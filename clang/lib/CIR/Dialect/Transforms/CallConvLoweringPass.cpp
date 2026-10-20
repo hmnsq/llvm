@@ -241,6 +241,10 @@ static bool isSupportedType(mlir::Type ty, const DataLayout &dl) {
                       [&](mlir::Type m) { return isSupportedType(m, dl); }))
       return false;
     if (recTy.isUnion()) {
+      // The size query below reads the tail padding too.
+      if (mlir::Type padding = cast<cir::UnionType>(ty).getPadding();
+          padding && !isSupportedType(padding, dl))
+        return false;
       llvm::ArrayRef<mlir::Type> members = recTy.getMembers();
       uint64_t recordBits = dl.getTypeSizeInBits(recTy).getFixedValue();
       // Refuse a union that could reach SSEUP at a size no coerce exists for.
