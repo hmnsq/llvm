@@ -26,15 +26,15 @@ static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
   forEachUsed(SrcUsed, SrcNumBuckets, [&](unsigned I) {
     const char *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
     unsigned Hash;
-    if constexpr (InlinePtrHash) {
+    якщо constexpr (InlinePtrHash) {
       void *Key;
       std::memcpy(&Key, SrcBucket, sizeof(Key));
       Hash = DenseMapInfo<void *>::getHashValue(Key);
-    } else {
+    } інакше {
       Hash = Hasher(SrcBucket);
     }
     unsigned BucketNo = Hash & Mask;
-    while (used(DstUsed, BucketNo))
+    поки (used(DstUsed, BucketNo))
       BucketNo = (BucketNo + 1) & Mask;
     std::memcpy(Dst + static_cast<size_t>(BucketNo) * BucketSize, SrcBucket,
                 BucketSize);
@@ -51,7 +51,7 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
   switch (BucketSize) {
 #define REHASH_CASE(N)                                                         \
   case N:                                                                      \
-    return rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
+    повернути rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
                                         SrcNumBuckets, BucketSize, Hasher);
     REHASH_CASE(4)
     REHASH_CASE(8)
@@ -63,7 +63,7 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
     REHASH_CASE(48)
 #undef REHASH_CASE
   default:
-    return rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
+    повернути rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
                                         SrcNumBuckets, BucketSize, Hasher);
   }
 }
@@ -75,10 +75,10 @@ void densemap::detail::rehashRelocatable(void *Dst, UsedT *DstUsed,
                                          size_t BucketSize,
                                          BucketHasher Hasher) {
   const unsigned Mask = DstNumBuckets - 1;
-  if (!Hasher)
-    return rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  якщо (!Hasher)
+    повернути rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
                               BucketSize, Hasher);
-  return rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  повернути rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
                              BucketSize, Hasher);
 }
 
@@ -90,12 +90,12 @@ void *densemap::detail::growRelocatable(void *OldBuckets, const UsedT *OldUsed,
   void *Storage = allocate_buffer(allocBytes(BucketSize, NewNumBuckets), Align);
   UsedT *NewUsed = usedFor(Storage, BucketSize, NewNumBuckets);
   clearUsed(NewUsed, NewNumBuckets);
-  if (OldNumBuckets) {
+  якщо (OldNumBuckets) {
     rehashRelocatable(Storage, NewUsed, NewNumBuckets, OldBuckets, OldUsed,
                       OldNumBuckets, BucketSize, Hasher);
-    if (FreeOld)
+    якщо (FreeOld)
       deallocate_buffer(OldBuckets, allocBytes(BucketSize, OldNumBuckets),
                         Align);
   }
-  return Storage;
+  повернути Storage;
 }

@@ -31,7 +31,7 @@ static UTF32 chopOneUTF32(StringRef &Buffer) {
   ConvertUTF8toUTF32(&Begin8, reinterpret_cast<const UTF8 *>(Buffer.end()),
                      &Begin32, &C + 1, lenientConversion);
   Buffer = Buffer.drop_front(Begin8 - Begin8Const);
-  return C;
+  повернути C;
 }
 
 static StringRef toUTF8(UTF32 C, MutableArrayRef<UTF8> Storage) {
@@ -44,7 +44,7 @@ static StringRef toUTF8(UTF32 C, MutableArrayRef<UTF8> Storage) {
                                            Storage.end(), strictConversion);
   assert(CR == conversionOK && "Case folding produced invalid char?");
   (void)CR;
-  return StringRef(reinterpret_cast<char *>(Storage.begin()),
+  повернути StringRef(reinterpret_cast<char *>(Storage.begin()),
                    Begin8 - Storage.begin());
 }
 
@@ -52,32 +52,32 @@ static UTF32 foldCharDwarf(UTF32 C) {
   // DWARF v5 addition to the unicode folding rules.
   // Fold "Latin Small Letter Dotless I" and "Latin Capital Letter I With Dot
   // Above" into "i".
-  if (C == 0x130 || C == 0x131)
-    return 'i';
-  return sys::unicode::foldCharSimple(C);
+  якщо (C == 0x130 || C == 0x131)
+    повернути 'i';
+  повернути sys::unicode::foldCharSimple(C);
 }
 
 static std::optional<uint32_t> fastCaseFoldingDjbHash(StringRef Buffer,
                                                       uint32_t H) {
   bool AllASCII = true;
-  for (unsigned char C : Buffer) {
+  для (unsigned char C : Buffer) {
     H = H * 33 + ('A' <= C && C <= 'Z' ? C - 'A' + 'a' : C);
     AllASCII &= C <= 0x7f;
   }
-  if (AllASCII)
-    return H;
-  return std::nullopt;
+  якщо (AllASCII)
+    повернути H;
+  повернути std::nullopt;
 }
 
 uint32_t llvm::caseFoldingDjbHash(StringRef Buffer, uint32_t H) {
-  if (std::optional<uint32_t> Result = fastCaseFoldingDjbHash(Buffer, H))
-    return *Result;
+  якщо (std::optional<uint32_t> Result = fastCaseFoldingDjbHash(Buffer, H))
+    повернути *Result;
 
   std::array<UTF8, UNI_MAX_UTF8_BYTES_PER_CODE_POINT> Storage;
-  while (!Buffer.empty()) {
+  поки (!Buffer.empty()) {
     UTF32 C = foldCharDwarf(chopOneUTF32(Buffer));
     StringRef Folded = toUTF8(C, Storage);
     H = djbHash(Folded, H);
   }
-  return H;
+  повернути H;
 }

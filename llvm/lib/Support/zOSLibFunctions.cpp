@@ -63,16 +63,16 @@ const char *signalName[] = {
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+char *strsignal(ціле sig) {
+  якщо (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
+    повернути const_cast<char *>(signalName[sig]);
   static char msg[256];
   snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
   msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  повернути msg;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
@@ -80,6 +80,6 @@ char *strsignal(int sig) {
 size_t strnlen(const char *S, size_t MaxLen) {
   const char *PtrToNullChar =
       static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+  повернути PtrToNullChar ? PtrToNullChar - S : MaxLen;
 }
 #endif

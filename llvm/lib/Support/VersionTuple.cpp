@@ -24,116 +24,116 @@ std::string VersionTuple::getAsString() const {
     llvm::raw_string_ostream Out(Result);
     Out << *this;
   }
-  return Result;
+  повернути Result;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  якщо (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  якщо (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  якщо (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  якщо (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  повернути Out;
 }
 
 static bool parseInt(StringRef &input, unsigned &value) {
   assert(value == 0);
-  if (input.empty())
-    return true;
+  якщо (input.empty())
+    повернути true;
 
   char next = input[0];
   input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
+  якщо (next < '0' || next > '9')
+    повернути true;
   value = (unsigned)(next - '0');
 
-  while (!input.empty()) {
+  поки (!input.empty()) {
     next = input[0];
-    if (next < '0' || next > '9')
-      return false;
+    якщо (next < '0' || next > '9')
+      повернути false;
     input = input.substr(1);
     value = value * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  повернути false;
 }
 
 bool VersionTuple::tryParse(StringRef input) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  якщо (parseInt(input, major))
+    повернути true;
 
-  if (input.empty()) {
+  якщо (input.empty()) {
     *this = VersionTuple(major);
-    return false;
+    повернути false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
+  якщо (input[0] != '.')
+    повернути true;
   input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  якщо (parseInt(input, minor))
+    повернути true;
 
-  if (input.empty()) {
+  якщо (input.empty()) {
     *this = VersionTuple(major, minor);
-    return false;
+    повернути false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  якщо (!input.consume_front("."))
+    повернути true;
+  якщо (parseInt(input, subminor))
+    повернути true;
 
-  if (input.empty()) {
+  якщо (input.empty()) {
     *this = VersionTuple(major, minor, subminor);
-    return false;
+    повернути false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  якщо (!input.consume_front("."))
+    повернути true;
+  якщо (parseInt(input, build))
+    повернути true;
+  якщо (build >= 1024 * 1024)
+    повернути true;
 
-  if (input.empty()) {
+  якщо (input.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
-    return false;
+    повернути false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  якщо (!input.consume_front("."))
+    повернути true;
+  якщо (parseInt(input, subbuild))
+    повернути true;
+  якщо (subbuild >= 1024)
+    повернути true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  якщо (!input.empty())
+    повернути true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  повернути false;
 }
 
 VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+  якщо (HasSubbuild)
+    повернути VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  якщо (HasBuild)
+    повернути VersionTuple(NewMajor, Minor, Subminor, Build);
+  якщо (HasSubminor)
+    повернути VersionTuple(NewMajor, Minor, Subminor);
+  якщо (HasMinor)
+    повернути VersionTuple(NewMajor, Minor);
+  повернути VersionTuple(NewMajor);
 }

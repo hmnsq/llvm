@@ -29,7 +29,7 @@ static bool Execute(ProcessInfo &PI, StringRef Program,
                     unsigned MemoryLimit, std::string *ErrMsg,
                     BitVector *AffinityMask, bool DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+ціле sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
                         unsigned SecondsToWait, unsigned MemoryLimit,
@@ -38,20 +38,20 @@ int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         BitVector *AffinityMask) {
   assert(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  якщо (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
               AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
+    якщо (ExecutionFailed)
       *ExecutionFailed = false;
     ProcessInfo Result = Wait(
         PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
         ErrMsg, ProcStat);
-    return Result.ReturnCode;
+    повернути Result.ReturnCode;
   }
 
-  if (ExecutionFailed)
+  якщо (ExecutionFailed)
     *ExecutionFailed = true;
 
-  return -1;
+  повернути -1;
 }
 
 ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
@@ -62,34 +62,34 @@ ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
                                bool DetachProcess) {
   assert(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
+  якщо (ExecutionFailed)
     *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  якщо (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
                AffinityMask, DetachProcess))
-    if (ExecutionFailed)
+    якщо (ExecutionFailed)
       *ExecutionFailed = true;
 
-  return PI;
+  повернути PI;
 }
 
 bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
                                             ArrayRef<const char *> Args) {
   SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+  повернути commandLineFitsWithinSystemLimits(Program, StringRefArgs);
 }
 
 void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
   const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  якщо (!Quote && !Escape) {
     OS << Arg;
-    return;
+    повернути;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  для (const auto c : Arg) {
+    якщо (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }

@@ -44,16 +44,16 @@
 
 #include <stdlib.h>
 
-#if !defined(LLVM_XXH_USE_NEON)
-#if (defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)) &&      \
+#якщо !defined(LLVM_XXH_USE_NEON)
+#якщо (defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)) &&      \
     !defined(__ARM_BIG_ENDIAN)
 #define LLVM_XXH_USE_NEON 1
-#else
+#інакше
 #define LLVM_XXH_USE_NEON 0
 #endif
 #endif
 
-#if LLVM_XXH_USE_NEON
+#якщо LLVM_XXH_USE_NEON
 #include <arm_neon.h>
 #endif
 
@@ -61,7 +61,7 @@ using namespace llvm;
 using namespace support;
 
 static uint64_t rotl64(uint64_t X, size_t R) {
-  return (X << R) | (X >> (64 - R));
+  повернути (X << R) | (X >> (64 - R));
 }
 
 constexpr uint32_t PRIME32_1 = 0x9E3779B1;
@@ -80,7 +80,7 @@ static uint64_t XXH64_avalanche(uint64_t hash) {
   hash ^= hash >> 29;
   hash *= PRIME64_3;
   hash ^= hash >> 32;
-  return hash;
+  повернути hash;
 }
 
 constexpr size_t XXH3_SECRETSIZE_MIN = 136;
@@ -109,12 +109,12 @@ constexpr uint64_t PRIME_MX2 = 0x9FB21C651E98DF25;
 
 // Calculates a 64-bit to 128-bit multiply, then XOR folds it.
 static uint64_t XXH3_mul128_fold64(uint64_t lhs, uint64_t rhs) {
-#if defined(__SIZEOF_INT128__) ||                                              \
+#якщо defined(__SIZEOF_INT128__) ||                                              \
     (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
   __uint128_t product = (__uint128_t)lhs * (__uint128_t)rhs;
-  return uint64_t(product) ^ uint64_t(product >> 64);
+  повернути uint64_t(product) ^ uint64_t(product >> 64);
 
-#else
+#інакше
   /* First calculate all of the cross products. */
   const uint64_t lo_lo = (lhs & 0xFFFFFFFF) * (rhs & 0xFFFFFFFF);
   const uint64_t hi_lo = (lhs >> 32) * (rhs & 0xFFFFFFFF);
@@ -126,7 +126,7 @@ static uint64_t XXH3_mul128_fold64(uint64_t lhs, uint64_t rhs) {
   const uint64_t upper = (hi_lo >> 32) + (cross >> 32) + hi_hi;
   const uint64_t lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
 
-  return upper ^ lower;
+  повернути upper ^ lower;
 #endif
 }
 
@@ -138,7 +138,7 @@ static uint64_t XXH3_avalanche(uint64_t hash) {
   hash ^= hash >> 37;
   hash *= PRIME_MX1;
   hash ^= hash >> 32;
-  return hash;
+  повернути hash;
 }
 
 static uint64_t XXH3_len_1to3_64b(const uint8_t *input, size_t len,
@@ -151,7 +151,7 @@ static uint64_t XXH3_len_1to3_64b(const uint8_t *input, size_t len,
   uint64_t bitflip =
       (uint64_t)(endian::read32le(secret) ^ endian::read32le(secret + 4)) +
       seed;
-  return XXH64_avalanche(uint64_t(combined) ^ bitflip);
+  повернути XXH64_avalanche(uint64_t(combined) ^ bitflip);
 }
 
 static uint64_t XXH3_len_4to8_64b(const uint8_t *input, size_t len,
@@ -168,7 +168,7 @@ static uint64_t XXH3_len_4to8_64b(const uint8_t *input, size_t len,
   acc *= PRIME_MX2;
   acc ^= (acc >> 35) + (uint64_t)len;
   acc *= PRIME_MX2;
-  return acc ^ (acc >> 28);
+  повернути acc ^ (acc >> 28);
 }
 
 static uint64_t XXH3_len_9to16_64b(const uint8_t *input, size_t len,
@@ -181,19 +181,19 @@ static uint64_t XXH3_len_9to16_64b(const uint8_t *input, size_t len,
   input_hi ^= endian::read64le(input + len - 8);
   uint64_t acc = uint64_t(len) + byteswap(input_lo) + input_hi +
                  XXH3_mul128_fold64(input_lo, input_hi);
-  return XXH3_avalanche(acc);
+  повернути XXH3_avalanche(acc);
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
 static uint64_t XXH3_len_0to16_64b(const uint8_t *input, size_t len,
                                    const uint8_t *secret, uint64_t const seed) {
-  if (LLVM_LIKELY(len > 8))
-    return XXH3_len_9to16_64b(input, len, secret, seed);
-  if (LLVM_LIKELY(len >= 4))
-    return XXH3_len_4to8_64b(input, len, secret, seed);
-  if (len != 0)
-    return XXH3_len_1to3_64b(input, len, secret, seed);
-  return XXH64_avalanche(seed ^ endian::read64le(secret + 56) ^
+  якщо (LLVM_LIKELY(len > 8))
+    повернути XXH3_len_9to16_64b(input, len, secret, seed);
+  якщо (LLVM_LIKELY(len >= 4))
+    повернути XXH3_len_4to8_64b(input, len, secret, seed);
+  якщо (len != 0)
+    повернути XXH3_len_1to3_64b(input, len, secret, seed);
+  повернути XXH64_avalanche(seed ^ endian::read64le(secret + 56) ^
                          endian::read64le(secret + 64));
 }
 
@@ -205,7 +205,7 @@ static uint64_t XXH3_mix16B(const uint8_t *input, uint8_t const *secret,
   rhs += endian::read64le(secret + 8);
   lhs ^= endian::read64le(input);
   rhs ^= endian::read64le(input + 8);
-  return XXH3_mul128_fold64(lhs, rhs);
+  повернути XXH3_mul128_fold64(lhs, rhs);
 }
 
 /* For mid range keys, XXH3 uses a Mum-hash variant. */
@@ -216,19 +216,19 @@ static uint64_t XXH3_len_17to128_64b(const uint8_t *input, size_t len,
   uint64_t acc = len * PRIME64_1, acc_end;
   acc += XXH3_mix16B(input + 0, secret + 0, seed);
   acc_end = XXH3_mix16B(input + len - 16, secret + 16, seed);
-  if (len > 32) {
+  якщо (len > 32) {
     acc += XXH3_mix16B(input + 16, secret + 32, seed);
     acc_end += XXH3_mix16B(input + len - 32, secret + 48, seed);
-    if (len > 64) {
+    якщо (len > 64) {
       acc += XXH3_mix16B(input + 32, secret + 64, seed);
       acc_end += XXH3_mix16B(input + len - 48, secret + 80, seed);
-      if (len > 96) {
+      якщо (len > 96) {
         acc += XXH3_mix16B(input + 48, secret + 96, seed);
         acc_end += XXH3_mix16B(input + len - 64, secret + 112, seed);
       }
     }
   }
-  return XXH3_avalanche(acc + acc_end);
+  повернути XXH3_avalanche(acc + acc_end);
 }
 
 constexpr size_t XXH3_MIDSIZE_MAX = 240;
@@ -240,11 +240,11 @@ static uint64_t XXH3_len_129to240_64b(const uint8_t *input, size_t len,
                                       const uint8_t *secret, uint64_t seed) {
   uint64_t acc = (uint64_t)len * PRIME64_1;
   const unsigned nbRounds = len / 16;
-  for (unsigned i = 0; i < 8; ++i)
+  для (unsigned i = 0; i < 8; ++i)
     acc += XXH3_mix16B(input + 16 * i, secret + 16 * i, seed);
   acc = XXH3_avalanche(acc);
 
-  for (unsigned i = 8; i < nbRounds; ++i) {
+  для (unsigned i = 8; i < nbRounds; ++i) {
     acc += XXH3_mix16B(input + 16 * i,
                        secret + 16 * (i - 8) + XXH3_MIDSIZE_STARTOFFSET, seed);
   }
@@ -252,10 +252,10 @@ static uint64_t XXH3_len_129to240_64b(const uint8_t *input, size_t len,
   acc +=
       XXH3_mix16B(input + len - 16,
                   secret + XXH3_SECRETSIZE_MIN - XXH3_MIDSIZE_LASTOFFSET, seed);
-  return XXH3_avalanche(acc);
+  повернути XXH3_avalanche(acc);
 }
 
-#if LLVM_XXH_USE_NEON
+#якщо LLVM_XXH_USE_NEON
 
 #define XXH3_accumulate_512 XXH3_accumulate_512_neon
 #define XXH3_scrambleAcc XXH3_scrambleAcc_neon
@@ -268,16 +268,16 @@ static uint64_t XXH3_len_129to240_64b(const uint8_t *input, size_t len,
 // - configurable split between NEON and scalar lanes (benchmarking shows no
 //   penalty when fully doing SIMD on the Apple M1)
 
-#if defined(__GNUC__) || defined(__clang__)
+#якщо defined(__GNUC__) || defined(__clang__)
 #define XXH_ALIASING __attribute__((__may_alias__))
-#else
+#інакше
 #define XXH_ALIASING /* nothing */
 #endif
 
 typedef uint64x2_t xxh_aliasing_uint64x2_t XXH_ALIASING;
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static uint64x2_t XXH_vld1q_u64(void const *ptr) {
-  return vreinterpretq_u64_u8(vld1q_u8((uint8_t const *)ptr));
+  повернути vreinterpretq_u64_u8(vld1q_u8((uint8_t const *)ptr));
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
@@ -288,7 +288,7 @@ static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
 #ifdef __clang__
 #pragma clang loop unroll(full)
 #endif
-  for (size_t i = 0; i < XXH_ACC_NB / 2; i += 2) {
+  для (size_t i = 0; i < XXH_ACC_NB / 2; i += 2) {
     /* data_vec = input[i]; */
     uint64x2_t data_vec_1 = XXH_vld1q_u64(input + (i * 16));
     uint64x2_t data_vec_2 = XXH_vld1q_u64(input + ((i + 1) * 16));
@@ -355,7 +355,7 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
   uint32x4_t const kPrimeHi =
       vreinterpretq_u32_u64(vdupq_n_u64((uint64_t)PRIME32_1 << 32));
 
-  for (size_t i = 0; i < XXH_ACC_NB / 2; ++i) {
+  для (size_t i = 0; i < XXH_ACC_NB / 2; ++i) {
     /* xacc[i] ^= (xacc[i] >> 47); */
     uint64x2_t acc_vec = XXH_vld1q_u64(acc + (2 * i));
     uint64x2_t shifted = vshrq_n_u64(acc_vec, 47);
@@ -388,7 +388,7 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
     xacc[i] = vmlal_u32(vreinterpretq_u64_u32(prod_hi), data_key_lo, kPrimeLo);
   }
 }
-#else
+#інакше
 
 #define XXH3_accumulate_512 XXH3_accumulate_512_scalar
 #define XXH3_scrambleAcc XXH3_scrambleAcc_scalar
@@ -396,7 +396,7 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
 LLVM_ATTRIBUTE_ALWAYS_INLINE
 static void XXH3_accumulate_512_scalar(uint64_t *acc, const uint8_t *input,
                                        const uint8_t *secret) {
-  for (size_t i = 0; i < XXH_ACC_NB; ++i) {
+  для (size_t i = 0; i < XXH_ACC_NB; ++i) {
     uint64_t data_val = endian::read64le(input + 8 * i);
     uint64_t data_key = data_val ^ endian::read64le(secret + 8 * i);
     acc[i ^ 1] += data_val;
@@ -406,7 +406,7 @@ static void XXH3_accumulate_512_scalar(uint64_t *acc, const uint8_t *input,
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
 static void XXH3_scrambleAcc_scalar(uint64_t *acc, const uint8_t *secret) {
-  for (size_t i = 0; i < XXH_ACC_NB; ++i) {
+  для (size_t i = 0; i < XXH_ACC_NB; ++i) {
     acc[i] ^= acc[i] >> 47;
     acc[i] ^= endian::read64le(secret + 8 * i);
     acc[i] *= PRIME32_1;
@@ -417,23 +417,23 @@ static void XXH3_scrambleAcc_scalar(uint64_t *acc, const uint8_t *secret) {
 LLVM_ATTRIBUTE_ALWAYS_INLINE
 static void XXH3_accumulate(uint64_t *acc, const uint8_t *input,
                             const uint8_t *secret, size_t nbStripes) {
-  for (size_t n = 0; n < nbStripes; ++n) {
+  для (size_t n = 0; n < nbStripes; ++n) {
     XXH3_accumulate_512(acc, input + n * XXH_STRIPE_LEN,
                         secret + n * XXH_SECRET_CONSUME_RATE);
   }
 }
 
 static uint64_t XXH3_mix2Accs(const uint64_t *acc, const uint8_t *secret) {
-  return XXH3_mul128_fold64(acc[0] ^ endian::read64le(secret),
+  повернути XXH3_mul128_fold64(acc[0] ^ endian::read64le(secret),
                             acc[1] ^ endian::read64le(secret + 8));
 }
 
 static uint64_t XXH3_mergeAccs(const uint64_t *acc, const uint8_t *key,
                                uint64_t start) {
   uint64_t result64 = start;
-  for (size_t i = 0; i < 4; ++i)
+  для (size_t i = 0; i < 4; ++i)
     result64 += XXH3_mix2Accs(acc + 2 * i, key + 16 * i);
-  return XXH3_avalanche(result64);
+  повернути XXH3_avalanche(result64);
 }
 
 LLVM_ATTRIBUTE_NOINLINE
@@ -447,7 +447,7 @@ static uint64_t XXH3_hashLong_64b(const uint8_t *input, size_t len,
       PRIME32_3, PRIME64_1, PRIME64_2, PRIME64_3,
       PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1,
   };
-  for (size_t n = 0; n < nb_blocks; ++n) {
+  для (size_t n = 0; n < nb_blocks; ++n) {
     XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
     XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
   }
@@ -465,18 +465,18 @@ static uint64_t XXH3_hashLong_64b(const uint8_t *input, size_t len,
 
   /* converge into final hash */
   constexpr size_t XXH_SECRET_MERGEACCS_START = 11;
-  return XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START,
+  повернути XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START,
                         (uint64_t)len * PRIME64_1);
 }
 
 uint64_t llvm::xxh3_64bits(const uint8_t *in, size_t len) {
-  if (len <= 16)
-    return XXH3_len_0to16_64b(in, len, kSecret, 0);
-  if (len <= 128)
-    return XXH3_len_17to128_64b(in, len, kSecret, 0);
-  if (len <= XXH3_MIDSIZE_MAX)
-    return XXH3_len_129to240_64b(in, len, kSecret, 0);
-  return XXH3_hashLong_64b(in, len, kSecret, sizeof(kSecret));
+  якщо (len <= 16)
+    повернути XXH3_len_0to16_64b(in, len, kSecret, 0);
+  якщо (len <= 128)
+    повернути XXH3_len_17to128_64b(in, len, kSecret, 0);
+  якщо (len <= XXH3_MIDSIZE_MAX)
+    повернути XXH3_len_129to240_64b(in, len, kSecret, 0);
+  повернути XXH3_hashLong_64b(in, len, kSecret, sizeof(kSecret));
 }
 
 /* ==========================================
@@ -509,7 +509,7 @@ uint64_t llvm::xxh3_64bits(const uint8_t *in, size_t len) {
  *   @p x and @p r may be evaluated multiple times.
  * @return The rotated result.
  */
-#if __has_builtin(__builtin_rotateleft32) &&                                   \
+#якщо __has_builtin(__builtin_rotateleft32) &&                                   \
     __has_builtin(__builtin_rotateleft64)
 #define XXH_rotl32 __builtin_rotateleft32
 #define XXH_rotl64 __builtin_rotateleft64
@@ -518,7 +518,7 @@ uint64_t llvm::xxh3_64bits(const uint8_t *in, size_t len) {
 #elif defined(_MSC_VER)
 #define XXH_rotl32(x, r) _rotl(x, r)
 #define XXH_rotl64(x, r) _rotl64(x, r)
-#else
+#інакше
 #define XXH_rotl32(x, r) (((x) << (r)) | ((x) >> (32 - (r))))
 #define XXH_rotl64(x, r) (((x) << (r)) | ((x) >> (64 - (r))))
 #endif
@@ -550,7 +550,7 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
    * In that case it is best to use the portable one.
    * https://github.com/Cyan4973/xxHash/issues/211#issuecomment-515575677
    */
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(__wasm__) &&         \
+#якщо (defined(__GNUC__) || defined(__clang__)) && !defined(__wasm__) &&         \
         defined(__SIZEOF_INT128__) ||                                          \
     (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
 
@@ -558,7 +558,7 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
   XXH128_hash_t r128;
   r128.low64 = (uint64_t)(product);
   r128.high64 = (uint64_t)(product >> 64);
-  return r128;
+  повернути r128;
 
   /*
    * MSVC for x64's _umul128 method.
@@ -578,7 +578,7 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
   XXH128_hash_t r128;
   r128.low64 = product_low;
   r128.high64 = product_high;
-  return r128;
+  повернути r128;
 
   /*
    * MSVC for ARM64's __umulh method.
@@ -593,9 +593,9 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
   XXH128_hash_t r128;
   r128.low64 = lhs * rhs;
   r128.high64 = __umulh(lhs, rhs);
-  return r128;
+  повернути r128;
 
-#else
+#інакше
   /*
    * Portable scalar method. Optimized for 32-bit and 64-bit ALUs.
    *
@@ -653,14 +653,14 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
   XXH128_hash_t r128;
   r128.low64 = lower;
   r128.high64 = upper;
-  return r128;
+  повернути r128;
 #endif
 }
 
 /*! Seems to produce slightly better code on GCC for some reason. */
 LLVM_ATTRIBUTE_ALWAYS_INLINE constexpr uint64_t XXH_xorshift64(uint64_t v64,
-                                                               int shift) {
-  return v64 ^ (v64 >> shift);
+                                                               ціле shift) {
+  повернути v64 ^ (v64 >> shift);
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
@@ -687,7 +687,7 @@ XXH3_len_1to3_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   XXH128_hash_t h128;
   h128.low64 = XXH64_avalanche(keyed_lo);
   h128.high64 = XXH64_avalanche(keyed_hi);
-  return h128;
+  повернути h128;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
@@ -712,7 +712,7 @@ XXH3_len_4to8_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   m128.low64 *= PRIME_MX2;
   m128.low64 = XXH_xorshift64(m128.low64, 28);
   m128.high64 = XXH3_avalanche(m128.high64);
-  return m128;
+  повернути m128;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
@@ -739,7 +739,7 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    *
    * The best approach to this operation is different on 32-bit and 64-bit.
    */
-  if (sizeof(void *) < sizeof(uint64_t)) { /* 32-bit */
+  якщо (sizeof(void *) < sizeof(uint64_t)) { /* 32-bit */
     /*
      * 32-bit optimized version, which is more readable.
      *
@@ -748,7 +748,7 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
      */
     m128.high64 += (input_hi & 0xFFFFFFFF00000000ULL) +
                    XXH_mult32to64((uint32_t)input_hi, PRIME32_2);
-  } else {
+  } інакше {
     /*
      * 64-bit optimized (albeit more confusing) version.
      *
@@ -785,7 +785,7 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
 
   h128.low64 = XXH3_avalanche(h128.low64);
   h128.high64 = XXH3_avalanche(h128.high64);
-  return h128;
+  повернути h128;
 }
 
 /*
@@ -794,12 +794,12 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
 XXH3_len_0to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
                     uint64_t seed) {
-  if (len > 8)
-    return XXH3_len_9to16_128b(input, len, secret, seed);
-  if (len >= 4)
-    return XXH3_len_4to8_128b(input, len, secret, seed);
-  if (len)
-    return XXH3_len_1to3_128b(input, len, secret, seed);
+  якщо (len > 8)
+    повернути XXH3_len_9to16_128b(input, len, secret, seed);
+  якщо (len >= 4)
+    повернути XXH3_len_4to8_128b(input, len, secret, seed);
+  якщо (len)
+    повернути XXH3_len_1to3_128b(input, len, secret, seed);
   XXH128_hash_t h128;
   uint64_t const bitflipl =
       endian::read64le(secret + 64) ^ endian::read64le(secret + 72);
@@ -807,7 +807,7 @@ XXH3_len_0to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
       endian::read64le(secret + 80) ^ endian::read64le(secret + 88);
   h128.low64 = XXH64_avalanche(seed ^ bitflipl);
   h128.high64 = XXH64_avalanche(seed ^ bitfliph);
-  return h128;
+  повернути h128;
 }
 
 /*
@@ -820,7 +820,7 @@ XXH128_mix32B(XXH128_hash_t acc, const uint8_t *input_1, const uint8_t *input_2,
   acc.low64 ^= endian::read64le(input_2) + endian::read64le(input_2 + 8);
   acc.high64 += XXH3_mix16B(input_2, secret + 16, seed);
   acc.high64 ^= endian::read64le(input_1) + endian::read64le(input_1 + 8);
-  return acc;
+  повернути acc;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
@@ -832,9 +832,9 @@ XXH3_len_17to128_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   acc.low64 = len * PRIME64_1;
   acc.high64 = 0;
 
-  if (len > 32) {
-    if (len > 64) {
-      if (len > 96) {
+  якщо (len > 32) {
+    якщо (len > 64) {
+      якщо (len > 96) {
         acc =
             XXH128_mix32B(acc, input + 48, input + len - 64, secret + 96, seed);
       }
@@ -849,7 +849,7 @@ XXH3_len_17to128_128b(const uint8_t *input, size_t len, const uint8_t *secret,
                 ((len - seed) * PRIME64_2);
   h128.low64 = XXH3_avalanche(h128.low64);
   h128.high64 = (uint64_t)0 - XXH3_avalanche(h128.high64);
-  return h128;
+  повернути h128;
 }
 
 LLVM_ATTRIBUTE_NOINLINE static XXH128_hash_t
@@ -867,7 +867,7 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * where both x86 and aarch64 get simple agen and good codegen
    * for the loop.
    */
-  for (i = 32; i < 160; i += 32) {
+  для (i = 32; i < 160; i += 32) {
     acc = XXH128_mix32B(acc, input + i - 32, input + i - 16, secret + i - 32,
                         seed);
   }
@@ -878,7 +878,7 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * len % 32 was zero. This is an unfortunate necessity to keep
    * the hash result stable.
    */
-  for (i = 160; i <= len; i += 32) {
+  для (i = 160; i <= len; i += 32) {
     acc = XXH128_mix32B(acc, input + i - 32, input + i - 16,
                         secret + XXH3_MIDSIZE_STARTOFFSET + i - 160, seed);
   }
@@ -894,7 +894,7 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
                 ((len - seed) * PRIME64_2);
   h128.low64 = XXH3_avalanche(h128.low64);
   h128.high64 = (uint64_t)0 - XXH3_avalanche(h128.high64);
-  return h128;
+  повернути h128;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE XXH128_hash_t
@@ -909,7 +909,7 @@ XXH3_hashLong_128b(const uint8_t *input, size_t len, const uint8_t *secret,
       PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1,
   };
 
-  for (size_t n = 0; n < nb_blocks; ++n) {
+  для (size_t n = 0; n < nb_blocks; ++n) {
     XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
     XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
   }
@@ -934,7 +934,7 @@ XXH3_hashLong_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   h128.high64 = XXH3_mergeAccs(
       acc, secret + secretSize - sizeof(acc) - XXH_SECRET_MERGEACCS_START,
       ~((uint64_t)len * PRIME64_2));
-  return h128;
+  повернути h128;
 }
 
 llvm::XXH128_hash_t llvm::xxh3_128bits(const uint8_t *input, size_t len) {
@@ -944,13 +944,13 @@ llvm::XXH128_hash_t llvm::xxh3_128bits(const uint8_t *input, size_t len) {
    * For now, it's a contract pre-condition.
    * Adding a check and a branch here would cost performance at every hash.
    */
-  if (len <= 16)
-    return XXH3_len_0to16_128b(input, len, kSecret, /*seed64=*/0);
-  if (len <= 128)
-    return XXH3_len_17to128_128b(input, len, kSecret, sizeof(kSecret),
+  якщо (len <= 16)
+    повернути XXH3_len_0to16_128b(input, len, kSecret, /*seed64=*/0);
+  якщо (len <= 128)
+    повернути XXH3_len_17to128_128b(input, len, kSecret, sizeof(kSecret),
                                  /*seed64=*/0);
-  if (len <= XXH3_MIDSIZE_MAX)
-    return XXH3_len_129to240_128b(input, len, kSecret, sizeof(kSecret),
+  якщо (len <= XXH3_MIDSIZE_MAX)
+    повернути XXH3_len_129to240_128b(input, len, kSecret, sizeof(kSecret),
                                   /*seed64=*/0);
-  return XXH3_hashLong_128b(input, len, kSecret, sizeof(kSecret));
+  повернути XXH3_hashLong_128b(input, len, kSecret, sizeof(kSecret));
 }

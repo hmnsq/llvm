@@ -16,17 +16,17 @@ using namespace llvm;
 
 std::string Twine::str() const {
   // If we're storing only a std::string, just return it.
-  if (LHSKind == StdStringKind && RHSKind == EmptyKind)
-    return *LHS.stdString;
+  якщо (LHSKind == StdStringKind && RHSKind == EmptyKind)
+    повернути *LHS.stdString;
 
   // If we're storing a formatv_object, we can avoid an extra copy by formatting
   // it immediately and returning the result.
-  if (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
-    return LHS.formatvObject->str();
+  якщо (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
+    повернути LHS.formatvObject->str();
 
   // Otherwise, flatten and copy the contents first.
   SmallString<256> Vec;
-  return toStringRef(Vec).str();
+  повернути toStringRef(Vec).str();
 }
 
 void Twine::toVector(SmallVectorImpl<char> &Out) const {
@@ -35,17 +35,17 @@ void Twine::toVector(SmallVectorImpl<char> &Out) const {
 }
 
 StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
-  if (isUnary()) {
+  якщо (isUnary()) {
     switch (getLHSKind()) {
     case CStringKind:
       // Already null terminated, yay!
-      return StringRef(LHS.cString);
+      повернути StringRef(LHS.cString);
     case StdStringKind: {
       const std::string *str = LHS.stdString;
-      return StringRef(str->c_str(), str->size());
+      повернути StringRef(str->c_str(), str->size());
     }
     case StringLiteralKind:
-      return StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
+      повернути StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
     default:
       break;
     }
@@ -53,7 +53,7 @@ StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
   toVector(Out);
   Out.push_back(0);
   Out.pop_back();
-  return StringRef(Out.data(), Out.size());
+  повернути StringRef(Out.data(), Out.size());
 }
 
 void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
@@ -174,7 +174,7 @@ void Twine::printRepr(raw_ostream &OS) const {
   OS << ")";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#якщо !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
 
 LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }

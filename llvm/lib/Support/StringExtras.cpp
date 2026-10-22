@@ -31,7 +31,7 @@ std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
   // Find the next occurrence of the delimiter.
   StringRef::size_type End = Source.find_first_of(Delimiters, Start);
 
-  return {Source.slice(Start, End), Source.substr(End)};
+  повернути {Source.slice(Start, End), Source.substr(End)};
 }
 
 /// SplitString - Split up the specified string according to the specified
@@ -40,94 +40,94 @@ void llvm::SplitString(StringRef Source,
                        SmallVectorImpl<StringRef> &OutFragments,
                        StringRef Delimiters) {
   std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
+  поки (!S.first.empty()) {
     OutFragments.push_back(S.first);
     S = getToken(S.second, Delimiters);
   }
 }
 
 void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned char C : Name) {
-    if (C == '\\')
+  для (unsigned char C : Name) {
+    якщо (C == '\\')
       Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
+    інакше якщо (isPrint(C) && C != '"')
       Out << C;
-    else
+    інакше
       Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
 void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
+  для (char C : String) {
+    якщо (C == '&')
       Out << "&amp;";
-    else if (C == '<')
+    інакше якщо (C == '<')
       Out << "&lt;";
-    else if (C == '>')
+    інакше якщо (C == '>')
       Out << "&gt;";
-    else if (C == '\"')
+    інакше якщо (C == '\"')
       Out << "&quot;";
-    else if (C == '\'')
+    інакше якщо (C == '\'')
       Out << "&apos;";
-    else
+    інакше
       Out << C;
   }
 }
 
 void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
+  для (const char C : String)
     Out << toLower(C);
 }
 
 void llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
-  for (unsigned char C : String) {
-    if (isAlnum(C) || StringRef("-_.~").contains(C))
+  для (unsigned char C : String) {
+    якщо (isAlnum(C) || StringRef("-_.~").contains(C))
       Out << C;
-    else
+    інакше
       Out << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
 std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+  якщо (input.empty())
+    повернути "";
 
   std::string snakeCase;
   snakeCase.reserve(input.size());
-  auto check = [&input](size_t j, function_ref<bool(int)> predicate) {
-    return j < input.size() && predicate(input[j]);
+  auto check = [&input](size_t j, function_ref<bool(ціле)> predicate) {
+    повернути j < input.size() && predicate(input[j]);
   };
-  for (size_t i = 0; i < input.size(); ++i) {
+  для (size_t i = 0; i < input.size(); ++i) {
     snakeCase.push_back(tolower(input[i]));
     // Handles "runs" of capitals, such as in OPName -> op_name.
-    if (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
+    якщо (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
       snakeCase.push_back('_');
-    if ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
+    якщо ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
       snakeCase.push_back('_');
   }
-  return snakeCase;
+  повернути snakeCase;
 }
 
 std::string llvm::convertToCamelFromSnakeCase(StringRef input,
                                               bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+  якщо (input.empty())
+    повернути "";
 
   std::string output;
   output.reserve(input.size());
 
   // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
+  якщо (capitalizeFirst && std::islower(input.front()))
     output.push_back(llvm::toUpper(input.front()));
-  else
+  інакше
     output.push_back(input.front());
 
   // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
+  для (size_t pos = 1, e = input.size(); pos < e; ++pos) {
+    якщо (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
       output.push_back(llvm::toUpper(input[++pos]));
-    else
+    інакше
       output.push_back(input[pos]);
   }
-  return output;
+  повернути output;
 }

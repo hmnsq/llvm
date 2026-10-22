@@ -20,48 +20,48 @@ using namespace llvm;
 
 BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  повернути *this;
 }
 
 BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
   BlockFrequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  повернути Freq;
 }
 
 BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  повернути *this;
 }
 
 BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
   BlockFrequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  повернути Freq;
 }
 
 std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
   bool Overflow;
   uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+  якщо (Overflow)
+    повернути {};
+  повернути BlockFrequency(ResultFrequency);
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  повернути OS;
 }
 
 void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
                                   BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+  якщо (Freq == BlockFrequency(0)) {
     OS << "0";
-    return;
+    повернути;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  якщо (EntryFreq == BlockFrequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    повернути;
   }
   ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
   ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);

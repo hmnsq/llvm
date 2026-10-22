@@ -15,21 +15,21 @@
 #include "llvm/Support/Signals.h"
 using namespace llvm;
 
-static bool isStdout(StringRef Filename) { return Filename == "-"; }
+static bool isStdout(StringRef Filename) { повернути Filename == "-"; }
 
 CleanupInstaller::CleanupInstaller(StringRef Filename)
     : Filename(std::string(Filename)), Keep(false) {
   // Arrange for the file to be deleted if the process is killed.
-  if (!isStdout(Filename))
+  якщо (!isStdout(Filename))
     sys::RemoveFileOnSignal(Filename);
 }
 
 CleanupInstaller::~CleanupInstaller() {
-  if (isStdout(Filename))
-    return;
+  якщо (isStdout(Filename))
+    повернути;
 
   // Delete the file if the client hasn't told us not to.
-  if (!Keep)
+  якщо (!Keep)
     sys::fs::remove(Filename);
 
   // Ok, the file is successfully written and closed, or deleted. There's no
@@ -40,19 +40,19 @@ CleanupInstaller::~CleanupInstaller() {
 ToolOutputFile::ToolOutputFile(StringRef Filename, std::error_code &EC,
                                sys::fs::OpenFlags Flags)
     : Installer(Filename) {
-  if (isStdout(Filename)) {
+  якщо (isStdout(Filename)) {
     OS = &outs();
     EC = std::error_code();
-    return;
+    повернути;
   }
   OSHolder.emplace(Filename, EC, Flags);
   OS = &*OSHolder;
   // If open fails, no cleanup is needed.
-  if (EC)
+  якщо (EC)
     Installer.Keep = true;
 }
 
-ToolOutputFile::ToolOutputFile(StringRef Filename, int FD)
+ToolOutputFile::ToolOutputFile(StringRef Filename, ціле FD)
     : Installer(Filename) {
   OSHolder.emplace(FD, true);
   OS = &*OSHolder;

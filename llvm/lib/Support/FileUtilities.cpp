@@ -29,7 +29,7 @@
 using namespace llvm;
 
 static bool isSignedChar(char C) {
-  return (C == '+' || C == '-');
+  повернути (C == '+' || C == '-');
 }
 
 static bool isExponentChar(char C) {
@@ -37,8 +37,8 @@ static bool isExponentChar(char C) {
   case 'D':  // Strange exponential notation.
   case 'd':  // Strange exponential notation.
   case 'e':
-  case 'E': return true;
-  default: return false;
+  case 'E': повернути true;
+  default: повернути false;
   }
 }
 
@@ -46,39 +46,39 @@ static bool isNumberChar(char C) {
   switch (C) {
   case '0': case '1': case '2': case '3': case '4':
   case '5': case '6': case '7': case '8': case '9':
-  case '.': return true;
-  default: return isSignedChar(C) || isExponentChar(C);
+  case '.': повернути true;
+  default: повернути isSignedChar(C) || isExponentChar(C);
   }
 }
 
 static const char *BackupNumber(const char *Pos, const char *FirstChar) {
   // If we didn't stop in the middle of a number, don't backup.
-  if (!isNumberChar(*Pos)) return Pos;
+  якщо (!isNumberChar(*Pos)) повернути Pos;
 
   // Otherwise, return to the start of the number.
   bool HasPeriod = false;
-  while (Pos > FirstChar && isNumberChar(Pos[-1])) {
+  поки (Pos > FirstChar && isNumberChar(Pos[-1])) {
     // Backup over at most one period.
-    if (Pos[-1] == '.') {
-      if (HasPeriod)
+    якщо (Pos[-1] == '.') {
+      якщо (HasPeriod)
         break;
       HasPeriod = true;
     }
 
     --Pos;
-    if (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
+    якщо (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
       break;
   }
-  return Pos;
+  повернути Pos;
 }
 
 /// EndOfNumber - Return the first character that is not part of the specified
 /// number.  This assumes that the buffer is null terminated, so it won't fall
 /// off the end.
 static const char *EndOfNumber(const char *Pos) {
-  while (isNumberChar(*Pos))
+  поки (isNumberChar(*Pos))
     ++Pos;
-  return Pos;
+  повернути Pos;
 }
 
 /// CompareNumbers - compare two numbers, returning true if they are different.
@@ -91,24 +91,24 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 
   // If one of the positions is at a space and the other isn't, chomp up 'til
   // the end of the space.
-  while (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
+  поки (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
     ++F1P;
-  while (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
+  поки (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
     ++F2P;
 
   // If we stop on numbers, compare their difference.
-  if (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
+  якщо (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
     // The diff failed.
     F1NumEnd = F1P;
     F2NumEnd = F2P;
-  } else {
+  } інакше {
     // Note that some ugliness is built into this to permit support for numbers
     // that use "D" or "d" as their exponential marker, e.g. "1.234D45".  This
     // occurs in 200.sixtrack in spec2k.
     V1 = strtod(F1P, const_cast<char**>(&F1NumEnd));
     V2 = strtod(F2P, const_cast<char**>(&F2NumEnd));
 
-    if (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
+    якщо (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
       SmallString<200> StrTmp(F1P, EndOfNumber(F1NumEnd)+1);
       // Strange exponential notation!
@@ -118,7 +118,7 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
       F1NumEnd = F1P + (F1NumEnd-&StrTmp[0]);
     }
 
-    if (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
+    якщо (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
       SmallString<200> StrTmp(F2P, EndOfNumber(F2NumEnd)+1);
       // Strange exponential notation!
@@ -129,42 +129,42 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
     }
   }
 
-  if (F1NumEnd == F1P || F2NumEnd == F2P) {
-    if (ErrorMsg) {
+  якщо (F1NumEnd == F1P || F2NumEnd == F2P) {
+    якщо (ErrorMsg) {
       *ErrorMsg = "FP Comparison failed, not a numeric difference between '";
       *ErrorMsg += F1P[0];
       *ErrorMsg += "' and '";
       *ErrorMsg += F2P[0];
       *ErrorMsg += "'";
     }
-    return true;
+    повернути true;
   }
 
   // Check to see if these are inside the absolute tolerance
-  if (AbsTolerance < std::abs(V1-V2)) {
+  якщо (AbsTolerance < std::abs(V1-V2)) {
     // Nope, check the relative tolerance...
     double Diff;
-    if (V2)
+    якщо (V2)
       Diff = std::abs(V1/V2 - 1.0);
-    else if (V1)
+    інакше якщо (V1)
       Diff = std::abs(V2/V1 - 1.0);
-    else
+    інакше
       Diff = 0;  // Both zero.
-    if (Diff > RelTolerance) {
-      if (ErrorMsg) {
+    якщо (Diff > RelTolerance) {
+      якщо (ErrorMsg) {
         raw_string_ostream(*ErrorMsg)
           << "Compared: " << V1 << " and " << V2 << '\n'
           << "abs. diff = " << std::abs(V1-V2) << " rel.diff = " << Diff << '\n'
           << "Out of tolerance: rel/abs: " << RelTolerance << '/'
           << AbsTolerance;
       }
-      return true;
+      повернути true;
     }
   }
 
   // Otherwise, advance our read pointers to the end of the numbers.
   F1P = F1NumEnd;  F2P = F2NumEnd;
-  return false;
+  повернути false;
 }
 
 /// DiffFilesWithTolerance - Compare the two files specified, returning 0 if the
@@ -175,25 +175,25 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 /// error occurs, allowing the caller to distinguish between a failed diff and a
 /// file system error.
 ///
-int llvm::DiffFilesWithTolerance(StringRef NameA,
+ціле llvm::DiffFilesWithTolerance(StringRef NameA,
                                  StringRef NameB,
                                  double AbsTol, double RelTol,
                                  std::string *Error) {
   // Now its safe to mmap the files into memory because both files
   // have a non-zero size.
   ErrorOr<std::unique_ptr<MemoryBuffer>> F1OrErr = MemoryBuffer::getFile(NameA);
-  if (std::error_code EC = F1OrErr.getError()) {
-    if (Error)
+  якщо (std::error_code EC = F1OrErr.getError()) {
+    якщо (Error)
       *Error = EC.message();
-    return 2;
+    повернути 2;
   }
   MemoryBuffer &F1 = *F1OrErr.get();
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> F2OrErr = MemoryBuffer::getFile(NameB);
-  if (std::error_code EC = F2OrErr.getError()) {
-    if (Error)
+  якщо (std::error_code EC = F2OrErr.getError()) {
+    якщо (Error)
       *Error = EC.message();
-    return 2;
+    повернути 2;
   }
   MemoryBuffer &F2 = *F2OrErr.get();
 
@@ -208,26 +208,26 @@ int llvm::DiffFilesWithTolerance(StringRef NameA,
   uint64_t B_size = F2.getBufferSize();
 
   // Are the buffers identical?  Common case: Handle this efficiently.
-  if (A_size == B_size &&
+  якщо (A_size == B_size &&
       std::memcmp(File1Start, File2Start, A_size) == 0)
-    return 0;
+    повернути 0;
 
   // Otherwise, we are done a tolerances are set.
-  if (AbsTol == 0 && RelTol == 0) {
-    if (Error)
+  якщо (AbsTol == 0 && RelTol == 0) {
+    якщо (Error)
       *Error = "Files differ without tolerance allowance";
-    return 1;   // Files different!
+    повернути 1;   // Files different!
   }
 
   bool CompareFailed = false;
-  while (true) {
+  поки (true) {
     // Scan for the end of file or next difference.
-    while (F1P < File1End && F2P < File2End && *F1P == *F2P) {
+    поки (F1P < File1End && F2P < File2End && *F1P == *F2P) {
       ++F1P;
       ++F2P;
     }
 
-    if (F1P >= File1End || F2P >= File2End) break;
+    якщо (F1P >= File1End || F2P >= File2End) break;
 
     // Okay, we must have found a difference.  Backup to the start of the
     // current number each stream is at so that we can compare from the
@@ -237,7 +237,7 @@ int llvm::DiffFilesWithTolerance(StringRef NameA,
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
+    якщо (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
       CompareFailed = true;
       break;
     }
@@ -247,38 +247,38 @@ int llvm::DiffFilesWithTolerance(StringRef NameA,
   // succeeded.
   bool F1AtEnd = F1P >= File1End;
   bool F2AtEnd = F2P >= File2End;
-  if (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
+  якщо (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
     // Else, we might have run off the end due to a number: backup and retry.
-    if (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
-    if (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
+    якщо (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
+    якщо (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
     F1P = BackupNumber(F1P, File1Start);
     F2P = BackupNumber(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
+    якщо (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
       CompareFailed = true;
 
     // If we found the end, we succeeded.
-    if (F1P < File1End || F2P < File2End)
+    якщо (F1P < File1End || F2P < File2End)
       CompareFailed = true;
   }
 
-  return CompareFailed;
+  повернути CompareFailed;
 }
 
 Expected<FilePermissionsApplier>
 FilePermissionsApplier::create(StringRef InputFilename) {
   sys::fs::file_status Status;
 
-  if (InputFilename != "-") {
-    if (auto EC = sys::fs::status(InputFilename, Status))
-      return createFileError(InputFilename, EC);
-  } else {
+  якщо (InputFilename != "-") {
+    якщо (auto EC = sys::fs::status(InputFilename, Status))
+      повернути createFileError(InputFilename, EC);
+  } інакше {
     Status.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  return FilePermissionsApplier(InputFilename, Status);
+  повернути FilePermissionsApplier(InputFilename, Status);
 }
 
 Error FilePermissionsApplier::apply(
@@ -286,49 +286,49 @@ Error FilePermissionsApplier::apply(
     std::optional<sys::fs::perms> OverwritePermissions) {
   sys::fs::file_status Status = InputStatus;
 
-  if (OverwritePermissions)
+  якщо (OverwritePermissions)
     Status.permissions(*OverwritePermissions);
 
-  int FD = 0;
+  ціле FD = 0;
 
   // Writing to stdout should not be treated as an error here, just
   // do not set access/modification times or permissions.
-  if (OutputFilename == "-")
-    return Error::success();
+  якщо (OutputFilename == "-")
+    повернути Error::success();
 
-  if (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
+  якщо (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
                                                      sys::fs::CD_OpenExisting))
-    return createFileError(OutputFilename, EC);
+    повернути createFileError(OutputFilename, EC);
 
-  if (CopyDates)
-    if (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
+  якщо (CopyDates)
+    якщо (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
             FD, Status.getLastAccessedTime(), Status.getLastModificationTime()))
-      return createFileError(OutputFilename, EC);
+      повернути createFileError(OutputFilename, EC);
 
   sys::fs::file_status OStat;
-  if (std::error_code EC =
+  якщо (std::error_code EC =
           sys::fs::status(sys::fs::convertFDToNativeFile(FD), OStat))
-    return createFileError(OutputFilename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file) {
+    повернути createFileError(OutputFilename, EC);
+  якщо (OStat.type() == sys::fs::file_type::regular_file) {
 #ifndef _WIN32
     // Keep ownership if llvm-objcopy is called under root.
-    if (OutputFilename == InputFilename && OStat.getUser() == 0)
+    якщо (OutputFilename == InputFilename && OStat.getUser() == 0)
       sys::fs::changeFileOwnership(FD, Status.getUser(), Status.getGroup());
 #endif
 
     sys::fs::perms Perm = Status.permissions();
-    if (OutputFilename != InputFilename)
+    якщо (OutputFilename != InputFilename)
       Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
 #ifdef _WIN32
-    if (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
-#else
-    if (std::error_code EC = sys::fs::setPermissions(FD, Perm))
+    якщо (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
+#інакше
+    якщо (std::error_code EC = sys::fs::setPermissions(FD, Perm))
 #endif
-      return createFileError(OutputFilename, EC);
+      повернути createFileError(OutputFilename, EC);
   }
 
-  if (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return createFileError(OutputFilename, EC);
+  якщо (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    повернути createFileError(OutputFilename, EC);
 
-  return Error::success();
+  повернути Error::success();
 }

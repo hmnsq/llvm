@@ -49,10 +49,10 @@
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+static const char *regatoi(const llvm_regex_t *, char *, ціле);
 
 static struct rerr {
-	int code;
+	ціле code;
 	const char *name;
 	const char *explain;
 } rerrs[] = {
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(ціле errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 	struct rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
+	ціле target = errcode &~ REG_ITOA;
 	const char *s;
 	char convbuf[50];
 
-	if (errcode == REG_ATOI)
+	якщо (errcode == REG_ATOI)
 		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
+	інакше {
+		для (r = rerrs; r->code != 0; r++)
+			якщо (r->code == target)
 				break;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
+		якщо (errcode&REG_ITOA) {
+			якщо (r->code != 0) {
 				assert(strlen(r->name) < sizeof(convbuf));
 				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
+			} інакше
 				(void)snprintf(convbuf, sizeof convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} інакше
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	якщо (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	повернути(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
 static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+regatoi(const llvm_regex_t *preg, char *localbuf, ціле localbufsize)
 {
 	struct rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
+	для (r = rerrs; r->code != 0; r++)
+		якщо (strcmp(r->name, preg->re_endp) == 0)
 			break;
-	if (r->code == 0)
-		return("0");
+	якщо (r->code == 0)
+		повернути("0");
 
 	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	повернути(localbuf);
 }

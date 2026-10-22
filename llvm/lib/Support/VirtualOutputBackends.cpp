@@ -36,15 +36,15 @@ void OnDiskOutputBackend::anchor() {}
 IntrusiveRefCntPtr<OutputBackend> vfs::makeNullOutputBackend() {
   struct NullOutputBackend : public OutputBackend {
     IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return const_cast<NullOutputBackend *>(this);
+      повернути const_cast<NullOutputBackend *>(this);
     }
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path, std::optional<OutputConfig>) override {
-      return std::make_unique<NullOutputFileImpl>();
+      повернути std::make_unique<NullOutputFileImpl>();
     }
   };
 
-  return makeIntrusiveRefCnt<NullOutputBackend>();
+  повернути makeIntrusiveRefCnt<NullOutputBackend>();
 }
 
 IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
@@ -54,13 +54,13 @@ IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path,
                    std::optional<OutputConfig> Config) override {
-      if (Filter(Path, Config))
-        return ProxyOutputBackend::createFileImpl(Path, Config);
-      return std::make_unique<NullOutputFileImpl>();
+      якщо (Filter(Path, Config))
+        повернути ProxyOutputBackend::createFileImpl(Path, Config);
+      повернути std::make_unique<NullOutputFileImpl>();
     }
 
     IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return makeIntrusiveRefCnt<FilteringOutputBackend>(
+      повернути makeIntrusiveRefCnt<FilteringOutputBackend>(
           getUnderlyingBackend().clone(), Filter);
     }
 
@@ -74,7 +74,7 @@ IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
     std::function<bool(StringRef, std::optional<OutputConfig>)> Filter;
   };
 
-  return makeIntrusiveRefCnt<FilteringOutputBackend>(
+  повернути makeIntrusiveRefCnt<FilteringOutputBackend>(
       std::move(UnderlyingBackend), std::move(Filter));
 }
 
@@ -90,13 +90,13 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
   struct MirroringOutput final : public OutputFileImpl, raw_pwrite_stream {
     Error keep() final {
       flush();
-      return joinErrors(F1->keep(), F2->keep());
+      повернути joinErrors(F1->keep(), F2->keep());
     }
     Error discard() final {
       flush();
-      return joinErrors(F1->discard(), F2->discard());
+      повернути joinErrors(F1->discard(), F2->discard());
     }
-    raw_pwrite_stream &getOS() final { return *this; }
+    raw_pwrite_stream &getOS() final { повернути *this; }
 
     void write_impl(const char *Ptr, size_t Size) override {
       F1->getOS().write(Ptr, Size);
@@ -107,19 +107,19 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
       F1->getOS().pwrite(Ptr, Size, Offset);
       F2->getOS().pwrite(Ptr, Size, Offset);
     }
-    uint64_t current_pos() const override { return F1->getOS().tell(); }
+    uint64_t current_pos() const override { повернути F1->getOS().tell(); }
     size_t preferred_buffer_size() const override {
-      return PreferredBufferSize;
+      повернути PreferredBufferSize;
     }
     void reserveExtraSpace(uint64_t ExtraSize) override {
       F1->getOS().reserveExtraSpace(ExtraSize);
       F2->getOS().reserveExtraSpace(ExtraSize);
     }
     bool is_displayed() const override {
-      return F1->getOS().is_displayed() && F2->getOS().is_displayed();
+      повернути F1->getOS().is_displayed() && F2->getOS().is_displayed();
     }
     bool has_colors() const override {
-      return F1->getOS().has_colors() && F2->getOS().has_colors();
+      повернути F1->getOS().has_colors() && F2->getOS().has_colors();
     }
     void enable_colors(bool enable) override {
       raw_pwrite_stream::enable_colors(enable);
@@ -144,28 +144,28 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
                    std::optional<OutputConfig> Config) override {
       std::unique_ptr<OutputFileImpl> File1;
       std::unique_ptr<OutputFileImpl> File2;
-      if (Error E =
+      якщо (Error E =
               ProxyOutputBackend1::createFileImpl(Path, Config).moveInto(File1))
-        return std::move(E);
-      if (Error E =
+        повернути std::move(E);
+      якщо (Error E =
               ProxyOutputBackend2::createFileImpl(Path, Config).moveInto(File2))
-        return joinErrors(std::move(E), File1->discard());
+        повернути joinErrors(std::move(E), File1->discard());
 
       // Skip the extra indirection if one of these is a null output.
-      if (isa<NullOutputFileImpl>(*File1)) {
+      якщо (isa<NullOutputFileImpl>(*File1)) {
         consumeError(File1->discard());
-        return std::move(File2);
+        повернути std::move(File2);
       }
-      if (isa<NullOutputFileImpl>(*File2)) {
+      якщо (isa<NullOutputFileImpl>(*File2)) {
         consumeError(File2->discard());
-        return std::move(File1);
+        повернути std::move(File1);
       }
-      return std::make_unique<MirroringOutput>(std::move(File1),
+      повернути std::make_unique<MirroringOutput>(std::move(File1),
                                                std::move(File2));
     }
 
     IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return IntrusiveRefCntPtr<ProxyOutputBackend1>(
+      повернути IntrusiveRefCntPtr<ProxyOutputBackend1>(
           makeIntrusiveRefCnt<MirroringOutputBackend>(
               ProxyOutputBackend1::getUnderlyingBackend().clone(),
               ProxyOutputBackend2::getUnderlyingBackend().clone()));
@@ -181,7 +181,7 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
 
   assert(Backend1 && "Expected actual backend");
   assert(Backend2 && "Expected actual backend");
-  return IntrusiveRefCntPtr<ProxyOutputBackend1>(
+  повернути IntrusiveRefCntPtr<ProxyOutputBackend1>(
       makeIntrusiveRefCnt<MirroringOutputBackend>(std::move(Backend1),
                                                   std::move(Backend2)));
 }
@@ -189,13 +189,13 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
 static OutputConfig
 applySettings(std::optional<OutputConfig> &&Config,
               const OnDiskOutputBackend::OutputSettings &Settings) {
-  if (!Config)
+  якщо (!Config)
     Config = Settings.DefaultConfig;
-  if (!Settings.UseTemporaries)
+  якщо (!Settings.UseTemporaries)
     Config->setNoAtomicWrite();
-  if (!Settings.RemoveOnSignal)
+  якщо (!Settings.RemoveOnSignal)
     Config->setNoDiscardOnSignal();
-  return *Config;
+  повернути *Config;
 }
 
 namespace {
@@ -205,9 +205,9 @@ public:
   Error discard() override;
   raw_pwrite_stream &getOS() override {
     assert(FileOS && "Expected valid file");
-    if (BufferOS)
-      return *BufferOS;
-    return *FileOS;
+    якщо (BufferOS)
+      повернути *BufferOS;
+    повернути *FileOS;
   }
 
   /// Attempt to open a temporary file for \p OutputPath.
@@ -218,9 +218,9 @@ public:
   /// Config.
   ///
   /// \post FD and \a TempPath are initialized if this is successful.
-  Error tryToCreateTemporary(std::optional<int> &FD);
+  Error tryToCreateTemporary(std::optional<ціле> &FD);
 
-  Error initializeFile(std::optional<int> &FD);
+  Error initializeFile(std::optional<ціле> &FD);
   Error initializeStream();
   Error reset();
 
@@ -240,33 +240,33 @@ public:
 static Error createDirectoriesOnDemand(StringRef OutputPath,
                                        OutputConfig Config,
                                        llvm::function_ref<Error()> CreateFile) {
-  return handleErrors(CreateFile(), [&](std::unique_ptr<ECError> EC) {
-    if (EC->convertToErrorCode() != std::errc::no_such_file_or_directory ||
+  повернути handleErrors(CreateFile(), [&](std::unique_ptr<ECError> EC) {
+    якщо (EC->convertToErrorCode() != std::errc::no_such_file_or_directory ||
         Config.getNoImplyCreateDirectories())
-      return Error(std::move(EC));
+      повернути Error(std::move(EC));
 
     StringRef ParentPath = sys::path::parent_path(OutputPath);
-    if (std::error_code EC = sys::fs::create_directories(ParentPath))
-      return make_error<OutputError>(ParentPath, EC);
-    return CreateFile();
+    якщо (std::error_code EC = sys::fs::create_directories(ParentPath))
+      повернути make_error<OutputError>(ParentPath, EC);
+    повернути CreateFile();
   });
 }
 
 static sys::fs::OpenFlags generateFlagsFromConfig(OutputConfig Config) {
   sys::fs::OpenFlags OF = sys::fs::OF_None;
-  if (Config.getTextWithCRLF())
+  якщо (Config.getTextWithCRLF())
     OF |= sys::fs::OF_TextWithCRLF;
-  else if (Config.getText())
+  інакше якщо (Config.getText())
     OF |= sys::fs::OF_Text;
   // Don't pass OF_Append if writting to temporary since OF_Append is
   // not Atomic Append
-  if (Config.getAppend() && !Config.getAtomicWrite())
+  якщо (Config.getAppend() && !Config.getAtomicWrite())
     OF |= sys::fs::OF_Append;
 
-  return OF;
+  повернути OF;
 }
 
-Error OnDiskOutputFile::tryToCreateTemporary(std::optional<int> &FD) {
+Error OnDiskOutputFile::tryToCreateTemporary(std::optional<ціле> &FD) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Create a temporary file.
@@ -280,24 +280,24 @@ Error OnDiskOutputFile::tryToCreateTemporary(std::optional<int> &FD) {
   ModelPath += OutputExtension;
   ModelPath += ".tmp";
 
-  return createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
-    int NewFD;
+  повернути createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
+    ціле NewFD;
     SmallString<128> UniquePath;
     sys::fs::OpenFlags OF = generateFlagsFromConfig(Config);
-    if (std::error_code EC =
+    якщо (std::error_code EC =
             sys::fs::createUniqueFile(ModelPath, NewFD, UniquePath, OF))
-      return make_error<TempFileOutputError>(ModelPath, OutputPath, EC);
+      повернути make_error<TempFileOutputError>(ModelPath, OutputPath, EC);
 
-    if (Config.getDiscardOnSignal())
+    якщо (Config.getDiscardOnSignal())
       sys::RemoveFileOnSignal(UniquePath);
 
     TempPath = UniquePath.str().str();
     FD.emplace(NewFD);
-    return Error::success();
+    повернути Error::success();
   });
 }
 
-Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
+Error OnDiskOutputFile::initializeFile(std::optional<ціле> &FD) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   assert(OutputPath != "-" && "Unexpected request for FD of stdout");
@@ -305,11 +305,11 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
   // Disable temporary file for other non-regular files, and if we get a status
   // object, also check if in append mode we can write and disable write-through
   // buffers if appropriate.
-  if (Config.getAtomicWrite()) {
+  якщо (Config.getAtomicWrite()) {
     sys::fs::file_status Status;
     sys::fs::status(OutputPath, Status);
-    if (sys::fs::exists(Status)) {
-      if (!sys::fs::is_regular_file(Status))
+    якщо (sys::fs::exists(Status)) {
+      якщо (!sys::fs::is_regular_file(Status))
         Config.setNoAtomicWrite();
 
       // In append mode, we will open the file for writing which will need write
@@ -317,8 +317,8 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
       // final destination.
       // In non-append mode, we will delete and replace the file. Permission
       // bits of the file itself are irrelevant in this case.
-      if (Config.getAppend() && !sys::fs::can_write(OutputPath))
-        return make_error<OutputError>(
+      якщо (Config.getAppend() && !sys::fs::can_write(OutputPath))
+        повернути make_error<OutputError>(
             OutputPath,
             std::make_error_code(std::errc::operation_not_permitted));
     }
@@ -326,22 +326,22 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
 
   // If (still) using a temporary file, try to create it (and return success if
   // that works).
-  if (Config.getAtomicWrite())
-    if (!errorToBool(tryToCreateTemporary(FD)))
-      return Error::success();
+  якщо (Config.getAtomicWrite())
+    якщо (!errorToBool(tryToCreateTemporary(FD)))
+      повернути Error::success();
 
   // Not using a temporary file. Open the final output file.
-  return createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
-    int NewFD;
+  повернути createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
+    ціле NewFD;
     sys::fs::OpenFlags OF = generateFlagsFromConfig(Config);
-    if (std::error_code EC = sys::fs::openFileForWrite(
+    якщо (std::error_code EC = sys::fs::openFileForWrite(
             OutputPath, NewFD, sys::fs::CD_CreateAlways, OF))
-      return convertToOutputError(OutputPath, EC);
+      повернути convertToOutputError(OutputPath, EC);
     FD.emplace(NewFD);
 
-    if (Config.getDiscardOnSignal())
+    якщо (Config.getDiscardOnSignal())
       sys::RemoveFileOnSignal(OutputPath);
-    return Error::success();
+    повернути Error::success();
   });
 }
 
@@ -349,34 +349,34 @@ Error OnDiskOutputFile::initializeStream() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Open the file stream.
-  if (OutputPath == "-") {
+  якщо (OutputPath == "-") {
     std::error_code EC;
     FileOS.emplace(OutputPath, EC);
-    if (EC)
-      return make_error<OutputError>(OutputPath, EC);
-  } else {
-    std::optional<int> FD;
-    if (Error E = initializeFile(FD))
-      return E;
+    якщо (EC)
+      повернути make_error<OutputError>(OutputPath, EC);
+  } інакше {
+    std::optional<ціле> FD;
+    якщо (Error E = initializeFile(FD))
+      повернути E;
     FileOS.emplace(*FD, /*shouldClose=*/true);
   }
 
   // Buffer the stream if necessary.
-  if (!FileOS->supportsSeeking() && !Config.getText())
+  якщо (!FileOS->supportsSeeking() && !Config.getText())
     BufferOS.emplace(*FileOS);
 
-  return Error::success();
+  повернути Error::success();
 }
 
 namespace {
 class OpenFileRAII {
-  static const int InvalidFd = -1;
+  static const ціле InvalidFd = -1;
 
 public:
-  int Fd = InvalidFd;
+  ціле Fd = InvalidFd;
 
   ~OpenFileRAII() {
-    if (Fd != InvalidFd)
+    якщо (Fd != InvalidFd)
       llvm::sys::Process::SafelyCloseFileDescriptor(Fd);
   }
 };
@@ -395,38 +395,38 @@ enum class FileDifference : uint8_t {
 
 static Expected<FileDifference>
 areFilesDifferent(const llvm::Twine &Source, const llvm::Twine &Destination) {
-  if (sys::fs::equivalent(Source, Destination))
-    return FileDifference::IdenticalFile;
+  якщо (sys::fs::equivalent(Source, Destination))
+    повернути FileDifference::IdenticalFile;
 
   OpenFileRAII SourceFile;
   sys::fs::file_status SourceStatus;
   // If we can't open the source file, fail.
-  if (std::error_code EC = sys::fs::openFileForRead(Source, SourceFile.Fd))
-    return convertToOutputError(Source, EC);
+  якщо (std::error_code EC = sys::fs::openFileForRead(Source, SourceFile.Fd))
+    повернути convertToOutputError(Source, EC);
 
   // If we can't stat the source file, fail.
-  if (std::error_code EC = sys::fs::status(SourceFile.Fd, SourceStatus))
-    return convertToOutputError(Source, EC);
+  якщо (std::error_code EC = sys::fs::status(SourceFile.Fd, SourceStatus))
+    повернути convertToOutputError(Source, EC);
 
   OpenFileRAII DestFile;
   sys::fs::file_status DestStatus;
   // If we can't open the destination file, report different.
-  if (std::error_code Error =
+  якщо (std::error_code Error =
           sys::fs::openFileForRead(Destination, DestFile.Fd))
-    return FileDifference::DifferentContents;
+    повернути FileDifference::DifferentContents;
 
   // If we can't open the destination file, report different.
-  if (std::error_code Error = sys::fs::status(DestFile.Fd, DestStatus))
-    return FileDifference::DifferentContents;
+  якщо (std::error_code Error = sys::fs::status(DestFile.Fd, DestStatus))
+    повернути FileDifference::DifferentContents;
 
   // If the files are different sizes, they must be different.
   uint64_t Size = SourceStatus.getSize();
-  if (Size != DestStatus.getSize())
-    return FileDifference::DifferentContents;
+  якщо (Size != DestStatus.getSize())
+    повернути FileDifference::DifferentContents;
 
   // If both files are zero size, they must be the same.
-  if (Size == 0)
-    return FileDifference::SameContents;
+  якщо (Size == 0)
+    повернути FileDifference::SameContents;
 
   // The two files match in size, so we have to compare the bytes to determine
   // if they're the same.
@@ -434,21 +434,21 @@ areFilesDifferent(const llvm::Twine &Source, const llvm::Twine &Destination) {
   sys::fs::mapped_file_region SourceRegion(
       sys::fs::convertFDToNativeFile(SourceFile.Fd),
       sys::fs::mapped_file_region::readonly, Size, 0, SourceRegionErr);
-  if (SourceRegionErr)
-    return convertToOutputError(Source, SourceRegionErr);
+  якщо (SourceRegionErr)
+    повернути convertToOutputError(Source, SourceRegionErr);
 
   std::error_code DestRegionErr;
   sys::fs::mapped_file_region DestRegion(
       sys::fs::convertFDToNativeFile(DestFile.Fd),
       sys::fs::mapped_file_region::readonly, Size, 0, DestRegionErr);
 
-  if (DestRegionErr)
-    return FileDifference::DifferentContents;
+  якщо (DestRegionErr)
+    повернути FileDifference::DifferentContents;
 
-  if (memcmp(SourceRegion.const_data(), DestRegion.const_data(), Size) != 0)
-    return FileDifference::DifferentContents;
+  якщо (memcmp(SourceRegion.const_data(), DestRegion.const_data(), Size) != 0)
+    повернути FileDifference::DifferentContents;
 
-  return FileDifference::SameContents;
+  повернути FileDifference::SameContents;
 }
 
 Error OnDiskOutputFile::reset() {
@@ -456,65 +456,65 @@ Error OnDiskOutputFile::reset() {
 
   // Destroy the streams to flush them.
   BufferOS.reset();
-  if (!FileOS)
-    return Error::success();
+  якщо (!FileOS)
+    повернути Error::success();
 
   // Remember the error in raw_fd_ostream to be reported later.
   std::error_code EC = FileOS->error();
   // Clear the error to avoid fatal error when reset.
   FileOS->clear_error();
   FileOS.reset();
-  return errorCodeToError(EC);
+  повернути errorCodeToError(EC);
 }
 
 Error OnDiskOutputFile::keep() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (auto E = reset())
-    return E;
+  якщо (auto E = reset())
+    повернути E;
 
   // Close the file descriptor and remove crash cleanup before exit.
   llvm::scope_exit RemoveDiscardOnSignal([&]() {
-    if (Config.getDiscardOnSignal())
+    якщо (Config.getDiscardOnSignal())
       sys::DontRemoveFileOnSignal(TempPath ? *TempPath : OutputPath);
   });
 
-  if (!TempPath)
-    return Error::success();
+  якщо (!TempPath)
+    повернути Error::success();
 
   // See if we should append instead of move.
-  if (Config.getAppend() && OutputPath != "-") {
+  якщо (Config.getAppend() && OutputPath != "-") {
     // Read TempFile for the content to append.
     auto Content = MemoryBuffer::getFile(*TempPath);
-    if (!Content)
-      return convertToTempFileOutputError(*TempPath, OutputPath,
+    якщо (!Content)
+      повернути convertToTempFileOutputError(*TempPath, OutputPath,
                                           Content.getError());
-    while (1) {
+    поки (1) {
       // Attempt to lock the output file.
       // Only one process is allowed to append to this file at a time.
       llvm::LockFileManager Lock(OutputPath);
       bool Owned;
-      if (Error Err = Lock.tryLock().moveInto(Owned)) {
+      якщо (Error Err = Lock.tryLock().moveInto(Owned)) {
         // If we error acquiring a lock, we cannot ensure appends
         // to the trace file are atomic - cannot ensure output correctness.
         Lock.unsafeUnlock();
-        return convertToOutputError(
+        повернути convertToOutputError(
             OutputPath, std::make_error_code(std::errc::no_lock_available));
       }
-      if (Owned) {
+      якщо (Owned) {
         // Lock acquired, perform the write and release the lock.
         std::error_code EC;
         llvm::raw_fd_ostream Out(OutputPath, EC, llvm::sys::fs::OF_Append);
-        if (EC)
-          return convertToOutputError(OutputPath, EC);
+        якщо (EC)
+          повернути convertToOutputError(OutputPath, EC);
         Out << (*Content)->getBuffer();
         Out.close();
         Lock.unsafeUnlock();
-        if (Out.has_error())
-          return convertToOutputError(OutputPath, Out.error());
+        якщо (Out.has_error())
+          повернути convertToOutputError(OutputPath, Out.error());
         // Remove temp file and done.
         (void)sys::fs::remove(*TempPath);
-        return Error::success();
+        повернути Error::success();
       }
       // Someone else owns the lock on this file, wait.
       switch (Lock.waitForUnlockFor(std::chrono::seconds(256))) {
@@ -537,19 +537,19 @@ Error OnDiskOutputFile::keep() {
     }
   }
 
-  if (Config.getOnlyIfDifferent()) {
+  якщо (Config.getOnlyIfDifferent()) {
     auto Result = areFilesDifferent(*TempPath, OutputPath);
-    if (!Result)
-      return Result.takeError();
+    якщо (!Result)
+      повернути Result.takeError();
     switch (*Result) {
     case FileDifference::IdenticalFile:
       // Do nothing for a self-move.
-      return Error::success();
+      повернути Error::success();
 
     case FileDifference::SameContents:
       // Files are identical; remove the source file.
       (void)sys::fs::remove(*TempPath);
-      return Error::success();
+      повернути Error::success();
 
     case FileDifference::DifferentContents:
       break; // Rename the file.
@@ -558,8 +558,8 @@ Error OnDiskOutputFile::keep() {
 
   // Move temporary to the final output path and remove it if that fails.
   std::error_code RenameEC = sys::fs::rename(*TempPath, OutputPath);
-  if (!RenameEC)
-    return Error::success();
+  якщо (!RenameEC)
+    повернути Error::success();
 
   // FIXME: TempPath should be in the same directory as OutputPath but try to
   // copy the output to see if makes any difference. If this path is used,
@@ -567,40 +567,40 @@ Error OnDiskOutputFile::keep() {
   RenameEC = sys::fs::copy_file(*TempPath, OutputPath);
   (void)sys::fs::remove(*TempPath);
 
-  if (!RenameEC)
-    return Error::success();
+  якщо (!RenameEC)
+    повернути Error::success();
 
-  return make_error<TempFileOutputError>(*TempPath, OutputPath, RenameEC);
+  повернути make_error<TempFileOutputError>(*TempPath, OutputPath, RenameEC);
 }
 
 Error OnDiskOutputFile::discard() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Destroy the streams to flush them.
-  if (auto E = reset())
-    return E;
+  якщо (auto E = reset())
+    повернути E;
 
   // Nothing on the filesystem to remove for stdout.
-  if (OutputPath == "-")
-    return Error::success();
+  якщо (OutputPath == "-")
+    повернути Error::success();
 
   auto discardPath = [&](StringRef Path) {
     std::error_code EC = sys::fs::remove(Path);
     sys::DontRemoveFileOnSignal(Path);
-    return EC;
+    повернути EC;
   };
 
   // Clean up the file that's in-progress.
-  if (!TempPath)
-    return convertToOutputError(OutputPath, discardPath(OutputPath));
-  return convertToTempFileOutputError(*TempPath, OutputPath,
+  якщо (!TempPath)
+    повернути convertToOutputError(OutputPath, discardPath(OutputPath));
+  повернути convertToTempFileOutputError(*TempPath, OutputPath,
                                       discardPath(*TempPath));
 }
 
 Error OnDiskOutputBackend::makeAbsolute(SmallVectorImpl<char> &Path) const {
   // FIXME: Should this really call sys::fs::make_absolute?
   auto BypassSandbox = sys::sandbox::scopedDisable();
-  return convertToOutputError(StringRef(Path.data(), Path.size()),
+  повернути convertToOutputError(StringRef(Path.data(), Path.size()),
                               sys::fs::make_absolute(Path));
 }
 
@@ -610,16 +610,16 @@ OnDiskOutputBackend::createFileImpl(StringRef Path,
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> AbsPath;
-  if (Path != "-") {
+  якщо (Path != "-") {
     AbsPath = Path;
-    if (Error E = makeAbsolute(AbsPath))
-      return std::move(E);
+    якщо (Error E = makeAbsolute(AbsPath))
+      повернути std::move(E);
     Path = AbsPath;
   }
 
   auto File = std::make_unique<OnDiskOutputFile>(Path, Config, Settings);
-  if (Error E = File->initializeStream())
-    return std::move(E);
+  якщо (Error E = File->initializeStream())
+    повернути std::move(E);
 
-  return std::move(File);
+  повернути std::move(File);
 }

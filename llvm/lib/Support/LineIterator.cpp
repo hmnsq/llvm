@@ -12,23 +12,23 @@
 using namespace llvm;
 
 static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+  якщо (*P == '\n')
+    повернути true;
+  якщо (*P == '\r' && *(P + 1) == '\n')
+    повернути true;
+  повернути false;
 }
 
 static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+  якщо (*P == '\n') {
     ++P;
-    return true;
+    повернути true;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  якщо (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    повернути true;
   }
-  return false;
+  повернути false;
 }
 
 line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
@@ -44,10 +44,10 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
+  якщо (Buffer.getBufferSize()) {
     assert(Buffer.getBufferEnd()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    якщо (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
       advance();
   }
 }
@@ -58,39 +58,39 @@ void line_iterator::advance() {
   const char *Pos = CurrentLine.end();
   assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
+  якщо (skipIfAtLineEnd(Pos))
     ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  якщо (!SkipBlanks && isAtLineEnd(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } інакше якщо (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
+    поки (skipIfAtLineEnd(Pos))
       ++LineNumber;
-  } else {
+  } інакше {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
+    для (;;) {
+      якщо (isAtLineEnd(Pos) && !SkipBlanks)
         break;
-      if (*Pos == CommentMarker)
+      якщо (*Pos == CommentMarker)
         do {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
+        } поки (*Pos != '\0' && !isAtLineEnd(Pos));
+      якщо (!skipIfAtLineEnd(Pos))
         break;
       ++LineNumber;
     }
   }
 
-  if (*Pos == '\0') {
+  якщо (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
     Buffer = std::nullopt;
     CurrentLine = StringRef();
-    return;
+    повернути;
   }
 
   // Measure the line.
   size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
+  поки (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
     ++Length;
   }
 
