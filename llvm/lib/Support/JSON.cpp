@@ -6,310 +6,310 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/JSON.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
-#include <cerrno>
-#include <optional>
+#अन्तर्भाव "llvm/Support/JSON.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/ConvertUTF.h"
+#अन्तर्भाव "llvm/Support/Error.h"
+#अन्तर्भाव "llvm/Support/Format.h"
+#अन्तर्भाव "llvm/Support/NativeFormatting.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव <cctype>
+#अन्तर्भाव <cerrno>
+#अन्तर्भाव <optional>
 
-namespace llvm {
-namespace json {
+नामाकाश llvm {
+नामाकाश json {
 
-Value &Object::operator[](const ObjectKey &K) {
-  return try_emplace(K, nullptr).first->getSecond();
+मूल्य &Object::operator[](ध्रुव Object_कुंजी &K) {
+  प्रत्यागम try_emplace(K, nullptr).first->getSecond();
 }
-Value &Object::operator[](ObjectKey &&K) {
-  return try_emplace(std::move(K), nullptr).first->getSecond();
+मूल्य &Object::operator[](Object_कुंजी &&K) {
+  प्रत्यागम try_emplace(std::move(K), nullptr).first->getSecond();
 }
-Value *Object::get(StringRef K) {
+मूल्य *Object::get(StringRef K) {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  यदि (I == end())
+    प्रत्यागम nullptr;
+  प्रत्यागम &I->second;
 }
-const Value *Object::get(StringRef K) const {
+ध्रुव मूल्य *Object::get(StringRef K) ध्रुव {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  यदि (I == end())
+    प्रत्यागम nullptr;
+  प्रत्यागम &I->second;
 }
-std::optional<std::nullptr_t> Object::getNull(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNull();
-  return std::nullopt;
+std::optional<std::nullptr_t> Object::getNull(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsNull();
+  प्रत्यागम std::nullopt;
 }
-std::optional<bool> Object::getBoolean(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsBoolean();
-  return std::nullopt;
+std::optional<तार्किक> Object::getBoolean(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsBoolean();
+  प्रत्यागम std::nullopt;
 }
-std::optional<double> Object::getNumber(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNumber();
-  return std::nullopt;
+std::optional<द्विगुण> Object::get_संख्या(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->get_As_संख्या();
+  प्रत्यागम std::nullopt;
 }
-std::optional<int64_t> Object::getInteger(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsInteger();
-  return std::nullopt;
+std::optional<int64_t> Object::getInteger(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsInteger();
+  प्रत्यागम std::nullopt;
 }
-std::optional<llvm::StringRef> Object::getString(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsString();
-  return std::nullopt;
+std::optional<llvm::StringRef> Object::getString(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsString();
+  प्रत्यागम std::nullopt;
 }
-const json::Object *Object::getObject(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+ध्रुव json::Object *Object::getObject(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsObject();
+  प्रत्यागम nullptr;
 }
 json::Object *Object::getObject(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsObject();
+  प्रत्यागम nullptr;
 }
-const json::Array *Object::getArray(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+ध्रुव json::Array *Object::getArray(StringRef K) ध्रुव {
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsArray();
+  प्रत्यागम nullptr;
 }
 json::Array *Object::getArray(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+  यदि (auto *V = get(K))
+    प्रत्यागम V->getAsArray();
+  प्रत्यागम nullptr;
 }
-bool operator==(const Object &LHS, const Object &RHS) { return LHS.M == RHS.M; }
+तार्किक operator==(ध्रुव Object &LHS, ध्रुव Object &RHS) { प्रत्यागम LHS.M == RHS.M; }
 
-Array::Array(std::initializer_list<Value> Elements) {
+Array::Array(std::initializer_list<मूल्य> Elements) {
   V.reserve(Elements.size());
-  for (const Value &V : Elements) {
+  प्रति (ध्रुव मूल्य &V : Elements) {
     emplace_back(nullptr);
     back().moveFrom(std::move(V));
   }
 }
 
-Value::Value(std::initializer_list<Value> Elements)
-    : Value(json::Array(Elements)) {}
+मूल्य::मूल्य(std::initializer_list<मूल्य> Elements)
+    : मूल्य(json::Array(Elements)) {}
 
-void Value::copyFrom(const Value &M) {
+शून्य मूल्य::copyFrom(ध्रुव मूल्य &M) {
   Type = M.Type;
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    memcpy(&Union, &M.Union, sizeof(Union));
-    break;
-  case T_StringRef:
+  विकल्प (Type) {
+  पक्ष T_Null:
+  पक्ष T_Boolean:
+  पक्ष T_Double:
+  पक्ष T_Integer:
+  पक्ष T_UINT64:
+    memcpy(&Union, &M.Union, परिमाण(Union));
+    भङ्ग;
+  पक्ष T_StringRef:
     create<StringRef>(M.as<StringRef>());
-    break;
-  case T_String:
+    भङ्ग;
+  पक्ष T_String:
     create<std::string>(M.as<std::string>());
-    break;
-  case T_Object:
+    भङ्ग;
+  पक्ष T_Object:
     create<json::Object>(M.as<json::Object>());
-    break;
-  case T_Array:
+    भङ्ग;
+  पक्ष T_Array:
     create<json::Array>(M.as<json::Array>());
-    break;
+    भङ्ग;
   }
 }
 
-void Value::moveFrom(const Value &&M) {
+शून्य मूल्य::moveFrom(ध्रुव मूल्य &&M) {
   Type = M.Type;
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    memcpy(&Union, &M.Union, sizeof(Union));
-    break;
-  case T_StringRef:
+  विकल्प (Type) {
+  पक्ष T_Null:
+  पक्ष T_Boolean:
+  पक्ष T_Double:
+  पक्ष T_Integer:
+  पक्ष T_UINT64:
+    memcpy(&Union, &M.Union, परिमाण(Union));
+    भङ्ग;
+  पक्ष T_StringRef:
     create<StringRef>(M.as<StringRef>());
-    break;
-  case T_String:
+    भङ्ग;
+  पक्ष T_String:
     create<std::string>(std::move(M.as<std::string>()));
-    break;
-  case T_Object:
+    भङ्ग;
+  पक्ष T_Object:
     create<json::Object>(std::move(M.as<json::Object>()));
-    break;
-  case T_Array:
+    भङ्ग;
+  पक्ष T_Array:
     create<json::Array>(std::move(M.as<json::Array>()));
-    break;
+    भङ्ग;
   }
-  const_cast<Value &>(M).destroy();
+  const_cast<मूल्य &>(M).destroy();
   M.Type = T_Null;
 }
 
-void Value::destroy() {
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    break;
-  case T_StringRef:
+शून्य मूल्य::destroy() {
+  विकल्प (Type) {
+  पक्ष T_Null:
+  पक्ष T_Boolean:
+  पक्ष T_Double:
+  पक्ष T_Integer:
+  पक्ष T_UINT64:
+    भङ्ग;
+  पक्ष T_StringRef:
     as<StringRef>().~StringRef();
-    break;
-  case T_String:
+    भङ्ग;
+  पक्ष T_String:
     as<std::string>().~basic_string();
-    break;
-  case T_Object:
+    भङ्ग;
+  पक्ष T_Object:
     as<json::Object>().~Object();
-    break;
-  case T_Array:
+    भङ्ग;
+  पक्ष T_Array:
     as<json::Array>().~Array();
-    break;
+    भङ्ग;
   }
 }
 
-void Value::print(llvm::raw_ostream &OS) const { OS << *this; }
+शून्य मूल्य::print(llvm::raw_ostream &OS) ध्रुव { OS << *एतत्; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Value::dump() const {
+#यदि !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD शून्य मूल्य::dump() ध्रुव {
   print(llvm::dbgs());
   llvm::dbgs() << '\n';
 }
 #endif
 
-bool operator==(const Value &L, const Value &R) {
-  if (L.kind() != R.kind())
-    return false;
-  switch (L.kind()) {
-  case Value::Null:
-    return *L.getAsNull() == *R.getAsNull();
-  case Value::Boolean:
-    return *L.getAsBoolean() == *R.getAsBoolean();
-  case Value::Number:
+तार्किक operator==(ध्रुव मूल्य &L, ध्रुव मूल्य &R) {
+  यदि (L.kind() != R.kind())
+    प्रत्यागम असत्य;
+  विकल्प (L.kind()) {
+  पक्ष मूल्य::Null:
+    प्रत्यागम *L.getAsNull() == *R.getAsNull();
+  पक्ष मूल्य::Boolean:
+    प्रत्यागम *L.getAsBoolean() == *R.getAsBoolean();
+  पक्ष मूल्य::संख्या:
     // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=323
     // The same integer must convert to the same double, per the standard.
     // However we see 64-vs-80-bit precision comparisons with gcc-7 -O3 -m32.
     // So we avoid floating point promotion for exact comparisons.
-    if (L.Type == Value::T_Integer || R.Type == Value::T_Integer)
-      return L.getAsInteger() == R.getAsInteger();
-    return *L.getAsNumber() == *R.getAsNumber();
-  case Value::String:
-    return *L.getAsString() == *R.getAsString();
-  case Value::Array:
-    return *L.getAsArray() == *R.getAsArray();
-  case Value::Object:
-    return *L.getAsObject() == *R.getAsObject();
+    यदि (L.Type == मूल्य::T_Integer || R.Type == मूल्य::T_Integer)
+      प्रत्यागम L.getAsInteger() == R.getAsInteger();
+    प्रत्यागम *L.get_As_संख्या() == *R.get_As_संख्या();
+  पक्ष मूल्य::String:
+    प्रत्यागम *L.getAsString() == *R.getAsString();
+  पक्ष मूल्य::Array:
+    प्रत्यागम *L.getAsArray() == *R.getAsArray();
+  पक्ष मूल्य::Object:
+    प्रत्यागम *L.getAsObject() == *R.getAsObject();
   }
   llvm_unreachable("Unknown value kind");
 }
 
-void Path::report(llvm::StringLiteral Msg) {
+शून्य Path::report(llvm::StringLiteral संदेश_2) {
   // Walk up to the root context, and count the number of segments.
-  unsigned Count = 0;
-  const Path *P;
-  for (P = this; P->Parent != nullptr; P = P->Parent)
-    ++Count;
-  Path::Root *R = P->Seg.root();
+  unsigned गिनती_2 = 0;
+  ध्रुव Path *P;
+  प्रति (P = एतत्; P->Parent != nullptr; P = P->Parent)
+    ++गिनती_2;
+  Path::मूल_2 *R = P->Seg.मूल_3();
   // Fill in the error message and copy the path (in reverse order).
-  R->ErrorMessage = Msg;
-  R->ErrorPath.resize(Count);
+  R->ErrorMessage = संदेश_2;
+  R->ErrorPath.resize(गिनती_2);
   auto It = R->ErrorPath.begin();
-  for (P = this; P->Parent != nullptr; P = P->Parent)
+  प्रति (P = एतत्; P->Parent != nullptr; P = P->Parent)
     *It++ = P->Seg;
 }
 
-Error Path::Root::getError() const {
+Error Path::मूल_2::getError() ध्रुव {
   std::string S;
   raw_string_ostream OS(S);
   OS << (ErrorMessage.empty() ? "invalid JSON contents" : ErrorMessage);
-  if (ErrorPath.empty()) {
-    if (!Name.empty())
+  यदि (ErrorPath.empty()) {
+    यदि (!Name.empty())
       OS << " when parsing " << Name;
-  } else {
+  } अन्यथा {
     OS << " at " << (Name.empty() ? "(root)" : Name);
-    for (const Path::Segment &S : llvm::reverse(ErrorPath)) {
-      if (S.isField())
+    प्रति (ध्रुव Path::Segment &S : llvm::reverse(ErrorPath)) {
+      यदि (S.isField())
         OS << '.' << S.field();
-      else
+      अन्यथा
         OS << '[' << S.index() << ']';
     }
   }
-  return createStringError(llvm::inconvertibleErrorCode(), S);
+  प्रत्यागम createStringError(llvm::inconvertibleErrorCode(), S);
 }
 
-std::vector<const Object::value_type *> sortedElements(const Object &O) {
-  std::vector<const Object::value_type *> Elements;
-  for (const auto &E : O)
-    Elements.push_back(&E);
+std::vector<ध्रुव Object::मूल्य_type *> sortedElements(ध्रुव Object &O) {
+  std::vector<ध्रुव Object::मूल्य_type *> Elements;
+  प्रति (ध्रुव auto &E : O)
+    Elements.धकेलो_back(&E);
   llvm::sort(Elements,
-             [](const Object::value_type *L, const Object::value_type *R) {
-               return L->first < R->first;
+             [](ध्रुव Object::मूल्य_type *L, ध्रुव Object::मूल्य_type *R) {
+               प्रत्यागम L->first < R->first;
              });
-  return Elements;
+  प्रत्यागम Elements;
 }
 
 // Prints a one-line version of a value that isn't our main focus.
 // We interleave writes to OS and JOS, exploiting the lack of extra buffering.
 // This is OK as we own the implementation.
-static void abbreviate(const Value &V, OStream &JOS) {
-  switch (V.kind()) {
-  case Value::Array:
-    JOS.rawValue(V.getAsArray()->empty() ? "[]" : "[ ... ]");
-    break;
-  case Value::Object:
-    JOS.rawValue(V.getAsObject()->empty() ? "{}" : "{ ... }");
-    break;
-  case Value::String: {
+स्थिर शून्य abbreviate(ध्रुव मूल्य &V, OStream &JOS) {
+  विकल्प (V.kind()) {
+  पक्ष मूल्य::Array:
+    JOS.raw_मूल्य(V.getAsArray()->empty() ? "[]" : "[ ... ]");
+    भङ्ग;
+  पक्ष मूल्य::Object:
+    JOS.raw_मूल्य(V.getAsObject()->empty() ? "{}" : "{ ... }");
+    भङ्ग;
+  पक्ष मूल्य::String: {
     llvm::StringRef S = *V.getAsString();
-    if (S.size() < 40) {
-      JOS.value(V);
-    } else {
+    यदि (S.size() < 40) {
+      JOS.मूल्य_2(V);
+    } अन्यथा {
       std::string Truncated = fixUTF8(S.take_front(37));
       Truncated.append("...");
-      JOS.value(Truncated);
+      JOS.मूल्य_2(Truncated);
     }
-    break;
+    भङ्ग;
   }
-  default:
-    JOS.value(V);
+  स्वभाव:
+    JOS.मूल्य_2(V);
   }
 }
 
 // Prints a semi-expanded version of a value that is our main focus.
 // Array/Object entries are printed, but not recursively as they may be huge.
-static void abbreviateChildren(const Value &V, OStream &JOS) {
-  switch (V.kind()) {
-  case Value::Array:
+स्थिर शून्य abbreviateChildren(ध्रुव मूल्य &V, OStream &JOS) {
+  विकल्प (V.kind()) {
+  पक्ष मूल्य::Array:
     JOS.array([&] {
-      for (const auto &I : *V.getAsArray())
+      प्रति (ध्रुव auto &I : *V.getAsArray())
         abbreviate(I, JOS);
     });
-    break;
-  case Value::Object:
+    भङ्ग;
+  पक्ष मूल्य::Object:
     JOS.object([&] {
-      for (const auto *KV : sortedElements(*V.getAsObject())) {
+      प्रति (ध्रुव auto *KV : sortedElements(*V.getAsObject())) {
         JOS.attributeBegin(KV->first);
         abbreviate(KV->second, JOS);
         JOS.attributeEnd();
       }
     });
-    break;
-  default:
-    JOS.value(V);
+    भङ्ग;
+  स्वभाव:
+    JOS.मूल्य_2(V);
   }
 }
 
-void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
+शून्य Path::मूल_2::printErrorContext(ध्रुव मूल्य &R, raw_ostream &OS) ध्रुव {
   OStream JOS(OS, /*IndentSize=*/2);
   // PrintValue recurses down the path, printing the ancestors of our target.
   // Siblings of nodes along the path are printed with abbreviate(), and the
   // target itself is printed with the somewhat richer abbreviateChildren().
   // 'Recurse' is the lambda itself, to allow recursive calls.
-  auto PrintValue = [&](const Value &V, ArrayRef<Segment> Path, auto &Recurse) {
+  auto Print_मूल्य = [&](ध्रुव मूल्य &V, ArrayRef<Segment> Path, auto &Recurse) {
     // Print the target node itself, with the error as a comment.
     // Also used if we can't follow our path, e.g. it names a field that
     // *should* exist but doesn't.
@@ -319,288 +319,288 @@ void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
       JOS.comment(Comment);
       abbreviateChildren(V, JOS);
     };
-    if (Path.empty()) // We reached our target.
-      return HighlightCurrent();
-    const Segment &S = Path.back(); // Path is in reverse order.
-    if (S.isField()) {
+    यदि (Path.empty()) // We reached our target.
+      प्रत्यागम HighlightCurrent();
+    ध्रुव Segment &S = Path.back(); // Path is in reverse order.
+    यदि (S.isField()) {
       // Current node is an object, path names a field.
       llvm::StringRef FieldName = S.field();
-      const Object *O = V.getAsObject();
-      if (!O || !O->get(FieldName))
-        return HighlightCurrent();
+      ध्रुव Object *O = V.getAsObject();
+      यदि (!O || !O->get(FieldName))
+        प्रत्यागम HighlightCurrent();
       JOS.object([&] {
-        for (const auto *KV : sortedElements(*O)) {
+        प्रति (ध्रुव auto *KV : sortedElements(*O)) {
           JOS.attributeBegin(KV->first);
-          if (FieldName == StringRef(KV->first))
+          यदि (FieldName == StringRef(KV->first))
             Recurse(KV->second, Path.drop_back(), Recurse);
-          else
+          अन्यथा
             abbreviate(KV->second, JOS);
           JOS.attributeEnd();
         }
       });
-    } else {
+    } अन्यथा {
       // Current node is an array, path names an element.
-      const Array *A = V.getAsArray();
-      if (!A || S.index() >= A->size())
-        return HighlightCurrent();
+      ध्रुव Array *A = V.getAsArray();
+      यदि (!A || S.index() >= A->size())
+        प्रत्यागम HighlightCurrent();
       JOS.array([&] {
         unsigned Current = 0;
-        for (const auto &V : *A) {
-          if (Current++ == S.index())
+        प्रति (ध्रुव auto &V : *A) {
+          यदि (Current++ == S.index())
             Recurse(V, Path.drop_back(), Recurse);
-          else
+          अन्यथा
             abbreviate(V, JOS);
         }
       });
     }
   };
-  PrintValue(R, ErrorPath, PrintValue);
+  Print_मूल्य(R, ErrorPath, Print_मूल्य);
 }
 
-namespace {
+नामाकाश {
 // Simple recursive-descent JSON parser.
-class Parser {
-public:
+वर्ग Parser {
+सार्वजनिक:
   Parser(StringRef JSON)
       : Start(JSON.begin()), P(JSON.begin()), End(JSON.end()) {}
 
-  bool checkUTF8() {
+  तार्किक checkUTF8() {
     size_t ErrOffset;
-    if (isUTF8(StringRef(Start, End - Start), &ErrOffset))
-      return true;
+    यदि (isUTF8(StringRef(Start, End - Start), &ErrOffset))
+      प्रत्यागम सत्य;
     P = Start + ErrOffset; // For line/column calculation.
-    return parseError("Invalid UTF-8 sequence");
+    प्रत्यागम parseError("Invalid UTF-8 sequence");
   }
 
-  bool parseValue(Value &Out);
+  तार्किक parse_मूल्य(मूल्य &Out);
 
-  bool assertEnd() {
+  तार्किक assertEnd() {
     eatWhitespace();
-    if (P == End)
-      return true;
-    return parseError("Text after end of document");
+    यदि (P == End)
+      प्रत्यागम सत्य;
+    प्रत्यागम parseError("Text after end of document");
   }
 
   Error takeError() {
-    assert(Err);
-    return std::move(*Err);
+    प्रतिज्ञा(Err);
+    प्रत्यागम std::move(*Err);
   }
 
-private:
-  void eatWhitespace() {
-    while (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
+गुप्त:
+  शून्य eatWhitespace() {
+    यावत् (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
       ++P;
   }
 
   // On invalid syntax, parseX() functions return false and set Err.
-  bool parseNumber(char First, Value &Out);
-  bool parseString(std::string &Out);
-  bool parseUnicode(std::string &Out);
-  bool parseError(const char *Msg); // always returns false
+  तार्किक parse_संख्या(वर्ण First, मूल्य &Out);
+  तार्किक parseString(std::string &Out);
+  तार्किक parseUnicode(std::string &Out);
+  तार्किक parseError(ध्रुव वर्ण *संदेश_2); // always returns false
 
-  char next() { return P == End ? 0 : *P++; }
-  char peek() { return P == End ? 0 : *P; }
-  static bool isNumber(char C) {
-    return C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
+  वर्ण next() { प्रत्यागम P == End ? 0 : *P++; }
+  वर्ण peek() { प्रत्यागम P == End ? 0 : *P; }
+  स्थिर तार्किक is_संख्या(वर्ण C) {
+    प्रत्यागम C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
            C == '5' || C == '6' || C == '7' || C == '8' || C == '9' ||
            C == 'e' || C == 'E' || C == '+' || C == '-' || C == '.';
   }
 
   std::optional<Error> Err;
-  const char *Start, *P, *End;
+  ध्रुव वर्ण *Start, *P, *End;
 };
 } // namespace
 
-bool Parser::parseValue(Value &Out) {
+तार्किक Parser::parse_मूल्य(मूल्य &Out) {
   eatWhitespace();
-  if (P == End)
-    return parseError("Unexpected EOF");
-  switch (char C = next()) {
+  यदि (P == End)
+    प्रत्यागम parseError("Unexpected EOF");
+  विकल्प (वर्ण C = next()) {
   // Bare null/true/false are easy - first char identifies them.
-  case 'n':
+  पक्ष 'n':
     Out = nullptr;
-    return (next() == 'u' && next() == 'l' && next() == 'l') ||
+    प्रत्यागम (next() == 'u' && next() == 'l' && next() == 'l') ||
            parseError("Invalid JSON value (null?)");
-  case 't':
-    Out = true;
-    return (next() == 'r' && next() == 'u' && next() == 'e') ||
+  पक्ष 't':
+    Out = सत्य;
+    प्रत्यागम (next() == 'r' && next() == 'u' && next() == 'e') ||
            parseError("Invalid JSON value (true?)");
-  case 'f':
-    Out = false;
-    return (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
+  पक्ष 'f':
+    Out = असत्य;
+    प्रत्यागम (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
            parseError("Invalid JSON value (false?)");
-  case '"': {
+  पक्ष '"': {
     std::string S;
-    if (parseString(S)) {
+    यदि (parseString(S)) {
       Out = std::move(S);
-      return true;
+      प्रत्यागम सत्य;
     }
-    return false;
+    प्रत्यागम असत्य;
   }
-  case '[': {
+  पक्ष '[': {
     Out = Array{};
     Array &A = *Out.getAsArray();
     eatWhitespace();
-    if (peek() == ']') {
+    यदि (peek() == ']') {
       ++P;
-      return true;
+      प्रत्यागम सत्य;
     }
-    for (;;) {
+    प्रति (;;) {
       A.emplace_back(nullptr);
-      if (!parseValue(A.back()))
-        return false;
+      यदि (!parse_मूल्य(A.back()))
+        प्रत्यागम असत्य;
       eatWhitespace();
-      switch (next()) {
-      case ',':
+      विकल्प (next()) {
+      पक्ष ',':
         eatWhitespace();
-        continue;
-      case ']':
-        return true;
-      default:
-        return parseError("Expected , or ] after array element");
+        अनुवर्त;
+      पक्ष ']':
+        प्रत्यागम सत्य;
+      स्वभाव:
+        प्रत्यागम parseError("Expected , or ] after array element");
       }
     }
   }
-  case '{': {
+  पक्ष '{': {
     Out = Object{};
     Object &O = *Out.getAsObject();
     eatWhitespace();
-    if (peek() == '}') {
+    यदि (peek() == '}') {
       ++P;
-      return true;
+      प्रत्यागम सत्य;
     }
-    for (;;) {
-      if (next() != '"')
-        return parseError("Expected object key");
+    प्रति (;;) {
+      यदि (next() != '"')
+        प्रत्यागम parseError("Expected object key");
       std::string K;
-      if (!parseString(K))
-        return false;
+      यदि (!parseString(K))
+        प्रत्यागम असत्य;
       eatWhitespace();
-      if (next() != ':')
-        return parseError("Expected : after object key");
+      यदि (next() != ':')
+        प्रत्यागम parseError("Expected : after object key");
       eatWhitespace();
-      if (!parseValue(O[std::move(K)]))
-        return false;
+      यदि (!parse_मूल्य(O[std::move(K)]))
+        प्रत्यागम असत्य;
       eatWhitespace();
-      switch (next()) {
-      case ',':
+      विकल्प (next()) {
+      पक्ष ',':
         eatWhitespace();
-        continue;
-      case '}':
-        return true;
-      default:
-        return parseError("Expected , or } after object property");
+        अनुवर्त;
+      पक्ष '}':
+        प्रत्यागम सत्य;
+      स्वभाव:
+        प्रत्यागम parseError("Expected , or } after object property");
       }
     }
   }
-  default:
-    if (isNumber(C))
-      return parseNumber(C, Out);
-    return parseError("Invalid JSON value");
+  स्वभाव:
+    यदि (is_संख्या(C))
+      प्रत्यागम parse_संख्या(C, Out);
+    प्रत्यागम parseError("Invalid JSON value");
   }
 }
 
-bool Parser::parseNumber(char First, Value &Out) {
+तार्किक Parser::parse_संख्या(वर्ण First, मूल्य &Out) {
   // Read the number into a string. (Must be null-terminated for strto*).
   SmallString<24> S;
-  S.push_back(First);
-  while (isNumber(peek()))
-    S.push_back(next());
-  char *End;
+  S.धकेलो_back(First);
+  यावत् (is_संख्या(peek()))
+    S.धकेलो_back(next());
+  वर्ण *End;
   // Try first to parse as integer, and if so preserve full 64 bits.
   // We check for errno for out of bounds errors and for End == S.end()
   // to make sure that the numeric string is not malformed.
   errno = 0;
   int64_t I = std::strtoll(S.c_str(), &End, 10);
-  if (End == S.end() && errno != ERANGE) {
+  यदि (End == S.end() && errno != ERANGE) {
     Out = I;
-    return true;
+    प्रत्यागम सत्य;
   }
   // strtroull has a special handling for negative numbers, but in this
   // case we don't want to do that because negative numbers were already
   // handled in the previous block.
-  if (First != '-') {
+  यदि (First != '-') {
     errno = 0;
     uint64_t UI = std::strtoull(S.c_str(), &End, 10);
-    if (End == S.end() && errno != ERANGE) {
+    यदि (End == S.end() && errno != ERANGE) {
       Out = UI;
-      return true;
+      प्रत्यागम सत्य;
     }
   }
   // If it's not an integer
   Out = std::strtod(S.c_str(), &End);
-  return End == S.end() || parseError("Invalid JSON value (number?)");
+  प्रत्यागम End == S.end() || parseError("Invalid JSON value (number?)");
 }
 
-bool Parser::parseString(std::string &Out) {
+तार्किक Parser::parseString(std::string &Out) {
   // leading quote was already consumed.
-  for (char C = next(); C != '"'; C = next()) {
-    if (LLVM_UNLIKELY(P == End))
-      return parseError("Unterminated string");
-    if (LLVM_UNLIKELY((C & 0x1f) == C))
-      return parseError("Control character in string");
-    if (LLVM_LIKELY(C != '\\')) {
-      Out.push_back(C);
-      continue;
+  प्रति (वर्ण C = next(); C != '"'; C = next()) {
+    यदि (LLVM_UNLIKELY(P == End))
+      प्रत्यागम parseError("Unterminated string");
+    यदि (LLVM_UNLIKELY((C & 0x1f) == C))
+      प्रत्यागम parseError("Control character in string");
+    यदि (LLVM_LIKELY(C != '\\')) {
+      Out.धकेलो_back(C);
+      अनुवर्त;
     }
     // Handle escape sequence.
-    switch (C = next()) {
-    case '"':
-    case '\\':
-    case '/':
-      Out.push_back(C);
-      break;
-    case 'b':
-      Out.push_back('\b');
-      break;
-    case 'f':
-      Out.push_back('\f');
-      break;
-    case 'n':
-      Out.push_back('\n');
-      break;
-    case 'r':
-      Out.push_back('\r');
-      break;
-    case 't':
-      Out.push_back('\t');
-      break;
-    case 'u':
-      if (!parseUnicode(Out))
-        return false;
-      break;
-    default:
-      return parseError("Invalid escape sequence");
+    विकल्प (C = next()) {
+    पक्ष '"':
+    पक्ष '\\':
+    पक्ष '/':
+      Out.धकेलो_back(C);
+      भङ्ग;
+    पक्ष 'b':
+      Out.धकेलो_back('\b');
+      भङ्ग;
+    पक्ष 'f':
+      Out.धकेलो_back('\f');
+      भङ्ग;
+    पक्ष 'n':
+      Out.धकेलो_back('\n');
+      भङ्ग;
+    पक्ष 'r':
+      Out.धकेलो_back('\r');
+      भङ्ग;
+    पक्ष 't':
+      Out.धकेलो_back('\t');
+      भङ्ग;
+    पक्ष 'u':
+      यदि (!parseUnicode(Out))
+        प्रत्यागम असत्य;
+      भङ्ग;
+    स्वभाव:
+      प्रत्यागम parseError("Invalid escape sequence");
     }
   }
-  return true;
+  प्रत्यागम सत्य;
 }
 
-static void encodeUtf8(uint32_t Rune, std::string &Out) {
-  if (Rune < 0x80) {
-    Out.push_back(Rune & 0x7F);
-  } else if (Rune < 0x800) {
+स्थिर शून्य encodeUtf8(uint32_t Rune, std::string &Out) {
+  यदि (Rune < 0x80) {
+    Out.धकेलो_back(Rune & 0x7F);
+  } अन्यथा यदि (Rune < 0x800) {
     uint8_t FirstByte = 0xC0 | ((Rune & 0x7C0) >> 6);
     uint8_t SecondByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-  } else if (Rune < 0x10000) {
+    Out.धकेलो_back(FirstByte);
+    Out.धकेलो_back(SecondByte);
+  } अन्यथा यदि (Rune < 0x10000) {
     uint8_t FirstByte = 0xE0 | ((Rune & 0xF000) >> 12);
     uint8_t SecondByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t ThirdByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-  } else if (Rune < 0x110000) {
+    Out.धकेलो_back(FirstByte);
+    Out.धकेलो_back(SecondByte);
+    Out.धकेलो_back(ThirdByte);
+  } अन्यथा यदि (Rune < 0x110000) {
     uint8_t FirstByte = 0xF0 | ((Rune & 0x1F0000) >> 18);
     uint8_t SecondByte = 0x80 | ((Rune & 0x3F000) >> 12);
     uint8_t ThirdByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t FourthByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-    Out.push_back(FourthByte);
-  } else {
+    Out.धकेलो_back(FirstByte);
+    Out.धकेलो_back(SecondByte);
+    Out.धकेलो_back(ThirdByte);
+    Out.धकेलो_back(FourthByte);
+  } अन्यथा {
     llvm_unreachable("Invalid codepoint");
   }
 }
@@ -609,325 +609,325 @@ static void encodeUtf8(uint32_t Rune, std::string &Out) {
 // May parse several sequential escapes to ensure proper surrogate handling.
 // We do not use ConvertUTF.h, it can't accept and replace unpaired surrogates.
 // These are invalid Unicode but valid JSON (RFC 8259, section 8.2).
-bool Parser::parseUnicode(std::string &Out) {
+तार्किक Parser::parseUnicode(std::string &Out) {
   // Invalid UTF is not a JSON error (RFC 8529§8.2). It gets replaced by U+FFFD.
   auto Invalid = [&] { Out.append(/* UTF-8 */ {'\xef', '\xbf', '\xbd'}); };
   // Decodes 4 hex digits from the stream into Out, returns false on error.
-  auto Parse4Hex = [this](uint16_t &Out) -> bool {
+  auto Parse4Hex = [एतत्](uint16_t &Out) -> तार्किक {
     Out = 0;
-    char Bytes[] = {next(), next(), next(), next()};
-    for (unsigned char C : Bytes) {
-      if (!std::isxdigit(C))
-        return parseError("Invalid \\u escape sequence");
+    वर्ण Bytes[] = {next(), next(), next(), next()};
+    प्रति (unsigned वर्ण C : Bytes) {
+      यदि (!std::isxdigit(C))
+        प्रत्यागम parseError("Invalid \\u escape sequence");
       Out <<= 4;
       Out |= (C > '9') ? (C & ~0x20) - 'A' + 10 : (C - '0');
     }
-    return true;
+    प्रत्यागम सत्य;
   };
   uint16_t First; // UTF-16 code unit from the first \u escape.
-  if (!Parse4Hex(First))
-    return false;
+  यदि (!Parse4Hex(First))
+    प्रत्यागम असत्य;
 
   // We loop to allow proper surrogate-pair error handling.
-  while (true) {
+  यावत् (सत्य) {
     // Case 1: the UTF-16 code unit is already a codepoint in the BMP.
-    if (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
+    यदि (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
       encodeUtf8(First, Out);
-      return true;
+      प्रत्यागम सत्य;
     }
 
     // Case 2: it's an (unpaired) trailing surrogate.
-    if (LLVM_UNLIKELY(First >= 0xDC00)) {
+    यदि (LLVM_UNLIKELY(First >= 0xDC00)) {
       Invalid();
-      return true;
+      प्रत्यागम सत्य;
     }
 
     // Case 3: it's a leading surrogate. We expect a trailing one next.
     // Case 3a: there's no trailing \u escape. Don't advance in the stream.
-    if (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
+    यदि (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
       Invalid(); // Leading surrogate was unpaired.
-      return true;
+      प्रत्यागम सत्य;
     }
     P += 2;
     uint16_t Second;
-    if (!Parse4Hex(Second))
-      return false;
+    यदि (!Parse4Hex(Second))
+      प्रत्यागम असत्य;
     // Case 3b: there was another \u escape, but it wasn't a trailing surrogate.
-    if (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
+    यदि (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
       Invalid();      // Leading surrogate was unpaired.
       First = Second; // Second escape still needs to be processed.
-      continue;
+      अनुवर्त;
     }
     // Case 3c: a valid surrogate pair encoding an astral codepoint.
     encodeUtf8(0x10000 | ((First - 0xD800) << 10) | (Second - 0xDC00), Out);
-    return true;
+    प्रत्यागम सत्य;
   }
 }
 
-bool Parser::parseError(const char *Msg) {
-  int Line = 1;
-  const char *StartOfLine = Start;
-  for (const char *X = Start; X < P; ++X) {
-    if (*X == 0x0A) {
-      ++Line;
-      StartOfLine = X + 1;
+तार्किक Parser::parseError(ध्रुव वर्ण *संदेश_2) {
+  पूर्णाङ्क पंक्ति = 1;
+  ध्रुव वर्ण *Start_Of_पंक्ति = Start;
+  प्रति (ध्रुव वर्ण *X = Start; X < P; ++X) {
+    यदि (*X == 0x0A) {
+      ++पंक्ति;
+      Start_Of_पंक्ति = X + 1;
     }
   }
   Err.emplace(
-      std::make_unique<ParseError>(Msg, Line, P - StartOfLine, P - Start));
-  return false;
+      std::make_unique<ParseError>(संदेश_2, पंक्ति, P - Start_Of_पंक्ति, P - Start));
+  प्रत्यागम असत्य;
 }
 
-Expected<Value> parse(StringRef JSON) {
+Expected<मूल्य> parse(StringRef JSON) {
   Parser P(JSON);
-  Value E = nullptr;
-  if (P.checkUTF8())
-    if (P.parseValue(E))
-      if (P.assertEnd())
-        return std::move(E);
-  return P.takeError();
+  मूल्य E = nullptr;
+  यदि (P.checkUTF8())
+    यदि (P.parse_मूल्य(E))
+      यदि (P.assertEnd())
+        प्रत्यागम std::move(E);
+  प्रत्यागम P.takeError();
 }
 
-char ParseError::ID = 0;
+वर्ण ParseError::ID = 0;
 
 // Defined out-of-line to place vtable in this compilation unit.
-void ParseError::log(llvm::raw_ostream &OS) const {
-  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", Line, Column, Offset, Msg);
+शून्य ParseError::log(llvm::raw_ostream &OS) ध्रुव {
+  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", पंक्ति, Column, Offset, संदेश_2);
 }
 
-bool isUTF8(llvm::StringRef S, size_t *ErrOffset) {
+तार्किक isUTF8(llvm::StringRef S, size_t *ErrOffset) {
   // Fast-path for ASCII, which is valid UTF-8.
-  if (LLVM_LIKELY(isASCII(S)))
-    return true;
+  यदि (LLVM_LIKELY(isASCII(S)))
+    प्रत्यागम सत्य;
 
-  const UTF8 *Data = reinterpret_cast<const UTF8 *>(S.data()), *Rest = Data;
-  if (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
-    return true;
+  ध्रुव UTF8 *Data = reinterpret_cast<ध्रुव UTF8 *>(S.data()), *Rest = Data;
+  यदि (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
+    प्रत्यागम सत्य;
 
-  if (ErrOffset)
+  यदि (ErrOffset)
     *ErrOffset = Rest - Data;
-  return false;
+  प्रत्यागम असत्य;
 }
 
 std::string fixUTF8(llvm::StringRef S) {
   // This isn't particularly efficient, but is only for error-recovery.
   std::vector<UTF32> Codepoints(S.size()); // 1 codepoint per byte suffices.
-  const UTF8 *In8 = reinterpret_cast<const UTF8 *>(S.data());
+  ध्रुव UTF8 *In8 = reinterpret_cast<ध्रुव UTF8 *>(S.data());
   UTF32 *Out32 = Codepoints.data();
   ConvertUTF8toUTF32(&In8, In8 + S.size(), &Out32, Out32 + Codepoints.size(),
                      lenientConversion);
   Codepoints.resize(Out32 - Codepoints.data());
   std::string Res(4 * Codepoints.size(), 0); // 4 bytes per codepoint suffice
-  const UTF32 *In32 = Codepoints.data();
+  ध्रुव UTF32 *In32 = Codepoints.data();
   UTF8 *Out8 = reinterpret_cast<UTF8 *>(&Res[0]);
   ConvertUTF32toUTF8(&In32, In32 + Codepoints.size(), &Out8, Out8 + Res.size(),
                      strictConversion);
-  Res.resize(reinterpret_cast<char *>(Out8) - Res.data());
-  return Res;
+  Res.resize(reinterpret_cast<वर्ण *>(Out8) - Res.data());
+  प्रत्यागम Res;
 }
 
-static void quote(llvm::raw_ostream &OS, llvm::StringRef S) {
+स्थिर शून्य quote(llvm::raw_ostream &OS, llvm::StringRef S) {
   OS << '\"';
-  for (unsigned char C : S) {
-    if (C == 0x22 || C == 0x5C)
+  प्रति (unsigned वर्ण C : S) {
+    यदि (C == 0x22 || C == 0x5C)
       OS << '\\';
-    if (C >= 0x20) {
+    यदि (C >= 0x20) {
       OS << C;
-      continue;
+      अनुवर्त;
     }
     OS << '\\';
-    switch (C) {
+    विकल्प (C) {
     // A few characters are common enough to make short escapes worthwhile.
-    case '\t':
+    पक्ष '\t':
       OS << 't';
-      break;
-    case '\n':
+      भङ्ग;
+    पक्ष '\n':
       OS << 'n';
-      break;
-    case '\r':
+      भङ्ग;
+    पक्ष '\r':
       OS << 'r';
-      break;
-    default:
+      भङ्ग;
+    स्वभाव:
       OS << 'u';
       llvm::write_hex(OS, C, llvm::HexPrintStyle::Lower, 4);
-      break;
+      भङ्ग;
     }
   }
   OS << '\"';
 }
 
-void llvm::json::OStream::value(const Value &V) {
-  switch (V.kind()) {
-  case Value::Null:
-    valueBegin();
+शून्य llvm::json::OStream::मूल्य_2(ध्रुव मूल्य &V) {
+  विकल्प (V.kind()) {
+  पक्ष मूल्य::Null:
+    मूल्य_Begin();
     OS << "null";
-    return;
-  case Value::Boolean:
-    valueBegin();
+    प्रत्यागम;
+  पक्ष मूल्य::Boolean:
+    मूल्य_Begin();
     OS << (*V.getAsBoolean() ? "true" : "false");
-    return;
-  case Value::Number:
-    valueBegin();
-    if (V.Type == Value::T_Integer)
+    प्रत्यागम;
+  पक्ष मूल्य::संख्या:
+    मूल्य_Begin();
+    यदि (V.Type == मूल्य::T_Integer)
       OS << *V.getAsInteger();
-    else if (V.Type == Value::T_UINT64)
+    अन्यथा यदि (V.Type == मूल्य::T_UINT64)
       OS << *V.getAsUINT64();
-    else
-      OS << format("%.*g", std::numeric_limits<double>::max_digits10,
-                   *V.getAsNumber());
-    return;
-  case Value::String:
-    valueBegin();
+    अन्यथा
+      OS << format("%.*g", std::numeric_limits<द्विगुण>::max_digits10,
+                   *V.get_As_संख्या());
+    प्रत्यागम;
+  पक्ष मूल्य::String:
+    मूल्य_Begin();
     quote(OS, *V.getAsString());
-    return;
-  case Value::Array:
-    return array([&] {
-      for (const Value &E : *V.getAsArray())
-        value(E);
+    प्रत्यागम;
+  पक्ष मूल्य::Array:
+    प्रत्यागम array([&] {
+      प्रति (ध्रुव मूल्य &E : *V.getAsArray())
+        मूल्य_2(E);
     });
-  case Value::Object:
-    return object([&] {
-      for (const Object::value_type *E : sortedElements(*V.getAsObject()))
+  पक्ष मूल्य::Object:
+    प्रत्यागम object([&] {
+      प्रति (ध्रुव Object::मूल्य_type *E : sortedElements(*V.getAsObject()))
         attribute(E->first, E->second);
     });
   }
 }
 
-void llvm::json::OStream::valueBegin() {
-  assert(Stack.back().Ctx != Object && "Only attributes allowed here");
-  if (Stack.back().HasValue) {
-    assert(Stack.back().Ctx != Singleton && "Only one value allowed here");
+शून्य llvm::json::OStream::मूल्य_Begin() {
+  प्रतिज्ञा(ढेर.back().Ctx != Object && "Only attributes allowed here");
+  यदि (ढेर.back().Has_मूल्य) {
+    प्रतिज्ञा(ढेर.back().Ctx != Singleton && "Only one value allowed here");
     OS << ',';
   }
-  if (Stack.back().Ctx == Array)
+  यदि (ढेर.back().Ctx == Array)
     newline();
   flushComment();
-  Stack.back().HasValue = true;
+  ढेर.back().Has_मूल्य = सत्य;
 }
 
-void OStream::comment(llvm::StringRef Comment) {
-  assert(PendingComment.empty() && "Only one comment per value!");
+शून्य OStream::comment(llvm::StringRef Comment) {
+  प्रतिज्ञा(PendingComment.empty() && "Only one comment per value!");
   PendingComment = Comment;
 }
 
-void OStream::flushComment() {
-  if (PendingComment.empty())
-    return;
+शून्य OStream::flushComment() {
+  यदि (PendingComment.empty())
+    प्रत्यागम;
   OS << (IndentSize ? "/* " : "/*");
   // Be sure not to accidentally emit "*/". Transform to "* /".
-  while (!PendingComment.empty()) {
+  यावत् (!PendingComment.empty()) {
     auto Pos = PendingComment.find("*/");
-    if (Pos == StringRef::npos) {
+    यदि (Pos == StringRef::npos) {
       OS << PendingComment;
       PendingComment = "";
-    } else {
+    } अन्यथा {
       OS << PendingComment.take_front(Pos) << "* /";
       PendingComment = PendingComment.drop_front(Pos + 2);
     }
   }
   OS << (IndentSize ? " */" : "*/");
   // Comments are on their own line unless attached to an attribute value.
-  if (Stack.size() > 1 && Stack.back().Ctx == Singleton) {
-    if (IndentSize)
+  यदि (ढेर.size() > 1 && ढेर.back().Ctx == Singleton) {
+    यदि (IndentSize)
       OS << ' ';
-  } else {
+  } अन्यथा {
     newline();
   }
 }
 
-void llvm::json::OStream::newline() {
-  if (IndentSize) {
-    OS.write('\n');
+शून्य llvm::json::OStream::newline() {
+  यदि (IndentSize) {
+    OS.लिख('\n');
     OS.indent(Indent);
   }
 }
 
-void llvm::json::OStream::arrayBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Array;
+शून्य llvm::json::OStream::arrayBegin() {
+  मूल्य_Begin();
+  ढेर.emplace_back();
+  ढेर.back().Ctx = Array;
   Indent += IndentSize;
   OS << '[';
 }
 
-void llvm::json::OStream::arrayEnd() {
-  assert(Stack.back().Ctx == Array);
+शून्य llvm::json::OStream::arrayEnd() {
+  प्रतिज्ञा(ढेर.back().Ctx == Array);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  यदि (ढेर.back().Has_मूल्य)
     newline();
   OS << ']';
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  प्रतिज्ञा(PendingComment.empty());
+  ढेर.निकालो_back();
+  प्रतिज्ञा(!ढेर.empty());
 }
 
-void llvm::json::OStream::objectBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Object;
+शून्य llvm::json::OStream::objectBegin() {
+  मूल्य_Begin();
+  ढेर.emplace_back();
+  ढेर.back().Ctx = Object;
   Indent += IndentSize;
   OS << '{';
 }
 
-void llvm::json::OStream::objectEnd() {
-  assert(Stack.back().Ctx == Object);
+शून्य llvm::json::OStream::objectEnd() {
+  प्रतिज्ञा(ढेर.back().Ctx == Object);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  यदि (ढेर.back().Has_मूल्य)
     newline();
   OS << '}';
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  प्रतिज्ञा(PendingComment.empty());
+  ढेर.निकालो_back();
+  प्रतिज्ञा(!ढेर.empty());
 }
 
-void llvm::json::OStream::attributeBegin(llvm::StringRef Key) {
-  assert(Stack.back().Ctx == Object);
-  if (Stack.back().HasValue)
+शून्य llvm::json::OStream::attributeBegin(llvm::StringRef कुंजी) {
+  प्रतिज्ञा(ढेर.back().Ctx == Object);
+  यदि (ढेर.back().Has_मूल्य)
     OS << ',';
   newline();
   flushComment();
-  Stack.back().HasValue = true;
-  Stack.emplace_back();
-  Stack.back().Ctx = Singleton;
-  if (LLVM_LIKELY(isUTF8(Key))) {
-    quote(OS, Key);
-  } else {
-    assert(false && "Invalid UTF-8 in attribute key");
-    quote(OS, fixUTF8(Key));
+  ढेर.back().Has_मूल्य = सत्य;
+  ढेर.emplace_back();
+  ढेर.back().Ctx = Singleton;
+  यदि (LLVM_LIKELY(isUTF8(कुंजी))) {
+    quote(OS, कुंजी);
+  } अन्यथा {
+    प्रतिज्ञा(असत्य && "Invalid UTF-8 in attribute key");
+    quote(OS, fixUTF8(कुंजी));
   }
-  OS.write(':');
-  if (IndentSize)
-    OS.write(' ');
+  OS.लिख(':');
+  यदि (IndentSize)
+    OS.लिख(' ');
 }
 
-void llvm::json::OStream::attributeEnd() {
-  assert(Stack.back().Ctx == Singleton);
-  assert(Stack.back().HasValue && "Attribute must have a value");
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(Stack.back().Ctx == Object);
+शून्य llvm::json::OStream::attributeEnd() {
+  प्रतिज्ञा(ढेर.back().Ctx == Singleton);
+  प्रतिज्ञा(ढेर.back().Has_मूल्य && "Attribute must have a value");
+  प्रतिज्ञा(PendingComment.empty());
+  ढेर.निकालो_back();
+  प्रतिज्ञा(ढेर.back().Ctx == Object);
 }
 
-raw_ostream &llvm::json::OStream::rawValueBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = RawValue;
-  return OS;
+raw_ostream &llvm::json::OStream::raw_मूल्य_Begin() {
+  मूल्य_Begin();
+  ढेर.emplace_back();
+  ढेर.back().Ctx = Raw_मूल्य;
+  प्रत्यागम OS;
 }
 
-void llvm::json::OStream::rawValueEnd() {
-  assert(Stack.back().Ctx == RawValue);
-  Stack.pop_back();
+शून्य llvm::json::OStream::raw_मूल्य_End() {
+  प्रतिज्ञा(ढेर.back().Ctx == Raw_मूल्य);
+  ढेर.निकालो_back();
 }
 
 } // namespace json
 } // namespace llvm
 
-void llvm::format_provider<llvm::json::Value>::format(
-    const llvm::json::Value &E, raw_ostream &OS, StringRef Options) {
+शून्य llvm::format_provider<llvm::json::मूल्य>::format(
+    ध्रुव llvm::json::मूल्य &E, raw_ostream &OS, StringRef Options) {
   unsigned IndentAmount = 0;
-  if (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
+  यदि (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
     llvm_unreachable("json::Value format options should be an integer");
-  json::OStream(OS, IndentAmount).value(E);
+  json::OStream(OS, IndentAmount).मूल्य_2(E);
 }
 
