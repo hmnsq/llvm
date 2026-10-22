@@ -11,38 +11,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SipHash.h"
-#include "siphash/SipHash.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Endian.h"
-#include <cstdint>
+#अन्तर्भाव "llvm/Support/SipHash.h"
+#अन्तर्भाव "siphash/SipHash.h"
+#अन्तर्भाव "llvm/ADT/ArrayRef.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Support/Debug.h"
+#अन्तर्भाव "llvm/Support/Endian.h"
+#अन्तर्भाव <cstdint>
 
-using namespace llvm;
-using namespace support;
+using नामाकाश llvm;
+using नामाकाश support;
 
 #define DEBUG_TYPE "llvm-siphash"
 
-void llvm::getSipHash_2_4_64(ArrayRef<uint8_t> In, const uint8_t (&K)[16],
+शून्य llvm::getSipHash_2_4_64(ArrayRef<uint8_t> In, ध्रुव uint8_t (&K)[16],
                              uint8_t (&Out)[8]) {
   siphash<2, 4>(In.data(), In.size(), K, Out);
 }
 
-void llvm::getSipHash_2_4_128(ArrayRef<uint8_t> In, const uint8_t (&K)[16],
+शून्य llvm::getSipHash_2_4_128(ArrayRef<uint8_t> In, ध्रुव uint8_t (&K)[16],
                               uint8_t (&Out)[16]) {
   siphash<2, 4>(In.data(), In.size(), K, Out);
 }
 
 /// Compute an ABI-stable 64-bit hash of the given string.
 uint64_t llvm::getStableSipHash(StringRef Str) {
-  static const uint8_t K[16] = {0xb5, 0xd4, 0xc9, 0xeb, 0x79, 0x10, 0x4a, 0x79,
+  स्थिर ध्रुव uint8_t K[16] = {0xb5, 0xd4, 0xc9, 0xeb, 0x79, 0x10, 0x4a, 0x79,
                                 0x6f, 0xec, 0x8b, 0x1b, 0x42, 0x87, 0x81, 0xd4};
 
   uint8_t RawHashBytes[8];
   getSipHash_2_4_64(arrayRefFromStringRef(Str), K, RawHashBytes);
-  return endian::read64le(RawHashBytes);
+  प्रत्यागम endian::read64le(RawHashBytes);
 }
 
 /// Compute an ABI-stable 16-bit hash of the given string.
@@ -54,8 +54,8 @@ uint16_t llvm::getPointerAuthStableSipHash(StringRef Str) {
   LLVM_DEBUG(
       dbgs() << "ptrauth stable hash discriminator: " << utostr(Discriminator)
              << " (0x"
-             << utohexstr(Discriminator, /*Lowercase=*/false, /*Width=*/4)
+             << utohexstr(Discriminator, /*Lowercase=*/असत्य, /*Width=*/4)
              << ")"
              << " of: " << Str << "\n");
-  return Discriminator;
+  प्रत्यागम Discriminator;
 }
