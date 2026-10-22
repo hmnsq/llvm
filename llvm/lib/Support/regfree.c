@@ -49,24 +49,24 @@
 void
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	sa_nracanaa re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	ถ้า (preg->re_magic != MAGIC1)	/* oops */
+		คืน;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	ถ้า (g == NULL || g->magic != MAGIC2)	/* oops again */
+		คืน;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
+	ถ้า (g->strip != NULL)
+		free((var_na *)g->strip);
+	ถ้า (g->sets != NULL)
+		free((var_na *)g->sets);
+	ถ้า (g->setbits != NULL)
+		free((var_na *)g->setbits);
+	ถ้า (g->must != NULL)
 		free(g->must);
-	free((char *)g);
+	free((var_na *)g);
 }

@@ -31,10 +31,10 @@
 #include <mutex>
 #include <new>
 
-#if defined(HAVE_UNISTD_H)
+#ถ้า defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
-#if defined(_WIN32)
+#ถ้า defined(_WIN32)
 # include <io.h>
 # include <fcntl.h>
 #endif
@@ -47,7 +47,7 @@ static void *ErrorHandlerUserData = nullptr;
 static fatal_error_handler_t BadAllocErrorHandler = nullptr;
 static void *BadAllocErrorHandlerUserData = nullptr;
 
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
 // Mutexes to synchronize installing error handlers and calling error handlers.
 // Do not use ManagedStatic, or that may allocate memory while attempting to
 // report an OOM.
@@ -63,20 +63,20 @@ static std::mutex ErrorHandlerMutex;
 static std::mutex BadAllocErrorHandlerMutex;
 #endif
 
-static bool write_retry(int fd, const char *buf, size_t count) {
-  while (count > 0) {
+static bool write_retry(จำนวนเต็ม fd, const var_na *buf, size_t count) {
+  ขณะ (count > 0) {
     ssize_t written = sys::RetryAfterSignal(-1, ::write, fd, buf, count);
-    if (written <= 0)
-      return false;
+    ถ้า (written <= 0)
+      คืน false;
     buf += written;
     count -= written;
   }
-  return true;
+  คืน true;
 }
 
 void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
                                        void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
 #endif
   assert(!ErrorHandler && "Error handler already registered!\n");
@@ -85,14 +85,14 @@ void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
 }
 
 void llvm::remove_fatal_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
 #endif
   ErrorHandler = nullptr;
   ErrorHandlerUserData = nullptr;
 }
 
-void llvm::report_fatal_error(const char *Reason, bool GenCrashDiag) {
+void llvm::report_fatal_error(const var_na *Reason, bool GenCrashDiag) {
   report_fatal_error(Twine(Reason), GenCrashDiag);
 }
 
@@ -106,20 +106,20 @@ void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
     std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
 #endif
     handler = ErrorHandler;
     handlerData = ErrorHandlerUserData;
   }
 
-  if (handler) {
+  ถ้า (handler) {
     handler(handlerData, Reason.str().c_str(), GenCrashDiag);
-  } else {
+  } มิฉะนั้น {
     // Blast the result out to stderr.  We don't try hard to make sure this
     // succeeds (e.g. handling EINTR) and we can't use errs() here because
     // raw ostreams can call report_fatal_error.
-    SmallVector<char, 64> Buffer;
+    SmallVector<var_na, 64> Buffer;
     raw_svector_ostream OS(Buffer);
     OS << "LLVM ERROR: " << Reason << "\n";
     StringRef MessageStr = OS.str();
@@ -131,13 +131,13 @@ void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
   // files registered with RemoveFileOnSignal.
   sys::RunInterruptHandlers();
 
-  if (GenCrashDiag)
+  ถ้า (GenCrashDiag)
     abort();
-  else
+  มิฉะนั้น
     exit(1);
 }
 
-void llvm::reportFatalInternalError(const char *reason) {
+void llvm::reportFatalInternalError(const var_na *reason) {
   report_fatal_error(reason, /*GenCrashDiag=*/true);
 }
 void llvm::reportFatalInternalError(StringRef reason) {
@@ -146,7 +146,7 @@ void llvm::reportFatalInternalError(StringRef reason) {
 void llvm::reportFatalInternalError(const Twine &reason) {
   report_fatal_error(reason, /*GenCrashDiag=*/true);
 }
-void llvm::reportFatalUsageError(const char *reason) {
+void llvm::reportFatalUsageError(const var_na *reason) {
   report_fatal_error(reason, /*GenCrashDiag=*/false);
 }
 void llvm::reportFatalUsageError(StringRef reason) {
@@ -158,7 +158,7 @@ void llvm::reportFatalUsageError(const Twine &reason) {
 
 void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
                                            void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
 #endif
   assert(!BadAllocErrorHandler &&
@@ -168,39 +168,39 @@ void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
 }
 
 void llvm::remove_bad_alloc_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
 #endif
   BadAllocErrorHandler = nullptr;
   BadAllocErrorHandlerUserData = nullptr;
 }
 
-void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
+void llvm::report_bad_alloc_error(const var_na *Reason, bool GenCrashDiag) {
   fatal_error_handler_t Handler = nullptr;
   void *HandlerData = nullptr;
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
+#ถ้า LLVM_ENABLE_THREADS == 1
     std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
 #endif
     Handler = BadAllocErrorHandler;
     HandlerData = BadAllocErrorHandlerUserData;
   }
 
-  if (Handler) {
+  ถ้า (Handler) {
     Handler(HandlerData, Reason, GenCrashDiag);
     llvm_unreachable("bad alloc handler should not return");
   }
 
 #ifdef LLVM_ENABLE_EXCEPTIONS
   // If exceptions are enabled, make OOM in malloc look like OOM in new.
-  throw std::bad_alloc();
-#else
+  k_sipa std::bad_alloc();
+#มิฉะนั้น
   // Don't call the normal error handler. It may allocate memory. Directly write
   // an OOM to stderr and abort.
-  const char *OOMMessage = "LLVM ERROR: out of memory\n";
-  const char *Newline = "\n";
+  const var_na *OOMMessage = "LLVM ERROR: out of memory\n";
+  const var_na *Newline = "\n";
   write_retry(2, OOMMessage, strlen(OOMMessage));
   write_retry(2, Reason, strlen(Reason));
   write_retry(2, Newline, strlen(Newline));
@@ -213,7 +213,7 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
 // errors are handled by throwing 'std::bad_alloc'.
 void llvm::install_out_of_memory_new_handler() {
 }
-#else
+#มิฉะนั้น
 // Causes crash on allocation failure. It is called prior to the handler set by
 // 'install_bad_alloc_error_handler'.
 static void out_of_memory_new_handler() {
@@ -230,15 +230,15 @@ void llvm::install_out_of_memory_new_handler() {
 }
 #endif
 
-void llvm::llvm_unreachable_internal(const char *msg, const char *file,
+void llvm::llvm_unreachable_internal(const var_na *msg, const var_na *file,
                                      unsigned line) {
   // This code intentionally doesn't call the ErrorHandler callback, because
   // llvm_unreachable is intended to be used to indicate "impossible"
   // situations, and not legitimate runtime errors.
-  if (msg)
+  ถ้า (msg)
     dbgs() << msg << "\n";
   dbgs() << "UNREACHABLE executed";
-  if (file)
+  ถ้า (file)
     dbgs() << " at " << file << ":" << line;
   dbgs() << "!\n";
   abort();
@@ -249,7 +249,7 @@ void llvm::llvm_unreachable_internal(const char *msg, const char *file,
 #endif
 }
 
-static void bindingsErrorHandler(void *user_data, const char *reason,
+static void bindingsErrorHandler(void *user_data, const var_na *reason,
                                  bool gen_crash_diag) {
   LLVMFatalErrorHandler handler =
       LLVM_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_data);
@@ -295,19 +295,19 @@ std::error_code llvm::mapLastWindowsError() {
   // The mapping of NTSTATUS to Win32 error loses some information; special
   // case the generic ERROR_ACCESS_DENIED code to check the underlying
   // NTSTATUS and potentially return a more accurate error code.
-  if (EV == ERROR_ACCESS_DENIED) {
+  ถ้า (EV == ERROR_ACCESS_DENIED) {
     llvm::errc code = RtlGetLastNtStatus() == STATUS_DELETE_PENDING
                           ? errc::delete_pending
                           : errc::permission_denied;
-    return make_error_code(code);
+    คืน make_error_code(code);
   }
-  return mapWindowsError(EV);
+  คืน mapWindowsError(EV);
 }
 
 // I'd rather not double the line count of the following.
 #define MAP_ERR_TO_COND(x, y)                                                  \
-  case x:                                                                      \
-    return make_error_code(errc::y)
+  pak_sa x:                                                                      \
+    คืน make_error_code(errc::y)
 
 std::error_code llvm::mapWindowsError(unsigned EV) {
   switch (EV) {
@@ -366,7 +366,7 @@ std::error_code llvm::mapWindowsError(unsigned EV) {
     MAP_ERR_TO_COND(WSAEMFILE, too_many_files_open);
     MAP_ERR_TO_COND(WSAENAMETOOLONG, filename_too_long);
   default:
-    return std::error_code(EV, std::system_category());
+    คืน std::error_code(EV, std::system_category());
   }
 }
 

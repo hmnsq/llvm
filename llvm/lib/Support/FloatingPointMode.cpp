@@ -13,49 +13,49 @@ using namespace llvm;
 
 FPClassTest llvm::fneg(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcNegInf)
+  ถ้า (Mask & fcNegInf)
     NewMask |= fcPosInf;
-  if (Mask & fcNegNormal)
+  ถ้า (Mask & fcNegNormal)
     NewMask |= fcPosNormal;
-  if (Mask & fcNegSubnormal)
+  ถ้า (Mask & fcNegSubnormal)
     NewMask |= fcPosSubnormal;
-  if (Mask & fcNegZero)
+  ถ้า (Mask & fcNegZero)
     NewMask |= fcPosZero;
-  if (Mask & fcPosZero)
+  ถ้า (Mask & fcPosZero)
     NewMask |= fcNegZero;
-  if (Mask & fcPosSubnormal)
+  ถ้า (Mask & fcPosSubnormal)
     NewMask |= fcNegSubnormal;
-  if (Mask & fcPosNormal)
+  ถ้า (Mask & fcPosNormal)
     NewMask |= fcNegNormal;
-  if (Mask & fcPosInf)
+  ถ้า (Mask & fcPosInf)
     NewMask |= fcNegInf;
-  return NewMask;
+  คืน NewMask;
 }
 
 FPClassTest llvm::inverse_fabs(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcPosZero)
+  ถ้า (Mask & fcPosZero)
     NewMask |= fcZero;
-  if (Mask & fcPosSubnormal)
+  ถ้า (Mask & fcPosSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcPosNormal)
+  ถ้า (Mask & fcPosNormal)
     NewMask |= fcNormal;
-  if (Mask & fcPosInf)
+  ถ้า (Mask & fcPosInf)
     NewMask |= fcInf;
-  return NewMask;
+  คืน NewMask;
 }
 
 FPClassTest llvm::unknown_sign(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcZero)
+  ถ้า (Mask & fcZero)
     NewMask |= fcZero;
-  if (Mask & fcSubnormal)
+  ถ้า (Mask & fcSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcNormal)
+  ถ้า (Mask & fcNormal)
     NewMask |= fcNormal;
-  if (Mask & fcInf)
+  ถ้า (Mask & fcInf)
     NewMask |= fcInf;
-  return NewMask;
+  คืน NewMask;
 }
 
 // Every bitfield has a unique name and one or more aliasing names that cover
@@ -86,14 +86,14 @@ static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
 raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   OS << '(';
 
-  if (Mask == fcNone) {
+  ถ้า (Mask == fcNone) {
     OS << "none)";
-    return OS;
+    คืน OS;
   }
 
   ListSeparator LS(" ");
-  for (auto [BitTest, Name] : NoFPClassName) {
-    if ((Mask & BitTest) == BitTest) {
+  สำหรับ (auto [BitTest, Name] : NoFPClassName) {
+    ถ้า ((Mask & BitTest) == BitTest) {
       OS << LS << Name;
 
       // Clear the bits so we don't print any aliased names later.
@@ -104,17 +104,17 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   assert(Mask == 0 && "didn't print some mask bits");
 
   OS << ')';
-  return OS;
+  คืน OS;
 }
 
 void DenormalFPEnv::print(raw_ostream &OS, bool OmitIfSame) const {
-  if (F32Mode == DefaultMode) {
+  ถ้า (F32Mode == DefaultMode) {
     DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
-    return;
+    คืน;
   }
 
   // Omit printing the base mode if only the f32 mode isn't the default.
-  if (DefaultMode != DenormalMode::getDefault()) {
+  ถ้า (DefaultMode != DenormalMode::getDefault()) {
     DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
     OS << ", ";
   }
@@ -128,50 +128,50 @@ static bool cannotOrderStrictlyGreaterImpl(FPClassTest LHS, FPClassTest RHS,
   LHS &= ~fcNan;
   RHS &= ~fcNan;
 
-  if (LHS == fcNone || RHS == fcNone)
-    return true;
+  ถ้า (LHS == fcNone || RHS == fcNone)
+    คืน true;
 
   FPClassTest LowestBitRHS = static_cast<FPClassTest>(RHS & -RHS);
   FPClassTest HighestBitLHS = static_cast<FPClassTest>(1 << Log2_32(LHS));
 
-  if (!OrderedZero) {
+  ถ้า (!OrderedZero) {
     // Introduce conflict in zero bits if we're treating them as equal.
-    if (LowestBitRHS == fcNegZero)
+    ถ้า (LowestBitRHS == fcNegZero)
       LowestBitRHS = fcPosZero;
-    if (HighestBitLHS == fcNegZero)
+    ถ้า (HighestBitLHS == fcNegZero)
       HighestBitLHS = fcPosZero;
   }
 
-  if (LowestBitRHS > HighestBitLHS) {
+  ถ้า (LowestBitRHS > HighestBitLHS) {
     assert((LHS & RHS) == fcNone && "no bits should intersect");
-    return true;
+    คืน true;
   }
 
-  if (LowestBitRHS < HighestBitLHS)
-    return false;
+  ถ้า (LowestBitRHS < HighestBitLHS)
+    คืน false;
 
   constexpr FPClassTest ExactValuesMask = fcZero | fcInf;
-  return !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
+  คืน !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
 }
 
 bool llvm::cannotOrderStrictlyGreater(FPClassTest LHS, FPClassTest RHS,
                                       bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
+  คืน cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyGreaterEq(FPClassTest LHS, FPClassTest RHS,
                                         bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
+  คืน cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyLess(FPClassTest LHS, FPClassTest RHS,
                                    bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
+  คืน cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyLessEq(FPClassTest LHS, FPClassTest RHS,
                                      bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
+  คืน cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
 }
 
 FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
@@ -190,9 +190,9 @@ FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is smaller
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  ถ้า (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  คืน NewMask;
 }
 
 FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
@@ -207,7 +207,7 @@ FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is greater
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  ถ้า (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  คืน NewMask;
 }

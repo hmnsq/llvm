@@ -16,12 +16,12 @@
 using namespace llvm;
 
 bool llvm::CheckBitcodeOutputToConsole(raw_ostream &stream_to_check) {
-  if (stream_to_check.is_displayed()) {
+  ถ้า (stream_to_check.is_displayed()) {
     errs() << "WARNING: You're attempting to print out a bitcode file.\n"
               "This is inadvisable as it may cause display problems. If\n"
               "you REALLY want to taste LLVM bitcode first-hand, you\n"
               "can force output with the `-f' option.\n\n";
-    return true;
+    คืน true;
   }
-  return false;
+  คืน false;
 }

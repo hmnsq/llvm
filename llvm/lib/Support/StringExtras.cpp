@@ -31,7 +31,7 @@ std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
   // Find the next occurrence of the delimiter.
   StringRef::size_type End = Source.find_first_of(Delimiters, Start);
 
-  return {Source.slice(Start, End), Source.substr(End)};
+  คืน {Source.slice(Start, End), Source.substr(End)};
 }
 
 /// SplitString - Split up the specified string according to the specified
@@ -40,94 +40,94 @@ void llvm::SplitString(StringRef Source,
                        SmallVectorImpl<StringRef> &OutFragments,
                        StringRef Delimiters) {
   std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
+  ขณะ (!S.first.empty()) {
     OutFragments.push_back(S.first);
     S = getToken(S.second, Delimiters);
   }
 }
 
 void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned char C : Name) {
-    if (C == '\\')
+  สำหรับ (unsigned var_na C : Name) {
+    ถ้า (C == '\\')
       Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
+    มิฉะนั้น ถ้า (isPrint(C) && C != '"')
       Out << C;
-    else
+    มิฉะนั้น
       Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
 void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
+  สำหรับ (var_na C : String) {
+    ถ้า (C == '&')
       Out << "&amp;";
-    else if (C == '<')
+    มิฉะนั้น ถ้า (C == '<')
       Out << "&lt;";
-    else if (C == '>')
+    มิฉะนั้น ถ้า (C == '>')
       Out << "&gt;";
-    else if (C == '\"')
+    มิฉะนั้น ถ้า (C == '\"')
       Out << "&quot;";
-    else if (C == '\'')
+    มิฉะนั้น ถ้า (C == '\'')
       Out << "&apos;";
-    else
+    มิฉะนั้น
       Out << C;
   }
 }
 
 void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
+  สำหรับ (const var_na C : String)
     Out << toLower(C);
 }
 
 void llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
-  for (unsigned char C : String) {
-    if (isAlnum(C) || StringRef("-_.~").contains(C))
+  สำหรับ (unsigned var_na C : String) {
+    ถ้า (isAlnum(C) || StringRef("-_.~").contains(C))
       Out << C;
-    else
+    มิฉะนั้น
       Out << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
 std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+  ถ้า (input.empty())
+    คืน "";
 
   std::string snakeCase;
   snakeCase.reserve(input.size());
-  auto check = [&input](size_t j, function_ref<bool(int)> predicate) {
-    return j < input.size() && predicate(input[j]);
+  auto check = [&input](size_t j, function_ref<bool(จำนวนเต็ม)> predicate) {
+    คืน j < input.size() && predicate(input[j]);
   };
-  for (size_t i = 0; i < input.size(); ++i) {
+  สำหรับ (size_t i = 0; i < input.size(); ++i) {
     snakeCase.push_back(tolower(input[i]));
     // Handles "runs" of capitals, such as in OPName -> op_name.
-    if (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
+    ถ้า (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
       snakeCase.push_back('_');
-    if ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
+    ถ้า ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
       snakeCase.push_back('_');
   }
-  return snakeCase;
+  คืน snakeCase;
 }
 
 std::string llvm::convertToCamelFromSnakeCase(StringRef input,
                                               bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+  ถ้า (input.empty())
+    คืน "";
 
   std::string output;
   output.reserve(input.size());
 
   // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
+  ถ้า (capitalizeFirst && std::islower(input.front()))
     output.push_back(llvm::toUpper(input.front()));
-  else
+  มิฉะนั้น
     output.push_back(input.front());
 
   // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
+  สำหรับ (size_t pos = 1, e = input.size(); pos < e; ++pos) {
+    ถ้า (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
       output.push_back(llvm::toUpper(input[++pos]));
-    else
+    มิฉะนั้น
       output.push_back(input[pos]);
   }
-  return output;
+  คืน output;
 }
