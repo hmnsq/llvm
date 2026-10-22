@@ -6,35 +6,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/WithColor.h"
+#شامل "llvm/Support/WithColor.h"
 
-#include "DebugOptions.h"
+#شامل "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
+#شامل "llvm/Support/CommandLine.h"
+#شامل "llvm/Support/Error.h"
+#شامل "llvm/Support/ManagedStatic.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
 cl::OptionCategory &llvm::getColorCategory() {
-  static cl::OptionCategory ColorCategory("Color Options");
-  return ColorCategory;
+  ساکن cl::OptionCategory ColorCategory("Color Options");
+  واپس ColorCategory;
 }
-namespace {
-struct CreateUseColor {
-  static void *call() {
-    return new cl::opt<cl::boolOrDefault>(
+نامخلا {
+ساخت CreateUseColor {
+  ساکن خالی *call() {
+    واپس نیا cl::opt<cl::boolOrDefault>(
         "color", cl::cat(getColorCategory()),
         cl::desc("Use colors in output (default=autodetect)"),
         cl::init(cl::boolOrDefault::BOU_UNSET));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
-void llvm::initWithColorOptions() { *UseColor; }
+ساکن ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
+خالی llvm::initWithColorOptions() { *UseColor; }
 
-static bool DefaultAutoDetectFunction(const raw_ostream &OS) {
-  return *UseColor == cl::boolOrDefault::BOU_UNSET
+ساکن منطقی DefaultAutoDetectFunction(ثابت raw_ostream &OS) {
+  واپس *UseColor == cl::boolOrDefault::BOU_UNSET
              ? OS.has_colors()
              : *UseColor == cl::boolOrDefault::BOU_TRUE;
 }
@@ -42,137 +42,137 @@ static bool DefaultAutoDetectFunction(const raw_ostream &OS) {
 WithColor::AutoDetectFunctionType WithColor::AutoDetectFunction =
     DefaultAutoDetectFunction;
 
-WithColor::WithColor(raw_ostream &OS, HighlightColor Color, ColorMode Mode)
-    : OS(OS), Mode(Mode) {
+WithColor::WithColor(raw_ostream &OS, HighlightColor Color, Color_منوال منوال)
+    : OS(OS), منوال(منوال) {
   // Detect color from terminal type unless the user passed the --color option.
-  if (colorsEnabled()) {
-    switch (Color) {
-    case HighlightColor::Address:
+  اگر (colorsEnabled()) {
+    انتخاب (Color) {
+    حالت HighlightColor::پتہ:
       OS.changeColor(raw_ostream::YELLOW);
-      break;
-    case HighlightColor::String:
+      توڑو;
+    حالت HighlightColor::String:
       OS.changeColor(raw_ostream::GREEN);
-      break;
-    case HighlightColor::Tag:
+      توڑو;
+    حالت HighlightColor::لیبل:
       OS.changeColor(raw_ostream::BLUE);
-      break;
-    case HighlightColor::Attribute:
+      توڑو;
+    حالت HighlightColor::Attribute:
       OS.changeColor(raw_ostream::CYAN);
-      break;
-    case HighlightColor::Enumerator:
+      توڑو;
+    حالت HighlightColor::Enumerator:
       OS.changeColor(raw_ostream::MAGENTA);
-      break;
-    case HighlightColor::Macro:
+      توڑو;
+    حالت HighlightColor::Macro:
       OS.changeColor(raw_ostream::RED);
-      break;
-    case HighlightColor::Error:
-      OS.changeColor(raw_ostream::RED, true);
-      break;
-    case HighlightColor::Warning:
-      OS.changeColor(raw_ostream::MAGENTA, true);
-      break;
-    case HighlightColor::Note:
-      OS.changeColor(raw_ostream::BLACK, true);
-      break;
-    case HighlightColor::Remark:
-      OS.changeColor(raw_ostream::BLUE, true);
-      break;
+      توڑو;
+    حالت HighlightColor::Error:
+      OS.changeColor(raw_ostream::RED, سچ);
+      توڑو;
+    حالت HighlightColor::Warning:
+      OS.changeColor(raw_ostream::MAGENTA, سچ);
+      توڑو;
+    حالت HighlightColor::Note:
+      OS.changeColor(raw_ostream::BLACK, سچ);
+      توڑو;
+    حالت HighlightColor::Remark:
+      OS.changeColor(raw_ostream::BLUE, سچ);
+      توڑو;
     }
   }
 }
 
-raw_ostream &WithColor::error() { return error(errs()); }
+raw_ostream &WithColor::error() { واپس error(errs()); }
 
-raw_ostream &WithColor::warning() { return warning(errs()); }
+raw_ostream &WithColor::warning() { واپس warning(errs()); }
 
-raw_ostream &WithColor::note() { return note(errs()); }
+raw_ostream &WithColor::note() { واپس note(errs()); }
 
-raw_ostream &WithColor::remark() { return remark(errs()); }
+raw_ostream &WithColor::remark() { واپس remark(errs()); }
 
-raw_ostream &WithColor::error(raw_ostream &OS, StringRef Prefix,
-                              bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Error,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::error(raw_ostream &OS, StringRef سابقہ,
+                              منطقی DisableColors) {
+  اگر (!سابقہ.خالی_خانے())
+    OS << سابقہ << ": ";
+  واپس WithColor(OS, HighlightColor::Error,
+                   DisableColors ? Color_منوال::Disable : Color_منوال::Auto)
              .get()
          << "error: ";
 }
 
-raw_ostream &WithColor::warning(raw_ostream &OS, StringRef Prefix,
-                                bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Warning,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::warning(raw_ostream &OS, StringRef سابقہ,
+                                منطقی DisableColors) {
+  اگر (!سابقہ.خالی_خانے())
+    OS << سابقہ << ": ";
+  واپس WithColor(OS, HighlightColor::Warning,
+                   DisableColors ? Color_منوال::Disable : Color_منوال::Auto)
              .get()
          << "warning: ";
 }
 
-raw_ostream &WithColor::note(raw_ostream &OS, StringRef Prefix,
-                             bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Note,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::note(raw_ostream &OS, StringRef سابقہ,
+                             منطقی DisableColors) {
+  اگر (!سابقہ.خالی_خانے())
+    OS << سابقہ << ": ";
+  واپس WithColor(OS, HighlightColor::Note,
+                   DisableColors ? Color_منوال::Disable : Color_منوال::Auto)
              .get()
          << "note: ";
 }
 
-raw_ostream &WithColor::remark(raw_ostream &OS, StringRef Prefix,
-                               bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Remark,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::remark(raw_ostream &OS, StringRef سابقہ,
+                               منطقی DisableColors) {
+  اگر (!سابقہ.خالی_خانے())
+    OS << سابقہ << ": ";
+  واپس WithColor(OS, HighlightColor::Remark,
+                   DisableColors ? Color_منوال::Disable : Color_منوال::Auto)
              .get()
          << "remark: ";
 }
 
-bool WithColor::colorsEnabled() {
-  switch (Mode) {
-  case ColorMode::Enable:
-    return true;
-  case ColorMode::Disable:
-    return false;
-  case ColorMode::Auto:
-    return AutoDetectFunction(OS);
+منطقی WithColor::colorsEnabled() {
+  انتخاب (منوال) {
+  حالت Color_منوال::Enable:
+    واپس سچ;
+  حالت Color_منوال::Disable:
+    واپس جھوٹ;
+  حالت Color_منوال::Auto:
+    واپس AutoDetectFunction(OS);
   }
   llvm_unreachable("All cases handled above.");
 }
 
-WithColor &WithColor::changeColor(raw_ostream::Colors Color, bool Bold,
-                                  bool BG) {
-  if (colorsEnabled())
+WithColor &WithColor::changeColor(raw_ostream::Colors Color, منطقی Bold,
+                                  منطقی BG) {
+  اگر (colorsEnabled())
     OS.changeColor(Color, Bold, BG);
-  return *this;
+  واپس *یہ;
 }
 
 WithColor &WithColor::resetColor() {
-  if (colorsEnabled())
+  اگر (colorsEnabled())
     OS.resetColor();
-  return *this;
+  واپس *یہ;
 }
 
 WithColor::~WithColor() { resetColor(); }
 
-void WithColor::defaultErrorHandler(Error Err) {
-  handleAllErrors(std::move(Err), [](ErrorInfoBase &Info) {
-    WithColor::error() << Info.message() << '\n';
+خالی WithColor::defaultErrorHandler(Error Err) {
+  handleAllErrors(std::move(Err), [](Error_Info_بنیاد &Info) {
+    WithColor::error() << Info.پیغام_2() << '\n';
   });
 }
 
-void WithColor::defaultWarningHandler(Error Warning) {
-  handleAllErrors(std::move(Warning), [](ErrorInfoBase &Info) {
-    WithColor::warning() << Info.message() << '\n';
+خالی WithColor::defaultWarningHandler(Error Warning) {
+  handleAllErrors(std::move(Warning), [](Error_Info_بنیاد &Info) {
+    WithColor::warning() << Info.پیغام_2() << '\n';
   });
 }
 
 WithColor::AutoDetectFunctionType WithColor::defaultAutoDetectFunction() {
-  return DefaultAutoDetectFunction;
+  واپس DefaultAutoDetectFunction;
 }
 
-void WithColor::setAutoDetectFunction(
+خالی WithColor::سیٹ_Auto_Detect_Function(
     AutoDetectFunctionType NewAutoDetectFunction) {
   AutoDetectFunction = NewAutoDetectFunction;
 }

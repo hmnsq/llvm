@@ -6,118 +6,118 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/BinaryByteStream.h"
+#شامل "llvm/Support/BinaryStreamRef.h"
+#شامل "llvm/Support/BinaryByteStream.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-namespace {
+نامخلا {
 
-class ArrayRefImpl : public BinaryStream {
-public:
-  ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
+جماعت ArrayRefImpl : عوامی ثنائی_دھارا {
+عوامی:
+  ArrayRefImpl(ArrayRef<uint8_t> ڈیٹا_2, endianness Endian) : BBS(ڈیٹا_2, Endian) {}
 
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() ثابت override { واپس BBS.getEndian(); }
+  Error read_بائٹیں(uint64_t انحراف, uint64_t سائز,
+                  ArrayRef<uint8_t> &بفر) override {
+    واپس BBS.read_بائٹیں(انحراف, سائز, بفر);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t انحراف,
+                                   ArrayRef<uint8_t> &بفر) override {
+    واپس BBS.readLongestContiguousChunk(انحراف, بفر);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_لمبائی() override { واپس BBS.get_لمبائی(); }
 
-private:
-  BinaryByteStream BBS;
+نجی:
+  ثنائی_Byte_دھارا BBS;
 };
 
-class MutableArrayRefImpl : public WritableBinaryStream {
-public:
-  MutableArrayRefImpl(MutableArrayRef<uint8_t> Data, endianness Endian)
-      : BBS(Data, Endian) {}
+جماعت MutableArrayRefImpl : عوامی Writable_ثنائی_دھارا {
+عوامی:
+  MutableArrayRefImpl(MutableArrayRef<uint8_t> ڈیٹا_2, endianness Endian)
+      : BBS(ڈیٹا_2, Endian) {}
 
   // Inherited via WritableBinaryStream
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() ثابت override { واپس BBS.getEndian(); }
+  Error read_بائٹیں(uint64_t انحراف, uint64_t سائز,
+                  ArrayRef<uint8_t> &بفر) override {
+    واپس BBS.read_بائٹیں(انحراف, سائز, بفر);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t انحراف,
+                                   ArrayRef<uint8_t> &بفر) override {
+    واپس BBS.readLongestContiguousChunk(انحراف, بفر);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_لمبائی() override { واپس BBS.get_لمبائی(); }
 
-  Error writeBytes(uint64_t Offset, ArrayRef<uint8_t> Data) override {
-    return BBS.writeBytes(Offset, Data);
+  Error write_بائٹیں(uint64_t انحراف, ArrayRef<uint8_t> ڈیٹا_2) override {
+    واپس BBS.write_بائٹیں(انحراف, ڈیٹا_2);
   }
-  Error commit() override { return BBS.commit(); }
+  Error commit() override { واپس BBS.commit(); }
 
-private:
-  MutableBinaryByteStream BBS;
+نجی:
+  Mutable_ثنائی_Byte_دھارا BBS;
 };
 } // namespace
 
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream, uint64_t Offset,
-                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
-BinaryStreamRef::BinaryStreamRef(ArrayRef<uint8_t> Data, endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
-                          Data.size()) {}
-BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
-    : BinaryStreamRef(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
+ثنائی_دھارا_Ref::ثنائی_دھارا_Ref(ثنائی_دھارا &دھارا)
+    : ثنائی_دھارا_Ref_بنیاد(دھارا) {}
+ثنائی_دھارا_Ref::ثنائی_دھارا_Ref(ثنائی_دھارا &دھارا, uint64_t انحراف,
+                                 std::optional<uint64_t> لمبائی)
+    : ثنائی_دھارا_Ref_بنیاد(دھارا, انحراف, لمبائی) {}
+ثنائی_دھارا_Ref::ثنائی_دھارا_Ref(ArrayRef<uint8_t> ڈیٹا_2, endianness Endian)
+    : ثنائی_دھارا_Ref_بنیاد(std::make_shared<ArrayRefImpl>(ڈیٹا_2, Endian), 0,
+                          ڈیٹا_2.سائز_2()) {}
+ثنائی_دھارا_Ref::ثنائی_دھارا_Ref(StringRef ڈیٹا_2, endianness Endian)
+    : ثنائی_دھارا_Ref(ArrayRef(ڈیٹا_2.بائٹیں_begin(), ڈیٹا_2.بائٹیں_انتہا()), Endian) {}
 
-Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
-                                 ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, Size))
-    return EC;
-  return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
+Error ثنائی_دھارا_Ref::read_بائٹیں(uint64_t انحراف, uint64_t سائز,
+                                 ArrayRef<uint8_t> &بفر) ثابت {
+  اگر (خودکار EC = check_انحراف_For_Read(انحراف, سائز))
+    واپس EC;
+  واپس BorrowedImpl->read_بائٹیں(View_انحراف + انحراف, سائز, بفر);
 }
 
-Error BinaryStreamRef::readLongestContiguousChunk(
-    uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, 1))
-    return EC;
+Error ثنائی_دھارا_Ref::readLongestContiguousChunk(
+    uint64_t انحراف, ArrayRef<uint8_t> &بفر) ثابت {
+  اگر (خودکار EC = check_انحراف_For_Read(انحراف, 1))
+    واپس EC;
 
-  if (auto EC =
-          BorrowedImpl->readLongestContiguousChunk(ViewOffset + Offset, Buffer))
-    return EC;
+  اگر (خودکار EC =
+          BorrowedImpl->readLongestContiguousChunk(View_انحراف + انحراف, بفر))
+    واپس EC;
   // This StreamRef might refer to a smaller window over a larger stream.  In
   // that case we will have read out more bytes than we should return, because
   // we should not read past the end of the current view.
-  uint64_t MaxLength = getLength() - Offset;
-  if (Buffer.size() > MaxLength)
-    Buffer = Buffer.slice(0, MaxLength);
-  return Error::success();
+  uint64_t Max_لمبائی = get_لمبائی() - انحراف;
+  اگر (بفر.سائز_2() > Max_لمبائی)
+    بفر = بفر.قاش(0, Max_لمبائی);
+  واپس Error::success();
 }
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
+Writable_ثنائی_دھارا_Ref::Writable_ثنائی_دھارا_Ref(Writable_ثنائی_دھارا &دھارا)
+    : ثنائی_دھارا_Ref_بنیاد(دھارا) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream,
-                                                 uint64_t Offset,
-                                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
+Writable_ثنائی_دھارا_Ref::Writable_ثنائی_دھارا_Ref(Writable_ثنائی_دھارا &دھارا,
+                                                 uint64_t انحراف,
+                                                 std::optional<uint64_t> لمبائی)
+    : ثنائی_دھارا_Ref_بنیاد(دھارا, انحراف, لمبائی) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
+Writable_ثنائی_دھارا_Ref::Writable_ثنائی_دھارا_Ref(MutableArrayRef<uint8_t> ڈیٹا_2,
                                                  endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<MutableArrayRefImpl>(Data, Endian),
-                          0, Data.size()) {}
+    : ثنائی_دھارا_Ref_بنیاد(std::make_shared<MutableArrayRefImpl>(ڈیٹا_2, Endian),
+                          0, ڈیٹا_2.سائز_2()) {}
 
-Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
-                                          ArrayRef<uint8_t> Data) const {
-  if (auto EC = checkOffsetForWrite(Offset, Data.size()))
-    return EC;
+Error Writable_ثنائی_دھارا_Ref::write_بائٹیں(uint64_t انحراف,
+                                          ArrayRef<uint8_t> ڈیٹا_2) ثابت {
+  اگر (خودکار EC = check_انحراف_For_Write(انحراف, ڈیٹا_2.سائز_2()))
+    واپس EC;
 
-  return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
+  واپس BorrowedImpl->write_بائٹیں(View_انحراف + انحراف, ڈیٹا_2);
 }
 
-WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+Writable_ثنائی_دھارا_Ref::عامل ثنائی_دھارا_Ref() ثابت {
+  واپس ثنائی_دھارا_Ref(*BorrowedImpl, View_انحراف, لمبائی);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error Writable_ثنائی_دھارا_Ref::commit() { واپس BorrowedImpl->commit(); }

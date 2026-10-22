@@ -1,97 +1,97 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#شامل <stdbool.h>
+#شامل <stddef.h>
+#شامل <stdint.h>
 
-#include "blake3_impl.h"
+#شامل "blake3_impl.h"
 
-#if defined(_MSC_VER)
-#include <Windows.h>
-#endif
+#اگر defined(_MSC_VER)
+#شامل <Windows.h>
+#اگر_ختم
 
-#if defined(IS_X86)
-#if defined(_MSC_VER)
-#include <intrin.h>
-#elif defined(__GNUC__)
-#include <immintrin.h>
-#else
-#undef IS_X86 /* Unimplemented! */
-#endif
-#endif
+#اگر defined(IS_X86)
+#اگر defined(_MSC_VER)
+#شامل <intrin.h>
+#وگرنہ_اگر defined(__GNUC__)
+#شامل <immintrin.h>
+#ورنہ
+#تعریف_منسوخ IS_X86 /* Unimplemented! */
+#اگر_ختم
+#اگر_ختم
 
-#if !defined(BLAKE3_ATOMICS)
-#if defined(__has_include)
-#if __has_include(<stdatomic.h>) && !defined(_MSC_VER)
-#define BLAKE3_ATOMICS 1
-#else
-#define BLAKE3_ATOMICS 0
-#endif /* __has_include(<stdatomic.h>) && !defined(_MSC_VER) */
-#else
-#define BLAKE3_ATOMICS 0
-#endif /* defined(__has_include) */
-#endif /* BLAKE3_ATOMICS */
+#اگر !defined(BLAKE3_ATOMICS)
+#اگر defined(__has_include)
+#اگر __has_include(<stdatomic.h>) && !defined(_MSC_VER)
+#تعریف_کرو BLAKE3_ATOMICS 1
+#ورنہ
+#تعریف_کرو BLAKE3_ATOMICS 0
+#اگر_ختم /* __has_include(<stdatomic.h>) && !defined(_MSC_VER) */
+#ورنہ
+#تعریف_کرو BLAKE3_ATOMICS 0
+#اگر_ختم /* defined(__has_include) */
+#اگر_ختم /* BLAKE3_ATOMICS */
 
-#if BLAKE3_ATOMICS
-#define ATOMIC_INT _Atomic int
-#define ATOMIC_LOAD(x) x
-#define ATOMIC_STORE(x, y) x = y
-#elif defined(_MSC_VER)
-#define ATOMIC_INT LONG
-#define ATOMIC_LOAD(x) InterlockedOr(&x, 0)
-#define ATOMIC_STORE(x, y) InterlockedExchange(&x, y)
-#else
-#define ATOMIC_INT int
-#define ATOMIC_LOAD(x) x
-#define ATOMIC_STORE(x, y) x = y
-#endif
+#اگر BLAKE3_ATOMICS
+#تعریف_کرو ATOMIC_INT _Atomic صحیح
+#تعریف_کرو ATOMIC_بھرو(x) x
+#تعریف_کرو ATOMIC_STORE(x, y) x = y
+#وگرنہ_اگر defined(_MSC_VER)
+#تعریف_کرو ATOMIC_INT LONG
+#تعریف_کرو ATOMIC_بھرو(x) InterlockedOr(&x, 0)
+#تعریف_کرو ATOMIC_STORE(x, y) InterlockedExchange(&x, y)
+#ورنہ
+#تعریف_کرو ATOMIC_INT صحیح
+#تعریف_کرو ATOMIC_بھرو(x) x
+#تعریف_کرو ATOMIC_STORE(x, y) x = y
+#اگر_ختم
 
-#define MAYBE_UNUSED(x) (void)((x))
+#تعریف_کرو MAYBE_غیر_مستعمل(x) (خالی)((x))
 
-#if defined(IS_X86)
-static uint64_t xgetbv(void) {
-#if defined(_MSC_VER)
-  return _xgetbv(0);
-#else
+#اگر defined(IS_X86)
+ساکن uint64_t xgetbv(خالی) {
+#اگر defined(_MSC_VER)
+  واپس _xgetbv(0);
+#ورنہ
   uint32_t eax = 0, edx = 0;
   __asm__ __volatile__("xgetbv\n" : "=a"(eax), "=d"(edx) : "c"(0));
-  return ((uint64_t)edx << 32) | eax;
-#endif
+  واپس ((uint64_t)edx << 32) | eax;
+#اگر_ختم
 }
 
-static void cpuid(uint32_t out[4], uint32_t id) {
-#if defined(_MSC_VER)
-  __cpuid((int *)out, id);
-#elif defined(__i386__) || defined(_M_IX86)
+ساکن خالی cpuid(uint32_t برآمد_2[4], uint32_t id) {
+#اگر defined(_MSC_VER)
+  __cpuid((صحیح *)برآمد_2, id);
+#وگرنہ_اگر defined(__i386__) || defined(_M_IX86)
   __asm__ __volatile__("movl %%ebx, %1\n"
                        "cpuid\n"
                        "xchgl %1, %%ebx\n"
-                       : "=a"(out[0]), "=r"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(برآمد_2[0]), "=r"(برآمد_2[1]), "=c"(برآمد_2[2]), "=d"(برآمد_2[3])
                        : "a"(id));
-#else
+#ورنہ
   __asm__ __volatile__("cpuid\n"
-                       : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(برآمد_2[0]), "=b"(برآمد_2[1]), "=c"(برآمد_2[2]), "=d"(برآمد_2[3])
                        : "a"(id));
-#endif
+#اگر_ختم
 }
 
-static void cpuidex(uint32_t out[4], uint32_t id, uint32_t sid) {
-#if defined(_MSC_VER)
-  __cpuidex((int *)out, id, sid);
-#elif defined(__i386__) || defined(_M_IX86)
+ساکن خالی cpuidex(uint32_t برآمد_2[4], uint32_t id, uint32_t sid) {
+#اگر defined(_MSC_VER)
+  __cpuidex((صحیح *)برآمد_2, id, sid);
+#وگرنہ_اگر defined(__i386__) || defined(_M_IX86)
   __asm__ __volatile__("movl %%ebx, %1\n"
                        "cpuid\n"
                        "xchgl %1, %%ebx\n"
-                       : "=a"(out[0]), "=r"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(برآمد_2[0]), "=r"(برآمد_2[1]), "=c"(برآمد_2[2]), "=d"(برآمد_2[3])
                        : "a"(id), "c"(sid));
-#else
+#ورنہ
   __asm__ __volatile__("cpuid\n"
-                       : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(برآمد_2[0]), "=b"(برآمد_2[1]), "=c"(برآمد_2[2]), "=d"(برآمد_2[3])
                        : "a"(id), "c"(sid));
-#endif
+#اگر_ختم
 }
 
-#endif
+#اگر_ختم
 
-enum cpu_feature {
+شمار cpu_feature {
   SSE2 = 1 << 0,
   SSSE3 = 1 << 1,
   SSE41 = 1 << 2,
@@ -103,231 +103,231 @@ enum cpu_feature {
   UNDEFINED = 1 << 30
 };
 
-#if !defined(BLAKE3_TESTING)
-static /* Allow the variable to be controlled manually for testing */
-#endif
+#اگر !defined(BLAKE3_TESTING)
+ساکن /* Allow the variable to be controlled manually for testing */
+#اگر_ختم
     ATOMIC_INT g_cpu_features = UNDEFINED;
 
-LLVM_ATTRIBUTE_USED
-#if !defined(BLAKE3_TESTING)
-static
-#endif
-    enum cpu_feature
-    get_cpu_features(void) {
+LLVM_ATTRIBUTE_مستعمل
+#اگر !defined(BLAKE3_TESTING)
+ساکن
+#اگر_ختم
+    شمار cpu_feature
+    get_cpu_features(خالی) {
 
   /* If TSAN detects a data race here, try compiling with -DBLAKE3_ATOMICS=1 */
-  enum cpu_feature features = ATOMIC_LOAD(g_cpu_features);
-  if (features != UNDEFINED) {
-    return features;
-  } else {
-#if defined(IS_X86)
+  شمار cpu_feature features = ATOMIC_بھرو(g_cpu_features);
+  اگر (features != UNDEFINED) {
+    واپس features;
+  } ورنہ {
+#اگر defined(IS_X86)
     uint32_t regs[4] = {0};
     uint32_t *eax = &regs[0], *ebx = &regs[1], *ecx = &regs[2], *edx = &regs[3];
-    (void)edx;
+    (خالی)edx;
     features = 0;
     cpuid(regs, 0);
-    const int max_id = *eax;
+    ثابت صحیح max_id = *eax;
     cpuid(regs, 1);
-#if defined(__amd64__) || defined(_M_X64)
+#اگر defined(__amd64__) || defined(_M_X64)
     features |= SSE2;
-#else
-    if (*edx & (1UL << 26))
+#ورنہ
+    اگر (*edx & (1UL << 26))
       features |= SSE2;
-#endif
-    if (*ecx & (1UL << 9))
+#اگر_ختم
+    اگر (*ecx & (1UL << 9))
       features |= SSSE3;
-    if (*ecx & (1UL << 19))
+    اگر (*ecx & (1UL << 19))
       features |= SSE41;
 
-    if (*ecx & (1UL << 27)) { // OSXSAVE
-      const uint64_t mask = xgetbv();
-      if ((mask & 6) == 6) { // SSE and AVX states
-        if (*ecx & (1UL << 28))
+    اگر (*ecx & (1UL << 27)) { // OSXSAVE
+      ثابت uint64_t نقاب_2 = xgetbv();
+      اگر ((نقاب_2 & 6) == 6) { // SSE and AVX states
+        اگر (*ecx & (1UL << 28))
           features |= AVX;
-        if (max_id >= 7) {
+        اگر (max_id >= 7) {
           cpuidex(regs, 7, 0);
-          if (*ebx & (1UL << 5))
+          اگر (*ebx & (1UL << 5))
             features |= AVX2;
-          if ((mask & 224) == 224) { // Opmask, ZMM_Hi256, Hi16_Zmm
-            if (*ebx & (1UL << 31))
+          اگر ((نقاب_2 & 224) == 224) { // Opmask, ZMM_Hi256, Hi16_Zmm
+            اگر (*ebx & (1UL << 31))
               features |= AVX512VL;
-            if (*ebx & (1UL << 16))
+            اگر (*ebx & (1UL << 16))
               features |= AVX512F;
           }
         }
       }
     }
     ATOMIC_STORE(g_cpu_features, features);
-    return features;
-#else
+    واپس features;
+#ورنہ
     /* How to detect NEON? */
-    return 0;
-#endif
+    واپس 0;
+#اگر_ختم
   }
 }
 
-void blake3_compress_in_place(uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
+خالی blake3_compress_اندر_رکھو(uint32_t cv[8],
+                              ثابت uint8_t بلاک[BLAKE3_بلاک_LEN],
+                              uint8_t بلاک_len, uint64_t شمار_3,
                               uint8_t flags) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_compress_in_place_avx512(cv, block, block_len, counter, flags);
-    return;
+#اگر defined(IS_X86)
+  ثابت شمار cpu_feature features = get_cpu_features();
+  MAYBE_غیر_مستعمل(features);
+#اگر !defined(BLAKE3_NO_AVX512)
+  اگر (features & AVX512VL) {
+    blake3_compress_اندر_رکھو_avx512(cv, بلاک, بلاک_len, شمار_3, flags);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_compress_in_place_sse41(cv, block, block_len, counter, flags);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE41)
+  اگر (features & SSE41) {
+    blake3_compress_اندر_رکھو_sse41(cv, بلاک, بلاک_len, شمار_3, flags);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_compress_in_place_sse2(cv, block, block_len, counter, flags);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE2)
+  اگر (features & SSE2) {
+    blake3_compress_اندر_رکھو_sse2(cv, بلاک, بلاک_len, شمار_3, flags);
+    واپس;
   }
-#endif
-#endif
-  blake3_compress_in_place_portable(cv, block, block_len, counter, flags);
+#اگر_ختم
+#اگر_ختم
+  blake3_compress_اندر_رکھو_portable(cv, بلاک, بلاک_len, شمار_3, flags);
 }
 
-void blake3_compress_xof(const uint32_t cv[8],
-                         const uint8_t block[BLAKE3_BLOCK_LEN],
-                         uint8_t block_len, uint64_t counter, uint8_t flags,
-                         uint8_t out[64]) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_compress_xof_avx512(cv, block, block_len, counter, flags, out);
-    return;
+خالی blake3_compress_xof(ثابت uint32_t cv[8],
+                         ثابت uint8_t بلاک[BLAKE3_بلاک_LEN],
+                         uint8_t بلاک_len, uint64_t شمار_3, uint8_t flags,
+                         uint8_t برآمد_2[64]) {
+#اگر defined(IS_X86)
+  ثابت شمار cpu_feature features = get_cpu_features();
+  MAYBE_غیر_مستعمل(features);
+#اگر !defined(BLAKE3_NO_AVX512)
+  اگر (features & AVX512VL) {
+    blake3_compress_xof_avx512(cv, بلاک, بلاک_len, شمار_3, flags, برآمد_2);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_compress_xof_sse41(cv, block, block_len, counter, flags, out);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE41)
+  اگر (features & SSE41) {
+    blake3_compress_xof_sse41(cv, بلاک, بلاک_len, شمار_3, flags, برآمد_2);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_compress_xof_sse2(cv, block, block_len, counter, flags, out);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE2)
+  اگر (features & SSE2) {
+    blake3_compress_xof_sse2(cv, بلاک, بلاک_len, شمار_3, flags, برآمد_2);
+    واپس;
   }
-#endif
-#endif
-  blake3_compress_xof_portable(cv, block, block_len, counter, flags, out);
+#اگر_ختم
+#اگر_ختم
+  blake3_compress_xof_portable(cv, بلاک, بلاک_len, شمار_3, flags, برآمد_2);
 }
 
 
-void blake3_xof_many(const uint32_t cv[8],
-                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                     uint8_t block_len, uint64_t counter, uint8_t flags,
-                     uint8_t out[64], size_t outblocks) {
-  if (outblocks == 0) {
+خالی blake3_xof_many(ثابت uint32_t cv[8],
+                     ثابت uint8_t بلاک[BLAKE3_بلاک_LEN],
+                     uint8_t بلاک_len, uint64_t شمار_3, uint8_t flags,
+                     uint8_t برآمد_2[64], size_t outblocks) {
+  اگر (outblocks == 0) {
     // The current assembly implementation always outputs at least 1 block.
-    return;
+    واپس;
   }
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_xof_many_avx512(cv, block, block_len, counter, flags, out, outblocks);
-    return;
+#اگر defined(IS_X86)
+  ثابت شمار cpu_feature features = get_cpu_features();
+  MAYBE_غیر_مستعمل(features);
+#اگر !defined(_WIN32) && !defined(__CYGWIN__) && !defined(BLAKE3_NO_AVX512)
+  اگر (features & AVX512VL) {
+    blake3_xof_many_avx512(cv, بلاک, بلاک_len, شمار_3, flags, برآمد_2, outblocks);
+    واپس;
   }
-#endif
-#endif
-  for(size_t i = 0; i < outblocks; ++i) {
-    blake3_compress_xof(cv, block, block_len, counter + i, flags, out + 64*i);
+#اگر_ختم
+#اگر_ختم
+  برائے(size_t i = 0; i < outblocks; ++i) {
+    blake3_compress_xof(cv, بلاک, بلاک_len, شمار_3 + i, flags, برآمد_2 + 64*i);
   }
 }
 
-void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
-                      size_t blocks, const uint32_t key[8], uint64_t counter,
-                      bool increment_counter, uint8_t flags,
-                      uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    blake3_hash_many_avx512(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
-    return;
+خالی blake3_hash_many(ثابت uint8_t *ثابت *inputs, size_t عدد_inputs,
+                      size_t بلاکیں, ثابت uint32_t کلید_2[8], uint64_t شمار_3,
+                      bool increment_شمار, uint8_t flags,
+                      uint8_t flags_آغاز, uint8_t flags_انتہا, uint8_t *برآمد_2) {
+#اگر defined(IS_X86)
+  ثابت شمار cpu_feature features = get_cpu_features();
+  MAYBE_غیر_مستعمل(features);
+#اگر !defined(BLAKE3_NO_AVX512)
+  اگر ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    blake3_hash_many_avx512(inputs, عدد_inputs, بلاکیں, کلید_2, شمار_3,
+                            increment_شمار, flags, flags_آغاز, flags_انتہا,
+                            برآمد_2);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_AVX2)
-  if (features & AVX2) {
-    blake3_hash_many_avx2(inputs, num_inputs, blocks, key, counter,
-                          increment_counter, flags, flags_start, flags_end,
-                          out);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_AVX2)
+  اگر (features & AVX2) {
+    blake3_hash_many_avx2(inputs, عدد_inputs, بلاکیں, کلید_2, شمار_3,
+                          increment_شمار, flags, flags_آغاز, flags_انتہا,
+                          برآمد_2);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
-                           increment_counter, flags, flags_start, flags_end,
-                           out);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE41)
+  اگر (features & SSE41) {
+    blake3_hash_many_sse41(inputs, عدد_inputs, بلاکیں, کلید_2, شمار_3,
+                           increment_شمار, flags, flags_آغاز, flags_انتہا,
+                           برآمد_2);
+    واپس;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_hash_many_sse2(inputs, num_inputs, blocks, key, counter,
-                          increment_counter, flags, flags_start, flags_end,
-                          out);
-    return;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE2)
+  اگر (features & SSE2) {
+    blake3_hash_many_sse2(inputs, عدد_inputs, بلاکیں, کلید_2, شمار_3,
+                          increment_شمار, flags, flags_آغاز, flags_انتہا,
+                          برآمد_2);
+    واپس;
   }
-#endif
-#endif
+#اگر_ختم
+#اگر_ختم
 
-#if BLAKE3_USE_NEON == 1
-  blake3_hash_many_neon(inputs, num_inputs, blocks, key, counter,
-                        increment_counter, flags, flags_start, flags_end, out);
-  return;
-#endif
+#اگر BLAKE3_USE_NEON == 1
+  blake3_hash_many_neon(inputs, عدد_inputs, بلاکیں, کلید_2, شمار_3,
+                        increment_شمار, flags, flags_آغاز, flags_انتہا, برآمد_2);
+  واپس;
+#اگر_ختم
 
-  blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
+  blake3_hash_many_portable(inputs, عدد_inputs, بلاکیں, کلید_2, شمار_3,
+                            increment_شمار, flags, flags_آغاز, flags_انتہا,
+                            برآمد_2);
 }
 
 // The dynamically detected SIMD degree of the current platform.
-size_t blake3_simd_degree(void) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    return 16;
+size_t blake3_simd_degree(خالی) {
+#اگر defined(IS_X86)
+  ثابت شمار cpu_feature features = get_cpu_features();
+  MAYBE_غیر_مستعمل(features);
+#اگر !defined(BLAKE3_NO_AVX512)
+  اگر ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    واپس 16;
   }
-#endif
-#if !defined(BLAKE3_NO_AVX2)
-  if (features & AVX2) {
-    return 8;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_AVX2)
+  اگر (features & AVX2) {
+    واپس 8;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    return 4;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE41)
+  اگر (features & SSE41) {
+    واپس 4;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    return 4;
+#اگر_ختم
+#اگر !defined(BLAKE3_NO_SSE2)
+  اگر (features & SSE2) {
+    واپس 4;
   }
-#endif
-#endif
-#if BLAKE3_USE_NEON == 1
-  return 4;
-#endif
-  return 1;
+#اگر_ختم
+#اگر_ختم
+#اگر BLAKE3_USE_NEON == 1
+  واپس 4;
+#اگر_ختم
+  واپس 1;
 }

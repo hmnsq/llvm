@@ -6,10 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/OptionStrCmp.h"
-#include "llvm/ADT/STLExtras.h"
+#شامل "llvm/Support/OptionStrCmp.h"
+#شامل "llvm/ADT/STLExtras.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
 // Comparison function for Option strings (option names & prefixes).
 // The ordering is *almost* case-insensitive lexicographic, with an exception.
@@ -17,27 +17,27 @@ using namespace llvm;
 // precede any other options which prefix them). Additionally, if two options
 // are identical ignoring case, they are ordered according to case sensitive
 // ordering if `FallbackCaseSensitive` is true.
-int llvm::StrCmpOptionName(StringRef A, StringRef B,
-                           bool FallbackCaseSensitive) {
-  size_t MinSize = std::min(A.size(), B.size());
-  if (int Res = A.substr(0, MinSize).compare_insensitive(B.substr(0, MinSize)))
-    return Res;
+صحیح llvm::StrCmpOptionName(StringRef A, StringRef B,
+                           منطقی FallbackCaseSensitive) {
+  size_t Min_سائز = std::min(A.سائز_2(), B.سائز_2());
+  اگر (صحیح Res = A.substr(0, Min_سائز).compare_insensitive(B.substr(0, Min_سائز)))
+    واپس Res;
 
   // If they are identical ignoring case, use case sensitive ordering.
-  if (A.size() == B.size())
-    return FallbackCaseSensitive ? A.compare(B) : 0;
+  اگر (A.سائز_2() == B.سائز_2())
+    واپس FallbackCaseSensitive ? A.compare(B) : 0;
 
-  return (A.size() == MinSize) ? 1 /* A is a prefix of B. */
+  واپس (A.سائز_2() == Min_سائز) ? 1 /* A is a prefix of B. */
                                : -1 /* B is a prefix of A */;
 }
 
 // Comparison function for Option prefixes.
-int llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
+صحیح llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
                                ArrayRef<StringRef> BPrefixes) {
-  for (const auto &[APre, BPre] : zip(APrefixes, BPrefixes)) {
-    if (int Cmp = StrCmpOptionName(APre, BPre))
-      return Cmp;
+  برائے (ثابت خودکار &[APre, BPre] : zip(APrefixes, BPrefixes)) {
+    اگر (صحیح Cmp = StrCmpOptionName(APre, BPre))
+      واپس Cmp;
   }
   // Both prefixes are identical.
-  return 0;
+  واپس 0;
 }

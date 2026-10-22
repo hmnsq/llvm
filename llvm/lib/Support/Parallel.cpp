@@ -6,103 +6,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Parallel.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/Jobserver.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Threading.h"
+#شامل "llvm/Support/Parallel.h"
+#شامل "llvm/ADT/ScopeExit.h"
+#شامل "llvm/Config/llvm-config.h"
+#شامل "llvm/Support/ExponentialBackoff.h"
+#شامل "llvm/Support/Jobserver.h"
+#شامل "llvm/Support/ManagedStatic.h"
+#شامل "llvm/Support/Threading.h"
 
-#include <atomic>
-#include <future>
-#include <memory>
-#include <mutex>
-#include <thread>
-#include <vector>
+#شامل <atomic>
+#شامل <future>
+#شامل <memory>
+#شامل <mutex>
+#شامل <thread>
+#شامل <vector>
 
-using namespace llvm;
-using namespace llvm::parallel;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::parallel;
 
 llvm::ThreadPoolStrategy parallel::strategy;
 
-#if LLVM_ENABLE_THREADS
+#اگر LLVM_ENABLE_دھاگے
 
-static thread_local unsigned threadIndex = UINT_MAX;
+ساکن thread_local غیرعلامتی thread_اشاریہ = UINT_MAX;
 
-namespace {
+نامخلا {
 
 /// Runs closures on a thread pool in filo order.
-class ThreadPoolExecutor {
-public:
-  explicit ThreadPoolExecutor(ThreadPoolStrategy S) {
-    if (S.UseJobserver)
+جماعت ThreadPoolExecutor {
+عوامی:
+  صریح ThreadPoolExecutor(ThreadPoolStrategy S) {
+    اگر (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
-    ThreadCount = S.compute_thread_count();
+    Thread_گنتی = S.compute_thread_گنتی();
     // Spawn all but one of the threads in another thread as spawning threads
     // can take a while.
-    Threads.reserve(ThreadCount);
-    Threads.resize(1);
-    std::lock_guard<std::mutex> Lock(Mutex);
+    دھاگے.reserve(Thread_گنتی);
+    دھاگے.resize(1);
+    std::تالا_guard<std::mutex> تالا_3(Mutex);
     // Use operator[] before creating the thread to avoid data race in .size()
     // in 'safe libc++' mode.
-    auto &Thread0 = Threads[0];
-    Thread0 = std::thread([this, S] {
-      for (unsigned I = 1; I < ThreadCount; ++I) {
-        Threads.emplace_back([this, S, I] { work(S, I); });
-        if (Stop)
-          break;
+    خودکار &Thread0 = دھاگے[0];
+    Thread0 = std::thread([یہ, S] {
+      برائے (غیرعلامتی I = 1; I < Thread_گنتی; ++I) {
+        دھاگے.emplace_عقب([یہ, S, I] { work(S, I); });
+        اگر (Stop)
+          توڑو;
       }
-      ThreadsCreated.set_value();
+      دھاگے_Created.سیٹ_قدر();
       work(S, 0);
     });
   }
 
   // To make sure the thread pool executor can only be created with a parallel
   // strategy.
-  ThreadPoolExecutor() = delete;
+  ThreadPoolExecutor() = حذف;
 
-  void stop() {
+  خالی stop() {
     {
-      std::lock_guard<std::mutex> Lock(Mutex);
-      if (Stop)
-        return;
-      Stop = true;
+      std::تالا_guard<std::mutex> تالا_3(Mutex);
+      اگر (Stop)
+        واپس;
+      Stop = سچ;
     }
     Cond.notify_all();
-    ThreadsCreated.get_future().wait();
+    دھاگے_Created.get_future().wait();
 
     std::thread::id CurrentThreadId = std::this_thread::get_id();
-    for (std::thread &T : Threads)
-      if (T.get_id() == CurrentThreadId)
+    برائے (std::thread &T : دھاگے)
+      اگر (T.get_id() == CurrentThreadId)
         T.detach();
-      else
+      ورنہ
         T.join();
   }
 
   ~ThreadPoolExecutor() { stop(); }
 
-  struct Creator {
-    static void *call() { return new ThreadPoolExecutor(strategy); }
+  ساخت Creator {
+    ساکن خالی *call() { واپس نیا ThreadPoolExecutor(strategy); }
   };
-  struct Deleter {
-    static void call(void *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
+  ساخت Deleter {
+    ساکن خالی call(خالی *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
   };
 
-  struct WorkItem {
-    std::function<void()> F;
+  ساخت Work_شے {
+    std::function<خالی()> F;
     std::reference_wrapper<parallel::detail::Latch> L;
-    void operator()() {
+    خالی عامل()() {
       F();
       L.get().dec();
     }
   };
 
-  void add(std::function<void()> F, parallel::detail::Latch &L) {
+  خالی جوڑو(std::function<خالی()> F, parallel::detail::Latch &L) {
     {
-      std::lock_guard<std::mutex> Lock(Mutex);
-      WorkStack.push_back({std::move(F), std::ref(L)});
+      std::تالا_guard<std::mutex> تالا_3(Mutex);
+      Work_ڈھیر.ڈالو_عقب({std::move(F), std::ref(L)});
     }
     Cond.notify_one();
   }
@@ -110,29 +110,29 @@ public:
   // Execute tasks from the work queue until the latch reaches zero.
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
-  void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
-      std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
-        return;
-      popAndRun(Lock);
+  خالی helpSync(ثابت parallel::detail::Latch &L) {
+    جب (L.get_گنتی() != 0) {
+      std::unique_تالا<std::mutex> تالا_3(Mutex);
+      اگر (Stop || Work_ڈھیر.خالی_خانے())
+        واپس;
+      نکالو_And_تسلسل(تالا_3);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t get_Thread_گنتی() ثابت { واپس Thread_گنتی; }
 
-private:
+نجی:
   // Pop one task from the queue and run it. Must be called with Lock held;
   // releases Lock before executing the task.
-  void popAndRun(std::unique_lock<std::mutex> &Lock) {
-    auto Item = std::move(WorkStack.back());
-    WorkStack.pop_back();
-    Lock.unlock();
-    Item();
+  خالی نکالو_And_تسلسل(std::unique_تالا<std::mutex> &تالا_3) {
+    خودکار شے = std::move(Work_ڈھیر.عقب());
+    Work_ڈھیر.نکالو_عقب();
+    تالا_3.unlock();
+    شے();
   }
 
-  void work(ThreadPoolStrategy S, unsigned ThreadID) {
-    threadIndex = ThreadID;
+  خالی work(ThreadPoolStrategy S, غیرعلامتی ThreadID) {
+    thread_اشاریہ = ThreadID;
     S.apply_thread_strategy(ThreadID);
     // Note on jobserver deadlock avoidance:
     // GNU Make grants each invoked process one implicit job slot. Our
@@ -140,8 +140,8 @@ private:
     // first successful tryAcquire() in a process. This guarantees forward
     // progress without requiring a dedicated "always-on" thread here.
 
-    while (true) {
-      if (TheJobserver) {
+    جب (سچ) {
+      اگر (TheJobserver) {
         // Jobserver-mode scheduling:
         // - Acquire one job slot (with exponential backoff to avoid busy-wait).
         // - While holding the slot, drain and run tasks from the local queue.
@@ -151,143 +151,143 @@ private:
         // the jobserver’s global concurrency limit. With K available slots,
         // up to K workers run tasks in parallel; within each worker tasks run
         // sequentially until the local queue is empty.
-        ExponentialBackoff Backoff(std::chrono::hours(24));
-        JobSlot Slot;
-        do {
-          if (Stop)
-            return;
-          Slot = TheJobserver->tryAcquire();
-          if (Slot.isValid())
-            break;
-        } while (Backoff.waitForNextAttempt());
+        قوت_نمائی_Backoff Backoff(std::chrono::hours(24));
+        کام_خانہ خانہ;
+        کرو {
+          اگر (Stop)
+            واپس;
+          خانہ = TheJobserver->tryAcquire();
+          اگر (خانہ.isValid())
+            توڑو;
+        } جب (Backoff.wait_For_اگلا_Attempt());
 
-        llvm::scope_exit SlotReleaser(
-            [&] { TheJobserver->release(std::move(Slot)); });
+        llvm::scope_exit خانہ_Releaser(
+            [&] { TheJobserver->release(std::move(خانہ)); });
 
-        while (true) {
-          std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
-            return;
-          if (WorkStack.empty())
-            break;
-          popAndRun(Lock);
+        جب (سچ) {
+          std::unique_تالا<std::mutex> تالا_3(Mutex);
+          Cond.wait(تالا_3, [&] { واپس Stop || !Work_ڈھیر.خالی_خانے(); });
+          اگر (Stop && Work_ڈھیر.خالی_خانے())
+            واپس;
+          اگر (Work_ڈھیر.خالی_خانے())
+            توڑو;
+          نکالو_And_تسلسل(تالا_3);
         }
-      } else {
-        std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-        if (Stop)
-          break;
-        popAndRun(Lock);
+      } ورنہ {
+        std::unique_تالا<std::mutex> تالا_3(Mutex);
+        Cond.wait(تالا_3, [&] { واپس Stop || !Work_ڈھیر.خالی_خانے(); });
+        اگر (Stop)
+          توڑو;
+        نکالو_And_تسلسل(تالا_3);
       }
     }
   }
 
-  std::atomic<bool> Stop{false};
-  std::vector<WorkItem> WorkStack;
+  std::atomic<منطقی> Stop{جھوٹ};
+  std::سمتیہ<Work_شے> Work_ڈھیر;
   std::mutex Mutex;
   std::condition_variable Cond;
-  std::promise<void> ThreadsCreated;
-  std::vector<std::thread> Threads;
-  unsigned ThreadCount;
+  std::promise<خالی> دھاگے_Created;
+  std::سمتیہ<std::thread> دھاگے;
+  غیرعلامتی Thread_گنتی;
 
-  JobserverClient *TheJobserver = nullptr;
+  JobserverClient *TheJobserver = خالی_اشاریہ;
 };
 } // namespace
 
-static ThreadPoolExecutor *getDefaultExecutor() {
-#ifdef _WIN32
+ساکن ThreadPoolExecutor *getDefaultExecutor() {
+#اگر_تعریف_شدہ _WIN32
   // The ManagedStatic enables the ThreadPoolExecutor to be stopped via
   // llvm_shutdown() on Windows. This is important to avoid various race
   // conditions at process exit that can cause crashes or deadlocks.
 
-  static ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
+  ساکن ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
                        ThreadPoolExecutor::Deleter>
       ManagedExec;
-  static std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
-  return Exec.get();
-#else
+  ساکن std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
+  واپس Exec.get();
+#ورنہ
   // ManagedStatic is not desired on other platforms. When `Exec` is destroyed
   // by llvm_shutdown(), worker threads will clean up and invoke TLS
   // destructors. This can lead to race conditions if other threads attempt to
   // access TLS objects that have already been destroyed.
-  static ThreadPoolExecutor Exec(strategy);
-  return &Exec;
-#endif
+  ساکن ThreadPoolExecutor Exec(strategy);
+  واپس &Exec;
+#اگر_ختم
 }
 
-size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+size_t parallel::get_Thread_گنتی() {
+  واپس getDefaultExecutor()->get_Thread_گنتی();
 }
-#endif
+#اگر_ختم
 
-TaskGroup::TaskGroup()
+Task_گروہ::Task_گروہ()
     : Parallel(
-#if LLVM_ENABLE_THREADS
-          strategy.ThreadsRequested != 1
-#else
-          false
-#endif
+#اگر LLVM_ENABLE_دھاگے
+          strategy.دھاگے_Requested != 1
+#ورنہ
+          جھوٹ
+#اگر_ختم
       ) {
 }
 
-TaskGroup::~TaskGroup() {
-#if LLVM_ENABLE_THREADS
+Task_گروہ::~Task_گروہ() {
+#اگر LLVM_ENABLE_دھاگے
   // In a nested TaskGroup (threadIndex != -1u), actively help drain the queue.
-  bool IsNested = threadIndex != UINT_MAX;
-  if (Parallel && IsNested)
+  منطقی IsNested = thread_اشاریہ != UINT_MAX;
+  اگر (Parallel && IsNested)
     getDefaultExecutor()->helpSync(L);
-#endif
-  L.sync();
+#اگر_ختم
+  L.ہمآہنگ();
 }
 
-void TaskGroup::spawn(std::function<void()> F) {
-#if LLVM_ENABLE_THREADS
-  if (Parallel) {
+خالی Task_گروہ::spawn(std::function<خالی()> F) {
+#اگر LLVM_ENABLE_دھاگے
+  اگر (Parallel) {
     L.inc();
-    getDefaultExecutor()->add(std::move(F), L);
-    return;
+    getDefaultExecutor()->جوڑو(std::move(F), L);
+    واپس;
   }
-#endif
+#اگر_ختم
   F();
 }
 
-void llvm::parallelFor(size_t Begin, size_t End,
-                       function_ref<void(size_t)> Fn) {
-#if LLVM_ENABLE_THREADS
-  if (strategy.ThreadsRequested != 1) {
-    size_t NumItems = End - Begin;
-    if (NumItems == 0)
-      return;
+خالی llvm::parallelFor(size_t Begin, size_t انتہا_2,
+                       function_ref<خالی(size_t)> Fn) {
+#اگر LLVM_ENABLE_دھاگے
+  اگر (strategy.دھاگے_Requested != 1) {
+    size_t عدد_اشیاء = انتہا_2 - Begin;
+    اگر (عدد_اشیاء == 0)
+      واپس;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
     // While 2 vs 4 vs 8 makes no measurable difference, 4 is used as a
     // reasonable default.
-    size_t NumWorkers = std::min<size_t>(NumItems, getThreadCount());
-    size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
+    size_t عدد_Workers = std::min<size_t>(عدد_اشیاء, get_Thread_گنتی());
+    size_t Chunk_سائز = std::max(size_t(1), عدد_اشیاء / (عدد_Workers * 4));
     std::atomic<size_t> Idx{Begin};
-    auto Worker = [&] {
-      while (true) {
-        size_t I = Idx.fetch_add(ChunkSize, std::memory_order_relaxed);
-        if (I >= End)
-          break;
-        size_t IEnd = std::min(I + ChunkSize, End);
-        for (; I < IEnd; ++I)
+    خودکار کارکن = [&] {
+      جب (سچ) {
+        size_t I = Idx.fetch_جوڑو(Chunk_سائز, std::memory_order_relaxed);
+        اگر (I >= انتہا_2)
+          توڑو;
+        size_t IEnd = std::min(I + Chunk_سائز, انتہا_2);
+        برائے (; I < IEnd; ++I)
           Fn(I);
       }
     };
 
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
-    TaskGroup TG;
-    while (--NumWorkers)
-      TG.spawn(Worker);
-    Worker();
-    return;
+    Task_گروہ TG;
+    جب (--عدد_Workers)
+      TG.spawn(کارکن);
+    کارکن();
+    واپس;
   }
-#endif
+#اگر_ختم
 
-  for (; Begin != End; ++Begin)
+  برائے (; Begin != انتہا_2; ++Begin)
     Fn(Begin);
 }

@@ -6,17 +6,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MSP430Attributes.h"
+#شامل "llvm/Support/MSP430Attributes.h"
 
-using namespace llvm;
-using namespace llvm::MSP430Attrs;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::MSP430Attrs;
 
-static constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
-                                          {TagCodeModel, "Tag_Code_Model"},
-                                          {TagDataModel, "Tag_Data_Model"},
-                                          {TagEnumSize, "Tag_Enum_Size"}};
+ساکن constexpr لیبل_Name_شے لیبل_ڈیٹا_2[] = {{لیبل_ISA, "Tag_ISA"},
+                                          {لیبل_رمز_Model, "Tag_Code_Model"},
+                                          {لیبل_ڈیٹا_Model, "Tag_Data_Model"},
+                                          {لیبل_Enum_سائز, "Tag_Enum_Size"}};
 
-constexpr TagNameMap MSP430AttributeTags{TagData};
-const TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
-  return MSP430AttributeTags;
+constexpr لیبل_Name_Map MSP430_Attribute_لیبل_فہرست{لیبل_ڈیٹا_2};
+ثابت لیبل_Name_Map &llvm::MSP430Attrs::get_MSP430_Attribute_لیبل_فہرست() {
+  واپس MSP430_Attribute_لیبل_فہرست;
 }

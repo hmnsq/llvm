@@ -10,244 +10,244 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm-c/Support.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Mutex.h"
-#include <vector>
+#شامل "llvm/Support/DynamicLibrary.h"
+#شامل "llvm-c/Support.h"
+#شامل "llvm/ADT/STLExtras.h"
+#شامل "llvm/ADT/StringMap.h"
+#شامل "llvm/Config/config.h"
+#شامل "llvm/Support/Mutex.h"
+#شامل <vector>
 
-using namespace llvm;
-using namespace llvm::sys;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::sys;
 
 // All methods for HandleSet should be used holding SymbolsMutex.
-class DynamicLibrary::HandleSet {
-  using HandleList = std::vector<void *>;
+جماعت DynamicLibrary::Handle_سیٹ {
+  استعمال HandleList = std::سمتیہ<خالی *>;
   HandleList Handles;
-  void *Process = &Invalid;
+  خالی *Process = &Invalid;
 
-public:
-  static void *DLOpen(const char *Filename, std::string *Err);
-  static void DLClose(void *Handle);
-  static void *DLSym(void *Handle, const char *Symbol);
+عوامی:
+  ساکن خالی *DLOpen(ثابت حرف *Filename, std::string *Err);
+  ساکن خالی DLClose(خالی *Handle);
+  ساکن خالی *DLSym(خالی *Handle, ثابت حرف *علامت);
 
-  HandleSet() = default;
-  ~HandleSet();
+  Handle_سیٹ() = طےشدہ;
+  ~Handle_سیٹ();
 
-  HandleList::iterator Find(void *Handle) { return find(Handles, Handle); }
+  HandleList::iterator ڈھونڈو_2(خالی *Handle) { واپس ڈھونڈو(Handles, Handle); }
 
-  bool Contains(void *Handle) {
-    return Handle == Process || Find(Handle) != Handles.end();
+  منطقی شامل_ہے_2(خالی *Handle) {
+    واپس Handle == Process || ڈھونڈو_2(Handle) != Handles.انتہا();
   }
 
-  bool AddLibrary(void *Handle, bool IsProcess = false, bool CanClose = true,
-                  bool AllowDuplicates = false) {
-#ifdef _WIN32
-    assert((Handle == this ? IsProcess : !IsProcess) && "Bad Handle.");
-#endif
-    assert((!AllowDuplicates || !CanClose) &&
+  منطقی جوڑو_Library(خالی *Handle, منطقی IsProcess = جھوٹ, منطقی CanClose = سچ,
+                  منطقی AllowDuplicates = جھوٹ) {
+#اگر_تعریف_شدہ _WIN32
+    أكد((Handle == یہ ? IsProcess : !IsProcess) && "Bad Handle.");
+#اگر_ختم
+    أكد((!AllowDuplicates || !CanClose) &&
            "CanClose must be false if AllowDuplicates is true.");
 
-    if (LLVM_LIKELY(!IsProcess)) {
-      if (!AllowDuplicates && Find(Handle) != Handles.end()) {
-        if (CanClose)
+    اگر (LLVM_LIKELY(!IsProcess)) {
+      اگر (!AllowDuplicates && ڈھونڈو_2(Handle) != Handles.انتہا()) {
+        اگر (CanClose)
           DLClose(Handle);
-        return false;
+        واپس جھوٹ;
       }
-      Handles.push_back(Handle);
-    } else {
-#ifndef _WIN32
-      if (Process != &Invalid) {
-        if (CanClose)
+      Handles.ڈالو_عقب(Handle);
+    } ورنہ {
+#اگر_غیر_تعریف_شدہ _WIN32
+      اگر (Process != &Invalid) {
+        اگر (CanClose)
           DLClose(Process);
-        if (Process == Handle)
-          return false;
+        اگر (Process == Handle)
+          واپس جھوٹ;
       }
-#endif
+#اگر_ختم
       Process = Handle;
     }
-    return true;
+    واپس سچ;
   }
 
-  void CloseLibrary(void *Handle) {
+  خالی CloseLibrary(خالی *Handle) {
     DLClose(Handle);
-    HandleList::iterator it = Find(Handle);
-    if (it != Handles.end()) {
+    HandleList::iterator it = ڈھونڈو_2(Handle);
+    اگر (it != Handles.انتہا()) {
       Handles.erase(it);
     }
   }
 
-  void *LibLookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    if (Order & SO_LoadOrder) {
-      for (void *Handle : Handles) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+  خالی *LibLookup(ثابت حرف *علامت, DynamicLibrary::تلاش_Ordering ترتیب) {
+    اگر (ترتیب & SO_بھرو_ترتیب) {
+      برائے (خالی *Handle : Handles) {
+        اگر (خالی *Ptr = DLSym(Handle, علامت))
+          واپس Ptr;
       }
-    } else {
-      for (void *Handle : llvm::reverse(Handles)) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+    } ورنہ {
+      برائے (خالی *Handle : llvm::الٹ(Handles)) {
+        اگر (خالی *Ptr = DLSym(Handle, علامت))
+          واپس Ptr;
       }
     }
-    return nullptr;
+    واپس خالی_اشاریہ;
   }
 
-  void *Lookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    assert(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
+  خالی *Lookup(ثابت حرف *علامت, DynamicLibrary::تلاش_Ordering ترتیب) {
+    أكد(!((ترتیب & SO_Loaded_پہلا) && (ترتیب & SO_Loaded_آخری)) &&
            "Invalid Ordering");
 
-    if (Process == &Invalid || (Order & SO_LoadedFirst)) {
-      if (void *Ptr = LibLookup(Symbol, Order))
-        return Ptr;
+    اگر (Process == &Invalid || (ترتیب & SO_Loaded_پہلا)) {
+      اگر (خالی *Ptr = LibLookup(علامت, ترتیب))
+        واپس Ptr;
     }
-    if (Process != &Invalid) {
+    اگر (Process != &Invalid) {
       // Use OS facilities to search the current binary and all loaded libs.
-      if (void *Ptr = DLSym(Process, Symbol))
-        return Ptr;
+      اگر (خالی *Ptr = DLSym(Process, علامت))
+        واپس Ptr;
 
       // Search any libs that might have been skipped because of RTLD_LOCAL.
-      if (Order & SO_LoadedLast) {
-        if (void *Ptr = LibLookup(Symbol, Order))
-          return Ptr;
+      اگر (ترتیب & SO_Loaded_آخری) {
+        اگر (خالی *Ptr = LibLookup(علامت, ترتیب))
+          واپس Ptr;
       }
     }
-    return nullptr;
+    واپس خالی_اشاریہ;
   }
 };
 
-namespace {
+نامخلا {
 
-struct Globals {
+ساخت Globals {
   // Collection of symbol name/value pairs to be searched prior to any
   // libraries.
-  llvm::StringMap<void *> ExplicitSymbols;
+  llvm::StringMap<خالی *> ExplicitSymbols;
   // Collections of known library handles.
-  DynamicLibrary::HandleSet OpenedHandles;
-  DynamicLibrary::HandleSet OpenedTemporaryHandles;
+  DynamicLibrary::Handle_سیٹ OpenedHandles;
+  DynamicLibrary::Handle_سیٹ OpenedTemporaryHandles;
   // Lock for ExplicitSymbols, OpenedHandles, and OpenedTemporaryHandles.
-  llvm::sys::SmartMutex<true> SymbolsMutex;
+  llvm::sys::SmartMutex<سچ> SymbolsMutex;
 };
 
 Globals &getGlobals() {
-  static Globals G;
-  return G;
+  ساکن Globals G;
+  واپس G;
 }
 
 } // namespace
 
-#ifdef _WIN32
+#اگر_تعریف_شدہ _WIN32
 
-#include "Windows/DynamicLibrary.inc"
+#شامل "Windows/DynamicLibrary.inc"
 
-#else
+#ورنہ
 
-#include "Unix/DynamicLibrary.inc"
+#شامل "Unix/DynamicLibrary.inc"
 
-#endif
+#اگر_ختم
 
-char DynamicLibrary::Invalid;
-DynamicLibrary::SearchOrdering DynamicLibrary::SearchOrder =
+حرف DynamicLibrary::Invalid;
+DynamicLibrary::تلاش_Ordering DynamicLibrary::تلاش_ترتیب =
     DynamicLibrary::SO_Linker;
 
-namespace llvm {
-void *SearchForAddressOfSpecialSymbol(const char *SymbolName) {
-  return DoSearch(SymbolName); // DynamicLibrary.inc
+نامخلا llvm {
+خالی *تلاش_For_پتہ_کا_Special_علامت(ثابت حرف *علامت_Name) {
+  واپس Do_تلاش(علامت_Name); // DynamicLibrary.inc
 }
 } // namespace llvm
 
-void DynamicLibrary::AddSymbol(StringRef SymbolName, void *SymbolValue) {
-  auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  G.ExplicitSymbols[SymbolName] = SymbolValue;
+خالی DynamicLibrary::جوڑو_علامت(StringRef علامت_Name, خالی *علامت_قدر) {
+  خودکار &G = getGlobals();
+  Smart_Scoped_تالا<سچ> تالا_3(G.SymbolsMutex);
+  G.ExplicitSymbols[علامت_Name] = علامت_قدر;
 }
 
-DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getPermanentLibrary(ثابت حرف *FileName,
                                                    std::string *Err) {
-  auto &G = getGlobals();
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
-    G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ FileName == nullptr);
+  خودکار &G = getGlobals();
+  خالی *Handle = Handle_سیٹ::DLOpen(FileName, Err);
+  اگر (Handle != &Invalid) {
+    Smart_Scoped_تالا<سچ> تالا_3(G.SymbolsMutex);
+    G.OpenedHandles.جوڑو_Library(Handle, /*IsProcess*/ FileName == خالی_اشاریہ);
   }
 
-  return DynamicLibrary(Handle);
+  واپس DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::addPermanentLibrary(void *Handle,
+DynamicLibrary DynamicLibrary::جوڑو_Permanent_Library(خالی *Handle,
                                                    std::string *Err) {
-  auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
+  خودکار &G = getGlobals();
+  Smart_Scoped_تالا<سچ> تالا_3(G.SymbolsMutex);
   // If we've already loaded this library, tell the caller.
-  if (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                  /*CanClose*/ false))
+  اگر (!G.OpenedHandles.جوڑو_Library(Handle, /*IsProcess*/ جھوٹ,
+                                  /*CanClose*/ جھوٹ))
     *Err = "Library already loaded";
 
-  return DynamicLibrary(Handle);
+  واپس DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::getLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getLibrary(ثابت حرف *FileName,
                                           std::string *Err) {
-  assert(FileName && "Use getPermanentLibrary() for opening process handle");
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
-    auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
-    G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                        /*CanClose*/ false,
-                                        /*AllowDuplicates*/ true);
+  أكد(FileName && "Use getPermanentLibrary() for opening process handle");
+  خالی *Handle = Handle_سیٹ::DLOpen(FileName, Err);
+  اگر (Handle != &Invalid) {
+    خودکار &G = getGlobals();
+    Smart_Scoped_تالا<سچ> تالا_3(G.SymbolsMutex);
+    G.OpenedTemporaryHandles.جوڑو_Library(Handle, /*IsProcess*/ جھوٹ,
+                                        /*CanClose*/ جھوٹ,
+                                        /*AllowDuplicates*/ سچ);
   }
-  return DynamicLibrary(Handle);
+  واپس DynamicLibrary(Handle);
 }
 
-void DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
-  auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  if (Lib.isValid()) {
-    G.OpenedTemporaryHandles.CloseLibrary(Lib.Data);
-    Lib.Data = &Invalid;
+خالی DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
+  خودکار &G = getGlobals();
+  Smart_Scoped_تالا<سچ> تالا_3(G.SymbolsMutex);
+  اگر (Lib.isValid()) {
+    G.OpenedTemporaryHandles.CloseLibrary(Lib.ڈیٹا_2);
+    Lib.ڈیٹا_2 = &Invalid;
   }
 }
 
-void *DynamicLibrary::getAddressOfSymbol(const char *SymbolName) {
-  if (!isValid())
-    return nullptr;
-  return HandleSet::DLSym(Data, SymbolName);
+خالی *DynamicLibrary::get_پتہ_کا_علامت(ثابت حرف *علامت_Name) {
+  اگر (!isValid())
+    واپس خالی_اشاریہ;
+  واپس Handle_سیٹ::DLSym(ڈیٹا_2, علامت_Name);
 }
 
-void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
+خالی *DynamicLibrary::تلاش_For_پتہ_کا_علامت(ثابت حرف *علامت_Name) {
   {
-    auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
+    خودکار &G = getGlobals();
+    Smart_Scoped_تالا<سچ> تالا_3(G.SymbolsMutex);
 
     // First check symbols added via AddSymbol().
-    StringMap<void *>::iterator i = G.ExplicitSymbols.find(SymbolName);
+    StringMap<خالی *>::iterator i = G.ExplicitSymbols.ڈھونڈو(علامت_Name);
 
-    if (i != G.ExplicitSymbols.end())
-      return i->second;
+    اگر (i != G.ExplicitSymbols.انتہا())
+      واپس i->دوسرا_2;
 
     // Now search the libraries.
-    if (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
-    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
+    اگر (خالی *Ptr = G.OpenedHandles.Lookup(علامت_Name, تلاش_ترتیب))
+      واپس Ptr;
+    اگر (خالی *Ptr = G.OpenedTemporaryHandles.Lookup(علامت_Name, تلاش_ترتیب))
+      واپس Ptr;
   }
 
-  return llvm::SearchForAddressOfSpecialSymbol(SymbolName);
+  واپس llvm::تلاش_For_پتہ_کا_Special_علامت(علامت_Name);
 }
 
 //===----------------------------------------------------------------------===//
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
-  return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
+LLVMBool LLVMLoadLibraryPermanently(ثابت حرف *Filename) {
+  واپس llvm::sys::DynamicLibrary::بھرو_Library_Permanently(Filename);
 }
 
-void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
-  return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
+خالی *LLVMSearch_For_پتہ_کا_علامت(ثابت حرف *علامت_Name_2) {
+  واپس llvm::sys::DynamicLibrary::تلاش_For_پتہ_کا_علامت(علامت_Name_2);
 }
 
-void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
-  return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
+خالی LLVMAdd_علامت(ثابت حرف *علامت_Name_2, خالی *علامت_قدر_2) {
+  واپس llvm::sys::DynamicLibrary::جوڑو_علامت(علامت_Name_2, علامت_قدر_2);
 }

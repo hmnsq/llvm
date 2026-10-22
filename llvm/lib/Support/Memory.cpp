@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#شامل "llvm/Support/Memory.h"
+#شامل "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#اگر_غیر_تعریف_شدہ NDEBUG
+#شامل "llvm/Support/raw_ostream.h"
+#اگر_ختم // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#اگر_تعریف_شدہ LLVM_ON_UNIX
+#شامل "Unix/Memory.inc"
+#اگر_ختم
+#اگر_تعریف_شدہ _WIN32
+#شامل "Windows/Memory.inc"
+#اگر_ختم
 
-#ifndef NDEBUG
+#اگر_غیر_تعریف_شدہ NDEBUG
 
-namespace llvm {
-namespace sys {
+نامخلا llvm {
+نامخلا sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &عامل<<(raw_ostream &OS, ثابت حافظہ_2::ProtectionFlags &PF) {
+  أكد((PF & ~(حافظہ_2::MF_READ | حافظہ_2::MF_WRITE | حافظہ_2::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
-            << (PF & Memory::MF_WRITE ? 'W' : '-')
-            << (PF & Memory::MF_EXEC ? 'X' : '-');
+  واپس OS << (PF & حافظہ_2::MF_READ ? 'R' : '-')
+            << (PF & حافظہ_2::MF_WRITE ? 'W' : '-')
+            << (PF & حافظہ_2::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &عامل<<(raw_ostream &OS, ثابت حافظہ_بلاک &MB) {
+  واپس OS << "[ " << MB.بنیاد_2() << " .. "
+            << (خالی *)((حرف *)MB.بنیاد_2() + MB.allocated_سائز()) << " ] ("
+            << MB.allocated_سائز() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#اگر_ختم // ifndef NDEBUG

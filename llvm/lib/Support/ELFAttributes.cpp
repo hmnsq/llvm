@@ -6,29 +6,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/ADT/StringRef.h"
+#شامل "llvm/Support/ELFAttributes.h"
+#شامل "llvm/ADT/StringRef.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
-                                     bool hasTagPrefix) {
-  auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
-  StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+StringRef ELFAttrs::attrTypeAsString(غیرعلامتی attr, لیبل_Name_Map لیبل_Name_Map_2,
+                                     منطقی has_لیبل_سابقہ) {
+  خودکار لیبل_Name_It = ڈھونڈو_if(
+      لیبل_Name_Map_2, [attr](ثابت لیبل_Name_شے شے_2) { واپس شے_2.attr == attr; });
+  اگر (لیبل_Name_It == لیبل_Name_Map_2.انتہا())
+    واپس "";
+  StringRef لیبل_Name = لیبل_Name_It->لیبل_Name;
+  واپس has_لیبل_سابقہ ? لیبل_Name : لیبل_Name.drop_front(4);
 }
 
-std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
-                                                     TagNameMap tagNameMap) {
-  bool hasTagPrefix = tag.starts_with("Tag_");
-  auto tagNameIt =
-      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+std::optional<غیرعلامتی> ELFAttrs::attrTypeFromString(StringRef لیبل_2,
+                                                     لیبل_Name_Map لیبل_Name_Map_2) {
+  منطقی has_لیبل_سابقہ = لیبل_2.starts_with("Tag_");
+  خودکار لیبل_Name_It =
+      ڈھونڈو_if(لیبل_Name_Map_2, [لیبل_2, has_لیبل_سابقہ](ثابت لیبل_Name_شے شے_2) {
+        واپس شے_2.لیبل_Name.drop_front(has_لیبل_سابقہ ? 0 : 4) == لیبل_2;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  اگر (لیبل_Name_It == لیبل_Name_Map_2.انتہا())
+    واپس std::nullopt;
+  واپس لیبل_Name_It->attr;
 }

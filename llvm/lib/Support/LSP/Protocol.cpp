@@ -10,193 +10,193 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Protocol.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/JSON.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/raw_ostream.h"
+#شامل "llvm/Support/LSP/Protocol.h"
+#شامل "llvm/ADT/StringExtras.h"
+#شامل "llvm/ADT/StringSet.h"
+#شامل "llvm/Support/ErrorHandling.h"
+#شامل "llvm/Support/JSON.h"
+#شامل "llvm/Support/MemoryBuffer.h"
+#شامل "llvm/Support/Path.h"
+#شامل "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::lsp;
 
 // Helper that doesn't treat `null` and absent fields as failures.
-template <typename T>
-static bool mapOptOrNull(const llvm::json::Value &Params,
-                         llvm::StringLiteral Prop, T &Out,
-                         llvm::json::Path Path) {
-  const llvm::json::Object *O = Params.getAsObject();
-  assert(O);
+سانچہ <قسم_نام T>
+ساکن منطقی mapOptOrNull(ثابت llvm::json::قدر &Params,
+                         llvm::StringLiteral Prop, T &برآمد,
+                         llvm::json::راستہ راستہ) {
+  ثابت llvm::json::Object *O = Params.getAsObject();
+  أكد(O);
 
   // Field is missing or null.
-  auto *V = O->get(Prop);
-  if (!V || V->getAsNull())
-    return true;
-  return fromJSON(*V, Out, Path.field(Prop));
+  خودکار *V = O->get(Prop);
+  اگر (!V || V->getAsNull())
+    واپس سچ;
+  واپس fromJSON(*V, برآمد, راستہ.میدان(Prop));
 }
 
 //===----------------------------------------------------------------------===//
 // LSPError
 //===----------------------------------------------------------------------===//
 
-char LSPError::ID;
+حرف LSPError::ID;
 
 //===----------------------------------------------------------------------===//
 // URIForFile
 //===----------------------------------------------------------------------===//
 
-static bool isWindowsPath(StringRef Path) {
-  return Path.size() > 1 && llvm::isAlpha(Path[0]) && Path[1] == ':';
+ساکن منطقی is_Windows_راستہ(StringRef راستہ) {
+  واپس راستہ.سائز_2() > 1 && llvm::isAlpha(راستہ[0]) && راستہ[1] == ':';
 }
 
-static bool isNetworkPath(StringRef Path) {
-  return Path.size() > 2 && Path[0] == Path[1] &&
-         llvm::sys::path::is_separator(Path[0]);
+ساکن منطقی is_جال_راستہ(StringRef راستہ) {
+  واپس راستہ.سائز_2() > 2 && راستہ[0] == راستہ[1] &&
+         llvm::sys::راستہ_2::is_separator(راستہ[0]);
 }
 
-static bool shouldEscapeInURI(unsigned char C) {
+ساکن منطقی should_Escape_اندر_URI(غیرعلامتی حرف C) {
   // Unreserved characters.
-  if ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
+  اگر ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
       (C >= '0' && C <= '9'))
-    return false;
+    واپس جھوٹ;
 
-  switch (C) {
-  case '-':
-  case '_':
-  case '.':
-  case '~':
+  انتخاب (C) {
+  حالت '-':
+  حالت '_':
+  حالت '.':
+  حالت '~':
   // '/' is only reserved when parsing.
-  case '/':
+  حالت '/':
   // ':' is only reserved for relative URI paths, which we doesn't produce.
-  case ':':
-    return false;
+  حالت ':':
+    واپس جھوٹ;
   }
-  return true;
+  واپس سچ;
 }
 
 /// Encodes a string according to percent-encoding.
 /// - Unreserved characters are not escaped.
 /// - Reserved characters always escaped with exceptions like '/'.
 /// - All other characters are escaped.
-static void percentEncode(StringRef Content, std::string &Out) {
-  for (unsigned char C : Content) {
-    if (shouldEscapeInURI(C)) {
-      Out.push_back('%');
-      Out.push_back(llvm::hexdigit(C / 16));
-      Out.push_back(llvm::hexdigit(C % 16));
-    } else {
-      Out.push_back(C);
+ساکن خالی percentEncode(StringRef Content, std::string &برآمد) {
+  برائے (غیرعلامتی حرف C : Content) {
+    اگر (should_Escape_اندر_URI(C)) {
+      برآمد.ڈالو_عقب('%');
+      برآمد.ڈالو_عقب(llvm::hexdigit(C / 16));
+      برآمد.ڈالو_عقب(llvm::hexdigit(C % 16));
+    } ورنہ {
+      برآمد.ڈالو_عقب(C);
     }
   }
 }
 
 /// Decodes a string according to percent-encoding.
-static std::string percentDecode(StringRef Content) {
-  std::string Result;
-  for (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
-    if (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
+ساکن std::string percentDecode(StringRef Content) {
+  std::string نتیجہ;
+  برائے (خودکار I = Content.begin(), E = Content.انتہا(); I != E; ++I) {
+    اگر (*I == '%' && I + 2 < Content.انتہا() && llvm::isHexDigit(*(I + 1)) &&
         llvm::isHexDigit(*(I + 2))) {
-      Result.push_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
+      نتیجہ.ڈالو_عقب(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
       I += 2;
-    } else {
-      Result.push_back(*I);
+    } ورنہ {
+      نتیجہ.ڈالو_عقب(*I);
     }
   }
-  return Result;
+  واپس نتیجہ;
 }
 
 /// Return the set containing the supported URI schemes.
-static StringSet<> &getSupportedSchemes() {
-  static StringSet<> Schemes({"file", "test"});
-  return Schemes;
+ساکن String_سیٹ<> &getSupportedSchemes() {
+  ساکن String_سیٹ<> Schemes({"file", "test"});
+  واپس Schemes;
 }
 
 /// Returns true if the given scheme is structurally valid, i.e. it does not
 /// contain any invalid scheme characters. This does not check that the scheme
 /// is actually supported.
-static bool isStructurallyValidScheme(StringRef Scheme) {
-  if (Scheme.empty())
-    return false;
-  if (!llvm::isAlpha(Scheme[0]))
-    return false;
-  return llvm::all_of(llvm::drop_begin(Scheme), [](char C) {
-    return llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
+ساکن منطقی isStructurallyValidScheme(StringRef Scheme) {
+  اگر (Scheme.خالی_خانے())
+    واپس جھوٹ;
+  اگر (!llvm::isAlpha(Scheme[0]))
+    واپس جھوٹ;
+  واپس llvm::all_کا(llvm::drop_begin(Scheme), [](حرف C) {
+    واپس llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
   });
 }
 
-static llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
+ساکن llvm::Expected<std::string> uri_From_Absolute_راستہ(StringRef Absolute_راستہ,
                                                        StringRef Scheme) {
   std::string Body;
   StringRef Authority;
-  StringRef Root = llvm::sys::path::root_name(AbsolutePath);
-  if (isNetworkPath(Root)) {
+  StringRef جڑ_2 = llvm::sys::راستہ_2::جڑ_name(Absolute_راستہ);
+  اگر (is_جال_راستہ(جڑ_2)) {
     // Windows UNC paths e.g. \\server\share => file://server/share
-    Authority = Root.drop_front(2);
-    AbsolutePath.consume_front(Root);
-  } else if (isWindowsPath(Root)) {
+    Authority = جڑ_2.drop_front(2);
+    Absolute_راستہ.consume_front(جڑ_2);
+  } ورنہ اگر (is_Windows_راستہ(جڑ_2)) {
     // Windows paths e.g. X:\path => file:///X:/path
     Body = "/";
   }
-  Body += llvm::sys::path::convert_to_slash(AbsolutePath);
+  Body += llvm::sys::راستہ_2::convert_مقصد_slash(Absolute_راستہ);
 
   std::string Uri = Scheme.str() + ":";
-  if (Authority.empty() && Body.empty())
-    return Uri;
+  اگر (Authority.خالی_خانے() && Body.خالی_خانے())
+    واپس Uri;
 
   // If authority if empty, we only print body if it starts with "/"; otherwise,
   // the URI is invalid.
-  if (!Authority.empty() || StringRef(Body).starts_with("/")) {
+  اگر (!Authority.خالی_خانے() || StringRef(Body).starts_with("/")) {
     Uri.append("//");
     percentEncode(Authority, Uri);
   }
   percentEncode(Body, Uri);
-  return Uri;
+  واپس Uri;
 }
 
-static llvm::Expected<std::string> getAbsolutePath(StringRef Authority,
+ساکن llvm::Expected<std::string> get_Absolute_راستہ(StringRef Authority,
                                                    StringRef Body) {
-  if (!Body.starts_with("/"))
-    return llvm::createStringError(
-        llvm::inconvertibleErrorCode(),
+  اگر (!Body.starts_with("/"))
+    واپس llvm::createStringError(
+        llvm::inconvertible_Error_رمز(),
         "File scheme: expect body to be an absolute path starting "
         "with '/': " +
             Body);
-  SmallString<128> Path;
-  if (!Authority.empty()) {
+  SmallString<128> راستہ;
+  اگر (!Authority.خالی_خانے()) {
     // Windows UNC paths e.g. file://server/share => \\server\share
-    ("//" + Authority).toVector(Path);
-  } else if (isWindowsPath(Body.substr(1))) {
+    ("//" + Authority).مقصد_سمتیہ(راستہ);
+  } ورنہ اگر (is_Windows_راستہ(Body.substr(1))) {
     // Windows paths e.g. file:///X:/path => X:\path
     Body.consume_front("/");
   }
-  Path.append(Body);
-  llvm::sys::path::native(Path);
-  return std::string(Path);
+  راستہ.append(Body);
+  llvm::sys::راستہ_2::native(راستہ);
+  واپس std::string(راستہ);
 }
 
-static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
+ساکن llvm::Expected<std::string> parse_File_راستہ_From_URI(StringRef OrigUri) {
   StringRef Uri = OrigUri;
 
   // Decode the scheme of the URI.
-  size_t Pos = Uri.find(':');
-  if (Pos == StringRef::npos)
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  size_t Pos = Uri.ڈھونڈو(':');
+  اگر (Pos == StringRef::npos)
+    واپس llvm::createStringError(llvm::inconvertible_Error_رمز(),
                                    "Scheme must be provided in URI: " +
                                        OrigUri);
   StringRef SchemeStr = Uri.substr(0, Pos);
   std::string UriScheme = percentDecode(SchemeStr);
-  if (!isStructurallyValidScheme(UriScheme))
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  اگر (!isStructurallyValidScheme(UriScheme))
+    واپس llvm::createStringError(llvm::inconvertible_Error_رمز(),
                                    "Invalid scheme: " + SchemeStr +
                                        " (decoded: " + UriScheme + ")");
   Uri = Uri.substr(Pos + 1);
 
   // Decode the authority of the URI.
   std::string UriAuthority;
-  if (Uri.consume_front("//")) {
-    Pos = Uri.find('/');
+  اگر (Uri.consume_front("//")) {
+    Pos = Uri.ڈھونڈو('/');
     UriAuthority = percentDecode(Uri.substr(0, Pos));
     Uri = Uri.substr(Pos);
   }
@@ -205,390 +205,390 @@ static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
   std::string UriBody = percentDecode(Uri);
 
   // Compute the absolute path for this uri.
-  if (!getSupportedSchemes().contains(UriScheme)) {
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  اگر (!getSupportedSchemes().شامل_ہے(UriScheme)) {
+    واپس llvm::createStringError(llvm::inconvertible_Error_رمز(),
                                    "unsupported URI scheme `" + UriScheme +
                                        "' for workspace files");
   }
-  return getAbsolutePath(UriAuthority, UriBody);
+  واپس get_Absolute_راستہ(UriAuthority, UriBody);
 }
 
 llvm::Expected<URIForFile> URIForFile::fromURI(StringRef Uri) {
-  llvm::Expected<std::string> FilePath = parseFilePathFromURI(Uri);
-  if (!FilePath)
-    return FilePath.takeError();
-  return URIForFile(std::move(*FilePath), Uri.str());
+  llvm::Expected<std::string> File_راستہ = parse_File_راستہ_From_URI(Uri);
+  اگر (!File_راستہ)
+    واپس File_راستہ.takeError();
+  واپس URIForFile(std::move(*File_راستہ), Uri.str());
 }
 
 llvm::Expected<URIForFile> URIForFile::fromFile(StringRef AbsoluteFilepath,
                                                 StringRef Scheme) {
   llvm::Expected<std::string> Uri =
-      uriFromAbsolutePath(AbsoluteFilepath, Scheme);
-  if (!Uri)
-    return Uri.takeError();
-  return fromURI(*Uri);
+      uri_From_Absolute_راستہ(AbsoluteFilepath, Scheme);
+  اگر (!Uri)
+    واپس Uri.takeError();
+  واپس fromURI(*Uri);
 }
 
-StringRef URIForFile::scheme() const { return uri().split(':').first; }
+StringRef URIForFile::scheme() ثابت { واپس uri().بانٹو(':').پہلا_2; }
 
-void URIForFile::registerSupportedScheme(StringRef Scheme) {
-  getSupportedSchemes().insert(Scheme);
+خالی URIForFile::رجسٹر_Supported_Scheme(StringRef Scheme) {
+  getSupportedSchemes().داخل_کرو(Scheme);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, URIForFile &Result,
-                         llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, URIForFile &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  اگر (std::optional<StringRef> Str = قدر.getAsString()) {
     llvm::Expected<URIForFile> ExpectedUri = URIForFile::fromURI(*Str);
-    if (!ExpectedUri) {
-      Path.report("unresolvable URI");
+    اگر (!ExpectedUri) {
+      راستہ.report("unresolvable URI");
       consumeError(ExpectedUri.takeError());
-      return false;
+      واپس جھوٹ;
     }
-    Result = std::move(*ExpectedUri);
-    return true;
+    نتیجہ = std::move(*ExpectedUri);
+    واپس سچ;
   }
-  return false;
+  واپس جھوٹ;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const URIForFile &Value) {
-  return Value.uri();
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت URIForFile &قدر) {
+  واپس قدر.uri();
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const URIForFile &Value) {
-  return Os << Value.uri();
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os, ثابت URIForFile &قدر) {
+  واپس Os << قدر.uri();
 }
 
 //===----------------------------------------------------------------------===//
 // ClientCapabilities
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         ClientCapabilities &Result, llvm::json::Path Path) {
-  const llvm::json::Object *O = Value.getAsObject();
-  if (!O) {
-    Path.report("expected object");
-    return false;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         ClientCapabilities &نتیجہ, llvm::json::راستہ راستہ) {
+  ثابت llvm::json::Object *O = قدر.getAsObject();
+  اگر (!O) {
+    راستہ.report("expected object");
+    واپس جھوٹ;
   }
-  if (const llvm::json::Object *TextDocument = O->getObject("textDocument")) {
-    if (const llvm::json::Object *DocumentSymbol =
-            TextDocument->getObject("documentSymbol")) {
-      if (std::optional<bool> HierarchicalSupport =
-              DocumentSymbol->getBoolean("hierarchicalDocumentSymbolSupport"))
-        Result.hierarchicalDocumentSymbol = *HierarchicalSupport;
+  اگر (ثابت llvm::json::Object *متن_Document = O->getObject("textDocument")) {
+    اگر (ثابت llvm::json::Object *Document_علامت =
+            متن_Document->getObject("documentSymbol")) {
+      اگر (std::optional<منطقی> درجہ_وار_Support =
+              Document_علامت->getBoolean("hierarchicalDocumentSymbolSupport"))
+        نتیجہ.درجہ_وار_Document_علامت = *درجہ_وار_Support;
     }
-    if (auto *CodeAction = TextDocument->getObject("codeAction")) {
-      if (CodeAction->getObject("codeActionLiteralSupport"))
-        Result.codeActionStructure = true;
+    اگر (خودکار *رمز_Action = متن_Document->getObject("codeAction")) {
+      اگر (رمز_Action->getObject("codeActionLiteralSupport"))
+        نتیجہ.رمز_Action_Structure = سچ;
     }
   }
-  if (auto *Window = O->getObject("window")) {
-    if (std::optional<bool> WorkDoneProgressSupport =
-            Window->getBoolean("workDoneProgress"))
-      Result.workDoneProgress = *WorkDoneProgressSupport;
+  اگر (خودکار *کھڑکی = O->getObject("window")) {
+    اگر (std::optional<منطقی> Work_مکمل_پیش_رفت_Support =
+            کھڑکی->getBoolean("workDoneProgress"))
+      نتیجہ.work_مکمل_پیش_رفت = *Work_مکمل_پیش_رفت_Support;
   }
-  return true;
+  واپس سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // ClientInfo
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, ClientInfo &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("name", Result.name))
-    return false;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, ClientInfo &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  اگر (!O || !O.map("name", نتیجہ.name))
+    واپس جھوٹ;
 
   // Don't fail if we can't parse version.
-  O.map("version", Result.version);
-  return true;
+  O.map("version", نتیجہ.نسخہ_2);
+  واپس سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // InitializeParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TraceLevel &Result,
-                         llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
-    if (*Str == "off") {
-      Result = TraceLevel::Off;
-      return true;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, TraceLevel &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  اگر (std::optional<StringRef> Str = قدر.getAsString()) {
+    اگر (*Str == "off") {
+      نتیجہ = TraceLevel::Off;
+      واپس سچ;
     }
-    if (*Str == "messages") {
-      Result = TraceLevel::Messages;
-      return true;
+    اگر (*Str == "messages") {
+      نتیجہ = TraceLevel::Messages;
+      واپس سچ;
     }
-    if (*Str == "verbose") {
-      Result = TraceLevel::Verbose;
-      return true;
+    اگر (*Str == "verbose") {
+      نتیجہ = TraceLevel::Verbose;
+      واپس سچ;
     }
   }
-  return false;
+  واپس جھوٹ;
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         InitializeParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         InitializeParams &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  اگر (!O)
+    واپس جھوٹ;
   // We deliberately don't fail if we can't parse individual fields.
-  O.map("capabilities", Result.capabilities);
-  O.map("trace", Result.trace);
-  O.map("rootUri", Result.rootUri);
-  O.map("rootPath", Result.rootPath);
-  mapOptOrNull(Value, "clientInfo", Result.clientInfo, Path);
+  O.map("capabilities", نتیجہ.capabilities);
+  O.map("trace", نتیجہ.trace);
+  O.map("rootUri", نتیجہ.جڑ_Uri);
+  O.map("rootPath", نتیجہ.جڑ_راستہ);
+  mapOptOrNull(قدر, "clientInfo", نتیجہ.clientInfo, راستہ);
 
-  return true;
+  واپس سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentItem
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentItem &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) &&
-         O.map("languageId", Result.languageId) && O.map("text", Result.text) &&
-         O.map("version", Result.version);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         متن_Document_شے &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("uri", نتیجہ.uri) &&
+         O.map("languageId", نتیجہ.languageId) && O.map("text", نتیجہ.متن) &&
+         O.map("version", نتیجہ.نسخہ_2);
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const TextDocumentIdentifier &Value) {
-  return llvm::json::Object{{"uri", Value.uri}};
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت متن_Document_Identifier &قدر) {
+  واپس llvm::json::Object{{"uri", قدر.uri}};
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentIdentifier &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         متن_Document_Identifier &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("uri", نتیجہ.uri);
 }
 
 //===----------------------------------------------------------------------===//
 // VersionedTextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value
-llvm::lsp::toJSON(const VersionedTextDocumentIdentifier &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"version", Value.version},
+llvm::json::قدر
+llvm::lsp::مقصد_JSON(ثابت Versioned_متن_Document_Identifier &قدر) {
+  واپس llvm::json::Object{
+      {"uri", قدر.uri},
+      {"version", قدر.نسخہ_2},
   };
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         VersionedTextDocumentIdentifier &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("version", Result.version);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Versioned_متن_Document_Identifier &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("uri", نتیجہ.uri) && O.map("version", نتیجہ.نسخہ_2);
 }
 
 //===----------------------------------------------------------------------===//
 // Position
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Position &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("line", Result.line) &&
-         O.map("character", Result.character);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, Position &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("line", نتیجہ.سطر_2) &&
+         O.map("character", نتیجہ.character);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Position &Value) {
-  return llvm::json::Object{
-      {"line", Value.line},
-      {"character", Value.character},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Position &قدر) {
+  واپس llvm::json::Object{
+      {"line", قدر.سطر_2},
+      {"character", قدر.character},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Position &Value) {
-  return Os << Value.line << ':' << Value.character;
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os, ثابت Position &قدر) {
+  واپس Os << قدر.سطر_2 << ':' << قدر.character;
 }
 
 //===----------------------------------------------------------------------===//
 // Range
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Range &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("start", Result.start) && O.map("end", Result.end);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, Range &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("start", نتیجہ.آغاز_2) && O.map("end", نتیجہ.انتہا);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Range &Value) {
-  return llvm::json::Object{
-      {"start", Value.start},
-      {"end", Value.end},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Range &قدر) {
+  واپس llvm::json::Object{
+      {"start", قدر.آغاز_2},
+      {"end", قدر.انتہا},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Range &Value) {
-  return Os << Value.start << '-' << Value.end;
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os, ثابت Range &قدر) {
+  واپس Os << قدر.آغاز_2 << '-' << قدر.انتہا;
 }
 
 //===----------------------------------------------------------------------===//
 // Location
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Location &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("range", Result.range);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, Location &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("uri", نتیجہ.uri) && O.map("range", نتیجہ.range);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Location &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"range", Value.range},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Location &قدر) {
+  واپس llvm::json::Object{
+      {"uri", قدر.uri},
+      {"range", قدر.range},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Location &Value) {
-  return Os << Value.range << '@' << Value.uri;
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os, ثابت Location &قدر) {
+  واپس Os << قدر.range << '@' << قدر.uri;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentPositionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentPositionParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("position", Result.position);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         متن_Document_Position_Params &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2) &&
+         O.map("position", نتیجہ.position);
 }
 
 //===----------------------------------------------------------------------===//
 // ReferenceParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         ReferenceContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         ReferenceContext &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.mapOptional("includeDeclaration", نتیجہ.includeDeclaration);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         ReferenceParams &Result, llvm::json::Path Path) {
-  TextDocumentPositionParams &Base = Result;
-  llvm::json::ObjectMapper O(Value, Path);
-  return fromJSON(Value, Base, Path) && O &&
-         O.mapOptional("context", Result.context);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         ReferenceParams &نتیجہ, llvm::json::راستہ راستہ) {
+  متن_Document_Position_Params &بنیاد = نتیجہ;
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس fromJSON(قدر, بنیاد, راستہ) && O &&
+         O.mapOptional("context", نتیجہ.context);
 }
 
 //===----------------------------------------------------------------------===//
 // DidOpenTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DidOpenTextDocumentParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Did_Open_متن_Document_Params &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DidCloseTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DidCloseTextDocumentParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Did_Close_متن_Document_Params &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DidSaveTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
-                         DidSaveTextDocumentParams &R, llvm::json::Path P) {
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &Params,
+                         Did_Save_متن_Document_Params &R, llvm::json::راستہ P) {
   llvm::json::ObjectMapper O(Params, P);
-  return O && O.map("textDocument", R.textDocument);
+  واپس O && O.map("textDocument", R.متن_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DidChangeTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-LogicalResult
-TextDocumentContentChangeEvent::applyTo(std::string &Contents) const {
+Logical_نتیجہ
+متن_Document_Content_Change_Event::apply_مقصد(std::string &Contents) ثابت {
   // If there is no range, the full document changed.
-  if (!range) {
-    Contents = text;
-    return success();
+  اگر (!range) {
+    Contents = متن;
+    واپس success();
   }
 
   // Try to map the replacement range to the content.
-  llvm::SourceMgr TmpScrMgr;
-  TmpScrMgr.AddNewSourceBuffer(llvm::MemoryBuffer::getMemBuffer(Contents),
+  llvm::ماخذ_Mgr TmpScrMgr;
+  TmpScrMgr.جوڑو_New_ماخذ_بفر(llvm::حافظہ_بفر::get_Mem_بفر(Contents),
                                SMLoc());
   SMRange RangeLoc = range->getAsSMRange(TmpScrMgr);
-  if (!RangeLoc.isValid())
-    return failure();
+  اگر (!RangeLoc.isValid())
+    واپس failure();
 
-  Contents.replace(RangeLoc.Start.getPointer() - Contents.data(),
-                   RangeLoc.End.getPointer() - RangeLoc.Start.getPointer(),
-                   text);
-  return success();
+  Contents.replace(RangeLoc.آغاز.get_اشارہ_گر() - Contents.ڈیٹا(),
+                   RangeLoc.انتہا_2.get_اشارہ_گر() - RangeLoc.آغاز.get_اشارہ_گر(),
+                   متن);
+  واپس success();
 }
 
-LogicalResult TextDocumentContentChangeEvent::applyTo(
-    ArrayRef<TextDocumentContentChangeEvent> Changes, std::string &Contents) {
-  for (const auto &Change : Changes)
-    if (failed(Change.applyTo(Contents)))
-      return failure();
-  return success();
+Logical_نتیجہ متن_Document_Content_Change_Event::apply_مقصد(
+    ArrayRef<متن_Document_Content_Change_Event> Changes, std::string &Contents) {
+  برائے (ثابت خودکار &Change : Changes)
+    اگر (failed(Change.apply_مقصد(Contents)))
+      واپس failure();
+  واپس success();
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentContentChangeEvent &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) &&
-         O.map("rangeLength", Result.rangeLength) && O.map("text", Result.text);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         متن_Document_Content_Change_Event &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("range", نتیجہ.range) &&
+         O.map("rangeLength", نتیجہ.range_لمبائی) && O.map("text", نتیجہ.متن);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DidChangeTextDocumentParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("contentChanges", Result.contentChanges);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Did_Change_متن_Document_Params &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2) &&
+         O.map("contentChanges", نتیجہ.contentChanges);
 }
 
 //===----------------------------------------------------------------------===//
 // MarkupContent
 //===----------------------------------------------------------------------===//
 
-static llvm::StringRef toTextKind(MarkupKind Kind) {
-  switch (Kind) {
-  case MarkupKind::PlainText:
-    return "plaintext";
-  case MarkupKind::Markdown:
-    return "markdown";
+ساکن llvm::StringRef مقصد_متن_قسم(Markup_قسم قسم_3) {
+  انتخاب (قسم_3) {
+  حالت Markup_قسم::Plain_متن:
+    واپس "plaintext";
+  حالت Markup_قسم::Markdown:
+    واپس "markdown";
   }
   llvm_unreachable("Invalid MarkupKind");
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, MarkupKind Kind) {
-  return Os << toTextKind(Kind);
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os, Markup_قسم قسم_3) {
+  واپس Os << مقصد_متن_قسم(قسم_3);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
-  if (Mc.value.empty())
-    return nullptr;
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت MarkupContent &Mc) {
+  اگر (Mc.قدر_2.خالی_خانے())
+    واپس خالی_اشاریہ;
 
-  return llvm::json::Object{
-      {"kind", toTextKind(Mc.kind)},
-      {"value", Mc.value},
+  واپس llvm::json::Object{
+      {"kind", مقصد_متن_قسم(Mc.قسم_2)},
+      {"value", Mc.قدر_2},
   };
 }
 
@@ -596,56 +596,56 @@ llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
 // Hover
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const Hover &Hover) {
-  llvm::json::Object Result{{"contents", toJSON(Hover.contents)}};
-  if (Hover.range)
-    Result["range"] = toJSON(*Hover.range);
-  return std::move(Result);
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Hover &Hover) {
+  llvm::json::Object نتیجہ{{"contents", مقصد_JSON(Hover.contents)}};
+  اگر (Hover.range)
+    نتیجہ["range"] = مقصد_JSON(*Hover.range);
+  واپس std::move(نتیجہ);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbol
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentSymbol &Symbol) {
-  llvm::json::Object Result{{"name", Symbol.name},
-                            {"kind", static_cast<int>(Symbol.kind)},
-                            {"range", Symbol.range},
-                            {"selectionRange", Symbol.selectionRange}};
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Document_علامت &علامت) {
+  llvm::json::Object نتیجہ{{"name", علامت.name},
+                            {"kind", static_cast<صحیح>(علامت.قسم_2)},
+                            {"range", علامت.range},
+                            {"selectionRange", علامت.selectionRange}};
 
-  if (!Symbol.detail.empty())
-    Result["detail"] = Symbol.detail;
-  if (!Symbol.children.empty())
-    Result["children"] = Symbol.children;
-  return std::move(Result);
+  اگر (!علامت.detail.خالی_خانے())
+    نتیجہ["detail"] = علامت.detail;
+  اگر (!علامت.children.خالی_خانے())
+    نتیجہ["children"] = علامت.children;
+  واپس std::move(نتیجہ);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbolParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentSymbolParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Document_علامت_Params &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DiagnosticRelatedInformation
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DiagnosticRelatedInformation &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("location", Result.location) &&
-         O.map("message", Result.message);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         DiagnosticRelatedInformation &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("location", نتیجہ.location) &&
+         O.map("message", نتیجہ.پیغام_2);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
-  return llvm::json::Object{
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت DiagnosticRelatedInformation &Info) {
+  واپس llvm::json::Object{
       {"location", Info.location},
-      {"message", Info.message},
+      {"message", Info.پیغام_2},
   };
 }
 
@@ -653,64 +653,64 @@ llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
 // Diagnostic
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(DiagnosticTag Tag) {
-  return static_cast<int>(Tag);
+llvm::json::قدر llvm::lsp::مقصد_JSON(Diagnostic_لیبل لیبل) {
+  واپس static_cast<صحیح>(لیبل);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, DiagnosticTag &Result,
-                         llvm::json::Path Path) {
-  if (std::optional<int64_t> I = Value.getAsInteger()) {
-    Result = (DiagnosticTag)*I;
-    return true;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, Diagnostic_لیبل &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  اگر (std::optional<int64_t> I = قدر.getAsInteger()) {
+    نتیجہ = (Diagnostic_لیبل)*I;
+    واپس سچ;
   }
 
-  return false;
+  واپس جھوٹ;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Diagnostic &Diag) {
-  llvm::json::Object Result{
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Diagnostic &Diag) {
+  llvm::json::Object نتیجہ{
       {"range", Diag.range},
-      {"severity", (int)Diag.severity},
-      {"message", Diag.message},
+      {"severity", (صحیح)Diag.severity},
+      {"message", Diag.پیغام_2},
   };
-  if (Diag.category)
-    Result["category"] = *Diag.category;
-  if (!Diag.source.empty())
-    Result["source"] = Diag.source;
-  if (Diag.relatedInformation)
-    Result["relatedInformation"] = *Diag.relatedInformation;
-  if (!Diag.tags.empty())
-    Result["tags"] = Diag.tags;
-  return std::move(Result);
+  اگر (Diag.category)
+    نتیجہ["category"] = *Diag.category;
+  اگر (!Diag.ماخذ_2.خالی_خانے())
+    نتیجہ["source"] = Diag.ماخذ_2;
+  اگر (Diag.relatedInformation)
+    نتیجہ["relatedInformation"] = *Diag.relatedInformation;
+  اگر (!Diag.لیبل_فہرست.خالی_خانے())
+    نتیجہ["tags"] = Diag.لیبل_فہرست;
+  واپس std::move(نتیجہ);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Diagnostic &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
-  int Severity = 0;
-  if (!mapOptOrNull(Value, "severity", Severity, Path))
-    return false;
-  Result.severity = (DiagnosticSeverity)Severity;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, Diagnostic &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  اگر (!O)
+    واپس جھوٹ;
+  صحیح Severity = 0;
+  اگر (!mapOptOrNull(قدر, "severity", Severity, راستہ))
+    واپس جھوٹ;
+  نتیجہ.severity = (DiagnosticSeverity)Severity;
 
-  return O.map("range", Result.range) && O.map("message", Result.message) &&
-         mapOptOrNull(Value, "category", Result.category, Path) &&
-         mapOptOrNull(Value, "source", Result.source, Path) &&
-         mapOptOrNull(Value, "relatedInformation", Result.relatedInformation,
-                      Path) &&
-         mapOptOrNull(Value, "tags", Result.tags, Path);
+  واپس O.map("range", نتیجہ.range) && O.map("message", نتیجہ.پیغام_2) &&
+         mapOptOrNull(قدر, "category", نتیجہ.category, راستہ) &&
+         mapOptOrNull(قدر, "source", نتیجہ.ماخذ_2, راستہ) &&
+         mapOptOrNull(قدر, "relatedInformation", نتیجہ.relatedInformation,
+                      راستہ) &&
+         mapOptOrNull(قدر, "tags", نتیجہ.لیبل_فہرست, راستہ);
 }
 
 //===----------------------------------------------------------------------===//
 // PublishDiagnosticsParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
-  return llvm::json::Object{
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت PublishDiagnosticsParams &Params) {
+  واپس llvm::json::Object{
       {"uri", Params.uri},
       {"diagnostics", Params.diagnostics},
-      {"version", Params.version},
+      {"version", Params.نسخہ_2},
   };
 }
 
@@ -718,128 +718,128 @@ llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
 // TextEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TextEdit &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) && O.map("newText", Result.newText);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, متن_Edit &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("range", نتیجہ.range) && O.map("newText", نتیجہ.new_متن);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const TextEdit &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"newText", Value.newText},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت متن_Edit &قدر) {
+  واپس llvm::json::Object{
+      {"range", قدر.range},
+      {"newText", قدر.new_متن},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &Value) {
-  Os << Value.range << " => \"";
-  llvm::printEscapedString(Value.newText, Os);
-  return Os << '"';
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os, ثابت متن_Edit &قدر) {
+  Os << قدر.range << " => \"";
+  llvm::printEscapedString(قدر.new_متن, Os);
+  واپس Os << '"';
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItemKind
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionItemKind &Result, llvm::json::Path Path) {
-  if (std::optional<int64_t> IntValue = Value.getAsInteger()) {
-    if (*IntValue < static_cast<int>(CompletionItemKind::Text) ||
-        *IntValue > static_cast<int>(CompletionItemKind::TypeParameter))
-      return false;
-    Result = static_cast<CompletionItemKind>(*IntValue);
-    return true;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Completion_شے_قسم &نتیجہ, llvm::json::راستہ راستہ) {
+  اگر (std::optional<int64_t> Int_قدر = قدر.getAsInteger()) {
+    اگر (*Int_قدر < static_cast<صحیح>(Completion_شے_قسم::متن_2) ||
+        *Int_قدر > static_cast<صحیح>(Completion_شے_قسم::TypeParameter))
+      واپس جھوٹ;
+    نتیجہ = static_cast<Completion_شے_قسم>(*Int_قدر);
+    واپس سچ;
   }
-  return false;
+  واپس جھوٹ;
 }
 
-CompletionItemKind llvm::lsp::adjustKindToCapability(
-    CompletionItemKind Kind,
-    CompletionItemKindBitset &SupportedCompletionItemKinds) {
-  size_t KindVal = static_cast<size_t>(Kind);
-  if (KindVal >= kCompletionItemKindMin &&
-      KindVal <= SupportedCompletionItemKinds.size() &&
-      SupportedCompletionItemKinds[KindVal])
-    return Kind;
+Completion_شے_قسم llvm::lsp::adjust_قسم_مقصد_Capability(
+    Completion_شے_قسم قسم_3,
+    Completion_شے_قسم_Bitset &Supported_Completion_شے_Kinds) {
+  size_t قسم_Val = static_cast<size_t>(قسم_3);
+  اگر (قسم_Val >= k_Completion_شے_قسم_Min &&
+      قسم_Val <= Supported_Completion_شے_Kinds.سائز_2() &&
+      Supported_Completion_شے_Kinds[قسم_Val])
+    واپس قسم_3;
 
   // Provide some fall backs for common kinds that are close enough.
-  switch (Kind) {
-  case CompletionItemKind::Folder:
-    return CompletionItemKind::File;
-  case CompletionItemKind::EnumMember:
-    return CompletionItemKind::Enum;
-  case CompletionItemKind::Struct:
-    return CompletionItemKind::Class;
-  default:
-    return CompletionItemKind::Text;
+  انتخاب (قسم_3) {
+  حالت Completion_شے_قسم::Folder:
+    واپس Completion_شے_قسم::File;
+  حالت Completion_شے_قسم::EnumMember:
+    واپس Completion_شے_قسم::Enum;
+  حالت Completion_شے_قسم::Struct:
+    واپس Completion_شے_قسم::Class;
+  طےشدہ:
+    واپس Completion_شے_قسم::متن_2;
   }
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionItemKindBitset &Result,
-                         llvm::json::Path Path) {
-  if (const llvm::json::Array *ArrayValue = Value.getAsArray()) {
-    for (size_t I = 0, E = ArrayValue->size(); I < E; ++I) {
-      CompletionItemKind KindOut;
-      if (fromJSON((*ArrayValue)[I], KindOut, Path.index(I)))
-        Result.set(size_t(KindOut));
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         Completion_شے_قسم_Bitset &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  اگر (ثابت llvm::json::Array *Array_قدر = قدر.getAsArray()) {
+    برائے (size_t I = 0, E = Array_قدر->سائز_2(); I < E; ++I) {
+      Completion_شے_قسم قسم_برآمد;
+      اگر (fromJSON((*Array_قدر)[I], قسم_برآمد, راستہ.اشاریہ(I)))
+        نتیجہ.سیٹ(size_t(قسم_برآمد));
     }
-    return true;
+    واپس سچ;
   }
-  return false;
+  واپس جھوٹ;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItem
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionItem &Value) {
-  assert(!Value.label.empty() && "completion item label is required");
-  llvm::json::Object Result{{"label", Value.label}};
-  if (Value.kind != CompletionItemKind::Missing)
-    Result["kind"] = static_cast<int>(Value.kind);
-  if (!Value.detail.empty())
-    Result["detail"] = Value.detail;
-  if (Value.documentation)
-    Result["documentation"] = Value.documentation;
-  if (!Value.sortText.empty())
-    Result["sortText"] = Value.sortText;
-  if (!Value.filterText.empty())
-    Result["filterText"] = Value.filterText;
-  if (!Value.insertText.empty())
-    Result["insertText"] = Value.insertText;
-  if (Value.insertTextFormat != InsertTextFormat::Missing)
-    Result["insertTextFormat"] = static_cast<int>(Value.insertTextFormat);
-  if (Value.textEdit)
-    Result["textEdit"] = *Value.textEdit;
-  if (!Value.additionalTextEdits.empty()) {
-    Result["additionalTextEdits"] =
-        llvm::json::Array(Value.additionalTextEdits);
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Completion_شے &قدر) {
+  أكد(!قدر.label.خالی_خانے() && "completion item label is required");
+  llvm::json::Object نتیجہ{{"label", قدر.label}};
+  اگر (قدر.قسم_2 != Completion_شے_قسم::Missing)
+    نتیجہ["kind"] = static_cast<صحیح>(قدر.قسم_2);
+  اگر (!قدر.detail.خالی_خانے())
+    نتیجہ["detail"] = قدر.detail;
+  اگر (قدر.documentation)
+    نتیجہ["documentation"] = قدر.documentation;
+  اگر (!قدر.ترتیب_دو_متن.خالی_خانے())
+    نتیجہ["sortText"] = قدر.ترتیب_دو_متن;
+  اگر (!قدر.filter_متن.خالی_خانے())
+    نتیجہ["filterText"] = قدر.filter_متن;
+  اگر (!قدر.داخل_کرو_متن.خالی_خانے())
+    نتیجہ["insertText"] = قدر.داخل_کرو_متن;
+  اگر (قدر.داخل_کرو_متن_Format != داخل_کرو_متن_Format_2::Missing)
+    نتیجہ["insertTextFormat"] = static_cast<صحیح>(قدر.داخل_کرو_متن_Format);
+  اگر (قدر.متن_Edit_2)
+    نتیجہ["textEdit"] = *قدر.متن_Edit_2;
+  اگر (!قدر.additional_متن_Edits.خالی_خانے()) {
+    نتیجہ["additionalTextEdits"] =
+        llvm::json::Array(قدر.additional_متن_Edits);
   }
-  if (Value.deprecated)
-    Result["deprecated"] = Value.deprecated;
-  return std::move(Result);
+  اگر (قدر.deprecated)
+    نتیجہ["deprecated"] = قدر.deprecated;
+  واپس std::move(نتیجہ);
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const CompletionItem &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os,
+                                   ثابت Completion_شے &قدر) {
+  واپس Os << قدر.label << " - " << مقصد_JSON(قدر);
 }
 
-bool llvm::lsp::operator<(const CompletionItem &Lhs,
-                          const CompletionItem &Rhs) {
-  return (Lhs.sortText.empty() ? Lhs.label : Lhs.sortText) <
-         (Rhs.sortText.empty() ? Rhs.label : Rhs.sortText);
+منطقی llvm::lsp::عامل<(ثابت Completion_شے &Lhs,
+                          ثابت Completion_شے &Rhs) {
+  واپس (Lhs.ترتیب_دو_متن.خالی_خانے() ? Lhs.label : Lhs.ترتیب_دو_متن) <
+         (Rhs.ترتیب_دو_متن.خالی_خانے() ? Rhs.label : Rhs.ترتیب_دو_متن);
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionList
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
-  return llvm::json::Object{
-      {"isIncomplete", Value.isIncomplete},
-      {"items", llvm::json::Array(Value.items)},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت CompletionList &قدر) {
+  واپس llvm::json::Object{
+      {"isIncomplete", قدر.isIncomplete},
+      {"items", llvm::json::Array(قدر.اشیاء)},
   };
 }
 
@@ -847,81 +847,81 @@ llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
 // CompletionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  int TriggerKind;
-  if (!O || !O.map("triggerKind", TriggerKind) ||
-      !mapOptOrNull(Value, "triggerCharacter", Result.triggerCharacter, Path))
-    return false;
-  Result.triggerKind = static_cast<CompletionTriggerKind>(TriggerKind);
-  return true;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         CompletionContext &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  صحیح Trigger_قسم;
+  اگر (!O || !O.map("triggerKind", Trigger_قسم) ||
+      !mapOptOrNull(قدر, "triggerCharacter", نتیجہ.triggerCharacter, راستہ))
+    واپس جھوٹ;
+  نتیجہ.trigger_قسم = static_cast<Completion_Trigger_قسم>(Trigger_قسم);
+  واپس سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionParams &Result, llvm::json::Path Path) {
-  if (!fromJSON(Value, static_cast<TextDocumentPositionParams &>(Result), Path))
-    return false;
-  if (const llvm::json::Value *Context = Value.getAsObject()->get("context"))
-    return fromJSON(*Context, Result.context, Path.field("context"));
-  return true;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         CompletionParams &نتیجہ, llvm::json::راستہ راستہ) {
+  اگر (!fromJSON(قدر, static_cast<متن_Document_Position_Params &>(نتیجہ), راستہ))
+    واپس جھوٹ;
+  اگر (ثابت llvm::json::قدر *Context = قدر.getAsObject()->get("context"))
+    واپس fromJSON(*Context, نتیجہ.context, راستہ.میدان("context"));
+  واپس سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // ParameterInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ParameterInformation &Value) {
-  assert((Value.labelOffsets || !Value.labelString.empty()) &&
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت ParameterInformation &قدر) {
+  أكد((قدر.labelOffsets || !قدر.labelString.خالی_خانے()) &&
          "parameter information label is required");
-  llvm::json::Object Result;
-  if (Value.labelOffsets)
-    Result["label"] = llvm::json::Array(
-        {Value.labelOffsets->first, Value.labelOffsets->second});
-  else
-    Result["label"] = Value.labelString;
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+  llvm::json::Object نتیجہ;
+  اگر (قدر.labelOffsets)
+    نتیجہ["label"] = llvm::json::Array(
+        {قدر.labelOffsets->پہلا_2, قدر.labelOffsets->دوسرا_2});
+  ورنہ
+    نتیجہ["label"] = قدر.labelString;
+  اگر (!قدر.documentation.خالی_خانے())
+    نتیجہ["documentation"] = قدر.documentation;
+  واپس std::move(نتیجہ);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureInformation &Value) {
-  assert(!Value.label.empty() && "signature information label is required");
-  llvm::json::Object Result{
-      {"label", Value.label},
-      {"parameters", llvm::json::Array(Value.parameters)},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت SignatureInformation &قدر) {
+  أكد(!قدر.label.خالی_خانے() && "signature information label is required");
+  llvm::json::Object نتیجہ{
+      {"label", قدر.label},
+      {"parameters", llvm::json::Array(قدر.parameters)},
   };
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+  اگر (!قدر.documentation.خالی_خانے())
+    نتیجہ["documentation"] = قدر.documentation;
+  واپس std::move(نتیجہ);
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const SignatureInformation &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+raw_ostream &llvm::lsp::عامل<<(raw_ostream &Os,
+                                   ثابت SignatureInformation &قدر) {
+  واپس Os << قدر.label << " - " << مقصد_JSON(قدر);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureHelp
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
-  assert(Value.activeSignature >= 0 &&
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت SignatureHelp &قدر) {
+  أكد(قدر.فعال_Signature >= 0 &&
          "Unexpected negative value for number of active signatures.");
-  assert(Value.activeParameter >= 0 &&
+  أكد(قدر.فعال_Parameter >= 0 &&
          "Unexpected negative value for active parameter index");
-  return llvm::json::Object{
-      {"activeSignature", Value.activeSignature},
-      {"activeParameter", Value.activeParameter},
-      {"signatures", llvm::json::Array(Value.signatures)},
+  واپس llvm::json::Object{
+      {"activeSignature", قدر.فعال_Signature},
+      {"activeParameter", قدر.فعال_Parameter},
+      {"signatures", llvm::json::Array(قدر.signatures)},
   };
 }
 
@@ -929,20 +929,20 @@ llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
 // DocumentLinkParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentLinkParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         DocumentLinkParams &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentLink
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"target", Value.target},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت DocumentLink &قدر) {
+  واپس llvm::json::Object{
+      {"range", قدر.range},
+      {"target", قدر.ہدف},
   };
 }
 
@@ -950,40 +950,40 @@ llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
 // InlayHintsParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         InlayHintsParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("range", Result.range);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         InlayHintsParams &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2) &&
+         O.map("range", نتیجہ.range);
 }
 
 //===----------------------------------------------------------------------===//
 // InlayHint
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const InlayHint &Value) {
-  return llvm::json::Object{{"position", Value.position},
-                            {"kind", (int)Value.kind},
-                            {"label", Value.label},
-                            {"paddingLeft", Value.paddingLeft},
-                            {"paddingRight", Value.paddingRight}};
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت InlayHint &قدر) {
+  واپس llvm::json::Object{{"position", قدر.position},
+                            {"kind", (صحیح)قدر.قسم_2},
+                            {"label", قدر.label},
+                            {"paddingLeft", قدر.padding_بایاں},
+                            {"paddingRight", قدر.padding_دایاں}};
 }
-bool llvm::lsp::operator==(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
-         std::tie(Rhs.position, Rhs.kind, Rhs.label);
+منطقی llvm::lsp::عامل==(ثابت InlayHint &Lhs, ثابت InlayHint &Rhs) {
+  واپس std::tie(Lhs.position, Lhs.قسم_2, Lhs.label) ==
+         std::tie(Rhs.position, Rhs.قسم_2, Rhs.label);
 }
-bool llvm::lsp::operator<(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) <
-         std::tie(Rhs.position, Rhs.kind, Rhs.label);
+منطقی llvm::lsp::عامل<(ثابت InlayHint &Lhs, ثابت InlayHint &Rhs) {
+  واپس std::tie(Lhs.position, Lhs.قسم_2, Lhs.label) <
+         std::tie(Rhs.position, Rhs.قسم_2, Rhs.label);
 }
 
-llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
-                                         InlayHintKind Value) {
-  switch (Value) {
-  case InlayHintKind::Parameter:
-    return Os << "parameter";
-  case InlayHintKind::Type:
-    return Os << "type";
+llvm::raw_ostream &llvm::lsp::عامل<<(llvm::raw_ostream &Os,
+                                         Inlay_Hint_قسم قدر) {
+  انتخاب (قدر) {
+  حالت Inlay_Hint_قسم::Parameter:
+    واپس Os << "parameter";
+  حالت Inlay_Hint_قسم::Type:
+    واپس Os << "type";
   }
   llvm_unreachable("Unknown InlayHintKind");
 }
@@ -992,78 +992,78 @@ llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
 // CodeActionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CodeActionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("diagnostics", Result.diagnostics))
-    return false;
-  O.map("only", Result.only);
-  return true;
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         رمز_Action_Context &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  اگر (!O || !O.map("diagnostics", نتیجہ.diagnostics))
+    واپس جھوٹ;
+  O.map("only", نتیجہ.only);
+  واپس سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // CodeActionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CodeActionParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("range", Result.range) && O.map("context", Result.context);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر,
+                         رمز_Action_Params &نتیجہ, llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("textDocument", نتیجہ.متن_Document_2) &&
+         O.map("range", نتیجہ.range) && O.map("context", نتیجہ.context);
 }
 
 //===----------------------------------------------------------------------===//
 // WorkspaceEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, WorkspaceEdit &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("changes", Result.changes);
+منطقی llvm::lsp::fromJSON(ثابت llvm::json::قدر &قدر, WorkspaceEdit &نتیجہ,
+                         llvm::json::راستہ راستہ) {
+  llvm::json::ObjectMapper O(قدر, راستہ);
+  واپس O && O.map("changes", نتیجہ.changes);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const WorkspaceEdit &Value) {
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت WorkspaceEdit &قدر) {
   llvm::json::Object FileChanges;
-  for (auto &Change : Value.changes)
-    FileChanges[Change.first] = llvm::json::Array(Change.second);
-  return llvm::json::Object{{"changes", std::move(FileChanges)}};
+  برائے (خودکار &Change : قدر.changes)
+    FileChanges[Change.پہلا_2] = llvm::json::Array(Change.دوسرا_2);
+  واپس llvm::json::Object{{"changes", std::move(FileChanges)}};
 }
 
 //===----------------------------------------------------------------------===//
 // CodeAction
 //===----------------------------------------------------------------------===//
 
-const llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
-const llvm::StringLiteral CodeAction::kRefactor = "refactor";
-const llvm::StringLiteral CodeAction::kInfo = "info";
+ثابت llvm::StringLiteral رمز_Action::k_تیز_Fix = "quickfix";
+ثابت llvm::StringLiteral رمز_Action::kRefactor = "refactor";
+ثابت llvm::StringLiteral رمز_Action::kInfo = "info";
 
-llvm::json::Value llvm::lsp::toJSON(const CodeAction &Value) {
-  llvm::json::Object CodeAction{{"title", Value.title}};
-  if (Value.kind)
-    CodeAction["kind"] = *Value.kind;
-  if (Value.diagnostics)
-    CodeAction["diagnostics"] = llvm::json::Array(*Value.diagnostics);
-  if (Value.isPreferred)
-    CodeAction["isPreferred"] = true;
-  if (Value.edit)
-    CodeAction["edit"] = *Value.edit;
-  return std::move(CodeAction);
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت رمز_Action &قدر) {
+  llvm::json::Object رمز_Action{{"title", قدر.title}};
+  اگر (قدر.قسم_2)
+    رمز_Action["kind"] = *قدر.قسم_2;
+  اگر (قدر.diagnostics)
+    رمز_Action["diagnostics"] = llvm::json::Array(*قدر.diagnostics);
+  اگر (قدر.isPreferred)
+    رمز_Action["isPreferred"] = سچ;
+  اگر (قدر.edit)
+    رمز_Action["edit"] = *قدر.edit;
+  واپس std::move(رمز_Action);
 }
 
 //===----------------------------------------------------------------------===//
 // ShowMessageParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ShowMessageParams &Params) {
-  auto Out = llvm::json::Object{
-      {"type", static_cast<int>(Params.type)},
-      {"message", Params.message},
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت Show_پیغام_Params &Params) {
+  خودکار برآمد = llvm::json::Object{
+      {"type", static_cast<صحیح>(Params.type)},
+      {"message", Params.پیغام_2},
   };
-  if (Params.actions)
-    Out["actions"] = *Params.actions;
-  return Out;
+  اگر (Params.actions)
+    برآمد["actions"] = *Params.actions;
+  واپس برآمد;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MessageActionItem &Params) {
-  return llvm::json::Object{{"title", Params.title}};
+llvm::json::قدر llvm::lsp::مقصد_JSON(ثابت پیغام_Action_شے &Params) {
+  واپس llvm::json::Object{{"title", Params.title}};
 }

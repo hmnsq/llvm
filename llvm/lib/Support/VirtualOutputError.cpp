@@ -11,62 +11,62 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputError.h"
+#شامل "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::vfs;
 
-void OutputError::anchor() {}
-void OutputConfigError::anchor() {}
-void TempFileOutputError::anchor() {}
+خالی OutputError::anchor() {}
+خالی OutputConfigError::anchor() {}
+خالی عارضی_File_Output_Error::anchor() {}
 
-char OutputError::ID = 0;
-char OutputConfigError::ID = 0;
-char TempFileOutputError::ID = 0;
+حرف OutputError::ID = 0;
+حرف OutputConfigError::ID = 0;
+حرف عارضی_File_Output_Error::ID = 0;
 
-void OutputError::log(raw_ostream &OS) const {
-  OS << getOutputPath() << ": ";
-  ECError::log(OS);
+خالی OutputError::لوگارتھم(raw_ostream &OS) ثابت {
+  OS << get_Output_راستہ() << ": ";
+  ECError::لوگارتھم(OS);
 }
 
-void OutputConfigError::log(raw_ostream &OS) const {
-  OutputError::log(OS);
+خالی OutputConfigError::لوگارتھم(raw_ostream &OS) ثابت {
+  OutputError::لوگارتھم(OS);
   OS << ": " << Config;
 }
 
-void TempFileOutputError::log(raw_ostream &OS) const {
-  OS << getTempPath() << " => ";
-  OutputError::log(OS);
+خالی عارضی_File_Output_Error::لوگارتھم(raw_ostream &OS) ثابت {
+  OS << get_عارضی_راستہ() << " => ";
+  OutputError::لوگارتھم(OS);
 }
 
-namespace {
-class OutputErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override;
-  std::string message(int EV) const override;
+نامخلا {
+جماعت OutputErrorCategory : عوامی std::error_category {
+عوامی:
+  ثابت حرف *name() ثابت noexcept override;
+  std::string پیغام_2(صحیح EV) ثابت override;
 };
 } // end namespace
 
-const std::error_category &vfs::output_category() {
-  static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+ثابت std::error_category &vfs::output_category() {
+  ساکن OutputErrorCategory ErrorCategory;
+  واپس ErrorCategory;
 }
 
-const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+ثابت حرف *OutputErrorCategory::name() ثابت noexcept {
+  واپس "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
-  OutputErrorCode E = static_cast<OutputErrorCode>(EV);
-  switch (E) {
-  case OutputErrorCode::invalid_config:
-    return "invalid config";
-  case OutputErrorCode::not_closed:
-    return "output not closed";
-  case OutputErrorCode::already_closed:
-    return "output already closed";
-  case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+std::string OutputErrorCategory::پیغام_2(صحیح EV) ثابت {
+  Output_Error_رمز E = static_cast<Output_Error_رمز>(EV);
+  انتخاب (E) {
+  حالت Output_Error_رمز::invalid_config:
+    واپس "invalid config";
+  حالت Output_Error_رمز::not_closed:
+    واپس "output not closed";
+  حالت Output_Error_رمز::already_closed:
+    واپس "output already closed";
+  حالت Output_Error_رمز::has_open_proxy:
+    واپس "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");

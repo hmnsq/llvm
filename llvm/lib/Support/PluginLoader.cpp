@@ -10,49 +10,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#تعریف_کرو DONT_GET_PLUGIN_LOADER_OPTION
+#شامل "llvm/Support/PluginLoader.h"
+#شامل "llvm/Support/DynamicLibrary.h"
+#شامل "llvm/Support/Mutex.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <vector>
+استعمال نامخلا llvm;
 
-namespace {
+نامخلا {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
-  std::vector<std::string> List;
+ساخت Plugins {
+  sys::SmartMutex<سچ> تالا_3;
+  std::سمتیہ<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  ساکن Plugins P;
+  واپس P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+خالی PluginLoader::عامل=(ثابت std::string &Filename) {
+  خودکار &P = getPlugins();
+  sys::Smart_Scoped_تالا<سچ> تالا_3(P.تالا_3);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  اگر (sys::DynamicLibrary::بھرو_Library_Permanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } ورنہ {
+    P.List.ڈالو_عقب(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+غیرعلامتی PluginLoader::get_عدد_Plugins() {
+  خودکار &P = getPlugins();
+  sys::Smart_Scoped_تالا<سچ> تالا_3(P.تالا_3);
+  واپس P.List.سائز_2();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+std::string &PluginLoader::getPlugin(غیرعلامتی عدد_2) {
+  خودکار &P = getPlugins();
+  sys::Smart_Scoped_تالا<سچ> تالا_3(P.تالا_3);
+  أكد(عدد_2 < P.List.سائز_2() && "Asking for an out of bounds plugin");
+  واپس P.List[عدد_2];
 }

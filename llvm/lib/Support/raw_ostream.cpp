@@ -10,601 +10,601 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Duration.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Program.h"
-#include <algorithm>
-#include <cerrno>
-#include <cstdio>
-#include <sys/stat.h>
+#شامل "llvm/Support/raw_ostream.h"
+#شامل "llvm/ADT/StringExtras.h"
+#شامل "llvm/Config/config.h"
+#شامل "llvm/Support/AutoConvert.h"
+#شامل "llvm/Support/Compiler.h"
+#شامل "llvm/Support/Duration.h"
+#شامل "llvm/Support/ErrorHandling.h"
+#شامل "llvm/Support/FileSystem.h"
+#شامل "llvm/Support/Format.h"
+#شامل "llvm/Support/FormatVariadic.h"
+#شامل "llvm/Support/IOSandbox.h"
+#شامل "llvm/Support/MathExtras.h"
+#شامل "llvm/Support/NativeFormatting.h"
+#شامل "llvm/Support/Process.h"
+#شامل "llvm/Support/Program.h"
+#شامل <algorithm>
+#شامل <cerrno>
+#شامل <cstdio>
+#شامل <sys/stat.h>
 
 // <fcntl.h> may provide O_BINARY.
 # include <fcntl.h>
 
-#if defined(HAVE_UNISTD_H)
+#اگر defined(HAVE_UNISTD_H)
 # include <unistd.h>
-#endif
+#اگر_ختم
 
-#if defined(__CYGWIN__)
-#include <io.h>
-#endif
+#اگر defined(__CYGWIN__)
+#شامل <io.h>
+#اگر_ختم
 
-#if defined(_MSC_VER)
-#include <io.h>
-#ifndef STDIN_FILENO
+#اگر defined(_MSC_VER)
+#شامل <io.h>
+#اگر_غیر_تعریف_شدہ STDIN_FILENO
 # define STDIN_FILENO 0
-#endif
-#ifndef STDOUT_FILENO
+#اگر_ختم
+#اگر_غیر_تعریف_شدہ STDOUT_FILENO
 # define STDOUT_FILENO 1
-#endif
-#ifndef STDERR_FILENO
+#اگر_ختم
+#اگر_غیر_تعریف_شدہ STDERR_FILENO
 # define STDERR_FILENO 2
-#endif
-#endif
+#اگر_ختم
+#اگر_ختم
 
-#ifdef _WIN32
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/Windows/WindowsSupport.h"
-#endif
+#اگر_تعریف_شدہ _WIN32
+#شامل "llvm/Support/ConvertUTF.h"
+#شامل "llvm/Support/Signals.h"
+#شامل "llvm/Support/Windows/WindowsSupport.h"
+#اگر_ختم
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
 raw_ostream::~raw_ostream() {
   // raw_ostream's subclasses should take care to flush the buffer
   // in their destructors.
-  assert(OutBufCur == OutBufStart &&
+  أكد(برآمد_Buf_Cur == برآمد_Buf_آغاز &&
          "raw_ostream destructor called with non-empty buffer!");
 
-  if (BufferMode == BufferKind::InternalBuffer)
-    delete [] OutBufStart;
+  اگر (بفر_منوال == بفر_قسم::اندرونی_بفر)
+    حذف [] برآمد_Buf_آغاز;
 }
 
-size_t raw_ostream::preferred_buffer_size() const {
-#ifdef _WIN32
+size_t raw_ostream::preferred_بفر_سائز() ثابت {
+#اگر_تعریف_شدہ _WIN32
   // On Windows BUFSIZ is only 512 which results in more calls to write. This
   // overhead can cause significant performance degradation. Therefore use a
   // better default.
-  return (16 * 1024);
-#else
+  واپس (16 * 1024);
+#ورنہ
   // BUFSIZ is intended to be a reasonable default.
-  return BUFSIZ;
-#endif
+  واپس BUFSIZ;
+#اگر_ختم
 }
 
-void raw_ostream::SetBuffered() {
+خالی raw_ostream::سیٹ_Buffered() {
   // Ask the subclass to determine an appropriate buffer size.
-  if (size_t Size = preferred_buffer_size())
-    SetBufferSize(Size);
-  else
+  اگر (size_t سائز = preferred_بفر_سائز())
+    سیٹ_بفر_سائز(سائز);
+  ورنہ
     // It may return 0, meaning this stream should be unbuffered.
-    SetUnbuffered();
+    سیٹ_Unbuffered();
 }
 
-void raw_ostream::SetBufferAndMode(char *BufferStart, size_t Size,
-                                   BufferKind Mode) {
-  assert(((Mode == BufferKind::Unbuffered && !BufferStart && Size == 0) ||
-          (Mode != BufferKind::Unbuffered && BufferStart && Size != 0)) &&
+خالی raw_ostream::سیٹ_بفر_And_منوال(حرف *بفر_آغاز, size_t سائز,
+                                   بفر_قسم منوال) {
+  أكد(((منوال == بفر_قسم::Unbuffered && !بفر_آغاز && سائز == 0) ||
+          (منوال != بفر_قسم::Unbuffered && بفر_آغاز && سائز != 0)) &&
          "stream must be unbuffered or have at least one byte");
   // Make sure the current buffer is free of content (we can't flush here; the
   // child buffer management logic will be in write_impl).
-  assert(GetNumBytesInBuffer() == 0 && "Current buffer is non-empty!");
+  أكد(Get_عدد_بائٹیں_اندر_بفر() == 0 && "Current buffer is non-empty!");
 
-  if (BufferMode == BufferKind::InternalBuffer)
-    delete [] OutBufStart;
-  OutBufStart = BufferStart;
-  OutBufEnd = OutBufStart+Size;
-  OutBufCur = OutBufStart;
-  BufferMode = Mode;
+  اگر (بفر_منوال == بفر_قسم::اندرونی_بفر)
+    حذف [] برآمد_Buf_آغاز;
+  برآمد_Buf_آغاز = بفر_آغاز;
+  برآمد_Buf_انتہا = برآمد_Buf_آغاز+سائز;
+  برآمد_Buf_Cur = برآمد_Buf_آغاز;
+  بفر_منوال = منوال;
 
-  assert(OutBufStart <= OutBufEnd && "Invalid size!");
+  أكد(برآمد_Buf_آغاز <= برآمد_Buf_انتہا && "Invalid size!");
 }
 
-raw_ostream &raw_ostream::operator<<(unsigned long N) {
-  write_integer(*this, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(غیرعلامتی طویل N) {
+  write_integer(*یہ, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(long N) {
-  write_integer(*this, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(طویل N) {
+  write_integer(*یہ, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(unsigned long long N) {
-  write_integer(*this, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(غیرعلامتی طویل طویل N) {
+  write_integer(*یہ, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(long long N) {
-  write_integer(*this, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(طویل طویل N) {
+  write_integer(*یہ, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::write_hex(unsigned long long N) {
-  llvm::write_hex(*this, N, HexPrintStyle::Lower);
-  return *this;
+raw_ostream &raw_ostream::write_hex(غیرعلامتی طویل طویل N) {
+  llvm::write_hex(*یہ, N, HexPrintStyle::زیریں_2);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(Colors C) {
-  if (C == Colors::RESET)
+raw_ostream &raw_ostream::عامل<<(Colors C) {
+  اگر (C == Colors::RESET)
     resetColor();
-  else
+  ورنہ
     changeColor(C);
-  return *this;
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::write_uuid(const uuid_t UUID) {
-  for (int Idx = 0; Idx < 16; ++Idx) {
-    *this << format("%02" PRIX32, UUID[Idx]);
-    if (Idx == 3 || Idx == 5 || Idx == 7 || Idx == 9)
-      *this << "-";
+raw_ostream &raw_ostream::write_uuid(ثابت uuid_t UUID) {
+  برائے (صحیح Idx = 0; Idx < 16; ++Idx) {
+    *یہ << format("%02" PRIX32, UUID[Idx]);
+    اگر (Idx == 3 || Idx == 5 || Idx == 7 || Idx == 9)
+      *یہ << "-";
   }
-  return *this;
+  واپس *یہ;
 }
 
 
 raw_ostream &raw_ostream::write_escaped(StringRef Str,
-                                        bool UseHexEscapes) {
-  for (unsigned char c : Str) {
-    switch (c) {
-    case '\\':
-      *this << '\\' << '\\';
-      break;
-    case '\t':
-      *this << '\\' << 't';
-      break;
-    case '\n':
-      *this << '\\' << 'n';
-      break;
-    case '"':
-      *this << '\\' << '"';
-      break;
-    default:
-      if (isPrint(c)) {
-        *this << c;
-        break;
+                                        منطقی UseHexEscapes) {
+  برائے (غیرعلامتی حرف c : Str) {
+    انتخاب (c) {
+    حالت '\\':
+      *یہ << '\\' << '\\';
+      توڑو;
+    حالت '\t':
+      *یہ << '\\' << 't';
+      توڑو;
+    حالت '\n':
+      *یہ << '\\' << 'n';
+      توڑو;
+    حالت '"':
+      *یہ << '\\' << '"';
+      توڑو;
+    طےشدہ:
+      اگر (isPrint(c)) {
+        *یہ << c;
+        توڑو;
       }
 
       // Write out the escaped representation.
-      if (UseHexEscapes) {
-        *this << '\\' << 'x';
-        *this << hexdigit((c >> 4) & 0xF);
-        *this << hexdigit((c >> 0) & 0xF);
-      } else {
+      اگر (UseHexEscapes) {
+        *یہ << '\\' << 'x';
+        *یہ << hexdigit((c >> 4) & 0xF);
+        *یہ << hexdigit((c >> 0) & 0xF);
+      } ورنہ {
         // Always use a full 3-character octal escape.
-        *this << '\\';
-        *this << char('0' + ((c >> 6) & 7));
-        *this << char('0' + ((c >> 3) & 7));
-        *this << char('0' + ((c >> 0) & 7));
+        *یہ << '\\';
+        *یہ << حرف('0' + ((c >> 6) & 7));
+        *یہ << حرف('0' + ((c >> 3) & 7));
+        *یہ << حرف('0' + ((c >> 0) & 7));
       }
     }
   }
 
-  return *this;
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(const void *P) {
-  llvm::write_hex(*this, (uintptr_t)P, HexPrintStyle::PrefixLower);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(ثابت خالی *P) {
+  llvm::write_hex(*یہ, (uintptr_t)P, HexPrintStyle::سابقہ_زیریں);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(double N) {
-  llvm::write_double(*this, N, FloatStyle::Exponent);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(دوہرا N) {
+  llvm::write_double(*یہ, N, FloatStyle::Exponent);
+  واپس *یہ;
 }
 
-void raw_ostream::flush_nonempty() {
-  assert(OutBufCur > OutBufStart && "Invalid call to flush_nonempty.");
-  size_t Length = OutBufCur - OutBufStart;
-  OutBufCur = OutBufStart;
-  write_impl(OutBufStart, Length);
+خالی raw_ostream::flush_nonempty() {
+  أكد(برآمد_Buf_Cur > برآمد_Buf_آغاز && "Invalid call to flush_nonempty.");
+  size_t لمبائی = برآمد_Buf_Cur - برآمد_Buf_آغاز;
+  برآمد_Buf_Cur = برآمد_Buf_آغاز;
+  write_impl(برآمد_Buf_آغاز, لمبائی);
 }
 
-raw_ostream &raw_ostream::write(unsigned char C) {
+raw_ostream &raw_ostream::اكتب(غیرعلامتی حرف C) {
   // Group exceptional cases into a single branch.
-  if (LLVM_UNLIKELY(OutBufCur >= OutBufEnd)) {
-    if (LLVM_UNLIKELY(!OutBufStart)) {
-      if (BufferMode == BufferKind::Unbuffered) {
-        write_impl(reinterpret_cast<char *>(&C), 1);
-        return *this;
+  اگر (LLVM_UNLIKELY(برآمد_Buf_Cur >= برآمد_Buf_انتہا)) {
+    اگر (LLVM_UNLIKELY(!برآمد_Buf_آغاز)) {
+      اگر (بفر_منوال == بفر_قسم::Unbuffered) {
+        write_impl(reinterpret_cast<حرف *>(&C), 1);
+        واپس *یہ;
       }
       // Set up a buffer and start over.
-      SetBuffered();
-      return write(C);
+      سیٹ_Buffered();
+      واپس اكتب(C);
     }
 
     flush_nonempty();
   }
 
-  *OutBufCur++ = C;
-  return *this;
+  *برآمد_Buf_Cur++ = C;
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::write(const char *Ptr, size_t Size) {
+raw_ostream &raw_ostream::اكتب(ثابت حرف *Ptr, size_t سائز) {
   // Group exceptional cases into a single branch.
-  if (LLVM_UNLIKELY(size_t(OutBufEnd - OutBufCur) < Size)) {
-    if (LLVM_UNLIKELY(!OutBufStart)) {
-      if (BufferMode == BufferKind::Unbuffered) {
-        write_impl(Ptr, Size);
-        return *this;
+  اگر (LLVM_UNLIKELY(size_t(برآمد_Buf_انتہا - برآمد_Buf_Cur) < سائز)) {
+    اگر (LLVM_UNLIKELY(!برآمد_Buf_آغاز)) {
+      اگر (بفر_منوال == بفر_قسم::Unbuffered) {
+        write_impl(Ptr, سائز);
+        واپس *یہ;
       }
       // Set up a buffer and start over.
-      SetBuffered();
-      return write(Ptr, Size);
+      سیٹ_Buffered();
+      واپس اكتب(Ptr, سائز);
     }
 
-    size_t NumBytes = OutBufEnd - OutBufCur;
+    size_t عدد_بائٹیں = برآمد_Buf_انتہا - برآمد_Buf_Cur;
 
     // If the buffer is empty at this point we have a string that is larger
     // than the buffer. Directly write the chunk that is a multiple of the
     // preferred buffer size and put the remainder in the buffer.
-    if (LLVM_UNLIKELY(OutBufCur == OutBufStart)) {
-      assert(NumBytes != 0 && "undefined behavior");
-      size_t BytesToWrite = Size - (Size % NumBytes);
-      write_impl(Ptr, BytesToWrite);
-      size_t BytesRemaining = Size - BytesToWrite;
-      if (BytesRemaining > size_t(OutBufEnd - OutBufCur)) {
+    اگر (LLVM_UNLIKELY(برآمد_Buf_Cur == برآمد_Buf_آغاز)) {
+      أكد(عدد_بائٹیں != 0 && "undefined behavior");
+      size_t بائٹیں_مقصد_Write_2 = سائز - (سائز % عدد_بائٹیں);
+      write_impl(Ptr, بائٹیں_مقصد_Write_2);
+      size_t بائٹیں_بقایا_2 = سائز - بائٹیں_مقصد_Write_2;
+      اگر (بائٹیں_بقایا_2 > size_t(برآمد_Buf_انتہا - برآمد_Buf_Cur)) {
         // Too much left over to copy into our buffer.
-        return write(Ptr + BytesToWrite, BytesRemaining);
+        واپس اكتب(Ptr + بائٹیں_مقصد_Write_2, بائٹیں_بقایا_2);
       }
-      copy_to_buffer(Ptr + BytesToWrite, BytesRemaining);
-      return *this;
+      copy_مقصد_بفر(Ptr + بائٹیں_مقصد_Write_2, بائٹیں_بقایا_2);
+      واپس *یہ;
     }
 
     // We don't have enough space in the buffer to fit the string in. Insert as
     // much as possible, flush and start over with the remainder.
-    copy_to_buffer(Ptr, NumBytes);
+    copy_مقصد_بفر(Ptr, عدد_بائٹیں);
     flush_nonempty();
-    return write(Ptr + NumBytes, Size - NumBytes);
+    واپس اكتب(Ptr + عدد_بائٹیں, سائز - عدد_بائٹیں);
   }
 
-  copy_to_buffer(Ptr, Size);
+  copy_مقصد_بفر(Ptr, سائز);
 
-  return *this;
+  واپس *یہ;
 }
 
-void raw_ostream::copy_to_buffer(const char *Ptr, size_t Size) {
-  assert(Size <= size_t(OutBufEnd - OutBufCur) && "Buffer overrun!");
+خالی raw_ostream::copy_مقصد_بفر(ثابت حرف *Ptr, size_t سائز) {
+  أكد(سائز <= size_t(برآمد_Buf_انتہا - برآمد_Buf_Cur) && "Buffer overrun!");
 
   // Handle short strings specially, memcpy isn't very good at very short
   // strings.
-  switch (Size) {
-  case 4: OutBufCur[3] = Ptr[3]; [[fallthrough]];
-  case 3: OutBufCur[2] = Ptr[2]; [[fallthrough]];
-  case 2: OutBufCur[1] = Ptr[1]; [[fallthrough]];
-  case 1: OutBufCur[0] = Ptr[0]; [[fallthrough]];
-  case 0: break;
-  default:
-    memcpy(OutBufCur, Ptr, Size);
-    break;
+  انتخاب (سائز) {
+  حالت 4: برآمد_Buf_Cur[3] = Ptr[3]; [[fallthrough]];
+  حالت 3: برآمد_Buf_Cur[2] = Ptr[2]; [[fallthrough]];
+  حالت 2: برآمد_Buf_Cur[1] = Ptr[1]; [[fallthrough]];
+  حالت 1: برآمد_Buf_Cur[0] = Ptr[0]; [[fallthrough]];
+  حالت 0: توڑو;
+  طےشدہ:
+    حافظہ_نقل(برآمد_Buf_Cur, Ptr, سائز);
+    توڑو;
   }
 
-  OutBufCur += Size;
+  برآمد_Buf_Cur += سائز;
 }
 
 // Formatted output. Snprint returns the snprintf-style length the output
 // needs, excluding the '\0'. A negative value is a genuine error, which a
 // larger buffer can't fix, so give up and print nothing.
 raw_ostream &
-raw_ostream::operator<<(function_ref<int(char *, size_t)> Snprint) {
+raw_ostream::عامل<<(function_ref<صحیح(حرف *, size_t)> Snprint) {
   // If we have more than a few bytes left in our output buffer, try
   // formatting directly onto its end.
-  size_t Size = 128;
-  size_t BufferBytesLeft = OutBufEnd - OutBufCur;
-  if (BufferBytesLeft > 3) {
-    int N = Snprint(OutBufCur, BufferBytesLeft);
-    if (N < 0)
-      return *this;
+  size_t سائز = 128;
+  size_t بفر_بائٹیں_بایاں = برآمد_Buf_انتہا - برآمد_Buf_Cur;
+  اگر (بفر_بائٹیں_بایاں > 3) {
+    صحیح N = Snprint(برآمد_Buf_Cur, بفر_بائٹیں_بایاں);
+    اگر (N < 0)
+      واپس *یہ;
     // Common case is that we have plenty of space.
-    if (size_t(N) < BufferBytesLeft) {
-      OutBufCur += N;
-      return *this;
+    اگر (size_t(N) < بفر_بائٹیں_بایاں) {
+      برآمد_Buf_Cur += N;
+      واپس *یہ;
     }
     // N excludes the '\0', so N + 1 bytes are exactly enough.
-    Size = size_t(N) + 1;
+    سائز = size_t(N) + 1;
   }
 
   // Otherwise format into a SmallVector resized to fit.
-  SmallVector<char, 128> V;
-  for (;;) {
-    V.resize(Size);
-    int N = Snprint(V.data(), Size);
-    if (N < 0)
-      return *this;
-    if (size_t(N) < Size)
-      return write(V.data(), N);
-    Size = size_t(N) + 1;
+  Small_سمتیہ<حرف, 128> V;
+  برائے (;;) {
+    V.resize(سائز);
+    صحیح N = Snprint(V.ڈیٹا(), سائز);
+    اگر (N < 0)
+      واپس *یہ;
+    اگر (size_t(N) < سائز)
+      واپس اكتب(V.ڈیٹا(), N);
+    سائز = size_t(N) + 1;
   }
 }
 
-raw_ostream &raw_ostream::operator<<(const formatv_object_base &Obj) {
-  Obj.format(*this);
-  return *this;
+raw_ostream &raw_ostream::عامل<<(ثابت formatv_object_بنیاد &Obj) {
+  Obj.format(*یہ);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedString &FS) {
-  unsigned LeftIndent = 0;
-  unsigned RightIndent = 0;
-  const ssize_t Difference = FS.Width - FS.Str.size();
-  if (Difference > 0) {
-    switch (FS.Justify) {
-    case FormattedString::JustifyNone:
-      break;
-    case FormattedString::JustifyLeft:
-      RightIndent = Difference;
-      break;
-    case FormattedString::JustifyRight:
-      LeftIndent = Difference;
-      break;
-    case FormattedString::JustifyCenter:
-      LeftIndent = Difference / 2;
-      RightIndent = Difference - LeftIndent;
-      break;
+raw_ostream &raw_ostream::عامل<<(ثابت FormattedString &FS) {
+  غیرعلامتی بایاں_Indent = 0;
+  غیرعلامتی دایاں_Indent = 0;
+  ثابت ssize_t Difference = FS.چوڑائی - FS.Str.سائز_2();
+  اگر (Difference > 0) {
+    انتخاب (FS.Justify) {
+    حالت FormattedString::JustifyNone:
+      توڑو;
+    حالت FormattedString::Justify_بایاں:
+      دایاں_Indent = Difference;
+      توڑو;
+    حالت FormattedString::Justify_دایاں:
+      بایاں_Indent = Difference;
+      توڑو;
+    حالت FormattedString::JustifyCenter:
+      بایاں_Indent = Difference / 2;
+      دایاں_Indent = Difference - بایاں_Indent;
+      توڑو;
     }
   }
-  indent(LeftIndent);
-  (*this) << FS.Str;
-  indent(RightIndent);
-  return *this;
+  indent(بایاں_Indent);
+  (*یہ) << FS.Str;
+  indent(دایاں_Indent);
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedNumber &FN) {
-  if (FN.Hex) {
+raw_ostream &raw_ostream::عامل<<(ثابت Formatted_نمبر &FN) {
+  اگر (FN.Hex) {
     HexPrintStyle Style;
-    if (FN.Upper && FN.HexPrefix)
-      Style = HexPrintStyle::PrefixUpper;
-    else if (FN.Upper && !FN.HexPrefix)
-      Style = HexPrintStyle::Upper;
-    else if (!FN.Upper && FN.HexPrefix)
-      Style = HexPrintStyle::PrefixLower;
-    else
-      Style = HexPrintStyle::Lower;
-    llvm::write_hex(*this, FN.HexValue, Style, FN.Width);
-  } else {
-    llvm::SmallString<16> Buffer;
-    llvm::raw_svector_ostream Stream(Buffer);
-    llvm::write_integer(Stream, FN.DecValue, 0, IntegerStyle::Integer);
-    if (Buffer.size() < FN.Width)
-      indent(FN.Width - Buffer.size());
-    (*this) << Buffer;
+    اگر (FN.بالائی_2 && FN.Hex_سابقہ)
+      Style = HexPrintStyle::سابقہ_بالائی;
+    ورنہ اگر (FN.بالائی_2 && !FN.Hex_سابقہ)
+      Style = HexPrintStyle::بالائی_2;
+    ورنہ اگر (!FN.بالائی_2 && FN.Hex_سابقہ)
+      Style = HexPrintStyle::سابقہ_زیریں;
+    ورنہ
+      Style = HexPrintStyle::زیریں_2;
+    llvm::write_hex(*یہ, FN.Hex_قدر, Style, FN.چوڑائی);
+  } ورنہ {
+    llvm::SmallString<16> بفر;
+    llvm::raw_svector_ostream دھارا(بفر);
+    llvm::write_integer(دھارا, FN.Dec_قدر, 0, IntegerStyle::Integer);
+    اگر (بفر.سائز_2() < FN.چوڑائی)
+      indent(FN.چوڑائی - بفر.سائز_2());
+    (*یہ) << بفر;
   }
-  return *this;
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedBytes &FB) {
-  if (FB.Bytes.empty())
-    return *this;
+raw_ostream &raw_ostream::عامل<<(ثابت Formatted_بائٹیں &FB) {
+  اگر (FB.بائٹیں_2.خالی_خانے())
+    واپس *یہ;
 
-  size_t LineIndex = 0;
-  auto Bytes = FB.Bytes;
-  const size_t Size = Bytes.size();
-  HexPrintStyle HPS = FB.Upper ? HexPrintStyle::Upper : HexPrintStyle::Lower;
-  uint64_t OffsetWidth = 0;
-  if (FB.FirstByteOffset) {
+  size_t سطر_اشاریہ = 0;
+  خودکار بائٹیں_2 = FB.بائٹیں_2;
+  ثابت size_t سائز = بائٹیں_2.سائز_2();
+  HexPrintStyle HPS = FB.بالائی_2 ? HexPrintStyle::بالائی_2 : HexPrintStyle::زیریں_2;
+  uint64_t انحراف_چوڑائی = 0;
+  اگر (FB.پہلا_Byte_انحراف) {
     // Figure out how many nibbles are needed to print the largest offset
     // represented by this data set, so that we can align the offset field
     // to the right width.
-    size_t Lines = Size / FB.NumPerLine;
-    uint64_t MaxOffset = *FB.FirstByteOffset + Lines * FB.NumPerLine;
-    unsigned Power = 0;
-    if (MaxOffset > 0)
-      Power = llvm::Log2_64_Ceil(MaxOffset);
-    OffsetWidth = std::max<uint64_t>(4, llvm::alignTo(Power, 4) / 4);
+    size_t سطریں = سائز / FB.عدد_فی_سطر;
+    uint64_t Max_انحراف = *FB.پہلا_Byte_انحراف + سطریں * FB.عدد_فی_سطر;
+    غیرعلامتی Power = 0;
+    اگر (Max_انحراف > 0)
+      Power = llvm::Log2_64_Ceil(Max_انحراف);
+    انحراف_چوڑائی = std::max<uint64_t>(4, llvm::align_مقصد(Power, 4) / 4);
   }
 
   // The width of a block of data including all spaces for group separators.
-  unsigned NumByteGroups =
-      alignTo(FB.NumPerLine, FB.ByteGroupSize) / FB.ByteGroupSize;
-  unsigned BlockCharWidth = FB.NumPerLine * 2 + NumByteGroups - 1;
+  غیرعلامتی عدد_Byte_Groups =
+      align_مقصد(FB.عدد_فی_سطر, FB.Byte_گروہ_سائز) / FB.Byte_گروہ_سائز;
+  غیرعلامتی بلاک_Char_چوڑائی = FB.عدد_فی_سطر * 2 + عدد_Byte_Groups - 1;
 
-  while (!Bytes.empty()) {
+  جب (!بائٹیں_2.خالی_خانے()) {
     indent(FB.IndentLevel);
 
-    if (FB.FirstByteOffset) {
-      uint64_t Offset = *FB.FirstByteOffset;
-      llvm::write_hex(*this, Offset + LineIndex, HPS, OffsetWidth);
-      *this << ": ";
+    اگر (FB.پہلا_Byte_انحراف) {
+      uint64_t انحراف = *FB.پہلا_Byte_انحراف;
+      llvm::write_hex(*یہ, انحراف + سطر_اشاریہ, HPS, انحراف_چوڑائی);
+      *یہ << ": ";
     }
 
-    auto Line = Bytes.take_front(FB.NumPerLine);
+    خودکار سطر = بائٹیں_2.take_front(FB.عدد_فی_سطر);
 
     size_t CharsPrinted = 0;
     // Print the hex bytes for this line in groups
-    for (size_t I = 0; I < Line.size(); ++I, CharsPrinted += 2) {
-      if (I && (I % FB.ByteGroupSize) == 0) {
+    برائے (size_t I = 0; I < سطر.سائز_2(); ++I, CharsPrinted += 2) {
+      اگر (I && (I % FB.Byte_گروہ_سائز) == 0) {
         ++CharsPrinted;
-        *this << " ";
+        *یہ << " ";
       }
-      llvm::write_hex(*this, Line[I], HPS, 2);
+      llvm::write_hex(*یہ, سطر[I], HPS, 2);
     }
 
-    if (FB.ASCII) {
+    اگر (FB.ASCII) {
       // Print any spaces needed for any bytes that we didn't print on this
       // line so that the ASCII bytes are correctly aligned.
-      assert(BlockCharWidth >= CharsPrinted);
-      indent(BlockCharWidth - CharsPrinted + 2);
-      *this << "|";
+      أكد(بلاک_Char_چوڑائی >= CharsPrinted);
+      indent(بلاک_Char_چوڑائی - CharsPrinted + 2);
+      *یہ << "|";
 
       // Print the ASCII char values for each byte on this line
-      for (uint8_t Byte : Line) {
-        if (isPrint(Byte))
-          *this << static_cast<char>(Byte);
-        else
-          *this << '.';
+      برائے (uint8_t Byte : سطر) {
+        اگر (isPrint(Byte))
+          *یہ << static_cast<حرف>(Byte);
+        ورنہ
+          *یہ << '.';
       }
-      *this << '|';
+      *یہ << '|';
     }
 
-    Bytes = Bytes.drop_front(Line.size());
-    LineIndex += Line.size();
-    if (LineIndex < Size)
-      *this << '\n';
+    بائٹیں_2 = بائٹیں_2.drop_front(سطر.سائز_2());
+    سطر_اشاریہ += سطر.سائز_2();
+    اگر (سطر_اشاریہ < سائز)
+      *یہ << '\n';
   }
-  return *this;
+  واپس *یہ;
 }
 
-template <char C>
-static raw_ostream &write_padding(raw_ostream &OS, unsigned NumChars) {
-  static const char Chars[] = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
+سانچہ <حرف C>
+ساکن raw_ostream &write_padding(raw_ostream &OS, غیرعلامتی عدد_Chars) {
+  ساکن ثابت حرف Chars[] = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C};
 
   // Usually the indentation is small, handle it with a fastpath.
-  if (NumChars < std::size(Chars))
-    return OS.write(Chars, NumChars);
+  اگر (عدد_Chars < std::سائز_2(Chars))
+    واپس OS.اكتب(Chars, عدد_Chars);
 
-  while (NumChars) {
-    unsigned NumToWrite = std::min(NumChars, (unsigned)std::size(Chars) - 1);
-    OS.write(Chars, NumToWrite);
-    NumChars -= NumToWrite;
+  جب (عدد_Chars) {
+    غیرعلامتی عدد_مقصد_Write = std::min(عدد_Chars, (غیرعلامتی)std::سائز_2(Chars) - 1);
+    OS.اكتب(Chars, عدد_مقصد_Write);
+    عدد_Chars -= عدد_مقصد_Write;
   }
-  return OS;
+  واپس OS;
 }
 
 /// indent - Insert 'NumSpaces' spaces.
-raw_ostream &raw_ostream::indent(unsigned NumSpaces) {
-  return write_padding<' '>(*this, NumSpaces);
+raw_ostream &raw_ostream::indent(غیرعلامتی عدد_Spaces) {
+  واپس write_padding<' '>(*یہ, عدد_Spaces);
 }
 
 /// write_zeros - Insert 'NumZeros' nulls.
-raw_ostream &raw_ostream::write_zeros(unsigned NumZeros) {
-  return write_padding<'\0'>(*this, NumZeros);
+raw_ostream &raw_ostream::write_zeros(غیرعلامتی عدد_Zeros) {
+  واپس write_padding<'\0'>(*یہ, عدد_Zeros);
 }
 
-bool raw_ostream::prepare_colors() {
+منطقی raw_ostream::prepare_colors() {
   // Colors were explicitly disabled.
-  if (!ColorEnabled)
-    return false;
+  اگر (!ColorEnabled)
+    واپس جھوٹ;
 
   // Colors require changing the terminal but this stream is not going to a
   // terminal.
-  if (sys::Process::ColorNeedsFlush() && !is_displayed())
-    return false;
+  اگر (sys::Process::ColorNeedsFlush() && !is_displayed())
+    واپس جھوٹ;
 
-  if (sys::Process::ColorNeedsFlush())
+  اگر (sys::Process::ColorNeedsFlush())
     flush();
 
-  return true;
+  واپس سچ;
 }
 
-raw_ostream &raw_ostream::changeColor(enum Colors colors, bool bold, bool bg) {
-  if (!prepare_colors())
-    return *this;
+raw_ostream &raw_ostream::changeColor(شمار Colors colors, منطقی bold, منطقی bg) {
+  اگر (!prepare_colors())
+    واپس *یہ;
 
-  const char *colorcode =
+  ثابت حرف *colorcode =
       (colors == SAVEDCOLOR)
           ? sys::Process::OutputBold(bg)
-          : sys::Process::OutputColor(static_cast<char>(colors), bold, bg);
-  if (colorcode)
-    write(colorcode, strlen(colorcode));
-  return *this;
+          : sys::Process::OutputColor(static_cast<حرف>(colors), bold, bg);
+  اگر (colorcode)
+    اكتب(colorcode, لڑی_لمبائی(colorcode));
+  واپس *یہ;
 }
 
 raw_ostream &raw_ostream::resetColor() {
-  if (!prepare_colors())
-    return *this;
+  اگر (!prepare_colors())
+    واپس *یہ;
 
-  if (const char *colorcode = sys::Process::ResetColor())
-    write(colorcode, strlen(colorcode));
-  return *this;
+  اگر (ثابت حرف *colorcode = sys::Process::ResetColor())
+    اكتب(colorcode, لڑی_لمبائی(colorcode));
+  واپس *یہ;
 }
 
-raw_ostream &raw_ostream::reverseColor() {
-  if (!prepare_colors())
-    return *this;
+raw_ostream &raw_ostream::الٹ_Color() {
+  اگر (!prepare_colors())
+    واپس *یہ;
 
-  if (const char *colorcode = sys::Process::OutputReverse())
-    write(colorcode, strlen(colorcode));
-  return *this;
+  اگر (ثابت حرف *colorcode = sys::Process::Output_الٹ())
+    اكتب(colorcode, لڑی_لمبائی(colorcode));
+  واپس *یہ;
 }
 
-void raw_ostream::anchor() {}
+خالی raw_ostream::anchor() {}
 
 //===----------------------------------------------------------------------===//
 //  raw_fd_ostream
 //===----------------------------------------------------------------------===//
 
-static int getFD(StringRef Filename, std::error_code &EC,
+ساکن صحیح getFD(StringRef Filename, std::error_رمز &EC,
                  sys::fs::CreationDisposition Disp, sys::fs::FileAccess Access,
                  sys::fs::OpenFlags Flags) {
   // FIXME(sandboxing): Remove this by adopting `llvm::vfs::OutputBackend`.
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert((Access & sys::fs::FA_Write) &&
+  أكد((Access & sys::fs::FA_Write) &&
          "Cannot make a raw_ostream from a read-only descriptor!");
 
   // Handle "-" as stdout. Note that when we do this, we consider ourself
   // the owner of stdout and may set the "binary" flag globally based on Flags.
-  if (Filename == "-") {
-    EC = std::error_code();
+  اگر (Filename == "-") {
+    EC = std::error_رمز();
     // Change stdout's text/binary mode based on the Flags.
-    sys::ChangeStdoutMode(Flags);
-    return STDOUT_FILENO;
+    sys::Change_Stdout_منوال(Flags);
+    واپس STDOUT_FILENO;
   }
 
-  int FD;
-  if (Access & sys::fs::FA_Read)
+  صحیح FD;
+  اگر (Access & sys::fs::FA_Read)
     EC = sys::fs::openFileForReadWrite(Filename, FD, Disp, Flags);
-  else
+  ورنہ
     EC = sys::fs::openFileForWrite(Filename, FD, Disp, Flags);
-  if (EC)
-    return -1;
+  اگر (EC)
+    واپس -1;
 
-  return FD;
+  واپس FD;
 }
 
-raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC)
+raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_رمز &EC)
     : raw_fd_ostream(Filename, EC, sys::fs::CD_CreateAlways, sys::fs::FA_Write,
-                     sys::fs::OF_None) {}
+                     sys::fs::کا_None) {}
 
-raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC,
+raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_رمز &EC,
                                sys::fs::CreationDisposition Disp)
-    : raw_fd_ostream(Filename, EC, Disp, sys::fs::FA_Write, sys::fs::OF_None) {}
+    : raw_fd_ostream(Filename, EC, Disp, sys::fs::FA_Write, sys::fs::کا_None) {}
 
-raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC,
+raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_رمز &EC,
                                sys::fs::FileAccess Access)
     : raw_fd_ostream(Filename, EC, sys::fs::CD_CreateAlways, Access,
-                     sys::fs::OF_None) {}
+                     sys::fs::کا_None) {}
 
-raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC,
+raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_رمز &EC,
                                sys::fs::OpenFlags Flags)
     : raw_fd_ostream(Filename, EC, sys::fs::CD_CreateAlways, sys::fs::FA_Write,
                      Flags) {}
 
-raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC,
+raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_رمز &EC,
                                sys::fs::CreationDisposition Disp,
                                sys::fs::FileAccess Access,
                                sys::fs::OpenFlags Flags)
-    : raw_fd_ostream(getFD(Filename, EC, Disp, Access, Flags), true) {}
+    : raw_fd_ostream(getFD(Filename, EC, Disp, Access, Flags), سچ) {}
 
 /// FD is the file descriptor that this writes to.  If ShouldClose is true, this
 /// closes the file when the stream is destroyed.
-raw_fd_ostream::raw_fd_ostream(int fd, bool shouldClose, bool unbuffered,
-                               OStreamKind K)
-    : raw_pwrite_stream(unbuffered, K), FD(fd), ShouldClose(shouldClose) {
+raw_fd_ostream::raw_fd_ostream(صحیح fd, منطقی shouldClose, منطقی unbuffered,
+                               OStream_قسم K)
+    : raw_pwrite_دھارا(unbuffered, K), FD(fd), ShouldClose(shouldClose) {
   // FIXME(sandboxing): Remove this by adopting `llvm::vfs::OutputBackend`.
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (FD < 0 ) {
-    ShouldClose = false;
-    return;
+  اگر (FD < 0 ) {
+    ShouldClose = جھوٹ;
+    واپس;
   }
 
-  enable_colors(true);
+  enable_colors(سچ);
 
   // Do not attempt to close stdout or stderr. We used to try to maintain the
   // property that tools that support writing file to stdout should not also
@@ -612,59 +612,59 @@ raw_fd_ostream::raw_fd_ostream(int fd, bool shouldClose, bool unbuffered,
   // maintain this invariant. Many features have been added to LLVM and clang
   // (-fdump-record-layouts, optimization remarks, etc) that print to stdout, so
   // users must simply be aware that mixed output and remarks is a possibility.
-  if (FD <= STDERR_FILENO)
-    ShouldClose = false;
+  اگر (FD <= STDERR_FILENO)
+    ShouldClose = جھوٹ;
 
-#ifdef _WIN32
+#اگر_تعریف_شدہ _WIN32
   // Check if this is a console device. This is not equivalent to isatty.
   IsWindowsConsole =
       ::GetFileType((HANDLE)::_get_osfhandle(fd)) == FILE_TYPE_CHAR;
-#endif
+#اگر_ختم
 
   // Get the starting position.
   off_t loc = ::lseek(FD, 0, SEEK_CUR);
-  sys::fs::file_status Status;
-  std::error_code EC = status(FD, Status);
-  IsRegularFile = Status.type() == sys::fs::file_type::regular_file;
-#ifdef _WIN32
+  sys::fs::file_حالت حالت_2;
+  std::error_رمز EC = حالت_3(FD, حالت_2);
+  IsRegularFile = حالت_2.type() == sys::fs::file_type::regular_file;
+#اگر_تعریف_شدہ _WIN32
   // MSVCRT's _lseek(SEEK_CUR) doesn't return -1 for pipes.
   SupportsSeeking = !EC && IsRegularFile;
-#else
+#ورنہ
   SupportsSeeking = !EC && loc != (off_t)-1;
-#endif
-  if (!SupportsSeeking)
+#اگر_ختم
+  اگر (!SupportsSeeking)
     pos = 0;
-  else
+  ورنہ
     pos = static_cast<uint64_t>(loc);
 }
 
 raw_fd_ostream::~raw_fd_ostream() {
-  if (FD >= 0) {
+  اگر (FD >= 0) {
     flush();
-    if (ShouldClose) {
-      if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    اگر (ShouldClose) {
+      اگر (خودکار EC = sys::Process::SafelyCloseFileDescriptor(FD))
         error_detected(EC);
     }
   }
 
-#ifdef __MINGW32__
+#اگر_تعریف_شدہ __MINGW32__
   // On mingw, global dtors should not call exit().
   // report_fatal_error() invokes exit(). We know report_fatal_error()
   // might not write messages to stderr when any errors were detected
   // on FD == 2.
-  if (FD == 2) return;
-#endif
+  اگر (FD == 2) واپس;
+#اگر_ختم
 
   // If there are any pending errors, report them now. Clients wishing
   // to avoid report_fatal_error calls should check for errors with
   // has_error() and clear the error flag with clear_error() before
   // destructing raw_ostream objects which may have errors.
-  if (has_error())
+  اگر (has_error())
     reportFatalUsageError(Twine("IO failure on output stream: ") +
-                          error().message());
+                          error().پیغام_2());
 }
 
-#if defined(_WIN32)
+#اگر defined(_WIN32)
 // The most reliable way to print unicode in a Windows console is with
 // WriteConsoleW. To use that, first transcode from UTF-8 to UTF-16. This
 // assumes that LLVM programs always print valid UTF-8 to the console. The data
@@ -679,72 +679,72 @@ raw_fd_ostream::~raw_fd_ostream() {
 // the input is UTF-8 or transcode from the local codepage to UTF-8 before
 // quoting it. If they don't, this may mess up the encoding, but this is still
 // probably the best compromise we can make.
-static bool write_console_impl(int FD, StringRef Data) {
-  SmallVector<wchar_t, 256> WideText;
+ساکن منطقی write_console_impl(صحیح FD, StringRef ڈیٹا_2) {
+  Small_سمتیہ<wchar_t, 256> Wide_متن;
 
   // Fall back to ::write if it wasn't valid UTF-8.
-  if (auto EC = sys::windows::UTF8ToUTF16(Data, WideText))
-    return false;
+  اگر (خودکار EC = sys::windows::UTF8_مقصد_UTF16(ڈیٹا_2, Wide_متن))
+    واپس جھوٹ;
 
   // On Windows 7 and earlier, WriteConsoleW has a low maximum amount of data
   // that can be written to the console at a time.
-  size_t MaxWriteSize = WideText.size();
-  if (!RunningWindows8OrGreater())
-    MaxWriteSize = 32767;
+  size_t Max_Write_سائز = Wide_متن.سائز_2();
+  اگر (!RunningWindows8OrGreater())
+    Max_Write_سائز = 32767;
 
   size_t WCharsWritten = 0;
-  do {
-    size_t WCharsToWrite =
-        std::min(MaxWriteSize, WideText.size() - WCharsWritten);
+  کرو {
+    size_t WChars_مقصد_Write =
+        std::min(Max_Write_سائز, Wide_متن.سائز_2() - WCharsWritten);
     DWORD ActuallyWritten;
-    bool Success =
-        ::WriteConsoleW((HANDLE)::_get_osfhandle(FD), &WideText[WCharsWritten],
-                        WCharsToWrite, &ActuallyWritten,
-                        /*Reserved=*/nullptr);
+    منطقی Success =
+        ::WriteConsoleW((HANDLE)::_get_osfhandle(FD), &Wide_متن[WCharsWritten],
+                        WChars_مقصد_Write, &ActuallyWritten,
+                        /*Reserved=*/خالی_اشاریہ);
 
     // The most likely reason for WriteConsoleW to fail is that FD no longer
     // points to a console. Fall back to ::write. If this isn't the first loop
     // iteration, something is truly wrong.
-    if (!Success)
-      return false;
+    اگر (!Success)
+      واپس جھوٹ;
 
     WCharsWritten += ActuallyWritten;
-  } while (WCharsWritten != WideText.size());
-  return true;
+  } جب (WCharsWritten != Wide_متن.سائز_2());
+  واپس سچ;
 }
-#endif
+#اگر_ختم
 
-void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (TiedStream)
-    TiedStream->flush();
+خالی raw_fd_ostream::write_impl(ثابت حرف *Ptr, size_t سائز) {
+  اگر (Tied_دھارا)
+    Tied_دھارا->flush();
 
-  assert(FD >= 0 && "File already closed.");
-  pos += Size;
+  أكد(FD >= 0 && "File already closed.");
+  pos += سائز;
 
-#if defined(_WIN32)
+#اگر defined(_WIN32)
   // If this is a Windows console device, try re-encoding from UTF-8 to UTF-16
   // and using WriteConsoleW. If that fails, fall back to plain write().
-  if (IsWindowsConsole)
-    if (write_console_impl(FD, StringRef(Ptr, Size)))
-      return;
-#endif
+  اگر (IsWindowsConsole)
+    اگر (write_console_impl(FD, StringRef(Ptr, سائز)))
+      واپس;
+#اگر_ختم
 
   // The maximum write size is limited to INT32_MAX. A write
   // greater than SSIZE_MAX is implementation-defined in POSIX,
   // and Windows _write requires 32 bit input.
-  size_t MaxWriteSize = INT32_MAX;
+  size_t Max_Write_سائز = INT32_MAX;
 
-#if defined(__linux__)
+#اگر defined(__linux__)
   // It is observed that Linux returns EINVAL for a very large write (>2G).
   // Make it a reasonably small value.
-  MaxWriteSize = 1024 * 1024 * 1024;
-#endif
+  Max_Write_سائز = 1024 * 1024 * 1024;
+#اگر_ختم
 
-  do {
-    size_t ChunkSize = std::min(Size, MaxWriteSize);
-    ssize_t ret = ::write(FD, Ptr, ChunkSize);
+  کرو {
+    size_t Chunk_سائز = std::min(سائز, Max_Write_سائز);
+    ssize_t ret = ::اكتب(FD, Ptr, Chunk_سائز);
 
-    if (ret < 0) {
+    اگر (ret < 0) {
       // If it's a recoverable error, swallow it and retry the write.
       //
       // Ideally we wouldn't ever see EAGAIN or EWOULDBLOCK here, since
@@ -753,121 +753,121 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
       // O_NONBLOCK. For compatibility, emulate blocking semantics by
       // spinning until the write succeeds. If you don't want spinning,
       // don't use O_NONBLOCK file descriptors with raw_ostream.
-      if (errno == EINTR || errno == EAGAIN
-#ifdef EWOULDBLOCK
+      اگر (errno == EINTR || errno == EAGAIN
+#اگر_تعریف_شدہ EWOULDBLOCK
           || errno == EWOULDBLOCK
-#endif
+#اگر_ختم
           )
-        continue;
+        جاری;
 
-#ifdef _WIN32
+#اگر_تعریف_شدہ _WIN32
       // Windows equivalents of SIGPIPE/EPIPE.
-      DWORD WinLastError = GetLastError();
-      if (WinLastError == ERROR_BROKEN_PIPE ||
-          (WinLastError == ERROR_NO_DATA && errno == EINVAL)) {
+      DWORD Win_آخری_Error = Get_آخری_Error();
+      اگر (Win_آخری_Error == ERROR_BROKEN_PIPE ||
+          (Win_آخری_Error == ERROR_NO_ڈیٹا && errno == EINVAL)) {
         llvm::sys::CallOneShotPipeSignalHandler();
         errno = EPIPE;
       }
-#endif
+#اگر_ختم
       // Otherwise it's a non-recoverable error. Note it and quit.
-      error_detected(errnoAsErrorCode());
-      break;
+      error_detected(errno_As_Error_رمز());
+      توڑو;
     }
 
     // The write may have written some or all of the data. Update the
     // size and buffer pointer to reflect the remainder that needs
     // to be written. If there are no bytes left, we're done.
     Ptr += ret;
-    Size -= ret;
-  } while (Size > 0);
+    سائز -= ret;
+  } جب (سائز > 0);
 }
 
-void raw_fd_ostream::close() {
-  assert(ShouldClose);
-  ShouldClose = false;
+خالی raw_fd_ostream::close() {
+  أكد(ShouldClose);
+  ShouldClose = جھوٹ;
   flush();
-  if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+  اگر (خودکار EC = sys::Process::SafelyCloseFileDescriptor(FD))
     error_detected(EC);
   FD = -1;
 }
 
 uint64_t raw_fd_ostream::seek(uint64_t off) {
-  assert(SupportsSeeking && "Stream does not support seeking!");
+  أكد(SupportsSeeking && "Stream does not support seeking!");
   flush();
-#ifdef _WIN32
+#اگر_تعریف_شدہ _WIN32
   pos = ::_lseeki64(FD, off, SEEK_SET);
-#else
+#ورنہ
   pos = ::lseek(FD, off, SEEK_SET);
-#endif
-  if (pos == (uint64_t)-1)
-    error_detected(errnoAsErrorCode());
-  return pos;
+#اگر_ختم
+  اگر (pos == (uint64_t)-1)
+    error_detected(errno_As_Error_رمز());
+  واپس pos;
 }
 
-void raw_fd_ostream::pwrite_impl(const char *Ptr, size_t Size,
-                                 uint64_t Offset) {
+خالی raw_fd_ostream::pwrite_impl(ثابت حرف *Ptr, size_t سائز,
+                                 uint64_t انحراف) {
   uint64_t Pos = tell();
-  seek(Offset);
-  write(Ptr, Size);
+  seek(انحراف);
+  اكتب(Ptr, سائز);
   seek(Pos);
 }
 
-size_t raw_fd_ostream::preferred_buffer_size() const {
-#if defined(_WIN32)
+size_t raw_fd_ostream::preferred_بفر_سائز() ثابت {
+#اگر defined(_WIN32)
   // Disable buffering for console devices. Console output is re-encoded from
   // UTF-8 to UTF-16 on Windows, and buffering it would require us to split the
   // buffer on a valid UTF-8 codepoint boundary. Terminal buffering is disabled
   // below on most other OSs, so do the same thing on Windows and avoid that
   // complexity.
-  if (IsWindowsConsole)
-    return 0;
-  return raw_ostream::preferred_buffer_size();
-#elif defined(__MVS__)
+  اگر (IsWindowsConsole)
+    واپس 0;
+  واپس raw_ostream::preferred_بفر_سائز();
+#وگرنہ_اگر defined(__MVS__)
   // The buffer size on z/OS is defined with macro BUFSIZ, which can be
   // retrieved by invoking function raw_ostream::preferred_buffer_size().
-  return raw_ostream::preferred_buffer_size();
-#else
-  assert(FD >= 0 && "File not yet open!");
-  struct stat statbuf;
-  if (fstat(FD, &statbuf) != 0)
-    return 0;
+  واپس raw_ostream::preferred_بفر_سائز();
+#ورنہ
+  أكد(FD >= 0 && "File not yet open!");
+  ساخت stat statbuf;
+  اگر (fstat(FD, &statbuf) != 0)
+    واپس 0;
 
   // If this is a terminal, don't use buffering. Line buffering
   // would be a more traditional thing to do, but it's not worth
   // the complexity.
-  if (S_ISCHR(statbuf.st_mode) && is_displayed())
-    return 0;
+  اگر (S_ISCHR(statbuf.st_منوال) && is_displayed())
+    واپس 0;
   // Return the preferred block size.
-  return statbuf.st_blksize;
-#endif
+  واپس statbuf.st_blksize;
+#اگر_ختم
 }
 
-bool raw_fd_ostream::is_displayed() const {
-  return sys::Process::FileDescriptorIsDisplayed(FD);
+منطقی raw_fd_ostream::is_displayed() ثابت {
+  واپس sys::Process::FileDescriptorIsDisplayed(FD);
 }
 
-bool raw_fd_ostream::has_colors() const {
-  if (!HasColors)
+منطقی raw_fd_ostream::has_colors() ثابت {
+  اگر (!HasColors)
     HasColors = sys::Process::FileDescriptorHasColors(FD);
-  return *HasColors;
+  واپس *HasColors;
 }
 
-Expected<sys::fs::FileLocker> raw_fd_ostream::lock() {
-  std::error_code EC = sys::fs::lockFile(FD);
-  if (!EC)
-    return sys::fs::FileLocker(FD);
-  return errorCodeToError(EC);
+Expected<sys::fs::FileLocker> raw_fd_ostream::تالا_2() {
+  std::error_رمز EC = sys::fs::تالا_File(FD);
+  اگر (!EC)
+    واپس sys::fs::FileLocker(FD);
+  واپس error_رمز_مقصد_Error(EC);
 }
 
 Expected<sys::fs::FileLocker>
-raw_fd_ostream::tryLockFor(Duration const& Timeout) {
-  std::error_code EC = sys::fs::tryLockFile(FD, Timeout.getDuration());
-  if (!EC)
-    return sys::fs::FileLocker(FD);
-  return errorCodeToError(EC);
+raw_fd_ostream::try_تالا_For(Duration ثابت& Timeout) {
+  std::error_رمز EC = sys::fs::try_تالا_File(FD, Timeout.getDuration());
+  اگر (!EC)
+    واپس sys::fs::FileLocker(FD);
+  واپس error_رمز_مقصد_Error(EC);
 }
 
-void raw_fd_ostream::anchor() {}
+خالی raw_fd_ostream::anchor() {}
 
 //===----------------------------------------------------------------------===//
 //  outs(), errs(), nulls()
@@ -875,93 +875,93 @@ void raw_fd_ostream::anchor() {}
 
 raw_fd_ostream &llvm::outs() {
   // Set buffer settings to model stdout behavior.
-  std::error_code EC;
+  std::error_رمز EC;
 
   // On z/OS we need to enable auto conversion
-  static std::error_code EC1 = enableAutoConversion(STDOUT_FILENO);
-  assert(!EC1);
-  (void)EC1;
+  ساکن std::error_رمز EC1 = enableAutoConversion(STDOUT_FILENO);
+  أكد(!EC1);
+  (خالی)EC1;
 
-  static raw_fd_ostream S("-", EC, sys::fs::OF_None);
-  assert(!EC);
-  return S;
+  ساکن raw_fd_ostream S("-", EC, sys::fs::کا_None);
+  أكد(!EC);
+  واپس S;
 }
 
 raw_fd_ostream &llvm::errs() {
   // On z/OS we need to enable auto conversion
-  static std::error_code EC = enableAutoConversion(STDERR_FILENO);
-  assert(!EC);
-  (void)EC;
+  ساکن std::error_رمز EC = enableAutoConversion(STDERR_FILENO);
+  أكد(!EC);
+  (خالی)EC;
 
   // Set standard error to be unbuffered.
-  static raw_fd_ostream S(STDERR_FILENO, false, true);
-  return S;
+  ساکن raw_fd_ostream S(STDERR_FILENO, جھوٹ, سچ);
+  واپس S;
 }
 
 /// nulls() - This returns a reference to a raw_ostream which discards output.
 raw_ostream &llvm::nulls() {
-  static raw_null_ostream S;
-  return S;
+  ساکن raw_null_ostream S;
+  واپس S;
 }
 
 //===----------------------------------------------------------------------===//
 // File Streams
 //===----------------------------------------------------------------------===//
 
-raw_fd_stream::raw_fd_stream(StringRef Filename, std::error_code &EC)
+raw_fd_دھارا::raw_fd_دھارا(StringRef Filename, std::error_رمز &EC)
     : raw_fd_ostream(getFD(Filename, EC, sys::fs::CD_CreateAlways,
                            sys::fs::FA_Write | sys::fs::FA_Read,
-                           sys::fs::OF_None),
-                     true, false, OStreamKind::OK_FDStream) {
-  if (EC)
-    return;
+                           sys::fs::کا_None),
+                     سچ, جھوٹ, OStream_قسم::OK_FDStream) {
+  اگر (EC)
+    واپس;
 
-  if (!isRegularFile())
-    EC = std::make_error_code(std::errc::invalid_argument);
+  اگر (!isRegularFile())
+    EC = std::make_error_رمز(std::errc::invalid_دلیل);
 }
 
-raw_fd_stream::raw_fd_stream(int fd, bool shouldClose)
-    : raw_fd_ostream(fd, shouldClose, false, OStreamKind::OK_FDStream) {}
+raw_fd_دھارا::raw_fd_دھارا(صحیح fd, منطقی shouldClose)
+    : raw_fd_ostream(fd, shouldClose, جھوٹ, OStream_قسم::OK_FDStream) {}
 
-ssize_t raw_fd_stream::read(char *Ptr, size_t Size) {
-  assert(get_fd() >= 0 && "File already closed.");
-  ssize_t Ret = ::read(get_fd(), (void *)Ptr, Size);
-  if (Ret >= 0)
+ssize_t raw_fd_دھارا::اقرأ(حرف *Ptr, size_t سائز) {
+  أكد(get_fd() >= 0 && "File already closed.");
+  ssize_t Ret = ::اقرأ(get_fd(), (خالی *)Ptr, سائز);
+  اگر (Ret >= 0)
     inc_pos(Ret);
-  else
-    error_detected(errnoAsErrorCode());
-  return Ret;
+  ورنہ
+    error_detected(errno_As_Error_رمز());
+  واپس Ret;
 }
 
-bool raw_fd_stream::classof(const raw_ostream *OS) {
-  return OS->get_kind() == OStreamKind::OK_FDStream;
+منطقی raw_fd_دھارا::classof(ثابت raw_ostream *OS) {
+  واپس OS->get_قسم_2() == OStream_قسم::OK_FDStream;
 }
 
 //===----------------------------------------------------------------------===//
 //  raw_string_ostream
 //===----------------------------------------------------------------------===//
 
-void raw_string_ostream::write_impl(const char *Ptr, size_t Size) {
-  OS.append(Ptr, Size);
+خالی raw_string_ostream::write_impl(ثابت حرف *Ptr, size_t سائز) {
+  OS.append(Ptr, سائز);
 }
 
 //===----------------------------------------------------------------------===//
 //  raw_svector_ostream
 //===----------------------------------------------------------------------===//
 
-uint64_t raw_svector_ostream::current_pos() const { return OS.size(); }
+uint64_t raw_svector_ostream::current_pos() ثابت { واپس OS.سائز_2(); }
 
-void raw_svector_ostream::write_impl(const char *Ptr, size_t Size) {
-  OS.append(Ptr, Ptr + Size);
+خالی raw_svector_ostream::write_impl(ثابت حرف *Ptr, size_t سائز) {
+  OS.append(Ptr, Ptr + سائز);
 }
 
-void raw_svector_ostream::pwrite_impl(const char *Ptr, size_t Size,
-                                      uint64_t Offset) {
-  memcpy(OS.data() + Offset, Ptr, Size);
+خالی raw_svector_ostream::pwrite_impl(ثابت حرف *Ptr, size_t سائز,
+                                      uint64_t انحراف) {
+  حافظہ_نقل(OS.ڈیٹا() + انحراف, Ptr, سائز);
 }
 
-bool raw_svector_ostream::classof(const raw_ostream *OS) {
-  return OS->get_kind() == OStreamKind::OK_SVecStream;
+منطقی raw_svector_ostream::classof(ثابت raw_ostream *OS) {
+  واپس OS->get_قسم_2() == OStream_قسم::OK_SVec_دھارا;
 }
 
 //===----------------------------------------------------------------------===//
@@ -969,72 +969,72 @@ bool raw_svector_ostream::classof(const raw_ostream *OS) {
 //===----------------------------------------------------------------------===//
 
 raw_null_ostream::~raw_null_ostream() {
-#ifndef NDEBUG
+#اگر_غیر_تعریف_شدہ NDEBUG
   // ~raw_ostream asserts that the buffer is empty. This isn't necessary
   // with raw_null_ostream, but it's better to have raw_null_ostream follow
   // the rules than to change the rules just for raw_null_ostream.
   flush();
-#endif
+#اگر_ختم
 }
 
-void raw_null_ostream::write_impl(const char *Ptr, size_t Size) {
+خالی raw_null_ostream::write_impl(ثابت حرف *Ptr, size_t سائز) {
 }
 
-uint64_t raw_null_ostream::current_pos() const {
-  return 0;
+uint64_t raw_null_ostream::current_pos() ثابت {
+  واپس 0;
 }
 
-void raw_null_ostream::pwrite_impl(const char *Ptr, size_t Size,
-                                   uint64_t Offset) {}
+خالی raw_null_ostream::pwrite_impl(ثابت حرف *Ptr, size_t سائز,
+                                   uint64_t انحراف) {}
 
-void raw_pwrite_stream::anchor() {}
+خالی raw_pwrite_دھارا::anchor() {}
 
-void buffer_ostream::anchor() {}
+خالی بفر_ostream::anchor() {}
 
-void buffer_unique_ostream::anchor() {}
+خالی بفر_unique_ostream::anchor() {}
 
-static bool isNullDeviceName(StringRef OutputFileName) {
-#ifdef _WIN32
-  if (OutputFileName.equals_insensitive("NUL"))
-    return true;
-#endif
-  return OutputFileName == "/dev/null";
+ساکن منطقی isNullDeviceName(StringRef OutputFileName) {
+#اگر_تعریف_شدہ _WIN32
+  اگر (OutputFileName.equals_insensitive("NUL"))
+    واپس سچ;
+#اگر_ختم
+  واپس OutputFileName == "/dev/null";
 }
 
-Error llvm::writeToOutput(StringRef OutputFileName,
+Error llvm::write_مقصد_Output(StringRef OutputFileName,
                           std::function<Error(raw_ostream &)> Write) {
-  if (OutputFileName == "-")
-    return Write(outs());
+  اگر (OutputFileName == "-")
+    واپس Write(outs());
 
-  if (isNullDeviceName(OutputFileName)) {
-    raw_null_ostream Out;
-    return Write(Out);
+  اگر (isNullDeviceName(OutputFileName)) {
+    raw_null_ostream برآمد;
+    واپس Write(برآمد);
   }
 
-  unsigned Mode = sys::fs::all_read | sys::fs::all_write;
-  Expected<sys::fs::TempFile> Temp =
-      sys::fs::TempFile::create(OutputFileName + ".temp-stream-%%%%%%", Mode);
-  if (!Temp)
-    return createFileError(OutputFileName, Temp.takeError());
+  غیرعلامتی منوال = sys::fs::all_read | sys::fs::all_write;
+  Expected<sys::fs::عارضی_File> عارضی =
+      sys::fs::عارضی_File::create(OutputFileName + ".temp-stream-%%%%%%", منوال);
+  اگر (!عارضی)
+    واپس createFileError(OutputFileName, عارضی.takeError());
 
-#if defined(__MVS__)
+#اگر defined(__MVS__)
   // The file tag needs to be set before any output can be written to the file.
   // Do this before creating the raw_fd_ostream to ensure the correct
   // sequence.
-  if (auto EC = llvm::copyFileTagAttributes(OutputFileName.str(), Temp->FD)) {
-    if (EC != std::errc::no_such_file_or_directory)
-      return createFileError(OutputFileName, EC);
+  اگر (خودکار EC = llvm::copy_File_لیبل_اوصاف(OutputFileName.str(), عارضی->FD)) {
+    اگر (EC != std::errc::no_such_file_or_directory)
+      واپس createFileError(OutputFileName, EC);
   }
-#endif
+#اگر_ختم
 
-  raw_fd_ostream Out(Temp->FD, false);
+  raw_fd_ostream برآمد(عارضی->FD, جھوٹ);
 
-  if (Error E = Write(Out)) {
-    if (Error DiscardError = Temp->discard())
-      return joinErrors(std::move(E), std::move(DiscardError));
-    return E;
+  اگر (Error E = Write(برآمد)) {
+    اگر (Error DiscardError = عارضی->discard())
+      واپس joinErrors(std::move(E), std::move(DiscardError));
+    واپس E;
   }
-  Out.flush();
+  برآمد.flush();
 
-  return Temp->keep(OutputFileName);
+  واپس عارضی->keep(OutputFileName);
 }

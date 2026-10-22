@@ -6,58 +6,58 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CHERICapabilityFormat.h"
-#include "llvm/ADT/bit.h"
+#شامل "llvm/Support/CHERICapabilityFormat.h"
+#شامل "llvm/ADT/bit.h"
 
-namespace llvm {
+نامخلا llvm {
 
-template <typename AddressType, unsigned MW, unsigned MAX_E>
-AddressType RVYCapabilityFormat<AddressType, MW, MAX_E>::getAlignmentMaskImpl(
-    uint64_t Length) {
-  static constexpr unsigned int IE_TAKE_BITS = 3;
+سانچہ <قسم_نام پتہ_Type, غیرعلامتی MW, غیرعلامتی MAX_E>
+پتہ_Type RVYCapabilityFormat<پتہ_Type, MW, MAX_E>::get_Alignment_نقاب_Impl(
+    uint64_t لمبائی) {
+  ساکن constexpr غیرعلامتی صحیح IE_TAKE_بٹ = 3;
 
-  if (Length == 0)
-    return RVYCapabilityFormat::AddressMask;
+  اگر (لمبائی == 0)
+    واپس RVYCapabilityFormat::پتہ_نقاب;
 
   // Extract bits that overflow the uncompressed mantissa window.
-  uint64_t Slice = static_cast<uint64_t>(Length) >> (MW - 1);
-  unsigned int E = 64 - llvm::countl_zero(Slice);
+  uint64_t قاش_2 = static_cast<uint64_t>(لمبائی) >> (MW - 1);
+  غیرعلامتی صحیح E = 64 - llvm::countl_zero(قاش_2);
   // We use internal exponent if length overflows OR the denormal boundary
   // bit is set.
-  bool IE = (E != 0) || ((static_cast<uint64_t>(Length) >> (MW - 2)) & 1);
+  منطقی IE = (E != 0) || ((static_cast<uint64_t>(لمبائی) >> (MW - 2)) & 1);
   // Include bits used by the internal exponent for the shift value.
-  unsigned int Eprime = IE ? (E + IE_TAKE_BITS) : 0;
+  غیرعلامتی صحیح Eprime = IE ? (E + IE_TAKE_بٹ) : 0;
 
-  assert(E <= MAX_E && "Raw exponent exceeds architecture maximum");
-  assert(Eprime <= sizeof(AddressType) * 8 &&
+  أكد(E <= MAX_E && "Raw exponent exceeds architecture maximum");
+  أكد(Eprime <= حجم(پتہ_Type) * 8 &&
          "Shift amount exceeds integer width");
 
   // Left-shift ~0 to mask out the lost precision bits
-  return RVYCapabilityFormat::AddressMask << Eprime;
+  واپس RVYCapabilityFormat::پتہ_نقاب << Eprime;
 }
 
-template struct CHERICapabilityFormatBase<RVYCapabilityFormat<uint32_t, 10, 24>,
+سانچہ ساخت CHERICapability_Format_بنیاد<RVYCapabilityFormat<uint32_t, 10, 24>,
                                           uint32_t>;
-template struct CHERICapabilityFormatBase<RVYCapabilityFormat<uint64_t, 14, 52>,
+سانچہ ساخت CHERICapability_Format_بنیاد<RVYCapabilityFormat<uint64_t, 14, 52>,
                                           uint64_t>;
-template struct RVYCapabilityFormat<uint32_t, 10, 24>;
-template struct RVYCapabilityFormat<uint64_t, 14, 52>;
+سانچہ ساخت RVYCapabilityFormat<uint32_t, 10, 24>;
+سانچہ ساخت RVYCapabilityFormat<uint64_t, 14, 52>;
 
-uint32_t CHERIoTCapabilityFormat::getAlignmentMaskImpl(uint32_t Length) {
+uint32_t CHERIoTCapabilityFormat::get_Alignment_نقاب_Impl(uint32_t لمبائی) {
   // Per section 7.13.4 and table 7.4 in the v1.0 CHERIoT specification.
-  constexpr uint32_t NINE_SET_BITS = 511;
+  constexpr uint32_t NINE_سیٹ_بٹ = 511;
   uint32_t E;
-  if (Length > NINE_SET_BITS << 14)
+  اگر (لمبائی > NINE_سیٹ_بٹ << 14)
     E = 24;
-  else {
-    E = Length > NINE_SET_BITS ? 32 - llvm::countl_zero(Length) - 9 : 0;
-    if (Length > NINE_SET_BITS << E)
+  ورنہ {
+    E = لمبائی > NINE_سیٹ_بٹ ? 32 - llvm::countl_zero(لمبائی) - 9 : 0;
+    اگر (لمبائی > NINE_سیٹ_بٹ << E)
       ++E;
-    assert(E <= 14 && "CHERIoT capabilities cannot encode E between 14 and 24");
+    أكد(E <= 14 && "CHERIoT capabilities cannot encode E between 14 and 24");
   }
-  return CHERIoTCapabilityFormat::AddressMask << E;
+  واپس CHERIoTCapabilityFormat::پتہ_نقاب << E;
 }
 
-template struct CHERICapabilityFormatBase<CHERIoTCapabilityFormat, uint32_t>;
+سانچہ ساخت CHERICapability_Format_بنیاد<CHERIoTCapabilityFormat, uint32_t>;
 
 } // namespace llvm

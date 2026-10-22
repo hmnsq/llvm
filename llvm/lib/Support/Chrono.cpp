@@ -6,122 +6,122 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Chrono.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#شامل "llvm/Support/Chrono.h"
+#شامل "llvm/Config/llvm-config.h"
+#شامل "llvm/Support/Compiler.h"
+#شامل "llvm/Support/Format.h"
+#شامل "llvm/Support/raw_ostream.h"
 
-namespace llvm {
+نامخلا llvm {
 
-using namespace sys;
+استعمال نامخلا sys;
 
-LLVM_ABI const char llvm::detail::unit<std::ratio<3600>>::value[] = "h";
-LLVM_ABI const char llvm::detail::unit<std::ratio<60>>::value[] = "m";
-LLVM_ABI const char llvm::detail::unit<std::ratio<1>>::value[] = "s";
-LLVM_ABI const char llvm::detail::unit<std::milli>::value[] = "ms";
-LLVM_ABI const char llvm::detail::unit<std::micro>::value[] = "us";
-LLVM_ABI const char llvm::detail::unit<std::nano>::value[] = "ns";
+LLVM_ABI ثابت حرف llvm::detail::unit<std::تناسب<3600>>::قدر_2[] = "h";
+LLVM_ABI ثابت حرف llvm::detail::unit<std::تناسب<60>>::قدر_2[] = "m";
+LLVM_ABI ثابت حرف llvm::detail::unit<std::تناسب<1>>::قدر_2[] = "s";
+LLVM_ABI ثابت حرف llvm::detail::unit<std::milli>::قدر_2[] = "ms";
+LLVM_ABI ثابت حرف llvm::detail::unit<std::micro>::قدر_2[] = "us";
+LLVM_ABI ثابت حرف llvm::detail::unit<std::nano>::قدر_2[] = "ns";
 
-static inline struct tm getStructTM(TimePoint<> TP) {
-  struct tm Storage;
-  std::time_t OurTime = toTimeT(TP);
+ساکن اندرونی ساخت tm getStructTM(وقت_نقطہ<> TP) {
+  ساخت tm Storage;
+  std::time_t Our_وقت = مقصد_وقت_T(TP);
 
-#if defined(LLVM_ON_UNIX)
-  struct tm *LT = ::localtime_r(&OurTime, &Storage);
-  assert(LT);
-  (void)LT;
-#endif
-#if defined(_WIN32)
-  int Error = ::localtime_s(&Storage, &OurTime);
-  assert(!Error);
-  (void)Error;
-#endif
+#اگر defined(LLVM_ON_UNIX)
+  ساخت tm *LT = ::localtime_r(&Our_وقت, &Storage);
+  أكد(LT);
+  (خالی)LT;
+#اگر_ختم
+#اگر defined(_WIN32)
+  صحیح Error = ::localtime_s(&Storage, &Our_وقت);
+  أكد(!Error);
+  (خالی)Error;
+#اگر_ختم
 
-  return Storage;
+  واپس Storage;
 }
 
-static inline struct tm getStructTMUtc(UtcTime<> TP) {
-  struct tm Storage;
-  std::time_t OurTime = toTimeT(TP);
+ساکن اندرونی ساخت tm getStructTMUtc(Utc_وقت<> TP) {
+  ساخت tm Storage;
+  std::time_t Our_وقت = مقصد_وقت_T(TP);
 
-#if defined(LLVM_ON_UNIX)
-  struct tm *LT = ::gmtime_r(&OurTime, &Storage);
-  assert(LT);
-  (void)LT;
-#endif
-#if defined(_WIN32)
-  int Error = ::gmtime_s(&Storage, &OurTime);
-  assert(!Error);
-  (void)Error;
-#endif
+#اگر defined(LLVM_ON_UNIX)
+  ساخت tm *LT = ::gmtime_r(&Our_وقت, &Storage);
+  أكد(LT);
+  (خالی)LT;
+#اگر_ختم
+#اگر defined(_WIN32)
+  صحیح Error = ::gmtime_s(&Storage, &Our_وقت);
+  أكد(!Error);
+  (خالی)Error;
+#اگر_ختم
 
-  return Storage;
+  واپس Storage;
 }
 
-raw_ostream &operator<<(raw_ostream &OS, TimePoint<> TP) {
-  struct tm LT = getStructTM(TP);
-  char Buffer[sizeof("YYYY-MM-DD HH:MM:SS")];
-  strftime(Buffer, sizeof(Buffer), "%Y-%m-%d %H:%M:%S", &LT);
-  return OS << Buffer << '.'
+raw_ostream &عامل<<(raw_ostream &OS, وقت_نقطہ<> TP) {
+  ساخت tm LT = getStructTM(TP);
+  حرف بفر[حجم("YYYY-MM-DD HH:MM:SS")];
+  strftime(بفر, حجم(بفر), "%Y-%m-%d %H:%M:%S", &LT);
+  واپس OS << بفر << '.'
             << format("%.9lu",
-                      long((TP.time_since_epoch() % std::chrono::seconds(1))
-                               .count()));
+                      طویل((TP.وقت_since_epoch() % std::chrono::seconds(1))
+                               .گنتی()));
 }
 
-template <class T>
-static void format(const T &Fractional, struct tm &LT, raw_ostream &OS,
+سانچہ <جماعت T>
+ساکن خالی format(ثابت T &Fractional, ساخت tm &LT, raw_ostream &OS,
                    StringRef Style) {
-  using namespace std::chrono;
+  استعمال نامخلا std::chrono;
   // Handle extensions first. strftime mangles unknown %x on some platforms.
-  if (Style.empty()) Style = "%Y-%m-%d %H:%M:%S.%N";
+  اگر (Style.خالی_خانے()) Style = "%Y-%m-%d %H:%M:%S.%N";
   std::string Format;
   raw_string_ostream FStream(Format);
-  for (unsigned I = 0; I < Style.size(); ++I) {
-    if (Style[I] == '%' && Style.size() > I + 1) switch (Style[I + 1]) {
-        case 'L':  // Milliseconds, from Ruby.
+  برائے (غیرعلامتی I = 0; I < Style.سائز_2(); ++I) {
+    اگر (Style[I] == '%' && Style.سائز_2() > I + 1) انتخاب (Style[I + 1]) {
+        حالت 'L':  // Milliseconds, from Ruby.
           FStream << llvm::format(
-              "%.3lu", (long)duration_cast<milliseconds>(Fractional).count());
+              "%.3lu", (طویل)duration_cast<milliseconds>(Fractional).گنتی());
           ++I;
-          continue;
-        case 'f':  // Microseconds, from Python.
+          جاری;
+        حالت 'f':  // Microseconds, from Python.
           FStream << llvm::format(
-              "%.6lu", (long)duration_cast<microseconds>(Fractional).count());
+              "%.6lu", (طویل)duration_cast<microseconds>(Fractional).گنتی());
           ++I;
-          continue;
-        case 'N':  // Nanoseconds, from date(1).
+          جاری;
+        حالت 'N':  // Nanoseconds, from date(1).
           FStream << llvm::format(
-              "%.9lu", (long)duration_cast<nanoseconds>(Fractional).count());
+              "%.9lu", (طویل)duration_cast<nanoseconds>(Fractional).گنتی());
           ++I;
-          continue;
-        case '%':  // Consume %%, so %%f parses as (%%)f not %(%f)
+          جاری;
+        حالت '%':  // Consume %%, so %%f parses as (%%)f not %(%f)
           FStream << "%%";
           ++I;
-          continue;
+          جاری;
       }
     FStream << Style[I];
   }
-  char Buffer[256];  // Should be enough for anywhen.
-  size_t Len = strftime(Buffer, sizeof(Buffer), Format.c_str(), &LT);
-  OS << (Len ? Buffer : "BAD-DATE-FORMAT");
+  حرف بفر[256];  // Should be enough for anywhen.
+  size_t Len = strftime(بفر, حجم(بفر), Format.c_str(), &LT);
+  OS << (Len ? بفر : "BAD-DATE-FORMAT");
 }
 
-void format_provider<UtcTime<std::chrono::seconds>>::format(
-    const UtcTime<std::chrono::seconds> &T, raw_ostream &OS, StringRef Style) {
-  using namespace std::chrono;
-  UtcTime<seconds> Truncated =
-      UtcTime<seconds>(duration_cast<seconds>(T.time_since_epoch()));
-  auto Fractional = T - Truncated;
-  struct tm LT = getStructTMUtc(Truncated);
+خالی format_provider<Utc_وقت<std::chrono::seconds>>::format(
+    ثابت Utc_وقت<std::chrono::seconds> &T, raw_ostream &OS, StringRef Style) {
+  استعمال نامخلا std::chrono;
+  Utc_وقت<seconds> Truncated =
+      Utc_وقت<seconds>(duration_cast<seconds>(T.وقت_since_epoch()));
+  خودکار Fractional = T - Truncated;
+  ساخت tm LT = getStructTMUtc(Truncated);
   llvm::format(Fractional, LT, OS, Style);
 }
 
-void format_provider<TimePoint<>>::format(const TimePoint<> &T, raw_ostream &OS,
+خالی format_provider<وقت_نقطہ<>>::format(ثابت وقت_نقطہ<> &T, raw_ostream &OS,
                                           StringRef Style) {
-  using namespace std::chrono;
-  TimePoint<seconds> Truncated = time_point_cast<seconds>(T);
-  auto Fractional = T - Truncated;
-  struct tm LT = getStructTM(Truncated);
+  استعمال نامخلا std::chrono;
+  وقت_نقطہ<seconds> Truncated = وقت_نقطہ_cast<seconds>(T);
+  خودکار Fractional = T - Truncated;
+  ساخت tm LT = getStructTM(Truncated);
   llvm::format(Fractional, LT, OS, Style);
 }
 

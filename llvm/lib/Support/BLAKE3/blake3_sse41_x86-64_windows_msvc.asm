@@ -8,8 +8,8 @@ public _llvm_blake3_compress_xof_sse41
 _TEXT   SEGMENT ALIGN(16) 'CODE'
 
 ALIGN   16
-llvm_blake3_hash_many_sse41 PROC
-_llvm_blake3_hash_many_sse41 PROC
+llvm_blake3_hash_many_sse41 طریقہ
+_llvm_blake3_hash_many_sse41 طریقہ
         push    r15
         push    r14
         push    r13
@@ -1800,8 +1800,8 @@ endroundloop1:
 _llvm_blake3_hash_many_sse41 ENDP
 llvm_blake3_hash_many_sse41 ENDP
 
-llvm_blake3_compress_in_place_sse41 PROC
-_llvm_blake3_compress_in_place_sse41 PROC
+llvm_blake3_compress_in_place_sse41 طریقہ
+_llvm_blake3_compress_in_place_sse41 طریقہ
         sub     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
@@ -1920,8 +1920,8 @@ _llvm_blake3_compress_in_place_sse41 ENDP
 llvm_blake3_compress_in_place_sse41 ENDP
 
 ALIGN 16
-llvm_blake3_compress_xof_sse41 PROC
-_llvm_blake3_compress_xof_sse41 PROC
+llvm_blake3_compress_xof_sse41 طریقہ
+_llvm_blake3_compress_xof_sse41 طریقہ
         sub     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
@@ -2085,5 +2085,5 @@ CMP_MSB_MASK:
         dd 8 dup(80000000H)
 
 _RDATA ENDS
-END
+اختتام
 

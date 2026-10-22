@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#شامل "llvm/Support/VirtualOutputConfig.h"
+#شامل "llvm/Support/Debug.h"
+#شامل "llvm/Support/FileSystem.h"
+#شامل "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::سیٹ_Open_Flags(ثابت sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
-  using namespace llvm::sys::fs;
-  return Flags & OF_Text
-             ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+  استعمال نامخلا llvm::sys::fs;
+  واپس Flags & کا_متن
+             ? سیٹ_متن().سیٹ_CRLF(Flags & کا_CRLF).سیٹ_Append(Flags & کا_Append)
+             : سیٹ_ثنائی().سیٹ_Append(Flags & کا_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+خالی OutputConfig::print(raw_ostream &OS) ثابت {
   OS << "{";
-  bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
-      IsFirst = false;
-    else
+  منطقی Is_پہلا = سچ;
+  خودکار printFlag = [&](StringRef FlagName, منطقی قدر) {
+    اگر (Is_پہلا)
+      Is_پہلا = جھوٹ;
+    ورنہ
       OS << ",";
-    if (!Value)
+    اگر (!قدر)
       OS << "No";
     OS << FlagName;
   };
 
-#define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+#تعریف_کرو HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
+  اگر (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#شامل "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_طریقہ خالی OutputConfig::dump() ثابت { print(dbgs()); }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
+raw_ostream &llvm::عامل<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  واپس OS;
 }

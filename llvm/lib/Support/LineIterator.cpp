@@ -6,93 +6,93 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
+#شامل "llvm/Support/LineIterator.h"
+#شامل "llvm/Support/MemoryBuffer.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+ساکن منطقی is_At_سطر_انتہا(ثابت حرف *P) {
+  اگر (*P == '\n')
+    واپس سچ;
+  اگر (*P == '\r' && *(P + 1) == '\n')
+    واپس سچ;
+  واپس جھوٹ;
 }
 
-static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+ساکن منطقی skip_If_At_سطر_انتہا(ثابت حرف *&P) {
+  اگر (*P == '\n') {
     ++P;
-    return true;
+    واپس سچ;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  اگر (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    واپس سچ;
   }
-  return false;
+  واپس جھوٹ;
 }
 
-line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
-                             char CommentMarker)
-    : line_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
+سطر_iterator::سطر_iterator(ثابت حافظہ_بفر &بفر, منطقی SkipBlanks,
+                             حرف CommentMarker)
+    : سطر_iterator(بفر.get_Mem_بفر_Ref(), SkipBlanks, CommentMarker) {}
 
-line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
-                             char CommentMarker)
-    : Buffer(Buffer.getBufferSize() ? std::optional<MemoryBufferRef>(Buffer)
+سطر_iterator::سطر_iterator(ثابت حافظہ_بفر_Ref &بفر, منطقی SkipBlanks,
+                             حرف CommentMarker)
+    : بفر(بفر.get_بفر_سائز() ? std::optional<حافظہ_بفر_Ref>(بفر)
                                     : std::nullopt),
       CommentMarker(CommentMarker), SkipBlanks(SkipBlanks),
-      CurrentLine(Buffer.getBufferSize() ? Buffer.getBufferStart() : nullptr,
+      Current_سطر(بفر.get_بفر_سائز() ? بفر.get_بفر_آغاز() : خالی_اشاریہ,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
-    assert(Buffer.getBufferEnd()[0] == '\0');
+  اگر (بفر.get_بفر_سائز()) {
+    أكد(بفر.get_بفر_انتہا()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    اگر (SkipBlanks || !is_At_سطر_انتہا(بفر.get_بفر_آغاز()))
       advance();
   }
 }
 
-void line_iterator::advance() {
-  assert(Buffer && "Cannot advance past the end!");
+خالی سطر_iterator::advance() {
+  أكد(بفر && "Cannot advance past the end!");
 
-  const char *Pos = CurrentLine.end();
-  assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
+  ثابت حرف *Pos = Current_سطر.انتہا();
+  أكد(Pos == بفر->get_بفر_آغاز() || is_At_سطر_انتہا(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
-    ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  اگر (skip_If_At_سطر_انتہا(Pos))
+    ++سطر_نمبر;
+  اگر (!SkipBlanks && is_At_سطر_انتہا(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } ورنہ اگر (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
-      ++LineNumber;
-  } else {
+    جب (skip_If_At_سطر_انتہا(Pos))
+      ++سطر_نمبر;
+  } ورنہ {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
-        break;
-      if (*Pos == CommentMarker)
-        do {
+    برائے (;;) {
+      اگر (is_At_سطر_انتہا(Pos) && !SkipBlanks)
+        توڑو;
+      اگر (*Pos == CommentMarker)
+        کرو {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
-        break;
-      ++LineNumber;
+        } جب (*Pos != '\0' && !is_At_سطر_انتہا(Pos));
+      اگر (!skip_If_At_سطر_انتہا(Pos))
+        توڑو;
+      ++سطر_نمبر;
     }
   }
 
-  if (*Pos == '\0') {
+  اگر (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
-    Buffer = std::nullopt;
-    CurrentLine = StringRef();
-    return;
+    بفر = std::nullopt;
+    Current_سطر = StringRef();
+    واپس;
   }
 
   // Measure the line.
-  size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
-    ++Length;
+  size_t لمبائی = 0;
+  جب (Pos[لمبائی] != '\0' && !is_At_سطر_انتہا(&Pos[لمبائی])) {
+    ++لمبائی;
   }
 
-  CurrentLine = StringRef(Pos, Length);
+  Current_سطر = StringRef(Pos, لمبائی);
 }

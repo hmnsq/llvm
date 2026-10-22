@@ -6,127 +6,127 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LockFileManager.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ON_UNIX
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cerrno>
-#include <chrono>
-#include <ctime>
-#include <memory>
-#include <system_error>
-#include <tuple>
+#شامل "llvm/Support/LockFileManager.h"
+#شامل "llvm/ADT/SmallVector.h"
+#شامل "llvm/ADT/StringExtras.h"
+#شامل "llvm/Config/llvm-config.h" // for LLVM_ON_UNIX
+#شامل "llvm/Support/Errc.h"
+#شامل "llvm/Support/ErrorOr.h"
+#شامل "llvm/Support/ExponentialBackoff.h"
+#شامل "llvm/Support/FileSystem.h"
+#شامل "llvm/Support/IOSandbox.h"
+#شامل "llvm/Support/MemoryBuffer.h"
+#شامل "llvm/Support/Path.h"
+#شامل "llvm/Support/Process.h"
+#شامل "llvm/Support/Signals.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <cerrno>
+#شامل <chrono>
+#شامل <ctime>
+#شامل <memory>
+#شامل <system_error>
+#شامل <tuple>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-#if LLVM_ON_UNIX
-#include <unistd.h>
-#endif
+#اگر_تعریف_شدہ _WIN32
+#شامل <windows.h>
+#اگر_ختم
+#اگر LLVM_ON_UNIX
+#شامل <unistd.h>
+#اگر_ختم
 
-#if defined(__APPLE__) && defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && (__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ > 1050)
-#define USE_OSX_GETHOSTUUID 1
-#else
-#define USE_OSX_GETHOSTUUID 0
-#endif
+#اگر defined(__APPLE__) && defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && (__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ > 1050)
+#تعریف_کرو USE_OSX_GETHOSTUUID 1
+#ورنہ
+#تعریف_کرو USE_OSX_GETHOSTUUID 0
+#اگر_ختم
 
-#if USE_OSX_GETHOSTUUID
-#include <uuid/uuid.h>
-#endif
+#اگر USE_OSX_GETHOSTUUID
+#شامل <uuid/uuid.h>
+#اگر_ختم
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
 /// Attempt to read the lock file with the given name, if it exists.
 ///
 /// \param LockFileName The name of the lock file to read.
 ///
 /// \returns The process ID of the process that owns this lock file
-std::optional<LockFileManager::OwnedByAnother>
-LockFileManager::readLockFile(StringRef LockFileName) {
+std::optional<تالا_File_Manager::OwnedByAnother>
+تالا_File_Manager::read_تالا_File(StringRef تالا_File_Name) {
   // Read the owning host and PID out of the lock file. If it appears that the
   // owning process is dead, the lock file is invalid.
-  ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-      MemoryBuffer::getFile(LockFileName);
-  if (!MBOrErr) {
-    sys::fs::remove(LockFileName);
-    return std::nullopt;
+  ErrorOr<std::unique_ptr<حافظہ_بفر>> MBOrErr =
+      حافظہ_بفر::getFile(تالا_File_Name);
+  اگر (!MBOrErr) {
+    sys::fs::remove(تالا_File_Name);
+    واپس std::nullopt;
   }
-  MemoryBuffer &MB = *MBOrErr.get();
+  حافظہ_بفر &MB = *MBOrErr.get();
 
   StringRef Hostname;
   StringRef PIDStr;
-  std::tie(Hostname, PIDStr) = getToken(MB.getBuffer(), " ");
-  PIDStr = PIDStr.substr(PIDStr.find_first_not_of(' '));
-  int PID;
-  if (!PIDStr.getAsInteger(10, PID)) {
+  std::tie(Hostname, PIDStr) = getToken(MB.get_بفر(), " ");
+  PIDStr = PIDStr.substr(PIDStr.ڈھونڈو_پہلا_not_کا(' '));
+  صحیح PID;
+  اگر (!PIDStr.getAsInteger(10, PID)) {
     OwnedByAnother Owner;
     Owner.OwnerHostName = Hostname;
     Owner.OwnerPID = PID;
-    if (processStillExecuting(Owner.OwnerHostName, Owner.OwnerPID))
-      return Owner;
+    اگر (processStillExecuting(Owner.OwnerHostName, Owner.OwnerPID))
+      واپس Owner;
   }
 
   // Delete the lock file. It's invalid anyway.
-  sys::fs::remove(LockFileName);
-  return std::nullopt;
+  sys::fs::remove(تالا_File_Name);
+  واپس std::nullopt;
 }
 
-static std::error_code getHostID(SmallVectorImpl<char> &HostID) {
+ساکن std::error_رمز getHostID(Small_سمتیہ_Impl<حرف> &HostID) {
   HostID.clear();
 
-#if USE_OSX_GETHOSTUUID
+#اگر USE_OSX_GETHOSTUUID
   // On OS X, use the more stable hardware UUID instead of hostname.
-  struct timespec wait = {1, 0}; // 1 second.
+  ساخت timespec wait = {1, 0}; // 1 second.
   uuid_t uuid;
-  if (gethostuuid(uuid, &wait) != 0)
-    return errnoAsErrorCode();
+  اگر (gethostuuid(uuid, &wait) != 0)
+    واپس errno_As_Error_رمز();
 
   uuid_string_t UUIDStr;
   uuid_unparse(uuid, UUIDStr);
   StringRef UUIDRef(UUIDStr);
-  HostID.append(UUIDRef.begin(), UUIDRef.end());
+  HostID.append(UUIDRef.begin(), UUIDRef.انتہا());
 
-#elif LLVM_ON_UNIX
-  char HostName[256];
+#وگرنہ_اگر LLVM_ON_UNIX
+  حرف HostName[256];
   HostName[255] = 0;
   HostName[0] = 0;
   gethostname(HostName, 255);
   StringRef HostNameRef(HostName);
-  HostID.append(HostNameRef.begin(), HostNameRef.end());
+  HostID.append(HostNameRef.begin(), HostNameRef.انتہا());
 
-#else
+#ورنہ
   StringRef Dummy("localhost");
-  HostID.append(Dummy.begin(), Dummy.end());
-#endif
+  HostID.append(Dummy.begin(), Dummy.انتہا());
+#اگر_ختم
 
-  return std::error_code();
+  واپس std::error_رمز();
 }
 
-bool LockFileManager::processStillExecuting(StringRef HostID, int PID) {
-#if LLVM_ON_UNIX && !defined(__ANDROID__)
+منطقی تالا_File_Manager::processStillExecuting(StringRef HostID, صحیح PID) {
+#اگر LLVM_ON_UNIX && !defined(__ANDROID__)
   SmallString<256> StoredHostID;
-  if (getHostID(StoredHostID))
-    return true; // Conservatively assume it's executing on error.
+  اگر (getHostID(StoredHostID))
+    واپس سچ; // Conservatively assume it's executing on error.
 
   // Check whether the process is dead. If so, we're done.
-  if (StoredHostID == HostID && getsid(PID) == -1 && errno == ESRCH)
-    return false;
-#endif
+  اگر (StoredHostID == HostID && getsid(PID) == -1 && errno == ESRCH)
+    واپس جھوٹ;
+#اگر_ختم
 
-  return true;
+  واپس سچ;
 }
 
-namespace {
+نامخلا {
 
 /// An RAII helper object ensure that the unique lock file is removed.
 ///
@@ -135,187 +135,187 @@ namespace {
 /// the signal handler is left in place so that signals while the lock is held
 /// will remove the unique lock file. The caller should ensure there is a
 /// matching call to sys::DontRemoveFileOnSignal when the lock is released.
-class RemoveUniqueLockFileOnSignal {
+جماعت Remove_Unique_تالا_File_On_Signal {
   StringRef Filename;
-  bool RemoveImmediately;
-public:
-  RemoveUniqueLockFileOnSignal(StringRef Name)
-  : Filename(Name), RemoveImmediately(true) {
-    sys::RemoveFileOnSignal(Filename, nullptr);
+  منطقی RemoveImmediately;
+عوامی:
+  Remove_Unique_تالا_File_On_Signal(StringRef Name)
+  : Filename(Name), RemoveImmediately(سچ) {
+    sys::RemoveFileOnSignal(Filename, خالی_اشاریہ);
   }
 
-  ~RemoveUniqueLockFileOnSignal() {
-    if (!RemoveImmediately) {
+  ~Remove_Unique_تالا_File_On_Signal() {
+    اگر (!RemoveImmediately) {
       // Leave the signal handler enabled. It will be removed when the lock is
       // released.
-      return;
+      واپس;
     }
     sys::fs::remove(Filename);
     sys::DontRemoveFileOnSignal(Filename);
   }
 
-  void lockAcquired() { RemoveImmediately = false; }
+  خالی تالا_Acquired() { RemoveImmediately = جھوٹ; }
 };
 
 } // end anonymous namespace
 
-LockFileManager::LockFileManager(StringRef FileName)
+تالا_File_Manager::تالا_File_Manager(StringRef FileName)
     : FileName(FileName), Owner(OwnerUnknown{}) {}
 
-Expected<bool> LockFileManager::tryLock() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+Expected<منطقی> تالا_File_Manager::try_تالا() {
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(std::holds_alternative<OwnerUnknown>(Owner) &&
+  أكد(std::holds_alternative<OwnerUnknown>(Owner) &&
          "lock has already been attempted");
 
   SmallString<128> AbsoluteFileName(FileName);
-  if (std::error_code EC = sys::fs::make_absolute(AbsoluteFileName))
-    return createStringError(EC, "failed to obtain absolute path for " +
+  اگر (std::error_رمز EC = sys::fs::make_absolute(AbsoluteFileName))
+    واپس createStringError(EC, "failed to obtain absolute path for " +
                                      AbsoluteFileName);
-  LockFileName = AbsoluteFileName;
-  LockFileName += ".lock";
+  تالا_File_Name = AbsoluteFileName;
+  تالا_File_Name += ".lock";
 
   // If the lock file already exists, don't bother to try to create our own
   // lock file; it won't work anyway. Just figure out who owns this lock file.
-  if (auto LockFileOwner = readLockFile(LockFileName)) {
-    Owner = std::move(*LockFileOwner);
-    return false;
+  اگر (خودکار تالا_File_Owner = read_تالا_File(تالا_File_Name)) {
+    Owner = std::move(*تالا_File_Owner);
+    واپس جھوٹ;
   }
 
   // Create a lock file that is unique to this instance.
-  int UniqueLockFileID;
+  صحیح Unique_تالا_File_ID;
   {
-    SmallString<128> UniqueLockFilePattern = LockFileName;
-    UniqueLockFilePattern += "-%%%%%%%%";
-    SmallString<128> UniquePath;
-    std::error_code EC = sys::fs::createUniqueFile(
-        UniqueLockFilePattern, UniqueLockFileID, UniquePath);
-    if (EC == errc::no_such_file_or_directory) {
-      SmallString<128> Dir = sys::path::parent_path(UniqueLockFilePattern);
-      if (!Dir.empty()) {
-        if (std::error_code DirEC = sys::fs::create_directories(Dir))
-          return createStringError(DirEC,
+    SmallString<128> Unique_تالا_File_نمونہ = تالا_File_Name;
+    Unique_تالا_File_نمونہ += "-%%%%%%%%";
+    SmallString<128> Unique_راستہ;
+    std::error_رمز EC = sys::fs::createUniqueFile(
+        Unique_تالا_File_نمونہ, Unique_تالا_File_ID, Unique_راستہ);
+    اگر (EC == errc::no_such_file_or_directory) {
+      SmallString<128> Dir = sys::راستہ_2::والد_راستہ(Unique_تالا_File_نمونہ);
+      اگر (!Dir.خالی_خانے()) {
+        اگر (std::error_رمز DirEC = sys::fs::create_directories(Dir))
+          واپس createStringError(DirEC,
                                    "failed to create lock directory " + Dir);
       }
 
       // Retry creating lock file
-      EC = sys::fs::createUniqueFile(UniqueLockFilePattern, UniqueLockFileID,
-                                     UniquePath);
+      EC = sys::fs::createUniqueFile(Unique_تالا_File_نمونہ, Unique_تالا_File_ID,
+                                     Unique_راستہ);
     }
 
-    if (EC)
-      return createStringError(EC,
-                               "failed to create unique file " + UniquePath);
+    اگر (EC)
+      واپس createStringError(EC,
+                               "failed to create unique file " + Unique_راستہ);
 
-    UniqueLockFileName = UniquePath;
+    Unique_تالا_File_Name = Unique_راستہ;
   }
 
   // Clean up the unique file on signal or scope exit.
-  RemoveUniqueLockFileOnSignal RemoveUniqueFile(UniqueLockFileName);
+  Remove_Unique_تالا_File_On_Signal RemoveUniqueFile(Unique_تالا_File_Name);
 
   // Write our process ID to our unique lock file.
   {
     SmallString<256> HostID;
-    if (auto EC = getHostID(HostID))
-      return createStringError(EC, "failed to get host id");
+    اگر (خودکار EC = getHostID(HostID))
+      واپس createStringError(EC, "failed to get host id");
 
-    raw_fd_ostream Out(UniqueLockFileID, /*shouldClose=*/true);
-    Out << HostID << ' ' << sys::Process::getProcessId();
-    Out.close();
+    raw_fd_ostream برآمد(Unique_تالا_File_ID, /*shouldClose=*/سچ);
+    برآمد << HostID << ' ' << sys::Process::getProcessId();
+    برآمد.close();
 
-    if (Out.has_error()) {
+    اگر (برآمد.has_error()) {
       // We failed to write out PID, so report the error and fail.
-      Error Err = createStringError(Out.error(),
-                                    "failed to write to " + UniqueLockFileName);
+      Error Err = createStringError(برآمد.error(),
+                                    "failed to write to " + Unique_تالا_File_Name);
       // Don't call report_fatal_error.
-      Out.clear_error();
-      return std::move(Err);
+      برآمد.clear_error();
+      واپس std::move(Err);
     }
   }
 
-  while (true) {
+  جب (سچ) {
     // Create a link from the lock file name. If this succeeds, we're done.
-    std::error_code EC =
-        sys::fs::create_link(UniqueLockFileName, LockFileName);
-    if (!EC) {
-      RemoveUniqueFile.lockAcquired();
+    std::error_رمز EC =
+        sys::fs::create_link(Unique_تالا_File_Name, تالا_File_Name);
+    اگر (!EC) {
+      RemoveUniqueFile.تالا_Acquired();
       Owner = OwnedByUs{};
-      return true;
+      واپس سچ;
     }
 
-    if (EC != errc::file_exists)
-      return createStringError(EC, "failed to create link " + LockFileName +
-                                       " to " + UniqueLockFileName);
+    اگر (EC != errc::file_exists)
+      واپس createStringError(EC, "failed to create link " + تالا_File_Name +
+                                       " to " + Unique_تالا_File_Name);
 
     // Someone else managed to create the lock file first. Read the process ID
     // from the lock file.
-    if (auto LockFileOwner = readLockFile(LockFileName)) {
-      Owner = std::move(*LockFileOwner);
-      return false;
+    اگر (خودکار تالا_File_Owner = read_تالا_File(تالا_File_Name)) {
+      Owner = std::move(*تالا_File_Owner);
+      واپس جھوٹ;
     }
 
-    if (!sys::fs::exists(LockFileName)) {
+    اگر (!sys::fs::exists(تالا_File_Name)) {
       // The previous owner released the lock file before we could read it.
       // Try to get ownership again.
-      continue;
+      جاری;
     }
 
     // There is a lock file that nobody owns; try to clean it up and get
     // ownership.
-    if ((EC = sys::fs::remove(LockFileName)))
-      return createStringError(EC, "failed to remove lockfile " +
-                                       UniqueLockFileName);
+    اگر ((EC = sys::fs::remove(تالا_File_Name)))
+      واپس createStringError(EC, "failed to remove lockfile " +
+                                       Unique_تالا_File_Name);
   }
 }
 
-LockFileManager::~LockFileManager() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+تالا_File_Manager::~تالا_File_Manager() {
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (!std::holds_alternative<OwnedByUs>(Owner))
-    return;
+  اگر (!std::holds_alternative<OwnedByUs>(Owner))
+    واپس;
 
   // Since we own the lock, remove the lock file and our own unique lock file.
-  sys::fs::remove(LockFileName);
-  sys::fs::remove(UniqueLockFileName);
+  sys::fs::remove(تالا_File_Name);
+  sys::fs::remove(Unique_تالا_File_Name);
   // The unique file is now gone, so remove it from the signal handler. This
   // matches a sys::RemoveFileOnSignal() in LockFileManager().
-  sys::DontRemoveFileOnSignal(UniqueLockFileName);
+  sys::DontRemoveFileOnSignal(Unique_تالا_File_Name);
 }
 
-WaitForUnlockResult
-LockFileManager::waitForUnlockFor(std::chrono::seconds MaxSeconds) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+Wait_For_Unlock_نتیجہ
+تالا_File_Manager::waitForUnlockFor(std::chrono::seconds MaxSeconds) {
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
-  auto *LockFileOwner = std::get_if<OwnedByAnother>(&Owner);
-  assert(LockFileOwner &&
+  خودکار *تالا_File_Owner = std::get_if<OwnedByAnother>(&Owner);
+  أكد(تالا_File_Owner &&
          "waiting for lock to be unlocked without knowing the owner");
 
   // Since we don't yet have an event-based method to wait for the lock file,
   // use randomized exponential backoff, similar to Ethernet collision
   // algorithm. This improves performance on machines with high core counts
   // when the file lock is heavily contended by multiple clang processes
-  using namespace std::chrono_literals;
-  ExponentialBackoff Backoff(MaxSeconds, 10ms, 500ms);
+  استعمال نامخلا std::chrono_literals;
+  قوت_نمائی_Backoff Backoff(MaxSeconds, 10ms, 500ms);
 
   // Wait first as this is only called when the lock is known to be held.
-  while (Backoff.waitForNextAttempt()) {
+  جب (Backoff.wait_For_اگلا_Attempt()) {
     // FIXME: implement event-based waiting
-    if (sys::fs::access(LockFileName.c_str(), sys::fs::AccessMode::Exist) ==
+    اگر (sys::fs::access(تالا_File_Name.c_str(), sys::fs::Access_منوال::Exist) ==
         errc::no_such_file_or_directory)
-      return WaitForUnlockResult::Success;
+      واپس Wait_For_Unlock_نتیجہ::Success;
 
     // If the process owning the lock died without cleaning up, just bail out.
-    if (!processStillExecuting(LockFileOwner->OwnerHostName,
-                               LockFileOwner->OwnerPID))
-      return WaitForUnlockResult::OwnerDied;
+    اگر (!processStillExecuting(تالا_File_Owner->OwnerHostName,
+                               تالا_File_Owner->OwnerPID))
+      واپس Wait_For_Unlock_نتیجہ::OwnerDied;
   }
 
   // Give up.
-  return WaitForUnlockResult::Timeout;
+  واپس Wait_For_Unlock_نتیجہ::Timeout;
 }
 
-std::error_code LockFileManager::unsafeUnlock() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_رمز تالا_File_Manager::unsafeUnlock() {
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
-  return sys::fs::remove(LockFileName);
+  واپس sys::fs::remove(تالا_File_Name);
 }

@@ -9,119 +9,119 @@
 //
 //===--------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttrParserCompact.h"
-#include "llvm/ADT/Enum.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ScopedPrinter.h"
+#شامل "llvm/Support/ELFAttrParserCompact.h"
+#شامل "llvm/ADT/Enum.h"
+#شامل "llvm/ADT/StringExtras.h"
+#شامل "llvm/Support/Errc.h"
+#شامل "llvm/Support/ScopedPrinter.h"
 
-using namespace llvm;
-using namespace llvm::ELFAttrs;
+استعمال نامخلا llvm;
+استعمال نامخلا llvm::ELFAttrs;
 
 Error ELFCompactAttrParser::parseStringAttribute(
-    const char *name, unsigned tag, ArrayRef<const char *> strings) {
-  uint64_t value = de.getULEB128(cursor);
-  if (value >= strings.size()) {
-    printAttribute(tag, value, "");
-    return createStringError(errc::invalid_argument,
+    ثابت حرف *name, غیرعلامتی لیبل_2, ArrayRef<ثابت حرف *> لڑیاں) {
+  uint64_t قدر_2 = de.getULEB128(cursor);
+  اگر (قدر_2 >= لڑیاں.سائز_2()) {
+    printAttribute(لیبل_2, قدر_2, "");
+    واپس createStringError(errc::invalid_دلیل,
                              "unknown " + Twine(name) +
-                                 " value: " + Twine(value));
+                                 " value: " + Twine(قدر_2));
   }
-  printAttribute(tag, value, strings[value]);
-  return Error::success();
+  printAttribute(لیبل_2, قدر_2, لڑیاں[قدر_2]);
+  واپس Error::success();
 }
 
-Error ELFCompactAttrParser::integerAttribute(unsigned tag) {
-  StringRef tagName =
-      ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
-  uint64_t value = de.getULEB128(cursor);
-  attributes.insert(std::make_pair(tag, value));
+Error ELFCompactAttrParser::integerAttribute(غیرعلامتی لیبل_2) {
+  StringRef لیبل_Name =
+      ELFAttrs::attrTypeAsString(لیبل_2, لیبل_مقصد_String_Map, /*hasTagPrefix=*/جھوٹ);
+  uint64_t قدر_2 = de.getULEB128(cursor);
+  اوصاف_2.داخل_کرو(std::make_pair(لیبل_2, قدر_2));
 
-  if (sw) {
+  اگر (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    if (!tagName.empty())
-      sw->printString("TagName", tagName);
-    sw->printNumber("Value", value);
+    sw->print_نمبر("Tag", لیبل_2);
+    اگر (!لیبل_Name.خالی_خانے())
+      sw->printString("TagName", لیبل_Name);
+    sw->print_نمبر("Value", قدر_2);
   }
-  return Error::success();
+  واپس Error::success();
 }
 
-Error ELFCompactAttrParser::stringAttribute(unsigned tag) {
-  StringRef tagName =
-      ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
+Error ELFCompactAttrParser::stringAttribute(غیرعلامتی لیبل_2) {
+  StringRef لیبل_Name =
+      ELFAttrs::attrTypeAsString(لیبل_2, لیبل_مقصد_String_Map, /*hasTagPrefix=*/جھوٹ);
   StringRef desc = de.getCStrRef(cursor);
-  setAttributeString(tag, desc);
+  سیٹ_Attribute_String(لیبل_2, desc);
 
-  if (sw) {
+  اگر (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    if (!tagName.empty())
-      sw->printString("TagName", tagName);
+    sw->print_نمبر("Tag", لیبل_2);
+    اگر (!لیبل_Name.خالی_خانے())
+      sw->printString("TagName", لیبل_Name);
     sw->printString("Value", desc);
   }
-  return Error::success();
+  واپس Error::success();
 }
 
-void ELFCompactAttrParser::printAttribute(unsigned tag, unsigned value,
-                                          StringRef valueDesc) {
-  attributes.insert(std::make_pair(tag, value));
+خالی ELFCompactAttrParser::printAttribute(غیرعلامتی لیبل_2, غیرعلامتی قدر_2,
+                                          StringRef قدر_Desc) {
+  اوصاف_2.داخل_کرو(std::make_pair(لیبل_2, قدر_2));
 
-  if (sw) {
-    StringRef tagName = ELFAttrs::attrTypeAsString(tag, tagToStringMap,
-                                                   /*hasTagPrefix=*/false);
+  اگر (sw) {
+    StringRef لیبل_Name = ELFAttrs::attrTypeAsString(لیبل_2, لیبل_مقصد_String_Map,
+                                                   /*hasTagPrefix=*/جھوٹ);
     DictScope as(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->printNumber("Value", value);
-    if (!tagName.empty())
-      sw->printString("TagName", tagName);
-    if (!valueDesc.empty())
-      sw->printString("Description", valueDesc);
+    sw->print_نمبر("Tag", لیبل_2);
+    sw->print_نمبر("Value", قدر_2);
+    اگر (!لیبل_Name.خالی_خانے())
+      sw->printString("TagName", لیبل_Name);
+    اگر (!قدر_Desc.خالی_خانے())
+      sw->printString("Description", قدر_Desc);
   }
 }
 
-void ELFCompactAttrParser::parseIndexList(SmallVectorImpl<uint8_t> &indexList) {
-  for (;;) {
-    uint64_t value = de.getULEB128(cursor);
-    if (!cursor || !value)
-      break;
-    indexList.push_back(value);
+خالی ELFCompactAttrParser::parse_اشاریہ_List(Small_سمتیہ_Impl<uint8_t> &اشاریہ_List) {
+  برائے (;;) {
+    uint64_t قدر_2 = de.getULEB128(cursor);
+    اگر (!cursor || !قدر_2)
+      توڑو;
+    اشاریہ_List.ڈالو_عقب(قدر_2);
   }
 }
 
-Error ELFCompactAttrParser::parseAttributeList(uint32_t length) {
+Error ELFCompactAttrParser::parseAttributeList(uint32_t لمبائی_2) {
   uint64_t pos;
-  uint64_t end = cursor.tell() + length;
-  while ((pos = cursor.tell()) < end) {
-    uint64_t tag = de.getULEB128(cursor);
-    bool handled;
-    if (Error e = handler(tag, handled))
-      return e;
+  uint64_t انتہا = cursor.tell() + لمبائی_2;
+  جب ((pos = cursor.tell()) < انتہا) {
+    uint64_t لیبل_2 = de.getULEB128(cursor);
+    منطقی handled;
+    اگر (Error e = handler(لیبل_2, handled))
+      واپس e;
 
-    if (!handled) {
-      if (tag < 32) {
-        return createStringError(errc::invalid_argument,
-                                 "invalid tag 0x" + Twine::utohexstr(tag) +
+    اگر (!handled) {
+      اگر (لیبل_2 < 32) {
+        واپس createStringError(errc::invalid_دلیل,
+                                 "invalid tag 0x" + Twine::utohexstr(لیبل_2) +
                                      " at offset 0x" + Twine::utohexstr(pos));
       }
 
-      if (tag % 2 == 0) {
-        if (Error e = integerAttribute(tag))
-          return e;
-      } else {
-        if (Error e = stringAttribute(tag))
-          return e;
+      اگر (لیبل_2 % 2 == 0) {
+        اگر (Error e = integerAttribute(لیبل_2))
+          واپس e;
+      } ورنہ {
+        اگر (Error e = stringAttribute(لیبل_2))
+          واپس e;
       }
     }
   }
-  return Error::success();
+  واپس Error::success();
 }
 
-Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
-  uint64_t end = cursor.tell() - sizeof(length) + length;
+Error ELFCompactAttrParser::parseSubsection(uint32_t لمبائی_2) {
+  uint64_t انتہا = cursor.tell() - حجم(لمبائی_2) + لمبائی_2;
   StringRef vendorName = de.getCStrRef(cursor);
-  if (sw) {
-    sw->printNumber("SectionLength", length);
+  اگر (sw) {
+    sw->print_نمبر("SectionLength", لمبائی_2);
     sw->printString("Vendor", vendorName);
   }
 
@@ -129,112 +129,112 @@ Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
   // over it to the next subsection. ADDENDA32 in the Arm ABI defines
   // that vendor attribute sections must not affect compatibility, so
   // this should always be safe.
-  if (vendorName.lower() != vendor) {
-    cursor.seek(end);
-    return Error::success();
+  اگر (vendorName.زیریں() != vendor) {
+    cursor.seek(انتہا);
+    واپس Error::success();
   }
 
-  while (cursor.tell() < end) {
+  جب (cursor.tell() < انتہا) {
     /// Tag_File | Tag_Section | Tag_Symbol   uleb128:byte-size
-    uint8_t tag = de.getU8(cursor);
-    uint32_t size = de.getU32(cursor);
-    if (!cursor)
-      return cursor.takeError();
+    uint8_t لیبل_2 = de.getU8(cursor);
+    uint32_t سائز_2 = de.getU32(cursor);
+    اگر (!cursor)
+      واپس cursor.takeError();
 
-    if (sw) {
-      constexpr EnumStringDef<unsigned> TagNameDefs[] = {
+    اگر (sw) {
+      constexpr EnumStringDef<غیرعلامتی> لیبل_Name_Defs[] = {
           {{"Tag_File"}, ELFAttrs::File},
           {{"Tag_Section"}, ELFAttrs::Section},
-          {{"Tag_Symbol"}, ELFAttrs::Symbol},
+          {{"Tag_Symbol"}, ELFAttrs::علامت},
       };
-      static constexpr auto TagNames = BUILD_ENUM_STRINGS(TagNameDefs);
+      ساکن constexpr خودکار لیبل_نام = BUILD_ENUM_لڑیاں(لیبل_Name_Defs);
 
-      sw->printEnum("Tag", tag, EnumStrings(TagNames));
-      sw->printNumber("Size", size);
+      sw->printEnum("Tag", لیبل_2, Enum_لڑیاں(لیبل_نام));
+      sw->print_نمبر("Size", سائز_2);
     }
-    if (size < 5)
-      return createStringError(errc::invalid_argument,
-                               "invalid attribute size " + Twine(size) +
+    اگر (سائز_2 < 5)
+      واپس createStringError(errc::invalid_دلیل,
+                               "invalid attribute size " + Twine(سائز_2) +
                                    " at offset 0x" +
                                    Twine::utohexstr(cursor.tell() - 5));
 
-    StringRef scopeName, indexName;
-    SmallVector<uint8_t, 8> indices;
-    switch (tag) {
-    case ELFAttrs::File:
+    StringRef scopeName, اشاریہ_Name;
+    Small_سمتیہ<uint8_t, 8> indices;
+    انتخاب (لیبل_2) {
+    حالت ELFAttrs::File:
       scopeName = "FileAttributes";
-      break;
-    case ELFAttrs::Section:
+      توڑو;
+    حالت ELFAttrs::Section:
       scopeName = "SectionAttributes";
-      indexName = "Sections";
-      parseIndexList(indices);
-      break;
-    case ELFAttrs::Symbol:
+      اشاریہ_Name = "Sections";
+      parse_اشاریہ_List(indices);
+      توڑو;
+    حالت ELFAttrs::علامت:
       scopeName = "SymbolAttributes";
-      indexName = "Symbols";
-      parseIndexList(indices);
-      break;
-    default:
-      return createStringError(errc::invalid_argument,
-                               "unrecognized tag 0x" + Twine::utohexstr(tag) +
+      اشاریہ_Name = "Symbols";
+      parse_اشاریہ_List(indices);
+      توڑو;
+    طےشدہ:
+      واپس createStringError(errc::invalid_دلیل,
+                               "unrecognized tag 0x" + Twine::utohexstr(لیبل_2) +
                                    " at offset 0x" +
                                    Twine::utohexstr(cursor.tell() - 5));
     }
 
-    if (sw) {
+    اگر (sw) {
       DictScope scope(*sw, scopeName);
-      if (!indices.empty())
-        sw->printList(indexName, indices);
-      if (Error e = parseAttributeList(size - 5))
-        return e;
-    } else if (Error e = parseAttributeList(size - 5))
-      return e;
+      اگر (!indices.خالی_خانے())
+        sw->printList(اشاریہ_Name, indices);
+      اگر (Error e = parseAttributeList(سائز_2 - 5))
+        واپس e;
+    } ورنہ اگر (Error e = parseAttributeList(سائز_2 - 5))
+      واپس e;
   }
-  return Error::success();
+  واپس Error::success();
 }
 
 Error ELFCompactAttrParser::parse(ArrayRef<uint8_t> section,
                                   llvm::endianness endian) {
-  unsigned sectionNumber = 0;
-  de = DataExtractor(section, endian == llvm::endianness::little);
+  غیرعلامتی section_نمبر = 0;
+  de = ڈیٹا_Extractor(section, endian == llvm::endianness::little);
 
   // For early returns, we have more specific errors, consume the Error in
   // cursor.
-  struct ClearCursorError {
-    DataExtractor::Cursor &cursor;
+  ساخت ClearCursorError {
+    ڈیٹا_Extractor::Cursor &cursor;
     ~ClearCursorError() { consumeError(cursor.takeError()); }
   } clear{cursor};
 
   // Unrecognized format-version.
-  uint8_t formatVersion = de.getU8(cursor);
-  if (formatVersion != ELFAttrs::Format_Version)
-    return createStringError(errc::invalid_argument,
+  uint8_t format_نسخہ = de.getU8(cursor);
+  اگر (format_نسخہ != ELFAttrs::Format_نسخہ)
+    واپس createStringError(errc::invalid_دلیل,
                              "unrecognized format-version: 0x" +
-                                 utohexstr(formatVersion));
+                                 utohexstr(format_نسخہ));
 
-  while (!de.eof(cursor)) {
-    uint32_t sectionLength = de.getU32(cursor);
-    if (!cursor)
-      return cursor.takeError();
+  جب (!de.eof(cursor)) {
+    uint32_t section_لمبائی = de.getU32(cursor);
+    اگر (!cursor)
+      واپس cursor.takeError();
 
-    if (sw) {
-      sw->startLine() << "Section " << ++sectionNumber << " {\n";
+    اگر (sw) {
+      sw->آغاز_سطر() << "Section " << ++section_نمبر << " {\n";
       sw->indent();
     }
 
-    if (sectionLength < 4 || cursor.tell() - 4 + sectionLength > section.size())
-      return createStringError(errc::invalid_argument,
+    اگر (section_لمبائی < 4 || cursor.tell() - 4 + section_لمبائی > section.سائز_2())
+      واپس createStringError(errc::invalid_دلیل,
                                "invalid section length " +
-                                   Twine(sectionLength) + " at offset 0x" +
+                                   Twine(section_لمبائی) + " at offset 0x" +
                                    utohexstr(cursor.tell() - 4));
 
-    if (Error e = parseSubsection(sectionLength))
-      return e;
-    if (sw) {
+    اگر (Error e = parseSubsection(section_لمبائی))
+      واپس e;
+    اگر (sw) {
       sw->unindent();
-      sw->startLine() << "}\n";
+      sw->آغاز_سطر() << "}\n";
     }
   }
 
-  return cursor.takeError();
+  واپس cursor.takeError();
 }

@@ -6,312 +6,312 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/bit.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <string>
-#include <vector>
+#شامل "llvm/ADT/ArrayRef.h"
+#شامل "llvm/ADT/StringRef.h"
+#شامل "llvm/ADT/bit.h"
+#شامل "llvm/Support/ConvertUTF.h"
+#شامل "llvm/Support/ErrorHandling.h"
+#شامل <string>
+#شامل <vector>
 
-namespace llvm {
+نامخلا llvm {
 
-bool ConvertUTF8toWide(unsigned WideCharWidth, llvm::StringRef Source,
-                       char *&ResultPtr, const UTF8 *&ErrorPtr) {
-  assert(WideCharWidth == 1 || WideCharWidth == 2 || WideCharWidth == 4);
-  ConversionResult result = conversionOK;
+منطقی ConvertUTF8toWide(غیرعلامتی Wide_Char_چوڑائی, llvm::StringRef ماخذ,
+                       حرف *&نتیجہ_Ptr, ثابت UTF8 *&ErrorPtr) {
+  أكد(Wide_Char_چوڑائی == 1 || Wide_Char_چوڑائی == 2 || Wide_Char_چوڑائی == 4);
+  Conversion_نتیجہ نتیجہ_2 = conversionOK;
   // Copy the character span over.
-  if (WideCharWidth == 1) {
-    const UTF8 *Pos = reinterpret_cast<const UTF8*>(Source.begin());
-    if (!isLegalUTF8String(&Pos, reinterpret_cast<const UTF8*>(Source.end()))) {
-      result = sourceIllegal;
+  اگر (Wide_Char_چوڑائی == 1) {
+    ثابت UTF8 *Pos = reinterpret_cast<ثابت UTF8*>(ماخذ.begin());
+    اگر (!isLegalUTF8String(&Pos, reinterpret_cast<ثابت UTF8*>(ماخذ.انتہا()))) {
+      نتیجہ_2 = ماخذ_Illegal;
       ErrorPtr = Pos;
-    } else {
-      memcpy(ResultPtr, Source.data(), Source.size());
-      ResultPtr += Source.size();
+    } ورنہ {
+      حافظہ_نقل(نتیجہ_Ptr, ماخذ.ڈیٹا(), ماخذ.سائز_2());
+      نتیجہ_Ptr += ماخذ.سائز_2();
     }
-  } else if (WideCharWidth == 2) {
-    const UTF8 *sourceStart = (const UTF8*)Source.data();
+  } ورنہ اگر (Wide_Char_چوڑائی == 2) {
+    ثابت UTF8 *ماخذ_آغاز = (ثابت UTF8*)ماخذ.ڈیٹا();
     // FIXME: Make the type of the result buffer correct instead of
     // using reinterpret_cast.
-    UTF16 *targetStart = reinterpret_cast<UTF16 *>(ResultPtr);
+    UTF16 *ہدف_آغاز = reinterpret_cast<UTF16 *>(نتیجہ_Ptr);
     ConversionFlags flags = strictConversion;
-    result =
-        ConvertUTF8toUTF16(&sourceStart, sourceStart + Source.size(),
-                           &targetStart, targetStart + Source.size(), flags);
-    if (result == conversionOK)
-      ResultPtr = reinterpret_cast<char *>(targetStart);
-    else
-      ErrorPtr = sourceStart;
-  } else if (WideCharWidth == 4) {
-    const UTF8 *sourceStart = (const UTF8 *)Source.data();
+    نتیجہ_2 =
+        ConvertUTF8toUTF16(&ماخذ_آغاز, ماخذ_آغاز + ماخذ.سائز_2(),
+                           &ہدف_آغاز, ہدف_آغاز + ماخذ.سائز_2(), flags);
+    اگر (نتیجہ_2 == conversionOK)
+      نتیجہ_Ptr = reinterpret_cast<حرف *>(ہدف_آغاز);
+    ورنہ
+      ErrorPtr = ماخذ_آغاز;
+  } ورنہ اگر (Wide_Char_چوڑائی == 4) {
+    ثابت UTF8 *ماخذ_آغاز = (ثابت UTF8 *)ماخذ.ڈیٹا();
     // FIXME: Make the type of the result buffer correct instead of
     // using reinterpret_cast.
-    UTF32 *targetStart = reinterpret_cast<UTF32 *>(ResultPtr);
+    UTF32 *ہدف_آغاز = reinterpret_cast<UTF32 *>(نتیجہ_Ptr);
     ConversionFlags flags = strictConversion;
-    result =
-        ConvertUTF8toUTF32(&sourceStart, sourceStart + Source.size(),
-                           &targetStart, targetStart + Source.size(), flags);
-    if (result == conversionOK)
-      ResultPtr = reinterpret_cast<char *>(targetStart);
-    else
-      ErrorPtr = sourceStart;
+    نتیجہ_2 =
+        ConvertUTF8toUTF32(&ماخذ_آغاز, ماخذ_آغاز + ماخذ.سائز_2(),
+                           &ہدف_آغاز, ہدف_آغاز + ماخذ.سائز_2(), flags);
+    اگر (نتیجہ_2 == conversionOK)
+      نتیجہ_Ptr = reinterpret_cast<حرف *>(ہدف_آغاز);
+    ورنہ
+      ErrorPtr = ماخذ_آغاز;
   }
-  assert((result != targetExhausted) &&
+  أكد((نتیجہ_2 != ہدف_Exhausted) &&
          "ConvertUTF8toUTFXX exhausted target buffer");
-  return result == conversionOK;
+  واپس نتیجہ_2 == conversionOK;
 }
 
-bool ConvertCodePointToUTF8(unsigned Source, char *&ResultPtr) {
-  const UTF32 *SourceStart = &Source;
-  const UTF32 *SourceEnd = SourceStart + 1;
-  UTF8 *TargetStart = reinterpret_cast<UTF8 *>(ResultPtr);
-  UTF8 *TargetEnd = TargetStart + 4;
-  ConversionResult CR = ConvertUTF32toUTF8(
-      &SourceStart, SourceEnd, &TargetStart, TargetEnd, strictConversion);
-  if (CR != conversionOK)
-    return false;
+منطقی Convert_رمز_نقطہ_مقصد_UTF8(غیرعلامتی ماخذ, حرف *&نتیجہ_Ptr) {
+  ثابت UTF32 *ماخذ_آغاز_2 = &ماخذ;
+  ثابت UTF32 *ماخذ_انتہا_2 = ماخذ_آغاز_2 + 1;
+  UTF8 *ہدف_آغاز_2 = reinterpret_cast<UTF8 *>(نتیجہ_Ptr);
+  UTF8 *ہدف_انتہا_2 = ہدف_آغاز_2 + 4;
+  Conversion_نتیجہ CR = ConvertUTF32toUTF8(
+      &ماخذ_آغاز_2, ماخذ_انتہا_2, &ہدف_آغاز_2, ہدف_انتہا_2, strictConversion);
+  اگر (CR != conversionOK)
+    واپس جھوٹ;
 
-  ResultPtr = reinterpret_cast<char *>(TargetStart);
-  return true;
+  نتیجہ_Ptr = reinterpret_cast<حرف *>(ہدف_آغاز_2);
+  واپس سچ;
 }
 
-bool hasUTF16ByteOrderMark(ArrayRef<char> S) {
-  return (S.size() >= 2 && ((S[0] == '\xff' && S[1] == '\xfe') ||
+منطقی has_UTF16_Byte_ترتیب_Mark(ArrayRef<حرف> S) {
+  واپس (S.سائز_2() >= 2 && ((S[0] == '\xff' && S[1] == '\xfe') ||
                             (S[0] == '\xfe' && S[1] == '\xff')));
 }
 
-bool convertUTF16ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
-  assert(Out.empty());
+منطقی convert_UTF16_مقصد_UTF8_String(ArrayRef<حرف> Src_بائٹیں, std::string &برآمد) {
+  أكد(برآمد.خالی_خانے());
 
   // Error out on an uneven byte count.
-  if (SrcBytes.size() % 2)
-    return false;
+  اگر (Src_بائٹیں.سائز_2() % 2)
+    واپس جھوٹ;
 
   // Avoid OOB by returning early on empty input.
-  if (SrcBytes.empty())
-    return true;
+  اگر (Src_بائٹیں.خالی_خانے())
+    واپس سچ;
 
-  const UTF16 *Src = reinterpret_cast<const UTF16 *>(SrcBytes.begin());
-  const UTF16 *SrcEnd = reinterpret_cast<const UTF16 *>(SrcBytes.end());
+  ثابت UTF16 *Src = reinterpret_cast<ثابت UTF16 *>(Src_بائٹیں.begin());
+  ثابت UTF16 *Src_انتہا = reinterpret_cast<ثابت UTF16 *>(Src_بائٹیں.انتہا());
 
-  assert((uintptr_t)Src % sizeof(UTF16) == 0);
+  أكد((uintptr_t)Src % حجم(UTF16) == 0);
 
   // Byteswap if necessary.
-  std::vector<UTF16> ByteSwapped;
-  if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
-    for (UTF16 &I : ByteSwapped)
+  std::سمتیہ<UTF16> ByteSwapped;
+  اگر (Src[0] == UNI_UTF16_BYTE_ترتیب_MARK_SWAPPED) {
+    ByteSwapped.داخل_کرو(ByteSwapped.انتہا(), Src, Src_انتہا);
+    برائے (UTF16 &I : ByteSwapped)
       I = llvm::byteswap<uint16_t>(I);
     Src = &ByteSwapped[0];
-    SrcEnd = &ByteSwapped[ByteSwapped.size() - 1] + 1;
+    Src_انتہا = &ByteSwapped[ByteSwapped.سائز_2() - 1] + 1;
   }
 
   // Skip the BOM for conversion.
-  if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_NATIVE)
+  اگر (Src[0] == UNI_UTF16_BYTE_ترتیب_MARK_NATIVE)
     Src++;
 
   // Just allocate enough space up front.  We'll shrink it later.  Allocate
   // enough that we can fit a null terminator without reallocating.
-  Out.resize(SrcBytes.size() * UNI_MAX_UTF8_BYTES_PER_CODE_POINT + 1);
-  UTF8 *Dst = reinterpret_cast<UTF8 *>(&Out[0]);
-  UTF8 *DstEnd = Dst + Out.size();
+  برآمد.resize(Src_بائٹیں.سائز_2() * UNI_MAX_UTF8_بائٹیں_فی_رمز_نقطہ + 1);
+  UTF8 *Dst = reinterpret_cast<UTF8 *>(&برآمد[0]);
+  UTF8 *Dst_انتہا = Dst + برآمد.سائز_2();
 
-  ConversionResult CR =
-      ConvertUTF16toUTF8(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  Conversion_نتیجہ CR =
+      ConvertUTF16toUTF8(&Src, Src_انتہا, &Dst, Dst_انتہا, strictConversion);
+  أكد(CR != ہدف_Exhausted);
 
-  if (CR != conversionOK) {
-    Out.clear();
-    return false;
+  اگر (CR != conversionOK) {
+    برآمد.clear();
+    واپس جھوٹ;
   }
 
-  Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
-  return true;
+  برآمد.resize(reinterpret_cast<حرف *>(Dst) - &برآمد[0]);
+  برآمد.ڈالو_عقب(0);
+  برآمد.نکالو_عقب();
+  واپس سچ;
 }
 
-bool convertUTF16ToUTF8String(ArrayRef<UTF16> Src, std::string &Out) {
-  return convertUTF16ToUTF8String(
-      llvm::ArrayRef<char>(reinterpret_cast<const char *>(Src.data()),
-                           Src.size() * sizeof(UTF16)),
-      Out);
+منطقی convert_UTF16_مقصد_UTF8_String(ArrayRef<UTF16> Src, std::string &برآمد) {
+  واپس convert_UTF16_مقصد_UTF8_String(
+      llvm::ArrayRef<حرف>(reinterpret_cast<ثابت حرف *>(Src.ڈیٹا()),
+                           Src.سائز_2() * حجم(UTF16)),
+      برآمد);
 }
 
-bool convertUTF32ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
-  assert(Out.empty());
+منطقی convert_UTF32_مقصد_UTF8_String(ArrayRef<حرف> Src_بائٹیں, std::string &برآمد) {
+  أكد(برآمد.خالی_خانے());
 
   // Error out on an uneven byte count.
-  if (SrcBytes.size() % 4)
-    return false;
+  اگر (Src_بائٹیں.سائز_2() % 4)
+    واپس جھوٹ;
 
   // Avoid OOB by returning early on empty input.
-  if (SrcBytes.empty())
-    return true;
+  اگر (Src_بائٹیں.خالی_خانے())
+    واپس سچ;
 
-  const UTF32 *Src = reinterpret_cast<const UTF32 *>(SrcBytes.begin());
-  const UTF32 *SrcEnd = reinterpret_cast<const UTF32 *>(SrcBytes.end());
+  ثابت UTF32 *Src = reinterpret_cast<ثابت UTF32 *>(Src_بائٹیں.begin());
+  ثابت UTF32 *Src_انتہا = reinterpret_cast<ثابت UTF32 *>(Src_بائٹیں.انتہا());
 
-  assert((uintptr_t)Src % sizeof(UTF32) == 0);
+  أكد((uintptr_t)Src % حجم(UTF32) == 0);
 
   // Byteswap if necessary.
-  std::vector<UTF32> ByteSwapped;
-  if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
-    for (UTF32 &I : ByteSwapped)
+  std::سمتیہ<UTF32> ByteSwapped;
+  اگر (Src[0] == UNI_UTF32_BYTE_ترتیب_MARK_SWAPPED) {
+    ByteSwapped.داخل_کرو(ByteSwapped.انتہا(), Src, Src_انتہا);
+    برائے (UTF32 &I : ByteSwapped)
       I = llvm::byteswap<uint32_t>(I);
     Src = &ByteSwapped[0];
-    SrcEnd = &ByteSwapped[ByteSwapped.size() - 1] + 1;
+    Src_انتہا = &ByteSwapped[ByteSwapped.سائز_2() - 1] + 1;
   }
 
   // Skip the BOM for conversion.
-  if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_NATIVE)
+  اگر (Src[0] == UNI_UTF32_BYTE_ترتیب_MARK_NATIVE)
     Src++;
 
   // Just allocate enough space up front.  We'll shrink it later.  Allocate
   // enough that we can fit a null terminator without reallocating.
-  Out.resize(SrcBytes.size() * UNI_MAX_UTF8_BYTES_PER_CODE_POINT + 1);
-  UTF8 *Dst = reinterpret_cast<UTF8 *>(&Out[0]);
-  UTF8 *DstEnd = Dst + Out.size();
+  برآمد.resize(Src_بائٹیں.سائز_2() * UNI_MAX_UTF8_بائٹیں_فی_رمز_نقطہ + 1);
+  UTF8 *Dst = reinterpret_cast<UTF8 *>(&برآمد[0]);
+  UTF8 *Dst_انتہا = Dst + برآمد.سائز_2();
 
-  ConversionResult CR =
-      ConvertUTF32toUTF8(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  Conversion_نتیجہ CR =
+      ConvertUTF32toUTF8(&Src, Src_انتہا, &Dst, Dst_انتہا, strictConversion);
+  أكد(CR != ہدف_Exhausted);
 
-  if (CR != conversionOK) {
-    Out.clear();
-    return false;
+  اگر (CR != conversionOK) {
+    برآمد.clear();
+    واپس جھوٹ;
   }
 
-  Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
-  return true;
+  برآمد.resize(reinterpret_cast<حرف *>(Dst) - &برآمد[0]);
+  برآمد.ڈالو_عقب(0);
+  برآمد.نکالو_عقب();
+  واپس سچ;
 }
 
-bool convertUTF32ToUTF8String(ArrayRef<UTF32> Src, std::string &Out) {
-  return convertUTF32ToUTF8String(
-      llvm::ArrayRef<char>(reinterpret_cast<const char *>(Src.data()),
-                           Src.size() * sizeof(UTF32)),
-      Out);
+منطقی convert_UTF32_مقصد_UTF8_String(ArrayRef<UTF32> Src, std::string &برآمد) {
+  واپس convert_UTF32_مقصد_UTF8_String(
+      llvm::ArrayRef<حرف>(reinterpret_cast<ثابت حرف *>(Src.ڈیٹا()),
+                           Src.سائز_2() * حجم(UTF32)),
+      برآمد);
 }
 
-bool convertUTF8ToUTF16String(StringRef SrcUTF8,
-                              SmallVectorImpl<UTF16> &DstUTF16) {
-  assert(DstUTF16.empty());
+منطقی convert_UTF8_مقصد_UTF16_String(StringRef SrcUTF8,
+                              Small_سمتیہ_Impl<UTF16> &DstUTF16) {
+  أكد(DstUTF16.خالی_خانے());
 
   // Avoid OOB by returning early on empty input.
-  if (SrcUTF8.empty()) {
-    DstUTF16.push_back(0);
-    DstUTF16.pop_back();
-    return true;
+  اگر (SrcUTF8.خالی_خانے()) {
+    DstUTF16.ڈالو_عقب(0);
+    DstUTF16.نکالو_عقب();
+    واپس سچ;
   }
 
-  const UTF8 *Src = reinterpret_cast<const UTF8 *>(SrcUTF8.begin());
-  const UTF8 *SrcEnd = reinterpret_cast<const UTF8 *>(SrcUTF8.end());
+  ثابت UTF8 *Src = reinterpret_cast<ثابت UTF8 *>(SrcUTF8.begin());
+  ثابت UTF8 *Src_انتہا = reinterpret_cast<ثابت UTF8 *>(SrcUTF8.انتہا());
 
   // Allocate the same number of UTF-16 code units as UTF-8 code units. Encoding
   // as UTF-16 should always require the same amount or less code units than the
   // UTF-8 encoding.  Allocate one extra byte for the null terminator though,
   // so that someone calling DstUTF16.data() gets a null terminated string.
   // We resize down later so we don't have to worry that this over allocates.
-  DstUTF16.resize(SrcUTF8.size()+1);
+  DstUTF16.resize(SrcUTF8.سائز_2()+1);
   UTF16 *Dst = &DstUTF16[0];
-  UTF16 *DstEnd = Dst + DstUTF16.size();
+  UTF16 *Dst_انتہا = Dst + DstUTF16.سائز_2();
 
-  ConversionResult CR =
-      ConvertUTF8toUTF16(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  Conversion_نتیجہ CR =
+      ConvertUTF8toUTF16(&Src, Src_انتہا, &Dst, Dst_انتہا, strictConversion);
+  أكد(CR != ہدف_Exhausted);
 
-  if (CR != conversionOK) {
+  اگر (CR != conversionOK) {
     DstUTF16.clear();
-    return false;
+    واپس جھوٹ;
   }
 
   DstUTF16.resize(Dst - &DstUTF16[0]);
-  DstUTF16.push_back(0);
-  DstUTF16.pop_back();
-  return true;
+  DstUTF16.ڈالو_عقب(0);
+  DstUTF16.نکالو_عقب();
+  واپس سچ;
 }
 
-static_assert(sizeof(wchar_t) == 1 || sizeof(wchar_t) == 2 ||
-                  sizeof(wchar_t) == 4,
+static_assert(حجم(wchar_t) == 1 || حجم(wchar_t) == 2 ||
+                  حجم(wchar_t) == 4,
               "Expected wchar_t to be 1, 2, or 4 bytes");
 
-template <typename TResult>
-static inline bool ConvertUTF8toWideInternal(llvm::StringRef Source,
-                                             TResult &Result) {
+سانچہ <قسم_نام TResult>
+ساکن اندرونی منطقی Convert_UTF8to_Wide_اندرونی(llvm::StringRef ماخذ,
+                                             TResult &نتیجہ) {
   // Even in the case of UTF-16, the number of bytes in a UTF-8 string is
   // at least as large as the number of elements in the resulting wide
   // string, because surrogate pairs take at least 4 bytes in UTF-8.
-  Result.resize(Source.size() + 1);
-  char *ResultPtr = reinterpret_cast<char *>(&Result[0]);
-  const UTF8 *ErrorPtr;
-  if (!ConvertUTF8toWide(sizeof(wchar_t), Source, ResultPtr, ErrorPtr)) {
-    Result.clear();
-    return false;
+  نتیجہ.resize(ماخذ.سائز_2() + 1);
+  حرف *نتیجہ_Ptr = reinterpret_cast<حرف *>(&نتیجہ[0]);
+  ثابت UTF8 *ErrorPtr;
+  اگر (!ConvertUTF8toWide(حجم(wchar_t), ماخذ, نتیجہ_Ptr, ErrorPtr)) {
+    نتیجہ.clear();
+    واپس جھوٹ;
   }
-  Result.resize(reinterpret_cast<wchar_t *>(ResultPtr) - &Result[0]);
-  return true;
+  نتیجہ.resize(reinterpret_cast<wchar_t *>(نتیجہ_Ptr) - &نتیجہ[0]);
+  واپس سچ;
 }
 
-bool ConvertUTF8toWide(llvm::StringRef Source, std::wstring &Result) {
-  return ConvertUTF8toWideInternal(Source, Result);
+منطقی ConvertUTF8toWide(llvm::StringRef ماخذ, std::wstring &نتیجہ) {
+  واپس Convert_UTF8to_Wide_اندرونی(ماخذ, نتیجہ);
 }
 
-bool ConvertUTF8toWide(const char *Source, std::wstring &Result) {
-  if (!Source) {
-    Result.clear();
-    return true;
+منطقی ConvertUTF8toWide(ثابت حرف *ماخذ, std::wstring &نتیجہ) {
+  اگر (!ماخذ) {
+    نتیجہ.clear();
+    واپس سچ;
   }
-  return ConvertUTF8toWide(llvm::StringRef(Source), Result);
+  واپس ConvertUTF8toWide(llvm::StringRef(ماخذ), نتیجہ);
 }
 
-bool convertWideToUTF8(std::wstring_view Source, std::string &Result) {
-  if (sizeof(wchar_t) == 1) {
-    const UTF8 *Start = reinterpret_cast<const UTF8 *>(Source.data());
-    const UTF8 *End =
-        reinterpret_cast<const UTF8 *>(Source.data() + Source.size());
-    if (!isLegalUTF8String(&Start, End))
-      return false;
-    Result.resize(Source.size());
-    memcpy(&Result[0], Source.data(), Source.size());
-    return true;
-  } else if (sizeof(wchar_t) == 2) {
-    return convertUTF16ToUTF8String(
-        llvm::ArrayRef<UTF16>(reinterpret_cast<const UTF16 *>(Source.data()),
-                              Source.size()),
-        Result);
-  } else if (sizeof(wchar_t) == 4) {
-    const UTF32 *Start = reinterpret_cast<const UTF32 *>(Source.data());
-    const UTF32 *End =
-        reinterpret_cast<const UTF32 *>(Source.data() + Source.size());
-    Result.resize(UNI_MAX_UTF8_BYTES_PER_CODE_POINT * Source.size());
-    UTF8 *ResultPtr = reinterpret_cast<UTF8 *>(&Result[0]);
-    UTF8 *ResultEnd = reinterpret_cast<UTF8 *>(&Result[0] + Result.size());
-    if (ConvertUTF32toUTF8(&Start, End, &ResultPtr, ResultEnd,
+منطقی convert_Wide_مقصد_UTF8(std::wstring_view ماخذ, std::string &نتیجہ) {
+  اگر (حجم(wchar_t) == 1) {
+    ثابت UTF8 *آغاز = reinterpret_cast<ثابت UTF8 *>(ماخذ.ڈیٹا());
+    ثابت UTF8 *انتہا_2 =
+        reinterpret_cast<ثابت UTF8 *>(ماخذ.ڈیٹا() + ماخذ.سائز_2());
+    اگر (!isLegalUTF8String(&آغاز, انتہا_2))
+      واپس جھوٹ;
+    نتیجہ.resize(ماخذ.سائز_2());
+    حافظہ_نقل(&نتیجہ[0], ماخذ.ڈیٹا(), ماخذ.سائز_2());
+    واپس سچ;
+  } ورنہ اگر (حجم(wchar_t) == 2) {
+    واپس convert_UTF16_مقصد_UTF8_String(
+        llvm::ArrayRef<UTF16>(reinterpret_cast<ثابت UTF16 *>(ماخذ.ڈیٹا()),
+                              ماخذ.سائز_2()),
+        نتیجہ);
+  } ورنہ اگر (حجم(wchar_t) == 4) {
+    ثابت UTF32 *آغاز = reinterpret_cast<ثابت UTF32 *>(ماخذ.ڈیٹا());
+    ثابت UTF32 *انتہا_2 =
+        reinterpret_cast<ثابت UTF32 *>(ماخذ.ڈیٹا() + ماخذ.سائز_2());
+    نتیجہ.resize(UNI_MAX_UTF8_بائٹیں_فی_رمز_نقطہ * ماخذ.سائز_2());
+    UTF8 *نتیجہ_Ptr = reinterpret_cast<UTF8 *>(&نتیجہ[0]);
+    UTF8 *نتیجہ_انتہا = reinterpret_cast<UTF8 *>(&نتیجہ[0] + نتیجہ.سائز_2());
+    اگر (ConvertUTF32toUTF8(&آغاز, انتہا_2, &نتیجہ_Ptr, نتیجہ_انتہا,
                            strictConversion) == conversionOK) {
-      Result.resize(reinterpret_cast<char *>(ResultPtr) - &Result[0]);
-      return true;
-    } else {
-      Result.clear();
-      return false;
+      نتیجہ.resize(reinterpret_cast<حرف *>(نتیجہ_Ptr) - &نتیجہ[0]);
+      واپس سچ;
+    } ورنہ {
+      نتیجہ.clear();
+      واپس جھوٹ;
     }
-  } else {
+  } ورنہ {
     llvm_unreachable(
         "Control should never reach this point; see static_assert further up");
   }
 }
 
-bool IsSingleCodeUnitUTF8Codepoint(unsigned V) { return V <= 0x7F; }
+منطقی Is_Single_رمز_Unit_UTF8_Codepoint(غیرعلامتی V) { واپس V <= 0x7F; }
 
-bool IsSingleCodeUnitUTF16Codepoint(unsigned V) {
-  return V <= 0xD7FF || (V >= 0xE000 && V <= 0xFFFF);
+منطقی Is_Single_رمز_Unit_UTF16_Codepoint(غیرعلامتی V) {
+  واپس V <= 0xD7FF || (V >= 0xE000 && V <= 0xFFFF);
 }
 
-bool IsSingleCodeUnitUTF32Codepoint(unsigned V) {
-  return V <= 0xD7FF || (V >= 0xE000 && V <= 0x10FFFF);
+منطقی Is_Single_رمز_Unit_UTF32_Codepoint(غیرعلامتی V) {
+  واپس V <= 0xD7FF || (V >= 0xE000 && V <= 0x10FFFF);
 }
 
 } // end namespace llvm

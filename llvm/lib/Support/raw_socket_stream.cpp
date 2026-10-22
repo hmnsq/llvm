@@ -11,137 +11,137 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_socket_stream.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/FileSystem.h"
+#شامل "llvm/Support/raw_socket_stream.h"
+#شامل "llvm/Config/config.h"
+#شامل "llvm/Support/Error.h"
+#شامل "llvm/Support/FileSystem.h"
 
-#include <atomic>
-#include <fcntl.h>
-#include <functional>
+#شامل <atomic>
+#شامل <fcntl.h>
+#شامل <functional>
 
-#ifndef _WIN32
-#include <poll.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#else
-#include "llvm/Support/Windows/WindowsSupport.h"
+#اگر_غیر_تعریف_شدہ _WIN32
+#شامل <poll.h>
+#شامل <sys/socket.h>
+#شامل <sys/un.h>
+#ورنہ
+#شامل "llvm/Support/Windows/WindowsSupport.h"
 // winsock2.h must be included before afunix.h. Briefly turn off clang-format to
 // avoid error.
 // clang-format off
-#include <winsock2.h>
-#include <afunix.h>
+#شامل <winsock2.h>
+#شامل <afunix.h>
 // clang-format on
-#include <io.h>
-#endif // _WIN32
+#شامل <io.h>
+#اگر_ختم // _WIN32
 
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
+#اگر defined(HAVE_UNISTD_H)
+#شامل <unistd.h>
+#اگر_ختم
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-#ifdef _WIN32
+#اگر_تعریف_شدہ _WIN32
 WSABalancer::WSABalancer() {
-  WSADATA WsaData;
-  ::memset(&WsaData, 0, sizeof(WsaData));
-  if (WSAStartup(MAKEWORD(2, 2), &WsaData) != 0) {
+  WSADATA Wsa_ڈیٹا;
+  ::memset(&Wsa_ڈیٹا, 0, حجم(Wsa_ڈیٹا));
+  اگر (WSAStartup(MAKEWORD(2, 2), &Wsa_ڈیٹا) != 0) {
     llvm::report_fatal_error("WSAStartup failed");
   }
 }
 
 WSABalancer::~WSABalancer() { WSACleanup(); }
-#endif // _WIN32
+#اگر_ختم // _WIN32
 
-static std::error_code getLastSocketErrorCode() {
-#ifdef _WIN32
-  return std::error_code(::WSAGetLastError(), std::system_category());
-#else
-  return errnoAsErrorCode();
-#endif
+ساکن std::error_رمز get_آخری_Socket_Error_رمز() {
+#اگر_تعریف_شدہ _WIN32
+  واپس std::error_رمز(::WSAGet_آخری_Error(), std::system_category());
+#ورنہ
+  واپس errno_As_Error_رمز();
+#اگر_ختم
 }
 
-#ifdef _WIN32
-using NativeSocket = SOCKET;
-#else
-using NativeSocket = int;
-#define INVALID_SOCKET -1
-#endif
+#اگر_تعریف_شدہ _WIN32
+استعمال NativeSocket = SOCKET;
+#ورنہ
+استعمال NativeSocket = صحیح;
+#تعریف_کرو INVALID_SOCKET -1
+#اگر_ختم
 
-static int closeSocket(NativeSocket Socket) {
-#ifdef _WIN32
-  return ::closesocket(Socket);
-#else
-  return ::close(Socket);
-#endif
+ساکن صحیح closeSocket(NativeSocket Socket) {
+#اگر_تعریف_شدہ _WIN32
+  واپس ::closesocket(Socket);
+#ورنہ
+  واپس ::close(Socket);
+#اگر_ختم
 }
 
-static Expected<sockaddr_un> setSocketAddr(StringRef SocketPath) {
-  struct sockaddr_un Addr;
-  memset(&Addr, 0, sizeof(Addr));
+ساکن Expected<sockaddr_un> سیٹ_Socket_Addr(StringRef Socket_راستہ) {
+  ساخت sockaddr_un Addr;
+  memset(&Addr, 0, حجم(Addr));
   Addr.sun_family = AF_UNIX;
 
-  if (sizeof(sockaddr_un::sun_path) <= SocketPath.size())
-    return make_error<StringError>(
-        std::make_error_code(std::errc::filename_too_long),
+  اگر (حجم(sockaddr_un::sun_راستہ) <= Socket_راستہ.سائز_2())
+    واپس make_error<StringError>(
+        std::make_error_رمز(std::errc::filename_too_long),
         "Socket path exceeds sockaddr_un::sun_path size limit");
 
-  strncpy(Addr.sun_path, SocketPath.str().c_str(), sizeof(Addr.sun_path) - 1);
-  return Addr;
+  strncpy(Addr.sun_راستہ, Socket_راستہ.str().c_str(), حجم(Addr.sun_راستہ) - 1);
+  واپس Addr;
 }
 
-static Expected<int> getSocketFD(StringRef SocketPath) {
-  NativeSocket Socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (Socket == INVALID_SOCKET) {
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+ساکن Expected<صحیح> getSocketFD(StringRef Socket_راستہ) {
+  NativeSocket Socket = socket(AF_UNIX, SOCK_دھارا, 0);
+  اگر (Socket == INVALID_SOCKET) {
+    واپس llvm::make_error<StringError>(get_آخری_Socket_Error_رمز(),
                                          "Create socket failed");
   }
 
-#ifdef __CYGWIN__
+#اگر_تعریف_شدہ __CYGWIN__
   // On Cygwin, UNIX sockets involve a handshake between connect and accept
   // to enable SO_PEERCRED/getpeereid handling.  This necessitates accept being
   // called before connect can return, but at least the tests in
   // llvm/unittests/Support/raw_socket_stream_test do both on the same thread
   // (first connect and then accept), resulting in a deadlock.  This call turns
   // off the handshake (and SO_PEERCRED/getpeereid support).
-  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, NULL, 0);
-#endif
-  Expected<struct sockaddr_un> Addr = setSocketAddr(SocketPath);
-  if (!Addr) {
+  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, تہی, 0);
+#اگر_ختم
+  Expected<ساخت sockaddr_un> Addr = سیٹ_Socket_Addr(Socket_راستہ);
+  اگر (!Addr) {
     closeSocket(Socket);
-    return Addr.takeError();
+    واپس Addr.takeError();
   }
 
-  if (::connect(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
+  اگر (::connect(Socket, (ساخت sockaddr *)&*Addr, حجم(*Addr)) == -1) {
     // Grab the error code before closing, which may overwrite it.
-    std::error_code EC = getLastSocketErrorCode();
+    std::error_رمز EC = get_آخری_Socket_Error_رمز();
     closeSocket(Socket);
-    return llvm::make_error<StringError>(EC, "Connect socket failed");
+    واپس llvm::make_error<StringError>(EC, "Connect socket failed");
   }
 
-#ifdef _WIN32
-  return _open_osfhandle(Socket, 0);
-#else
-  return Socket;
-#endif // _WIN32
+#اگر_تعریف_شدہ _WIN32
+  واپس _open_osfhandle(Socket, 0);
+#ورنہ
+  واپس Socket;
+#اگر_ختم // _WIN32
 }
 
-ListeningSocket::ListeningSocket(int SocketFD, StringRef SocketPath,
-                                 int PipeFD[2])
-    : FD(SocketFD), SocketPath(SocketPath), PipeFD{PipeFD[0], PipeFD[1]} {}
+ListeningSocket::ListeningSocket(صحیح SocketFD, StringRef Socket_راستہ,
+                                 صحیح PipeFD[2])
+    : FD(SocketFD), Socket_راستہ(Socket_راستہ), PipeFD{PipeFD[0], PipeFD[1]} {}
 
 ListeningSocket::ListeningSocket(ListeningSocket &&LS)
-    : FD(LS.FD.load()), SocketPath(LS.SocketPath),
+    : FD(LS.FD.بھرو()), Socket_راستہ(LS.Socket_راستہ),
       PipeFD{LS.PipeFD[0], LS.PipeFD[1]} {
 
   LS.FD = -1;
-  LS.SocketPath.clear();
+  LS.Socket_راستہ.clear();
   LS.PipeFD[0] = -1;
   LS.PipeFD[1] = -1;
 }
 
-Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
-                                                      int MaxBacklog) {
+Expected<ListeningSocket> ListeningSocket::createUnix(StringRef Socket_راستہ,
+                                                      صحیح MaxBacklog) {
 
   // Handle instances where the target socket address already exists and
   // differentiate between a preexisting file with and without a bound socket
@@ -149,76 +149,76 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
   // ::bind will return std::errc:address_in_use if a file at the socket address
   // already exists (e.g., the file was not properly unlinked due to a crash)
   // even if another socket has not yet binded to that address
-  if (llvm::sys::fs::exists(SocketPath)) {
-    Expected<int> MaybeFD = getSocketFD(SocketPath);
-    if (!MaybeFD) {
+  اگر (llvm::sys::fs::exists(Socket_راستہ)) {
+    Expected<صحیح> MaybeFD = getSocketFD(Socket_راستہ);
+    اگر (!MaybeFD) {
 
       // Regardless of the error, notify the caller that a file already exists
       // at the desired socket address and that there is no bound socket at that
       // address. The file must be removed before ::bind can use the address
       consumeError(MaybeFD.takeError());
-      return llvm::make_error<StringError>(
-          std::make_error_code(std::errc::file_exists),
+      واپس llvm::make_error<StringError>(
+          std::make_error_رمز(std::errc::file_exists),
           "Socket address unavailable");
     }
     ::close(std::move(*MaybeFD));
 
     // Notify caller that the provided socket address already has a bound socket
-    return llvm::make_error<StringError>(
-        std::make_error_code(std::errc::address_in_use),
+    واپس llvm::make_error<StringError>(
+        std::make_error_رمز(std::errc::پتہ_اندر_use),
         "Socket address unavailable");
   }
 
-#ifdef _WIN32
+#اگر_تعریف_شدہ _WIN32
   WSABalancer _;
-#endif
-  NativeSocket Socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (Socket == INVALID_SOCKET)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+#اگر_ختم
+  NativeSocket Socket = socket(AF_UNIX, SOCK_دھارا, 0);
+  اگر (Socket == INVALID_SOCKET)
+    واپس llvm::make_error<StringError>(get_آخری_Socket_Error_رمز(),
                                          "socket create failed");
 
-#ifdef __CYGWIN__
+#اگر_تعریف_شدہ __CYGWIN__
   // On Cygwin, UNIX sockets involve a handshake between connect and accept
   // to enable SO_PEERCRED/getpeereid handling.  This necessitates accept being
   // called before connect can return, but at least the tests in
   // llvm/unittests/Support/raw_socket_stream_test do both on the same thread
   // (first connect and then accept), resulting in a deadlock.  This call turns
   // off the handshake (and SO_PEERCRED/getpeereid support).
-  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, NULL, 0);
-#endif
-  Expected<struct sockaddr_un> Addr = setSocketAddr(SocketPath);
-  if (!Addr) {
+  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, تہی, 0);
+#اگر_ختم
+  Expected<ساخت sockaddr_un> Addr = سیٹ_Socket_Addr(Socket_راستہ);
+  اگر (!Addr) {
     closeSocket(Socket);
-    return Addr.takeError();
+    واپس Addr.takeError();
   }
 
-  if (::bind(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
+  اگر (::bind(Socket, (ساخت sockaddr *)&*Addr, حجم(*Addr)) == -1) {
     // Grab error code from call to ::bind before closing the socket
-    std::error_code EC = getLastSocketErrorCode();
+    std::error_رمز EC = get_آخری_Socket_Error_رمز();
     closeSocket(Socket);
-    return llvm::make_error<StringError>(EC, "Bind error");
+    واپس llvm::make_error<StringError>(EC, "Bind error");
   }
 
   // Mark socket as passive so incoming connections can be accepted
-  if (::listen(Socket, MaxBacklog) == -1)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  اگر (::listen(Socket, MaxBacklog) == -1)
+    واپس llvm::make_error<StringError>(get_آخری_Socket_Error_رمز(),
                                          "Listen error");
 
-  int PipeFD[2];
-#ifdef _WIN32
+  صحیح PipeFD[2];
+#اگر_تعریف_شدہ _WIN32
   // Reserve 1 byte for the pipe and use default textmode
-  if (::_pipe(PipeFD, 1, 0) == -1)
-#else
-  if (::pipe(PipeFD) == -1)
-#endif // _WIN32
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  اگر (::_pipe(PipeFD, 1, 0) == -1)
+#ورنہ
+  اگر (::أنبوب(PipeFD) == -1)
+#اگر_ختم // _WIN32
+    واپس llvm::make_error<StringError>(get_آخری_Socket_Error_رمز(),
                                          "pipe failed");
 
-#ifdef _WIN32
-  return ListeningSocket{_open_osfhandle(Socket, 0), SocketPath, PipeFD};
-#else
-  return ListeningSocket{Socket, SocketPath, PipeFD};
-#endif // _WIN32
+#اگر_تعریف_شدہ _WIN32
+  واپس ListeningSocket{_open_osfhandle(Socket, 0), Socket_راستہ, PipeFD};
+#ورنہ
+  واپس ListeningSocket{Socket, Socket_راستہ, PipeFD};
+#اگر_ختم // _WIN32
 }
 
 // If a file descriptor being monitored by ::poll is closed by another thread,
@@ -230,111 +230,111 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
 // Timeout should be -1 to block indefinitly
 //
 // getActiveFD is a callback to handle ActiveFD's of std::atomic<int> and int
-static std::error_code
-manageTimeout(const std::chrono::milliseconds &Timeout,
-              const std::function<int()> &getActiveFD,
-              const std::optional<int> &CancelFD = std::nullopt) {
-  struct pollfd FD[2];
+ساکن std::error_رمز
+manageTimeout(ثابت std::chrono::milliseconds &Timeout,
+              ثابت std::function<صحیح()> &get_فعال_FD,
+              ثابت std::optional<صحیح> &CancelFD = std::nullopt) {
+  ساخت pollfd FD[2];
   FD[0].events = POLLIN;
-#ifdef _WIN32
-  SOCKET WinServerSock = _get_osfhandle(getActiveFD());
+#اگر_تعریف_شدہ _WIN32
+  SOCKET WinServerSock = _get_osfhandle(get_فعال_FD());
   FD[0].fd = WinServerSock;
-#else
-  FD[0].fd = getActiveFD();
-#endif
+#ورنہ
+  FD[0].fd = get_فعال_FD();
+#اگر_ختم
   uint8_t FDCount = 1;
-  if (CancelFD.has_value()) {
+  اگر (CancelFD.has_قدر_2()) {
     FD[1].events = POLLIN;
-    FD[1].fd = CancelFD.value();
+    FD[1].fd = CancelFD.قدر_2();
     FDCount++;
   }
 
   // Keep track of how much time has passed in case ::poll or WSAPoll are
   // interupted by a signal and need to be recalled
-  auto Start = std::chrono::steady_clock::now();
-  auto RemainingTimeout = Timeout;
-  int PollStatus = 0;
-  do {
+  خودکار آغاز = std::chrono::steady_clock::now();
+  خودکار بقایا_Timeout = Timeout;
+  صحیح Poll_حالت = 0;
+  کرو {
     // If Timeout is -1 then poll should block and RemainingTimeout does not
     // need to be recalculated
-    if (PollStatus != 0 && Timeout != std::chrono::milliseconds(-1)) {
-      auto TotalElapsedTime =
+    اگر (Poll_حالت != 0 && Timeout != std::chrono::milliseconds(-1)) {
+      خودکار کل_Elapsed_وقت =
           std::chrono::duration_cast<std::chrono::milliseconds>(
-              std::chrono::steady_clock::now() - Start);
+              std::chrono::steady_clock::now() - آغاز);
 
-      if (TotalElapsedTime >= Timeout)
-        return std::make_error_code(std::errc::operation_would_block);
+      اگر (کل_Elapsed_وقت >= Timeout)
+        واپس std::make_error_رمز(std::errc::operation_would_بلاک);
 
-      RemainingTimeout = Timeout - TotalElapsedTime;
+      بقایا_Timeout = Timeout - کل_Elapsed_وقت;
     }
-#ifdef _WIN32
-    PollStatus = WSAPoll(FD, FDCount, RemainingTimeout.count());
-  } while (PollStatus == SOCKET_ERROR &&
-           getLastSocketErrorCode() == std::errc::interrupted);
-#else
-    PollStatus = ::poll(FD, FDCount, RemainingTimeout.count());
-  } while (PollStatus == -1 &&
-           getLastSocketErrorCode() == std::errc::interrupted);
-#endif
+#اگر_تعریف_شدہ _WIN32
+    Poll_حالت = WSAPoll(FD, FDCount, بقایا_Timeout.گنتی());
+  } جب (Poll_حالت == SOCKET_ERROR &&
+           get_آخری_Socket_Error_رمز() == std::errc::interrupted);
+#ورنہ
+    Poll_حالت = ::poll(FD, FDCount, بقایا_Timeout.گنتی());
+  } جب (Poll_حالت == -1 &&
+           get_آخری_Socket_Error_رمز() == std::errc::interrupted);
+#اگر_ختم
 
   // If ActiveFD equals -1 or CancelFD has data to be read then the operation
   // has been canceled by another thread
-  if (getActiveFD() == -1 || (CancelFD.has_value() && FD[1].revents & POLLIN))
-    return std::make_error_code(std::errc::operation_canceled);
-#ifdef _WIN32
-  if (PollStatus == SOCKET_ERROR)
-#else
-  if (PollStatus == -1)
-#endif
-    return getLastSocketErrorCode();
-  if (PollStatus == 0)
-    return std::make_error_code(std::errc::timed_out);
-  if (FD[0].revents & POLLNVAL)
-    return std::make_error_code(std::errc::bad_file_descriptor);
-  return std::error_code();
+  اگر (get_فعال_FD() == -1 || (CancelFD.has_قدر_2() && FD[1].revents & POLLIN))
+    واپس std::make_error_رمز(std::errc::operation_canceled);
+#اگر_تعریف_شدہ _WIN32
+  اگر (Poll_حالت == SOCKET_ERROR)
+#ورنہ
+  اگر (Poll_حالت == -1)
+#اگر_ختم
+    واپس get_آخری_Socket_Error_رمز();
+  اگر (Poll_حالت == 0)
+    واپس std::make_error_رمز(std::errc::timed_برآمد);
+  اگر (FD[0].revents & POLLNVAL)
+    واپس std::make_error_رمز(std::errc::bad_file_descriptor);
+  واپس std::error_رمز();
 }
 
-Expected<std::unique_ptr<raw_socket_stream>>
-ListeningSocket::accept(const std::chrono::milliseconds &Timeout) {
-  auto getActiveFD = [this]() -> int { return FD; };
-  std::error_code TimeoutErr = manageTimeout(Timeout, getActiveFD, PipeFD[0]);
-  if (TimeoutErr)
-    return llvm::make_error<StringError>(TimeoutErr, "Timeout error");
+Expected<std::unique_ptr<raw_socket_دھارا>>
+ListeningSocket::accept(ثابت std::chrono::milliseconds &Timeout) {
+  خودکار get_فعال_FD = [یہ]() -> صحیح { واپس FD; };
+  std::error_رمز TimeoutErr = manageTimeout(Timeout, get_فعال_FD, PipeFD[0]);
+  اگر (TimeoutErr)
+    واپس llvm::make_error<StringError>(TimeoutErr, "Timeout error");
 
-  int AcceptFD;
-#ifdef _WIN32
-  SOCKET WinAcceptSock = ::accept(_get_osfhandle(FD), NULL, NULL);
+  صحیح AcceptFD;
+#اگر_تعریف_شدہ _WIN32
+  SOCKET WinAcceptSock = ::accept(_get_osfhandle(FD), تہی, تہی);
   AcceptFD = _open_osfhandle(WinAcceptSock, 0);
-#else
-  AcceptFD = ::accept(FD, NULL, NULL);
-#endif
+#ورنہ
+  AcceptFD = ::accept(FD, تہی, تہی);
+#اگر_ختم
 
-  if (AcceptFD == -1)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  اگر (AcceptFD == -1)
+    واپس llvm::make_error<StringError>(get_آخری_Socket_Error_رمز(),
                                          "Socket accept failed");
-  return std::make_unique<raw_socket_stream>(AcceptFD);
+  واپس std::make_unique<raw_socket_دھارا>(AcceptFD);
 }
 
-void ListeningSocket::shutdown() {
-  int ObservedFD = FD.load();
+خالی ListeningSocket::shutdown() {
+  صحیح ObservedFD = FD.بھرو();
 
-  if (ObservedFD == -1)
-    return;
+  اگر (ObservedFD == -1)
+    واپس;
 
   // If FD equals ObservedFD set FD to -1; If FD doesn't equal ObservedFD then
   // another thread is responsible for shutdown so return
-  if (!FD.compare_exchange_strong(ObservedFD, -1))
-    return;
+  اگر (!FD.compare_exchange_strong(ObservedFD, -1))
+    واپس;
 
   ::close(ObservedFD);
-  ::unlink(SocketPath.c_str());
+  ::unlink(Socket_راستہ.c_str());
 
   // Ensure ::poll returns if shutdown is called by a separate thread
-  char Byte = 'A';
-  ssize_t written = ::write(PipeFD[1], &Byte, 1);
+  حرف Byte = 'A';
+  ssize_t written = ::اكتب(PipeFD[1], &Byte, 1);
 
   // Ignore any write() error
-  (void)written;
+  (خالی)written;
 }
 
 ListeningSocket::~ListeningSocket() {
@@ -345,9 +345,9 @@ ListeningSocket::~ListeningSocket() {
   // would occur as PipeFD's values would have to be changed to -1
   //
   // The move constructor sets PipeFD to -1
-  if (PipeFD[0] != -1)
+  اگر (PipeFD[0] != -1)
     ::close(PipeFD[0]);
-  if (PipeFD[1] != -1)
+  اگر (PipeFD[1] != -1)
     ::close(PipeFD[1]);
 }
 
@@ -355,30 +355,30 @@ ListeningSocket::~ListeningSocket() {
 //  raw_socket_stream
 //===----------------------------------------------------------------------===//
 
-raw_socket_stream::raw_socket_stream(int SocketFD)
-    : raw_fd_stream(SocketFD, true) {}
+raw_socket_دھارا::raw_socket_دھارا(صحیح SocketFD)
+    : raw_fd_دھارا(SocketFD, سچ) {}
 
-raw_socket_stream::~raw_socket_stream() = default;
+raw_socket_دھارا::~raw_socket_دھارا() = طےشدہ;
 
-Expected<std::unique_ptr<raw_socket_stream>>
-raw_socket_stream::createConnectedUnix(StringRef SocketPath) {
-#ifdef _WIN32
+Expected<std::unique_ptr<raw_socket_دھارا>>
+raw_socket_دھارا::createConnectedUnix(StringRef Socket_راستہ) {
+#اگر_تعریف_شدہ _WIN32
   WSABalancer _;
-#endif // _WIN32
-  Expected<int> FD = getSocketFD(SocketPath);
-  if (!FD)
-    return FD.takeError();
-  return std::make_unique<raw_socket_stream>(*FD);
+#اگر_ختم // _WIN32
+  Expected<صحیح> FD = getSocketFD(Socket_راستہ);
+  اگر (!FD)
+    واپس FD.takeError();
+  واپس std::make_unique<raw_socket_دھارا>(*FD);
 }
 
-ssize_t raw_socket_stream::read(char *Ptr, size_t Size,
-                                const std::chrono::milliseconds &Timeout) {
-  auto getActiveFD = [this]() -> int { return this->get_fd(); };
-  std::error_code Err = manageTimeout(Timeout, getActiveFD);
+ssize_t raw_socket_دھارا::اقرأ(حرف *Ptr, size_t سائز,
+                                ثابت std::chrono::milliseconds &Timeout) {
+  خودکار get_فعال_FD = [یہ]() -> صحیح { واپس یہ->get_fd(); };
+  std::error_رمز Err = manageTimeout(Timeout, get_فعال_FD);
   // Mimic raw_fd_stream::read error handling behavior
-  if (Err) {
-    raw_fd_stream::error_detected(Err);
-    return -1;
+  اگر (Err) {
+    raw_fd_دھارا::error_detected(Err);
+    واپس -1;
   }
-  return raw_fd_stream::read(Ptr, Size);
+  واپس raw_fd_دھارا::اقرأ(Ptr, سائز);
 }

@@ -7,42 +7,42 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64AttributeParser.h"
-#include "llvm/Support/AArch64BuildAttributes.h"
+#شامل "llvm/Support/AArch64AttributeParser.h"
+#شامل "llvm/Support/AArch64BuildAttributes.h"
 
-std::vector<llvm::SubsectionAndTagToTagName> &
-llvm::AArch64AttributeParser::returnTagsNamesMap() {
-  static std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
+std::سمتیہ<llvm::Subsection_And_لیبل_مقصد_لیبل_Name> &
+llvm::AArch64AttributeParser::return_لیبل_فہرست_نام_Map() {
+  ساکن std::سمتیہ<Subsection_And_لیبل_مقصد_لیبل_Name> لیبل_فہرست_نام_Map = {
       {"aeabi_pauthabi", 1, "Tag_PAuth_Platform"},
       {"aeabi_pauthabi", 2, "Tag_PAuth_Schema"},
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  واپس لیبل_فہرست_نام_Map;
 }
 
-llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
-    const llvm::AArch64AttributeParser &Attributes) {
+llvm::AArch64BuildAttrSubsections llvm::نکالو_Build_اوصاف_Subsections(
+    ثابت llvm::AArch64AttributeParser &اوصاف) {
 
   llvm::AArch64BuildAttrSubsections SubSections;
-  auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+  خودکار Get_Pauth_قدر = [&اوصاف](غیرعلامتی لیبل) {
+    واپس اوصاف.get_Attribute_قدر("aeabi_pauthabi", لیبل).قدر_or(0);
   };
-  SubSections.Pauth.TagPlatform =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
-  SubSections.Pauth.TagSchema =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
+  SubSections.Pauth.لیبل_Platform =
+      Get_Pauth_قدر(llvm::AArch64_Build_اوصاف::لیبل_PAUTH_PLATFORM);
+  SubSections.Pauth.لیبل_Schema =
+      Get_Pauth_قدر(llvm::AArch64_Build_اوصاف::لیبل_PAUTH_SCHEMA);
 
-  auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
-        .value_or(0);
+  خودکار Get_Feature_قدر = [&اوصاف](غیرعلامتی لیبل) {
+    واپس اوصاف.get_Attribute_قدر("aeabi_feature_and_bits", لیبل)
+        .قدر_or(0);
   };
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_BTI);
+      Get_Feature_قدر(llvm::AArch64_Build_اوصاف::لیبل_FEATURE_BTI);
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_PAC) << 1;
+      Get_Feature_قدر(llvm::AArch64_Build_اوصاف::لیبل_FEATURE_PAC) << 1;
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
+      Get_Feature_قدر(llvm::AArch64_Build_اوصاف::لیبل_FEATURE_GCS) << 2;
 
-  return SubSections;
+  واپس SubSections;
 }

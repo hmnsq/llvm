@@ -17,61 +17,61 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntEqClasses.h"
-#include <cassert>
+#شامل "llvm/ADT/IntEqClasses.h"
+#شامل <cassert>
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-void IntEqClasses::grow(unsigned N) {
-  assert(NumClasses == 0 && "grow() called after compress().");
+خالی IntEqClasses::grow(غیرعلامتی N) {
+  أكد(عدد_Classes == 0 && "grow() called after compress().");
   EC.reserve(N);
-  while (EC.size() < N)
-    EC.push_back(EC.size());
+  جب (EC.سائز_2() < N)
+    EC.ڈالو_عقب(EC.سائز_2());
 }
 
-unsigned IntEqClasses::join(unsigned a, unsigned b) {
-  assert(NumClasses == 0 && "join() called after compress().");
-  unsigned eca = EC[a];
-  unsigned ecb = EC[b];
+غیرعلامتی IntEqClasses::join(غیرعلامتی a, غیرعلامتی b) {
+  أكد(عدد_Classes == 0 && "join() called after compress().");
+  غیرعلامتی eca = EC[a];
+  غیرعلامتی ecb = EC[b];
   // Update pointers while searching for the leaders, compressing the paths
   // incrementally. The larger leader will eventually be updated, joining the
   // classes.
-  while (eca != ecb)
-    if (eca < ecb) {
+  جب (eca != ecb)
+    اگر (eca < ecb) {
       EC[b] = eca;
       b = ecb;
       ecb = EC[b];
-    } else {
+    } ورنہ {
       EC[a] = ecb;
       a = eca;
       eca = EC[a];
     }
 
-  return eca;
+  واپس eca;
 }
 
-unsigned IntEqClasses::findLeader(unsigned a) const {
-  assert(NumClasses == 0 && "findLeader() called after compress().");
-  while (a != EC[a])
+غیرعلامتی IntEqClasses::ڈھونڈو_Leader(غیرعلامتی a) ثابت {
+  أكد(عدد_Classes == 0 && "findLeader() called after compress().");
+  جب (a != EC[a])
     a = EC[a];
-  return a;
+  واپس a;
 }
 
-void IntEqClasses::compress() {
-  if (NumClasses)
-    return;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    EC[i] = (EC[i] == i) ? NumClasses++ : EC[EC[i]];
+خالی IntEqClasses::compress() {
+  اگر (عدد_Classes)
+    واپس;
+  برائے (غیرعلامتی i = 0, e = EC.سائز_2(); i != e; ++i)
+    EC[i] = (EC[i] == i) ? عدد_Classes++ : EC[EC[i]];
 }
 
-void IntEqClasses::uncompress() {
-  if (!NumClasses)
-    return;
-  SmallVector<unsigned, 8> Leader;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    if (EC[i] < Leader.size())
+خالی IntEqClasses::uncompress() {
+  اگر (!عدد_Classes)
+    واپس;
+  Small_سمتیہ<غیرعلامتی, 8> Leader;
+  برائے (غیرعلامتی i = 0, e = EC.سائز_2(); i != e; ++i)
+    اگر (EC[i] < Leader.سائز_2())
       EC[i] = Leader[EC[i]];
-    else
-      Leader.push_back(EC[i] = i);
-  NumClasses = 0;
+    ورنہ
+      Leader.ڈالو_عقب(EC[i] = i);
+  عدد_Classes = 0;
 }

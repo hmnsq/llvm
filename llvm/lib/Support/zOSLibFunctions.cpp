@@ -12,14 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __MVS__
-#include <stdio.h>
-#include <string.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
+#اگر_تعریف_شدہ __MVS__
+#شامل <stdio.h>
+#شامل <string.h>
+#شامل <sys/resource.h>
+#شامل <sys/wait.h>
 
-const char *signalName[] = {
-    /*  0 */ nullptr,
+ثابت حرف *signalName[] = {
+    /*  0 */ خالی_اشاریہ,
     /*  1 */ "Hangup",                   // SIGHUP
     /*  2 */ "Interrupt",                // SIGINT
     /*  3 */ "Aborted",                  // SIGABRT
@@ -55,31 +55,31 @@ const char *signalName[] = {
     /* 33 */ "OMVS subsystem shutdown",  // SIGDANGER
     /* 34 */ "Thread stop",              // SIGTHSTOP
     /* 35 */ "Thread resume",            // SIGTHCONT
-    /* 36 */ nullptr,                    // n/a
+    /* 36 */ خالی_اشاریہ,                    // n/a
     /* 37 */ "Toggle syscall trace",     // SIGTRACE
-    /* 38 */ nullptr,                    // SIGDCE
+    /* 38 */ خالی_اشاریہ,                    // SIGDCE
     /* 39 */ "System dump",              // SIGDUMP
 };
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+حرف *strsignal(صحیح sig) {
+  اگر (static_cast<size_t>(sig) < (حجم(signalName) / حجم(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+    واپس const_cast<حرف *>(signalName[sig]);
+  ساکن حرف پیغام[256];
+  snprintf(پیغام, حجم(پیغام), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  پیغام[حجم(پیغام) - 1] = '\0';
+  واپس پیغام;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
 // function is implemented here.
-size_t strnlen(const char *S, size_t MaxLen) {
-  const char *PtrToNullChar =
-      static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+size_t strnlen(ثابت حرف *S, size_t MaxLen) {
+  ثابت حرف *Ptr_مقصد_Null_Char =
+      static_cast<ثابت حرف *>(memchr(S, '\0', MaxLen));
+  واپس Ptr_مقصد_Null_Char ? Ptr_مقصد_Null_Char - S : MaxLen;
 }
-#endif
+#اگر_ختم

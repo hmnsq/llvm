@@ -6,173 +6,173 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamReader.h"
+#شامل "llvm/Support/BinaryStreamReader.h"
 
-#include "llvm/Support/BinaryStreamError.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#شامل "llvm/Support/BinaryStreamError.h"
+#شامل "llvm/Support/BinaryStreamRef.h"
+#شامل "llvm/Support/LEB128.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-BinaryStreamReader::BinaryStreamReader(BinaryStreamRef Ref) : Stream(Ref) {}
+ثنائی_دھارا_Reader::ثنائی_دھارا_Reader(ثنائی_دھارا_Ref Ref) : دھارا(Ref) {}
 
-BinaryStreamReader::BinaryStreamReader(BinaryStream &Stream) : Stream(Stream) {}
+ثنائی_دھارا_Reader::ثنائی_دھارا_Reader(ثنائی_دھارا &دھارا) : دھارا(دھارا) {}
 
-BinaryStreamReader::BinaryStreamReader(ArrayRef<uint8_t> Data,
+ثنائی_دھارا_Reader::ثنائی_دھارا_Reader(ArrayRef<uint8_t> ڈیٹا_2,
                                        endianness Endian)
-    : Stream(Data, Endian) {}
+    : دھارا(ڈیٹا_2, Endian) {}
 
-BinaryStreamReader::BinaryStreamReader(StringRef Data, endianness Endian)
-    : Stream(Data, Endian) {}
+ثنائی_دھارا_Reader::ثنائی_دھارا_Reader(StringRef ڈیٹا_2, endianness Endian)
+    : دھارا(ڈیٹا_2, Endian) {}
 
-Error BinaryStreamReader::readLongestContiguousChunk(
-    ArrayRef<uint8_t> &Buffer) {
-  if (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
-    return EC;
-  Offset += Buffer.size();
-  return Error::success();
+Error ثنائی_دھارا_Reader::readLongestContiguousChunk(
+    ArrayRef<uint8_t> &بفر) {
+  اگر (خودکار EC = دھارا.readLongestContiguousChunk(انحراف, بفر))
+    واپس EC;
+  انحراف += بفر.سائز_2();
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
-  if (auto EC = Stream.readBytes(Offset, Size, Buffer))
-    return EC;
-  Offset += Size;
-  return Error::success();
+Error ثنائی_دھارا_Reader::read_بائٹیں(ArrayRef<uint8_t> &بفر, uint32_t سائز) {
+  اگر (خودکار EC = دھارا.read_بائٹیں(انحراف, سائز, بفر))
+    واپس EC;
+  انحراف += سائز;
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readULEB128(uint64_t &Dest) {
-  SmallVector<uint8_t, 10> EncodedBytes;
-  ArrayRef<uint8_t> NextByte;
+Error ثنائی_دھارا_Reader::readULEB128(uint64_t &Dest) {
+  Small_سمتیہ<uint8_t, 10> Encoded_بائٹیں;
+  ArrayRef<uint8_t> اگلا_Byte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  کرو {
+    اگر (خودکار Err = read_بائٹیں(اگلا_Byte, 1))
+      واپس Err;
+    Encoded_بائٹیں.ڈالو_عقب(اگلا_Byte[0]);
+  } جب (اگلا_Byte[0] & 0x80);
 
-  Dest = decodeULEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  Dest = decodeULEB128(Encoded_بائٹیں.begin(), خالی_اشاریہ, Encoded_بائٹیں.انتہا());
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readSLEB128(int64_t &Dest) {
-  SmallVector<uint8_t, 10> EncodedBytes;
-  ArrayRef<uint8_t> NextByte;
+Error ثنائی_دھارا_Reader::readSLEB128(int64_t &Dest) {
+  Small_سمتیہ<uint8_t, 10> Encoded_بائٹیں;
+  ArrayRef<uint8_t> اگلا_Byte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  کرو {
+    اگر (خودکار Err = read_بائٹیں(اگلا_Byte, 1))
+      واپس Err;
+    Encoded_بائٹیں.ڈالو_عقب(اگلا_Byte[0]);
+  } جب (اگلا_Byte[0] & 0x80);
 
-  Dest = decodeSLEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  Dest = decodeSLEB128(Encoded_بائٹیں.begin(), خالی_اشاریہ, Encoded_بائٹیں.انتہا());
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readCString(StringRef &Dest) {
-  uint64_t OriginalOffset = getOffset();
-  uint64_t FoundOffset = 0;
-  while (true) {
-    uint64_t ThisOffset = getOffset();
-    ArrayRef<uint8_t> Buffer;
-    if (auto EC = readLongestContiguousChunk(Buffer))
-      return EC;
-    StringRef S(reinterpret_cast<const char *>(Buffer.begin()), Buffer.size());
-    size_t Pos = S.find_first_of('\0');
-    if (LLVM_LIKELY(Pos != StringRef::npos)) {
-      FoundOffset = Pos + ThisOffset;
-      break;
+Error ثنائی_دھارا_Reader::readCString(StringRef &Dest) {
+  uint64_t Original_انحراف = get_انحراف();
+  uint64_t ملا_انحراف = 0;
+  جب (سچ) {
+    uint64_t This_انحراف = get_انحراف();
+    ArrayRef<uint8_t> بفر;
+    اگر (خودکار EC = readLongestContiguousChunk(بفر))
+      واپس EC;
+    StringRef S(reinterpret_cast<ثابت حرف *>(بفر.begin()), بفر.سائز_2());
+    size_t Pos = S.ڈھونڈو_پہلا_کا('\0');
+    اگر (LLVM_LIKELY(Pos != StringRef::npos)) {
+      ملا_انحراف = Pos + This_انحراف;
+      توڑو;
     }
   }
-  assert(FoundOffset >= OriginalOffset);
+  أكد(ملا_انحراف >= Original_انحراف);
 
-  setOffset(OriginalOffset);
-  size_t Length = FoundOffset - OriginalOffset;
+  سیٹ_انحراف(Original_انحراف);
+  size_t لمبائی = ملا_انحراف - Original_انحراف;
 
-  if (auto EC = readFixedString(Dest, Length))
-    return EC;
+  اگر (خودکار EC = readFixedString(Dest, لمبائی))
+    واپس EC;
 
   // Now set the offset back to after the null terminator.
-  setOffset(FoundOffset + 1);
-  return Error::success();
+  سیٹ_انحراف(ملا_انحراف + 1);
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readWideString(ArrayRef<UTF16> &Dest) {
-  uint64_t Length = 0;
-  uint64_t OriginalOffset = getOffset();
-  const UTF16 *C;
-  while (true) {
-    if (auto EC = readObject(C))
-      return EC;
-    if (*C == 0x0000)
-      break;
-    ++Length;
+Error ثنائی_دھارا_Reader::readWideString(ArrayRef<UTF16> &Dest) {
+  uint64_t لمبائی = 0;
+  uint64_t Original_انحراف = get_انحراف();
+  ثابت UTF16 *C;
+  جب (سچ) {
+    اگر (خودکار EC = readObject(C))
+      واپس EC;
+    اگر (*C == 0x0000)
+      توڑو;
+    ++لمبائی;
   }
-  uint64_t NewOffset = getOffset();
-  setOffset(OriginalOffset);
+  uint64_t New_انحراف = get_انحراف();
+  سیٹ_انحراف(Original_انحراف);
 
-  if (auto EC = readArray(Dest, Length))
-    return EC;
-  setOffset(NewOffset);
-  return Error::success();
+  اگر (خودکار EC = readArray(Dest, لمبائی))
+    واپس EC;
+  سیٹ_انحراف(New_انحراف);
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readFixedString(StringRef &Dest, uint32_t Length) {
-  ArrayRef<uint8_t> Bytes;
-  if (auto EC = readBytes(Bytes, Length))
-    return EC;
-  Dest = StringRef(reinterpret_cast<const char *>(Bytes.begin()), Bytes.size());
-  return Error::success();
+Error ثنائی_دھارا_Reader::readFixedString(StringRef &Dest, uint32_t لمبائی) {
+  ArrayRef<uint8_t> بائٹیں_2;
+  اگر (خودکار EC = read_بائٹیں(بائٹیں_2, لمبائی))
+    واپس EC;
+  Dest = StringRef(reinterpret_cast<ثابت حرف *>(بائٹیں_2.begin()), بائٹیں_2.سائز_2());
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref) {
-  return readStreamRef(Ref, bytesRemaining());
+Error ثنائی_دھارا_Reader::read_دھارا_Ref(ثنائی_دھارا_Ref &Ref) {
+  واپس read_دھارا_Ref(Ref, بائٹیں_بقایا());
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref, uint32_t Length) {
-  if (bytesRemaining() < Length)
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
-  Ref = Stream.slice(Offset, Length);
-  Offset += Length;
-  return Error::success();
+Error ثنائی_دھارا_Reader::read_دھارا_Ref(ثنائی_دھارا_Ref &Ref, uint32_t لمبائی) {
+  اگر (بائٹیں_بقایا() < لمبائی)
+    واپس make_error<ثنائی_دھارا_Error>(دھارا_error_رمز::دھارا_too_short);
+  Ref = دھارا.قاش(انحراف, لمبائی);
+  انحراف += لمبائی;
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::readSubstream(BinarySubstreamRef &Ref,
-                                        uint32_t Length) {
-  Ref.Offset = getOffset();
-  return readStreamRef(Ref.StreamData, Length);
+Error ثنائی_دھارا_Reader::readSubstream(ثنائی_Substream_Ref &Ref,
+                                        uint32_t لمبائی) {
+  Ref.انحراف = get_انحراف();
+  واپس read_دھارا_Ref(Ref.دھارا_ڈیٹا, لمبائی);
 }
 
-Error BinaryStreamReader::skip(uint64_t Amount) {
-  if (Amount > bytesRemaining())
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
-  Offset += Amount;
-  return Error::success();
+Error ثنائی_دھارا_Reader::skip(uint64_t Amount) {
+  اگر (Amount > بائٹیں_بقایا())
+    واپس make_error<ثنائی_دھارا_Error>(دھارا_error_رمز::دھارا_too_short);
+  انحراف += Amount;
+  واپس Error::success();
 }
 
-Error BinaryStreamReader::padToAlignment(uint32_t Align) {
-  uint32_t NewOffset = alignTo(Offset, Align);
-  return skip(NewOffset - Offset);
+Error ثنائی_دھارا_Reader::pad_مقصد_Alignment(uint32_t Align) {
+  uint32_t New_انحراف = align_مقصد(انحراف, Align);
+  واپس skip(New_انحراف - انحراف);
 }
 
-uint8_t BinaryStreamReader::peek() const {
-  ArrayRef<uint8_t> Buffer;
-  auto EC = Stream.readBytes(Offset, 1, Buffer);
-  assert(!EC && "Cannot peek an empty buffer!");
+uint8_t ثنائی_دھارا_Reader::peek() ثابت {
+  ArrayRef<uint8_t> بفر;
+  خودکار EC = دھارا.read_بائٹیں(انحراف, 1, بفر);
+  أكد(!EC && "Cannot peek an empty buffer!");
   llvm::consumeError(std::move(EC));
-  return Buffer[0];
+  واپس بفر[0];
 }
 
-std::pair<BinaryStreamReader, BinaryStreamReader>
-BinaryStreamReader::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+std::pair<ثنائی_دھارا_Reader, ثنائی_دھارا_Reader>
+ثنائی_دھارا_Reader::بانٹو(uint64_t Off) ثابت {
+  أكد(get_لمبائی() >= Off);
 
-  BinaryStreamRef First = Stream.drop_front(Offset);
+  ثنائی_دھارا_Ref پہلا = دھارا.drop_front(انحراف);
 
-  BinaryStreamRef Second = First.drop_front(Off);
-  First = First.keep_front(Off);
-  BinaryStreamReader W1{First};
-  BinaryStreamReader W2{Second};
-  return {W1, W2};
+  ثنائی_دھارا_Ref دوسرا = پہلا.drop_front(Off);
+  پہلا = پہلا.keep_front(Off);
+  ثنائی_دھارا_Reader W1{پہلا};
+  ثنائی_دھارا_Reader W2{دوسرا};
+  واپس {W1, W2};
 }

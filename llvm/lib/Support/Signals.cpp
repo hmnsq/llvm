@@ -11,133 +11,133 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Signals.h"
+#شامل "llvm/Support/Signals.h"
 
-#include "DebugOptions.h"
+#شامل "DebugOptions.h"
 
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Program.h"
-#include "llvm/Support/StringSaver.h"
-#include "llvm/Support/raw_ostream.h"
-#include <array>
-#include <cmath>
+#شامل "llvm/ADT/StringRef.h"
+#شامل "llvm/Config/llvm-config.h"
+#شامل "llvm/Support/CommandLine.h"
+#شامل "llvm/Support/ErrorOr.h"
+#شامل "llvm/Support/FileSystem.h"
+#شامل "llvm/Support/FileUtilities.h"
+#شامل "llvm/Support/Format.h"
+#شامل "llvm/Support/FormatVariadic.h"
+#شامل "llvm/Support/IOSandbox.h"
+#شامل "llvm/Support/ManagedStatic.h"
+#شامل "llvm/Support/MemoryBuffer.h"
+#شامل "llvm/Support/Path.h"
+#شامل "llvm/Support/Program.h"
+#شامل "llvm/Support/StringSaver.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <array>
+#شامل <cmath>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
 // Use explicit storage to avoid accessing cl::opt in a signal handler.
-static bool DisableSymbolicationFlag = false;
-static ManagedStatic<std::string> CrashDiagnosticsDirectory;
-namespace {
-struct CreateDisableSymbolication {
-  static void *call() {
-    return new cl::opt<bool, true>(
+ساکن منطقی DisableSymbolicationFlag = جھوٹ;
+ساکن ManagedStatic<std::string> CrashDiagnosticsDirectory;
+نامخلا {
+ساخت CreateDisableSymbolication {
+  ساکن خالی *call() {
+    واپس نیا cl::opt<منطقی, سچ>(
         "disable-symbolication",
         cl::desc("Disable symbolizing crash backtraces."),
         cl::location(DisableSymbolicationFlag), cl::Hidden);
   }
 };
-struct CreateCrashDiagnosticsDir {
-  static void *call() {
-    return new cl::opt<std::string, true>(
-        "crash-diagnostics-dir", cl::value_desc("directory"),
+ساخت CreateCrashDiagnosticsDir {
+  ساکن خالی *call() {
+    واپس نیا cl::opt<std::string, سچ>(
+        "crash-diagnostics-dir", cl::قدر_desc("directory"),
         cl::desc("Directory for crash diagnostic files."),
         cl::location(*CrashDiagnosticsDirectory), cl::Hidden);
   }
 };
 } // namespace
-void llvm::initSignalsOptions() {
-  static ManagedStatic<cl::opt<bool, true>, CreateDisableSymbolication>
+خالی llvm::init_اشارات_Options() {
+  ساکن ManagedStatic<cl::opt<منطقی, سچ>, CreateDisableSymbolication>
       DisableSymbolication;
-  static ManagedStatic<cl::opt<std::string, true>, CreateCrashDiagnosticsDir>
+  ساکن ManagedStatic<cl::opt<std::string, سچ>, CreateCrashDiagnosticsDir>
       CrashDiagnosticsDir;
   *DisableSymbolication;
   *CrashDiagnosticsDir;
 }
 
-constexpr char DisableSymbolizationEnv[] = "LLVM_DISABLE_SYMBOLIZATION";
-constexpr char LLVMSymbolizerPathEnv[] = "LLVM_SYMBOLIZER_PATH";
-constexpr char EnableSymbolizerMarkupEnv[] = "LLVM_ENABLE_SYMBOLIZER_MARKUP";
+constexpr حرف DisableSymbolizationEnv[] = "LLVM_DISABLE_SYMBOLIZATION";
+constexpr حرف LLVMSymbolizer_راستہ_Env[] = "LLVM_SYMBOLIZER_PATH";
+constexpr حرف EnableSymbolizerMarkupEnv[] = "LLVM_ENABLE_SYMBOLIZER_MARKUP";
 
 // Callbacks to run in signal handler must be lock-free because a signal handler
 // could be running as we add new callbacks. We don't add unbounded numbers of
 // callbacks, an array is therefore sufficient.
-struct CallbackAndCookie {
+ساخت CallbackAndCookie {
   sys::SignalHandlerCallback Callback;
-  void *Cookie;
-  enum class Status { Empty, Initializing, Initialized, Executing };
-  std::atomic<Status> Flag;
+  خالی *Cookie;
+  شمار جماعت حالت_2 { خالی_خانے_2, Initializing, Initialized, Executing };
+  std::atomic<حالت_2> Flag;
 };
 
-static constexpr size_t MaxSignalHandlerCallbacks = 8;
+ساکن constexpr size_t MaxSignalHandlerCallbacks = 8;
 
 // A global array of CallbackAndCookie may not compile with
 // -Werror=global-constructors in c++20 and above
-static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> &
-CallBacksToRun() {
-  static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> callbacks;
-  return callbacks;
+ساکن std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> &
+Call_Backs_مقصد_تسلسل() {
+  ساکن std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> callbacks;
+  واپس callbacks;
 }
 
 // Signal-safe.
-void sys::RunSignalHandlers() {
+خالی sys::تسلسل_Signal_Handlers() {
   // Let's not interfere with stack trace symbolication and friends.
-  auto BypassSandbox = sandbox::scopedDisable();
+  خودکار BypassSandbox = sandbox::scopedDisable();
 
-  for (CallbackAndCookie &RunMe : CallBacksToRun()) {
-    auto Expected = CallbackAndCookie::Status::Initialized;
-    auto Desired = CallbackAndCookie::Status::Executing;
-    if (!RunMe.Flag.compare_exchange_strong(Expected, Desired))
-      continue;
-    (*RunMe.Callback)(RunMe.Cookie);
-    RunMe.Callback = nullptr;
-    RunMe.Cookie = nullptr;
-    RunMe.Flag.store(CallbackAndCookie::Status::Empty);
+  برائے (CallbackAndCookie &تسلسل_Me : Call_Backs_مقصد_تسلسل()) {
+    خودکار Expected = CallbackAndCookie::حالت_2::Initialized;
+    خودکار Desired = CallbackAndCookie::حالت_2::Executing;
+    اگر (!تسلسل_Me.Flag.compare_exchange_strong(Expected, Desired))
+      جاری;
+    (*تسلسل_Me.Callback)(تسلسل_Me.Cookie);
+    تسلسل_Me.Callback = خالی_اشاریہ;
+    تسلسل_Me.Cookie = خالی_اشاریہ;
+    تسلسل_Me.Flag.store(CallbackAndCookie::حالت_2::خالی_خانے_2);
   }
 }
 
 // Signal-safe.
-static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
-                                void *Cookie) {
-  for (CallbackAndCookie &SetMe : CallBacksToRun()) {
-    auto Expected = CallbackAndCookie::Status::Empty;
-    auto Desired = CallbackAndCookie::Status::Initializing;
-    if (!SetMe.Flag.compare_exchange_strong(Expected, Desired))
-      continue;
-    SetMe.Callback = FnPtr;
-    SetMe.Cookie = Cookie;
-    SetMe.Flag.store(CallbackAndCookie::Status::Initialized);
-    return;
+ساکن خالی داخل_کرو_Signal_Handler(sys::SignalHandlerCallback FnPtr,
+                                خالی *Cookie) {
+  برائے (CallbackAndCookie &سیٹ_Me : Call_Backs_مقصد_تسلسل()) {
+    خودکار Expected = CallbackAndCookie::حالت_2::خالی_خانے_2;
+    خودکار Desired = CallbackAndCookie::حالت_2::Initializing;
+    اگر (!سیٹ_Me.Flag.compare_exchange_strong(Expected, Desired))
+      جاری;
+    سیٹ_Me.Callback = FnPtr;
+    سیٹ_Me.Cookie = Cookie;
+    سیٹ_Me.Flag.store(CallbackAndCookie::حالت_2::Initialized);
+    واپس;
   }
   report_fatal_error("too many signal callbacks already registered");
 }
 
-static bool findModulesAndOffsets(void **StackTrace, int Depth,
-                                  const char **Modules, intptr_t *Offsets,
-                                  const char *MainExecutableName,
+ساکن منطقی ڈھونڈو_Modules_And_Offsets(خالی **ڈھیر_Trace, صحیح گہرائی,
+                                  ثابت حرف **Modules, intptr_t *Offsets,
+                                  ثابت حرف *MainExecutableName,
                                   StringSaver &StrPool);
 
 /// Format a pointer value as hexadecimal. Zero pad it out so its always the
 /// same width.
-static FormattedNumber format_ptr(void *PC) {
+ساکن Formatted_نمبر format_ptr(خالی *PC) {
   // Each byte is two hex digits plus 2 for the 0x prefix.
-  unsigned PtrWidth = 2 + 2 * sizeof(void *);
-  return format_hex((uint64_t)PC, PtrWidth);
+  غیرعلامتی Ptr_چوڑائی = 2 + 2 * حجم(خالی *);
+  واپس format_hex((uint64_t)PC, Ptr_چوڑائی);
 }
 
 /// Reads a file \p Filename written by llvm-symbolizer containing function
@@ -151,55 +151,55 @@ static FormattedNumber format_ptr(void *PC) {
 /// There may be multiple returned entries for a single \p AddressList entry if
 /// that frame address corresponds to one or more inlined frames; in this case,
 /// all frames for an address will appear contiguously and in-order.
-std::optional<SmallVector<std::pair<unsigned, std::string>, 0>>
-collectAddressSymbols(void **AddressList, unsigned AddressCount,
-                      const char *MainExecutableName,
-                      const std::string &LLVMSymbolizerPath) {
+std::optional<Small_سمتیہ<std::pair<غیرعلامتی, std::string>, 0>>
+collect_پتہ_Symbols(خالی **پتہ_List, غیرعلامتی پتہ_گنتی,
+                      ثابت حرف *MainExecutableName,
+                      ثابت std::string &LLVMSymbolizer_راستہ) {
   BumpPtrAllocator Allocator;
   StringSaver StrPool(Allocator);
-  SmallVector<const char *, 0> Modules(AddressCount, nullptr);
-  SmallVector<intptr_t, 0> Offsets(AddressCount, 0);
-  if (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
-                             Offsets.data(), MainExecutableName, StrPool))
-    return {};
-  int InputFD;
-  SmallString<32> InputFile, OutputFile;
-  sys::fs::createTemporaryFile("symbolizer-input", "", InputFD, InputFile);
+  Small_سمتیہ<ثابت حرف *, 0> Modules(پتہ_گنتی, خالی_اشاریہ);
+  Small_سمتیہ<intptr_t, 0> Offsets(پتہ_گنتی, 0);
+  اگر (!ڈھونڈو_Modules_And_Offsets(پتہ_List, پتہ_گنتی, Modules.ڈیٹا(),
+                             Offsets.ڈیٹا(), MainExecutableName, StrPool))
+    واپس {};
+  صحیح داخلہ_FD;
+  SmallString<32> داخلہ_File, OutputFile;
+  sys::fs::createTemporaryFile("symbolizer-input", "", داخلہ_FD, داخلہ_File);
   sys::fs::createTemporaryFile("symbolizer-output", "", OutputFile);
-  FileRemover InputRemover(InputFile.c_str());
+  FileRemover داخلہ_Remover(داخلہ_File.c_str());
   FileRemover OutputRemover(OutputFile.c_str());
 
   {
-    raw_fd_ostream Input(InputFD, true);
-    for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-      if (Modules[AddrIdx])
-        Input << Modules[AddrIdx] << " " << (void *)Offsets[AddrIdx] << "\n";
+    raw_fd_ostream داخلہ(داخلہ_FD, سچ);
+    برائے (غیرعلامتی AddrIdx = 0; AddrIdx < پتہ_گنتی; AddrIdx++) {
+      اگر (Modules[AddrIdx])
+        داخلہ << Modules[AddrIdx] << " " << (خالی *)Offsets[AddrIdx] << "\n";
     }
   }
 
-  std::optional<StringRef> Redirects[] = {InputFile.str(), OutputFile.str(),
+  std::optional<StringRef> Redirects[] = {داخلہ_File.str(), OutputFile.str(),
                                           StringRef("")};
-  StringRef Args[] = {"llvm-symbolizer", "--functions=linkage", "--inlining",
-#ifdef _WIN32
+  StringRef دلائل[] = {"llvm-symbolizer", "--functions=linkage", "--inlining",
+#اگر_تعریف_شدہ _WIN32
                       // Pass --relative-address on Windows so that we don't
                       // have to add ImageBase from PE file.
                       // FIXME: Make this the default for llvm-symbolizer.
                       "--relative-address",
-#endif
+#اگر_ختم
                       "--demangle"};
-  int RunResult =
-      sys::ExecuteAndWait(LLVMSymbolizerPath, Args, std::nullopt, Redirects);
-  if (RunResult != 0)
-    return {};
+  صحیح تسلسل_نتیجہ =
+      sys::ExecuteAndWait(LLVMSymbolizer_راستہ, دلائل, std::nullopt, Redirects);
+  اگر (تسلسل_نتیجہ != 0)
+    واپس {};
 
-  SmallVector<std::pair<unsigned, std::string>, 0> Result;
-  auto OutputBuf = MemoryBuffer::getFile(OutputFile.c_str());
-  if (!OutputBuf)
-    return {};
-  StringRef Output = OutputBuf.get()->getBuffer();
-  SmallVector<StringRef, 32> Lines;
-  Output.split(Lines, "\n");
-  auto *CurLine = Lines.begin();
+  Small_سمتیہ<std::pair<غیرعلامتی, std::string>, 0> نتیجہ;
+  خودکار OutputBuf = حافظہ_بفر::getFile(OutputFile.c_str());
+  اگر (!OutputBuf)
+    واپس {};
+  StringRef Output = OutputBuf.get()->get_بفر();
+  Small_سمتیہ<StringRef, 32> سطریں;
+  Output.بانٹو(سطریں, "\n");
+  خودکار *Cur_سطر = سطریں.begin();
   // Lines contains the output from llvm-symbolizer, which should contain for
   // each address with a module in order of appearance, one or more lines
   // containing the function name and line associated with that address,
@@ -209,157 +209,157 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   // containing just the formatted address; for all other output entries, we
   // output the function entry if it is known, and either the line number if it
   // is known or the module+address offset otherwise.
-  for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-    if (!Modules[AddrIdx]) {
-      auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
-      raw_string_ostream OS(SymbolizedFrame.second);
-      OS << format_ptr(AddressList[AddrIdx]);
-      continue;
+  برائے (غیرعلامتی AddrIdx = 0; AddrIdx < پتہ_گنتی; AddrIdx++) {
+    اگر (!Modules[AddrIdx]) {
+      خودکار &Symbolized_چوکھٹا = نتیجہ.emplace_عقب(std::make_pair(AddrIdx, ""));
+      raw_string_ostream OS(Symbolized_چوکھٹا.دوسرا_2);
+      OS << format_ptr(پتہ_List[AddrIdx]);
+      جاری;
     }
     // Read pairs of lines (function name and file/line info) until we
     // encounter empty line.
-    for (;;) {
-      if (CurLine == Lines.end())
-        return {};
-      StringRef FunctionName = *CurLine++;
-      if (FunctionName.empty())
-        break;
-      auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
-      raw_string_ostream OS(SymbolizedFrame.second);
-      OS << format_ptr(AddressList[AddrIdx]) << ' ';
-      if (!FunctionName.starts_with("??"))
+    برائے (;;) {
+      اگر (Cur_سطر == سطریں.انتہا())
+        واپس {};
+      StringRef FunctionName = *Cur_سطر++;
+      اگر (FunctionName.خالی_خانے())
+        توڑو;
+      خودکار &Symbolized_چوکھٹا = نتیجہ.emplace_عقب(std::make_pair(AddrIdx, ""));
+      raw_string_ostream OS(Symbolized_چوکھٹا.دوسرا_2);
+      OS << format_ptr(پتہ_List[AddrIdx]) << ' ';
+      اگر (!FunctionName.starts_with("??"))
         OS << FunctionName << ' ';
-      if (CurLine == Lines.end())
-        return {};
-      StringRef FileLineInfo = *CurLine++;
-      if (!FileLineInfo.starts_with("??")) {
-        OS << FileLineInfo;
-      } else {
+      اگر (Cur_سطر == سطریں.انتہا())
+        واپس {};
+      StringRef File_سطر_Info = *Cur_سطر++;
+      اگر (!File_سطر_Info.starts_with("??")) {
+        OS << File_سطر_Info;
+      } ورنہ {
         OS << "(" << Modules[AddrIdx] << '+' << format_hex(Offsets[AddrIdx], 0)
            << ")";
       }
     }
   }
-  return Result;
+  واپس نتیجہ;
 }
 
-ErrorOr<std::string> getLLVMSymbolizerPath(StringRef Argv0 = {}) {
-  ErrorOr<std::string> LLVMSymbolizerPathOrErr = std::error_code();
-  if (const char *Path = getenv(LLVMSymbolizerPathEnv)) {
-    LLVMSymbolizerPathOrErr = sys::findProgramByName(Path);
-  } else if (!Argv0.empty()) {
-    StringRef Parent = llvm::sys::path::parent_path(Argv0);
-    if (!Parent.empty())
-      LLVMSymbolizerPathOrErr =
-          sys::findProgramByName("llvm-symbolizer", Parent);
+ErrorOr<std::string> get_LLVMSymbolizer_راستہ(StringRef Argv0 = {}) {
+  ErrorOr<std::string> LLVMSymbolizer_راستہ_Or_Err = std::error_رمز();
+  اگر (ثابت حرف *راستہ = getenv(LLVMSymbolizer_راستہ_Env)) {
+    LLVMSymbolizer_راستہ_Or_Err = sys::ڈھونڈو_پروگرام_By_Name(راستہ);
+  } ورنہ اگر (!Argv0.خالی_خانے()) {
+    StringRef والد_2 = llvm::sys::راستہ_2::والد_راستہ(Argv0);
+    اگر (!والد_2.خالی_خانے())
+      LLVMSymbolizer_راستہ_Or_Err =
+          sys::ڈھونڈو_پروگرام_By_Name("llvm-symbolizer", والد_2);
   }
-  if (!LLVMSymbolizerPathOrErr)
-    LLVMSymbolizerPathOrErr = sys::findProgramByName("llvm-symbolizer");
-  return LLVMSymbolizerPathOrErr;
+  اگر (!LLVMSymbolizer_راستہ_Or_Err)
+    LLVMSymbolizer_راستہ_Or_Err = sys::ڈھونڈو_پروگرام_By_Name("llvm-symbolizer");
+  واپس LLVMSymbolizer_راستہ_Or_Err;
 }
 
 /// Helper that launches llvm-symbolizer and symbolizes a backtrace.
-LLVM_ATTRIBUTE_USED
-static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
-                                      int Depth, llvm::raw_ostream &OS) {
-  if (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
-    return false;
+LLVM_ATTRIBUTE_مستعمل
+ساکن منطقی print_Symbolized_ڈھیر_Trace(StringRef Argv0, خالی **ڈھیر_Trace,
+                                      صحیح گہرائی, llvm::raw_ostream &OS) {
+  اگر (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
+    واپس جھوٹ;
 
   // Don't recursively invoke the llvm-symbolizer binary.
-  if (Argv0.contains("llvm-symbolizer"))
-    return false;
+  اگر (Argv0.شامل_ہے("llvm-symbolizer"))
+    واپس جھوٹ;
 
   // FIXME: Subtract necessary number from StackTrace entries to turn return
   // addresses into actual instruction addresses.
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
-  ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath(Argv0);
-  if (!LLVMSymbolizerPathOrErr)
-    return false;
-  const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
+  ErrorOr<std::string> LLVMSymbolizer_راستہ_Or_Err = get_LLVMSymbolizer_راستہ(Argv0);
+  اگر (!LLVMSymbolizer_راستہ_Or_Err)
+    واپس جھوٹ;
+  ثابت std::string &LLVMSymbolizer_راستہ = *LLVMSymbolizer_راستہ_Or_Err;
 
   // If we don't know argv0 or the address of main() at this point, try
   // to guess it anyway (it's possible on some platforms).
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
-                             : sys::fs::getMainExecutable(nullptr, nullptr);
+                             : sys::fs::getMainExecutable(خالی_اشاریہ, خالی_اشاریہ);
 
-  auto SymbolizedAddressesOpt = collectAddressSymbols(
-      StackTrace, Depth, MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return false;
-  for (unsigned FrameNo = 0; FrameNo < SymbolizedAddressesOpt->size();
-       ++FrameNo) {
-    OS << right_justify(formatv("#{0}", FrameNo).str(), std::log10(Depth) + 2)
-       << ' ' << (*SymbolizedAddressesOpt)[FrameNo].second << '\n';
+  خودکار Symbolized_پتے_Opt = collect_پتہ_Symbols(
+      ڈھیر_Trace, گہرائی, MainExecutableName.c_str(), LLVMSymbolizer_راستہ);
+  اگر (!Symbolized_پتے_Opt)
+    واپس جھوٹ;
+  برائے (غیرعلامتی چوکھٹا_No = 0; چوکھٹا_No < Symbolized_پتے_Opt->سائز_2();
+       ++چوکھٹا_No) {
+    OS << دایاں_justify(formatv("#{0}", چوکھٹا_No).str(), std::log10(گہرائی) + 2)
+       << ' ' << (*Symbolized_پتے_Opt)[چوکھٹا_No].دوسرا_2 << '\n';
   }
-  return true;
+  واپس سچ;
 }
 
-#if LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
-void sys::symbolizeAddresses(AddressSet &Addresses,
-                             SymbolizedAddressMap &SymbolizedAddresses) {
-  assert(!DisableSymbolicationFlag && !getenv(DisableSymbolizationEnv) &&
+#اگر LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
+خالی sys::symbolize_پتے(پتہ_سیٹ &پتے,
+                             Symbolized_پتہ_Map &Symbolized_پتے) {
+  أكد(!DisableSymbolicationFlag && !getenv(DisableSymbolizationEnv) &&
          "Debugify origin stacktraces require symbolization to be enabled.");
 
   // This function deals with temporary files for the purposes of symbolization
   // only, not formal compiler output.
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
   // Convert Set of Addresses to ordered list.
-  SmallVector<void *, 0> AddressList(Addresses.begin(), Addresses.end());
-  if (AddressList.empty())
-    return;
-  llvm::sort(AddressList);
+  Small_سمتیہ<خالی *, 0> پتہ_List(پتے.begin(), پتے.انتہا());
+  اگر (پتہ_List.خالی_خانے())
+    واپس;
+  llvm::ترتیب_دو(پتہ_List);
 
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
-  ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath();
-  if (!LLVMSymbolizerPathOrErr)
+  ErrorOr<std::string> LLVMSymbolizer_راستہ_Or_Err = get_LLVMSymbolizer_راستہ();
+  اگر (!LLVMSymbolizer_راستہ_Or_Err)
     report_fatal_error("Debugify origin stacktraces require llvm-symbolizer");
-  const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
+  ثابت std::string &LLVMSymbolizer_راستہ = *LLVMSymbolizer_راستہ_Or_Err;
 
   // Try to guess the main executable name, since we don't have argv0 available
   // here.
-  std::string MainExecutableName = sys::fs::getMainExecutable(nullptr, nullptr);
+  std::string MainExecutableName = sys::fs::getMainExecutable(خالی_اشاریہ, خالی_اشاریہ);
 
-  auto SymbolizedAddressesOpt =
-      collectAddressSymbols(AddressList.begin(), AddressList.size(),
-                            MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return;
-  for (auto SymbolizedFrame : *SymbolizedAddressesOpt) {
-    SmallVector<std::string, 0> &SymbolizedAddrs =
-        SymbolizedAddresses[AddressList[SymbolizedFrame.first]];
-    SymbolizedAddrs.push_back(SymbolizedFrame.second);
+  خودکار Symbolized_پتے_Opt =
+      collect_پتہ_Symbols(پتہ_List.begin(), پتہ_List.سائز_2(),
+                            MainExecutableName.c_str(), LLVMSymbolizer_راستہ);
+  اگر (!Symbolized_پتے_Opt)
+    واپس;
+  برائے (خودکار Symbolized_چوکھٹا : *Symbolized_پتے_Opt) {
+    Small_سمتیہ<std::string, 0> &SymbolizedAddrs =
+        Symbolized_پتے[پتہ_List[Symbolized_چوکھٹا.پہلا_2]];
+    SymbolizedAddrs.ڈالو_عقب(Symbolized_چوکھٹا.دوسرا_2);
   }
-  return;
+  واپس;
 }
-#endif
+#اگر_ختم
 
-static bool printMarkupContext(raw_ostream &OS, const char *MainExecutableName);
+ساکن منطقی printMarkupContext(raw_ostream &OS, ثابت حرف *MainExecutableName);
 
-LLVM_ATTRIBUTE_USED
-static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, int Depth,
+LLVM_ATTRIBUTE_مستعمل
+ساکن منطقی print_Markup_ڈھیر_Trace(StringRef Argv0, خالی **ڈھیر_Trace, صحیح گہرائی,
                                   raw_ostream &OS) {
-  const char *Env = getenv(EnableSymbolizerMarkupEnv);
-  if (!Env || !*Env)
-    return false;
+  ثابت حرف *Env = getenv(EnableSymbolizerMarkupEnv);
+  اگر (!Env || !*Env)
+    واپس جھوٹ;
 
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
-                             : sys::fs::getMainExecutable(nullptr, nullptr);
-  if (!printMarkupContext(OS, MainExecutableName.c_str()))
-    return false;
-  for (int I = 0; I < Depth; I++)
-    OS << format("{{{bt:%d:%#016x}}}\n", I, StackTrace[I]);
-  return true;
+                             : sys::fs::getMainExecutable(خالی_اشاریہ, خالی_اشاریہ);
+  اگر (!printMarkupContext(OS, MainExecutableName.c_str()))
+    واپس جھوٹ;
+  برائے (صحیح I = 0; I < گہرائی; I++)
+    OS << format("{{{bt:%d:%#016x}}}\n", I, ڈھیر_Trace[I]);
+  واپس سچ;
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Signals.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Signals.inc"
-#endif
+#اگر_تعریف_شدہ LLVM_ON_UNIX
+#شامل "Unix/Signals.inc"
+#اگر_ختم
+#اگر_تعریف_شدہ _WIN32
+#شامل "Windows/Signals.inc"
+#اگر_ختم

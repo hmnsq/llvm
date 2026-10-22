@@ -6,10 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_ostream_proxy.h"
+#شامل "llvm/Support/raw_ostream_proxy.h"
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-void raw_ostream_proxy::anchor() {}
+خالی raw_ostream_proxy::anchor() {}
 
-void raw_pwrite_stream_proxy::anchor() {}
+خالی raw_pwrite_دھارا_proxy::anchor() {}

@@ -6,56 +6,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ProgramStack.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
+#شامل "llvm/Support/ProgramStack.h"
+#شامل "llvm/Config/config.h"
+#شامل "llvm/Support/Compiler.h"
 
-#ifdef LLVM_ON_UNIX
+#اگر_تعریف_شدہ LLVM_ON_UNIX
 # include <sys/resource.h> // for getrlimit
-#endif
+#اگر_ختم
 
-#ifdef _MSC_VER
+#اگر_تعریف_شدہ _MSC_VER
 # include <intrin.h>  // for _AddressOfReturnAddress
-#endif
+#اگر_ختم
 
-#include "llvm/Support/thread.h"
+#شامل "llvm/Support/thread.h"
 
-#include <cstdlib>
+#شامل <cstdlib>
 
-using namespace llvm;
+استعمال نامخلا llvm;
 
-uintptr_t llvm::getStackPointer() {
-#if __GNUC__ || __has_builtin(__builtin_frame_address)
-  return (uintptr_t)__builtin_frame_address(0);
-#elif defined(_MSC_VER)
-  return (uintptr_t)_AddressOfReturnAddress();
-#else
-  volatile char CharOnStack = 0;
+uintptr_t llvm::get_ڈھیر_اشارہ_گر() {
+#اگر __GNUC__ || __has_builtin(__builtin_frame_address)
+  واپس (uintptr_t)__builtin_frame_address(0);
+#وگرنہ_اگر defined(_MSC_VER)
+  واپس (uintptr_t)پتہ_کا_Return_پتہ();
+#ورنہ
+  متلون حرف Char_On_ڈھیر = 0;
   // The volatile store here is intended to escape the local variable, to
   // prevent the compiler from optimizing CharOnStack into anything other
   // than a char on the stack.
   //
   // Tested on: MSVC 2015 - 2019, GCC 4.9 - 9, Clang 3.2 - 9, ICC 13 - 19.
-  char *volatile Ptr = &CharOnStack;
-  return (uintptr_t)Ptr;
-#endif
+  حرف *متلون Ptr = &Char_On_ڈھیر;
+  واپس (uintptr_t)Ptr;
+#اگر_ختم
 }
 
-unsigned llvm::getDefaultStackSize() {
-#ifdef LLVM_ON_UNIX
+غیرعلامتی llvm::get_Default_ڈھیر_سائز() {
+#اگر_تعریف_شدہ LLVM_ON_UNIX
   rlimit RL;
   getrlimit(RLIMIT_STACK, &RL);
-  return RL.rlim_cur;
-#else
+  واپس RL.rlim_cur;
+#ورنہ
   // Clang recursively parses, instantiates templates, and evaluates constant
   // expressions. We've found 8MiB to be a reasonable stack size given the way
   // Clang works and the way C++ is commonly written.
-  return 8 << 20;
-#endif
+  واپس 8 << 20;
+#اگر_ختم
 }
 
-void llvm::runOnNewStack(unsigned StackSize, function_ref<void()> Fn) {
+خالی llvm::تسلسل_On_New_ڈھیر(غیرعلامتی ڈھیر_سائز, function_ref<خالی()> Fn) {
   llvm::thread Thread(
-      StackSize == 0 ? std::nullopt : std::optional<unsigned>(StackSize), Fn);
+      ڈھیر_سائز == 0 ? std::nullopt : std::optional<غیرعلامتی>(ڈھیر_سائز), Fn);
   Thread.join();
 }
