@@ -10,9 +10,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_os_ostream.h"
-#include <ostream>
-using namespace llvm;
+#ضمن "llvm/Support/raw_os_ostream.h"
+#ضمن <ostream>
+ورتوں نطاق llvm;
 
 //===----------------------------------------------------------------------===//
 //  raw_os_ostream
@@ -22,8 +22,8 @@ raw_os_ostream::~raw_os_ostream() {
   flush();
 }
 
-void raw_os_ostream::write_impl(const char *Ptr, size_t Size) {
-  OS.write(Ptr, Size);
+فراغ raw_os_ostream::write_impl(ثابت حرف *Ptr, size_t ناپ) {
+  OS.اكتب(Ptr, ناپ);
 }
 
-uint64_t raw_os_ostream::current_pos() const { return OS.tellp(); }
+uint64_t raw_os_ostream::current_pos() ثابت { أرجع OS.tellp(); }

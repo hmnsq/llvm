@@ -12,114 +12,114 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/IntegerInclusiveInterval.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Regex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <string>
+#ضمن "llvm/Support/IntegerInclusiveInterval.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/Regex.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <string>
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
-namespace llvm::IntegerInclusiveIntervalUtils {
+نطاق llvm::IntegerInclusiveIntervalUtils {
 
-Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
+Expected<IntervalList> parseIntervals(StringRef Str, حرف Separator) {
   IntervalList Intervals;
 
-  if (Str.empty())
-    return std::move(Intervals);
+  إذا (Str.خالی_تھاواں())
+    أرجع std::move(Intervals);
 
   // Regex to match either single number or interval "num1-num2".
-  const Regex IntervalRegex("^([0-9]+)(-([0-9]+))?$");
+  ثابت Regex IntervalRegex("^([0-9]+)(-([0-9]+))?$");
 
-  for (StringRef Part : llvm::split(Str, Separator)) {
+  لكل (StringRef Part : llvm::ونڈو(Str, Separator)) {
     Part = Part.trim();
-    if (Part.empty())
-      continue;
+    إذا (Part.خالی_تھاواں())
+      استمر;
 
-    SmallVector<StringRef, 4> Matches;
-    if (!IntervalRegex.match(Part, &Matches))
-      return createStringError(std::errc::invalid_argument,
+    Small_سمتیہ<StringRef, 4> Matches;
+    إذا (!IntervalRegex.میل(Part, &Matches))
+      أرجع createStringError(std::errc::invalid_دلیل,
                                "Invalid interval format: '%s'",
                                Part.str().c_str());
 
-    int64_t Begin, End;
-    if (Matches[1].getAsInteger(10, Begin))
-      return createStringError(std::errc::invalid_argument,
+    int64_t Begin, سرا_2;
+    إذا (Matches[1].getAsInteger(10, Begin))
+      أرجع createStringError(std::errc::invalid_دلیل,
                                "Failed to parse number: '%s'",
                                Matches[1].str().c_str());
 
-    if (!Matches[3].empty()) {
+    إذا (!Matches[3].خالی_تھاواں()) {
       // Interval format "begin-end".
-      if (Matches[3].getAsInteger(10, End))
-        return createStringError(std::errc::invalid_argument,
+      إذا (Matches[3].getAsInteger(10, سرا_2))
+        أرجع createStringError(std::errc::invalid_دلیل,
                                  "Failed to parse number: '%s'",
                                  Matches[3].str().c_str());
-      if (Begin >= End)
-        return createStringError(std::errc::invalid_argument,
-                                 "Invalid interval: %lld >= %lld", Begin, End);
-    } else
+      إذا (Begin >= سرا_2)
+        أرجع createStringError(std::errc::invalid_دلیل,
+                                 "Invalid interval: %lld >= %lld", Begin, سرا_2);
+    } وإلا
       // Single number.
-      End = Begin;
+      سرا_2 = Begin;
 
     // Check ordering constraint (intervals must be in increasing order).
-    if (!Intervals.empty() && Begin <= Intervals.back().getEnd())
-      return createStringError(
-          std::errc::invalid_argument,
+    إذا (!Intervals.خالی_تھاواں() && Begin <= Intervals.پٹھ().get_سرا())
+      أرجع createStringError(
+          std::errc::invalid_دلیل,
           "Expected intervals to be in increasing order: %lld <= %lld", Begin,
-          Intervals.back().getEnd());
+          Intervals.پٹھ().get_سرا());
 
-    Intervals.push_back(IntegerInclusiveInterval(Begin, End));
+    Intervals.ڈالو_پٹھ(IntegerInclusiveInterval(Begin, سرا_2));
   }
 
-  return Intervals;
+  أرجع Intervals;
 }
 
-bool contains(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t Value) {
-  for (const IntegerInclusiveInterval &It : Intervals) {
-    if (It.contains(Value))
-      return true;
+منطقي شامل_اے(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t قدر) {
+  لكل (ثابت IntegerInclusiveInterval &It : Intervals) {
+    إذا (It.شامل_اے(قدر))
+      أرجع سچ;
   }
-  return false;
+  أرجع خطأ;
 }
 
-void printIntervals(raw_ostream &OS,
+فراغ printIntervals(raw_ostream &OS,
                     ArrayRef<IntegerInclusiveInterval> Intervals,
-                    char Separator) {
-  if (Intervals.empty()) {
+                    حرف Separator) {
+  إذا (Intervals.خالی_تھاواں()) {
     OS << "empty";
-    return;
+    أرجع;
   }
 
   std::string Sep(1, Separator);
   ListSeparator LS(Sep);
-  for (const IntegerInclusiveInterval &It : Intervals) {
+  لكل (ثابت IntegerInclusiveInterval &It : Intervals) {
     OS << LS;
     It.print(OS);
   }
 }
 
 IntervalList
-mergeAdjacentIntervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
-  if (Intervals.empty())
-    return {};
+ملاؤ_Adjacent_Intervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
+  إذا (Intervals.خالی_تھاواں())
+    أرجع {};
 
-  IntervalList Result;
-  Result.push_back(Intervals[0]);
+  IntervalList نتیجہ;
+  نتیجہ.ڈالو_پٹھ(Intervals[0]);
 
-  for (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
-    IntegerInclusiveInterval &Last = Result.back();
+  لكل (ثابت IntegerInclusiveInterval &Current : Intervals.drop_front()) {
+    IntegerInclusiveInterval &آخری = نتیجہ.پٹھ();
     // Check if current interval is adjacent to the last merged interval.
-    if (Current.getBegin() == Last.getEnd() + 1) {
+    إذا (Current.getBegin() == آخری.get_سرا() + 1) {
       // Merge by extending the end of the last interval.
-      Last.setEnd(Current.getEnd());
-    } else {
+      آخری.سیٹ_سرا(Current.get_سرا());
+    } وإلا {
       // Not adjacent, add as separate interval.
-      Result.push_back(Current);
+      نتیجہ.ڈالو_پٹھ(Current);
     }
   }
 
-  return Result;
+  أرجع نتیجہ;
 }
 
 } // end namespace llvm::IntegerInclusiveIntervalUtils

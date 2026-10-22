@@ -12,38 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RandomNumberGenerator.h"
+#ضمن "llvm/Support/RandomNumberGenerator.h"
 
-#include "DebugOptions.h"
+#ضمن "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/raw_ostream.h"
-#ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
-#else
-#include "Unix/Unix.h"
-#endif
+#ضمن "llvm/Support/CommandLine.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#جے_تعریف_شدہ _WIN32
+#ضمن "llvm/Support/Windows/WindowsSupport.h"
+#وإلا
+#ضمن "Unix/Unix.h"
+#جے_انت
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
-#define DEBUG_TYPE "rng"
-namespace {
-struct CreateSeed {
-  static void *call() {
-    return new cl::opt<uint64_t>(
-        "rng-seed", cl::value_desc("seed"), cl::Hidden,
+#تعریف_کرو DEBUG_TYPE "rng"
+نطاق {
+بنية Create_بیج {
+  ساكن فراغ *call() {
+    أرجع جديد cl::opt<uint64_t>(
+        "rng-seed", cl::قدر_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
-void llvm::initRandomSeedOptions() { *Seed; }
+ساكن ManagedStatic<cl::opt<uint64_t>, Create_بیج> بیج;
+فراغ llvm::init_Random_بیج_Options() { *بیج; }
 
-RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
-  LLVM_DEBUG(if (*Seed == 0) dbgs()
+Random_نمبر_Generator::Random_نمبر_Generator(StringRef Salt) {
+  LLVM_DEBUG(إذا (*بیج == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
   // Combine seed and salts using std::seed_seq.
@@ -51,46 +51,46 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
   // Note: std::seed_seq can only store 32-bit values, even though we
   // are using a 64-bit RNG. This isn't a problem since the Mersenne
   // twister constructor copies these correctly into its initial state.
-  std::vector<uint32_t> Data;
-  Data.resize(2 + Salt.size());
-  Data[0] = *Seed;
-  Data[1] = *Seed >> 32;
+  std::سمتیہ<uint32_t> انکڑے_2;
+  انکڑے_2.resize(2 + Salt.ناپ_2());
+  انکڑے_2[0] = *بیج;
+  انکڑے_2[1] = *بیج >> 32;
 
-  llvm::copy(Salt, Data.begin() + 2);
+  llvm::copy(Salt, انکڑے_2.begin() + 2);
 
-  std::seed_seq SeedSeq(Data.begin(), Data.end());
-  Generator.seed(SeedSeq);
+  std::بیج_seq بیج_Seq(انکڑے_2.begin(), انکڑے_2.سرا());
+  Generator.بیج_2(بیج_Seq);
 }
 
-RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
-  return Generator();
+Random_نمبر_Generator::نتیجہ_type Random_نمبر_Generator::عامل()() {
+  أرجع Generator();
 }
 
 // Get random vector of specified size
-std::error_code llvm::getRandomBytes(void *Buffer, size_t Size) {
-#ifdef _WIN32
+std::error_کوڈ llvm::get_Random_بائٹاں(فراغ *بفر, size_t ناپ) {
+#جے_تعریف_شدہ _WIN32
   HCRYPTPROV hProvider;
-  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
+  إذا (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_بھریا,
                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     ScopedCryptContext ScopedHandle(hProvider);
-    if (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
-      return std::error_code();
+    إذا (CryptGenRandom(hProvider, ناپ, static_cast<BYTE *>(بفر)))
+      أرجع std::error_کوڈ();
   }
-  return std::error_code(GetLastError(), std::system_category());
-#else
-  int Fd = open("/dev/urandom", O_RDONLY);
-  if (Fd != -1) {
-    std::error_code Ret;
-    ssize_t BytesRead = read(Fd, Buffer, Size);
-    if (BytesRead == -1)
-      Ret = errnoAsErrorCode();
-    else if (BytesRead != static_cast<ssize_t>(Size))
-      Ret = std::error_code(EIO, std::system_category());
-    if (close(Fd) == -1)
-      Ret = errnoAsErrorCode();
+  أرجع std::error_کوڈ(Get_آخری_Error(), std::system_category());
+#وإلا
+  صحيح Fd = open("/dev/urandom", O_RDONLY);
+  إذا (Fd != -1) {
+    std::error_کوڈ Ret;
+    ssize_t بائٹاں_Read = اقرأ(Fd, بفر, ناپ);
+    إذا (بائٹاں_Read == -1)
+      Ret = errno_As_Error_کوڈ();
+    وإلا إذا (بائٹاں_Read != static_cast<ssize_t>(ناپ))
+      Ret = std::error_کوڈ(EIO, std::system_category());
+    إذا (close(Fd) == -1)
+      Ret = errno_As_Error_کوڈ();
 
-    return Ret;
+    أرجع Ret;
   }
-  return errnoAsErrorCode();
-#endif
+  أرجع errno_As_Error_کوڈ();
+#جے_انت
 }

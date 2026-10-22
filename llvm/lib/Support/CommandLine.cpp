@@ -15,239 +15,239 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CommandLine.h"
+#ضمن "llvm/Support/CommandLine.h"
 
-#include "DebugOptions.h"
+#ضمن "DebugOptions.h"
 
-#include "llvm-c/Support.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLFunctionalExtras.h"
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/LibraryOptionsContext.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/StringSaver.h"
-#include "llvm/Support/TypeSize.h"
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cstdlib>
-#include <optional>
-#include <string>
-using namespace llvm;
-using namespace cl;
+#ضمن "llvm-c/Support.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/STLFunctionalExtras.h"
+#ضمن "llvm/ADT/SmallPtrSet.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringMap.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/ConvertUTF.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/LibraryOptionsContext.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/StringSaver.h"
+#ضمن "llvm/Support/TypeSize.h"
+#ضمن "llvm/Support/VirtualFileSystem.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cstdlib>
+#ضمن <optional>
+#ضمن <string>
+ورتوں نطاق llvm;
+ورتوں نطاق cl;
 
-#define DEBUG_TYPE "commandline"
+#تعریف_کرو DEBUG_TYPE "commandline"
 
 //===----------------------------------------------------------------------===//
 // Template instantiations and anchors.
 //
-namespace llvm {
-namespace cl {
-template class LLVM_EXPORT_TEMPLATE basic_parser<bool>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<boolOrDefault>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<int>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<long long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<unsigned>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<unsigned long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<unsigned long long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<double>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<float>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<std::string>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<char>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<ElementCount>;
+نطاق llvm {
+نطاق cl {
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<منطقي>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<boolOrDefault>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<صحيح>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<لما>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<لما لما>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<بنانشانی>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<بنانشانی لما>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<بنانشانی لما لما>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<مزدوج>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<عائم>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<std::string>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<حرف>;
+سانچا صنف LLVM_EXPORT_TEMPLATE basic_parser<Element_گنتی>;
 
-#if !(defined(LLVM_ENABLE_LLVM_EXPORT_ANNOTATIONS) && defined(_MSC_VER))
+#إذا !(defined(LLVM_ENABLE_LLVM_EXPORT_ANNOTATIONS) && defined(_MSC_VER))
 // Only instantiate opt<std::string> when not building a Windows DLL. When
 // exporting opt<std::string>, MSVC implicitly exports symbols for
 // std::basic_string through transitive inheritance via std::string. These
 // symbols may appear in clients, leading to duplicate symbol conflicts.
-template class LLVM_EXPORT_TEMPLATE opt<std::string>;
-#endif
+سانچا صنف LLVM_EXPORT_TEMPLATE opt<std::string>;
+#جے_انت
 
-template class LLVM_EXPORT_TEMPLATE opt<bool>;
-template class LLVM_EXPORT_TEMPLATE opt<char>;
-template class LLVM_EXPORT_TEMPLATE opt<int>;
-template class LLVM_EXPORT_TEMPLATE opt<unsigned>;
+سانچا صنف LLVM_EXPORT_TEMPLATE opt<منطقي>;
+سانچا صنف LLVM_EXPORT_TEMPLATE opt<حرف>;
+سانچا صنف LLVM_EXPORT_TEMPLATE opt<صحيح>;
+سانچا صنف LLVM_EXPORT_TEMPLATE opt<بنانشانی>;
 
 } // namespace cl
 } // namespace llvm
 
 // Pin the vtables to this file.
-void GenericOptionValue::anchor() {}
-void OptionValue<boolOrDefault>::anchor() {}
-void OptionValue<std::string>::anchor() {}
-void Option::anchor() {}
-void basic_parser_impl::anchor() {}
-void parser<bool>::anchor() {}
-void parser<boolOrDefault>::anchor() {}
-void parser<int>::anchor() {}
-void parser<long>::anchor() {}
-void parser<long long>::anchor() {}
-void parser<unsigned>::anchor() {}
-void parser<unsigned long>::anchor() {}
-void parser<unsigned long long>::anchor() {}
-void parser<double>::anchor() {}
-void parser<float>::anchor() {}
-void parser<std::string>::anchor() {}
-void parser<std::optional<std::string>>::anchor() {}
-void parser<char>::anchor() {}
-void parser<ElementCount>::anchor() {}
+فراغ Generic_Option_قدر::anchor() {}
+فراغ Option_قدر<boolOrDefault>::anchor() {}
+فراغ Option_قدر<std::string>::anchor() {}
+فراغ Option::anchor() {}
+فراغ basic_parser_impl::anchor() {}
+فراغ parser<منطقي>::anchor() {}
+فراغ parser<boolOrDefault>::anchor() {}
+فراغ parser<صحيح>::anchor() {}
+فراغ parser<لما>::anchor() {}
+فراغ parser<لما لما>::anchor() {}
+فراغ parser<بنانشانی>::anchor() {}
+فراغ parser<بنانشانی لما>::anchor() {}
+فراغ parser<بنانشانی لما لما>::anchor() {}
+فراغ parser<مزدوج>::anchor() {}
+فراغ parser<عائم>::anchor() {}
+فراغ parser<std::string>::anchor() {}
+فراغ parser<std::optional<std::string>>::anchor() {}
+فراغ parser<حرف>::anchor() {}
+فراغ parser<Element_گنتی>::anchor() {}
 
 // These anchor functions instantiate opt<T> and reference its virtual
 // destructor to ensure MSVC exports the corresponding vtable and typeinfo when
 // building a Windows DLL. Without an explicit reference, MSVC may omit the
 // instantiation at link time even if it is marked DLL-export.
-void opt_bool_anchor() { opt<bool> anchor{""}; }
-void opt_char_anchor() { opt<char> anchor{""}; }
-void opt_int_anchor() { opt<int> anchor{""}; }
-void opt_unsigned_anchor() { opt<unsigned> anchor{""}; }
+فراغ opt_bool_anchor() { opt<منطقي> anchor{""}; }
+فراغ opt_char_anchor() { opt<حرف> anchor{""}; }
+فراغ opt_int_anchor() { opt<صحيح> anchor{""}; }
+فراغ opt_unsigned_anchor() { opt<بنانشانی> anchor{""}; }
 
 //===----------------------------------------------------------------------===//
 
-const static size_t DefaultPad = 2;
+ثابت ساكن size_t DefaultPad = 2;
 
-static StringRef ArgPrefix = "-";
-static StringRef ArgPrefixLong = "--";
-static StringRef ArgHelpPrefix = " - ";
+ساكن StringRef Arg_اگیتر = "-";
+ساكن StringRef Arg_اگیتر_Long = "--";
+ساكن StringRef Arg_Help_اگیتر = " - ";
 
-static size_t argPlusPrefixesSize(StringRef ArgName, size_t Pad = DefaultPad) {
-  size_t Len = ArgName.size();
-  if (Len == 1)
-    return Len + Pad + ArgPrefix.size() + ArgHelpPrefix.size();
-  return Len + Pad + ArgPrefixLong.size() + ArgHelpPrefix.size();
+ساكن size_t arg_Plus_Prefixes_ناپ(StringRef ArgName, size_t Pad = DefaultPad) {
+  size_t Len = ArgName.ناپ_2();
+  إذا (Len == 1)
+    أرجع Len + Pad + Arg_اگیتر.ناپ_2() + Arg_Help_اگیتر.ناپ_2();
+  أرجع Len + Pad + Arg_اگیتر_Long.ناپ_2() + Arg_Help_اگیتر.ناپ_2();
 }
 
-static SmallString<8> argPrefix(StringRef ArgName, size_t Pad = DefaultPad) {
-  SmallString<8> Prefix;
-  for (size_t I = 0; I < Pad; ++I) {
-    Prefix.push_back(' ');
+ساكن SmallString<8> arg_اگیتر(StringRef ArgName, size_t Pad = DefaultPad) {
+  SmallString<8> اگیتر;
+  لكل (size_t I = 0; I < Pad; ++I) {
+    اگیتر.ڈالو_پٹھ(' ');
   }
-  Prefix.append(ArgName.size() > 1 ? ArgPrefixLong : ArgPrefix);
-  return Prefix;
+  اگیتر.append(ArgName.ناپ_2() > 1 ? Arg_اگیتر_Long : Arg_اگیتر);
+  أرجع اگیتر;
 }
 
-using OptionsMapTy = DenseMap<StringRef, Option *>;
+ورتوں OptionsMapTy = DenseMap<StringRef, Option *>;
 
-namespace {
+نطاق {
 
-class PrintArg {
+صنف PrintArg {
   StringRef ArgName;
   size_t Pad;
-public:
+عام:
   PrintArg(StringRef ArgName, size_t Pad = DefaultPad) : ArgName(ArgName), Pad(Pad) {}
-  friend raw_ostream &operator<<(raw_ostream &OS, const PrintArg &);
+  یار raw_ostream &عامل<<(raw_ostream &OS, ثابت PrintArg &);
 };
 
-raw_ostream &operator<<(raw_ostream &OS, const PrintArg& Arg) {
-  OS << argPrefix(Arg.ArgName, Arg.Pad) << Arg.ArgName;
-  return OS;
+raw_ostream &عامل<<(raw_ostream &OS, ثابت PrintArg& Arg) {
+  OS << arg_اگیتر(Arg.ArgName, Arg.Pad) << Arg.ArgName;
+  أرجع OS;
 }
 
-class CommandLineParser {
-public:
+صنف Command_سطر_Parser {
+عام:
   // Globals for name and overview of program.  Program name is not a string to
   // avoid static ctor/dtor issues.
-  std::string ProgramName;
-  StringRef ProgramOverview;
+  std::string پروگرام_Name;
+  StringRef پروگرام_Overview;
 
   // This collects additional help to be printed.
-  std::vector<StringRef> MoreHelp;
+  std::سمتیہ<StringRef> ہور_Help;
 
   // This collects the different option categories that have been registered.
-  SmallPtrSet<OptionCategory *, 16> RegisteredOptionCategories;
+  Small_Ptr_سیٹ<OptionCategory *, 16> RegisteredOptionCategories;
 
   // This collects the different subcommands that have been registered.
-  SmallPtrSet<SubCommand *, 4> RegisteredSubCommands;
+  Small_Ptr_سیٹ<SubCommand *, 4> RegisteredSubCommands;
 
   // Libraries whose options are declared in TableGen, and an index from their
   // option names. Libraries[NumIndexedLibraries:] are not indexed yet.
-  SmallVector<LibraryOptions *, 0> Libraries;
-  DenseMap<StringRef, LibraryOptions *> LibraryIndex;
-  size_t NumIndexedLibraries = 0;
+  Small_سمتیہ<LibraryOptions *, 0> Libraries;
+  DenseMap<StringRef, LibraryOptions *> Library_اشاریہ;
+  size_t عدد_اشاریہ_دار_Libraries = 0;
   // Storage that library options refer to: copies of the arguments passed to
   // LibraryOptions::parse and what it allocates. Response file expansions do
   // not outlive parsing.
   BumpPtrAllocator LibraryArgAlloc;
 
-  CommandLineParser() { registerSubCommand(&SubCommand::getTopLevel()); }
+  Command_سطر_Parser() { رجسٹر_Sub_Command(&SubCommand::get_چوٹی_Level()); }
 
-  void ResetAllOptionOccurrences();
+  فراغ ResetAllOptionOccurrences();
 
-  bool ParseCommandLineOptions(int argc, const char *const *argv,
-                               StringRef Overview, raw_ostream *Errs = nullptr,
-                               vfs::FileSystem *VFS = nullptr,
-                               LibraryOptionsContext *Context = nullptr);
+  منطقي Parse_Command_سطر_Options(صحيح argc, ثابت حرف *ثابت *argv,
+                               StringRef Overview, raw_ostream *Errs = خالی_سوچک,
+                               vfs::FileSystem *VFS = خالی_سوچک,
+                               LibraryOptionsContext *Context = خالی_سوچک);
 
-  void forEachSubCommand(Option &Opt, function_ref<void(SubCommand &)> Action) {
-    if (Opt.Subs.empty()) {
-      Action(SubCommand::getTopLevel());
-      return;
+  فراغ forEachSubCommand(Option &Opt, function_ref<فراغ(SubCommand &)> Action) {
+    إذا (Opt.Subs.خالی_تھاواں()) {
+      Action(SubCommand::get_چوٹی_Level());
+      أرجع;
     }
-    if (Opt.Subs.size() == 1 && *Opt.Subs.begin() == &SubCommand::getAll()) {
-      for (auto *SC : RegisteredSubCommands)
+    إذا (Opt.Subs.ناپ_2() == 1 && *Opt.Subs.begin() == &SubCommand::getAll()) {
+      لكل (خودکار *SC : RegisteredSubCommands)
         Action(*SC);
       Action(SubCommand::getAll());
-      return;
+      أرجع;
     }
-    for (auto *SC : Opt.Subs) {
-      assert(SC != &SubCommand::getAll() &&
+    لكل (خودکار *SC : Opt.Subs) {
+      أكد(SC != &SubCommand::getAll() &&
              "SubCommand::getAll() should not be used with other subcommands");
       Action(*SC);
     }
   }
 
-  void addLiteralOption(Option &Opt, SubCommand *SC, StringRef Name) {
-    if (Opt.hasArgStr())
-      return;
-    if (!SC->OptionsMap.insert(std::make_pair(Name, &Opt)).second) {
-      errs() << ProgramName << ": CommandLine Error: Option '" << Name
+  فراغ جوڑو_Literal_Option(Option &Opt, SubCommand *SC, StringRef Name) {
+    إذا (Opt.hasArgStr())
+      أرجع;
+    إذا (!SC->OptionsMap.داخل_کرو(std::make_pair(Name, &Opt)).دوجا_2) {
+      errs() << پروگرام_Name << ": CommandLine Error: Option '" << Name
              << "' registered more than once!\n";
       report_fatal_error("inconsistency in registered CommandLine options");
     }
   }
 
-  void addLiteralOption(Option &Opt, StringRef Name) {
+  فراغ جوڑو_Literal_Option(Option &Opt, StringRef Name) {
     forEachSubCommand(
-        Opt, [&](SubCommand &SC) { addLiteralOption(Opt, &SC, Name); });
+        Opt, [&](SubCommand &SC) { جوڑو_Literal_Option(Opt, &SC, Name); });
   }
 
-  void addOption(Option *O, SubCommand *SC) {
-    bool HadErrors = false;
-    if (O->hasArgStr()) {
+  فراغ جوڑو_Option(Option *O, SubCommand *SC) {
+    منطقي HadErrors = خطأ;
+    إذا (O->hasArgStr()) {
       // Add argument to the argument map!
       // An unregistered subcommand, such as MLIR's PassOptions, parses its
       // own arguments.
-      if (!SC->OptionsMap.insert(std::make_pair(O->ArgStr, O)).second ||
-          (RegisteredSubCommands.contains(SC) &&
-           LibraryIndex.contains(O->ArgStr))) {
-        errs() << ProgramName << ": CommandLine Error: Option '" << O->ArgStr
+      إذا (!SC->OptionsMap.داخل_کرو(std::make_pair(O->ArgStr, O)).دوجا_2 ||
+          (RegisteredSubCommands.شامل_اے(SC) &&
+           Library_اشاریہ.شامل_اے(O->ArgStr))) {
+        errs() << پروگرام_Name << ": CommandLine Error: Option '" << O->ArgStr
                << "' registered more than once!\n";
-        HadErrors = true;
+        HadErrors = سچ;
       }
     }
 
     // Remember information about positional options.
-    if (O->getFormattingFlag() == cl::Positional)
-      SC->PositionalOpts.push_back(O);
-    else if (O->getNumOccurrencesFlag() == cl::ConsumeAfter) {
-      if (SC->ConsumeAfterOpt) {
+    إذا (O->getFormattingFlag() == cl::Positional)
+      SC->PositionalOpts.ڈالو_پٹھ(O);
+    وإلا إذا (O->get_عدد_Occurrences_Flag() == cl::ConsumeAfter) {
+      إذا (SC->ConsumeAfterOpt) {
         O->error("Cannot specify more than one option with cl::ConsumeAfter!");
-        HadErrors = true;
+        HadErrors = سچ;
       }
       SC->ConsumeAfterOpt = O;
     }
@@ -256,178 +256,178 @@ public:
     // indicate serious issues such as conflicting option names or an
     // incorrectly
     // linked LLVM distribution.
-    if (HadErrors)
+    إذا (HadErrors)
       report_fatal_error("inconsistency in registered CommandLine options");
   }
 
-  void addOption(Option *O) {
-    forEachSubCommand(*O, [&](SubCommand &SC) { addOption(O, &SC); });
+  فراغ جوڑو_Option(Option *O) {
+    forEachSubCommand(*O, [&](SubCommand &SC) { جوڑو_Option(O, &SC); });
   }
 
-  void removeOption(Option *O, SubCommand *SC) {
-    SmallVector<StringRef, 16> OptionNames;
-    O->getExtraOptionNames(OptionNames);
-    if (O->hasArgStr())
-      OptionNames.push_back(O->ArgStr);
+  فراغ removeOption(Option *O, SubCommand *SC) {
+    Small_سمتیہ<StringRef, 16> Option_ناں;
+    O->get_Extra_Option_ناں(Option_ناں);
+    إذا (O->hasArgStr())
+      Option_ناں.ڈالو_پٹھ(O->ArgStr);
 
     SubCommand &Sub = *SC;
-    for (auto Name : OptionNames) {
-      auto I = Sub.OptionsMap.find(Name);
+    لكل (خودکار Name : Option_ناں) {
+      خودکار I = Sub.OptionsMap.لبھو(Name);
       // Re-query end() each iteration: a prior erase invalidates iterators
       // (including a cached end()) under backward-shift deletion.
-      if (I != Sub.OptionsMap.end() && I->second == O)
+      إذا (I != Sub.OptionsMap.سرا() && I->دوجا_2 == O)
         Sub.OptionsMap.erase(I);
     }
 
-    if (O->getFormattingFlag() == cl::Positional)
-      for (auto *Opt = Sub.PositionalOpts.begin();
-           Opt != Sub.PositionalOpts.end(); ++Opt) {
-        if (*Opt == O) {
+    إذا (O->getFormattingFlag() == cl::Positional)
+      لكل (خودکار *Opt = Sub.PositionalOpts.begin();
+           Opt != Sub.PositionalOpts.سرا(); ++Opt) {
+        إذا (*Opt == O) {
           Sub.PositionalOpts.erase(Opt);
-          break;
+          اكسر;
         }
       }
-    else if (O == Sub.ConsumeAfterOpt)
-      Sub.ConsumeAfterOpt = nullptr;
+    وإلا إذا (O == Sub.ConsumeAfterOpt)
+      Sub.ConsumeAfterOpt = خالی_سوچک;
   }
 
-  void removeOption(Option *O) {
+  فراغ removeOption(Option *O) {
     forEachSubCommand(*O, [&](SubCommand &SC) { removeOption(O, &SC); });
   }
 
-  bool hasOptions(const SubCommand &Sub) const {
-    return (!Sub.OptionsMap.empty() || !Sub.PositionalOpts.empty() ||
-            nullptr != Sub.ConsumeAfterOpt);
+  منطقي hasOptions(ثابت SubCommand &Sub) ثابت {
+    أرجع (!Sub.OptionsMap.خالی_تھاواں() || !Sub.PositionalOpts.خالی_تھاواں() ||
+            خالی_سوچک != Sub.ConsumeAfterOpt);
   }
 
-  bool hasOptions() const {
-    for (const auto *S : RegisteredSubCommands) {
-      if (hasOptions(*S))
-        return true;
+  منطقي hasOptions() ثابت {
+    لكل (ثابت خودکار *S : RegisteredSubCommands) {
+      إذا (hasOptions(*S))
+        أرجع سچ;
     }
-    return !Libraries.empty();
+    أرجع !Libraries.خالی_تھاواں();
   }
 
-  bool hasNamedSubCommands() const {
-    for (const auto *S : RegisteredSubCommands)
-      if (!S->getName().empty())
-        return true;
-    return false;
+  منطقي hasNamedSubCommands() ثابت {
+    لكل (ثابت خودکار *S : RegisteredSubCommands)
+      إذا (!S->getName().خالی_تھاواں())
+        أرجع سچ;
+    أرجع خطأ;
   }
 
-  SubCommand *getActiveSubCommand() { return ActiveSubCommand; }
+  SubCommand *get_سرگرم_Sub_Command() { أرجع سرگرم_Sub_Command; }
 
-  void updateArgStr(Option *O, StringRef NewName, SubCommand *SC) {
+  فراغ updateArgStr(Option *O, StringRef NewName, SubCommand *SC) {
     SubCommand &Sub = *SC;
-    if (!Sub.OptionsMap.insert(std::make_pair(NewName, O)).second) {
-      errs() << ProgramName << ": CommandLine Error: Option '" << O->ArgStr
+    إذا (!Sub.OptionsMap.داخل_کرو(std::make_pair(NewName, O)).دوجا_2) {
+      errs() << پروگرام_Name << ": CommandLine Error: Option '" << O->ArgStr
              << "' registered more than once!\n";
       report_fatal_error("inconsistency in registered CommandLine options");
     }
     Sub.OptionsMap.erase(O->ArgStr);
   }
 
-  void updateArgStr(Option *O, StringRef NewName) {
+  فراغ updateArgStr(Option *O, StringRef NewName) {
     forEachSubCommand(*O,
                       [&](SubCommand &SC) { updateArgStr(O, NewName, &SC); });
   }
 
-  void printOptionValues();
+  فراغ print_Option_اقدار();
 
-  void indexLibraryOptions() {
-    bool HadErrors = false;
-    for (; NumIndexedLibraries != Libraries.size(); ++NumIndexedLibraries) {
-      LibraryOptions *L = Libraries[NumIndexedLibraries];
+  فراغ اشاریہ_Library_Options() {
+    منطقي HadErrors = خطأ;
+    لكل (; عدد_اشاریہ_دار_Libraries != Libraries.ناپ_2(); ++عدد_اشاریہ_دار_Libraries) {
+      LibraryOptions *L = Libraries[عدد_اشاریہ_دار_Libraries];
       L->forEachOption([&](StringRef Spelling, StringRef, StringRef) {
         StringRef Name = Spelling.rtrim('=');
-        auto [It, Inserted] = LibraryIndex.try_emplace(Name, L);
-        if (Inserted ? none_of(RegisteredSubCommands,
+        خودکار [It, Inserted] = Library_اشاریہ.try_emplace(Name, L);
+        إذا (Inserted ? none_دا(RegisteredSubCommands,
                                [&](SubCommand *SC) {
-                                 return SC->OptionsMap.contains(Name);
+                                 أرجع SC->OptionsMap.شامل_اے(Name);
                                })
-                     : It->second == L)
-          return;
-        errs() << ProgramName << ": CommandLine Error: Option '" << Name
+                     : It->دوجا_2 == L)
+          أرجع;
+        errs() << پروگرام_Name << ": CommandLine Error: Option '" << Name
                << "' registered more than once!\n";
-        HadErrors = true;
+        HadErrors = سچ;
       });
     }
-    if (HadErrors)
+    إذا (HadErrors)
       report_fatal_error("inconsistency in registered CommandLine options");
   }
 
   // A library loaded while parsing (e.g. a pass plugin) may define the name.
   LibraryOptions *lookupLibraryOption(StringRef Name) {
-    indexLibraryOptions();
-    return LibraryIndex.lookup(Name);
+    اشاریہ_Library_Options();
+    أرجع Library_اشاریہ.lookup(Name);
   }
 
-  void registerCategory(OptionCategory *cat) {
-    assert(count_if(RegisteredOptionCategories,
-                    [cat](const OptionCategory *Category) {
-             return cat->getName() == Category->getName();
+  فراغ رجسٹر_Category(OptionCategory *cat) {
+    أكد(گنتی_if(RegisteredOptionCategories,
+                    [cat](ثابت OptionCategory *Category) {
+             أرجع cat->getName() == Category->getName();
            }) == 0 &&
            "Duplicate option categories");
 
-    RegisteredOptionCategories.insert(cat);
+    RegisteredOptionCategories.داخل_کرو(cat);
   }
 
-  void registerSubCommand(SubCommand *sub) {
-    assert(count_if(RegisteredSubCommands,
-                    [sub](const SubCommand *Sub) {
-                      return (!sub->getName().empty()) &&
+  فراغ رجسٹر_Sub_Command(SubCommand *sub) {
+    أكد(گنتی_if(RegisteredSubCommands,
+                    [sub](ثابت SubCommand *Sub) {
+                      أرجع (!sub->getName().خالی_تھاواں()) &&
                              (Sub->getName() == sub->getName());
                     }) == 0 &&
            "Duplicate subcommands");
-    RegisteredSubCommands.insert(sub);
+    RegisteredSubCommands.داخل_کرو(sub);
 
     // For all options that have been registered for all subcommands, add the
     // option to this subcommand now.
-    assert(sub != &SubCommand::getAll() &&
+    أكد(sub != &SubCommand::getAll() &&
            "SubCommand::getAll() should not be registered");
-    for (auto &E : SubCommand::getAll().OptionsMap) {
-      Option *O = E.second;
-      if (O->isPositional() || O->isConsumeAfter() || O->hasArgStr())
-        addOption(O, sub);
-      else
-        addLiteralOption(*O, sub, E.first);
+    لكل (خودکار &E : SubCommand::getAll().OptionsMap) {
+      Option *O = E.دوجا_2;
+      إذا (O->isPositional() || O->isConsumeAfter() || O->hasArgStr())
+        جوڑو_Option(O, sub);
+      وإلا
+        جوڑو_Literal_Option(*O, sub, E.پہلا_2);
     }
   }
 
-  void unregisterSubCommand(SubCommand *sub) {
+  فراغ unregisterSubCommand(SubCommand *sub) {
     RegisteredSubCommands.erase(sub);
   }
 
-  iterator_range<SmallPtrSet<SubCommand *, 4>::iterator>
+  iterator_range<Small_Ptr_سیٹ<SubCommand *, 4>::iterator>
   getRegisteredSubcommands() {
-    return make_range(RegisteredSubCommands.begin(),
-                      RegisteredSubCommands.end());
+    أرجع make_range(RegisteredSubCommands.begin(),
+                      RegisteredSubCommands.سرا());
   }
 
-  void reset() {
-    ActiveSubCommand = nullptr;
-    ProgramName.clear();
-    ProgramOverview = StringRef();
+  فراغ reset() {
+    سرگرم_Sub_Command = خالی_سوچک;
+    پروگرام_Name.clear();
+    پروگرام_Overview = StringRef();
 
-    MoreHelp.clear();
+    ہور_Help.clear();
     RegisteredOptionCategories.clear();
 
     ResetAllOptionOccurrences();
     RegisteredSubCommands.clear();
     Libraries.clear();
-    LibraryIndex.clear();
-    NumIndexedLibraries = 0;
+    Library_اشاریہ.clear();
+    عدد_اشاریہ_دار_Libraries = 0;
 
-    SubCommand::getTopLevel().reset();
+    SubCommand::get_چوٹی_Level().reset();
     SubCommand::getAll().reset();
-    registerSubCommand(&SubCommand::getTopLevel());
+    رجسٹر_Sub_Command(&SubCommand::get_چوٹی_Level());
   }
 
-private:
-  SubCommand *ActiveSubCommand = nullptr;
+خاص:
+  SubCommand *سرگرم_Sub_Command = خالی_سوچک;
 
-  Option *LookupOption(SubCommand &Sub, StringRef &Arg, StringRef &Value);
-  SubCommand *LookupSubCommand(StringRef Name, std::string &NearestString);
+  Option *LookupOption(SubCommand &Sub, StringRef &Arg, StringRef &قدر);
+  SubCommand *LookupSubCommand(StringRef Name, std::string &سبھ_توں_نیڑے_String);
 };
 
 } // namespace
@@ -437,95 +437,95 @@ private:
 // units never reference a namespace-scope global whose initialization order
 // is unspecified. The ManagedStatic keeps construction lazy and destruction
 // tied to llvm_shutdown().
-static CommandLineParser &globalParser() {
-  static ManagedStatic<CommandLineParser> GlobalParser;
-  return *GlobalParser;
+ساكن Command_سطر_Parser &globalParser() {
+  ساكن ManagedStatic<Command_سطر_Parser> GlobalParser;
+  أرجع *GlobalParser;
 }
 
 // Parses the library option spelled by Args[0], which takes at most one
 // separate value, into Opts. Opts may refer to the arguments, so they are
 // copied into Alloc, and appended to Record if given.
-static Error
-parseLibraryOption(LibraryOptions &L, void *Opts, ArrayRef<const char *> Args,
-                   unsigned &Consumed, BumpPtrAllocator &Alloc,
-                   SmallVectorImpl<const char *> *Record = nullptr) {
+ساكن Error
+parseLibraryOption(LibraryOptions &L, فراغ *Opts, ArrayRef<ثابت حرف *> دلیلاں,
+                   بنانشانی &Consumed, BumpPtrAllocator &Alloc,
+                   Small_سمتیہ_Impl<ثابت حرف *> *ریکارڈ = خالی_سوچک) {
   StringSaver Saver(Alloc);
-  const char *Saved[2];
-  unsigned NumArgs = std::min<size_t>(Args.size(), 2);
-  for (unsigned J = 0; J != NumArgs; ++J)
-    Saved[J] = Saver.save(Args[J]).data();
+  ثابت حرف *Saved[2];
+  بنانشانی عدد_دلیلاں = std::min<size_t>(دلیلاں.ناپ_2(), 2);
+  لكل (بنانشانی J = 0; J != عدد_دلیلاں; ++J)
+    Saved[J] = Saver.save(دلیلاں[J]).انکڑے();
   Consumed = 1;
-  if (Error E = L.parse(Opts, ArrayRef(Saved, NumArgs), Consumed, Alloc))
-    return E;
-  if (Record)
-    Record->append(Saved, Saved + Consumed);
-  return Error::success();
+  إذا (Error E = L.parse(Opts, ArrayRef(Saved, عدد_دلیلاں), Consumed, Alloc))
+    أرجع E;
+  إذا (ریکارڈ)
+    ریکارڈ->append(Saved, Saved + Consumed);
+  أرجع Error::success();
 }
 
-template <typename T, T TrueVal, T FalseVal>
-static bool parseBool(Option &O, StringRef ArgName, StringRef Arg, T &Value) {
+سانچا <قسم_ناں T, T TrueVal, T FalseVal>
+ساكن منطقي parseBool(Option &O, StringRef ArgName, StringRef Arg, T &قدر) {
   // ProvideOption passes a null Arg for a bare -flag (treated as true) and an
   // empty one for -flag= (treated as invalid).
-  if (!Arg.data() || Arg == "true" || Arg == "1") {
-    Value = TrueVal;
-    return false;
+  إذا (!Arg.انکڑے() || Arg == "true" || Arg == "1") {
+    قدر = TrueVal;
+    أرجع خطأ;
   }
 
-  if (Arg == "false" || Arg == "0") {
-    Value = FalseVal;
-    return false;
+  إذا (Arg == "false" || Arg == "0") {
+    قدر = FalseVal;
+    أرجع خطأ;
   }
-  return O.error("'" + Arg +
+  أرجع O.error("'" + Arg +
                  "' is invalid value for boolean argument! Try 0 or 1");
 }
 
-void cl::AddLiteralOption(Option &O, StringRef Name) {
-  globalParser().addLiteralOption(O, Name);
+فراغ cl::جوڑو_Literal_Option_2(Option &O, StringRef Name) {
+  globalParser().جوڑو_Literal_Option(O, Name);
 }
 
 extrahelp::extrahelp(StringRef Help) : morehelp(Help) {
-  globalParser().MoreHelp.push_back(Help);
+  globalParser().ہور_Help.ڈالو_پٹھ(Help);
 }
 
-Option::Option(NumOccurrencesFlag OccurrencesFlag, OptionHidden Hidden)
-    : NumOccurrences(0), Occurrences(OccurrencesFlag), Value(0),
-      HiddenFlag(Hidden), Formatting(NormalFormatting), Misc(0),
-      FullyInitialized(false), Position(0) {
-  Categories.push_back(&getGeneralCategory());
+Option::Option(عدد_Occurrences_Flag OccurrencesFlag, OptionHidden Hidden)
+    : عدد_Occurrences(0), Occurrences(OccurrencesFlag), قدر(0),
+      HiddenFlag(Hidden), Formatting(عام_Formatting), Misc(0),
+      FullyInitialized(خطأ), Position(0) {
+  Categories.ڈالو_پٹھ(&getGeneralCategory());
 }
 
-void Option::addArgument() {
-  globalParser().addOption(this);
-  FullyInitialized = true;
+فراغ Option::جوڑو_دلیل() {
+  globalParser().جوڑو_Option(هذا);
+  FullyInitialized = سچ;
 }
 
-void Option::removeArgument() { globalParser().removeOption(this); }
+فراغ Option::remove_دلیل() { globalParser().removeOption(هذا); }
 
-void Option::setArgStr(StringRef S) {
-  if (FullyInitialized)
-    globalParser().updateArgStr(this, S);
-  assert(!S.starts_with("-") && "Option can't start with '-");
+فراغ Option::سیٹ_Arg_Str(StringRef S) {
+  إذا (FullyInitialized)
+    globalParser().updateArgStr(هذا, S);
+  أكد(!S.starts_with("-") && "Option can't start with '-");
   ArgStr = S;
 }
 
-void Option::addCategory(OptionCategory &C) {
-  assert(!Categories.empty() && "Categories cannot be empty.");
+فراغ Option::جوڑو_Category(OptionCategory &C) {
+  أكد(!Categories.خالی_تھاواں() && "Categories cannot be empty.");
   // Maintain backward compatibility by replacing the default GeneralCategory
   // if it's still set.  Otherwise, just add the new one.  The GeneralCategory
   // must be explicitly added if you want multiple categories that include it.
-  if (&C != &getGeneralCategory() && Categories[0] == &getGeneralCategory())
+  إذا (&C != &getGeneralCategory() && Categories[0] == &getGeneralCategory())
     Categories[0] = &C;
-  else if (!is_contained(Categories, &C))
-    Categories.push_back(&C);
+  وإلا إذا (!is_contained(Categories, &C))
+    Categories.ڈالو_پٹھ(&C);
 }
 
-void Option::reset() {
-  NumOccurrences = 0;
-  setDefault();
+فراغ Option::reset() {
+  عدد_Occurrences = 0;
+  سیٹ_Default();
 }
 
-void OptionCategory::registerCategory() {
-  globalParser().registerCategory(this);
+فراغ OptionCategory::رجسٹر_Category() {
+  globalParser().رجسٹر_Category(هذا);
 }
 
 // A special subcommand representing no subcommand. It is kept as a
@@ -533,34 +533,34 @@ void OptionCategory::registerCategory() {
 // which run dynamically in an arbitrary order across translation units;
 // block-scope statics are initialized on first use and therefore have no
 // initialization-order hazard.
-SubCommand &SubCommand::getTopLevel() {
-  static ManagedStatic<SubCommand> TopLevelSubCommand;
-  return *TopLevelSubCommand;
+SubCommand &SubCommand::get_چوٹی_Level() {
+  ساكن ManagedStatic<SubCommand> چوٹی_Level_Sub_Command;
+  أرجع *چوٹی_Level_Sub_Command;
 }
 
 // A special subcommand that can be used to put an option into all subcommands.
 SubCommand &SubCommand::getAll() {
-  static ManagedStatic<SubCommand> AllSubCommands;
-  return *AllSubCommands;
+  ساكن ManagedStatic<SubCommand> AllSubCommands;
+  أرجع *AllSubCommands;
 }
 
-void SubCommand::registerSubCommand() {
-  globalParser().registerSubCommand(this);
+فراغ SubCommand::رجسٹر_Sub_Command() {
+  globalParser().رجسٹر_Sub_Command(هذا);
 }
 
-void SubCommand::unregisterSubCommand() {
-  globalParser().unregisterSubCommand(this);
+فراغ SubCommand::unregisterSubCommand() {
+  globalParser().unregisterSubCommand(هذا);
 }
 
-void SubCommand::reset() {
+فراغ SubCommand::reset() {
   PositionalOpts.clear();
   OptionsMap.clear();
 
-  ConsumeAfterOpt = nullptr;
+  ConsumeAfterOpt = خالی_سوچک;
 }
 
-SubCommand::operator bool() const {
-  return (globalParser().getActiveSubCommand() == this);
+SubCommand::عامل منطقي() ثابت {
+  أرجع (globalParser().get_سرگرم_Sub_Command() == هذا);
 }
 
 //===----------------------------------------------------------------------===//
@@ -570,293 +570,293 @@ SubCommand::operator bool() const {
 /// LookupOption - Lookup the option specified by the specified option on the
 /// command line.  If there is a value specified (after an equal sign) return
 /// that as well.  This assumes that leading dashes have already been stripped.
-Option *CommandLineParser::LookupOption(SubCommand &Sub, StringRef &Arg,
-                                        StringRef &Value) {
+Option *Command_سطر_Parser::LookupOption(SubCommand &Sub, StringRef &Arg,
+                                        StringRef &قدر) {
   // Reject all dashes.
-  if (Arg.empty())
-    return nullptr;
-  assert(&Sub != &SubCommand::getAll());
+  إذا (Arg.خالی_تھاواں())
+    أرجع خالی_سوچک;
+  أكد(&Sub != &SubCommand::getAll());
 
-  size_t EqualPos = Arg.find('=');
+  size_t EqualPos = Arg.لبھو('=');
 
   // If we have an equals sign, remember the value.
-  if (EqualPos == StringRef::npos) {
+  إذا (EqualPos == StringRef::npos) {
     // Look up the option.
-    return Sub.OptionsMap.lookup(Arg);
+    أرجع Sub.OptionsMap.lookup(Arg);
   }
 
   // If the argument before the = is a valid option name and the option allows
   // non-prefix form (ie is not AlwaysPrefix), we match.  If not, signal match
   // failure by returning nullptr.
-  auto I = Sub.OptionsMap.find(Arg.substr(0, EqualPos));
-  if (I == Sub.OptionsMap.end())
-    return nullptr;
+  خودکار I = Sub.OptionsMap.لبھو(Arg.substr(0, EqualPos));
+  إذا (I == Sub.OptionsMap.سرا())
+    أرجع خالی_سوچک;
 
-  auto *O = I->second;
-  if (O->getFormattingFlag() == cl::AlwaysPrefix)
-    return nullptr;
+  خودکار *O = I->دوجا_2;
+  إذا (O->getFormattingFlag() == cl::Always_اگیتر)
+    أرجع خالی_سوچک;
 
-  Value = Arg.substr(EqualPos + 1);
+  قدر = Arg.substr(EqualPos + 1);
   Arg = Arg.substr(0, EqualPos);
-  return I->second;
+  أرجع I->دوجا_2;
 }
 
-SubCommand *CommandLineParser::LookupSubCommand(StringRef Name,
-                                                std::string &NearestString) {
-  if (Name.empty())
-    return &SubCommand::getTopLevel();
+SubCommand *Command_سطر_Parser::LookupSubCommand(StringRef Name,
+                                                std::string &سبھ_توں_نیڑے_String) {
+  إذا (Name.خالی_تھاواں())
+    أرجع &SubCommand::get_چوٹی_Level();
   // Find a subcommand with the edit distance == 1.
-  SubCommand *NearestMatch = nullptr;
-  for (auto *S : RegisteredSubCommands) {
-    assert(S != &SubCommand::getAll() &&
+  SubCommand *سبھ_توں_نیڑے_میل = خالی_سوچک;
+  لكل (خودکار *S : RegisteredSubCommands) {
+    أكد(S != &SubCommand::getAll() &&
            "SubCommand::getAll() is not expected in RegisteredSubCommands");
-    if (S->getName().empty())
-      continue;
+    إذا (S->getName().خالی_تھاواں())
+      استمر;
 
-    if (S->getName() == Name)
-      return S;
+    إذا (S->getName() == Name)
+      أرجع S;
 
-    if (!NearestMatch && S->getName().edit_distance(Name) < 2)
-      NearestMatch = S;
+    إذا (!سبھ_توں_نیڑے_میل && S->getName().edit_فاصلہ(Name) < 2)
+      سبھ_توں_نیڑے_میل = S;
   }
 
-  if (NearestMatch)
-    NearestString = NearestMatch->getName();
+  إذا (سبھ_توں_نیڑے_میل)
+    سبھ_توں_نیڑے_String = سبھ_توں_نیڑے_میل->getName();
 
-  return &SubCommand::getTopLevel();
+  أرجع &SubCommand::get_چوٹی_Level();
 }
 
 /// LookupNearestOption - Lookup the closest match to the option specified by
 /// the specified option on the command line.  If there is a value specified
 /// (after an equal sign) return that as well.  This assumes that leading dashes
 /// have already been stripped.
-static Option *LookupNearestOption(StringRef Arg,
-                                   const OptionsMapTy &OptionsMap,
-                                   std::string &NearestString) {
+ساكن Option *Lookup_سبھ_توں_نیڑے_Option(StringRef Arg,
+                                   ثابت OptionsMapTy &OptionsMap,
+                                   std::string &سبھ_توں_نیڑے_String) {
   // Reject all dashes.
-  if (Arg.empty())
-    return nullptr;
+  إذا (Arg.خالی_تھاواں())
+    أرجع خالی_سوچک;
 
   // Split on any equal sign.
-  std::pair<StringRef, StringRef> SplitArg = Arg.split('=');
-  StringRef &LHS = SplitArg.first; // LHS == Arg when no '=' is present.
-  StringRef &RHS = SplitArg.second;
+  std::pair<StringRef, StringRef> ونڈو_Arg = Arg.ونڈو('=');
+  StringRef &LHS = ونڈو_Arg.پہلا_2; // LHS == Arg when no '=' is present.
+  StringRef &RHS = ونڈو_Arg.دوجا_2;
 
   // Find the closest match.
-  Option *Best = nullptr;
-  unsigned BestDistance = 0;
-  for (const auto &[_, O] : OptionsMap) {
+  Option *بہترین = خالی_سوچک;
+  بنانشانی بہترین_فاصلہ = 0;
+  لكل (ثابت خودکار &[_, O] : OptionsMap) {
     // Do not suggest really hidden options (not shown in any help).
-    if (O->getOptionHiddenFlag() == ReallyHidden)
-      continue;
+    إذا (O->getOptionHiddenFlag() == ReallyHidden)
+      استمر;
 
-    SmallVector<StringRef, 16> OptionNames;
-    O->getExtraOptionNames(OptionNames);
-    if (O->hasArgStr())
-      OptionNames.push_back(O->ArgStr);
+    Small_سمتیہ<StringRef, 16> Option_ناں;
+    O->get_Extra_Option_ناں(Option_ناں);
+    إذا (O->hasArgStr())
+      Option_ناں.ڈالو_پٹھ(O->ArgStr);
 
-    bool PermitValue = O->getValueExpectedFlag() != cl::ValueDisallowed;
-    StringRef Flag = PermitValue ? LHS : Arg;
-    for (const auto &Name : OptionNames) {
-      unsigned Distance = StringRef(Name).edit_distance(
-          Flag, /*AllowReplacements=*/true, /*MaxEditDistance=*/BestDistance);
-      if (!Best || Distance < BestDistance) {
-        Best = O;
-        BestDistance = Distance;
-        if (RHS.empty() || !PermitValue)
-          NearestString = std::string(Name);
-        else
-          NearestString = (Twine(Name) + "=" + RHS).str();
+    منطقي Permit_قدر = O->get_قدر_Expected_Flag() != cl::قدر_Disallowed;
+    StringRef Flag = Permit_قدر ? LHS : Arg;
+    لكل (ثابت خودکار &Name : Option_ناں) {
+      بنانشانی فاصلہ_2 = StringRef(Name).edit_فاصلہ(
+          Flag, /*AllowReplacements=*/سچ, /*MaxEditDistance=*/بہترین_فاصلہ);
+      إذا (!بہترین || فاصلہ_2 < بہترین_فاصلہ) {
+        بہترین = O;
+        بہترین_فاصلہ = فاصلہ_2;
+        إذا (RHS.خالی_تھاواں() || !Permit_قدر)
+          سبھ_توں_نیڑے_String = std::string(Name);
+        وإلا
+          سبھ_توں_نیڑے_String = (Twine(Name) + "=" + RHS).str();
       }
     }
   }
 
-  return Best;
+  أرجع بہترین;
 }
 
 /// CommaSeparateAndAddOccurrence - A wrapper around Handler->addOccurrence()
 /// that does special handling of cl::CommaSeparated options.
-static bool CommaSeparateAndAddOccurrence(Option *Handler, unsigned pos,
-                                          StringRef ArgName, StringRef Value) {
+ساكن منطقي Comma_Separate_And_جوڑو_Occurrence(Option *Handler, بنانشانی pos,
+                                          StringRef ArgName, StringRef قدر) {
   // Check to see if this option accepts a comma separated list of values.  If
   // it does, we have to split up the value into multiple values.
-  if (Handler->getMiscFlags() & CommaSeparated) {
-    StringRef Val(Value);
-    StringRef::size_type Pos = Val.find(',');
+  إذا (Handler->getMiscFlags() & CommaSeparated) {
+    StringRef Val(قدر);
+    StringRef::ناپ_type Pos = Val.لبھو(',');
 
-    while (Pos != StringRef::npos) {
+    طالما (Pos != StringRef::npos) {
       // Process the portion before the comma.
-      if (Handler->addOccurrence(pos, ArgName, Val.substr(0, Pos)))
-        return true;
+      إذا (Handler->جوڑو_Occurrence(pos, ArgName, Val.substr(0, Pos)))
+        أرجع سچ;
       // Erase the portion before the comma, AND the comma.
       Val = Val.substr(Pos + 1);
       // Check for another comma.
-      Pos = Val.find(',');
+      Pos = Val.لبھو(',');
     }
 
-    Value = Val;
+    قدر = Val;
   }
 
-  return Handler->addOccurrence(pos, ArgName, Value);
+  أرجع Handler->جوڑو_Occurrence(pos, ArgName, قدر);
 }
 
 /// ProvideOption - For Value, this differentiates between an empty value ("")
 /// and a null value (StringRef()).  The later is accepted for arguments that
 /// don't allow a value (-foo) the former is rejected (-foo=).
-static inline bool ProvideOption(Option *Handler, StringRef ArgName,
-                                 StringRef Value, int argc,
-                                 const char *const *argv, int &i) {
+ساكن مضمن منطقي ProvideOption(Option *Handler, StringRef ArgName,
+                                 StringRef قدر, صحيح argc,
+                                 ثابت حرف *ثابت *argv, صحيح &i) {
   // Enforce value requirements
-  switch (Handler->getValueExpectedFlag()) {
-  case ValueRequired:
-    if (!Value.data()) { // No value specified?
+  بدل (Handler->get_قدر_Expected_Flag()) {
+  حالة قدر_Required:
+    إذا (!قدر.انکڑے()) { // No value specified?
       // If no other argument or the option only supports prefix form, we
       // cannot look at the next argument.
-      if (i + 1 >= argc || Handler->getFormattingFlag() == cl::AlwaysPrefix)
-        return Handler->error("requires a value!");
+      إذا (i + 1 >= argc || Handler->getFormattingFlag() == cl::Always_اگیتر)
+        أرجع Handler->error("requires a value!");
       // Steal the next argument, like for '-o filename'
-      assert(argv && "null check");
-      Value = StringRef(argv[++i]);
+      أكد(argv && "null check");
+      قدر = StringRef(argv[++i]);
     }
-    break;
-  case ValueDisallowed:
-    if (Value.data())
-      return Handler->error("does not allow a value! '" + Twine(Value) +
+    اكسر;
+  حالة قدر_Disallowed:
+    إذا (قدر.انکڑے())
+      أرجع Handler->error("does not allow a value! '" + Twine(قدر) +
                             "' specified.");
-    break;
-  case ValueOptional:
-    break;
+    اكسر;
+  حالة قدر_Optional:
+    اكسر;
   }
 
-  return CommaSeparateAndAddOccurrence(Handler, i, ArgName, Value);
+  أرجع Comma_Separate_And_جوڑو_Occurrence(Handler, i, ArgName, قدر);
 }
 
-bool llvm::cl::ProvidePositionalOption(Option *Handler, StringRef Arg, int i) {
-  int Dummy = i;
-  return ProvideOption(Handler, Handler->ArgStr, Arg, 0, nullptr, Dummy);
+منطقي llvm::cl::ProvidePositionalOption(Option *Handler, StringRef Arg, صحيح i) {
+  صحيح Dummy = i;
+  أرجع ProvideOption(Handler, Handler->ArgStr, Arg, 0, خالی_سوچک, Dummy);
 }
 
 // Find the cl::Prefix or cl::AlwaysPrefix option whose name is the longest
 // prefix of Name.
-static Option *findPrefixOption(StringRef Name, size_t &Length,
-                                const OptionsMapTy &OptionsMap) {
-  for (; !Name.empty(); Name = Name.drop_back()) {
+ساكن Option *لبھو_اگیتر_Option(StringRef Name, size_t &لمائی,
+                                ثابت OptionsMapTy &OptionsMap) {
+  لكل (; !Name.خالی_تھاواں(); Name = Name.drop_پٹھ()) {
     Option *O = OptionsMap.lookup(Name);
-    if (O && (O->getFormattingFlag() == cl::Prefix ||
-              O->getFormattingFlag() == cl::AlwaysPrefix)) {
-      Length = Name.size();
-      return O;
+    إذا (O && (O->getFormattingFlag() == cl::اگیتر ||
+              O->getFormattingFlag() == cl::Always_اگیتر)) {
+      لمائی = Name.ناپ_2();
+      أرجع O;
     }
   }
-  return nullptr;
+  أرجع خالی_سوچک;
 }
 
 /// The specified argument string (which started with at least one '-') does not
 /// fully match an available option.  Check to see if this is a prefix option.
 /// If so, split arg into output an Arg/Value pair and return the Option to
 /// parse it with.
-static Option *HandlePrefixedOption(StringRef &Arg, StringRef &Value,
-                                    const OptionsMapTy &OptionsMap) {
-  if (Arg.size() == 1)
-    return nullptr;
+ساكن Option *HandlePrefixedOption(StringRef &Arg, StringRef &قدر,
+                                    ثابت OptionsMapTy &OptionsMap) {
+  إذا (Arg.ناپ_2() == 1)
+    أرجع خالی_سوچک;
 
-  size_t Length = 0;
-  Option *POpt = findPrefixOption(Arg, Length, OptionsMap);
-  if (!POpt)
-    return nullptr;
+  size_t لمائی = 0;
+  Option *POpt = لبھو_اگیتر_Option(Arg, لمائی, OptionsMap);
+  إذا (!POpt)
+    أرجع خالی_سوچک;
 
-  StringRef MaybeValue =
-      (Length < Arg.size()) ? Arg.substr(Length) : StringRef();
-  Arg = Arg.substr(0, Length);
+  StringRef Maybe_قدر =
+      (لمائی < Arg.ناپ_2()) ? Arg.substr(لمائی) : StringRef();
+  Arg = Arg.substr(0, لمائی);
 
   // cl::Prefix options do not preserve '=' when used separately.
-  if (POpt->getFormattingFlag() == cl::Prefix && MaybeValue.starts_with("="))
-    MaybeValue = MaybeValue.drop_front();
-  Value = MaybeValue;
-  return POpt;
+  إذا (POpt->getFormattingFlag() == cl::اگیتر && Maybe_قدر.starts_with("="))
+    Maybe_قدر = Maybe_قدر.drop_front();
+  قدر = Maybe_قدر;
+  أرجع POpt;
 }
 
-static bool RequiresValue(const Option *O) {
-  return O->getNumOccurrencesFlag() == cl::Required ||
-         O->getNumOccurrencesFlag() == cl::OneOrMore;
+ساكن منطقي Requires_قدر(ثابت Option *O) {
+  أرجع O->get_عدد_Occurrences_Flag() == cl::Required ||
+         O->get_عدد_Occurrences_Flag() == cl::One_Or_ہور;
 }
 
-static bool EatsUnboundedNumberOfValues(const Option *O) {
-  return O->getNumOccurrencesFlag() == cl::ZeroOrMore ||
-         O->getNumOccurrencesFlag() == cl::OneOrMore;
+ساكن منطقي Eats_Unbounded_نمبر_دا_اقدار(ثابت Option *O) {
+  أرجع O->get_عدد_Occurrences_Flag() == cl::Zero_Or_ہور ||
+         O->get_عدد_Occurrences_Flag() == cl::One_Or_ہور;
 }
 
-static bool isWhitespace(char C) {
-  return C == ' ' || C == '\t' || C == '\r' || C == '\n';
+ساكن منطقي isWhitespace(حرف C) {
+  أرجع C == ' ' || C == '\t' || C == '\r' || C == '\n';
 }
 
-static bool isWhitespaceOrNull(char C) {
-  return isWhitespace(C) || C == '\0';
+ساكن منطقي isWhitespaceOrNull(حرف C) {
+  أرجع isWhitespace(C) || C == '\0';
 }
 
-static bool isQuote(char C) { return C == '\"' || C == '\''; }
+ساكن منطقي isQuote(حرف C) { أرجع C == '\"' || C == '\''; }
 
-void cl::TokenizeGNUCommandLine(StringRef Src, StringSaver &Saver,
-                                SmallVectorImpl<const char *> &NewArgv,
-                                bool MarkEOLs) {
+فراغ cl::Tokenize_GNUCommand_سطر(StringRef Src, StringSaver &Saver,
+                                Small_سمتیہ_Impl<ثابت حرف *> &NewArgv,
+                                منطقي MarkEOLs) {
   SmallString<128> Token;
-  bool InToken = false;
-  for (size_t I = 0, E = Src.size(); I != E; ++I) {
+  منطقي وچ_Token = خطأ;
+  لكل (size_t I = 0, E = Src.ناپ_2(); I != E; ++I) {
     // Consume runs of whitespace.
-    if (!InToken) {
-      while (I != E && isWhitespace(Src[I])) {
+    إذا (!وچ_Token) {
+      طالما (I != E && isWhitespace(Src[I])) {
         // Mark the end of lines in response files.
-        if (MarkEOLs && Src[I] == '\n')
-          NewArgv.push_back(nullptr);
+        إذا (MarkEOLs && Src[I] == '\n')
+          NewArgv.ڈالو_پٹھ(خالی_سوچک);
         ++I;
       }
-      if (I == E)
-        break;
-      InToken = true;
+      إذا (I == E)
+        اكسر;
+      وچ_Token = سچ;
     }
 
-    char C = Src[I];
+    حرف C = Src[I];
 
     // Backslash escapes the next character.
-    if (I + 1 < E && C == '\\') {
+    إذا (I + 1 < E && C == '\\') {
       ++I; // Skip the escape.
-      Token.push_back(Src[I]);
-      continue;
+      Token.ڈالو_پٹھ(Src[I]);
+      استمر;
     }
 
     // Consume a quoted string.
-    if (isQuote(C)) {
+    إذا (isQuote(C)) {
       ++I;
-      while (I != E && Src[I] != C) {
+      طالما (I != E && Src[I] != C) {
         // Backslash escapes the next character.
-        if (Src[I] == '\\' && I + 1 != E)
+        إذا (Src[I] == '\\' && I + 1 != E)
           ++I;
-        Token.push_back(Src[I]);
+        Token.ڈالو_پٹھ(Src[I]);
         ++I;
       }
-      if (I == E)
-        break;
-      continue;
+      إذا (I == E)
+        اكسر;
+      استمر;
     }
 
     // End the token if this is whitespace.
-    if (isWhitespace(C)) {
-      NewArgv.push_back(Saver.save(Token.str()).data());
+    إذا (isWhitespace(C)) {
+      NewArgv.ڈالو_پٹھ(Saver.save(Token.str()).انکڑے());
       // Mark the end of lines in response files.
-      if (MarkEOLs && C == '\n')
-        NewArgv.push_back(nullptr);
+      إذا (MarkEOLs && C == '\n')
+        NewArgv.ڈالو_پٹھ(خالی_سوچک);
       Token.clear();
-      InToken = false;
-      continue;
+      وچ_Token = خطأ;
+      استمر;
     }
 
     // This is a normal character.  Append it.
-    Token.push_back(C);
+    Token.ڈالو_پٹھ(C);
   }
 
   // Append the last token after hitting EOF with no whitespace.
-  if (InToken)
-    NewArgv.push_back(Saver.save(Token.str()).data());
+  إذا (وچ_Token)
+    NewArgv.ڈالو_پٹھ(Saver.save(Token.str()).انکڑے());
 }
 
 /// Backslashes are interpreted in a rather complicated way in the Windows-style
@@ -876,42 +876,42 @@ void cl::TokenizeGNUCommandLine(StringRef Src, StringSaver &Saver,
 ///    consumed in this case.
 ///
 ///  * Otherwise, backslashes are interpreted literally.
-static size_t parseBackslash(StringRef Src, size_t I, SmallString<128> &Token) {
-  size_t E = Src.size();
-  int BackslashCount = 0;
+ساكن size_t parseBackslash(StringRef Src, size_t I, SmallString<128> &Token) {
+  size_t E = Src.ناپ_2();
+  صحيح Backslash_گنتی = 0;
   // Skip the backslashes.
-  do {
+  افعل {
     ++I;
-    ++BackslashCount;
-  } while (I != E && Src[I] == '\\');
+    ++Backslash_گنتی;
+  } طالما (I != E && Src[I] == '\\');
 
-  bool FollowedByDoubleQuote = (I != E && Src[I] == '"');
-  if (FollowedByDoubleQuote) {
-    Token.append(BackslashCount / 2, '\\');
-    if (BackslashCount % 2 == 0)
-      return I - 1;
-    Token.push_back('"');
-    return I;
+  منطقي FollowedByDoubleQuote = (I != E && Src[I] == '"');
+  إذا (FollowedByDoubleQuote) {
+    Token.append(Backslash_گنتی / 2, '\\');
+    إذا (Backslash_گنتی % 2 == 0)
+      أرجع I - 1;
+    Token.ڈالو_پٹھ('"');
+    أرجع I;
   }
-  Token.append(BackslashCount, '\\');
-  return I - 1;
+  Token.append(Backslash_گنتی, '\\');
+  أرجع I - 1;
 }
 
 // Windows treats whitespace, double quotes, and backslashes specially, except
 // when parsing the first token of a full command line, in which case
 // backslashes are not special.
-static bool isWindowsSpecialChar(char C) {
-  return isWhitespaceOrNull(C) || C == '\\' || C == '\"';
+ساكن منطقي isWindowsSpecialChar(حرف C) {
+  أرجع isWhitespaceOrNull(C) || C == '\\' || C == '\"';
 }
-static bool isWindowsSpecialCharInCommandName(char C) {
-  return isWhitespaceOrNull(C) || C == '\"';
+ساكن منطقي is_Windows_Special_Char_وچ_Command_Name(حرف C) {
+  أرجع isWhitespaceOrNull(C) || C == '\"';
 }
 
 // Windows tokenization implementation. The implementation is designed to be
 // inlined and specialized for the two user entry points.
-static inline void tokenizeWindowsCommandLineImpl(
-    StringRef Src, StringSaver &Saver, function_ref<void(StringRef)> AddToken,
-    bool AlwaysCopy, function_ref<void()> MarkEOL, bool InitialCommandName) {
+ساكن مضمن فراغ tokenize_Windows_Command_سطر_Impl(
+    StringRef Src, StringSaver &Saver, function_ref<فراغ(StringRef)> جوڑو_Token,
+    منطقي AlwaysCopy, function_ref<فراغ()> MarkEOL, منطقي InitialCommandName) {
   SmallString<128> Token;
 
   // Sometimes, this function will be handling a full command line including an
@@ -920,265 +920,265 @@ static inline void tokenizeWindowsCommandLineImpl(
   // CreateProcess or cmd.exe scans the pathname, it doesn't treat \ as
   // escaping the quote character, whereas when libc scans the rest of the
   // command line, it does.
-  bool CommandName = InitialCommandName;
+  منطقي CommandName = InitialCommandName;
 
   // Try to do as much work inside the state machine as possible.
-  enum { INIT, UNQUOTED, QUOTED } State = INIT;
+  تعداد { INIT, UNQUOTED, QUOTED } State = INIT;
 
-  for (size_t I = 0, E = Src.size(); I < E; ++I) {
-    switch (State) {
-    case INIT: {
-      assert(Token.empty() && "token should be empty in initial state");
+  لكل (size_t I = 0, E = Src.ناپ_2(); I < E; ++I) {
+    بدل (State) {
+    حالة INIT: {
+      أكد(Token.خالی_تھاواں() && "token should be empty in initial state");
       // Eat whitespace before a token.
-      while (I < E && isWhitespaceOrNull(Src[I])) {
-        if (Src[I] == '\n')
+      طالما (I < E && isWhitespaceOrNull(Src[I])) {
+        إذا (Src[I] == '\n')
           MarkEOL();
         ++I;
       }
       // Stop if this was trailing whitespace.
-      if (I >= E)
-        break;
-      size_t Start = I;
-      if (CommandName) {
-        while (I < E && !isWindowsSpecialCharInCommandName(Src[I]))
+      إذا (I >= E)
+        اكسر;
+      size_t شروع = I;
+      إذا (CommandName) {
+        طالما (I < E && !is_Windows_Special_Char_وچ_Command_Name(Src[I]))
           ++I;
-      } else {
-        while (I < E && !isWindowsSpecialChar(Src[I]))
+      } وإلا {
+        طالما (I < E && !isWindowsSpecialChar(Src[I]))
           ++I;
       }
-      StringRef NormalChars = Src.slice(Start, I);
-      if (I >= E || isWhitespaceOrNull(Src[I])) {
+      StringRef عام_Chars = Src.ٹکڑا(شروع, I);
+      إذا (I >= E || isWhitespaceOrNull(Src[I])) {
         // No special characters: slice out the substring and start the next
         // token. Copy the string if the caller asks us to.
-        AddToken(AlwaysCopy ? Saver.save(NormalChars) : NormalChars);
-        if (I < E && Src[I] == '\n') {
+        جوڑو_Token(AlwaysCopy ? Saver.save(عام_Chars) : عام_Chars);
+        إذا (I < E && Src[I] == '\n') {
           MarkEOL();
           CommandName = InitialCommandName;
-        } else {
-          CommandName = false;
+        } وإلا {
+          CommandName = خطأ;
         }
-      } else if (Src[I] == '\"') {
-        Token += NormalChars;
+      } وإلا إذا (Src[I] == '\"') {
+        Token += عام_Chars;
         State = QUOTED;
-      } else if (Src[I] == '\\') {
-        assert(!CommandName && "or else we'd have treated it as a normal char");
-        Token += NormalChars;
+      } وإلا إذا (Src[I] == '\\') {
+        أكد(!CommandName && "or else we'd have treated it as a normal char");
+        Token += عام_Chars;
         I = parseBackslash(Src, I, Token);
         State = UNQUOTED;
-      } else {
+      } وإلا {
         llvm_unreachable("unexpected special character");
       }
-      break;
+      اكسر;
     }
 
-    case UNQUOTED:
-      if (isWhitespaceOrNull(Src[I])) {
+    حالة UNQUOTED:
+      إذا (isWhitespaceOrNull(Src[I])) {
         // Whitespace means the end of the token. If we are in this state, the
         // token must have contained a special character, so we must copy the
         // token.
-        AddToken(Saver.save(Token.str()));
+        جوڑو_Token(Saver.save(Token.str()));
         Token.clear();
-        if (Src[I] == '\n') {
+        إذا (Src[I] == '\n') {
           CommandName = InitialCommandName;
           MarkEOL();
-        } else {
-          CommandName = false;
+        } وإلا {
+          CommandName = خطأ;
         }
         State = INIT;
-      } else if (Src[I] == '\"') {
+      } وإلا إذا (Src[I] == '\"') {
         State = QUOTED;
-      } else if (Src[I] == '\\' && !CommandName) {
+      } وإلا إذا (Src[I] == '\\' && !CommandName) {
         I = parseBackslash(Src, I, Token);
-      } else {
-        Token.push_back(Src[I]);
+      } وإلا {
+        Token.ڈالو_پٹھ(Src[I]);
       }
-      break;
+      اكسر;
 
-    case QUOTED:
-      if (Src[I] == '\"') {
-        if (I < (E - 1) && Src[I + 1] == '"') {
+    حالة QUOTED:
+      إذا (Src[I] == '\"') {
+        إذا (I < (E - 1) && Src[I + 1] == '"') {
           // Consecutive double-quotes inside a quoted string implies one
           // double-quote.
-          Token.push_back('"');
+          Token.ڈالو_پٹھ('"');
           ++I;
-        } else {
+        } وإلا {
           // Otherwise, end the quoted portion and return to the unquoted state.
           State = UNQUOTED;
         }
-      } else if (Src[I] == '\\' && !CommandName) {
+      } وإلا إذا (Src[I] == '\\' && !CommandName) {
         I = parseBackslash(Src, I, Token);
-      } else {
-        Token.push_back(Src[I]);
+      } وإلا {
+        Token.ڈالو_پٹھ(Src[I]);
       }
-      break;
+      اكسر;
     }
   }
 
-  if (State != INIT)
-    AddToken(Saver.save(Token.str()));
+  إذا (State != INIT)
+    جوڑو_Token(Saver.save(Token.str()));
 }
 
-void cl::TokenizeWindowsCommandLine(StringRef Src, StringSaver &Saver,
-                                    SmallVectorImpl<const char *> &NewArgv,
-                                    bool MarkEOLs) {
-  auto AddToken = [&](StringRef Tok) { NewArgv.push_back(Tok.data()); };
-  auto OnEOL = [&]() {
-    if (MarkEOLs)
-      NewArgv.push_back(nullptr);
+فراغ cl::Tokenize_Windows_Command_سطر(StringRef Src, StringSaver &Saver,
+                                    Small_سمتیہ_Impl<ثابت حرف *> &NewArgv,
+                                    منطقي MarkEOLs) {
+  خودکار جوڑو_Token = [&](StringRef Tok) { NewArgv.ڈالو_پٹھ(Tok.انکڑے()); };
+  خودکار OnEOL = [&]() {
+    إذا (MarkEOLs)
+      NewArgv.ڈالو_پٹھ(خالی_سوچک);
   };
-  tokenizeWindowsCommandLineImpl(Src, Saver, AddToken,
-                                 /*AlwaysCopy=*/true, OnEOL, false);
+  tokenize_Windows_Command_سطر_Impl(Src, Saver, جوڑو_Token,
+                                 /*AlwaysCopy=*/سچ, OnEOL, خطأ);
 }
 
-void cl::TokenizeWindowsCommandLineNoCopy(StringRef Src, StringSaver &Saver,
-                                          SmallVectorImpl<StringRef> &NewArgv) {
-  auto AddToken = [&](StringRef Tok) { NewArgv.push_back(Tok); };
-  auto OnEOL = []() {};
-  tokenizeWindowsCommandLineImpl(Src, Saver, AddToken, /*AlwaysCopy=*/false,
-                                 OnEOL, false);
+فراغ cl::Tokenize_Windows_Command_سطر_No_Copy(StringRef Src, StringSaver &Saver,
+                                          Small_سمتیہ_Impl<StringRef> &NewArgv) {
+  خودکار جوڑو_Token = [&](StringRef Tok) { NewArgv.ڈالو_پٹھ(Tok); };
+  خودکار OnEOL = []() {};
+  tokenize_Windows_Command_سطر_Impl(Src, Saver, جوڑو_Token, /*AlwaysCopy=*/خطأ,
+                                 OnEOL, خطأ);
 }
 
-void cl::TokenizeWindowsCommandLineFull(StringRef Src, StringSaver &Saver,
-                                        SmallVectorImpl<const char *> &NewArgv,
-                                        bool MarkEOLs) {
-  auto AddToken = [&](StringRef Tok) { NewArgv.push_back(Tok.data()); };
-  auto OnEOL = [&]() {
-    if (MarkEOLs)
-      NewArgv.push_back(nullptr);
+فراغ cl::Tokenize_Windows_Command_سطر_بھریا(StringRef Src, StringSaver &Saver,
+                                        Small_سمتیہ_Impl<ثابت حرف *> &NewArgv,
+                                        منطقي MarkEOLs) {
+  خودکار جوڑو_Token = [&](StringRef Tok) { NewArgv.ڈالو_پٹھ(Tok.انکڑے()); };
+  خودکار OnEOL = [&]() {
+    إذا (MarkEOLs)
+      NewArgv.ڈالو_پٹھ(خالی_سوچک);
   };
-  tokenizeWindowsCommandLineImpl(Src, Saver, AddToken,
-                                 /*AlwaysCopy=*/true, OnEOL, true);
+  tokenize_Windows_Command_سطر_Impl(Src, Saver, جوڑو_Token,
+                                 /*AlwaysCopy=*/سچ, OnEOL, سچ);
 }
 
-void cl::tokenizeConfigFile(StringRef Source, StringSaver &Saver,
-                            SmallVectorImpl<const char *> &NewArgv,
-                            bool MarkEOLs) {
-  for (const char *Cur = Source.begin(); Cur != Source.end();) {
-    SmallString<128> Line;
+فراغ cl::tokenizeConfigFile(StringRef سروت, StringSaver &Saver,
+                            Small_سمتیہ_Impl<ثابت حرف *> &NewArgv,
+                            منطقي MarkEOLs) {
+  لكل (ثابت حرف *Cur = سروت.begin(); Cur != سروت.سرا();) {
+    SmallString<128> سطر;
     // Check for comment line.
-    if (isWhitespace(*Cur)) {
-      while (Cur != Source.end() && isWhitespace(*Cur))
+    إذا (isWhitespace(*Cur)) {
+      طالما (Cur != سروت.سرا() && isWhitespace(*Cur))
         ++Cur;
-      continue;
+      استمر;
     }
-    if (*Cur == '#') {
-      while (Cur != Source.end() && *Cur != '\n')
+    إذا (*Cur == '#') {
+      طالما (Cur != سروت.سرا() && *Cur != '\n')
         ++Cur;
-      continue;
+      استمر;
     }
     // Find end of the current line, splicing backslash-newline continuations.
     // A '#' that begins a new unquoted token starts a comment running to the
     // next literal newline; escapes and continuations are not honored inside
     // the comment.
-    const char *Start = Cur;
-    const char *LineEnd = nullptr;
-    char Quote = 0;
-    bool AtTokenStart = true;
-    for (const char *End = Source.end(); Cur != End; ++Cur) {
-      char C = *Cur;
-      if (C == '\\') {
-        if (Cur + 1 != End) {
+    ثابت حرف *شروع = Cur;
+    ثابت حرف *سطر_سرا = خالی_سوچک;
+    حرف Quote = 0;
+    منطقي At_Token_شروع = سچ;
+    لكل (ثابت حرف *سرا_2 = سروت.سرا(); Cur != سرا_2; ++Cur) {
+      حرف C = *Cur;
+      إذا (C == '\\') {
+        إذا (Cur + 1 != سرا_2) {
           ++Cur;
-          if (*Cur == '\n' ||
-              (*Cur == '\r' && (Cur + 1 != End) && Cur[1] == '\n')) {
-            Line.append(Start, Cur - 1);
-            if (*Cur == '\r')
+          إذا (*Cur == '\n' ||
+              (*Cur == '\r' && (Cur + 1 != سرا_2) && Cur[1] == '\n')) {
+            سطر.append(شروع, Cur - 1);
+            إذا (*Cur == '\r')
               ++Cur;
-            Start = Cur + 1;
+            شروع = Cur + 1;
             // Splicing does not introduce a token boundary.
-            continue;
+            استمر;
           }
         }
-        AtTokenStart = false;
-        continue;
+        At_Token_شروع = خطأ;
+        استمر;
       }
-      if (C == '\n')
-        break;
-      if (Quote) {
-        if (C == Quote)
+      إذا (C == '\n')
+        اكسر;
+      إذا (Quote) {
+        إذا (C == Quote)
           Quote = 0;
-      } else if (isQuote(C)) {
+      } وإلا إذا (isQuote(C)) {
         Quote = C;
-      } else if (C == '#' && AtTokenStart) {
-        LineEnd = Cur;
-        while (Cur != End && *Cur != '\n')
+      } وإلا إذا (C == '#' && At_Token_شروع) {
+        سطر_سرا = Cur;
+        طالما (Cur != سرا_2 && *Cur != '\n')
           ++Cur;
-        break;
+        اكسر;
       }
-      AtTokenStart = isWhitespace(C);
+      At_Token_شروع = isWhitespace(C);
     }
     // Tokenize line.
-    Line.append(Start, LineEnd ? LineEnd : Cur);
-    cl::TokenizeGNUCommandLine(Line, Saver, NewArgv, MarkEOLs);
+    سطر.append(شروع, سطر_سرا ? سطر_سرا : Cur);
+    cl::Tokenize_GNUCommand_سطر(سطر, Saver, NewArgv, MarkEOLs);
   }
 }
 
 // It is called byte order marker but the UTF-8 BOM is actually not affected
 // by the host system's endianness.
-static bool hasUTF8ByteOrderMark(ArrayRef<char> S) {
-  return (S.size() >= 3 && S[0] == '\xef' && S[1] == '\xbb' && S[2] == '\xbf');
+ساكن منطقي has_UTF8_Byte_ترتیب_Mark(ArrayRef<حرف> S) {
+  أرجع (S.ناپ_2() >= 3 && S[0] == '\xef' && S[1] == '\xbb' && S[2] == '\xbf');
 }
 
 // Substitute <CFGDIR> with the file's base path.
-static void ExpandBasePaths(StringRef BasePath, StringSaver &Saver,
-                            const char *&Arg) {
-  assert(sys::path::is_absolute(BasePath));
+ساكن فراغ Expand_ادھار_Paths(StringRef ادھار_رستہ, StringSaver &Saver,
+                            ثابت حرف *&Arg) {
+  أكد(sys::رستہ_2::is_absolute(ادھار_رستہ));
   constexpr StringLiteral Token("<CFGDIR>");
-  const StringRef ArgString(Arg);
+  ثابت StringRef ArgString(Arg);
 
   SmallString<128> ResponseFile;
-  StringRef::size_type StartPos = 0;
-  for (StringRef::size_type TokenPos = ArgString.find(Token);
+  StringRef::ناپ_type شروع_Pos = 0;
+  لكل (StringRef::ناپ_type TokenPos = ArgString.لبھو(Token);
        TokenPos != StringRef::npos;
-       TokenPos = ArgString.find(Token, StartPos)) {
+       TokenPos = ArgString.لبھو(Token, شروع_Pos)) {
     // Token may appear more than once per arg (e.g. comma-separated linker
     // args). Support by using path-append on any subsequent appearances.
-    const StringRef LHS = ArgString.substr(StartPos, TokenPos - StartPos);
-    if (ResponseFile.empty())
+    ثابت StringRef LHS = ArgString.substr(شروع_Pos, TokenPos - شروع_Pos);
+    إذا (ResponseFile.خالی_تھاواں())
       ResponseFile = LHS;
-    else
-      llvm::sys::path::append(ResponseFile, LHS);
-    ResponseFile.append(BasePath);
-    StartPos = TokenPos + Token.size();
+    وإلا
+      llvm::sys::رستہ_2::append(ResponseFile, LHS);
+    ResponseFile.append(ادھار_رستہ);
+    شروع_Pos = TokenPos + Token.ناپ_2();
   }
 
-  if (!ResponseFile.empty()) {
+  إذا (!ResponseFile.خالی_تھاواں()) {
     // Path-append the remaining arg substring if at least one token appeared.
-    const StringRef Remaining = ArgString.substr(StartPos);
-    if (!Remaining.empty())
-      llvm::sys::path::append(ResponseFile, Remaining);
-    Arg = Saver.save(ResponseFile.str()).data();
+    ثابت StringRef بچیا = ArgString.substr(شروع_Pos);
+    إذا (!بچیا.خالی_تھاواں())
+      llvm::sys::رستہ_2::append(ResponseFile, بچیا);
+    Arg = Saver.save(ResponseFile.str()).انکڑے();
   }
 }
 
 // FName must be an absolute path.
 Error ExpansionContext::expandResponseFile(
-    StringRef FName, SmallVectorImpl<const char *> &NewArgv) {
-  assert(sys::path::is_absolute(FName));
-  llvm::ErrorOr<std::unique_ptr<MemoryBuffer>> MemBufOrErr =
-      FS->getBufferForFile(FName);
-  if (!MemBufOrErr) {
-    std::error_code EC = MemBufOrErr.getError();
-    return llvm::createStringError(EC, Twine("cannot not open file '") + FName +
-                                           "': " + EC.message());
+    StringRef FName, Small_سمتیہ_Impl<ثابت حرف *> &NewArgv) {
+  أكد(sys::رستہ_2::is_absolute(FName));
+  llvm::ErrorOr<std::unique_ptr<حافظہ_بفر>> MemBufOrErr =
+      FS->get_بفر_For_File(FName);
+  إذا (!MemBufOrErr) {
+    std::error_کوڈ EC = MemBufOrErr.getError();
+    أرجع llvm::createStringError(EC, Twine("cannot not open file '") + FName +
+                                           "': " + EC.سنیہا());
   }
-  MemoryBuffer &MemBuf = *MemBufOrErr.get();
-  StringRef Str(MemBuf.getBufferStart(), MemBuf.getBufferSize());
+  حافظہ_بفر &MemBuf = *MemBufOrErr.get();
+  StringRef Str(MemBuf.get_بفر_شروع(), MemBuf.get_بفر_ناپ());
 
   // If we have a UTF-16 byte order mark, convert to UTF-8 for parsing.
-  ArrayRef<char> BufRef(MemBuf.getBufferStart(), MemBuf.getBufferEnd());
+  ArrayRef<حرف> BufRef(MemBuf.get_بفر_شروع(), MemBuf.get_بفر_سرا());
   std::string UTF8Buf;
-  if (hasUTF16ByteOrderMark(BufRef)) {
-    if (!convertUTF16ToUTF8String(BufRef, UTF8Buf))
-      return llvm::createStringError(std::errc::illegal_byte_sequence,
+  إذا (has_UTF16_Byte_ترتیب_Mark(BufRef)) {
+    إذا (!convert_UTF16_منزل_UTF8_String(BufRef, UTF8Buf))
+      أرجع llvm::createStringError(std::errc::illegal_byte_sequence,
                                      "Could not convert UTF16 to UTF8");
     Str = StringRef(UTF8Buf);
   }
   // If we see UTF-8 BOM sequence at the beginning of a file, we shall remove
   // these bytes before parsing.
   // Reference: http://en.wikipedia.org/wiki/UTF-8#Byte_order_mark
-  else if (hasUTF8ByteOrderMark(BufRef))
-    Str = StringRef(BufRef.data() + 3, BufRef.size() - 3);
+  وإلا إذا (has_UTF8_Byte_ترتیب_Mark(BufRef))
+    Str = StringRef(BufRef.انکڑے() + 3, BufRef.ناپ_2() - 3);
 
   // Tokenize the contents into NewArgv.
   Tokenizer(Str, Saver, NewArgv, MarkEOLs);
@@ -1186,163 +1186,163 @@ Error ExpansionContext::expandResponseFile(
   // Expanded file content may require additional transformations, like using
   // absolute paths instead of relative in '@file' constructs or expanding
   // macros.
-  if (!RelativeNames && !InConfigFile)
-    return Error::success();
+  إذا (!Relative_ناں && !وچ_Config_File)
+    أرجع Error::success();
 
-  StringRef BasePath = llvm::sys::path::parent_path(FName);
-  for (const char *&Arg : NewArgv) {
-    if (!Arg)
-      continue;
+  StringRef ادھار_رستہ = llvm::sys::رستہ_2::ماپا_رستہ(FName);
+  لكل (ثابت حرف *&Arg : NewArgv) {
+    إذا (!Arg)
+      استمر;
 
     // Substitute <CFGDIR> with the file's base path.
-    if (InConfigFile)
-      ExpandBasePaths(BasePath, Saver, Arg);
+    إذا (وچ_Config_File)
+      Expand_ادھار_Paths(ادھار_رستہ, Saver, Arg);
 
     // Discover the case, when argument should be transformed into '@file' and
     // evaluate 'file' for it.
     StringRef ArgStr(Arg);
     StringRef FileName;
-    bool ConfigInclusion = false;
-    if (ArgStr.consume_front("@")) {
+    منطقي ConfigInclusion = خطأ;
+    إذا (ArgStr.consume_front("@")) {
       FileName = ArgStr;
-      if (!llvm::sys::path::is_relative(FileName))
-        continue;
-    } else if (ArgStr.consume_front("--config=")) {
+      إذا (!llvm::sys::رستہ_2::is_relative(FileName))
+        استمر;
+    } وإلا إذا (ArgStr.consume_front("--config=")) {
       FileName = ArgStr;
-      ConfigInclusion = true;
-    } else {
-      continue;
+      ConfigInclusion = سچ;
+    } وإلا {
+      استمر;
     }
 
     // Update expansion construct.
     SmallString<128> ResponseFile;
-    ResponseFile.push_back('@');
-    if (ConfigInclusion && !llvm::sys::path::has_parent_path(FileName)) {
-      SmallString<128> FilePath;
-      if (!findConfigFile(FileName, FilePath))
-        return createStringError(
-            std::make_error_code(std::errc::no_such_file_or_directory),
+    ResponseFile.ڈالو_پٹھ('@');
+    إذا (ConfigInclusion && !llvm::sys::رستہ_2::has_ماپا_رستہ(FileName)) {
+      SmallString<128> File_رستہ;
+      إذا (!لبھو_Config_File(FileName, File_رستہ))
+        أرجع createStringError(
+            std::make_error_کوڈ(std::errc::no_such_file_or_directory),
             "cannot not find configuration file: " + FileName);
-      ResponseFile.append(FilePath);
-    } else {
-      ResponseFile.append(BasePath);
-      llvm::sys::path::append(ResponseFile, FileName);
+      ResponseFile.append(File_رستہ);
+    } وإلا {
+      ResponseFile.append(ادھار_رستہ);
+      llvm::sys::رستہ_2::append(ResponseFile, FileName);
     }
-    Arg = Saver.save(ResponseFile.str()).data();
+    Arg = Saver.save(ResponseFile.str()).انکڑے();
   }
-  return Error::success();
+  أرجع Error::success();
 }
 
 /// Expand response files on a command line recursively using the given
 /// StringSaver and tokenization strategy.
 Error ExpansionContext::expandResponseFiles(
-    SmallVectorImpl<const char *> &Argv) {
-  struct ResponseFileRecord {
+    Small_سمتیہ_Impl<ثابت حرف *> &Argv) {
+  بنية Response_File_ریکارڈ {
     std::string File;
-    size_t End;
+    size_t سرا_2;
   };
 
   // To detect recursive response files, we maintain a stack of files and the
   // position of the last argument in the file. This position is updated
   // dynamically as we recursively expand files.
-  SmallVector<ResponseFileRecord, 3> FileStack;
+  Small_سمتیہ<Response_File_ریکارڈ, 3> File_ڈھیر;
 
   // Push a dummy entry that represents the initial command line, removing
   // the need to check for an empty list.
-  FileStack.push_back({"", Argv.size()});
+  File_ڈھیر.ڈالو_پٹھ({"", Argv.ناپ_2()});
 
   // Don't cache Argv.size() because it can change.
-  for (unsigned I = 0; I != Argv.size();) {
-    while (I == FileStack.back().End) {
+  لكل (بنانشانی I = 0; I != Argv.ناپ_2();) {
+    طالما (I == File_ڈھیر.پٹھ().سرا_2) {
       // Passing the end of a file's argument list, so we can remove it from the
       // stack.
-      FileStack.pop_back();
+      File_ڈھیر.نکالو_پٹھ();
     }
 
-    const char *Arg = Argv[I];
+    ثابت حرف *Arg = Argv[I];
     // Check if it is an EOL marker
-    if (Arg == nullptr) {
+    إذا (Arg == خالی_سوچک) {
       ++I;
-      continue;
+      استمر;
     }
 
-    if (Arg[0] != '@') {
+    إذا (Arg[0] != '@') {
       ++I;
-      continue;
+      استمر;
     }
 
-    const char *FName = Arg + 1;
+    ثابت حرف *FName = Arg + 1;
     // Note that CurrentDir is only used for top-level rsp files, the rest will
     // always have an absolute path deduced from the containing file.
     SmallString<128> CurrDir;
-    if (llvm::sys::path::is_relative(FName)) {
-      if (CurrentDir.empty()) {
-        if (auto CWD = FS->getCurrentWorkingDirectory()) {
+    إذا (llvm::sys::رستہ_2::is_relative(FName)) {
+      إذا (CurrentDir.خالی_تھاواں()) {
+        إذا (خودکار CWD = FS->getCurrentWorkingDirectory()) {
           CurrDir = *CWD;
-        } else {
-          return createStringError(
+        } وإلا {
+          أرجع createStringError(
               CWD.getError(), Twine("cannot get absolute path for: ") + FName);
         }
-      } else {
+      } وإلا {
         CurrDir = CurrentDir;
       }
-      llvm::sys::path::append(CurrDir, FName);
+      llvm::sys::رستہ_2::append(CurrDir, FName);
       FName = CurrDir.c_str();
     }
 
-    ErrorOr<llvm::vfs::Status> Res = FS->status(FName);
-    if (!Res || !Res->exists()) {
-      std::error_code EC = Res.getError();
-      if (!InConfigFile) {
+    ErrorOr<llvm::vfs::حالت> Res = FS->حالت_2(FName);
+    إذا (!Res || !Res->exists()) {
+      std::error_کوڈ EC = Res.getError();
+      إذا (!وچ_Config_File) {
         // If the specified file does not exist, leave '@file' unexpanded, as
         // libiberty does.
-        if (!EC || EC == llvm::errc::no_such_file_or_directory) {
+        إذا (!EC || EC == llvm::errc::no_such_file_or_directory) {
           ++I;
-          continue;
+          استمر;
         }
       }
-      if (!EC)
+      إذا (!EC)
         EC = llvm::errc::no_such_file_or_directory;
-      return createStringError(EC, Twine("cannot not open file '") + FName +
-                                       "': " + EC.message());
+      أرجع createStringError(EC, Twine("cannot not open file '") + FName +
+                                       "': " + EC.سنیہا());
     }
-    const llvm::vfs::Status &FileStatus = Res.get();
+    ثابت llvm::vfs::حالت &File_حالت = Res.get();
 
-    auto IsEquivalent =
-        [FileStatus, this](const ResponseFileRecord &RFile) -> ErrorOr<bool> {
-      ErrorOr<llvm::vfs::Status> RHS = FS->status(RFile.File);
-      if (!RHS)
-        return RHS.getError();
-      return FileStatus.equivalent(*RHS);
+    خودکار IsEquivalent =
+        [File_حالت, هذا](ثابت Response_File_ریکارڈ &RFile) -> ErrorOr<منطقي> {
+      ErrorOr<llvm::vfs::حالت> RHS = FS->حالت_2(RFile.File);
+      إذا (!RHS)
+        أرجع RHS.getError();
+      أرجع File_حالت.equivalent(*RHS);
     };
 
     // Check for recursive response files.
-    for (const auto &F : drop_begin(FileStack)) {
-      if (ErrorOr<bool> R = IsEquivalent(F)) {
-        if (R.get())
-          return createStringError(
+    لكل (ثابت خودکار &F : drop_begin(File_ڈھیر)) {
+      إذا (ErrorOr<منطقي> R = IsEquivalent(F)) {
+        إذا (R.get())
+          أرجع createStringError(
               R.getError(), Twine("recursive expansion of: '") + F.File + "'");
-      } else {
-        return createStringError(R.getError(),
+      } وإلا {
+        أرجع createStringError(R.getError(),
                                  Twine("cannot open file: ") + F.File);
       }
     }
 
     // Replace this response file argument with the tokenization of its
     // contents.  Nested response files are expanded in subsequent iterations.
-    SmallVector<const char *, 0> ExpandedArgv;
-    if (Error Err = expandResponseFile(FName, ExpandedArgv))
-      return Err;
+    Small_سمتیہ<ثابت حرف *, 0> ExpandedArgv;
+    إذا (Error Err = expandResponseFile(FName, ExpandedArgv))
+      أرجع Err;
 
-    for (ResponseFileRecord &Record : FileStack) {
+    لكل (Response_File_ریکارڈ &ریکارڈ : File_ڈھیر) {
       // Increase the end of all active records by the number of newly expanded
       // arguments, minus the response file itself.
-      Record.End += ExpandedArgv.size() - 1;
+      ریکارڈ.سرا_2 += ExpandedArgv.ناپ_2() - 1;
     }
 
-    FileStack.push_back({FName, I + ExpandedArgv.size()});
+    File_ڈھیر.ڈالو_پٹھ({FName, I + ExpandedArgv.ناپ_2()});
     Argv.erase(Argv.begin() + I);
-    Argv.insert(Argv.begin() + I, ExpandedArgv.begin(), ExpandedArgv.end());
+    Argv.داخل_کرو(Argv.begin() + I, ExpandedArgv.begin(), ExpandedArgv.سرا());
   }
 
   // If successful, the top of the file stack will mark the end of the Argv
@@ -1350,319 +1350,319 @@ Error ExpansionContext::expandResponseFiles(
   // Note that FileStack may have more than one element at this point because we
   // don't have a chance to pop the stack when encountering recursive files at
   // the end of the stream, so seeing that doesn't indicate a bug.
-  assert(FileStack.size() > 0 && Argv.size() == FileStack.back().End);
-  return Error::success();
+  أكد(File_ڈھیر.ناپ_2() > 0 && Argv.ناپ_2() == File_ڈھیر.پٹھ().سرا_2);
+  أرجع Error::success();
 }
 
-bool cl::expandResponseFiles(int Argc, const char *const *Argv,
-                             const char *EnvVar, StringSaver &Saver,
-                             SmallVectorImpl<const char *> &NewArgv) {
-#ifdef _WIN32
-  auto Tokenize = cl::TokenizeWindowsCommandLine;
-#else
-  auto Tokenize = cl::TokenizeGNUCommandLine;
-#endif
+منطقي cl::expandResponseFiles(صحيح Argc, ثابت حرف *ثابت *Argv,
+                             ثابت حرف *EnvVar, StringSaver &Saver,
+                             Small_سمتیہ_Impl<ثابت حرف *> &NewArgv) {
+#جے_تعریف_شدہ _WIN32
+  خودکار Tokenize = cl::Tokenize_Windows_Command_سطر;
+#وإلا
+  خودکار Tokenize = cl::Tokenize_GNUCommand_سطر;
+#جے_انت
   // The environment variable specifies initial options.
-  if (EnvVar)
-    if (std::optional<std::string> EnvValue = sys::Process::GetEnv(EnvVar))
-      Tokenize(*EnvValue, Saver, NewArgv, /*MarkEOLs=*/false);
+  إذا (EnvVar)
+    إذا (std::optional<std::string> Env_قدر = sys::Process::GetEnv(EnvVar))
+      Tokenize(*Env_قدر, Saver, NewArgv, /*MarkEOLs=*/خطأ);
 
   // Command line options can override the environment variable.
   NewArgv.append(Argv + 1, Argv + Argc);
   ExpansionContext ECtx(Saver.getAllocator(), Tokenize);
-  if (Error Err = ECtx.expandResponseFiles(NewArgv)) {
-    errs() << toString(std::move(Err)) << '\n';
-    return false;
+  إذا (Error Err = ECtx.expandResponseFiles(NewArgv)) {
+    errs() << منزل_String(std::move(Err)) << '\n';
+    أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }
 
-bool cl::ExpandResponseFiles(StringSaver &Saver, TokenizerCallback Tokenizer,
-                             SmallVectorImpl<const char *> &Argv) {
+منطقي cl::ExpandResponseFiles(StringSaver &Saver, TokenizerCallback Tokenizer,
+                             Small_سمتیہ_Impl<ثابت حرف *> &Argv) {
   ExpansionContext ECtx(Saver.getAllocator(), Tokenizer);
-  if (Error Err = ECtx.expandResponseFiles(Argv)) {
-    errs() << toString(std::move(Err)) << '\n';
-    return false;
+  إذا (Error Err = ECtx.expandResponseFiles(Argv)) {
+    errs() << منزل_String(std::move(Err)) << '\n';
+    أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }
 
 ExpansionContext::ExpansionContext(BumpPtrAllocator &A, TokenizerCallback T,
                                    vfs::FileSystem *FS)
     : Saver(A), Tokenizer(T), FS(FS ? FS : vfs::getRealFileSystem().get()) {}
 
-bool ExpansionContext::findConfigFile(StringRef FileName,
-                                      SmallVectorImpl<char> &FilePath) {
-  SmallString<128> CfgFilePath;
-  const auto FileExists = [this](SmallString<128> Path) -> bool {
-    auto Status = FS->status(Path);
-    return Status &&
-           Status->getType() == llvm::sys::fs::file_type::regular_file;
+منطقي ExpansionContext::لبھو_Config_File(StringRef FileName,
+                                      Small_سمتیہ_Impl<حرف> &File_رستہ) {
+  SmallString<128> Cfg_File_رستہ;
+  ثابت خودکار FileExists = [هذا](SmallString<128> رستہ) -> منطقي {
+    خودکار حالت = FS->حالت_2(رستہ);
+    أرجع حالت &&
+           حالت->getType() == llvm::sys::fs::file_type::regular_file;
   };
 
   // If file name contains directory separator, treat it as a path to
   // configuration file.
-  if (llvm::sys::path::has_parent_path(FileName)) {
-    CfgFilePath = FileName;
-    if (llvm::sys::path::is_relative(FileName) && FS->makeAbsolute(CfgFilePath))
-      return false;
-    if (!FileExists(CfgFilePath))
-      return false;
-    FilePath.assign(CfgFilePath.begin(), CfgFilePath.end());
-    return true;
+  إذا (llvm::sys::رستہ_2::has_ماپا_رستہ(FileName)) {
+    Cfg_File_رستہ = FileName;
+    إذا (llvm::sys::رستہ_2::is_relative(FileName) && FS->makeAbsolute(Cfg_File_رستہ))
+      أرجع خطأ;
+    إذا (!FileExists(Cfg_File_رستہ))
+      أرجع خطأ;
+    File_رستہ.سونپو(Cfg_File_رستہ.begin(), Cfg_File_رستہ.سرا());
+    أرجع سچ;
   }
 
   // Look for the file in search directories.
-  for (const StringRef &Dir : SearchDirs) {
-    if (Dir.empty())
-      continue;
-    CfgFilePath.assign(Dir);
-    llvm::sys::path::append(CfgFilePath, FileName);
-    llvm::sys::path::native(CfgFilePath);
-    if (FileExists(CfgFilePath)) {
-      FilePath.assign(CfgFilePath.begin(), CfgFilePath.end());
-      return true;
+  لكل (ثابت StringRef &Dir : تلاش_Dirs) {
+    إذا (Dir.خالی_تھاواں())
+      استمر;
+    Cfg_File_رستہ.سونپو(Dir);
+    llvm::sys::رستہ_2::append(Cfg_File_رستہ, FileName);
+    llvm::sys::رستہ_2::native(Cfg_File_رستہ);
+    إذا (FileExists(Cfg_File_رستہ)) {
+      File_رستہ.سونپو(Cfg_File_رستہ.begin(), Cfg_File_رستہ.سرا());
+      أرجع سچ;
     }
   }
 
-  return false;
+  أرجع خطأ;
 }
 
 Error ExpansionContext::readConfigFile(StringRef CfgFile,
-                                       SmallVectorImpl<const char *> &Argv) {
-  SmallString<128> AbsPath;
-  if (sys::path::is_relative(CfgFile)) {
-    AbsPath.assign(CfgFile);
-    if (std::error_code EC = FS->makeAbsolute(AbsPath))
-      return make_error<StringError>(
+                                       Small_سمتیہ_Impl<ثابت حرف *> &Argv) {
+  SmallString<128> Abs_رستہ;
+  إذا (sys::رستہ_2::is_relative(CfgFile)) {
+    Abs_رستہ.سونپو(CfgFile);
+    إذا (std::error_کوڈ EC = FS->makeAbsolute(Abs_رستہ))
+      أرجع make_error<StringError>(
           EC, Twine("cannot get absolute path for " + CfgFile));
-    CfgFile = AbsPath.str();
+    CfgFile = Abs_رستہ.str();
   }
-  InConfigFile = true;
-  RelativeNames = true;
-  if (Error Err = expandResponseFile(CfgFile, Argv))
-    return Err;
-  return expandResponseFiles(Argv);
+  وچ_Config_File = سچ;
+  Relative_ناں = سچ;
+  إذا (Error Err = expandResponseFile(CfgFile, Argv))
+    أرجع Err;
+  أرجع expandResponseFiles(Argv);
 }
 
-static void initCommonOptions();
-static bool parseCommandLineOptionsImpl(LibraryOptionsContext *Context,
-                                        ArrayRef<const char *> Args,
+ساكن فراغ initCommonOptions();
+ساكن منطقي parse_Command_سطر_Options_Impl(LibraryOptionsContext *Context,
+                                        ArrayRef<ثابت حرف *> دلیلاں,
                                         StringRef Overview, raw_ostream *Errs,
                                         vfs::FileSystem *VFS,
-                                        const char *EnvVar) {
+                                        ثابت حرف *EnvVar) {
   initCommonOptions();
-  SmallVector<const char *, 20> NewArgv;
+  Small_سمتیہ<ثابت حرف *, 20> NewArgv;
   BumpPtrAllocator A;
   StringSaver Saver(A);
-  NewArgv.push_back(Args[0]);
+  NewArgv.ڈالو_پٹھ(دلیلاں[0]);
 
   // Parse options from environment variable.
-  if (EnvVar) {
-    if (std::optional<std::string> EnvValue =
+  إذا (EnvVar) {
+    إذا (std::optional<std::string> Env_قدر =
             sys::Process::GetEnv(StringRef(EnvVar)))
-      TokenizeGNUCommandLine(*EnvValue, Saver, NewArgv);
+      Tokenize_GNUCommand_سطر(*Env_قدر, Saver, NewArgv);
   }
 
   // Append options from command line.
-  append_range(NewArgv, Args.drop_front());
-  int NewArgc = static_cast<int>(NewArgv.size());
+  append_range(NewArgv, دلیلاں.drop_front());
+  صحيح NewArgc = static_cast<صحيح>(NewArgv.ناپ_2());
 
   // Parse all options.
-  return globalParser().ParseCommandLineOptions(NewArgc, &NewArgv[0], Overview,
+  أرجع globalParser().Parse_Command_سطر_Options(NewArgc, &NewArgv[0], Overview,
                                                 Errs, VFS, Context);
 }
 
-bool cl::ParseCommandLineOptions(int argc, const char *const *argv,
+منطقي cl::Parse_Command_سطر_Options(صحيح argc, ثابت حرف *ثابت *argv,
                                  StringRef Overview, raw_ostream *Errs,
-                                 vfs::FileSystem *VFS, const char *EnvVar) {
-  return parseCommandLineOptionsImpl(nullptr, ArrayRef(argv, argc), Overview,
+                                 vfs::FileSystem *VFS, ثابت حرف *EnvVar) {
+  أرجع parse_Command_سطر_Options_Impl(خالی_سوچک, ArrayRef(argv, argc), Overview,
                                      Errs, VFS, EnvVar);
 }
 
-bool cl::parseCommandLineOptions(LibraryOptionsContext &Context,
-                                 ArrayRef<const char *> Args,
+منطقي cl::parse_Command_سطر_Options(LibraryOptionsContext &Context,
+                                 ArrayRef<ثابت حرف *> دلیلاں,
                                  StringRef Overview, raw_ostream *Errs,
-                                 vfs::FileSystem *VFS, const char *EnvVar) {
-  return parseCommandLineOptionsImpl(&Context, Args, Overview, Errs, VFS,
+                                 vfs::FileSystem *VFS, ثابت حرف *EnvVar) {
+  أرجع parse_Command_سطر_Options_Impl(&Context, دلیلاں, Overview, Errs, VFS,
                                      EnvVar);
 }
 
 /// Reset all options at least once, so that we can parse different options.
-void CommandLineParser::ResetAllOptionOccurrences() {
+فراغ Command_سطر_Parser::ResetAllOptionOccurrences() {
   // Reset all option values to look like they have never been seen before.
   // Options might be reset twice (they can be reference in both OptionsMap
   // and one of the other members), but that does not harm.
-  for (auto *SC : RegisteredSubCommands) {
+  لكل (خودکار *SC : RegisteredSubCommands) {
     // reset() removes default options from OptionsMap (via removeArgument), so
     // collect the options first to avoid invalidating the map iterator.
-    SmallVector<Option *, 0> Opts;
-    Opts.reserve(SC->OptionsMap.size());
-    for (auto &O : SC->OptionsMap)
-      Opts.push_back(O.second);
-    for (Option *O : Opts)
+    Small_سمتیہ<Option *, 0> Opts;
+    Opts.reserve(SC->OptionsMap.ناپ_2());
+    لكل (خودکار &O : SC->OptionsMap)
+      Opts.ڈالو_پٹھ(O.دوجا_2);
+    لكل (Option *O : Opts)
       O->reset();
-    for (Option *O : SC->PositionalOpts)
+    لكل (Option *O : SC->PositionalOpts)
       O->reset();
-    if (SC->ConsumeAfterOpt)
+    إذا (SC->ConsumeAfterOpt)
       SC->ConsumeAfterOpt->reset();
   }
-  for (LibraryOptions *L : Libraries)
+  لكل (LibraryOptions *L : Libraries)
     L->reset();
   LibraryArgAlloc.Reset();
 }
 
-bool CommandLineParser::ParseCommandLineOptions(
-    int argc, const char *const *argv, StringRef Overview, raw_ostream *Errs,
+منطقي Command_سطر_Parser::Parse_Command_سطر_Options(
+    صحيح argc, ثابت حرف *ثابت *argv, StringRef Overview, raw_ostream *Errs,
     vfs::FileSystem *VFS, LibraryOptionsContext *Context) {
-  assert(hasOptions() && "No options specified!");
+  أكد(hasOptions() && "No options specified!");
 
-  ProgramOverview = Overview;
-  bool IgnoreErrors = Errs;
-  if (!Errs)
+  پروگرام_Overview = Overview;
+  منطقي IgnoreErrors = Errs;
+  إذا (!Errs)
     Errs = &errs();
-  if (!VFS)
+  إذا (!VFS)
     VFS = vfs::getRealFileSystem().get();
-  bool ErrorParsing = false;
+  منطقي ErrorParsing = خطأ;
 
   // Expand response files.
-  SmallVector<const char *, 20> newArgv(argv, argv + argc);
+  Small_سمتیہ<ثابت حرف *, 20> newArgv(argv, argv + argc);
   BumpPtrAllocator A;
-#ifdef _WIN32
-  auto Tokenize = cl::TokenizeWindowsCommandLine;
-#else
-  auto Tokenize = cl::TokenizeGNUCommandLine;
-#endif
+#جے_تعریف_شدہ _WIN32
+  خودکار Tokenize = cl::Tokenize_Windows_Command_سطر;
+#وإلا
+  خودکار Tokenize = cl::Tokenize_GNUCommand_سطر;
+#جے_انت
   ExpansionContext ECtx(A, Tokenize, VFS);
-  if (Error Err = ECtx.expandResponseFiles(newArgv)) {
-    *Errs << toString(std::move(Err)) << '\n';
-    return false;
+  إذا (Error Err = ECtx.expandResponseFiles(newArgv)) {
+    *Errs << منزل_String(std::move(Err)) << '\n';
+    أرجع خطأ;
   }
   argv = &newArgv[0];
-  argc = static_cast<int>(newArgv.size());
+  argc = static_cast<صحيح>(newArgv.ناپ_2());
 
   // Copy the program name into ProgName, making sure not to overflow it.
-  ProgramName = std::string(sys::path::filename(StringRef(argv[0])));
-  indexLibraryOptions();
+  پروگرام_Name = std::string(sys::رستہ_2::filename(StringRef(argv[0])));
+  اشاریہ_Library_Options();
 
   // Check out the positional arguments to collect information about them.
-  unsigned NumPositionalRequired = 0;
+  بنانشانی عدد_Positional_Required = 0;
 
   // Determine whether or not there are an unlimited number of positionals
-  bool HasUnlimitedPositionals = false;
+  منطقي HasUnlimitedPositionals = خطأ;
 
-  int FirstArg = 1;
-  SubCommand *ChosenSubCommand = &SubCommand::getTopLevel();
-  std::string NearestSubCommandString;
-  bool MaybeNamedSubCommand =
-      argc >= 2 && argv[FirstArg][0] != '-' && hasNamedSubCommands();
-  if (MaybeNamedSubCommand) {
+  صحيح پہلا_Arg = 1;
+  SubCommand *ChosenSubCommand = &SubCommand::get_چوٹی_Level();
+  std::string سبھ_توں_نیڑے_Sub_Command_String;
+  منطقي MaybeNamedSubCommand =
+      argc >= 2 && argv[پہلا_Arg][0] != '-' && hasNamedSubCommands();
+  إذا (MaybeNamedSubCommand) {
     // If the first argument specifies a valid subcommand, start processing
     // options from the second argument.
     ChosenSubCommand =
-        LookupSubCommand(StringRef(argv[FirstArg]), NearestSubCommandString);
-    if (ChosenSubCommand != &SubCommand::getTopLevel())
-      FirstArg = 2;
+        LookupSubCommand(StringRef(argv[پہلا_Arg]), سبھ_توں_نیڑے_Sub_Command_String);
+    إذا (ChosenSubCommand != &SubCommand::get_چوٹی_Level())
+      پہلا_Arg = 2;
   }
-  globalParser().ActiveSubCommand = ChosenSubCommand;
+  globalParser().سرگرم_Sub_Command = ChosenSubCommand;
 
-  assert(ChosenSubCommand);
-  auto &ConsumeAfterOpt = ChosenSubCommand->ConsumeAfterOpt;
-  auto &PositionalOpts = ChosenSubCommand->PositionalOpts;
-  auto &OptionsMap = ChosenSubCommand->OptionsMap;
+  أكد(ChosenSubCommand);
+  خودکار &ConsumeAfterOpt = ChosenSubCommand->ConsumeAfterOpt;
+  خودکار &PositionalOpts = ChosenSubCommand->PositionalOpts;
+  خودکار &OptionsMap = ChosenSubCommand->OptionsMap;
 
-  if (ConsumeAfterOpt) {
-    assert(PositionalOpts.size() > 0 &&
+  إذا (ConsumeAfterOpt) {
+    أكد(PositionalOpts.ناپ_2() > 0 &&
            "Cannot specify cl::ConsumeAfter without a positional argument!");
   }
-  if (!PositionalOpts.empty()) {
+  إذا (!PositionalOpts.خالی_تھاواں()) {
 
     // Calculate how many positional values are _required_.
-    bool UnboundedFound = false;
-    for (size_t i = 0, e = PositionalOpts.size(); i != e; ++i) {
+    منطقي Unbounded_لبھیا = خطأ;
+    لكل (size_t i = 0, e = PositionalOpts.ناپ_2(); i != e; ++i) {
       Option *Opt = PositionalOpts[i];
-      if (RequiresValue(Opt))
-        ++NumPositionalRequired;
-      else if (ConsumeAfterOpt) {
+      إذا (Requires_قدر(Opt))
+        ++عدد_Positional_Required;
+      وإلا إذا (ConsumeAfterOpt) {
         // ConsumeAfter cannot be combined with "optional" positional options
         // unless there is only one positional argument...
-        if (PositionalOpts.size() > 1) {
-          if (!IgnoreErrors)
+        إذا (PositionalOpts.ناپ_2() > 1) {
+          إذا (!IgnoreErrors)
             Opt->error("error - this positional option will never be matched, "
                        "because it does not Require a value, and a "
                        "cl::ConsumeAfter option is active!");
-          ErrorParsing = true;
+          ErrorParsing = سچ;
         }
-      } else if (UnboundedFound && !Opt->hasArgStr()) {
+      } وإلا إذا (Unbounded_لبھیا && !Opt->hasArgStr()) {
         // This option does not "require" a value...  Make sure this option is
         // not specified after an option that eats all extra arguments, or this
         // one will never get any!
         //
-        if (!IgnoreErrors)
+        إذا (!IgnoreErrors)
           Opt->error("error - option can never match, because "
                      "another positional argument will match an "
                      "unbounded number of values, and this option"
                      " does not require a value!");
-        *Errs << ProgramName << ": CommandLine Error: Option '" << Opt->ArgStr
+        *Errs << پروگرام_Name << ": CommandLine Error: Option '" << Opt->ArgStr
               << "' is all messed up!\n";
-        *Errs << PositionalOpts.size();
-        ErrorParsing = true;
+        *Errs << PositionalOpts.ناپ_2();
+        ErrorParsing = سچ;
       }
-      UnboundedFound |= EatsUnboundedNumberOfValues(Opt);
+      Unbounded_لبھیا |= Eats_Unbounded_نمبر_دا_اقدار(Opt);
     }
-    HasUnlimitedPositionals = UnboundedFound || ConsumeAfterOpt;
+    HasUnlimitedPositionals = Unbounded_لبھیا || ConsumeAfterOpt;
   }
 
   // PositionalVals - A vector of "positional" arguments we accumulate into
   // the process at the end.
   //
-  SmallVector<std::pair<StringRef, unsigned>, 4> PositionalVals;
+  Small_سمتیہ<std::pair<StringRef, بنانشانی>, 4> PositionalVals;
 
   // If the program has named positional arguments, and the name has been run
   // across, keep track of which positional argument was named.  Otherwise put
   // the positional args into the PositionalVals list...
-  Option *ActivePositionalArg = nullptr;
+  Option *سرگرم_Positional_Arg = خالی_سوچک;
 
   // Loop over all of the arguments... processing them.
-  bool DashDashFound = false; // Have we read '--'?
-  for (int i = FirstArg; i < argc; ++i) {
-    Option *Handler = nullptr;
-    std::string NearestHandlerString;
-    StringRef Value;
+  منطقي Dash_Dash_لبھیا = خطأ; // Have we read '--'?
+  لكل (صحيح i = پہلا_Arg; i < argc; ++i) {
+    Option *Handler = خالی_سوچک;
+    std::string سبھ_توں_نیڑے_Handler_String;
+    StringRef قدر;
     StringRef ArgName = "";
 
     // Check to see if this is a positional argument.  This argument is
     // considered to be positional if it doesn't start with '-', if it is "-"
     // itself, or if we have seen "--" already.
     //
-    if (argv[i][0] != '-' || argv[i][1] == 0 || DashDashFound) {
+    إذا (argv[i][0] != '-' || argv[i][1] == 0 || Dash_Dash_لبھیا) {
       // Positional argument!
-      if (ActivePositionalArg) {
-        ProvidePositionalOption(ActivePositionalArg, StringRef(argv[i]), i);
-        continue; // We are done!
+      إذا (سرگرم_Positional_Arg) {
+        ProvidePositionalOption(سرگرم_Positional_Arg, StringRef(argv[i]), i);
+        استمر; // We are done!
       }
 
-      if (!PositionalOpts.empty()) {
-        PositionalVals.push_back(std::make_pair(StringRef(argv[i]), i));
+      إذا (!PositionalOpts.خالی_تھاواں()) {
+        PositionalVals.ڈالو_پٹھ(std::make_pair(StringRef(argv[i]), i));
 
         // All of the positional arguments have been fulfulled, give the rest to
         // the consume after option... if it's specified...
         //
-        if (PositionalVals.size() >= NumPositionalRequired && ConsumeAfterOpt) {
-          for (++i; i < argc; ++i)
-            PositionalVals.push_back(std::make_pair(StringRef(argv[i]), i));
-          break; // Handle outside of the argument processing loop...
+        إذا (PositionalVals.ناپ_2() >= عدد_Positional_Required && ConsumeAfterOpt) {
+          لكل (++i; i < argc; ++i)
+            PositionalVals.ڈالو_پٹھ(std::make_pair(StringRef(argv[i]), i));
+          اكسر; // Handle outside of the argument processing loop...
         }
 
         // Delay processing positional arguments until the end...
-        continue;
+        استمر;
       }
-    } else if (argv[i][0] == '-' && argv[i][1] == '-' && argv[i][2] == 0 &&
-               !DashDashFound) {
-      DashDashFound = true; // This is the mythical "--"?
-      continue;             // Don't try to process it as an argument itself.
-    } else if (ActivePositionalArg &&
-               (ActivePositionalArg->getMiscFlags() & PositionalEatsArgs)) {
+    } وإلا إذا (argv[i][0] == '-' && argv[i][1] == '-' && argv[i][2] == 0 &&
+               !Dash_Dash_لبھیا) {
+      Dash_Dash_لبھیا = سچ; // This is the mythical "--"?
+      استمر;             // Don't try to process it as an argument itself.
+    } وإلا إذا (سرگرم_Positional_Arg &&
+               (سرگرم_Positional_Arg->getMiscFlags() & Positional_Eats_دلیلاں)) {
       // If there is a positional argument eating options, check to see if this
       // option is another positional argument.  If so, treat it as an argument,
       // otherwise feed it to the eating positional.
@@ -1670,148 +1670,148 @@ bool CommandLineParser::ParseCommandLineOptions(
       // Eat second dash.
       ArgName.consume_front("-");
 
-      Handler = LookupOption(*ChosenSubCommand, ArgName, Value);
-      if (!Handler || Handler->getFormattingFlag() != cl::Positional) {
-        ProvidePositionalOption(ActivePositionalArg, StringRef(argv[i]), i);
-        continue; // We are done!
+      Handler = LookupOption(*ChosenSubCommand, ArgName, قدر);
+      إذا (!Handler || Handler->getFormattingFlag() != cl::Positional) {
+        ProvidePositionalOption(سرگرم_Positional_Arg, StringRef(argv[i]), i);
+        استمر; // We are done!
       }
-    } else { // We start with a '-', must be an argument.
+    } وإلا { // We start with a '-', must be an argument.
       ArgName = StringRef(argv[i] + 1);
       // Eat second dash.
       ArgName.consume_front("-");
 
-      Handler = LookupOption(*ChosenSubCommand, ArgName, Value);
+      Handler = LookupOption(*ChosenSubCommand, ArgName, قدر);
 
       // If Handler is not found in a specialized subcommand, look up handler
       // in the top-level subcommand.
       // cl::opt without cl::sub belongs to top-level subcommand.
-      if (!Handler && ChosenSubCommand != &SubCommand::getTopLevel())
-        Handler = LookupOption(SubCommand::getTopLevel(), ArgName, Value);
+      إذا (!Handler && ChosenSubCommand != &SubCommand::get_چوٹی_Level())
+        Handler = LookupOption(SubCommand::get_چوٹی_Level(), ArgName, قدر);
 
-      if (!Handler) {
-        if (LibraryOptions *L = lookupLibraryOption(ArgName.split('=').first)) {
-          ArrayRef<const char *> Rest(argv + i, argc - i);
-          unsigned N;
-          if (Error E = Context && L->isPerContext()
+      إذا (!Handler) {
+        إذا (LibraryOptions *L = lookupLibraryOption(ArgName.ونڈو('=').پہلا_2)) {
+          ArrayRef<ثابت حرف *> Rest(argv + i, argc - i);
+          بنانشانی N;
+          إذا (Error E = Context && L->is_فی_Context()
                             ? Context->parse(*L, Rest, N)
                             : parseLibraryOption(*L, L->global(), Rest, N,
                                                  LibraryArgAlloc)) {
-            *Errs << ProgramName << ": " << toString(std::move(E)) << '\n';
-            ErrorParsing = true;
+            *Errs << پروگرام_Name << ": " << منزل_String(std::move(E)) << '\n';
+            ErrorParsing = سچ;
           }
           i += N - 1;
-          continue;
+          استمر;
         }
       }
 
       // Check to see if this "option" is really a prefixed argument.
-      if (!Handler)
-        Handler = HandlePrefixedOption(ArgName, Value, OptionsMap);
+      إذا (!Handler)
+        Handler = HandlePrefixedOption(ArgName, قدر, OptionsMap);
 
       // Otherwise, look for the closest available option to report to the user
       // in the upcoming error.
-      if (!Handler)
-        LookupNearestOption(ArgName, OptionsMap, NearestHandlerString);
+      إذا (!Handler)
+        Lookup_سبھ_توں_نیڑے_Option(ArgName, OptionsMap, سبھ_توں_نیڑے_Handler_String);
     }
 
-    if (!Handler) {
-      auto ReportUnknownArgument = [&](bool IsArg,
-                                       StringRef NearestArgumentName) {
-        *Errs << ProgramName << ": Unknown "
+    إذا (!Handler) {
+      خودکار Report_Unknown_دلیل = [&](منطقي IsArg,
+                                       StringRef سبھ_توں_نیڑے_دلیل_Name) {
+        *Errs << پروگرام_Name << ": Unknown "
               << (IsArg ? "command line argument" : "subcommand") << " '"
               << argv[i] << "'.  Try: '" << argv[0] << " --help'\n";
 
-        if (NearestArgumentName.empty())
-          return;
+        إذا (سبھ_توں_نیڑے_دلیل_Name.خالی_تھاواں())
+          أرجع;
 
-        *Errs << ProgramName << ": Did you mean '";
-        if (IsArg)
-          *Errs << PrintArg(NearestArgumentName, 0);
-        else
-          *Errs << NearestArgumentName;
+        *Errs << پروگرام_Name << ": Did you mean '";
+        إذا (IsArg)
+          *Errs << PrintArg(سبھ_توں_نیڑے_دلیل_Name, 0);
+        وإلا
+          *Errs << سبھ_توں_نیڑے_دلیل_Name;
         *Errs << "'?\n";
       };
 
-      if (i > 1 || !MaybeNamedSubCommand)
-        ReportUnknownArgument(/*IsArg=*/true, NearestHandlerString);
-      else
-        ReportUnknownArgument(/*IsArg=*/false, NearestSubCommandString);
+      إذا (i > 1 || !MaybeNamedSubCommand)
+        Report_Unknown_دلیل(/*IsArg=*/سچ, سبھ_توں_نیڑے_Handler_String);
+      وإلا
+        Report_Unknown_دلیل(/*IsArg=*/خطأ, سبھ_توں_نیڑے_Sub_Command_String);
 
-      ErrorParsing = true;
-      continue;
+      ErrorParsing = سچ;
+      استمر;
     }
 
     // If this is a named positional argument, just remember that it is the
     // active one...
-    if (Handler->getFormattingFlag() == cl::Positional) {
-      if ((Handler->getMiscFlags() & PositionalEatsArgs) && !Value.empty()) {
+    إذا (Handler->getFormattingFlag() == cl::Positional) {
+      إذا ((Handler->getMiscFlags() & Positional_Eats_دلیلاں) && !قدر.خالی_تھاواں()) {
         Handler->error("This argument does not take a value.\n"
                        "\tInstead, it consumes any positional arguments until "
                        "the next recognized option.", *Errs);
-        ErrorParsing = true;
+        ErrorParsing = سچ;
       }
-      ActivePositionalArg = Handler;
+      سرگرم_Positional_Arg = Handler;
     }
-    else
-      ErrorParsing |= ProvideOption(Handler, ArgName, Value, argc, argv, i);
+    وإلا
+      ErrorParsing |= ProvideOption(Handler, ArgName, قدر, argc, argv, i);
   }
 
   // Check and handle positional arguments now...
-  if (NumPositionalRequired > PositionalVals.size()) {
-      *Errs << ProgramName
+  إذا (عدد_Positional_Required > PositionalVals.ناپ_2()) {
+      *Errs << پروگرام_Name
              << ": Not enough positional command line arguments specified!\n"
-             << "Must specify at least " << NumPositionalRequired
-             << " positional argument" << (NumPositionalRequired > 1 ? "s" : "")
+             << "Must specify at least " << عدد_Positional_Required
+             << " positional argument" << (عدد_Positional_Required > 1 ? "s" : "")
              << ": See: " << argv[0] << " --help\n";
 
-    ErrorParsing = true;
-  } else if (!HasUnlimitedPositionals &&
-             PositionalVals.size() > PositionalOpts.size()) {
-    *Errs << ProgramName << ": Too many positional arguments specified!\n"
-          << "Can specify at most " << PositionalOpts.size()
+    ErrorParsing = سچ;
+  } وإلا إذا (!HasUnlimitedPositionals &&
+             PositionalVals.ناپ_2() > PositionalOpts.ناپ_2()) {
+    *Errs << پروگرام_Name << ": Too many positional arguments specified!\n"
+          << "Can specify at most " << PositionalOpts.ناپ_2()
           << " positional arguments: See: " << argv[0] << " --help\n";
-    ErrorParsing = true;
+    ErrorParsing = سچ;
 
-  } else if (!ConsumeAfterOpt) {
+  } وإلا إذا (!ConsumeAfterOpt) {
     // Positional args have already been handled if ConsumeAfter is specified.
-    unsigned ValNo = 0, NumVals = static_cast<unsigned>(PositionalVals.size());
-    for (Option *Opt : PositionalOpts) {
-      if (RequiresValue(Opt)) {
-        ProvidePositionalOption(Opt, PositionalVals[ValNo].first,
-                                PositionalVals[ValNo].second);
+    بنانشانی ValNo = 0, عدد_Vals = static_cast<بنانشانی>(PositionalVals.ناپ_2());
+    لكل (Option *Opt : PositionalOpts) {
+      إذا (Requires_قدر(Opt)) {
+        ProvidePositionalOption(Opt, PositionalVals[ValNo].پہلا_2,
+                                PositionalVals[ValNo].دوجا_2);
         ValNo++;
-        --NumPositionalRequired; // We fulfilled our duty...
+        --عدد_Positional_Required; // We fulfilled our duty...
       }
 
       // If we _can_ give this option more arguments, do so now, as long as we
       // do not give it values that others need.  'Done' controls whether the
       // option even _WANTS_ any more.
       //
-      bool Done = Opt->getNumOccurrencesFlag() == cl::Required;
-      while (NumVals - ValNo > NumPositionalRequired && !Done) {
-        switch (Opt->getNumOccurrencesFlag()) {
-        case cl::Optional:
-          Done = true; // Optional arguments want _at most_ one value
+      منطقي پورا = Opt->get_عدد_Occurrences_Flag() == cl::Required;
+      طالما (عدد_Vals - ValNo > عدد_Positional_Required && !پورا) {
+        بدل (Opt->get_عدد_Occurrences_Flag()) {
+        حالة cl::Optional:
+          پورا = سچ; // Optional arguments want _at most_ one value
           [[fallthrough]];
-        case cl::ZeroOrMore: // Zero or more will take all they can get...
-        case cl::OneOrMore:  // One or more will take all they can get...
-          ProvidePositionalOption(Opt, PositionalVals[ValNo].first,
-                                  PositionalVals[ValNo].second);
+        حالة cl::Zero_Or_ہور: // Zero or more will take all they can get...
+        حالة cl::One_Or_ہور:  // One or more will take all they can get...
+          ProvidePositionalOption(Opt, PositionalVals[ValNo].پہلا_2,
+                                  PositionalVals[ValNo].دوجا_2);
           ValNo++;
-          break;
-        default:
+          اكسر;
+        افتراضي:
           llvm_unreachable("Internal error, unexpected NumOccurrences flag in "
                            "positional argument processing!");
         }
       }
     }
-  } else {
-    assert(ConsumeAfterOpt && NumPositionalRequired <= PositionalVals.size());
-    unsigned ValNo = 0;
-    for (Option *Opt : PositionalOpts)
-      if (RequiresValue(Opt)) {
+  } وإلا {
+    أكد(ConsumeAfterOpt && عدد_Positional_Required <= PositionalVals.ناپ_2());
+    بنانشانی ValNo = 0;
+    لكل (Option *Opt : PositionalOpts)
+      إذا (Requires_قدر(Opt)) {
         ErrorParsing |= ProvidePositionalOption(
-            Opt, PositionalVals[ValNo].first, PositionalVals[ValNo].second);
+            Opt, PositionalVals[ValNo].پہلا_2, PositionalVals[ValNo].دوجا_2);
         ValNo++;
       }
 
@@ -1820,33 +1820,33 @@ bool CommandLineParser::ParseCommandLineOptions(
     // positional option and keep the rest for the consume after.  The above
     // loop would have assigned no values to positional options in this case.
     //
-    if (PositionalOpts.size() == 1 && ValNo == 0 && !PositionalVals.empty()) {
+    إذا (PositionalOpts.ناپ_2() == 1 && ValNo == 0 && !PositionalVals.خالی_تھاواں()) {
       ErrorParsing |= ProvidePositionalOption(PositionalOpts[0],
-                                              PositionalVals[ValNo].first,
-                                              PositionalVals[ValNo].second);
+                                              PositionalVals[ValNo].پہلا_2,
+                                              PositionalVals[ValNo].دوجا_2);
       ValNo++;
     }
 
     // Handle over all of the rest of the arguments to the
     // cl::ConsumeAfter command line option...
-    for (; ValNo != PositionalVals.size(); ++ValNo)
+    لكل (; ValNo != PositionalVals.ناپ_2(); ++ValNo)
       ErrorParsing |=
-          ProvidePositionalOption(ConsumeAfterOpt, PositionalVals[ValNo].first,
-                                  PositionalVals[ValNo].second);
+          ProvidePositionalOption(ConsumeAfterOpt, PositionalVals[ValNo].پہلا_2,
+                                  PositionalVals[ValNo].دوجا_2);
   }
 
   // Loop over args and make sure all required args are specified!
-  for (const auto &Opt : OptionsMap) {
-    switch (Opt.second->getNumOccurrencesFlag()) {
-    case Required:
-    case OneOrMore:
-      if (Opt.second->getNumOccurrences() == 0) {
-        Opt.second->error("must be specified at least once!");
-        ErrorParsing = true;
+  لكل (ثابت خودکار &Opt : OptionsMap) {
+    بدل (Opt.دوجا_2->get_عدد_Occurrences_Flag()) {
+    حالة Required:
+    حالة One_Or_ہور:
+      إذا (Opt.دوجا_2->get_عدد_Occurrences() == 0) {
+        Opt.دوجا_2->error("must be specified at least once!");
+        ErrorParsing = سچ;
       }
       [[fallthrough]];
-    default:
-      break;
+    افتراضي:
+      اكسر;
     }
   }
 
@@ -1854,50 +1854,50 @@ bool CommandLineParser::ParseCommandLineOptions(
   // Note that if ReadResponseFiles == true, this must be done before the
   // memory allocated for the expanded command line is free()d below.
   LLVM_DEBUG(dbgs() << "Args: ";
-             for (int i = 0; i < argc; ++i) dbgs() << argv[i] << ' ';
+             لكل (صحيح i = 0; i < argc; ++i) dbgs() << argv[i] << ' ';
              dbgs() << '\n';);
 
   // Free all of the memory allocated to the map.  Command line options may only
   // be processed once!
-  MoreHelp.clear();
+  ہور_Help.clear();
 
   // If we had an error processing our arguments, don't let the program execute
-  if (ErrorParsing) {
-    if (!IgnoreErrors)
-      exit(1);
-    return false;
+  إذا (ErrorParsing) {
+    إذا (!IgnoreErrors)
+      باہر_نکلو(1);
+    أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }
 
 //===----------------------------------------------------------------------===//
 // Option Base class implementation
 //
 
-bool Option::error(const Twine &Message, StringRef ArgName, raw_ostream &Errs) {
-  if (!ArgName.data())
+منطقي Option::error(ثابت Twine &سنیہا_2, StringRef ArgName, raw_ostream &Errs) {
+  إذا (!ArgName.انکڑے())
     ArgName = ArgStr;
-  if (ArgName.empty())
+  إذا (ArgName.خالی_تھاواں())
     Errs << HelpStr; // Be nice for positional arguments
-  else
-    Errs << globalParser().ProgramName << ": for the " << PrintArg(ArgName, 0);
+  وإلا
+    Errs << globalParser().پروگرام_Name << ": for the " << PrintArg(ArgName, 0);
 
-  Errs << " option: " << Message << "\n";
-  return true;
+  Errs << " option: " << سنیہا_2 << "\n";
+  أرجع سچ;
 }
 
-bool Option::addOccurrence(unsigned pos, StringRef ArgName, StringRef Value) {
-  ++NumOccurrences;
-  return handleOccurrence(pos, ArgName, Value);
+منطقي Option::جوڑو_Occurrence(بنانشانی pos, StringRef ArgName, StringRef قدر) {
+  ++عدد_Occurrences;
+  أرجع handleOccurrence(pos, ArgName, قدر);
 }
 
 // getValueStr - Get the value description string, using "DefaultMsg" if nothing
 // has been specified yet.
 //
-static StringRef getValueStr(const Option &O, StringRef DefaultMsg) {
-  if (O.ValueStr.empty())
-    return DefaultMsg;
-  return O.ValueStr;
+ساكن StringRef get_قدر_Str(ثابت Option &O, StringRef Default_پیغام) {
+  إذا (O.قدر_Str.خالی_تھاواں())
+    أرجع Default_پیغام;
+  أرجع O.قدر_Str;
 }
 
 //===----------------------------------------------------------------------===//
@@ -1905,39 +1905,39 @@ static StringRef getValueStr(const Option &O, StringRef DefaultMsg) {
 //
 
 // Return the width of the option tag for printing...
-size_t alias::getOptionWidth() const {
-  return argPlusPrefixesSize(ArgStr);
+size_t alias::get_Option_چوڑائی() ثابت {
+  أرجع arg_Plus_Prefixes_ناپ(ArgStr);
 }
 
-void Option::printHelpStr(StringRef HelpStr, size_t Indent,
-                          size_t FirstLineIndentedBy) {
-  assert(Indent >= FirstLineIndentedBy);
-  std::pair<StringRef, StringRef> Split = HelpStr.split('\n');
-  outs().indent(Indent - FirstLineIndentedBy)
-      << ArgHelpPrefix << Split.first << "\n";
-  while (!Split.second.empty()) {
-    Split = Split.second.split('\n');
-    outs().indent(Indent) << Split.first << "\n";
+فراغ Option::printHelpStr(StringRef HelpStr, size_t Indent,
+                          size_t پہلا_سطر_Indented_By) {
+  أكد(Indent >= پہلا_سطر_Indented_By);
+  std::pair<StringRef, StringRef> ونڈو_2 = HelpStr.ونڈو('\n');
+  outs().indent(Indent - پہلا_سطر_Indented_By)
+      << Arg_Help_اگیتر << ونڈو_2.پہلا_2 << "\n";
+  طالما (!ونڈو_2.دوجا_2.خالی_تھاواں()) {
+    ونڈو_2 = ونڈو_2.دوجا_2.ونڈو('\n');
+    outs().indent(Indent) << ونڈو_2.پہلا_2 << "\n";
   }
 }
 
-void Option::printEnumValHelpStr(StringRef HelpStr, size_t BaseIndent,
-                                 size_t FirstLineIndentedBy) {
-  const StringRef ValHelpPrefix = "  ";
-  assert(BaseIndent >= FirstLineIndentedBy);
-  std::pair<StringRef, StringRef> Split = HelpStr.split('\n');
-  outs().indent(BaseIndent - FirstLineIndentedBy)
-      << ArgHelpPrefix << ValHelpPrefix << Split.first << "\n";
-  while (!Split.second.empty()) {
-    Split = Split.second.split('\n');
-    outs().indent(BaseIndent + ValHelpPrefix.size()) << Split.first << "\n";
+فراغ Option::printEnumValHelpStr(StringRef HelpStr, size_t ادھار_Indent,
+                                 size_t پہلا_سطر_Indented_By) {
+  ثابت StringRef Val_Help_اگیتر = "  ";
+  أكد(ادھار_Indent >= پہلا_سطر_Indented_By);
+  std::pair<StringRef, StringRef> ونڈو_2 = HelpStr.ونڈو('\n');
+  outs().indent(ادھار_Indent - پہلا_سطر_Indented_By)
+      << Arg_Help_اگیتر << Val_Help_اگیتر << ونڈو_2.پہلا_2 << "\n";
+  طالما (!ونڈو_2.دوجا_2.خالی_تھاواں()) {
+    ونڈو_2 = ونڈو_2.دوجا_2.ونڈو('\n');
+    outs().indent(ادھار_Indent + Val_Help_اگیتر.ناپ_2()) << ونڈو_2.پہلا_2 << "\n";
   }
 }
 
 // Print out the option for the alias.
-void alias::printOptionInfo(size_t GlobalWidth) const {
+فراغ alias::printOptionInfo(size_t Global_چوڑائی) ثابت {
   outs() << PrintArg(ArgStr);
-  printHelpStr(HelpStr, GlobalWidth, argPlusPrefixesSize(ArgStr));
+  printHelpStr(HelpStr, Global_چوڑائی, arg_Plus_Prefixes_ناپ(ArgStr));
 }
 
 //===----------------------------------------------------------------------===//
@@ -1948,182 +1948,182 @@ void alias::printOptionInfo(size_t GlobalWidth) const {
 //
 
 // Return the width of the option tag for printing...
-size_t basic_parser_impl::getOptionWidth(const Option &O) const {
-  size_t Len = argPlusPrefixesSize(O.ArgStr);
-  auto ValName = getValueName();
-  if (!ValName.empty()) {
+size_t basic_parser_impl::get_Option_چوڑائی(ثابت Option &O) ثابت {
+  size_t Len = arg_Plus_Prefixes_ناپ(O.ArgStr);
+  خودکار ValName = get_قدر_Name();
+  إذا (!ValName.خالی_تھاواں()) {
     size_t FormattingLen = 3;
-    if (O.getMiscFlags() & PositionalEatsArgs)
+    إذا (O.getMiscFlags() & Positional_Eats_دلیلاں)
       FormattingLen = 6;
-    Len += getValueStr(O, ValName).size() + FormattingLen;
+    Len += get_قدر_Str(O, ValName).ناپ_2() + FormattingLen;
   }
 
-  return Len;
+  أرجع Len;
 }
 
 // printOptionInfo - Print out information about this option.  The
 // to-be-maintained width is specified.
 //
-void basic_parser_impl::printOptionInfo(const Option &O,
-                                        size_t GlobalWidth) const {
+فراغ basic_parser_impl::printOptionInfo(ثابت Option &O,
+                                        size_t Global_چوڑائی) ثابت {
   outs() << PrintArg(O.ArgStr);
 
-  auto ValName = getValueName();
-  if (!ValName.empty()) {
-    if (O.getMiscFlags() & PositionalEatsArgs) {
-      outs() << " <" << getValueStr(O, ValName) << ">...";
-    } else if (O.getValueExpectedFlag() == ValueOptional)
-      outs() << "[=<" << getValueStr(O, ValName) << ">]";
-    else {
-      outs() << (O.ArgStr.size() == 1 ? " <" : "=<") << getValueStr(O, ValName)
+  خودکار ValName = get_قدر_Name();
+  إذا (!ValName.خالی_تھاواں()) {
+    إذا (O.getMiscFlags() & Positional_Eats_دلیلاں) {
+      outs() << " <" << get_قدر_Str(O, ValName) << ">...";
+    } وإلا إذا (O.get_قدر_Expected_Flag() == قدر_Optional)
+      outs() << "[=<" << get_قدر_Str(O, ValName) << ">]";
+    وإلا {
+      outs() << (O.ArgStr.ناپ_2() == 1 ? " <" : "=<") << get_قدر_Str(O, ValName)
              << '>';
     }
   }
 
-  Option::printHelpStr(O.HelpStr, GlobalWidth, getOptionWidth(O));
+  Option::printHelpStr(O.HelpStr, Global_چوڑائی, get_Option_چوڑائی(O));
 }
 
-void basic_parser_impl::printOptionName(const Option &O,
-                                        size_t GlobalWidth) const {
+فراغ basic_parser_impl::printOptionName(ثابت Option &O,
+                                        size_t Global_چوڑائی) ثابت {
   outs() << PrintArg(O.ArgStr);
-  outs().indent(GlobalWidth - O.ArgStr.size());
+  outs().indent(Global_چوڑائی - O.ArgStr.ناپ_2());
 }
 
 // parser<bool> implementation
 //
-bool parser<bool>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                         bool &Value) {
-  return parseBool<bool, true, false>(O, ArgName, Arg, Value);
+منطقي parser<منطقي>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                         منطقي &قدر) {
+  أرجع parseBool<منطقي, سچ, خطأ>(O, ArgName, Arg, قدر);
 }
 
 // parser<boolOrDefault> implementation
 //
-bool parser<boolOrDefault>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                                  boolOrDefault &Value) {
-  return parseBool<boolOrDefault, boolOrDefault::BOU_TRUE,
-                   boolOrDefault::BOU_FALSE>(O, ArgName, Arg, Value);
+منطقي parser<boolOrDefault>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                                  boolOrDefault &قدر) {
+  أرجع parseBool<boolOrDefault, boolOrDefault::BOU_TRUE,
+                   boolOrDefault::BOU_FALSE>(O, ArgName, Arg, قدر);
 }
 
 // parser<FixedOrScalableQuantity> implementation
 //
-template <typename FixedOrScalableQuantityT>
-static bool parseFixedOrScalableQuantity(Option &O, StringRef Arg,
-                                         StringRef ValueKind,
-                                         FixedOrScalableQuantityT &Value) {
-  using ScalarTy = typename FixedOrScalableQuantityT::ScalarTy;
+سانچا <قسم_ناں FixedOrScalableQuantityT>
+ساكن منطقي parseFixedOrScalableQuantity(Option &O, StringRef Arg,
+                                         StringRef قدر_قسم,
+                                         FixedOrScalableQuantityT &قدر) {
+  ورتوں ScalarTy = قسم_ناں FixedOrScalableQuantityT::ScalarTy;
 
   Arg = Arg.trim();
 
-  ScalarTy MinValue;
-  if (!Arg.getAsInteger(0, MinValue)) {
-    Value = FixedOrScalableQuantityT::getFixed(MinValue);
-    return false;
+  ScalarTy Min_قدر;
+  إذا (!Arg.getAsInteger(0, Min_قدر)) {
+    قدر = FixedOrScalableQuantityT::getFixed(Min_قدر);
+    أرجع خطأ;
   }
 
   StringRef Remainder = Arg;
-  if (!Remainder.consume_front("vscale"))
-    return O.error("'" + Arg + "' value invalid for " + ValueKind +
+  إذا (!Remainder.consume_front("vscale"))
+    أرجع O.error("'" + Arg + "' value invalid for " + قدر_قسم +
                    " argument!");
 
   Remainder = Remainder.ltrim();
-  if (!Remainder.consume_front('x'))
-    return O.error("'" + Arg + "' value invalid for " + ValueKind +
+  إذا (!Remainder.consume_front('x'))
+    أرجع O.error("'" + Arg + "' value invalid for " + قدر_قسم +
                    " argument!");
 
   Remainder = Remainder.ltrim();
-  if (Remainder.getAsInteger(0, MinValue))
-    return O.error("'" + Arg + "' value invalid for " + ValueKind +
+  إذا (Remainder.getAsInteger(0, Min_قدر))
+    أرجع O.error("'" + Arg + "' value invalid for " + قدر_قسم +
                    " argument!");
 
-  Value = FixedOrScalableQuantityT::getScalable(MinValue);
-  return false;
+  قدر = FixedOrScalableQuantityT::getScalable(Min_قدر);
+  أرجع خطأ;
 }
 
 // parser<int> implementation
 //
-bool parser<int>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                        int &Value) {
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for integer argument!");
-  return false;
+منطقي parser<صحيح>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                        صحيح &قدر) {
+  إذا (Arg.getAsInteger(0, قدر))
+    أرجع O.error("'" + Arg + "' value invalid for integer argument!");
+  أرجع خطأ;
 }
 
 // parser<long> implementation
 //
-bool parser<long>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                         long &Value) {
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for long argument!");
-  return false;
+منطقي parser<لما>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                         لما &قدر) {
+  إذا (Arg.getAsInteger(0, قدر))
+    أرجع O.error("'" + Arg + "' value invalid for long argument!");
+  أرجع خطأ;
 }
 
 // parser<long long> implementation
 //
-bool parser<long long>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                              long long &Value) {
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for llong argument!");
-  return false;
+منطقي parser<لما لما>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                              لما لما &قدر) {
+  إذا (Arg.getAsInteger(0, قدر))
+    أرجع O.error("'" + Arg + "' value invalid for llong argument!");
+  أرجع خطأ;
 }
 
 // parser<unsigned> implementation
 //
-bool parser<unsigned>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                             unsigned &Value) {
+منطقي parser<بنانشانی>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                             بنانشانی &قدر) {
 
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for uint argument!");
-  return false;
+  إذا (Arg.getAsInteger(0, قدر))
+    أرجع O.error("'" + Arg + "' value invalid for uint argument!");
+  أرجع خطأ;
 }
 
 // parser<unsigned long> implementation
 //
-bool parser<unsigned long>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                                  unsigned long &Value) {
+منطقي parser<بنانشانی لما>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                                  بنانشانی لما &قدر) {
 
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for ulong argument!");
-  return false;
+  إذا (Arg.getAsInteger(0, قدر))
+    أرجع O.error("'" + Arg + "' value invalid for ulong argument!");
+  أرجع خطأ;
 }
 
 // parser<unsigned long long> implementation
 //
-bool parser<unsigned long long>::parse(Option &O, StringRef ArgName,
+منطقي parser<بنانشانی لما لما>::parse(Option &O, StringRef ArgName,
                                        StringRef Arg,
-                                       unsigned long long &Value) {
+                                       بنانشانی لما لما &قدر) {
 
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for ullong argument!");
-  return false;
+  إذا (Arg.getAsInteger(0, قدر))
+    أرجع O.error("'" + Arg + "' value invalid for ullong argument!");
+  أرجع خطأ;
 }
 
 // parser<ElementCount> implementation
 //
-bool parser<ElementCount>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                                 ElementCount &Value) {
-  return parseFixedOrScalableQuantity(O, Arg, getValueName(), Value);
+منطقي parser<Element_گنتی>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                                 Element_گنتی &قدر) {
+  أرجع parseFixedOrScalableQuantity(O, Arg, get_قدر_Name(), قدر);
 }
 
 // parser<double>/parser<float> implementation
 //
-static bool parseDouble(Option &O, StringRef Arg, double &Value) {
-  if (to_float(Arg, Value))
-    return false;
-  return O.error("'" + Arg + "' value invalid for floating point argument!");
+ساكن منطقي parseDouble(Option &O, StringRef Arg, مزدوج &قدر) {
+  إذا (منزل_float(Arg, قدر))
+    أرجع خطأ;
+  أرجع O.error("'" + Arg + "' value invalid for floating point argument!");
 }
 
-bool parser<double>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                           double &Val) {
-  return parseDouble(O, Arg, Val);
+منطقي parser<مزدوج>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                           مزدوج &Val) {
+  أرجع parseDouble(O, Arg, Val);
 }
 
-bool parser<float>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                          float &Val) {
-  double dVal;
-  if (parseDouble(O, Arg, dVal))
-    return true;
-  Val = (float)dVal;
-  return false;
+منطقي parser<عائم>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                          عائم &Val) {
+  مزدوج dVal;
+  إذا (parseDouble(O, Arg, dVal))
+    أرجع سچ;
+  Val = (عائم)dVal;
+  أرجع خطأ;
 }
 
 // generic_parser_base implementation
@@ -2132,210 +2132,210 @@ bool parser<float>::parse(Option &O, StringRef ArgName, StringRef Arg,
 // findOption - Return the option number corresponding to the specified
 // argument string.  If the option is not found, getNumOptions() is returned.
 //
-unsigned generic_parser_base::findOption(StringRef Name) {
-  unsigned e = getNumOptions();
+بنانشانی generic_parser_ادھار::لبھو_Option(StringRef Name) {
+  بنانشانی e = get_عدد_Options();
 
-  for (unsigned i = 0; i != e; ++i) {
-    if (getOption(i) == Name)
-      return i;
+  لكل (بنانشانی i = 0; i != e; ++i) {
+    إذا (getOption(i) == Name)
+      أرجع i;
   }
-  return e;
+  أرجع e;
 }
 
-static StringRef EqValue = "=<value>";
-static StringRef EmptyOption = "<empty>";
-static StringRef OptionPrefix = "    =";
-static size_t getOptionPrefixesSize() {
-  return OptionPrefix.size() + ArgHelpPrefix.size();
+ساكن StringRef Eq_قدر = "=<value>";
+ساكن StringRef خالی_تھاواں_Option = "<empty>";
+ساكن StringRef Option_اگیتر = "    =";
+ساكن size_t get_Option_Prefixes_ناپ() {
+  أرجع Option_اگیتر.ناپ_2() + Arg_Help_اگیتر.ناپ_2();
 }
 
-static bool shouldPrintOption(StringRef Name, StringRef Description,
-                              const Option &O) {
-  return O.getValueExpectedFlag() != ValueOptional || !Name.empty() ||
-         !Description.empty();
+ساكن منطقي shouldPrintOption(StringRef Name, StringRef Description,
+                              ثابت Option &O) {
+  أرجع O.get_قدر_Expected_Flag() != قدر_Optional || !Name.خالی_تھاواں() ||
+         !Description.خالی_تھاواں();
 }
 
 // Return the width of the option tag for printing...
-size_t generic_parser_base::getOptionWidth(const Option &O) const {
-  if (O.hasArgStr()) {
-    size_t Size =
-        argPlusPrefixesSize(O.ArgStr) + EqValue.size();
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
+size_t generic_parser_ادھار::get_Option_چوڑائی(ثابت Option &O) ثابت {
+  إذا (O.hasArgStr()) {
+    size_t ناپ =
+        arg_Plus_Prefixes_ناپ(O.ArgStr) + Eq_قدر.ناپ_2();
+    لكل (بنانشانی i = 0, e = get_عدد_Options(); i != e; ++i) {
       StringRef Name = getOption(i);
-      if (!shouldPrintOption(Name, getDescription(i), O))
-        continue;
-      size_t NameSize = Name.empty() ? EmptyOption.size() : Name.size();
-      Size = std::max(Size, NameSize + getOptionPrefixesSize());
+      إذا (!shouldPrintOption(Name, getDescription(i), O))
+        استمر;
+      size_t Name_ناپ = Name.خالی_تھاواں() ? خالی_تھاواں_Option.ناپ_2() : Name.ناپ_2();
+      ناپ = std::max(ناپ, Name_ناپ + get_Option_Prefixes_ناپ());
     }
-    return Size;
-  } else {
-    size_t BaseSize = 0;
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i)
-      BaseSize = std::max(BaseSize, getOption(i).size() + 8);
-    return BaseSize;
+    أرجع ناپ;
+  } وإلا {
+    size_t ادھار_ناپ = 0;
+    لكل (بنانشانی i = 0, e = get_عدد_Options(); i != e; ++i)
+      ادھار_ناپ = std::max(ادھار_ناپ, getOption(i).ناپ_2() + 8);
+    أرجع ادھار_ناپ;
   }
 }
 
 // printOptionInfo - Print out information about this option.  The
 // to-be-maintained width is specified.
 //
-void generic_parser_base::printOptionInfo(const Option &O,
-                                          size_t GlobalWidth) const {
-  if (O.hasArgStr()) {
+فراغ generic_parser_ادھار::printOptionInfo(ثابت Option &O,
+                                          size_t Global_چوڑائی) ثابت {
+  إذا (O.hasArgStr()) {
     // When the value is optional, first print a line just describing the
     // option without values.
-    if (O.getValueExpectedFlag() == ValueOptional) {
-      for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
-        if (getOption(i).empty()) {
+    إذا (O.get_قدر_Expected_Flag() == قدر_Optional) {
+      لكل (بنانشانی i = 0, e = get_عدد_Options(); i != e; ++i) {
+        إذا (getOption(i).خالی_تھاواں()) {
           outs() << PrintArg(O.ArgStr);
-          Option::printHelpStr(O.HelpStr, GlobalWidth,
-                               argPlusPrefixesSize(O.ArgStr));
-          break;
+          Option::printHelpStr(O.HelpStr, Global_چوڑائی,
+                               arg_Plus_Prefixes_ناپ(O.ArgStr));
+          اكسر;
         }
       }
     }
 
-    outs() << PrintArg(O.ArgStr) << EqValue;
-    Option::printHelpStr(O.HelpStr, GlobalWidth,
-                         EqValue.size() +
-                             argPlusPrefixesSize(O.ArgStr));
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
+    outs() << PrintArg(O.ArgStr) << Eq_قدر;
+    Option::printHelpStr(O.HelpStr, Global_چوڑائی,
+                         Eq_قدر.ناپ_2() +
+                             arg_Plus_Prefixes_ناپ(O.ArgStr));
+    لكل (بنانشانی i = 0, e = get_عدد_Options(); i != e; ++i) {
       StringRef OptionName = getOption(i);
       StringRef Description = getDescription(i);
-      if (!shouldPrintOption(OptionName, Description, O))
-        continue;
-      size_t FirstLineIndent = OptionName.size() + getOptionPrefixesSize();
-      outs() << OptionPrefix << OptionName;
-      if (OptionName.empty()) {
-        outs() << EmptyOption;
-        assert(FirstLineIndent >= EmptyOption.size());
-        FirstLineIndent += EmptyOption.size();
+      إذا (!shouldPrintOption(OptionName, Description, O))
+        استمر;
+      size_t پہلا_سطر_Indent = OptionName.ناپ_2() + get_Option_Prefixes_ناپ();
+      outs() << Option_اگیتر << OptionName;
+      إذا (OptionName.خالی_تھاواں()) {
+        outs() << خالی_تھاواں_Option;
+        أكد(پہلا_سطر_Indent >= خالی_تھاواں_Option.ناپ_2());
+        پہلا_سطر_Indent += خالی_تھاواں_Option.ناپ_2();
       }
-      if (!Description.empty())
-        Option::printEnumValHelpStr(Description, GlobalWidth, FirstLineIndent);
-      else
+      إذا (!Description.خالی_تھاواں())
+        Option::printEnumValHelpStr(Description, Global_چوڑائی, پہلا_سطر_Indent);
+      وإلا
         outs() << '\n';
     }
-  } else {
-    if (!O.HelpStr.empty())
+  } وإلا {
+    إذا (!O.HelpStr.خالی_تھاواں())
       outs() << "  " << O.HelpStr << '\n';
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
+    لكل (بنانشانی i = 0, e = get_عدد_Options(); i != e; ++i) {
       StringRef Option = getOption(i);
       outs() << "    " << PrintArg(Option);
-      Option::printHelpStr(getDescription(i), GlobalWidth, Option.size() + 8);
+      Option::printHelpStr(getDescription(i), Global_چوڑائی, Option.ناپ_2() + 8);
     }
   }
 }
 
-static const size_t MaxOptWidth = 8; // arbitrary spacing for printOptionDiff
+ساكن ثابت size_t Max_Opt_چوڑائی = 8; // arbitrary spacing for printOptionDiff
 
 // printGenericOptionDiff - Print the value of this option and it's default.
 //
 // "Generic" options have each value mapped to a name.
-void generic_parser_base::printGenericOptionDiff(
-    const Option &O, const GenericOptionValue &Value,
-    const GenericOptionValue &Default, size_t GlobalWidth) const {
+فراغ generic_parser_ادھار::printGenericOptionDiff(
+    ثابت Option &O, ثابت Generic_Option_قدر &قدر,
+    ثابت Generic_Option_قدر &Default, size_t Global_چوڑائی) ثابت {
   outs() << "  " << PrintArg(O.ArgStr);
-  outs().indent(GlobalWidth - O.ArgStr.size());
+  outs().indent(Global_چوڑائی - O.ArgStr.ناپ_2());
 
-  unsigned NumOpts = getNumOptions();
-  for (unsigned i = 0; i != NumOpts; ++i) {
-    if (!Value.compare(getOptionValue(i)))
-      continue;
+  بنانشانی عدد_Opts = get_عدد_Options();
+  لكل (بنانشانی i = 0; i != عدد_Opts; ++i) {
+    إذا (!قدر.compare(get_Option_قدر(i)))
+      استمر;
 
     outs() << "= " << getOption(i);
-    size_t L = getOption(i).size();
-    size_t NumSpaces = MaxOptWidth > L ? MaxOptWidth - L : 0;
-    outs().indent(NumSpaces) << " (default: ";
-    for (unsigned j = 0; j != NumOpts; ++j) {
-      if (!Default.compare(getOptionValue(j)))
-        continue;
+    size_t L = getOption(i).ناپ_2();
+    size_t عدد_Spaces = Max_Opt_چوڑائی > L ? Max_Opt_چوڑائی - L : 0;
+    outs().indent(عدد_Spaces) << " (default: ";
+    لكل (بنانشانی j = 0; j != عدد_Opts; ++j) {
+      إذا (!Default.compare(get_Option_قدر(j)))
+        استمر;
       outs() << getOption(j);
-      break;
+      اكسر;
     }
     outs() << ")\n";
-    return;
+    أرجع;
   }
   outs() << "= *unknown option value*\n";
 }
 
 // printOptionDiff - Specializations for printing basic value types.
 //
-namespace llvm {
-namespace cl {
-static raw_ostream &operator<<(raw_ostream &OS, boolOrDefault V) {
-  return OS << static_cast<int>(V);
+نطاق llvm {
+نطاق cl {
+ساكن raw_ostream &عامل<<(raw_ostream &OS, boolOrDefault V) {
+  أرجع OS << static_cast<صحيح>(V);
 }
 } // namespace cl
 } // namespace llvm
 
-#define PRINT_OPT_DIFF(T)                                                      \
-  void parser<T>::printOptionDiff(const Option &O, T V, OptionValue<T> D,      \
-                                  size_t GlobalWidth) const {                  \
-    printOptionName(O, GlobalWidth);                                           \
+#تعریف_کرو PRINT_OPT_DIFF(T)                                                      \
+  فراغ parser<T>::printOptionDiff(ثابت Option &O, T V, Option_قدر<T> D,      \
+                                  size_t Global_چوڑائی) ثابت {                  \
+    printOptionName(O, Global_چوڑائی);                                           \
     std::string Str;                                                           \
     {                                                                          \
       raw_string_ostream SS(Str);                                              \
       SS << V;                                                                 \
     }                                                                          \
     outs() << "= " << Str;                                                     \
-    size_t NumSpaces =                                                         \
-        MaxOptWidth > Str.size() ? MaxOptWidth - Str.size() : 0;               \
-    outs().indent(NumSpaces) << " (default: ";                                 \
-    if (D.hasValue())                                                          \
-      outs() << D.getValue();                                                  \
-    else                                                                       \
+    size_t عدد_Spaces =                                                         \
+        Max_Opt_چوڑائی > Str.ناپ_2() ? Max_Opt_چوڑائی - Str.ناپ_2() : 0;               \
+    outs().indent(عدد_Spaces) << " (default: ";                                 \
+    إذا (D.has_قدر())                                                          \
+      outs() << D.get_قدر();                                                  \
+    وإلا                                                                       \
       outs() << "*no default*";                                                \
     outs() << ")\n";                                                           \
   }
 
-PRINT_OPT_DIFF(bool)
+PRINT_OPT_DIFF(منطقي)
 PRINT_OPT_DIFF(boolOrDefault)
-PRINT_OPT_DIFF(int)
-PRINT_OPT_DIFF(long)
-PRINT_OPT_DIFF(long long)
-PRINT_OPT_DIFF(unsigned)
-PRINT_OPT_DIFF(unsigned long)
-PRINT_OPT_DIFF(unsigned long long)
-PRINT_OPT_DIFF(double)
-PRINT_OPT_DIFF(float)
-PRINT_OPT_DIFF(char)
-PRINT_OPT_DIFF(ElementCount)
+PRINT_OPT_DIFF(صحيح)
+PRINT_OPT_DIFF(لما)
+PRINT_OPT_DIFF(لما لما)
+PRINT_OPT_DIFF(بنانشانی)
+PRINT_OPT_DIFF(بنانشانی لما)
+PRINT_OPT_DIFF(بنانشانی لما لما)
+PRINT_OPT_DIFF(مزدوج)
+PRINT_OPT_DIFF(عائم)
+PRINT_OPT_DIFF(حرف)
+PRINT_OPT_DIFF(Element_گنتی)
 
-void parser<std::string>::printOptionDiff(const Option &O, StringRef V,
-                                          const OptionValue<std::string> &D,
-                                          size_t GlobalWidth) const {
-  printOptionName(O, GlobalWidth);
+فراغ parser<std::string>::printOptionDiff(ثابت Option &O, StringRef V,
+                                          ثابت Option_قدر<std::string> &D,
+                                          size_t Global_چوڑائی) ثابت {
+  printOptionName(O, Global_چوڑائی);
   outs() << "= " << V;
-  size_t NumSpaces = MaxOptWidth > V.size() ? MaxOptWidth - V.size() : 0;
-  outs().indent(NumSpaces) << " (default: ";
-  if (D.hasValue())
-    outs() << D.getValue();
-  else
+  size_t عدد_Spaces = Max_Opt_چوڑائی > V.ناپ_2() ? Max_Opt_چوڑائی - V.ناپ_2() : 0;
+  outs().indent(عدد_Spaces) << " (default: ";
+  إذا (D.has_قدر())
+    outs() << D.get_قدر();
+  وإلا
     outs() << "*no default*";
   outs() << ")\n";
 }
 
-void parser<std::optional<std::string>>::printOptionDiff(
-    const Option &O, std::optional<StringRef> V,
-    const OptionValue<std::optional<std::string>> &D,
-    size_t GlobalWidth) const {
-  printOptionName(O, GlobalWidth);
+فراغ parser<std::optional<std::string>>::printOptionDiff(
+    ثابت Option &O, std::optional<StringRef> V,
+    ثابت Option_قدر<std::optional<std::string>> &D,
+    size_t Global_چوڑائی) ثابت {
+  printOptionName(O, Global_چوڑائی);
   outs() << "= " << V;
-  size_t VSize = V.has_value() ? V.value().size() : 0;
-  size_t NumSpaces = MaxOptWidth > VSize ? MaxOptWidth - VSize : 0;
-  outs().indent(NumSpaces) << " (default: ";
-  if (D.hasValue() && D.getValue().has_value())
-    outs() << D.getValue();
-  else
+  size_t VSize = V.has_قدر_2() ? V.قدر_2().ناپ_2() : 0;
+  size_t عدد_Spaces = Max_Opt_چوڑائی > VSize ? Max_Opt_چوڑائی - VSize : 0;
+  outs().indent(عدد_Spaces) << " (default: ";
+  إذا (D.has_قدر() && D.get_قدر().has_قدر_2())
+    outs() << D.get_قدر();
+  وإلا
     outs() << "*no value*";
   outs() << ")\n";
 }
 
 // Print a placeholder for options that don't yet support printOptionDiff().
-void basic_parser_impl::printOptionNoValue(const Option &O,
-                                           size_t GlobalWidth) const {
-  printOptionName(O, GlobalWidth);
+فراغ basic_parser_impl::print_Option_No_قدر(ثابت Option &O,
+                                           size_t Global_چوڑائی) ثابت {
+  printOptionName(O, Global_چوڑائی);
   outs() << "= *cannot print option value*\n";
 }
 
@@ -2343,144 +2343,144 @@ void basic_parser_impl::printOptionNoValue(const Option &O,
 // -help and -help-hidden option implementation
 //
 
-static int OptNameCompare(const std::pair<const char *, Option *> *LHS,
-                          const std::pair<const char *, Option *> *RHS) {
-  return strcmp(LHS->first, RHS->first);
+ساكن صحيح OptNameCompare(ثابت std::pair<ثابت حرف *, Option *> *LHS,
+                          ثابت std::pair<ثابت حرف *, Option *> *RHS) {
+  أرجع strcmp(LHS->پہلا_2, RHS->پہلا_2);
 }
 
-static int SubNameCompare(const std::pair<const char *, SubCommand *> *LHS,
-                          const std::pair<const char *, SubCommand *> *RHS) {
-  return strcmp(LHS->first, RHS->first);
+ساكن صحيح SubNameCompare(ثابت std::pair<ثابت حرف *, SubCommand *> *LHS,
+                          ثابت std::pair<ثابت حرف *, SubCommand *> *RHS) {
+  أرجع strcmp(LHS->پہلا_2, RHS->پہلا_2);
 }
 
 // Copy Options into a vector so we can sort them as we like.
-static void sortOpts(OptionsMapTy &OptMap,
-                     SmallVectorImpl<std::pair<const char *, Option *>> &Opts,
-                     bool ShowHidden) {
-  SmallPtrSet<Option *, 32> OptionSet; // Duplicate option detection.
+ساكن فراغ ترتیب_دیو_Opts(OptionsMapTy &OptMap,
+                     Small_سمتیہ_Impl<std::pair<ثابت حرف *, Option *>> &Opts,
+                     منطقي ShowHidden) {
+  Small_Ptr_سیٹ<Option *, 32> Option_سیٹ; // Duplicate option detection.
 
-  for (auto I = OptMap.begin(), E = OptMap.end(); I != E; ++I) {
+  لكل (خودکار I = OptMap.begin(), E = OptMap.سرا(); I != E; ++I) {
     // Ignore really-hidden options.
-    if (I->second->getOptionHiddenFlag() == ReallyHidden)
-      continue;
+    إذا (I->دوجا_2->getOptionHiddenFlag() == ReallyHidden)
+      استمر;
 
     // Unless showhidden is set, ignore hidden flags.
-    if (I->second->getOptionHiddenFlag() == Hidden && !ShowHidden)
-      continue;
+    إذا (I->دوجا_2->getOptionHiddenFlag() == Hidden && !ShowHidden)
+      استمر;
 
     // If we've already seen this option, don't add it to the list again.
-    if (!OptionSet.insert(I->second).second)
-      continue;
+    إذا (!Option_سیٹ.داخل_کرو(I->دوجا_2).دوجا_2)
+      استمر;
 
-    Opts.push_back(
-        std::pair<const char *, Option *>(I->first.data(), I->second));
+    Opts.ڈالو_پٹھ(
+        std::pair<ثابت حرف *, Option *>(I->پہلا_2.انکڑے(), I->دوجا_2));
   }
 
   // Sort the options list alphabetically.
-  array_pod_sort(Opts.begin(), Opts.end(), OptNameCompare);
+  array_pod_ترتیب_دیو(Opts.begin(), Opts.سرا(), OptNameCompare);
 }
 
-static void
-sortSubCommands(const SmallPtrSetImpl<SubCommand *> &SubMap,
-                SmallVectorImpl<std::pair<const char *, SubCommand *>> &Subs) {
-  for (auto *S : SubMap) {
-    if (S->getName().empty())
-      continue;
-    Subs.push_back(std::make_pair(S->getName().data(), S));
+ساكن فراغ
+ترتیب_دیو_Sub_Commands(ثابت Small_Ptr_سیٹ_Impl<SubCommand *> &SubMap,
+                Small_سمتیہ_Impl<std::pair<ثابت حرف *, SubCommand *>> &Subs) {
+  لكل (خودکار *S : SubMap) {
+    إذا (S->getName().خالی_تھاواں())
+      استمر;
+    Subs.ڈالو_پٹھ(std::make_pair(S->getName().انکڑے(), S));
   }
-  array_pod_sort(Subs.begin(), Subs.end(), SubNameCompare);
+  array_pod_ترتیب_دیو(Subs.begin(), Subs.سرا(), SubNameCompare);
 }
 
-namespace {
+نطاق {
 
-class HelpPrinter {
-protected:
-  const bool ShowHidden;
-  using StrOptionPairVector =
-      SmallVector<std::pair<const char *, Option *>, 128>;
-  using StrSubCommandPairVector =
-      SmallVector<std::pair<const char *, SubCommand *>, 128>;
+صنف HelpPrinter {
+محمي:
+  ثابت منطقي ShowHidden;
+  ورتوں Str_Option_Pair_سمتیہ =
+      Small_سمتیہ<std::pair<ثابت حرف *, Option *>, 128>;
+  ورتوں Str_Sub_Command_Pair_سمتیہ =
+      Small_سمتیہ<std::pair<ثابت حرف *, SubCommand *>, 128>;
   // Print the options. Opts is assumed to be alphabetically sorted.
-  virtual void printOptions(StrOptionPairVector &Opts, size_t MaxArgLen) {
-    for (const auto &Opt : Opts)
-      Opt.second->printOptionInfo(MaxArgLen);
+  مجازی فراغ printOptions(Str_Option_Pair_سمتیہ &Opts, size_t MaxArgLen) {
+    لكل (ثابت خودکار &Opt : Opts)
+      Opt.دوجا_2->printOptionInfo(MaxArgLen);
   }
 
-  void printSubCommands(StrSubCommandPairVector &Subs, size_t MaxSubLen) {
-    for (const auto &S : Subs) {
-      outs() << "  " << S.first;
-      if (!S.second->getDescription().empty()) {
-        outs().indent(MaxSubLen - strlen(S.first));
-        outs() << " - " << S.second->getDescription();
+  فراغ printSubCommands(Str_Sub_Command_Pair_سمتیہ &Subs, size_t MaxSubLen) {
+    لكل (ثابت خودکار &S : Subs) {
+      outs() << "  " << S.پہلا_2;
+      إذا (!S.دوجا_2->getDescription().خالی_تھاواں()) {
+        outs().indent(MaxSubLen - لڑی_لمبائی(S.پہلا_2));
+        outs() << " - " << S.دوجا_2->getDescription();
       }
       outs() << "\n";
     }
   }
 
-public:
-  explicit HelpPrinter(bool showHidden) : ShowHidden(showHidden) {}
-  virtual ~HelpPrinter() = default;
+عام:
+  واضح HelpPrinter(منطقي showHidden) : ShowHidden(showHidden) {}
+  مجازی ~HelpPrinter() = افتراضي;
 
   // Invoke the printer.
-  void operator=(bool Value) {
-    if (!Value)
-      return;
+  فراغ عامل=(منطقي قدر) {
+    إذا (!قدر)
+      أرجع;
     printHelp();
 
     // Halt the program since help information was printed
-    exit(0);
+    باہر_نکلو(0);
   }
 
-  void printHelp() {
-    SubCommand *Sub = globalParser().getActiveSubCommand();
-    auto &OptionsMap = Sub->OptionsMap;
-    auto &PositionalOpts = Sub->PositionalOpts;
-    auto &ConsumeAfterOpt = Sub->ConsumeAfterOpt;
+  فراغ printHelp() {
+    SubCommand *Sub = globalParser().get_سرگرم_Sub_Command();
+    خودکار &OptionsMap = Sub->OptionsMap;
+    خودکار &PositionalOpts = Sub->PositionalOpts;
+    خودکار &ConsumeAfterOpt = Sub->ConsumeAfterOpt;
 
-    StrOptionPairVector Opts;
-    sortOpts(OptionsMap, Opts, ShowHidden);
+    Str_Option_Pair_سمتیہ Opts;
+    ترتیب_دیو_Opts(OptionsMap, Opts, ShowHidden);
 
-    StrSubCommandPairVector Subs;
-    sortSubCommands(globalParser().RegisteredSubCommands, Subs);
+    Str_Sub_Command_Pair_سمتیہ Subs;
+    ترتیب_دیو_Sub_Commands(globalParser().RegisteredSubCommands, Subs);
 
-    if (!globalParser().ProgramOverview.empty())
-      outs() << "OVERVIEW: " << globalParser().ProgramOverview << "\n";
+    إذا (!globalParser().پروگرام_Overview.خالی_تھاواں())
+      outs() << "OVERVIEW: " << globalParser().پروگرام_Overview << "\n";
 
-    if (Sub == &SubCommand::getTopLevel()) {
-      outs() << "USAGE: " << globalParser().ProgramName;
-      if (!Subs.empty())
+    إذا (Sub == &SubCommand::get_چوٹی_Level()) {
+      outs() << "USAGE: " << globalParser().پروگرام_Name;
+      إذا (!Subs.خالی_تھاواں())
         outs() << " [subcommand]";
       outs() << " [options]";
-    } else {
-      if (!Sub->getDescription().empty()) {
+    } وإلا {
+      إذا (!Sub->getDescription().خالی_تھاواں()) {
         outs() << "SUBCOMMAND '" << Sub->getName()
                << "': " << Sub->getDescription() << "\n\n";
       }
-      outs() << "USAGE: " << globalParser().ProgramName << " " << Sub->getName()
+      outs() << "USAGE: " << globalParser().پروگرام_Name << " " << Sub->getName()
              << " [options]";
     }
 
-    for (auto *Opt : PositionalOpts) {
-      if (Opt->hasArgStr())
+    لكل (خودکار *Opt : PositionalOpts) {
+      إذا (Opt->hasArgStr())
         outs() << " --" << Opt->ArgStr;
       outs() << " " << Opt->HelpStr;
     }
 
     // Print the consume after option info if it exists...
-    if (ConsumeAfterOpt)
+    إذا (ConsumeAfterOpt)
       outs() << " " << ConsumeAfterOpt->HelpStr;
 
-    if (Sub == &SubCommand::getTopLevel() && !Subs.empty()) {
+    إذا (Sub == &SubCommand::get_چوٹی_Level() && !Subs.خالی_تھاواں()) {
       // Compute the maximum subcommand length...
       size_t MaxSubLen = 0;
-      for (const auto &Sub : Subs)
-        MaxSubLen = std::max(MaxSubLen, strlen(Sub.first));
+      لكل (ثابت خودکار &Sub : Subs)
+        MaxSubLen = std::max(MaxSubLen, لڑی_لمبائی(Sub.پہلا_2));
 
       outs() << "\n\n";
       outs() << "SUBCOMMANDS:\n\n";
       printSubCommands(Subs, MaxSubLen);
       outs() << "\n";
-      outs() << "  Type \"" << globalParser().ProgramName
+      outs() << "  Type \"" << globalParser().پروگرام_Name
              << " <subcommand> --help\" to get more help on a specific "
                 "subcommand";
     }
@@ -2489,58 +2489,58 @@ public:
 
     // Compute the maximum argument length...
     size_t MaxArgLen = 0;
-    for (const auto &Opt : Opts)
-      MaxArgLen = std::max(MaxArgLen, Opt.second->getOptionWidth());
+    لكل (ثابت خودکار &Opt : Opts)
+      MaxArgLen = std::max(MaxArgLen, Opt.دوجا_2->get_Option_چوڑائی());
 
-    SmallVector<std::pair<std::string, StringRef>, 0> LibraryOpts;
-    if (ShowHidden)
-      for (LibraryOptions *L : globalParser().Libraries)
+    Small_سمتیہ<std::pair<std::string, StringRef>, 0> LibraryOpts;
+    إذا (ShowHidden)
+      لكل (LibraryOptions *L : globalParser().Libraries)
         L->forEachOption(
             [&](StringRef Spelling, StringRef MetaVar, StringRef Help) {
-              if (!Help.empty())
-                LibraryOpts.emplace_back((Spelling + MetaVar).str(), Help);
+              إذا (!Help.خالی_تھاواں())
+                LibraryOpts.emplace_پٹھ((Spelling + MetaVar).str(), Help);
             });
-    llvm::sort(LibraryOpts);
-    for (const auto &[Name, Help] : LibraryOpts)
-      MaxArgLen = std::max(MaxArgLen, argPlusPrefixesSize(Name));
+    llvm::ترتیب_دیو(LibraryOpts);
+    لكل (ثابت خودکار &[Name, Help] : LibraryOpts)
+      MaxArgLen = std::max(MaxArgLen, arg_Plus_Prefixes_ناپ(Name));
 
     outs() << "OPTIONS:\n";
     printOptions(Opts, MaxArgLen);
 
-    if (!LibraryOpts.empty())
+    إذا (!LibraryOpts.خالی_تھاواں())
       outs() << "\nLibrary options:\n\n";
-    for (const auto &[Name, Help] : LibraryOpts) {
+    لكل (ثابت خودکار &[Name, Help] : LibraryOpts) {
       outs() << PrintArg(Name);
-      Option::printHelpStr(Help, MaxArgLen, argPlusPrefixesSize(Name));
+      Option::printHelpStr(Help, MaxArgLen, arg_Plus_Prefixes_ناپ(Name));
     }
 
     // Print any extra help the user has declared.
-    for (const auto &I : globalParser().MoreHelp)
+    لكل (ثابت خودکار &I : globalParser().ہور_Help)
       outs() << I;
-    globalParser().MoreHelp.clear();
+    globalParser().ہور_Help.clear();
   }
 };
 
-class CategorizedHelpPrinter : public HelpPrinter {
-public:
-  explicit CategorizedHelpPrinter(bool showHidden) : HelpPrinter(showHidden) {}
+صنف CategorizedHelpPrinter : عام HelpPrinter {
+عام:
+  واضح CategorizedHelpPrinter(منطقي showHidden) : HelpPrinter(showHidden) {}
 
   // Helper function for printOptions().
   // It shall return a negative value if A's name should be lexicographically
   // ordered before B's name. It returns a value greater than zero if B's name
   // should be ordered before A's name, and it returns 0 otherwise.
-  static int OptionCategoryCompare(OptionCategory *const *A,
-                                   OptionCategory *const *B) {
-    return (*A)->getName().compare((*B)->getName());
+  ساكن صحيح OptionCategoryCompare(OptionCategory *ثابت *A,
+                                   OptionCategory *ثابت *B) {
+    أرجع (*A)->getName().compare((*B)->getName());
   }
 
   // Make sure we inherit our base class's operator=()
-  using HelpPrinter::operator=;
+  ورتوں HelpPrinter::عامل=;
 
-protected:
-  void printOptions(StrOptionPairVector &Opts, size_t MaxArgLen) override {
-    std::vector<OptionCategory *> SortedCategories;
-    DenseMap<OptionCategory *, std::vector<Option *>> CategorizedOptions;
+محمي:
+  فراغ printOptions(Str_Option_Pair_سمتیہ &Opts, size_t MaxArgLen) override {
+    std::سمتیہ<OptionCategory *> SortedCategories;
+    DenseMap<OptionCategory *, std::سمتیہ<Option *>> CategorizedOptions;
 
     // Collect registered option categories into vector in preparation for
     // sorting.
@@ -2548,41 +2548,41 @@ protected:
                        globalParser().RegisteredOptionCategories);
 
     // Sort the different option categories alphabetically.
-    assert(SortedCategories.size() > 0 && "No option categories registered!");
-    array_pod_sort(SortedCategories.begin(), SortedCategories.end(),
+    أكد(SortedCategories.ناپ_2() > 0 && "No option categories registered!");
+    array_pod_ترتیب_دیو(SortedCategories.begin(), SortedCategories.سرا(),
                    OptionCategoryCompare);
 
     // Walk through pre-sorted options and assign into categories.
     // Because the options are already alphabetically sorted the
     // options within categories will also be alphabetically sorted.
-    for (const auto &I : Opts) {
-      Option *Opt = I.second;
-      for (OptionCategory *Cat : Opt->Categories) {
-        assert(llvm::is_contained(SortedCategories, Cat) &&
+    لكل (ثابت خودکار &I : Opts) {
+      Option *Opt = I.دوجا_2;
+      لكل (OptionCategory *Cat : Opt->Categories) {
+        أكد(llvm::is_contained(SortedCategories, Cat) &&
                "Option has an unregistered category");
-        CategorizedOptions[Cat].push_back(Opt);
+        CategorizedOptions[Cat].ڈالو_پٹھ(Opt);
       }
     }
 
     // Now do printing.
-    for (OptionCategory *Category : SortedCategories) {
+    لكل (OptionCategory *Category : SortedCategories) {
       // Hide empty categories for --help, but show for --help-hidden.
-      const auto &CategoryOptions = CategorizedOptions[Category];
-      if (CategoryOptions.empty())
-        continue;
+      ثابت خودکار &CategoryOptions = CategorizedOptions[Category];
+      إذا (CategoryOptions.خالی_تھاواں())
+        استمر;
 
       // Print category information.
       outs() << "\n";
       outs() << Category->getName() << ":\n";
 
       // Check if description is set.
-      if (!Category->getDescription().empty())
+      إذا (!Category->getDescription().خالی_تھاواں())
         outs() << Category->getDescription() << "\n\n";
-      else
+      وإلا
         outs() << "\n";
 
       // Loop over the options in the category and print.
-      for (const Option *Opt : CategoryOptions)
+      لكل (ثابت Option *Opt : CategoryOptions)
         Opt->printOptionInfo(MaxArgLen);
     }
   }
@@ -2590,87 +2590,87 @@ protected:
 
 // This wraps the Uncategorizing and Categorizing printers and decides
 // at run time which should be invoked.
-class HelpPrinterWrapper {
-private:
+صنف HelpPrinterWrapper {
+خاص:
   HelpPrinter &UncategorizedPrinter;
   CategorizedHelpPrinter &CategorizedPrinter;
 
-public:
-  explicit HelpPrinterWrapper(HelpPrinter &UncategorizedPrinter,
+عام:
+  واضح HelpPrinterWrapper(HelpPrinter &UncategorizedPrinter,
                               CategorizedHelpPrinter &CategorizedPrinter)
       : UncategorizedPrinter(UncategorizedPrinter),
         CategorizedPrinter(CategorizedPrinter) {}
 
   // Invoke the printer.
-  void operator=(bool Value);
+  فراغ عامل=(منطقي قدر);
 };
 
 } // End anonymous namespace
 
-#if defined(__GNUC__)
+#إذا defined(__GNUC__)
 // GCC and GCC-compatible compilers define __OPTIMIZE__ when optimizations are
 // enabled.
-# if defined(__OPTIMIZE__)
+# إذا defined(__OPTIMIZE__)
 #  define LLVM_IS_DEBUG_BUILD 0
-# else
+# وإلا
 #  define LLVM_IS_DEBUG_BUILD 1
 # endif
-#elif defined(_MSC_VER)
+#وإلاإذا defined(_MSC_VER)
 // MSVC doesn't have a predefined macro indicating if optimizations are enabled.
 // Use _DEBUG instead. This macro actually corresponds to the choice between
 // debug and release CRTs, but it is a reasonable proxy.
-# if defined(_DEBUG)
+# إذا defined(_DEBUG)
 #  define LLVM_IS_DEBUG_BUILD 1
-# else
+# وإلا
 #  define LLVM_IS_DEBUG_BUILD 0
 # endif
-#else
+#وإلا
 // Otherwise, for an unknown compiler, assume this is an optimized build.
 # define LLVM_IS_DEBUG_BUILD 0
-#endif
+#جے_انت
 
-namespace {
-class VersionPrinter {
-public:
-  void print(const std::vector<VersionPrinterTy> &ExtraPrinters) {
+نطاق {
+صنف نسخہ_Printer {
+عام:
+  فراغ print(ثابت std::سمتیہ<نسخہ_Printer_Ty> &ExtraPrinters) {
     raw_ostream &OS = outs();
-#ifdef PACKAGE_VENDOR
+#جے_تعریف_شدہ PACKAGE_VENDOR
     OS << PACKAGE_VENDOR << " ";
-#else
+#وإلا
     OS << "LLVM (http://llvm.org/):\n  ";
-#endif
-    OS << PACKAGE_NAME << " version " << PACKAGE_VERSION << "\n  ";
-#if LLVM_IS_DEBUG_BUILD
+#جے_انت
+    OS << PACKAGE_NAME << " version " << PACKAGE_نسخہ << "\n  ";
+#إذا LLVM_IS_DEBUG_BUILD
     OS << "DEBUG build";
-#else
+#وإلا
     OS << "Optimized build";
-#endif
-#ifndef NDEBUG
+#جے_انت
+#جے_بنا_تعریف NDEBUG
     OS << " with assertions";
-#endif
+#جے_انت
     OS << ".\n";
 
     // Iterate over any registered extra printers and call them to add further
     // information.
-    if (!ExtraPrinters.empty()) {
-      for (const auto &I : ExtraPrinters)
+    إذا (!ExtraPrinters.خالی_تھاواں()) {
+      لكل (ثابت خودکار &I : ExtraPrinters)
         I(outs());
     }
   }
-  void operator=(bool OptionWasSpecified);
+  فراغ عامل=(منطقي OptionWasSpecified);
 };
 
-struct CommandLineCommonOptions {
+بنية Command_سطر_Common_Options {
   // Declare the four HelpPrinter instances that are used to print out help, or
   // help-hidden as an uncategorized list or in categories.
-  HelpPrinter UncategorizedNormalPrinter{false};
-  HelpPrinter UncategorizedHiddenPrinter{true};
-  CategorizedHelpPrinter CategorizedNormalPrinter{false};
-  CategorizedHelpPrinter CategorizedHiddenPrinter{true};
+  HelpPrinter Uncategorized_عام_Printer{خطأ};
+  HelpPrinter UncategorizedHiddenPrinter{سچ};
+  CategorizedHelpPrinter Categorized_عام_Printer{خطأ};
+  CategorizedHelpPrinter CategorizedHiddenPrinter{سچ};
   // Declare HelpPrinter wrappers that will decide whether or not to invoke
   // a categorizing help printer
-  HelpPrinterWrapper WrappedNormalPrinter{UncategorizedNormalPrinter,
-                                          CategorizedNormalPrinter};
+  HelpPrinterWrapper Wrapped_عام_Printer{Uncategorized_عام_Printer,
+                                          Categorized_عام_Printer};
   HelpPrinterWrapper WrappedHiddenPrinter{UncategorizedHiddenPrinter,
                                           CategorizedHiddenPrinter};
   // Define a category for generic options that all tools should have.
@@ -2679,302 +2679,302 @@ struct CommandLineCommonOptions {
   // Define uncategorized help printers.
   // --help-list is hidden by default because if Option categories are being
   // used then --help behaves the same as --help-list.
-  cl::opt<HelpPrinter, true, parser<bool>> HLOp{
+  cl::opt<HelpPrinter, سچ, parser<منطقي>> HLOp{
       "help-list",
       cl::desc(
           "Display list of available options (--help-list-hidden for more)"),
-      cl::location(UncategorizedNormalPrinter),
+      cl::location(Uncategorized_عام_Printer),
       cl::Hidden,
-      cl::ValueDisallowed,
+      cl::قدر_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  cl::opt<HelpPrinter, true, parser<bool>> HLHOp{
+  cl::opt<HelpPrinter, سچ, parser<منطقي>> HLHOp{
       "help-list-hidden",
       cl::desc("Display list of all available options"),
       cl::location(UncategorizedHiddenPrinter),
       cl::Hidden,
-      cl::ValueDisallowed,
+      cl::قدر_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
   // Define uncategorized/categorized help printers. These printers change their
   // behaviour at runtime depending on whether one or more Option categories
   // have been declared.
-  cl::opt<HelpPrinterWrapper, true, parser<bool>> HOp{
+  cl::opt<HelpPrinterWrapper, سچ, parser<منطقي>> HOp{
       "help",
       cl::desc("Display available options (--help-hidden for more)"),
-      cl::location(WrappedNormalPrinter),
-      cl::ValueDisallowed,
+      cl::location(Wrapped_عام_Printer),
+      cl::قدر_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
   cl::alias HOpA{"h", cl::desc("Alias for --help"), cl::aliasopt(HOp)};
 
-  cl::opt<HelpPrinterWrapper, true, parser<bool>> HHOp{
+  cl::opt<HelpPrinterWrapper, سچ, parser<منطقي>> HHOp{
       "help-hidden",
       cl::desc("Display all available options"),
       cl::location(WrappedHiddenPrinter),
       cl::Hidden,
-      cl::ValueDisallowed,
+      cl::قدر_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  cl::opt<bool> PrintOptions{
+  cl::opt<منطقي> PrintOptions{
       "print-options",
       cl::desc("Print non-default options after command line parsing"),
       cl::Hidden,
-      cl::init(false),
+      cl::init(خطأ),
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  cl::opt<bool> PrintAllOptions{
+  cl::opt<منطقي> PrintAllOptions{
       "print-all-options",
       cl::desc("Print all option values after command line parsing"),
       cl::Hidden,
-      cl::init(false),
+      cl::init(خطأ),
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  VersionPrinterTy OverrideVersionPrinter = nullptr;
+  نسخہ_Printer_Ty Override_نسخہ_Printer = خالی_سوچک;
 
-  std::vector<VersionPrinterTy> ExtraVersionPrinters;
+  std::سمتیہ<نسخہ_Printer_Ty> Extra_نسخہ_Printers;
 
   // Define the --version option that prints out the LLVM version for the tool
-  VersionPrinter VersionPrinterInstance;
+  نسخہ_Printer نسخہ_Printer_Instance;
 
-  cl::opt<VersionPrinter, true, parser<bool>> VersOp{
+  cl::opt<نسخہ_Printer, سچ, parser<منطقي>> VersOp{
       "version", cl::desc("Display the version of this program"),
-      cl::location(VersionPrinterInstance), cl::ValueDisallowed,
+      cl::location(نسخہ_Printer_Instance), cl::قدر_Disallowed,
       cl::cat(GenericCategory)};
 };
 } // End anonymous namespace
 
 // Lazy-initialized global instance of options controlling the command-line
 // parser and general handling.
-static ManagedStatic<CommandLineCommonOptions> CommonOptions;
+ساكن ManagedStatic<Command_سطر_Common_Options> CommonOptions;
 
-static void initCommonOptions() {
+ساكن فراغ initCommonOptions() {
   *CommonOptions;
   initDebugCounterOptions();
-  initGraphWriterOptions();
-  initSignalsOptions();
+  init_گراف_Writer_Options();
+  init_اشارے_Options();
   initStatisticOptions();
   initTimerOptions();
   initWithColorOptions();
   initDebugOptions();
-  initRandomSeedOptions();
+  init_Random_بیج_Options();
 }
 
 OptionCategory &cl::getGeneralCategory() {
   // Initialise the general option category.
-  static OptionCategory GeneralCategory{"General options"};
-  return GeneralCategory;
+  ساكن OptionCategory GeneralCategory{"General options"};
+  أرجع GeneralCategory;
 }
 
-void VersionPrinter::operator=(bool OptionWasSpecified) {
-  if (!OptionWasSpecified)
-    return;
+فراغ نسخہ_Printer::عامل=(منطقي OptionWasSpecified) {
+  إذا (!OptionWasSpecified)
+    أرجع;
 
-  if (CommonOptions->OverrideVersionPrinter != nullptr) {
-    CommonOptions->OverrideVersionPrinter(outs());
-    exit(0);
+  إذا (CommonOptions->Override_نسخہ_Printer != خالی_سوچک) {
+    CommonOptions->Override_نسخہ_Printer(outs());
+    باہر_نکلو(0);
   }
-  print(CommonOptions->ExtraVersionPrinters);
+  print(CommonOptions->Extra_نسخہ_Printers);
 
-  exit(0);
+  باہر_نکلو(0);
 }
 
-void HelpPrinterWrapper::operator=(bool Value) {
-  if (!Value)
-    return;
+فراغ HelpPrinterWrapper::عامل=(منطقي قدر) {
+  إذا (!قدر)
+    أرجع;
 
   // Decide which printer to invoke. If more than one option category is
   // registered then it is useful to show the categorized help instead of
   // uncategorized help.
-  if (globalParser().RegisteredOptionCategories.size() > 1) {
+  إذا (globalParser().RegisteredOptionCategories.ناپ_2() > 1) {
     // unhide --help-list option so user can have uncategorized output if they
     // want it.
-    CommonOptions->HLOp.setHiddenFlag(NotHidden);
+    CommonOptions->HLOp.سیٹ_Hidden_Flag(NotHidden);
 
-    CategorizedPrinter = true; // Invoke categorized printer
-  } else {
-    UncategorizedPrinter = true; // Invoke uncategorized printer
+    CategorizedPrinter = سچ; // Invoke categorized printer
+  } وإلا {
+    UncategorizedPrinter = سچ; // Invoke uncategorized printer
   }
 }
 
 // Print the value of each option.
-void cl::PrintOptionValues() { globalParser().printOptionValues(); }
+فراغ cl::Print_Option_اقدار() { globalParser().print_Option_اقدار(); }
 
-void CommandLineParser::printOptionValues() {
-  if (!CommonOptions->PrintOptions && !CommonOptions->PrintAllOptions)
-    return;
+فراغ Command_سطر_Parser::print_Option_اقدار() {
+  إذا (!CommonOptions->PrintOptions && !CommonOptions->PrintAllOptions)
+    أرجع;
 
-  SmallVector<std::pair<const char *, Option *>, 128> Opts;
-  sortOpts(ActiveSubCommand->OptionsMap, Opts, /*ShowHidden*/ true);
+  Small_سمتیہ<std::pair<ثابت حرف *, Option *>, 128> Opts;
+  ترتیب_دیو_Opts(سرگرم_Sub_Command->OptionsMap, Opts, /*ShowHidden*/ سچ);
 
   // Compute the maximum argument length...
   size_t MaxArgLen = 0;
-  for (const auto &Opt : Opts)
-    MaxArgLen = std::max(MaxArgLen, Opt.second->getOptionWidth());
+  لكل (ثابت خودکار &Opt : Opts)
+    MaxArgLen = std::max(MaxArgLen, Opt.دوجا_2->get_Option_چوڑائی());
 
-  for (const auto &Opt : Opts)
-    Opt.second->printOptionValue(MaxArgLen, CommonOptions->PrintAllOptions);
+  لكل (ثابت خودکار &Opt : Opts)
+    Opt.دوجا_2->print_Option_قدر(MaxArgLen, CommonOptions->PrintAllOptions);
 }
 
 // Utility function for printing the help message.
-void cl::PrintHelpMessage(bool Hidden, bool Categorized) {
-  if (!Hidden && !Categorized)
-    CommonOptions->UncategorizedNormalPrinter.printHelp();
-  else if (!Hidden && Categorized)
-    CommonOptions->CategorizedNormalPrinter.printHelp();
-  else if (Hidden && !Categorized)
+فراغ cl::Print_Help_سنیہا(منطقي Hidden, منطقي Categorized) {
+  إذا (!Hidden && !Categorized)
+    CommonOptions->Uncategorized_عام_Printer.printHelp();
+  وإلا إذا (!Hidden && Categorized)
+    CommonOptions->Categorized_عام_Printer.printHelp();
+  وإلا إذا (Hidden && !Categorized)
     CommonOptions->UncategorizedHiddenPrinter.printHelp();
-  else
+  وإلا
     CommonOptions->CategorizedHiddenPrinter.printHelp();
 }
 
 ArrayRef<StringRef> cl::getCompilerBuildConfig() {
-  static const StringRef Config[] = {
+  ساكن ثابت StringRef Config[] = {
       // Placeholder to ensure the array always has elements, since it's an
       // error to have a zero-sized array. Slice this off before returning.
       "",
   // Actual compiler build config feature list:
-#if LLVM_IS_DEBUG_BUILD
+#إذا LLVM_IS_DEBUG_BUILD
       "+unoptimized",
-#endif
-#ifndef NDEBUG
+#جے_انت
+#جے_بنا_تعریف NDEBUG
       "+assertions",
-#endif
-#ifdef EXPENSIVE_CHECKS
+#جے_انت
+#جے_تعریف_شدہ EXPENSIVE_CHECKS
       "+expensive-checks",
-#endif
-#if __has_feature(address_sanitizer)
+#جے_انت
+#إذا __has_feature(پتہ_sanitizer)
       "+asan",
-#endif
-#if __has_feature(dataflow_sanitizer)
+#جے_انت
+#إذا __has_feature(dataflow_sanitizer)
       "+dfsan",
-#endif
-#if __has_feature(hwaddress_sanitizer)
+#جے_انت
+#إذا __has_feature(hwaddress_sanitizer)
       "+hwasan",
-#endif
-#if __has_feature(memory_sanitizer)
+#جے_انت
+#إذا __has_feature(حافظہ_sanitizer)
       "+msan",
-#endif
-#if __has_feature(thread_sanitizer)
+#جے_انت
+#إذا __has_feature(thread_sanitizer)
       "+tsan",
-#endif
-#if __has_feature(undefined_behavior_sanitizer)
+#جے_انت
+#إذا __has_feature(undefined_behavior_sanitizer)
       "+ubsan",
-#endif
-#ifdef LLVM_INTEGRATED_CRT_ALLOC
+#جے_انت
+#جے_تعریف_شدہ LLVM_INTEGRATED_CRT_ALLOC
       "+alloc:" LLVM_INTEGRATED_CRT_ALLOC,
-#endif
+#جے_انت
   };
-  return ArrayRef(Config).drop_front(1);
+  أرجع ArrayRef(Config).drop_front(1);
 }
 
 // Utility function for printing the build config.
-void cl::printBuildConfig(raw_ostream &OS) {
-#if LLVM_VERSION_PRINTER_SHOW_BUILD_CONFIG
+فراغ cl::printBuildConfig(raw_ostream &OS) {
+#إذا LLVM_نسخہ_PRINTER_SHOW_BUILD_CONFIG
   OS << "Build config: ";
   llvm::interleaveComma(cl::getCompilerBuildConfig(), OS);
   OS << '\n';
-#endif
+#جے_انت
 }
 
 /// Utility function for printing version number.
-void cl::PrintVersionMessage() {
-  CommonOptions->VersionPrinterInstance.print(CommonOptions->ExtraVersionPrinters);
+فراغ cl::Print_نسخہ_سنیہا() {
+  CommonOptions->نسخہ_Printer_Instance.print(CommonOptions->Extra_نسخہ_Printers);
 }
 
-void cl::SetVersionPrinter(VersionPrinterTy func) {
-  CommonOptions->OverrideVersionPrinter = func;
+فراغ cl::سیٹ_نسخہ_Printer(نسخہ_Printer_Ty func) {
+  CommonOptions->Override_نسخہ_Printer = func;
 }
 
-void cl::AddExtraVersionPrinter(VersionPrinterTy func) {
-  CommonOptions->ExtraVersionPrinters.push_back(func);
+فراغ cl::جوڑو_Extra_نسخہ_Printer(نسخہ_Printer_Ty func) {
+  CommonOptions->Extra_نسخہ_Printers.ڈالو_پٹھ(func);
 }
 
 OptionsMapTy &cl::getRegisteredOptions(SubCommand &Sub) {
   initCommonOptions();
-  auto &Subs = globalParser().RegisteredSubCommands;
-  (void)Subs;
-  assert(Subs.contains(&Sub));
-  return Sub.OptionsMap;
+  خودکار &Subs = globalParser().RegisteredSubCommands;
+  (فراغ)Subs;
+  أكد(Subs.شامل_اے(&Sub));
+  أرجع Sub.OptionsMap;
 }
 
-iterator_range<SmallPtrSet<SubCommand *, 4>::iterator>
+iterator_range<Small_Ptr_سیٹ<SubCommand *, 4>::iterator>
 cl::getRegisteredSubcommands() {
-  return globalParser().getRegisteredSubcommands();
+  أرجع globalParser().getRegisteredSubcommands();
 }
 
-void cl::HideUnrelatedOptions(cl::OptionCategory &Category, SubCommand &Sub) {
+فراغ cl::HideUnrelatedOptions(cl::OptionCategory &Category, SubCommand &Sub) {
   initCommonOptions();
-  for (auto &I : Sub.OptionsMap) {
-    bool Unrelated = true;
-    for (auto &Cat : I.second->Categories) {
-      if (Cat == &Category || Cat == &CommonOptions->GenericCategory)
-        Unrelated = false;
+  لكل (خودکار &I : Sub.OptionsMap) {
+    منطقي Unrelated = سچ;
+    لكل (خودکار &Cat : I.دوجا_2->Categories) {
+      إذا (Cat == &Category || Cat == &CommonOptions->GenericCategory)
+        Unrelated = خطأ;
     }
-    if (Unrelated)
-      I.second->setHiddenFlag(cl::ReallyHidden);
+    إذا (Unrelated)
+      I.دوجا_2->سیٹ_Hidden_Flag(cl::ReallyHidden);
   }
 }
 
-void cl::HideUnrelatedOptions(ArrayRef<const cl::OptionCategory *> Categories,
+فراغ cl::HideUnrelatedOptions(ArrayRef<ثابت cl::OptionCategory *> Categories,
                               SubCommand &Sub) {
   initCommonOptions();
-  for (auto &I : Sub.OptionsMap) {
-    bool Unrelated = true;
-    for (auto &Cat : I.second->Categories) {
-      if (is_contained(Categories, Cat) ||
+  لكل (خودکار &I : Sub.OptionsMap) {
+    منطقي Unrelated = سچ;
+    لكل (خودکار &Cat : I.دوجا_2->Categories) {
+      إذا (is_contained(Categories, Cat) ||
           Cat == &CommonOptions->GenericCategory)
-        Unrelated = false;
+        Unrelated = خطأ;
     }
-    if (Unrelated)
-      I.second->setHiddenFlag(cl::ReallyHidden);
+    إذا (Unrelated)
+      I.دوجا_2->سیٹ_Hidden_Flag(cl::ReallyHidden);
   }
 }
 
-void cl::ResetCommandLineParser() { globalParser().reset(); }
+فراغ cl::Reset_Command_سطر_Parser() { globalParser().reset(); }
 
-void cl::addLibraryOptions(LibraryOptions &L) {
-  globalParser().Libraries.push_back(&L);
+فراغ cl::جوڑو_Library_Options(LibraryOptions &L) {
+  globalParser().Libraries.ڈالو_پٹھ(&L);
 }
 
-void LibraryOptionsContext::assign(const LibraryOptionsContext &Other) {
-  assert(this != &Other);
-  Values.clear();
-  SavedArgs.clear();
-  ArrayRef<const char *> Args = Other.SavedArgs;
-  for (size_t I = 0, E = Args.size(); I != E;) {
-    StringRef Name = Args[I];
+فراغ LibraryOptionsContext::سونپو(ثابت LibraryOptionsContext &Other) {
+  أكد(هذا != &Other);
+  اقدار.clear();
+  Saved_دلیلاں.clear();
+  ArrayRef<ثابت حرف *> دلیلاں = Other.Saved_دلیلاں;
+  لكل (size_t I = 0, E = دلیلاں.ناپ_2(); I != E;) {
+    StringRef Name = دلیلاں[I];
     Name.consume_front("-");
     Name.consume_front("-");
     LibraryOptions *L =
-        globalParser().lookupLibraryOption(Name.split('=').first);
-    unsigned N;
-    cantFail(parse(*L, Args.drop_front(I), N));
+        globalParser().lookupLibraryOption(Name.ونڈو('=').پہلا_2);
+    بنانشانی N;
+    cantFail(parse(*L, دلیلاں.drop_front(I), N));
     I += N;
   }
 }
 
 Error LibraryOptionsContext::parse(LibraryOptions &L,
-                                   ArrayRef<const char *> Args,
-                                   unsigned &Consumed) {
-  auto [It, Inserted] = Values.try_emplace(L.getDefault());
-  if (Inserted)
-    It->second = L.copyDefault(Alloc);
-  return parseLibraryOption(L, It->second, Args, Consumed, Alloc, &SavedArgs);
+                                   ArrayRef<ثابت حرف *> دلیلاں,
+                                   بنانشانی &Consumed) {
+  خودکار [It, Inserted] = اقدار.try_emplace(L.getDefault());
+  إذا (Inserted)
+    It->دوجا_2 = L.copyDefault(Alloc);
+  أرجع parseLibraryOption(L, It->دوجا_2, دلیلاں, Consumed, Alloc, &Saved_دلیلاں);
 }
 
-void cl::ResetAllOptionOccurrences() {
+فراغ cl::ResetAllOptionOccurrences() {
   globalParser().ResetAllOptionOccurrences();
 }
 
-void LLVMParseCommandLineOptions(int argc, const char *const *argv,
-                                 const char *Overview) {
-  llvm::cl::ParseCommandLineOptions(argc, argv, StringRef(Overview),
+فراغ LLVMParse_Command_سطر_Options(صحيح argc, ثابت حرف *ثابت *argv,
+                                 ثابت حرف *Overview) {
+  llvm::cl::Parse_Command_سطر_Options(argc, argv, StringRef(Overview),
                                     &llvm::nulls());
 }

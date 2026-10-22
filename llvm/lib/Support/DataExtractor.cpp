@@ -6,281 +6,281 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DataExtractor.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/LEB128.h"
-#include "llvm/Support/SwapByteOrder.h"
+#ضمن "llvm/Support/DataExtractor.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/LEB128.h"
+#ضمن "llvm/Support/SwapByteOrder.h"
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
-bool DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
-                                Error *E) const {
-  if (isValidOffsetForDataOfSize(Offset, Size))
-    return true;
-  if (E) {
-    if (Offset <= Data.size())
+منطقي انکڑے_Extractor::prepareRead(uint64_t وتھ, uint64_t ناپ,
+                                Error *E) ثابت {
+  إذا (is_Valid_وتھ_For_انکڑے_دا_ناپ(وتھ, ناپ))
+    أرجع سچ;
+  إذا (E) {
+    إذا (وتھ <= انکڑے_2.ناپ_2())
       *E = createStringError(
           errc::illegal_byte_sequence,
           "unexpected end of data at offset 0x%zx while reading [0x%" PRIx64
           ", 0x%" PRIx64 ")",
-          Data.size(), Offset, Offset + Size);
-    else
-      *E = createStringError(errc::invalid_argument,
+          انکڑے_2.ناپ_2(), وتھ, وتھ + ناپ);
+    وإلا
+      *E = createStringError(errc::invalid_دلیل,
                              "offset 0x%" PRIx64
                              " is beyond the end of data at 0x%zx",
-                             Offset, Data.size());
+                             وتھ, انکڑے_2.ناپ_2());
   }
-  return false;
+  أرجع خطأ;
 }
 
-static bool isError(Error *E) { return E && *E; }
+ساكن منطقي isError(Error *E) { أرجع E && *E; }
 
-template <typename T>
-T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
+سانچا <قسم_ناں T>
+T انکڑے_Extractor::getU(uint64_t *وتھ_ptr, Error *Err) ثابت {
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
   T val = 0;
-  if (isError(Err))
-    return val;
+  إذا (isError(Err))
+    أرجع val;
 
-  uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, sizeof(T), Err))
-    return val;
-  std::memcpy(&val, &Data.data()[offset], sizeof(val));
-  if (sys::IsLittleEndianHost != IsLittleEndian)
-    sys::swapByteOrder(val);
+  uint64_t وتھ_2 = *وتھ_ptr;
+  إذا (!prepareRead(وتھ_2, حجم(T), Err))
+    أرجع val;
+  std::حافظہ_نقل(&val, &انکڑے_2.انکڑے()[وتھ_2], حجم(val));
+  إذا (sys::IsLittleEndianHost != IsLittleEndian)
+    sys::وٹاندرا_Byte_ترتیب(val);
 
   // Advance the offset
-  *offset_ptr += sizeof(val);
-  return val;
+  *وتھ_ptr += حجم(val);
+  أرجع val;
 }
 
-template <typename T>
-T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
-                        Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return nullptr;
+سانچا <قسم_ناں T>
+T *انکڑے_Extractor::getUs(uint64_t *وتھ_ptr, T *dst, uint32_t گنتی,
+                        Error *Err) ثابت {
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
+  إذا (isError(Err))
+    أرجع خالی_سوچک;
 
-  uint64_t offset = *offset_ptr;
+  uint64_t وتھ_2 = *وتھ_ptr;
 
-  if (!prepareRead(offset, sizeof(*dst) * count, Err))
-    return nullptr;
-  for (T *value_ptr = dst, *end = dst + count; value_ptr != end;
-       ++value_ptr, offset += sizeof(*dst))
-    *value_ptr = getU<T>(offset_ptr, Err);
+  إذا (!prepareRead(وتھ_2, حجم(*dst) * گنتی, Err))
+    أرجع خالی_سوچک;
+  لكل (T *قدر_ptr = dst, *سرا = dst + گنتی; قدر_ptr != سرا;
+       ++قدر_ptr, وتھ_2 += حجم(*dst))
+    *قدر_ptr = getU<T>(وتھ_ptr, Err);
   // Advance the offset
-  *offset_ptr = offset;
+  *وتھ_ptr = وتھ_2;
   // Return a non-NULL pointer to the converted data as an indicator of
   // success
-  return dst;
+  أرجع dst;
 }
 
-uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint8_t>(offset_ptr, Err);
+uint8_t انکڑے_Extractor::getU8(uint64_t *وتھ_ptr, llvm::Error *Err) ثابت {
+  أرجع getU<uint8_t>(وتھ_ptr, Err);
 }
 
-uint8_t *DataExtractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
-                              uint32_t count) const {
-  return getUs<uint8_t>(offset_ptr, dst, count, nullptr);
+uint8_t *انکڑے_Extractor::getU8(uint64_t *وتھ_ptr, uint8_t *dst,
+                              uint32_t گنتی) ثابت {
+  أرجع getUs<uint8_t>(وتھ_ptr, dst, گنتی, خالی_سوچک);
 }
 
-uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t Count) const {
-  return getUs<uint8_t>(&C.Offset, Dst, Count, &C.Err);
+uint8_t *انکڑے_Extractor::getU8(Cursor &C, uint8_t *Dst, uint32_t گنتی_2) ثابت {
+  أرجع getUs<uint8_t>(&C.وتھ, Dst, گنتی_2, &C.Err);
 }
 
-uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint16_t>(offset_ptr, Err);
+uint16_t انکڑے_Extractor::getU16(uint64_t *وتھ_ptr, llvm::Error *Err) ثابت {
+  أرجع getU<uint16_t>(وتھ_ptr, Err);
 }
 
-uint16_t *DataExtractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
-                                uint32_t count) const {
-  return getUs<uint16_t>(offset_ptr, dst, count, nullptr);
+uint16_t *انکڑے_Extractor::getU16(uint64_t *وتھ_ptr, uint16_t *dst,
+                                uint32_t گنتی) ثابت {
+  أرجع getUs<uint16_t>(وتھ_ptr, dst, گنتی, خالی_سوچک);
 }
 
-uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) const {
-  uint24_t ExtractedVal = getU<uint24_t>(OffsetPtr, Err);
+uint32_t انکڑے_Extractor::getU24(uint64_t *وتھ_Ptr, Error *Err) ثابت {
+  uint24_t ExtractedVal = getU<uint24_t>(وتھ_Ptr, Err);
   // The 3 bytes are in the correct byte order for the host.
-  return ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
+  أرجع ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
 }
 
-uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint32_t>(offset_ptr, Err);
+uint32_t انکڑے_Extractor::getU32(uint64_t *وتھ_ptr, llvm::Error *Err) ثابت {
+  أرجع getU<uint32_t>(وتھ_ptr, Err);
 }
 
-uint32_t *DataExtractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
-                                uint32_t count) const {
-  return getUs<uint32_t>(offset_ptr, dst, count, nullptr);
+uint32_t *انکڑے_Extractor::getU32(uint64_t *وتھ_ptr, uint32_t *dst,
+                                uint32_t گنتی) ثابت {
+  أرجع getUs<uint32_t>(وتھ_ptr, dst, گنتی, خالی_سوچک);
 }
 
-uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint64_t>(offset_ptr, Err);
+uint64_t انکڑے_Extractor::getU64(uint64_t *وتھ_ptr, llvm::Error *Err) ثابت {
+  أرجع getU<uint64_t>(وتھ_ptr, Err);
 }
 
-uint64_t *DataExtractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
-                                uint32_t count) const {
-  return getUs<uint64_t>(offset_ptr, dst, count, nullptr);
+uint64_t *انکڑے_Extractor::getU64(uint64_t *وتھ_ptr, uint64_t *dst,
+                                uint32_t گنتی) ثابت {
+  أرجع getUs<uint64_t>(وتھ_ptr, dst, گنتی, خالی_سوچک);
 }
 
-uint64_t DataExtractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_size,
-                                    llvm::Error *Err) const {
-  switch (byte_size) {
-  case 1:
-    return getU8(offset_ptr, Err);
-  case 2:
-    return getU16(offset_ptr, Err);
-  case 4:
-    return getU32(offset_ptr, Err);
-  case 8:
-    return getU64(offset_ptr, Err);
+uint64_t انکڑے_Extractor::getUnsigned(uint64_t *وتھ_ptr, uint32_t byte_ناپ,
+                                    llvm::Error *Err) ثابت {
+  بدل (byte_ناپ) {
+  حالة 1:
+    أرجع getU8(وتھ_ptr, Err);
+  حالة 2:
+    أرجع getU16(وتھ_ptr, Err);
+  حالة 4:
+    أرجع getU32(وتھ_ptr, Err);
+  حالة 8:
+    أرجع getU64(وتھ_ptr, Err);
   }
 
   // For any other byte size, read the bytes and swap/shift if necessary.
-  ErrorAsOutParameter ErrAsOut(Err);
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
   uint64_t val = 0;
-  if (isError(Err))
-    return val;
-  uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, byte_size, Err))
-    return val;
+  إذا (isError(Err))
+    أرجع val;
+  uint64_t وتھ_2 = *وتھ_ptr;
+  إذا (!prepareRead(وتھ_2, byte_ناپ, Err))
+    أرجع val;
   // Copy into the least significant bytes of val regardless of host
   // endianness.
-  std::memcpy(reinterpret_cast<char *>(&val) +
-                  (sys::IsLittleEndianHost ? 0 : 8 - byte_size),
-              &Data.data()[offset], byte_size);
+  std::حافظہ_نقل(reinterpret_cast<حرف *>(&val) +
+                  (sys::IsLittleEndianHost ? 0 : 8 - byte_ناپ),
+              &انکڑے_2.انکڑے()[وتھ_2], byte_ناپ);
   // Swap the least significant bytes of val if endianness doesn't match.
-  if (sys::IsLittleEndianHost != IsLittleEndian)
-    val = sys::getSwappedBytes(val) >> (8 * (8 - byte_size));
+  إذا (sys::IsLittleEndianHost != IsLittleEndian)
+    val = sys::get_Swapped_بائٹاں(val) >> (8 * (8 - byte_ناپ));
 
-  *offset_ptr += byte_size;
-  return val;
+  *وتھ_ptr += byte_ناپ;
+  أرجع val;
 }
 
 int64_t
-DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) const {
-  switch (byte_size) {
-  case 1:
-    return getS8(offset_ptr);
-  case 2:
-    return getS16(offset_ptr);
-  case 4:
-    return getS32(offset_ptr);
-  case 8:
-    return getS64(offset_ptr);
+انکڑے_Extractor::getSigned(uint64_t *وتھ_ptr, uint32_t byte_ناپ) ثابت {
+  بدل (byte_ناپ) {
+  حالة 1:
+    أرجع getS8(وتھ_ptr);
+  حالة 2:
+    أرجع getS16(وتھ_ptr);
+  حالة 4:
+    أرجع getS32(وتھ_ptr);
+  حالة 8:
+    أرجع getS64(وتھ_ptr);
   }
   llvm_unreachable("getSigned unhandled case!");
 }
 
-StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+StringRef انکڑے_Extractor::getCStrRef(uint64_t *وتھ_Ptr, Error *Err) ثابت {
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
+  إذا (isError(Err))
+    أرجع StringRef();
 
-  uint64_t Start = *OffsetPtr;
-  StringRef::size_type Pos = Data.find('\0', Start);
-  if (Pos != StringRef::npos) {
-    *OffsetPtr = Pos + 1;
-    return StringRef(Data.data() + Start, Pos - Start);
+  uint64_t شروع = *وتھ_Ptr;
+  StringRef::ناپ_type Pos = انکڑے_2.لبھو('\0', شروع);
+  إذا (Pos != StringRef::npos) {
+    *وتھ_Ptr = Pos + 1;
+    أرجع StringRef(انکڑے_2.انکڑے() + شروع, Pos - شروع);
   }
-  if (Err)
+  إذا (Err)
     *Err = createStringError(errc::illegal_byte_sequence,
                              "no null terminated string at offset 0x%" PRIx64,
-                             Start);
-  return StringRef();
+                             شروع);
+  أرجع StringRef();
 }
 
-StringRef DataExtractor::getFixedLengthString(uint64_t *OffsetPtr,
-                                              uint64_t Length,
-                                              StringRef TrimChars) const {
-  StringRef Bytes(getBytes(OffsetPtr, Length));
-  return Bytes.trim(TrimChars);
+StringRef انکڑے_Extractor::get_Fixed_لمائی_String(uint64_t *وتھ_Ptr,
+                                              uint64_t لمائی,
+                                              StringRef TrimChars) ثابت {
+  StringRef بائٹاں_2(get_بائٹاں(وتھ_Ptr, لمائی));
+  أرجع بائٹاں_2.trim(TrimChars);
 }
 
-StringRef DataExtractor::getBytes(uint64_t *OffsetPtr, uint64_t Length,
-                                  Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+StringRef انکڑے_Extractor::get_بائٹاں(uint64_t *وتھ_Ptr, uint64_t لمائی,
+                                  Error *Err) ثابت {
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
+  إذا (isError(Err))
+    أرجع StringRef();
 
-  if (!prepareRead(*OffsetPtr, Length, Err))
-    return StringRef();
+  إذا (!prepareRead(*وتھ_Ptr, لمائی, Err))
+    أرجع StringRef();
 
-  StringRef Result = Data.substr(*OffsetPtr, Length);
-  *OffsetPtr += Length;
-  return Result;
+  StringRef نتیجہ = انکڑے_2.substr(*وتھ_Ptr, لمائی);
+  *وتھ_Ptr += لمائی;
+  أرجع نتیجہ;
 }
 
-template <typename T>
-static T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
-                   T (&Decoder)(const uint8_t *p, unsigned *n,
-                                const uint8_t *end, const char **error)) {
-  ArrayRef<uint8_t> Bytes = arrayRefFromStringRef(Data);
-  assert(*OffsetPtr <= Bytes.size());
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return T();
+سانچا <قسم_ناں T>
+ساكن T getLEB128(StringRef انکڑے_2, uint64_t *وتھ_Ptr, Error *Err,
+                   T (&Decoder)(ثابت uint8_t *p, بنانشانی *n,
+                                ثابت uint8_t *سرا, ثابت حرف **error)) {
+  ArrayRef<uint8_t> بائٹاں_2 = arrayRefFromStringRef(انکڑے_2);
+  أكد(*وتھ_Ptr <= بائٹاں_2.ناپ_2());
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
+  إذا (isError(Err))
+    أرجع T();
 
-  const char *error = nullptr;
-  unsigned bytes_read;
-  T result =
-      Decoder(Bytes.data() + *OffsetPtr, &bytes_read, Bytes.end(), &error);
-  if (error) {
-    if (Err)
+  ثابت حرف *error = خالی_سوچک;
+  بنانشانی بائٹاں_read;
+  T نتیجہ_2 =
+      Decoder(بائٹاں_2.انکڑے() + *وتھ_Ptr, &بائٹاں_read, بائٹاں_2.سرا(), &error);
+  إذا (error) {
+    إذا (Err)
       *Err = createStringError(errc::illegal_byte_sequence,
                                "unable to decode LEB128 at offset 0x%8.8" PRIx64
                                ": %s",
-                               *OffsetPtr, error);
-    return T();
+                               *وتھ_Ptr, error);
+    أرجع T();
   }
-  *OffsetPtr += bytes_read;
-  return result;
+  *وتھ_Ptr += بائٹاں_read;
+  أرجع نتیجہ_2;
 }
 
-uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeULEB128);
+uint64_t انکڑے_Extractor::getULEB128(uint64_t *وتھ_ptr, Error *Err) ثابت {
+  أرجع getLEB128(انکڑے_2, وتھ_ptr, Err, decodeULEB128);
 }
 
-int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeSLEB128);
+int64_t انکڑے_Extractor::getSLEB128(uint64_t *وتھ_ptr, Error *Err) ثابت {
+  أرجع getLEB128(انکڑے_2, وتھ_ptr, Err, decodeSLEB128);
 }
 
-APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return APSInt();
+APSInt انکڑے_Extractor::getSLEB128APSInt(uint64_t *وتھ_Ptr, Error *Err) ثابت {
+  Error_As_باہرلا_Parameter Err_As_باہرلا(Err);
+  إذا (isError(Err))
+    أرجع APSInt();
 
-  uint64_t Offset = *OffsetPtr;
-  APInt Value;
-  unsigned Shift = 0;
+  uint64_t وتھ = *وتھ_Ptr;
+  APInt قدر;
+  بنانشانی کھسکاؤ_2 = 0;
   uint8_t Byte;
-  do {
-    if (!prepareRead(Offset, 1, Err))
-      return APSInt();
-    Byte = Data[Offset++];
-    APInt Slice(7, Byte & 0x7f);
-    if (Shift == 0)
-      Value = Slice;
-    else {
-      Value = Value.zext(Shift + 7);
-      Value.insertBits(Slice, Shift);
+  افعل {
+    إذا (!prepareRead(وتھ, 1, Err))
+      أرجع APSInt();
+    Byte = انکڑے_2[وتھ++];
+    APInt ٹکڑا_2(7, Byte & 0x7f);
+    إذا (کھسکاؤ_2 == 0)
+      قدر = ٹکڑا_2;
+    وإلا {
+      قدر = قدر.zext(کھسکاؤ_2 + 7);
+      قدر.داخل_کرو_بٹ(ٹکڑا_2, کھسکاؤ_2);
     }
-    Shift += 7;
-  } while (Byte & 0x80);
+    کھسکاؤ_2 += 7;
+  } طالما (Byte & 0x80);
 
   // Sign extend Value to at least 64 bits to match getSLEB128.
-  if (Shift < 64)
-    Value = Value.sext(64);
+  إذا (کھسکاؤ_2 < 64)
+    قدر = قدر.sext(64);
 
-  *OffsetPtr = Offset;
-  return APSInt(std::move(Value), /*isUnsigned=*/false);
+  *وتھ_Ptr = وتھ;
+  أرجع APSInt(std::move(قدر), /*isUnsigned=*/خطأ);
 }
 
-void DataExtractor::skip(Cursor &C, uint64_t Length) const {
-  ErrorAsOutParameter ErrAsOut(C.Err);
-  if (isError(&C.Err))
-    return;
+فراغ انکڑے_Extractor::skip(Cursor &C, uint64_t لمائی) ثابت {
+  Error_As_باہرلا_Parameter Err_As_باہرلا(C.Err);
+  إذا (isError(&C.Err))
+    أرجع;
 
-  if (prepareRead(C.Offset, Length, &C.Err))
-    C.Offset += Length;
+  إذا (prepareRead(C.وتھ, لمائی, &C.Err))
+    C.وتھ += لمائی;
 }

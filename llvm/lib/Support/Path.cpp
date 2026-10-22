@@ -10,1238 +10,1238 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Path.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signals.h"
-#include <cctype>
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/ScopeExit.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/IOSandbox.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/Signals.h"
+#ضمن <cctype>
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
+#إذا !defined(_MSC_VER) && !defined(__MINGW32__)
+#ضمن <unistd.h>
+#وإلا
+#ضمن <io.h>
+#جے_انت
 
-using namespace llvm;
-using namespace llvm::support::endian;
+ورتوں نطاق llvm;
+ورتوں نطاق llvm::support::endian;
 
-namespace {
-  using llvm::StringRef;
-  using llvm::sys::path::is_separator;
-  using llvm::sys::path::Style;
+نطاق {
+  ورتوں llvm::StringRef;
+  ورتوں llvm::sys::رستہ_2::is_separator;
+  ورتوں llvm::sys::رستہ_2::Style;
 
-  inline bool prefer_forward_slash() {
-    static bool prefer = []() {
-      if (std::optional<std::string> Env =
+  مضمن منطقي prefer_forward_slash() {
+    ساكن منطقي prefer = []() {
+      إذا (std::optional<std::string> Env =
               sys::Process::GetEnv("LLVM_WINDOWS_PREFER_FORWARD_SLASH"))
-        return *Env == "1";
-      return static_cast<bool>(LLVM_WINDOWS_PREFER_FORWARD_SLASH);
+        أرجع *Env == "1";
+      أرجع static_cast<منطقي>(LLVM_WINDOWS_PREFER_FORWARD_SLASH);
     }();
-    return prefer;
+    أرجع prefer;
   }
 
-  inline Style real_style(Style style) {
-    if (style != Style::native)
-      return style;
-    if (is_style_posix(style))
-      return Style::posix;
-    return prefer_forward_slash() ? Style::windows_slash
+  مضمن Style real_style(Style style) {
+    إذا (style != Style::native)
+      أرجع style;
+    إذا (is_style_posix(style))
+      أرجع Style::posix;
+    أرجع prefer_forward_slash() ? Style::windows_slash
                                   : Style::windows_backslash;
   }
 
-  inline const char *separators(Style style) {
-    if (is_style_windows(style))
-      return "\\/";
-    return "/";
+  مضمن ثابت حرف *separators(Style style) {
+    إذا (is_style_windows(style))
+      أرجع "\\/";
+    أرجع "/";
   }
 
-  inline char preferred_separator(Style style) {
-    if (real_style(style) == Style::windows)
-      return '\\';
-    return '/';
+  مضمن حرف preferred_separator(Style style) {
+    إذا (real_style(style) == Style::windows)
+      أرجع '\\';
+    أرجع '/';
   }
 
-  StringRef find_first_component(StringRef path, Style style) {
+  StringRef لبھو_پہلا_component(StringRef رستہ_2, Style style) {
     // Look for this first component in the following order.
     // * empty (in this case we return an empty string)
     // * either C: or {//,\\}net.
     // * {/,\}
     // * {file,directory}name
 
-    if (path.empty())
-      return path;
+    إذا (رستہ_2.خالی_تھاواں())
+      أرجع رستہ_2;
 
-    if (is_style_windows(style)) {
+    إذا (is_style_windows(style)) {
       // C:
-      if (path.size() >= 2 &&
-          std::isalpha(static_cast<unsigned char>(path[0])) && path[1] == ':')
-        return path.substr(0, 2);
+      إذا (رستہ_2.ناپ_2() >= 2 &&
+          std::حرف_اے(static_cast<بنانشانی حرف>(رستہ_2[0])) && رستہ_2[1] == ':')
+        أرجع رستہ_2.substr(0, 2);
     }
 
     // //net
-    if ((path.size() > 2) && is_separator(path[0], style) &&
-        path[0] == path[1] && !is_separator(path[2], style)) {
+    إذا ((رستہ_2.ناپ_2() > 2) && is_separator(رستہ_2[0], style) &&
+        رستہ_2[0] == رستہ_2[1] && !is_separator(رستہ_2[2], style)) {
       // Find the next directory separator.
-      size_t end = path.find_first_of(separators(style), 2);
-      return path.substr(0, end);
+      size_t سرا = رستہ_2.لبھو_پہلا_دا(separators(style), 2);
+      أرجع رستہ_2.substr(0, سرا);
     }
 
     // {/,\}
-    if (is_separator(path[0], style))
-      return path.substr(0, 1);
+    إذا (is_separator(رستہ_2[0], style))
+      أرجع رستہ_2.substr(0, 1);
 
     // * {file,directory}name
-    size_t end = path.find_first_of(separators(style));
-    return path.substr(0, end);
+    size_t سرا = رستہ_2.لبھو_پہلا_دا(separators(style));
+    أرجع رستہ_2.substr(0, سرا);
   }
 
   // Returns the first character of the filename in str. For paths ending in
   // '/', it returns the position of the '/'.
   size_t filename_pos(StringRef str, Style style) {
-    if (str.size() > 0 && is_separator(str[str.size() - 1], style))
-      return str.size() - 1;
+    إذا (str.ناپ_2() > 0 && is_separator(str[str.ناپ_2() - 1], style))
+      أرجع str.ناپ_2() - 1;
 
-    size_t pos = str.find_last_of(separators(style), str.size() - 1);
+    size_t pos = str.لبھو_آخری_دا(separators(style), str.ناپ_2() - 1);
 
-    if (is_style_windows(style)) {
-      if (pos == StringRef::npos)
-        pos = str.find_last_of(':', str.size() - 1);
+    إذا (is_style_windows(style)) {
+      إذا (pos == StringRef::npos)
+        pos = str.لبھو_آخری_دا(':', str.ناپ_2() - 1);
     }
 
-    if (pos == StringRef::npos || (pos == 1 && is_separator(str[0], style)))
-      return 0;
+    إذا (pos == StringRef::npos || (pos == 1 && is_separator(str[0], style)))
+      أرجع 0;
 
-    return pos + 1;
+    أرجع pos + 1;
   }
 
   // Returns the position of the root directory in str. If there is no root
   // directory in str, it returns StringRef::npos.
-  size_t root_dir_start(StringRef str, Style style) {
+  size_t جڑ_dir_شروع(StringRef str, Style style) {
     // case "c:/"
-    if (is_style_windows(style)) {
-      if (str.size() > 2 && str[1] == ':' && is_separator(str[2], style))
-        return 2;
+    إذا (is_style_windows(style)) {
+      إذا (str.ناپ_2() > 2 && str[1] == ':' && is_separator(str[2], style))
+        أرجع 2;
     }
 
     // case "//net"
-    if (str.size() > 3 && is_separator(str[0], style) && str[0] == str[1] &&
+    إذا (str.ناپ_2() > 3 && is_separator(str[0], style) && str[0] == str[1] &&
         !is_separator(str[2], style)) {
-      return str.find_first_of(separators(style), 2);
+      أرجع str.لبھو_پہلا_دا(separators(style), 2);
     }
 
     // case "/"
-    if (str.size() > 0 && is_separator(str[0], style))
-      return 0;
+    إذا (str.ناپ_2() > 0 && is_separator(str[0], style))
+      أرجع 0;
 
-    return StringRef::npos;
+    أرجع StringRef::npos;
   }
 
   // Returns the position past the end of the "parent path" of path. The parent
   // path will not end in '/', unless the parent is the root directory. If the
   // path has no parent, 0 is returned.
-  size_t parent_path_end(StringRef path, Style style) {
-    size_t end_pos = filename_pos(path, style);
+  size_t ماپا_رستہ_سرا(StringRef رستہ_2, Style style) {
+    size_t سرا_pos = filename_pos(رستہ_2, style);
 
-    bool filename_was_sep =
-        path.size() > 0 && is_separator(path[end_pos], style);
+    منطقي filename_was_sep =
+        رستہ_2.ناپ_2() > 0 && is_separator(رستہ_2[سرا_pos], style);
 
     // Skip separators until we reach root dir (or the start of the string).
-    size_t root_dir_pos = root_dir_start(path, style);
-    while (end_pos > 0 &&
-           (root_dir_pos == StringRef::npos || end_pos > root_dir_pos) &&
-           is_separator(path[end_pos - 1], style))
-      --end_pos;
+    size_t جڑ_dir_pos = جڑ_dir_شروع(رستہ_2, style);
+    طالما (سرا_pos > 0 &&
+           (جڑ_dir_pos == StringRef::npos || سرا_pos > جڑ_dir_pos) &&
+           is_separator(رستہ_2[سرا_pos - 1], style))
+      --سرا_pos;
 
-    if (end_pos == root_dir_pos && !filename_was_sep) {
+    إذا (سرا_pos == جڑ_dir_pos && !filename_was_sep) {
       // We've reached the root dir and the input path was *not* ending in a
       // sequence of slashes. Include the root dir in the parent path.
-      return root_dir_pos + 1;
+      أرجع جڑ_dir_pos + 1;
     }
 
     // Otherwise, just include before the last slash.
-    return end_pos;
+    أرجع سرا_pos;
   }
 } // end unnamed namespace
 
-enum FSEntity {
+تعداد FSEntity {
   FS_Dir,
   FS_File,
   FS_Name
 };
 
-static std::error_code
-createUniqueEntity(const Twine &Model, int &ResultFD,
-                   SmallVectorImpl<char> &ResultPath, bool MakeAbsolute,
-                   FSEntity Type, sys::fs::OpenFlags Flags = sys::fs::OF_None,
-                   unsigned Mode = 0) {
+ساكن std::error_کوڈ
+createUniqueEntity(ثابت Twine &Model, صحيح &نتیجہ_FD,
+                   Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ, منطقي MakeAbsolute,
+                   FSEntity Type, sys::fs::OpenFlags Flags = sys::fs::دا_None,
+                   بنانشانی منوال = 0) {
 
   // Limit the number of attempts we make, so that we don't infinite loop. E.g.
   // "permission denied" could be for a specific file (so we retry with a
   // different name) or for the whole directory (retry would always fail).
   // Checking which is racy, so we try a number of times, then give up.
-  std::error_code EC;
-  for (int Retries = 128; Retries > 0; --Retries) {
-    sys::fs::createUniquePath(Model, ResultPath, MakeAbsolute);
+  std::error_کوڈ EC;
+  لكل (صحيح Retries = 128; Retries > 0; --Retries) {
+    sys::fs::create_Unique_رستہ(Model, نتیجہ_رستہ, MakeAbsolute);
     // Try to open + create the file.
-    switch (Type) {
-    case FS_File: {
-      EC = sys::fs::openFileForReadWrite(Twine(ResultPath.begin()), ResultFD,
-                                         sys::fs::CD_CreateNew, Flags, Mode);
-      if (EC) {
+    بدل (Type) {
+    حالة FS_File: {
+      EC = sys::fs::openFileForReadWrite(Twine(نتیجہ_رستہ.begin()), نتیجہ_FD,
+                                         sys::fs::CD_CreateNew, Flags, منوال);
+      إذا (EC) {
         // errc::permission_denied happens on Windows when we try to open a file
         // that has been marked for deletion.
-        if (EC == errc::file_exists || EC == errc::permission_denied)
-          continue;
-        return EC;
+        إذا (EC == errc::file_exists || EC == errc::permission_denied)
+          استمر;
+        أرجع EC;
       }
 
-      return std::error_code();
+      أرجع std::error_کوڈ();
     }
 
-    case FS_Name: {
-      EC = sys::fs::access(ResultPath.begin(), sys::fs::AccessMode::Exist);
-      if (EC == errc::no_such_file_or_directory)
-        return std::error_code();
-      if (EC)
-        return EC;
-      continue;
+    حالة FS_Name: {
+      EC = sys::fs::access(نتیجہ_رستہ.begin(), sys::fs::Access_منوال::Exist);
+      إذا (EC == errc::no_such_file_or_directory)
+        أرجع std::error_کوڈ();
+      إذا (EC)
+        أرجع EC;
+      استمر;
     }
 
-    case FS_Dir: {
-      EC = sys::fs::create_directory(ResultPath.begin(), false);
-      if (EC) {
-        if (EC == errc::file_exists)
-          continue;
-        return EC;
+    حالة FS_Dir: {
+      EC = sys::fs::create_directory(نتیجہ_رستہ.begin(), خطأ);
+      إذا (EC) {
+        إذا (EC == errc::file_exists)
+          استمر;
+        أرجع EC;
       }
-      return std::error_code();
+      أرجع std::error_کوڈ();
     }
     }
     llvm_unreachable("Invalid Type");
   }
-  return EC;
+  أرجع EC;
 }
 
-namespace llvm {
-namespace sys  {
-namespace path {
+نطاق llvm {
+نطاق sys  {
+نطاق رستہ_2 {
 
-const_iterator begin(StringRef path, Style style) {
+const_iterator begin(StringRef رستہ_2, Style style) {
   const_iterator i;
-  i.Path      = path;
-  i.Component = find_first_component(path, style);
+  i.رستہ      = رستہ_2;
+  i.Component = لبھو_پہلا_component(رستہ_2, style);
   i.Position  = 0;
   i.S = style;
-  return i;
+  أرجع i;
 }
 
-const_iterator end(StringRef path) {
+const_iterator سرا(StringRef رستہ_2) {
   const_iterator i;
-  i.Path      = path;
-  i.Position  = path.size();
-  return i;
+  i.رستہ      = رستہ_2;
+  i.Position  = رستہ_2.ناپ_2();
+  أرجع i;
 }
 
-const_iterator &const_iterator::operator++() {
-  assert(Position < Path.size() && "Tried to increment past end!");
+const_iterator &const_iterator::عامل++() {
+  أكد(Position < رستہ.ناپ_2() && "Tried to increment past end!");
 
   // Increment Position to past the current component
-  Position += Component.size();
+  Position += Component.ناپ_2();
 
   // Check for end.
-  if (Position == Path.size()) {
+  إذا (Position == رستہ.ناپ_2()) {
     Component = StringRef();
-    return *this;
+    أرجع *هذا;
   }
 
   // Both POSIX and Windows treat paths that begin with exactly two separators
   // specially.
-  bool was_net = Component.size() > 2 && is_separator(Component[0], S) &&
+  منطقي was_net = Component.ناپ_2() > 2 && is_separator(Component[0], S) &&
                  Component[1] == Component[0] && !is_separator(Component[2], S);
 
   // Handle separators.
-  if (is_separator(Path[Position], S)) {
+  إذا (is_separator(رستہ[Position], S)) {
     // Root dir.
-    if (was_net ||
+    إذا (was_net ||
         // c:/
-        (is_style_windows(S) && Component.ends_with(":"))) {
-      Component = Path.substr(Position, 1);
-      return *this;
+        (is_style_windows(S) && Component.سرے_with(":"))) {
+      Component = رستہ.substr(Position, 1);
+      أرجع *هذا;
     }
 
     // Skip extra separators.
-    while (Position != Path.size() && is_separator(Path[Position], S)) {
+    طالما (Position != رستہ.ناپ_2() && is_separator(رستہ[Position], S)) {
       ++Position;
     }
 
     // Treat trailing '/' as a '.', unless it is the root dir.
-    if (Position == Path.size() && Component != "/") {
+    إذا (Position == رستہ.ناپ_2() && Component != "/") {
       --Position;
       Component = ".";
-      return *this;
+      أرجع *هذا;
     }
   }
 
   // Find next component.
-  size_t end_pos = Path.find_first_of(separators(S), Position);
-  Component = Path.slice(Position, end_pos);
+  size_t سرا_pos = رستہ.لبھو_پہلا_دا(separators(S), Position);
+  Component = رستہ.ٹکڑا(Position, سرا_pos);
 
-  return *this;
+  أرجع *هذا;
 }
 
-bool const_iterator::operator==(const const_iterator &RHS) const {
-  return Path.begin() == RHS.Path.begin() && Position == RHS.Position;
+منطقي const_iterator::عامل==(ثابت const_iterator &RHS) ثابت {
+  أرجع رستہ.begin() == RHS.رستہ.begin() && Position == RHS.Position;
 }
 
-ptrdiff_t const_iterator::operator-(const const_iterator &RHS) const {
-  return Position - RHS.Position;
+ptrdiff_t const_iterator::عامل-(ثابت const_iterator &RHS) ثابت {
+  أرجع Position - RHS.Position;
 }
 
-reverse_iterator rbegin(StringRef Path, Style style) {
-  reverse_iterator I;
-  I.Path = Path;
-  I.Position = Path.size();
+الٹ_iterator rbegin(StringRef رستہ, Style style) {
+  الٹ_iterator I;
+  I.رستہ = رستہ;
+  I.Position = رستہ.ناپ_2();
   I.S = style;
   ++I;
-  return I;
+  أرجع I;
 }
 
-reverse_iterator rend(StringRef Path) {
-  reverse_iterator I;
-  I.Path = Path;
-  I.Component = Path.substr(0, 0);
+الٹ_iterator rend(StringRef رستہ) {
+  الٹ_iterator I;
+  I.رستہ = رستہ;
+  I.Component = رستہ.substr(0, 0);
   I.Position = 0;
-  return I;
+  أرجع I;
 }
 
-reverse_iterator &reverse_iterator::operator++() {
-  size_t root_dir_pos = root_dir_start(Path, S);
+الٹ_iterator &الٹ_iterator::عامل++() {
+  size_t جڑ_dir_pos = جڑ_dir_شروع(رستہ, S);
 
   // Skip separators unless it's the root directory.
-  size_t end_pos = Position;
-  while (end_pos > 0 && (end_pos - 1) != root_dir_pos &&
-         is_separator(Path[end_pos - 1], S))
-    --end_pos;
+  size_t سرا_pos = Position;
+  طالما (سرا_pos > 0 && (سرا_pos - 1) != جڑ_dir_pos &&
+         is_separator(رستہ[سرا_pos - 1], S))
+    --سرا_pos;
 
   // Treat trailing '/' as a '.', unless it is the root dir.
-  if (Position == Path.size() && !Path.empty() &&
-      is_separator(Path.back(), S) &&
-      (root_dir_pos == StringRef::npos || end_pos - 1 > root_dir_pos)) {
+  إذا (Position == رستہ.ناپ_2() && !رستہ.خالی_تھاواں() &&
+      is_separator(رستہ.پٹھ(), S) &&
+      (جڑ_dir_pos == StringRef::npos || سرا_pos - 1 > جڑ_dir_pos)) {
     --Position;
     Component = ".";
-    return *this;
+    أرجع *هذا;
   }
 
   // Find next separator.
-  size_t start_pos = filename_pos(Path.substr(0, end_pos), S);
-  Component = Path.slice(start_pos, end_pos);
-  Position = start_pos;
-  return *this;
+  size_t شروع_pos = filename_pos(رستہ.substr(0, سرا_pos), S);
+  Component = رستہ.ٹکڑا(شروع_pos, سرا_pos);
+  Position = شروع_pos;
+  أرجع *هذا;
 }
 
-bool reverse_iterator::operator==(const reverse_iterator &RHS) const {
-  return Path.begin() == RHS.Path.begin() && Component == RHS.Component &&
+منطقي الٹ_iterator::عامل==(ثابت الٹ_iterator &RHS) ثابت {
+  أرجع رستہ.begin() == RHS.رستہ.begin() && Component == RHS.Component &&
          Position == RHS.Position;
 }
 
-ptrdiff_t reverse_iterator::operator-(const reverse_iterator &RHS) const {
-  return Position - RHS.Position;
+ptrdiff_t الٹ_iterator::عامل-(ثابت الٹ_iterator &RHS) ثابت {
+  أرجع Position - RHS.Position;
 }
 
-StringRef root_path(StringRef path, Style style) {
-  const_iterator b = begin(path, style), pos = b, e = end(path);
-  if (b != e) {
-    bool has_net =
-        b->size() > 2 && is_separator((*b)[0], style) && (*b)[1] == (*b)[0];
-    bool has_drive = is_style_windows(style) && b->ends_with(":");
+StringRef جڑ_رستہ_2(StringRef رستہ_2, Style style) {
+  const_iterator b = begin(رستہ_2, style), pos = b, e = سرا(رستہ_2);
+  إذا (b != e) {
+    منطقي has_net =
+        b->ناپ_2() > 2 && is_separator((*b)[0], style) && (*b)[1] == (*b)[0];
+    منطقي has_drive = is_style_windows(style) && b->سرے_with(":");
 
-    if (has_net || has_drive) {
-      if ((++pos != e) && is_separator((*pos)[0], style)) {
+    إذا (has_net || has_drive) {
+      إذا ((++pos != e) && is_separator((*pos)[0], style)) {
         // {C:/,//net/}, so get the first two components.
-        return path.substr(0, b->size() + pos->size());
+        أرجع رستہ_2.substr(0, b->ناپ_2() + pos->ناپ_2());
       }
       // just {C:,//net}, return the first component.
-      return *b;
+      أرجع *b;
     }
 
     // POSIX style root directory.
-    if (is_separator((*b)[0], style)) {
-      return *b;
+    إذا (is_separator((*b)[0], style)) {
+      أرجع *b;
     }
   }
 
-  return StringRef();
+  أرجع StringRef();
 }
 
-StringRef root_name(StringRef path, Style style) {
-  const_iterator b = begin(path, style), e = end(path);
-  if (b != e) {
-    bool has_net =
-        b->size() > 2 && is_separator((*b)[0], style) && (*b)[1] == (*b)[0];
-    bool has_drive = is_style_windows(style) && b->ends_with(":");
+StringRef جڑ_name(StringRef رستہ_2, Style style) {
+  const_iterator b = begin(رستہ_2, style), e = سرا(رستہ_2);
+  إذا (b != e) {
+    منطقي has_net =
+        b->ناپ_2() > 2 && is_separator((*b)[0], style) && (*b)[1] == (*b)[0];
+    منطقي has_drive = is_style_windows(style) && b->سرے_with(":");
 
-    if (has_net || has_drive) {
+    إذا (has_net || has_drive) {
       // just {C:,//net}, return the first component.
-      return *b;
+      أرجع *b;
     }
   }
 
   // No path or no name.
-  return StringRef();
+  أرجع StringRef();
 }
 
-StringRef root_directory(StringRef path, Style style) {
-  const_iterator b = begin(path, style), pos = b, e = end(path);
-  if (b != e) {
-    bool has_net =
-        b->size() > 2 && is_separator((*b)[0], style) && (*b)[1] == (*b)[0];
-    bool has_drive = is_style_windows(style) && b->ends_with(":");
+StringRef جڑ_directory(StringRef رستہ_2, Style style) {
+  const_iterator b = begin(رستہ_2, style), pos = b, e = سرا(رستہ_2);
+  إذا (b != e) {
+    منطقي has_net =
+        b->ناپ_2() > 2 && is_separator((*b)[0], style) && (*b)[1] == (*b)[0];
+    منطقي has_drive = is_style_windows(style) && b->سرے_with(":");
 
-    if ((has_net || has_drive) &&
+    إذا ((has_net || has_drive) &&
         // {C:,//net}, skip to the next component.
         (++pos != e) && is_separator((*pos)[0], style)) {
-      return *pos;
+      أرجع *pos;
     }
 
     // POSIX style root directory.
-    if (!has_net && is_separator((*b)[0], style)) {
-      return *b;
+    إذا (!has_net && is_separator((*b)[0], style)) {
+      أرجع *b;
     }
   }
 
   // No path or no root.
-  return StringRef();
+  أرجع StringRef();
 }
 
-StringRef relative_path(StringRef path, Style style) {
-  StringRef root = root_path(path, style);
-  return path.substr(root.size());
+StringRef relative_رستہ(StringRef رستہ_2, Style style) {
+  StringRef جڑ_3 = جڑ_رستہ_2(رستہ_2, style);
+  أرجع رستہ_2.substr(جڑ_3.ناپ_2());
 }
 
-void append(SmallVectorImpl<char> &path, Style style, const Twine &a,
-            const Twine &b, const Twine &c, const Twine &d) {
+فراغ append(Small_سمتیہ_Impl<حرف> &رستہ_2, Style style, ثابت Twine &a,
+            ثابت Twine &b, ثابت Twine &c, ثابت Twine &d) {
   SmallString<32> a_storage;
   SmallString<32> b_storage;
   SmallString<32> c_storage;
   SmallString<32> d_storage;
 
-  SmallVector<StringRef, 4> components;
-  if (!a.isTriviallyEmpty()) components.push_back(a.toStringRef(a_storage));
-  if (!b.isTriviallyEmpty()) components.push_back(b.toStringRef(b_storage));
-  if (!c.isTriviallyEmpty()) components.push_back(c.toStringRef(c_storage));
-  if (!d.isTriviallyEmpty()) components.push_back(d.toStringRef(d_storage));
+  Small_سمتیہ<StringRef, 4> components;
+  إذا (!a.is_Trivially_خالی_تھاواں()) components.ڈالو_پٹھ(a.منزل_String_Ref(a_storage));
+  إذا (!b.is_Trivially_خالی_تھاواں()) components.ڈالو_پٹھ(b.منزل_String_Ref(b_storage));
+  إذا (!c.is_Trivially_خالی_تھاواں()) components.ڈالو_پٹھ(c.منزل_String_Ref(c_storage));
+  إذا (!d.is_Trivially_خالی_تھاواں()) components.ڈالو_پٹھ(d.منزل_String_Ref(d_storage));
 
-  for (auto &component : components) {
-    bool path_has_sep =
-        !path.empty() && is_separator(path[path.size() - 1], style);
-    if (path_has_sep) {
+  لكل (خودکار &component : components) {
+    منطقي رستہ_has_sep =
+        !رستہ_2.خالی_تھاواں() && is_separator(رستہ_2[رستہ_2.ناپ_2() - 1], style);
+    إذا (رستہ_has_sep) {
       // Strip separators from beginning of component.
-      size_t loc = component.find_first_not_of(separators(style));
+      size_t loc = component.لبھو_پہلا_not_دا(separators(style));
       StringRef c = component.substr(loc);
 
       // Append it.
-      path.append(c.begin(), c.end());
-      continue;
+      رستہ_2.append(c.begin(), c.سرا());
+      استمر;
     }
 
-    bool component_has_sep =
-        !component.empty() && is_separator(component[0], style);
-    if (!component_has_sep &&
-        !(path.empty() || has_root_name(component, style))) {
+    منطقي component_has_sep =
+        !component.خالی_تھاواں() && is_separator(component[0], style);
+    إذا (!component_has_sep &&
+        !(رستہ_2.خالی_تھاواں() || has_جڑ_name(component, style))) {
       // Add a separator.
-      path.push_back(preferred_separator(style));
+      رستہ_2.ڈالو_پٹھ(preferred_separator(style));
     }
 
-    path.append(component.begin(), component.end());
+    رستہ_2.append(component.begin(), component.سرا());
   }
 }
 
-void append(SmallVectorImpl<char> &path, const Twine &a, const Twine &b,
-            const Twine &c, const Twine &d) {
-  append(path, Style::native, a, b, c, d);
+فراغ append(Small_سمتیہ_Impl<حرف> &رستہ_2, ثابت Twine &a, ثابت Twine &b,
+            ثابت Twine &c, ثابت Twine &d) {
+  append(رستہ_2, Style::native, a, b, c, d);
 }
 
-void append(SmallVectorImpl<char> &path, const_iterator begin,
-            const_iterator end, Style style) {
-  for (; begin != end; ++begin)
-    path::append(path, style, *begin);
+فراغ append(Small_سمتیہ_Impl<حرف> &رستہ_2, const_iterator begin,
+            const_iterator سرا, Style style) {
+  لكل (; begin != سرا; ++begin)
+    رستہ_2::append(رستہ_2, style, *begin);
 }
 
-StringRef parent_path(StringRef path, Style style) {
-  size_t end_pos = parent_path_end(path, style);
-  if (end_pos == StringRef::npos)
-    return StringRef();
-  return path.substr(0, end_pos);
+StringRef ماپا_رستہ(StringRef رستہ_2, Style style) {
+  size_t سرا_pos = ماپا_رستہ_سرا(رستہ_2, style);
+  إذا (سرا_pos == StringRef::npos)
+    أرجع StringRef();
+  أرجع رستہ_2.substr(0, سرا_pos);
 }
 
-void remove_filename(SmallVectorImpl<char> &path, Style style) {
-  size_t end_pos = parent_path_end(StringRef(path.begin(), path.size()), style);
-  if (end_pos != StringRef::npos)
-    path.truncate(end_pos);
+فراغ remove_filename(Small_سمتیہ_Impl<حرف> &رستہ_2, Style style) {
+  size_t سرا_pos = ماپا_رستہ_سرا(StringRef(رستہ_2.begin(), رستہ_2.ناپ_2()), style);
+  إذا (سرا_pos != StringRef::npos)
+    رستہ_2.truncate(سرا_pos);
 }
 
-void replace_extension(SmallVectorImpl<char> &path, const Twine &extension,
+فراغ replace_extension(Small_سمتیہ_Impl<حرف> &رستہ_2, ثابت Twine &extension,
                        Style style) {
-  StringRef p(path.begin(), path.size());
+  StringRef p(رستہ_2.begin(), رستہ_2.ناپ_2());
   SmallString<32> ext_storage;
-  StringRef ext = extension.toStringRef(ext_storage);
+  StringRef ext = extension.منزل_String_Ref(ext_storage);
 
   // Erase existing extension.
-  size_t pos = p.find_last_of('.');
-  if (pos != StringRef::npos && pos >= filename_pos(p, style))
-    path.truncate(pos);
+  size_t pos = p.لبھو_آخری_دا('.');
+  إذا (pos != StringRef::npos && pos >= filename_pos(p, style))
+    رستہ_2.truncate(pos);
 
   // Append '.' if needed.
-  if (ext.size() > 0 && ext[0] != '.')
-    path.push_back('.');
+  إذا (ext.ناپ_2() > 0 && ext[0] != '.')
+    رستہ_2.ڈالو_پٹھ('.');
 
   // Append extension.
-  path.append(ext.begin(), ext.end());
+  رستہ_2.append(ext.begin(), ext.سرا());
 }
 
-static bool starts_with(StringRef Path, StringRef Prefix,
+ساكن منطقي starts_with(StringRef رستہ, StringRef اگیتر,
                         Style style = Style::native) {
   // Windows prefix matching : case and separator insensitive
-  if (is_style_windows(style)) {
-    if (Path.size() < Prefix.size())
-      return false;
-    for (size_t I = 0, E = Prefix.size(); I != E; ++I) {
-      bool SepPath = is_separator(Path[I], style);
-      bool SepPrefix = is_separator(Prefix[I], style);
-      if (SepPath != SepPrefix)
-        return false;
-      if (!SepPath && toLower(Path[I]) != toLower(Prefix[I]))
-        return false;
+  إذا (is_style_windows(style)) {
+    إذا (رستہ.ناپ_2() < اگیتر.ناپ_2())
+      أرجع خطأ;
+    لكل (size_t I = 0, E = اگیتر.ناپ_2(); I != E; ++I) {
+      منطقي Sep_رستہ = is_separator(رستہ[I], style);
+      منطقي Sep_اگیتر = is_separator(اگیتر[I], style);
+      إذا (Sep_رستہ != Sep_اگیتر)
+        أرجع خطأ;
+      إذا (!Sep_رستہ && منزل_ہیٹھلا(رستہ[I]) != منزل_ہیٹھلا(اگیتر[I]))
+        أرجع خطأ;
     }
-    return true;
+    أرجع سچ;
   }
-  return Path.starts_with(Prefix);
+  أرجع رستہ.starts_with(اگیتر);
 }
 
-bool replace_path_prefix(SmallVectorImpl<char> &Path, StringRef OldPrefix,
-                         StringRef NewPrefix, Style style) {
-  if (OldPrefix.empty() && NewPrefix.empty())
-    return false;
+منطقي replace_رستہ_اگیتر(Small_سمتیہ_Impl<حرف> &رستہ, StringRef Old_اگیتر,
+                         StringRef New_اگیتر, Style style) {
+  إذا (Old_اگیتر.خالی_تھاواں() && New_اگیتر.خالی_تھاواں())
+    أرجع خطأ;
 
-  StringRef OrigPath(Path.begin(), Path.size());
-  if (!starts_with(OrigPath, OldPrefix, style))
-    return false;
+  StringRef Orig_رستہ(رستہ.begin(), رستہ.ناپ_2());
+  إذا (!starts_with(Orig_رستہ, Old_اگیتر, style))
+    أرجع خطأ;
 
   // If prefixes have the same size we can simply copy the new one over.
-  if (OldPrefix.size() == NewPrefix.size()) {
-    llvm::copy(NewPrefix, Path.begin());
-    return true;
+  إذا (Old_اگیتر.ناپ_2() == New_اگیتر.ناپ_2()) {
+    llvm::copy(New_اگیتر, رستہ.begin());
+    أرجع سچ;
   }
 
-  StringRef RelPath = OrigPath.substr(OldPrefix.size());
-  SmallString<256> NewPath;
-  (Twine(NewPrefix) + RelPath).toVector(NewPath);
-  Path.swap(NewPath);
-  return true;
+  StringRef Rel_رستہ = Orig_رستہ.substr(Old_اگیتر.ناپ_2());
+  SmallString<256> New_رستہ;
+  (Twine(New_اگیتر) + Rel_رستہ).منزل_سمتیہ(New_رستہ);
+  رستہ.وٹاندرا(New_رستہ);
+  أرجع سچ;
 }
 
-void native(const Twine &path, SmallVectorImpl<char> &result, Style style) {
-  assert((!path.isSingleStringRef() ||
-          path.getSingleStringRef().data() != result.data()) &&
+فراغ native(ثابت Twine &رستہ_2, Small_سمتیہ_Impl<حرف> &نتیجہ_2, Style style) {
+  أكد((!رستہ_2.isSingleStringRef() ||
+          رستہ_2.getSingleStringRef().انکڑے() != نتیجہ_2.انکڑے()) &&
          "path and result are not allowed to overlap!");
   // Clear result.
-  result.clear();
-  path.toVector(result);
-  native(result, style);
+  نتیجہ_2.clear();
+  رستہ_2.منزل_سمتیہ(نتیجہ_2);
+  native(نتیجہ_2, style);
 }
 
-std::string native(const Twine &path, Style style) {
-  SmallString<128> Result;
-  native(path, Result, style);
-  return std::string(Result);
+std::string native(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> نتیجہ;
+  native(رستہ_2, نتیجہ, style);
+  أرجع std::string(نتیجہ);
 }
 
-void native(SmallVectorImpl<char> &Path, Style style) {
-  if (Path.empty())
-    return;
-  if (is_style_windows(style)) {
-    for (char &Ch : Path)
-      if (is_separator(Ch, style))
+فراغ native(Small_سمتیہ_Impl<حرف> &رستہ, Style style) {
+  إذا (رستہ.خالی_تھاواں())
+    أرجع;
+  إذا (is_style_windows(style)) {
+    لكل (حرف &Ch : رستہ)
+      إذا (is_separator(Ch, style))
         Ch = preferred_separator(style);
-    if (Path[0] == '~' && (Path.size() == 1 || is_separator(Path[1], style))) {
-      SmallString<128> PathHome;
-      home_directory(PathHome);
-      PathHome.append(Path.begin() + 1, Path.end());
-      Path = std::move(PathHome);
+    إذا (رستہ[0] == '~' && (رستہ.ناپ_2() == 1 || is_separator(رستہ[1], style))) {
+      SmallString<128> رستہ_Home;
+      home_directory(رستہ_Home);
+      رستہ_Home.append(رستہ.begin() + 1, رستہ.سرا());
+      رستہ = std::move(رستہ_Home);
     }
-  } else {
-    llvm::replace(Path, '\\', '/');
+  } وإلا {
+    llvm::replace(رستہ, '\\', '/');
   }
 }
 
-std::string convert_to_slash(StringRef path, Style style) {
-  if (is_style_posix(style))
-    return std::string(path);
+std::string convert_منزل_slash(StringRef رستہ_2, Style style) {
+  إذا (is_style_posix(style))
+    أرجع std::string(رستہ_2);
 
-  std::string s = path.str();
+  std::string s = رستہ_2.str();
   llvm::replace(s, '\\', '/');
-  return s;
+  أرجع s;
 }
 
-StringRef filename(StringRef path, Style style) { return *rbegin(path, style); }
+StringRef filename(StringRef رستہ_2, Style style) { أرجع *rbegin(رستہ_2, style); }
 
-StringRef stem(StringRef path, Style style) {
-  StringRef fname = filename(path, style);
-  size_t pos = fname.find_last_of('.');
-  if (pos == StringRef::npos)
-    return fname;
-  if ((fname.size() == 1 && fname == ".") ||
-      (fname.size() == 2 && fname == ".."))
-    return fname;
-  return fname.substr(0, pos);
+StringRef stem(StringRef رستہ_2, Style style) {
+  StringRef fname = filename(رستہ_2, style);
+  size_t pos = fname.لبھو_آخری_دا('.');
+  إذا (pos == StringRef::npos)
+    أرجع fname;
+  إذا ((fname.ناپ_2() == 1 && fname == ".") ||
+      (fname.ناپ_2() == 2 && fname == ".."))
+    أرجع fname;
+  أرجع fname.substr(0, pos);
 }
 
-StringRef extension(StringRef path, Style style) {
-  StringRef fname = filename(path, style);
-  size_t pos = fname.find_last_of('.');
-  if (pos == StringRef::npos)
-    return StringRef();
-  if ((fname.size() == 1 && fname == ".") ||
-      (fname.size() == 2 && fname == ".."))
-    return StringRef();
-  return fname.substr(pos);
+StringRef extension(StringRef رستہ_2, Style style) {
+  StringRef fname = filename(رستہ_2, style);
+  size_t pos = fname.لبھو_آخری_دا('.');
+  إذا (pos == StringRef::npos)
+    أرجع StringRef();
+  إذا ((fname.ناپ_2() == 1 && fname == ".") ||
+      (fname.ناپ_2() == 2 && fname == ".."))
+    أرجع StringRef();
+  أرجع fname.substr(pos);
 }
 
-bool is_separator(char value, Style style) {
-  if (value == '/')
-    return true;
-  if (is_style_windows(style))
-    return value == '\\';
-  return false;
+منطقي is_separator(حرف قدر_2, Style style) {
+  إذا (قدر_2 == '/')
+    أرجع سچ;
+  إذا (is_style_windows(style))
+    أرجع قدر_2 == '\\';
+  أرجع خطأ;
 }
 
 StringRef get_separator(Style style) {
-  if (real_style(style) == Style::windows)
-    return "\\";
-  return "/";
+  إذا (real_style(style) == Style::windows)
+    أرجع "\\";
+  أرجع "/";
 }
 
-bool has_root_name(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_جڑ_name(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !root_name(p, style).empty();
+  أرجع !جڑ_name(p, style).خالی_تھاواں();
 }
 
-bool has_root_directory(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_جڑ_directory(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !root_directory(p, style).empty();
+  أرجع !جڑ_directory(p, style).خالی_تھاواں();
 }
 
-bool has_root_path(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_جڑ_رستہ(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !root_path(p, style).empty();
+  أرجع !جڑ_رستہ_2(p, style).خالی_تھاواں();
 }
 
-bool has_relative_path(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_relative_رستہ(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !relative_path(p, style).empty();
+  أرجع !relative_رستہ(p, style).خالی_تھاواں();
 }
 
-bool has_filename(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_filename(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !filename(p, style).empty();
+  أرجع !filename(p, style).خالی_تھاواں();
 }
 
-bool has_parent_path(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_ماپا_رستہ(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !parent_path(p, style).empty();
+  أرجع !ماپا_رستہ(p, style).خالی_تھاواں();
 }
 
-bool has_stem(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_stem(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !stem(p, style).empty();
+  أرجع !stem(p, style).خالی_تھاواں();
 }
 
-bool has_extension(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي has_extension(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  return !extension(p, style).empty();
+  أرجع !extension(p, style).خالی_تھاواں();
 }
 
-bool is_absolute(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي is_absolute(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
-  bool rootDir = has_root_directory(p, style);
-  bool rootName = is_style_posix(style) || has_root_name(p, style);
+  منطقي جڑ_Dir = has_جڑ_directory(p, style);
+  منطقي جڑ_Name = is_style_posix(style) || has_جڑ_name(p, style);
 
-  return rootDir && rootName;
+  أرجع جڑ_Dir && جڑ_Name;
 }
 
-bool is_absolute_gnu(const Twine &path, Style style) {
-  SmallString<128> path_storage;
-  StringRef p = path.toStringRef(path_storage);
+منطقي is_absolute_gnu(ثابت Twine &رستہ_2, Style style) {
+  SmallString<128> رستہ_storage;
+  StringRef p = رستہ_2.منزل_String_Ref(رستہ_storage);
 
   // Handle '/' which is absolute for both Windows and POSIX systems.
   // Handle '\\' on Windows.
-  if (!p.empty() && is_separator(p.front(), style))
-    return true;
+  إذا (!p.خالی_تھاواں() && is_separator(p.front(), style))
+    أرجع سچ;
 
-  if (is_style_windows(style)) {
+  إذا (is_style_windows(style)) {
     // Handle drive letter pattern (a character followed by ':') on Windows.
-    if (p.size() >= 2 && (p[0] && p[1] == ':'))
-      return true;
+    إذا (p.ناپ_2() >= 2 && (p[0] && p[1] == ':'))
+      أرجع سچ;
   }
 
-  return false;
+  أرجع خطأ;
 }
 
-bool is_relative(const Twine &path, Style style) {
-  return !is_absolute(path, style);
+منطقي is_relative(ثابت Twine &رستہ_2, Style style) {
+  أرجع !is_absolute(رستہ_2, style);
 }
 
-void make_absolute(const Twine &current_directory,
-                   SmallVectorImpl<char> &path) {
-  StringRef p(path.data(), path.size());
+فراغ make_absolute(ثابت Twine &current_directory,
+                   Small_سمتیہ_Impl<حرف> &رستہ_2) {
+  StringRef p(رستہ_2.انکڑے(), رستہ_2.ناپ_2());
 
-  bool rootDirectory = has_root_directory(p);
-  bool rootName = has_root_name(p);
+  منطقي جڑ_Directory = has_جڑ_directory(p);
+  منطقي جڑ_Name = has_جڑ_name(p);
 
   // Already absolute.
-  if ((rootName || is_style_posix(Style::native)) && rootDirectory)
-    return;
+  إذا ((جڑ_Name || is_style_posix(Style::native)) && جڑ_Directory)
+    أرجع;
 
   // All the following conditions will need the current directory.
   SmallString<128> current_dir;
-  current_directory.toVector(current_dir);
+  current_directory.منزل_سمتیہ(current_dir);
 
   // Relative path. Prepend the current directory.
-  if (!rootName && !rootDirectory) {
+  إذا (!جڑ_Name && !جڑ_Directory) {
     // Append path to the current directory.
     append(current_dir, p);
     // Set path to the result.
-    path.swap(current_dir);
-    return;
+    رستہ_2.وٹاندرا(current_dir);
+    أرجع;
   }
 
-  if (!rootName && rootDirectory) {
-    StringRef cdrn = root_name(current_dir);
-    SmallString<128> curDirRootName(cdrn.begin(), cdrn.end());
-    append(curDirRootName, p);
+  إذا (!جڑ_Name && جڑ_Directory) {
+    StringRef cdrn = جڑ_name(current_dir);
+    SmallString<128> cur_Dir_جڑ_Name(cdrn.begin(), cdrn.سرا());
+    append(cur_Dir_جڑ_Name, p);
     // Set path to the result.
-    path.swap(curDirRootName);
-    return;
+    رستہ_2.وٹاندرا(cur_Dir_جڑ_Name);
+    أرجع;
   }
 
-  if (rootName && !rootDirectory) {
-    StringRef pRootName = root_name(p);
-    StringRef bRootDirectory = root_directory(current_dir);
-    StringRef bRelativePath = relative_path(current_dir);
-    StringRef pRelativePath = relative_path(p);
+  إذا (جڑ_Name && !جڑ_Directory) {
+    StringRef p_جڑ_Name = جڑ_name(p);
+    StringRef b_جڑ_Directory = جڑ_directory(current_dir);
+    StringRef b_Relative_رستہ = relative_رستہ(current_dir);
+    StringRef p_Relative_رستہ = relative_رستہ(p);
 
     SmallString<128> res;
-    append(res, pRootName, bRootDirectory, bRelativePath, pRelativePath);
-    path.swap(res);
-    return;
+    append(res, p_جڑ_Name, b_جڑ_Directory, b_Relative_رستہ, p_Relative_رستہ);
+    رستہ_2.وٹاندرا(res);
+    أرجع;
   }
 
   llvm_unreachable("All rootName and rootDirectory combinations should have "
                    "occurred above!");
 }
 
-StringRef remove_leading_dotslash(StringRef Path, Style style) {
+StringRef remove_leading_dotslash(StringRef رستہ, Style style) {
   // Remove leading "./" (or ".//" or "././" etc.)
-  while (Path.size() > 2 && Path[0] == '.' && is_separator(Path[1], style)) {
-    Path = Path.substr(2);
-    while (Path.size() > 0 && is_separator(Path[0], style))
-      Path = Path.substr(1);
+  طالما (رستہ.ناپ_2() > 2 && رستہ[0] == '.' && is_separator(رستہ[1], style)) {
+    رستہ = رستہ.substr(2);
+    طالما (رستہ.ناپ_2() > 0 && is_separator(رستہ[0], style))
+      رستہ = رستہ.substr(1);
   }
-  return Path;
+  أرجع رستہ;
 }
 
-bool remove_dots(SmallVectorImpl<char> &the_path, bool remove_dot_dot,
+منطقي remove_dots(Small_سمتیہ_Impl<حرف> &the_رستہ, منطقي remove_dot_dot,
                  Style style) {
   style = real_style(style);
-  StringRef remaining(the_path.data(), the_path.size());
-  bool needs_change = false;
-  SmallVector<StringRef, 16> components;
+  StringRef بچیا_2(the_رستہ.انکڑے(), the_رستہ.ناپ_2());
+  منطقي needs_change = خطأ;
+  Small_سمتیہ<StringRef, 16> components;
 
   // Consume the root path, if present.
-  StringRef root = path::root_path(remaining, style);
-  bool absolute = !root.empty();
-  if (absolute)
-    remaining = remaining.drop_front(root.size());
+  StringRef جڑ_3 = رستہ_2::جڑ_رستہ_2(بچیا_2, style);
+  منطقي absolute = !جڑ_3.خالی_تھاواں();
+  إذا (absolute)
+    بچیا_2 = بچیا_2.drop_front(جڑ_3.ناپ_2());
 
   // Loop over path components manually. This makes it easier to detect
   // non-preferred slashes and double separators that must be canonicalized.
-  while (!remaining.empty()) {
-    size_t next_slash = remaining.find_first_of(separators(style));
-    if (next_slash == StringRef::npos)
-      next_slash = remaining.size();
-    StringRef component = remaining.take_front(next_slash);
-    remaining = remaining.drop_front(next_slash);
+  طالما (!بچیا_2.خالی_تھاواں()) {
+    size_t اگلا_slash = بچیا_2.لبھو_پہلا_دا(separators(style));
+    إذا (اگلا_slash == StringRef::npos)
+      اگلا_slash = بچیا_2.ناپ_2();
+    StringRef component = بچیا_2.take_front(اگلا_slash);
+    بچیا_2 = بچیا_2.drop_front(اگلا_slash);
 
     // Eat the slash, and check if it is the preferred separator.
-    if (!remaining.empty()) {
-      needs_change |= remaining.front() != preferred_separator(style);
-      remaining = remaining.drop_front();
+    إذا (!بچیا_2.خالی_تھاواں()) {
+      needs_change |= بچیا_2.front() != preferred_separator(style);
+      بچیا_2 = بچیا_2.drop_front();
       // The path needs to be rewritten if it has a trailing slash.
       // FIXME: This is emergent behavior that could be removed.
-      needs_change |= remaining.empty();
+      needs_change |= بچیا_2.خالی_تھاواں();
     }
 
     // Check for path traversal components or double separators.
-    if (component.empty() || component == ".") {
-      needs_change = true;
-    } else if (remove_dot_dot && component == "..") {
-      needs_change = true;
+    إذا (component.خالی_تھاواں() || component == ".") {
+      needs_change = سچ;
+    } وإلا إذا (remove_dot_dot && component == "..") {
+      needs_change = سچ;
       // Do not allow ".." to remove the root component. If this is the
       // beginning of a relative path, keep the ".." component.
-      if (!components.empty() && components.back() != "..") {
-        components.pop_back();
-      } else if (!absolute) {
-        components.push_back(component);
+      إذا (!components.خالی_تھاواں() && components.پٹھ() != "..") {
+        components.نکالو_پٹھ();
+      } وإلا إذا (!absolute) {
+        components.ڈالو_پٹھ(component);
       }
-    } else {
-      components.push_back(component);
+    } وإلا {
+      components.ڈالو_پٹھ(component);
     }
   }
 
-  SmallString<256> buffer = root;
+  SmallString<256> بفر_2 = جڑ_3;
   // "root" could be "/", which may need to be translated into "\".
-  make_preferred(buffer, style);
-  needs_change |= root != buffer;
+  make_preferred(بفر_2, style);
+  needs_change |= جڑ_3 != بفر_2;
 
   // Avoid rewriting the path unless we have to.
-  if (!needs_change)
-    return false;
+  إذا (!needs_change)
+    أرجع خطأ;
 
-  if (!components.empty()) {
-    buffer += components[0];
-    for (StringRef C : ArrayRef(components).drop_front()) {
-      buffer += preferred_separator(style);
-      buffer += C;
+  إذا (!components.خالی_تھاواں()) {
+    بفر_2 += components[0];
+    لكل (StringRef C : ArrayRef(components).drop_front()) {
+      بفر_2 += preferred_separator(style);
+      بفر_2 += C;
     }
   }
-  the_path.swap(buffer);
-  return true;
+  the_رستہ.وٹاندرا(بفر_2);
+  أرجع سچ;
 }
 
 } // end namespace path
 
-namespace fs {
+نطاق fs {
 
-std::error_code getUniqueID(const Twine Path, UniqueID &Result) {
+std::error_کوڈ getUniqueID(ثابت Twine رستہ, UniqueID &نتیجہ) {
   sandbox::violationIfEnabled();
 
-  file_status Status;
-  std::error_code EC = status(Path, Status);
-  if (EC)
-    return EC;
-  Result = Status.getUniqueID();
-  return std::error_code();
+  file_حالت حالت;
+  std::error_کوڈ EC = حالت_2(رستہ, حالت);
+  إذا (EC)
+    أرجع EC;
+  نتیجہ = حالت.getUniqueID();
+  أرجع std::error_کوڈ();
 }
 
-void createUniquePath(const Twine &Model, SmallVectorImpl<char> &ResultPath,
-                      bool MakeAbsolute) {
+فراغ create_Unique_رستہ(ثابت Twine &Model, Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ,
+                      منطقي MakeAbsolute) {
   SmallString<128> ModelStorage;
-  Model.toVector(ModelStorage);
+  Model.منزل_سمتیہ(ModelStorage);
 
-  assert(llvm::is_contained(ModelStorage, '%') &&
+  أكد(llvm::is_contained(ModelStorage, '%') &&
          "createUniquePath: Model must contain at least one '%'");
 
-  if (MakeAbsolute) {
+  إذا (MakeAbsolute) {
     // Make model absolute by prepending a temp directory if it's not already.
-    if (!sys::path::is_absolute(Twine(ModelStorage))) {
+    إذا (!sys::رستہ_2::is_absolute(Twine(ModelStorage))) {
       SmallString<128> TDir;
-      sys::path::system_temp_directory(true, TDir);
-      sys::path::append(TDir, Twine(ModelStorage));
-      ModelStorage.swap(TDir);
+      sys::رستہ_2::system_عارضی_directory(سچ, TDir);
+      sys::رستہ_2::append(TDir, Twine(ModelStorage));
+      ModelStorage.وٹاندرا(TDir);
     }
   }
 
-  ResultPath = ModelStorage;
-  ResultPath.push_back(0);
-  ResultPath.pop_back();
+  نتیجہ_رستہ = ModelStorage;
+  نتیجہ_رستہ.ڈالو_پٹھ(0);
+  نتیجہ_رستہ.نکالو_پٹھ();
 
   // Replace '%' with random chars.
-  for (unsigned i = 0, e = ModelStorage.size(); i != e; ++i) {
-    if (ModelStorage[i] == '%')
-      ResultPath[i] = "0123456789abcdef"[sys::Process::GetRandomNumber() & 15];
+  لكل (بنانشانی i = 0, e = ModelStorage.ناپ_2(); i != e; ++i) {
+    إذا (ModelStorage[i] == '%')
+      نتیجہ_رستہ[i] = "0123456789abcdef"[sys::Process::Get_Random_نمبر() & 15];
   }
 }
 
-std::error_code createUniqueFile(const Twine &Model, int &ResultFd,
-                                 SmallVectorImpl<char> &ResultPath,
-                                 OpenFlags Flags, unsigned Mode) {
-  return createUniqueEntity(Model, ResultFd, ResultPath, false, FS_File, Flags,
-                            Mode);
+std::error_کوڈ createUniqueFile(ثابت Twine &Model, صحيح &نتیجہ_Fd,
+                                 Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ,
+                                 OpenFlags Flags, بنانشانی منوال) {
+  أرجع createUniqueEntity(Model, نتیجہ_Fd, نتیجہ_رستہ, خطأ, FS_File, Flags,
+                            منوال);
 }
 
-std::error_code createUniqueFile(const Twine &Model,
-                                 SmallVectorImpl<char> &ResultPath,
-                                 unsigned Mode) {
-  int FD;
-  auto EC = createUniqueFile(Model, FD, ResultPath, OF_None, Mode);
-  if (EC)
-    return EC;
+std::error_کوڈ createUniqueFile(ثابت Twine &Model,
+                                 Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ,
+                                 بنانشانی منوال) {
+  صحيح FD;
+  خودکار EC = createUniqueFile(Model, FD, نتیجہ_رستہ, دا_None, منوال);
+  إذا (EC)
+    أرجع EC;
   // FD is only needed to avoid race conditions. Close it right away.
   close(FD);
-  return EC;
+  أرجع EC;
 }
 
-static std::error_code
-createTemporaryFile(const Twine &Model, int &ResultFD,
-                    llvm::SmallVectorImpl<char> &ResultPath, FSEntity Type,
-                    sys::fs::OpenFlags Flags = sys::fs::OF_None) {
+ساكن std::error_کوڈ
+createTemporaryFile(ثابت Twine &Model, صحيح &نتیجہ_FD,
+                    llvm::Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ, FSEntity Type,
+                    sys::fs::OpenFlags Flags = sys::fs::دا_None) {
   // Any *temporary* file is assumed to be a compiler-internal output, not
   // a formal one.
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  خودکار BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<128> Storage;
-  StringRef P = Model.toNullTerminatedStringRef(Storage);
-  assert(P.find_first_of(separators(Style::native)) == StringRef::npos &&
+  StringRef P = Model.منزل_Null_Terminated_String_Ref(Storage);
+  أكد(P.لبھو_پہلا_دا(separators(Style::native)) == StringRef::npos &&
          "Model must be a simple filename.");
   // Use P.begin() so that createUniqueEntity doesn't need to recreate Storage.
-  return createUniqueEntity(P.begin(), ResultFD, ResultPath, true, Type, Flags,
+  أرجع createUniqueEntity(P.begin(), نتیجہ_FD, نتیجہ_رستہ, سچ, Type, Flags,
                             all_read | all_write);
 }
 
-static std::error_code
-createTemporaryFile(const Twine &Prefix, StringRef Suffix, int &ResultFD,
-                    llvm::SmallVectorImpl<char> &ResultPath, FSEntity Type,
-                    sys::fs::OpenFlags Flags = sys::fs::OF_None) {
-  const char *Middle = Suffix.empty() ? "-%%%%%%" : "-%%%%%%.";
-  return createTemporaryFile(Prefix + Middle + Suffix, ResultFD, ResultPath,
+ساكن std::error_کوڈ
+createTemporaryFile(ثابت Twine &اگیتر, StringRef Suffix, صحيح &نتیجہ_FD,
+                    llvm::Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ, FSEntity Type,
+                    sys::fs::OpenFlags Flags = sys::fs::دا_None) {
+  ثابت حرف *درمیان = Suffix.خالی_تھاواں() ? "-%%%%%%" : "-%%%%%%.";
+  أرجع createTemporaryFile(اگیتر + درمیان + Suffix, نتیجہ_FD, نتیجہ_رستہ,
                              Type, Flags);
 }
 
-std::error_code createTemporaryFile(const Twine &Prefix, StringRef Suffix,
-                                    int &ResultFD,
-                                    SmallVectorImpl<char> &ResultPath,
+std::error_کوڈ createTemporaryFile(ثابت Twine &اگیتر, StringRef Suffix,
+                                    صحيح &نتیجہ_FD,
+                                    Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ,
                                     sys::fs::OpenFlags Flags) {
-  return createTemporaryFile(Prefix, Suffix, ResultFD, ResultPath, FS_File,
+  أرجع createTemporaryFile(اگیتر, Suffix, نتیجہ_FD, نتیجہ_رستہ, FS_File,
                              Flags);
 }
 
-std::error_code createTemporaryFile(const Twine &Prefix, StringRef Suffix,
-                                    SmallVectorImpl<char> &ResultPath,
+std::error_کوڈ createTemporaryFile(ثابت Twine &اگیتر, StringRef Suffix,
+                                    Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ,
                                     sys::fs::OpenFlags Flags) {
-  int FD;
-  auto EC = createTemporaryFile(Prefix, Suffix, FD, ResultPath, Flags);
-  if (EC)
-    return EC;
+  صحيح FD;
+  خودکار EC = createTemporaryFile(اگیتر, Suffix, FD, نتیجہ_رستہ, Flags);
+  إذا (EC)
+    أرجع EC;
   // FD is only needed to avoid race conditions. Close it right away.
   close(FD);
-  return EC;
+  أرجع EC;
 }
 
 // This is a mkdtemp with a different pattern. We use createUniqueEntity mostly
 // for consistency. We should try using mkdtemp.
-std::error_code createUniqueDirectory(const Twine &Prefix,
-                                      SmallVectorImpl<char> &ResultPath) {
-  int Dummy;
-  return createUniqueEntity(Prefix + "-%%%%%%", Dummy, ResultPath, true,
+std::error_کوڈ createUniqueDirectory(ثابت Twine &اگیتر,
+                                      Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ) {
+  صحيح Dummy;
+  أرجع createUniqueEntity(اگیتر + "-%%%%%%", Dummy, نتیجہ_رستہ, سچ,
                             FS_Dir);
 }
 
-std::error_code
-getPotentiallyUniqueFileName(const Twine &Model,
-                             SmallVectorImpl<char> &ResultPath) {
-  int Dummy;
-  return createUniqueEntity(Model, Dummy, ResultPath, false, FS_Name);
+std::error_کوڈ
+getPotentiallyUniqueFileName(ثابت Twine &Model,
+                             Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ) {
+  صحيح Dummy;
+  أرجع createUniqueEntity(Model, Dummy, نتیجہ_رستہ, خطأ, FS_Name);
 }
 
-std::error_code
-getPotentiallyUniqueTempFileName(const Twine &Prefix, StringRef Suffix,
-                                 SmallVectorImpl<char> &ResultPath) {
-  int Dummy;
-  return createTemporaryFile(Prefix, Suffix, Dummy, ResultPath, FS_Name);
+std::error_کوڈ
+get_Potentially_Unique_عارضی_File_Name(ثابت Twine &اگیتر, StringRef Suffix,
+                                 Small_سمتیہ_Impl<حرف> &نتیجہ_رستہ) {
+  صحيح Dummy;
+  أرجع createTemporaryFile(اگیتر, Suffix, Dummy, نتیجہ_رستہ, FS_Name);
 }
 
-std::error_code make_absolute(SmallVectorImpl<char> &path) {
+std::error_کوڈ make_absolute(Small_سمتیہ_Impl<حرف> &رستہ_2) {
   sandbox::violationIfEnabled();
 
-  if (path::is_absolute(path))
-    return {};
+  إذا (رستہ_2::is_absolute(رستہ_2))
+    أرجع {};
 
   SmallString<128> current_dir;
-  if (std::error_code ec = current_path(current_dir))
-    return ec;
+  إذا (std::error_کوڈ ec = current_رستہ(current_dir))
+    أرجع ec;
 
-  path::make_absolute(current_dir, path);
-  return {};
+  رستہ_2::make_absolute(current_dir, رستہ_2);
+  أرجع {};
 }
 
-std::error_code create_directories(const Twine &Path, bool IgnoreExisting,
+std::error_کوڈ create_directories(ثابت Twine &رستہ, منطقي IgnoreExisting,
                                    perms Perms) {
-  SmallString<128> PathStorage;
-  StringRef P = Path.toStringRef(PathStorage);
+  SmallString<128> رستہ_Storage;
+  StringRef P = رستہ.منزل_String_Ref(رستہ_Storage);
 
   // Be optimistic and try to create the directory
-  std::error_code EC = create_directory(P, IgnoreExisting, Perms);
+  std::error_کوڈ EC = create_directory(P, IgnoreExisting, Perms);
   // If we succeeded, or had any error other than the parent not existing, just
   // return it.
-  if (EC != errc::no_such_file_or_directory)
-    return EC;
+  إذا (EC != errc::no_such_file_or_directory)
+    أرجع EC;
 
   // We failed because of a no_such_file_or_directory, try to create the
   // parent.
-  StringRef Parent = path::parent_path(P);
-  if (Parent.empty())
-    return EC;
+  StringRef ماپا_2 = رستہ_2::ماپا_رستہ(P);
+  إذا (ماپا_2.خالی_تھاواں())
+    أرجع EC;
 
-  if ((EC = create_directories(Parent, IgnoreExisting, Perms)))
-      return EC;
+  إذا ((EC = create_directories(ماپا_2, IgnoreExisting, Perms)))
+      أرجع EC;
 
-  return create_directory(P, IgnoreExisting, Perms);
+  أرجع create_directory(P, IgnoreExisting, Perms);
 }
 
-static std::error_code copy_file_internal(int ReadFD, int WriteFD) {
-  const size_t BufSize = 4096;
-  char *Buf = new char[BufSize];
-  int BytesRead = 0, BytesWritten = 0;
-  for (;;) {
-    BytesRead = read(ReadFD, Buf, BufSize);
-    if (BytesRead <= 0)
-      break;
-    while (BytesRead) {
-      BytesWritten = write(WriteFD, Buf, BytesRead);
-      if (BytesWritten < 0)
-        break;
-      BytesRead -= BytesWritten;
+ساكن std::error_کوڈ copy_file_اندرونی(صحيح ReadFD, صحيح WriteFD) {
+  ثابت size_t Buf_ناپ = 4096;
+  حرف *Buf = جديد حرف[Buf_ناپ];
+  صحيح بائٹاں_Read = 0, بائٹاں_Written = 0;
+  لكل (;;) {
+    بائٹاں_Read = اقرأ(ReadFD, Buf, Buf_ناپ);
+    إذا (بائٹاں_Read <= 0)
+      اكسر;
+    طالما (بائٹاں_Read) {
+      بائٹاں_Written = اكتب(WriteFD, Buf, بائٹاں_Read);
+      إذا (بائٹاں_Written < 0)
+        اكسر;
+      بائٹاں_Read -= بائٹاں_Written;
     }
-    if (BytesWritten < 0)
-      break;
+    إذا (بائٹاں_Written < 0)
+      اكسر;
   }
-  delete[] Buf;
+  مٹاؤ[] Buf;
 
-  if (BytesRead < 0 || BytesWritten < 0)
-    return errnoAsErrorCode();
-  return std::error_code();
+  إذا (بائٹاں_Read < 0 || بائٹاں_Written < 0)
+    أرجع errno_As_Error_کوڈ();
+  أرجع std::error_کوڈ();
 }
 
-#ifndef __APPLE__
-std::error_code copy_file(const Twine &From, const Twine &To) {
-  int ReadFD, WriteFD;
-  if (std::error_code EC = openFileForRead(From, ReadFD, OF_None))
-    return EC;
-  if (std::error_code EC =
-          openFileForWrite(To, WriteFD, CD_CreateAlways, OF_None)) {
+#جے_بنا_تعریف __APPLE__
+std::error_کوڈ copy_file(ثابت Twine &From, ثابت Twine &منزل) {
+  صحيح ReadFD, WriteFD;
+  إذا (std::error_کوڈ EC = openFileForRead(From, ReadFD, دا_None))
+    أرجع EC;
+  إذا (std::error_کوڈ EC =
+          openFileForWrite(منزل, WriteFD, CD_CreateAlways, دا_None)) {
     close(ReadFD);
-    return EC;
+    أرجع EC;
   }
 
-  std::error_code EC = copy_file_internal(ReadFD, WriteFD);
+  std::error_کوڈ EC = copy_file_اندرونی(ReadFD, WriteFD);
 
   close(ReadFD);
   close(WriteFD);
 
-  return EC;
+  أرجع EC;
 }
-#endif
+#جے_انت
 
-std::error_code copy_file(const Twine &From, int ToFD) {
-  int ReadFD;
-  if (std::error_code EC = openFileForRead(From, ReadFD, OF_None))
-    return EC;
+std::error_کوڈ copy_file(ثابت Twine &From, صحيح منزل_FD) {
+  صحيح ReadFD;
+  إذا (std::error_کوڈ EC = openFileForRead(From, ReadFD, دا_None))
+    أرجع EC;
 
-  std::error_code EC = copy_file_internal(ReadFD, ToFD);
+  std::error_کوڈ EC = copy_file_اندرونی(ReadFD, منزل_FD);
 
   close(ReadFD);
 
-  return EC;
+  أرجع EC;
 }
 
-ErrorOr<MD5::MD5Result> md5_contents(int FD) {
+ErrorOr<MD5::MD5_نتیجہ> md5_contents(صحيح FD) {
   sandbox::violationIfEnabled();
 
   MD5 Hash;
 
-  constexpr size_t BufSize = 4096;
-  std::vector<uint8_t> Buf(BufSize);
-  int BytesRead = 0;
-  for (;;) {
-    BytesRead = read(FD, Buf.data(), BufSize);
-    if (BytesRead <= 0)
-      break;
-    Hash.update(ArrayRef(Buf.data(), BytesRead));
+  constexpr size_t Buf_ناپ = 4096;
+  std::سمتیہ<uint8_t> Buf(Buf_ناپ);
+  صحيح بائٹاں_Read = 0;
+  لكل (;;) {
+    بائٹاں_Read = اقرأ(FD, Buf.انکڑے(), Buf_ناپ);
+    إذا (بائٹاں_Read <= 0)
+      اكسر;
+    Hash.update(ArrayRef(Buf.انکڑے(), بائٹاں_Read));
   }
 
-  if (BytesRead < 0)
-    return errnoAsErrorCode();
-  MD5::MD5Result Result;
-  Hash.final(Result);
-  return Result;
+  إذا (بائٹاں_Read < 0)
+    أرجع errno_As_Error_کوڈ();
+  MD5::MD5_نتیجہ نتیجہ;
+  Hash.final(نتیجہ);
+  أرجع نتیجہ;
 }
 
-ErrorOr<MD5::MD5Result> md5_contents(const Twine &Path) {
+ErrorOr<MD5::MD5_نتیجہ> md5_contents(ثابت Twine &رستہ) {
   sandbox::violationIfEnabled();
 
-  int FD;
-  if (auto EC = openFileForRead(Path, FD, OF_None))
-    return EC;
+  صحيح FD;
+  إذا (خودکار EC = openFileForRead(رستہ, FD, دا_None))
+    أرجع EC;
 
-  auto Result = md5_contents(FD);
+  خودکار نتیجہ = md5_contents(FD);
   close(FD);
-  return Result;
+  أرجع نتیجہ;
 }
 
-bool exists(const basic_file_status &status) {
-  return status_known(status) && status.type() != file_type::file_not_found;
+منطقي exists(ثابت basic_file_حالت &حالت_2) {
+  أرجع حالت_معلوم(حالت_2) && حالت_2.type() != file_type::file_not_لبھیا;
 }
 
-bool status_known(const basic_file_status &s) {
-  return s.type() != file_type::status_error;
+منطقي حالت_معلوم(ثابت basic_file_حالت &s) {
+  أرجع s.type() != file_type::حالت_error;
 }
 
-file_type get_file_type(const Twine &Path, bool Follow) {
-  file_status st;
-  if (status(Path, st, Follow))
-    return file_type::status_error;
-  return st.type();
+file_type get_file_type(ثابت Twine &رستہ, منطقي Follow) {
+  file_حالت st;
+  إذا (حالت_2(رستہ, st, Follow))
+    أرجع file_type::حالت_error;
+  أرجع st.type();
 }
 
-bool is_directory(const basic_file_status &status) {
-  return status.type() == file_type::directory_file;
+منطقي is_directory(ثابت basic_file_حالت &حالت_2) {
+  أرجع حالت_2.type() == file_type::directory_file;
 }
 
-std::error_code is_directory(const Twine &path, bool &result) {
+std::error_کوڈ is_directory(ثابت Twine &رستہ_2, منطقي &نتیجہ_2) {
   sandbox::violationIfEnabled();
 
-  file_status st;
-  if (std::error_code ec = status(path, st))
-    return ec;
-  result = is_directory(st);
-  return std::error_code();
+  file_حالت st;
+  إذا (std::error_کوڈ ec = حالت_2(رستہ_2, st))
+    أرجع ec;
+  نتیجہ_2 = is_directory(st);
+  أرجع std::error_کوڈ();
 }
 
-bool is_regular_file(const basic_file_status &status) {
-  return status.type() == file_type::regular_file;
+منطقي is_regular_file(ثابت basic_file_حالت &حالت_2) {
+  أرجع حالت_2.type() == file_type::regular_file;
 }
 
-std::error_code is_regular_file(const Twine &path, bool &result) {
+std::error_کوڈ is_regular_file(ثابت Twine &رستہ_2, منطقي &نتیجہ_2) {
   sandbox::violationIfEnabled();
 
-  file_status st;
-  if (std::error_code ec = status(path, st))
-    return ec;
-  result = is_regular_file(st);
-  return std::error_code();
+  file_حالت st;
+  إذا (std::error_کوڈ ec = حالت_2(رستہ_2, st))
+    أرجع ec;
+  نتیجہ_2 = is_regular_file(st);
+  أرجع std::error_کوڈ();
 }
 
-bool is_symlink_file(const basic_file_status &status) {
-  return status.type() == file_type::symlink_file;
+منطقي is_symlink_file(ثابت basic_file_حالت &حالت_2) {
+  أرجع حالت_2.type() == file_type::symlink_file;
 }
 
-std::error_code is_symlink_file(const Twine &path, bool &result) {
+std::error_کوڈ is_symlink_file(ثابت Twine &رستہ_2, منطقي &نتیجہ_2) {
   sandbox::violationIfEnabled();
 
-  file_status st;
-  if (std::error_code ec = status(path, st, false))
-    return ec;
-  result = is_symlink_file(st);
-  return std::error_code();
+  file_حالت st;
+  إذا (std::error_کوڈ ec = حالت_2(رستہ_2, st, خطأ))
+    أرجع ec;
+  نتیجہ_2 = is_symlink_file(st);
+  أرجع std::error_کوڈ();
 }
 
-bool is_other(const basic_file_status &status) {
-  return exists(status) &&
-         !is_regular_file(status) &&
-         !is_directory(status);
+منطقي is_other(ثابت basic_file_حالت &حالت_2) {
+  أرجع exists(حالت_2) &&
+         !is_regular_file(حالت_2) &&
+         !is_directory(حالت_2);
 }
 
-std::error_code is_other(const Twine &Path, bool &Result) {
+std::error_کوڈ is_other(ثابت Twine &رستہ, منطقي &نتیجہ) {
   sandbox::violationIfEnabled();
 
-  file_status FileStatus;
-  if (std::error_code EC = status(Path, FileStatus))
-    return EC;
-  Result = is_other(FileStatus);
-  return std::error_code();
+  file_حالت File_حالت;
+  إذا (std::error_کوڈ EC = حالت_2(رستہ, File_حالت))
+    أرجع EC;
+  نتیجہ = is_other(File_حالت);
+  أرجع std::error_کوڈ();
 }
 
-void directory_entry::replace_filename(const Twine &Filename, file_type Type,
-                                       basic_file_status Status) {
-  SmallString<128> PathStr = path::parent_path(Path);
-  path::append(PathStr, Filename);
-  this->Path = std::string(PathStr);
-  this->Type = Type;
-  this->Status = Status;
+فراغ directory_اندراج::replace_filename(ثابت Twine &Filename, file_type Type,
+                                       basic_file_حالت حالت) {
+  SmallString<128> رستہ_Str = رستہ_2::ماپا_رستہ(رستہ);
+  رستہ_2::append(رستہ_Str, Filename);
+  هذا->رستہ = std::string(رستہ_Str);
+  هذا->Type = Type;
+  هذا->حالت = حالت;
 }
 
-ErrorOr<perms> getPermissions(const Twine &Path) {
+ErrorOr<perms> getPermissions(ثابت Twine &رستہ) {
   sandbox::violationIfEnabled();
 
-  file_status Status;
-  if (std::error_code EC = status(Path, Status))
-    return EC;
+  file_حالت حالت;
+  إذا (std::error_کوڈ EC = حالت_2(رستہ, حالت))
+    أرجع EC;
 
-  return Status.permissions();
+  أرجع حالت.permissions();
 }
 
-std::error_code setLastAccessAndModificationTime(const Twine &Path,
-                                                 TimePoint<> AccessTime,
-                                                 TimePoint<> ModificationTime) {
-  int FD;
-  if (std::error_code EC = openFile(Path, FD, CD_OpenExisting, FA_Read,
-                                    OF_UpdateAttributes | OF_OpenDirectory))
-    return EC;
-  std::error_code EC =
-      setLastAccessAndModificationTime(FD, AccessTime, ModificationTime);
+std::error_کوڈ سیٹ_آخری_Access_And_Modification_ویلا(ثابت Twine &رستہ,
+                                                 ویلا_نقطہ<> Access_ویلا,
+                                                 ویلا_نقطہ<> Modification_ویلا) {
+  صحيح FD;
+  إذا (std::error_کوڈ EC = openFile(رستہ, FD, CD_OpenExisting, FA_Read,
+                                    دا_Update_گن | دا_Open_Directory))
+    أرجع EC;
+  std::error_کوڈ EC =
+      سیٹ_آخری_Access_And_Modification_ویلا(FD, Access_ویلا, Modification_ویلا);
   Process::SafelyCloseFileDescriptor(FD);
-  return EC;
+  أرجع EC;
 }
 
-size_t mapped_file_region::size() const {
-  assert(Mapping && "Mapping failed but used anyway!");
-  return Size;
+size_t mapped_file_region::ناپ_2() ثابت {
+  أكد(Mapping && "Mapping failed but used anyway!");
+  أرجع ناپ;
 }
 
-char *mapped_file_region::data() const {
-  assert(Mapping && "Mapping failed but used anyway!");
-  return reinterpret_cast<char *>(Mapping);
+حرف *mapped_file_region::انکڑے() ثابت {
+  أكد(Mapping && "Mapping failed but used anyway!");
+  أرجع reinterpret_cast<حرف *>(Mapping);
 }
 
-const char *mapped_file_region::const_data() const {
-  assert(Mapping && "Mapping failed but used anyway!");
-  return reinterpret_cast<const char *>(Mapping);
+ثابت حرف *mapped_file_region::const_انکڑے() ثابت {
+  أكد(Mapping && "Mapping failed but used anyway!");
+  أرجع reinterpret_cast<ثابت حرف *>(Mapping);
 }
 
-Error readNativeFileToEOF(file_t FileHandle, SmallVectorImpl<char> &Buffer,
-                          ssize_t ChunkSize) {
+Error read_Native_File_منزل_EOF(file_t FileHandle, Small_سمتیہ_Impl<حرف> &بفر,
+                          ssize_t Chunk_ناپ) {
   sandbox::violationIfEnabled();
 
   // Install a handler to truncate the buffer to the correct size on exit.
-  size_t Size = Buffer.size();
-  llvm::scope_exit TruncateOnExit([&]() { Buffer.truncate(Size); });
+  size_t ناپ = بفر.ناپ_2();
+  llvm::scope_exit TruncateOnExit([&]() { بفر.truncate(ناپ); });
 
   // Read into Buffer until we hit EOF.
-  for (;;) {
-    Buffer.resize_for_overwrite(Size + ChunkSize);
-    Expected<size_t> ReadBytes = readNativeFile(
-        FileHandle, MutableArrayRef(Buffer.begin() + Size, ChunkSize));
-    if (!ReadBytes)
-      return ReadBytes.takeError();
-    if (*ReadBytes == 0)
-      return Error::success();
-    Size += *ReadBytes;
+  لكل (;;) {
+    بفر.resize_for_overwrite(ناپ + Chunk_ناپ);
+    Expected<size_t> Read_بائٹاں = readNativeFile(
+        FileHandle, MutableArrayRef(بفر.begin() + ناپ, Chunk_ناپ));
+    إذا (!Read_بائٹاں)
+      أرجع Read_بائٹاں.takeError();
+    إذا (*Read_بائٹاں == 0)
+      أرجع Error::success();
+    ناپ += *Read_بائٹاں;
   }
 }
 
@@ -1250,159 +1250,159 @@ Error readNativeFileToEOF(file_t FileHandle, SmallVectorImpl<char> &Buffer,
 } // end namespace llvm
 
 // Include the truly platform-specific parts.
-#if defined(LLVM_ON_UNIX)
-#include "Unix/Path.inc"
-#endif
-#if defined(_WIN32)
-#include "Windows/Path.inc"
-#endif
+#إذا defined(LLVM_ON_UNIX)
+#ضمن "Unix/Path.inc"
+#جے_انت
+#إذا defined(_WIN32)
+#ضمن "Windows/Path.inc"
+#جے_انت
 
-namespace llvm {
-namespace sys {
-namespace fs {
+نطاق llvm {
+نطاق sys {
+نطاق fs {
 
-TempFile::TempFile(StringRef Name, int FD)
+عارضی_File::عارضی_File(StringRef Name, صحيح FD)
     : TmpName(std::string(Name)), FD(FD) {}
-TempFile::TempFile(TempFile &&Other) { *this = std::move(Other); }
-TempFile &TempFile::operator=(TempFile &&Other) {
+عارضی_File::عارضی_File(عارضی_File &&Other) { *هذا = std::move(Other); }
+عارضی_File &عارضی_File::عامل=(عارضی_File &&Other) {
   TmpName = std::move(Other.TmpName);
   FD = Other.FD;
-  Other.Done = true;
+  Other.پورا = سچ;
   Other.FD = -1;
-#ifdef _WIN32
+#جے_تعریف_شدہ _WIN32
   RemoveOnClose = Other.RemoveOnClose;
-  Other.RemoveOnClose = false;
-#endif
-  return *this;
+  Other.RemoveOnClose = خطأ;
+#جے_انت
+  أرجع *هذا;
 }
 
-TempFile::~TempFile() { assert(Done); }
+عارضی_File::~عارضی_File() { أكد(پورا); }
 
-Error TempFile::discard() {
-  Done = true;
-  if (FD != -1 && close(FD) == -1) {
-    std::error_code EC = errnoAsErrorCode();
-    return errorCodeToError(EC);
+Error عارضی_File::discard() {
+  پورا = سچ;
+  إذا (FD != -1 && close(FD) == -1) {
+    std::error_کوڈ EC = errno_As_Error_کوڈ();
+    أرجع error_کوڈ_منزل_Error(EC);
   }
   FD = -1;
 
-#ifdef _WIN32
+#جے_تعریف_شدہ _WIN32
   // On Windows, closing will remove the file, if we set the delete
   // disposition. If not, remove it manually.
-  bool Remove = RemoveOnClose;
-#else
+  منطقي Remove = RemoveOnClose;
+#وإلا
   // Always try to remove the file.
-  bool Remove = true;
-#endif
-  std::error_code RemoveEC;
-  if (Remove && !TmpName.empty()) {
+  منطقي Remove = سچ;
+#جے_انت
+  std::error_کوڈ RemoveEC;
+  إذا (Remove && !TmpName.خالی_تھاواں()) {
     RemoveEC = fs::remove(TmpName);
     sys::DontRemoveFileOnSignal(TmpName);
-    if (!RemoveEC)
+    إذا (!RemoveEC)
       TmpName = "";
-  } else {
+  } وإلا {
     TmpName = "";
   }
-  return errorCodeToError(RemoveEC);
+  أرجع error_کوڈ_منزل_Error(RemoveEC);
 }
 
-Error TempFile::keep(const Twine &Name) {
-  assert(!Done);
-  Done = true;
+Error عارضی_File::keep(ثابت Twine &Name) {
+  أكد(!پورا);
+  پورا = سچ;
   // Always try to close and rename.
-#ifdef _WIN32
+#جے_تعریف_شدہ _WIN32
   // If we can't cancel the delete don't rename.
-  auto H = reinterpret_cast<HANDLE>(_get_osfhandle(FD));
-  std::error_code RenameEC =
-      RemoveOnClose ? std::error_code() : setDeleteDisposition(H, false);
-  bool ShouldDelete = false;
-  if (!RenameEC) {
+  خودکار H = reinterpret_cast<HANDLE>(_get_osfhandle(FD));
+  std::error_کوڈ RenameEC =
+      RemoveOnClose ? std::error_کوڈ() : سیٹ_Delete_Disposition(H, خطأ);
+  منطقي ShouldDelete = خطأ;
+  إذا (!RenameEC) {
     RenameEC = rename_handle(H, Name);
     // If rename failed because it's cross-device, copy instead
-    if (RenameEC ==
-      std::error_code(ERROR_NOT_SAME_DEVICE, std::system_category())) {
+    إذا (RenameEC ==
+      std::error_کوڈ(ERROR_NOT_SAME_DEVICE, std::system_category())) {
       RenameEC = copy_file(TmpName, Name);
-      ShouldDelete = true;
+      ShouldDelete = سچ;
     }
   }
 
   // If we can't rename or copy, discard the temporary file.
-  if (RenameEC)
-    ShouldDelete = true;
-  if (ShouldDelete) {
-    if (!RemoveOnClose)
-      setDeleteDisposition(H, true);
-    else
+  إذا (RenameEC)
+    ShouldDelete = سچ;
+  إذا (ShouldDelete) {
+    إذا (!RemoveOnClose)
+      سیٹ_Delete_Disposition(H, سچ);
+    وإلا
       remove(TmpName);
   }
-#else
-  std::error_code RenameEC = fs::rename(TmpName, Name);
-  if (RenameEC) {
+#وإلا
+  std::error_کوڈ RenameEC = fs::rename(TmpName, Name);
+  إذا (RenameEC) {
     // If we can't rename, try to copy to work around cross-device link issues.
     RenameEC = sys::fs::copy_file(TmpName, Name);
     // If we can't rename or copy, discard the temporary file.
-    if (RenameEC)
+    إذا (RenameEC)
       remove(TmpName);
   }
-#endif
+#جے_انت
   sys::DontRemoveFileOnSignal(TmpName);
 
-  if (!RenameEC)
+  إذا (!RenameEC)
     TmpName = "";
 
-  if (close(FD) == -1)
-    return errorCodeToError(errnoAsErrorCode());
+  إذا (close(FD) == -1)
+    أرجع error_کوڈ_منزل_Error(errno_As_Error_کوڈ());
   FD = -1;
 
-  return errorCodeToError(RenameEC);
+  أرجع error_کوڈ_منزل_Error(RenameEC);
 }
 
-Error TempFile::keep() {
-  assert(!Done);
-  Done = true;
+Error عارضی_File::keep() {
+  أكد(!پورا);
+  پورا = سچ;
 
-#ifdef _WIN32
-  auto H = reinterpret_cast<HANDLE>(_get_osfhandle(FD));
-  if (std::error_code EC = setDeleteDisposition(H, false))
-    return errorCodeToError(EC);
-#endif
+#جے_تعریف_شدہ _WIN32
+  خودکار H = reinterpret_cast<HANDLE>(_get_osfhandle(FD));
+  إذا (std::error_کوڈ EC = سیٹ_Delete_Disposition(H, خطأ))
+    أرجع error_کوڈ_منزل_Error(EC);
+#جے_انت
   sys::DontRemoveFileOnSignal(TmpName);
 
   TmpName = "";
 
-  if (close(FD) == -1)
-    return errorCodeToError(errnoAsErrorCode());
+  إذا (close(FD) == -1)
+    أرجع error_کوڈ_منزل_Error(errno_As_Error_کوڈ());
   FD = -1;
 
-  return Error::success();
+  أرجع Error::success();
 }
 
-Expected<TempFile> TempFile::create(const Twine &Model, unsigned Mode,
+Expected<عارضی_File> عارضی_File::create(ثابت Twine &Model, بنانشانی منوال,
                                     OpenFlags ExtraFlags) {
-  int FD;
-  SmallString<128> ResultPath;
-  if (std::error_code EC =
-          createUniqueFile(Model, FD, ResultPath, OF_Delete | ExtraFlags, Mode))
-    return errorCodeToError(EC);
+  صحيح FD;
+  SmallString<128> نتیجہ_رستہ;
+  إذا (std::error_کوڈ EC =
+          createUniqueFile(Model, FD, نتیجہ_رستہ, دا_Delete | ExtraFlags, منوال))
+    أرجع error_کوڈ_منزل_Error(EC);
 
-  TempFile Ret(ResultPath, FD);
-#ifdef _WIN32
-  auto H = reinterpret_cast<HANDLE>(_get_osfhandle(FD));
-  bool SetSignalHandler = false;
-  if (std::error_code EC = setDeleteDisposition(H, true)) {
-    Ret.RemoveOnClose = true;
-    SetSignalHandler = true;
+  عارضی_File Ret(نتیجہ_رستہ, FD);
+#جے_تعریف_شدہ _WIN32
+  خودکار H = reinterpret_cast<HANDLE>(_get_osfhandle(FD));
+  منطقي سیٹ_Signal_Handler = خطأ;
+  إذا (std::error_کوڈ EC = سیٹ_Delete_Disposition(H, سچ)) {
+    Ret.RemoveOnClose = سچ;
+    سیٹ_Signal_Handler = سچ;
   }
-#else
-  bool SetSignalHandler = true;
-#endif
-  if (SetSignalHandler && sys::RemoveFileOnSignal(ResultPath)) {
+#وإلا
+  منطقي سیٹ_Signal_Handler = سچ;
+#جے_انت
+  إذا (سیٹ_Signal_Handler && sys::RemoveFileOnSignal(نتیجہ_رستہ)) {
     // Make sure we delete the file when RemoveFileOnSignal fails.
     consumeError(Ret.discard());
-    std::error_code EC(errc::operation_not_permitted);
-    return errorCodeToError(EC);
+    std::error_کوڈ EC(errc::operation_not_permitted);
+    أرجع error_کوڈ_منزل_Error(EC);
   }
-  return std::move(Ret);
+  أرجع std::move(Ret);
 }
 } // namespace fs
 

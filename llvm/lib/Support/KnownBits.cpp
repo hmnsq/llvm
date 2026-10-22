@@ -11,369 +11,369 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/KnownBits.h"
-#include "llvm/ADT/Sequence.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#ضمن "llvm/Support/KnownBits.h"
+#ضمن "llvm/ADT/Sequence.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cassert>
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
-KnownBits KnownBits::flipSignBit(const KnownBits &Val) {
-  unsigned SignBitPosition = Val.getBitWidth() - 1;
+معلوم_بٹ معلوم_بٹ::flip_Sign_ثنائی_ہندسہ(ثابت معلوم_بٹ &Val) {
+  بنانشانی Sign_ثنائی_ہندسہ_Position = Val.get_ثنائی_ہندسہ_چوڑائی() - 1;
   APInt Zero = Val.Zero;
   APInt One = Val.One;
-  Zero.setBitVal(SignBitPosition, Val.One[SignBitPosition]);
-  One.setBitVal(SignBitPosition, Val.Zero[SignBitPosition]);
-  return KnownBits(Zero, One);
+  Zero.سیٹ_ثنائی_ہندسہ_Val(Sign_ثنائی_ہندسہ_Position, Val.One[Sign_ثنائی_ہندسہ_Position]);
+  One.سیٹ_ثنائی_ہندسہ_Val(Sign_ثنائی_ہندسہ_Position, Val.Zero[Sign_ثنائی_ہندسہ_Position]);
+  أرجع معلوم_بٹ(Zero, One);
 }
 
-static KnownBits computeForAddCarry(const KnownBits &LHS, const KnownBits &RHS,
-                                    bool CarryZero, bool CarryOne) {
+ساكن معلوم_بٹ compute_For_جوڑو_حاصل(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                                    منطقي حاصل_Zero, منطقي حاصل_One) {
 
-  APInt PossibleSumZero = LHS.getMaxValue() + RHS.getMaxValue() + !CarryZero;
-  APInt PossibleSumOne = LHS.getMinValue() + RHS.getMinValue() + CarryOne;
+  APInt Possible_جوڑ_Zero = LHS.get_Max_قدر() + RHS.get_Max_قدر() + !حاصل_Zero;
+  APInt Possible_جوڑ_One = LHS.get_Min_قدر() + RHS.get_Min_قدر() + حاصل_One;
 
   // Compute known bits of the carry.
-  APInt CarryKnownZero = ~(PossibleSumZero ^ LHS.Zero ^ RHS.Zero);
-  APInt CarryKnownOne = PossibleSumOne ^ LHS.One ^ RHS.One;
+  APInt حاصل_معلوم_Zero = ~(Possible_جوڑ_Zero ^ LHS.Zero ^ RHS.Zero);
+  APInt حاصل_معلوم_One = Possible_جوڑ_One ^ LHS.One ^ RHS.One;
 
   // Compute set of known bits (where all three relevant bits are known).
   APInt LHSKnownUnion = LHS.Zero | LHS.One;
   APInt RHSKnownUnion = RHS.Zero | RHS.One;
-  APInt CarryKnownUnion = std::move(CarryKnownZero) | CarryKnownOne;
-  APInt Known = std::move(LHSKnownUnion) & RHSKnownUnion & CarryKnownUnion;
+  APInt حاصل_معلوم_Union = std::move(حاصل_معلوم_Zero) | حاصل_معلوم_One;
+  APInt معلوم = std::move(LHSKnownUnion) & RHSKnownUnion & حاصل_معلوم_Union;
 
   // Compute known bits of the result.
-  KnownBits KnownOut;
-  KnownOut.Zero = ~std::move(PossibleSumZero) & Known;
-  KnownOut.One = std::move(PossibleSumOne) & Known;
-  return KnownOut;
+  معلوم_بٹ معلوم_باہرلا;
+  معلوم_باہرلا.Zero = ~std::move(Possible_جوڑ_Zero) & معلوم;
+  معلوم_باہرلا.One = std::move(Possible_جوڑ_One) & معلوم;
+  أرجع معلوم_باہرلا;
 }
 
-KnownBits KnownBits::computeForAddCarry(
-    const KnownBits &LHS, const KnownBits &RHS, const KnownBits &Carry) {
-  assert(Carry.getBitWidth() == 1 && "Carry must be 1-bit");
-  return ::computeForAddCarry(
-      LHS, RHS, Carry.Zero.getBoolValue(), Carry.One.getBoolValue());
+معلوم_بٹ معلوم_بٹ::compute_For_جوڑو_حاصل(
+    ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS, ثابت معلوم_بٹ &حاصل_2) {
+  أكد(حاصل_2.get_ثنائی_ہندسہ_چوڑائی() == 1 && "Carry must be 1-bit");
+  أرجع ::compute_For_جوڑو_حاصل(
+      LHS, RHS, حاصل_2.Zero.get_Bool_قدر(), حاصل_2.One.get_Bool_قدر());
 }
 
-KnownBits KnownBits::computeForAddSub(bool Add, bool NSW, bool NUW,
-                                      const KnownBits &LHS,
-                                      const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  KnownBits KnownOut(BitWidth);
+معلوم_بٹ معلوم_بٹ::compute_For_جوڑو_Sub(منطقي جوڑو_2, منطقي NSW, منطقي NUW,
+                                      ثابت معلوم_بٹ &LHS,
+                                      ثابت معلوم_بٹ &RHS) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ معلوم_باہرلا(ثنائی_ہندسہ_چوڑائی_2);
   // This can be a relatively expensive helper, so optimistically save some
   // work.
-  if (LHS.isUnknown() && RHS.isUnknown())
-    return KnownOut;
+  إذا (LHS.isUnknown() && RHS.isUnknown())
+    أرجع معلوم_باہرلا;
 
-  if (!LHS.isUnknown() && !RHS.isUnknown()) {
-    if (Add) {
+  إذا (!LHS.isUnknown() && !RHS.isUnknown()) {
+    إذا (جوڑو_2) {
       // Sum = LHS + RHS + 0
-      KnownOut = ::computeForAddCarry(LHS, RHS, /*CarryZero=*/true,
-                                      /*CarryOne=*/false);
-    } else {
+      معلوم_باہرلا = ::compute_For_جوڑو_حاصل(LHS, RHS, /*CarryZero=*/سچ,
+                                      /*CarryOne=*/خطأ);
+    } وإلا {
       // Sum = LHS + ~RHS + 1
-      KnownBits NotRHS = RHS;
-      std::swap(NotRHS.Zero, NotRHS.One);
-      KnownOut = ::computeForAddCarry(LHS, NotRHS, /*CarryZero=*/false,
-                                      /*CarryOne=*/true);
+      معلوم_بٹ NotRHS = RHS;
+      std::وٹاندرا(NotRHS.Zero, NotRHS.One);
+      معلوم_باہرلا = ::compute_For_جوڑو_حاصل(LHS, NotRHS, /*CarryZero=*/خطأ,
+                                      /*CarryOne=*/سچ);
     }
   }
 
   // Handle add/sub given nsw and/or nuw.
-  if (NUW) {
-    if (Add) {
+  إذا (NUW) {
+    إذا (جوڑو_2) {
       // (add nuw X, Y)
-      APInt MinVal = LHS.getMinValue().uadd_sat(RHS.getMinValue());
+      APInt MinVal = LHS.get_Min_قدر().uadd_sat(RHS.get_Min_قدر());
       // None of the adds can end up overflowing, so min consecutive highbits
       // in minimum possible of X + Y must all remain set.
-      if (NSW) {
-        unsigned NumBits = MinVal.trunc(BitWidth - 1).countl_one();
+      إذا (NSW) {
+        بنانشانی عدد_بٹ_2 = MinVal.trunc(ثنائی_ہندسہ_چوڑائی_2 - 1).countl_one();
         // If we have NSW as well, we also know we can't overflow the signbit so
         // can start counting from 1 bit back.
-        KnownOut.One.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
+        معلوم_باہرلا.One.سیٹ_بٹ(ثنائی_ہندسہ_چوڑائی_2 - 1 - عدد_بٹ_2, ثنائی_ہندسہ_چوڑائی_2 - 1);
       }
-      KnownOut.One.setHighBits(MinVal.countl_one());
-    } else {
+      معلوم_باہرلا.One.سیٹ_بلند_بٹ(MinVal.countl_one());
+    } وإلا {
       // (sub nuw X, Y)
-      APInt MaxVal = LHS.getMaxValue().usub_sat(RHS.getMinValue());
+      APInt MaxVal = LHS.get_Max_قدر().usub_sat(RHS.get_Min_قدر());
       // None of the subs can overflow at any point, so any common high bits
       // will subtract away and result in zeros.
-      if (NSW) {
+      إذا (NSW) {
         // If we have NSW as well, we also know we can't overflow the signbit so
         // can start counting from 1 bit back.
-        unsigned NumBits = MaxVal.trunc(BitWidth - 1).countl_zero();
-        KnownOut.Zero.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
+        بنانشانی عدد_بٹ_2 = MaxVal.trunc(ثنائی_ہندسہ_چوڑائی_2 - 1).countl_zero();
+        معلوم_باہرلا.Zero.سیٹ_بٹ(ثنائی_ہندسہ_چوڑائی_2 - 1 - عدد_بٹ_2, ثنائی_ہندسہ_چوڑائی_2 - 1);
       }
-      KnownOut.Zero.setHighBits(MaxVal.countl_zero());
+      معلوم_باہرلا.Zero.سیٹ_بلند_بٹ(MaxVal.countl_zero());
     }
   }
 
-  if (NSW) {
+  إذا (NSW) {
     APInt MinVal;
     APInt MaxVal;
-    if (Add) {
+    إذا (جوڑو_2) {
       // (add nsw X, Y)
-      MinVal = LHS.getSignedMinValue().sadd_sat(RHS.getSignedMinValue());
-      MaxVal = LHS.getSignedMaxValue().sadd_sat(RHS.getSignedMaxValue());
-    } else {
+      MinVal = LHS.get_Signed_Min_قدر().sadd_sat(RHS.get_Signed_Min_قدر());
+      MaxVal = LHS.get_Signed_Max_قدر().sadd_sat(RHS.get_Signed_Max_قدر());
+    } وإلا {
       // (sub nsw X, Y)
-      MinVal = LHS.getSignedMinValue().ssub_sat(RHS.getSignedMaxValue());
-      MaxVal = LHS.getSignedMaxValue().ssub_sat(RHS.getSignedMinValue());
+      MinVal = LHS.get_Signed_Min_قدر().ssub_sat(RHS.get_Signed_Max_قدر());
+      MaxVal = LHS.get_Signed_Max_قدر().ssub_sat(RHS.get_Signed_Min_قدر());
     }
-    if (MinVal.isNonNegative()) {
+    إذا (MinVal.isNonNegative()) {
       // If min is non-negative, result will always be non-neg (can't overflow
       // around).
-      unsigned NumBits = MinVal.trunc(BitWidth - 1).countl_one();
-      KnownOut.One.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
-      KnownOut.Zero.setSignBit();
+      بنانشانی عدد_بٹ_2 = MinVal.trunc(ثنائی_ہندسہ_چوڑائی_2 - 1).countl_one();
+      معلوم_باہرلا.One.سیٹ_بٹ(ثنائی_ہندسہ_چوڑائی_2 - 1 - عدد_بٹ_2, ثنائی_ہندسہ_چوڑائی_2 - 1);
+      معلوم_باہرلا.Zero.سیٹ_Sign_ثنائی_ہندسہ();
     }
-    if (MaxVal.isNegative()) {
+    إذا (MaxVal.isNegative()) {
       // If max is negative, result will always be neg (can't overflow around).
-      unsigned NumBits = MaxVal.trunc(BitWidth - 1).countl_zero();
-      KnownOut.Zero.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
-      KnownOut.One.setSignBit();
+      بنانشانی عدد_بٹ_2 = MaxVal.trunc(ثنائی_ہندسہ_چوڑائی_2 - 1).countl_zero();
+      معلوم_باہرلا.Zero.سیٹ_بٹ(ثنائی_ہندسہ_چوڑائی_2 - 1 - عدد_بٹ_2, ثنائی_ہندسہ_چوڑائی_2 - 1);
+      معلوم_باہرلا.One.سیٹ_Sign_ثنائی_ہندسہ();
     }
   }
 
   // Just return 0 if the nsw/nuw is violated and we have poison.
-  if (KnownOut.hasConflict())
-    KnownOut.setAllZero();
-  return KnownOut;
+  إذا (معلوم_باہرلا.hasConflict())
+    معلوم_باہرلا.سیٹ_All_Zero();
+  أرجع معلوم_باہرلا;
 }
 
-KnownBits KnownBits::computeForSubBorrow(const KnownBits &LHS, KnownBits RHS,
-                                         const KnownBits &Borrow) {
-  assert(Borrow.getBitWidth() == 1 && "Borrow must be 1-bit");
+معلوم_بٹ معلوم_بٹ::computeForSubBorrow(ثابت معلوم_بٹ &LHS, معلوم_بٹ RHS,
+                                         ثابت معلوم_بٹ &Borrow) {
+  أكد(Borrow.get_ثنائی_ہندسہ_چوڑائی() == 1 && "Borrow must be 1-bit");
 
   // LHS - RHS = LHS + ~RHS + 1
   // Carry 1 - Borrow in ::computeForAddCarry
-  std::swap(RHS.Zero, RHS.One);
-  return ::computeForAddCarry(LHS, RHS,
-                              /*CarryZero=*/Borrow.One.getBoolValue(),
-                              /*CarryOne=*/Borrow.Zero.getBoolValue());
+  std::وٹاندرا(RHS.Zero, RHS.One);
+  أرجع ::compute_For_جوڑو_حاصل(LHS, RHS,
+                              /*CarryZero=*/Borrow.One.get_Bool_قدر(),
+                              /*CarryOne=*/Borrow.Zero.get_Bool_قدر());
 }
 
-KnownBits KnownBits::truncSSat(unsigned BitWidth) const {
-  unsigned InputBits = getBitWidth();
-  APInt MinInRange = APInt::getSignedMinValue(BitWidth).sext(InputBits);
-  APInt MaxInRange = APInt::getSignedMaxValue(BitWidth).sext(InputBits);
-  APInt InputMin = getSignedMinValue();
-  APInt InputMax = getSignedMaxValue();
-  KnownBits Known(BitWidth);
+معلوم_بٹ معلوم_بٹ::truncSSat(بنانشانی ثنائی_ہندسہ_چوڑائی_2) ثابت {
+  بنانشانی داخلہ_بٹ = get_ثنائی_ہندسہ_چوڑائی();
+  APInt Min_وچ_Range = APInt::get_Signed_Min_قدر(ثنائی_ہندسہ_چوڑائی_2).sext(داخلہ_بٹ);
+  APInt Max_وچ_Range = APInt::get_Signed_Max_قدر(ثنائی_ہندسہ_چوڑائی_2).sext(داخلہ_بٹ);
+  APInt داخلہ_Min = get_Signed_Min_قدر();
+  APInt داخلہ_Max = get_Signed_Max_قدر();
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
 
   // Case 1: All values fit - just truncate
-  if (InputMin.sge(MinInRange) && InputMax.sle(MaxInRange)) {
-    Known = trunc(BitWidth);
+  إذا (داخلہ_Min.sge(Min_وچ_Range) && داخلہ_Max.sle(Max_وچ_Range)) {
+    معلوم = trunc(ثنائی_ہندسہ_چوڑائی_2);
   }
   // Case 2: All saturate to min
-  else if (InputMax.slt(MinInRange)) {
-    Known = KnownBits::makeConstant(APInt::getSignedMinValue(BitWidth));
+  وإلا إذا (داخلہ_Max.slt(Min_وچ_Range)) {
+    معلوم = معلوم_بٹ::makeConstant(APInt::get_Signed_Min_قدر(ثنائی_ہندسہ_چوڑائی_2));
   }
   // Case 3: All saturate to max
-  else if (InputMin.sgt(MaxInRange)) {
-    Known = KnownBits::makeConstant(APInt::getSignedMaxValue(BitWidth));
+  وإلا إذا (داخلہ_Min.sgt(Max_وچ_Range)) {
+    معلوم = معلوم_بٹ::makeConstant(APInt::get_Signed_Max_قدر(ثنائی_ہندسہ_چوڑائی_2));
   }
   // Case 4: All non-negative, some fit, some saturate to max
-  else if (InputMin.isNonNegative()) {
+  وإلا إذا (داخلہ_Min.isNonNegative()) {
     // Output: truncated OR max saturation
     // Max saturation has only sign bit as 0
-    Known.Zero = APInt(BitWidth, 0);
-    Known.Zero.setBit(BitWidth - 1); // Sign bit always 0
+    معلوم.Zero = APInt(ثنائی_ہندسہ_چوڑائی_2, 0);
+    معلوم.Zero.سیٹ_ثنائی_ہندسہ(ثنائی_ہندسہ_چوڑائی_2 - 1); // Sign bit always 0
     // Max saturation has all lower bits as 1, so preserve InputOneLower
-    Known.One = One.trunc(BitWidth);
-    Known.One.clearBit(BitWidth - 1); // Sign bit is 0, not 1
+    معلوم.One = One.trunc(ثنائی_ہندسہ_چوڑائی_2);
+    معلوم.One.clear_ثنائی_ہندسہ(ثنائی_ہندسہ_چوڑائی_2 - 1); // Sign bit is 0, not 1
   }
   // Case 5: All negative, some fit, some saturate to min
-  else if (InputMax.isNegative()) {
+  وإلا إذا (داخلہ_Max.isNegative()) {
     // Output: truncated OR min saturation
     // Min saturation has all lower bits as 0, so preserve InputZeroLower
-    Known.Zero = Zero.trunc(BitWidth);
-    Known.Zero.clearBit(BitWidth - 1); // Sign bit is 1, not 0
+    معلوم.Zero = Zero.trunc(ثنائی_ہندسہ_چوڑائی_2);
+    معلوم.Zero.clear_ثنائی_ہندسہ(ثنائی_ہندسہ_چوڑائی_2 - 1); // Sign bit is 1, not 0
     // Min saturation has only sign bit as 1
-    Known.One = APInt(BitWidth, 0);
-    Known.One.setBit(BitWidth - 1); // Sign bit always 1
+    معلوم.One = APInt(ثنائی_ہندسہ_چوڑائی_2, 0);
+    معلوم.One.سیٹ_ثنائی_ہندسہ(ثنائی_ہندسہ_چوڑائی_2 - 1); // Sign bit always 1
   }
   // Case 6: Mixed positive and negative
-  else {
+  وإلا {
     // Output: min saturation, truncated, or max saturation
-    APInt InputZeroLower = Zero.trunc(BitWidth);
-    APInt InputOneLower = One.trunc(BitWidth);
-    APInt MinSat = APInt::getSignedMinValue(BitWidth);
-    APInt MaxSat = APInt::getSignedMaxValue(BitWidth);
-    KnownBits MinSatKB = KnownBits::makeConstant(MinSat);
-    KnownBits MaxSatKB = KnownBits::makeConstant(MaxSat);
-    if (InputMax.sle(MaxInRange)) {
+    APInt داخلہ_Zero_ہیٹھلا = Zero.trunc(ثنائی_ہندسہ_چوڑائی_2);
+    APInt داخلہ_One_ہیٹھلا = One.trunc(ثنائی_ہندسہ_چوڑائی_2);
+    APInt MinSat = APInt::get_Signed_Min_قدر(ثنائی_ہندسہ_چوڑائی_2);
+    APInt MaxSat = APInt::get_Signed_Max_قدر(ثنائی_ہندسہ_چوڑائی_2);
+    معلوم_بٹ MinSatKB = معلوم_بٹ::makeConstant(MinSat);
+    معلوم_بٹ MaxSatKB = معلوم_بٹ::makeConstant(MaxSat);
+    إذا (داخلہ_Max.sle(Max_وچ_Range)) {
       // Positive values fit, only negatives saturate to min
-      Known.Zero = InputZeroLower & MinSatKB.Zero;
-      Known.One = InputOneLower & MinSatKB.One;
-    } else if (InputMin.sge(MinInRange)) {
+      معلوم.Zero = داخلہ_Zero_ہیٹھلا & MinSatKB.Zero;
+      معلوم.One = داخلہ_One_ہیٹھلا & MinSatKB.One;
+    } وإلا إذا (داخلہ_Min.sge(Min_وچ_Range)) {
       // Negative values fit, only positives saturate to max
-      Known.Zero = InputZeroLower & MaxSatKB.Zero;
-      Known.One = InputOneLower & MaxSatKB.One;
-    } else {
+      معلوم.Zero = داخلہ_Zero_ہیٹھلا & MaxSatKB.Zero;
+      معلوم.One = داخلہ_One_ہیٹھلا & MaxSatKB.One;
+    } وإلا {
       // Both positive and negative values might saturate
-      Known.Zero = InputZeroLower & MinSatKB.Zero & MaxSatKB.Zero;
-      Known.One = InputOneLower & MinSatKB.One & MaxSatKB.One;
+      معلوم.Zero = داخلہ_Zero_ہیٹھلا & MinSatKB.Zero & MaxSatKB.Zero;
+      معلوم.One = داخلہ_One_ہیٹھلا & MinSatKB.One & MaxSatKB.One;
     }
   }
-  return Known;
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::truncSSatU(unsigned BitWidth) const {
-  unsigned InputBits = getBitWidth();
-  APInt MaxInRange = APInt::getAllOnes(BitWidth).zext(InputBits);
-  APInt InputMin = getSignedMinValue();
-  APInt InputMax = getSignedMaxValue();
-  KnownBits Known(BitWidth);
+معلوم_بٹ معلوم_بٹ::truncSSatU(بنانشانی ثنائی_ہندسہ_چوڑائی_2) ثابت {
+  بنانشانی داخلہ_بٹ = get_ثنائی_ہندسہ_چوڑائی();
+  APInt Max_وچ_Range = APInt::getAllOnes(ثنائی_ہندسہ_چوڑائی_2).zext(داخلہ_بٹ);
+  APInt داخلہ_Min = get_Signed_Min_قدر();
+  APInt داخلہ_Max = get_Signed_Max_قدر();
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
 
-  if (isNegative()) {
-    Known.setAllZero();
-  } else if (InputMin.isNonNegative() && InputMax.ule(MaxInRange)) {
-    Known = trunc(BitWidth);
-  } else if (InputMin.isNonNegative() && InputMin.ugt(MaxInRange)) {
-    Known.setAllOnes();
-  } else if (InputMin.isNonNegative()) {
+  إذا (isNegative()) {
+    معلوم.سیٹ_All_Zero();
+  } وإلا إذا (داخلہ_Min.isNonNegative() && داخلہ_Max.ule(Max_وچ_Range)) {
+    معلوم = trunc(ثنائی_ہندسہ_چوڑائی_2);
+  } وإلا إذا (داخلہ_Min.isNonNegative() && داخلہ_Min.ugt(Max_وچ_Range)) {
+    معلوم.سیٹ_All_Ones();
+  } وإلا إذا (داخلہ_Min.isNonNegative()) {
     // All non-negative but mixed: some fit, some saturate to all-ones
     // No common zero bits (saturation is all-ones)
-    Known.Zero = APInt(BitWidth, 0);
+    معلوم.Zero = APInt(ثنائی_ہندسہ_چوڑائی_2, 0);
     // Common one bits: bits that are 1 in input stay 1
-    Known.One = One.trunc(BitWidth);
-  } else {
+    معلوم.One = One.trunc(ثنائی_ہندسہ_چوڑائی_2);
+  } وإلا {
     // Mixed: sign bit unknown
-    if (InputMax.ule(MaxInRange)) {
+    إذا (داخلہ_Max.ule(Max_وچ_Range)) {
       // Positive values all fit (no saturation to all-ones)
       // Output: all-zeros (negatives) OR truncated (positives)
-      Known.Zero = Zero.trunc(BitWidth);
-      Known.One = APInt(BitWidth, 0);
-    } else {
+      معلوم.Zero = Zero.trunc(ثنائی_ہندسہ_چوڑائی_2);
+      معلوم.One = APInt(ثنائی_ہندسہ_چوڑائی_2, 0);
+    } وإلا {
       // Positive values might saturate to all-ones
       // Output: all-zeros OR truncated OR all-ones
       // No common bits
-      Known.Zero = APInt(BitWidth, 0);
-      Known.One = APInt(BitWidth, 0);
+      معلوم.Zero = APInt(ثنائی_ہندسہ_چوڑائی_2, 0);
+      معلوم.One = APInt(ثنائی_ہندسہ_چوڑائی_2, 0);
     }
   }
-  return Known;
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::truncUSat(unsigned BitWidth) const {
-  unsigned InputBits = getBitWidth();
-  APInt MaxInRange = APInt::getLowBitsSet(InputBits, BitWidth);
-  APInt InputMax = getMaxValue();
-  APInt InputMin = getMinValue();
-  KnownBits Known(BitWidth);
+معلوم_بٹ معلوم_بٹ::truncUSat(بنانشانی ثنائی_ہندسہ_چوڑائی_2) ثابت {
+  بنانشانی داخلہ_بٹ = get_ثنائی_ہندسہ_چوڑائی();
+  APInt Max_وچ_Range = APInt::get_کم_بٹ_سیٹ(داخلہ_بٹ, ثنائی_ہندسہ_چوڑائی_2);
+  APInt داخلہ_Max = get_Max_قدر();
+  APInt داخلہ_Min = get_Min_قدر();
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
 
-  if (InputMax.ule(MaxInRange)) {
-    Known = trunc(BitWidth);
-  } else if (InputMin.ugt(MaxInRange)) {
-    Known.setAllOnes();
-  } else {
-    Known.resetAll();
-    Known.One = One.trunc(BitWidth);
+  إذا (داخلہ_Max.ule(Max_وچ_Range)) {
+    معلوم = trunc(ثنائی_ہندسہ_چوڑائی_2);
+  } وإلا إذا (داخلہ_Min.ugt(Max_وچ_Range)) {
+    معلوم.سیٹ_All_Ones();
+  } وإلا {
+    معلوم.resetAll();
+    معلوم.One = One.trunc(ثنائی_ہندسہ_چوڑائی_2);
   }
-  return Known;
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::sextInReg(unsigned SrcBitWidth) const {
-  unsigned BitWidth = getBitWidth();
-  assert(0 < SrcBitWidth && SrcBitWidth <= BitWidth &&
+معلوم_بٹ معلوم_بٹ::sext_وچ_Reg(بنانشانی Src_ثنائی_ہندسہ_چوڑائی) ثابت {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = get_ثنائی_ہندسہ_چوڑائی();
+  أكد(0 < Src_ثنائی_ہندسہ_چوڑائی && Src_ثنائی_ہندسہ_چوڑائی <= ثنائی_ہندسہ_چوڑائی_2 &&
          "Illegal sext-in-register");
 
-  if (SrcBitWidth == BitWidth)
-    return *this;
+  إذا (Src_ثنائی_ہندسہ_چوڑائی == ثنائی_ہندسہ_چوڑائی_2)
+    أرجع *هذا;
 
-  unsigned ExtBits = BitWidth - SrcBitWidth;
-  KnownBits Result;
-  Result.One = One << ExtBits;
-  Result.Zero = Zero << ExtBits;
-  Result.One.ashrInPlace(ExtBits);
-  Result.Zero.ashrInPlace(ExtBits);
-  return Result;
+  بنانشانی Ext_بٹ = ثنائی_ہندسہ_چوڑائی_2 - Src_ثنائی_ہندسہ_چوڑائی;
+  معلوم_بٹ نتیجہ;
+  نتیجہ.One = One << Ext_بٹ;
+  نتیجہ.Zero = Zero << Ext_بٹ;
+  نتیجہ.One.ashr_وچ_رکھو(Ext_بٹ);
+  نتیجہ.Zero.ashr_وچ_رکھو(Ext_بٹ);
+  أرجع نتیجہ;
 }
 
-KnownBits KnownBits::makeGE(const APInt &Val) const {
+معلوم_بٹ معلوم_بٹ::makeGE(ثابت APInt &Val) ثابت {
   // Count the number of leading bit positions where our underlying value is
   // known to be less than or equal to Val.
-  unsigned N = (Zero | Val).countl_one();
+  بنانشانی N = (Zero | Val).countl_one();
 
   // For each of those bit positions, if Val has a 1 in that bit then our
   // underlying value must also have a 1.
   APInt MaskedVal(Val);
-  MaskedVal.clearLowBits(getBitWidth() - N);
-  return KnownBits(Zero, One | MaskedVal);
+  MaskedVal.clear_کم_بٹ(get_ثنائی_ہندسہ_چوڑائی() - N);
+  أرجع معلوم_بٹ(Zero, One | MaskedVal);
 }
 
-KnownBits KnownBits::umax(const KnownBits &LHS, const KnownBits &RHS) {
+معلوم_بٹ معلوم_بٹ::umax(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // If we can prove that LHS >= RHS then use LHS as the result. Likewise for
   // RHS. Ideally our caller would already have spotted these cases and
   // optimized away the umax operation, but we handle them here for
   // completeness.
-  if (LHS.getMinValue().uge(RHS.getMaxValue()))
-    return LHS;
-  if (RHS.getMinValue().uge(LHS.getMaxValue()))
-    return RHS;
+  إذا (LHS.get_Min_قدر().uge(RHS.get_Max_قدر()))
+    أرجع LHS;
+  إذا (RHS.get_Min_قدر().uge(LHS.get_Max_قدر()))
+    أرجع RHS;
 
   // If the result of the umax is LHS then it must be greater than or equal to
   // the minimum possible value of RHS. Likewise for RHS. Any known bits that
   // are common to these two values are also known in the result.
-  KnownBits L = LHS.makeGE(RHS.getMinValue());
-  KnownBits R = RHS.makeGE(LHS.getMinValue());
-  return L.intersectWith(R);
+  معلوم_بٹ L = LHS.makeGE(RHS.get_Min_قدر());
+  معلوم_بٹ R = RHS.makeGE(LHS.get_Min_قدر());
+  أرجع L.intersectWith(R);
 }
 
-KnownBits KnownBits::umin(const KnownBits &LHS, const KnownBits &RHS) {
+معلوم_بٹ معلوم_بٹ::umin(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // Flip the range of values: [0, 0xFFFFFFFF] <-> [0xFFFFFFFF, 0]
-  auto Flip = [](const KnownBits &Val) { return KnownBits(Val.One, Val.Zero); };
-  return Flip(umax(Flip(LHS), Flip(RHS)));
+  خودکار Flip = [](ثابت معلوم_بٹ &Val) { أرجع معلوم_بٹ(Val.One, Val.Zero); };
+  أرجع Flip(umax(Flip(LHS), Flip(RHS)));
 }
 
-KnownBits KnownBits::smax(const KnownBits &LHS, const KnownBits &RHS) {
-  return flipSignBit(umax(flipSignBit(LHS), flipSignBit(RHS)));
+معلوم_بٹ معلوم_بٹ::smax(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع flip_Sign_ثنائی_ہندسہ(umax(flip_Sign_ثنائی_ہندسہ(LHS), flip_Sign_ثنائی_ہندسہ(RHS)));
 }
 
-KnownBits KnownBits::smin(const KnownBits &LHS, const KnownBits &RHS) {
+معلوم_بٹ معلوم_بٹ::smin(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // Flip the range of values: [-0x80000000, 0x7FFFFFFF] <-> [0xFFFFFFFF, 0]
-  auto Flip = [](const KnownBits &Val) {
-    unsigned SignBitPosition = Val.getBitWidth() - 1;
+  خودکار Flip = [](ثابت معلوم_بٹ &Val) {
+    بنانشانی Sign_ثنائی_ہندسہ_Position = Val.get_ثنائی_ہندسہ_چوڑائی() - 1;
     APInt Zero = Val.One;
     APInt One = Val.Zero;
-    Zero.setBitVal(SignBitPosition, Val.Zero[SignBitPosition]);
-    One.setBitVal(SignBitPosition, Val.One[SignBitPosition]);
-    return KnownBits(Zero, One);
+    Zero.سیٹ_ثنائی_ہندسہ_Val(Sign_ثنائی_ہندسہ_Position, Val.Zero[Sign_ثنائی_ہندسہ_Position]);
+    One.سیٹ_ثنائی_ہندسہ_Val(Sign_ثنائی_ہندسہ_Position, Val.One[Sign_ثنائی_ہندسہ_Position]);
+    أرجع معلوم_بٹ(Zero, One);
   };
-  return Flip(umax(Flip(LHS), Flip(RHS)));
+  أرجع Flip(umax(Flip(LHS), Flip(RHS)));
 }
 
-KnownBits KnownBits::abdu(const KnownBits &LHS, const KnownBits &RHS) {
+معلوم_بٹ معلوم_بٹ::abdu(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // If we know which argument is larger, return (sub LHS, RHS) or
   // (sub RHS, LHS) directly.
-  if (LHS.getMinValue().uge(RHS.getMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, LHS,
+  إذا (LHS.get_Min_قدر().uge(RHS.get_Max_قدر()))
+    أرجع compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/خطأ, LHS,
                             RHS);
-  if (RHS.getMinValue().uge(LHS.getMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, RHS,
+  إذا (RHS.get_Min_قدر().uge(LHS.get_Max_قدر()))
+    أرجع compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/خطأ, RHS,
                             LHS);
 
   // By construction, the subtraction in abdu never has unsigned overflow.
   // Find the common bits between (sub nuw LHS, RHS) and (sub nuw RHS, LHS).
-  KnownBits Diff0 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, LHS, RHS);
-  KnownBits Diff1 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, RHS, LHS);
-  return Diff0.intersectWith(Diff1);
+  معلوم_بٹ Diff0 =
+      compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/سچ, LHS, RHS);
+  معلوم_بٹ Diff1 =
+      compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/سچ, RHS, LHS);
+  أرجع Diff0.intersectWith(Diff1);
 }
 
-KnownBits KnownBits::abds(KnownBits LHS, KnownBits RHS) {
+معلوم_بٹ معلوم_بٹ::abds(معلوم_بٹ LHS, معلوم_بٹ RHS) {
   // If we know which argument is larger, return (sub LHS, RHS) or
   // (sub RHS, LHS) directly.
-  if (LHS.getSignedMinValue().sge(RHS.getSignedMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, LHS,
+  إذا (LHS.get_Signed_Min_قدر().sge(RHS.get_Signed_Max_قدر()))
+    أرجع compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/خطأ, LHS,
                             RHS);
-  if (RHS.getSignedMinValue().sge(LHS.getSignedMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, RHS,
+  إذا (RHS.get_Signed_Min_قدر().sge(LHS.get_Signed_Max_قدر()))
+    أرجع compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/خطأ, RHS,
                             LHS);
 
   // Shift both arguments from the signed range to the unsigned range, e.g. from
@@ -382,420 +382,420 @@ KnownBits KnownBits::abds(KnownBits LHS, KnownBits RHS) {
   // Note that we can't just use "sub nsw" instead because abds has signed
   // inputs but an unsigned result, which makes the overflow conditions
   // different.
-  unsigned SignBitPosition = LHS.getBitWidth() - 1;
-  for (auto Arg : {&LHS, &RHS}) {
-    bool Tmp = Arg->Zero[SignBitPosition];
-    Arg->Zero.setBitVal(SignBitPosition, Arg->One[SignBitPosition]);
-    Arg->One.setBitVal(SignBitPosition, Tmp);
+  بنانشانی Sign_ثنائی_ہندسہ_Position = LHS.get_ثنائی_ہندسہ_چوڑائی() - 1;
+  لكل (خودکار Arg : {&LHS, &RHS}) {
+    منطقي Tmp = Arg->Zero[Sign_ثنائی_ہندسہ_Position];
+    Arg->Zero.سیٹ_ثنائی_ہندسہ_Val(Sign_ثنائی_ہندسہ_Position, Arg->One[Sign_ثنائی_ہندسہ_Position]);
+    Arg->One.سیٹ_ثنائی_ہندسہ_Val(Sign_ثنائی_ہندسہ_Position, Tmp);
   }
 
   // Find the common bits between (sub nuw LHS, RHS) and (sub nuw RHS, LHS).
-  KnownBits Diff0 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, LHS, RHS);
-  KnownBits Diff1 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, RHS, LHS);
-  return Diff0.intersectWith(Diff1);
+  معلوم_بٹ Diff0 =
+      compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/سچ, LHS, RHS);
+  معلوم_بٹ Diff1 =
+      compute_For_جوڑو_Sub(/*Add=*/خطأ, /*NSW=*/خطأ, /*NUW=*/سچ, RHS, LHS);
+  أرجع Diff0.intersectWith(Diff1);
 }
 
-static unsigned getMaxShiftAmount(const APInt &MaxValue, unsigned BitWidth) {
-  if (isPowerOf2_32(BitWidth))
+ساكن بنانشانی get_Max_کھسکاؤ_Amount(ثابت APInt &Max_قدر, بنانشانی ثنائی_ہندسہ_چوڑائی_2) {
+  إذا (isPowerOf2_32(ثنائی_ہندسہ_چوڑائی_2))
     // Clamp to the shift amount's width: a narrower amount is already
     // < BitWidth, so this stays a valid upper bound.
-    return MaxValue.extractBitsAsZExtValue(
-        std::min(Log2_32(BitWidth), MaxValue.getBitWidth()), 0);
+    أرجع Max_قدر.کڈھو_بٹ_As_ZExt_قدر(
+        std::min(Log2_32(ثنائی_ہندسہ_چوڑائی_2), Max_قدر.get_ثنائی_ہندسہ_چوڑائی()), 0);
   // This is only an approximate upper bound.
-  return MaxValue.getLimitedValue(BitWidth - 1);
+  أرجع Max_قدر.get_Limited_قدر(ثنائی_ہندسہ_چوڑائی_2 - 1);
 }
 
-KnownBits KnownBits::shl(const KnownBits &LHS, const KnownBits &RHS, bool NUW,
-                         bool NSW, bool ShAmtNonZero) {
-  unsigned BitWidth = LHS.getBitWidth();
-  auto ShiftByConst = [&](const KnownBits &LHS, unsigned ShiftAmt) {
-    KnownBits Known;
-    bool ShiftedOutZero, ShiftedOutOne;
-    Known.Zero = LHS.Zero.ushl_ov(ShiftAmt, ShiftedOutZero);
-    Known.Zero.setLowBits(ShiftAmt);
-    Known.One = LHS.One.ushl_ov(ShiftAmt, ShiftedOutOne);
+معلوم_بٹ معلوم_بٹ::shl(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS, منطقي NUW,
+                         منطقي NSW, منطقي ShAmtNonZero) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  خودکار کھسکاؤ_By_Const = [&](ثابت معلوم_بٹ &LHS, بنانشانی کھسکاؤ_Amt_2) {
+    معلوم_بٹ معلوم;
+    منطقي Shifted_باہرلا_Zero, Shifted_باہرلا_One;
+    معلوم.Zero = LHS.Zero.ushl_ov(کھسکاؤ_Amt_2, Shifted_باہرلا_Zero);
+    معلوم.Zero.سیٹ_کم_بٹ(کھسکاؤ_Amt_2);
+    معلوم.One = LHS.One.ushl_ov(کھسکاؤ_Amt_2, Shifted_باہرلا_One);
 
     // All cases returning poison have been handled by MaxShiftAmount already.
-    if (NSW) {
-      if (NUW && ShiftAmt != 0)
+    إذا (NSW) {
+      إذا (NUW && کھسکاؤ_Amt_2 != 0)
         // NUW means we can assume anything shifted out was a zero.
-        ShiftedOutZero = true;
+        Shifted_باہرلا_Zero = سچ;
 
-      if (ShiftedOutZero)
-        Known.makeNonNegative();
-      else if (ShiftedOutOne)
-        Known.makeNegative();
+      إذا (Shifted_باہرلا_Zero)
+        معلوم.makeNonNegative();
+      وإلا إذا (Shifted_باہرلا_One)
+        معلوم.makeNegative();
     }
-    return Known;
+    أرجع معلوم;
   };
 
   // Fast path for a common case when LHS is completely unknown.
-  KnownBits Known(BitWidth);
-  unsigned MinShiftAmount = RHS.getMinValue().getLimitedValue(BitWidth);
-  if (MinShiftAmount == 0 && ShAmtNonZero)
-    MinShiftAmount = 1;
-  if (LHS.isUnknown()) {
-    Known.Zero.setLowBits(MinShiftAmount);
-    if (NUW && NSW && MinShiftAmount != 0)
-      Known.makeNonNegative();
-    return Known;
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
+  بنانشانی Min_کھسکاؤ_Amount = RHS.get_Min_قدر().get_Limited_قدر(ثنائی_ہندسہ_چوڑائی_2);
+  إذا (Min_کھسکاؤ_Amount == 0 && ShAmtNonZero)
+    Min_کھسکاؤ_Amount = 1;
+  إذا (LHS.isUnknown()) {
+    معلوم.Zero.سیٹ_کم_بٹ(Min_کھسکاؤ_Amount);
+    إذا (NUW && NSW && Min_کھسکاؤ_Amount != 0)
+      معلوم.makeNonNegative();
+    أرجع معلوم;
   }
 
   // Determine maximum shift amount, taking NUW/NSW flags into account.
-  APInt MaxValue = RHS.getMaxValue();
-  unsigned MaxShiftAmount = getMaxShiftAmount(MaxValue, BitWidth);
-  if (NUW && NSW)
-    MaxShiftAmount = std::min(MaxShiftAmount, LHS.countMaxLeadingZeros() - 1);
-  if (NUW)
-    MaxShiftAmount = std::min(MaxShiftAmount, LHS.countMaxLeadingZeros());
-  if (NSW)
-    MaxShiftAmount = std::min(
-        MaxShiftAmount,
-        std::max(LHS.countMaxLeadingZeros(), LHS.countMaxLeadingOnes()) - 1);
+  APInt Max_قدر = RHS.get_Max_قدر();
+  بنانشانی Max_کھسکاؤ_Amount = get_Max_کھسکاؤ_Amount(Max_قدر, ثنائی_ہندسہ_چوڑائی_2);
+  إذا (NUW && NSW)
+    Max_کھسکاؤ_Amount = std::min(Max_کھسکاؤ_Amount, LHS.گنتی_Max_Leading_Zeros() - 1);
+  إذا (NUW)
+    Max_کھسکاؤ_Amount = std::min(Max_کھسکاؤ_Amount, LHS.گنتی_Max_Leading_Zeros());
+  إذا (NSW)
+    Max_کھسکاؤ_Amount = std::min(
+        Max_کھسکاؤ_Amount,
+        std::max(LHS.گنتی_Max_Leading_Zeros(), LHS.گنتی_Max_Leading_Ones()) - 1);
 
   // Fast path for common case where the shift amount is unknown.
-  if (MinShiftAmount == 0 && MaxShiftAmount == BitWidth - 1 &&
-      isPowerOf2_32(BitWidth)) {
-    Known.Zero.setLowBits(LHS.countMinTrailingZeros());
-    if (LHS.isAllOnes())
-      Known.One.setSignBit();
-    if (NSW) {
-      if (LHS.isNonNegative())
-        Known.makeNonNegative();
-      if (LHS.isNegative())
-        Known.makeNegative();
+  إذا (Min_کھسکاؤ_Amount == 0 && Max_کھسکاؤ_Amount == ثنائی_ہندسہ_چوڑائی_2 - 1 &&
+      isPowerOf2_32(ثنائی_ہندسہ_چوڑائی_2)) {
+    معلوم.Zero.سیٹ_کم_بٹ(LHS.گنتی_Min_Trailing_Zeros());
+    إذا (LHS.isAllOnes())
+      معلوم.One.سیٹ_Sign_ثنائی_ہندسہ();
+    إذا (NSW) {
+      إذا (LHS.isNonNegative())
+        معلوم.makeNonNegative();
+      إذا (LHS.isNegative())
+        معلوم.makeNegative();
     }
-    return Known;
+    أرجع معلوم;
   }
 
   // Find the common bits from all possible shifts.
-  unsigned ShiftAmtZeroMask = RHS.Zero.zextOrTrunc(32).getZExtValue();
-  unsigned ShiftAmtOneMask = RHS.One.zextOrTrunc(32).getZExtValue();
-  Known.setAllConflict();
-  for (unsigned ShiftAmt = MinShiftAmount; ShiftAmt <= MaxShiftAmount;
-       ++ShiftAmt) {
+  بنانشانی کھسکاؤ_Amt_Zero_نقاب = RHS.Zero.zextOrTrunc(32).get_ZExt_قدر();
+  بنانشانی کھسکاؤ_Amt_One_نقاب = RHS.One.zextOrTrunc(32).get_ZExt_قدر();
+  معلوم.سیٹ_All_Conflict();
+  لكل (بنانشانی کھسکاؤ_Amt_2 = Min_کھسکاؤ_Amount; کھسکاؤ_Amt_2 <= Max_کھسکاؤ_Amount;
+       ++کھسکاؤ_Amt_2) {
     // Skip if the shift amount is impossible.
-    if ((ShiftAmtZeroMask & ShiftAmt) != 0 ||
-        (ShiftAmtOneMask | ShiftAmt) != ShiftAmt)
-      continue;
-    Known = Known.intersectWith(ShiftByConst(LHS, ShiftAmt));
-    if (Known.isUnknown())
-      break;
+    إذا ((کھسکاؤ_Amt_Zero_نقاب & کھسکاؤ_Amt_2) != 0 ||
+        (کھسکاؤ_Amt_One_نقاب | کھسکاؤ_Amt_2) != کھسکاؤ_Amt_2)
+      استمر;
+    معلوم = معلوم.intersectWith(کھسکاؤ_By_Const(LHS, کھسکاؤ_Amt_2));
+    إذا (معلوم.isUnknown())
+      اكسر;
   }
 
   // All shift amounts may result in poison.
-  if (Known.hasConflict())
-    Known.setAllZero();
-  return Known;
+  إذا (معلوم.hasConflict())
+    معلوم.سیٹ_All_Zero();
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::lshr(const KnownBits &LHS, const KnownBits &RHS,
-                          bool ShAmtNonZero, bool Exact) {
-  unsigned BitWidth = LHS.getBitWidth();
-  auto ShiftByConst = [&](const KnownBits &LHS, unsigned ShiftAmt) {
-    KnownBits Known = LHS;
-    Known >>= ShiftAmt;
+معلوم_بٹ معلوم_بٹ::lshr(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                          منطقي ShAmtNonZero, منطقي Exact) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  خودکار کھسکاؤ_By_Const = [&](ثابت معلوم_بٹ &LHS, بنانشانی کھسکاؤ_Amt_2) {
+    معلوم_بٹ معلوم = LHS;
+    معلوم >>= کھسکاؤ_Amt_2;
     // High bits are known zero.
-    Known.Zero.setHighBits(ShiftAmt);
-    return Known;
+    معلوم.Zero.سیٹ_بلند_بٹ(کھسکاؤ_Amt_2);
+    أرجع معلوم;
   };
 
   // Fast path for a common case when LHS is completely unknown.
-  KnownBits Known(BitWidth);
-  unsigned MinShiftAmount = RHS.getMinValue().getLimitedValue(BitWidth);
-  if (MinShiftAmount == 0 && ShAmtNonZero)
-    MinShiftAmount = 1;
-  if (LHS.isUnknown()) {
-    Known.Zero.setHighBits(MinShiftAmount);
-    return Known;
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
+  بنانشانی Min_کھسکاؤ_Amount = RHS.get_Min_قدر().get_Limited_قدر(ثنائی_ہندسہ_چوڑائی_2);
+  إذا (Min_کھسکاؤ_Amount == 0 && ShAmtNonZero)
+    Min_کھسکاؤ_Amount = 1;
+  إذا (LHS.isUnknown()) {
+    معلوم.Zero.سیٹ_بلند_بٹ(Min_کھسکاؤ_Amount);
+    أرجع معلوم;
   }
 
   // Find the common bits from all possible shifts.
-  APInt MaxValue = RHS.getMaxValue();
-  unsigned MaxShiftAmount = getMaxShiftAmount(MaxValue, BitWidth);
+  APInt Max_قدر = RHS.get_Max_قدر();
+  بنانشانی Max_کھسکاؤ_Amount = get_Max_کھسکاؤ_Amount(Max_قدر, ثنائی_ہندسہ_چوڑائی_2);
 
   // If exact, bound MaxShiftAmount to first known 1 in LHS.
-  if (Exact) {
-    unsigned FirstOne = LHS.countMaxTrailingZeros();
-    if (FirstOne < MinShiftAmount) {
+  إذا (Exact) {
+    بنانشانی پہلا_One = LHS.گنتی_Max_Trailing_Zeros();
+    إذا (پہلا_One < Min_کھسکاؤ_Amount) {
       // Always poison. Return zero because we don't like returning conflict.
-      Known.setAllZero();
-      return Known;
+      معلوم.سیٹ_All_Zero();
+      أرجع معلوم;
     }
-    MaxShiftAmount = std::min(MaxShiftAmount, FirstOne);
+    Max_کھسکاؤ_Amount = std::min(Max_کھسکاؤ_Amount, پہلا_One);
   }
 
-  unsigned ShiftAmtZeroMask = RHS.Zero.zextOrTrunc(32).getZExtValue();
-  unsigned ShiftAmtOneMask = RHS.One.zextOrTrunc(32).getZExtValue();
-  Known.setAllConflict();
-  for (unsigned ShiftAmt = MinShiftAmount; ShiftAmt <= MaxShiftAmount;
-       ++ShiftAmt) {
+  بنانشانی کھسکاؤ_Amt_Zero_نقاب = RHS.Zero.zextOrTrunc(32).get_ZExt_قدر();
+  بنانشانی کھسکاؤ_Amt_One_نقاب = RHS.One.zextOrTrunc(32).get_ZExt_قدر();
+  معلوم.سیٹ_All_Conflict();
+  لكل (بنانشانی کھسکاؤ_Amt_2 = Min_کھسکاؤ_Amount; کھسکاؤ_Amt_2 <= Max_کھسکاؤ_Amount;
+       ++کھسکاؤ_Amt_2) {
     // Skip if the shift amount is impossible.
-    if ((ShiftAmtZeroMask & ShiftAmt) != 0 ||
-        (ShiftAmtOneMask | ShiftAmt) != ShiftAmt)
-      continue;
-    Known = Known.intersectWith(ShiftByConst(LHS, ShiftAmt));
-    if (Known.isUnknown())
-      break;
+    إذا ((کھسکاؤ_Amt_Zero_نقاب & کھسکاؤ_Amt_2) != 0 ||
+        (کھسکاؤ_Amt_One_نقاب | کھسکاؤ_Amt_2) != کھسکاؤ_Amt_2)
+      استمر;
+    معلوم = معلوم.intersectWith(کھسکاؤ_By_Const(LHS, کھسکاؤ_Amt_2));
+    إذا (معلوم.isUnknown())
+      اكسر;
   }
 
   // All shift amounts may result in poison.
-  if (Known.hasConflict())
-    Known.setAllZero();
-  return Known;
+  إذا (معلوم.hasConflict())
+    معلوم.سیٹ_All_Zero();
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::ashr(const KnownBits &LHS, const KnownBits &RHS,
-                          bool ShAmtNonZero, bool Exact) {
-  unsigned BitWidth = LHS.getBitWidth();
-  auto ShiftByConst = [&](const KnownBits &LHS, unsigned ShiftAmt) {
-    KnownBits Known = LHS;
-    Known.Zero.ashrInPlace(ShiftAmt);
-    Known.One.ashrInPlace(ShiftAmt);
-    return Known;
+معلوم_بٹ معلوم_بٹ::ashr(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                          منطقي ShAmtNonZero, منطقي Exact) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  خودکار کھسکاؤ_By_Const = [&](ثابت معلوم_بٹ &LHS, بنانشانی کھسکاؤ_Amt_2) {
+    معلوم_بٹ معلوم = LHS;
+    معلوم.Zero.ashr_وچ_رکھو(کھسکاؤ_Amt_2);
+    معلوم.One.ashr_وچ_رکھو(کھسکاؤ_Amt_2);
+    أرجع معلوم;
   };
 
   // Fast path for a common case when LHS is completely unknown.
-  KnownBits Known(BitWidth);
-  unsigned MinShiftAmount = RHS.getMinValue().getLimitedValue(BitWidth);
-  if (MinShiftAmount == 0 && ShAmtNonZero)
-    MinShiftAmount = 1;
-  if (LHS.isUnknown()) {
-    if (MinShiftAmount == BitWidth) {
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
+  بنانشانی Min_کھسکاؤ_Amount = RHS.get_Min_قدر().get_Limited_قدر(ثنائی_ہندسہ_چوڑائی_2);
+  إذا (Min_کھسکاؤ_Amount == 0 && ShAmtNonZero)
+    Min_کھسکاؤ_Amount = 1;
+  إذا (LHS.isUnknown()) {
+    إذا (Min_کھسکاؤ_Amount == ثنائی_ہندسہ_چوڑائی_2) {
       // Always poison. Return zero because we don't like returning conflict.
-      Known.setAllZero();
-      return Known;
+      معلوم.سیٹ_All_Zero();
+      أرجع معلوم;
     }
-    return Known;
+    أرجع معلوم;
   }
 
   // Find the common bits from all possible shifts.
-  APInt MaxValue = RHS.getMaxValue();
-  unsigned MaxShiftAmount = getMaxShiftAmount(MaxValue, BitWidth);
+  APInt Max_قدر = RHS.get_Max_قدر();
+  بنانشانی Max_کھسکاؤ_Amount = get_Max_کھسکاؤ_Amount(Max_قدر, ثنائی_ہندسہ_چوڑائی_2);
 
   // If exact, bound MaxShiftAmount to first known 1 in LHS.
-  if (Exact) {
-    unsigned FirstOne = LHS.countMaxTrailingZeros();
-    if (FirstOne < MinShiftAmount) {
+  إذا (Exact) {
+    بنانشانی پہلا_One = LHS.گنتی_Max_Trailing_Zeros();
+    إذا (پہلا_One < Min_کھسکاؤ_Amount) {
       // Always poison. Return zero because we don't like returning conflict.
-      Known.setAllZero();
-      return Known;
+      معلوم.سیٹ_All_Zero();
+      أرجع معلوم;
     }
-    MaxShiftAmount = std::min(MaxShiftAmount, FirstOne);
+    Max_کھسکاؤ_Amount = std::min(Max_کھسکاؤ_Amount, پہلا_One);
   }
 
-  unsigned ShiftAmtZeroMask = RHS.Zero.zextOrTrunc(32).getZExtValue();
-  unsigned ShiftAmtOneMask = RHS.One.zextOrTrunc(32).getZExtValue();
-  Known.setAllConflict();
-  for (unsigned ShiftAmt = MinShiftAmount; ShiftAmt <= MaxShiftAmount;
-      ++ShiftAmt) {
+  بنانشانی کھسکاؤ_Amt_Zero_نقاب = RHS.Zero.zextOrTrunc(32).get_ZExt_قدر();
+  بنانشانی کھسکاؤ_Amt_One_نقاب = RHS.One.zextOrTrunc(32).get_ZExt_قدر();
+  معلوم.سیٹ_All_Conflict();
+  لكل (بنانشانی کھسکاؤ_Amt_2 = Min_کھسکاؤ_Amount; کھسکاؤ_Amt_2 <= Max_کھسکاؤ_Amount;
+      ++کھسکاؤ_Amt_2) {
     // Skip if the shift amount is impossible.
-    if ((ShiftAmtZeroMask & ShiftAmt) != 0 ||
-        (ShiftAmtOneMask | ShiftAmt) != ShiftAmt)
-      continue;
-    Known = Known.intersectWith(ShiftByConst(LHS, ShiftAmt));
-    if (Known.isUnknown())
-      break;
+    إذا ((کھسکاؤ_Amt_Zero_نقاب & کھسکاؤ_Amt_2) != 0 ||
+        (کھسکاؤ_Amt_One_نقاب | کھسکاؤ_Amt_2) != کھسکاؤ_Amt_2)
+      استمر;
+    معلوم = معلوم.intersectWith(کھسکاؤ_By_Const(LHS, کھسکاؤ_Amt_2));
+    إذا (معلوم.isUnknown())
+      اكسر;
   }
 
   // All shift amounts may result in poison.
-  if (Known.hasConflict())
-    Known.setAllZero();
-  return Known;
+  إذا (معلوم.hasConflict())
+    معلوم.سیٹ_All_Zero();
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::fshl(const KnownBits &LHS, const KnownBits &RHS,
-                          const APInt &Amt) {
-  return KnownBits(APIntOps::fshl(LHS.Zero, RHS.Zero, Amt),
+معلوم_بٹ معلوم_بٹ::fshl(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                          ثابت APInt &Amt) {
+  أرجع معلوم_بٹ(APIntOps::fshl(LHS.Zero, RHS.Zero, Amt),
                    APIntOps::fshl(LHS.One, RHS.One, Amt));
 }
 
-KnownBits KnownBits::fshr(const KnownBits &LHS, const KnownBits &RHS,
-                          const APInt &Amt) {
-  return KnownBits(APIntOps::fshr(LHS.Zero, RHS.Zero, Amt),
+معلوم_بٹ معلوم_بٹ::fshr(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                          ثابت APInt &Amt) {
+  أرجع معلوم_بٹ(APIntOps::fshr(LHS.Zero, RHS.Zero, Amt),
                    APIntOps::fshr(LHS.One, RHS.One, Amt));
 }
 
-KnownBits KnownBits::clmul(const KnownBits &LHS, const KnownBits &RHS) {
-  KnownBits Res =
-      makeConstant(APIntOps::clmul(LHS.getMinValue(), RHS.getMinValue()));
+معلوم_بٹ معلوم_بٹ::clmul(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  معلوم_بٹ Res =
+      makeConstant(APIntOps::clmul(LHS.get_Min_قدر(), RHS.get_Min_قدر()));
 
   // This is the same operation as clmul except it accumulates the result with
   // an OR instead of an XOR.
-  auto ClMulOr = [](const APInt &LHS, const APInt &RHS) {
-    unsigned BW = LHS.getBitWidth();
-    assert(BW == RHS.getBitWidth() && "Operand mismatch");
-    APInt Result(BW, 0);
-    for (unsigned I :
-         seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
-      if (RHS[I])
-        Result |= LHS << I;
-    return Result;
+  خودکار ClMulOr = [](ثابت APInt &LHS, ثابت APInt &RHS) {
+    بنانشانی BW = LHS.get_ثنائی_ہندسہ_چوڑائی();
+    أكد(BW == RHS.get_ثنائی_ہندسہ_چوڑائی() && "Operand mismatch");
+    APInt نتیجہ(BW, 0);
+    لكل (بنانشانی I :
+         seq(std::min(RHS.get_سرگرم_بٹ(), BW - LHS.countr_zero())))
+      إذا (RHS[I])
+        نتیجہ |= LHS << I;
+    أرجع نتیجہ;
   };
 
   // Bits in the result are known if, for every corresponding pair of input
   // bits, both input bits are known or either input bit is known to be zero.
-  APInt Known = ~(ClMulOr(~LHS.Zero & ~LHS.One, ~RHS.Zero) |
+  APInt معلوم = ~(ClMulOr(~LHS.Zero & ~LHS.One, ~RHS.Zero) |
                   ClMulOr(~LHS.Zero, ~RHS.Zero & ~RHS.One));
-  Res.Zero &= Known;
-  Res.One &= Known;
+  Res.Zero &= معلوم;
+  Res.One &= معلوم;
 
-  return Res;
+  أرجع Res;
 }
 
-KnownBits KnownBits::pext(const KnownBits &Val, const KnownBits &Mask) {
-  unsigned BitWidth = Val.getBitWidth();
-  KnownBits Res(BitWidth);
+معلوم_بٹ معلوم_بٹ::pext(ثابت معلوم_بٹ &Val, ثابت معلوم_بٹ &نقاب) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = Val.get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ Res(ثنائی_ہندسہ_چوڑائی_2);
   // We start by asserting that bits cannot be 0 and cannot be 1, then clear
   // Res bits where we know a bit could have some value.
-  Res.setAllConflict();
+  Res.سیٹ_All_Conflict();
 
   // For each source position I where Mask[I] could be 1, the output position J
   // lies in [M0, M1], where M0 and M1 track the range of possible 1-bit counts
   // seen so far in Mask. Note that M0=M1 as long as bits in Mask are known;
   // otherwise, the range of possible output positions widens.
-  unsigned M0 = 0, M1 = 0;
-  for (unsigned I = 0; I < BitWidth; ++I) {
-    if (!Mask.Zero[I]) {
+  بنانشانی M0 = 0, M1 = 0;
+  لكل (بنانشانی I = 0; I < ثنائی_ہندسہ_چوڑائی_2; ++I) {
+    إذا (!نقاب.Zero[I]) {
       // Mask[I] could be 1, so we decide what value the Res bits could have.
-      if (!Val.Zero[I])
+      إذا (!Val.Zero[I])
         // Val[I] could be 1 => Res[J] for J in [M0, M1] could be 1
-        Res.Zero.clearBits(M0, M1 + 1);
-      if (!Val.One[I])
+        Res.Zero.clear_بٹ(M0, M1 + 1);
+      إذا (!Val.One[I])
         // Val[I] could be 0 => Res[J] for J in [M0, M1] could be 0
-        Res.One.clearBits(M0, M1 + 1);
+        Res.One.clear_بٹ(M0, M1 + 1);
     }
-    if (Mask.One[I])
+    إذا (نقاب.One[I])
       ++M0, ++M1;
-    else if (!Mask.Zero[I])
+    وإلا إذا (!نقاب.Zero[I])
       ++M1;
   }
 
   // Output bits at J >= M0 may have no source (popcount(Mask) may be <= J), so
   // they may be 0.
-  Res.One.clearBits(M0, BitWidth);
-  return Res;
+  Res.One.clear_بٹ(M0, ثنائی_ہندسہ_چوڑائی_2);
+  أرجع Res;
 }
 
-KnownBits KnownBits::pdep(const KnownBits &Val, const KnownBits &Mask) {
-  unsigned BitWidth = Val.getBitWidth();
-  KnownBits Res(BitWidth);
+معلوم_بٹ معلوم_بٹ::pdep(ثابت معلوم_بٹ &Val, ثابت معلوم_بٹ &نقاب) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = Val.get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ Res(ثنائی_ہندسہ_چوڑائی_2);
   // We start by asserting that bits cannot be 0 and cannot be 1, then clear
   // Res bits where we know a bit could have some value.
-  Res.setAllConflict();
+  Res.سیٹ_All_Conflict();
 
   // For each output position I where Mask[I] could be 1, the source position J
   // lies in [M0, M1], where M0 and M1 track the range of possible 1-bit counts
   // seen so far in Mask. Note that M0=M1 as long as bits in Mask are known;
   // otherwise, the range of possible source positions widens.
-  unsigned M0 = 0, M1 = 0;
-  for (unsigned I = 0; I < BitWidth; ++I) {
-    if (!Mask.One[I])
+  بنانشانی M0 = 0, M1 = 0;
+  لكل (بنانشانی I = 0; I < ثنائی_ہندسہ_چوڑائی_2; ++I) {
+    إذا (!نقاب.One[I])
       // Mask[I] could be 0 => Res[I] could be 0
-      Res.One.clearBit(I);
-    if (!Mask.Zero[I]) {
+      Res.One.clear_ثنائی_ہندسہ(I);
+    إذا (!نقاب.Zero[I]) {
       // Mask[I] could be 1, so we check what value the Val bits could have.
-      APInt Range = APInt::getBitsSet(BitWidth, M0, M1 + 1);
-      if (!Range.isSubsetOf(Val.One))
+      APInt Range = APInt::get_بٹ_سیٹ(ثنائی_ہندسہ_چوڑائی_2, M0, M1 + 1);
+      إذا (!Range.is_Subset_دا(Val.One))
         // Any Val[J] for J in [M0, M1] could be 0 => Res[I] could be 0
-        Res.One.clearBit(I);
-      if (!Range.isSubsetOf(Val.Zero))
+        Res.One.clear_ثنائی_ہندسہ(I);
+      إذا (!Range.is_Subset_دا(Val.Zero))
         // Any Val[J] for J in [M0, M1] could be 1 => Res[I] could be 1
-        Res.Zero.clearBit(I);
+        Res.Zero.clear_ثنائی_ہندسہ(I);
     }
-    if (Mask.One[I])
+    إذا (نقاب.One[I])
       ++M0, ++M1;
-    else if (!Mask.Zero[I])
+    وإلا إذا (!نقاب.Zero[I])
       ++M1;
   }
-  return Res;
+  أرجع Res;
 }
 
-std::optional<bool> KnownBits::eq(const KnownBits &LHS, const KnownBits &RHS) {
-  if (LHS.isConstant() && RHS.isConstant())
-    return LHS.getConstant() == RHS.getConstant();
-  if (LHS.One.intersects(RHS.Zero) || RHS.One.intersects(LHS.Zero))
-    return false;
-  return std::nullopt;
+std::optional<منطقي> معلوم_بٹ::eq(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  إذا (LHS.isConstant() && RHS.isConstant())
+    أرجع LHS.getConstant() == RHS.getConstant();
+  إذا (LHS.One.intersects(RHS.Zero) || RHS.One.intersects(LHS.Zero))
+    أرجع خطأ;
+  أرجع std::nullopt;
 }
 
-std::optional<bool> KnownBits::ne(const KnownBits &LHS, const KnownBits &RHS) {
-  if (std::optional<bool> KnownEQ = eq(LHS, RHS))
-    return !*KnownEQ;
-  return std::nullopt;
+std::optional<منطقي> معلوم_بٹ::ne(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  إذا (std::optional<منطقي> معلوم_EQ = eq(LHS, RHS))
+    أرجع !*معلوم_EQ;
+  أرجع std::nullopt;
 }
 
-std::optional<bool> KnownBits::ugt(const KnownBits &LHS, const KnownBits &RHS) {
+std::optional<منطقي> معلوم_بٹ::ugt(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // LHS >u RHS -> false if umax(LHS) <= umax(RHS)
-  if (LHS.getMaxValue().ule(RHS.getMinValue()))
-    return false;
+  إذا (LHS.get_Max_قدر().ule(RHS.get_Min_قدر()))
+    أرجع خطأ;
   // LHS >u RHS -> true if umin(LHS) > umax(RHS)
-  if (LHS.getMinValue().ugt(RHS.getMaxValue()))
-    return true;
-  return std::nullopt;
+  إذا (LHS.get_Min_قدر().ugt(RHS.get_Max_قدر()))
+    أرجع سچ;
+  أرجع std::nullopt;
 }
 
-std::optional<bool> KnownBits::uge(const KnownBits &LHS, const KnownBits &RHS) {
-  if (std::optional<bool> IsUGT = ugt(RHS, LHS))
-    return !*IsUGT;
-  return std::nullopt;
+std::optional<منطقي> معلوم_بٹ::uge(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  إذا (std::optional<منطقي> IsUGT = ugt(RHS, LHS))
+    أرجع !*IsUGT;
+  أرجع std::nullopt;
 }
 
-std::optional<bool> KnownBits::ult(const KnownBits &LHS, const KnownBits &RHS) {
-  return ugt(RHS, LHS);
+std::optional<منطقي> معلوم_بٹ::ult(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع ugt(RHS, LHS);
 }
 
-std::optional<bool> KnownBits::ule(const KnownBits &LHS, const KnownBits &RHS) {
-  return uge(RHS, LHS);
+std::optional<منطقي> معلوم_بٹ::ule(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع uge(RHS, LHS);
 }
 
-std::optional<bool> KnownBits::sgt(const KnownBits &LHS, const KnownBits &RHS) {
+std::optional<منطقي> معلوم_بٹ::sgt(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // LHS >s RHS -> false if smax(LHS) <= smax(RHS)
-  if (LHS.getSignedMaxValue().sle(RHS.getSignedMinValue()))
-    return false;
+  إذا (LHS.get_Signed_Max_قدر().sle(RHS.get_Signed_Min_قدر()))
+    أرجع خطأ;
   // LHS >s RHS -> true if smin(LHS) > smax(RHS)
-  if (LHS.getSignedMinValue().sgt(RHS.getSignedMaxValue()))
-    return true;
-  return std::nullopt;
+  إذا (LHS.get_Signed_Min_قدر().sgt(RHS.get_Signed_Max_قدر()))
+    أرجع سچ;
+  أرجع std::nullopt;
 }
 
-std::optional<bool> KnownBits::sge(const KnownBits &LHS, const KnownBits &RHS) {
-  if (std::optional<bool> KnownSGT = sgt(RHS, LHS))
-    return !*KnownSGT;
-  return std::nullopt;
+std::optional<منطقي> معلوم_بٹ::sge(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  إذا (std::optional<منطقي> معلوم_SGT = sgt(RHS, LHS))
+    أرجع !*معلوم_SGT;
+  أرجع std::nullopt;
 }
 
-std::optional<bool> KnownBits::slt(const KnownBits &LHS, const KnownBits &RHS) {
-  return sgt(RHS, LHS);
+std::optional<منطقي> معلوم_بٹ::slt(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع sgt(RHS, LHS);
 }
 
-std::optional<bool> KnownBits::sle(const KnownBits &LHS, const KnownBits &RHS) {
-  return sge(RHS, LHS);
+std::optional<منطقي> معلوم_بٹ::sle(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع sge(RHS, LHS);
 }
 
-KnownBits KnownBits::abs(bool IntMinIsPoison) const {
+معلوم_بٹ معلوم_بٹ::مطلق_قدر(منطقي IntMinIsPoison) ثابت {
   // If the source's MSB is zero then we know the rest of the bits already.
-  if (isNonNegative())
-    return *this;
+  إذا (isNonNegative())
+    أرجع *هذا;
 
   // Absolute value preserves trailing zero count.
-  KnownBits KnownAbs(getBitWidth());
+  معلوم_بٹ معلوم_Abs(get_ثنائی_ہندسہ_چوڑائی());
 
   // If the input is negative, then abs(x) == -x.
-  if (isNegative()) {
-    KnownBits Tmp = *this;
+  إذا (isNegative()) {
+    معلوم_بٹ Tmp = *هذا;
     // Special case for IntMinIsPoison. We know the sign bit is set and we know
     // all the rest of the bits except one to be zero. Since we have
     // IntMinIsPoison, that final bit MUST be a one, as otherwise the input is
     // INT_MIN.
-    if (IntMinIsPoison && (Zero.popcount() + 2) == getBitWidth())
-      Tmp.One.setBit(countMinTrailingZeros());
+    إذا (IntMinIsPoison && (Zero.popcount() + 2) == get_ثنائی_ہندسہ_چوڑائی())
+      Tmp.One.سیٹ_ثنائی_ہندسہ(گنتی_Min_Trailing_Zeros());
 
-    KnownAbs = computeForAddSub(
-        /*Add*/ false, IntMinIsPoison, /*NUW=*/false,
-        KnownBits::makeConstant(APInt(getBitWidth(), 0)), Tmp);
+    معلوم_Abs = compute_For_جوڑو_Sub(
+        /*جوڑو*/ خطأ, IntMinIsPoison, /*NUW=*/خطأ,
+        معلوم_بٹ::makeConstant(APInt(get_ثنائی_ہندسہ_چوڑائی(), 0)), Tmp);
 
     // One more special case for IntMinIsPoison. If we don't know any ones other
     // than the signbit, we know for certain that all the unknowns can't be
@@ -804,45 +804,45 @@ KnownBits KnownBits::abs(bool IntMinIsPoison) const {
     // the low bits can't be all zeros, so the +1 in (~x + 1) cannot carry up
     // to the high bits. If we know a known INT_MIN input skip this. The result
     // is poison anyways.
-    if (IntMinIsPoison && Tmp.countMinPopulation() == 1 &&
-        Tmp.countMaxPopulation() != 1) {
-      Tmp.One.clearSignBit();
-      Tmp.Zero.setSignBit();
-      KnownAbs.One.setBits(getBitWidth() - Tmp.countMinLeadingZeros(),
-                           getBitWidth() - 1);
+    إذا (IntMinIsPoison && Tmp.گنتی_Min_Population() == 1 &&
+        Tmp.گنتی_Max_Population() != 1) {
+      Tmp.One.clear_Sign_ثنائی_ہندسہ();
+      Tmp.Zero.سیٹ_Sign_ثنائی_ہندسہ();
+      معلوم_Abs.One.سیٹ_بٹ(get_ثنائی_ہندسہ_چوڑائی() - Tmp.گنتی_Min_Leading_Zeros(),
+                           get_ثنائی_ہندسہ_چوڑائی() - 1);
     }
 
-  } else {
-    unsigned MaxTZ = countMaxTrailingZeros();
-    unsigned MinTZ = countMinTrailingZeros();
+  } وإلا {
+    بنانشانی MaxTZ = گنتی_Max_Trailing_Zeros();
+    بنانشانی MinTZ = گنتی_Min_Trailing_Zeros();
 
-    KnownAbs.Zero.setLowBits(MinTZ);
+    معلوم_Abs.Zero.سیٹ_کم_بٹ(MinTZ);
     // If we know the lowest set 1, then preserve it.
-    if (MaxTZ == MinTZ && MaxTZ < getBitWidth())
-      KnownAbs.One.setBit(MaxTZ);
+    إذا (MaxTZ == MinTZ && MaxTZ < get_ثنائی_ہندسہ_چوڑائی())
+      معلوم_Abs.One.سیٹ_ثنائی_ہندسہ(MaxTZ);
 
     // We only know that the absolute values's MSB will be zero if INT_MIN is
     // poison, or there is a set bit that isn't the sign bit (otherwise it could
     // be INT_MIN).
-    if (IntMinIsPoison || (!One.isZero() && !One.isMinSignedValue())) {
-      KnownAbs.One.clearSignBit();
-      KnownAbs.Zero.setSignBit();
+    إذا (IntMinIsPoison || (!One.isZero() && !One.is_Min_Signed_قدر())) {
+      معلوم_Abs.One.clear_Sign_ثنائی_ہندسہ();
+      معلوم_Abs.Zero.سیٹ_Sign_ثنائی_ہندسہ();
     }
   }
 
-  return KnownAbs;
+  أرجع معلوم_Abs;
 }
 
-KnownBits KnownBits::reduceAdd(unsigned NumElts) const {
-  if (NumElts == 0)
-    return KnownBits(getBitWidth());
+معلوم_بٹ معلوم_بٹ::reduce_جوڑو(بنانشانی عدد_Elts) ثابت {
+  إذا (عدد_Elts == 0)
+    أرجع معلوم_بٹ(get_ثنائی_ہندسہ_چوڑائی());
 
-  unsigned BitWidth = getBitWidth();
-  KnownBits Result(BitWidth);
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ نتیجہ(ثنائی_ہندسہ_چوڑائی_2);
 
-  if (isConstant())
+  إذا (isConstant())
     // If all elements are the same constant, we can simply compute it
-    return KnownBits::makeConstant(NumElts * getConstant());
+    أرجع معلوم_بٹ::makeConstant(عدد_Elts * getConstant());
 
   // The main idea is as follows.
   //
@@ -858,222 +858,222 @@ KnownBits KnownBits::reduceAdd(unsigned NumElts) const {
   //   L' = L - ceil(log2(N))
   //
   // Similar logic can be applied to leading ones.
-  unsigned LostBits = Log2_32_Ceil(NumElts);
+  بنانشانی گواچا_بٹ = Log2_32_Ceil(عدد_Elts);
 
-  if (isNonNegative()) {
-    unsigned LeadingZeros = countMinLeadingZeros();
-    LeadingZeros = LeadingZeros > LostBits ? LeadingZeros - LostBits : 0;
-    Result.Zero.setHighBits(LeadingZeros);
-  } else if (isNegative()) {
-    unsigned LeadingOnes = countMinLeadingOnes();
-    LeadingOnes = LeadingOnes > LostBits ? LeadingOnes - LostBits : 0;
-    Result.One.setHighBits(LeadingOnes);
+  إذا (isNonNegative()) {
+    بنانشانی LeadingZeros = گنتی_Min_Leading_Zeros();
+    LeadingZeros = LeadingZeros > گواچا_بٹ ? LeadingZeros - گواچا_بٹ : 0;
+    نتیجہ.Zero.سیٹ_بلند_بٹ(LeadingZeros);
+  } وإلا إذا (isNegative()) {
+    بنانشانی LeadingOnes = گنتی_Min_Leading_Ones();
+    LeadingOnes = LeadingOnes > گواچا_بٹ ? LeadingOnes - گواچا_بٹ : 0;
+    نتیجہ.One.سیٹ_بلند_بٹ(LeadingOnes);
   }
 
-  return Result;
+  أرجع نتیجہ;
 }
 
-static KnownBits computeForSatAddSub(bool Add, bool Signed,
-                                     const KnownBits &LHS,
-                                     const KnownBits &RHS) {
+ساكن معلوم_بٹ compute_For_Sat_جوڑو_Sub(منطقي جوڑو_2, منطقي Signed,
+                                     ثابت معلوم_بٹ &LHS,
+                                     ثابت معلوم_بٹ &RHS) {
   // We don't see NSW even for sadd/ssub as we want to check if the result has
   // signed overflow.
-  unsigned BitWidth = LHS.getBitWidth();
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
 
-  std::optional<bool> Overflow;
+  std::optional<منطقي> حد_توں_ودھ;
   // Even if we can't entirely rule out overflow, we may be able to rule out
   // overflow in one direction. This allows us to potentially keep some of the
   // add/sub bits. I.e if we can't overflow in the positive direction we won't
   // clamp to INT_MAX so we can keep low 0s from the add/sub result.
-  bool MayNegClamp = true;
-  bool MayPosClamp = true;
-  if (Signed) {
+  منطقي MayNegClamp = سچ;
+  منطقي MayPosClamp = سچ;
+  إذا (Signed) {
     // Easy cases we can rule out any overflow.
-    if (Add && ((LHS.isNegative() && RHS.isNonNegative()) ||
+    إذا (جوڑو_2 && ((LHS.isNegative() && RHS.isNonNegative()) ||
                 (LHS.isNonNegative() && RHS.isNegative())))
-      Overflow = false;
-    else if (!Add && (((LHS.isNegative() && RHS.isNegative()) ||
+      حد_توں_ودھ = خطأ;
+    وإلا إذا (!جوڑو_2 && (((LHS.isNegative() && RHS.isNegative()) ||
                        (LHS.isNonNegative() && RHS.isNonNegative()))))
-      Overflow = false;
-    else {
+      حد_توں_ودھ = خطأ;
+    وإلا {
       // Check if we may overflow. If we can't rule out overflow then check if
       // we can rule out a direction at least.
-      KnownBits UnsignedLHS = LHS;
-      KnownBits UnsignedRHS = RHS;
+      معلوم_بٹ UnsignedLHS = LHS;
+      معلوم_بٹ UnsignedRHS = RHS;
       // Get version of LHS/RHS with clearer signbit. This allows us to detect
       // how the addition/subtraction might overflow into the signbit. Then
       // using the actual known signbits of LHS/RHS, we can figure out which
       // overflows are/aren't possible.
-      UnsignedLHS.One.clearSignBit();
-      UnsignedLHS.Zero.setSignBit();
-      UnsignedRHS.One.clearSignBit();
-      UnsignedRHS.Zero.setSignBit();
-      KnownBits Res =
-          KnownBits::computeForAddSub(Add, /*NSW=*/false,
-                                      /*NUW=*/false, UnsignedLHS, UnsignedRHS);
-      if (Add) {
-        if (Res.isNegative()) {
+      UnsignedLHS.One.clear_Sign_ثنائی_ہندسہ();
+      UnsignedLHS.Zero.سیٹ_Sign_ثنائی_ہندسہ();
+      UnsignedRHS.One.clear_Sign_ثنائی_ہندسہ();
+      UnsignedRHS.Zero.سیٹ_Sign_ثنائی_ہندسہ();
+      معلوم_بٹ Res =
+          معلوم_بٹ::compute_For_جوڑو_Sub(جوڑو_2, /*NSW=*/خطأ,
+                                      /*NUW=*/خطأ, UnsignedLHS, UnsignedRHS);
+      إذا (جوڑو_2) {
+        إذا (Res.isNegative()) {
           // Only overflow scenario is Pos + Pos.
-          MayNegClamp = false;
+          MayNegClamp = خطأ;
           // Pos + Pos will overflow with extra signbit.
-          if (LHS.isNonNegative() && RHS.isNonNegative())
-            Overflow = true;
-        } else if (Res.isNonNegative()) {
+          إذا (LHS.isNonNegative() && RHS.isNonNegative())
+            حد_توں_ودھ = سچ;
+        } وإلا إذا (Res.isNonNegative()) {
           // Only overflow scenario is Neg + Neg
-          MayPosClamp = false;
+          MayPosClamp = خطأ;
           // Neg + Neg will overflow without extra signbit.
-          if (LHS.isNegative() && RHS.isNegative())
-            Overflow = true;
+          إذا (LHS.isNegative() && RHS.isNegative())
+            حد_توں_ودھ = سچ;
         }
         // We will never clamp to the opposite sign of N-bit result.
-        if (LHS.isNegative() || RHS.isNegative())
-          MayPosClamp = false;
-        if (LHS.isNonNegative() || RHS.isNonNegative())
-          MayNegClamp = false;
-      } else {
-        if (Res.isNegative()) {
+        إذا (LHS.isNegative() || RHS.isNegative())
+          MayPosClamp = خطأ;
+        إذا (LHS.isNonNegative() || RHS.isNonNegative())
+          MayNegClamp = خطأ;
+      } وإلا {
+        إذا (Res.isNegative()) {
           // Only overflow scenario is Neg - Pos.
-          MayPosClamp = false;
+          MayPosClamp = خطأ;
           // Neg - Pos will overflow with extra signbit.
-          if (LHS.isNegative() && RHS.isNonNegative())
-            Overflow = true;
-        } else if (Res.isNonNegative()) {
+          إذا (LHS.isNegative() && RHS.isNonNegative())
+            حد_توں_ودھ = سچ;
+        } وإلا إذا (Res.isNonNegative()) {
           // Only overflow scenario is Pos - Neg.
-          MayNegClamp = false;
+          MayNegClamp = خطأ;
           // Pos - Neg will overflow without extra signbit.
-          if (LHS.isNonNegative() && RHS.isNegative())
-            Overflow = true;
+          إذا (LHS.isNonNegative() && RHS.isNegative())
+            حد_توں_ودھ = سچ;
         }
         // We will never clamp to the opposite sign of N-bit result.
-        if (LHS.isNegative() || RHS.isNonNegative())
-          MayPosClamp = false;
-        if (LHS.isNonNegative() || RHS.isNegative())
-          MayNegClamp = false;
+        إذا (LHS.isNegative() || RHS.isNonNegative())
+          MayPosClamp = خطأ;
+        إذا (LHS.isNonNegative() || RHS.isNegative())
+          MayNegClamp = خطأ;
       }
     }
     // If we have ruled out all clamping, we will never overflow.
-    if (!MayNegClamp && !MayPosClamp)
-      Overflow = false;
-  } else if (Add) {
+    إذا (!MayNegClamp && !MayPosClamp)
+      حد_توں_ودھ = خطأ;
+  } وإلا إذا (جوڑو_2) {
     // uadd.sat
-    bool Of;
-    (void)LHS.getMaxValue().uadd_ov(RHS.getMaxValue(), Of);
-    if (!Of) {
-      Overflow = false;
-    } else {
-      (void)LHS.getMinValue().uadd_ov(RHS.getMinValue(), Of);
-      if (Of)
-        Overflow = true;
+    منطقي دا;
+    (فراغ)LHS.get_Max_قدر().uadd_ov(RHS.get_Max_قدر(), دا);
+    إذا (!دا) {
+      حد_توں_ودھ = خطأ;
+    } وإلا {
+      (فراغ)LHS.get_Min_قدر().uadd_ov(RHS.get_Min_قدر(), دا);
+      إذا (دا)
+        حد_توں_ودھ = سچ;
     }
-  } else {
+  } وإلا {
     // usub.sat
-    bool Of;
-    (void)LHS.getMinValue().usub_ov(RHS.getMaxValue(), Of);
-    if (!Of) {
-      Overflow = false;
-    } else {
-      (void)LHS.getMaxValue().usub_ov(RHS.getMinValue(), Of);
-      if (Of)
-        Overflow = true;
+    منطقي دا;
+    (فراغ)LHS.get_Min_قدر().usub_ov(RHS.get_Max_قدر(), دا);
+    إذا (!دا) {
+      حد_توں_ودھ = خطأ;
+    } وإلا {
+      (فراغ)LHS.get_Max_قدر().usub_ov(RHS.get_Min_قدر(), دا);
+      إذا (دا)
+        حد_توں_ودھ = سچ;
     }
   }
 
-  KnownBits Res = KnownBits::computeForAddSub(Add, /*NSW=*/Signed,
+  معلوم_بٹ Res = معلوم_بٹ::compute_For_جوڑو_Sub(جوڑو_2, /*NSW=*/Signed,
                                               /*NUW=*/!Signed, LHS, RHS);
 
-  if (Overflow) {
+  إذا (حد_توں_ودھ) {
     // We know whether or not we overflowed.
-    if (!(*Overflow)) {
+    إذا (!(*حد_توں_ودھ)) {
       // No overflow.
-      return Res;
+      أرجع Res;
     }
 
     // We overflowed
     APInt C;
-    if (Signed) {
+    إذا (Signed) {
       // sadd.sat / ssub.sat
-      assert(!LHS.isSignUnknown() &&
+      أكد(!LHS.isSignUnknown() &&
              "We somehow know overflow without knowing input sign");
-      C = LHS.isNegative() ? APInt::getSignedMinValue(BitWidth)
-                           : APInt::getSignedMaxValue(BitWidth);
-    } else if (Add) {
+      C = LHS.isNegative() ? APInt::get_Signed_Min_قدر(ثنائی_ہندسہ_چوڑائی_2)
+                           : APInt::get_Signed_Max_قدر(ثنائی_ہندسہ_چوڑائی_2);
+    } وإلا إذا (جوڑو_2) {
       // uadd.sat
-      C = APInt::getMaxValue(BitWidth);
-    } else {
+      C = APInt::get_Max_قدر(ثنائی_ہندسہ_چوڑائی_2);
+    } وإلا {
       // uadd.sat
-      C = APInt::getMinValue(BitWidth);
+      C = APInt::get_Min_قدر(ثنائی_ہندسہ_چوڑائی_2);
     }
 
     Res.One = C;
     Res.Zero = ~C;
-    return Res;
+    أرجع Res;
   }
 
   // We don't know if we overflowed.
-  if (Signed) {
+  إذا (Signed) {
     // sadd.sat/ssub.sat
     // We can keep our information about the sign bits.
-    if (MayPosClamp)
-      Res.Zero.clearLowBits(BitWidth - 1);
-    if (MayNegClamp)
-      Res.One.clearLowBits(BitWidth - 1);
-  } else if (Add) {
+    إذا (MayPosClamp)
+      Res.Zero.clear_کم_بٹ(ثنائی_ہندسہ_چوڑائی_2 - 1);
+    إذا (MayNegClamp)
+      Res.One.clear_کم_بٹ(ثنائی_ہندسہ_چوڑائی_2 - 1);
+  } وإلا إذا (جوڑو_2) {
     // uadd.sat
     // We need to clear all the known zeros as we can only use the leading ones.
-    Res.Zero.clearAllBits();
-  } else {
+    Res.Zero.clear_All_بٹ();
+  } وإلا {
     // usub.sat
     // We need to clear all the known ones as we can only use the leading zero.
-    Res.One.clearAllBits();
+    Res.One.clear_All_بٹ();
   }
 
-  return Res;
+  أرجع Res;
 }
 
-KnownBits KnownBits::sadd_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ true, /*Signed*/ true, LHS, RHS);
+معلوم_بٹ معلوم_بٹ::sadd_sat(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع compute_For_Sat_جوڑو_Sub(/*جوڑو*/ سچ, /*Signed*/ سچ, LHS, RHS);
 }
-KnownBits KnownBits::ssub_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ false, /*Signed*/ true, LHS, RHS);
+معلوم_بٹ معلوم_بٹ::ssub_sat(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع compute_For_Sat_جوڑو_Sub(/*جوڑو*/ خطأ, /*Signed*/ سچ, LHS, RHS);
 }
-KnownBits KnownBits::uadd_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ true, /*Signed*/ false, LHS, RHS);
+معلوم_بٹ معلوم_بٹ::uadd_sat(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع compute_For_Sat_جوڑو_Sub(/*جوڑو*/ سچ, /*Signed*/ خطأ, LHS, RHS);
 }
-KnownBits KnownBits::usub_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ false, /*Signed*/ false, LHS, RHS);
+معلوم_بٹ معلوم_بٹ::usub_sat(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع compute_For_Sat_جوڑو_Sub(/*جوڑو*/ خطأ, /*Signed*/ خطأ, LHS, RHS);
 }
 
-static KnownBits avgComputeU(KnownBits LHS, KnownBits RHS, bool IsCeil) {
-  unsigned BitWidth = LHS.getBitWidth();
-  LHS = LHS.zext(BitWidth + 1);
-  RHS = RHS.zext(BitWidth + 1);
+ساكن معلوم_بٹ avgComputeU(معلوم_بٹ LHS, معلوم_بٹ RHS, منطقي IsCeil) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  LHS = LHS.zext(ثنائی_ہندسہ_چوڑائی_2 + 1);
+  RHS = RHS.zext(ثنائی_ہندسہ_چوڑائی_2 + 1);
   LHS =
-      computeForAddCarry(LHS, RHS, /*CarryZero*/ !IsCeil, /*CarryOne*/ IsCeil);
-  LHS = LHS.extractBits(BitWidth, 1);
-  return LHS;
+      compute_For_جوڑو_حاصل(LHS, RHS, /*CarryZero*/ !IsCeil, /*CarryOne*/ IsCeil);
+  LHS = LHS.کڈھو_بٹ(ثنائی_ہندسہ_چوڑائی_2, 1);
+  أرجع LHS;
 }
 
-KnownBits KnownBits::avgFloorS(const KnownBits &LHS, const KnownBits &RHS) {
-  return flipSignBit(avgFloorU(flipSignBit(LHS), flipSignBit(RHS)));
+معلوم_بٹ معلوم_بٹ::avgFloorS(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع flip_Sign_ثنائی_ہندسہ(avgFloorU(flip_Sign_ثنائی_ہندسہ(LHS), flip_Sign_ثنائی_ہندسہ(RHS)));
 }
 
-KnownBits KnownBits::avgFloorU(const KnownBits &LHS, const KnownBits &RHS) {
-  return avgComputeU(LHS, RHS, /*IsCeil=*/false);
+معلوم_بٹ معلوم_بٹ::avgFloorU(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع avgComputeU(LHS, RHS, /*IsCeil=*/خطأ);
 }
 
-KnownBits KnownBits::avgCeilS(const KnownBits &LHS, const KnownBits &RHS) {
-  return flipSignBit(avgCeilU(flipSignBit(LHS), flipSignBit(RHS)));
+معلوم_بٹ معلوم_بٹ::avgCeilS(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع flip_Sign_ثنائی_ہندسہ(avgCeilU(flip_Sign_ثنائی_ہندسہ(LHS), flip_Sign_ثنائی_ہندسہ(RHS)));
 }
 
-KnownBits KnownBits::avgCeilU(const KnownBits &LHS, const KnownBits &RHS) {
-  return avgComputeU(LHS, RHS, /*IsCeil=*/true);
+معلوم_بٹ معلوم_بٹ::avgCeilU(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  أرجع avgComputeU(LHS, RHS, /*IsCeil=*/سچ);
 }
 
-KnownBits KnownBits::mul(const KnownBits &LHS, const KnownBits &RHS,
-                         bool NoUndefSelfMultiply) {
-  unsigned BitWidth = LHS.getBitWidth();
-  assert(BitWidth == RHS.getBitWidth() && "Operand mismatch");
-  assert((!NoUndefSelfMultiply || LHS == RHS) &&
+معلوم_بٹ معلوم_بٹ::mul(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                         منطقي NoUndefSelfMultiply) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  أكد(ثنائی_ہندسہ_چوڑائی_2 == RHS.get_ثنائی_ہندسہ_چوڑائی() && "Operand mismatch");
+  أكد((!NoUndefSelfMultiply || LHS == RHS) &&
          "Self multiplication knownbits mismatch");
 
   // Compute the high known-0 bits by multiplying the unsigned max of each side.
@@ -1081,14 +1081,14 @@ KnownBits KnownBits::mul(const KnownBits &LHS, const KnownBits &RHS,
   // result. But if we know a value is a power-of-2 for example, then this
   // computes one more leading zero.
   // TODO: This could be generalized to number of sign bits (negative numbers).
-  APInt UMaxLHS = LHS.getMaxValue();
-  APInt UMaxRHS = RHS.getMaxValue();
+  APInt UMaxLHS = LHS.get_Max_قدر();
+  APInt UMaxRHS = RHS.get_Max_قدر();
 
   // For leading zeros in the result to be valid, the unsigned max product must
   // fit in the bitwidth (it must not overflow).
-  bool HasOverflow;
-  APInt UMaxResult = UMaxLHS.umul_ov(UMaxRHS, HasOverflow);
-  unsigned LeadZ = HasOverflow ? 0 : UMaxResult.countl_zero();
+  منطقي Has_حد_توں_ودھ;
+  APInt UMax_نتیجہ = UMaxLHS.umul_ov(UMaxRHS, Has_حد_توں_ودھ);
+  بنانشانی LeadZ = Has_حد_توں_ودھ ? 0 : UMax_نتیجہ.countl_zero();
 
   // The result of the bottom bits of an integer multiply can be
   // inferred by looking at the bottom bits of both operands and
@@ -1135,213 +1135,213 @@ KnownBits KnownBits::mul(const KnownBits &LHS, const KnownBits &RHS,
 
   // How many times we'd be able to divide each argument by 2 (shr by 1).
   // This gives us the number of trailing zeros on the multiplication result.
-  unsigned TrailBitsKnownLHS = (LHS.Zero | LHS.One).countr_one();
-  unsigned TrailBitsKnownRHS = (RHS.Zero | RHS.One).countr_one();
-  unsigned TrailZeroLHS = LHS.countMinTrailingZeros();
-  unsigned TrailZeroRHS = RHS.countMinTrailingZeros();
-  unsigned TrailZ = TrailZeroLHS + TrailZeroRHS;
+  بنانشانی Trail_بٹ_معلوم_LHS = (LHS.Zero | LHS.One).countr_one();
+  بنانشانی Trail_بٹ_معلوم_RHS = (RHS.Zero | RHS.One).countr_one();
+  بنانشانی TrailZeroLHS = LHS.گنتی_Min_Trailing_Zeros();
+  بنانشانی TrailZeroRHS = RHS.گنتی_Min_Trailing_Zeros();
+  بنانشانی TrailZ = TrailZeroLHS + TrailZeroRHS;
 
   // Figure out the fewest known-bits operand.
-  unsigned SmallestOperand = std::min(TrailBitsKnownLHS - TrailZeroLHS,
-                                      TrailBitsKnownRHS - TrailZeroRHS);
-  unsigned ResultBitsKnown = std::min(SmallestOperand + TrailZ, BitWidth);
+  بنانشانی سبھ_توں_چھوٹا_عملیہ = std::min(Trail_بٹ_معلوم_LHS - TrailZeroLHS,
+                                      Trail_بٹ_معلوم_RHS - TrailZeroRHS);
+  بنانشانی نتیجہ_بٹ_معلوم = std::min(سبھ_توں_چھوٹا_عملیہ + TrailZ, ثنائی_ہندسہ_چوڑائی_2);
 
   // The lower ResultBitsKnown bits of this are known.
-  APInt BottomKnown = LHS.One * RHS.One;
+  APInt Bottom_معلوم = LHS.One * RHS.One;
 
-  KnownBits Res(BitWidth);
-  Res.Zero.setHighBits(LeadZ);
-  Res.Zero |= (~BottomKnown).getLoBits(ResultBitsKnown);
-  Res.One = BottomKnown.getLoBits(ResultBitsKnown);
+  معلوم_بٹ Res(ثنائی_ہندسہ_چوڑائی_2);
+  Res.Zero.سیٹ_بلند_بٹ(LeadZ);
+  Res.Zero |= (~Bottom_معلوم).get_Lo_بٹ(نتیجہ_بٹ_معلوم);
+  Res.One = Bottom_معلوم.get_Lo_بٹ(نتیجہ_بٹ_معلوم);
 
-  if (NoUndefSelfMultiply) {
+  إذا (NoUndefSelfMultiply) {
     // If X has at least TZ trailing zeroes, then bit (2 * TZ + 1) must be zero.
-    unsigned TwoTZP1 = 2 * TrailZeroLHS + 1;
-    if (TwoTZP1 < BitWidth)
-      Res.Zero.setBit(TwoTZP1);
+    بنانشانی TwoTZP1 = 2 * TrailZeroLHS + 1;
+    إذا (TwoTZP1 < ثنائی_ہندسہ_چوڑائی_2)
+      Res.Zero.سیٹ_ثنائی_ہندسہ(TwoTZP1);
 
     // If X has exactly TZ trailing zeros, then bit (2 * TZ + 2) must also be
     // zero.
-    if (TrailZeroLHS < BitWidth && LHS.One[TrailZeroLHS]) {
-      unsigned TwoTZP2 = TwoTZP1 + 1;
-      if (TwoTZP2 < BitWidth)
-        Res.Zero.setBit(TwoTZP2);
+    إذا (TrailZeroLHS < ثنائی_ہندسہ_چوڑائی_2 && LHS.One[TrailZeroLHS]) {
+      بنانشانی TwoTZP2 = TwoTZP1 + 1;
+      إذا (TwoTZP2 < ثنائی_ہندسہ_چوڑائی_2)
+        Res.Zero.سیٹ_ثنائی_ہندسہ(TwoTZP2);
     }
   }
 
-  return Res;
+  أرجع Res;
 }
 
-KnownBits KnownBits::mulhs(const KnownBits &LHS, const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  assert(BitWidth == RHS.getBitWidth() && "Operand mismatch");
-  KnownBits WideLHS = LHS.sext(2 * BitWidth);
-  KnownBits WideRHS = RHS.sext(2 * BitWidth);
-  return mul(WideLHS, WideRHS).extractBits(BitWidth, BitWidth);
+معلوم_بٹ معلوم_بٹ::mulhs(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  أكد(ثنائی_ہندسہ_چوڑائی_2 == RHS.get_ثنائی_ہندسہ_چوڑائی() && "Operand mismatch");
+  معلوم_بٹ WideLHS = LHS.sext(2 * ثنائی_ہندسہ_چوڑائی_2);
+  معلوم_بٹ WideRHS = RHS.sext(2 * ثنائی_ہندسہ_چوڑائی_2);
+  أرجع mul(WideLHS, WideRHS).کڈھو_بٹ(ثنائی_ہندسہ_چوڑائی_2, ثنائی_ہندسہ_چوڑائی_2);
 }
 
-KnownBits KnownBits::mulhu(const KnownBits &LHS, const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  assert(BitWidth == RHS.getBitWidth() && "Operand mismatch");
-  KnownBits WideLHS = LHS.zext(2 * BitWidth);
-  KnownBits WideRHS = RHS.zext(2 * BitWidth);
-  return mul(WideLHS, WideRHS).extractBits(BitWidth, BitWidth);
+معلوم_بٹ معلوم_بٹ::mulhu(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  أكد(ثنائی_ہندسہ_چوڑائی_2 == RHS.get_ثنائی_ہندسہ_چوڑائی() && "Operand mismatch");
+  معلوم_بٹ WideLHS = LHS.zext(2 * ثنائی_ہندسہ_چوڑائی_2);
+  معلوم_بٹ WideRHS = RHS.zext(2 * ثنائی_ہندسہ_چوڑائی_2);
+  أرجع mul(WideLHS, WideRHS).کڈھو_بٹ(ثنائی_ہندسہ_چوڑائی_2, ثنائی_ہندسہ_چوڑائی_2);
 }
 
-static KnownBits divComputeLowBit(KnownBits Known, const KnownBits &LHS,
-                                  const KnownBits &RHS, bool Exact) {
+ساكن معلوم_بٹ div_Compute_کم_ثنائی_ہندسہ(معلوم_بٹ معلوم, ثابت معلوم_بٹ &LHS,
+                                  ثابت معلوم_بٹ &RHS, منطقي Exact) {
 
-  if (!Exact)
-    return Known;
+  إذا (!Exact)
+    أرجع معلوم;
 
   // If LHS is Odd, the result is Odd no matter what.
   // Odd / Odd -> Odd
   // Odd / Even -> Impossible (because its exact division)
-  if (LHS.One[0])
-    Known.One.setBit(0);
+  إذا (LHS.One[0])
+    معلوم.One.سیٹ_ثنائی_ہندسہ(0);
 
-  int MinTZ =
-      (int)LHS.countMinTrailingZeros() - (int)RHS.countMaxTrailingZeros();
-  int MaxTZ =
-      (int)LHS.countMaxTrailingZeros() - (int)RHS.countMinTrailingZeros();
-  if (MinTZ >= 0) {
+  صحيح MinTZ =
+      (صحيح)LHS.گنتی_Min_Trailing_Zeros() - (صحيح)RHS.گنتی_Max_Trailing_Zeros();
+  صحيح MaxTZ =
+      (صحيح)LHS.گنتی_Max_Trailing_Zeros() - (صحيح)RHS.گنتی_Min_Trailing_Zeros();
+  إذا (MinTZ >= 0) {
     // Result has at least MinTZ trailing zeros.
-    Known.Zero.setLowBits(MinTZ);
-    if (MinTZ == MaxTZ) {
+    معلوم.Zero.سیٹ_کم_بٹ(MinTZ);
+    إذا (MinTZ == MaxTZ) {
       // Result has exactly MinTZ trailing zeros.
-      Known.One.setBit(MinTZ);
+      معلوم.One.سیٹ_ثنائی_ہندسہ(MinTZ);
     }
-  } else if (MaxTZ < 0) {
+  } وإلا إذا (MaxTZ < 0) {
     // Poison Result
-    Known.setAllZero();
+    معلوم.سیٹ_All_Zero();
   }
 
   // In the KnownBits exhaustive tests, we have poison inputs for exact values
   // a LOT. If we have a conflict, just return all zeros.
-  if (Known.hasConflict())
-    Known.setAllZero();
+  إذا (معلوم.hasConflict())
+    معلوم.سیٹ_All_Zero();
 
-  return Known;
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::sdiv(const KnownBits &LHS, const KnownBits &RHS,
-                          bool Exact) {
+معلوم_بٹ معلوم_بٹ::sdiv(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                          منطقي Exact) {
   // Equivalent of `udiv`. We must have caught this before it was folded.
-  if (LHS.isNonNegative() && RHS.isNonNegative())
-    return udiv(LHS, RHS, Exact);
+  إذا (LHS.isNonNegative() && RHS.isNonNegative())
+    أرجع udiv(LHS, RHS, Exact);
 
-  unsigned BitWidth = LHS.getBitWidth();
-  KnownBits Known(BitWidth);
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
 
-  if (LHS.isZero() || RHS.isZero()) {
+  إذا (LHS.isZero() || RHS.isZero()) {
     // Result is either known Zero or UB. Return Zero either way.
     // Checking this earlier saves us a lot of special cases later on.
-    Known.setAllZero();
-    return Known;
+    معلوم.سیٹ_All_Zero();
+    أرجع معلوم;
   }
 
   std::optional<APInt> Res;
-  if (LHS.isNegative() && RHS.isNegative()) {
+  إذا (LHS.isNegative() && RHS.isNegative()) {
     // Result non-negative.
-    APInt Denom = RHS.getSignedMaxValue();
-    APInt Num = LHS.getSignedMinValue();
+    APInt Denom = RHS.get_Signed_Max_قدر();
+    APInt عدد = LHS.get_Signed_Min_قدر();
     // INT_MIN/-1 would be a poison result (impossible). Estimate the division
     // as signed max (we will only set sign bit in the result).
-    Res = (Num.isMinSignedValue() && Denom.isAllOnes())
-              ? APInt::getSignedMaxValue(BitWidth)
-              : Num.sdiv(Denom);
-  } else if (LHS.isNegative() && RHS.isNonNegative()) {
+    Res = (عدد.is_Min_Signed_قدر() && Denom.isAllOnes())
+              ? APInt::get_Signed_Max_قدر(ثنائی_ہندسہ_چوڑائی_2)
+              : عدد.sdiv(Denom);
+  } وإلا إذا (LHS.isNegative() && RHS.isNonNegative()) {
     // Result is negative if Exact OR -LHS u>= RHS.
-    if (Exact || (-LHS.getSignedMaxValue()).uge(RHS.getSignedMaxValue())) {
-      APInt Denom = RHS.getSignedMinValue();
-      APInt Num = LHS.getSignedMinValue();
+    إذا (Exact || (-LHS.get_Signed_Max_قدر()).uge(RHS.get_Signed_Max_قدر())) {
+      APInt Denom = RHS.get_Signed_Min_قدر();
+      APInt عدد = LHS.get_Signed_Min_قدر();
       // If the denominator may be zero, use the lowest unknown bit as the
       // minimum non-zero denominator, matching udiv.
-      if (Denom.isZero())
-        Denom.setBit(RHS.countMinTrailingZeros());
-      Res = Num.sdiv(Denom);
+      إذا (Denom.isZero())
+        Denom.سیٹ_ثنائی_ہندسہ(RHS.گنتی_Min_Trailing_Zeros());
+      Res = عدد.sdiv(Denom);
     }
-  } else if (LHS.isStrictlyPositive() && RHS.isNegative()) {
+  } وإلا إذا (LHS.is_Strictly_مثبت() && RHS.isNegative()) {
     // Result is negative if Exact OR LHS u>= -RHS.
-    if (Exact || LHS.getSignedMinValue().uge(-RHS.getSignedMinValue())) {
-      APInt Denom = RHS.getSignedMaxValue();
-      APInt Num = LHS.getSignedMaxValue();
-      Res = Num.sdiv(Denom);
+    إذا (Exact || LHS.get_Signed_Min_قدر().uge(-RHS.get_Signed_Min_قدر())) {
+      APInt Denom = RHS.get_Signed_Max_قدر();
+      APInt عدد = LHS.get_Signed_Max_قدر();
+      Res = عدد.sdiv(Denom);
     }
   }
 
-  if (Res) {
-    if (Res->isNonNegative()) {
-      unsigned LeadZ = Res->countLeadingZeros();
-      Known.Zero.setHighBits(LeadZ);
-    } else {
-      unsigned LeadO = Res->countLeadingOnes();
-      Known.One.setHighBits(LeadO);
+  إذا (Res) {
+    إذا (Res->isNonNegative()) {
+      بنانشانی LeadZ = Res->گنتی_Leading_Zeros();
+      معلوم.Zero.سیٹ_بلند_بٹ(LeadZ);
+    } وإلا {
+      بنانشانی LeadO = Res->گنتی_Leading_Ones();
+      معلوم.One.سیٹ_بلند_بٹ(LeadO);
     }
   }
 
-  Known = divComputeLowBit(Known, LHS, RHS, Exact);
-  return Known;
+  معلوم = div_Compute_کم_ثنائی_ہندسہ(معلوم, LHS, RHS, Exact);
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::udiv(const KnownBits &LHS, const KnownBits &RHS,
-                          bool Exact) {
-  unsigned BitWidth = LHS.getBitWidth();
-  KnownBits Known(BitWidth);
+معلوم_بٹ معلوم_بٹ::udiv(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS,
+                          منطقي Exact) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
 
-  if (LHS.isZero() || RHS.isZero()) {
+  إذا (LHS.isZero() || RHS.isZero()) {
     // Result is either known Zero or UB. Return Zero either way.
     // Checking this earlier saves us a lot of special cases later on.
-    Known.setAllZero();
-    return Known;
+    معلوم.سیٹ_All_Zero();
+    أرجع معلوم;
   }
 
   // A zero denominator is UB, so the minimum attainable denominator is the
   // smallest non-zero value consistent with the known bits.
-  APInt MinDenom = RHS.getMinValue();
-  if (MinDenom.isZero())
-    MinDenom.setBit(RHS.countMinTrailingZeros());
+  APInt MinDenom = RHS.get_Min_قدر();
+  إذا (MinDenom.isZero())
+    MinDenom.سیٹ_ثنائی_ہندسہ(RHS.گنتی_Min_Trailing_Zeros());
 
   // The quotient grows when the numerator grows and shrinks when the
   // denominator grows, and all four operand bounds are attainable, so the
   // result is in [MinNum / MaxDenom, MaxNum / MinDenom]. Keep the common
   // leading bits of the two bounds (as ConstantRange::toKnownBits does),
   // which can include leading ones, not just leading zeros.
-  APInt MaxRes = LHS.getMaxValue().udiv(MinDenom);
-  APInt MinRes = LHS.getMinValue().udiv(RHS.getMaxValue());
+  APInt MaxRes = LHS.get_Max_قدر().udiv(MinDenom);
+  APInt MinRes = LHS.get_Min_قدر().udiv(RHS.get_Max_قدر());
 
-  Known = KnownBits::makeConstant(MinRes);
-  if (std::optional<unsigned> DifferentBit =
-          APIntOps::GetMostSignificantDifferentBit(MinRes, MaxRes)) {
-    Known.Zero.clearLowBits(*DifferentBit + 1);
-    Known.One.clearLowBits(*DifferentBit + 1);
+  معلوم = معلوم_بٹ::makeConstant(MinRes);
+  إذا (std::optional<بنانشانی> Different_ثنائی_ہندسہ =
+          APIntOps::Get_Most_Significant_Different_ثنائی_ہندسہ(MinRes, MaxRes)) {
+    معلوم.Zero.clear_کم_بٹ(*Different_ثنائی_ہندسہ + 1);
+    معلوم.One.clear_کم_بٹ(*Different_ثنائی_ہندسہ + 1);
   }
 
-  Known = divComputeLowBit(Known, LHS, RHS, Exact);
+  معلوم = div_Compute_کم_ثنائی_ہندسہ(معلوم, LHS, RHS, Exact);
 
-  return Known;
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::remGetLowBits(const KnownBits &LHS, const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  if (!RHS.isZero() && RHS.Zero[0]) {
+معلوم_بٹ معلوم_بٹ::rem_Get_کم_بٹ(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = LHS.get_ثنائی_ہندسہ_چوڑائی();
+  إذا (!RHS.isZero() && RHS.Zero[0]) {
     // rem X, Y where Y[0:N] is zero will preserve X[0:N] in the result.
-    unsigned RHSZeros = RHS.countMinTrailingZeros();
-    APInt Mask = APInt::getLowBitsSet(BitWidth, RHSZeros);
-    APInt OnesMask = LHS.One & Mask;
-    APInt ZerosMask = LHS.Zero & Mask;
-    return KnownBits(ZerosMask, OnesMask);
+    بنانشانی RHSZeros = RHS.گنتی_Min_Trailing_Zeros();
+    APInt نقاب = APInt::get_کم_بٹ_سیٹ(ثنائی_ہندسہ_چوڑائی_2, RHSZeros);
+    APInt Ones_نقاب = LHS.One & نقاب;
+    APInt Zeros_نقاب = LHS.Zero & نقاب;
+    أرجع معلوم_بٹ(Zeros_نقاب, Ones_نقاب);
   }
-  return KnownBits(BitWidth);
+  أرجع معلوم_بٹ(ثنائی_ہندسہ_چوڑائی_2);
 }
 
-KnownBits KnownBits::urem(const KnownBits &LHS, const KnownBits &RHS) {
+معلوم_بٹ معلوم_بٹ::urem(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
   // L % R for L < R is L. (A zero divisor is UB, and if MinR is zero this
   // condition cannot hold anyway.)
-  if (LHS.getMaxValue().ult(RHS.getMinValue()))
-    return LHS;
+  إذا (LHS.get_Max_قدر().ult(RHS.get_Min_قدر()))
+    أرجع LHS;
 
-  KnownBits Known = remGetLowBits(LHS, RHS);
+  معلوم_بٹ معلوم = rem_Get_کم_بٹ(LHS, RHS);
 
   // L % R is at most L and, since a zero divisor is UB, strictly less than
   // R, so the result has at least as many leading zeros as
@@ -1349,127 +1349,127 @@ KnownBits KnownBits::urem(const KnownBits &LHS, const KnownBits &RHS) {
   // constant R this computes the exact L & (R - 1): remGetLowBits preserved
   // the low bits and this clears the bits from log2(R) up. If R is known to
   // be zero, MaxR - 1 wraps around, which is harmless: every input is UB.
-  APInt MaxRes = APIntOps::umin(LHS.getMaxValue(), RHS.getMaxValue() - 1);
-  Known.Zero.setHighBits(MaxRes.countLeadingZeros());
-  return Known;
+  APInt MaxRes = APIntOps::umin(LHS.get_Max_قدر(), RHS.get_Max_قدر() - 1);
+  معلوم.Zero.سیٹ_بلند_بٹ(MaxRes.گنتی_Leading_Zeros());
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::srem(const KnownBits &LHS, const KnownBits &RHS) {
-  KnownBits Known = remGetLowBits(LHS, RHS);
-  if (RHS.isConstant() && RHS.getConstant().isPowerOf2()) {
+معلوم_بٹ معلوم_بٹ::srem(ثابت معلوم_بٹ &LHS, ثابت معلوم_بٹ &RHS) {
+  معلوم_بٹ معلوم = rem_Get_کم_بٹ(LHS, RHS);
+  إذا (RHS.isConstant() && RHS.getConstant().isPowerOf2()) {
     // NB: Low bits are set in `remGetLowBits`.
-    APInt LowBits = RHS.getConstant() - 1;
+    APInt کم_بٹ = RHS.getConstant() - 1;
     // If the first operand is non-negative or has all low bits zero, then
     // the upper bits are all zero.
-    if (LHS.isNonNegative() || LowBits.isSubsetOf(LHS.Zero))
-      Known.Zero |= ~LowBits;
+    إذا (LHS.isNonNegative() || کم_بٹ.is_Subset_دا(LHS.Zero))
+      معلوم.Zero |= ~کم_بٹ;
 
     // If the first operand is negative and not all low bits are zero, then
     // the upper bits are all one.
-    if (LHS.isNegative() && LowBits.intersects(LHS.One))
-      Known.One |= ~LowBits;
-    return Known;
+    إذا (LHS.isNegative() && کم_بٹ.intersects(LHS.One))
+      معلوم.One |= ~کم_بٹ;
+    أرجع معلوم;
   }
 
   // The sign bit is the LHS's sign bit, except when the result of the
   // remainder is zero. The magnitude of the result should be less than or
   // equal to the magnitude of either operand.
-  if (LHS.isNegative() && Known.isNonZero())
-    Known.One.setHighBits(
-        std::max(LHS.countMinLeadingOnes(), RHS.countMinSignBits()));
-  else if (LHS.isNonNegative())
-    Known.Zero.setHighBits(
-        std::max(LHS.countMinLeadingZeros(), RHS.countMinSignBits()));
-  return Known;
+  إذا (LHS.isNegative() && معلوم.isNonZero())
+    معلوم.One.سیٹ_بلند_بٹ(
+        std::max(LHS.گنتی_Min_Leading_Ones(), RHS.گنتی_Min_Sign_بٹ()));
+  وإلا إذا (LHS.isNonNegative())
+    معلوم.Zero.سیٹ_بلند_بٹ(
+        std::max(LHS.گنتی_Min_Leading_Zeros(), RHS.گنتی_Min_Sign_بٹ()));
+  أرجع معلوم;
 }
 
-KnownBits &KnownBits::operator&=(const KnownBits &RHS) {
+معلوم_بٹ &معلوم_بٹ::عامل&=(ثابت معلوم_بٹ &RHS) {
   // Result bit is 0 if either operand bit is 0.
   Zero |= RHS.Zero;
   // Result bit is 1 if both operand bits are 1.
   One &= RHS.One;
-  return *this;
+  أرجع *هذا;
 }
 
-KnownBits &KnownBits::operator|=(const KnownBits &RHS) {
+معلوم_بٹ &معلوم_بٹ::عامل|=(ثابت معلوم_بٹ &RHS) {
   // Result bit is 0 if both operand bits are 0.
   Zero &= RHS.Zero;
   // Result bit is 1 if either operand bit is 1.
   One |= RHS.One;
-  return *this;
+  أرجع *هذا;
 }
 
-KnownBits &KnownBits::operator^=(const KnownBits &RHS) {
+معلوم_بٹ &معلوم_بٹ::عامل^=(ثابت معلوم_بٹ &RHS) {
   // Result bit is 0 if both operand bits are 0 or both are 1.
   APInt Z = (Zero & RHS.Zero) | (One & RHS.One);
   // Result bit is 1 if one operand bit is 0 and the other is 1.
   One = (Zero & RHS.One) | (One & RHS.Zero);
   Zero = std::move(Z);
-  return *this;
+  أرجع *هذا;
 }
 
-KnownBits KnownBits::blsi() const {
-  unsigned BitWidth = getBitWidth();
-  KnownBits Known(Zero, APInt(BitWidth, 0));
-  unsigned Max = countMaxTrailingZeros();
-  Known.Zero.setBitsFrom(std::min(Max + 1, BitWidth));
-  unsigned Min = countMinTrailingZeros();
-  if (Max == Min && Max < BitWidth)
-    Known.One.setBit(Max);
-  return Known;
+معلوم_بٹ معلوم_بٹ::blsi() ثابت {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ معلوم(Zero, APInt(ثنائی_ہندسہ_چوڑائی_2, 0));
+  بنانشانی Max = گنتی_Max_Trailing_Zeros();
+  معلوم.Zero.سیٹ_بٹ_From(std::min(Max + 1, ثنائی_ہندسہ_چوڑائی_2));
+  بنانشانی Min = گنتی_Min_Trailing_Zeros();
+  إذا (Max == Min && Max < ثنائی_ہندسہ_چوڑائی_2)
+    معلوم.One.سیٹ_ثنائی_ہندسہ(Max);
+  أرجع معلوم;
 }
 
-KnownBits KnownBits::blsmsk() const {
-  unsigned BitWidth = getBitWidth();
-  KnownBits Known(BitWidth);
-  unsigned Max = countMaxTrailingZeros();
-  Known.Zero.setBitsFrom(std::min(Max + 1, BitWidth));
-  unsigned Min = countMinTrailingZeros();
-  Known.One.setLowBits(std::min(Min + 1, BitWidth));
-  return Known;
+معلوم_بٹ معلوم_بٹ::blsmsk() ثابت {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = get_ثنائی_ہندسہ_چوڑائی();
+  معلوم_بٹ معلوم(ثنائی_ہندسہ_چوڑائی_2);
+  بنانشانی Max = گنتی_Max_Trailing_Zeros();
+  معلوم.Zero.سیٹ_بٹ_From(std::min(Max + 1, ثنائی_ہندسہ_چوڑائی_2));
+  بنانشانی Min = گنتی_Min_Trailing_Zeros();
+  معلوم.One.سیٹ_کم_بٹ(std::min(Min + 1, ثنائی_ہندسہ_چوڑائی_2));
+  أرجع معلوم;
 }
 
-void KnownBits::print(raw_ostream &OS) const {
-  unsigned BitWidth = getBitWidth();
-  for (unsigned I = 0; I < BitWidth; ++I) {
-    unsigned N = BitWidth - I - 1;
-    if (Zero[N] && One[N])
+فراغ معلوم_بٹ::print(raw_ostream &OS) ثابت {
+  بنانشانی ثنائی_ہندسہ_چوڑائی_2 = get_ثنائی_ہندسہ_چوڑائی();
+  لكل (بنانشانی I = 0; I < ثنائی_ہندسہ_چوڑائی_2; ++I) {
+    بنانشانی N = ثنائی_ہندسہ_چوڑائی_2 - I - 1;
+    إذا (Zero[N] && One[N])
       OS << "!";
-    else if (Zero[N])
+    وإلا إذا (Zero[N])
       OS << "0";
-    else if (One[N])
+    وإلا إذا (One[N])
       OS << "1";
-    else
+    وإلا
       OS << "?";
   }
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void KnownBits::dump() const {
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_طریقہ فراغ معلوم_بٹ::dump() ثابت {
   print(dbgs());
   dbgs() << "\n";
 }
-#endif
+#جے_انت
 
-unsigned llvm::SignBitsOps::rot(unsigned SrcSignBits, unsigned BitWidth,
+بنانشانی llvm::Sign_بٹ_Ops::rot(بنانشانی Src_Sign_بٹ, بنانشانی ثنائی_ہندسہ_چوڑائی_2,
                                 std::optional<APInt> RotAmt,
-                                bool IsRotateRight) {
+                                منطقي Is_Rotate_دایاں) {
   // If we're rotating an 0/-1 value, then it stays an 0/-1 value.
-  if (SrcSignBits == BitWidth)
-    return BitWidth;
+  إذا (Src_Sign_بٹ == ثنائی_ہندسہ_چوڑائی_2)
+    أرجع ثنائی_ہندسہ_چوڑائی_2;
 
-  if (!RotAmt)
-    return 1;
+  إذا (!RotAmt)
+    أرجع 1;
 
-  unsigned Amt = RotAmt->urem(BitWidth);
+  بنانشانی Amt = RotAmt->urem(ثنائی_ہندسہ_چوڑائی_2);
 
   // Handle rotate right by N like a rotate left by BitWidth-N.
-  if (IsRotateRight)
-    Amt = (BitWidth - Amt) % BitWidth;
+  إذا (Is_Rotate_دایاں)
+    Amt = (ثنائی_ہندسہ_چوڑائی_2 - Amt) % ثنائی_ہندسہ_چوڑائی_2;
 
   // If we aren't rotating out all of the known-in sign bits, return the
   // number that are left. This handles rotl(sext(x), 1) for example.
-  if (SrcSignBits > Amt + 1)
-    return SrcSignBits - Amt;
-  return 1;
+  إذا (Src_Sign_بٹ > Amt + 1)
+    أرجع Src_Sign_بٹ - Amt;
+  أرجع 1;
 }

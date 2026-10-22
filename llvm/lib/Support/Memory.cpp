@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Memory.h"
+#ضمن "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#جے_بنا_تعریف NDEBUG
+#ضمن "llvm/Support/raw_ostream.h"
+#جے_انت // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#جے_تعریف_شدہ LLVM_ON_UNIX
+#ضمن "Unix/Memory.inc"
+#جے_انت
+#جے_تعریف_شدہ _WIN32
+#ضمن "Windows/Memory.inc"
+#جے_انت
 
-#ifndef NDEBUG
+#جے_بنا_تعریف NDEBUG
 
-namespace llvm {
-namespace sys {
+نطاق llvm {
+نطاق sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &عامل<<(raw_ostream &OS, ثابت حافظہ_2::ProtectionFlags &PF) {
+  أكد((PF & ~(حافظہ_2::MF_READ | حافظہ_2::MF_WRITE | حافظہ_2::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
-            << (PF & Memory::MF_WRITE ? 'W' : '-')
-            << (PF & Memory::MF_EXEC ? 'X' : '-');
+  أرجع OS << (PF & حافظہ_2::MF_READ ? 'R' : '-')
+            << (PF & حافظہ_2::MF_WRITE ? 'W' : '-')
+            << (PF & حافظہ_2::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &عامل<<(raw_ostream &OS, ثابت حافظہ_بلاک &MB) {
+  أرجع OS << "[ " << MB.ادھار_2() << " .. "
+            << (فراغ *)((حرف *)MB.ادھار_2() + MB.allocated_ناپ()) << " ] ("
+            << MB.allocated_ناپ() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#جے_انت // ifndef NDEBUG

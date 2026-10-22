@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/ADT/AllocatorList.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/Unicode.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <string>
-#include <system_error>
-#include <utility>
+#ضمن "llvm/Support/YAMLParser.h"
+#ضمن "llvm/ADT/AllocatorList.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/SMLoc.h"
+#ضمن "llvm/Support/SourceMgr.h"
+#ضمن "llvm/Support/Unicode.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cassert>
+#ضمن <cstddef>
+#ضمن <cstdint>
+#ضمن <map>
+#ضمن <memory>
+#ضمن <string>
+#ضمن <system_error>
+#ضمن <utility>
 
-using namespace llvm;
-using namespace yaml;
+ورتوں نطاق llvm;
+ورتوں نطاق yaml;
 
-enum UnicodeEncodingForm {
+تعداد UnicodeEncodingForm {
   UEF_UTF32_LE, ///< UTF-32 Little Endian
   UEF_UTF32_BE, ///< UTF-32 Big Endian
   UEF_UTF16_LE, ///< UTF-16 Little Endian
@@ -49,7 +49,7 @@ enum UnicodeEncodingForm {
 
 /// EncodingInfo - Holds the encoding type and length of the byte order mark if
 ///                it exists. Length is in {0, 2, 3, 4}.
-using EncodingInfo = std::pair<UnicodeEncodingForm, unsigned>;
+ورتوں EncodingInfo = std::pair<UnicodeEncodingForm, بنانشانی>;
 
 /// getUnicodeEncoding - Reads up to the first 4 bytes to determine the Unicode
 ///                      encoding form of \a Input.
@@ -57,113 +57,113 @@ using EncodingInfo = std::pair<UnicodeEncodingForm, unsigned>;
 /// @param Input A string of length 0 or more.
 /// @returns An EncodingInfo indicating the Unicode encoding form of the input
 ///          and how long the byte order mark is if one exists.
-static EncodingInfo getUnicodeEncoding(StringRef Input) {
-  if (Input.empty())
-    return {UEF_Unknown, 0};
+ساكن EncodingInfo getUnicodeEncoding(StringRef داخلہ) {
+  إذا (داخلہ.خالی_تھاواں())
+    أرجع {UEF_Unknown, 0};
 
-  switch (uint8_t(Input[0])) {
-  case 0x00:
-    if (Input.size() >= 4) {
-      if (  Input[1] == 0
-         && uint8_t(Input[2]) == 0xFE
-         && uint8_t(Input[3]) == 0xFF)
-        return {UEF_UTF32_BE, 4};
-      if (Input[1] == 0 && Input[2] == 0 && Input[3] != 0)
-        return {UEF_UTF32_BE, 0};
+  بدل (uint8_t(داخلہ[0])) {
+  حالة 0x00:
+    إذا (داخلہ.ناپ_2() >= 4) {
+      إذا (  داخلہ[1] == 0
+         && uint8_t(داخلہ[2]) == 0xFE
+         && uint8_t(داخلہ[3]) == 0xFF)
+        أرجع {UEF_UTF32_BE, 4};
+      إذا (داخلہ[1] == 0 && داخلہ[2] == 0 && داخلہ[3] != 0)
+        أرجع {UEF_UTF32_BE, 0};
     }
 
-    if (Input.size() >= 2 && Input[1] != 0)
-      return {UEF_UTF16_BE, 0};
-    return {UEF_Unknown, 0};
-  case 0xFF:
-    if (  Input.size() >= 4
-       && uint8_t(Input[1]) == 0xFE
-       && Input[2] == 0
-       && Input[3] == 0)
-      return {UEF_UTF32_LE, 4};
+    إذا (داخلہ.ناپ_2() >= 2 && داخلہ[1] != 0)
+      أرجع {UEF_UTF16_BE, 0};
+    أرجع {UEF_Unknown, 0};
+  حالة 0xFF:
+    إذا (  داخلہ.ناپ_2() >= 4
+       && uint8_t(داخلہ[1]) == 0xFE
+       && داخلہ[2] == 0
+       && داخلہ[3] == 0)
+      أرجع {UEF_UTF32_LE, 4};
 
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFE)
-      return {UEF_UTF16_LE, 2};
-    return {UEF_Unknown, 0};
-  case 0xFE:
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFF)
-      return {UEF_UTF16_BE, 2};
-    return {UEF_Unknown, 0};
-  case 0xEF:
-    if (  Input.size() >= 3
-       && uint8_t(Input[1]) == 0xBB
-       && uint8_t(Input[2]) == 0xBF)
-      return {UEF_UTF8, 3};
-    return {UEF_Unknown, 0};
+    إذا (داخلہ.ناپ_2() >= 2 && uint8_t(داخلہ[1]) == 0xFE)
+      أرجع {UEF_UTF16_LE, 2};
+    أرجع {UEF_Unknown, 0};
+  حالة 0xFE:
+    إذا (داخلہ.ناپ_2() >= 2 && uint8_t(داخلہ[1]) == 0xFF)
+      أرجع {UEF_UTF16_BE, 2};
+    أرجع {UEF_Unknown, 0};
+  حالة 0xEF:
+    إذا (  داخلہ.ناپ_2() >= 3
+       && uint8_t(داخلہ[1]) == 0xBB
+       && uint8_t(داخلہ[2]) == 0xBF)
+      أرجع {UEF_UTF8, 3};
+    أرجع {UEF_Unknown, 0};
   }
 
   // It could still be utf-32 or utf-16.
-  if (Input.size() >= 4 && Input[1] == 0 && Input[2] == 0 && Input[3] == 0)
-    return {UEF_UTF32_LE, 0};
+  إذا (داخلہ.ناپ_2() >= 4 && داخلہ[1] == 0 && داخلہ[2] == 0 && داخلہ[3] == 0)
+    أرجع {UEF_UTF32_LE, 0};
 
-  if (Input.size() >= 2 && Input[1] == 0)
-    return {UEF_UTF16_LE, 0};
+  إذا (داخلہ.ناپ_2() >= 2 && داخلہ[1] == 0)
+    أرجع {UEF_UTF16_LE, 0};
 
-  return {UEF_UTF8, 0};
+  أرجع {UEF_UTF8, 0};
 }
 
 /// Pin the vtables to this file.
-void Node::anchor() {}
-void NullNode::anchor() {}
-void ScalarNode::anchor() {}
-void BlockScalarNode::anchor() {}
-void KeyValueNode::anchor() {}
-void MappingNode::anchor() {}
-void SequenceNode::anchor() {}
-void AliasNode::anchor() {}
+فراغ گرہ::anchor() {}
+فراغ Null_گرہ::anchor() {}
+فراغ Scalar_گرہ::anchor() {}
+فراغ بلاک_Scalar_گرہ::anchor() {}
+فراغ کلید_قدر_گرہ::anchor() {}
+فراغ Mapping_گرہ::anchor() {}
+فراغ Sequence_گرہ::anchor() {}
+فراغ Alias_گرہ::anchor() {}
 
-namespace llvm {
-namespace yaml {
+نطاق llvm {
+نطاق yaml {
 
 /// Token - A single YAML token.
-struct Token {
-  enum TokenKind {
+بنية Token {
+  تعداد Token_قسم {
     TK_Error, // Uninitialized token.
-    TK_StreamStart,
-    TK_StreamEnd,
-    TK_VersionDirective,
-    TK_TagDirective,
-    TK_DocumentStart,
-    TK_DocumentEnd,
-    TK_BlockEntry,
-    TK_BlockEnd,
-    TK_BlockSequenceStart,
-    TK_BlockMappingStart,
-    TK_FlowEntry,
-    TK_FlowSequenceStart,
-    TK_FlowSequenceEnd,
-    TK_FlowMappingStart,
-    TK_FlowMappingEnd,
-    TK_Key,
-    TK_Value,
+    TK_دھارا_شروع,
+    TK_دھارا_سرا,
+    TK_نسخہ_Directive,
+    TK_ٹیگ_Directive,
+    TK_Document_شروع,
+    TK_Document_سرا,
+    TK_بلاک_اندراج,
+    TK_بلاک_سرا,
+    TK_بلاک_Sequence_شروع,
+    TK_بلاک_Mapping_شروع,
+    TK_Flow_اندراج,
+    TK_Flow_Sequence_شروع,
+    TK_Flow_Sequence_سرا,
+    TK_Flow_Mapping_شروع,
+    TK_Flow_Mapping_سرا,
+    TK_کلید,
+    TK_قدر,
     TK_Scalar,
-    TK_BlockScalar,
+    TK_بلاک_Scalar,
     TK_Alias,
     TK_Anchor,
-    TK_Tag
-  } Kind = TK_Error;
+    TK_ٹیگ
+  } قسم_2 = TK_Error;
 
   /// A string of length 0 or more whose begin() points to the logical location
   /// of the token in the input.
   StringRef Range;
 
   /// The value of a block scalar node.
-  std::string Value;
+  std::string قدر;
 
-  Token() = default;
+  Token() = افتراضي;
 };
 
 } // end namespace yaml
 } // end namespace llvm
 
-using TokenQueueT = BumpPtrList<Token>;
+ورتوں Token_قطار_T = BumpPtrList<Token>;
 
-namespace {
+نطاق {
 
 /// This struct is used to track simple keys.
 ///
@@ -174,15 +174,15 @@ namespace {
 /// a simple key (we moved on to the next line or went further than 1024 chars).
 /// Or when we run into a Value, and then insert a Key token (and possibly
 /// others) before the SimpleKey's Tok.
-struct SimpleKey {
-  TokenQueueT::iterator Tok;
-  unsigned Column = 0;
-  unsigned Line = 0;
-  unsigned FlowLevel = 0;
-  bool IsRequired = false;
+بنية Simple_کلید {
+  Token_قطار_T::iterator Tok;
+  بنانشانی کالم = 0;
+  بنانشانی سطر = 0;
+  بنانشانی FlowLevel = 0;
+  منطقي IsRequired = خطأ;
 
-  bool operator ==(const SimpleKey &Other) {
-    return Tok == Other.Tok;
+  منطقي عامل ==(ثابت Simple_کلید &Other) {
+    أرجع Tok == Other.Tok;
   }
 };
 
@@ -191,28 +191,28 @@ struct SimpleKey {
 /// The Unicode scalar value of a UTF-8 minimal well-formed code unit
 ///        subsequence and the subsequence's length in code units (uint8_t).
 ///        A length of 0 represents an error.
-using UTF8Decoded = std::pair<uint32_t, unsigned>;
+ورتوں UTF8Decoded = std::pair<uint32_t, بنانشانی>;
 
-static UTF8Decoded decodeUTF8(StringRef Range) {
+ساكن UTF8Decoded decodeUTF8(StringRef Range) {
   StringRef::iterator Position= Range.begin();
-  StringRef::iterator End = Range.end();
+  StringRef::iterator سرا_2 = Range.سرا();
   // 1 byte: [0x00, 0x7f]
   // Bit pattern: 0xxxxxxx
-  if (Position < End && (*Position & 0x80) == 0) {
-    return {*Position, 1};
+  إذا (Position < سرا_2 && (*Position & 0x80) == 0) {
+    أرجع {*Position, 1};
   }
   // 2 bytes: [0x80, 0x7ff]
   // Bit pattern: 110xxxxx 10xxxxxx
-  if (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
+  إذا (Position + 1 < سرا_2 && ((*Position & 0xE0) == 0xC0) &&
       ((*(Position + 1) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x1F) << 6) |
                           (*(Position + 1) & 0x3F);
-    if (codepoint >= 0x80)
-      return {codepoint, 2};
+    إذا (codepoint >= 0x80)
+      أرجع {codepoint, 2};
   }
   // 3 bytes: [0x8000, 0xffff]
   // Bit pattern: 1110xxxx 10xxxxxx 10xxxxxx
-  if (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
+  إذا (Position + 2 < سرا_2 && ((*Position & 0xF0) == 0xE0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x0F) << 12) |
@@ -220,13 +220,13 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                           (*(Position + 2) & 0x3F);
     // Codepoints between 0xD800 and 0xDFFF are invalid, as
     // they are high / low surrogate halves used by UTF-16.
-    if (codepoint >= 0x800 &&
+    إذا (codepoint >= 0x800 &&
         (codepoint < 0xD800 || codepoint > 0xDFFF))
-      return {codepoint, 3};
+      أرجع {codepoint, 3};
   }
   // 4 bytes: [0x10000, 0x10FFFF]
   // Bit pattern: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-  if (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
+  إذا (Position + 3 < سرا_2 && ((*Position & 0xF8) == 0xF0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80) &&
       ((*(Position + 3) & 0xC0) == 0x80)) {
@@ -234,59 +234,59 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                          ((*(Position + 1) & 0x3F) << 12) |
                          ((*(Position + 2) & 0x3F) << 6) |
                           (*(Position + 3) & 0x3F);
-    if (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
-      return {codepoint, 4};
+    إذا (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
+      أرجع {codepoint, 4};
   }
-  return {0, 0};
+  أرجع {0, 0};
 }
 
-namespace llvm {
-namespace yaml {
+نطاق llvm {
+نطاق yaml {
 
 /// Scans YAML tokens from a MemoryBuffer.
-class Scanner {
-public:
-  Scanner(StringRef Input, SourceMgr &SM, bool ShowColors = true,
-          std::error_code *EC = nullptr);
-  Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors = true,
-          std::error_code *EC = nullptr);
+صنف Scanner {
+عام:
+  Scanner(StringRef داخلہ, سروت_Mgr &SM, منطقي ShowColors = سچ,
+          std::error_کوڈ *EC = خالی_سوچک);
+  Scanner(حافظہ_بفر_Ref بفر, سروت_Mgr &SM_, منطقي ShowColors = سچ,
+          std::error_کوڈ *EC = خالی_سوچک);
 
   /// Parse the next token and return it without popping it.
-  Token &peekNext();
+  Token &peek_اگلا();
 
   /// Parse the next token and pop it from the queue.
-  Token getNext();
+  Token get_اگلا();
 
-  void printError(SMLoc Loc, SourceMgr::DiagKind Kind, const Twine &Message,
+  فراغ printError(SMLoc Loc, سروت_Mgr::Diag_قسم قسم_2, ثابت Twine &سنیہا_2,
                   ArrayRef<SMRange> Ranges = {}) {
-    SM.PrintMessage(Loc, Kind, Message, Ranges, /* FixIts= */ {}, ShowColors);
+    SM.Print_سنیہا(Loc, قسم_2, سنیہا_2, Ranges, /* FixIts= */ {}, ShowColors);
   }
 
-  void setError(const Twine &Message, StringRef::iterator Position) {
-    if (Position >= End)
-      Position = End - 1;
+  فراغ سیٹ_Error(ثابت Twine &سنیہا_2, StringRef::iterator Position) {
+    إذا (Position >= سرا_2)
+      Position = سرا_2 - 1;
 
     // propagate the error if possible
-    if (EC)
-      *EC = make_error_code(std::errc::invalid_argument);
+    إذا (EC)
+      *EC = make_error_کوڈ(std::errc::invalid_دلیل);
 
     // Don't print out more errors after the first one we encounter. The rest
     // are just the result of the first, and have no meaning.
-    if (!Failed)
-      printError(SMLoc::getFromPointer(Position), SourceMgr::DK_Error, Message);
-    Failed = true;
+    إذا (!Failed)
+      printError(SMLoc::get_From_اشارہ_گر(Position), سروت_Mgr::DK_Error, سنیہا_2);
+    Failed = سچ;
   }
 
   /// Returns true if an error occurred while parsing.
-  bool failed() {
-    return Failed;
+  منطقي failed() {
+    أرجع Failed;
   }
 
-private:
-  void init(MemoryBufferRef Buffer);
+خاص:
+  فراغ init(حافظہ_بفر_Ref بفر);
 
-  StringRef currentInput() {
-    return StringRef(Current, End - Current);
+  StringRef current_داخلہ() {
+    أرجع StringRef(Current, سرا_2 - Current);
   }
 
   /// Decode a UTF-8 minimal well-formed code unit subsequence starting
@@ -296,7 +296,7 @@ private:
   /// code unit subsequence, then the Unicode scalar value is 0, and the length
   /// is 0.
   UTF8Decoded decodeUTF8(StringRef::iterator Position) {
-    return ::decodeUTF8(StringRef(Position, End - Position));
+    أرجع ::decodeUTF8(StringRef(Position, سرا_2 - Position));
   }
 
   // The following functions are based on the gramar rules in the YAML spec. The
@@ -360,7 +360,7 @@ private:
   ///          ns-char.
   StringRef::iterator skip_ns_char(StringRef::iterator Position);
 
-  using SkipWhileFunc = StringRef::iterator (Scanner::*)(StringRef::iterator);
+  ورتوں SkipWhileFunc = StringRef::iterator (Scanner::*)(StringRef::iterator);
 
   /// Skip minimal well-formed code unit subsequences until Func
   ///        returns its input.
@@ -372,109 +372,109 @@ private:
 
   /// Skip minimal well-formed code unit subsequences until Func returns its
   /// input.
-  void advanceWhile(SkipWhileFunc Func);
+  فراغ advanceWhile(SkipWhileFunc Func);
 
   /// Scan ns-uri-char[39]s starting at Cur.
   ///
   /// This updates Cur and Column while scanning.
-  void scan_ns_uri_char();
+  فراغ جانچ_ns_uri_char();
 
   /// Consume a minimal well-formed code unit subsequence starting at
   ///        \a Cur. Return false if it is not the same Unicode scalar value as
   ///        \a Expected. This updates \a Column.
-  bool consume(uint32_t Expected);
+  منطقي consume(uint32_t Expected);
 
   /// Skip \a Distance UTF-8 code units. Updates \a Cur and \a Column.
-  void skip(uint32_t Distance);
+  فراغ skip(uint32_t فاصلہ_2);
 
   /// Return true if the minimal well-formed code unit subsequence at
   ///        Pos is whitespace or a new line
-  bool isBlankOrBreak(StringRef::iterator Position);
+  منطقي isBlankOrBreak(StringRef::iterator Position);
 
   /// Return true if the minimal well-formed code unit subsequence at
   ///        Pos is considered a "safe" character for plain scalars.
-  bool isPlainSafeNonBlank(StringRef::iterator Position);
+  منطقي is_Plain_محفوظ_Non_Blank(StringRef::iterator Position);
 
   /// Return true if the line is a line break, false otherwise.
-  bool isLineEmpty(StringRef Line);
+  منطقي is_سطر_خالی_تھاواں(StringRef سطر);
 
   /// Consume a single b-break[28] if it's present at the current position.
   ///
   /// Return false if the code unit at the current position isn't a line break.
-  bool consumeLineBreakIfPresent();
+  منطقي consume_سطر_Break_If_Present();
 
   /// If IsSimpleKeyAllowed, create and push_back a new SimpleKey.
-  void saveSimpleKeyCandidate( TokenQueueT::iterator Tok
-                             , unsigned AtColumn
-                             , bool IsRequired);
+  فراغ save_Simple_کلید_Candidate( Token_قطار_T::iterator Tok
+                             , بنانشانی At_کالم
+                             , منطقي IsRequired);
 
   /// Remove simple keys that can no longer be valid simple keys.
   ///
   /// Invalid simple keys are not on the current line or are further than 1024
   /// columns back.
-  void removeStaleSimpleKeyCandidates();
+  فراغ remove_Stale_Simple_کلید_Candidates();
 
   /// Remove all simple keys on FlowLevel \a Level.
-  void removeSimpleKeyCandidatesOnFlowLevel(unsigned Level);
+  فراغ remove_Simple_کلید_Candidates_On_Flow_Level(بنانشانی Level);
 
   /// Unroll indentation in \a Indents back to \a Col. Creates BlockEnd
   ///        tokens if needed.
-  bool unrollIndent(int ToColumn);
+  منطقي unrollIndent(صحيح منزل_کالم);
 
   /// Increase indent to \a Col. Creates \a Kind token at \a InsertPoint
   ///        if needed.
-  bool rollIndent( int ToColumn
-                 , Token::TokenKind Kind
-                 , TokenQueueT::iterator InsertPoint);
+  منطقي rollIndent( صحيح منزل_کالم
+                 , Token::Token_قسم قسم_2
+                 , Token_قطار_T::iterator داخل_کرو_نقطہ);
 
   /// Skip a single-line comment when the comment starts at the current
   /// position of the scanner.
-  void skipComment();
+  فراغ skipComment();
 
   /// Skip whitespace and comments until the start of the next token.
-  void scanToNextToken();
+  فراغ جانچ_منزل_اگلا_Token();
 
   /// Must be the first token generated.
-  bool scanStreamStart();
+  منطقي جانچ_دھارا_شروع();
 
   /// Generate tokens needed to close out the stream.
-  bool scanStreamEnd();
+  منطقي جانچ_دھارا_سرا();
 
   /// Scan a %BLAH directive.
-  bool scanDirective();
+  منطقي جانچ_Directive();
 
   /// Scan a ... or ---.
-  bool scanDocumentIndicator(bool IsStart);
+  منطقي جانچ_Document_Indicator(منطقي Is_شروع);
 
   /// Scan a [ or { and generate the proper flow collection start token.
-  bool scanFlowCollectionStart(bool IsSequence);
+  منطقي جانچ_Flow_Collection_شروع(منطقي IsSequence);
 
   /// Scan a ] or } and generate the proper flow collection end token.
-  bool scanFlowCollectionEnd(bool IsSequence);
+  منطقي جانچ_Flow_Collection_سرا(منطقي IsSequence);
 
   /// Scan the , that separates entries in a flow collection.
-  bool scanFlowEntry();
+  منطقي جانچ_Flow_اندراج();
 
   /// Scan the - that starts block sequence entries.
-  bool scanBlockEntry();
+  منطقي جانچ_بلاک_اندراج();
 
   /// Scan an explicit ? indicating a key.
-  bool scanKey();
+  منطقي جانچ_کلید();
 
   /// Scan an explicit : indicating a value.
-  bool scanValue();
+  منطقي جانچ_قدر();
 
   /// Scan a quoted scalar.
-  bool scanFlowScalar(bool IsDoubleQuoted);
+  منطقي جانچ_Flow_Scalar(منطقي IsDoubleQuoted);
 
   /// Scan an unquoted scalar.
-  bool scanPlainScalar();
+  منطقي جانچ_Plain_Scalar();
 
   /// Scan an Alias or Anchor starting with * or &.
-  bool scanAliasOrAnchor(bool IsAlias);
+  منطقي جانچ_Alias_Or_Anchor(منطقي IsAlias);
 
   /// Scan a block scalar starting with | or >.
-  bool scanBlockScalar(bool IsLiteral);
+  منطقي جانچ_بلاک_Scalar(منطقي IsLiteral);
 
   /// Scan a block scalar style indicator and header.
   ///
@@ -482,690 +482,690 @@ private:
   /// YAML does not consider the style indicator to be a part of the header.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarIndicators(char &StyleIndicator, char &ChompingIndicator,
-                                 unsigned &IndentIndicator, bool &IsDone);
+  منطقي جانچ_بلاک_Scalar_Indicators(حرف &StyleIndicator, حرف &ChompingIndicator,
+                                 بنانشانی &IndentIndicator, منطقي &Is_پورا);
 
   /// Scan a style indicator in a block scalar header.
-  char scanBlockStyleIndicator();
+  حرف جانچ_بلاک_Style_Indicator();
 
   /// Scan a chomping indicator in a block scalar header.
-  char scanBlockChompingIndicator();
+  حرف جانچ_بلاک_Chomping_Indicator();
 
   /// Scan an indentation indicator in a block scalar header.
-  unsigned scanBlockIndentationIndicator();
+  بنانشانی جانچ_بلاک_Indentation_Indicator();
 
   /// Scan a block scalar header.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarHeader(char &ChompingIndicator, unsigned &IndentIndicator,
-                             bool &IsDone);
+  منطقي جانچ_بلاک_Scalar_سرخی(حرف &ChompingIndicator, بنانشانی &IndentIndicator,
+                             منطقي &Is_پورا);
 
   /// Look for the indentation level of a block scalar.
   ///
   /// Return false if an error occurred.
-  bool findBlockScalarIndent(unsigned &BlockIndent, unsigned BlockExitIndent,
-                             unsigned &LineBreaks, bool &IsDone);
+  منطقي لبھو_بلاک_Scalar_Indent(بنانشانی &بلاک_Indent, بنانشانی بلاک_Exit_Indent,
+                             بنانشانی &سطر_Breaks, منطقي &Is_پورا);
 
   /// Scan the indentation of a text line in a block scalar.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarIndent(unsigned BlockIndent, unsigned BlockExitIndent,
-                             bool &IsDone);
+  منطقي جانچ_بلاک_Scalar_Indent(بنانشانی بلاک_Indent, بنانشانی بلاک_Exit_Indent,
+                             منطقي &Is_پورا);
 
   /// Scan a tag of the form !stuff.
-  bool scanTag();
+  منطقي جانچ_ٹیگ();
 
   /// Dispatch to the next scanning function based on \a *Cur.
-  bool fetchMoreTokens();
+  منطقي fetch_ہور_ٹوکن();
 
   /// The SourceMgr used for diagnostics and buffer management.
-  SourceMgr &SM;
+  سروت_Mgr &SM;
 
   /// The original input.
-  MemoryBufferRef InputBuffer;
+  حافظہ_بفر_Ref داخلہ_بفر;
 
   /// The current position of the scanner.
   StringRef::iterator Current;
 
   /// The end of the input (one past the last character).
-  StringRef::iterator End;
+  StringRef::iterator سرا_2;
 
   /// Current YAML indentation level in spaces.
-  int Indent;
+  صحيح Indent;
 
   /// Current column number in Unicode code points.
-  unsigned Column;
+  بنانشانی کالم;
 
   /// Current line number.
-  unsigned Line;
+  بنانشانی سطر;
 
   /// How deep we are in flow style containers. 0 Means at block level.
-  unsigned FlowLevel;
+  بنانشانی FlowLevel;
 
   /// Are we at the start of the stream?
-  bool IsStartOfStream;
+  منطقي Is_شروع_دا_دھارا;
 
   /// Can the next token be the start of a simple key?
-  bool IsSimpleKeyAllowed;
+  منطقي Is_Simple_کلید_Allowed;
 
   /// Can the next token be a value indicator even if it does not have a
   /// trailing space?
-  bool IsAdjacentValueAllowedInFlow;
+  منطقي Is_Adjacent_قدر_Allowed_وچ_Flow;
 
   /// True if an error has occurred.
-  bool Failed;
+  منطقي Failed;
 
   /// Should colors be used when printing out the diagnostic messages?
-  bool ShowColors;
+  منطقي ShowColors;
 
   /// Queue of tokens. This is required to queue up tokens while looking
   ///        for the end of a simple key. And for cases where a single character
   ///        can produce multiple tokens (e.g. BlockEnd).
-  TokenQueueT TokenQueue;
+  Token_قطار_T Token_قطار;
 
   /// Indentation levels.
-  SmallVector<int, 4> Indents;
+  Small_سمتیہ<صحيح, 4> Indents;
 
   /// Potential simple keys.
-  SmallVector<SimpleKey, 4> SimpleKeys;
+  Small_سمتیہ<Simple_کلید, 4> Simple_کلیدیں;
 
-  std::error_code *EC;
+  std::error_کوڈ *EC;
 };
 
 } // end namespace yaml
 } // end namespace llvm
 
 /// encodeUTF8 - Encode \a UnicodeScalarValue in UTF-8 and append it to result.
-static void encodeUTF8( uint32_t UnicodeScalarValue
-                      , SmallVectorImpl<char> &Result) {
-  if (UnicodeScalarValue <= 0x7F) {
-    Result.push_back(UnicodeScalarValue & 0x7F);
-  } else if (UnicodeScalarValue <= 0x7FF) {
-    uint8_t FirstByte = 0xC0 | ((UnicodeScalarValue & 0x7C0) >> 6);
-    uint8_t SecondByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-  } else if (UnicodeScalarValue <= 0xFFFF) {
-    uint8_t FirstByte = 0xE0 | ((UnicodeScalarValue & 0xF000) >> 12);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t ThirdByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-  } else if (UnicodeScalarValue <= 0x10FFFF) {
-    uint8_t FirstByte = 0xF0 | ((UnicodeScalarValue & 0x1F0000) >> 18);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0x3F000) >> 12);
-    uint8_t ThirdByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t FourthByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-    Result.push_back(FourthByte);
+ساكن فراغ encodeUTF8( uint32_t Unicode_Scalar_قدر
+                      , Small_سمتیہ_Impl<حرف> &نتیجہ) {
+  إذا (Unicode_Scalar_قدر <= 0x7F) {
+    نتیجہ.ڈالو_پٹھ(Unicode_Scalar_قدر & 0x7F);
+  } وإلا إذا (Unicode_Scalar_قدر <= 0x7FF) {
+    uint8_t پہلا_Byte = 0xC0 | ((Unicode_Scalar_قدر & 0x7C0) >> 6);
+    uint8_t دوجا_Byte = 0x80 | (Unicode_Scalar_قدر & 0x3F);
+    نتیجہ.ڈالو_پٹھ(پہلا_Byte);
+    نتیجہ.ڈالو_پٹھ(دوجا_Byte);
+  } وإلا إذا (Unicode_Scalar_قدر <= 0xFFFF) {
+    uint8_t پہلا_Byte = 0xE0 | ((Unicode_Scalar_قدر & 0xF000) >> 12);
+    uint8_t دوجا_Byte = 0x80 | ((Unicode_Scalar_قدر & 0xFC0) >> 6);
+    uint8_t تیجا_Byte = 0x80 | (Unicode_Scalar_قدر & 0x3F);
+    نتیجہ.ڈالو_پٹھ(پہلا_Byte);
+    نتیجہ.ڈالو_پٹھ(دوجا_Byte);
+    نتیجہ.ڈالو_پٹھ(تیجا_Byte);
+  } وإلا إذا (Unicode_Scalar_قدر <= 0x10FFFF) {
+    uint8_t پہلا_Byte = 0xF0 | ((Unicode_Scalar_قدر & 0x1F0000) >> 18);
+    uint8_t دوجا_Byte = 0x80 | ((Unicode_Scalar_قدر & 0x3F000) >> 12);
+    uint8_t تیجا_Byte = 0x80 | ((Unicode_Scalar_قدر & 0xFC0) >> 6);
+    uint8_t FourthByte = 0x80 | (Unicode_Scalar_قدر & 0x3F);
+    نتیجہ.ڈالو_پٹھ(پہلا_Byte);
+    نتیجہ.ڈالو_پٹھ(دوجا_Byte);
+    نتیجہ.ڈالو_پٹھ(تیجا_Byte);
+    نتیجہ.ڈالو_پٹھ(FourthByte);
   }
 }
 
-bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
-  SourceMgr SM;
-  Scanner scanner(Input, SM);
-  while (true) {
-    Token T = scanner.getNext();
-    switch (T.Kind) {
-    case Token::TK_StreamStart:
+منطقي yaml::dump_ٹوکن(StringRef داخلہ, raw_ostream &OS) {
+  سروت_Mgr SM;
+  Scanner scanner(داخلہ, SM);
+  طالما (سچ) {
+    Token T = scanner.get_اگلا();
+    بدل (T.قسم_2) {
+    حالة Token::TK_دھارا_شروع:
       OS << "Stream-Start: ";
-      break;
-    case Token::TK_StreamEnd:
+      اكسر;
+    حالة Token::TK_دھارا_سرا:
       OS << "Stream-End: ";
-      break;
-    case Token::TK_VersionDirective:
+      اكسر;
+    حالة Token::TK_نسخہ_Directive:
       OS << "Version-Directive: ";
-      break;
-    case Token::TK_TagDirective:
+      اكسر;
+    حالة Token::TK_ٹیگ_Directive:
       OS << "Tag-Directive: ";
-      break;
-    case Token::TK_DocumentStart:
+      اكسر;
+    حالة Token::TK_Document_شروع:
       OS << "Document-Start: ";
-      break;
-    case Token::TK_DocumentEnd:
+      اكسر;
+    حالة Token::TK_Document_سرا:
       OS << "Document-End: ";
-      break;
-    case Token::TK_BlockEntry:
+      اكسر;
+    حالة Token::TK_بلاک_اندراج:
       OS << "Block-Entry: ";
-      break;
-    case Token::TK_BlockEnd:
+      اكسر;
+    حالة Token::TK_بلاک_سرا:
       OS << "Block-End: ";
-      break;
-    case Token::TK_BlockSequenceStart:
+      اكسر;
+    حالة Token::TK_بلاک_Sequence_شروع:
       OS << "Block-Sequence-Start: ";
-      break;
-    case Token::TK_BlockMappingStart:
+      اكسر;
+    حالة Token::TK_بلاک_Mapping_شروع:
       OS << "Block-Mapping-Start: ";
-      break;
-    case Token::TK_FlowEntry:
+      اكسر;
+    حالة Token::TK_Flow_اندراج:
       OS << "Flow-Entry: ";
-      break;
-    case Token::TK_FlowSequenceStart:
+      اكسر;
+    حالة Token::TK_Flow_Sequence_شروع:
       OS << "Flow-Sequence-Start: ";
-      break;
-    case Token::TK_FlowSequenceEnd:
+      اكسر;
+    حالة Token::TK_Flow_Sequence_سرا:
       OS << "Flow-Sequence-End: ";
-      break;
-    case Token::TK_FlowMappingStart:
+      اكسر;
+    حالة Token::TK_Flow_Mapping_شروع:
       OS << "Flow-Mapping-Start: ";
-      break;
-    case Token::TK_FlowMappingEnd:
+      اكسر;
+    حالة Token::TK_Flow_Mapping_سرا:
       OS << "Flow-Mapping-End: ";
-      break;
-    case Token::TK_Key:
+      اكسر;
+    حالة Token::TK_کلید:
       OS << "Key: ";
-      break;
-    case Token::TK_Value:
+      اكسر;
+    حالة Token::TK_قدر:
       OS << "Value: ";
-      break;
-    case Token::TK_Scalar:
+      اكسر;
+    حالة Token::TK_Scalar:
       OS << "Scalar: ";
-      break;
-    case Token::TK_BlockScalar:
+      اكسر;
+    حالة Token::TK_بلاک_Scalar:
       OS << "Block Scalar: ";
-      break;
-    case Token::TK_Alias:
+      اكسر;
+    حالة Token::TK_Alias:
       OS << "Alias: ";
-      break;
-    case Token::TK_Anchor:
+      اكسر;
+    حالة Token::TK_Anchor:
       OS << "Anchor: ";
-      break;
-    case Token::TK_Tag:
+      اكسر;
+    حالة Token::TK_ٹیگ:
       OS << "Tag: ";
-      break;
-    case Token::TK_Error:
-      break;
+      اكسر;
+    حالة Token::TK_Error:
+      اكسر;
     }
     OS << T.Range << "\n";
-    if (T.Kind == Token::TK_StreamEnd)
-      break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    إذا (T.قسم_2 == Token::TK_دھارا_سرا)
+      اكسر;
+    وإلا إذا (T.قسم_2 == Token::TK_Error)
+      أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }
 
-bool yaml::scanTokens(StringRef Input) {
-  SourceMgr SM;
-  Scanner scanner(Input, SM);
-  while (true) {
-    Token T = scanner.getNext();
-    if (T.Kind == Token::TK_StreamEnd)
-      break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+منطقي yaml::جانچ_ٹوکن(StringRef داخلہ) {
+  سروت_Mgr SM;
+  Scanner scanner(داخلہ, SM);
+  طالما (سچ) {
+    Token T = scanner.get_اگلا();
+    إذا (T.قسم_2 == Token::TK_دھارا_سرا)
+      اكسر;
+    وإلا إذا (T.قسم_2 == Token::TK_Error)
+      أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }
 
-std::string yaml::escape(StringRef Input, bool EscapePrintable) {
-  std::string EscapedInput;
-  for (StringRef::iterator i = Input.begin(), e = Input.end(); i != e; ++i) {
-    if (*i == '\\')
-      EscapedInput += "\\\\";
-    else if (*i == '"')
-      EscapedInput += "\\\"";
-    else if (*i == 0)
-      EscapedInput += "\\0";
-    else if (*i == 0x07)
-      EscapedInput += "\\a";
-    else if (*i == 0x08)
-      EscapedInput += "\\b";
-    else if (*i == 0x09)
-      EscapedInput += "\\t";
-    else if (*i == 0x0A)
-      EscapedInput += "\\n";
-    else if (*i == 0x0B)
-      EscapedInput += "\\v";
-    else if (*i == 0x0C)
-      EscapedInput += "\\f";
-    else if (*i == 0x0D)
-      EscapedInput += "\\r";
-    else if (*i == 0x1B)
-      EscapedInput += "\\e";
-    else if ((unsigned char)*i < 0x20) { // Control characters not handled above.
+std::string yaml::escape(StringRef داخلہ, منطقي EscapePrintable) {
+  std::string Escaped_داخلہ;
+  لكل (StringRef::iterator i = داخلہ.begin(), e = داخلہ.سرا(); i != e; ++i) {
+    إذا (*i == '\\')
+      Escaped_داخلہ += "\\\\";
+    وإلا إذا (*i == '"')
+      Escaped_داخلہ += "\\\"";
+    وإلا إذا (*i == 0)
+      Escaped_داخلہ += "\\0";
+    وإلا إذا (*i == 0x07)
+      Escaped_داخلہ += "\\a";
+    وإلا إذا (*i == 0x08)
+      Escaped_داخلہ += "\\b";
+    وإلا إذا (*i == 0x09)
+      Escaped_داخلہ += "\\t";
+    وإلا إذا (*i == 0x0A)
+      Escaped_داخلہ += "\\n";
+    وإلا إذا (*i == 0x0B)
+      Escaped_داخلہ += "\\v";
+    وإلا إذا (*i == 0x0C)
+      Escaped_داخلہ += "\\f";
+    وإلا إذا (*i == 0x0D)
+      Escaped_داخلہ += "\\r";
+    وإلا إذا (*i == 0x1B)
+      Escaped_داخلہ += "\\e";
+    وإلا إذا ((بنانشانی حرف)*i < 0x20) { // Control characters not handled above.
       std::string HexStr = utohexstr(*i);
-      EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-    } else if (*i & 0x80) { // UTF-8 multiple code unit subsequence.
-      UTF8Decoded UnicodeScalarValue
-        = decodeUTF8(StringRef(i, Input.end() - i));
-      if (UnicodeScalarValue.second == 0) {
+      Escaped_داخلہ += "\\x" + std::string(2 - HexStr.ناپ_2(), '0') + HexStr;
+    } وإلا إذا (*i & 0x80) { // UTF-8 multiple code unit subsequence.
+      UTF8Decoded Unicode_Scalar_قدر
+        = decodeUTF8(StringRef(i, داخلہ.سرا() - i));
+      إذا (Unicode_Scalar_قدر.دوجا_2 == 0) {
         // Found invalid char.
         SmallString<4> Val;
         encodeUTF8(0xFFFD, Val);
-        llvm::append_range(EscapedInput, Val);
+        llvm::append_range(Escaped_داخلہ, Val);
         // FIXME: Error reporting.
-        return EscapedInput;
+        أرجع Escaped_داخلہ;
       }
-      if (UnicodeScalarValue.first == 0x85)
-        EscapedInput += "\\N";
-      else if (UnicodeScalarValue.first == 0xA0)
-        EscapedInput += "\\_";
-      else if (UnicodeScalarValue.first == 0x2028)
-        EscapedInput += "\\L";
-      else if (UnicodeScalarValue.first == 0x2029)
-        EscapedInput += "\\P";
-      else if (!EscapePrintable &&
-               sys::unicode::isPrintable(UnicodeScalarValue.first))
-        EscapedInput += StringRef(i, UnicodeScalarValue.second);
-      else {
-        std::string HexStr = utohexstr(UnicodeScalarValue.first);
-        if (HexStr.size() <= 2)
-          EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 4)
-          EscapedInput += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 8)
-          EscapedInput += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
+      إذا (Unicode_Scalar_قدر.پہلا_2 == 0x85)
+        Escaped_داخلہ += "\\N";
+      وإلا إذا (Unicode_Scalar_قدر.پہلا_2 == 0xA0)
+        Escaped_داخلہ += "\\_";
+      وإلا إذا (Unicode_Scalar_قدر.پہلا_2 == 0x2028)
+        Escaped_داخلہ += "\\L";
+      وإلا إذا (Unicode_Scalar_قدر.پہلا_2 == 0x2029)
+        Escaped_داخلہ += "\\P";
+      وإلا إذا (!EscapePrintable &&
+               sys::unicode::isPrintable(Unicode_Scalar_قدر.پہلا_2))
+        Escaped_داخلہ += StringRef(i, Unicode_Scalar_قدر.دوجا_2);
+      وإلا {
+        std::string HexStr = utohexstr(Unicode_Scalar_قدر.پہلا_2);
+        إذا (HexStr.ناپ_2() <= 2)
+          Escaped_داخلہ += "\\x" + std::string(2 - HexStr.ناپ_2(), '0') + HexStr;
+        وإلا إذا (HexStr.ناپ_2() <= 4)
+          Escaped_داخلہ += "\\u" + std::string(4 - HexStr.ناپ_2(), '0') + HexStr;
+        وإلا إذا (HexStr.ناپ_2() <= 8)
+          Escaped_داخلہ += "\\U" + std::string(8 - HexStr.ناپ_2(), '0') + HexStr;
       }
-      i += UnicodeScalarValue.second - 1;
-    } else {
-      EscapedInput.push_back(*i);
+      i += Unicode_Scalar_قدر.دوجا_2 - 1;
+    } وإلا {
+      Escaped_داخلہ.ڈالو_پٹھ(*i);
     }
   }
-  return EscapedInput;
+  أرجع Escaped_داخلہ;
 }
 
-std::optional<bool> yaml::parseBool(StringRef S) {
-  switch (S.size()) {
-  case 1:
-    switch (S.front()) {
-    case 'y':
-    case 'Y':
-      return true;
-    case 'n':
-    case 'N':
-      return false;
-    default:
-      return std::nullopt;
+std::optional<منطقي> yaml::parseBool(StringRef S) {
+  بدل (S.ناپ_2()) {
+  حالة 1:
+    بدل (S.front()) {
+    حالة 'y':
+    حالة 'Y':
+      أرجع سچ;
+    حالة 'n':
+    حالة 'N':
+      أرجع خطأ;
+    افتراضي:
+      أرجع std::nullopt;
     }
-  case 2:
-    switch (S.front()) {
-    case 'O':
-      if (S[1] == 'N') // ON
-        return true;
+  حالة 2:
+    بدل (S.front()) {
+    حالة 'O':
+      إذا (S[1] == 'N') // ON
+        أرجع سچ;
       [[fallthrough]];
-    case 'o':
-      if (S[1] == 'n') //[Oo]n
-        return true;
-      return std::nullopt;
-    case 'N':
-      if (S[1] == 'O') // NO
-        return false;
+    حالة 'o':
+      إذا (S[1] == 'n') //[Oo]n
+        أرجع سچ;
+      أرجع std::nullopt;
+    حالة 'N':
+      إذا (S[1] == 'O') // NO
+        أرجع خطأ;
       [[fallthrough]];
-    case 'n':
-      if (S[1] == 'o') //[Nn]o
-        return false;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    حالة 'n':
+      إذا (S[1] == 'o') //[Nn]o
+        أرجع خطأ;
+      أرجع std::nullopt;
+    افتراضي:
+      أرجع std::nullopt;
     }
-  case 3:
-    switch (S.front()) {
-    case 'O':
-      if (S.drop_front() == "FF") // OFF
-        return false;
+  حالة 3:
+    بدل (S.front()) {
+    حالة 'O':
+      إذا (S.drop_front() == "FF") // OFF
+        أرجع خطأ;
       [[fallthrough]];
-    case 'o':
-      if (S.drop_front() == "ff") //[Oo]ff
-        return false;
-      return std::nullopt;
-    case 'Y':
-      if (S.drop_front() == "ES") // YES
-        return true;
+    حالة 'o':
+      إذا (S.drop_front() == "ff") //[Oo]ff
+        أرجع خطأ;
+      أرجع std::nullopt;
+    حالة 'Y':
+      إذا (S.drop_front() == "ES") // YES
+        أرجع سچ;
       [[fallthrough]];
-    case 'y':
-      if (S.drop_front() == "es") //[Yy]es
-        return true;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    حالة 'y':
+      إذا (S.drop_front() == "es") //[Yy]es
+        أرجع سچ;
+      أرجع std::nullopt;
+    افتراضي:
+      أرجع std::nullopt;
     }
-  case 4:
-    switch (S.front()) {
-    case 'T':
-      if (S.drop_front() == "RUE") // TRUE
-        return true;
+  حالة 4:
+    بدل (S.front()) {
+    حالة 'T':
+      إذا (S.drop_front() == "RUE") // TRUE
+        أرجع سچ;
       [[fallthrough]];
-    case 't':
-      if (S.drop_front() == "rue") //[Tt]rue
-        return true;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    حالة 't':
+      إذا (S.drop_front() == "rue") //[Tt]rue
+        أرجع سچ;
+      أرجع std::nullopt;
+    افتراضي:
+      أرجع std::nullopt;
     }
-  case 5:
-    switch (S.front()) {
-    case 'F':
-      if (S.drop_front() == "ALSE") // FALSE
-        return false;
+  حالة 5:
+    بدل (S.front()) {
+    حالة 'F':
+      إذا (S.drop_front() == "ALSE") // FALSE
+        أرجع خطأ;
       [[fallthrough]];
-    case 'f':
-      if (S.drop_front() == "alse") //[Ff]alse
-        return false;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    حالة 'f':
+      إذا (S.drop_front() == "alse") //[Ff]alse
+        أرجع خطأ;
+      أرجع std::nullopt;
+    افتراضي:
+      أرجع std::nullopt;
     }
-  default:
-    return std::nullopt;
+  افتراضي:
+    أرجع std::nullopt;
   }
 }
 
-Scanner::Scanner(StringRef Input, SourceMgr &sm, bool ShowColors,
-                 std::error_code *EC)
+Scanner::Scanner(StringRef داخلہ, سروت_Mgr &sm, منطقي ShowColors,
+                 std::error_کوڈ *EC)
     : SM(sm), ShowColors(ShowColors), EC(EC) {
-  init(MemoryBufferRef(Input, "YAML"));
+  init(حافظہ_بفر_Ref(داخلہ, "YAML"));
 }
 
-Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors,
-                 std::error_code *EC)
+Scanner::Scanner(حافظہ_بفر_Ref بفر, سروت_Mgr &SM_, منطقي ShowColors,
+                 std::error_کوڈ *EC)
     : SM(SM_), ShowColors(ShowColors), EC(EC) {
-  init(Buffer);
+  init(بفر);
 }
 
-void Scanner::init(MemoryBufferRef Buffer) {
-  InputBuffer = Buffer;
-  Current = InputBuffer.getBufferStart();
-  End = InputBuffer.getBufferEnd();
+فراغ Scanner::init(حافظہ_بفر_Ref بفر) {
+  داخلہ_بفر = بفر;
+  Current = داخلہ_بفر.get_بفر_شروع();
+  سرا_2 = داخلہ_بفر.get_بفر_سرا();
   Indent = -1;
-  Column = 0;
-  Line = 0;
+  کالم = 0;
+  سطر = 0;
   FlowLevel = 0;
-  IsStartOfStream = true;
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
-  Failed = false;
-  std::unique_ptr<MemoryBuffer> InputBufferOwner =
-      MemoryBuffer::getMemBuffer(Buffer, /*RequiresNullTerminator=*/false);
-  SM.AddNewSourceBuffer(std::move(InputBufferOwner), SMLoc());
+  Is_شروع_دا_دھارا = سچ;
+  Is_Simple_کلید_Allowed = سچ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
+  Failed = خطأ;
+  std::unique_ptr<حافظہ_بفر> داخلہ_بفر_Owner =
+      حافظہ_بفر::get_Mem_بفر(بفر, /*RequiresNullTerminator=*/خطأ);
+  SM.جوڑو_New_سروت_بفر(std::move(داخلہ_بفر_Owner), SMLoc());
 }
 
-Token &Scanner::peekNext() {
+Token &Scanner::peek_اگلا() {
   // If the current token is a possible simple key, keep parsing until we
   // can confirm.
-  bool NeedMore = false;
-  while (true) {
-    if (TokenQueue.empty() || NeedMore) {
-      if (!fetchMoreTokens()) {
-        TokenQueue.clear();
-        SimpleKeys.clear();
-        TokenQueue.push_back(Token());
-        return TokenQueue.front();
+  منطقي Need_ہور = خطأ;
+  طالما (سچ) {
+    إذا (Token_قطار.خالی_تھاواں() || Need_ہور) {
+      إذا (!fetch_ہور_ٹوکن()) {
+        Token_قطار.clear();
+        Simple_کلیدیں.clear();
+        Token_قطار.ڈالو_پٹھ(Token());
+        أرجع Token_قطار.front();
       }
     }
-    assert(!TokenQueue.empty() &&
+    أكد(!Token_قطار.خالی_تھاواں() &&
             "fetchMoreTokens lied about getting tokens!");
 
-    removeStaleSimpleKeyCandidates();
-    SimpleKey SK;
-    SK.Tok = TokenQueue.begin();
-    if (!is_contained(SimpleKeys, SK))
-      break;
-    else
-      NeedMore = true;
+    remove_Stale_Simple_کلید_Candidates();
+    Simple_کلید SK;
+    SK.Tok = Token_قطار.begin();
+    إذا (!is_contained(Simple_کلیدیں, SK))
+      اكسر;
+    وإلا
+      Need_ہور = سچ;
   }
-  return TokenQueue.front();
+  أرجع Token_قطار.front();
 }
 
-Token Scanner::getNext() {
-  Token Ret = peekNext();
+Token Scanner::get_اگلا() {
+  Token Ret = peek_اگلا();
   // TokenQueue can be empty if there was an error getting the next token.
-  if (!TokenQueue.empty())
-    TokenQueue.pop_front();
+  إذا (!Token_قطار.خالی_تھاواں())
+    Token_قطار.نکالو_front();
 
   // There cannot be any referenced Token's if the TokenQueue is empty. So do a
   // quick deallocation of them all.
-  if (TokenQueue.empty())
-    TokenQueue.resetAlloc();
+  إذا (Token_قطار.خالی_تھاواں())
+    Token_قطار.resetAlloc();
 
-  return Ret;
+  أرجع Ret;
 }
 
 StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
+  إذا (Position == سرا_2)
+    أرجع Position;
   // Check 7 bit c-printable - b-char.
-  if (   *Position == 0x09
+  إذا (   *Position == 0x09
       || (*Position >= 0x20 && *Position <= 0x7E))
-    return Position + 1;
+    أرجع Position + 1;
 
   // Check for valid UTF-8.
-  if (uint8_t(*Position) & 0x80) {
+  إذا (uint8_t(*Position) & 0x80) {
     UTF8Decoded u8d = decodeUTF8(Position);
-    if (   u8d.second != 0
-        && u8d.first != 0xFEFF
-        && ( u8d.first == 0x85
-          || ( u8d.first >= 0xA0
-            && u8d.first <= 0xD7FF)
-          || ( u8d.first >= 0xE000
-            && u8d.first <= 0xFFFD)
-          || ( u8d.first >= 0x10000
-            && u8d.first <= 0x10FFFF)))
-      return Position + u8d.second;
+    إذا (   u8d.دوجا_2 != 0
+        && u8d.پہلا_2 != 0xFEFF
+        && ( u8d.پہلا_2 == 0x85
+          || ( u8d.پہلا_2 >= 0xA0
+            && u8d.پہلا_2 <= 0xD7FF)
+          || ( u8d.پہلا_2 >= 0xE000
+            && u8d.پہلا_2 <= 0xFFFD)
+          || ( u8d.پہلا_2 >= 0x10000
+            && u8d.پہلا_2 <= 0x10FFFF)))
+      أرجع Position + u8d.دوجا_2;
   }
-  return Position;
+  أرجع Position;
 }
 
 StringRef::iterator Scanner::skip_b_break(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == 0x0D) {
-    if (Position + 1 != End && *(Position + 1) == 0x0A)
-      return Position + 2;
-    return Position + 1;
+  إذا (Position == سرا_2)
+    أرجع Position;
+  إذا (*Position == 0x0D) {
+    إذا (Position + 1 != سرا_2 && *(Position + 1) == 0x0A)
+      أرجع Position + 2;
+    أرجع Position + 1;
   }
 
-  if (*Position == 0x0A)
-    return Position + 1;
-  return Position;
+  إذا (*Position == 0x0A)
+    أرجع Position + 1;
+  أرجع Position;
 }
 
 StringRef::iterator Scanner::skip_s_space(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ')
-    return Position + 1;
-  return Position;
+  إذا (Position == سرا_2)
+    أرجع Position;
+  إذا (*Position == ' ')
+    أرجع Position + 1;
+  أرجع Position;
 }
 
 StringRef::iterator Scanner::skip_s_white(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position + 1;
-  return Position;
+  إذا (Position == سرا_2)
+    أرجع Position;
+  إذا (*Position == ' ' || *Position == '\t')
+    أرجع Position + 1;
+  أرجع Position;
 }
 
 StringRef::iterator Scanner::skip_ns_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position;
-  return skip_nb_char(Position);
+  إذا (Position == سرا_2)
+    أرجع Position;
+  إذا (*Position == ' ' || *Position == '\t')
+    أرجع Position;
+  أرجع skip_nb_char(Position);
 }
 
 StringRef::iterator Scanner::skip_while( SkipWhileFunc Func
                                        , StringRef::iterator Position) {
-  while (true) {
-    StringRef::iterator i = (this->*Func)(Position);
-    if (i == Position)
-      break;
+  طالما (سچ) {
+    StringRef::iterator i = (هذا->*Func)(Position);
+    إذا (i == Position)
+      اكسر;
     Position = i;
   }
-  return Position;
+  أرجع Position;
 }
 
-void Scanner::advanceWhile(SkipWhileFunc Func) {
-  auto Final = skip_while(Func, Current);
-  Column += Final - Current;
+فراغ Scanner::advanceWhile(SkipWhileFunc Func) {
+  خودکار Final = skip_while(Func, Current);
+  کالم += Final - Current;
   Current = Final;
 }
 
-static bool is_ns_hex_digit(const char C) { return isAlnum(C); }
+ساكن منطقي is_ns_hex_digit(ثابت حرف C) { أرجع isAlnum(C); }
 
-static bool is_ns_word_char(const char C) { return C == '-' || isAlpha(C); }
+ساكن منطقي is_ns_لفظ_char(ثابت حرف C) { أرجع C == '-' || isAlpha(C); }
 
-void Scanner::scan_ns_uri_char() {
-  while (true) {
-    if (Current == End)
-      break;
-    if ((*Current == '%' && Current + 2 < End &&
+فراغ Scanner::جانچ_ns_uri_char() {
+  طالما (سچ) {
+    إذا (Current == سرا_2)
+      اكسر;
+    إذا ((*Current == '%' && Current + 2 < سرا_2 &&
          is_ns_hex_digit(*(Current + 1)) && is_ns_hex_digit(*(Current + 2))) ||
-        is_ns_word_char(*Current) ||
-        StringRef(Current, 1).find_first_of("#;/?:@&=+$,_.!~*'()[]") !=
+        is_ns_لفظ_char(*Current) ||
+        StringRef(Current, 1).لبھو_پہلا_دا("#;/?:@&=+$,_.!~*'()[]") !=
             StringRef::npos) {
       ++Current;
-      ++Column;
-    } else {
-      break;
+      ++کالم;
+    } وإلا {
+      اكسر;
     }
   }
 }
 
-bool Scanner::consume(uint32_t Expected) {
-  if (Expected >= 0x80) {
-    setError("Cannot consume non-ascii characters", Current);
-    return false;
+منطقي Scanner::consume(uint32_t Expected) {
+  إذا (Expected >= 0x80) {
+    سیٹ_Error("Cannot consume non-ascii characters", Current);
+    أرجع خطأ;
   }
-  if (Current == End)
-    return false;
-  if (uint8_t(*Current) >= 0x80) {
-    setError("Cannot consume non-ascii characters", Current);
-    return false;
+  إذا (Current == سرا_2)
+    أرجع خطأ;
+  إذا (uint8_t(*Current) >= 0x80) {
+    سیٹ_Error("Cannot consume non-ascii characters", Current);
+    أرجع خطأ;
   }
-  if (uint8_t(*Current) == Expected) {
+  إذا (uint8_t(*Current) == Expected) {
     ++Current;
-    ++Column;
-    return true;
+    ++کالم;
+    أرجع سچ;
   }
-  return false;
+  أرجع خطأ;
 }
 
-void Scanner::skip(uint32_t Distance) {
-  Current += Distance;
-  Column += Distance;
-  assert(Current <= End && "Skipped past the end");
+فراغ Scanner::skip(uint32_t فاصلہ_2) {
+  Current += فاصلہ_2;
+  کالم += فاصلہ_2;
+  أكد(Current <= سرا_2 && "Skipped past the end");
 }
 
-bool Scanner::isBlankOrBreak(StringRef::iterator Position) {
-  if (Position == End)
-    return false;
-  return *Position == ' ' || *Position == '\t' || *Position == '\r' ||
+منطقي Scanner::isBlankOrBreak(StringRef::iterator Position) {
+  إذا (Position == سرا_2)
+    أرجع خطأ;
+  أرجع *Position == ' ' || *Position == '\t' || *Position == '\r' ||
          *Position == '\n';
 }
 
-bool Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
-  if (Position == End || isBlankOrBreak(Position))
-    return false;
-  if (FlowLevel &&
-      StringRef(Position, 1).find_first_of(",[]{}") != StringRef::npos)
-    return false;
-  return true;
+منطقي Scanner::is_Plain_محفوظ_Non_Blank(StringRef::iterator Position) {
+  إذا (Position == سرا_2 || isBlankOrBreak(Position))
+    أرجع خطأ;
+  إذا (FlowLevel &&
+      StringRef(Position, 1).لبھو_پہلا_دا(",[]{}") != StringRef::npos)
+    أرجع خطأ;
+  أرجع سچ;
 }
 
-bool Scanner::isLineEmpty(StringRef Line) {
-  for (const auto *Position = Line.begin(); Position != Line.end(); ++Position)
-    if (!isBlankOrBreak(Position))
-      return false;
-  return true;
+منطقي Scanner::is_سطر_خالی_تھاواں(StringRef سطر) {
+  لكل (ثابت خودکار *Position = سطر.begin(); Position != سطر.سرا(); ++Position)
+    إذا (!isBlankOrBreak(Position))
+      أرجع خطأ;
+  أرجع سچ;
 }
 
-bool Scanner::consumeLineBreakIfPresent() {
-  auto Next = skip_b_break(Current);
-  if (Next == Current)
-    return false;
-  Column = 0;
-  ++Line;
-  Current = Next;
-  return true;
+منطقي Scanner::consume_سطر_Break_If_Present() {
+  خودکار اگلا_2 = skip_b_break(Current);
+  إذا (اگلا_2 == Current)
+    أرجع خطأ;
+  کالم = 0;
+  ++سطر;
+  Current = اگلا_2;
+  أرجع سچ;
 }
 
-void Scanner::saveSimpleKeyCandidate( TokenQueueT::iterator Tok
-                                    , unsigned AtColumn
-                                    , bool IsRequired) {
-  if (IsSimpleKeyAllowed) {
-    SimpleKey SK;
+فراغ Scanner::save_Simple_کلید_Candidate( Token_قطار_T::iterator Tok
+                                    , بنانشانی At_کالم
+                                    , منطقي IsRequired) {
+  إذا (Is_Simple_کلید_Allowed) {
+    Simple_کلید SK;
     SK.Tok = Tok;
-    SK.Line = Line;
-    SK.Column = AtColumn;
+    SK.سطر = سطر;
+    SK.کالم = At_کالم;
     SK.IsRequired = IsRequired;
     SK.FlowLevel = FlowLevel;
-    SimpleKeys.push_back(SK);
+    Simple_کلیدیں.ڈالو_پٹھ(SK);
   }
 }
 
-void Scanner::removeStaleSimpleKeyCandidates() {
-  for (SmallVectorImpl<SimpleKey>::iterator i = SimpleKeys.begin();
-                                            i != SimpleKeys.end();) {
-    if (i->Line != Line || i->Column + 1024 < Column) {
-      if (i->IsRequired)
-        setError( "Could not find expected : for simple key"
+فراغ Scanner::remove_Stale_Simple_کلید_Candidates() {
+  لكل (Small_سمتیہ_Impl<Simple_کلید>::iterator i = Simple_کلیدیں.begin();
+                                            i != Simple_کلیدیں.سرا();) {
+    إذا (i->سطر != سطر || i->کالم + 1024 < کالم) {
+      إذا (i->IsRequired)
+        سیٹ_Error( "Could not find expected : for simple key"
                 , i->Tok->Range.begin());
-      i = SimpleKeys.erase(i);
-    } else {
+      i = Simple_کلیدیں.erase(i);
+    } وإلا {
       ++i;
     }
   }
 }
 
-void Scanner::removeSimpleKeyCandidatesOnFlowLevel(unsigned Level) {
-  if (!SimpleKeys.empty() && (SimpleKeys.end() - 1)->FlowLevel == Level)
-    SimpleKeys.pop_back();
+فراغ Scanner::remove_Simple_کلید_Candidates_On_Flow_Level(بنانشانی Level) {
+  إذا (!Simple_کلیدیں.خالی_تھاواں() && (Simple_کلیدیں.سرا() - 1)->FlowLevel == Level)
+    Simple_کلیدیں.نکالو_پٹھ();
 }
 
-bool Scanner::unrollIndent(int ToColumn) {
+منطقي Scanner::unrollIndent(صحيح منزل_کالم) {
   Token T;
   // Indentation is ignored in flow.
-  if (FlowLevel != 0)
-    return true;
+  إذا (FlowLevel != 0)
+    أرجع سچ;
 
-  while (Indent > ToColumn) {
-    T.Kind = Token::TK_BlockEnd;
+  طالما (Indent > منزل_کالم) {
+    T.قسم_2 = Token::TK_بلاک_سرا;
     T.Range = StringRef(Current, 1);
-    TokenQueue.push_back(T);
-    Indent = Indents.pop_back_val();
+    Token_قطار.ڈالو_پٹھ(T);
+    Indent = Indents.نکالو_پٹھ_val();
   }
 
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::rollIndent( int ToColumn
-                        , Token::TokenKind Kind
-                        , TokenQueueT::iterator InsertPoint) {
-  if (FlowLevel)
-    return true;
-  if (Indent < ToColumn) {
-    Indents.push_back(Indent);
-    Indent = ToColumn;
+منطقي Scanner::rollIndent( صحيح منزل_کالم
+                        , Token::Token_قسم قسم_2
+                        , Token_قطار_T::iterator داخل_کرو_نقطہ) {
+  إذا (FlowLevel)
+    أرجع سچ;
+  إذا (Indent < منزل_کالم) {
+    Indents.ڈالو_پٹھ(Indent);
+    Indent = منزل_کالم;
 
     Token T;
-    T.Kind = Kind;
+    T.قسم_2 = قسم_2;
     T.Range = StringRef(Current, 0);
-    TokenQueue.insert(InsertPoint, T);
+    Token_قطار.داخل_کرو(داخل_کرو_نقطہ, T);
   }
-  return true;
+  أرجع سچ;
 }
 
-void Scanner::skipComment() {
-  if (Current == End || *Current != '#')
-    return;
-  while (true) {
+فراغ Scanner::skipComment() {
+  إذا (Current == سرا_2 || *Current != '#')
+    أرجع;
+  طالما (سچ) {
     // This may skip more than one byte, thus Column is only incremented
     // for code points.
     StringRef::iterator I = skip_nb_char(Current);
-    if (I == Current)
-      break;
+    إذا (I == Current)
+      اكسر;
     Current = I;
-    ++Column;
+    ++کالم;
   }
 }
 
-void Scanner::scanToNextToken() {
-  while (true) {
-    while (Current != End && (*Current == ' ' || *Current == '\t')) {
+فراغ Scanner::جانچ_منزل_اگلا_Token() {
+  طالما (سچ) {
+    طالما (Current != سرا_2 && (*Current == ' ' || *Current == '\t')) {
       skip(1);
     }
 
@@ -1173,587 +1173,587 @@ void Scanner::scanToNextToken() {
 
     // Skip EOL.
     StringRef::iterator i = skip_b_break(Current);
-    if (i == Current)
-      break;
+    إذا (i == Current)
+      اكسر;
     Current = i;
-    ++Line;
-    Column = 0;
+    ++سطر;
+    کالم = 0;
     // New lines may start a simple key.
-    if (!FlowLevel)
-      IsSimpleKeyAllowed = true;
+    إذا (!FlowLevel)
+      Is_Simple_کلید_Allowed = سچ;
   }
 }
 
-bool Scanner::scanStreamStart() {
-  IsStartOfStream = false;
+منطقي Scanner::جانچ_دھارا_شروع() {
+  Is_شروع_دا_دھارا = خطأ;
 
-  EncodingInfo EI = getUnicodeEncoding(currentInput());
+  EncodingInfo EI = getUnicodeEncoding(current_داخلہ());
 
   Token T;
-  T.Kind = Token::TK_StreamStart;
-  T.Range = StringRef(Current, EI.second);
-  TokenQueue.push_back(T);
-  Current += EI.second;
-  return true;
+  T.قسم_2 = Token::TK_دھارا_شروع;
+  T.Range = StringRef(Current, EI.دوجا_2);
+  Token_قطار.ڈالو_پٹھ(T);
+  Current += EI.دوجا_2;
+  أرجع سچ;
 }
 
-bool Scanner::scanStreamEnd() {
+منطقي Scanner::جانچ_دھارا_سرا() {
   // Force an ending new line if one isn't present.
-  if (Column != 0) {
-    Column = 0;
-    ++Line;
+  إذا (کالم != 0) {
+    کالم = 0;
+    ++سطر;
   }
 
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_کلیدیں.clear();
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
   Token T;
-  T.Kind = Token::TK_StreamEnd;
+  T.قسم_2 = Token::TK_دھارا_سرا;
   T.Range = StringRef(Current, 0);
-  TokenQueue.push_back(T);
-  return true;
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
-bool Scanner::scanDirective() {
+منطقي Scanner::جانچ_Directive() {
   // Reset the indentation level.
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_کلیدیں.clear();
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
-  StringRef::iterator Start = Current;
+  StringRef::iterator شروع = Current;
   consume('%');
-  StringRef::iterator NameStart = Current;
+  StringRef::iterator Name_شروع = Current;
   Current = skip_while(&Scanner::skip_ns_char, Current);
-  StringRef Name(NameStart, Current - NameStart);
+  StringRef Name(Name_شروع, Current - Name_شروع);
   Current = skip_while(&Scanner::skip_s_white, Current);
 
   Token T;
-  if (Name == "YAML") {
+  إذا (Name == "YAML") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
-    T.Kind = Token::TK_VersionDirective;
-    T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    return true;
-  } else if(Name == "TAG") {
+    T.قسم_2 = Token::TK_نسخہ_Directive;
+    T.Range = StringRef(شروع, Current - شروع);
+    Token_قطار.ڈالو_پٹھ(T);
+    أرجع سچ;
+  } وإلا إذا(Name == "TAG") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     Current = skip_while(&Scanner::skip_s_white, Current);
     Current = skip_while(&Scanner::skip_ns_char, Current);
-    T.Kind = Token::TK_TagDirective;
-    T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    return true;
+    T.قسم_2 = Token::TK_ٹیگ_Directive;
+    T.Range = StringRef(شروع, Current - شروع);
+    Token_قطار.ڈالو_پٹھ(T);
+    أرجع سچ;
   }
-  return false;
+  أرجع خطأ;
 }
 
-bool Scanner::scanDocumentIndicator(bool IsStart) {
+منطقي Scanner::جانچ_Document_Indicator(منطقي Is_شروع) {
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_کلیدیں.clear();
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
   Token T;
-  T.Kind = IsStart ? Token::TK_DocumentStart : Token::TK_DocumentEnd;
+  T.قسم_2 = Is_شروع ? Token::TK_Document_شروع : Token::TK_Document_سرا;
   T.Range = StringRef(Current, 3);
   skip(3);
-  TokenQueue.push_back(T);
-  return true;
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
-bool Scanner::scanFlowCollectionStart(bool IsSequence) {
+منطقي Scanner::جانچ_Flow_Collection_شروع(منطقي IsSequence) {
   Token T;
-  T.Kind = IsSequence ? Token::TK_FlowSequenceStart
-                      : Token::TK_FlowMappingStart;
+  T.قسم_2 = IsSequence ? Token::TK_Flow_Sequence_شروع
+                      : Token::TK_Flow_Mapping_شروع;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  Token_قطار.ڈالو_پٹھ(T);
 
   // [ and { may begin a simple key.
-  saveSimpleKeyCandidate(--TokenQueue.end(), Column - 1, false);
+  save_Simple_کلید_Candidate(--Token_قطار.سرا(), کالم - 1, خطأ);
 
   // And may also be followed by a simple key.
-  IsSimpleKeyAllowed = true;
+  Is_Simple_کلید_Allowed = سچ;
   // Adjacent values are allowed in flows only after JSON-style keys.
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
   ++FlowLevel;
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::scanFlowCollectionEnd(bool IsSequence) {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+منطقي Scanner::جانچ_Flow_Collection_سرا(منطقي IsSequence) {
+  remove_Simple_کلید_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = سچ;
   Token T;
-  T.Kind = IsSequence ? Token::TK_FlowSequenceEnd
-                      : Token::TK_FlowMappingEnd;
+  T.قسم_2 = IsSequence ? Token::TK_Flow_Sequence_سرا
+                      : Token::TK_Flow_Mapping_سرا;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  if (FlowLevel)
+  Token_قطار.ڈالو_پٹھ(T);
+  إذا (FlowLevel)
     --FlowLevel;
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::scanFlowEntry() {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+منطقي Scanner::جانچ_Flow_اندراج() {
+  remove_Simple_کلید_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_کلید_Allowed = سچ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
   Token T;
-  T.Kind = Token::TK_FlowEntry;
+  T.قسم_2 = Token::TK_Flow_اندراج;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
-bool Scanner::scanBlockEntry() {
-  rollIndent(Column, Token::TK_BlockSequenceStart, TokenQueue.end());
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+منطقي Scanner::جانچ_بلاک_اندراج() {
+  rollIndent(کالم, Token::TK_بلاک_Sequence_شروع, Token_قطار.سرا());
+  remove_Simple_کلید_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_کلید_Allowed = سچ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
   Token T;
-  T.Kind = Token::TK_BlockEntry;
+  T.قسم_2 = Token::TK_بلاک_اندراج;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
-bool Scanner::scanKey() {
-  if (!FlowLevel)
-    rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
+منطقي Scanner::جانچ_کلید() {
+  إذا (!FlowLevel)
+    rollIndent(کالم, Token::TK_بلاک_Mapping_شروع, Token_قطار.سرا());
 
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = !FlowLevel;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_کلید_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_کلید_Allowed = !FlowLevel;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
   Token T;
-  T.Kind = Token::TK_Key;
+  T.قسم_2 = Token::TK_کلید;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
-bool Scanner::scanValue() {
+منطقي Scanner::جانچ_قدر() {
   // If the previous token could have been a simple key, insert the key token
   // into the token queue.
-  if (!SimpleKeys.empty()) {
-    SimpleKey SK = SimpleKeys.pop_back_val();
+  إذا (!Simple_کلیدیں.خالی_تھاواں()) {
+    Simple_کلید SK = Simple_کلیدیں.نکالو_پٹھ_val();
     Token T;
-    T.Kind = Token::TK_Key;
+    T.قسم_2 = Token::TK_کلید;
     T.Range = SK.Tok->Range;
-    TokenQueueT::iterator i, e;
-    for (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
-      if (i == SK.Tok)
-        break;
+    Token_قطار_T::iterator i, e;
+    لكل (i = Token_قطار.begin(), e = Token_قطار.سرا(); i != e; ++i) {
+      إذا (i == SK.Tok)
+        اكسر;
     }
-    if (i == e) {
-      Failed = true;
-      return false;
+    إذا (i == e) {
+      Failed = سچ;
+      أرجع خطأ;
     }
-    i = TokenQueue.insert(i, T);
+    i = Token_قطار.داخل_کرو(i, T);
 
     // We may also need to add a Block-Mapping-Start token.
-    rollIndent(SK.Column, Token::TK_BlockMappingStart, i);
+    rollIndent(SK.کالم, Token::TK_بلاک_Mapping_شروع, i);
 
-    IsSimpleKeyAllowed = false;
-  } else {
-    if (!FlowLevel)
-      rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
-    IsSimpleKeyAllowed = !FlowLevel;
+    Is_Simple_کلید_Allowed = خطأ;
+  } وإلا {
+    إذا (!FlowLevel)
+      rollIndent(کالم, Token::TK_بلاک_Mapping_شروع, Token_قطار.سرا());
+    Is_Simple_کلید_Allowed = !FlowLevel;
   }
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
   Token T;
-  T.Kind = Token::TK_Value;
+  T.قسم_2 = Token::TK_قدر;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
 // Forbidding inlining improves performance by roughly 20%.
 // FIXME: Remove once llvm optimizes this to the faster version without hints.
-LLVM_ATTRIBUTE_NOINLINE static bool
-wasEscaped(StringRef::iterator First, StringRef::iterator Position);
+LLVM_ATTRIBUTE_NOINLINE ساكن منطقي
+wasEscaped(StringRef::iterator پہلا, StringRef::iterator Position);
 
 // Returns whether a character at 'Position' was escaped with a leading '\'.
 // 'First' specifies the position of the first character in the string.
-static bool wasEscaped(StringRef::iterator First,
+ساكن منطقي wasEscaped(StringRef::iterator پہلا,
                        StringRef::iterator Position) {
-  assert(Position - 1 >= First);
+  أكد(Position - 1 >= پہلا);
   StringRef::iterator I = Position - 1;
   // We calculate the number of consecutive '\'s before the current position
   // by iterating backwards through our string.
-  while (I >= First && *I == '\\') --I;
+  طالما (I >= پہلا && *I == '\\') --I;
   // (Position - 1 - I) now contains the number of '\'s before the current
   // position. If it is odd, the character at 'Position' was escaped.
-  return (Position - 1 - I) % 2 == 1;
+  أرجع (Position - 1 - I) % 2 == 1;
 }
 
-bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
-  StringRef::iterator Start = Current;
-  unsigned ColStart = Column;
-  if (IsDoubleQuoted) {
-    do {
+منطقي Scanner::جانچ_Flow_Scalar(منطقي IsDoubleQuoted) {
+  StringRef::iterator شروع = Current;
+  بنانشانی خانہ_شروع = کالم;
+  إذا (IsDoubleQuoted) {
+    افعل {
       ++Current;
-      while (Current != End && *Current != '"')
+      طالما (Current != سرا_2 && *Current != '"')
         ++Current;
       // Repeat until the previous character was not a '\' or was an escaped
       // backslash.
-    } while (   Current != End
+    } طالما (   Current != سرا_2
              && *(Current - 1) == '\\'
-             && wasEscaped(Start + 1, Current));
-  } else {
+             && wasEscaped(شروع + 1, Current));
+  } وإلا {
     skip(1);
-    while (Current != End) {
+    طالما (Current != سرا_2) {
       // Skip a ' followed by another '.
-      if (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
+      إذا (Current + 1 < سرا_2 && *Current == '\'' && *(Current + 1) == '\'') {
         skip(2);
-        continue;
-      } else if (*Current == '\'')
-        break;
+        استمر;
+      } وإلا إذا (*Current == '\'')
+        اكسر;
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current) {
+      إذا (i == Current) {
         i = skip_b_break(Current);
-        if (i == Current)
-          break;
+        إذا (i == Current)
+          اكسر;
         Current = i;
-        Column = 0;
-        ++Line;
-      } else {
-        if (i == End)
-          break;
+        کالم = 0;
+        ++سطر;
+      } وإلا {
+        إذا (i == سرا_2)
+          اكسر;
         Current = i;
-        ++Column;
+        ++کالم;
       }
     }
   }
 
-  if (Current == End) {
-    setError("Expected quote at end of scalar", Current);
-    return false;
+  إذا (Current == سرا_2) {
+    سیٹ_Error("Expected quote at end of scalar", Current);
+    أرجع خطأ;
   }
 
   skip(1); // Skip ending quote.
   Token T;
-  T.Kind = Token::TK_Scalar;
-  T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  T.قسم_2 = Token::TK_Scalar;
+  T.Range = StringRef(شروع, Current - شروع);
+  Token_قطار.ڈالو_پٹھ(T);
 
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_کلید_Candidate(--Token_قطار.سرا(), خانہ_شروع, خطأ);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = سچ;
 
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::scanPlainScalar() {
-  StringRef::iterator Start = Current;
-  unsigned ColStart = Column;
-  unsigned LeadingBlanks = 0;
-  assert(Indent >= -1 && "Indent must be >= -1 !");
-  unsigned indent = static_cast<unsigned>(Indent + 1);
-  while (Current != End) {
-    if (*Current == '#')
-      break;
+منطقي Scanner::جانچ_Plain_Scalar() {
+  StringRef::iterator شروع = Current;
+  بنانشانی خانہ_شروع = کالم;
+  بنانشانی LeadingBlanks = 0;
+  أكد(Indent >= -1 && "Indent must be >= -1 !");
+  بنانشانی indent = static_cast<بنانشانی>(Indent + 1);
+  طالما (Current != سرا_2) {
+    إذا (*Current == '#')
+      اكسر;
 
-    while (Current != End &&
-           ((*Current != ':' && isPlainSafeNonBlank(Current)) ||
-            (*Current == ':' && isPlainSafeNonBlank(Current + 1)))) {
+    طالما (Current != سرا_2 &&
+           ((*Current != ':' && is_Plain_محفوظ_Non_Blank(Current)) ||
+            (*Current == ':' && is_Plain_محفوظ_Non_Blank(Current + 1)))) {
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current)
-        break;
+      إذا (i == Current)
+        اكسر;
       Current = i;
-      ++Column;
+      ++کالم;
     }
 
     // Are we at the end?
-    if (!isBlankOrBreak(Current))
-      break;
+    إذا (!isBlankOrBreak(Current))
+      اكسر;
 
     // Eat blanks.
     StringRef::iterator Tmp = Current;
-    while (isBlankOrBreak(Tmp)) {
+    طالما (isBlankOrBreak(Tmp)) {
       StringRef::iterator i = skip_s_white(Tmp);
-      if (i != Tmp) {
-        if (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
-          setError("Found invalid tab character in indentation", Tmp);
-          return false;
+      إذا (i != Tmp) {
+        إذا (LeadingBlanks && (کالم < indent) && *Tmp == '\t') {
+          سیٹ_Error("Found invalid tab character in indentation", Tmp);
+          أرجع خطأ;
         }
         Tmp = i;
-        ++Column;
-      } else {
+        ++کالم;
+      } وإلا {
         i = skip_b_break(Tmp);
-        if (!LeadingBlanks)
+        إذا (!LeadingBlanks)
           LeadingBlanks = 1;
         Tmp = i;
-        Column = 0;
-        ++Line;
+        کالم = 0;
+        ++سطر;
       }
     }
 
-    if (!FlowLevel && Column < indent)
-      break;
+    إذا (!FlowLevel && کالم < indent)
+      اكسر;
 
     Current = Tmp;
   }
-  if (Start == Current) {
-    setError("Got empty plain scalar", Start);
-    return false;
+  إذا (شروع == Current) {
+    سیٹ_Error("Got empty plain scalar", شروع);
+    أرجع خطأ;
   }
   Token T;
-  T.Kind = Token::TK_Scalar;
-  T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  T.قسم_2 = Token::TK_Scalar;
+  T.Range = StringRef(شروع, Current - شروع);
+  Token_قطار.ڈالو_پٹھ(T);
 
   // Plain scalars can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_کلید_Candidate(--Token_قطار.سرا(), خانہ_شروع, خطأ);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::scanAliasOrAnchor(bool IsAlias) {
-  StringRef::iterator Start = Current;
-  unsigned ColStart = Column;
+منطقي Scanner::جانچ_Alias_Or_Anchor(منطقي IsAlias) {
+  StringRef::iterator شروع = Current;
+  بنانشانی خانہ_شروع = کالم;
   skip(1);
-  while (Current != End) {
-    if (   *Current == '[' || *Current == ']'
+  طالما (Current != سرا_2) {
+    إذا (   *Current == '[' || *Current == ']'
         || *Current == '{' || *Current == '}'
         || *Current == ','
         || *Current == ':')
-      break;
+      اكسر;
     StringRef::iterator i = skip_ns_char(Current);
-    if (i == Current)
-      break;
+    إذا (i == Current)
+      اكسر;
     Current = i;
-    ++Column;
+    ++کالم;
   }
 
-  if (Start + 1 == Current) {
-    setError("Got empty alias or anchor", Start);
-    return false;
+  إذا (شروع + 1 == Current) {
+    سیٹ_Error("Got empty alias or anchor", شروع);
+    أرجع خطأ;
   }
 
   Token T;
-  T.Kind = IsAlias ? Token::TK_Alias : Token::TK_Anchor;
-  T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  T.قسم_2 = IsAlias ? Token::TK_Alias : Token::TK_Anchor;
+  T.Range = StringRef(شروع, Current - شروع);
+  Token_قطار.ڈالو_پٹھ(T);
 
   // Alias and anchors can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_کلید_Candidate(--Token_قطار.سرا(), خانہ_شروع, خطأ);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::scanBlockScalarIndicators(char &StyleIndicator,
-                                        char &ChompingIndicator,
-                                        unsigned &IndentIndicator,
-                                        bool &IsDone) {
-  StyleIndicator = scanBlockStyleIndicator();
-  if (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
-    return false;
-  return true;
+منطقي Scanner::جانچ_بلاک_Scalar_Indicators(حرف &StyleIndicator,
+                                        حرف &ChompingIndicator,
+                                        بنانشانی &IndentIndicator,
+                                        منطقي &Is_پورا) {
+  StyleIndicator = جانچ_بلاک_Style_Indicator();
+  إذا (!جانچ_بلاک_Scalar_سرخی(ChompingIndicator, IndentIndicator, Is_پورا))
+    أرجع خطأ;
+  أرجع سچ;
 }
 
-char Scanner::scanBlockStyleIndicator() {
-  char Indicator = ' ';
-  if (Current != End && (*Current == '>' || *Current == '|')) {
+حرف Scanner::جانچ_بلاک_Style_Indicator() {
+  حرف Indicator = ' ';
+  إذا (Current != سرا_2 && (*Current == '>' || *Current == '|')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  أرجع Indicator;
 }
 
-char Scanner::scanBlockChompingIndicator() {
-  char Indicator = ' ';
-  if (Current != End && (*Current == '+' || *Current == '-')) {
+حرف Scanner::جانچ_بلاک_Chomping_Indicator() {
+  حرف Indicator = ' ';
+  إذا (Current != سرا_2 && (*Current == '+' || *Current == '-')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  أرجع Indicator;
 }
 
 /// Get the number of line breaks after chomping.
 ///
 /// Return the number of trailing line breaks to emit, depending on
 /// \p ChompingIndicator.
-static unsigned getChompedLineBreaks(char ChompingIndicator,
-                                     unsigned LineBreaks, StringRef Str) {
-  if (ChompingIndicator == '-') // Strip all line breaks.
-    return 0;
-  if (ChompingIndicator == '+') // Keep all line breaks.
-    return LineBreaks;
+ساكن بنانشانی get_Chomped_سطر_Breaks(حرف ChompingIndicator,
+                                     بنانشانی سطر_Breaks, StringRef Str) {
+  إذا (ChompingIndicator == '-') // Strip all line breaks.
+    أرجع 0;
+  إذا (ChompingIndicator == '+') // Keep all line breaks.
+    أرجع سطر_Breaks;
   // Clip trailing lines.
-  return Str.empty() ? 0 : 1;
+  أرجع Str.خالی_تھاواں() ? 0 : 1;
 }
 
-unsigned Scanner::scanBlockIndentationIndicator() {
-  unsigned Indent = 0;
-  if (Current != End && (*Current >= '1' && *Current <= '9')) {
-    Indent = unsigned(*Current - '0');
+بنانشانی Scanner::جانچ_بلاک_Indentation_Indicator() {
+  بنانشانی Indent = 0;
+  إذا (Current != سرا_2 && (*Current >= '1' && *Current <= '9')) {
+    Indent = بنانشانی(*Current - '0');
     skip(1);
   }
-  return Indent;
+  أرجع Indent;
 }
 
-bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
-                                    unsigned &IndentIndicator, bool &IsDone) {
-  auto Start = Current;
+منطقي Scanner::جانچ_بلاک_Scalar_سرخی(حرف &ChompingIndicator,
+                                    بنانشانی &IndentIndicator, منطقي &Is_پورا) {
+  خودکار شروع = Current;
 
-  ChompingIndicator = scanBlockChompingIndicator();
-  IndentIndicator = scanBlockIndentationIndicator();
+  ChompingIndicator = جانچ_بلاک_Chomping_Indicator();
+  IndentIndicator = جانچ_بلاک_Indentation_Indicator();
   // Check for the chomping indicator once again.
-  if (ChompingIndicator == ' ')
-    ChompingIndicator = scanBlockChompingIndicator();
+  إذا (ChompingIndicator == ' ')
+    ChompingIndicator = جانچ_بلاک_Chomping_Indicator();
   Current = skip_while(&Scanner::skip_s_white, Current);
   skipComment();
 
-  if (Current == End) { // EOF, we have an empty scalar.
+  إذا (Current == سرا_2) { // EOF, we have an empty scalar.
     Token T;
-    T.Kind = Token::TK_BlockScalar;
-    T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    IsDone = true;
-    return true;
+    T.قسم_2 = Token::TK_بلاک_Scalar;
+    T.Range = StringRef(شروع, Current - شروع);
+    Token_قطار.ڈالو_پٹھ(T);
+    Is_پورا = سچ;
+    أرجع سچ;
   }
 
-  if (!consumeLineBreakIfPresent()) {
-    setError("Expected a line break after block scalar header", Current);
-    return false;
+  إذا (!consume_سطر_Break_If_Present()) {
+    سیٹ_Error("Expected a line break after block scalar header", Current);
+    أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
-                                    unsigned BlockExitIndent,
-                                    unsigned &LineBreaks, bool &IsDone) {
-  unsigned MaxAllSpaceLineCharacters = 0;
-  StringRef::iterator LongestAllSpaceLine;
+منطقي Scanner::لبھو_بلاک_Scalar_Indent(بنانشانی &بلاک_Indent,
+                                    بنانشانی بلاک_Exit_Indent,
+                                    بنانشانی &سطر_Breaks, منطقي &Is_پورا) {
+  بنانشانی Max_All_Space_سطر_Characters = 0;
+  StringRef::iterator Longest_All_Space_سطر;
 
-  while (true) {
+  طالما (سچ) {
     advanceWhile(&Scanner::skip_s_space);
-    if (skip_nb_char(Current) != Current) {
+    إذا (skip_nb_char(Current) != Current) {
       // This line isn't empty, so try and find the indentation.
-      if (Column <= BlockExitIndent) { // End of the block literal.
-        IsDone = true;
-        return true;
+      إذا (کالم <= بلاک_Exit_Indent) { // End of the block literal.
+        Is_پورا = سچ;
+        أرجع سچ;
       }
       // We found the block's indentation.
-      BlockIndent = Column;
-      if (MaxAllSpaceLineCharacters > BlockIndent) {
-        setError(
+      بلاک_Indent = کالم;
+      إذا (Max_All_Space_سطر_Characters > بلاک_Indent) {
+        سیٹ_Error(
             "Leading all-spaces line must be smaller than the block indent",
-            LongestAllSpaceLine);
-        return false;
+            Longest_All_Space_سطر);
+        أرجع خطأ;
       }
-      return true;
+      أرجع سچ;
     }
-    if (skip_b_break(Current) != Current &&
-        Column > MaxAllSpaceLineCharacters) {
+    إذا (skip_b_break(Current) != Current &&
+        کالم > Max_All_Space_سطر_Characters) {
       // Record the longest all-space line in case it's longer than the
       // discovered block indent.
-      MaxAllSpaceLineCharacters = Column;
-      LongestAllSpaceLine = Current;
+      Max_All_Space_سطر_Characters = کالم;
+      Longest_All_Space_سطر = Current;
     }
 
     // Check for EOF.
-    if (Current == End) {
-      IsDone = true;
-      return true;
+    إذا (Current == سرا_2) {
+      Is_پورا = سچ;
+      أرجع سچ;
     }
 
-    if (!consumeLineBreakIfPresent()) {
-      IsDone = true;
-      return true;
+    إذا (!consume_سطر_Break_If_Present()) {
+      Is_پورا = سچ;
+      أرجع سچ;
     }
-    ++LineBreaks;
+    ++سطر_Breaks;
   }
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::scanBlockScalarIndent(unsigned BlockIndent,
-                                    unsigned BlockExitIndent, bool &IsDone) {
+منطقي Scanner::جانچ_بلاک_Scalar_Indent(بنانشانی بلاک_Indent,
+                                    بنانشانی بلاک_Exit_Indent, منطقي &Is_پورا) {
   // Skip the indentation.
-  while (Column < BlockIndent) {
-    auto I = skip_s_space(Current);
-    if (I == Current)
-      break;
+  طالما (کالم < بلاک_Indent) {
+    خودکار I = skip_s_space(Current);
+    إذا (I == Current)
+      اكسر;
     Current = I;
-    ++Column;
+    ++کالم;
   }
 
-  if (skip_nb_char(Current) == Current)
-    return true;
+  إذا (skip_nb_char(Current) == Current)
+    أرجع سچ;
 
-  if (Column <= BlockExitIndent) { // End of the block literal.
-    IsDone = true;
-    return true;
+  إذا (کالم <= بلاک_Exit_Indent) { // End of the block literal.
+    Is_پورا = سچ;
+    أرجع سچ;
   }
 
-  if (Column < BlockIndent) {
-    if (Current != End && *Current == '#') { // Trailing comment.
-      IsDone = true;
-      return true;
+  إذا (کالم < بلاک_Indent) {
+    إذا (Current != سرا_2 && *Current == '#') { // Trailing comment.
+      Is_پورا = سچ;
+      أرجع سچ;
     }
-    setError("A text line is less indented than the block scalar", Current);
-    return false;
+    سیٹ_Error("A text line is less indented than the block scalar", Current);
+    أرجع خطأ;
   }
-  return true; // A normal text line.
+  أرجع سچ; // A normal text line.
 }
 
-bool Scanner::scanBlockScalar(bool IsLiteral) {
-  assert(*Current == '|' || *Current == '>');
-  char StyleIndicator;
-  char ChompingIndicator;
-  unsigned BlockIndent;
-  bool IsDone = false;
-  if (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
-                                 IsDone))
-    return false;
-  if (IsDone)
-    return true;
-  bool IsFolded = StyleIndicator == '>';
+منطقي Scanner::جانچ_بلاک_Scalar(منطقي IsLiteral) {
+  أكد(*Current == '|' || *Current == '>');
+  حرف StyleIndicator;
+  حرف ChompingIndicator;
+  بنانشانی بلاک_Indent;
+  منطقي Is_پورا = خطأ;
+  إذا (!جانچ_بلاک_Scalar_Indicators(StyleIndicator, ChompingIndicator, بلاک_Indent,
+                                 Is_پورا))
+    أرجع خطأ;
+  إذا (Is_پورا)
+    أرجع سچ;
+  منطقي IsFolded = StyleIndicator == '>';
 
-  const auto *Start = Current;
-  unsigned BlockExitIndent = Indent < 0 ? 0 : (unsigned)Indent;
-  unsigned LineBreaks = 0;
-  if (BlockIndent == 0) {
-    if (!findBlockScalarIndent(BlockIndent, BlockExitIndent, LineBreaks,
-                               IsDone))
-      return false;
+  ثابت خودکار *شروع = Current;
+  بنانشانی بلاک_Exit_Indent = Indent < 0 ? 0 : (بنانشانی)Indent;
+  بنانشانی سطر_Breaks = 0;
+  إذا (بلاک_Indent == 0) {
+    إذا (!لبھو_بلاک_Scalar_Indent(بلاک_Indent, بلاک_Exit_Indent, سطر_Breaks,
+                               Is_پورا))
+      أرجع خطأ;
   }
 
   // Scan the block's scalars body.
   SmallString<256> Str;
-  while (!IsDone) {
-    if (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
-      return false;
-    if (IsDone)
-      break;
+  طالما (!Is_پورا) {
+    إذا (!جانچ_بلاک_Scalar_Indent(بلاک_Indent, بلاک_Exit_Indent, Is_پورا))
+      أرجع خطأ;
+    إذا (Is_پورا)
+      اكسر;
 
     // Parse the current line.
-    auto LineStart = Current;
+    خودکار سطر_شروع = Current;
     advanceWhile(&Scanner::skip_nb_char);
-    if (LineStart != Current) {
-      if (LineBreaks && IsFolded && !Scanner::isLineEmpty(Str)) {
+    إذا (سطر_شروع != Current) {
+      إذا (سطر_Breaks && IsFolded && !Scanner::is_سطر_خالی_تھاواں(Str)) {
         // The folded style "folds" any single line break between content into a
         // single space, except when that content is "empty" (only contains
         // whitespace) in which case the line break is left as-is.
-        if (LineBreaks == 1) {
-          Str.append(LineBreaks,
-                     isLineEmpty(StringRef(LineStart, Current - LineStart))
+        إذا (سطر_Breaks == 1) {
+          Str.append(سطر_Breaks,
+                     is_سطر_خالی_تھاواں(StringRef(سطر_شروع, Current - سطر_شروع))
                          ? '\n'
                          : ' ');
         }
@@ -1761,280 +1761,280 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
         // want `LineBreaks == 0`. Otherwise this decrement accounts for the
         // fact that the first line break is "trimmed", only being used to
         // signal a sequence of line breaks which should not be folded.
-        LineBreaks--;
+        سطر_Breaks--;
       }
-      Str.append(LineBreaks, '\n');
-      Str.append(StringRef(LineStart, Current - LineStart));
-      LineBreaks = 0;
+      Str.append(سطر_Breaks, '\n');
+      Str.append(StringRef(سطر_شروع, Current - سطر_شروع));
+      سطر_Breaks = 0;
     }
 
     // Check for EOF.
-    if (Current == End)
-      break;
+    إذا (Current == سرا_2)
+      اكسر;
 
-    if (!consumeLineBreakIfPresent())
-      break;
-    ++LineBreaks;
+    إذا (!consume_سطر_Break_If_Present())
+      اكسر;
+    ++سطر_Breaks;
   }
 
-  if (Current == End && !LineBreaks)
+  إذا (Current == سرا_2 && !سطر_Breaks)
     // Ensure that there is at least one line break before the end of file.
-    LineBreaks = 1;
-  Str.append(getChompedLineBreaks(ChompingIndicator, LineBreaks, Str), '\n');
+    سطر_Breaks = 1;
+  Str.append(get_Chomped_سطر_Breaks(ChompingIndicator, سطر_Breaks, Str), '\n');
 
   // New lines may start a simple key.
-  if (!FlowLevel)
-    IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  إذا (!FlowLevel)
+    Is_Simple_کلید_Allowed = سچ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
   Token T;
-  T.Kind = Token::TK_BlockScalar;
-  T.Range = StringRef(Start, Current - Start);
-  T.Value = std::string(Str);
-  TokenQueue.push_back(T);
-  return true;
+  T.قسم_2 = Token::TK_بلاک_Scalar;
+  T.Range = StringRef(شروع, Current - شروع);
+  T.قدر = std::string(Str);
+  Token_قطار.ڈالو_پٹھ(T);
+  أرجع سچ;
 }
 
-bool Scanner::scanTag() {
-  StringRef::iterator Start = Current;
-  unsigned ColStart = Column;
+منطقي Scanner::جانچ_ٹیگ() {
+  StringRef::iterator شروع = Current;
+  بنانشانی خانہ_شروع = کالم;
   skip(1); // Eat !.
-  if (Current == End || isBlankOrBreak(Current)); // An empty tag.
-  else if (*Current == '<') {
+  إذا (Current == سرا_2 || isBlankOrBreak(Current)); // An empty tag.
+  وإلا إذا (*Current == '<') {
     skip(1);
-    scan_ns_uri_char();
-    if (!consume('>'))
-      return false;
-  } else {
+    جانچ_ns_uri_char();
+    إذا (!consume('>'))
+      أرجع خطأ;
+  } وإلا {
     // FIXME: Actually parse the c-ns-shorthand-tag rule.
     Current = skip_while(&Scanner::skip_ns_char, Current);
   }
 
   Token T;
-  T.Kind = Token::TK_Tag;
-  T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  T.قسم_2 = Token::TK_ٹیگ;
+  T.Range = StringRef(شروع, Current - شروع);
+  Token_قطار.ڈالو_پٹھ(T);
 
   // Tags can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_کلید_Candidate(--Token_قطار.سرا(), خانہ_شروع, خطأ);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_کلید_Allowed = خطأ;
+  Is_Adjacent_قدر_Allowed_وچ_Flow = خطأ;
 
-  return true;
+  أرجع سچ;
 }
 
-bool Scanner::fetchMoreTokens() {
-  if (IsStartOfStream)
-    return scanStreamStart();
+منطقي Scanner::fetch_ہور_ٹوکن() {
+  إذا (Is_شروع_دا_دھارا)
+    أرجع جانچ_دھارا_شروع();
 
-  scanToNextToken();
+  جانچ_منزل_اگلا_Token();
 
-  if (Current == End)
-    return scanStreamEnd();
+  إذا (Current == سرا_2)
+    أرجع جانچ_دھارا_سرا();
 
-  removeStaleSimpleKeyCandidates();
+  remove_Stale_Simple_کلید_Candidates();
 
-  unrollIndent(Column);
+  unrollIndent(کالم);
 
-  if (Column == 0 && *Current == '%')
-    return scanDirective();
+  إذا (کالم == 0 && *Current == '%')
+    أرجع جانچ_Directive();
 
-  if (Column == 0 && Current + 3 <= End
+  إذا (کالم == 0 && Current + 3 <= سرا_2
       && *Current == '-'
       && *(Current + 1) == '-'
       && *(Current + 2) == '-'
-      && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(true);
+      && (Current + 3 == سرا_2 || isBlankOrBreak(Current + 3)))
+    أرجع جانچ_Document_Indicator(سچ);
 
-  if (Column == 0 && Current + 3 <= End
+  إذا (کالم == 0 && Current + 3 <= سرا_2
       && *Current == '.'
       && *(Current + 1) == '.'
       && *(Current + 2) == '.'
-      && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(false);
+      && (Current + 3 == سرا_2 || isBlankOrBreak(Current + 3)))
+    أرجع جانچ_Document_Indicator(خطأ);
 
-  if (*Current == '[')
-    return scanFlowCollectionStart(true);
+  إذا (*Current == '[')
+    أرجع جانچ_Flow_Collection_شروع(سچ);
 
-  if (*Current == '{')
-    return scanFlowCollectionStart(false);
+  إذا (*Current == '{')
+    أرجع جانچ_Flow_Collection_شروع(خطأ);
 
-  if (*Current == ']')
-    return scanFlowCollectionEnd(true);
+  إذا (*Current == ']')
+    أرجع جانچ_Flow_Collection_سرا(سچ);
 
-  if (*Current == '}')
-    return scanFlowCollectionEnd(false);
+  إذا (*Current == '}')
+    أرجع جانچ_Flow_Collection_سرا(خطأ);
 
-  if (*Current == ',')
-    return scanFlowEntry();
+  إذا (*Current == ',')
+    أرجع جانچ_Flow_اندراج();
 
-  if (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
-    return scanBlockEntry();
+  إذا (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == سرا_2))
+    أرجع جانچ_بلاک_اندراج();
 
-  if (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
-    return scanKey();
+  إذا (*Current == '?' && (Current + 1 == سرا_2 || isBlankOrBreak(Current + 1)))
+    أرجع جانچ_کلید();
 
-  if (*Current == ':' &&
-      (!isPlainSafeNonBlank(Current + 1) || IsAdjacentValueAllowedInFlow))
-    return scanValue();
+  إذا (*Current == ':' &&
+      (!is_Plain_محفوظ_Non_Blank(Current + 1) || Is_Adjacent_قدر_Allowed_وچ_Flow))
+    أرجع جانچ_قدر();
 
-  if (*Current == '*')
-    return scanAliasOrAnchor(true);
+  إذا (*Current == '*')
+    أرجع جانچ_Alias_Or_Anchor(سچ);
 
-  if (*Current == '&')
-    return scanAliasOrAnchor(false);
+  إذا (*Current == '&')
+    أرجع جانچ_Alias_Or_Anchor(خطأ);
 
-  if (*Current == '!')
-    return scanTag();
+  إذا (*Current == '!')
+    أرجع جانچ_ٹیگ();
 
-  if (*Current == '|' && !FlowLevel)
-    return scanBlockScalar(true);
+  إذا (*Current == '|' && !FlowLevel)
+    أرجع جانچ_بلاک_Scalar(سچ);
 
-  if (*Current == '>' && !FlowLevel)
-    return scanBlockScalar(false);
+  إذا (*Current == '>' && !FlowLevel)
+    أرجع جانچ_بلاک_Scalar(خطأ);
 
-  if (*Current == '\'')
-    return scanFlowScalar(false);
+  إذا (*Current == '\'')
+    أرجع جانچ_Flow_Scalar(خطأ);
 
-  if (*Current == '"')
-    return scanFlowScalar(true);
+  إذا (*Current == '"')
+    أرجع جانچ_Flow_Scalar(سچ);
 
   // Get a plain scalar.
-  StringRef FirstChar(Current, 1);
-  if ((!isBlankOrBreak(Current) &&
-       FirstChar.find_first_of("-?:,[]{}#&*!|>'\"%@`") == StringRef::npos) ||
-      (FirstChar.find_first_of("?:-") != StringRef::npos &&
-       isPlainSafeNonBlank(Current + 1)))
-    return scanPlainScalar();
+  StringRef پہلا_Char(Current, 1);
+  إذا ((!isBlankOrBreak(Current) &&
+       پہلا_Char.لبھو_پہلا_دا("-?:,[]{}#&*!|>'\"%@`") == StringRef::npos) ||
+      (پہلا_Char.لبھو_پہلا_دا("?:-") != StringRef::npos &&
+       is_Plain_محفوظ_Non_Blank(Current + 1)))
+    أرجع جانچ_Plain_Scalar();
 
-  setError("Unrecognized character while tokenizing.", Current);
-  return false;
+  سیٹ_Error("Unrecognized character while tokenizing.", Current);
+  أرجع خطأ;
 }
 
-Stream::Stream(StringRef Input, SourceMgr &SM, bool ShowColors,
-               std::error_code *EC)
-    : scanner(new Scanner(Input, SM, ShowColors, EC)) {}
+دھارا::دھارا(StringRef داخلہ, سروت_Mgr &SM, منطقي ShowColors,
+               std::error_کوڈ *EC)
+    : scanner(جديد Scanner(داخلہ, SM, ShowColors, EC)) {}
 
-Stream::Stream(MemoryBufferRef InputBuffer, SourceMgr &SM, bool ShowColors,
-               std::error_code *EC)
-    : scanner(new Scanner(InputBuffer, SM, ShowColors, EC)) {}
+دھارا::دھارا(حافظہ_بفر_Ref داخلہ_بفر, سروت_Mgr &SM, منطقي ShowColors,
+               std::error_کوڈ *EC)
+    : scanner(جديد Scanner(داخلہ_بفر, SM, ShowColors, EC)) {}
 
-Stream::~Stream() = default;
+دھارا::~دھارا() = افتراضي;
 
-bool Stream::failed() { return scanner->failed(); }
+منطقي دھارا::failed() { أرجع scanner->failed(); }
 
-void Stream::printError(Node *N, const Twine &Msg, SourceMgr::DiagKind Kind) {
-  printError(N ? N->getSourceRange() : SMRange(), Msg, Kind);
+فراغ دھارا::printError(گرہ *N, ثابت Twine &پیغام_2, سروت_Mgr::Diag_قسم قسم_2) {
+  printError(N ? N->get_سروت_Range() : SMRange(), پیغام_2, قسم_2);
 }
 
-void Stream::printError(const SMRange &Range, const Twine &Msg,
-                        SourceMgr::DiagKind Kind) {
-  scanner->printError(Range.Start, Kind, Msg, Range);
+فراغ دھارا::printError(ثابت SMRange &Range, ثابت Twine &پیغام_2,
+                        سروت_Mgr::Diag_قسم قسم_2) {
+  scanner->printError(Range.شروع, قسم_2, پیغام_2, Range);
 }
 
-document_iterator Stream::begin() {
-  if (CurrentDoc)
+document_iterator دھارا::begin() {
+  إذا (CurrentDoc)
     report_fatal_error("Can only iterate over the stream once");
 
   // Skip Stream-Start.
-  scanner->getNext();
+  scanner->get_اگلا();
 
-  CurrentDoc.reset(new Document(*this));
-  return document_iterator(CurrentDoc);
+  CurrentDoc.reset(جديد Document(*هذا));
+  أرجع document_iterator(CurrentDoc);
 }
 
-document_iterator Stream::end() {
-  return document_iterator();
+document_iterator دھارا::سرا() {
+  أرجع document_iterator();
 }
 
-void Stream::skip() {
-  for (Document &Doc : *this)
+فراغ دھارا::skip() {
+  لكل (Document &Doc : *هذا)
     Doc.skip();
 }
 
-Node::Node(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
+گرہ::گرہ(بنانشانی صحيح Type, std::unique_ptr<Document> &D, StringRef A,
            StringRef T)
-    : Doc(D), TypeID(Type), Anchor(A), Tag(T) {
-  SMLoc Start = SMLoc::getFromPointer(peekNext().Range.begin());
-  SourceRange = SMRange(Start, Start);
+    : Doc(D), TypeID(Type), Anchor(A), ٹیگ(T) {
+  SMLoc شروع = SMLoc::get_From_اشارہ_گر(peek_اگلا().Range.begin());
+  سروت_Range = SMRange(شروع, شروع);
 }
 
-std::string Node::getVerbatimTag() const {
-  StringRef Raw = getRawTag();
-  if (!Raw.empty() && Raw != "!") {
+std::string گرہ::get_Verbatim_ٹیگ() ثابت {
+  StringRef Raw = get_Raw_ٹیگ();
+  إذا (!Raw.خالی_تھاواں() && Raw != "!") {
     std::string Ret;
-    if (Raw.find_last_of('!') == 0) {
-      Ret = std::string(Doc->getTagMap().find("!")->second);
+    إذا (Raw.لبھو_آخری_دا('!') == 0) {
+      Ret = std::string(Doc->get_ٹیگ_Map().لبھو("!")->دوجا_2);
       Ret += Raw.substr(1);
-      return Ret;
-    } else if (Raw.starts_with("!!")) {
-      Ret = std::string(Doc->getTagMap().find("!!")->second);
+      أرجع Ret;
+    } وإلا إذا (Raw.starts_with("!!")) {
+      Ret = std::string(Doc->get_ٹیگ_Map().لبھو("!!")->دوجا_2);
       Ret += Raw.substr(2);
-      return Ret;
-    } else {
-      StringRef TagHandle = Raw.substr(0, Raw.find_last_of('!') + 1);
+      أرجع Ret;
+    } وإلا {
+      StringRef ٹیگ_Handle = Raw.substr(0, Raw.لبھو_آخری_دا('!') + 1);
       std::map<StringRef, StringRef>::const_iterator It =
-          Doc->getTagMap().find(TagHandle);
-      if (It != Doc->getTagMap().end())
-        Ret = std::string(It->second);
-      else {
+          Doc->get_ٹیگ_Map().لبھو(ٹیگ_Handle);
+      إذا (It != Doc->get_ٹیگ_Map().سرا())
+        Ret = std::string(It->دوجا_2);
+      وإلا {
         Token T;
-        T.Kind = Token::TK_Tag;
-        T.Range = TagHandle;
-        setError(Twine("Unknown tag handle ") + TagHandle, T);
+        T.قسم_2 = Token::TK_ٹیگ;
+        T.Range = ٹیگ_Handle;
+        سیٹ_Error(Twine("Unknown tag handle ") + ٹیگ_Handle, T);
       }
-      Ret += Raw.substr(Raw.find_last_of('!') + 1);
-      return Ret;
+      Ret += Raw.substr(Raw.لبھو_آخری_دا('!') + 1);
+      أرجع Ret;
     }
   }
 
-  switch (getType()) {
-  case NK_Null:
-    return "tag:yaml.org,2002:null";
-  case NK_Scalar:
-  case NK_BlockScalar:
+  بدل (getType()) {
+  حالة NK_Null:
+    أرجع "tag:yaml.org,2002:null";
+  حالة NK_Scalar:
+  حالة NK_بلاک_Scalar:
     // TODO: Tag resolution.
-    return "tag:yaml.org,2002:str";
-  case NK_Mapping:
-    return "tag:yaml.org,2002:map";
-  case NK_Sequence:
-    return "tag:yaml.org,2002:seq";
+    أرجع "tag:yaml.org,2002:str";
+  حالة NK_Mapping:
+    أرجع "tag:yaml.org,2002:map";
+  حالة NK_Sequence:
+    أرجع "tag:yaml.org,2002:seq";
   }
 
-  return "";
+  أرجع "";
 }
 
-Token &Node::peekNext() {
-  return Doc->peekNext();
+Token &گرہ::peek_اگلا() {
+  أرجع Doc->peek_اگلا();
 }
 
-Token Node::getNext() {
-  return Doc->getNext();
+Token گرہ::get_اگلا() {
+  أرجع Doc->get_اگلا();
 }
 
-Node *Node::parseBlockNode() {
-  return Doc->parseBlockNode();
+گرہ *گرہ::parse_بلاک_گرہ() {
+  أرجع Doc->parse_بلاک_گرہ();
 }
 
-BumpPtrAllocator &Node::getAllocator() {
-  return Doc->NodeAllocator;
+BumpPtrAllocator &گرہ::getAllocator() {
+  أرجع Doc->گرہ_Allocator;
 }
 
-void Node::setError(const Twine &Msg, Token &Tok) const {
-  Doc->setError(Msg, Tok);
+فراغ گرہ::سیٹ_Error(ثابت Twine &پیغام_2, Token &Tok) ثابت {
+  Doc->سیٹ_Error(پیغام_2, Tok);
 }
 
-bool Node::failed() const {
-  return Doc->failed();
+منطقي گرہ::failed() ثابت {
+  أرجع Doc->failed();
 }
 
-StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
-  if (Value[0] == '"')
-    return getDoubleQuotedValue(Value, Storage);
-  if (Value[0] == '\'')
-    return getSingleQuotedValue(Value, Storage);
-  return getPlainValue(Value, Storage);
+StringRef Scalar_گرہ::get_قدر(Small_سمتیہ_Impl<حرف> &Storage) ثابت {
+  إذا (قدر[0] == '"')
+    أرجع get_Double_Quoted_قدر(قدر, Storage);
+  إذا (قدر[0] == '\'')
+    أرجع get_Single_Quoted_قدر(قدر, Storage);
+  أرجع get_Plain_قدر(قدر, Storage);
 }
 
 /// parseScalarValue - A common parsing routine for all flow scalar styles.
@@ -2051,614 +2051,614 @@ StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
 /// \param UnescapeCallback - This is called when the escape character is found
 /// in the input.
 /// \returns - The unfolded and unescaped value.
-static StringRef
-parseScalarValue(StringRef UnquotedValue, SmallVectorImpl<char> &Storage,
+ساكن StringRef
+parse_Scalar_قدر(StringRef Unquoted_قدر, Small_سمتیہ_Impl<حرف> &Storage,
                  StringRef LookupChars,
-                 std::function<StringRef(StringRef, SmallVectorImpl<char> &)>
+                 std::function<StringRef(StringRef, Small_سمتیہ_Impl<حرف> &)>
                      UnescapeCallback) {
-  size_t I = UnquotedValue.find_first_of(LookupChars);
-  if (I == StringRef::npos)
-    return UnquotedValue;
+  size_t I = Unquoted_قدر.لبھو_پہلا_دا(LookupChars);
+  إذا (I == StringRef::npos)
+    أرجع Unquoted_قدر;
 
   Storage.clear();
-  Storage.reserve(UnquotedValue.size());
-  char LastNewLineAddedAs = '\0';
-  for (; I != StringRef::npos; I = UnquotedValue.find_first_of(LookupChars)) {
-    if (UnquotedValue[I] != '\r' && UnquotedValue[I] != '\n') {
-      llvm::append_range(Storage, UnquotedValue.take_front(I));
-      UnquotedValue = UnescapeCallback(UnquotedValue.drop_front(I), Storage);
-      LastNewLineAddedAs = '\0';
-      continue;
+  Storage.reserve(Unquoted_قدر.ناپ_2());
+  حرف آخری_New_سطر_Added_As = '\0';
+  لكل (; I != StringRef::npos; I = Unquoted_قدر.لبھو_پہلا_دا(LookupChars)) {
+    إذا (Unquoted_قدر[I] != '\r' && Unquoted_قدر[I] != '\n') {
+      llvm::append_range(Storage, Unquoted_قدر.take_front(I));
+      Unquoted_قدر = UnescapeCallback(Unquoted_قدر.drop_front(I), Storage);
+      آخری_New_سطر_Added_As = '\0';
+      استمر;
     }
-    if (size_t LastNonSWhite = UnquotedValue.find_last_not_of(" \t", I);
-        LastNonSWhite != StringRef::npos) {
-      llvm::append_range(Storage, UnquotedValue.take_front(LastNonSWhite + 1));
-      Storage.push_back(' ');
-      LastNewLineAddedAs = ' ';
-    } else {
+    إذا (size_t آخری_Non_SWhite = Unquoted_قدر.لبھو_آخری_not_دا(" \t", I);
+        آخری_Non_SWhite != StringRef::npos) {
+      llvm::append_range(Storage, Unquoted_قدر.take_front(آخری_Non_SWhite + 1));
+      Storage.ڈالو_پٹھ(' ');
+      آخری_New_سطر_Added_As = ' ';
+    } وإلا {
       // Note: we can't just check if the last character in Storage is ' ',
       // '\n', or something else; that would give a wrong result for double
       // quoted values containing an escaped space character before a new-line
       // character.
-      switch (LastNewLineAddedAs) {
-      case ' ':
-        assert(!Storage.empty() && Storage.back() == ' ');
-        Storage.back() = '\n';
-        LastNewLineAddedAs = '\n';
-        break;
-      case '\n':
-        assert(!Storage.empty() && Storage.back() == '\n');
-        Storage.push_back('\n');
-        break;
-      default:
-        Storage.push_back(' ');
-        LastNewLineAddedAs = ' ';
-        break;
+      بدل (آخری_New_سطر_Added_As) {
+      حالة ' ':
+        أكد(!Storage.خالی_تھاواں() && Storage.پٹھ() == ' ');
+        Storage.پٹھ() = '\n';
+        آخری_New_سطر_Added_As = '\n';
+        اكسر;
+      حالة '\n':
+        أكد(!Storage.خالی_تھاواں() && Storage.پٹھ() == '\n');
+        Storage.ڈالو_پٹھ('\n');
+        اكسر;
+      افتراضي:
+        Storage.ڈالو_پٹھ(' ');
+        آخری_New_سطر_Added_As = ' ';
+        اكسر;
       }
     }
     // Handle Windows-style EOL
-    if (UnquotedValue.substr(I, 2) == "\r\n")
+    إذا (Unquoted_قدر.substr(I, 2) == "\r\n")
       I++;
-    UnquotedValue = UnquotedValue.drop_front(I + 1).ltrim(" \t");
+    Unquoted_قدر = Unquoted_قدر.drop_front(I + 1).ltrim(" \t");
   }
-  llvm::append_range(Storage, UnquotedValue);
-  return StringRef(Storage.begin(), Storage.size());
+  llvm::append_range(Storage, Unquoted_قدر);
+  أرجع StringRef(Storage.begin(), Storage.ناپ_2());
 }
 
 StringRef
-ScalarNode::getDoubleQuotedValue(StringRef RawValue,
-                                 SmallVectorImpl<char> &Storage) const {
-  assert(RawValue.size() >= 2 && RawValue.front() == '"' &&
-         RawValue.back() == '"');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+Scalar_گرہ::get_Double_Quoted_قدر(StringRef Raw_قدر,
+                                 Small_سمتیہ_Impl<حرف> &Storage) ثابت {
+  أكد(Raw_قدر.ناپ_2() >= 2 && Raw_قدر.front() == '"' &&
+         Raw_قدر.پٹھ() == '"');
+  StringRef Unquoted_قدر = Raw_قدر.substr(1, Raw_قدر.ناپ_2() - 2);
 
-  auto UnescapeFunc = [this](StringRef UnquotedValue,
-                             SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(1) == "\\");
-    if (UnquotedValue.size() == 1) {
+  خودکار UnescapeFunc = [هذا](StringRef Unquoted_قدر,
+                             Small_سمتیہ_Impl<حرف> &Storage) {
+    أكد(Unquoted_قدر.take_front(1) == "\\");
+    إذا (Unquoted_قدر.ناپ_2() == 1) {
       Token T;
-      T.Range = UnquotedValue;
-      setError("Unrecognized escape code", T);
+      T.Range = Unquoted_قدر;
+      سیٹ_Error("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      أرجع StringRef();
     }
-    UnquotedValue = UnquotedValue.drop_front(1);
-    switch (UnquotedValue[0]) {
-    default: {
+    Unquoted_قدر = Unquoted_قدر.drop_front(1);
+    بدل (Unquoted_قدر[0]) {
+    افتراضي: {
       Token T;
-      T.Range = UnquotedValue.take_front(1);
-      setError("Unrecognized escape code", T);
+      T.Range = Unquoted_قدر.take_front(1);
+      سیٹ_Error("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      أرجع StringRef();
     }
-    case '\r':
+    حالة '\r':
       // Shrink the Windows-style EOL.
-      if (UnquotedValue.size() >= 2 && UnquotedValue[1] == '\n')
-        UnquotedValue = UnquotedValue.drop_front(1);
+      إذا (Unquoted_قدر.ناپ_2() >= 2 && Unquoted_قدر[1] == '\n')
+        Unquoted_قدر = Unquoted_قدر.drop_front(1);
       [[fallthrough]];
-    case '\n':
-      return UnquotedValue.drop_front(1).ltrim(" \t");
-    case '0':
-      Storage.push_back(0x00);
-      break;
-    case 'a':
-      Storage.push_back(0x07);
-      break;
-    case 'b':
-      Storage.push_back(0x08);
-      break;
-    case 't':
-    case 0x09:
-      Storage.push_back(0x09);
-      break;
-    case 'n':
-      Storage.push_back(0x0A);
-      break;
-    case 'v':
-      Storage.push_back(0x0B);
-      break;
-    case 'f':
-      Storage.push_back(0x0C);
-      break;
-    case 'r':
-      Storage.push_back(0x0D);
-      break;
-    case 'e':
-      Storage.push_back(0x1B);
-      break;
-    case ' ':
-      Storage.push_back(0x20);
-      break;
-    case '"':
-      Storage.push_back(0x22);
-      break;
-    case '/':
-      Storage.push_back(0x2F);
-      break;
-    case '\\':
-      Storage.push_back(0x5C);
-      break;
-    case 'N':
+    حالة '\n':
+      أرجع Unquoted_قدر.drop_front(1).ltrim(" \t");
+    حالة '0':
+      Storage.ڈالو_پٹھ(0x00);
+      اكسر;
+    حالة 'a':
+      Storage.ڈالو_پٹھ(0x07);
+      اكسر;
+    حالة 'b':
+      Storage.ڈالو_پٹھ(0x08);
+      اكسر;
+    حالة 't':
+    حالة 0x09:
+      Storage.ڈالو_پٹھ(0x09);
+      اكسر;
+    حالة 'n':
+      Storage.ڈالو_پٹھ(0x0A);
+      اكسر;
+    حالة 'v':
+      Storage.ڈالو_پٹھ(0x0B);
+      اكسر;
+    حالة 'f':
+      Storage.ڈالو_پٹھ(0x0C);
+      اكسر;
+    حالة 'r':
+      Storage.ڈالو_پٹھ(0x0D);
+      اكسر;
+    حالة 'e':
+      Storage.ڈالو_پٹھ(0x1B);
+      اكسر;
+    حالة ' ':
+      Storage.ڈالو_پٹھ(0x20);
+      اكسر;
+    حالة '"':
+      Storage.ڈالو_پٹھ(0x22);
+      اكسر;
+    حالة '/':
+      Storage.ڈالو_پٹھ(0x2F);
+      اكسر;
+    حالة '\\':
+      Storage.ڈالو_پٹھ(0x5C);
+      اكسر;
+    حالة 'N':
       encodeUTF8(0x85, Storage);
-      break;
-    case '_':
+      اكسر;
+    حالة '_':
       encodeUTF8(0xA0, Storage);
-      break;
-    case 'L':
+      اكسر;
+    حالة 'L':
       encodeUTF8(0x2028, Storage);
-      break;
-    case 'P':
+      اكسر;
+    حالة 'P':
       encodeUTF8(0x2029, Storage);
-      break;
-    case 'x': {
-      if (UnquotedValue.size() < 3)
+      اكسر;
+    حالة 'x': {
+      إذا (Unquoted_قدر.ناپ_2() < 3)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 2).getAsInteger(16, UnicodeScalarValue))
+        اكسر;
+      بنانشانی صحيح Unicode_Scalar_قدر;
+      إذا (Unquoted_قدر.substr(1, 2).getAsInteger(16, Unicode_Scalar_قدر))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(3);
+        Unicode_Scalar_قدر = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_قدر, Storage);
+      أرجع Unquoted_قدر.drop_front(3);
     }
-    case 'u': {
-      if (UnquotedValue.size() < 5)
+    حالة 'u': {
+      إذا (Unquoted_قدر.ناپ_2() < 5)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 4).getAsInteger(16, UnicodeScalarValue))
+        اكسر;
+      بنانشانی صحيح Unicode_Scalar_قدر;
+      إذا (Unquoted_قدر.substr(1, 4).getAsInteger(16, Unicode_Scalar_قدر))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(5);
+        Unicode_Scalar_قدر = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_قدر, Storage);
+      أرجع Unquoted_قدر.drop_front(5);
     }
-    case 'U': {
-      if (UnquotedValue.size() < 9)
+    حالة 'U': {
+      إذا (Unquoted_قدر.ناپ_2() < 9)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 8).getAsInteger(16, UnicodeScalarValue))
+        اكسر;
+      بنانشانی صحيح Unicode_Scalar_قدر;
+      إذا (Unquoted_قدر.substr(1, 8).getAsInteger(16, Unicode_Scalar_قدر))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(9);
+        Unicode_Scalar_قدر = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_قدر, Storage);
+      أرجع Unquoted_قدر.drop_front(9);
     }
     }
-    return UnquotedValue.drop_front(1);
+    أرجع Unquoted_قدر.drop_front(1);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "\\\r\n", UnescapeFunc);
+  أرجع parse_Scalar_قدر(Unquoted_قدر, Storage, "\\\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getSingleQuotedValue(StringRef RawValue,
-                                           SmallVectorImpl<char> &Storage) {
-  assert(RawValue.size() >= 2 && RawValue.front() == '\'' &&
-         RawValue.back() == '\'');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+StringRef Scalar_گرہ::get_Single_Quoted_قدر(StringRef Raw_قدر,
+                                           Small_سمتیہ_Impl<حرف> &Storage) {
+  أكد(Raw_قدر.ناپ_2() >= 2 && Raw_قدر.front() == '\'' &&
+         Raw_قدر.پٹھ() == '\'');
+  StringRef Unquoted_قدر = Raw_قدر.substr(1, Raw_قدر.ناپ_2() - 2);
 
-  auto UnescapeFunc = [](StringRef UnquotedValue,
-                         SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(2) == "''");
-    Storage.push_back('\'');
-    return UnquotedValue.drop_front(2);
+  خودکار UnescapeFunc = [](StringRef Unquoted_قدر,
+                         Small_سمتیہ_Impl<حرف> &Storage) {
+    أكد(Unquoted_قدر.take_front(2) == "''");
+    Storage.ڈالو_پٹھ('\'');
+    أرجع Unquoted_قدر.drop_front(2);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "'\r\n", UnescapeFunc);
+  أرجع parse_Scalar_قدر(Unquoted_قدر, Storage, "'\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getPlainValue(StringRef RawValue,
-                                    SmallVectorImpl<char> &Storage) {
+StringRef Scalar_گرہ::get_Plain_قدر(StringRef Raw_قدر,
+                                    Small_سمتیہ_Impl<حرف> &Storage) {
   // Trim trailing whitespace ('b-char' and 's-white').
   // NOTE: Alternatively we could change the scanner to not include whitespace
   //       here in the first place.
-  RawValue = RawValue.rtrim("\r\n \t");
-  return parseScalarValue(RawValue, Storage, "\r\n", nullptr);
+  Raw_قدر = Raw_قدر.rtrim("\r\n \t");
+  أرجع parse_Scalar_قدر(Raw_قدر, Storage, "\r\n", خالی_سوچک);
 }
 
-Node *KeyValueNode::getKey() {
-  if (Key)
-    return Key;
+گرہ *کلید_قدر_گرہ::get_کلید() {
+  إذا (کلید)
+    أرجع کلید;
   // Handle implicit null keys.
   {
-    Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
-        || t.Kind == Token::TK_Value
-        || t.Kind == Token::TK_Error) {
-      return Key = new (getAllocator()) NullNode(Doc);
+    Token &t = peek_اگلا();
+    إذا (   t.قسم_2 == Token::TK_بلاک_سرا
+        || t.قسم_2 == Token::TK_قدر
+        || t.قسم_2 == Token::TK_Error) {
+      أرجع کلید = جديد (getAllocator()) Null_گرہ(Doc);
     }
-    if (t.Kind == Token::TK_Key)
-      getNext(); // skip TK_Key.
+    إذا (t.قسم_2 == Token::TK_کلید)
+      get_اگلا(); // skip TK_Key.
   }
 
   // Handle explicit null keys.
-  Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Value) {
-    return Key = new (getAllocator()) NullNode(Doc);
+  Token &t = peek_اگلا();
+  إذا (t.قسم_2 == Token::TK_بلاک_سرا || t.قسم_2 == Token::TK_قدر) {
+    أرجع کلید = جديد (getAllocator()) Null_گرہ(Doc);
   }
 
   // We've got a normal key.
-  return Key = parseBlockNode();
+  أرجع کلید = parse_بلاک_گرہ();
 }
 
-Node *KeyValueNode::getValue() {
-  if (Value)
-    return Value;
+گرہ *کلید_قدر_گرہ::get_قدر() {
+  إذا (قدر)
+    أرجع قدر;
 
-  if (Node* Key = getKey())
-    Key->skip();
-  else {
-    setError("Null key in Key Value.", peekNext());
-    return Value = new (getAllocator()) NullNode(Doc);
+  إذا (گرہ* کلید = get_کلید())
+    کلید->skip();
+  وإلا {
+    سیٹ_Error("Null key in Key Value.", peek_اگلا());
+    أرجع قدر = جديد (getAllocator()) Null_گرہ(Doc);
   }
 
-  if (failed())
-    return Value = new (getAllocator()) NullNode(Doc);
+  إذا (failed())
+    أرجع قدر = جديد (getAllocator()) Null_گرہ(Doc);
 
   // Handle implicit null values.
   {
-    Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
-        || t.Kind == Token::TK_FlowMappingEnd
-        || t.Kind == Token::TK_Key
-        || t.Kind == Token::TK_FlowEntry
-        || t.Kind == Token::TK_Error) {
-      return Value = new (getAllocator()) NullNode(Doc);
+    Token &t = peek_اگلا();
+    إذا (   t.قسم_2 == Token::TK_بلاک_سرا
+        || t.قسم_2 == Token::TK_Flow_Mapping_سرا
+        || t.قسم_2 == Token::TK_کلید
+        || t.قسم_2 == Token::TK_Flow_اندراج
+        || t.قسم_2 == Token::TK_Error) {
+      أرجع قدر = جديد (getAllocator()) Null_گرہ(Doc);
     }
 
-    if (t.Kind != Token::TK_Value) {
-      setError("Unexpected token in Key Value.", t);
-      return Value = new (getAllocator()) NullNode(Doc);
+    إذا (t.قسم_2 != Token::TK_قدر) {
+      سیٹ_Error("Unexpected token in Key Value.", t);
+      أرجع قدر = جديد (getAllocator()) Null_گرہ(Doc);
     }
-    getNext(); // skip TK_Value.
+    get_اگلا(); // skip TK_Value.
   }
 
   // Handle explicit null values.
-  Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Key) {
-    return Value = new (getAllocator()) NullNode(Doc);
+  Token &t = peek_اگلا();
+  إذا (t.قسم_2 == Token::TK_بلاک_سرا || t.قسم_2 == Token::TK_کلید) {
+    أرجع قدر = جديد (getAllocator()) Null_گرہ(Doc);
   }
 
   // We got a normal value.
-  return Value = parseBlockNode();
+  أرجع قدر = parse_بلاک_گرہ();
 }
 
-void MappingNode::increment() {
-  if (failed()) {
-    IsAtEnd = true;
-    CurrentEntry = nullptr;
-    return;
+فراغ Mapping_گرہ::increment() {
+  إذا (failed()) {
+    Is_At_سرا = سچ;
+    Current_اندراج = خالی_سوچک;
+    أرجع;
   }
-  if (CurrentEntry) {
-    CurrentEntry->skip();
-    if (Type == MT_Inline) {
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
-      return;
+  إذا (Current_اندراج) {
+    Current_اندراج->skip();
+    إذا (Type == MT_Inline) {
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
+      أرجع;
     }
   }
-  Token T = peekNext();
-  if (T.Kind == Token::TK_Key || T.Kind == Token::TK_Scalar) {
+  Token T = peek_اگلا();
+  إذا (T.قسم_2 == Token::TK_کلید || T.قسم_2 == Token::TK_Scalar) {
     // KeyValueNode eats the TK_Key. That way it can detect null keys.
-    CurrentEntry = new (getAllocator()) KeyValueNode(Doc);
-  } else if (Type == MT_Block) {
-    switch (T.Kind) {
-    case Token::TK_BlockEnd:
-      getNext();
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
-      break;
-    default:
-      setError("Unexpected token. Expected Key or Block End", T);
+    Current_اندراج = جديد (getAllocator()) کلید_قدر_گرہ(Doc);
+  } وإلا إذا (Type == MT_بلاک) {
+    بدل (T.قسم_2) {
+    حالة Token::TK_بلاک_سرا:
+      get_اگلا();
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
+      اكسر;
+    افتراضي:
+      سیٹ_Error("Unexpected token. Expected Key or Block End", T);
       [[fallthrough]];
-    case Token::TK_Error:
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
+    حالة Token::TK_Error:
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
     }
-  } else {
-    switch (T.Kind) {
-    case Token::TK_FlowEntry:
+  } وإلا {
+    بدل (T.قسم_2) {
+    حالة Token::TK_Flow_اندراج:
       // Eat the flow entry and recurse.
-      getNext();
-      return increment();
-    case Token::TK_FlowMappingEnd:
-      getNext();
+      get_اگلا();
+      أرجع increment();
+    حالة Token::TK_Flow_Mapping_سرا:
+      get_اگلا();
       [[fallthrough]];
-    case Token::TK_Error:
+    حالة Token::TK_Error:
       // Set this to end iterator.
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
-      break;
-    default:
-      setError( "Unexpected token. Expected Key, Flow Entry, or Flow "
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
+      اكسر;
+    افتراضي:
+      سیٹ_Error( "Unexpected token. Expected Key, Flow Entry, or Flow "
                 "Mapping End."
               , T);
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
     }
   }
 }
 
-void SequenceNode::increment() {
-  if (failed()) {
-    IsAtEnd = true;
-    CurrentEntry = nullptr;
-    return;
+فراغ Sequence_گرہ::increment() {
+  إذا (failed()) {
+    Is_At_سرا = سچ;
+    Current_اندراج = خالی_سوچک;
+    أرجع;
   }
-  if (CurrentEntry)
-    CurrentEntry->skip();
-  Token T = peekNext();
-  if (SeqType == ST_Block) {
-    switch (T.Kind) {
-    case Token::TK_BlockEntry:
-      getNext();
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
-        IsAtEnd = true;
-        CurrentEntry = nullptr;
+  إذا (Current_اندراج)
+    Current_اندراج->skip();
+  Token T = peek_اگلا();
+  إذا (SeqType == ST_بلاک) {
+    بدل (T.قسم_2) {
+    حالة Token::TK_بلاک_اندراج:
+      get_اگلا();
+      Current_اندراج = parse_بلاک_گرہ();
+      إذا (!Current_اندراج) { // An error occurred.
+        Is_At_سرا = سچ;
+        Current_اندراج = خالی_سوچک;
       }
-      break;
-    case Token::TK_BlockEnd:
-      getNext();
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
-      break;
-    default:
-      setError( "Unexpected token. Expected Block Entry or Block End."
+      اكسر;
+    حالة Token::TK_بلاک_سرا:
+      get_اگلا();
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
+      اكسر;
+    افتراضي:
+      سیٹ_Error( "Unexpected token. Expected Block Entry or Block End."
               , T);
       [[fallthrough]];
-    case Token::TK_Error:
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
+    حالة Token::TK_Error:
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
     }
-  } else if (SeqType == ST_Indentless) {
-    switch (T.Kind) {
-    case Token::TK_BlockEntry:
-      getNext();
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
-        IsAtEnd = true;
-        CurrentEntry = nullptr;
+  } وإلا إذا (SeqType == ST_Indentless) {
+    بدل (T.قسم_2) {
+    حالة Token::TK_بلاک_اندراج:
+      get_اگلا();
+      Current_اندراج = parse_بلاک_گرہ();
+      إذا (!Current_اندراج) { // An error occurred.
+        Is_At_سرا = سچ;
+        Current_اندراج = خالی_سوچک;
       }
-      break;
-    default:
-    case Token::TK_Error:
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
+      اكسر;
+    افتراضي:
+    حالة Token::TK_Error:
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
     }
-  } else if (SeqType == ST_Flow) {
-    switch (T.Kind) {
-    case Token::TK_FlowEntry:
+  } وإلا إذا (SeqType == ST_Flow) {
+    بدل (T.قسم_2) {
+    حالة Token::TK_Flow_اندراج:
       // Eat the flow entry and recurse.
-      getNext();
-      WasPreviousTokenFlowEntry = true;
-      return increment();
-    case Token::TK_FlowSequenceEnd:
-      getNext();
+      get_اگلا();
+      Was_پچھلا_Token_Flow_اندراج = سچ;
+      أرجع increment();
+    حالة Token::TK_Flow_Sequence_سرا:
+      get_اگلا();
       [[fallthrough]];
-    case Token::TK_Error:
+    حالة Token::TK_Error:
       // Set this to end iterator.
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
-      break;
-    case Token::TK_StreamEnd:
-    case Token::TK_DocumentEnd:
-    case Token::TK_DocumentStart:
-      setError("Could not find closing ]!", T);
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
+      اكسر;
+    حالة Token::TK_دھارا_سرا:
+    حالة Token::TK_Document_سرا:
+    حالة Token::TK_Document_شروع:
+      سیٹ_Error("Could not find closing ]!", T);
       // Set this to end iterator.
-      IsAtEnd = true;
-      CurrentEntry = nullptr;
-      break;
-    default:
-      if (!WasPreviousTokenFlowEntry) {
-        setError("Expected , between entries!", T);
-        IsAtEnd = true;
-        CurrentEntry = nullptr;
-        break;
+      Is_At_سرا = سچ;
+      Current_اندراج = خالی_سوچک;
+      اكسر;
+    افتراضي:
+      إذا (!Was_پچھلا_Token_Flow_اندراج) {
+        سیٹ_Error("Expected , between entries!", T);
+        Is_At_سرا = سچ;
+        Current_اندراج = خالی_سوچک;
+        اكسر;
       }
       // Otherwise it must be a flow entry.
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) {
-        IsAtEnd = true;
+      Current_اندراج = parse_بلاک_گرہ();
+      إذا (!Current_اندراج) {
+        Is_At_سرا = سچ;
       }
-      WasPreviousTokenFlowEntry = false;
-      break;
+      Was_پچھلا_Token_Flow_اندراج = خطأ;
+      اكسر;
     }
   }
 }
 
-Document::Document(Stream &S) : stream(S), Root(nullptr) {
+Document::Document(دھارا &S) : دھارا_2(S), جڑ_2(خالی_سوچک) {
   // Tag maps starts with two default mappings.
-  TagMap["!"] = "!";
-  TagMap["!!"] = "tag:yaml.org,2002:";
+  ٹیگ_Map["!"] = "!";
+  ٹیگ_Map["!!"] = "tag:yaml.org,2002:";
 
-  if (parseDirectives())
-    expectToken(Token::TK_DocumentStart);
-  Token &T = peekNext();
-  if (T.Kind == Token::TK_DocumentStart)
-    getNext();
+  إذا (parseDirectives())
+    expectToken(Token::TK_Document_شروع);
+  Token &T = peek_اگلا();
+  إذا (T.قسم_2 == Token::TK_Document_شروع)
+    get_اگلا();
 }
 
-bool Document::skip()  {
-  if (stream.scanner->failed())
-    return false;
-  if (!Root && !getRoot())
-    return false;
-  Root->skip();
-  Token &T = peekNext();
-  if (T.Kind == Token::TK_StreamEnd)
-    return false;
-  if (T.Kind == Token::TK_DocumentEnd) {
-    getNext();
-    return skip();
+منطقي Document::skip()  {
+  إذا (دھارا_2.scanner->failed())
+    أرجع خطأ;
+  إذا (!جڑ_2 && !get_جڑ())
+    أرجع خطأ;
+  جڑ_2->skip();
+  Token &T = peek_اگلا();
+  إذا (T.قسم_2 == Token::TK_دھارا_سرا)
+    أرجع خطأ;
+  إذا (T.قسم_2 == Token::TK_Document_سرا) {
+    get_اگلا();
+    أرجع skip();
   }
-  return true;
+  أرجع سچ;
 }
 
-Token &Document::peekNext() {
-  return stream.scanner->peekNext();
+Token &Document::peek_اگلا() {
+  أرجع دھارا_2.scanner->peek_اگلا();
 }
 
-Token Document::getNext() {
-  return stream.scanner->getNext();
+Token Document::get_اگلا() {
+  أرجع دھارا_2.scanner->get_اگلا();
 }
 
-void Document::setError(const Twine &Message, Token &Location) const {
-  stream.scanner->setError(Message, Location.Range.begin());
+فراغ Document::سیٹ_Error(ثابت Twine &سنیہا_2, Token &Location) ثابت {
+  دھارا_2.scanner->سیٹ_Error(سنیہا_2, Location.Range.begin());
 }
 
-bool Document::failed() const {
-  return stream.scanner->failed();
+منطقي Document::failed() ثابت {
+  أرجع دھارا_2.scanner->failed();
 }
 
-Node *Document::parseBlockNode() {
-  Token T = peekNext();
+گرہ *Document::parse_بلاک_گرہ() {
+  Token T = peek_اگلا();
   // Handle properties.
   Token AnchorInfo;
-  Token TagInfo;
+  Token ٹیگ_Info;
 parse_property:
-  switch (T.Kind) {
-  case Token::TK_Alias:
-    getNext();
-    return new (NodeAllocator) AliasNode(stream.CurrentDoc, T.Range.substr(1));
-  case Token::TK_Anchor:
-    if (AnchorInfo.Kind == Token::TK_Anchor) {
-      setError("Already encountered an anchor for this node!", T);
-      return nullptr;
+  بدل (T.قسم_2) {
+  حالة Token::TK_Alias:
+    get_اگلا();
+    أرجع جديد (گرہ_Allocator) Alias_گرہ(دھارا_2.CurrentDoc, T.Range.substr(1));
+  حالة Token::TK_Anchor:
+    إذا (AnchorInfo.قسم_2 == Token::TK_Anchor) {
+      سیٹ_Error("Already encountered an anchor for this node!", T);
+      أرجع خالی_سوچک;
     }
-    AnchorInfo = getNext(); // Consume TK_Anchor.
-    T = peekNext();
-    goto parse_property;
-  case Token::TK_Tag:
-    if (TagInfo.Kind == Token::TK_Tag) {
-      setError("Already encountered a tag for this node!", T);
-      return nullptr;
+    AnchorInfo = get_اگلا(); // Consume TK_Anchor.
+    T = peek_اگلا();
+    اذهب parse_property;
+  حالة Token::TK_ٹیگ:
+    إذا (ٹیگ_Info.قسم_2 == Token::TK_ٹیگ) {
+      سیٹ_Error("Already encountered a tag for this node!", T);
+      أرجع خالی_سوچک;
     }
-    TagInfo = getNext(); // Consume TK_Tag.
-    T = peekNext();
-    goto parse_property;
-  default:
-    break;
+    ٹیگ_Info = get_اگلا(); // Consume TK_Tag.
+    T = peek_اگلا();
+    اذهب parse_property;
+  افتراضي:
+    اكسر;
   }
 
-  switch (T.Kind) {
-  case Token::TK_BlockEntry:
+  بدل (T.قسم_2) {
+  حالة Token::TK_بلاک_اندراج:
     // We got an unindented BlockEntry sequence. This is not terminated with
     // a BlockEnd.
     // Don't eat the TK_BlockEntry, SequenceNode needs it.
-    return new (NodeAllocator) SequenceNode( stream.CurrentDoc
+    أرجع جديد (گرہ_Allocator) Sequence_گرہ( دھارا_2.CurrentDoc
                                            , AnchorInfo.Range.substr(1)
-                                           , TagInfo.Range
-                                           , SequenceNode::ST_Indentless);
-  case Token::TK_BlockSequenceStart:
-    getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+                                           , ٹیگ_Info.Range
+                                           , Sequence_گرہ::ST_Indentless);
+  حالة Token::TK_بلاک_Sequence_شروع:
+    get_اگلا();
+    أرجع جديد (گرہ_Allocator)
+      Sequence_گرہ( دھارا_2.CurrentDoc
                   , AnchorInfo.Range.substr(1)
-                  , TagInfo.Range
-                  , SequenceNode::ST_Block);
-  case Token::TK_BlockMappingStart:
-    getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+                  , ٹیگ_Info.Range
+                  , Sequence_گرہ::ST_بلاک);
+  حالة Token::TK_بلاک_Mapping_شروع:
+    get_اگلا();
+    أرجع جديد (گرہ_Allocator)
+      Mapping_گرہ( دھارا_2.CurrentDoc
                  , AnchorInfo.Range.substr(1)
-                 , TagInfo.Range
-                 , MappingNode::MT_Block);
-  case Token::TK_FlowSequenceStart:
-    getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+                 , ٹیگ_Info.Range
+                 , Mapping_گرہ::MT_بلاک);
+  حالة Token::TK_Flow_Sequence_شروع:
+    get_اگلا();
+    أرجع جديد (گرہ_Allocator)
+      Sequence_گرہ( دھارا_2.CurrentDoc
                   , AnchorInfo.Range.substr(1)
-                  , TagInfo.Range
-                  , SequenceNode::ST_Flow);
-  case Token::TK_FlowMappingStart:
-    getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+                  , ٹیگ_Info.Range
+                  , Sequence_گرہ::ST_Flow);
+  حالة Token::TK_Flow_Mapping_شروع:
+    get_اگلا();
+    أرجع جديد (گرہ_Allocator)
+      Mapping_گرہ( دھارا_2.CurrentDoc
                  , AnchorInfo.Range.substr(1)
-                 , TagInfo.Range
-                 , MappingNode::MT_Flow);
-  case Token::TK_Scalar:
-    getNext();
-    return new (NodeAllocator)
-      ScalarNode( stream.CurrentDoc
+                 , ٹیگ_Info.Range
+                 , Mapping_گرہ::MT_Flow);
+  حالة Token::TK_Scalar:
+    get_اگلا();
+    أرجع جديد (گرہ_Allocator)
+      Scalar_گرہ( دھارا_2.CurrentDoc
                 , AnchorInfo.Range.substr(1)
-                , TagInfo.Range
+                , ٹیگ_Info.Range
                 , T.Range);
-  case Token::TK_BlockScalar: {
-    getNext();
-    StringRef NullTerminatedStr(T.Value.c_str(), T.Value.length() + 1);
-    StringRef StrCopy = NullTerminatedStr.copy(NodeAllocator).drop_back();
-    return new (NodeAllocator)
-        BlockScalarNode(stream.CurrentDoc, AnchorInfo.Range.substr(1),
-                        TagInfo.Range, StrCopy, T.Range);
+  حالة Token::TK_بلاک_Scalar: {
+    get_اگلا();
+    StringRef NullTerminatedStr(T.قدر.c_str(), T.قدر.لمائی_2() + 1);
+    StringRef StrCopy = NullTerminatedStr.copy(گرہ_Allocator).drop_پٹھ();
+    أرجع جديد (گرہ_Allocator)
+        بلاک_Scalar_گرہ(دھارا_2.CurrentDoc, AnchorInfo.Range.substr(1),
+                        ٹیگ_Info.Range, StrCopy, T.Range);
   }
-  case Token::TK_Key:
+  حالة Token::TK_کلید:
     // Don't eat the TK_Key, KeyValueNode expects it.
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    أرجع جديد (گرہ_Allocator)
+      Mapping_گرہ( دھارا_2.CurrentDoc
                  , AnchorInfo.Range.substr(1)
-                 , TagInfo.Range
-                 , MappingNode::MT_Inline);
-  case Token::TK_DocumentStart:
-  case Token::TK_DocumentEnd:
-  case Token::TK_StreamEnd:
-  default:
+                 , ٹیگ_Info.Range
+                 , Mapping_گرہ::MT_Inline);
+  حالة Token::TK_Document_شروع:
+  حالة Token::TK_Document_سرا:
+  حالة Token::TK_دھارا_سرا:
+  افتراضي:
     // TODO: Properly handle tags. "[!!str ]" should resolve to !!str "", not
     //       !!null null.
-    return new (NodeAllocator) NullNode(stream.CurrentDoc);
-  case Token::TK_FlowMappingEnd:
-  case Token::TK_FlowSequenceEnd:
-  case Token::TK_FlowEntry: {
-    if (Root && (isa<MappingNode>(Root) || isa<SequenceNode>(Root)))
-      return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    أرجع جديد (گرہ_Allocator) Null_گرہ(دھارا_2.CurrentDoc);
+  حالة Token::TK_Flow_Mapping_سرا:
+  حالة Token::TK_Flow_Sequence_سرا:
+  حالة Token::TK_Flow_اندراج: {
+    إذا (جڑ_2 && (isa<Mapping_گرہ>(جڑ_2) || isa<Sequence_گرہ>(جڑ_2)))
+      أرجع جديد (گرہ_Allocator) Null_گرہ(دھارا_2.CurrentDoc);
 
-    setError("Unexpected token", T);
-    return nullptr;
+    سیٹ_Error("Unexpected token", T);
+    أرجع خالی_سوچک;
   }
-  case Token::TK_Error:
-    return nullptr;
+  حالة Token::TK_Error:
+    أرجع خالی_سوچک;
   }
   llvm_unreachable("Control flow shouldn't reach here.");
-  return nullptr;
+  أرجع خالی_سوچک;
 }
 
-bool Document::parseDirectives() {
-  bool isDirective = false;
-  while (true) {
-    Token T = peekNext();
-    if (T.Kind == Token::TK_TagDirective) {
+منطقي Document::parseDirectives() {
+  منطقي isDirective = خطأ;
+  طالما (سچ) {
+    Token T = peek_اگلا();
+    إذا (T.قسم_2 == Token::TK_ٹیگ_Directive) {
       parseTAGDirective();
-      isDirective = true;
-    } else if (T.Kind == Token::TK_VersionDirective) {
+      isDirective = سچ;
+    } وإلا إذا (T.قسم_2 == Token::TK_نسخہ_Directive) {
       parseYAMLDirective();
-      isDirective = true;
-    } else {
-      break;
+      isDirective = سچ;
+    } وإلا {
+      اكسر;
     }
   }
-  return isDirective;
+  أرجع isDirective;
 }
 
-void Document::parseYAMLDirective() {
-  getNext(); // Eat %YAML <version>
+فراغ Document::parseYAMLDirective() {
+  get_اگلا(); // Eat %YAML <version>
 }
 
-void Document::parseTAGDirective() {
-  Token Tag = getNext(); // %TAG <handle> <prefix>
-  StringRef T = Tag.Range;
+فراغ Document::parseTAGDirective() {
+  Token ٹیگ = get_اگلا(); // %TAG <handle> <prefix>
+  StringRef T = ٹیگ.Range;
   // Strip %TAG
-  T = T.substr(T.find_first_of(" \t")).ltrim(" \t");
-  std::size_t HandleEnd = T.find_first_of(" \t");
-  StringRef TagHandle = T.substr(0, HandleEnd);
-  StringRef TagPrefix = T.substr(HandleEnd).ltrim(" \t");
-  TagMap[TagHandle] = TagPrefix;
+  T = T.substr(T.لبھو_پہلا_دا(" \t")).ltrim(" \t");
+  std::size_t Handle_سرا = T.لبھو_پہلا_دا(" \t");
+  StringRef ٹیگ_Handle = T.substr(0, Handle_سرا);
+  StringRef ٹیگ_اگیتر = T.substr(Handle_سرا).ltrim(" \t");
+  ٹیگ_Map[ٹیگ_Handle] = ٹیگ_اگیتر;
 }
 
-bool Document::expectToken(int TK) {
-  Token T = getNext();
-  if (T.Kind != TK) {
-    setError("Unexpected token", T);
-    return false;
+منطقي Document::expectToken(صحيح TK) {
+  Token T = get_اگلا();
+  إذا (T.قسم_2 != TK) {
+    سیٹ_Error("Unexpected token", T);
+    أرجع خطأ;
   }
-  return true;
+  أرجع سچ;
 }

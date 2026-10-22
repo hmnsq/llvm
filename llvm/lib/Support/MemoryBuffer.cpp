@@ -10,48 +10,48 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Alignment.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Program.h"
-#include "llvm/Support/SmallVectorMemoryBuffer.h"
-#include <algorithm>
-#include <cassert>
-#include <cstring>
-#include <new>
-#include <sys/types.h>
-#include <system_error>
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/Alignment.h"
+#ضمن "llvm/Support/AutoConvert.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/IOSandbox.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/Program.h"
+#ضمن "llvm/Support/SmallVectorMemoryBuffer.h"
+#ضمن <algorithm>
+#ضمن <cassert>
+#ضمن <cstring>
+#ضمن <new>
+#ضمن <sys/types.h>
+#ضمن <system_error>
+#إذا !defined(_MSC_VER) && !defined(__MINGW32__)
+#ضمن <unistd.h>
+#وإلا
+#ضمن <io.h>
+#جے_انت
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
 //===----------------------------------------------------------------------===//
 // MemoryBuffer implementation itself.
 //===----------------------------------------------------------------------===//
 
-MemoryBuffer::~MemoryBuffer() = default;
+حافظہ_بفر::~حافظہ_بفر() = افتراضي;
 
 /// init - Initialize this MemoryBuffer as a reference to externally allocated
 /// memory, memory that we know is already null terminated.
-void MemoryBuffer::init(const char *BufStart, const char *BufEnd,
-                        bool RequiresNullTerminator) {
-  assert((!RequiresNullTerminator || BufEnd[0] == 0) &&
+فراغ حافظہ_بفر::init(ثابت حرف *Buf_شروع, ثابت حرف *Buf_سرا,
+                        منطقي RequiresNullTerminator) {
+  أكد((!RequiresNullTerminator || Buf_سرا[0] == 0) &&
          "Buffer is not null terminated!");
-  BufferStart = BufStart;
-  BufferEnd = BufEnd;
+  بفر_شروع = Buf_شروع;
+  بفر_سرا = Buf_سرا;
 }
 
 //===----------------------------------------------------------------------===//
@@ -60,22 +60,22 @@ void MemoryBuffer::init(const char *BufStart, const char *BufEnd,
 
 /// CopyStringRef - Copies contents of a StringRef into a block of memory and
 /// null-terminates it.
-static void CopyStringRef(char *Memory, StringRef Data) {
-  if (!Data.empty())
-    memcpy(Memory, Data.data(), Data.size());
-  Memory[Data.size()] = 0; // Null terminate string.
+ساكن فراغ CopyStringRef(حرف *حافظہ_2, StringRef انکڑے_2) {
+  إذا (!انکڑے_2.خالی_تھاواں())
+    حافظہ_نقل(حافظہ_2, انکڑے_2.انکڑے(), انکڑے_2.ناپ_2());
+  حافظہ_2[انکڑے_2.ناپ_2()] = 0; // Null terminate string.
 }
 
-namespace {
-struct NamedBufferAlloc {
-  const Twine &Name;
-  NamedBufferAlloc(const Twine &Name) : Name(Name) {}
+نطاق {
+بنية Named_بفر_Alloc {
+  ثابت Twine &Name;
+  Named_بفر_Alloc(ثابت Twine &Name) : Name(Name) {}
 };
 } // namespace
 
-void *operator new(size_t N, const NamedBufferAlloc &Alloc) {
+فراغ *عامل جديد(size_t N, ثابت Named_بفر_Alloc &Alloc) {
   SmallString<256> NameBuf;
-  StringRef NameRef = Alloc.Name.toStringRef(NameBuf);
+  StringRef NameRef = Alloc.Name.منزل_String_Ref(NameBuf);
 
   // We use malloc() and manually handle it returning null instead of calling
   // operator new because we need all uses of NamedBufferAlloc to be
@@ -83,104 +83,104 @@ void *operator new(size_t N, const NamedBufferAlloc &Alloc) {
   // WritableMemoryBuffer::getNewUninitMemBuffer() to work around the out-of-
   // memory handler installed by default in LLVM. See operator delete() member
   // functions within this file for the paired call to free().
-  char *Mem =
-      static_cast<char *>(std::malloc(N + sizeof(size_t) + NameRef.size() + 1));
-  if (!Mem)
+  حرف *Mem =
+      static_cast<حرف *>(std::حافظہ_دیو(N + حجم(size_t) + NameRef.ناپ_2() + 1));
+  إذا (!Mem)
     llvm::report_bad_alloc_error("Allocation failed");
-  *reinterpret_cast<size_t *>(Mem + N) = NameRef.size();
-  CopyStringRef(Mem + N + sizeof(size_t), NameRef);
-  return Mem;
+  *reinterpret_cast<size_t *>(Mem + N) = NameRef.ناپ_2();
+  CopyStringRef(Mem + N + حجم(size_t), NameRef);
+  أرجع Mem;
 }
 
-namespace {
+نطاق {
 /// MemoryBufferMem - Named MemoryBuffer pointing to a block of memory.
-template<typename MB>
-class MemoryBufferMem : public MB {
-public:
-  MemoryBufferMem(StringRef InputData, bool RequiresNullTerminator) {
-    MemoryBuffer::init(InputData.begin(), InputData.end(),
+سانچا<قسم_ناں MB>
+صنف حافظہ_بفر_Mem : عام MB {
+عام:
+  حافظہ_بفر_Mem(StringRef داخلہ_انکڑے, منطقي RequiresNullTerminator) {
+    حافظہ_بفر::init(داخلہ_انکڑے.begin(), داخلہ_انکڑے.سرا(),
                        RequiresNullTerminator);
   }
 
   /// Disable sized deallocation for MemoryBufferMem, because it has
   /// tail-allocated data.
-  void operator delete(void *p) { std::free(p); }
+  فراغ عامل مٹاؤ(فراغ *p) { std::حرر(p); }
 
-  StringRef getBufferIdentifier() const override {
+  StringRef get_بفر_Identifier() ثابت override {
     // The name is stored after the class itself.
-    return StringRef(reinterpret_cast<const char *>(this + 1) + sizeof(size_t),
-                     *reinterpret_cast<const size_t *>(this + 1));
+    أرجع StringRef(reinterpret_cast<ثابت حرف *>(هذا + 1) + حجم(size_t),
+                     *reinterpret_cast<ثابت size_t *>(هذا + 1));
   }
 
-  MemoryBuffer::BufferKind getBufferKind() const override {
-    return MemoryBuffer::MemoryBuffer_Malloc;
+  حافظہ_بفر::بفر_قسم get_بفر_قسم() ثابت override {
+    أرجع حافظہ_بفر::حافظہ_بفر_Malloc;
   }
 };
 } // namespace
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getFileAux(const Twine &Filename, uint64_t MapSize, uint64_t Offset,
-           bool IsText, bool RequiresNullTerminator, bool IsVolatile,
+سانچا <قسم_ناں MB>
+ساكن ErrorOr<std::unique_ptr<MB>>
+getFileAux(ثابت Twine &Filename, uint64_t Map_ناپ, uint64_t وتھ,
+           منطقي Is_متن, منطقي RequiresNullTerminator, منطقي IsVolatile,
            std::optional<Align> Alignment);
 
-std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBuffer(StringRef InputData, StringRef BufferName,
-                           bool RequiresNullTerminator) {
-  auto *Ret = new (NamedBufferAlloc(BufferName))
-      MemoryBufferMem<MemoryBuffer>(InputData, RequiresNullTerminator);
-  return std::unique_ptr<MemoryBuffer>(Ret);
+std::unique_ptr<حافظہ_بفر>
+حافظہ_بفر::get_Mem_بفر(StringRef داخلہ_انکڑے, StringRef بفر_Name,
+                           منطقي RequiresNullTerminator) {
+  خودکار *Ret = جديد (Named_بفر_Alloc(بفر_Name))
+      حافظہ_بفر_Mem<حافظہ_بفر>(داخلہ_انکڑے, RequiresNullTerminator);
+  أرجع std::unique_ptr<حافظہ_بفر>(Ret);
 }
 
-std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBuffer(MemoryBufferRef Ref, bool RequiresNullTerminator) {
-  return std::unique_ptr<MemoryBuffer>(getMemBuffer(
-      Ref.getBuffer(), Ref.getBufferIdentifier(), RequiresNullTerminator));
+std::unique_ptr<حافظہ_بفر>
+حافظہ_بفر::get_Mem_بفر(حافظہ_بفر_Ref Ref, منطقي RequiresNullTerminator) {
+  أرجع std::unique_ptr<حافظہ_بفر>(get_Mem_بفر(
+      Ref.get_بفر(), Ref.get_بفر_Identifier(), RequiresNullTerminator));
 }
 
-static ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-getMemBufferCopyImpl(StringRef InputData, const Twine &BufferName) {
-  auto Buf =
-      WritableMemoryBuffer::getNewUninitMemBuffer(InputData.size(), BufferName);
-  if (!Buf)
-    return make_error_code(errc::not_enough_memory);
+ساكن ErrorOr<std::unique_ptr<Writable_حافظہ_بفر>>
+get_Mem_بفر_Copy_Impl(StringRef داخلہ_انکڑے, ثابت Twine &بفر_Name) {
+  خودکار Buf =
+      Writable_حافظہ_بفر::get_New_Uninit_Mem_بفر(داخلہ_انکڑے.ناپ_2(), بفر_Name);
+  إذا (!Buf)
+    أرجع make_error_کوڈ(errc::not_enough_حافظہ);
   // Calling memcpy with null src/dst is UB, and an empty StringRef is
   // represented with {nullptr, 0}.
-  llvm::copy(InputData, Buf->getBufferStart());
-  return std::move(Buf);
+  llvm::copy(داخلہ_انکڑے, Buf->get_بفر_شروع());
+  أرجع std::move(Buf);
 }
 
-std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBufferCopy(StringRef InputData, const Twine &BufferName) {
-  auto Buf = getMemBufferCopyImpl(InputData, BufferName);
-  if (Buf)
-    return std::move(*Buf);
-  return nullptr;
+std::unique_ptr<حافظہ_بفر>
+حافظہ_بفر::get_Mem_بفر_Copy(StringRef داخلہ_انکڑے, ثابت Twine &بفر_Name) {
+  خودکار Buf = get_Mem_بفر_Copy_Impl(داخلہ_انکڑے, بفر_Name);
+  إذا (Buf)
+    أرجع std::move(*Buf);
+  أرجع خالی_سوچک;
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFileOrSTDIN(const Twine &Filename, bool IsText,
-                             bool RequiresNullTerminator,
+ErrorOr<std::unique_ptr<حافظہ_بفر>>
+حافظہ_بفر::getFileOrSTDIN(ثابت Twine &Filename, منطقي Is_متن,
+                             منطقي RequiresNullTerminator,
                              std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
   SmallString<256> NameBuf;
-  StringRef NameRef = Filename.toStringRef(NameBuf);
+  StringRef NameRef = Filename.منزل_String_Ref(NameBuf);
 
-  if (NameRef == "-")
-    return getSTDIN();
-  return getFile(Filename, IsText, RequiresNullTerminator,
-                 /*IsVolatile=*/false, Alignment);
+  إذا (NameRef == "-")
+    أرجع getSTDIN();
+  أرجع getFile(Filename, Is_متن, RequiresNullTerminator,
+                 /*IsVolatile=*/خطأ, Alignment);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFileSlice(const Twine &FilePath, uint64_t MapSize,
-                           uint64_t Offset, bool IsVolatile,
+ErrorOr<std::unique_ptr<حافظہ_بفر>>
+حافظہ_بفر::get_File_ٹکڑا(ثابت Twine &File_رستہ, uint64_t Map_ناپ,
+                           uint64_t وتھ, منطقي IsVolatile,
                            std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<MemoryBuffer>(FilePath, MapSize, Offset, /*IsText=*/false,
-                                  /*RequiresNullTerminator=*/false, IsVolatile,
+  أرجع getFileAux<حافظہ_بفر>(File_رستہ, Map_ناپ, وتھ, /*IsText=*/خطأ,
+                                  /*RequiresNullTerminator=*/خطأ, IsVolatile,
                                   Alignment);
 }
 
@@ -188,151 +188,151 @@ MemoryBuffer::getFileSlice(const Twine &FilePath, uint64_t MapSize,
 // MemoryBuffer::getFile implementation.
 //===----------------------------------------------------------------------===//
 
-namespace {
+نطاق {
 
-template <typename MB>
+سانچا <قسم_ناں MB>
 constexpr sys::fs::mapped_file_region::mapmode Mapmode =
     sys::fs::mapped_file_region::readonly;
-template <>
-constexpr sys::fs::mapped_file_region::mapmode Mapmode<MemoryBuffer> =
+سانچا <>
+constexpr sys::fs::mapped_file_region::mapmode Mapmode<حافظہ_بفر> =
     sys::fs::mapped_file_region::readonly;
-template <>
-constexpr sys::fs::mapped_file_region::mapmode Mapmode<WritableMemoryBuffer> =
+سانچا <>
+constexpr sys::fs::mapped_file_region::mapmode Mapmode<Writable_حافظہ_بفر> =
     sys::fs::mapped_file_region::priv;
-template <>
+سانچا <>
 constexpr sys::fs::mapped_file_region::mapmode
-    Mapmode<WriteThroughMemoryBuffer> = sys::fs::mapped_file_region::readwrite;
+    Mapmode<Write_Through_حافظہ_بفر> = sys::fs::mapped_file_region::readwrite;
 
 /// Memory maps a file descriptor using sys::fs::mapped_file_region.
 ///
 /// This handles converting the offset into a legal offset on the platform.
-template<typename MB>
-class MemoryBufferMMapFile : public MB {
+سانچا<قسم_ناں MB>
+صنف حافظہ_بفر_MMap_File : عام MB {
   sys::fs::mapped_file_region MFR;
 
-  static uint64_t getLegalMapOffset(uint64_t Offset) {
-    return Offset & ~(sys::fs::mapped_file_region::alignment() - 1);
+  ساكن uint64_t get_Legal_Map_وتھ(uint64_t وتھ) {
+    أرجع وتھ & ~(sys::fs::mapped_file_region::alignment() - 1);
   }
 
-  static uint64_t getLegalMapSize(uint64_t Len, uint64_t Offset) {
-    return Len + (Offset - getLegalMapOffset(Offset));
+  ساكن uint64_t get_Legal_Map_ناپ(uint64_t Len, uint64_t وتھ) {
+    أرجع Len + (وتھ - get_Legal_Map_وتھ(وتھ));
   }
 
-  const char *getStart(uint64_t Len, uint64_t Offset) {
-    return MFR.const_data() + (Offset - getLegalMapOffset(Offset));
+  ثابت حرف *get_شروع(uint64_t Len, uint64_t وتھ) {
+    أرجع MFR.const_انکڑے() + (وتھ - get_Legal_Map_وتھ(وتھ));
   }
 
-public:
-  MemoryBufferMMapFile(bool RequiresNullTerminator, sys::fs::file_t FD, uint64_t Len,
-                       uint64_t Offset, std::error_code &EC)
-      : MFR(FD, Mapmode<MB>, getLegalMapSize(Len, Offset),
-            getLegalMapOffset(Offset), EC) {
-    if (!EC) {
-      const char *Start = getStart(Len, Offset);
-      MemoryBuffer::init(Start, Start + Len, RequiresNullTerminator);
+عام:
+  حافظہ_بفر_MMap_File(منطقي RequiresNullTerminator, sys::fs::file_t FD, uint64_t Len,
+                       uint64_t وتھ, std::error_کوڈ &EC)
+      : MFR(FD, Mapmode<MB>, get_Legal_Map_ناپ(Len, وتھ),
+            get_Legal_Map_وتھ(وتھ), EC) {
+    إذا (!EC) {
+      ثابت حرف *شروع = get_شروع(Len, وتھ);
+      حافظہ_بفر::init(شروع, شروع + Len, RequiresNullTerminator);
     }
   }
 
   /// Disable sized deallocation for MemoryBufferMMapFile, because it has
   /// tail-allocated data.
-  void operator delete(void *p) { std::free(p); }
+  فراغ عامل مٹاؤ(فراغ *p) { std::حرر(p); }
 
-  StringRef getBufferIdentifier() const override {
+  StringRef get_بفر_Identifier() ثابت override {
     // The name is stored after the class itself.
-    return StringRef(reinterpret_cast<const char *>(this + 1) + sizeof(size_t),
-                     *reinterpret_cast<const size_t *>(this + 1));
+    أرجع StringRef(reinterpret_cast<ثابت حرف *>(هذا + 1) + حجم(size_t),
+                     *reinterpret_cast<ثابت size_t *>(هذا + 1));
   }
 
-  MemoryBuffer::BufferKind getBufferKind() const override {
-    return MemoryBuffer::MemoryBuffer_MMap;
+  حافظہ_بفر::بفر_قسم get_بفر_قسم() ثابت override {
+    أرجع حافظہ_بفر::حافظہ_بفر_MMap;
   }
 
-  void dontNeedIfMmap() override { MFR.dontNeed(); }
-  void willNeedIfMmap() override { MFR.willNeed(); }
-  void randomAccessIfMmap() override { MFR.randomAccess(); }
+  فراغ dontNeedIfMmap() override { MFR.dontNeed(); }
+  فراغ willNeedIfMmap() override { MFR.willNeed(); }
+  فراغ randomAccessIfMmap() override { MFR.randomAccess(); }
 };
 } // namespace
 
-static ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-getMemoryBufferForStream(sys::fs::file_t FD, const Twine &BufferName) {
-  SmallString<sys::fs::DefaultReadChunkSize> Buffer;
-  if (Error E = sys::fs::readNativeFileToEOF(FD, Buffer))
-    return errorToErrorCode(std::move(E));
-  return getMemBufferCopyImpl(Buffer, BufferName);
+ساكن ErrorOr<std::unique_ptr<Writable_حافظہ_بفر>>
+get_حافظہ_بفر_For_دھارا(sys::fs::file_t FD, ثابت Twine &بفر_Name) {
+  SmallString<sys::fs::Default_Read_Chunk_ناپ> بفر;
+  إذا (Error E = sys::fs::read_Native_File_منزل_EOF(FD, بفر))
+    أرجع error_منزل_Error_کوڈ(std::move(E));
+  أرجع get_Mem_بفر_Copy_Impl(بفر, بفر_Name);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFile(const Twine &Filename, bool IsText,
-                      bool RequiresNullTerminator, bool IsVolatile,
+ErrorOr<std::unique_ptr<حافظہ_بفر>>
+حافظہ_بفر::getFile(ثابت Twine &Filename, منطقي Is_متن,
+                      منطقي RequiresNullTerminator, منطقي IsVolatile,
                       std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<MemoryBuffer>(Filename, /*MapSize=*/-1, /*Offset=*/0,
-                                  IsText, RequiresNullTerminator, IsVolatile,
+  أرجع getFileAux<حافظہ_بفر>(Filename, /*MapSize=*/-1, /*Offset=*/0,
+                                  Is_متن, RequiresNullTerminator, IsVolatile,
                                   Alignment);
 }
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getOpenFileImpl(sys::fs::file_t FD, const Twine &Filename, uint64_t FileSize,
-                uint64_t MapSize, int64_t Offset, bool RequiresNullTerminator,
-                bool IsVolatile, std::optional<Align> Alignment);
+سانچا <قسم_ناں MB>
+ساكن ErrorOr<std::unique_ptr<MB>>
+getOpenFileImpl(sys::fs::file_t FD, ثابت Twine &Filename, uint64_t File_ناپ,
+                uint64_t Map_ناپ, int64_t وتھ, منطقي RequiresNullTerminator,
+                منطقي IsVolatile, std::optional<Align> Alignment);
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getFileAux(const Twine &Filename, uint64_t MapSize, uint64_t Offset,
-           bool IsText, bool RequiresNullTerminator, bool IsVolatile,
+سانچا <قسم_ناں MB>
+ساكن ErrorOr<std::unique_ptr<MB>>
+getFileAux(ثابت Twine &Filename, uint64_t Map_ناپ, uint64_t وتھ,
+           منطقي Is_متن, منطقي RequiresNullTerminator, منطقي IsVolatile,
            std::optional<Align> Alignment) {
   Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
-      Filename, IsText ? sys::fs::OF_TextWithCRLF : sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+      Filename, Is_متن ? sys::fs::دا_متن_With_CRLF : sys::fs::دا_None);
+  إذا (!FDOrErr)
+    أرجع error_منزل_Error_کوڈ(FDOrErr.takeError());
   sys::fs::file_t FD = *FDOrErr;
-  auto Ret = getOpenFileImpl<MB>(FD, Filename, /*FileSize=*/-1, MapSize, Offset,
+  خودکار Ret = getOpenFileImpl<MB>(FD, Filename, /*FileSize=*/-1, Map_ناپ, وتھ,
                                  RequiresNullTerminator, IsVolatile, Alignment);
   sys::fs::closeFile(FD);
-  return Ret;
+  أرجع Ret;
 }
 
-ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-WritableMemoryBuffer::getFile(const Twine &Filename, bool IsVolatile,
+ErrorOr<std::unique_ptr<Writable_حافظہ_بفر>>
+Writable_حافظہ_بفر::getFile(ثابت Twine &Filename, منطقي IsVolatile,
                               std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<WritableMemoryBuffer>(
-      Filename, /*MapSize=*/-1, /*Offset=*/0, /*IsText=*/false,
-      /*RequiresNullTerminator=*/false, IsVolatile, Alignment);
+  أرجع getFileAux<Writable_حافظہ_بفر>(
+      Filename, /*MapSize=*/-1, /*Offset=*/0, /*IsText=*/خطأ,
+      /*RequiresNullTerminator=*/خطأ, IsVolatile, Alignment);
 }
 
-ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-WritableMemoryBuffer::getFileSlice(const Twine &Filename, uint64_t MapSize,
-                                   uint64_t Offset, bool IsVolatile,
+ErrorOr<std::unique_ptr<Writable_حافظہ_بفر>>
+Writable_حافظہ_بفر::get_File_ٹکڑا(ثابت Twine &Filename, uint64_t Map_ناپ,
+                                   uint64_t وتھ, منطقي IsVolatile,
                                    std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<WritableMemoryBuffer>(
-      Filename, MapSize, Offset, /*IsText=*/false,
-      /*RequiresNullTerminator=*/false, IsVolatile, Alignment);
+  أرجع getFileAux<Writable_حافظہ_بفر>(
+      Filename, Map_ناپ, وتھ, /*IsText=*/خطأ,
+      /*RequiresNullTerminator=*/خطأ, IsVolatile, Alignment);
 }
 
-std::unique_ptr<WritableMemoryBuffer>
-WritableMemoryBuffer::getNewUninitMemBuffer(size_t Size,
-                                            const Twine &BufferName,
+std::unique_ptr<Writable_حافظہ_بفر>
+Writable_حافظہ_بفر::get_New_Uninit_Mem_بفر(size_t ناپ,
+                                            ثابت Twine &بفر_Name,
                                             std::optional<Align> Alignment) {
-  using MemBuffer = MemoryBufferMem<WritableMemoryBuffer>;
+  ورتوں Mem_بفر = حافظہ_بفر_Mem<Writable_حافظہ_بفر>;
 
   // Use 16-byte alignment if no alignment is specified.
-  Align BufAlign = Alignment.value_or(Align(16));
+  Align BufAlign = Alignment.قدر_or(Align(16));
 
   // Allocate space for the MemoryBuffer, the data and the name. It is important
   // that MemoryBuffer and data are aligned so PointerIntPair works with them.
   SmallString<256> NameBuf;
-  StringRef NameRef = BufferName.toStringRef(NameBuf);
+  StringRef NameRef = بفر_Name.منزل_String_Ref(NameBuf);
 
-  size_t StringLen = sizeof(MemBuffer) + sizeof(size_t) + NameRef.size() + 1;
-  size_t RealLen = StringLen + Size + 1 + BufAlign.value();
-  if (RealLen <= Size) // Check for rollover.
-    return nullptr;
+  size_t StringLen = حجم(Mem_بفر) + حجم(size_t) + NameRef.ناپ_2() + 1;
+  size_t RealLen = StringLen + ناپ + 1 + BufAlign.قدر_2();
+  إذا (RealLen <= ناپ) // Check for rollover.
+    أرجع خالی_سوچک;
   // We use a call to malloc() rather than a call to a non-throwing operator
   // new() because LLVM unconditionally installs an out of memory new handler
   // when exceptions are disabled. This new handler intentionally crashes to
@@ -340,286 +340,286 @@ WritableMemoryBuffer::getNewUninitMemBuffer(size_t Size,
   // See MemoryBufferMem::operator delete() for the paired call to free(), and
   // llvm::install_out_of_memory_new_handler() for the installation of the
   // custom new handler.
-  char *Mem = static_cast<char *>(std::malloc(RealLen));
-  if (!Mem)
-    return nullptr;
+  حرف *Mem = static_cast<حرف *>(std::حافظہ_دیو(RealLen));
+  إذا (!Mem)
+    أرجع خالی_سوچک;
 
   // The name is stored after the class itself.
-  *reinterpret_cast<size_t *>(Mem + sizeof(MemBuffer)) = NameRef.size();
-  CopyStringRef(Mem + sizeof(MemBuffer) + sizeof(size_t), NameRef);
+  *reinterpret_cast<size_t *>(Mem + حجم(Mem_بفر)) = NameRef.ناپ_2();
+  CopyStringRef(Mem + حجم(Mem_بفر) + حجم(size_t), NameRef);
 
   // The buffer begins after the name and must be aligned.
-  char *Buf = (char *)alignAddr(Mem + StringLen, BufAlign);
-  Buf[Size] = 0; // Null terminate buffer.
+  حرف *Buf = (حرف *)alignAddr(Mem + StringLen, BufAlign);
+  Buf[ناپ] = 0; // Null terminate buffer.
 
-  auto *Ret = new (Mem) MemBuffer(StringRef(Buf, Size), true);
-  return std::unique_ptr<WritableMemoryBuffer>(Ret);
+  خودکار *Ret = جديد (Mem) Mem_بفر(StringRef(Buf, ناپ), سچ);
+  أرجع std::unique_ptr<Writable_حافظہ_بفر>(Ret);
 }
 
-std::unique_ptr<WritableMemoryBuffer>
-WritableMemoryBuffer::getNewMemBuffer(size_t Size, const Twine &BufferName) {
-  auto SB = WritableMemoryBuffer::getNewUninitMemBuffer(Size, BufferName);
-  if (!SB)
-    return nullptr;
-  memset(SB->getBufferStart(), 0, Size);
-  return SB;
+std::unique_ptr<Writable_حافظہ_بفر>
+Writable_حافظہ_بفر::get_New_Mem_بفر(size_t ناپ, ثابت Twine &بفر_Name) {
+  خودکار SB = Writable_حافظہ_بفر::get_New_Uninit_Mem_بفر(ناپ, بفر_Name);
+  إذا (!SB)
+    أرجع خالی_سوچک;
+  memset(SB->get_بفر_شروع(), 0, ناپ);
+  أرجع SB;
 }
 
-static bool shouldUseMmap(sys::fs::file_t FD,
-                          size_t FileSize,
-                          size_t MapSize,
-                          off_t Offset,
-                          bool RequiresNullTerminator,
-                          int PageSize,
-                          bool IsVolatile) {
-#if defined(__MVS__)
+ساكن منطقي shouldUseMmap(sys::fs::file_t FD,
+                          size_t File_ناپ,
+                          size_t Map_ناپ,
+                          off_t وتھ,
+                          منطقي RequiresNullTerminator,
+                          صحيح ورقہ_ناپ,
+                          منطقي IsVolatile) {
+#إذا defined(__MVS__)
   // zOS Enhanced ASCII auto convert does not support mmap.
-  return false;
-#endif
+  أرجع خطأ;
+#جے_انت
 
   // mmap may leave the buffer without null terminator if the file size changed
   // by the time the last page is mapped in, so avoid it if the file size is
   // likely to change.
-  if (IsVolatile && RequiresNullTerminator)
-    return false;
+  إذا (IsVolatile && RequiresNullTerminator)
+    أرجع خطأ;
 
   // We don't use mmap for small files because this can severely fragment our
   // address space.
-  if (MapSize < 4 * 4096 || MapSize < (unsigned)PageSize)
-    return false;
+  إذا (Map_ناپ < 4 * 4096 || Map_ناپ < (بنانشانی)ورقہ_ناپ)
+    أرجع خطأ;
 
-  if (!RequiresNullTerminator)
-    return true;
+  إذا (!RequiresNullTerminator)
+    أرجع سچ;
 
   // If we don't know the file size, use fstat to find out.  fstat on an open
   // file descriptor is cheaper than stat on a random path.
   // FIXME: this chunk of code is duplicated, but it avoids a fstat when
   // RequiresNullTerminator = false and MapSize != -1.
-  if (FileSize == size_t(-1)) {
-    sys::fs::file_status Status;
-    if (sys::fs::status(FD, Status))
-      return false;
-    FileSize = Status.getSize();
+  إذا (File_ناپ == size_t(-1)) {
+    sys::fs::file_حالت حالت;
+    إذا (sys::fs::حالت_2(FD, حالت))
+      أرجع خطأ;
+    File_ناپ = حالت.get_ناپ();
   }
 
   // If we need a null terminator and the end of the map is inside the file,
   // we cannot use mmap.
-  size_t End = Offset + MapSize;
-  assert(End <= FileSize);
-  if (End != FileSize)
-    return false;
+  size_t سرا_2 = وتھ + Map_ناپ;
+  أكد(سرا_2 <= File_ناپ);
+  إذا (سرا_2 != File_ناپ)
+    أرجع خطأ;
 
   // Don't try to map files that are exactly a multiple of the system page size
   // if we need a null terminator.
-  if ((FileSize & (PageSize -1)) == 0)
-    return false;
+  إذا ((File_ناپ & (ورقہ_ناپ -1)) == 0)
+    أرجع خطأ;
 
-#if defined(__CYGWIN__)
+#إذا defined(__CYGWIN__)
   // Don't try to map files that are exactly a multiple of the physical page size
   // if we need a null terminator.
   // FIXME: We should reorganize again getPageSize() on Win32.
-  if ((FileSize & (4096 - 1)) == 0)
-    return false;
-#endif
+  إذا ((File_ناپ & (4096 - 1)) == 0)
+    أرجع خطأ;
+#جے_انت
 
-  return true;
+  أرجع سچ;
 }
 
-static ErrorOr<std::unique_ptr<WriteThroughMemoryBuffer>>
-getReadWriteFile(const Twine &Filename, uint64_t FileSize, uint64_t MapSize,
-                 uint64_t Offset) {
+ساكن ErrorOr<std::unique_ptr<Write_Through_حافظہ_بفر>>
+getReadWriteFile(ثابت Twine &Filename, uint64_t File_ناپ, uint64_t Map_ناپ,
+                 uint64_t وتھ) {
   Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForReadWrite(
-      Filename, sys::fs::CD_OpenExisting, sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+      Filename, sys::fs::CD_OpenExisting, sys::fs::دا_None);
+  إذا (!FDOrErr)
+    أرجع error_منزل_Error_کوڈ(FDOrErr.takeError());
   sys::fs::file_t FD = *FDOrErr;
 
   // Default is to map the full file.
-  if (MapSize == uint64_t(-1)) {
+  إذا (Map_ناپ == uint64_t(-1)) {
     // If we don't know the file size, use fstat to find out.  fstat on an open
     // file descriptor is cheaper than stat on a random path.
-    if (FileSize == uint64_t(-1)) {
-      sys::fs::file_status Status;
-      std::error_code EC = sys::fs::status(FD, Status);
-      if (EC)
-        return EC;
+    إذا (File_ناپ == uint64_t(-1)) {
+      sys::fs::file_حالت حالت;
+      std::error_کوڈ EC = sys::fs::حالت_2(FD, حالت);
+      إذا (EC)
+        أرجع EC;
 
       // If this not a file or a block device (e.g. it's a named pipe
       // or character device), we can't mmap it, so error out.
-      sys::fs::file_type Type = Status.type();
-      if (Type != sys::fs::file_type::regular_file &&
-          Type != sys::fs::file_type::block_file)
-        return make_error_code(errc::invalid_argument);
+      sys::fs::file_type Type = حالت.type();
+      إذا (Type != sys::fs::file_type::regular_file &&
+          Type != sys::fs::file_type::بلاک_file)
+        أرجع make_error_کوڈ(errc::invalid_دلیل);
 
-      FileSize = Status.getSize();
+      File_ناپ = حالت.get_ناپ();
     }
-    MapSize = FileSize;
+    Map_ناپ = File_ناپ;
   }
 
-  std::error_code EC;
-  std::unique_ptr<WriteThroughMemoryBuffer> Result(
-      new (NamedBufferAlloc(Filename))
-          MemoryBufferMMapFile<WriteThroughMemoryBuffer>(false, FD, MapSize,
-                                                         Offset, EC));
-  if (EC)
-    return EC;
-  return std::move(Result);
+  std::error_کوڈ EC;
+  std::unique_ptr<Write_Through_حافظہ_بفر> نتیجہ(
+      جديد (Named_بفر_Alloc(Filename))
+          حافظہ_بفر_MMap_File<Write_Through_حافظہ_بفر>(خطأ, FD, Map_ناپ,
+                                                         وتھ, EC));
+  إذا (EC)
+    أرجع EC;
+  أرجع std::move(نتیجہ);
 }
 
-ErrorOr<std::unique_ptr<WriteThroughMemoryBuffer>>
-WriteThroughMemoryBuffer::getFile(const Twine &Filename, int64_t FileSize) {
+ErrorOr<std::unique_ptr<Write_Through_حافظہ_بفر>>
+Write_Through_حافظہ_بفر::getFile(ثابت Twine &Filename, int64_t File_ناپ) {
   sys::sandbox::violationIfEnabled();
 
-  return getReadWriteFile(Filename, FileSize, FileSize, 0);
+  أرجع getReadWriteFile(Filename, File_ناپ, File_ناپ, 0);
 }
 
 /// Map a subrange of the specified file as a WritableMemoryBuffer.
-ErrorOr<std::unique_ptr<WriteThroughMemoryBuffer>>
-WriteThroughMemoryBuffer::getFileSlice(const Twine &Filename, uint64_t MapSize,
-                                       uint64_t Offset) {
+ErrorOr<std::unique_ptr<Write_Through_حافظہ_بفر>>
+Write_Through_حافظہ_بفر::get_File_ٹکڑا(ثابت Twine &Filename, uint64_t Map_ناپ,
+                                       uint64_t وتھ) {
   sys::sandbox::violationIfEnabled();
 
-  return getReadWriteFile(Filename, -1, MapSize, Offset);
+  أرجع getReadWriteFile(Filename, -1, Map_ناپ, وتھ);
 }
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getOpenFileImpl(sys::fs::file_t FD, const Twine &Filename, uint64_t FileSize,
-                uint64_t MapSize, int64_t Offset, bool RequiresNullTerminator,
-                bool IsVolatile, std::optional<Align> Alignment) {
-  static int PageSize = sys::Process::getPageSizeEstimate();
+سانچا <قسم_ناں MB>
+ساكن ErrorOr<std::unique_ptr<MB>>
+getOpenFileImpl(sys::fs::file_t FD, ثابت Twine &Filename, uint64_t File_ناپ,
+                uint64_t Map_ناپ, int64_t وتھ, منطقي RequiresNullTerminator,
+                منطقي IsVolatile, std::optional<Align> Alignment) {
+  ساكن صحيح ورقہ_ناپ = sys::Process::get_ورقہ_ناپ_Estimate();
 
   // Default is to map the full file.
-  if (MapSize == uint64_t(-1)) {
+  إذا (Map_ناپ == uint64_t(-1)) {
     // If we don't know the file size, use fstat to find out.  fstat on an open
     // file descriptor is cheaper than stat on a random path.
-    if (FileSize == uint64_t(-1)) {
-      sys::fs::file_status Status;
-      std::error_code EC = sys::fs::status(FD, Status);
-      if (EC)
-        return EC;
+    إذا (File_ناپ == uint64_t(-1)) {
+      sys::fs::file_حالت حالت;
+      std::error_کوڈ EC = sys::fs::حالت_2(FD, حالت);
+      إذا (EC)
+        أرجع EC;
 
       // If this not a file or a block device (e.g. it's a named pipe
       // or character device), we can't trust the size. Create the memory
       // buffer by copying off the stream.
-      sys::fs::file_type Type = Status.type();
-      if (Type != sys::fs::file_type::regular_file &&
-          Type != sys::fs::file_type::block_file)
-        return getMemoryBufferForStream(FD, Filename);
+      sys::fs::file_type Type = حالت.type();
+      إذا (Type != sys::fs::file_type::regular_file &&
+          Type != sys::fs::file_type::بلاک_file)
+        أرجع get_حافظہ_بفر_For_دھارا(FD, Filename);
 
-      FileSize = Status.getSize();
+      File_ناپ = حالت.get_ناپ();
     }
-    MapSize = FileSize;
+    Map_ناپ = File_ناپ;
   }
 
-  if (shouldUseMmap(FD, FileSize, MapSize, Offset, RequiresNullTerminator,
-                    PageSize, IsVolatile)) {
-    std::error_code EC;
-    std::unique_ptr<MB> Result(
-        new (NamedBufferAlloc(Filename)) MemoryBufferMMapFile<MB>(
-            RequiresNullTerminator, FD, MapSize, Offset, EC));
-    if (!EC) {
+  إذا (shouldUseMmap(FD, File_ناپ, Map_ناپ, وتھ, RequiresNullTerminator,
+                    ورقہ_ناپ, IsVolatile)) {
+    std::error_کوڈ EC;
+    std::unique_ptr<MB> نتیجہ(
+        جديد (Named_بفر_Alloc(Filename)) حافظہ_بفر_MMap_File<MB>(
+            RequiresNullTerminator, FD, Map_ناپ, وتھ, EC));
+    إذا (!EC) {
       // On at least Linux, and possibly on other systems, mmap may return pages
       // from the page cache that are not properly filled with trailing zeroes,
       // if some prior user of the page wrote non-zero bytes. Detect this and
       // don't use mmap in that case.
-      if (!RequiresNullTerminator || *Result->getBufferEnd() == '\0')
-        return std::move(Result);
+      إذا (!RequiresNullTerminator || *نتیجہ->get_بفر_سرا() == '\0')
+        أرجع std::move(نتیجہ);
     }
   }
 
-#ifdef __MVS__
-  ErrorOr<bool> NeedsConversion = needConversion(Filename, FD);
-  if (std::error_code EC = NeedsConversion.getError())
-    return EC;
+#جے_تعریف_شدہ __MVS__
+  ErrorOr<منطقي> NeedsConversion = needConversion(Filename, FD);
+  إذا (std::error_کوڈ EC = NeedsConversion.getError())
+    أرجع EC;
   // File size may increase due to EBCDIC -> UTF-8 conversion, therefore we
   // cannot trust the file size and we create the memory buffer by copying
   // off the stream.
   // Note: This only works with the assumption of reading a full file (i.e,
   // Offset == 0 and MapSize == FileSize). Reading a file slice does not work.
-  if (*NeedsConversion && Offset == 0 && MapSize == FileSize)
-    return getMemoryBufferForStream(FD, Filename);
-#endif
+  إذا (*NeedsConversion && وتھ == 0 && Map_ناپ == File_ناپ)
+    أرجع get_حافظہ_بفر_For_دھارا(FD, Filename);
+#جے_انت
 
-  auto Buf =
-      WritableMemoryBuffer::getNewUninitMemBuffer(MapSize, Filename, Alignment);
-  if (!Buf) {
+  خودکار Buf =
+      Writable_حافظہ_بفر::get_New_Uninit_Mem_بفر(Map_ناپ, Filename, Alignment);
+  إذا (!Buf) {
     // Failed to create a buffer. The only way it can fail is if
     // new(std::nothrow) returns 0.
-    return make_error_code(errc::not_enough_memory);
+    أرجع make_error_کوڈ(errc::not_enough_حافظہ);
   }
 
   // Read until EOF, zero-initialize the rest.
-  MutableArrayRef<char> ToRead = Buf->getBuffer();
-  while (!ToRead.empty()) {
-    Expected<size_t> ReadBytes =
-        sys::fs::readNativeFileSlice(FD, ToRead, Offset);
-    if (!ReadBytes)
-      return errorToErrorCode(ReadBytes.takeError());
-    if (*ReadBytes == 0) {
-      std::memset(ToRead.data(), 0, ToRead.size());
-      break;
+  MutableArrayRef<حرف> منزل_Read = Buf->get_بفر();
+  طالما (!منزل_Read.خالی_تھاواں()) {
+    Expected<size_t> Read_بائٹاں =
+        sys::fs::read_Native_File_ٹکڑا(FD, منزل_Read, وتھ);
+    إذا (!Read_بائٹاں)
+      أرجع error_منزل_Error_کوڈ(Read_بائٹاں.takeError());
+    إذا (*Read_بائٹاں == 0) {
+      std::memset(منزل_Read.انکڑے(), 0, منزل_Read.ناپ_2());
+      اكسر;
     }
-    ToRead = ToRead.drop_front(*ReadBytes);
-    Offset += *ReadBytes;
+    منزل_Read = منزل_Read.drop_front(*Read_بائٹاں);
+    وتھ += *Read_بائٹاں;
   }
 
-  return std::move(Buf);
+  أرجع std::move(Buf);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getOpenFile(sys::fs::file_t FD, const Twine &Filename,
-                          uint64_t FileSize, bool RequiresNullTerminator,
-                          bool IsVolatile, std::optional<Align> Alignment) {
+ErrorOr<std::unique_ptr<حافظہ_بفر>>
+حافظہ_بفر::getOpenFile(sys::fs::file_t FD, ثابت Twine &Filename,
+                          uint64_t File_ناپ, منطقي RequiresNullTerminator,
+                          منطقي IsVolatile, std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getOpenFileImpl<MemoryBuffer>(FD, Filename, FileSize, FileSize, 0,
+  أرجع getOpenFileImpl<حافظہ_بفر>(FD, Filename, File_ناپ, File_ناپ, 0,
                                        RequiresNullTerminator, IsVolatile,
                                        Alignment);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>> MemoryBuffer::getOpenFileSlice(
-    sys::fs::file_t FD, const Twine &Filename, uint64_t MapSize, int64_t Offset,
-    bool IsVolatile, std::optional<Align> Alignment) {
-  assert(MapSize != uint64_t(-1));
+ErrorOr<std::unique_ptr<حافظہ_بفر>> حافظہ_بفر::get_Open_File_ٹکڑا(
+    sys::fs::file_t FD, ثابت Twine &Filename, uint64_t Map_ناپ, int64_t وتھ,
+    منطقي IsVolatile, std::optional<Align> Alignment) {
+  أكد(Map_ناپ != uint64_t(-1));
 
   sys::sandbox::violationIfEnabled();
 
-  return getOpenFileImpl<MemoryBuffer>(FD, Filename, -1, MapSize, Offset, false,
+  أرجع getOpenFileImpl<حافظہ_بفر>(FD, Filename, -1, Map_ناپ, وتھ, خطأ,
                                        IsVolatile, Alignment);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>> MemoryBuffer::getSTDIN() {
+ErrorOr<std::unique_ptr<حافظہ_بفر>> حافظہ_بفر::getSTDIN() {
   sys::sandbox::violationIfEnabled();
 
   // Read in all of the data from stdin, we cannot mmap stdin.
   //
   // FIXME: That isn't necessarily true, we should try to mmap stdin and
   // fallback if it fails.
-  sys::ChangeStdinMode(sys::fs::OF_Text);
+  sys::Change_Stdin_منوال(sys::fs::دا_متن);
 
-  return getMemoryBufferForStream(sys::fs::getStdinHandle(), "<stdin>");
+  أرجع get_حافظہ_بفر_For_دھارا(sys::fs::getStdinHandle(), "<stdin>");
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFileAsStream(const Twine &Filename) {
+ErrorOr<std::unique_ptr<حافظہ_بفر>>
+حافظہ_بفر::get_File_As_دھارا(ثابت Twine &Filename) {
   sys::sandbox::violationIfEnabled();
 
   Expected<sys::fs::file_t> FDOrErr =
-      sys::fs::openNativeFileForRead(Filename, sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+      sys::fs::openNativeFileForRead(Filename, sys::fs::دا_None);
+  إذا (!FDOrErr)
+    أرجع error_منزل_Error_کوڈ(FDOrErr.takeError());
   sys::fs::file_t FD = *FDOrErr;
-  ErrorOr<std::unique_ptr<MemoryBuffer>> Ret =
-      getMemoryBufferForStream(FD, Filename);
+  ErrorOr<std::unique_ptr<حافظہ_بفر>> Ret =
+      get_حافظہ_بفر_For_دھارا(FD, Filename);
   sys::fs::closeFile(FD);
-  return Ret;
+  أرجع Ret;
 }
 
-MemoryBufferRef MemoryBuffer::getMemBufferRef() const {
-  StringRef Data = getBuffer();
-  StringRef Identifier = getBufferIdentifier();
-  return MemoryBufferRef(Data, Identifier);
+حافظہ_بفر_Ref حافظہ_بفر::get_Mem_بفر_Ref() ثابت {
+  StringRef انکڑے_2 = get_بفر();
+  StringRef Identifier = get_بفر_Identifier();
+  أرجع حافظہ_بفر_Ref(انکڑے_2, Identifier);
 }
 
-SmallVectorMemoryBuffer::~SmallVectorMemoryBuffer() = default;
+Small_سمتیہ_حافظہ_بفر::~Small_سمتیہ_حافظہ_بفر() = افتراضي;

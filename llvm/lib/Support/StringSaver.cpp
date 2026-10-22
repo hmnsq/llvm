@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/StringSaver.h"
+#ضمن "llvm/Support/StringSaver.h"
 
-#include "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallString.h"
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
 StringRef StringSaver::save(StringRef S) {
-  char *P = Alloc.Allocate<char>(S.size() + 1);
-  if (!S.empty())
-    memcpy(P, S.data(), S.size());
-  P[S.size()] = '\0';
-  return StringRef(P, S.size());
+  حرف *P = Alloc.Allocate<حرف>(S.ناپ_2() + 1);
+  إذا (!S.خالی_تھاواں())
+    حافظہ_نقل(P, S.انکڑے(), S.ناپ_2());
+  P[S.ناپ_2()] = '\0';
+  أرجع StringRef(P, S.ناپ_2());
 }
 
-StringRef StringSaver::save(const Twine &S) {
+StringRef StringSaver::save(ثابت Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  أرجع save(S.منزل_String_Ref(Storage));
 }
 
 StringRef UniqueStringSaver::save(StringRef S) {
-  auto R = Unique.insert(S);
-  if (R.second)                 // cache miss, need to actually save the string
-    *R.first = Strings.save(S); // safe replacement with equal value
-  return *R.first;
+  خودکار R = Unique.داخل_کرو(S);
+  إذا (R.دوجا_2)                 // cache miss, need to actually save the string
+    *R.پہلا_2 = لڑیاں_2.save(S); // safe replacement with equal value
+  أرجع *R.پہلا_2;
 }
 
-StringRef UniqueStringSaver::save(const Twine &S) {
+StringRef UniqueStringSaver::save(ثابت Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  أرجع save(S.منزل_String_Ref(Storage));
 }

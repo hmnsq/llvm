@@ -10,62 +10,62 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ReverseIteration.h"
+#ضمن "llvm/ADT/StringMap.h"
+#ضمن "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/ReverseIteration.h"
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
 /// Returns the number of buckets to allocate to ensure that the DenseMap can
 /// accommodate \p NumEntries without need to grow().
-static inline unsigned getMinBucketToReserveForEntries(unsigned NumEntries) {
+ساكن مضمن بنانشانی get_Min_بالٹی_منزل_Reserve_For_Entries(بنانشانی عدد_Entries) {
   // Ensure that "NumEntries * 4 < NumBuckets * 3"
-  if (NumEntries == 0)
-    return 0;
+  إذا (عدد_Entries == 0)
+    أرجع 0;
   // +1 is required because of the strict equality.
   // For example if NumEntries is 48, we need to return 401.
-  return NextPowerOf2(NumEntries * 4 / 3 + 1);
+  أرجع اگلا_Power_Of2(عدد_Entries * 4 / 3 + 1);
 }
 
-static inline StringMapEntryBase **createTable(unsigned NewNumBuckets) {
-  auto **Table = static_cast<StringMapEntryBase **>(safe_calloc(
-      NewNumBuckets + 1, sizeof(StringMapEntryBase **) + sizeof(unsigned)));
+ساكن مضمن String_Map_اندراج_ادھار **create_جدول(بنانشانی New_عدد_Buckets) {
+  خودکار **جدول = static_cast<String_Map_اندراج_ادھار **>(محفوظ_calloc(
+      New_عدد_Buckets + 1, حجم(String_Map_اندراج_ادھار **) + حجم(بنانشانی)));
 
   // Allocate one extra bucket, set it to look filled so the iterators stop at
   // end.
-  Table[NewNumBuckets] = (StringMapEntryBase *)2;
-  return Table;
+  جدول[New_عدد_Buckets] = (String_Map_اندراج_ادھار *)2;
+  أرجع جدول;
 }
 
-static inline unsigned *getHashTable(StringMapEntryBase **TheTable,
-                                     unsigned NumBuckets) {
-  return reinterpret_cast<unsigned *>(TheTable + NumBuckets + 1);
+ساكن مضمن بنانشانی *get_Hash_جدول(String_Map_اندراج_ادھار **The_جدول,
+                                     بنانشانی عدد_Buckets) {
+  أرجع reinterpret_cast<بنانشانی *>(The_جدول + عدد_Buckets + 1);
 }
 
-uint32_t StringMapImpl::hash(StringRef Key) { return xxh3_64bits(Key); }
+uint32_t StringMapImpl::hash(StringRef کلید) { أرجع xxh3_64bits(کلید); }
 
-StringMapImpl::StringMapImpl(unsigned InitSize, unsigned itemSize)
-    : ItemSize(itemSize) {
+StringMapImpl::StringMapImpl(بنانشانی Init_ناپ, بنانشانی شے_ناپ)
+    : شے_ناپ_2(شے_ناپ) {
   // If a size is specified, initialize the table with that many buckets.
-  if (InitSize) {
+  إذا (Init_ناپ) {
     // The table will grow when the number of entries reach 3/4 of the number of
     // buckets. To guarantee that "InitSize" number of entries can be inserted
     // in the table without growing, we allocate just what is needed here.
-    init(getMinBucketToReserveForEntries(InitSize));
+    init(get_Min_بالٹی_منزل_Reserve_For_Entries(Init_ناپ));
   }
 }
 
-void StringMapImpl::init(unsigned InitSize) {
-  assert((InitSize & (InitSize - 1)) == 0 &&
+فراغ StringMapImpl::init(بنانشانی Init_ناپ) {
+  أكد((Init_ناپ & (Init_ناپ - 1)) == 0 &&
          "Init Size must be a power of 2 or zero!");
 
-  unsigned NewNumBuckets = InitSize ? InitSize : 16;
-  NumItems = 0;
+  بنانشانی New_عدد_Buckets = Init_ناپ ? Init_ناپ : 16;
+  عدد_اشیاء = 0;
 
-  TheTable = createTable(NewNumBuckets);
+  The_جدول = create_جدول(New_عدد_Buckets);
 
   // Set the member only if TheTable was successfully allocated
-  NumBuckets = NewNumBuckets;
+  عدد_Buckets = New_عدد_Buckets;
 }
 
 /// LookupBucketFor - Look up the bucket that the specified string should end
@@ -73,28 +73,28 @@ void StringMapImpl::init(unsigned InitSize) {
 /// specified bucket will be non-null.  Otherwise, it will be null.  In either
 /// case, the FullHashValue field of the bucket will be set to the hash value
 /// of the string.
-unsigned StringMapImpl::LookupBucketFor(StringRef Name,
-                                        uint32_t FullHashValue) {
-#ifdef EXPENSIVE_CHECKS
-  assert(FullHashValue == hash(Name));
-#endif
+بنانشانی StringMapImpl::Lookup_بالٹی_For(StringRef Name,
+                                        uint32_t بھریا_Hash_قدر) {
+#جے_تعریف_شدہ EXPENSIVE_CHECKS
+  أكد(بھریا_Hash_قدر == hash(Name));
+#جے_انت
   // Hash table unallocated so far?
-  if (NumBuckets == 0)
+  إذا (عدد_Buckets == 0)
     init(16);
-  if constexpr (shouldReverseIterate())
-    FullHashValue = ~FullHashValue;
-  unsigned BucketNo = FullHashValue & (NumBuckets - 1);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  إذا constexpr (should_الٹ_Iterate())
+    بھریا_Hash_قدر = ~بھریا_Hash_قدر;
+  بنانشانی بالٹی_No = بھریا_Hash_قدر & (عدد_Buckets - 1);
+  بنانشانی *Hash_جدول = get_Hash_جدول(The_جدول, عدد_Buckets);
 
-  while (true) {
-    StringMapEntryBase *BucketItem = TheTable[BucketNo];
+  طالما (سچ) {
+    String_Map_اندراج_ادھار *بالٹی_شے = The_جدول[بالٹی_No];
     // If we found an empty bucket, this key isn't in the table yet, return it.
-    if (LLVM_LIKELY(!BucketItem)) {
-      HashTable[BucketNo] = FullHashValue;
-      return BucketNo;
+    إذا (LLVM_LIKELY(!بالٹی_شے)) {
+      Hash_جدول[بالٹی_No] = بھریا_Hash_قدر;
+      أرجع بالٹی_No;
     }
 
-    if (LLVM_LIKELY(HashTable[BucketNo] == FullHashValue)) {
+    إذا (LLVM_LIKELY(Hash_جدول[بالٹی_No] == بھریا_Hash_قدر)) {
       // If the full hash value matches, check deeply for a match.  The common
       // case here is that we are only looking at the buckets (for item info
       // being non-null and for the full hash value) not at the items.  This
@@ -102,39 +102,39 @@ unsigned StringMapImpl::LookupBucketFor(StringRef Name,
 
       // Do the comparison like this because Name isn't necessarily
       // null-terminated!
-      char *ItemStr = (char *)BucketItem + ItemSize;
-      if (Name == StringRef(ItemStr, BucketItem->getKeyLength())) {
+      حرف *شے_Str = (حرف *)بالٹی_شے + شے_ناپ_2;
+      إذا (Name == StringRef(شے_Str, بالٹی_شے->get_کلید_لمائی())) {
         // We found a match!
-        return BucketNo;
+        أرجع بالٹی_No;
       }
     }
 
     // Okay, we didn't find the item.  Probe to the next bucket.
-    BucketNo = (BucketNo + 1) & (NumBuckets - 1);
+    بالٹی_No = (بالٹی_No + 1) & (عدد_Buckets - 1);
   }
 }
 
 /// FindKey - Look up the bucket that contains the specified key. If it exists
 /// in the map, return the bucket number of the key.  Otherwise return -1.
 /// This does not modify the map.
-int StringMapImpl::FindKey(StringRef Key, uint32_t FullHashValue) const {
-  if (NumBuckets == 0)
-    return -1; // Really empty table?
-#ifdef EXPENSIVE_CHECKS
-  assert(FullHashValue == hash(Key));
-#endif
-  if constexpr (shouldReverseIterate())
-    FullHashValue = ~FullHashValue;
-  unsigned BucketNo = FullHashValue & (NumBuckets - 1);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+صحيح StringMapImpl::لبھو_کلید(StringRef کلید, uint32_t بھریا_Hash_قدر) ثابت {
+  إذا (عدد_Buckets == 0)
+    أرجع -1; // Really empty table?
+#جے_تعریف_شدہ EXPENSIVE_CHECKS
+  أكد(بھریا_Hash_قدر == hash(کلید));
+#جے_انت
+  إذا constexpr (should_الٹ_Iterate())
+    بھریا_Hash_قدر = ~بھریا_Hash_قدر;
+  بنانشانی بالٹی_No = بھریا_Hash_قدر & (عدد_Buckets - 1);
+  بنانشانی *Hash_جدول = get_Hash_جدول(The_جدول, عدد_Buckets);
 
-  while (true) {
-    StringMapEntryBase *BucketItem = TheTable[BucketNo];
+  طالما (سچ) {
+    String_Map_اندراج_ادھار *بالٹی_شے = The_جدول[بالٹی_No];
     // If we found an empty bucket, this key isn't in the table yet, return.
-    if (LLVM_LIKELY(!BucketItem))
-      return -1;
+    إذا (LLVM_LIKELY(!بالٹی_شے))
+      أرجع -1;
 
-    if (LLVM_LIKELY(HashTable[BucketNo] == FullHashValue)) {
+    إذا (LLVM_LIKELY(Hash_جدول[بالٹی_No] == بھریا_Hash_قدر)) {
       // If the full hash value matches, check deeply for a match.  The common
       // case here is that we are only looking at the buckets (for item info
       // being non-null and for the full hash value) not at the items.  This
@@ -142,93 +142,93 @@ int StringMapImpl::FindKey(StringRef Key, uint32_t FullHashValue) const {
 
       // Do the comparison like this because NameStart isn't necessarily
       // null-terminated!
-      char *ItemStr = (char *)BucketItem + ItemSize;
-      if (Key == StringRef(ItemStr, BucketItem->getKeyLength())) {
+      حرف *شے_Str = (حرف *)بالٹی_شے + شے_ناپ_2;
+      إذا (کلید == StringRef(شے_Str, بالٹی_شے->get_کلید_لمائی())) {
         // We found a match!
-        return BucketNo;
+        أرجع بالٹی_No;
       }
     }
 
     // Okay, we didn't find the item.  Probe to the next bucket.
-    BucketNo = (BucketNo + 1) & (NumBuckets - 1);
+    بالٹی_No = (بالٹی_No + 1) & (عدد_Buckets - 1);
   }
 }
 
 /// RemoveKey - Remove the specified StringMapEntry from the table, but do not
 /// delete it.  This aborts if the value isn't in the table.
-void StringMapImpl::RemoveKey(StringMapEntryBase *V) {
-  const char *VStr = (char *)V + ItemSize;
-  StringMapEntryBase *V2 = RemoveKey(StringRef(VStr, V->getKeyLength()));
-  (void)V2;
-  assert(V == V2 && "Didn't find key?");
+فراغ StringMapImpl::Remove_کلید(String_Map_اندراج_ادھار *V) {
+  ثابت حرف *VStr = (حرف *)V + شے_ناپ_2;
+  String_Map_اندراج_ادھار *V2 = Remove_کلید(StringRef(VStr, V->get_کلید_لمائی()));
+  (فراغ)V2;
+  أكد(V == V2 && "Didn't find key?");
 }
 
 // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
 // whose probe path crosses the hole.
-void StringMapImpl::removeBucket(unsigned Bucket) {
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
-  unsigned Mask = NumBuckets - 1;
-  unsigned I = Bucket, J = I;
-  while ((J = (J + 1) & Mask), TheTable[J]) {
-    unsigned Ideal = HashTable[J];
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
-      TheTable[I] = TheTable[J];
-      HashTable[I] = HashTable[J];
+فراغ StringMapImpl::remove_بالٹی(بنانشانی بالٹی) {
+  بنانشانی *Hash_جدول = get_Hash_جدول(The_جدول, عدد_Buckets);
+  بنانشانی نقاب = عدد_Buckets - 1;
+  بنانشانی I = بالٹی, J = I;
+  طالما ((J = (J + 1) & نقاب), The_جدول[J]) {
+    بنانشانی Ideal = Hash_جدول[J];
+    إذا (((I - Ideal) & نقاب) < ((J - Ideal) & نقاب)) {
+      The_جدول[I] = The_جدول[J];
+      Hash_جدول[I] = Hash_جدول[J];
       I = J;
     }
   }
-  TheTable[I] = nullptr;
-  --NumItems;
+  The_جدول[I] = خالی_سوچک;
+  --عدد_اشیاء;
 }
 
-StringMapEntryBase *StringMapImpl::RemoveKey(StringRef Key) {
-  int Bucket = FindKey(Key);
-  if (Bucket == -1)
-    return nullptr;
+String_Map_اندراج_ادھار *StringMapImpl::Remove_کلید(StringRef کلید) {
+  صحيح بالٹی = لبھو_کلید(کلید);
+  إذا (بالٹی == -1)
+    أرجع خالی_سوچک;
 
-  StringMapEntryBase *Result = TheTable[Bucket];
-  removeBucket(Bucket);
-  return Result;
+  String_Map_اندراج_ادھار *نتیجہ = The_جدول[بالٹی];
+  remove_بالٹی(بالٹی);
+  أرجع نتیجہ;
 }
 
 /// RehashTable - Grow the table, redistributing values into the buckets with
 /// the appropriate mod-of-hashtable-size.
-unsigned StringMapImpl::RehashTable(unsigned BucketNo) {
-  unsigned NewSize;
+بنانشانی StringMapImpl::Rehash_جدول(بنانشانی بالٹی_No) {
+  بنانشانی New_ناپ;
   // If the hash table is now more than 3/4 full, grow the table.
-  if (LLVM_UNLIKELY(NumItems * 4 > NumBuckets * 3)) {
-    NewSize = NumBuckets * 2;
-  } else {
-    return BucketNo;
+  إذا (LLVM_UNLIKELY(عدد_اشیاء * 4 > عدد_Buckets * 3)) {
+    New_ناپ = عدد_Buckets * 2;
+  } وإلا {
+    أرجع بالٹی_No;
   }
 
-  unsigned NewBucketNo = BucketNo;
-  auto **NewTableArray = createTable(NewSize);
-  unsigned *NewHashArray = getHashTable(NewTableArray, NewSize);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  بنانشانی New_بالٹی_No = بالٹی_No;
+  خودکار **New_جدول_Array = create_جدول(New_ناپ);
+  بنانشانی *NewHashArray = get_Hash_جدول(New_جدول_Array, New_ناپ);
+  بنانشانی *Hash_جدول = get_Hash_جدول(The_جدول, عدد_Buckets);
 
   // Rehash all the items into their new buckets.  Luckily :) we already have
   // the hash values available, so we don't have to rehash any strings.
-  for (unsigned I = 0, E = NumBuckets; I != E; ++I) {
-    StringMapEntryBase *Bucket = TheTable[I];
-    if (Bucket) {
+  لكل (بنانشانی I = 0, E = عدد_Buckets; I != E; ++I) {
+    String_Map_اندراج_ادھار *بالٹی = The_جدول[I];
+    إذا (بالٹی) {
       // If the bucket is not available, probe for a spot.
-      unsigned FullHash = HashTable[I];
-      unsigned NewBucket = FullHash & (NewSize - 1);
-      while (NewTableArray[NewBucket])
-        NewBucket = (NewBucket + 1) & (NewSize - 1);
+      بنانشانی بھریا_Hash = Hash_جدول[I];
+      بنانشانی New_بالٹی = بھریا_Hash & (New_ناپ - 1);
+      طالما (New_جدول_Array[New_بالٹی])
+        New_بالٹی = (New_بالٹی + 1) & (New_ناپ - 1);
 
       // Finally found a slot.  Fill it in.
-      NewTableArray[NewBucket] = Bucket;
-      NewHashArray[NewBucket] = FullHash;
-      if (I == BucketNo)
-        NewBucketNo = NewBucket;
+      New_جدول_Array[New_بالٹی] = بالٹی;
+      NewHashArray[New_بالٹی] = بھریا_Hash;
+      إذا (I == بالٹی_No)
+        New_بالٹی_No = New_بالٹی;
     }
   }
 
-  free(TheTable);
+  حرر(The_جدول);
 
-  TheTable = NewTableArray;
-  NumBuckets = NewSize;
-  return NewBucketNo;
+  The_جدول = New_جدول_Array;
+  عدد_Buckets = New_ناپ;
+  أرجع New_بالٹی_No;
 }

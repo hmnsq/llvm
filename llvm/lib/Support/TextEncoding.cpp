@@ -12,71 +12,71 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TextEncoding.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/ConvertEBCDIC.h"
-#include <system_error>
+#ضمن "llvm/Support/TextEncoding.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/ConvertEBCDIC.h"
+#ضمن <system_error>
 
-#if HAVE_ICU
-#if HAVE_WINDOWS_ICU
-#include <icu.h>
-#else
-#include <unicode/ucnv.h>
-#endif
-#elif HAVE_ICONV
-#include <iconv.h>
-#endif
+#إذا HAVE_ICU
+#إذا HAVE_WINDOWS_ICU
+#ضمن <icu.h>
+#وإلا
+#ضمن <unicode/ucnv.h>
+#جے_انت
+#وإلاإذا HAVE_ICONV
+#ضمن <iconv.h>
+#جے_انت
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
 // Normalize the charset name with the charset alias matching algorithm proposed
 // in https://www.unicode.org/reports/tr22/tr22-8.html#Charset_Alias_Matching.
-static void normalizeCharSetName(StringRef CSName,
-                                 SmallVectorImpl<char> &Normalized) {
-  bool PrevDigit = false;
-  for (auto Ch : CSName) {
-    if (isAlnum(Ch)) {
-      Ch = toLower(Ch);
-      if (Ch != '0' || PrevDigit) {
+ساكن فراغ normalize_Char_سیٹ_Name(StringRef CSName,
+                                 Small_سمتیہ_Impl<حرف> &Normalized) {
+  منطقي PrevDigit = خطأ;
+  لكل (خودکار Ch : CSName) {
+    إذا (isAlnum(Ch)) {
+      Ch = منزل_ہیٹھلا(Ch);
+      إذا (Ch != '0' || PrevDigit) {
         PrevDigit = isDigit(Ch);
-        Normalized.push_back(Ch);
+        Normalized.ڈالو_پٹھ(Ch);
       }
     }
   }
 }
 
 // Maps the encoding name to enum constant if possible.
-static std::optional<TextEncoding> getKnownEncoding(StringRef Name) {
+ساكن std::optional<متن_Encoding> get_معلوم_Encoding(StringRef Name) {
   SmallString<16> Normalized;
-  normalizeCharSetName(Name, Normalized);
-  if (Normalized.equals("utf8"))
-    return TextEncoding::UTF8;
-  if (Normalized.equals("ibm1047"))
-    return TextEncoding::IBM1047;
-  return std::nullopt;
+  normalize_Char_سیٹ_Name(Name, Normalized);
+  إذا (Normalized.equals("utf8"))
+    أرجع متن_Encoding::UTF8;
+  إذا (Normalized.equals("ibm1047"))
+    أرجع متن_Encoding::IBM1047;
+  أرجع std::nullopt;
 }
 
-[[maybe_unused]] static void HandleOverflow(size_t &Capacity, char *&Output,
-                                            size_t &OutputLength,
-                                            SmallVectorImpl<char> &Result) {
+[[maybe_بن_ورتیا]] ساكن فراغ Handle_حد_توں_ودھ(size_t &سمرتھا, حرف *&Output,
+                                            size_t &Output_لمائی,
+                                            Small_سمتیہ_Impl<حرف> &نتیجہ) {
   // No space left in output buffer. Double the size of the underlying
   // memory in the SmallVectorImpl, adjust pointer and length and continue
   // the conversion.
-  Capacity =
-      (Capacity < Result.max_size() / 2) ? 2 * Capacity : Result.max_size();
-  Result.resize(0);
-  Result.resize_for_overwrite(Capacity);
-  Output = static_cast<char *>(Result.data());
-  OutputLength = Capacity;
+  سمرتھا =
+      (سمرتھا < نتیجہ.max_ناپ() / 2) ? 2 * سمرتھا : نتیجہ.max_ناپ();
+  نتیجہ.resize(0);
+  نتیجہ.resize_for_overwrite(سمرتھا);
+  Output = static_cast<حرف *>(نتیجہ.انکڑے());
+  Output_لمائی = سمرتھا;
 }
 
-namespace {
-enum ConversionType {
-  UTF8ToIBM1047,
-  IBM1047ToUTF8,
+نطاق {
+تعداد ConversionType {
+  UTF8_منزل_IBM1047,
+  IBM1047_منزل_UTF8,
 };
 
 // Support conversion between EBCDIC 1047 and UTF-8. This class uses
@@ -84,57 +84,57 @@ enum ConversionType {
 // aforementioned encodings. The use of tables for conversion is only
 // possible because EBCDIC 1047 is a single-byte, stateless encoding; other
 // encodings are not supported.
-class TextEncodingConverterTable final
-    : public details::TextEncodingConverterImplBase {
-  const ConversionType ConvType;
+صنف متن_Encoding_Converter_جدول final
+    : عام details::متن_Encoding_Converter_Impl_ادھار {
+  ثابت ConversionType ConvType;
 
-public:
-  TextEncodingConverterTable(ConversionType ConvType) : ConvType(ConvType) {}
+عام:
+  متن_Encoding_Converter_جدول(ConversionType ConvType) : ConvType(ConvType) {}
 
-  std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+  std::error_کوڈ convertString(StringRef سروت,
+                                Small_سمتیہ_Impl<حرف> &نتیجہ) override;
 
-  void reset() override {}
+  فراغ reset() override {}
 };
 
-std::error_code
-TextEncodingConverterTable::convertString(StringRef Source,
-                                          SmallVectorImpl<char> &Result) {
-  switch (ConvType) {
-  case IBM1047ToUTF8:
-    ConverterEBCDIC::convertToUTF8(Source, Result);
-    return std::error_code();
-  case UTF8ToIBM1047:
-    return ConverterEBCDIC::convertToEBCDIC(Source, Result);
+std::error_کوڈ
+متن_Encoding_Converter_جدول::convertString(StringRef سروت,
+                                          Small_سمتیہ_Impl<حرف> &نتیجہ) {
+  بدل (ConvType) {
+  حالة IBM1047_منزل_UTF8:
+    ConverterEBCDIC::convert_منزل_UTF8(سروت, نتیجہ);
+    أرجع std::error_کوڈ();
+  حالة UTF8_منزل_IBM1047:
+    أرجع ConverterEBCDIC::convert_منزل_EBCDIC(سروت, نتیجہ);
   }
   llvm_unreachable("Invalid ConvType!");
-  return std::error_code();
+  أرجع std::error_کوڈ();
 }
 
-#if HAVE_ICU
-struct UConverterDeleter {
-  void operator()(UConverter *Converter) const {
-    if (Converter)
+#إذا HAVE_ICU
+بنية UConverterDeleter {
+  فراغ عامل()(UConverter *Converter) ثابت {
+    إذا (Converter)
       ucnv_close(Converter);
   }
 };
-using UConverterUniquePtr = std::unique_ptr<UConverter, UConverterDeleter>;
+ورتوں UConverterUniquePtr = std::unique_ptr<UConverter, UConverterDeleter>;
 
-class TextEncodingConverterICU final
-    : public details::TextEncodingConverterImplBase {
+صنف متن_Encoding_Converter_ICU final
+    : عام details::متن_Encoding_Converter_Impl_ادھار {
   UConverterUniquePtr FromConvDesc;
-  UConverterUniquePtr ToConvDesc;
+  UConverterUniquePtr منزل_Conv_Desc;
 
-public:
-  TextEncodingConverterICU(UConverterUniquePtr FromConverter,
-                           UConverterUniquePtr ToConverter)
+عام:
+  متن_Encoding_Converter_ICU(UConverterUniquePtr FromConverter,
+                           UConverterUniquePtr منزل_Converter)
       : FromConvDesc(std::move(FromConverter)),
-        ToConvDesc(std::move(ToConverter)) {}
+        منزل_Conv_Desc(std::move(منزل_Converter)) {}
 
-  std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+  std::error_کوڈ convertString(StringRef سروت,
+                                Small_سمتیہ_Impl<حرف> &نتیجہ) override;
 
-  void reset() override;
+  فراغ reset() override;
 };
 
 // TODO: The current implementation discards the partial result and restarts the
@@ -142,73 +142,73 @@ public:
 // insufficient buffer size. In the future, it would better to save the partial
 // result and resume the conversion for the remaining string.
 // TODO: Improve translation of ICU errors to error_code
-std::error_code
-TextEncodingConverterICU::convertString(StringRef Source,
-                                        SmallVectorImpl<char> &Result) {
+std::error_کوڈ
+متن_Encoding_Converter_ICU::convertString(StringRef سروت,
+                                        Small_سمتیہ_Impl<حرف> &نتیجہ) {
   // Setup the input in case it has no backing data.
-  size_t InputLength = Source.size();
-  const char *In = InputLength ? const_cast<char *>(Source.data()) : "";
+  size_t داخلہ_لمائی = سروت.ناپ_2();
+  ثابت حرف *وچ_2 = داخلہ_لمائی ? const_cast<حرف *>(سروت.انکڑے()) : "";
 
   // Setup the output. We directly write into the SmallVector.
-  size_t Capacity = Result.capacity();
-  size_t OutputLength = Capacity;
-  Result.resize_for_overwrite(Capacity);
-  char *Output;
-  UErrorCode EC = U_ZERO_ERROR;
+  size_t سمرتھا = نتیجہ.سمرتھا_2();
+  size_t Output_لمائی = سمرتھا;
+  نتیجہ.resize_for_overwrite(سمرتھا);
+  حرف *Output;
+  UError_کوڈ EC = U_ZERO_ERROR;
 
-  ucnv_setToUCallBack(&*FromConvDesc, UCNV_TO_U_CALLBACK_STOP, NULL, NULL, NULL,
+  ucnv_سیٹ_منزل_UCall_پٹھ(&*FromConvDesc, UCNV_منزل_U_CALLBACK_STOP, عدم, عدم, عدم,
                       &EC);
-  ucnv_setFromUCallBack(&*ToConvDesc, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL,
-                        NULL, &EC);
-  assert(U_SUCCESS(EC));
+  ucnv_سیٹ_From_UCall_پٹھ(&*منزل_Conv_Desc, UCNV_FROM_U_CALLBACK_STOP, عدم, عدم,
+                        عدم, &EC);
+  أكد(U_SUCCESS(EC));
 
-  do {
+  افعل {
     EC = U_ZERO_ERROR;
-    const char *Input = In;
+    ثابت حرف *داخلہ = وچ_2;
 
-    Output = static_cast<char *>(Result.data());
-    ucnv_convertEx(&*ToConvDesc, &*FromConvDesc, &Output, Result.end(), &Input,
-                   In + InputLength, /*pivotStart=*/NULL,
-                   /*pivotSource=*/NULL, /*pivotTarget=*/NULL,
-                   /*pivotLimit=*/NULL, /*reset=*/true,
-                   /*flush=*/true, &EC);
-    if (U_FAILURE(EC)) {
-      if (EC == U_BUFFER_OVERFLOW_ERROR) {
-        if (Capacity < Result.max_size()) {
-          HandleOverflow(Capacity, Output, OutputLength, Result);
-          continue;
-        } else {
-          Result.resize(Output - Result.data());
-          return std::error_code(E2BIG, std::generic_category());
+    Output = static_cast<حرف *>(نتیجہ.انکڑے());
+    ucnv_convertEx(&*منزل_Conv_Desc, &*FromConvDesc, &Output, نتیجہ.سرا(), &داخلہ,
+                   وچ_2 + داخلہ_لمائی, /*pivotStart=*/عدم,
+                   /*pivotSource=*/عدم, /*pivotTarget=*/عدم,
+                   /*pivotLimit=*/عدم, /*reset=*/سچ,
+                   /*flush=*/سچ, &EC);
+    إذا (U_FAILURE(EC)) {
+      إذا (EC == U_بفر_حد_توں_ودھ_ERROR) {
+        إذا (سمرتھا < نتیجہ.max_ناپ()) {
+          Handle_حد_توں_ودھ(سمرتھا, Output, Output_لمائی, نتیجہ);
+          استمر;
+        } وإلا {
+          نتیجہ.resize(Output - نتیجہ.انکڑے());
+          أرجع std::error_کوڈ(E2BIG, std::generic_category());
         }
       }
       // Some other error occurred.
-      Result.resize(Output - Result.data());
-      return std::error_code(EILSEQ, std::generic_category());
+      نتیجہ.resize(Output - نتیجہ.انکڑے());
+      أرجع std::error_کوڈ(EILSEQ, std::generic_category());
     }
-    break;
-  } while (true);
+    اكسر;
+  } طالما (سچ);
 
-  Result.resize(Output - Result.data());
-  return std::error_code();
+  نتیجہ.resize(Output - نتیجہ.انکڑے());
+  أرجع std::error_کوڈ();
 }
 
-void TextEncodingConverterICU::reset() {
+فراغ متن_Encoding_Converter_ICU::reset() {
   ucnv_reset(&*FromConvDesc);
-  ucnv_reset(&*ToConvDesc);
+  ucnv_reset(&*منزل_Conv_Desc);
 }
 
-#elif HAVE_ICONV
-class TextEncodingConverterIconv final
-    : public details::TextEncodingConverterImplBase {
-  class UniqueIconvT {
+#وإلاإذا HAVE_ICONV
+صنف متن_Encoding_Converter_Iconv final
+    : عام details::متن_Encoding_Converter_Impl_ادھار {
+  صنف UniqueIconvT {
     iconv_t ConvDesc;
 
-  public:
-    operator iconv_t() const { return ConvDesc; }
+  عام:
+    عامل iconv_t() ثابت { أرجع ConvDesc; }
     UniqueIconvT(iconv_t CD) : ConvDesc(CD) {}
     ~UniqueIconvT() {
-      if (ConvDesc != (iconv_t)-1) {
+      إذا (ConvDesc != (iconv_t)-1) {
         iconv_close(ConvDesc);
         ConvDesc = (iconv_t)-1;
       }
@@ -216,144 +216,144 @@ class TextEncodingConverterIconv final
     UniqueIconvT(UniqueIconvT &&Other) : ConvDesc(Other.ConvDesc) {
       Other.ConvDesc = (iconv_t)-1;
     }
-    UniqueIconvT &operator=(UniqueIconvT &&Other) {
-      if (&Other != this) {
+    UniqueIconvT &عامل=(UniqueIconvT &&Other) {
+      إذا (&Other != هذا) {
         ConvDesc = Other.ConvDesc;
         Other.ConvDesc = (iconv_t)-1;
       }
-      return *this;
+      أرجع *هذا;
     }
   };
   UniqueIconvT ConvDesc;
 
-public:
-  TextEncodingConverterIconv(UniqueIconvT ConvDesc)
+عام:
+  متن_Encoding_Converter_Iconv(UniqueIconvT ConvDesc)
       : ConvDesc(std::move(ConvDesc)) {}
 
-  std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+  std::error_کوڈ convertString(StringRef سروت,
+                                Small_سمتیہ_Impl<حرف> &نتیجہ) override;
 
-  void reset() override;
+  فراغ reset() override;
 };
 
 // TODO: The current implementation discards the partial result and restarts the
 // conversion from the beginning if there is a conversion error due to
 // insufficient buffer size. In the future, it would better to save the partial
 // result and resume the conversion for the remaining string.
-std::error_code
-TextEncodingConverterIconv::convertString(StringRef Source,
-                                          SmallVectorImpl<char> &Result) {
+std::error_کوڈ
+متن_Encoding_Converter_Iconv::convertString(StringRef سروت,
+                                          Small_سمتیہ_Impl<حرف> &نتیجہ) {
   // Setup the output. We directly write into the SmallVector.
-  size_t Capacity = Result.capacity();
-  char *Output = static_cast<char *>(Result.data());
-  size_t OutputLength = Capacity;
-  Result.resize_for_overwrite(Capacity);
+  size_t سمرتھا = نتیجہ.سمرتھا_2();
+  حرف *Output = static_cast<حرف *>(نتیجہ.انکڑے());
+  size_t Output_لمائی = سمرتھا;
+  نتیجہ.resize_for_overwrite(سمرتھا);
 
   size_t Ret;
   // Handle errors returned from iconv().
-  auto HandleError = [&Capacity, &Output, &OutputLength, &Result,
-                      this](size_t Ret) {
-    if (Ret == static_cast<size_t>(-1)) {
+  خودکار HandleError = [&سمرتھا, &Output, &Output_لمائی, &نتیجہ,
+                      هذا](size_t Ret) {
+    إذا (Ret == static_cast<size_t>(-1)) {
       // An error occurred. Check if we can gracefully handle it.
-      if (errno == E2BIG && Capacity < Result.max_size()) {
-        HandleOverflow(Capacity, Output, OutputLength, Result);
+      إذا (errno == E2BIG && سمرتھا < نتیجہ.max_ناپ()) {
+        Handle_حد_توں_ودھ(سمرتھا, Output, Output_لمائی, نتیجہ);
         // Reset converter
         reset();
-        return std::error_code();
-      } else {
+        أرجع std::error_کوڈ();
+      } وإلا {
         // Some other error occurred.
-        Result.resize(Output - Result.data());
-        return std::error_code(errno, std::generic_category());
+        نتیجہ.resize(Output - نتیجہ.انکڑے());
+        أرجع std::error_کوڈ(errno, std::generic_category());
       }
-    } else {
+    } وإلا {
       // A positive return value indicates that some characters were converted
       // in a nonreversible way, that is, replaced with a SUB symbol. Returning
       // an error in this case makes sure that both conversion routines behave
       // in the same way.
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+      أرجع std::make_error_کوڈ(std::errc::illegal_byte_sequence);
     }
   };
 
-  do {
-    size_t InputLength = Source.size();
-    char *Input = const_cast<char *>(Source.data());
-    Ret = iconv(ConvDesc, &Input, &InputLength, &Output, &OutputLength);
-    if (Ret != 0) {
-      if (auto EC = HandleError(Ret))
-        return EC;
-      continue;
+  افعل {
+    size_t داخلہ_لمائی = سروت.ناپ_2();
+    حرف *داخلہ = const_cast<حرف *>(سروت.انکڑے());
+    Ret = iconv(ConvDesc, &داخلہ, &داخلہ_لمائی, &Output, &Output_لمائی);
+    إذا (Ret != 0) {
+      إذا (خودکار EC = HandleError(Ret))
+        أرجع EC;
+      استمر;
     }
     // Flush the converter
-    Ret = iconv(ConvDesc, nullptr, nullptr, &Output, &OutputLength);
-    if (Ret != 0) {
-      if (auto EC = HandleError(Ret))
-        return EC;
-      continue;
+    Ret = iconv(ConvDesc, خالی_سوچک, خالی_سوچک, &Output, &Output_لمائی);
+    إذا (Ret != 0) {
+      إذا (خودکار EC = HandleError(Ret))
+        أرجع EC;
+      استمر;
     }
-    break;
-  } while (true);
+    اكسر;
+  } طالما (سچ);
 
   // Re-adjust size to actual size.
-  Result.resize(Output - Result.data());
-  return std::error_code();
+  نتیجہ.resize(Output - نتیجہ.انکڑے());
+  أرجع std::error_کوڈ();
 }
 
-inline void TextEncodingConverterIconv::reset() {
-  iconv(ConvDesc, nullptr, nullptr, nullptr, nullptr);
+مضمن فراغ متن_Encoding_Converter_Iconv::reset() {
+  iconv(ConvDesc, خالی_سوچک, خالی_سوچک, خالی_سوچک, خالی_سوچک);
 }
 
-#endif // HAVE_ICONV
+#جے_انت // HAVE_ICONV
 } // namespace
 
-ErrorOr<TextEncodingConverter>
-TextEncodingConverter::create(TextEncoding CPFrom, TextEncoding CPTo) {
+ErrorOr<متن_Encoding_Converter>
+متن_Encoding_Converter::create(متن_Encoding CPFrom, متن_Encoding CPTo) {
 
   // Text encodings should be distinct.
-  if (CPFrom == CPTo)
-    return std::make_error_code(std::errc::invalid_argument);
+  إذا (CPFrom == CPTo)
+    أرجع std::make_error_کوڈ(std::errc::invalid_دلیل);
 
   ConversionType Conversion;
-  if (CPFrom == TextEncoding::UTF8 && CPTo == TextEncoding::IBM1047)
-    Conversion = UTF8ToIBM1047;
-  else if (CPFrom == TextEncoding::IBM1047 && CPTo == TextEncoding::UTF8)
-    Conversion = IBM1047ToUTF8;
-  else
-    return std::make_error_code(std::errc::invalid_argument);
+  إذا (CPFrom == متن_Encoding::UTF8 && CPTo == متن_Encoding::IBM1047)
+    Conversion = UTF8_منزل_IBM1047;
+  وإلا إذا (CPFrom == متن_Encoding::IBM1047 && CPTo == متن_Encoding::UTF8)
+    Conversion = IBM1047_منزل_UTF8;
+  وإلا
+    أرجع std::make_error_کوڈ(std::errc::invalid_دلیل);
 
-  return TextEncodingConverter(
-      std::make_unique<TextEncodingConverterTable>(Conversion));
+  أرجع متن_Encoding_Converter(
+      std::make_unique<متن_Encoding_Converter_جدول>(Conversion));
 }
 
-ErrorOr<TextEncodingConverter> TextEncodingConverter::create(StringRef From,
-                                                             StringRef To) {
-  std::optional<TextEncoding> FromEncoding = getKnownEncoding(From);
-  std::optional<TextEncoding> ToEncoding = getKnownEncoding(To);
-  if (FromEncoding && ToEncoding) {
-    ErrorOr<TextEncodingConverter> Converter =
-        create(*FromEncoding, *ToEncoding);
-    if (Converter)
-      return Converter;
+ErrorOr<متن_Encoding_Converter> متن_Encoding_Converter::create(StringRef From,
+                                                             StringRef منزل) {
+  std::optional<متن_Encoding> FromEncoding = get_معلوم_Encoding(From);
+  std::optional<متن_Encoding> منزل_Encoding = get_معلوم_Encoding(منزل);
+  إذا (FromEncoding && منزل_Encoding) {
+    ErrorOr<متن_Encoding_Converter> Converter =
+        create(*FromEncoding, *منزل_Encoding);
+    إذا (Converter)
+      أرجع Converter;
   }
-#if HAVE_ICU
-  UErrorCode EC = U_ZERO_ERROR;
+#إذا HAVE_ICU
+  UError_کوڈ EC = U_ZERO_ERROR;
   UConverterUniquePtr FromConvDesc(ucnv_open(From.str().c_str(), &EC));
-  if (U_FAILURE(EC))
-    return std::make_error_code(std::errc::invalid_argument);
+  إذا (U_FAILURE(EC))
+    أرجع std::make_error_کوڈ(std::errc::invalid_دلیل);
 
-  UConverterUniquePtr ToConvDesc(ucnv_open(To.str().c_str(), &EC));
-  if (U_FAILURE(EC))
-    return std::make_error_code(std::errc::invalid_argument);
+  UConverterUniquePtr منزل_Conv_Desc(ucnv_open(منزل.str().c_str(), &EC));
+  إذا (U_FAILURE(EC))
+    أرجع std::make_error_کوڈ(std::errc::invalid_دلیل);
 
-  auto Converter = std::make_unique<TextEncodingConverterICU>(
-      std::move(FromConvDesc), std::move(ToConvDesc));
-  return TextEncodingConverter(std::move(Converter));
-#elif HAVE_ICONV
-  iconv_t ConvDesc = iconv_open(To.str().c_str(), From.str().c_str());
-  if (ConvDesc == (iconv_t)-1)
-    return std::make_error_code(std::errc::invalid_argument);
-  return TextEncodingConverter(
-      std::make_unique<TextEncodingConverterIconv>(ConvDesc));
-#else
-  return std::make_error_code(std::errc::invalid_argument);
-#endif
+  خودکار Converter = std::make_unique<متن_Encoding_Converter_ICU>(
+      std::move(FromConvDesc), std::move(منزل_Conv_Desc));
+  أرجع متن_Encoding_Converter(std::move(Converter));
+#وإلاإذا HAVE_ICONV
+  iconv_t ConvDesc = iconv_open(منزل.str().c_str(), From.str().c_str());
+  إذا (ConvDesc == (iconv_t)-1)
+    أرجع std::make_error_کوڈ(std::errc::invalid_دلیل);
+  أرجع متن_Encoding_Converter(
+      std::make_unique<متن_Encoding_Converter_Iconv>(ConvDesc));
+#وإلا
+  أرجع std::make_error_کوڈ(std::errc::invalid_دلیل);
+#جے_انت
 }

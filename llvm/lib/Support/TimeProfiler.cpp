@@ -10,101 +10,101 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TimeProfiler.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/STLFunctionalExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Support/Compression.h"
-#include "llvm/Support/JSON.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Threading.h"
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <vector>
+#ضمن "llvm/Support/TimeProfiler.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/STLFunctionalExtras.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringMap.h"
+#ضمن "llvm/Support/Compression.h"
+#ضمن "llvm/Support/JSON.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/Threading.h"
+#ضمن <algorithm>
+#ضمن <cassert>
+#ضمن <chrono>
+#ضمن <memory>
+#ضمن <mutex>
+#ضمن <string>
+#ضمن <vector>
 
-using namespace llvm;
+ورتوں نطاق llvm;
 
-namespace {
+نطاق {
 
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::microseconds;
-using std::chrono::steady_clock;
-using std::chrono::system_clock;
-using std::chrono::time_point;
-using std::chrono::time_point_cast;
+ورتوں std::chrono::duration;
+ورتوں std::chrono::duration_cast;
+ورتوں std::chrono::microseconds;
+ورتوں std::chrono::steady_clock;
+ورتوں std::chrono::system_clock;
+ورتوں std::chrono::ویلا_نقطہ_2;
+ورتوں std::chrono::ویلا_نقطہ_cast;
 
-struct TimeTraceProfilerInstances {
-  std::mutex Lock;
-  std::vector<TimeTraceProfiler *> List;
+بنية ویلا_Trace_Profiler_Instances {
+  std::mutex جندرا_2;
+  std::سمتیہ<ویلا_Trace_Profiler *> List;
 };
 
-TimeTraceProfilerInstances &getTimeTraceProfilerInstances() {
-  static TimeTraceProfilerInstances Instances;
-  return Instances;
+ویلا_Trace_Profiler_Instances &get_ویلا_Trace_Profiler_Instances() {
+  ساكن ویلا_Trace_Profiler_Instances Instances;
+  أرجع Instances;
 }
 
-static const char TimeTraceFileExtension[] = ".time-trace.json";
+ساكن ثابت حرف ویلا_Trace_File_Extension[] = ".time-trace.json";
 
 } // anonymous namespace
 
 // Per Thread instance
-static LLVM_THREAD_LOCAL TimeTraceProfiler *TimeTraceProfilerInstance = nullptr;
+ساكن LLVM_THREAD_LOCAL ویلا_Trace_Profiler *ویلا_Trace_Profiler_Instance = خالی_سوچک;
 
-TimeTraceProfiler *llvm::getTimeTraceProfilerInstance() {
-  return TimeTraceProfilerInstance;
+ویلا_Trace_Profiler *llvm::get_ویلا_Trace_Profiler_Instance() {
+  أرجع ویلا_Trace_Profiler_Instance;
 }
 
-namespace {
+نطاق {
 
-using ClockType = steady_clock;
-using TimePointType = time_point<ClockType>;
-using DurationType = duration<ClockType::rep, ClockType::period>;
-using CountAndDurationType = std::pair<size_t, DurationType>;
-using NameAndCountAndDurationType =
-    std::pair<std::string, CountAndDurationType>;
+ورتوں ClockType = steady_clock;
+ورتوں ویلا_نقطہ_Type = ویلا_نقطہ_2<ClockType>;
+ورتوں DurationType = duration<ClockType::rep, ClockType::period>;
+ورتوں گنتی_And_Duration_Type = std::pair<size_t, DurationType>;
+ورتوں Name_And_گنتی_And_Duration_Type =
+    std::pair<std::string, گنتی_And_Duration_Type>;
 
 } // anonymous namespace
 
 /// Represents an open or completed time section entry to be captured.
-struct llvm::TimeTraceProfilerEntry {
-  const TimePointType Start;
-  TimePointType End;
-  const std::string Name;
-  TimeTraceMetadata Metadata;
+بنية llvm::ویلا_Trace_Profiler_اندراج {
+  ثابت ویلا_نقطہ_Type شروع;
+  ویلا_نقطہ_Type سرا_2;
+  ثابت std::string Name;
+  ویلا_Trace_Metadata Metadata;
 
-  const TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent;
-  TimeTraceProfilerEntry(TimePointType &&S, TimePointType &&E, std::string &&N,
-                         std::string &&Dt, TimeTraceEventType Et)
-      : Start(std::move(S)), End(std::move(E)), Name(std::move(N)), Metadata(),
+  ثابت ویلا_Trace_Event_Type EventType = ویلا_Trace_Event_Type::CompleteEvent;
+  ویلا_Trace_Profiler_اندراج(ویلا_نقطہ_Type &&S, ویلا_نقطہ_Type &&E, std::string &&N,
+                         std::string &&Dt, ویلا_Trace_Event_Type Et)
+      : شروع(std::move(S)), سرا_2(std::move(E)), Name(std::move(N)), Metadata(),
         EventType(Et) {
     Metadata.Detail = std::move(Dt);
   }
 
-  TimeTraceProfilerEntry(TimePointType &&S, TimePointType &&E, std::string &&N,
-                         TimeTraceMetadata &&Mt, TimeTraceEventType Et)
-      : Start(std::move(S)), End(std::move(E)), Name(std::move(N)),
+  ویلا_Trace_Profiler_اندراج(ویلا_نقطہ_Type &&S, ویلا_نقطہ_Type &&E, std::string &&N,
+                         ویلا_Trace_Metadata &&Mt, ویلا_Trace_Event_Type Et)
+      : شروع(std::move(S)), سرا_2(std::move(E)), Name(std::move(N)),
         Metadata(std::move(Mt)), EventType(Et) {}
 
   // Calculate timings for FlameGraph. Cast time points to microsecond precision
   // rather than casting duration. This avoids truncation issues causing inner
   // scopes overruning outer scopes.
-  ClockType::rep getFlameGraphStartUs(TimePointType StartTime) const {
-    return (time_point_cast<microseconds>(Start) -
-            time_point_cast<microseconds>(StartTime))
-        .count();
+  ClockType::rep get_Flame_گراف_شروع_Us(ویلا_نقطہ_Type شروع_ویلا) ثابت {
+    أرجع (ویلا_نقطہ_cast<microseconds>(شروع) -
+            ویلا_نقطہ_cast<microseconds>(شروع_ویلا))
+        .گنتی();
   }
 
-  ClockType::rep getFlameGraphDurUs() const {
-    return (time_point_cast<microseconds>(End) -
-            time_point_cast<microseconds>(Start))
-        .count();
+  ClockType::rep get_Flame_گراف_Dur_Us() ثابت {
+    أرجع (ویلا_نقطہ_cast<microseconds>(سرا_2) -
+            ویلا_نقطہ_cast<microseconds>(شروع))
+        .گنتی();
   }
 };
 
@@ -112,88 +112,88 @@ struct llvm::TimeTraceProfilerEntry {
 // that happen during an open event are associated with the duration of this
 // parent event and they are dropped if parent duration is shorter than
 // the granularity.
-struct InProgressEntry {
-  TimeTraceProfilerEntry Event;
-  std::vector<TimeTraceProfilerEntry> InstantEvents;
+بنية وچ_ترقی_اندراج {
+  ویلا_Trace_Profiler_اندراج Event;
+  std::سمتیہ<ویلا_Trace_Profiler_اندراج> InstantEvents;
 
-  InProgressEntry(TimePointType S, TimePointType E, std::string N,
-                  std::string Dt, TimeTraceEventType Et)
+  وچ_ترقی_اندراج(ویلا_نقطہ_Type S, ویلا_نقطہ_Type E, std::string N,
+                  std::string Dt, ویلا_Trace_Event_Type Et)
       : Event(std::move(S), std::move(E), std::move(N), std::move(Dt), Et),
         InstantEvents() {}
 
-  InProgressEntry(TimePointType S, TimePointType E, std::string N,
-                  TimeTraceMetadata Mt, TimeTraceEventType Et)
+  وچ_ترقی_اندراج(ویلا_نقطہ_Type S, ویلا_نقطہ_Type E, std::string N,
+                  ویلا_Trace_Metadata Mt, ویلا_Trace_Event_Type Et)
       : Event(std::move(S), std::move(E), std::move(N), std::move(Mt), Et),
         InstantEvents() {}
 };
 
-struct llvm::TimeTraceProfiler {
-  TimeTraceProfiler(
-      unsigned TimeTraceGranularity = 0, StringRef ProcName = "",
-      bool TimeTraceVerbose = false,
-      TimeTraceCompression TimeTraceCompress = TimeTraceCompression::Infer)
-      : BeginningOfTime(system_clock::now()), StartTime(ClockType::now()),
+بنية llvm::ویلا_Trace_Profiler {
+  ویلا_Trace_Profiler(
+      بنانشانی ویلا_Trace_Granularity = 0, StringRef ProcName = "",
+      منطقي ویلا_Trace_Verbose = خطأ,
+      ویلا_Trace_Compression ویلا_Trace_Compress = ویلا_Trace_Compression::Infer)
+      : Beginning_دا_ویلا(system_clock::now()), شروع_ویلا(ClockType::now()),
         ProcName(ProcName), Pid(sys::Process::getProcessId()),
-        Tid(llvm::get_threadid()), TimeTraceGranularity(TimeTraceGranularity),
-        TimeTraceVerbose(TimeTraceVerbose),
-        TimeTraceCompress(TimeTraceCompress) {
+        Tid(llvm::get_threadid()), ویلا_Trace_Granularity(ویلا_Trace_Granularity),
+        ویلا_Trace_Verbose(ویلا_Trace_Verbose),
+        ویلا_Trace_Compress(ویلا_Trace_Compress) {
     llvm::get_thread_name(ThreadName);
   }
 
-  TimeTraceProfilerEntry *
+  ویلا_Trace_Profiler_اندراج *
   begin(std::string Name, llvm::function_ref<std::string()> Detail,
-        TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent) {
-    assert(EventType != TimeTraceEventType::InstantEvent &&
+        ویلا_Trace_Event_Type EventType = ویلا_Trace_Event_Type::CompleteEvent) {
+    أكد(EventType != ویلا_Trace_Event_Type::InstantEvent &&
            "Instant Events don't have begin and end.");
-    Stack.emplace_back(std::make_unique<InProgressEntry>(
-        ClockType::now(), TimePointType(), std::move(Name), Detail(),
+    ڈھیر.emplace_پٹھ(std::make_unique<وچ_ترقی_اندراج>(
+        ClockType::now(), ویلا_نقطہ_Type(), std::move(Name), Detail(),
         EventType));
-    return &Stack.back()->Event;
+    أرجع &ڈھیر.پٹھ()->Event;
   }
 
-  TimeTraceProfilerEntry *
-  begin(std::string Name, llvm::function_ref<TimeTraceMetadata()> Metadata,
-        TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent) {
-    assert(EventType != TimeTraceEventType::InstantEvent &&
+  ویلا_Trace_Profiler_اندراج *
+  begin(std::string Name, llvm::function_ref<ویلا_Trace_Metadata()> Metadata,
+        ویلا_Trace_Event_Type EventType = ویلا_Trace_Event_Type::CompleteEvent) {
+    أكد(EventType != ویلا_Trace_Event_Type::InstantEvent &&
            "Instant Events don't have begin and end.");
-    Stack.emplace_back(std::make_unique<InProgressEntry>(
-        ClockType::now(), TimePointType(), std::move(Name), Metadata(),
+    ڈھیر.emplace_پٹھ(std::make_unique<وچ_ترقی_اندراج>(
+        ClockType::now(), ویلا_نقطہ_Type(), std::move(Name), Metadata(),
         EventType));
-    return &Stack.back()->Event;
+    أرجع &ڈھیر.پٹھ()->Event;
   }
 
-  void insert(std::string Name, llvm::function_ref<std::string()> Detail) {
-    if (Stack.empty())
-      return;
+  فراغ داخل_کرو(std::string Name, llvm::function_ref<std::string()> Detail) {
+    إذا (ڈھیر.خالی_تھاواں())
+      أرجع;
 
-    Stack.back()->InstantEvents.emplace_back(TimeTraceProfilerEntry(
-        ClockType::now(), TimePointType(), std::move(Name), Detail(),
-        TimeTraceEventType::InstantEvent));
+    ڈھیر.پٹھ()->InstantEvents.emplace_پٹھ(ویلا_Trace_Profiler_اندراج(
+        ClockType::now(), ویلا_نقطہ_Type(), std::move(Name), Detail(),
+        ویلا_Trace_Event_Type::InstantEvent));
   }
 
-  void end() {
-    assert(!Stack.empty() && "Must call begin() first");
-    end(Stack.back()->Event);
+  فراغ سرا() {
+    أكد(!ڈھیر.خالی_تھاواں() && "Must call begin() first");
+    سرا(ڈھیر.پٹھ()->Event);
   }
 
-  void end(TimeTraceProfilerEntry &E) {
-    assert(!Stack.empty() && "Must call begin() first");
-    E.End = ClockType::now();
+  فراغ سرا(ویلا_Trace_Profiler_اندراج &E) {
+    أكد(!ڈھیر.خالی_تھاواں() && "Must call begin() first");
+    E.سرا_2 = ClockType::now();
 
     // Calculate duration at full precision for overall counts.
-    DurationType Duration = E.End - E.Start;
+    DurationType Duration = E.سرا_2 - E.شروع;
 
-    const auto *Iter =
-        llvm::find_if(Stack, [&](const std::unique_ptr<InProgressEntry> &Val) {
-          return &Val->Event == &E;
+    ثابت خودکار *Iter =
+        llvm::لبھو_if(ڈھیر, [&](ثابت std::unique_ptr<وچ_ترقی_اندراج> &Val) {
+          أرجع &Val->Event == &E;
         });
-    assert(Iter != Stack.end() && "Event not in the Stack");
+    أكد(Iter != ڈھیر.سرا() && "Event not in the Stack");
 
     // Only include sections longer or equal to TimeTraceGranularity msec.
-    if (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
-      Entries.emplace_back(E);
-      for (auto &IE : Iter->get()->InstantEvents) {
-        Entries.emplace_back(IE);
+    إذا (duration_cast<microseconds>(Duration).گنتی() >= ویلا_Trace_Granularity) {
+      Entries.emplace_پٹھ(E);
+      لكل (خودکار &IE : Iter->get()->InstantEvents) {
+        Entries.emplace_پٹھ(IE);
       }
     }
 
@@ -202,28 +202,28 @@ struct llvm::TimeTraceProfiler {
     // templates from within, we only want to add the topmost one. "topmost"
     // happens to be the ones that don't have any currently open entries above
     // itself.
-    if (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
-                      [&](const std::unique_ptr<InProgressEntry> &Val) {
-                        return Val->Event.Name == E.Name;
+    إذا (llvm::none_دا(llvm::drop_begin(llvm::الٹ(ڈھیر)),
+                      [&](ثابت std::unique_ptr<وچ_ترقی_اندراج> &Val) {
+                        أرجع Val->Event.Name == E.Name;
                       })) {
-      auto &CountAndTotal = CountAndTotalPerName[E.Name];
-      CountAndTotal.first++;
-      CountAndTotal.second += Duration;
+      خودکار &گنتی_And_کل = گنتی_And_کل_فی_Name[E.Name];
+      گنتی_And_کل.پہلا_2++;
+      گنتی_And_کل.دوجا_2 += Duration;
     };
 
-    Stack.erase(Iter);
+    ڈھیر.erase(Iter);
   }
 
   // Write events from this TimeTraceProfilerInstance and
   // ThreadTimeTraceProfilerInstances.
-  void write(raw_ostream &OS) {
+  فراغ اكتب(raw_ostream &OS) {
     // Acquire Mutex as reading ThreadTimeTraceProfilerInstances.
-    auto &Instances = getTimeTraceProfilerInstances();
-    std::lock_guard<std::mutex> Lock(Instances.Lock);
-    assert(Stack.empty() &&
+    خودکار &Instances = get_ویلا_Trace_Profiler_Instances();
+    std::جندرا_guard<std::mutex> جندرا_2(Instances.جندرا_2);
+    أكد(ڈھیر.خالی_تھاواں() &&
            "All profiler sections should be ended when calling write");
-    assert(llvm::all_of(Instances.List,
-                        [](const auto &TTP) { return TTP->Stack.empty(); }) &&
+    أكد(llvm::all_دا(Instances.List,
+                        [](ثابت خودکار &TTP) { أرجع TTP->ڈھیر.خالی_تھاواں(); }) &&
            "All profiler sections should be ended when calling write");
 
     json::OStream J(OS);
@@ -232,44 +232,44 @@ struct llvm::TimeTraceProfiler {
     J.arrayBegin();
 
     // Emit all events for the main flame graph.
-    auto writeEvent = [&](const auto &E, uint64_t Tid) {
-      auto StartUs = E.getFlameGraphStartUs(StartTime);
-      auto DurUs = E.getFlameGraphDurUs();
+    خودکار writeEvent = [&](ثابت خودکار &E, uint64_t Tid) {
+      خودکار شروع_Us = E.get_Flame_گراف_شروع_Us(شروع_ویلا);
+      خودکار DurUs = E.get_Flame_گراف_Dur_Us();
 
       J.object([&] {
         J.attribute("pid", Pid);
         J.attribute("tid", int64_t(Tid));
-        J.attribute("ts", StartUs);
-        if (E.EventType == TimeTraceEventType::AsyncEvent) {
+        J.attribute("ts", شروع_Us);
+        إذا (E.EventType == ویلا_Trace_Event_Type::AsyncEvent) {
           J.attribute("cat", E.Name);
           J.attribute("ph", "b");
           J.attribute("id", 0);
-        } else if (E.EventType == TimeTraceEventType::CompleteEvent) {
+        } وإلا إذا (E.EventType == ویلا_Trace_Event_Type::CompleteEvent) {
           J.attribute("ph", "X");
           J.attribute("dur", DurUs);
-        } else { // instant event
-          assert(E.EventType == TimeTraceEventType::InstantEvent &&
+        } وإلا { // instant event
+          أكد(E.EventType == ویلا_Trace_Event_Type::InstantEvent &&
                  "InstantEvent expected");
           J.attribute("ph", "i");
         }
         J.attribute("name", E.Name);
-        if (!E.Metadata.isEmpty()) {
+        إذا (!E.Metadata.is_خالی_تھاواں()) {
           J.attributeObject("args", [&] {
-            if (!E.Metadata.Detail.empty())
+            إذا (!E.Metadata.Detail.خالی_تھاواں())
               J.attribute("detail", E.Metadata.Detail);
-            if (!E.Metadata.File.empty())
+            إذا (!E.Metadata.File.خالی_تھاواں())
               J.attribute("file", E.Metadata.File);
-            if (E.Metadata.Line > 0)
-              J.attribute("line", E.Metadata.Line);
+            إذا (E.Metadata.سطر > 0)
+              J.attribute("line", E.Metadata.سطر);
           });
         }
       });
 
-      if (E.EventType == TimeTraceEventType::AsyncEvent) {
+      إذا (E.EventType == ویلا_Trace_Event_Type::AsyncEvent) {
         J.object([&] {
           J.attribute("pid", Pid);
           J.attribute("tid", int64_t(Tid));
-          J.attribute("ts", StartUs + DurUs);
+          J.attribute("ts", شروع_Us + DurUs);
           J.attribute("cat", E.Name);
           J.attribute("ph", "e");
           J.attribute("id", 0);
@@ -277,67 +277,67 @@ struct llvm::TimeTraceProfiler {
         });
       }
     };
-    for (const TimeTraceProfilerEntry &E : Entries)
-      writeEvent(E, this->Tid);
-    for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const TimeTraceProfilerEntry &E : TTP->Entries)
+    لكل (ثابت ویلا_Trace_Profiler_اندراج &E : Entries)
+      writeEvent(E, هذا->Tid);
+    لكل (ثابت ویلا_Trace_Profiler *TTP : Instances.List)
+      لكل (ثابت ویلا_Trace_Profiler_اندراج &E : TTP->Entries)
         writeEvent(E, TTP->Tid);
 
     // Emit totals by section name as additional "thread" events, sorted from
     // longest one.
     // Find highest used thread id.
-    uint64_t MaxTid = this->Tid;
-    for (const TimeTraceProfiler *TTP : Instances.List)
+    uint64_t MaxTid = هذا->Tid;
+    لكل (ثابت ویلا_Trace_Profiler *TTP : Instances.List)
       MaxTid = std::max(MaxTid, TTP->Tid);
 
     // Combine all CountAndTotalPerName from threads into one.
-    StringMap<CountAndDurationType> AllCountAndTotalPerName;
-    auto combineStat = [&](const auto &Stat) {
-      StringRef Key = Stat.getKey();
-      auto Value = Stat.getValue();
-      auto &CountAndTotal = AllCountAndTotalPerName[Key];
-      CountAndTotal.first += Value.first;
-      CountAndTotal.second += Value.second;
+    StringMap<گنتی_And_Duration_Type> All_گنتی_And_کل_فی_Name;
+    خودکار combineStat = [&](ثابت خودکار &Stat) {
+      StringRef کلید = Stat.get_کلید();
+      خودکار قدر = Stat.get_قدر();
+      خودکار &گنتی_And_کل = All_گنتی_And_کل_فی_Name[کلید];
+      گنتی_And_کل.پہلا_2 += قدر.پہلا_2;
+      گنتی_And_کل.دوجا_2 += قدر.دوجا_2;
     };
-    for (const auto &Stat : CountAndTotalPerName)
+    لكل (ثابت خودکار &Stat : گنتی_And_کل_فی_Name)
       combineStat(Stat);
-    for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const auto &Stat : TTP->CountAndTotalPerName)
+    لكل (ثابت ویلا_Trace_Profiler *TTP : Instances.List)
+      لكل (ثابت خودکار &Stat : TTP->گنتی_And_کل_فی_Name)
         combineStat(Stat);
 
-    std::vector<NameAndCountAndDurationType> SortedTotals;
-    SortedTotals.reserve(AllCountAndTotalPerName.size());
-    for (const auto &Total : AllCountAndTotalPerName)
-      SortedTotals.emplace_back(std::string(Total.getKey()), Total.getValue());
+    std::سمتیہ<Name_And_گنتی_And_Duration_Type> SortedTotals;
+    SortedTotals.reserve(All_گنتی_And_کل_فی_Name.ناپ_2());
+    لكل (ثابت خودکار &کل : All_گنتی_And_کل_فی_Name)
+      SortedTotals.emplace_پٹھ(std::string(کل.get_کلید()), کل.get_قدر());
 
-    llvm::sort(SortedTotals, [](const NameAndCountAndDurationType &A,
-                                const NameAndCountAndDurationType &B) {
-      return A.second.second > B.second.second;
+    llvm::ترتیب_دیو(SortedTotals, [](ثابت Name_And_گنتی_And_Duration_Type &A,
+                                ثابت Name_And_گنتی_And_Duration_Type &B) {
+      أرجع A.دوجا_2.دوجا_2 > B.دوجا_2.دوجا_2;
     });
 
     // Report totals on separate threads of tracing file.
-    uint64_t TotalTid = MaxTid + 1;
-    for (const NameAndCountAndDurationType &Total : SortedTotals) {
-      auto DurUs = duration_cast<microseconds>(Total.second.second).count();
-      auto Count = AllCountAndTotalPerName[Total.first].first;
+    uint64_t کل_Tid = MaxTid + 1;
+    لكل (ثابت Name_And_گنتی_And_Duration_Type &کل : SortedTotals) {
+      خودکار DurUs = duration_cast<microseconds>(کل.دوجا_2.دوجا_2).گنتی();
+      خودکار گنتی_2 = All_گنتی_And_کل_فی_Name[کل.پہلا_2].پہلا_2;
 
       J.object([&] {
         J.attribute("pid", Pid);
-        J.attribute("tid", int64_t(TotalTid));
+        J.attribute("tid", int64_t(کل_Tid));
         J.attribute("ph", "X");
         J.attribute("ts", 0);
         J.attribute("dur", DurUs);
-        J.attribute("name", "Total " + Total.first);
+        J.attribute("name", "Total " + کل.پہلا_2);
         J.attributeObject("args", [&] {
-          J.attribute("count", int64_t(Count));
-          J.attribute("avg ms", int64_t(DurUs / Count / 1000));
+          J.attribute("count", int64_t(گنتی_2));
+          J.attribute("avg ms", int64_t(DurUs / گنتی_2 / 1000));
         });
       });
 
-      ++TotalTid;
+      ++کل_Tid;
     }
 
-    auto writeMetadataEvent = [&](const char *Name, uint64_t Tid,
+    خودکار writeMetadataEvent = [&](ثابت حرف *Name, uint64_t Tid,
                                   StringRef arg) {
       J.object([&] {
         J.attribute("cat", "");
@@ -352,207 +352,207 @@ struct llvm::TimeTraceProfiler {
 
     writeMetadataEvent("process_name", Tid, ProcName);
     writeMetadataEvent("thread_name", Tid, ThreadName);
-    for (const TimeTraceProfiler *TTP : Instances.List)
+    لكل (ثابت ویلا_Trace_Profiler *TTP : Instances.List)
       writeMetadataEvent("thread_name", TTP->Tid, TTP->ThreadName);
 
-    J.arrayEnd();
-    J.attributeEnd();
+    J.array_سرا();
+    J.attribute_سرا();
 
     // Emit the absolute time when this TimeProfiler started.
     // This can be used to combine the profiling data from
     // multiple processes and preserve actual time intervals.
     J.attribute("beginningOfTime",
-                time_point_cast<microseconds>(BeginningOfTime)
-                    .time_since_epoch()
-                    .count());
+                ویلا_نقطہ_cast<microseconds>(Beginning_دا_ویلا)
+                    .ویلا_since_epoch()
+                    .گنتی());
 
-    J.objectEnd();
+    J.object_سرا();
   }
 
-  SmallVector<std::unique_ptr<InProgressEntry>, 16> Stack;
-  SmallVector<TimeTraceProfilerEntry, 128> Entries;
-  StringMap<CountAndDurationType> CountAndTotalPerName;
+  Small_سمتیہ<std::unique_ptr<وچ_ترقی_اندراج>, 16> ڈھیر;
+  Small_سمتیہ<ویلا_Trace_Profiler_اندراج, 128> Entries;
+  StringMap<گنتی_And_Duration_Type> گنتی_And_کل_فی_Name;
   // System clock time when the session was begun.
-  const time_point<system_clock> BeginningOfTime;
+  ثابت ویلا_نقطہ_2<system_clock> Beginning_دا_ویلا;
   // Profiling clock time when the session was begun.
-  const TimePointType StartTime;
-  const std::string ProcName;
-  const sys::Process::Pid Pid;
+  ثابت ویلا_نقطہ_Type شروع_ویلا;
+  ثابت std::string ProcName;
+  ثابت sys::Process::Pid Pid;
   SmallString<0> ThreadName;
-  const uint64_t Tid;
+  ثابت uint64_t Tid;
 
   // Minimum time granularity (in microseconds)
-  const unsigned TimeTraceGranularity;
+  ثابت بنانشانی ویلا_Trace_Granularity;
 
   // Make time trace capture verbose event details (e.g. source filenames). This
   // can increase the size of the output by 2-3 times.
-  const bool TimeTraceVerbose;
+  ثابت منطقي ویلا_Trace_Verbose;
 
   // Compression mode for output.
-  TimeTraceCompression TimeTraceCompress;
+  ویلا_Trace_Compression ویلا_Trace_Compress;
 };
 
-bool llvm::isTimeTraceVerbose() {
-  return getTimeTraceProfilerInstance() &&
-         getTimeTraceProfilerInstance()->TimeTraceVerbose;
+منطقي llvm::is_ویلا_Trace_Verbose() {
+  أرجع get_ویلا_Trace_Profiler_Instance() &&
+         get_ویلا_Trace_Profiler_Instance()->ویلا_Trace_Verbose;
 }
 
-TimeTraceCompression llvm::inferTimeTraceCompressionFromPath(StringRef Path) {
-  StringRef Ext = llvm::sys::path::extension(Path);
-  if (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
-    return TimeTraceCompression::Zstd;
-  return TimeTraceCompression::None;
+ویلا_Trace_Compression llvm::infer_ویلا_Trace_Compression_From_رستہ(StringRef رستہ) {
+  StringRef Ext = llvm::sys::رستہ_2::extension(رستہ);
+  إذا (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
+    أرجع ویلا_Trace_Compression::Zstd;
+  أرجع ویلا_Trace_Compression::None;
 }
 
-void llvm::timeTraceProfilerInitialize(unsigned TimeTraceGranularity,
+فراغ llvm::ویلا_Trace_Profiler_Initialize(بنانشانی ویلا_Trace_Granularity,
                                        StringRef ProcName,
-                                       bool TimeTraceVerbose,
-                                       TimeTraceCompression TimeTraceCompress) {
-  assert(TimeTraceProfilerInstance == nullptr &&
+                                       منطقي ویلا_Trace_Verbose,
+                                       ویلا_Trace_Compression ویلا_Trace_Compress) {
+  أكد(ویلا_Trace_Profiler_Instance == خالی_سوچک &&
          "Profiler should not be initialized");
-  TimeTraceProfilerInstance = new TimeTraceProfiler(
-      TimeTraceGranularity, llvm::sys::path::filename(ProcName),
-      TimeTraceVerbose, TimeTraceCompress);
+  ویلا_Trace_Profiler_Instance = جديد ویلا_Trace_Profiler(
+      ویلا_Trace_Granularity, llvm::sys::رستہ_2::filename(ProcName),
+      ویلا_Trace_Verbose, ویلا_Trace_Compress);
 }
 
 // Removes all TimeTraceProfilerInstances.
 // Called from main thread.
-void llvm::timeTraceProfilerCleanup() {
-  delete TimeTraceProfilerInstance;
-  TimeTraceProfilerInstance = nullptr;
+فراغ llvm::ویلا_Trace_Profiler_Cleanup() {
+  مٹاؤ ویلا_Trace_Profiler_Instance;
+  ویلا_Trace_Profiler_Instance = خالی_سوچک;
 
-  auto &Instances = getTimeTraceProfilerInstances();
-  std::lock_guard<std::mutex> Lock(Instances.Lock);
-  for (auto *TTP : Instances.List)
-    delete TTP;
+  خودکار &Instances = get_ویلا_Trace_Profiler_Instances();
+  std::جندرا_guard<std::mutex> جندرا_2(Instances.جندرا_2);
+  لكل (خودکار *TTP : Instances.List)
+    مٹاؤ TTP;
   Instances.List.clear();
 }
 
 // Finish TimeTraceProfilerInstance on a worker thread.
 // This doesn't remove the instance, just moves the pointer to global vector.
-void llvm::timeTraceProfilerFinishThread() {
-  auto &Instances = getTimeTraceProfilerInstances();
-  std::lock_guard<std::mutex> Lock(Instances.Lock);
-  Instances.List.push_back(TimeTraceProfilerInstance);
-  TimeTraceProfilerInstance = nullptr;
+فراغ llvm::ویلا_Trace_Profiler_انت_Thread() {
+  خودکار &Instances = get_ویلا_Trace_Profiler_Instances();
+  std::جندرا_guard<std::mutex> جندرا_2(Instances.جندرا_2);
+  Instances.List.ڈالو_پٹھ(ویلا_Trace_Profiler_Instance);
+  ویلا_Trace_Profiler_Instance = خالی_سوچک;
 }
 
-void llvm::timeTraceProfilerWrite(raw_pwrite_stream &OS) {
-  assert(TimeTraceProfilerInstance != nullptr &&
+فراغ llvm::ویلا_Trace_Profiler_Write(raw_pwrite_دھارا &OS) {
+  أكد(ویلا_Trace_Profiler_Instance != خالی_سوچک &&
          "Profiler object can't be null");
-  TimeTraceCompression CompressType =
-      TimeTraceProfilerInstance->TimeTraceCompress;
-  if (CompressType != TimeTraceCompression::Zstd) {
-    TimeTraceProfilerInstance->write(OS);
-    return;
+  ویلا_Trace_Compression CompressType =
+      ویلا_Trace_Profiler_Instance->ویلا_Trace_Compress;
+  إذا (CompressType != ویلا_Trace_Compression::Zstd) {
+    ویلا_Trace_Profiler_Instance->اكتب(OS);
+    أرجع;
   }
 
   compression::Format F = compression::Format::Zstd;
-  if (const char *Reason = compression::getReasonIfUnsupported(F))
+  إذا (ثابت حرف *Reason = compression::getReasonIfUnsupported(F))
     report_fatal_error(Reason);
 
-  SmallVector<char, 0> Uncompressed;
+  Small_سمتیہ<حرف, 0> Uncompressed;
   {
     raw_svector_ostream UncompressedOS(Uncompressed);
-    TimeTraceProfilerInstance->write(UncompressedOS);
+    ویلا_Trace_Profiler_Instance->اكتب(UncompressedOS);
   }
-  SmallVector<uint8_t, 0> Compressed;
+  Small_سمتیہ<uint8_t, 0> Compressed;
   compression::compress(
       compression::Params(F),
-      ArrayRef(reinterpret_cast<const uint8_t *>(Uncompressed.data()),
-               Uncompressed.size()),
+      ArrayRef(reinterpret_cast<ثابت uint8_t *>(Uncompressed.انکڑے()),
+               Uncompressed.ناپ_2()),
       Compressed);
-  OS.write(reinterpret_cast<const char *>(Compressed.data()),
-           Compressed.size());
+  OS.اكتب(reinterpret_cast<ثابت حرف *>(Compressed.انکڑے()),
+           Compressed.ناپ_2());
 }
 
-Error llvm::timeTraceProfilerWrite(StringRef PreferredFileName,
+Error llvm::ویلا_Trace_Profiler_Write(StringRef PreferredFileName,
                                    StringRef FallbackFileName) {
-  assert(TimeTraceProfilerInstance != nullptr &&
+  أكد(ویلا_Trace_Profiler_Instance != خالی_سوچک &&
          "Profiler object can't be null");
 
-  TimeTraceCompression CompressType =
-      TimeTraceProfilerInstance->TimeTraceCompress;
-  std::string Path = PreferredFileName.str();
-  if (Path.empty()) {
-    Path = FallbackFileName == "-" ? "out" : FallbackFileName.str();
-    Path += TimeTraceFileExtension;
-    if (CompressType == TimeTraceCompression::Zstd)
-      Path += ".zst";
-  } else if (CompressType == TimeTraceCompression::Infer) {
-    CompressType = inferTimeTraceCompressionFromPath(Path);
+  ویلا_Trace_Compression CompressType =
+      ویلا_Trace_Profiler_Instance->ویلا_Trace_Compress;
+  std::string رستہ = PreferredFileName.str();
+  إذا (رستہ.خالی_تھاواں()) {
+    رستہ = FallbackFileName == "-" ? "out" : FallbackFileName.str();
+    رستہ += ویلا_Trace_File_Extension;
+    إذا (CompressType == ویلا_Trace_Compression::Zstd)
+      رستہ += ".zst";
+  } وإلا إذا (CompressType == ویلا_Trace_Compression::Infer) {
+    CompressType = infer_ویلا_Trace_Compression_From_رستہ(رستہ);
   }
 
-  if (CompressType == TimeTraceCompression::Zstd) {
-    if (const char *Reason =
+  إذا (CompressType == ویلا_Trace_Compression::Zstd) {
+    إذا (ثابت حرف *Reason =
             compression::getReasonIfUnsupported(compression::Format::Zstd))
-      return createStringError(inconvertibleErrorCode(), Reason);
+      أرجع createStringError(inconvertible_Error_کوڈ(), Reason);
   }
 
-  std::error_code EC;
-  sys::fs::OpenFlags Flags = CompressType == TimeTraceCompression::Zstd
-                                 ? sys::fs::OF_None
-                                 : sys::fs::OF_TextWithCRLF;
-  raw_fd_ostream OS(Path, EC, Flags);
-  if (EC)
-    return createStringError(EC, "Could not open " + Path);
+  std::error_کوڈ EC;
+  sys::fs::OpenFlags Flags = CompressType == ویلا_Trace_Compression::Zstd
+                                 ? sys::fs::دا_None
+                                 : sys::fs::دا_متن_With_CRLF;
+  raw_fd_ostream OS(رستہ, EC, Flags);
+  إذا (EC)
+    أرجع createStringError(EC, "Could not open " + رستہ);
 
-  TimeTraceCompression SavedCompress =
-      TimeTraceProfilerInstance->TimeTraceCompress;
-  TimeTraceProfilerInstance->TimeTraceCompress = CompressType;
-  timeTraceProfilerWrite(OS);
-  TimeTraceProfilerInstance->TimeTraceCompress = SavedCompress;
-  return Error::success();
+  ویلا_Trace_Compression SavedCompress =
+      ویلا_Trace_Profiler_Instance->ویلا_Trace_Compress;
+  ویلا_Trace_Profiler_Instance->ویلا_Trace_Compress = CompressType;
+  ویلا_Trace_Profiler_Write(OS);
+  ویلا_Trace_Profiler_Instance->ویلا_Trace_Compress = SavedCompress;
+  أرجع Error::success();
 }
 
-TimeTraceProfilerEntry *llvm::timeTraceProfilerBegin(StringRef Name,
+ویلا_Trace_Profiler_اندراج *llvm::ویلا_Trace_Profiler_Begin(StringRef Name,
                                                      StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
-        TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    أرجع ویلا_Trace_Profiler_Instance->begin(
+        std::string(Name), [&]() { أرجع std::string(Detail); },
+        ویلا_Trace_Event_Type::CompleteEvent);
+  أرجع خالی_سوچک;
 }
 
-TimeTraceProfilerEntry *
-llvm::timeTraceProfilerBegin(StringRef Name,
+ویلا_Trace_Profiler_اندراج *
+llvm::ویلا_Trace_Profiler_Begin(StringRef Name,
                              llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Detail,
-                                            TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    أرجع ویلا_Trace_Profiler_Instance->begin(std::string(Name), Detail,
+                                            ویلا_Trace_Event_Type::CompleteEvent);
+  أرجع خالی_سوچک;
 }
 
-TimeTraceProfilerEntry *
-llvm::timeTraceProfilerBegin(StringRef Name,
-                             llvm::function_ref<TimeTraceMetadata()> Metadata) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Metadata,
-                                            TimeTraceEventType::CompleteEvent);
-  return nullptr;
+ویلا_Trace_Profiler_اندراج *
+llvm::ویلا_Trace_Profiler_Begin(StringRef Name,
+                             llvm::function_ref<ویلا_Trace_Metadata()> Metadata) {
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    أرجع ویلا_Trace_Profiler_Instance->begin(std::string(Name), Metadata,
+                                            ویلا_Trace_Event_Type::CompleteEvent);
+  أرجع خالی_سوچک;
 }
 
-TimeTraceProfilerEntry *llvm::timeTraceAsyncProfilerBegin(StringRef Name,
+ویلا_Trace_Profiler_اندراج *llvm::ویلا_Trace_Async_Profiler_Begin(StringRef Name,
                                                           StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
-        TimeTraceEventType::AsyncEvent);
-  return nullptr;
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    أرجع ویلا_Trace_Profiler_Instance->begin(
+        std::string(Name), [&]() { أرجع std::string(Detail); },
+        ویلا_Trace_Event_Type::AsyncEvent);
+  أرجع خالی_سوچک;
 }
 
-void llvm::timeTraceAddInstantEvent(StringRef Name,
+فراغ llvm::ویلا_Trace_جوڑو_Instant_Event(StringRef Name,
                                     llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->insert(std::string(Name), Detail);
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    ویلا_Trace_Profiler_Instance->داخل_کرو(std::string(Name), Detail);
 }
 
-void llvm::timeTraceProfilerEnd() {
-  if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->end();
+فراغ llvm::ویلا_Trace_Profiler_سرا() {
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    ویلا_Trace_Profiler_Instance->سرا();
 }
 
-void llvm::timeTraceProfilerEnd(TimeTraceProfilerEntry *E) {
-  if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->end(*E);
+فراغ llvm::ویلا_Trace_Profiler_سرا(ویلا_Trace_Profiler_اندراج *E) {
+  إذا (ویلا_Trace_Profiler_Instance != خالی_سوچک)
+    ویلا_Trace_Profiler_Instance->سرا(*E);
 }
