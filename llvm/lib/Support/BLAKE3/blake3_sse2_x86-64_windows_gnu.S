@@ -1,12 +1,12 @@
 #include "llvm_blake3_prefix.h"
 
 .intel_syntax noprefix
-.global blake3_hash_many_sse2
-.global _blake3_hash_many_sse2
-.global blake3_compress_in_place_sse2
-.global _blake3_compress_in_place_sse2
-.global blake3_compress_xof_sse2
-.global _blake3_compress_xof_sse2
+.ವೈಶ್ವಿಕ blake3_hash_many_sse2
+.ವೈಶ್ವಿಕ _blake3_hash_many_sse2
+.ವೈಶ್ವಿಕ blake3_compress_in_place_sse2
+.ವೈಶ್ವಿಕ _blake3_compress_in_place_sse2
+.ವೈಶ್ವಿಕ blake3_compress_xof_sse2
+.ವೈಶ್ವಿಕ _blake3_compress_xof_sse2
 .section .text
         .p2align  6
 _blake3_hash_many_sse2:

@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/StringSaver.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/StringSaver.h"
 
-#include "llvm/ADT/SmallString.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallString.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
 StringRef StringSaver::save(StringRef S) {
-  char *P = Alloc.Allocate<char>(S.size() + 1);
-  if (!S.empty())
+  ವರ್ಣ *P = Alloc.Allocate<ವರ್ಣ>(S.size() + 1);
+  ಯದಿ (!S.empty())
     memcpy(P, S.data(), S.size());
   P[S.size()] = '\0';
-  return StringRef(P, S.size());
+  ಪ್ರತ್ಯಾಗಮ StringRef(P, S.size());
 }
 
-StringRef StringSaver::save(const Twine &S) {
+StringRef StringSaver::save(ಧ್ರುವ Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  ಪ್ರತ್ಯಾಗಮ save(S.toStringRef(Storage));
 }
 
 StringRef UniqueStringSaver::save(StringRef S) {
-  auto R = Unique.insert(S);
-  if (R.second)                 // cache miss, need to actually save the string
+  auto R = Unique.ಸೇರಿಸು(S);
+  ಯದಿ (R.second)                 // cache miss, need to actually save the string
     *R.first = Strings.save(S); // safe replacement with equal value
-  return *R.first;
+  ಪ್ರತ್ಯಾಗಮ *R.first;
 }
 
-StringRef UniqueStringSaver::save(const Twine &S) {
+StringRef UniqueStringSaver::save(ಧ್ರುವ Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  ಪ್ರತ್ಯಾಗಮ save(S.toStringRef(Storage));
 }

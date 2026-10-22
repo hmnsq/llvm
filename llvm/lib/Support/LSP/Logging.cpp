@@ -6,30 +6,30 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Logging.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LSP/Logging.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Chrono.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+using ನಾಮಾಕಾಶ llvm;
+using ನಾಮಾಕಾಶ llvm::lsp;
 
-void Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
+ಶೂನ್ಯ Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
 
 Logger &Logger::get() {
-  static Logger Logger;
-  return Logger;
+  ಸ್ಥಿರ Logger Logger;
+  ಪ್ರತ್ಯಾಗಮ Logger;
 }
 
-void Logger::log(Level LogLevel, const char *Fmt,
-                 const llvm::formatv_object_base &Message) {
+ಶೂನ್ಯ Logger::log(Level LogLevel, ಧ್ರುವ ವರ್ಣ *Fmt,
+                 ಧ್ರುವ llvm::formatv_object_base &Message) {
   Logger &Logger = get();
 
   // Ignore messages with log levels below the current setting in the logger.
-  if (LogLevel < Logger.LogLevel)
-    return;
+  ಯದಿ (LogLevel < Logger.LogLevel)
+    ಪ್ರತ್ಯಾಗಮ;
 
   // An indicator character for each log level.
-  const char *LogLevelIndicators = "DIE";
+  ಧ್ರುವ ವರ್ಣ *LogLevelIndicators = "DIE";
 
   // Format the message and print to errs.
   llvm::sys::TimePoint<> Timestamp = std::chrono::system_clock::now();

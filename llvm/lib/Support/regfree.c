@@ -35,38 +35,38 @@
  *	@(#)regfree.c	8.3 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#ಅನ್ತರ್ಭಾವ "regutils.h"
+#ಅನ್ತರ್ಭಾವ "regex2.h"
 
 /*
  - llvm_regfree - free everything
  */
-void
+ಶೂನ್ಯ
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	ಸಂರಚನಾ re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	ಯದಿ (preg->re_magic != MAGIC1)	/* oops */
+		ಪ್ರತ್ಯಾಗಮ;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	ಯದಿ (g == ರಿಕ್ತ || g->magic != MAGIC2)	/* oops again */
+		ಪ್ರತ್ಯಾಗಮ;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
-		free(g->must);
-	free((char *)g);
+	ಯದಿ (g->strip != ರಿಕ್ತ)
+		ಮುಕ್ತ((ವರ್ಣ *)g->strip);
+	ಯದಿ (g->sets != ರಿಕ್ತ)
+		ಮುಕ್ತ((ವರ್ಣ *)g->sets);
+	ಯದಿ (g->setbits != ರಿಕ್ತ)
+		ಮುಕ್ತ((ವರ್ಣ *)g->setbits);
+	ಯದಿ (g->must != ರಿಕ್ತ)
+		ಮುಕ್ತ(g->must);
+	ಮುಕ್ತ((ವರ್ಣ *)g);
 }

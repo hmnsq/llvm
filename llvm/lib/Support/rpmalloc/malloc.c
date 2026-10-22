@@ -16,48 +16,48 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if defined(__TINYC__)
-#include <sys/types.h>
+#ಯದಿ defined(__TINYC__)
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
 #endif
 
 #ifndef ARCH_64BIT
-#if defined(__LLP64__) || defined(__LP64__) || defined(_WIN64)
+#ಯದಿ defined(__LLP64__) || defined(__LP64__) || defined(_WIN64)
 #define ARCH_64BIT 1
-_Static_assert(sizeof(size_t) == 8, "Data type size mismatch");
-_Static_assert(sizeof(void *) == 8, "Data type size mismatch");
-#else
+_Static_assert(ಪರಿಮಾಣ(size_t) == 8, "Data type size mismatch");
+_Static_assert(ಪರಿಮಾಣ(ಶೂನ್ಯ *) == 8, "Data type size mismatch");
+#ಅನ್ಯಥಾ
 #define ARCH_64BIT 0
-_Static_assert(sizeof(size_t) == 4, "Data type size mismatch");
-_Static_assert(sizeof(void *) == 4, "Data type size mismatch");
+_Static_assert(ಪರಿಮಾಣ(size_t) == 4, "Data type size mismatch");
+_Static_assert(ಪರಿಮಾಣ(ಶೂನ್ಯ *) == 4, "Data type size mismatch");
 #endif
 #endif
 
-#if (defined(__GNUC__) || defined(__clang__))
-#pragma GCC visibility push(default)
+#ಯದಿ (defined(__GNUC__) || defined(__clang__))
+#pragma GCC visibility ತಳ್ಳು(ಸ್ವಭಾವ)
 #endif
 
 #define USE_IMPLEMENT 1
 #define USE_INTERPOSE 0
 #define USE_ALIAS 0
 
-#if defined(__APPLE__)
+#ಯದಿ defined(__APPLE__)
 #undef USE_INTERPOSE
 #define USE_INTERPOSE 1
 
-typedef struct interpose_t {
-  void *new_func;
-  void *orig_func;
+ಪ್ರಕಾರನಿರ್ದೇಶ ಸಂರಚನಾ interpose_t {
+  ಶೂನ್ಯ *new_func;
+  ಶೂನ್ಯ *orig_func;
 } interpose_t;
 
-#define MAC_INTERPOSE_PAIR(newf, oldf) {(void *)newf, (void *)oldf}
+#define MAC_INTERPOSE_PAIR(newf, oldf) {(ಶೂನ್ಯ *)newf, (ಶೂನ್ಯ *)oldf}
 #define MAC_INTERPOSE_SINGLE(newf, oldf)                                       \
-  __attribute__((used)) static const interpose_t macinterpose##newf##oldf      \
+  __attribute__((used)) ಸ್ಥಿರ ಧ್ರುವ interpose_t macinterpose##newf##oldf      \
       __attribute__((section("__DATA, __interpose"))) =                        \
           MAC_INTERPOSE_PAIR(newf, oldf)
 
 #endif
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#ಯದಿ !defined(_WIN32) && !defined(__APPLE__)
 #undef USE_IMPLEMENT
 #undef USE_ALIAS
 #define USE_IMPLEMENT 0
@@ -67,283 +67,283 @@ typedef struct interpose_t {
 #ifdef _MSC_VER
 #pragma warning(disable : 4100)
 #undef malloc
-#undef free
+#undef ಮುಕ್ತ
 #undef calloc
 #define RPMALLOC_RESTRICT __declspec(restrict)
-#else
+#ಅನ್ಯಥಾ
 #define RPMALLOC_RESTRICT
 #endif
 
-#if ENABLE_OVERRIDE
+#ಯದಿ ENABLE_OVERRIDE
 
-typedef struct rp_nothrow_t {
-  int __dummy;
+ಪ್ರಕಾರನಿರ್ದೇಶ ಸಂರಚನಾ rp_nothrow_t {
+  ಪೂರ್ಣಾಙ್ಕ __dummy;
 } rp_nothrow_t;
 
-#if USE_IMPLEMENT
+#ಯದಿ USE_IMPLEMENT
 
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL malloc(size_t size) {
-  return rpmalloc(size);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ RPMALLOC_RESTRICT ಶೂನ್ಯ *RPMALLOC_CDECL malloc(size_t size) {
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL calloc(size_t count,
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ RPMALLOC_RESTRICT ಶೂನ್ಯ *RPMALLOC_CDECL calloc(size_t ಎಣಿಕೆ,
                                                             size_t size) {
-  return rpcalloc(count, size);
+  ಪ್ರತ್ಯಾಗಮ rpcalloc(ಎಣಿಕೆ, size);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL realloc(void *ptr,
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ RPMALLOC_RESTRICT ಶೂನ್ಯ *RPMALLOC_CDECL realloc(ಶೂನ್ಯ *ptr,
                                                              size_t size) {
-  return rprealloc(ptr, size);
+  ಪ್ರತ್ಯಾಗಮ rprealloc(ptr, size);
 }
-extern inline void *RPMALLOC_CDECL reallocf(void *ptr, size_t size) {
-  return rprealloc(ptr, size);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ *RPMALLOC_CDECL reallocf(ಶೂನ್ಯ *ptr, size_t size) {
+  ಪ್ರತ್ಯಾಗಮ rprealloc(ptr, size);
 }
-extern inline void *RPMALLOC_CDECL aligned_alloc(size_t alignment,
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ *RPMALLOC_CDECL aligned_alloc(size_t alignment,
                                                  size_t size) {
-  return rpaligned_alloc(alignment, size);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(alignment, size);
 }
-extern inline void *RPMALLOC_CDECL memalign(size_t alignment, size_t size) {
-  return rpmemalign(alignment, size);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ *RPMALLOC_CDECL memalign(size_t alignment, size_t size) {
+  ಪ್ರತ್ಯಾಗಮ rpmemalign(alignment, size);
 }
-extern inline int RPMALLOC_CDECL posix_memalign(void **memptr, size_t alignment,
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಪೂರ್ಣಾಙ್ಕ RPMALLOC_CDECL posix_memalign(ಶೂನ್ಯ **memptr, size_t alignment,
                                                 size_t size) {
-  return rpposix_memalign(memptr, alignment, size);
+  ಪ್ರತ್ಯಾಗಮ rpposix_memalign(memptr, alignment, size);
 }
-extern inline void RPMALLOC_CDECL free(void *ptr) { rpfree(ptr); }
-extern inline void RPMALLOC_CDECL cfree(void *ptr) { rpfree(ptr); }
-extern inline size_t RPMALLOC_CDECL malloc_usable_size(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ RPMALLOC_CDECL ಮುಕ್ತ(ಶೂನ್ಯ *ptr) { rpfree(ptr); }
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ RPMALLOC_CDECL cfree(ಶೂನ್ಯ *ptr) { rpfree(ptr); }
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ size_t RPMALLOC_CDECL malloc_usable_size(ಶೂನ್ಯ *ptr) {
+  ಪ್ರತ್ಯಾಗಮ rpmalloc_usable_size(ptr);
 }
-extern inline size_t RPMALLOC_CDECL malloc_size(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ size_t RPMALLOC_CDECL malloc_size(ಶೂನ್ಯ *ptr) {
+  ಪ್ರತ್ಯಾಗಮ rpmalloc_usable_size(ptr);
 }
 
 #ifdef _WIN32
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _malloc_base(size_t size) {
-  return rpmalloc(size);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ RPMALLOC_RESTRICT ಶೂನ್ಯ *RPMALLOC_CDECL _malloc_base(size_t size) {
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-extern inline void RPMALLOC_CDECL _free_base(void *ptr) { rpfree(ptr); }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _calloc_base(size_t count,
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ RPMALLOC_CDECL _free_base(ಶೂನ್ಯ *ptr) { rpfree(ptr); }
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ RPMALLOC_RESTRICT ಶೂನ್ಯ *RPMALLOC_CDECL _calloc_base(size_t ಎಣಿಕೆ,
                                                                   size_t size) {
-  return rpcalloc(count, size);
+  ಪ್ರತ್ಯಾಗಮ rpcalloc(ಎಣಿಕೆ, size);
 }
-extern inline size_t RPMALLOC_CDECL _msize(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ size_t RPMALLOC_CDECL _msize(ಶೂನ್ಯ *ptr) {
+  ಪ್ರತ್ಯಾಗಮ rpmalloc_usable_size(ptr);
 }
-extern inline size_t RPMALLOC_CDECL _msize_base(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ size_t RPMALLOC_CDECL _msize_base(ಶೂನ್ಯ *ptr) {
+  ಪ್ರತ್ಯಾಗಮ rpmalloc_usable_size(ptr);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL
-_realloc_base(void *ptr, size_t size) {
-  return rprealloc(ptr, size);
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ RPMALLOC_RESTRICT ಶೂನ್ಯ *RPMALLOC_CDECL
+_realloc_base(ಶೂನ್ಯ *ptr, size_t size) {
+  ಪ್ರತ್ಯಾಗಮ rprealloc(ptr, size);
 }
 #endif
 
 #ifdef _WIN32
 // For Windows, #include <rpnew.h> in one source file to get the C++ operator
 // overrides implemented in your module
-#else
+#ಅನ್ಯಥಾ
 // Overload the C++ operators using the mangled names
 // (https://itanium-cxx-abi.github.io/cxx-abi/abi.html#mangling) operators
 // delete and delete[]
 #define RPDEFVIS __attribute__((visibility("default")))
-extern void _ZdlPv(void *p);
-void RPDEFVIS _ZdlPv(void *p) { rpfree(p); }
-extern void _ZdaPv(void *p);
-void RPDEFVIS _ZdaPv(void *p) { rpfree(p); }
-#if ARCH_64BIT
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPv(ಶೂನ್ಯ *p);
+ಶೂನ್ಯ RPDEFVIS _ZdlPv(ಶೂನ್ಯ *p) { rpfree(p); }
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPv(ಶೂನ್ಯ *p);
+ಶೂನ್ಯ RPDEFVIS _ZdaPv(ಶೂನ್ಯ *p) { rpfree(p); }
+#ಯದಿ ARCH_64BIT
 // 64-bit operators new and new[], normal and aligned
-extern void *_Znwm(uint64_t size);
-void *RPDEFVIS _Znwm(uint64_t size) { return rpmalloc(size); }
-extern void *_Znam(uint64_t size);
-void *RPDEFVIS _Znam(uint64_t size) { return rpmalloc(size); }
-extern void *_Znwmm(uint64_t size, uint64_t align);
-void *RPDEFVIS _Znwmm(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znwm(uint64_t size);
+ಶೂನ್ಯ *RPDEFVIS _Znwm(uint64_t size) { ಪ್ರತ್ಯಾಗಮ rpmalloc(size); }
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znam(uint64_t size);
+ಶೂನ್ಯ *RPDEFVIS _Znam(uint64_t size) { ಪ್ರತ್ಯಾಗಮ rpmalloc(size); }
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znwmm(uint64_t size, uint64_t align);
+ಶೂನ್ಯ *RPDEFVIS _Znwmm(uint64_t size, uint64_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_Znamm(uint64_t size, uint64_t align);
-void *RPDEFVIS _Znamm(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znamm(uint64_t size, uint64_t align);
+ಶೂನ್ಯ *RPDEFVIS _Znamm(uint64_t size, uint64_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnwmSt11align_val_t(uint64_t size, uint64_t align);
-void *RPDEFVIS _ZnwmSt11align_val_t(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnwmSt11align_val_t(uint64_t size, uint64_t align);
+ಶೂನ್ಯ *RPDEFVIS _ZnwmSt11align_val_t(uint64_t size, uint64_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnamSt11align_val_t(uint64_t size, uint64_t align);
-void *RPDEFVIS _ZnamSt11align_val_t(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnamSt11align_val_t(uint64_t size, uint64_t align);
+ಶೂನ್ಯ *RPDEFVIS _ZnamSt11align_val_t(uint64_t size, uint64_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnwmRKSt9nothrow_t(uint64_t size, rp_nothrow_t t);
-void *RPDEFVIS _ZnwmRKSt9nothrow_t(uint64_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnwmRKSt9nothrow_t(uint64_t size, rp_nothrow_t t);
+ಶೂನ್ಯ *RPDEFVIS _ZnwmRKSt9nothrow_t(uint64_t size, rp_nothrow_t t) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-extern void *_ZnamRKSt9nothrow_t(uint64_t size, rp_nothrow_t t);
-void *RPDEFVIS _ZnamRKSt9nothrow_t(uint64_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnamRKSt9nothrow_t(uint64_t size, rp_nothrow_t t);
+ಶೂನ್ಯ *RPDEFVIS _ZnamRKSt9nothrow_t(uint64_t size, rp_nothrow_t t) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-extern void *_ZnwmSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnwmSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                 rp_nothrow_t t);
-void *RPDEFVIS _ZnwmSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
+ಶೂನ್ಯ *RPDEFVIS _ZnwmSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnamSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnamSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                 rp_nothrow_t t);
-void *RPDEFVIS _ZnamSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
+ಶೂನ್ಯ *RPDEFVIS _ZnamSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
 // 64-bit operators sized delete and delete[], normal and aligned
-extern void _ZdlPvm(void *p, uint64_t size);
-void RPDEFVIS _ZdlPvm(void *p, uint64_t size) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPvm(ಶೂನ್ಯ *p, uint64_t size);
+ಶೂನ್ಯ RPDEFVIS _ZdlPvm(ಶೂನ್ಯ *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
 }
-extern void _ZdaPvm(void *p, uint64_t size);
-void RPDEFVIS _ZdaPvm(void *p, uint64_t size) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPvm(ಶೂನ್ಯ *p, uint64_t size);
+ಶೂನ್ಯ RPDEFVIS _ZdaPvm(ಶೂನ್ಯ *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
 }
-extern void _ZdlPvSt11align_val_t(void *p, uint64_t align);
-void RPDEFVIS _ZdlPvSt11align_val_t(void *p, uint64_t align) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPvSt11align_val_t(ಶೂನ್ಯ *p, uint64_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdlPvSt11align_val_t(ಶೂನ್ಯ *p, uint64_t align) {
   rpfree(p);
-  (void)sizeof(align);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
 }
-extern void _ZdaPvSt11align_val_t(void *p, uint64_t align);
-void RPDEFVIS _ZdaPvSt11align_val_t(void *p, uint64_t align) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPvSt11align_val_t(ಶೂನ್ಯ *p, uint64_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdaPvSt11align_val_t(ಶೂನ್ಯ *p, uint64_t align) {
   rpfree(p);
-  (void)sizeof(align);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
 }
-extern void _ZdlPvmSt11align_val_t(void *p, uint64_t size, uint64_t align);
-void RPDEFVIS _ZdlPvmSt11align_val_t(void *p, uint64_t size, uint64_t align) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPvmSt11align_val_t(ಶೂನ್ಯ *p, uint64_t size, uint64_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdlPvmSt11align_val_t(ಶೂನ್ಯ *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
 }
-extern void _ZdaPvmSt11align_val_t(void *p, uint64_t size, uint64_t align);
-void RPDEFVIS _ZdaPvmSt11align_val_t(void *p, uint64_t size, uint64_t align) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPvmSt11align_val_t(ಶೂನ್ಯ *p, uint64_t size, uint64_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdaPvmSt11align_val_t(ಶೂನ್ಯ *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
 }
-#else
+#ಅನ್ಯಥಾ
 // 32-bit operators new and new[], normal and aligned
-extern void *_Znwj(uint32_t size);
-void *RPDEFVIS _Znwj(uint32_t size) { return rpmalloc(size); }
-extern void *_Znaj(uint32_t size);
-void *RPDEFVIS _Znaj(uint32_t size) { return rpmalloc(size); }
-extern void *_Znwjj(uint32_t size, uint32_t align);
-void *RPDEFVIS _Znwjj(uint32_t size, uint32_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znwj(uint32_t size);
+ಶೂನ್ಯ *RPDEFVIS _Znwj(uint32_t size) { ಪ್ರತ್ಯಾಗಮ rpmalloc(size); }
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znaj(uint32_t size);
+ಶೂನ್ಯ *RPDEFVIS _Znaj(uint32_t size) { ಪ್ರತ್ಯಾಗಮ rpmalloc(size); }
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znwjj(uint32_t size, uint32_t align);
+ಶೂನ್ಯ *RPDEFVIS _Znwjj(uint32_t size, uint32_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_Znajj(uint32_t size, uint32_t align);
-void *RPDEFVIS _Znajj(uint32_t size, uint32_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_Znajj(uint32_t size, uint32_t align);
+ಶೂನ್ಯ *RPDEFVIS _Znajj(uint32_t size, uint32_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnwjSt11align_val_t(size_t size, size_t align);
-void *RPDEFVIS _ZnwjSt11align_val_t(size_t size, size_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnwjSt11align_val_t(size_t size, size_t align);
+ಶೂನ್ಯ *RPDEFVIS _ZnwjSt11align_val_t(size_t size, size_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnajSt11align_val_t(size_t size, size_t align);
-void *RPDEFVIS _ZnajSt11align_val_t(size_t size, size_t align) {
-  return rpaligned_alloc(align, size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnajSt11align_val_t(size_t size, size_t align);
+ಶೂನ್ಯ *RPDEFVIS _ZnajSt11align_val_t(size_t size, size_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnwjRKSt9nothrow_t(size_t size, rp_nothrow_t t);
-void *RPDEFVIS _ZnwjRKSt9nothrow_t(size_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnwjRKSt9nothrow_t(size_t size, rp_nothrow_t t);
+ಶೂನ್ಯ *RPDEFVIS _ZnwjRKSt9nothrow_t(size_t size, rp_nothrow_t t) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-extern void *_ZnajRKSt9nothrow_t(size_t size, rp_nothrow_t t);
-void *RPDEFVIS _ZnajRKSt9nothrow_t(size_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnajRKSt9nothrow_t(size_t size, rp_nothrow_t t);
+ಶೂನ್ಯ *RPDEFVIS _ZnajRKSt9nothrow_t(size_t size, rp_nothrow_t t) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-extern void *_ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                 rp_nothrow_t t);
-void *RPDEFVIS _ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
+ಶೂನ್ಯ *RPDEFVIS _ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-extern void *_ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
+ಬಾಹ್ಯ ಶೂನ್ಯ *_ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                 rp_nothrow_t t);
-void *RPDEFVIS _ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
+ಶೂನ್ಯ *RPDEFVIS _ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
 // 32-bit operators sized delete and delete[], normal and aligned
-extern void _ZdlPvj(void *p, uint64_t size);
-void RPDEFVIS _ZdlPvj(void *p, uint64_t size) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPvj(ಶೂನ್ಯ *p, uint64_t size);
+ಶೂನ್ಯ RPDEFVIS _ZdlPvj(ಶೂನ್ಯ *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
 }
-extern void _ZdaPvj(void *p, uint64_t size);
-void RPDEFVIS _ZdaPvj(void *p, uint64_t size) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPvj(ಶೂನ್ಯ *p, uint64_t size);
+ಶೂನ್ಯ RPDEFVIS _ZdaPvj(ಶೂನ್ಯ *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
 }
-extern void _ZdlPvSt11align_val_t(void *p, uint32_t align);
-void RPDEFVIS _ZdlPvSt11align_val_t(void *p, uint64_t a) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPvSt11align_val_t(ಶೂನ್ಯ *p, uint32_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdlPvSt11align_val_t(ಶೂನ್ಯ *p, uint64_t a) {
   rpfree(p);
-  (void)sizeof(align);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
 }
-extern void _ZdaPvSt11align_val_t(void *p, uint32_t align);
-void RPDEFVIS _ZdaPvSt11align_val_t(void *p, uint64_t a) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPvSt11align_val_t(ಶೂನ್ಯ *p, uint32_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdaPvSt11align_val_t(ಶೂನ್ಯ *p, uint64_t a) {
   rpfree(p);
-  (void)sizeof(align);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
 }
-extern void _ZdlPvjSt11align_val_t(void *p, uint32_t size, uint32_t align);
-void RPDEFVIS _ZdlPvjSt11align_val_t(void *p, uint64_t size, uint64_t align) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdlPvjSt11align_val_t(ಶೂನ್ಯ *p, uint32_t size, uint32_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdlPvjSt11align_val_t(ಶೂನ್ಯ *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(a);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(a);
 }
-extern void _ZdaPvjSt11align_val_t(void *p, uint32_t size, uint32_t align);
-void RPDEFVIS _ZdaPvjSt11align_val_t(void *p, uint64_t size, uint64_t align) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _ZdaPvjSt11align_val_t(ಶೂನ್ಯ *p, uint32_t size, uint32_t align);
+ಶೂನ್ಯ RPDEFVIS _ZdaPvjSt11align_val_t(ಶೂನ್ಯ *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(a);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(a);
 }
 #endif
 #endif
 #endif
 
-#if USE_INTERPOSE || USE_ALIAS
+#ಯದಿ USE_INTERPOSE || USE_ALIAS
 
-static void *rpmalloc_nothrow(size_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+ಸ್ಥಿರ ಶೂನ್ಯ *rpmalloc_nothrow(size_t size, rp_nothrow_t t) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpmalloc(size);
 }
-static void *rpaligned_alloc_reverse(size_t size, size_t align) {
-  return rpaligned_alloc(align, size);
+ಸ್ಥಿರ ಶೂನ್ಯ *rpaligned_alloc_reverse(size_t size, size_t align) {
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-static void *rpaligned_alloc_reverse_nothrow(size_t size, size_t align,
+ಸ್ಥಿರ ಶೂನ್ಯ *rpaligned_alloc_reverse_nothrow(size_t size, size_t align,
                                              rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(t);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(align, size);
 }
-static void rpfree_size(void *p, size_t size) {
-  (void)sizeof(size);
+ಸ್ಥಿರ ಶೂನ್ಯ rpfree_size(ಶೂನ್ಯ *p, size_t size) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
   rpfree(p);
 }
-static void rpfree_aligned(void *p, size_t align) {
-  (void)sizeof(align);
+ಸ್ಥಿರ ಶೂನ್ಯ rpfree_aligned(ಶೂನ್ಯ *p, size_t align) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
   rpfree(p);
 }
-static void rpfree_size_aligned(void *p, size_t size, size_t align) {
-  (void)sizeof(size);
-  (void)sizeof(align);
+ಸ್ಥಿರ ಶೂನ್ಯ rpfree_size_aligned(ಶೂನ್ಯ *p, size_t size, size_t align) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(size);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(align);
   rpfree(p);
 }
 
 #endif
 
-#if USE_INTERPOSE
+#ಯದಿ USE_INTERPOSE
 
-__attribute__((used)) static const interpose_t macinterpose_malloc[]
+__attribute__((used)) ಸ್ಥಿರ ಧ್ರುವ interpose_t macinterpose_malloc[]
     __attribute__((section("__DATA, __interpose"))) = {
         // new and new[]
         MAC_INTERPOSE_PAIR(rpmalloc, _Znwm),
@@ -371,18 +371,18 @@ __attribute__((used)) static const interpose_t macinterpose_malloc[]
         MAC_INTERPOSE_PAIR(rpmalloc, calloc),
         MAC_INTERPOSE_PAIR(rprealloc, realloc),
         MAC_INTERPOSE_PAIR(rprealloc, reallocf),
-#if defined(__MAC_10_15) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_15
+#ಯದಿ defined(__MAC_10_15) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_15
         MAC_INTERPOSE_PAIR(rpaligned_alloc, aligned_alloc),
 #endif
         MAC_INTERPOSE_PAIR(rpmemalign, memalign),
         MAC_INTERPOSE_PAIR(rpposix_memalign, posix_memalign),
-        MAC_INTERPOSE_PAIR(rpfree, free), MAC_INTERPOSE_PAIR(rpfree, cfree),
+        MAC_INTERPOSE_PAIR(rpfree, ಮುಕ್ತ), MAC_INTERPOSE_PAIR(rpfree, cfree),
         MAC_INTERPOSE_PAIR(rpmalloc_usable_size, malloc_usable_size),
         MAC_INTERPOSE_PAIR(rpmalloc_usable_size, malloc_size)};
 
 #endif
 
-#if USE_ALIAS
+#ಯದಿ USE_ALIAS
 
 #define RPALIAS(fn) __attribute__((alias(#fn), used, visibility("default")));
 
@@ -390,213 +390,213 @@ __attribute__((used)) static const interpose_t macinterpose_malloc[]
 // (https://itanium-cxx-abi.github.io/cxx-abi/abi.html#mangling)
 
 // operators delete and delete[]
-void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
+ಶೂನ್ಯ _ZdlPv(ಶೂನ್ಯ *p) RPALIAS(rpfree) ಶೂನ್ಯ _ZdaPv(ಶೂನ್ಯ *p) RPALIAS(rpfree)
 
-#if ARCH_64BIT
+#ಯದಿ ARCH_64BIT
     // 64-bit operators new and new[], normal and aligned
-    void *_Znwm(uint64_t size) RPMALLOC_ATTRIB_MALLOC
+    ಶೂನ್ಯ *_Znwm(uint64_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
-        RPALIAS(rpmalloc) void *_Znam(uint64_t size) RPMALLOC_ATTRIB_MALLOC
-    RPMALLOC_ATTRIB_ALLOC_SIZE(1) RPALIAS(rpmalloc) void *_Znwmm(uint64_t size,
+        RPALIAS(rpmalloc) ಶೂನ್ಯ *_Znam(uint64_t size) RPMALLOC_ATTRIB_MALLOC
+    RPMALLOC_ATTRIB_ALLOC_SIZE(1) RPALIAS(rpmalloc) ಶೂನ್ಯ *_Znwmm(uint64_t size,
                                                                  uint64_t align)
-        RPALIAS(rpaligned_alloc_reverse) void *_Znamm(uint64_t size,
+        RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_Znamm(uint64_t size,
                                                       uint64_t align)
-            RPALIAS(rpaligned_alloc_reverse) void *_ZnwmSt11align_val_t(
+            RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_ZnwmSt11align_val_t(
                 size_t size, size_t align)
-                RPALIAS(rpaligned_alloc_reverse) void *_ZnamSt11align_val_t(
+                RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_ZnamSt11align_val_t(
                     size_t size, size_t align)
-                    RPALIAS(rpaligned_alloc_reverse) void *_ZnwmRKSt9nothrow_t(
+                    RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_ZnwmRKSt9nothrow_t(
                         size_t size, rp_nothrow_t t)
-                        RPALIAS(rpmalloc_nothrow) void *_ZnamRKSt9nothrow_t(
+                        RPALIAS(rpmalloc_nothrow) ಶೂನ್ಯ *_ZnamRKSt9nothrow_t(
                             size_t size,
-                            rp_nothrow_t t) RPALIAS(rpmalloc_nothrow) void
+                            rp_nothrow_t t) RPALIAS(rpmalloc_nothrow) ಶೂನ್ಯ
                             *_ZnwmSt11align_val_tRKSt9nothrow_t(size_t size,
                                                                 size_t align,
                                                                 rp_nothrow_t t)
-                                RPALIAS(rpaligned_alloc_reverse_nothrow) void
+                                RPALIAS(rpaligned_alloc_reverse_nothrow) ಶೂನ್ಯ
                                     *_ZnamSt11align_val_tRKSt9nothrow_t(
                                         size_t size, size_t align,
                                         rp_nothrow_t t)
                                         RPALIAS(rpaligned_alloc_reverse_nothrow)
     // 64-bit operators delete and delete[], sized and aligned
-    void _ZdlPvm(void *p, size_t n) RPALIAS(rpfree_size) void _ZdaPvm(void *p,
+    ಶೂನ್ಯ _ZdlPvm(ಶೂನ್ಯ *p, size_t n) RPALIAS(rpfree_size) ಶೂನ್ಯ _ZdaPvm(ಶೂನ್ಯ *p,
                                                                       size_t n)
-        RPALIAS(rpfree_size) void _ZdlPvSt11align_val_t(void *p, size_t a)
-            RPALIAS(rpfree_aligned) void _ZdaPvSt11align_val_t(void *p,
+        RPALIAS(rpfree_size) ಶೂನ್ಯ _ZdlPvSt11align_val_t(ಶೂನ್ಯ *p, size_t a)
+            RPALIAS(rpfree_aligned) ಶೂನ್ಯ _ZdaPvSt11align_val_t(ಶೂನ್ಯ *p,
                                                                size_t a)
-                RPALIAS(rpfree_aligned) void _ZdlPvmSt11align_val_t(void *p,
+                RPALIAS(rpfree_aligned) ಶೂನ್ಯ _ZdlPvmSt11align_val_t(ಶೂನ್ಯ *p,
                                                                     size_t n,
                                                                     size_t a)
-                    RPALIAS(rpfree_size_aligned) void _ZdaPvmSt11align_val_t(
-                        void *p, size_t n, size_t a)
+                    RPALIAS(rpfree_size_aligned) ಶೂನ್ಯ _ZdaPvmSt11align_val_t(
+                        ಶೂನ್ಯ *p, size_t n, size_t a)
                         RPALIAS(rpfree_size_aligned)
-#else
+#ಅನ್ಯಥಾ
     // 32-bit operators new and new[], normal and aligned
-    void *_Znwj(uint32_t size) RPMALLOC_ATTRIB_MALLOC
+    ಶೂನ್ಯ *_Znwj(uint32_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
-        RPALIAS(rpmalloc) void *_Znaj(uint32_t size) RPMALLOC_ATTRIB_MALLOC
-    RPMALLOC_ATTRIB_ALLOC_SIZE(1) RPALIAS(rpmalloc) void *_Znwjj(uint32_t size,
+        RPALIAS(rpmalloc) ಶೂನ್ಯ *_Znaj(uint32_t size) RPMALLOC_ATTRIB_MALLOC
+    RPMALLOC_ATTRIB_ALLOC_SIZE(1) RPALIAS(rpmalloc) ಶೂನ್ಯ *_Znwjj(uint32_t size,
                                                                  uint32_t align)
-        RPALIAS(rpaligned_alloc_reverse) void *_Znajj(uint32_t size,
+        RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_Znajj(uint32_t size,
                                                       uint32_t align)
-            RPALIAS(rpaligned_alloc_reverse) void *_ZnwjSt11align_val_t(
+            RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_ZnwjSt11align_val_t(
                 size_t size, size_t align)
-                RPALIAS(rpaligned_alloc_reverse) void *_ZnajSt11align_val_t(
+                RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_ZnajSt11align_val_t(
                     size_t size, size_t align)
-                    RPALIAS(rpaligned_alloc_reverse) void *_ZnwjRKSt9nothrow_t(
+                    RPALIAS(rpaligned_alloc_reverse) ಶೂನ್ಯ *_ZnwjRKSt9nothrow_t(
                         size_t size, rp_nothrow_t t)
-                        RPALIAS(rpmalloc_nothrow) void *_ZnajRKSt9nothrow_t(
+                        RPALIAS(rpmalloc_nothrow) ಶೂನ್ಯ *_ZnajRKSt9nothrow_t(
                             size_t size,
-                            rp_nothrow_t t) RPALIAS(rpmalloc_nothrow) void
+                            rp_nothrow_t t) RPALIAS(rpmalloc_nothrow) ಶೂನ್ಯ
                             *_ZnwjSt11align_val_tRKSt9nothrow_t(size_t size,
                                                                 size_t align,
                                                                 rp_nothrow_t t)
-                                RPALIAS(rpaligned_alloc_reverse_nothrow) void
+                                RPALIAS(rpaligned_alloc_reverse_nothrow) ಶೂನ್ಯ
                                     *_ZnajSt11align_val_tRKSt9nothrow_t(
                                         size_t size, size_t align,
                                         rp_nothrow_t t)
                                         RPALIAS(rpaligned_alloc_reverse_nothrow)
     // 32-bit operators delete and delete[], sized and aligned
-    void _ZdlPvj(void *p, size_t n) RPALIAS(rpfree_size) void _ZdaPvj(void *p,
+    ಶೂನ್ಯ _ZdlPvj(ಶೂನ್ಯ *p, size_t n) RPALIAS(rpfree_size) ಶೂನ್ಯ _ZdaPvj(ಶೂನ್ಯ *p,
                                                                       size_t n)
-        RPALIAS(rpfree_size) void _ZdlPvSt11align_val_t(void *p, size_t a)
-            RPALIAS(rpfree_aligned) void _ZdaPvSt11align_val_t(void *p,
+        RPALIAS(rpfree_size) ಶೂನ್ಯ _ZdlPvSt11align_val_t(ಶೂನ್ಯ *p, size_t a)
+            RPALIAS(rpfree_aligned) ಶೂನ್ಯ _ZdaPvSt11align_val_t(ಶೂನ್ಯ *p,
                                                                size_t a)
-                RPALIAS(rpfree_aligned) void _ZdlPvjSt11align_val_t(void *p,
+                RPALIAS(rpfree_aligned) ಶೂನ್ಯ _ZdlPvjSt11align_val_t(ಶೂನ್ಯ *p,
                                                                     size_t n,
                                                                     size_t a)
-                    RPALIAS(rpfree_size_aligned) void _ZdaPvjSt11align_val_t(
-                        void *p, size_t n, size_t a)
+                    RPALIAS(rpfree_size_aligned) ಶೂನ್ಯ _ZdaPvjSt11align_val_t(
+                        ಶೂನ್ಯ *p, size_t n, size_t a)
                         RPALIAS(rpfree_size_aligned)
 #endif
 
-                            void *malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
+                            ಶೂನ್ಯ *malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
-        RPALIAS(rpmalloc) void *calloc(size_t count, size_t size)
-            RPALIAS(rpcalloc) void *realloc(void *ptr, size_t size)
-                RPALIAS(rprealloc) void *reallocf(void *ptr, size_t size)
+        RPALIAS(rpmalloc) ಶೂನ್ಯ *calloc(size_t ಎಣಿಕೆ, size_t size)
+            RPALIAS(rpcalloc) ಶೂನ್ಯ *realloc(ಶೂನ್ಯ *ptr, size_t size)
+                RPALIAS(rprealloc) ಶೂನ್ಯ *reallocf(ಶೂನ್ಯ *ptr, size_t size)
                     RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2)
-        RPALIAS(rprealloc) void *aligned_alloc(size_t alignment, size_t size)
-            RPALIAS(rpaligned_alloc) void *memalign(
+        RPALIAS(rprealloc) ಶೂನ್ಯ *aligned_alloc(size_t alignment, size_t size)
+            RPALIAS(rpaligned_alloc) ಶೂನ್ಯ *memalign(
                 size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2)
-        RPALIAS(rpmemalign) int posix_memalign(void **memptr, size_t alignment,
+        RPALIAS(rpmemalign) ಪೂರ್ಣಾಙ್ಕ posix_memalign(ಶೂನ್ಯ **memptr, size_t alignment,
                                                size_t size)
-            RPALIAS(rpposix_memalign) void free(void *ptr)
-                RPALIAS(rpfree) void cfree(void *ptr) RPALIAS(rpfree)
-#if defined(__ANDROID__) || defined(__FreeBSD__)
+            RPALIAS(rpposix_memalign) ಶೂನ್ಯ ಮುಕ್ತ(ಶೂನ್ಯ *ptr)
+                RPALIAS(rpfree) ಶೂನ್ಯ cfree(ಶೂನ್ಯ *ptr) RPALIAS(rpfree)
+#ಯದಿ defined(__ANDROID__) || defined(__FreeBSD__)
                     size_t
-    malloc_usable_size(const void *ptr) RPALIAS(rpmalloc_usable_size)
-#else
+    malloc_usable_size(ಧ್ರುವ ಶೂನ್ಯ *ptr) RPALIAS(rpmalloc_usable_size)
+#ಅನ್ಯಥಾ
                     size_t
-    malloc_usable_size(void *ptr) RPALIAS(rpmalloc_usable_size)
+    malloc_usable_size(ಶೂನ್ಯ *ptr) RPALIAS(rpmalloc_usable_size)
 #endif
-        size_t malloc_size(void *ptr) RPALIAS(rpmalloc_usable_size)
+        size_t malloc_size(ಶೂನ್ಯ *ptr) RPALIAS(rpmalloc_usable_size)
 
 #endif
 
-            static inline size_t _rpmalloc_page_size(void) {
-  return _memory_page_size;
+            ಸ್ಥಿರ ಅನ್ತಃಸ್ಥ size_t _rpmalloc_page_size(ಶೂನ್ಯ) {
+  ಪ್ರತ್ಯಾಗಮ _memory_page_size;
 }
 
-extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t count, size_t size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *RPMALLOC_CDECL reallocarray(ಶೂನ್ಯ *ptr, size_t ಎಣಿಕೆ, size_t size);
 
-extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t count, size_t size) {
+ಬಾಹ್ಯ ಶೂನ್ಯ *RPMALLOC_CDECL reallocarray(ಶೂನ್ಯ *ptr, size_t ಎಣಿಕೆ, size_t size) {
   size_t total;
-#if ENABLE_VALIDATE_ARGS
+#ಯದಿ ENABLE_VALIDATE_ARGS
 #ifdef _MSC_VER
-  int err = SizeTMult(count, size, &total);
-  if ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
+  ಪೂರ್ಣಾಙ್ಕ err = SizeTMult(ಎಣಿಕೆ, size, &total);
+  ಯದಿ ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    ಪ್ರತ್ಯಾಗಮ 0;
   }
-#else
-  int err = __builtin_umull_overflow(count, size, &total);
-  if (err || (total >= MAX_ALLOC_SIZE)) {
+#ಅನ್ಯಥಾ
+  ಪೂರ್ಣಾಙ್ಕ err = __builtin_umull_overflow(ಎಣಿಕೆ, size, &total);
+  ಯದಿ (err || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    ಪ್ರತ್ಯಾಗಮ 0;
   }
 #endif
-#else
-  total = count * size;
+#ಅನ್ಯಥಾ
+  total = ಎಣಿಕೆ * size;
 #endif
-  return realloc(ptr, total);
+  ಪ್ರತ್ಯಾಗಮ realloc(ptr, total);
 }
 
-extern inline void *RPMALLOC_CDECL valloc(size_t size) {
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ *RPMALLOC_CDECL valloc(size_t size) {
   get_thread_heap();
-  return rpaligned_alloc(_rpmalloc_page_size(), size);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(_rpmalloc_page_size(), size);
 }
 
-extern inline void *RPMALLOC_CDECL pvalloc(size_t size) {
+ಬಾಹ್ಯ ಅನ್ತಃಸ್ಥ ಶೂನ್ಯ *RPMALLOC_CDECL pvalloc(size_t size) {
   get_thread_heap();
-  const size_t page_size = _rpmalloc_page_size();
-  const size_t aligned_size = ((size + page_size - 1) / page_size) * page_size;
-#if ENABLE_VALIDATE_ARGS
-  if (aligned_size < size) {
+  ಧ್ರುವ size_t page_size = _rpmalloc_page_size();
+  ಧ್ರುವ size_t aligned_size = ((size + page_size - 1) / page_size) * page_size;
+#ಯದಿ ENABLE_VALIDATE_ARGS
+  ಯದಿ (aligned_size < size) {
     errno = EINVAL;
-    return 0;
+    ಪ್ರತ್ಯಾಗಮ 0;
   }
 #endif
-  return rpaligned_alloc(_rpmalloc_page_size(), aligned_size);
+  ಪ್ರತ್ಯಾಗಮ rpaligned_alloc(_rpmalloc_page_size(), aligned_size);
 }
 
 #endif // ENABLE_OVERRIDE
 
-#if ENABLE_PRELOAD
+#ಯದಿ ENABLE_PRELOAD
 
 #ifdef _WIN32
 
-#if defined(BUILD_DYNAMIC_LINK) && BUILD_DYNAMIC_LINK
+#ಯದಿ defined(BUILD_DYNAMIC_LINK) && BUILD_DYNAMIC_LINK
 
-extern __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
+ಬಾಹ್ಯ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
                                                  DWORD reason, LPVOID reserved);
 
-extern __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
+ಬಾಹ್ಯ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
                                                  DWORD reason,
                                                  LPVOID reserved) {
-  (void)sizeof(reserved);
-  (void)sizeof(instance);
-  if (reason == DLL_PROCESS_ATTACH)
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(reserved);
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(instance);
+  ಯದಿ (reason == DLL_PROCESS_ATTACH)
     rpmalloc_initialize();
-  else if (reason == DLL_PROCESS_DETACH)
+  ಅನ್ಯಥಾ ಯದಿ (reason == DLL_PROCESS_DETACH)
     rpmalloc_finalize();
-  else if (reason == DLL_THREAD_ATTACH)
+  ಅನ್ಯಥಾ ಯದಿ (reason == DLL_THREAD_ATTACH)
     rpmalloc_thread_initialize();
-  else if (reason == DLL_THREAD_DETACH)
+  ಅನ್ಯಥಾ ಯದಿ (reason == DLL_THREAD_DETACH)
     rpmalloc_thread_finalize(1);
-  return TRUE;
+  ಪ್ರತ್ಯಾಗಮ TRUE;
 }
 
 // end BUILD_DYNAMIC_LINK
-#else
+#ಅನ್ಯಥಾ
 
-extern void _global_rpmalloc_init(void) {
+ಬಾಹ್ಯ ಶೂನ್ಯ _global_rpmalloc_init(ಶೂನ್ಯ) {
   rpmalloc_set_main_thread();
   rpmalloc_initialize();
 }
 
-#if defined(__clang__) || defined(__GNUC__)
+#ಯದಿ defined(__clang__) || defined(__GNUC__)
 
-static void __attribute__((constructor)) initializer(void) {
+ಸ್ಥಿರ ಶೂನ್ಯ __attribute__((constructor)) initializer(ಶೂನ್ಯ) {
   _global_rpmalloc_init();
 }
 
-#elif defined(_MSC_VER)
+#ನೋಚೇದ್ಯದಿ defined(_MSC_VER)
 
-static int _global_rpmalloc_xib(void) {
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ _global_rpmalloc_xib(ಶೂನ್ಯ) {
   _global_rpmalloc_init();
-  return 0;
+  ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-#pragma section(".CRT$XIB", read)
-__declspec(allocate(".CRT$XIB")) void (*_rpmalloc_module_init)(void) =
+#pragma section(".CRT$XIB", ಪಠ)
+__declspec(allocate(".CRT$XIB")) ಶೂನ್ಯ (*_rpmalloc_module_init)(ಶೂನ್ಯ) =
     _global_rpmalloc_xib;
-#if defined(_M_IX86) || defined(__i386__)
+#ಯದಿ defined(_M_IX86) || defined(__i386__)
 #pragma comment(linker, "/include:"                                            \
                         "__rpmalloc_module_init")
-#else
+#ಅನ್ಯಥಾ
 #pragma comment(linker, "/include:"                                            \
                         "_rpmalloc_module_init")
 #endif
@@ -606,80 +606,80 @@ __declspec(allocate(".CRT$XIB")) void (*_rpmalloc_module_init)(void) =
 // end !BUILD_DYNAMIC_LINK
 #endif
 
-#else
+#ಅನ್ಯಥಾ
 
-#include <pthread.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <pthread.h>
+#ಅನ್ತರ್ಭಾವ <stdint.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-extern void rpmalloc_set_main_thread(void);
+ಬಾಹ್ಯ ಶೂನ್ಯ rpmalloc_set_main_thread(ಶೂನ್ಯ);
 
-static pthread_key_t destructor_key;
+ಸ್ಥಿರ pthread_key_t destructor_ಕೀಲಿ;
 
-static void thread_destructor(void *);
+ಸ್ಥಿರ ಶೂನ್ಯ thread_destructor(ಶೂನ್ಯ *);
 
-static void __attribute__((constructor)) initializer(void) {
+ಸ್ಥಿರ ಶೂನ್ಯ __attribute__((constructor)) initializer(ಶೂನ್ಯ) {
   rpmalloc_set_main_thread();
   rpmalloc_initialize();
-  pthread_key_create(&destructor_key, thread_destructor);
+  pthread_ಕೀಲಿ_create(&destructor_ಕೀಲಿ, thread_destructor);
 }
 
-static void __attribute__((destructor)) finalizer(void) { rpmalloc_finalize(); }
+ಸ್ಥಿರ ಶೂನ್ಯ __attribute__((destructor)) finalizer(ಶೂನ್ಯ) { rpmalloc_finalize(); }
 
-typedef struct {
-  void *(*real_start)(void *);
-  void *real_arg;
+ಪ್ರಕಾರನಿರ್ದೇಶ ಸಂರಚನಾ {
+  ಶೂನ್ಯ *(*real_start)(ಶೂನ್ಯ *);
+  ಶೂನ್ಯ *real_arg;
 } thread_starter_arg;
 
-static void *thread_starter(void *argptr) {
+ಸ್ಥಿರ ಶೂನ್ಯ *thread_starter(ಶೂನ್ಯ *argptr) {
   thread_starter_arg *arg = argptr;
-  void *(*real_start)(void *) = arg->real_start;
-  void *real_arg = arg->real_arg;
+  ಶೂನ್ಯ *(*real_start)(ಶೂನ್ಯ *) = arg->real_start;
+  ಶೂನ್ಯ *real_arg = arg->real_arg;
   rpmalloc_thread_initialize();
   rpfree(argptr);
-  pthread_setspecific(destructor_key, (void *)1);
-  return (*real_start)(real_arg);
+  pthread_setspecific(destructor_ಕೀಲಿ, (ಶೂನ್ಯ *)1);
+  ಪ್ರತ್ಯಾಗಮ (*real_start)(real_arg);
 }
 
-static void thread_destructor(void *value) {
-  (void)sizeof(value);
+ಸ್ಥಿರ ಶೂನ್ಯ thread_destructor(ಶೂನ್ಯ *ಮೌಲ್ಯ_2) {
+  (ಶೂನ್ಯ)ಪರಿಮಾಣ(ಮೌಲ್ಯ_2);
   rpmalloc_thread_finalize(1);
 }
 
 #ifdef __APPLE__
 
-static int pthread_create_proxy(pthread_t *thread, const pthread_attr_t *attr,
-                                void *(*start_routine)(void *), void *arg) {
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ pthread_create_proxy(pthread_t *thread, ಧ್ರುವ pthread_attr_t *attr,
+                                ಶೂನ್ಯ *(*start_routine)(ಶೂನ್ಯ *), ಶೂನ್ಯ *arg) {
   rpmalloc_initialize();
-  thread_starter_arg *starter_arg = rpmalloc(sizeof(thread_starter_arg));
+  thread_starter_arg *starter_arg = rpmalloc(ಪರಿಮಾಣ(thread_starter_arg));
   starter_arg->real_start = start_routine;
   starter_arg->real_arg = arg;
-  return pthread_create(thread, attr, thread_starter, starter_arg);
+  ಪ್ರತ್ಯಾಗಮ pthread_create(thread, attr, thread_starter, starter_arg);
 }
 
 MAC_INTERPOSE_SINGLE(pthread_create_proxy, pthread_create);
 
-#else
+#ಅನ್ಯಥಾ
 
-#include <dlfcn.h>
+#ಅನ್ತರ್ಭಾವ <dlfcn.h>
 
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
-                   void *(*start_routine)(void *), void *arg) {
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||      \
+ಪೂರ್ಣಾಙ್ಕ pthread_create(pthread_t *thread, ಧ್ರುವ pthread_attr_t *attr,
+                   ಶೂನ್ಯ *(*start_routine)(ಶೂನ್ಯ *), ಶೂನ್ಯ *arg) {
+#ಯದಿ defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||      \
     defined(__NetBSD__) || defined(__DragonFly__) || defined(__APPLE__) ||     \
     defined(__HAIKU__)
-  char fname[] = "pthread_create";
-#else
-  char fname[] = "_pthread_create";
+  ವರ್ಣ fname[] = "pthread_create";
+#ಅನ್ಯಥಾ
+  ವರ್ಣ fname[] = "_pthread_create";
 #endif
-  void *real_pthread_create = dlsym(RTLD_NEXT, fname);
+  ಶೂನ್ಯ *real_pthread_create = dlsym(RTLD_NEXT, fname);
   rpmalloc_thread_initialize();
-  thread_starter_arg *starter_arg = rpmalloc(sizeof(thread_starter_arg));
+  thread_starter_arg *starter_arg = rpmalloc(ಪರಿಮಾಣ(thread_starter_arg));
   starter_arg->real_start = start_routine;
   starter_arg->real_arg = arg;
-  return (*(int (*)(pthread_t *, const pthread_attr_t *, void *(*)(void *),
-                    void *))real_pthread_create)(thread, attr, thread_starter,
+  ಪ್ರತ್ಯಾಗಮ (*(ಪೂರ್ಣಾಙ್ಕ (*)(pthread_t *, ಧ್ರುವ pthread_attr_t *, ಶೂನ್ಯ *(*)(ಶೂನ್ಯ *),
+                    ಶೂನ್ಯ *))real_pthread_create)(thread, attr, thread_starter,
                                                  starter_arg);
 }
 
@@ -689,36 +689,36 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 #endif
 
-#if ENABLE_OVERRIDE
+#ಯದಿ ENABLE_OVERRIDE
 
-#if defined(__GLIBC__) && defined(__linux__)
+#ಯದಿ defined(__GLIBC__) && defined(__linux__)
 
-void *__libc_malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
+ಶೂನ್ಯ *__libc_malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
-        RPALIAS(rpmalloc) void *__libc_calloc(size_t count, size_t size)
+        RPALIAS(rpmalloc) ಶೂನ್ಯ *__libc_calloc(size_t ಎಣಿಕೆ, size_t size)
             RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE2(1, 2)
-                RPALIAS(rpcalloc) void *__libc_realloc(void *p, size_t size)
+                RPALIAS(rpcalloc) ಶೂನ್ಯ *__libc_realloc(ಶೂನ್ಯ *p, size_t size)
                     RPMALLOC_ATTRIB_MALLOC
-    RPMALLOC_ATTRIB_ALLOC_SIZE(2) RPALIAS(rprealloc) void __libc_free(void *p)
-        RPALIAS(rpfree) void __libc_cfree(void *p)
-            RPALIAS(rpfree) void *__libc_memalign(size_t align, size_t size)
+    RPMALLOC_ATTRIB_ALLOC_SIZE(2) RPALIAS(rprealloc) ಶೂನ್ಯ __libc_free(ಶೂನ್ಯ *p)
+        RPALIAS(rpfree) ಶೂನ್ಯ __libc_cfree(ಶೂನ್ಯ *p)
+            RPALIAS(rpfree) ಶೂನ್ಯ *__libc_memalign(size_t align, size_t size)
                 RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2)
-        RPALIAS(rpmemalign) int __posix_memalign(void **p, size_t align,
+        RPALIAS(rpmemalign) ಪೂರ್ಣಾಙ್ಕ __posix_memalign(ಶೂನ್ಯ **p, size_t align,
                                                  size_t size)
             RPALIAS(rpposix_memalign)
 
-                extern void *__libc_valloc(size_t size);
-extern void *__libc_pvalloc(size_t size);
+                ಬಾಹ್ಯ ಶೂನ್ಯ *__libc_valloc(size_t size);
+ಬಾಹ್ಯ ಶೂನ್ಯ *__libc_pvalloc(size_t size);
 
-void *__libc_valloc(size_t size) { return valloc(size); }
+ಶೂನ್ಯ *__libc_valloc(size_t size) { ಪ್ರತ್ಯಾಗಮ valloc(size); }
 
-void *__libc_pvalloc(size_t size) { return pvalloc(size); }
-
-#endif
+ಶೂನ್ಯ *__libc_pvalloc(size_t size) { ಪ್ರತ್ಯಾಗಮ pvalloc(size); }
 
 #endif
 
-#if (defined(__GNUC__) || defined(__clang__))
-#pragma GCC visibility pop
+#endif
+
+#ಯದಿ (defined(__GNUC__) || defined(__clang__))
+#pragma GCC visibility ತೆಗೆ
 #endif

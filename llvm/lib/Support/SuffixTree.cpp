@@ -10,27 +10,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTree.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/SuffixTreeNode.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SuffixTree.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Allocator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Casting.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
 /// \returns the number of elements in the substring associated with \p N.
-static size_t numElementsInSubstring(const SuffixTreeNode *N) {
-  assert(N && "Got a null node?");
-  if (auto *Internal = dyn_cast<SuffixTreeInternalNode>(N))
-    if (Internal->isRoot())
-      return 0;
-  return N->getEndIdx() - N->getStartIdx() + 1;
+ಸ್ಥಿರ size_t ಅಂಕೆ_Elements_In_Substring(ಧ್ರುವ Suffix_ವೃಕ್ಷ_ಗಂಟು *N) {
+  ಪ್ರತಿಜ್ಞಾ(N && "Got a null node?");
+  ಯದಿ (auto *Internal = dyn_cast<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು>(N))
+    ಯದಿ (Internal->is_ಬೇರು())
+      ಪ್ರತ್ಯಾಗಮ 0;
+  ಪ್ರತ್ಯಾಗಮ N->getEndIdx() - N->getStartIdx() + 1;
 }
 
-SuffixTree::SuffixTree(const ArrayRef<unsigned> &Str,
-                       bool OutlinerLeafDescendants)
+Suffix_ವೃಕ್ಷ::Suffix_ವೃಕ್ಷ(ಧ್ರುವ ArrayRef<unsigned> &Str,
+                       ತಾರ್ಕಿಕ OutlinerLeafDescendants)
     : Str(Str), OutlinerLeafDescendants(OutlinerLeafDescendants) {
-  Root = insertRoot();
-  Active.Node = Root;
+  ಬೇರು_2 = ಸೇರಿಸು_ಬೇರು();
+  Active.ಗಂಟು = ಬೇರು_2;
 
   // Keep track of the number of suffixes we have to add of the current
   // prefix.
@@ -39,82 +39,82 @@ SuffixTree::SuffixTree(const ArrayRef<unsigned> &Str,
   // Construct the suffix tree iteratively on each prefix of the string.
   // PfxEndIdx is the end index of the current prefix.
   // End is one past the last element in the string.
-  for (unsigned PfxEndIdx = 0, End = Str.size(); PfxEndIdx < End; PfxEndIdx++) {
+  ಪ್ರತಿ (unsigned PfxEndIdx = 0, End = Str.size(); PfxEndIdx < End; PfxEndIdx++) {
     SuffixesToAdd++;
     LeafEndIdx = PfxEndIdx; // Extend each of the leaves.
     SuffixesToAdd = extend(PfxEndIdx, SuffixesToAdd);
   }
 
   // Set the suffix indices of each leaf.
-  assert(Root && "Root node can't be nullptr!");
+  ಪ್ರತಿಜ್ಞಾ(ಬೇರು_2 && "Root node can't be nullptr!");
   setSuffixIndices();
 
   // Collect all leaf nodes of the suffix tree. And for each internal node,
   // record the range of leaf nodes that are descendants of it.
-  if (OutlinerLeafDescendants)
+  ಯದಿ (OutlinerLeafDescendants)
     setLeafNodes();
 }
 
-SuffixTreeNode *SuffixTree::insertLeaf(SuffixTreeInternalNode &Parent,
+Suffix_ವೃಕ್ಷ_ಗಂಟು *Suffix_ವೃಕ್ಷ::ಸೇರಿಸು_Leaf(Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು &Parent,
                                        unsigned StartIdx, unsigned Edge) {
-  assert(StartIdx <= LeafEndIdx && "String can't start after it ends!");
-  auto *N = new (LeafNodeAllocator.Allocate())
-      SuffixTreeLeafNode(StartIdx, &LeafEndIdx);
+  ಪ್ರತಿಜ್ಞಾ(StartIdx <= LeafEndIdx && "String can't start after it ends!");
+  auto *N = ನೂತನ (Leaf_ಗಂಟು_Allocator.Allocate())
+      Suffix_ವೃಕ್ಷ_Leaf_ಗಂಟು(StartIdx, &LeafEndIdx);
   Parent.Children[Edge] = N;
-  return N;
+  ಪ್ರತ್ಯಾಗಮ N;
 }
 
-SuffixTreeInternalNode *
-SuffixTree::insertInternalNode(SuffixTreeInternalNode *Parent,
+Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು *
+Suffix_ವೃಕ್ಷ::ಸೇರಿಸು_Internal_ಗಂಟು(Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು *Parent,
                                unsigned StartIdx, unsigned EndIdx,
                                unsigned Edge) {
-  assert(StartIdx <= EndIdx && "String can't start after it ends!");
-  assert(!(!Parent && StartIdx != SuffixTreeNode::EmptyIdx) &&
+  ಪ್ರತಿಜ್ಞಾ(StartIdx <= EndIdx && "String can't start after it ends!");
+  ಪ್ರತಿಜ್ಞಾ(!(!Parent && StartIdx != Suffix_ವೃಕ್ಷ_ಗಂಟು::EmptyIdx) &&
          "Non-root internal nodes must have parents!");
-  auto *N = new (InternalNodeAllocator.Allocate())
-      SuffixTreeInternalNode(StartIdx, EndIdx, Root);
-  if (Parent)
+  auto *N = ನೂತನ (Internal_ಗಂಟು_Allocator.Allocate())
+      Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು(StartIdx, EndIdx, ಬೇರು_2);
+  ಯದಿ (Parent)
     Parent->Children[Edge] = N;
-  return N;
+  ಪ್ರತ್ಯಾಗಮ N;
 }
 
-SuffixTreeInternalNode *SuffixTree::insertRoot() {
-  return insertInternalNode(/*Parent = */ nullptr, SuffixTreeNode::EmptyIdx,
-                            SuffixTreeNode::EmptyIdx, /*Edge = */ 0);
+Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು *Suffix_ವೃಕ್ಷ::ಸೇರಿಸು_ಬೇರು() {
+  ಪ್ರತ್ಯಾಗಮ ಸೇರಿಸು_Internal_ಗಂಟು(/*Parent = */ nullptr, Suffix_ವೃಕ್ಷ_ಗಂಟು::EmptyIdx,
+                            Suffix_ವೃಕ್ಷ_ಗಂಟು::EmptyIdx, /*Edge = */ 0);
 }
 
-void SuffixTree::setSuffixIndices() {
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ::setSuffixIndices() {
   // List of nodes we need to visit along with the current length of the
   // string.
-  SmallVector<std::pair<SuffixTreeNode *, unsigned>> ToVisit;
+  SmallVector<std::pair<Suffix_ವೃಕ್ಷ_ಗಂಟು *, unsigned>> ToVisit;
 
   // Current node being visited.
-  SuffixTreeNode *CurrNode = Root;
+  Suffix_ವೃಕ್ಷ_ಗಂಟು *Curr_ಗಂಟು = ಬೇರು_2;
 
   // Sum of the lengths of the nodes down the path to the current one.
-  unsigned CurrNodeLen = 0;
-  ToVisit.push_back({CurrNode, CurrNodeLen});
-  while (!ToVisit.empty()) {
-    std::tie(CurrNode, CurrNodeLen) = ToVisit.pop_back_val();
+  unsigned Curr_ಗಂಟು_Len = 0;
+  ToVisit.ತಳ್ಳು_back({Curr_ಗಂಟು, Curr_ಗಂಟು_Len});
+  ಯಾವತ್ (!ToVisit.empty()) {
+    std::tie(Curr_ಗಂಟು, Curr_ಗಂಟು_Len) = ToVisit.ತೆಗೆ_back_val();
     // Length of the current node from the root down to here.
-    CurrNode->setConcatLen(CurrNodeLen);
-    if (auto *InternalNode = dyn_cast<SuffixTreeInternalNode>(CurrNode))
-      for (auto &ChildPair : InternalNode->Children) {
-        assert(ChildPair.second && "Node had a null child!");
-        ToVisit.push_back(
+    Curr_ಗಂಟು->setConcatLen(Curr_ಗಂಟು_Len);
+    ಯದಿ (auto *Internal_ಗಂಟು = dyn_cast<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು>(Curr_ಗಂಟು))
+      ಪ್ರತಿ (auto &ChildPair : Internal_ಗಂಟು->Children) {
+        ಪ್ರತಿಜ್ಞಾ(ChildPair.second && "Node had a null child!");
+        ToVisit.ತಳ್ಳು_back(
             {ChildPair.second,
-             CurrNodeLen + numElementsInSubstring(ChildPair.second)});
+             Curr_ಗಂಟು_Len + ಅಂಕೆ_Elements_In_Substring(ChildPair.second)});
       }
     // No children, so we are at the end of the string.
-    if (auto *LeafNode = dyn_cast<SuffixTreeLeafNode>(CurrNode))
-      LeafNode->setSuffixIdx(Str.size() - CurrNodeLen);
+    ಯದಿ (auto *Leaf_ಗಂಟು = dyn_cast<Suffix_ವೃಕ್ಷ_Leaf_ಗಂಟು>(Curr_ಗಂಟು))
+      Leaf_ಗಂಟು->setSuffixIdx(Str.size() - Curr_ಗಂಟು_Len);
   }
 }
 
-void SuffixTree::setLeafNodes() {
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ::setLeafNodes() {
   // A stack that keeps track of nodes to visit for post-order DFS traversal.
-  SmallVector<SuffixTreeNode *> ToVisit;
-  ToVisit.push_back(Root);
+  SmallVector<Suffix_ವೃಕ್ಷ_ಗಂಟು *> ToVisit;
+  ToVisit.ತಳ್ಳು_back(ಬೇರು_2);
 
   // This keeps track of the index of the next leaf node to be added to
   // the LeafNodes vector of the suffix tree.
@@ -122,33 +122,33 @@ void SuffixTree::setLeafNodes() {
 
   // This keeps track of nodes whose children have been added to the stack.
   // The value is a pair, representing a node's first and last children.
-  DenseMap<SuffixTreeInternalNode *,
-           std::pair<SuffixTreeNode *, SuffixTreeNode *>>
+  DenseMap<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು *,
+           std::pair<Suffix_ವೃಕ್ಷ_ಗಂಟು *, Suffix_ವೃಕ್ಷ_ಗಂಟು *>>
       ChildrenMap;
 
   // Traverse the tree in post-order.
-  while (!ToVisit.empty()) {
-    SuffixTreeNode *CurrNode = ToVisit.pop_back_val();
-    if (auto *CurrInternalNode = dyn_cast<SuffixTreeInternalNode>(CurrNode)) {
+  ಯಾವತ್ (!ToVisit.empty()) {
+    Suffix_ವೃಕ್ಷ_ಗಂಟು *Curr_ಗಂಟು = ToVisit.ತೆಗೆ_back_val();
+    ಯದಿ (auto *Curr_Internal_ಗಂಟು = dyn_cast<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು>(Curr_ಗಂಟು)) {
       // The current node is an internal node.
-      auto I = ChildrenMap.find(CurrInternalNode);
-      if (I == ChildrenMap.end()) {
+      auto I = ChildrenMap.find(Curr_Internal_ಗಂಟು);
+      ಯದಿ (I == ChildrenMap.end()) {
         // This is the first time we visit this node.
         // Its children have not been added to the stack yet.
         // We add current node back, and add its children to the stack.
         // We keep track of the first and last children of the current node.
-        auto J = CurrInternalNode->Children.begin();
-        if (J != CurrInternalNode->Children.end()) {
-          ToVisit.push_back(CurrNode);
-          SuffixTreeNode *FirstChild = J->second;
-          SuffixTreeNode *LastChild = nullptr;
-          for (; J != CurrInternalNode->Children.end(); ++J) {
+        auto J = Curr_Internal_ಗಂಟು->Children.begin();
+        ಯದಿ (J != Curr_Internal_ಗಂಟು->Children.end()) {
+          ToVisit.ತಳ್ಳು_back(Curr_ಗಂಟು);
+          Suffix_ವೃಕ್ಷ_ಗಂಟು *FirstChild = J->second;
+          Suffix_ವೃಕ್ಷ_ಗಂಟು *LastChild = nullptr;
+          ಪ್ರತಿ (; J != Curr_Internal_ಗಂಟು->Children.end(); ++J) {
             LastChild = J->second;
-            ToVisit.push_back(LastChild);
+            ToVisit.ತಳ್ಳು_back(LastChild);
           }
-          ChildrenMap[CurrInternalNode] = {FirstChild, LastChild};
+          ChildrenMap[Curr_Internal_ಗಂಟು] = {FirstChild, LastChild};
         }
-      } else {
+      } ಅನ್ಯಥಾ {
         // This is the second time we visit this node.
         // All of its children have already been processed.
         // Now, we can set its LeftLeafIdx and RightLeafIdx;
@@ -157,70 +157,70 @@ void SuffixTree::setLeafNodes() {
         // The first child is the first one added to the stack, so it is
         // the last one to be processed. Hence, the leaf descendants
         // of the first child are assigned the largest index numbers.
-        CurrNode->setRightLeafIdx(FirstChild->getRightLeafIdx());
+        Curr_ಗಂಟು->set_ಬಲ_Leaf_Idx(FirstChild->get_ಬಲ_Leaf_Idx());
         // Get the last child to use its LeftLeafIdx.
-        CurrNode->setLeftLeafIdx(LastChild->getLeftLeafIdx());
-        assert(CurrNode->getLeftLeafIdx() <= CurrNode->getRightLeafIdx() &&
+        Curr_ಗಂಟು->set_ಎಡ_Leaf_Idx(LastChild->get_ಎಡ_Leaf_Idx());
+        ಪ್ರತಿಜ್ಞಾ(Curr_ಗಂಟು->get_ಎಡ_Leaf_Idx() <= Curr_ಗಂಟು->get_ಬಲ_Leaf_Idx() &&
                "LeftLeafIdx should not be larger than RightLeafIdx");
       }
-    } else {
+    } ಅನ್ಯಥಾ {
       // The current node is a leaf node.
       // We can simply set its LeftLeafIdx and RightLeafIdx.
-      CurrNode->setLeftLeafIdx(LeafCounter);
-      CurrNode->setRightLeafIdx(LeafCounter);
+      Curr_ಗಂಟು->set_ಎಡ_Leaf_Idx(LeafCounter);
+      Curr_ಗಂಟು->set_ಬಲ_Leaf_Idx(LeafCounter);
       ++LeafCounter;
-      auto *CurrLeafNode = cast<SuffixTreeLeafNode>(CurrNode);
-      LeafNodes.push_back(CurrLeafNode);
+      auto *Curr_Leaf_ಗಂಟು = cast<Suffix_ವೃಕ್ಷ_Leaf_ಗಂಟು>(Curr_ಗಂಟು);
+      LeafNodes.ತಳ್ಳು_back(Curr_Leaf_ಗಂಟು);
     }
   }
 }
 
-unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
-  SuffixTreeInternalNode *NeedsLink = nullptr;
+unsigned Suffix_ವೃಕ್ಷ::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
+  Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು *NeedsLink = nullptr;
 
-  while (SuffixesToAdd > 0) {
+  ಯಾವತ್ (SuffixesToAdd > 0) {
 
     // Are we waiting to add anything other than just the last character?
-    if (Active.Len == 0) {
+    ಯದಿ (Active.Len == 0) {
       // If not, then say the active index is the end index.
       Active.Idx = EndIdx;
     }
 
-    assert(Active.Idx <= EndIdx && "Start index can't be after end index!");
+    ಪ್ರತಿಜ್ಞಾ(Active.Idx <= EndIdx && "Start index can't be after end index!");
 
     // The first character in the current substring we're looking at.
     unsigned FirstChar = Str[Active.Idx];
 
     // Have we inserted anything starting with FirstChar at the current node?
-    if (auto It = Active.Node->Children.find(FirstChar);
-        It == Active.Node->Children.end()) {
+    ಯದಿ (auto It = Active.ಗಂಟು->Children.find(FirstChar);
+        It == Active.ಗಂಟು->Children.end()) {
       // If not, then we can just insert a leaf and move to the next step.
-      insertLeaf(*Active.Node, EndIdx, FirstChar);
+      ಸೇರಿಸು_Leaf(*Active.ಗಂಟು, EndIdx, FirstChar);
 
       // The active node is an internal node, and we visited it, so it must
       // need a link if it doesn't have one.
-      if (NeedsLink) {
-        NeedsLink->setLink(Active.Node);
+      ಯದಿ (NeedsLink) {
+        NeedsLink->setLink(Active.ಗಂಟು);
         NeedsLink = nullptr;
       }
-    } else {
+    } ಅನ್ಯಥಾ {
       // There's a match with FirstChar, so look for the point in the tree to
       // insert a new node.
-      SuffixTreeNode *NextNode = It->second;
+      Suffix_ವೃಕ್ಷ_ಗಂಟು *Next_ಗಂಟು = It->second;
 
-      unsigned SubstringLen = numElementsInSubstring(NextNode);
+      unsigned SubstringLen = ಅಂಕೆ_Elements_In_Substring(Next_ಗಂಟು);
 
       // Is the current suffix we're trying to insert longer than the size of
       // the child we want to move to?
-      if (Active.Len >= SubstringLen) {
+      ಯದಿ (Active.Len >= SubstringLen) {
         // If yes, then consume the characters we've seen and move to the next
         // node.
-        assert(isa<SuffixTreeInternalNode>(NextNode) &&
+        ಪ್ರತಿಜ್ಞಾ(isa<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು>(Next_ಗಂಟು) &&
                "Expected an internal node?");
         Active.Idx += SubstringLen;
         Active.Len -= SubstringLen;
-        Active.Node = cast<SuffixTreeInternalNode>(NextNode);
-        continue;
+        Active.ಗಂಟು = cast<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು>(Next_ಗಂಟು);
+        ಅನುವರ್ತ;
       }
 
       // Otherwise, the suffix we're trying to insert must be contained in the
@@ -228,17 +228,17 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
       unsigned LastChar = Str[EndIdx];
 
       // Is the string we're trying to insert a substring of the next node?
-      if (Str[NextNode->getStartIdx() + Active.Len] == LastChar) {
+      ಯದಿ (Str[Next_ಗಂಟು->getStartIdx() + Active.Len] == LastChar) {
         // If yes, then we're done for this step. Remember our insertion point
         // and move to the next end index. At this point, we have an implicit
         // suffix tree.
-        if (NeedsLink && !Active.Node->isRoot()) {
-          NeedsLink->setLink(Active.Node);
+        ಯದಿ (NeedsLink && !Active.ಗಂಟು->is_ಬೇರು()) {
+          NeedsLink->setLink(Active.ಗಂಟು);
           NeedsLink = nullptr;
         }
 
         Active.Len++;
-        break;
+        ಭಙ್ಗ;
       }
 
       // The string we're trying to insert isn't a substring of the next node,
@@ -255,45 +255,45 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
       //                      n   l
 
       // The node s from the diagram
-      SuffixTreeInternalNode *SplitNode = insertInternalNode(
-          Active.Node, NextNode->getStartIdx(),
-          NextNode->getStartIdx() + Active.Len - 1, FirstChar);
+      Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು *Split_ಗಂಟು = ಸೇರಿಸು_Internal_ಗಂಟು(
+          Active.ಗಂಟು, Next_ಗಂಟು->getStartIdx(),
+          Next_ಗಂಟು->getStartIdx() + Active.Len - 1, FirstChar);
 
       // Insert the new node representing the new substring into the tree as
       // a child of the split node. This is the node l from the diagram.
-      insertLeaf(*SplitNode, EndIdx, LastChar);
+      ಸೇರಿಸು_Leaf(*Split_ಗಂಟು, EndIdx, LastChar);
 
       // Make the old node a child of the split node and update its start
       // index. This is the node n from the diagram.
-      NextNode->incrementStartIdx(Active.Len);
-      SplitNode->Children[Str[NextNode->getStartIdx()]] = NextNode;
+      Next_ಗಂಟು->incrementStartIdx(Active.Len);
+      Split_ಗಂಟು->Children[Str[Next_ಗಂಟು->getStartIdx()]] = Next_ಗಂಟು;
 
       // SplitNode is an internal node, update the suffix link.
-      if (NeedsLink)
-        NeedsLink->setLink(SplitNode);
+      ಯದಿ (NeedsLink)
+        NeedsLink->setLink(Split_ಗಂಟು);
 
-      NeedsLink = SplitNode;
+      NeedsLink = Split_ಗಂಟು;
     }
 
     // We've added something new to the tree, so there's one less suffix to
     // add.
     SuffixesToAdd--;
 
-    if (Active.Node->isRoot()) {
-      if (Active.Len > 0) {
+    ಯದಿ (Active.ಗಂಟು->is_ಬೇರು()) {
+      ಯದಿ (Active.Len > 0) {
         Active.Len--;
         Active.Idx = EndIdx - SuffixesToAdd + 1;
       }
-    } else {
+    } ಅನ್ಯಥಾ {
       // Start the next phase at the next smallest suffix.
-      Active.Node = Active.Node->getLink();
+      Active.ಗಂಟು = Active.ಗಂಟು->getLink();
     }
   }
 
-  return SuffixesToAdd;
+  ಪ್ರತ್ಯಾಗಮ SuffixesToAdd;
 }
 
-void SuffixTree::RepeatedSubstringIterator::advance() {
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ::RepeatedSubstringIterator::advance() {
   // Clear the current state. If we're at the end of the range, then this
   // is the state we want to be in.
   RS = RepeatedSubstring();
@@ -303,9 +303,9 @@ void SuffixTree::RepeatedSubstringIterator::advance() {
   SmallVector<unsigned> RepeatedSubstringStarts;
 
   // Continue visiting nodes until we find one which repeats more than once.
-  while (!InternalNodesToVisit.empty()) {
+  ಯಾವತ್ (!InternalNodesToVisit.empty()) {
     RepeatedSubstringStarts.clear();
-    auto *Curr = InternalNodesToVisit.pop_back_val();
+    auto *Curr = InternalNodesToVisit.ತೆಗೆ_back_val();
 
     // Keep track of the length of the string associated with the node. If
     // it's too short, we'll quit.
@@ -313,41 +313,41 @@ void SuffixTree::RepeatedSubstringIterator::advance() {
 
     // Iterate over each child, saving internal nodes for visiting.
     // Internal nodes represent individual strings, which may repeat.
-    for (auto &ChildPair : Curr->Children)
+    ಪ್ರತಿ (auto &ChildPair : Curr->Children)
       // Save all of this node's children for processing.
-      if (auto *InternalChild =
-              dyn_cast<SuffixTreeInternalNode>(ChildPair.second))
-        InternalNodesToVisit.push_back(InternalChild);
+      ಯದಿ (auto *InternalChild =
+              dyn_cast<Suffix_ವೃಕ್ಷ_Internal_ಗಂಟು>(ChildPair.second))
+        InternalNodesToVisit.ತಳ್ಳು_back(InternalChild);
 
     // If length of repeated substring is below threshold, then skip it.
-    if (Length < MinLength)
-      continue;
+    ಯದಿ (Length < MinLength)
+      ಅನುವರ್ತ;
 
     // The root never represents a repeated substring. If we're looking at
     // that, then skip it.
-    if (Curr->isRoot())
-      continue;
+    ಯದಿ (Curr->is_ಬೇರು())
+      ಅನುವರ್ತ;
 
     // Collect leaf children or leaf descendants by OutlinerLeafDescendants.
-    if (OutlinerLeafDescendants) {
-      for (unsigned I = Curr->getLeftLeafIdx(); I <= Curr->getRightLeafIdx();
+    ಯದಿ (OutlinerLeafDescendants) {
+      ಪ್ರತಿ (unsigned I = Curr->get_ಎಡ_Leaf_Idx(); I <= Curr->get_ಬಲ_Leaf_Idx();
            ++I)
-        RepeatedSubstringStarts.push_back(LeafNodes[I]->getSuffixIdx());
-    } else {
-      for (auto &ChildPair : Curr->Children)
-        if (auto *Leaf = dyn_cast<SuffixTreeLeafNode>(ChildPair.second))
-          RepeatedSubstringStarts.push_back(Leaf->getSuffixIdx());
+        RepeatedSubstringStarts.ತಳ್ಳು_back(LeafNodes[I]->getSuffixIdx());
+    } ಅನ್ಯಥಾ {
+      ಪ್ರತಿ (auto &ChildPair : Curr->Children)
+        ಯದಿ (auto *Leaf = dyn_cast<Suffix_ವೃಕ್ಷ_Leaf_ಗಂಟು>(ChildPair.second))
+          RepeatedSubstringStarts.ತಳ್ಳು_back(Leaf->getSuffixIdx());
     }
 
     // Do we have any repeated substrings?
-    if (RepeatedSubstringStarts.size() < 2)
-      continue;
+    ಯದಿ (RepeatedSubstringStarts.size() < 2)
+      ಅನುವರ್ತ;
 
     // Yes. Update the state to reflect this, and then bail out.
     N = Curr;
     RS.Length = Length;
     llvm::append_range(RS.StartIndices, RepeatedSubstringStarts);
-    break;
+    ಭಙ್ಗ;
   }
   // At this point, either NewRS is an empty RepeatedSubstring, or it was
   // set in the above loop. Similarly, N is either nullptr, or the node

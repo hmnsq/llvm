@@ -11,855 +11,855 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Unicode.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Unicode.h"
 
-int llvm::sys::unicode::foldCharSimple(int C) {
-  if (C < 0x0041)
-    return C;
+ಪೂರ್ಣಾಙ್ಕ llvm::sys::unicode::foldCharSimple(ಪೂರ್ಣಾಙ್ಕ C) {
+  ಯದಿ (C < 0x0041)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 26 characters
-  if (C <= 0x005a)
-    return C + 32;
+  ಯದಿ (C <= 0x005a)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
   // MICRO SIGN
-  if (C == 0x00b5)
-    return 0x03bc;
-  if (C < 0x00c0)
-    return C;
+  ಯದಿ (C == 0x00b5)
+    ಪ್ರತ್ಯಾಗಮ 0x03bc;
+  ಯದಿ (C < 0x00c0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 23 characters
-  if (C <= 0x00d6)
-    return C + 32;
-  if (C < 0x00d8)
-    return C;
+  ಯದಿ (C <= 0x00d6)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x00d8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 7 characters
-  if (C <= 0x00de)
-    return C + 32;
-  if (C < 0x0100)
-    return C;
+  ಯದಿ (C <= 0x00de)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x0100)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 24 characters
-  if (C <= 0x012e)
-    return C | 1;
-  if (C < 0x0132)
-    return C;
+  ಯದಿ (C <= 0x012e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x0132)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x0136)
-    return C | 1;
-  if (C < 0x0139)
-    return C;
+  ಯದಿ (C <= 0x0136)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x0139)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x0147 && C % 2 == 1)
-    return C + 1;
-  if (C < 0x014a)
-    return C;
+  ಯದಿ (C <= 0x0147 && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x014a)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 23 characters
-  if (C <= 0x0176)
-    return C | 1;
+  ಯದಿ (C <= 0x0176)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER Y WITH DIAERESIS
-  if (C == 0x0178)
-    return 0x00ff;
-  if (C < 0x0179)
-    return C;
+  ಯದಿ (C == 0x0178)
+    ಪ್ರತ್ಯಾಗಮ 0x00ff;
+  ಯದಿ (C < 0x0179)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x017d && C % 2 == 1)
-    return C + 1;
+  ಯದಿ (C <= 0x017d && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
   // LATIN SMALL LETTER LONG S
-  if (C == 0x017f)
-    return 0x0073;
+  ಯದಿ (C == 0x017f)
+    ಪ್ರತ್ಯಾಗಮ 0x0073;
   // LATIN CAPITAL LETTER B WITH HOOK
-  if (C == 0x0181)
-    return 0x0253;
-  if (C < 0x0182)
-    return C;
+  ಯದಿ (C == 0x0181)
+    ಪ್ರತ್ಯಾಗಮ 0x0253;
+  ಯದಿ (C < 0x0182)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x0184)
-    return C | 1;
+  ಯದಿ (C <= 0x0184)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER OPEN O
-  if (C == 0x0186)
-    return 0x0254;
+  ಯದಿ (C == 0x0186)
+    ಪ್ರತ್ಯಾಗಮ 0x0254;
   // LATIN CAPITAL LETTER C WITH HOOK
-  if (C == 0x0187)
-    return 0x0188;
-  if (C < 0x0189)
-    return C;
+  ಯದಿ (C == 0x0187)
+    ಪ್ರತ್ಯಾಗಮ 0x0188;
+  ಯದಿ (C < 0x0189)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x018a)
-    return C + 205;
+  ಯದಿ (C <= 0x018a)
+    ಪ್ರತ್ಯಾಗಮ C + 205;
   // LATIN CAPITAL LETTER D WITH TOPBAR
-  if (C == 0x018b)
-    return 0x018c;
+  ಯದಿ (C == 0x018b)
+    ಪ್ರತ್ಯಾಗಮ 0x018c;
   // LATIN CAPITAL LETTER REVERSED E
-  if (C == 0x018e)
-    return 0x01dd;
+  ಯದಿ (C == 0x018e)
+    ಪ್ರತ್ಯಾಗಮ 0x01dd;
   // LATIN CAPITAL LETTER SCHWA
-  if (C == 0x018f)
-    return 0x0259;
+  ಯದಿ (C == 0x018f)
+    ಪ್ರತ್ಯಾಗಮ 0x0259;
   // LATIN CAPITAL LETTER OPEN E
-  if (C == 0x0190)
-    return 0x025b;
+  ಯದಿ (C == 0x0190)
+    ಪ್ರತ್ಯಾಗಮ 0x025b;
   // LATIN CAPITAL LETTER F WITH HOOK
-  if (C == 0x0191)
-    return 0x0192;
+  ಯದಿ (C == 0x0191)
+    ಪ್ರತ್ಯಾಗಮ 0x0192;
   // LATIN CAPITAL LETTER G WITH HOOK
-  if (C == 0x0193)
-    return 0x0260;
+  ಯದಿ (C == 0x0193)
+    ಪ್ರತ್ಯಾಗಮ 0x0260;
   // LATIN CAPITAL LETTER GAMMA
-  if (C == 0x0194)
-    return 0x0263;
+  ಯದಿ (C == 0x0194)
+    ಪ್ರತ್ಯಾಗಮ 0x0263;
   // LATIN CAPITAL LETTER IOTA
-  if (C == 0x0196)
-    return 0x0269;
+  ಯದಿ (C == 0x0196)
+    ಪ್ರತ್ಯಾಗಮ 0x0269;
   // LATIN CAPITAL LETTER I WITH STROKE
-  if (C == 0x0197)
-    return 0x0268;
+  ಯದಿ (C == 0x0197)
+    ಪ್ರತ್ಯಾಗಮ 0x0268;
   // LATIN CAPITAL LETTER K WITH HOOK
-  if (C == 0x0198)
-    return 0x0199;
+  ಯದಿ (C == 0x0198)
+    ಪ್ರತ್ಯಾಗಮ 0x0199;
   // LATIN CAPITAL LETTER TURNED M
-  if (C == 0x019c)
-    return 0x026f;
+  ಯದಿ (C == 0x019c)
+    ಪ್ರತ್ಯಾಗಮ 0x026f;
   // LATIN CAPITAL LETTER N WITH LEFT HOOK
-  if (C == 0x019d)
-    return 0x0272;
+  ಯದಿ (C == 0x019d)
+    ಪ್ರತ್ಯಾಗಮ 0x0272;
   // LATIN CAPITAL LETTER O WITH MIDDLE TILDE
-  if (C == 0x019f)
-    return 0x0275;
-  if (C < 0x01a0)
-    return C;
+  ಯದಿ (C == 0x019f)
+    ಪ್ರತ್ಯಾಗಮ 0x0275;
+  ಯದಿ (C < 0x01a0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x01a4)
-    return C | 1;
+  ಯದಿ (C <= 0x01a4)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN LETTER YR
-  if (C == 0x01a6)
-    return 0x0280;
+  ಯದಿ (C == 0x01a6)
+    ಪ್ರತ್ಯಾಗಮ 0x0280;
   // LATIN CAPITAL LETTER TONE TWO
-  if (C == 0x01a7)
-    return 0x01a8;
+  ಯದಿ (C == 0x01a7)
+    ಪ್ರತ್ಯಾಗಮ 0x01a8;
   // LATIN CAPITAL LETTER ESH
-  if (C == 0x01a9)
-    return 0x0283;
+  ಯದಿ (C == 0x01a9)
+    ಪ್ರತ್ಯಾಗಮ 0x0283;
   // LATIN CAPITAL LETTER T WITH HOOK
-  if (C == 0x01ac)
-    return 0x01ad;
+  ಯದಿ (C == 0x01ac)
+    ಪ್ರತ್ಯಾಗಮ 0x01ad;
   // LATIN CAPITAL LETTER T WITH RETROFLEX HOOK
-  if (C == 0x01ae)
-    return 0x0288;
+  ಯದಿ (C == 0x01ae)
+    ಪ್ರತ್ಯಾಗಮ 0x0288;
   // LATIN CAPITAL LETTER U WITH HORN
-  if (C == 0x01af)
-    return 0x01b0;
-  if (C < 0x01b1)
-    return C;
+  ಯದಿ (C == 0x01af)
+    ಪ್ರತ್ಯಾಗಮ 0x01b0;
+  ಯದಿ (C < 0x01b1)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x01b2)
-    return C + 217;
-  if (C < 0x01b3)
-    return C;
+  ಯದಿ (C <= 0x01b2)
+    ಪ್ರತ್ಯಾಗಮ C + 217;
+  ಯದಿ (C < 0x01b3)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x01b5 && C % 2 == 1)
-    return C + 1;
+  ಯದಿ (C <= 0x01b5 && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
   // LATIN CAPITAL LETTER EZH
-  if (C == 0x01b7)
-    return 0x0292;
-  if (C < 0x01b8)
-    return C;
+  ಯದಿ (C == 0x01b7)
+    ಪ್ರತ್ಯಾಗಮ 0x0292;
+  ಯದಿ (C < 0x01b8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x01bc && C % 4 == 0)
-    return C + 1;
+  ಯದಿ (C <= 0x01bc && C % 4 == 0)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
   // LATIN CAPITAL LETTER DZ WITH CARON
-  if (C == 0x01c4)
-    return 0x01c6;
+  ಯದಿ (C == 0x01c4)
+    ಪ್ರತ್ಯಾಗಮ 0x01c6;
   // LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
-  if (C == 0x01c5)
-    return 0x01c6;
+  ಯದಿ (C == 0x01c5)
+    ಪ್ರತ್ಯಾಗಮ 0x01c6;
   // LATIN CAPITAL LETTER LJ
-  if (C == 0x01c7)
-    return 0x01c9;
+  ಯದಿ (C == 0x01c7)
+    ಪ್ರತ್ಯಾಗಮ 0x01c9;
   // LATIN CAPITAL LETTER L WITH SMALL LETTER J
-  if (C == 0x01c8)
-    return 0x01c9;
+  ಯದಿ (C == 0x01c8)
+    ಪ್ರತ್ಯಾಗಮ 0x01c9;
   // LATIN CAPITAL LETTER NJ
-  if (C == 0x01ca)
-    return 0x01cc;
-  if (C < 0x01cb)
-    return C;
+  ಯದಿ (C == 0x01ca)
+    ಪ್ರತ್ಯಾಗಮ 0x01cc;
+  ಯದಿ (C < 0x01cb)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 9 characters
-  if (C <= 0x01db && C % 2 == 1)
-    return C + 1;
-  if (C < 0x01de)
-    return C;
+  ಯದಿ (C <= 0x01db && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x01de)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 9 characters
-  if (C <= 0x01ee)
-    return C | 1;
+  ಯದಿ (C <= 0x01ee)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER DZ
-  if (C == 0x01f1)
-    return 0x01f3;
-  if (C < 0x01f2)
-    return C;
+  ಯದಿ (C == 0x01f1)
+    ಪ್ರತ್ಯಾಗಮ 0x01f3;
+  ಯದಿ (C < 0x01f2)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x01f4)
-    return C | 1;
+  ಯದಿ (C <= 0x01f4)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER HWAIR
-  if (C == 0x01f6)
-    return 0x0195;
+  ಯದಿ (C == 0x01f6)
+    ಪ್ರತ್ಯಾಗಮ 0x0195;
   // LATIN CAPITAL LETTER WYNN
-  if (C == 0x01f7)
-    return 0x01bf;
-  if (C < 0x01f8)
-    return C;
+  ಯದಿ (C == 0x01f7)
+    ಪ್ರತ್ಯಾಗಮ 0x01bf;
+  ಯದಿ (C < 0x01f8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 20 characters
-  if (C <= 0x021e)
-    return C | 1;
+  ಯದಿ (C <= 0x021e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER N WITH LONG RIGHT LEG
-  if (C == 0x0220)
-    return 0x019e;
-  if (C < 0x0222)
-    return C;
+  ಯದಿ (C == 0x0220)
+    ಪ್ರತ್ಯಾಗಮ 0x019e;
+  ಯದಿ (C < 0x0222)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 9 characters
-  if (C <= 0x0232)
-    return C | 1;
+  ಯದಿ (C <= 0x0232)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER A WITH STROKE
-  if (C == 0x023a)
-    return 0x2c65;
+  ಯದಿ (C == 0x023a)
+    ಪ್ರತ್ಯಾಗಮ 0x2c65;
   // LATIN CAPITAL LETTER C WITH STROKE
-  if (C == 0x023b)
-    return 0x023c;
+  ಯದಿ (C == 0x023b)
+    ಪ್ರತ್ಯಾಗಮ 0x023c;
   // LATIN CAPITAL LETTER L WITH BAR
-  if (C == 0x023d)
-    return 0x019a;
+  ಯದಿ (C == 0x023d)
+    ಪ್ರತ್ಯಾಗಮ 0x019a;
   // LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
-  if (C == 0x023e)
-    return 0x2c66;
+  ಯದಿ (C == 0x023e)
+    ಪ್ರತ್ಯಾಗಮ 0x2c66;
   // LATIN CAPITAL LETTER GLOTTAL STOP
-  if (C == 0x0241)
-    return 0x0242;
+  ಯದಿ (C == 0x0241)
+    ಪ್ರತ್ಯಾಗಮ 0x0242;
   // LATIN CAPITAL LETTER B WITH STROKE
-  if (C == 0x0243)
-    return 0x0180;
+  ಯದಿ (C == 0x0243)
+    ಪ್ರತ್ಯಾಗಮ 0x0180;
   // LATIN CAPITAL LETTER U BAR
-  if (C == 0x0244)
-    return 0x0289;
+  ಯದಿ (C == 0x0244)
+    ಪ್ರತ್ಯಾಗಮ 0x0289;
   // LATIN CAPITAL LETTER TURNED V
-  if (C == 0x0245)
-    return 0x028c;
-  if (C < 0x0246)
-    return C;
+  ಯದಿ (C == 0x0245)
+    ಪ್ರತ್ಯಾಗಮ 0x028c;
+  ಯದಿ (C < 0x0246)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 5 characters
-  if (C <= 0x024e)
-    return C | 1;
+  ಯದಿ (C <= 0x024e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // COMBINING GREEK YPOGEGRAMMENI
-  if (C == 0x0345)
-    return 0x03b9;
-  if (C < 0x0370)
-    return C;
+  ಯದಿ (C == 0x0345)
+    ಪ್ರತ್ಯಾಗಮ 0x03b9;
+  ಯದಿ (C < 0x0370)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x0372)
-    return C | 1;
+  ಯದಿ (C <= 0x0372)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // GREEK CAPITAL LETTER PAMPHYLIAN DIGAMMA
-  if (C == 0x0376)
-    return 0x0377;
+  ಯದಿ (C == 0x0376)
+    ಪ್ರತ್ಯಾಗಮ 0x0377;
   // GREEK CAPITAL LETTER YOT
-  if (C == 0x037f)
-    return 0x03f3;
+  ಯದಿ (C == 0x037f)
+    ಪ್ರತ್ಯಾಗಮ 0x03f3;
   // GREEK CAPITAL LETTER ALPHA WITH TONOS
-  if (C == 0x0386)
-    return 0x03ac;
-  if (C < 0x0388)
-    return C;
+  ಯದಿ (C == 0x0386)
+    ಪ್ರತ್ಯಾಗಮ 0x03ac;
+  ಯದಿ (C < 0x0388)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x038a)
-    return C + 37;
+  ಯದಿ (C <= 0x038a)
+    ಪ್ರತ್ಯಾಗಮ C + 37;
   // GREEK CAPITAL LETTER OMICRON WITH TONOS
-  if (C == 0x038c)
-    return 0x03cc;
-  if (C < 0x038e)
-    return C;
+  ಯದಿ (C == 0x038c)
+    ಪ್ರತ್ಯಾಗಮ 0x03cc;
+  ಯದಿ (C < 0x038e)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x038f)
-    return C + 63;
-  if (C < 0x0391)
-    return C;
+  ಯದಿ (C <= 0x038f)
+    ಪ್ರತ್ಯಾಗಮ C + 63;
+  ಯದಿ (C < 0x0391)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 17 characters
-  if (C <= 0x03a1)
-    return C + 32;
-  if (C < 0x03a3)
-    return C;
+  ಯದಿ (C <= 0x03a1)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x03a3)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 9 characters
-  if (C <= 0x03ab)
-    return C + 32;
+  ಯದಿ (C <= 0x03ab)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
   // GREEK SMALL LETTER FINAL SIGMA
-  if (C == 0x03c2)
-    return 0x03c3;
+  ಯದಿ (C == 0x03c2)
+    ಪ್ರತ್ಯಾಗಮ 0x03c3;
   // GREEK CAPITAL KAI SYMBOL
-  if (C == 0x03cf)
-    return 0x03d7;
+  ಯದಿ (C == 0x03cf)
+    ಪ್ರತ್ಯಾಗಮ 0x03d7;
   // GREEK BETA SYMBOL
-  if (C == 0x03d0)
-    return 0x03b2;
+  ಯದಿ (C == 0x03d0)
+    ಪ್ರತ್ಯಾಗಮ 0x03b2;
   // GREEK THETA SYMBOL
-  if (C == 0x03d1)
-    return 0x03b8;
+  ಯದಿ (C == 0x03d1)
+    ಪ್ರತ್ಯಾಗಮ 0x03b8;
   // GREEK PHI SYMBOL
-  if (C == 0x03d5)
-    return 0x03c6;
+  ಯದಿ (C == 0x03d5)
+    ಪ್ರತ್ಯಾಗಮ 0x03c6;
   // GREEK PI SYMBOL
-  if (C == 0x03d6)
-    return 0x03c0;
-  if (C < 0x03d8)
-    return C;
+  ಯದಿ (C == 0x03d6)
+    ಪ್ರತ್ಯಾಗಮ 0x03c0;
+  ಯದಿ (C < 0x03d8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 12 characters
-  if (C <= 0x03ee)
-    return C | 1;
+  ಯದಿ (C <= 0x03ee)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // GREEK KAPPA SYMBOL
-  if (C == 0x03f0)
-    return 0x03ba;
+  ಯದಿ (C == 0x03f0)
+    ಪ್ರತ್ಯಾಗಮ 0x03ba;
   // GREEK RHO SYMBOL
-  if (C == 0x03f1)
-    return 0x03c1;
+  ಯದಿ (C == 0x03f1)
+    ಪ್ರತ್ಯಾಗಮ 0x03c1;
   // GREEK CAPITAL THETA SYMBOL
-  if (C == 0x03f4)
-    return 0x03b8;
+  ಯದಿ (C == 0x03f4)
+    ಪ್ರತ್ಯಾಗಮ 0x03b8;
   // GREEK LUNATE EPSILON SYMBOL
-  if (C == 0x03f5)
-    return 0x03b5;
+  ಯದಿ (C == 0x03f5)
+    ಪ್ರತ್ಯಾಗಮ 0x03b5;
   // GREEK CAPITAL LETTER SHO
-  if (C == 0x03f7)
-    return 0x03f8;
+  ಯದಿ (C == 0x03f7)
+    ಪ್ರತ್ಯಾಗಮ 0x03f8;
   // GREEK CAPITAL LUNATE SIGMA SYMBOL
-  if (C == 0x03f9)
-    return 0x03f2;
+  ಯದಿ (C == 0x03f9)
+    ಪ್ರತ್ಯಾಗಮ 0x03f2;
   // GREEK CAPITAL LETTER SAN
-  if (C == 0x03fa)
-    return 0x03fb;
-  if (C < 0x03fd)
-    return C;
+  ಯದಿ (C == 0x03fa)
+    ಪ್ರತ್ಯಾಗಮ 0x03fb;
+  ಯದಿ (C < 0x03fd)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x03ff)
-    return C + -130;
-  if (C < 0x0400)
-    return C;
+  ಯದಿ (C <= 0x03ff)
+    ಪ್ರತ್ಯಾಗಮ C + -130;
+  ಯದಿ (C < 0x0400)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 16 characters
-  if (C <= 0x040f)
-    return C + 80;
-  if (C < 0x0410)
-    return C;
+  ಯದಿ (C <= 0x040f)
+    ಪ್ರತ್ಯಾಗಮ C + 80;
+  ಯದಿ (C < 0x0410)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 32 characters
-  if (C <= 0x042f)
-    return C + 32;
-  if (C < 0x0460)
-    return C;
+  ಯದಿ (C <= 0x042f)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x0460)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 17 characters
-  if (C <= 0x0480)
-    return C | 1;
-  if (C < 0x048a)
-    return C;
+  ಯದಿ (C <= 0x0480)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x048a)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 27 characters
-  if (C <= 0x04be)
-    return C | 1;
+  ಯದಿ (C <= 0x04be)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // CYRILLIC LETTER PALOCHKA
-  if (C == 0x04c0)
-    return 0x04cf;
-  if (C < 0x04c1)
-    return C;
+  ಯದಿ (C == 0x04c0)
+    ಪ್ರತ್ಯಾಗಮ 0x04cf;
+  ಯದಿ (C < 0x04c1)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 7 characters
-  if (C <= 0x04cd && C % 2 == 1)
-    return C + 1;
-  if (C < 0x04d0)
-    return C;
+  ಯದಿ (C <= 0x04cd && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x04d0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 48 characters
-  if (C <= 0x052e)
-    return C | 1;
-  if (C < 0x0531)
-    return C;
+  ಯದಿ (C <= 0x052e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x0531)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 38 characters
-  if (C <= 0x0556)
-    return C + 48;
-  if (C < 0x10a0)
-    return C;
+  ಯದಿ (C <= 0x0556)
+    ಪ್ರತ್ಯಾಗಮ C + 48;
+  ಯದಿ (C < 0x10a0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 38 characters
-  if (C <= 0x10c5)
-    return C + 7264;
-  if (C < 0x10c7)
-    return C;
+  ಯದಿ (C <= 0x10c5)
+    ಪ್ರತ್ಯಾಗಮ C + 7264;
+  ಯದಿ (C < 0x10c7)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x10cd && C % 6 == 5)
-    return C + 7264;
-  if (C < 0x13f8)
-    return C;
+  ಯದಿ (C <= 0x10cd && C % 6 == 5)
+    ಪ್ರತ್ಯಾಗಮ C + 7264;
+  ಯದಿ (C < 0x13f8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 6 characters
-  if (C <= 0x13fd)
-    return C + -8;
+  ಯದಿ (C <= 0x13fd)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
   // CYRILLIC SMALL LETTER ROUNDED VE
-  if (C == 0x1c80)
-    return 0x0432;
+  ಯದಿ (C == 0x1c80)
+    ಪ್ರತ್ಯಾಗಮ 0x0432;
   // CYRILLIC SMALL LETTER LONG-LEGGED DE
-  if (C == 0x1c81)
-    return 0x0434;
+  ಯದಿ (C == 0x1c81)
+    ಪ್ರತ್ಯಾಗಮ 0x0434;
   // CYRILLIC SMALL LETTER NARROW O
-  if (C == 0x1c82)
-    return 0x043e;
-  if (C < 0x1c83)
-    return C;
+  ಯದಿ (C == 0x1c82)
+    ಪ್ರತ್ಯಾಗಮ 0x043e;
+  ಯದಿ (C < 0x1c83)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1c84)
-    return C + -6210;
+  ಯದಿ (C <= 0x1c84)
+    ಪ್ರತ್ಯಾಗಮ C + -6210;
   // CYRILLIC SMALL LETTER THREE-LEGGED TE
-  if (C == 0x1c85)
-    return 0x0442;
+  ಯದಿ (C == 0x1c85)
+    ಪ್ರತ್ಯಾಗಮ 0x0442;
   // CYRILLIC SMALL LETTER TALL HARD SIGN
-  if (C == 0x1c86)
-    return 0x044a;
+  ಯದಿ (C == 0x1c86)
+    ಪ್ರತ್ಯಾಗಮ 0x044a;
   // CYRILLIC SMALL LETTER TALL YAT
-  if (C == 0x1c87)
-    return 0x0463;
+  ಯದಿ (C == 0x1c87)
+    ಪ್ರತ್ಯಾಗಮ 0x0463;
   // CYRILLIC SMALL LETTER UNBLENDED UK
-  if (C == 0x1c88)
-    return 0xa64b;
+  ಯದಿ (C == 0x1c88)
+    ಪ್ರತ್ಯಾಗಮ 0xa64b;
   // CYRILLIC CAPITAL LETTER TJE
-  if (C == 0x1c89)
-    return 0x1c8a;
-  if (C < 0x1c90)
-    return C;
+  ಯದಿ (C == 0x1c89)
+    ಪ್ರತ್ಯಾಗಮ 0x1c8a;
+  ಯದಿ (C < 0x1c90)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 43 characters
-  if (C <= 0x1cba)
-    return C + -3008;
-  if (C < 0x1cbd)
-    return C;
+  ಯದಿ (C <= 0x1cba)
+    ಪ್ರತ್ಯಾಗಮ C + -3008;
+  ಯದಿ (C < 0x1cbd)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x1cbf)
-    return C + -3008;
-  if (C < 0x1e00)
-    return C;
+  ಯದಿ (C <= 0x1cbf)
+    ಪ್ರತ್ಯಾಗಮ C + -3008;
+  ಯದಿ (C < 0x1e00)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 75 characters
-  if (C <= 0x1e94)
-    return C | 1;
+  ಯದಿ (C <= 0x1e94)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN SMALL LETTER LONG S WITH DOT ABOVE
-  if (C == 0x1e9b)
-    return 0x1e61;
+  ಯದಿ (C == 0x1e9b)
+    ಪ್ರತ್ಯಾಗಮ 0x1e61;
   // LATIN CAPITAL LETTER SHARP S
-  if (C == 0x1e9e)
-    return 0x00df;
-  if (C < 0x1ea0)
-    return C;
+  ಯದಿ (C == 0x1e9e)
+    ಪ್ರತ್ಯಾಗಮ 0x00df;
+  ಯದಿ (C < 0x1ea0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 48 characters
-  if (C <= 0x1efe)
-    return C | 1;
-  if (C < 0x1f08)
-    return C;
+  ಯದಿ (C <= 0x1efe)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x1f08)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1f0f)
-    return C + -8;
-  if (C < 0x1f18)
-    return C;
+  ಯದಿ (C <= 0x1f0f)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f18)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 6 characters
-  if (C <= 0x1f1d)
-    return C + -8;
-  if (C < 0x1f28)
-    return C;
+  ಯದಿ (C <= 0x1f1d)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f28)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1f2f)
-    return C + -8;
-  if (C < 0x1f38)
-    return C;
+  ಯದಿ (C <= 0x1f2f)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f38)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1f3f)
-    return C + -8;
-  if (C < 0x1f48)
-    return C;
+  ಯದಿ (C <= 0x1f3f)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f48)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 6 characters
-  if (C <= 0x1f4d)
-    return C + -8;
-  if (C < 0x1f59)
-    return C;
+  ಯದಿ (C <= 0x1f4d)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f59)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 4 characters
-  if (C <= 0x1f5f && C % 2 == 1)
-    return C + -8;
-  if (C < 0x1f68)
-    return C;
+  ಯದಿ (C <= 0x1f5f && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f68)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1f6f)
-    return C + -8;
-  if (C < 0x1f88)
-    return C;
+  ಯದಿ (C <= 0x1f6f)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f88)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1f8f)
-    return C + -8;
-  if (C < 0x1f98)
-    return C;
+  ಯದಿ (C <= 0x1f8f)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1f98)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1f9f)
-    return C + -8;
-  if (C < 0x1fa8)
-    return C;
+  ಯದಿ (C <= 0x1f9f)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1fa8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0x1faf)
-    return C + -8;
-  if (C < 0x1fb8)
-    return C;
+  ಯದಿ (C <= 0x1faf)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1fb8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1fb9)
-    return C + -8;
-  if (C < 0x1fba)
-    return C;
+  ಯದಿ (C <= 0x1fb9)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1fba)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1fbb)
-    return C + -74;
+  ಯದಿ (C <= 0x1fbb)
+    ಪ್ರತ್ಯಾಗಮ C + -74;
   // GREEK CAPITAL LETTER ALPHA WITH PROSGEGRAMMENI
-  if (C == 0x1fbc)
-    return 0x1fb3;
+  ಯದಿ (C == 0x1fbc)
+    ಪ್ರತ್ಯಾಗಮ 0x1fb3;
   // GREEK PROSGEGRAMMENI
-  if (C == 0x1fbe)
-    return 0x03b9;
-  if (C < 0x1fc8)
-    return C;
+  ಯದಿ (C == 0x1fbe)
+    ಪ್ರತ್ಯಾಗಮ 0x03b9;
+  ಯದಿ (C < 0x1fc8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 4 characters
-  if (C <= 0x1fcb)
-    return C + -86;
+  ಯದಿ (C <= 0x1fcb)
+    ಪ್ರತ್ಯಾಗಮ C + -86;
   // GREEK CAPITAL LETTER ETA WITH PROSGEGRAMMENI
-  if (C == 0x1fcc)
-    return 0x1fc3;
+  ಯದಿ (C == 0x1fcc)
+    ಪ್ರತ್ಯಾಗಮ 0x1fc3;
   // GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
-  if (C == 0x1fd3)
-    return 0x0390;
-  if (C < 0x1fd8)
-    return C;
+  ಯದಿ (C == 0x1fd3)
+    ಪ್ರತ್ಯಾಗಮ 0x0390;
+  ಯದಿ (C < 0x1fd8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1fd9)
-    return C + -8;
-  if (C < 0x1fda)
-    return C;
+  ಯದಿ (C <= 0x1fd9)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1fda)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1fdb)
-    return C + -100;
+  ಯದಿ (C <= 0x1fdb)
+    ಪ್ರತ್ಯಾಗಮ C + -100;
   // GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
-  if (C == 0x1fe3)
-    return 0x03b0;
-  if (C < 0x1fe8)
-    return C;
+  ಯದಿ (C == 0x1fe3)
+    ಪ್ರತ್ಯಾಗಮ 0x03b0;
+  ಯದಿ (C < 0x1fe8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1fe9)
-    return C + -8;
-  if (C < 0x1fea)
-    return C;
+  ಯದಿ (C <= 0x1fe9)
+    ಪ್ರತ್ಯಾಗಮ C + -8;
+  ಯದಿ (C < 0x1fea)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1feb)
-    return C + -112;
+  ಯದಿ (C <= 0x1feb)
+    ಪ್ರತ್ಯಾಗಮ C + -112;
   // GREEK CAPITAL LETTER RHO WITH DASIA
-  if (C == 0x1fec)
-    return 0x1fe5;
-  if (C < 0x1ff8)
-    return C;
+  ಯದಿ (C == 0x1fec)
+    ಪ್ರತ್ಯಾಗಮ 0x1fe5;
+  ಯದಿ (C < 0x1ff8)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1ff9)
-    return C + -128;
-  if (C < 0x1ffa)
-    return C;
+  ಯದಿ (C <= 0x1ff9)
+    ಪ್ರತ್ಯಾಗಮ C + -128;
+  ಯದಿ (C < 0x1ffa)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1ffb)
-    return C + -126;
+  ಯದಿ (C <= 0x1ffb)
+    ಪ್ರತ್ಯಾಗಮ C + -126;
   // GREEK CAPITAL LETTER OMEGA WITH PROSGEGRAMMENI
-  if (C == 0x1ffc)
-    return 0x1ff3;
+  ಯದಿ (C == 0x1ffc)
+    ಪ್ರತ್ಯಾಗಮ 0x1ff3;
   // OHM SIGN
-  if (C == 0x2126)
-    return 0x03c9;
+  ಯದಿ (C == 0x2126)
+    ಪ್ರತ್ಯಾಗಮ 0x03c9;
   // KELVIN SIGN
-  if (C == 0x212a)
-    return 0x006b;
+  ಯದಿ (C == 0x212a)
+    ಪ್ರತ್ಯಾಗಮ 0x006b;
   // ANGSTROM SIGN
-  if (C == 0x212b)
-    return 0x00e5;
+  ಯದಿ (C == 0x212b)
+    ಪ್ರತ್ಯಾಗಮ 0x00e5;
   // TURNED CAPITAL F
-  if (C == 0x2132)
-    return 0x214e;
-  if (C < 0x2160)
-    return C;
+  ಯದಿ (C == 0x2132)
+    ಪ್ರತ್ಯಾಗಮ 0x214e;
+  ಯದಿ (C < 0x2160)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 16 characters
-  if (C <= 0x216f)
-    return C + 16;
+  ಯದಿ (C <= 0x216f)
+    ಪ್ರತ್ಯಾಗಮ C + 16;
   // ROMAN NUMERAL REVERSED ONE HUNDRED
-  if (C == 0x2183)
-    return 0x2184;
-  if (C < 0x24b6)
-    return C;
+  ಯದಿ (C == 0x2183)
+    ಪ್ರತ್ಯಾಗಮ 0x2184;
+  ಯದಿ (C < 0x24b6)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 26 characters
-  if (C <= 0x24cf)
-    return C + 26;
-  if (C < 0x2c00)
-    return C;
+  ಯದಿ (C <= 0x24cf)
+    ಪ್ರತ್ಯಾಗಮ C + 26;
+  ಯದಿ (C < 0x2c00)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 48 characters
-  if (C <= 0x2c2f)
-    return C + 48;
+  ಯದಿ (C <= 0x2c2f)
+    ಪ್ರತ್ಯಾಗಮ C + 48;
   // LATIN CAPITAL LETTER L WITH DOUBLE BAR
-  if (C == 0x2c60)
-    return 0x2c61;
+  ಯದಿ (C == 0x2c60)
+    ಪ್ರತ್ಯಾಗಮ 0x2c61;
   // LATIN CAPITAL LETTER L WITH MIDDLE TILDE
-  if (C == 0x2c62)
-    return 0x026b;
+  ಯದಿ (C == 0x2c62)
+    ಪ್ರತ್ಯಾಗಮ 0x026b;
   // LATIN CAPITAL LETTER P WITH STROKE
-  if (C == 0x2c63)
-    return 0x1d7d;
+  ಯದಿ (C == 0x2c63)
+    ಪ್ರತ್ಯಾಗಮ 0x1d7d;
   // LATIN CAPITAL LETTER R WITH TAIL
-  if (C == 0x2c64)
-    return 0x027d;
-  if (C < 0x2c67)
-    return C;
+  ಯದಿ (C == 0x2c64)
+    ಪ್ರತ್ಯಾಗಮ 0x027d;
+  ಯದಿ (C < 0x2c67)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x2c6b && C % 2 == 1)
-    return C + 1;
+  ಯದಿ (C <= 0x2c6b && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
   // LATIN CAPITAL LETTER ALPHA
-  if (C == 0x2c6d)
-    return 0x0251;
+  ಯದಿ (C == 0x2c6d)
+    ಪ್ರತ್ಯಾಗಮ 0x0251;
   // LATIN CAPITAL LETTER M WITH HOOK
-  if (C == 0x2c6e)
-    return 0x0271;
+  ಯದಿ (C == 0x2c6e)
+    ಪ್ರತ್ಯಾಗಮ 0x0271;
   // LATIN CAPITAL LETTER TURNED A
-  if (C == 0x2c6f)
-    return 0x0250;
+  ಯದಿ (C == 0x2c6f)
+    ಪ್ರತ್ಯಾಗಮ 0x0250;
   // LATIN CAPITAL LETTER TURNED ALPHA
-  if (C == 0x2c70)
-    return 0x0252;
-  if (C < 0x2c72)
-    return C;
+  ಯದಿ (C == 0x2c70)
+    ಪ್ರತ್ಯಾಗಮ 0x0252;
+  ಯದಿ (C < 0x2c72)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x2c75 && C % 3 == 2)
-    return C + 1;
-  if (C < 0x2c7e)
-    return C;
+  ಯದಿ (C <= 0x2c75 && C % 3 == 2)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x2c7e)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x2c7f)
-    return C + -10815;
-  if (C < 0x2c80)
-    return C;
+  ಯದಿ (C <= 0x2c7f)
+    ಪ್ರತ್ಯಾಗಮ C + -10815;
+  ಯದಿ (C < 0x2c80)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 50 characters
-  if (C <= 0x2ce2)
-    return C | 1;
-  if (C < 0x2ceb)
-    return C;
+  ಯದಿ (C <= 0x2ce2)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x2ceb)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x2ced && C % 2 == 1)
-    return C + 1;
-  if (C < 0x2cf2)
-    return C;
+  ಯದಿ (C <= 0x2ced && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x2cf2)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0xa640 && C % 31054 == 11506)
-    return C + 1;
-  if (C < 0xa642)
-    return C;
+  ಯದಿ (C <= 0xa640 && C % 31054 == 11506)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0xa642)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 22 characters
-  if (C <= 0xa66c)
-    return C | 1;
-  if (C < 0xa680)
-    return C;
+  ಯದಿ (C <= 0xa66c)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0xa680)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 14 characters
-  if (C <= 0xa69a)
-    return C | 1;
-  if (C < 0xa722)
-    return C;
+  ಯದಿ (C <= 0xa69a)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0xa722)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 7 characters
-  if (C <= 0xa72e)
-    return C | 1;
-  if (C < 0xa732)
-    return C;
+  ಯದಿ (C <= 0xa72e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0xa732)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 31 characters
-  if (C <= 0xa76e)
-    return C | 1;
-  if (C < 0xa779)
-    return C;
+  ಯದಿ (C <= 0xa76e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0xa779)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0xa77b && C % 2 == 1)
-    return C + 1;
+  ಯದಿ (C <= 0xa77b && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
   // LATIN CAPITAL LETTER INSULAR G
-  if (C == 0xa77d)
-    return 0x1d79;
-  if (C < 0xa77e)
-    return C;
+  ಯದಿ (C == 0xa77d)
+    ಪ್ರತ್ಯಾಗಮ 0x1d79;
+  ಯದಿ (C < 0xa77e)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 5 characters
-  if (C <= 0xa786)
-    return C | 1;
+  ಯದಿ (C <= 0xa786)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER SALTILLO
-  if (C == 0xa78b)
-    return 0xa78c;
+  ಯದಿ (C == 0xa78b)
+    ಪ್ರತ್ಯಾಗಮ 0xa78c;
   // LATIN CAPITAL LETTER TURNED H
-  if (C == 0xa78d)
-    return 0x0265;
-  if (C < 0xa790)
-    return C;
+  ಯದಿ (C == 0xa78d)
+    ಪ್ರತ್ಯಾಗಮ 0x0265;
+  ಯದಿ (C < 0xa790)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0xa792)
-    return C | 1;
-  if (C < 0xa796)
-    return C;
+  ಯದಿ (C <= 0xa792)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0xa796)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 10 characters
-  if (C <= 0xa7a8)
-    return C | 1;
+  ಯದಿ (C <= 0xa7a8)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER H WITH HOOK
-  if (C == 0xa7aa)
-    return 0x0266;
+  ಯದಿ (C == 0xa7aa)
+    ಪ್ರತ್ಯಾಗಮ 0x0266;
   // LATIN CAPITAL LETTER REVERSED OPEN E
-  if (C == 0xa7ab)
-    return 0x025c;
+  ಯದಿ (C == 0xa7ab)
+    ಪ್ರತ್ಯಾಗಮ 0x025c;
   // LATIN CAPITAL LETTER SCRIPT G
-  if (C == 0xa7ac)
-    return 0x0261;
+  ಯದಿ (C == 0xa7ac)
+    ಪ್ರತ್ಯಾಗಮ 0x0261;
   // LATIN CAPITAL LETTER L WITH BELT
-  if (C == 0xa7ad)
-    return 0x026c;
+  ಯದಿ (C == 0xa7ad)
+    ಪ್ರತ್ಯಾಗಮ 0x026c;
   // LATIN CAPITAL LETTER SMALL CAPITAL I
-  if (C == 0xa7ae)
-    return 0x026a;
+  ಯದಿ (C == 0xa7ae)
+    ಪ್ರತ್ಯಾಗಮ 0x026a;
   // LATIN CAPITAL LETTER TURNED K
-  if (C == 0xa7b0)
-    return 0x029e;
+  ಯದಿ (C == 0xa7b0)
+    ಪ್ರತ್ಯಾಗಮ 0x029e;
   // LATIN CAPITAL LETTER TURNED T
-  if (C == 0xa7b1)
-    return 0x0287;
+  ಯದಿ (C == 0xa7b1)
+    ಪ್ರತ್ಯಾಗಮ 0x0287;
   // LATIN CAPITAL LETTER J WITH CROSSED-TAIL
-  if (C == 0xa7b2)
-    return 0x029d;
+  ಯದಿ (C == 0xa7b2)
+    ಪ್ರತ್ಯಾಗಮ 0x029d;
   // LATIN CAPITAL LETTER CHI
-  if (C == 0xa7b3)
-    return 0xab53;
-  if (C < 0xa7b4)
-    return C;
+  ಯದಿ (C == 0xa7b3)
+    ಪ್ರತ್ಯಾಗಮ 0xab53;
+  ಯದಿ (C < 0xa7b4)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0xa7c2)
-    return C | 1;
+  ಯದಿ (C <= 0xa7c2)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER C WITH PALATAL HOOK
-  if (C == 0xa7c4)
-    return 0xa794;
+  ಯದಿ (C == 0xa7c4)
+    ಪ್ರತ್ಯಾಗಮ 0xa794;
   // LATIN CAPITAL LETTER S WITH HOOK
-  if (C == 0xa7c5)
-    return 0x0282;
+  ಯದಿ (C == 0xa7c5)
+    ಪ್ರತ್ಯಾಗಮ 0x0282;
   // LATIN CAPITAL LETTER Z WITH PALATAL HOOK
-  if (C == 0xa7c6)
-    return 0x1d8e;
-  if (C < 0xa7c7)
-    return C;
+  ಯದಿ (C == 0xa7c6)
+    ಪ್ರತ್ಯಾಗಮ 0x1d8e;
+  ಯದಿ (C < 0xa7c7)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0xa7c9 && C % 2 == 1)
-    return C + 1;
+  ಯದಿ (C <= 0xa7c9 && C % 2 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
   // LATIN CAPITAL LETTER RAMS HORN
-  if (C == 0xa7cb)
-    return 0x0264;
-  if (C < 0xa7cc)
-    return C;
+  ಯದಿ (C == 0xa7cb)
+    ಪ್ರತ್ಯಾಗಮ 0x0264;
+  ಯದಿ (C < 0xa7cc)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 8 characters
-  if (C <= 0xa7da)
-    return C | 1;
+  ಯದಿ (C <= 0xa7da)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN CAPITAL LETTER LAMBDA WITH STROKE
-  if (C == 0xa7dc)
-    return 0x019b;
-  if (C < 0xa7dd)
-    return C;
+  ಯದಿ (C == 0xa7dc)
+    ಪ್ರತ್ಯಾಗಮ 0x019b;
+  ಯದಿ (C < 0xa7dd)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0xa7e2 && C % 5 == 3)
-    return C + -42342;
+  ಯದಿ (C <= 0xa7e2 && C % 5 == 3)
+    ಪ್ರತ್ಯಾಗಮ C + -42342;
   // LATIN CAPITAL LETTER REVERSED HALF H
-  if (C == 0xa7f5)
-    return 0xa7f6;
-  if (C < 0xab6c)
-    return C;
+  ಯದಿ (C == 0xa7f5)
+    ಪ್ರತ್ಯಾಗಮ 0xa7f6;
+  ಯದಿ (C < 0xab6c)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0xab6d)
-    return C + -33;
-  if (C < 0xab70)
-    return C;
+  ಯದಿ (C <= 0xab6d)
+    ಪ್ರತ್ಯಾಗಮ C + -33;
+  ಯದಿ (C < 0xab70)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 80 characters
-  if (C <= 0xabbf)
-    return C + -38864;
+  ಯದಿ (C <= 0xabbf)
+    ಪ್ರತ್ಯಾಗಮ C + -38864;
   // LATIN SMALL LIGATURE LONG S T
-  if (C == 0xfb05)
-    return 0xfb06;
-  if (C < 0xff21)
-    return C;
+  ಯದಿ (C == 0xfb05)
+    ಪ್ರತ್ಯಾಗಮ 0xfb06;
+  ಯದಿ (C < 0xff21)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 26 characters
-  if (C <= 0xff3a)
-    return C + 32;
-  if (C < 0x10400)
-    return C;
+  ಯದಿ (C <= 0xff3a)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x10400)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 40 characters
-  if (C <= 0x10427)
-    return C + 40;
-  if (C < 0x104b0)
-    return C;
+  ಯದಿ (C <= 0x10427)
+    ಪ್ರತ್ಯಾಗಮ C + 40;
+  ಯದಿ (C < 0x104b0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 36 characters
-  if (C <= 0x104d3)
-    return C + 40;
-  if (C < 0x10570)
-    return C;
+  ಯದಿ (C <= 0x104d3)
+    ಪ್ರತ್ಯಾಗಮ C + 40;
+  ಯದಿ (C < 0x10570)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 11 characters
-  if (C <= 0x1057a)
-    return C + 39;
-  if (C < 0x1057c)
-    return C;
+  ಯದಿ (C <= 0x1057a)
+    ಪ್ರತ್ಯಾಗಮ C + 39;
+  ಯದಿ (C < 0x1057c)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 15 characters
-  if (C <= 0x1058a)
-    return C + 39;
-  if (C < 0x1058c)
-    return C;
+  ಯದಿ (C <= 0x1058a)
+    ಪ್ರತ್ಯಾಗಮ C + 39;
+  ಯದಿ (C < 0x1058c)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 7 characters
-  if (C <= 0x10592)
-    return C + 39;
-  if (C < 0x10594)
-    return C;
+  ಯದಿ (C <= 0x10592)
+    ಪ್ರತ್ಯಾಗಮ C + 39;
+  ಯದಿ (C < 0x10594)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x10595)
-    return C + 39;
-  if (C < 0x10c80)
-    return C;
+  ಯದಿ (C <= 0x10595)
+    ಪ್ರತ್ಯಾಗಮ C + 39;
+  ಯದಿ (C < 0x10c80)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 51 characters
-  if (C <= 0x10cb2)
-    return C + 64;
-  if (C < 0x10d50)
-    return C;
+  ಯದಿ (C <= 0x10cb2)
+    ಪ್ರತ್ಯಾಗಮ C + 64;
+  ಯದಿ (C < 0x10d50)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 22 characters
-  if (C <= 0x10d65)
-    return C + 32;
-  if (C < 0x118a0)
-    return C;
+  ಯದಿ (C <= 0x10d65)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x118a0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 32 characters
-  if (C <= 0x118bf)
-    return C + 32;
-  if (C < 0x16e40)
-    return C;
+  ಯದಿ (C <= 0x118bf)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x16e40)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 32 characters
-  if (C <= 0x16e5f)
-    return C + 32;
-  if (C < 0x16ea0)
-    return C;
+  ಯದಿ (C <= 0x16e5f)
+    ಪ್ರತ್ಯಾಗಮ C + 32;
+  ಯದಿ (C < 0x16ea0)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 25 characters
-  if (C <= 0x16eb8)
-    return C + 27;
-  if (C < 0x1df40)
-    return C;
+  ಯದಿ (C <= 0x16eb8)
+    ಪ್ರತ್ಯಾಗಮ C + 27;
+  ಯದಿ (C < 0x1df40)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1df48 && C % 8 == 0)
-    return C + 1;
-  if (C < 0x1df4a)
-    return C;
+  ಯದಿ (C <= 0x1df48 && C % 8 == 0)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x1df4a)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1df4d && C % 3 == 1)
-    return C + 1;
-  if (C < 0x1df51)
-    return C;
+  ಯದಿ (C <= 0x1df4d && C % 3 == 1)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x1df51)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 2 characters
-  if (C <= 0x1df68 && C % 23 == 0)
-    return C + 1;
-  if (C < 0x1df6a)
-    return C;
+  ಯದಿ (C <= 0x1df68 && C % 23 == 0)
+    ಪ್ರತ್ಯಾಗಮ C + 1;
+  ಯದಿ (C < 0x1df6a)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 3 characters
-  if (C <= 0x1df6e)
-    return C | 1;
-  if (C < 0x1df72)
-    return C;
+  ಯದಿ (C <= 0x1df6e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
+  ಯದಿ (C < 0x1df72)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 7 characters
-  if (C <= 0x1df7e)
-    return C | 1;
+  ಯದಿ (C <= 0x1df7e)
+    ಪ್ರತ್ಯಾಗಮ C | 1;
   // LATIN SMALL LIGATURE LONG S WITH DESCENDER S
-  if (C == 0x1df95)
-    return 0x00df;
-  if (C < 0x1e900)
-    return C;
+  ಯದಿ (C == 0x1df95)
+    ಪ್ರತ್ಯಾಗಮ 0x00df;
+  ಯದಿ (C < 0x1e900)
+    ಪ್ರತ್ಯಾಗಮ C;
   // 34 characters
-  if (C <= 0x1e921)
-    return C + 34;
+  ಯದಿ (C <= 0x1e921)
+    ಪ್ರತ್ಯಾಗಮ C + 34;
 
-  return C;
+  ಪ್ರತ್ಯಾಗಮ C;
 }

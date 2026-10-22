@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ "regex_impl.h"
 
-#include "regutils.h"
+#ಅನ್ತರ್ಭಾವ "regutils.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *regatoi(ಧ್ರುವ llvm_regex_t *, ವರ್ಣ *, ಪೂರ್ಣಾಙ್ಕ);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+ಸ್ಥಿರ ಸಂರಚನಾ rerr {
+	ಪೂರ್ಣಾಙ್ಕ code;
+	ಧ್ರುವ ವರ್ಣ *name;
+	ಧ್ರುವ ವರ್ಣ *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(ಪೂರ್ಣಾಙ್ಕ errcode, ಧ್ರುವ llvm_regex_t *preg, ವರ್ಣ *errbuf, size_t errbuf_size)
 {
-	struct rerr *r;
+	ಸಂರಚನಾ rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	ಪೂರ್ಣಾಙ್ಕ target = errcode &~ REG_ITOA;
+	ಧ್ರುವ ವರ್ಣ *s;
+	ವರ್ಣ convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	ಯದಿ (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, ಪರಿಮಾಣ convbuf);
+	ಅನ್ಯಥಾ {
+		ಪ್ರತಿ (r = rerrs; r->code != 0; r++)
+			ಯದಿ (r->code == target)
+				ಭಙ್ಗ;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
+		ಯದಿ (errcode&REG_ITOA) {
+			ಯದಿ (r->code != 0) {
+				ಪ್ರತಿಜ್ಞಾ(strlen(r->name) < ಪರಿಮಾಣ(convbuf));
+				(ಶೂನ್ಯ) llvm_strlcpy(convbuf, r->name, ಪರಿಮಾಣ convbuf);
+			} ಅನ್ಯಥಾ
+				(ಶೂನ್ಯ)snprintf(convbuf, ಪರಿಮಾಣ convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} ಅನ್ಯಥಾ
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	ಯದಿ (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	ಪ್ರತ್ಯಾಗಮ(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *
+regatoi(ಧ್ರುವ llvm_regex_t *preg, ವರ್ಣ *localbuf, ಪೂರ್ಣಾಙ್ಕ localbufsize)
 {
-	struct rerr *r;
+	ಸಂರಚನಾ rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	ಪ್ರತಿ (r = rerrs; r->code != 0; r++)
+		ಯದಿ (strcmp(r->name, preg->re_endp) == 0)
+			ಭಙ್ಗ;
+	ಯದಿ (r->code == 0)
+		ಪ್ರತ್ಯಾಗಮ("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(ಶೂನ್ಯ)snprintf(localbuf, localbufsize, "%d", r->code);
+	ಪ್ರತ್ಯಾಗಮ(localbuf);
 }

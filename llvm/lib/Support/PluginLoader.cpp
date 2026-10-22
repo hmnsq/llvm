@@ -11,48 +11,48 @@
 //===----------------------------------------------------------------------===//
 
 #define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#ಅನ್ತರ್ಭಾವ "llvm/Support/PluginLoader.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/DynamicLibrary.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Mutex.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ <vector>
+using ನಾಮಾಕಾಶ llvm;
 
-namespace {
+ನಾಮಾಕಾಶ {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
+ಸಂರಚನಾ Plugins {
+  sys::SmartMutex<ಸತ್ಯ> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  ಸ್ಥಿರ Plugins P;
+  ಪ್ರತ್ಯಾಗಮ P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
+ಶೂನ್ಯ PluginLoader::operator=(ಧ್ರುವ std::string &Filename) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+  sys::SmartScopedLock<ಸತ್ಯ> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  ಯದಿ (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } ಅನ್ಯಥಾ {
+    P.List.ತಳ್ಳು_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
+unsigned PluginLoader::get_ಅಂಕೆ_Plugins() {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  sys::SmartScopedLock<ಸತ್ಯ> Lock(P.Lock);
+  ಪ್ರತ್ಯಾಗಮ P.List.size();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
+std::string &PluginLoader::getPlugin(unsigned ಅಂಕೆ_2) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  sys::SmartScopedLock<ಸತ್ಯ> Lock(P.Lock);
+  ಪ್ರತಿಜ್ಞಾ(ಅಂಕೆ_2 < P.List.size() && "Asking for an out of bounds plugin");
+  ಪ್ರತ್ಯಾಗಮ P.List[ಅಂಕೆ_2];
 }

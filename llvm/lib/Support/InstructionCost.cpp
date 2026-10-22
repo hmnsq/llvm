@@ -11,27 +11,27 @@
 /// instructions.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InstructionCost.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/InstructionCost.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
+ಶೂನ್ಯ InstructionCost::print(raw_ostream &OS) ಧ್ರುವ {
   using UnsignedCostType = std::make_unsigned_t<CostType>;
-  if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+  ಯದಿ (isValid()) {
+    UnsignedCostType Abs_ಮೌಲ್ಯ =
+        (ಮೌಲ್ಯ < 0) ? -((UnsignedCostType)ಮೌಲ್ಯ) : ((UnsignedCostType)ಮೌಲ್ಯ);
+    UnsignedCostType Whole_ಸಂಖ್ಯೆ = Abs_ಮೌಲ್ಯ / CostGranularity;
+    UnsignedCostType Remainder = Abs_ಮೌಲ್ಯ % CostGranularity;
+    ಯದಿ (ಮೌಲ್ಯ < 0)
       OS << "-";
     UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
-    while (RemainderHundreds % 10 == 0 && RemainderHundreds)
+    ಯಾವತ್ (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
-    if (RemainderHundreds)
+    OS << Whole_ಸಂಖ್ಯೆ;
+    ಯದಿ (RemainderHundreds)
       OS << "." << RemainderHundreds;
-  } else {
+  } ಅನ್ಯಥಾ {
     OS << "Invalid";
   }
 }

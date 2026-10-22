@@ -12,38 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RandomNumberGenerator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/RandomNumberGenerator.h"
 
-#include "DebugOptions.h"
+#ಅನ್ತರ್ಭಾವ "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CommandLine.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Error.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ManagedStatic.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 #ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
-#else
-#include "Unix/Unix.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Windows/WindowsSupport.h"
+#ಅನ್ಯಥಾ
+#ಅನ್ತರ್ಭಾವ "Unix/Unix.h"
 #endif
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
 #define DEBUG_TYPE "rng"
-namespace {
-struct CreateSeed {
-  static void *call() {
-    return new cl::opt<uint64_t>(
-        "rng-seed", cl::value_desc("seed"), cl::Hidden,
+ನಾಮಾಕಾಶ {
+ಸಂರಚನಾ CreateSeed {
+  ಸ್ಥಿರ ಶೂನ್ಯ *call() {
+    ಪ್ರತ್ಯಾಗಮ ನೂತನ cl::opt<uint64_t>(
+        "rng-seed", cl::ಮೌಲ್ಯ_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
-void llvm::initRandomSeedOptions() { *Seed; }
+ಸ್ಥಿರ ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
+ಶೂನ್ಯ llvm::initRandomSeedOptions() { *Seed; }
 
-RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
-  LLVM_DEBUG(if (*Seed == 0) dbgs()
+Random_ಸಂಖ್ಯೆ_Generator::Random_ಸಂಖ್ಯೆ_Generator(StringRef Salt) {
+  LLVM_DEBUG(ಯದಿ (*Seed == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
   // Combine seed and salts using std::seed_seq.
@@ -62,35 +62,35 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
   Generator.seed(SeedSeq);
 }
 
-RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
-  return Generator();
+Random_ಸಂಖ್ಯೆ_Generator::result_type Random_ಸಂಖ್ಯೆ_Generator::operator()() {
+  ಪ್ರತ್ಯಾಗಮ Generator();
 }
 
 // Get random vector of specified size
-std::error_code llvm::getRandomBytes(void *Buffer, size_t Size) {
+std::error_code llvm::getRandomBytes(ಶೂನ್ಯ *Buffer, size_t Size) {
 #ifdef _WIN32
   HCRYPTPROV hProvider;
-  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
+  ಯದಿ (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     ScopedCryptContext ScopedHandle(hProvider);
-    if (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
-      return std::error_code();
+    ಯದಿ (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
+      ಪ್ರತ್ಯಾಗಮ std::error_code();
   }
-  return std::error_code(GetLastError(), std::system_category());
-#else
-  int Fd = open("/dev/urandom", O_RDONLY);
-  if (Fd != -1) {
+  ಪ್ರತ್ಯಾಗಮ std::error_code(GetLastError(), std::system_category());
+#ಅನ್ಯಥಾ
+  ಪೂರ್ಣಾಙ್ಕ Fd = open("/dev/urandom", O_RDONLY);
+  ಯದಿ (Fd != -1) {
     std::error_code Ret;
-    ssize_t BytesRead = read(Fd, Buffer, Size);
-    if (BytesRead == -1)
+    ssize_t BytesRead = ಪಠ(Fd, Buffer, Size);
+    ಯದಿ (BytesRead == -1)
       Ret = errnoAsErrorCode();
-    else if (BytesRead != static_cast<ssize_t>(Size))
+    ಅನ್ಯಥಾ ಯದಿ (BytesRead != static_cast<ssize_t>(Size))
       Ret = std::error_code(EIO, std::system_category());
-    if (close(Fd) == -1)
+    ಯದಿ (close(Fd) == -1)
       Ret = errnoAsErrorCode();
 
-    return Ret;
+    ಪ್ರತ್ಯಾಗಮ Ret;
   }
-  return errnoAsErrorCode();
+  ಪ್ರತ್ಯಾಗಮ errnoAsErrorCode();
 #endif
 }

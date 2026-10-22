@@ -5,33 +5,33 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "llvm/ADT/DynamicAPInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/DynamicAPInt.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/Hashing.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-hash_code llvm::hash_value(const DynamicAPInt &X) {
-  if (X.isSmall())
-    return llvm::hash_value(X.getSmall());
-  return detail::hash_value(X.getLarge());
+hash_code llvm::hash_ಮೌಲ್ಯ(ಧ್ರುವ DynamicAPInt &X) {
+  ಯದಿ (X.isSmall())
+    ಪ್ರತ್ಯಾಗಮ llvm::hash_ಮೌಲ್ಯ(X.getSmall());
+  ಪ್ರತ್ಯಾಗಮ detail::hash_ಮೌಲ್ಯ(X.getLarge());
 }
 
-void DynamicAPInt::static_assert_layout() {
+ಶೂನ್ಯ DynamicAPInt::static_assert_layout() {
   constexpr size_t ValLargeOffset =
       offsetof(DynamicAPInt, ValLarge.Val.BitWidth);
   constexpr size_t ValSmallOffset = offsetof(DynamicAPInt, ValSmall);
-  constexpr size_t ValSmallSize = sizeof(ValSmall);
+  constexpr size_t ValSmallSize = ಪರಿಮಾಣ(ValSmall);
   static_assert(ValLargeOffset >= ValSmallOffset + ValSmallSize);
 }
 
-raw_ostream &DynamicAPInt::print(raw_ostream &OS) const {
-  if (isSmall())
-    return OS << ValSmall;
-  return OS << ValLarge;
+raw_ostream &DynamicAPInt::print(raw_ostream &OS) ಧ್ರುವ {
+  ಯದಿ (isSmall())
+    ಪ್ರತ್ಯಾಗಮ OS << ValSmall;
+  ಪ್ರತ್ಯಾಗಮ OS << ValLarge;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void DynamicAPInt::dump() const { print(dbgs()); }
+#ಯದಿ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD ಶೂನ್ಯ DynamicAPInt::dump() ಧ್ರುವ { print(dbgs()); }
 #endif

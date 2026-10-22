@@ -6,129 +6,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Driver.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Driver.h"
 
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/Path.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallVector.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/InitLLVM.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Path.h"
 
-#include <cassert>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#ಅನ್ತರ್ಭಾವ <cassert>
+#ಅನ್ತರ್ಭಾವ <string>
+#ಅನ್ತರ್ಭಾವ <system_error>
+#ಅನ್ತರ್ಭಾವ <utility>
+#ಅನ್ತರ್ಭಾವ <vector>
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-namespace {
+ನಾಮಾಕಾಶ {
 
-bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
+ತಾರ್ಕಿಕ matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
   StringRef Stem = sys::path::stem(InvokedName);
   StringRef Filename = sys::path::filename(InvokedName);
   auto Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
+    ಪ್ರತ್ಯಾಗಮ Position != StringRef::npos &&
            (Position + RegisteredName.size() == Candidate.size() ||
             !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  ಪ್ರತ್ಯಾಗಮ Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+ತಾರ್ಕಿಕ isMulticallName(StringRef Name) { ಪ್ರತ್ಯಾಗಮ matchesToolName("llvm", Name); }
 
 } // namespace
 
-struct ToolSession::Impl {
+ಸಂರಚನಾ ToolSession::Impl {
   InitLLVM Initialization;
   std::string ExecutablePath;
   std::vector<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
-       bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
+  Impl(ಪೂರ್ಣಾಙ್ಕ &Argc, ವರ್ಣ **&Argv, ArrayRef<CallableTool> RegisteredTools,
+       ತಾರ್ಕಿಕ InstallPipeSignalExitHandler, ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
         ExecutablePath(Argv[0]) {
     Tools.reserve(RegisteredTools.size());
-    for (const CallableTool &Tool : RegisteredTools)
+    ಪ್ರತಿ (ಧ್ರುವ CallableTool &Tool : RegisteredTools)
       Tools.emplace_back(Tool.Name.str(), Tool.Main);
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
-                         bool InstallPipeSignalExitHandler,
-                         bool NeedsPOSIXUtilitySignalHandling) {
-  assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
+ToolSession::ToolSession(ಪೂರ್ಣಾಙ್ಕ &Argc, ವರ್ಣ **&Argv, ArrayRef<CallableTool> Tools,
+                         ತಾರ್ಕಿಕ InstallPipeSignalExitHandler,
+                         ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling) {
+  ಪ್ರತಿಜ್ಞಾ(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
   PImpl =
       std::make_unique<Impl>(Argc, Argv, Tools, InstallPipeSignalExitHandler,
                              NeedsPOSIXUtilitySignalHandling);
 }
 
-ToolSession::~ToolSession() = default;
+ToolSession::~ToolSession() = ಸ್ವಭಾವ;
 
-ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
+ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) ಧ್ರುವ {
   StringRef Stem = sys::path::stem(Name);
   StringRef Filename = sys::path::filename(Name);
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+  ಪ್ರತಿ (ಧ್ರುವ auto &[RegisteredName, Main] : PImpl->Tools)
+    ಯದಿ (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      ಪ್ರತ್ಯಾಗಮ CallableTool{RegisteredName, Main};
 
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+  ಪ್ರತಿ (ಧ್ರುವ auto &[RegisteredName, Main] : PImpl->Tools)
+    ಯದಿ (matchesToolName(RegisteredName, Name))
+      ಪ್ರತ್ಯಾಗಮ CallableTool{RegisteredName, Main};
+  ಪ್ರತ್ಯಾಗಮ make_error_code(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
-                                     const char *PrependArg) {
+                                     ಧ್ರುವ ವರ್ಣ *PrependArg) {
   ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->ExecutablePath);
-  bool NeedsPrependArg =
+  ತಾರ್ಕಿಕ NeedsPrependArg =
       !ExecutableTool ||
       !ExecutableTool->Name.equals_insensitive(RegisteredName);
   ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
                       NeedsPrependArg);
-  Context.Session = this;
-  return Context;
+  Context.Session = ಏತತ್;
+  ಪ್ರತ್ಯಾಗಮ Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<ಪೂರ್ಣಾಙ್ಕ> ToolSession::callTool(ArrayRef<ಧ್ರುವ ವರ್ಣ *> Args) {
+  ಯದಿ (Args.empty())
+    ಪ್ರತ್ಯಾಗಮ make_error_code(std::errc::invalid_argument);
 
   StringRef InvokedName = Args.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
+  ಯದಿ (!Tool) {
+    ಯದಿ (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
+      ಪ್ರತ್ಯಾಗಮ make_error_code(std::errc::no_such_file_or_directory);
     Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
+    ಯದಿ (Args.empty())
+      ಪ್ರತ್ಯಾಗಮ make_error_code(std::errc::invalid_argument);
     InvokedName = Args.front();
     Tool = findTool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  ಯದಿ (!Tool)
+    ಪ್ರತ್ಯಾಗಮ Tool.getError();
 
   std::string PrependArg = sys::path::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
+  SmallVector<ವರ್ಣ *, 16> MutableArgs;
   MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
-  MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  ಪ್ರತಿ (ಧ್ರುವ ವರ್ಣ *Arg : Args)
+    MutableArgs.ತಳ್ಳು_back(const_cast<ವರ್ಣ *>(Arg));
+  MutableArgs.ತಳ್ಳು_back(nullptr);
+  ಪ್ರತ್ಯಾಗಮ Tool->Main(Args.size(), MutableArgs.data(), Context);
 }
 
-ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) ಧ್ರುವ {
+  ಯದಿ (!Session)
+    ಪ್ರತ್ಯಾಗಮ make_error_code(std::errc::operation_not_permitted);
+  ಪ್ರತ್ಯಾಗಮ Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<ಪೂರ್ಣಾಙ್ಕ> ToolContext::callTool(ArrayRef<ಧ್ರುವ ವರ್ಣ *> Args) ಧ್ರುವ {
+  ಯದಿ (!Session)
+    ಪ್ರತ್ಯಾಗಮ make_error_code(std::errc::operation_not_permitted);
+  ಪ್ರತ್ಯಾಗಮ Session->callTool(Args);
 }

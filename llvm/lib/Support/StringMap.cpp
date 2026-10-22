@@ -10,44 +10,44 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ReverseIteration.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringMap.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MathExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ReverseIteration.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
 /// Returns the number of buckets to allocate to ensure that the DenseMap can
 /// accommodate \p NumEntries without need to grow().
-static inline unsigned getMinBucketToReserveForEntries(unsigned NumEntries) {
+ಸ್ಥಿರ ಅನ್ತಃಸ್ಥ unsigned getMinBucketToReserveForEntries(unsigned ಅಂಕೆ_Entries) {
   // Ensure that "NumEntries * 4 < NumBuckets * 3"
-  if (NumEntries == 0)
-    return 0;
+  ಯದಿ (ಅಂಕೆ_Entries == 0)
+    ಪ್ರತ್ಯಾಗಮ 0;
   // +1 is required because of the strict equality.
   // For example if NumEntries is 48, we need to return 401.
-  return NextPowerOf2(NumEntries * 4 / 3 + 1);
+  ಪ್ರತ್ಯಾಗಮ NextPowerOf2(ಅಂಕೆ_Entries * 4 / 3 + 1);
 }
 
-static inline StringMapEntryBase **createTable(unsigned NewNumBuckets) {
+ಸ್ಥಿರ ಅನ್ತಃಸ್ಥ StringMapEntryBase **createTable(unsigned New_ಅಂಕೆ_Buckets) {
   auto **Table = static_cast<StringMapEntryBase **>(safe_calloc(
-      NewNumBuckets + 1, sizeof(StringMapEntryBase **) + sizeof(unsigned)));
+      New_ಅಂಕೆ_Buckets + 1, ಪರಿಮಾಣ(StringMapEntryBase **) + ಪರಿಮಾಣ(unsigned)));
 
   // Allocate one extra bucket, set it to look filled so the iterators stop at
   // end.
-  Table[NewNumBuckets] = (StringMapEntryBase *)2;
-  return Table;
+  Table[New_ಅಂಕೆ_Buckets] = (StringMapEntryBase *)2;
+  ಪ್ರತ್ಯಾಗಮ Table;
 }
 
-static inline unsigned *getHashTable(StringMapEntryBase **TheTable,
-                                     unsigned NumBuckets) {
-  return reinterpret_cast<unsigned *>(TheTable + NumBuckets + 1);
+ಸ್ಥಿರ ಅನ್ತಃಸ್ಥ unsigned *getHashTable(StringMapEntryBase **TheTable,
+                                     unsigned ಅಂಕೆ_Buckets) {
+  ಪ್ರತ್ಯಾಗಮ reinterpret_cast<unsigned *>(TheTable + ಅಂಕೆ_Buckets + 1);
 }
 
-uint32_t StringMapImpl::hash(StringRef Key) { return xxh3_64bits(Key); }
+uint32_t StringMapImpl::hash(StringRef ಕೀಲಿ) { ಪ್ರತ್ಯಾಗಮ xxh3_64bits(ಕೀಲಿ); }
 
 StringMapImpl::StringMapImpl(unsigned InitSize, unsigned itemSize)
     : ItemSize(itemSize) {
   // If a size is specified, initialize the table with that many buckets.
-  if (InitSize) {
+  ಯದಿ (InitSize) {
     // The table will grow when the number of entries reach 3/4 of the number of
     // buckets. To guarantee that "InitSize" number of entries can be inserted
     // in the table without growing, we allocate just what is needed here.
@@ -55,17 +55,17 @@ StringMapImpl::StringMapImpl(unsigned InitSize, unsigned itemSize)
   }
 }
 
-void StringMapImpl::init(unsigned InitSize) {
-  assert((InitSize & (InitSize - 1)) == 0 &&
+ಶೂನ್ಯ StringMapImpl::init(unsigned InitSize) {
+  ಪ್ರತಿಜ್ಞಾ((InitSize & (InitSize - 1)) == 0 &&
          "Init Size must be a power of 2 or zero!");
 
-  unsigned NewNumBuckets = InitSize ? InitSize : 16;
-  NumItems = 0;
+  unsigned New_ಅಂಕೆ_Buckets = InitSize ? InitSize : 16;
+  ಅಂಕೆ_ವಸ್ತುಗಳು = 0;
 
-  TheTable = createTable(NewNumBuckets);
+  TheTable = createTable(New_ಅಂಕೆ_Buckets);
 
   // Set the member only if TheTable was successfully allocated
-  NumBuckets = NewNumBuckets;
+  ಅಂಕೆ_Buckets = New_ಅಂಕೆ_Buckets;
 }
 
 /// LookupBucketFor - Look up the bucket that the specified string should end
@@ -74,27 +74,27 @@ void StringMapImpl::init(unsigned InitSize) {
 /// case, the FullHashValue field of the bucket will be set to the hash value
 /// of the string.
 unsigned StringMapImpl::LookupBucketFor(StringRef Name,
-                                        uint32_t FullHashValue) {
+                                        uint32_t Full_Hash_ಮೌಲ್ಯ) {
 #ifdef EXPENSIVE_CHECKS
-  assert(FullHashValue == hash(Name));
+  ಪ್ರತಿಜ್ಞಾ(Full_Hash_ಮೌಲ್ಯ == hash(Name));
 #endif
   // Hash table unallocated so far?
-  if (NumBuckets == 0)
+  ಯದಿ (ಅಂಕೆ_Buckets == 0)
     init(16);
-  if constexpr (shouldReverseIterate())
-    FullHashValue = ~FullHashValue;
-  unsigned BucketNo = FullHashValue & (NumBuckets - 1);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  ಯದಿ constexpr (shouldReverseIterate())
+    Full_Hash_ಮೌಲ್ಯ = ~Full_Hash_ಮೌಲ್ಯ;
+  unsigned BucketNo = Full_Hash_ಮೌಲ್ಯ & (ಅಂಕೆ_Buckets - 1);
+  unsigned *HashTable = getHashTable(TheTable, ಅಂಕೆ_Buckets);
 
-  while (true) {
+  ಯಾವತ್ (ಸತ್ಯ) {
     StringMapEntryBase *BucketItem = TheTable[BucketNo];
     // If we found an empty bucket, this key isn't in the table yet, return it.
-    if (LLVM_LIKELY(!BucketItem)) {
-      HashTable[BucketNo] = FullHashValue;
-      return BucketNo;
+    ಯದಿ (LLVM_LIKELY(!BucketItem)) {
+      HashTable[BucketNo] = Full_Hash_ಮೌಲ್ಯ;
+      ಪ್ರತ್ಯಾಗಮ BucketNo;
     }
 
-    if (LLVM_LIKELY(HashTable[BucketNo] == FullHashValue)) {
+    ಯದಿ (LLVM_LIKELY(HashTable[BucketNo] == Full_Hash_ಮೌಲ್ಯ)) {
       // If the full hash value matches, check deeply for a match.  The common
       // case here is that we are only looking at the buckets (for item info
       // being non-null and for the full hash value) not at the items.  This
@@ -102,39 +102,39 @@ unsigned StringMapImpl::LookupBucketFor(StringRef Name,
 
       // Do the comparison like this because Name isn't necessarily
       // null-terminated!
-      char *ItemStr = (char *)BucketItem + ItemSize;
-      if (Name == StringRef(ItemStr, BucketItem->getKeyLength())) {
+      ವರ್ಣ *ItemStr = (ವರ್ಣ *)BucketItem + ItemSize;
+      ಯದಿ (Name == StringRef(ItemStr, BucketItem->get_ಕೀಲಿ_Length())) {
         // We found a match!
-        return BucketNo;
+        ಪ್ರತ್ಯಾಗಮ BucketNo;
       }
     }
 
     // Okay, we didn't find the item.  Probe to the next bucket.
-    BucketNo = (BucketNo + 1) & (NumBuckets - 1);
+    BucketNo = (BucketNo + 1) & (ಅಂಕೆ_Buckets - 1);
   }
 }
 
 /// FindKey - Look up the bucket that contains the specified key. If it exists
 /// in the map, return the bucket number of the key.  Otherwise return -1.
 /// This does not modify the map.
-int StringMapImpl::FindKey(StringRef Key, uint32_t FullHashValue) const {
-  if (NumBuckets == 0)
-    return -1; // Really empty table?
+ಪೂರ್ಣಾಙ್ಕ StringMapImpl::Find_ಕೀಲಿ(StringRef ಕೀಲಿ, uint32_t Full_Hash_ಮೌಲ್ಯ) ಧ್ರುವ {
+  ಯದಿ (ಅಂಕೆ_Buckets == 0)
+    ಪ್ರತ್ಯಾಗಮ -1; // Really empty table?
 #ifdef EXPENSIVE_CHECKS
-  assert(FullHashValue == hash(Key));
+  ಪ್ರತಿಜ್ಞಾ(Full_Hash_ಮೌಲ್ಯ == hash(ಕೀಲಿ));
 #endif
-  if constexpr (shouldReverseIterate())
-    FullHashValue = ~FullHashValue;
-  unsigned BucketNo = FullHashValue & (NumBuckets - 1);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  ಯದಿ constexpr (shouldReverseIterate())
+    Full_Hash_ಮೌಲ್ಯ = ~Full_Hash_ಮೌಲ್ಯ;
+  unsigned BucketNo = Full_Hash_ಮೌಲ್ಯ & (ಅಂಕೆ_Buckets - 1);
+  unsigned *HashTable = getHashTable(TheTable, ಅಂಕೆ_Buckets);
 
-  while (true) {
+  ಯಾವತ್ (ಸತ್ಯ) {
     StringMapEntryBase *BucketItem = TheTable[BucketNo];
     // If we found an empty bucket, this key isn't in the table yet, return.
-    if (LLVM_LIKELY(!BucketItem))
-      return -1;
+    ಯದಿ (LLVM_LIKELY(!BucketItem))
+      ಪ್ರತ್ಯಾಗಮ -1;
 
-    if (LLVM_LIKELY(HashTable[BucketNo] == FullHashValue)) {
+    ಯದಿ (LLVM_LIKELY(HashTable[BucketNo] == Full_Hash_ಮೌಲ್ಯ)) {
       // If the full hash value matches, check deeply for a match.  The common
       // case here is that we are only looking at the buckets (for item info
       // being non-null and for the full hash value) not at the items.  This
@@ -142,53 +142,53 @@ int StringMapImpl::FindKey(StringRef Key, uint32_t FullHashValue) const {
 
       // Do the comparison like this because NameStart isn't necessarily
       // null-terminated!
-      char *ItemStr = (char *)BucketItem + ItemSize;
-      if (Key == StringRef(ItemStr, BucketItem->getKeyLength())) {
+      ವರ್ಣ *ItemStr = (ವರ್ಣ *)BucketItem + ItemSize;
+      ಯದಿ (ಕೀಲಿ == StringRef(ItemStr, BucketItem->get_ಕೀಲಿ_Length())) {
         // We found a match!
-        return BucketNo;
+        ಪ್ರತ್ಯಾಗಮ BucketNo;
       }
     }
 
     // Okay, we didn't find the item.  Probe to the next bucket.
-    BucketNo = (BucketNo + 1) & (NumBuckets - 1);
+    BucketNo = (BucketNo + 1) & (ಅಂಕೆ_Buckets - 1);
   }
 }
 
 /// RemoveKey - Remove the specified StringMapEntry from the table, but do not
 /// delete it.  This aborts if the value isn't in the table.
-void StringMapImpl::RemoveKey(StringMapEntryBase *V) {
-  const char *VStr = (char *)V + ItemSize;
-  StringMapEntryBase *V2 = RemoveKey(StringRef(VStr, V->getKeyLength()));
-  (void)V2;
-  assert(V == V2 && "Didn't find key?");
+ಶೂನ್ಯ StringMapImpl::Remove_ಕೀಲಿ(StringMapEntryBase *V) {
+  ಧ್ರುವ ವರ್ಣ *VStr = (ವರ್ಣ *)V + ItemSize;
+  StringMapEntryBase *V2 = Remove_ಕೀಲಿ(StringRef(VStr, V->get_ಕೀಲಿ_Length()));
+  (ಶೂನ್ಯ)V2;
+  ಪ್ರತಿಜ್ಞಾ(V == V2 && "Didn't find key?");
 }
 
 // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
 // whose probe path crosses the hole.
-void StringMapImpl::removeBucket(unsigned Bucket) {
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
-  unsigned Mask = NumBuckets - 1;
+ಶೂನ್ಯ StringMapImpl::removeBucket(unsigned Bucket) {
+  unsigned *HashTable = getHashTable(TheTable, ಅಂಕೆ_Buckets);
+  unsigned Mask = ಅಂಕೆ_Buckets - 1;
   unsigned I = Bucket, J = I;
-  while ((J = (J + 1) & Mask), TheTable[J]) {
+  ಯಾವತ್ ((J = (J + 1) & Mask), TheTable[J]) {
     unsigned Ideal = HashTable[J];
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+    ಯದಿ (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       TheTable[I] = TheTable[J];
       HashTable[I] = HashTable[J];
       I = J;
     }
   }
   TheTable[I] = nullptr;
-  --NumItems;
+  --ಅಂಕೆ_ವಸ್ತುಗಳು;
 }
 
-StringMapEntryBase *StringMapImpl::RemoveKey(StringRef Key) {
-  int Bucket = FindKey(Key);
-  if (Bucket == -1)
-    return nullptr;
+StringMapEntryBase *StringMapImpl::Remove_ಕೀಲಿ(StringRef ಕೀಲಿ) {
+  ಪೂರ್ಣಾಙ್ಕ Bucket = Find_ಕೀಲಿ(ಕೀಲಿ);
+  ಯದಿ (Bucket == -1)
+    ಪ್ರತ್ಯಾಗಮ nullptr;
 
   StringMapEntryBase *Result = TheTable[Bucket];
   removeBucket(Bucket);
-  return Result;
+  ಪ್ರತ್ಯಾಗಮ Result;
 }
 
 /// RehashTable - Grow the table, redistributing values into the buckets with
@@ -196,39 +196,39 @@ StringMapEntryBase *StringMapImpl::RemoveKey(StringRef Key) {
 unsigned StringMapImpl::RehashTable(unsigned BucketNo) {
   unsigned NewSize;
   // If the hash table is now more than 3/4 full, grow the table.
-  if (LLVM_UNLIKELY(NumItems * 4 > NumBuckets * 3)) {
-    NewSize = NumBuckets * 2;
-  } else {
-    return BucketNo;
+  ಯದಿ (LLVM_UNLIKELY(ಅಂಕೆ_ವಸ್ತುಗಳು * 4 > ಅಂಕೆ_Buckets * 3)) {
+    NewSize = ಅಂಕೆ_Buckets * 2;
+  } ಅನ್ಯಥಾ {
+    ಪ್ರತ್ಯಾಗಮ BucketNo;
   }
 
   unsigned NewBucketNo = BucketNo;
   auto **NewTableArray = createTable(NewSize);
   unsigned *NewHashArray = getHashTable(NewTableArray, NewSize);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  unsigned *HashTable = getHashTable(TheTable, ಅಂಕೆ_Buckets);
 
   // Rehash all the items into their new buckets.  Luckily :) we already have
   // the hash values available, so we don't have to rehash any strings.
-  for (unsigned I = 0, E = NumBuckets; I != E; ++I) {
+  ಪ್ರತಿ (unsigned I = 0, E = ಅಂಕೆ_Buckets; I != E; ++I) {
     StringMapEntryBase *Bucket = TheTable[I];
-    if (Bucket) {
+    ಯದಿ (Bucket) {
       // If the bucket is not available, probe for a spot.
       unsigned FullHash = HashTable[I];
       unsigned NewBucket = FullHash & (NewSize - 1);
-      while (NewTableArray[NewBucket])
+      ಯಾವತ್ (NewTableArray[NewBucket])
         NewBucket = (NewBucket + 1) & (NewSize - 1);
 
       // Finally found a slot.  Fill it in.
       NewTableArray[NewBucket] = Bucket;
       NewHashArray[NewBucket] = FullHash;
-      if (I == BucketNo)
+      ಯದಿ (I == BucketNo)
         NewBucketNo = NewBucket;
     }
   }
 
-  free(TheTable);
+  ಮುಕ್ತ(TheTable);
 
   TheTable = NewTableArray;
-  NumBuckets = NewSize;
-  return NewBucketNo;
+  ಅಂಕೆ_Buckets = NewSize;
+  ಪ್ರತ್ಯಾಗಮ NewBucketNo;
 }

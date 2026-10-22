@@ -6,173 +6,173 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamReader.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BinaryStreamReader.h"
 
-#include "llvm/Support/BinaryStreamError.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BinaryStreamError.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BinaryStreamRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LEB128.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-BinaryStreamReader::BinaryStreamReader(BinaryStreamRef Ref) : Stream(Ref) {}
+ದ್ವಿಮಾನ_Stream_Reader::ದ್ವಿಮಾನ_Stream_Reader(ದ್ವಿಮಾನ_Stream_Ref Ref) : Stream(Ref) {}
 
-BinaryStreamReader::BinaryStreamReader(BinaryStream &Stream) : Stream(Stream) {}
+ದ್ವಿಮಾನ_Stream_Reader::ದ್ವಿಮಾನ_Stream_Reader(ದ್ವಿಮಾನ_Stream &Stream) : Stream(Stream) {}
 
-BinaryStreamReader::BinaryStreamReader(ArrayRef<uint8_t> Data,
+ದ್ವಿಮಾನ_Stream_Reader::ದ್ವಿಮಾನ_Stream_Reader(ArrayRef<uint8_t> Data,
                                        endianness Endian)
     : Stream(Data, Endian) {}
 
-BinaryStreamReader::BinaryStreamReader(StringRef Data, endianness Endian)
+ದ್ವಿಮಾನ_Stream_Reader::ದ್ವಿಮಾನ_Stream_Reader(StringRef Data, endianness Endian)
     : Stream(Data, Endian) {}
 
-Error BinaryStreamReader::readLongestContiguousChunk(
+Error ದ್ವಿಮಾನ_Stream_Reader::readLongestContiguousChunk(
     ArrayRef<uint8_t> &Buffer) {
-  if (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
-    return EC;
+  ಯದಿ (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
+    ಪ್ರತ್ಯಾಗಮ EC;
   Offset += Buffer.size();
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
-  if (auto EC = Stream.readBytes(Offset, Size, Buffer))
-    return EC;
+Error ದ್ವಿಮಾನ_Stream_Reader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
+  ಯದಿ (auto EC = Stream.readBytes(Offset, Size, Buffer))
+    ಪ್ರತ್ಯಾಗಮ EC;
   Offset += Size;
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readULEB128(uint64_t &Dest) {
+Error ದ್ವಿಮಾನ_Stream_Reader::readULEB128(uint64_t &Dest) {
   SmallVector<uint8_t, 10> EncodedBytes;
   ArrayRef<uint8_t> NextByte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  ಕುರು {
+    ಯದಿ (auto Err = readBytes(NextByte, 1))
+      ಪ್ರತ್ಯಾಗಮ Err;
+    EncodedBytes.ತಳ್ಳು_back(NextByte[0]);
+  } ಯಾವತ್ (NextByte[0] & 0x80);
 
   Dest = decodeULEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readSLEB128(int64_t &Dest) {
+Error ದ್ವಿಮಾನ_Stream_Reader::readSLEB128(int64_t &Dest) {
   SmallVector<uint8_t, 10> EncodedBytes;
   ArrayRef<uint8_t> NextByte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  ಕುರು {
+    ಯದಿ (auto Err = readBytes(NextByte, 1))
+      ಪ್ರತ್ಯಾಗಮ Err;
+    EncodedBytes.ತಳ್ಳು_back(NextByte[0]);
+  } ಯಾವತ್ (NextByte[0] & 0x80);
 
   Dest = decodeSLEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readCString(StringRef &Dest) {
+Error ದ್ವಿಮಾನ_Stream_Reader::readCString(StringRef &Dest) {
   uint64_t OriginalOffset = getOffset();
   uint64_t FoundOffset = 0;
-  while (true) {
+  ಯಾವತ್ (ಸತ್ಯ) {
     uint64_t ThisOffset = getOffset();
     ArrayRef<uint8_t> Buffer;
-    if (auto EC = readLongestContiguousChunk(Buffer))
-      return EC;
-    StringRef S(reinterpret_cast<const char *>(Buffer.begin()), Buffer.size());
+    ಯದಿ (auto EC = readLongestContiguousChunk(Buffer))
+      ಪ್ರತ್ಯಾಗಮ EC;
+    StringRef S(reinterpret_cast<ಧ್ರುವ ವರ್ಣ *>(Buffer.begin()), Buffer.size());
     size_t Pos = S.find_first_of('\0');
-    if (LLVM_LIKELY(Pos != StringRef::npos)) {
+    ಯದಿ (LLVM_LIKELY(Pos != StringRef::npos)) {
       FoundOffset = Pos + ThisOffset;
-      break;
+      ಭಙ್ಗ;
     }
   }
-  assert(FoundOffset >= OriginalOffset);
+  ಪ್ರತಿಜ್ಞಾ(FoundOffset >= OriginalOffset);
 
   setOffset(OriginalOffset);
   size_t Length = FoundOffset - OriginalOffset;
 
-  if (auto EC = readFixedString(Dest, Length))
-    return EC;
+  ಯದಿ (auto EC = readFixedString(Dest, Length))
+    ಪ್ರತ್ಯಾಗಮ EC;
 
   // Now set the offset back to after the null terminator.
   setOffset(FoundOffset + 1);
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readWideString(ArrayRef<UTF16> &Dest) {
+Error ದ್ವಿಮಾನ_Stream_Reader::readWideString(ArrayRef<UTF16> &Dest) {
   uint64_t Length = 0;
   uint64_t OriginalOffset = getOffset();
-  const UTF16 *C;
-  while (true) {
-    if (auto EC = readObject(C))
-      return EC;
-    if (*C == 0x0000)
-      break;
+  ಧ್ರುವ UTF16 *C;
+  ಯಾವತ್ (ಸತ್ಯ) {
+    ಯದಿ (auto EC = readObject(C))
+      ಪ್ರತ್ಯಾಗಮ EC;
+    ಯದಿ (*C == 0x0000)
+      ಭಙ್ಗ;
     ++Length;
   }
   uint64_t NewOffset = getOffset();
   setOffset(OriginalOffset);
 
-  if (auto EC = readArray(Dest, Length))
-    return EC;
+  ಯದಿ (auto EC = readArray(Dest, Length))
+    ಪ್ರತ್ಯಾಗಮ EC;
   setOffset(NewOffset);
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readFixedString(StringRef &Dest, uint32_t Length) {
+Error ದ್ವಿಮಾನ_Stream_Reader::readFixedString(StringRef &Dest, uint32_t Length) {
   ArrayRef<uint8_t> Bytes;
-  if (auto EC = readBytes(Bytes, Length))
-    return EC;
-  Dest = StringRef(reinterpret_cast<const char *>(Bytes.begin()), Bytes.size());
-  return Error::success();
+  ಯದಿ (auto EC = readBytes(Bytes, Length))
+    ಪ್ರತ್ಯಾಗಮ EC;
+  Dest = StringRef(reinterpret_cast<ಧ್ರುವ ವರ್ಣ *>(Bytes.begin()), Bytes.size());
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref) {
-  return readStreamRef(Ref, bytesRemaining());
+Error ದ್ವಿಮಾನ_Stream_Reader::readStreamRef(ದ್ವಿಮಾನ_Stream_Ref &Ref) {
+  ಪ್ರತ್ಯಾಗಮ readStreamRef(Ref, bytesRemaining());
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref, uint32_t Length) {
-  if (bytesRemaining() < Length)
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+Error ದ್ವಿಮಾನ_Stream_Reader::readStreamRef(ದ್ವಿಮಾನ_Stream_Ref &Ref, uint32_t Length) {
+  ಯದಿ (bytesRemaining() < Length)
+    ಪ್ರತ್ಯಾಗಮ make_error<ದ್ವಿಮಾನ_Stream_Error>(stream_error_code::stream_too_short);
   Ref = Stream.slice(Offset, Length);
   Offset += Length;
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::readSubstream(BinarySubstreamRef &Ref,
+Error ದ್ವಿಮಾನ_Stream_Reader::readSubstream(ದ್ವಿಮಾನ_Substream_Ref &Ref,
                                         uint32_t Length) {
   Ref.Offset = getOffset();
-  return readStreamRef(Ref.StreamData, Length);
+  ಪ್ರತ್ಯಾಗಮ readStreamRef(Ref.StreamData, Length);
 }
 
-Error BinaryStreamReader::skip(uint64_t Amount) {
-  if (Amount > bytesRemaining())
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+Error ದ್ವಿಮಾನ_Stream_Reader::skip(uint64_t Amount) {
+  ಯದಿ (Amount > bytesRemaining())
+    ಪ್ರತ್ಯಾಗಮ make_error<ದ್ವಿಮಾನ_Stream_Error>(stream_error_code::stream_too_short);
   Offset += Amount;
-  return Error::success();
+  ಪ್ರತ್ಯಾಗಮ Error::success();
 }
 
-Error BinaryStreamReader::padToAlignment(uint32_t Align) {
+Error ದ್ವಿಮಾನ_Stream_Reader::padToAlignment(uint32_t Align) {
   uint32_t NewOffset = alignTo(Offset, Align);
-  return skip(NewOffset - Offset);
+  ಪ್ರತ್ಯಾಗಮ skip(NewOffset - Offset);
 }
 
-uint8_t BinaryStreamReader::peek() const {
+uint8_t ದ್ವಿಮಾನ_Stream_Reader::peek() ಧ್ರುವ {
   ArrayRef<uint8_t> Buffer;
   auto EC = Stream.readBytes(Offset, 1, Buffer);
-  assert(!EC && "Cannot peek an empty buffer!");
+  ಪ್ರತಿಜ್ಞಾ(!EC && "Cannot peek an empty buffer!");
   llvm::consumeError(std::move(EC));
-  return Buffer[0];
+  ಪ್ರತ್ಯಾಗಮ Buffer[0];
 }
 
-std::pair<BinaryStreamReader, BinaryStreamReader>
-BinaryStreamReader::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+std::pair<ದ್ವಿಮಾನ_Stream_Reader, ದ್ವಿಮಾನ_Stream_Reader>
+ದ್ವಿಮಾನ_Stream_Reader::split(uint64_t Off) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(getLength() >= Off);
 
-  BinaryStreamRef First = Stream.drop_front(Offset);
+  ದ್ವಿಮಾನ_Stream_Ref First = Stream.drop_front(Offset);
 
-  BinaryStreamRef Second = First.drop_front(Off);
+  ದ್ವಿಮಾನ_Stream_Ref Second = First.drop_front(Off);
   First = First.keep_front(Off);
-  BinaryStreamReader W1{First};
-  BinaryStreamReader W2{Second};
-  return {W1, W2};
+  ದ್ವಿಮಾನ_Stream_Reader W1{First};
+  ದ್ವಿಮಾನ_Stream_Reader W2{Second};
+  ಪ್ರತ್ಯಾಗಮ {W1, W2};
 }

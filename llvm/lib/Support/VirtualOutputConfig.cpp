@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputConfig.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using ನಾಮಾಕಾಶ llvm;
+using ನಾಮಾಕಾಶ llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::setOpenFlags(ಧ್ರುವ sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
-  using namespace llvm::sys::fs;
-  return Flags & OF_Text
+  using ನಾಮಾಕಾಶ llvm::sys::fs;
+  ಪ್ರತ್ಯಾಗಮ Flags & OF_Text
              ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+             : set_ದ್ವಿಮಾನ().setAppend(Flags & OF_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+ಶೂನ್ಯ OutputConfig::print(raw_ostream &OS) ಧ್ರುವ {
   OS << "{";
-  bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
-      IsFirst = false;
-    else
+  ತಾರ್ಕಿಕ IsFirst = ಸತ್ಯ;
+  auto printFlag = [&](StringRef FlagName, ತಾರ್ಕಿಕ ಮೌಲ್ಯ) {
+    ಯದಿ (IsFirst)
+      IsFirst = ಅಸತ್ಯ;
+    ಅನ್ಯಥಾ
       OS << ",";
-    if (!Value)
+    ಯದಿ (!ಮೌಲ್ಯ)
       OS << "No";
     OS << FlagName;
   };
 
 #define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+  ಯದಿ (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD ಶೂನ್ಯ OutputConfig::dump() ಧ್ರುವ { print(dbgs()); }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  ಪ್ರತ್ಯಾಗಮ OS;
 }

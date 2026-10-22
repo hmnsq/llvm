@@ -6,84 +6,84 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/TrieRawHashMap.h"
-#include "llvm/ADT/LazyAtomicPointer.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/TrieHashIndexGenerator.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/ThreadSafeAllocator.h"
-#include "llvm/Support/TrailingObjects.h"
-#include "llvm/Support/raw_ostream.h"
-#include <memory>
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/TrieRawHashMap.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/LazyAtomicPointer.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/TrieHashIndexGenerator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Allocator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Casting.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ThreadSafeAllocator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/TrailingObjects.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ <memory>
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-namespace {
-struct TrieNode {
-  const bool IsSubtrie = false;
+ನಾಮಾಕಾಶ {
+ಸಂರಚನಾ Trie_ಗಂಟು {
+  ಧ್ರುವ ತಾರ್ಕಿಕ IsSubtrie = ಅಸತ್ಯ;
 
-  TrieNode(bool IsSubtrie) : IsSubtrie(IsSubtrie) {}
+  Trie_ಗಂಟು(ತಾರ್ಕಿಕ IsSubtrie) : IsSubtrie(IsSubtrie) {}
 
-  static void *operator new(size_t Size) { return ::operator new(Size); }
-  void operator delete(void *Ptr) { ::operator delete(Ptr); }
+  ಸ್ಥಿರ ಶೂನ್ಯ *operator ನೂತನ(size_t Size) { ಪ್ರತ್ಯಾಗಮ ::operator ನೂತನ(Size); }
+  ಶೂನ್ಯ operator delete(ಶೂನ್ಯ *Ptr) { ::operator delete(Ptr); }
 };
 
-struct TrieContent final : public TrieNode {
-  const uint8_t ContentOffset;
-  const uint8_t HashSize;
-  const uint8_t HashOffset;
+ಸಂರಚನಾ TrieContent final : ಸಾರ್ವಜನಿಕ Trie_ಗಂಟು {
+  ಧ್ರುವ uint8_t ContentOffset;
+  ಧ್ರುವ uint8_t HashSize;
+  ಧ್ರುವ uint8_t HashOffset;
 
-  void *getValuePointer() const {
-    auto *Content = reinterpret_cast<const uint8_t *>(this) + ContentOffset;
-    return const_cast<uint8_t *>(Content);
+  ಶೂನ್ಯ *get_ಮೌಲ್ಯ_Pointer() ಧ್ರುವ {
+    auto *Content = reinterpret_cast<ಧ್ರುವ uint8_t *>(ಏತತ್) + ContentOffset;
+    ಪ್ರತ್ಯಾಗಮ const_cast<uint8_t *>(Content);
   }
 
-  ArrayRef<uint8_t> getHash() const {
-    auto *Begin = reinterpret_cast<const uint8_t *>(this) + HashOffset;
-    return ArrayRef(Begin, Begin + HashSize);
+  ArrayRef<uint8_t> getHash() ಧ್ರುವ {
+    auto *Begin = reinterpret_cast<ಧ್ರುವ uint8_t *>(ಏತತ್) + HashOffset;
+    ಪ್ರತ್ಯಾಗಮ ArrayRef(Begin, Begin + HashSize);
   }
 
   TrieContent(size_t ContentOffset, size_t HashSize, size_t HashOffset)
-      : TrieNode(/*IsSubtrie=*/false), ContentOffset(ContentOffset),
+      : Trie_ಗಂಟು(/*IsSubtrie=*/ಅಸತ್ಯ), ContentOffset(ContentOffset),
         HashSize(HashSize), HashOffset(HashOffset) {}
 
-  static bool classof(const TrieNode *TN) { return !TN->IsSubtrie; }
+  ಸ್ಥಿರ ತಾರ್ಕಿಕ classof(ಧ್ರುವ Trie_ಗಂಟು *TN) { ಪ್ರತ್ಯಾಗಮ !TN->IsSubtrie; }
 };
 
-static_assert(sizeof(TrieContent) ==
+static_assert(ಪರಿಮಾಣ(TrieContent) ==
                   ThreadSafeTrieRawHashMapBase::TrieContentBaseSize,
               "Check header assumption!");
 
-class TrieSubtrie final
-    : public TrieNode,
-      private TrailingObjects<TrieSubtrie, LazyAtomicPointer<TrieNode>> {
-public:
-  using Slot = LazyAtomicPointer<TrieNode>;
+ವರ್ಗ TrieSubtrie final
+    : ಸಾರ್ವಜನಿಕ Trie_ಗಂಟು,
+      ಗುಪ್ತ TrailingObjects<TrieSubtrie, LazyAtomicPointer<Trie_ಗಂಟು>> {
+ಸಾರ್ವಜನಿಕ:
+  using Slot = LazyAtomicPointer<Trie_ಗಂಟು>;
 
-  Slot &get(size_t I) { return getTrailingObjects()[I]; }
-  TrieNode *load(size_t I) { return get(I).load(); }
+  Slot &get(size_t I) { ಪ್ರತ್ಯಾಗಮ getTrailingObjects()[I]; }
+  Trie_ಗಂಟು *load(size_t I) { ಪ್ರತ್ಯಾಗಮ get(I).load(); }
 
-  unsigned size() const { return Size; }
+  unsigned size() ಧ್ರುವ { ಪ್ರತ್ಯಾಗಮ Size; }
 
   TrieSubtrie *
-  sink(size_t I, TrieContent &Content, size_t NumSubtrieBits, size_t NewI,
+  sink(size_t I, TrieContent &Content, size_t ಅಂಕೆ_Subtrie_Bits, size_t NewI,
        function_ref<TrieSubtrie *(std::unique_ptr<TrieSubtrie>)> Saver);
 
-  static std::unique_ptr<TrieSubtrie> create(size_t StartBit, size_t NumBits);
+  ಸ್ಥಿರ std::unique_ptr<TrieSubtrie> create(size_t StartBit, size_t ಅಂಕೆ_Bits_2);
 
-  explicit TrieSubtrie(size_t StartBit, size_t NumBits);
+  explicit TrieSubtrie(size_t StartBit, size_t ಅಂಕೆ_Bits_2);
 
-  static bool classof(const TrieNode *TN) { return TN->IsSubtrie; }
+  ಸ್ಥಿರ ತಾರ್ಕಿಕ classof(ಧ್ರುವ Trie_ಗಂಟು *TN) { ಪ್ರತ್ಯಾಗಮ TN->IsSubtrie; }
 
-  static constexpr size_t sizeToAlloc(unsigned NumBits) {
-    assert(NumBits < 20 && "Tries should have fewer than ~1M slots");
-    unsigned Count = 1u << NumBits;
-    return totalSizeToAlloc<LazyAtomicPointer<TrieNode>>(Count);
+  ಸ್ಥಿರ constexpr size_t sizeToAlloc(unsigned ಅಂಕೆ_Bits_2) {
+    ಪ್ರತಿಜ್ಞಾ(ಅಂಕೆ_Bits_2 < 20 && "Tries should have fewer than ~1M slots");
+    unsigned ಎಣಿಕೆ_2 = 1u << ಅಂಕೆ_Bits_2;
+    ಪ್ರತ್ಯಾಗಮ totalSizeToAlloc<LazyAtomicPointer<Trie_ಗಂಟು>>(ಎಣಿಕೆ_2);
   }
 
-private:
+ಗುಪ್ತ:
   // FIXME: Use a bitset to speed up access:
   //
   //     std::array<std::atomic<uint64_t>, NumSlots/64> IsSet;
@@ -105,32 +105,32 @@ private:
 
   // For debugging.
   unsigned StartBit = 0;
-  unsigned NumBits = 0;
+  unsigned ಅಂಕೆ_Bits_2 = 0;
   unsigned Size = 0;
-  friend class llvm::ThreadSafeTrieRawHashMapBase;
-  friend class TrailingObjects;
+  friend ವರ್ಗ llvm::ThreadSafeTrieRawHashMapBase;
+  friend ವರ್ಗ TrailingObjects;
 
-public:
+ಸಾರ್ವಜನಿಕ:
   /// Linked list for ownership of tries. The pointer is owned by TrieSubtrie.
   std::atomic<TrieSubtrie *> Next;
 };
 } // end namespace
 
 std::unique_ptr<TrieSubtrie> TrieSubtrie::create(size_t StartBit,
-                                                 size_t NumBits) {
-  void *Memory = ::operator new(sizeToAlloc(NumBits));
-  TrieSubtrie *S = ::new (Memory) TrieSubtrie(StartBit, NumBits);
-  return std::unique_ptr<TrieSubtrie>(S);
+                                                 size_t ಅಂಕೆ_Bits_2) {
+  ಶೂನ್ಯ *Memory = ::operator ನೂತನ(sizeToAlloc(ಅಂಕೆ_Bits_2));
+  TrieSubtrie *S = ::ನೂತನ (Memory) TrieSubtrie(StartBit, ಅಂಕೆ_Bits_2);
+  ಪ್ರತ್ಯಾಗಮ std::unique_ptr<TrieSubtrie>(S);
 }
 
-TrieSubtrie::TrieSubtrie(size_t StartBit, size_t NumBits)
-    : TrieNode(true), StartBit(StartBit), NumBits(NumBits), Size(1u << NumBits),
+TrieSubtrie::TrieSubtrie(size_t StartBit, size_t ಅಂಕೆ_Bits_2)
+    : Trie_ಗಂಟು(ಸತ್ಯ), StartBit(StartBit), ಅಂಕೆ_Bits_2(ಅಂಕೆ_Bits_2), Size(1u << ಅಂಕೆ_Bits_2),
       Next(nullptr) {
-  for (unsigned I = 0; I < Size; ++I)
-    new (&get(I)) Slot(nullptr);
+  ಪ್ರತಿ (unsigned I = 0; I < Size; ++I)
+    ನೂತನ (&get(I)) Slot(nullptr);
 
   static_assert(
-      std::is_trivially_destructible<LazyAtomicPointer<TrieNode>>::value,
+      std::is_trivially_destructible<LazyAtomicPointer<Trie_ಗಂಟು>>::ಮೌಲ್ಯ_2,
       "Expected no work in destructor for TrieNode");
 }
 
@@ -138,116 +138,116 @@ TrieSubtrie::TrieSubtrie(size_t StartBit, size_t NumBits)
 // the index of existing object in the trie. In this case, a new sub-trie needs
 // to be allocated to hold existing object.
 TrieSubtrie *TrieSubtrie::sink(
-    size_t I, TrieContent &Content, size_t NumSubtrieBits, size_t NewI,
+    size_t I, TrieContent &Content, size_t ಅಂಕೆ_Subtrie_Bits, size_t NewI,
     function_ref<TrieSubtrie *(std::unique_ptr<TrieSubtrie>)> Saver) {
   // Create a new sub-trie that points to the existing object with the new
   // index for the next level.
-  assert(NumSubtrieBits > 0);
-  std::unique_ptr<TrieSubtrie> S = create(StartBit + NumBits, NumSubtrieBits);
+  ಪ್ರತಿಜ್ಞಾ(ಅಂಕೆ_Subtrie_Bits > 0);
+  std::unique_ptr<TrieSubtrie> S = create(StartBit + ಅಂಕೆ_Bits_2, ಅಂಕೆ_Subtrie_Bits);
 
-  assert(NewI < Size);
+  ಪ್ರತಿಜ್ಞಾ(NewI < Size);
   S->get(NewI).store(&Content);
 
   // Using compare_exchange to atomically add back the new sub-trie to the trie
   // in the place of the exsiting object.
-  TrieNode *ExistingNode = &Content;
-  assert(I < Size);
-  if (get(I).compare_exchange_strong(ExistingNode, S.get()))
-    return Saver(std::move(S));
+  Trie_ಗಂಟು *Existing_ಗಂಟು = &Content;
+  ಪ್ರತಿಜ್ಞಾ(I < Size);
+  ಯದಿ (get(I).compare_exchange_strong(Existing_ಗಂಟು, S.get()))
+    ಪ್ರತ್ಯಾಗಮ Saver(std::move(S));
 
   // Another thread created a subtrie already. Return it and let "S" be
   // destructed.
-  return cast<TrieSubtrie>(ExistingNode);
+  ಪ್ರತ್ಯಾಗಮ cast<TrieSubtrie>(Existing_ಗಂಟು);
 }
 
-class ThreadSafeTrieRawHashMapBase::ImplType final
-    : private TrailingObjects<ThreadSafeTrieRawHashMapBase::ImplType,
+ವರ್ಗ ThreadSafeTrieRawHashMapBase::ImplType final
+    : ಗುಪ್ತ TrailingObjects<ThreadSafeTrieRawHashMapBase::ImplType,
                               TrieSubtrie> {
-public:
-  static std::unique_ptr<ImplType> create(size_t StartBit, size_t NumBits) {
-    size_t Size = sizeof(ImplType) + TrieSubtrie::sizeToAlloc(NumBits);
-    void *Memory = ::operator new(Size);
-    ImplType *Impl = ::new (Memory) ImplType(StartBit, NumBits);
-    return std::unique_ptr<ImplType>(Impl);
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಥಿರ std::unique_ptr<ImplType> create(size_t StartBit, size_t ಅಂಕೆ_Bits_2) {
+    size_t Size = ಪರಿಮಾಣ(ImplType) + TrieSubtrie::sizeToAlloc(ಅಂಕೆ_Bits_2);
+    ಶೂನ್ಯ *Memory = ::operator ನೂತನ(Size);
+    ImplType *Impl = ::ನೂತನ (Memory) ImplType(StartBit, ಅಂಕೆ_Bits_2);
+    ಪ್ರತ್ಯಾಗಮ std::unique_ptr<ImplType>(Impl);
   }
 
   // Save the Subtrie into the ownship list of the trie structure in a
   // thread-safe way. The ownership transfer is done by compare_exchange the
   // pointer value inside the unique_ptr.
   TrieSubtrie *save(std::unique_ptr<TrieSubtrie> S) {
-    assert(!S->Next && "Expected S to a freshly-constructed leaf");
+    ಪ್ರತಿಜ್ಞಾ(!S->Next && "Expected S to a freshly-constructed leaf");
 
     TrieSubtrie *CurrentHead = nullptr;
     // Add ownership of "S" to front of the list, so that Root -> S ->
     // Root.Next. This works by repeatedly setting S->Next to a candidate value
     // of Root.Next (initially nullptr), then setting Root.Next to S once the
     // candidate matches reality.
-    while (!getRoot()->Next.compare_exchange_weak(CurrentHead, S.get()))
+    ಯಾವತ್ (!get_ಬೇರು()->Next.compare_exchange_weak(CurrentHead, S.get()))
       S->Next.exchange(CurrentHead);
 
     // Ownership transferred to subtrie successfully. Release the unique_ptr.
-    return S.release();
+    ಪ್ರತ್ಯಾಗಮ S.release();
   }
 
   // Get the root which is the trailing object.
-  TrieSubtrie *getRoot() { return getTrailingObjects(); }
+  TrieSubtrie *get_ಬೇರು() { ಪ್ರತ್ಯಾಗಮ getTrailingObjects(); }
 
-  static void *operator new(size_t Size) { return ::operator new(Size); }
-  void operator delete(void *Ptr) { ::operator delete(Ptr); }
+  ಸ್ಥಿರ ಶೂನ್ಯ *operator ನೂತನ(size_t Size) { ಪ್ರತ್ಯಾಗಮ ::operator ನೂತನ(Size); }
+  ಶೂನ್ಯ operator delete(ಶೂನ್ಯ *Ptr) { ::operator delete(Ptr); }
 
   /// FIXME: This should take a function that allocates and constructs the
   /// content lazily (taking the hash as a separate parameter), in case of
   /// collision.
   ThreadSafeAllocator<BumpPtrAllocator> ContentAlloc;
 
-private:
-  friend class TrailingObjects;
+ಗುಪ್ತ:
+  friend ವರ್ಗ TrailingObjects;
 
-  ImplType(size_t StartBit, size_t NumBits) {
-    ::new (getRoot()) TrieSubtrie(StartBit, NumBits);
+  ImplType(size_t StartBit, size_t ಅಂಕೆ_Bits_2) {
+    ::ನೂತನ (get_ಬೇರು()) TrieSubtrie(StartBit, ಅಂಕೆ_Bits_2);
   }
 };
 
 ThreadSafeTrieRawHashMapBase::ImplType &
 ThreadSafeTrieRawHashMapBase::getOrCreateImpl() {
-  if (ImplType *Impl = ImplPtr.load())
-    return *Impl;
+  ಯದಿ (ImplType *Impl = ImplPtr.load())
+    ಪ್ರತ್ಯಾಗಮ *Impl;
 
   // Create a new ImplType and store it if another thread doesn't do so first.
   // If another thread wins this one is destroyed locally.
-  std::unique_ptr<ImplType> Impl = ImplType::create(0, NumRootBits);
+  std::unique_ptr<ImplType> Impl = ImplType::create(0, ಅಂಕೆ_ಬೇರು_Bits);
   ImplType *ExistingImpl = nullptr;
 
   // If the ownership transferred succesfully, release unique_ptr and return
   // the pointer to the new ImplType.
-  if (ImplPtr.compare_exchange_strong(ExistingImpl, Impl.get()))
-    return *Impl.release();
+  ಯದಿ (ImplPtr.compare_exchange_strong(ExistingImpl, Impl.get()))
+    ಪ್ರತ್ಯಾಗಮ *Impl.release();
 
   // Already created, return the existing ImplType.
-  return *ExistingImpl;
+  ಪ್ರತ್ಯಾಗಮ *ExistingImpl;
 }
 
 ThreadSafeTrieRawHashMapBase::PointerBase
-ThreadSafeTrieRawHashMapBase::find(ArrayRef<uint8_t> Hash) const {
-  assert(!Hash.empty() && "Uninitialized hash");
+ThreadSafeTrieRawHashMapBase::find(ArrayRef<uint8_t> Hash) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(!Hash.empty() && "Uninitialized hash");
 
   ImplType *Impl = ImplPtr.load();
-  if (!Impl)
-    return PointerBase();
+  ಯದಿ (!Impl)
+    ಪ್ರತ್ಯಾಗಮ PointerBase();
 
-  TrieSubtrie *S = Impl->getRoot();
-  TrieHashIndexGenerator IndexGen{NumRootBits, NumSubtrieBits, Hash};
+  TrieSubtrie *S = Impl->get_ಬೇರು();
+  TrieHashIndexGenerator IndexGen{ಅಂಕೆ_ಬೇರು_Bits, ಅಂಕೆ_Subtrie_Bits, Hash};
   size_t Index = IndexGen.next();
-  while (Index != IndexGen.end()) {
+  ಯಾವತ್ (Index != IndexGen.end()) {
     // Try to set the content.
-    TrieNode *Existing = S->get(Index);
-    if (!Existing)
-      return PointerBase(S, Index, *IndexGen.StartBit);
+    Trie_ಗಂಟು *Existing = S->get(Index);
+    ಯದಿ (!Existing)
+      ಪ್ರತ್ಯಾಗಮ PointerBase(S, Index, *IndexGen.StartBit);
 
     // Check for an exact match.
-    if (auto *ExistingContent = dyn_cast<TrieContent>(Existing))
-      return ExistingContent->getHash() == Hash
-                 ? PointerBase(ExistingContent->getValuePointer())
+    ಯದಿ (auto *ExistingContent = dyn_cast<TrieContent>(Existing))
+      ಪ್ರತ್ಯಾಗಮ ExistingContent->getHash() == Hash
+                 ? PointerBase(ExistingContent->get_ಮೌಲ್ಯ_Pointer())
                  : PointerBase(S, Index, *IndexGen.StartBit);
 
     Index = IndexGen.next();
@@ -256,71 +256,71 @@ ThreadSafeTrieRawHashMapBase::find(ArrayRef<uint8_t> Hash) const {
   llvm_unreachable("failed to locate the node after consuming all hash bytes");
 }
 
-ThreadSafeTrieRawHashMapBase::PointerBase ThreadSafeTrieRawHashMapBase::insert(
+ThreadSafeTrieRawHashMapBase::PointerBase ThreadSafeTrieRawHashMapBase::ಸೇರಿಸು(
     PointerBase Hint, ArrayRef<uint8_t> Hash,
-    function_ref<const uint8_t *(void *Mem, ArrayRef<uint8_t> Hash)>
+    function_ref<ಧ್ರುವ uint8_t *(ಶೂನ್ಯ *Mem, ArrayRef<uint8_t> Hash)>
         Constructor) {
-  assert(!Hash.empty() && "Uninitialized hash");
+  ಪ್ರತಿಜ್ಞಾ(!Hash.empty() && "Uninitialized hash");
 
   ImplType &Impl = getOrCreateImpl();
-  TrieSubtrie *S = Impl.getRoot();
-  TrieHashIndexGenerator IndexGen{NumRootBits, NumSubtrieBits, Hash};
+  TrieSubtrie *S = Impl.get_ಬೇರು();
+  TrieHashIndexGenerator IndexGen{ಅಂಕೆ_ಬೇರು_Bits, ಅಂಕೆ_Subtrie_Bits, Hash};
   size_t Index;
-  if (Hint.isHint()) {
+  ಯದಿ (Hint.isHint()) {
     S = static_cast<TrieSubtrie *>(Hint.P);
     Index = IndexGen.hint(Hint.I, Hint.B);
-  } else {
+  } ಅನ್ಯಥಾ {
     Index = IndexGen.next();
   }
 
-  while (Index != IndexGen.end()) {
+  ಯಾವತ್ (Index != IndexGen.end()) {
     // Load the node from the slot, allocating and calling the constructor if
     // the slot is empty.
-    bool Generated = false;
-    TrieNode &Existing = S->get(Index).loadOrGenerate([&]() {
-      Generated = true;
+    ತಾರ್ಕಿಕ Generated = ಅಸತ್ಯ;
+    Trie_ಗಂಟು &Existing = S->get(Index).loadOrGenerate([&]() {
+      Generated = ಸತ್ಯ;
 
       // Construct the value itself at the tail.
       uint8_t *Memory = reinterpret_cast<uint8_t *>(
           Impl.ContentAlloc.Allocate(ContentAllocSize, ContentAllocAlign));
-      const uint8_t *HashStorage = Constructor(Memory + ContentOffset, Hash);
+      ಧ್ರುವ uint8_t *HashStorage = Constructor(Memory + ContentOffset, Hash);
 
       // Construct the TrieContent header, passing in the offset to the hash.
-      TrieContent *Content = ::new (Memory)
+      TrieContent *Content = ::ನೂತನ (Memory)
           TrieContent(ContentOffset, Hash.size(), HashStorage - Memory);
-      assert(Hash == Content->getHash() && "Hash not properly initialized");
-      return Content;
+      ಪ್ರತಿಜ್ಞಾ(Hash == Content->getHash() && "Hash not properly initialized");
+      ಪ್ರತ್ಯಾಗಮ Content;
     });
     // If we just generated it, return it!
-    if (Generated)
-      return PointerBase(cast<TrieContent>(Existing).getValuePointer());
+    ಯದಿ (Generated)
+      ಪ್ರತ್ಯಾಗಮ PointerBase(cast<TrieContent>(Existing).get_ಮೌಲ್ಯ_Pointer());
 
-    if (auto *ST = dyn_cast<TrieSubtrie>(&Existing)) {
+    ಯದಿ (auto *ST = dyn_cast<TrieSubtrie>(&Existing)) {
       S = ST;
       Index = IndexGen.next();
-      continue;
+      ಅನುವರ್ತ;
     }
 
     // Return the existing content if it's an exact match!
     auto &ExistingContent = cast<TrieContent>(Existing);
-    if (ExistingContent.getHash() == Hash)
-      return PointerBase(ExistingContent.getValuePointer());
+    ಯದಿ (ExistingContent.getHash() == Hash)
+      ಪ್ರತ್ಯಾಗಮ PointerBase(ExistingContent.get_ಮೌಲ್ಯ_Pointer());
 
     // Sink the existing content as long as the indexes match.
     size_t NextIndex = IndexGen.next();
-    while (NextIndex != IndexGen.end()) {
+    ಯಾವತ್ (NextIndex != IndexGen.end()) {
       size_t NewIndexForExistingContent =
           IndexGen.getCollidingBits(ExistingContent.getHash());
-      S = S->sink(Index, ExistingContent, IndexGen.getNumBits(),
+      S = S->sink(Index, ExistingContent, IndexGen.get_ಅಂಕೆ_Bits(),
                   NewIndexForExistingContent,
                   [&Impl](std::unique_ptr<TrieSubtrie> S) {
-                    return Impl.save(std::move(S));
+                    ಪ್ರತ್ಯಾಗಮ Impl.save(std::move(S));
                   });
       Index = NextIndex;
 
       // Found the difference.
-      if (NextIndex != NewIndexForExistingContent)
-        break;
+      ಯದಿ (NextIndex != NewIndexForExistingContent)
+        ಭಙ್ಗ;
 
       NextIndex = IndexGen.next();
     }
@@ -330,18 +330,18 @@ ThreadSafeTrieRawHashMapBase::PointerBase ThreadSafeTrieRawHashMapBase::insert(
 
 ThreadSafeTrieRawHashMapBase::ThreadSafeTrieRawHashMapBase(
     size_t ContentAllocSize, size_t ContentAllocAlign, size_t ContentOffset,
-    std::optional<size_t> NumRootBits, std::optional<size_t> NumSubtrieBits)
+    std::optional<size_t> ಅಂಕೆ_ಬೇರು_Bits, std::optional<size_t> ಅಂಕೆ_Subtrie_Bits)
     : ContentAllocSize(ContentAllocSize), ContentAllocAlign(ContentAllocAlign),
       ContentOffset(ContentOffset),
-      NumRootBits(NumRootBits.value_or(DefaultNumRootBits)),
-      NumSubtrieBits(NumSubtrieBits.value_or(DefaultNumSubtrieBits)),
+      ಅಂಕೆ_ಬೇರು_Bits(ಅಂಕೆ_ಬೇರು_Bits.ಮೌಲ್ಯ_or(Default_ಅಂಕೆ_ಬೇರು_Bits)),
+      ಅಂಕೆ_Subtrie_Bits(ಅಂಕೆ_Subtrie_Bits.ಮೌಲ್ಯ_or(Default_ಅಂಕೆ_Subtrie_Bits)),
       ImplPtr(nullptr) {
   // Assertion checks for reasonable configuration. The settings below are not
   // hard limits on most platforms, but a reasonable configuration should fall
   // within those limits.
-  assert((!NumRootBits || *NumRootBits < 20) &&
+  ಪ್ರತಿಜ್ಞಾ((!ಅಂಕೆ_ಬೇರು_Bits || *ಅಂಕೆ_ಬೇರು_Bits < 20) &&
          "Root should have fewer than ~1M slots");
-  assert((!NumSubtrieBits || *NumSubtrieBits < 10) &&
+  ಪ್ರತಿಜ್ಞಾ((!ಅಂಕೆ_Subtrie_Bits || *ಅಂಕೆ_Subtrie_Bits < 10) &&
          "Subtries should have fewer than ~1K slots");
 }
 
@@ -349,37 +349,37 @@ ThreadSafeTrieRawHashMapBase::ThreadSafeTrieRawHashMapBase(
     ThreadSafeTrieRawHashMapBase &&RHS)
     : ContentAllocSize(RHS.ContentAllocSize),
       ContentAllocAlign(RHS.ContentAllocAlign),
-      ContentOffset(RHS.ContentOffset), NumRootBits(RHS.NumRootBits),
-      NumSubtrieBits(RHS.NumSubtrieBits) {
+      ContentOffset(RHS.ContentOffset), ಅಂಕೆ_ಬೇರು_Bits(RHS.ಅಂಕೆ_ಬೇರು_Bits),
+      ಅಂಕೆ_Subtrie_Bits(RHS.ಅಂಕೆ_Subtrie_Bits) {
   // Steal the root from RHS.
   ImplPtr = RHS.ImplPtr.exchange(nullptr);
 }
 
 ThreadSafeTrieRawHashMapBase::~ThreadSafeTrieRawHashMapBase() {
-  assert(!ImplPtr.load() && "Expected subclass to call destroyImpl()");
+  ಪ್ರತಿಜ್ಞಾ(!ImplPtr.load() && "Expected subclass to call destroyImpl()");
 }
 
-void ThreadSafeTrieRawHashMapBase::destroyImpl(
-    function_ref<void(void *)> Destructor) {
+ಶೂನ್ಯ ThreadSafeTrieRawHashMapBase::destroyImpl(
+    function_ref<ಶೂನ್ಯ(ಶೂನ್ಯ *)> Destructor) {
   std::unique_ptr<ImplType> Impl(ImplPtr.exchange(nullptr));
-  if (!Impl)
-    return;
+  ಯದಿ (!Impl)
+    ಪ್ರತ್ಯಾಗಮ;
 
   // Destroy content nodes throughout trie. Avoid destroying any subtries since
   // we need TrieNode::classof() to find the content nodes.
   //
   // FIXME: Once we have bitsets (see FIXME in TrieSubtrie class), use them
   // facilitate sparse iteration here.
-  if (Destructor)
-    for (TrieSubtrie *Trie = Impl->getRoot(); Trie; Trie = Trie->Next.load())
-      for (unsigned I = 0; I < Trie->size(); ++I)
-        if (auto *Content = dyn_cast_or_null<TrieContent>(Trie->load(I)))
-          Destructor(Content->getValuePointer());
+  ಯದಿ (Destructor)
+    ಪ್ರತಿ (TrieSubtrie *Trie = Impl->get_ಬೇರು(); Trie; Trie = Trie->Next.load())
+      ಪ್ರತಿ (unsigned I = 0; I < Trie->size(); ++I)
+        ಯದಿ (auto *Content = dyn_cast_or_null<TrieContent>(Trie->load(I)))
+          Destructor(Content->get_ಮೌಲ್ಯ_Pointer());
 
   // Destroy the subtries. Incidentally, this destroys them in the reverse order
   // of saving.
-  TrieSubtrie *Trie = Impl->getRoot()->Next;
-  while (Trie) {
+  TrieSubtrie *Trie = Impl->get_ಬೇರು()->Next;
+  ಯಾವತ್ (Trie) {
     TrieSubtrie *Next = Trie->Next.exchange(nullptr);
     delete Trie;
     Trie = Next;
@@ -387,129 +387,129 @@ void ThreadSafeTrieRawHashMapBase::destroyImpl(
 }
 
 ThreadSafeTrieRawHashMapBase::PointerBase
-ThreadSafeTrieRawHashMapBase::getRoot() const {
+ThreadSafeTrieRawHashMapBase::get_ಬೇರು() ಧ್ರುವ {
   ImplType *Impl = ImplPtr.load();
-  if (!Impl)
-    return PointerBase();
-  return PointerBase(Impl->getRoot());
+  ಯದಿ (!Impl)
+    ಪ್ರತ್ಯಾಗಮ PointerBase();
+  ಪ್ರತ್ಯಾಗಮ PointerBase(Impl->get_ಬೇರು());
 }
 
 unsigned ThreadSafeTrieRawHashMapBase::getStartBit(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return 0;
-  if (auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P))
-    return S->StartBit;
-  return 0;
+    ThreadSafeTrieRawHashMapBase::PointerBase P) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(!P.isHint() && "Not a valid trie");
+  ಯದಿ (!P.P)
+    ಪ್ರತ್ಯಾಗಮ 0;
+  ಯದಿ (auto *S = dyn_cast<TrieSubtrie>((Trie_ಗಂಟು *)P.P))
+    ಪ್ರತ್ಯಾಗಮ S->StartBit;
+  ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getNumBits(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return 0;
-  if (auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P))
-    return S->NumBits;
-  return 0;
+unsigned ThreadSafeTrieRawHashMapBase::get_ಅಂಕೆ_Bits(
+    ThreadSafeTrieRawHashMapBase::PointerBase P) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(!P.isHint() && "Not a valid trie");
+  ಯದಿ (!P.P)
+    ಪ್ರತ್ಯಾಗಮ 0;
+  ಯದಿ (auto *S = dyn_cast<TrieSubtrie>((Trie_ಗಂಟು *)P.P))
+    ಪ್ರತ್ಯಾಗಮ S->ಅಂಕೆ_Bits_2;
+  ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getNumSlotUsed(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return 0;
-  auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P);
-  if (!S)
-    return 0;
-  unsigned Num = 0;
-  for (unsigned I = 0, E = S->size(); I < E; ++I)
-    if (S->load(I))
-      ++Num;
-  return Num;
+unsigned ThreadSafeTrieRawHashMapBase::get_ಅಂಕೆ_Slot_Used(
+    ThreadSafeTrieRawHashMapBase::PointerBase P) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(!P.isHint() && "Not a valid trie");
+  ಯದಿ (!P.P)
+    ಪ್ರತ್ಯಾಗಮ 0;
+  auto *S = dyn_cast<TrieSubtrie>((Trie_ಗಂಟು *)P.P);
+  ಯದಿ (!S)
+    ಪ್ರತ್ಯಾಗಮ 0;
+  unsigned ಅಂಕೆ = 0;
+  ಪ್ರತಿ (unsigned I = 0, E = S->size(); I < E; ++I)
+    ಯದಿ (S->load(I))
+      ++ಅಂಕೆ;
+  ಪ್ರತ್ಯಾಗಮ ಅಂಕೆ;
 }
 
 std::string ThreadSafeTrieRawHashMapBase::getTriePrefixAsString(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return "";
+    ThreadSafeTrieRawHashMapBase::PointerBase P) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(!P.isHint() && "Not a valid trie");
+  ಯದಿ (!P.P)
+    ಪ್ರತ್ಯಾಗಮ "";
 
-  auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P);
-  if (!S || !S->IsSubtrie)
-    return "";
+  auto *S = dyn_cast<TrieSubtrie>((Trie_ಗಂಟು *)P.P);
+  ಯದಿ (!S || !S->IsSubtrie)
+    ಪ್ರತ್ಯಾಗಮ "";
 
   // Find a TrieContent node which has hash stored. Depth search following the
   // first used slot until a TrieContent node is found.
   TrieSubtrie *Current = S;
-  TrieContent *Node = nullptr;
-  while (Current) {
+  TrieContent *ಗಂಟು = nullptr;
+  ಯಾವತ್ (Current) {
     TrieSubtrie *Next = nullptr;
     // Find first used slot in the trie.
-    for (unsigned I = 0, E = Current->size(); I < E; ++I) {
+    ಪ್ರತಿ (unsigned I = 0, E = Current->size(); I < E; ++I) {
       auto *S = Current->load(I);
-      if (!S)
-        continue;
+      ಯದಿ (!S)
+        ಅನುವರ್ತ;
 
-      if (auto *Content = dyn_cast<TrieContent>(S))
-        Node = Content;
-      else if (auto *Sub = dyn_cast<TrieSubtrie>(S))
+      ಯದಿ (auto *Content = dyn_cast<TrieContent>(S))
+        ಗಂಟು = Content;
+      ಅನ್ಯಥಾ ಯದಿ (auto *Sub = dyn_cast<TrieSubtrie>(S))
         Next = Sub;
-      break;
+      ಭಙ್ಗ;
     }
 
     // Found the node.
-    if (Node)
-      break;
+    ಯದಿ (ಗಂಟು)
+      ಭಙ್ಗ;
 
     // Continue to the next level if the node is not found.
     Current = Next;
   }
 
-  assert(Node && "malformed trie, cannot find TrieContent on leaf node");
+  ಪ್ರತಿಜ್ಞಾ(ಗಂಟು && "malformed trie, cannot find TrieContent on leaf node");
   // The prefix for the current trie is the first `StartBit` of the content
   // stored underneath this subtrie.
   std::string Str;
   raw_string_ostream SS(Str);
 
   unsigned StartFullBytes = (S->StartBit + 1) / 8 - 1;
-  SS << toHex(toStringRef(Node->getHash()).take_front(StartFullBytes),
-              /*LowerCase=*/true);
+  SS << toHex(toStringRef(ಗಂಟು->getHash()).take_front(StartFullBytes),
+              /*LowerCase=*/ಸತ್ಯ);
 
   // For the part of the prefix that doesn't fill a byte, print raw bit values.
   std::string Bits;
-  for (unsigned I = StartFullBytes * 8, E = S->StartBit; I < E; ++I) {
+  ಪ್ರತಿ (unsigned I = StartFullBytes * 8, E = S->StartBit; I < E; ++I) {
     unsigned Index = I / 8;
     unsigned Offset = 7 - I % 8;
-    Bits.push_back('0' + ((Node->getHash()[Index] >> Offset) & 1));
+    Bits.ತಳ್ಳು_back('0' + ((ಗಂಟು->getHash()[Index] >> Offset) & 1));
   }
 
-  if (!Bits.empty())
+  ಯದಿ (!Bits.empty())
     SS << "[" << Bits << "]";
 
-  return SS.str();
+  ಪ್ರತ್ಯಾಗಮ SS.str();
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getNumTries() const {
+unsigned ThreadSafeTrieRawHashMapBase::get_ಅಂಕೆ_Tries() ಧ್ರುವ {
   ImplType *Impl = ImplPtr.load();
-  if (!Impl)
-    return 0;
-  unsigned Num = 0;
-  for (TrieSubtrie *Trie = Impl->getRoot(); Trie; Trie = Trie->Next.load())
-    ++Num;
-  return Num;
+  ಯದಿ (!Impl)
+    ಪ್ರತ್ಯಾಗಮ 0;
+  unsigned ಅಂಕೆ = 0;
+  ಪ್ರತಿ (TrieSubtrie *Trie = Impl->get_ಬೇರು(); Trie; Trie = Trie->Next.load())
+    ++ಅಂಕೆ;
+  ಪ್ರತ್ಯಾಗಮ ಅಂಕೆ;
 }
 
 ThreadSafeTrieRawHashMapBase::PointerBase
 ThreadSafeTrieRawHashMapBase::getNextTrie(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return PointerBase();
-  auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P);
-  if (!S)
-    return PointerBase();
-  if (auto *E = S->Next.load())
-    return PointerBase(E);
-  return PointerBase();
+    ThreadSafeTrieRawHashMapBase::PointerBase P) ಧ್ರುವ {
+  ಪ್ರತಿಜ್ಞಾ(!P.isHint() && "Not a valid trie");
+  ಯದಿ (!P.P)
+    ಪ್ರತ್ಯಾಗಮ PointerBase();
+  auto *S = dyn_cast<TrieSubtrie>((Trie_ಗಂಟು *)P.P);
+  ಯದಿ (!S)
+    ಪ್ರತ್ಯಾಗಮ PointerBase();
+  ಯದಿ (auto *E = S->Next.load())
+    ಪ್ರತ್ಯಾಗಮ PointerBase(E);
+  ಪ್ರತ್ಯಾಗಮ PointerBase();
 }

@@ -6,71 +6,71 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Signposts.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Signposts.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/Mutex.h"
-#include <Availability.h>
-#include <os/signpost.h>
+#ಯದಿ LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/DenseMap.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Mutex.h"
+#ಅನ್ತರ್ಭಾವ <Availability.h>
+#ಅನ್ತರ್ಭಾವ <os/signpost.h>
 #endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ಯದಿ LLVM_SUPPORT_XCODE_SIGNPOSTS
 #define SIGNPOSTS_AVAILABLE()                                                  \
   __builtin_available(macos 10.14, iOS 12, tvOS 12, watchOS 5, *)
-namespace {
+ನಾಮಾಕಾಶ {
 os_log_t *LogCreator() {
-  os_log_t *X = new os_log_t;
+  os_log_t *X = ನೂತನ os_log_t;
   *X = os_log_create("org.llvm.signposts", "toolchain");
-  return X;
+  ಪ್ರತ್ಯಾಗಮ X;
 }
-struct LogDeleter {
-  void operator()(os_log_t *X) const {
+ಸಂರಚನಾ LogDeleter {
+  ಶೂನ್ಯ operator()(os_log_t *X) ಧ್ರುವ {
     os_release(*X);
     delete X;
   }
 };
 } // end anonymous namespace
 
-namespace llvm {
-class SignpostEmitterImpl {
+ನಾಮಾಕಾಶ llvm {
+ವರ್ಗ SignpostEmitterImpl {
   using LogPtrTy = std::unique_ptr<os_log_t, LogDeleter>;
   using LogTy = LogPtrTy::element_type;
 
   LogPtrTy SignpostLog;
-  DenseMap<const void *, os_signpost_id_t> Signposts;
-  sys::SmartMutex<true> Mutex;
+  DenseMap<ಧ್ರುವ ಶೂನ್ಯ *, os_signpost_id_t> Signposts;
+  sys::SmartMutex<ಸತ್ಯ> Mutex;
 
-  LogTy &getLogger() const { return *SignpostLog; }
-  os_signpost_id_t getSignpostForObject(const void *O) {
-    sys::SmartScopedLock<true> Lock(Mutex);
-    const auto &I = Signposts.find(O);
-    if (I != Signposts.end())
-      return I->second;
+  LogTy &getLogger() ಧ್ರುವ { ಪ್ರತ್ಯಾಗಮ *SignpostLog; }
+  os_signpost_id_t getSignpostForObject(ಧ್ರುವ ಶೂನ್ಯ *O) {
+    sys::SmartScopedLock<ಸತ್ಯ> Lock(Mutex);
+    ಧ್ರುವ auto &I = Signposts.find(O);
+    ಯದಿ (I != Signposts.end())
+      ಪ್ರತ್ಯಾಗಮ I->second;
     os_signpost_id_t ID = {};
-    if (SIGNPOSTS_AVAILABLE()) {
+    ಯದಿ (SIGNPOSTS_AVAILABLE()) {
       ID = os_signpost_id_make_with_pointer(getLogger(), O);
     }
-    const auto &Inserted = Signposts.insert(std::make_pair(O, ID));
-    return Inserted.first->second;
+    ಧ್ರುವ auto &Inserted = Signposts.ಸೇರಿಸು(std::make_pair(O, ID));
+    ಪ್ರತ್ಯಾಗಮ Inserted.first->second;
   }
 
-public:
+ಸಾರ್ವಜನಿಕ:
   SignpostEmitterImpl() : SignpostLog(LogCreator()) {}
 
-  bool isEnabled() const {
-    if (SIGNPOSTS_AVAILABLE())
-      return os_signpost_enabled(*SignpostLog);
-    return false;
+  ತಾರ್ಕಿಕ isEnabled() ಧ್ರುವ {
+    ಯದಿ (SIGNPOSTS_AVAILABLE())
+      ಪ್ರತ್ಯಾಗಮ os_signpost_enabled(*SignpostLog);
+    ಪ್ರತ್ಯಾಗಮ ಅಸತ್ಯ;
   }
 
-  void startInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  ಶೂನ್ಯ startInterval(ಧ್ರುವ ಶೂನ್ಯ *O, llvm::StringRef Name) {
+    ಯದಿ (isEnabled()) {
+      ಯದಿ (SIGNPOSTS_AVAILABLE()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_begin(getLogger(), getSignpostForObject(O),
                                    "LLVM Timers", "%s", Name.data());
@@ -78,9 +78,9 @@ public:
     }
   }
 
-  void endInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  ಶೂನ್ಯ endInterval(ಧ್ರುವ ಶೂನ್ಯ *O, llvm::StringRef Name) {
+    ಯದಿ (isEnabled()) {
+      ಯದಿ (SIGNPOSTS_AVAILABLE()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_end(getLogger(), getSignpostForObject(O),
                                  "LLVM Timers", "");
@@ -89,45 +89,45 @@ public:
   }
 };
 } // end namespace llvm
-#else
+#ಅನ್ಯಥಾ
 /// Definition necessary for use of std::unique_ptr in SignpostEmitter::Impl.
-class llvm::SignpostEmitterImpl {};
+ವರ್ಗ llvm::SignpostEmitterImpl {};
 #endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ಯದಿ LLVM_SUPPORT_XCODE_SIGNPOSTS
 #define HAVE_ANY_SIGNPOST_IMPL 1
-#else
+#ಅನ್ಯಥಾ
 #define HAVE_ANY_SIGNPOST_IMPL 0
 #endif
 
 SignpostEmitter::SignpostEmitter() {
-#if HAVE_ANY_SIGNPOST_IMPL
+#ಯದಿ HAVE_ANY_SIGNPOST_IMPL
   Impl = std::make_unique<SignpostEmitterImpl>();
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-SignpostEmitter::~SignpostEmitter() = default;
+SignpostEmitter::~SignpostEmitter() = ಸ್ವಭಾವ;
 
-bool SignpostEmitter::isEnabled() const {
-#if HAVE_ANY_SIGNPOST_IMPL
-  return Impl->isEnabled();
-#else
-  return false;
+ತಾರ್ಕಿಕ SignpostEmitter::isEnabled() ಧ್ರುವ {
+#ಯದಿ HAVE_ANY_SIGNPOST_IMPL
+  ಪ್ರತ್ಯಾಗಮ Impl->isEnabled();
+#ಅನ್ಯಥಾ
+  ಪ್ರತ್ಯಾಗಮ ಅಸತ್ಯ;
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::startInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  return Impl->startInterval(O, Name);
+ಶೂನ್ಯ SignpostEmitter::startInterval(ಧ್ರುವ ಶೂನ್ಯ *O, StringRef Name) {
+#ಯದಿ HAVE_ANY_SIGNPOST_IMPL
+  ಯದಿ (Impl == nullptr)
+    ಪ್ರತ್ಯಾಗಮ;
+  ಪ್ರತ್ಯಾಗಮ Impl->startInterval(O, Name);
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::endInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
+ಶೂನ್ಯ SignpostEmitter::endInterval(ಧ್ರುವ ಶೂನ್ಯ *O, StringRef Name) {
+#ಯದಿ HAVE_ANY_SIGNPOST_IMPL
+  ಯದಿ (Impl == nullptr)
+    ಪ್ರತ್ಯಾಗಮ;
   Impl->endInterval(O, Name);
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }

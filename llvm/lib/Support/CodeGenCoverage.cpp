@@ -9,76 +9,76 @@
 /// This file implements the CodeGenCoverage class.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CodeGenCoverage.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CodeGenCoverage.h"
 
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/ToolOutputFile.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Endian.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MemoryBuffer.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Mutex.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Process.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ScopedPrinter.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ToolOutputFile.h"
 
-using namespace llvm;
+using ನಾಮಾಕಾಶ llvm;
 
-CodeGenCoverage::CodeGenCoverage() = default;
+CodeGenCoverage::CodeGenCoverage() = ಸ್ವಭಾವ;
 
-void CodeGenCoverage::setCovered(uint64_t RuleID) {
-  if (RuleCoverage.size() <= RuleID)
-    RuleCoverage.resize(RuleID + 1, false);
-  RuleCoverage[RuleID] = true;
+ಶೂನ್ಯ CodeGenCoverage::setCovered(uint64_t RuleID) {
+  ಯದಿ (RuleCoverage.size() <= RuleID)
+    RuleCoverage.resize(RuleID + 1, ಅಸತ್ಯ);
+  RuleCoverage[RuleID] = ಸತ್ಯ;
 }
 
-bool CodeGenCoverage::isCovered(uint64_t RuleID) const {
-  if (RuleCoverage.size() <= RuleID)
-    return false;
-  return RuleCoverage[RuleID];
+ತಾರ್ಕಿಕ CodeGenCoverage::isCovered(uint64_t RuleID) ಧ್ರುವ {
+  ಯದಿ (RuleCoverage.size() <= RuleID)
+    ಪ್ರತ್ಯಾಗಮ ಅಸತ್ಯ;
+  ಪ್ರತ್ಯಾಗಮ RuleCoverage[RuleID];
 }
 
 iterator_range<CodeGenCoverage::const_covered_iterator>
-CodeGenCoverage::covered() const {
-  return RuleCoverage.set_bits();
+CodeGenCoverage::covered() ಧ್ರುವ {
+  ಪ್ರತ್ಯಾಗಮ RuleCoverage.set_bits();
 }
 
-bool CodeGenCoverage::parse(MemoryBuffer &Buffer, StringRef BackendName) {
-  const char *CurPtr = Buffer.getBufferStart();
+ತಾರ್ಕಿಕ CodeGenCoverage::parse(MemoryBuffer &Buffer, StringRef BackendName) {
+  ಧ್ರುವ ವರ್ಣ *CurPtr = Buffer.getBufferStart();
 
-  while (CurPtr != Buffer.getBufferEnd()) {
+  ಯಾವತ್ (CurPtr != Buffer.getBufferEnd()) {
     // Read the backend name from the input.
-    const char *LexedBackendName = CurPtr;
-    while (*CurPtr++ != 0)
+    ಧ್ರುವ ವರ್ಣ *LexedBackendName = CurPtr;
+    ಯಾವತ್ (*CurPtr++ != 0)
       ;
-    if (CurPtr == Buffer.getBufferEnd())
-      return false; // Data is invalid, expected rule id's to follow.
+    ಯದಿ (CurPtr == Buffer.getBufferEnd())
+      ಪ್ರತ್ಯಾಗಮ ಅಸತ್ಯ; // Data is invalid, expected rule id's to follow.
 
-    bool IsForThisBackend = BackendName == LexedBackendName;
-    while (CurPtr != Buffer.getBufferEnd()) {
-      if (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
-        return false; // Data is invalid. Not enough bytes for another rule id.
+    ತಾರ್ಕಿಕ IsForThisBackend = BackendName == LexedBackendName;
+    ಯಾವತ್ (CurPtr != Buffer.getBufferEnd()) {
+      ಯದಿ (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
+        ಪ್ರತ್ಯಾಗಮ ಅಸತ್ಯ; // Data is invalid. Not enough bytes for another rule id.
 
       uint64_t RuleID =
           support::endian::read64(CurPtr, llvm::endianness::native);
       CurPtr += 8;
 
       // ~0ull terminates the rule id list.
-      if (RuleID == ~0ull)
-        break;
+      ಯದಿ (RuleID == ~0ull)
+        ಭಙ್ಗ;
 
       // Anything else, is recorded or ignored depending on whether it's
       // intended for the backend we're interested in.
-      if (IsForThisBackend)
+      ಯದಿ (IsForThisBackend)
         setCovered(RuleID);
     }
   }
 
-  return true;
+  ಪ್ರತ್ಯಾಗಮ ಸತ್ಯ;
 }
 
-bool CodeGenCoverage::emit(StringRef CoveragePrefix,
-                           StringRef BackendName) const {
-  if (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
-    static sys::SmartMutex<true> OutputMutex;
-    sys::SmartScopedLock<true> Lock(OutputMutex);
+ತಾರ್ಕಿಕ CodeGenCoverage::emit(StringRef CoveragePrefix,
+                           StringRef BackendName) ಧ್ರುವ {
+  ಯದಿ (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
+    ಸ್ಥಿರ sys::SmartMutex<ಸತ್ಯ> OutputMutex;
+    sys::SmartScopedLock<ಸತ್ಯ> Lock(OutputMutex);
 
     // We can handle locking within a process easily enough but we don't want to
     // manage it between multiple processes. Use the process ID to ensure no
@@ -91,21 +91,21 @@ bool CodeGenCoverage::emit(StringRef CoveragePrefix,
     sys::fs::OpenFlags OpenFlags = sys::fs::OF_Append;
     std::unique_ptr<ToolOutputFile> CoverageFile =
         std::make_unique<ToolOutputFile>(CoverageFilename, EC, OpenFlags);
-    if (EC)
-      return false;
+    ಯದಿ (EC)
+      ಪ್ರತ್ಯಾಗಮ ಅಸತ್ಯ;
 
     uint64_t Zero = 0;
     uint64_t InvZero = ~0ull;
     CoverageFile->os() << BackendName;
-    CoverageFile->os().write((const char *)&Zero, sizeof(unsigned char));
-    for (uint64_t I : RuleCoverage.set_bits())
-      CoverageFile->os().write((const char *)&I, sizeof(uint64_t));
-    CoverageFile->os().write((const char *)&InvZero, sizeof(uint64_t));
+    CoverageFile->os().ಲಿಖ((ಧ್ರುವ ವರ್ಣ *)&Zero, ಪರಿಮಾಣ(unsigned ವರ್ಣ));
+    ಪ್ರತಿ (uint64_t I : RuleCoverage.set_bits())
+      CoverageFile->os().ಲಿಖ((ಧ್ರುವ ವರ್ಣ *)&I, ಪರಿಮಾಣ(uint64_t));
+    CoverageFile->os().ಲಿಖ((ಧ್ರುವ ವರ್ಣ *)&InvZero, ಪರಿಮಾಣ(uint64_t));
 
     CoverageFile->keep();
   }
 
-  return true;
+  ಪ್ರತ್ಯಾಗಮ ಸತ್ಯ;
 }
 
-void CodeGenCoverage::reset() { RuleCoverage.resize(0); }
+ಶೂನ್ಯ CodeGenCoverage::reset() { RuleCoverage.resize(0); }

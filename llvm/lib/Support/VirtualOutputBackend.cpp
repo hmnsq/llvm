@@ -11,30 +11,30 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputBackend.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Support/VirtualOutputError.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputBackend.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallString.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using ನಾಮಾಕಾಶ llvm;
+using ನಾಮಾಕಾಶ llvm::vfs;
 
-void OutputBackend::anchor() {}
+ಶೂನ್ಯ OutputBackend::anchor() {}
 
 Expected<OutputFile>
-OutputBackend::createFile(const Twine &Path,
+OutputBackend::createFile(ಧ್ರುವ Twine &Path,
                           std::optional<OutputConfig> Config) {
   SmallString<128> PathStorage;
   Path.toVector(PathStorage);
 
-  if (Config) {
+  ಯದಿ (Config) {
     // Check for invalid configs.
-    if (!Config->getText() && Config->getCRLF())
-      return make_error<OutputConfigError>(*Config, PathStorage);
+    ಯದಿ (!Config->getText() && Config->getCRLF())
+      ಪ್ರತ್ಯಾಗಮ make_error<OutputConfigError>(*Config, PathStorage);
   }
 
   std::unique_ptr<OutputFileImpl> Impl;
-  if (Error E = createFileImpl(PathStorage, Config).moveInto(Impl))
-    return std::move(E);
-  assert(Impl && "Expected valid Impl or Error");
-  return OutputFile(PathStorage, std::move(Impl));
+  ಯದಿ (Error E = createFileImpl(PathStorage, Config).moveInto(Impl))
+    ಪ್ರತ್ಯಾಗಮ std::move(E);
+  ಪ್ರತಿಜ್ಞಾ(Impl && "Expected valid Impl or Error");
+  ಪ್ರತ್ಯಾಗಮ OutputFile(PathStorage, std::move(Impl));
 }
