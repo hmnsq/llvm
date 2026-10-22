@@ -21,25 +21,25 @@ namespace {
 using Accessor = ArrayRef<StringRef>;
 
 static bool isFalsey(const json::Value &V) {
-  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
+  返回 V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
          (V.getAsArray() && V.getAsArray()->empty());
 }
 
 static bool isContextFalsey(const json::Value *V) {
   // A missing context (represented by a nullptr) is defined as falsey.
-  if (!V)
-    return true;
-  return isFalsey(*V);
+  如果 (!V)
+    返回 true;
+  返回 isFalsey(*V);
 }
 
 static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
   size_t CurrentPos = 0;
-  while (CurrentPos < Str.size()) {
+  当 (CurrentPos < Str.size()) {
     // Find the next delimiter.
     size_t DelimiterPos = Str.find('.', CurrentPos);
 
     // If no delimiter is found, process the rest of the string.
-    if (DelimiterPos == StringRef::npos)
+    如果 (DelimiterPos == StringRef::npos)
       DelimiterPos = Str.size();
 
     // Get the current part, which may have whitespace.
@@ -47,7 +47,7 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
 
     // Manually trim the part without creating a new string object.
     size_t Start = Part.find_first_not_of(" \t\r\n");
-    if (Start != StringRef::npos) {
+    如果 (Start != StringRef::npos) {
       size_t End = Part.find_last_not_of(" \t\r\n");
       Tokens.push_back(Part.slice(Start, End + 1));
     }
@@ -64,11 +64,11 @@ static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // We make an exception for a single dot which
   // refers to the current context.
   SmallVector<StringRef> Tokens;
-  if (Str == ".") {
+  如果 (Str == ".") {
     // "." is a special accessor that refers to the current context.
     // It's a literal, so it doesn't need to be saved.
     Tokens.push_back(".");
-  } else {
+  } 否则 {
     splitAndTrim(Str, Tokens);
   }
   // Now, allocate memory for the array of StringRefs in the arena.
@@ -76,7 +76,7 @@ static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // Copy the StringRefs from the stack vector to the arena.
   llvm::copy(Tokens, ArenaTokens);
   // Return an ArrayRef pointing to the stable arena memory.
-  return ArrayRef<StringRef>(ArenaTokens, Tokens.size());
+  返回 ArrayRef<StringRef>(ArenaTokens, Tokens.size());
 }
 } // namespace
 
@@ -106,7 +106,7 @@ private:
   void write_impl(const char *Ptr, size_t Size) override {
     OS.write(Ptr, Size);
   }
-  uint64_t current_pos() const override { return OS.tell(); }
+  uint64_t current_pos() const override { 返回 OS.tell(); }
 };
 
 class Token {
@@ -131,40 +131,40 @@ public:
         MustacheContext &Ctx)
       : RawBody(RawBody), TokenBody(TokenBody), Indentation(0) {
     TokenType = getTokenType(Identifier);
-    if (TokenType == Type::Comment)
-      return;
+    如果 (TokenType == Type::Comment)
+      返回;
     StringRef AccessorStr(this->TokenBody);
-    if (TokenType != Type::Variable)
+    如果 (TokenType != Type::Variable)
       AccessorStr = AccessorStr.substr(1);
     AccessorValue = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
   }
 
-  ArrayRef<StringRef> getAccessor() const { return AccessorValue; }
+  ArrayRef<StringRef> getAccessor() const { 返回 AccessorValue; }
 
-  Type getType() const { return TokenType; }
+  Type getType() const { 返回 TokenType; }
 
   void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; }
 
-  size_t getIndentation() const { return Indentation; }
+  size_t getIndentation() const { 返回 Indentation; }
 
   static Type getTokenType(char Identifier) {
     switch (Identifier) {
     case '#':
-      return Type::SectionOpen;
+      返回 Type::SectionOpen;
     case '/':
-      return Type::SectionClose;
+      返回 Type::SectionClose;
     case '^':
-      return Type::InvertSectionOpen;
+      返回 Type::InvertSectionOpen;
     case '!':
-      return Type::Comment;
+      返回 Type::Comment;
     case '>':
-      return Type::Partial;
+      返回 Type::Partial;
     case '&':
-      return Type::UnescapeVariable;
+      返回 Type::UnescapeVariable;
     case '=':
-      return Type::SetDelimiter;
+      返回 Type::SetDelimiter;
     default:
-      return Type::Variable;
+      返回 Type::Variable;
     }
   }
 
@@ -249,17 +249,17 @@ private:
 
 // A wrapper for arena allocator for ASTNodes
 static AstPtr createRootNode(MustacheContext &Ctx) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
+  返回 new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
 }
 
 static AstPtr createNode(MustacheContext &Ctx, ASTNode::Type T,
                          ArrayRef<StringRef> A, ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
+  返回 new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
 }
 
 static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
                              ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
+  返回 new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
 }
 
 // Function to check if there is meaningful text behind.
@@ -275,37 +275,37 @@ static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
 // For example:
 //  "{{#Section}}"
 static bool hasTextBehind(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx == 0)
-    return true;
+  如果 (Idx == 0)
+    返回 true;
 
   size_t PrevIdx = Idx - 1;
-  if (Tokens[PrevIdx].getType() != Token::Type::Text)
-    return true;
+  如果 (Tokens[PrevIdx].getType() != Token::Type::Text)
+    返回 true;
 
   const Token &PrevToken = Tokens[PrevIdx];
   StringRef TokenBody = StringRef(PrevToken.RawBody).rtrim(" \r\t\v");
-  return !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
+  返回 !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
 }
 
 // Function to check if there's no meaningful text ahead.
 // We determine if a token has text ahead if the left of previous
 // token does not start with a newline.
 static bool hasTextAhead(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx >= Tokens.size() - 1)
-    return true;
+  如果 (Idx >= Tokens.size() - 1)
+    返回 true;
 
   size_t NextIdx = Idx + 1;
-  if (Tokens[NextIdx].getType() != Token::Type::Text)
-    return true;
+  如果 (Tokens[NextIdx].getType() != Token::Type::Text)
+    返回 true;
 
   const Token &NextToken = Tokens[NextIdx];
   StringRef TokenBody = StringRef(NextToken.RawBody).ltrim(" ");
-  return !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
+  返回 !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
 }
 
 static bool requiresCleanUp(Token::Type T) {
   // We must clean up all the tokens that could contain child nodes.
-  return T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
+  返回 T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
          T == Token::Type::SectionClose || T == Token::Type::Comment ||
          T == Token::Type::Partial || T == Token::Type::SetDelimiter;
 }
@@ -320,9 +320,9 @@ static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
   Token &NextToken = Tokens[Idx + 1];
   StringRef NextTokenBody = NextToken.TokenBody;
   // Cut off the leading newline which could be \n or \r\n.
-  if (NextTokenBody.starts_with("\r\n"))
+  如果 (NextTokenBody.starts_with("\r\n"))
     NextToken.TokenBody = NextTokenBody.substr(2);
-  else if (NextTokenBody.starts_with("\n"))
+  否则 如果 (NextTokenBody.starts_with("\n"))
     NextToken.TokenBody = NextTokenBody.substr(1);
 }
 
@@ -358,11 +358,11 @@ struct Tag {
 [[maybe_unused]] static const char *tagKindToString(Tag::Kind K) {
   switch (K) {
   case Tag::Kind::None:
-    return "None";
+    返回 "None";
   case Tag::Kind::Normal:
-    return "Normal";
+    返回 "Normal";
   case Tag::Kind::Triple:
-    return "Triple";
+    返回 "Triple";
   }
   llvm_unreachable("Unknown Tag::Kind");
 }
@@ -370,17 +370,17 @@ struct Tag {
 [[maybe_unused]] static const char *jsonKindToString(json::Value::Kind K) {
   switch (K) {
   case json::Value::Kind::Null:
-    return "JSON_KIND_NULL";
+    返回 "JSON_KIND_NULL";
   case json::Value::Kind::Boolean:
-    return "JSON_KIND_BOOLEAN";
+    返回 "JSON_KIND_BOOLEAN";
   case json::Value::Kind::Number:
-    return "JSON_KIND_NUMBER";
+    返回 "JSON_KIND_NUMBER";
   case json::Value::Kind::String:
-    return "JSON_KIND_STRING";
+    返回 "JSON_KIND_STRING";
   case json::Value::Kind::Array:
-    return "JSON_KIND_ARRAY";
+    返回 "JSON_KIND_ARRAY";
   case json::Value::Kind::Object:
-    return "JSON_KIND_OBJECT";
+    返回 "JSON_KIND_OBJECT";
   }
   llvm_unreachable("Unknown json::Value::Kind");
 }
@@ -397,33 +397,33 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   const StringLiteral TripleOpen("{{{");
   const StringLiteral TripleClose("}}}");
 
-  while (Cursor < Template.size()) {
+  当 (Cursor < Template.size()) {
     StringRef TemplateSuffix = Template.substr(Cursor);
     StringRef TagOpen, TagClose;
     Tag::Kind Kind;
 
     // Determine which tag we've encountered.
-    if (TemplateSuffix.starts_with(TripleOpen)) {
+    如果 (TemplateSuffix.starts_with(TripleOpen)) {
       Kind = Tag::Kind::Triple;
       TagOpen = TripleOpen;
       TagClose = TripleClose;
-    } else if (TemplateSuffix.starts_with(Open)) {
+    } 否则 如果 (TemplateSuffix.starts_with(Open)) {
       Kind = Tag::Kind::Normal;
       TagOpen = Open;
       TagClose = Close;
-    } else {
+    } 否则 {
       // Not at a tag, continue scanning.
       ++Cursor;
       continue;
     }
 
     // Found a tag, first add the preceding text.
-    if (Cursor > TextStart)
+    如果 (Cursor > TextStart)
       Tokens.emplace_back(Template.slice(TextStart, Cursor));
 
     // Find the closing tag.
     size_t EndPos = Template.find(TagClose, Cursor + TagOpen.size());
-    if (EndPos == StringRef::npos) {
+    如果 (EndPos == StringRef::npos) {
       // No closing tag, the rest is text.
       Tokens.emplace_back(Template.substr(Cursor));
       TextStart = Cursor = Template.size();
@@ -439,18 +439,18 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
     // Process the tag (inlined logic from processTag).
     LLVM_DEBUG(dbgs() << "[Tag] " << FullMatch << ", Content: " << Content
                       << ", Kind: " << tagKindToString(Kind) << "\n");
-    if (Kind == Tag::Kind::Triple) {
+    如果 (Kind == Tag::Kind::Triple) {
       Tokens.emplace_back(FullMatch, Ctx.Saver.save("&" + Content), '&', Ctx);
-    } else { // Normal Tag
+    } 否则 { // Normal Tag
       StringRef Interpolated = Content;
-      if (!Interpolated.trim().starts_with("=")) {
+      如果 (!Interpolated.trim().starts_with("=")) {
         char Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
         Tokens.emplace_back(FullMatch, Interpolated, Front, Ctx);
-      } else { // Set Delimiter
+      } 否则 { // Set Delimiter
         Tokens.emplace_back(FullMatch, Interpolated, '=', Ctx);
         StringRef DelimSpec = Interpolated.trim();
         DelimSpec = DelimSpec.drop_front(1);
-        DelimSpec = DelimSpec.take_until([](char C) { return C == '='; });
+        DelimSpec = DelimSpec.take_until([](char C) { 返回 C == '='; });
         DelimSpec = DelimSpec.trim();
 
         auto [NewOpen, NewClose] = DelimSpec.split(' ');
@@ -467,27 +467,27 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   }
 
   // Add any remaining text after the last tag.
-  if (TextStart < Template.size())
+  如果 (TextStart < Template.size())
     Tokens.emplace_back(Template.substr(TextStart));
 
   // Fix up white spaces for standalone tags.
   size_t LastIdx = Tokens.size() - 1;
-  for (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
+  为 (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
     Token &CurrentToken = Tokens[Idx];
     Token::Type CurrentType = CurrentToken.getType();
-    if (!requiresCleanUp(CurrentType))
+    如果 (!requiresCleanUp(CurrentType))
       continue;
 
     bool HasTextBehind = hasTextBehind(Idx, Tokens);
     bool HasTextAhead = hasTextAhead(Idx, Tokens);
 
-    if ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
+    如果 ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
       stripTokenAhead(Tokens, Idx);
 
-    if ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
+    如果 ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
       stripTokenBefore(Tokens, Idx, CurrentToken, CurrentType);
   }
-  return Tokens;
+  返回 Tokens;
 }
 
 // Custom stream to escape strings.
@@ -504,18 +504,18 @@ protected:
   void write_impl(const char *Ptr, size_t Size) override {
     StringRef Data(Ptr, Size);
     size_t Start = 0;
-    while (Start < Size) {
+    当 (Start < Size) {
       // Find the next character that needs to be escaped.
       size_t Next = Data.find_first_of(EscapeChars.str(), Start);
 
       // If no escapable characters are found, write the rest of the string.
-      if (Next == StringRef::npos) {
+      如果 (Next == StringRef::npos) {
         WrappedStream << Data.substr(Start);
-        return;
+        返回;
       }
 
       // Write the chunk of text before the escapable character.
-      if (Next > Start)
+      如果 (Next > Start)
         WrappedStream << Data.substr(Start, Next - Start);
 
       // Look up and write the escaped version of the character.
@@ -524,7 +524,7 @@ protected:
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() const override { 返回 WrappedStream.tell(); }
 
 private:
   EscapeMap &Escape;
@@ -551,21 +551,21 @@ protected:
     SmallString<0> Indent;
     Indent.resize(Indentation, ' ');
 
-    for (char C : Data) {
+    为 (char C : Data) {
       LLVM_DEBUG(dbgs() << "[Indentation Stream] NeedsIndent:" << NeedsIndent
                         << ", C:'" << C << "', Indentation:" << Indentation
                         << "\n");
-      if (NeedsIndent && C != '\n') {
+      如果 (NeedsIndent && C != '\n') {
         WrappedStream << Indent;
         NeedsIndent = false;
       }
       WrappedStream << C;
-      if (C == '\n' && !IsSuspended)
+      如果 (C == '\n' && !IsSuspended)
         NeedsIndent = true;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() const override { 返回 WrappedStream.tell(); }
 
 private:
   size_t Indentation;
@@ -599,12 +599,12 @@ void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
   const size_t End = CurrentPtr - 1;
 
   size_t RawBodySize = 0;
-  for (size_t I = Start; I < End; ++I)
+  为 (size_t I = Start; I < End; ++I)
     RawBodySize += Tokens[I].RawBody.size();
 
   SmallString<128> RawBody;
   RawBody.reserve(RawBodySize);
-  for (std::size_t I = Start; I < End; ++I)
+  为 (std::size_t I = Start; I < End; ++I)
     RawBody += Tokens[I].RawBody;
 
   CurrentNode->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
@@ -616,12 +616,12 @@ AstPtr Parser::parse() {
   CurrentPtr = 0;
   AstPtr RootNode = createRootNode(Ctx);
   parseMustache(RootNode);
-  return RootNode;
+  返回 RootNode;
 }
 
 void Parser::parseMustache(ASTNode *Parent) {
 
-  while (CurrentPtr < Tokens.size()) {
+  当 (CurrentPtr < Tokens.size()) {
     Token CurrentToken = Tokens[CurrentPtr];
     CurrentPtr++;
     ArrayRef<StringRef> A = CurrentToken.getAccessor();
@@ -661,7 +661,7 @@ void Parser::parseMustache(ASTNode *Parent) {
     case Token::Type::SetDelimiter:
       break;
     case Token::Type::SectionClose:
-      return;
+      返回;
     }
   }
 }
@@ -671,23 +671,23 @@ static void toMustacheString(const json::Value &Data, raw_ostream &OS) {
                     << "\n");
   switch (Data.kind()) {
   case json::Value::Null:
-    return;
+    返回;
   case json::Value::Number: {
     auto Num = *Data.getAsNumber();
     std::ostringstream SS;
     SS << Num;
     OS << SS.str();
-    return;
+    返回;
   }
   case json::Value::String: {
     OS << *Data.getAsString();
-    return;
+    返回;
   }
 
   case json::Value::Array: {
     auto Arr = *Data.getAsArray();
-    if (Arr.empty())
-      return;
+    如果 (Arr.empty())
+      返回;
     [[fallthrough]];
   }
   case json::Value::Object:
@@ -711,16 +711,16 @@ void ASTNode::renderPartial(const json::Value &CurrentCtx,
   LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << AccessorValue[0]
                     << ", Indentation:" << Indentation << "\n");
   auto Partial = Ctx.Partials.find(AccessorValue[0]);
-  if (Partial != Ctx.Partials.end())
+  如果 (Partial != Ctx.Partials.end())
     renderPartial(CurrentCtx, OS, Partial->getValue());
 }
 
 void ASTNode::renderVariable(const json::Value &CurrentCtx,
                              MustacheOutputStream &OS) {
   auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
+  如果 (Lambda != Ctx.Lambdas.end()) {
     renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  } 否则 如果 (const json::Value *ContextPtr = findContext()) {
     EscapeStringStream ES(OS, Ctx.Escapes);
     toMustacheString(*ContextPtr, ES);
   }
@@ -731,9 +731,9 @@ void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
   LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << AccessorValue[0]
                     << "\n");
   auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
+  如果 (Lambda != Ctx.Lambdas.end()) {
     renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  } 否则 如果 (const json::Value *ContextPtr = findContext()) {
     OS.suspendIndentation();
     toMustacheString(*ContextPtr, OS);
     OS.resumeIndentation();
@@ -743,19 +743,19 @@ void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
 void ASTNode::renderSection(const json::Value &CurrentCtx,
                             MustacheOutputStream &OS) {
   auto SectionLambda = Ctx.SectionLambdas.find(AccessorValue[0]);
-  if (SectionLambda != Ctx.SectionLambdas.end()) {
+  如果 (SectionLambda != Ctx.SectionLambdas.end()) {
     renderSectionLambdas(CurrentCtx, OS, SectionLambda->getValue());
-    return;
+    返回;
   }
 
   const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr))
-    return;
+  如果 (isContextFalsey(ContextPtr))
+    返回;
 
-  if (const json::Array *Arr = ContextPtr->getAsArray()) {
-    for (const json::Value &V : *Arr)
+  如果 (const json::Array *Arr = ContextPtr->getAsArray()) {
+    为 (const json::Value &V : *Arr)
       renderChild(V, OS);
-    return;
+    返回;
   }
   renderChild(*ContextPtr, OS);
 }
@@ -764,14 +764,14 @@ void ASTNode::renderInvertSection(const json::Value &CurrentCtx,
                                   MustacheOutputStream &OS) {
   bool IsLambda = Ctx.SectionLambdas.contains(AccessorValue[0]);
   const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr) && !IsLambda) {
+  如果 (isContextFalsey(ContextPtr) && !IsLambda) {
     renderChild(CurrentCtx, OS);
   }
 }
 
 void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
-  if (Ty != Root && Ty != Text && AccessorValue.empty())
-    return;
+  如果 (Ty != Root && Ty != Text && AccessorValue.empty())
+    返回;
   // Set the parent context to the incoming context so that we
   // can walk up the context tree correctly in findContext().
   ParentContext = &Data;
@@ -779,25 +779,25 @@ void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
   switch (Ty) {
   case Root:
     renderRoot(Data, OS);
-    return;
+    返回;
   case Text:
     renderText(OS);
-    return;
+    返回;
   case Partial:
     renderPartial(Data, OS);
-    return;
+    返回;
   case Variable:
     renderVariable(Data, OS);
-    return;
+    返回;
   case UnescapeVariable:
     renderUnescapeVariable(Data, OS);
-    return;
+    返回;
   case Section:
     renderSection(Data, OS);
-    return;
+    返回;
   case InvertSection:
     renderInvertSection(Data, OS);
-    return;
+    返回;
   }
   llvm_unreachable("Invalid ASTNode type");
 }
@@ -808,42 +808,42 @@ const json::Value *ASTNode::findContext() {
   // We attempt to find the JSON context in the current node, if it is not
   // found, then we traverse the parent nodes to find the context until we
   // reach the root node or the context is found.
-  if (AccessorValue.empty())
-    return nullptr;
-  if (AccessorValue[0] == ".")
-    return ParentContext;
+  如果 (AccessorValue.empty())
+    返回 nullptr;
+  如果 (AccessorValue[0] == ".")
+    返回 ParentContext;
 
   const json::Object *CurrentContext = ParentContext->getAsObject();
   StringRef CurrentAccessor = AccessorValue[0];
   ASTNode *CurrentParent = Parent;
 
-  while (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
-    if (CurrentParent->Ty != Root) {
+  当 (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
+    如果 (CurrentParent->Ty != Root) {
       CurrentContext = CurrentParent->ParentContext->getAsObject();
       CurrentParent = CurrentParent->Parent;
       continue;
     }
-    return nullptr;
+    返回 nullptr;
   }
   const json::Value *Context = nullptr;
-  for (auto [Idx, Acc] : enumerate(AccessorValue)) {
+  为 (auto [Idx, Acc] : enumerate(AccessorValue)) {
     const json::Value *CurrentValue = CurrentContext->get(Acc);
-    if (!CurrentValue)
-      return nullptr;
-    if (Idx < AccessorValue.size() - 1) {
+    如果 (!CurrentValue)
+      返回 nullptr;
+    如果 (Idx < AccessorValue.size() - 1) {
       CurrentContext = CurrentValue->getAsObject();
-      if (!CurrentContext)
-        return nullptr;
-    } else {
+      如果 (!CurrentContext)
+        返回 nullptr;
+    } 否则 {
       Context = CurrentValue;
     }
   }
-  return Context;
+  返回 Context;
 }
 
 void ASTNode::renderChild(const json::Value &Contexts,
                           MustacheOutputStream &OS) {
-  for (ASTNode &Child : Children)
+  为 (ASTNode &Child : Children)
     Child.render(Contexts, OS);
 }
 
@@ -864,9 +864,9 @@ void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
   AstPtr LambdaNode = P.parse();
 
   EscapeStringStream ES(OS, Ctx.Escapes);
-  if (Ty == Variable) {
+  如果 (Ty == Variable) {
     LambdaNode->render(Contexts, ES);
-    return;
+    返回;
   }
   LambdaNode->render(Contexts, OS);
 }
@@ -874,8 +874,8 @@ void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
 void ASTNode::renderSectionLambdas(const llvm::json::Value &Contexts,
                                    MustacheOutputStream &OS, SectionLambda &L) {
   json::Value Return = L(RawBody.str());
-  if (isFalsey(Return))
-    return;
+  如果 (isFalsey(Return))
+    返回;
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(Return, Output);

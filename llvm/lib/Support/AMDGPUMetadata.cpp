@@ -185,13 +185,13 @@ struct MappingTraits<Kernel::Metadata> {
     YIO.mapOptional(Kernel::Key::Language, MD.mLanguage, std::string());
     YIO.mapOptional(Kernel::Key::LanguageVersion, MD.mLanguageVersion,
                     std::vector<uint32_t>());
-    if (!MD.mAttrs.empty() || !YIO.outputting())
+    如果 (!MD.mAttrs.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::Attrs, MD.mAttrs);
-    if (!MD.mArgs.empty() || !YIO.outputting())
+    如果 (!MD.mArgs.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::Args, MD.mArgs);
-    if (!MD.mCodeProps.empty() || !YIO.outputting())
+    如果 (!MD.mCodeProps.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::CodeProps, MD.mCodeProps);
-    if (!MD.mDebugProps.empty() || !YIO.outputting())
+    如果 (!MD.mDebugProps.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::DebugProps, MD.mDebugProps);
   }
 };
@@ -201,7 +201,7 @@ struct MappingTraits<HSAMD::Metadata> {
   static void mapping(IO &YIO, HSAMD::Metadata &MD) {
     YIO.mapRequired(Key::Version, MD.mVersion);
     YIO.mapOptional(Key::Printf, MD.mPrintf, std::vector<std::string>());
-    if (!MD.mKernels.empty() || !YIO.outputting())
+    如果 (!MD.mKernels.empty() || !YIO.outputting())
       YIO.mapOptional(Key::Kernels, MD.mKernels);
   }
 };
@@ -214,14 +214,14 @@ namespace HSAMD {
 std::error_code fromString(StringRef String, Metadata &HSAMetadata) {
   yaml::Input YamlInput(String);
   YamlInput >> HSAMetadata;
-  return YamlInput.error();
+  返回 YamlInput.error();
 }
 
 std::error_code toString(Metadata HSAMetadata, std::string &String) {
   raw_string_ostream YamlStream(String);
-  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<int>::max());
+  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<整数>::max());
   YamlOutput << HSAMetadata;
-  return std::error_code();
+  返回 std::error_code();
 }
 
 } // end namespace HSAMD

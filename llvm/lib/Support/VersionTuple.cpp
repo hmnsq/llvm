@@ -24,116 +24,116 @@ std::string VersionTuple::getAsString() const {
     llvm::raw_string_ostream Out(Result);
     Out << *this;
   }
-  return Result;
+  返回 Result;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  如果 (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  如果 (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  如果 (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  如果 (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  返回 Out;
 }
 
 static bool parseInt(StringRef &input, unsigned &value) {
   assert(value == 0);
-  if (input.empty())
-    return true;
+  如果 (input.empty())
+    返回 true;
 
   char next = input[0];
   input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
+  如果 (next < '0' || next > '9')
+    返回 true;
   value = (unsigned)(next - '0');
 
-  while (!input.empty()) {
+  当 (!input.empty()) {
     next = input[0];
-    if (next < '0' || next > '9')
-      return false;
+    如果 (next < '0' || next > '9')
+      返回 false;
     input = input.substr(1);
     value = value * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  返回 false;
 }
 
 bool VersionTuple::tryParse(StringRef input) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  如果 (parseInt(input, major))
+    返回 true;
 
-  if (input.empty()) {
+  如果 (input.empty()) {
     *this = VersionTuple(major);
-    return false;
+    返回 false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
+  如果 (input[0] != '.')
+    返回 true;
   input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  如果 (parseInt(input, minor))
+    返回 true;
 
-  if (input.empty()) {
+  如果 (input.empty()) {
     *this = VersionTuple(major, minor);
-    return false;
+    返回 false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  如果 (!input.consume_front("."))
+    返回 true;
+  如果 (parseInt(input, subminor))
+    返回 true;
 
-  if (input.empty()) {
+  如果 (input.empty()) {
     *this = VersionTuple(major, minor, subminor);
-    return false;
+    返回 false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  如果 (!input.consume_front("."))
+    返回 true;
+  如果 (parseInt(input, build))
+    返回 true;
+  如果 (build >= 1024 * 1024)
+    返回 true;
 
-  if (input.empty()) {
+  如果 (input.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
-    return false;
+    返回 false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  如果 (!input.consume_front("."))
+    返回 true;
+  如果 (parseInt(input, subbuild))
+    返回 true;
+  如果 (subbuild >= 1024)
+    返回 true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  如果 (!input.empty())
+    返回 true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  返回 false;
 }
 
 VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+  如果 (HasSubbuild)
+    返回 VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  如果 (HasBuild)
+    返回 VersionTuple(NewMajor, Minor, Subminor, Build);
+  如果 (HasSubminor)
+    返回 VersionTuple(NewMajor, Minor, Subminor);
+  如果 (HasMinor)
+    返回 VersionTuple(NewMajor, Minor);
+  返回 VersionTuple(NewMajor);
 }

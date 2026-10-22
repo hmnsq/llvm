@@ -22,73 +22,73 @@ namespace llvm {
 namespace json {
 
 Value &Object::operator[](const ObjectKey &K) {
-  return try_emplace(K, nullptr).first->getSecond();
+  返回 try_emplace(K, nullptr).first->getSecond();
 }
 Value &Object::operator[](ObjectKey &&K) {
-  return try_emplace(std::move(K), nullptr).first->getSecond();
+  返回 try_emplace(std::move(K), nullptr).first->getSecond();
 }
 Value *Object::get(StringRef K) {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  如果 (I == end())
+    返回 nullptr;
+  返回 &I->second;
 }
 const Value *Object::get(StringRef K) const {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  如果 (I == end())
+    返回 nullptr;
+  返回 &I->second;
 }
 std::optional<std::nullptr_t> Object::getNull(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNull();
-  return std::nullopt;
+  如果 (auto *V = get(K))
+    返回 V->getAsNull();
+  返回 std::nullopt;
 }
 std::optional<bool> Object::getBoolean(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsBoolean();
-  return std::nullopt;
+  如果 (auto *V = get(K))
+    返回 V->getAsBoolean();
+  返回 std::nullopt;
 }
 std::optional<double> Object::getNumber(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNumber();
-  return std::nullopt;
+  如果 (auto *V = get(K))
+    返回 V->getAsNumber();
+  返回 std::nullopt;
 }
 std::optional<int64_t> Object::getInteger(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsInteger();
-  return std::nullopt;
+  如果 (auto *V = get(K))
+    返回 V->getAsInteger();
+  返回 std::nullopt;
 }
 std::optional<llvm::StringRef> Object::getString(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsString();
-  return std::nullopt;
+  如果 (auto *V = get(K))
+    返回 V->getAsString();
+  返回 std::nullopt;
 }
 const json::Object *Object::getObject(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+  如果 (auto *V = get(K))
+    返回 V->getAsObject();
+  返回 nullptr;
 }
 json::Object *Object::getObject(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+  如果 (auto *V = get(K))
+    返回 V->getAsObject();
+  返回 nullptr;
 }
 const json::Array *Object::getArray(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+  如果 (auto *V = get(K))
+    返回 V->getAsArray();
+  返回 nullptr;
 }
 json::Array *Object::getArray(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+  如果 (auto *V = get(K))
+    返回 V->getAsArray();
+  返回 nullptr;
 }
-bool operator==(const Object &LHS, const Object &RHS) { return LHS.M == RHS.M; }
+bool operator==(const Object &LHS, const Object &RHS) { 返回 LHS.M == RHS.M; }
 
 Array::Array(std::initializer_list<Value> Elements) {
   V.reserve(Elements.size());
-  for (const Value &V : Elements) {
+  为 (const Value &V : Elements) {
     emplace_back(nullptr);
     back().moveFrom(std::move(V));
   }
@@ -174,7 +174,7 @@ void Value::destroy() {
 
 void Value::print(llvm::raw_ostream &OS) const { OS << *this; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#如果 !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void Value::dump() const {
   print(llvm::dbgs());
   llvm::dbgs() << '\n';
@@ -182,27 +182,27 @@ LLVM_DUMP_METHOD void Value::dump() const {
 #endif
 
 bool operator==(const Value &L, const Value &R) {
-  if (L.kind() != R.kind())
-    return false;
+  如果 (L.kind() != R.kind())
+    返回 false;
   switch (L.kind()) {
   case Value::Null:
-    return *L.getAsNull() == *R.getAsNull();
+    返回 *L.getAsNull() == *R.getAsNull();
   case Value::Boolean:
-    return *L.getAsBoolean() == *R.getAsBoolean();
+    返回 *L.getAsBoolean() == *R.getAsBoolean();
   case Value::Number:
     // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=323
     // The same integer must convert to the same double, per the standard.
     // However we see 64-vs-80-bit precision comparisons with gcc-7 -O3 -m32.
     // So we avoid floating point promotion for exact comparisons.
-    if (L.Type == Value::T_Integer || R.Type == Value::T_Integer)
-      return L.getAsInteger() == R.getAsInteger();
-    return *L.getAsNumber() == *R.getAsNumber();
+    如果 (L.Type == Value::T_Integer || R.Type == Value::T_Integer)
+      返回 L.getAsInteger() == R.getAsInteger();
+    返回 *L.getAsNumber() == *R.getAsNumber();
   case Value::String:
-    return *L.getAsString() == *R.getAsString();
+    返回 *L.getAsString() == *R.getAsString();
   case Value::Array:
-    return *L.getAsArray() == *R.getAsArray();
+    返回 *L.getAsArray() == *R.getAsArray();
   case Value::Object:
-    return *L.getAsObject() == *R.getAsObject();
+    返回 *L.getAsObject() == *R.getAsObject();
   }
   llvm_unreachable("Unknown value kind");
 }
@@ -211,14 +211,14 @@ void Path::report(llvm::StringLiteral Msg) {
   // Walk up to the root context, and count the number of segments.
   unsigned Count = 0;
   const Path *P;
-  for (P = this; P->Parent != nullptr; P = P->Parent)
+  为 (P = this; P->Parent != nullptr; P = P->Parent)
     ++Count;
   Path::Root *R = P->Seg.root();
   // Fill in the error message and copy the path (in reverse order).
   R->ErrorMessage = Msg;
   R->ErrorPath.resize(Count);
   auto It = R->ErrorPath.begin();
-  for (P = this; P->Parent != nullptr; P = P->Parent)
+  为 (P = this; P->Parent != nullptr; P = P->Parent)
     *It++ = P->Seg;
 }
 
@@ -226,30 +226,30 @@ Error Path::Root::getError() const {
   std::string S;
   raw_string_ostream OS(S);
   OS << (ErrorMessage.empty() ? "invalid JSON contents" : ErrorMessage);
-  if (ErrorPath.empty()) {
-    if (!Name.empty())
+  如果 (ErrorPath.empty()) {
+    如果 (!Name.empty())
       OS << " when parsing " << Name;
-  } else {
+  } 否则 {
     OS << " at " << (Name.empty() ? "(root)" : Name);
-    for (const Path::Segment &S : llvm::reverse(ErrorPath)) {
-      if (S.isField())
+    为 (const Path::Segment &S : llvm::reverse(ErrorPath)) {
+      如果 (S.isField())
         OS << '.' << S.field();
-      else
+      否则
         OS << '[' << S.index() << ']';
     }
   }
-  return createStringError(llvm::inconvertibleErrorCode(), S);
+  返回 createStringError(llvm::inconvertibleErrorCode(), S);
 }
 
 std::vector<const Object::value_type *> sortedElements(const Object &O) {
   std::vector<const Object::value_type *> Elements;
-  for (const auto &E : O)
+  为 (const auto &E : O)
     Elements.push_back(&E);
   llvm::sort(Elements,
              [](const Object::value_type *L, const Object::value_type *R) {
-               return L->first < R->first;
+               返回 L->first < R->first;
              });
-  return Elements;
+  返回 Elements;
 }
 
 // Prints a one-line version of a value that isn't our main focus.
@@ -265,9 +265,9 @@ static void abbreviate(const Value &V, OStream &JOS) {
     break;
   case Value::String: {
     llvm::StringRef S = *V.getAsString();
-    if (S.size() < 40) {
+    如果 (S.size() < 40) {
       JOS.value(V);
-    } else {
+    } 否则 {
       std::string Truncated = fixUTF8(S.take_front(37));
       Truncated.append("...");
       JOS.value(Truncated);
@@ -285,13 +285,13 @@ static void abbreviateChildren(const Value &V, OStream &JOS) {
   switch (V.kind()) {
   case Value::Array:
     JOS.array([&] {
-      for (const auto &I : *V.getAsArray())
+      为 (const auto &I : *V.getAsArray())
         abbreviate(I, JOS);
     });
     break;
   case Value::Object:
     JOS.object([&] {
-      for (const auto *KV : sortedElements(*V.getAsObject())) {
+      为 (const auto *KV : sortedElements(*V.getAsObject())) {
         JOS.attributeBegin(KV->first);
         abbreviate(KV->second, JOS);
         JOS.attributeEnd();
@@ -319,36 +319,36 @@ void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
       JOS.comment(Comment);
       abbreviateChildren(V, JOS);
     };
-    if (Path.empty()) // We reached our target.
-      return HighlightCurrent();
+    如果 (Path.empty()) // We reached our target.
+      返回 HighlightCurrent();
     const Segment &S = Path.back(); // Path is in reverse order.
-    if (S.isField()) {
+    如果 (S.isField()) {
       // Current node is an object, path names a field.
       llvm::StringRef FieldName = S.field();
       const Object *O = V.getAsObject();
-      if (!O || !O->get(FieldName))
-        return HighlightCurrent();
+      如果 (!O || !O->get(FieldName))
+        返回 HighlightCurrent();
       JOS.object([&] {
-        for (const auto *KV : sortedElements(*O)) {
+        为 (const auto *KV : sortedElements(*O)) {
           JOS.attributeBegin(KV->first);
-          if (FieldName == StringRef(KV->first))
+          如果 (FieldName == StringRef(KV->first))
             Recurse(KV->second, Path.drop_back(), Recurse);
-          else
+          否则
             abbreviate(KV->second, JOS);
           JOS.attributeEnd();
         }
       });
-    } else {
+    } 否则 {
       // Current node is an array, path names an element.
       const Array *A = V.getAsArray();
-      if (!A || S.index() >= A->size())
-        return HighlightCurrent();
+      如果 (!A || S.index() >= A->size())
+        返回 HighlightCurrent();
       JOS.array([&] {
         unsigned Current = 0;
-        for (const auto &V : *A) {
-          if (Current++ == S.index())
+        为 (const auto &V : *A) {
+          如果 (Current++ == S.index())
             Recurse(V, Path.drop_back(), Recurse);
-          else
+          否则
             abbreviate(V, JOS);
         }
       });
@@ -366,29 +366,29 @@ public:
 
   bool checkUTF8() {
     size_t ErrOffset;
-    if (isUTF8(StringRef(Start, End - Start), &ErrOffset))
-      return true;
+    如果 (isUTF8(StringRef(Start, End - Start), &ErrOffset))
+      返回 true;
     P = Start + ErrOffset; // For line/column calculation.
-    return parseError("Invalid UTF-8 sequence");
+    返回 parseError("Invalid UTF-8 sequence");
   }
 
   bool parseValue(Value &Out);
 
   bool assertEnd() {
     eatWhitespace();
-    if (P == End)
-      return true;
-    return parseError("Text after end of document");
+    如果 (P == End)
+      返回 true;
+    返回 parseError("Text after end of document");
   }
 
   Error takeError() {
     assert(Err);
-    return std::move(*Err);
+    返回 std::move(*Err);
   }
 
 private:
   void eatWhitespace() {
-    while (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
+    当 (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
       ++P;
   }
 
@@ -398,10 +398,10 @@ private:
   bool parseUnicode(std::string &Out);
   bool parseError(const char *Msg); // always returns false
 
-  char next() { return P == End ? 0 : *P++; }
-  char peek() { return P == End ? 0 : *P; }
+  char next() { 返回 P == End ? 0 : *P++; }
+  char peek() { 返回 P == End ? 0 : *P; }
   static bool isNumber(char C) {
-    return C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
+    返回 C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
            C == '5' || C == '6' || C == '7' || C == '8' || C == '9' ||
            C == 'e' || C == 'E' || C == '+' || C == '-' || C == '.';
   }
@@ -413,51 +413,51 @@ private:
 
 bool Parser::parseValue(Value &Out) {
   eatWhitespace();
-  if (P == End)
-    return parseError("Unexpected EOF");
+  如果 (P == End)
+    返回 parseError("Unexpected EOF");
   switch (char C = next()) {
   // Bare null/true/false are easy - first char identifies them.
   case 'n':
     Out = nullptr;
-    return (next() == 'u' && next() == 'l' && next() == 'l') ||
+    返回 (next() == 'u' && next() == 'l' && next() == 'l') ||
            parseError("Invalid JSON value (null?)");
   case 't':
     Out = true;
-    return (next() == 'r' && next() == 'u' && next() == 'e') ||
+    返回 (next() == 'r' && next() == 'u' && next() == 'e') ||
            parseError("Invalid JSON value (true?)");
   case 'f':
     Out = false;
-    return (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
+    返回 (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
            parseError("Invalid JSON value (false?)");
   case '"': {
     std::string S;
-    if (parseString(S)) {
+    如果 (parseString(S)) {
       Out = std::move(S);
-      return true;
+      返回 true;
     }
-    return false;
+    返回 false;
   }
   case '[': {
     Out = Array{};
     Array &A = *Out.getAsArray();
     eatWhitespace();
-    if (peek() == ']') {
+    如果 (peek() == ']') {
       ++P;
-      return true;
+      返回 true;
     }
-    for (;;) {
+    为 (;;) {
       A.emplace_back(nullptr);
-      if (!parseValue(A.back()))
-        return false;
+      如果 (!parseValue(A.back()))
+        返回 false;
       eatWhitespace();
       switch (next()) {
       case ',':
         eatWhitespace();
         continue;
       case ']':
-        return true;
+        返回 true;
       default:
-        return parseError("Expected , or ] after array element");
+        返回 parseError("Expected , or ] after array element");
       }
     }
   }
@@ -465,38 +465,38 @@ bool Parser::parseValue(Value &Out) {
     Out = Object{};
     Object &O = *Out.getAsObject();
     eatWhitespace();
-    if (peek() == '}') {
+    如果 (peek() == '}') {
       ++P;
-      return true;
+      返回 true;
     }
-    for (;;) {
-      if (next() != '"')
-        return parseError("Expected object key");
+    为 (;;) {
+      如果 (next() != '"')
+        返回 parseError("Expected object key");
       std::string K;
-      if (!parseString(K))
-        return false;
+      如果 (!parseString(K))
+        返回 false;
       eatWhitespace();
-      if (next() != ':')
-        return parseError("Expected : after object key");
+      如果 (next() != ':')
+        返回 parseError("Expected : after object key");
       eatWhitespace();
-      if (!parseValue(O[std::move(K)]))
-        return false;
+      如果 (!parseValue(O[std::move(K)]))
+        返回 false;
       eatWhitespace();
       switch (next()) {
       case ',':
         eatWhitespace();
         continue;
       case '}':
-        return true;
+        返回 true;
       default:
-        return parseError("Expected , or } after object property");
+        返回 parseError("Expected , or } after object property");
       }
     }
   }
   default:
-    if (isNumber(C))
-      return parseNumber(C, Out);
-    return parseError("Invalid JSON value");
+    如果 (isNumber(C))
+      返回 parseNumber(C, Out);
+    返回 parseError("Invalid JSON value");
   }
 }
 
@@ -504,7 +504,7 @@ bool Parser::parseNumber(char First, Value &Out) {
   // Read the number into a string. (Must be null-terminated for strto*).
   SmallString<24> S;
   S.push_back(First);
-  while (isNumber(peek()))
+  当 (isNumber(peek()))
     S.push_back(next());
   char *End;
   // Try first to parse as integer, and if so preserve full 64 bits.
@@ -512,34 +512,34 @@ bool Parser::parseNumber(char First, Value &Out) {
   // to make sure that the numeric string is not malformed.
   errno = 0;
   int64_t I = std::strtoll(S.c_str(), &End, 10);
-  if (End == S.end() && errno != ERANGE) {
+  如果 (End == S.end() && errno != ERANGE) {
     Out = I;
-    return true;
+    返回 true;
   }
   // strtroull has a special handling for negative numbers, but in this
   // case we don't want to do that because negative numbers were already
   // handled in the previous block.
-  if (First != '-') {
+  如果 (First != '-') {
     errno = 0;
     uint64_t UI = std::strtoull(S.c_str(), &End, 10);
-    if (End == S.end() && errno != ERANGE) {
+    如果 (End == S.end() && errno != ERANGE) {
       Out = UI;
-      return true;
+      返回 true;
     }
   }
   // If it's not an integer
   Out = std::strtod(S.c_str(), &End);
-  return End == S.end() || parseError("Invalid JSON value (number?)");
+  返回 End == S.end() || parseError("Invalid JSON value (number?)");
 }
 
 bool Parser::parseString(std::string &Out) {
   // leading quote was already consumed.
-  for (char C = next(); C != '"'; C = next()) {
-    if (LLVM_UNLIKELY(P == End))
-      return parseError("Unterminated string");
-    if (LLVM_UNLIKELY((C & 0x1f) == C))
-      return parseError("Control character in string");
-    if (LLVM_LIKELY(C != '\\')) {
+  为 (char C = next(); C != '"'; C = next()) {
+    如果 (LLVM_UNLIKELY(P == End))
+      返回 parseError("Unterminated string");
+    如果 (LLVM_UNLIKELY((C & 0x1f) == C))
+      返回 parseError("Control character in string");
+    如果 (LLVM_LIKELY(C != '\\')) {
       Out.push_back(C);
       continue;
     }
@@ -566,32 +566,32 @@ bool Parser::parseString(std::string &Out) {
       Out.push_back('\t');
       break;
     case 'u':
-      if (!parseUnicode(Out))
-        return false;
+      如果 (!parseUnicode(Out))
+        返回 false;
       break;
     default:
-      return parseError("Invalid escape sequence");
+      返回 parseError("Invalid escape sequence");
     }
   }
-  return true;
+  返回 true;
 }
 
 static void encodeUtf8(uint32_t Rune, std::string &Out) {
-  if (Rune < 0x80) {
+  如果 (Rune < 0x80) {
     Out.push_back(Rune & 0x7F);
-  } else if (Rune < 0x800) {
+  } 否则 如果 (Rune < 0x800) {
     uint8_t FirstByte = 0xC0 | ((Rune & 0x7C0) >> 6);
     uint8_t SecondByte = 0x80 | (Rune & 0x3F);
     Out.push_back(FirstByte);
     Out.push_back(SecondByte);
-  } else if (Rune < 0x10000) {
+  } 否则 如果 (Rune < 0x10000) {
     uint8_t FirstByte = 0xE0 | ((Rune & 0xF000) >> 12);
     uint8_t SecondByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t ThirdByte = 0x80 | (Rune & 0x3F);
     Out.push_back(FirstByte);
     Out.push_back(SecondByte);
     Out.push_back(ThirdByte);
-  } else if (Rune < 0x110000) {
+  } 否则 如果 (Rune < 0x110000) {
     uint8_t FirstByte = 0xF0 | ((Rune & 0x1F0000) >> 18);
     uint8_t SecondByte = 0x80 | ((Rune & 0x3F000) >> 12);
     uint8_t ThirdByte = 0x80 | ((Rune & 0xFC0) >> 6);
@@ -600,7 +600,7 @@ static void encodeUtf8(uint32_t Rune, std::string &Out) {
     Out.push_back(SecondByte);
     Out.push_back(ThirdByte);
     Out.push_back(FourthByte);
-  } else {
+  } 否则 {
     llvm_unreachable("Invalid codepoint");
   }
 }
@@ -616,76 +616,76 @@ bool Parser::parseUnicode(std::string &Out) {
   auto Parse4Hex = [this](uint16_t &Out) -> bool {
     Out = 0;
     char Bytes[] = {next(), next(), next(), next()};
-    for (unsigned char C : Bytes) {
-      if (!std::isxdigit(C))
-        return parseError("Invalid \\u escape sequence");
+    为 (unsigned char C : Bytes) {
+      如果 (!std::isxdigit(C))
+        返回 parseError("Invalid \\u escape sequence");
       Out <<= 4;
       Out |= (C > '9') ? (C & ~0x20) - 'A' + 10 : (C - '0');
     }
-    return true;
+    返回 true;
   };
   uint16_t First; // UTF-16 code unit from the first \u escape.
-  if (!Parse4Hex(First))
-    return false;
+  如果 (!Parse4Hex(First))
+    返回 false;
 
   // We loop to allow proper surrogate-pair error handling.
-  while (true) {
+  当 (true) {
     // Case 1: the UTF-16 code unit is already a codepoint in the BMP.
-    if (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
+    如果 (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
       encodeUtf8(First, Out);
-      return true;
+      返回 true;
     }
 
     // Case 2: it's an (unpaired) trailing surrogate.
-    if (LLVM_UNLIKELY(First >= 0xDC00)) {
+    如果 (LLVM_UNLIKELY(First >= 0xDC00)) {
       Invalid();
-      return true;
+      返回 true;
     }
 
     // Case 3: it's a leading surrogate. We expect a trailing one next.
     // Case 3a: there's no trailing \u escape. Don't advance in the stream.
-    if (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
+    如果 (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
       Invalid(); // Leading surrogate was unpaired.
-      return true;
+      返回 true;
     }
     P += 2;
     uint16_t Second;
-    if (!Parse4Hex(Second))
-      return false;
+    如果 (!Parse4Hex(Second))
+      返回 false;
     // Case 3b: there was another \u escape, but it wasn't a trailing surrogate.
-    if (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
+    如果 (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
       Invalid();      // Leading surrogate was unpaired.
       First = Second; // Second escape still needs to be processed.
       continue;
     }
     // Case 3c: a valid surrogate pair encoding an astral codepoint.
     encodeUtf8(0x10000 | ((First - 0xD800) << 10) | (Second - 0xDC00), Out);
-    return true;
+    返回 true;
   }
 }
 
 bool Parser::parseError(const char *Msg) {
-  int Line = 1;
+  整数 Line = 1;
   const char *StartOfLine = Start;
-  for (const char *X = Start; X < P; ++X) {
-    if (*X == 0x0A) {
+  为 (const char *X = Start; X < P; ++X) {
+    如果 (*X == 0x0A) {
       ++Line;
       StartOfLine = X + 1;
     }
   }
   Err.emplace(
       std::make_unique<ParseError>(Msg, Line, P - StartOfLine, P - Start));
-  return false;
+  返回 false;
 }
 
 Expected<Value> parse(StringRef JSON) {
   Parser P(JSON);
   Value E = nullptr;
-  if (P.checkUTF8())
-    if (P.parseValue(E))
-      if (P.assertEnd())
-        return std::move(E);
-  return P.takeError();
+  如果 (P.checkUTF8())
+    如果 (P.parseValue(E))
+      如果 (P.assertEnd())
+        返回 std::move(E);
+  返回 P.takeError();
 }
 
 char ParseError::ID = 0;
@@ -697,16 +697,16 @@ void ParseError::log(llvm::raw_ostream &OS) const {
 
 bool isUTF8(llvm::StringRef S, size_t *ErrOffset) {
   // Fast-path for ASCII, which is valid UTF-8.
-  if (LLVM_LIKELY(isASCII(S)))
-    return true;
+  如果 (LLVM_LIKELY(isASCII(S)))
+    返回 true;
 
   const UTF8 *Data = reinterpret_cast<const UTF8 *>(S.data()), *Rest = Data;
-  if (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
-    return true;
+  如果 (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
+    返回 true;
 
-  if (ErrOffset)
+  如果 (ErrOffset)
     *ErrOffset = Rest - Data;
-  return false;
+  返回 false;
 }
 
 std::string fixUTF8(llvm::StringRef S) {
@@ -723,15 +723,15 @@ std::string fixUTF8(llvm::StringRef S) {
   ConvertUTF32toUTF8(&In32, In32 + Codepoints.size(), &Out8, Out8 + Res.size(),
                      strictConversion);
   Res.resize(reinterpret_cast<char *>(Out8) - Res.data());
-  return Res;
+  返回 Res;
 }
 
 static void quote(llvm::raw_ostream &OS, llvm::StringRef S) {
   OS << '\"';
-  for (unsigned char C : S) {
-    if (C == 0x22 || C == 0x5C)
+  为 (unsigned char C : S) {
+    如果 (C == 0x22 || C == 0x5C)
       OS << '\\';
-    if (C >= 0x20) {
+    如果 (C >= 0x20) {
       OS << C;
       continue;
     }
@@ -761,33 +761,33 @@ void llvm::json::OStream::value(const Value &V) {
   case Value::Null:
     valueBegin();
     OS << "null";
-    return;
+    返回;
   case Value::Boolean:
     valueBegin();
     OS << (*V.getAsBoolean() ? "true" : "false");
-    return;
+    返回;
   case Value::Number:
     valueBegin();
-    if (V.Type == Value::T_Integer)
+    如果 (V.Type == Value::T_Integer)
       OS << *V.getAsInteger();
-    else if (V.Type == Value::T_UINT64)
+    否则 如果 (V.Type == Value::T_UINT64)
       OS << *V.getAsUINT64();
-    else
+    否则
       OS << format("%.*g", std::numeric_limits<double>::max_digits10,
                    *V.getAsNumber());
-    return;
+    返回;
   case Value::String:
     valueBegin();
     quote(OS, *V.getAsString());
-    return;
+    返回;
   case Value::Array:
-    return array([&] {
-      for (const Value &E : *V.getAsArray())
+    返回 array([&] {
+      为 (const Value &E : *V.getAsArray())
         value(E);
     });
   case Value::Object:
-    return object([&] {
-      for (const Object::value_type *E : sortedElements(*V.getAsObject()))
+    返回 object([&] {
+      为 (const Object::value_type *E : sortedElements(*V.getAsObject()))
         attribute(E->first, E->second);
     });
   }
@@ -795,11 +795,11 @@ void llvm::json::OStream::value(const Value &V) {
 
 void llvm::json::OStream::valueBegin() {
   assert(Stack.back().Ctx != Object && "Only attributes allowed here");
-  if (Stack.back().HasValue) {
+  如果 (Stack.back().HasValue) {
     assert(Stack.back().Ctx != Singleton && "Only one value allowed here");
     OS << ',';
   }
-  if (Stack.back().Ctx == Array)
+  如果 (Stack.back().Ctx == Array)
     newline();
   flushComment();
   Stack.back().HasValue = true;
@@ -811,32 +811,32 @@ void OStream::comment(llvm::StringRef Comment) {
 }
 
 void OStream::flushComment() {
-  if (PendingComment.empty())
-    return;
+  如果 (PendingComment.empty())
+    返回;
   OS << (IndentSize ? "/* " : "/*");
   // Be sure not to accidentally emit "*/". Transform to "* /".
-  while (!PendingComment.empty()) {
+  当 (!PendingComment.empty()) {
     auto Pos = PendingComment.find("*/");
-    if (Pos == StringRef::npos) {
+    如果 (Pos == StringRef::npos) {
       OS << PendingComment;
       PendingComment = "";
-    } else {
+    } 否则 {
       OS << PendingComment.take_front(Pos) << "* /";
       PendingComment = PendingComment.drop_front(Pos + 2);
     }
   }
   OS << (IndentSize ? " */" : "*/");
   // Comments are on their own line unless attached to an attribute value.
-  if (Stack.size() > 1 && Stack.back().Ctx == Singleton) {
-    if (IndentSize)
+  如果 (Stack.size() > 1 && Stack.back().Ctx == Singleton) {
+    如果 (IndentSize)
       OS << ' ';
-  } else {
+  } 否则 {
     newline();
   }
 }
 
 void llvm::json::OStream::newline() {
-  if (IndentSize) {
+  如果 (IndentSize) {
     OS.write('\n');
     OS.indent(Indent);
   }
@@ -853,7 +853,7 @@ void llvm::json::OStream::arrayBegin() {
 void llvm::json::OStream::arrayEnd() {
   assert(Stack.back().Ctx == Array);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  如果 (Stack.back().HasValue)
     newline();
   OS << ']';
   assert(PendingComment.empty());
@@ -872,7 +872,7 @@ void llvm::json::OStream::objectBegin() {
 void llvm::json::OStream::objectEnd() {
   assert(Stack.back().Ctx == Object);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  如果 (Stack.back().HasValue)
     newline();
   OS << '}';
   assert(PendingComment.empty());
@@ -882,21 +882,21 @@ void llvm::json::OStream::objectEnd() {
 
 void llvm::json::OStream::attributeBegin(llvm::StringRef Key) {
   assert(Stack.back().Ctx == Object);
-  if (Stack.back().HasValue)
+  如果 (Stack.back().HasValue)
     OS << ',';
   newline();
   flushComment();
   Stack.back().HasValue = true;
   Stack.emplace_back();
   Stack.back().Ctx = Singleton;
-  if (LLVM_LIKELY(isUTF8(Key))) {
+  如果 (LLVM_LIKELY(isUTF8(Key))) {
     quote(OS, Key);
-  } else {
+  } 否则 {
     assert(false && "Invalid UTF-8 in attribute key");
     quote(OS, fixUTF8(Key));
   }
   OS.write(':');
-  if (IndentSize)
+  如果 (IndentSize)
     OS.write(' ');
 }
 
@@ -912,7 +912,7 @@ raw_ostream &llvm::json::OStream::rawValueBegin() {
   valueBegin();
   Stack.emplace_back();
   Stack.back().Ctx = RawValue;
-  return OS;
+  返回 OS;
 }
 
 void llvm::json::OStream::rawValueEnd() {
@@ -926,7 +926,7 @@ void llvm::json::OStream::rawValueEnd() {
 void llvm::format_provider<llvm::json::Value>::format(
     const llvm::json::Value &E, raw_ostream &OS, StringRef Options) {
   unsigned IndentAmount = 0;
-  if (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
+  如果 (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
     llvm_unreachable("json::Value format options should be an integer");
   json::OStream(OS, IndentAmount).value(E);
 }

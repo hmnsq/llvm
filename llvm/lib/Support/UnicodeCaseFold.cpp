@@ -13,853 +13,853 @@
 
 #include "llvm/Support/Unicode.h"
 
-int llvm::sys::unicode::foldCharSimple(int C) {
-  if (C < 0x0041)
-    return C;
+整数 llvm::sys::unicode::foldCharSimple(整数 C) {
+  如果 (C < 0x0041)
+    返回 C;
   // 26 characters
-  if (C <= 0x005a)
-    return C + 32;
+  如果 (C <= 0x005a)
+    返回 C + 32;
   // MICRO SIGN
-  if (C == 0x00b5)
-    return 0x03bc;
-  if (C < 0x00c0)
-    return C;
+  如果 (C == 0x00b5)
+    返回 0x03bc;
+  如果 (C < 0x00c0)
+    返回 C;
   // 23 characters
-  if (C <= 0x00d6)
-    return C + 32;
-  if (C < 0x00d8)
-    return C;
+  如果 (C <= 0x00d6)
+    返回 C + 32;
+  如果 (C < 0x00d8)
+    返回 C;
   // 7 characters
-  if (C <= 0x00de)
-    return C + 32;
-  if (C < 0x0100)
-    return C;
+  如果 (C <= 0x00de)
+    返回 C + 32;
+  如果 (C < 0x0100)
+    返回 C;
   // 24 characters
-  if (C <= 0x012e)
-    return C | 1;
-  if (C < 0x0132)
-    return C;
+  如果 (C <= 0x012e)
+    返回 C | 1;
+  如果 (C < 0x0132)
+    返回 C;
   // 3 characters
-  if (C <= 0x0136)
-    return C | 1;
-  if (C < 0x0139)
-    return C;
+  如果 (C <= 0x0136)
+    返回 C | 1;
+  如果 (C < 0x0139)
+    返回 C;
   // 8 characters
-  if (C <= 0x0147 && C % 2 == 1)
-    return C + 1;
-  if (C < 0x014a)
-    return C;
+  如果 (C <= 0x0147 && C % 2 == 1)
+    返回 C + 1;
+  如果 (C < 0x014a)
+    返回 C;
   // 23 characters
-  if (C <= 0x0176)
-    return C | 1;
+  如果 (C <= 0x0176)
+    返回 C | 1;
   // LATIN CAPITAL LETTER Y WITH DIAERESIS
-  if (C == 0x0178)
-    return 0x00ff;
-  if (C < 0x0179)
-    return C;
+  如果 (C == 0x0178)
+    返回 0x00ff;
+  如果 (C < 0x0179)
+    返回 C;
   // 3 characters
-  if (C <= 0x017d && C % 2 == 1)
-    return C + 1;
+  如果 (C <= 0x017d && C % 2 == 1)
+    返回 C + 1;
   // LATIN SMALL LETTER LONG S
-  if (C == 0x017f)
-    return 0x0073;
+  如果 (C == 0x017f)
+    返回 0x0073;
   // LATIN CAPITAL LETTER B WITH HOOK
-  if (C == 0x0181)
-    return 0x0253;
-  if (C < 0x0182)
-    return C;
+  如果 (C == 0x0181)
+    返回 0x0253;
+  如果 (C < 0x0182)
+    返回 C;
   // 2 characters
-  if (C <= 0x0184)
-    return C | 1;
+  如果 (C <= 0x0184)
+    返回 C | 1;
   // LATIN CAPITAL LETTER OPEN O
-  if (C == 0x0186)
-    return 0x0254;
+  如果 (C == 0x0186)
+    返回 0x0254;
   // LATIN CAPITAL LETTER C WITH HOOK
-  if (C == 0x0187)
-    return 0x0188;
-  if (C < 0x0189)
-    return C;
+  如果 (C == 0x0187)
+    返回 0x0188;
+  如果 (C < 0x0189)
+    返回 C;
   // 2 characters
-  if (C <= 0x018a)
-    return C + 205;
+  如果 (C <= 0x018a)
+    返回 C + 205;
   // LATIN CAPITAL LETTER D WITH TOPBAR
-  if (C == 0x018b)
-    return 0x018c;
+  如果 (C == 0x018b)
+    返回 0x018c;
   // LATIN CAPITAL LETTER REVERSED E
-  if (C == 0x018e)
-    return 0x01dd;
+  如果 (C == 0x018e)
+    返回 0x01dd;
   // LATIN CAPITAL LETTER SCHWA
-  if (C == 0x018f)
-    return 0x0259;
+  如果 (C == 0x018f)
+    返回 0x0259;
   // LATIN CAPITAL LETTER OPEN E
-  if (C == 0x0190)
-    return 0x025b;
+  如果 (C == 0x0190)
+    返回 0x025b;
   // LATIN CAPITAL LETTER F WITH HOOK
-  if (C == 0x0191)
-    return 0x0192;
+  如果 (C == 0x0191)
+    返回 0x0192;
   // LATIN CAPITAL LETTER G WITH HOOK
-  if (C == 0x0193)
-    return 0x0260;
+  如果 (C == 0x0193)
+    返回 0x0260;
   // LATIN CAPITAL LETTER GAMMA
-  if (C == 0x0194)
-    return 0x0263;
+  如果 (C == 0x0194)
+    返回 0x0263;
   // LATIN CAPITAL LETTER IOTA
-  if (C == 0x0196)
-    return 0x0269;
+  如果 (C == 0x0196)
+    返回 0x0269;
   // LATIN CAPITAL LETTER I WITH STROKE
-  if (C == 0x0197)
-    return 0x0268;
+  如果 (C == 0x0197)
+    返回 0x0268;
   // LATIN CAPITAL LETTER K WITH HOOK
-  if (C == 0x0198)
-    return 0x0199;
+  如果 (C == 0x0198)
+    返回 0x0199;
   // LATIN CAPITAL LETTER TURNED M
-  if (C == 0x019c)
-    return 0x026f;
+  如果 (C == 0x019c)
+    返回 0x026f;
   // LATIN CAPITAL LETTER N WITH LEFT HOOK
-  if (C == 0x019d)
-    return 0x0272;
+  如果 (C == 0x019d)
+    返回 0x0272;
   // LATIN CAPITAL LETTER O WITH MIDDLE TILDE
-  if (C == 0x019f)
-    return 0x0275;
-  if (C < 0x01a0)
-    return C;
+  如果 (C == 0x019f)
+    返回 0x0275;
+  如果 (C < 0x01a0)
+    返回 C;
   // 3 characters
-  if (C <= 0x01a4)
-    return C | 1;
+  如果 (C <= 0x01a4)
+    返回 C | 1;
   // LATIN LETTER YR
-  if (C == 0x01a6)
-    return 0x0280;
+  如果 (C == 0x01a6)
+    返回 0x0280;
   // LATIN CAPITAL LETTER TONE TWO
-  if (C == 0x01a7)
-    return 0x01a8;
+  如果 (C == 0x01a7)
+    返回 0x01a8;
   // LATIN CAPITAL LETTER ESH
-  if (C == 0x01a9)
-    return 0x0283;
+  如果 (C == 0x01a9)
+    返回 0x0283;
   // LATIN CAPITAL LETTER T WITH HOOK
-  if (C == 0x01ac)
-    return 0x01ad;
+  如果 (C == 0x01ac)
+    返回 0x01ad;
   // LATIN CAPITAL LETTER T WITH RETROFLEX HOOK
-  if (C == 0x01ae)
-    return 0x0288;
+  如果 (C == 0x01ae)
+    返回 0x0288;
   // LATIN CAPITAL LETTER U WITH HORN
-  if (C == 0x01af)
-    return 0x01b0;
-  if (C < 0x01b1)
-    return C;
+  如果 (C == 0x01af)
+    返回 0x01b0;
+  如果 (C < 0x01b1)
+    返回 C;
   // 2 characters
-  if (C <= 0x01b2)
-    return C + 217;
-  if (C < 0x01b3)
-    return C;
+  如果 (C <= 0x01b2)
+    返回 C + 217;
+  如果 (C < 0x01b3)
+    返回 C;
   // 2 characters
-  if (C <= 0x01b5 && C % 2 == 1)
-    return C + 1;
+  如果 (C <= 0x01b5 && C % 2 == 1)
+    返回 C + 1;
   // LATIN CAPITAL LETTER EZH
-  if (C == 0x01b7)
-    return 0x0292;
-  if (C < 0x01b8)
-    return C;
+  如果 (C == 0x01b7)
+    返回 0x0292;
+  如果 (C < 0x01b8)
+    返回 C;
   // 2 characters
-  if (C <= 0x01bc && C % 4 == 0)
-    return C + 1;
+  如果 (C <= 0x01bc && C % 4 == 0)
+    返回 C + 1;
   // LATIN CAPITAL LETTER DZ WITH CARON
-  if (C == 0x01c4)
-    return 0x01c6;
+  如果 (C == 0x01c4)
+    返回 0x01c6;
   // LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
-  if (C == 0x01c5)
-    return 0x01c6;
+  如果 (C == 0x01c5)
+    返回 0x01c6;
   // LATIN CAPITAL LETTER LJ
-  if (C == 0x01c7)
-    return 0x01c9;
+  如果 (C == 0x01c7)
+    返回 0x01c9;
   // LATIN CAPITAL LETTER L WITH SMALL LETTER J
-  if (C == 0x01c8)
-    return 0x01c9;
+  如果 (C == 0x01c8)
+    返回 0x01c9;
   // LATIN CAPITAL LETTER NJ
-  if (C == 0x01ca)
-    return 0x01cc;
-  if (C < 0x01cb)
-    return C;
+  如果 (C == 0x01ca)
+    返回 0x01cc;
+  如果 (C < 0x01cb)
+    返回 C;
   // 9 characters
-  if (C <= 0x01db && C % 2 == 1)
-    return C + 1;
-  if (C < 0x01de)
-    return C;
+  如果 (C <= 0x01db && C % 2 == 1)
+    返回 C + 1;
+  如果 (C < 0x01de)
+    返回 C;
   // 9 characters
-  if (C <= 0x01ee)
-    return C | 1;
+  如果 (C <= 0x01ee)
+    返回 C | 1;
   // LATIN CAPITAL LETTER DZ
-  if (C == 0x01f1)
-    return 0x01f3;
-  if (C < 0x01f2)
-    return C;
+  如果 (C == 0x01f1)
+    返回 0x01f3;
+  如果 (C < 0x01f2)
+    返回 C;
   // 2 characters
-  if (C <= 0x01f4)
-    return C | 1;
+  如果 (C <= 0x01f4)
+    返回 C | 1;
   // LATIN CAPITAL LETTER HWAIR
-  if (C == 0x01f6)
-    return 0x0195;
+  如果 (C == 0x01f6)
+    返回 0x0195;
   // LATIN CAPITAL LETTER WYNN
-  if (C == 0x01f7)
-    return 0x01bf;
-  if (C < 0x01f8)
-    return C;
+  如果 (C == 0x01f7)
+    返回 0x01bf;
+  如果 (C < 0x01f8)
+    返回 C;
   // 20 characters
-  if (C <= 0x021e)
-    return C | 1;
+  如果 (C <= 0x021e)
+    返回 C | 1;
   // LATIN CAPITAL LETTER N WITH LONG RIGHT LEG
-  if (C == 0x0220)
-    return 0x019e;
-  if (C < 0x0222)
-    return C;
+  如果 (C == 0x0220)
+    返回 0x019e;
+  如果 (C < 0x0222)
+    返回 C;
   // 9 characters
-  if (C <= 0x0232)
-    return C | 1;
+  如果 (C <= 0x0232)
+    返回 C | 1;
   // LATIN CAPITAL LETTER A WITH STROKE
-  if (C == 0x023a)
-    return 0x2c65;
+  如果 (C == 0x023a)
+    返回 0x2c65;
   // LATIN CAPITAL LETTER C WITH STROKE
-  if (C == 0x023b)
-    return 0x023c;
+  如果 (C == 0x023b)
+    返回 0x023c;
   // LATIN CAPITAL LETTER L WITH BAR
-  if (C == 0x023d)
-    return 0x019a;
+  如果 (C == 0x023d)
+    返回 0x019a;
   // LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
-  if (C == 0x023e)
-    return 0x2c66;
+  如果 (C == 0x023e)
+    返回 0x2c66;
   // LATIN CAPITAL LETTER GLOTTAL STOP
-  if (C == 0x0241)
-    return 0x0242;
+  如果 (C == 0x0241)
+    返回 0x0242;
   // LATIN CAPITAL LETTER B WITH STROKE
-  if (C == 0x0243)
-    return 0x0180;
+  如果 (C == 0x0243)
+    返回 0x0180;
   // LATIN CAPITAL LETTER U BAR
-  if (C == 0x0244)
-    return 0x0289;
+  如果 (C == 0x0244)
+    返回 0x0289;
   // LATIN CAPITAL LETTER TURNED V
-  if (C == 0x0245)
-    return 0x028c;
-  if (C < 0x0246)
-    return C;
+  如果 (C == 0x0245)
+    返回 0x028c;
+  如果 (C < 0x0246)
+    返回 C;
   // 5 characters
-  if (C <= 0x024e)
-    return C | 1;
+  如果 (C <= 0x024e)
+    返回 C | 1;
   // COMBINING GREEK YPOGEGRAMMENI
-  if (C == 0x0345)
-    return 0x03b9;
-  if (C < 0x0370)
-    return C;
+  如果 (C == 0x0345)
+    返回 0x03b9;
+  如果 (C < 0x0370)
+    返回 C;
   // 2 characters
-  if (C <= 0x0372)
-    return C | 1;
+  如果 (C <= 0x0372)
+    返回 C | 1;
   // GREEK CAPITAL LETTER PAMPHYLIAN DIGAMMA
-  if (C == 0x0376)
-    return 0x0377;
+  如果 (C == 0x0376)
+    返回 0x0377;
   // GREEK CAPITAL LETTER YOT
-  if (C == 0x037f)
-    return 0x03f3;
+  如果 (C == 0x037f)
+    返回 0x03f3;
   // GREEK CAPITAL LETTER ALPHA WITH TONOS
-  if (C == 0x0386)
-    return 0x03ac;
-  if (C < 0x0388)
-    return C;
+  如果 (C == 0x0386)
+    返回 0x03ac;
+  如果 (C < 0x0388)
+    返回 C;
   // 3 characters
-  if (C <= 0x038a)
-    return C + 37;
+  如果 (C <= 0x038a)
+    返回 C + 37;
   // GREEK CAPITAL LETTER OMICRON WITH TONOS
-  if (C == 0x038c)
-    return 0x03cc;
-  if (C < 0x038e)
-    return C;
+  如果 (C == 0x038c)
+    返回 0x03cc;
+  如果 (C < 0x038e)
+    返回 C;
   // 2 characters
-  if (C <= 0x038f)
-    return C + 63;
-  if (C < 0x0391)
-    return C;
+  如果 (C <= 0x038f)
+    返回 C + 63;
+  如果 (C < 0x0391)
+    返回 C;
   // 17 characters
-  if (C <= 0x03a1)
-    return C + 32;
-  if (C < 0x03a3)
-    return C;
+  如果 (C <= 0x03a1)
+    返回 C + 32;
+  如果 (C < 0x03a3)
+    返回 C;
   // 9 characters
-  if (C <= 0x03ab)
-    return C + 32;
+  如果 (C <= 0x03ab)
+    返回 C + 32;
   // GREEK SMALL LETTER FINAL SIGMA
-  if (C == 0x03c2)
-    return 0x03c3;
+  如果 (C == 0x03c2)
+    返回 0x03c3;
   // GREEK CAPITAL KAI SYMBOL
-  if (C == 0x03cf)
-    return 0x03d7;
+  如果 (C == 0x03cf)
+    返回 0x03d7;
   // GREEK BETA SYMBOL
-  if (C == 0x03d0)
-    return 0x03b2;
+  如果 (C == 0x03d0)
+    返回 0x03b2;
   // GREEK THETA SYMBOL
-  if (C == 0x03d1)
-    return 0x03b8;
+  如果 (C == 0x03d1)
+    返回 0x03b8;
   // GREEK PHI SYMBOL
-  if (C == 0x03d5)
-    return 0x03c6;
+  如果 (C == 0x03d5)
+    返回 0x03c6;
   // GREEK PI SYMBOL
-  if (C == 0x03d6)
-    return 0x03c0;
-  if (C < 0x03d8)
-    return C;
+  如果 (C == 0x03d6)
+    返回 0x03c0;
+  如果 (C < 0x03d8)
+    返回 C;
   // 12 characters
-  if (C <= 0x03ee)
-    return C | 1;
+  如果 (C <= 0x03ee)
+    返回 C | 1;
   // GREEK KAPPA SYMBOL
-  if (C == 0x03f0)
-    return 0x03ba;
+  如果 (C == 0x03f0)
+    返回 0x03ba;
   // GREEK RHO SYMBOL
-  if (C == 0x03f1)
-    return 0x03c1;
+  如果 (C == 0x03f1)
+    返回 0x03c1;
   // GREEK CAPITAL THETA SYMBOL
-  if (C == 0x03f4)
-    return 0x03b8;
+  如果 (C == 0x03f4)
+    返回 0x03b8;
   // GREEK LUNATE EPSILON SYMBOL
-  if (C == 0x03f5)
-    return 0x03b5;
+  如果 (C == 0x03f5)
+    返回 0x03b5;
   // GREEK CAPITAL LETTER SHO
-  if (C == 0x03f7)
-    return 0x03f8;
+  如果 (C == 0x03f7)
+    返回 0x03f8;
   // GREEK CAPITAL LUNATE SIGMA SYMBOL
-  if (C == 0x03f9)
-    return 0x03f2;
+  如果 (C == 0x03f9)
+    返回 0x03f2;
   // GREEK CAPITAL LETTER SAN
-  if (C == 0x03fa)
-    return 0x03fb;
-  if (C < 0x03fd)
-    return C;
+  如果 (C == 0x03fa)
+    返回 0x03fb;
+  如果 (C < 0x03fd)
+    返回 C;
   // 3 characters
-  if (C <= 0x03ff)
-    return C + -130;
-  if (C < 0x0400)
-    return C;
+  如果 (C <= 0x03ff)
+    返回 C + -130;
+  如果 (C < 0x0400)
+    返回 C;
   // 16 characters
-  if (C <= 0x040f)
-    return C + 80;
-  if (C < 0x0410)
-    return C;
+  如果 (C <= 0x040f)
+    返回 C + 80;
+  如果 (C < 0x0410)
+    返回 C;
   // 32 characters
-  if (C <= 0x042f)
-    return C + 32;
-  if (C < 0x0460)
-    return C;
+  如果 (C <= 0x042f)
+    返回 C + 32;
+  如果 (C < 0x0460)
+    返回 C;
   // 17 characters
-  if (C <= 0x0480)
-    return C | 1;
-  if (C < 0x048a)
-    return C;
+  如果 (C <= 0x0480)
+    返回 C | 1;
+  如果 (C < 0x048a)
+    返回 C;
   // 27 characters
-  if (C <= 0x04be)
-    return C | 1;
+  如果 (C <= 0x04be)
+    返回 C | 1;
   // CYRILLIC LETTER PALOCHKA
-  if (C == 0x04c0)
-    return 0x04cf;
-  if (C < 0x04c1)
-    return C;
+  如果 (C == 0x04c0)
+    返回 0x04cf;
+  如果 (C < 0x04c1)
+    返回 C;
   // 7 characters
-  if (C <= 0x04cd && C % 2 == 1)
-    return C + 1;
-  if (C < 0x04d0)
-    return C;
+  如果 (C <= 0x04cd && C % 2 == 1)
+    返回 C + 1;
+  如果 (C < 0x04d0)
+    返回 C;
   // 48 characters
-  if (C <= 0x052e)
-    return C | 1;
-  if (C < 0x0531)
-    return C;
+  如果 (C <= 0x052e)
+    返回 C | 1;
+  如果 (C < 0x0531)
+    返回 C;
   // 38 characters
-  if (C <= 0x0556)
-    return C + 48;
-  if (C < 0x10a0)
-    return C;
+  如果 (C <= 0x0556)
+    返回 C + 48;
+  如果 (C < 0x10a0)
+    返回 C;
   // 38 characters
-  if (C <= 0x10c5)
-    return C + 7264;
-  if (C < 0x10c7)
-    return C;
+  如果 (C <= 0x10c5)
+    返回 C + 7264;
+  如果 (C < 0x10c7)
+    返回 C;
   // 2 characters
-  if (C <= 0x10cd && C % 6 == 5)
-    return C + 7264;
-  if (C < 0x13f8)
-    return C;
+  如果 (C <= 0x10cd && C % 6 == 5)
+    返回 C + 7264;
+  如果 (C < 0x13f8)
+    返回 C;
   // 6 characters
-  if (C <= 0x13fd)
-    return C + -8;
+  如果 (C <= 0x13fd)
+    返回 C + -8;
   // CYRILLIC SMALL LETTER ROUNDED VE
-  if (C == 0x1c80)
-    return 0x0432;
+  如果 (C == 0x1c80)
+    返回 0x0432;
   // CYRILLIC SMALL LETTER LONG-LEGGED DE
-  if (C == 0x1c81)
-    return 0x0434;
+  如果 (C == 0x1c81)
+    返回 0x0434;
   // CYRILLIC SMALL LETTER NARROW O
-  if (C == 0x1c82)
-    return 0x043e;
-  if (C < 0x1c83)
-    return C;
+  如果 (C == 0x1c82)
+    返回 0x043e;
+  如果 (C < 0x1c83)
+    返回 C;
   // 2 characters
-  if (C <= 0x1c84)
-    return C + -6210;
+  如果 (C <= 0x1c84)
+    返回 C + -6210;
   // CYRILLIC SMALL LETTER THREE-LEGGED TE
-  if (C == 0x1c85)
-    return 0x0442;
+  如果 (C == 0x1c85)
+    返回 0x0442;
   // CYRILLIC SMALL LETTER TALL HARD SIGN
-  if (C == 0x1c86)
-    return 0x044a;
+  如果 (C == 0x1c86)
+    返回 0x044a;
   // CYRILLIC SMALL LETTER TALL YAT
-  if (C == 0x1c87)
-    return 0x0463;
+  如果 (C == 0x1c87)
+    返回 0x0463;
   // CYRILLIC SMALL LETTER UNBLENDED UK
-  if (C == 0x1c88)
-    return 0xa64b;
+  如果 (C == 0x1c88)
+    返回 0xa64b;
   // CYRILLIC CAPITAL LETTER TJE
-  if (C == 0x1c89)
-    return 0x1c8a;
-  if (C < 0x1c90)
-    return C;
+  如果 (C == 0x1c89)
+    返回 0x1c8a;
+  如果 (C < 0x1c90)
+    返回 C;
   // 43 characters
-  if (C <= 0x1cba)
-    return C + -3008;
-  if (C < 0x1cbd)
-    return C;
+  如果 (C <= 0x1cba)
+    返回 C + -3008;
+  如果 (C < 0x1cbd)
+    返回 C;
   // 3 characters
-  if (C <= 0x1cbf)
-    return C + -3008;
-  if (C < 0x1e00)
-    return C;
+  如果 (C <= 0x1cbf)
+    返回 C + -3008;
+  如果 (C < 0x1e00)
+    返回 C;
   // 75 characters
-  if (C <= 0x1e94)
-    return C | 1;
+  如果 (C <= 0x1e94)
+    返回 C | 1;
   // LATIN SMALL LETTER LONG S WITH DOT ABOVE
-  if (C == 0x1e9b)
-    return 0x1e61;
+  如果 (C == 0x1e9b)
+    返回 0x1e61;
   // LATIN CAPITAL LETTER SHARP S
-  if (C == 0x1e9e)
-    return 0x00df;
-  if (C < 0x1ea0)
-    return C;
+  如果 (C == 0x1e9e)
+    返回 0x00df;
+  如果 (C < 0x1ea0)
+    返回 C;
   // 48 characters
-  if (C <= 0x1efe)
-    return C | 1;
-  if (C < 0x1f08)
-    return C;
+  如果 (C <= 0x1efe)
+    返回 C | 1;
+  如果 (C < 0x1f08)
+    返回 C;
   // 8 characters
-  if (C <= 0x1f0f)
-    return C + -8;
-  if (C < 0x1f18)
-    return C;
+  如果 (C <= 0x1f0f)
+    返回 C + -8;
+  如果 (C < 0x1f18)
+    返回 C;
   // 6 characters
-  if (C <= 0x1f1d)
-    return C + -8;
-  if (C < 0x1f28)
-    return C;
+  如果 (C <= 0x1f1d)
+    返回 C + -8;
+  如果 (C < 0x1f28)
+    返回 C;
   // 8 characters
-  if (C <= 0x1f2f)
-    return C + -8;
-  if (C < 0x1f38)
-    return C;
+  如果 (C <= 0x1f2f)
+    返回 C + -8;
+  如果 (C < 0x1f38)
+    返回 C;
   // 8 characters
-  if (C <= 0x1f3f)
-    return C + -8;
-  if (C < 0x1f48)
-    return C;
+  如果 (C <= 0x1f3f)
+    返回 C + -8;
+  如果 (C < 0x1f48)
+    返回 C;
   // 6 characters
-  if (C <= 0x1f4d)
-    return C + -8;
-  if (C < 0x1f59)
-    return C;
+  如果 (C <= 0x1f4d)
+    返回 C + -8;
+  如果 (C < 0x1f59)
+    返回 C;
   // 4 characters
-  if (C <= 0x1f5f && C % 2 == 1)
-    return C + -8;
-  if (C < 0x1f68)
-    return C;
+  如果 (C <= 0x1f5f && C % 2 == 1)
+    返回 C + -8;
+  如果 (C < 0x1f68)
+    返回 C;
   // 8 characters
-  if (C <= 0x1f6f)
-    return C + -8;
-  if (C < 0x1f88)
-    return C;
+  如果 (C <= 0x1f6f)
+    返回 C + -8;
+  如果 (C < 0x1f88)
+    返回 C;
   // 8 characters
-  if (C <= 0x1f8f)
-    return C + -8;
-  if (C < 0x1f98)
-    return C;
+  如果 (C <= 0x1f8f)
+    返回 C + -8;
+  如果 (C < 0x1f98)
+    返回 C;
   // 8 characters
-  if (C <= 0x1f9f)
-    return C + -8;
-  if (C < 0x1fa8)
-    return C;
+  如果 (C <= 0x1f9f)
+    返回 C + -8;
+  如果 (C < 0x1fa8)
+    返回 C;
   // 8 characters
-  if (C <= 0x1faf)
-    return C + -8;
-  if (C < 0x1fb8)
-    return C;
+  如果 (C <= 0x1faf)
+    返回 C + -8;
+  如果 (C < 0x1fb8)
+    返回 C;
   // 2 characters
-  if (C <= 0x1fb9)
-    return C + -8;
-  if (C < 0x1fba)
-    return C;
+  如果 (C <= 0x1fb9)
+    返回 C + -8;
+  如果 (C < 0x1fba)
+    返回 C;
   // 2 characters
-  if (C <= 0x1fbb)
-    return C + -74;
+  如果 (C <= 0x1fbb)
+    返回 C + -74;
   // GREEK CAPITAL LETTER ALPHA WITH PROSGEGRAMMENI
-  if (C == 0x1fbc)
-    return 0x1fb3;
+  如果 (C == 0x1fbc)
+    返回 0x1fb3;
   // GREEK PROSGEGRAMMENI
-  if (C == 0x1fbe)
-    return 0x03b9;
-  if (C < 0x1fc8)
-    return C;
+  如果 (C == 0x1fbe)
+    返回 0x03b9;
+  如果 (C < 0x1fc8)
+    返回 C;
   // 4 characters
-  if (C <= 0x1fcb)
-    return C + -86;
+  如果 (C <= 0x1fcb)
+    返回 C + -86;
   // GREEK CAPITAL LETTER ETA WITH PROSGEGRAMMENI
-  if (C == 0x1fcc)
-    return 0x1fc3;
+  如果 (C == 0x1fcc)
+    返回 0x1fc3;
   // GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
-  if (C == 0x1fd3)
-    return 0x0390;
-  if (C < 0x1fd8)
-    return C;
+  如果 (C == 0x1fd3)
+    返回 0x0390;
+  如果 (C < 0x1fd8)
+    返回 C;
   // 2 characters
-  if (C <= 0x1fd9)
-    return C + -8;
-  if (C < 0x1fda)
-    return C;
+  如果 (C <= 0x1fd9)
+    返回 C + -8;
+  如果 (C < 0x1fda)
+    返回 C;
   // 2 characters
-  if (C <= 0x1fdb)
-    return C + -100;
+  如果 (C <= 0x1fdb)
+    返回 C + -100;
   // GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
-  if (C == 0x1fe3)
-    return 0x03b0;
-  if (C < 0x1fe8)
-    return C;
+  如果 (C == 0x1fe3)
+    返回 0x03b0;
+  如果 (C < 0x1fe8)
+    返回 C;
   // 2 characters
-  if (C <= 0x1fe9)
-    return C + -8;
-  if (C < 0x1fea)
-    return C;
+  如果 (C <= 0x1fe9)
+    返回 C + -8;
+  如果 (C < 0x1fea)
+    返回 C;
   // 2 characters
-  if (C <= 0x1feb)
-    return C + -112;
+  如果 (C <= 0x1feb)
+    返回 C + -112;
   // GREEK CAPITAL LETTER RHO WITH DASIA
-  if (C == 0x1fec)
-    return 0x1fe5;
-  if (C < 0x1ff8)
-    return C;
+  如果 (C == 0x1fec)
+    返回 0x1fe5;
+  如果 (C < 0x1ff8)
+    返回 C;
   // 2 characters
-  if (C <= 0x1ff9)
-    return C + -128;
-  if (C < 0x1ffa)
-    return C;
+  如果 (C <= 0x1ff9)
+    返回 C + -128;
+  如果 (C < 0x1ffa)
+    返回 C;
   // 2 characters
-  if (C <= 0x1ffb)
-    return C + -126;
+  如果 (C <= 0x1ffb)
+    返回 C + -126;
   // GREEK CAPITAL LETTER OMEGA WITH PROSGEGRAMMENI
-  if (C == 0x1ffc)
-    return 0x1ff3;
+  如果 (C == 0x1ffc)
+    返回 0x1ff3;
   // OHM SIGN
-  if (C == 0x2126)
-    return 0x03c9;
+  如果 (C == 0x2126)
+    返回 0x03c9;
   // KELVIN SIGN
-  if (C == 0x212a)
-    return 0x006b;
+  如果 (C == 0x212a)
+    返回 0x006b;
   // ANGSTROM SIGN
-  if (C == 0x212b)
-    return 0x00e5;
+  如果 (C == 0x212b)
+    返回 0x00e5;
   // TURNED CAPITAL F
-  if (C == 0x2132)
-    return 0x214e;
-  if (C < 0x2160)
-    return C;
+  如果 (C == 0x2132)
+    返回 0x214e;
+  如果 (C < 0x2160)
+    返回 C;
   // 16 characters
-  if (C <= 0x216f)
-    return C + 16;
+  如果 (C <= 0x216f)
+    返回 C + 16;
   // ROMAN NUMERAL REVERSED ONE HUNDRED
-  if (C == 0x2183)
-    return 0x2184;
-  if (C < 0x24b6)
-    return C;
+  如果 (C == 0x2183)
+    返回 0x2184;
+  如果 (C < 0x24b6)
+    返回 C;
   // 26 characters
-  if (C <= 0x24cf)
-    return C + 26;
-  if (C < 0x2c00)
-    return C;
+  如果 (C <= 0x24cf)
+    返回 C + 26;
+  如果 (C < 0x2c00)
+    返回 C;
   // 48 characters
-  if (C <= 0x2c2f)
-    return C + 48;
+  如果 (C <= 0x2c2f)
+    返回 C + 48;
   // LATIN CAPITAL LETTER L WITH DOUBLE BAR
-  if (C == 0x2c60)
-    return 0x2c61;
+  如果 (C == 0x2c60)
+    返回 0x2c61;
   // LATIN CAPITAL LETTER L WITH MIDDLE TILDE
-  if (C == 0x2c62)
-    return 0x026b;
+  如果 (C == 0x2c62)
+    返回 0x026b;
   // LATIN CAPITAL LETTER P WITH STROKE
-  if (C == 0x2c63)
-    return 0x1d7d;
+  如果 (C == 0x2c63)
+    返回 0x1d7d;
   // LATIN CAPITAL LETTER R WITH TAIL
-  if (C == 0x2c64)
-    return 0x027d;
-  if (C < 0x2c67)
-    return C;
+  如果 (C == 0x2c64)
+    返回 0x027d;
+  如果 (C < 0x2c67)
+    返回 C;
   // 3 characters
-  if (C <= 0x2c6b && C % 2 == 1)
-    return C + 1;
+  如果 (C <= 0x2c6b && C % 2 == 1)
+    返回 C + 1;
   // LATIN CAPITAL LETTER ALPHA
-  if (C == 0x2c6d)
-    return 0x0251;
+  如果 (C == 0x2c6d)
+    返回 0x0251;
   // LATIN CAPITAL LETTER M WITH HOOK
-  if (C == 0x2c6e)
-    return 0x0271;
+  如果 (C == 0x2c6e)
+    返回 0x0271;
   // LATIN CAPITAL LETTER TURNED A
-  if (C == 0x2c6f)
-    return 0x0250;
+  如果 (C == 0x2c6f)
+    返回 0x0250;
   // LATIN CAPITAL LETTER TURNED ALPHA
-  if (C == 0x2c70)
-    return 0x0252;
-  if (C < 0x2c72)
-    return C;
+  如果 (C == 0x2c70)
+    返回 0x0252;
+  如果 (C < 0x2c72)
+    返回 C;
   // 2 characters
-  if (C <= 0x2c75 && C % 3 == 2)
-    return C + 1;
-  if (C < 0x2c7e)
-    return C;
+  如果 (C <= 0x2c75 && C % 3 == 2)
+    返回 C + 1;
+  如果 (C < 0x2c7e)
+    返回 C;
   // 2 characters
-  if (C <= 0x2c7f)
-    return C + -10815;
-  if (C < 0x2c80)
-    return C;
+  如果 (C <= 0x2c7f)
+    返回 C + -10815;
+  如果 (C < 0x2c80)
+    返回 C;
   // 50 characters
-  if (C <= 0x2ce2)
-    return C | 1;
-  if (C < 0x2ceb)
-    return C;
+  如果 (C <= 0x2ce2)
+    返回 C | 1;
+  如果 (C < 0x2ceb)
+    返回 C;
   // 2 characters
-  if (C <= 0x2ced && C % 2 == 1)
-    return C + 1;
-  if (C < 0x2cf2)
-    return C;
+  如果 (C <= 0x2ced && C % 2 == 1)
+    返回 C + 1;
+  如果 (C < 0x2cf2)
+    返回 C;
   // 2 characters
-  if (C <= 0xa640 && C % 31054 == 11506)
-    return C + 1;
-  if (C < 0xa642)
-    return C;
+  如果 (C <= 0xa640 && C % 31054 == 11506)
+    返回 C + 1;
+  如果 (C < 0xa642)
+    返回 C;
   // 22 characters
-  if (C <= 0xa66c)
-    return C | 1;
-  if (C < 0xa680)
-    return C;
+  如果 (C <= 0xa66c)
+    返回 C | 1;
+  如果 (C < 0xa680)
+    返回 C;
   // 14 characters
-  if (C <= 0xa69a)
-    return C | 1;
-  if (C < 0xa722)
-    return C;
+  如果 (C <= 0xa69a)
+    返回 C | 1;
+  如果 (C < 0xa722)
+    返回 C;
   // 7 characters
-  if (C <= 0xa72e)
-    return C | 1;
-  if (C < 0xa732)
-    return C;
+  如果 (C <= 0xa72e)
+    返回 C | 1;
+  如果 (C < 0xa732)
+    返回 C;
   // 31 characters
-  if (C <= 0xa76e)
-    return C | 1;
-  if (C < 0xa779)
-    return C;
+  如果 (C <= 0xa76e)
+    返回 C | 1;
+  如果 (C < 0xa779)
+    返回 C;
   // 2 characters
-  if (C <= 0xa77b && C % 2 == 1)
-    return C + 1;
+  如果 (C <= 0xa77b && C % 2 == 1)
+    返回 C + 1;
   // LATIN CAPITAL LETTER INSULAR G
-  if (C == 0xa77d)
-    return 0x1d79;
-  if (C < 0xa77e)
-    return C;
+  如果 (C == 0xa77d)
+    返回 0x1d79;
+  如果 (C < 0xa77e)
+    返回 C;
   // 5 characters
-  if (C <= 0xa786)
-    return C | 1;
+  如果 (C <= 0xa786)
+    返回 C | 1;
   // LATIN CAPITAL LETTER SALTILLO
-  if (C == 0xa78b)
-    return 0xa78c;
+  如果 (C == 0xa78b)
+    返回 0xa78c;
   // LATIN CAPITAL LETTER TURNED H
-  if (C == 0xa78d)
-    return 0x0265;
-  if (C < 0xa790)
-    return C;
+  如果 (C == 0xa78d)
+    返回 0x0265;
+  如果 (C < 0xa790)
+    返回 C;
   // 2 characters
-  if (C <= 0xa792)
-    return C | 1;
-  if (C < 0xa796)
-    return C;
+  如果 (C <= 0xa792)
+    返回 C | 1;
+  如果 (C < 0xa796)
+    返回 C;
   // 10 characters
-  if (C <= 0xa7a8)
-    return C | 1;
+  如果 (C <= 0xa7a8)
+    返回 C | 1;
   // LATIN CAPITAL LETTER H WITH HOOK
-  if (C == 0xa7aa)
-    return 0x0266;
+  如果 (C == 0xa7aa)
+    返回 0x0266;
   // LATIN CAPITAL LETTER REVERSED OPEN E
-  if (C == 0xa7ab)
-    return 0x025c;
+  如果 (C == 0xa7ab)
+    返回 0x025c;
   // LATIN CAPITAL LETTER SCRIPT G
-  if (C == 0xa7ac)
-    return 0x0261;
+  如果 (C == 0xa7ac)
+    返回 0x0261;
   // LATIN CAPITAL LETTER L WITH BELT
-  if (C == 0xa7ad)
-    return 0x026c;
+  如果 (C == 0xa7ad)
+    返回 0x026c;
   // LATIN CAPITAL LETTER SMALL CAPITAL I
-  if (C == 0xa7ae)
-    return 0x026a;
+  如果 (C == 0xa7ae)
+    返回 0x026a;
   // LATIN CAPITAL LETTER TURNED K
-  if (C == 0xa7b0)
-    return 0x029e;
+  如果 (C == 0xa7b0)
+    返回 0x029e;
   // LATIN CAPITAL LETTER TURNED T
-  if (C == 0xa7b1)
-    return 0x0287;
+  如果 (C == 0xa7b1)
+    返回 0x0287;
   // LATIN CAPITAL LETTER J WITH CROSSED-TAIL
-  if (C == 0xa7b2)
-    return 0x029d;
+  如果 (C == 0xa7b2)
+    返回 0x029d;
   // LATIN CAPITAL LETTER CHI
-  if (C == 0xa7b3)
-    return 0xab53;
-  if (C < 0xa7b4)
-    return C;
+  如果 (C == 0xa7b3)
+    返回 0xab53;
+  如果 (C < 0xa7b4)
+    返回 C;
   // 8 characters
-  if (C <= 0xa7c2)
-    return C | 1;
+  如果 (C <= 0xa7c2)
+    返回 C | 1;
   // LATIN CAPITAL LETTER C WITH PALATAL HOOK
-  if (C == 0xa7c4)
-    return 0xa794;
+  如果 (C == 0xa7c4)
+    返回 0xa794;
   // LATIN CAPITAL LETTER S WITH HOOK
-  if (C == 0xa7c5)
-    return 0x0282;
+  如果 (C == 0xa7c5)
+    返回 0x0282;
   // LATIN CAPITAL LETTER Z WITH PALATAL HOOK
-  if (C == 0xa7c6)
-    return 0x1d8e;
-  if (C < 0xa7c7)
-    return C;
+  如果 (C == 0xa7c6)
+    返回 0x1d8e;
+  如果 (C < 0xa7c7)
+    返回 C;
   // 2 characters
-  if (C <= 0xa7c9 && C % 2 == 1)
-    return C + 1;
+  如果 (C <= 0xa7c9 && C % 2 == 1)
+    返回 C + 1;
   // LATIN CAPITAL LETTER RAMS HORN
-  if (C == 0xa7cb)
-    return 0x0264;
-  if (C < 0xa7cc)
-    return C;
+  如果 (C == 0xa7cb)
+    返回 0x0264;
+  如果 (C < 0xa7cc)
+    返回 C;
   // 8 characters
-  if (C <= 0xa7da)
-    return C | 1;
+  如果 (C <= 0xa7da)
+    返回 C | 1;
   // LATIN CAPITAL LETTER LAMBDA WITH STROKE
-  if (C == 0xa7dc)
-    return 0x019b;
-  if (C < 0xa7dd)
-    return C;
+  如果 (C == 0xa7dc)
+    返回 0x019b;
+  如果 (C < 0xa7dd)
+    返回 C;
   // 2 characters
-  if (C <= 0xa7e2 && C % 5 == 3)
-    return C + -42342;
+  如果 (C <= 0xa7e2 && C % 5 == 3)
+    返回 C + -42342;
   // LATIN CAPITAL LETTER REVERSED HALF H
-  if (C == 0xa7f5)
-    return 0xa7f6;
-  if (C < 0xab6c)
-    return C;
+  如果 (C == 0xa7f5)
+    返回 0xa7f6;
+  如果 (C < 0xab6c)
+    返回 C;
   // 2 characters
-  if (C <= 0xab6d)
-    return C + -33;
-  if (C < 0xab70)
-    return C;
+  如果 (C <= 0xab6d)
+    返回 C + -33;
+  如果 (C < 0xab70)
+    返回 C;
   // 80 characters
-  if (C <= 0xabbf)
-    return C + -38864;
+  如果 (C <= 0xabbf)
+    返回 C + -38864;
   // LATIN SMALL LIGATURE LONG S T
-  if (C == 0xfb05)
-    return 0xfb06;
-  if (C < 0xff21)
-    return C;
+  如果 (C == 0xfb05)
+    返回 0xfb06;
+  如果 (C < 0xff21)
+    返回 C;
   // 26 characters
-  if (C <= 0xff3a)
-    return C + 32;
-  if (C < 0x10400)
-    return C;
+  如果 (C <= 0xff3a)
+    返回 C + 32;
+  如果 (C < 0x10400)
+    返回 C;
   // 40 characters
-  if (C <= 0x10427)
-    return C + 40;
-  if (C < 0x104b0)
-    return C;
+  如果 (C <= 0x10427)
+    返回 C + 40;
+  如果 (C < 0x104b0)
+    返回 C;
   // 36 characters
-  if (C <= 0x104d3)
-    return C + 40;
-  if (C < 0x10570)
-    return C;
+  如果 (C <= 0x104d3)
+    返回 C + 40;
+  如果 (C < 0x10570)
+    返回 C;
   // 11 characters
-  if (C <= 0x1057a)
-    return C + 39;
-  if (C < 0x1057c)
-    return C;
+  如果 (C <= 0x1057a)
+    返回 C + 39;
+  如果 (C < 0x1057c)
+    返回 C;
   // 15 characters
-  if (C <= 0x1058a)
-    return C + 39;
-  if (C < 0x1058c)
-    return C;
+  如果 (C <= 0x1058a)
+    返回 C + 39;
+  如果 (C < 0x1058c)
+    返回 C;
   // 7 characters
-  if (C <= 0x10592)
-    return C + 39;
-  if (C < 0x10594)
-    return C;
+  如果 (C <= 0x10592)
+    返回 C + 39;
+  如果 (C < 0x10594)
+    返回 C;
   // 2 characters
-  if (C <= 0x10595)
-    return C + 39;
-  if (C < 0x10c80)
-    return C;
+  如果 (C <= 0x10595)
+    返回 C + 39;
+  如果 (C < 0x10c80)
+    返回 C;
   // 51 characters
-  if (C <= 0x10cb2)
-    return C + 64;
-  if (C < 0x10d50)
-    return C;
+  如果 (C <= 0x10cb2)
+    返回 C + 64;
+  如果 (C < 0x10d50)
+    返回 C;
   // 22 characters
-  if (C <= 0x10d65)
-    return C + 32;
-  if (C < 0x118a0)
-    return C;
+  如果 (C <= 0x10d65)
+    返回 C + 32;
+  如果 (C < 0x118a0)
+    返回 C;
   // 32 characters
-  if (C <= 0x118bf)
-    return C + 32;
-  if (C < 0x16e40)
-    return C;
+  如果 (C <= 0x118bf)
+    返回 C + 32;
+  如果 (C < 0x16e40)
+    返回 C;
   // 32 characters
-  if (C <= 0x16e5f)
-    return C + 32;
-  if (C < 0x16ea0)
-    return C;
+  如果 (C <= 0x16e5f)
+    返回 C + 32;
+  如果 (C < 0x16ea0)
+    返回 C;
   // 25 characters
-  if (C <= 0x16eb8)
-    return C + 27;
-  if (C < 0x1df40)
-    return C;
+  如果 (C <= 0x16eb8)
+    返回 C + 27;
+  如果 (C < 0x1df40)
+    返回 C;
   // 2 characters
-  if (C <= 0x1df48 && C % 8 == 0)
-    return C + 1;
-  if (C < 0x1df4a)
-    return C;
+  如果 (C <= 0x1df48 && C % 8 == 0)
+    返回 C + 1;
+  如果 (C < 0x1df4a)
+    返回 C;
   // 2 characters
-  if (C <= 0x1df4d && C % 3 == 1)
-    return C + 1;
-  if (C < 0x1df51)
-    return C;
+  如果 (C <= 0x1df4d && C % 3 == 1)
+    返回 C + 1;
+  如果 (C < 0x1df51)
+    返回 C;
   // 2 characters
-  if (C <= 0x1df68 && C % 23 == 0)
-    return C + 1;
-  if (C < 0x1df6a)
-    return C;
+  如果 (C <= 0x1df68 && C % 23 == 0)
+    返回 C + 1;
+  如果 (C < 0x1df6a)
+    返回 C;
   // 3 characters
-  if (C <= 0x1df6e)
-    return C | 1;
-  if (C < 0x1df72)
-    return C;
+  如果 (C <= 0x1df6e)
+    返回 C | 1;
+  如果 (C < 0x1df72)
+    返回 C;
   // 7 characters
-  if (C <= 0x1df7e)
-    return C | 1;
+  如果 (C <= 0x1df7e)
+    返回 C | 1;
   // LATIN SMALL LIGATURE LONG S WITH DESCENDER S
-  if (C == 0x1df95)
-    return 0x00df;
-  if (C < 0x1e900)
-    return C;
+  如果 (C == 0x1df95)
+    返回 0x00df;
+  如果 (C < 0x1e900)
+    返回 C;
   // 34 characters
-  if (C <= 0x1e921)
-    return C + 34;
+  如果 (C <= 0x1e921)
+    返回 C + 34;
 
-  return C;
+  返回 C;
 }

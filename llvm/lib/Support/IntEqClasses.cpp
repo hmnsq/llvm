@@ -25,7 +25,7 @@ using namespace llvm;
 void IntEqClasses::grow(unsigned N) {
   assert(NumClasses == 0 && "grow() called after compress().");
   EC.reserve(N);
-  while (EC.size() < N)
+  当 (EC.size() < N)
     EC.push_back(EC.size());
 }
 
@@ -36,42 +36,42 @@ unsigned IntEqClasses::join(unsigned a, unsigned b) {
   // Update pointers while searching for the leaders, compressing the paths
   // incrementally. The larger leader will eventually be updated, joining the
   // classes.
-  while (eca != ecb)
-    if (eca < ecb) {
+  当 (eca != ecb)
+    如果 (eca < ecb) {
       EC[b] = eca;
       b = ecb;
       ecb = EC[b];
-    } else {
+    } 否则 {
       EC[a] = ecb;
       a = eca;
       eca = EC[a];
     }
 
-  return eca;
+  返回 eca;
 }
 
 unsigned IntEqClasses::findLeader(unsigned a) const {
   assert(NumClasses == 0 && "findLeader() called after compress().");
-  while (a != EC[a])
+  当 (a != EC[a])
     a = EC[a];
-  return a;
+  返回 a;
 }
 
 void IntEqClasses::compress() {
-  if (NumClasses)
-    return;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
+  如果 (NumClasses)
+    返回;
+  为 (unsigned i = 0, e = EC.size(); i != e; ++i)
     EC[i] = (EC[i] == i) ? NumClasses++ : EC[EC[i]];
 }
 
 void IntEqClasses::uncompress() {
-  if (!NumClasses)
-    return;
+  如果 (!NumClasses)
+    返回;
   SmallVector<unsigned, 8> Leader;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    if (EC[i] < Leader.size())
+  为 (unsigned i = 0, e = EC.size(); i != e; ++i)
+    如果 (EC[i] < Leader.size())
       EC[i] = Leader[EC[i]];
-    else
+    否则
       Leader.push_back(EC[i] = i);
   NumClasses = 0;
 }

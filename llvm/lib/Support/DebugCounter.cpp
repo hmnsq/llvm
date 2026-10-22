@@ -43,7 +43,7 @@ private:
     // width, so we do the same.
     Option::printHelpStr(HelpStr, GlobalWidth, ArgStr.size() + 6);
     const auto &CounterInstance = DebugCounter::instance();
-    for (const auto &Entry : CounterInstance) {
+    为 (const auto &Entry : CounterInstance) {
       const auto &[Name, Desc] = CounterInstance.getCounterDesc(Entry.second);
       size_t NumSpaces = GlobalWidth - Name.size() - 8;
       outs() << "    =" << Name;
@@ -68,7 +68,7 @@ struct DebugCounterOwner : DebugCounter {
       cl::init(false),
       cl::desc("Print out debug counter info after all counters accumulated"),
       cl::callback([&](const bool &Value) {
-        if (Value)
+        如果 (Value)
           activateAllCounters();
       })};
   cl::opt<bool, true> PrintDebugCounterQueries{
@@ -93,7 +93,7 @@ struct DebugCounterOwner : DebugCounter {
 
   // Print information when destroyed, iff command line option is specified.
   ~DebugCounterOwner() {
-    if (ShouldPrintCounter)
+    如果 (ShouldPrintCounter)
       print(dbgs());
   }
 };
@@ -107,32 +107,32 @@ static ManagedStatic<DebugCounterOwner> Owner;
 
 void llvm::initDebugCounterOptions() { (void)DebugCounter::instance(); }
 
-DebugCounter &DebugCounter::instance() { return *Owner; }
+DebugCounter &DebugCounter::instance() { 返回 *Owner; }
 
 // This is called by the command line parser when it sees a value for the
 // debug-counter option defined above.
 void DebugCounter::push_back(const std::string &Val) {
-  if (Val.empty())
-    return;
+  如果 (Val.empty())
+    返回;
 
   // The strings should come in as counter=chunk_list
   auto CounterPair = StringRef(Val).split('=');
-  if (CounterPair.second.empty()) {
+  如果 (CounterPair.second.empty()) {
     errs() << "DebugCounter Error: " << Val << " does not have an = in it\n";
     exit(1);
   }
   StringRef CounterName = CounterPair.first;
 
   CounterInfo *Counter = getCounterInfo(CounterName);
-  if (!Counter) {
+  如果 (!Counter) {
     errs() << "DebugCounter Error: " << CounterName
            << " is not a registered counter\n";
-    return;
+    返回;
   }
 
   auto ExpectedChunks =
       IntegerInclusiveIntervalUtils::parseIntervals(CounterPair.second, ':');
-  if (!ExpectedChunks) {
+  如果 (!ExpectedChunks) {
     handleAllErrors(ExpectedChunks.takeError(), [&](const StringError &E) {
       errs() << "DebugCounter Error: " << E.getMessage() << "\n";
     });
@@ -147,7 +147,7 @@ void DebugCounter::print(raw_ostream &OS) const {
   sort(CounterNames);
 
   OS << "Counters and values:\n";
-  for (StringRef CounterName : CounterNames) {
+  为 (StringRef CounterName : CounterNames) {
     const CounterInfo *C = getCounterInfo(CounterName);
     OS << left_justify(C->Name, 32) << ": {" << C->Count << ",";
     printChunks(OS, C->Chunks);
@@ -159,38 +159,38 @@ bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
   int64_t CurrCount = Info.Count++;
   uint64_t CurrIdx = Info.CurrChunkIdx;
 
-  if (Info.Chunks.empty())
-    return true;
-  if (CurrIdx >= Info.Chunks.size())
-    return false;
+  如果 (Info.Chunks.empty())
+    返回 true;
+  如果 (CurrIdx >= Info.Chunks.size())
+    返回 false;
 
   bool Res = Info.Chunks[CurrIdx].contains(CurrCount);
-  if (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
+  如果 (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
       CurrCount == Info.Chunks[CurrIdx].getEnd()) {
     LLVM_BUILTIN_DEBUGTRAP;
   }
-  if (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
+  如果 (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
     Info.CurrChunkIdx++;
 
     /// Handle consecutive blocks.
-    if (Info.CurrChunkIdx < Info.Chunks.size() &&
+    如果 (Info.CurrChunkIdx < Info.Chunks.size() &&
         CurrCount == Info.Chunks[Info.CurrChunkIdx].getBegin())
-      return true;
+      返回 true;
   }
-  return Res;
+  返回 Res;
 }
 
 bool DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
   auto &Us = instance();
   bool Res = Us.handleCounterIncrement(Counter);
-  if (Us.ShouldPrintCounterQueries && Counter.IsSet) {
+  如果 (Us.ShouldPrintCounterQueries && Counter.IsSet) {
     dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.Count - 1)
            << (Res ? " execute" : " skip") << "\n";
   }
-  return Res;
+  返回 Res;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#如果 !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void DebugCounter::dump() const {
   print(dbgs());
 }

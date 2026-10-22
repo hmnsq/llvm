@@ -12,23 +12,23 @@
 using namespace llvm;
 
 static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+  如果 (*P == '\n')
+    返回 true;
+  如果 (*P == '\r' && *(P + 1) == '\n')
+    返回 true;
+  返回 false;
 }
 
 static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+  如果 (*P == '\n') {
     ++P;
-    return true;
+    返回 true;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  如果 (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    返回 true;
   }
-  return false;
+  返回 false;
 }
 
 line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
@@ -44,10 +44,10 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
+  如果 (Buffer.getBufferSize()) {
     assert(Buffer.getBufferEnd()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    如果 (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
       advance();
   }
 }
@@ -58,39 +58,39 @@ void line_iterator::advance() {
   const char *Pos = CurrentLine.end();
   assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
+  如果 (skipIfAtLineEnd(Pos))
     ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  如果 (!SkipBlanks && isAtLineEnd(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } 否则 如果 (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
+    当 (skipIfAtLineEnd(Pos))
       ++LineNumber;
-  } else {
+  } 否则 {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
+    为 (;;) {
+      如果 (isAtLineEnd(Pos) && !SkipBlanks)
         break;
-      if (*Pos == CommentMarker)
+      如果 (*Pos == CommentMarker)
         do {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
+        } 当 (*Pos != '\0' && !isAtLineEnd(Pos));
+      如果 (!skipIfAtLineEnd(Pos))
         break;
       ++LineNumber;
     }
   }
 
-  if (*Pos == '\0') {
+  如果 (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
     Buffer = std::nullopt;
     CurrentLine = StringRef();
-    return;
+    返回;
   }
 
   // Measure the line.
   size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
+  当 (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
     ++Length;
   }
 

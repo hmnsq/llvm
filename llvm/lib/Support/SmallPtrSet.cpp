@@ -39,7 +39,7 @@ void SmallPtrSetImplBase::shrink_and_clear() {
 
 std::pair<const void *const *, bool>
 SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
-  if (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
+  如果 (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
     // If more than 2/3 of the array is full, grow.
     Grow(CurArraySize < 64 ? 128 : CurArraySize * 2);
   }
@@ -48,9 +48,9 @@ SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
   unsigned Mask = CurArraySize - 1;
   unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
   const void **Array = CurArray;
-  while (Array[I] != getEmptyMarker()) {
-    if (Array[I] == Ptr)
-      return {Array + I, false};
+  当 (Array[I] != getEmptyMarker()) {
+    如果 (Array[I] == Ptr)
+      返回 {Array + I, false};
     I = (I + 1) & Mask;
   }
 
@@ -58,18 +58,18 @@ SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
   ++NumEntries;
   Array[I] = Ptr;
   incrementEpoch();
-  return {Array + I, true};
+  返回 {Array + I, true};
 }
 
 const void *const *SmallPtrSetImplBase::doFind(const void *Ptr) const {
   unsigned Mask = CurArraySize - 1;
   unsigned BucketNo = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  while (true) {
+  当 (true) {
     const void *const *Bucket = CurArray + BucketNo;
-    if (LLVM_LIKELY(*Bucket == Ptr))
-      return Bucket;
-    if (LLVM_LIKELY(*Bucket == getEmptyMarker()))
-      return nullptr;
+    如果 (LLVM_LIKELY(*Bucket == Ptr))
+      返回 Bucket;
+    如果 (LLVM_LIKELY(*Bucket == getEmptyMarker()))
+      返回 nullptr;
     BucketNo = (BucketNo + 1) & Mask;
   }
 }
@@ -81,9 +81,9 @@ void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
   unsigned I = Bucket - CurArray;
   unsigned J = I;
   const void *Empty = getEmptyMarker();
-  while ((J = (J + 1) & Mask), CurArray[J] != Empty) {
+  当 ((J = (J + 1) & Mask), CurArray[J] != Empty) {
     auto Ideal = DenseMapInfo<void *>::getHashValue(CurArray[J]);
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+    如果 (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       CurArray[I] = CurArray[J];
       I = J;
     }
@@ -107,18 +107,18 @@ void SmallPtrSetImplBase::Grow(unsigned NewSize) {
 
   // Copy over all valid entries.
   unsigned Mask = CurArraySize - 1;
-  for (const void *Ptr : OldBuckets) {
-    if (Ptr == getEmptyMarker())
+  为 (const void *Ptr : OldBuckets) {
+    如果 (Ptr == getEmptyMarker())
       continue;
     // Find the first empty bucket on this key's probe chain; there is no equal
     // key, so nothing to compare against.
     unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-    while (NewBuckets[I] != getEmptyMarker())
+    当 (NewBuckets[I] != getEmptyMarker())
       I = (I + 1) & Mask;
     NewBuckets[I] = Ptr;
   }
 
-  if (!WasSmall)
+  如果 (!WasSmall)
     free(OldBuckets.begin());
   IsSmall = false;
 }
@@ -126,10 +126,10 @@ void SmallPtrSetImplBase::Grow(unsigned NewSize) {
 SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
                                          const SmallPtrSetImplBase &that) {
   IsSmall = that.isSmall();
-  if (IsSmall) {
+  如果 (IsSmall) {
     // If we're becoming small, prepare to insert into our stack space
     CurArray = SmallStorage;
-  } else {
+  } 否则 {
     // Otherwise, allocate new heap space (unless we were the same size)
     CurArray = (const void**)safe_malloc(sizeof(void*) * that.CurArraySize);
   }
@@ -149,21 +149,21 @@ void SmallPtrSetImplBase::copyFrom(const void **SmallStorage,
                                    const SmallPtrSetImplBase &RHS) {
   assert(&RHS != this && "Self-copy should be handled by the caller.");
 
-  if (isSmall() && RHS.isSmall())
+  如果 (isSmall() && RHS.isSmall())
     assert(CurArraySize == RHS.CurArraySize &&
            "Cannot assign sets with different small sizes");
 
   // If we're becoming small, prepare to insert into our stack space
-  if (RHS.isSmall()) {
-    if (!isSmall())
+  如果 (RHS.isSmall()) {
+    如果 (!isSmall())
       free(CurArray);
     CurArray = SmallStorage;
     IsSmall = true;
     // Otherwise, allocate new heap space (unless we were the same size)
-  } else if (CurArraySize != RHS.CurArraySize) {
-    if (isSmall())
+  } 否则 如果 (CurArraySize != RHS.CurArraySize) {
+    如果 (isSmall())
       CurArray = (const void**)safe_malloc(sizeof(void*) * RHS.CurArraySize);
-    else {
+    否则 {
       const void **T = (const void**)safe_realloc(CurArray,
                                              sizeof(void*) * RHS.CurArraySize);
       CurArray = T;
@@ -188,7 +188,7 @@ void SmallPtrSetImplBase::moveFrom(const void **SmallStorage,
                                    unsigned SmallSize,
                                    const void **RHSSmallStorage,
                                    SmallPtrSetImplBase &&RHS) {
-  if (!isSmall())
+  如果 (!isSmall())
     free(CurArray);
   moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(RHS));
 }
@@ -201,11 +201,11 @@ void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
   incrementEpoch();
   RHS.incrementEpoch();
 
-  if (RHS.isSmall()) {
+  如果 (RHS.isSmall()) {
     // Copy a small RHS rather than moving.
     CurArray = SmallStorage;
     llvm::copy(RHS.small_buckets(), CurArray);
-  } else {
+  } 否则 {
     CurArray = RHS.CurArray;
     RHS.CurArray = RHSSmallStorage;
   }
@@ -224,34 +224,34 @@ void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
 void SmallPtrSetImplBase::swap(const void **SmallStorage,
                                const void **RHSSmallStorage,
                                SmallPtrSetImplBase &RHS) {
-  if (this == &RHS) return;
+  如果 (this == &RHS) 返回;
   incrementEpoch();
   RHS.incrementEpoch();
 
   // We can only avoid copying elements if neither set is small.
-  if (!this->isSmall() && !RHS.isSmall()) {
+  如果 (!this->isSmall() && !RHS.isSmall()) {
     std::swap(this->CurArray, RHS.CurArray);
     std::swap(this->CurArraySize, RHS.CurArraySize);
     std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+    返回;
   }
 
   // FIXME: From here on we assume that both sets have the same small size.
 
   // Both a small, just swap the small elements.
-  if (this->isSmall() && RHS.isSmall()) {
+  如果 (this->isSmall() && RHS.isSmall()) {
     unsigned MinEntries = std::min(this->NumEntries, RHS.NumEntries);
     std::swap_ranges(this->CurArray, this->CurArray + MinEntries, RHS.CurArray);
-    if (this->NumEntries > MinEntries) {
+    如果 (this->NumEntries > MinEntries) {
       std::copy(this->CurArray + MinEntries, this->CurArray + this->NumEntries,
                 RHS.CurArray + MinEntries);
-    } else {
+    } 否则 {
       std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.NumEntries,
                 this->CurArray + MinEntries);
     }
     assert(this->CurArraySize == RHS.CurArraySize);
     std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+    返回;
   }
 
   // If only one side is small, copy the small elements into the large side and

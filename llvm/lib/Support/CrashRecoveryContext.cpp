@@ -46,14 +46,14 @@ public:
     CurrentContext = this;
   }
   ~CrashRecoveryContextImpl() {
-    if (!SwitchedThread)
+    如果 (!SwitchedThread)
       CurrentContext = Next;
   }
 
   /// Called when the separate crash-recovery thread was finished, to
   /// indicate that we don't need to clear the thread-local CurrentContext.
   void setSwitchedThread() {
-#if defined(LLVM_ENABLE_THREADS) && LLVM_ENABLE_THREADS != 0
+#如果 defined(LLVM_ENABLE_THREADS) && LLVM_ENABLE_THREADS != 0
     SwitchedThread = true;
 #endif
   }
@@ -62,7 +62,7 @@ public:
   // 'RetCode' represents the returned error code, as if it was returned by a
   // process. 'Context' represents the signal type on Unix; on Windows, it is
   // the ExceptionContext.
-  void HandleCrash(int RetCode, uintptr_t Context) {
+  void HandleCrash(整数 RetCode, uintptr_t Context) {
     // Eliminate the current context entry, to avoid re-entering in case the
     // cleanup code crashes.
     CurrentContext = Next;
@@ -70,13 +70,13 @@ public:
     assert(!Failed && "Crash recovery context already failed!");
     Failed = true;
 
-    if (CRC->DumpStackAndCleanupOnFailure)
+    如果 (CRC->DumpStackAndCleanupOnFailure)
       sys::CleanupOnSignal(Context);
 
     CRC->RetCode = RetCode;
 
     // Jump back to the RunSafely we were called under.
-    if (ValidJumpBuffer)
+    如果 (ValidJumpBuffer)
       longjmp(JumpBuffer, 1);
 
     // Otherwise let the caller decide of the outcome of the crash. Currently
@@ -86,7 +86,7 @@ public:
 
 std::mutex &getCrashRecoveryContextMutex() {
   static std::mutex CrashRecoveryContextMutex;
-  return CrashRecoveryContextMutex;
+  返回 CrashRecoveryContextMutex;
 }
 
 static bool gCrashRecoveryEnabled = false;
@@ -113,7 +113,7 @@ CrashRecoveryContext::~CrashRecoveryContext() {
   CrashRecoveryContextCleanup *i = head;
   const CrashRecoveryContext *PC = IsRecoveringFromCrash;
   IsRecoveringFromCrash = this;
-  while (i) {
+  当 (i) {
     CrashRecoveryContextCleanup *tmp = i;
     i = tmp->next;
     tmp->cleanupFired = true;
@@ -127,42 +127,42 @@ CrashRecoveryContext::~CrashRecoveryContext() {
 }
 
 bool CrashRecoveryContext::isRecoveringFromCrash() {
-  return IsRecoveringFromCrash != nullptr;
+  返回 IsRecoveringFromCrash != nullptr;
 }
 
 CrashRecoveryContext *CrashRecoveryContext::GetCurrent() {
-  if (!gCrashRecoveryEnabled)
-    return nullptr;
+  如果 (!gCrashRecoveryEnabled)
+    返回 nullptr;
 
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
-  if (!CRCI)
-    return nullptr;
+  如果 (!CRCI)
+    返回 nullptr;
 
-  return CRCI->CRC;
+  返回 CRCI->CRC;
 }
 
 void CrashRecoveryContext::Enable(bool NeedsPOSIXUtilitySignalHandling) {
   std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
   // FIXME: Shouldn't this be a refcount or something?
-  if (gCrashRecoveryEnabled)
-    return;
+  如果 (gCrashRecoveryEnabled)
+    返回;
   gCrashRecoveryEnabled = true;
   installExceptionOrSignalHandlers(NeedsPOSIXUtilitySignalHandling);
 }
 
 void CrashRecoveryContext::Disable() {
   std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
-  if (!gCrashRecoveryEnabled)
-    return;
+  如果 (!gCrashRecoveryEnabled)
+    返回;
   gCrashRecoveryEnabled = false;
   uninstallExceptionOrSignalHandlers();
 }
 
 void CrashRecoveryContext::registerCleanup(CrashRecoveryContextCleanup *cleanup)
 {
-  if (!cleanup)
-    return;
-  if (head)
+  如果 (!cleanup)
+    返回;
+  如果 (head)
     head->prev = cleanup;
   cleanup->next = head;
   head = cleanup;
@@ -170,22 +170,22 @@ void CrashRecoveryContext::registerCleanup(CrashRecoveryContextCleanup *cleanup)
 
 void
 CrashRecoveryContext::unregisterCleanup(CrashRecoveryContextCleanup *cleanup) {
-  if (!cleanup)
-    return;
-  if (cleanup == head) {
+  如果 (!cleanup)
+    返回;
+  如果 (cleanup == head) {
     head = cleanup->next;
-    if (head)
+    如果 (head)
       head->prev = nullptr;
   }
-  else {
+  否则 {
     cleanup->prev->next = cleanup->next;
-    if (cleanup->next)
+    如果 (cleanup->next)
       cleanup->next->prev = cleanup->prev;
   }
   delete cleanup;
 }
 
-#if defined(_MSC_VER)
+#如果 defined(_MSC_VER)
 
 #include <windows.h> // for GetExceptionInformation
 
@@ -203,50 +203,50 @@ static void uninstallExceptionOrSignalHandlers() {}
 
 // We need this function because the call to GetExceptionInformation() can only
 // occur inside the __except evaluation block
-static int ExceptionFilter(_EXCEPTION_POINTERS *Except) {
+static 整数 ExceptionFilter(_EXCEPTION_POINTERS *Except) {
   // Lookup the current thread local recovery object.
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  如果 (!CRCI) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    返回 EXCEPTION_CONTINUE_SEARCH;
   }
 
-  int RetCode = (int)Except->ExceptionRecord->ExceptionCode;
-  if ((RetCode & 0xF0000000) == 0xE0000000)
+  整数 RetCode = (整数)Except->ExceptionRecord->ExceptionCode;
+  如果 ((RetCode & 0xF0000000) == 0xE0000000)
     RetCode &= ~0xF0000000; // this crash was generated by sys::Process::Exit
 
   // Handle the crash
   const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(
       RetCode, reinterpret_cast<uintptr_t>(Except));
 
-  return EXCEPTION_EXECUTE_HANDLER;
+  返回 EXCEPTION_EXECUTE_HANDLER;
 }
 
-#if defined(__clang__) && defined(_M_IX86)
+#如果 defined(__clang__) && defined(_M_IX86)
 // Work around PR44697.
 __attribute__((optnone))
 #endif
 bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
-  if (!gCrashRecoveryEnabled) {
+  如果 (!gCrashRecoveryEnabled) {
     Fn();
-    return true;
+    返回 true;
   }
   assert(!Impl && "Crash recovery context already initialized!");
   Impl = new CrashRecoveryContextImpl(this);
   __try {
     Fn();
   } __except (ExceptionFilter(GetExceptionInformation())) {
-    return false;
+    返回 false;
   }
-  return true;
+  返回 true;
 }
 
-#else // !_MSC_VER
+#否则 // !_MSC_VER
 
-#if defined(_WIN32)
+#如果 defined(_WIN32)
 // This is a non-MSVC compiler, probably mingw gcc or clang without
 // -fms-extensions. Use vectored exception handling (VEH).
 //
@@ -278,24 +278,24 @@ static LONG CALLBACK ExceptionHandler(PEXCEPTION_POINTERS ExceptionInfo)
   case DBG_PRINTEXCEPTION_C:
   case DbgPrintExceptionWideC:
   case 0x406D1388:  // set debugger thread name
-    return EXCEPTION_CONTINUE_EXECUTION;
+    返回 EXCEPTION_CONTINUE_EXECUTION;
   }
 
   // Lookup the current thread local recovery object.
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  如果 (!CRCI) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    返回 EXCEPTION_CONTINUE_SEARCH;
   }
 
   // TODO: We can capture the stack backtrace here and store it on the
   // implementation if we so choose.
 
-  int RetCode = (int)ExceptionInfo->ExceptionRecord->ExceptionCode;
-  if ((RetCode & 0xF0000000) == 0xE0000000)
+  整数 RetCode = (整数)ExceptionInfo->ExceptionRecord->ExceptionCode;
+  如果 ((RetCode & 0xF0000000) == 0xE0000000)
     RetCode &= ~0xF0000000; // this crash was generated by sys::Process::Exit
 
   // Handle the crash
@@ -326,7 +326,7 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
 
 static void uninstallExceptionOrSignalHandlers() {
   PVOID currentHandle = const_cast<PVOID>(sCurrentExceptionHandle);
-  if (currentHandle) {
+  如果 (currentHandle) {
     // Now we can remove the vectored exception handler from the chain
     ::RemoveVectoredExceptionHandler(currentHandle);
 
@@ -335,7 +335,7 @@ static void uninstallExceptionOrSignalHandlers() {
   }
 }
 
-#else // !_WIN32
+#否则 // !_WIN32
 
 // Generic POSIX implementation.
 //
@@ -350,16 +350,16 @@ static void uninstallExceptionOrSignalHandlers() {
 
 #include <signal.h>
 
-static const int Signals[] =
+static const 整数 Signals[] =
     { SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP };
 static const unsigned NumSignals = std::size(Signals);
 static struct sigaction PrevActions[NumSignals];
 
-static void CrashRecoverySignalHandler(int Signal) {
+static void CrashRecoverySignalHandler(整数 Signal) {
   // Lookup the current thread local recovery object.
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  如果 (!CRCI) {
     // We didn't find a crash recovery context -- this means either we got a
     // signal on a thread we didn't expect it on, the application got a signal
     // outside of a crash recovery context, or something else went horribly
@@ -378,7 +378,7 @@ static void CrashRecoverySignalHandler(int Signal) {
     raise(Signal);
 
     // The signal will be thrown once the signal mask is restored.
-    return;
+    返回;
   }
 
   // Unblock the signal we received.
@@ -390,13 +390,13 @@ static void CrashRecoverySignalHandler(int Signal) {
   // Return the same error code as if the program crashed, as mentioned in the
   // section "Exit Status for Commands":
   // https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xcu_chap02.html
-  int RetCode = 128 + Signal;
+  整数 RetCode = 128 + Signal;
 
   // Don't consider a broken pipe as a crash (see clang/lib/Driver/Driver.cpp)
-  if (Signal == SIGPIPE)
+  如果 (Signal == SIGPIPE)
     RetCode = EX_IOERR;
 
-  if (CRCI)
+  如果 (CRCI)
     const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(RetCode, Signal);
 }
 
@@ -408,13 +408,13 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
   Handler.sa_flags = 0;
   sigemptyset(&Handler.sa_mask);
 
-  for (unsigned i = 0; i != NumSignals; ++i) {
-    if (NeedsPOSIXUtilitySignalHandling) {
+  为 (unsigned i = 0; i != NumSignals; ++i) {
+    如果 (NeedsPOSIXUtilitySignalHandling) {
       // Don't install the new handler if the signal disposition is SIG_IGN.
       struct sigaction act;
-      if (sigaction(Signals[i], NULL, &act) == 0 && act.sa_handler != SIG_IGN)
+      如果 (sigaction(Signals[i], NULL, &act) == 0 && act.sa_handler != SIG_IGN)
         sigaction(Signals[i], &Handler, &PrevActions[i]);
-    } else {
+    } 否则 {
       sigaction(Signals[i], &Handler, &PrevActions[i]);
     }
   }
@@ -422,7 +422,7 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
 
 static void uninstallExceptionOrSignalHandlers() {
   // Restore the previous signal handlers.
-  for (unsigned i = 0; i != NumSignals; ++i)
+  为 (unsigned i = 0; i != NumSignals; ++i)
     sigaction(Signals[i], &PrevActions[i], nullptr);
 }
 
@@ -430,31 +430,31 @@ static void uninstallExceptionOrSignalHandlers() {
 
 bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
   // If crash recovery is disabled, do nothing.
-  if (gCrashRecoveryEnabled) {
+  如果 (gCrashRecoveryEnabled) {
     assert(!Impl && "Crash recovery context already initialized!");
     CrashRecoveryContextImpl *CRCI = new CrashRecoveryContextImpl(this);
     Impl = CRCI;
 
     CRCI->ValidJumpBuffer = true;
-    if (setjmp(CRCI->JumpBuffer) != 0) {
-      return false;
+    如果 (setjmp(CRCI->JumpBuffer) != 0) {
+      返回 false;
     }
   }
 
   Fn();
-  return true;
+  返回 true;
 }
 
 #endif // !_MSC_VER
 
-[[noreturn]] void CrashRecoveryContext::HandleExit(int RetCode) {
-#if defined(_WIN32)
+[[noreturn]] void CrashRecoveryContext::HandleExit(整数 RetCode) {
+#如果 defined(_WIN32)
   // Since the exception code is actually of NTSTATUS type, we use the
   // Microsoft-recommended 0xE prefix, to signify that this is a user error.
   // This value is a combination of the customer field (bit 29) and severity
   // field (bits 30-31) in the NTSTATUS specification.
   ::RaiseException(0xE0000000 | RetCode, 0, 0, NULL);
-#else
+#否则
   // On Unix we don't need to raise an exception, we go directly to
   // HandleCrash(), then longjmp will unwind the stack for us.
   CrashRecoveryContextImpl *CRCI = (CrashRecoveryContextImpl *)Impl;
@@ -464,34 +464,34 @@ bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
   llvm_unreachable("Most likely setjmp wasn't called!");
 }
 
-bool CrashRecoveryContext::isCrash(int RetCode) {
-#if defined(_WIN32)
+bool CrashRecoveryContext::isCrash(整数 RetCode) {
+#如果 defined(_WIN32)
   // On Windows, the code is interpreted as NTSTATUS. The two high bits
   // represent the severity. Values starting with 0x80000000 are reserved for
   // "warnings"; values of 0xC0000000 and up are for "errors". In practice, both
   // are interpreted as a non-continuable signal.
   unsigned Code = ((unsigned)RetCode & 0xF0000000) >> 28;
-  if (Code != 0xC && Code != 8)
-    return false;
-#else
+  如果 (Code != 0xC && Code != 8)
+    返回 false;
+#否则
   // On Unix, signals are represented by return codes of 128 or higher.
   // Exit code 128 is a reserved value and should not be raised as a signal.
-  if (RetCode <= 128)
-    return false;
+  如果 (RetCode <= 128)
+    返回 false;
 #endif
-  return true;
+  返回 true;
 }
 
-bool CrashRecoveryContext::throwIfCrash(int RetCode) {
-  if (!isCrash(RetCode))
-    return false;
-#if defined(_WIN32)
+bool CrashRecoveryContext::throwIfCrash(整数 RetCode) {
+  如果 (!isCrash(RetCode))
+    返回 false;
+#如果 defined(_WIN32)
   ::RaiseException(RetCode, 0, 0, NULL);
-#else
+#否则
   llvm::sys::unregisterHandlers();
   raise(RetCode - 128);
 #endif
-  return true;
+  返回 true;
 }
 
 // FIXME: Portability.
@@ -503,9 +503,9 @@ static void setThreadBackgroundPriority() {
 
 static bool hasThreadBackgroundPriority() {
 #ifdef __APPLE__
-  return getpriority(PRIO_DARWIN_THREAD, 0) == 1;
-#else
-  return false;
+  返回 getpriority(PRIO_DARWIN_THREAD, 0) == 1;
+#否则
+  返回 false;
 #endif
 }
 
@@ -522,7 +522,7 @@ static void RunSafelyOnThread_Dispatch(void *UserData) {
   RunSafelyOnThreadInfo *Info =
     reinterpret_cast<RunSafelyOnThreadInfo*>(UserData);
 
-  if (Info->UseBackgroundPriority)
+  如果 (Info->UseBackgroundPriority)
     setThreadBackgroundPriority();
 
   Info->Result = Info->CRC->RunSafely(Info->Fn);
@@ -537,12 +537,12 @@ bool CrashRecoveryContext::RunSafelyOnThread(function_ref<void()> Fn,
                       RunSafelyOnThread_Dispatch, &Info);
   Thread.join();
 
-  if (CrashRecoveryContextImpl *CRC = (CrashRecoveryContextImpl *)Impl)
+  如果 (CrashRecoveryContextImpl *CRC = (CrashRecoveryContextImpl *)Impl)
     CRC->setSwitchedThread();
-  return Info.Result;
+  返回 Info.Result;
 }
 
 bool CrashRecoveryContext::RunSafelyOnNewStack(function_ref<void()> Fn,
                                                unsigned RequestedStackSize) {
-  return RunSafelyOnThread(Fn, RequestedStackSize);
+  返回 RunSafelyOnThread(Fn, RequestedStackSize);
 }

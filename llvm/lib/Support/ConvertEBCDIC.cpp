@@ -71,22 +71,22 @@ static const unsigned char IBM1047ToISO88591[256] = {
 static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
   assert(Ptr != End);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  如果 (Lead < 0xc2 || Lead > 0xf4)
+    返回 false;
+  如果 (Ptr == End)
+    返回 true;
 
   UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
+  如果 ((Second & 0xc0) != 0x80)
+    返回 false;
+  如果 ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
       (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+    返回 false;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  当 (Ptr != End)
+    如果 ((*Ptr++ & 0xc0) != 0x80)
+      返回 false;
+  返回 true;
 }
 
 std::error_code
@@ -94,13 +94,13 @@ ConverterEBCDIC::convertToEBCDIC(StringRef Source,
                                  SmallVectorImpl<char> &Result) {
   assert(Result.empty() && "Result must be empty!");
   Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+  如果 (Source.empty())
+    返回 std::error_code();
 
   const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
   const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
+  当 (Ptr != End) {
+    如果 (*Ptr < 0x80) {
       Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
       continue;
     }
@@ -110,21 +110,21 @@ ConverterEBCDIC::convertToEBCDIC(StringRef Source,
     case conversionOK:
       break;
     case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
+      如果 (!isPotentiallyValidUTF8Prefix(Ptr, End))
+        返回 std::make_error_code(std::errc::illegal_byte_sequence);
+      返回 std::make_error_code(std::errc::invalid_argument);
     case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+      返回 std::make_error_code(std::errc::illegal_byte_sequence);
     case targetExhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    如果 (Ch > 0xff)
+      返回 std::make_error_code(std::errc::illegal_byte_sequence);
 
     Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
   }
-  return std::error_code();
+  返回 std::error_code();
 }
 
 void ConverterEBCDIC::convertToUTF8(StringRef Source,
@@ -136,12 +136,12 @@ void ConverterEBCDIC::convertToUTF8(StringRef Source,
       reinterpret_cast<const unsigned char *>(Source.data());
   size_t Length = Source.size();
   Result.reserve(Length);
-  while (Length--) {
+  当 (Length--) {
     unsigned char Ch = *Ptr++;
     // Translate the character.
     Ch = Table[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    如果 (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
       Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.

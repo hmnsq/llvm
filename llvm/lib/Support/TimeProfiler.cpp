@@ -47,7 +47,7 @@ struct TimeTraceProfilerInstances {
 
 TimeTraceProfilerInstances &getTimeTraceProfilerInstances() {
   static TimeTraceProfilerInstances Instances;
-  return Instances;
+  返回 Instances;
 }
 
 static const char TimeTraceFileExtension[] = ".time-trace.json";
@@ -58,7 +58,7 @@ static const char TimeTraceFileExtension[] = ".time-trace.json";
 static LLVM_THREAD_LOCAL TimeTraceProfiler *TimeTraceProfilerInstance = nullptr;
 
 TimeTraceProfiler *llvm::getTimeTraceProfilerInstance() {
-  return TimeTraceProfilerInstance;
+  返回 TimeTraceProfilerInstance;
 }
 
 namespace {
@@ -96,13 +96,13 @@ struct llvm::TimeTraceProfilerEntry {
   // rather than casting duration. This avoids truncation issues causing inner
   // scopes overruning outer scopes.
   ClockType::rep getFlameGraphStartUs(TimePointType StartTime) const {
-    return (time_point_cast<microseconds>(Start) -
+    返回 (time_point_cast<microseconds>(Start) -
             time_point_cast<microseconds>(StartTime))
         .count();
   }
 
   ClockType::rep getFlameGraphDurUs() const {
-    return (time_point_cast<microseconds>(End) -
+    返回 (time_point_cast<microseconds>(End) -
             time_point_cast<microseconds>(Start))
         .count();
   }
@@ -148,7 +148,7 @@ struct llvm::TimeTraceProfiler {
     Stack.emplace_back(std::make_unique<InProgressEntry>(
         ClockType::now(), TimePointType(), std::move(Name), Detail(),
         EventType));
-    return &Stack.back()->Event;
+    返回 &Stack.back()->Event;
   }
 
   TimeTraceProfilerEntry *
@@ -159,12 +159,12 @@ struct llvm::TimeTraceProfiler {
     Stack.emplace_back(std::make_unique<InProgressEntry>(
         ClockType::now(), TimePointType(), std::move(Name), Metadata(),
         EventType));
-    return &Stack.back()->Event;
+    返回 &Stack.back()->Event;
   }
 
   void insert(std::string Name, llvm::function_ref<std::string()> Detail) {
-    if (Stack.empty())
-      return;
+    如果 (Stack.empty())
+      返回;
 
     Stack.back()->InstantEvents.emplace_back(TimeTraceProfilerEntry(
         ClockType::now(), TimePointType(), std::move(Name), Detail(),
@@ -185,14 +185,14 @@ struct llvm::TimeTraceProfiler {
 
     const auto *Iter =
         llvm::find_if(Stack, [&](const std::unique_ptr<InProgressEntry> &Val) {
-          return &Val->Event == &E;
+          返回 &Val->Event == &E;
         });
     assert(Iter != Stack.end() && "Event not in the Stack");
 
     // Only include sections longer or equal to TimeTraceGranularity msec.
-    if (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
+    如果 (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
       Entries.emplace_back(E);
-      for (auto &IE : Iter->get()->InstantEvents) {
+      为 (auto &IE : Iter->get()->InstantEvents) {
         Entries.emplace_back(IE);
       }
     }
@@ -202,9 +202,9 @@ struct llvm::TimeTraceProfiler {
     // templates from within, we only want to add the topmost one. "topmost"
     // happens to be the ones that don't have any currently open entries above
     // itself.
-    if (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
+    如果 (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
                       [&](const std::unique_ptr<InProgressEntry> &Val) {
-                        return Val->Event.Name == E.Name;
+                        返回 Val->Event.Name == E.Name;
                       })) {
       auto &CountAndTotal = CountAndTotalPerName[E.Name];
       CountAndTotal.first++;
@@ -223,7 +223,7 @@ struct llvm::TimeTraceProfiler {
     assert(Stack.empty() &&
            "All profiler sections should be ended when calling write");
     assert(llvm::all_of(Instances.List,
-                        [](const auto &TTP) { return TTP->Stack.empty(); }) &&
+                        [](const auto &TTP) { 返回 TTP->Stack.empty(); }) &&
            "All profiler sections should be ended when calling write");
 
     json::OStream J(OS);
@@ -240,32 +240,32 @@ struct llvm::TimeTraceProfiler {
         J.attribute("pid", Pid);
         J.attribute("tid", int64_t(Tid));
         J.attribute("ts", StartUs);
-        if (E.EventType == TimeTraceEventType::AsyncEvent) {
+        如果 (E.EventType == TimeTraceEventType::AsyncEvent) {
           J.attribute("cat", E.Name);
           J.attribute("ph", "b");
           J.attribute("id", 0);
-        } else if (E.EventType == TimeTraceEventType::CompleteEvent) {
+        } 否则 如果 (E.EventType == TimeTraceEventType::CompleteEvent) {
           J.attribute("ph", "X");
           J.attribute("dur", DurUs);
-        } else { // instant event
+        } 否则 { // instant event
           assert(E.EventType == TimeTraceEventType::InstantEvent &&
                  "InstantEvent expected");
           J.attribute("ph", "i");
         }
         J.attribute("name", E.Name);
-        if (!E.Metadata.isEmpty()) {
+        如果 (!E.Metadata.isEmpty()) {
           J.attributeObject("args", [&] {
-            if (!E.Metadata.Detail.empty())
+            如果 (!E.Metadata.Detail.empty())
               J.attribute("detail", E.Metadata.Detail);
-            if (!E.Metadata.File.empty())
+            如果 (!E.Metadata.File.empty())
               J.attribute("file", E.Metadata.File);
-            if (E.Metadata.Line > 0)
+            如果 (E.Metadata.Line > 0)
               J.attribute("line", E.Metadata.Line);
           });
         }
       });
 
-      if (E.EventType == TimeTraceEventType::AsyncEvent) {
+      如果 (E.EventType == TimeTraceEventType::AsyncEvent) {
         J.object([&] {
           J.attribute("pid", Pid);
           J.attribute("tid", int64_t(Tid));
@@ -277,17 +277,17 @@ struct llvm::TimeTraceProfiler {
         });
       }
     };
-    for (const TimeTraceProfilerEntry &E : Entries)
+    为 (const TimeTraceProfilerEntry &E : Entries)
       writeEvent(E, this->Tid);
-    for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const TimeTraceProfilerEntry &E : TTP->Entries)
+    为 (const TimeTraceProfiler *TTP : Instances.List)
+      为 (const TimeTraceProfilerEntry &E : TTP->Entries)
         writeEvent(E, TTP->Tid);
 
     // Emit totals by section name as additional "thread" events, sorted from
     // longest one.
     // Find highest used thread id.
     uint64_t MaxTid = this->Tid;
-    for (const TimeTraceProfiler *TTP : Instances.List)
+    为 (const TimeTraceProfiler *TTP : Instances.List)
       MaxTid = std::max(MaxTid, TTP->Tid);
 
     // Combine all CountAndTotalPerName from threads into one.
@@ -299,25 +299,25 @@ struct llvm::TimeTraceProfiler {
       CountAndTotal.first += Value.first;
       CountAndTotal.second += Value.second;
     };
-    for (const auto &Stat : CountAndTotalPerName)
+    为 (const auto &Stat : CountAndTotalPerName)
       combineStat(Stat);
-    for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const auto &Stat : TTP->CountAndTotalPerName)
+    为 (const TimeTraceProfiler *TTP : Instances.List)
+      为 (const auto &Stat : TTP->CountAndTotalPerName)
         combineStat(Stat);
 
     std::vector<NameAndCountAndDurationType> SortedTotals;
     SortedTotals.reserve(AllCountAndTotalPerName.size());
-    for (const auto &Total : AllCountAndTotalPerName)
+    为 (const auto &Total : AllCountAndTotalPerName)
       SortedTotals.emplace_back(std::string(Total.getKey()), Total.getValue());
 
     llvm::sort(SortedTotals, [](const NameAndCountAndDurationType &A,
                                 const NameAndCountAndDurationType &B) {
-      return A.second.second > B.second.second;
+      返回 A.second.second > B.second.second;
     });
 
     // Report totals on separate threads of tracing file.
     uint64_t TotalTid = MaxTid + 1;
-    for (const NameAndCountAndDurationType &Total : SortedTotals) {
+    为 (const NameAndCountAndDurationType &Total : SortedTotals) {
       auto DurUs = duration_cast<microseconds>(Total.second.second).count();
       auto Count = AllCountAndTotalPerName[Total.first].first;
 
@@ -352,7 +352,7 @@ struct llvm::TimeTraceProfiler {
 
     writeMetadataEvent("process_name", Tid, ProcName);
     writeMetadataEvent("thread_name", Tid, ThreadName);
-    for (const TimeTraceProfiler *TTP : Instances.List)
+    为 (const TimeTraceProfiler *TTP : Instances.List)
       writeMetadataEvent("thread_name", TTP->Tid, TTP->ThreadName);
 
     J.arrayEnd();
@@ -393,15 +393,15 @@ struct llvm::TimeTraceProfiler {
 };
 
 bool llvm::isTimeTraceVerbose() {
-  return getTimeTraceProfilerInstance() &&
+  返回 getTimeTraceProfilerInstance() &&
          getTimeTraceProfilerInstance()->TimeTraceVerbose;
 }
 
 TimeTraceCompression llvm::inferTimeTraceCompressionFromPath(StringRef Path) {
   StringRef Ext = llvm::sys::path::extension(Path);
-  if (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
-    return TimeTraceCompression::Zstd;
-  return TimeTraceCompression::None;
+  如果 (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
+    返回 TimeTraceCompression::Zstd;
+  返回 TimeTraceCompression::None;
 }
 
 void llvm::timeTraceProfilerInitialize(unsigned TimeTraceGranularity,
@@ -423,7 +423,7 @@ void llvm::timeTraceProfilerCleanup() {
 
   auto &Instances = getTimeTraceProfilerInstances();
   std::lock_guard<std::mutex> Lock(Instances.Lock);
-  for (auto *TTP : Instances.List)
+  为 (auto *TTP : Instances.List)
     delete TTP;
   Instances.List.clear();
 }
@@ -442,13 +442,13 @@ void llvm::timeTraceProfilerWrite(raw_pwrite_stream &OS) {
          "Profiler object can't be null");
   TimeTraceCompression CompressType =
       TimeTraceProfilerInstance->TimeTraceCompress;
-  if (CompressType != TimeTraceCompression::Zstd) {
+  如果 (CompressType != TimeTraceCompression::Zstd) {
     TimeTraceProfilerInstance->write(OS);
-    return;
+    返回;
   }
 
   compression::Format F = compression::Format::Zstd;
-  if (const char *Reason = compression::getReasonIfUnsupported(F))
+  如果 (const char *Reason = compression::getReasonIfUnsupported(F))
     report_fatal_error(Reason);
 
   SmallVector<char, 0> Uncompressed;
@@ -474,19 +474,19 @@ Error llvm::timeTraceProfilerWrite(StringRef PreferredFileName,
   TimeTraceCompression CompressType =
       TimeTraceProfilerInstance->TimeTraceCompress;
   std::string Path = PreferredFileName.str();
-  if (Path.empty()) {
+  如果 (Path.empty()) {
     Path = FallbackFileName == "-" ? "out" : FallbackFileName.str();
     Path += TimeTraceFileExtension;
-    if (CompressType == TimeTraceCompression::Zstd)
+    如果 (CompressType == TimeTraceCompression::Zstd)
       Path += ".zst";
-  } else if (CompressType == TimeTraceCompression::Infer) {
+  } 否则 如果 (CompressType == TimeTraceCompression::Infer) {
     CompressType = inferTimeTraceCompressionFromPath(Path);
   }
 
-  if (CompressType == TimeTraceCompression::Zstd) {
-    if (const char *Reason =
+  如果 (CompressType == TimeTraceCompression::Zstd) {
+    如果 (const char *Reason =
             compression::getReasonIfUnsupported(compression::Format::Zstd))
-      return createStringError(inconvertibleErrorCode(), Reason);
+      返回 createStringError(inconvertibleErrorCode(), Reason);
   }
 
   std::error_code EC;
@@ -494,65 +494,65 @@ Error llvm::timeTraceProfilerWrite(StringRef PreferredFileName,
                                  ? sys::fs::OF_None
                                  : sys::fs::OF_TextWithCRLF;
   raw_fd_ostream OS(Path, EC, Flags);
-  if (EC)
-    return createStringError(EC, "Could not open " + Path);
+  如果 (EC)
+    返回 createStringError(EC, "Could not open " + Path);
 
   TimeTraceCompression SavedCompress =
       TimeTraceProfilerInstance->TimeTraceCompress;
   TimeTraceProfilerInstance->TimeTraceCompress = CompressType;
   timeTraceProfilerWrite(OS);
   TimeTraceProfilerInstance->TimeTraceCompress = SavedCompress;
-  return Error::success();
+  返回 Error::success();
 }
 
 TimeTraceProfilerEntry *llvm::timeTraceProfilerBegin(StringRef Name,
                                                      StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
+  如果 (TimeTraceProfilerInstance != nullptr)
+    返回 TimeTraceProfilerInstance->begin(
+        std::string(Name), [&]() { 返回 std::string(Detail); },
         TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  返回 nullptr;
 }
 
 TimeTraceProfilerEntry *
 llvm::timeTraceProfilerBegin(StringRef Name,
                              llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Detail,
+  如果 (TimeTraceProfilerInstance != nullptr)
+    返回 TimeTraceProfilerInstance->begin(std::string(Name), Detail,
                                             TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  返回 nullptr;
 }
 
 TimeTraceProfilerEntry *
 llvm::timeTraceProfilerBegin(StringRef Name,
                              llvm::function_ref<TimeTraceMetadata()> Metadata) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Metadata,
+  如果 (TimeTraceProfilerInstance != nullptr)
+    返回 TimeTraceProfilerInstance->begin(std::string(Name), Metadata,
                                             TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  返回 nullptr;
 }
 
 TimeTraceProfilerEntry *llvm::timeTraceAsyncProfilerBegin(StringRef Name,
                                                           StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
+  如果 (TimeTraceProfilerInstance != nullptr)
+    返回 TimeTraceProfilerInstance->begin(
+        std::string(Name), [&]() { 返回 std::string(Detail); },
         TimeTraceEventType::AsyncEvent);
-  return nullptr;
+  返回 nullptr;
 }
 
 void llvm::timeTraceAddInstantEvent(StringRef Name,
                                     llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
+  如果 (TimeTraceProfilerInstance != nullptr)
     TimeTraceProfilerInstance->insert(std::string(Name), Detail);
 }
 
 void llvm::timeTraceProfilerEnd() {
-  if (TimeTraceProfilerInstance != nullptr)
+  如果 (TimeTraceProfilerInstance != nullptr)
     TimeTraceProfilerInstance->end();
 }
 
 void llvm::timeTraceProfilerEnd(TimeTraceProfilerEntry *E) {
-  if (TimeTraceProfilerInstance != nullptr)
+  如果 (TimeTraceProfilerInstance != nullptr)
     TimeTraceProfilerInstance->end(*E);
 }

@@ -36,7 +36,7 @@ struct FileInfo {
   /// Used to determine which files to prune first. Also used to determine
   /// set membership, so must take into account all fields.
   bool operator<(const FileInfo &Other) const {
-    return std::tie(Time, Other.Size, Path) <
+    返回 std::tie(Time, Other.Size, Path) <
            std::tie(Other.Time, Size, Other.Path);
   }
 };
@@ -50,25 +50,25 @@ static void writeTimestampFile(StringRef TimestampFile) {
 }
 
 static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
-  if (Duration.empty())
-    return make_error<StringError>("Duration must not be empty",
+  如果 (Duration.empty())
+    返回 make_error<StringError>("Duration must not be empty",
                                    inconvertibleErrorCode());
 
   StringRef NumStr = Duration.slice(0, Duration.size()-1);
   uint64_t Num;
-  if (NumStr.getAsInteger(0, Num))
-    return make_error<StringError>("'" + NumStr + "' not an integer",
+  如果 (NumStr.getAsInteger(0, Num))
+    返回 make_error<StringError>("'" + NumStr + "' not an integer",
                                    inconvertibleErrorCode());
 
   switch (Duration.back()) {
   case 's':
-    return std::chrono::seconds(Num);
+    返回 std::chrono::seconds(Num);
   case 'm':
-    return std::chrono::minutes(Num);
+    返回 std::chrono::minutes(Num);
   case 'h':
-    return std::chrono::hours(Num);
+    返回 std::chrono::hours(Num);
   default:
-    return make_error<StringError>("'" + Duration +
+    返回 make_error<StringError>("'" + Duration +
                                        "' must end with one of 's', 'm' or 'h'",
                                    inconvertibleErrorCode());
   }
@@ -78,36 +78,36 @@ Expected<CachePruningPolicy>
 llvm::parseCachePruningPolicy(StringRef PolicyStr) {
   CachePruningPolicy Policy;
   std::pair<StringRef, StringRef> P = {"", PolicyStr};
-  while (!P.second.empty()) {
+  当 (!P.second.empty()) {
     P = P.second.split(':');
 
     StringRef Key, Value;
     std::tie(Key, Value) = P.first.split('=');
-    if (Key == "prune_interval") {
+    如果 (Key == "prune_interval") {
       auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+      如果 (!DurationOrErr)
+        返回 DurationOrErr.takeError();
       Policy.Interval = *DurationOrErr;
-    } else if (Key == "prune_after") {
+    } 否则 如果 (Key == "prune_after") {
       auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+      如果 (!DurationOrErr)
+        返回 DurationOrErr.takeError();
       Policy.Expiration = *DurationOrErr;
-    } else if (Key == "cache_size") {
-      if (Value.back() != '%')
-        return make_error<StringError>("'" + Value + "' must be a percentage",
+    } 否则 如果 (Key == "cache_size") {
+      如果 (Value.back() != '%')
+        返回 make_error<StringError>("'" + Value + "' must be a percentage",
                                        inconvertibleErrorCode());
       StringRef SizeStr = Value.drop_back();
       uint64_t Size;
-      if (SizeStr.getAsInteger(0, Size))
-        return make_error<StringError>("'" + SizeStr + "' not an integer",
+      如果 (SizeStr.getAsInteger(0, Size))
+        返回 make_error<StringError>("'" + SizeStr + "' not an integer",
                                        inconvertibleErrorCode());
-      if (Size > 100)
-        return make_error<StringError>("'" + SizeStr +
+      如果 (Size > 100)
+        返回 make_error<StringError>("'" + SizeStr +
                                            "' must be between 0 and 100",
                                        inconvertibleErrorCode());
       Policy.MaxSizePercentageOfAvailableSpace = Size;
-    } else if (Key == "cache_size_bytes") {
+    } 否则 如果 (Key == "cache_size_bytes") {
       uint64_t Mult = 1;
       switch (tolower(Value.back())) {
       case 'k':
@@ -124,21 +124,21 @@ llvm::parseCachePruningPolicy(StringRef PolicyStr) {
         break;
       }
       uint64_t Size;
-      if (Value.getAsInteger(0, Size))
-        return make_error<StringError>("'" + Value + "' not an integer",
+      如果 (Value.getAsInteger(0, Size))
+        返回 make_error<StringError>("'" + Value + "' not an integer",
                                        inconvertibleErrorCode());
       Policy.MaxSizeBytes = Size * Mult;
-    } else if (Key == "cache_size_files") {
-      if (Value.getAsInteger(0, Policy.MaxSizeFiles))
-        return make_error<StringError>("'" + Value + "' not an integer",
+    } 否则 如果 (Key == "cache_size_files") {
+      如果 (Value.getAsInteger(0, Policy.MaxSizeFiles))
+        返回 make_error<StringError>("'" + Value + "' not an integer",
                                        inconvertibleErrorCode());
-    } else {
-      return make_error<StringError>("Unknown key: '" + Key + "'",
+    } 否则 {
+      返回 make_error<StringError>("Unknown key: '" + Key + "'",
                                      inconvertibleErrorCode());
     }
   }
 
-  return Policy;
+  返回 Policy;
 }
 
 /// Prune the cache of files that haven't been accessed in a long time.
@@ -147,25 +147,25 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
                  const std::vector<std::unique_ptr<MemoryBuffer>> &Files) {
   using namespace std::chrono;
 
-  if (Path.empty())
-    return false;
+  如果 (Path.empty())
+    返回 false;
 
   bool isPathDir;
-  if (sys::fs::is_directory(Path, isPathDir))
-    return false;
+  如果 (sys::fs::is_directory(Path, isPathDir))
+    返回 false;
 
-  if (!isPathDir)
-    return false;
+  如果 (!isPathDir)
+    返回 false;
 
   Policy.MaxSizePercentageOfAvailableSpace =
       std::min(Policy.MaxSizePercentageOfAvailableSpace, 100u);
 
-  if (Policy.Expiration == seconds(0) &&
+  如果 (Policy.Expiration == seconds(0) &&
       Policy.MaxSizePercentageOfAvailableSpace == 0 &&
       Policy.MaxSizeBytes == 0 && Policy.MaxSizeFiles == 0) {
     LLVM_DEBUG(dbgs() << "No pruning settings set, exit early\n");
     // Nothing will be pruned, early exit
-    return false;
+    返回 false;
   }
 
   // Try to stat() the timestamp file.
@@ -173,27 +173,27 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   sys::path::append(TimestampFile, "llvmcache.timestamp");
   sys::fs::file_status FileStatus;
   const auto CurrentTime = system_clock::now();
-  if (auto EC = sys::fs::status(TimestampFile, FileStatus)) {
-    if (EC == errc::no_such_file_or_directory) {
+  如果 (auto EC = sys::fs::status(TimestampFile, FileStatus)) {
+    如果 (EC == errc::no_such_file_or_directory) {
       // If the timestamp file wasn't there, create one now.
       writeTimestampFile(TimestampFile);
-    } else {
+    } 否则 {
       // Unknown error?
-      return false;
+      返回 false;
     }
-  } else {
-    if (!Policy.Interval)
-      return false;
-    if (Policy.Interval != seconds(0)) {
+  } 否则 {
+    如果 (!Policy.Interval)
+      返回 false;
+    如果 (Policy.Interval != seconds(0)) {
       // Check whether the time stamp is older than our pruning interval.
       // If not, do nothing.
       const auto TimeStampModTime = FileStatus.getLastModificationTime();
       auto TimeStampAge = CurrentTime - TimeStampModTime;
-      if (TimeStampAge <= *Policy.Interval) {
+      如果 (TimeStampAge <= *Policy.Interval) {
         LLVM_DEBUG(dbgs() << "Timestamp file too recent ("
                           << duration_cast<seconds>(TimeStampAge).count()
                           << "s old), do not prune.\n");
-        return false;
+        返回 false;
       }
     }
     // Write a new timestamp file so that nobody else attempts to prune.
@@ -212,20 +212,20 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   SmallString<128> CachePathNative;
   sys::path::native(Path, CachePathNative);
   // Walk all of the files within this directory.
-  for (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
+  为 (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
        File != FileEnd && !EC; File.increment(EC)) {
     // Ignore filenames not beginning with "llvmcache-" or "Thin-". This
     // includes the timestamp file as well as any files created by the user.
     // This acts as a safeguard against data loss if the user specifies the
     // wrong directory as their cache directory.
     StringRef filename = sys::path::filename(File->path());
-    if (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
+    如果 (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
       continue;
 
     // Look at this file. If we can't stat it, there's nothing interesting
     // there.
     ErrorOr<sys::fs::basic_file_status> StatusOrErr = File->status();
-    if (!StatusOrErr) {
+    如果 (!StatusOrErr) {
       LLVM_DEBUG(dbgs() << "Ignore " << File->path() << " (can't stat)\n");
       continue;
     }
@@ -233,7 +233,7 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
     // If the file hasn't been used recently enough, delete it
     const auto FileAccessTime = StatusOrErr->getLastAccessedTime();
     auto FileAge = CurrentTime - FileAccessTime;
-    if (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
+    如果 (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
       LLVM_DEBUG(dbgs() << "Remove " << File->path() << " ("
                         << duration_cast<seconds>(FileAge).count()
                         << "s old)\n");
@@ -265,7 +265,7 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   // file is created and stored in the cache directory if --thinlto-cache-policy
   // option is used. Therefore, files.size() is used as ActualNums.
   const size_t ActualNums = Files.size();
-  if (Policy.MaxSizeFiles && ActualNums > Policy.MaxSizeFiles)
+  如果 (Policy.MaxSizeFiles && ActualNums > Policy.MaxSizeFiles)
     WithColor::warning()
         << "ThinLTO cache pruning happens since the number of created files ("
         << ActualNums << ") exceeds the maximum number of files ("
@@ -273,25 +273,25 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
         << "); consider adjusting --thinlto-cache-policy\n";
 
   // Prune for number of files.
-  if (Policy.MaxSizeFiles)
-    while (NumFiles > Policy.MaxSizeFiles)
+  如果 (Policy.MaxSizeFiles)
+    当 (NumFiles > Policy.MaxSizeFiles)
       RemoveCacheFile();
 
   // Prune for size now if needed
-  if (Policy.MaxSizePercentageOfAvailableSpace > 0 || Policy.MaxSizeBytes > 0) {
+  如果 (Policy.MaxSizePercentageOfAvailableSpace > 0 || Policy.MaxSizeBytes > 0) {
     auto SpaceInfoOrErr = sys::fs::disk_space(Path);
-    if (!SpaceInfoOrErr) {
+    如果 (!SpaceInfoOrErr) {
       auto EC = SpaceInfoOrErr.getError();
-      return createStringError(EC,
+      返回 createStringError(EC,
                                "cannot get available disk space for '%s': '%s'",
                                Path.str().c_str(), EC.message().c_str());
     }
     sys::fs::space_info SpaceInfo = SpaceInfoOrErr.get();
     auto AvailableSpace = TotalSize + SpaceInfo.free;
 
-    if (Policy.MaxSizePercentageOfAvailableSpace == 0)
+    如果 (Policy.MaxSizePercentageOfAvailableSpace == 0)
       Policy.MaxSizePercentageOfAvailableSpace = 100;
-    if (Policy.MaxSizeBytes == 0)
+    如果 (Policy.MaxSizeBytes == 0)
       Policy.MaxSizeBytes = AvailableSpace;
     auto TotalSizeTarget = std::min<uint64_t>(
         AvailableSpace * Policy.MaxSizePercentageOfAvailableSpace / 100ull,
@@ -303,11 +303,11 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
                       << Policy.MaxSizeBytes << " bytes\n");
 
     size_t ActualSizes = 0;
-    for (const auto &File : Files)
-      if (File)
+    为 (const auto &File : Files)
+      如果 (File)
         ActualSizes += File->getBufferSize();
 
-    if (ActualSizes > TotalSizeTarget)
+    如果 (ActualSizes > TotalSizeTarget)
       WithColor::warning()
           << "ThinLTO cache pruning happens since the total size of the cache "
              "files consumed by the current link job ("
@@ -316,8 +316,8 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
           << " bytes); consider adjusting --thinlto-cache-policy\n";
 
     // Remove the oldest accessed files first, till we get below the threshold.
-    while (TotalSize > TotalSizeTarget && FileInfo != FileInfos.end())
+    当 (TotalSize > TotalSizeTarget && FileInfo != FileInfos.end())
       RemoveCacheFile();
   }
-  return true;
+  返回 true;
 }

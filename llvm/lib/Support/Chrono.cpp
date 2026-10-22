@@ -27,43 +27,43 @@ static inline struct tm getStructTM(TimePoint<> TP) {
   struct tm Storage;
   std::time_t OurTime = toTimeT(TP);
 
-#if defined(LLVM_ON_UNIX)
+#如果 defined(LLVM_ON_UNIX)
   struct tm *LT = ::localtime_r(&OurTime, &Storage);
   assert(LT);
   (void)LT;
 #endif
-#if defined(_WIN32)
-  int Error = ::localtime_s(&Storage, &OurTime);
+#如果 defined(_WIN32)
+  整数 Error = ::localtime_s(&Storage, &OurTime);
   assert(!Error);
   (void)Error;
 #endif
 
-  return Storage;
+  返回 Storage;
 }
 
 static inline struct tm getStructTMUtc(UtcTime<> TP) {
   struct tm Storage;
   std::time_t OurTime = toTimeT(TP);
 
-#if defined(LLVM_ON_UNIX)
+#如果 defined(LLVM_ON_UNIX)
   struct tm *LT = ::gmtime_r(&OurTime, &Storage);
   assert(LT);
   (void)LT;
 #endif
-#if defined(_WIN32)
-  int Error = ::gmtime_s(&Storage, &OurTime);
+#如果 defined(_WIN32)
+  整数 Error = ::gmtime_s(&Storage, &OurTime);
   assert(!Error);
   (void)Error;
 #endif
 
-  return Storage;
+  返回 Storage;
 }
 
 raw_ostream &operator<<(raw_ostream &OS, TimePoint<> TP) {
   struct tm LT = getStructTM(TP);
   char Buffer[sizeof("YYYY-MM-DD HH:MM:SS")];
   strftime(Buffer, sizeof(Buffer), "%Y-%m-%d %H:%M:%S", &LT);
-  return OS << Buffer << '.'
+  返回 OS << Buffer << '.'
             << format("%.9lu",
                       long((TP.time_since_epoch() % std::chrono::seconds(1))
                                .count()));
@@ -74,11 +74,11 @@ static void format(const T &Fractional, struct tm &LT, raw_ostream &OS,
                    StringRef Style) {
   using namespace std::chrono;
   // Handle extensions first. strftime mangles unknown %x on some platforms.
-  if (Style.empty()) Style = "%Y-%m-%d %H:%M:%S.%N";
+  如果 (Style.empty()) Style = "%Y-%m-%d %H:%M:%S.%N";
   std::string Format;
   raw_string_ostream FStream(Format);
-  for (unsigned I = 0; I < Style.size(); ++I) {
-    if (Style[I] == '%' && Style.size() > I + 1) switch (Style[I + 1]) {
+  为 (unsigned I = 0; I < Style.size(); ++I) {
+    如果 (Style[I] == '%' && Style.size() > I + 1) switch (Style[I + 1]) {
         case 'L':  // Milliseconds, from Ruby.
           FStream << llvm::format(
               "%.3lu", (long)duration_cast<milliseconds>(Fractional).count());

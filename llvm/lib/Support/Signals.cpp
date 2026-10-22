@@ -46,7 +46,7 @@ static ManagedStatic<std::string> CrashDiagnosticsDirectory;
 namespace {
 struct CreateDisableSymbolication {
   static void *call() {
-    return new cl::opt<bool, true>(
+    返回 new cl::opt<bool, true>(
         "disable-symbolication",
         cl::desc("Disable symbolizing crash backtraces."),
         cl::location(DisableSymbolicationFlag), cl::Hidden);
@@ -54,7 +54,7 @@ struct CreateDisableSymbolication {
 };
 struct CreateCrashDiagnosticsDir {
   static void *call() {
-    return new cl::opt<std::string, true>(
+    返回 new cl::opt<std::string, true>(
         "crash-diagnostics-dir", cl::value_desc("directory"),
         cl::desc("Directory for crash diagnostic files."),
         cl::location(*CrashDiagnosticsDirectory), cl::Hidden);
@@ -91,7 +91,7 @@ static constexpr size_t MaxSignalHandlerCallbacks = 8;
 static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> &
 CallBacksToRun() {
   static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> callbacks;
-  return callbacks;
+  返回 callbacks;
 }
 
 // Signal-safe.
@@ -99,10 +99,10 @@ void sys::RunSignalHandlers() {
   // Let's not interfere with stack trace symbolication and friends.
   auto BypassSandbox = sandbox::scopedDisable();
 
-  for (CallbackAndCookie &RunMe : CallBacksToRun()) {
+  为 (CallbackAndCookie &RunMe : CallBacksToRun()) {
     auto Expected = CallbackAndCookie::Status::Initialized;
     auto Desired = CallbackAndCookie::Status::Executing;
-    if (!RunMe.Flag.compare_exchange_strong(Expected, Desired))
+    如果 (!RunMe.Flag.compare_exchange_strong(Expected, Desired))
       continue;
     (*RunMe.Callback)(RunMe.Cookie);
     RunMe.Callback = nullptr;
@@ -114,20 +114,20 @@ void sys::RunSignalHandlers() {
 // Signal-safe.
 static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
                                 void *Cookie) {
-  for (CallbackAndCookie &SetMe : CallBacksToRun()) {
+  为 (CallbackAndCookie &SetMe : CallBacksToRun()) {
     auto Expected = CallbackAndCookie::Status::Empty;
     auto Desired = CallbackAndCookie::Status::Initializing;
-    if (!SetMe.Flag.compare_exchange_strong(Expected, Desired))
+    如果 (!SetMe.Flag.compare_exchange_strong(Expected, Desired))
       continue;
     SetMe.Callback = FnPtr;
     SetMe.Cookie = Cookie;
     SetMe.Flag.store(CallbackAndCookie::Status::Initialized);
-    return;
+    返回;
   }
   report_fatal_error("too many signal callbacks already registered");
 }
 
-static bool findModulesAndOffsets(void **StackTrace, int Depth,
+static bool findModulesAndOffsets(void **StackTrace, 整数 Depth,
                                   const char **Modules, intptr_t *Offsets,
                                   const char *MainExecutableName,
                                   StringSaver &StrPool);
@@ -137,7 +137,7 @@ static bool findModulesAndOffsets(void **StackTrace, int Depth,
 static FormattedNumber format_ptr(void *PC) {
   // Each byte is two hex digits plus 2 for the 0x prefix.
   unsigned PtrWidth = 2 + 2 * sizeof(void *);
-  return format_hex((uint64_t)PC, PtrWidth);
+  返回 format_hex((uint64_t)PC, PtrWidth);
 }
 
 /// Reads a file \p Filename written by llvm-symbolizer containing function
@@ -159,10 +159,10 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   StringSaver StrPool(Allocator);
   SmallVector<const char *, 0> Modules(AddressCount, nullptr);
   SmallVector<intptr_t, 0> Offsets(AddressCount, 0);
-  if (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
+  如果 (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
                              Offsets.data(), MainExecutableName, StrPool))
-    return {};
-  int InputFD;
+    返回 {};
+  整数 InputFD;
   SmallString<32> InputFile, OutputFile;
   sys::fs::createTemporaryFile("symbolizer-input", "", InputFD, InputFile);
   sys::fs::createTemporaryFile("symbolizer-output", "", OutputFile);
@@ -171,8 +171,8 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
 
   {
     raw_fd_ostream Input(InputFD, true);
-    for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-      if (Modules[AddrIdx])
+    为 (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
+      如果 (Modules[AddrIdx])
         Input << Modules[AddrIdx] << " " << (void *)Offsets[AddrIdx] << "\n";
     }
   }
@@ -187,15 +187,15 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
                       "--relative-address",
 #endif
                       "--demangle"};
-  int RunResult =
+  整数 RunResult =
       sys::ExecuteAndWait(LLVMSymbolizerPath, Args, std::nullopt, Redirects);
-  if (RunResult != 0)
-    return {};
+  如果 (RunResult != 0)
+    返回 {};
 
   SmallVector<std::pair<unsigned, std::string>, 0> Result;
   auto OutputBuf = MemoryBuffer::getFile(OutputFile.c_str());
-  if (!OutputBuf)
-    return {};
+  如果 (!OutputBuf)
+    返回 {};
   StringRef Output = OutputBuf.get()->getBuffer();
   SmallVector<StringRef, 32> Lines;
   Output.split(Lines, "\n");
@@ -209,8 +209,8 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   // containing just the formatted address; for all other output entries, we
   // output the function entry if it is known, and either the line number if it
   // is known or the module+address offset otherwise.
-  for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-    if (!Modules[AddrIdx]) {
+  为 (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
+    如果 (!Modules[AddrIdx]) {
       auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
       raw_string_ostream OS(SymbolizedFrame.second);
       OS << format_ptr(AddressList[AddrIdx]);
@@ -218,64 +218,64 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
     }
     // Read pairs of lines (function name and file/line info) until we
     // encounter empty line.
-    for (;;) {
-      if (CurLine == Lines.end())
-        return {};
+    为 (;;) {
+      如果 (CurLine == Lines.end())
+        返回 {};
       StringRef FunctionName = *CurLine++;
-      if (FunctionName.empty())
+      如果 (FunctionName.empty())
         break;
       auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
       raw_string_ostream OS(SymbolizedFrame.second);
       OS << format_ptr(AddressList[AddrIdx]) << ' ';
-      if (!FunctionName.starts_with("??"))
+      如果 (!FunctionName.starts_with("??"))
         OS << FunctionName << ' ';
-      if (CurLine == Lines.end())
-        return {};
+      如果 (CurLine == Lines.end())
+        返回 {};
       StringRef FileLineInfo = *CurLine++;
-      if (!FileLineInfo.starts_with("??")) {
+      如果 (!FileLineInfo.starts_with("??")) {
         OS << FileLineInfo;
-      } else {
+      } 否则 {
         OS << "(" << Modules[AddrIdx] << '+' << format_hex(Offsets[AddrIdx], 0)
            << ")";
       }
     }
   }
-  return Result;
+  返回 Result;
 }
 
 ErrorOr<std::string> getLLVMSymbolizerPath(StringRef Argv0 = {}) {
   ErrorOr<std::string> LLVMSymbolizerPathOrErr = std::error_code();
-  if (const char *Path = getenv(LLVMSymbolizerPathEnv)) {
+  如果 (const char *Path = getenv(LLVMSymbolizerPathEnv)) {
     LLVMSymbolizerPathOrErr = sys::findProgramByName(Path);
-  } else if (!Argv0.empty()) {
+  } 否则 如果 (!Argv0.empty()) {
     StringRef Parent = llvm::sys::path::parent_path(Argv0);
-    if (!Parent.empty())
+    如果 (!Parent.empty())
       LLVMSymbolizerPathOrErr =
           sys::findProgramByName("llvm-symbolizer", Parent);
   }
-  if (!LLVMSymbolizerPathOrErr)
+  如果 (!LLVMSymbolizerPathOrErr)
     LLVMSymbolizerPathOrErr = sys::findProgramByName("llvm-symbolizer");
-  return LLVMSymbolizerPathOrErr;
+  返回 LLVMSymbolizerPathOrErr;
 }
 
 /// Helper that launches llvm-symbolizer and symbolizes a backtrace.
 LLVM_ATTRIBUTE_USED
 static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
-                                      int Depth, llvm::raw_ostream &OS) {
-  if (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
-    return false;
+                                      整数 Depth, llvm::raw_ostream &OS) {
+  如果 (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
+    返回 false;
 
   // Don't recursively invoke the llvm-symbolizer binary.
-  if (Argv0.contains("llvm-symbolizer"))
-    return false;
+  如果 (Argv0.contains("llvm-symbolizer"))
+    返回 false;
 
   // FIXME: Subtract necessary number from StackTrace entries to turn return
   // addresses into actual instruction addresses.
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
   ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath(Argv0);
-  if (!LLVMSymbolizerPathOrErr)
-    return false;
+  如果 (!LLVMSymbolizerPathOrErr)
+    返回 false;
   const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
 
   // If we don't know argv0 or the address of main() at this point, try
@@ -286,17 +286,17 @@ static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
 
   auto SymbolizedAddressesOpt = collectAddressSymbols(
       StackTrace, Depth, MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return false;
-  for (unsigned FrameNo = 0; FrameNo < SymbolizedAddressesOpt->size();
+  如果 (!SymbolizedAddressesOpt)
+    返回 false;
+  为 (unsigned FrameNo = 0; FrameNo < SymbolizedAddressesOpt->size();
        ++FrameNo) {
     OS << right_justify(formatv("#{0}", FrameNo).str(), std::log10(Depth) + 2)
        << ' ' << (*SymbolizedAddressesOpt)[FrameNo].second << '\n';
   }
-  return true;
+  返回 true;
 }
 
-#if LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
+#如果 LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
 void sys::symbolizeAddresses(AddressSet &Addresses,
                              SymbolizedAddressMap &SymbolizedAddresses) {
   assert(!DisableSymbolicationFlag && !getenv(DisableSymbolizationEnv) &&
@@ -308,14 +308,14 @@ void sys::symbolizeAddresses(AddressSet &Addresses,
 
   // Convert Set of Addresses to ordered list.
   SmallVector<void *, 0> AddressList(Addresses.begin(), Addresses.end());
-  if (AddressList.empty())
-    return;
+  如果 (AddressList.empty())
+    返回;
   llvm::sort(AddressList);
 
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
   ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath();
-  if (!LLVMSymbolizerPathOrErr)
+  如果 (!LLVMSymbolizerPathOrErr)
     report_fatal_error("Debugify origin stacktraces require llvm-symbolizer");
   const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
 
@@ -326,34 +326,34 @@ void sys::symbolizeAddresses(AddressSet &Addresses,
   auto SymbolizedAddressesOpt =
       collectAddressSymbols(AddressList.begin(), AddressList.size(),
                             MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return;
-  for (auto SymbolizedFrame : *SymbolizedAddressesOpt) {
+  如果 (!SymbolizedAddressesOpt)
+    返回;
+  为 (auto SymbolizedFrame : *SymbolizedAddressesOpt) {
     SmallVector<std::string, 0> &SymbolizedAddrs =
         SymbolizedAddresses[AddressList[SymbolizedFrame.first]];
     SymbolizedAddrs.push_back(SymbolizedFrame.second);
   }
-  return;
+  返回;
 }
 #endif
 
 static bool printMarkupContext(raw_ostream &OS, const char *MainExecutableName);
 
 LLVM_ATTRIBUTE_USED
-static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, int Depth,
+static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, 整数 Depth,
                                   raw_ostream &OS) {
   const char *Env = getenv(EnableSymbolizerMarkupEnv);
-  if (!Env || !*Env)
-    return false;
+  如果 (!Env || !*Env)
+    返回 false;
 
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
                              : sys::fs::getMainExecutable(nullptr, nullptr);
-  if (!printMarkupContext(OS, MainExecutableName.c_str()))
-    return false;
-  for (int I = 0; I < Depth; I++)
+  如果 (!printMarkupContext(OS, MainExecutableName.c_str()))
+    返回 false;
+  为 (整数 I = 0; I < Depth; I++)
     OS << format("{{{bt:%d:%#016x}}}\n", I, StackTrace[I]);
-  return true;
+  返回 true;
 }
 
 // Include the platform-specific parts of this class.

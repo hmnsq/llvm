@@ -21,35 +21,35 @@ constexpr std::array<MSP430AttributeParser::DisplayHandler, 4>
 
 Error MSP430AttributeParser::parseISA(AttrType Tag) {
   static const char *const StringVals[] = {"None", "MSP430", "MSP430X"};
-  return parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
+  返回 parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseCodeModel(AttrType Tag) {
   static const char *const StringVals[] = {"None", "Small", "Large"};
-  return parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
+  返回 parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseDataModel(AttrType Tag) {
   static const char *const StringVals[] = {"None", "Small", "Large",
                                            "Restricted"};
-  return parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
+  返回 parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseEnumSize(AttrType Tag) {
   static const char *const StringVals[] = {"None", "Small", "Integer",
                                            "Don't Care"};
-  return parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
+  返回 parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::handler(uint64_t Tag, bool &Handled) {
   Handled = false;
-  for (const DisplayHandler &Disp : DisplayRoutines) {
-    if (uint64_t(Disp.Attribute) != Tag)
+  为 (const DisplayHandler &Disp : DisplayRoutines) {
+    如果 (uint64_t(Disp.Attribute) != Tag)
       continue;
-    if (Error E = (this->*Disp.Routine)(static_cast<AttrType>(Tag)))
-      return E;
+    如果 (Error E = (this->*Disp.Routine)(static_cast<AttrType>(Tag)))
+      返回 E;
     Handled = true;
     break;
   }
-  return Error::success();
+  返回 Error::success();
 }

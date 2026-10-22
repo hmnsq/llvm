@@ -30,9 +30,9 @@ extern const UnicodeCharSet::CharRanges GeneratedDoubleWidthCharacterRanges;
 /// returns true for any code point defined by Unicode as a character, false for
 /// any code point defined as a non-character, as reserved, as a surrogate code
 /// point, or not defined at all.
-bool isCharacter(int UCS) {
+bool isCharacter(整数 UCS) {
   static const UnicodeCharSet Character(GeneratedCharacterRanges);
-  return Character.contains(UCS);
+  返回 Character.contains(UCS);
 }
 
 /// Unicode code points of the categories L, M, N, P, S and Zs are considered
@@ -40,25 +40,25 @@ bool isCharacter(int UCS) {
 /// In addition, U+00AD SOFT HYPHEN is also considered printable, as
 /// it's actually displayed on most terminals. \return true if the character is
 /// considered printable.
-bool isPrintable(int UCS) {
+bool isPrintable(整数 UCS) {
   static const UnicodeCharSet Printables(GeneratedPrintableRanges);
   // Clang special cases 0x00AD (SOFT HYPHEN) which is rendered as an actual
   // hyphen in most terminals.
-  return UCS == 0x00AD || Printables.contains(UCS);
+  返回 UCS == 0x00AD || Printables.contains(UCS);
 }
 
 /// Unicode code points of the Cc category are considered
 /// control characters.
-bool isControl(int UCS) {
+bool isControl(整数 UCS) {
   static const UnicodeCharSet Control(GeneratedControlCharacterRanges);
-  return Control.contains(UCS);
+  返回 Control.contains(UCS);
 }
 
 /// Unicode code points of the Cf category are considered
 /// formatting characters.
-bool isFormatting(int UCS) {
+bool isFormatting(整数 UCS) {
   static const UnicodeCharSet Format(GeneratedFormatCharacterRanges);
-  return Format.contains(UCS);
+  返回 Format.contains(UCS);
 }
 
 /// Gets the number of positions a character is likely to occupy when output
@@ -72,54 +72,54 @@ bool isFormatting(int UCS) {
 ///   * 0 for non-spacing and enclosing combining marks;
 ///   * 2 for CJK characters excluding halfwidth forms;
 ///   * 1 for all remaining characters.
-static inline int charWidth(int UCS) {
-  if (!isPrintable(UCS))
-    return ErrorNonPrintableCharacter;
+static inline 整数 charWidth(整数 UCS) {
+  如果 (!isPrintable(UCS))
+    返回 ErrorNonPrintableCharacter;
 
   static const UnicodeCharSet CombiningCharacters(
       GeneratedCombiningCharacterRanges);
 
-  if (CombiningCharacters.contains(UCS))
-    return 0;
+  如果 (CombiningCharacters.contains(UCS))
+    返回 0;
 
   static const UnicodeCharSet DoubleWidthCharacters(
       GeneratedDoubleWidthCharacterRanges);
 
-  if (DoubleWidthCharacters.contains(UCS))
-    return 2;
-  return 1;
+  如果 (DoubleWidthCharacters.contains(UCS))
+    返回 2;
+  返回 1;
 }
 
-static bool isprintableascii(char c) { return c > 31 && c < 127; }
+static bool isprintableascii(char c) { 返回 c > 31 && c < 127; }
 
-int columnWidthUTF8(StringRef Text) {
+整数 columnWidthUTF8(StringRef Text) {
   unsigned ColumnWidth = 0;
   unsigned Length;
-  for (size_t i = 0, e = Text.size(); i < e; i += Length) {
+  为 (size_t i = 0, e = Text.size(); i < e; i += Length) {
     Length = getNumBytesForUTF8(Text[i]);
 
     // fast path for ASCII characters
-    if (Length == 1) {
-      if (!isprintableascii(Text[i]))
-        return ErrorNonPrintableCharacter;
+    如果 (Length == 1) {
+      如果 (!isprintableascii(Text[i]))
+        返回 ErrorNonPrintableCharacter;
       ColumnWidth += 1;
       continue;
     }
 
-    if (Length <= 0 || i + Length > Text.size())
-      return ErrorInvalidUTF8;
+    如果 (Length <= 0 || i + Length > Text.size())
+      返回 ErrorInvalidUTF8;
     UTF32 buf[1];
     const UTF8 *Start = reinterpret_cast<const UTF8 *>(Text.data() + i);
     UTF32 *Target = &buf[0];
-    if (conversionOK != ConvertUTF8toUTF32(&Start, Start + Length, &Target,
+    如果 (conversionOK != ConvertUTF8toUTF32(&Start, Start + Length, &Target,
                                            Target + 1, strictConversion))
-      return ErrorInvalidUTF8;
-    int Width = charWidth(buf[0]);
-    if (Width < 0)
-      return ErrorNonPrintableCharacter;
+      返回 ErrorInvalidUTF8;
+    整数 Width = charWidth(buf[0]);
+    如果 (Width < 0)
+      返回 ErrorNonPrintableCharacter;
     ColumnWidth += Width;
   }
-  return ColumnWidth;
+  返回 ColumnWidth;
 }
 
 } // namespace unicode

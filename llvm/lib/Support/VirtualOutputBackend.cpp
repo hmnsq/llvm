@@ -26,15 +26,15 @@ OutputBackend::createFile(const Twine &Path,
   SmallString<128> PathStorage;
   Path.toVector(PathStorage);
 
-  if (Config) {
+  如果 (Config) {
     // Check for invalid configs.
-    if (!Config->getText() && Config->getCRLF())
-      return make_error<OutputConfigError>(*Config, PathStorage);
+    如果 (!Config->getText() && Config->getCRLF())
+      返回 make_error<OutputConfigError>(*Config, PathStorage);
   }
 
   std::unique_ptr<OutputFileImpl> Impl;
-  if (Error E = createFileImpl(PathStorage, Config).moveInto(Impl))
-    return std::move(E);
+  如果 (Error E = createFileImpl(PathStorage, Config).moveInto(Impl))
+    返回 std::move(E);
   assert(Impl && "Expected valid Impl or Error");
-  return OutputFile(PathStorage, std::move(Impl));
+  返回 OutputFile(PathStorage, std::move(Impl));
 }

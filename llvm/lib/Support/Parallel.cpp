@@ -26,7 +26,7 @@ using namespace llvm::parallel;
 
 llvm::ThreadPoolStrategy parallel::strategy;
 
-#if LLVM_ENABLE_THREADS
+#如果 LLVM_ENABLE_THREADS
 
 static thread_local unsigned threadIndex = UINT_MAX;
 
@@ -36,7 +36,7 @@ namespace {
 class ThreadPoolExecutor {
 public:
   explicit ThreadPoolExecutor(ThreadPoolStrategy S) {
-    if (S.UseJobserver)
+    如果 (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
     ThreadCount = S.compute_thread_count();
@@ -49,9 +49,9 @@ public:
     // in 'safe libc++' mode.
     auto &Thread0 = Threads[0];
     Thread0 = std::thread([this, S] {
-      for (unsigned I = 1; I < ThreadCount; ++I) {
+      为 (unsigned I = 1; I < ThreadCount; ++I) {
         Threads.emplace_back([this, S, I] { work(S, I); });
-        if (Stop)
+        如果 (Stop)
           break;
       }
       ThreadsCreated.set_value();
@@ -66,25 +66,25 @@ public:
   void stop() {
     {
       std::lock_guard<std::mutex> Lock(Mutex);
-      if (Stop)
-        return;
+      如果 (Stop)
+        返回;
       Stop = true;
     }
     Cond.notify_all();
     ThreadsCreated.get_future().wait();
 
     std::thread::id CurrentThreadId = std::this_thread::get_id();
-    for (std::thread &T : Threads)
-      if (T.get_id() == CurrentThreadId)
+    为 (std::thread &T : Threads)
+      如果 (T.get_id() == CurrentThreadId)
         T.detach();
-      else
+      否则
         T.join();
   }
 
   ~ThreadPoolExecutor() { stop(); }
 
   struct Creator {
-    static void *call() { return new ThreadPoolExecutor(strategy); }
+    static void *call() { 返回 new ThreadPoolExecutor(strategy); }
   };
   struct Deleter {
     static void call(void *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
@@ -111,15 +111,15 @@ public:
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
   void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
+    当 (L.getCount() != 0) {
       std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
-        return;
+      如果 (Stop || WorkStack.empty())
+        返回;
       popAndRun(Lock);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t getThreadCount() const { 返回 ThreadCount; }
 
 private:
   // Pop one task from the queue and run it. Must be called with Lock held;
@@ -140,8 +140,8 @@ private:
     // first successful tryAcquire() in a process. This guarantees forward
     // progress without requiring a dedicated "always-on" thread here.
 
-    while (true) {
-      if (TheJobserver) {
+    当 (true) {
+      如果 (TheJobserver) {
         // Jobserver-mode scheduling:
         // - Acquire one job slot (with exponential backoff to avoid busy-wait).
         // - While holding the slot, drain and run tasks from the local queue.
@@ -154,29 +154,29 @@ private:
         ExponentialBackoff Backoff(std::chrono::hours(24));
         JobSlot Slot;
         do {
-          if (Stop)
-            return;
+          如果 (Stop)
+            返回;
           Slot = TheJobserver->tryAcquire();
-          if (Slot.isValid())
+          如果 (Slot.isValid())
             break;
-        } while (Backoff.waitForNextAttempt());
+        } 当 (Backoff.waitForNextAttempt());
 
         llvm::scope_exit SlotReleaser(
             [&] { TheJobserver->release(std::move(Slot)); });
 
-        while (true) {
+        当 (true) {
           std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
-            return;
-          if (WorkStack.empty())
+          Cond.wait(Lock, [&] { 返回 Stop || !WorkStack.empty(); });
+          如果 (Stop && WorkStack.empty())
+            返回;
+          如果 (WorkStack.empty())
             break;
           popAndRun(Lock);
         }
-      } else {
+      } 否则 {
         std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-        if (Stop)
+        Cond.wait(Lock, [&] { 返回 Stop || !WorkStack.empty(); });
+        如果 (Stop)
           break;
         popAndRun(Lock);
       }
@@ -205,48 +205,48 @@ static ThreadPoolExecutor *getDefaultExecutor() {
                        ThreadPoolExecutor::Deleter>
       ManagedExec;
   static std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
-  return Exec.get();
-#else
+  返回 Exec.get();
+#否则
   // ManagedStatic is not desired on other platforms. When `Exec` is destroyed
   // by llvm_shutdown(), worker threads will clean up and invoke TLS
   // destructors. This can lead to race conditions if other threads attempt to
   // access TLS objects that have already been destroyed.
   static ThreadPoolExecutor Exec(strategy);
-  return &Exec;
+  返回 &Exec;
 #endif
 }
 
 size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+  返回 getDefaultExecutor()->getThreadCount();
 }
 #endif
 
 TaskGroup::TaskGroup()
     : Parallel(
-#if LLVM_ENABLE_THREADS
+#如果 LLVM_ENABLE_THREADS
           strategy.ThreadsRequested != 1
-#else
+#否则
           false
 #endif
       ) {
 }
 
 TaskGroup::~TaskGroup() {
-#if LLVM_ENABLE_THREADS
+#如果 LLVM_ENABLE_THREADS
   // In a nested TaskGroup (threadIndex != -1u), actively help drain the queue.
   bool IsNested = threadIndex != UINT_MAX;
-  if (Parallel && IsNested)
+  如果 (Parallel && IsNested)
     getDefaultExecutor()->helpSync(L);
 #endif
   L.sync();
 }
 
 void TaskGroup::spawn(std::function<void()> F) {
-#if LLVM_ENABLE_THREADS
-  if (Parallel) {
+#如果 LLVM_ENABLE_THREADS
+  如果 (Parallel) {
     L.inc();
     getDefaultExecutor()->add(std::move(F), L);
-    return;
+    返回;
   }
 #endif
   F();
@@ -254,11 +254,11 @@ void TaskGroup::spawn(std::function<void()> F) {
 
 void llvm::parallelFor(size_t Begin, size_t End,
                        function_ref<void(size_t)> Fn) {
-#if LLVM_ENABLE_THREADS
-  if (strategy.ThreadsRequested != 1) {
+#如果 LLVM_ENABLE_THREADS
+  如果 (strategy.ThreadsRequested != 1) {
     size_t NumItems = End - Begin;
-    if (NumItems == 0)
-      return;
+    如果 (NumItems == 0)
+      返回;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
@@ -268,12 +268,12 @@ void llvm::parallelFor(size_t Begin, size_t End,
     size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
     std::atomic<size_t> Idx{Begin};
     auto Worker = [&] {
-      while (true) {
+      当 (true) {
         size_t I = Idx.fetch_add(ChunkSize, std::memory_order_relaxed);
-        if (I >= End)
+        如果 (I >= End)
           break;
         size_t IEnd = std::min(I + ChunkSize, End);
-        for (; I < IEnd; ++I)
+        为 (; I < IEnd; ++I)
           Fn(I);
       }
     };
@@ -281,13 +281,13 @@ void llvm::parallelFor(size_t Begin, size_t End,
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
     TaskGroup TG;
-    while (--NumWorkers)
+    当 (--NumWorkers)
       TG.spawn(Worker);
     Worker();
-    return;
+    返回;
   }
 #endif
 
-  for (; Begin != End; ++Begin)
+  为 (; Begin != End; ++Begin)
     Fn(Begin);
 }

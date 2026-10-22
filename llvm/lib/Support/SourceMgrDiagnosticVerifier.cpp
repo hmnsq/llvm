@@ -16,35 +16,35 @@ using namespace llvm;
 static StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
   switch (kind) {
   case SourceMgr::DK_Note:
-    return "note";
+    返回 "note";
   case SourceMgr::DK_Warning:
-    return "warning";
+    返回 "warning";
   case SourceMgr::DK_Error:
-    return "error";
+    返回 "error";
   case SourceMgr::DK_Remark:
-    return "remark";
+    返回 "remark";
   }
   llvm_unreachable("Unknown SourceMgr::DiagKind");
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
     raw_ostream &os, SourceMgr &mgr, const Twine &msg) const {
-  if (fileLoc.isValid()) {
+  如果 (fileLoc.isValid()) {
     SMRange range(fileLoc, SMLoc::getFromPointer(fileLoc.getPointer() +
                                                  substring.size()));
     mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg, range);
-  } else {
+  } 否则 {
     mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg);
   }
-  return false;
+  返回 false;
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::match(StringRef str) const {
   // If this isn't a regex diagnostic, we simply check if the string was
   // contained.
-  if (substringRegex)
-    return substringRegex->match(str);
-  return str.contains(substring);
+  如果 (substringRegex)
+    返回 substringRegex->match(str);
+  返回 str.contains(substring);
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
@@ -52,10 +52,10 @@ bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
   std::string regexStr;
   raw_string_ostream regexOS(regexStr);
   StringRef strToProcess = substring;
-  while (!strToProcess.empty()) {
+  当 (!strToProcess.empty()) {
     // Find the next regex block.
     size_t regexIt = strToProcess.find("{{");
-    if (regexIt == StringRef::npos) {
+    如果 (regexIt == StringRef::npos) {
       regexOS << Regex::escape(strToProcess);
       break;
     }
@@ -64,20 +64,20 @@ bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
 
     // Find the end of the regex block.
     size_t regexEndIt = strToProcess.find("}}");
-    if (regexEndIt == StringRef::npos)
-      return emitError(os, mgr, "found start of regex with no end '}}'");
+    如果 (regexEndIt == StringRef::npos)
+      返回 emitError(os, mgr, "found start of regex with no end '}}'");
     StringRef regexBlock = strToProcess.take_front(regexEndIt);
 
     // Validate that the regex is actually valid.
     std::string regexError;
-    if (!Regex(regexBlock).isValid(regexError))
-      return emitError(os, mgr, "invalid regex: " + regexError);
+    如果 (!Regex(regexBlock).isValid(regexError))
+      返回 emitError(os, mgr, "invalid regex: " + regexError);
 
     regexOS << '(' << regexBlock << ')';
     strToProcess = strToProcess.drop_front(regexEndIt + 2);
   }
   substringRegex = Regex(regexStr);
-  return true;
+  返回 true;
 }
 
 MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>
@@ -85,8 +85,8 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
                                                   SourceMgr &mgr,
                                                   const MemoryBuffer *buf) {
   // If the buffer is invalid, return an empty list.
-  if (!buf)
-    return {};
+  如果 (!buf)
+    返回 {};
   auto &expectedDiags = expectedDiagsPerFile[buf->getBufferIdentifier()];
 
   // The number of the last line that did not correlate to a designator.
@@ -98,12 +98,12 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
   // Scan the file for expected-* designators.
   SmallVector<StringRef, 100> lines;
   buf->getBuffer().split(lines, '\n');
-  for (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
+  为 (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
     SmallVector<StringRef, 4> matches;
-    if (!expected.match(lines[lineNo].rtrim(), &matches)) {
+    如果 (!expected.match(lines[lineNo].rtrim(), &matches)) {
       // Check for designators that apply to this line.
-      if (!designatorsForNextLine.empty()) {
-        for (unsigned diagIndex : designatorsForNextLine)
+      如果 (!designatorsForNextLine.empty()) {
+        为 (unsigned diagIndex : designatorsForNextLine)
           expectedDiags[diagIndex].lineNo = lineNo + 1;
         designatorsForNextLine.clear();
       }
@@ -115,47 +115,47 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
     SMLoc expectedStart = SMLoc::getFromPointer(matches[0].data());
 
     SourceMgr::DiagKind kind;
-    if (matches[1] == "error")
+    如果 (matches[1] == "error")
       kind = SourceMgr::DK_Error;
-    else if (matches[1] == "warning")
+    否则 如果 (matches[1] == "warning")
       kind = SourceMgr::DK_Warning;
-    else if (matches[1] == "remark")
+    否则 如果 (matches[1] == "remark")
       kind = SourceMgr::DK_Remark;
-    else {
+    否则 {
       assert(matches[1] == "note");
       kind = SourceMgr::DK_Note;
     }
     ExpectedDiag record(kind, lineNo + 1, expectedStart, matches[5]);
 
     // Check to see if this is a regex match, i.e. it includes the `-re`.
-    if (!matches[2].empty() && !record.computeRegex(os, mgr)) {
+    如果 (!matches[2].empty() && !record.computeRegex(os, mgr)) {
       ok = false;
       continue;
     }
 
     StringRef offsetMatch = matches[3];
-    if (!offsetMatch.empty()) {
+    如果 (!offsetMatch.empty()) {
       offsetMatch = offsetMatch.drop_front(1);
 
       // Get the integer value without the @ and +/- prefix.
-      if (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
-        int offset;
+      如果 (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
+        整数 offset;
         offsetMatch.drop_front().getAsInteger(0, offset);
 
-        if (offsetMatch.front() == '+')
+        如果 (offsetMatch.front() == '+')
           record.lineNo += offset;
-        else
+        否则
           record.lineNo -= offset;
-      } else if (offsetMatch.consume_front("unknown")) {
+      } 否则 如果 (offsetMatch.consume_front("unknown")) {
         // This is matching unknown locations.
         record.fileLoc = SMLoc();
         expectedUnknownLocDiags.emplace_back(std::move(record));
         continue;
-      } else if (offsetMatch.consume_front("above")) {
+      } 否则 如果 (offsetMatch.consume_front("above")) {
         // If the designator applies 'above' we add it to the last non
         // designator line.
         record.lineNo = lastNonDesignatorLine + 1;
-      } else {
+      } 否则 {
         // Otherwise, this is a 'below' designator and applies to the next
         // non-designator line.
         assert(offsetMatch.consume_front("below"));
@@ -168,15 +168,15 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
     }
     expectedDiags.emplace_back(std::move(record));
   }
-  return expectedDiags;
+  返回 expectedDiags;
 }
 
 std::optional<MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>>
 SourceMgrDiagnosticVerifier::getExpectedDiags(StringRef bufName) {
   auto expectedDiags = expectedDiagsPerFile.find(bufName);
-  if (expectedDiags != expectedDiagsPerFile.end())
-    return MutableArrayRef<ExpectedDiag>(expectedDiags->second);
-  return std::nullopt;
+  如果 (expectedDiags != expectedDiagsPerFile.end())
+    返回 MutableArrayRef<ExpectedDiag>(expectedDiags->second);
+  返回 std::nullopt;
 }
 
 SourceMgrDiagnosticVerifier::MatchResult
@@ -185,16 +185,16 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
                                      const MemoryBuffer *buf, unsigned lineNo,
                                      StringRef message, bool reportUnexpected) {
   MutableArrayRef<ExpectedDiag> diags;
-  if (hasLoc) {
+  如果 (hasLoc) {
     // If the buffer couldn't be resolved, `diags` stays empty: a diagnostic
     // with a location in an unknown file can never match anything.
-    if (buf) {
-      if (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
+    如果 (buf) {
+      如果 (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
         diags = *maybeDiags;
-      else
+      否则
         diags = computeExpectedDiags(os, mgr, buf);
     }
-  } else {
+  } 否则 {
     diags = expectedUnknownLocDiags;
   }
 
@@ -203,14 +203,14 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
   ExpectedDiag *nearMiss = nullptr;
 
   // If this was an expected error, remember that we saw it and return.
-  for (auto &e : diags) {
+  为 (auto &e : diags) {
     // File line must match (unless it's an unknown location).
-    if (hasLoc && e.lineNo != lineNo)
+    如果 (hasLoc && e.lineNo != lineNo)
       continue;
-    if (e.match(message)) {
-      if (e.kind == kind) {
+    如果 (e.match(message)) {
+      如果 (e.kind == kind) {
         e.matched = true;
-        return MatchResult::Matched;
+        返回 MatchResult::Matched;
       }
 
       // If this only differs based on the diagnostic kind, then consider it
@@ -219,37 +219,37 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
     }
   }
 
-  if (!reportUnexpected)
-    return MatchResult::Ignored;
+  如果 (!reportUnexpected)
+    返回 MatchResult::Ignored;
 
   ok = false;
 
   // Otherwise, emit an error for the near miss.
-  if (nearMiss) {
+  如果 (nearMiss) {
     mgr.PrintMessage(os, nearMiss->fileLoc, SourceMgr::DK_Error,
                      "'" + getDiagKindStr(kind) +
                          "' diagnostic emitted when expecting a '" +
                          getDiagKindStr(nearMiss->kind) + "'");
-    return MatchResult::NearMiss;
+    返回 MatchResult::NearMiss;
   }
-  return MatchResult::Unexpected;
+  返回 MatchResult::Unexpected;
 }
 
 bool SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
   // Verify that all expected errors were seen.
   auto checkExpectedDiags = [&](ExpectedDiag &diag) {
-    if (!diag.matched) {
+    如果 (!diag.matched) {
       diag.emitError(os, mgr,
                      "expected " + getDiagKindStr(diag.kind) + " \"" +
                          diag.substring + "\" was not produced");
       ok = false;
     }
   };
-  for (auto &expectedDiagsPair : expectedDiagsPerFile)
-    for (auto &diag : expectedDiagsPair.second)
+  为 (auto &expectedDiagsPair : expectedDiagsPerFile)
+    为 (auto &diag : expectedDiagsPair.second)
       checkExpectedDiags(diag);
-  for (auto &diag : expectedUnknownLocDiags)
+  为 (auto &diag : expectedUnknownLocDiags)
     checkExpectedDiags(diag);
   expectedDiagsPerFile.clear();
-  return ok;
+  返回 ok;
 }

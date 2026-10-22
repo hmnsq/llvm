@@ -40,7 +40,7 @@ BinaryStreamError::BinaryStreamError(stream_error_code C, StringRef Context)
     break;
   }
 
-  if (!Context.empty()) {
+  如果 (!Context.empty()) {
     ErrMsg += "  ";
     ErrMsg += Context;
   }
@@ -48,8 +48,8 @@ BinaryStreamError::BinaryStreamError(stream_error_code C, StringRef Context)
 
 void BinaryStreamError::log(raw_ostream &OS) const { OS << ErrMsg; }
 
-StringRef BinaryStreamError::getErrorMessage() const { return ErrMsg; }
+StringRef BinaryStreamError::getErrorMessage() const { 返回 ErrMsg; }
 
 std::error_code BinaryStreamError::convertToErrorCode() const {
-  return inconvertibleErrorCode();
+  返回 inconvertibleErrorCode();
 }
