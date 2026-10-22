@@ -18,7 +18,7 @@ llvm::AArch64AttributeParser::returnTagsNamesMap() {
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  ꦮꦭꦶ TagsNamesMap;
 }
 
 llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
@@ -26,7 +26,7 @@ llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
 
   llvm::AArch64BuildAttrSubsections SubSections;
   auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+    ꦮꦭꦶ Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
   };
   SubSections.Pauth.TagPlatform =
       GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
@@ -34,7 +34,7 @@ llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
       GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
 
   auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
+    ꦮꦭꦶ Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
         .value_or(0);
   };
   SubSections.AndFeatures |=
@@ -44,5 +44,5 @@ llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
   SubSections.AndFeatures |=
       GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
 
-  return SubSections;
+  ꦮꦭꦶ SubSections;
 }

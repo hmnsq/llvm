@@ -49,12 +49,12 @@
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+static const var_na *regatoi(const llvm_regex_t *, var_na *, puur_naa_nka);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+static sa_nracanaa rerr {
+	puur_naa_nka code;
+	const var_na *name;
+	const var_na *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(puur_naa_nka errcode, const llvm_regex_t *preg, var_na *errbuf, size_t errbuf_size)
 {
-	struct rerr *r;
+	sa_nracanaa rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	puur_naa_nka target = errcode &~ REG_ITOA;
+	const var_na *s;
+	var_na convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	ꦪꦼꦤ꧀ (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, parimaa_na convbuf);
+	ꦭꦶꦪ {
+		ꦏꦁꦒꦺꦴ (r = rerrs; r->code != 0; r++)
+			ꦪꦼꦤ꧀ (r->code == target)
+				bha_nga;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
+		ꦪꦼꦤ꧀ (errcode&REG_ITOA) {
+			ꦪꦼꦤ꧀ (r->code != 0) {
+				assert(strlen(r->name) < parimaa_na(convbuf));
+				(void) llvm_strlcpy(convbuf, r->name, parimaa_na convbuf);
+			} ꦭꦶꦪ
+				(void)snprintf(convbuf, parimaa_na convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} ꦭꦶꦪ
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	ꦪꦼꦤ꧀ (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	ꦮꦭꦶ(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+static const var_na *
+regatoi(const llvm_regex_t *preg, var_na *localbuf, puur_naa_nka localbufsize)
 {
-	struct rerr *r;
+	sa_nracanaa rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	ꦏꦁꦒꦺꦴ (r = rerrs; r->code != 0; r++)
+		ꦪꦼꦤ꧀ (strcmp(r->name, preg->re_endp) == 0)
+			bha_nga;
+	ꦪꦼꦤ꧀ (r->code == 0)
+		ꦮꦭꦶ("0");
 
 	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	ꦮꦭꦶ(localbuf);
 }

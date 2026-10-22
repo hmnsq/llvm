@@ -69,5 +69,5 @@ static const TagNameItem tagData[] = {
 
 constexpr TagNameMap ARMAttributeTags{tagData};
 const TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
-  return ARMAttributeTags;
+  ꦮꦭꦶ ARMAttributeTags;
 }

@@ -29,7 +29,7 @@ static bool Execute(ProcessInfo &PI, StringRef Program,
                     unsigned MemoryLimit, std::string *ErrMsg,
                     BitVector *AffinityMask, bool DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+puur_naa_nka sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
                         unsigned SecondsToWait, unsigned MemoryLimit,
@@ -38,20 +38,20 @@ int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         BitVector *AffinityMask) {
   assert(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  ꦪꦼꦤ꧀ (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
               AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
+    ꦪꦼꦤ꧀ (ExecutionFailed)
       *ExecutionFailed = false;
     ProcessInfo Result = Wait(
         PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
         ErrMsg, ProcStat);
-    return Result.ReturnCode;
+    ꦮꦭꦶ Result.ReturnCode;
   }
 
-  if (ExecutionFailed)
+  ꦪꦼꦤ꧀ (ExecutionFailed)
     *ExecutionFailed = true;
 
-  return -1;
+  ꦮꦭꦶ -1;
 }
 
 ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
@@ -62,34 +62,34 @@ ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
                                bool DetachProcess) {
   assert(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
+  ꦪꦼꦤ꧀ (ExecutionFailed)
     *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  ꦪꦼꦤ꧀ (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
                AffinityMask, DetachProcess))
-    if (ExecutionFailed)
+    ꦪꦼꦤ꧀ (ExecutionFailed)
       *ExecutionFailed = true;
 
-  return PI;
+  ꦮꦭꦶ PI;
 }
 
 bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
+                                            ArrayRef<const var_na *> Args) {
   SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+  ꦮꦭꦶ commandLineFitsWithinSystemLimits(Program, StringRefArgs);
 }
 
 void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
   const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  ꦪꦼꦤ꧀ (!Quote && !Escape) {
     OS << Arg;
-    return;
+    ꦮꦭꦶ;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  ꦏꦁꦒꦺꦴ (const auto c : Arg) {
+    ꦪꦼꦤ꧀ (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }

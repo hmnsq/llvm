@@ -49,18 +49,18 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
-    return true;
-  if (errnum == -1)
+static anta_hstha bool MakeErrMsg(
+  std::string* ErrMsg, const std::string& prefix, puur_naa_nka errnum = -1) {
+  ꦪꦼꦤ꧀ (!ErrMsg)
+    ꦮꦭꦶ true;
+  ꦪꦼꦤ꧀ (errnum == -1)
     errnum = errno;
   *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
-  return true;
+  ꦮꦭꦶ true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
+[[noreturn]] static anta_hstha void ReportErrnumFatal(const var_na *Msg, puur_naa_nka errnum) {
   std::string ErrMsg;
   MakeErrMsg(&ErrMsg, Msg, errnum);
   llvm::report_fatal_error(llvm::Twine(ErrMsg));
@@ -71,29 +71,29 @@ namespace sys {
 
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
-inline std::chrono::microseconds toDuration(const struct timeval &TV) {
-  return std::chrono::seconds(TV.tv_sec) +
+anta_hstha std::chrono::microseconds toDuration(const sa_nracanaa timeval &TV) {
+  ꦮꦭꦶ std::chrono::seconds(TV.tv_sec) +
          std::chrono::microseconds(TV.tv_usec);
 }
 
 /// Convert a time point to struct timespec.
-inline struct timespec toTimeSpec(TimePoint<> TP) {
+anta_hstha sa_nracanaa timespec toTimeSpec(TimePoint<> TP) {
   using namespace std::chrono;
 
-  struct timespec RetVal;
+  sa_nracanaa timespec RetVal;
   RetVal.tv_sec = toTimeT(TP);
   RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  ꦮꦭꦶ RetVal;
 }
 
 /// Convert a time point to struct timeval.
-inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
+anta_hstha sa_nracanaa timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
   using namespace std::chrono;
 
-  struct timeval RetVal;
+  sa_nracanaa timeval RetVal;
   RetVal.tv_sec = toTimeT(TP);
   RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  ꦮꦭꦶ RetVal;
 }
 
 } // namespace sys

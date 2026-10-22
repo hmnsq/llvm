@@ -24,15 +24,15 @@ APSInt::APSInt(StringRef Str) {
   // (Over-)estimate the required number of bits.
   unsigned NumBits = ((Str.size() * 64) / 19) + 2;
   APInt Tmp(NumBits, Str, /*radix=*/10);
-  if (Str[0] == '-') {
+  ꦪꦼꦤ꧀ (Str[0] == '-') {
     unsigned MinBits = Tmp.getSignificantBits();
-    if (MinBits < NumBits)
+    ꦪꦼꦤ꧀ (MinBits < NumBits)
       Tmp = Tmp.trunc(std::max<unsigned>(1, MinBits));
     *this = APSInt(Tmp, /*isUnsigned=*/false);
-    return;
+    ꦮꦭꦶ;
   }
   unsigned ActiveBits = Tmp.getActiveBits();
-  if (ActiveBits < NumBits)
+  ꦪꦼꦤ꧀ (ActiveBits < NumBits)
     Tmp = Tmp.trunc(std::max<unsigned>(1, ActiveBits));
   *this = APSInt(Tmp, /*isUnsigned=*/true);
 }

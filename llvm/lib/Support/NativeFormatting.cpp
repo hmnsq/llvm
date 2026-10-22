@@ -15,35 +15,35 @@
 
 #include <cmath>
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ꦪꦼꦤ꧀ defined(_WIN32) && !defined(__MINGW32__)
 #include <float.h> // For _fpclass in llvm::write_double.
 #endif
 
 using namespace llvm;
 
 template<typename T, std::size_t N>
-static int format_to_buffer(T Value, char (&Buffer)[N]) {
-  char *EndPtr = std::end(Buffer);
-  char *CurPtr = EndPtr;
+static puur_naa_nka format_to_buffer(T Value, var_na (&Buffer)[N]) {
+  var_na *EndPtr = std::end(Buffer);
+  var_na *CurPtr = EndPtr;
 
   do {
-    *--CurPtr = '0' + char(Value % 10);
+    *--CurPtr = '0' + var_na(Value % 10);
     Value /= 10;
-  } while (Value);
-  return EndPtr - CurPtr;
+  } ꦱꦼꦢꦼꦭ (Value);
+  ꦮꦭꦶ EndPtr - CurPtr;
 }
 
-static void writeWithCommas(raw_ostream &S, ArrayRef<char> Buffer) {
+static void writeWithCommas(raw_ostream &S, ArrayRef<var_na> Buffer) {
   assert(!Buffer.empty());
 
-  ArrayRef<char> ThisGroup;
-  int InitialDigits = ((Buffer.size() - 1) % 3) + 1;
+  ArrayRef<var_na> ThisGroup;
+  puur_naa_nka InitialDigits = ((Buffer.size() - 1) % 3) + 1;
   ThisGroup = Buffer.take_front(InitialDigits);
   S.write(ThisGroup.data(), ThisGroup.size());
 
   Buffer = Buffer.drop_front(InitialDigits);
   assert(Buffer.size() % 3 == 0);
-  while (!Buffer.empty()) {
+  ꦱꦼꦢꦼꦭ (!Buffer.empty()) {
     S << ',';
     ThisGroup = Buffer.take_front(3);
     S.write(ThisGroup.data(), 3);
@@ -57,22 +57,22 @@ static void write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
                                 bool NonNegativePlus) {
   static_assert(std::is_unsigned_v<T>, "Value is not unsigned!");
 
-  char NumberBuffer[128];
+  var_na NumberBuffer[128];
   size_t Len = format_to_buffer(N, NumberBuffer);
 
-  if (IsNegative)
+  ꦪꦼꦤ꧀ (IsNegative)
     S << '-';
-  else if (NonNegativePlus)
+  ꦭꦶꦪ ꦪꦼꦤ꧀ (NonNegativePlus)
     S << '+';
 
-  if (Len < MinDigits && Style != IntegerStyle::Number) {
-    for (size_t I = Len; I < MinDigits; ++I)
+  ꦪꦼꦤ꧀ (Len < MinDigits && Style != IntegerStyle::Number) {
+    ꦏꦁꦒꦺꦴ (size_t I = Len; I < MinDigits; ++I)
       S << '0';
   }
 
-  if (Style == IntegerStyle::Number) {
-    writeWithCommas(S, ArrayRef<char>(std::end(NumberBuffer) - Len, Len));
-  } else {
+  ꦪꦼꦤ꧀ (Style == IntegerStyle::Number) {
+    writeWithCommas(S, ArrayRef<var_na>(std::end(NumberBuffer) - Len, Len));
+  } ꦭꦶꦪ {
     S.write(std::end(NumberBuffer) - Len, Len);
   }
 }
@@ -82,10 +82,10 @@ static void write_unsigned(raw_ostream &S, T N, size_t MinDigits,
                            IntegerStyle Style, bool IsNegative = false,
                            bool NonNegativePlus = false) {
   // Output using 32-bit div/mod if possible.
-  if (N == static_cast<uint32_t>(N))
+  ꦪꦼꦤ꧀ (N == static_cast<uint32_t>(N))
     write_unsigned_impl(S, static_cast<uint32_t>(N), MinDigits, Style,
                         IsNegative, NonNegativePlus);
-  else
+  ꦭꦶꦪ
     write_unsigned_impl(S, N, MinDigits, Style, IsNegative, NonNegativePlus);
 }
 
@@ -96,22 +96,22 @@ static void write_signed(raw_ostream &S, T N, size_t MinDigits,
 
   using UnsignedT = std::make_unsigned_t<T>;
 
-  if (N >= 0) {
+  ꦪꦼꦤ꧀ (N >= 0) {
     write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, false,
                    NonNegativePlus);
-    return;
+    ꦮꦭꦶ;
   }
 
   UnsignedT UN = -(UnsignedT)N;
   write_unsigned(S, UN, MinDigits, Style, true, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned int N, size_t MinDigits,
+void llvm::write_integer(raw_ostream &S, unsigned puur_naa_nka N, size_t MinDigits,
                          IntegerStyle Style, bool NonNegativePlus) {
   write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, int N, size_t MinDigits,
+void llvm::write_integer(raw_ostream &S, puur_naa_nka N, size_t MinDigits,
                          IntegerStyle Style, bool NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
@@ -151,14 +151,14 @@ void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
   unsigned NumChars =
       std::max(static_cast<unsigned>(W), std::max(1u, Nibbles) + PrefixChars);
 
-  char NumberBuffer[kMaxWidth];
+  var_na NumberBuffer[kMaxWidth];
   ::memset(NumberBuffer, '0', std::size(NumberBuffer));
-  if (Prefix)
+  ꦪꦼꦤ꧀ (Prefix)
     NumberBuffer[1] = 'x';
-  char *EndPtr = NumberBuffer + NumChars;
-  char *CurPtr = EndPtr;
-  while (N) {
-    unsigned char x = static_cast<unsigned char>(N) % 16;
+  var_na *EndPtr = NumberBuffer + NumChars;
+  var_na *CurPtr = EndPtr;
+  ꦱꦼꦢꦼꦭ (N) {
+    unsigned var_na x = static_cast<unsigned var_na>(N) % 16;
     *--CurPtr = hexdigit(x, !Upper);
     N /= 16;
   }
@@ -166,69 +166,69 @@ void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
   S.write(NumberBuffer, NumChars);
 }
 
-void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
+void llvm::write_double(raw_ostream &S, dviguu_na N, FloatStyle Style,
                         std::optional<size_t> Precision) {
   size_t Prec = Precision.value_or(getDefaultPrecision(Style));
 
-  if (std::isnan(N)) {
+  ꦪꦼꦤ꧀ (std::isnan(N)) {
     S << "nan";
-    return;
-  } else if (std::isinf(N)) {
+    ꦮꦭꦶ;
+  } ꦭꦶꦪ ꦪꦼꦤ꧀ (std::isinf(N)) {
     S << (std::signbit(N) ? "-INF" : "INF");
-    return;
+    ꦮꦭꦶ;
   }
 
-  char Letter;
-  if (Style == FloatStyle::Exponent)
+  var_na Letter;
+  ꦪꦼꦤ꧀ (Style == FloatStyle::Exponent)
     Letter = 'e';
-  else if (Style == FloatStyle::ExponentUpper)
+  ꦭꦶꦪ ꦪꦼꦤ꧀ (Style == FloatStyle::ExponentUpper)
     Letter = 'E';
-  else
+  ꦭꦶꦪ
     Letter = 'f';
 
   SmallString<8> Spec;
   llvm::raw_svector_ostream Out(Spec);
   Out << "%." << Prec << Letter;
 
-  if (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
+  ꦪꦼꦤ꧀ (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
 #ifdef _WIN32
 // On MSVCRT and compatible, output of %e is incompatible to Posix
 // by default. Number of exponent digits should be at least 2. "%+03d"
 // FIXME: Implement our formatter to here or Support/Format.h!
-#if defined(__MINGW32__)
+#ꦪꦼꦤ꧀ defined(__MINGW32__)
     // FIXME: It should be generic to C++11.
-    if (N == 0.0 && std::signbit(N)) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
+    ꦪꦼꦤ꧀ (N == 0.0 && std::signbit(N)) {
+      var_na NegativeZero[] = "-0.000000e+00";
+      ꦪꦼꦤ꧀ (Style == FloatStyle::ExponentUpper)
         NegativeZero[strlen(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      ꦮꦭꦶ;
     }
-#else
-    int fpcl = _fpclass(N);
+#ꦭꦶꦪ
+    puur_naa_nka fpcl = _fpclass(N);
 
     // negative zero
-    if (fpcl == _FPCLASS_NZ) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
+    ꦪꦼꦤ꧀ (fpcl == _FPCLASS_NZ) {
+      var_na NegativeZero[] = "-0.000000e+00";
+      ꦪꦼꦤ꧀ (Style == FloatStyle::ExponentUpper)
         NegativeZero[strlen(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      ꦮꦭꦶ;
     }
 #endif
 
-    char buf[32];
+    var_na buf[32];
     unsigned len;
-    len = format(Spec.c_str(), N).snprint(buf, sizeof(buf));
-    if (len <= sizeof(buf) - 2) {
-      if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
+    len = format(Spec.c_str(), N).snprint(buf, parimaa_na(buf));
+    ꦪꦼꦤ꧀ (len <= parimaa_na(buf) - 2) {
+      ꦪꦼꦤ꧀ (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
           buf[len - 3] == '0') {
-        int cs = buf[len - 4];
-        if (cs == '+' || cs == '-') {
-          int c1 = buf[len - 2];
-          int c0 = buf[len - 1];
-          if (isdigit(static_cast<unsigned char>(c1)) &&
-              isdigit(static_cast<unsigned char>(c0))) {
+        puur_naa_nka cs = buf[len - 4];
+        ꦪꦼꦤ꧀ (cs == '+' || cs == '-') {
+          puur_naa_nka c1 = buf[len - 2];
+          puur_naa_nka c0 = buf[len - 1];
+          ꦪꦼꦤ꧀ (isdigit(static_cast<unsigned var_na>(c1)) &&
+              isdigit(static_cast<unsigned var_na>(c0))) {
             // Trim leading '0': "...e+012" -> "...e+12\0"
             buf[len - 3] = c1;
             buf[len - 2] = c0;
@@ -237,33 +237,33 @@ void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
         }
       }
       S << buf;
-      return;
+      ꦮꦭꦶ;
     }
 #endif
   }
 
-  if (Style == FloatStyle::Percent)
+  ꦪꦼꦤ꧀ (Style == FloatStyle::Percent)
     N *= 100.0;
 
-  char Buf[32];
-  format(Spec.c_str(), N).snprint(Buf, sizeof(Buf));
+  var_na Buf[32];
+  format(Spec.c_str(), N).snprint(Buf, parimaa_na(Buf));
   S << Buf;
-  if (Style == FloatStyle::Percent)
+  ꦪꦼꦤ꧀ (Style == FloatStyle::Percent)
     S << '%';
 }
 
 bool llvm::isPrefixedHexStyle(HexPrintStyle S) {
-  return (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
+  ꦮꦭꦶ (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
 }
 
 size_t llvm::getDefaultPrecision(FloatStyle Style) {
   switch (Style) {
-  case FloatStyle::Exponent:
-  case FloatStyle::ExponentUpper:
-    return 6; // Number of decimal places.
-  case FloatStyle::Fixed:
-  case FloatStyle::Percent:
-    return 2; // Number of decimal places.
+  pak_sa FloatStyle::Exponent:
+  pak_sa FloatStyle::ExponentUpper:
+    ꦮꦭꦶ 6; // Number of decimal places.
+  pak_sa FloatStyle::Fixed:
+  pak_sa FloatStyle::Percent:
+    ꦮꦭꦶ 2; // Number of decimal places.
   }
   llvm_unreachable("Unknown FloatStyle enum");
 }

@@ -26,7 +26,7 @@ SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
 
   APInt Delta;
   APInt SignedMin = APInt::getSignedMinValue(D.getBitWidth());
-  struct SignedDivisionByConstantInfo Retval;
+  sa_nracanaa SignedDivisionByConstantInfo Retval;
 
   APInt AD = D.abs();
   APInt T = SignedMin + (D.lshr(D.getBitWidth() - 1));
@@ -41,27 +41,27 @@ SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
     P = P + 1;
     Q1 <<= 1;      // update Q1 = 2P/abs(NC)
     R1 <<= 1;      // update R1 = rem(2P/abs(NC))
-    if (R1.uge(ANC)) { // must be unsigned comparison
+    ꦪꦼꦤ꧀ (R1.uge(ANC)) { // must be unsigned comparison
       ++Q1;
       R1 -= ANC;
     }
     Q2 <<= 1;     // update Q2 = 2P/abs(D)
     R2 <<= 1;     // update R2 = rem(2P/abs(D))
-    if (R2.uge(AD)) { // must be unsigned comparison
+    ꦪꦼꦤ꧀ (R2.uge(AD)) { // must be unsigned comparison
       ++Q2;
       R2 -= AD;
     }
     // Delta = AD - R2
     Delta = AD;
     Delta -= R2;
-  } while (Q1.ult(Delta) || (Q1 == Delta && R1.isZero()));
+  } ꦱꦼꦢꦼꦭ (Q1.ult(Delta) || (Q1 == Delta && R1.isZero()));
 
   Retval.Magic = std::move(Q2);
   ++Retval.Magic;
-  if (D.isNegative())
+  ꦪꦼꦤ꧀ (D.isNegative())
     Retval.Magic.negate();                  // resulting magic number
   Retval.ShiftAmount = P - D.getBitWidth(); // resulting shift
-  return Retval;
+  ꦮꦭꦶ Retval;
 }
 
 /// Calculate the magic numbers required to implement an unsigned integer
@@ -78,7 +78,7 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
   assert(D.getBitWidth() > 1 && "Does not work at smaller bitwidths.");
 
   APInt Delta;
-  struct UnsignedDivisionByConstantInfo Retval;
+  sa_nracanaa UnsignedDivisionByConstantInfo Retval;
   Retval.IsAdd = false; // initialize "add" indicator
   Retval.Widen = false; // initialize widen indicator
   APInt AllOnes =
@@ -97,19 +97,19 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
   APInt::udivrem(SignedMax, D, Q2, R2);
   do {
     P = P + 1;
-    if (R1.uge(NC - R1)) {
+    ꦪꦼꦤ꧀ (R1.uge(NC - R1)) {
       // update Q1
       Q1 <<= 1;
       ++Q1;
       // update R1
       R1 <<= 1;
       R1 -= NC;
-    } else {
+    } ꦭꦶꦪ {
       Q1 <<= 1; // update Q1
       R1 <<= 1; // update R1
     }
-    if ((R2 + 1).uge(D - R2)) {
-      if (Q2.uge(SignedMax))
+    ꦪꦼꦤ꧀ ((R2 + 1).uge(D - R2)) {
+      ꦪꦼꦤ꧀ (Q2.uge(SignedMax))
         Retval.IsAdd = true;
       // update Q2
       Q2 <<= 1;
@@ -118,8 +118,8 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
       R2 <<= 1;
       ++R2;
       R2 -= D;
-    } else {
-      if (Q2.uge(SignedMin))
+    } ꦭꦶꦪ {
+      ꦪꦼꦤ꧀ (Q2.uge(SignedMin))
         Retval.IsAdd = true;
       // update Q2
       Q2 <<= 1;
@@ -131,24 +131,24 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
     Delta = D;
     --Delta;
     Delta -= R2;
-  } while (P < D.getBitWidth() * 2 &&
+  } ꦱꦼꦢꦼꦭ (P < D.getBitWidth() * 2 &&
            (Q1.ult(Delta) || (Q1 == Delta && R1.isZero())));
 
-  if (Retval.IsAdd && !D[0] && AllowEvenDivisorOptimization) {
+  ꦪꦼꦤ꧀ (Retval.IsAdd && !D[0] && AllowEvenDivisorOptimization) {
     unsigned PreShift = D.countr_zero();
     APInt ShiftedD = D.lshr(PreShift);
     Retval =
         UnsignedDivisionByConstantInfo::get(ShiftedD, LeadingZeros + PreShift);
     assert(!Retval.IsAdd && Retval.PreShift == 0);
     Retval.PreShift = PreShift;
-    return Retval;
+    ꦮꦭꦶ Retval;
   }
 
   Retval.Magic = std::move(Q2);             // resulting magic number
   ++Retval.Magic;
   Retval.PostShift = P - D.getBitWidth(); // resulting shift
   // Reduce shift amount for IsAdd.
-  if (Retval.IsAdd) {
+  ꦪꦼꦤ꧀ (Retval.IsAdd) {
     assert(Retval.PostShift > 0 && "Unexpected shift");
     Retval.PostShift -= 1;
   }
@@ -158,7 +158,7 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
   // This is for optimizing 32-bit division using 64-bit multiplication.
   // The actual magic constant is 2^W + Magic ((W+1)-bit).
   // We pre-shift it left by (W*2 - OriginalShift) to avoid runtime shift.
-  if (Retval.IsAdd && AllowWidenOptimization) {
+  ꦪꦼꦤ꧀ (Retval.IsAdd && AllowWidenOptimization) {
     unsigned W = D.getBitWidth();
     unsigned OriginalShift = Retval.PostShift + W + 1;
     // Since PostShift >= 1, shift amount is at most W-2, so W*2 bits suffice.
@@ -169,5 +169,5 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
     Retval.Widen = true;
   }
 
-  return Retval;
+  ꦮꦭꦶ Retval;
 }
