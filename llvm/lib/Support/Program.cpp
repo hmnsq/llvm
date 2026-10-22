@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Program.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
-using namespace sys;
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Program.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/llvm-config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-static bool Execute(ProcessInfo &PI, StringRef Program,
-                    ArrayRef<StringRef> Args,
+ಸ್ಥಿರ ತಾರ್ಕಿಕ Execute(ProcessInfo &PI, StringRef ಕಾರ್ಯಕ್ರಮ_2,
+                    ArrayRef<StringRef> ವಾದಗಳು,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
-                    BitVector *AffinityMask, bool DetachProcess);
+                    ಚಿಹ್ನೆರಹಿತ ಸ್ಮರಣೆ_ಎಲ್ಲೆ, std::string *Err_ಸಂದೇಶ,
+                    ಬಿಟ್_ಸದಿಶ *Affinity_ಮುಖವಾಡ, ತಾರ್ಕಿಕ DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+ಪೂರ್ಣಾಂಕ sys::ExecuteAndWait(StringRef ಕಾರ್ಯಕ್ರಮ_2, ArrayRef<StringRef> ವಾದಗಳು,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
-                        unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        ಚಿಹ್ನೆರಹಿತ Seconds_ಗಮ್ಯ_Wait, ಚಿಹ್ನೆರಹಿತ ಸ್ಮರಣೆ_ಎಲ್ಲೆ,
+                        std::string *Err_ಸಂದೇಶ, ತಾರ್ಕಿಕ *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
-                        BitVector *AffinityMask) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                        ಬಿಟ್_ಸದಿಶ *Affinity_ಮುಖವಾಡ) {
+  ಪ್ರತಿಜ್ಞಾ(Redirects.ಖಾಲಿಗಳು() || Redirects.ಗಾತ್ರ_3() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-              AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
-      *ExecutionFailed = false;
-    ProcessInfo Result = Wait(
-        PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
-    return Result.ReturnCode;
+  ಆದರೆ (Execute(PI, ಕಾರ್ಯಕ್ರಮ_2, ವಾದಗಳು, Env, Redirects, ಸ್ಮರಣೆ_ಎಲ್ಲೆ, Err_ಸಂದೇಶ,
+              Affinity_ಮುಖವಾಡ, /*DetachProcess=*/ಸುಳ್ಳು)) {
+    ಆದರೆ (ExecutionFailed)
+      *ExecutionFailed = ಸುಳ್ಳು;
+    ProcessInfo ಫಲಿತಾಂಶ = Wait(
+        PI, Seconds_ಗಮ್ಯ_Wait == 0 ? std::nullopt : std::optional(Seconds_ಗಮ್ಯ_Wait),
+        Err_ಸಂದೇಶ, ProcStat);
+    ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ.Return_ಸಂಕೇತ;
   }
 
-  if (ExecutionFailed)
-    *ExecutionFailed = true;
+  ಆದರೆ (ExecutionFailed)
+    *ExecutionFailed = ನಿಜ;
 
-  return -1;
+  ಹಿಂತಿರುಗಿ -1;
 }
 
-ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
+ProcessInfo sys::ExecuteNoWait(StringRef ಕಾರ್ಯಕ್ರಮ_2, ArrayRef<StringRef> ವಾದಗಳು,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
-                               bool *ExecutionFailed, BitVector *AffinityMask,
-                               bool DetachProcess) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                               ಚಿಹ್ನೆರಹಿತ ಸ್ಮರಣೆ_ಎಲ್ಲೆ, std::string *Err_ಸಂದೇಶ,
+                               ತಾರ್ಕಿಕ *ExecutionFailed, ಬಿಟ್_ಸದಿಶ *Affinity_ಮುಖವಾಡ,
+                               ತಾರ್ಕಿಕ DetachProcess) {
+  ಪ್ರತಿಜ್ಞಾ(Redirects.ಖಾಲಿಗಳು() || Redirects.ಗಾತ್ರ_3() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
-    *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-               AffinityMask, DetachProcess))
-    if (ExecutionFailed)
-      *ExecutionFailed = true;
+  ಆದರೆ (ExecutionFailed)
+    *ExecutionFailed = ಸುಳ್ಳು;
+  ಆದರೆ (!Execute(PI, ಕಾರ್ಯಕ್ರಮ_2, ವಾದಗಳು, Env, Redirects, ಸ್ಮರಣೆ_ಎಲ್ಲೆ, Err_ಸಂದೇಶ,
+               Affinity_ಮುಖವಾಡ, DetachProcess))
+    ಆದರೆ (ExecutionFailed)
+      *ExecutionFailed = ನಿಜ;
 
-  return PI;
+  ಹಿಂತಿರುಗಿ PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
-  SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+ತಾರ್ಕಿಕ sys::command_ಸಾಲು_ಹೊಂದುತ್ತದೆ_Within_System_Limits(StringRef ಕಾರ್ಯಕ್ರಮ_2,
+                                            ArrayRef<ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *> ವಾದಗಳು) {
+  Small_ಸದಿಶ<StringRef, 8> String_Ref_ವಾದಗಳು(ವಾದಗಳು);
+  ಹಿಂತಿರುಗಿ command_ಸಾಲು_ಹೊಂದುತ್ತದೆ_Within_System_Limits(ಕಾರ್ಯಕ್ರಮ_2, String_Ref_ವಾದಗಳು);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+ಶೂನ್ಯ sys::printArg(raw_ostream &OS, StringRef Arg, ತಾರ್ಕಿಕ Quote) {
+  ಸ್ಥಿರಾಂಕ ತಾರ್ಕಿಕ Escape = Arg.ಕಂಡುಹಿಡಿ_ಮೊದಲ_ದ(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  ಆದರೆ (!Quote && !Escape) {
     OS << Arg;
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ c : Arg) {
+    ಆದರೆ (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }
@@ -97,9 +97,9 @@ void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Program.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Program.inc"
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ LLVM_ON_UNIX
+#ಅನ್ತರ್ಭಾವ "Unix/Program.inc"
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+#ಅನ್ತರ್ಭಾವ "Windows/Program.inc"
+#ಆದರೆ_ಅಂತ್ಯ

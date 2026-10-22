@@ -6,173 +6,173 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamReader.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BinaryStreamReader.h"
 
-#include "llvm/Support/BinaryStreamError.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BinaryStreamError.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BinaryStreamRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LEB128.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-BinaryStreamReader::BinaryStreamReader(BinaryStreamRef Ref) : Stream(Ref) {}
+ದ್ವಿಮಾನ_ಹರಿವು_Reader::ದ್ವಿಮಾನ_ಹರಿವು_Reader(ದ್ವಿಮಾನ_ಹರಿವು_Ref Ref) : ಹರಿವು(Ref) {}
 
-BinaryStreamReader::BinaryStreamReader(BinaryStream &Stream) : Stream(Stream) {}
+ದ್ವಿಮಾನ_ಹರಿವು_Reader::ದ್ವಿಮಾನ_ಹರಿವು_Reader(ದ್ವಿಮಾನ_ಹರಿವು &ಹರಿವು) : ಹರಿವು(ಹರಿವು) {}
 
-BinaryStreamReader::BinaryStreamReader(ArrayRef<uint8_t> Data,
+ದ್ವಿಮಾನ_ಹರಿವು_Reader::ದ್ವಿಮಾನ_ಹರಿವು_Reader(ArrayRef<uint8_t> ದತ್ತಾಂಶ_2,
                                        endianness Endian)
-    : Stream(Data, Endian) {}
+    : ಹರಿವು(ದತ್ತಾಂಶ_2, Endian) {}
 
-BinaryStreamReader::BinaryStreamReader(StringRef Data, endianness Endian)
-    : Stream(Data, Endian) {}
+ದ್ವಿಮಾನ_ಹರಿವು_Reader::ದ್ವಿಮಾನ_ಹರಿವು_Reader(StringRef ದತ್ತಾಂಶ_2, endianness Endian)
+    : ಹರಿವು(ದತ್ತಾಂಶ_2, Endian) {}
 
-Error BinaryStreamReader::readLongestContiguousChunk(
-    ArrayRef<uint8_t> &Buffer) {
-  if (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
-    return EC;
-  Offset += Buffer.size();
-  return Error::success();
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readLongestContiguousChunk(
+    ArrayRef<uint8_t> &ಬಫರ್) {
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = ಹರಿವು.readLongestContiguousChunk(ಸ್ಥಾನಾಂತರ, ಬಫರ್))
+    ಹಿಂತಿರುಗಿ EC;
+  ಸ್ಥಾನಾಂತರ += ಬಫರ್.ಗಾತ್ರ_3();
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
-  if (auto EC = Stream.readBytes(Offset, Size, Buffer))
-    return EC;
-  Offset += Size;
-  return Error::success();
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::read_ಬೈಟುಗಳು(ArrayRef<uint8_t> &ಬಫರ್, uint32_t ಗಾತ್ರ_2) {
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = ಹರಿವು.read_ಬೈಟುಗಳು(ಸ್ಥಾನಾಂತರ, ಗಾತ್ರ_2, ಬಫರ್))
+    ಹಿಂತಿರುಗಿ EC;
+  ಸ್ಥಾನಾಂತರ += ಗಾತ್ರ_2;
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readULEB128(uint64_t &Dest) {
-  SmallVector<uint8_t, 10> EncodedBytes;
-  ArrayRef<uint8_t> NextByte;
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readULEB128(uint64_t &Dest) {
+  Small_ಸದಿಶ<uint8_t, 10> Encoded_ಬೈಟುಗಳು;
+  ArrayRef<uint8_t> ಮುಂದಿನ_Byte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  ಮಾಡು {
+    ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = read_ಬೈಟುಗಳು(ಮುಂದಿನ_Byte, 1))
+      ಹಿಂತಿರುಗಿ Err;
+    Encoded_ಬೈಟುಗಳು.ತಳ್ಳು_ಹಿಂಭಾಗ(ಮುಂದಿನ_Byte[0]);
+  } ಆಗ (ಮುಂದಿನ_Byte[0] & 0x80);
 
-  Dest = decodeULEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  Dest = decodeULEB128(Encoded_ಬೈಟುಗಳು.begin(), ಶೂನ್ಯಸೂಚಕ, Encoded_ಬೈಟುಗಳು.ಕೊನೆ());
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readSLEB128(int64_t &Dest) {
-  SmallVector<uint8_t, 10> EncodedBytes;
-  ArrayRef<uint8_t> NextByte;
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readSLEB128(int64_t &Dest) {
+  Small_ಸದಿಶ<uint8_t, 10> Encoded_ಬೈಟುಗಳು;
+  ArrayRef<uint8_t> ಮುಂದಿನ_Byte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  ಮಾಡು {
+    ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = read_ಬೈಟುಗಳು(ಮುಂದಿನ_Byte, 1))
+      ಹಿಂತಿರುಗಿ Err;
+    Encoded_ಬೈಟುಗಳು.ತಳ್ಳು_ಹಿಂಭಾಗ(ಮುಂದಿನ_Byte[0]);
+  } ಆಗ (ಮುಂದಿನ_Byte[0] & 0x80);
 
-  Dest = decodeSLEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  Dest = decodeSLEB128(Encoded_ಬೈಟುಗಳು.begin(), ಶೂನ್ಯಸೂಚಕ, Encoded_ಬೈಟುಗಳು.ಕೊನೆ());
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readCString(StringRef &Dest) {
-  uint64_t OriginalOffset = getOffset();
-  uint64_t FoundOffset = 0;
-  while (true) {
-    uint64_t ThisOffset = getOffset();
-    ArrayRef<uint8_t> Buffer;
-    if (auto EC = readLongestContiguousChunk(Buffer))
-      return EC;
-    StringRef S(reinterpret_cast<const char *>(Buffer.begin()), Buffer.size());
-    size_t Pos = S.find_first_of('\0');
-    if (LLVM_LIKELY(Pos != StringRef::npos)) {
-      FoundOffset = Pos + ThisOffset;
-      break;
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readCString(StringRef &Dest) {
+  uint64_t Original_ಸ್ಥಾನಾಂತರ = get_ಸ್ಥಾನಾಂತರ();
+  uint64_t ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ = 0;
+  ಆಗ (ನಿಜ) {
+    uint64_t This_ಸ್ಥಾನಾಂತರ = get_ಸ್ಥಾನಾಂತರ();
+    ArrayRef<uint8_t> ಬಫರ್;
+    ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = readLongestContiguousChunk(ಬಫರ್))
+      ಹಿಂತಿರುಗಿ EC;
+    StringRef S(reinterpret_cast<ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *>(ಬಫರ್.begin()), ಬಫರ್.ಗಾತ್ರ_3());
+    size_t Pos = S.ಕಂಡುಹಿಡಿ_ಮೊದಲ_ದ('\0');
+    ಆದರೆ (LLVM_LIKELY(Pos != StringRef::npos)) {
+      ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ = Pos + This_ಸ್ಥಾನಾಂತರ;
+      ನಿಲ್ಲಿಸು;
     }
   }
-  assert(FoundOffset >= OriginalOffset);
+  ಪ್ರತಿಜ್ಞಾ(ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ >= Original_ಸ್ಥಾನಾಂತರ);
 
-  setOffset(OriginalOffset);
-  size_t Length = FoundOffset - OriginalOffset;
+  ಗಣ_ಸ್ಥಾನಾಂತರ(Original_ಸ್ಥಾನಾಂತರ);
+  size_t ಉದ್ದಳತೆ = ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ - Original_ಸ್ಥಾನಾಂತರ;
 
-  if (auto EC = readFixedString(Dest, Length))
-    return EC;
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = readFixedString(Dest, ಉದ್ದಳತೆ))
+    ಹಿಂತಿರುಗಿ EC;
 
   // Now set the offset back to after the null terminator.
-  setOffset(FoundOffset + 1);
-  return Error::success();
+  ಗಣ_ಸ್ಥಾನಾಂತರ(ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ + 1);
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readWideString(ArrayRef<UTF16> &Dest) {
-  uint64_t Length = 0;
-  uint64_t OriginalOffset = getOffset();
-  const UTF16 *C;
-  while (true) {
-    if (auto EC = readObject(C))
-      return EC;
-    if (*C == 0x0000)
-      break;
-    ++Length;
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readWideString(ArrayRef<UTF16> &Dest) {
+  uint64_t ಉದ್ದಳತೆ = 0;
+  uint64_t Original_ಸ್ಥಾನಾಂತರ = get_ಸ್ಥಾನಾಂತರ();
+  ಸ್ಥಿರಾಂಕ UTF16 *C;
+  ಆಗ (ನಿಜ) {
+    ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = readObject(C))
+      ಹಿಂತಿರುಗಿ EC;
+    ಆದರೆ (*C == 0x0000)
+      ನಿಲ್ಲಿಸು;
+    ++ಉದ್ದಳತೆ;
   }
-  uint64_t NewOffset = getOffset();
-  setOffset(OriginalOffset);
+  uint64_t New_ಸ್ಥಾನಾಂತರ = get_ಸ್ಥಾನಾಂತರ();
+  ಗಣ_ಸ್ಥಾನಾಂತರ(Original_ಸ್ಥಾನಾಂತರ);
 
-  if (auto EC = readArray(Dest, Length))
-    return EC;
-  setOffset(NewOffset);
-  return Error::success();
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = readArray(Dest, ಉದ್ದಳತೆ))
+    ಹಿಂತಿರುಗಿ EC;
+  ಗಣ_ಸ್ಥಾನಾಂತರ(New_ಸ್ಥಾನಾಂತರ);
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readFixedString(StringRef &Dest, uint32_t Length) {
-  ArrayRef<uint8_t> Bytes;
-  if (auto EC = readBytes(Bytes, Length))
-    return EC;
-  Dest = StringRef(reinterpret_cast<const char *>(Bytes.begin()), Bytes.size());
-  return Error::success();
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readFixedString(StringRef &Dest, uint32_t ಉದ್ದಳತೆ) {
+  ArrayRef<uint8_t> ಬೈಟುಗಳು_2;
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = read_ಬೈಟುಗಳು(ಬೈಟುಗಳು_2, ಉದ್ದಳತೆ))
+    ಹಿಂತಿರುಗಿ EC;
+  Dest = StringRef(reinterpret_cast<ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *>(ಬೈಟುಗಳು_2.begin()), ಬೈಟುಗಳು_2.ಗಾತ್ರ_3());
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref) {
-  return readStreamRef(Ref, bytesRemaining());
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::read_ಹರಿವು_Ref(ದ್ವಿಮಾನ_ಹರಿವು_Ref &Ref) {
+  ಹಿಂತಿರುಗಿ read_ಹರಿವು_Ref(Ref, ಬೈಟುಗಳು_ಉಳಿದ());
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref, uint32_t Length) {
-  if (bytesRemaining() < Length)
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
-  Ref = Stream.slice(Offset, Length);
-  Offset += Length;
-  return Error::success();
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::read_ಹರಿವು_Ref(ದ್ವಿಮಾನ_ಹರಿವು_Ref &Ref, uint32_t ಉದ್ದಳತೆ) {
+  ಆದರೆ (ಬೈಟುಗಳು_ಉಳಿದ() < ಉದ್ದಳತೆ)
+    ಹಿಂತಿರುಗಿ make_error<ದ್ವಿಮಾನ_ಹರಿವು_Error>(ಹರಿವು_error_ಸಂಕೇತ::ಹರಿವು_too_short);
+  Ref = ಹರಿವು.ತುಂಡು(ಸ್ಥಾನಾಂತರ, ಉದ್ದಳತೆ);
+  ಸ್ಥಾನಾಂತರ += ಉದ್ದಳತೆ;
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::readSubstream(BinarySubstreamRef &Ref,
-                                        uint32_t Length) {
-  Ref.Offset = getOffset();
-  return readStreamRef(Ref.StreamData, Length);
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::readSubstream(ದ್ವಿಮಾನ_Substream_Ref &Ref,
+                                        uint32_t ಉದ್ದಳತೆ) {
+  Ref.ಸ್ಥಾನಾಂತರ = get_ಸ್ಥಾನಾಂತರ();
+  ಹಿಂತಿರುಗಿ read_ಹರಿವು_Ref(Ref.ಹರಿವು_ದತ್ತಾಂಶ, ಉದ್ದಳತೆ);
 }
 
-Error BinaryStreamReader::skip(uint64_t Amount) {
-  if (Amount > bytesRemaining())
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
-  Offset += Amount;
-  return Error::success();
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::skip(uint64_t Amount) {
+  ಆದರೆ (Amount > ಬೈಟುಗಳು_ಉಳಿದ())
+    ಹಿಂತಿರುಗಿ make_error<ದ್ವಿಮಾನ_ಹರಿವು_Error>(ಹರಿವು_error_ಸಂಕೇತ::ಹರಿವು_too_short);
+  ಸ್ಥಾನಾಂತರ += Amount;
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error BinaryStreamReader::padToAlignment(uint32_t Align) {
-  uint32_t NewOffset = alignTo(Offset, Align);
-  return skip(NewOffset - Offset);
+Error ದ್ವಿಮಾನ_ಹರಿವು_Reader::pad_ಗಮ್ಯ_Alignment(uint32_t Align) {
+  uint32_t New_ಸ್ಥಾನಾಂತರ = align_ಗಮ್ಯ(ಸ್ಥಾನಾಂತರ, Align);
+  ಹಿಂತಿರುಗಿ skip(New_ಸ್ಥಾನಾಂತರ - ಸ್ಥಾನಾಂತರ);
 }
 
-uint8_t BinaryStreamReader::peek() const {
-  ArrayRef<uint8_t> Buffer;
-  auto EC = Stream.readBytes(Offset, 1, Buffer);
-  assert(!EC && "Cannot peek an empty buffer!");
+uint8_t ದ್ವಿಮಾನ_ಹರಿವು_Reader::peek() ಸ್ಥಿರಾಂಕ {
+  ArrayRef<uint8_t> ಬಫರ್;
+  ಸ್ವಯಂಚಾಲಿತ EC = ಹರಿವು.read_ಬೈಟುಗಳು(ಸ್ಥಾನಾಂತರ, 1, ಬಫರ್);
+  ಪ್ರತಿಜ್ಞಾ(!EC && "Cannot peek an empty buffer!");
   llvm::consumeError(std::move(EC));
-  return Buffer[0];
+  ಹಿಂತಿರುಗಿ ಬಫರ್[0];
 }
 
-std::pair<BinaryStreamReader, BinaryStreamReader>
-BinaryStreamReader::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+std::pair<ದ್ವಿಮಾನ_ಹರಿವು_Reader, ದ್ವಿಮಾನ_ಹರಿವು_Reader>
+ದ್ವಿಮಾನ_ಹರಿವು_Reader::ವಿಭಜಿಸು(uint64_t Off) ಸ್ಥಿರಾಂಕ {
+  ಪ್ರತಿಜ್ಞಾ(get_ಉದ್ದಳತೆ() >= Off);
 
-  BinaryStreamRef First = Stream.drop_front(Offset);
+  ದ್ವಿಮಾನ_ಹರಿವು_Ref ಮೊದಲ = ಹರಿವು.drop_front(ಸ್ಥಾನಾಂತರ);
 
-  BinaryStreamRef Second = First.drop_front(Off);
-  First = First.keep_front(Off);
-  BinaryStreamReader W1{First};
-  BinaryStreamReader W2{Second};
-  return {W1, W2};
+  ದ್ವಿಮಾನ_ಹರಿವು_Ref ಎರಡನೇ = ಮೊದಲ.drop_front(Off);
+  ಮೊದಲ = ಮೊದಲ.keep_front(Off);
+  ದ್ವಿಮಾನ_ಹರಿವು_Reader W1{ಮೊದಲ};
+  ದ್ವಿಮಾನ_ಹರಿವು_Reader W2{ಎರಡನೇ};
+  ಹಿಂತಿರುಗಿ {W1, W2};
 }

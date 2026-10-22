@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಗಂಟು::get_ಆರಂಭ_Idx() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಆರಂಭ_Idx; }
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ_ಗಂಟು::increment_ಆರಂಭ_Idx(ಚಿಹ್ನೆರಹಿತ Inc) { ಆರಂಭ_Idx += Inc; }
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ_ಗಂಟು::ಗಣ_Concat_Len(ಚಿಹ್ನೆರಹಿತ Len) { ConcatLen = Len; }
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಗಂಟು::getConcatLen() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+ತಾರ್ಕಿಕ Suffix_ವೃಕ್ಷ_ಆಂತರಿಕ_ಗಂಟು::is_ಬೇರು() ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ get_ಆರಂಭ_Idx() == ಖಾಲಿಗಳು_Idx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಆಂತರಿಕ_ಗಂಟು::get_ಕೊನೆ_Idx() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಕೊನೆ_Idx; }
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ_ಆಂತರಿಕ_ಗಂಟು::ಗಣ_Link(Suffix_ವೃಕ್ಷ_ಆಂತರಿಕ_ಗಂಟು *L) {
+  ಪ್ರತಿಜ್ಞಾ(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_ವೃಕ್ಷ_ಆಂತರಿಕ_ಗಂಟು *Suffix_ವೃಕ್ಷ_ಆಂತರಿಕ_ಗಂಟು::getLink() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಎಲೆ_ಗಂಟು::get_ಕೊನೆ_Idx() ಸ್ಥಿರಾಂಕ {
+  ಪ್ರತಿಜ್ಞಾ(ಕೊನೆ_Idx && "EndIdx is empty?");
+  ಹಿಂತಿರುಗಿ *ಕೊನೆ_Idx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಎಲೆ_ಗಂಟು::getSuffixIdx() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ SuffixIdx; }
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ_ಎಲೆ_ಗಂಟು::ಗಣ_Suffix_Idx(ಚಿಹ್ನೆರಹಿತ Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಗಂಟು::get_ಎಡ_ಎಲೆ_Idx() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಎಡ_ಎಲೆ_Idx; }
+ಚಿಹ್ನೆರಹಿತ Suffix_ವೃಕ್ಷ_ಗಂಟು::get_ಬಲ_ಎಲೆ_Idx() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಬಲ_ಎಲೆ_Idx; }
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ_ಗಂಟು::ಗಣ_ಎಡ_ಎಲೆ_Idx(ಚಿಹ್ನೆರಹಿತ Idx) { ಎಡ_ಎಲೆ_Idx = Idx; }
+ಶೂನ್ಯ Suffix_ವೃಕ್ಷ_ಗಂಟು::ಗಣ_ಬಲ_ಎಲೆ_Idx(ಚಿಹ್ನೆರಹಿತ Idx) { ಬಲ_ಎಲೆ_Idx = Idx; }

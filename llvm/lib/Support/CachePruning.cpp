@@ -10,67 +10,67 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CachePruning.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/WithColor.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CachePruning.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Errc.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Error.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Path.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/WithColor.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-#define DEBUG_TYPE "cache-pruning"
+#ವ್ಯಾಖ್ಯಾನಿಸು DEBUG_TYPE "cache-pruning"
 
-#include <set>
-#include <system_error>
+#ಅನ್ತರ್ಭಾವ <set>
+#ಅನ್ತರ್ಭಾವ <system_error>
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-namespace {
-struct FileInfo {
-  sys::TimePoint<> Time;
-  uint64_t Size;
-  std::string Path;
+ನಾಮಾಕಾಶ {
+ರಚನೆ FileInfo {
+  sys::ಸಮಯ_ಬಿಂದು<> ಸಮಯ;
+  uint64_t ಗಾತ್ರ_2;
+  std::string ಮಾರ್ಗ;
 
   /// Used to determine which files to prune first. Also used to determine
   /// set membership, so must take into account all fields.
-  bool operator<(const FileInfo &Other) const {
-    return std::tie(Time, Other.Size, Path) <
-           std::tie(Other.Time, Size, Other.Path);
+  ತಾರ್ಕಿಕ ಕ್ರಿಯಾಕಾರಕ<(ಸ್ಥಿರಾಂಕ FileInfo &Other) ಸ್ಥಿರಾಂಕ {
+    ಹಿಂತಿರುಗಿ std::tie(ಸಮಯ, Other.ಗಾತ್ರ_2, ಮಾರ್ಗ) <
+           std::tie(Other.ಸಮಯ, ಗಾತ್ರ_2, Other.ಮಾರ್ಗ);
   }
 };
 } // anonymous namespace
 
 /// Write a new timestamp file with the given path. This is used for the pruning
 /// interval option.
-static void writeTimestampFile(StringRef TimestampFile) {
-  std::error_code EC;
-  raw_fd_ostream Out(TimestampFile.str(), EC, sys::fs::OF_None);
+ಸ್ಥಿರ ಶೂನ್ಯ writeTimestampFile(StringRef TimestampFile) {
+  std::error_ಸಂಕೇತ EC;
+  raw_fd_ostream ಹೊರಹೋಗು(TimestampFile.str(), EC, sys::fs::ದ_None);
 }
 
-static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
-  if (Duration.empty())
-    return make_error<StringError>("Duration must not be empty",
-                                   inconvertibleErrorCode());
+ಸ್ಥಿರ Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
+  ಆದರೆ (Duration.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ make_error<StringError>("Duration must not be empty",
+                                   inconvertible_Error_ಸಂಕೇತ());
 
-  StringRef NumStr = Duration.slice(0, Duration.size()-1);
-  uint64_t Num;
-  if (NumStr.getAsInteger(0, Num))
-    return make_error<StringError>("'" + NumStr + "' not an integer",
-                                   inconvertibleErrorCode());
+  StringRef ಅಂಕೆ_Str = Duration.ತುಂಡು(0, Duration.ಗಾತ್ರ_3()-1);
+  uint64_t ಅಂಕೆ;
+  ಆದರೆ (ಅಂಕೆ_Str.getAsInteger(0, ಅಂಕೆ))
+    ಹಿಂತಿರುಗಿ make_error<StringError>("'" + ಅಂಕೆ_Str + "' not an integer",
+                                   inconvertible_Error_ಸಂಕೇತ());
 
-  switch (Duration.back()) {
-  case 's':
-    return std::chrono::seconds(Num);
-  case 'm':
-    return std::chrono::minutes(Num);
-  case 'h':
-    return std::chrono::hours(Num);
-  default:
-    return make_error<StringError>("'" + Duration +
+  ಆಯ್ಕೆ (Duration.ಹಿಂಭಾಗ()) {
+  ಸ್ಥಿತಿ 's':
+    ಹಿಂತಿರುಗಿ std::chrono::seconds(ಅಂಕೆ);
+  ಸ್ಥಿತಿ 'm':
+    ಹಿಂತಿರುಗಿ std::chrono::minutes(ಅಂಕೆ);
+  ಸ್ಥಿತಿ 'h':
+    ಹಿಂತಿರುಗಿ std::chrono::hours(ಅಂಕೆ);
+  ಪೂರ್ವನಿಯೋಜಿತ:
+    ಹಿಂತಿರುಗಿ make_error<StringError>("'" + Duration +
                                        "' must end with one of 's', 'm' or 'h'",
-                                   inconvertibleErrorCode());
+                                   inconvertible_Error_ಸಂಕೇತ());
   }
 }
 
@@ -78,122 +78,122 @@ Expected<CachePruningPolicy>
 llvm::parseCachePruningPolicy(StringRef PolicyStr) {
   CachePruningPolicy Policy;
   std::pair<StringRef, StringRef> P = {"", PolicyStr};
-  while (!P.second.empty()) {
-    P = P.second.split(':');
+  ಆಗ (!P.ಎರಡನೇ_2.ಖಾಲಿಗಳು()) {
+    P = P.ಎರಡನೇ_2.ವಿಭಜಿಸು(':');
 
-    StringRef Key, Value;
-    std::tie(Key, Value) = P.first.split('=');
-    if (Key == "prune_interval") {
-      auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+    StringRef ಕೀಲಿ, ಮೌಲ್ಯ;
+    std::tie(ಕೀಲಿ, ಮೌಲ್ಯ) = P.ಮೊದಲ_2.ವಿಭಜಿಸು('=');
+    ಆದರೆ (ಕೀಲಿ == "prune_interval") {
+      ಸ್ವಯಂಚಾಲಿತ DurationOrErr = parseDuration(ಮೌಲ್ಯ);
+      ಆದರೆ (!DurationOrErr)
+        ಹಿಂತಿರುಗಿ DurationOrErr.takeError();
       Policy.Interval = *DurationOrErr;
-    } else if (Key == "prune_after") {
-      auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಕೀಲಿ == "prune_after") {
+      ಸ್ವಯಂಚಾಲಿತ DurationOrErr = parseDuration(ಮೌಲ್ಯ);
+      ಆದರೆ (!DurationOrErr)
+        ಹಿಂತಿರುಗಿ DurationOrErr.takeError();
       Policy.Expiration = *DurationOrErr;
-    } else if (Key == "cache_size") {
-      if (Value.back() != '%')
-        return make_error<StringError>("'" + Value + "' must be a percentage",
-                                       inconvertibleErrorCode());
-      StringRef SizeStr = Value.drop_back();
-      uint64_t Size;
-      if (SizeStr.getAsInteger(0, Size))
-        return make_error<StringError>("'" + SizeStr + "' not an integer",
-                                       inconvertibleErrorCode());
-      if (Size > 100)
-        return make_error<StringError>("'" + SizeStr +
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಕೀಲಿ == "cache_size") {
+      ಆದರೆ (ಮೌಲ್ಯ.ಹಿಂಭಾಗ() != '%')
+        ಹಿಂತಿರುಗಿ make_error<StringError>("'" + ಮೌಲ್ಯ + "' must be a percentage",
+                                       inconvertible_Error_ಸಂಕೇತ());
+      StringRef ಗಾತ್ರ_Str = ಮೌಲ್ಯ.drop_ಹಿಂಭಾಗ();
+      uint64_t ಗಾತ್ರ_2;
+      ಆದರೆ (ಗಾತ್ರ_Str.getAsInteger(0, ಗಾತ್ರ_2))
+        ಹಿಂತಿರುಗಿ make_error<StringError>("'" + ಗಾತ್ರ_Str + "' not an integer",
+                                       inconvertible_Error_ಸಂಕೇತ());
+      ಆದರೆ (ಗಾತ್ರ_2 > 100)
+        ಹಿಂತಿರುಗಿ make_error<StringError>("'" + ಗಾತ್ರ_Str +
                                            "' must be between 0 and 100",
-                                       inconvertibleErrorCode());
-      Policy.MaxSizePercentageOfAvailableSpace = Size;
-    } else if (Key == "cache_size_bytes") {
+                                       inconvertible_Error_ಸಂಕೇತ());
+      Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space = ಗಾತ್ರ_2;
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಕೀಲಿ == "cache_size_bytes") {
       uint64_t Mult = 1;
-      switch (tolower(Value.back())) {
-      case 'k':
+      ಆಯ್ಕೆ (tolower(ಮೌಲ್ಯ.ಹಿಂಭಾಗ())) {
+      ಸ್ಥಿತಿ 'k':
         Mult = 1024;
-        Value = Value.drop_back();
-        break;
-      case 'm':
+        ಮೌಲ್ಯ = ಮೌಲ್ಯ.drop_ಹಿಂಭಾಗ();
+        ನಿಲ್ಲಿಸು;
+      ಸ್ಥಿತಿ 'm':
         Mult = 1024 * 1024;
-        Value = Value.drop_back();
-        break;
-      case 'g':
+        ಮೌಲ್ಯ = ಮೌಲ್ಯ.drop_ಹಿಂಭಾಗ();
+        ನಿಲ್ಲಿಸು;
+      ಸ್ಥಿತಿ 'g':
         Mult = 1024 * 1024 * 1024;
-        Value = Value.drop_back();
-        break;
+        ಮೌಲ್ಯ = ಮೌಲ್ಯ.drop_ಹಿಂಭಾಗ();
+        ನಿಲ್ಲಿಸು;
       }
-      uint64_t Size;
-      if (Value.getAsInteger(0, Size))
-        return make_error<StringError>("'" + Value + "' not an integer",
-                                       inconvertibleErrorCode());
-      Policy.MaxSizeBytes = Size * Mult;
-    } else if (Key == "cache_size_files") {
-      if (Value.getAsInteger(0, Policy.MaxSizeFiles))
-        return make_error<StringError>("'" + Value + "' not an integer",
-                                       inconvertibleErrorCode());
-    } else {
-      return make_error<StringError>("Unknown key: '" + Key + "'",
-                                     inconvertibleErrorCode());
+      uint64_t ಗಾತ್ರ_2;
+      ಆದರೆ (ಮೌಲ್ಯ.getAsInteger(0, ಗಾತ್ರ_2))
+        ಹಿಂತಿರುಗಿ make_error<StringError>("'" + ಮೌಲ್ಯ + "' not an integer",
+                                       inconvertible_Error_ಸಂಕೇತ());
+      Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು = ಗಾತ್ರ_2 * Mult;
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಕೀಲಿ == "cache_size_files") {
+      ಆದರೆ (ಮೌಲ್ಯ.getAsInteger(0, Policy.Max_ಗಾತ್ರ_Files))
+        ಹಿಂತಿರುಗಿ make_error<StringError>("'" + ಮೌಲ್ಯ + "' not an integer",
+                                       inconvertible_Error_ಸಂಕೇತ());
+    } ಇಲ್ಲದಿದ್ದರೆ {
+      ಹಿಂತಿರುಗಿ make_error<StringError>("Unknown key: '" + ಕೀಲಿ + "'",
+                                     inconvertible_Error_ಸಂಕೇತ());
     }
   }
 
-  return Policy;
+  ಹಿಂತಿರುಗಿ Policy;
 }
 
 /// Prune the cache of files that haven't been accessed in a long time.
-Expected<bool>
-llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
-                 const std::vector<std::unique_ptr<MemoryBuffer>> &Files) {
-  using namespace std::chrono;
+Expected<ತಾರ್ಕಿಕ>
+llvm::pruneCache(StringRef ಮಾರ್ಗ, CachePruningPolicy Policy,
+                 ಸ್ಥಿರಾಂಕ std::ಸದಿಶ<std::unique_ptr<ಸ್ಮರಣೆ_ಬಫರ್>> &Files) {
+  ಬಳಸಿ ನಾಮಾಕಾಶ std::chrono;
 
-  if (Path.empty())
-    return false;
+  ಆದರೆ (ಮಾರ್ಗ.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-  bool isPathDir;
-  if (sys::fs::is_directory(Path, isPathDir))
-    return false;
+  ತಾರ್ಕಿಕ is_ಮಾರ್ಗ_Dir;
+  ಆದರೆ (sys::fs::is_directory(ಮಾರ್ಗ, is_ಮಾರ್ಗ_Dir))
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-  if (!isPathDir)
-    return false;
+  ಆದರೆ (!is_ಮಾರ್ಗ_Dir)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-  Policy.MaxSizePercentageOfAvailableSpace =
-      std::min(Policy.MaxSizePercentageOfAvailableSpace, 100u);
+  Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space =
+      std::min(Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space, 100u);
 
-  if (Policy.Expiration == seconds(0) &&
-      Policy.MaxSizePercentageOfAvailableSpace == 0 &&
-      Policy.MaxSizeBytes == 0 && Policy.MaxSizeFiles == 0) {
+  ಆದರೆ (Policy.Expiration == seconds(0) &&
+      Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space == 0 &&
+      Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು == 0 && Policy.Max_ಗಾತ್ರ_Files == 0) {
     LLVM_DEBUG(dbgs() << "No pruning settings set, exit early\n");
     // Nothing will be pruned, early exit
-    return false;
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
 
   // Try to stat() the timestamp file.
-  SmallString<128> TimestampFile(Path);
-  sys::path::append(TimestampFile, "llvmcache.timestamp");
-  sys::fs::file_status FileStatus;
-  const auto CurrentTime = system_clock::now();
-  if (auto EC = sys::fs::status(TimestampFile, FileStatus)) {
-    if (EC == errc::no_such_file_or_directory) {
+  SmallString<128> TimestampFile(ಮಾರ್ಗ);
+  sys::ಮಾರ್ಗ_2::append(TimestampFile, "llvmcache.timestamp");
+  sys::fs::file_ಸ್ಥಿತಿ File_ಸ್ಥಿತಿ;
+  ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ Current_ಸಮಯ = system_clock::now();
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = sys::fs::ಸ್ಥಿತಿ_3(TimestampFile, File_ಸ್ಥಿತಿ)) {
+    ಆದರೆ (EC == errc::no_such_file_or_directory) {
       // If the timestamp file wasn't there, create one now.
       writeTimestampFile(TimestampFile);
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
       // Unknown error?
-      return false;
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
-  } else {
-    if (!Policy.Interval)
-      return false;
-    if (Policy.Interval != seconds(0)) {
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಆದರೆ (!Policy.Interval)
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+    ಆದರೆ (Policy.Interval != seconds(0)) {
       // Check whether the time stamp is older than our pruning interval.
       // If not, do nothing.
-      const auto TimeStampModTime = FileStatus.getLastModificationTime();
-      auto TimeStampAge = CurrentTime - TimeStampModTime;
-      if (TimeStampAge <= *Policy.Interval) {
+      ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ ಸಮಯ_Stamp_Mod_ಸಮಯ = File_ಸ್ಥಿತಿ.get_ಕೊನೆಯ_Modification_ಸಮಯ();
+      ಸ್ವಯಂಚಾಲಿತ ಸಮಯ_Stamp_Age = Current_ಸಮಯ - ಸಮಯ_Stamp_Mod_ಸಮಯ;
+      ಆದರೆ (ಸಮಯ_Stamp_Age <= *Policy.Interval) {
         LLVM_DEBUG(dbgs() << "Timestamp file too recent ("
-                          << duration_cast<seconds>(TimeStampAge).count()
+                          << duration_cast<seconds>(ಸಮಯ_Stamp_Age).ಎಣಿಕೆ_2()
                           << "s old), do not prune.\n");
-        return false;
+        ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
       }
     }
     // Write a new timestamp file so that nobody else attempts to prune.
@@ -204,59 +204,59 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
 
   // Keep track of files to delete to get below the size limit.
   // Order by time of last use so that recently used files are preserved.
-  std::set<FileInfo> FileInfos;
-  uint64_t TotalSize = 0;
+  std::ಗಣ<FileInfo> FileInfos;
+  uint64_t ಒಟ್ಟು_ಗಾತ್ರ = 0;
 
   // Walk the entire directory cache, looking for unused files.
-  std::error_code EC;
-  SmallString<128> CachePathNative;
-  sys::path::native(Path, CachePathNative);
+  std::error_ಸಂಕೇತ EC;
+  SmallString<128> Cache_ಮಾರ್ಗ_Native;
+  sys::ಮಾರ್ಗ_2::native(ಮಾರ್ಗ, Cache_ಮಾರ್ಗ_Native);
   // Walk all of the files within this directory.
-  for (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
-       File != FileEnd && !EC; File.increment(EC)) {
+  ಗಾಗಿ (sys::fs::directory_iterator File(Cache_ಮಾರ್ಗ_Native, EC), File_ಕೊನೆ;
+       File != File_ಕೊನೆ && !EC; File.increment(EC)) {
     // Ignore filenames not beginning with "llvmcache-" or "Thin-". This
     // includes the timestamp file as well as any files created by the user.
     // This acts as a safeguard against data loss if the user specifies the
     // wrong directory as their cache directory.
-    StringRef filename = sys::path::filename(File->path());
-    if (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
-      continue;
+    StringRef filename = sys::ಮಾರ್ಗ_2::filename(File->ಮಾರ್ಗ_2());
+    ಆದರೆ (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
+      ಮುಂದುವರಿ;
 
     // Look at this file. If we can't stat it, there's nothing interesting
     // there.
-    ErrorOr<sys::fs::basic_file_status> StatusOrErr = File->status();
-    if (!StatusOrErr) {
-      LLVM_DEBUG(dbgs() << "Ignore " << File->path() << " (can't stat)\n");
-      continue;
+    ErrorOr<sys::fs::basic_file_ಸ್ಥಿತಿ> ಸ್ಥಿತಿ_Or_Err = File->ಸ್ಥಿತಿ_3();
+    ಆದರೆ (!ಸ್ಥಿತಿ_Or_Err) {
+      LLVM_DEBUG(dbgs() << "Ignore " << File->ಮಾರ್ಗ_2() << " (can't stat)\n");
+      ಮುಂದುವರಿ;
     }
 
     // If the file hasn't been used recently enough, delete it
-    const auto FileAccessTime = StatusOrErr->getLastAccessedTime();
-    auto FileAge = CurrentTime - FileAccessTime;
-    if (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
-      LLVM_DEBUG(dbgs() << "Remove " << File->path() << " ("
-                        << duration_cast<seconds>(FileAge).count()
+    ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ File_Access_ಸಮಯ = ಸ್ಥಿತಿ_Or_Err->get_ಕೊನೆಯ_Accessed_ಸಮಯ();
+    ಸ್ವಯಂಚಾಲಿತ FileAge = Current_ಸಮಯ - File_Access_ಸಮಯ;
+    ಆದರೆ (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
+      LLVM_DEBUG(dbgs() << "Remove " << File->ಮಾರ್ಗ_2() << " ("
+                        << duration_cast<seconds>(FileAge).ಎಣಿಕೆ_2()
                         << "s old)\n");
-      sys::fs::remove(File->path());
-      continue;
+      sys::fs::remove(File->ಮಾರ್ಗ_2());
+      ಮುಂದುವರಿ;
     }
 
     // Leave it here for now, but add it to the list of size-based pruning.
-    TotalSize += StatusOrErr->getSize();
-    FileInfos.insert({FileAccessTime, StatusOrErr->getSize(), File->path()});
+    ಒಟ್ಟು_ಗಾತ್ರ += ಸ್ಥಿತಿ_Or_Err->get_ಗಾತ್ರ();
+    FileInfos.ಸೇರಿಸು({File_Access_ಸಮಯ, ಸ್ಥಿತಿ_Or_Err->get_ಗಾತ್ರ(), File->ಮಾರ್ಗ_2()});
   }
 
-  auto FileInfo = FileInfos.begin();
-  size_t NumFiles = FileInfos.size();
+  ಸ್ವಯಂಚಾಲಿತ FileInfo = FileInfos.begin();
+  size_t ಅಂಕೆ_Files = FileInfos.ಗಾತ್ರ_3();
 
-  auto RemoveCacheFile = [&]() {
+  ಸ್ವಯಂಚಾಲಿತ RemoveCacheFile = [&]() {
     // Remove the file.
-    sys::fs::remove(FileInfo->Path);
+    sys::fs::remove(FileInfo->ಮಾರ್ಗ);
     // Update size
-    TotalSize -= FileInfo->Size;
-    NumFiles--;
-    LLVM_DEBUG(dbgs() << " - Remove " << FileInfo->Path << " (size "
-                      << FileInfo->Size << "), new occupancy is " << TotalSize
+    ಒಟ್ಟು_ಗಾತ್ರ -= FileInfo->ಗಾತ್ರ_2;
+    ಅಂಕೆ_Files--;
+    LLVM_DEBUG(dbgs() << " - Remove " << FileInfo->ಮಾರ್ಗ << " (size "
+                      << FileInfo->ಗಾತ್ರ_2 << "), new occupancy is " << ಒಟ್ಟು_ಗಾತ್ರ
                       << "%\n");
     ++FileInfo;
   };
@@ -264,60 +264,60 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   // files.size() is greater the number of inputs  by one. However, a timestamp
   // file is created and stored in the cache directory if --thinlto-cache-policy
   // option is used. Therefore, files.size() is used as ActualNums.
-  const size_t ActualNums = Files.size();
-  if (Policy.MaxSizeFiles && ActualNums > Policy.MaxSizeFiles)
+  ಸ್ಥಿರಾಂಕ size_t ActualNums = Files.ಗಾತ್ರ_3();
+  ಆದರೆ (Policy.Max_ಗಾತ್ರ_Files && ActualNums > Policy.Max_ಗಾತ್ರ_Files)
     WithColor::warning()
         << "ThinLTO cache pruning happens since the number of created files ("
         << ActualNums << ") exceeds the maximum number of files ("
-        << Policy.MaxSizeFiles
+        << Policy.Max_ಗಾತ್ರ_Files
         << "); consider adjusting --thinlto-cache-policy\n";
 
   // Prune for number of files.
-  if (Policy.MaxSizeFiles)
-    while (NumFiles > Policy.MaxSizeFiles)
+  ಆದರೆ (Policy.Max_ಗಾತ್ರ_Files)
+    ಆಗ (ಅಂಕೆ_Files > Policy.Max_ಗಾತ್ರ_Files)
       RemoveCacheFile();
 
   // Prune for size now if needed
-  if (Policy.MaxSizePercentageOfAvailableSpace > 0 || Policy.MaxSizeBytes > 0) {
-    auto SpaceInfoOrErr = sys::fs::disk_space(Path);
-    if (!SpaceInfoOrErr) {
-      auto EC = SpaceInfoOrErr.getError();
-      return createStringError(EC,
+  ಆದರೆ (Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space > 0 || Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು > 0) {
+    ಸ್ವಯಂಚಾಲಿತ SpaceInfoOrErr = sys::fs::disk_space(ಮಾರ್ಗ);
+    ಆದರೆ (!SpaceInfoOrErr) {
+      ಸ್ವಯಂಚಾಲಿತ EC = SpaceInfoOrErr.getError();
+      ಹಿಂತಿರುಗಿ createStringError(EC,
                                "cannot get available disk space for '%s': '%s'",
-                               Path.str().c_str(), EC.message().c_str());
+                               ಮಾರ್ಗ.str().c_str(), EC.ಸಂದೇಶ_2().c_str());
     }
     sys::fs::space_info SpaceInfo = SpaceInfoOrErr.get();
-    auto AvailableSpace = TotalSize + SpaceInfo.free;
+    ಸ್ವಯಂಚಾಲಿತ ಲಭ್ಯ_Space = ಒಟ್ಟು_ಗಾತ್ರ + SpaceInfo.ಬಿಡುಗಡೆ;
 
-    if (Policy.MaxSizePercentageOfAvailableSpace == 0)
-      Policy.MaxSizePercentageOfAvailableSpace = 100;
-    if (Policy.MaxSizeBytes == 0)
-      Policy.MaxSizeBytes = AvailableSpace;
-    auto TotalSizeTarget = std::min<uint64_t>(
-        AvailableSpace * Policy.MaxSizePercentageOfAvailableSpace / 100ull,
-        Policy.MaxSizeBytes);
+    ಆದರೆ (Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space == 0)
+      Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space = 100;
+    ಆದರೆ (Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು == 0)
+      Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು = ಲಭ್ಯ_Space;
+    ಸ್ವಯಂಚಾಲಿತ ಒಟ್ಟು_ಗಾತ್ರ_ಗುರಿ = std::min<uint64_t>(
+        ಲಭ್ಯ_Space * Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space / 100ull,
+        Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು);
 
-    LLVM_DEBUG(dbgs() << "Occupancy: " << ((100 * TotalSize) / AvailableSpace)
+    LLVM_DEBUG(dbgs() << "Occupancy: " << ((100 * ಒಟ್ಟು_ಗಾತ್ರ) / ಲಭ್ಯ_Space)
                       << "% target is: "
-                      << Policy.MaxSizePercentageOfAvailableSpace << "%, "
-                      << Policy.MaxSizeBytes << " bytes\n");
+                      << Policy.Max_ಗಾತ್ರ_Percentage_ದ_ಲಭ್ಯ_Space << "%, "
+                      << Policy.Max_ಗಾತ್ರ_ಬೈಟುಗಳು << " bytes\n");
 
     size_t ActualSizes = 0;
-    for (const auto &File : Files)
-      if (File)
-        ActualSizes += File->getBufferSize();
+    ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &File : Files)
+      ಆದರೆ (File)
+        ActualSizes += File->get_ಬಫರ್_ಗಾತ್ರ();
 
-    if (ActualSizes > TotalSizeTarget)
+    ಆದರೆ (ActualSizes > ಒಟ್ಟು_ಗಾತ್ರ_ಗುರಿ)
       WithColor::warning()
           << "ThinLTO cache pruning happens since the total size of the cache "
              "files consumed by the current link job ("
           << ActualSizes << "  bytes) exceeds maximum cache size ("
-          << TotalSizeTarget
+          << ಒಟ್ಟು_ಗಾತ್ರ_ಗುರಿ
           << " bytes); consider adjusting --thinlto-cache-policy\n";
 
     // Remove the oldest accessed files first, till we get below the threshold.
-    while (TotalSize > TotalSizeTarget && FileInfo != FileInfos.end())
+    ಆಗ (ಒಟ್ಟು_ಗಾತ್ರ > ಒಟ್ಟು_ಗಾತ್ರ_ಗುರಿ && FileInfo != FileInfos.ಕೊನೆ())
       RemoveCacheFile();
   }
-  return true;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }

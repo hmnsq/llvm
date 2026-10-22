@@ -6,61 +6,61 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Signals.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/InitLLVM.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/AutoConvert.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Error.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ErrorHandling.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ManagedStatic.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Signals.h"
 
-#ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Windows/WindowsSupport.h"
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#else
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#endif
-#ifndef STDOUT_FILENO
-#define STDOUT_FILENO 1
-#endif
-#ifndef STDERR_FILENO
-#define STDERR_FILENO 2
-#endif
-#endif
+#ಆದರೆ defined(HAVE_UNISTD_H)
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಇಲ್ಲದಿದ್ದರೆ
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ STDIN_FILENO
+#ವ್ಯಾಖ್ಯಾನಿಸು STDIN_FILENO 0
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ STDOUT_FILENO
+#ವ್ಯಾಖ್ಯಾನಿಸು STDOUT_FILENO 1
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ STDERR_FILENO
+#ವ್ಯಾಖ್ಯಾನಿಸು STDERR_FILENO 2
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ_ಅಂತ್ಯ
 
-static void RaiseLimits() {
-#ifdef _AIX
+ಸ್ಥಿರ ಶೂನ್ಯ RaiseLimits() {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _AIX
   // AIX has restrictive memory soft-limits out-of-box, so raise them if needed.
-  auto RaiseLimit = [](int resource) {
-    struct rlimit r;
+  ಸ್ವಯಂಚಾಲಿತ Raise_ಎಲ್ಲೆ = [](ಪೂರ್ಣಾಂಕ resource) {
+    ರಚನೆ rlimit r;
     getrlimit(resource, &r);
 
     // Increase the soft limit to the hard limit, if necessary and
     // possible.
-    if (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
+    ಆದರೆ (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
       r.rlim_cur = r.rlim_max;
       setrlimit(resource, &r);
     }
   };
 
   // Address space size.
-  RaiseLimit(RLIMIT_AS);
+  Raise_ಎಲ್ಲೆ(RLIMIT_AS);
   // Heap size.
-  RaiseLimit(RLIMIT_DATA);
+  Raise_ಎಲ್ಲೆ(RLIMIT_DATA);
   // Stack size.
-  RaiseLimit(RLIMIT_STACK);
-#ifdef RLIMIT_RSS
+  Raise_ಎಲ್ಲೆ(RLIMIT_STACK);
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ RLIMIT_RSS
   // Resident set size.
-  RaiseLimit(RLIMIT_RSS);
-#endif
-#endif
+  Raise_ಎಲ್ಲೆ(RLIMIT_RSS);
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-void CleanupStdHandles(void *Cookie) {
+ಶೂನ್ಯ CleanupStdHandles(ಶೂನ್ಯ *Cookie) {
   llvm::raw_ostream *Outs = &llvm::outs(), *Errs = &llvm::errs();
   Outs->flush();
   Errs->flush();
@@ -69,41 +69,41 @@ void CleanupStdHandles(void *Cookie) {
   llvm::restoreStdHandleAutoConversion(STDERR_FILENO);
 }
 
-using namespace llvm;
-using namespace llvm::sys;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::sys;
 
-InitLLVM::InitLLVM(int &Argc, const char **&Argv,
-                   bool InstallPipeSignalExitHandler,
-                   bool NeedsPOSIXUtilitySignalHandling) {
-#ifndef NDEBUG
-  static std::atomic<bool> Initialized{false};
-  assert(!Initialized && "InitLLVM was already initialized!");
-  Initialized = true;
-#endif
+InitLLVM::InitLLVM(ಪೂರ್ಣಾಂಕ &Argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **&Argv,
+                   ತಾರ್ಕಿಕ InstallPipeSignalExitHandler,
+                   ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling) {
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ NDEBUG
+  ಸ್ಥಿರ std::atomic<ತಾರ್ಕಿಕ> Initialized{ಸುಳ್ಳು};
+  ಪ್ರತಿಜ್ಞಾ(!Initialized && "InitLLVM was already initialized!");
+  Initialized = ನಿಜ;
+#ಆದರೆ_ಅಂತ್ಯ
 
   // Bring stdin/stdout/stderr into a known state.
-#ifdef _WIN32
-  sys::AddSignalHandler(CleanupStdHandles, nullptr);
-#else
-  sys::AddSignalHandler(CleanupStdHandles, nullptr,
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  sys::ಕೂಡಿಸು_Signal_Handler(CleanupStdHandles, ಶೂನ್ಯಸೂಚಕ);
+#ಇಲ್ಲದಿದ್ದರೆ
+  sys::ಕೂಡಿಸು_Signal_Handler(CleanupStdHandles, ಶೂನ್ಯಸೂಚಕ,
                         NeedsPOSIXUtilitySignalHandling);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-  if (InstallPipeSignalExitHandler)
+  ಆದರೆ (InstallPipeSignalExitHandler)
     // The pipe signal handler must be installed before any other handlers are
     // registered. This is because the Unix \ref RegisterHandlers function does
     // not perform a sigaction() for SIGPIPE unless a one-shot handler is
     // present, to allow long-lived processes (like lldb) to fully opt-out of
     // llvm's SIGPIPE handling and ignore the signal safely.
-    sys::SetOneShotPipeSignalFunction(sys::DefaultOneShotPipeSignalHandler);
+    sys::ಗಣ_One_Shot_Pipe_Signal_Function(sys::DefaultOneShotPipeSignalHandler);
   // Initialize the stack printer after installing the one-shot pipe signal
   // handler, so we can perform a sigaction() for SIGPIPE on Unix if requested.
-  StackPrinter.emplace(Argc, Argv);
-  sys::PrintStackTraceOnErrorSignal(Argv[0]);
-  install_out_of_memory_new_handler();
+  ರಾಶಿ_Printer.emplace(Argc, Argv);
+  sys::Print_ರಾಶಿ_Trace_On_Error_Signal(Argv[0]);
+  install_ಹೊರಹೋಗು_ದ_ಸ್ಮರಣೆ_new_handler();
   RaiseLimits();
 
-#ifdef __MVS__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __MVS__
 
   // We use UTF-8 as the internal character encoding. On z/OS, all external
   // output is encoded in EBCDIC. In order to be able to read all
@@ -113,11 +113,11 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
 
   // If turning on conversion for stderr fails then the error message
   // may be garbled. There is no solution to this problem.
-  ExitOnErr(errorCodeToError(llvm::enableAutoConversion(STDERR_FILENO)));
-  ExitOnErr(errorCodeToError(llvm::enableAutoConversion(STDOUT_FILENO)));
-#endif
+  ExitOnErr(error_ಸಂಕೇತ_ಗಮ್ಯ_Error(llvm::enableAutoConversion(STDERR_FILENO)));
+  ExitOnErr(error_ಸಂಕೇತ_ಗಮ್ಯ_Error(llvm::enableAutoConversion(STDOUT_FILENO)));
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef _WIN32
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
   // We use UTF-8 as the internal character encoding. On Windows,
   // arguments passed to main() may not be encoded in UTF-8. In order
   // to reliably detect encoding of command line arguments, we use an
@@ -130,18 +130,18 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
   std::string Banner = std::string(Argv[0]) + ": ";
   ExitOnError ExitOnErr(Banner);
 
-  ExitOnErr(errorCodeToError(windows::GetCommandLineArguments(Args, Alloc)));
+  ExitOnErr(error_ಸಂಕೇತ_ಗಮ್ಯ_Error(windows::Get_Command_ಸಾಲು_Arguments(ವಾದಗಳು, Alloc)));
 
   // GetCommandLineArguments doesn't terminate the vector with a
   // nullptr.  Do it to make it compatible with the real argv.
-  Args.push_back(nullptr);
+  ವಾದಗಳು.ತಳ್ಳು_ಹಿಂಭಾಗ(ಶೂನ್ಯಸೂಚಕ);
 
-  Argc = Args.size() - 1;
-  Argv = Args.data();
-#endif
+  Argc = ವಾದಗಳು.ಗಾತ್ರ_3() - 1;
+  Argv = ವಾದಗಳು.ದತ್ತಾಂಶ();
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
 InitLLVM::~InitLLVM() {
-  CleanupStdHandles(nullptr);
+  CleanupStdHandles(ಶೂನ್ಯಸೂಚಕ);
   llvm_shutdown();
 }

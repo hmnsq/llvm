@@ -11,137 +11,137 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_socket_stream.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/FileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_socket_stream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Error.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileSystem.h"
 
-#include <atomic>
-#include <fcntl.h>
-#include <functional>
+#ಅನ್ತರ್ಭಾವ <atomic>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <functional>
 
-#ifndef _WIN32
-#include <poll.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#else
-#include "llvm/Support/Windows/WindowsSupport.h"
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ _WIN32
+#ಅನ್ತರ್ಭಾವ <poll.h>
+#ಅನ್ತರ್ಭಾವ <sys/socket.h>
+#ಅನ್ತರ್ಭಾವ <sys/un.h>
+#ಇಲ್ಲದಿದ್ದರೆ
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Windows/WindowsSupport.h"
 // winsock2.h must be included before afunix.h. Briefly turn off clang-format to
 // avoid error.
 // clang-format off
-#include <winsock2.h>
-#include <afunix.h>
+#ಅನ್ತರ್ಭಾವ <winsock2.h>
+#ಅನ್ತರ್ಭಾವ <afunix.h>
 // clang-format on
-#include <io.h>
-#endif // _WIN32
+#ಅನ್ತರ್ಭಾವ <io.h>
+#ಆದರೆ_ಅಂತ್ಯ // _WIN32
 
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
+#ಆದರೆ defined(HAVE_UNISTD_H)
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-#ifdef _WIN32
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
 WSABalancer::WSABalancer() {
-  WSADATA WsaData;
-  ::memset(&WsaData, 0, sizeof(WsaData));
-  if (WSAStartup(MAKEWORD(2, 2), &WsaData) != 0) {
+  WSADATA Wsa_ದತ್ತಾಂಶ;
+  ::memset(&Wsa_ದತ್ತಾಂಶ, 0, ಗಾತ್ರ(Wsa_ದತ್ತಾಂಶ));
+  ಆದರೆ (WSAStartup(MAKEWORD(2, 2), &Wsa_ದತ್ತಾಂಶ) != 0) {
     llvm::report_fatal_error("WSAStartup failed");
   }
 }
 
 WSABalancer::~WSABalancer() { WSACleanup(); }
-#endif // _WIN32
+#ಆದರೆ_ಅಂತ್ಯ // _WIN32
 
-static std::error_code getLastSocketErrorCode() {
-#ifdef _WIN32
-  return std::error_code(::WSAGetLastError(), std::system_category());
-#else
-  return errnoAsErrorCode();
-#endif
+ಸ್ಥಿರ std::error_ಸಂಕೇತ get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ() {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  ಹಿಂತಿರುಗಿ std::error_ಸಂಕೇತ(::WSAGet_ಕೊನೆಯ_Error(), std::system_category());
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಹಿಂತಿರುಗಿ errno_As_Error_ಸಂಕೇತ();
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-#ifdef _WIN32
-using NativeSocket = SOCKET;
-#else
-using NativeSocket = int;
-#define INVALID_SOCKET -1
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+ಬಳಸಿ NativeSocket = SOCKET;
+#ಇಲ್ಲದಿದ್ದರೆ
+ಬಳಸಿ NativeSocket = ಪೂರ್ಣಾಂಕ;
+#ವ್ಯಾಖ್ಯಾನಿಸು INVALID_SOCKET -1
+#ಆದರೆ_ಅಂತ್ಯ
 
-static int closeSocket(NativeSocket Socket) {
-#ifdef _WIN32
-  return ::closesocket(Socket);
-#else
-  return ::close(Socket);
-#endif
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ closeSocket(NativeSocket Socket) {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  ಹಿಂತಿರುಗಿ ::closesocket(Socket);
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಹಿಂತಿರುಗಿ ::close(Socket);
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-static Expected<sockaddr_un> setSocketAddr(StringRef SocketPath) {
-  struct sockaddr_un Addr;
-  memset(&Addr, 0, sizeof(Addr));
+ಸ್ಥಿರ Expected<sockaddr_un> ಗಣ_Socket_Addr(StringRef Socket_ಮಾರ್ಗ) {
+  ರಚನೆ sockaddr_un Addr;
+  memset(&Addr, 0, ಗಾತ್ರ(Addr));
   Addr.sun_family = AF_UNIX;
 
-  if (sizeof(sockaddr_un::sun_path) <= SocketPath.size())
-    return make_error<StringError>(
-        std::make_error_code(std::errc::filename_too_long),
+  ಆದರೆ (ಗಾತ್ರ(sockaddr_un::sun_ಮಾರ್ಗ) <= Socket_ಮಾರ್ಗ.ಗಾತ್ರ_3())
+    ಹಿಂತಿರುಗಿ make_error<StringError>(
+        std::make_error_ಸಂಕೇತ(std::errc::filename_too_long),
         "Socket path exceeds sockaddr_un::sun_path size limit");
 
-  strncpy(Addr.sun_path, SocketPath.str().c_str(), sizeof(Addr.sun_path) - 1);
-  return Addr;
+  strncpy(Addr.sun_ಮಾರ್ಗ, Socket_ಮಾರ್ಗ.str().c_str(), ಗಾತ್ರ(Addr.sun_ಮಾರ್ಗ) - 1);
+  ಹಿಂತಿರುಗಿ Addr;
 }
 
-static Expected<int> getSocketFD(StringRef SocketPath) {
-  NativeSocket Socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (Socket == INVALID_SOCKET) {
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+ಸ್ಥಿರ Expected<ಪೂರ್ಣಾಂಕ> getSocketFD(StringRef Socket_ಮಾರ್ಗ) {
+  NativeSocket Socket = socket(AF_UNIX, SOCK_ಹರಿವು, 0);
+  ಆದರೆ (Socket == INVALID_SOCKET) {
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ(),
                                          "Create socket failed");
   }
 
-#ifdef __CYGWIN__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __CYGWIN__
   // On Cygwin, UNIX sockets involve a handshake between connect and accept
   // to enable SO_PEERCRED/getpeereid handling.  This necessitates accept being
   // called before connect can return, but at least the tests in
   // llvm/unittests/Support/raw_socket_stream_test do both on the same thread
   // (first connect and then accept), resulting in a deadlock.  This call turns
   // off the handshake (and SO_PEERCRED/getpeereid support).
-  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, NULL, 0);
-#endif
-  Expected<struct sockaddr_un> Addr = setSocketAddr(SocketPath);
-  if (!Addr) {
+  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, ಖಾಲಿ, 0);
+#ಆದರೆ_ಅಂತ್ಯ
+  Expected<ರಚನೆ sockaddr_un> Addr = ಗಣ_Socket_Addr(Socket_ಮಾರ್ಗ);
+  ಆದರೆ (!Addr) {
     closeSocket(Socket);
-    return Addr.takeError();
+    ಹಿಂತಿರುಗಿ Addr.takeError();
   }
 
-  if (::connect(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
+  ಆದರೆ (::connect(Socket, (ರಚನೆ sockaddr *)&*Addr, ಗಾತ್ರ(*Addr)) == -1) {
     // Grab the error code before closing, which may overwrite it.
-    std::error_code EC = getLastSocketErrorCode();
+    std::error_ಸಂಕೇತ EC = get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ();
     closeSocket(Socket);
-    return llvm::make_error<StringError>(EC, "Connect socket failed");
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(EC, "Connect socket failed");
   }
 
-#ifdef _WIN32
-  return _open_osfhandle(Socket, 0);
-#else
-  return Socket;
-#endif // _WIN32
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  ಹಿಂತಿರುಗಿ _open_osfhandle(Socket, 0);
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಹಿಂತಿರುಗಿ Socket;
+#ಆದರೆ_ಅಂತ್ಯ // _WIN32
 }
 
-ListeningSocket::ListeningSocket(int SocketFD, StringRef SocketPath,
-                                 int PipeFD[2])
-    : FD(SocketFD), SocketPath(SocketPath), PipeFD{PipeFD[0], PipeFD[1]} {}
+ListeningSocket::ListeningSocket(ಪೂರ್ಣಾಂಕ SocketFD, StringRef Socket_ಮಾರ್ಗ,
+                                 ಪೂರ್ಣಾಂಕ PipeFD[2])
+    : FD(SocketFD), Socket_ಮಾರ್ಗ(Socket_ಮಾರ್ಗ), PipeFD{PipeFD[0], PipeFD[1]} {}
 
 ListeningSocket::ListeningSocket(ListeningSocket &&LS)
-    : FD(LS.FD.load()), SocketPath(LS.SocketPath),
+    : FD(LS.FD.ತುಂಬು()), Socket_ಮಾರ್ಗ(LS.Socket_ಮಾರ್ಗ),
       PipeFD{LS.PipeFD[0], LS.PipeFD[1]} {
 
   LS.FD = -1;
-  LS.SocketPath.clear();
+  LS.Socket_ಮಾರ್ಗ.clear();
   LS.PipeFD[0] = -1;
   LS.PipeFD[1] = -1;
 }
 
-Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
-                                                      int MaxBacklog) {
+Expected<ListeningSocket> ListeningSocket::createUnix(StringRef Socket_ಮಾರ್ಗ,
+                                                      ಪೂರ್ಣಾಂಕ MaxBacklog) {
 
   // Handle instances where the target socket address already exists and
   // differentiate between a preexisting file with and without a bound socket
@@ -149,76 +149,76 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
   // ::bind will return std::errc:address_in_use if a file at the socket address
   // already exists (e.g., the file was not properly unlinked due to a crash)
   // even if another socket has not yet binded to that address
-  if (llvm::sys::fs::exists(SocketPath)) {
-    Expected<int> MaybeFD = getSocketFD(SocketPath);
-    if (!MaybeFD) {
+  ಆದರೆ (llvm::sys::fs::exists(Socket_ಮಾರ್ಗ)) {
+    Expected<ಪೂರ್ಣಾಂಕ> MaybeFD = getSocketFD(Socket_ಮಾರ್ಗ);
+    ಆದರೆ (!MaybeFD) {
 
       // Regardless of the error, notify the caller that a file already exists
       // at the desired socket address and that there is no bound socket at that
       // address. The file must be removed before ::bind can use the address
       consumeError(MaybeFD.takeError());
-      return llvm::make_error<StringError>(
-          std::make_error_code(std::errc::file_exists),
+      ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(
+          std::make_error_ಸಂಕೇತ(std::errc::file_exists),
           "Socket address unavailable");
     }
     ::close(std::move(*MaybeFD));
 
     // Notify caller that the provided socket address already has a bound socket
-    return llvm::make_error<StringError>(
-        std::make_error_code(std::errc::address_in_use),
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(
+        std::make_error_ಸಂಕೇತ(std::errc::ವಿಳಾಸ_ಒಳ_use),
         "Socket address unavailable");
   }
 
-#ifdef _WIN32
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
   WSABalancer _;
-#endif
-  NativeSocket Socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (Socket == INVALID_SOCKET)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+#ಆದರೆ_ಅಂತ್ಯ
+  NativeSocket Socket = socket(AF_UNIX, SOCK_ಹರಿವು, 0);
+  ಆದರೆ (Socket == INVALID_SOCKET)
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ(),
                                          "socket create failed");
 
-#ifdef __CYGWIN__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __CYGWIN__
   // On Cygwin, UNIX sockets involve a handshake between connect and accept
   // to enable SO_PEERCRED/getpeereid handling.  This necessitates accept being
   // called before connect can return, but at least the tests in
   // llvm/unittests/Support/raw_socket_stream_test do both on the same thread
   // (first connect and then accept), resulting in a deadlock.  This call turns
   // off the handshake (and SO_PEERCRED/getpeereid support).
-  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, NULL, 0);
-#endif
-  Expected<struct sockaddr_un> Addr = setSocketAddr(SocketPath);
-  if (!Addr) {
+  setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, ಖಾಲಿ, 0);
+#ಆದರೆ_ಅಂತ್ಯ
+  Expected<ರಚನೆ sockaddr_un> Addr = ಗಣ_Socket_Addr(Socket_ಮಾರ್ಗ);
+  ಆದರೆ (!Addr) {
     closeSocket(Socket);
-    return Addr.takeError();
+    ಹಿಂತಿರುಗಿ Addr.takeError();
   }
 
-  if (::bind(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
+  ಆದರೆ (::bind(Socket, (ರಚನೆ sockaddr *)&*Addr, ಗಾತ್ರ(*Addr)) == -1) {
     // Grab error code from call to ::bind before closing the socket
-    std::error_code EC = getLastSocketErrorCode();
+    std::error_ಸಂಕೇತ EC = get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ();
     closeSocket(Socket);
-    return llvm::make_error<StringError>(EC, "Bind error");
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(EC, "Bind error");
   }
 
   // Mark socket as passive so incoming connections can be accepted
-  if (::listen(Socket, MaxBacklog) == -1)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  ಆದರೆ (::listen(Socket, MaxBacklog) == -1)
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ(),
                                          "Listen error");
 
-  int PipeFD[2];
-#ifdef _WIN32
+  ಪೂರ್ಣಾಂಕ PipeFD[2];
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
   // Reserve 1 byte for the pipe and use default textmode
-  if (::_pipe(PipeFD, 1, 0) == -1)
-#else
-  if (::pipe(PipeFD) == -1)
-#endif // _WIN32
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  ಆದರೆ (::_pipe(PipeFD, 1, 0) == -1)
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಆದರೆ (::ಪ್ರಣಾಲ(PipeFD) == -1)
+#ಆದರೆ_ಅಂತ್ಯ // _WIN32
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ(),
                                          "pipe failed");
 
-#ifdef _WIN32
-  return ListeningSocket{_open_osfhandle(Socket, 0), SocketPath, PipeFD};
-#else
-  return ListeningSocket{Socket, SocketPath, PipeFD};
-#endif // _WIN32
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  ಹಿಂತಿರುಗಿ ListeningSocket{_open_osfhandle(Socket, 0), Socket_ಮಾರ್ಗ, PipeFD};
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಹಿಂತಿರುಗಿ ListeningSocket{Socket, Socket_ಮಾರ್ಗ, PipeFD};
+#ಆದರೆ_ಅಂತ್ಯ // _WIN32
 }
 
 // If a file descriptor being monitored by ::poll is closed by another thread,
@@ -230,111 +230,111 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
 // Timeout should be -1 to block indefinitly
 //
 // getActiveFD is a callback to handle ActiveFD's of std::atomic<int> and int
-static std::error_code
-manageTimeout(const std::chrono::milliseconds &Timeout,
-              const std::function<int()> &getActiveFD,
-              const std::optional<int> &CancelFD = std::nullopt) {
-  struct pollfd FD[2];
+ಸ್ಥಿರ std::error_ಸಂಕೇತ
+manageTimeout(ಸ್ಥಿರಾಂಕ std::chrono::milliseconds &Timeout,
+              ಸ್ಥಿರಾಂಕ std::function<ಪೂರ್ಣಾಂಕ()> &get_ಸಕ್ರಿಯ_FD,
+              ಸ್ಥಿರಾಂಕ std::optional<ಪೂರ್ಣಾಂಕ> &CancelFD = std::nullopt) {
+  ರಚನೆ pollfd FD[2];
   FD[0].events = POLLIN;
-#ifdef _WIN32
-  SOCKET WinServerSock = _get_osfhandle(getActiveFD());
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  SOCKET WinServerSock = _get_osfhandle(get_ಸಕ್ರಿಯ_FD());
   FD[0].fd = WinServerSock;
-#else
-  FD[0].fd = getActiveFD();
-#endif
+#ಇಲ್ಲದಿದ್ದರೆ
+  FD[0].fd = get_ಸಕ್ರಿಯ_FD();
+#ಆದರೆ_ಅಂತ್ಯ
   uint8_t FDCount = 1;
-  if (CancelFD.has_value()) {
+  ಆದರೆ (CancelFD.has_ಮೌಲ್ಯ_2()) {
     FD[1].events = POLLIN;
-    FD[1].fd = CancelFD.value();
+    FD[1].fd = CancelFD.ಮೌಲ್ಯ_2();
     FDCount++;
   }
 
   // Keep track of how much time has passed in case ::poll or WSAPoll are
   // interupted by a signal and need to be recalled
-  auto Start = std::chrono::steady_clock::now();
-  auto RemainingTimeout = Timeout;
-  int PollStatus = 0;
-  do {
+  ಸ್ವಯಂಚಾಲಿತ ಆರಂಭ = std::chrono::steady_clock::now();
+  ಸ್ವಯಂಚಾಲಿತ ಉಳಿದ_Timeout = Timeout;
+  ಪೂರ್ಣಾಂಕ Poll_ಸ್ಥಿತಿ = 0;
+  ಮಾಡು {
     // If Timeout is -1 then poll should block and RemainingTimeout does not
     // need to be recalculated
-    if (PollStatus != 0 && Timeout != std::chrono::milliseconds(-1)) {
-      auto TotalElapsedTime =
+    ಆದರೆ (Poll_ಸ್ಥಿತಿ != 0 && Timeout != std::chrono::milliseconds(-1)) {
+      ಸ್ವಯಂಚಾಲಿತ ಒಟ್ಟು_Elapsed_ಸಮಯ =
           std::chrono::duration_cast<std::chrono::milliseconds>(
-              std::chrono::steady_clock::now() - Start);
+              std::chrono::steady_clock::now() - ಆರಂಭ);
 
-      if (TotalElapsedTime >= Timeout)
-        return std::make_error_code(std::errc::operation_would_block);
+      ಆದರೆ (ಒಟ್ಟು_Elapsed_ಸಮಯ >= Timeout)
+        ಹಿಂತಿರುಗಿ std::make_error_ಸಂಕೇತ(std::errc::operation_would_ಖಂಡ);
 
-      RemainingTimeout = Timeout - TotalElapsedTime;
+      ಉಳಿದ_Timeout = Timeout - ಒಟ್ಟು_Elapsed_ಸಮಯ;
     }
-#ifdef _WIN32
-    PollStatus = WSAPoll(FD, FDCount, RemainingTimeout.count());
-  } while (PollStatus == SOCKET_ERROR &&
-           getLastSocketErrorCode() == std::errc::interrupted);
-#else
-    PollStatus = ::poll(FD, FDCount, RemainingTimeout.count());
-  } while (PollStatus == -1 &&
-           getLastSocketErrorCode() == std::errc::interrupted);
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+    Poll_ಸ್ಥಿತಿ = WSAPoll(FD, FDCount, ಉಳಿದ_Timeout.ಎಣಿಕೆ_2());
+  } ಆಗ (Poll_ಸ್ಥಿತಿ == SOCKET_ERROR &&
+           get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ() == std::errc::interrupted);
+#ಇಲ್ಲದಿದ್ದರೆ
+    Poll_ಸ್ಥಿತಿ = ::poll(FD, FDCount, ಉಳಿದ_Timeout.ಎಣಿಕೆ_2());
+  } ಆಗ (Poll_ಸ್ಥಿತಿ == -1 &&
+           get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ() == std::errc::interrupted);
+#ಆದರೆ_ಅಂತ್ಯ
 
   // If ActiveFD equals -1 or CancelFD has data to be read then the operation
   // has been canceled by another thread
-  if (getActiveFD() == -1 || (CancelFD.has_value() && FD[1].revents & POLLIN))
-    return std::make_error_code(std::errc::operation_canceled);
-#ifdef _WIN32
-  if (PollStatus == SOCKET_ERROR)
-#else
-  if (PollStatus == -1)
-#endif
-    return getLastSocketErrorCode();
-  if (PollStatus == 0)
-    return std::make_error_code(std::errc::timed_out);
-  if (FD[0].revents & POLLNVAL)
-    return std::make_error_code(std::errc::bad_file_descriptor);
-  return std::error_code();
+  ಆದರೆ (get_ಸಕ್ರಿಯ_FD() == -1 || (CancelFD.has_ಮೌಲ್ಯ_2() && FD[1].revents & POLLIN))
+    ಹಿಂತಿರುಗಿ std::make_error_ಸಂಕೇತ(std::errc::operation_canceled);
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  ಆದರೆ (Poll_ಸ್ಥಿತಿ == SOCKET_ERROR)
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಆದರೆ (Poll_ಸ್ಥಿತಿ == -1)
+#ಆದರೆ_ಅಂತ್ಯ
+    ಹಿಂತಿರುಗಿ get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ();
+  ಆದರೆ (Poll_ಸ್ಥಿತಿ == 0)
+    ಹಿಂತಿರುಗಿ std::make_error_ಸಂಕೇತ(std::errc::timed_ಹೊರಹೋಗು);
+  ಆದರೆ (FD[0].revents & POLLNVAL)
+    ಹಿಂತಿರುಗಿ std::make_error_ಸಂಕೇತ(std::errc::bad_file_descriptor);
+  ಹಿಂತಿರುಗಿ std::error_ಸಂಕೇತ();
 }
 
-Expected<std::unique_ptr<raw_socket_stream>>
-ListeningSocket::accept(const std::chrono::milliseconds &Timeout) {
-  auto getActiveFD = [this]() -> int { return FD; };
-  std::error_code TimeoutErr = manageTimeout(Timeout, getActiveFD, PipeFD[0]);
-  if (TimeoutErr)
-    return llvm::make_error<StringError>(TimeoutErr, "Timeout error");
+Expected<std::unique_ptr<raw_socket_ಹರಿವು>>
+ListeningSocket::accept(ಸ್ಥಿರಾಂಕ std::chrono::milliseconds &Timeout) {
+  ಸ್ವಯಂಚಾಲಿತ get_ಸಕ್ರಿಯ_FD = [ಇದು]() -> ಪೂರ್ಣಾಂಕ { ಹಿಂತಿರುಗಿ FD; };
+  std::error_ಸಂಕೇತ TimeoutErr = manageTimeout(Timeout, get_ಸಕ್ರಿಯ_FD, PipeFD[0]);
+  ಆದರೆ (TimeoutErr)
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(TimeoutErr, "Timeout error");
 
-  int AcceptFD;
-#ifdef _WIN32
-  SOCKET WinAcceptSock = ::accept(_get_osfhandle(FD), NULL, NULL);
+  ಪೂರ್ಣಾಂಕ AcceptFD;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+  SOCKET WinAcceptSock = ::accept(_get_osfhandle(FD), ಖಾಲಿ, ಖಾಲಿ);
   AcceptFD = _open_osfhandle(WinAcceptSock, 0);
-#else
-  AcceptFD = ::accept(FD, NULL, NULL);
-#endif
+#ಇಲ್ಲದಿದ್ದರೆ
+  AcceptFD = ::accept(FD, ಖಾಲಿ, ಖಾಲಿ);
+#ಆದರೆ_ಅಂತ್ಯ
 
-  if (AcceptFD == -1)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  ಆದರೆ (AcceptFD == -1)
+    ಹಿಂತಿರುಗಿ llvm::make_error<StringError>(get_ಕೊನೆಯ_Socket_Error_ಸಂಕೇತ(),
                                          "Socket accept failed");
-  return std::make_unique<raw_socket_stream>(AcceptFD);
+  ಹಿಂತಿರುಗಿ std::make_unique<raw_socket_ಹರಿವು>(AcceptFD);
 }
 
-void ListeningSocket::shutdown() {
-  int ObservedFD = FD.load();
+ಶೂನ್ಯ ListeningSocket::shutdown() {
+  ಪೂರ್ಣಾಂಕ ObservedFD = FD.ತುಂಬು();
 
-  if (ObservedFD == -1)
-    return;
+  ಆದರೆ (ObservedFD == -1)
+    ಹಿಂತಿರುಗಿ;
 
   // If FD equals ObservedFD set FD to -1; If FD doesn't equal ObservedFD then
   // another thread is responsible for shutdown so return
-  if (!FD.compare_exchange_strong(ObservedFD, -1))
-    return;
+  ಆದರೆ (!FD.compare_exchange_strong(ObservedFD, -1))
+    ಹಿಂತಿರುಗಿ;
 
   ::close(ObservedFD);
-  ::unlink(SocketPath.c_str());
+  ::unlink(Socket_ಮಾರ್ಗ.c_str());
 
   // Ensure ::poll returns if shutdown is called by a separate thread
-  char Byte = 'A';
-  ssize_t written = ::write(PipeFD[1], &Byte, 1);
+  ಅಕ್ಷರ Byte = 'A';
+  ssize_t written = ::ಲಿಖ(PipeFD[1], &Byte, 1);
 
   // Ignore any write() error
-  (void)written;
+  (ಶೂನ್ಯ)written;
 }
 
 ListeningSocket::~ListeningSocket() {
@@ -345,9 +345,9 @@ ListeningSocket::~ListeningSocket() {
   // would occur as PipeFD's values would have to be changed to -1
   //
   // The move constructor sets PipeFD to -1
-  if (PipeFD[0] != -1)
+  ಆದರೆ (PipeFD[0] != -1)
     ::close(PipeFD[0]);
-  if (PipeFD[1] != -1)
+  ಆದರೆ (PipeFD[1] != -1)
     ::close(PipeFD[1]);
 }
 
@@ -355,30 +355,30 @@ ListeningSocket::~ListeningSocket() {
 //  raw_socket_stream
 //===----------------------------------------------------------------------===//
 
-raw_socket_stream::raw_socket_stream(int SocketFD)
-    : raw_fd_stream(SocketFD, true) {}
+raw_socket_ಹರಿವು::raw_socket_ಹರಿವು(ಪೂರ್ಣಾಂಕ SocketFD)
+    : raw_fd_ಹರಿವು(SocketFD, ನಿಜ) {}
 
-raw_socket_stream::~raw_socket_stream() = default;
+raw_socket_ಹರಿವು::~raw_socket_ಹರಿವು() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-Expected<std::unique_ptr<raw_socket_stream>>
-raw_socket_stream::createConnectedUnix(StringRef SocketPath) {
-#ifdef _WIN32
+Expected<std::unique_ptr<raw_socket_ಹರಿವು>>
+raw_socket_ಹರಿವು::createConnectedUnix(StringRef Socket_ಮಾರ್ಗ) {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
   WSABalancer _;
-#endif // _WIN32
-  Expected<int> FD = getSocketFD(SocketPath);
-  if (!FD)
-    return FD.takeError();
-  return std::make_unique<raw_socket_stream>(*FD);
+#ಆದರೆ_ಅಂತ್ಯ // _WIN32
+  Expected<ಪೂರ್ಣಾಂಕ> FD = getSocketFD(Socket_ಮಾರ್ಗ);
+  ಆದರೆ (!FD)
+    ಹಿಂತಿರುಗಿ FD.takeError();
+  ಹಿಂತಿರುಗಿ std::make_unique<raw_socket_ಹರಿವು>(*FD);
 }
 
-ssize_t raw_socket_stream::read(char *Ptr, size_t Size,
-                                const std::chrono::milliseconds &Timeout) {
-  auto getActiveFD = [this]() -> int { return this->get_fd(); };
-  std::error_code Err = manageTimeout(Timeout, getActiveFD);
+ssize_t raw_socket_ಹರಿವು::ಪಠ(ಅಕ್ಷರ *Ptr, size_t ಗಾತ್ರ_2,
+                                ಸ್ಥಿರಾಂಕ std::chrono::milliseconds &Timeout) {
+  ಸ್ವಯಂಚಾಲಿತ get_ಸಕ್ರಿಯ_FD = [ಇದು]() -> ಪೂರ್ಣಾಂಕ { ಹಿಂತಿರುಗಿ ಇದು->get_fd(); };
+  std::error_ಸಂಕೇತ Err = manageTimeout(Timeout, get_ಸಕ್ರಿಯ_FD);
   // Mimic raw_fd_stream::read error handling behavior
-  if (Err) {
-    raw_fd_stream::error_detected(Err);
-    return -1;
+  ಆದರೆ (Err) {
+    raw_fd_ಹರಿವು::error_detected(Err);
+    ಹಿಂತಿರುಗಿ -1;
   }
-  return raw_fd_stream::read(Ptr, Size);
+  ಹಿಂತಿರುಗಿ raw_fd_ಹರಿವು::ಪಠ(Ptr, ಗಾತ್ರ_2);
 }

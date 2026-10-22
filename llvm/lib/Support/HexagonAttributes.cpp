@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributes.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/HexagonAttributes.h"
 
-using namespace llvm;
-using namespace llvm::HexagonAttrs;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::HexagonAttrs;
 
-static constexpr TagNameItem TagData[] = {
+ಸ್ಥಿರ constexpr ಟ್ಯಾಗ್_Name_ಅಂಶ ಟ್ಯಾಗ್_ದತ್ತಾಂಶ_2[] = {
     {ARCH, "Tag_arch"},
     {HVXARCH, "Tag_hvx_arch"},
     {HVXIEEEFP, "Tag_hvx_ieeefp"},
@@ -21,7 +21,7 @@ static constexpr TagNameItem TagData[] = {
     {CABAC, "Tag_cabac"},
 };
 
-constexpr TagNameMap HexagonAttributeTags{TagData};
-const TagNameMap &llvm::HexagonAttrs::getHexagonAttributeTags() {
-  return HexagonAttributeTags;
+constexpr ಟ್ಯಾಗ್_Name_Map Hexagon_Attribute_ಟ್ಯಾಗುಗಳು{ಟ್ಯಾಗ್_ದತ್ತಾಂಶ_2};
+ಸ್ಥಿರಾಂಕ ಟ್ಯಾಗ್_Name_Map &llvm::HexagonAttrs::get_Hexagon_Attribute_ಟ್ಯಾಗುಗಳು() {
+  ಹಿಂತಿರುಗಿ Hexagon_Attribute_ಟ್ಯಾಗುಗಳು;
 }

@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/StringSaver.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/StringSaver.h"
 
-#include "llvm/ADT/SmallString.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallString.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
 StringRef StringSaver::save(StringRef S) {
-  char *P = Alloc.Allocate<char>(S.size() + 1);
-  if (!S.empty())
-    memcpy(P, S.data(), S.size());
-  P[S.size()] = '\0';
-  return StringRef(P, S.size());
+  ಅಕ್ಷರ *P = Alloc.Allocate<ಅಕ್ಷರ>(S.ಗಾತ್ರ_3() + 1);
+  ಆದರೆ (!S.ಖಾಲಿಗಳು())
+    ಸ್ಮರಣೆ_ನಕಲು(P, S.ದತ್ತಾಂಶ(), S.ಗಾತ್ರ_3());
+  P[S.ಗಾತ್ರ_3()] = '\0';
+  ಹಿಂತಿರುಗಿ StringRef(P, S.ಗಾತ್ರ_3());
 }
 
-StringRef StringSaver::save(const Twine &S) {
+StringRef StringSaver::save(ಸ್ಥಿರಾಂಕ Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  ಹಿಂತಿರುಗಿ save(S.ಗಮ್ಯ_String_Ref(Storage));
 }
 
 StringRef UniqueStringSaver::save(StringRef S) {
-  auto R = Unique.insert(S);
-  if (R.second)                 // cache miss, need to actually save the string
-    *R.first = Strings.save(S); // safe replacement with equal value
-  return *R.first;
+  ಸ್ವಯಂಚಾಲಿತ R = Unique.ಸೇರಿಸು(S);
+  ಆದರೆ (R.ಎರಡನೇ_2)                 // cache miss, need to actually save the string
+    *R.ಮೊದಲ_2 = ಅಕ್ಷರಸರಣಿಗಳು_2.save(S); // safe replacement with equal value
+  ಹಿಂತಿರುಗಿ *R.ಮೊದಲ_2;
 }
 
-StringRef UniqueStringSaver::save(const Twine &S) {
+StringRef UniqueStringSaver::save(ಸ್ಥಿರಾಂಕ Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  ಹಿಂತಿರುಗಿ save(S.ಗಮ್ಯ_String_Ref(Storage));
 }

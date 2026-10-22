@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LEB128.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LEB128.h"
 
-namespace llvm {
+ನಾಮಾಕಾಶ llvm {
 
 /// Utility function to get the size of the ULEB128-encoded value.
-unsigned getULEB128Size(uint64_t Value) {
-  unsigned Size = 0;
-  do {
-    Value >>= 7;
-    Size += sizeof(int8_t);
-  } while (Value);
-  return Size;
+ಚಿಹ್ನೆರಹಿತ get_ULEB128_ಗಾತ್ರ(uint64_t ಮೌಲ್ಯ) {
+  ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_2 = 0;
+  ಮಾಡು {
+    ಮೌಲ್ಯ >>= 7;
+    ಗಾತ್ರ_2 += ಗಾತ್ರ(int8_t);
+  } ಆಗ (ಮೌಲ್ಯ);
+  ಹಿಂತಿರುಗಿ ಗಾತ್ರ_2;
 }
 
 /// Utility function to get the size of the SLEB128-encoded value.
-unsigned getSLEB128Size(int64_t Value) {
-  unsigned Size = 0;
-  int Sign = Value >> (8 * sizeof(Value) - 1);
-  bool IsMore;
+ಚಿಹ್ನೆರಹಿತ get_SLEB128_ಗಾತ್ರ(int64_t ಮೌಲ್ಯ) {
+  ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_2 = 0;
+  ಪೂರ್ಣಾಂಕ Sign = ಮೌಲ್ಯ >> (8 * ಗಾತ್ರ(ಮೌಲ್ಯ) - 1);
+  ತಾರ್ಕಿಕ Is_ಇನ್ನಷ್ಟು;
 
-  do {
-    unsigned Byte = Value & 0x7f;
-    Value >>= 7;
-    IsMore = Value != Sign || ((Byte ^ Sign) & 0x40) != 0;
-    Size += sizeof(int8_t);
-  } while (IsMore);
-  return Size;
+  ಮಾಡು {
+    ಚಿಹ್ನೆರಹಿತ Byte = ಮೌಲ್ಯ & 0x7f;
+    ಮೌಲ್ಯ >>= 7;
+    Is_ಇನ್ನಷ್ಟು = ಮೌಲ್ಯ != Sign || ((Byte ^ Sign) & 0x40) != 0;
+    ಗಾತ್ರ_2 += ಗಾತ್ರ(int8_t);
+  } ಆಗ (Is_ಇನ್ನಷ್ಟು);
+  ಹಿಂತಿರುಗಿ ಗಾತ್ರ_2;
 }
 
 }  // namespace llvm

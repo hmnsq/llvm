@@ -6,400 +6,400 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdint>
-#include <cstring>
-#include <string>
-#include <vector>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/YAMLTraits.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/STLExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallString.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/Twine.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Casting.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Errc.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ErrorHandling.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Format.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LineIterator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MemoryBuffer.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VersionTuple.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/YAMLParser.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
+#ಅನ್ತರ್ಭಾವ <cstdint>
+#ಅನ್ತರ್ಭಾವ <cstring>
+#ಅನ್ತರ್ಭಾವ <string>
+#ಅನ್ತರ್ಭಾವ <vector>
 
-using namespace llvm;
-using namespace yaml;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ yaml;
 
 //===----------------------------------------------------------------------===//
 //  IO
 //===----------------------------------------------------------------------===//
 
-IO::IO(void *Context) : Ctxt(Context) {}
+IO::IO(ಶೂನ್ಯ *Context) : Ctxt(Context) {}
 
-IO::~IO() = default;
+IO::~IO() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-void *IO::getContext() const {
-  return Ctxt;
+ಶೂನ್ಯ *IO::getContext() ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ Ctxt;
 }
 
-void IO::setContext(void *Context) {
+ಶೂನ್ಯ IO::ಗಣ_Context(ಶೂನ್ಯ *Context) {
   Ctxt = Context;
 }
 
-void IO::setAllowUnknownKeys(bool Allow) {
+ಶೂನ್ಯ IO::ಗಣ_Allow_Unknown_ಕೀಲಿಗಳು(ತಾರ್ಕಿಕ Allow) {
   llvm_unreachable("Only supported for Input");
 }
 
 //===----------------------------------------------------------------------===//
-//  Input
+//ಒಳಹರಿವು
 //===----------------------------------------------------------------------===//
 
-Input::Input(StringRef InputContent, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(InputContent, SrcMgr, false, &EC)) {
-  if (DiagHandler)
-    SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
+ಒಳಹರಿವು::ಒಳಹರಿವು(StringRef ಒಳಹರಿವು_Content, ಶೂನ್ಯ *Ctxt,
+             ಮೂಲ_Mgr::DiagHandlerTy DiagHandler, ಶೂನ್ಯ *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(ಹೊಸ ಹರಿವು(ಒಳಹರಿವು_Content, SrcMgr, ಸುಳ್ಳು, &EC)) {
+  ಆದರೆ (DiagHandler)
+    SrcMgr.ಗಣ_Diag_Handler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::Input(MemoryBufferRef Input, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(Input, SrcMgr, false, &EC)) {
-  if (DiagHandler)
-    SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
+ಒಳಹರಿವು::ಒಳಹರಿವು(ಸ್ಮರಣೆ_ಬಫರ್_Ref ಒಳಹರಿವು, ಶೂನ್ಯ *Ctxt,
+             ಮೂಲ_Mgr::DiagHandlerTy DiagHandler, ಶೂನ್ಯ *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(ಹೊಸ ಹರಿವು(ಒಳಹರಿವು, SrcMgr, ಸುಳ್ಳು, &EC)) {
+  ಆದರೆ (DiagHandler)
+    SrcMgr.ಗಣ_Diag_Handler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::~Input() = default;
+ಒಳಹರಿವು::~ಒಳಹರಿವು() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-std::error_code Input::error() { return EC; }
+std::error_ಸಂಕೇತ ಒಳಹರಿವು::error() { ಹಿಂತಿರುಗಿ EC; }
 
-bool Input::outputting() const {
-  return false;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::outputting() ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-bool Input::setCurrentDocument() {
-  if (DocIterator != Strm->end()) {
-    Node *N = DocIterator->getRoot();
-    if (!N) {
-      EC = make_error_code(errc::invalid_argument);
-      return false;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::ಗಣ_Current_Document() {
+  ಆದರೆ (DocIterator != Strm->ಕೊನೆ()) {
+    ಗಂಟು *N = DocIterator->get_ಬೇರು();
+    ಆದರೆ (!N) {
+      EC = make_error_ಸಂಕೇತ(errc::invalid_ವಾದ);
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
 
-    if (isa<NullNode>(N)) {
+    ಆದರೆ (isa<Null_ಗಂಟು>(N)) {
       // Empty files are allowed and ignored
       ++DocIterator;
-      return setCurrentDocument();
+      ಹಿಂತಿರುಗಿ ಗಣ_Current_Document();
     }
     releaseHNodeBuffers();
-    TopNode = createHNodes(N);
-    CurrentNode = TopNode;
-    return true;
+    ತುದಿ_ಗಂಟು = createHNodes(N);
+    Current_ಗಂಟು = ತುದಿ_ಗಂಟು;
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-bool Input::nextDocument() {
-  return ++DocIterator != Strm->end();
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::ಮುಂದಿನ_Document() {
+  ಹಿಂತಿರುಗಿ ++DocIterator != Strm->ಕೊನೆ();
 }
 
-const Node *Input::getCurrentNode() const {
-  return CurrentNode ? CurrentNode->_node : nullptr;
+ಸ್ಥಿರಾಂಕ ಗಂಟು *ಒಳಹರಿವು::get_Current_ಗಂಟು() ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ Current_ಗಂಟು ? Current_ಗಂಟು->ಗಂಟು_2 : ಶೂನ್ಯಸೂಚಕ;
 }
 
-bool Input::mapTag(StringRef Tag, bool Default) {
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::map_ಟ್ಯಾಗ್(StringRef ಟ್ಯಾಗ್, ತಾರ್ಕಿಕ Default) {
   // CurrentNode can be null if setCurrentDocument() was unable to
   // parse the document because it was invalid or empty.
-  if (!CurrentNode)
-    return false;
+  ಆದರೆ (!Current_ಗಂಟು)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-  std::string foundTag = CurrentNode->_node->getVerbatimTag();
-  if (foundTag.empty()) {
+  std::string ಸಿಕ್ಕಿತು_ಟ್ಯಾಗ್ = Current_ಗಂಟು->ಗಂಟು_2->get_Verbatim_ಟ್ಯಾಗ್();
+  ಆದರೆ (ಸಿಕ್ಕಿತು_ಟ್ಯಾಗ್.ಖಾಲಿಗಳು()) {
     // If no tag found and 'Tag' is the default, say it was found.
-    return Default;
+    ಹಿಂತಿರುಗಿ Default;
   }
   // Return true iff found tag matches supplied tag.
-  return Tag == foundTag;
+  ಹಿಂತಿರುಗಿ ಟ್ಯಾಗ್ == ಸಿಕ್ಕಿತು_ಟ್ಯಾಗ್;
 }
 
-void Input::beginMapping() {
-  if (EC)
-    return;
+ಶೂನ್ಯ ಒಳಹರಿವು::beginMapping() {
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (MN) {
-    MN->ValidKeys.clear();
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_ಗಂಟು);
+  ಆದರೆ (MN) {
+    MN->Valid_ಕೀಲಿಗಳು.clear();
   }
 }
 
-std::vector<StringRef> Input::keys() {
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  std::vector<StringRef> Ret;
-  if (!MN) {
-    setError(CurrentNode, "not a mapping");
-    return Ret;
+std::ಸದಿಶ<StringRef> ಒಳಹರಿವು::ಕೀಲಿಗಳು() {
+  MapHNode *MN = dyn_cast<MapHNode>(Current_ಗಂಟು);
+  std::ಸದಿಶ<StringRef> Ret;
+  ಆದರೆ (!MN) {
+    ಗಣ_Error(Current_ಗಂಟು, "not a mapping");
+    ಹಿಂತಿರುಗಿ Ret;
   }
-  for (auto &P : MN->Mapping)
-    Ret.push_back(P.first());
-  return Ret;
+  ಗಾಗಿ (ಸ್ವಯಂಚಾಲಿತ &P : MN->Mapping)
+    Ret.ತಳ್ಳು_ಹಿಂಭಾಗ(P.ಮೊದಲ_2());
+  ಹಿಂತಿರುಗಿ Ret;
 }
 
-bool Input::preflightKey(StringRef Key, bool Required, bool, bool &UseDefault,
-                         void *&SaveInfo) {
-  UseDefault = false;
-  if (EC)
-    return false;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::preflight_ಕೀಲಿ(StringRef ಕೀಲಿ, ತಾರ್ಕಿಕ Required, ತಾರ್ಕಿಕ, ತಾರ್ಕಿಕ &UseDefault,
+                         ಶೂನ್ಯ *&SaveInfo) {
+  UseDefault = ಸುಳ್ಳು;
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
   // CurrentNode is null for empty documents, which is an error in case required
   // nodes are present.
-  if (!CurrentNode) {
-    if (Required)
-      EC = make_error_code(errc::invalid_argument);
-    else
-      UseDefault = true;
-    return false;
+  ಆದರೆ (!Current_ಗಂಟು) {
+    ಆದರೆ (Required)
+      EC = make_error_ಸಂಕೇತ(errc::invalid_ವಾದ);
+    ಇಲ್ಲದಿದ್ದರೆ
+      UseDefault = ನಿಜ;
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
 
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  if (!MN) {
-    if (Required || !isa<EmptyHNode>(CurrentNode))
-      setError(CurrentNode, "not a mapping");
-    else
-      UseDefault = true;
-    return false;
+  MapHNode *MN = dyn_cast<MapHNode>(Current_ಗಂಟು);
+  ಆದರೆ (!MN) {
+    ಆದರೆ (Required || !isa<ಖಾಲಿಗಳು_HNode>(Current_ಗಂಟು))
+      ಗಣ_Error(Current_ಗಂಟು, "not a mapping");
+    ಇಲ್ಲದಿದ್ದರೆ
+      UseDefault = ನಿಜ;
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
-  MN->ValidKeys.push_back(Key.str());
-  HNode *Value = MN->Mapping[Key].first;
-  if (!Value) {
-    if (Required)
-      setError(CurrentNode, Twine("missing required key '") + Key + "'");
-    else
-      UseDefault = true;
-    return false;
+  MN->Valid_ಕೀಲಿಗಳು.ತಳ್ಳು_ಹಿಂಭಾಗ(ಕೀಲಿ.str());
+  HNode *ಮೌಲ್ಯ = MN->Mapping[ಕೀಲಿ].ಮೊದಲ_2;
+  ಆದರೆ (!ಮೌಲ್ಯ) {
+    ಆದರೆ (Required)
+      ಗಣ_Error(Current_ಗಂಟು, Twine("missing required key '") + ಕೀಲಿ + "'");
+    ಇಲ್ಲದಿದ್ದರೆ
+      UseDefault = ನಿಜ;
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
-  SaveInfo = CurrentNode;
-  CurrentNode = Value;
-  return true;
+  SaveInfo = Current_ಗಂಟು;
+  Current_ಗಂಟು = ಮೌಲ್ಯ;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Input::postflightKey(void *saveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(saveInfo);
+ಶೂನ್ಯ ಒಳಹರಿವು::postflight_ಕೀಲಿ(ಶೂನ್ಯ *saveInfo) {
+  Current_ಗಂಟು = reinterpret_cast<HNode *>(saveInfo);
 }
 
-void Input::endMapping() {
-  if (EC)
-    return;
+ಶೂನ್ಯ ಒಳಹರಿವು::ಕೊನೆ_Mapping() {
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (!MN)
-    return;
-  for (const auto &NN : MN->Mapping) {
-    if (!is_contained(MN->ValidKeys, NN.first())) {
-      const SMRange &ReportLoc = NN.second.second;
-      if (!AllowUnknownKeys) {
-        setError(ReportLoc, Twine("unknown key '") + NN.first() + "'");
-        break;
-      } else
-        reportWarning(ReportLoc, Twine("unknown key '") + NN.first() + "'");
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_ಗಂಟು);
+  ಆದರೆ (!MN)
+    ಹಿಂತಿರುಗಿ;
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &NN : MN->Mapping) {
+    ಆದರೆ (!is_contained(MN->Valid_ಕೀಲಿಗಳು, NN.ಮೊದಲ_2())) {
+      ಸ್ಥಿರಾಂಕ SMRange &ReportLoc = NN.ಎರಡನೇ_2.ಎರಡನೇ_2;
+      ಆದರೆ (!Allow_Unknown_ಕೀಲಿಗಳು) {
+        ಗಣ_Error(ReportLoc, Twine("unknown key '") + NN.ಮೊದಲ_2() + "'");
+        ನಿಲ್ಲಿಸು;
+      } ಇಲ್ಲದಿದ್ದರೆ
+        reportWarning(ReportLoc, Twine("unknown key '") + NN.ಮೊದಲ_2() + "'");
     }
   }
 }
 
-void Input::beginFlowMapping() { beginMapping(); }
+ಶೂನ್ಯ ಒಳಹರಿವು::beginFlowMapping() { beginMapping(); }
 
-void Input::endFlowMapping() { endMapping(); }
+ಶೂನ್ಯ ಒಳಹರಿವು::ಕೊನೆ_Flow_Mapping() { ಕೊನೆ_Mapping(); }
 
-unsigned Input::beginSequence() {
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
-    return SQ->Entries.size();
-  if (isa<EmptyHNode>(CurrentNode))
-    return 0;
+ಚಿಹ್ನೆರಹಿತ ಒಳಹರಿವು::beginSequence() {
+  ಆದರೆ (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_ಗಂಟು))
+    ಹಿಂತಿರುಗಿ SQ->Entries.ಗಾತ್ರ_3();
+  ಆದರೆ (isa<ಖಾಲಿಗಳು_HNode>(Current_ಗಂಟು))
+    ಹಿಂತಿರುಗಿ 0;
   // Treat case where there's a scalar "null" value as an empty sequence.
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (isNull(SN->value()))
-      return 0;
+  ಆದರೆ (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_ಗಂಟು)) {
+    ಆದರೆ (isNull(SN->ಮೌಲ್ಯ_2()))
+      ಹಿಂತಿರುಗಿ 0;
   }
   // Any other type of HNode is an error.
-  setError(CurrentNode, "not a sequence");
-  return 0;
+  ಗಣ_Error(Current_ಗಂಟು, "not a sequence");
+  ಹಿಂತಿರುಗಿ 0;
 }
 
-void Input::endSequence() {
+ಶೂನ್ಯ ಒಳಹರಿವು::ಕೊನೆ_Sequence() {
 }
 
-bool Input::preflightElement(unsigned Index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[Index];
-    return true;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::preflightElement(ಚಿಹ್ನೆರಹಿತ ಸೂಚ್ಯಂಕ_2, ಶೂನ್ಯ *&SaveInfo) {
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  ಆದರೆ (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_ಗಂಟು)) {
+    SaveInfo = Current_ಗಂಟು;
+    Current_ಗಂಟು = SQ->Entries[ಸೂಚ್ಯಂಕ_2];
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-void Input::postflightElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+ಶೂನ್ಯ ಒಳಹರಿವು::postflightElement(ಶೂನ್ಯ *SaveInfo) {
+  Current_ಗಂಟು = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-unsigned Input::beginFlowSequence() { return beginSequence(); }
+ಚಿಹ್ನೆರಹಿತ ಒಳಹರಿವು::beginFlowSequence() { ಹಿಂತಿರುಗಿ beginSequence(); }
 
-bool Input::preflightFlowElement(unsigned index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[index];
-    return true;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::preflightFlowElement(ಚಿಹ್ನೆರಹಿತ ಸೂಚ್ಯಂಕ, ಶೂನ್ಯ *&SaveInfo) {
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  ಆದರೆ (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_ಗಂಟು)) {
+    SaveInfo = Current_ಗಂಟು;
+    Current_ಗಂಟು = SQ->Entries[ಸೂಚ್ಯಂಕ];
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-void Input::postflightFlowElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+ಶೂನ್ಯ ಒಳಹರಿವು::postflightFlowElement(ಶೂನ್ಯ *SaveInfo) {
+  Current_ಗಂಟು = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-void Input::endFlowSequence() {
+ಶೂನ್ಯ ಒಳಹರಿವು::ಕೊನೆ_Flow_Sequence() {
 }
 
-void Input::beginEnumScalar() {
-  ScalarMatchFound = false;
+ಶೂನ್ಯ ಒಳಹರಿವು::beginEnumScalar() {
+  Scalar_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು = ಸುಳ್ಳು;
 }
 
-bool Input::matchEnumScalar(StringRef Str, bool) {
-  if (ScalarMatchFound)
-    return false;
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (SN->value() == Str) {
-      ScalarMatchFound = true;
-      return true;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::ಹೊಂದಿಕೆ_Enum_Scalar(StringRef Str, ತಾರ್ಕಿಕ) {
+  ಆದರೆ (Scalar_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  ಆದರೆ (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_ಗಂಟು)) {
+    ಆದರೆ (SN->ಮೌಲ್ಯ_2() == Str) {
+      Scalar_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು = ನಿಜ;
+      ಹಿಂತಿರುಗಿ ನಿಜ;
     }
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-bool Input::matchEnumFallback() {
-  if (ScalarMatchFound)
-    return false;
-  ScalarMatchFound = true;
-  return true;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::ಹೊಂದಿಕೆ_Enum_Fallback() {
+  ಆದರೆ (Scalar_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  Scalar_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು = ನಿಜ;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Input::endEnumScalar() {
-  if (!ScalarMatchFound) {
-    setError(CurrentNode, "unknown enumerated scalar");
+ಶೂನ್ಯ ಒಳಹರಿವು::ಕೊನೆ_Enum_Scalar() {
+  ಆದರೆ (!Scalar_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು) {
+    ಗಣ_Error(Current_ಗಂಟು, "unknown enumerated scalar");
   }
 }
 
-bool Input::beginBitSetScalar(bool &DoClear) {
-  BitValuesUsed.clear();
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    BitValuesUsed.resize(SQ->Entries.size());
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::begin_ಬಿಟ್_ಗಣ_Scalar(ತಾರ್ಕಿಕ &DoClear) {
+  ಬಿಟ್_ಮೌಲ್ಯಗಳು_ಬಳಸಿದ.clear();
+  ಆದರೆ (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_ಗಂಟು)) {
+    ಬಿಟ್_ಮೌಲ್ಯಗಳು_ಬಳಸಿದ.resize(SQ->Entries.ಗಾತ್ರ_3());
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಗಣ_Error(Current_ಗಂಟು, "expected sequence of bit values");
   }
-  DoClear = true;
-  return true;
+  DoClear = ನಿಜ;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-bool Input::bitSetMatch(StringRef Str, bool) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    unsigned Index = 0;
-    for (auto &N : SQ->Entries) {
-      if (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
-        if (SN->value() == Str) {
-          BitValuesUsed[Index] = true;
-          return true;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::ಬಿಟ್_ಗಣ_ಹೊಂದಿಕೆ(StringRef Str, ತಾರ್ಕಿಕ) {
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  ಆದರೆ (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_ಗಂಟು)) {
+    ಚಿಹ್ನೆರಹಿತ ಸೂಚ್ಯಂಕ_2 = 0;
+    ಗಾಗಿ (ಸ್ವಯಂಚಾಲಿತ &N : SQ->Entries) {
+      ಆದರೆ (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
+        ಆದರೆ (SN->ಮೌಲ್ಯ_2() == Str) {
+          ಬಿಟ್_ಮೌಲ್ಯಗಳು_ಬಳಸಿದ[ಸೂಚ್ಯಂಕ_2] = ನಿಜ;
+          ಹಿಂತಿರುಗಿ ನಿಜ;
         }
-      } else {
-        setError(CurrentNode, "unexpected scalar in sequence of bit values");
+      } ಇಲ್ಲದಿದ್ದರೆ {
+        ಗಣ_Error(Current_ಗಂಟು, "unexpected scalar in sequence of bit values");
       }
-      ++Index;
+      ++ಸೂಚ್ಯಂಕ_2;
     }
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಗಣ_Error(Current_ಗಂಟು, "expected sequence of bit values");
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-void Input::endBitSetScalar() {
-  if (EC)
-    return;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    assert(BitValuesUsed.size() == SQ->Entries.size());
-    for (unsigned i = 0; i < SQ->Entries.size(); ++i) {
-      if (!BitValuesUsed[i]) {
-        setError(SQ->Entries[i], "unknown bit value");
-        return;
+ಶೂನ್ಯ ಒಳಹರಿವು::ಕೊನೆ_ಬಿಟ್_ಗಣ_Scalar() {
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ;
+  ಆದರೆ (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_ಗಂಟು)) {
+    ಪ್ರತಿಜ್ಞಾ(ಬಿಟ್_ಮೌಲ್ಯಗಳು_ಬಳಸಿದ.ಗಾತ್ರ_3() == SQ->Entries.ಗಾತ್ರ_3());
+    ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ i = 0; i < SQ->Entries.ಗಾತ್ರ_3(); ++i) {
+      ಆದರೆ (!ಬಿಟ್_ಮೌಲ್ಯಗಳು_ಬಳಸಿದ[i]) {
+        ಗಣ_Error(SQ->Entries[i], "unknown bit value");
+        ಹಿಂತಿರುಗಿ;
       }
     }
   }
 }
 
-void Input::scalarString(StringRef &S, QuotingType) {
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    S = SN->value();
-  } else {
-    setError(CurrentNode, "unexpected scalar");
+ಶೂನ್ಯ ಒಳಹರಿವು::scalarString(StringRef &S, QuotingType) {
+  ಆದರೆ (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_ಗಂಟು)) {
+    S = SN->ಮೌಲ್ಯ_2();
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಗಣ_Error(Current_ಗಂಟು, "unexpected scalar");
   }
 }
 
-void Input::blockScalarString(StringRef &S) { scalarString(S, QuotingType::None); }
+ಶೂನ್ಯ ಒಳಹರಿವು::ಖಂಡ_Scalar_String(StringRef &S) { scalarString(S, QuotingType::None); }
 
-void Input::scalarTag(std::string &Tag) {
-  Tag = CurrentNode->_node->getVerbatimTag();
+ಶೂನ್ಯ ಒಳಹರಿವು::scalar_ಟ್ಯಾಗ್(std::string &ಟ್ಯಾಗ್) {
+  ಟ್ಯಾಗ್ = Current_ಗಂಟು->ಗಂಟು_2->get_Verbatim_ಟ್ಯಾಗ್();
 }
 
-void Input::setError(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  setError(hnode->_node, message);
+ಶೂನ್ಯ ಒಳಹರಿವು::ಗಣ_Error(HNode *hnode, ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
+  ಪ್ರತಿಜ್ಞಾ(hnode && "HNode must not be NULL");
+  ಗಣ_Error(hnode->ಗಂಟು_2, ಸಂದೇಶ_2);
 }
 
-NodeKind Input::getNodeKind() {
-  if (isa<ScalarHNode>(CurrentNode))
-    return NodeKind::Scalar;
-  else if (isa<MapHNode>(CurrentNode))
-    return NodeKind::Map;
-  else if (isa<SequenceHNode>(CurrentNode))
-    return NodeKind::Sequence;
+ಗಂಟು_ಬಗೆ ಒಳಹರಿವು::get_ಗಂಟು_ಬಗೆ() {
+  ಆದರೆ (isa<ScalarHNode>(Current_ಗಂಟು))
+    ಹಿಂತಿರುಗಿ ಗಂಟು_ಬಗೆ::Scalar;
+  ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (isa<MapHNode>(Current_ಗಂಟು))
+    ಹಿಂತಿರುಗಿ ಗಂಟು_ಬಗೆ::Map;
+  ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (isa<SequenceHNode>(Current_ಗಂಟು))
+    ಹಿಂತಿರುಗಿ ಗಂಟು_ಬಗೆ::Sequence;
   llvm_unreachable("Unsupported node kind");
 }
 
-void Input::setError(Node *node, const Twine &message) {
-  Strm->printError(node, message);
-  EC = make_error_code(errc::invalid_argument);
+ಶೂನ್ಯ ಒಳಹರಿವು::ಗಣ_Error(ಗಂಟು *ಗಂಟು_3, ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
+  Strm->printError(ಗಂಟು_3, ಸಂದೇಶ_2);
+  EC = make_error_ಸಂಕೇತ(errc::invalid_ವಾದ);
 }
 
-void Input::setError(const SMRange &range, const Twine &message) {
-  Strm->printError(range, message);
-  EC = make_error_code(errc::invalid_argument);
+ಶೂನ್ಯ ಒಳಹರಿವು::ಗಣ_Error(ಸ್ಥಿರಾಂಕ SMRange &range, ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
+  Strm->printError(range, ಸಂದೇಶ_2);
+  EC = make_error_ಸಂಕೇತ(errc::invalid_ವಾದ);
 }
 
-void Input::reportWarning(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  Strm->printError(hnode->_node, message, SourceMgr::DK_Warning);
+ಶೂನ್ಯ ಒಳಹರಿವು::reportWarning(HNode *hnode, ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
+  ಪ್ರತಿಜ್ಞಾ(hnode && "HNode must not be NULL");
+  Strm->printError(hnode->ಗಂಟು_2, ಸಂದೇಶ_2, ಮೂಲ_Mgr::DK_Warning);
 }
 
-void Input::reportWarning(Node *node, const Twine &message) {
-  Strm->printError(node, message, SourceMgr::DK_Warning);
+ಶೂನ್ಯ ಒಳಹರಿವು::reportWarning(ಗಂಟು *ಗಂಟು_3, ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
+  Strm->printError(ಗಂಟು_3, ಸಂದೇಶ_2, ಮೂಲ_Mgr::DK_Warning);
 }
 
-void Input::reportWarning(const SMRange &range, const Twine &message) {
-  Strm->printError(range, message, SourceMgr::DK_Warning);
+ಶೂನ್ಯ ಒಳಹರಿವು::reportWarning(ಸ್ಥಿರಾಂಕ SMRange &range, ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
+  Strm->printError(range, ಸಂದೇಶ_2, ಮೂಲ_Mgr::DK_Warning);
 }
 
-void Input::releaseHNodeBuffers() {
-  EmptyHNodeAllocator.DestroyAll();
+ಶೂನ್ಯ ಒಳಹರಿವು::releaseHNodeBuffers() {
+  ಖಾಲಿಗಳು_HNode_Allocator.DestroyAll();
   ScalarHNodeAllocator.DestroyAll();
   SequenceHNodeAllocator.DestroyAll();
   MapHNodeAllocator.DestroyAll();
 }
 
-void Input::saveAliasHNode(Node *N, HNode *HN) {
+ಶೂನ್ಯ ಒಳಹರಿವು::saveAliasHNode(ಗಂಟು *N, HNode *HN) {
   StringRef Anchor = N->getAnchor();
-  if (!Anchor.empty())
+  ಆದರೆ (!Anchor.ಖಾಲಿಗಳು())
     // YAML 1.2.2 - 3.2.2.2. Anchors and Aliases:
     //
     // An alias event refers to the most recent event in the serialization
@@ -409,403 +409,403 @@ void Input::saveAliasHNode(Node *N, HNode *HN) {
     AliasMap[Anchor] = HN;
 }
 
-Input::HNode *Input::createHNodes(Node *N) {
+ಒಳಹರಿವು::HNode *ಒಳಹರಿವು::createHNodes(ಗಂಟು *N) {
   SmallString<128> StringStorage;
-  switch (N->getType()) {
-  case Node::NK_Scalar: {
-    ScalarNode *SN = dyn_cast<ScalarNode>(N);
-    StringRef KeyStr = SN->getValue(StringStorage);
-    if (!StringStorage.empty()) {
+  ಆಯ್ಕೆ (N->getType()) {
+  ಸ್ಥಿತಿ ಗಂಟು::NK_Scalar: {
+    Scalar_ಗಂಟು *SN = dyn_cast<Scalar_ಗಂಟು>(N);
+    StringRef ಕೀಲಿ_Str = SN->get_ಮೌಲ್ಯ(StringStorage);
+    ಆದರೆ (!StringStorage.ಖಾಲಿಗಳು()) {
       // Copy string to permanent storage
-      KeyStr = StringStorage.str().copy(StringAllocator);
+      ಕೀಲಿ_Str = StringStorage.str().copy(StringAllocator);
     }
-    auto *SHNode = new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, KeyStr);
+    ಸ್ವಯಂಚಾಲಿತ *SHNode = ಹೊಸ (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ಕೀಲಿ_Str);
     saveAliasHNode(SN, SHNode);
-    return SHNode;
+    ಹಿಂತಿರುಗಿ SHNode;
   }
-  case Node::NK_BlockScalar: {
-    BlockScalarNode *BSN = dyn_cast<BlockScalarNode>(N);
-    StringRef ValueCopy = BSN->getValue().copy(StringAllocator);
-    auto *BSHNode =
-        new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ValueCopy);
+  ಸ್ಥಿತಿ ಗಂಟು::NK_ಖಂಡ_Scalar: {
+    ಖಂಡ_Scalar_ಗಂಟು *BSN = dyn_cast<ಖಂಡ_Scalar_ಗಂಟು>(N);
+    StringRef ಮೌಲ್ಯ_Copy = BSN->get_ಮೌಲ್ಯ().copy(StringAllocator);
+    ಸ್ವಯಂಚಾಲಿತ *BSHNode =
+        ಹೊಸ (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ಮೌಲ್ಯ_Copy);
     saveAliasHNode(BSN, BSHNode);
-    return BSHNode;
+    ಹಿಂತಿರುಗಿ BSHNode;
   }
-  case Node::NK_Sequence: {
-    SequenceNode *SQ = dyn_cast<SequenceNode>(N);
-    auto SQHNode = new (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
-    for (Node &SN : *SQ) {
-      auto Entry = createHNodes(&SN);
-      if (EC)
-        break;
-      SQHNode->Entries.push_back(Entry);
+  ಸ್ಥಿತಿ ಗಂಟು::NK_Sequence: {
+    Sequence_ಗಂಟು *SQ = dyn_cast<Sequence_ಗಂಟು>(N);
+    ಸ್ವಯಂಚಾಲಿತ SQHNode = ಹೊಸ (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
+    ಗಾಗಿ (ಗಂಟು &SN : *SQ) {
+      ಸ್ವಯಂಚಾಲಿತ ನಮೂದು = createHNodes(&SN);
+      ಆದರೆ (EC)
+        ನಿಲ್ಲಿಸು;
+      SQHNode->Entries.ತಳ್ಳು_ಹಿಂಭಾಗ(ನಮೂದು);
     }
     saveAliasHNode(SQ, SQHNode);
-    return SQHNode;
+    ಹಿಂತಿರುಗಿ SQHNode;
   }
-  case Node::NK_Mapping: {
-    MappingNode *Map = dyn_cast<MappingNode>(N);
-    auto mapHNode = new (MapHNodeAllocator.Allocate()) MapHNode(N);
-    for (KeyValueNode &KVN : *Map) {
-      Node *KeyNode = KVN.getKey();
-      ScalarNode *Key = dyn_cast_if_present<ScalarNode>(KeyNode);
-      Node *Value = KVN.getValue();
-      if (!Key || !Value) {
-        if (!Key)
-          setError(KeyNode, "Map key must be a scalar");
-        if (!Value)
-          setError(KeyNode, "Map value must not be empty");
-        break;
+  ಸ್ಥಿತಿ ಗಂಟು::NK_Mapping: {
+    Mapping_ಗಂಟು *Map = dyn_cast<Mapping_ಗಂಟು>(N);
+    ಸ್ವಯಂಚಾಲಿತ mapHNode = ಹೊಸ (MapHNodeAllocator.Allocate()) MapHNode(N);
+    ಗಾಗಿ (ಕೀಲಿ_ಮೌಲ್ಯ_ಗಂಟು &KVN : *Map) {
+      ಗಂಟು *ಕೀಲಿ_ಗಂಟು = KVN.get_ಕೀಲಿ();
+      Scalar_ಗಂಟು *ಕೀಲಿ = dyn_cast_if_present<Scalar_ಗಂಟು>(ಕೀಲಿ_ಗಂಟು);
+      ಗಂಟು *ಮೌಲ್ಯ = KVN.get_ಮೌಲ್ಯ();
+      ಆದರೆ (!ಕೀಲಿ || !ಮೌಲ್ಯ) {
+        ಆದರೆ (!ಕೀಲಿ)
+          ಗಣ_Error(ಕೀಲಿ_ಗಂಟು, "Map key must be a scalar");
+        ಆದರೆ (!ಮೌಲ್ಯ)
+          ಗಣ_Error(ಕೀಲಿ_ಗಂಟು, "Map value must not be empty");
+        ನಿಲ್ಲಿಸು;
       }
       StringStorage.clear();
-      StringRef KeyStr = Key->getValue(StringStorage);
-      if (!StringStorage.empty()) {
+      StringRef ಕೀಲಿ_Str = ಕೀಲಿ->get_ಮೌಲ್ಯ(StringStorage);
+      ಆದರೆ (!StringStorage.ಖಾಲಿಗಳು()) {
         // Copy string to permanent storage
-        KeyStr = StringStorage.str().copy(StringAllocator);
+        ಕೀಲಿ_Str = StringStorage.str().copy(StringAllocator);
       }
-      if (mapHNode->Mapping.count(KeyStr))
+      ಆದರೆ (mapHNode->Mapping.ಎಣಿಕೆ_2(ಕೀಲಿ_Str))
         // From YAML spec: "The content of a mapping node is an unordered set of
         // key/value node pairs, with the restriction that each of the keys is
         // unique."
-        setError(KeyNode, Twine("duplicated mapping key '") + KeyStr + "'");
-      auto ValueHNode = createHNodes(Value);
-      if (EC)
-        break;
-      mapHNode->Mapping[KeyStr] =
-          std::make_pair(std::move(ValueHNode), KeyNode->getSourceRange());
+        ಗಣ_Error(ಕೀಲಿ_ಗಂಟು, Twine("duplicated mapping key '") + ಕೀಲಿ_Str + "'");
+      ಸ್ವಯಂಚಾಲಿತ ಮೌಲ್ಯ_HNode = createHNodes(ಮೌಲ್ಯ);
+      ಆದರೆ (EC)
+        ನಿಲ್ಲಿಸು;
+      mapHNode->Mapping[ಕೀಲಿ_Str] =
+          std::make_pair(std::move(ಮೌಲ್ಯ_HNode), ಕೀಲಿ_ಗಂಟು->get_ಮೂಲ_Range());
     }
     saveAliasHNode(Map, mapHNode);
-    return std::move(mapHNode);
+    ಹಿಂತಿರುಗಿ std::move(mapHNode);
   }
-  case Node::NK_Null:
+  ಸ್ಥಿತಿ ಗಂಟು::NK_Null:
     // TODO: Anchor is not set for NullNode in the parser. Update the parser to
     // faithfully preserve anchors.
-    return new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
-  case Node::NK_Alias: {
-    AliasNode *AN = dyn_cast<AliasNode>(N);
-    auto AliasName = AN->getName();
-    auto AHN = AliasMap.find(AliasName);
-    if (AHN == AliasMap.end()) {
-      setError(AN, Twine("undefined alias '" + AliasName + "'"));
-      return nullptr;
+    ಹಿಂತಿರುಗಿ ಹೊಸ (ಖಾಲಿಗಳು_HNode_Allocator.Allocate()) ಖಾಲಿಗಳು_HNode(N);
+  ಸ್ಥಿತಿ ಗಂಟು::NK_Alias: {
+    Alias_ಗಂಟು *AN = dyn_cast<Alias_ಗಂಟು>(N);
+    ಸ್ವಯಂಚಾಲಿತ AliasName = AN->getName();
+    ಸ್ವಯಂಚಾಲಿತ AHN = AliasMap.ಕಂಡುಹಿಡಿ(AliasName);
+    ಆದರೆ (AHN == AliasMap.ಕೊನೆ()) {
+      ಗಣ_Error(AN, Twine("undefined alias '" + AliasName + "'"));
+      ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
     }
-    return AHN->second;
+    ಹಿಂತಿರುಗಿ AHN->ಎರಡನೇ_2;
   }
-  default:
-    setError(N, "unknown node kind");
-    return nullptr;
+  ಪೂರ್ವನಿಯೋಜಿತ:
+    ಗಣ_Error(N, "unknown node kind");
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
   }
 }
 
-void Input::setError(const Twine &Message) {
-  setError(CurrentNode, Message);
+ಶೂನ್ಯ ಒಳಹರಿವು::ಗಣ_Error(ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_3) {
+  ಗಣ_Error(Current_ಗಂಟು, ಸಂದೇಶ_3);
 }
 
-void Input::setAllowUnknownKeys(bool Allow) { AllowUnknownKeys = Allow; }
+ಶೂನ್ಯ ಒಳಹರಿವು::ಗಣ_Allow_Unknown_ಕೀಲಿಗಳು(ತಾರ್ಕಿಕ Allow) { Allow_Unknown_ಕೀಲಿಗಳು = Allow; }
 
-bool Input::canElideEmptySequence() {
-  return false;
+ತಾರ್ಕಿಕ ಒಳಹರಿವು::can_Elide_ಖಾಲಿಗಳು_Sequence() {
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
 //===----------------------------------------------------------------------===//
 //  Output
 //===----------------------------------------------------------------------===//
 
-Output::Output(raw_ostream &yout, void *context, int WrapColumn)
-    : IO(context), Out(yout), WrapColumn(WrapColumn) {}
+Output::Output(raw_ostream &yout, ಶೂನ್ಯ *context, ಪೂರ್ಣಾಂಕ Wrap_ಸ್ತಂಭ)
+    : IO(context), ಹೊರಹೋಗು(yout), Wrap_ಸ್ತಂಭ(Wrap_ಸ್ತಂಭ) {}
 
-Output::~Output() = default;
+Output::~Output() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-bool Output::outputting() const {
-  return true;
+ತಾರ್ಕಿಕ Output::outputting() ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Output::beginMapping() {
-  StateStack.push_back(inMapFirstKey);
+ಶೂನ್ಯ Output::beginMapping() {
+  State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
 }
 
-bool Output::mapTag(StringRef Tag, bool Use) {
-  if (Use) {
+ತಾರ್ಕಿಕ Output::map_ಟ್ಯಾಗ್(StringRef ಟ್ಯಾಗ್, ತಾರ್ಕಿಕ Use) {
+  ಆದರೆ (Use) {
     // If this tag is being written inside a sequence we should write the start
     // of the sequence before writing the tag, otherwise the tag won't be
     // attached to the element in the sequence, but rather the sequence itself.
-    bool SequenceElement = false;
-    if (StateStack.size() > 1) {
-      auto &E = StateStack[StateStack.size() - 2];
-      SequenceElement = inSeqAnyElement(E) || inFlowSeqAnyElement(E);
+    ತಾರ್ಕಿಕ SequenceElement = ಸುಳ್ಳು;
+    ಆದರೆ (State_ರಾಶಿ.ಗಾತ್ರ_3() > 1) {
+      ಸ್ವಯಂಚಾಲಿತ &E = State_ರಾಶಿ[State_ರಾಶಿ.ಗಾತ್ರ_3() - 2];
+      SequenceElement = ಒಳ_Seq_Any_Element(E) || ಒಳ_Flow_Seq_Any_Element(E);
     }
-    if (SequenceElement && StateStack.back() == inMapFirstKey) {
-      newLineCheck();
-    } else {
+    ಆದರೆ (SequenceElement && State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ) {
+      new_ಸಾಲು_Check();
+    } ಇಲ್ಲದಿದ್ದರೆ {
       output(" ");
     }
-    output(Tag);
-    if (SequenceElement) {
+    output(ಟ್ಯಾಗ್);
+    ಆದರೆ (SequenceElement) {
       // If we're writing the tag during the first element of a map, the tag
       // takes the place of the first element in the sequence.
-      if (StateStack.back() == inMapFirstKey) {
-        StateStack.pop_back();
-        StateStack.push_back(inMapOtherKey);
+      ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ) {
+        State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+        State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Map_Other_ಕೀಲಿ);
       }
       // Tags inside maps in sequences should act as keys in the map from a
       // formatting perspective, so we always want a newline in a sequence.
       Padding = "\n";
     }
   }
-  return Use;
+  ಹಿಂತಿರುಗಿ Use;
 }
 
-void Output::endMapping() {
+ಶೂನ್ಯ Output::ಕೊನೆ_Mapping() {
   // If we did not map anything, we should explicitly emit an empty map
-  if (StateStack.back() == inMapFirstKey) {
+  ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ) {
     Padding = PaddingBeforeContainer;
-    newLineCheck();
+    new_ಸಾಲು_Check();
     output("{}");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
 }
 
-std::vector<StringRef> Output::keys() {
+std::ಸದಿಶ<StringRef> Output::ಕೀಲಿಗಳು() {
   report_fatal_error("invalid call");
 }
 
-bool Output::preflightKey(StringRef Key, bool Required, bool SameAsDefault,
-                          bool &UseDefault, void *&SaveInfo) {
-  UseDefault = false;
-  SaveInfo = nullptr;
-  if (Required || !SameAsDefault || WriteDefaultValues) {
-    auto State = StateStack.back();
-    if (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
-      flowKey(Key);
-    } else {
-      newLineCheck();
-      paddedKey(Key);
+ತಾರ್ಕಿಕ Output::preflight_ಕೀಲಿ(StringRef ಕೀಲಿ, ತಾರ್ಕಿಕ Required, ತಾರ್ಕಿಕ SameAsDefault,
+                          ತಾರ್ಕಿಕ &UseDefault, ಶೂನ್ಯ *&SaveInfo) {
+  UseDefault = ಸುಳ್ಳು;
+  SaveInfo = ಶೂನ್ಯಸೂಚಕ;
+  ಆದರೆ (Required || !SameAsDefault || Write_Default_ಮೌಲ್ಯಗಳು) {
+    ಸ್ವಯಂಚಾಲಿತ State = State_ರಾಶಿ.ಹಿಂಭಾಗ();
+    ಆದರೆ (State == ಒಳ_Flow_Map_ಮೊದಲ_ಕೀಲಿ || State == ಒಳ_Flow_Map_Other_ಕೀಲಿ) {
+      flow_ಕೀಲಿ(ಕೀಲಿ);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+      new_ಸಾಲು_Check();
+      padded_ಕೀಲಿ(ಕೀಲಿ);
     }
-    return true;
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-void Output::postflightKey(void *) {
-  if (StateStack.back() == inMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inMapOtherKey);
-  } else if (StateStack.back() == inFlowMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowMapOtherKey);
+ಶೂನ್ಯ Output::postflight_ಕೀಲಿ(ಶೂನ್ಯ *) {
+  ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ) {
+    State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+    State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Map_Other_ಕೀಲಿ);
+  } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Flow_Map_ಮೊದಲ_ಕೀಲಿ) {
+    State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+    State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Flow_Map_Other_ಕೀಲಿ);
   }
 }
 
-void Output::beginFlowMapping() {
-  StateStack.push_back(inFlowMapFirstKey);
-  newLineCheck();
-  ColumnAtMapFlowStart = Column;
+ಶೂನ್ಯ Output::beginFlowMapping() {
+  State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Flow_Map_ಮೊದಲ_ಕೀಲಿ);
+  new_ಸಾಲು_Check();
+  ಸ್ತಂಭ_At_Map_Flow_ಆರಂಭ = ಸ್ತಂಭ;
   output("{ ");
 }
 
-void Output::endFlowMapping() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" }");
+ಶೂನ್ಯ Output::ಕೊನೆ_Flow_Mapping() {
+  State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+  output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು(" }");
 }
 
-void Output::beginDocuments() {
-  outputUpToEndOfLine("---");
+ಶೂನ್ಯ Output::beginDocuments() {
+  output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು("---");
 }
 
-bool Output::preflightDocument(unsigned index) {
-  if (index > 0)
-    outputUpToEndOfLine("\n---");
-  return true;
+ತಾರ್ಕಿಕ Output::preflightDocument(ಚಿಹ್ನೆರಹಿತ ಸೂಚ್ಯಂಕ) {
+  ಆದರೆ (ಸೂಚ್ಯಂಕ > 0)
+    output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು("\n---");
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Output::postflightDocument() {
+ಶೂನ್ಯ Output::postflightDocument() {
 }
 
-void Output::endDocuments() {
+ಶೂನ್ಯ Output::ಕೊನೆ_Documents() {
   output("\n...\n");
 }
 
-unsigned Output::beginSequence() {
-  StateStack.push_back(inSeqFirstElement);
+ಚಿಹ್ನೆರಹಿತ Output::beginSequence() {
+  State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Seq_ಮೊದಲ_Element);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
-  return 0;
+  ಹಿಂತಿರುಗಿ 0;
 }
 
-void Output::endSequence() {
+ಶೂನ್ಯ Output::ಕೊನೆ_Sequence() {
   // If we did not emit anything, we should explicitly emit an empty sequence
-  if (StateStack.back() == inSeqFirstElement) {
+  ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Seq_ಮೊದಲ_Element) {
     Padding = PaddingBeforeContainer;
-    newLineCheck(/*EmptySequence=*/true);
+    new_ಸಾಲು_Check(/*EmptySequence=*/ನಿಜ);
     output("[]");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
 }
 
-bool Output::preflightElement(unsigned, void *&SaveInfo) {
-  SaveInfo = nullptr;
-  return true;
+ತಾರ್ಕಿಕ Output::preflightElement(ಚಿಹ್ನೆರಹಿತ, ಶೂನ್ಯ *&SaveInfo) {
+  SaveInfo = ಶೂನ್ಯಸೂಚಕ;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Output::postflightElement(void *) {
-  if (StateStack.back() == inSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inSeqOtherElement);
-  } else if (StateStack.back() == inFlowSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowSeqOtherElement);
+ಶೂನ್ಯ Output::postflightElement(ಶೂನ್ಯ *) {
+  ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Seq_ಮೊದಲ_Element) {
+    State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+    State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Seq_Other_Element);
+  } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Flow_Seq_ಮೊದಲ_Element) {
+    State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+    State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Flow_Seq_Other_Element);
   }
 }
 
-unsigned Output::beginFlowSequence() {
-  StateStack.push_back(inFlowSeqFirstElement);
-  newLineCheck();
-  ColumnAtFlowStart = Column;
+ಚಿಹ್ನೆರಹಿತ Output::beginFlowSequence() {
+  State_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ(ಒಳ_Flow_Seq_ಮೊದಲ_Element);
+  new_ಸಾಲು_Check();
+  ಸ್ತಂಭ_At_Flow_ಆರಂಭ = ಸ್ತಂಭ;
   output("[ ");
-  NeedFlowSequenceComma = false;
-  return 0;
+  NeedFlowSequenceComma = ಸುಳ್ಳು;
+  ಹಿಂತಿರುಗಿ 0;
 }
 
-void Output::endFlowSequence() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" ]");
+ಶೂನ್ಯ Output::ಕೊನೆ_Flow_Sequence() {
+  State_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+  output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು(" ]");
 }
 
-bool Output::preflightFlowElement(unsigned, void *&SaveInfo) {
-  if (NeedFlowSequenceComma)
+ತಾರ್ಕಿಕ Output::preflightFlowElement(ಚಿಹ್ನೆರಹಿತ, ಶೂನ್ಯ *&SaveInfo) {
+  ಆದರೆ (NeedFlowSequenceComma)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  ಆದರೆ (Wrap_ಸ್ತಂಭ && ಸ್ತಂಭ > Wrap_ಸ್ತಂಭ) {
     output("\n");
-    for (int i = 0; i < ColumnAtFlowStart; ++i)
+    ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < ಸ್ತಂಭ_At_Flow_ಆರಂಭ; ++i)
       output(" ");
-    Column = ColumnAtFlowStart;
+    ಸ್ತಂಭ = ಸ್ತಂಭ_At_Flow_ಆರಂಭ;
     output("  ");
   }
-  SaveInfo = nullptr;
-  return true;
+  SaveInfo = ಶೂನ್ಯಸೂಚಕ;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Output::postflightFlowElement(void *) {
-  NeedFlowSequenceComma = true;
+ಶೂನ್ಯ Output::postflightFlowElement(ಶೂನ್ಯ *) {
+  NeedFlowSequenceComma = ನಿಜ;
 }
 
-void Output::beginEnumScalar() {
-  EnumerationMatchFound = false;
+ಶೂನ್ಯ Output::beginEnumScalar() {
+  Enumeration_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು = ಸುಳ್ಳು;
 }
 
-bool Output::matchEnumScalar(StringRef Str, bool Match) {
-  if (Match && !EnumerationMatchFound) {
-    newLineCheck();
-    outputUpToEndOfLine(Str);
-    EnumerationMatchFound = true;
+ತಾರ್ಕಿಕ Output::ಹೊಂದಿಕೆ_Enum_Scalar(StringRef Str, ತಾರ್ಕಿಕ ಹೊಂದಿಕೆ_2) {
+  ಆದರೆ (ಹೊಂದಿಕೆ_2 && !Enumeration_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು) {
+    new_ಸಾಲು_Check();
+    output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು(Str);
+    Enumeration_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು = ನಿಜ;
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-bool Output::matchEnumFallback() {
-  if (EnumerationMatchFound)
-    return false;
-  EnumerationMatchFound = true;
-  return true;
+ತಾರ್ಕಿಕ Output::ಹೊಂದಿಕೆ_Enum_Fallback() {
+  ಆದರೆ (Enumeration_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  Enumeration_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು = ನಿಜ;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-void Output::endEnumScalar() {
-  if (!EnumerationMatchFound)
+ಶೂನ್ಯ Output::ಕೊನೆ_Enum_Scalar() {
+  ಆದರೆ (!Enumeration_ಹೊಂದಿಕೆ_ಸಿಕ್ಕಿತು)
     llvm_unreachable("bad runtime enum value");
 }
 
-bool Output::beginBitSetScalar(bool &DoClear) {
-  newLineCheck();
+ತಾರ್ಕಿಕ Output::begin_ಬಿಟ್_ಗಣ_Scalar(ತಾರ್ಕಿಕ &DoClear) {
+  new_ಸಾಲು_Check();
   output("[ ");
-  NeedBitValueComma = false;
-  DoClear = false;
-  return true;
+  Need_ಬಿಟ್_ಮೌಲ್ಯ_Comma = ಸುಳ್ಳು;
+  DoClear = ಸುಳ್ಳು;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-bool Output::bitSetMatch(StringRef Str, bool Matches) {
-  if (Matches) {
-    if (NeedBitValueComma)
+ತಾರ್ಕಿಕ Output::ಬಿಟ್_ಗಣ_ಹೊಂದಿಕೆ(StringRef Str, ತಾರ್ಕಿಕ Matches) {
+  ಆದರೆ (Matches) {
+    ಆದರೆ (Need_ಬಿಟ್_ಮೌಲ್ಯ_Comma)
       output(", ");
     output(Str);
-    NeedBitValueComma = true;
+    Need_ಬಿಟ್_ಮೌಲ್ಯ_Comma = ನಿಜ;
   }
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-void Output::endBitSetScalar() {
-  outputUpToEndOfLine(" ]");
+ಶೂನ್ಯ Output::ಕೊನೆ_ಬಿಟ್_ಗಣ_Scalar() {
+  output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು(" ]");
 }
 
-void Output::scalarString(StringRef &S, QuotingType MustQuote) {
-  newLineCheck();
-  if (S.empty()) {
+ಶೂನ್ಯ Output::scalarString(StringRef &S, QuotingType MustQuote) {
+  new_ಸಾಲು_Check();
+  ಆದರೆ (S.ಖಾಲಿಗಳು()) {
     // Print '' for the empty string because leaving the field empty is not
     // allowed.
-    outputUpToEndOfLine("''");
-    return;
+    output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು("''");
+    ಹಿಂತಿರುಗಿ;
   }
   output(S, MustQuote);
-  outputUpToEndOfLine("");
+  output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು("");
 }
 
-void Output::blockScalarString(StringRef &S) {
-  if (!StateStack.empty())
-    newLineCheck();
+ಶೂನ್ಯ Output::ಖಂಡ_Scalar_String(StringRef &S) {
+  ಆದರೆ (!State_ರಾಶಿ.ಖಾಲಿಗಳು())
+    new_ಸಾಲು_Check();
   output(" |");
 
-  unsigned Indent = StateStack.empty() ? 1 : StateStack.size();
+  ಚಿಹ್ನೆರಹಿತ Indent = State_ರಾಶಿ.ಖಾಲಿಗಳು() ? 1 : State_ರಾಶಿ.ಗಾತ್ರ_3();
 
-  auto Buffer = MemoryBuffer::getMemBuffer(S, "", false);
-  for (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
-    outputNewLine();
-    for (unsigned I = 0; I < Indent; ++I) {
+  ಸ್ವಯಂಚಾಲಿತ ಬಫರ್ = ಸ್ಮರಣೆ_ಬಫರ್::get_Mem_ಬಫರ್(S, "", ಸುಳ್ಳು);
+  ಗಾಗಿ (ಸಾಲು_iterator ಸಾಲುಗಳು(*ಬಫರ್, ಸುಳ್ಳು); !ಸಾಲುಗಳು.is_at_ಕೊನೆ(); ++ಸಾಲುಗಳು) {
+    output_New_ಸಾಲು();
+    ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ I = 0; I < Indent; ++I) {
       output("  ");
     }
-    output(*Lines);
+    output(*ಸಾಲುಗಳು);
   }
-  outputUpToEndOfLine("");
+  output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು("");
 }
 
-void Output::scalarTag(std::string &Tag) {
-  if (Tag.empty())
-    return;
-  newLineCheck();
-  output(Tag);
+ಶೂನ್ಯ Output::scalar_ಟ್ಯಾಗ್(std::string &ಟ್ಯಾಗ್) {
+  ಆದರೆ (ಟ್ಯಾಗ್.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ;
+  new_ಸಾಲು_Check();
+  output(ಟ್ಯಾಗ್);
   output(" ");
 }
 
-void Output::setError(const Twine &message) {
+ಶೂನ್ಯ Output::ಗಣ_Error(ಸ್ಥಿರಾಂಕ Twine &ಸಂದೇಶ_2) {
 }
 
-std::error_code Output::error() { return {}; }
+std::error_ಸಂಕೇತ Output::error() { ಹಿಂತಿರುಗಿ {}; }
 
-bool Output::canElideEmptySequence() {
+ತಾರ್ಕಿಕ Output::can_Elide_ಖಾಲಿಗಳು_Sequence() {
   // Normally, with an optional key/value where the value is an empty sequence,
   // the whole key/value can be not written.  But, that produces wrong yaml
   // if the key/value is the only thing in the map and the map is used in
   // a sequence.  This detects if the this sequence is the first key/value
   // in map that itself is embedded in a sequence.
-  if (StateStack.size() < 2)
-    return true;
-  if (StateStack.back() != inMapFirstKey)
-    return true;
-  return !inSeqAnyElement(StateStack[StateStack.size() - 2]);
+  ಆದರೆ (State_ರಾಶಿ.ಗಾತ್ರ_3() < 2)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() != ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಹಿಂತಿರುಗಿ !ಒಳ_Seq_Any_Element(State_ರಾಶಿ[State_ರಾಶಿ.ಗಾತ್ರ_3() - 2]);
 }
 
-void Output::output(StringRef s) {
-  Column += s.size();
-  Out << s;
+ಶೂನ್ಯ Output::output(StringRef s) {
+  ಸ್ತಂಭ += s.ಗಾತ್ರ_3();
+  ಹೊರಹೋಗು << s;
 }
 
-void Output::output(StringRef S, QuotingType MustQuote) {
-  if (MustQuote == QuotingType::None) {
+ಶೂನ್ಯ Output::output(StringRef S, QuotingType MustQuote) {
+  ಆದರೆ (MustQuote == QuotingType::None) {
     // Only quote if we must.
     output(S);
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
 
   StringLiteral Quote = MustQuote == QuotingType::Single ? StringLiteral("'")
@@ -816,380 +816,380 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   // characters may be present, and will be escaped using a variety of
   // unicode-scalar and special short-form escapes. This is handled in
   // yaml::escape.
-  if (MustQuote == QuotingType::Double) {
-    output(yaml::escape(S, /* EscapePrintable= */ false));
+  ಆದರೆ (MustQuote == QuotingType::Double) {
+    output(yaml::escape(S, /* EscapePrintable= */ ಸುಳ್ಳು));
     output(Quote);
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
 
-  unsigned i = 0;
-  unsigned j = 0;
-  unsigned End = S.size();
-  const char *Base = S.data();
+  ಚಿಹ್ನೆರಹಿತ i = 0;
+  ಚಿಹ್ನೆರಹಿತ j = 0;
+  ಚಿಹ್ನೆರಹಿತ ಕೊನೆ_2 = S.ಗಾತ್ರ_3();
+  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ = S.ದತ್ತಾಂಶ();
 
   // When using single-quoted strings, any single quote ' must be doubled to be
   // escaped.
-  while (j < End) {
-    if (S[j] == '\'') {                   // Escape quotes.
-      output(StringRef(&Base[i], j - i)); // "flush".
+  ಆಗ (j < ಕೊನೆ_2) {
+    ಆದರೆ (S[j] == '\'') {                   // Escape quotes.
+      output(StringRef(&ತಳ[i], j - i)); // "flush".
       output(StringLiteral("''"));        // Print it as ''
       i = j + 1;
     }
     ++j;
   }
-  output(StringRef(&Base[i], j - i));
+  output(StringRef(&ತಳ[i], j - i));
   output(Quote); // Ending quote.
 }
 
-void Output::outputUpToEndOfLine(StringRef s) {
+ಶೂನ್ಯ Output::output_ಮೇಲೆ_ಗಮ್ಯ_ಕೊನೆ_ದ_ಸಾಲು(StringRef s) {
   output(s);
-  if (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
-                             !inFlowMapAnyKey(StateStack.back())))
+  ಆದರೆ (State_ರಾಶಿ.ಖಾಲಿಗಳು() || (!ಒಳ_Flow_Seq_Any_Element(State_ರಾಶಿ.ಹಿಂಭಾಗ()) &&
+                             !ಒಳ_Flow_Map_Any_ಕೀಲಿ(State_ರಾಶಿ.ಹಿಂಭಾಗ())))
     Padding = "\n";
 }
 
-void Output::outputNewLine() {
-  Out << "\n";
-  Column = 0;
+ಶೂನ್ಯ Output::output_New_ಸಾಲು() {
+  ಹೊರಹೋಗು << "\n";
+  ಸ್ತಂಭ = 0;
 }
 
 // if seq at top, indent as if map, then add "- "
 // if seq in middle, use "- " if firstKey, else use "  "
 //
 
-void Output::newLineCheck(bool EmptySequence) {
-  if (Padding != "\n") {
+ಶೂನ್ಯ Output::new_ಸಾಲು_Check(ತಾರ್ಕಿಕ ಖಾಲಿಗಳು_Sequence) {
+  ಆದರೆ (Padding != "\n") {
     output(Padding);
     Padding = {};
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
-  outputNewLine();
+  output_New_ಸಾಲು();
   Padding = {};
 
-  if (StateStack.size() == 0 || EmptySequence)
-    return;
+  ಆದರೆ (State_ರಾಶಿ.ಗಾತ್ರ_3() == 0 || ಖಾಲಿಗಳು_Sequence)
+    ಹಿಂತಿರುಗಿ;
 
-  unsigned Indent = StateStack.size() - 1;
-  bool PossiblyNestedSeq = false;
-  auto I = StateStack.rbegin(), E = StateStack.rend();
+  ಚಿಹ್ನೆರಹಿತ Indent = State_ರಾಶಿ.ಗಾತ್ರ_3() - 1;
+  ತಾರ್ಕಿಕ PossiblyNestedSeq = ಸುಳ್ಳು;
+  ಸ್ವಯಂಚಾಲಿತ I = State_ರಾಶಿ.rbegin(), E = State_ರಾಶಿ.rend();
 
-  if (inSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true; // Not possibly but always.
+  ಆದರೆ (ಒಳ_Seq_Any_Element(*I)) {
+    PossiblyNestedSeq = ನಿಜ; // Not possibly but always.
     ++Indent;
-  } else if (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
-             inFlowSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true;
+  } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*I == ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ || *I == ಒಳ_Flow_Map_ಮೊದಲ_ಕೀಲಿ ||
+             ಒಳ_Flow_Seq_Any_Element(*I)) {
+    PossiblyNestedSeq = ನಿಜ;
     ++I; // Skip back().
   }
 
-  unsigned OutputDashCount = 0;
-  if (PossiblyNestedSeq) {
+  ಚಿಹ್ನೆರಹಿತ Output_Dash_ಎಣಿಕೆ = 0;
+  ಆದರೆ (PossiblyNestedSeq) {
     // Count up consecutive inSeqFirstElement from the end, unless
     // inSeqFirstElement is the top of nested sequence.
-    while (I != E) {
+    ಆಗ (I != E) {
       // Don't count the top of nested sequence.
-      if (!inSeqAnyElement(*I))
-        break;
+      ಆದರೆ (!ಒಳ_Seq_Any_Element(*I))
+        ನಿಲ್ಲಿಸು;
 
-      ++OutputDashCount;
+      ++Output_Dash_ಎಣಿಕೆ;
 
       // Stop counting if consecutive inSeqFirstElement ends.
-      if (*I++ != inSeqFirstElement)
-        break;
+      ಆದರೆ (*I++ != ಒಳ_Seq_ಮೊದಲ_Element)
+        ನಿಲ್ಲಿಸು;
     }
   }
 
-  for (unsigned I = OutputDashCount; I < Indent; ++I)
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ I = Output_Dash_ಎಣಿಕೆ; I < Indent; ++I)
     output("  ");
 
-  for (unsigned I = 0; I < OutputDashCount; ++I)
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ I = 0; I < Output_Dash_ಎಣಿಕೆ; ++I)
     output("- ");
 }
 
-void Output::paddedKey(StringRef key) {
-  output(key, needsQuotes(key, false));
+ಶೂನ್ಯ Output::padded_ಕೀಲಿ(StringRef ಕೀಲಿ_2) {
+  output(ಕೀಲಿ_2, needsQuotes(ಕೀಲಿ_2, ಸುಳ್ಳು));
   output(":");
-  const char *spaces = "                ";
-  if (key.size() < strlen(spaces))
-    Padding = &spaces[key.size()];
-  else
+  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *spaces = "                ";
+  ಆದರೆ (ಕೀಲಿ_2.ಗಾತ್ರ_3() < ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(spaces))
+    Padding = &spaces[ಕೀಲಿ_2.ಗಾತ್ರ_3()];
+  ಇಲ್ಲದಿದ್ದರೆ
     Padding = " ";
 }
 
-void Output::flowKey(StringRef Key) {
-  if (StateStack.back() == inFlowMapOtherKey)
+ಶೂನ್ಯ Output::flow_ಕೀಲಿ(StringRef ಕೀಲಿ) {
+  ಆದರೆ (State_ರಾಶಿ.ಹಿಂಭಾಗ() == ಒಳ_Flow_Map_Other_ಕೀಲಿ)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  ಆದರೆ (Wrap_ಸ್ತಂಭ && ಸ್ತಂಭ > Wrap_ಸ್ತಂಭ) {
     output("\n");
-    for (int I = 0; I < ColumnAtMapFlowStart; ++I)
+    ಗಾಗಿ (ಪೂರ್ಣಾಂಕ I = 0; I < ಸ್ತಂಭ_At_Map_Flow_ಆರಂಭ; ++I)
       output(" ");
-    Column = ColumnAtMapFlowStart;
+    ಸ್ತಂಭ = ಸ್ತಂಭ_At_Map_Flow_ಆರಂಭ;
     output("  ");
   }
-  output(Key, needsQuotes(Key, false));
+  output(ಕೀಲಿ, needsQuotes(ಕೀಲಿ, ಸುಳ್ಳು));
   output(": ");
 }
 
-NodeKind Output::getNodeKind() { report_fatal_error("invalid call"); }
+ಗಂಟು_ಬಗೆ Output::get_ಗಂಟು_ಬಗೆ() { report_fatal_error("invalid call"); }
 
-bool Output::inSeqAnyElement(InState State) {
-  return State == inSeqFirstElement || State == inSeqOtherElement;
+ತಾರ್ಕಿಕ Output::ಒಳ_Seq_Any_Element(ಒಳ_State State) {
+  ಹಿಂತಿರುಗಿ State == ಒಳ_Seq_ಮೊದಲ_Element || State == ಒಳ_Seq_Other_Element;
 }
 
-bool Output::inFlowSeqAnyElement(InState State) {
-  return State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
+ತಾರ್ಕಿಕ Output::ಒಳ_Flow_Seq_Any_Element(ಒಳ_State State) {
+  ಹಿಂತಿರುಗಿ State == ಒಳ_Flow_Seq_ಮೊದಲ_Element || State == ಒಳ_Flow_Seq_Other_Element;
 }
 
-bool Output::inMapAnyKey(InState State) {
-  return State == inMapFirstKey || State == inMapOtherKey;
+ತಾರ್ಕಿಕ Output::ಒಳ_Map_Any_ಕೀಲಿ(ಒಳ_State State) {
+  ಹಿಂತಿರುಗಿ State == ಒಳ_Map_ಮೊದಲ_ಕೀಲಿ || State == ಒಳ_Map_Other_ಕೀಲಿ;
 }
 
-bool Output::inFlowMapAnyKey(InState State) {
-  return State == inFlowMapFirstKey || State == inFlowMapOtherKey;
+ತಾರ್ಕಿಕ Output::ಒಳ_Flow_Map_Any_ಕೀಲಿ(ಒಳ_State State) {
+  ಹಿಂತಿರುಗಿ State == ಒಳ_Flow_Map_ಮೊದಲ_ಕೀಲಿ || State == ಒಳ_Flow_Map_Other_ಕೀಲಿ;
 }
 
 //===----------------------------------------------------------------------===//
 //  traits for built-in types
 //===----------------------------------------------------------------------===//
 
-void ScalarTraits<bool>::output(const bool &Val, void *, raw_ostream &Out) {
-  Out << (Val ? "true" : "false");
+ಶೂನ್ಯ ScalarTraits<ತಾರ್ಕಿಕ>::output(ಸ್ಥಿರಾಂಕ ತಾರ್ಕಿಕ &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << (Val ? "true" : "false");
 }
 
-StringRef ScalarTraits<bool>::input(StringRef Scalar, void *, bool &Val) {
-  if (std::optional<bool> Parsed = parseBool(Scalar)) {
+StringRef ScalarTraits<ತಾರ್ಕಿಕ>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, ತಾರ್ಕಿಕ &Val) {
+  ಆದರೆ (std::optional<ತಾರ್ಕಿಕ> Parsed = parseBool(Scalar)) {
     Val = *Parsed;
-    return StringRef();
+    ಹಿಂತಿರುಗಿ StringRef();
   }
-  return "invalid boolean";
+  ಹಿಂತಿರುಗಿ "invalid boolean";
 }
 
-void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
-                                     raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<StringRef>::output(ಸ್ಥಿರಾಂಕ StringRef &Val, ಶೂನ್ಯ *,
+                                     raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<StringRef>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<StringRef>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *,
                                          StringRef &Val) {
   Val = Scalar;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<std::string>::output(const std::string &Val, void *,
-                                       raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<std::string>::output(ಸ್ಥಿರಾಂಕ std::string &Val, ಶೂನ್ಯ *,
+                                       raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<std::string>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<std::string>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *,
                                            std::string &Val) {
   Val = Scalar.str();
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
-                                   raw_ostream &Out) {
+ಶೂನ್ಯ ScalarTraits<uint8_t>::output(ಸ್ಥಿರಾಂಕ uint8_t &Val, ಶೂನ್ಯ *,
+                                   raw_ostream &ಹೊರಹೋಗು) {
   // use temp uin32_t because ostream thinks uint8_t is a character
-  uint32_t Num = Val;
-  Out << Num;
+  uint32_t ಅಂಕೆ = Val;
+  ಹೊರಹೋಗು << ಅಂಕೆ;
 }
 
-StringRef ScalarTraits<uint8_t>::input(StringRef Scalar, void *, uint8_t &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFF)
-    return "out of range number";
+StringRef ScalarTraits<uint8_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, uint8_t &Val) {
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ n;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, n))
+    ಹಿಂತಿರುಗಿ "invalid number";
+  ಆದರೆ (n > 0xFF)
+    ಹಿಂತಿರುಗಿ "out of range number";
   Val = n;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
-                                    raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<uint16_t>::output(ಸ್ಥಿರಾಂಕ uint16_t &Val, ಶೂನ್ಯ *,
+                                    raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<uint16_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint16_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *,
                                         uint16_t &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFF)
-    return "out of range number";
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ n;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, n))
+    ಹಿಂತಿರುಗಿ "invalid number";
+  ಆದರೆ (n > 0xFFFF)
+    ಹಿಂತಿರುಗಿ "out of range number";
   Val = n;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
-                                    raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<uint32_t>::output(ಸ್ಥಿರಾಂಕ uint32_t &Val, ಶೂನ್ಯ *,
+                                    raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<uint32_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint32_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *,
                                         uint32_t &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range number";
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ n;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, n))
+    ಹಿಂತಿರುಗಿ "invalid number";
+  ಆದರೆ (n > 0xFFFFFFFFUL)
+    ಹಿಂತಿರುಗಿ "out of range number";
   Val = n;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
-                                    raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<uint64_t>::output(ಸ್ಥಿರಾಂಕ uint64_t &Val, ಶೂನ್ಯ *,
+                                    raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<uint64_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint64_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *,
                                         uint64_t &Val) {
-  unsigned long long N;
-  if (getAsUnsignedInteger(Scalar, 0, N))
-    return "invalid number";
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ N;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, N))
+    ಹಿಂತಿರುಗಿ "invalid number";
   Val = N;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
+ಶೂನ್ಯ ScalarTraits<int8_t>::output(ಸ್ಥಿರಾಂಕ int8_t &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
   // use temp in32_t because ostream thinks int8_t is a character
-  int32_t Num = Val;
-  Out << Num;
+  int32_t ಅಂಕೆ = Val;
+  ಹೊರಹೋಗು << ಅಂಕೆ;
 }
 
-StringRef ScalarTraits<int8_t>::input(StringRef Scalar, void *, int8_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > 127) || (N < -128))
-    return "out of range number";
+StringRef ScalarTraits<int8_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, int8_t &Val) {
+  ದೀರ್ಘ ದೀರ್ಘ N;
+  ಆದರೆ (getAsSignedInteger(Scalar, 0, N))
+    ಹಿಂತಿರುಗಿ "invalid number";
+  ಆದರೆ ((N > 127) || (N < -128))
+    ಹಿಂತಿರುಗಿ "out of range number";
   Val = N;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
-                                   raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<int16_t>::output(ಸ್ಥಿರಾಂಕ int16_t &Val, ಶೂನ್ಯ *,
+                                   raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<int16_t>::input(StringRef Scalar, void *, int16_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT16_MAX) || (N < INT16_MIN))
-    return "out of range number";
+StringRef ScalarTraits<int16_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, int16_t &Val) {
+  ದೀರ್ಘ ದೀರ್ಘ N;
+  ಆದರೆ (getAsSignedInteger(Scalar, 0, N))
+    ಹಿಂತಿರುಗಿ "invalid number";
+  ಆದರೆ ((N > INT16_MAX) || (N < INT16_MIN))
+    ಹಿಂತಿರುಗಿ "out of range number";
   Val = N;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
-                                   raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<int32_t>::output(ಸ್ಥಿರಾಂಕ int32_t &Val, ಶೂನ್ಯ *,
+                                   raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<int32_t>::input(StringRef Scalar, void *, int32_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT32_MAX) || (N < INT32_MIN))
-    return "out of range number";
+StringRef ScalarTraits<int32_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, int32_t &Val) {
+  ದೀರ್ಘ ದೀರ್ಘ N;
+  ಆದರೆ (getAsSignedInteger(Scalar, 0, N))
+    ಹಿಂತಿರುಗಿ "invalid number";
+  ಆದರೆ ((N > INT32_MAX) || (N < INT32_MIN))
+    ಹಿಂತಿರುಗಿ "out of range number";
   Val = N;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
-                                   raw_ostream &Out) {
-  Out << Val;
+ಶೂನ್ಯ ScalarTraits<int64_t>::output(ಸ್ಥಿರಾಂಕ int64_t &Val, ಶೂನ್ಯ *,
+                                   raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val;
 }
 
-StringRef ScalarTraits<int64_t>::input(StringRef Scalar, void *, int64_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
+StringRef ScalarTraits<int64_t>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, int64_t &Val) {
+  ದೀರ್ಘ ದೀರ್ಘ N;
+  ಆದರೆ (getAsSignedInteger(Scalar, 0, N))
+    ಹಿಂತಿರುಗಿ "invalid number";
   Val = N;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
-  Out << format("%g", Val);
+ಶೂನ್ಯ ScalarTraits<ದ್ವಿಗುಣ>::output(ಸ್ಥಿರಾಂಕ ದ್ವಿಗುಣ &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << format("%g", Val);
 }
 
-StringRef ScalarTraits<double>::input(StringRef Scalar, void *, double &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<ದ್ವಿಗುಣ>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, ದ್ವಿಗುಣ &Val) {
+  ಆದರೆ (ಗಮ್ಯ_float(Scalar, Val))
+    ಹಿಂತಿರುಗಿ StringRef();
+  ಹಿಂತಿರುಗಿ "invalid floating point number";
 }
 
-void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
-  Out << format("%g", Val);
+ಶೂನ್ಯ ScalarTraits<ದಶಮಾಂಶ>::output(ಸ್ಥಿರಾಂಕ ದಶಮಾಂಶ &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << format("%g", Val);
 }
 
-StringRef ScalarTraits<float>::input(StringRef Scalar, void *, float &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<ದಶಮಾಂಶ>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, ದಶಮಾಂಶ &Val) {
+  ಆದರೆ (ಗಮ್ಯ_float(Scalar, Val))
+    ಹಿಂತಿರುಗಿ StringRef();
+  ಹಿಂತಿರುಗಿ "invalid floating point number";
 }
 
-void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX8, (uint8_t)Val);
+ಶೂನ್ಯ ScalarTraits<Hex8>::output(ಸ್ಥಿರಾಂಕ Hex8 &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << format("0x%" PRIX8, (uint8_t)Val);
 }
 
-StringRef ScalarTraits<Hex8>::input(StringRef Scalar, void *, Hex8 &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex8 number";
-  if (n > 0xFF)
-    return "out of range hex8 number";
+StringRef ScalarTraits<Hex8>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, Hex8 &Val) {
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ n;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, n))
+    ಹಿಂತಿರುಗಿ "invalid hex8 number";
+  ಆದರೆ (n > 0xFF)
+    ಹಿಂತಿರುಗಿ "out of range hex8 number";
   Val = n;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX16, (uint16_t)Val);
+ಶೂನ್ಯ ScalarTraits<Hex16>::output(ಸ್ಥಿರಾಂಕ Hex16 &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << format("0x%" PRIX16, (uint16_t)Val);
 }
 
-StringRef ScalarTraits<Hex16>::input(StringRef Scalar, void *, Hex16 &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex16 number";
-  if (n > 0xFFFF)
-    return "out of range hex16 number";
+StringRef ScalarTraits<Hex16>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, Hex16 &Val) {
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ n;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, n))
+    ಹಿಂತಿರುಗಿ "invalid hex16 number";
+  ಆದರೆ (n > 0xFFFF)
+    ಹಿಂತಿರುಗಿ "out of range hex16 number";
   Val = n;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX32, (uint32_t)Val);
+ಶೂನ್ಯ ScalarTraits<Hex32>::output(ಸ್ಥಿರಾಂಕ Hex32 &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << format("0x%" PRIX32, (uint32_t)Val);
 }
 
-StringRef ScalarTraits<Hex32>::input(StringRef Scalar, void *, Hex32 &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex32 number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range hex32 number";
+StringRef ScalarTraits<Hex32>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, Hex32 &Val) {
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ n;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, n))
+    ಹಿಂತಿರುಗಿ "invalid hex32 number";
+  ಆದರೆ (n > 0xFFFFFFFFUL)
+    ಹಿಂತಿರುಗಿ "out of range hex32 number";
   Val = n;
-  return StringRef();
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX64, (uint64_t)Val);
+ಶೂನ್ಯ ScalarTraits<Hex64>::output(ಸ್ಥಿರಾಂಕ Hex64 &Val, ಶೂನ್ಯ *, raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << format("0x%" PRIX64, (uint64_t)Val);
 }
 
-StringRef ScalarTraits<Hex64>::input(StringRef Scalar, void *, Hex64 &Val) {
-  unsigned long long Num;
-  if (getAsUnsignedInteger(Scalar, 0, Num))
-    return "invalid hex64 number";
-  Val = Num;
-  return StringRef();
+StringRef ScalarTraits<Hex64>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *, Hex64 &Val) {
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ ಅಂಕೆ;
+  ಆದರೆ (getAsUnsignedInteger(Scalar, 0, ಅಂಕೆ))
+    ಹಿಂತಿರುಗಿ "invalid hex64 number";
+  Val = ಅಂಕೆ;
+  ಹಿಂತಿರುಗಿ StringRef();
 }
 
-void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
-                                        llvm::raw_ostream &Out) {
-  Out << Val.getAsString();
+ಶೂನ್ಯ ScalarTraits<ಆವೃತ್ತಿ_Tuple>::output(ಸ್ಥಿರಾಂಕ ಆವೃತ್ತಿ_Tuple &Val, ಶೂನ್ಯ *,
+                                        llvm::raw_ostream &ಹೊರಹೋಗು) {
+  ಹೊರಹೋಗು << Val.getAsString();
 }
 
-StringRef ScalarTraits<VersionTuple>::input(StringRef Scalar, void *,
-                                            VersionTuple &Val) {
-  if (Val.tryParse(Scalar))
-    return "invalid version format";
-  return StringRef();
+StringRef ScalarTraits<ಆವೃತ್ತಿ_Tuple>::ಒಳಹರಿವು_2(StringRef Scalar, ಶೂನ್ಯ *,
+                                            ಆವೃತ್ತಿ_Tuple &Val) {
+  ಆದರೆ (Val.tryParse(Scalar))
+    ಹಿಂತಿರುಗಿ "invalid version format";
+  ಹಿಂತಿರುಗಿ StringRef();
 }

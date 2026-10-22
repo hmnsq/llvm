@@ -10,69 +10,69 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Threading.h"
-#include <cassert>
-#include <mutex>
-using namespace llvm;
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ManagedStatic.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Threading.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
+#ಅನ್ತರ್ಭಾವ <mutex>
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-static const ManagedStaticBase *StaticList = nullptr;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ Managed_Static_ತಳ *StaticList = ಶೂನ್ಯಸೂಚಕ;
 
-static std::recursive_mutex *getManagedStaticMutex() {
-  static std::recursive_mutex m;
-  return &m;
+ಸ್ಥಿರ std::recursive_mutex *getManagedStaticMutex() {
+  ಸ್ಥಿರ std::recursive_mutex m;
+  ಹಿಂತಿರುಗಿ &m;
 }
 
-void ManagedStaticBase::RegisterManagedStatic(void *(*Creator)(),
-                                              void (*Deleter)(void*)) const {
-  assert(Creator);
-  if (llvm_is_multithreaded()) {
-    std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
+ಶೂನ್ಯ Managed_Static_ತಳ::ರಿಜಿಸ್ಟರ್_Managed_Static(ಶೂನ್ಯ *(*Creator)(),
+                                              ಶೂನ್ಯ (*Deleter)(ಶೂನ್ಯ*)) ಸ್ಥಿರಾಂಕ {
+  ಪ್ರತಿಜ್ಞಾ(Creator);
+  ಆದರೆ (llvm_is_multithreaded()) {
+    std::ಬೀಗ_guard<std::recursive_mutex> ಬೀಗ_3(*getManagedStaticMutex());
 
-    if (!Ptr.load(std::memory_order_relaxed)) {
-      void *Tmp = Creator();
+    ಆದರೆ (!Ptr.ತುಂಬು(std::memory_order_relaxed)) {
+      ಶೂನ್ಯ *Tmp = Creator();
 
       Ptr.store(Tmp, std::memory_order_release);
       DeleterFn = Deleter;
 
       // Add to list of managed statics.
-      Next = StaticList;
-      StaticList = this;
+      ಮುಂದಿನ_2 = StaticList;
+      StaticList = ಇದು;
     }
-  } else {
-    assert(!Ptr && !DeleterFn && !Next &&
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಪ್ರತಿಜ್ಞಾ(!Ptr && !DeleterFn && !ಮುಂದಿನ_2 &&
            "Partially initialized ManagedStatic!?");
     Ptr = Creator();
     DeleterFn = Deleter;
 
     // Add to list of managed statics.
-    Next = StaticList;
-    StaticList = this;
+    ಮುಂದಿನ_2 = StaticList;
+    StaticList = ಇದು;
   }
 }
 
-void ManagedStaticBase::destroy() const {
-  assert(DeleterFn && "ManagedStatic not initialized correctly!");
-  assert(StaticList == this &&
+ಶೂನ್ಯ Managed_Static_ತಳ::destroy() ಸ್ಥಿರಾಂಕ {
+  ಪ್ರತಿಜ್ಞಾ(DeleterFn && "ManagedStatic not initialized correctly!");
+  ಪ್ರತಿಜ್ಞಾ(StaticList == ಇದು &&
          "Not destroyed in reverse order of construction?");
   // Unlink from list.
-  StaticList = Next;
-  Next = nullptr;
+  StaticList = ಮುಂದಿನ_2;
+  ಮುಂದಿನ_2 = ಶೂನ್ಯಸೂಚಕ;
 
   // Destroy memory.
   DeleterFn(Ptr);
 
   // Cleanup.
-  Ptr = nullptr;
-  DeleterFn = nullptr;
+  Ptr = ಶೂನ್ಯಸೂಚಕ;
+  DeleterFn = ಶೂನ್ಯಸೂಚಕ;
 }
 
 /// llvm_shutdown - Deallocate and destroy all ManagedStatic variables.
 /// IMPORTANT: it's only safe to call llvm_shutdown() in single thread,
 /// without any other threads executing LLVM APIs.
 /// llvm_shutdown() should be the last use of LLVM APIs.
-void llvm::llvm_shutdown() {
-  while (StaticList)
+ಶೂನ್ಯ llvm::llvm_shutdown() {
+  ಆಗ (StaticList)
     StaticList->destroy();
 }

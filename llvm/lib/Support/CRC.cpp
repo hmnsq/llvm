@@ -18,16 +18,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CRC.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CRC.h"
 
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/ArrayRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-#if !LLVM_ENABLE_ZLIB
+#ಆದರೆ !LLVM_ENABLE_ZLIB
 
-static const uint32_t CRCTable[256] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ uint32_t CRCTable[256] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
     0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
     0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
@@ -72,36 +72,36 @@ static const uint32_t CRCTable[256] = {
     0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
-uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
-  CRC ^= 0xFFFFFFFFU;
-  for (uint8_t Byte : Data) {
-    int TableIdx = (CRC ^ Byte) & 0xff;
-    CRC = CRCTable[TableIdx] ^ (CRC >> 8);
+uint32_t llvm::ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, ArrayRef<uint8_t> ದತ್ತಾಂಶ_2) {
+  ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^= 0xFFFFFFFFU;
+  ಗಾಗಿ (uint8_t Byte : ದತ್ತಾಂಶ_2) {
+    ಪೂರ್ಣಾಂಕ ಕೋಷ್ಟಕ_Idx = (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^ Byte) & 0xff;
+    ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = CRCTable[ಕೋಷ್ಟಕ_Idx] ^ (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ >> 8);
   }
-  return CRC ^ 0xFFFFFFFFU;
+  ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^ 0xFFFFFFFFU;
 }
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
-#include <zlib.h>
-uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
+#ಅನ್ತರ್ಭಾವ <zlib.h>
+uint32_t llvm::ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, ArrayRef<uint8_t> ದತ್ತಾಂಶ_2) {
   // Zlib's crc32() only takes a 32-bit length, so we have to iterate for larger
   // sizes. One could use crc32_z() instead, but that's a recent (2017) addition
   // and may not be available on all systems.
-  do {
-    ArrayRef<uint8_t> Slice = Data.take_front(UINT32_MAX);
-    CRC = ::crc32(CRC, (const Bytef *)Slice.data(), (uInt)Slice.size());
-    Data = Data.drop_front(Slice.size());
-  } while (Data.size() > 0);
-  return CRC;
+  ಮಾಡು {
+    ArrayRef<uint8_t> ತುಂಡು_2 = ದತ್ತಾಂಶ_2.take_front(UINT32_MAX);
+    ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ::ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, (ಸ್ಥಿರಾಂಕ Bytef *)ತುಂಡು_2.ದತ್ತಾಂಶ(), (uInt)ತುಂಡು_2.ಗಾತ್ರ_3());
+    ದತ್ತಾಂಶ_2 = ದತ್ತಾಂಶ_2.drop_front(ತುಂಡು_2.ಗಾತ್ರ_3());
+  } ಆಗ (ದತ್ತಾಂಶ_2.ಗಾತ್ರ_3() > 0);
+  ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
 }
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-uint32_t llvm::crc32(ArrayRef<uint8_t> Data) { return crc32(0, Data); }
+uint32_t llvm::ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(ArrayRef<uint8_t> ದತ್ತಾಂಶ_2) { ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(0, ದತ್ತಾಂಶ_2); }
 
-void JamCRC::update(ArrayRef<uint8_t> Data) {
-  CRC ^= 0xFFFFFFFFU; // Undo CRC-32 Init.
-  CRC = crc32(CRC, Data);
-  CRC ^= 0xFFFFFFFFU; // Undo CRC-32 XorOut.
+ಶೂನ್ಯ Jam_ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ::update(ArrayRef<uint8_t> ದತ್ತಾಂಶ_2) {
+  ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^= 0xFFFFFFFFU; // Undo CRC-32 Init.
+  ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, ದತ್ತಾಂಶ_2);
+  ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^= 0xFFFFFFFFU; // Undo CRC-32 XorOut.
 }

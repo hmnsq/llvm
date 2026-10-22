@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CSKYAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CSKYAttributeParser.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Errc.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-const CSKYAttributeParser::DisplayHandler
+ಸ್ಥಿರಾಂಕ CSKYAttributeParser::DisplayHandler
     CSKYAttributeParser::displayRoutines[] = {
         {
             CSKYAttrs::CSKY_ARCH_NAME,
@@ -31,16 +31,16 @@ const CSKYAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         },
         {
-            CSKYAttrs::CSKY_DSP_VERSION,
-            &CSKYAttributeParser::dspVersion,
+            CSKYAttrs::CSKY_DSP_ಆವೃತ್ತಿ,
+            &CSKYAttributeParser::dsp_ಆವೃತ್ತಿ,
         },
         {
-            CSKYAttrs::CSKY_VDSP_VERSION,
-            &CSKYAttributeParser::vdspVersion,
+            CSKYAttrs::CSKY_VDSP_ಆವೃತ್ತಿ,
+            &CSKYAttributeParser::vdsp_ಆವೃತ್ತಿ,
         },
         {
-            CSKYAttrs::CSKY_FPU_VERSION,
-            &CSKYAttributeParser::fpuVersion,
+            CSKYAttrs::CSKY_FPU_ಆವೃತ್ತಿ,
+            &CSKYAttributeParser::fpu_ಆವೃತ್ತಿ,
         },
         {
             CSKYAttrs::CSKY_FPU_ABI,
@@ -59,7 +59,7 @@ const CSKYAttributeParser::DisplayHandler
             &CSKYAttributeParser::fpuException,
         },
         {
-            CSKYAttrs::CSKY_FPU_NUMBER_MODULE,
+            CSKYAttrs::CSKY_FPU_ಸಂಖ್ಯೆ_MODULE,
             &ELFCompactAttrParser::stringAttribute,
         },
         {
@@ -67,83 +67,83 @@ const CSKYAttributeParser::DisplayHandler
             &CSKYAttributeParser::fpuHardFP,
         }};
 
-Error CSKYAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
-      handled = true;
-      break;
+Error CSKYAttributeParser::handler(uint64_t ಟ್ಯಾಗ್_2, ತಾರ್ಕಿಕ &handled) {
+  handled = ಸುಳ್ಳು;
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &AH : displayRoutines) {
+    ಆದರೆ (uint64_t(AH.attribute) == ಟ್ಯಾಗ್_2) {
+      ಆದರೆ (Error e = (ಇದು->*AH.routine)(ಟ್ಯಾಗ್_2))
+        ಹಿಂತಿರುಗಿ e;
+      handled = ನಿಜ;
+      ನಿಲ್ಲಿಸು;
     }
   }
 
-  return Error::success();
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-Error CSKYAttributeParser::dspVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "DSP Extension", "DSP 2.0"};
-  return parseStringAttribute("Tag_CSKY_DSP_VERSION", tag, ArrayRef(strings));
+Error CSKYAttributeParser::dsp_ಆವೃತ್ತಿ(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"Error", "DSP Extension", "DSP 2.0"};
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_DSP_VERSION", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::vdspVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "VDSP Version 1",
+Error CSKYAttributeParser::vdsp_ಆವೃತ್ತಿ(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"Error", "VDSP Version 1",
                                         "VDSP Version 2"};
-  return parseStringAttribute("Tag_CSKY_VDSP_VERSION", tag, ArrayRef(strings));
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_VDSP_VERSION", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::fpuVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "FPU Version 1",
+Error CSKYAttributeParser::fpu_ಆವೃತ್ತಿ(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"Error", "FPU Version 1",
                                         "FPU Version 2", "FPU Version 3"};
-  return parseStringAttribute("Tag_CSKY_FPU_VERSION", tag, ArrayRef(strings));
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_FPU_VERSION", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::fpuABI(unsigned tag) {
-  static const char *const strings[] = {"Error", "Soft", "SoftFP", "Hard"};
-  return parseStringAttribute("Tag_CSKY_FPU_ABI", tag, ArrayRef(strings));
+Error CSKYAttributeParser::fpuABI(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"Error", "Soft", "SoftFP", "Hard"};
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_FPU_ABI", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::fpuRounding(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_ROUNDING", tag, ArrayRef(strings));
+Error CSKYAttributeParser::fpuRounding(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"None", "Needed"};
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_FPU_ROUNDING", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::fpuDenormal(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_DENORMAL", tag, ArrayRef(strings));
+Error CSKYAttributeParser::fpuDenormal(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"None", "Needed"};
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_FPU_DENORMAL", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::fpuException(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_EXCEPTION", tag, ArrayRef(strings));
+Error CSKYAttributeParser::fpuException(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ ಅಕ್ಷರಸರಣಿಗಳು[] = {"None", "Needed"};
+  ಹಿಂತಿರುಗಿ parseStringAttribute("Tag_CSKY_FPU_EXCEPTION", ಟ್ಯಾಗ್_2, ArrayRef(ಅಕ್ಷರಸರಣಿಗಳು));
 }
 
-Error CSKYAttributeParser::fpuHardFP(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error CSKYAttributeParser::fpuHardFP(ಚಿಹ್ನೆರಹಿತ ಟ್ಯಾಗ್_2) {
+  uint64_t ಮೌಲ್ಯ_2 = de.getULEB128(cursor);
   ListSeparator LS(" ");
 
   std::string description;
 
-  if (value & 0x1) {
+  ಆದರೆ (ಮೌಲ್ಯ_2 & 0x1) {
     description += LS;
     description += "Half";
   }
-  if ((value >> 1) & 0x1) {
+  ಆದರೆ ((ಮೌಲ್ಯ_2 >> 1) & 0x1) {
     description += LS;
     description += "Single";
   }
-  if ((value >> 2) & 0x1) {
+  ಆದರೆ ((ಮೌಲ್ಯ_2 >> 2) & 0x1) {
     description += LS;
     description += "Double";
   }
 
-  if (description.empty()) {
-    printAttribute(tag, value, "");
-    return createStringError(errc::invalid_argument,
+  ಆದರೆ (description.ಖಾಲಿಗಳು()) {
+    printAttribute(ಟ್ಯಾಗ್_2, ಮೌಲ್ಯ_2, "");
+    ಹಿಂತಿರುಗಿ createStringError(errc::invalid_ವಾದ,
                              "unknown Tag_CSKY_FPU_HARDFP value: " +
-                                 Twine(value));
+                                 Twine(ಮೌಲ್ಯ_2));
   }
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(ಟ್ಯಾಗ್_2, ಮೌಲ್ಯ_2, description);
+  ಹಿಂತಿರುಗಿ Error::success();
 }

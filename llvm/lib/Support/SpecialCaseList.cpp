@@ -13,122 +13,122 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SpecialCaseList.h"
-#include "llvm/ADT/RadixTree.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/iterator_range.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/GlobPattern.h"
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Regex.h"
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/Support/WithColor.h"
-#include <assert.h>
-#include <memory>
-#include <mutex>
-#include <stdio.h>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <variant>
-#include <vector>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SpecialCaseList.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/RadixTree.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/STLExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallVector.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringMap.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/iterator_range.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Compiler.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/GlobPattern.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LineIterator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MemoryBuffer.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Path.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Regex.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualFileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/WithColor.h"
+#ಅನ್ತರ್ಭಾವ <assert.h>
+#ಅನ್ತರ್ಭಾವ <memory>
+#ಅನ್ತರ್ಭಾವ <mutex>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <string>
+#ಅನ್ತರ್ಭಾವ <system_error>
+#ಅನ್ತರ್ಭಾವ <utility>
+#ಅನ್ತರ್ಭಾವ <variant>
+#ಅನ್ತರ್ಭಾವ <vector>
 
-namespace llvm {
+ನಾಮಾಕಾಶ llvm {
 
-namespace {
+ನಾಮಾಕಾಶ {
 
 // Lagacy v1 matcher.
-class RegexMatcher {
-public:
-  Error insert(StringRef Pattern, unsigned LineNumber, bool SlashAgnostic);
-  unsigned match(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+ವರ್ಗ RegexMatcher {
+ಸಾರ್ವಜನಿಕ:
+  Error ಸೇರಿಸು(StringRef ನಮೂನೆ, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_ಸಂಖ್ಯೆ, ತಾರ್ಕಿಕ SlashAgnostic);
+  ಚಿಹ್ನೆರಹಿತ ಹೊಂದಿಕೆ(StringRef Query) ಸ್ಥಿರಾಂಕ;
+  StringRef ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No) ಸ್ಥಿರಾಂಕ;
 
-private:
-  struct Reg {
-    Reg(StringRef Name, unsigned LineNo, Regex &&Rg)
-        : Name(Name), LineNo(LineNo), Rg(std::move(Rg)) {}
+ಖಾಸಗಿ:
+  ರಚನೆ Reg {
+    Reg(StringRef Name, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No, Regex &&Rg)
+        : Name(Name), ಸಾಲು_No(ಸಾಲು_No), Rg(std::move(Rg)) {}
     StringRef Name;
-    unsigned LineNo;
+    ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No;
     Regex Rg;
   };
 
-  std::vector<Reg> RegExes;
+  std::ಸದಿಶ<Reg> RegExes;
 };
 
-class GlobMatcher {
-public:
-  Error insert(StringRef Pattern, unsigned LineNumber, bool SlashAgnostic);
-  unsigned match(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+ವರ್ಗ GlobMatcher {
+ಸಾರ್ವಜನಿಕ:
+  Error ಸೇರಿಸು(StringRef ನಮೂನೆ, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_ಸಂಖ್ಯೆ, ತಾರ್ಕಿಕ SlashAgnostic);
+  ಚಿಹ್ನೆರಹಿತ ಹೊಂದಿಕೆ(StringRef Query) ಸ್ಥಿರಾಂಕ;
+  StringRef ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No) ಸ್ಥಿರಾಂಕ;
 
-private:
-  struct Glob {
-    Glob(StringRef Name, unsigned LineNo, GlobPattern &&Pattern)
-        : Name(Name), LineNo(LineNo), Pattern(std::move(Pattern)) {}
+ಖಾಸಗಿ:
+  ರಚನೆ Glob {
+    Glob(StringRef Name, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No, Glob_ನಮೂನೆ &&ನಮೂನೆ)
+        : Name(Name), ಸಾಲು_No(ಸಾಲು_No), ನಮೂನೆ(std::move(ನಮೂನೆ)) {}
     StringRef Name;
-    unsigned LineNo;
-    GlobPattern Pattern;
+    ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No;
+    Glob_ನಮೂನೆ ನಮೂನೆ;
   };
 
-  void LazyInit() const;
+  ಶೂನ್ಯ LazyInit() ಸ್ಥಿರಾಂಕ;
 
-  std::vector<GlobMatcher::Glob> Globs;
+  std::ಸದಿಶ<GlobMatcher::Glob> Globs;
 
-  mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    RadixTree<iterator_range<StringRef::const_reverse_iterator>,
-                              SmallVector<int, 1>>>
-      PrefixSuffixToGlob;
+  ಬದಲಾಯಿಸಬಹುದಾದ Radix_ವೃಕ್ಷ<iterator_range<StringRef::const_iterator>,
+                    Radix_ವೃಕ್ಷ<iterator_range<StringRef::const_ಹಿಮ್ಮುಖ_iterator>,
+                              Small_ಸದಿಶ<ಪೂರ್ಣಾಂಕ, 1>>>
+      ಪೂರ್ವಪ್ರತ್ಯಯ_Suffix_ಗಮ್ಯ_Glob;
 
-  mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    SmallVector<int, 1>>
-      SubstrToGlob;
+  ಬದಲಾಯಿಸಬಹುದಾದ Radix_ವೃಕ್ಷ<iterator_range<StringRef::const_iterator>,
+                    Small_ಸದಿಶ<ಪೂರ್ಣಾಂಕ, 1>>
+      Substr_ಗಮ್ಯ_Glob;
 
-  mutable bool Initialized = false;
+  ಬದಲಾಯಿಸಬಹುದಾದ ತಾರ್ಕಿಕ Initialized = ಸುಳ್ಳು;
 };
 
-struct QueryOptions {
-  bool UseGlobs = true;
-  bool RemoveDotSlash = false;
-  bool WarnDotSlashMatch = false;
-  bool SlashAgnostic = false;
+ರಚನೆ QueryOptions {
+  ತಾರ್ಕಿಕ UseGlobs = ನಿಜ;
+  ತಾರ್ಕಿಕ RemoveDotSlash = ಸುಳ್ಳು;
+  ತಾರ್ಕಿಕ Warn_Dot_Slash_ಹೊಂದಿಕೆ = ಸುಳ್ಳು;
+  ತಾರ್ಕಿಕ SlashAgnostic = ಸುಳ್ಳು;
 };
 
 /// Represents a set of patterns and their line numbers
-class Matcher {
-public:
-  explicit Matcher(QueryOptions QOpts);
+ವರ್ಗ Matcher {
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಪಷ್ಟ Matcher(QueryOptions QOpts);
 
-  Error insert(StringRef Pattern, unsigned LineNumber);
-  unsigned match(StringRef Query) const;
+  Error ಸೇರಿಸು(StringRef ನಮೂನೆ, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_ಸಂಖ್ಯೆ);
+  ಚಿಹ್ನೆರಹಿತ ಹೊಂದಿಕೆ(StringRef Query) ಸ್ಥಿರಾಂಕ;
 
-  bool matchAny(StringRef Query) const { return match(Query); }
+  ತಾರ್ಕಿಕ ಹೊಂದಿಕೆ_Any(StringRef Query) ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಹೊಂದಿಕೆ(Query); }
 
-private:
-  unsigned matchInternal(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+ಖಾಸಗಿ:
+  ಚಿಹ್ನೆರಹಿತ ಹೊಂದಿಕೆ_ಆಂತರಿಕ(StringRef Query) ಸ್ಥಿರಾಂಕ;
+  StringRef ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No) ಸ್ಥಿರಾಂಕ;
 
   std::variant<RegexMatcher, GlobMatcher> M;
   QueryOptions Options;
-  mutable std::once_flag Warned;
+  ಬದಲಾಯಿಸಬಹುದಾದ std::once_flag Warned;
 };
 
-Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
-                           bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument,
+Error RegexMatcher::ಸೇರಿಸು(StringRef ನಮೂನೆ, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_ಸಂಖ್ಯೆ,
+                           ತಾರ್ಕಿಕ SlashAgnostic) {
+  ಆದರೆ (ನಮೂನೆ.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ createStringError(errc::invalid_ವಾದ,
                              "Supplied regex was blank");
 
   // Replace * with .*
-  auto Regexp = Pattern.str();
-  for (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
-       pos += strlen(".*")) {
-    Regexp.replace(pos, strlen("*"), ".*");
+  ಸ್ವಯಂಚಾಲಿತ Regexp = ನಮೂನೆ.str();
+  ಗಾಗಿ (size_t pos = 0; (pos = Regexp.ಕಂಡುಹಿಡಿ('*', pos)) != std::string::npos;
+       pos += ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(".*")) {
+    Regexp.replace(pos, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("*"), ".*");
   }
 
   Regexp = (Twine("^(") + StringRef(Regexp) + ")$").str();
@@ -136,135 +136,135 @@ Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
   // Check that the regexp is valid.
   Regex CheckRE(Regexp);
   std::string REError;
-  if (!CheckRE.isValid(REError))
-    return createStringError(errc::invalid_argument, REError);
+  ಆದರೆ (!CheckRE.isValid(REError))
+    ಹಿಂತಿರುಗಿ createStringError(errc::invalid_ವಾದ, REError);
 
-  RegExes.emplace_back(Pattern, LineNumber, std::move(CheckRE));
-  return Error::success();
+  RegExes.emplace_ಹಿಂಭಾಗ(ನಮೂನೆ, ಸಾಲು_ಸಂಖ್ಯೆ, std::move(CheckRE));
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-unsigned RegexMatcher::match(StringRef Query) const {
-  for (const auto &R : reverse(RegExes))
-    if (R.Rg.match(Query))
-      return R.LineNo;
-  return 0;
+ಚಿಹ್ನೆರಹಿತ RegexMatcher::ಹೊಂದಿಕೆ(StringRef Query) ಸ್ಥಿರಾಂಕ {
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &R : ಹಿಮ್ಮುಖ(RegExes))
+    ಆದರೆ (R.Rg.ಹೊಂದಿಕೆ(Query))
+      ಹಿಂತಿರುಗಿ R.ಸಾಲು_No;
+  ಹಿಂತಿರುಗಿ 0;
 }
 
-StringRef RegexMatcher::findRule(unsigned LineNo) const {
-  for (const auto &R : RegExes)
-    if (R.LineNo == LineNo)
-      return R.Name;
+StringRef RegexMatcher::ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No) ಸ್ಥಿರಾಂಕ {
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &R : RegExes)
+    ಆದರೆ (R.ಸಾಲು_No == ಸಾಲು_No)
+      ಹಿಂತಿರುಗಿ R.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  ಹಿಂತಿರುಗಿ {};
 }
 
-Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
-                          bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument, "Supplied glob was blank");
+Error GlobMatcher::ಸೇರಿಸು(StringRef ನಮೂನೆ, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_ಸಂಖ್ಯೆ,
+                          ತಾರ್ಕಿಕ SlashAgnostic) {
+  ಆದರೆ (ನಮೂನೆ.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ createStringError(errc::invalid_ವಾದ, "Supplied glob was blank");
 
-  auto Res =
-      GlobPattern::create(Pattern, /*MaxSubPatterns=*/1024, SlashAgnostic);
-  if (auto Err = Res.takeError())
-    return Err;
-  Globs.emplace_back(Pattern, LineNumber, std::move(Res.get()));
-  return Error::success();
+  ಸ್ವಯಂಚಾಲಿತ Res =
+      Glob_ನಮೂನೆ::create(ನಮೂನೆ, /*MaxSubPatterns=*/1024, SlashAgnostic);
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = Res.takeError())
+    ಹಿಂತಿರುಗಿ Err;
+  Globs.emplace_ಹಿಂಭಾಗ(ನಮೂನೆ, ಸಾಲು_ಸಂಖ್ಯೆ, std::move(Res.get()));
+  ಹಿಂತಿರುಗಿ Error::success();
 }
 
-void GlobMatcher::LazyInit() const {
-  if (LLVM_LIKELY(Initialized))
-    return;
-  Initialized = true;
-  for (const auto &[Idx, G] : enumerate(Globs)) {
-    StringRef Prefix = G.Pattern.prefix();
-    StringRef Suffix = G.Pattern.suffix();
+ಶೂನ್ಯ GlobMatcher::LazyInit() ಸ್ಥಿರಾಂಕ {
+  ಆದರೆ (LLVM_LIKELY(Initialized))
+    ಹಿಂತಿರುಗಿ;
+  Initialized = ನಿಜ;
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &[Idx, G] : enumerate(Globs)) {
+    StringRef ಪೂರ್ವಪ್ರತ್ಯಯ = G.ನಮೂನೆ.ಪೂರ್ವಪ್ರತ್ಯಯ_2();
+    StringRef Suffix = G.ನಮೂನೆ.suffix();
 
-    if (Suffix.empty() && Prefix.empty()) {
+    ಆದರೆ (Suffix.ಖಾಲಿಗಳು() && ಪೂರ್ವಪ್ರತ್ಯಯ.ಖಾಲಿಗಳು()) {
       // If both prefix and suffix are empty put into special tree to search by
       // substring in a middle.
-      StringRef Substr = G.Pattern.longest_substr();
-      if (!Substr.empty()) {
+      StringRef Substr = G.ನಮೂನೆ.longest_substr();
+      ಆದರೆ (!Substr.ಖಾಲಿಗಳು()) {
         // But only if substring is not empty. Searching this tree is more
         // expensive.
-        auto &V = SubstrToGlob.emplace(Substr).first->second;
-        V.emplace_back(Idx);
-        continue;
+        ಸ್ವಯಂಚಾಲಿತ &V = Substr_ಗಮ್ಯ_Glob.emplace(Substr).ಮೊದಲ_2->ಎರಡನೇ_2;
+        V.emplace_ಹಿಂಭಾಗ(Idx);
+        ಮುಂದುವರಿ;
       }
     }
 
-    auto &SToGlob = PrefixSuffixToGlob.emplace(Prefix).first->second;
-    auto &V = SToGlob.emplace(reverse(Suffix)).first->second;
-    V.emplace_back(Idx);
+    ಸ್ವಯಂಚಾಲಿತ &SToGlob = ಪೂರ್ವಪ್ರತ್ಯಯ_Suffix_ಗಮ್ಯ_Glob.emplace(ಪೂರ್ವಪ್ರತ್ಯಯ).ಮೊದಲ_2->ಎರಡನೇ_2;
+    ಸ್ವಯಂಚಾಲಿತ &V = SToGlob.emplace(ಹಿಮ್ಮುಖ(Suffix)).ಮೊದಲ_2->ಎರಡನೇ_2;
+    V.emplace_ಹಿಂಭಾಗ(Idx);
   }
 }
 
-unsigned GlobMatcher::match(StringRef Query) const {
+ಚಿಹ್ನೆರಹಿತ GlobMatcher::ಹೊಂದಿಕೆ(StringRef Query) ಸ್ಥಿರಾಂಕ {
   LazyInit();
 
-  int Best = -1;
-  if (!PrefixSuffixToGlob.empty()) {
-    for (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
-      for (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
-            break;
-          const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
-            Best = Idx;
+  ಪೂರ್ಣಾಂಕ ಉತ್ತಮ = -1;
+  ಆದರೆ (!ಪೂರ್ವಪ್ರತ್ಯಯ_Suffix_ಗಮ್ಯ_Glob.ಖಾಲಿಗಳು()) {
+    ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &[_, SToGlob] : ಪೂರ್ವಪ್ರತ್ಯಯ_Suffix_ಗಮ್ಯ_Glob.ಕಂಡುಹಿಡಿ_prefixes(Query)) {
+      ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &[_, V] : SToGlob.ಕಂಡುಹಿಡಿ_prefixes(ಹಿಮ್ಮುಖ(Query))) {
+        ಗಾಗಿ (ಪೂರ್ಣಾಂಕ Idx : ಹಿಮ್ಮುಖ(V)) {
+          ಆದರೆ (ಉತ್ತಮ > Idx)
+            ನಿಲ್ಲಿಸು;
+          ಸ್ಥಿರಾಂಕ GlobMatcher::Glob &G = Globs[Idx];
+          ಆದರೆ (G.ನಮೂನೆ.ಹೊಂದಿಕೆ(Query)) {
+            ಉತ್ತಮ = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
             // prefix group. However, we continue searching other prefix groups
             // in the map, as they may contain a better match overall.
-            break;
+            ನಿಲ್ಲಿಸು;
           }
         }
       }
     }
   }
 
-  if (!SubstrToGlob.empty()) {
+  ಆದರೆ (!Substr_ಗಮ್ಯ_Glob.ಖಾಲಿಗಳು()) {
     // As we don't know when substring exactly starts, we will try all
     // possibilities. In most cases search will fail on first characters.
-    for (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
-      for (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
-            break;
-          const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
-            Best = Idx;
+    ಗಾಗಿ (StringRef Q = Query; !Q.ಖಾಲಿಗಳು(); Q = Q.drop_front()) {
+      ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &[_, V] : Substr_ಗಮ್ಯ_Glob.ಕಂಡುಹಿಡಿ_prefixes(Q)) {
+        ಗಾಗಿ (ಪೂರ್ಣಾಂಕ Idx : ಹಿಮ್ಮುಖ(V)) {
+          ಆದರೆ (ಉತ್ತಮ > Idx)
+            ನಿಲ್ಲಿಸು;
+          ಸ್ಥಿರಾಂಕ GlobMatcher::Glob &G = Globs[Idx];
+          ಆದರೆ (G.ನಮೂನೆ.ಹೊಂದಿಕೆ(Query)) {
+            ಉತ್ತಮ = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
             // prefix group. However, we continue searching other prefix groups
             // in the map, as they may contain a better match overall.
-            break;
+            ನಿಲ್ಲಿಸು;
           }
         }
       }
     }
   }
-  return Best < 0 ? 0 : Globs[Best].LineNo;
+  ಹಿಂತಿರುಗಿ ಉತ್ತಮ < 0 ? 0 : Globs[ಉತ್ತಮ].ಸಾಲು_No;
 }
 
-StringRef GlobMatcher::findRule(unsigned LineNo) const {
-  for (const auto &G : Globs)
-    if (G.LineNo == LineNo)
-      return G.Name;
+StringRef GlobMatcher::ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No) ಸ್ಥಿರಾಂಕ {
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &G : Globs)
+    ಆದರೆ (G.ಸಾಲು_No == ಸಾಲು_No)
+      ಹಿಂತಿರುಗಿ G.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  ಹಿಂತಿರುಗಿ {};
 }
 
 Matcher::Matcher(QueryOptions QOpts) : Options(QOpts) {
-  if (Options.UseGlobs)
+  ಆದರೆ (Options.UseGlobs)
     M.emplace<GlobMatcher>();
-  else
+  ಇಲ್ಲದಿದ್ದರೆ
     M.emplace<RegexMatcher>();
 }
 
-Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
-  return std::visit(
-      [&](auto &V) {
-        return V.insert(Pattern, LineNumber, Options.SlashAgnostic);
+Error Matcher::ಸೇರಿಸು(StringRef ನಮೂನೆ, ಚಿಹ್ನೆರಹಿತ ಸಾಲು_ಸಂಖ್ಯೆ) {
+  ಹಿಂತಿರುಗಿ std::ಭೇಟಿ(
+      [&](ಸ್ವಯಂಚಾಲಿತ &V) {
+        ಹಿಂತಿರುಗಿ V.ಸೇರಿಸು(ನಮೂನೆ, ಸಾಲು_ಸಂಖ್ಯೆ, Options.SlashAgnostic);
       },
       M);
 }
@@ -281,47 +281,47 @@ Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
 //   (canonicalized and non-canonicalized) to maintain backward compatibility.
 //   If a match only works with the old behavior (non-canonicalized), a warning
 //   is emitted.
-unsigned Matcher::match(StringRef Query) const {
-  if (!Options.RemoveDotSlash)
-    return matchInternal(Query);
+ಚಿಹ್ನೆರಹಿತ Matcher::ಹೊಂದಿಕೆ(StringRef Query) ಸ್ಥಿರಾಂಕ {
+  ಆದರೆ (!Options.RemoveDotSlash)
+    ಹಿಂತಿರುಗಿ ಹೊಂದಿಕೆ_ಆಂತರಿಕ(Query);
 
-  if (!Options.WarnDotSlashMatch)
-    return matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
+  ಆದರೆ (!Options.Warn_Dot_Slash_ಹೊಂದಿಕೆ)
+    ಹಿಂತಿರುಗಿ ಹೊಂದಿಕೆ_ಆಂತರಿಕ(llvm::sys::ಮಾರ್ಗ_2::remove_leading_dotslash(Query));
 
-  StringRef FixedQuery = llvm::sys::path::remove_leading_dotslash(Query);
-  unsigned FixedMatched = matchInternal(FixedQuery);
-  if (FixedQuery == Query)
-    return FixedMatched;
+  StringRef FixedQuery = llvm::sys::ಮಾರ್ಗ_2::remove_leading_dotslash(Query);
+  ಚಿಹ್ನೆರಹಿತ FixedMatched = ಹೊಂದಿಕೆ_ಆಂತರಿಕ(FixedQuery);
+  ಆದರೆ (FixedQuery == Query)
+    ಹಿಂತಿರುಗಿ FixedMatched;
 
-  unsigned OriginalMatch = matchInternal(Query);
-  if (OriginalMatch > FixedMatched) {
+  ಚಿಹ್ನೆರಹಿತ Original_ಹೊಂದಿಕೆ = ಹೊಂದಿಕೆ_ಆಂತರಿಕ(Query);
+  ಆದರೆ (Original_ಹೊಂದಿಕೆ > FixedMatched) {
     std::call_once(Warned, [&]() {
       WithColor::warning() << "Deprecated behaviour: pattern '"
-                           << findRule(OriginalMatch) << "' matches '" << Query
+                           << ಕಂಡುಹಿಡಿ_ನಿಯಮ(Original_ಹೊಂದಿಕೆ) << "' matches '" << Query
                            << "', update it to match '" << FixedQuery
                            << "' instead (further warnings suppressed).\n";
     });
   }
-  return std::max(OriginalMatch, FixedMatched);
+  ಹಿಂತಿರುಗಿ std::max(Original_ಹೊಂದಿಕೆ, FixedMatched);
 }
 
-unsigned Matcher::matchInternal(StringRef Query) const {
-  return std::visit([&](auto &V) -> unsigned { return V.match(Query); }, M);
+ಚಿಹ್ನೆರಹಿತ Matcher::ಹೊಂದಿಕೆ_ಆಂತರಿಕ(StringRef Query) ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ std::ಭೇಟಿ([&](ಸ್ವಯಂಚಾಲಿತ &V) -> ಚಿಹ್ನೆರಹಿತ { ಹಿಂತಿರುಗಿ V.ಹೊಂದಿಕೆ(Query); }, M);
 }
 
-StringRef Matcher::findRule(unsigned LineNo) const {
-  return std::visit([&](auto &V) -> StringRef { return V.findRule(LineNo); },
+StringRef Matcher::ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No) ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ std::ಭೇಟಿ([&](ಸ್ವಯಂಚಾಲಿತ &V) -> StringRef { ಹಿಂತಿರುಗಿ V.ಕಂಡುಹಿಡಿ_ನಿಯಮ(ಸಾಲು_No); },
                     M);
 }
 } // namespace
 
-class SpecialCaseList::Section::SectionImpl {
-public:
-  const Matcher *findMatcher(StringRef Prefix, StringRef Category) const;
+ವರ್ಗ SpecialCaseList::Section::SectionImpl {
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಥಿರಾಂಕ Matcher *ಕಂಡುಹಿಡಿ_Matcher(StringRef ಪೂರ್ವಪ್ರತ್ಯಯ, StringRef Category) ಸ್ಥಿರಾಂಕ;
 
-  using SectionEntries = StringMap<StringMap<Matcher>>;
+  ಬಳಸಿ SectionEntries = StringMap<StringMap<Matcher>>;
 
-  explicit SectionImpl(QueryOptions QOpts) : SectionMatcher(QOpts) {}
+  ಸ್ಪಷ್ಟ SectionImpl(QueryOptions QOpts) : SectionMatcher(QOpts) {}
 
   Matcher SectionMatcher;
   SectionEntries Entries;
@@ -329,92 +329,92 @@ public:
 
 // TODO: Refactor this to return Expected<...>
 std::unique_ptr<SpecialCaseList>
-SpecialCaseList::create(const std::vector<std::string> &Paths,
+SpecialCaseList::create(ಸ್ಥಿರಾಂಕ std::ಸದಿಶ<std::string> &Paths,
                         llvm::vfs::FileSystem &FS, std::string &Error) {
-  std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(Paths, FS, Error))
-    return SCL;
-  return nullptr;
+  std::unique_ptr<SpecialCaseList> SCL(ಹೊಸ SpecialCaseList());
+  ಆದರೆ (SCL->create_ಆಂತರಿಕ(Paths, FS, Error))
+    ಹಿಂತಿರುಗಿ SCL;
+  ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 }
 
-std::unique_ptr<SpecialCaseList> SpecialCaseList::create(const MemoryBuffer *MB,
+std::unique_ptr<SpecialCaseList> SpecialCaseList::create(ಸ್ಥಿರಾಂಕ ಸ್ಮರಣೆ_ಬಫರ್ *MB,
                                                          std::string &Error) {
-  std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(MB, Error))
-    return SCL;
-  return nullptr;
+  std::unique_ptr<SpecialCaseList> SCL(ಹೊಸ SpecialCaseList());
+  ಆದರೆ (SCL->create_ಆಂತರಿಕ(MB, Error))
+    ಹಿಂತಿರುಗಿ SCL;
+  ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 }
 
 std::unique_ptr<SpecialCaseList>
-SpecialCaseList::createOrDie(const std::vector<std::string> &Paths,
+SpecialCaseList::createOrDie(ಸ್ಥಿರಾಂಕ std::ಸದಿಶ<std::string> &Paths,
                              llvm::vfs::FileSystem &FS) {
   std::string Error;
-  if (auto SCL = create(Paths, FS, Error))
-    return SCL;
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ SCL = create(Paths, FS, Error))
+    ಹಿಂತಿರುಗಿ SCL;
   report_fatal_error(Twine(Error));
 }
 
-bool SpecialCaseList::createInternal(const std::vector<std::string> &Paths,
+ತಾರ್ಕಿಕ SpecialCaseList::create_ಆಂತರಿಕ(ಸ್ಥಿರಾಂಕ std::ಸದಿಶ<std::string> &Paths,
                                      vfs::FileSystem &VFS, std::string &Error) {
-  for (size_t i = 0; i < Paths.size(); ++i) {
-    const auto &Path = Paths[i];
-    ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
-        VFS.getBufferForFile(Path);
-    if (std::error_code EC = FileOrErr.getError()) {
-      Error = (Twine("can't open file '") + Path + "': " + EC.message()).str();
-      return false;
+  ಗಾಗಿ (size_t i = 0; i < Paths.ಗಾತ್ರ_3(); ++i) {
+    ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &ಮಾರ್ಗ = Paths[i];
+    ErrorOr<std::unique_ptr<ಸ್ಮರಣೆ_ಬಫರ್>> FileOrErr =
+        VFS.get_ಬಫರ್_For_File(ಮಾರ್ಗ);
+    ಆದರೆ (std::error_ಸಂಕೇತ EC = FileOrErr.getError()) {
+      Error = (Twine("can't open file '") + ಮಾರ್ಗ + "': " + EC.ಸಂದೇಶ_2()).str();
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
     std::string ParseError;
-    if (!parse(i, FileOrErr.get().get(), ParseError)) {
-      Error = (Twine("error parsing file '") + Path + "': " + ParseError).str();
-      return false;
+    ಆದರೆ (!parse(i, FileOrErr.get().get(), ParseError)) {
+      Error = (Twine("error parsing file '") + ಮಾರ್ಗ + "': " + ParseError).str();
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
   }
-  return true;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-bool SpecialCaseList::createInternal(const MemoryBuffer *MB,
+ತಾರ್ಕಿಕ SpecialCaseList::create_ಆಂತರಿಕ(ಸ್ಥಿರಾಂಕ ಸ್ಮರಣೆ_ಬಫರ್ *MB,
                                      std::string &Error) {
-  if (!parse(0, MB, Error))
-    return false;
-  return true;
+  ಆದರೆ (!parse(0, MB, Error))
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
 Expected<SpecialCaseList::Section *>
-SpecialCaseList::addSection(StringRef SectionStr, unsigned FileNo,
-                            unsigned LineNo, bool UseGlobs) {
+SpecialCaseList::ಕೂಡಿಸು_Section(StringRef SectionStr, ಚಿಹ್ನೆರಹಿತ FileNo,
+                            ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No, ತಾರ್ಕಿಕ UseGlobs) {
   SectionStr = SectionStr.copy(StrAlloc);
-  Sections.emplace_back(SectionStr, FileNo, UseGlobs);
-  auto &Section = Sections.back();
+  Sections.emplace_ಹಿಂಭಾಗ(SectionStr, FileNo, UseGlobs);
+  ಸ್ವಯಂಚಾಲಿತ &Section = Sections.ಹಿಂಭಾಗ();
 
-  if (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
-    return createStringError(errc::invalid_argument,
-                             "malformed section at line " + Twine(LineNo) +
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = Section.Impl->SectionMatcher.ಸೇರಿಸು(SectionStr, ಸಾಲು_No)) {
+    ಹಿಂತಿರುಗಿ createStringError(errc::invalid_ವಾದ,
+                             "malformed section at line " + Twine(ಸಾಲು_No) +
                                  ": '" + SectionStr +
-                                 "': " + toString(std::move(Err)));
+                                 "': " + ಗಮ್ಯ_String(std::move(Err)));
   }
 
-  return &Section;
+  ಹಿಂತಿರುಗಿ &Section;
 }
 
-bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
+ತಾರ್ಕಿಕ SpecialCaseList::parse(ಚಿಹ್ನೆರಹಿತ FileIdx, ಸ್ಥಿರಾಂಕ ಸ್ಮರಣೆ_ಬಫರ್ *MB,
                             std::string &Error) {
-  unsigned long long Version = 2;
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ ಆವೃತ್ತಿ = 2;
 
-  StringRef Header = MB->getBuffer();
-  if (Header.consume_front("#!special-case-list-v"))
-    consumeUnsignedInteger(Header, 10, Version);
+  StringRef ಶೀರ್ಷಿಕೆ = MB->get_ಬಫರ್();
+  ಆದರೆ (ಶೀರ್ಷಿಕೆ.consume_front("#!special-case-list-v"))
+    consumeUnsignedInteger(ಶೀರ್ಷಿಕೆ, 10, ಆವೃತ್ತಿ);
 
-  auto MinVersion = [&](unsigned V) { return Version >= V; };
+  ಸ್ವಯಂಚಾಲಿತ Min_ಆವೃತ್ತಿ = [&](ಚಿಹ್ನೆರಹಿತ V) { ಹಿಂತಿರುಗಿ ಆವೃತ್ತಿ >= V; };
 
   // In https://reviews.llvm.org/D154014 we added glob support and planned
   // to remove regex support in patterns. We temporarily support the
   // original behavior using regexes if "#!special-case-list-v1" is the
   // first line of the file. For more details, see
   // https://discourse.llvm.org/t/use-glob-instead-of-regex-for-specialcaselists/71666
-  bool UseGlobs = MinVersion(2);
-  bool RemoveDotSlash = MinVersion(3);
-  bool WarnDotSlash = MinVersion(4) && !MinVersion(5);
+  ತಾರ್ಕಿಕ UseGlobs = Min_ಆವೃತ್ತಿ(2);
+  ತಾರ್ಕಿಕ RemoveDotSlash = Min_ಆವೃತ್ತಿ(3);
+  ತಾರ್ಕಿಕ WarnDotSlash = Min_ಆವೃತ್ತಿ(4) && !Min_ಆವೃತ್ತಿ(5);
   // TODO: Improve efficiency on Windows.
   // `SlashAgnostic` makes `GlobMatcher` lookup inefficient by reducing the part
   // of the pattern handled by the RadixTree. This was already the case even
@@ -422,135 +422,135 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   // needed to represent Windows backslashes. A possible, but not unique,
   // solution is to assume (or convert Windows query) backslashes, and
   // preprocess the Glob pattern to use different escape sequences.
-  bool SlashAgnostic = MinVersion(4) && llvm::sys::path::is_style_windows(
-                                            llvm::sys::path::Style::native);
+  ತಾರ್ಕಿಕ SlashAgnostic = Min_ಆವೃತ್ತಿ(4) && llvm::sys::ಮಾರ್ಗ_2::is_style_windows(
+                                            llvm::sys::ಮಾರ್ಗ_2::Style::native);
 
-  auto ErrOrSection = addSection("*", FileIdx, 1, true);
-  if (auto Err = ErrOrSection.takeError()) {
-    Error = toString(std::move(Err));
-    return false;
+  ಸ್ವಯಂಚಾಲಿತ ErrOrSection = ಕೂಡಿಸು_Section("*", FileIdx, 1, ನಿಜ);
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = ErrOrSection.takeError()) {
+    Error = ಗಮ್ಯ_String(std::move(Err));
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
   Section::SectionImpl *CurrentImpl = ErrOrSection.get()->Impl.get();
 
   // This is the current list of prefixes for all existing users matching file
   // path. We may need parametrization in constructor in future.
-  constexpr StringRef PathPrefixes[] = {"src", "!src", "mainfile", "source"};
+  constexpr StringRef ಮಾರ್ಗ_Prefixes[] = {"src", "!src", "mainfile", "source"};
 
-  for (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
-       !LineIt.is_at_eof(); LineIt++) {
-    unsigned LineNo = LineIt.line_number();
-    StringRef Line = LineIt->trim();
-    if (Line.empty())
-      continue;
+  ಗಾಗಿ (ಸಾಲು_iterator ಸಾಲು_It(*MB, /*SkipBlanks=*/ನಿಜ, /*CommentMarker=*/'#');
+       !ಸಾಲು_It.is_at_eof(); ಸಾಲು_It++) {
+    ಚಿಹ್ನೆರಹಿತ ಸಾಲು_No = ಸಾಲು_It.ಸಾಲು_ಸಂಖ್ಯೆ_2();
+    StringRef ಸಾಲು = ಸಾಲು_It->trim();
+    ಆದರೆ (ಸಾಲು.ಖಾಲಿಗಳು())
+      ಮುಂದುವರಿ;
 
     // Save section names
-    if (Line.starts_with("[")) {
-      if (!Line.ends_with("]")) {
+    ಆದರೆ (ಸಾಲು.starts_with("[")) {
+      ಆದರೆ (!ಸಾಲು.ತುದಿಗಳು_with("]")) {
         Error =
-            ("malformed section header on line " + Twine(LineNo) + ": " + Line)
+            ("malformed section header on line " + Twine(ಸಾಲು_No) + ": " + ಸಾಲು)
                 .str();
-        return false;
+        ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
       }
 
-      auto ErrOrSection =
-          addSection(Line.drop_front().drop_back(), FileIdx, LineNo, UseGlobs);
-      if (auto Err = ErrOrSection.takeError()) {
-        Error = toString(std::move(Err));
-        return false;
+      ಸ್ವಯಂಚಾಲಿತ ErrOrSection =
+          ಕೂಡಿಸು_Section(ಸಾಲು.drop_front().drop_ಹಿಂಭಾಗ(), FileIdx, ಸಾಲು_No, UseGlobs);
+      ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = ErrOrSection.takeError()) {
+        Error = ಗಮ್ಯ_String(std::move(Err));
+        ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
       }
       CurrentImpl = ErrOrSection.get()->Impl.get();
-      continue;
+      ಮುಂದುವರಿ;
     }
 
     // Get our prefix and unparsed glob.
-    auto [Prefix, Postfix] = Line.split(":");
-    if (Postfix.empty()) {
+    ಸ್ವಯಂಚಾಲಿತ [ಪೂರ್ವಪ್ರತ್ಯಯ, Postfix] = ಸಾಲು.ವಿಭಜಿಸು(":");
+    ಆದರೆ (Postfix.ಖಾಲಿಗಳು()) {
       // Missing ':' in the line.
-      Error = ("malformed line " + Twine(LineNo) + ": '" + Line + "'").str();
-      return false;
+      Error = ("malformed line " + Twine(ಸಾಲು_No) + ": '" + ಸಾಲು + "'").str();
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
 
     QueryOptions QOpts;
     QOpts.UseGlobs = UseGlobs;
-    if (llvm::is_contained(PathPrefixes, Prefix)) {
+    ಆದರೆ (llvm::is_contained(ಮಾರ್ಗ_Prefixes, ಪೂರ್ವಪ್ರತ್ಯಯ)) {
       QOpts.RemoveDotSlash = RemoveDotSlash;
-      QOpts.WarnDotSlashMatch = WarnDotSlash;
+      QOpts.Warn_Dot_Slash_ಹೊಂದಿಕೆ = WarnDotSlash;
       QOpts.SlashAgnostic = SlashAgnostic;
     }
 
-    auto [Pattern, Category] = Postfix.split("=");
-    auto [It, _] = CurrentImpl->Entries[Prefix].try_emplace(Category, QOpts);
-    Pattern = Pattern.copy(StrAlloc);
-    if (auto Err = It->second.insert(Pattern, LineNo)) {
+    ಸ್ವಯಂಚಾಲಿತ [ನಮೂನೆ, Category] = Postfix.ವಿಭಜಿಸು("=");
+    ಸ್ವಯಂಚಾಲಿತ [It, _] = CurrentImpl->Entries[ಪೂರ್ವಪ್ರತ್ಯಯ].try_emplace(Category, QOpts);
+    ನಮೂನೆ = ನಮೂನೆ.copy(StrAlloc);
+    ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ Err = It->ಎರಡನೇ_2.ಸೇರಿಸು(ನಮೂನೆ, ಸಾಲು_No)) {
       Error =
           (Twine("malformed ") + (UseGlobs ? "glob" : "regex") + " in line " +
-           Twine(LineNo) + ": '" + Pattern + "': " + toString(std::move(Err)))
+           Twine(ಸಾಲು_No) + ": '" + ನಮೂನೆ + "': " + ಗಮ್ಯ_String(std::move(Err)))
               .str();
-      return false;
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
   }
 
-  return true;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-SpecialCaseList::~SpecialCaseList() = default;
+SpecialCaseList::~SpecialCaseList() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-bool SpecialCaseList::inSection(StringRef Section, StringRef Prefix,
-                                StringRef Query, StringRef Category) const {
-  auto [FileIdx, LineNo] = inSectionBlame(Section, Prefix, Query, Category);
-  return LineNo;
+ತಾರ್ಕಿಕ SpecialCaseList::ಒಳ_Section(StringRef Section, StringRef ಪೂರ್ವಪ್ರತ್ಯಯ,
+                                StringRef Query, StringRef Category) ಸ್ಥಿರಾಂಕ {
+  ಸ್ವಯಂಚಾಲಿತ [FileIdx, ಸಾಲು_No] = ಒಳ_Section_Blame(Section, ಪೂರ್ವಪ್ರತ್ಯಯ, Query, Category);
+  ಹಿಂತಿರುಗಿ ಸಾಲು_No;
 }
 
-std::pair<unsigned, unsigned>
-SpecialCaseList::inSectionBlame(StringRef Section, StringRef Prefix,
-                                StringRef Query, StringRef Category) const {
-  for (const auto &S : reverse(Sections)) {
-    if (S.Impl->SectionMatcher.matchAny(Section)) {
-      unsigned Blame = S.getLastMatch(Prefix, Query, Category);
-      if (Blame)
-        return {S.FileIdx, Blame};
+std::pair<ಚಿಹ್ನೆರಹಿತ, ಚಿಹ್ನೆರಹಿತ>
+SpecialCaseList::ಒಳ_Section_Blame(StringRef Section, StringRef ಪೂರ್ವಪ್ರತ್ಯಯ,
+                                StringRef Query, StringRef Category) ಸ್ಥಿರಾಂಕ {
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &S : ಹಿಮ್ಮುಖ(Sections)) {
+    ಆದರೆ (S.Impl->SectionMatcher.ಹೊಂದಿಕೆ_Any(Section)) {
+      ಚಿಹ್ನೆರಹಿತ Blame = S.get_ಕೊನೆಯ_ಹೊಂದಿಕೆ(ಪೂರ್ವಪ್ರತ್ಯಯ, Query, Category);
+      ಆದರೆ (Blame)
+        ಹಿಂತಿರುಗಿ {S.FileIdx, Blame};
     }
   }
-  return NotFound;
+  ಹಿಂತಿರುಗಿ Not_ಸಿಕ್ಕಿತು;
 }
 
-SpecialCaseList::Section::Section(StringRef Str, unsigned FileIdx,
-                                  bool UseGlobs)
+SpecialCaseList::Section::Section(StringRef Str, ಚಿಹ್ನೆರಹಿತ FileIdx,
+                                  ತಾರ್ಕಿಕ UseGlobs)
     : Name(Str), FileIdx(FileIdx),
       Impl(std::make_unique<SectionImpl>(
-          QueryOptions{UseGlobs, /*RemoveDotSlash=*/false})) {}
+          QueryOptions{UseGlobs, /*RemoveDotSlash=*/ಸುಳ್ಳು})) {}
 
-SpecialCaseList::Section::Section(Section &&) = default;
+SpecialCaseList::Section::Section(Section &&) = ಪೂರ್ವನಿಯೋಜಿತ;
 
-SpecialCaseList::Section::~Section() = default;
+SpecialCaseList::Section::~Section() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-bool SpecialCaseList::Section::matchName(StringRef Name) const {
-  return Impl->SectionMatcher.matchAny(Name);
+ತಾರ್ಕಿಕ SpecialCaseList::Section::ಹೊಂದಿಕೆ_Name(StringRef Name) ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ Impl->SectionMatcher.ಹೊಂದಿಕೆ_Any(Name);
 }
 
-const Matcher *
-SpecialCaseList::Section::SectionImpl::findMatcher(StringRef Prefix,
-                                                   StringRef Category) const {
-  SectionEntries::const_iterator I = Entries.find(Prefix);
-  if (I == Entries.end())
-    return nullptr;
-  StringMap<Matcher>::const_iterator II = I->second.find(Category);
-  if (II == I->second.end())
-    return nullptr;
+ಸ್ಥಿರಾಂಕ Matcher *
+SpecialCaseList::Section::SectionImpl::ಕಂಡುಹಿಡಿ_Matcher(StringRef ಪೂರ್ವಪ್ರತ್ಯಯ,
+                                                   StringRef Category) ಸ್ಥಿರಾಂಕ {
+  SectionEntries::const_iterator I = Entries.ಕಂಡುಹಿಡಿ(ಪೂರ್ವಪ್ರತ್ಯಯ);
+  ಆದರೆ (I == Entries.ಕೊನೆ())
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
+  StringMap<Matcher>::const_iterator II = I->ಎರಡನೇ_2.ಕಂಡುಹಿಡಿ(Category);
+  ಆದರೆ (II == I->ಎರಡನೇ_2.ಕೊನೆ())
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 
-  return &II->second;
+  ಹಿಂತಿರುಗಿ &II->ಎರಡನೇ_2;
 }
 
-unsigned SpecialCaseList::Section::getLastMatch(StringRef Prefix,
+ಚಿಹ್ನೆರಹಿತ SpecialCaseList::Section::get_ಕೊನೆಯ_ಹೊಂದಿಕೆ(StringRef ಪೂರ್ವಪ್ರತ್ಯಯ,
                                                 StringRef Query,
-                                                StringRef Category) const {
-  if (const Matcher *M = Impl->findMatcher(Prefix, Category))
-    return M->match(Query);
-  return 0;
+                                                StringRef Category) ಸ್ಥಿರಾಂಕ {
+  ಆದರೆ (ಸ್ಥಿರಾಂಕ Matcher *M = Impl->ಕಂಡುಹಿಡಿ_Matcher(ಪೂರ್ವಪ್ರತ್ಯಯ, Category))
+    ಹಿಂತಿರುಗಿ M->ಹೊಂದಿಕೆ(Query);
+  ಹಿಂತಿರುಗಿ 0;
 }
 
-bool SpecialCaseList::Section::hasPrefix(StringRef Prefix) const {
-  return Impl->Entries.contains(Prefix);
+ತಾರ್ಕಿಕ SpecialCaseList::Section::has_ಪೂರ್ವಪ್ರತ್ಯಯ(StringRef ಪೂರ್ವಪ್ರತ್ಯಯ) ಸ್ಥಿರಾಂಕ {
+  ಹಿಂತಿರುಗಿ Impl->Entries.ಒಳಗೊಂಡಿದೆ(ಪೂರ್ವಪ್ರತ್ಯಯ);
 }
 
 } // namespace llvm

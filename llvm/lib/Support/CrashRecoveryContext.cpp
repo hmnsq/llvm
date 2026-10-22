@@ -6,78 +6,78 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ExitCodes.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/thread.h"
-#include <cassert>
-#include <mutex>
-#include <setjmp.h>
-#ifdef __APPLE__
-#include <sys/resource.h>
-#endif
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CrashRecoveryContext.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/llvm-config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ErrorHandling.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ExitCodes.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Signals.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/thread.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
+#ಅನ್ತರ್ಭಾವ <mutex>
+#ಅನ್ತರ್ಭಾವ <setjmp.h>
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __APPLE__
+#ಅನ್ತರ್ಭಾವ <sys/resource.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-namespace {
+ನಾಮಾಕಾಶ {
 
-struct CrashRecoveryContextImpl;
-static LLVM_THREAD_LOCAL const CrashRecoveryContextImpl *CurrentContext;
+ರಚನೆ CrashRecoveryContextImpl;
+ಸ್ಥಿರ LLVM_THREAD_LOCAL ಸ್ಥಿರಾಂಕ CrashRecoveryContextImpl *CurrentContext;
 
-struct CrashRecoveryContextImpl {
+ರಚನೆ CrashRecoveryContextImpl {
   // When threads are disabled, this links up all active
   // CrashRecoveryContextImpls.  When threads are enabled there's one thread
   // per CrashRecoveryContext and CurrentContext is a thread-local, so only one
   // CrashRecoveryContextImpl is active per thread and this is always null.
-  const CrashRecoveryContextImpl *Next;
+  ಸ್ಥಿರಾಂಕ CrashRecoveryContextImpl *ಮುಂದಿನ_2;
 
-  CrashRecoveryContext *CRC;
-  ::jmp_buf JumpBuffer;
-  volatile unsigned Failed : 1;
-  unsigned SwitchedThread : 1;
-  unsigned ValidJumpBuffer : 1;
+  CrashRecoveryContext *ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
+  ::jmp_buf Jump_ಬಫರ್;
+  ಅಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ Failed : 1;
+  ಚಿಹ್ನೆರಹಿತ SwitchedThread : 1;
+  ಚಿಹ್ನೆರಹಿತ Valid_Jump_ಬಫರ್ : 1;
 
-public:
-  CrashRecoveryContextImpl(CrashRecoveryContext *CRC) noexcept
-      : CRC(CRC), Failed(false), SwitchedThread(false), ValidJumpBuffer(false) {
-    Next = CurrentContext;
-    CurrentContext = this;
+ಸಾರ್ವಜನಿಕ:
+  CrashRecoveryContextImpl(CrashRecoveryContext *ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ) noexcept
+      : ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ(ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ), Failed(ಸುಳ್ಳು), SwitchedThread(ಸುಳ್ಳು), Valid_Jump_ಬಫರ್(ಸುಳ್ಳು) {
+    ಮುಂದಿನ_2 = CurrentContext;
+    CurrentContext = ಇದು;
   }
   ~CrashRecoveryContextImpl() {
-    if (!SwitchedThread)
-      CurrentContext = Next;
+    ಆದರೆ (!SwitchedThread)
+      CurrentContext = ಮುಂದಿನ_2;
   }
 
   /// Called when the separate crash-recovery thread was finished, to
   /// indicate that we don't need to clear the thread-local CurrentContext.
-  void setSwitchedThread() {
-#if defined(LLVM_ENABLE_THREADS) && LLVM_ENABLE_THREADS != 0
-    SwitchedThread = true;
-#endif
+  ಶೂನ್ಯ ಗಣ_Switched_Thread() {
+#ಆದರೆ defined(LLVM_ENABLE_ಎಳೆಗಳು) && LLVM_ENABLE_ಎಳೆಗಳು != 0
+    SwitchedThread = ನಿಜ;
+#ಆದರೆ_ಅಂತ್ಯ
   }
 
   // If the function ran by the CrashRecoveryContext crashes or fails, then
   // 'RetCode' represents the returned error code, as if it was returned by a
   // process. 'Context' represents the signal type on Unix; on Windows, it is
   // the ExceptionContext.
-  void HandleCrash(int RetCode, uintptr_t Context) {
+  ಶೂನ್ಯ HandleCrash(ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ, uintptr_t Context) {
     // Eliminate the current context entry, to avoid re-entering in case the
     // cleanup code crashes.
-    CurrentContext = Next;
+    CurrentContext = ಮುಂದಿನ_2;
 
-    assert(!Failed && "Crash recovery context already failed!");
-    Failed = true;
+    ಪ್ರತಿಜ್ಞಾ(!Failed && "Crash recovery context already failed!");
+    Failed = ನಿಜ;
 
-    if (CRC->DumpStackAndCleanupOnFailure)
+    ಆದರೆ (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ->Dump_ರಾಶಿ_And_Cleanup_On_Failure)
       sys::CleanupOnSignal(Context);
 
-    CRC->RetCode = RetCode;
+    ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ->Ret_ಸಂಕೇತ = Ret_ಸಂಕೇತ;
 
     // Jump back to the RunSafely we were called under.
-    if (ValidJumpBuffer)
-      longjmp(JumpBuffer, 1);
+    ಆದರೆ (Valid_Jump_ಬಫರ್)
+      longjmp(Jump_ಬಫರ್, 1);
 
     // Otherwise let the caller decide of the outcome of the crash. Currently
     // this occurs when using SEH on Windows with MSVC or clang-cl.
@@ -85,21 +85,21 @@ public:
 };
 
 std::mutex &getCrashRecoveryContextMutex() {
-  static std::mutex CrashRecoveryContextMutex;
-  return CrashRecoveryContextMutex;
+  ಸ್ಥಿರ std::mutex CrashRecoveryContextMutex;
+  ಹಿಂತಿರುಗಿ CrashRecoveryContextMutex;
 }
 
-static bool gCrashRecoveryEnabled = false;
+ಸ್ಥಿರ ತಾರ್ಕಿಕ gCrashRecoveryEnabled = ಸುಳ್ಳು;
 
-static LLVM_THREAD_LOCAL const CrashRecoveryContext *IsRecoveringFromCrash;
+ಸ್ಥಿರ LLVM_THREAD_LOCAL ಸ್ಥಿರಾಂಕ CrashRecoveryContext *IsRecoveringFromCrash;
 
 } // namespace
 
-static void
-installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling);
-static void uninstallExceptionOrSignalHandlers();
+ಸ್ಥಿರ ಶೂನ್ಯ
+installExceptionOrSignalHandlers(ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling);
+ಸ್ಥಿರ ಶೂನ್ಯ uninstallExceptionOrSignalHandlers();
 
-CrashRecoveryContextCleanup::~CrashRecoveryContextCleanup() = default;
+CrashRecoveryContextCleanup::~CrashRecoveryContextCleanup() = ಪೂರ್ವನಿಯೋಜಿತ;
 
 CrashRecoveryContext::CrashRecoveryContext() {
   // On Windows, if abort() was previously triggered (and caught by a previous
@@ -110,84 +110,84 @@ CrashRecoveryContext::CrashRecoveryContext() {
 
 CrashRecoveryContext::~CrashRecoveryContext() {
   // Reclaim registered resources.
-  CrashRecoveryContextCleanup *i = head;
-  const CrashRecoveryContext *PC = IsRecoveringFromCrash;
-  IsRecoveringFromCrash = this;
-  while (i) {
+  CrashRecoveryContextCleanup *i = ತಲೆ;
+  ಸ್ಥಿರಾಂಕ CrashRecoveryContext *PC = IsRecoveringFromCrash;
+  IsRecoveringFromCrash = ಇದು;
+  ಆಗ (i) {
     CrashRecoveryContextCleanup *tmp = i;
-    i = tmp->next;
-    tmp->cleanupFired = true;
+    i = tmp->ಮುಂದಿನ;
+    tmp->cleanupFired = ನಿಜ;
     tmp->recoverResources();
-    delete tmp;
+    ಅಳಿಸು tmp;
   }
   IsRecoveringFromCrash = PC;
 
   CrashRecoveryContextImpl *CRCI = (CrashRecoveryContextImpl *) Impl;
-  delete CRCI;
+  ಅಳಿಸು CRCI;
 }
 
-bool CrashRecoveryContext::isRecoveringFromCrash() {
-  return IsRecoveringFromCrash != nullptr;
+ತಾರ್ಕಿಕ CrashRecoveryContext::isRecoveringFromCrash() {
+  ಹಿಂತಿರುಗಿ IsRecoveringFromCrash != ಶೂನ್ಯಸೂಚಕ;
 }
 
 CrashRecoveryContext *CrashRecoveryContext::GetCurrent() {
-  if (!gCrashRecoveryEnabled)
-    return nullptr;
+  ಆದರೆ (!gCrashRecoveryEnabled)
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 
-  const CrashRecoveryContextImpl *CRCI = CurrentContext;
-  if (!CRCI)
-    return nullptr;
+  ಸ್ಥಿರಾಂಕ CrashRecoveryContextImpl *CRCI = CurrentContext;
+  ಆದರೆ (!CRCI)
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 
-  return CRCI->CRC;
+  ಹಿಂತಿರುಗಿ CRCI->ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
 }
 
-void CrashRecoveryContext::Enable(bool NeedsPOSIXUtilitySignalHandling) {
-  std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
+ಶೂನ್ಯ CrashRecoveryContext::Enable(ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling) {
+  std::ಬೀಗ_guard<std::mutex> L(getCrashRecoveryContextMutex());
   // FIXME: Shouldn't this be a refcount or something?
-  if (gCrashRecoveryEnabled)
-    return;
-  gCrashRecoveryEnabled = true;
+  ಆದರೆ (gCrashRecoveryEnabled)
+    ಹಿಂತಿರುಗಿ;
+  gCrashRecoveryEnabled = ನಿಜ;
   installExceptionOrSignalHandlers(NeedsPOSIXUtilitySignalHandling);
 }
 
-void CrashRecoveryContext::Disable() {
-  std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
-  if (!gCrashRecoveryEnabled)
-    return;
-  gCrashRecoveryEnabled = false;
+ಶೂನ್ಯ CrashRecoveryContext::Disable() {
+  std::ಬೀಗ_guard<std::mutex> L(getCrashRecoveryContextMutex());
+  ಆದರೆ (!gCrashRecoveryEnabled)
+    ಹಿಂತಿರುಗಿ;
+  gCrashRecoveryEnabled = ಸುಳ್ಳು;
   uninstallExceptionOrSignalHandlers();
 }
 
-void CrashRecoveryContext::registerCleanup(CrashRecoveryContextCleanup *cleanup)
+ಶೂನ್ಯ CrashRecoveryContext::ರಿಜಿಸ್ಟರ್_Cleanup(CrashRecoveryContextCleanup *cleanup)
 {
-  if (!cleanup)
-    return;
-  if (head)
-    head->prev = cleanup;
-  cleanup->next = head;
-  head = cleanup;
+  ಆದರೆ (!cleanup)
+    ಹಿಂತಿರುಗಿ;
+  ಆದರೆ (ತಲೆ)
+    ತಲೆ->prev = cleanup;
+  cleanup->ಮುಂದಿನ = ತಲೆ;
+  ತಲೆ = cleanup;
 }
 
-void
+ಶೂನ್ಯ
 CrashRecoveryContext::unregisterCleanup(CrashRecoveryContextCleanup *cleanup) {
-  if (!cleanup)
-    return;
-  if (cleanup == head) {
-    head = cleanup->next;
-    if (head)
-      head->prev = nullptr;
+  ಆದರೆ (!cleanup)
+    ಹಿಂತಿರುಗಿ;
+  ಆದರೆ (cleanup == ತಲೆ) {
+    ತಲೆ = cleanup->ಮುಂದಿನ;
+    ಆದರೆ (ತಲೆ)
+      ತಲೆ->prev = ಶೂನ್ಯಸೂಚಕ;
   }
-  else {
-    cleanup->prev->next = cleanup->next;
-    if (cleanup->next)
-      cleanup->next->prev = cleanup->prev;
+  ಇಲ್ಲದಿದ್ದರೆ {
+    cleanup->prev->ಮುಂದಿನ = cleanup->ಮುಂದಿನ;
+    ಆದರೆ (cleanup->ಮುಂದಿನ)
+      cleanup->ಮುಂದಿನ->prev = cleanup->prev;
   }
-  delete cleanup;
+  ಅಳಿಸು cleanup;
 }
 
-#if defined(_MSC_VER)
+#ಆದರೆ defined(_MSC_VER)
 
-#include <windows.h> // for GetExceptionInformation
+#ಅನ್ತರ್ಭಾವ <windows.h> // for GetExceptionInformation
 
 // If _MSC_VER is defined, we must have SEH. Use it if it's available. It's way
 // better than VEH. Vectored exception handling catches all exceptions happening
@@ -197,56 +197,56 @@ CrashRecoveryContext::unregisterCleanup(CrashRecoveryContextCleanup *cleanup) {
 // catches exceptions if they would bubble out from the stack frame with __try /
 // __except.
 
-static void
-installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {}
-static void uninstallExceptionOrSignalHandlers() {}
+ಸ್ಥಿರ ಶೂನ್ಯ
+installExceptionOrSignalHandlers(ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling) {}
+ಸ್ಥಿರ ಶೂನ್ಯ uninstallExceptionOrSignalHandlers() {}
 
 // We need this function because the call to GetExceptionInformation() can only
 // occur inside the __except evaluation block
-static int ExceptionFilter(_EXCEPTION_POINTERS *Except) {
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ExceptionFilter(EXCEPTION_ಸೂಚಕಗಳು *Except) {
   // Lookup the current thread local recovery object.
-  const CrashRecoveryContextImpl *CRCI = CurrentContext;
+  ಸ್ಥಿರಾಂಕ CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  ಆದರೆ (!CRCI) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    ಹಿಂತಿರುಗಿ EXCEPTION_CONTINUE_ಹುಡುಕು;
   }
 
-  int RetCode = (int)Except->ExceptionRecord->ExceptionCode;
-  if ((RetCode & 0xF0000000) == 0xE0000000)
-    RetCode &= ~0xF0000000; // this crash was generated by sys::Process::Exit
+  ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ = (ಪೂರ್ಣಾಂಕ)Except->Exception_ದಾಖಲೆ->Exception_ಸಂಕೇತ;
+  ಆದರೆ ((Ret_ಸಂಕೇತ & 0xF0000000) == 0xE0000000)
+    Ret_ಸಂಕೇತ &= ~0xF0000000; // this crash was generated by sys::Process::Exit
 
   // Handle the crash
   const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(
-      RetCode, reinterpret_cast<uintptr_t>(Except));
+      Ret_ಸಂಕೇತ, reinterpret_cast<uintptr_t>(Except));
 
-  return EXCEPTION_EXECUTE_HANDLER;
+  ಹಿಂತಿರುಗಿ EXCEPTION_EXECUTE_HANDLER;
 }
 
-#if defined(__clang__) && defined(_M_IX86)
+#ಆದರೆ defined(__clang__) && defined(_M_IX86)
 // Work around PR44697.
 __attribute__((optnone))
-#endif
-bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
-  if (!gCrashRecoveryEnabled) {
+#ಆದರೆ_ಅಂತ್ಯ
+ತಾರ್ಕಿಕ CrashRecoveryContext::ಸತತ_Safely(function_ref<ಶೂನ್ಯ()> Fn) {
+  ಆದರೆ (!gCrashRecoveryEnabled) {
     Fn();
-    return true;
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
-  assert(!Impl && "Crash recovery context already initialized!");
-  Impl = new CrashRecoveryContextImpl(this);
+  ಪ್ರತಿಜ್ಞಾ(!Impl && "Crash recovery context already initialized!");
+  Impl = ಹೊಸ CrashRecoveryContextImpl(ಇದು);
   __try {
     Fn();
   } __except (ExceptionFilter(GetExceptionInformation())) {
-    return false;
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
-  return true;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-#else // !_MSC_VER
+#ಇಲ್ಲದಿದ್ದರೆ // !_MSC_VER
 
-#if defined(_WIN32)
+#ಆದರೆ defined(_WIN32)
 // This is a non-MSVC compiler, probably mingw gcc or clang without
 // -fms-extensions. Use vectored exception handling (VEH).
 //
@@ -266,41 +266,41 @@ bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
 // XP, so if support for older versions of Windows is required,
 // it will have to be added.
 
-#include "llvm/Support/Windows/WindowsSupport.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Windows/WindowsSupport.h"
 
-static LONG CALLBACK ExceptionHandler(PEXCEPTION_POINTERS ExceptionInfo)
+ಸ್ಥಿರ LONG CALLBACK ExceptionHandler(PEXCEPTION_ಸೂಚಕಗಳು ExceptionInfo)
 {
   // DBG_PRINTEXCEPTION_WIDE_C is not properly defined on all supported
   // compilers and platforms, so we define it manually.
   constexpr ULONG DbgPrintExceptionWideC = 0x4001000AL;
-  switch (ExceptionInfo->ExceptionRecord->ExceptionCode)
+  ಆಯ್ಕೆ (ExceptionInfo->Exception_ದಾಖಲೆ->Exception_ಸಂಕೇತ)
   {
-  case DBG_PRINTEXCEPTION_C:
-  case DbgPrintExceptionWideC:
-  case 0x406D1388:  // set debugger thread name
-    return EXCEPTION_CONTINUE_EXECUTION;
+  ಸ್ಥಿತಿ DBG_PRINTEXCEPTION_C:
+  ಸ್ಥಿತಿ DbgPrintExceptionWideC:
+  ಸ್ಥಿತಿ 0x406D1388:  // set debugger thread name
+    ಹಿಂತಿರುಗಿ EXCEPTION_CONTINUE_EXECUTION;
   }
 
   // Lookup the current thread local recovery object.
-  const CrashRecoveryContextImpl *CRCI = CurrentContext;
+  ಸ್ಥಿರಾಂಕ CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  ಆದರೆ (!CRCI) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    ಹಿಂತಿರುಗಿ EXCEPTION_CONTINUE_ಹುಡುಕು;
   }
 
   // TODO: We can capture the stack backtrace here and store it on the
   // implementation if we so choose.
 
-  int RetCode = (int)ExceptionInfo->ExceptionRecord->ExceptionCode;
-  if ((RetCode & 0xF0000000) == 0xE0000000)
-    RetCode &= ~0xF0000000; // this crash was generated by sys::Process::Exit
+  ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ = (ಪೂರ್ಣಾಂಕ)ExceptionInfo->Exception_ದಾಖಲೆ->Exception_ಸಂಕೇತ;
+  ಆದರೆ ((Ret_ಸಂಕೇತ & 0xF0000000) == 0xE0000000)
+    Ret_ಸಂಕೇತ &= ~0xF0000000; // this crash was generated by sys::Process::Exit
 
   // Handle the crash
   const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(
-      RetCode, reinterpret_cast<uintptr_t>(ExceptionInfo));
+      Ret_ಸಂಕೇತ, reinterpret_cast<uintptr_t>(ExceptionInfo));
 
   // Note that we don't actually get here because HandleCrash calls
   // longjmp, which means the HandleCrash function never returns.
@@ -312,30 +312,30 @@ static LONG CALLBACK ExceptionHandler(PEXCEPTION_POINTERS ExceptionInfo)
 // CrashRecoveryContext at all.  So we make use of a thread-local
 // exception table.  The handles contained in here will either be
 // non-NULL, valid VEH handles, or NULL.
-static LLVM_THREAD_LOCAL const void* sCurrentExceptionHandle;
+ಸ್ಥಿರ LLVM_THREAD_LOCAL ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ* sCurrentExceptionHandle;
 
-static void
-installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
+ಸ್ಥಿರ ಶೂನ್ಯ
+installExceptionOrSignalHandlers(ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling) {
   // We can set up vectored exception handling now.  We will install our
   // handler as the front of the list, though there's no assurances that
   // it will remain at the front (another call could install itself before
   // our handler).  This 1) isn't likely, and 2) shouldn't cause problems.
-  PVOID handle = ::AddVectoredExceptionHandler(1, ExceptionHandler);
+  PVOID handle = ::ಕೂಡಿಸು_Vectored_Exception_Handler(1, ExceptionHandler);
   sCurrentExceptionHandle = handle;
 }
 
-static void uninstallExceptionOrSignalHandlers() {
+ಸ್ಥಿರ ಶೂನ್ಯ uninstallExceptionOrSignalHandlers() {
   PVOID currentHandle = const_cast<PVOID>(sCurrentExceptionHandle);
-  if (currentHandle) {
+  ಆದರೆ (currentHandle) {
     // Now we can remove the vectored exception handler from the chain
     ::RemoveVectoredExceptionHandler(currentHandle);
 
     // Reset the handle in our thread-local set.
-    sCurrentExceptionHandle = NULL;
+    sCurrentExceptionHandle = ಖಾಲಿ;
   }
 }
 
-#else // !_WIN32
+#ಇಲ್ಲದಿದ್ದರೆ // !_WIN32
 
 // Generic POSIX implementation.
 //
@@ -348,18 +348,18 @@ static void uninstallExceptionOrSignalHandlers() {
 // reliable fashion -- if we get a signal outside of a crash recovery context we
 // simply disable crash recovery and raise the signal again.
 
-#include <signal.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
 
-static const int Signals[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ ಸಂಕೇತಗಳು[] =
     { SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP };
-static const unsigned NumSignals = std::size(Signals);
-static struct sigaction PrevActions[NumSignals];
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಸಂಕೇತಗಳು = std::ಗಾತ್ರ_3(ಸಂಕೇತಗಳು);
+ಸ್ಥಿರ ರಚನೆ sigaction PrevActions[ಅಂಕೆ_ಸಂಕೇತಗಳು];
 
-static void CrashRecoverySignalHandler(int Signal) {
+ಸ್ಥಿರ ಶೂನ್ಯ CrashRecoverySignalHandler(ಪೂರ್ಣಾಂಕ Signal) {
   // Lookup the current thread local recovery object.
-  const CrashRecoveryContextImpl *CRCI = CurrentContext;
+  ಸ್ಥಿರಾಂಕ CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  ಆದರೆ (!CRCI) {
     // We didn't find a crash recovery context -- this means either we got a
     // signal on a thread we didn't expect it on, the application got a signal
     // outside of a crash recovery context, or something else went horribly
@@ -373,176 +373,176 @@ static void CrashRecoverySignalHandler(int Signal) {
     // not take a lock, and a lock with static storage duration may already be
     // destroyed by the time a signal is delivered during exit(). Racing with
     // another thread here doesn't matter.
-    gCrashRecoveryEnabled = false;
+    gCrashRecoveryEnabled = ಸುಳ್ಳು;
     uninstallExceptionOrSignalHandlers();
-    raise(Signal);
+    ಎತ್ತು(Signal);
 
     // The signal will be thrown once the signal mask is restored.
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
 
   // Unblock the signal we received.
-  sigset_t SigMask;
-  sigemptyset(&SigMask);
-  sigaddset(&SigMask, Signal);
-  sigprocmask(SIG_UNBLOCK, &SigMask, nullptr);
+  sigset_t Sig_ಮುಖವಾಡ;
+  sigemptyset(&Sig_ಮುಖವಾಡ);
+  sigaddset(&Sig_ಮುಖವಾಡ, Signal);
+  sigprocmask(SIG_UNBLOCK, &Sig_ಮುಖವಾಡ, ಶೂನ್ಯಸೂಚಕ);
 
   // Return the same error code as if the program crashed, as mentioned in the
   // section "Exit Status for Commands":
   // https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xcu_chap02.html
-  int RetCode = 128 + Signal;
+  ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ = 128 + Signal;
 
   // Don't consider a broken pipe as a crash (see clang/lib/Driver/Driver.cpp)
-  if (Signal == SIGPIPE)
-    RetCode = EX_IOERR;
+  ಆದರೆ (Signal == SIGPIPE)
+    Ret_ಸಂಕೇತ = EX_IOERR;
 
-  if (CRCI)
-    const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(RetCode, Signal);
+  ಆದರೆ (CRCI)
+    const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(Ret_ಸಂಕೇತ, Signal);
 }
 
-static void
-installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
+ಸ್ಥಿರ ಶೂನ್ಯ
+installExceptionOrSignalHandlers(ತಾರ್ಕಿಕ NeedsPOSIXUtilitySignalHandling) {
   // Setup the signal handler.
-  struct sigaction Handler;
+  ರಚನೆ sigaction Handler;
   Handler.sa_handler = CrashRecoverySignalHandler;
   Handler.sa_flags = 0;
-  sigemptyset(&Handler.sa_mask);
+  sigemptyset(&Handler.sa_ಮುಖವಾಡ);
 
-  for (unsigned i = 0; i != NumSignals; ++i) {
-    if (NeedsPOSIXUtilitySignalHandling) {
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ i = 0; i != ಅಂಕೆ_ಸಂಕೇತಗಳು; ++i) {
+    ಆದರೆ (NeedsPOSIXUtilitySignalHandling) {
       // Don't install the new handler if the signal disposition is SIG_IGN.
-      struct sigaction act;
-      if (sigaction(Signals[i], NULL, &act) == 0 && act.sa_handler != SIG_IGN)
-        sigaction(Signals[i], &Handler, &PrevActions[i]);
-    } else {
-      sigaction(Signals[i], &Handler, &PrevActions[i]);
+      ರಚನೆ sigaction act;
+      ಆದರೆ (sigaction(ಸಂಕೇತಗಳು[i], ಖಾಲಿ, &act) == 0 && act.sa_handler != SIG_IGN)
+        sigaction(ಸಂಕೇತಗಳು[i], &Handler, &PrevActions[i]);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+      sigaction(ಸಂಕೇತಗಳು[i], &Handler, &PrevActions[i]);
     }
   }
 }
 
-static void uninstallExceptionOrSignalHandlers() {
+ಸ್ಥಿರ ಶೂನ್ಯ uninstallExceptionOrSignalHandlers() {
   // Restore the previous signal handlers.
-  for (unsigned i = 0; i != NumSignals; ++i)
-    sigaction(Signals[i], &PrevActions[i], nullptr);
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ i = 0; i != ಅಂಕೆ_ಸಂಕೇತಗಳು; ++i)
+    sigaction(ಸಂಕೇತಗಳು[i], &PrevActions[i], ಶೂನ್ಯಸೂಚಕ);
 }
 
-#endif // !_WIN32
+#ಆದರೆ_ಅಂತ್ಯ // !_WIN32
 
-bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
+ತಾರ್ಕಿಕ CrashRecoveryContext::ಸತತ_Safely(function_ref<ಶೂನ್ಯ()> Fn) {
   // If crash recovery is disabled, do nothing.
-  if (gCrashRecoveryEnabled) {
-    assert(!Impl && "Crash recovery context already initialized!");
-    CrashRecoveryContextImpl *CRCI = new CrashRecoveryContextImpl(this);
+  ಆದರೆ (gCrashRecoveryEnabled) {
+    ಪ್ರತಿಜ್ಞಾ(!Impl && "Crash recovery context already initialized!");
+    CrashRecoveryContextImpl *CRCI = ಹೊಸ CrashRecoveryContextImpl(ಇದು);
     Impl = CRCI;
 
-    CRCI->ValidJumpBuffer = true;
-    if (setjmp(CRCI->JumpBuffer) != 0) {
-      return false;
+    CRCI->Valid_Jump_ಬಫರ್ = ನಿಜ;
+    ಆದರೆ (setjmp(CRCI->Jump_ಬಫರ್) != 0) {
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
   }
 
   Fn();
-  return true;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-#endif // !_MSC_VER
+#ಆದರೆ_ಅಂತ್ಯ // !_MSC_VER
 
-[[noreturn]] void CrashRecoveryContext::HandleExit(int RetCode) {
-#if defined(_WIN32)
+[[noreturn]] ಶೂನ್ಯ CrashRecoveryContext::HandleExit(ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ) {
+#ಆದರೆ defined(_WIN32)
   // Since the exception code is actually of NTSTATUS type, we use the
   // Microsoft-recommended 0xE prefix, to signify that this is a user error.
   // This value is a combination of the customer field (bit 29) and severity
   // field (bits 30-31) in the NTSTATUS specification.
-  ::RaiseException(0xE0000000 | RetCode, 0, 0, NULL);
-#else
+  ::RaiseException(0xE0000000 | Ret_ಸಂಕೇತ, 0, 0, ಖಾಲಿ);
+#ಇಲ್ಲದಿದ್ದರೆ
   // On Unix we don't need to raise an exception, we go directly to
   // HandleCrash(), then longjmp will unwind the stack for us.
   CrashRecoveryContextImpl *CRCI = (CrashRecoveryContextImpl *)Impl;
-  assert(CRCI && "Crash recovery context never initialized!");
-  CRCI->HandleCrash(RetCode, 0 /*no sig num*/);
-#endif
+  ಪ್ರತಿಜ್ಞಾ(CRCI && "Crash recovery context never initialized!");
+  CRCI->HandleCrash(Ret_ಸಂಕೇತ, 0 /*no sig num*/);
+#ಆದರೆ_ಅಂತ್ಯ
   llvm_unreachable("Most likely setjmp wasn't called!");
 }
 
-bool CrashRecoveryContext::isCrash(int RetCode) {
-#if defined(_WIN32)
+ತಾರ್ಕಿಕ CrashRecoveryContext::isCrash(ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ) {
+#ಆದರೆ defined(_WIN32)
   // On Windows, the code is interpreted as NTSTATUS. The two high bits
   // represent the severity. Values starting with 0x80000000 are reserved for
   // "warnings"; values of 0xC0000000 and up are for "errors". In practice, both
   // are interpreted as a non-continuable signal.
-  unsigned Code = ((unsigned)RetCode & 0xF0000000) >> 28;
-  if (Code != 0xC && Code != 8)
-    return false;
-#else
+  ಚಿಹ್ನೆರಹಿತ ಸಂಕೇತ_2 = ((ಚಿಹ್ನೆರಹಿತ)Ret_ಸಂಕೇತ & 0xF0000000) >> 28;
+  ಆದರೆ (ಸಂಕೇತ_2 != 0xC && ಸಂಕೇತ_2 != 8)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+#ಇಲ್ಲದಿದ್ದರೆ
   // On Unix, signals are represented by return codes of 128 or higher.
   // Exit code 128 is a reserved value and should not be raised as a signal.
-  if (RetCode <= 128)
-    return false;
-#endif
-  return true;
+  ಆದರೆ (Ret_ಸಂಕೇತ <= 128)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+#ಆದರೆ_ಅಂತ್ಯ
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
-bool CrashRecoveryContext::throwIfCrash(int RetCode) {
-  if (!isCrash(RetCode))
-    return false;
-#if defined(_WIN32)
-  ::RaiseException(RetCode, 0, 0, NULL);
-#else
+ತಾರ್ಕಿಕ CrashRecoveryContext::throwIfCrash(ಪೂರ್ಣಾಂಕ Ret_ಸಂಕೇತ) {
+  ಆದರೆ (!isCrash(Ret_ಸಂಕೇತ))
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+#ಆದರೆ defined(_WIN32)
+  ::RaiseException(Ret_ಸಂಕೇತ, 0, 0, ಖಾಲಿ);
+#ಇಲ್ಲದಿದ್ದರೆ
   llvm::sys::unregisterHandlers();
-  raise(RetCode - 128);
-#endif
-  return true;
+  ಎತ್ತು(Ret_ಸಂಕೇತ - 128);
+#ಆದರೆ_ಅಂತ್ಯ
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }
 
 // FIXME: Portability.
-static void setThreadBackgroundPriority() {
-#ifdef __APPLE__
+ಸ್ಥಿರ ಶೂನ್ಯ ಗಣ_Thread_Background_ಆದ್ಯತೆ() {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __APPLE__
   setpriority(PRIO_DARWIN_THREAD, 0, PRIO_DARWIN_BG);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-static bool hasThreadBackgroundPriority() {
-#ifdef __APPLE__
-  return getpriority(PRIO_DARWIN_THREAD, 0) == 1;
-#else
-  return false;
-#endif
+ಸ್ಥಿರ ತಾರ್ಕಿಕ has_Thread_Background_ಆದ್ಯತೆ() {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __APPLE__
+  ಹಿಂತಿರುಗಿ getpriority(PRIO_DARWIN_THREAD, 0) == 1;
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-namespace {
-struct RunSafelyOnThreadInfo {
-  function_ref<void()> Fn;
-  CrashRecoveryContext *CRC;
-  bool UseBackgroundPriority;
-  bool Result;
+ನಾಮಾಕಾಶ {
+ರಚನೆ ಸತತ_Safely_On_Thread_Info {
+  function_ref<ಶೂನ್ಯ()> Fn;
+  CrashRecoveryContext *ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
+  ತಾರ್ಕಿಕ Use_Background_ಆದ್ಯತೆ;
+  ತಾರ್ಕಿಕ ಫಲಿತಾಂಶ;
 };
 } // namespace
 
-static void RunSafelyOnThread_Dispatch(void *UserData) {
-  RunSafelyOnThreadInfo *Info =
-    reinterpret_cast<RunSafelyOnThreadInfo*>(UserData);
+ಸ್ಥಿರ ಶೂನ್ಯ ಸತತ_Safely_On_Thread_Dispatch(ಶೂನ್ಯ *User_ದತ್ತಾಂಶ) {
+  ಸತತ_Safely_On_Thread_Info *Info =
+    reinterpret_cast<ಸತತ_Safely_On_Thread_Info*>(User_ದತ್ತಾಂಶ);
 
-  if (Info->UseBackgroundPriority)
-    setThreadBackgroundPriority();
+  ಆದರೆ (Info->Use_Background_ಆದ್ಯತೆ)
+    ಗಣ_Thread_Background_ಆದ್ಯತೆ();
 
-  Info->Result = Info->CRC->RunSafely(Info->Fn);
+  Info->ಫಲಿತಾಂಶ = Info->ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ->ಸತತ_Safely(Info->Fn);
 }
-bool CrashRecoveryContext::RunSafelyOnThread(function_ref<void()> Fn,
-                                             unsigned RequestedStackSize) {
-  bool UseBackgroundPriority = hasThreadBackgroundPriority();
-  RunSafelyOnThreadInfo Info = { Fn, this, UseBackgroundPriority, false };
-  llvm::thread Thread(RequestedStackSize == 0
+ತಾರ್ಕಿಕ CrashRecoveryContext::ಸತತ_Safely_On_Thread(function_ref<ಶೂನ್ಯ()> Fn,
+                                             ಚಿಹ್ನೆರಹಿತ Requested_ರಾಶಿ_ಗಾತ್ರ) {
+  ತಾರ್ಕಿಕ Use_Background_ಆದ್ಯತೆ = has_Thread_Background_ಆದ್ಯತೆ();
+  ಸತತ_Safely_On_Thread_Info Info = { Fn, ಇದು, Use_Background_ಆದ್ಯತೆ, ಸುಳ್ಳು };
+  llvm::thread Thread(Requested_ರಾಶಿ_ಗಾತ್ರ == 0
                           ? std::nullopt
-                          : std::optional<unsigned>(RequestedStackSize),
-                      RunSafelyOnThread_Dispatch, &Info);
+                          : std::optional<ಚಿಹ್ನೆರಹಿತ>(Requested_ರಾಶಿ_ಗಾತ್ರ),
+                      ಸತತ_Safely_On_Thread_Dispatch, &Info);
   Thread.join();
 
-  if (CrashRecoveryContextImpl *CRC = (CrashRecoveryContextImpl *)Impl)
-    CRC->setSwitchedThread();
-  return Info.Result;
+  ಆದರೆ (CrashRecoveryContextImpl *ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = (CrashRecoveryContextImpl *)Impl)
+    ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ->ಗಣ_Switched_Thread();
+  ಹಿಂತಿರುಗಿ Info.ಫಲಿತಾಂಶ;
 }
 
-bool CrashRecoveryContext::RunSafelyOnNewStack(function_ref<void()> Fn,
-                                               unsigned RequestedStackSize) {
-  return RunSafelyOnThread(Fn, RequestedStackSize);
+ತಾರ್ಕಿಕ CrashRecoveryContext::ಸತತ_Safely_On_New_ರಾಶಿ(function_ref<ಶೂನ್ಯ()> Fn,
+                                               ಚಿಹ್ನೆರಹಿತ Requested_ರಾಶಿ_ಗಾತ್ರ) {
+  ಹಿಂತಿರುಗಿ ಸತತ_Safely_On_Thread(Fn, Requested_ರಾಶಿ_ಗಾತ್ರ);
 }

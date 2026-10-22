@@ -16,37 +16,37 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/types.h>
-#include <string.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
 
-#include "regex_impl.h"
+#ಅನ್ತರ್ಭಾವ "regex_impl.h"
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
 size_t
-llvm_strlcpy(char *dst, const char *src, size_t siz)
+llvm_strlcpy(ಅಕ್ಷರ *dst, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *src, size_t siz)
 {
-	char *d = dst;
-	const char *s = src;
+	ಅಕ್ಷರ *d = dst;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s = src;
 	size_t n = siz;
 
 	/* Copy as many bytes as will fit */
-	if (n != 0) {
-		while (--n != 0) {
-			if ((*d++ = *s++) == '\0')
-				break;
+	ಆದರೆ (n != 0) {
+		ಆಗ (--n != 0) {
+			ಆದರೆ ((*d++ = *s++) == '\0')
+				ನಿಲ್ಲಿಸು;
 		}
 	}
 
 	/* Not enough room in dst, add NUL and traverse rest of src */
-	if (n == 0) {
-		if (siz != 0)
+	ಆದರೆ (n == 0) {
+		ಆದರೆ (siz != 0)
 			*d = '\0';		/* NUL-terminate dst */
-		while (*s++)
+		ಆಗ (*s++)
 			;
 	}
 
-	return(s - src - 1);	/* count does not include NUL */
+	ಹಿಂತಿರುಗಿ(s - src - 1);	/* count does not include NUL */
 }

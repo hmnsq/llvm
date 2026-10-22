@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/StringRef.h"
-#include <cassert>
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/APSInt.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/FoldingSet.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
 APSInt::APSInt(StringRef Str) {
-  assert(!Str.empty() && "Invalid string length");
+  ಪ್ರತಿಜ್ಞಾ(!Str.ಖಾಲಿಗಳು() && "Invalid string length");
 
   // (Over-)estimate the required number of bits.
-  unsigned NumBits = ((Str.size() * 64) / 19) + 2;
-  APInt Tmp(NumBits, Str, /*radix=*/10);
-  if (Str[0] == '-') {
-    unsigned MinBits = Tmp.getSignificantBits();
-    if (MinBits < NumBits)
-      Tmp = Tmp.trunc(std::max<unsigned>(1, MinBits));
-    *this = APSInt(Tmp, /*isUnsigned=*/false);
-    return;
+  ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬಿಟ್ಟುಗಳು_2 = ((Str.ಗಾತ್ರ_3() * 64) / 19) + 2;
+  APInt Tmp(ಅಂಕೆ_ಬಿಟ್ಟುಗಳು_2, Str, /*radix=*/10);
+  ಆದರೆ (Str[0] == '-') {
+    ಚಿಹ್ನೆರಹಿತ Min_ಬಿಟ್ಟುಗಳು = Tmp.get_Significant_ಬಿಟ್ಟುಗಳು();
+    ಆದರೆ (Min_ಬಿಟ್ಟುಗಳು < ಅಂಕೆ_ಬಿಟ್ಟುಗಳು_2)
+      Tmp = Tmp.trunc(std::max<ಚಿಹ್ನೆರಹಿತ>(1, Min_ಬಿಟ್ಟುಗಳು));
+    *ಇದು = APSInt(Tmp, /*isUnsigned=*/ಸುಳ್ಳು);
+    ಹಿಂತಿರುಗಿ;
   }
-  unsigned ActiveBits = Tmp.getActiveBits();
-  if (ActiveBits < NumBits)
-    Tmp = Tmp.trunc(std::max<unsigned>(1, ActiveBits));
-  *this = APSInt(Tmp, /*isUnsigned=*/true);
+  ಚಿಹ್ನೆರಹಿತ ಸಕ್ರಿಯ_ಬಿಟ್ಟುಗಳು = Tmp.get_ಸಕ್ರಿಯ_ಬಿಟ್ಟುಗಳು();
+  ಆದರೆ (ಸಕ್ರಿಯ_ಬಿಟ್ಟುಗಳು < ಅಂಕೆ_ಬಿಟ್ಟುಗಳು_2)
+    Tmp = Tmp.trunc(std::max<ಚಿಹ್ನೆರಹಿತ>(1, ಸಕ್ರಿಯ_ಬಿಟ್ಟುಗಳು));
+  *ಇದು = APSInt(Tmp, /*isUnsigned=*/ನಿಜ);
 }
 
-void APSInt::Profile(FoldingSetNodeID& ID) const {
-  ID.AddInteger((unsigned) (IsUnsigned ? 1 : 0));
+ಶೂನ್ಯ APSInt::Profile(Folding_ಗಣ_ಗಂಟು_ID& ID) ಸ್ಥಿರಾಂಕ {
+  ID.ಕೂಡಿಸು_Integer((ಚಿಹ್ನೆರಹಿತ) (IsUnsigned ? 1 : 0));
   APInt::Profile(ID);
 }

@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ModRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ModRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/STLExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
-  switch (MR) {
-  case ModRefInfo::NoModRef:
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, ModRefInfo MR) {
+  ಆಯ್ಕೆ (MR) {
+  ಸ್ಥಿತಿ ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    ನಿಲ್ಲಿಸು;
+  ಸ್ಥಿತಿ ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    ನಿಲ್ಲಿಸು;
+  ಸ್ಥಿತಿ ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    ನಿಲ್ಲಿಸು;
+  ಸ್ಥಿತಿ ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    ನಿಲ್ಲಿಸು;
   }
-  return OS;
+  ಹಿಂತಿರುಗಿ OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
-  interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
-    switch (Loc) {
-    case IRMemLocation::ArgMem:
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, ಸ್ಮರಣೆ_Effects ME) {
+  interleaveComma(ಸ್ಮರಣೆ_Effects::locations(), OS, [&](IRMemLocation Loc) {
+    ಆಯ್ಕೆ (Loc) {
+    ಸ್ಥಿತಿ IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      ನಿಲ್ಲಿಸು;
+    ಸ್ಥಿತಿ IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      ನಿಲ್ಲಿಸು;
+    ಸ್ಥಿತಿ IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      ನಿಲ್ಲಿಸು;
+    ಸ್ಥಿತಿ IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      ನಿಲ್ಲಿಸು;
+    ಸ್ಥಿತಿ IRMemLocation::ಗುರಿ_Mem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      ನಿಲ್ಲಿಸು;
+    ಸ್ಥಿತಿ IRMemLocation::ಗುರಿ_Mem1:
       OS << "TargetMem1: ";
-      break;
+      ನಿಲ್ಲಿಸು;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  ಹಿಂತಿರುಗಿ OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, CaptureComponents CC) {
+  ಆದರೆ (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    ಹಿಂತಿರುಗಿ OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  ಆದರೆ (captures_ವಿಳಾಸ_Is_Null_Only(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (captures_ವಿಳಾಸ(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  ಆದರೆ (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  ಆದರೆ (captures_ತುಂಬಿದ_Provenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  ಹಿಂತಿರುಗಿ OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, CaptureInfo CI) {
   ListSeparator LS;
   CaptureComponents Other = CI.getOtherComponents();
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  ಆದರೆ (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  ಆದರೆ (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  ಹಿಂತಿರುಗಿ OS;
 }

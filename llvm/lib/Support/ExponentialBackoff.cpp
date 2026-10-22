@@ -6,24 +6,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ExponentialBackoff.h"
-#include <thread>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ExponentialBackoff.h"
+#ಅನ್ತರ್ಭಾವ <thread>
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-bool ExponentialBackoff::waitForNextAttempt() {
-  auto Now = std::chrono::steady_clock::now();
-  if (Now >= EndTime)
-    return false;
+ತಾರ್ಕಿಕ ಘಾತೀಯ_Backoff::wait_For_ಮುಂದಿನ_Attempt() {
+  ಸ್ವಯಂಚಾಲಿತ Now = std::chrono::steady_clock::now();
+  ಆದರೆ (Now >= ಕೊನೆ_ಸಮಯ)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
   duration CurMaxWait = std::min(MinWait * CurrentMultiplier, MaxWait);
-  std::uniform_int_distribution<uint64_t> Dist(MinWait.count(),
-                                               CurMaxWait.count());
+  std::ಏಕರೂಪ_int_distribution<uint64_t> Dist(MinWait.ಎಣಿಕೆ_2(),
+                                               CurMaxWait.ಎಣಿಕೆ_2());
   // Use random_device directly instead of a PRNG as uniform_int_distribution
   // often only takes a few samples anyway.
-  duration WaitDuration = std::min(duration(Dist(RandDev)), EndTime - Now);
-  if (CurMaxWait < MaxWait)
+  duration WaitDuration = std::min(duration(Dist(RandDev)), ಕೊನೆ_ಸಮಯ - Now);
+  ಆದರೆ (CurMaxWait < MaxWait)
     CurrentMultiplier *= 2;
   std::this_thread::sleep_for(WaitDuration);
-  return true;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }

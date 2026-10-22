@@ -10,107 +10,107 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AllocToken.h"
-#include "llvm/ADT/StringSwitch.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SipHash.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/AllocToken.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringSwitch.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ErrorHandling.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MathExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SipHash.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-std::optional<AllocTokenMode>
-llvm::getAllocTokenModeFromString(StringRef Name) {
-  return StringSwitch<std::optional<AllocTokenMode>>(Name)
-      .Case("increment", AllocTokenMode::Increment)
-      .Case("random", AllocTokenMode::Random)
-      .Case("typehash", AllocTokenMode::TypeHash)
-      .Case("typehashpointersplit", AllocTokenMode::TypeHashPointerSplit)
-      .Case("typefunchash", AllocTokenMode::TypeFuncHash)
+std::optional<Alloc_Token_ಬಹುಲಕ>
+llvm::get_Alloc_Token_ಬಹುಲಕ_From_String(StringRef Name) {
+  ಹಿಂತಿರುಗಿ StringSwitch<std::optional<Alloc_Token_ಬಹುಲಕ>>(Name)
+      .Case("increment", Alloc_Token_ಬಹುಲಕ::Increment)
+      .Case("random", Alloc_Token_ಬಹುಲಕ::Random)
+      .Case("typehash", Alloc_Token_ಬಹುಲಕ::TypeHash)
+      .Case("typehashpointersplit", Alloc_Token_ಬಹುಲಕ::Type_Hash_ಸೂಚಕ_ವಿಭಜಿಸು)
+      .Case("typefunchash", Alloc_Token_ಬಹುಲಕ::TypeFuncHash)
       .Case("typefunchashpointersplit",
-            AllocTokenMode::TypeFuncHashPointerSplit)
-      .Case("default", DefaultAllocTokenMode)
+            Alloc_Token_ಬಹುಲಕ::Type_Func_Hash_ಸೂಚಕ_ವಿಭಜಿಸು)
+      .Case("default", Default_Alloc_Token_ಬಹುಲಕ)
       .Default(std::nullopt);
 }
 
-StringRef llvm::getAllocTokenModeAsString(AllocTokenMode Mode) {
-  switch (Mode) {
-  case AllocTokenMode::Increment:
-    return "increment";
-  case AllocTokenMode::Random:
-    return "random";
-  case AllocTokenMode::TypeHash:
-    return "typehash";
-  case AllocTokenMode::TypeHashPointerSplit:
-    return "typehashpointersplit";
-  case AllocTokenMode::TypeFuncHash:
-    return "typefunchash";
-  case AllocTokenMode::TypeFuncHashPointerSplit:
-    return "typefunchashpointersplit";
+StringRef llvm::get_Alloc_Token_ಬಹುಲಕ_As_String(Alloc_Token_ಬಹುಲಕ ಬಹುಲಕ) {
+  ಆಯ್ಕೆ (ಬಹುಲಕ) {
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Increment:
+    ಹಿಂತಿರುಗಿ "increment";
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Random:
+    ಹಿಂತಿರುಗಿ "random";
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::TypeHash:
+    ಹಿಂತಿರುಗಿ "typehash";
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Type_Hash_ಸೂಚಕ_ವಿಭಜಿಸು:
+    ಹಿಂತಿರುಗಿ "typehashpointersplit";
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::TypeFuncHash:
+    ಹಿಂತಿರುಗಿ "typefunchash";
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Type_Func_Hash_ಸೂಚಕ_ವಿಭಜಿಸು:
+    ಹಿಂತಿರುಗಿ "typefunchashpointersplit";
   }
   llvm_unreachable("Unknown AllocTokenMode");
 }
 
-static uint64_t getStableHash(const AllocTokenMetadata &Metadata,
-                              uint64_t MaxTokens) {
-  return getStableSipHash(Metadata.TypeName) % MaxTokens;
+ಸ್ಥಿರ uint64_t getStableHash(ಸ್ಥಿರಾಂಕ AllocTokenMetadata &Metadata,
+                              uint64_t Max_ಟೋಕನುಗಳು) {
+  ಹಿಂತಿರುಗಿ getStableSipHash(Metadata.TypeName) % Max_ಟೋಕನುಗಳು;
 }
 
 /// Splits the Bits bits into: [pointer flag,] type name hash, function name
 /// hash. The function name hash gets Bits / 2 bits. Bits is k if MaxTokens is
 /// 2^k-1 (e.g. SIZE_MAX, tokens in [0, MaxTokens]), or Log2(MaxTokens)
 /// otherwise. With pointer split, the MSB is the pointer flag.
-static uint64_t getTypeFuncHash(const AllocTokenMetadata &Metadata,
-                                uint64_t MaxTokens, bool PointerSplit) {
-  if (MaxTokens == 1)
-    return 0;
-  const unsigned Bits =
-      isMask_64(MaxTokens) ? llvm::countr_one(MaxTokens) : Log2_64(MaxTokens);
-  const unsigned FuncBits = Bits / 2;
-  unsigned TypeBits = Bits - FuncBits;
+ಸ್ಥಿರ uint64_t getTypeFuncHash(ಸ್ಥಿರಾಂಕ AllocTokenMetadata &Metadata,
+                                uint64_t Max_ಟೋಕನುಗಳು, ತಾರ್ಕಿಕ ಸೂಚಕ_ವಿಭಜಿಸು) {
+  ಆದರೆ (Max_ಟೋಕನುಗಳು == 1)
+    ಹಿಂತಿರುಗಿ 0;
+  ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಬಿಟ್ಟುಗಳು_2 =
+      is_ಮುಖವಾಡ_64(Max_ಟೋಕನುಗಳು) ? llvm::countr_one(Max_ಟೋಕನುಗಳು) : Log2_64(Max_ಟೋಕನುಗಳು);
+  ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ Func_ಬಿಟ್ಟುಗಳು = ಬಿಟ್ಟುಗಳು_2 / 2;
+  ಚಿಹ್ನೆರಹಿತ Type_ಬಿಟ್ಟುಗಳು = ಬಿಟ್ಟುಗಳು_2 - Func_ಬಿಟ್ಟುಗಳು;
   uint64_t Token = 0;
-  if (PointerSplit) {
-    --TypeBits;
-    Token = uint64_t(Metadata.ContainsPointer) << (Bits - 1);
+  ಆದರೆ (ಸೂಚಕ_ವಿಭಜಿಸು) {
+    --Type_ಬಿಟ್ಟುಗಳು;
+    Token = uint64_t(Metadata.ಒಳಗೊಂಡಿದೆ_ಸೂಚಕ) << (ಬಿಟ್ಟುಗಳು_2 - 1);
   }
   // An empty type name denotes an unknown type.
-  if (!Metadata.TypeName.empty())
+  ಆದರೆ (!Metadata.TypeName.ಖಾಲಿಗಳು())
     Token |= (getStableSipHash(Metadata.TypeName) &
-              maskTrailingOnes<uint64_t>(TypeBits))
-             << FuncBits;
+              ಮುಖವಾಡ_Trailing_Ones<uint64_t>(Type_ಬಿಟ್ಟುಗಳು))
+             << Func_ಬಿಟ್ಟುಗಳು;
   Token |= getStableSipHash(*Metadata.FunctionName) &
-           maskTrailingOnes<uint64_t>(FuncBits);
-  return Token;
+           ಮುಖವಾಡ_Trailing_Ones<uint64_t>(Func_ಬಿಟ್ಟುಗಳು);
+  ಹಿಂತಿರುಗಿ Token;
 }
 
-std::optional<uint64_t> llvm::getAllocToken(AllocTokenMode Mode,
-                                            const AllocTokenMetadata &Metadata,
-                                            uint64_t MaxTokens) {
-  assert(MaxTokens && "Must provide non-zero max tokens");
+std::optional<uint64_t> llvm::getAllocToken(Alloc_Token_ಬಹುಲಕ ಬಹುಲಕ,
+                                            ಸ್ಥಿರಾಂಕ AllocTokenMetadata &Metadata,
+                                            uint64_t Max_ಟೋಕನುಗಳು) {
+  ಪ್ರತಿಜ್ಞಾ(Max_ಟೋಕನುಗಳು && "Must provide non-zero max tokens");
 
-  switch (Mode) {
-  case AllocTokenMode::Increment:
-  case AllocTokenMode::Random:
+  ಆಯ್ಕೆ (ಬಹುಲಕ) {
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Increment:
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Random:
     // Stateful modes cannot be implemented as a pure function.
-    return std::nullopt;
+    ಹಿಂತಿರುಗಿ std::nullopt;
 
-  case AllocTokenMode::TypeFuncHash:
-  case AllocTokenMode::TypeFuncHashPointerSplit:
-    if (!Metadata.FunctionName)
-      return std::nullopt;
-    return getTypeFuncHash(Metadata, MaxTokens,
-                           Mode == AllocTokenMode::TypeFuncHashPointerSplit);
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::TypeFuncHash:
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Type_Func_Hash_ಸೂಚಕ_ವಿಭಜಿಸು:
+    ಆದರೆ (!Metadata.FunctionName)
+      ಹಿಂತಿರುಗಿ std::nullopt;
+    ಹಿಂತಿರುಗಿ getTypeFuncHash(Metadata, Max_ಟೋಕನುಗಳು,
+                           ಬಹುಲಕ == Alloc_Token_ಬಹುಲಕ::Type_Func_Hash_ಸೂಚಕ_ವಿಭಜಿಸು);
 
-  case AllocTokenMode::TypeHash:
-    return getStableHash(Metadata, MaxTokens);
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::TypeHash:
+    ಹಿಂತಿರುಗಿ getStableHash(Metadata, Max_ಟೋಕನುಗಳು);
 
-  case AllocTokenMode::TypeHashPointerSplit: {
-    if (MaxTokens == 1)
-      return 0;
-    const uint64_t HalfTokens = MaxTokens / 2;
-    uint64_t Hash = getStableHash(Metadata, HalfTokens);
-    if (Metadata.ContainsPointer)
-      Hash += HalfTokens;
-    return Hash;
+  ಸ್ಥಿತಿ Alloc_Token_ಬಹುಲಕ::Type_Hash_ಸೂಚಕ_ವಿಭಜಿಸು: {
+    ಆದರೆ (Max_ಟೋಕನುಗಳು == 1)
+      ಹಿಂತಿರುಗಿ 0;
+    ಸ್ಥಿರಾಂಕ uint64_t Half_ಟೋಕನುಗಳು = Max_ಟೋಕನುಗಳು / 2;
+    uint64_t Hash = getStableHash(Metadata, Half_ಟೋಕನುಗಳು);
+    ಆದರೆ (Metadata.ಒಳಗೊಂಡಿದೆ_ಸೂಚಕ)
+      Hash += Half_ಟೋಕನುಗಳು;
+    ಹಿಂತಿರುಗಿ Hash;
   }
   }
 

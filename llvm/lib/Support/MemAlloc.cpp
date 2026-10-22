@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemAlloc.h"
-#include <new>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MemAlloc.h"
+#ಅನ್ತರ್ಭಾವ <new>
 
 // These are out of line to have __cpp_aligned_new not affect ABI.
 
-LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS void *
-llvm::allocate_buffer(size_t Size, size_t Alignment) {
-  void *Result = ::operator new(Size,
-#ifdef __cpp_aligned_new
+LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS ಶೂನ್ಯ *
+llvm::allocate_ಬಫರ್(size_t ಗಾತ್ರ_2, size_t Alignment) {
+  ಶೂನ್ಯ *ಫಲಿತಾಂಶ = ::ಕ್ರಿಯಾಕಾರಕ ಹೊಸ(ಗಾತ್ರ_2,
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __cpp_aligned_new
                                 std::align_val_t(Alignment),
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
                                 std::nothrow);
-  if (Result == nullptr) {
+  ಆದರೆ (ಫಲಿತಾಂಶ == ಶೂನ್ಯಸೂಚಕ) {
     report_bad_alloc_error("Buffer allocation failed");
   }
-  return Result;
+  ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-void llvm::deallocate_buffer(void *Ptr, size_t Size, size_t Alignment) {
-  ::operator delete(Ptr
-#ifdef __cpp_sized_deallocation
+ಶೂನ್ಯ llvm::deallocate_ಬಫರ್(ಶೂನ್ಯ *Ptr, size_t ಗಾತ್ರ_2, size_t Alignment) {
+  ::ಕ್ರಿಯಾಕಾರಕ ಅಳಿಸು(Ptr
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __cpp_sized_deallocation
                     ,
-                    Size
-#endif
-#ifdef __cpp_aligned_new
+                    ಗಾತ್ರ_2
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __cpp_aligned_new
                     ,
                     std::align_val_t(Alignment)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
   );
 }

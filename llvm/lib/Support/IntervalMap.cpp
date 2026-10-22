@@ -10,150 +10,150 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntervalMap.h"
-#include <cassert>
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/IntervalMap.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
 
-namespace llvm {
-namespace IntervalMapImpl {
+ನಾಮಾಕಾಶ llvm {
+ನಾಮಾಕಾಶ IntervalMapImpl {
 
-void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
-  assert(!path.empty() && "Can't replace missing root");
-  path.front() = Entry(Root, Size, Offsets.first);
-  path.insert(path.begin() + 1, Entry(subtree(0), Offsets.second));
+ಶೂನ್ಯ ಮಾರ್ಗ::replace_ಬೇರು(ಶೂನ್ಯ *ಬೇರು_2, ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_2, IdxPair Offsets) {
+  ಪ್ರತಿಜ್ಞಾ(!ಮಾರ್ಗ_2.ಖಾಲಿಗಳು() && "Can't replace missing root");
+  ಮಾರ್ಗ_2.front() = ನಮೂದು(ಬೇರು_2, ಗಾತ್ರ_2, Offsets.ಮೊದಲ_2);
+  ಮಾರ್ಗ_2.ಸೇರಿಸು(ಮಾರ್ಗ_2.begin() + 1, ನಮೂದು(subtree(0), Offsets.ಎರಡನೇ_2));
 }
 
-NodeRef Path::getLeftSibling(unsigned Level) const {
+ಗಂಟು_Ref ಮಾರ್ಗ::get_ಎಡ_Sibling(ಚಿಹ್ನೆರಹಿತ Level) ಸ್ಥಿರಾಂಕ {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  ಆದರೆ (Level == 0)
+    ಹಿಂತಿರುಗಿ ಗಂಟು_Ref();
 
   // Go up the tree until we can go left.
-  unsigned l = Level - 1;
-  while (l && path[l].offset == 0)
+  ಚಿಹ್ನೆರಹಿತ l = Level - 1;
+  ಆಗ (l && ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2 == 0)
     --l;
 
   // We can't go left.
-  if (path[l].offset == 0)
-    return NodeRef();
+  ಆದರೆ (ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2 == 0)
+    ಹಿಂತಿರುಗಿ ಗಂಟು_Ref();
 
   // NR is the subtree containing our left sibling.
-  NodeRef NR = path[l].subtree(path[l].offset - 1);
+  ಗಂಟು_Ref NR = ಮಾರ್ಗ_2[l].subtree(ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2 - 1);
 
   // Keep right all the way down.
-  for (++l; l != Level; ++l)
-    NR = NR.subtree(NR.size() - 1);
-  return NR;
+  ಗಾಗಿ (++l; l != Level; ++l)
+    NR = NR.subtree(NR.ಗಾತ್ರ_3() - 1);
+  ಹಿಂತಿರುಗಿ NR;
 }
 
-void Path::moveLeft(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+ಶೂನ್ಯ ಮಾರ್ಗ::move_ಎಡ(ಚಿಹ್ನೆರಹಿತ Level) {
+  ಪ್ರತಿಜ್ಞಾ(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go left.
-  unsigned l = 0;
-  if (valid()) {
+  ಚಿಹ್ನೆರಹಿತ l = 0;
+  ಆದರೆ (valid()) {
     l = Level - 1;
-    while (path[l].offset == 0) {
-      assert(l != 0 && "Cannot move beyond begin()");
+    ಆಗ (ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2 == 0) {
+      ಪ್ರತಿಜ್ಞಾ(l != 0 && "Cannot move beyond begin()");
       --l;
     }
-  } else if (height() < Level)
+  } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಎತ್ತರ() < Level)
     // end() may have created a height=0 path.
-    path.resize(Level + 1, Entry(nullptr, 0, 0));
+    ಮಾರ್ಗ_2.resize(Level + 1, ನಮೂದು(ಶೂನ್ಯಸೂಚಕ, 0, 0));
 
   // NR is the subtree containing our left sibling.
-  --path[l].offset;
-  NodeRef NR = subtree(l);
+  --ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2;
+  ಗಂಟು_Ref NR = subtree(l);
 
   // Get the rightmost node in the subtree.
-  for (++l; l != Level; ++l) {
-    path[l] = Entry(NR, NR.size() - 1);
-    NR = NR.subtree(NR.size() - 1);
+  ಗಾಗಿ (++l; l != Level; ++l) {
+    ಮಾರ್ಗ_2[l] = ನಮೂದು(NR, NR.ಗಾತ್ರ_3() - 1);
+    NR = NR.subtree(NR.ಗಾತ್ರ_3() - 1);
   }
-  path[l] = Entry(NR, NR.size() - 1);
+  ಮಾರ್ಗ_2[l] = ನಮೂದು(NR, NR.ಗಾತ್ರ_3() - 1);
 }
 
-NodeRef Path::getRightSibling(unsigned Level) const {
+ಗಂಟು_Ref ಮಾರ್ಗ::get_ಬಲ_Sibling(ಚಿಹ್ನೆರಹಿತ Level) ಸ್ಥಿರಾಂಕ {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  ಆದರೆ (Level == 0)
+    ಹಿಂತಿರುಗಿ ಗಂಟು_Ref();
 
   // Go up the tree until we can go right.
-  unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  ಚಿಹ್ನೆರಹಿತ l = Level - 1;
+  ಆಗ (l && at_ಕೊನೆಯ_ನಮೂದು(l))
     --l;
 
   // We can't go right.
-  if (atLastEntry(l))
-    return NodeRef();
+  ಆದರೆ (at_ಕೊನೆಯ_ನಮೂದು(l))
+    ಹಿಂತಿರುಗಿ ಗಂಟು_Ref();
 
   // NR is the subtree containing our right sibling.
-  NodeRef NR = path[l].subtree(path[l].offset + 1);
+  ಗಂಟು_Ref NR = ಮಾರ್ಗ_2[l].subtree(ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2 + 1);
 
   // Keep left all the way down.
-  for (++l; l != Level; ++l)
+  ಗಾಗಿ (++l; l != Level; ++l)
     NR = NR.subtree(0);
-  return NR;
+  ಹಿಂತಿರುಗಿ NR;
 }
 
-void Path::moveRight(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+ಶೂನ್ಯ ಮಾರ್ಗ::move_ಬಲ(ಚಿಹ್ನೆರಹಿತ Level) {
+  ಪ್ರತಿಜ್ಞಾ(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go right.
-  unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  ಚಿಹ್ನೆರಹಿತ l = Level - 1;
+  ಆಗ (l && at_ಕೊನೆಯ_ನಮೂದು(l))
     --l;
 
   // NR is the subtree containing our right sibling. If we hit end(), we have
   // offset(0) == node(0).size().
-  if (++path[l].offset == path[l].size)
-    return;
-  NodeRef NR = subtree(l);
+  ಆದರೆ (++ಮಾರ್ಗ_2[l].ಸ್ಥಾನಾಂತರ_2 == ಮಾರ್ಗ_2[l].ಗಾತ್ರ_3)
+    ಹಿಂತಿರುಗಿ;
+  ಗಂಟು_Ref NR = subtree(l);
 
-  for (++l; l != Level; ++l) {
-    path[l] = Entry(NR, 0);
+  ಗಾಗಿ (++l; l != Level; ++l) {
+    ಮಾರ್ಗ_2[l] = ನಮೂದು(NR, 0);
     NR = NR.subtree(0);
   }
-  path[l] = Entry(NR, 0);
+  ಮಾರ್ಗ_2[l] = ನಮೂದು(NR, 0);
 }
 
 
-IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
-                   const unsigned *CurSize, unsigned NewSize[],
-                   unsigned Position, bool Grow) {
-  assert(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
-  assert(Position <= Elements && "Invalid position");
-  if (!Nodes)
-    return IdxPair();
+IdxPair distribute(ಚಿಹ್ನೆರಹಿತ Nodes, ಚಿಹ್ನೆರಹಿತ Elements, ಚಿಹ್ನೆರಹಿತ ಸಾಮರ್ಥ್ಯ,
+                   ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ *Cur_ಗಾತ್ರ, ಚಿಹ್ನೆರಹಿತ New_ಗಾತ್ರ[],
+                   ಚಿಹ್ನೆರಹಿತ Position, ತಾರ್ಕಿಕ Grow) {
+  ಪ್ರತಿಜ್ಞಾ(Elements + Grow <= Nodes * ಸಾಮರ್ಥ್ಯ && "Not enough room for elements");
+  ಪ್ರತಿಜ್ಞಾ(Position <= Elements && "Invalid position");
+  ಆದರೆ (!Nodes)
+    ಹಿಂತಿರುಗಿ IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
-  const unsigned PerNode = (Elements + Grow) / Nodes;
-  const unsigned Extra = (Elements + Grow) % Nodes;
+  ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಪ್ರತಿ_ಗಂಟು = (Elements + Grow) / Nodes;
+  ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ Extra = (Elements + Grow) % Nodes;
   IdxPair PosPair = IdxPair(Nodes, 0);
-  unsigned Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    Sum += NewSize[n] = PerNode + (n < Extra);
-    if (PosPair.first == Nodes && Sum > Position)
-      PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
+  ಚಿಹ್ನೆರಹಿತ ಮೊತ್ತ = 0;
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ n = 0; n != Nodes; ++n) {
+    ಮೊತ್ತ += New_ಗಾತ್ರ[n] = ಪ್ರತಿ_ಗಂಟು + (n < Extra);
+    ಆದರೆ (PosPair.ಮೊದಲ_2 == Nodes && ಮೊತ್ತ > Position)
+      PosPair = IdxPair(n, Position - (ಮೊತ್ತ - New_ಗಾತ್ರ[n]));
   }
-  assert(Sum == Elements + Grow && "Bad distribution sum");
+  ಪ್ರತಿಜ್ಞಾ(ಮೊತ್ತ == Elements + Grow && "Bad distribution sum");
 
   // Subtract the Grow element that was added.
-  if (Grow) {
-    assert(PosPair.first < Nodes && "Bad algebra");
-    assert(NewSize[PosPair.first] && "Too few elements to need Grow");
-    --NewSize[PosPair.first];
+  ಆದರೆ (Grow) {
+    ಪ್ರತಿಜ್ಞಾ(PosPair.ಮೊದಲ_2 < Nodes && "Bad algebra");
+    ಪ್ರತಿಜ್ಞಾ(New_ಗಾತ್ರ[PosPair.ಮೊದಲ_2] && "Too few elements to need Grow");
+    --New_ಗಾತ್ರ[PosPair.ಮೊದಲ_2];
   }
 
-#ifndef NDEBUG
-  Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    assert(NewSize[n] <= Capacity && "Overallocated node");
-    Sum += NewSize[n];
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ NDEBUG
+  ಮೊತ್ತ = 0;
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ n = 0; n != Nodes; ++n) {
+    ಪ್ರತಿಜ್ಞಾ(New_ಗಾತ್ರ[n] <= ಸಾಮರ್ಥ್ಯ && "Overallocated node");
+    ಮೊತ್ತ += New_ಗಾತ್ರ[n];
   }
-  assert(Sum == Elements && "Bad distribution sum");
-#endif
+  ಪ್ರತಿಜ್ಞಾ(ಮೊತ್ತ == Elements && "Bad distribution sum");
+#ಆದರೆ_ಅಂತ್ಯ
 
-  return PosPair;
+  ಹಿಂತಿರುಗಿ PosPair;
 }
 
 } // namespace IntervalMapImpl

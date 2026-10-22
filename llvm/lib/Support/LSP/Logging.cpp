@@ -6,36 +6,36 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Logging.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/LSP/Logging.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Chrono.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::lsp;
 
-void Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
+ಶೂನ್ಯ Logger::ಗಣ_Log_Level(Level LogLevel) { get().LogLevel = LogLevel; }
 
 Logger &Logger::get() {
-  static Logger Logger;
-  return Logger;
+  ಸ್ಥಿರ Logger Logger;
+  ಹಿಂತಿರುಗಿ Logger;
 }
 
-void Logger::log(Level LogLevel, const char *Fmt,
-                 const llvm::formatv_object_base &Message) {
+ಶೂನ್ಯ Logger::ಲಘುಗಣಕ(Level LogLevel, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *Fmt,
+                 ಸ್ಥಿರಾಂಕ llvm::formatv_object_ತಳ &ಸಂದೇಶ_3) {
   Logger &Logger = get();
 
   // Ignore messages with log levels below the current setting in the logger.
-  if (LogLevel < Logger.LogLevel)
-    return;
+  ಆದರೆ (LogLevel < Logger.LogLevel)
+    ಹಿಂತಿರುಗಿ;
 
   // An indicator character for each log level.
-  const char *LogLevelIndicators = "DIE";
+  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *LogLevelIndicators = "DIE";
 
   // Format the message and print to errs.
-  llvm::sys::TimePoint<> Timestamp = std::chrono::system_clock::now();
-  std::lock_guard<std::mutex> LogGuard(Logger.Mutex);
+  llvm::sys::ಸಮಯ_ಬಿಂದು<> Timestamp = std::chrono::system_clock::now();
+  std::ಬೀಗ_guard<std::mutex> LogGuard(Logger.Mutex);
   llvm::errs() << llvm::formatv(
       "{0}[{1:%H:%M:%S.%L}] {2}\n",
-      LogLevelIndicators[static_cast<unsigned>(LogLevel)], Timestamp, Message);
+      LogLevelIndicators[static_cast<ಚಿಹ್ನೆರಹಿತ>(LogLevel)], Timestamp, ಸಂದೇಶ_3);
   llvm::errs().flush();
 }

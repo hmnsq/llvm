@@ -5,107 +5,107 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include <algorithm>
-#include <iterator>
-using namespace llvm;
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/DeltaAlgorithm.h"
+#ಅನ್ತರ್ಭಾವ <algorithm>
+#ಅನ್ತರ್ಭಾವ <iterator>
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-DeltaAlgorithm::~DeltaAlgorithm() = default;
+DeltaAlgorithm::~DeltaAlgorithm() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-bool DeltaAlgorithm::GetTestResult(const changeset_ty &Changes) {
-  if (FailedTestsCache.count(Changes))
-    return false;
+ತಾರ್ಕಿಕ DeltaAlgorithm::Get_Test_ಫಲಿತಾಂಶ(ಸ್ಥಿರಾಂಕ changeset_ty &Changes) {
+  ಆದರೆ (FailedTestsCache.ಎಣಿಕೆ_2(Changes))
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-  bool Result = ExecuteOneTest(Changes);
-  if (!Result)
-    FailedTestsCache.insert(Changes);
+  ತಾರ್ಕಿಕ ಫಲಿತಾಂಶ = ExecuteOneTest(Changes);
+  ಆದರೆ (!ಫಲಿತಾಂಶ)
+    FailedTestsCache.ಸೇರಿಸು(Changes);
 
-  return Result;
+  ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
+ಶೂನ್ಯ DeltaAlgorithm::ವಿಭಜಿಸು_2(ಸ್ಥಿರಾಂಕ changeset_ty &S, changesetlist_ty &Res) {
   // FIXME: Allow clients to provide heuristics for improved splitting.
 
   // FIXME: This is really slow.
   changeset_ty LHS, RHS;
-  unsigned idx = 0, N = S.size() / 2;
-  for (changeset_ty::const_iterator it = S.begin(),
-         ie = S.end(); it != ie; ++it, ++idx)
-    ((idx < N) ? LHS : RHS).insert(*it);
-  if (!LHS.empty())
-    Res.push_back(LHS);
-  if (!RHS.empty())
-    Res.push_back(RHS);
+  ಚಿಹ್ನೆರಹಿತ idx = 0, N = S.ಗಾತ್ರ_3() / 2;
+  ಗಾಗಿ (changeset_ty::const_iterator it = S.begin(),
+         ie = S.ಕೊನೆ(); it != ie; ++it, ++idx)
+    ((idx < N) ? LHS : RHS).ಸೇರಿಸು(*it);
+  ಆದರೆ (!LHS.ಖಾಲಿಗಳು())
+    Res.ತಳ್ಳು_ಹಿಂಭಾಗ(LHS);
+  ಆದರೆ (!RHS.ಖಾಲಿಗಳು())
+    Res.ತಳ್ಳು_ಹಿಂಭಾಗ(RHS);
 }
 
 DeltaAlgorithm::changeset_ty
-DeltaAlgorithm::Delta(const changeset_ty &Changes,
-                      const changesetlist_ty &Sets) {
+DeltaAlgorithm::Delta(ಸ್ಥಿರಾಂಕ changeset_ty &Changes,
+                      ಸ್ಥಿರಾಂಕ changesetlist_ty &Sets) {
   // Invariant: union(Res) == Changes
-  UpdatedSearchState(Changes, Sets);
+  Updated_ಹುಡುಕು_State(Changes, Sets);
 
   // If there is nothing left we can remove, we are done.
-  if (Sets.size() <= 1)
-    return Changes;
+  ಆದರೆ (Sets.ಗಾತ್ರ_3() <= 1)
+    ಹಿಂತಿರುಗಿ Changes;
 
   // Look for a passing subset.
   changeset_ty Res;
-  if (Search(Changes, Sets, Res))
-    return Res;
+  ಆದರೆ (ಹುಡುಕು(Changes, Sets, Res))
+    ಹಿಂತಿರುಗಿ Res;
 
   // Otherwise, partition the sets if possible; if not we are done.
-  changesetlist_ty SplitSets;
-  for (const changeset_ty &Set : Sets)
-    Split(Set, SplitSets);
-  if (SplitSets.size() == Sets.size())
-    return Changes;
+  changesetlist_ty ವಿಭಜಿಸು_Sets;
+  ಗಾಗಿ (ಸ್ಥಿರಾಂಕ changeset_ty &ಗಣ_2 : Sets)
+    ವಿಭಜಿಸು_2(ಗಣ_2, ವಿಭಜಿಸು_Sets);
+  ಆದರೆ (ವಿಭಜಿಸು_Sets.ಗಾತ್ರ_3() == Sets.ಗಾತ್ರ_3())
+    ಹಿಂತಿರುಗಿ Changes;
 
-  return Delta(Changes, SplitSets);
+  ಹಿಂತಿರುಗಿ Delta(Changes, ವಿಭಜಿಸು_Sets);
 }
 
-bool DeltaAlgorithm::Search(const changeset_ty &Changes,
-                            const changesetlist_ty &Sets,
+ತಾರ್ಕಿಕ DeltaAlgorithm::ಹುಡುಕು(ಸ್ಥಿರಾಂಕ changeset_ty &Changes,
+                            ಸ್ಥಿರಾಂಕ changesetlist_ty &Sets,
                             changeset_ty &Res) {
   // FIXME: Parallelize.
-  for (changesetlist_ty::const_iterator it = Sets.begin(),
-         ie = Sets.end(); it != ie; ++it) {
+  ಗಾಗಿ (changesetlist_ty::const_iterator it = Sets.begin(),
+         ie = Sets.ಕೊನೆ(); it != ie; ++it) {
     // If the test passes on this subset alone, recurse.
-    if (GetTestResult(*it)) {
+    ಆದರೆ (Get_Test_ಫಲಿತಾಂಶ(*it)) {
       changesetlist_ty Sets;
-      Split(*it, Sets);
+      ವಿಭಜಿಸು_2(*it, Sets);
       Res = Delta(*it, Sets);
-      return true;
+      ಹಿಂತಿರುಗಿ ನಿಜ;
     }
 
     // Otherwise, if we have more than two sets, see if test passes on the
     // complement.
-    if (Sets.size() > 2) {
+    ಆದರೆ (Sets.ಗಾತ್ರ_3() > 2) {
       // FIXME: This is really slow.
       changeset_ty Complement;
-      std::set_difference(Changes.begin(), Changes.end(), it->begin(),
-                          it->end(),
+      std::ಗಣ_difference(Changes.begin(), Changes.ಕೊನೆ(), it->begin(),
+                          it->ಕೊನೆ(),
                           std::inserter(Complement, Complement.begin()));
-      if (GetTestResult(Complement)) {
+      ಆದರೆ (Get_Test_ಫಲಿತಾಂಶ(Complement)) {
         changesetlist_ty ComplementSets;
-        ComplementSets.insert(ComplementSets.end(), Sets.begin(), it);
-        ComplementSets.insert(ComplementSets.end(), it + 1, Sets.end());
+        ComplementSets.ಸೇರಿಸು(ComplementSets.ಕೊನೆ(), Sets.begin(), it);
+        ComplementSets.ಸೇರಿಸು(ComplementSets.ಕೊನೆ(), it + 1, Sets.ಕೊನೆ());
         Res = Delta(Complement, ComplementSets);
-        return true;
+        ಹಿಂತಿರುಗಿ ನಿಜ;
       }
     }
   }
 
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(const changeset_ty &Changes) {
+DeltaAlgorithm::changeset_ty DeltaAlgorithm::ಸತತ_2(ಸ್ಥಿರಾಂಕ changeset_ty &Changes) {
   // Check empty set first to quickly find poor test functions.
-  if (GetTestResult(changeset_ty()))
-    return changeset_ty();
+  ಆದರೆ (Get_Test_ಫಲಿತಾಂಶ(changeset_ty()))
+    ಹಿಂತಿರುಗಿ changeset_ty();
 
   // Otherwise run the real delta algorithm.
   changesetlist_ty Sets;
-  Split(Changes, Sets);
+  ವಿಭಜಿಸು_2(Changes, Sets);
 
-  return Delta(Changes, Sets);
+  ಹಿಂತಿರುಗಿ Delta(Changes, Sets);
 }

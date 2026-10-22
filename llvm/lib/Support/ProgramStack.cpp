@@ -6,56 +6,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ProgramStack.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ProgramStack.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Compiler.h"
 
-#ifdef LLVM_ON_UNIX
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ LLVM_ON_UNIX
 # include <sys/resource.h> // for getrlimit
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef _MSC_VER
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _MSC_VER
 # include <intrin.h>  // for _AddressOfReturnAddress
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#include "llvm/Support/thread.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/thread.h"
 
-#include <cstdlib>
+#ಅನ್ತರ್ಭಾವ <cstdlib>
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-uintptr_t llvm::getStackPointer() {
-#if __GNUC__ || __has_builtin(__builtin_frame_address)
-  return (uintptr_t)__builtin_frame_address(0);
-#elif defined(_MSC_VER)
-  return (uintptr_t)_AddressOfReturnAddress();
-#else
-  volatile char CharOnStack = 0;
+uintptr_t llvm::get_ರಾಶಿ_ಸೂಚಕ() {
+#ಆದರೆ __GNUC__ || __has_builtin(__builtin_frame_address)
+  ಹಿಂತಿರುಗಿ (uintptr_t)__builtin_frame_address(0);
+#ಅಥವಾಆದರೆ defined(_MSC_VER)
+  ಹಿಂತಿರುಗಿ (uintptr_t)ವಿಳಾಸ_ದ_Return_ವಿಳಾಸ();
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಅಸ್ಥಿರ ಅಕ್ಷರ Char_On_ರಾಶಿ = 0;
   // The volatile store here is intended to escape the local variable, to
   // prevent the compiler from optimizing CharOnStack into anything other
   // than a char on the stack.
   //
   // Tested on: MSVC 2015 - 2019, GCC 4.9 - 9, Clang 3.2 - 9, ICC 13 - 19.
-  char *volatile Ptr = &CharOnStack;
-  return (uintptr_t)Ptr;
-#endif
+  ಅಕ್ಷರ *ಅಸ್ಥಿರ Ptr = &Char_On_ರಾಶಿ;
+  ಹಿಂತಿರುಗಿ (uintptr_t)Ptr;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-unsigned llvm::getDefaultStackSize() {
-#ifdef LLVM_ON_UNIX
+ಚಿಹ್ನೆರಹಿತ llvm::get_Default_ರಾಶಿ_ಗಾತ್ರ() {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ LLVM_ON_UNIX
   rlimit RL;
   getrlimit(RLIMIT_STACK, &RL);
-  return RL.rlim_cur;
-#else
+  ಹಿಂತಿರುಗಿ RL.rlim_cur;
+#ಇಲ್ಲದಿದ್ದರೆ
   // Clang recursively parses, instantiates templates, and evaluates constant
   // expressions. We've found 8MiB to be a reasonable stack size given the way
   // Clang works and the way C++ is commonly written.
-  return 8 << 20;
-#endif
+  ಹಿಂತಿರುಗಿ 8 << 20;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-void llvm::runOnNewStack(unsigned StackSize, function_ref<void()> Fn) {
+ಶೂನ್ಯ llvm::ಸತತ_On_New_ರಾಶಿ(ಚಿಹ್ನೆರಹಿತ ರಾಶಿ_ಗಾತ್ರ, function_ref<ಶೂನ್ಯ()> Fn) {
   llvm::thread Thread(
-      StackSize == 0 ? std::nullopt : std::optional<unsigned>(StackSize), Fn);
+      ರಾಶಿ_ಗಾತ್ರ == 0 ? std::nullopt : std::optional<ಚಿಹ್ನೆರಹಿತ>(ರಾಶಿ_ಗಾತ್ರ), Fn);
   Thread.join();
 }

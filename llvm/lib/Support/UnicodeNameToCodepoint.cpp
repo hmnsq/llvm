@@ -12,212 +12,212 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Unicode.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/STLExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Unicode.h"
 
-namespace llvm {
-namespace sys {
-namespace unicode {
+ನಾಮಾಕಾಶ llvm {
+ನಾಮಾಕಾಶ sys {
+ನಾಮಾಕಾಶ unicode {
 
-extern const char *const UnicodeNameToCodepointDict;
-extern const uint8_t *const UnicodeNameToCodepointIndex;
-extern const std::size_t UnicodeNameToCodepointIndexSize;
-extern const std::size_t UnicodeNameToCodepointLargestNameSize;
+ಬಾಹ್ಯ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ Unicode_Name_ಗಮ್ಯ_Codepoint_Dict;
+ಬಾಹ್ಯ ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ;
+ಬಾಹ್ಯ ಸ್ಥಿರಾಂಕ std::size_t Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ_ಗಾತ್ರ;
+ಬಾಹ್ಯ ಸ್ಥಿರಾಂಕ std::size_t Unicode_Name_ಗಮ್ಯ_Codepoint_ಅತಿದೊಡ್ಡ_Name_ಗಾತ್ರ;
 
-using BufferType = SmallString<64>;
+ಬಳಸಿ ಬಫರ್_Type = SmallString<64>;
 
-struct Node {
-  bool IsRoot = false;
-  char32_t Value = 0xFFFFFFFF;
-  uint32_t ChildrenOffset = 0;
-  bool HasSibling = false;
-  uint32_t Size = 0;
+ರಚನೆ ಗಂಟು {
+  ತಾರ್ಕಿಕ Is_ಬೇರು = ಸುಳ್ಳು;
+  char32_t ಮೌಲ್ಯ = 0xFFFFFFFF;
+  uint32_t Children_ಸ್ಥಾನಾಂತರ = 0;
+  ತಾರ್ಕಿಕ HasSibling = ಸುಳ್ಳು;
+  uint32_t ಗಾತ್ರ_2 = 0;
   StringRef Name;
-  const Node *Parent = nullptr;
+  ಸ್ಥಿರಾಂಕ ಗಂಟು *ಪೋಷಕ_2 = ಶೂನ್ಯಸೂಚಕ;
 
-  constexpr bool isValid() const {
-    return !Name.empty() || Value == 0xFFFFFFFF;
+  constexpr ತಾರ್ಕಿಕ isValid() ಸ್ಥಿರಾಂಕ {
+    ಹಿಂತಿರುಗಿ !Name.ಖಾಲಿಗಳು() || ಮೌಲ್ಯ == 0xFFFFFFFF;
   }
-  constexpr bool hasChildren() const { return ChildrenOffset != 0 || IsRoot; }
+  constexpr ತಾರ್ಕಿಕ hasChildren() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ Children_ಸ್ಥಾನಾಂತರ != 0 || Is_ಬೇರು; }
 
-  std::string fullName() const {
+  std::string ತುಂಬಿದ_Name() ಸ್ಥಿರಾಂಕ {
     std::string S;
     // Reserve enough space for most unicode code points.
     // The chosen value represent the 99th percentile of name size as of
     // Unicode 15.0.
     S.reserve(46);
-    const Node *N = this;
-    while (N) {
-      std::reverse_copy(N->Name.begin(), N->Name.end(), std::back_inserter(S));
-      N = N->Parent;
+    ಸ್ಥಿರಾಂಕ ಗಂಟು *N = ಇದು;
+    ಆಗ (N) {
+      std::ಹಿಮ್ಮುಖ_copy(N->Name.begin(), N->Name.ಕೊನೆ(), std::ಹಿಂಭಾಗ_inserter(S));
+      N = N->ಪೋಷಕ_2;
     }
-    std::reverse(S.begin(), S.end());
-    return S;
+    std::ಹಿಮ್ಮುಖ(S.begin(), S.ಕೊನೆ());
+    ಹಿಂತಿರುಗಿ S;
   }
 };
 
-static Node createRoot() {
-  Node N;
-  N.IsRoot = true;
-  N.ChildrenOffset = 1;
-  N.Size = 1;
-  return N;
+ಸ್ಥಿರ ಗಂಟು create_ಬೇರು() {
+  ಗಂಟು N;
+  N.Is_ಬೇರು = ನಿಜ;
+  N.Children_ಸ್ಥಾನಾಂತರ = 1;
+  N.ಗಾತ್ರ_2 = 1;
+  ಹಿಂತಿರುಗಿ N;
 }
 
-static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
-  if (Offset == 0)
-    return createRoot();
+ಸ್ಥಿರ ಗಂಟು read_ಗಂಟು(uint32_t ಸ್ಥಾನಾಂತರ, ಸ್ಥಿರಾಂಕ ಗಂಟು *ಪೋಷಕ_2 = ಶೂನ್ಯಸೂಚಕ) {
+  ಆದರೆ (ಸ್ಥಾನಾಂತರ == 0)
+    ಹಿಂತಿರುಗಿ create_ಬೇರು();
 
-  uint32_t Origin = Offset;
-  Node N;
-  N.Parent = Parent;
-  uint8_t NameInfo = UnicodeNameToCodepointIndex[Offset++];
-  if (Offset + 6 >= UnicodeNameToCodepointIndexSize)
-    return N;
+  uint32_t Origin = ಸ್ಥಾನಾಂತರ;
+  ಗಂಟು N;
+  N.ಪೋಷಕ_2 = ಪೋಷಕ_2;
+  uint8_t NameInfo = Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
+  ಆದರೆ (ಸ್ಥಾನಾಂತರ + 6 >= Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ_ಗಾತ್ರ)
+    ಹಿಂತಿರುಗಿ N;
 
-  bool LongName = NameInfo & 0x40;
-  bool HasValue = NameInfo & 0x80;
-  std::size_t Size = NameInfo & ~0xC0;
-  if (LongName) {
-    uint32_t NameOffset = (UnicodeNameToCodepointIndex[Offset++] << 8);
-    NameOffset |= UnicodeNameToCodepointIndex[Offset++];
-    N.Name = StringRef(UnicodeNameToCodepointDict + NameOffset, Size);
-  } else {
-    N.Name = StringRef(UnicodeNameToCodepointDict + Size, 1);
+  ತಾರ್ಕಿಕ LongName = NameInfo & 0x40;
+  ತಾರ್ಕಿಕ Has_ಮೌಲ್ಯ = NameInfo & 0x80;
+  std::size_t ಗಾತ್ರ_2 = NameInfo & ~0xC0;
+  ಆದರೆ (LongName) {
+    uint32_t Name_ಸ್ಥಾನಾಂತರ = (Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++] << 8);
+    Name_ಸ್ಥಾನಾಂತರ |= Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
+    N.Name = StringRef(Unicode_Name_ಗಮ್ಯ_Codepoint_Dict + Name_ಸ್ಥಾನಾಂತರ, ಗಾತ್ರ_2);
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    N.Name = StringRef(Unicode_Name_ಗಮ್ಯ_Codepoint_Dict + ಗಾತ್ರ_2, 1);
   }
-  if (HasValue) {
-    uint8_t H = UnicodeNameToCodepointIndex[Offset++];
-    uint8_t M = UnicodeNameToCodepointIndex[Offset++];
-    uint8_t L = UnicodeNameToCodepointIndex[Offset++];
-    N.Value = ((H << 16) | (M << 8) | L) >> 3;
+  ಆದರೆ (Has_ಮೌಲ್ಯ) {
+    uint8_t H = Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
+    uint8_t M = Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
+    uint8_t L = Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
+    N.ಮೌಲ್ಯ = ((H << 16) | (M << 8) | L) >> 3;
 
-    bool HasChildren = L & 0x02;
+    ತಾರ್ಕಿಕ HasChildren = L & 0x02;
     N.HasSibling = L & 0x01;
 
-    if (HasChildren) {
-      N.ChildrenOffset = UnicodeNameToCodepointIndex[Offset++] << 16;
-      N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++] << 8;
-      N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++];
+    ಆದರೆ (HasChildren) {
+      N.Children_ಸ್ಥಾನಾಂತರ = Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++] << 16;
+      N.Children_ಸ್ಥಾನಾಂತರ |= Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++] << 8;
+      N.Children_ಸ್ಥಾನಾಂತರ |= Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
     }
-  } else {
-    uint8_t H = UnicodeNameToCodepointIndex[Offset++];
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    uint8_t H = Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
     N.HasSibling = H & 0x80;
-    bool HasChildren = H & 0x40;
+    ತಾರ್ಕಿಕ HasChildren = H & 0x40;
     H &= uint8_t(~0xC0);
-    if (HasChildren) {
-      N.ChildrenOffset = (H << 16);
-      N.ChildrenOffset |=
-          (uint32_t(UnicodeNameToCodepointIndex[Offset++]) << 8);
-      N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++];
+    ಆದರೆ (HasChildren) {
+      N.Children_ಸ್ಥಾನಾಂತರ = (H << 16);
+      N.Children_ಸ್ಥಾನಾಂತರ |=
+          (uint32_t(Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++]) << 8);
+      N.Children_ಸ್ಥಾನಾಂತರ |= Unicode_Name_ಗಮ್ಯ_Codepoint_ಸೂಚ್ಯಂಕ[ಸ್ಥಾನಾಂತರ++];
     }
   }
-  N.Size = Offset - Origin;
-  return N;
+  N.ಗಾತ್ರ_2 = ಸ್ಥಾನಾಂತರ - Origin;
+  ಹಿಂತಿರುಗಿ N;
 }
 
-static bool startsWith(StringRef Name, StringRef Needle, bool Strict,
-                       std::size_t &Consummed, char &PreviousCharInName,
-                       bool IsPrefix = false) {
+ಸ್ಥಿರ ತಾರ್ಕಿಕ startsWith(StringRef Name, StringRef Needle, ತಾರ್ಕಿಕ Strict,
+                       std::size_t &Consummed, ಅಕ್ಷರ &ಹಿಂದಿನ_Char_ಒಳ_Name,
+                       ತಾರ್ಕಿಕ Is_ಪೂರ್ವಪ್ರತ್ಯಯ = ಸುಳ್ಳು) {
 
   Consummed = 0;
-  if (Strict) {
-    if (!Name.starts_with(Needle))
-      return false;
-    Consummed = Needle.size();
-    return true;
+  ಆದರೆ (Strict) {
+    ಆದರೆ (!Name.starts_with(Needle))
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+    Consummed = Needle.ಗಾತ್ರ_3();
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
-  if (Needle.empty())
-    return true;
+  ಆದರೆ (Needle.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  auto NamePos = Name.begin();
-  auto NeedlePos = Needle.begin();
+  ಸ್ವಯಂಚಾಲಿತ NamePos = Name.begin();
+  ಸ್ವಯಂಚಾಲಿತ NeedlePos = Needle.begin();
 
-  char PreviousCharInNameOrigin = PreviousCharInName;
-  char PreviousCharInNeedle = *Needle.begin();
-  auto IgnoreSpaces = [](auto It, auto End, char &PreviousChar,
-                         bool IsPrefix = false) {
-    while (It != End) {
-      const auto Next = std::next(It);
+  ಅಕ್ಷರ ಹಿಂದಿನ_Char_ಒಳ_Name_Origin = ಹಿಂದಿನ_Char_ಒಳ_Name;
+  ಅಕ್ಷರ ಹಿಂದಿನ_Char_ಒಳ_Needle = *Needle.begin();
+  ಸ್ವಯಂಚಾಲಿತ IgnoreSpaces = [](ಸ್ವಯಂಚಾಲಿತ It, ಸ್ವಯಂಚಾಲಿತ ಕೊನೆ_2, ಅಕ್ಷರ &ಹಿಂದಿನ_Char,
+                         ತಾರ್ಕಿಕ Is_ಪೂರ್ವಪ್ರತ್ಯಯ = ಸುಳ್ಳು) {
+    ಆಗ (It != ಕೊನೆ_2) {
+      ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ ಮುಂದಿನ_2 = std::ಮುಂದಿನ(It);
       // Ignore spaces, underscore, medial hyphens
       // The generator ensures a needle never ends (or starts) by a medial
       // hyphen https://unicode.org/reports/tr44/#UAX44-LM2.
-      bool Ignore =
+      ತಾರ್ಕಿಕ Ignore =
           *It == ' ' || *It == '_' ||
-          (*It == '-' && isAlnum(PreviousChar) &&
-           ((Next != End && isAlnum(*Next)) || (Next == End && IsPrefix)));
-      PreviousChar = *It;
-      if (!Ignore)
-        break;
+          (*It == '-' && isAlnum(ಹಿಂದಿನ_Char) &&
+           ((ಮುಂದಿನ_2 != ಕೊನೆ_2 && isAlnum(*ಮುಂದಿನ_2)) || (ಮುಂದಿನ_2 == ಕೊನೆ_2 && Is_ಪೂರ್ವಪ್ರತ್ಯಯ)));
+      ಹಿಂದಿನ_Char = *It;
+      ಆದರೆ (!Ignore)
+        ನಿಲ್ಲಿಸು;
       ++It;
     }
-    return It;
+    ಹಿಂತಿರುಗಿ It;
   };
 
-  while (true) {
-    NamePos = IgnoreSpaces(NamePos, Name.end(), PreviousCharInName);
+  ಆಗ (ನಿಜ) {
+    NamePos = IgnoreSpaces(NamePos, Name.ಕೊನೆ(), ಹಿಂದಿನ_Char_ಒಳ_Name);
     NeedlePos =
-        IgnoreSpaces(NeedlePos, Needle.end(), PreviousCharInNeedle, IsPrefix);
-    if (NeedlePos == Needle.end())
-      break;
-    if (NamePos == Name.end())
-      break;
-    if (toUpper(*NeedlePos) != toUpper(*NamePos))
-      break;
+        IgnoreSpaces(NeedlePos, Needle.ಕೊನೆ(), ಹಿಂದಿನ_Char_ಒಳ_Needle, Is_ಪೂರ್ವಪ್ರತ್ಯಯ);
+    ಆದರೆ (NeedlePos == Needle.ಕೊನೆ())
+      ನಿಲ್ಲಿಸು;
+    ಆದರೆ (NamePos == Name.ಕೊನೆ())
+      ನಿಲ್ಲಿಸು;
+    ಆದರೆ (ಗಮ್ಯ_ಊರ್ಧ್ವ(*NeedlePos) != ಗಮ್ಯ_ಊರ್ಧ್ವ(*NamePos))
+      ನಿಲ್ಲಿಸು;
     NeedlePos++;
     NamePos++;
   }
-  Consummed = std::distance(Name.begin(), NamePos);
-  if (NeedlePos != Needle.end()) {
-    PreviousCharInName = PreviousCharInNameOrigin;
+  Consummed = std::ದೂರ(Name.begin(), NamePos);
+  ಆದರೆ (NeedlePos != Needle.ಕೊನೆ()) {
+    ಹಿಂದಿನ_Char_ಒಳ_Name = ಹಿಂದಿನ_Char_ಒಳ_Name_Origin;
   }
-  return NeedlePos == Needle.end();
+  ಹಿಂತಿರುಗಿ NeedlePos == Needle.ಕೊನೆ();
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict,
-            char PreviousCharInName, BufferType &Buffer,
-            const Node *Parent = nullptr) {
-  Node N = readNode(Offset, Parent);
+ಸ್ಥಿರ std::tuple<ಗಂಟು, ತಾರ್ಕಿಕ, uint32_t>
+compare_ಗಂಟು(uint32_t ಸ್ಥಾನಾಂತರ, StringRef Name, ತಾರ್ಕಿಕ Strict,
+            ಅಕ್ಷರ ಹಿಂದಿನ_Char_ಒಳ_Name, ಬಫರ್_Type &ಬಫರ್,
+            ಸ್ಥಿರಾಂಕ ಗಂಟು *ಪೋಷಕ_2 = ಶೂನ್ಯಸೂಚಕ) {
+  ಗಂಟು N = read_ಗಂಟು(ಸ್ಥಾನಾಂತರ, ಪೋಷಕ_2);
   std::size_t Consummed = 0;
-  bool DoesStartWith = N.IsRoot || startsWith(Name, N.Name, Strict, Consummed,
-                                              PreviousCharInName);
-  if (!DoesStartWith)
-    return std::make_tuple(N, false, 0);
+  ತಾರ್ಕಿಕ Does_ಆರಂಭ_With = N.Is_ಬೇರು || startsWith(Name, N.Name, Strict, Consummed,
+                                              ಹಿಂದಿನ_Char_ಒಳ_Name);
+  ಆದರೆ (!Does_ಆರಂಭ_With)
+    ಹಿಂತಿರುಗಿ std::make_tuple(N, ಸುಳ್ಳು, 0);
 
-  if (Name.size() - Consummed == 0 && N.Value != 0xFFFFFFFF)
-    return std::make_tuple(N, true, N.Value);
+  ಆದರೆ (Name.ಗಾತ್ರ_3() - Consummed == 0 && N.ಮೌಲ್ಯ != 0xFFFFFFFF)
+    ಹಿಂತಿರುಗಿ std::make_tuple(N, ನಿಜ, N.ಮೌಲ್ಯ);
 
-  if (N.hasChildren()) {
-    uint32_t ChildOffset = N.ChildrenOffset;
-    for (;;) {
-      Node C;
-      bool Matches;
-      uint32_t Value;
-      std::tie(C, Matches, Value) =
-          compareNode(ChildOffset, Name.substr(Consummed), Strict,
-                      PreviousCharInName, Buffer, &N);
-      if (Matches) {
-        std::reverse_copy(C.Name.begin(), C.Name.end(),
-                          std::back_inserter(Buffer));
-        return std::make_tuple(N, true, Value);
+  ಆದರೆ (N.hasChildren()) {
+    uint32_t ಮಗು_ಸ್ಥಾನಾಂತರ = N.Children_ಸ್ಥಾನಾಂತರ;
+    ಗಾಗಿ (;;) {
+      ಗಂಟು C;
+      ತಾರ್ಕಿಕ Matches;
+      uint32_t ಮೌಲ್ಯ;
+      std::tie(C, Matches, ಮೌಲ್ಯ) =
+          compare_ಗಂಟು(ಮಗು_ಸ್ಥಾನಾಂತರ, Name.substr(Consummed), Strict,
+                      ಹಿಂದಿನ_Char_ಒಳ_Name, ಬಫರ್, &N);
+      ಆದರೆ (Matches) {
+        std::ಹಿಮ್ಮುಖ_copy(C.Name.begin(), C.Name.ಕೊನೆ(),
+                          std::ಹಿಂಭಾಗ_inserter(ಬಫರ್));
+        ಹಿಂತಿರುಗಿ std::make_tuple(N, ನಿಜ, ಮೌಲ್ಯ);
       }
-      ChildOffset += C.Size;
-      if (!C.HasSibling)
-        break;
+      ಮಗು_ಸ್ಥಾನಾಂತರ += C.ಗಾತ್ರ_2;
+      ಆದರೆ (!C.HasSibling)
+        ನಿಲ್ಲಿಸು;
     }
   }
-  return std::make_tuple(N, false, 0);
+  ಹಿಂತಿರುಗಿ std::make_tuple(N, ಸುಳ್ಳು, 0);
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict, BufferType &Buffer) {
-  return compareNode(Offset, Name, Strict, 0, Buffer);
+ಸ್ಥಿರ std::tuple<ಗಂಟು, ತಾರ್ಕಿಕ, uint32_t>
+compare_ಗಂಟು(uint32_t ಸ್ಥಾನಾಂತರ, StringRef Name, ತಾರ್ಕಿಕ Strict, ಬಫರ್_Type &ಬಫರ್) {
+  ಹಿಂತಿರುಗಿ compare_ಗಂಟು(ಸ್ಥಾನಾಂತರ, Name, Strict, 0, ಬಫರ್);
 }
 
 // clang-format off
-constexpr const char *const HangulSyllables[][3] = {
+constexpr ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ HangulSyllables[][3] = {
     { "G",  "A",   ""   },
     { "GG", "AE",  "G"  },
     { "N",  "YA",  "GG" },
@@ -256,72 +256,72 @@ constexpr uint32_t LCount = 19;
 constexpr uint32_t VCount = 21;
 constexpr uint32_t TCount = 28;
 
-static std::size_t findSyllable(StringRef Name, bool Strict,
-                                char &PreviousInName, int &Pos, int Column) {
-  assert(Column == 0 || Column == 1 || Column == 2);
-  static std::size_t CountPerColumn[] = {LCount, VCount, TCount};
-  int Len = -1;
-  int Prev = PreviousInName;
-  for (std::size_t I = 0; I < CountPerColumn[Column]; I++) {
-    StringRef Syllable(HangulSyllables[I][Column]);
-    if (int(Syllable.size()) <= Len)
-      continue;
+ಸ್ಥಿರ std::size_t ಕಂಡುಹಿಡಿ_Syllable(StringRef Name, ತಾರ್ಕಿಕ Strict,
+                                ಅಕ್ಷರ &ಹಿಂದಿನ_ಒಳ_Name, ಪೂರ್ಣಾಂಕ &Pos, ಪೂರ್ಣಾಂಕ ಸ್ತಂಭ) {
+  ಪ್ರತಿಜ್ಞಾ(ಸ್ತಂಭ == 0 || ಸ್ತಂಭ == 1 || ಸ್ತಂಭ == 2);
+  ಸ್ಥಿರ std::size_t ಎಣಿಕೆ_ಪ್ರತಿ_ಸ್ತಂಭ[] = {LCount, VCount, TCount};
+  ಪೂರ್ಣಾಂಕ Len = -1;
+  ಪೂರ್ಣಾಂಕ Prev = ಹಿಂದಿನ_ಒಳ_Name;
+  ಗಾಗಿ (std::size_t I = 0; I < ಎಣಿಕೆ_ಪ್ರತಿ_ಸ್ತಂಭ[ಸ್ತಂಭ]; I++) {
+    StringRef Syllable(HangulSyllables[I][ಸ್ತಂಭ]);
+    ಆದರೆ (ಪೂರ್ಣಾಂಕ(Syllable.ಗಾತ್ರ_3()) <= Len)
+      ಮುಂದುವರಿ;
     std::size_t Consummed = 0;
-    char PreviousInNameCopy = PreviousInName;
-    bool DoesStartWith =
-        startsWith(Name, Syllable, Strict, Consummed, PreviousInNameCopy);
-    if (!DoesStartWith)
-      continue;
+    ಅಕ್ಷರ ಹಿಂದಿನ_ಒಳ_Name_Copy = ಹಿಂದಿನ_ಒಳ_Name;
+    ತಾರ್ಕಿಕ Does_ಆರಂಭ_With =
+        startsWith(Name, Syllable, Strict, Consummed, ಹಿಂದಿನ_ಒಳ_Name_Copy);
+    ಆದರೆ (!Does_ಆರಂಭ_With)
+      ಮುಂದುವರಿ;
     Len = Consummed;
     Pos = I;
-    Prev = PreviousInNameCopy;
+    Prev = ಹಿಂದಿನ_ಒಳ_Name_Copy;
   }
-  if (Len == -1)
-    return 0;
-  PreviousInName = Prev;
-  return size_t(Len);
+  ಆದರೆ (Len == -1)
+    ಹಿಂತಿರುಗಿ 0;
+  ಹಿಂದಿನ_ಒಳ_Name = Prev;
+  ಹಿಂತಿರುಗಿ size_t(Len);
 }
 
-static std::optional<char32_t>
-nameToHangulCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
-  Buffer.clear();
+ಸ್ಥಿರ std::optional<char32_t>
+name_ಗಮ್ಯ_Hangul_ಸಂಕೇತ_ಬಿಂದು(StringRef Name, ತಾರ್ಕಿಕ Strict, ಬಫರ್_Type &ಬಫರ್) {
+  ಬಫರ್.clear();
   // Hangul Syllable Decomposition
   std::size_t Consummed = 0;
-  char NameStart = 0;
-  bool DoesStartWith =
-      startsWith(Name, "HANGUL SYLLABLE ", Strict, Consummed, NameStart);
-  if (!DoesStartWith)
-    return std::nullopt;
+  ಅಕ್ಷರ Name_ಆರಂಭ = 0;
+  ತಾರ್ಕಿಕ Does_ಆರಂಭ_With =
+      startsWith(Name, "HANGUL SYLLABLE ", Strict, Consummed, Name_ಆರಂಭ);
+  ಆದರೆ (!Does_ಆರಂಭ_With)
+    ಹಿಂತಿರುಗಿ std::nullopt;
   Name = Name.substr(Consummed);
-  int L = -1, V = -1, T = -1;
-  Name = Name.substr(findSyllable(Name, Strict, NameStart, L, 0));
-  Name = Name.substr(findSyllable(Name, Strict, NameStart, V, 1));
-  Name = Name.substr(findSyllable(Name, Strict, NameStart, T, 2));
-  if (L != -1 && V != -1 && T != -1 && Name.empty()) {
-    if (!Strict) {
-      Buffer.append("HANGUL SYLLABLE ");
-      if (L != -1)
-        Buffer.append(HangulSyllables[L][0]);
-      if (V != -1)
-        Buffer.append(HangulSyllables[V][1]);
-      if (T != -1)
-        Buffer.append(HangulSyllables[T][2]);
+  ಪೂರ್ಣಾಂಕ L = -1, V = -1, T = -1;
+  Name = Name.substr(ಕಂಡುಹಿಡಿ_Syllable(Name, Strict, Name_ಆರಂಭ, L, 0));
+  Name = Name.substr(ಕಂಡುಹಿಡಿ_Syllable(Name, Strict, Name_ಆರಂಭ, V, 1));
+  Name = Name.substr(ಕಂಡುಹಿಡಿ_Syllable(Name, Strict, Name_ಆರಂಭ, T, 2));
+  ಆದರೆ (L != -1 && V != -1 && T != -1 && Name.ಖಾಲಿಗಳು()) {
+    ಆದರೆ (!Strict) {
+      ಬಫರ್.append("HANGUL SYLLABLE ");
+      ಆದರೆ (L != -1)
+        ಬಫರ್.append(HangulSyllables[L][0]);
+      ಆದರೆ (V != -1)
+        ಬಫರ್.append(HangulSyllables[V][1]);
+      ಆದರೆ (T != -1)
+        ಬಫರ್.append(HangulSyllables[T][2]);
     }
-    return SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
+    ಹಿಂತಿರುಗಿ SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
            std::uint32_t(T);
   }
   // Otherwise, it's an illegal syllable name.
-  return std::nullopt;
+  ಹಿಂತಿರುಗಿ std::nullopt;
 }
 
-struct GeneratedNamesData {
-  StringRef Prefix;
-  uint32_t Start;
-  uint32_t End;
+ರಚನೆ Generated_ಹೆಸರುಗಳು_ದತ್ತಾಂಶ {
+  StringRef ಪೂರ್ವಪ್ರತ್ಯಯ;
+  uint32_t ಆರಂಭ;
+  uint32_t ಕೊನೆ_2;
 };
 
 // Unicode 18.0 Name Derivation Rule Prefix Strings (extracted/DerivedName.txt)
-static const GeneratedNamesData GeneratedNamesDataTable[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ Generated_ಹೆಸರುಗಳು_ದತ್ತಾಂಶ Generated_ಹೆಸರುಗಳು_ದತ್ತಾಂಶ_ಕೋಷ್ಟಕ[] = {
     {"CJK UNIFIED IDEOGRAPH-", 0x3400, 0x4DBF},
     {"CJK UNIFIED IDEOGRAPH-", 0x4E00, 0x9FFF},
     {"CJK UNIFIED IDEOGRAPH-", 0x20000, 0x2A6DF},
@@ -346,204 +346,204 @@ static const GeneratedNamesData GeneratedNamesDataTable[] = {
     {"CJK COMPATIBILITY IDEOGRAPH-", 0x2F800, 0x2FA1D},
 };
 
-static std::optional<char32_t>
-nameToGeneratedCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
-  for (auto &&Item : GeneratedNamesDataTable) {
-    Buffer.clear();
+ಸ್ಥಿರ std::optional<char32_t>
+name_ಗಮ್ಯ_Generated_ಸಂಕೇತ_ಬಿಂದು(StringRef Name, ತಾರ್ಕಿಕ Strict, ಬಫರ್_Type &ಬಫರ್) {
+  ಗಾಗಿ (ಸ್ವಯಂಚಾಲಿತ &&ಅಂಶ : Generated_ಹೆಸರುಗಳು_ದತ್ತಾಂಶ_ಕೋಷ್ಟಕ) {
+    ಬಫರ್.clear();
     std::size_t Consummed = 0;
-    char NameStart = 0;
-    bool DoesStartWith = startsWith(Name, Item.Prefix, Strict, Consummed,
-                                    NameStart, /*IsPrefix=*/true);
-    if (!DoesStartWith)
-      continue;
-    auto Number = Name.substr(Consummed);
-    unsigned long long V = 0;
+    ಅಕ್ಷರ Name_ಆರಂಭ = 0;
+    ತಾರ್ಕಿಕ Does_ಆರಂಭ_With = startsWith(Name, ಅಂಶ.ಪೂರ್ವಪ್ರತ್ಯಯ, Strict, Consummed,
+                                    Name_ಆರಂಭ, /*IsPrefix=*/ನಿಜ);
+    ಆದರೆ (!Does_ಆರಂಭ_With)
+      ಮುಂದುವರಿ;
+    ಸ್ವಯಂಚಾಲಿತ ಸಂಖ್ಯೆ = Name.substr(Consummed);
+    ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ದೀರ್ಘ V = 0;
     // Be consistent about mandating upper casing.
-    if (Strict &&
-        llvm::any_of(Number, [](char C) { return C >= 'a' && C <= 'f'; }))
-      return {};
-    if (getAsUnsignedInteger(Number, 16, V) || V < Item.Start || V > Item.End)
-      continue;
-    if (!Strict) {
-      Buffer.append(Item.Prefix);
-      Buffer.append(utohexstr(V, true));
+    ಆದರೆ (Strict &&
+        llvm::any_ದ(ಸಂಖ್ಯೆ, [](ಅಕ್ಷರ C) { ಹಿಂತಿರುಗಿ C >= 'a' && C <= 'f'; }))
+      ಹಿಂತಿರುಗಿ {};
+    ಆದರೆ (getAsUnsignedInteger(ಸಂಖ್ಯೆ, 16, V) || V < ಅಂಶ.ಆರಂಭ || V > ಅಂಶ.ಕೊನೆ_2)
+      ಮುಂದುವರಿ;
+    ಆದರೆ (!Strict) {
+      ಬಫರ್.append(ಅಂಶ.ಪೂರ್ವಪ್ರತ್ಯಯ);
+      ಬಫರ್.append(utohexstr(V, ನಿಜ));
     }
-    return V;
+    ಹಿಂತಿರುಗಿ V;
   }
-  return std::nullopt;
+  ಹಿಂತಿರುಗಿ std::nullopt;
 }
 
-static std::optional<char32_t> nameToCodepoint(StringRef Name, bool Strict,
-                                               BufferType &Buffer) {
-  if (Name.empty())
-    return std::nullopt;
+ಸ್ಥಿರ std::optional<char32_t> name_ಗಮ್ಯ_Codepoint(StringRef Name, ತಾರ್ಕಿಕ Strict,
+                                               ಬಫರ್_Type &ಬಫರ್) {
+  ಆದರೆ (Name.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ std::nullopt;
 
-  std::optional<char32_t> Res = nameToHangulCodePoint(Name, Strict, Buffer);
-  if (!Res)
-    Res = nameToGeneratedCodePoint(Name, Strict, Buffer);
-  if (Res)
-    return *Res;
+  std::optional<char32_t> Res = name_ಗಮ್ಯ_Hangul_ಸಂಕೇತ_ಬಿಂದು(Name, Strict, ಬಫರ್);
+  ಆದರೆ (!Res)
+    Res = name_ಗಮ್ಯ_Generated_ಸಂಕೇತ_ಬಿಂದು(Name, Strict, ಬಫರ್);
+  ಆದರೆ (Res)
+    ಹಿಂತಿರುಗಿ *Res;
 
-  Buffer.clear();
-  Node Node;
-  bool Matches;
-  uint32_t Value;
-  std::tie(Node, Matches, Value) = compareNode(0, Name, Strict, Buffer);
-  if (Matches) {
-    std::reverse(Buffer.begin(), Buffer.end());
+  ಬಫರ್.clear();
+  ಗಂಟು ಗಂಟು;
+  ತಾರ್ಕಿಕ Matches;
+  uint32_t ಮೌಲ್ಯ;
+  std::tie(ಗಂಟು, Matches, ಮೌಲ್ಯ) = compare_ಗಂಟು(0, Name, Strict, ಬಫರ್);
+  ಆದರೆ (Matches) {
+    std::ಹಿಮ್ಮುಖ(ಬಫರ್.begin(), ಬಫರ್.ಕೊನೆ());
     // UAX44-LM2. Ignore case, whitespace, underscore ('_'), and all medial
     // hyphens except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
-    if (!Strict && Value == 0x116c && Name.contains_insensitive("O-E")) {
-      Buffer = "HANGUL JUNGSEONG O-E";
-      Value = 0x1180;
+    ಆದರೆ (!Strict && ಮೌಲ್ಯ == 0x116c && Name.ಒಳಗೊಂಡಿದೆ_insensitive("O-E")) {
+      ಬಫರ್ = "HANGUL JUNGSEONG O-E";
+      ಮೌಲ್ಯ = 0x1180;
     }
-    return Value;
+    ಹಿಂತಿರುಗಿ ಮೌಲ್ಯ;
   }
-  return std::nullopt;
+  ಹಿಂತಿರುಗಿ std::nullopt;
 }
 
-std::optional<char32_t> nameToCodepointStrict(StringRef Name) {
+std::optional<char32_t> name_ಗಮ್ಯ_Codepoint_Strict(StringRef Name) {
 
-  BufferType Buffer;
-  auto Opt = nameToCodepoint(Name, true, Buffer);
-  return Opt;
+  ಬಫರ್_Type ಬಫರ್;
+  ಸ್ವಯಂಚಾಲಿತ Opt = name_ಗಮ್ಯ_Codepoint(Name, ನಿಜ, ಬಫರ್);
+  ಹಿಂತಿರುಗಿ Opt;
 }
 
-std::optional<LooseMatchingResult>
-nameToCodepointLooseMatching(StringRef Name) {
-  BufferType Buffer;
-  auto Opt = nameToCodepoint(Name, false, Buffer);
-  if (!Opt)
-    return std::nullopt;
-  return LooseMatchingResult{*Opt, Buffer};
+std::optional<Loose_Matching_ಫಲಿತಾಂಶ>
+name_ಗಮ್ಯ_Codepoint_Loose_Matching(StringRef Name) {
+  ಬಫರ್_Type ಬಫರ್;
+  ಸ್ವಯಂಚಾಲಿತ Opt = name_ಗಮ್ಯ_Codepoint(Name, ಸುಳ್ಳು, ಬಫರ್);
+  ಆದರೆ (!Opt)
+    ಹಿಂತಿರುಗಿ std::nullopt;
+  ಹಿಂತಿರುಗಿ Loose_Matching_ಫಲಿತಾಂಶ{*Opt, ಬಫರ್};
 }
 
 // Find the unicode character whose editing distance to Pattern
 // is shortest, using the Wagner–Fischer algorithm.
-llvm::SmallVector<MatchForCodepointName>
-nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
+llvm::Small_ಸದಿಶ<ಹೊಂದಿಕೆ_For_Codepoint_Name>
+ಹತ್ತಿರದ_Matches_For_Codepoint_Name(StringRef ನಮೂನೆ, std::size_t Max_Matches_ಎಣಿಕೆ) {
   // We maintain a fixed size vector of matches,
   // sorted by distance
   // The worst match (with the biggest distance) are discarded when new elements
   // are added.
-  std::size_t LargestEditDistance = 0;
-  llvm::SmallVector<MatchForCodepointName> Matches;
-  Matches.reserve(MaxMatchesCount + 1);
+  std::size_t ಅತಿದೊಡ್ಡ_Edit_ದೂರ = 0;
+  llvm::Small_ಸದಿಶ<ಹೊಂದಿಕೆ_For_Codepoint_Name> Matches;
+  Matches.reserve(Max_Matches_ಎಣಿಕೆ + 1);
 
-  auto Insert = [&](const Node &Node, uint32_t Distance,
-                    char32_t Value) -> bool {
-    if (Distance > LargestEditDistance) {
-      if (Matches.size() == MaxMatchesCount)
-        return false;
-      LargestEditDistance = Distance;
+  ಸ್ವಯಂಚಾಲಿತ ಸೇರಿಸು_2 = [&](ಸ್ಥಿರಾಂಕ ಗಂಟು &ಗಂಟು, uint32_t ದೂರ_2,
+                    char32_t ಮೌಲ್ಯ) -> ತಾರ್ಕಿಕ {
+    ಆದರೆ (ದೂರ_2 > ಅತಿದೊಡ್ಡ_Edit_ದೂರ) {
+      ಆದರೆ (Matches.ಗಾತ್ರ_3() == Max_Matches_ಎಣಿಕೆ)
+        ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+      ಅತಿದೊಡ್ಡ_Edit_ದೂರ = ದೂರ_2;
     }
     // To avoid allocations, the creation of the name is delayed
     // as much as possible.
     std::string Name;
-    auto GetName = [&] {
-      if (Name.empty())
-        Name = Node.fullName();
-      return Name;
+    ಸ್ವಯಂಚಾಲಿತ GetName = [&] {
+      ಆದರೆ (Name.ಖಾಲಿಗಳು())
+        Name = ಗಂಟು.ತುಂಬಿದ_Name();
+      ಹಿಂತಿರುಗಿ Name;
     };
 
-    auto It = llvm::lower_bound(
-        Matches, Distance,
-        [&](const MatchForCodepointName &a, std::size_t Distance) {
-          if (Distance == a.Distance)
-            return a.Name < GetName();
-          return a.Distance < Distance;
+    ಸ್ವಯಂಚಾಲಿತ It = llvm::ಅಧೋ_bound(
+        Matches, ದೂರ_2,
+        [&](ಸ್ಥಿರಾಂಕ ಹೊಂದಿಕೆ_For_Codepoint_Name &a, std::size_t ದೂರ_2) {
+          ಆದರೆ (ದೂರ_2 == a.ದೂರ_2)
+            ಹಿಂತಿರುಗಿ a.Name < GetName();
+          ಹಿಂತಿರುಗಿ a.ದೂರ_2 < ದೂರ_2;
         });
-    if (It == Matches.end() && Matches.size() == MaxMatchesCount)
-      return false;
+    ಆದರೆ (It == Matches.ಕೊನೆ() && Matches.ಗಾತ್ರ_3() == Max_Matches_ಎಣಿಕೆ)
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-    MatchForCodepointName M{GetName(), Distance, Value};
-    Matches.insert(It, std::move(M));
-    if (Matches.size() > MaxMatchesCount)
-      Matches.pop_back();
-    return true;
+    ಹೊಂದಿಕೆ_For_Codepoint_Name M{GetName(), ದೂರ_2, ಮೌಲ್ಯ};
+    Matches.ಸೇರಿಸು(It, std::move(M));
+    ಆದರೆ (Matches.ಗಾತ್ರ_3() > Max_Matches_ಎಣಿಕೆ)
+      Matches.ತೆಗೆ_ಹಿಂಭಾಗ();
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   };
 
   // We ignore case, space, hyphens, etc,
   // in both the search pattern and the prospective names.
-  auto Normalize = [](StringRef Name) {
-    std::string Out;
-    Out.reserve(Name.size());
-    for (char C : Name) {
-      if (isAlnum(C))
-        Out.push_back(toUpper(C));
+  ಸ್ವಯಂಚಾಲಿತ Normalize = [](StringRef Name) {
+    std::string ಹೊರಹೋಗು;
+    ಹೊರಹೋಗು.reserve(Name.ಗಾತ್ರ_3());
+    ಗಾಗಿ (ಅಕ್ಷರ C : Name) {
+      ಆದರೆ (isAlnum(C))
+        ಹೊರಹೋಗು.ತಳ್ಳು_ಹಿಂಭಾಗ(ಗಮ್ಯ_ಊರ್ಧ್ವ(C));
     }
-    return Out;
+    ಹಿಂತಿರುಗಿ ಹೊರಹೋಗು;
   };
-  std::string NormalizedName = Normalize(Pattern);
+  std::string NormalizedName = Normalize(ನಮೂನೆ);
 
   // Allocate a matrix big enough for longest names.
-  const std::size_t Columns =
-      std::min(NormalizedName.size(), UnicodeNameToCodepointLargestNameSize) +
+  ಸ್ಥಿರಾಂಕ std::size_t Columns =
+      std::min(NormalizedName.ಗಾತ್ರ_3(), Unicode_Name_ಗಮ್ಯ_Codepoint_ಅತಿದೊಡ್ಡ_Name_ಗಾತ್ರ) +
       1;
 
-  [[maybe_unused]] static std::size_t Rows =
-      UnicodeNameToCodepointLargestNameSize + 1;
+  [[maybe_ಬಳಸದ]] ಸ್ಥಿರ std::size_t ಅಡ್ಡಸಾಲುಗಳು_2 =
+      Unicode_Name_ಗಮ್ಯ_Codepoint_ಅತಿದೊಡ್ಡ_Name_ಗಾತ್ರ + 1;
 
-  std::vector<char> Distances(
-      Columns * (UnicodeNameToCodepointLargestNameSize + 1), 0);
+  std::ಸದಿಶ<ಅಕ್ಷರ> Distances(
+      Columns * (Unicode_Name_ಗಮ್ಯ_Codepoint_ಅತಿದೊಡ್ಡ_Name_ಗಾತ್ರ + 1), 0);
 
-  auto Get = [&Distances, Columns](size_t Column, std::size_t Row) -> char & {
-    assert(Column < Columns);
-    assert(Row < Rows);
-    return Distances[Row * Columns + Column];
+  ಸ್ವಯಂಚಾಲಿತ Get = [&Distances, Columns](size_t ಸ್ತಂಭ, std::size_t ಅಡ್ಡಸಾಲು) -> ಅಕ್ಷರ & {
+    ಪ್ರತಿಜ್ಞಾ(ಸ್ತಂಭ < Columns);
+    ಪ್ರತಿಜ್ಞಾ(ಅಡ್ಡಸಾಲು < ಅಡ್ಡಸಾಲುಗಳು_2);
+    ಹಿಂತಿರುಗಿ Distances[ಅಡ್ಡಸಾಲು * Columns + ಸ್ತಂಭ];
   };
 
-  for (std::size_t I = 0; I < Columns; I++)
+  ಗಾಗಿ (std::size_t I = 0; I < Columns; I++)
     Get(I, 0) = I;
 
   // Visit the childrens,
   // Filling (and overriding) the matrix for the name fragment of each node
   // iteratively. CompleteName is used to collect the actual name of potential
   // match, respecting case and spacing.
-  auto VisitNode = [&](const Node &N, std::size_t Row,
-                       auto &VisitNode) -> void {
+  ಸ್ವಯಂಚಾಲಿತ ಭೇಟಿ_ಗಂಟು = [&](ಸ್ಥಿರಾಂಕ ಗಂಟು &N, std::size_t ಅಡ್ಡಸಾಲು,
+                       ಸ್ವಯಂಚಾಲಿತ &ಭೇಟಿ_ಗಂಟು) -> ಶೂನ್ಯ {
     std::size_t J = 0;
-    for (; J < N.Name.size(); J++) {
-      if (!isAlnum(N.Name[J]))
-        continue;
+    ಗಾಗಿ (; J < N.Name.ಗಾತ್ರ_3(); J++) {
+      ಆದರೆ (!isAlnum(N.Name[J]))
+        ಮುಂದುವರಿ;
 
-      Get(0, Row) = Row;
+      Get(0, ಅಡ್ಡಸಾಲು) = ಅಡ್ಡಸಾಲು;
 
-      for (std::size_t I = 1; I < Columns; I++) {
-        const int Delete = Get(I - 1, Row) + 1;
-        const int Insert = Get(I, Row - 1) + 1;
+      ಗಾಗಿ (std::size_t I = 1; I < Columns; I++) {
+        ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ Delete = Get(I - 1, ಅಡ್ಡಸಾಲು) + 1;
+        ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ ಸೇರಿಸು_2 = Get(I, ಅಡ್ಡಸಾಲು - 1) + 1;
 
-        const int Replace =
-            Get(I - 1, Row - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
+        ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ Replace =
+            Get(I - 1, ಅಡ್ಡಸಾಲು - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
 
-        Get(I, Row) = std::min({Insert, Delete, Replace});
+        Get(I, ಅಡ್ಡಸಾಲು) = std::min({ಸೇರಿಸು_2, Delete, Replace});
       }
 
-      Row++;
+      ಅಡ್ಡಸಾಲು++;
     }
 
-    unsigned Cost = Get(Columns - 1, Row - 1);
-    if (N.Value != 0xFFFFFFFF) {
-      Insert(N, Cost, N.Value);
+    ಚಿಹ್ನೆರಹಿತ ವೆಚ್ಚ = Get(Columns - 1, ಅಡ್ಡಸಾಲು - 1);
+    ಆದರೆ (N.ಮೌಲ್ಯ != 0xFFFFFFFF) {
+      ಸೇರಿಸು_2(N, ವೆಚ್ಚ, N.ಮೌಲ್ಯ);
     }
 
-    if (N.hasChildren()) {
-      auto ChildOffset = N.ChildrenOffset;
-      for (;;) {
-        Node C = readNode(ChildOffset, &N);
-        ChildOffset += C.Size;
-        if (!C.isValid())
-          break;
-        VisitNode(C, Row, VisitNode);
-        if (!C.HasSibling)
-          break;
+    ಆದರೆ (N.hasChildren()) {
+      ಸ್ವಯಂಚಾಲಿತ ಮಗು_ಸ್ಥಾನಾಂತರ = N.Children_ಸ್ಥಾನಾಂತರ;
+      ಗಾಗಿ (;;) {
+        ಗಂಟು C = read_ಗಂಟು(ಮಗು_ಸ್ಥಾನಾಂತರ, &N);
+        ಮಗು_ಸ್ಥಾನಾಂತರ += C.ಗಾತ್ರ_2;
+        ಆದರೆ (!C.isValid())
+          ನಿಲ್ಲಿಸು;
+        ಭೇಟಿ_ಗಂಟು(C, ಅಡ್ಡಸಾಲು, ಭೇಟಿ_ಗಂಟು);
+        ಆದರೆ (!C.HasSibling)
+          ನಿಲ್ಲಿಸು;
       }
     }
   };
 
-  Node Root = createRoot();
-  VisitNode(Root, 1, VisitNode);
-  return Matches;
+  ಗಂಟು ಬೇರು_2 = create_ಬೇರು();
+  ಭೇಟಿ_ಗಂಟು(ಬೇರು_2, 1, ಭೇಟಿ_ಗಂಟು);
+  ಹಿಂತಿರುಗಿ Matches;
 }
 
 } // namespace unicode

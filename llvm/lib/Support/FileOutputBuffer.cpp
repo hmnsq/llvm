@@ -10,167 +10,167 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileOutputBuffer.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Memory.h"
-#include "llvm/Support/TimeProfiler.h"
-#include <system_error>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileOutputBuffer.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Errc.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Memory.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/TimeProfiler.h"
+#ಅನ್ತರ್ಭಾವ <system_error>
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
+#ಆದರೆ !defined(_MSC_VER) && !defined(__MINGW32__)
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಇಲ್ಲದಿದ್ದರೆ
+#ಅನ್ತರ್ಭಾವ <io.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
-using namespace llvm;
-using namespace llvm::sys;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::sys;
 
-namespace {
+ನಾಮಾಕಾಶ {
 // A FileOutputBuffer which creates a temporary file in the same directory
 // as the final output file. The final output file is atomically replaced
 // with the temporary file on commit().
-class OnDiskBuffer : public FileOutputBuffer {
-public:
-  OnDiskBuffer(StringRef Path, fs::TempFile Temp, fs::mapped_file_region Buf)
-      : FileOutputBuffer(Path), Buffer(std::move(Buf)), Temp(std::move(Temp)) {}
+ವರ್ಗ On_Disk_ಬಫರ್ : ಸಾರ್ವಜನಿಕ File_Output_ಬಫರ್ {
+ಸಾರ್ವಜನಿಕ:
+  On_Disk_ಬಫರ್(StringRef ಮಾರ್ಗ, fs::ತಾತ್ಕಾಲಿಕ_File ತಾತ್ಕಾಲಿಕ, fs::mapped_file_region Buf)
+      : File_Output_ಬಫರ್(ಮಾರ್ಗ), ಬಫರ್(std::move(Buf)), ತಾತ್ಕಾಲಿಕ(std::move(ತಾತ್ಕಾಲಿಕ)) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.data(); }
+  uint8_t *get_ಬಫರ್_ಆರಂಭ() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ (uint8_t *)ಬಫರ್.ದತ್ತಾಂಶ(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.data() + Buffer.size();
+  uint8_t *get_ಬಫರ್_ಕೊನೆ() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ (uint8_t *)ಬಫರ್.ದತ್ತಾಂಶ() + ಬಫರ್.ಗಾತ್ರ_3();
   }
 
-  size_t getBufferSize() const override { return Buffer.size(); }
+  size_t get_ಬಫರ್_ಗಾತ್ರ() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ ಬಫರ್.ಗಾತ್ರ_3(); }
 
   Error commit() override {
-    llvm::TimeTraceScope timeScope("Commit buffer to disk");
+    llvm::ಸಮಯ_Trace_Scope ಸಮಯ_Scope("Commit buffer to disk");
 
     // Unmap buffer, letting OS flush dirty pages to file on disk.
-    Buffer.unmap();
+    ಬಫರ್.unmap();
 
     // Atomically replace the existing file with the new one.
-    return Temp.keep(FinalPath);
+    ಹಿಂತಿರುಗಿ ತಾತ್ಕಾಲಿಕ.keep(Final_ಮಾರ್ಗ);
   }
 
-  ~OnDiskBuffer() override {
+  ~On_Disk_ಬಫರ್() override {
     // Close the mapping before deleting the temp file, so that the removal
     // succeeds.
-    Buffer.unmap();
-    consumeError(Temp.discard());
+    ಬಫರ್.unmap();
+    consumeError(ತಾತ್ಕಾಲಿಕ.discard());
   }
 
-  void discard() override {
+  ಶೂನ್ಯ discard() override {
     // Delete the temp file if it still was open, but keeping the mapping
     // active.
-    consumeError(Temp.discard());
+    consumeError(ತಾತ್ಕಾಲಿಕ.discard());
   }
 
-private:
-  fs::mapped_file_region Buffer;
-  fs::TempFile Temp;
+ಖಾಸಗಿ:
+  fs::mapped_file_region ಬಫರ್;
+  fs::ತಾತ್ಕಾಲಿಕ_File ತಾತ್ಕಾಲಿಕ;
 };
 
 // A FileOutputBuffer which keeps data in memory and writes to the final
 // output file on commit(). This is used only when we cannot use OnDiskBuffer.
-class InMemoryBuffer : public FileOutputBuffer {
-public:
-  InMemoryBuffer(StringRef Path, MemoryBlock Buf, std::size_t BufSize,
-                 unsigned Mode)
-      : FileOutputBuffer(Path), Buffer(Buf), BufferSize(BufSize),
-        Mode(Mode) {}
+ವರ್ಗ ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್ : ಸಾರ್ವಜನಿಕ File_Output_ಬಫರ್ {
+ಸಾರ್ವಜನಿಕ:
+  ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್(StringRef ಮಾರ್ಗ, ಸ್ಮರಣೆ_ಖಂಡ Buf, std::size_t Buf_ಗಾತ್ರ,
+                 ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ)
+      : File_Output_ಬಫರ್(ಮಾರ್ಗ), ಬಫರ್(Buf), ಬಫರ್_ಗಾತ್ರ(Buf_ಗಾತ್ರ),
+        ಬಹುಲಕ(ಬಹುಲಕ) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.base(); }
+  uint8_t *get_ಬಫರ್_ಆರಂಭ() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ (uint8_t *)ಬಫರ್.ತಳ_2(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.base() + BufferSize;
+  uint8_t *get_ಬಫರ್_ಕೊನೆ() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ (uint8_t *)ಬಫರ್.ತಳ_2() + ಬಫರ್_ಗಾತ್ರ;
   }
 
-  size_t getBufferSize() const override { return BufferSize; }
+  size_t get_ಬಫರ್_ಗಾತ್ರ() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ ಬಫರ್_ಗಾತ್ರ; }
 
   Error commit() override {
-    if (FinalPath == "-") {
-      llvm::outs() << StringRef((const char *)Buffer.base(), BufferSize);
+    ಆದರೆ (Final_ಮಾರ್ಗ == "-") {
+      llvm::outs() << StringRef((ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *)ಬಫರ್.ತಳ_2(), ಬಫರ್_ಗಾತ್ರ);
       llvm::outs().flush();
-      return Error::success();
+      ಹಿಂತಿರುಗಿ Error::success();
     }
 
-    using namespace sys::fs;
-    int FD;
-    std::error_code EC;
-    if (auto EC =
-            openFileForWrite(FinalPath, FD, CD_CreateAlways, OF_Delete, Mode))
-      return errorCodeToError(EC);
-    raw_fd_ostream OS(FD, /*shouldClose=*/true, /*unbuffered=*/true);
-    OS << StringRef((const char *)Buffer.base(), BufferSize);
-    return Error::success();
+    ಬಳಸಿ ನಾಮಾಕಾಶ sys::fs;
+    ಪೂರ್ಣಾಂಕ FD;
+    std::error_ಸಂಕೇತ EC;
+    ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC =
+            openFileForWrite(Final_ಮಾರ್ಗ, FD, CD_CreateAlways, ದ_Delete, ಬಹುಲಕ))
+      ಹಿಂತಿರುಗಿ error_ಸಂಕೇತ_ಗಮ್ಯ_Error(EC);
+    raw_fd_ostream OS(FD, /*shouldClose=*/ನಿಜ, /*unbuffered=*/ನಿಜ);
+    OS << StringRef((ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *)ಬಫರ್.ತಳ_2(), ಬಫರ್_ಗಾತ್ರ);
+    ಹಿಂತಿರುಗಿ Error::success();
   }
 
-private:
+ಖಾಸಗಿ:
   // Buffer may actually contain a larger memory block than BufferSize
-  OwningMemoryBlock Buffer;
-  size_t BufferSize;
-  unsigned Mode;
+  Owning_ಸ್ಮರಣೆ_ಖಂಡ ಬಫರ್;
+  size_t ಬಫರ್_ಗಾತ್ರ;
+  ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ;
 };
 } // namespace
 
-static Expected<std::unique_ptr<InMemoryBuffer>>
-createInMemoryBuffer(StringRef Path, size_t Size, unsigned Mode) {
-  std::error_code EC;
-  MemoryBlock MB = Memory::allocateMappedMemory(
-      Size, nullptr, sys::Memory::MF_READ | sys::Memory::MF_WRITE, EC);
-  if (EC)
-    return errorCodeToError(EC);
-  return std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
+ಸ್ಥಿರ Expected<std::unique_ptr<ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್>>
+create_ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್(StringRef ಮಾರ್ಗ, size_t ಗಾತ್ರ_2, ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ) {
+  std::error_ಸಂಕೇತ EC;
+  ಸ್ಮರಣೆ_ಖಂಡ MB = ಸ್ಮರಣೆ_2::allocate_Mapped_ಸ್ಮರಣೆ(
+      ಗಾತ್ರ_2, ಶೂನ್ಯಸೂಚಕ, sys::ಸ್ಮರಣೆ_2::MF_READ | sys::ಸ್ಮರಣೆ_2::MF_WRITE, EC);
+  ಆದರೆ (EC)
+    ಹಿಂತಿರುಗಿ error_ಸಂಕೇತ_ಗಮ್ಯ_Error(EC);
+  ಹಿಂತಿರುಗಿ std::make_unique<ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್>(ಮಾರ್ಗ, MB, ಗಾತ್ರ_2, ಬಹುಲಕ);
 }
 
-static Expected<std::unique_ptr<FileOutputBuffer>>
-createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
-  Expected<fs::TempFile> FileOrErr =
-      fs::TempFile::create(Path + ".tmp%%%%%%%", Mode);
-  if (!FileOrErr)
-    return FileOrErr.takeError();
-  fs::TempFile File = std::move(*FileOrErr);
+ಸ್ಥಿರ Expected<std::unique_ptr<File_Output_ಬಫರ್>>
+create_On_Disk_ಬಫರ್(StringRef ಮಾರ್ಗ, size_t ಗಾತ್ರ_2, ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ) {
+  Expected<fs::ತಾತ್ಕಾಲಿಕ_File> FileOrErr =
+      fs::ತಾತ್ಕಾಲಿಕ_File::create(ಮಾರ್ಗ + ".tmp%%%%%%%", ಬಹುಲಕ);
+  ಆದರೆ (!FileOrErr)
+    ಹಿಂತಿರುಗಿ FileOrErr.takeError();
+  fs::ತಾತ್ಕಾಲಿಕ_File File = std::move(*FileOrErr);
 
-  if (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ EC = fs::resize_file_before_mapping_readwrite(File.FD, ಗಾತ್ರ_2)) {
     consumeError(File.discard());
-    return errorCodeToError(EC);
+    ಹಿಂತಿರುಗಿ error_ಸಂಕೇತ_ಗಮ್ಯ_Error(EC);
   }
 
   // Mmap it.
-  std::error_code EC;
+  std::error_ಸಂಕೇತ EC;
   fs::mapped_file_region MappedFile =
       fs::mapped_file_region(fs::convertFDToNativeFile(File.FD),
-                             fs::mapped_file_region::readwrite, Size, 0, EC);
+                             fs::mapped_file_region::readwrite, ಗಾತ್ರ_2, 0, EC);
 
   // mmap(2) can fail if the underlying filesystem does not support it.
   // If that happens, we fall back to in-memory buffer as the last resort.
-  if (EC) {
+  ಆದರೆ (EC) {
     consumeError(File.discard());
-    return createInMemoryBuffer(Path, Size, Mode);
+    ಹಿಂತಿರುಗಿ create_ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್(ಮಾರ್ಗ, ಗಾತ್ರ_2, ಬಹುಲಕ);
   }
 
-  return std::make_unique<OnDiskBuffer>(Path, std::move(File),
+  ಹಿಂತಿರುಗಿ std::make_unique<On_Disk_ಬಫರ್>(ಮಾರ್ಗ, std::move(File),
                                          std::move(MappedFile));
 }
 
 // Create an instance of FileOutputBuffer.
-Expected<std::unique_ptr<FileOutputBuffer>>
-FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
+Expected<std::unique_ptr<File_Output_ಬಫರ್>>
+File_Output_ಬಫರ್::create(StringRef ಮಾರ್ಗ, size_t ಗಾತ್ರ_2, ಚಿಹ್ನೆರಹಿತ Flags) {
   // Handle "-" as stdout just like llvm::raw_ostream does.
-  if (Path == "-")
-    return createInMemoryBuffer("-", Size, /*Mode=*/0);
+  ಆದರೆ (ಮಾರ್ಗ == "-")
+    ಹಿಂತಿರುಗಿ create_ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್("-", ಗಾತ್ರ_2, /*Mode=*/0);
 
-  unsigned Mode = fs::all_read | fs::all_write;
-  if (Flags & F_executable)
-    Mode |= fs::all_exe;
+  ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ = fs::all_read | fs::all_write;
+  ಆದರೆ (Flags & F_executable)
+    ಬಹುಲಕ |= fs::all_exe;
 
   // If Size is zero, don't use mmap which will fail with EINVAL.
-  if (Size == 0)
-    return createInMemoryBuffer(Path, Size, Mode);
+  ಆದರೆ (ಗಾತ್ರ_2 == 0)
+    ಹಿಂತಿರುಗಿ create_ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್(ಮಾರ್ಗ, ಗಾತ್ರ_2, ಬಹುಲಕ);
 
-  fs::file_status Stat;
-  fs::status(Path, Stat);
+  fs::file_ಸ್ಥಿತಿ Stat;
+  fs::ಸ್ಥಿತಿ_3(ಮಾರ್ಗ, Stat);
 
   // Usually, we want to create OnDiskBuffer to create a temporary file in
   // the same directory as the destination file and atomically replaces it
@@ -180,17 +180,17 @@ FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // use rename (e.g. we don't want to replace /dev/null with a regular
   // file.) If that's the case, we create an in-memory buffer, open the
   // destination file and write to it on commit().
-  switch (Stat.type()) {
-  case fs::file_type::directory_file:
-    return errorCodeToError(errc::is_a_directory);
-  case fs::file_type::regular_file:
-  case fs::file_type::file_not_found:
-  case fs::file_type::status_error:
-    if (Flags & F_mmap)
-      return createInMemoryBuffer(Path, Size, Mode);
-    else
-      return createOnDiskBuffer(Path, Size, Mode);
-  default:
-    return createInMemoryBuffer(Path, Size, Mode);
+  ಆಯ್ಕೆ (Stat.type()) {
+  ಸ್ಥಿತಿ fs::file_type::directory_file:
+    ಹಿಂತಿರುಗಿ error_ಸಂಕೇತ_ಗಮ್ಯ_Error(errc::is_a_directory);
+  ಸ್ಥಿತಿ fs::file_type::regular_file:
+  ಸ್ಥಿತಿ fs::file_type::file_not_ಸಿಕ್ಕಿತು:
+  ಸ್ಥಿತಿ fs::file_type::ಸ್ಥಿತಿ_error:
+    ಆದರೆ (Flags & F_mmap)
+      ಹಿಂತಿರುಗಿ create_ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್(ಮಾರ್ಗ, ಗಾತ್ರ_2, ಬಹುಲಕ);
+    ಇಲ್ಲದಿದ್ದರೆ
+      ಹಿಂತಿರುಗಿ create_On_Disk_ಬಫರ್(ಮಾರ್ಗ, ಗಾತ್ರ_2, ಬಹುಲಕ);
+  ಪೂರ್ವನಿಯೋಜಿತ:
+    ಹಿಂತಿರುಗಿ create_ಒಳ_ಸ್ಮರಣೆ_ಬಫರ್(ಮಾರ್ಗ, ಗಾತ್ರ_2, ಬಹುಲಕ);
   }
 }

@@ -11,129 +11,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VersionTuple.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-std::string VersionTuple::getAsString() const {
-  std::string Result;
+std::string ಆವೃತ್ತಿ_Tuple::getAsString() ಸ್ಥಿರಾಂಕ {
+  std::string ಫಲಿತಾಂಶ;
   {
-    llvm::raw_string_ostream Out(Result);
-    Out << *this;
+    llvm::raw_string_ostream ಹೊರಹೋಗು(ಫಲಿತಾಂಶ);
+    ಹೊರಹೋಗು << *ಇದು;
   }
-  return Result;
+  ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
-  Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
-    Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
-    Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
-    Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
-    Out << '.' << *Subbuild;
-  return Out;
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &ಹೊರಹೋಗು, ಸ್ಥಿರಾಂಕ ಆವೃತ್ತಿ_Tuple &V) {
+  ಹೊರಹೋಗು << V.getMajor();
+  ಆದರೆ (std::optional<ಚಿಹ್ನೆರಹಿತ> Minor = V.getMinor())
+    ಹೊರಹೋಗು << '.' << *Minor;
+  ಆದರೆ (std::optional<ಚಿಹ್ನೆರಹಿತ> Subminor = V.getSubminor())
+    ಹೊರಹೋಗು << '.' << *Subminor;
+  ಆದರೆ (std::optional<ಚಿಹ್ನೆರಹಿತ> Build = V.getBuild())
+    ಹೊರಹೋಗು << '.' << *Build;
+  ಆದರೆ (std::optional<ಚಿಹ್ನೆರಹಿತ> Subbuild = V.getSubbuild())
+    ಹೊರಹೋಗು << '.' << *Subbuild;
+  ಹಿಂತಿರುಗಿ ಹೊರಹೋಗು;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
-    return true;
+ಸ್ಥಿರ ತಾರ್ಕಿಕ parseInt(StringRef &ಒಳಹರಿವು_2, ಚಿಹ್ನೆರಹಿತ &ಮೌಲ್ಯ_2) {
+  ಪ್ರತಿಜ್ಞಾ(ಮೌಲ್ಯ_2 == 0);
+  ಆದರೆ (ಒಳಹರಿವು_2.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  char next = input[0];
-  input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
-  value = (unsigned)(next - '0');
+  ಅಕ್ಷರ ಮುಂದಿನ = ಒಳಹರಿವು_2[0];
+  ಒಳಹರಿವು_2 = ಒಳಹರಿವು_2.substr(1);
+  ಆದರೆ (ಮುಂದಿನ < '0' || ಮುಂದಿನ > '9')
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಮೌಲ್ಯ_2 = (ಚಿಹ್ನೆರಹಿತ)(ಮುಂದಿನ - '0');
 
-  while (!input.empty()) {
-    next = input[0];
-    if (next < '0' || next > '9')
-      return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+  ಆಗ (!ಒಳಹರಿವು_2.ಖಾಲಿಗಳು()) {
+    ಮುಂದಿನ = ಒಳಹರಿವು_2[0];
+    ಆದರೆ (ಮುಂದಿನ < '0' || ಮುಂದಿನ > '9')
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
+    ಒಳಹರಿವು_2 = ಒಳಹರಿವು_2.substr(1);
+    ಮೌಲ್ಯ_2 = ಮೌಲ್ಯ_2 * 10 + (ಚಿಹ್ನೆರಹಿತ)(ಮುಂದಿನ - '0');
   }
 
-  return false;
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
-  unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
+ತಾರ್ಕಿಕ ಆವೃತ್ತಿ_Tuple::tryParse(StringRef ಒಳಹರಿವು_2) {
+  ಚಿಹ್ನೆರಹಿತ major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  ಆದರೆ (parseInt(ಒಳಹರಿವು_2, major))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major);
-    return false;
+  ಆದರೆ (ಒಳಹರಿವು_2.ಖಾಲಿಗಳು()) {
+    *ಇದು = ಆವೃತ್ತಿ_Tuple(major);
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  ಆದರೆ (ಒಳಹರಿವು_2[0] != '.')
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಒಳಹರಿವು_2 = ಒಳಹರಿವು_2.substr(1);
+  ಆದರೆ (parseInt(ಒಳಹರಿವು_2, minor))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor);
-    return false;
+  ಆದರೆ (ಒಳಹರಿವು_2.ಖಾಲಿಗಳು()) {
+    *ಇದು = ಆವೃತ್ತಿ_Tuple(major, minor);
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  ಆದರೆ (!ಒಳಹರಿವು_2.consume_front("."))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಆದರೆ (parseInt(ಒಳಹರಿವು_2, subminor))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor);
-    return false;
+  ಆದರೆ (ಒಳಹರಿವು_2.ಖಾಲಿಗಳು()) {
+    *ಇದು = ಆವೃತ್ತಿ_Tuple(major, minor, subminor);
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  ಆದರೆ (!ಒಳಹರಿವು_2.consume_front("."))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಆದರೆ (parseInt(ಒಳಹರಿವು_2, build))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಆದರೆ (build >= 1024 * 1024)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor, build);
-    return false;
+  ಆದರೆ (ಒಳಹರಿವು_2.ಖಾಲಿಗಳು()) {
+    *ಇದು = ಆವೃತ್ತಿ_Tuple(major, minor, subminor, build);
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  ಆದರೆ (!ಒಳಹರಿವು_2.consume_front("."))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಆದರೆ (parseInt(ಒಳಹರಿವು_2, subbuild))
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಆದರೆ (subbuild >= 1024)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  ಆದರೆ (!ಒಳಹರಿವು_2.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  *ಇದು = ಆವೃತ್ತಿ_Tuple(major, minor, subminor, build, subbuild);
+  ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 }
 
-VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+ಆವೃತ್ತಿ_Tuple ಆವೃತ್ತಿ_Tuple::withMajorReplaced(ಚಿಹ್ನೆರಹಿತ NewMajor) ಸ್ಥಿರಾಂಕ {
+  ಆದರೆ (HasSubbuild)
+    ಹಿಂತಿರುಗಿ ಆವೃತ್ತಿ_Tuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  ಆದರೆ (HasBuild)
+    ಹಿಂತಿರುಗಿ ಆವೃತ್ತಿ_Tuple(NewMajor, Minor, Subminor, Build);
+  ಆದರೆ (HasSubminor)
+    ಹಿಂತಿರುಗಿ ಆವೃತ್ತಿ_Tuple(NewMajor, Minor, Subminor);
+  ಆದರೆ (HasMinor)
+    ಹಿಂತಿರುಗಿ ಆವೃತ್ತಿ_Tuple(NewMajor, Minor);
+  ಹಿಂತಿರುಗಿ ಆವೃತ್ತಿ_Tuple(NewMajor);
 }

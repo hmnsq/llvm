@@ -6,18 +6,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/PGOOptions.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/PGOOptions.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
 PGOOptions::PGOOptions(std::string ProfileFile, std::string CSProfileGenFile,
                        std::string ProfileRemappingFile,
-                       std::string MemoryProfile, PGOAction Action,
+                       std::string ಸ್ಮರಣೆ_Profile, PGOAction Action,
                        CSPGOAction CSAction, ColdFuncOpt ColdType,
-                       bool DebugInfoForProfiling, bool PseudoProbeForProfiling,
-                       bool AtomicCounterUpdate)
+                       ತಾರ್ಕಿಕ DebugInfoForProfiling, ತಾರ್ಕಿಕ PseudoProbeForProfiling,
+                       ತಾರ್ಕಿಕ AtomicCounterUpdate)
     : ProfileFile(ProfileFile), CSProfileGenFile(CSProfileGenFile),
-      ProfileRemappingFile(ProfileRemappingFile), MemoryProfile(MemoryProfile),
+      ProfileRemappingFile(ProfileRemappingFile), ಸ್ಮರಣೆ_Profile(ಸ್ಮರಣೆ_Profile),
       Action(Action), CSAction(CSAction), ColdOptType(ColdType),
       DebugInfoForProfiling(DebugInfoForProfiling ||
                             (Action == SampleUse && !PseudoProbeForProfiling)),
@@ -27,28 +27,28 @@ PGOOptions::PGOOptions(std::string ProfileFile, std::string CSProfileGenFile,
   // callback with IRUse action without ProfileFile.
 
   // If there is a CSAction, PGOAction cannot be IRInstr or SampleUse.
-  assert(this->CSAction == NoCSAction ||
-         (this->Action != IRInstr && this->Action != SampleUse));
+  ಪ್ರತಿಜ್ಞಾ(ಇದು->CSAction == NoCSAction ||
+         (ಇದು->Action != IRInstr && ಇದು->Action != SampleUse));
 
   // For CSIRInstr, CSProfileGenFile also needs to be nonempty.
-  assert(this->CSAction != CSIRInstr || !this->CSProfileGenFile.empty());
+  ಪ್ರತಿಜ್ಞಾ(ಇದು->CSAction != CSIRInstr || !ಇದು->CSProfileGenFile.ಖಾಲಿಗಳು());
 
   // If CSAction is CSIRUse, PGOAction needs to be IRUse as they share
   // a profile.
-  assert(this->CSAction != CSIRUse || this->Action == IRUse);
+  ಪ್ರತಿಜ್ಞಾ(ಇದು->CSAction != CSIRUse || ಇದು->Action == IRUse);
 
   // Cannot optimize with MemProf profile during IR instrumentation.
-  assert(this->MemoryProfile.empty() || this->Action != PGOOptions::IRInstr);
+  ಪ್ರತಿಜ್ಞಾ(ಇದು->ಸ್ಮರಣೆ_Profile.ಖಾಲಿಗಳು() || ಇದು->Action != PGOOptions::IRInstr);
 
   // If neither Action nor CSAction nor MemoryProfile are set,
   // DebugInfoForProfiling or PseudoProbeForProfiling needs to be true.
-  assert(this->Action != NoAction || this->CSAction != NoCSAction ||
-         !this->MemoryProfile.empty() || this->DebugInfoForProfiling ||
-         this->PseudoProbeForProfiling);
+  ಪ್ರತಿಜ್ಞಾ(ಇದು->Action != NoAction || ಇದು->CSAction != NoCSAction ||
+         !ಇದು->ಸ್ಮರಣೆ_Profile.ಖಾಲಿಗಳು() || ಇದು->DebugInfoForProfiling ||
+         ಇದು->PseudoProbeForProfiling);
 }
 
-PGOOptions::PGOOptions(const PGOOptions &) = default;
+PGOOptions::PGOOptions(ಸ್ಥಿರಾಂಕ PGOOptions &) = ಪೂರ್ವನಿಯೋಜಿತ;
 
-PGOOptions &PGOOptions::operator=(const PGOOptions &O) = default;
+PGOOptions &PGOOptions::ಕ್ರಿಯಾಕಾರಕ=(ಸ್ಥಿರಾಂಕ PGOOptions &O) = ಪೂರ್ವನಿಯೋಜಿತ;
 
-PGOOptions::~PGOOptions() = default;
+PGOOptions::~PGOOptions() = ಪೂರ್ವನಿಯೋಜಿತ;

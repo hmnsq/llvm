@@ -10,60 +10,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BlockFrequency.h"
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BlockFrequency.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/BranchProbability.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MathExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ScaledNumber.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
+ಖಂಡ_Frequency &ಖಂಡ_Frequency::ಕ್ರಿಯಾಕಾರಕ*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  ಹಿಂತಿರುಗಿ *ಇದು;
 }
 
-BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+ಖಂಡ_Frequency ಖಂಡ_Frequency::ಕ್ರಿಯಾಕಾರಕ*(BranchProbability Prob) ಸ್ಥಿರಾಂಕ {
+  ಖಂಡ_Frequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  ಹಿಂತಿರುಗಿ Freq;
 }
 
-BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
+ಖಂಡ_Frequency &ಖಂಡ_Frequency::ಕ್ರಿಯಾಕಾರಕ/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  ಹಿಂತಿರುಗಿ *ಇದು;
 }
 
-BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+ಖಂಡ_Frequency ಖಂಡ_Frequency::ಕ್ರಿಯಾಕಾರಕ/(BranchProbability Prob) ಸ್ಥಿರಾಂಕ {
+  ಖಂಡ_Frequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  ಹಿಂತಿರುಗಿ Freq;
 }
 
-std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
-  bool Overflow;
-  uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+std::optional<ಖಂಡ_Frequency> ಖಂಡ_Frequency::mul(uint64_t ಗುಣಕ) ಸ್ಥಿರಾಂಕ {
+  ತಾರ್ಕಿಕ ಅತಿಪ್ರವಾಹ;
+  uint64_t ಫಲಿತಾಂಶ_Frequency = SaturatingMultiply(Frequency, ಗುಣಕ, &ಅತಿಪ್ರವಾಹ);
+  ಆದರೆ (ಅತಿಪ್ರವಾಹ)
+    ಹಿಂತಿರುಗಿ {};
+  ಹಿಂತಿರುಗಿ ಖಂಡ_Frequency(ಫಲಿತಾಂಶ_Frequency);
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, ಖಂಡ_Frequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  ಹಿಂತಿರುಗಿ OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
-                                  BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+ಶೂನ್ಯ llvm::print_Relative_ಖಂಡ_Freq(raw_ostream &OS, ಖಂಡ_Frequency ನಮೂದು_Freq,
+                                  ಖಂಡ_Frequency Freq) {
+  ಆದರೆ (Freq == ಖಂಡ_Frequency(0)) {
     OS << "0";
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  ಆದರೆ (ನಮೂದು_Freq == ಖಂಡ_Frequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
-  OS << Block / Entry;
+  Scaled_ಸಂಖ್ಯೆ<uint64_t> ಖಂಡ_2(Freq.getFrequency(), 0);
+  Scaled_ಸಂಖ್ಯೆ<uint64_t> ನಮೂದು(ನಮೂದು_Freq.getFrequency(), 0);
+  OS << ಖಂಡ_2 / ನಮೂದು;
 }

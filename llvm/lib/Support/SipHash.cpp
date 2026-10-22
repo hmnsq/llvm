@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SipHash.h"
-#include "siphash/SipHash.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Endian.h"
-#include <cstdint>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SipHash.h"
+#ಅನ್ತರ್ಭಾವ "siphash/SipHash.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/ArrayRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Endian.h"
+#ಅನ್ತರ್ಭಾವ <cstdint>
 
-using namespace llvm;
-using namespace support;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ support;
 
-#define DEBUG_TYPE "llvm-siphash"
+#ವ್ಯಾಖ್ಯಾನಿಸು DEBUG_TYPE "llvm-siphash"
 
-void llvm::getSipHash_2_4_64(ArrayRef<uint8_t> In, const uint8_t (&K)[16],
-                             uint8_t (&Out)[8]) {
-  siphash<2, 4>(In.data(), In.size(), K, Out);
+ಶೂನ್ಯ llvm::getSipHash_2_4_64(ArrayRef<uint8_t> ಒಳ_2, ಸ್ಥಿರಾಂಕ uint8_t (&K)[16],
+                             uint8_t (&ಹೊರಹೋಗು)[8]) {
+  siphash<2, 4>(ಒಳ_2.ದತ್ತಾಂಶ(), ಒಳ_2.ಗಾತ್ರ_3(), K, ಹೊರಹೋಗು);
 }
 
-void llvm::getSipHash_2_4_128(ArrayRef<uint8_t> In, const uint8_t (&K)[16],
-                              uint8_t (&Out)[16]) {
-  siphash<2, 4>(In.data(), In.size(), K, Out);
+ಶೂನ್ಯ llvm::getSipHash_2_4_128(ArrayRef<uint8_t> ಒಳ_2, ಸ್ಥಿರಾಂಕ uint8_t (&K)[16],
+                              uint8_t (&ಹೊರಹೋಗು)[16]) {
+  siphash<2, 4>(ಒಳ_2.ದತ್ತಾಂಶ(), ಒಳ_2.ಗಾತ್ರ_3(), K, ಹೊರಹೋಗು);
 }
 
 /// Compute an ABI-stable 64-bit hash of the given string.
 uint64_t llvm::getStableSipHash(StringRef Str) {
-  static const uint8_t K[16] = {0xb5, 0xd4, 0xc9, 0xeb, 0x79, 0x10, 0x4a, 0x79,
+  ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ uint8_t K[16] = {0xb5, 0xd4, 0xc9, 0xeb, 0x79, 0x10, 0x4a, 0x79,
                                 0x6f, 0xec, 0x8b, 0x1b, 0x42, 0x87, 0x81, 0xd4};
 
-  uint8_t RawHashBytes[8];
-  getSipHash_2_4_64(arrayRefFromStringRef(Str), K, RawHashBytes);
-  return endian::read64le(RawHashBytes);
+  uint8_t Raw_Hash_ಬೈಟುಗಳು[8];
+  getSipHash_2_4_64(arrayRefFromStringRef(Str), K, Raw_Hash_ಬೈಟುಗಳು);
+  ಹಿಂತಿರುಗಿ endian::read64le(Raw_Hash_ಬೈಟುಗಳು);
 }
 
 /// Compute an ABI-stable 16-bit hash of the given string.
-uint16_t llvm::getPointerAuthStableSipHash(StringRef Str) {
+uint16_t llvm::get_ಸೂಚಕ_Auth_Stable_Sip_Hash(StringRef Str) {
   uint64_t RawHash = getStableSipHash(Str);
 
   // Produce a non-zero 16-bit discriminator.
@@ -54,8 +54,8 @@ uint16_t llvm::getPointerAuthStableSipHash(StringRef Str) {
   LLVM_DEBUG(
       dbgs() << "ptrauth stable hash discriminator: " << utostr(Discriminator)
              << " (0x"
-             << utohexstr(Discriminator, /*Lowercase=*/false, /*Width=*/4)
+             << utohexstr(Discriminator, /*Lowercase=*/ಸುಳ್ಳು, /*Width=*/4)
              << ")"
              << " of: " << Str << "\n");
-  return Discriminator;
+  ಹಿಂತಿರುಗಿ Discriminator;
 }

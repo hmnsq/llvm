@@ -12,38 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RandomNumberGenerator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/RandomNumberGenerator.h"
 
-#include "DebugOptions.h"
+#ಅನ್ತರ್ಭಾವ "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/raw_ostream.h"
-#ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
-#else
-#include "Unix/Unix.h"
-#endif
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CommandLine.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Error.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ManagedStatic.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Windows/WindowsSupport.h"
+#ಇಲ್ಲದಿದ್ದರೆ
+#ಅನ್ತರ್ಭಾವ "Unix/Unix.h"
+#ಆದರೆ_ಅಂತ್ಯ
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-#define DEBUG_TYPE "rng"
-namespace {
-struct CreateSeed {
-  static void *call() {
-    return new cl::opt<uint64_t>(
-        "rng-seed", cl::value_desc("seed"), cl::Hidden,
+#ವ್ಯಾಖ್ಯಾನಿಸು DEBUG_TYPE "rng"
+ನಾಮಾಕಾಶ {
+ರಚನೆ Create_ಬೀಜ {
+  ಸ್ಥಿರ ಶೂನ್ಯ *call() {
+    ಹಿಂತಿರುಗಿ ಹೊಸ cl::opt<uint64_t>(
+        "rng-seed", cl::ಮೌಲ್ಯ_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
-void llvm::initRandomSeedOptions() { *Seed; }
+ಸ್ಥಿರ ManagedStatic<cl::opt<uint64_t>, Create_ಬೀಜ> ಬೀಜ;
+ಶೂನ್ಯ llvm::init_Random_ಬೀಜ_Options() { *ಬೀಜ; }
 
-RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
-  LLVM_DEBUG(if (*Seed == 0) dbgs()
+Random_ಸಂಖ್ಯೆ_Generator::Random_ಸಂಖ್ಯೆ_Generator(StringRef Salt) {
+  LLVM_DEBUG(ಆದರೆ (*ಬೀಜ == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
   // Combine seed and salts using std::seed_seq.
@@ -51,46 +51,46 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
   // Note: std::seed_seq can only store 32-bit values, even though we
   // are using a 64-bit RNG. This isn't a problem since the Mersenne
   // twister constructor copies these correctly into its initial state.
-  std::vector<uint32_t> Data;
-  Data.resize(2 + Salt.size());
-  Data[0] = *Seed;
-  Data[1] = *Seed >> 32;
+  std::ಸದಿಶ<uint32_t> ದತ್ತಾಂಶ_2;
+  ದತ್ತಾಂಶ_2.resize(2 + Salt.ಗಾತ್ರ_3());
+  ದತ್ತಾಂಶ_2[0] = *ಬೀಜ;
+  ದತ್ತಾಂಶ_2[1] = *ಬೀಜ >> 32;
 
-  llvm::copy(Salt, Data.begin() + 2);
+  llvm::copy(Salt, ದತ್ತಾಂಶ_2.begin() + 2);
 
-  std::seed_seq SeedSeq(Data.begin(), Data.end());
-  Generator.seed(SeedSeq);
+  std::ಬೀಜ_seq ಬೀಜ_Seq(ದತ್ತಾಂಶ_2.begin(), ದತ್ತಾಂಶ_2.ಕೊನೆ());
+  Generator.ಬೀಜ_2(ಬೀಜ_Seq);
 }
 
-RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
-  return Generator();
+Random_ಸಂಖ್ಯೆ_Generator::ಫಲಿತಾಂಶ_type Random_ಸಂಖ್ಯೆ_Generator::ಕ್ರಿಯಾಕಾರಕ()() {
+  ಹಿಂತಿರುಗಿ Generator();
 }
 
 // Get random vector of specified size
-std::error_code llvm::getRandomBytes(void *Buffer, size_t Size) {
-#ifdef _WIN32
+std::error_ಸಂಕೇತ llvm::get_Random_ಬೈಟುಗಳು(ಶೂನ್ಯ *ಬಫರ್, size_t ಗಾತ್ರ_2) {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
   HCRYPTPROV hProvider;
-  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
+  ಆದರೆ (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_ತುಂಬಿದ,
                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     ScopedCryptContext ScopedHandle(hProvider);
-    if (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
-      return std::error_code();
+    ಆದರೆ (CryptGenRandom(hProvider, ಗಾತ್ರ_2, static_cast<BYTE *>(ಬಫರ್)))
+      ಹಿಂತಿರುಗಿ std::error_ಸಂಕೇತ();
   }
-  return std::error_code(GetLastError(), std::system_category());
-#else
-  int Fd = open("/dev/urandom", O_RDONLY);
-  if (Fd != -1) {
-    std::error_code Ret;
-    ssize_t BytesRead = read(Fd, Buffer, Size);
-    if (BytesRead == -1)
-      Ret = errnoAsErrorCode();
-    else if (BytesRead != static_cast<ssize_t>(Size))
-      Ret = std::error_code(EIO, std::system_category());
-    if (close(Fd) == -1)
-      Ret = errnoAsErrorCode();
+  ಹಿಂತಿರುಗಿ std::error_ಸಂಕೇತ(Get_ಕೊನೆಯ_Error(), std::system_category());
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಪೂರ್ಣಾಂಕ Fd = open("/dev/urandom", O_RDONLY);
+  ಆದರೆ (Fd != -1) {
+    std::error_ಸಂಕೇತ Ret;
+    ssize_t ಬೈಟುಗಳು_Read = ಪಠ(Fd, ಬಫರ್, ಗಾತ್ರ_2);
+    ಆದರೆ (ಬೈಟುಗಳು_Read == -1)
+      Ret = errno_As_Error_ಸಂಕೇತ();
+    ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಬೈಟುಗಳು_Read != static_cast<ssize_t>(ಗಾತ್ರ_2))
+      Ret = std::error_ಸಂಕೇತ(EIO, std::system_category());
+    ಆದರೆ (close(Fd) == -1)
+      Ret = errno_As_Error_ಸಂಕೇತ();
 
-    return Ret;
+    ಹಿಂತಿರುಗಿ Ret;
   }
-  return errnoAsErrorCode();
-#endif
+  ಹಿಂತಿರುಗಿ errno_As_Error_ಸಂಕೇತ();
+#ಆದರೆ_ಅಂತ್ಯ
 }

@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/RewriteRope.h"
-#include "llvm/Support/Casting.h"
-#include <algorithm>
-#include <cassert>
-#include <cstring>
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/RewriteRope.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Casting.h"
+#ಅನ್ತರ್ಭಾವ <algorithm>
+#ಅನ್ತರ್ಭಾವ <cassert>
+#ಅನ್ತರ್ಭಾವ <cstring>
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
 /// RewriteRope is a "strong" string class, designed to make insertions and
 /// deletions in the middle of the string nearly constant time (really, they are
@@ -61,7 +61,7 @@ using namespace llvm;
 ///     RopePieceBTreeInterior - An interior node in the B+ Tree, which manages
 ///          up to '2*WidthFactor' other nodes in the tree.
 
-namespace {
+ನಾಮಾಕಾಶ {
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeNode Class
@@ -73,31 +73,31 @@ namespace {
 /// important, this node knows the full extend of the node, including any
 /// children that it has.  This allows efficient skipping over entire subtrees
 /// when looking for an offset in the BTree.
-class RopePieceBTreeNode {
-protected:
+ವರ್ಗ Rope_Piece_BTree_ಗಂಟು {
+ಸಂರಕ್ಷಿತ:
   /// WidthFactor - This controls the number of K/V slots held in the BTree:
   /// how wide it is.  Each level of the BTree is guaranteed to have at least
   /// 'WidthFactor' elements in it (either ropepieces or children), (except
   /// the root, which may have less) and may have at most 2*WidthFactor
   /// elements.
-  enum { WidthFactor = 8 };
+  ಎಣಿಕೆ { ಅಗಲ_ಗುಣಕ = 8 };
 
   /// Size - This is the number of bytes of file this node (including any
   /// potential children) covers.
-  unsigned Size = 0;
+  ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_2 = 0;
 
   /// IsLeaf - True if this is an instance of RopePieceBTreeLeaf, false if it
   /// is an instance of RopePieceBTreeInterior.
-  bool IsLeaf;
+  ತಾರ್ಕಿಕ Is_ಎಲೆ;
 
-  RopePieceBTreeNode(bool isLeaf) : IsLeaf(isLeaf) {}
-  ~RopePieceBTreeNode() = default;
+  Rope_Piece_BTree_ಗಂಟು(ತಾರ್ಕಿಕ is_ಎಲೆ) : Is_ಎಲೆ(is_ಎಲೆ) {}
+  ~Rope_Piece_BTree_ಗಂಟು() = ಪೂರ್ವನಿಯೋಜಿತ;
 
-public:
-  bool isLeaf() const { return IsLeaf; }
-  unsigned size() const { return Size; }
+ಸಾರ್ವಜನಿಕ:
+  ತಾರ್ಕಿಕ is_ಎಲೆ() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ Is_ಎಲೆ; }
+  ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_3() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಗಾತ್ರ_2; }
 
-  void Destroy();
+  ಶೂನ್ಯ Destroy();
 
   /// split - Split the range containing the specified offset so that we are
   /// guaranteed that there is a place to do an insertion at the specified
@@ -105,7 +105,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_ಗಂಟು *ವಿಭಜಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -113,11 +113,11 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_ಗಂಟು *ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಸ್ಥಿರಾಂಕ RopePiece &R);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  ಶೂನ್ಯ erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು);
 };
 
 //===----------------------------------------------------------------------===//
@@ -131,72 +131,72 @@ public:
 /// over the leaves efficient, they maintain a singly linked list through the
 /// NextLeaf field.  This allows the B+Tree forward iterator to be constant
 /// time for all increments.
-class RopePieceBTreeLeaf : public RopePieceBTreeNode {
+ವರ್ಗ Rope_Piece_BTree_ಎಲೆ : ಸಾರ್ವಜನಿಕ Rope_Piece_BTree_ಗಂಟು {
   /// NumPieces - This holds the number of rope pieces currently active in the
   /// Pieces array.
-  unsigned char NumPieces = 0;
+  ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ಅಂಕೆ_Pieces = 0;
 
   /// Pieces - This tracks the file chunks currently in this leaf.
-  RopePiece Pieces[2 * WidthFactor];
+  RopePiece Pieces[2 * ಅಗಲ_ಗುಣಕ];
 
   /// NextLeaf - This is a pointer to the next leaf in the tree, allowing
   /// efficient in-order forward iteration of the tree without traversal.
-  RopePieceBTreeLeaf **PrevLeaf = nullptr;
-  RopePieceBTreeLeaf *NextLeaf = nullptr;
+  Rope_Piece_BTree_ಎಲೆ **Prev_ಎಲೆ = ಶೂನ್ಯಸೂಚಕ;
+  Rope_Piece_BTree_ಎಲೆ *ಮುಂದಿನ_ಎಲೆ = ಶೂನ್ಯಸೂಚಕ;
 
-public:
-  RopePieceBTreeLeaf() : RopePieceBTreeNode(true) {}
+ಸಾರ್ವಜನಿಕ:
+  Rope_Piece_BTree_ಎಲೆ() : Rope_Piece_BTree_ಗಂಟು(ನಿಜ) {}
 
-  ~RopePieceBTreeLeaf() {
-    if (PrevLeaf || NextLeaf)
-      removeFromLeafInOrder();
+  ~Rope_Piece_BTree_ಎಲೆ() {
+    ಆದರೆ (Prev_ಎಲೆ || ಮುಂದಿನ_ಎಲೆ)
+      remove_From_ಎಲೆ_ಒಳ_ಕ್ರಮ();
     clear();
   }
 
-  bool isFull() const { return NumPieces == 2 * WidthFactor; }
+  ತಾರ್ಕಿಕ is_ತುಂಬಿದ() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಅಂಕೆ_Pieces == 2 * ಅಗಲ_ಗುಣಕ; }
 
   /// clear - Remove all rope pieces from this leaf.
-  void clear() {
-    while (NumPieces)
-      Pieces[--NumPieces] = RopePiece();
-    Size = 0;
+  ಶೂನ್ಯ clear() {
+    ಆಗ (ಅಂಕೆ_Pieces)
+      Pieces[--ಅಂಕೆ_Pieces] = RopePiece();
+    ಗಾತ್ರ_2 = 0;
   }
 
-  unsigned getNumPieces() const { return NumPieces; }
+  ಚಿಹ್ನೆರಹಿತ get_ಅಂಕೆ_Pieces() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಅಂಕೆ_Pieces; }
 
-  const RopePiece &getPiece(unsigned i) const {
-    assert(i < getNumPieces() && "Invalid piece ID");
-    return Pieces[i];
+  ಸ್ಥಿರಾಂಕ RopePiece &getPiece(ಚಿಹ್ನೆರಹಿತ i) ಸ್ಥಿರಾಂಕ {
+    ಪ್ರತಿಜ್ಞಾ(i < get_ಅಂಕೆ_Pieces() && "Invalid piece ID");
+    ಹಿಂತಿರುಗಿ Pieces[i];
   }
 
-  const RopePieceBTreeLeaf *getNextLeafInOrder() const { return NextLeaf; }
+  ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಎಲೆ *get_ಮುಂದಿನ_ಎಲೆ_ಒಳ_ಕ್ರಮ() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಮುಂದಿನ_ಎಲೆ; }
 
-  void insertAfterLeafInOrder(RopePieceBTreeLeaf *Node) {
-    assert(!PrevLeaf && !NextLeaf && "Already in ordering");
+  ಶೂನ್ಯ ಸೇರಿಸು_After_ಎಲೆ_ಒಳ_ಕ್ರಮ(Rope_Piece_BTree_ಎಲೆ *ಗಂಟು) {
+    ಪ್ರತಿಜ್ಞಾ(!Prev_ಎಲೆ && !ಮುಂದಿನ_ಎಲೆ && "Already in ordering");
 
-    NextLeaf = Node->NextLeaf;
-    if (NextLeaf)
-      NextLeaf->PrevLeaf = &NextLeaf;
-    PrevLeaf = &Node->NextLeaf;
-    Node->NextLeaf = this;
+    ಮುಂದಿನ_ಎಲೆ = ಗಂಟು->ಮುಂದಿನ_ಎಲೆ;
+    ಆದರೆ (ಮುಂದಿನ_ಎಲೆ)
+      ಮುಂದಿನ_ಎಲೆ->Prev_ಎಲೆ = &ಮುಂದಿನ_ಎಲೆ;
+    Prev_ಎಲೆ = &ಗಂಟು->ಮುಂದಿನ_ಎಲೆ;
+    ಗಂಟು->ಮುಂದಿನ_ಎಲೆ = ಇದು;
   }
 
-  void removeFromLeafInOrder() {
-    if (PrevLeaf) {
-      *PrevLeaf = NextLeaf;
-      if (NextLeaf)
-        NextLeaf->PrevLeaf = PrevLeaf;
-    } else if (NextLeaf) {
-      NextLeaf->PrevLeaf = nullptr;
+  ಶೂನ್ಯ remove_From_ಎಲೆ_ಒಳ_ಕ್ರಮ() {
+    ಆದರೆ (Prev_ಎಲೆ) {
+      *Prev_ಎಲೆ = ಮುಂದಿನ_ಎಲೆ;
+      ಆದರೆ (ಮುಂದಿನ_ಎಲೆ)
+        ಮುಂದಿನ_ಎಲೆ->Prev_ಎಲೆ = Prev_ಎಲೆ;
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಮುಂದಿನ_ಎಲೆ) {
+      ಮುಂದಿನ_ಎಲೆ->Prev_ಎಲೆ = ಶೂನ್ಯಸೂಚಕ;
     }
   }
 
   /// FullRecomputeSizeLocally - This method recomputes the 'Size' field by
   /// summing the size of all RopePieces.
-  void FullRecomputeSizeLocally() {
-    Size = 0;
-    for (unsigned i = 0, e = getNumPieces(); i != e; ++i)
-      Size += getPiece(i).size();
+  ಶೂನ್ಯ ತುಂಬಿದ_Recompute_ಗಾತ್ರ_Locally() {
+    ಗಾತ್ರ_2 = 0;
+    ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ i = 0, e = get_ಅಂಕೆ_Pieces(); i != e; ++i)
+      ಗಾತ್ರ_2 += getPiece(i).ಗಾತ್ರ_3();
   }
 
   /// split - Split the range containing the specified offset so that we are
@@ -205,7 +205,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_ಗಂಟು *ವಿಭಜಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -213,13 +213,13 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_ಗಂಟು *ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಸ್ಥಿರಾಂಕ RopePiece &R);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  ಶೂನ್ಯ erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು);
 
-  static bool classof(const RopePieceBTreeNode *N) { return N->isLeaf(); }
+  ಸ್ಥಿರ ತಾರ್ಕಿಕ classof(ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಗಂಟು *N) { ಹಿಂತಿರುಗಿ N->is_ಎಲೆ(); }
 };
 
 } // namespace
@@ -230,39 +230,39 @@ public:
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeLeaf::split(unsigned Offset) {
+Rope_Piece_BTree_ಗಂಟು *Rope_Piece_BTree_ಎಲೆ::ವಿಭಜಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ) {
   // Find the insertion point.  We are guaranteed that there is a split at the
   // specified offset so find it.
-  if (Offset == 0 || Offset == size()) {
+  ಆದರೆ (ಸ್ಥಾನಾಂತರ == 0 || ಸ್ಥಾನಾಂತರ == ಗಾತ್ರ_3()) {
     // Fastpath for a common case.  There is already a splitpoint at the end.
-    return nullptr;
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
   }
 
   // Find the piece that this offset lands in.
-  unsigned PieceOffs = 0;
-  unsigned i = 0;
-  while (Offset >= PieceOffs + Pieces[i].size()) {
-    PieceOffs += Pieces[i].size();
+  ಚಿಹ್ನೆರಹಿತ PieceOffs = 0;
+  ಚಿಹ್ನೆರಹಿತ i = 0;
+  ಆಗ (ಸ್ಥಾನಾಂತರ >= PieceOffs + Pieces[i].ಗಾತ್ರ_3()) {
+    PieceOffs += Pieces[i].ಗಾತ್ರ_3();
     ++i;
   }
 
   // If there is already a split point at the specified offset, just return
   // success.
-  if (PieceOffs == Offset)
-    return nullptr;
+  ಆದರೆ (PieceOffs == ಸ್ಥಾನಾಂತರ)
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 
   // Otherwise, we need to split piece 'i' at Offset-PieceOffs.  Convert Offset
   // to being Piece relative.
-  unsigned IntraPieceOffset = Offset - PieceOffs;
+  ಚಿಹ್ನೆರಹಿತ Intra_Piece_ಸ್ಥಾನಾಂತರ = ಸ್ಥಾನಾಂತರ - PieceOffs;
 
   // We do this by shrinking the RopePiece and then doing an insert of the tail.
-  RopePiece Tail(Pieces[i].StrData, Pieces[i].StartOffs + IntraPieceOffset,
-                 Pieces[i].EndOffs);
-  Size -= Pieces[i].size();
-  Pieces[i].EndOffs = Pieces[i].StartOffs + IntraPieceOffset;
-  Size += Pieces[i].size();
+  RopePiece ಬಾಲ(Pieces[i].Str_ದತ್ತಾಂಶ, Pieces[i].ಆರಂಭ_Offs + Intra_Piece_ಸ್ಥಾನಾಂತರ,
+                 Pieces[i].ಕೊನೆ_Offs);
+  ಗಾತ್ರ_2 -= Pieces[i].ಗಾತ್ರ_3();
+  Pieces[i].ಕೊನೆ_Offs = Pieces[i].ಆರಂಭ_Offs + Intra_Piece_ಸ್ಥಾನಾಂತರ;
+  ಗಾತ್ರ_2 += Pieces[i].ಗಾತ್ರ_3();
 
-  return insert(Offset, Tail);
+  ಹಿಂತಿರುಗಿ ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ, ಬಾಲ);
 }
 
 /// insert - Insert the specified RopePiece into this tree node at the
@@ -270,31 +270,31 @@ RopePieceBTreeNode *RopePieceBTreeLeaf::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeLeaf::insert(unsigned Offset,
-                                               const RopePiece &R) {
+Rope_Piece_BTree_ಗಂಟು *Rope_Piece_BTree_ಎಲೆ::ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ,
+                                               ಸ್ಥಿರಾಂಕ RopePiece &R) {
   // If this node is not full, insert the piece.
-  if (!isFull()) {
+  ಆದರೆ (!is_ತುಂಬಿದ()) {
     // Find the insertion point.  We are guaranteed that there is a split at the
     // specified offset so find it.
-    unsigned i = 0, e = getNumPieces();
-    if (Offset == size()) {
+    ಚಿಹ್ನೆರಹಿತ i = 0, e = get_ಅಂಕೆ_Pieces();
+    ಆದರೆ (ಸ್ಥಾನಾಂತರ == ಗಾತ್ರ_3()) {
       // Fastpath for a common case.
       i = e;
-    } else {
-      unsigned SlotOffs = 0;
-      for (; Offset > SlotOffs; ++i)
-        SlotOffs += getPiece(i).size();
-      assert(SlotOffs == Offset && "Split didn't occur before insertion!");
+    } ಇಲ್ಲದಿದ್ದರೆ {
+      ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನ_Offs = 0;
+      ಗಾಗಿ (; ಸ್ಥಾನಾಂತರ > ಸ್ಥಾನ_Offs; ++i)
+        ಸ್ಥಾನ_Offs += getPiece(i).ಗಾತ್ರ_3();
+      ಪ್ರತಿಜ್ಞಾ(ಸ್ಥಾನ_Offs == ಸ್ಥಾನಾಂತರ && "Split didn't occur before insertion!");
     }
 
     // For an insertion into a non-full leaf node, just insert the value in
     // its sorted position.  This requires moving later values over.
-    for (; i != e; --e)
+    ಗಾಗಿ (; i != e; --e)
       Pieces[e] = Pieces[e - 1];
     Pieces[i] = R;
-    ++NumPieces;
-    Size += R.size();
-    return nullptr;
+    ++ಅಂಕೆ_Pieces;
+    ಗಾತ್ರ_2 += R.ಗಾತ್ರ_3();
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
   }
 
   // Otherwise, if this is leaf is full, split it in two halves.  Since this
@@ -303,136 +303,136 @@ RopePieceBTreeNode *RopePieceBTreeLeaf::insert(unsigned Offset,
   // move the last 'WidthFactor' values into the RHS child.
 
   // Create the new node.
-  RopePieceBTreeLeaf *NewNode = new RopePieceBTreeLeaf();
+  Rope_Piece_BTree_ಎಲೆ *New_ಗಂಟು = ಹೊಸ Rope_Piece_BTree_ಎಲೆ();
 
   // Move over the last 'WidthFactor' values from here to NewNode.
-  std::copy(&Pieces[WidthFactor], &Pieces[2 * WidthFactor],
-            &NewNode->Pieces[0]);
+  std::copy(&Pieces[ಅಗಲ_ಗುಣಕ], &Pieces[2 * ಅಗಲ_ಗುಣಕ],
+            &New_ಗಂಟು->Pieces[0]);
   // Replace old pieces with null RopePieces to drop refcounts.
-  std::fill(&Pieces[WidthFactor], &Pieces[2 * WidthFactor], RopePiece());
+  std::fill(&Pieces[ಅಗಲ_ಗುಣಕ], &Pieces[2 * ಅಗಲ_ಗುಣಕ], RopePiece());
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumPieces = NumPieces = WidthFactor;
+  New_ಗಂಟು->ಅಂಕೆ_Pieces = ಅಂಕೆ_Pieces = ಅಗಲ_ಗುಣಕ;
 
   // Recompute the two nodes' size.
-  NewNode->FullRecomputeSizeLocally();
-  FullRecomputeSizeLocally();
+  New_ಗಂಟು->ತುಂಬಿದ_Recompute_ಗಾತ್ರ_Locally();
+  ತುಂಬಿದ_Recompute_ಗಾತ್ರ_Locally();
 
   // Update the list of leaves.
-  NewNode->insertAfterLeafInOrder(this);
+  New_ಗಂಟು->ಸೇರಿಸು_After_ಎಲೆ_ಒಳ_ಕ್ರಮ(ಇದು);
 
   // These insertions can't fail.
-  if (this->size() >= Offset)
-    this->insert(Offset, R);
-  else
-    NewNode->insert(Offset - this->size(), R);
-  return NewNode;
+  ಆದರೆ (ಇದು->ಗಾತ್ರ_3() >= ಸ್ಥಾನಾಂತರ)
+    ಇದು->ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ, R);
+  ಇಲ್ಲದಿದ್ದರೆ
+    New_ಗಂಟು->ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ - ಇದು->ಗಾತ್ರ_3(), R);
+  ಹಿಂತಿರುಗಿ New_ಗಂಟು;
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeLeaf::erase(unsigned Offset, unsigned NumBytes) {
+ಶೂನ್ಯ Rope_Piece_BTree_ಎಲೆ::erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು) {
   // Since we are guaranteed that there is a split at Offset, we start by
   // finding the Piece that starts there.
-  unsigned PieceOffs = 0;
-  unsigned i = 0;
-  for (; Offset > PieceOffs; ++i)
-    PieceOffs += getPiece(i).size();
-  assert(PieceOffs == Offset && "Split didn't occur before erase!");
+  ಚಿಹ್ನೆರಹಿತ PieceOffs = 0;
+  ಚಿಹ್ನೆರಹಿತ i = 0;
+  ಗಾಗಿ (; ಸ್ಥಾನಾಂತರ > PieceOffs; ++i)
+    PieceOffs += getPiece(i).ಗಾತ್ರ_3();
+  ಪ್ರತಿಜ್ಞಾ(PieceOffs == ಸ್ಥಾನಾಂತರ && "Split didn't occur before erase!");
 
-  unsigned StartPiece = i;
+  ಚಿಹ್ನೆರಹಿತ ಆರಂಭ_Piece = i;
 
   // Figure out how many pieces completely cover 'NumBytes'.  We want to remove
   // all of them.
-  for (; Offset + NumBytes > PieceOffs + getPiece(i).size(); ++i)
-    PieceOffs += getPiece(i).size();
+  ಗಾಗಿ (; ಸ್ಥಾನಾಂತರ + ಅಂಕೆ_ಬೈಟುಗಳು > PieceOffs + getPiece(i).ಗಾತ್ರ_3(); ++i)
+    PieceOffs += getPiece(i).ಗಾತ್ರ_3();
 
   // If we exactly include the last one, include it in the region to delete.
-  if (Offset + NumBytes == PieceOffs + getPiece(i).size()) {
-    PieceOffs += getPiece(i).size();
+  ಆದರೆ (ಸ್ಥಾನಾಂತರ + ಅಂಕೆ_ಬೈಟುಗಳು == PieceOffs + getPiece(i).ಗಾತ್ರ_3()) {
+    PieceOffs += getPiece(i).ಗಾತ್ರ_3();
     ++i;
   }
 
   // If we completely cover some RopePieces, erase them now.
-  if (i != StartPiece) {
-    unsigned NumDeleted = i - StartPiece;
-    for (; i != getNumPieces(); ++i)
-      Pieces[i - NumDeleted] = Pieces[i];
+  ಆದರೆ (i != ಆರಂಭ_Piece) {
+    ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_Deleted = i - ಆರಂಭ_Piece;
+    ಗಾಗಿ (; i != get_ಅಂಕೆ_Pieces(); ++i)
+      Pieces[i - ಅಂಕೆ_Deleted] = Pieces[i];
 
     // Drop references to dead rope pieces.
-    std::fill(&Pieces[getNumPieces() - NumDeleted], &Pieces[getNumPieces()],
+    std::fill(&Pieces[get_ಅಂಕೆ_Pieces() - ಅಂಕೆ_Deleted], &Pieces[get_ಅಂಕೆ_Pieces()],
               RopePiece());
-    NumPieces -= NumDeleted;
+    ಅಂಕೆ_Pieces -= ಅಂಕೆ_Deleted;
 
-    unsigned CoverBytes = PieceOffs - Offset;
-    NumBytes -= CoverBytes;
-    Size -= CoverBytes;
+    ಚಿಹ್ನೆರಹಿತ Cover_ಬೈಟುಗಳು = PieceOffs - ಸ್ಥಾನಾಂತರ;
+    ಅಂಕೆ_ಬೈಟುಗಳು -= Cover_ಬೈಟುಗಳು;
+    ಗಾತ್ರ_2 -= Cover_ಬೈಟುಗಳು;
   }
 
   // If we completely removed some stuff, we could be done.
-  if (NumBytes == 0)
-    return;
+  ಆದರೆ (ಅಂಕೆ_ಬೈಟುಗಳು == 0)
+    ಹಿಂತಿರುಗಿ;
 
   // Okay, now might be erasing part of some Piece.  If this is the case, then
   // move the start point of the piece.
-  assert(getPiece(StartPiece).size() > NumBytes);
-  Pieces[StartPiece].StartOffs += NumBytes;
+  ಪ್ರತಿಜ್ಞಾ(getPiece(ಆರಂಭ_Piece).ಗಾತ್ರ_3() > ಅಂಕೆ_ಬೈಟುಗಳು);
+  Pieces[ಆರಂಭ_Piece].ಆರಂಭ_Offs += ಅಂಕೆ_ಬೈಟುಗಳು;
 
   // The size of this node just shrunk by NumBytes.
-  Size -= NumBytes;
+  ಗಾತ್ರ_2 -= ಅಂಕೆ_ಬೈಟುಗಳು;
 }
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeInterior Class
 //===----------------------------------------------------------------------===//
 
-namespace {
+ನಾಮಾಕಾಶ {
 
 /// RopePieceBTreeInterior - This represents an interior node in the B+Tree,
 /// which holds up to 2*WidthFactor pointers to child nodes.
-class RopePieceBTreeInterior : public RopePieceBTreeNode {
+ವರ್ಗ RopePieceBTreeInterior : ಸಾರ್ವಜನಿಕ Rope_Piece_BTree_ಗಂಟು {
   /// NumChildren - This holds the number of children currently active in the
   /// Children array.
-  unsigned char NumChildren = 0;
+  ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ಅಂಕೆ_Children = 0;
 
-  RopePieceBTreeNode *Children[2 * WidthFactor];
+  Rope_Piece_BTree_ಗಂಟು *Children[2 * ಅಗಲ_ಗುಣಕ];
 
-public:
-  RopePieceBTreeInterior() : RopePieceBTreeNode(false) {}
+ಸಾರ್ವಜನಿಕ:
+  RopePieceBTreeInterior() : Rope_Piece_BTree_ಗಂಟು(ಸುಳ್ಳು) {}
 
-  RopePieceBTreeInterior(RopePieceBTreeNode *LHS, RopePieceBTreeNode *RHS)
-      : RopePieceBTreeNode(false) {
+  RopePieceBTreeInterior(Rope_Piece_BTree_ಗಂಟು *LHS, Rope_Piece_BTree_ಗಂಟು *RHS)
+      : Rope_Piece_BTree_ಗಂಟು(ಸುಳ್ಳು) {
     Children[0] = LHS;
     Children[1] = RHS;
-    NumChildren = 2;
-    Size = LHS->size() + RHS->size();
+    ಅಂಕೆ_Children = 2;
+    ಗಾತ್ರ_2 = LHS->ಗಾತ್ರ_3() + RHS->ಗಾತ್ರ_3();
   }
 
   ~RopePieceBTreeInterior() {
-    for (unsigned i = 0, e = getNumChildren(); i != e; ++i)
+    ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ i = 0, e = get_ಅಂಕೆ_Children(); i != e; ++i)
       Children[i]->Destroy();
   }
 
-  bool isFull() const { return NumChildren == 2 * WidthFactor; }
+  ತಾರ್ಕಿಕ is_ತುಂಬಿದ() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಅಂಕೆ_Children == 2 * ಅಗಲ_ಗುಣಕ; }
 
-  unsigned getNumChildren() const { return NumChildren; }
+  ಚಿಹ್ನೆರಹಿತ get_ಅಂಕೆ_Children() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ ಅಂಕೆ_Children; }
 
-  const RopePieceBTreeNode *getChild(unsigned i) const {
-    assert(i < NumChildren && "invalid child #");
-    return Children[i];
+  ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಗಂಟು *get_ಮಗು(ಚಿಹ್ನೆರಹಿತ i) ಸ್ಥಿರಾಂಕ {
+    ಪ್ರತಿಜ್ಞಾ(i < ಅಂಕೆ_Children && "invalid child #");
+    ಹಿಂತಿರುಗಿ Children[i];
   }
 
-  RopePieceBTreeNode *getChild(unsigned i) {
-    assert(i < NumChildren && "invalid child #");
-    return Children[i];
+  Rope_Piece_BTree_ಗಂಟು *get_ಮಗು(ಚಿಹ್ನೆರಹಿತ i) {
+    ಪ್ರತಿಜ್ಞಾ(i < ಅಂಕೆ_Children && "invalid child #");
+    ಹಿಂತಿರುಗಿ Children[i];
   }
 
   /// FullRecomputeSizeLocally - Recompute the Size field of this node by
   /// summing up the sizes of the child nodes.
-  void FullRecomputeSizeLocally() {
-    Size = 0;
-    for (unsigned i = 0, e = getNumChildren(); i != e; ++i)
-      Size += getChild(i)->size();
+  ಶೂನ್ಯ ತುಂಬಿದ_Recompute_ಗಾತ್ರ_Locally() {
+    ಗಾತ್ರ_2 = 0;
+    ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ i = 0, e = get_ಅಂಕೆ_Children(); i != e; ++i)
+      ಗಾತ್ರ_2 += get_ಮಗು(i)->ಗಾತ್ರ_3();
   }
 
   /// split - Split the range containing the specified offset so that we are
@@ -441,7 +441,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_ಗಂಟು *ವಿಭಜಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -449,17 +449,17 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_ಗಂಟು *ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಸ್ಥಿರಾಂಕ RopePiece &R);
 
   /// HandleChildPiece - A child propagated an insertion result up to us.
   /// Insert the new child, and/or propagate the result further up the tree.
-  RopePieceBTreeNode *HandleChildPiece(unsigned i, RopePieceBTreeNode *RHS);
+  Rope_Piece_BTree_ಗಂಟು *Handle_ಮಗು_Piece(ಚಿಹ್ನೆರಹಿತ i, Rope_Piece_BTree_ಗಂಟು *RHS);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  ಶೂನ್ಯ erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು);
 
-  static bool classof(const RopePieceBTreeNode *N) { return !N->isLeaf(); }
+  ಸ್ಥಿರ ತಾರ್ಕಿಕ classof(ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಗಂಟು *N) { ಹಿಂತಿರುಗಿ !N->is_ಎಲೆ(); }
 };
 
 } // namespace
@@ -470,24 +470,24 @@ public:
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeInterior::split(unsigned Offset) {
+Rope_Piece_BTree_ಗಂಟು *RopePieceBTreeInterior::ವಿಭಜಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ) {
   // Figure out which child to split.
-  if (Offset == 0 || Offset == size())
-    return nullptr; // If we have an exact offset, we're already split.
+  ಆದರೆ (ಸ್ಥಾನಾಂತರ == 0 || ಸ್ಥಾನಾಂತರ == ಗಾತ್ರ_3())
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ; // If we have an exact offset, we're already split.
 
-  unsigned ChildOffset = 0;
-  unsigned i = 0;
-  for (; Offset >= ChildOffset + getChild(i)->size(); ++i)
-    ChildOffset += getChild(i)->size();
+  ಚಿಹ್ನೆರಹಿತ ಮಗು_ಸ್ಥಾನಾಂತರ = 0;
+  ಚಿಹ್ನೆರಹಿತ i = 0;
+  ಗಾಗಿ (; ಸ್ಥಾನಾಂತರ >= ಮಗು_ಸ್ಥಾನಾಂತರ + get_ಮಗು(i)->ಗಾತ್ರ_3(); ++i)
+    ಮಗು_ಸ್ಥಾನಾಂತರ += get_ಮಗು(i)->ಗಾತ್ರ_3();
 
   // If already split there, we're done.
-  if (ChildOffset == Offset)
-    return nullptr;
+  ಆದರೆ (ಮಗು_ಸ್ಥಾನಾಂತರ == ಸ್ಥಾನಾಂತರ)
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 
   // Otherwise, recursively split the child.
-  if (RopePieceBTreeNode *RHS = getChild(i)->split(Offset - ChildOffset))
-    return HandleChildPiece(i, RHS);
-  return nullptr; // Done!
+  ಆದರೆ (Rope_Piece_BTree_ಗಂಟು *RHS = get_ಮಗು(i)->ವಿಭಜಿಸು(ಸ್ಥಾನಾಂತರ - ಮಗು_ಸ್ಥಾನಾಂತರ))
+    ಹಿಂತಿರುಗಿ Handle_ಮಗು_Piece(i, RHS);
+  ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ; // Done!
 }
 
 /// insert - Insert the specified ropepiece into this tree node at the
@@ -496,116 +496,116 @@ RopePieceBTreeNode *RopePieceBTreeInterior::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeInterior::insert(unsigned Offset,
-                                                   const RopePiece &R) {
+Rope_Piece_BTree_ಗಂಟು *RopePieceBTreeInterior::ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ,
+                                                   ಸ್ಥಿರಾಂಕ RopePiece &R) {
   // Find the insertion point.  We are guaranteed that there is a split at the
   // specified offset so find it.
-  unsigned i = 0, e = getNumChildren();
+  ಚಿಹ್ನೆರಹಿತ i = 0, e = get_ಅಂಕೆ_Children();
 
-  unsigned ChildOffs = 0;
-  if (Offset == size()) {
+  ಚಿಹ್ನೆರಹಿತ ಮಗು_Offs = 0;
+  ಆದರೆ (ಸ್ಥಾನಾಂತರ == ಗಾತ್ರ_3()) {
     // Fastpath for a common case.  Insert at end of last child.
     i = e - 1;
-    ChildOffs = size() - getChild(i)->size();
-  } else {
-    for (; Offset > ChildOffs + getChild(i)->size(); ++i)
-      ChildOffs += getChild(i)->size();
+    ಮಗು_Offs = ಗಾತ್ರ_3() - get_ಮಗು(i)->ಗಾತ್ರ_3();
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಗಾಗಿ (; ಸ್ಥಾನಾಂತರ > ಮಗು_Offs + get_ಮಗು(i)->ಗಾತ್ರ_3(); ++i)
+      ಮಗು_Offs += get_ಮಗು(i)->ಗಾತ್ರ_3();
   }
 
-  Size += R.size();
+  ಗಾತ್ರ_2 += R.ಗಾತ್ರ_3();
 
   // Insert at the end of this child.
-  if (RopePieceBTreeNode *RHS = getChild(i)->insert(Offset - ChildOffs, R))
-    return HandleChildPiece(i, RHS);
+  ಆದರೆ (Rope_Piece_BTree_ಗಂಟು *RHS = get_ಮಗು(i)->ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ - ಮಗು_Offs, R))
+    ಹಿಂತಿರುಗಿ Handle_ಮಗು_Piece(i, RHS);
 
-  return nullptr;
+  ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
 }
 
 /// HandleChildPiece - A child propagated an insertion result up to us.
 /// Insert the new child, and/or propagate the result further up the tree.
-RopePieceBTreeNode *
-RopePieceBTreeInterior::HandleChildPiece(unsigned i, RopePieceBTreeNode *RHS) {
+Rope_Piece_BTree_ಗಂಟು *
+RopePieceBTreeInterior::Handle_ಮಗು_Piece(ಚಿಹ್ನೆರಹಿತ i, Rope_Piece_BTree_ಗಂಟು *RHS) {
   // Otherwise the child propagated a subtree up to us as a new child.  See if
   // we have space for it here.
-  if (!isFull()) {
+  ಆದರೆ (!is_ತುಂಬಿದ()) {
     // Insert RHS after child 'i'.
-    if (i + 1 != getNumChildren())
+    ಆದರೆ (i + 1 != get_ಅಂಕೆ_Children())
       memmove(&Children[i + 2], &Children[i + 1],
-              (getNumChildren() - i - 1) * sizeof(Children[0]));
+              (get_ಅಂಕೆ_Children() - i - 1) * ಗಾತ್ರ(Children[0]));
     Children[i + 1] = RHS;
-    ++NumChildren;
-    return nullptr;
+    ++ಅಂಕೆ_Children;
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
   }
 
   // Okay, this node is full.  Split it in half, moving WidthFactor children to
   // a newly allocated interior node.
 
   // Create the new node.
-  RopePieceBTreeInterior *NewNode = new RopePieceBTreeInterior();
+  RopePieceBTreeInterior *New_ಗಂಟು = ಹೊಸ RopePieceBTreeInterior();
 
   // Move over the last 'WidthFactor' values from here to NewNode.
-  memcpy(&NewNode->Children[0], &Children[WidthFactor],
-         WidthFactor * sizeof(Children[0]));
+  ಸ್ಮರಣೆ_ನಕಲು(&New_ಗಂಟು->Children[0], &Children[ಅಗಲ_ಗುಣಕ],
+         ಅಗಲ_ಗುಣಕ * ಗಾತ್ರ(Children[0]));
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumChildren = NumChildren = WidthFactor;
+  New_ಗಂಟು->ಅಂಕೆ_Children = ಅಂಕೆ_Children = ಅಗಲ_ಗುಣಕ;
 
   // Finally, insert the two new children in the side the can (now) hold them.
   // These insertions can't fail.
-  if (i < WidthFactor)
-    this->HandleChildPiece(i, RHS);
-  else
-    NewNode->HandleChildPiece(i - WidthFactor, RHS);
+  ಆದರೆ (i < ಅಗಲ_ಗುಣಕ)
+    ಇದು->Handle_ಮಗು_Piece(i, RHS);
+  ಇಲ್ಲದಿದ್ದರೆ
+    New_ಗಂಟು->Handle_ಮಗು_Piece(i - ಅಗಲ_ಗುಣಕ, RHS);
 
   // Recompute the two nodes' size.
-  NewNode->FullRecomputeSizeLocally();
-  FullRecomputeSizeLocally();
-  return NewNode;
+  New_ಗಂಟು->ತುಂಬಿದ_Recompute_ಗಾತ್ರ_Locally();
+  ತುಂಬಿದ_Recompute_ಗಾತ್ರ_Locally();
+  ಹಿಂತಿರುಗಿ New_ಗಂಟು;
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeInterior::erase(unsigned Offset, unsigned NumBytes) {
+ಶೂನ್ಯ RopePieceBTreeInterior::erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು) {
   // This will shrink this node by NumBytes.
-  Size -= NumBytes;
+  ಗಾತ್ರ_2 -= ಅಂಕೆ_ಬೈಟುಗಳು;
 
   // Find the first child that overlaps with Offset.
-  unsigned i = 0;
-  for (; Offset >= getChild(i)->size(); ++i)
-    Offset -= getChild(i)->size();
+  ಚಿಹ್ನೆರಹಿತ i = 0;
+  ಗಾಗಿ (; ಸ್ಥಾನಾಂತರ >= get_ಮಗು(i)->ಗಾತ್ರ_3(); ++i)
+    ಸ್ಥಾನಾಂತರ -= get_ಮಗು(i)->ಗಾತ್ರ_3();
 
   // Propagate the delete request into overlapping children, or completely
   // delete the children as appropriate.
-  while (NumBytes) {
-    RopePieceBTreeNode *CurChild = getChild(i);
+  ಆಗ (ಅಂಕೆ_ಬೈಟುಗಳು) {
+    Rope_Piece_BTree_ಗಂಟು *Cur_ಮಗು = get_ಮಗು(i);
 
     // If we are deleting something contained entirely in the child, pass on the
     // request.
-    if (Offset + NumBytes < CurChild->size()) {
-      CurChild->erase(Offset, NumBytes);
-      return;
+    ಆದರೆ (ಸ್ಥಾನಾಂತರ + ಅಂಕೆ_ಬೈಟುಗಳು < Cur_ಮಗು->ಗಾತ್ರ_3()) {
+      Cur_ಮಗು->erase(ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_ಬೈಟುಗಳು);
+      ಹಿಂತಿರುಗಿ;
     }
 
     // If this deletion request starts somewhere in the middle of the child, it
     // must be deleting to the end of the child.
-    if (Offset) {
-      unsigned BytesFromChild = CurChild->size() - Offset;
-      CurChild->erase(Offset, BytesFromChild);
-      NumBytes -= BytesFromChild;
+    ಆದರೆ (ಸ್ಥಾನಾಂತರ) {
+      ಚಿಹ್ನೆರಹಿತ ಬೈಟುಗಳು_From_ಮಗು = Cur_ಮಗು->ಗಾತ್ರ_3() - ಸ್ಥಾನಾಂತರ;
+      Cur_ಮಗು->erase(ಸ್ಥಾನಾಂತರ, ಬೈಟುಗಳು_From_ಮಗು);
+      ಅಂಕೆ_ಬೈಟುಗಳು -= ಬೈಟುಗಳು_From_ಮಗು;
       // Start at the beginning of the next child.
-      Offset = 0;
+      ಸ್ಥಾನಾಂತರ = 0;
       ++i;
-      continue;
+      ಮುಂದುವರಿ;
     }
 
     // If the deletion request completely covers the child, delete it and move
     // the rest down.
-    NumBytes -= CurChild->size();
-    CurChild->Destroy();
-    --NumChildren;
-    if (i != getNumChildren())
+    ಅಂಕೆ_ಬೈಟುಗಳು -= Cur_ಮಗು->ಗಾತ್ರ_3();
+    Cur_ಮಗು->Destroy();
+    --ಅಂಕೆ_Children;
+    ಆದರೆ (i != get_ಅಂಕೆ_Children())
       memmove(&Children[i], &Children[i + 1],
-              (getNumChildren() - i) * sizeof(Children[0]));
+              (get_ಅಂಕೆ_Children() - i) * ಗಾತ್ರ(Children[0]));
   }
 }
 
@@ -613,11 +613,11 @@ void RopePieceBTreeInterior::erase(unsigned Offset, unsigned NumBytes) {
 // RopePieceBTreeNode Implementation
 //===----------------------------------------------------------------------===//
 
-void RopePieceBTreeNode::Destroy() {
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    delete Leaf;
-  else
-    delete cast<RopePieceBTreeInterior>(this);
+ಶೂನ್ಯ Rope_Piece_BTree_ಗಂಟು::Destroy() {
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ *ಎಲೆ = dyn_cast<Rope_Piece_BTree_ಎಲೆ>(ಇದು))
+    ಅಳಿಸು ಎಲೆ;
+  ಇಲ್ಲದಿದ್ದರೆ
+    ಅಳಿಸು cast<RopePieceBTreeInterior>(ಇದು);
 }
 
 /// split - Split the range containing the specified offset so that we are
@@ -626,11 +626,11 @@ void RopePieceBTreeNode::Destroy() {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeNode::split(unsigned Offset) {
-  assert(Offset <= size() && "Invalid offset to split!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->split(Offset);
-  return cast<RopePieceBTreeInterior>(this)->split(Offset);
+Rope_Piece_BTree_ಗಂಟು *Rope_Piece_BTree_ಗಂಟು::ವಿಭಜಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ) {
+  ಪ್ರತಿಜ್ಞಾ(ಸ್ಥಾನಾಂತರ <= ಗಾತ್ರ_3() && "Invalid offset to split!");
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ *ಎಲೆ = dyn_cast<Rope_Piece_BTree_ಎಲೆ>(ಇದು))
+    ಹಿಂತಿರುಗಿ ಎಲೆ->ವಿಭಜಿಸು(ಸ್ಥಾನಾಂತರ);
+  ಹಿಂತಿರುಗಿ cast<RopePieceBTreeInterior>(ಇದು)->ವಿಭಜಿಸು(ಸ್ಥಾನಾಂತರ);
 }
 
 /// insert - Insert the specified ropepiece into this tree node at the
@@ -639,71 +639,71 @@ RopePieceBTreeNode *RopePieceBTreeNode::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeNode::insert(unsigned Offset,
-                                               const RopePiece &R) {
-  assert(Offset <= size() && "Invalid offset to insert!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->insert(Offset, R);
-  return cast<RopePieceBTreeInterior>(this)->insert(Offset, R);
+Rope_Piece_BTree_ಗಂಟು *Rope_Piece_BTree_ಗಂಟು::ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ,
+                                               ಸ್ಥಿರಾಂಕ RopePiece &R) {
+  ಪ್ರತಿಜ್ಞಾ(ಸ್ಥಾನಾಂತರ <= ಗಾತ್ರ_3() && "Invalid offset to insert!");
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ *ಎಲೆ = dyn_cast<Rope_Piece_BTree_ಎಲೆ>(ಇದು))
+    ಹಿಂತಿರುಗಿ ಎಲೆ->ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ, R);
+  ಹಿಂತಿರುಗಿ cast<RopePieceBTreeInterior>(ಇದು)->ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ, R);
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeNode::erase(unsigned Offset, unsigned NumBytes) {
-  assert(Offset + NumBytes <= size() && "Invalid offset to erase!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->erase(Offset, NumBytes);
-  return cast<RopePieceBTreeInterior>(this)->erase(Offset, NumBytes);
+ಶೂನ್ಯ Rope_Piece_BTree_ಗಂಟು::erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು) {
+  ಪ್ರತಿಜ್ಞಾ(ಸ್ಥಾನಾಂತರ + ಅಂಕೆ_ಬೈಟುಗಳು <= ಗಾತ್ರ_3() && "Invalid offset to erase!");
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ *ಎಲೆ = dyn_cast<Rope_Piece_BTree_ಎಲೆ>(ಇದು))
+    ಹಿಂತಿರುಗಿ ಎಲೆ->erase(ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_ಬೈಟುಗಳು);
+  ಹಿಂತಿರುಗಿ cast<RopePieceBTreeInterior>(ಇದು)->erase(ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_ಬೈಟುಗಳು);
 }
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeIterator Implementation
 //===----------------------------------------------------------------------===//
 
-static const RopePieceBTreeLeaf *getCN(const void *P) {
-  return static_cast<const RopePieceBTreeLeaf *>(P);
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಎಲೆ *getCN(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *P) {
+  ಹಿಂತಿರುಗಿ static_cast<ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಎಲೆ *>(P);
 }
 
 // begin iterator.
-RopePieceBTreeIterator::RopePieceBTreeIterator(const void *n) {
-  const auto *N = static_cast<const RopePieceBTreeNode *>(n);
+RopePieceBTreeIterator::RopePieceBTreeIterator(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *n) {
+  ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ *N = static_cast<ಸ್ಥಿರಾಂಕ Rope_Piece_BTree_ಗಂಟು *>(n);
 
   // Walk down the left side of the tree until we get to a leaf.
-  while (const auto *IN = dyn_cast<RopePieceBTreeInterior>(N))
-    N = IN->getChild(0);
+  ಆಗ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ *ಒಳ = dyn_cast<RopePieceBTreeInterior>(N))
+    N = ಒಳ->get_ಮಗು(0);
 
   // We must have at least one leaf.
-  CurNode = cast<RopePieceBTreeLeaf>(N);
+  Cur_ಗಂಟು = cast<Rope_Piece_BTree_ಎಲೆ>(N);
 
   // If we found a leaf that happens to be empty, skip over it until we get
   // to something full.
-  while (CurNode && getCN(CurNode)->getNumPieces() == 0)
-    CurNode = getCN(CurNode)->getNextLeafInOrder();
+  ಆಗ (Cur_ಗಂಟು && getCN(Cur_ಗಂಟು)->get_ಅಂಕೆ_Pieces() == 0)
+    Cur_ಗಂಟು = getCN(Cur_ಗಂಟು)->get_ಮುಂದಿನ_ಎಲೆ_ಒಳ_ಕ್ರಮ();
 
-  if (CurNode)
-    CurPiece = &getCN(CurNode)->getPiece(0);
-  else // Empty tree, this is an end() iterator.
-    CurPiece = nullptr;
+  ಆದರೆ (Cur_ಗಂಟು)
+    CurPiece = &getCN(Cur_ಗಂಟು)->getPiece(0);
+  ಇಲ್ಲದಿದ್ದರೆ // Empty tree, this is an end() iterator.
+    CurPiece = ಶೂನ್ಯಸೂಚಕ;
   CurChar = 0;
 }
 
-void RopePieceBTreeIterator::MoveToNextPiece() {
-  if (CurPiece !=
-      &getCN(CurNode)->getPiece(getCN(CurNode)->getNumPieces() - 1)) {
+ಶೂನ್ಯ RopePieceBTreeIterator::Move_ಗಮ್ಯ_ಮುಂದಿನ_Piece() {
+  ಆದರೆ (CurPiece !=
+      &getCN(Cur_ಗಂಟು)->getPiece(getCN(Cur_ಗಂಟು)->get_ಅಂಕೆ_Pieces() - 1)) {
     CurChar = 0;
     ++CurPiece;
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
 
   // Find the next non-empty leaf node.
-  do
-    CurNode = getCN(CurNode)->getNextLeafInOrder();
-  while (CurNode && getCN(CurNode)->getNumPieces() == 0);
+  ಮಾಡು
+    Cur_ಗಂಟು = getCN(Cur_ಗಂಟು)->get_ಮುಂದಿನ_ಎಲೆ_ಒಳ_ಕ್ರಮ();
+  ಆಗ (Cur_ಗಂಟು && getCN(Cur_ಗಂಟು)->get_ಅಂಕೆ_Pieces() == 0);
 
-  if (CurNode)
-    CurPiece = &getCN(CurNode)->getPiece(0);
-  else // Hit end().
-    CurPiece = nullptr;
+  ಆದರೆ (Cur_ಗಂಟು)
+    CurPiece = &getCN(Cur_ಗಂಟು)->getPiece(0);
+  ಇಲ್ಲದಿದ್ದರೆ // Hit end().
+    CurPiece = ಶೂನ್ಯಸೂಚಕ;
   CurChar = 0;
 }
 
@@ -711,47 +711,47 @@ void RopePieceBTreeIterator::MoveToNextPiece() {
 // RopePieceBTree Implementation
 //===----------------------------------------------------------------------===//
 
-static RopePieceBTreeNode *getRoot(void *P) {
-  return static_cast<RopePieceBTreeNode *>(P);
+ಸ್ಥಿರ Rope_Piece_BTree_ಗಂಟು *get_ಬೇರು(ಶೂನ್ಯ *P) {
+  ಹಿಂತಿರುಗಿ static_cast<Rope_Piece_BTree_ಗಂಟು *>(P);
 }
 
-RopePieceBTree::RopePieceBTree() { Root = new RopePieceBTreeLeaf(); }
+RopePieceBTree::RopePieceBTree() { ಬೇರು_2 = ಹೊಸ Rope_Piece_BTree_ಎಲೆ(); }
 
-RopePieceBTree::RopePieceBTree(const RopePieceBTree &RHS) {
-  assert(RHS.empty() && "Can't copy non-empty tree yet");
-  Root = new RopePieceBTreeLeaf();
+RopePieceBTree::RopePieceBTree(ಸ್ಥಿರಾಂಕ RopePieceBTree &RHS) {
+  ಪ್ರತಿಜ್ಞಾ(RHS.ಖಾಲಿಗಳು() && "Can't copy non-empty tree yet");
+  ಬೇರು_2 = ಹೊಸ Rope_Piece_BTree_ಎಲೆ();
 }
 
-RopePieceBTree::~RopePieceBTree() { getRoot(Root)->Destroy(); }
+RopePieceBTree::~RopePieceBTree() { get_ಬೇರು(ಬೇರು_2)->Destroy(); }
 
-unsigned RopePieceBTree::size() const { return getRoot(Root)->size(); }
+ಚಿಹ್ನೆರಹಿತ RopePieceBTree::ಗಾತ್ರ_3() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ get_ಬೇರು(ಬೇರು_2)->ಗಾತ್ರ_3(); }
 
-void RopePieceBTree::clear() {
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(getRoot(Root)))
-    Leaf->clear();
-  else {
-    getRoot(Root)->Destroy();
-    Root = new RopePieceBTreeLeaf();
+ಶೂನ್ಯ RopePieceBTree::clear() {
+  ಆದರೆ (ಸ್ವಯಂಚಾಲಿತ *ಎಲೆ = dyn_cast<Rope_Piece_BTree_ಎಲೆ>(get_ಬೇರು(ಬೇರು_2)))
+    ಎಲೆ->clear();
+  ಇಲ್ಲದಿದ್ದರೆ {
+    get_ಬೇರು(ಬೇರು_2)->Destroy();
+    ಬೇರು_2 = ಹೊಸ Rope_Piece_BTree_ಎಲೆ();
   }
 }
 
-void RopePieceBTree::insert(unsigned Offset, const RopePiece &R) {
+ಶೂನ್ಯ RopePieceBTree::ಸೇರಿಸು(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಸ್ಥಿರಾಂಕ RopePiece &R) {
   // #1. Split at Offset.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->split(Offset))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  ಆದರೆ (Rope_Piece_BTree_ಗಂಟು *RHS = get_ಬೇರು(ಬೇರು_2)->ವಿಭಜಿಸು(ಸ್ಥಾನಾಂತರ))
+    ಬೇರು_2 = ಹೊಸ RopePieceBTreeInterior(get_ಬೇರು(ಬೇರು_2), RHS);
 
   // #2. Do the insertion.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->insert(Offset, R))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  ಆದರೆ (Rope_Piece_BTree_ಗಂಟು *RHS = get_ಬೇರು(ಬೇರು_2)->ಸೇರಿಸು(ಸ್ಥಾನಾಂತರ, R))
+    ಬೇರು_2 = ಹೊಸ RopePieceBTreeInterior(get_ಬೇರು(ಬೇರು_2), RHS);
 }
 
-void RopePieceBTree::erase(unsigned Offset, unsigned NumBytes) {
+ಶೂನ್ಯ RopePieceBTree::erase(ಚಿಹ್ನೆರಹಿತ ಸ್ಥಾನಾಂತರ, ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಬೈಟುಗಳು) {
   // #1. Split at Offset.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->split(Offset))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  ಆದರೆ (Rope_Piece_BTree_ಗಂಟು *RHS = get_ಬೇರು(ಬೇರು_2)->ವಿಭಜಿಸು(ಸ್ಥಾನಾಂತರ))
+    ಬೇರು_2 = ಹೊಸ RopePieceBTreeInterior(get_ಬೇರು(ಬೇರು_2), RHS);
 
   // #2. Do the erasing.
-  getRoot(Root)->erase(Offset, NumBytes);
+  get_ಬೇರು(ಬೇರು_2)->erase(ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_ಬೈಟುಗಳು);
 }
 
 //===----------------------------------------------------------------------===//
@@ -762,36 +762,36 @@ void RopePieceBTree::erase(unsigned Offset, unsigned NumBytes) {
 /// RopeRefCountString, and return a RopePiece that represents it.  This uses
 /// the AllocBuffer object to aggregate requests for small strings into one
 /// allocation instead of doing tons of tiny allocations.
-RopePiece RewriteRope::MakeRopeString(const char *Start, const char *End) {
-  unsigned Len = End - Start;
-  assert(Len && "Zero length RopePiece is invalid!");
+RopePiece RewriteRope::MakeRopeString(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಆರಂಭ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೊನೆ_2) {
+  ಚಿಹ್ನೆರಹಿತ Len = ಕೊನೆ_2 - ಆರಂಭ;
+  ಪ್ರತಿಜ್ಞಾ(Len && "Zero length RopePiece is invalid!");
 
   // If we have space for this string in the current alloc buffer, use it.
-  if (AllocOffs + Len <= AllocChunkSize) {
-    memcpy(AllocBuffer->Data + AllocOffs, Start, Len);
+  ಆದರೆ (AllocOffs + Len <= Alloc_Chunk_ಗಾತ್ರ) {
+    ಸ್ಮರಣೆ_ನಕಲು(Alloc_ಬಫರ್->ದತ್ತಾಂಶ_2 + AllocOffs, ಆರಂಭ, Len);
     AllocOffs += Len;
-    return RopePiece(AllocBuffer, AllocOffs - Len, AllocOffs);
+    ಹಿಂತಿರುಗಿ RopePiece(Alloc_ಬಫರ್, AllocOffs - Len, AllocOffs);
   }
 
   // If we don't have enough room because this specific allocation is huge,
   // just allocate a new rope piece for it alone.
-  if (Len > AllocChunkSize) {
-    unsigned Size = End - Start + sizeof(RopeRefCountString) - 1;
-    auto *Res = reinterpret_cast<RopeRefCountString *>(new char[Size]);
-    Res->RefCount = 0;
-    memcpy(Res->Data, Start, End - Start);
-    return RopePiece(Res, 0, End - Start);
+  ಆದರೆ (Len > Alloc_Chunk_ಗಾತ್ರ) {
+    ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_2 = ಕೊನೆ_2 - ಆರಂಭ + ಗಾತ್ರ(Rope_Ref_ಎಣಿಕೆ_String) - 1;
+    ಸ್ವಯಂಚಾಲಿತ *Res = reinterpret_cast<Rope_Ref_ಎಣಿಕೆ_String *>(ಹೊಸ ಅಕ್ಷರ[ಗಾತ್ರ_2]);
+    Res->Ref_ಎಣಿಕೆ = 0;
+    ಸ್ಮರಣೆ_ನಕಲು(Res->ದತ್ತಾಂಶ_2, ಆರಂಭ, ಕೊನೆ_2 - ಆರಂಭ);
+    ಹಿಂತಿರುಗಿ RopePiece(Res, 0, ಕೊನೆ_2 - ಆರಂಭ);
   }
 
   // Otherwise, this was a small request but we just don't have space for it
   // Make a new chunk and share it with later allocations.
 
-  unsigned AllocSize = offsetof(RopeRefCountString, Data) + AllocChunkSize;
-  auto *Res = reinterpret_cast<RopeRefCountString *>(new char[AllocSize]);
-  Res->RefCount = 0;
-  memcpy(Res->Data, Start, Len);
-  AllocBuffer = Res;
+  ಚಿಹ್ನೆರಹಿತ Alloc_ಗಾತ್ರ = offsetof(Rope_Ref_ಎಣಿಕೆ_String, ದತ್ತಾಂಶ_2) + Alloc_Chunk_ಗಾತ್ರ;
+  ಸ್ವಯಂಚಾಲಿತ *Res = reinterpret_cast<Rope_Ref_ಎಣಿಕೆ_String *>(ಹೊಸ ಅಕ್ಷರ[Alloc_ಗಾತ್ರ]);
+  Res->Ref_ಎಣಿಕೆ = 0;
+  ಸ್ಮರಣೆ_ನಕಲು(Res->ದತ್ತಾಂಶ_2, ಆರಂಭ, Len);
+  Alloc_ಬಫರ್ = Res;
   AllocOffs = Len;
 
-  return RopePiece(AllocBuffer, 0, Len);
+  ಹಿಂತಿರುಗಿ RopePiece(Alloc_ಬಫರ್, 0, Len);
 }

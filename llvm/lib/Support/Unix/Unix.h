@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_SUPPORT_UNIX_UNIX_H
-#define LLVM_LIB_SUPPORT_UNIX_UNIX_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ LLVM_LIB_SUPPORT_UNIX_UNIX_H
+#ವ್ಯಾಖ್ಯಾನಿಸು LLVM_LIB_SUPPORT_UNIX_UNIX_H
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only generic UNIX code that
 //===          is guaranteed to work on all UNIX variants.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <assert.h>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <sys/types.h>
-#include <sys/wait.h>
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Chrono.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Errno.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ErrorHandling.h"
+#ಅನ್ತರ್ಭಾವ <assert.h>
+#ಅನ್ತರ್ಭಾವ <cerrno>
+#ಅನ್ತರ್ಭಾವ <cstdio>
+#ಅನ್ತರ್ಭಾವ <cstdlib>
+#ಅನ್ತರ್ಭಾವ <cstring>
+#ಅನ್ತರ್ಭಾವ <string>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/wait.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_UNISTD_H
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
-#include <sys/time.h>
-#include <time.h>
+#ಅನ್ತರ್ಭಾವ <sys/time.h>
+#ಅನ್ತರ್ಭಾವ <time.h>
 
-#include <dlfcn.h>
+#ಅನ್ತರ್ಭಾವ <dlfcn.h>
 
 # include <fcntl.h>
 
@@ -49,21 +49,21 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
-    return true;
-  if (errnum == -1)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ bool Make_Err_ಸಂದೇಶ(
+  std::string* Err_ಸಂದೇಶ, ಸ್ಥಿರಾಂಕ std::string& ಪೂರ್ವಪ್ರತ್ಯಯ_2, ಪೂರ್ಣಾಂಕ errnum = -1) {
+  ಆದರೆ (!Err_ಸಂದೇಶ)
+    ಹಿಂತಿರುಗಿ true;
+  ಆದರೆ (errnum == -1)
     errnum = errno;
-  *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
-  return true;
+  *Err_ಸಂದೇಶ = ಪೂರ್ವಪ್ರತ್ಯಯ_2 + ": " + llvm::sys::StrError(errnum);
+  ಹಿಂತಿರುಗಿ true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
-  std::string ErrMsg;
-  MakeErrMsg(&ErrMsg, Msg, errnum);
-  llvm::report_fatal_error(llvm::Twine(ErrMsg));
+[[noreturn]] ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ ReportErrnumFatal(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ_4, ಪೂರ್ಣಾಂಕ errnum) {
+  std::string Err_ಸಂದೇಶ;
+  Make_Err_ಸಂದೇಶ(&Err_ಸಂದೇಶ, ಸಂದೇಶ_4, errnum);
+  llvm::report_fatal_error(llvm::Twine(Err_ಸಂದೇಶ));
 }
 
 namespace llvm {
@@ -71,32 +71,32 @@ namespace sys {
 
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
-inline std::chrono::microseconds toDuration(const struct timeval &TV) {
-  return std::chrono::seconds(TV.tv_sec) +
+ಸಾಲೊಳಗೆ std::chrono::microseconds ಗಮ್ಯ_Duration(ಸ್ಥಿರಾಂಕ ರಚನೆ timeval &TV) {
+  ಹಿಂತಿರುಗಿ std::chrono::seconds(TV.tv_sec) +
          std::chrono::microseconds(TV.tv_usec);
 }
 
 /// Convert a time point to struct timespec.
-inline struct timespec toTimeSpec(TimePoint<> TP) {
+ಸಾಲೊಳಗೆ ರಚನೆ timespec ಗಮ್ಯ_ಸಮಯ_Spec(ಸಮಯ_ಬಿಂದು<> TP) {
   using namespace std::chrono;
 
-  struct timespec RetVal;
-  RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  ರಚನೆ timespec RetVal;
+  RetVal.tv_sec = ಗಮ್ಯ_ಸಮಯ_T(TP);
+  RetVal.tv_nsec = (TP.ಸಮಯ_since_epoch() % seconds(1)).ಎಣಿಕೆ_2();
+  ಹಿಂತಿರುಗಿ RetVal;
 }
 
 /// Convert a time point to struct timeval.
-inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
+ಸಾಲೊಳಗೆ ರಚನೆ timeval ಗಮ್ಯ_ಸಮಯ_Val(ಸಮಯ_ಬಿಂದು<std::chrono::microseconds> TP) {
   using namespace std::chrono;
 
-  struct timeval RetVal;
-  RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  ರಚನೆ timeval RetVal;
+  RetVal.tv_sec = ಗಮ್ಯ_ಸಮಯ_T(TP);
+  RetVal.tv_usec = (TP.ಸಮಯ_since_epoch() % seconds(1)).ಎಣಿಕೆ_2();
+  ಹಿಂತಿರುಗಿ RetVal;
 }
 
 } // namespace sys
 } // namespace llvm
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

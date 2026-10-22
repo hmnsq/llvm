@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputConfig.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/FileSystem.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::ಗಣ_Open_Flags(ಸ್ಥಿರಾಂಕ sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
-  using namespace llvm::sys::fs;
-  return Flags & OF_Text
-             ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+  ಬಳಸಿ ನಾಮಾಕಾಶ llvm::sys::fs;
+  ಹಿಂತಿರುಗಿ Flags & ದ_ಪಠ್ಯ
+             ? ಗಣ_ಪಠ್ಯ().ಗಣ_CRLF(Flags & ದ_CRLF).ಗಣ_Append(Flags & ದ_Append)
+             : ಗಣ_ದ್ವಿಮಾನ().ಗಣ_Append(Flags & ದ_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+ಶೂನ್ಯ OutputConfig::print(raw_ostream &OS) ಸ್ಥಿರಾಂಕ {
   OS << "{";
-  bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
-      IsFirst = false;
-    else
+  ತಾರ್ಕಿಕ Is_ಮೊದಲ = ನಿಜ;
+  ಸ್ವಯಂಚಾಲಿತ printFlag = [&](StringRef FlagName, ತಾರ್ಕಿಕ ಮೌಲ್ಯ) {
+    ಆದರೆ (Is_ಮೊದಲ)
+      Is_ಮೊದಲ = ಸುಳ್ಳು;
+    ಇಲ್ಲದಿದ್ದರೆ
       OS << ",";
-    if (!Value)
+    ಆದರೆ (!ಮೌಲ್ಯ)
       OS << "No";
     OS << FlagName;
   };
 
-#define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+#ವ್ಯಾಖ್ಯಾನಿಸು HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
+  ಆದರೆ (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_ವಿಧಾನ ಶೂನ್ಯ OutputConfig::dump() ಸ್ಥಿರಾಂಕ { print(dbgs()); }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
+raw_ostream &llvm::ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  ಹಿಂತಿರುಗಿ OS;
 }

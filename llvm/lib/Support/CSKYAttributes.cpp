@@ -6,28 +6,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CSKYAttributes.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/CSKYAttributes.h"
 
-using namespace llvm;
-using namespace llvm::CSKYAttrs;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::CSKYAttrs;
 
-static const TagNameItem tagData[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಟ್ಯಾಗ್_Name_ಅಂಶ ಟ್ಯಾಗ್_ದತ್ತಾಂಶ[] = {
     {CSKY_ARCH_NAME, "Tag_CSKY_ARCH_NAME"},
     {CSKY_CPU_NAME, "Tag_CSKY_CPU_NAME"},
     {CSKY_CPU_NAME, "Tag_CSKY_CPU_NAME"},
     {CSKY_ISA_FLAGS, "Tag_CSKY_ISA_FLAGS"},
     {CSKY_ISA_EXT_FLAGS, "Tag_CSKY_ISA_EXT_FLAGS"},
-    {CSKY_DSP_VERSION, "Tag_CSKY_DSP_VERSION"},
-    {CSKY_VDSP_VERSION, "Tag_CSKY_VDSP_VERSION"},
-    {CSKY_FPU_VERSION, "Tag_CSKY_FPU_VERSION"},
+    {CSKY_DSP_ಆವೃತ್ತಿ, "Tag_CSKY_DSP_VERSION"},
+    {CSKY_VDSP_ಆವೃತ್ತಿ, "Tag_CSKY_VDSP_VERSION"},
+    {CSKY_FPU_ಆವೃತ್ತಿ, "Tag_CSKY_FPU_VERSION"},
     {CSKY_FPU_ABI, "Tag_CSKY_FPU_ABI"},
     {CSKY_FPU_ROUNDING, "Tag_CSKY_FPU_ROUNDING"},
     {CSKY_FPU_DENORMAL, "Tag_CSKY_FPU_DENORMAL"},
     {CSKY_FPU_EXCEPTION, "Tag_CSKY_FPU_EXCEPTION"},
-    {CSKY_FPU_NUMBER_MODULE, "Tag_CSKY_FPU_NUMBER_MODULE"},
+    {CSKY_FPU_ಸಂಖ್ಯೆ_MODULE, "Tag_CSKY_FPU_NUMBER_MODULE"},
     {CSKY_FPU_HARDFP, "Tag_CSKY_FPU_HARDFP"}};
 
-constexpr TagNameMap CSKYAttributeTags{tagData};
-const TagNameMap &llvm::CSKYAttrs::getCSKYAttributeTags() {
-  return CSKYAttributeTags;
+constexpr ಟ್ಯಾಗ್_Name_Map CSKYAttribute_ಟ್ಯಾಗುಗಳು{ಟ್ಯಾಗ್_ದತ್ತಾಂಶ};
+ಸ್ಥಿರಾಂಕ ಟ್ಯಾಗ್_Name_Map &llvm::CSKYAttrs::get_CSKYAttribute_ಟ್ಯಾಗುಗಳು() {
+  ಹಿಂತಿರುಗಿ CSKYAttribute_ಟ್ಯಾಗುಗಳು;
 }

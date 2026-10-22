@@ -6,49 +6,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/SMTAPI.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/ScopeExit.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/NativeFormatting.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SMTAPI.h"
 
-using namespace llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-#if LLVM_WITH_Z3
+#ಆದರೆ LLVM_WITH_Z3
 
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/Twine.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallString.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringMap.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/Twine.h"
 
-#include <set>
+#ಅನ್ತರ್ಭಾವ <set>
 
-#include <z3.h>
+#ಅನ್ತರ್ಭಾವ <z3.h>
 
-namespace {
+ನಾಮಾಕಾಶ {
 
 /// Configuration class for Z3
-class Z3Config {
-  friend class Z3Context;
+ವರ್ಗ Z3Config {
+  ಮಿತ್ರ ವರ್ಗ Z3Context;
 
   Z3_config Config = Z3_mk_config();
 
-public:
-  Z3Config() = default;
-  Z3Config(const Z3Config &) = delete;
-  Z3Config(Z3Config &&) = default;
-  Z3Config &operator=(Z3Config &) = delete;
-  Z3Config &operator=(Z3Config &&) = default;
+ಸಾರ್ವಜನಿಕ:
+  Z3Config() = ಪೂರ್ವನಿಯೋಜಿತ;
+  Z3Config(ಸ್ಥಿರಾಂಕ Z3Config &) = ಅಳಿಸು;
+  Z3Config(Z3Config &&) = ಪೂರ್ವನಿಯೋಜಿತ;
+  Z3Config &ಕ್ರಿಯಾಕಾರಕ=(Z3Config &) = ಅಳಿಸು;
+  Z3Config &ಕ್ರಿಯಾಕಾರಕ=(Z3Config &&) = ಪೂರ್ವನಿಯೋಜಿತ;
   ~Z3Config() { Z3_del_config(Config); }
 }; // end class Z3Config
 
 // Function used to report errors
-void Z3ErrorHandler(Z3_context Context, Z3_error_code Error) {
+ಶೂನ್ಯ Z3ErrorHandler(Z3_context Context, Z3_error_ಸಂಕೇತ Error) {
   llvm::report_fatal_error("Z3 error: " +
-                           llvm::Twine(Z3_get_error_msg(Context, Error)));
+                           llvm::Twine(Z3_get_error_ಸಂದೇಶ(Context, Error)));
 }
 
 /// Wrapper for Z3 context
-class Z3Context {
-public:
+ವರ್ಗ Z3Context {
+ಸಾರ್ವಜನಿಕ:
   Z3Config Config;
   Z3_context Context;
 
@@ -56,934 +56,934 @@ public:
     Context = Z3_mk_context_rc(Config.Config);
     // The error function is set here because the context is the first object
     // created by the backend
-    Z3_set_error_handler(Context, Z3ErrorHandler);
+    Z3_ಗಣ_error_handler(Context, Z3ErrorHandler);
   }
 
-  Z3Context(const Z3Context &) = delete;
-  Z3Context(Z3Context &&) = default;
-  Z3Context &operator=(Z3Context &) = delete;
-  Z3Context &operator=(Z3Context &&) = default;
+  Z3Context(ಸ್ಥಿರಾಂಕ Z3Context &) = ಅಳಿಸು;
+  Z3Context(Z3Context &&) = ಪೂರ್ವನಿಯೋಜಿತ;
+  Z3Context &ಕ್ರಿಯಾಕಾರಕ=(Z3Context &) = ಅಳಿಸು;
+  Z3Context &ಕ್ರಿಯಾಕಾರಕ=(Z3Context &&) = ಪೂರ್ವನಿಯೋಜಿತ;
 
   ~Z3Context() {
     Z3_del_context(Context);
-    Context = nullptr;
+    Context = ಶೂನ್ಯಸೂಚಕ;
   }
 }; // end class Z3Context
 
 /// Wrapper for Z3 Sort
-class Z3Sort : public SMTSort {
-  friend class Z3Solver;
+ವರ್ಗ Z3_ವಿಂಗಡಿಸು : ಸಾರ್ವಜನಿಕ SMTSort {
+  ಮಿತ್ರ ವರ್ಗ Z3Solver;
 
   Z3Context &Context;
 
-  Z3_sort Sort;
+  Z3_ವಿಂಗಡಿಸು_2 ವಿಂಗಡಿಸು_2;
 
-public:
+ಸಾರ್ವಜನಿಕ:
   /// Default constructor, mainly used by make_shared
-  Z3Sort(Z3Context &C, Z3_sort ZS) : Context(C), Sort(ZS) {
-    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
+  Z3_ವಿಂಗಡಿಸು(Z3Context &C, Z3_ವಿಂಗಡಿಸು_2 ZS) : Context(C), ವಿಂಗಡಿಸು_2(ZS) {
+    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(ವಿಂಗಡಿಸು_2));
   }
 
   /// Override implicit copy constructor for correct reference counting.
-  Z3Sort(const Z3Sort &Other) : Context(Other.Context), Sort(Other.Sort) {
-    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
+  Z3_ವಿಂಗಡಿಸು(ಸ್ಥಿರಾಂಕ Z3_ವಿಂಗಡಿಸು &Other) : Context(Other.Context), ವಿಂಗಡಿಸು_2(Other.ವಿಂಗಡಿಸು_2) {
+    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(ವಿಂಗಡಿಸು_2));
   }
 
   /// Override implicit copy assignment constructor for correct reference
   /// counting.
-  Z3Sort &operator=(const Z3Sort &Other) {
-    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Other.Sort));
-    Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
-    Sort = Other.Sort;
-    return *this;
+  Z3_ವಿಂಗಡಿಸು &ಕ್ರಿಯಾಕಾರಕ=(ಸ್ಥಿರಾಂಕ Z3_ವಿಂಗಡಿಸು &Other) {
+    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Other.ವಿಂಗಡಿಸು_2));
+    Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(ವಿಂಗಡಿಸು_2));
+    ವಿಂಗಡಿಸು_2 = Other.ವಿಂಗಡಿಸು_2;
+    ಹಿಂತಿರುಗಿ *ಇದು;
   }
 
-  Z3Sort(Z3Sort &&Other) = delete;
-  Z3Sort &operator=(Z3Sort &&Other) = delete;
+  Z3_ವಿಂಗಡಿಸು(Z3_ವಿಂಗಡಿಸು &&Other) = ಅಳಿಸು;
+  Z3_ವಿಂಗಡಿಸು &ಕ್ರಿಯಾಕಾರಕ=(Z3_ವಿಂಗಡಿಸು &&Other) = ಅಳಿಸು;
 
-  ~Z3Sort() {
-    if (Sort)
-      Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
+  ~Z3_ವಿಂಗಡಿಸು() {
+    ಆದರೆ (ವಿಂಗಡಿಸು_2)
+      Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(ವಿಂಗಡಿಸು_2));
   }
 
-  void Profile(llvm::FoldingSetNodeID &ID) const override {
-    ID.AddInteger(
-        Z3_get_ast_id(Context.Context, reinterpret_cast<Z3_ast>(Sort)));
+  ಶೂನ್ಯ Profile(llvm::Folding_ಗಣ_ಗಂಟು_ID &ID) ಸ್ಥಿರಾಂಕ override {
+    ID.ಕೂಡಿಸು_Integer(
+        Z3_get_ast_id(Context.Context, reinterpret_cast<Z3_ast>(ವಿಂಗಡಿಸು_2)));
   }
 
-  bool isBitvectorSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_BV_SORT);
+  ತಾರ್ಕಿಕ is_Bitvector_ವಿಂಗಡಿಸು_Impl() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ (Z3_get_ವಿಂಗಡಿಸು_ಬಗೆ(Context.Context, ವಿಂಗಡಿಸು_2) == Z3_BV_ವಿಂಗಡಿಸು);
   }
 
-  bool isFloatSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_FLOATING_POINT_SORT);
+  ತಾರ್ಕಿಕ is_Float_ವಿಂಗಡಿಸು_Impl() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ (Z3_get_ವಿಂಗಡಿಸು_ಬಗೆ(Context.Context, ವಿಂಗಡಿಸು_2) == Z3_FLOATING_ಬಿಂದು_ವಿಂಗಡಿಸು);
   }
 
-  bool isBooleanSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_BOOL_SORT);
+  ತಾರ್ಕಿಕ is_Boolean_ವಿಂಗಡಿಸು_Impl() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ (Z3_get_ವಿಂಗಡಿಸು_ಬಗೆ(Context.Context, ವಿಂಗಡಿಸು_2) == Z3_BOOL_ವಿಂಗಡಿಸು);
   }
 
-  unsigned getBitvectorSortSizeImpl() const override {
-    return Z3_get_bv_sort_size(Context.Context, Sort);
+  ಚಿಹ್ನೆರಹಿತ get_Bitvector_ವಿಂಗಡಿಸು_ಗಾತ್ರ_Impl() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ Z3_get_bv_ವಿಂಗಡಿಸು_ಗಾತ್ರ(Context.Context, ವಿಂಗಡಿಸು_2);
   }
 
-  unsigned getFloatSortSizeImpl() const override {
-    return Z3_fpa_get_ebits(Context.Context, Sort) +
-           Z3_fpa_get_sbits(Context.Context, Sort);
+  ಚಿಹ್ನೆರಹಿತ get_Float_ವಿಂಗಡಿಸು_ಗಾತ್ರ_Impl() ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ Z3_fpa_get_ebits(Context.Context, ವಿಂಗಡಿಸು_2) +
+           Z3_fpa_get_sbits(Context.Context, ವಿಂಗಡಿಸು_2);
   }
 
-  bool equal_to(SMTSort const &Other) const override {
-    return Z3_is_eq_sort(Context.Context, Sort,
-                         static_cast<const Z3Sort &>(Other).Sort);
+  ತಾರ್ಕಿಕ equal_ಗಮ್ಯ(SMTSort ಸ್ಥಿರಾಂಕ &Other) ಸ್ಥಿರಾಂಕ override {
+    ಹಿಂತಿರುಗಿ Z3_is_eq_ವಿಂಗಡಿಸು(Context.Context, ವಿಂಗಡಿಸು_2,
+                         static_cast<ಸ್ಥಿರಾಂಕ Z3_ವಿಂಗಡಿಸು &>(Other).ವಿಂಗಡಿಸು_2);
   }
 
-  void print(raw_ostream &OS) const override {
-    OS << Z3_sort_to_string(Context.Context, Sort);
+  ಶೂನ್ಯ print(raw_ostream &OS) ಸ್ಥಿರಾಂಕ override {
+    OS << Z3_ವಿಂಗಡಿಸು_ಗಮ್ಯ_string(Context.Context, ವಿಂಗಡಿಸು_2);
   }
 }; // end class Z3Sort
 
-static const Z3Sort &toZ3Sort(const SMTSort &S) {
-  return static_cast<const Z3Sort &>(S);
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ Z3_ವಿಂಗಡಿಸು &ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(ಸ್ಥಿರಾಂಕ SMTSort &S) {
+  ಹಿಂತಿರುಗಿ static_cast<ಸ್ಥಿರಾಂಕ Z3_ವಿಂಗಡಿಸು &>(S);
 }
 
-class Z3Expr : public SMTExpr {
-  friend class Z3Solver;
+ವರ್ಗ Z3_ಅಭಿವ್ಯಕ್ತಿ : ಸಾರ್ವಜನಿಕ SMTExpr {
+  ಮಿತ್ರ ವರ್ಗ Z3Solver;
 
   Z3Context &Context;
 
   Z3_ast AST;
 
-public:
-  Z3Expr(Z3Context &C, Z3_ast ZA) : SMTExpr(), Context(C), AST(ZA) {
+ಸಾರ್ವಜನಿಕ:
+  Z3_ಅಭಿವ್ಯಕ್ತಿ(Z3Context &C, Z3_ast ZA) : SMTExpr(), Context(C), AST(ZA) {
     Z3_inc_ref(Context.Context, AST);
   }
 
   /// Override implicit copy constructor for correct reference counting.
-  Z3Expr(const Z3Expr &Copy) : SMTExpr(), Context(Copy.Context), AST(Copy.AST) {
+  Z3_ಅಭಿವ್ಯಕ್ತಿ(ಸ್ಥಿರಾಂಕ Z3_ಅಭಿವ್ಯಕ್ತಿ &Copy) : SMTExpr(), Context(Copy.Context), AST(Copy.AST) {
     Z3_inc_ref(Context.Context, AST);
   }
 
   /// Override implicit copy assignment constructor for correct reference
   /// counting.
-  Z3Expr &operator=(const Z3Expr &Other) {
+  Z3_ಅಭಿವ್ಯಕ್ತಿ &ಕ್ರಿಯಾಕಾರಕ=(ಸ್ಥಿರಾಂಕ Z3_ಅಭಿವ್ಯಕ್ತಿ &Other) {
     Z3_inc_ref(Context.Context, Other.AST);
     Z3_dec_ref(Context.Context, AST);
     AST = Other.AST;
-    return *this;
+    ಹಿಂತಿರುಗಿ *ಇದು;
   }
 
-  Z3Expr(Z3Expr &&Other) = delete;
-  Z3Expr &operator=(Z3Expr &&Other) = delete;
+  Z3_ಅಭಿವ್ಯಕ್ತಿ(Z3_ಅಭಿವ್ಯಕ್ತಿ &&Other) = ಅಳಿಸು;
+  Z3_ಅಭಿವ್ಯಕ್ತಿ &ಕ್ರಿಯಾಕಾರಕ=(Z3_ಅಭಿವ್ಯಕ್ತಿ &&Other) = ಅಳಿಸು;
 
-  ~Z3Expr() {
-    if (AST)
+  ~Z3_ಅಭಿವ್ಯಕ್ತಿ() {
+    ಆದರೆ (AST)
       Z3_dec_ref(Context.Context, AST);
   }
 
-  void Profile(llvm::FoldingSetNodeID &ID) const override {
-    ID.AddInteger(Z3_get_ast_id(Context.Context, AST));
+  ಶೂನ್ಯ Profile(llvm::Folding_ಗಣ_ಗಂಟು_ID &ID) ಸ್ಥಿರಾಂಕ override {
+    ID.ಕೂಡಿಸು_Integer(Z3_get_ast_id(Context.Context, AST));
   }
 
   /// Comparison of AST equality, not model equivalence.
-  bool equal_to(SMTExpr const &Other) const override {
-    assert(Z3_is_eq_sort(Context.Context, Z3_get_sort(Context.Context, AST),
-                         Z3_get_sort(Context.Context,
-                                     static_cast<const Z3Expr &>(Other).AST)) &&
+  ತಾರ್ಕಿಕ equal_ಗಮ್ಯ(SMTExpr ಸ್ಥಿರಾಂಕ &Other) ಸ್ಥಿರಾಂಕ override {
+    ಪ್ರತಿಜ್ಞಾ(Z3_is_eq_ವಿಂಗಡಿಸು(Context.Context, Z3_get_ವಿಂಗಡಿಸು(Context.Context, AST),
+                         Z3_get_ವಿಂಗಡಿಸು(Context.Context,
+                                     static_cast<ಸ್ಥಿರಾಂಕ Z3_ಅಭಿವ್ಯಕ್ತಿ &>(Other).AST)) &&
            "AST's must have the same sort");
-    return Z3_is_eq_ast(Context.Context, AST,
-                        static_cast<const Z3Expr &>(Other).AST);
+    ಹಿಂತಿರುಗಿ Z3_is_eq_ast(Context.Context, AST,
+                        static_cast<ಸ್ಥಿರಾಂಕ Z3_ಅಭಿವ್ಯಕ್ತಿ &>(Other).AST);
   }
 
-  void print(raw_ostream &OS) const override {
-    OS << Z3_ast_to_string(Context.Context, AST);
+  ಶೂನ್ಯ print(raw_ostream &OS) ಸ್ಥಿರಾಂಕ override {
+    OS << Z3_ast_ಗಮ್ಯ_string(Context.Context, AST);
   }
 }; // end class Z3Expr
 
-static const Z3Expr &toZ3Expr(const SMTExpr &E) {
-  return static_cast<const Z3Expr &>(E);
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ Z3_ಅಭಿವ್ಯಕ್ತಿ &ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(ಸ್ಥಿರಾಂಕ SMTExpr &E) {
+  ಹಿಂತಿರುಗಿ static_cast<ಸ್ಥಿರಾಂಕ Z3_ಅಭಿವ್ಯಕ್ತಿ &>(E);
 }
 
-class Z3Model {
-  friend class Z3Solver;
+ವರ್ಗ Z3Model {
+  ಮಿತ್ರ ವರ್ಗ Z3Solver;
 
   Z3Context &Context;
 
   Z3_model Model;
 
-public:
+ಸಾರ್ವಜನಿಕ:
   Z3Model(Z3Context &C, Z3_model ZM) : Context(C), Model(ZM) {
     Z3_model_inc_ref(Context.Context, Model);
   }
 
-  Z3Model(const Z3Model &Other) = delete;
-  Z3Model(Z3Model &&Other) = delete;
-  Z3Model &operator=(Z3Model &Other) = delete;
-  Z3Model &operator=(Z3Model &&Other) = delete;
+  Z3Model(ಸ್ಥಿರಾಂಕ Z3Model &Other) = ಅಳಿಸು;
+  Z3Model(Z3Model &&Other) = ಅಳಿಸು;
+  Z3Model &ಕ್ರಿಯಾಕಾರಕ=(Z3Model &Other) = ಅಳಿಸು;
+  Z3Model &ಕ್ರಿಯಾಕಾರಕ=(Z3Model &&Other) = ಅಳಿಸು;
 
   ~Z3Model() {
-    if (Model)
+    ಆದರೆ (Model)
       Z3_model_dec_ref(Context.Context, Model);
   }
 
-  void print(raw_ostream &OS) const {
-    OS << Z3_model_to_string(Context.Context, Model);
+  ಶೂನ್ಯ print(raw_ostream &OS) ಸ್ಥಿರಾಂಕ {
+    OS << Z3_model_ಗಮ್ಯ_string(Context.Context, Model);
   }
 
-  LLVM_DUMP_METHOD void dump() const { print(llvm::errs()); }
+  LLVM_DUMP_ವಿಧಾನ ಶೂನ್ಯ dump() ಸ್ಥಿರಾಂಕ { print(llvm::errs()); }
 }; // end class Z3Model
 
 /// Get the corresponding IEEE floating-point type for a given bitwidth.
-static const llvm::fltSemantics &getFloatSemantics(unsigned BitWidth) {
-  switch (BitWidth) {
-  default:
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ llvm::fltSemantics &getFloatSemantics(ಚಿಹ್ನೆರಹಿತ ಬಿಟ್_ಅಗಲ_2) {
+  ಆಯ್ಕೆ (ಬಿಟ್_ಅಗಲ_2) {
+  ಪೂರ್ವನಿಯೋಜಿತ:
     llvm_unreachable("Unsupported floating-point semantics!");
-    break;
-  case 16:
-    return llvm::APFloat::IEEEhalf();
-  case 32:
-    return llvm::APFloat::IEEEsingle();
-  case 64:
-    return llvm::APFloat::IEEEdouble();
-  case 128:
-    return llvm::APFloat::IEEEquad();
+    ನಿಲ್ಲಿಸು;
+  ಸ್ಥಿತಿ 16:
+    ಹಿಂತಿರುಗಿ llvm::APFloat::IEEEhalf();
+  ಸ್ಥಿತಿ 32:
+    ಹಿಂತಿರುಗಿ llvm::APFloat::IEEEsingle();
+  ಸ್ಥಿತಿ 64:
+    ಹಿಂತಿರುಗಿ llvm::APFloat::IEEEdouble();
+  ಸ್ಥಿತಿ 128:
+    ಹಿಂತಿರುಗಿ llvm::APFloat::IEEEquad();
   }
 }
 
 // Determine whether two float semantics are equivalent
-static bool areEquivalent(const llvm::fltSemantics &LHS,
-                          const llvm::fltSemantics &RHS) {
-  return (llvm::APFloat::semanticsPrecision(LHS) ==
+ಸ್ಥಿರ ತಾರ್ಕಿಕ areEquivalent(ಸ್ಥಿರಾಂಕ llvm::fltSemantics &LHS,
+                          ಸ್ಥಿರಾಂಕ llvm::fltSemantics &RHS) {
+  ಹಿಂತಿರುಗಿ (llvm::APFloat::semanticsPrecision(LHS) ==
           llvm::APFloat::semanticsPrecision(RHS)) &&
          (llvm::APFloat::semanticsMinExponent(LHS) ==
           llvm::APFloat::semanticsMinExponent(RHS)) &&
          (llvm::APFloat::semanticsMaxExponent(LHS) ==
           llvm::APFloat::semanticsMaxExponent(RHS)) &&
-         (llvm::APFloat::semanticsSizeInBits(LHS) ==
-          llvm::APFloat::semanticsSizeInBits(RHS));
+         (llvm::APFloat::semantics_ಗಾತ್ರ_ಒಳ_ಬಿಟ್ಟುಗಳು(LHS) ==
+          llvm::APFloat::semantics_ಗಾತ್ರ_ಒಳ_ಬಿಟ್ಟುಗಳು(RHS));
 }
 
-class Z3Solver : public SMTSolver {
-  friend class Z3ConstraintManager;
+ವರ್ಗ Z3Solver : ಸಾರ್ವಜನಿಕ SMTSolver {
+  ಮಿತ್ರ ವರ್ಗ Z3ConstraintManager;
 
   Z3Context Context;
 
-  Z3_solver Solver = [this] {
+  Z3_solver Solver = [ಇದು] {
     Z3_solver S = Z3_mk_simple_solver(Context.Context);
     Z3_solver_inc_ref(Context.Context, S);
-    return S;
+    ಹಿಂತಿರುಗಿ S;
   }();
 
-  Z3_params Params = [this] {
+  Z3_params Params = [ಇದು] {
     Z3_params P = Z3_mk_params(Context.Context);
     Z3_params_inc_ref(Context.Context, P);
-    return P;
+    ಹಿಂತಿರುಗಿ P;
   }();
 
   // Cache Sorts
-  std::set<Z3Sort> CachedSorts;
+  std::ಗಣ<Z3_ವಿಂಗಡಿಸು> CachedSorts;
 
   // Cache Exprs
-  std::set<Z3Expr> CachedExprs;
+  std::ಗಣ<Z3_ಅಭಿವ್ಯಕ್ತಿ> CachedExprs;
 
-public:
-  Z3Solver() = default;
-  Z3Solver(const Z3Solver &Other) = delete;
-  Z3Solver(Z3Solver &&Other) = delete;
-  Z3Solver &operator=(Z3Solver &Other) = delete;
-  Z3Solver &operator=(Z3Solver &&Other) = delete;
+ಸಾರ್ವಜನಿಕ:
+  Z3Solver() = ಪೂರ್ವನಿಯೋಜಿತ;
+  Z3Solver(ಸ್ಥಿರಾಂಕ Z3Solver &Other) = ಅಳಿಸು;
+  Z3Solver(Z3Solver &&Other) = ಅಳಿಸು;
+  Z3Solver &ಕ್ರಿಯಾಕಾರಕ=(Z3Solver &Other) = ಅಳಿಸು;
+  Z3Solver &ಕ್ರಿಯಾಕಾರಕ=(Z3Solver &&Other) = ಅಳಿಸು;
 
   ~Z3Solver() override {
     Z3_params_dec_ref(Context.Context, Params);
     Z3_solver_dec_ref(Context.Context, Solver);
   }
 
-  void addConstraint(const SMTExprRef &Exp) const override {
-    Z3_solver_assert(Context.Context, Solver, toZ3Expr(*Exp).AST);
+  ಶೂನ್ಯ ಕೂಡಿಸು_Constraint(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) ಸ್ಥಿರಾಂಕ override {
+    Z3_solver_assert(Context.Context, Solver, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST);
   }
 
   // Given an SMTSort, adds/retrives it from the cache and returns
   // an SMTSortRef to the SMTSort in the cache
-  SMTSortRef newSortRef(const SMTSort &Sort) {
-    auto It = CachedSorts.insert(toZ3Sort(Sort));
-    return &(*It.first);
+  SMTSortRef new_ವಿಂಗಡಿಸು_Ref(ಸ್ಥಿರಾಂಕ SMTSort &ವಿಂಗಡಿಸು_2) {
+    ಸ್ವಯಂಚಾಲಿತ It = CachedSorts.ಸೇರಿಸು(ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(ವಿಂಗಡಿಸು_2));
+    ಹಿಂತಿರುಗಿ &(*It.ಮೊದಲ_2);
   }
 
   // Given an SMTExpr, adds/retrives it from the cache and returns
   // an SMTExprRef to the SMTExpr in the cache
-  SMTExprRef newExprRef(const SMTExpr &Exp) {
-    auto It = CachedExprs.insert(toZ3Expr(Exp));
-    return &(*It.first);
+  SMTExprRef new_ಅಭಿವ್ಯಕ್ತಿ_Ref(ಸ್ಥಿರಾಂಕ SMTExpr &Exp) {
+    ಸ್ವಯಂಚಾಲಿತ It = CachedExprs.ಸೇರಿಸು(ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(Exp));
+    ಹಿಂತಿರುಗಿ &(*It.ಮೊದಲ_2);
   }
 
-  SMTSortRef getBoolSort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_bool_sort(Context.Context)));
+  SMTSortRef get_Bool_ವಿಂಗಡಿಸು() override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(Z3_ವಿಂಗಡಿಸು(Context, Z3_mk_bool_ವಿಂಗಡಿಸು(Context.Context)));
   }
 
-  SMTSortRef getBitvectorSort(unsigned BitWidth) override {
-    return newSortRef(
-        Z3Sort(Context, Z3_mk_bv_sort(Context.Context, BitWidth)));
+  SMTSortRef get_Bitvector_ವಿಂಗಡಿಸು(ಚಿಹ್ನೆರಹಿತ ಬಿಟ್_ಅಗಲ_2) override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(
+        Z3_ವಿಂಗಡಿಸು(Context, Z3_mk_bv_ವಿಂಗಡಿಸು(Context.Context, ಬಿಟ್_ಅಗಲ_2)));
   }
 
-  SMTSortRef getSort(const SMTExprRef &Exp) override {
-    return newSortRef(
-        Z3Sort(Context, Z3_get_sort(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTSortRef get_ವಿಂಗಡಿಸು(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(
+        Z3_ವಿಂಗಡಿಸು(Context, Z3_get_ವಿಂಗಡಿಸು(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTSortRef getFloat16Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_16(Context.Context)));
+  SMTSortRef get_Float16_ವಿಂಗಡಿಸು() override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(Z3_ವಿಂಗಡಿಸು(Context, Z3_mk_fpa_ವಿಂಗಡಿಸು_16(Context.Context)));
   }
 
-  SMTSortRef getFloat32Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_32(Context.Context)));
+  SMTSortRef get_Float32_ವಿಂಗಡಿಸು() override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(Z3_ವಿಂಗಡಿಸು(Context, Z3_mk_fpa_ವಿಂಗಡಿಸು_32(Context.Context)));
   }
 
-  SMTSortRef getFloat64Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_64(Context.Context)));
+  SMTSortRef get_Float64_ವಿಂಗಡಿಸು() override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(Z3_ವಿಂಗಡಿಸು(Context, Z3_mk_fpa_ವಿಂಗಡಿಸು_64(Context.Context)));
   }
 
-  SMTSortRef getFloat128Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_128(Context.Context)));
+  SMTSortRef get_Float128_ವಿಂಗಡಿಸು() override {
+    ಹಿಂತಿರುಗಿ new_ವಿಂಗಡಿಸು_Ref(Z3_ವಿಂಗಡಿಸು(Context, Z3_mk_fpa_ವಿಂಗಡಿಸು_128(Context.Context)));
   }
 
-  SMTExprRef mkBVNeg(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvneg(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVNeg(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvneg(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVNot(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvnot(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVNot(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvnot(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkNot(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_not(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkNot(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_not(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVAdd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvadd(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAdd(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvadd(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSub(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsub(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSub(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvsub(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVMul(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvmul(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVMul(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvmul(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSRem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsrem(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSRem(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvsrem(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVURem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvurem(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVURem(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvurem(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsdiv(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSDiv(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvsdiv(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvudiv(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUDiv(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvudiv(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVShl(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvshl(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVShl(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvshl(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVAshr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvashr(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAshr(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvashr(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVLshr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvlshr(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVLshr(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvlshr(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVXor(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvxor(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVXor(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvxor(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVOr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvor(Context.Context, toZ3Expr(*LHS).AST,
-                                   toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVOr(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvor(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                   ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVAnd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvand(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAnd(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvand(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUlt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvult(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUlt(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvult(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSlt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvslt(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSlt(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvslt(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUgt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvugt(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUgt(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvugt(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSgt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsgt(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSgt(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvsgt(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUle(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvule(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUle(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvule(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSle(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsle(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSle(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvsle(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUge(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvuge(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUge(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvuge(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSge(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsge(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSge(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_bvsge(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkAnd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    Z3_ast Args[2] = {toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST};
-    return newExprRef(Z3Expr(Context, Z3_mk_and(Context.Context, 2, Args)));
+  SMTExprRef mkAnd(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    Z3_ast ವಾದಗಳು[2] = {ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST};
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_and(Context.Context, 2, ವಾದಗಳು)));
   }
 
-  SMTExprRef mkOr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    Z3_ast Args[2] = {toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST};
-    return newExprRef(Z3Expr(Context, Z3_mk_or(Context.Context, 2, Args)));
+  SMTExprRef mkOr(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    Z3_ast ವಾದಗಳು[2] = {ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST};
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_or(Context.Context, 2, ವಾದಗಳು)));
   }
 
-  SMTExprRef mkEqual(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_eq(Context.Context, toZ3Expr(*LHS).AST,
-                                 toZ3Expr(*RHS).AST)));
+  SMTExprRef mkEqual(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_eq(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                 ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPNeg(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_neg(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPNeg(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_neg(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsInfinite(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_is_infinite(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPIsInfinite(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_fpa_is_infinite(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsNaN(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_is_nan(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPIsNaN(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_is_nan(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsNormal(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_is_normal(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mk_FPIs_ಸಾಮಾನ್ಯ(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_fpa_is_ಸಾಮಾನ್ಯ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsZero(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_is_zero(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPIsZero(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_fpa_is_zero(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPMul(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_mul(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPMul(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context,
+               Z3_mk_fpa_mul(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                             ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_div(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPDiv(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context,
+               Z3_mk_fpa_div(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                             ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPRem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_rem(Context.Context, toZ3Expr(*LHS).AST,
-                                      toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPRem(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_rem(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                      ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPAdd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_add(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPAdd(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context,
+               Z3_mk_fpa_ಕೂಡಿಸು(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                             ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPSub(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_sub(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPSub(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context,
+               Z3_mk_fpa_sub(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                             ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPLt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_lt(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPLt(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_lt(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPGt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_gt(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPGt(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_gt(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPLe(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_leq(Context.Context, toZ3Expr(*LHS).AST,
-                                      toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPLe(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_leq(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                      ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPGe(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_geq(Context.Context, toZ3Expr(*LHS).AST,
-                                      toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPGe(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_geq(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                      ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPEqual(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_eq(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPEqual(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_eq(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkIte(const SMTExprRef &Cond, const SMTExprRef &T,
-                   const SMTExprRef &F) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_ite(Context.Context, toZ3Expr(*Cond).AST,
-                                  toZ3Expr(*T).AST, toZ3Expr(*F).AST)));
+  SMTExprRef mkIte(ಸ್ಥಿರಾಂಕ SMTExprRef &Cond, ಸ್ಥಿರಾಂಕ SMTExprRef &T,
+                   ಸ್ಥಿರಾಂಕ SMTExprRef &F) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_ite(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Cond).AST,
+                                  ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*T).AST, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*F).AST)));
   }
 
-  SMTExprRef mkBVSignExt(unsigned i, const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_sign_ext(Context.Context, i, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVSignExt(ಚಿಹ್ನೆರಹಿತ i, ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_sign_ext(Context.Context, i, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVZeroExt(unsigned i, const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_zero_ext(Context.Context, i, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVZeroExt(ಚಿಹ್ನೆರಹಿತ i, ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_zero_ext(Context.Context, i, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVExtract(unsigned High, unsigned Low,
-                         const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(Context, Z3_mk_extract(Context.Context, High, Low,
-                                                    toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVExtract(ಚಿಹ್ನೆರಹಿತ ಮೇಲಿನ_2, ಚಿಹ್ನೆರಹಿತ ಕೆಳಗಿನ_2,
+                         ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_ಹೊರತೆಗೆ(Context.Context, ಮೇಲಿನ_2, ಕೆಳಗಿನ_2,
+                                                    ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a bitvector addition
   /// operation
-  SMTExprRef mkBVAddNoOverflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
-                               bool isSigned) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvadd_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                         toZ3Expr(*RHS).AST, isSigned)));
+  SMTExprRef mk_BVAdd_No_ಅತಿಪ್ರವಾಹ(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS,
+                               ತಾರ್ಕಿಕ isSigned) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvadd_no_ಅತಿಪ್ರವಾಹ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                         ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST, isSigned)));
   }
 
   /// Creates a predicate that checks for underflow in a signed bitvector
   /// addition operation
-  SMTExprRef mkBVAddNoUnderflow(const SMTExprRef &LHS,
-                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvadd_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAddNoUnderflow(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS,
+                                ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvadd_no_underflow(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                          ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a signed bitvector
   /// subtraction operation
-  SMTExprRef mkBVSubNoOverflow(const SMTExprRef &LHS,
-                               const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvsub_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                         toZ3Expr(*RHS).AST)));
+  SMTExprRef mk_BVSub_No_ಅತಿಪ್ರವಾಹ(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS,
+                               ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvsub_no_ಅತಿಪ್ರವಾಹ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                         ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
   /// Creates a predicate that checks for underflow in a bitvector subtraction
   /// operation
-  SMTExprRef mkBVSubNoUnderflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
-                                bool isSigned) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvsub_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST, isSigned)));
+  SMTExprRef mkBVSubNoUnderflow(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS,
+                                ತಾರ್ಕಿಕ isSigned) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvsub_no_underflow(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                          ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST, isSigned)));
   }
 
   /// Creates a predicate that checks for overflow in a signed bitvector
   /// division/modulus operation
-  SMTExprRef mkBVSDivNoOverflow(const SMTExprRef &LHS,
-                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvsdiv_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST)));
+  SMTExprRef mk_BVSDiv_No_ಅತಿಪ್ರವಾಹ(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS,
+                                ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvsdiv_no_ಅತಿಪ್ರವಾಹ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                          ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a bitvector negation
   /// operation
-  SMTExprRef mkBVNegNoOverflow(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvneg_no_overflow(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mk_BVNeg_No_ಅತಿಪ್ರವಾಹ(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvneg_no_ಅತಿಪ್ರವಾಹ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a bitvector multiplication
   /// operation
-  SMTExprRef mkBVMulNoOverflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
-                               bool isSigned) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvmul_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                         toZ3Expr(*RHS).AST, isSigned)));
+  SMTExprRef mk_BVMul_No_ಅತಿಪ್ರವಾಹ(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS,
+                               ತಾರ್ಕಿಕ isSigned) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvmul_no_ಅತಿಪ್ರವಾಹ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                         ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST, isSigned)));
   }
 
   /// Creates a predicate that checks for underflow in a signed bitvector
   /// multiplication operation
-  SMTExprRef mkBVMulNoUnderflow(const SMTExprRef &LHS,
-                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvmul_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVMulNoUnderflow(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS,
+                                ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_bvmul_no_underflow(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                          ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVConcat(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_concat(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVConcat(ಸ್ಥಿರಾಂಕ SMTExprRef &LHS, ಸ್ಥಿರಾಂಕ SMTExprRef &RHS) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_concat(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*LHS).AST,
+                                     ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+  SMTExprRef mkFPtoFP(ಸ್ಥಿರಾಂಕ SMTExprRef &From, ಸ್ಥಿರಾಂಕ SMTSortRef &ಗಮ್ಯ) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
         Context,
-        Z3_mk_fpa_to_fp_float(Context.Context, toZ3Expr(*RoundingMode).AST,
-                              toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
+        Z3_mk_fpa_ಗಮ್ಯ_fp_float(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                              ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*From).AST, ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(*ಗಮ್ಯ).ವಿಂಗಡಿಸು_2)));
   }
 
-  SMTExprRef mkSBVtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+  SMTExprRef mkSBVtoFP(ಸ್ಥಿರಾಂಕ SMTExprRef &From, ಸ್ಥಿರಾಂಕ SMTSortRef &ಗಮ್ಯ) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
         Context,
-        Z3_mk_fpa_to_fp_signed(Context.Context, toZ3Expr(*RoundingMode).AST,
-                               toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
+        Z3_mk_fpa_ಗಮ್ಯ_fp_signed(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                               ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*From).AST, ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(*ಗಮ್ಯ).ವಿಂಗಡಿಸು_2)));
   }
 
-  SMTExprRef mkUBVtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+  SMTExprRef mkUBVtoFP(ಸ್ಥಿರಾಂಕ SMTExprRef &From, ಸ್ಥಿರಾಂಕ SMTSortRef &ಗಮ್ಯ) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
         Context,
-        Z3_mk_fpa_to_fp_unsigned(Context.Context, toZ3Expr(*RoundingMode).AST,
-                                 toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
+        Z3_mk_fpa_ಗಮ್ಯ_fp_unsigned(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                                 ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*From).AST, ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(*ಗಮ್ಯ).ವಿಂಗಡಿಸು_2)));
   }
 
-  SMTExprRef mkFPtoSBV(const SMTExprRef &From, unsigned ToWidth) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_to_sbv(Context.Context, toZ3Expr(*RoundingMode).AST,
-                                  toZ3Expr(*From).AST, ToWidth)));
+  SMTExprRef mkFPtoSBV(ಸ್ಥಿರಾಂಕ SMTExprRef &From, ಚಿಹ್ನೆರಹಿತ ಗಮ್ಯ_ಅಗಲ) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_fpa_ಗಮ್ಯ_sbv(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                                  ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*From).AST, ಗಮ್ಯ_ಅಗಲ)));
   }
 
-  SMTExprRef mkFPtoUBV(const SMTExprRef &From, unsigned ToWidth) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_to_ubv(Context.Context, toZ3Expr(*RoundingMode).AST,
-                                  toZ3Expr(*From).AST, ToWidth)));
+  SMTExprRef mkFPtoUBV(ಸ್ಥಿರಾಂಕ SMTExprRef &From, ಚಿಹ್ನೆರಹಿತ ಗಮ್ಯ_ಅಗಲ) override {
+    SMTExprRef Rounding_ಬಹುಲಕ = get_Float_Rounding_ಬಹುಲಕ();
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_fpa_ಗಮ್ಯ_ubv(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Rounding_ಬಹುಲಕ).AST,
+                                  ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*From).AST, ಗಮ್ಯ_ಅಗಲ)));
   }
 
-  SMTExprRef mkBoolean(const bool b) override {
-    return newExprRef(Z3Expr(Context, b ? Z3_mk_true(Context.Context)
+  SMTExprRef mkBoolean(ಸ್ಥಿರಾಂಕ ತಾರ್ಕಿಕ b) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, b ? Z3_mk_true(Context.Context)
                                         : Z3_mk_false(Context.Context)));
   }
 
-  SMTExprRef mkBitvector(const llvm::APSInt Int, unsigned BitWidth) override {
-    const Z3_sort Z3Sort = toZ3Sort(*getBitvectorSort(BitWidth)).Sort;
+  SMTExprRef mkBitvector(ಸ್ಥಿರಾಂಕ llvm::APSInt Int, ಚಿಹ್ನೆರಹಿತ ಬಿಟ್_ಅಗಲ_2) override {
+    ಸ್ಥಿರಾಂಕ Z3_ವಿಂಗಡಿಸು_2 Z3_ವಿಂಗಡಿಸು = ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(*get_Bitvector_ವಿಂಗಡಿಸು(ಬಿಟ್_ಅಗಲ_2)).ವಿಂಗಡಿಸು_2;
 
     // Slow path, when 64 bits are not enough.
-    if (LLVM_UNLIKELY(!Int.isRepresentableByInt64())) {
-      SmallString<40> Buffer;
-      Int.toString(Buffer, 10);
-      return newExprRef(Z3Expr(
-          Context, Z3_mk_numeral(Context.Context, Buffer.c_str(), Z3Sort)));
+    ಆದರೆ (LLVM_UNLIKELY(!Int.isRepresentableByInt64())) {
+      SmallString<40> ಬಫರ್;
+      Int.ಗಮ್ಯ_String(ಬಫರ್, 10);
+      ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+          Context, Z3_mk_numeral(Context.Context, ಬಫರ್.c_str(), Z3_ವಿಂಗಡಿಸು)));
     }
 
-    const int64_t BitReprAsSigned = Int.getExtValue();
-    const uint64_t BitReprAsUnsigned =
-        reinterpret_cast<const uint64_t &>(BitReprAsSigned);
+    ಸ್ಥಿರಾಂಕ int64_t ಬಿಟ್_Repr_As_Signed = Int.get_Ext_ಮೌಲ್ಯ();
+    ಸ್ಥಿರಾಂಕ uint64_t ಬಿಟ್_Repr_As_Unsigned =
+        reinterpret_cast<ಸ್ಥಿರಾಂಕ uint64_t &>(ಬಿಟ್_Repr_As_Signed);
 
     Z3_ast Literal =
         Int.isSigned()
-            ? Z3_mk_int64(Context.Context, BitReprAsSigned, Z3Sort)
-            : Z3_mk_unsigned_int64(Context.Context, BitReprAsUnsigned, Z3Sort);
-    return newExprRef(Z3Expr(Context, Literal));
+            ? Z3_mk_int64(Context.Context, ಬಿಟ್_Repr_As_Signed, Z3_ವಿಂಗಡಿಸು)
+            : Z3_mk_unsigned_int64(Context.Context, ಬಿಟ್_Repr_As_Unsigned, Z3_ವಿಂಗಡಿಸು);
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Literal));
   }
 
-  SMTExprRef mkFloat(const llvm::APFloat Float) override {
-    SMTSortRef Sort =
-        getFloatSort(llvm::APFloat::semanticsSizeInBits(Float.getSemantics()));
+  SMTExprRef mkFloat(ಸ್ಥಿರಾಂಕ llvm::APFloat Float) override {
+    SMTSortRef ವಿಂಗಡಿಸು_2 =
+        get_Float_ವಿಂಗಡಿಸು(llvm::APFloat::semantics_ಗಾತ್ರ_ಒಳ_ಬಿಟ್ಟುಗಳು(Float.getSemantics()));
 
-    llvm::APSInt Int = llvm::APSInt(Float.bitcastToAPInt(), false);
-    SMTExprRef Z3Int = mkBitvector(Int, Int.getBitWidth());
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_to_fp_bv(Context.Context, toZ3Expr(*Z3Int).AST,
-                                    toZ3Sort(*Sort).Sort)));
+    llvm::APSInt Int = llvm::APSInt(Float.bitcast_ಗಮ್ಯ_APInt(), ಸುಳ್ಳು);
+    SMTExprRef Z3Int = mkBitvector(Int, Int.get_ಬಿಟ್_ಅಗಲ());
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(
+        Context, Z3_mk_fpa_ಗಮ್ಯ_fp_bv(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Z3Int).AST,
+                                    ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(*ವಿಂಗಡಿಸು_2).ವಿಂಗಡಿಸು_2)));
   }
 
-  SMTExprRef mkSymbol(const char *Name, SMTSortRef Sort) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_const(Context.Context,
-                                    Z3_mk_string_symbol(Context.Context, Name),
-                                    toZ3Sort(*Sort).Sort)));
+  SMTExprRef mk_ಚಿಹ್ನೆ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *Name, SMTSortRef ವಿಂಗಡಿಸು_2) override {
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_const(Context.Context,
+                                    Z3_mk_string_ಚಿಹ್ನೆ(Context.Context, Name),
+                                    ಗಮ್ಯ_Z3_ವಿಂಗಡಿಸು(*ವಿಂಗಡಿಸು_2).ವಿಂಗಡಿಸು_2)));
   }
 
-  llvm::APSInt getBitvector(const SMTExprRef &Exp, unsigned BitWidth,
-                            bool isUnsigned) override {
-    return llvm::APSInt(
-        llvm::APInt(BitWidth,
-                    Z3_get_numeral_string(Context.Context, toZ3Expr(*Exp).AST),
+  llvm::APSInt getBitvector(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp, ಚಿಹ್ನೆರಹಿತ ಬಿಟ್_ಅಗಲ_2,
+                            ತಾರ್ಕಿಕ isUnsigned) override {
+    ಹಿಂತಿರುಗಿ llvm::APSInt(
+        llvm::APInt(ಬಿಟ್_ಅಗಲ_2,
+                    Z3_get_numeral_string(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST),
                     10),
         isUnsigned);
   }
 
-  bool getBoolean(const SMTExprRef &Exp) override {
-    return Z3_get_bool_value(Context.Context, toZ3Expr(*Exp).AST) == Z3_L_TRUE;
+  ತಾರ್ಕಿಕ getBoolean(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp) override {
+    ಹಿಂತಿರುಗಿ Z3_get_bool_ಮೌಲ್ಯ(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST) == Z3_L_TRUE;
   }
 
-  SMTExprRef getFloatRoundingMode() override {
+  SMTExprRef get_Float_Rounding_ಬಹುಲಕ() override {
     // TODO: Don't assume nearest ties to even rounding mode
-    return newExprRef(Z3Expr(Context, Z3_mk_fpa_rne(Context.Context)));
+    ಹಿಂತಿರುಗಿ new_ಅಭಿವ್ಯಕ್ತಿ_Ref(Z3_ಅಭಿವ್ಯಕ್ತಿ(Context, Z3_mk_fpa_rne(Context.Context)));
   }
 
-  bool toAPFloat(const SMTSortRef &Sort, const SMTExprRef &AST,
-                 llvm::APFloat &Float, bool useSemantics) {
-    assert(Sort->isFloatSort() && "Unsupported sort to floating-point!");
+  ತಾರ್ಕಿಕ ಗಮ್ಯ_APFloat(ಸ್ಥಿರಾಂಕ SMTSortRef &ವಿಂಗಡಿಸು_2, ಸ್ಥಿರಾಂಕ SMTExprRef &AST,
+                 llvm::APFloat &Float, ತಾರ್ಕಿಕ useSemantics) {
+    ಪ್ರತಿಜ್ಞಾ(ವಿಂಗಡಿಸು_2->is_Float_ವಿಂಗಡಿಸು() && "Unsupported sort to floating-point!");
 
-    llvm::APSInt Int(Sort->getFloatSortSize(), true);
-    const llvm::fltSemantics &Semantics =
-        getFloatSemantics(Sort->getFloatSortSize());
-    SMTSortRef BVSort = getBitvectorSort(Sort->getFloatSortSize());
-    if (!toAPSInt(BVSort, AST, Int, true)) {
-      return false;
+    llvm::APSInt Int(ವಿಂಗಡಿಸು_2->get_Float_ವಿಂಗಡಿಸು_ಗಾತ್ರ(), ನಿಜ);
+    ಸ್ಥಿರಾಂಕ llvm::fltSemantics &Semantics =
+        getFloatSemantics(ವಿಂಗಡಿಸು_2->get_Float_ವಿಂಗಡಿಸು_ಗಾತ್ರ());
+    SMTSortRef BVSort = get_Bitvector_ವಿಂಗಡಿಸು(ವಿಂಗಡಿಸು_2->get_Float_ವಿಂಗಡಿಸು_ಗಾತ್ರ());
+    ಆದರೆ (!ಗಮ್ಯ_APSInt(BVSort, AST, Int, ನಿಜ)) {
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
 
-    if (useSemantics && !areEquivalent(Float.getSemantics(), Semantics)) {
-      assert(false && "Floating-point types don't match!");
-      return false;
+    ಆದರೆ (useSemantics && !areEquivalent(Float.getSemantics(), Semantics)) {
+      ಪ್ರತಿಜ್ಞಾ(ಸುಳ್ಳು && "Floating-point types don't match!");
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
     }
 
     Float = llvm::APFloat(Semantics, Int);
-    return true;
+    ಹಿಂತಿರುಗಿ ನಿಜ;
   }
 
-  bool toAPSInt(const SMTSortRef &Sort, const SMTExprRef &AST,
-                llvm::APSInt &Int, bool useSemantics) {
-    if (Sort->isBitvectorSort()) {
-      if (useSemantics && Int.getBitWidth() != Sort->getBitvectorSortSize()) {
-        assert(false && "Bitvector types don't match!");
-        return false;
+  ತಾರ್ಕಿಕ ಗಮ್ಯ_APSInt(ಸ್ಥಿರಾಂಕ SMTSortRef &ವಿಂಗಡಿಸು_2, ಸ್ಥಿರಾಂಕ SMTExprRef &AST,
+                llvm::APSInt &Int, ತಾರ್ಕಿಕ useSemantics) {
+    ಆದರೆ (ವಿಂಗಡಿಸು_2->is_Bitvector_ವಿಂಗಡಿಸು()) {
+      ಆದರೆ (useSemantics && Int.get_ಬಿಟ್_ಅಗಲ() != ವಿಂಗಡಿಸು_2->get_Bitvector_ವಿಂಗಡಿಸು_ಗಾತ್ರ()) {
+        ಪ್ರತಿಜ್ಞಾ(ಸುಳ್ಳು && "Bitvector types don't match!");
+        ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
       }
 
       // FIXME: This function is also used to retrieve floating-point values,
       // which can be 16, 32, 64 or 128 bits long. In the future, we need proper
       // calls in the backend to retrieve floating-points and its special values
       // (NaN, +/-infinity, +/-zero).
-      Int = getBitvector(AST, Int.getBitWidth(), Int.isUnsigned());
-      return true;
+      Int = getBitvector(AST, Int.get_ಬಿಟ್_ಅಗಲ(), Int.isUnsigned());
+      ಹಿಂತಿರುಗಿ ನಿಜ;
     }
 
-    if (Sort->isBooleanSort()) {
-      if (useSemantics && Int.getBitWidth() < 1) {
-        assert(false && "Boolean type doesn't match!");
-        return false;
+    ಆದರೆ (ವಿಂಗಡಿಸು_2->is_Boolean_ವಿಂಗಡಿಸು()) {
+      ಆದರೆ (useSemantics && Int.get_ಬಿಟ್_ಅಗಲ() < 1) {
+        ಪ್ರತಿಜ್ಞಾ(ಸುಳ್ಳು && "Boolean type doesn't match!");
+        ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
       }
 
-      Int = llvm::APSInt(llvm::APInt(Int.getBitWidth(), getBoolean(AST)),
+      Int = llvm::APSInt(llvm::APInt(Int.get_ಬಿಟ್_ಅಗಲ(), getBoolean(AST)),
                          Int.isUnsigned());
-      return true;
+      ಹಿಂತಿರುಗಿ ನಿಜ;
     }
 
     llvm_unreachable("Unsupported sort to integer!");
   }
 
-  bool getInterpretation(const SMTExprRef &Exp, llvm::APSInt &Int) override {
+  ತಾರ್ಕಿಕ getInterpretation(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp, llvm::APSInt &Int) override {
     Z3Model Model(Context, Z3_solver_get_model(Context.Context, Solver));
     Z3_func_decl Func = Z3_get_app_decl(
-        Context.Context, Z3_to_app(Context.Context, toZ3Expr(*Exp).AST));
-    if (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
-      return false;
+        Context.Context, Z3_ಗಮ್ಯ_app(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST));
+    ಆದರೆ (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-    SMTExprRef Assign = newExprRef(
-        Z3Expr(Context,
+    SMTExprRef ನಿಯೋಜಿಸು_2 = new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context,
                Z3_model_get_const_interp(Context.Context, Model.Model, Func)));
-    SMTSortRef Sort = getSort(Assign);
-    return toAPSInt(Sort, Assign, Int, true);
+    SMTSortRef ವಿಂಗಡಿಸು_2 = get_ವಿಂಗಡಿಸು(ನಿಯೋಜಿಸು_2);
+    ಹಿಂತಿರುಗಿ ಗಮ್ಯ_APSInt(ವಿಂಗಡಿಸು_2, ನಿಯೋಜಿಸು_2, Int, ನಿಜ);
   }
 
-  bool getInterpretation(const SMTExprRef &Exp, llvm::APFloat &Float) override {
+  ತಾರ್ಕಿಕ getInterpretation(ಸ್ಥಿರಾಂಕ SMTExprRef &Exp, llvm::APFloat &Float) override {
     Z3Model Model(Context, Z3_solver_get_model(Context.Context, Solver));
     Z3_func_decl Func = Z3_get_app_decl(
-        Context.Context, Z3_to_app(Context.Context, toZ3Expr(*Exp).AST));
-    if (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
-      return false;
+        Context.Context, Z3_ಗಮ್ಯ_app(Context.Context, ಗಮ್ಯ_Z3_ಅಭಿವ್ಯಕ್ತಿ(*Exp).AST));
+    ಆದರೆ (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-    SMTExprRef Assign = newExprRef(
-        Z3Expr(Context,
+    SMTExprRef ನಿಯೋಜಿಸು_2 = new_ಅಭಿವ್ಯಕ್ತಿ_Ref(
+        Z3_ಅಭಿವ್ಯಕ್ತಿ(Context,
                Z3_model_get_const_interp(Context.Context, Model.Model, Func)));
-    SMTSortRef Sort = getSort(Assign);
-    return toAPFloat(Sort, Assign, Float, true);
+    SMTSortRef ವಿಂಗಡಿಸು_2 = get_ವಿಂಗಡಿಸು(ನಿಯೋಜಿಸು_2);
+    ಹಿಂತಿರುಗಿ ಗಮ್ಯ_APFloat(ವಿಂಗಡಿಸು_2, ನಿಯೋಜಿಸು_2, Float, ನಿಜ);
   }
 
-  std::optional<bool> check() const override {
-    Z3_solver_set_params(Context.Context, Solver, Params);
+  std::optional<ತಾರ್ಕಿಕ> check() ಸ್ಥಿರಾಂಕ override {
+    Z3_solver_ಗಣ_params(Context.Context, Solver, Params);
     Z3_lbool res = Z3_solver_check(Context.Context, Solver);
-    if (res == Z3_L_TRUE)
-      return true;
+    ಆದರೆ (res == Z3_L_TRUE)
+      ಹಿಂತಿರುಗಿ ನಿಜ;
 
-    if (res == Z3_L_FALSE)
-      return false;
+    ಆದರೆ (res == Z3_L_FALSE)
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು;
 
-    return std::nullopt;
+    ಹಿಂತಿರುಗಿ std::nullopt;
   }
 
-  void push() override { return Z3_solver_push(Context.Context, Solver); }
+  ಶೂನ್ಯ ತಳ್ಳು() override { ಹಿಂತಿರುಗಿ Z3_solver_ತಳ್ಳು(Context.Context, Solver); }
 
-  void pop(unsigned NumStates = 1) override {
-    assert(Z3_solver_get_num_scopes(Context.Context, Solver) >= NumStates);
-    return Z3_solver_pop(Context.Context, Solver, NumStates);
+  ಶೂನ್ಯ ತೆಗೆ(ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಸ್ಥಿತಿಗಳು = 1) override {
+    ಪ್ರತಿಜ್ಞಾ(Z3_solver_get_ಅಂಕೆ_scopes(Context.Context, Solver) >= ಅಂಕೆ_ಸ್ಥಿತಿಗಳು);
+    ಹಿಂತಿರುಗಿ Z3_solver_ತೆಗೆ(Context.Context, Solver, ಅಂಕೆ_ಸ್ಥಿತಿಗಳು);
   }
 
-  bool isFPSupported() override { return true; }
+  ತಾರ್ಕಿಕ isFPSupported() override { ಹಿಂತಿರುಗಿ ನಿಜ; }
 
   /// Reset the solver and remove all constraints.
-  void reset() override { Z3_solver_reset(Context.Context, Solver); }
+  ಶೂನ್ಯ reset() override { Z3_solver_reset(Context.Context, Solver); }
 
-  void print(raw_ostream &OS) const override {
-    OS << Z3_solver_to_string(Context.Context, Solver);
+  ಶೂನ್ಯ print(raw_ostream &OS) ಸ್ಥಿರಾಂಕ override {
+    OS << Z3_solver_ಗಮ್ಯ_string(Context.Context, Solver);
   }
 
-  void setUnsignedParam(StringRef Key, unsigned Value) override {
-    Z3_symbol Sym = Z3_mk_string_symbol(Context.Context, Key.str().c_str());
-    Z3_params_set_uint(Context.Context, Params, Sym, Value);
+  ಶೂನ್ಯ ಗಣ_Unsigned_Param(StringRef ಕೀಲಿ, ಚಿಹ್ನೆರಹಿತ ಮೌಲ್ಯ) override {
+    Z3_ಚಿಹ್ನೆ Sym = Z3_mk_string_ಚಿಹ್ನೆ(Context.Context, ಕೀಲಿ.str().c_str());
+    Z3_params_ಗಣ_uint(Context.Context, Params, Sym, ಮೌಲ್ಯ);
   }
 
-  void setBoolParam(StringRef Key, bool Value) override {
-    Z3_symbol Sym = Z3_mk_string_symbol(Context.Context, Key.str().c_str());
-    Z3_params_set_bool(Context.Context, Params, Sym, Value);
+  ಶೂನ್ಯ ಗಣ_Bool_Param(StringRef ಕೀಲಿ, ತಾರ್ಕಿಕ ಮೌಲ್ಯ) override {
+    Z3_ಚಿಹ್ನೆ Sym = Z3_mk_string_ಚಿಹ್ನೆ(Context.Context, ಕೀಲಿ.str().c_str());
+    Z3_params_ಗಣ_bool(Context.Context, Params, Sym, ಮೌಲ್ಯ);
   }
 
-  std::unique_ptr<SMTSolverStatistics> getStatistics() const override;
+  std::unique_ptr<SMTSolverStatistics> getStatistics() ಸ್ಥಿರಾಂಕ override;
 }; // end class Z3Solver
 
-class Z3Statistics final : public SMTSolverStatistics {
-public:
-  double getDouble(StringRef Key) const override {
-    auto It = DoubleValues.find(Key.str());
-    assert(It != DoubleValues.end());
-    return It->second;
+ವರ್ಗ Z3Statistics final : ಸಾರ್ವಜನಿಕ SMTSolverStatistics {
+ಸಾರ್ವಜನಿಕ:
+  ದ್ವಿಗುಣ getDouble(StringRef ಕೀಲಿ) ಸ್ಥಿರಾಂಕ override {
+    ಸ್ವಯಂಚಾಲಿತ It = Double_ಮೌಲ್ಯಗಳು.ಕಂಡುಹಿಡಿ(ಕೀಲಿ.str());
+    ಪ್ರತಿಜ್ಞಾ(It != Double_ಮೌಲ್ಯಗಳು.ಕೊನೆ());
+    ಹಿಂತಿರುಗಿ It->ಎರಡನೇ_2;
   };
-  unsigned getUnsigned(StringRef Key) const override {
-    auto It = UnsignedValues.find(Key.str());
-    if (It == UnsignedValues.end())
-      return 0;
-    return It->second;
+  ಚಿಹ್ನೆರಹಿತ getUnsigned(StringRef ಕೀಲಿ) ಸ್ಥಿರಾಂಕ override {
+    ಸ್ವಯಂಚಾಲಿತ It = Unsigned_ಮೌಲ್ಯಗಳು.ಕಂಡುಹಿಡಿ(ಕೀಲಿ.str());
+    ಆದರೆ (It == Unsigned_ಮೌಲ್ಯಗಳು.ಕೊನೆ())
+      ಹಿಂತಿರುಗಿ 0;
+    ಹಿಂತಿರುಗಿ It->ಎರಡನೇ_2;
   };
 
-  void print(raw_ostream &OS) const override {
-    for (const auto &E : UnsignedValues)
-      OS << E.first() << ": " << E.second << '\n';
-    for (const auto &E : DoubleValues) {
-      write_double(OS << E.first() << ": ", E.second, FloatStyle::Fixed);
+  ಶೂನ್ಯ print(raw_ostream &OS) ಸ್ಥಿರಾಂಕ override {
+    ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &E : Unsigned_ಮೌಲ್ಯಗಳು)
+      OS << E.ಮೊದಲ_2() << ": " << E.ಎರಡನೇ_2 << '\n';
+    ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಸ್ವಯಂಚಾಲಿತ &E : Double_ಮೌಲ್ಯಗಳು) {
+      write_double(OS << E.ಮೊದಲ_2() << ": ", E.ಎರಡನೇ_2, FloatStyle::Fixed);
       OS << '\n';
     }
   }
 
-private:
-  friend class Z3Solver;
-  StringMap<unsigned> UnsignedValues;
-  StringMap<double> DoubleValues;
+ಖಾಸಗಿ:
+  ಮಿತ್ರ ವರ್ಗ Z3Solver;
+  StringMap<ಚಿಹ್ನೆರಹಿತ> Unsigned_ಮೌಲ್ಯಗಳು;
+  StringMap<ದ್ವಿಗುಣ> Double_ಮೌಲ್ಯಗಳು;
 };
 
-std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() const {
-  auto const &C = Context.Context;
+std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() ಸ್ಥಿರಾಂಕ {
+  ಸ್ವಯಂಚಾಲಿತ ಸ್ಥಿರಾಂಕ &C = Context.Context;
   Z3_stats S = Z3_solver_get_statistics(C, Solver);
   Z3_stats_inc_ref(C, S);
   llvm::scope_exit StatsGuard([&C, &S] { Z3_stats_dec_ref(C, S); });
-  Z3Statistics Result;
+  Z3Statistics ಫಲಿತಾಂಶ;
 
-  unsigned NumKeys = Z3_stats_size(C, S);
-  for (unsigned Idx = 0; Idx < NumKeys; ++Idx) {
-    const char *Key = Z3_stats_get_key(C, S, Idx);
-    if (Z3_stats_is_uint(C, S, Idx)) {
-      auto Value = Z3_stats_get_uint_value(C, S, Idx);
-      Result.UnsignedValues.try_emplace(Key, Value);
-    } else {
-      assert(Z3_stats_is_double(C, S, Idx));
-      auto Value = Z3_stats_get_double_value(C, S, Idx);
-      Result.DoubleValues.try_emplace(Key, Value);
+  ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_ಕೀಲಿಗಳು = Z3_stats_ಗಾತ್ರ(C, S);
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ Idx = 0; Idx < ಅಂಕೆ_ಕೀಲಿಗಳು; ++Idx) {
+    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ = Z3_stats_get_ಕೀಲಿ(C, S, Idx);
+    ಆದರೆ (Z3_stats_is_uint(C, S, Idx)) {
+      ಸ್ವಯಂಚಾಲಿತ ಮೌಲ್ಯ = Z3_stats_get_uint_ಮೌಲ್ಯ(C, S, Idx);
+      ಫಲಿತಾಂಶ.Unsigned_ಮೌಲ್ಯಗಳು.try_emplace(ಕೀಲಿ, ಮೌಲ್ಯ);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+      ಪ್ರತಿಜ್ಞಾ(Z3_stats_is_double(C, S, Idx));
+      ಸ್ವಯಂಚಾಲಿತ ಮೌಲ್ಯ = Z3_stats_get_double_ಮೌಲ್ಯ(C, S, Idx);
+      ಫಲಿತಾಂಶ.Double_ಮೌಲ್ಯಗಳು.try_emplace(ಕೀಲಿ, ಮೌಲ್ಯ);
     }
   }
-  return std::make_unique<Z3Statistics>(std::move(Result));
+  ಹಿಂತಿರುಗಿ std::make_unique<Z3Statistics>(std::move(ಫಲಿತಾಂಶ));
 }
 
 } // end anonymous namespace
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 llvm::SMTSolverRef llvm::CreateZ3Solver() {
-#if LLVM_WITH_Z3
-  return std::make_unique<Z3Solver>();
-#else
+#ಆದರೆ LLVM_WITH_Z3
+  ಹಿಂತಿರುಗಿ std::make_unique<Z3Solver>();
+#ಇಲ್ಲದಿದ್ದರೆ
   llvm::report_fatal_error("LLVM was not compiled with Z3 support, rebuild "
                            "with -DLLVM_ENABLE_Z3_SOLVER=ON",
-                           false);
-  return nullptr;
-#endif
+                           ಸುಳ್ಳು);
+  ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void SMTSort::dump() const { print(llvm::errs()); }
-LLVM_DUMP_METHOD void SMTExpr::dump() const { print(llvm::errs()); }
-LLVM_DUMP_METHOD void SMTSolver::dump() const { print(llvm::errs()); }
-LLVM_DUMP_METHOD void SMTSolverStatistics::dump() const { print(llvm::errs()); }
-#endif
+#ಆದರೆ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_ವಿಧಾನ ಶೂನ್ಯ SMTSort::dump() ಸ್ಥಿರಾಂಕ { print(llvm::errs()); }
+LLVM_DUMP_ವಿಧಾನ ಶೂನ್ಯ SMTExpr::dump() ಸ್ಥಿರಾಂಕ { print(llvm::errs()); }
+LLVM_DUMP_ವಿಧಾನ ಶೂನ್ಯ SMTSolver::dump() ಸ್ಥಿರಾಂಕ { print(llvm::errs()); }
+LLVM_DUMP_ವಿಧಾನ ಶೂನ್ಯ SMTSolverStatistics::dump() ಸ್ಥಿರಾಂಕ { print(llvm::errs()); }
+#ಆದರೆ_ಅಂತ್ಯ

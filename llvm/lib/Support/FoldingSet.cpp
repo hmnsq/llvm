@@ -11,212 +11,212 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <cassert>
-#include <cstring>
-using namespace llvm;
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/FoldingSet.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/STLExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/StringRef.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Allocator.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/MathExtras.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/SwapByteOrder.h"
+#ಅನ್ತರ್ಭಾವ <cassert>
+#ಅನ್ತರ್ಭಾವ <cstring>
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeIDRef Implementation
 
-bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
-  if (LHS.size() != RHS.size())
-    return LHS.size() < RHS.size();
-  return memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
+ತಾರ್ಕಿಕ llvm::ಕ್ರಿಯಾಕಾರಕ<(Folding_ಗಣ_ಗಂಟು_IDRef LHS, Folding_ಗಣ_ಗಂಟು_IDRef RHS) {
+  ಆದರೆ (LHS.ಗಾತ್ರ_3() != RHS.ಗಾತ್ರ_3())
+    ಹಿಂತಿರುಗಿ LHS.ಗಾತ್ರ_3() < RHS.ಗಾತ್ರ_3();
+  ಹಿಂತಿರುಗಿ memcmp(LHS.ದತ್ತಾಂಶ(), RHS.ದತ್ತಾಂಶ(), LHS.ಗಾತ್ರ_3() * ಗಾತ್ರ(ಚಿಹ್ನೆರಹಿತ)) < 0;
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeID Implementation
 
-void FoldingSetNodeID::AddString(StringRef String) {
-  unsigned Size = String.size();
+ಶೂನ್ಯ Folding_ಗಣ_ಗಂಟು_ID::ಕೂಡಿಸು_String(StringRef String) {
+  ಚಿಹ್ನೆರಹಿತ ಗಾತ್ರ_2 = String.ಗಾತ್ರ_3();
 
-  unsigned NumInserts = 1 + divideCeil(Size, 4);
-  Bits.reserve(Bits.size() + NumInserts);
+  ಚಿಹ್ನೆರಹಿತ ಅಂಕೆ_Inserts = 1 + divideCeil(ಗಾತ್ರ_2, 4);
+  ಬಿಟ್ಟುಗಳು_2.reserve(ಬಿಟ್ಟುಗಳು_2.ಗಾತ್ರ_3() + ಅಂಕೆ_Inserts);
 
-  Bits.push_back(Size);
-  if (!Size)
-    return;
+  ಬಿಟ್ಟುಗಳು_2.ತಳ್ಳು_ಹಿಂಭಾಗ(ಗಾತ್ರ_2);
+  ಆದರೆ (!ಗಾತ್ರ_2)
+    ಹಿಂತಿರುಗಿ;
 
-  unsigned Units = Size / 4;
-  unsigned Pos = 0;
-  const unsigned *Base = (const unsigned *)String.data();
+  ಚಿಹ್ನೆರಹಿತ Units = ಗಾತ್ರ_2 / 4;
+  ಚಿಹ್ನೆರಹಿತ Pos = 0;
+  ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ *ತಳ = (ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ *)String.ದತ್ತಾಂಶ();
 
   // If the string is aligned do a bulk transfer.
-  if (!((intptr_t)Base & 3)) {
-    Bits.append(Base, Base + Units);
+  ಆದರೆ (!((intptr_t)ತಳ & 3)) {
+    ಬಿಟ್ಟುಗಳು_2.append(ತಳ, ತಳ + Units);
     Pos = (Units + 1) * 4;
-  } else {
+  } ಇಲ್ಲದಿದ್ದರೆ {
     // Otherwise do it the hard way.
     // To be compatible with above bulk transfer, we need to take endianness
     // into account.
     static_assert(sys::IsBigEndianHost || sys::IsLittleEndianHost,
                   "Unexpected host endianness");
-    if (sys::IsBigEndianHost) {
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 4] << 24) |
-                     ((unsigned char)String[Pos - 3] << 16) |
-                     ((unsigned char)String[Pos - 2] << 8) |
-                     (unsigned char)String[Pos - 1];
-        Bits.push_back(V);
+    ಆದರೆ (sys::IsBigEndianHost) {
+      ಗಾಗಿ (Pos += 4; Pos <= ಗಾತ್ರ_2; Pos += 4) {
+        ಚಿಹ್ನೆರಹಿತ V = ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 4] << 24) |
+                     ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 3] << 16) |
+                     ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 2] << 8) |
+                     (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 1];
+        ಬಿಟ್ಟುಗಳು_2.ತಳ್ಳು_ಹಿಂಭಾಗ(V);
       }
-    } else { // Little-endian host
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 1] << 24) |
-                     ((unsigned char)String[Pos - 2] << 16) |
-                     ((unsigned char)String[Pos - 3] << 8) |
-                     (unsigned char)String[Pos - 4];
-        Bits.push_back(V);
+    } ಇಲ್ಲದಿದ್ದರೆ { // Little-endian host
+      ಗಾಗಿ (Pos += 4; Pos <= ಗಾತ್ರ_2; Pos += 4) {
+        ಚಿಹ್ನೆರಹಿತ V = ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 1] << 24) |
+                     ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 2] << 16) |
+                     ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 3] << 8) |
+                     (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[Pos - 4];
+        ಬಿಟ್ಟುಗಳು_2.ತಳ್ಳು_ಹಿಂಭಾಗ(V);
       }
     }
   }
 
   // With the leftover bits.
-  unsigned V = 0;
+  ಚಿಹ್ನೆರಹಿತ V = 0;
   // Pos will have overshot size by 4 - #bytes left over.
   // No need to take endianness into account here - this is always executed.
-  switch (Pos - Size) {
-  case 1:
-    V = (V << 8) | (unsigned char)String[Size - 3];
+  ಆಯ್ಕೆ (Pos - ಗಾತ್ರ_2) {
+  ಸ್ಥಿತಿ 1:
+    V = (V << 8) | (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[ಗಾತ್ರ_2 - 3];
     [[fallthrough]];
-  case 2:
-    V = (V << 8) | (unsigned char)String[Size - 2];
+  ಸ್ಥಿತಿ 2:
+    V = (V << 8) | (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[ಗಾತ್ರ_2 - 2];
     [[fallthrough]];
-  case 3:
-    V = (V << 8) | (unsigned char)String[Size - 1];
-    break;
-  default:
-    return; // Nothing left.
+  ಸ್ಥಿತಿ 3:
+    V = (V << 8) | (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)String[ಗಾತ್ರ_2 - 1];
+    ನಿಲ್ಲಿಸು;
+  ಪೂರ್ವನಿಯೋಜಿತ:
+    ಹಿಂತಿರುಗಿ; // Nothing left.
   }
 
-  Bits.push_back(V);
+  ಬಿಟ್ಟುಗಳು_2.ತಳ್ಳು_ಹಿಂಭಾಗ(V);
 }
 
-void FoldingSetNodeID::AddNodeID(const FoldingSetNodeID &ID) {
-  Bits.append(ID.Bits.begin(), ID.Bits.end());
+ಶೂನ್ಯ Folding_ಗಣ_ಗಂಟು_ID::ಕೂಡಿಸು_ಗಂಟು_ID(ಸ್ಥಿರಾಂಕ Folding_ಗಣ_ಗಂಟು_ID &ID) {
+  ಬಿಟ್ಟುಗಳು_2.append(ID.ಬಿಟ್ಟುಗಳು_2.begin(), ID.ಬಿಟ್ಟುಗಳು_2.ಕೊನೆ());
 }
 
-FoldingSetNodeIDRef
-FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
-  unsigned *New = Allocator.Allocate<unsigned>(Bits.size());
-  llvm::uninitialized_copy(Bits, New);
-  return FoldingSetNodeIDRef(New, Bits.size());
+Folding_ಗಣ_ಗಂಟು_IDRef
+Folding_ಗಣ_ಗಂಟು_ID::Intern(BumpPtrAllocator &Allocator) ಸ್ಥಿರಾಂಕ {
+  ಚಿಹ್ನೆರಹಿತ *New = Allocator.Allocate<ಚಿಹ್ನೆರಹಿತ>(ಬಿಟ್ಟುಗಳು_2.ಗಾತ್ರ_3());
+  llvm::uninitialized_copy(ಬಿಟ್ಟುಗಳು_2, New);
+  ಹಿಂತಿರುಗಿ Folding_ಗಣ_ಗಂಟು_IDRef(New, ಬಿಟ್ಟುಗಳು_2.ಗಾತ್ರ_3());
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetBase Implementation
 
-FoldingSetBase::FoldingSetBase(unsigned Log2InitSize) {
-  assert(5 < Log2InitSize && Log2InitSize < 32 &&
+Folding_ಗಣ_ತಳ::Folding_ಗಣ_ತಳ(ಚಿಹ್ನೆರಹಿತ Log2_Init_ಗಾತ್ರ) {
+  ಪ್ರತಿಜ್ಞಾ(5 < Log2_Init_ಗಾತ್ರ && Log2_Init_ಗಾತ್ರ < 32 &&
          "Initial hash table size out of range");
-  NumBuckets = 1 << Log2InitSize;
-  Buckets = static_cast<FoldingSetNode **>(
-      safe_calloc(NumBuckets, sizeof(FoldingSetNode *)));
+  ಅಂಕೆ_Buckets = 1 << Log2_Init_ಗಾತ್ರ;
+  Buckets = static_cast<Folding_ಗಣ_ಗಂಟು **>(
+      ಸುರಕ್ಷಿತ_calloc(ಅಂಕೆ_Buckets, ಗಾತ್ರ(Folding_ಗಣ_ಗಂಟು *)));
 }
 
-FoldingSetBase::FoldingSetBase(FoldingSetBase &&Arg)
-    : Buckets(std::exchange(Arg.Buckets, nullptr)),
-      NumBuckets(std::exchange(Arg.NumBuckets, 0)),
-      NumNodes(std::exchange(Arg.NumNodes, 0)) {
+Folding_ಗಣ_ತಳ::Folding_ಗಣ_ತಳ(Folding_ಗಣ_ತಳ &&Arg)
+    : Buckets(std::exchange(Arg.Buckets, ಶೂನ್ಯಸೂಚಕ)),
+      ಅಂಕೆ_Buckets(std::exchange(Arg.ಅಂಕೆ_Buckets, 0)),
+      ಅಂಕೆ_Nodes(std::exchange(Arg.ಅಂಕೆ_Nodes, 0)) {
   Arg.incrementEpoch();
 }
 
-FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
-  if (this == &RHS)
-    return *this;
+Folding_ಗಣ_ತಳ &Folding_ಗಣ_ತಳ::ಕ್ರಿಯಾಕಾರಕ=(Folding_ಗಣ_ತಳ &&RHS) {
+  ಆದರೆ (ಇದು == &RHS)
+    ಹಿಂತಿರುಗಿ *ಇದು;
 
   incrementEpoch();
   RHS.incrementEpoch();
-  free(Buckets); // This may be null if the set is in a moved-from state.
-  Buckets = std::exchange(RHS.Buckets, nullptr);
-  NumBuckets = std::exchange(RHS.NumBuckets, 0);
-  NumNodes = std::exchange(RHS.NumNodes, 0);
-  return *this;
+  ಬಿಡುಗಡೆ(Buckets); // This may be null if the set is in a moved-from state.
+  Buckets = std::exchange(RHS.Buckets, ಶೂನ್ಯಸೂಚಕ);
+  ಅಂಕೆ_Buckets = std::exchange(RHS.ಅಂಕೆ_Buckets, 0);
+  ಅಂಕೆ_Nodes = std::exchange(RHS.ಅಂಕೆ_Nodes, 0);
+  ಹಿಂತಿರುಗಿ *ಇದು;
 }
 
-FoldingSetBase::~FoldingSetBase() { free(Buckets); }
+Folding_ಗಣ_ತಳ::~Folding_ಗಣ_ತಳ() { ಬಿಡುಗಡೆ(Buckets); }
 
-void FoldingSetBase::clear() {
+ಶೂನ್ಯ Folding_ಗಣ_ತಳ::clear() {
   incrementEpoch();
   // Stale hashes are unreachable, so only the occupancy needs resetting.
-  if (NumBuckets)
-    memset(Buckets, 0, NumBuckets * sizeof(FoldingSetNode *));
-  NumNodes = 0;
+  ಆದರೆ (ಅಂಕೆ_Buckets)
+    memset(Buckets, 0, ಅಂಕೆ_Buckets * ಗಾತ್ರ(Folding_ಗಣ_ಗಂಟು *));
+  ಅಂಕೆ_Nodes = 0;
 }
 
-void FoldingSetBase::placeNode(FoldingSetNode *N, uint32_t Hash) {
-  unsigned Mask = NumBuckets - 1;
-  unsigned I = Hash & Mask;
-  while (Buckets[I]) {
-    assert(Buckets[I] != N && "Node already in the folding set");
-    I = (I + 1) & Mask;
+ಶೂನ್ಯ Folding_ಗಣ_ತಳ::ಇರಿಸು_ಗಂಟು(Folding_ಗಣ_ಗಂಟು *N, uint32_t Hash) {
+  ಚಿಹ್ನೆರಹಿತ ಮುಖವಾಡ = ಅಂಕೆ_Buckets - 1;
+  ಚಿಹ್ನೆರಹಿತ I = Hash & ಮುಖವಾಡ;
+  ಆಗ (Buckets[I]) {
+    ಪ್ರತಿಜ್ಞಾ(Buckets[I] != N && "Node already in the folding set");
+    I = (I + 1) & ಮುಖವಾಡ;
   }
   Buckets[I] = N;
-  ++NumNodes;
+  ++ಅಂಕೆ_Nodes;
 }
 
-void FoldingSetBase::grow(unsigned MinNumBuckets) {
+ಶೂನ್ಯ Folding_ಗಣ_ತಳ::grow(ಚಿಹ್ನೆರಹಿತ Min_ಅಂಕೆ_Buckets) {
   // The floor is the smallest size the constructor accepts.
-  unsigned NewBucketCount = std::max(64u, llvm::bit_ceil(MinNumBuckets));
-  assert(NewBucketCount > NumBuckets && "Can't shrink a folding set");
+  ಚಿಹ್ನೆರಹಿತ New_ಪಾತ್ರೆ_ಎಣಿಕೆ = std::max(64u, llvm::ಬಿಟ್_ceil(Min_ಅಂಕೆ_Buckets));
+  ಪ್ರತಿಜ್ಞಾ(New_ಪಾತ್ರೆ_ಎಣಿಕೆ > ಅಂಕೆ_Buckets && "Can't shrink a folding set");
 
-  FoldingSetBase Tmp(llvm::Log2_32(NewBucketCount));
-  for (unsigned I = 0; I != NumBuckets; ++I)
-    if (FoldingSetNode *N = Buckets[I])
-      Tmp.placeNode(N, N->getFoldingSetHash());
+  Folding_ಗಣ_ತಳ Tmp(llvm::Log2_32(New_ಪಾತ್ರೆ_ಎಣಿಕೆ));
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ I = 0; I != ಅಂಕೆ_Buckets; ++I)
+    ಆದರೆ (Folding_ಗಣ_ಗಂಟು *N = Buckets[I])
+      Tmp.ಇರಿಸು_ಗಂಟು(N, N->get_Folding_ಗಣ_Hash());
 
-  *this = std::move(Tmp);
+  *ಇದು = std::move(Tmp);
 }
 
-void FoldingSetBase::reserve(unsigned N) {
-  if (N * 4 <= NumBuckets * 3)
-    return;
+ಶೂನ್ಯ Folding_ಗಣ_ತಳ::reserve(ಚಿಹ್ನೆರಹಿತ N) {
+  ಆದರೆ (N * 4 <= ಅಂಕೆ_Buckets * 3)
+    ಹಿಂತಿರುಗಿ;
   // N + (N + 2) / 3 is ceil(4N/3).
   grow(N + (N + 2) / 3);
 }
 
-void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
-  assert(N && "Cannot insert a null node");
-  assert(Token && "Invalid token!");
+ಶೂನ್ಯ Folding_ಗಣ_ತಳ::ಸೇರಿಸು(Folding_ಗಣ_ಗಂಟು *N, Folding_ಗಣ_ಸೇರಿಸು_Token Token) {
+  ಪ್ರತಿಜ್ಞಾ(N && "Cannot insert a null node");
+  ಪ್ರತಿಜ್ಞಾ(Token && "Invalid token!");
   incrementEpoch();
-  if (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
-    grow(NumBuckets * 2);
+  ಆದರೆ (LLVM_UNLIKELY((ಅಂಕೆ_Nodes + 1) * 4 > ಅಂಕೆ_Buckets * 3))
+    grow(ಅಂಕೆ_Buckets * 2);
   uint32_t Hash = Token.Hash;
-  placeNode(N, Hash);
-  N->setFoldingSetHash(Hash);
+  ಇರಿಸು_ಗಂಟು(N, Hash);
+  N->ಗಣ_Folding_ಗಣ_Hash(Hash);
 }
 
-bool FoldingSetBase::erase(FoldingSetNode *N) {
-  uint32_t Hash = N->getFoldingSetHash();
-  if (Hash == FoldingSetNodeIDRef::NotAHash)
-    return false; // Never inserted.
+ತಾರ್ಕಿಕ Folding_ಗಣ_ತಳ::erase(Folding_ಗಣ_ಗಂಟು *N) {
+  uint32_t Hash = N->get_Folding_ಗಣ_Hash();
+  ಆದರೆ (Hash == Folding_ಗಣ_ಗಂಟು_IDRef::NotAHash)
+    ಹಿಂತಿರುಗಿ ಸುಳ್ಳು; // Never inserted.
 
-  unsigned Mask = NumBuckets - 1;
-  unsigned I = Hash & Mask;
-  while (Buckets[I] != N) {
-    if (LLVM_UNLIKELY(!Buckets[I]))
-      return false; // Not in folding set.
-    I = (I + 1) & Mask;
+  ಚಿಹ್ನೆರಹಿತ ಮುಖವಾಡ = ಅಂಕೆ_Buckets - 1;
+  ಚಿಹ್ನೆರಹಿತ I = Hash & ಮುಖವಾಡ;
+  ಆಗ (Buckets[I] != N) {
+    ಆದರೆ (LLVM_UNLIKELY(!Buckets[I]))
+      ಹಿಂತಿರುಗಿ ಸುಳ್ಳು; // Not in folding set.
+    I = (I + 1) & ಮುಖವಾಡ;
   }
 
   incrementEpoch();
 
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  for (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
-    unsigned Ideal = Buckets[J]->getFoldingSetHash();
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+  ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ J = (I + 1) & ಮುಖವಾಡ; Buckets[J]; J = (J + 1) & ಮುಖವಾಡ) {
+    ಚಿಹ್ನೆರಹಿತ Ideal = Buckets[J]->get_Folding_ಗಣ_Hash();
+    ಆದರೆ (((I - Ideal) & ಮುಖವಾಡ) < ((J - Ideal) & ಮುಖವಾಡ)) {
       Buckets[I] = Buckets[J];
       I = J;
     }
   }
-  Buckets[I] = nullptr;
-  N->setFoldingSetHash(FoldingSetNodeIDRef::NotAHash);
-  --NumNodes;
-  return true;
+  Buckets[I] = ಶೂನ್ಯಸೂಚಕ;
+  N->ಗಣ_Folding_ಗಣ_Hash(Folding_ಗಣ_ಗಂಟು_IDRef::NotAHash);
+  --ಅಂಕೆ_Nodes;
+  ಹಿಂತಿರುಗಿ ನಿಜ;
 }

@@ -11,62 +11,62 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputError.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::vfs;
 
-void OutputError::anchor() {}
-void OutputConfigError::anchor() {}
-void TempFileOutputError::anchor() {}
+ಶೂನ್ಯ OutputError::anchor() {}
+ಶೂನ್ಯ OutputConfigError::anchor() {}
+ಶೂನ್ಯ ತಾತ್ಕಾಲಿಕ_File_Output_Error::anchor() {}
 
-char OutputError::ID = 0;
-char OutputConfigError::ID = 0;
-char TempFileOutputError::ID = 0;
+ಅಕ್ಷರ OutputError::ID = 0;
+ಅಕ್ಷರ OutputConfigError::ID = 0;
+ಅಕ್ಷರ ತಾತ್ಕಾಲಿಕ_File_Output_Error::ID = 0;
 
-void OutputError::log(raw_ostream &OS) const {
-  OS << getOutputPath() << ": ";
-  ECError::log(OS);
+ಶೂನ್ಯ OutputError::ಲಘುಗಣಕ(raw_ostream &OS) ಸ್ಥಿರಾಂಕ {
+  OS << get_Output_ಮಾರ್ಗ() << ": ";
+  ECError::ಲಘುಗಣಕ(OS);
 }
 
-void OutputConfigError::log(raw_ostream &OS) const {
-  OutputError::log(OS);
+ಶೂನ್ಯ OutputConfigError::ಲಘುಗಣಕ(raw_ostream &OS) ಸ್ಥಿರಾಂಕ {
+  OutputError::ಲಘುಗಣಕ(OS);
   OS << ": " << Config;
 }
 
-void TempFileOutputError::log(raw_ostream &OS) const {
-  OS << getTempPath() << " => ";
-  OutputError::log(OS);
+ಶೂನ್ಯ ತಾತ್ಕಾಲಿಕ_File_Output_Error::ಲಘುಗಣಕ(raw_ostream &OS) ಸ್ಥಿರಾಂಕ {
+  OS << get_ತಾತ್ಕಾಲಿಕ_ಮಾರ್ಗ() << " => ";
+  OutputError::ಲಘುಗಣಕ(OS);
 }
 
-namespace {
-class OutputErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override;
-  std::string message(int EV) const override;
+ನಾಮಾಕಾಶ {
+ವರ್ಗ OutputErrorCategory : ಸಾರ್ವಜನಿಕ std::error_category {
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name() ಸ್ಥಿರಾಂಕ noexcept override;
+  std::string ಸಂದೇಶ_2(ಪೂರ್ಣಾಂಕ EV) ಸ್ಥಿರಾಂಕ override;
 };
 } // end namespace
 
-const std::error_category &vfs::output_category() {
-  static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+ಸ್ಥಿರಾಂಕ std::error_category &vfs::output_category() {
+  ಸ್ಥಿರ OutputErrorCategory ErrorCategory;
+  ಹಿಂತಿರುಗಿ ErrorCategory;
 }
 
-const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *OutputErrorCategory::name() ಸ್ಥಿರಾಂಕ noexcept {
+  ಹಿಂತಿರುಗಿ "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
-  OutputErrorCode E = static_cast<OutputErrorCode>(EV);
-  switch (E) {
-  case OutputErrorCode::invalid_config:
-    return "invalid config";
-  case OutputErrorCode::not_closed:
-    return "output not closed";
-  case OutputErrorCode::already_closed:
-    return "output already closed";
-  case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+std::string OutputErrorCategory::ಸಂದೇಶ_2(ಪೂರ್ಣಾಂಕ EV) ಸ್ಥಿರಾಂಕ {
+  Output_Error_ಸಂಕೇತ E = static_cast<Output_Error_ಸಂಕೇತ>(EV);
+  ಆಯ್ಕೆ (E) {
+  ಸ್ಥಿತಿ Output_Error_ಸಂಕೇತ::invalid_config:
+    ಹಿಂತಿರುಗಿ "invalid config";
+  ಸ್ಥಿತಿ Output_Error_ಸಂಕೇತ::not_closed:
+    ಹಿಂತಿರುಗಿ "output not closed";
+  ಸ್ಥಿತಿ Output_Error_ಸಂಕೇತ::already_closed:
+    ಹಿಂತಿರುಗಿ "output already closed";
+  ಸ್ಥಿತಿ Output_Error_ಸಂಕೇತ::has_open_proxy:
+    ಹಿಂತಿರುಗಿ "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");

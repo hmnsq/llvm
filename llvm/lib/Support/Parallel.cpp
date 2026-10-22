@@ -6,103 +6,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Parallel.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/Jobserver.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Threading.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Parallel.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/ScopeExit.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/llvm-config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ExponentialBackoff.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Jobserver.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/ManagedStatic.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Threading.h"
 
-#include <atomic>
-#include <future>
-#include <memory>
-#include <mutex>
-#include <thread>
-#include <vector>
+#ಅನ್ತರ್ಭಾವ <atomic>
+#ಅನ್ತರ್ಭಾವ <future>
+#ಅನ್ತರ್ಭಾವ <memory>
+#ಅನ್ತರ್ಭಾವ <mutex>
+#ಅನ್ತರ್ಭಾವ <thread>
+#ಅನ್ತರ್ಭಾವ <vector>
 
-using namespace llvm;
-using namespace llvm::parallel;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::parallel;
 
 llvm::ThreadPoolStrategy parallel::strategy;
 
-#if LLVM_ENABLE_THREADS
+#ಆದರೆ LLVM_ENABLE_ಎಳೆಗಳು
 
-static thread_local unsigned threadIndex = UINT_MAX;
+ಸ್ಥಿರ thread_local ಚಿಹ್ನೆರಹಿತ thread_ಸೂಚ್ಯಂಕ = UINT_MAX;
 
-namespace {
+ನಾಮಾಕಾಶ {
 
 /// Runs closures on a thread pool in filo order.
-class ThreadPoolExecutor {
-public:
-  explicit ThreadPoolExecutor(ThreadPoolStrategy S) {
-    if (S.UseJobserver)
+ವರ್ಗ ThreadPoolExecutor {
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಪಷ್ಟ ThreadPoolExecutor(ThreadPoolStrategy S) {
+    ಆದರೆ (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
-    ThreadCount = S.compute_thread_count();
+    Thread_ಎಣಿಕೆ = S.compute_thread_ಎಣಿಕೆ();
     // Spawn all but one of the threads in another thread as spawning threads
     // can take a while.
-    Threads.reserve(ThreadCount);
-    Threads.resize(1);
-    std::lock_guard<std::mutex> Lock(Mutex);
+    ಎಳೆಗಳು.reserve(Thread_ಎಣಿಕೆ);
+    ಎಳೆಗಳು.resize(1);
+    std::ಬೀಗ_guard<std::mutex> ಬೀಗ_3(Mutex);
     // Use operator[] before creating the thread to avoid data race in .size()
     // in 'safe libc++' mode.
-    auto &Thread0 = Threads[0];
-    Thread0 = std::thread([this, S] {
-      for (unsigned I = 1; I < ThreadCount; ++I) {
-        Threads.emplace_back([this, S, I] { work(S, I); });
-        if (Stop)
-          break;
+    ಸ್ವಯಂಚಾಲಿತ &Thread0 = ಎಳೆಗಳು[0];
+    Thread0 = std::thread([ಇದು, S] {
+      ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ I = 1; I < Thread_ಎಣಿಕೆ; ++I) {
+        ಎಳೆಗಳು.emplace_ಹಿಂಭಾಗ([ಇದು, S, I] { work(S, I); });
+        ಆದರೆ (Stop)
+          ನಿಲ್ಲಿಸು;
       }
-      ThreadsCreated.set_value();
+      ಎಳೆಗಳು_Created.ಗಣ_ಮೌಲ್ಯ();
       work(S, 0);
     });
   }
 
   // To make sure the thread pool executor can only be created with a parallel
   // strategy.
-  ThreadPoolExecutor() = delete;
+  ThreadPoolExecutor() = ಅಳಿಸು;
 
-  void stop() {
+  ಶೂನ್ಯ stop() {
     {
-      std::lock_guard<std::mutex> Lock(Mutex);
-      if (Stop)
-        return;
-      Stop = true;
+      std::ಬೀಗ_guard<std::mutex> ಬೀಗ_3(Mutex);
+      ಆದರೆ (Stop)
+        ಹಿಂತಿರುಗಿ;
+      Stop = ನಿಜ;
     }
     Cond.notify_all();
-    ThreadsCreated.get_future().wait();
+    ಎಳೆಗಳು_Created.get_future().wait();
 
     std::thread::id CurrentThreadId = std::this_thread::get_id();
-    for (std::thread &T : Threads)
-      if (T.get_id() == CurrentThreadId)
+    ಗಾಗಿ (std::thread &T : ಎಳೆಗಳು)
+      ಆದರೆ (T.get_id() == CurrentThreadId)
         T.detach();
-      else
+      ಇಲ್ಲದಿದ್ದರೆ
         T.join();
   }
 
   ~ThreadPoolExecutor() { stop(); }
 
-  struct Creator {
-    static void *call() { return new ThreadPoolExecutor(strategy); }
+  ರಚನೆ Creator {
+    ಸ್ಥಿರ ಶೂನ್ಯ *call() { ಹಿಂತಿರುಗಿ ಹೊಸ ThreadPoolExecutor(strategy); }
   };
-  struct Deleter {
-    static void call(void *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
+  ರಚನೆ Deleter {
+    ಸ್ಥಿರ ಶೂನ್ಯ call(ಶೂನ್ಯ *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
   };
 
-  struct WorkItem {
-    std::function<void()> F;
+  ರಚನೆ Work_ಅಂಶ {
+    std::function<ಶೂನ್ಯ()> F;
     std::reference_wrapper<parallel::detail::Latch> L;
-    void operator()() {
+    ಶೂನ್ಯ ಕ್ರಿಯಾಕಾರಕ()() {
       F();
       L.get().dec();
     }
   };
 
-  void add(std::function<void()> F, parallel::detail::Latch &L) {
+  ಶೂನ್ಯ ಕೂಡಿಸು(std::function<ಶೂನ್ಯ()> F, parallel::detail::Latch &L) {
     {
-      std::lock_guard<std::mutex> Lock(Mutex);
-      WorkStack.push_back({std::move(F), std::ref(L)});
+      std::ಬೀಗ_guard<std::mutex> ಬೀಗ_3(Mutex);
+      Work_ರಾಶಿ.ತಳ್ಳು_ಹಿಂಭಾಗ({std::move(F), std::ref(L)});
     }
     Cond.notify_one();
   }
@@ -110,29 +110,29 @@ public:
   // Execute tasks from the work queue until the latch reaches zero.
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
-  void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
-      std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
-        return;
-      popAndRun(Lock);
+  ಶೂನ್ಯ helpSync(ಸ್ಥಿರಾಂಕ parallel::detail::Latch &L) {
+    ಆಗ (L.get_ಎಣಿಕೆ() != 0) {
+      std::unique_ಬೀಗ<std::mutex> ಬೀಗ_3(Mutex);
+      ಆದರೆ (Stop || Work_ರಾಶಿ.ಖಾಲಿಗಳು())
+        ಹಿಂತಿರುಗಿ;
+      ತೆಗೆ_And_ಸತತ(ಬೀಗ_3);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t get_Thread_ಎಣಿಕೆ() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ Thread_ಎಣಿಕೆ; }
 
-private:
+ಖಾಸಗಿ:
   // Pop one task from the queue and run it. Must be called with Lock held;
   // releases Lock before executing the task.
-  void popAndRun(std::unique_lock<std::mutex> &Lock) {
-    auto Item = std::move(WorkStack.back());
-    WorkStack.pop_back();
-    Lock.unlock();
-    Item();
+  ಶೂನ್ಯ ತೆಗೆ_And_ಸತತ(std::unique_ಬೀಗ<std::mutex> &ಬೀಗ_3) {
+    ಸ್ವಯಂಚಾಲಿತ ಅಂಶ = std::move(Work_ರಾಶಿ.ಹಿಂಭಾಗ());
+    Work_ರಾಶಿ.ತೆಗೆ_ಹಿಂಭಾಗ();
+    ಬೀಗ_3.unlock();
+    ಅಂಶ();
   }
 
-  void work(ThreadPoolStrategy S, unsigned ThreadID) {
-    threadIndex = ThreadID;
+  ಶೂನ್ಯ work(ThreadPoolStrategy S, ಚಿಹ್ನೆರಹಿತ ThreadID) {
+    thread_ಸೂಚ್ಯಂಕ = ThreadID;
     S.apply_thread_strategy(ThreadID);
     // Note on jobserver deadlock avoidance:
     // GNU Make grants each invoked process one implicit job slot. Our
@@ -140,8 +140,8 @@ private:
     // first successful tryAcquire() in a process. This guarantees forward
     // progress without requiring a dedicated "always-on" thread here.
 
-    while (true) {
-      if (TheJobserver) {
+    ಆಗ (ನಿಜ) {
+      ಆದರೆ (TheJobserver) {
         // Jobserver-mode scheduling:
         // - Acquire one job slot (with exponential backoff to avoid busy-wait).
         // - While holding the slot, drain and run tasks from the local queue.
@@ -151,143 +151,143 @@ private:
         // the jobserver’s global concurrency limit. With K available slots,
         // up to K workers run tasks in parallel; within each worker tasks run
         // sequentially until the local queue is empty.
-        ExponentialBackoff Backoff(std::chrono::hours(24));
-        JobSlot Slot;
-        do {
-          if (Stop)
-            return;
-          Slot = TheJobserver->tryAcquire();
-          if (Slot.isValid())
-            break;
-        } while (Backoff.waitForNextAttempt());
+        ಘಾತೀಯ_Backoff Backoff(std::chrono::hours(24));
+        ಕೆಲಸ_ಸ್ಥಾನ ಸ್ಥಾನ;
+        ಮಾಡು {
+          ಆದರೆ (Stop)
+            ಹಿಂತಿರುಗಿ;
+          ಸ್ಥಾನ = TheJobserver->tryAcquire();
+          ಆದರೆ (ಸ್ಥಾನ.isValid())
+            ನಿಲ್ಲಿಸು;
+        } ಆಗ (Backoff.wait_For_ಮುಂದಿನ_Attempt());
 
-        llvm::scope_exit SlotReleaser(
-            [&] { TheJobserver->release(std::move(Slot)); });
+        llvm::scope_exit ಸ್ಥಾನ_Releaser(
+            [&] { TheJobserver->release(std::move(ಸ್ಥಾನ)); });
 
-        while (true) {
-          std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
-            return;
-          if (WorkStack.empty())
-            break;
-          popAndRun(Lock);
+        ಆಗ (ನಿಜ) {
+          std::unique_ಬೀಗ<std::mutex> ಬೀಗ_3(Mutex);
+          Cond.wait(ಬೀಗ_3, [&] { ಹಿಂತಿರುಗಿ Stop || !Work_ರಾಶಿ.ಖಾಲಿಗಳು(); });
+          ಆದರೆ (Stop && Work_ರಾಶಿ.ಖಾಲಿಗಳು())
+            ಹಿಂತಿರುಗಿ;
+          ಆದರೆ (Work_ರಾಶಿ.ಖಾಲಿಗಳು())
+            ನಿಲ್ಲಿಸು;
+          ತೆಗೆ_And_ಸತತ(ಬೀಗ_3);
         }
-      } else {
-        std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-        if (Stop)
-          break;
-        popAndRun(Lock);
+      } ಇಲ್ಲದಿದ್ದರೆ {
+        std::unique_ಬೀಗ<std::mutex> ಬೀಗ_3(Mutex);
+        Cond.wait(ಬೀಗ_3, [&] { ಹಿಂತಿರುಗಿ Stop || !Work_ರಾಶಿ.ಖಾಲಿಗಳು(); });
+        ಆದರೆ (Stop)
+          ನಿಲ್ಲಿಸು;
+        ತೆಗೆ_And_ಸತತ(ಬೀಗ_3);
       }
     }
   }
 
-  std::atomic<bool> Stop{false};
-  std::vector<WorkItem> WorkStack;
+  std::atomic<ತಾರ್ಕಿಕ> Stop{ಸುಳ್ಳು};
+  std::ಸದಿಶ<Work_ಅಂಶ> Work_ರಾಶಿ;
   std::mutex Mutex;
   std::condition_variable Cond;
-  std::promise<void> ThreadsCreated;
-  std::vector<std::thread> Threads;
-  unsigned ThreadCount;
+  std::promise<ಶೂನ್ಯ> ಎಳೆಗಳು_Created;
+  std::ಸದಿಶ<std::thread> ಎಳೆಗಳು;
+  ಚಿಹ್ನೆರಹಿತ Thread_ಎಣಿಕೆ;
 
-  JobserverClient *TheJobserver = nullptr;
+  JobserverClient *TheJobserver = ಶೂನ್ಯಸೂಚಕ;
 };
 } // namespace
 
-static ThreadPoolExecutor *getDefaultExecutor() {
-#ifdef _WIN32
+ಸ್ಥಿರ ThreadPoolExecutor *getDefaultExecutor() {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
   // The ManagedStatic enables the ThreadPoolExecutor to be stopped via
   // llvm_shutdown() on Windows. This is important to avoid various race
   // conditions at process exit that can cause crashes or deadlocks.
 
-  static ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
+  ಸ್ಥಿರ ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
                        ThreadPoolExecutor::Deleter>
       ManagedExec;
-  static std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
-  return Exec.get();
-#else
+  ಸ್ಥಿರ std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
+  ಹಿಂತಿರುಗಿ Exec.get();
+#ಇಲ್ಲದಿದ್ದರೆ
   // ManagedStatic is not desired on other platforms. When `Exec` is destroyed
   // by llvm_shutdown(), worker threads will clean up and invoke TLS
   // destructors. This can lead to race conditions if other threads attempt to
   // access TLS objects that have already been destroyed.
-  static ThreadPoolExecutor Exec(strategy);
-  return &Exec;
-#endif
+  ಸ್ಥಿರ ThreadPoolExecutor Exec(strategy);
+  ಹಿಂತಿರುಗಿ &Exec;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
-size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+size_t parallel::get_Thread_ಎಣಿಕೆ() {
+  ಹಿಂತಿರುಗಿ getDefaultExecutor()->get_Thread_ಎಣಿಕೆ();
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-TaskGroup::TaskGroup()
+Task_ಗುಂಪು::Task_ಗುಂಪು()
     : Parallel(
-#if LLVM_ENABLE_THREADS
-          strategy.ThreadsRequested != 1
-#else
-          false
-#endif
+#ಆದರೆ LLVM_ENABLE_ಎಳೆಗಳು
+          strategy.ಎಳೆಗಳು_Requested != 1
+#ಇಲ್ಲದಿದ್ದರೆ
+          ಸುಳ್ಳು
+#ಆದರೆ_ಅಂತ್ಯ
       ) {
 }
 
-TaskGroup::~TaskGroup() {
-#if LLVM_ENABLE_THREADS
+Task_ಗುಂಪು::~Task_ಗುಂಪು() {
+#ಆದರೆ LLVM_ENABLE_ಎಳೆಗಳು
   // In a nested TaskGroup (threadIndex != -1u), actively help drain the queue.
-  bool IsNested = threadIndex != UINT_MAX;
-  if (Parallel && IsNested)
+  ತಾರ್ಕಿಕ IsNested = thread_ಸೂಚ್ಯಂಕ != UINT_MAX;
+  ಆದರೆ (Parallel && IsNested)
     getDefaultExecutor()->helpSync(L);
-#endif
-  L.sync();
+#ಆದರೆ_ಅಂತ್ಯ
+  L.ಸಮಕಾಲೀಕರಣ();
 }
 
-void TaskGroup::spawn(std::function<void()> F) {
-#if LLVM_ENABLE_THREADS
-  if (Parallel) {
+ಶೂನ್ಯ Task_ಗುಂಪು::spawn(std::function<ಶೂನ್ಯ()> F) {
+#ಆದರೆ LLVM_ENABLE_ಎಳೆಗಳು
+  ಆದರೆ (Parallel) {
     L.inc();
-    getDefaultExecutor()->add(std::move(F), L);
-    return;
+    getDefaultExecutor()->ಕೂಡಿಸು(std::move(F), L);
+    ಹಿಂತಿರುಗಿ;
   }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
   F();
 }
 
-void llvm::parallelFor(size_t Begin, size_t End,
-                       function_ref<void(size_t)> Fn) {
-#if LLVM_ENABLE_THREADS
-  if (strategy.ThreadsRequested != 1) {
-    size_t NumItems = End - Begin;
-    if (NumItems == 0)
-      return;
+ಶೂನ್ಯ llvm::parallelFor(size_t Begin, size_t ಕೊನೆ_2,
+                       function_ref<ಶೂನ್ಯ(size_t)> Fn) {
+#ಆದರೆ LLVM_ENABLE_ಎಳೆಗಳು
+  ಆದರೆ (strategy.ಎಳೆಗಳು_Requested != 1) {
+    size_t ಅಂಕೆ_ವಸ್ತುಗಳು = ಕೊನೆ_2 - Begin;
+    ಆದರೆ (ಅಂಕೆ_ವಸ್ತುಗಳು == 0)
+      ಹಿಂತಿರುಗಿ;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
     // While 2 vs 4 vs 8 makes no measurable difference, 4 is used as a
     // reasonable default.
-    size_t NumWorkers = std::min<size_t>(NumItems, getThreadCount());
-    size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
+    size_t ಅಂಕೆ_Workers = std::min<size_t>(ಅಂಕೆ_ವಸ್ತುಗಳು, get_Thread_ಎಣಿಕೆ());
+    size_t Chunk_ಗಾತ್ರ = std::max(size_t(1), ಅಂಕೆ_ವಸ್ತುಗಳು / (ಅಂಕೆ_Workers * 4));
     std::atomic<size_t> Idx{Begin};
-    auto Worker = [&] {
-      while (true) {
-        size_t I = Idx.fetch_add(ChunkSize, std::memory_order_relaxed);
-        if (I >= End)
-          break;
-        size_t IEnd = std::min(I + ChunkSize, End);
-        for (; I < IEnd; ++I)
+    ಸ್ವಯಂಚಾಲಿತ ಕೆಲಸಗಾರ = [&] {
+      ಆಗ (ನಿಜ) {
+        size_t I = Idx.fetch_ಕೂಡಿಸು(Chunk_ಗಾತ್ರ, std::memory_order_relaxed);
+        ಆದರೆ (I >= ಕೊನೆ_2)
+          ನಿಲ್ಲಿಸು;
+        size_t IEnd = std::min(I + Chunk_ಗಾತ್ರ, ಕೊನೆ_2);
+        ಗಾಗಿ (; I < IEnd; ++I)
           Fn(I);
       }
     };
 
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
-    TaskGroup TG;
-    while (--NumWorkers)
-      TG.spawn(Worker);
-    Worker();
-    return;
+    Task_ಗುಂಪು TG;
+    ಆಗ (--ಅಂಕೆ_Workers)
+      TG.spawn(ಕೆಲಸಗಾರ);
+    ಕೆಲಸಗಾರ();
+    ಹಿಂತಿರುಗಿ;
   }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-  for (; Begin != End; ++Begin)
+  ಗಾಗಿ (; Begin != ಕೊನೆ_2; ++Begin)
     Fn(Begin);
 }

@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/circular_raw_ostream.h"
-#include <algorithm>
-using namespace llvm;
+#ಅನ್ತರ್ಭಾವ "llvm/Support/circular_raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ <algorithm>
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
 
-void circular_raw_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (BufferSize == 0) {
-    TheStream->write(Ptr, Size);
-    return;
+ಶೂನ್ಯ circular_raw_ostream::write_impl(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *Ptr, size_t ಗಾತ್ರ_2) {
+  ಆದರೆ (ಬಫರ್_ಗಾತ್ರ == 0) {
+    The_ಹರಿವು->ಲಿಖ(Ptr, ಗಾತ್ರ_2);
+    ಹಿಂತಿರುಗಿ;
   }
 
   // Write into the buffer, wrapping if necessary.
-  while (Size != 0) {
-    unsigned Bytes =
-      std::min(unsigned(Size), unsigned(BufferSize - (Cur - BufferArray)));
-    memcpy(Cur, Ptr, Bytes);
-    Size -= Bytes;
-    Cur += Bytes;
-    if (Cur == BufferArray + BufferSize) {
+  ಆಗ (ಗಾತ್ರ_2 != 0) {
+    ಚಿಹ್ನೆರಹಿತ ಬೈಟುಗಳು_2 =
+      std::min(ಚಿಹ್ನೆರಹಿತ(ಗಾತ್ರ_2), ಚಿಹ್ನೆರಹಿತ(ಬಫರ್_ಗಾತ್ರ - (Cur - ಬಫರ್_Array)));
+    ಸ್ಮರಣೆ_ನಕಲು(Cur, Ptr, ಬೈಟುಗಳು_2);
+    ಗಾತ್ರ_2 -= ಬೈಟುಗಳು_2;
+    Cur += ಬೈಟುಗಳು_2;
+    ಆದರೆ (Cur == ಬಫರ್_Array + ಬಫರ್_ಗಾತ್ರ) {
       // Reset the output pointer to the start of the buffer.
-      Cur = BufferArray;
-      Filled = true;
+      Cur = ಬಫರ್_Array;
+      Filled = ನಿಜ;
     }
   }
 }
 
-void circular_raw_ostream::flushBufferWithBanner() {
-  if (BufferSize != 0) {
+ಶೂನ್ಯ circular_raw_ostream::flush_ಬಫರ್_With_Banner() {
+  ಆದರೆ (ಬಫರ್_ಗಾತ್ರ != 0) {
     // Write out the buffer
-    TheStream->write(Banner, std::strlen(Banner));
-    flushBuffer();
+    The_ಹರಿವು->ಲಿಖ(Banner, std::ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(Banner));
+    flush_ಬಫರ್();
   }
 }

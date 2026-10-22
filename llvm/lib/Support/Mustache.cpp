@@ -5,51 +5,51 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "llvm/Support/Mustache.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
-#include <sstream>
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Mustache.h"
+#ಅನ್ತರ್ಭಾವ "llvm/ADT/SmallVector.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Debug.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ಅನ್ತರ್ಭಾವ <sstream>
 
-#define DEBUG_TYPE "mustache"
+#ವ್ಯಾಖ್ಯಾನಿಸು DEBUG_TYPE "mustache"
 
-using namespace llvm;
-using namespace llvm::mustache;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm;
+ಬಳಸಿ ನಾಮಾಕಾಶ llvm::mustache;
 
-namespace {
+ನಾಮಾಕಾಶ {
 
-using Accessor = ArrayRef<StringRef>;
+ಬಳಸಿ Accessor = ArrayRef<StringRef>;
 
-static bool isFalsey(const json::Value &V) {
-  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
-         (V.getAsArray() && V.getAsArray()->empty());
+ಸ್ಥಿರ ತಾರ್ಕಿಕ isFalsey(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &V) {
+  ಹಿಂತಿರುಗಿ V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().ಮೌಲ್ಯ_2()) ||
+         (V.getAsArray() && V.getAsArray()->ಖಾಲಿಗಳು());
 }
 
-static bool isContextFalsey(const json::Value *V) {
+ಸ್ಥಿರ ತಾರ್ಕಿಕ isContextFalsey(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *V) {
   // A missing context (represented by a nullptr) is defined as falsey.
-  if (!V)
-    return true;
-  return isFalsey(*V);
+  ಆದರೆ (!V)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
+  ಹಿಂತಿರುಗಿ isFalsey(*V);
 }
 
-static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
+ಸ್ಥಿರ ಶೂನ್ಯ ವಿಭಜಿಸು_And_Trim(StringRef Str, Small_ಸದಿಶ_Impl<StringRef> &ಟೋಕನುಗಳು) {
   size_t CurrentPos = 0;
-  while (CurrentPos < Str.size()) {
+  ಆಗ (CurrentPos < Str.ಗಾತ್ರ_3()) {
     // Find the next delimiter.
-    size_t DelimiterPos = Str.find('.', CurrentPos);
+    size_t DelimiterPos = Str.ಕಂಡುಹಿಡಿ('.', CurrentPos);
 
     // If no delimiter is found, process the rest of the string.
-    if (DelimiterPos == StringRef::npos)
-      DelimiterPos = Str.size();
+    ಆದರೆ (DelimiterPos == StringRef::npos)
+      DelimiterPos = Str.ಗಾತ್ರ_3();
 
     // Get the current part, which may have whitespace.
-    StringRef Part = Str.slice(CurrentPos, DelimiterPos);
+    StringRef Part = Str.ತುಂಡು(CurrentPos, DelimiterPos);
 
     // Manually trim the part without creating a new string object.
-    size_t Start = Part.find_first_not_of(" \t\r\n");
-    if (Start != StringRef::npos) {
-      size_t End = Part.find_last_not_of(" \t\r\n");
-      Tokens.push_back(Part.slice(Start, End + 1));
+    size_t ಆರಂಭ = Part.ಕಂಡುಹಿಡಿ_ಮೊದಲ_not_ದ(" \t\r\n");
+    ಆದರೆ (ಆರಂಭ != StringRef::npos) {
+      size_t ಕೊನೆ_2 = Part.ಕಂಡುಹಿಡಿ_ಕೊನೆಯ_not_ದ(" \t\r\n");
+      ಟೋಕನುಗಳು.ತಳ್ಳು_ಹಿಂಭಾಗ(Part.ತುಂಡು(ಆರಂಭ, ಕೊನೆ_2 + 1));
     }
 
     // Move past the delimiter for the next iteration.
@@ -57,62 +57,62 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
   }
 }
 
-static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
+ಸ್ಥಿರ Accessor ವಿಭಜಿಸು_Mustache_String(StringRef Str, MustacheContext &Ctx) {
   // We split the mustache string into an accessor.
   // For example:
   //    "a.b.c" would be split into {"a", "b", "c"}
   // We make an exception for a single dot which
   // refers to the current context.
-  SmallVector<StringRef> Tokens;
-  if (Str == ".") {
+  Small_ಸದಿಶ<StringRef> ಟೋಕನುಗಳು;
+  ಆದರೆ (Str == ".") {
     // "." is a special accessor that refers to the current context.
     // It's a literal, so it doesn't need to be saved.
-    Tokens.push_back(".");
-  } else {
-    splitAndTrim(Str, Tokens);
+    ಟೋಕನುಗಳು.ತಳ್ಳು_ಹಿಂಭಾಗ(".");
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ವಿಭಜಿಸು_And_Trim(Str, ಟೋಕನುಗಳು);
   }
   // Now, allocate memory for the array of StringRefs in the arena.
-  StringRef *ArenaTokens = Ctx.Allocator.Allocate<StringRef>(Tokens.size());
+  StringRef *Arena_ಟೋಕನುಗಳು = Ctx.Allocator.Allocate<StringRef>(ಟೋಕನುಗಳು.ಗಾತ್ರ_3());
   // Copy the StringRefs from the stack vector to the arena.
-  llvm::copy(Tokens, ArenaTokens);
+  llvm::copy(ಟೋಕನುಗಳು, Arena_ಟೋಕನುಗಳು);
   // Return an ArrayRef pointing to the stable arena memory.
-  return ArrayRef<StringRef>(ArenaTokens, Tokens.size());
+  ಹಿಂತಿರುಗಿ ArrayRef<StringRef>(Arena_ಟೋಕನುಗಳು, ಟೋಕನುಗಳು.ಗಾತ್ರ_3());
 }
 } // namespace
 
-namespace llvm::mustache {
+ನಾಮಾಕಾಶ llvm::mustache {
 
-class MustacheOutputStream : public raw_ostream {
-public:
-  MustacheOutputStream() = default;
-  ~MustacheOutputStream() override = default;
+ವರ್ಗ Mustache_Output_ಹರಿವು : ಸಾರ್ವಜನಿಕ raw_ostream {
+ಸಾರ್ವಜನಿಕ:
+  Mustache_Output_ಹರಿವು() = ಪೂರ್ವನಿಯೋಜಿತ;
+  ~Mustache_Output_ಹರಿವು() override = ಪೂರ್ವನಿಯೋಜಿತ;
 
-  virtual void suspendIndentation() {}
-  virtual void resumeIndentation() {}
+  ವಾಸ್ತವಿಕ ಶೂನ್ಯ suspendIndentation() {}
+  ವಾಸ್ತವಿಕ ಶೂನ್ಯ resumeIndentation() {}
 
-private:
-  void anchor() override;
+ಖಾಸಗಿ:
+  ಶೂನ್ಯ anchor() override;
 };
 
-void MustacheOutputStream::anchor() {}
+ಶೂನ್ಯ Mustache_Output_ಹರಿವು::anchor() {}
 
-class RawMustacheOutputStream : public MustacheOutputStream {
-public:
-  RawMustacheOutputStream(raw_ostream &OS) : OS(OS) { SetUnbuffered(); }
+ವರ್ಗ Raw_Mustache_Output_ಹರಿವು : ಸಾರ್ವಜನಿಕ Mustache_Output_ಹರಿವು {
+ಸಾರ್ವಜನಿಕ:
+  Raw_Mustache_Output_ಹರಿವು(raw_ostream &OS) : OS(OS) { ಗಣ_Unbuffered(); }
 
-private:
+ಖಾಸಗಿ:
   raw_ostream &OS;
 
-  void write_impl(const char *Ptr, size_t Size) override {
-    OS.write(Ptr, Size);
+  ಶೂನ್ಯ write_impl(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *Ptr, size_t ಗಾತ್ರ_2) override {
+    OS.ಲಿಖ(Ptr, ಗಾತ್ರ_2);
   }
-  uint64_t current_pos() const override { return OS.tell(); }
+  uint64_t current_pos() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ OS.tell(); }
 };
 
-class Token {
-public:
-  enum class Type {
-    Text,
+ವರ್ಗ Token {
+ಸಾರ್ವಜನಿಕ:
+  ಎಣಿಕೆ ವರ್ಗ Type {
+    ಪಠ್ಯ_2,
     Variable,
     Partial,
     SectionOpen,
@@ -120,51 +120,51 @@ public:
     InvertSectionOpen,
     UnescapeVariable,
     Comment,
-    SetDelimiter,
+    ಗಣ_Delimiter,
   };
 
   Token(StringRef Str)
-      : TokenType(Type::Text), RawBody(Str), TokenBody(RawBody),
-        AccessorValue({}), Indentation(0) {};
+      : TokenType(Type::ಪಠ್ಯ_2), RawBody(Str), TokenBody(RawBody),
+        Accessor_ಮೌಲ್ಯ({}), Indentation(0) {};
 
-  Token(StringRef RawBody, StringRef TokenBody, char Identifier,
+  Token(StringRef RawBody, StringRef TokenBody, ಅಕ್ಷರ Identifier,
         MustacheContext &Ctx)
       : RawBody(RawBody), TokenBody(TokenBody), Indentation(0) {
     TokenType = getTokenType(Identifier);
-    if (TokenType == Type::Comment)
-      return;
-    StringRef AccessorStr(this->TokenBody);
-    if (TokenType != Type::Variable)
+    ಆದರೆ (TokenType == Type::Comment)
+      ಹಿಂತಿರುಗಿ;
+    StringRef AccessorStr(ಇದು->TokenBody);
+    ಆದರೆ (TokenType != Type::Variable)
       AccessorStr = AccessorStr.substr(1);
-    AccessorValue = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
+    Accessor_ಮೌಲ್ಯ = ವಿಭಜಿಸು_Mustache_String(StringRef(AccessorStr).trim(), Ctx);
   }
 
-  ArrayRef<StringRef> getAccessor() const { return AccessorValue; }
+  ArrayRef<StringRef> getAccessor() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ Accessor_ಮೌಲ್ಯ; }
 
-  Type getType() const { return TokenType; }
+  Type getType() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ TokenType; }
 
-  void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; }
+  ಶೂನ್ಯ ಗಣ_Indentation(size_t NewIndentation) { Indentation = NewIndentation; }
 
-  size_t getIndentation() const { return Indentation; }
+  size_t getIndentation() ಸ್ಥಿರಾಂಕ { ಹಿಂತಿರುಗಿ Indentation; }
 
-  static Type getTokenType(char Identifier) {
-    switch (Identifier) {
-    case '#':
-      return Type::SectionOpen;
-    case '/':
-      return Type::SectionClose;
-    case '^':
-      return Type::InvertSectionOpen;
-    case '!':
-      return Type::Comment;
-    case '>':
-      return Type::Partial;
-    case '&':
-      return Type::UnescapeVariable;
-    case '=':
-      return Type::SetDelimiter;
-    default:
-      return Type::Variable;
+  ಸ್ಥಿರ Type getTokenType(ಅಕ್ಷರ Identifier) {
+    ಆಯ್ಕೆ (Identifier) {
+    ಸ್ಥಿತಿ '#':
+      ಹಿಂತಿರುಗಿ Type::SectionOpen;
+    ಸ್ಥಿತಿ '/':
+      ಹಿಂತಿರುಗಿ Type::SectionClose;
+    ಸ್ಥಿತಿ '^':
+      ಹಿಂತಿರುಗಿ Type::InvertSectionOpen;
+    ಸ್ಥಿತಿ '!':
+      ಹಿಂತಿರುಗಿ Type::Comment;
+    ಸ್ಥಿತಿ '>':
+      ಹಿಂತಿರುಗಿ Type::Partial;
+    ಸ್ಥಿತಿ '&':
+      ಹಿಂತಿರುಗಿ Type::UnescapeVariable;
+    ಸ್ಥಿತಿ '=':
+      ಹಿಂತಿರುಗಿ Type::ಗಣ_Delimiter;
+    ಪೂರ್ವನಿಯೋಜಿತ:
+      ಹಿಂತಿರುಗಿ Type::Variable;
     }
   }
 
@@ -173,17 +173,17 @@ public:
   StringRef RawBody;
   // TokenBody is the original string with the identifier removed.
   StringRef TokenBody;
-  ArrayRef<StringRef> AccessorValue;
+  ArrayRef<StringRef> Accessor_ಮೌಲ್ಯ;
   size_t Indentation;
 };
 
-using EscapeMap = DenseMap<char, std::string>;
+ಬಳಸಿ EscapeMap = DenseMap<ಅಕ್ಷರ, std::string>;
 
-class ASTNode : public ilist_node<ASTNode> {
-public:
-  enum Type {
-    Root,
-    Text,
+ವರ್ಗ ASTNode : ಸಾರ್ವಜನಿಕ ilist_ಗಂಟು<ASTNode> {
+ಸಾರ್ವಜನಿಕ:
+  ಎಣಿಕೆ Type {
+    ಬೇರು_2,
+    ಪಠ್ಯ_2,
     Partial,
     Variable,
     UnescapeVariable,
@@ -192,74 +192,74 @@ public:
   };
 
   ASTNode(MustacheContext &Ctx)
-      : Ctx(Ctx), Ty(Type::Root), Parent(nullptr), ParentContext(nullptr) {}
+      : Ctx(Ctx), Ty(Type::ಬೇರು_2), ಪೋಷಕ_2(ಶೂನ್ಯಸೂಚಕ), ಪೋಷಕ_Context(ಶೂನ್ಯಸೂಚಕ) {}
 
-  ASTNode(MustacheContext &Ctx, StringRef Body, ASTNode *Parent)
-      : Ctx(Ctx), Ty(Type::Text), Body(Body), Parent(Parent),
-        ParentContext(nullptr) {}
+  ASTNode(MustacheContext &Ctx, StringRef Body, ASTNode *ಪೋಷಕ_2)
+      : Ctx(Ctx), Ty(Type::ಪಠ್ಯ_2), Body(Body), ಪೋಷಕ_2(ಪೋಷಕ_2),
+        ಪೋಷಕ_Context(ಶೂನ್ಯಸೂಚಕ) {}
 
   // Constructor for Section/InvertSection/Variable/UnescapeVariable Nodes
   ASTNode(MustacheContext &Ctx, Type Ty, ArrayRef<StringRef> Accessor,
-          ASTNode *Parent)
-      : Ctx(Ctx), Ty(Ty), Parent(Parent), AccessorValue(Accessor),
-        ParentContext(nullptr) {}
+          ASTNode *ಪೋಷಕ_2)
+      : Ctx(Ctx), Ty(Ty), ಪೋಷಕ_2(ಪೋಷಕ_2), Accessor_ಮೌಲ್ಯ(Accessor),
+        ಪೋಷಕ_Context(ಶೂನ್ಯಸೂಚಕ) {}
 
-  void addChild(AstPtr Child) { Children.push_back(Child); };
+  ಶೂನ್ಯ ಕೂಡಿಸು_ಮಗು(AstPtr ಮಗು) { Children.ತಳ್ಳು_ಹಿಂಭಾಗ(ಮಗು); };
 
-  void setRawBody(StringRef NewBody) { RawBody = NewBody; };
+  ಶೂನ್ಯ ಗಣ_Raw_Body(StringRef NewBody) { RawBody = NewBody; };
 
-  void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; };
+  ಶೂನ್ಯ ಗಣ_Indentation(size_t NewIndentation) { Indentation = NewIndentation; };
 
-  void render(const llvm::json::Value &Data, MustacheOutputStream &OS);
+  ಶೂನ್ಯ render(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &ದತ್ತಾಂಶ_2, Mustache_Output_ಹರಿವು &OS);
 
-private:
-  void renderLambdas(const llvm::json::Value &Contexts,
-                     MustacheOutputStream &OS, Lambda &L);
+ಖಾಸಗಿ:
+  ಶೂನ್ಯ renderLambdas(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &Contexts,
+                     Mustache_Output_ಹರಿವು &OS, Lambda &L);
 
-  void renderSectionLambdas(const llvm::json::Value &Contexts,
-                            MustacheOutputStream &OS, SectionLambda &L);
+  ಶೂನ್ಯ renderSectionLambdas(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &Contexts,
+                            Mustache_Output_ಹರಿವು &OS, SectionLambda &L);
 
-  void renderPartial(const llvm::json::Value &Contexts,
-                     MustacheOutputStream &OS, ASTNode *Partial);
+  ಶೂನ್ಯ renderPartial(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &Contexts,
+                     Mustache_Output_ಹರಿವು &OS, ASTNode *Partial);
 
-  void renderChild(const llvm::json::Value &Context, MustacheOutputStream &OS);
+  ಶೂನ್ಯ render_ಮಗು(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &Context, Mustache_Output_ಹರಿವು &OS);
 
-  const llvm::json::Value *findContext();
+  ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ *ಕಂಡುಹಿಡಿ_Context();
 
-  void renderRoot(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderText(MustacheOutputStream &OS);
-  void renderPartial(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderVariable(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderUnescapeVariable(const json::Value &CurrentCtx,
-                              MustacheOutputStream &OS);
-  void renderSection(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderInvertSection(const json::Value &CurrentCtx,
-                           MustacheOutputStream &OS);
+  ಶೂನ್ಯ render_ಬೇರು(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx, Mustache_Output_ಹರಿವು &OS);
+  ಶೂನ್ಯ render_ಪಠ್ಯ(Mustache_Output_ಹರಿವು &OS);
+  ಶೂನ್ಯ renderPartial(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx, Mustache_Output_ಹರಿವು &OS);
+  ಶೂನ್ಯ renderVariable(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx, Mustache_Output_ಹರಿವು &OS);
+  ಶೂನ್ಯ renderUnescapeVariable(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                              Mustache_Output_ಹರಿವು &OS);
+  ಶೂನ್ಯ renderSection(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx, Mustache_Output_ಹರಿವು &OS);
+  ಶೂನ್ಯ renderInvertSection(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                           Mustache_Output_ಹರಿವು &OS);
 
   MustacheContext &Ctx;
   Type Ty;
   size_t Indentation = 0;
   StringRef RawBody;
   StringRef Body;
-  ASTNode *Parent;
+  ASTNode *ಪೋಷಕ_2;
   ASTNodeList Children;
-  const ArrayRef<StringRef> AccessorValue;
-  const llvm::json::Value *ParentContext;
+  ಸ್ಥಿರಾಂಕ ArrayRef<StringRef> Accessor_ಮೌಲ್ಯ;
+  ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ *ಪೋಷಕ_Context;
 };
 
 // A wrapper for arena allocator for ASTNodes
-static AstPtr createRootNode(MustacheContext &Ctx) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
+ಸ್ಥಿರ AstPtr create_ಬೇರು_ಗಂಟು(MustacheContext &Ctx) {
+  ಹಿಂತಿರುಗಿ ಹೊಸ (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
 }
 
-static AstPtr createNode(MustacheContext &Ctx, ASTNode::Type T,
-                         ArrayRef<StringRef> A, ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
+ಸ್ಥಿರ AstPtr create_ಗಂಟು(MustacheContext &Ctx, ASTNode::Type T,
+                         ArrayRef<StringRef> A, ASTNode *ಪೋಷಕ_2) {
+  ಹಿಂತಿರುಗಿ ಹೊಸ (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, ಪೋಷಕ_2);
 }
 
-static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
-                             ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
+ಸ್ಥಿರ AstPtr create_ಪಠ್ಯ_ಗಂಟು(MustacheContext &Ctx, StringRef Body,
+                             ASTNode *ಪೋಷಕ_2) {
+  ಹಿಂತಿರುಗಿ ಹೊಸ (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, ಪೋಷಕ_2);
 }
 
 // Function to check if there is meaningful text behind.
@@ -274,40 +274,40 @@ static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
 // and the current token is the second token.
 // For example:
 //  "{{#Section}}"
-static bool hasTextBehind(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx == 0)
-    return true;
+ಸ್ಥಿರ ತಾರ್ಕಿಕ has_ಪಠ್ಯ_Behind(size_t Idx, ಸ್ಥಿರಾಂಕ ArrayRef<Token> &ಟೋಕನುಗಳು) {
+  ಆದರೆ (Idx == 0)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
   size_t PrevIdx = Idx - 1;
-  if (Tokens[PrevIdx].getType() != Token::Type::Text)
-    return true;
+  ಆದರೆ (ಟೋಕನುಗಳು[PrevIdx].getType() != Token::Type::ಪಠ್ಯ_2)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  const Token &PrevToken = Tokens[PrevIdx];
+  ಸ್ಥಿರಾಂಕ Token &PrevToken = ಟೋಕನುಗಳು[PrevIdx];
   StringRef TokenBody = StringRef(PrevToken.RawBody).rtrim(" \r\t\v");
-  return !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
+  ಹಿಂತಿರುಗಿ !TokenBody.ತುದಿಗಳು_with("\n") && !(TokenBody.ಖಾಲಿಗಳು() && Idx == 1);
 }
 
 // Function to check if there's no meaningful text ahead.
 // We determine if a token has text ahead if the left of previous
 // token does not start with a newline.
-static bool hasTextAhead(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx >= Tokens.size() - 1)
-    return true;
+ಸ್ಥಿರ ತಾರ್ಕಿಕ has_ಪಠ್ಯ_Ahead(size_t Idx, ಸ್ಥಿರಾಂಕ ArrayRef<Token> &ಟೋಕನುಗಳು) {
+  ಆದರೆ (Idx >= ಟೋಕನುಗಳು.ಗಾತ್ರ_3() - 1)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  size_t NextIdx = Idx + 1;
-  if (Tokens[NextIdx].getType() != Token::Type::Text)
-    return true;
+  size_t ಮುಂದಿನ_Idx = Idx + 1;
+  ಆದರೆ (ಟೋಕನುಗಳು[ಮುಂದಿನ_Idx].getType() != Token::Type::ಪಠ್ಯ_2)
+    ಹಿಂತಿರುಗಿ ನಿಜ;
 
-  const Token &NextToken = Tokens[NextIdx];
-  StringRef TokenBody = StringRef(NextToken.RawBody).ltrim(" ");
-  return !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
+  ಸ್ಥಿರಾಂಕ Token &ಮುಂದಿನ_Token = ಟೋಕನುಗಳು[ಮುಂದಿನ_Idx];
+  StringRef TokenBody = StringRef(ಮುಂದಿನ_Token.RawBody).ltrim(" ");
+  ಹಿಂತಿರುಗಿ !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
 }
 
-static bool requiresCleanUp(Token::Type T) {
+ಸ್ಥಿರ ತಾರ್ಕಿಕ requires_Clean_ಮೇಲೆ(Token::Type T) {
   // We must clean up all the tokens that could contain child nodes.
-  return T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
+  ಹಿಂತಿರುಗಿ T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
          T == Token::Type::SectionClose || T == Token::Type::Comment ||
-         T == Token::Type::Partial || T == Token::Type::SetDelimiter;
+         T == Token::Type::Partial || T == Token::Type::ಗಣ_Delimiter;
 }
 
 // Adjust next token body if there is no text ahead.
@@ -316,14 +316,14 @@ static bool requiresCleanUp(Token::Type T) {
 //  "{{! Comment }} \nLine 2"
 // would be considered as no text ahead and should be rendered as
 //  " Line 2"
-static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
-  Token &NextToken = Tokens[Idx + 1];
-  StringRef NextTokenBody = NextToken.TokenBody;
+ಸ್ಥಿರ ಶೂನ್ಯ stripTokenAhead(Small_ಸದಿಶ_Impl<Token> &ಟೋಕನುಗಳು, size_t Idx) {
+  Token &ಮುಂದಿನ_Token = ಟೋಕನುಗಳು[Idx + 1];
+  StringRef ಮುಂದಿನ_Token_Body = ಮುಂದಿನ_Token.TokenBody;
   // Cut off the leading newline which could be \n or \r\n.
-  if (NextTokenBody.starts_with("\r\n"))
-    NextToken.TokenBody = NextTokenBody.substr(2);
-  else if (NextTokenBody.starts_with("\n"))
-    NextToken.TokenBody = NextTokenBody.substr(1);
+  ಆದರೆ (ಮುಂದಿನ_Token_Body.starts_with("\r\n"))
+    ಮುಂದಿನ_Token.TokenBody = ಮುಂದಿನ_Token_Body.substr(2);
+  ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಮುಂದಿನ_Token_Body.starts_with("\n"))
+    ಮುಂದಿನ_Token.TokenBody = ಮುಂದಿನ_Token_Body.substr(1);
 }
 
 // Adjust previous token body if there no text behind.
@@ -332,128 +332,128 @@ static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
 //  " \t{{#section}}A{{/section}}"
 // would be considered as having no text ahead and would be render as:
 //  "A"
-void stripTokenBefore(SmallVectorImpl<Token> &Tokens, size_t Idx,
+ಶೂನ್ಯ stripTokenBefore(Small_ಸದಿಶ_Impl<Token> &ಟೋಕನುಗಳು, size_t Idx,
                       Token &CurrentToken, Token::Type CurrentType) {
-  Token &PrevToken = Tokens[Idx - 1];
+  Token &PrevToken = ಟೋಕನುಗಳು[Idx - 1];
   StringRef PrevTokenBody = PrevToken.TokenBody;
   StringRef Unindented = PrevTokenBody.rtrim(" \r\t\v");
-  size_t Indentation = PrevTokenBody.size() - Unindented.size();
+  size_t Indentation = PrevTokenBody.ಗಾತ್ರ_3() - Unindented.ಗಾತ್ರ_3();
   PrevToken.TokenBody = Unindented;
-  CurrentToken.setIndentation(Indentation);
+  CurrentToken.ಗಣ_Indentation(Indentation);
 }
 
-struct Tag {
-  enum class Kind {
+ರಚನೆ ಟ್ಯಾಗ್ {
+  ಎಣಿಕೆ ವರ್ಗ ಬಗೆ_2 {
     None,
-    Normal, // {{...}}
+    ಸಾಮಾನ್ಯ, // {{...}}
     Triple, // {{{...}}}
   };
 
-  Kind TagKind = Kind::None;
+  ಬಗೆ_2 ಟ್ಯಾಗ್_ಬಗೆ = ಬಗೆ_2::None;
   StringRef Content;   // The content between the delimiters.
-  StringRef FullMatch; // The entire tag, including delimiters.
-  size_t StartPosition = StringRef::npos;
+  StringRef ತುಂಬಿದ_ಹೊಂದಿಕೆ; // The entire tag, including delimiters.
+  size_t ಆರಂಭ_Position = StringRef::npos;
 };
 
-[[maybe_unused]] static const char *tagKindToString(Tag::Kind K) {
-  switch (K) {
-  case Tag::Kind::None:
-    return "None";
-  case Tag::Kind::Normal:
-    return "Normal";
-  case Tag::Kind::Triple:
-    return "Triple";
+[[maybe_ಬಳಸದ]] ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಟ್ಯಾಗ್_ಬಗೆ_ಗಮ್ಯ_String(ಟ್ಯಾಗ್::ಬಗೆ_2 K) {
+  ಆಯ್ಕೆ (K) {
+  ಸ್ಥಿತಿ ಟ್ಯಾಗ್::ಬಗೆ_2::None:
+    ಹಿಂತಿರುಗಿ "None";
+  ಸ್ಥಿತಿ ಟ್ಯಾಗ್::ಬಗೆ_2::ಸಾಮಾನ್ಯ:
+    ಹಿಂತಿರುಗಿ "Normal";
+  ಸ್ಥಿತಿ ಟ್ಯಾಗ್::ಬಗೆ_2::Triple:
+    ಹಿಂತಿರುಗಿ "Triple";
   }
   llvm_unreachable("Unknown Tag::Kind");
 }
 
-[[maybe_unused]] static const char *jsonKindToString(json::Value::Kind K) {
-  switch (K) {
-  case json::Value::Kind::Null:
-    return "JSON_KIND_NULL";
-  case json::Value::Kind::Boolean:
-    return "JSON_KIND_BOOLEAN";
-  case json::Value::Kind::Number:
-    return "JSON_KIND_NUMBER";
-  case json::Value::Kind::String:
-    return "JSON_KIND_STRING";
-  case json::Value::Kind::Array:
-    return "JSON_KIND_ARRAY";
-  case json::Value::Kind::Object:
-    return "JSON_KIND_OBJECT";
+[[maybe_ಬಳಸದ]] ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *json_ಬಗೆ_ಗಮ್ಯ_String(json::ಮೌಲ್ಯ::ಬಗೆ_2 K) {
+  ಆಯ್ಕೆ (K) {
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಬಗೆ_2::Null:
+    ಹಿಂತಿರುಗಿ "JSON_KIND_NULL";
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಬಗೆ_2::Boolean:
+    ಹಿಂತಿರುಗಿ "JSON_KIND_BOOLEAN";
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಬಗೆ_2::ಸಂಖ್ಯೆ:
+    ಹಿಂತಿರುಗಿ "JSON_KIND_NUMBER";
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಬಗೆ_2::String:
+    ಹಿಂತಿರುಗಿ "JSON_KIND_STRING";
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಬಗೆ_2::Array:
+    ಹಿಂತಿರುಗಿ "JSON_KIND_ARRAY";
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಬಗೆ_2::Object:
+    ಹಿಂತಿರುಗಿ "JSON_KIND_OBJECT";
   }
   llvm_unreachable("Unknown json::Value::Kind");
 }
 
 // Simple tokenizer that splits the template into tokens.
-static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
+ಸ್ಥಿರ Small_ಸದಿಶ<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   LLVM_DEBUG(dbgs() << "[Tokenize Template] \"" << Template << "\"\n");
-  SmallVector<Token> Tokens;
+  Small_ಸದಿಶ<Token> ಟೋಕನುಗಳು;
   SmallString<8> Open("{{");
   SmallString<8> Close("}}");
   size_t Cursor = 0;
-  size_t TextStart = 0;
+  size_t ಪಠ್ಯ_ಆರಂಭ = 0;
 
-  const StringLiteral TripleOpen("{{{");
-  const StringLiteral TripleClose("}}}");
+  ಸ್ಥಿರಾಂಕ StringLiteral TripleOpen("{{{");
+  ಸ್ಥಿರಾಂಕ StringLiteral TripleClose("}}}");
 
-  while (Cursor < Template.size()) {
+  ಆಗ (Cursor < Template.ಗಾತ್ರ_3()) {
     StringRef TemplateSuffix = Template.substr(Cursor);
-    StringRef TagOpen, TagClose;
-    Tag::Kind Kind;
+    StringRef ಟ್ಯಾಗ್_Open, ಟ್ಯಾಗ್_Close;
+    ಟ್ಯಾಗ್::ಬಗೆ_2 ಬಗೆ_2;
 
     // Determine which tag we've encountered.
-    if (TemplateSuffix.starts_with(TripleOpen)) {
-      Kind = Tag::Kind::Triple;
-      TagOpen = TripleOpen;
-      TagClose = TripleClose;
-    } else if (TemplateSuffix.starts_with(Open)) {
-      Kind = Tag::Kind::Normal;
-      TagOpen = Open;
-      TagClose = Close;
-    } else {
+    ಆದರೆ (TemplateSuffix.starts_with(TripleOpen)) {
+      ಬಗೆ_2 = ಟ್ಯಾಗ್::ಬಗೆ_2::Triple;
+      ಟ್ಯಾಗ್_Open = TripleOpen;
+      ಟ್ಯಾಗ್_Close = TripleClose;
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (TemplateSuffix.starts_with(Open)) {
+      ಬಗೆ_2 = ಟ್ಯಾಗ್::ಬಗೆ_2::ಸಾಮಾನ್ಯ;
+      ಟ್ಯಾಗ್_Open = Open;
+      ಟ್ಯಾಗ್_Close = Close;
+    } ಇಲ್ಲದಿದ್ದರೆ {
       // Not at a tag, continue scanning.
       ++Cursor;
-      continue;
+      ಮುಂದುವರಿ;
     }
 
     // Found a tag, first add the preceding text.
-    if (Cursor > TextStart)
-      Tokens.emplace_back(Template.slice(TextStart, Cursor));
+    ಆದರೆ (Cursor > ಪಠ್ಯ_ಆರಂಭ)
+      ಟೋಕನುಗಳು.emplace_ಹಿಂಭಾಗ(Template.ತುಂಡು(ಪಠ್ಯ_ಆರಂಭ, Cursor));
 
     // Find the closing tag.
-    size_t EndPos = Template.find(TagClose, Cursor + TagOpen.size());
-    if (EndPos == StringRef::npos) {
+    size_t ಕೊನೆ_Pos = Template.ಕಂಡುಹಿಡಿ(ಟ್ಯಾಗ್_Close, Cursor + ಟ್ಯಾಗ್_Open.ಗಾತ್ರ_3());
+    ಆದರೆ (ಕೊನೆ_Pos == StringRef::npos) {
       // No closing tag, the rest is text.
-      Tokens.emplace_back(Template.substr(Cursor));
-      TextStart = Cursor = Template.size();
-      break;
+      ಟೋಕನುಗಳು.emplace_ಹಿಂಭಾಗ(Template.substr(Cursor));
+      ಪಠ್ಯ_ಆರಂಭ = Cursor = Template.ಗಾತ್ರ_3();
+      ನಿಲ್ಲಿಸು;
     }
 
     // Extract tag content and full match.
-    size_t ContentStart = Cursor + TagOpen.size();
-    StringRef Content = Template.substr(ContentStart, EndPos - ContentStart);
-    StringRef FullMatch =
-        Template.substr(Cursor, (EndPos + TagClose.size()) - Cursor);
+    size_t Content_ಆರಂಭ = Cursor + ಟ್ಯಾಗ್_Open.ಗಾತ್ರ_3();
+    StringRef Content = Template.substr(Content_ಆರಂಭ, ಕೊನೆ_Pos - Content_ಆರಂಭ);
+    StringRef ತುಂಬಿದ_ಹೊಂದಿಕೆ =
+        Template.substr(Cursor, (ಕೊನೆ_Pos + ಟ್ಯಾಗ್_Close.ಗಾತ್ರ_3()) - Cursor);
 
     // Process the tag (inlined logic from processTag).
-    LLVM_DEBUG(dbgs() << "[Tag] " << FullMatch << ", Content: " << Content
-                      << ", Kind: " << tagKindToString(Kind) << "\n");
-    if (Kind == Tag::Kind::Triple) {
-      Tokens.emplace_back(FullMatch, Ctx.Saver.save("&" + Content), '&', Ctx);
-    } else { // Normal Tag
+    LLVM_DEBUG(dbgs() << "[Tag] " << ತುಂಬಿದ_ಹೊಂದಿಕೆ << ", Content: " << Content
+                      << ", Kind: " << ಟ್ಯಾಗ್_ಬಗೆ_ಗಮ್ಯ_String(ಬಗೆ_2) << "\n");
+    ಆದರೆ (ಬಗೆ_2 == ಟ್ಯಾಗ್::ಬಗೆ_2::Triple) {
+      ಟೋಕನುಗಳು.emplace_ಹಿಂಭಾಗ(ತುಂಬಿದ_ಹೊಂದಿಕೆ, Ctx.Saver.save("&" + Content), '&', Ctx);
+    } ಇಲ್ಲದಿದ್ದರೆ { // Normal Tag
       StringRef Interpolated = Content;
-      if (!Interpolated.trim().starts_with("=")) {
-        char Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
-        Tokens.emplace_back(FullMatch, Interpolated, Front, Ctx);
-      } else { // Set Delimiter
-        Tokens.emplace_back(FullMatch, Interpolated, '=', Ctx);
+      ಆದರೆ (!Interpolated.trim().starts_with("=")) {
+        ಅಕ್ಷರ Front = Interpolated.ಖಾಲಿಗಳು() ? ' ' : Interpolated.trim().front();
+        ಟೋಕನುಗಳು.emplace_ಹಿಂಭಾಗ(ತುಂಬಿದ_ಹೊಂದಿಕೆ, Interpolated, Front, Ctx);
+      } ಇಲ್ಲದಿದ್ದರೆ { // Set Delimiter
+        ಟೋಕನುಗಳು.emplace_ಹಿಂಭಾಗ(ತುಂಬಿದ_ಹೊಂದಿಕೆ, Interpolated, '=', Ctx);
         StringRef DelimSpec = Interpolated.trim();
         DelimSpec = DelimSpec.drop_front(1);
-        DelimSpec = DelimSpec.take_until([](char C) { return C == '='; });
+        DelimSpec = DelimSpec.take_until([](ಅಕ್ಷರ C) { ಹಿಂತಿರುಗಿ C == '='; });
         DelimSpec = DelimSpec.trim();
 
-        auto [NewOpen, NewClose] = DelimSpec.split(' ');
+        ಸ್ವಯಂಚಾಲಿತ [NewOpen, NewClose] = DelimSpec.ವಿಭಜಿಸು(' ');
         LLVM_DEBUG(dbgs() << "[Set Delimiter] NewOpen: " << NewOpen
                           << ", NewClose: " << NewClose << "\n");
         Open = NewOpen;
@@ -462,457 +462,457 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
     }
 
     // Move past the tag for the next iteration.
-    Cursor += FullMatch.size();
-    TextStart = Cursor;
+    Cursor += ತುಂಬಿದ_ಹೊಂದಿಕೆ.ಗಾತ್ರ_3();
+    ಪಠ್ಯ_ಆರಂಭ = Cursor;
   }
 
   // Add any remaining text after the last tag.
-  if (TextStart < Template.size())
-    Tokens.emplace_back(Template.substr(TextStart));
+  ಆದರೆ (ಪಠ್ಯ_ಆರಂಭ < Template.ಗಾತ್ರ_3())
+    ಟೋಕನುಗಳು.emplace_ಹಿಂಭಾಗ(Template.substr(ಪಠ್ಯ_ಆರಂಭ));
 
   // Fix up white spaces for standalone tags.
-  size_t LastIdx = Tokens.size() - 1;
-  for (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
-    Token &CurrentToken = Tokens[Idx];
+  size_t ಕೊನೆಯ_Idx = ಟೋಕನುಗಳು.ಗಾತ್ರ_3() - 1;
+  ಗಾಗಿ (size_t Idx = 0, ಕೊನೆ_2 = ಟೋಕನುಗಳು.ಗಾತ್ರ_3(); Idx < ಕೊನೆ_2; ++Idx) {
+    Token &CurrentToken = ಟೋಕನುಗಳು[Idx];
     Token::Type CurrentType = CurrentToken.getType();
-    if (!requiresCleanUp(CurrentType))
-      continue;
+    ಆದರೆ (!requires_Clean_ಮೇಲೆ(CurrentType))
+      ಮುಂದುವರಿ;
 
-    bool HasTextBehind = hasTextBehind(Idx, Tokens);
-    bool HasTextAhead = hasTextAhead(Idx, Tokens);
+    ತಾರ್ಕಿಕ Has_ಪಠ್ಯ_Behind = has_ಪಠ್ಯ_Behind(Idx, ಟೋಕನುಗಳು);
+    ತಾರ್ಕಿಕ Has_ಪಠ್ಯ_Ahead = has_ಪಠ್ಯ_Ahead(Idx, ಟೋಕನುಗಳು);
 
-    if ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
-      stripTokenAhead(Tokens, Idx);
+    ಆದರೆ ((!Has_ಪಠ್ಯ_Ahead && !Has_ಪಠ್ಯ_Behind) || (!Has_ಪಠ್ಯ_Ahead && Idx == 0))
+      stripTokenAhead(ಟೋಕನುಗಳು, Idx);
 
-    if ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
-      stripTokenBefore(Tokens, Idx, CurrentToken, CurrentType);
+    ಆದರೆ ((!Has_ಪಠ್ಯ_Behind && !Has_ಪಠ್ಯ_Ahead) || (!Has_ಪಠ್ಯ_Behind && Idx == ಕೊನೆಯ_Idx))
+      stripTokenBefore(ಟೋಕನುಗಳು, Idx, CurrentToken, CurrentType);
   }
-  return Tokens;
+  ಹಿಂತಿರುಗಿ ಟೋಕನುಗಳು;
 }
 
 // Custom stream to escape strings.
-class EscapeStringStream : public MustacheOutputStream {
-public:
-  explicit EscapeStringStream(llvm::raw_ostream &WrappedStream,
+ವರ್ಗ Escape_String_ಹರಿವು : ಸಾರ್ವಜನಿಕ Mustache_Output_ಹರಿವು {
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಪಷ್ಟ Escape_String_ಹರಿವು(llvm::raw_ostream &Wrapped_ಹರಿವು,
                               EscapeMap &Escape)
-      : Escape(Escape), EscapeChars(Escape.keys().begin(), Escape.keys().end()),
-        WrappedStream(WrappedStream) {
-    SetUnbuffered();
+      : Escape(Escape), EscapeChars(Escape.ಕೀಲಿಗಳು().begin(), Escape.ಕೀಲಿಗಳು().ಕೊನೆ()),
+        Wrapped_ಹರಿವು(Wrapped_ಹರಿವು) {
+    ಗಣ_Unbuffered();
   }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
-    StringRef Data(Ptr, Size);
-    size_t Start = 0;
-    while (Start < Size) {
+ಸಂರಕ್ಷಿತ:
+  ಶೂನ್ಯ write_impl(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *Ptr, size_t ಗಾತ್ರ_2) override {
+    StringRef ದತ್ತಾಂಶ_2(Ptr, ಗಾತ್ರ_2);
+    size_t ಆರಂಭ = 0;
+    ಆಗ (ಆರಂಭ < ಗಾತ್ರ_2) {
       // Find the next character that needs to be escaped.
-      size_t Next = Data.find_first_of(EscapeChars.str(), Start);
+      size_t ಮುಂದಿನ_2 = ದತ್ತಾಂಶ_2.ಕಂಡುಹಿಡಿ_ಮೊದಲ_ದ(EscapeChars.str(), ಆರಂಭ);
 
       // If no escapable characters are found, write the rest of the string.
-      if (Next == StringRef::npos) {
-        WrappedStream << Data.substr(Start);
-        return;
+      ಆದರೆ (ಮುಂದಿನ_2 == StringRef::npos) {
+        Wrapped_ಹರಿವು << ದತ್ತಾಂಶ_2.substr(ಆರಂಭ);
+        ಹಿಂತಿರುಗಿ;
       }
 
       // Write the chunk of text before the escapable character.
-      if (Next > Start)
-        WrappedStream << Data.substr(Start, Next - Start);
+      ಆದರೆ (ಮುಂದಿನ_2 > ಆರಂಭ)
+        Wrapped_ಹರಿವು << ದತ್ತಾಂಶ_2.substr(ಆರಂಭ, ಮುಂದಿನ_2 - ಆರಂಭ);
 
       // Look up and write the escaped version of the character.
-      WrappedStream << Escape[Data[Next]];
-      Start = Next + 1;
+      Wrapped_ಹರಿವು << Escape[ದತ್ತಾಂಶ_2[ಮುಂದಿನ_2]];
+      ಆರಂಭ = ಮುಂದಿನ_2 + 1;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ Wrapped_ಹರಿವು.tell(); }
 
-private:
+ಖಾಸಗಿ:
   EscapeMap &Escape;
   SmallString<8> EscapeChars;
-  llvm::raw_ostream &WrappedStream;
+  llvm::raw_ostream &Wrapped_ಹರಿವು;
 };
 
 // Custom stream to add indentation used to for rendering partials.
-class AddIndentationStringStream : public MustacheOutputStream {
-public:
-  explicit AddIndentationStringStream(raw_ostream &WrappedStream,
+ವರ್ಗ ಕೂಡಿಸು_Indentation_String_ಹರಿವು : ಸಾರ್ವಜನಿಕ Mustache_Output_ಹರಿವು {
+ಸಾರ್ವಜನಿಕ:
+  ಸ್ಪಷ್ಟ ಕೂಡಿಸು_Indentation_String_ಹರಿವು(raw_ostream &Wrapped_ಹರಿವು,
                                       size_t Indentation)
-      : Indentation(Indentation), WrappedStream(WrappedStream),
-        NeedsIndent(true), IsSuspended(false) {
-    SetUnbuffered();
+      : Indentation(Indentation), Wrapped_ಹರಿವು(Wrapped_ಹರಿವು),
+        NeedsIndent(ನಿಜ), IsSuspended(ಸುಳ್ಳು) {
+    ಗಣ_Unbuffered();
   }
 
-  void suspendIndentation() override { IsSuspended = true; }
-  void resumeIndentation() override { IsSuspended = false; }
+  ಶೂನ್ಯ suspendIndentation() override { IsSuspended = ನಿಜ; }
+  ಶೂನ್ಯ resumeIndentation() override { IsSuspended = ಸುಳ್ಳು; }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
-    llvm::StringRef Data(Ptr, Size);
+ಸಂರಕ್ಷಿತ:
+  ಶೂನ್ಯ write_impl(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *Ptr, size_t ಗಾತ್ರ_2) override {
+    llvm::StringRef ದತ್ತಾಂಶ_2(Ptr, ಗಾತ್ರ_2);
     SmallString<0> Indent;
     Indent.resize(Indentation, ' ');
 
-    for (char C : Data) {
+    ಗಾಗಿ (ಅಕ್ಷರ C : ದತ್ತಾಂಶ_2) {
       LLVM_DEBUG(dbgs() << "[Indentation Stream] NeedsIndent:" << NeedsIndent
                         << ", C:'" << C << "', Indentation:" << Indentation
                         << "\n");
-      if (NeedsIndent && C != '\n') {
-        WrappedStream << Indent;
-        NeedsIndent = false;
+      ಆದರೆ (NeedsIndent && C != '\n') {
+        Wrapped_ಹರಿವು << Indent;
+        NeedsIndent = ಸುಳ್ಳು;
       }
-      WrappedStream << C;
-      if (C == '\n' && !IsSuspended)
-        NeedsIndent = true;
+      Wrapped_ಹರಿವು << C;
+      ಆದರೆ (C == '\n' && !IsSuspended)
+        NeedsIndent = ನಿಜ;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() ಸ್ಥಿರಾಂಕ override { ಹಿಂತಿರುಗಿ Wrapped_ಹರಿವು.tell(); }
 
-private:
+ಖಾಸಗಿ:
   size_t Indentation;
-  raw_ostream &WrappedStream;
-  bool NeedsIndent;
-  bool IsSuspended;
+  raw_ostream &Wrapped_ಹರಿವು;
+  ತಾರ್ಕಿಕ NeedsIndent;
+  ತಾರ್ಕಿಕ IsSuspended;
 };
 
-class Parser {
-public:
+ವರ್ಗ Parser {
+ಸಾರ್ವಜನಿಕ:
   Parser(StringRef TemplateStr, MustacheContext &Ctx)
       : Ctx(Ctx), TemplateStr(TemplateStr) {}
 
   AstPtr parse();
 
-private:
-  void parseMustache(ASTNode *Parent);
-  void parseSection(ASTNode *Parent, ASTNode::Type Ty, const Accessor &A);
+ಖಾಸಗಿ:
+  ಶೂನ್ಯ parseMustache(ASTNode *ಪೋಷಕ_2);
+  ಶೂನ್ಯ parseSection(ASTNode *ಪೋಷಕ_2, ASTNode::Type Ty, ಸ್ಥಿರಾಂಕ Accessor &A);
 
   MustacheContext &Ctx;
-  SmallVector<Token> Tokens;
+  Small_ಸದಿಶ<Token> ಟೋಕನುಗಳು;
   size_t CurrentPtr;
   StringRef TemplateStr;
 };
 
-void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
-                          const Accessor &A) {
-  AstPtr CurrentNode = createNode(Ctx, Ty, A, Parent);
-  size_t Start = CurrentPtr;
-  parseMustache(CurrentNode);
-  const size_t End = CurrentPtr - 1;
+ಶೂನ್ಯ Parser::parseSection(ASTNode *ಪೋಷಕ_2, ASTNode::Type Ty,
+                          ಸ್ಥಿರಾಂಕ Accessor &A) {
+  AstPtr Current_ಗಂಟು = create_ಗಂಟು(Ctx, Ty, A, ಪೋಷಕ_2);
+  size_t ಆರಂಭ = CurrentPtr;
+  parseMustache(Current_ಗಂಟು);
+  ಸ್ಥಿರಾಂಕ size_t ಕೊನೆ_2 = CurrentPtr - 1;
 
-  size_t RawBodySize = 0;
-  for (size_t I = Start; I < End; ++I)
-    RawBodySize += Tokens[I].RawBody.size();
+  size_t Raw_Body_ಗಾತ್ರ = 0;
+  ಗಾಗಿ (size_t I = ಆರಂಭ; I < ಕೊನೆ_2; ++I)
+    Raw_Body_ಗಾತ್ರ += ಟೋಕನುಗಳು[I].RawBody.ಗಾತ್ರ_3();
 
   SmallString<128> RawBody;
-  RawBody.reserve(RawBodySize);
-  for (std::size_t I = Start; I < End; ++I)
-    RawBody += Tokens[I].RawBody;
+  RawBody.reserve(Raw_Body_ಗಾತ್ರ);
+  ಗಾಗಿ (std::size_t I = ಆರಂಭ; I < ಕೊನೆ_2; ++I)
+    RawBody += ಟೋಕನುಗಳು[I].RawBody;
 
-  CurrentNode->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
-  Parent->addChild(CurrentNode);
+  Current_ಗಂಟು->ಗಣ_Raw_Body(Ctx.Saver.save(StringRef(RawBody)));
+  ಪೋಷಕ_2->ಕೂಡಿಸು_ಮಗು(Current_ಗಂಟು);
 }
 
 AstPtr Parser::parse() {
-  Tokens = tokenize(TemplateStr, Ctx);
+  ಟೋಕನುಗಳು = tokenize(TemplateStr, Ctx);
   CurrentPtr = 0;
-  AstPtr RootNode = createRootNode(Ctx);
-  parseMustache(RootNode);
-  return RootNode;
+  AstPtr ಬೇರು_ಗಂಟು = create_ಬೇರು_ಗಂಟು(Ctx);
+  parseMustache(ಬೇರು_ಗಂಟು);
+  ಹಿಂತಿರುಗಿ ಬೇರು_ಗಂಟು;
 }
 
-void Parser::parseMustache(ASTNode *Parent) {
+ಶೂನ್ಯ Parser::parseMustache(ASTNode *ಪೋಷಕ_2) {
 
-  while (CurrentPtr < Tokens.size()) {
-    Token CurrentToken = Tokens[CurrentPtr];
+  ಆಗ (CurrentPtr < ಟೋಕನುಗಳು.ಗಾತ್ರ_3()) {
+    Token CurrentToken = ಟೋಕನುಗಳು[CurrentPtr];
     CurrentPtr++;
     ArrayRef<StringRef> A = CurrentToken.getAccessor();
-    AstPtr CurrentNode;
+    AstPtr Current_ಗಂಟು;
 
-    switch (CurrentToken.getType()) {
-    case Token::Type::Text: {
-      CurrentNode = createTextNode(Ctx, CurrentToken.TokenBody, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    ಆಯ್ಕೆ (CurrentToken.getType()) {
+    ಸ್ಥಿತಿ Token::Type::ಪಠ್ಯ_2: {
+      Current_ಗಂಟು = create_ಪಠ್ಯ_ಗಂಟು(Ctx, CurrentToken.TokenBody, ಪೋಷಕ_2);
+      ಪೋಷಕ_2->ಕೂಡಿಸು_ಮಗು(Current_ಗಂಟು);
+      ನಿಲ್ಲಿಸು;
     }
-    case Token::Type::Variable: {
-      CurrentNode = createNode(Ctx, ASTNode::Variable, A, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    ಸ್ಥಿತಿ Token::Type::Variable: {
+      Current_ಗಂಟು = create_ಗಂಟು(Ctx, ASTNode::Variable, A, ಪೋಷಕ_2);
+      ಪೋಷಕ_2->ಕೂಡಿಸು_ಮಗು(Current_ಗಂಟು);
+      ನಿಲ್ಲಿಸು;
     }
-    case Token::Type::UnescapeVariable: {
-      CurrentNode = createNode(Ctx, ASTNode::UnescapeVariable, A, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    ಸ್ಥಿತಿ Token::Type::UnescapeVariable: {
+      Current_ಗಂಟು = create_ಗಂಟು(Ctx, ASTNode::UnescapeVariable, A, ಪೋಷಕ_2);
+      ಪೋಷಕ_2->ಕೂಡಿಸು_ಮಗು(Current_ಗಂಟು);
+      ನಿಲ್ಲಿಸು;
     }
-    case Token::Type::Partial: {
-      CurrentNode = createNode(Ctx, ASTNode::Partial, A, Parent);
-      CurrentNode->setIndentation(CurrentToken.getIndentation());
-      Parent->addChild(CurrentNode);
-      break;
+    ಸ್ಥಿತಿ Token::Type::Partial: {
+      Current_ಗಂಟು = create_ಗಂಟು(Ctx, ASTNode::Partial, A, ಪೋಷಕ_2);
+      Current_ಗಂಟು->ಗಣ_Indentation(CurrentToken.getIndentation());
+      ಪೋಷಕ_2->ಕೂಡಿಸು_ಮಗು(Current_ಗಂಟು);
+      ನಿಲ್ಲಿಸು;
     }
-    case Token::Type::SectionOpen: {
-      parseSection(Parent, ASTNode::Section, A);
-      break;
+    ಸ್ಥಿತಿ Token::Type::SectionOpen: {
+      parseSection(ಪೋಷಕ_2, ASTNode::Section, A);
+      ನಿಲ್ಲಿಸು;
     }
-    case Token::Type::InvertSectionOpen: {
-      parseSection(Parent, ASTNode::InvertSection, A);
-      break;
+    ಸ್ಥಿತಿ Token::Type::InvertSectionOpen: {
+      parseSection(ಪೋಷಕ_2, ASTNode::InvertSection, A);
+      ನಿಲ್ಲಿಸು;
     }
-    case Token::Type::Comment:
-    case Token::Type::SetDelimiter:
-      break;
-    case Token::Type::SectionClose:
-      return;
+    ಸ್ಥಿತಿ Token::Type::Comment:
+    ಸ್ಥಿತಿ Token::Type::ಗಣ_Delimiter:
+      ನಿಲ್ಲಿಸು;
+    ಸ್ಥಿತಿ Token::Type::SectionClose:
+      ಹಿಂತಿರುಗಿ;
     }
   }
 }
-static void toMustacheString(const json::Value &Data, raw_ostream &OS) {
+ಸ್ಥಿರ ಶೂನ್ಯ ಗಮ್ಯ_Mustache_String(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &ದತ್ತಾಂಶ_2, raw_ostream &OS) {
   LLVM_DEBUG(dbgs() << "[To Mustache String] Kind: "
-                    << jsonKindToString(Data.kind()) << ", Data: " << Data
+                    << json_ಬಗೆ_ಗಮ್ಯ_String(ದತ್ತಾಂಶ_2.ಬಗೆ()) << ", Data: " << ದತ್ತಾಂಶ_2
                     << "\n");
-  switch (Data.kind()) {
-  case json::Value::Null:
-    return;
-  case json::Value::Number: {
-    auto Num = *Data.getAsNumber();
+  ಆಯ್ಕೆ (ದತ್ತಾಂಶ_2.ಬಗೆ()) {
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::Null:
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::ಸಂಖ್ಯೆ: {
+    ಸ್ವಯಂಚಾಲಿತ ಅಂಕೆ = *ದತ್ತಾಂಶ_2.get_As_ಸಂಖ್ಯೆ();
     std::ostringstream SS;
-    SS << Num;
+    SS << ಅಂಕೆ;
     OS << SS.str();
-    return;
+    ಹಿಂತಿರುಗಿ;
   }
-  case json::Value::String: {
-    OS << *Data.getAsString();
-    return;
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::String: {
+    OS << *ದತ್ತಾಂಶ_2.getAsString();
+    ಹಿಂತಿರುಗಿ;
   }
 
-  case json::Value::Array: {
-    auto Arr = *Data.getAsArray();
-    if (Arr.empty())
-      return;
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::Array: {
+    ಸ್ವಯಂಚಾಲಿತ Arr = *ದತ್ತಾಂಶ_2.getAsArray();
+    ಆದರೆ (Arr.ಖಾಲಿಗಳು())
+      ಹಿಂತಿರುಗಿ;
     [[fallthrough]];
   }
-  case json::Value::Object:
-  case json::Value::Boolean: {
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::Object:
+  ಸ್ಥಿತಿ json::ಮೌಲ್ಯ::Boolean: {
     llvm::json::OStream JOS(OS, 2);
-    JOS.value(Data);
-    break;
+    JOS.ಮೌಲ್ಯ_2(ದತ್ತಾಂಶ_2);
+    ನಿಲ್ಲಿಸು;
   }
   }
 }
 
-void ASTNode::renderRoot(const json::Value &CurrentCtx,
-                         MustacheOutputStream &OS) {
-  renderChild(CurrentCtx, OS);
+ಶೂನ್ಯ ASTNode::render_ಬೇರು(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                         Mustache_Output_ಹರಿವು &OS) {
+  render_ಮಗು(CurrentCtx, OS);
 }
 
-void ASTNode::renderText(MustacheOutputStream &OS) { OS << Body; }
+ಶೂನ್ಯ ASTNode::render_ಪಠ್ಯ(Mustache_Output_ಹರಿವು &OS) { OS << Body; }
 
-void ASTNode::renderPartial(const json::Value &CurrentCtx,
-                            MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << AccessorValue[0]
+ಶೂನ್ಯ ASTNode::renderPartial(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                            Mustache_Output_ಹರಿವು &OS) {
+  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << Accessor_ಮೌಲ್ಯ[0]
                     << ", Indentation:" << Indentation << "\n");
-  auto Partial = Ctx.Partials.find(AccessorValue[0]);
-  if (Partial != Ctx.Partials.end())
-    renderPartial(CurrentCtx, OS, Partial->getValue());
+  ಸ್ವಯಂಚಾಲಿತ Partial = Ctx.Partials.ಕಂಡುಹಿಡಿ(Accessor_ಮೌಲ್ಯ[0]);
+  ಆದರೆ (Partial != Ctx.Partials.ಕೊನೆ())
+    renderPartial(CurrentCtx, OS, Partial->get_ಮೌಲ್ಯ());
 }
 
-void ASTNode::renderVariable(const json::Value &CurrentCtx,
-                             MustacheOutputStream &OS) {
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
-    EscapeStringStream ES(OS, Ctx.Escapes);
-    toMustacheString(*ContextPtr, ES);
+ಶೂನ್ಯ ASTNode::renderVariable(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                             Mustache_Output_ಹರಿವು &OS) {
+  ಸ್ವಯಂಚಾಲಿತ Lambda = Ctx.Lambdas.ಕಂಡುಹಿಡಿ(Accessor_ಮೌಲ್ಯ[0]);
+  ಆದರೆ (Lambda != Ctx.Lambdas.ಕೊನೆ()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_ಮೌಲ್ಯ());
+  } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *ContextPtr = ಕಂಡುಹಿಡಿ_Context()) {
+    Escape_String_ಹರಿವು ES(OS, Ctx.Escapes);
+    ಗಮ್ಯ_Mustache_String(*ContextPtr, ES);
   }
 }
 
-void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
-                                     MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << AccessorValue[0]
+ಶೂನ್ಯ ASTNode::renderUnescapeVariable(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                                     Mustache_Output_ಹರಿವು &OS) {
+  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << Accessor_ಮೌಲ್ಯ[0]
                     << "\n");
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  ಸ್ವಯಂಚಾಲಿತ Lambda = Ctx.Lambdas.ಕಂಡುಹಿಡಿ(Accessor_ಮೌಲ್ಯ[0]);
+  ಆದರೆ (Lambda != Ctx.Lambdas.ಕೊನೆ()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_ಮೌಲ್ಯ());
+  } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *ContextPtr = ಕಂಡುಹಿಡಿ_Context()) {
     OS.suspendIndentation();
-    toMustacheString(*ContextPtr, OS);
+    ಗಮ್ಯ_Mustache_String(*ContextPtr, OS);
     OS.resumeIndentation();
   }
 }
 
-void ASTNode::renderSection(const json::Value &CurrentCtx,
-                            MustacheOutputStream &OS) {
-  auto SectionLambda = Ctx.SectionLambdas.find(AccessorValue[0]);
-  if (SectionLambda != Ctx.SectionLambdas.end()) {
-    renderSectionLambdas(CurrentCtx, OS, SectionLambda->getValue());
-    return;
+ಶೂನ್ಯ ASTNode::renderSection(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                            Mustache_Output_ಹರಿವು &OS) {
+  ಸ್ವಯಂಚಾಲಿತ SectionLambda = Ctx.SectionLambdas.ಕಂಡುಹಿಡಿ(Accessor_ಮೌಲ್ಯ[0]);
+  ಆದರೆ (SectionLambda != Ctx.SectionLambdas.ಕೊನೆ()) {
+    renderSectionLambdas(CurrentCtx, OS, SectionLambda->get_ಮೌಲ್ಯ());
+    ಹಿಂತಿರುಗಿ;
   }
 
-  const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr))
-    return;
+  ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *ContextPtr = ಕಂಡುಹಿಡಿ_Context();
+  ಆದರೆ (isContextFalsey(ContextPtr))
+    ಹಿಂತಿರುಗಿ;
 
-  if (const json::Array *Arr = ContextPtr->getAsArray()) {
-    for (const json::Value &V : *Arr)
-      renderChild(V, OS);
-    return;
+  ಆದರೆ (ಸ್ಥಿರಾಂಕ json::Array *Arr = ContextPtr->getAsArray()) {
+    ಗಾಗಿ (ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &V : *Arr)
+      render_ಮಗು(V, OS);
+    ಹಿಂತಿರುಗಿ;
   }
-  renderChild(*ContextPtr, OS);
+  render_ಮಗು(*ContextPtr, OS);
 }
 
-void ASTNode::renderInvertSection(const json::Value &CurrentCtx,
-                                  MustacheOutputStream &OS) {
-  bool IsLambda = Ctx.SectionLambdas.contains(AccessorValue[0]);
-  const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr) && !IsLambda) {
-    renderChild(CurrentCtx, OS);
+ಶೂನ್ಯ ASTNode::renderInvertSection(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &CurrentCtx,
+                                  Mustache_Output_ಹರಿವು &OS) {
+  ತಾರ್ಕಿಕ IsLambda = Ctx.SectionLambdas.ಒಳಗೊಂಡಿದೆ(Accessor_ಮೌಲ್ಯ[0]);
+  ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *ContextPtr = ಕಂಡುಹಿಡಿ_Context();
+  ಆದರೆ (isContextFalsey(ContextPtr) && !IsLambda) {
+    render_ಮಗು(CurrentCtx, OS);
   }
 }
 
-void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
-  if (Ty != Root && Ty != Text && AccessorValue.empty())
-    return;
+ಶೂನ್ಯ ASTNode::render(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &ದತ್ತಾಂಶ_2, Mustache_Output_ಹರಿವು &OS) {
+  ಆದರೆ (Ty != ಬೇರು_2 && Ty != ಪಠ್ಯ_2 && Accessor_ಮೌಲ್ಯ.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ;
   // Set the parent context to the incoming context so that we
   // can walk up the context tree correctly in findContext().
-  ParentContext = &Data;
+  ಪೋಷಕ_Context = &ದತ್ತಾಂಶ_2;
 
-  switch (Ty) {
-  case Root:
-    renderRoot(Data, OS);
-    return;
-  case Text:
-    renderText(OS);
-    return;
-  case Partial:
-    renderPartial(Data, OS);
-    return;
-  case Variable:
-    renderVariable(Data, OS);
-    return;
-  case UnescapeVariable:
-    renderUnescapeVariable(Data, OS);
-    return;
-  case Section:
-    renderSection(Data, OS);
-    return;
-  case InvertSection:
-    renderInvertSection(Data, OS);
-    return;
+  ಆಯ್ಕೆ (Ty) {
+  ಸ್ಥಿತಿ ಬೇರು_2:
+    render_ಬೇರು(ದತ್ತಾಂಶ_2, OS);
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ ಪಠ್ಯ_2:
+    render_ಪಠ್ಯ(OS);
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ Partial:
+    renderPartial(ದತ್ತಾಂಶ_2, OS);
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ Variable:
+    renderVariable(ದತ್ತಾಂಶ_2, OS);
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ UnescapeVariable:
+    renderUnescapeVariable(ದತ್ತಾಂಶ_2, OS);
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ Section:
+    renderSection(ದತ್ತಾಂಶ_2, OS);
+    ಹಿಂತಿರುಗಿ;
+  ಸ್ಥಿತಿ InvertSection:
+    renderInvertSection(ದತ್ತಾಂಶ_2, OS);
+    ಹಿಂತಿರುಗಿ;
   }
   llvm_unreachable("Invalid ASTNode type");
 }
 
-const json::Value *ASTNode::findContext() {
+ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *ASTNode::ಕಂಡುಹಿಡಿ_Context() {
   // The mustache spec allows for dot notation to access nested values
   // a single dot refers to the current context.
   // We attempt to find the JSON context in the current node, if it is not
   // found, then we traverse the parent nodes to find the context until we
   // reach the root node or the context is found.
-  if (AccessorValue.empty())
-    return nullptr;
-  if (AccessorValue[0] == ".")
-    return ParentContext;
+  ಆದರೆ (Accessor_ಮೌಲ್ಯ.ಖಾಲಿಗಳು())
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
+  ಆದರೆ (Accessor_ಮೌಲ್ಯ[0] == ".")
+    ಹಿಂತಿರುಗಿ ಪೋಷಕ_Context;
 
-  const json::Object *CurrentContext = ParentContext->getAsObject();
-  StringRef CurrentAccessor = AccessorValue[0];
-  ASTNode *CurrentParent = Parent;
+  ಸ್ಥಿರಾಂಕ json::Object *CurrentContext = ಪೋಷಕ_Context->getAsObject();
+  StringRef CurrentAccessor = Accessor_ಮೌಲ್ಯ[0];
+  ASTNode *Current_ಪೋಷಕ = ಪೋಷಕ_2;
 
-  while (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
-    if (CurrentParent->Ty != Root) {
-      CurrentContext = CurrentParent->ParentContext->getAsObject();
-      CurrentParent = CurrentParent->Parent;
-      continue;
+  ಆಗ (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
+    ಆದರೆ (Current_ಪೋಷಕ->Ty != ಬೇರು_2) {
+      CurrentContext = Current_ಪೋಷಕ->ಪೋಷಕ_Context->getAsObject();
+      Current_ಪೋಷಕ = Current_ಪೋಷಕ->ಪೋಷಕ_2;
+      ಮುಂದುವರಿ;
     }
-    return nullptr;
+    ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
   }
-  const json::Value *Context = nullptr;
-  for (auto [Idx, Acc] : enumerate(AccessorValue)) {
-    const json::Value *CurrentValue = CurrentContext->get(Acc);
-    if (!CurrentValue)
-      return nullptr;
-    if (Idx < AccessorValue.size() - 1) {
-      CurrentContext = CurrentValue->getAsObject();
-      if (!CurrentContext)
-        return nullptr;
-    } else {
-      Context = CurrentValue;
+  ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *Context = ಶೂನ್ಯಸೂಚಕ;
+  ಗಾಗಿ (ಸ್ವಯಂಚಾಲಿತ [Idx, Acc] : enumerate(Accessor_ಮೌಲ್ಯ)) {
+    ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ *Current_ಮೌಲ್ಯ = CurrentContext->get(Acc);
+    ಆದರೆ (!Current_ಮೌಲ್ಯ)
+      ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
+    ಆದರೆ (Idx < Accessor_ಮೌಲ್ಯ.ಗಾತ್ರ_3() - 1) {
+      CurrentContext = Current_ಮೌಲ್ಯ->getAsObject();
+      ಆದರೆ (!CurrentContext)
+        ಹಿಂತಿರುಗಿ ಶೂನ್ಯಸೂಚಕ;
+    } ಇಲ್ಲದಿದ್ದರೆ {
+      Context = Current_ಮೌಲ್ಯ;
     }
   }
-  return Context;
+  ಹಿಂತಿರುಗಿ Context;
 }
 
-void ASTNode::renderChild(const json::Value &Contexts,
-                          MustacheOutputStream &OS) {
-  for (ASTNode &Child : Children)
-    Child.render(Contexts, OS);
+ಶೂನ್ಯ ASTNode::render_ಮಗು(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &Contexts,
+                          Mustache_Output_ಹರಿವು &OS) {
+  ಗಾಗಿ (ASTNode &ಮಗು : Children)
+    ಮಗು.render(Contexts, OS);
 }
 
-void ASTNode::renderPartial(const json::Value &Contexts,
-                            MustacheOutputStream &OS, ASTNode *Partial) {
+ಶೂನ್ಯ ASTNode::renderPartial(ಸ್ಥಿರಾಂಕ json::ಮೌಲ್ಯ &Contexts,
+                            Mustache_Output_ಹರಿವು &OS, ASTNode *Partial) {
   LLVM_DEBUG(dbgs() << "[Render Partial Indentation] Indentation: " << Indentation << "\n");
-  AddIndentationStringStream IS(OS, Indentation);
+  ಕೂಡಿಸು_Indentation_String_ಹರಿವು IS(OS, Indentation);
   Partial->render(Contexts, IS);
 }
 
-void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
-                            MustacheOutputStream &OS, Lambda &L) {
-  json::Value LambdaResult = L();
+ಶೂನ್ಯ ASTNode::renderLambdas(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &Contexts,
+                            Mustache_Output_ಹರಿವು &OS, Lambda &L) {
+  json::ಮೌಲ್ಯ Lambda_ಫಲಿತಾಂಶ = L();
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
-  toMustacheString(LambdaResult, Output);
+  ಗಮ್ಯ_Mustache_String(Lambda_ಫಲಿತಾಂಶ, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
+  AstPtr Lambda_ಗಂಟು = P.parse();
 
-  EscapeStringStream ES(OS, Ctx.Escapes);
-  if (Ty == Variable) {
-    LambdaNode->render(Contexts, ES);
-    return;
+  Escape_String_ಹರಿವು ES(OS, Ctx.Escapes);
+  ಆದರೆ (Ty == Variable) {
+    Lambda_ಗಂಟು->render(Contexts, ES);
+    ಹಿಂತಿರುಗಿ;
   }
-  LambdaNode->render(Contexts, OS);
+  Lambda_ಗಂಟು->render(Contexts, OS);
 }
 
-void ASTNode::renderSectionLambdas(const llvm::json::Value &Contexts,
-                                   MustacheOutputStream &OS, SectionLambda &L) {
-  json::Value Return = L(RawBody.str());
-  if (isFalsey(Return))
-    return;
+ಶೂನ್ಯ ASTNode::renderSectionLambdas(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &Contexts,
+                                   Mustache_Output_ಹರಿವು &OS, SectionLambda &L) {
+  json::ಮೌಲ್ಯ Return = L(RawBody.str());
+  ಆದರೆ (isFalsey(Return))
+    ಹಿಂತಿರುಗಿ;
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
-  toMustacheString(Return, Output);
+  ಗಮ್ಯ_Mustache_String(Return, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
-  LambdaNode->render(Contexts, OS);
+  AstPtr Lambda_ಗಂಟು = P.parse();
+  Lambda_ಗಂಟು->render(Contexts, OS);
 }
 
-void Template::render(const llvm::json::Value &Data, llvm::raw_ostream &OS) {
-  RawMustacheOutputStream MOS(OS);
-  Tree->render(Data, MOS);
+ಶೂನ್ಯ Template::render(ಸ್ಥಿರಾಂಕ llvm::json::ಮೌಲ್ಯ &ದತ್ತಾಂಶ_2, llvm::raw_ostream &OS) {
+  Raw_Mustache_Output_ಹರಿವು MOS(OS);
+  ವೃಕ್ಷ->render(ದತ್ತಾಂಶ_2, MOS);
 }
 
-void Template::registerPartial(std::string Name, std::string Partial) {
+ಶೂನ್ಯ Template::ರಿಜಿಸ್ಟರ್_Partial(std::string Name, std::string Partial) {
   StringRef SavedPartial = Ctx.Saver.save(Partial);
   Parser P(SavedPartial, Ctx);
-  AstPtr PartialTree = P.parse();
-  Ctx.Partials.insert(std::make_pair(Name, PartialTree));
+  AstPtr Partial_ವೃಕ್ಷ = P.parse();
+  Ctx.Partials.ಸೇರಿಸು(std::make_pair(Name, Partial_ವೃಕ್ಷ));
 }
 
-void Template::registerLambda(std::string Name, Lambda L) {
+ಶೂನ್ಯ Template::ರಿಜಿಸ್ಟರ್_Lambda(std::string Name, Lambda L) {
   Ctx.Lambdas[Name] = std::move(L);
 }
 
-void Template::registerLambda(std::string Name, SectionLambda L) {
+ಶೂನ್ಯ Template::ರಿಜಿಸ್ಟರ್_Lambda(std::string Name, SectionLambda L) {
   Ctx.SectionLambdas[Name] = std::move(L);
 }
 
-void Template::overrideEscapeCharacters(EscapeMap E) {
+ಶೂನ್ಯ Template::overrideEscapeCharacters(EscapeMap E) {
   Ctx.Escapes = std::move(E);
 }
 
 Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
   Parser P(TemplateStr, Ctx);
-  Tree = P.parse();
+  ವೃಕ್ಷ = P.parse();
   // The default behavior is to escape html entities.
-  const EscapeMap HtmlEntities = {{'&', "&amp;"},
+  ಸ್ಥಿರಾಂಕ EscapeMap HtmlEntities = {{'&', "&amp;"},
                                   {'<', "&lt;"},
                                   {'>', "&gt;"},
                                   {'"', "&quot;"},
@@ -921,12 +921,12 @@ Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
 }
 
 Template::Template(Template &&Other) noexcept
-    : Ctx(Other.Ctx), Tree(Other.Tree) {
-  Other.Tree = nullptr;
+    : Ctx(Other.Ctx), ವೃಕ್ಷ(Other.ವೃಕ್ಷ) {
+  Other.ವೃಕ್ಷ = ಶೂನ್ಯಸೂಚಕ;
 }
 
-Template::~Template() = default;
+Template::~Template() = ಪೂರ್ವನಿಯೋಜಿತ;
 
 } // namespace llvm::mustache
 
-#undef DEBUG_TYPE
+#ವ್ಯಾಖ್ಯಾನ_ರದ್ದು DEBUG_TYPE

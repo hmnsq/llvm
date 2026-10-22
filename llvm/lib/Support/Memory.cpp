@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Memory.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ NDEBUG
+#ಅನ್ತರ್ಭಾವ "llvm/Support/raw_ostream.h"
+#ಆದರೆ_ಅಂತ್ಯ // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ LLVM_ON_UNIX
+#ಅನ್ತರ್ಭಾವ "Unix/Memory.inc"
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _WIN32
+#ಅನ್ತರ್ಭಾವ "Windows/Memory.inc"
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifndef NDEBUG
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ NDEBUG
 
-namespace llvm {
-namespace sys {
+ನಾಮಾಕಾಶ llvm {
+ನಾಮಾಕಾಶ sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, ಸ್ಥಿರಾಂಕ ಸ್ಮರಣೆ_2::ProtectionFlags &PF) {
+  ಪ್ರತಿಜ್ಞಾ((PF & ~(ಸ್ಮರಣೆ_2::MF_READ | ಸ್ಮರಣೆ_2::MF_WRITE | ಸ್ಮರಣೆ_2::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
-            << (PF & Memory::MF_WRITE ? 'W' : '-')
-            << (PF & Memory::MF_EXEC ? 'X' : '-');
+  ಹಿಂತಿರುಗಿ OS << (PF & ಸ್ಮರಣೆ_2::MF_READ ? 'R' : '-')
+            << (PF & ಸ್ಮರಣೆ_2::MF_WRITE ? 'W' : '-')
+            << (PF & ಸ್ಮರಣೆ_2::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &ಕ್ರಿಯಾಕಾರಕ<<(raw_ostream &OS, ಸ್ಥಿರಾಂಕ ಸ್ಮರಣೆ_ಖಂಡ &MB) {
+  ಹಿಂತಿರುಗಿ OS << "[ " << MB.ತಳ_2() << " .. "
+            << (ಶೂನ್ಯ *)((ಅಕ್ಷರ *)MB.ತಳ_2() + MB.allocated_ಗಾತ್ರ()) << " ] ("
+            << MB.allocated_ಗಾತ್ರ() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#ಆದರೆ_ಅಂತ್ಯ // ifndef NDEBUG

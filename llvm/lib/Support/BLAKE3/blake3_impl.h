@@ -1,90 +1,90 @@
-#ifndef BLAKE3_IMPL_H
-#define BLAKE3_IMPL_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ BLAKE3_IMPL_H
+#ವ್ಯಾಖ್ಯಾನಿಸು BLAKE3_IMPL_H
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#ಅನ್ತರ್ಭಾವ <assert.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stddef.h>
+#ಅನ್ತರ್ಭಾವ <stdint.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
 
-#include "llvm-c/blake3.h"
+#ಅನ್ತರ್ಭಾವ "llvm-c/blake3.h"
 // For \p LLVM_LIBRARY_VISIBILITY
-#include "llvm/Support/Compiler.h"
+#ಅನ್ತರ್ಭಾವ "llvm/Support/Compiler.h"
 
-#include "llvm_blake3_prefix.h"
+#ಅನ್ತರ್ಭಾವ "llvm_blake3_prefix.h"
 
-#define BLAKE3_PRIVATE
+#ವ್ಯಾಖ್ಯಾನಿಸು BLAKE3_ಖಾಸಗಿ
 
 // internal flags
-enum blake3_flags {
-  CHUNK_START         = 1 << 0,
-  CHUNK_END           = 1 << 1,
-  PARENT              = 1 << 2,
-  ROOT                = 1 << 3,
+ಎಣಿಕೆ blake3_flags {
+  CHUNK_ಆರಂಭ         = 1 << 0,
+  CHUNK_ಕೊನೆ           = 1 << 1,
+  ಪೋಷಕ              = 1 << 2,
+  ಬೇರು                = 1 << 3,
   KEYED_HASH          = 1 << 4,
-  DERIVE_KEY_CONTEXT  = 1 << 5,
-  DERIVE_KEY_MATERIAL = 1 << 6,
+  DERIVE_ಕೀಲಿ_CONTEXT  = 1 << 5,
+  DERIVE_ಕೀಲಿ_MATERIAL = 1 << 6,
 };
 
 // This C implementation tries to support recent versions of GCC, Clang, and
 // MSVC.
-#if defined(_MSC_VER)
-#define INLINE static __forceinline
-#else
-#define INLINE static inline __attribute__((always_inline))
-#endif
+#ಆದರೆ defined(_MSC_VER)
+#ವ್ಯಾಖ್ಯಾನಿಸು INLINE ಸ್ಥಿರ __forceinline
+#ಇಲ್ಲದಿದ್ದರೆ
+#ವ್ಯಾಖ್ಯಾನಿಸು INLINE ಸ್ಥಿರ ಸಾಲೊಳಗೆ __attribute__((always_inline))
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
-#define IS_X86
-#define IS_X86_64
-#endif
+#ಆದರೆ (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
+#ವ್ಯಾಖ್ಯಾನಿಸು IS_X86
+#ವ್ಯಾಖ್ಯಾನಿಸು IS_X86_64
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(__i386__) || defined(_M_IX86)
-#define IS_X86
-#define IS_X86_32
-#endif
+#ಆದರೆ defined(__i386__) || defined(_M_IX86)
+#ವ್ಯಾಖ್ಯಾನಿಸು IS_X86
+#ವ್ಯಾಖ್ಯಾನಿಸು IS_X86_32
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
-#define IS_AARCH64
-#endif
+#ಆದರೆ defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
+#ವ್ಯಾಖ್ಯಾನಿಸು IS_AARCH64
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(IS_X86)
-#if defined(_MSC_VER)
-#include <intrin.h>
-#endif
-#include <immintrin.h>
-#endif
+#ಆದರೆ defined(IS_X86)
+#ಆದರೆ defined(_MSC_VER)
+#ಅನ್ತರ್ಭಾವ <intrin.h>
+#ಆದರೆ_ಅಂತ್ಯ
+#ಅನ್ತರ್ಭಾವ <immintrin.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if !defined(BLAKE3_USE_NEON) 
+#ಆದರೆ !defined(BLAKE3_USE_NEON) 
   // If BLAKE3_USE_NEON not manually set, autodetect based on AArch64ness
-  #if defined(IS_AARCH64)
-    #if defined(__ARM_BIG_ENDIAN)
-      #define BLAKE3_USE_NEON 0
-    #else
-      #define BLAKE3_USE_NEON 1
-    #endif
-  #else
-    #define BLAKE3_USE_NEON 0
-  #endif
-#endif
+  #ಆದರೆ defined(IS_AARCH64)
+    #ಆದರೆ defined(__ARM_BIG_ENDIAN)
+      #ವ್ಯಾಖ್ಯಾನಿಸು BLAKE3_USE_NEON 0
+    #ಇಲ್ಲದಿದ್ದರೆ
+      #ವ್ಯಾಖ್ಯಾನಿಸು BLAKE3_USE_NEON 1
+    #ಆದರೆ_ಅಂತ್ಯ
+  #ಇಲ್ಲದಿದ್ದರೆ
+    #ವ್ಯಾಖ್ಯಾನಿಸು BLAKE3_USE_NEON 0
+  #ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(IS_X86)
-#define MAX_SIMD_DEGREE 16
-#elif BLAKE3_USE_NEON == 1
-#define MAX_SIMD_DEGREE 4
-#else
-#define MAX_SIMD_DEGREE 1
-#endif
+#ಆದರೆ defined(IS_X86)
+#ವ್ಯಾಖ್ಯಾನಿಸು MAX_SIMD_DEGREE 16
+#ಅಥವಾಆದರೆ BLAKE3_USE_NEON == 1
+#ವ್ಯಾಖ್ಯಾನಿಸು MAX_SIMD_DEGREE 4
+#ಇಲ್ಲದಿದ್ದರೆ
+#ವ್ಯಾಖ್ಯಾನಿಸು MAX_SIMD_DEGREE 1
+#ಆದರೆ_ಅಂತ್ಯ
 
 // There are some places where we want a static size that's equal to the
 // MAX_SIMD_DEGREE, but also at least 2.
-#define MAX_SIMD_DEGREE_OR_2 (MAX_SIMD_DEGREE > 2 ? MAX_SIMD_DEGREE : 2)
+#ವ್ಯಾಖ್ಯಾನಿಸು MAX_SIMD_DEGREE_OR_2 (MAX_SIMD_DEGREE > 2 ? MAX_SIMD_DEGREE : 2)
 
-static const uint32_t IV[8] = {0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL,
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ uint32_t IV[8] = {0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL,
                                0xA54FF53AUL, 0x510E527FUL, 0x9B05688CUL,
                                0x1F83D9ABUL, 0x5BE0CD19UL};
 
-static const uint8_t MSG_SCHEDULE[7][16] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ uint8_t ಸಂದೇಶ_ವೇಳಾಪಟ್ಟಿ[7][16] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
     {2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8},
     {3, 4, 10, 12, 13, 2, 7, 14, 6, 5, 9, 0, 11, 15, 8, 1},
@@ -96,87 +96,87 @@ static const uint8_t MSG_SCHEDULE[7][16] = {
 
 /* Find index of the highest set bit */
 /* x is assumed to be nonzero.       */
-static unsigned int highest_one(uint64_t x) {
-#if defined(__GNUC__) || defined(__clang__)
-  return 63 ^ (unsigned int)__builtin_clzll(x);
-#elif defined(_MSC_VER) && defined(IS_X86_64)
-  unsigned long index;
-  _BitScanReverse64(&index, x);
-  return index;
-#elif defined(_MSC_VER) && defined(IS_X86_32)
-  if(x >> 32) {
-    unsigned long index;
-    _BitScanReverse(&index, (unsigned long)(x >> 32));
-    return 32 + index;
-  } else {
-    unsigned long index;
-    _BitScanReverse(&index, (unsigned long)x);
-    return index;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ highest_one(uint64_t x) {
+#ಆದರೆ defined(__GNUC__) || defined(__clang__)
+  ಹಿಂತಿರುಗಿ 63 ^ (ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ)__builtin_clzll(x);
+#ಅಥವಾಆದರೆ defined(_MSC_VER) && defined(IS_X86_64)
+  ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಸೂಚ್ಯಂಕ;
+  ಬಿಟ್_ಪರಿಶೀಲನೆ_Reverse64(&ಸೂಚ್ಯಂಕ, x);
+  ಹಿಂತಿರುಗಿ ಸೂಚ್ಯಂಕ;
+#ಅಥವಾಆದರೆ defined(_MSC_VER) && defined(IS_X86_32)
+  ಆದರೆ(x >> 32) {
+    ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಸೂಚ್ಯಂಕ;
+    ಬಿಟ್_ಪರಿಶೀಲನೆ_ಹಿಮ್ಮುಖ(&ಸೂಚ್ಯಂಕ, (ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ)(x >> 32));
+    ಹಿಂತಿರುಗಿ 32 + ಸೂಚ್ಯಂಕ;
+  } ಇಲ್ಲದಿದ್ದರೆ {
+    ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಸೂಚ್ಯಂಕ;
+    ಬಿಟ್_ಪರಿಶೀಲನೆ_ಹಿಮ್ಮುಖ(&ಸೂಚ್ಯಂಕ, (ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ)x);
+    ಹಿಂತಿರುಗಿ ಸೂಚ್ಯಂಕ;
   }
-#else
-  unsigned int c = 0;
-  if(x & 0xffffffff00000000ULL) { x >>= 32; c += 32; }
-  if(x & 0x00000000ffff0000ULL) { x >>= 16; c += 16; }
-  if(x & 0x000000000000ff00ULL) { x >>=  8; c +=  8; }
-  if(x & 0x00000000000000f0ULL) { x >>=  4; c +=  4; }
-  if(x & 0x000000000000000cULL) { x >>=  2; c +=  2; }
-  if(x & 0x0000000000000002ULL) {           c +=  1; }
-  return c;
-#endif
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ c = 0;
+  ಆದರೆ(x & 0xffffffff00000000ULL) { x >>= 32; c += 32; }
+  ಆದರೆ(x & 0x00000000ffff0000ULL) { x >>= 16; c += 16; }
+  ಆದರೆ(x & 0x000000000000ff00ULL) { x >>=  8; c +=  8; }
+  ಆದರೆ(x & 0x00000000000000f0ULL) { x >>=  4; c +=  4; }
+  ಆದರೆ(x & 0x000000000000000cULL) { x >>=  2; c +=  2; }
+  ಆದರೆ(x & 0x0000000000000002ULL) {           c +=  1; }
+  ಹಿಂತಿರುಗಿ c;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
 // Count the number of 1 bits.
-INLINE unsigned int popcnt(uint64_t x) {
-#if defined(__GNUC__) || defined(__clang__)
-  return (unsigned int)__builtin_popcountll(x);
-#else
-  unsigned int count = 0;
-  while (x != 0) {
-    count += 1;
+INLINE ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ popcnt(uint64_t x) {
+#ಆದರೆ defined(__GNUC__) || defined(__clang__)
+  ಹಿಂತಿರುಗಿ (ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ)__builtin_popcountll(x);
+#ಇಲ್ಲದಿದ್ದರೆ
+  ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಎಣಿಕೆ_2 = 0;
+  ಆಗ (x != 0) {
+    ಎಣಿಕೆ_2 += 1;
     x &= x - 1;
   }
-  return count;
-#endif
+  ಹಿಂತಿರುಗಿ ಎಣಿಕೆ_2;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
 // Largest power of two less than or equal to x. As a special case, returns 1
 // when x is 0. 
-INLINE uint64_t round_down_to_power_of_2(uint64_t x) {
-  return 1ULL << highest_one(x | 1);
+INLINE uint64_t ಸುತ್ತು_ಕೆಳಕ್ಕೆ_ಗಮ್ಯ_power_ದ_2(uint64_t x) {
+  ಹಿಂತಿರುಗಿ 1ULL << highest_one(x | 1);
 }
 
-INLINE uint32_t counter_low(uint64_t counter) { return (uint32_t)counter; }
+INLINE uint32_t counter_ಕೆಳಗಿನ(uint64_t counter) { ಹಿಂತಿರುಗಿ (uint32_t)counter; }
 
-INLINE uint32_t counter_high(uint64_t counter) {
-  return (uint32_t)(counter >> 32);
+INLINE uint32_t counter_ಮೇಲಿನ(uint64_t counter) {
+  ಹಿಂತಿರುಗಿ (uint32_t)(counter >> 32);
 }
 
-INLINE uint32_t load32(const void *src) {
-  const uint8_t *p = (const uint8_t *)src;
-  return ((uint32_t)(p[0]) << 0) | ((uint32_t)(p[1]) << 8) |
+INLINE uint32_t load32(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *src) {
+  ಸ್ಥಿರಾಂಕ uint8_t *p = (ಸ್ಥಿರಾಂಕ uint8_t *)src;
+  ಹಿಂತಿರುಗಿ ((uint32_t)(p[0]) << 0) | ((uint32_t)(p[1]) << 8) |
          ((uint32_t)(p[2]) << 16) | ((uint32_t)(p[3]) << 24);
 }
 
-INLINE void load_key_words(const uint8_t key[BLAKE3_KEY_LEN],
-                           uint32_t key_words[8]) {
-  key_words[0] = load32(&key[0 * 4]);
-  key_words[1] = load32(&key[1 * 4]);
-  key_words[2] = load32(&key[2 * 4]);
-  key_words[3] = load32(&key[3 * 4]);
-  key_words[4] = load32(&key[4 * 4]);
-  key_words[5] = load32(&key[5 * 4]);
-  key_words[6] = load32(&key[6 * 4]);
-  key_words[7] = load32(&key[7 * 4]);
+INLINE ಶೂನ್ಯ ತುಂಬು_ಕೀಲಿ_ಪದಗಳು(ಸ್ಥಿರಾಂಕ uint8_t ಕೀಲಿ_2[BLAKE3_ಕೀಲಿ_LEN],
+                           uint32_t ಕೀಲಿ_ಪದಗಳು[8]) {
+  ಕೀಲಿ_ಪದಗಳು[0] = load32(&ಕೀಲಿ_2[0 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[1] = load32(&ಕೀಲಿ_2[1 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[2] = load32(&ಕೀಲಿ_2[2 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[3] = load32(&ಕೀಲಿ_2[3 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[4] = load32(&ಕೀಲಿ_2[4 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[5] = load32(&ಕೀಲಿ_2[5 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[6] = load32(&ಕೀಲಿ_2[6 * 4]);
+  ಕೀಲಿ_ಪದಗಳು[7] = load32(&ಕೀಲಿ_2[7 * 4]);
 }
 
-INLINE void load_block_words(const uint8_t block[BLAKE3_BLOCK_LEN],
-                             uint32_t block_words[16]) {
-  for (size_t i = 0; i < 16; i++) {
-      block_words[i] = load32(&block[i * 4]);
+INLINE ಶೂನ್ಯ ತುಂಬು_ಖಂಡ_ಪದಗಳು(ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                             uint32_t ಖಂಡ_ಪದಗಳು[16]) {
+  ಗಾಗಿ (size_t i = 0; i < 16; i++) {
+      ಖಂಡ_ಪದಗಳು[i] = load32(&ಖಂಡ[i * 4]);
   }
 }
 
-INLINE void store32(void *dst, uint32_t w) {
+INLINE ಶೂನ್ಯ store32(ಶೂನ್ಯ *dst, uint32_t w) {
   uint8_t *p = (uint8_t *)dst;
   p[0] = (uint8_t)(w >> 0);
   p[1] = (uint8_t)(w >> 8);
@@ -184,164 +184,164 @@ INLINE void store32(void *dst, uint32_t w) {
   p[3] = (uint8_t)(w >> 24);
 }
 
-INLINE void store_cv_words(uint8_t bytes_out[32], uint32_t cv_words[8]) {
-  store32(&bytes_out[0 * 4], cv_words[0]);
-  store32(&bytes_out[1 * 4], cv_words[1]);
-  store32(&bytes_out[2 * 4], cv_words[2]);
-  store32(&bytes_out[3 * 4], cv_words[3]);
-  store32(&bytes_out[4 * 4], cv_words[4]);
-  store32(&bytes_out[5 * 4], cv_words[5]);
-  store32(&bytes_out[6 * 4], cv_words[6]);
-  store32(&bytes_out[7 * 4], cv_words[7]);
+INLINE ಶೂನ್ಯ store_cv_ಪದಗಳು(uint8_t ಬೈಟುಗಳು_ಹೊರಹೋಗು[32], uint32_t cv_ಪದಗಳು[8]) {
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[0 * 4], cv_ಪದಗಳು[0]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[1 * 4], cv_ಪದಗಳು[1]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[2 * 4], cv_ಪದಗಳು[2]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[3 * 4], cv_ಪದಗಳು[3]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[4 * 4], cv_ಪದಗಳು[4]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[5 * 4], cv_ಪದಗಳು[5]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[6 * 4], cv_ಪದಗಳು[6]);
+  store32(&ಬೈಟುಗಳು_ಹೊರಹೋಗು[7 * 4], cv_ಪದಗಳು[7]);
 }
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place(uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
+ಶೂನ್ಯ blake3_compress_ಒಳ_ಇರಿಸು(uint32_t cv[8],
+                              ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                              uint8_t ಖಂಡ_len, uint64_t counter,
                               uint8_t flags);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof(const uint32_t cv[8],
-                         const uint8_t block[BLAKE3_BLOCK_LEN],
-                         uint8_t block_len, uint64_t counter, uint8_t flags,
-                         uint8_t out[64]);
+ಶೂನ್ಯ blake3_compress_xof(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                         ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                         uint8_t ಖಂಡ_len, uint64_t counter, uint8_t flags,
+                         uint8_t ಹೊರಹೋಗು_2[64]);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_xof_many(const uint32_t cv[8],
-                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                     uint8_t block_len, uint64_t counter, uint8_t flags,
-                     uint8_t out[64], size_t outblocks);
+ಶೂನ್ಯ blake3_xof_many(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                     ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                     uint8_t ಖಂಡ_len, uint64_t counter, uint8_t flags,
+                     uint8_t ಹೊರಹೋಗು_2[64], size_t outblocks);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
-                      size_t blocks, const uint32_t key[8], uint64_t counter,
+ಶೂನ್ಯ blake3_hash_many(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                      size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8], uint64_t counter,
                       bool increment_counter, uint8_t flags,
-                      uint8_t flags_start, uint8_t flags_end, uint8_t *out);
+                      uint8_t flags_ಆರಂಭ, uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
 
 LLVM_LIBRARY_VISIBILITY
-size_t blake3_simd_degree(void);
+size_t blake3_simd_degree(ಶೂನ್ಯ);
 
-BLAKE3_PRIVATE size_t blake3_compress_subtree_wide(const uint8_t *input, size_t input_len,
-                                                   const uint32_t key[8],
+BLAKE3_ಖಾಸಗಿ size_t blake3_compress_subtree_wide(ಸ್ಥಿರಾಂಕ uint8_t *ಒಳಹರಿವು_2, size_t ಒಳಹರಿವು_len,
+                                                   ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                                                    uint64_t chunk_counter, uint8_t flags,
-                                                   uint8_t *out, bool use_tbb);
+                                                   uint8_t *ಹೊರಹೋಗು_2, bool use_tbb);
 
-#if defined(BLAKE3_USE_TBB)
-BLAKE3_PRIVATE void blake3_compress_subtree_wide_join_tbb(
+#ಆದರೆ defined(BLAKE3_USE_TBB)
+BLAKE3_ಖಾಸಗಿ ಶೂನ್ಯ blake3_compress_subtree_wide_join_tbb(
     // shared params
-    const uint32_t key[8], uint8_t flags, bool use_tbb,
+    ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8], uint8_t flags, bool use_tbb,
     // left-hand side params
-    const uint8_t *l_input, size_t l_input_len, uint64_t l_chunk_counter,
+    ಸ್ಥಿರಾಂಕ uint8_t *l_ಒಳಹರಿವು, size_t l_ಒಳಹರಿವು_len, uint64_t l_chunk_counter,
     uint8_t *l_cvs, size_t *l_n,
     // right-hand side params
-    const uint8_t *r_input, size_t r_input_len, uint64_t r_chunk_counter,
+    ಸ್ಥಿರಾಂಕ uint8_t *r_ಒಳಹರಿವು, size_t r_ಒಳಹರಿವು_len, uint64_t r_chunk_counter,
     uint8_t *r_cvs, size_t *r_n) NOEXCEPT;
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 // Declarations for implementation-specific functions.
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_portable(uint32_t cv[8],
-                                       const uint8_t block[BLAKE3_BLOCK_LEN],
-                                       uint8_t block_len, uint64_t counter,
+ಶೂನ್ಯ blake3_compress_ಒಳ_ಇರಿಸು_portable(uint32_t cv[8],
+                                       ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                                       uint8_t ಖಂಡ_len, uint64_t counter,
                                        uint8_t flags);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_portable(const uint32_t cv[8],
-                                  const uint8_t block[BLAKE3_BLOCK_LEN],
-                                  uint8_t block_len, uint64_t counter,
-                                  uint8_t flags, uint8_t out[64]);
+ಶೂನ್ಯ blake3_compress_xof_portable(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                                  ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                                  uint8_t ಖಂಡ_len, uint64_t counter,
+                                  uint8_t flags, uint8_t ಹೊರಹೋಗು_2[64]);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
-                               size_t blocks, const uint32_t key[8],
+ಶೂನ್ಯ blake3_hash_many_portable(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                               size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                                uint64_t counter, bool increment_counter,
-                               uint8_t flags, uint8_t flags_start,
-                               uint8_t flags_end, uint8_t *out);
+                               uint8_t flags, uint8_t flags_ಆರಂಭ,
+                               uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
 
-#if defined(IS_X86)
-#if !defined(BLAKE3_NO_SSE2)
+#ಆದರೆ defined(IS_X86)
+#ಆದರೆ !defined(BLAKE3_NO_SSE2)
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_sse2(uint32_t cv[8],
-                                   const uint8_t block[BLAKE3_BLOCK_LEN],
-                                   uint8_t block_len, uint64_t counter,
+ಶೂನ್ಯ blake3_compress_ಒಳ_ಇರಿಸು_sse2(uint32_t cv[8],
+                                   ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                                   uint8_t ಖಂಡ_len, uint64_t counter,
                                    uint8_t flags);
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_sse2(const uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
-                              uint8_t flags, uint8_t out[64]);
+ಶೂನ್ಯ blake3_compress_xof_sse2(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                              ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                              uint8_t ಖಂಡ_len, uint64_t counter,
+                              uint8_t flags, uint8_t ಹೊರಹೋಗು_2[64]);
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_sse2(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+ಶೂನ್ಯ blake3_hash_many_sse2(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                           size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out);
-#endif
-#if !defined(BLAKE3_NO_SSE41)
+                           uint8_t flags, uint8_t flags_ಆರಂಭ,
+                           uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ !defined(BLAKE3_NO_SSE41)
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_sse41(uint32_t cv[8],
-                                    const uint8_t block[BLAKE3_BLOCK_LEN],
-                                    uint8_t block_len, uint64_t counter,
+ಶೂನ್ಯ blake3_compress_ಒಳ_ಇರಿಸು_sse41(uint32_t cv[8],
+                                    ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                                    uint8_t ಖಂಡ_len, uint64_t counter,
                                     uint8_t flags);
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_sse41(const uint32_t cv[8],
-                               const uint8_t block[BLAKE3_BLOCK_LEN],
-                               uint8_t block_len, uint64_t counter,
-                               uint8_t flags, uint8_t out[64]);
+ಶೂನ್ಯ blake3_compress_xof_sse41(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                               ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                               uint8_t ಖಂಡ_len, uint64_t counter,
+                               uint8_t flags, uint8_t ಹೊರಹೋಗು_2[64]);
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t num_inputs,
-                            size_t blocks, const uint32_t key[8],
+ಶೂನ್ಯ blake3_hash_many_sse41(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                            size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                             uint64_t counter, bool increment_counter,
-                            uint8_t flags, uint8_t flags_start,
-                            uint8_t flags_end, uint8_t *out);
-#endif
-#if !defined(BLAKE3_NO_AVX2)
+                            uint8_t flags, uint8_t flags_ಆರಂಭ,
+                            uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ !defined(BLAKE3_NO_AVX2)
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_avx2(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+ಶೂನ್ಯ blake3_hash_many_avx2(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                           size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out);
-#endif
-#if !defined(BLAKE3_NO_AVX512)
+                           uint8_t flags, uint8_t flags_ಆರಂಭ,
+                           uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ !defined(BLAKE3_NO_AVX512)
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_avx512(uint32_t cv[8],
-                                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                                     uint8_t block_len, uint64_t counter,
+ಶೂನ್ಯ blake3_compress_ಒಳ_ಇರಿಸು_avx512(uint32_t cv[8],
+                                     ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                                     uint8_t ಖಂಡ_len, uint64_t counter,
                                      uint8_t flags);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_avx512(const uint32_t cv[8],
-                                const uint8_t block[BLAKE3_BLOCK_LEN],
-                                uint8_t block_len, uint64_t counter,
-                                uint8_t flags, uint8_t out[64]);
+ಶೂನ್ಯ blake3_compress_xof_avx512(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                                ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                                uint8_t ಖಂಡ_len, uint64_t counter,
+                                uint8_t flags, uint8_t ಹೊರಹೋಗು_2[64]);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_avx512(const uint8_t *const *inputs, size_t num_inputs,
-                             size_t blocks, const uint32_t key[8],
+ಶೂನ್ಯ blake3_hash_many_avx512(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                             size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                              uint64_t counter, bool increment_counter,
-                             uint8_t flags, uint8_t flags_start,
-                             uint8_t flags_end, uint8_t *out);
+                             uint8_t flags, uint8_t flags_ಆರಂಭ,
+                             uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
 
-#if !defined(_WIN32) && !defined(__CYGWIN__)
+#ಆದರೆ !defined(_WIN32) && !defined(__CYGWIN__)
 LLVM_LIBRARY_VISIBILITY
-void blake3_xof_many_avx512(const uint32_t cv[8],
-                            const uint8_t block[BLAKE3_BLOCK_LEN],
-                            uint8_t block_len, uint64_t counter, uint8_t flags,
-                            uint8_t* out, size_t outblocks);
-#endif
-#endif
-#endif
+ಶೂನ್ಯ blake3_xof_many_avx512(ಸ್ಥಿರಾಂಕ uint32_t cv[8],
+                            ಸ್ಥಿರಾಂಕ uint8_t ಖಂಡ[BLAKE3_ಖಂಡ_LEN],
+                            uint8_t ಖಂಡ_len, uint64_t counter, uint8_t flags,
+                            uint8_t* ಹೊರಹೋಗು_2, size_t outblocks);
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if BLAKE3_USE_NEON == 1
+#ಆದರೆ BLAKE3_USE_NEON == 1
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_neon(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+ಶೂನ್ಯ blake3_hash_many_neon(ಸ್ಥಿರಾಂಕ uint8_t *ಸ್ಥಿರಾಂಕ *inputs, size_t ಅಂಕೆ_inputs,
+                           size_t ಖಂಡಗಳು, ಸ್ಥಿರಾಂಕ uint32_t ಕೀಲಿ_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out);
-#endif
+                           uint8_t flags, uint8_t flags_ಆರಂಭ,
+                           uint8_t flags_ಕೊನೆ, uint8_t *ಹೊರಹೋಗು_2);
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#endif /* BLAKE3_IMPL_H */
+#ಆದರೆ_ಅಂತ್ಯ /* BLAKE3_IMPL_H */
