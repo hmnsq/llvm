@@ -10,50 +10,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Atomic.h"
-#include "llvm/Config/llvm-config.h"
+#شامل "llvm/Support/Atomic.h"
+#شامل "llvm/Config/llvm-config.h"
 
-using namespace llvm;
+using فضاینام llvm;
 
-#if defined(_MSC_VER)
-#include <intrin.h>
+#اگر defined(_MSC_VER)
+#شامل <intrin.h>
 
 // We must include windows.h after intrin.h.
-#include <windows.h>
+#شامل <windows.h>
 #undef MemoryFence
 #endif
 
-#if defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
+#اگر defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
 #define GNU_ATOMICS
 #endif
 
-void sys::MemoryFence() {
-#if LLVM_HAS_ATOMICS == 0
-  return;
-#else
-#  if defined(GNU_ATOMICS)
+تهی sys::MemoryFence() {
+#اگر LLVM_HAS_ATOMICS == 0
+  بازگشت;
+#وگرنه
+#  اگر defined(GNU_ATOMICS)
   __sync_synchronize();
 #  elif defined(_MSC_VER)
   MemoryBarrier();
-#  else
-# error No memory fence implementation for your platform!
+#  وگرنه
+# error No memory fence implementation برای your platform!
 #  endif
 #endif
 }
 
-sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
-                                  sys::cas_flag new_value,
-                                  sys::cas_flag old_value) {
-#if LLVM_HAS_ATOMICS == 0
+sys::cas_flag sys::CompareAndSwap(فرار sys::cas_flag* ptr,
+                                  sys::cas_flag new_مقدار,
+                                  sys::cas_flag old_مقدار) {
+#اگر LLVM_HAS_ATOMICS == 0
   sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
-  return result;
-#elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
-#elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
-#else
-#  error No compare-and-swap implementation for your platform!
+  اگر (result == old_مقدار)
+    *ptr = new_مقدار;
+  بازگشت result;
+#وگرنهاگر defined(GNU_ATOMICS)
+  بازگشت __sync_val_compare_and_swap(ptr, old_مقدار, new_مقدار);
+#وگرنهاگر defined(_MSC_VER)
+  بازگشت InterlockedCompareExchange(ptr, new_مقدار, old_مقدار);
+#وگرنه
+#  error No compare-and-swap implementation برای your platform!
 #endif
 }

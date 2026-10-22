@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributeParser.h"
+#شامل "llvm/Support/HexagonAttributeParser.h"
 
-using namespace llvm;
+using فضاینام llvm;
 
-const HexagonAttributeParser::DisplayHandler
+ثابت HexagonAttributeParser::DisplayHandler
     HexagonAttributeParser::DisplayRoutines[] = {
         {
             HexagonAttrs::ARCH,
@@ -41,15 +41,15 @@ const HexagonAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         }};
 
-Error HexagonAttributeParser::handler(uint64_t Tag, bool &Handled) {
-  Handled = false;
-  for (const auto &R : DisplayRoutines) {
-    if (uint64_t(R.Attribute) == Tag) {
-      if (Error E = (this->*R.Routine)(Tag))
-        return E;
-      Handled = true;
-      break;
+Error HexagonAttributeParser::handler(uint64_t Tag, منطقی &Handled) {
+  Handled = نادرست;
+  برای (ثابت auto &R : DisplayRoutines) {
+    اگر (uint64_t(R.Attribute) == Tag) {
+      اگر (Error E = (این->*R.Routine)(Tag))
+        بازگشت E;
+      Handled = درست;
+      بشکن;
     }
   }
-  return Error::success();
+  بازگشت Error::success();
 }

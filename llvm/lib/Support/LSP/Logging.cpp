@@ -6,30 +6,30 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Logging.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/raw_ostream.h"
+#شامل "llvm/Support/LSP/Logging.h"
+#شامل "llvm/Support/Chrono.h"
+#شامل "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+using فضاینام llvm;
+using فضاینام llvm::lsp;
 
-void Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
+تهی Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
 
 Logger &Logger::get() {
-  static Logger Logger;
-  return Logger;
+  ایستا Logger Logger;
+  بازگشت Logger;
 }
 
-void Logger::log(Level LogLevel, const char *Fmt,
-                 const llvm::formatv_object_base &Message) {
+تهی Logger::log(Level LogLevel, ثابت نویسه *Fmt,
+                 ثابت llvm::formatv_object_base &Message) {
   Logger &Logger = get();
 
   // Ignore messages with log levels below the current setting in the logger.
-  if (LogLevel < Logger.LogLevel)
-    return;
+  اگر (LogLevel < Logger.LogLevel)
+    بازگشت;
 
   // An indicator character for each log level.
-  const char *LogLevelIndicators = "DIE";
+  ثابت نویسه *LogLevelIndicators = "DIE";
 
   // Format the message and print to errs.
   llvm::sys::TimePoint<> Timestamp = std::chrono::system_clock::now();

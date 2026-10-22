@@ -38,18 +38,18 @@
 #ifndef LLVM_SUPPORT_REGEX_IMPL_H
 #define LLVM_SUPPORT_REGEX_IMPL_H
 
-#include <sys/types.h>
-typedef off_t llvm_regoff_t;
-typedef struct {
+#شامل <sys/types.h>
+تعریفنوع off_t llvm_regoff_t;
+تعریفنوع ساختار {
   llvm_regoff_t rm_so;		/* start of match */
   llvm_regoff_t rm_eo;		/* end of match */
 } llvm_regmatch_t;
 
-typedef struct llvm_regex {
-  int re_magic;
+تعریفنوع ساختار llvm_regex {
+  صحیح re_magic;
   size_t re_nsub;		/* number of parenthesized subexpressions */
-  const char *re_endp;	/* end pointer for REG_PEND */
-  struct re_guts *re_g;	/* none of your business :-) */
+  ثابت نویسه *re_endp;	/* end pointer for REG_PEND */
+  ساختار re_guts *re_g;	/* none of your business :-) */
 } llvm_regex_t;
 
 /* llvm_regcomp() flags */
@@ -91,15 +91,15 @@ typedef struct llvm_regex {
 #define	REG_BACKR	02000	/* force use of backref code */
 
 #ifdef __cplusplus
-extern "C" {
+بیرونی "C" {
 #endif
 
-int	llvm_regcomp(llvm_regex_t *, const char *, int);
-size_t	llvm_regerror(int, const llvm_regex_t *, char *, size_t);
-int	llvm_regexec(const llvm_regex_t *, const char *, size_t,
-                     llvm_regmatch_t [], int);
-void	llvm_regfree(llvm_regex_t *);
-size_t  llvm_strlcpy(char *dst, const char *src, size_t siz);
+صحیح	llvm_regcomp(llvm_regex_t *, ثابت نویسه *, صحیح);
+size_t	llvm_regerror(صحیح, ثابت llvm_regex_t *, نویسه *, size_t);
+صحیح	llvm_regexec(ثابت llvm_regex_t *, ثابت نویسه *, size_t,
+                     llvm_regmatch_t [], صحیح);
+تهی	llvm_regfree(llvm_regex_t *);
+size_t  llvm_strlcpy(نویسه *dst, ثابت نویسه *src, size_t siz);
 
 #ifdef __cplusplus
 }

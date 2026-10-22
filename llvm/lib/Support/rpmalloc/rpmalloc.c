@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "rpmalloc.h"
+#شامل "rpmalloc.h"
 
 ////////////
 ///
@@ -19,63 +19,63 @@
 ///
 //////
 
-#if defined(__clang__)
+#اگر defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-macros"
 #pragma clang diagnostic ignored "-Wunused-function"
-#if __has_warning("-Wreserved-identifier")
+#اگر __has_warning("-Wreserved-identifier")
 #pragma clang diagnostic ignored "-Wreserved-identifier"
 #endif
-#if __has_warning("-Wstatic-in-inline")
+#اگر __has_warning("-Wstatic-in-inline")
 #pragma clang diagnostic ignored "-Wstatic-in-inline"
 #endif
-#elif defined(__GNUC__)
+#وگرنهاگر defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wunused-macros"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
-#if !defined(__has_builtin)
+#اگر !defined(__has_builtin)
 #define __has_builtin(b) 0
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
+#اگر defined(__GNUC__) || defined(__clang__)
 
-#if __has_builtin(__builtin_memcpy_inline)
+#اگر __has_builtin(__builtin_memcpy_inline)
 #define _rpmalloc_memcpy_const(x, y, s) __builtin_memcpy_inline(x, y, s)
-#else
+#وگرنه
 #define _rpmalloc_memcpy_const(x, y, s)                                        \
-  do {                                                                         \
+  انجامبده {                                                                         \
     _Static_assert(__builtin_choose_expr(__builtin_constant_p(s), 1, 0),       \
                    "len must be a constant integer");                          \
     memcpy(x, y, s);                                                           \
-  } while (0)
+  } وقتی (0)
 #endif
 
-#if __has_builtin(__builtin_memset_inline)
+#اگر __has_builtin(__builtin_memset_inline)
 #define _rpmalloc_memset_const(x, y, s) __builtin_memset_inline(x, y, s)
-#else
+#وگرنه
 #define _rpmalloc_memset_const(x, y, s)                                        \
-  do {                                                                         \
+  انجامبده {                                                                         \
     _Static_assert(__builtin_choose_expr(__builtin_constant_p(s), 1, 0),       \
                    "len must be a constant integer");                          \
     memset(x, y, s);                                                           \
-  } while (0)
+  } وقتی (0)
 #endif
-#else
+#وگرنه
 #define _rpmalloc_memcpy_const(x, y, s) memcpy(x, y, s)
 #define _rpmalloc_memset_const(x, y, s) memset(x, y, s)
 #endif
 
-#if __has_builtin(__builtin_assume)
+#اگر __has_builtin(__builtin_assume)
 #define rpmalloc_assume(cond) __builtin_assume(cond)
-#elif defined(__GNUC__)
+#وگرنهاگر defined(__GNUC__)
 #define rpmalloc_assume(cond)                                                  \
-  do {                                                                         \
-    if (!__builtin_expect(cond, 0))                                            \
+  انجامبده {                                                                         \
+    اگر (!__builtin_expect(cond, 0))                                            \
       __builtin_unreachable();                                                 \
-  } while (0)
-#elif defined(_MSC_VER)
+  } وقتی (0)
+#وگرنهاگر defined(_MSC_VER)
 #define rpmalloc_assume(cond) __assume(cond)
-#else
+#وگرنه
 #define rpmalloc_assume(cond) 0
 #endif
 
@@ -123,144 +123,144 @@
 //! Enable adaptive thread cache size based on use heuristics
 #define ENABLE_ADAPTIVE_THREAD_CACHE 0
 #endif
-#ifndef DEFAULT_SPAN_MAP_COUNT
+#ifndef DEFAULT_SPAN_MAP_شمار
 //! Default number of spans to map in call to map more virtual memory (default
 //! values yield 4MiB here)
-#define DEFAULT_SPAN_MAP_COUNT 64
+#define DEFAULT_SPAN_MAP_شمار 64
 #endif
 #ifndef GLOBAL_CACHE_MULTIPLIER
 //! Multiplier for global cache
 #define GLOBAL_CACHE_MULTIPLIER 8
 #endif
 
-#if DISABLE_UNMAP && !ENABLE_GLOBAL_CACHE
-#error Must use global cache if unmap is disabled
+#اگر DISABLE_UNMAP && !ENABLE_GLOBAL_CACHE
+#error Must use global cache اگر unmap is disabled
 #endif
 
-#if DISABLE_UNMAP
+#اگر DISABLE_UNMAP
 #undef ENABLE_UNLIMITED_CACHE
 #define ENABLE_UNLIMITED_CACHE 1
 #endif
 
-#if !ENABLE_GLOBAL_CACHE
+#اگر !ENABLE_GLOBAL_CACHE
 #undef ENABLE_UNLIMITED_CACHE
 #define ENABLE_UNLIMITED_CACHE 0
 #endif
 
-#if !ENABLE_THREAD_CACHE
+#اگر !ENABLE_THREAD_CACHE
 #undef ENABLE_ADAPTIVE_THREAD_CACHE
 #define ENABLE_ADAPTIVE_THREAD_CACHE 0
 #endif
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64)
+#اگر defined(_WIN32) || defined(__WIN32__) || defined(_WIN64)
 #define PLATFORM_WINDOWS 1
 #define PLATFORM_POSIX 0
-#else
+#وگرنه
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_POSIX 1
 #endif
 
 /// Platform and arch specifics
-#if defined(_MSC_VER) && !defined(__clang__)
+#اگر defined(_MSC_VER) && !defined(__clang__)
 #pragma warning(disable : 5105)
 #ifndef FORCEINLINE
-#define FORCEINLINE inline __forceinline
+#define FORCEINLINE درونخطی __forceinline
 #endif
 #define _Static_assert static_assert
-#else
+#وگرنه
 #ifndef FORCEINLINE
-#define FORCEINLINE inline __attribute__((__always_inline__))
+#define FORCEINLINE درونخطی __attribute__((__always_inline__))
 #endif
 #endif
-#if PLATFORM_WINDOWS
+#اگر PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
-#if ENABLE_VALIDATE_ARGS
-#include <intsafe.h>
+#شامل <windows.h>
+#اگر ENABLE_VALIDATE_ARGS
+#شامل <intsafe.h>
 #endif
-#else
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
-#if defined(__linux__) || defined(__ANDROID__)
-#include <sys/prctl.h>
-#if !defined(PR_SET_VMA)
+#وگرنه
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <time.h>
+#شامل <unistd.h>
+#اگر defined(__linux__) || defined(__ANDROID__)
+#شامل <sys/prctl.h>
+#اگر !defined(PR_SET_VMA)
 #define PR_SET_VMA 0x53564d41
 #define PR_SET_VMA_ANON_NAME 0
 #endif
 #endif
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#if !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
-#include <mach/mach_vm.h>
-#include <mach/vm_statistics.h>
+#اگر defined(__APPLE__)
+#شامل <TargetConditionals.h>
+#اگر !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
+#شامل <mach/mach_vm.h>
+#شامل <mach/vm_statistics.h>
 #endif
-#include <pthread.h>
+#شامل <pthread.h>
 #endif
-#if defined(__HAIKU__) || defined(__TINYC__)
-#include <pthread.h>
+#اگر defined(__HAIKU__) || defined(__TINYC__)
+#شامل <pthread.h>
 #endif
-#endif
-
-#include <errno.h>
-#include <stdint.h>
-#include <string.h>
-
-#if defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
-#include <fibersapi.h>
-static DWORD fls_key;
 #endif
 
-#if PLATFORM_POSIX
-#include <sched.h>
-#include <sys/mman.h>
+#شامل <errno.h>
+#شامل <stdint.h>
+#شامل <string.h>
+
+#اگر defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
+#شامل <fibersapi.h>
+ایستا DWORD fls_کلید;
+#endif
+
+#اگر PLATFORM_POSIX
+#شامل <sched.h>
+#شامل <sys/mman.h>
 #ifdef __FreeBSD__
-#include <sys/sysctl.h>
+#شامل <sys/sysctl.h>
 #define MAP_HUGETLB MAP_ALIGNED_SUPER
 #ifndef PROT_MAX
 #define PROT_MAX(f) 0
 #endif
-#else
+#وگرنه
 #define PROT_MAX(f) 0
 #endif
 #ifdef __sun
-extern int madvise(caddr_t, size_t, int);
+بیرونی صحیح madvise(caddr_t, size_t, صحیح);
 #endif
 #ifndef MAP_UNINITIALIZED
 #define MAP_UNINITIALIZED 0
 #endif
 #endif
-#include <errno.h>
+#شامل <errno.h>
 
-#if ENABLE_ASSERTS
+#اگر ENABLE_ASSERTS
 #undef NDEBUG
-#if defined(_MSC_VER) && !defined(_DEBUG)
+#اگر defined(_MSC_VER) && !defined(_DEBUG)
 #define _DEBUG
 #endif
-#include <assert.h>
+#شامل <assert.h>
 #define RPMALLOC_TOSTRING_M(x) #x
 #define RPMALLOC_TOSTRING(x) RPMALLOC_TOSTRING_M(x)
 #define rpmalloc_assert(truth, message)                                        \
-  do {                                                                         \
-    if (!(truth)) {                                                            \
-      if (_memory_config.error_callback) {                                     \
+  انجامبده {                                                                         \
+    اگر (!(truth)) {                                                            \
+      اگر (_memory_config.error_callback) {                                     \
         _memory_config.error_callback(message " (" RPMALLOC_TOSTRING(          \
             truth) ") at " __FILE__ ":" RPMALLOC_TOSTRING(__LINE__));          \
-      } else {                                                                 \
-        assert((truth) && message);                                            \
+      } وگرنه {                                                                 \
+        أكد((truth) && message);                                            \
       }                                                                        \
     }                                                                          \
-  } while (0)
-#else
+  } وقتی (0)
+#وگرنه
 #define rpmalloc_assert(truth, message)                                        \
-  do {                                                                         \
-  } while (0)
+  انجامبده {                                                                         \
+  } وقتی (0)
 #endif
-#if ENABLE_STATISTICS
-#include <stdio.h>
+#اگر ENABLE_STATISTICS
+#شامل <stdio.h>
 #endif
 
 //////
@@ -269,55 +269,55 @@ extern int madvise(caddr_t, size_t, int);
 ///
 //////
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#اگر defined(_MSC_VER) && !defined(__clang__)
 
-typedef volatile long atomic32_t;
-typedef volatile long long atomic64_t;
-typedef volatile void *atomicptr_t;
+تعریفنوع فرار long atomic32_t;
+تعریفنوع فرار long long atomic64_t;
+تعریفنوع فرار تهی *atomicptr_t;
 
-static FORCEINLINE int32_t atomic_load32(atomic32_t *src) {
-  return (int32_t)InterlockedOr(src, 0);
+ایستا FORCEINLINE int32_t atomic_load32(atomic32_t *src) {
+  بازگشت (int32_t)InterlockedOr(src, 0);
 }
-static FORCEINLINE void atomic_store32(atomic32_t *dst, int32_t val) {
+ایستا FORCEINLINE تهی atomic_store32(atomic32_t *dst, int32_t val) {
   InterlockedExchange(dst, val);
 }
-static FORCEINLINE int32_t atomic_incr32(atomic32_t *val) {
-  return (int32_t)InterlockedIncrement(val);
+ایستا FORCEINLINE int32_t atomic_incr32(atomic32_t *val) {
+  بازگشت (int32_t)InterlockedIncrement(val);
 }
-static FORCEINLINE int32_t atomic_decr32(atomic32_t *val) {
-  return (int32_t)InterlockedDecrement(val);
+ایستا FORCEINLINE int32_t atomic_decr32(atomic32_t *val) {
+  بازگشت (int32_t)InterlockedDecrement(val);
 }
-static FORCEINLINE int32_t atomic_add32(atomic32_t *val, int32_t add) {
-  return (int32_t)InterlockedExchangeAdd(val, add) + add;
+ایستا FORCEINLINE int32_t atomic_add32(atomic32_t *val, int32_t add) {
+  بازگشت (int32_t)InterlockedExchangeAdd(val, add) + add;
 }
-static FORCEINLINE int atomic_cas32_acquire(atomic32_t *dst, int32_t val,
+ایستا FORCEINLINE صحیح atomic_cas32_acquire(atomic32_t *dst, int32_t val,
                                             int32_t ref) {
-  return (InterlockedCompareExchange(dst, val, ref) == ref) ? 1 : 0;
+  بازگشت (InterlockedCompareExchange(dst, val, ref) == ref) ? 1 : 0;
 }
-static FORCEINLINE void atomic_store32_release(atomic32_t *dst, int32_t val) {
+ایستا FORCEINLINE تهی atomic_store32_release(atomic32_t *dst, int32_t val) {
   InterlockedExchange(dst, val);
 }
-static FORCEINLINE int64_t atomic_load64(atomic64_t *src) {
-  return (int64_t)InterlockedOr64(src, 0);
+ایستا FORCEINLINE int64_t atomic_load64(atomic64_t *src) {
+  بازگشت (int64_t)InterlockedOr64(src, 0);
 }
-static FORCEINLINE int64_t atomic_add64(atomic64_t *val, int64_t add) {
-  return (int64_t)InterlockedExchangeAdd64(val, add) + add;
+ایستا FORCEINLINE int64_t atomic_add64(atomic64_t *val, int64_t add) {
+  بازگشت (int64_t)InterlockedExchangeAdd64(val, add) + add;
 }
-static FORCEINLINE void *atomic_load_ptr(atomicptr_t *src) {
-  return InterlockedCompareExchangePointer(src, 0, 0);
+ایستا FORCEINLINE تهی *atomic_load_ptr(atomicptr_t *src) {
+  بازگشت InterlockedCompareExchangePointer(src, 0, 0);
 }
-static FORCEINLINE void atomic_store_ptr(atomicptr_t *dst, void *val) {
+ایستا FORCEINLINE تهی atomic_store_ptr(atomicptr_t *dst, تهی *val) {
   InterlockedExchangePointer(dst, val);
 }
-static FORCEINLINE void atomic_store_ptr_release(atomicptr_t *dst, void *val) {
+ایستا FORCEINLINE تهی atomic_store_ptr_release(atomicptr_t *dst, تهی *val) {
   InterlockedExchangePointer(dst, val);
 }
-static FORCEINLINE void *atomic_exchange_ptr_acquire(atomicptr_t *dst,
-                                                     void *val) {
-  return (void *)InterlockedExchangePointer((void *volatile *)dst, val);
+ایستا FORCEINLINE تهی *atomic_exchange_ptr_acquire(atomicptr_t *dst,
+                                                     تهی *val) {
+  بازگشت (تهی *)InterlockedExchangePointer((تهی *فرار *)dst, val);
 }
-static FORCEINLINE int atomic_cas_ptr(atomicptr_t *dst, void *val, void *ref) {
-  return (InterlockedCompareExchangePointer((void *volatile *)dst, val, ref) ==
+ایستا FORCEINLINE صحیح atomic_cas_ptr(atomicptr_t *dst, تهی *val, تهی *ref) {
+  بازگشت (InterlockedCompareExchangePointer((تهی *فرار *)dst, val, ref) ==
           ref)
              ? 1
              : 0;
@@ -326,58 +326,58 @@ static FORCEINLINE int atomic_cas_ptr(atomicptr_t *dst, void *val, void *ref) {
 #define EXPECTED(x) (x)
 #define UNEXPECTED(x) (x)
 
-#else
+#وگرنه
 
-#include <stdatomic.h>
+#شامل <stdatomic.h>
 
-typedef volatile _Atomic(int32_t) atomic32_t;
-typedef volatile _Atomic(int64_t) atomic64_t;
-typedef volatile _Atomic(void *) atomicptr_t;
+تعریفنوع فرار _Atomic(int32_t) atomic32_t;
+تعریفنوع فرار _Atomic(int64_t) atomic64_t;
+تعریفنوع فرار _Atomic(تهی *) atomicptr_t;
 
-static FORCEINLINE int32_t atomic_load32(atomic32_t *src) {
-  return atomic_load_explicit(src, memory_order_relaxed);
+ایستا FORCEINLINE int32_t atomic_load32(atomic32_t *src) {
+  بازگشت atomic_load_explicit(src, memory_order_relaxed);
 }
-static FORCEINLINE void atomic_store32(atomic32_t *dst, int32_t val) {
+ایستا FORCEINLINE تهی atomic_store32(atomic32_t *dst, int32_t val) {
   atomic_store_explicit(dst, val, memory_order_relaxed);
 }
-static FORCEINLINE int32_t atomic_incr32(atomic32_t *val) {
-  return atomic_fetch_add_explicit(val, 1, memory_order_relaxed) + 1;
+ایستا FORCEINLINE int32_t atomic_incr32(atomic32_t *val) {
+  بازگشت atomic_fetch_add_explicit(val, 1, memory_order_relaxed) + 1;
 }
-static FORCEINLINE int32_t atomic_decr32(atomic32_t *val) {
-  return atomic_fetch_add_explicit(val, -1, memory_order_relaxed) - 1;
+ایستا FORCEINLINE int32_t atomic_decr32(atomic32_t *val) {
+  بازگشت atomic_fetch_add_explicit(val, -1, memory_order_relaxed) - 1;
 }
-static FORCEINLINE int32_t atomic_add32(atomic32_t *val, int32_t add) {
-  return atomic_fetch_add_explicit(val, add, memory_order_relaxed) + add;
+ایستا FORCEINLINE int32_t atomic_add32(atomic32_t *val, int32_t add) {
+  بازگشت atomic_fetch_add_explicit(val, add, memory_order_relaxed) + add;
 }
-static FORCEINLINE int atomic_cas32_acquire(atomic32_t *dst, int32_t val,
+ایستا FORCEINLINE صحیح atomic_cas32_acquire(atomic32_t *dst, int32_t val,
                                             int32_t ref) {
-  return atomic_compare_exchange_weak_explicit(
+  بازگشت atomic_compare_exchange_weak_explicit(
       dst, &ref, val, memory_order_acquire, memory_order_relaxed);
 }
-static FORCEINLINE void atomic_store32_release(atomic32_t *dst, int32_t val) {
+ایستا FORCEINLINE تهی atomic_store32_release(atomic32_t *dst, int32_t val) {
   atomic_store_explicit(dst, val, memory_order_release);
 }
-static FORCEINLINE int64_t atomic_load64(atomic64_t *val) {
-  return atomic_load_explicit(val, memory_order_relaxed);
+ایستا FORCEINLINE int64_t atomic_load64(atomic64_t *val) {
+  بازگشت atomic_load_explicit(val, memory_order_relaxed);
 }
-static FORCEINLINE int64_t atomic_add64(atomic64_t *val, int64_t add) {
-  return atomic_fetch_add_explicit(val, add, memory_order_relaxed) + add;
+ایستا FORCEINLINE int64_t atomic_add64(atomic64_t *val, int64_t add) {
+  بازگشت atomic_fetch_add_explicit(val, add, memory_order_relaxed) + add;
 }
-static FORCEINLINE void *atomic_load_ptr(atomicptr_t *src) {
-  return atomic_load_explicit(src, memory_order_relaxed);
+ایستا FORCEINLINE تهی *atomic_load_ptr(atomicptr_t *src) {
+  بازگشت atomic_load_explicit(src, memory_order_relaxed);
 }
-static FORCEINLINE void atomic_store_ptr(atomicptr_t *dst, void *val) {
+ایستا FORCEINLINE تهی atomic_store_ptr(atomicptr_t *dst, تهی *val) {
   atomic_store_explicit(dst, val, memory_order_relaxed);
 }
-static FORCEINLINE void atomic_store_ptr_release(atomicptr_t *dst, void *val) {
+ایستا FORCEINLINE تهی atomic_store_ptr_release(atomicptr_t *dst, تهی *val) {
   atomic_store_explicit(dst, val, memory_order_release);
 }
-static FORCEINLINE void *atomic_exchange_ptr_acquire(atomicptr_t *dst,
-                                                     void *val) {
-  return atomic_exchange_explicit(dst, val, memory_order_acquire);
+ایستا FORCEINLINE تهی *atomic_exchange_ptr_acquire(atomicptr_t *dst,
+                                                     تهی *val) {
+  بازگشت atomic_exchange_explicit(dst, val, memory_order_acquire);
 }
-static FORCEINLINE int atomic_cas_ptr(atomicptr_t *dst, void *val, void *ref) {
-  return atomic_compare_exchange_weak_explicit(
+ایستا FORCEINLINE صحیح atomic_cas_ptr(atomicptr_t *dst, تهی *val, تهی *ref) {
+  بازگشت atomic_compare_exchange_weak_explicit(
       dst, &ref, val, memory_order_relaxed, memory_order_relaxed);
 }
 
@@ -393,59 +393,59 @@ static FORCEINLINE int atomic_cas_ptr(atomicptr_t *dst, void *val, void *ref) {
 ///
 //////
 
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
 #define _rpmalloc_stat_inc(counter) atomic_incr32(counter)
 #define _rpmalloc_stat_dec(counter) atomic_decr32(counter)
-#define _rpmalloc_stat_add(counter, value)                                     \
-  atomic_add32(counter, (int32_t)(value))
-#define _rpmalloc_stat_add64(counter, value)                                   \
-  atomic_add64(counter, (int64_t)(value))
-#define _rpmalloc_stat_add_peak(counter, value, peak)                          \
-  do {                                                                         \
-    int32_t _cur_count = atomic_add32(counter, (int32_t)(value));              \
-    if (_cur_count > (peak))                                                   \
-      peak = _cur_count;                                                       \
-  } while (0)
-#define _rpmalloc_stat_sub(counter, value)                                     \
-  atomic_add32(counter, -(int32_t)(value))
+#define _rpmalloc_stat_add(counter, مقدار_2)                                     \
+  atomic_add32(counter, (int32_t)(مقدار_2))
+#define _rpmalloc_stat_add64(counter, مقدار_2)                                   \
+  atomic_add64(counter, (int64_t)(مقدار_2))
+#define _rpmalloc_stat_add_peak(counter, مقدار_2, peak)                          \
+  انجامبده {                                                                         \
+    int32_t cur_شمار = atomic_add32(counter, (int32_t)(مقدار_2));              \
+    اگر (cur_شمار > (peak))                                                   \
+      peak = cur_شمار;                                                       \
+  } وقتی (0)
+#define _rpmalloc_stat_sub(counter, مقدار_2)                                     \
+  atomic_add32(counter, -(int32_t)(مقدار_2))
 #define _rpmalloc_stat_inc_alloc(heap, class_idx)                              \
-  do {                                                                         \
+  انجامبده {                                                                         \
     int32_t alloc_current =                                                    \
         atomic_incr32(&heap->size_class_use[class_idx].alloc_current);         \
-    if (alloc_current > heap->size_class_use[class_idx].alloc_peak)            \
+    اگر (alloc_current > heap->size_class_use[class_idx].alloc_peak)            \
       heap->size_class_use[class_idx].alloc_peak = alloc_current;              \
     atomic_incr32(&heap->size_class_use[class_idx].alloc_total);               \
-  } while (0)
+  } وقتی (0)
 #define _rpmalloc_stat_inc_free(heap, class_idx)                               \
-  do {                                                                         \
+  انجامبده {                                                                         \
     atomic_decr32(&heap->size_class_use[class_idx].alloc_current);             \
     atomic_incr32(&heap->size_class_use[class_idx].free_total);                \
-  } while (0)
-#else
+  } وقتی (0)
+#وگرنه
 #define _rpmalloc_stat_inc(counter)                                            \
-  do {                                                                         \
-  } while (0)
+  انجامبده {                                                                         \
+  } وقتی (0)
 #define _rpmalloc_stat_dec(counter)                                            \
-  do {                                                                         \
-  } while (0)
-#define _rpmalloc_stat_add(counter, value)                                     \
-  do {                                                                         \
-  } while (0)
-#define _rpmalloc_stat_add64(counter, value)                                   \
-  do {                                                                         \
-  } while (0)
-#define _rpmalloc_stat_add_peak(counter, value, peak)                          \
-  do {                                                                         \
-  } while (0)
-#define _rpmalloc_stat_sub(counter, value)                                     \
-  do {                                                                         \
-  } while (0)
+  انجامبده {                                                                         \
+  } وقتی (0)
+#define _rpmalloc_stat_add(counter, مقدار_2)                                     \
+  انجامبده {                                                                         \
+  } وقتی (0)
+#define _rpmalloc_stat_add64(counter, مقدار_2)                                   \
+  انجامبده {                                                                         \
+  } وقتی (0)
+#define _rpmalloc_stat_add_peak(counter, مقدار_2, peak)                          \
+  انجامبده {                                                                         \
+  } وقتی (0)
+#define _rpmalloc_stat_sub(counter, مقدار_2)                                     \
+  انجامبده {                                                                         \
+  } وقتی (0)
 #define _rpmalloc_stat_inc_alloc(heap, class_idx)                              \
-  do {                                                                         \
-  } while (0)
+  انجامبده {                                                                         \
+  } وقتی (0)
 #define _rpmalloc_stat_inc_free(heap, class_idx)                               \
-  do {                                                                         \
-  } while (0)
+  انجامبده {                                                                         \
+  } وقتی (0)
 #endif
 
 ///
@@ -457,25 +457,25 @@ static FORCEINLINE int atomic_cas_ptr(atomicptr_t *dst, void *val, void *ref) {
 //! Small granularity shift count
 #define SMALL_GRANULARITY_SHIFT 4
 //! Number of small block size classes
-#define SMALL_CLASS_COUNT 65
+#define SMALL_CLASS_شمار 65
 //! Maximum size of a small block
-#define SMALL_SIZE_LIMIT (SMALL_GRANULARITY * (SMALL_CLASS_COUNT - 1))
+#define SMALL_SIZE_LIMIT (SMALL_GRANULARITY * (SMALL_CLASS_شمار - 1))
 //! Granularity of a medium allocation block
 #define MEDIUM_GRANULARITY 512
 //! Medium granularity shift count
 #define MEDIUM_GRANULARITY_SHIFT 9
 //! Number of medium block size classes
-#define MEDIUM_CLASS_COUNT 61
+#define MEDIUM_CLASS_شمار 61
 //! Total number of small + medium size classes
-#define SIZE_CLASS_COUNT (SMALL_CLASS_COUNT + MEDIUM_CLASS_COUNT)
+#define SIZE_CLASS_شمار (SMALL_CLASS_شمار + MEDIUM_CLASS_شمار)
 //! Number of large block size classes
-#define LARGE_CLASS_COUNT 63
+#define LARGE_CLASS_شمار 63
 //! Maximum size of a medium block
 #define MEDIUM_SIZE_LIMIT                                                      \
-  (SMALL_SIZE_LIMIT + (MEDIUM_GRANULARITY * MEDIUM_CLASS_COUNT))
+  (SMALL_SIZE_LIMIT + (MEDIUM_GRANULARITY * MEDIUM_CLASS_شمار))
 //! Maximum size of a large block
 #define LARGE_SIZE_LIMIT                                                       \
-  ((LARGE_CLASS_COUNT * _memory_span_size) - SPAN_HEADER_SIZE)
+  ((LARGE_CLASS_شمار * _memory_span_size) - SPAN_HEADER_SIZE)
 //! Size of a span header (must be a multiple of SMALL_GRANULARITY and a power
 //! of two)
 #define SPAN_HEADER_SIZE 128
@@ -494,19 +494,19 @@ _Static_assert((SMALL_GRANULARITY & (SMALL_GRANULARITY - 1)) == 0,
 _Static_assert((SPAN_HEADER_SIZE & (SPAN_HEADER_SIZE - 1)) == 0,
                "Span header size must be power of two");
 
-#if ENABLE_VALIDATE_ARGS
+#اگر ENABLE_VALIDATE_ARGS
 //! Maximum allocation size to avoid integer overflow
 #undef MAX_ALLOC_SIZE
 #define MAX_ALLOC_SIZE (((size_t) - 1) - _memory_span_size)
 #endif
 
-#define pointer_offset(ptr, ofs) (void *)((char *)(ptr) + (ptrdiff_t)(ofs))
+#define pointer_offset(ptr, ofs) (تهی *)((نویسه *)(ptr) + (ptrdiff_t)(ofs))
 #define pointer_diff(first, second)                                            \
-  (ptrdiff_t)((const char *)(first) - (const char *)(second))
+  (ptrdiff_t)((ثابت نویسه *)(first) - (ثابت نویسه *)(second))
 
-#define INVALID_POINTER ((void *)((uintptr_t) - 1))
+#define INVALID_POINTER ((تهی *)((uintptr_t) - 1))
 
-#define SIZE_CLASS_LARGE SIZE_CLASS_COUNT
+#define SIZE_CLASS_LARGE SIZE_CLASS_شمار
 #define SIZE_CLASS_HUGE ((uint32_t) - 1)
 
 ////////////
@@ -516,17 +516,17 @@ _Static_assert((SPAN_HEADER_SIZE & (SPAN_HEADER_SIZE - 1)) == 0,
 //////
 
 //! A memory heap, per thread
-typedef struct heap_t heap_t;
+تعریفنوع ساختار heap_t heap_t;
 //! Span of memory pages
-typedef struct span_t span_t;
+تعریفنوع ساختار span_t span_t;
 //! Span list
-typedef struct span_list_t span_list_t;
+تعریفنوع ساختار span_list_t span_list_t;
 //! Span active data
-typedef struct span_active_t span_active_t;
+تعریفنوع ساختار span_active_t span_active_t;
 //! Size class definition
-typedef struct size_class_t size_class_t;
+تعریفنوع ساختار size_class_t size_class_t;
 //! Global cache
-typedef struct global_cache_t global_cache_t;
+تعریفنوع ساختار global_cache_t global_cache_t;
 
 //! Flag indicating span is the first (master) span of a split superspan
 #define SPAN_FLAG_MASTER 1U
@@ -537,13 +537,13 @@ typedef struct global_cache_t global_cache_t;
 //! Flag indicating an unmapped master span
 #define SPAN_FLAG_UNMAPPED_MASTER 8U
 
-#if ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
-struct span_use_t {
+#اگر ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
+ساختار span_use_t {
   //! Current number of spans used (actually used, not in cache)
   atomic32_t current;
   //! High water mark of spans used
-  atomic32_t high;
-#if ENABLE_STATISTICS
+  atomic32_t بالا;
+#اگر ENABLE_STATISTICS
   //! Number of spans in deferred list
   atomic32_t spans_deferred;
   //! Number of spans transitioned to global cache
@@ -562,11 +562,11 @@ struct span_use_t {
   atomic32_t spans_map_calls;
 #endif
 };
-typedef struct span_use_t span_use_t;
+تعریفنوع ساختار span_use_t span_use_t;
 #endif
 
-#if ENABLE_STATISTICS
-struct size_class_use_t {
+#اگر ENABLE_STATISTICS
+ساختار size_class_use_t {
   //! Current number of allocations
   atomic32_t alloc_current;
   //! Peak number of allocations
@@ -589,7 +589,7 @@ struct size_class_use_t {
   atomic32_t spans_map_calls;
   int32_t unused;
 };
-typedef struct size_class_use_t size_class_use_t;
+تعریفنوع ساختار size_class_use_t size_class_use_t;
 #endif
 
 // A span can either represent a single span of memory pages with size declared
@@ -604,17 +604,17 @@ typedef struct size_class_use_t size_class_use_t;
 // has to be released in the same call to release the virtual memory range, but
 // individual subranges can be decommitted individually to reduce physical
 // memory use).
-struct span_t {
+ساختار span_t {
   //! Free list
-  void *free_list;
+  تهی *free_list;
   //! Total block count of size class
-  uint32_t block_count;
+  uint32_t block_شمار;
   //! Size class
   uint32_t size_class;
   //! Index of last block initialized in free list
   uint32_t free_list_limit;
   //! Number of used blocks remaining when in partial state
-  uint32_t used_count;
+  uint32_t used_شمار;
   //! Deferred free list
   atomicptr_t free_list_deferred;
   //! Size of deferred free list, or list of spans when part of a cache list
@@ -624,7 +624,7 @@ struct span_t {
   //! Flags and counters
   uint32_t flags;
   //! Number of spans
-  uint32_t span_count;
+  uint32_t span_شمار;
   //! Total span counter for master spans
   uint32_t total_spans;
   //! Offset from master span for subspans
@@ -640,46 +640,46 @@ struct span_t {
   //! Previous span
   span_t *prev;
 };
-_Static_assert(sizeof(span_t) <= SPAN_HEADER_SIZE, "span size mismatch");
+_Static_assert(اندازه(span_t) <= SPAN_HEADER_SIZE, "span size mismatch");
 
-struct span_cache_t {
-  size_t count;
+ساختار span_cache_t {
+  size_t شمار;
   span_t *span[MAX_THREAD_SPAN_CACHE];
 };
-typedef struct span_cache_t span_cache_t;
+تعریفنوع ساختار span_cache_t span_cache_t;
 
-struct span_large_cache_t {
-  size_t count;
+ساختار span_large_cache_t {
+  size_t شمار;
   span_t *span[MAX_THREAD_SPAN_LARGE_CACHE];
 };
-typedef struct span_large_cache_t span_large_cache_t;
+تعریفنوع ساختار span_large_cache_t span_large_cache_t;
 
-struct heap_size_class_t {
+ساختار heap_size_class_t {
   //! Free list of active span
-  void *free_list;
+  تهی *free_list;
   //! Double linked list of partially used spans with free blocks.
   //  Previous span pointer in head points to tail span of list.
   span_t *partial_span;
   //! Early level cache of fully free spans
   span_t *cache;
 };
-typedef struct heap_size_class_t heap_size_class_t;
+تعریفنوع ساختار heap_size_class_t heap_size_class_t;
 
 // Control structure for a heap, either a thread heap or a first class heap if
 // enabled
-struct heap_t {
+ساختار heap_t {
   //! Owning thread ID
   uintptr_t owner_thread;
   //! Free lists for each size class
-  heap_size_class_t size_class[SIZE_CLASS_COUNT];
-#if ENABLE_THREAD_CACHE
+  heap_size_class_t size_class[SIZE_CLASS_شمار];
+#اگر ENABLE_THREAD_CACHE
   //! Arrays of fully freed spans, single span
   span_cache_t span_cache;
 #endif
   //! List of deferred free spans (single linked list)
   atomicptr_t span_free_deferred;
   //! Number of full spans
-  size_t full_span_count;
+  size_t full_span_شمار;
   //! Mapped but unused spans
   span_t *span_reserve;
   //! Master span for mapped but unused spans
@@ -687,7 +687,7 @@ struct heap_t {
   //! Number of mapped but unused spans
   uint32_t spans_reserved;
   //! Child count
-  atomic32_t child_count;
+  atomic32_t child_شمار;
   //! Next heap in id list
   heap_t *next_heap;
   //! Next heap in orphan list
@@ -695,28 +695,28 @@ struct heap_t {
   //! Heap ID
   int32_t id;
   //! Finalization state flag
-  int finalize;
+  صحیح finalize;
   //! Master heap owning the memory pages
   heap_t *master_heap;
-#if ENABLE_THREAD_CACHE
+#اگر ENABLE_THREAD_CACHE
   //! Arrays of fully freed spans, large spans with > 1 span count
-  span_large_cache_t span_large_cache[LARGE_CLASS_COUNT - 1];
+  span_large_cache_t span_large_cache[LARGE_CLASS_شمار - 1];
 #endif
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   //! Double linked list of fully utilized spans with free blocks for each size
   //! class.
   //  Previous span pointer in head points to tail span of list.
-  span_t *full_span[SIZE_CLASS_COUNT];
+  span_t *full_span[SIZE_CLASS_شمار];
   //! Double linked list of large and huge spans allocated by this heap
   span_t *large_huge_span;
 #endif
-#if ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
+#اگر ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
   //! Current and high water mark of spans used per span count
-  span_use_t span_use[LARGE_CLASS_COUNT];
+  span_use_t span_use[LARGE_CLASS_شمار];
 #endif
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
   //! Allocation stats per size class
-  size_class_use_t size_class_use[SIZE_CLASS_COUNT + 1];
+  size_class_use_t size_class_use[SIZE_CLASS_شمار + 1];
   //! Number of bytes transitioned thread -> global
   atomic64_t thread_to_global;
   //! Number of bytes transitioned global -> thread
@@ -725,26 +725,26 @@ struct heap_t {
 };
 
 // Size class for defining a block size bucket
-struct size_class_t {
+ساختار size_class_t {
   //! Size of blocks in this class
   uint32_t block_size;
   //! Number of blocks in each chunk
-  uint16_t block_count;
+  uint16_t block_شمار;
   //! Class index this class is merged with
   uint16_t class_idx;
 };
-_Static_assert(sizeof(size_class_t) == 8, "Size class size mismatch");
+_Static_assert(اندازه(size_class_t) == 8, "Size class size mismatch");
 
-struct global_cache_t {
+ساختار global_cache_t {
   //! Cache lock
   atomic32_t lock;
   //! Cache count
-  uint32_t count;
-#if ENABLE_STATISTICS
+  uint32_t شمار;
+#اگر ENABLE_STATISTICS
   //! Insert count
-  size_t insert_count;
+  size_t درج_شمار;
   //! Extract count
-  size_t extract_count;
+  size_t extract_شمار;
 #endif
   //! Cached spans
   span_t *span[GLOBAL_CACHE_MULTIPLIER * MAX_THREAD_SPAN_CACHE];
@@ -764,87 +764,87 @@ struct global_cache_t {
 #define _memory_default_span_mask (~((uintptr_t)(_memory_span_size - 1)))
 
 //! Initialized flag
-static int _rpmalloc_initialized;
+ایستا صحیح _rpmalloc_initialized;
 //! Main thread ID
-static uintptr_t _rpmalloc_main_thread_id;
+ایستا uintptr_t _rpmalloc_main_thread_id;
 //! Configuration
-static rpmalloc_config_t _memory_config;
+ایستا rpmalloc_config_t _memory_config;
 //! Memory page size
-static size_t _memory_page_size;
+ایستا size_t _memory_page_size;
 //! Shift to divide by page size
-static size_t _memory_page_size_shift;
+ایستا size_t _memory_page_size_shift;
 //! Granularity at which memory pages are mapped by OS
-static size_t _memory_map_granularity;
-#if RPMALLOC_CONFIGURABLE
+ایستا size_t _memory_map_granularity;
+#اگر RPMALLOC_CONFIGURABLE
 //! Size of a span of memory pages
-static size_t _memory_span_size;
+ایستا size_t _memory_span_size;
 //! Shift to divide by span size
-static size_t _memory_span_size_shift;
+ایستا size_t _memory_span_size_shift;
 //! Mask to get to start of a memory span
-static uintptr_t _memory_span_mask;
-#else
+ایستا uintptr_t _memory_span_mask;
+#وگرنه
 //! Hardwired span size
 #define _memory_span_size _memory_default_span_size
 #define _memory_span_size_shift _memory_default_span_size_shift
 #define _memory_span_mask _memory_default_span_mask
 #endif
 //! Number of spans to map in each map call
-static size_t _memory_span_map_count;
+ایستا size_t memory_span_map_شمار;
 //! Number of spans to keep reserved in each heap
-static size_t _memory_heap_reserve_count;
+ایستا size_t memory_heap_reserve_شمار;
 //! Global size classes
-static size_class_t _memory_size_class[SIZE_CLASS_COUNT];
+ایستا size_class_t _memory_size_class[SIZE_CLASS_شمار];
 //! Run-time size limit of medium blocks
-static size_t _memory_medium_size_limit;
+ایستا size_t _memory_medium_size_limit;
 //! Heap ID counter
-static atomic32_t _memory_heap_id;
+ایستا atomic32_t _memory_heap_id;
 //! Huge page support
-static int _memory_huge_pages;
-#if ENABLE_GLOBAL_CACHE
+ایستا صحیح _memory_huge_pages;
+#اگر ENABLE_GLOBAL_CACHE
 //! Global span cache
-static global_cache_t _memory_span_cache[LARGE_CLASS_COUNT];
+ایستا global_cache_t _memory_span_cache[LARGE_CLASS_شمار];
 #endif
 //! Global reserved spans
-static span_t *_memory_global_reserve;
+ایستا span_t *_memory_global_reserve;
 //! Global reserved count
-static size_t _memory_global_reserve_count;
+ایستا size_t memory_global_reserve_شمار;
 //! Global reserved master
-static span_t *_memory_global_reserve_master;
+ایستا span_t *_memory_global_reserve_master;
 //! All heaps
-static heap_t *_memory_heaps[HEAP_ARRAY_SIZE];
+ایستا heap_t *_memory_heaps[HEAP_ARRAY_SIZE];
 //! Used to restrict access to mapping memory for huge pages
-static atomic32_t _memory_global_lock;
+ایستا atomic32_t _memory_global_lock;
 //! Orphaned heaps
-static heap_t *_memory_orphan_heaps;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+ایستا heap_t *_memory_orphan_heaps;
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
 //! Orphaned heaps (first class heaps)
-static heap_t *_memory_first_class_orphan_heaps;
+ایستا heap_t *_memory_first_class_orphan_heaps;
 #endif
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
 //! Allocations counter
-static atomic64_t _allocation_counter;
+ایستا atomic64_t _allocation_counter;
 //! Deallocations counter
-static atomic64_t _deallocation_counter;
+ایستا atomic64_t _deallocation_counter;
 //! Active heap count
-static atomic32_t _memory_active_heaps;
+ایستا atomic32_t _memory_active_heaps;
 //! Number of currently mapped memory pages
-static atomic32_t _mapped_pages;
+ایستا atomic32_t _mapped_pages;
 //! Peak number of concurrently mapped memory pages
-static int32_t _mapped_pages_peak;
+ایستا int32_t _mapped_pages_peak;
 //! Number of mapped master spans
-static atomic32_t _master_spans;
+ایستا atomic32_t _master_spans;
 //! Number of unmapped dangling master spans
-static atomic32_t _unmapped_master_spans;
+ایستا atomic32_t _unmapped_master_spans;
 //! Running counter of total number of mapped memory pages since start
-static atomic32_t _mapped_total;
+ایستا atomic32_t _mapped_total;
 //! Running counter of total number of unmapped memory pages since start
-static atomic32_t _unmapped_total;
+ایستا atomic32_t _unmapped_total;
 //! Number of currently mapped memory pages in OS calls
-static atomic32_t _mapped_pages_os;
+ایستا atomic32_t _mapped_pages_os;
 //! Number of currently allocated pages in huge allocations
-static atomic32_t _huge_pages_current;
+ایستا atomic32_t _huge_pages_current;
 //! Peak number of currently allocated pages in huge allocations
-static int32_t _huge_pages_peak;
+ایستا int32_t _huge_pages_peak;
 #endif
 
 ////////////
@@ -854,135 +854,135 @@ static int32_t _huge_pages_peak;
 //////
 
 //! Current thread heap
-#if ((defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD) ||          \
+#اگر ((defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD) ||          \
     defined(__TINYC__)
-static pthread_key_t _memory_thread_heap;
-#else
+ایستا pthread_key_t _memory_thread_heap;
+#وگرنه
 #ifdef _MSC_VER
 #define _Thread_local __declspec(thread)
 #define TLS_MODEL
-#else
+#وگرنه
 #ifndef __HAIKU__
 #define TLS_MODEL __attribute__((tls_model("initial-exec")))
-#else
+#وگرنه
 #define TLS_MODEL
 #endif
-#if !defined(__clang__) && defined(__GNUC__)
+#اگر !defined(__clang__) && defined(__GNUC__)
 #define _Thread_local __thread
 #endif
 #endif
-static _Thread_local heap_t *_memory_thread_heap TLS_MODEL;
+ایستا _Thread_local heap_t *_memory_thread_heap TLS_MODEL;
 #endif
 
-static inline heap_t *get_thread_heap_raw(void) {
-#if (defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD
-  return pthread_getspecific(_memory_thread_heap);
-#else
-  return _memory_thread_heap;
+ایستا درونخطی heap_t *get_thread_heap_raw(تهی) {
+#اگر (defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD
+  بازگشت pthread_getspecific(_memory_thread_heap);
+#وگرنه
+  بازگشت _memory_thread_heap;
 #endif
 }
 
 //! Get the current thread heap
-static inline heap_t *get_thread_heap(void) {
+ایستا درونخطی heap_t *get_thread_heap(تهی) {
   heap_t *heap = get_thread_heap_raw();
-#if ENABLE_PRELOAD
-  if (EXPECTED(heap != 0))
-    return heap;
+#اگر ENABLE_PRELOAD
+  اگر (EXPECTED(heap != 0))
+    بازگشت heap;
   rpmalloc_initialize();
-  return get_thread_heap_raw();
-#else
-  return heap;
+  بازگشت get_thread_heap_raw();
+#وگرنه
+  بازگشت heap;
 #endif
 }
 
 //! Fast thread ID
-static inline uintptr_t get_thread_id(void) {
-#if defined(_WIN32)
-  return (uintptr_t)((void *)NtCurrentTeb());
-#elif (defined(__GNUC__) || defined(__clang__)) && !defined(__CYGWIN__)
+ایستا درونخطی uintptr_t get_thread_id(تهی) {
+#اگر defined(_WIN32)
+  بازگشت (uintptr_t)((تهی *)NtCurrentTeb());
+#وگرنهاگر (defined(__GNUC__) || defined(__clang__)) && !defined(__CYGWIN__)
   uintptr_t tid;
-#if defined(__i386__)
+#اگر defined(__i386__)
   __asm__("movl %%gs:0, %0" : "=r"(tid) : :);
-#elif defined(__x86_64__)
-#if defined(__MACH__)
+#وگرنهاگر defined(__x86_64__)
+#اگر defined(__MACH__)
   __asm__("movq %%gs:0, %0" : "=r"(tid) : :);
-#else
+#وگرنه
   __asm__("movq %%fs:0, %0" : "=r"(tid) : :);
 #endif
-#elif defined(__arm__)
-  __asm__ volatile("mrc p15, 0, %0, c13, c0, 3" : "=r"(tid));
-#elif defined(__aarch64__)
-#if defined(__MACH__)
+#وگرنهاگر defined(__arm__)
+  __asm__ فرار("mrc p15, 0, %0, c13, c0, 3" : "=r"(tid));
+#وگرنهاگر defined(__aarch64__)
+#اگر defined(__MACH__)
   // tpidr_el0 likely unused, always return 0 on iOS
-  __asm__ volatile("mrs %0, tpidrro_el0" : "=r"(tid));
-#else
-  __asm__ volatile("mrs %0, tpidr_el0" : "=r"(tid));
+  __asm__ فرار("mrs %0, tpidrro_el0" : "=r"(tid));
+#وگرنه
+  __asm__ فرار("mrs %0, tpidr_el0" : "=r"(tid));
 #endif
-#else
+#وگرنه
 #error This platform needs implementation of get_thread_id()
 #endif
-  return tid;
-#else
+  بازگشت tid;
+#وگرنه
 #error This platform needs implementation of get_thread_id()
 #endif
 }
 
 //! Set the current thread heap
-static void set_thread_heap(heap_t *heap) {
-#if ((defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD) ||          \
+ایستا تهی set_thread_heap(heap_t *heap) {
+#اگر ((defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD) ||          \
     defined(__TINYC__)
   pthread_setspecific(_memory_thread_heap, heap);
-#else
+#وگرنه
   _memory_thread_heap = heap;
 #endif
-  if (heap)
+  اگر (heap)
     heap->owner_thread = get_thread_id();
 }
 
 //! Set main thread ID
-extern void rpmalloc_set_main_thread(void);
+بیرونی تهی rpmalloc_set_main_thread(تهی);
 
-void rpmalloc_set_main_thread(void) {
+تهی rpmalloc_set_main_thread(تهی) {
   _rpmalloc_main_thread_id = get_thread_id();
 }
 
-static void _rpmalloc_spin(void) {
-#if defined(_MSC_VER)
-#if defined(_M_ARM64)
+ایستا تهی _rpmalloc_spin(تهی) {
+#اگر defined(_MSC_VER)
+#اگر defined(_M_ARM64)
   __yield();
-#else
+#وگرنه
   _mm_pause();
 #endif
-#elif defined(__x86_64__) || defined(__i386__)
-  __asm__ volatile("pause" ::: "memory");
-#elif defined(__aarch64__) || (defined(__arm__) && __ARM_ARCH >= 7)
-  __asm__ volatile("yield" ::: "memory");
-#elif defined(__powerpc__) || defined(__powerpc64__)
+#وگرنهاگر defined(__x86_64__) || defined(__i386__)
+  __asm__ فرار("pause" ::: "memory");
+#وگرنهاگر defined(__aarch64__) || (defined(__arm__) && __ARM_ARCH >= 7)
+  __asm__ فرار("yield" ::: "memory");
+#وگرنهاگر defined(__powerpc__) || defined(__powerpc64__)
   // No idea if ever been compiled in such archs but ... as precaution
-  __asm__ volatile("or 27,27,27");
-#elif defined(__sparc__)
-  __asm__ volatile("rd %ccr, %g0 \n\trd %ccr, %g0 \n\trd %ccr, %g0");
-#else
-  struct timespec ts = {0};
+  __asm__ فرار("or 27,27,27");
+#وگرنهاگر defined(__sparc__)
+  __asm__ فرار("rd %ccr, %g0 \n\trd %ccr, %g0 \n\trd %ccr, %g0");
+#وگرنه
+  ساختار timespec ts = {0};
   nanosleep(&ts, 0);
 #endif
 }
 
-#if defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
+#اگر defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
 
-static void NTAPI RPMallocTlsOnThreadExit(PVOID module, DWORD reason,
+ایستا تهی NTAPI RPMallocTlsOnThreadExit(PVOID module, DWORD reason,
                                           PVOID reserved) {
-  switch (reason) {
-  case DLL_PROCESS_ATTACH:
-    break;
-  case DLL_PROCESS_DETACH:
+  انتخاب (reason) {
+  حالت DLL_PROCESS_ATTACH:
+    بشکن;
+  حالت DLL_PROCESS_DETACH:
     rpmalloc_finalize();
-    break;
-  case DLL_THREAD_ATTACH:
-    break;
-  case DLL_THREAD_DETACH:
+    بشکن;
+  حالت DLL_THREAD_ATTACH:
+    بشکن;
+  حالت DLL_THREAD_DETACH:
     rpmalloc_thread_finalize(1);
-    break;
+    بشکن;
   }
 }
 
@@ -995,13 +995,13 @@ static void NTAPI RPMallocTlsOnThreadExit(PVOID module, DWORD reason,
 // deinitialized last. Therefore, Y(.CRT$XLY) is used here.
 #pragma const_seg(".CRT$XLY")
 
-extern const PIMAGE_TLS_CALLBACK rpmalloc_tls_thread_exit_callback;
-const PIMAGE_TLS_CALLBACK rpmalloc_tls_thread_exit_callback =
+بیرونی ثابت PIMAGE_TLS_CALLBACK rpmalloc_tls_thread_exit_callback;
+ثابت PIMAGE_TLS_CALLBACK rpmalloc_tls_thread_exit_callback =
     RPMallocTlsOnThreadExit;
 
 // Reset const section
 #pragma const_seg()
-#else // _WIN64
+#وگرنه // _WIN64
 #pragma comment(linker, "/INCLUDE:__tls_used")
 #pragma comment(linker, "/INCLUDE:_rpmalloc_tls_thread_exit_callback")
 
@@ -1013,14 +1013,14 @@ PIMAGE_TLS_CALLBACK rpmalloc_tls_thread_exit_callback = RPMallocTlsOnThreadExit;
 #pragma data_seg()
 #endif // _WIN64
 
-static void NTAPI _rpmalloc_thread_destructor(void *value) {
-#if ENABLE_OVERRIDE
+ایستا تهی NTAPI _rpmalloc_thread_destructor(تهی *مقدار_2) {
+#اگر ENABLE_OVERRIDE
   // If this is called on main thread it means rpmalloc_finalize
   // has not been called and shutdown is forced (through _exit) or unclean
-  if (get_thread_id() == _rpmalloc_main_thread_id)
-    return;
+  اگر (get_thread_id() == _rpmalloc_main_thread_id)
+    بازگشت;
 #endif
-  if (value)
+  اگر (مقدار_2)
     rpmalloc_thread_finalize(1);
 }
 #endif
@@ -1031,19 +1031,19 @@ static void NTAPI _rpmalloc_thread_destructor(void *value) {
 ///
 //////
 
-static void _rpmalloc_set_name(void *address, size_t size) {
-#if defined(__linux__) || defined(__ANDROID__)
-  const char *name = _memory_huge_pages ? _memory_config.huge_page_name
+ایستا تهی _rpmalloc_set_name(تهی *address, size_t size) {
+#اگر defined(__linux__) || defined(__ANDROID__)
+  ثابت نویسه *name = _memory_huge_pages ? _memory_config.huge_page_name
                                         : _memory_config.page_name;
-  if (address == MAP_FAILED || !name)
-    return;
+  اگر (address == MAP_FAILED || !name)
+    بازگشت;
   // If the kernel does not support CONFIG_ANON_VMA_NAME or if the call fails
   // (e.g. invalid name) it is a no-op basically.
-  (void)prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, (uintptr_t)address, size,
+  (تهی)prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, (uintptr_t)address, size,
               (uintptr_t)name);
-#else
-  (void)sizeof(size);
-  (void)sizeof(address);
+#وگرنه
+  (تهی)اندازه(size);
+  (تهی)اندازه(address);
 #endif
 }
 
@@ -1051,16 +1051,16 @@ static void _rpmalloc_set_name(void *address, size_t size) {
 //  size is number of bytes to map
 //  offset receives the offset in bytes from start of mapped region
 //  returns address to start of mapped region to use
-static void *_rpmalloc_mmap(size_t size, size_t *offset) {
+ایستا تهی *_rpmalloc_mmap(size_t size, size_t *offset) {
   rpmalloc_assert(!(size % _memory_page_size), "Invalid mmap size");
   rpmalloc_assert(size >= _memory_page_size, "Invalid mmap size");
-  void *address = _memory_config.memory_map(size, offset);
-  if (EXPECTED(address != 0)) {
+  تهی *address = _memory_config.memory_map(size, offset);
+  اگر (EXPECTED(address != 0)) {
     _rpmalloc_stat_add_peak(&_mapped_pages, (size >> _memory_page_size_shift),
                             _mapped_pages_peak);
     _rpmalloc_stat_add(&_mapped_total, (size >> _memory_page_size_shift));
   }
-  return address;
+  بازگشت address;
 }
 
 //! Unmap virtual memory
@@ -1069,12 +1069,12 @@ static void *_rpmalloc_mmap(size_t size, size_t *offset) {
 //  for a partial unmap offset is the offset in bytes to the actual mapped
 //  region, as set by _memory_map release is set to 0 for partial unmap, or size
 //  of entire range for a full unmap
-static void _rpmalloc_unmap(void *address, size_t size, size_t offset,
+ایستا تهی _rpmalloc_unmap(تهی *address, size_t size, size_t offset,
                             size_t release) {
   rpmalloc_assert(!release || (release >= size), "Invalid unmap size");
   rpmalloc_assert(!release || (release >= _memory_page_size),
                   "Invalid unmap size");
-  if (release) {
+  اگر (release) {
     rpmalloc_assert(!(release % _memory_page_size), "Invalid unmap size");
     _rpmalloc_stat_sub(&_mapped_pages, (release >> _memory_page_size_shift));
     _rpmalloc_stat_add(&_unmapped_total, (release >> _memory_page_size_shift));
@@ -1083,7 +1083,7 @@ static void _rpmalloc_unmap(void *address, size_t size, size_t offset,
 }
 
 //! Default implementation to map new pages to virtual memory
-static void *_rpmalloc_mmap_os(size_t size, size_t *offset) {
+ایستا تهی *_rpmalloc_mmap_os(size_t size, size_t *offset) {
   // Either size is a heap (a single page) or a (multiple) span - we only need
   // to align spans, and only if larger than map granularity
   size_t padding = ((size >= _memory_span_size) &&
@@ -1091,74 +1091,74 @@ static void *_rpmalloc_mmap_os(size_t size, size_t *offset) {
                        ? _memory_span_size
                        : 0;
   rpmalloc_assert(size >= _memory_page_size, "Invalid mmap size");
-#if PLATFORM_WINDOWS
+#اگر PLATFORM_WINDOWS
   // Ok to MEM_COMMIT - according to MSDN, "actual physical pages are not
   // allocated unless/until the virtual addresses are actually accessed"
-  void *ptr = VirtualAlloc(0, size + padding,
+  تهی *ptr = VirtualAlloc(0, size + padding,
                            (_memory_huge_pages ? MEM_LARGE_PAGES : 0) |
                                MEM_RESERVE | MEM_COMMIT,
                            PAGE_READWRITE);
-  if (!ptr) {
-    if (_memory_config.map_fail_callback) {
-      if (_memory_config.map_fail_callback(size + padding))
-        return _rpmalloc_mmap_os(size, offset);
-    } else {
+  اگر (!ptr) {
+    اگر (_memory_config.map_fail_callback) {
+      اگر (_memory_config.map_fail_callback(size + padding))
+        بازگشت _rpmalloc_mmap_os(size, offset);
+    } وگرنه {
       rpmalloc_assert(ptr, "Failed to map virtual memory block");
     }
-    return 0;
+    بازگشت 0;
   }
-#else
-  int flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED;
-#if defined(__APPLE__) && !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
-  int fd = (int)VM_MAKE_TAG(240U);
-  if (_memory_huge_pages)
+#وگرنه
+  صحیح flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_UNINITIALIZED;
+#اگر defined(__APPLE__) && !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
+  صحیح fd = (صحیح)VM_MAKE_TAG(240U);
+  اگر (_memory_huge_pages)
     fd |= VM_FLAGS_SUPERPAGE_SIZE_2MB;
-  void *ptr = mmap(0, size + padding, PROT_READ | PROT_WRITE, flags, fd, 0);
-#elif defined(MAP_HUGETLB)
-  void *ptr = mmap(0, size + padding,
+  تهی *ptr = mmap(0, size + padding, PROT_READ | PROT_WRITE, flags, fd, 0);
+#وگرنهاگر defined(MAP_HUGETLB)
+  تهی *ptr = mmap(0, size + padding,
                    PROT_READ | PROT_WRITE | PROT_MAX(PROT_READ | PROT_WRITE),
                    (_memory_huge_pages ? MAP_HUGETLB : 0) | flags, -1, 0);
-#if defined(MADV_HUGEPAGE)
+#اگر defined(MADV_HUGEPAGE)
   // In some configurations, huge pages allocations might fail thus
   // we fallback to normal allocations and promote the region as transparent
   // huge page
-  if ((ptr == MAP_FAILED || !ptr) && _memory_huge_pages) {
+  اگر ((ptr == MAP_FAILED || !ptr) && _memory_huge_pages) {
     ptr = mmap(0, size + padding, PROT_READ | PROT_WRITE, flags, -1, 0);
-    if (ptr && ptr != MAP_FAILED) {
-      int prm = madvise(ptr, size + padding, MADV_HUGEPAGE);
-      (void)prm;
+    اگر (ptr && ptr != MAP_FAILED) {
+      صحیح prm = madvise(ptr, size + padding, MADV_HUGEPAGE);
+      (تهی)prm;
       rpmalloc_assert((prm == 0), "Failed to promote the page to THP");
     }
   }
 #endif
   _rpmalloc_set_name(ptr, size + padding);
-#elif defined(MAP_ALIGNED)
-  const size_t align =
-      (sizeof(size_t) * 8) - (size_t)(__builtin_clzl(size - 1));
-  void *ptr =
+#وگرنهاگر defined(MAP_ALIGNED)
+  ثابت size_t align =
+      (اندازه(size_t) * 8) - (size_t)(__builtin_clzl(size - 1));
+  تهی *ptr =
       mmap(0, size + padding, PROT_READ | PROT_WRITE,
            (_memory_huge_pages ? MAP_ALIGNED(align) : 0) | flags, -1, 0);
-#elif defined(MAP_ALIGN)
+#وگرنهاگر defined(MAP_ALIGN)
   caddr_t base = (_memory_huge_pages ? (caddr_t)(4 << 20) : 0);
-  void *ptr = mmap(base, size + padding, PROT_READ | PROT_WRITE,
+  تهی *ptr = mmap(base, size + padding, PROT_READ | PROT_WRITE,
                    (_memory_huge_pages ? MAP_ALIGN : 0) | flags, -1, 0);
-#else
-  void *ptr = mmap(0, size + padding, PROT_READ | PROT_WRITE, flags, -1, 0);
+#وگرنه
+  تهی *ptr = mmap(0, size + padding, PROT_READ | PROT_WRITE, flags, -1, 0);
 #endif
-  if ((ptr == MAP_FAILED) || !ptr) {
-    if (_memory_config.map_fail_callback) {
-      if (_memory_config.map_fail_callback(size + padding))
-        return _rpmalloc_mmap_os(size, offset);
-    } else if (errno != ENOMEM) {
+  اگر ((ptr == MAP_FAILED) || !ptr) {
+    اگر (_memory_config.map_fail_callback) {
+      اگر (_memory_config.map_fail_callback(size + padding))
+        بازگشت _rpmalloc_mmap_os(size, offset);
+    } وگرنه اگر (errno != ENOMEM) {
       rpmalloc_assert((ptr != MAP_FAILED) && ptr,
                       "Failed to map virtual memory block");
     }
-    return 0;
+    بازگشت 0;
   }
 #endif
   _rpmalloc_stat_add(&_mapped_pages_os,
                      (int32_t)((size + padding) >> _memory_page_size_shift));
-  if (padding) {
+  اگر (padding) {
     size_t final_padding = padding - ((uintptr_t)ptr & ~_memory_span_mask);
     rpmalloc_assert(final_padding <= _memory_span_size,
                     "Internal failure in padding");
@@ -1170,86 +1170,86 @@ static void *_rpmalloc_mmap_os(size_t size, size_t *offset) {
   rpmalloc_assert((size < _memory_span_size) ||
                       !((uintptr_t)ptr & ~_memory_span_mask),
                   "Internal failure in padding");
-  return ptr;
+  بازگشت ptr;
 }
 
 //! Default implementation to unmap pages from virtual memory
-static void _rpmalloc_unmap_os(void *address, size_t size, size_t offset,
+ایستا تهی _rpmalloc_unmap_os(تهی *address, size_t size, size_t offset,
                                size_t release) {
   rpmalloc_assert(release || (offset == 0), "Invalid unmap size");
   rpmalloc_assert(!release || (release >= _memory_page_size),
                   "Invalid unmap size");
   rpmalloc_assert(size >= _memory_page_size, "Invalid unmap size");
-  if (release && offset) {
+  اگر (release && offset) {
     offset <<= 3;
     address = pointer_offset(address, -(int32_t)offset);
-    if ((release >= _memory_span_size) &&
+    اگر ((release >= _memory_span_size) &&
         (_memory_span_size > _memory_map_granularity)) {
       // Padding is always one span size
       release += _memory_span_size;
     }
   }
-#if !DISABLE_UNMAP
-#if PLATFORM_WINDOWS
-  if (!VirtualFree(address, release ? 0 : size,
+#اگر !DISABLE_UNMAP
+#اگر PLATFORM_WINDOWS
+  اگر (!VirtualFree(address, release ? 0 : size,
                    release ? MEM_RELEASE : MEM_DECOMMIT)) {
     rpmalloc_assert(0, "Failed to unmap virtual memory block");
   }
-#else
-  if (release) {
-    if (munmap(address, release)) {
+#وگرنه
+  اگر (release) {
+    اگر (munmap(address, release)) {
       rpmalloc_assert(0, "Failed to unmap virtual memory block");
     }
-  } else {
-#if defined(MADV_FREE_REUSABLE)
-    int ret;
-    while ((ret = madvise(address, size, MADV_FREE_REUSABLE)) == -1 &&
+  } وگرنه {
+#اگر defined(MADV_FREE_REUSABLE)
+    صحیح ret;
+    وقتی ((ret = madvise(address, size, MADV_FREE_REUSABLE)) == -1 &&
            (errno == EAGAIN))
       errno = 0;
-    if ((ret == -1) && (errno != 0)) {
-#elif defined(MADV_DONTNEED)
-    if (madvise(address, size, MADV_DONTNEED)) {
-#elif defined(MADV_PAGEOUT)
-    if (madvise(address, size, MADV_PAGEOUT)) {
-#elif defined(MADV_FREE)
-    if (madvise(address, size, MADV_FREE)) {
-#else
-    if (posix_madvise(address, size, POSIX_MADV_DONTNEED)) {
+    اگر ((ret == -1) && (errno != 0)) {
+#وگرنهاگر defined(MADV_DONTNEED)
+    اگر (madvise(address, size, MADV_DONTNEED)) {
+#وگرنهاگر defined(MADV_PAGEOUT)
+    اگر (madvise(address, size, MADV_PAGEOUT)) {
+#وگرنهاگر defined(MADV_FREE)
+    اگر (madvise(address, size, MADV_FREE)) {
+#وگرنه
+    اگر (posix_madvise(address, size, POSIX_MADV_DONTNEED)) {
 #endif
       rpmalloc_assert(0, "Failed to madvise virtual memory block as free");
     }
   }
 #endif
 #endif
-  if (release)
+  اگر (release)
     _rpmalloc_stat_sub(&_mapped_pages_os, release >> _memory_page_size_shift);
 }
 
-static void _rpmalloc_span_mark_as_subspan_unless_master(span_t *master,
+ایستا تهی _rpmalloc_span_mark_as_subspan_unless_master(span_t *master,
                                                          span_t *subspan,
-                                                         size_t span_count);
+                                                         size_t span_شمار);
 
 //! Use global reserved spans to fulfill a memory map request (reserve size must
 //! be checked by caller)
-static span_t *_rpmalloc_global_get_reserved_spans(size_t span_count) {
+ایستا span_t *_rpmalloc_global_get_reserved_spans(size_t span_شمار) {
   span_t *span = _memory_global_reserve;
   _rpmalloc_span_mark_as_subspan_unless_master(_memory_global_reserve_master,
-                                               span, span_count);
-  _memory_global_reserve_count -= span_count;
-  if (_memory_global_reserve_count)
+                                               span, span_شمار);
+  memory_global_reserve_شمار -= span_شمار;
+  اگر (memory_global_reserve_شمار)
     _memory_global_reserve =
-        (span_t *)pointer_offset(span, span_count << _memory_span_size_shift);
-  else
+        (span_t *)pointer_offset(span, span_شمار << _memory_span_size_shift);
+  وگرنه
     _memory_global_reserve = 0;
-  return span;
+  بازگشت span;
 }
 
 //! Store the given spans as global reserve (must only be called from within new
 //! heap allocation, not thread safe)
-static void _rpmalloc_global_set_reserved_spans(span_t *master, span_t *reserve,
-                                                size_t reserve_span_count) {
+ایستا تهی _rpmalloc_global_set_reserved_spans(span_t *master, span_t *reserve,
+                                                size_t reserve_span_شمار) {
   _memory_global_reserve_master = master;
-  _memory_global_reserve_count = reserve_span_count;
+  memory_global_reserve_شمار = reserve_span_شمار;
   _memory_global_reserve = reserve;
 }
 
@@ -1260,15 +1260,15 @@ static void _rpmalloc_global_set_reserved_spans(span_t *master, span_t *reserve,
 //////
 
 //! Add a span to double linked list at the head
-static void _rpmalloc_span_double_link_list_add(span_t **head, span_t *span) {
-  if (*head)
+ایستا تهی _rpmalloc_span_double_link_list_add(span_t **head, span_t *span) {
+  اگر (*head)
     (*head)->prev = span;
   span->next = *head;
   *head = span;
 }
 
 //! Pop head span from double linked list
-static void _rpmalloc_span_double_link_list_pop_head(span_t **head,
+ایستا تهی rpmalloc_span_double_link_list_برداشت_head(span_t **head,
                                                      span_t *span) {
   rpmalloc_assert(*head == span, "Linked list corrupted");
   span = *head;
@@ -1276,16 +1276,16 @@ static void _rpmalloc_span_double_link_list_pop_head(span_t **head,
 }
 
 //! Remove a span from double linked list
-static void _rpmalloc_span_double_link_list_remove(span_t **head,
+ایستا تهی _rpmalloc_span_double_link_list_remove(span_t **head,
                                                    span_t *span) {
   rpmalloc_assert(*head, "Linked list corrupted");
-  if (*head == span) {
+  اگر (*head == span) {
     *head = span->next;
-  } else {
+  } وگرنه {
     span_t *next_span = span->next;
     span_t *prev_span = span->prev;
     prev_span->next = next_span;
-    if (EXPECTED(next_span != 0))
+    اگر (EXPECTED(next_span != 0))
       next_span->prev = prev_span;
   }
 }
@@ -1296,165 +1296,165 @@ static void _rpmalloc_span_double_link_list_remove(span_t **head,
 ///
 //////
 
-static void _rpmalloc_heap_cache_insert(heap_t *heap, span_t *span);
+ایستا تهی rpmalloc_heap_cache_درج(heap_t *heap, span_t *span);
 
-static void _rpmalloc_heap_finalize(heap_t *heap);
+ایستا تهی _rpmalloc_heap_finalize(heap_t *heap);
 
-static void _rpmalloc_heap_set_reserved_spans(heap_t *heap, span_t *master,
+ایستا تهی _rpmalloc_heap_set_reserved_spans(heap_t *heap, span_t *master,
                                               span_t *reserve,
-                                              size_t reserve_span_count);
+                                              size_t reserve_span_شمار);
 
 //! Declare the span to be a subspan and store distance from master span and
 //! span count
-static void _rpmalloc_span_mark_as_subspan_unless_master(span_t *master,
+ایستا تهی _rpmalloc_span_mark_as_subspan_unless_master(span_t *master,
                                                          span_t *subspan,
-                                                         size_t span_count) {
+                                                         size_t span_شمار) {
   rpmalloc_assert((subspan != master) || (subspan->flags & SPAN_FLAG_MASTER),
                   "Span master pointer and/or flag mismatch");
-  if (subspan != master) {
+  اگر (subspan != master) {
     subspan->flags = SPAN_FLAG_SUBSPAN;
     subspan->offset_from_master =
         (uint32_t)((uintptr_t)pointer_diff(subspan, master) >>
                    _memory_span_size_shift);
     subspan->align_offset = 0;
   }
-  subspan->span_count = (uint32_t)span_count;
+  subspan->span_شمار = (uint32_t)span_شمار;
 }
 
 //! Use reserved spans to fulfill a memory map request (reserve size must be
 //! checked by caller)
-static span_t *_rpmalloc_span_map_from_reserve(heap_t *heap,
-                                               size_t span_count) {
+ایستا span_t *_rpmalloc_span_map_from_reserve(heap_t *heap,
+                                               size_t span_شمار) {
   // Update the heap span reserve
   span_t *span = heap->span_reserve;
   heap->span_reserve =
-      (span_t *)pointer_offset(span, span_count * _memory_span_size);
-  heap->spans_reserved -= (uint32_t)span_count;
+      (span_t *)pointer_offset(span, span_شمار * _memory_span_size);
+  heap->spans_reserved -= (uint32_t)span_شمار;
 
   _rpmalloc_span_mark_as_subspan_unless_master(heap->span_reserve_master, span,
-                                               span_count);
-  if (span_count <= LARGE_CLASS_COUNT)
-    _rpmalloc_stat_inc(&heap->span_use[span_count - 1].spans_from_reserved);
+                                               span_شمار);
+  اگر (span_شمار <= LARGE_CLASS_شمار)
+    _rpmalloc_stat_inc(&heap->span_use[span_شمار - 1].spans_from_reserved);
 
-  return span;
+  بازگشت span;
 }
 
 //! Get the aligned number of spans to map in based on wanted count, configured
 //! mapping granularity and the page size
-static size_t _rpmalloc_span_align_count(size_t span_count) {
-  size_t request_count = (span_count > _memory_span_map_count)
-                             ? span_count
-                             : _memory_span_map_count;
-  if ((_memory_page_size > _memory_span_size) &&
-      ((request_count * _memory_span_size) % _memory_page_size))
-    request_count +=
-        _memory_span_map_count - (request_count % _memory_span_map_count);
-  return request_count;
+ایستا size_t rpmalloc_span_align_شمار(size_t span_شمار) {
+  size_t request_شمار = (span_شمار > memory_span_map_شمار)
+                             ? span_شمار
+                             : memory_span_map_شمار;
+  اگر ((_memory_page_size > _memory_span_size) &&
+      ((request_شمار * _memory_span_size) % _memory_page_size))
+    request_شمار +=
+        memory_span_map_شمار - (request_شمار % memory_span_map_شمار);
+  بازگشت request_شمار;
 }
 
 //! Setup a newly mapped span
-static void _rpmalloc_span_initialize(span_t *span, size_t total_span_count,
-                                      size_t span_count, size_t align_offset) {
-  span->total_spans = (uint32_t)total_span_count;
-  span->span_count = (uint32_t)span_count;
+ایستا تهی _rpmalloc_span_initialize(span_t *span, size_t total_span_شمار,
+                                      size_t span_شمار, size_t align_offset) {
+  span->total_spans = (uint32_t)total_span_شمار;
+  span->span_شمار = (uint32_t)span_شمار;
   span->align_offset = (uint32_t)align_offset;
   span->flags = SPAN_FLAG_MASTER;
-  atomic_store32(&span->remaining_spans, (int32_t)total_span_count);
+  atomic_store32(&span->remaining_spans, (int32_t)total_span_شمار);
 }
 
-static void _rpmalloc_span_unmap(span_t *span);
+ایستا تهی _rpmalloc_span_unmap(span_t *span);
 
 //! Map an aligned set of spans, taking configured mapping granularity and the
 //! page size into account
-static span_t *_rpmalloc_span_map_aligned_count(heap_t *heap,
-                                                size_t span_count) {
+ایستا span_t *rpmalloc_span_map_aligned_شمار(heap_t *heap,
+                                                size_t span_شمار) {
   // If we already have some, but not enough, reserved spans, release those to
   // heap cache and map a new full set of spans. Otherwise we would waste memory
   // if page size > span size (huge pages)
-  size_t aligned_span_count = _rpmalloc_span_align_count(span_count);
+  size_t aligned_span_شمار = rpmalloc_span_align_شمار(span_شمار);
   size_t align_offset = 0;
   span_t *span = (span_t *)_rpmalloc_mmap(
-      aligned_span_count * _memory_span_size, &align_offset);
-  if (!span)
-    return 0;
-  _rpmalloc_span_initialize(span, aligned_span_count, span_count, align_offset);
+      aligned_span_شمار * _memory_span_size, &align_offset);
+  اگر (!span)
+    بازگشت 0;
+  _rpmalloc_span_initialize(span, aligned_span_شمار, span_شمار, align_offset);
   _rpmalloc_stat_inc(&_master_spans);
-  if (span_count <= LARGE_CLASS_COUNT)
-    _rpmalloc_stat_inc(&heap->span_use[span_count - 1].spans_map_calls);
-  if (aligned_span_count > span_count) {
+  اگر (span_شمار <= LARGE_CLASS_شمار)
+    _rpmalloc_stat_inc(&heap->span_use[span_شمار - 1].spans_map_calls);
+  اگر (aligned_span_شمار > span_شمار) {
     span_t *reserved_spans =
-        (span_t *)pointer_offset(span, span_count * _memory_span_size);
-    size_t reserved_count = aligned_span_count - span_count;
-    if (heap->spans_reserved) {
+        (span_t *)pointer_offset(span, span_شمار * _memory_span_size);
+    size_t reserved_شمار = aligned_span_شمار - span_شمار;
+    اگر (heap->spans_reserved) {
       _rpmalloc_span_mark_as_subspan_unless_master(
           heap->span_reserve_master, heap->span_reserve, heap->spans_reserved);
-      _rpmalloc_heap_cache_insert(heap, heap->span_reserve);
+      rpmalloc_heap_cache_درج(heap, heap->span_reserve);
     }
-    if (reserved_count > _memory_heap_reserve_count) {
+    اگر (reserved_شمار > memory_heap_reserve_شمار) {
       // If huge pages or eager spam map count, the global reserve spin lock is
       // held by caller, _rpmalloc_span_map
       rpmalloc_assert(atomic_load32(&_memory_global_lock) == 1,
                       "Global spin lock not held as expected");
-      size_t remain_count = reserved_count - _memory_heap_reserve_count;
-      reserved_count = _memory_heap_reserve_count;
+      size_t remain_شمار = reserved_شمار - memory_heap_reserve_شمار;
+      reserved_شمار = memory_heap_reserve_شمار;
       span_t *remain_span = (span_t *)pointer_offset(
-          reserved_spans, reserved_count * _memory_span_size);
-      if (_memory_global_reserve) {
+          reserved_spans, reserved_شمار * _memory_span_size);
+      اگر (_memory_global_reserve) {
         _rpmalloc_span_mark_as_subspan_unless_master(
             _memory_global_reserve_master, _memory_global_reserve,
-            _memory_global_reserve_count);
+            memory_global_reserve_شمار);
         _rpmalloc_span_unmap(_memory_global_reserve);
       }
-      _rpmalloc_global_set_reserved_spans(span, remain_span, remain_count);
+      _rpmalloc_global_set_reserved_spans(span, remain_span, remain_شمار);
     }
     _rpmalloc_heap_set_reserved_spans(heap, span, reserved_spans,
-                                      reserved_count);
+                                      reserved_شمار);
   }
-  return span;
+  بازگشت span;
 }
 
 //! Map in memory pages for the given number of spans (or use previously
 //! reserved pages)
-static span_t *_rpmalloc_span_map(heap_t *heap, size_t span_count) {
-  if (span_count <= heap->spans_reserved)
-    return _rpmalloc_span_map_from_reserve(heap, span_count);
+ایستا span_t *_rpmalloc_span_map(heap_t *heap, size_t span_شمار) {
+  اگر (span_شمار <= heap->spans_reserved)
+    بازگشت _rpmalloc_span_map_from_reserve(heap, span_شمار);
   span_t *span = 0;
-  int use_global_reserve =
+  صحیح use_global_reserve =
       (_memory_page_size > _memory_span_size) ||
-      (_memory_span_map_count > _memory_heap_reserve_count);
-  if (use_global_reserve) {
+      (memory_span_map_شمار > memory_heap_reserve_شمار);
+  اگر (use_global_reserve) {
     // If huge pages, make sure only one thread maps more memory to avoid bloat
-    while (!atomic_cas32_acquire(&_memory_global_lock, 1, 0))
+    وقتی (!atomic_cas32_acquire(&_memory_global_lock, 1, 0))
       _rpmalloc_spin();
-    if (_memory_global_reserve_count >= span_count) {
-      size_t reserve_count =
-          (!heap->spans_reserved ? _memory_heap_reserve_count : span_count);
-      if (_memory_global_reserve_count < reserve_count)
-        reserve_count = _memory_global_reserve_count;
-      span = _rpmalloc_global_get_reserved_spans(reserve_count);
-      if (span) {
-        if (reserve_count > span_count) {
+    اگر (memory_global_reserve_شمار >= span_شمار) {
+      size_t reserve_شمار =
+          (!heap->spans_reserved ? memory_heap_reserve_شمار : span_شمار);
+      اگر (memory_global_reserve_شمار < reserve_شمار)
+        reserve_شمار = memory_global_reserve_شمار;
+      span = _rpmalloc_global_get_reserved_spans(reserve_شمار);
+      اگر (span) {
+        اگر (reserve_شمار > span_شمار) {
           span_t *reserved_span = (span_t *)pointer_offset(
-              span, span_count << _memory_span_size_shift);
+              span, span_شمار << _memory_span_size_shift);
           _rpmalloc_heap_set_reserved_spans(heap, _memory_global_reserve_master,
                                             reserved_span,
-                                            reserve_count - span_count);
+                                            reserve_شمار - span_شمار);
         }
         // Already marked as subspan in _rpmalloc_global_get_reserved_spans
-        span->span_count = (uint32_t)span_count;
+        span->span_شمار = (uint32_t)span_شمار;
       }
     }
   }
-  if (!span)
-    span = _rpmalloc_span_map_aligned_count(heap, span_count);
-  if (use_global_reserve)
+  اگر (!span)
+    span = rpmalloc_span_map_aligned_شمار(heap, span_شمار);
+  اگر (use_global_reserve)
     atomic_store32_release(&_memory_global_lock, 0);
-  return span;
+  بازگشت span;
 }
 
 //! Unmap memory pages for the given number of spans (or mark as unused if no
 //! partial unmappings)
-static void _rpmalloc_span_unmap(span_t *span) {
+ایستا تهی _rpmalloc_span_unmap(span_t *span) {
   rpmalloc_assert((span->flags & SPAN_FLAG_MASTER) ||
                       (span->flags & SPAN_FLAG_SUBSPAN),
                   "Span flag corrupted");
@@ -1462,7 +1462,7 @@ static void _rpmalloc_span_unmap(span_t *span) {
                       !(span->flags & SPAN_FLAG_SUBSPAN),
                   "Span flag corrupted");
 
-  int is_master = !!(span->flags & SPAN_FLAG_MASTER);
+  صحیح is_master = !!(span->flags & SPAN_FLAG_MASTER);
   span_t *master =
       is_master ? span
                 : ((span_t *)pointer_offset(
@@ -1472,14 +1472,14 @@ static void _rpmalloc_span_unmap(span_t *span) {
                   "Span flag corrupted");
   rpmalloc_assert(master->flags & SPAN_FLAG_MASTER, "Span flag corrupted");
 
-  size_t span_count = span->span_count;
-  if (!is_master) {
+  size_t span_شمار = span->span_شمار;
+  اگر (!is_master) {
     // Directly unmap subspans (unless huge pages, in which case we defer and
     // unmap entire page range with master)
     rpmalloc_assert(span->align_offset == 0, "Span align offset corrupted");
-    if (_memory_span_size >= _memory_page_size)
-      _rpmalloc_unmap(span, span_count * _memory_span_size, 0, 0);
-  } else {
+    اگر (_memory_span_size >= _memory_page_size)
+      _rpmalloc_unmap(span, span_شمار * _memory_span_size, 0, 0);
+  } وگرنه {
     // Special double flag to denote an unmapped master
     // It must be kept in memory since span header must be used
     span->flags |=
@@ -1487,18 +1487,18 @@ static void _rpmalloc_span_unmap(span_t *span) {
     _rpmalloc_stat_add(&_unmapped_master_spans, 1);
   }
 
-  if (atomic_add32(&master->remaining_spans, -(int32_t)span_count) <= 0) {
+  اگر (atomic_add32(&master->remaining_spans, -(int32_t)span_شمار) <= 0) {
     // Everything unmapped, unmap the master span with release flag to unmap the
     // entire range of the super span
     rpmalloc_assert(!!(master->flags & SPAN_FLAG_MASTER) &&
                         !!(master->flags & SPAN_FLAG_SUBSPAN),
                     "Span flag corrupted");
-    size_t unmap_count = master->span_count;
-    if (_memory_span_size < _memory_page_size)
-      unmap_count = master->total_spans;
+    size_t unmap_شمار = master->span_شمار;
+    اگر (_memory_span_size < _memory_page_size)
+      unmap_شمار = master->total_spans;
     _rpmalloc_stat_sub(&_master_spans, 1);
     _rpmalloc_stat_sub(&_unmapped_master_spans, 1);
-    _rpmalloc_unmap(master, unmap_count * _memory_span_size,
+    _rpmalloc_unmap(master, unmap_شمار * _memory_span_size,
                     master->align_offset,
                     (size_t)master->total_spans * _memory_span_size);
   }
@@ -1506,157 +1506,157 @@ static void _rpmalloc_span_unmap(span_t *span) {
 
 //! Move the span (used for small or medium allocations) to the heap thread
 //! cache
-static void _rpmalloc_span_release_to_cache(heap_t *heap, span_t *span) {
+ایستا تهی _rpmalloc_span_release_to_cache(heap_t *heap, span_t *span) {
   rpmalloc_assert(heap == span->heap, "Span heap pointer corrupted");
-  rpmalloc_assert(span->size_class < SIZE_CLASS_COUNT,
+  rpmalloc_assert(span->size_class < SIZE_CLASS_شمار,
                   "Invalid span size class");
-  rpmalloc_assert(span->span_count == 1, "Invalid span count");
-#if ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
+  rpmalloc_assert(span->span_شمار == 1, "Invalid span count");
+#اگر ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
   atomic_decr32(&heap->span_use[0].current);
 #endif
   _rpmalloc_stat_dec(&heap->size_class_use[span->size_class].spans_current);
-  if (!heap->finalize) {
+  اگر (!heap->finalize) {
     _rpmalloc_stat_inc(&heap->span_use[0].spans_to_cache);
     _rpmalloc_stat_inc(&heap->size_class_use[span->size_class].spans_to_cache);
-    if (heap->size_class[span->size_class].cache)
-      _rpmalloc_heap_cache_insert(heap,
+    اگر (heap->size_class[span->size_class].cache)
+      rpmalloc_heap_cache_درج(heap,
                                   heap->size_class[span->size_class].cache);
     heap->size_class[span->size_class].cache = span;
-  } else {
+  } وگرنه {
     _rpmalloc_span_unmap(span);
   }
 }
 
 //! Initialize a (partial) free list up to next system memory page, while
 //! reserving the first block as allocated, returning number of blocks in list
-static uint32_t free_list_partial_init(void **list, void **first_block,
-                                       void *page_start, void *block_start,
-                                       uint32_t block_count,
+ایستا uint32_t free_list_partial_init(تهی **list, تهی **first_block,
+                                       تهی *page_start, تهی *block_start,
+                                       uint32_t block_شمار,
                                        uint32_t block_size) {
-  rpmalloc_assert(block_count, "Internal failure");
+  rpmalloc_assert(block_شمار, "Internal failure");
   *first_block = block_start;
-  if (block_count > 1) {
-    void *free_block = pointer_offset(block_start, block_size);
-    void *block_end =
-        pointer_offset(block_start, (size_t)block_size * block_count);
+  اگر (block_شمار > 1) {
+    تهی *free_block = pointer_offset(block_start, block_size);
+    تهی *block_end =
+        pointer_offset(block_start, (size_t)block_size * block_شمار);
     // If block size is less than half a memory page, bound init to next memory
     // page boundary
-    if (block_size < (_memory_page_size >> 1)) {
-      void *page_end = pointer_offset(page_start, _memory_page_size);
-      if (page_end < block_end)
+    اگر (block_size < (_memory_page_size >> 1)) {
+      تهی *page_end = pointer_offset(page_start, _memory_page_size);
+      اگر (page_end < block_end)
         block_end = page_end;
     }
     *list = free_block;
-    block_count = 2;
-    void *next_block = pointer_offset(free_block, block_size);
-    while (next_block < block_end) {
-      *((void **)free_block) = next_block;
+    block_شمار = 2;
+    تهی *next_block = pointer_offset(free_block, block_size);
+    وقتی (next_block < block_end) {
+      *((تهی **)free_block) = next_block;
       free_block = next_block;
-      ++block_count;
+      ++block_شمار;
       next_block = pointer_offset(next_block, block_size);
     }
-    *((void **)free_block) = 0;
-  } else {
+    *((تهی **)free_block) = 0;
+  } وگرنه {
     *list = 0;
   }
-  return block_count;
+  بازگشت block_شمار;
 }
 
 //! Initialize an unused span (from cache or mapped) to be new active span,
 //! putting the initial free list in heap class free list
-static void *_rpmalloc_span_initialize_new(heap_t *heap,
+ایستا تهی *_rpmalloc_span_initialize_new(heap_t *heap,
                                            heap_size_class_t *heap_size_class,
                                            span_t *span, uint32_t class_idx) {
-  rpmalloc_assert(span->span_count == 1, "Internal failure");
+  rpmalloc_assert(span->span_شمار == 1, "Internal failure");
   size_class_t *size_class = _memory_size_class + class_idx;
   span->size_class = class_idx;
   span->heap = heap;
   span->flags &= ~SPAN_FLAG_ALIGNED_BLOCKS;
   span->block_size = size_class->block_size;
-  span->block_count = size_class->block_count;
+  span->block_شمار = size_class->block_شمار;
   span->free_list = 0;
   span->list_size = 0;
   atomic_store_ptr_release(&span->free_list_deferred, 0);
 
   // Setup free list. Only initialize one system page worth of free blocks in
   // list
-  void *block;
+  تهی *block;
   span->free_list_limit =
       free_list_partial_init(&heap_size_class->free_list, &block, span,
                              pointer_offset(span, SPAN_HEADER_SIZE),
-                             size_class->block_count, size_class->block_size);
+                             size_class->block_شمار, size_class->block_size);
   // Link span as partial if there remains blocks to be initialized as free
   // list, or full if fully initialized
-  if (span->free_list_limit < span->block_count) {
+  اگر (span->free_list_limit < span->block_شمار) {
     _rpmalloc_span_double_link_list_add(&heap_size_class->partial_span, span);
-    span->used_count = span->free_list_limit;
-  } else {
-#if RPMALLOC_FIRST_CLASS_HEAPS
+    span->used_شمار = span->free_list_limit;
+  } وگرنه {
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
     _rpmalloc_span_double_link_list_add(&heap->full_span[class_idx], span);
 #endif
-    ++heap->full_span_count;
-    span->used_count = span->block_count;
+    ++heap->full_span_شمار;
+    span->used_شمار = span->block_شمار;
   }
-  return block;
+  بازگشت block;
 }
 
-static void _rpmalloc_span_extract_free_list_deferred(span_t *span) {
+ایستا تهی _rpmalloc_span_extract_free_list_deferred(span_t *span) {
   // We need acquire semantics on the CAS operation since we are interested in
   // the list size Refer to _rpmalloc_deallocate_defer_small_or_medium for
   // further comments on this dependency
-  do {
+  انجامبده {
     span->free_list =
         atomic_exchange_ptr_acquire(&span->free_list_deferred, INVALID_POINTER);
-  } while (span->free_list == INVALID_POINTER);
-  span->used_count -= span->list_size;
+  } وقتی (span->free_list == INVALID_POINTER);
+  span->used_شمار -= span->list_size;
   span->list_size = 0;
   atomic_store_ptr_release(&span->free_list_deferred, 0);
 }
 
-static int _rpmalloc_span_is_fully_utilized(span_t *span) {
-  rpmalloc_assert(span->free_list_limit <= span->block_count,
+ایستا صحیح _rpmalloc_span_is_fully_utilized(span_t *span) {
+  rpmalloc_assert(span->free_list_limit <= span->block_شمار,
                   "Span free list corrupted");
-  return !span->free_list && (span->free_list_limit >= span->block_count);
+  بازگشت !span->free_list && (span->free_list_limit >= span->block_شمار);
 }
 
-static int _rpmalloc_span_finalize(heap_t *heap, size_t iclass, span_t *span,
+ایستا صحیح _rpmalloc_span_finalize(heap_t *heap, size_t iclass, span_t *span,
                                    span_t **list_head) {
-  void *free_list = heap->size_class[iclass].free_list;
+  تهی *free_list = heap->size_class[iclass].free_list;
   span_t *class_span = (span_t *)((uintptr_t)free_list & _memory_span_mask);
-  if (span == class_span) {
+  اگر (span == class_span) {
     // Adopt the heap class free list back into the span free list
-    void *block = span->free_list;
-    void *last_block = 0;
-    while (block) {
+    تهی *block = span->free_list;
+    تهی *last_block = 0;
+    وقتی (block) {
       last_block = block;
-      block = *((void **)block);
+      block = *((تهی **)block);
     }
-    uint32_t free_count = 0;
+    uint32_t free_شمار = 0;
     block = free_list;
-    while (block) {
-      ++free_count;
-      block = *((void **)block);
+    وقتی (block) {
+      ++free_شمار;
+      block = *((تهی **)block);
     }
-    if (last_block) {
-      *((void **)last_block) = free_list;
-    } else {
+    اگر (last_block) {
+      *((تهی **)last_block) = free_list;
+    } وگرنه {
       span->free_list = free_list;
     }
     heap->size_class[iclass].free_list = 0;
-    span->used_count -= free_count;
+    span->used_شمار -= free_شمار;
   }
   // If this assert triggers you have memory leaks
-  rpmalloc_assert(span->list_size == span->used_count, "Memory leak detected");
-  if (span->list_size == span->used_count) {
+  rpmalloc_assert(span->list_size == span->used_شمار, "Memory leak detected");
+  اگر (span->list_size == span->used_شمار) {
     _rpmalloc_stat_dec(&heap->span_use[0].current);
     _rpmalloc_stat_dec(&heap->size_class_use[iclass].spans_current);
     // This function only used for spans in double linked lists
-    if (list_head)
+    اگر (list_head)
       _rpmalloc_span_double_link_list_remove(list_head, span);
     _rpmalloc_span_unmap(span);
-    return 1;
+    بازگشت 1;
   }
-  return 0;
+  بازگشت 0;
 }
 
 ////////////
@@ -1665,18 +1665,18 @@ static int _rpmalloc_span_finalize(heap_t *heap, size_t iclass, span_t *span,
 ///
 //////
 
-#if ENABLE_GLOBAL_CACHE
+#اگر ENABLE_GLOBAL_CACHE
 
 //! Finalize a global cache
-static void _rpmalloc_global_cache_finalize(global_cache_t *cache) {
-  while (!atomic_cas32_acquire(&cache->lock, 1, 0))
+ایستا تهی _rpmalloc_global_cache_finalize(global_cache_t *cache) {
+  وقتی (!atomic_cas32_acquire(&cache->lock, 1, 0))
     _rpmalloc_spin();
 
-  for (size_t ispan = 0; ispan < cache->count; ++ispan)
+  برای (size_t ispan = 0; ispan < cache->شمار; ++ispan)
     _rpmalloc_span_unmap(cache->span[ispan]);
-  cache->count = 0;
+  cache->شمار = 0;
 
-  while (cache->overflow) {
+  وقتی (cache->overflow) {
     span_t *span = cache->overflow;
     cache->overflow = span->next;
     _rpmalloc_span_unmap(span);
@@ -1685,82 +1685,82 @@ static void _rpmalloc_global_cache_finalize(global_cache_t *cache) {
   atomic_store32_release(&cache->lock, 0);
 }
 
-static void _rpmalloc_global_cache_insert_spans(span_t **span,
-                                                size_t span_count,
-                                                size_t count) {
-  const size_t cache_limit =
-      (span_count == 1) ? GLOBAL_CACHE_MULTIPLIER * MAX_THREAD_SPAN_CACHE
+ایستا تهی rpmalloc_global_cache_درج_spans(span_t **span,
+                                                size_t span_شمار,
+                                                size_t شمار) {
+  ثابت size_t cache_limit =
+      (span_شمار == 1) ? GLOBAL_CACHE_MULTIPLIER * MAX_THREAD_SPAN_CACHE
                         : GLOBAL_CACHE_MULTIPLIER *
-                              (MAX_THREAD_SPAN_LARGE_CACHE - (span_count >> 1));
+                              (MAX_THREAD_SPAN_LARGE_CACHE - (span_شمار >> 1));
 
-  global_cache_t *cache = &_memory_span_cache[span_count - 1];
+  global_cache_t *cache = &_memory_span_cache[span_شمار - 1];
 
-  size_t insert_count = count;
-  while (!atomic_cas32_acquire(&cache->lock, 1, 0))
+  size_t درج_شمار = شمار;
+  وقتی (!atomic_cas32_acquire(&cache->lock, 1, 0))
     _rpmalloc_spin();
 
-#if ENABLE_STATISTICS
-  cache->insert_count += count;
+#اگر ENABLE_STATISTICS
+  cache->درج_شمار += شمار;
 #endif
-  if ((cache->count + insert_count) > cache_limit)
-    insert_count = cache_limit - cache->count;
+  اگر ((cache->شمار + درج_شمار) > cache_limit)
+    درج_شمار = cache_limit - cache->شمار;
 
-  memcpy(cache->span + cache->count, span, sizeof(span_t *) * insert_count);
-  cache->count += (uint32_t)insert_count;
+  memcpy(cache->span + cache->شمار, span, اندازه(span_t *) * درج_شمار);
+  cache->شمار += (uint32_t)درج_شمار;
 
-#if ENABLE_UNLIMITED_CACHE
-  while (insert_count < count) {
-#else
+#اگر ENABLE_UNLIMITED_CACHE
+  وقتی (درج_شمار < شمار) {
+#وگرنه
   // Enable unlimited cache if huge pages, or we will leak since it is unlikely
   // that an entire huge page will be unmapped, and we're unable to partially
   // decommit a huge page
-  while ((_memory_page_size > _memory_span_size) && (insert_count < count)) {
+  وقتی ((_memory_page_size > _memory_span_size) && (درج_شمار < شمار)) {
 #endif
-    span_t *current_span = span[insert_count++];
+    span_t *current_span = span[درج_شمار++];
     current_span->next = cache->overflow;
     cache->overflow = current_span;
   }
   atomic_store32_release(&cache->lock, 0);
 
   span_t *keep = 0;
-  for (size_t ispan = insert_count; ispan < count; ++ispan) {
+  برای (size_t ispan = درج_شمار; ispan < شمار; ++ispan) {
     span_t *current_span = span[ispan];
     // Keep master spans that has remaining subspans to avoid dangling them
-    if ((current_span->flags & SPAN_FLAG_MASTER) &&
+    اگر ((current_span->flags & SPAN_FLAG_MASTER) &&
         (atomic_load32(&current_span->remaining_spans) >
-         (int32_t)current_span->span_count)) {
+         (int32_t)current_span->span_شمار)) {
       current_span->next = keep;
       keep = current_span;
-    } else {
+    } وگرنه {
       _rpmalloc_span_unmap(current_span);
     }
   }
 
-  if (keep) {
-    while (!atomic_cas32_acquire(&cache->lock, 1, 0))
+  اگر (keep) {
+    وقتی (!atomic_cas32_acquire(&cache->lock, 1, 0))
       _rpmalloc_spin();
 
     size_t islot = 0;
-    while (keep) {
-      for (; islot < cache->count; ++islot) {
+    وقتی (keep) {
+      برای (; islot < cache->شمار; ++islot) {
         span_t *current_span = cache->span[islot];
-        if (!(current_span->flags & SPAN_FLAG_MASTER) ||
+        اگر (!(current_span->flags & SPAN_FLAG_MASTER) ||
             ((current_span->flags & SPAN_FLAG_MASTER) &&
              (atomic_load32(&current_span->remaining_spans) <=
-              (int32_t)current_span->span_count))) {
+              (int32_t)current_span->span_شمار))) {
           _rpmalloc_span_unmap(current_span);
           cache->span[islot] = keep;
-          break;
+          بشکن;
         }
       }
-      if (islot == cache->count)
-        break;
+      اگر (islot == cache->شمار)
+        بشکن;
       keep = keep->next;
     }
 
-    if (keep) {
+    اگر (keep) {
       span_t *tail = keep;
-      while (tail->next)
+      وقتی (tail->next)
         tail = tail->next;
       tail->next = cache->overflow;
       cache->overflow = keep;
@@ -1770,43 +1770,43 @@ static void _rpmalloc_global_cache_insert_spans(span_t **span,
   }
 }
 
-static size_t _rpmalloc_global_cache_extract_spans(span_t **span,
-                                                   size_t span_count,
-                                                   size_t count) {
-  global_cache_t *cache = &_memory_span_cache[span_count - 1];
+ایستا size_t _rpmalloc_global_cache_extract_spans(span_t **span,
+                                                   size_t span_شمار,
+                                                   size_t شمار) {
+  global_cache_t *cache = &_memory_span_cache[span_شمار - 1];
 
-  size_t extract_count = 0;
-  while (!atomic_cas32_acquire(&cache->lock, 1, 0))
+  size_t extract_شمار = 0;
+  وقتی (!atomic_cas32_acquire(&cache->lock, 1, 0))
     _rpmalloc_spin();
 
-#if ENABLE_STATISTICS
-  cache->extract_count += count;
+#اگر ENABLE_STATISTICS
+  cache->extract_شمار += شمار;
 #endif
-  size_t want = count - extract_count;
-  if (want > cache->count)
-    want = cache->count;
+  size_t want = شمار - extract_شمار;
+  اگر (want > cache->شمار)
+    want = cache->شمار;
 
-  memcpy(span + extract_count, cache->span + (cache->count - want),
-         sizeof(span_t *) * want);
-  cache->count -= (uint32_t)want;
-  extract_count += want;
+  memcpy(span + extract_شمار, cache->span + (cache->شمار - want),
+         اندازه(span_t *) * want);
+  cache->شمار -= (uint32_t)want;
+  extract_شمار += want;
 
-  while ((extract_count < count) && cache->overflow) {
+  وقتی ((extract_شمار < شمار) && cache->overflow) {
     span_t *current_span = cache->overflow;
-    span[extract_count++] = current_span;
+    span[extract_شمار++] = current_span;
     cache->overflow = current_span->next;
   }
 
-#if ENABLE_ASSERTS
-  for (size_t ispan = 0; ispan < extract_count; ++ispan) {
-    rpmalloc_assert(span[ispan]->span_count == span_count,
+#اگر ENABLE_ASSERTS
+  برای (size_t ispan = 0; ispan < extract_شمار; ++ispan) {
+    rpmalloc_assert(span[ispan]->span_شمار == span_شمار,
                     "Global cache span count mismatch");
   }
 #endif
 
   atomic_store32_release(&cache->lock, 0);
 
-  return extract_count;
+  بازگشت extract_شمار;
 }
 
 #endif
@@ -1817,117 +1817,117 @@ static size_t _rpmalloc_global_cache_extract_spans(span_t **span,
 ///
 //////
 
-static void _rpmalloc_deallocate_huge(span_t *);
+ایستا تهی _rpmalloc_deallocate_huge(span_t *);
 
 //! Store the given spans as reserve in the given heap
-static void _rpmalloc_heap_set_reserved_spans(heap_t *heap, span_t *master,
+ایستا تهی _rpmalloc_heap_set_reserved_spans(heap_t *heap, span_t *master,
                                               span_t *reserve,
-                                              size_t reserve_span_count) {
+                                              size_t reserve_span_شمار) {
   heap->span_reserve_master = master;
   heap->span_reserve = reserve;
-  heap->spans_reserved = (uint32_t)reserve_span_count;
+  heap->spans_reserved = (uint32_t)reserve_span_شمار;
 }
 
 //! Adopt the deferred span cache list, optionally extracting the first single
 //! span for immediate re-use
-static void _rpmalloc_heap_cache_adopt_deferred(heap_t *heap,
+ایستا تهی _rpmalloc_heap_cache_adopt_deferred(heap_t *heap,
                                                 span_t **single_span) {
-  span_t *span = (span_t *)((void *)atomic_exchange_ptr_acquire(
+  span_t *span = (span_t *)((تهی *)atomic_exchange_ptr_acquire(
       &heap->span_free_deferred, 0));
-  while (span) {
+  وقتی (span) {
     span_t *next_span = (span_t *)span->free_list;
     rpmalloc_assert(span->heap == heap, "Span heap pointer corrupted");
-    if (EXPECTED(span->size_class < SIZE_CLASS_COUNT)) {
-      rpmalloc_assert(heap->full_span_count, "Heap span counter corrupted");
-      --heap->full_span_count;
+    اگر (EXPECTED(span->size_class < SIZE_CLASS_شمار)) {
+      rpmalloc_assert(heap->full_span_شمار, "Heap span counter corrupted");
+      --heap->full_span_شمار;
       _rpmalloc_stat_dec(&heap->span_use[0].spans_deferred);
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
       _rpmalloc_span_double_link_list_remove(&heap->full_span[span->size_class],
                                              span);
 #endif
       _rpmalloc_stat_dec(&heap->span_use[0].current);
       _rpmalloc_stat_dec(&heap->size_class_use[span->size_class].spans_current);
-      if (single_span && !*single_span)
+      اگر (single_span && !*single_span)
         *single_span = span;
-      else
-        _rpmalloc_heap_cache_insert(heap, span);
-    } else {
-      if (span->size_class == SIZE_CLASS_HUGE) {
+      وگرنه
+        rpmalloc_heap_cache_درج(heap, span);
+    } وگرنه {
+      اگر (span->size_class == SIZE_CLASS_HUGE) {
         _rpmalloc_deallocate_huge(span);
-      } else {
+      } وگرنه {
         rpmalloc_assert(span->size_class == SIZE_CLASS_LARGE,
                         "Span size class invalid");
-        rpmalloc_assert(heap->full_span_count, "Heap span counter corrupted");
-        --heap->full_span_count;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+        rpmalloc_assert(heap->full_span_شمار, "Heap span counter corrupted");
+        --heap->full_span_شمار;
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
         _rpmalloc_span_double_link_list_remove(&heap->large_huge_span, span);
 #endif
-        uint32_t idx = span->span_count - 1;
+        uint32_t idx = span->span_شمار - 1;
         _rpmalloc_stat_dec(&heap->span_use[idx].spans_deferred);
         _rpmalloc_stat_dec(&heap->span_use[idx].current);
-        if (!idx && single_span && !*single_span)
+        اگر (!idx && single_span && !*single_span)
           *single_span = span;
-        else
-          _rpmalloc_heap_cache_insert(heap, span);
+        وگرنه
+          rpmalloc_heap_cache_درج(heap, span);
       }
     }
     span = next_span;
   }
 }
 
-static void _rpmalloc_heap_unmap(heap_t *heap) {
-  if (!heap->master_heap) {
-    if ((heap->finalize > 1) && !atomic_load32(&heap->child_count)) {
+ایستا تهی _rpmalloc_heap_unmap(heap_t *heap) {
+  اگر (!heap->master_heap) {
+    اگر ((heap->finalize > 1) && !atomic_load32(&heap->child_شمار)) {
       span_t *span = (span_t *)((uintptr_t)heap & _memory_span_mask);
       _rpmalloc_span_unmap(span);
     }
-  } else {
-    if (atomic_decr32(&heap->master_heap->child_count) == 0) {
+  } وگرنه {
+    اگر (atomic_decr32(&heap->master_heap->child_شمار) == 0) {
       _rpmalloc_heap_unmap(heap->master_heap);
     }
   }
 }
 
-static void _rpmalloc_heap_global_finalize(heap_t *heap) {
-  if (heap->finalize++ > 1) {
+ایستا تهی _rpmalloc_heap_global_finalize(heap_t *heap) {
+  اگر (heap->finalize++ > 1) {
     --heap->finalize;
-    return;
+    بازگشت;
   }
 
   _rpmalloc_heap_finalize(heap);
 
-#if ENABLE_THREAD_CACHE
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+#اگر ENABLE_THREAD_CACHE
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     span_cache_t *span_cache;
-    if (!iclass)
+    اگر (!iclass)
       span_cache = &heap->span_cache;
-    else
+    وگرنه
       span_cache = (span_cache_t *)(heap->span_large_cache + (iclass - 1));
-    for (size_t ispan = 0; ispan < span_cache->count; ++ispan)
+    برای (size_t ispan = 0; ispan < span_cache->شمار; ++ispan)
       _rpmalloc_span_unmap(span_cache->span[ispan]);
-    span_cache->count = 0;
+    span_cache->شمار = 0;
   }
 #endif
 
-  if (heap->full_span_count) {
+  اگر (heap->full_span_شمار) {
     --heap->finalize;
-    return;
+    بازگشت;
   }
 
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
-    if (heap->size_class[iclass].free_list ||
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
+    اگر (heap->size_class[iclass].free_list ||
         heap->size_class[iclass].partial_span) {
       --heap->finalize;
-      return;
+      بازگشت;
     }
   }
   // Heap is now completely free, unmap and remove from heap list
   size_t list_idx = (size_t)heap->id % HEAP_ARRAY_SIZE;
   heap_t *list_heap = _memory_heaps[list_idx];
-  if (list_heap == heap) {
+  اگر (list_heap == heap) {
     _memory_heaps[list_idx] = heap->next_heap;
-  } else {
-    while (list_heap->next_heap != heap)
+  } وگرنه {
+    وقتی (list_heap->next_heap != heap)
       list_heap = list_heap->next_heap;
     list_heap->next_heap = heap->next_heap;
   }
@@ -1937,156 +1937,156 @@ static void _rpmalloc_heap_global_finalize(heap_t *heap) {
 
 //! Insert a single span into thread heap cache, releasing to global cache if
 //! overflow
-static void _rpmalloc_heap_cache_insert(heap_t *heap, span_t *span) {
-  if (UNEXPECTED(heap->finalize != 0)) {
+ایستا تهی rpmalloc_heap_cache_درج(heap_t *heap, span_t *span) {
+  اگر (UNEXPECTED(heap->finalize != 0)) {
     _rpmalloc_span_unmap(span);
     _rpmalloc_heap_global_finalize(heap);
-    return;
+    بازگشت;
   }
-#if ENABLE_THREAD_CACHE
-  size_t span_count = span->span_count;
-  _rpmalloc_stat_inc(&heap->span_use[span_count - 1].spans_to_cache);
-  if (span_count == 1) {
+#اگر ENABLE_THREAD_CACHE
+  size_t span_شمار = span->span_شمار;
+  _rpmalloc_stat_inc(&heap->span_use[span_شمار - 1].spans_to_cache);
+  اگر (span_شمار == 1) {
     span_cache_t *span_cache = &heap->span_cache;
-    span_cache->span[span_cache->count++] = span;
-    if (span_cache->count == MAX_THREAD_SPAN_CACHE) {
-      const size_t remain_count =
+    span_cache->span[span_cache->شمار++] = span;
+    اگر (span_cache->شمار == MAX_THREAD_SPAN_CACHE) {
+      ثابت size_t remain_شمار =
           MAX_THREAD_SPAN_CACHE - THREAD_SPAN_CACHE_TRANSFER;
-#if ENABLE_GLOBAL_CACHE
+#اگر ENABLE_GLOBAL_CACHE
       _rpmalloc_stat_add64(&heap->thread_to_global,
                            THREAD_SPAN_CACHE_TRANSFER * _memory_span_size);
-      _rpmalloc_stat_add(&heap->span_use[span_count - 1].spans_to_global,
+      _rpmalloc_stat_add(&heap->span_use[span_شمار - 1].spans_to_global,
                          THREAD_SPAN_CACHE_TRANSFER);
-      _rpmalloc_global_cache_insert_spans(span_cache->span + remain_count,
-                                          span_count,
+      rpmalloc_global_cache_درج_spans(span_cache->span + remain_شمار,
+                                          span_شمار,
                                           THREAD_SPAN_CACHE_TRANSFER);
-#else
-      for (size_t ispan = 0; ispan < THREAD_SPAN_CACHE_TRANSFER; ++ispan)
-        _rpmalloc_span_unmap(span_cache->span[remain_count + ispan]);
+#وگرنه
+      برای (size_t ispan = 0; ispan < THREAD_SPAN_CACHE_TRANSFER; ++ispan)
+        _rpmalloc_span_unmap(span_cache->span[remain_شمار + ispan]);
 #endif
-      span_cache->count = remain_count;
+      span_cache->شمار = remain_شمار;
     }
-  } else {
-    size_t cache_idx = span_count - 2;
+  } وگرنه {
+    size_t cache_idx = span_شمار - 2;
     span_large_cache_t *span_cache = heap->span_large_cache + cache_idx;
-    span_cache->span[span_cache->count++] = span;
-    const size_t cache_limit =
-        (MAX_THREAD_SPAN_LARGE_CACHE - (span_count >> 1));
-    if (span_cache->count == cache_limit) {
-      const size_t transfer_limit = 2 + (cache_limit >> 2);
-      const size_t transfer_count =
+    span_cache->span[span_cache->شمار++] = span;
+    ثابت size_t cache_limit =
+        (MAX_THREAD_SPAN_LARGE_CACHE - (span_شمار >> 1));
+    اگر (span_cache->شمار == cache_limit) {
+      ثابت size_t transfer_limit = 2 + (cache_limit >> 2);
+      ثابت size_t transfer_شمار =
           (THREAD_SPAN_LARGE_CACHE_TRANSFER <= transfer_limit
                ? THREAD_SPAN_LARGE_CACHE_TRANSFER
                : transfer_limit);
-      const size_t remain_count = cache_limit - transfer_count;
-#if ENABLE_GLOBAL_CACHE
+      ثابت size_t remain_شمار = cache_limit - transfer_شمار;
+#اگر ENABLE_GLOBAL_CACHE
       _rpmalloc_stat_add64(&heap->thread_to_global,
-                           transfer_count * span_count * _memory_span_size);
-      _rpmalloc_stat_add(&heap->span_use[span_count - 1].spans_to_global,
-                         transfer_count);
-      _rpmalloc_global_cache_insert_spans(span_cache->span + remain_count,
-                                          span_count, transfer_count);
-#else
-      for (size_t ispan = 0; ispan < transfer_count; ++ispan)
-        _rpmalloc_span_unmap(span_cache->span[remain_count + ispan]);
+                           transfer_شمار * span_شمار * _memory_span_size);
+      _rpmalloc_stat_add(&heap->span_use[span_شمار - 1].spans_to_global,
+                         transfer_شمار);
+      rpmalloc_global_cache_درج_spans(span_cache->span + remain_شمار,
+                                          span_شمار, transfer_شمار);
+#وگرنه
+      برای (size_t ispan = 0; ispan < transfer_شمار; ++ispan)
+        _rpmalloc_span_unmap(span_cache->span[remain_شمار + ispan]);
 #endif
-      span_cache->count = remain_count;
+      span_cache->شمار = remain_شمار;
     }
   }
-#else
-  (void)sizeof(heap);
+#وگرنه
+  (تهی)اندازه(heap);
   _rpmalloc_span_unmap(span);
 #endif
 }
 
 //! Extract the given number of spans from the different cache levels
-static span_t *_rpmalloc_heap_thread_cache_extract(heap_t *heap,
-                                                   size_t span_count) {
+ایستا span_t *_rpmalloc_heap_thread_cache_extract(heap_t *heap,
+                                                   size_t span_شمار) {
   span_t *span = 0;
-#if ENABLE_THREAD_CACHE
+#اگر ENABLE_THREAD_CACHE
   span_cache_t *span_cache;
-  if (span_count == 1)
+  اگر (span_شمار == 1)
     span_cache = &heap->span_cache;
-  else
-    span_cache = (span_cache_t *)(heap->span_large_cache + (span_count - 2));
-  if (span_cache->count) {
-    _rpmalloc_stat_inc(&heap->span_use[span_count - 1].spans_from_cache);
-    return span_cache->span[--span_cache->count];
+  وگرنه
+    span_cache = (span_cache_t *)(heap->span_large_cache + (span_شمار - 2));
+  اگر (span_cache->شمار) {
+    _rpmalloc_stat_inc(&heap->span_use[span_شمار - 1].spans_from_cache);
+    بازگشت span_cache->span[--span_cache->شمار];
   }
 #endif
-  return span;
+  بازگشت span;
 }
 
-static span_t *_rpmalloc_heap_thread_cache_deferred_extract(heap_t *heap,
-                                                            size_t span_count) {
+ایستا span_t *_rpmalloc_heap_thread_cache_deferred_extract(heap_t *heap,
+                                                            size_t span_شمار) {
   span_t *span = 0;
-  if (span_count == 1) {
+  اگر (span_شمار == 1) {
     _rpmalloc_heap_cache_adopt_deferred(heap, &span);
-  } else {
+  } وگرنه {
     _rpmalloc_heap_cache_adopt_deferred(heap, 0);
-    span = _rpmalloc_heap_thread_cache_extract(heap, span_count);
+    span = _rpmalloc_heap_thread_cache_extract(heap, span_شمار);
   }
-  return span;
+  بازگشت span;
 }
 
-static span_t *_rpmalloc_heap_reserved_extract(heap_t *heap,
-                                               size_t span_count) {
-  if (heap->spans_reserved >= span_count)
-    return _rpmalloc_span_map(heap, span_count);
-  return 0;
+ایستا span_t *_rpmalloc_heap_reserved_extract(heap_t *heap,
+                                               size_t span_شمار) {
+  اگر (heap->spans_reserved >= span_شمار)
+    بازگشت _rpmalloc_span_map(heap, span_شمار);
+  بازگشت 0;
 }
 
 //! Extract a span from the global cache
-static span_t *_rpmalloc_heap_global_cache_extract(heap_t *heap,
-                                                   size_t span_count) {
-#if ENABLE_GLOBAL_CACHE
-#if ENABLE_THREAD_CACHE
+ایستا span_t *_rpmalloc_heap_global_cache_extract(heap_t *heap,
+                                                   size_t span_شمار) {
+#اگر ENABLE_GLOBAL_CACHE
+#اگر ENABLE_THREAD_CACHE
   span_cache_t *span_cache;
-  size_t wanted_count;
-  if (span_count == 1) {
+  size_t wanted_شمار;
+  اگر (span_شمار == 1) {
     span_cache = &heap->span_cache;
-    wanted_count = THREAD_SPAN_CACHE_TRANSFER;
-  } else {
-    span_cache = (span_cache_t *)(heap->span_large_cache + (span_count - 2));
-    wanted_count = THREAD_SPAN_LARGE_CACHE_TRANSFER;
+    wanted_شمار = THREAD_SPAN_CACHE_TRANSFER;
+  } وگرنه {
+    span_cache = (span_cache_t *)(heap->span_large_cache + (span_شمار - 2));
+    wanted_شمار = THREAD_SPAN_LARGE_CACHE_TRANSFER;
   }
-  span_cache->count = _rpmalloc_global_cache_extract_spans(
-      span_cache->span, span_count, wanted_count);
-  if (span_cache->count) {
+  span_cache->شمار = _rpmalloc_global_cache_extract_spans(
+      span_cache->span, span_شمار, wanted_شمار);
+  اگر (span_cache->شمار) {
     _rpmalloc_stat_add64(&heap->global_to_thread,
-                         span_count * span_cache->count * _memory_span_size);
-    _rpmalloc_stat_add(&heap->span_use[span_count - 1].spans_from_global,
-                       span_cache->count);
-    return span_cache->span[--span_cache->count];
+                         span_شمار * span_cache->شمار * _memory_span_size);
+    _rpmalloc_stat_add(&heap->span_use[span_شمار - 1].spans_from_global,
+                       span_cache->شمار);
+    بازگشت span_cache->span[--span_cache->شمار];
   }
-#else
+#وگرنه
   span_t *span = 0;
-  size_t count = _rpmalloc_global_cache_extract_spans(&span, span_count, 1);
-  if (count) {
+  size_t شمار = _rpmalloc_global_cache_extract_spans(&span, span_شمار, 1);
+  اگر (شمار) {
     _rpmalloc_stat_add64(&heap->global_to_thread,
-                         span_count * count * _memory_span_size);
-    _rpmalloc_stat_add(&heap->span_use[span_count - 1].spans_from_global,
-                       count);
-    return span;
+                         span_شمار * شمار * _memory_span_size);
+    _rpmalloc_stat_add(&heap->span_use[span_شمار - 1].spans_from_global,
+                       شمار);
+    بازگشت span;
   }
 #endif
 #endif
-  (void)sizeof(heap);
-  (void)sizeof(span_count);
-  return 0;
+  (تهی)اندازه(heap);
+  (تهی)اندازه(span_شمار);
+  بازگشت 0;
 }
 
-static void _rpmalloc_inc_span_statistics(heap_t *heap, size_t span_count,
+ایستا تهی _rpmalloc_inc_span_statistics(heap_t *heap, size_t span_شمار,
                                           uint32_t class_idx) {
-  (void)sizeof(heap);
-  (void)sizeof(span_count);
-  (void)sizeof(class_idx);
-#if ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
-  uint32_t idx = (uint32_t)span_count - 1;
-  uint32_t current_count =
+  (تهی)اندازه(heap);
+  (تهی)اندازه(span_شمار);
+  (تهی)اندازه(class_idx);
+#اگر ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
+  uint32_t idx = (uint32_t)span_شمار - 1;
+  uint32_t current_شمار =
       (uint32_t)atomic_incr32(&heap->span_use[idx].current);
-  if (current_count > (uint32_t)atomic_load32(&heap->span_use[idx].high))
-    atomic_store32(&heap->span_use[idx].high, (int32_t)current_count);
+  اگر (current_شمار > (uint32_t)atomic_load32(&heap->span_use[idx].بالا))
+    atomic_store32(&heap->span_use[idx].بالا, (int32_t)current_شمار);
   _rpmalloc_stat_add_peak(&heap->size_class_use[class_idx].spans_current, 1,
                           heap->size_class_use[class_idx].spans_peak);
 #endif
@@ -2094,65 +2094,65 @@ static void _rpmalloc_inc_span_statistics(heap_t *heap, size_t span_count,
 
 //! Get a span from one of the cache levels (thread cache, reserved, global
 //! cache) or fallback to mapping more memory
-static span_t *
+ایستا span_t *
 _rpmalloc_heap_extract_new_span(heap_t *heap,
                                 heap_size_class_t *heap_size_class,
-                                size_t span_count, uint32_t class_idx) {
+                                size_t span_شمار, uint32_t class_idx) {
   span_t *span;
-#if ENABLE_THREAD_CACHE
-  if (heap_size_class && heap_size_class->cache) {
+#اگر ENABLE_THREAD_CACHE
+  اگر (heap_size_class && heap_size_class->cache) {
     span = heap_size_class->cache;
     heap_size_class->cache =
-        (heap->span_cache.count
-             ? heap->span_cache.span[--heap->span_cache.count]
+        (heap->span_cache.شمار
+             ? heap->span_cache.span[--heap->span_cache.شمار]
              : 0);
-    _rpmalloc_inc_span_statistics(heap, span_count, class_idx);
-    return span;
+    _rpmalloc_inc_span_statistics(heap, span_شمار, class_idx);
+    بازگشت span;
   }
 #endif
-  (void)sizeof(class_idx);
+  (تهی)اندازه(class_idx);
   // Allow 50% overhead to increase cache hits
-  size_t base_span_count = span_count;
-  size_t limit_span_count =
-      (span_count > 2) ? (span_count + (span_count >> 1)) : span_count;
-  if (limit_span_count > LARGE_CLASS_COUNT)
-    limit_span_count = LARGE_CLASS_COUNT;
-  do {
-    span = _rpmalloc_heap_thread_cache_extract(heap, span_count);
-    if (EXPECTED(span != 0)) {
+  size_t base_span_شمار = span_شمار;
+  size_t limit_span_شمار =
+      (span_شمار > 2) ? (span_شمار + (span_شمار >> 1)) : span_شمار;
+  اگر (limit_span_شمار > LARGE_CLASS_شمار)
+    limit_span_شمار = LARGE_CLASS_شمار;
+  انجامبده {
+    span = _rpmalloc_heap_thread_cache_extract(heap, span_شمار);
+    اگر (EXPECTED(span != 0)) {
       _rpmalloc_stat_inc(&heap->size_class_use[class_idx].spans_from_cache);
-      _rpmalloc_inc_span_statistics(heap, span_count, class_idx);
-      return span;
+      _rpmalloc_inc_span_statistics(heap, span_شمار, class_idx);
+      بازگشت span;
     }
-    span = _rpmalloc_heap_thread_cache_deferred_extract(heap, span_count);
-    if (EXPECTED(span != 0)) {
+    span = _rpmalloc_heap_thread_cache_deferred_extract(heap, span_شمار);
+    اگر (EXPECTED(span != 0)) {
       _rpmalloc_stat_inc(&heap->size_class_use[class_idx].spans_from_cache);
-      _rpmalloc_inc_span_statistics(heap, span_count, class_idx);
-      return span;
+      _rpmalloc_inc_span_statistics(heap, span_شمار, class_idx);
+      بازگشت span;
     }
-    span = _rpmalloc_heap_global_cache_extract(heap, span_count);
-    if (EXPECTED(span != 0)) {
+    span = _rpmalloc_heap_global_cache_extract(heap, span_شمار);
+    اگر (EXPECTED(span != 0)) {
       _rpmalloc_stat_inc(&heap->size_class_use[class_idx].spans_from_cache);
-      _rpmalloc_inc_span_statistics(heap, span_count, class_idx);
-      return span;
+      _rpmalloc_inc_span_statistics(heap, span_شمار, class_idx);
+      بازگشت span;
     }
-    span = _rpmalloc_heap_reserved_extract(heap, span_count);
-    if (EXPECTED(span != 0)) {
+    span = _rpmalloc_heap_reserved_extract(heap, span_شمار);
+    اگر (EXPECTED(span != 0)) {
       _rpmalloc_stat_inc(&heap->size_class_use[class_idx].spans_from_reserved);
-      _rpmalloc_inc_span_statistics(heap, span_count, class_idx);
-      return span;
+      _rpmalloc_inc_span_statistics(heap, span_شمار, class_idx);
+      بازگشت span;
     }
-    ++span_count;
-  } while (span_count <= limit_span_count);
+    ++span_شمار;
+  } وقتی (span_شمار <= limit_span_شمار);
   // Final fallback, map in more virtual memory
-  span = _rpmalloc_span_map(heap, base_span_count);
-  _rpmalloc_inc_span_statistics(heap, base_span_count, class_idx);
+  span = _rpmalloc_span_map(heap, base_span_شمار);
+  _rpmalloc_inc_span_statistics(heap, base_span_شمار, class_idx);
   _rpmalloc_stat_inc(&heap->size_class_use[class_idx].spans_map_calls);
-  return span;
+  بازگشت span;
 }
 
-static void _rpmalloc_heap_initialize(heap_t *heap) {
-  _rpmalloc_memset_const(heap, 0, sizeof(heap_t));
+ایستا تهی _rpmalloc_heap_initialize(heap_t *heap) {
+  _rpmalloc_memset_const(heap, 0, اندازه(heap_t));
   // Get a new heap ID
   heap->id = 1 + atomic_incr32(&_memory_heap_id);
 
@@ -2162,13 +2162,13 @@ static void _rpmalloc_heap_initialize(heap_t *heap) {
   _memory_heaps[list_idx] = heap;
 }
 
-static void _rpmalloc_heap_orphan(heap_t *heap, int first_class) {
+ایستا تهی _rpmalloc_heap_orphan(heap_t *heap, صحیح first_class) {
   heap->owner_thread = (uintptr_t)-1;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   heap_t **heap_list =
       (first_class ? &_memory_first_class_orphan_heaps : &_memory_orphan_heaps);
-#else
-  (void)sizeof(first_class);
+#وگرنه
+  (تهی)اندازه(first_class);
   heap_t **heap_list = &_memory_orphan_heaps;
 #endif
   heap->next_orphan = *heap_list;
@@ -2176,159 +2176,159 @@ static void _rpmalloc_heap_orphan(heap_t *heap, int first_class) {
 }
 
 //! Allocate a new heap from newly mapped memory pages
-static heap_t *_rpmalloc_heap_allocate_new(void) {
+ایستا heap_t *_rpmalloc_heap_allocate_new(تهی) {
   // Map in pages for a 16 heaps. If page size is greater than required size for
   // this, map a page and use first part for heaps and remaining part for spans
   // for allocations. Adds a lot of complexity, but saves a lot of memory on
   // systems where page size > 64 spans (4MiB)
-  size_t heap_size = sizeof(heap_t);
+  size_t heap_size = اندازه(heap_t);
   size_t aligned_heap_size = 16 * ((heap_size + 15) / 16);
-  size_t request_heap_count = 16;
-  size_t heap_span_count = ((aligned_heap_size * request_heap_count) +
-                            sizeof(span_t) + _memory_span_size - 1) /
+  size_t request_heap_شمار = 16;
+  size_t heap_span_شمار = ((aligned_heap_size * request_heap_شمار) +
+                            اندازه(span_t) + _memory_span_size - 1) /
                            _memory_span_size;
-  size_t block_size = _memory_span_size * heap_span_count;
-  size_t span_count = heap_span_count;
+  size_t block_size = _memory_span_size * heap_span_شمار;
+  size_t span_شمار = heap_span_شمار;
   span_t *span = 0;
   // If there are global reserved spans, use these first
-  if (_memory_global_reserve_count >= heap_span_count) {
-    span = _rpmalloc_global_get_reserved_spans(heap_span_count);
+  اگر (memory_global_reserve_شمار >= heap_span_شمار) {
+    span = _rpmalloc_global_get_reserved_spans(heap_span_شمار);
   }
-  if (!span) {
-    if (_memory_page_size > block_size) {
-      span_count = _memory_page_size / _memory_span_size;
+  اگر (!span) {
+    اگر (_memory_page_size > block_size) {
+      span_شمار = _memory_page_size / _memory_span_size;
       block_size = _memory_page_size;
       // If using huge pages, make sure to grab enough heaps to avoid
       // reallocating a huge page just to serve new heaps
-      size_t possible_heap_count =
-          (block_size - sizeof(span_t)) / aligned_heap_size;
-      if (possible_heap_count >= (request_heap_count * 16))
-        request_heap_count *= 16;
-      else if (possible_heap_count < request_heap_count)
-        request_heap_count = possible_heap_count;
-      heap_span_count = ((aligned_heap_size * request_heap_count) +
-                         sizeof(span_t) + _memory_span_size - 1) /
+      size_t possible_heap_شمار =
+          (block_size - اندازه(span_t)) / aligned_heap_size;
+      اگر (possible_heap_شمار >= (request_heap_شمار * 16))
+        request_heap_شمار *= 16;
+      وگرنه اگر (possible_heap_شمار < request_heap_شمار)
+        request_heap_شمار = possible_heap_شمار;
+      heap_span_شمار = ((aligned_heap_size * request_heap_شمار) +
+                         اندازه(span_t) + _memory_span_size - 1) /
                         _memory_span_size;
     }
 
     size_t align_offset = 0;
     span = (span_t *)_rpmalloc_mmap(block_size, &align_offset);
-    if (!span)
-      return 0;
+    اگر (!span)
+      بازگشت 0;
 
     // Master span will contain the heaps
     _rpmalloc_stat_inc(&_master_spans);
-    _rpmalloc_span_initialize(span, span_count, heap_span_count, align_offset);
+    _rpmalloc_span_initialize(span, span_شمار, heap_span_شمار, align_offset);
   }
 
-  size_t remain_size = _memory_span_size - sizeof(span_t);
-  heap_t *heap = (heap_t *)pointer_offset(span, sizeof(span_t));
+  size_t remain_size = _memory_span_size - اندازه(span_t);
+  heap_t *heap = (heap_t *)pointer_offset(span, اندازه(span_t));
   _rpmalloc_heap_initialize(heap);
 
   // Put extra heaps as orphans
-  size_t num_heaps = remain_size / aligned_heap_size;
-  if (num_heaps < request_heap_count)
-    num_heaps = request_heap_count;
-  atomic_store32(&heap->child_count, (int32_t)num_heaps - 1);
+  size_t رقم_heaps = remain_size / aligned_heap_size;
+  اگر (رقم_heaps < request_heap_شمار)
+    رقم_heaps = request_heap_شمار;
+  atomic_store32(&heap->child_شمار, (int32_t)رقم_heaps - 1);
   heap_t *extra_heap = (heap_t *)pointer_offset(heap, aligned_heap_size);
-  while (num_heaps > 1) {
+  وقتی (رقم_heaps > 1) {
     _rpmalloc_heap_initialize(extra_heap);
     extra_heap->master_heap = heap;
     _rpmalloc_heap_orphan(extra_heap, 1);
     extra_heap = (heap_t *)pointer_offset(extra_heap, aligned_heap_size);
-    --num_heaps;
+    --رقم_heaps;
   }
 
-  if (span_count > heap_span_count) {
+  اگر (span_شمار > heap_span_شمار) {
     // Cap reserved spans
-    size_t remain_count = span_count - heap_span_count;
-    size_t reserve_count =
-        (remain_count > _memory_heap_reserve_count ? _memory_heap_reserve_count
-                                                   : remain_count);
+    size_t remain_شمار = span_شمار - heap_span_شمار;
+    size_t reserve_شمار =
+        (remain_شمار > memory_heap_reserve_شمار ? memory_heap_reserve_شمار
+                                                   : remain_شمار);
     span_t *remain_span =
-        (span_t *)pointer_offset(span, heap_span_count * _memory_span_size);
-    _rpmalloc_heap_set_reserved_spans(heap, span, remain_span, reserve_count);
+        (span_t *)pointer_offset(span, heap_span_شمار * _memory_span_size);
+    _rpmalloc_heap_set_reserved_spans(heap, span, remain_span, reserve_شمار);
 
-    if (remain_count > reserve_count) {
+    اگر (remain_شمار > reserve_شمار) {
       // Set to global reserved spans
       remain_span = (span_t *)pointer_offset(remain_span,
-                                             reserve_count * _memory_span_size);
-      reserve_count = remain_count - reserve_count;
-      _rpmalloc_global_set_reserved_spans(span, remain_span, reserve_count);
+                                             reserve_شمار * _memory_span_size);
+      reserve_شمار = remain_شمار - reserve_شمار;
+      _rpmalloc_global_set_reserved_spans(span, remain_span, reserve_شمار);
     }
   }
 
-  return heap;
+  بازگشت heap;
 }
 
-static heap_t *_rpmalloc_heap_extract_orphan(heap_t **heap_list) {
+ایستا heap_t *_rpmalloc_heap_extract_orphan(heap_t **heap_list) {
   heap_t *heap = *heap_list;
   *heap_list = (heap ? heap->next_orphan : 0);
-  return heap;
+  بازگشت heap;
 }
 
 //! Allocate a new heap, potentially reusing a previously orphaned heap
-static heap_t *_rpmalloc_heap_allocate(int first_class) {
+ایستا heap_t *_rpmalloc_heap_allocate(صحیح first_class) {
   heap_t *heap = 0;
-  while (!atomic_cas32_acquire(&_memory_global_lock, 1, 0))
+  وقتی (!atomic_cas32_acquire(&_memory_global_lock, 1, 0))
     _rpmalloc_spin();
-  if (first_class == 0)
+  اگر (first_class == 0)
     heap = _rpmalloc_heap_extract_orphan(&_memory_orphan_heaps);
-#if RPMALLOC_FIRST_CLASS_HEAPS
-  if (!heap)
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
+  اگر (!heap)
     heap = _rpmalloc_heap_extract_orphan(&_memory_first_class_orphan_heaps);
 #endif
-  if (!heap)
+  اگر (!heap)
     heap = _rpmalloc_heap_allocate_new();
   atomic_store32_release(&_memory_global_lock, 0);
-  if (heap)
+  اگر (heap)
     _rpmalloc_heap_cache_adopt_deferred(heap, 0);
-  return heap;
+  بازگشت heap;
 }
 
-static void _rpmalloc_heap_release(void *heapptr, int first_class,
-                                   int release_cache) {
+ایستا تهی _rpmalloc_heap_release(تهی *heapptr, صحیح first_class,
+                                   صحیح release_cache) {
   heap_t *heap = (heap_t *)heapptr;
-  if (!heap)
-    return;
+  اگر (!heap)
+    بازگشت;
   // Release thread cache spans back to global cache
   _rpmalloc_heap_cache_adopt_deferred(heap, 0);
-  if (release_cache || heap->finalize) {
-#if ENABLE_THREAD_CACHE
-    for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+  اگر (release_cache || heap->finalize) {
+#اگر ENABLE_THREAD_CACHE
+    برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
       span_cache_t *span_cache;
-      if (!iclass)
+      اگر (!iclass)
         span_cache = &heap->span_cache;
-      else
+      وگرنه
         span_cache = (span_cache_t *)(heap->span_large_cache + (iclass - 1));
-      if (!span_cache->count)
-        continue;
-#if ENABLE_GLOBAL_CACHE
-      if (heap->finalize) {
-        for (size_t ispan = 0; ispan < span_cache->count; ++ispan)
+      اگر (!span_cache->شمار)
+        ادامه;
+#اگر ENABLE_GLOBAL_CACHE
+      اگر (heap->finalize) {
+        برای (size_t ispan = 0; ispan < span_cache->شمار; ++ispan)
           _rpmalloc_span_unmap(span_cache->span[ispan]);
-      } else {
-        _rpmalloc_stat_add64(&heap->thread_to_global, span_cache->count *
+      } وگرنه {
+        _rpmalloc_stat_add64(&heap->thread_to_global, span_cache->شمار *
                                                           (iclass + 1) *
                                                           _memory_span_size);
         _rpmalloc_stat_add(&heap->span_use[iclass].spans_to_global,
-                           span_cache->count);
-        _rpmalloc_global_cache_insert_spans(span_cache->span, iclass + 1,
-                                            span_cache->count);
+                           span_cache->شمار);
+        rpmalloc_global_cache_درج_spans(span_cache->span, iclass + 1,
+                                            span_cache->شمار);
       }
-#else
-      for (size_t ispan = 0; ispan < span_cache->count; ++ispan)
+#وگرنه
+      برای (size_t ispan = 0; ispan < span_cache->شمار; ++ispan)
         _rpmalloc_span_unmap(span_cache->span[ispan]);
 #endif
-      span_cache->count = 0;
+      span_cache->شمار = 0;
     }
 #endif
   }
 
-  if (get_thread_heap_raw() == heap)
+  اگر (get_thread_heap_raw() == heap)
     set_thread_heap(0);
 
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
   atomic_decr32(&_memory_active_heaps);
   rpmalloc_assert(atomic_load32(&_memory_active_heaps) >= 0,
                   "Still active heaps during finalization");
@@ -2336,24 +2336,24 @@ static void _rpmalloc_heap_release(void *heapptr, int first_class,
 
   // If we are forcibly terminating with _exit the state of the
   // lock atomic is unknown and it's best to just go ahead and exit
-  if (get_thread_id() != _rpmalloc_main_thread_id) {
-    while (!atomic_cas32_acquire(&_memory_global_lock, 1, 0))
+  اگر (get_thread_id() != _rpmalloc_main_thread_id) {
+    وقتی (!atomic_cas32_acquire(&_memory_global_lock, 1, 0))
       _rpmalloc_spin();
   }
   _rpmalloc_heap_orphan(heap, first_class);
   atomic_store32_release(&_memory_global_lock, 0);
 }
 
-static void _rpmalloc_heap_release_raw(void *heapptr, int release_cache) {
+ایستا تهی _rpmalloc_heap_release_raw(تهی *heapptr, صحیح release_cache) {
   _rpmalloc_heap_release(heapptr, 0, release_cache);
 }
 
-static void _rpmalloc_heap_release_raw_fc(void *heapptr) {
+ایستا تهی _rpmalloc_heap_release_raw_fc(تهی *heapptr) {
   _rpmalloc_heap_release_raw(heapptr, 1);
 }
 
-static void _rpmalloc_heap_finalize(heap_t *heap) {
-  if (heap->spans_reserved) {
+ایستا تهی _rpmalloc_heap_finalize(heap_t *heap) {
+  اگر (heap->spans_reserved) {
     span_t *span = _rpmalloc_span_map(heap, heap->spans_reserved);
     _rpmalloc_span_unmap(span);
     heap->spans_reserved = 0;
@@ -2361,29 +2361,29 @@ static void _rpmalloc_heap_finalize(heap_t *heap) {
 
   _rpmalloc_heap_cache_adopt_deferred(heap, 0);
 
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
-    if (heap->size_class[iclass].cache)
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
+    اگر (heap->size_class[iclass].cache)
       _rpmalloc_span_unmap(heap->size_class[iclass].cache);
     heap->size_class[iclass].cache = 0;
     span_t *span = heap->size_class[iclass].partial_span;
-    while (span) {
+    وقتی (span) {
       span_t *next = span->next;
       _rpmalloc_span_finalize(heap, iclass, span,
                               &heap->size_class[iclass].partial_span);
       span = next;
     }
     // If class still has a free list it must be a full span
-    if (heap->size_class[iclass].free_list) {
+    اگر (heap->size_class[iclass].free_list) {
       span_t *class_span =
           (span_t *)((uintptr_t)heap->size_class[iclass].free_list &
                      _memory_span_mask);
       span_t **list = 0;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
       list = &heap->full_span[iclass];
 #endif
-      --heap->full_span_count;
-      if (!_rpmalloc_span_finalize(heap, iclass, class_span, list)) {
-        if (list)
+      --heap->full_span_شمار;
+      اگر (!_rpmalloc_span_finalize(heap, iclass, class_span, list)) {
+        اگر (list)
           _rpmalloc_span_double_link_list_remove(list, class_span);
         _rpmalloc_span_double_link_list_add(
             &heap->size_class[iclass].partial_span, class_span);
@@ -2391,16 +2391,16 @@ static void _rpmalloc_heap_finalize(heap_t *heap) {
     }
   }
 
-#if ENABLE_THREAD_CACHE
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+#اگر ENABLE_THREAD_CACHE
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     span_cache_t *span_cache;
-    if (!iclass)
+    اگر (!iclass)
       span_cache = &heap->span_cache;
-    else
+    وگرنه
       span_cache = (span_cache_t *)(heap->span_large_cache + (iclass - 1));
-    for (size_t ispan = 0; ispan < span_cache->count; ++ispan)
+    برای (size_t ispan = 0; ispan < span_cache->شمار; ++ispan)
       _rpmalloc_span_unmap(span_cache->span[ispan]);
-    span_cache->count = 0;
+    span_cache->شمار = 0;
   }
 #endif
   rpmalloc_assert(!atomic_load_ptr(&heap->span_free_deferred),
@@ -2414,195 +2414,195 @@ static void _rpmalloc_heap_finalize(heap_t *heap) {
 //////
 
 //! Pop first block from a free list
-static void *free_list_pop(void **list) {
-  void *block = *list;
-  *list = *((void **)block);
-  return block;
+ایستا تهی *free_list_برداشت(تهی **list) {
+  تهی *block = *list;
+  *list = *((تهی **)block);
+  بازگشت block;
 }
 
 //! Allocate a small/medium sized memory block from the given heap
-static void *_rpmalloc_allocate_from_heap_fallback(
+ایستا تهی *_rpmalloc_allocate_from_heap_fallback(
     heap_t *heap, heap_size_class_t *heap_size_class, uint32_t class_idx) {
   span_t *span = heap_size_class->partial_span;
   rpmalloc_assume(heap != 0);
-  if (EXPECTED(span != 0)) {
-    rpmalloc_assert(span->block_count ==
-                        _memory_size_class[span->size_class].block_count,
+  اگر (EXPECTED(span != 0)) {
+    rpmalloc_assert(span->block_شمار ==
+                        _memory_size_class[span->size_class].block_شمار,
                     "Span block count corrupted");
     rpmalloc_assert(!_rpmalloc_span_is_fully_utilized(span),
                     "Internal failure");
-    void *block;
-    if (span->free_list) {
+    تهی *block;
+    اگر (span->free_list) {
       // Span local free list is not empty, swap to size class free list
-      block = free_list_pop(&span->free_list);
+      block = free_list_برداشت(&span->free_list);
       heap_size_class->free_list = span->free_list;
       span->free_list = 0;
-    } else {
+    } وگرنه {
       // If the span did not fully initialize free list, link up another page
       // worth of blocks
-      void *block_start = pointer_offset(
+      تهی *block_start = pointer_offset(
           span, SPAN_HEADER_SIZE +
                     ((size_t)span->free_list_limit * span->block_size));
       span->free_list_limit += free_list_partial_init(
           &heap_size_class->free_list, &block,
-          (void *)((uintptr_t)block_start & ~(_memory_page_size - 1)),
-          block_start, span->block_count - span->free_list_limit,
+          (تهی *)((uintptr_t)block_start & ~(_memory_page_size - 1)),
+          block_start, span->block_شمار - span->free_list_limit,
           span->block_size);
     }
-    rpmalloc_assert(span->free_list_limit <= span->block_count,
+    rpmalloc_assert(span->free_list_limit <= span->block_شمار,
                     "Span block count corrupted");
-    span->used_count = span->free_list_limit;
+    span->used_شمار = span->free_list_limit;
 
     // Swap in deferred free list if present
-    if (atomic_load_ptr(&span->free_list_deferred))
+    اگر (atomic_load_ptr(&span->free_list_deferred))
       _rpmalloc_span_extract_free_list_deferred(span);
 
     // If span is still not fully utilized keep it in partial list and early
     // return block
-    if (!_rpmalloc_span_is_fully_utilized(span))
-      return block;
+    اگر (!_rpmalloc_span_is_fully_utilized(span))
+      بازگشت block;
 
     // The span is fully utilized, unlink from partial list and add to fully
     // utilized list
-    _rpmalloc_span_double_link_list_pop_head(&heap_size_class->partial_span,
+    rpmalloc_span_double_link_list_برداشت_head(&heap_size_class->partial_span,
                                              span);
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
     _rpmalloc_span_double_link_list_add(&heap->full_span[class_idx], span);
 #endif
-    ++heap->full_span_count;
-    return block;
+    ++heap->full_span_شمار;
+    بازگشت block;
   }
 
   // Find a span in one of the cache levels
   span = _rpmalloc_heap_extract_new_span(heap, heap_size_class, 1, class_idx);
-  if (EXPECTED(span != 0)) {
+  اگر (EXPECTED(span != 0)) {
     // Mark span as owned by this heap and set base data, return first block
-    return _rpmalloc_span_initialize_new(heap, heap_size_class, span,
+    بازگشت _rpmalloc_span_initialize_new(heap, heap_size_class, span,
                                          class_idx);
   }
 
-  return 0;
+  بازگشت 0;
 }
 
 //! Allocate a small sized memory block from the given heap
-static void *_rpmalloc_allocate_small(heap_t *heap, size_t size) {
+ایستا تهی *_rpmalloc_allocate_small(heap_t *heap, size_t size) {
   rpmalloc_assert(heap, "No thread heap");
   // Small sizes have unique size classes
-  const uint32_t class_idx =
+  ثابت uint32_t class_idx =
       (uint32_t)((size + (SMALL_GRANULARITY - 1)) >> SMALL_GRANULARITY_SHIFT);
   heap_size_class_t *heap_size_class = heap->size_class + class_idx;
   _rpmalloc_stat_inc_alloc(heap, class_idx);
-  if (EXPECTED(heap_size_class->free_list != 0))
-    return free_list_pop(&heap_size_class->free_list);
-  return _rpmalloc_allocate_from_heap_fallback(heap, heap_size_class,
+  اگر (EXPECTED(heap_size_class->free_list != 0))
+    بازگشت free_list_برداشت(&heap_size_class->free_list);
+  بازگشت _rpmalloc_allocate_from_heap_fallback(heap, heap_size_class,
                                                class_idx);
 }
 
 //! Allocate a medium sized memory block from the given heap
-static void *_rpmalloc_allocate_medium(heap_t *heap, size_t size) {
+ایستا تهی *_rpmalloc_allocate_medium(heap_t *heap, size_t size) {
   rpmalloc_assert(heap, "No thread heap");
   // Calculate the size class index and do a dependent lookup of the final class
   // index (in case of merged classes)
-  const uint32_t base_idx =
-      (uint32_t)(SMALL_CLASS_COUNT +
+  ثابت uint32_t base_idx =
+      (uint32_t)(SMALL_CLASS_شمار +
                  ((size - (SMALL_SIZE_LIMIT + 1)) >> MEDIUM_GRANULARITY_SHIFT));
-  const uint32_t class_idx = _memory_size_class[base_idx].class_idx;
+  ثابت uint32_t class_idx = _memory_size_class[base_idx].class_idx;
   heap_size_class_t *heap_size_class = heap->size_class + class_idx;
   _rpmalloc_stat_inc_alloc(heap, class_idx);
-  if (EXPECTED(heap_size_class->free_list != 0))
-    return free_list_pop(&heap_size_class->free_list);
-  return _rpmalloc_allocate_from_heap_fallback(heap, heap_size_class,
+  اگر (EXPECTED(heap_size_class->free_list != 0))
+    بازگشت free_list_برداشت(&heap_size_class->free_list);
+  بازگشت _rpmalloc_allocate_from_heap_fallback(heap, heap_size_class,
                                                class_idx);
 }
 
 //! Allocate a large sized memory block from the given heap
-static void *_rpmalloc_allocate_large(heap_t *heap, size_t size) {
+ایستا تهی *_rpmalloc_allocate_large(heap_t *heap, size_t size) {
   rpmalloc_assert(heap, "No thread heap");
   // Calculate number of needed max sized spans (including header)
   // Since this function is never called if size > LARGE_SIZE_LIMIT
   // the span_count is guaranteed to be <= LARGE_CLASS_COUNT
   size += SPAN_HEADER_SIZE;
-  size_t span_count = size >> _memory_span_size_shift;
-  if (size & (_memory_span_size - 1))
-    ++span_count;
+  size_t span_شمار = size >> _memory_span_size_shift;
+  اگر (size & (_memory_span_size - 1))
+    ++span_شمار;
 
   // Find a span in one of the cache levels
   span_t *span =
-      _rpmalloc_heap_extract_new_span(heap, 0, span_count, SIZE_CLASS_LARGE);
-  if (!span)
-    return span;
+      _rpmalloc_heap_extract_new_span(heap, 0, span_شمار, SIZE_CLASS_LARGE);
+  اگر (!span)
+    بازگشت span;
 
   // Mark span as owned by this heap and set base data
-  rpmalloc_assert(span->span_count >= span_count, "Internal failure");
+  rpmalloc_assert(span->span_شمار >= span_شمار, "Internal failure");
   span->size_class = SIZE_CLASS_LARGE;
   span->heap = heap;
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   _rpmalloc_span_double_link_list_add(&heap->large_huge_span, span);
 #endif
-  ++heap->full_span_count;
+  ++heap->full_span_شمار;
 
-  return pointer_offset(span, SPAN_HEADER_SIZE);
+  بازگشت pointer_offset(span, SPAN_HEADER_SIZE);
 }
 
 //! Allocate a huge block by mapping memory pages directly
-static void *_rpmalloc_allocate_huge(heap_t *heap, size_t size) {
+ایستا تهی *_rpmalloc_allocate_huge(heap_t *heap, size_t size) {
   rpmalloc_assert(heap, "No thread heap");
   _rpmalloc_heap_cache_adopt_deferred(heap, 0);
   size += SPAN_HEADER_SIZE;
-  size_t num_pages = size >> _memory_page_size_shift;
-  if (size & (_memory_page_size - 1))
-    ++num_pages;
+  size_t رقم_pages = size >> _memory_page_size_shift;
+  اگر (size & (_memory_page_size - 1))
+    ++رقم_pages;
   size_t align_offset = 0;
   span_t *span =
-      (span_t *)_rpmalloc_mmap(num_pages * _memory_page_size, &align_offset);
-  if (!span)
-    return span;
+      (span_t *)_rpmalloc_mmap(رقم_pages * _memory_page_size, &align_offset);
+  اگر (!span)
+    بازگشت span;
 
   // Store page count in span_count
   span->size_class = SIZE_CLASS_HUGE;
-  span->span_count = (uint32_t)num_pages;
+  span->span_شمار = (uint32_t)رقم_pages;
   span->align_offset = (uint32_t)align_offset;
   span->heap = heap;
-  _rpmalloc_stat_add_peak(&_huge_pages_current, num_pages, _huge_pages_peak);
+  _rpmalloc_stat_add_peak(&_huge_pages_current, رقم_pages, _huge_pages_peak);
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   _rpmalloc_span_double_link_list_add(&heap->large_huge_span, span);
 #endif
-  ++heap->full_span_count;
+  ++heap->full_span_شمار;
 
-  return pointer_offset(span, SPAN_HEADER_SIZE);
+  بازگشت pointer_offset(span, SPAN_HEADER_SIZE);
 }
 
 //! Allocate a block of the given size
-static void *_rpmalloc_allocate(heap_t *heap, size_t size) {
+ایستا تهی *_rpmalloc_allocate(heap_t *heap, size_t size) {
   _rpmalloc_stat_add64(&_allocation_counter, 1);
-  if (EXPECTED(size <= SMALL_SIZE_LIMIT))
-    return _rpmalloc_allocate_small(heap, size);
-  else if (size <= _memory_medium_size_limit)
-    return _rpmalloc_allocate_medium(heap, size);
-  else if (size <= LARGE_SIZE_LIMIT)
-    return _rpmalloc_allocate_large(heap, size);
-  return _rpmalloc_allocate_huge(heap, size);
+  اگر (EXPECTED(size <= SMALL_SIZE_LIMIT))
+    بازگشت _rpmalloc_allocate_small(heap, size);
+  وگرنه اگر (size <= _memory_medium_size_limit)
+    بازگشت _rpmalloc_allocate_medium(heap, size);
+  وگرنه اگر (size <= LARGE_SIZE_LIMIT)
+    بازگشت _rpmalloc_allocate_large(heap, size);
+  بازگشت _rpmalloc_allocate_huge(heap, size);
 }
 
-static void *_rpmalloc_aligned_allocate(heap_t *heap, size_t alignment,
+ایستا تهی *_rpmalloc_aligned_allocate(heap_t *heap, size_t alignment,
                                         size_t size) {
-  if (alignment <= SMALL_GRANULARITY)
-    return _rpmalloc_allocate(heap, size);
+  اگر (alignment <= SMALL_GRANULARITY)
+    بازگشت _rpmalloc_allocate(heap, size);
 
-#if ENABLE_VALIDATE_ARGS
-  if ((size + alignment) < size) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر ((size + alignment) < size) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
-  if (alignment & (alignment - 1)) {
+  اگر (alignment & (alignment - 1)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
 
-  if ((alignment <= SPAN_HEADER_SIZE) &&
+  اگر ((alignment <= SPAN_HEADER_SIZE) &&
       ((size + SPAN_HEADER_SIZE) < _memory_medium_size_limit)) {
     // If alignment is less or equal to span header size (which is power of
     // two), and size aligned to span header size multiples is less than size +
@@ -2612,21 +2612,21 @@ static void *_rpmalloc_aligned_allocate(heap_t *heap, size_t alignment,
                                 : SPAN_HEADER_SIZE;
     rpmalloc_assert(!(multiple_size % SPAN_HEADER_SIZE),
                     "Failed alignment calculation");
-    if (multiple_size <= (size + alignment))
-      return _rpmalloc_allocate(heap, multiple_size);
+    اگر (multiple_size <= (size + alignment))
+      بازگشت _rpmalloc_allocate(heap, multiple_size);
   }
 
-  void *ptr = 0;
+  تهی *ptr = 0;
   size_t align_mask = alignment - 1;
-  if (alignment <= _memory_page_size) {
+  اگر (alignment <= _memory_page_size) {
     ptr = _rpmalloc_allocate(heap, size + alignment);
-    if ((uintptr_t)ptr & align_mask) {
-      ptr = (void *)(((uintptr_t)ptr & ~(uintptr_t)align_mask) + alignment);
+    اگر ((uintptr_t)ptr & align_mask) {
+      ptr = (تهی *)(((uintptr_t)ptr & ~(uintptr_t)align_mask) + alignment);
       // Mark as having aligned blocks
       span_t *span = (span_t *)((uintptr_t)ptr & _memory_span_mask);
       span->flags |= SPAN_FLAG_ALIGNED_BLOCKS;
     }
-    return ptr;
+    بازگشت ptr;
   }
 
   // Fallback to mapping new pages for this request. Since pointers passed
@@ -2638,28 +2638,28 @@ static void *_rpmalloc_aligned_allocate(heap_t *heap, size_t alignment,
   // or greater, since the span header will push alignment more than one
   // span size away from span start (thus causing pointer mask to give us
   // an invalid span start on free)
-  if (alignment & align_mask) {
+  اگر (alignment & align_mask) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
-  if (alignment >= _memory_span_size) {
+  اگر (alignment >= _memory_span_size) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 
   size_t extra_pages = alignment / _memory_page_size;
 
   // Since each span has a header, we will at least need one extra memory page
-  size_t num_pages = 1 + (size / _memory_page_size);
-  if (size & (_memory_page_size - 1))
-    ++num_pages;
+  size_t رقم_pages = 1 + (size / _memory_page_size);
+  اگر (size & (_memory_page_size - 1))
+    ++رقم_pages;
 
-  if (extra_pages > num_pages)
-    num_pages = 1 + extra_pages;
+  اگر (extra_pages > رقم_pages)
+    رقم_pages = 1 + extra_pages;
 
-  size_t original_pages = num_pages;
+  size_t original_pages = رقم_pages;
   size_t limit_pages = (_memory_span_size / _memory_page_size) * 2;
-  if (limit_pages < (original_pages * 2))
+  اگر (limit_pages < (original_pages * 2))
     limit_pages = original_pages * 2;
 
   size_t mapped_size, align_offset;
@@ -2667,45 +2667,45 @@ static void *_rpmalloc_aligned_allocate(heap_t *heap, size_t alignment,
 
 retry:
   align_offset = 0;
-  mapped_size = num_pages * _memory_page_size;
+  mapped_size = رقم_pages * _memory_page_size;
 
   span = (span_t *)_rpmalloc_mmap(mapped_size, &align_offset);
-  if (!span) {
+  اگر (!span) {
     errno = ENOMEM;
-    return 0;
+    بازگشت 0;
   }
   ptr = pointer_offset(span, SPAN_HEADER_SIZE);
 
-  if ((uintptr_t)ptr & align_mask)
-    ptr = (void *)(((uintptr_t)ptr & ~(uintptr_t)align_mask) + alignment);
+  اگر ((uintptr_t)ptr & align_mask)
+    ptr = (تهی *)(((uintptr_t)ptr & ~(uintptr_t)align_mask) + alignment);
 
-  if (((size_t)pointer_diff(ptr, span) >= _memory_span_size) ||
+  اگر (((size_t)pointer_diff(ptr, span) >= _memory_span_size) ||
       (pointer_offset(ptr, size) > pointer_offset(span, mapped_size)) ||
       (((uintptr_t)ptr & _memory_span_mask) != (uintptr_t)span)) {
     _rpmalloc_unmap(span, mapped_size, align_offset, mapped_size);
-    ++num_pages;
-    if (num_pages > limit_pages) {
+    ++رقم_pages;
+    اگر (رقم_pages > limit_pages) {
       errno = EINVAL;
-      return 0;
+      بازگشت 0;
     }
-    goto retry;
+    برو retry;
   }
 
   // Store page count in span_count
   span->size_class = SIZE_CLASS_HUGE;
-  span->span_count = (uint32_t)num_pages;
+  span->span_شمار = (uint32_t)رقم_pages;
   span->align_offset = (uint32_t)align_offset;
   span->heap = heap;
-  _rpmalloc_stat_add_peak(&_huge_pages_current, num_pages, _huge_pages_peak);
+  _rpmalloc_stat_add_peak(&_huge_pages_current, رقم_pages, _huge_pages_peak);
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   _rpmalloc_span_double_link_list_add(&heap->large_huge_span, span);
 #endif
-  ++heap->full_span_count;
+  ++heap->full_span_شمار;
 
   _rpmalloc_stat_add64(&_allocation_counter, 1);
 
-  return ptr;
+  بازگشت ptr;
 }
 
 ////////////
@@ -2716,38 +2716,38 @@ retry:
 
 //! Deallocate the given small/medium memory block in the current thread local
 //! heap
-static void _rpmalloc_deallocate_direct_small_or_medium(span_t *span,
-                                                        void *block) {
+ایستا تهی _rpmalloc_deallocate_direct_small_or_medium(span_t *span,
+                                                        تهی *block) {
   heap_t *heap = span->heap;
   rpmalloc_assert(heap->owner_thread == get_thread_id() ||
                       !heap->owner_thread || heap->finalize,
                   "Internal failure");
   // Add block to free list
-  if (UNEXPECTED(_rpmalloc_span_is_fully_utilized(span))) {
-    span->used_count = span->block_count;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+  اگر (UNEXPECTED(_rpmalloc_span_is_fully_utilized(span))) {
+    span->used_شمار = span->block_شمار;
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
     _rpmalloc_span_double_link_list_remove(&heap->full_span[span->size_class],
                                            span);
 #endif
     _rpmalloc_span_double_link_list_add(
         &heap->size_class[span->size_class].partial_span, span);
-    --heap->full_span_count;
+    --heap->full_span_شمار;
   }
-  *((void **)block) = span->free_list;
-  --span->used_count;
+  *((تهی **)block) = span->free_list;
+  --span->used_شمار;
   span->free_list = block;
-  if (UNEXPECTED(span->used_count == span->list_size)) {
+  اگر (UNEXPECTED(span->used_شمار == span->list_size)) {
     // If there are no used blocks it is guaranteed that no other external
     // thread is accessing the span
-    if (span->used_count) {
+    اگر (span->used_شمار) {
       // Make sure we have synchronized the deferred list and list size by using
       // acquire semantics and guarantee that no external thread is accessing
       // span concurrently
-      void *free_list;
-      do {
+      تهی *free_list;
+      انجامبده {
         free_list = atomic_exchange_ptr_acquire(&span->free_list_deferred,
                                                 INVALID_POINTER);
-      } while (free_list == INVALID_POINTER);
+      } وقتی (free_list == INVALID_POINTER);
       atomic_store_ptr_release(&span->free_list_deferred, free_list);
     }
     _rpmalloc_span_double_link_list_remove(
@@ -2756,33 +2756,33 @@ static void _rpmalloc_deallocate_direct_small_or_medium(span_t *span,
   }
 }
 
-static void _rpmalloc_deallocate_defer_free_span(heap_t *heap, span_t *span) {
-  if (span->size_class != SIZE_CLASS_HUGE)
-    _rpmalloc_stat_inc(&heap->span_use[span->span_count - 1].spans_deferred);
+ایستا تهی _rpmalloc_deallocate_defer_free_span(heap_t *heap, span_t *span) {
+  اگر (span->size_class != SIZE_CLASS_HUGE)
+    _rpmalloc_stat_inc(&heap->span_use[span->span_شمار - 1].spans_deferred);
   // This list does not need ABA protection, no mutable side state
-  do {
-    span->free_list = (void *)atomic_load_ptr(&heap->span_free_deferred);
-  } while (!atomic_cas_ptr(&heap->span_free_deferred, span, span->free_list));
+  انجامبده {
+    span->free_list = (تهی *)atomic_load_ptr(&heap->span_free_deferred);
+  } وقتی (!atomic_cas_ptr(&heap->span_free_deferred, span, span->free_list));
 }
 
 //! Put the block in the deferred free list of the owning span
-static void _rpmalloc_deallocate_defer_small_or_medium(span_t *span,
-                                                       void *block) {
+ایستا تهی _rpmalloc_deallocate_defer_small_or_medium(span_t *span,
+                                                       تهی *block) {
   // The memory ordering here is a bit tricky, to avoid having to ABA protect
   // the deferred free list to avoid desynchronization of list and list size
   // we need to have acquire semantics on successful CAS of the pointer to
   // guarantee the list_size variable validity + release semantics on pointer
   // store
-  void *free_list;
-  do {
+  تهی *free_list;
+  انجامبده {
     free_list =
         atomic_exchange_ptr_acquire(&span->free_list_deferred, INVALID_POINTER);
-  } while (free_list == INVALID_POINTER);
-  *((void **)block) = free_list;
-  uint32_t free_count = ++span->list_size;
-  int all_deferred_free = (free_count == span->block_count);
+  } وقتی (free_list == INVALID_POINTER);
+  *((تهی **)block) = free_list;
+  uint32_t free_شمار = ++span->list_size;
+  صحیح all_deferred_free = (free_شمار == span->block_شمار);
   atomic_store_ptr_release(&span->free_list_deferred, block);
-  if (all_deferred_free) {
+  اگر (all_deferred_free) {
     // Span was completely freed by this block. Due to the INVALID_POINTER spin
     // lock no other thread can reach this state simultaneously on this span.
     // Safe to move to owner heap deferred cache
@@ -2790,31 +2790,31 @@ static void _rpmalloc_deallocate_defer_small_or_medium(span_t *span,
   }
 }
 
-static void _rpmalloc_deallocate_small_or_medium(span_t *span, void *p) {
+ایستا تهی _rpmalloc_deallocate_small_or_medium(span_t *span, تهی *p) {
   _rpmalloc_stat_inc_free(span->heap, span->size_class);
-  if (span->flags & SPAN_FLAG_ALIGNED_BLOCKS) {
+  اگر (span->flags & SPAN_FLAG_ALIGNED_BLOCKS) {
     // Realign pointer to block start
-    void *blocks_start = pointer_offset(span, SPAN_HEADER_SIZE);
+    تهی *blocks_start = pointer_offset(span, SPAN_HEADER_SIZE);
     uint32_t block_offset = (uint32_t)pointer_diff(p, blocks_start);
     p = pointer_offset(p, -(int32_t)(block_offset % span->block_size));
   }
   // Check if block belongs to this heap or if deallocation should be deferred
-#if RPMALLOC_FIRST_CLASS_HEAPS
-  int defer =
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
+  صحیح defer =
       (span->heap->owner_thread &&
        (span->heap->owner_thread != get_thread_id()) && !span->heap->finalize);
-#else
-  int defer =
+#وگرنه
+  صحیح defer =
       ((span->heap->owner_thread != get_thread_id()) && !span->heap->finalize);
 #endif
-  if (!defer)
+  اگر (!defer)
     _rpmalloc_deallocate_direct_small_or_medium(span, p);
-  else
+  وگرنه
     _rpmalloc_deallocate_defer_small_or_medium(span, p);
 }
 
 //! Deallocate the given large memory block to the current heap
-static void _rpmalloc_deallocate_large(span_t *span) {
+ایستا تهی _rpmalloc_deallocate_large(span_t *span) {
   rpmalloc_assert(span->size_class == SIZE_CLASS_LARGE, "Bad span size class");
   rpmalloc_assert(!(span->flags & SPAN_FLAG_MASTER) ||
                       !(span->flags & SPAN_FLAG_SUBSPAN),
@@ -2824,100 +2824,100 @@ static void _rpmalloc_deallocate_large(span_t *span) {
                   "Span flag corrupted");
   // We must always defer (unless finalizing) if from another heap since we
   // cannot touch the list or counters of another heap
-#if RPMALLOC_FIRST_CLASS_HEAPS
-  int defer =
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
+  صحیح defer =
       (span->heap->owner_thread &&
        (span->heap->owner_thread != get_thread_id()) && !span->heap->finalize);
-#else
-  int defer =
+#وگرنه
+  صحیح defer =
       ((span->heap->owner_thread != get_thread_id()) && !span->heap->finalize);
 #endif
-  if (defer) {
+  اگر (defer) {
     _rpmalloc_deallocate_defer_free_span(span->heap, span);
-    return;
+    بازگشت;
   }
-  rpmalloc_assert(span->heap->full_span_count, "Heap span counter corrupted");
-  --span->heap->full_span_count;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+  rpmalloc_assert(span->heap->full_span_شمار, "Heap span counter corrupted");
+  --span->heap->full_span_شمار;
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   _rpmalloc_span_double_link_list_remove(&span->heap->large_huge_span, span);
 #endif
-#if ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
+#اگر ENABLE_ADAPTIVE_THREAD_CACHE || ENABLE_STATISTICS
   // Decrease counter
-  size_t idx = span->span_count - 1;
+  size_t idx = span->span_شمار - 1;
   atomic_decr32(&span->heap->span_use[idx].current);
 #endif
   heap_t *heap = span->heap;
   rpmalloc_assert(heap, "No thread heap");
-#if ENABLE_THREAD_CACHE
-  const int set_as_reserved =
-      ((span->span_count > 1) && (heap->span_cache.count == 0) &&
+#اگر ENABLE_THREAD_CACHE
+  ثابت صحیح set_as_reserved =
+      ((span->span_شمار > 1) && (heap->span_cache.شمار == 0) &&
        !heap->finalize && !heap->spans_reserved);
-#else
-  const int set_as_reserved =
-      ((span->span_count > 1) && !heap->finalize && !heap->spans_reserved);
+#وگرنه
+  ثابت صحیح set_as_reserved =
+      ((span->span_شمار > 1) && !heap->finalize && !heap->spans_reserved);
 #endif
-  if (set_as_reserved) {
+  اگر (set_as_reserved) {
     heap->span_reserve = span;
-    heap->spans_reserved = span->span_count;
-    if (span->flags & SPAN_FLAG_MASTER) {
+    heap->spans_reserved = span->span_شمار;
+    اگر (span->flags & SPAN_FLAG_MASTER) {
       heap->span_reserve_master = span;
-    } else { // SPAN_FLAG_SUBSPAN
+    } وگرنه { // SPAN_FLAG_SUBSPAN
       span_t *master = (span_t *)pointer_offset(
           span,
           -(intptr_t)((size_t)span->offset_from_master * _memory_span_size));
       heap->span_reserve_master = master;
       rpmalloc_assert(master->flags & SPAN_FLAG_MASTER, "Span flag corrupted");
       rpmalloc_assert(atomic_load32(&master->remaining_spans) >=
-                          (int32_t)span->span_count,
+                          (int32_t)span->span_شمار,
                       "Master span count corrupted");
     }
     _rpmalloc_stat_inc(&heap->span_use[idx].spans_to_reserved);
-  } else {
+  } وگرنه {
     // Insert into cache list
-    _rpmalloc_heap_cache_insert(heap, span);
+    rpmalloc_heap_cache_درج(heap, span);
   }
 }
 
 //! Deallocate the given huge span
-static void _rpmalloc_deallocate_huge(span_t *span) {
+ایستا تهی _rpmalloc_deallocate_huge(span_t *span) {
   rpmalloc_assert(span->heap, "No span heap");
-#if RPMALLOC_FIRST_CLASS_HEAPS
-  int defer =
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
+  صحیح defer =
       (span->heap->owner_thread &&
        (span->heap->owner_thread != get_thread_id()) && !span->heap->finalize);
-#else
-  int defer =
+#وگرنه
+  صحیح defer =
       ((span->heap->owner_thread != get_thread_id()) && !span->heap->finalize);
 #endif
-  if (defer) {
+  اگر (defer) {
     _rpmalloc_deallocate_defer_free_span(span->heap, span);
-    return;
+    بازگشت;
   }
-  rpmalloc_assert(span->heap->full_span_count, "Heap span counter corrupted");
-  --span->heap->full_span_count;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+  rpmalloc_assert(span->heap->full_span_شمار, "Heap span counter corrupted");
+  --span->heap->full_span_شمار;
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   _rpmalloc_span_double_link_list_remove(&span->heap->large_huge_span, span);
 #endif
 
   // Oversized allocation, page count is stored in span_count
-  size_t num_pages = span->span_count;
-  _rpmalloc_unmap(span, num_pages * _memory_page_size, span->align_offset,
-                  num_pages * _memory_page_size);
-  _rpmalloc_stat_sub(&_huge_pages_current, num_pages);
+  size_t رقم_pages = span->span_شمار;
+  _rpmalloc_unmap(span, رقم_pages * _memory_page_size, span->align_offset,
+                  رقم_pages * _memory_page_size);
+  _rpmalloc_stat_sub(&_huge_pages_current, رقم_pages);
 }
 
 //! Deallocate the given block
-static void _rpmalloc_deallocate(void *p) {
+ایستا تهی _rpmalloc_deallocate(تهی *p) {
   _rpmalloc_stat_add64(&_deallocation_counter, 1);
   // Grab the span (always at start of span, using span alignment)
   span_t *span = (span_t *)((uintptr_t)p & _memory_span_mask);
-  if (UNEXPECTED(!span))
-    return;
-  if (EXPECTED(span->size_class < SIZE_CLASS_COUNT))
+  اگر (UNEXPECTED(!span))
+    بازگشت;
+  اگر (EXPECTED(span->size_class < SIZE_CLASS_شمار))
     _rpmalloc_deallocate_small_or_medium(span, p);
-  else if (span->size_class == SIZE_CLASS_LARGE)
+  وگرنه اگر (span->size_class == SIZE_CLASS_LARGE)
     _rpmalloc_deallocate_large(span);
-  else
+  وگرنه
     _rpmalloc_deallocate_huge(span);
 }
 
@@ -2927,76 +2927,76 @@ static void _rpmalloc_deallocate(void *p) {
 ///
 //////
 
-static size_t _rpmalloc_usable_size(void *p);
+ایستا size_t _rpmalloc_usable_size(تهی *p);
 
 //! Reallocate the given block to the given size
-static void *_rpmalloc_reallocate(heap_t *heap, void *p, size_t size,
-                                  size_t oldsize, unsigned int flags) {
-  if (p) {
+ایستا تهی *_rpmalloc_reallocate(heap_t *heap, تهی *p, size_t size,
+                                  size_t oldsize, unsigned صحیح flags) {
+  اگر (p) {
     // Grab the span using guaranteed span alignment
     span_t *span = (span_t *)((uintptr_t)p & _memory_span_mask);
-    if (EXPECTED(span->size_class < SIZE_CLASS_COUNT)) {
+    اگر (EXPECTED(span->size_class < SIZE_CLASS_شمار)) {
       // Small/medium sized block
-      rpmalloc_assert(span->span_count == 1, "Span counter corrupted");
-      void *blocks_start = pointer_offset(span, SPAN_HEADER_SIZE);
+      rpmalloc_assert(span->span_شمار == 1, "Span counter corrupted");
+      تهی *blocks_start = pointer_offset(span, SPAN_HEADER_SIZE);
       uint32_t block_offset = (uint32_t)pointer_diff(p, blocks_start);
       uint32_t block_idx = block_offset / span->block_size;
-      void *block =
+      تهی *block =
           pointer_offset(blocks_start, (size_t)block_idx * span->block_size);
-      if (!oldsize)
+      اگر (!oldsize)
         oldsize =
             (size_t)((ptrdiff_t)span->block_size - pointer_diff(p, block));
-      if ((size_t)span->block_size >= size) {
+      اگر ((size_t)span->block_size >= size) {
         // Still fits in block, never mind trying to save memory, but preserve
         // data if alignment changed
-        if ((p != block) && !(flags & RPMALLOC_NO_PRESERVE))
+        اگر ((p != block) && !(flags & RPMALLOC_NO_PRESERVE))
           memmove(block, p, oldsize);
-        return block;
+        بازگشت block;
       }
-    } else if (span->size_class == SIZE_CLASS_LARGE) {
+    } وگرنه اگر (span->size_class == SIZE_CLASS_LARGE) {
       // Large block
       size_t total_size = size + SPAN_HEADER_SIZE;
-      size_t num_spans = total_size >> _memory_span_size_shift;
-      if (total_size & (_memory_span_mask - 1))
-        ++num_spans;
-      size_t current_spans = span->span_count;
-      void *block = pointer_offset(span, SPAN_HEADER_SIZE);
-      if (!oldsize)
+      size_t رقم_spans = total_size >> _memory_span_size_shift;
+      اگر (total_size & (_memory_span_mask - 1))
+        ++رقم_spans;
+      size_t current_spans = span->span_شمار;
+      تهی *block = pointer_offset(span, SPAN_HEADER_SIZE);
+      اگر (!oldsize)
         oldsize = (current_spans * _memory_span_size) -
                   (size_t)pointer_diff(p, block) - SPAN_HEADER_SIZE;
-      if ((current_spans >= num_spans) && (total_size >= (oldsize / 2))) {
+      اگر ((current_spans >= رقم_spans) && (total_size >= (oldsize / 2))) {
         // Still fits in block, never mind trying to save memory, but preserve
         // data if alignment changed
-        if ((p != block) && !(flags & RPMALLOC_NO_PRESERVE))
+        اگر ((p != block) && !(flags & RPMALLOC_NO_PRESERVE))
           memmove(block, p, oldsize);
-        return block;
+        بازگشت block;
       }
-    } else {
+    } وگرنه {
       // Oversized block
       size_t total_size = size + SPAN_HEADER_SIZE;
-      size_t num_pages = total_size >> _memory_page_size_shift;
-      if (total_size & (_memory_page_size - 1))
-        ++num_pages;
+      size_t رقم_pages = total_size >> _memory_page_size_shift;
+      اگر (total_size & (_memory_page_size - 1))
+        ++رقم_pages;
       // Page count is stored in span_count
-      size_t current_pages = span->span_count;
-      void *block = pointer_offset(span, SPAN_HEADER_SIZE);
-      if (!oldsize)
+      size_t current_pages = span->span_شمار;
+      تهی *block = pointer_offset(span, SPAN_HEADER_SIZE);
+      اگر (!oldsize)
         oldsize = (current_pages * _memory_page_size) -
                   (size_t)pointer_diff(p, block) - SPAN_HEADER_SIZE;
-      if ((current_pages >= num_pages) && (num_pages >= (current_pages / 2))) {
+      اگر ((current_pages >= رقم_pages) && (رقم_pages >= (current_pages / 2))) {
         // Still fits in block, never mind trying to save memory, but preserve
         // data if alignment changed
-        if ((p != block) && !(flags & RPMALLOC_NO_PRESERVE))
+        اگر ((p != block) && !(flags & RPMALLOC_NO_PRESERVE))
           memmove(block, p, oldsize);
-        return block;
+        بازگشت block;
       }
     }
-  } else {
+  } وگرنه {
     oldsize = 0;
   }
 
-  if (!!(flags & RPMALLOC_GROW_OR_FAIL))
-    return 0;
+  اگر (!!(flags & RPMALLOC_GROW_OR_FAIL))
+    بازگشت 0;
 
   // Size is greater than block size, need to allocate a new block and
   // deallocate the old Avoid hysteresis by overallocating if increase is small
@@ -3004,40 +3004,40 @@ static void *_rpmalloc_reallocate(heap_t *heap, void *p, size_t size,
   size_t lower_bound = oldsize + (oldsize >> 2) + (oldsize >> 3);
   size_t new_size =
       (size > lower_bound) ? size : ((size > oldsize) ? lower_bound : size);
-  void *block = _rpmalloc_allocate(heap, new_size);
-  if (p && block) {
-    if (!(flags & RPMALLOC_NO_PRESERVE))
+  تهی *block = _rpmalloc_allocate(heap, new_size);
+  اگر (p && block) {
+    اگر (!(flags & RPMALLOC_NO_PRESERVE))
       memcpy(block, p, oldsize < new_size ? oldsize : new_size);
     _rpmalloc_deallocate(p);
   }
 
-  return block;
+  بازگشت block;
 }
 
-static void *_rpmalloc_aligned_reallocate(heap_t *heap, void *ptr,
+ایستا تهی *_rpmalloc_aligned_reallocate(heap_t *heap, تهی *ptr,
                                           size_t alignment, size_t size,
-                                          size_t oldsize, unsigned int flags) {
-  if (alignment <= SMALL_GRANULARITY)
-    return _rpmalloc_reallocate(heap, ptr, size, oldsize, flags);
+                                          size_t oldsize, unsigned صحیح flags) {
+  اگر (alignment <= SMALL_GRANULARITY)
+    بازگشت _rpmalloc_reallocate(heap, ptr, size, oldsize, flags);
 
-  int no_alloc = !!(flags & RPMALLOC_GROW_OR_FAIL);
+  صحیح no_alloc = !!(flags & RPMALLOC_GROW_OR_FAIL);
   size_t usablesize = (ptr ? _rpmalloc_usable_size(ptr) : 0);
-  if ((usablesize >= size) && !((uintptr_t)ptr & (alignment - 1))) {
-    if (no_alloc || (size >= (usablesize / 2)))
-      return ptr;
+  اگر ((usablesize >= size) && !((uintptr_t)ptr & (alignment - 1))) {
+    اگر (no_alloc || (size >= (usablesize / 2)))
+      بازگشت ptr;
   }
   // Aligned alloc marks span as having aligned blocks
-  void *block =
+  تهی *block =
       (!no_alloc ? _rpmalloc_aligned_allocate(heap, alignment, size) : 0);
-  if (EXPECTED(block != 0)) {
-    if (!(flags & RPMALLOC_NO_PRESERVE) && ptr) {
-      if (!oldsize)
+  اگر (EXPECTED(block != 0)) {
+    اگر (!(flags & RPMALLOC_NO_PRESERVE) && ptr) {
+      اگر (!oldsize)
         oldsize = usablesize;
       memcpy(block, ptr, oldsize < size ? oldsize : size);
     }
     _rpmalloc_deallocate(ptr);
   }
-  return block;
+  بازگشت block;
 }
 
 ////////////
@@ -3047,178 +3047,178 @@ static void *_rpmalloc_aligned_reallocate(heap_t *heap, void *ptr,
 //////
 
 //! Get the usable size of the given block
-static size_t _rpmalloc_usable_size(void *p) {
+ایستا size_t _rpmalloc_usable_size(تهی *p) {
   // Grab the span using guaranteed span alignment
   span_t *span = (span_t *)((uintptr_t)p & _memory_span_mask);
-  if (span->size_class < SIZE_CLASS_COUNT) {
+  اگر (span->size_class < SIZE_CLASS_شمار) {
     // Small/medium block
-    void *blocks_start = pointer_offset(span, SPAN_HEADER_SIZE);
-    return span->block_size -
+    تهی *blocks_start = pointer_offset(span, SPAN_HEADER_SIZE);
+    بازگشت span->block_size -
            ((size_t)pointer_diff(p, blocks_start) % span->block_size);
   }
-  if (span->size_class == SIZE_CLASS_LARGE) {
+  اگر (span->size_class == SIZE_CLASS_LARGE) {
     // Large block
-    size_t current_spans = span->span_count;
-    return (current_spans * _memory_span_size) - (size_t)pointer_diff(p, span);
+    size_t current_spans = span->span_شمار;
+    بازگشت (current_spans * _memory_span_size) - (size_t)pointer_diff(p, span);
   }
   // Oversized block, page count is stored in span_count
-  size_t current_pages = span->span_count;
-  return (current_pages * _memory_page_size) - (size_t)pointer_diff(p, span);
+  size_t current_pages = span->span_شمار;
+  بازگشت (current_pages * _memory_page_size) - (size_t)pointer_diff(p, span);
 }
 
 //! Adjust and optimize the size class properties for the given class
-static void _rpmalloc_adjust_size_class(size_t iclass) {
+ایستا تهی _rpmalloc_adjust_size_class(size_t iclass) {
   size_t block_size = _memory_size_class[iclass].block_size;
-  size_t block_count = (_memory_span_size - SPAN_HEADER_SIZE) / block_size;
+  size_t block_شمار = (_memory_span_size - SPAN_HEADER_SIZE) / block_size;
 
-  _memory_size_class[iclass].block_count = (uint16_t)block_count;
+  _memory_size_class[iclass].block_شمار = (uint16_t)block_شمار;
   _memory_size_class[iclass].class_idx = (uint16_t)iclass;
 
   // Check if previous size classes can be merged
-  if (iclass >= SMALL_CLASS_COUNT) {
+  اگر (iclass >= SMALL_CLASS_شمار) {
     size_t prevclass = iclass;
-    while (prevclass > 0) {
+    وقتی (prevclass > 0) {
       --prevclass;
       // A class can be merged if number of pages and number of blocks are equal
-      if (_memory_size_class[prevclass].block_count ==
-          _memory_size_class[iclass].block_count)
+      اگر (_memory_size_class[prevclass].block_شمار ==
+          _memory_size_class[iclass].block_شمار)
         _rpmalloc_memcpy_const(_memory_size_class + prevclass,
                                _memory_size_class + iclass,
-                               sizeof(_memory_size_class[iclass]));
-      else
-        break;
+                               اندازه(_memory_size_class[iclass]));
+      وگرنه
+        بشکن;
     }
   }
 }
 
 //! Initialize the allocator and setup global data
-extern inline int rpmalloc_initialize(void) {
-  if (_rpmalloc_initialized) {
+بیرونی درونخطی صحیح rpmalloc_initialize(تهی) {
+  اگر (_rpmalloc_initialized) {
     rpmalloc_thread_initialize();
-    return 0;
+    بازگشت 0;
   }
-  return rpmalloc_initialize_config(0);
+  بازگشت rpmalloc_initialize_config(0);
 }
 
-int rpmalloc_initialize_config(const rpmalloc_config_t *config) {
-  if (_rpmalloc_initialized) {
+صحیح rpmalloc_initialize_config(ثابت rpmalloc_config_t *config) {
+  اگر (_rpmalloc_initialized) {
     rpmalloc_thread_initialize();
-    return 0;
+    بازگشت 0;
   }
   _rpmalloc_initialized = 1;
 
-  if (config)
-    memcpy(&_memory_config, config, sizeof(rpmalloc_config_t));
-  else
-    _rpmalloc_memset_const(&_memory_config, 0, sizeof(rpmalloc_config_t));
+  اگر (config)
+    memcpy(&_memory_config, config, اندازه(rpmalloc_config_t));
+  وگرنه
+    _rpmalloc_memset_const(&_memory_config, 0, اندازه(rpmalloc_config_t));
 
-  if (!_memory_config.memory_map || !_memory_config.memory_unmap) {
+  اگر (!_memory_config.memory_map || !_memory_config.memory_unmap) {
     _memory_config.memory_map = _rpmalloc_mmap_os;
     _memory_config.memory_unmap = _rpmalloc_unmap_os;
   }
 
-#if PLATFORM_WINDOWS
+#اگر PLATFORM_WINDOWS
   SYSTEM_INFO system_info;
-  memset(&system_info, 0, sizeof(system_info));
+  memset(&system_info, 0, اندازه(system_info));
   GetSystemInfo(&system_info);
   _memory_map_granularity = system_info.dwAllocationGranularity;
-#else
+#وگرنه
   _memory_map_granularity = (size_t)sysconf(_SC_PAGESIZE);
 #endif
 
-#if RPMALLOC_CONFIGURABLE
+#اگر RPMALLOC_CONFIGURABLE
   _memory_page_size = _memory_config.page_size;
-#else
+#وگرنه
   _memory_page_size = 0;
 #endif
   _memory_huge_pages = 0;
-  if (!_memory_page_size) {
-#if PLATFORM_WINDOWS
+  اگر (!_memory_page_size) {
+#اگر PLATFORM_WINDOWS
     _memory_page_size = system_info.dwPageSize;
-#else
+#وگرنه
     _memory_page_size = _memory_map_granularity;
-    if (_memory_config.enable_huge_pages) {
-#if defined(__linux__)
+    اگر (_memory_config.enable_huge_pages) {
+#اگر defined(__linux__)
       size_t huge_page_size = 0;
       FILE *meminfo = fopen("/proc/meminfo", "r");
-      if (meminfo) {
-        char line[128];
-        while (!huge_page_size && fgets(line, sizeof(line) - 1, meminfo)) {
-          line[sizeof(line) - 1] = 0;
-          if (strstr(line, "Hugepagesize:"))
-            huge_page_size = (size_t)strtol(line + 13, 0, 10) * 1024;
+      اگر (meminfo) {
+        نویسه سطر_2[128];
+        وقتی (!huge_page_size && fgets(سطر_2, اندازه(سطر_2) - 1, meminfo)) {
+          سطر_2[اندازه(سطر_2) - 1] = 0;
+          اگر (strstr(سطر_2, "Hugepagesize:"))
+            huge_page_size = (size_t)strtol(سطر_2 + 13, 0, 10) * 1024;
         }
         fclose(meminfo);
       }
-      if (huge_page_size) {
+      اگر (huge_page_size) {
         _memory_huge_pages = 1;
         _memory_page_size = huge_page_size;
         _memory_map_granularity = huge_page_size;
       }
-#elif defined(__FreeBSD__)
-      int rc;
-      size_t sz = sizeof(rc);
+#وگرنهاگر defined(__FreeBSD__)
+      صحیح rc;
+      size_t sz = اندازه(rc);
 
-      if (sysctlbyname("vm.pmap.pg_ps_enabled", &rc, &sz, NULL, 0) == 0 &&
+      اگر (sysctlbyname("vm.pmap.pg_ps_enabled", &rc, &sz, پوچ, 0) == 0 &&
           rc == 1) {
-        static size_t defsize = 2 * 1024 * 1024;
-        int nsize = 0;
+        ایستا size_t defsize = 2 * 1024 * 1024;
+        صحیح nsize = 0;
         size_t sizes[4] = {0};
         _memory_huge_pages = 1;
         _memory_page_size = defsize;
-        if ((nsize = getpagesizes(sizes, 4)) >= 2) {
+        اگر ((nsize = getpagesizes(sizes, 4)) >= 2) {
           nsize--;
-          for (size_t csize = sizes[nsize]; nsize >= 0 && csize;
+          برای (size_t csize = sizes[nsize]; nsize >= 0 && csize;
                --nsize, csize = sizes[nsize]) {
             //! Unlikely, but as a precaution..
             rpmalloc_assert(!(csize & (csize - 1)) && !(csize % 1024),
                             "Invalid page size");
-            if (defsize < csize) {
+            اگر (defsize < csize) {
               _memory_page_size = csize;
-              break;
+              بشکن;
             }
           }
         }
         _memory_map_granularity = _memory_page_size;
       }
-#elif defined(__APPLE__) || defined(__NetBSD__)
+#وگرنهاگر defined(__APPLE__) || defined(__NetBSD__)
       _memory_huge_pages = 1;
       _memory_page_size = 2 * 1024 * 1024;
       _memory_map_granularity = _memory_page_size;
 #endif
     }
 #endif
-  } else {
-    if (_memory_config.enable_huge_pages)
+  } وگرنه {
+    اگر (_memory_config.enable_huge_pages)
       _memory_huge_pages = 1;
   }
 
-#if PLATFORM_WINDOWS
-  if (_memory_config.enable_huge_pages) {
+#اگر PLATFORM_WINDOWS
+  اگر (_memory_config.enable_huge_pages) {
     HANDLE token = 0;
     size_t large_page_minimum = GetLargePageMinimum();
-    if (large_page_minimum)
+    اگر (large_page_minimum)
       OpenProcessToken(GetCurrentProcess(),
                        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token);
-    if (token) {
+    اگر (token) {
       LUID luid;
-      if (LookupPrivilegeValue(0, SE_LOCK_MEMORY_NAME, &luid)) {
+      اگر (Lookup_Privilege_مقدار(0, SE_LOCK_MEMORY_NAME, &luid)) {
         TOKEN_PRIVILEGES token_privileges;
-        memset(&token_privileges, 0, sizeof(token_privileges));
-        token_privileges.PrivilegeCount = 1;
+        memset(&token_privileges, 0, اندازه(token_privileges));
+        token_privileges.Privilege_شمار = 1;
         token_privileges.Privileges[0].Luid = luid;
         token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-        if (AdjustTokenPrivileges(token, FALSE, &token_privileges, 0, 0, 0)) {
-          if (GetLastError() == ERROR_SUCCESS)
+        اگر (AdjustTokenPrivileges(token, FALSE, &token_privileges, 0, 0, 0)) {
+          اگر (GetLastError() == ERROR_SUCCESS)
             _memory_huge_pages = 1;
         }
       }
       CloseHandle(token);
     }
-    if (_memory_huge_pages) {
-      if (large_page_minimum > _memory_page_size)
+    اگر (_memory_huge_pages) {
+      اگر (large_page_minimum > _memory_page_size)
         _memory_page_size = large_page_minimum;
-      if (large_page_minimum > _memory_map_granularity)
+      اگر (large_page_minimum > _memory_map_granularity)
         _memory_map_granularity = large_page_minimum;
     }
   }
@@ -3226,35 +3226,35 @@ int rpmalloc_initialize_config(const rpmalloc_config_t *config) {
 
   size_t min_span_size = 256;
   size_t max_page_size;
-#if UINTPTR_MAX > 0xFFFFFFFF
+#اگر UINTPTR_MAX > 0xFFFFFFFF
   max_page_size = 4096ULL * 1024ULL * 1024ULL;
-#else
+#وگرنه
   max_page_size = 4 * 1024 * 1024;
 #endif
-  if (_memory_page_size < min_span_size)
+  اگر (_memory_page_size < min_span_size)
     _memory_page_size = min_span_size;
-  if (_memory_page_size > max_page_size)
+  اگر (_memory_page_size > max_page_size)
     _memory_page_size = max_page_size;
   _memory_page_size_shift = 0;
   size_t page_size_bit = _memory_page_size;
-  while (page_size_bit != 1) {
+  وقتی (page_size_bit != 1) {
     ++_memory_page_size_shift;
     page_size_bit >>= 1;
   }
   _memory_page_size = ((size_t)1 << _memory_page_size_shift);
 
-#if RPMALLOC_CONFIGURABLE
-  if (!_memory_config.span_size) {
+#اگر RPMALLOC_CONFIGURABLE
+  اگر (!_memory_config.span_size) {
     _memory_span_size = _memory_default_span_size;
     _memory_span_size_shift = _memory_default_span_size_shift;
     _memory_span_mask = _memory_default_span_mask;
-  } else {
+  } وگرنه {
     size_t span_size = _memory_config.span_size;
-    if (span_size > (256 * 1024))
+    اگر (span_size > (256 * 1024))
       span_size = (256 * 1024);
     _memory_span_size = 4096;
     _memory_span_size_shift = 12;
-    while (_memory_span_size < span_size) {
+    وقتی (_memory_span_size < span_size) {
       _memory_span_size <<= 1;
       ++_memory_span_size_shift;
     }
@@ -3262,61 +3262,61 @@ int rpmalloc_initialize_config(const rpmalloc_config_t *config) {
   }
 #endif
 
-  _memory_span_map_count =
-      (_memory_config.span_map_count ? _memory_config.span_map_count
-                                     : DEFAULT_SPAN_MAP_COUNT);
-  if ((_memory_span_size * _memory_span_map_count) < _memory_page_size)
-    _memory_span_map_count = (_memory_page_size / _memory_span_size);
-  if ((_memory_page_size >= _memory_span_size) &&
-      ((_memory_span_map_count * _memory_span_size) % _memory_page_size))
-    _memory_span_map_count = (_memory_page_size / _memory_span_size);
-  _memory_heap_reserve_count = (_memory_span_map_count > DEFAULT_SPAN_MAP_COUNT)
-                                   ? DEFAULT_SPAN_MAP_COUNT
-                                   : _memory_span_map_count;
+  memory_span_map_شمار =
+      (_memory_config.span_map_شمار ? _memory_config.span_map_شمار
+                                     : DEFAULT_SPAN_MAP_شمار);
+  اگر ((_memory_span_size * memory_span_map_شمار) < _memory_page_size)
+    memory_span_map_شمار = (_memory_page_size / _memory_span_size);
+  اگر ((_memory_page_size >= _memory_span_size) &&
+      ((memory_span_map_شمار * _memory_span_size) % _memory_page_size))
+    memory_span_map_شمار = (_memory_page_size / _memory_span_size);
+  memory_heap_reserve_شمار = (memory_span_map_شمار > DEFAULT_SPAN_MAP_شمار)
+                                   ? DEFAULT_SPAN_MAP_شمار
+                                   : memory_span_map_شمار;
 
   _memory_config.page_size = _memory_page_size;
   _memory_config.span_size = _memory_span_size;
-  _memory_config.span_map_count = _memory_span_map_count;
+  _memory_config.span_map_شمار = memory_span_map_شمار;
   _memory_config.enable_huge_pages = _memory_huge_pages;
 
-#if ((defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD) ||          \
+#اگر ((defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD) ||          \
     defined(__TINYC__)
-  if (pthread_key_create(&_memory_thread_heap, _rpmalloc_heap_release_raw_fc))
-    return -1;
+  اگر (pthread_کلید_create(&_memory_thread_heap, _rpmalloc_heap_release_raw_fc))
+    بازگشت -1;
 #endif
-#if defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
-  fls_key = FlsAlloc(&_rpmalloc_thread_destructor);
+#اگر defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
+  fls_کلید = FlsAlloc(&_rpmalloc_thread_destructor);
 #endif
 
   // Setup all small and medium size classes
   size_t iclass = 0;
   _memory_size_class[iclass].block_size = SMALL_GRANULARITY;
   _rpmalloc_adjust_size_class(iclass);
-  for (iclass = 1; iclass < SMALL_CLASS_COUNT; ++iclass) {
+  برای (iclass = 1; iclass < SMALL_CLASS_شمار; ++iclass) {
     size_t size = iclass * SMALL_GRANULARITY;
     _memory_size_class[iclass].block_size = (uint32_t)size;
     _rpmalloc_adjust_size_class(iclass);
   }
   // At least two blocks per span, then fall back to large allocations
   _memory_medium_size_limit = (_memory_span_size - SPAN_HEADER_SIZE) >> 1;
-  if (_memory_medium_size_limit > MEDIUM_SIZE_LIMIT)
+  اگر (_memory_medium_size_limit > MEDIUM_SIZE_LIMIT)
     _memory_medium_size_limit = MEDIUM_SIZE_LIMIT;
-  for (iclass = 0; iclass < MEDIUM_CLASS_COUNT; ++iclass) {
+  برای (iclass = 0; iclass < MEDIUM_CLASS_شمار; ++iclass) {
     size_t size = SMALL_SIZE_LIMIT + ((iclass + 1) * MEDIUM_GRANULARITY);
-    if (size > _memory_medium_size_limit) {
+    اگر (size > _memory_medium_size_limit) {
       _memory_medium_size_limit =
           SMALL_SIZE_LIMIT + (iclass * MEDIUM_GRANULARITY);
-      break;
+      بشکن;
     }
-    _memory_size_class[SMALL_CLASS_COUNT + iclass].block_size = (uint32_t)size;
-    _rpmalloc_adjust_size_class(SMALL_CLASS_COUNT + iclass);
+    _memory_size_class[SMALL_CLASS_شمار + iclass].block_size = (uint32_t)size;
+    _rpmalloc_adjust_size_class(SMALL_CLASS_شمار + iclass);
   }
 
   _memory_orphan_heaps = 0;
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
   _memory_first_class_orphan_heaps = 0;
 #endif
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
   atomic_store32(&_memory_active_heaps, 0);
   atomic_store32(&_mapped_pages, 0);
   _mapped_pages_peak = 0;
@@ -3327,34 +3327,34 @@ int rpmalloc_initialize_config(const rpmalloc_config_t *config) {
   atomic_store32(&_huge_pages_current, 0);
   _huge_pages_peak = 0;
 #endif
-  memset(_memory_heaps, 0, sizeof(_memory_heaps));
+  memset(_memory_heaps, 0, اندازه(_memory_heaps));
   atomic_store32_release(&_memory_global_lock, 0);
 
   rpmalloc_linker_reference();
 
   // Initialize this thread
   rpmalloc_thread_initialize();
-  return 0;
+  بازگشت 0;
 }
 
 //! Finalize the allocator
-void rpmalloc_finalize(void) {
+تهی rpmalloc_finalize(تهی) {
   rpmalloc_thread_finalize(1);
   // rpmalloc_dump_statistics(stdout);
 
-  if (_memory_global_reserve) {
+  اگر (_memory_global_reserve) {
     atomic_add32(&_memory_global_reserve_master->remaining_spans,
-                 -(int32_t)_memory_global_reserve_count);
+                 -(int32_t)memory_global_reserve_شمار);
     _memory_global_reserve_master = 0;
-    _memory_global_reserve_count = 0;
+    memory_global_reserve_شمار = 0;
     _memory_global_reserve = 0;
   }
   atomic_store32_release(&_memory_global_lock, 0);
 
   // Free all thread caches and fully free spans
-  for (size_t list_idx = 0; list_idx < HEAP_ARRAY_SIZE; ++list_idx) {
+  برای (size_t list_idx = 0; list_idx < HEAP_ARRAY_SIZE; ++list_idx) {
     heap_t *heap = _memory_heaps[list_idx];
-    while (heap) {
+    وقتی (heap) {
       heap_t *next_heap = heap->next_heap;
       heap->finalize = 1;
       _rpmalloc_heap_global_finalize(heap);
@@ -3362,20 +3362,20 @@ void rpmalloc_finalize(void) {
     }
   }
 
-#if ENABLE_GLOBAL_CACHE
+#اگر ENABLE_GLOBAL_CACHE
   // Free global caches
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass)
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass)
     _rpmalloc_global_cache_finalize(&_memory_span_cache[iclass]);
 #endif
 
-#if (defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD
-  pthread_key_delete(_memory_thread_heap);
+#اگر (defined(__APPLE__) || defined(__HAIKU__)) && ENABLE_PRELOAD
+  pthread_کلید_delete(_memory_thread_heap);
 #endif
-#if defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
-  FlsFree(fls_key);
-  fls_key = 0;
+#اگر defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
+  FlsFree(fls_کلید);
+  fls_کلید = 0;
 #endif
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
   // If you hit these asserts you probably have memory leaks (perhaps global
   // scope data doing dynamic allocations) or double frees in your code
   rpmalloc_assert(atomic_load32(&_mapped_pages) == 0, "Memory leak detected");
@@ -3387,200 +3387,200 @@ void rpmalloc_finalize(void) {
 }
 
 //! Initialize thread, assign heap
-extern inline void rpmalloc_thread_initialize(void) {
-  if (!get_thread_heap_raw()) {
+بیرونی درونخطی تهی rpmalloc_thread_initialize(تهی) {
+  اگر (!get_thread_heap_raw()) {
     heap_t *heap = _rpmalloc_heap_allocate(0);
-    if (heap) {
+    اگر (heap) {
       _rpmalloc_stat_inc(&_memory_active_heaps);
       set_thread_heap(heap);
-#if defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
-      FlsSetValue(fls_key, heap);
+#اگر defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
+      Fls_Set_مقدار(fls_کلید, heap);
 #endif
     }
   }
 }
 
 //! Finalize thread, orphan heap
-void rpmalloc_thread_finalize(int release_caches) {
+تهی rpmalloc_thread_finalize(صحیح release_caches) {
   heap_t *heap = get_thread_heap_raw();
-  if (heap)
+  اگر (heap)
     _rpmalloc_heap_release_raw(heap, release_caches);
   set_thread_heap(0);
-#if defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
-  FlsSetValue(fls_key, 0);
+#اگر defined(_WIN32) && (!defined(BUILD_DYNAMIC_LINK) || !BUILD_DYNAMIC_LINK)
+  Fls_Set_مقدار(fls_کلید, 0);
 #endif
 }
 
-int rpmalloc_is_thread_initialized(void) {
-  return (get_thread_heap_raw() != 0) ? 1 : 0;
+صحیح rpmalloc_is_thread_initialized(تهی) {
+  بازگشت (get_thread_heap_raw() != 0) ? 1 : 0;
 }
 
-const rpmalloc_config_t *rpmalloc_config(void) { return &_memory_config; }
+ثابت rpmalloc_config_t *rpmalloc_config(تهی) { بازگشت &_memory_config; }
 
 // Extern interface
 
-extern inline RPMALLOC_ALLOCATOR void *rpmalloc(size_t size) {
-#if ENABLE_VALIDATE_ARGS
-  if (size >= MAX_ALLOC_SIZE) {
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *rpmalloc(size_t size) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر (size >= MAX_ALLOC_SIZE) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
   heap_t *heap = get_thread_heap();
-  return _rpmalloc_allocate(heap, size);
+  بازگشت _rpmalloc_allocate(heap, size);
 }
 
-extern inline void rpfree(void *ptr) { _rpmalloc_deallocate(ptr); }
+بیرونی درونخطی تهی rpfree(تهی *ptr) { _rpmalloc_deallocate(ptr); }
 
-extern inline RPMALLOC_ALLOCATOR void *rpcalloc(size_t num, size_t size) {
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *rpcalloc(size_t رقم_2, size_t size) {
   size_t total;
-#if ENABLE_VALIDATE_ARGS
-#if PLATFORM_WINDOWS
-  int err = SizeTMult(num, size, &total);
-  if ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
+#اگر ENABLE_VALIDATE_ARGS
+#اگر PLATFORM_WINDOWS
+  صحیح err = SizeTMult(رقم_2, size, &total);
+  اگر ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
-#else
-  int err = __builtin_umull_overflow(num, size, &total);
-  if (err || (total >= MAX_ALLOC_SIZE)) {
+#وگرنه
+  صحیح err = __builtin_umull_overflow(رقم_2, size, &total);
+  اگر (err || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
-#else
-  total = num * size;
+#وگرنه
+  total = رقم_2 * size;
 #endif
   heap_t *heap = get_thread_heap();
-  void *block = _rpmalloc_allocate(heap, total);
-  if (block)
+  تهی *block = _rpmalloc_allocate(heap, total);
+  اگر (block)
     memset(block, 0, total);
-  return block;
+  بازگشت block;
 }
 
-extern inline RPMALLOC_ALLOCATOR void *rprealloc(void *ptr, size_t size) {
-#if ENABLE_VALIDATE_ARGS
-  if (size >= MAX_ALLOC_SIZE) {
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *rprealloc(تهی *ptr, size_t size) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر (size >= MAX_ALLOC_SIZE) {
     errno = EINVAL;
-    return ptr;
+    بازگشت ptr;
   }
 #endif
   heap_t *heap = get_thread_heap();
-  return _rpmalloc_reallocate(heap, ptr, size, 0, 0);
+  بازگشت _rpmalloc_reallocate(heap, ptr, size, 0, 0);
 }
 
-extern RPMALLOC_ALLOCATOR void *rpaligned_realloc(void *ptr, size_t alignment,
+بیرونی RPMALLOC_ALLOCATOR تهی *rpaligned_realloc(تهی *ptr, size_t alignment,
                                                   size_t size, size_t oldsize,
-                                                  unsigned int flags) {
-#if ENABLE_VALIDATE_ARGS
-  if ((size + alignment < size) || (alignment > _memory_page_size)) {
+                                                  unsigned صحیح flags) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر ((size + alignment < size) || (alignment > _memory_page_size)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
   heap_t *heap = get_thread_heap();
-  return _rpmalloc_aligned_reallocate(heap, ptr, alignment, size, oldsize,
+  بازگشت _rpmalloc_aligned_reallocate(heap, ptr, alignment, size, oldsize,
                                       flags);
 }
 
-extern RPMALLOC_ALLOCATOR void *rpaligned_alloc(size_t alignment, size_t size) {
+بیرونی RPMALLOC_ALLOCATOR تهی *rpaligned_alloc(size_t alignment, size_t size) {
   heap_t *heap = get_thread_heap();
-  return _rpmalloc_aligned_allocate(heap, alignment, size);
+  بازگشت _rpmalloc_aligned_allocate(heap, alignment, size);
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
-rpaligned_calloc(size_t alignment, size_t num, size_t size) {
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
+rpaligned_calloc(size_t alignment, size_t رقم_2, size_t size) {
   size_t total;
-#if ENABLE_VALIDATE_ARGS
-#if PLATFORM_WINDOWS
-  int err = SizeTMult(num, size, &total);
-  if ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
+#اگر ENABLE_VALIDATE_ARGS
+#اگر PLATFORM_WINDOWS
+  صحیح err = SizeTMult(رقم_2, size, &total);
+  اگر ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
-#else
-  int err = __builtin_umull_overflow(num, size, &total);
-  if (err || (total >= MAX_ALLOC_SIZE)) {
+#وگرنه
+  صحیح err = __builtin_umull_overflow(رقم_2, size, &total);
+  اگر (err || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
-#else
-  total = num * size;
+#وگرنه
+  total = رقم_2 * size;
 #endif
-  void *block = rpaligned_alloc(alignment, total);
-  if (block)
+  تهی *block = rpaligned_alloc(alignment, total);
+  اگر (block)
     memset(block, 0, total);
-  return block;
+  بازگشت block;
 }
 
-extern inline RPMALLOC_ALLOCATOR void *rpmemalign(size_t alignment,
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *rpmemalign(size_t alignment,
                                                   size_t size) {
-  return rpaligned_alloc(alignment, size);
+  بازگشت rpaligned_alloc(alignment, size);
 }
 
-extern inline int rpposix_memalign(void **memptr, size_t alignment,
+بیرونی درونخطی صحیح rpposix_memalign(تهی **memptr, size_t alignment,
                                    size_t size) {
-  if (memptr)
+  اگر (memptr)
     *memptr = rpaligned_alloc(alignment, size);
-  else
-    return EINVAL;
-  return *memptr ? 0 : ENOMEM;
+  وگرنه
+    بازگشت EINVAL;
+  بازگشت *memptr ? 0 : ENOMEM;
 }
 
-extern inline size_t rpmalloc_usable_size(void *ptr) {
-  return (ptr ? _rpmalloc_usable_size(ptr) : 0);
+بیرونی درونخطی size_t rpmalloc_usable_size(تهی *ptr) {
+  بازگشت (ptr ? _rpmalloc_usable_size(ptr) : 0);
 }
 
-extern inline void rpmalloc_thread_collect(void) {}
+بیرونی درونخطی تهی rpmalloc_thread_collect(تهی) {}
 
-void rpmalloc_thread_statistics(rpmalloc_thread_statistics_t *stats) {
-  memset(stats, 0, sizeof(rpmalloc_thread_statistics_t));
+تهی rpmalloc_thread_statistics(rpmalloc_thread_statistics_t *stats) {
+  memset(stats, 0, اندازه(rpmalloc_thread_statistics_t));
   heap_t *heap = get_thread_heap_raw();
-  if (!heap)
-    return;
+  اگر (!heap)
+    بازگشت;
 
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
     size_class_t *size_class = _memory_size_class + iclass;
     span_t *span = heap->size_class[iclass].partial_span;
-    while (span) {
-      size_t free_count = span->list_size;
-      size_t block_count = size_class->block_count;
-      if (span->free_list_limit < block_count)
-        block_count = span->free_list_limit;
-      free_count += (block_count - span->used_count);
-      stats->sizecache += free_count * size_class->block_size;
+    وقتی (span) {
+      size_t free_شمار = span->list_size;
+      size_t block_شمار = size_class->block_شمار;
+      اگر (span->free_list_limit < block_شمار)
+        block_شمار = span->free_list_limit;
+      free_شمار += (block_شمار - span->used_شمار);
+      stats->sizecache += free_شمار * size_class->block_size;
       span = span->next;
     }
   }
 
-#if ENABLE_THREAD_CACHE
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+#اگر ENABLE_THREAD_CACHE
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     span_cache_t *span_cache;
-    if (!iclass)
+    اگر (!iclass)
       span_cache = &heap->span_cache;
-    else
+    وگرنه
       span_cache = (span_cache_t *)(heap->span_large_cache + (iclass - 1));
-    stats->spancache += span_cache->count * (iclass + 1) * _memory_span_size;
+    stats->spancache += span_cache->شمار * (iclass + 1) * _memory_span_size;
   }
 #endif
 
   span_t *deferred = (span_t *)atomic_load_ptr(&heap->span_free_deferred);
-  while (deferred) {
-    if (deferred->size_class != SIZE_CLASS_HUGE)
-      stats->spancache += (size_t)deferred->span_count * _memory_span_size;
+  وقتی (deferred) {
+    اگر (deferred->size_class != SIZE_CLASS_HUGE)
+      stats->spancache += (size_t)deferred->span_شمار * _memory_span_size;
     deferred = (span_t *)deferred->free_list;
   }
 
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
   stats->thread_to_global = (size_t)atomic_load64(&heap->thread_to_global);
   stats->global_to_thread = (size_t)atomic_load64(&heap->global_to_thread);
 
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     stats->span_use[iclass].current =
         (size_t)atomic_load32(&heap->span_use[iclass].current);
     stats->span_use[iclass].peak =
-        (size_t)atomic_load32(&heap->span_use[iclass].high);
+        (size_t)atomic_load32(&heap->span_use[iclass].بالا);
     stats->span_use[iclass].to_global =
         (size_t)atomic_load32(&heap->span_use[iclass].spans_to_global);
     stats->span_use[iclass].from_global =
@@ -3596,7 +3596,7 @@ void rpmalloc_thread_statistics(rpmalloc_thread_statistics_t *stats) {
     stats->span_use[iclass].map_calls =
         (size_t)atomic_load32(&heap->span_use[iclass].spans_map_calls);
   }
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
     stats->size_use[iclass].alloc_current =
         (size_t)atomic_load32(&heap->size_class_use[iclass].alloc_current);
     stats->size_use[iclass].alloc_peak =
@@ -3617,9 +3617,9 @@ void rpmalloc_thread_statistics(rpmalloc_thread_statistics_t *stats) {
 #endif
 }
 
-void rpmalloc_global_statistics(rpmalloc_global_statistics_t *stats) {
-  memset(stats, 0, sizeof(rpmalloc_global_statistics_t));
-#if ENABLE_STATISTICS
+تهی rpmalloc_global_statistics(rpmalloc_global_statistics_t *stats) {
+  memset(stats, 0, اندازه(rpmalloc_global_statistics_t));
+#اگر ENABLE_STATISTICS
   stats->mapped = (size_t)atomic_load32(&_mapped_pages) * _memory_page_size;
   stats->mapped_peak = (size_t)_mapped_pages_peak * _memory_page_size;
   stats->mapped_total =
@@ -3630,35 +3630,35 @@ void rpmalloc_global_statistics(rpmalloc_global_statistics_t *stats) {
       (size_t)atomic_load32(&_huge_pages_current) * _memory_page_size;
   stats->huge_alloc_peak = (size_t)_huge_pages_peak * _memory_page_size;
 #endif
-#if ENABLE_GLOBAL_CACHE
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+#اگر ENABLE_GLOBAL_CACHE
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     global_cache_t *cache = &_memory_span_cache[iclass];
-    while (!atomic_cas32_acquire(&cache->lock, 1, 0))
+    وقتی (!atomic_cas32_acquire(&cache->lock, 1, 0))
       _rpmalloc_spin();
-    uint32_t count = cache->count;
-#if ENABLE_UNLIMITED_CACHE
+    uint32_t شمار = cache->شمار;
+#اگر ENABLE_UNLIMITED_CACHE
     span_t *current_span = cache->overflow;
-    while (current_span) {
-      ++count;
+    وقتی (current_span) {
+      ++شمار;
       current_span = current_span->next;
     }
 #endif
     atomic_store32_release(&cache->lock, 0);
-    stats->cached += count * (iclass + 1) * _memory_span_size;
+    stats->cached += شمار * (iclass + 1) * _memory_span_size;
   }
 #endif
 }
 
-#if ENABLE_STATISTICS
+#اگر ENABLE_STATISTICS
 
-static void _memory_heap_dump_statistics(heap_t *heap, void *file) {
+ایستا تهی _memory_heap_dump_statistics(heap_t *heap, تهی *file) {
   fprintf(file, "Heap %d stats:\n", heap->id);
   fprintf(file, "Class   CurAlloc  PeakAlloc   TotAlloc    TotFree  BlkSize "
                 "BlkCount SpansCur SpansPeak  PeakAllocMiB  ToCacheMiB "
                 "FromCacheMiB FromReserveMiB MmapCalls\n");
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
-    if (!atomic_load32(&heap->size_class_use[iclass].alloc_total))
-      continue;
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
+    اگر (!atomic_load32(&heap->size_class_use[iclass].alloc_total))
+      ادامه;
     fprintf(
         file,
         "%3u:  %10u %10u %10u %10u %8u %8u %8d %9d %13zu %11zu %12zu %14zu "
@@ -3669,7 +3669,7 @@ static void _memory_heap_dump_statistics(heap_t *heap, void *file) {
         atomic_load32(&heap->size_class_use[iclass].alloc_total),
         atomic_load32(&heap->size_class_use[iclass].free_total),
         _memory_size_class[iclass].block_size,
-        _memory_size_class[iclass].block_count,
+        _memory_size_class[iclass].block_شمار,
         atomic_load32(&heap->size_class_use[iclass].spans_current),
         heap->size_class_use[iclass].spans_peak,
         ((size_t)heap->size_class_use[iclass].alloc_peak *
@@ -3690,29 +3690,29 @@ static void _memory_heap_dump_statistics(heap_t *heap, void *file) {
   fprintf(file, "Spans  Current     Peak Deferred  PeakMiB  Cached  ToCacheMiB "
                 "FromCacheMiB ToReserveMiB FromReserveMiB ToGlobalMiB "
                 "FromGlobalMiB  MmapCalls\n");
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
-    if (!atomic_load32(&heap->span_use[iclass].high) &&
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
+    اگر (!atomic_load32(&heap->span_use[iclass].بالا) &&
         !atomic_load32(&heap->span_use[iclass].spans_map_calls))
-      continue;
+      ادامه;
     fprintf(
         file,
         "%4u: %8d %8u %8u %8zu %7u %11zu %12zu %12zu %14zu %11zu %13zu %10u\n",
         (uint32_t)(iclass + 1), atomic_load32(&heap->span_use[iclass].current),
-        atomic_load32(&heap->span_use[iclass].high),
+        atomic_load32(&heap->span_use[iclass].بالا),
         atomic_load32(&heap->span_use[iclass].spans_deferred),
-        ((size_t)atomic_load32(&heap->span_use[iclass].high) *
+        ((size_t)atomic_load32(&heap->span_use[iclass].بالا) *
          (size_t)_memory_span_size * (iclass + 1)) /
             (size_t)(1024 * 1024),
-#if ENABLE_THREAD_CACHE
-        (unsigned int)(!iclass ? heap->span_cache.count
-                               : heap->span_large_cache[iclass - 1].count),
+#اگر ENABLE_THREAD_CACHE
+        (unsigned صحیح)(!iclass ? heap->span_cache.شمار
+                               : heap->span_large_cache[iclass - 1].شمار),
         ((size_t)atomic_load32(&heap->span_use[iclass].spans_to_cache) *
          (iclass + 1) * _memory_span_size) /
             (size_t)(1024 * 1024),
         ((size_t)atomic_load32(&heap->span_use[iclass].spans_from_cache) *
          (iclass + 1) * _memory_span_size) /
             (size_t)(1024 * 1024),
-#else
+#وگرنه
         0, (size_t)0, (size_t)0,
 #endif
         ((size_t)atomic_load32(&heap->span_use[iclass].spans_to_reserved) *
@@ -3729,7 +3729,7 @@ static void _memory_heap_dump_statistics(heap_t *heap, void *file) {
             (size_t)(1024 * 1024),
         atomic_load32(&heap->span_use[iclass].spans_map_calls));
   }
-  fprintf(file, "Full spans: %zu\n", heap->full_span_count);
+  fprintf(file, "Full spans: %zu\n", heap->full_span_شمار);
   fprintf(file, "ThreadToGlobalMiB GlobalToThreadMiB\n");
   fprintf(
       file, "%17zu %17zu\n",
@@ -3739,33 +3739,33 @@ static void _memory_heap_dump_statistics(heap_t *heap, void *file) {
 
 #endif
 
-void rpmalloc_dump_statistics(void *file) {
-#if ENABLE_STATISTICS
-  for (size_t list_idx = 0; list_idx < HEAP_ARRAY_SIZE; ++list_idx) {
+تهی rpmalloc_dump_statistics(تهی *file) {
+#اگر ENABLE_STATISTICS
+  برای (size_t list_idx = 0; list_idx < HEAP_ARRAY_SIZE; ++list_idx) {
     heap_t *heap = _memory_heaps[list_idx];
-    while (heap) {
-      int need_dump = 0;
-      for (size_t iclass = 0; !need_dump && (iclass < SIZE_CLASS_COUNT);
+    وقتی (heap) {
+      صحیح need_dump = 0;
+      برای (size_t iclass = 0; !need_dump && (iclass < SIZE_CLASS_شمار);
            ++iclass) {
-        if (!atomic_load32(&heap->size_class_use[iclass].alloc_total)) {
+        اگر (!atomic_load32(&heap->size_class_use[iclass].alloc_total)) {
           rpmalloc_assert(
               !atomic_load32(&heap->size_class_use[iclass].free_total),
               "Heap statistics counter mismatch");
           rpmalloc_assert(
               !atomic_load32(&heap->size_class_use[iclass].spans_map_calls),
               "Heap statistics counter mismatch");
-          continue;
+          ادامه;
         }
         need_dump = 1;
       }
-      for (size_t iclass = 0; !need_dump && (iclass < LARGE_CLASS_COUNT);
+      برای (size_t iclass = 0; !need_dump && (iclass < LARGE_CLASS_شمار);
            ++iclass) {
-        if (!atomic_load32(&heap->span_use[iclass].high) &&
+        اگر (!atomic_load32(&heap->span_use[iclass].بالا) &&
             !atomic_load32(&heap->span_use[iclass].spans_map_calls))
-          continue;
+          ادامه;
         need_dump = 1;
       }
-      if (need_dump)
+      اگر (need_dump)
         _memory_heap_dump_statistics(heap, file);
       heap = heap->next_heap;
     }
@@ -3778,25 +3778,25 @@ void rpmalloc_dump_statistics(void *file) {
   fprintf(file, "%14zu %11zu\n", huge_current / (size_t)(1024 * 1024),
           huge_peak / (size_t)(1024 * 1024));
 
-#if ENABLE_GLOBAL_CACHE
+#اگر ENABLE_GLOBAL_CACHE
   fprintf(file, "GlobalCacheMiB\n");
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     global_cache_t *cache = _memory_span_cache + iclass;
-    size_t global_cache = (size_t)cache->count * iclass * _memory_span_size;
+    size_t global_cache = (size_t)cache->شمار * iclass * _memory_span_size;
 
     size_t global_overflow_cache = 0;
     span_t *span = cache->overflow;
-    while (span) {
+    وقتی (span) {
       global_overflow_cache += iclass * _memory_span_size;
       span = span->next;
     }
-    if (global_cache || global_overflow_cache || cache->insert_count ||
-        cache->extract_count)
+    اگر (global_cache || global_overflow_cache || cache->درج_شمار ||
+        cache->extract_شمار)
       fprintf(file,
               "%4zu: %8zuMiB (%8zuMiB overflow) %14zu insert %14zu extract\n",
               iclass + 1, global_cache / (size_t)(1024 * 1024),
               global_overflow_cache / (size_t)(1024 * 1024),
-              cache->insert_count, cache->extract_count);
+              cache->درج_شمار, cache->extract_شمار);
   }
 #endif
 
@@ -3818,7 +3818,7 @@ void rpmalloc_dump_statistics(void *file) {
           unmapped_total / (size_t)(1024 * 1024));
 
   fprintf(file, "\n");
-#if 0
+#اگر 0
 	int64_t allocated = atomic_load64(&_allocation_counter);
 	int64_t deallocated = atomic_load64(&_deallocation_counter);
 	fprintf(file, "Allocation count: %lli\n", allocated);
@@ -3828,213 +3828,213 @@ void rpmalloc_dump_statistics(void *file) {
 	fprintf(file, "Dangling master spans: %d\n", atomic_load32(&_unmapped_master_spans));
 #endif
 #endif
-  (void)sizeof(file);
+  (تهی)اندازه(file);
 }
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#اگر RPMALLOC_FIRST_CLASS_HEAPS
 
-extern inline rpmalloc_heap_t *rpmalloc_heap_acquire(void) {
+بیرونی درونخطی rpmalloc_heap_t *rpmalloc_heap_acquire(تهی) {
   // Must be a pristine heap from newly mapped memory pages, or else memory
   // blocks could already be allocated from the heap which would (wrongly) be
   // released when heap is cleared with rpmalloc_heap_free_all(). Also heaps
   // guaranteed to be pristine from the dedicated orphan list can be used.
   heap_t *heap = _rpmalloc_heap_allocate(1);
-  rpmalloc_assume(heap != NULL);
+  rpmalloc_assume(heap != پوچ);
   heap->owner_thread = 0;
   _rpmalloc_stat_inc(&_memory_active_heaps);
-  return heap;
+  بازگشت heap;
 }
 
-extern inline void rpmalloc_heap_release(rpmalloc_heap_t *heap) {
-  if (heap)
+بیرونی درونخطی تهی rpmalloc_heap_release(rpmalloc_heap_t *heap) {
+  اگر (heap)
     _rpmalloc_heap_release(heap, 1, 1);
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
 rpmalloc_heap_alloc(rpmalloc_heap_t *heap, size_t size) {
-#if ENABLE_VALIDATE_ARGS
-  if (size >= MAX_ALLOC_SIZE) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر (size >= MAX_ALLOC_SIZE) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
-  return _rpmalloc_allocate(heap, size);
+  بازگشت _rpmalloc_allocate(heap, size);
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
 rpmalloc_heap_aligned_alloc(rpmalloc_heap_t *heap, size_t alignment,
                             size_t size) {
-#if ENABLE_VALIDATE_ARGS
-  if (size >= MAX_ALLOC_SIZE) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر (size >= MAX_ALLOC_SIZE) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
-  return _rpmalloc_aligned_allocate(heap, alignment, size);
+  بازگشت _rpmalloc_aligned_allocate(heap, alignment, size);
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
-rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t num, size_t size) {
-  return rpmalloc_heap_aligned_calloc(heap, 0, num, size);
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
+rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t رقم_2, size_t size) {
+  بازگشت rpmalloc_heap_aligned_calloc(heap, 0, رقم_2, size);
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
 rpmalloc_heap_aligned_calloc(rpmalloc_heap_t *heap, size_t alignment,
-                             size_t num, size_t size) {
+                             size_t رقم_2, size_t size) {
   size_t total;
-#if ENABLE_VALIDATE_ARGS
-#if PLATFORM_WINDOWS
-  int err = SizeTMult(num, size, &total);
-  if ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
+#اگر ENABLE_VALIDATE_ARGS
+#اگر PLATFORM_WINDOWS
+  صحیح err = SizeTMult(رقم_2, size, &total);
+  اگر ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
-#else
-  int err = __builtin_umull_overflow(num, size, &total);
-  if (err || (total >= MAX_ALLOC_SIZE)) {
+#وگرنه
+  صحیح err = __builtin_umull_overflow(رقم_2, size, &total);
+  اگر (err || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
-#else
-  total = num * size;
+#وگرنه
+  total = رقم_2 * size;
 #endif
-  void *block = _rpmalloc_aligned_allocate(heap, alignment, total);
-  if (block)
+  تهی *block = _rpmalloc_aligned_allocate(heap, alignment, total);
+  اگر (block)
     memset(block, 0, total);
-  return block;
+  بازگشت block;
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
-rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
-                      unsigned int flags) {
-#if ENABLE_VALIDATE_ARGS
-  if (size >= MAX_ALLOC_SIZE) {
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
+rpmalloc_heap_realloc(rpmalloc_heap_t *heap, تهی *ptr, size_t size,
+                      unsigned صحیح flags) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر (size >= MAX_ALLOC_SIZE) {
     errno = EINVAL;
-    return ptr;
+    بازگشت ptr;
   }
 #endif
-  return _rpmalloc_reallocate(heap, ptr, size, 0, flags);
+  بازگشت _rpmalloc_reallocate(heap, ptr, size, 0, flags);
 }
 
-extern inline RPMALLOC_ALLOCATOR void *
-rpmalloc_heap_aligned_realloc(rpmalloc_heap_t *heap, void *ptr,
+بیرونی درونخطی RPMALLOC_ALLOCATOR تهی *
+rpmalloc_heap_aligned_realloc(rpmalloc_heap_t *heap, تهی *ptr,
                               size_t alignment, size_t size,
-                              unsigned int flags) {
-#if ENABLE_VALIDATE_ARGS
-  if ((size + alignment < size) || (alignment > _memory_page_size)) {
+                              unsigned صحیح flags) {
+#اگر ENABLE_VALIDATE_ARGS
+  اگر ((size + alignment < size) || (alignment > _memory_page_size)) {
     errno = EINVAL;
-    return 0;
+    بازگشت 0;
   }
 #endif
-  return _rpmalloc_aligned_reallocate(heap, ptr, alignment, size, 0, flags);
+  بازگشت _rpmalloc_aligned_reallocate(heap, ptr, alignment, size, 0, flags);
 }
 
-extern inline void rpmalloc_heap_free(rpmalloc_heap_t *heap, void *ptr) {
-  (void)sizeof(heap);
+بیرونی درونخطی تهی rpmalloc_heap_free(rpmalloc_heap_t *heap, تهی *ptr) {
+  (تهی)اندازه(heap);
   _rpmalloc_deallocate(ptr);
 }
 
-extern inline void rpmalloc_heap_free_all(rpmalloc_heap_t *heap) {
+بیرونی درونخطی تهی rpmalloc_heap_free_all(rpmalloc_heap_t *heap) {
   span_t *span;
   span_t *next_span;
 
   _rpmalloc_heap_cache_adopt_deferred(heap, 0);
 
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
     span = heap->size_class[iclass].partial_span;
-    while (span) {
+    وقتی (span) {
       next_span = span->next;
-      _rpmalloc_heap_cache_insert(heap, span);
+      rpmalloc_heap_cache_درج(heap, span);
       span = next_span;
     }
     heap->size_class[iclass].partial_span = 0;
     span = heap->full_span[iclass];
-    while (span) {
+    وقتی (span) {
       next_span = span->next;
-      _rpmalloc_heap_cache_insert(heap, span);
+      rpmalloc_heap_cache_درج(heap, span);
       span = next_span;
     }
 
     span = heap->size_class[iclass].cache;
-    if (span)
-      _rpmalloc_heap_cache_insert(heap, span);
+    اگر (span)
+      rpmalloc_heap_cache_درج(heap, span);
     heap->size_class[iclass].cache = 0;
   }
-  memset(heap->size_class, 0, sizeof(heap->size_class));
-  memset(heap->full_span, 0, sizeof(heap->full_span));
+  memset(heap->size_class, 0, اندازه(heap->size_class));
+  memset(heap->full_span, 0, اندازه(heap->full_span));
 
   span = heap->large_huge_span;
-  while (span) {
+  وقتی (span) {
     next_span = span->next;
-    if (UNEXPECTED(span->size_class == SIZE_CLASS_HUGE))
+    اگر (UNEXPECTED(span->size_class == SIZE_CLASS_HUGE))
       _rpmalloc_deallocate_huge(span);
-    else
-      _rpmalloc_heap_cache_insert(heap, span);
+    وگرنه
+      rpmalloc_heap_cache_درج(heap, span);
     span = next_span;
   }
   heap->large_huge_span = 0;
-  heap->full_span_count = 0;
+  heap->full_span_شمار = 0;
 
-#if ENABLE_THREAD_CACHE
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+#اگر ENABLE_THREAD_CACHE
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     span_cache_t *span_cache;
-    if (!iclass)
+    اگر (!iclass)
       span_cache = &heap->span_cache;
-    else
+    وگرنه
       span_cache = (span_cache_t *)(heap->span_large_cache + (iclass - 1));
-    if (!span_cache->count)
-      continue;
-#if ENABLE_GLOBAL_CACHE
+    اگر (!span_cache->شمار)
+      ادامه;
+#اگر ENABLE_GLOBAL_CACHE
     _rpmalloc_stat_add64(&heap->thread_to_global,
-                         span_cache->count * (iclass + 1) * _memory_span_size);
+                         span_cache->شمار * (iclass + 1) * _memory_span_size);
     _rpmalloc_stat_add(&heap->span_use[iclass].spans_to_global,
-                       span_cache->count);
-    _rpmalloc_global_cache_insert_spans(span_cache->span, iclass + 1,
-                                        span_cache->count);
-#else
-    for (size_t ispan = 0; ispan < span_cache->count; ++ispan)
+                       span_cache->شمار);
+    rpmalloc_global_cache_درج_spans(span_cache->span, iclass + 1,
+                                        span_cache->شمار);
+#وگرنه
+    برای (size_t ispan = 0; ispan < span_cache->شمار; ++ispan)
       _rpmalloc_span_unmap(span_cache->span[ispan]);
 #endif
-    span_cache->count = 0;
+    span_cache->شمار = 0;
   }
 #endif
 
-#if ENABLE_STATISTICS
-  for (size_t iclass = 0; iclass < SIZE_CLASS_COUNT; ++iclass) {
+#اگر ENABLE_STATISTICS
+  برای (size_t iclass = 0; iclass < SIZE_CLASS_شمار; ++iclass) {
     atomic_store32(&heap->size_class_use[iclass].alloc_current, 0);
     atomic_store32(&heap->size_class_use[iclass].spans_current, 0);
   }
-  for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+  برای (size_t iclass = 0; iclass < LARGE_CLASS_شمار; ++iclass) {
     atomic_store32(&heap->span_use[iclass].current, 0);
   }
 #endif
 }
 
-extern inline void rpmalloc_heap_thread_set_current(rpmalloc_heap_t *heap) {
+بیرونی درونخطی تهی rpmalloc_heap_thread_set_current(rpmalloc_heap_t *heap) {
   heap_t *prev_heap = get_thread_heap_raw();
-  if (prev_heap != heap) {
+  اگر (prev_heap != heap) {
     set_thread_heap(heap);
-    if (prev_heap)
+    اگر (prev_heap)
       rpmalloc_heap_release(prev_heap);
   }
 }
 
-extern inline rpmalloc_heap_t *rpmalloc_get_heap_for_ptr(void *ptr) {
+بیرونی درونخطی rpmalloc_heap_t *rpmalloc_get_heap_for_ptr(تهی *ptr) {
   // Grab the span, and then the heap from the span
   span_t *span = (span_t *)((uintptr_t)ptr & _memory_span_mask);
-  if (span) {
-    return span->heap;
+  اگر (span) {
+    بازگشت span->heap;
   }
-  return 0;
+  بازگشت 0;
 }
 
 #endif
 
-#if ENABLE_PRELOAD || ENABLE_OVERRIDE
+#اگر ENABLE_PRELOAD || ENABLE_OVERRIDE
 
-#include "malloc.c"
+#شامل "malloc.c"
 
 #endif
 
-void rpmalloc_linker_reference(void) { (void)sizeof(_rpmalloc_initialized); }
+تهی rpmalloc_linker_reference(تهی) { (تهی)اندازه(_rpmalloc_initialized); }

@@ -1,36 +1,36 @@
-#include "llvm/Support/DebugCounter.h"
+#شامل "llvm/Support/DebugCounter.h"
 
-#include "DebugOptions.h"
+#شامل "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
+#شامل "llvm/Support/CommandLine.h"
+#شامل "llvm/Support/Format.h"
+#شامل "llvm/Support/ManagedStatic.h"
 
-using namespace llvm;
+using فضاینام llvm;
 
-namespace llvm {
+فضاینام llvm {
 
-void DebugCounter::printChunks(raw_ostream &OS,
+تهی DebugCounter::printChunks(raw_ostream &OS,
                                ArrayRef<IntegerInclusiveInterval> Chunks) {
   IntegerInclusiveIntervalUtils::printIntervals(OS, Chunks, ':');
 }
 
 } // namespace llvm
 
-namespace {
+فضاینام {
 // This class overrides the default list implementation of printing so we
 // can pretty print the list of debug counter options.  This type of
 // dynamic option is pretty rare (basically this and pass lists).
-class DebugCounterList : public cl::list<std::string, DebugCounter> {
-private:
+رده DebugCounterList : عمومی cl::list<std::string, DebugCounter> {
+خصوصی:
   using Base = cl::list<std::string, DebugCounter>;
 
-public:
-  template <class... Mods>
+عمومی:
+  template <رده... Mods>
   explicit DebugCounterList(Mods &&... Ms) : Base(std::forward<Mods>(Ms)...) {}
 
-private:
-  void printOptionInfo(size_t GlobalWidth) const override {
+خصوصی:
+  تهی printOptionInfo(size_t GlobalWidth) ثابت override {
     // This is a variant of from generic_parser_base::printOptionInfo.  Sadly,
     // it's not easy to make it more usable.  We could get it to print these as
     // options if we were a cl::opt and registered them, but lists don't have
@@ -42,12 +42,12 @@ private:
     // All of the other options in CommandLine.cpp use ArgStr.size() + 6 for
     // width, so we do the same.
     Option::printHelpStr(HelpStr, GlobalWidth, ArgStr.size() + 6);
-    const auto &CounterInstance = DebugCounter::instance();
-    for (const auto &Entry : CounterInstance) {
-      const auto &[Name, Desc] = CounterInstance.getCounterDesc(Entry.second);
-      size_t NumSpaces = GlobalWidth - Name.size() - 8;
+    ثابت auto &CounterInstance = DebugCounter::instance();
+    برای (ثابت auto &Entry : CounterInstance) {
+      ثابت auto &[Name, Desc] = CounterInstance.getCounterDesc(Entry.second);
+      size_t رقم_Spaces = GlobalWidth - Name.size() - 8;
       outs() << "    =" << Name;
-      outs().indent(NumSpaces) << " -   " << Desc << '\n';
+      outs().indent(رقم_Spaces) << " -   " << Desc << '\n';
     }
   }
 };
@@ -56,44 +56,44 @@ private:
 // itself, are owned by a single global instance of the DebugCounterOwner
 // struct. This makes it easier to control the order in which constructors and
 // destructors are run.
-struct DebugCounterOwner : DebugCounter {
+ساختار DebugCounterOwner : DebugCounter {
   DebugCounterList DebugCounterOption{
       "debug-counter", cl::Hidden,
       cl::desc("Comma separated list of debug counter skip and count"),
-      cl::CommaSeparated, cl::location<DebugCounter>(*this)};
-  cl::opt<bool, true> PrintDebugCounter{
+      cl::CommaSeparated, cl::location<DebugCounter>(*این)};
+  cl::opt<منطقی, درست> PrintDebugCounter{
       "print-debug-counter",
       cl::Hidden,
-      cl::location(this->ShouldPrintCounter),
-      cl::init(false),
+      cl::location(این->ShouldPrintCounter),
+      cl::init(نادرست),
       cl::desc("Print out debug counter info after all counters accumulated"),
-      cl::callback([&](const bool &Value) {
-        if (Value)
+      cl::callback([&](ثابت منطقی &مقدار) {
+        اگر (مقدار)
           activateAllCounters();
       })};
-  cl::opt<bool, true> PrintDebugCounterQueries{
+  cl::opt<منطقی, درست> PrintDebugCounterQueries{
       "print-debug-counter-queries",
       cl::Hidden,
-      cl::location(this->ShouldPrintCounterQueries),
-      cl::init(false),
+      cl::location(این->ShouldPrintCounterQueries),
+      cl::init(نادرست),
       cl::desc("Print out each query of an enabled debug counter")};
-  cl::opt<bool, true> BreakOnLastCount{
+  cl::opt<منطقی, درست> Break_On_Last_شمار{
       "debug-counter-break-on-last",
       cl::Hidden,
-      cl::location(this->BreakOnLast),
-      cl::init(false),
+      cl::location(این->BreakOnLast),
+      cl::init(نادرست),
       cl::desc("Insert a break point on the last enabled count of a "
                "chunks list")};
 
   DebugCounterOwner() {
     // Our destructor uses the debug stream. By referencing it here, we
     // ensure that its destructor runs after our destructor.
-    (void)dbgs();
+    (تهی)dbgs();
   }
 
   // Print information when destroyed, iff command line option is specified.
   ~DebugCounterOwner() {
-    if (ShouldPrintCounter)
+    اگر (ShouldPrintCounter)
       print(dbgs());
   }
 };
@@ -103,95 +103,95 @@ struct DebugCounterOwner : DebugCounter {
 // Use ManagedStatic instead of function-local static variable to ensure
 // the destructor (which accesses counters and streams) runs during
 // llvm_shutdown() rather than at some unspecified point.
-static ManagedStatic<DebugCounterOwner> Owner;
+ایستا ManagedStatic<DebugCounterOwner> Owner;
 
-void llvm::initDebugCounterOptions() { (void)DebugCounter::instance(); }
+تهی llvm::initDebugCounterOptions() { (تهی)DebugCounter::instance(); }
 
-DebugCounter &DebugCounter::instance() { return *Owner; }
+DebugCounter &DebugCounter::instance() { بازگشت *Owner; }
 
 // This is called by the command line parser when it sees a value for the
 // debug-counter option defined above.
-void DebugCounter::push_back(const std::string &Val) {
-  if (Val.empty())
-    return;
+تهی DebugCounter::افزودن_back(ثابت std::string &Val) {
+  اگر (Val.empty())
+    بازگشت;
 
   // The strings should come in as counter=chunk_list
   auto CounterPair = StringRef(Val).split('=');
-  if (CounterPair.second.empty()) {
+  اگر (CounterPair.second.empty()) {
     errs() << "DebugCounter Error: " << Val << " does not have an = in it\n";
     exit(1);
   }
   StringRef CounterName = CounterPair.first;
 
   CounterInfo *Counter = getCounterInfo(CounterName);
-  if (!Counter) {
+  اگر (!Counter) {
     errs() << "DebugCounter Error: " << CounterName
            << " is not a registered counter\n";
-    return;
+    بازگشت;
   }
 
   auto ExpectedChunks =
       IntegerInclusiveIntervalUtils::parseIntervals(CounterPair.second, ':');
-  if (!ExpectedChunks) {
-    handleAllErrors(ExpectedChunks.takeError(), [&](const StringError &E) {
+  اگر (!ExpectedChunks) {
+    handleAllErrors(ExpectedChunks.takeError(), [&](ثابت StringError &E) {
       errs() << "DebugCounter Error: " << E.getMessage() << "\n";
     });
     exit(1);
   }
   Counter->Chunks = std::move(*ExpectedChunks);
-  Counter->Active = Counter->IsSet = true;
+  Counter->Active = Counter->IsSet = درست;
 }
 
-void DebugCounter::print(raw_ostream &OS) const {
-  SmallVector<StringRef, 16> CounterNames(Counters.keys());
+تهی DebugCounter::print(raw_ostream &OS) ثابت {
+  SmallVector<StringRef, 16> CounterNames(Counters.کلیدها());
   sort(CounterNames);
 
   OS << "Counters and values:\n";
-  for (StringRef CounterName : CounterNames) {
-    const CounterInfo *C = getCounterInfo(CounterName);
-    OS << left_justify(C->Name, 32) << ": {" << C->Count << ",";
+  برای (StringRef CounterName : CounterNames) {
+    ثابت CounterInfo *C = getCounterInfo(CounterName);
+    OS << چپ_justify(C->Name, 32) << ": {" << C->شمار_2 << ",";
     printChunks(OS, C->Chunks);
     OS << "}\n";
   }
 }
 
-bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
-  int64_t CurrCount = Info.Count++;
+منطقی DebugCounter::handleCounterIncrement(CounterInfo &Info) {
+  int64_t Curr_شمار = Info.شمار_2++;
   uint64_t CurrIdx = Info.CurrChunkIdx;
 
-  if (Info.Chunks.empty())
-    return true;
-  if (CurrIdx >= Info.Chunks.size())
-    return false;
+  اگر (Info.Chunks.empty())
+    بازگشت درست;
+  اگر (CurrIdx >= Info.Chunks.size())
+    بازگشت نادرست;
 
-  bool Res = Info.Chunks[CurrIdx].contains(CurrCount);
-  if (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
-      CurrCount == Info.Chunks[CurrIdx].getEnd()) {
+  منطقی Res = Info.Chunks[CurrIdx].contains(Curr_شمار);
+  اگر (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
+      Curr_شمار == Info.Chunks[CurrIdx].getEnd()) {
     LLVM_BUILTIN_DEBUGTRAP;
   }
-  if (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
+  اگر (Curr_شمار > Info.Chunks[CurrIdx].getEnd()) {
     Info.CurrChunkIdx++;
 
     /// Handle consecutive blocks.
-    if (Info.CurrChunkIdx < Info.Chunks.size() &&
-        CurrCount == Info.Chunks[Info.CurrChunkIdx].getBegin())
-      return true;
+    اگر (Info.CurrChunkIdx < Info.Chunks.size() &&
+        Curr_شمار == Info.Chunks[Info.CurrChunkIdx].getBegin())
+      بازگشت درست;
   }
-  return Res;
+  بازگشت Res;
 }
 
-bool DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
+منطقی DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
   auto &Us = instance();
-  bool Res = Us.handleCounterIncrement(Counter);
-  if (Us.ShouldPrintCounterQueries && Counter.IsSet) {
-    dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.Count - 1)
+  منطقی Res = Us.handleCounterIncrement(Counter);
+  اگر (Us.ShouldPrintCounterQueries && Counter.IsSet) {
+    dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.شمار_2 - 1)
            << (Res ? " execute" : " skip") << "\n";
   }
-  return Res;
+  بازگشت Res;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void DebugCounter::dump() const {
+#اگر !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD تهی DebugCounter::dump() ثابت {
   print(dbgs());
 }
 #endif

@@ -35,38 +35,38 @@
  *	@(#)regfree.c	8.3 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#شامل <sys/types.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#شامل "regutils.h"
+#شامل "regex2.h"
 
 /*
  - llvm_regfree - free everything
  */
-void
+تهی
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	ساختار re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	اگر (preg->re_magic != MAGIC1)	/* oops */
+		بازگشت;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	اگر (g == پوچ || g->magic != MAGIC2)	/* oops again */
+		بازگشت;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
-		free(g->must);
-	free((char *)g);
+	اگر (g->strip != پوچ)
+		آزاد((نویسه *)g->strip);
+	اگر (g->sets != پوچ)
+		آزاد((نویسه *)g->sets);
+	اگر (g->setbits != پوچ)
+		آزاد((نویسه *)g->setbits);
+	اگر (g->must != پوچ)
+		آزاد(g->must);
+	آزاد((نویسه *)g);
 }

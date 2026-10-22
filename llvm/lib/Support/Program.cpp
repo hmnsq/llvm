@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Program.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
-using namespace sys;
+#شامل "llvm/Support/Program.h"
+#شامل "llvm/ADT/StringRef.h"
+#شامل "llvm/Config/llvm-config.h"
+#شامل "llvm/Support/raw_ostream.h"
+using فضاینام llvm;
+using فضاینام sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-static bool Execute(ProcessInfo &PI, StringRef Program,
+ایستا منطقی Execute(ProcessInfo &PI, StringRef Program,
                     ArrayRef<StringRef> Args,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
-                    BitVector *AffinityMask, bool DetachProcess);
+                    unsigned MemoryLimit, std::string *Err_پیام,
+                    BitVector *AffinityMask, منطقی DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+صحیح sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
                         unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        std::string *Err_پیام, منطقی *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
                         BitVector *AffinityMask) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+  أكد(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-              AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
-      *ExecutionFailed = false;
+  اگر (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, Err_پیام,
+              AffinityMask, /*DetachProcess=*/نادرست)) {
+    اگر (ExecutionFailed)
+      *ExecutionFailed = نادرست;
     ProcessInfo Result = Wait(
         PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
-    return Result.ReturnCode;
+        Err_پیام, ProcStat);
+    بازگشت Result.ReturnCode;
   }
 
-  if (ExecutionFailed)
-    *ExecutionFailed = true;
+  اگر (ExecutionFailed)
+    *ExecutionFailed = درست;
 
-  return -1;
+  بازگشت -1;
 }
 
 ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
-                               bool *ExecutionFailed, BitVector *AffinityMask,
-                               bool DetachProcess) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                               unsigned MemoryLimit, std::string *Err_پیام,
+                               منطقی *ExecutionFailed, BitVector *AffinityMask,
+                               منطقی DetachProcess) {
+  أكد(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
-    *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  اگر (ExecutionFailed)
+    *ExecutionFailed = نادرست;
+  اگر (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, Err_پیام,
                AffinityMask, DetachProcess))
-    if (ExecutionFailed)
-      *ExecutionFailed = true;
+    اگر (ExecutionFailed)
+      *ExecutionFailed = درست;
 
-  return PI;
+  بازگشت PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
+منطقی sys::command_سطر_Fits_Within_System_Limits(StringRef Program,
+                                            ArrayRef<ثابت نویسه *> Args) {
   SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+  بازگشت command_سطر_Fits_Within_System_Limits(Program, StringRefArgs);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+تهی sys::printArg(raw_ostream &OS, StringRef Arg, منطقی Quote) {
+  ثابت منطقی Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  اگر (!Quote && !Escape) {
     OS << Arg;
-    return;
+    بازگشت;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  برای (ثابت auto c : Arg) {
+    اگر (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }
@@ -98,8 +98,8 @@ void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
-#include "Unix/Program.inc"
+#شامل "Unix/Program.inc"
 #endif
 #ifdef _WIN32
-#include "Windows/Program.inc"
+#شامل "Windows/Program.inc"
 #endif

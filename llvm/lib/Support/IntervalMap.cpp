@@ -10,106 +10,106 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntervalMap.h"
-#include <cassert>
+#شامل "llvm/ADT/IntervalMap.h"
+#شامل <cassert>
 
-namespace llvm {
-namespace IntervalMapImpl {
+فضاینام llvm {
+فضاینام IntervalMapImpl {
 
-void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
-  assert(!path.empty() && "Can't replace missing root");
-  path.front() = Entry(Root, Size, Offsets.first);
-  path.insert(path.begin() + 1, Entry(subtree(0), Offsets.second));
+تهی Path::replace_ریشه(تهی *ریشه_2, unsigned Size, IdxPair Offsets) {
+  أكد(!path.empty() && "Can't replace missing root");
+  path.front() = Entry(ریشه_2, Size, Offsets.first);
+  path.درج(path.begin() + 1, Entry(subtree(0), Offsets.second));
 }
 
-NodeRef Path::getLeftSibling(unsigned Level) const {
+گره_Ref Path::get_چپ_Sibling(unsigned Level) ثابت {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  اگر (Level == 0)
+    بازگشت گره_Ref();
 
   // Go up the tree until we can go left.
   unsigned l = Level - 1;
-  while (l && path[l].offset == 0)
+  وقتی (l && path[l].offset == 0)
     --l;
 
   // We can't go left.
-  if (path[l].offset == 0)
-    return NodeRef();
+  اگر (path[l].offset == 0)
+    بازگشت گره_Ref();
 
   // NR is the subtree containing our left sibling.
-  NodeRef NR = path[l].subtree(path[l].offset - 1);
+  گره_Ref NR = path[l].subtree(path[l].offset - 1);
 
   // Keep right all the way down.
-  for (++l; l != Level; ++l)
+  برای (++l; l != Level; ++l)
     NR = NR.subtree(NR.size() - 1);
-  return NR;
+  بازگشت NR;
 }
 
-void Path::moveLeft(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+تهی Path::move_چپ(unsigned Level) {
+  أكد(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go left.
   unsigned l = 0;
-  if (valid()) {
+  اگر (valid()) {
     l = Level - 1;
-    while (path[l].offset == 0) {
-      assert(l != 0 && "Cannot move beyond begin()");
+    وقتی (path[l].offset == 0) {
+      أكد(l != 0 && "Cannot move beyond begin()");
       --l;
     }
-  } else if (height() < Level)
+  } وگرنه اگر (height() < Level)
     // end() may have created a height=0 path.
     path.resize(Level + 1, Entry(nullptr, 0, 0));
 
   // NR is the subtree containing our left sibling.
   --path[l].offset;
-  NodeRef NR = subtree(l);
+  گره_Ref NR = subtree(l);
 
   // Get the rightmost node in the subtree.
-  for (++l; l != Level; ++l) {
+  برای (++l; l != Level; ++l) {
     path[l] = Entry(NR, NR.size() - 1);
     NR = NR.subtree(NR.size() - 1);
   }
   path[l] = Entry(NR, NR.size() - 1);
 }
 
-NodeRef Path::getRightSibling(unsigned Level) const {
+گره_Ref Path::get_راست_Sibling(unsigned Level) ثابت {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  اگر (Level == 0)
+    بازگشت گره_Ref();
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  وقتی (l && atLastEntry(l))
     --l;
 
   // We can't go right.
-  if (atLastEntry(l))
-    return NodeRef();
+  اگر (atLastEntry(l))
+    بازگشت گره_Ref();
 
   // NR is the subtree containing our right sibling.
-  NodeRef NR = path[l].subtree(path[l].offset + 1);
+  گره_Ref NR = path[l].subtree(path[l].offset + 1);
 
   // Keep left all the way down.
-  for (++l; l != Level; ++l)
+  برای (++l; l != Level; ++l)
     NR = NR.subtree(0);
-  return NR;
+  بازگشت NR;
 }
 
-void Path::moveRight(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+تهی Path::move_راست(unsigned Level) {
+  أكد(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  وقتی (l && atLastEntry(l))
     --l;
 
   // NR is the subtree containing our right sibling. If we hit end(), we have
   // offset(0) == node(0).size().
-  if (++path[l].offset == path[l].size)
-    return;
-  NodeRef NR = subtree(l);
+  اگر (++path[l].offset == path[l].size)
+    بازگشت;
+  گره_Ref NR = subtree(l);
 
-  for (++l; l != Level; ++l) {
+  برای (++l; l != Level; ++l) {
     path[l] = Entry(NR, 0);
     NR = NR.subtree(0);
   }
@@ -118,42 +118,42 @@ void Path::moveRight(unsigned Level) {
 
 
 IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
-                   const unsigned *CurSize, unsigned NewSize[],
-                   unsigned Position, bool Grow) {
-  assert(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
-  assert(Position <= Elements && "Invalid position");
-  if (!Nodes)
-    return IdxPair();
+                   ثابت unsigned *CurSize, unsigned NewSize[],
+                   unsigned Position, منطقی Grow) {
+  أكد(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
+  أكد(Position <= Elements && "Invalid position");
+  اگر (!Nodes)
+    بازگشت IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
-  const unsigned PerNode = (Elements + Grow) / Nodes;
-  const unsigned Extra = (Elements + Grow) % Nodes;
+  ثابت unsigned Per_گره = (Elements + Grow) / Nodes;
+  ثابت unsigned Extra = (Elements + Grow) % Nodes;
   IdxPair PosPair = IdxPair(Nodes, 0);
   unsigned Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    Sum += NewSize[n] = PerNode + (n < Extra);
-    if (PosPair.first == Nodes && Sum > Position)
+  برای (unsigned n = 0; n != Nodes; ++n) {
+    Sum += NewSize[n] = Per_گره + (n < Extra);
+    اگر (PosPair.first == Nodes && Sum > Position)
       PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
   }
-  assert(Sum == Elements + Grow && "Bad distribution sum");
+  أكد(Sum == Elements + Grow && "Bad distribution sum");
 
   // Subtract the Grow element that was added.
-  if (Grow) {
-    assert(PosPair.first < Nodes && "Bad algebra");
-    assert(NewSize[PosPair.first] && "Too few elements to need Grow");
+  اگر (Grow) {
+    أكد(PosPair.first < Nodes && "Bad algebra");
+    أكد(NewSize[PosPair.first] && "Too few elements to need Grow");
     --NewSize[PosPair.first];
   }
 
 #ifndef NDEBUG
   Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    assert(NewSize[n] <= Capacity && "Overallocated node");
+  برای (unsigned n = 0; n != Nodes; ++n) {
+    أكد(NewSize[n] <= Capacity && "Overallocated node");
     Sum += NewSize[n];
   }
-  assert(Sum == Elements && "Bad distribution sum");
+  أكد(Sum == Elements && "Bad distribution sum");
 #endif
 
-  return PosPair;
+  بازگشت PosPair;
 }
 
 } // namespace IntervalMapImpl

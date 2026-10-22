@@ -23,96 +23,96 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Debug.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/circular_raw_ostream.h"
-#include "llvm/Support/raw_ostream.h"
-#include <utility>
+#شامل "llvm/Support/Debug.h"
+#شامل "llvm/ADT/StringExtras.h"
+#شامل "llvm/Support/CommandLine.h"
+#شامل "llvm/Support/ManagedStatic.h"
+#شامل "llvm/Support/Signals.h"
+#شامل "llvm/Support/circular_raw_ostream.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <utility>
 
-#include "DebugOptions.h"
+#شامل "DebugOptions.h"
 
 #undef isCurrentDebugType
 #undef setCurrentDebugType
 #undef setCurrentDebugTypes
 
-using namespace llvm;
+using فضاینام llvm;
 
 /// Parse a debug type string into a pair of the debug type and the debug level.
 /// The expected format is "type[:level]", where the level is an optional
 /// integer.
-static std::pair<std::string, std::optional<int>>
+ایستا std::pair<std::string, std::optional<صحیح>>
 parseDebugType(StringRef DbgType) {
-  std::optional<int> Level;
+  std::optional<صحیح> Level;
   size_t ColonPos = DbgType.find(':');
-  if (ColonPos != StringRef::npos) {
+  اگر (ColonPos != StringRef::npos) {
     StringRef LevelStr = DbgType.substr(ColonPos + 1);
     DbgType = DbgType.take_front(ColonPos);
-    if (LevelStr.empty())
+    اگر (LevelStr.empty())
       Level = 0;
-    else {
-      int parsedLevel;
-      if (to_integer(LevelStr, parsedLevel, 10))
+    وگرنه {
+      صحیح parsedLevel;
+      اگر (to_integer(LevelStr, parsedLevel, 10))
         Level = parsedLevel;
     }
   }
-  return std::make_pair(DbgType.str(), Level);
+  بازگشت std::make_pair(DbgType.str(), Level);
 }
 
 // Even though LLVM might be built with NDEBUG, define symbols that the code
 // built without NDEBUG can depend on via the llvm/Support/Debug.h header.
-namespace llvm {
+فضاینام llvm {
 /// Exported boolean set by the -debug option.
-bool DebugFlag = false;
+منطقی DebugFlag = نادرست;
 
 /// The current debug type and an optional debug level.
 /// The debug level is the verbosity of the debug output.
 /// 0 is a special level that acts as an opt-out for this specific debug type.
 /// If provided, the debug output is enabled only if the user specified a level
 /// at least as high as the provided level.
-static ManagedStatic<std::vector<std::pair<std::string, std::optional<int>>>>
+ایستا ManagedStatic<std::vector<std::pair<std::string, std::optional<صحیح>>>>
     CurrentDebugType;
 
 /// Return true if the specified string is the debug type
 /// specified on the command line, or if none was specified on the command line
 /// with the -debug-only=X option.
-bool isCurrentDebugType(const char *DebugType, int Level) {
-  if (CurrentDebugType->empty())
-    return true;
+منطقی isCurrentDebugType(ثابت نویسه *DebugType, صحیح Level) {
+  اگر (CurrentDebugType->empty())
+    بازگشت درست;
   // Track if there is at least one debug type with a level, this is used
   // to allow to opt-out of some DebugType and leaving all the others enabled.
-  bool HasEnabledDebugType = false;
+  منطقی HasEnabledDebugType = نادرست;
   // See if DebugType is in list. Note: do not use find() as that forces us to
   // unnecessarily create an std::string instance.
-  for (auto &D : *CurrentDebugType) {
+  برای (auto &D : *CurrentDebugType) {
     HasEnabledDebugType =
-        HasEnabledDebugType || (!D.second.has_value() || D.second.value() > 0);
-    if (D.first != DebugType)
-      continue;
-    if (!D.second.has_value())
-      return true;
-    return D.second >= Level;
+        HasEnabledDebugType || (!D.second.has_مقدار_2() || D.second.مقدار_2() > 0);
+    اگر (D.first != DebugType)
+      ادامه;
+    اگر (!D.second.has_مقدار_2())
+      بازگشت درست;
+    بازگشت D.second >= Level;
   }
-  return !HasEnabledDebugType;
+  بازگشت !HasEnabledDebugType;
 }
 
 /// Set the current debug type, as if the -debug-only=X
 /// option were specified.  Note that DebugFlag also needs to be set to true for
 /// debug output to be produced.
 ///
-void setCurrentDebugTypes(const char **Types, unsigned Count);
+تهی setCurrentDebugTypes(ثابت نویسه **Types, unsigned شمار_2);
 
-void setCurrentDebugType(const char *Type) {
+تهی setCurrentDebugType(ثابت نویسه *Type) {
   setCurrentDebugTypes(&Type, 1);
 }
 
-void setCurrentDebugTypes(const char **Types, unsigned Count) {
+تهی setCurrentDebugTypes(ثابت نویسه **Types, unsigned شمار_2) {
   CurrentDebugType->clear();
-  CurrentDebugType->reserve(Count);
-  for (const char *Type : ArrayRef(Types, Count))
-    CurrentDebugType->push_back(parseDebugType(Type));
+  CurrentDebugType->reserve(شمار_2);
+  برای (ثابت نویسه *Type : ArrayRef(Types, شمار_2))
+    CurrentDebugType->افزودن_back(parseDebugType(Type));
 }
 
 } // namespace llvm
@@ -120,19 +120,19 @@ void setCurrentDebugTypes(const char **Types, unsigned Count) {
 // All Debug.h functionality is a no-op in NDEBUG mode.
 #ifndef NDEBUG
 
-namespace {
-struct CreateDebug {
-  static void *call() {
-    return new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
+فضاینام {
+ساختار CreateDebug {
+  ایستا تهی *call() {
+    بازگشت جدید cl::opt<منطقی, درست>("debug", cl::desc("Enable debug output"),
                                    cl::Hidden, cl::location(DebugFlag));
   }
 };
 
 // -debug-buffer-size - Buffer the last N characters of debug output
 //until program termination.
-struct CreateDebugBufferSize {
-  static void *call() {
-    return new cl::opt<unsigned>(
+ساختار CreateDebugBufferSize {
+  ایستا تهی *call() {
+    بازگشت جدید cl::opt<unsigned>(
         "debug-buffer-size",
         cl::desc("Buffer the last N characters of debug output "
                  "until program termination. "
@@ -144,30 +144,30 @@ struct CreateDebugBufferSize {
 
 // -debug - Command line option to enable the DEBUG statements in the passes.
 // This flag may only be enabled in debug builds.
-static ManagedStatic<cl::opt<bool, true>, CreateDebug> Debug;
-static ManagedStatic<cl::opt<unsigned>, CreateDebugBufferSize> DebugBufferSize;
+ایستا ManagedStatic<cl::opt<منطقی, درست>, CreateDebug> Debug;
+ایستا ManagedStatic<cl::opt<unsigned>, CreateDebugBufferSize> DebugBufferSize;
 
-namespace {
+فضاینام {
 
-struct DebugOnlyOpt {
-  void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
-    DebugFlag = true;
+ساختار DebugOnlyOpt {
+  تهی operator=(ثابت std::string &Val) ثابت {
+    اگر (Val.empty())
+      بازگشت;
+    DebugFlag = درست;
     SmallVector<StringRef, 8> DbgTypes;
-    StringRef(Val).split(DbgTypes, ',', -1, false);
-    for (auto DbgType : DbgTypes)
-      CurrentDebugType->push_back(parseDebugType(DbgType));
+    StringRef(Val).split(DbgTypes, ',', -1, نادرست);
+    برای (auto DbgType : DbgTypes)
+      CurrentDebugType->افزودن_back(parseDebugType(DbgType));
   }
 };
 } // namespace
 
-static DebugOnlyOpt DebugOnlyOptLoc;
+ایستا DebugOnlyOpt DebugOnlyOptLoc;
 
-namespace {
-struct CreateDebugOnly {
-  static void *call() {
-    return new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
+فضاینام {
+ساختار CreateDebugOnly {
+  ایستا تهی *call() {
+    بازگشت جدید cl::opt<DebugOnlyOpt, درست, cl::parser<std::string>>(
         "debug-only",
         cl::desc(
             "Enable a specific type of debug output (comma separated list "
@@ -176,23 +176,23 @@ struct CreateDebugOnly {
             "control the verbosity of the output. Setting a debug-type level "
             "to zero acts as an opt-out for this specific debug-type without "
             "affecting the others."),
-        cl::Hidden, cl::value_desc("debug string"),
-        cl::location(DebugOnlyOptLoc), cl::ValueRequired);
+        cl::Hidden, cl::مقدار_desc("debug string"),
+        cl::location(DebugOnlyOptLoc), cl::مقدار_Required);
   }
 };
 } // namespace
 
-static ManagedStatic<cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>,
+ایستا ManagedStatic<cl::opt<DebugOnlyOpt, درست, cl::parser<std::string>>,
                      CreateDebugOnly>
     DebugOnly;
 
-void llvm::initDebugOptions() {
+تهی llvm::initDebugOptions() {
   *Debug;
   *DebugBufferSize;
   *DebugOnly;
 }
 
-static void printDebugLogImpl() {
+ایستا تهی printDebugLogImpl() {
   // This is a bit sneaky.  Since this is under #ifndef NDEBUG, we
   // know that debug mode is enabled and dbgs() really is a
   // circular_raw_ostream.  If NDEBUG is defined, then dbgs() ==
@@ -203,18 +203,18 @@ static void printDebugLogImpl() {
 }
 
 // Signal handlers - dump debug output on termination.
-static void debug_user_sig_handler(void *Cookie) { printDebugLogImpl(); }
+ایستا تهی debug_user_sig_handler(تهی *Cookie) { printDebugLogImpl(); }
 
 /// dbgs - Return a circular-buffered debug stream.
 raw_ostream &llvm::dbgs() {
   // Do one-time initialization in a thread-safe way.
-  static struct dbgstream {
+  ایستا ساختار dbgstream {
     circular_raw_ostream strm;
 
     dbgstream()
         : strm(errs(), "*** Debug Log Output ***\n",
                (!EnableDebugBuffering || !DebugFlag) ? 0 : *DebugBufferSize) {
-      if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+      اگر (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
         // TODO: Add a handler for SIGUSER1-type signals so the user can
         // force a debug dump.
         sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
@@ -223,27 +223,27 @@ raw_ostream &llvm::dbgs() {
     }
   } thestrm;
 
-  return thestrm.strm;
+  بازگشت thestrm.strm;
 }
 
-void llvm::printDebugLog() {
-  if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+تهی llvm::printDebugLog() {
+  اگر (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
     printDebugLogImpl();
 }
 
-#else
+#وگرنه
 // Avoid "has no symbols" warning.
-namespace llvm {
+فضاینام llvm {
   /// dbgs - Return errs().
   raw_ostream &dbgs() {
-    return errs();
+    بازگشت errs();
   }
 }
-void llvm::initDebugOptions() {}
+تهی llvm::initDebugOptions() {}
 
-void llvm::printDebugLog() {}
+تهی llvm::printDebugLog() {}
 #endif
 
 /// EnableDebugBuffering - Turn on signal handler installation.
 ///
-bool llvm::EnableDebugBuffering = false;
+منطقی llvm::EnableDebugBuffering = نادرست;

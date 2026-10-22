@@ -10,60 +10,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BlockFrequency.h"
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/Support/raw_ostream.h"
+#شامل "llvm/Support/BlockFrequency.h"
+#شامل "llvm/Support/BranchProbability.h"
+#شامل "llvm/Support/MathExtras.h"
+#شامل "llvm/Support/ScaledNumber.h"
+#شامل "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using فضاینام llvm;
 
 BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  بازگشت *این;
 }
 
-BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
+BlockFrequency BlockFrequency::operator*(BranchProbability Prob) ثابت {
   BlockFrequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  بازگشت Freq;
 }
 
 BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  بازگشت *این;
 }
 
-BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
+BlockFrequency BlockFrequency::operator/(BranchProbability Prob) ثابت {
   BlockFrequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  بازگشت Freq;
 }
 
-std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
-  bool Overflow;
+std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) ثابت {
+  منطقی Overflow;
   uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+  اگر (Overflow)
+    بازگشت {};
+  بازگشت BlockFrequency(ResultFrequency);
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  بازگشت OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
+تهی llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
                                   BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+  اگر (Freq == BlockFrequency(0)) {
     OS << "0";
-    return;
+    بازگشت;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  اگر (EntryFreq == BlockFrequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    بازگشت;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
+  Scaled_عدد<uint64_t> Block(Freq.getFrequency(), 0);
+  Scaled_عدد<uint64_t> Entry(EntryFreq.getFrequency(), 0);
   OS << Block / Entry;
 }

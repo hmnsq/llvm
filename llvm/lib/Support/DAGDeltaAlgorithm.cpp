@@ -30,29 +30,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DAGDeltaAlgorithm.h"
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <map>
-using namespace llvm;
+#شامل "llvm/ADT/DAGDeltaAlgorithm.h"
+#شامل "llvm/ADT/DeltaAlgorithm.h"
+#شامل "llvm/Support/Debug.h"
+#شامل "llvm/Support/Format.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <cassert>
+#شامل <map>
+using فضاینام llvm;
 
 #define DEBUG_TYPE "dag-delta"
 
-namespace {
+فضاینام {
 
-class DAGDeltaAlgorithmImpl {
-  friend class DeltaActiveSetHelper;
+رده DAGDeltaAlgorithmImpl {
+  friend رده DeltaActiveSetHelper;
 
-public:
+عمومی:
   using change_ty = DAGDeltaAlgorithm::change_ty;
   using changeset_ty = DAGDeltaAlgorithm::changeset_ty;
   using changesetlist_ty = DAGDeltaAlgorithm::changesetlist_ty;
   using edge_ty = DAGDeltaAlgorithm::edge_ty;
 
-private:
+خصوصی:
   using pred_iterator_ty = std::vector<change_ty>::iterator;
   using succ_iterator_ty = std::vector<change_ty>::iterator;
   using pred_closure_iterator_ty = std::set<change_ty>::iterator;
@@ -75,66 +75,66 @@ private:
   std::map<change_ty, std::set<change_ty> > PredClosure;
   std::map<change_ty, std::set<change_ty> > SuccClosure;
 
-private:
-  pred_iterator_ty pred_begin(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].begin();
+خصوصی:
+  pred_iterator_ty pred_begin(change_ty گره) {
+    أكد(Predecessors.شمار(گره) && "Invalid node!");
+    بازگشت Predecessors[گره].begin();
   }
-  pred_iterator_ty pred_end(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].end();
-  }
-
-  pred_closure_iterator_ty pred_closure_begin(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].begin();
-  }
-  pred_closure_iterator_ty pred_closure_end(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].end();
+  pred_iterator_ty pred_end(change_ty گره) {
+    أكد(Predecessors.شمار(گره) && "Invalid node!");
+    بازگشت Predecessors[گره].end();
   }
 
-  succ_iterator_ty succ_begin(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].begin();
+  pred_closure_iterator_ty pred_closure_begin(change_ty گره) {
+    أكد(PredClosure.شمار(گره) && "Invalid node!");
+    بازگشت PredClosure[گره].begin();
   }
-  succ_iterator_ty succ_end(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].end();
-  }
-
-  succ_closure_iterator_ty succ_closure_begin(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].begin();
-  }
-  succ_closure_iterator_ty succ_closure_end(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].end();
+  pred_closure_iterator_ty pred_closure_end(change_ty گره) {
+    أكد(PredClosure.شمار(گره) && "Invalid node!");
+    بازگشت PredClosure[گره].end();
   }
 
-  void UpdatedSearchState(const changeset_ty &Changes,
-                          const changesetlist_ty &Sets,
-                          const changeset_ty &Required) {
-    DDA.UpdatedSearchState(Changes, Sets, Required);
+  succ_iterator_ty succ_begin(change_ty گره) {
+    أكد(Successors.شمار(گره) && "Invalid node!");
+    بازگشت Successors[گره].begin();
+  }
+  succ_iterator_ty succ_end(change_ty گره) {
+    أكد(Successors.شمار(گره) && "Invalid node!");
+    بازگشت Successors[گره].end();
+  }
+
+  succ_closure_iterator_ty succ_closure_begin(change_ty گره) {
+    أكد(SuccClosure.شمار(گره) && "Invalid node!");
+    بازگشت SuccClosure[گره].begin();
+  }
+  succ_closure_iterator_ty succ_closure_end(change_ty گره) {
+    أكد(SuccClosure.شمار(گره) && "Invalid node!");
+    بازگشت SuccClosure[گره].end();
+  }
+
+  تهی Updated_جستجو_State(ثابت changeset_ty &Changes,
+                          ثابت changesetlist_ty &Sets,
+                          ثابت changeset_ty &Required) {
+    DDA.Updated_جستجو_State(Changes, Sets, Required);
   }
 
   /// ExecuteOneTest - Execute a single test predicate on the change set \p S.
-  bool ExecuteOneTest(const changeset_ty &S) {
+  منطقی ExecuteOneTest(ثابت changeset_ty &S) {
     // Check dependencies invariant.
     LLVM_DEBUG({
-      for (changeset_ty::const_iterator it = S.begin(), ie = S.end(); it != ie;
+      برای (changeset_ty::const_iterator it = S.begin(), ie = S.end(); it != ie;
            ++it)
-        for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
+        برای (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
              it2 != ie2; ++it2)
-          assert(S.count(*it2) && "Attempt to run invalid changeset!");
+          أكد(S.شمار(*it2) && "Attempt to run invalid changeset!");
     });
 
-    return DDA.ExecuteOneTest(S);
+    بازگشت DDA.ExecuteOneTest(S);
   }
 
-public:
-  DAGDeltaAlgorithmImpl(DAGDeltaAlgorithm &DDA, const changeset_ty &Changes,
-                        const std::vector<edge_ty> &Dependencies);
+عمومی:
+  DAGDeltaAlgorithmImpl(DAGDeltaAlgorithm &DDA, ثابت changeset_ty &Changes,
+                        ثابت std::vector<edge_ty> &Dependencies);
 
   changeset_ty Run();
 
@@ -146,92 +146,92 @@ public:
   /// \param Required - The set of changes which have previously been
   /// established to be required.
   /// \return - The test result.
-  bool GetTestResult(const changeset_ty &Changes, const changeset_ty &Required);
+  منطقی GetTestResult(ثابت changeset_ty &Changes, ثابت changeset_ty &Required);
 };
 
 /// Helper object for minimizing an active set of changes.
-class DeltaActiveSetHelper : public DeltaAlgorithm {
+رده DeltaActiveSetHelper : عمومی DeltaAlgorithm {
   DAGDeltaAlgorithmImpl &DDAI;
 
-  const changeset_ty &Required;
+  ثابت changeset_ty &Required;
 
-protected:
+محافظتشده:
   /// UpdatedSearchState - Callback used when the search state changes.
-  void UpdatedSearchState(const changeset_ty &Changes,
-                                  const changesetlist_ty &Sets) override {
-    DDAI.UpdatedSearchState(Changes, Sets, Required);
+  تهی Updated_جستجو_State(ثابت changeset_ty &Changes,
+                                  ثابت changesetlist_ty &Sets) override {
+    DDAI.Updated_جستجو_State(Changes, Sets, Required);
   }
 
-  bool ExecuteOneTest(const changeset_ty &S) override {
-    return DDAI.GetTestResult(S, Required);
+  منطقی ExecuteOneTest(ثابت changeset_ty &S) override {
+    بازگشت DDAI.GetTestResult(S, Required);
   }
 
-public:
+عمومی:
   DeltaActiveSetHelper(DAGDeltaAlgorithmImpl &DDAI,
-                       const changeset_ty &Required)
+                       ثابت changeset_ty &Required)
       : DDAI(DDAI), Required(Required) {}
 };
 
 } // namespace
 
 DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
-    DAGDeltaAlgorithm &DDA, const changeset_ty &Changes,
-    const std::vector<edge_ty> &Dependencies)
+    DAGDeltaAlgorithm &DDA, ثابت changeset_ty &Changes,
+    ثابت std::vector<edge_ty> &Dependencies)
     : DDA(DDA) {
-  for (change_ty Change : Changes) {
+  برای (change_ty Change : Changes) {
     Predecessors.try_emplace(Change);
     Successors.try_emplace(Change);
   }
-  for (const edge_ty &Dep : Dependencies) {
-    Predecessors[Dep.second].push_back(Dep.first);
-    Successors[Dep.first].push_back(Dep.second);
+  برای (ثابت edge_ty &Dep : Dependencies) {
+    Predecessors[Dep.second].افزودن_back(Dep.first);
+    Successors[Dep.first].افزودن_back(Dep.second);
   }
 
   // Compute the roots.
-  for (change_ty Change : Changes)
-    if (succ_begin(Change) == succ_end(Change))
-      Roots.push_back(Change);
+  برای (change_ty Change : Changes)
+    اگر (succ_begin(Change) == succ_end(Change))
+      Roots.افزودن_back(Change);
 
   // Pre-compute the closure of the successor relation.
   std::vector<change_ty> Worklist(Roots.begin(), Roots.end());
-  while (!Worklist.empty()) {
+  وقتی (!Worklist.empty()) {
     change_ty Change = Worklist.back();
-    Worklist.pop_back();
+    Worklist.برداشت_back();
 
     std::set<change_ty> &ChangeSuccs = SuccClosure[Change];
-    for (pred_iterator_ty it = pred_begin(Change),
+    برای (pred_iterator_ty it = pred_begin(Change),
            ie = pred_end(Change); it != ie; ++it) {
       auto &SC = SuccClosure[*it];
-      SC.insert(Change);
-      SC.insert(ChangeSuccs.begin(), ChangeSuccs.end());
-      Worklist.push_back(*it);
+      SC.درج(Change);
+      SC.درج(ChangeSuccs.begin(), ChangeSuccs.end());
+      Worklist.افزودن_back(*it);
     }
   }
 
   // Invert to form the predecessor closure map.
-  for (change_ty Change : Changes)
+  برای (change_ty Change : Changes)
     PredClosure.try_emplace(Change);
-  for (change_ty Change : Changes)
-    for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
+  برای (change_ty Change : Changes)
+    برای (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
                                   ie2 = succ_closure_end(Change);
          it2 != ie2; ++it2)
-      PredClosure[*it2].insert(Change);
+      PredClosure[*it2].درج(Change);
 
   // Dump useful debug info.
   LLVM_DEBUG({
     llvm::errs() << "-- DAGDeltaAlgorithmImpl --\n";
     llvm::errs() << "Changes: [";
-    for (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.end();
+    برای (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.end();
          it != ie; ++it) {
-      if (it != Changes.begin())
+      اگر (it != Changes.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
 
-      if (succ_begin(*it) != succ_end(*it)) {
+      اگر (succ_begin(*it) != succ_end(*it)) {
         llvm::errs() << "(";
-        for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
+        برای (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
              it2 != ie2; ++it2) {
-          if (it2 != succ_begin(*it))
+          اگر (it2 != succ_begin(*it))
             llvm::errs() << ", ";
           llvm::errs() << "->" << *it2;
         }
@@ -241,22 +241,22 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     llvm::errs() << "]\n";
 
     llvm::errs() << "Roots: [";
-    for (std::vector<change_ty>::const_iterator it = Roots.begin(),
+    برای (std::vector<change_ty>::const_iterator it = Roots.begin(),
                                                 ie = Roots.end();
          it != ie; ++it) {
-      if (it != Roots.begin())
+      اگر (it != Roots.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
     }
     llvm::errs() << "]\n";
 
     llvm::errs() << "Predecessor Closure:\n";
-    for (change_ty Change : Changes) {
+    برای (change_ty Change : Changes) {
       llvm::errs() << format("  %-4d: [", Change);
-      for (pred_closure_iterator_ty it2 = pred_closure_begin(Change),
+      برای (pred_closure_iterator_ty it2 = pred_closure_begin(Change),
                                     ie2 = pred_closure_end(Change);
            it2 != ie2; ++it2) {
-        if (it2 != pred_closure_begin(Change))
+        اگر (it2 != pred_closure_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -264,12 +264,12 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     }
 
     llvm::errs() << "Successor Closure:\n";
-    for (change_ty Change : Changes) {
+    برای (change_ty Change : Changes) {
       llvm::errs() << format("  %-4d: [", Change);
-      for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
+      برای (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
                                     ie2 = succ_closure_end(Change);
            it2 != ie2; ++it2) {
-        if (it2 != succ_closure_begin(Change))
+        اگر (it2 != succ_closure_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -280,21 +280,21 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
   });
 }
 
-bool DAGDeltaAlgorithmImpl::GetTestResult(const changeset_ty &Changes,
-                                          const changeset_ty &Required) {
+منطقی DAGDeltaAlgorithmImpl::GetTestResult(ثابت changeset_ty &Changes,
+                                          ثابت changeset_ty &Required) {
   changeset_ty Extended(Required);
-  Extended.insert(Changes.begin(), Changes.end());
-  for (change_ty Change : Changes)
-    Extended.insert(pred_closure_begin(Change), pred_closure_end(Change));
+  Extended.درج(Changes.begin(), Changes.end());
+  برای (change_ty Change : Changes)
+    Extended.درج(pred_closure_begin(Change), pred_closure_end(Change));
 
-  if (FailedTestsCache.count(Extended))
-    return false;
+  اگر (FailedTestsCache.شمار(Extended))
+    بازگشت نادرست;
 
-  bool Result = ExecuteOneTest(Extended);
-  if (!Result)
-    FailedTestsCache.insert(Extended);
+  منطقی Result = ExecuteOneTest(Extended);
+  اگر (!Result)
+    FailedTestsCache.درج(Extended);
 
-  return Result;
+  بازگشت Result;
 }
 
 DAGDeltaAlgorithm::changeset_ty
@@ -310,14 +310,14 @@ DAGDeltaAlgorithmImpl::Run() {
   //
   // Invariant:  CurrentSet intersect Required == {}
   // Invariant:  Required == (Required union succ*(Required))
-  while (!CurrentSet.empty()) {
+  وقتی (!CurrentSet.empty()) {
     LLVM_DEBUG({
       llvm::errs() << "DAG_DD - " << CurrentSet.size() << " active changes, "
                    << Required.size() << " required changes\n";
     });
 
     // Minimize the current set of changes.
-    DeltaActiveSetHelper Helper(*this, Required);
+    DeltaActiveSetHelper Helper(*این, Required);
     changeset_ty CurrentMinSet = Helper.Run(CurrentSet);
 
     // Update the set of required changes. Since
@@ -327,26 +327,26 @@ DAGDeltaAlgorithmImpl::Run() {
     // then
     //   succ(CurrentMinSet) subset Required
     // and our invariant on Required is maintained.
-    Required.insert(CurrentMinSet.begin(), CurrentMinSet.end());
+    Required.درج(CurrentMinSet.begin(), CurrentMinSet.end());
 
     // Replace the current set with the predecssors of the minimized set of
     // active changes.
     CurrentSet.clear();
-    for (change_ty CT : CurrentMinSet)
-      CurrentSet.insert(pred_begin(CT), pred_end(CT));
+    برای (change_ty CT : CurrentMinSet)
+      CurrentSet.درج(pred_begin(CT), pred_end(CT));
 
     // FIXME: We could enforce CurrentSet intersect Required == {} here if we
     // wanted to protect against cyclic graphs.
   }
 
-  return Required;
+  بازگشت Required;
 }
 
-void DAGDeltaAlgorithm::anchor() {
+تهی DAGDeltaAlgorithm::anchor() {
 }
 
 DAGDeltaAlgorithm::changeset_ty
-DAGDeltaAlgorithm::Run(const changeset_ty &Changes,
-                       const std::vector<edge_ty> &Dependencies) {
-  return DAGDeltaAlgorithmImpl(*this, Changes, Dependencies).Run();
+DAGDeltaAlgorithm::Run(ثابت changeset_ty &Changes,
+                       ثابت std::vector<edge_ty> &Dependencies) {
+  بازگشت DAGDeltaAlgorithmImpl(*این, Changes, Dependencies).Run();
 }

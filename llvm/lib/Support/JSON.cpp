@@ -6,310 +6,310 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/JSON.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
-#include <cerrno>
-#include <optional>
+#شامل "llvm/Support/JSON.h"
+#شامل "llvm/ADT/STLExtras.h"
+#شامل "llvm/ADT/StringExtras.h"
+#شامل "llvm/Support/ConvertUTF.h"
+#شامل "llvm/Support/Error.h"
+#شامل "llvm/Support/Format.h"
+#شامل "llvm/Support/NativeFormatting.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <cctype>
+#شامل <cerrno>
+#شامل <optional>
 
-namespace llvm {
-namespace json {
+فضاینام llvm {
+فضاینام json {
 
-Value &Object::operator[](const ObjectKey &K) {
-  return try_emplace(K, nullptr).first->getSecond();
+مقدار &Object::operator[](ثابت Object_کلید &K) {
+  بازگشت try_emplace(K, nullptr).first->getSecond();
 }
-Value &Object::operator[](ObjectKey &&K) {
-  return try_emplace(std::move(K), nullptr).first->getSecond();
+مقدار &Object::operator[](Object_کلید &&K) {
+  بازگشت try_emplace(std::move(K), nullptr).first->getSecond();
 }
-Value *Object::get(StringRef K) {
+مقدار *Object::get(StringRef K) {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  اگر (I == end())
+    بازگشت nullptr;
+  بازگشت &I->second;
 }
-const Value *Object::get(StringRef K) const {
+ثابت مقدار *Object::get(StringRef K) ثابت {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  اگر (I == end())
+    بازگشت nullptr;
+  بازگشت &I->second;
 }
-std::optional<std::nullptr_t> Object::getNull(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNull();
-  return std::nullopt;
+std::optional<std::nullptr_t> Object::getNull(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->getAsNull();
+  بازگشت std::nullopt;
 }
-std::optional<bool> Object::getBoolean(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsBoolean();
-  return std::nullopt;
+std::optional<منطقی> Object::getBoolean(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->getAsBoolean();
+  بازگشت std::nullopt;
 }
-std::optional<double> Object::getNumber(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNumber();
-  return std::nullopt;
+std::optional<دوگانه> Object::get_عدد(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->get_As_عدد();
+  بازگشت std::nullopt;
 }
-std::optional<int64_t> Object::getInteger(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsInteger();
-  return std::nullopt;
+std::optional<int64_t> Object::getInteger(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->getAsInteger();
+  بازگشت std::nullopt;
 }
-std::optional<llvm::StringRef> Object::getString(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsString();
-  return std::nullopt;
+std::optional<llvm::StringRef> Object::getString(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->getAsString();
+  بازگشت std::nullopt;
 }
-const json::Object *Object::getObject(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+ثابت json::Object *Object::getObject(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->getAsObject();
+  بازگشت nullptr;
 }
 json::Object *Object::getObject(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+  اگر (auto *V = get(K))
+    بازگشت V->getAsObject();
+  بازگشت nullptr;
 }
-const json::Array *Object::getArray(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+ثابت json::Array *Object::getArray(StringRef K) ثابت {
+  اگر (auto *V = get(K))
+    بازگشت V->getAsArray();
+  بازگشت nullptr;
 }
 json::Array *Object::getArray(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+  اگر (auto *V = get(K))
+    بازگشت V->getAsArray();
+  بازگشت nullptr;
 }
-bool operator==(const Object &LHS, const Object &RHS) { return LHS.M == RHS.M; }
+منطقی operator==(ثابت Object &LHS, ثابت Object &RHS) { بازگشت LHS.M == RHS.M; }
 
-Array::Array(std::initializer_list<Value> Elements) {
+Array::Array(std::initializer_list<مقدار> Elements) {
   V.reserve(Elements.size());
-  for (const Value &V : Elements) {
+  برای (ثابت مقدار &V : Elements) {
     emplace_back(nullptr);
     back().moveFrom(std::move(V));
   }
 }
 
-Value::Value(std::initializer_list<Value> Elements)
-    : Value(json::Array(Elements)) {}
+مقدار::مقدار(std::initializer_list<مقدار> Elements)
+    : مقدار(json::Array(Elements)) {}
 
-void Value::copyFrom(const Value &M) {
+تهی مقدار::copyFrom(ثابت مقدار &M) {
   Type = M.Type;
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    memcpy(&Union, &M.Union, sizeof(Union));
-    break;
-  case T_StringRef:
+  انتخاب (Type) {
+  حالت T_Null:
+  حالت T_Boolean:
+  حالت T_Double:
+  حالت T_Integer:
+  حالت T_UINT64:
+    memcpy(&Union, &M.Union, اندازه(Union));
+    بشکن;
+  حالت T_StringRef:
     create<StringRef>(M.as<StringRef>());
-    break;
-  case T_String:
+    بشکن;
+  حالت T_String:
     create<std::string>(M.as<std::string>());
-    break;
-  case T_Object:
+    بشکن;
+  حالت T_Object:
     create<json::Object>(M.as<json::Object>());
-    break;
-  case T_Array:
+    بشکن;
+  حالت T_Array:
     create<json::Array>(M.as<json::Array>());
-    break;
+    بشکن;
   }
 }
 
-void Value::moveFrom(const Value &&M) {
+تهی مقدار::moveFrom(ثابت مقدار &&M) {
   Type = M.Type;
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    memcpy(&Union, &M.Union, sizeof(Union));
-    break;
-  case T_StringRef:
+  انتخاب (Type) {
+  حالت T_Null:
+  حالت T_Boolean:
+  حالت T_Double:
+  حالت T_Integer:
+  حالت T_UINT64:
+    memcpy(&Union, &M.Union, اندازه(Union));
+    بشکن;
+  حالت T_StringRef:
     create<StringRef>(M.as<StringRef>());
-    break;
-  case T_String:
+    بشکن;
+  حالت T_String:
     create<std::string>(std::move(M.as<std::string>()));
-    break;
-  case T_Object:
+    بشکن;
+  حالت T_Object:
     create<json::Object>(std::move(M.as<json::Object>()));
-    break;
-  case T_Array:
+    بشکن;
+  حالت T_Array:
     create<json::Array>(std::move(M.as<json::Array>()));
-    break;
+    بشکن;
   }
-  const_cast<Value &>(M).destroy();
+  const_cast<مقدار &>(M).destroy();
   M.Type = T_Null;
 }
 
-void Value::destroy() {
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    break;
-  case T_StringRef:
+تهی مقدار::destroy() {
+  انتخاب (Type) {
+  حالت T_Null:
+  حالت T_Boolean:
+  حالت T_Double:
+  حالت T_Integer:
+  حالت T_UINT64:
+    بشکن;
+  حالت T_StringRef:
     as<StringRef>().~StringRef();
-    break;
-  case T_String:
+    بشکن;
+  حالت T_String:
     as<std::string>().~basic_string();
-    break;
-  case T_Object:
+    بشکن;
+  حالت T_Object:
     as<json::Object>().~Object();
-    break;
-  case T_Array:
+    بشکن;
+  حالت T_Array:
     as<json::Array>().~Array();
-    break;
+    بشکن;
   }
 }
 
-void Value::print(llvm::raw_ostream &OS) const { OS << *this; }
+تهی مقدار::print(llvm::raw_ostream &OS) ثابت { OS << *این; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Value::dump() const {
+#اگر !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD تهی مقدار::dump() ثابت {
   print(llvm::dbgs());
   llvm::dbgs() << '\n';
 }
 #endif
 
-bool operator==(const Value &L, const Value &R) {
-  if (L.kind() != R.kind())
-    return false;
-  switch (L.kind()) {
-  case Value::Null:
-    return *L.getAsNull() == *R.getAsNull();
-  case Value::Boolean:
-    return *L.getAsBoolean() == *R.getAsBoolean();
-  case Value::Number:
+منطقی operator==(ثابت مقدار &L, ثابت مقدار &R) {
+  اگر (L.kind() != R.kind())
+    بازگشت نادرست;
+  انتخاب (L.kind()) {
+  حالت مقدار::Null:
+    بازگشت *L.getAsNull() == *R.getAsNull();
+  حالت مقدار::Boolean:
+    بازگشت *L.getAsBoolean() == *R.getAsBoolean();
+  حالت مقدار::عدد:
     // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=323
     // The same integer must convert to the same double, per the standard.
     // However we see 64-vs-80-bit precision comparisons with gcc-7 -O3 -m32.
     // So we avoid floating point promotion for exact comparisons.
-    if (L.Type == Value::T_Integer || R.Type == Value::T_Integer)
-      return L.getAsInteger() == R.getAsInteger();
-    return *L.getAsNumber() == *R.getAsNumber();
-  case Value::String:
-    return *L.getAsString() == *R.getAsString();
-  case Value::Array:
-    return *L.getAsArray() == *R.getAsArray();
-  case Value::Object:
-    return *L.getAsObject() == *R.getAsObject();
+    اگر (L.Type == مقدار::T_Integer || R.Type == مقدار::T_Integer)
+      بازگشت L.getAsInteger() == R.getAsInteger();
+    بازگشت *L.get_As_عدد() == *R.get_As_عدد();
+  حالت مقدار::String:
+    بازگشت *L.getAsString() == *R.getAsString();
+  حالت مقدار::Array:
+    بازگشت *L.getAsArray() == *R.getAsArray();
+  حالت مقدار::Object:
+    بازگشت *L.getAsObject() == *R.getAsObject();
   }
   llvm_unreachable("Unknown value kind");
 }
 
-void Path::report(llvm::StringLiteral Msg) {
+تهی Path::report(llvm::StringLiteral پیام_2) {
   // Walk up to the root context, and count the number of segments.
-  unsigned Count = 0;
-  const Path *P;
-  for (P = this; P->Parent != nullptr; P = P->Parent)
-    ++Count;
-  Path::Root *R = P->Seg.root();
+  unsigned شمار_2 = 0;
+  ثابت Path *P;
+  برای (P = این; P->Parent != nullptr; P = P->Parent)
+    ++شمار_2;
+  Path::ریشه_2 *R = P->Seg.ریشه_3();
   // Fill in the error message and copy the path (in reverse order).
-  R->ErrorMessage = Msg;
-  R->ErrorPath.resize(Count);
+  R->ErrorMessage = پیام_2;
+  R->ErrorPath.resize(شمار_2);
   auto It = R->ErrorPath.begin();
-  for (P = this; P->Parent != nullptr; P = P->Parent)
+  برای (P = این; P->Parent != nullptr; P = P->Parent)
     *It++ = P->Seg;
 }
 
-Error Path::Root::getError() const {
+Error Path::ریشه_2::getError() ثابت {
   std::string S;
   raw_string_ostream OS(S);
   OS << (ErrorMessage.empty() ? "invalid JSON contents" : ErrorMessage);
-  if (ErrorPath.empty()) {
-    if (!Name.empty())
+  اگر (ErrorPath.empty()) {
+    اگر (!Name.empty())
       OS << " when parsing " << Name;
-  } else {
+  } وگرنه {
     OS << " at " << (Name.empty() ? "(root)" : Name);
-    for (const Path::Segment &S : llvm::reverse(ErrorPath)) {
-      if (S.isField())
+    برای (ثابت Path::Segment &S : llvm::reverse(ErrorPath)) {
+      اگر (S.isField())
         OS << '.' << S.field();
-      else
+      وگرنه
         OS << '[' << S.index() << ']';
     }
   }
-  return createStringError(llvm::inconvertibleErrorCode(), S);
+  بازگشت createStringError(llvm::inconvertibleErrorCode(), S);
 }
 
-std::vector<const Object::value_type *> sortedElements(const Object &O) {
-  std::vector<const Object::value_type *> Elements;
-  for (const auto &E : O)
-    Elements.push_back(&E);
+std::vector<ثابت Object::مقدار_type *> sortedElements(ثابت Object &O) {
+  std::vector<ثابت Object::مقدار_type *> Elements;
+  برای (ثابت auto &E : O)
+    Elements.افزودن_back(&E);
   llvm::sort(Elements,
-             [](const Object::value_type *L, const Object::value_type *R) {
-               return L->first < R->first;
+             [](ثابت Object::مقدار_type *L, ثابت Object::مقدار_type *R) {
+               بازگشت L->first < R->first;
              });
-  return Elements;
+  بازگشت Elements;
 }
 
 // Prints a one-line version of a value that isn't our main focus.
 // We interleave writes to OS and JOS, exploiting the lack of extra buffering.
 // This is OK as we own the implementation.
-static void abbreviate(const Value &V, OStream &JOS) {
-  switch (V.kind()) {
-  case Value::Array:
-    JOS.rawValue(V.getAsArray()->empty() ? "[]" : "[ ... ]");
-    break;
-  case Value::Object:
-    JOS.rawValue(V.getAsObject()->empty() ? "{}" : "{ ... }");
-    break;
-  case Value::String: {
+ایستا تهی abbreviate(ثابت مقدار &V, OStream &JOS) {
+  انتخاب (V.kind()) {
+  حالت مقدار::Array:
+    JOS.raw_مقدار(V.getAsArray()->empty() ? "[]" : "[ ... ]");
+    بشکن;
+  حالت مقدار::Object:
+    JOS.raw_مقدار(V.getAsObject()->empty() ? "{}" : "{ ... }");
+    بشکن;
+  حالت مقدار::String: {
     llvm::StringRef S = *V.getAsString();
-    if (S.size() < 40) {
-      JOS.value(V);
-    } else {
+    اگر (S.size() < 40) {
+      JOS.مقدار_2(V);
+    } وگرنه {
       std::string Truncated = fixUTF8(S.take_front(37));
       Truncated.append("...");
-      JOS.value(Truncated);
+      JOS.مقدار_2(Truncated);
     }
-    break;
+    بشکن;
   }
-  default:
-    JOS.value(V);
+  پیشفرض:
+    JOS.مقدار_2(V);
   }
 }
 
 // Prints a semi-expanded version of a value that is our main focus.
 // Array/Object entries are printed, but not recursively as they may be huge.
-static void abbreviateChildren(const Value &V, OStream &JOS) {
-  switch (V.kind()) {
-  case Value::Array:
+ایستا تهی abbreviateChildren(ثابت مقدار &V, OStream &JOS) {
+  انتخاب (V.kind()) {
+  حالت مقدار::Array:
     JOS.array([&] {
-      for (const auto &I : *V.getAsArray())
+      برای (ثابت auto &I : *V.getAsArray())
         abbreviate(I, JOS);
     });
-    break;
-  case Value::Object:
+    بشکن;
+  حالت مقدار::Object:
     JOS.object([&] {
-      for (const auto *KV : sortedElements(*V.getAsObject())) {
+      برای (ثابت auto *KV : sortedElements(*V.getAsObject())) {
         JOS.attributeBegin(KV->first);
         abbreviate(KV->second, JOS);
         JOS.attributeEnd();
       }
     });
-    break;
-  default:
-    JOS.value(V);
+    بشکن;
+  پیشفرض:
+    JOS.مقدار_2(V);
   }
 }
 
-void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
+تهی Path::ریشه_2::printErrorContext(ثابت مقدار &R, raw_ostream &OS) ثابت {
   OStream JOS(OS, /*IndentSize=*/2);
   // PrintValue recurses down the path, printing the ancestors of our target.
   // Siblings of nodes along the path are printed with abbreviate(), and the
   // target itself is printed with the somewhat richer abbreviateChildren().
   // 'Recurse' is the lambda itself, to allow recursive calls.
-  auto PrintValue = [&](const Value &V, ArrayRef<Segment> Path, auto &Recurse) {
+  auto Print_مقدار = [&](ثابت مقدار &V, ArrayRef<Segment> Path, auto &Recurse) {
     // Print the target node itself, with the error as a comment.
     // Also used if we can't follow our path, e.g. it names a field that
     // *should* exist but doesn't.
@@ -319,288 +319,288 @@ void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
       JOS.comment(Comment);
       abbreviateChildren(V, JOS);
     };
-    if (Path.empty()) // We reached our target.
-      return HighlightCurrent();
-    const Segment &S = Path.back(); // Path is in reverse order.
-    if (S.isField()) {
+    اگر (Path.empty()) // We reached our target.
+      بازگشت HighlightCurrent();
+    ثابت Segment &S = Path.back(); // Path is in reverse order.
+    اگر (S.isField()) {
       // Current node is an object, path names a field.
       llvm::StringRef FieldName = S.field();
-      const Object *O = V.getAsObject();
-      if (!O || !O->get(FieldName))
-        return HighlightCurrent();
+      ثابت Object *O = V.getAsObject();
+      اگر (!O || !O->get(FieldName))
+        بازگشت HighlightCurrent();
       JOS.object([&] {
-        for (const auto *KV : sortedElements(*O)) {
+        برای (ثابت auto *KV : sortedElements(*O)) {
           JOS.attributeBegin(KV->first);
-          if (FieldName == StringRef(KV->first))
+          اگر (FieldName == StringRef(KV->first))
             Recurse(KV->second, Path.drop_back(), Recurse);
-          else
+          وگرنه
             abbreviate(KV->second, JOS);
           JOS.attributeEnd();
         }
       });
-    } else {
+    } وگرنه {
       // Current node is an array, path names an element.
-      const Array *A = V.getAsArray();
-      if (!A || S.index() >= A->size())
-        return HighlightCurrent();
+      ثابت Array *A = V.getAsArray();
+      اگر (!A || S.index() >= A->size())
+        بازگشت HighlightCurrent();
       JOS.array([&] {
         unsigned Current = 0;
-        for (const auto &V : *A) {
-          if (Current++ == S.index())
+        برای (ثابت auto &V : *A) {
+          اگر (Current++ == S.index())
             Recurse(V, Path.drop_back(), Recurse);
-          else
+          وگرنه
             abbreviate(V, JOS);
         }
       });
     }
   };
-  PrintValue(R, ErrorPath, PrintValue);
+  Print_مقدار(R, ErrorPath, Print_مقدار);
 }
 
-namespace {
+فضاینام {
 // Simple recursive-descent JSON parser.
-class Parser {
-public:
+رده Parser {
+عمومی:
   Parser(StringRef JSON)
       : Start(JSON.begin()), P(JSON.begin()), End(JSON.end()) {}
 
-  bool checkUTF8() {
+  منطقی checkUTF8() {
     size_t ErrOffset;
-    if (isUTF8(StringRef(Start, End - Start), &ErrOffset))
-      return true;
+    اگر (isUTF8(StringRef(Start, End - Start), &ErrOffset))
+      بازگشت درست;
     P = Start + ErrOffset; // For line/column calculation.
-    return parseError("Invalid UTF-8 sequence");
+    بازگشت parseError("Invalid UTF-8 sequence");
   }
 
-  bool parseValue(Value &Out);
+  منطقی parse_مقدار(مقدار &Out);
 
-  bool assertEnd() {
+  منطقی assertEnd() {
     eatWhitespace();
-    if (P == End)
-      return true;
-    return parseError("Text after end of document");
+    اگر (P == End)
+      بازگشت درست;
+    بازگشت parseError("Text after end of document");
   }
 
   Error takeError() {
-    assert(Err);
-    return std::move(*Err);
+    أكد(Err);
+    بازگشت std::move(*Err);
   }
 
-private:
-  void eatWhitespace() {
-    while (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
+خصوصی:
+  تهی eatWhitespace() {
+    وقتی (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
       ++P;
   }
 
   // On invalid syntax, parseX() functions return false and set Err.
-  bool parseNumber(char First, Value &Out);
-  bool parseString(std::string &Out);
-  bool parseUnicode(std::string &Out);
-  bool parseError(const char *Msg); // always returns false
+  منطقی parse_عدد(نویسه First, مقدار &Out);
+  منطقی parseString(std::string &Out);
+  منطقی parseUnicode(std::string &Out);
+  منطقی parseError(ثابت نویسه *پیام_2); // always returns false
 
-  char next() { return P == End ? 0 : *P++; }
-  char peek() { return P == End ? 0 : *P; }
-  static bool isNumber(char C) {
-    return C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
+  نویسه next() { بازگشت P == End ? 0 : *P++; }
+  نویسه peek() { بازگشت P == End ? 0 : *P; }
+  ایستا منطقی is_عدد(نویسه C) {
+    بازگشت C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
            C == '5' || C == '6' || C == '7' || C == '8' || C == '9' ||
            C == 'e' || C == 'E' || C == '+' || C == '-' || C == '.';
   }
 
   std::optional<Error> Err;
-  const char *Start, *P, *End;
+  ثابت نویسه *Start, *P, *End;
 };
 } // namespace
 
-bool Parser::parseValue(Value &Out) {
+منطقی Parser::parse_مقدار(مقدار &Out) {
   eatWhitespace();
-  if (P == End)
-    return parseError("Unexpected EOF");
-  switch (char C = next()) {
+  اگر (P == End)
+    بازگشت parseError("Unexpected EOF");
+  انتخاب (نویسه C = next()) {
   // Bare null/true/false are easy - first char identifies them.
-  case 'n':
+  حالت 'n':
     Out = nullptr;
-    return (next() == 'u' && next() == 'l' && next() == 'l') ||
+    بازگشت (next() == 'u' && next() == 'l' && next() == 'l') ||
            parseError("Invalid JSON value (null?)");
-  case 't':
-    Out = true;
-    return (next() == 'r' && next() == 'u' && next() == 'e') ||
+  حالت 't':
+    Out = درست;
+    بازگشت (next() == 'r' && next() == 'u' && next() == 'e') ||
            parseError("Invalid JSON value (true?)");
-  case 'f':
-    Out = false;
-    return (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
+  حالت 'f':
+    Out = نادرست;
+    بازگشت (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
            parseError("Invalid JSON value (false?)");
-  case '"': {
+  حالت '"': {
     std::string S;
-    if (parseString(S)) {
+    اگر (parseString(S)) {
       Out = std::move(S);
-      return true;
+      بازگشت درست;
     }
-    return false;
+    بازگشت نادرست;
   }
-  case '[': {
+  حالت '[': {
     Out = Array{};
     Array &A = *Out.getAsArray();
     eatWhitespace();
-    if (peek() == ']') {
+    اگر (peek() == ']') {
       ++P;
-      return true;
+      بازگشت درست;
     }
-    for (;;) {
+    برای (;;) {
       A.emplace_back(nullptr);
-      if (!parseValue(A.back()))
-        return false;
+      اگر (!parse_مقدار(A.back()))
+        بازگشت نادرست;
       eatWhitespace();
-      switch (next()) {
-      case ',':
+      انتخاب (next()) {
+      حالت ',':
         eatWhitespace();
-        continue;
-      case ']':
-        return true;
-      default:
-        return parseError("Expected , or ] after array element");
+        ادامه;
+      حالت ']':
+        بازگشت درست;
+      پیشفرض:
+        بازگشت parseError("Expected , or ] after array element");
       }
     }
   }
-  case '{': {
+  حالت '{': {
     Out = Object{};
     Object &O = *Out.getAsObject();
     eatWhitespace();
-    if (peek() == '}') {
+    اگر (peek() == '}') {
       ++P;
-      return true;
+      بازگشت درست;
     }
-    for (;;) {
-      if (next() != '"')
-        return parseError("Expected object key");
+    برای (;;) {
+      اگر (next() != '"')
+        بازگشت parseError("Expected object key");
       std::string K;
-      if (!parseString(K))
-        return false;
+      اگر (!parseString(K))
+        بازگشت نادرست;
       eatWhitespace();
-      if (next() != ':')
-        return parseError("Expected : after object key");
+      اگر (next() != ':')
+        بازگشت parseError("Expected : after object key");
       eatWhitespace();
-      if (!parseValue(O[std::move(K)]))
-        return false;
+      اگر (!parse_مقدار(O[std::move(K)]))
+        بازگشت نادرست;
       eatWhitespace();
-      switch (next()) {
-      case ',':
+      انتخاب (next()) {
+      حالت ',':
         eatWhitespace();
-        continue;
-      case '}':
-        return true;
-      default:
-        return parseError("Expected , or } after object property");
+        ادامه;
+      حالت '}':
+        بازگشت درست;
+      پیشفرض:
+        بازگشت parseError("Expected , or } after object property");
       }
     }
   }
-  default:
-    if (isNumber(C))
-      return parseNumber(C, Out);
-    return parseError("Invalid JSON value");
+  پیشفرض:
+    اگر (is_عدد(C))
+      بازگشت parse_عدد(C, Out);
+    بازگشت parseError("Invalid JSON value");
   }
 }
 
-bool Parser::parseNumber(char First, Value &Out) {
+منطقی Parser::parse_عدد(نویسه First, مقدار &Out) {
   // Read the number into a string. (Must be null-terminated for strto*).
   SmallString<24> S;
-  S.push_back(First);
-  while (isNumber(peek()))
-    S.push_back(next());
-  char *End;
+  S.افزودن_back(First);
+  وقتی (is_عدد(peek()))
+    S.افزودن_back(next());
+  نویسه *End;
   // Try first to parse as integer, and if so preserve full 64 bits.
   // We check for errno for out of bounds errors and for End == S.end()
   // to make sure that the numeric string is not malformed.
   errno = 0;
   int64_t I = std::strtoll(S.c_str(), &End, 10);
-  if (End == S.end() && errno != ERANGE) {
+  اگر (End == S.end() && errno != ERANGE) {
     Out = I;
-    return true;
+    بازگشت درست;
   }
   // strtroull has a special handling for negative numbers, but in this
   // case we don't want to do that because negative numbers were already
   // handled in the previous block.
-  if (First != '-') {
+  اگر (First != '-') {
     errno = 0;
     uint64_t UI = std::strtoull(S.c_str(), &End, 10);
-    if (End == S.end() && errno != ERANGE) {
+    اگر (End == S.end() && errno != ERANGE) {
       Out = UI;
-      return true;
+      بازگشت درست;
     }
   }
   // If it's not an integer
   Out = std::strtod(S.c_str(), &End);
-  return End == S.end() || parseError("Invalid JSON value (number?)");
+  بازگشت End == S.end() || parseError("Invalid JSON value (number?)");
 }
 
-bool Parser::parseString(std::string &Out) {
+منطقی Parser::parseString(std::string &Out) {
   // leading quote was already consumed.
-  for (char C = next(); C != '"'; C = next()) {
-    if (LLVM_UNLIKELY(P == End))
-      return parseError("Unterminated string");
-    if (LLVM_UNLIKELY((C & 0x1f) == C))
-      return parseError("Control character in string");
-    if (LLVM_LIKELY(C != '\\')) {
-      Out.push_back(C);
-      continue;
+  برای (نویسه C = next(); C != '"'; C = next()) {
+    اگر (LLVM_UNLIKELY(P == End))
+      بازگشت parseError("Unterminated string");
+    اگر (LLVM_UNLIKELY((C & 0x1f) == C))
+      بازگشت parseError("Control character in string");
+    اگر (LLVM_LIKELY(C != '\\')) {
+      Out.افزودن_back(C);
+      ادامه;
     }
     // Handle escape sequence.
-    switch (C = next()) {
-    case '"':
-    case '\\':
-    case '/':
-      Out.push_back(C);
-      break;
-    case 'b':
-      Out.push_back('\b');
-      break;
-    case 'f':
-      Out.push_back('\f');
-      break;
-    case 'n':
-      Out.push_back('\n');
-      break;
-    case 'r':
-      Out.push_back('\r');
-      break;
-    case 't':
-      Out.push_back('\t');
-      break;
-    case 'u':
-      if (!parseUnicode(Out))
-        return false;
-      break;
-    default:
-      return parseError("Invalid escape sequence");
+    انتخاب (C = next()) {
+    حالت '"':
+    حالت '\\':
+    حالت '/':
+      Out.افزودن_back(C);
+      بشکن;
+    حالت 'b':
+      Out.افزودن_back('\b');
+      بشکن;
+    حالت 'f':
+      Out.افزودن_back('\f');
+      بشکن;
+    حالت 'n':
+      Out.افزودن_back('\n');
+      بشکن;
+    حالت 'r':
+      Out.افزودن_back('\r');
+      بشکن;
+    حالت 't':
+      Out.افزودن_back('\t');
+      بشکن;
+    حالت 'u':
+      اگر (!parseUnicode(Out))
+        بازگشت نادرست;
+      بشکن;
+    پیشفرض:
+      بازگشت parseError("Invalid escape sequence");
     }
   }
-  return true;
+  بازگشت درست;
 }
 
-static void encodeUtf8(uint32_t Rune, std::string &Out) {
-  if (Rune < 0x80) {
-    Out.push_back(Rune & 0x7F);
-  } else if (Rune < 0x800) {
+ایستا تهی encodeUtf8(uint32_t Rune, std::string &Out) {
+  اگر (Rune < 0x80) {
+    Out.افزودن_back(Rune & 0x7F);
+  } وگرنه اگر (Rune < 0x800) {
     uint8_t FirstByte = 0xC0 | ((Rune & 0x7C0) >> 6);
     uint8_t SecondByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-  } else if (Rune < 0x10000) {
+    Out.افزودن_back(FirstByte);
+    Out.افزودن_back(SecondByte);
+  } وگرنه اگر (Rune < 0x10000) {
     uint8_t FirstByte = 0xE0 | ((Rune & 0xF000) >> 12);
     uint8_t SecondByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t ThirdByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-  } else if (Rune < 0x110000) {
+    Out.افزودن_back(FirstByte);
+    Out.افزودن_back(SecondByte);
+    Out.افزودن_back(ThirdByte);
+  } وگرنه اگر (Rune < 0x110000) {
     uint8_t FirstByte = 0xF0 | ((Rune & 0x1F0000) >> 18);
     uint8_t SecondByte = 0x80 | ((Rune & 0x3F000) >> 12);
     uint8_t ThirdByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t FourthByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-    Out.push_back(FourthByte);
-  } else {
+    Out.افزودن_back(FirstByte);
+    Out.افزودن_back(SecondByte);
+    Out.افزودن_back(ThirdByte);
+    Out.افزودن_back(FourthByte);
+  } وگرنه {
     llvm_unreachable("Invalid codepoint");
   }
 }
@@ -609,325 +609,325 @@ static void encodeUtf8(uint32_t Rune, std::string &Out) {
 // May parse several sequential escapes to ensure proper surrogate handling.
 // We do not use ConvertUTF.h, it can't accept and replace unpaired surrogates.
 // These are invalid Unicode but valid JSON (RFC 8259, section 8.2).
-bool Parser::parseUnicode(std::string &Out) {
+منطقی Parser::parseUnicode(std::string &Out) {
   // Invalid UTF is not a JSON error (RFC 8529§8.2). It gets replaced by U+FFFD.
   auto Invalid = [&] { Out.append(/* UTF-8 */ {'\xef', '\xbf', '\xbd'}); };
   // Decodes 4 hex digits from the stream into Out, returns false on error.
-  auto Parse4Hex = [this](uint16_t &Out) -> bool {
+  auto Parse4Hex = [این](uint16_t &Out) -> منطقی {
     Out = 0;
-    char Bytes[] = {next(), next(), next(), next()};
-    for (unsigned char C : Bytes) {
-      if (!std::isxdigit(C))
-        return parseError("Invalid \\u escape sequence");
+    نویسه Bytes[] = {next(), next(), next(), next()};
+    برای (unsigned نویسه C : Bytes) {
+      اگر (!std::isxdigit(C))
+        بازگشت parseError("Invalid \\u escape sequence");
       Out <<= 4;
       Out |= (C > '9') ? (C & ~0x20) - 'A' + 10 : (C - '0');
     }
-    return true;
+    بازگشت درست;
   };
   uint16_t First; // UTF-16 code unit from the first \u escape.
-  if (!Parse4Hex(First))
-    return false;
+  اگر (!Parse4Hex(First))
+    بازگشت نادرست;
 
   // We loop to allow proper surrogate-pair error handling.
-  while (true) {
+  وقتی (درست) {
     // Case 1: the UTF-16 code unit is already a codepoint in the BMP.
-    if (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
+    اگر (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
       encodeUtf8(First, Out);
-      return true;
+      بازگشت درست;
     }
 
     // Case 2: it's an (unpaired) trailing surrogate.
-    if (LLVM_UNLIKELY(First >= 0xDC00)) {
+    اگر (LLVM_UNLIKELY(First >= 0xDC00)) {
       Invalid();
-      return true;
+      بازگشت درست;
     }
 
     // Case 3: it's a leading surrogate. We expect a trailing one next.
     // Case 3a: there's no trailing \u escape. Don't advance in the stream.
-    if (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
+    اگر (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
       Invalid(); // Leading surrogate was unpaired.
-      return true;
+      بازگشت درست;
     }
     P += 2;
     uint16_t Second;
-    if (!Parse4Hex(Second))
-      return false;
+    اگر (!Parse4Hex(Second))
+      بازگشت نادرست;
     // Case 3b: there was another \u escape, but it wasn't a trailing surrogate.
-    if (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
+    اگر (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
       Invalid();      // Leading surrogate was unpaired.
       First = Second; // Second escape still needs to be processed.
-      continue;
+      ادامه;
     }
     // Case 3c: a valid surrogate pair encoding an astral codepoint.
     encodeUtf8(0x10000 | ((First - 0xD800) << 10) | (Second - 0xDC00), Out);
-    return true;
+    بازگشت درست;
   }
 }
 
-bool Parser::parseError(const char *Msg) {
-  int Line = 1;
-  const char *StartOfLine = Start;
-  for (const char *X = Start; X < P; ++X) {
-    if (*X == 0x0A) {
-      ++Line;
-      StartOfLine = X + 1;
+منطقی Parser::parseError(ثابت نویسه *پیام_2) {
+  صحیح سطر = 1;
+  ثابت نویسه *Start_Of_سطر = Start;
+  برای (ثابت نویسه *X = Start; X < P; ++X) {
+    اگر (*X == 0x0A) {
+      ++سطر;
+      Start_Of_سطر = X + 1;
     }
   }
   Err.emplace(
-      std::make_unique<ParseError>(Msg, Line, P - StartOfLine, P - Start));
-  return false;
+      std::make_unique<ParseError>(پیام_2, سطر, P - Start_Of_سطر, P - Start));
+  بازگشت نادرست;
 }
 
-Expected<Value> parse(StringRef JSON) {
+Expected<مقدار> parse(StringRef JSON) {
   Parser P(JSON);
-  Value E = nullptr;
-  if (P.checkUTF8())
-    if (P.parseValue(E))
-      if (P.assertEnd())
-        return std::move(E);
-  return P.takeError();
+  مقدار E = nullptr;
+  اگر (P.checkUTF8())
+    اگر (P.parse_مقدار(E))
+      اگر (P.assertEnd())
+        بازگشت std::move(E);
+  بازگشت P.takeError();
 }
 
-char ParseError::ID = 0;
+نویسه ParseError::ID = 0;
 
 // Defined out-of-line to place vtable in this compilation unit.
-void ParseError::log(llvm::raw_ostream &OS) const {
-  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", Line, Column, Offset, Msg);
+تهی ParseError::log(llvm::raw_ostream &OS) ثابت {
+  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", سطر, Column, Offset, پیام_2);
 }
 
-bool isUTF8(llvm::StringRef S, size_t *ErrOffset) {
+منطقی isUTF8(llvm::StringRef S, size_t *ErrOffset) {
   // Fast-path for ASCII, which is valid UTF-8.
-  if (LLVM_LIKELY(isASCII(S)))
-    return true;
+  اگر (LLVM_LIKELY(isASCII(S)))
+    بازگشت درست;
 
-  const UTF8 *Data = reinterpret_cast<const UTF8 *>(S.data()), *Rest = Data;
-  if (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
-    return true;
+  ثابت UTF8 *Data = reinterpret_cast<ثابت UTF8 *>(S.data()), *Rest = Data;
+  اگر (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
+    بازگشت درست;
 
-  if (ErrOffset)
+  اگر (ErrOffset)
     *ErrOffset = Rest - Data;
-  return false;
+  بازگشت نادرست;
 }
 
 std::string fixUTF8(llvm::StringRef S) {
   // This isn't particularly efficient, but is only for error-recovery.
   std::vector<UTF32> Codepoints(S.size()); // 1 codepoint per byte suffices.
-  const UTF8 *In8 = reinterpret_cast<const UTF8 *>(S.data());
+  ثابت UTF8 *In8 = reinterpret_cast<ثابت UTF8 *>(S.data());
   UTF32 *Out32 = Codepoints.data();
   ConvertUTF8toUTF32(&In8, In8 + S.size(), &Out32, Out32 + Codepoints.size(),
                      lenientConversion);
   Codepoints.resize(Out32 - Codepoints.data());
   std::string Res(4 * Codepoints.size(), 0); // 4 bytes per codepoint suffice
-  const UTF32 *In32 = Codepoints.data();
+  ثابت UTF32 *In32 = Codepoints.data();
   UTF8 *Out8 = reinterpret_cast<UTF8 *>(&Res[0]);
   ConvertUTF32toUTF8(&In32, In32 + Codepoints.size(), &Out8, Out8 + Res.size(),
                      strictConversion);
-  Res.resize(reinterpret_cast<char *>(Out8) - Res.data());
-  return Res;
+  Res.resize(reinterpret_cast<نویسه *>(Out8) - Res.data());
+  بازگشت Res;
 }
 
-static void quote(llvm::raw_ostream &OS, llvm::StringRef S) {
+ایستا تهی quote(llvm::raw_ostream &OS, llvm::StringRef S) {
   OS << '\"';
-  for (unsigned char C : S) {
-    if (C == 0x22 || C == 0x5C)
+  برای (unsigned نویسه C : S) {
+    اگر (C == 0x22 || C == 0x5C)
       OS << '\\';
-    if (C >= 0x20) {
+    اگر (C >= 0x20) {
       OS << C;
-      continue;
+      ادامه;
     }
     OS << '\\';
-    switch (C) {
+    انتخاب (C) {
     // A few characters are common enough to make short escapes worthwhile.
-    case '\t':
+    حالت '\t':
       OS << 't';
-      break;
-    case '\n':
+      بشکن;
+    حالت '\n':
       OS << 'n';
-      break;
-    case '\r':
+      بشکن;
+    حالت '\r':
       OS << 'r';
-      break;
-    default:
+      بشکن;
+    پیشفرض:
       OS << 'u';
       llvm::write_hex(OS, C, llvm::HexPrintStyle::Lower, 4);
-      break;
+      بشکن;
     }
   }
   OS << '\"';
 }
 
-void llvm::json::OStream::value(const Value &V) {
-  switch (V.kind()) {
-  case Value::Null:
-    valueBegin();
+تهی llvm::json::OStream::مقدار_2(ثابت مقدار &V) {
+  انتخاب (V.kind()) {
+  حالت مقدار::Null:
+    مقدار_Begin();
     OS << "null";
-    return;
-  case Value::Boolean:
-    valueBegin();
+    بازگشت;
+  حالت مقدار::Boolean:
+    مقدار_Begin();
     OS << (*V.getAsBoolean() ? "true" : "false");
-    return;
-  case Value::Number:
-    valueBegin();
-    if (V.Type == Value::T_Integer)
+    بازگشت;
+  حالت مقدار::عدد:
+    مقدار_Begin();
+    اگر (V.Type == مقدار::T_Integer)
       OS << *V.getAsInteger();
-    else if (V.Type == Value::T_UINT64)
+    وگرنه اگر (V.Type == مقدار::T_UINT64)
       OS << *V.getAsUINT64();
-    else
-      OS << format("%.*g", std::numeric_limits<double>::max_digits10,
-                   *V.getAsNumber());
-    return;
-  case Value::String:
-    valueBegin();
+    وگرنه
+      OS << format("%.*g", std::numeric_limits<دوگانه>::max_digits10,
+                   *V.get_As_عدد());
+    بازگشت;
+  حالت مقدار::String:
+    مقدار_Begin();
     quote(OS, *V.getAsString());
-    return;
-  case Value::Array:
-    return array([&] {
-      for (const Value &E : *V.getAsArray())
-        value(E);
+    بازگشت;
+  حالت مقدار::Array:
+    بازگشت array([&] {
+      برای (ثابت مقدار &E : *V.getAsArray())
+        مقدار_2(E);
     });
-  case Value::Object:
-    return object([&] {
-      for (const Object::value_type *E : sortedElements(*V.getAsObject()))
+  حالت مقدار::Object:
+    بازگشت object([&] {
+      برای (ثابت Object::مقدار_type *E : sortedElements(*V.getAsObject()))
         attribute(E->first, E->second);
     });
   }
 }
 
-void llvm::json::OStream::valueBegin() {
-  assert(Stack.back().Ctx != Object && "Only attributes allowed here");
-  if (Stack.back().HasValue) {
-    assert(Stack.back().Ctx != Singleton && "Only one value allowed here");
+تهی llvm::json::OStream::مقدار_Begin() {
+  أكد(پشته.back().Ctx != Object && "Only attributes allowed here");
+  اگر (پشته.back().Has_مقدار) {
+    أكد(پشته.back().Ctx != Singleton && "Only one value allowed here");
     OS << ',';
   }
-  if (Stack.back().Ctx == Array)
+  اگر (پشته.back().Ctx == Array)
     newline();
   flushComment();
-  Stack.back().HasValue = true;
+  پشته.back().Has_مقدار = درست;
 }
 
-void OStream::comment(llvm::StringRef Comment) {
-  assert(PendingComment.empty() && "Only one comment per value!");
+تهی OStream::comment(llvm::StringRef Comment) {
+  أكد(PendingComment.empty() && "Only one comment per value!");
   PendingComment = Comment;
 }
 
-void OStream::flushComment() {
-  if (PendingComment.empty())
-    return;
+تهی OStream::flushComment() {
+  اگر (PendingComment.empty())
+    بازگشت;
   OS << (IndentSize ? "/* " : "/*");
   // Be sure not to accidentally emit "*/". Transform to "* /".
-  while (!PendingComment.empty()) {
+  وقتی (!PendingComment.empty()) {
     auto Pos = PendingComment.find("*/");
-    if (Pos == StringRef::npos) {
+    اگر (Pos == StringRef::npos) {
       OS << PendingComment;
       PendingComment = "";
-    } else {
+    } وگرنه {
       OS << PendingComment.take_front(Pos) << "* /";
       PendingComment = PendingComment.drop_front(Pos + 2);
     }
   }
   OS << (IndentSize ? " */" : "*/");
   // Comments are on their own line unless attached to an attribute value.
-  if (Stack.size() > 1 && Stack.back().Ctx == Singleton) {
-    if (IndentSize)
+  اگر (پشته.size() > 1 && پشته.back().Ctx == Singleton) {
+    اگر (IndentSize)
       OS << ' ';
-  } else {
+  } وگرنه {
     newline();
   }
 }
 
-void llvm::json::OStream::newline() {
-  if (IndentSize) {
-    OS.write('\n');
+تهی llvm::json::OStream::newline() {
+  اگر (IndentSize) {
+    OS.اكتب('\n');
     OS.indent(Indent);
   }
 }
 
-void llvm::json::OStream::arrayBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Array;
+تهی llvm::json::OStream::arrayBegin() {
+  مقدار_Begin();
+  پشته.emplace_back();
+  پشته.back().Ctx = Array;
   Indent += IndentSize;
   OS << '[';
 }
 
-void llvm::json::OStream::arrayEnd() {
-  assert(Stack.back().Ctx == Array);
+تهی llvm::json::OStream::arrayEnd() {
+  أكد(پشته.back().Ctx == Array);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  اگر (پشته.back().Has_مقدار)
     newline();
   OS << ']';
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  أكد(PendingComment.empty());
+  پشته.برداشت_back();
+  أكد(!پشته.empty());
 }
 
-void llvm::json::OStream::objectBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Object;
+تهی llvm::json::OStream::objectBegin() {
+  مقدار_Begin();
+  پشته.emplace_back();
+  پشته.back().Ctx = Object;
   Indent += IndentSize;
   OS << '{';
 }
 
-void llvm::json::OStream::objectEnd() {
-  assert(Stack.back().Ctx == Object);
+تهی llvm::json::OStream::objectEnd() {
+  أكد(پشته.back().Ctx == Object);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  اگر (پشته.back().Has_مقدار)
     newline();
   OS << '}';
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  أكد(PendingComment.empty());
+  پشته.برداشت_back();
+  أكد(!پشته.empty());
 }
 
-void llvm::json::OStream::attributeBegin(llvm::StringRef Key) {
-  assert(Stack.back().Ctx == Object);
-  if (Stack.back().HasValue)
+تهی llvm::json::OStream::attributeBegin(llvm::StringRef کلید) {
+  أكد(پشته.back().Ctx == Object);
+  اگر (پشته.back().Has_مقدار)
     OS << ',';
   newline();
   flushComment();
-  Stack.back().HasValue = true;
-  Stack.emplace_back();
-  Stack.back().Ctx = Singleton;
-  if (LLVM_LIKELY(isUTF8(Key))) {
-    quote(OS, Key);
-  } else {
-    assert(false && "Invalid UTF-8 in attribute key");
-    quote(OS, fixUTF8(Key));
+  پشته.back().Has_مقدار = درست;
+  پشته.emplace_back();
+  پشته.back().Ctx = Singleton;
+  اگر (LLVM_LIKELY(isUTF8(کلید))) {
+    quote(OS, کلید);
+  } وگرنه {
+    أكد(نادرست && "Invalid UTF-8 in attribute key");
+    quote(OS, fixUTF8(کلید));
   }
-  OS.write(':');
-  if (IndentSize)
-    OS.write(' ');
+  OS.اكتب(':');
+  اگر (IndentSize)
+    OS.اكتب(' ');
 }
 
-void llvm::json::OStream::attributeEnd() {
-  assert(Stack.back().Ctx == Singleton);
-  assert(Stack.back().HasValue && "Attribute must have a value");
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(Stack.back().Ctx == Object);
+تهی llvm::json::OStream::attributeEnd() {
+  أكد(پشته.back().Ctx == Singleton);
+  أكد(پشته.back().Has_مقدار && "Attribute must have a value");
+  أكد(PendingComment.empty());
+  پشته.برداشت_back();
+  أكد(پشته.back().Ctx == Object);
 }
 
-raw_ostream &llvm::json::OStream::rawValueBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = RawValue;
-  return OS;
+raw_ostream &llvm::json::OStream::raw_مقدار_Begin() {
+  مقدار_Begin();
+  پشته.emplace_back();
+  پشته.back().Ctx = Raw_مقدار;
+  بازگشت OS;
 }
 
-void llvm::json::OStream::rawValueEnd() {
-  assert(Stack.back().Ctx == RawValue);
-  Stack.pop_back();
+تهی llvm::json::OStream::raw_مقدار_End() {
+  أكد(پشته.back().Ctx == Raw_مقدار);
+  پشته.برداشت_back();
 }
 
 } // namespace json
 } // namespace llvm
 
-void llvm::format_provider<llvm::json::Value>::format(
-    const llvm::json::Value &E, raw_ostream &OS, StringRef Options) {
+تهی llvm::format_provider<llvm::json::مقدار>::format(
+    ثابت llvm::json::مقدار &E, raw_ostream &OS, StringRef Options) {
   unsigned IndentAmount = 0;
-  if (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
+  اگر (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
     llvm_unreachable("json::Value format options should be an integer");
-  json::OStream(OS, IndentAmount).value(E);
+  json::OStream(OS, IndentAmount).مقدار_2(E);
 }
 

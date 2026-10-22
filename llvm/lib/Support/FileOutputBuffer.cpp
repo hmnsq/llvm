@@ -10,38 +10,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileOutputBuffer.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Memory.h"
-#include "llvm/Support/TimeProfiler.h"
-#include <system_error>
+#شامل "llvm/Support/FileOutputBuffer.h"
+#شامل "llvm/Support/Errc.h"
+#شامل "llvm/Support/FileSystem.h"
+#شامل "llvm/Support/Memory.h"
+#شامل "llvm/Support/TimeProfiler.h"
+#شامل <system_error>
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
+#اگر !defined(_MSC_VER) && !defined(__MINGW32__)
+#شامل <unistd.h>
+#وگرنه
+#شامل <io.h>
 #endif
 
-using namespace llvm;
-using namespace llvm::sys;
+using فضاینام llvm;
+using فضاینام llvm::sys;
 
-namespace {
+فضاینام {
 // A FileOutputBuffer which creates a temporary file in the same directory
 // as the final output file. The final output file is atomically replaced
 // with the temporary file on commit().
-class OnDiskBuffer : public FileOutputBuffer {
-public:
+رده OnDiskBuffer : عمومی FileOutputBuffer {
+عمومی:
   OnDiskBuffer(StringRef Path, fs::TempFile Temp, fs::mapped_file_region Buf)
       : FileOutputBuffer(Path), Buffer(std::move(Buf)), Temp(std::move(Temp)) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.data(); }
+  uint8_t *getBufferStart() ثابت override { بازگشت (uint8_t *)Buffer.data(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.data() + Buffer.size();
+  uint8_t *getBufferEnd() ثابت override {
+    بازگشت (uint8_t *)Buffer.data() + Buffer.size();
   }
 
-  size_t getBufferSize() const override { return Buffer.size(); }
+  size_t getBufferSize() ثابت override { بازگشت Buffer.size(); }
 
   Error commit() override {
     llvm::TimeTraceScope timeScope("Commit buffer to disk");
@@ -50,7 +50,7 @@ public:
     Buffer.unmap();
 
     // Atomically replace the existing file with the new one.
-    return Temp.keep(FinalPath);
+    بازگشت Temp.keep(FinalPath);
   }
 
   ~OnDiskBuffer() override {
@@ -60,53 +60,53 @@ public:
     consumeError(Temp.discard());
   }
 
-  void discard() override {
+  تهی discard() override {
     // Delete the temp file if it still was open, but keeping the mapping
     // active.
     consumeError(Temp.discard());
   }
 
-private:
+خصوصی:
   fs::mapped_file_region Buffer;
   fs::TempFile Temp;
 };
 
 // A FileOutputBuffer which keeps data in memory and writes to the final
 // output file on commit(). This is used only when we cannot use OnDiskBuffer.
-class InMemoryBuffer : public FileOutputBuffer {
-public:
+رده InMemoryBuffer : عمومی FileOutputBuffer {
+عمومی:
   InMemoryBuffer(StringRef Path, MemoryBlock Buf, std::size_t BufSize,
                  unsigned Mode)
       : FileOutputBuffer(Path), Buffer(Buf), BufferSize(BufSize),
         Mode(Mode) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.base(); }
+  uint8_t *getBufferStart() ثابت override { بازگشت (uint8_t *)Buffer.base(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.base() + BufferSize;
+  uint8_t *getBufferEnd() ثابت override {
+    بازگشت (uint8_t *)Buffer.base() + BufferSize;
   }
 
-  size_t getBufferSize() const override { return BufferSize; }
+  size_t getBufferSize() ثابت override { بازگشت BufferSize; }
 
   Error commit() override {
-    if (FinalPath == "-") {
-      llvm::outs() << StringRef((const char *)Buffer.base(), BufferSize);
+    اگر (FinalPath == "-") {
+      llvm::outs() << StringRef((ثابت نویسه *)Buffer.base(), BufferSize);
       llvm::outs().flush();
-      return Error::success();
+      بازگشت Error::success();
     }
 
-    using namespace sys::fs;
-    int FD;
+    using فضاینام sys::fs;
+    صحیح FD;
     std::error_code EC;
-    if (auto EC =
+    اگر (auto EC =
             openFileForWrite(FinalPath, FD, CD_CreateAlways, OF_Delete, Mode))
-      return errorCodeToError(EC);
-    raw_fd_ostream OS(FD, /*shouldClose=*/true, /*unbuffered=*/true);
-    OS << StringRef((const char *)Buffer.base(), BufferSize);
-    return Error::success();
+      بازگشت errorCodeToError(EC);
+    raw_fd_ostream OS(FD, /*shouldClose=*/درست, /*unbuffered=*/درست);
+    OS << StringRef((ثابت نویسه *)Buffer.base(), BufferSize);
+    بازگشت Error::success();
   }
 
-private:
+خصوصی:
   // Buffer may actually contain a larger memory block than BufferSize
   OwningMemoryBlock Buffer;
   size_t BufferSize;
@@ -114,27 +114,27 @@ private:
 };
 } // namespace
 
-static Expected<std::unique_ptr<InMemoryBuffer>>
+ایستا Expected<std::unique_ptr<InMemoryBuffer>>
 createInMemoryBuffer(StringRef Path, size_t Size, unsigned Mode) {
   std::error_code EC;
   MemoryBlock MB = Memory::allocateMappedMemory(
       Size, nullptr, sys::Memory::MF_READ | sys::Memory::MF_WRITE, EC);
-  if (EC)
-    return errorCodeToError(EC);
-  return std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
+  اگر (EC)
+    بازگشت errorCodeToError(EC);
+  بازگشت std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
 }
 
-static Expected<std::unique_ptr<FileOutputBuffer>>
+ایستا Expected<std::unique_ptr<FileOutputBuffer>>
 createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
   Expected<fs::TempFile> FileOrErr =
       fs::TempFile::create(Path + ".tmp%%%%%%%", Mode);
-  if (!FileOrErr)
-    return FileOrErr.takeError();
+  اگر (!FileOrErr)
+    بازگشت FileOrErr.takeError();
   fs::TempFile File = std::move(*FileOrErr);
 
-  if (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
+  اگر (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
     consumeError(File.discard());
-    return errorCodeToError(EC);
+    بازگشت errorCodeToError(EC);
   }
 
   // Mmap it.
@@ -145,12 +145,12 @@ createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
 
   // mmap(2) can fail if the underlying filesystem does not support it.
   // If that happens, we fall back to in-memory buffer as the last resort.
-  if (EC) {
+  اگر (EC) {
     consumeError(File.discard());
-    return createInMemoryBuffer(Path, Size, Mode);
+    بازگشت createInMemoryBuffer(Path, Size, Mode);
   }
 
-  return std::make_unique<OnDiskBuffer>(Path, std::move(File),
+  بازگشت std::make_unique<OnDiskBuffer>(Path, std::move(File),
                                          std::move(MappedFile));
 }
 
@@ -158,16 +158,16 @@ createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
 Expected<std::unique_ptr<FileOutputBuffer>>
 FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // Handle "-" as stdout just like llvm::raw_ostream does.
-  if (Path == "-")
-    return createInMemoryBuffer("-", Size, /*Mode=*/0);
+  اگر (Path == "-")
+    بازگشت createInMemoryBuffer("-", Size, /*Mode=*/0);
 
   unsigned Mode = fs::all_read | fs::all_write;
-  if (Flags & F_executable)
+  اگر (Flags & F_executable)
     Mode |= fs::all_exe;
 
   // If Size is zero, don't use mmap which will fail with EINVAL.
-  if (Size == 0)
-    return createInMemoryBuffer(Path, Size, Mode);
+  اگر (Size == 0)
+    بازگشت createInMemoryBuffer(Path, Size, Mode);
 
   fs::file_status Stat;
   fs::status(Path, Stat);
@@ -180,17 +180,17 @@ FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // use rename (e.g. we don't want to replace /dev/null with a regular
   // file.) If that's the case, we create an in-memory buffer, open the
   // destination file and write to it on commit().
-  switch (Stat.type()) {
-  case fs::file_type::directory_file:
-    return errorCodeToError(errc::is_a_directory);
-  case fs::file_type::regular_file:
-  case fs::file_type::file_not_found:
-  case fs::file_type::status_error:
-    if (Flags & F_mmap)
-      return createInMemoryBuffer(Path, Size, Mode);
-    else
-      return createOnDiskBuffer(Path, Size, Mode);
-  default:
-    return createInMemoryBuffer(Path, Size, Mode);
+  انتخاب (Stat.type()) {
+  حالت fs::file_type::directory_file:
+    بازگشت errorCodeToError(errc::is_a_directory);
+  حالت fs::file_type::regular_file:
+  حالت fs::file_type::file_not_found:
+  حالت fs::file_type::status_error:
+    اگر (Flags & F_mmap)
+      بازگشت createInMemoryBuffer(Path, Size, Mode);
+    وگرنه
+      بازگشت createOnDiskBuffer(Path, Size, Mode);
+  پیشفرض:
+    بازگشت createInMemoryBuffer(Path, Size, Mode);
   }
 }

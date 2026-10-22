@@ -11,48 +11,48 @@
 //===----------------------------------------------------------------------===//
 
 #define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#شامل "llvm/Support/PluginLoader.h"
+#شامل "llvm/Support/DynamicLibrary.h"
+#شامل "llvm/Support/Mutex.h"
+#شامل "llvm/Support/raw_ostream.h"
+#شامل <vector>
+using فضاینام llvm;
 
-namespace {
+فضاینام {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
+ساختار Plugins {
+  sys::SmartMutex<درست> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  ایستا Plugins P;
+  بازگشت P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
+تهی PluginLoader::operator=(ثابت std::string &Filename) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+  sys::SmartScopedLock<درست> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  اگر (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } وگرنه {
+    P.List.افزودن_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
+unsigned PluginLoader::get_رقم_Plugins() {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  sys::SmartScopedLock<درست> Lock(P.Lock);
+  بازگشت P.List.size();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
+std::string &PluginLoader::getPlugin(unsigned رقم_2) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  sys::SmartScopedLock<درست> Lock(P.Lock);
+  أكد(رقم_2 < P.List.size() && "Asking for an out of bounds plugin");
+  بازگشت P.List[رقم_2];
 }

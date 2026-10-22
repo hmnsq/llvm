@@ -11,27 +11,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Valgrind.h"
-#include <stddef.h>
+#شامل "llvm/Support/Valgrind.h"
+#شامل <stddef.h>
 
-#if __has_include(<valgrind/valgrind.h>)
-#include <valgrind/valgrind.h>
+#اگر __has_include(<valgrind/valgrind.h>)
+#شامل <valgrind/valgrind.h>
 
-bool llvm::sys::RunningOnValgrind() {
-  return RUNNING_ON_VALGRIND;
+منطقی llvm::sys::RunningOnValgrind() {
+  بازگشت RUNNING_ON_VALGRIND;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+تهی llvm::sys::ValgrindDiscardTranslations(ثابت تهی *Addr, size_t Len) {
   VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
 }
 
-#else
+#وگرنه
 
-bool llvm::sys::RunningOnValgrind() {
-  return false;
+منطقی llvm::sys::RunningOnValgrind() {
+  بازگشت نادرست;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+تهی llvm::sys::ValgrindDiscardTranslations(ثابت تهی *Addr, size_t Len) {
 }
 
 #endif
