@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#ضمن <sys/types.h>
+#ضمن <stdio.h>
+#ضمن <string.h>
+#ضمن <ctype.h>
+#ضمن <limits.h>
+#ضمن <stdlib.h>
+#ضمن "regex_impl.h"
 
-#include "regutils.h"
+#ضمن "regutils.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+ساكن ثابت حرف *regatoi(ثابت llvm_regex_t *, حرف *, صحيح);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+ساكن بنية rerr {
+	صحيح code;
+	ثابت حرف *name;
+	ثابت حرف *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(صحيح errcode, ثابت llvm_regex_t *preg, حرف *errbuf, size_t errbuf_size)
 {
-	struct rerr *r;
+	بنية rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	صحيح target = errcode &~ REG_ITOA;
+	ثابت حرف *s;
+	حرف convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	إذا (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, حجم convbuf);
+	وإلا {
+		لكل (r = rerrs; r->code != 0; r++)
+			إذا (r->code == target)
+				اكسر;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
+		إذا (errcode&REG_ITOA) {
+			إذا (r->code != 0) {
+				أكد(strlen(r->name) < حجم(convbuf));
+				(فراغ) llvm_strlcpy(convbuf, r->name, حجم convbuf);
+			} وإلا
+				(فراغ)snprintf(convbuf, حجم convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} وإلا
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	إذا (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	إرجاع(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+ساكن ثابت حرف *
+regatoi(ثابت llvm_regex_t *preg, حرف *localbuf, صحيح localbufsize)
 {
-	struct rerr *r;
+	بنية rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	لكل (r = rerrs; r->code != 0; r++)
+		إذا (strcmp(r->name, preg->re_endp) == 0)
+			اكسر;
+	إذا (r->code == 0)
+		إرجاع("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(فراغ)snprintf(localbuf, localbufsize, "%d", r->code);
+	إرجاع(localbuf);
 }

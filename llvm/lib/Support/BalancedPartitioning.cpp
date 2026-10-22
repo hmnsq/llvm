@@ -11,327 +11,327 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BalancedPartitioning.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/ThreadPool.h"
+#ضمن "llvm/Support/BalancedPartitioning.h"
+#ضمن "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/FormatVariadic.h"
+#ضمن "llvm/Support/ThreadPool.h"
 
-#include <cmath>
+#ضمن <cmath>
 
-using namespace llvm;
+using نطاق llvm;
 #define DEBUG_TYPE "balanced-partitioning"
 
-void BPFunctionNode::dump(raw_ostream &OS) const {
+فراغ BPFunction_عقدة::dump(raw_ostream &OS) ثابت {
   OS << formatv("{{ID={0} Utilities={{{1:$[,]}} Bucket={2}}", Id,
                 make_range(UtilityNodes.begin(), UtilityNodes.end()), Bucket);
 }
 
 template <typename Func>
-void BalancedPartitioning::BPThreadPool::async(Func &&F) {
-#if LLVM_ENABLE_THREADS
+فراغ BalancedPartitioning::BPThreadPool::async(Func &&F) {
+#إذا LLVM_ENABLE_THREADS
   // This new thread could spawn more threads, so mark it as active
-  ++NumActiveThreads;
-  TheThreadPool.async([this, F]() {
+  ++رقم_Active_Threads;
+  TheThreadPool.async([هذا, F]() {
     // Run the task
     F();
 
     // This thread will no longer spawn new threads, so mark it as inactive
-    if (--NumActiveThreads == 0) {
+    إذا (--رقم_Active_Threads == 0) {
       // There are no more active threads, so mark as finished and notify
       {
         std::unique_lock<std::mutex> lock(mtx);
-        assert(!IsFinishedSpawning);
+        أكد(!IsFinishedSpawning);
         IsFinishedSpawning = true;
       }
       cv.notify_one();
     }
   });
-#else
+#وإلا
   llvm_unreachable("threads are disabled");
 #endif
 }
 
-void BalancedPartitioning::BPThreadPool::wait() {
-#if LLVM_ENABLE_THREADS
+فراغ BalancedPartitioning::BPThreadPool::wait() {
+#إذا LLVM_ENABLE_THREADS
   // TODO: We could remove the mutex and condition variable and use
   // std::atomic::wait() instead, but that isn't available until C++20
   {
     std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [&]() { return IsFinishedSpawning; });
-    assert(IsFinishedSpawning && NumActiveThreads == 0);
+    cv.wait(lock, [&]() { إرجاع IsFinishedSpawning; });
+    أكد(IsFinishedSpawning && رقم_Active_Threads == 0);
   }
   // Now we can call ThreadPool::wait() since all tasks have been submitted
   TheThreadPool.wait();
-#else
+#وإلا
   llvm_unreachable("threads are disabled");
 #endif
 }
 
 BalancedPartitioning::BalancedPartitioning(
-    const BalancedPartitioningConfig &Config)
+    ثابت BalancedPartitioningConfig &Config)
     : Config(Config) {
   // Pre-computing log2 values
   Log2Cache[0] = 0.0;
-  for (unsigned I = 1; I < LOG_CACHE_SIZE; I++)
+  لكل (unsigned I = 1; I < LOG_CACHE_SIZE; I++)
     Log2Cache[I] = std::log2(I);
 }
 
-void BalancedPartitioning::run(std::vector<BPFunctionNode> &Nodes) const {
+فراغ BalancedPartitioning::run(std::vector<BPFunction_عقدة> &Nodes) ثابت {
   LLVM_DEBUG(
       dbgs() << format(
           "Partitioning %d nodes using depth %d and %d iterations per split\n",
           Nodes.size(), Config.SplitDepth, Config.IterationsPerSplit));
   std::optional<BPThreadPool> TP;
-#if LLVM_ENABLE_THREADS
+#إذا LLVM_ENABLE_THREADS
   DefaultThreadPool TheThreadPool;
-  if (Config.TaskSplitDepth > 1)
+  إذا (Config.TaskSplitDepth > 1)
     TP.emplace(TheThreadPool);
 #endif
 
   // Record the input order
-  for (unsigned I = 0; I < Nodes.size(); I++)
-    Nodes[I].InputOrderIndex = I;
+  لكل (unsigned I = 0; I < Nodes.size(); I++)
+    Nodes[I].إدخال_Order_Index = I;
 
   auto NodesRange = llvm::make_range(Nodes.begin(), Nodes.end());
-  auto BisectTask = [this, NodesRange, &TP]() {
+  auto BisectTask = [هذا, NodesRange, &TP]() {
     bisect(NodesRange, /*RecDepth=*/0, /*RootBucket=*/1, /*Offset=*/0, TP);
   };
-  if (TP) {
+  إذا (TP) {
     TP->async(std::move(BisectTask));
     TP->wait();
-  } else {
+  } وإلا {
     BisectTask();
   }
 
-  llvm::stable_sort(NodesRange, [](const auto &L, const auto &R) {
-    return L.Bucket < R.Bucket;
+  llvm::stable_sort(NodesRange, [](ثابت auto &L, ثابت auto &R) {
+    إرجاع L.Bucket < R.Bucket;
   });
 
   LLVM_DEBUG(dbgs() << "Balanced partitioning completed\n");
 }
 
-void BalancedPartitioning::bisect(const FunctionNodeRange Nodes,
-                                  unsigned RecDepth, unsigned RootBucket,
+فراغ BalancedPartitioning::bisect(ثابت Function_عقدة_Range Nodes,
+                                  unsigned RecDepth, unsigned جذر_Bucket,
                                   unsigned Offset,
-                                  std::optional<BPThreadPool> &TP) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  if (NumNodes <= 1 || RecDepth >= Config.SplitDepth) {
+                                  std::optional<BPThreadPool> &TP) ثابت {
+  unsigned رقم_Nodes = llvm::size(Nodes);
+  إذا (رقم_Nodes <= 1 || RecDepth >= Config.SplitDepth) {
     // We've reach the lowest level of the recursion tree. Fall back to the
     // original order and assign to buckets.
-    llvm::sort(Nodes, [](const auto &L, const auto &R) {
-      return L.InputOrderIndex < R.InputOrderIndex;
+    llvm::sort(Nodes, [](ثابت auto &L, ثابت auto &R) {
+      إرجاع L.إدخال_Order_Index < R.إدخال_Order_Index;
     });
-    for (auto &N : Nodes)
+    لكل (auto &N : Nodes)
       N.Bucket = Offset++;
-    return;
+    إرجاع;
   }
 
   LLVM_DEBUG(dbgs() << format("Bisect with %d nodes and root bucket %d\n",
-                              NumNodes, RootBucket));
+                              رقم_Nodes, جذر_Bucket));
 
-  std::mt19937 RNG(RootBucket);
+  std::mt19937 RNG(جذر_Bucket);
 
-  unsigned LeftBucket = 2 * RootBucket;
-  unsigned RightBucket = 2 * RootBucket + 1;
+  unsigned يسار_Bucket = 2 * جذر_Bucket;
+  unsigned يمين_Bucket = 2 * جذر_Bucket + 1;
 
   // Split into two and assign to the left and right buckets
-  split(Nodes, LeftBucket);
+  split(Nodes, يسار_Bucket);
 
-  runIterations(Nodes, LeftBucket, RightBucket, RNG);
+  runIterations(Nodes, يسار_Bucket, يمين_Bucket, RNG);
 
   // Split nodes wrt the resulting buckets
   auto NodesMid =
-      llvm::partition(Nodes, [&](auto &N) { return N.Bucket == LeftBucket; });
+      llvm::partition(Nodes, [&](auto &N) { إرجاع N.Bucket == يسار_Bucket; });
   unsigned MidOffset = Offset + std::distance(Nodes.begin(), NodesMid);
 
-  auto LeftNodes = llvm::make_range(Nodes.begin(), NodesMid);
-  auto RightNodes = llvm::make_range(NodesMid, Nodes.end());
+  auto يسار_Nodes = llvm::make_range(Nodes.begin(), NodesMid);
+  auto يمين_Nodes = llvm::make_range(NodesMid, Nodes.end());
 
-  auto LeftRecTask = [this, LeftNodes, RecDepth, LeftBucket, Offset, &TP]() {
-    bisect(LeftNodes, RecDepth + 1, LeftBucket, Offset, TP);
+  auto يسار_Rec_Task = [هذا, يسار_Nodes, RecDepth, يسار_Bucket, Offset, &TP]() {
+    bisect(يسار_Nodes, RecDepth + 1, يسار_Bucket, Offset, TP);
   };
-  auto RightRecTask = [this, RightNodes, RecDepth, RightBucket, MidOffset,
+  auto يمين_Rec_Task = [هذا, يمين_Nodes, RecDepth, يمين_Bucket, MidOffset,
                        &TP]() {
-    bisect(RightNodes, RecDepth + 1, RightBucket, MidOffset, TP);
+    bisect(يمين_Nodes, RecDepth + 1, يمين_Bucket, MidOffset, TP);
   };
 
-  if (TP && RecDepth < Config.TaskSplitDepth && NumNodes >= 4) {
-    TP->async(std::move(LeftRecTask));
-    TP->async(std::move(RightRecTask));
-  } else {
-    LeftRecTask();
-    RightRecTask();
+  إذا (TP && RecDepth < Config.TaskSplitDepth && رقم_Nodes >= 4) {
+    TP->async(std::move(يسار_Rec_Task));
+    TP->async(std::move(يمين_Rec_Task));
+  } وإلا {
+    يسار_Rec_Task();
+    يمين_Rec_Task();
   }
 }
 
-void BalancedPartitioning::runIterations(const FunctionNodeRange Nodes,
-                                         unsigned LeftBucket,
-                                         unsigned RightBucket,
-                                         std::mt19937 &RNG) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  DenseMap<BPFunctionNode::UtilityNodeT, unsigned> UtilityNodeIndex;
-  for (auto &N : Nodes)
-    for (auto &UN : N.UtilityNodes)
-      ++UtilityNodeIndex[UN];
+فراغ BalancedPartitioning::runIterations(ثابت Function_عقدة_Range Nodes,
+                                         unsigned يسار_Bucket,
+                                         unsigned يمين_Bucket,
+                                         std::mt19937 &RNG) ثابت {
+  unsigned رقم_Nodes = llvm::size(Nodes);
+  DenseMap<BPFunction_عقدة::Utility_عقدة_T, unsigned> Utility_عقدة_Index;
+  لكل (auto &N : Nodes)
+    لكل (auto &UN : N.UtilityNodes)
+      ++Utility_عقدة_Index[UN];
   // Remove utility nodes if they have just one edge or are connected to all
   // functions
-  for (auto &N : Nodes)
+  لكل (auto &N : Nodes)
     llvm::erase_if(N.UtilityNodes, [&](auto &UN) {
-      unsigned UNI = UtilityNodeIndex[UN];
-      return UNI == 1 || UNI == NumNodes;
+      unsigned UNI = Utility_عقدة_Index[UN];
+      إرجاع UNI == 1 || UNI == رقم_Nodes;
     });
 
   // Renumber utility nodes so they can be used to index into Signatures
-  UtilityNodeIndex.clear();
-  for (auto &N : Nodes)
-    for (auto &UN : N.UtilityNodes)
-      UN = UtilityNodeIndex.insert({UN, UtilityNodeIndex.size()}).first->second;
+  Utility_عقدة_Index.clear();
+  لكل (auto &N : Nodes)
+    لكل (auto &UN : N.UtilityNodes)
+      UN = Utility_عقدة_Index.أدرج({UN, Utility_عقدة_Index.size()}).first->second;
 
   // Initialize signatures
-  SignaturesT Signatures(/*Size=*/UtilityNodeIndex.size());
-  for (auto &N : Nodes) {
-    for (auto &UN : N.UtilityNodes) {
-      assert(UN < Signatures.size());
-      if (N.Bucket == LeftBucket) {
-        Signatures[UN].LeftCount++;
-      } else {
-        Signatures[UN].RightCount++;
+  SignaturesT Signatures(/*Size=*/Utility_عقدة_Index.size());
+  لكل (auto &N : Nodes) {
+    لكل (auto &UN : N.UtilityNodes) {
+      أكد(UN < Signatures.size());
+      إذا (N.Bucket == يسار_Bucket) {
+        Signatures[UN].يسار_تعداد++;
+      } وإلا {
+        Signatures[UN].يمين_تعداد++;
       }
     }
   }
 
-  for (unsigned I = 0; I < Config.IterationsPerSplit; I++) {
-    unsigned NumMovedNodes =
-        runIteration(Nodes, LeftBucket, RightBucket, Signatures, RNG);
-    if (NumMovedNodes == 0)
-      break;
+  لكل (unsigned I = 0; I < Config.IterationsPerSplit; I++) {
+    unsigned رقم_Moved_Nodes =
+        runIteration(Nodes, يسار_Bucket, يمين_Bucket, Signatures, RNG);
+    إذا (رقم_Moved_Nodes == 0)
+      اكسر;
   }
 }
 
-unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
-                                            unsigned LeftBucket,
-                                            unsigned RightBucket,
+unsigned BalancedPartitioning::runIteration(ثابت Function_عقدة_Range Nodes,
+                                            unsigned يسار_Bucket,
+                                            unsigned يمين_Bucket,
                                             SignaturesT &Signatures,
-                                            std::mt19937 &RNG) const {
+                                            std::mt19937 &RNG) ثابت {
   // Init signature cost caches
-  for (auto &Signature : Signatures) {
-    if (Signature.CachedGainIsValid)
-      continue;
-    unsigned L = Signature.LeftCount;
-    unsigned R = Signature.RightCount;
-    assert((L > 0 || R > 0) && "incorrect signature");
-    float Cost = logCost(L, R);
+  لكل (auto &Signature : Signatures) {
+    إذا (Signature.CachedGainIsValid)
+      استمر;
+    unsigned L = Signature.يسار_تعداد;
+    unsigned R = Signature.يمين_تعداد;
+    أكد((L > 0 || R > 0) && "incorrect signature");
+    عائم Cost = logCost(L, R);
     Signature.CachedGainLR = 0.f;
     Signature.CachedGainRL = 0.f;
-    if (L > 0)
+    إذا (L > 0)
       Signature.CachedGainLR = Cost - logCost(L - 1, R + 1);
-    if (R > 0)
+    إذا (R > 0)
       Signature.CachedGainRL = Cost - logCost(L + 1, R - 1);
     Signature.CachedGainIsValid = true;
   }
 
   // Compute move gains
-  using GainPair = std::pair<float, BPFunctionNode *>;
+  using GainPair = std::pair<عائم, BPFunction_عقدة *>;
   std::vector<GainPair> Gains;
-  for (auto &N : Nodes) {
-    bool FromLeftToRight = (N.Bucket == LeftBucket);
-    float Gain = moveGain(N, FromLeftToRight, Signatures);
-    Gains.push_back(std::make_pair(Gain, &N));
+  لكل (auto &N : Nodes) {
+    منطقي From_يسار_To_يمين = (N.Bucket == يسار_Bucket);
+    عائم Gain = moveGain(N, From_يسار_To_يمين, Signatures);
+    Gains.ادفع_back(std::make_pair(Gain, &N));
   }
 
   // Collect left and right gains
-  auto LeftEnd = llvm::partition(
-      Gains, [&](const auto &GP) { return GP.second->Bucket == LeftBucket; });
-  auto LeftRange = llvm::make_range(Gains.begin(), LeftEnd);
-  auto RightRange = llvm::make_range(LeftEnd, Gains.end());
+  auto يسار_End = llvm::partition(
+      Gains, [&](ثابت auto &GP) { إرجاع GP.second->Bucket == يسار_Bucket; });
+  auto يسار_Range = llvm::make_range(Gains.begin(), يسار_End);
+  auto يمين_Range = llvm::make_range(يسار_End, Gains.end());
 
   // Sort gains in descending order
-  auto LargerGain = [](const auto &L, const auto &R) {
-    return L.first > R.first;
+  auto LargerGain = [](ثابت auto &L, ثابت auto &R) {
+    إرجاع L.first > R.first;
   };
-  llvm::stable_sort(LeftRange, LargerGain);
-  llvm::stable_sort(RightRange, LargerGain);
+  llvm::stable_sort(يسار_Range, LargerGain);
+  llvm::stable_sort(يمين_Range, LargerGain);
 
-  unsigned NumMovedDataVertices = 0;
-  for (auto [LeftPair, RightPair] : llvm::zip(LeftRange, RightRange)) {
-    auto &[LeftGain, LeftNode] = LeftPair;
-    auto &[RightGain, RightNode] = RightPair;
+  unsigned رقم_Moved_Data_Vertices = 0;
+  لكل (auto [يسار_Pair, يمين_Pair] : llvm::zip(يسار_Range, يمين_Range)) {
+    auto &[يسار_Gain, يسار_عقدة] = يسار_Pair;
+    auto &[يمين_Gain, يمين_عقدة] = يمين_Pair;
     // Stop when the gain is no longer beneficial
-    if (LeftGain + RightGain <= 0.f)
-      break;
+    إذا (يسار_Gain + يمين_Gain <= 0.f)
+      اكسر;
     // Try to exchange the nodes between buckets
-    if (moveFunctionNode(*LeftNode, LeftBucket, RightBucket, Signatures, RNG))
-      ++NumMovedDataVertices;
-    if (moveFunctionNode(*RightNode, LeftBucket, RightBucket, Signatures, RNG))
-      ++NumMovedDataVertices;
+    إذا (move_Function_عقدة(*يسار_عقدة, يسار_Bucket, يمين_Bucket, Signatures, RNG))
+      ++رقم_Moved_Data_Vertices;
+    إذا (move_Function_عقدة(*يمين_عقدة, يسار_Bucket, يمين_Bucket, Signatures, RNG))
+      ++رقم_Moved_Data_Vertices;
   }
-  return NumMovedDataVertices;
+  إرجاع رقم_Moved_Data_Vertices;
 }
 
-bool BalancedPartitioning::moveFunctionNode(BPFunctionNode &N,
-                                            unsigned LeftBucket,
-                                            unsigned RightBucket,
+منطقي BalancedPartitioning::move_Function_عقدة(BPFunction_عقدة &N,
+                                            unsigned يسار_Bucket,
+                                            unsigned يمين_Bucket,
                                             SignaturesT &Signatures,
-                                            std::mt19937 &RNG) const {
+                                            std::mt19937 &RNG) ثابت {
   // Sometimes we skip the move. This helps to escape local optima
-  if (std::uniform_real_distribution<float>(0.f, 1.f)(RNG) <=
+  إذا (std::uniform_real_distribution<عائم>(0.f, 1.f)(RNG) <=
       Config.SkipProbability)
-    return false;
+    إرجاع خطأ;
 
-  bool FromLeftToRight = (N.Bucket == LeftBucket);
+  منطقي From_يسار_To_يمين = (N.Bucket == يسار_Bucket);
   // Update the current bucket
-  N.Bucket = (FromLeftToRight ? RightBucket : LeftBucket);
+  N.Bucket = (From_يسار_To_يمين ? يمين_Bucket : يسار_Bucket);
 
   // Update signatures and invalidate gain cache
-  if (FromLeftToRight) {
-    for (auto &UN : N.UtilityNodes) {
+  إذا (From_يسار_To_يمين) {
+    لكل (auto &UN : N.UtilityNodes) {
       auto &Signature = Signatures[UN];
-      Signature.LeftCount--;
-      Signature.RightCount++;
-      Signature.CachedGainIsValid = false;
+      Signature.يسار_تعداد--;
+      Signature.يمين_تعداد++;
+      Signature.CachedGainIsValid = خطأ;
     }
-  } else {
-    for (auto &UN : N.UtilityNodes) {
+  } وإلا {
+    لكل (auto &UN : N.UtilityNodes) {
       auto &Signature = Signatures[UN];
-      Signature.LeftCount++;
-      Signature.RightCount--;
-      Signature.CachedGainIsValid = false;
+      Signature.يسار_تعداد++;
+      Signature.يمين_تعداد--;
+      Signature.CachedGainIsValid = خطأ;
     }
   }
-  return true;
+  إرجاع true;
 }
 
-void BalancedPartitioning::split(const FunctionNodeRange Nodes,
-                                 unsigned StartBucket) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  auto NodesMid = Nodes.begin() + (NumNodes + 1) / 2;
+فراغ BalancedPartitioning::split(ثابت Function_عقدة_Range Nodes,
+                                 unsigned StartBucket) ثابت {
+  unsigned رقم_Nodes = llvm::size(Nodes);
+  auto NodesMid = Nodes.begin() + (رقم_Nodes + 1) / 2;
 
   llvm::sort(Nodes, [](auto &L, auto &R) {
-    return L.InputOrderIndex < R.InputOrderIndex;
+    إرجاع L.إدخال_Order_Index < R.إدخال_Order_Index;
   });
 
-  for (auto &N : llvm::make_range(Nodes.begin(), NodesMid))
+  لكل (auto &N : llvm::make_range(Nodes.begin(), NodesMid))
     N.Bucket = StartBucket;
-  for (auto &N : llvm::make_range(NodesMid, Nodes.end()))
+  لكل (auto &N : llvm::make_range(NodesMid, Nodes.end()))
     N.Bucket = StartBucket + 1;
 }
 
-float BalancedPartitioning::moveGain(const BPFunctionNode &N,
-                                     bool FromLeftToRight,
-                                     const SignaturesT &Signatures) {
-  float Gain = 0.f;
-  for (auto &UN : N.UtilityNodes)
-    Gain += (FromLeftToRight ? Signatures[UN].CachedGainLR
+عائم BalancedPartitioning::moveGain(ثابت BPFunction_عقدة &N,
+                                     منطقي From_يسار_To_يمين,
+                                     ثابت SignaturesT &Signatures) {
+  عائم Gain = 0.f;
+  لكل (auto &UN : N.UtilityNodes)
+    Gain += (From_يسار_To_يمين ? Signatures[UN].CachedGainLR
                              : Signatures[UN].CachedGainRL);
-  return Gain;
+  إرجاع Gain;
 }
 
-float BalancedPartitioning::logCost(unsigned X, unsigned Y) const {
-  return -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
+عائم BalancedPartitioning::logCost(unsigned X, unsigned Y) ثابت {
+  إرجاع -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
 }
 
-float BalancedPartitioning::log2Cached(unsigned i) const {
-  return (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
+عائم BalancedPartitioning::log2Cached(unsigned i) ثابت {
+  إرجاع (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
 }

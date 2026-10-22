@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#ضمن "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned Suffix_شجرة_عقدة::getStartIdx() ثابت { إرجاع StartIdx; }
+فراغ Suffix_شجرة_عقدة::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
+فراغ Suffix_شجرة_عقدة::setConcatLen(unsigned Len) { ConcatLen = Len; }
+unsigned Suffix_شجرة_عقدة::getConcatLen() ثابت { إرجاع ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+منطقي Suffix_شجرة_Internal_عقدة::is_جذر() ثابت {
+  إرجاع getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+unsigned Suffix_شجرة_Internal_عقدة::getEndIdx() ثابت { إرجاع EndIdx; }
+فراغ Suffix_شجرة_Internal_عقدة::setLink(Suffix_شجرة_Internal_عقدة *L) {
+  أكد(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_شجرة_Internal_عقدة *Suffix_شجرة_Internal_عقدة::getLink() ثابت { إرجاع Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+unsigned Suffix_شجرة_Leaf_عقدة::getEndIdx() ثابت {
+  أكد(EndIdx && "EndIdx is empty?");
+  إرجاع *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+unsigned Suffix_شجرة_Leaf_عقدة::getSuffixIdx() ثابت { إرجاع SuffixIdx; }
+فراغ Suffix_شجرة_Leaf_عقدة::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+unsigned Suffix_شجرة_عقدة::get_يسار_Leaf_Idx() ثابت { إرجاع يسار_Leaf_Idx; }
+unsigned Suffix_شجرة_عقدة::get_يمين_Leaf_Idx() ثابت { إرجاع يمين_Leaf_Idx; }
+فراغ Suffix_شجرة_عقدة::set_يسار_Leaf_Idx(unsigned Idx) { يسار_Leaf_Idx = Idx; }
+فراغ Suffix_شجرة_عقدة::set_يمين_Leaf_Idx(unsigned Idx) { يمين_Leaf_Idx = Idx; }

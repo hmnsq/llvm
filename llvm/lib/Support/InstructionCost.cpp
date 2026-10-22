@@ -11,27 +11,27 @@
 /// instructions.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InstructionCost.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/InstructionCost.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
+فراغ InstructionCost::print(raw_ostream &OS) ثابت {
   using UnsignedCostType = std::make_unsigned_t<CostType>;
-  if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+  إذا (isValid()) {
+    UnsignedCostType Abs_قيمة =
+        (قيمة < 0) ? -((UnsignedCostType)قيمة) : ((UnsignedCostType)قيمة);
+    UnsignedCostType Whole_العدد = Abs_قيمة / CostGranularity;
+    UnsignedCostType Remainder = Abs_قيمة % CostGranularity;
+    إذا (قيمة < 0)
       OS << "-";
     UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
-    while (RemainderHundreds % 10 == 0 && RemainderHundreds)
+    بينما (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
-    if (RemainderHundreds)
+    OS << Whole_العدد;
+    إذا (RemainderHundreds)
       OS << "." << RemainderHundreds;
-  } else {
+  } وإلا {
     OS << "Invalid";
   }
 }

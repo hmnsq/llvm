@@ -11,38 +11,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Memory.h"
+#ضمن "llvm/Config/llvm-config.h"
 
 #ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/raw_ostream.h"
 #endif // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
+#ضمن "Unix/Memory.inc"
 #endif
 #ifdef _WIN32
-#include "Windows/Memory.inc"
+#ضمن "Windows/Memory.inc"
 #endif
 
 #ifndef NDEBUG
 
-namespace llvm {
-namespace sys {
+نطاق llvm {
+نطاق sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &operator<<(raw_ostream &OS, ثابت Memory::ProtectionFlags &PF) {
+  أكد((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
+  إرجاع OS << (PF & Memory::MF_READ ? 'R' : '-')
             << (PF & Memory::MF_WRITE ? 'W' : '-')
             << (PF & Memory::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
+raw_ostream &operator<<(raw_ostream &OS, ثابت MemoryBlock &MB) {
+  إرجاع OS << "[ " << MB.base() << " .. "
+            << (فراغ *)((حرف *)MB.base() + MB.allocatedSize()) << " ] ("
             << MB.allocatedSize() << " bytes)";
 }
 

@@ -10,51 +10,51 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Threading.h"
-#include <cassert>
-#include <mutex>
-using namespace llvm;
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/Threading.h"
+#ضمن <cassert>
+#ضمن <mutex>
+using نطاق llvm;
 
-static const ManagedStaticBase *StaticList = nullptr;
+ساكن ثابت ManagedStaticBase *StaticList = nullptr;
 
-static std::recursive_mutex *getManagedStaticMutex() {
-  static std::recursive_mutex m;
-  return &m;
+ساكن std::recursive_mutex *getManagedStaticMutex() {
+  ساكن std::recursive_mutex m;
+  إرجاع &m;
 }
 
-void ManagedStaticBase::RegisterManagedStatic(void *(*Creator)(),
-                                              void (*Deleter)(void*)) const {
-  assert(Creator);
-  if (llvm_is_multithreaded()) {
+فراغ ManagedStaticBase::RegisterManagedStatic(فراغ *(*Creator)(),
+                                              فراغ (*Deleter)(فراغ*)) ثابت {
+  أكد(Creator);
+  إذا (llvm_is_multithreaded()) {
     std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
 
-    if (!Ptr.load(std::memory_order_relaxed)) {
-      void *Tmp = Creator();
+    إذا (!Ptr.load(std::memory_order_relaxed)) {
+      فراغ *Tmp = Creator();
 
       Ptr.store(Tmp, std::memory_order_release);
       DeleterFn = Deleter;
 
       // Add to list of managed statics.
       Next = StaticList;
-      StaticList = this;
+      StaticList = هذا;
     }
-  } else {
-    assert(!Ptr && !DeleterFn && !Next &&
+  } وإلا {
+    أكد(!Ptr && !DeleterFn && !Next &&
            "Partially initialized ManagedStatic!?");
     Ptr = Creator();
     DeleterFn = Deleter;
 
     // Add to list of managed statics.
     Next = StaticList;
-    StaticList = this;
+    StaticList = هذا;
   }
 }
 
-void ManagedStaticBase::destroy() const {
-  assert(DeleterFn && "ManagedStatic not initialized correctly!");
-  assert(StaticList == this &&
+فراغ ManagedStaticBase::destroy() ثابت {
+  أكد(DeleterFn && "ManagedStatic not initialized correctly!");
+  أكد(StaticList == هذا &&
          "Not destroyed in reverse order of construction?");
   // Unlink from list.
   StaticList = Next;
@@ -72,7 +72,7 @@ void ManagedStaticBase::destroy() const {
 /// IMPORTANT: it's only safe to call llvm_shutdown() in single thread,
 /// without any other threads executing LLVM APIs.
 /// llvm_shutdown() should be the last use of LLVM APIs.
-void llvm::llvm_shutdown() {
-  while (StaticList)
+فراغ llvm::llvm_shutdown() {
+  بينما (StaticList)
     StaticList->destroy();
 }

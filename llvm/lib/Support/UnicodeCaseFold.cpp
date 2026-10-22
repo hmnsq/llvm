@@ -11,855 +11,855 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Unicode.h"
+#ضمن "llvm/Support/Unicode.h"
 
-int llvm::sys::unicode::foldCharSimple(int C) {
-  if (C < 0x0041)
-    return C;
+صحيح llvm::sys::unicode::foldCharSimple(صحيح C) {
+  إذا (C < 0x0041)
+    إرجاع C;
   // 26 characters
-  if (C <= 0x005a)
-    return C + 32;
+  إذا (C <= 0x005a)
+    إرجاع C + 32;
   // MICRO SIGN
-  if (C == 0x00b5)
-    return 0x03bc;
-  if (C < 0x00c0)
-    return C;
+  إذا (C == 0x00b5)
+    إرجاع 0x03bc;
+  إذا (C < 0x00c0)
+    إرجاع C;
   // 23 characters
-  if (C <= 0x00d6)
-    return C + 32;
-  if (C < 0x00d8)
-    return C;
+  إذا (C <= 0x00d6)
+    إرجاع C + 32;
+  إذا (C < 0x00d8)
+    إرجاع C;
   // 7 characters
-  if (C <= 0x00de)
-    return C + 32;
-  if (C < 0x0100)
-    return C;
+  إذا (C <= 0x00de)
+    إرجاع C + 32;
+  إذا (C < 0x0100)
+    إرجاع C;
   // 24 characters
-  if (C <= 0x012e)
-    return C | 1;
-  if (C < 0x0132)
-    return C;
+  إذا (C <= 0x012e)
+    إرجاع C | 1;
+  إذا (C < 0x0132)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x0136)
-    return C | 1;
-  if (C < 0x0139)
-    return C;
+  إذا (C <= 0x0136)
+    إرجاع C | 1;
+  إذا (C < 0x0139)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x0147 && C % 2 == 1)
-    return C + 1;
-  if (C < 0x014a)
-    return C;
+  إذا (C <= 0x0147 && C % 2 == 1)
+    إرجاع C + 1;
+  إذا (C < 0x014a)
+    إرجاع C;
   // 23 characters
-  if (C <= 0x0176)
-    return C | 1;
+  إذا (C <= 0x0176)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER Y WITH DIAERESIS
-  if (C == 0x0178)
-    return 0x00ff;
-  if (C < 0x0179)
-    return C;
+  إذا (C == 0x0178)
+    إرجاع 0x00ff;
+  إذا (C < 0x0179)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x017d && C % 2 == 1)
-    return C + 1;
+  إذا (C <= 0x017d && C % 2 == 1)
+    إرجاع C + 1;
   // LATIN SMALL LETTER LONG S
-  if (C == 0x017f)
-    return 0x0073;
+  إذا (C == 0x017f)
+    إرجاع 0x0073;
   // LATIN CAPITAL LETTER B WITH HOOK
-  if (C == 0x0181)
-    return 0x0253;
-  if (C < 0x0182)
-    return C;
+  إذا (C == 0x0181)
+    إرجاع 0x0253;
+  إذا (C < 0x0182)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x0184)
-    return C | 1;
+  إذا (C <= 0x0184)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER OPEN O
-  if (C == 0x0186)
-    return 0x0254;
+  إذا (C == 0x0186)
+    إرجاع 0x0254;
   // LATIN CAPITAL LETTER C WITH HOOK
-  if (C == 0x0187)
-    return 0x0188;
-  if (C < 0x0189)
-    return C;
+  إذا (C == 0x0187)
+    إرجاع 0x0188;
+  إذا (C < 0x0189)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x018a)
-    return C + 205;
+  إذا (C <= 0x018a)
+    إرجاع C + 205;
   // LATIN CAPITAL LETTER D WITH TOPBAR
-  if (C == 0x018b)
-    return 0x018c;
+  إذا (C == 0x018b)
+    إرجاع 0x018c;
   // LATIN CAPITAL LETTER REVERSED E
-  if (C == 0x018e)
-    return 0x01dd;
+  إذا (C == 0x018e)
+    إرجاع 0x01dd;
   // LATIN CAPITAL LETTER SCHWA
-  if (C == 0x018f)
-    return 0x0259;
+  إذا (C == 0x018f)
+    إرجاع 0x0259;
   // LATIN CAPITAL LETTER OPEN E
-  if (C == 0x0190)
-    return 0x025b;
+  إذا (C == 0x0190)
+    إرجاع 0x025b;
   // LATIN CAPITAL LETTER F WITH HOOK
-  if (C == 0x0191)
-    return 0x0192;
+  إذا (C == 0x0191)
+    إرجاع 0x0192;
   // LATIN CAPITAL LETTER G WITH HOOK
-  if (C == 0x0193)
-    return 0x0260;
+  إذا (C == 0x0193)
+    إرجاع 0x0260;
   // LATIN CAPITAL LETTER GAMMA
-  if (C == 0x0194)
-    return 0x0263;
+  إذا (C == 0x0194)
+    إرجاع 0x0263;
   // LATIN CAPITAL LETTER IOTA
-  if (C == 0x0196)
-    return 0x0269;
+  إذا (C == 0x0196)
+    إرجاع 0x0269;
   // LATIN CAPITAL LETTER I WITH STROKE
-  if (C == 0x0197)
-    return 0x0268;
+  إذا (C == 0x0197)
+    إرجاع 0x0268;
   // LATIN CAPITAL LETTER K WITH HOOK
-  if (C == 0x0198)
-    return 0x0199;
+  إذا (C == 0x0198)
+    إرجاع 0x0199;
   // LATIN CAPITAL LETTER TURNED M
-  if (C == 0x019c)
-    return 0x026f;
+  إذا (C == 0x019c)
+    إرجاع 0x026f;
   // LATIN CAPITAL LETTER N WITH LEFT HOOK
-  if (C == 0x019d)
-    return 0x0272;
+  إذا (C == 0x019d)
+    إرجاع 0x0272;
   // LATIN CAPITAL LETTER O WITH MIDDLE TILDE
-  if (C == 0x019f)
-    return 0x0275;
-  if (C < 0x01a0)
-    return C;
+  إذا (C == 0x019f)
+    إرجاع 0x0275;
+  إذا (C < 0x01a0)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x01a4)
-    return C | 1;
+  إذا (C <= 0x01a4)
+    إرجاع C | 1;
   // LATIN LETTER YR
-  if (C == 0x01a6)
-    return 0x0280;
+  إذا (C == 0x01a6)
+    إرجاع 0x0280;
   // LATIN CAPITAL LETTER TONE TWO
-  if (C == 0x01a7)
-    return 0x01a8;
+  إذا (C == 0x01a7)
+    إرجاع 0x01a8;
   // LATIN CAPITAL LETTER ESH
-  if (C == 0x01a9)
-    return 0x0283;
+  إذا (C == 0x01a9)
+    إرجاع 0x0283;
   // LATIN CAPITAL LETTER T WITH HOOK
-  if (C == 0x01ac)
-    return 0x01ad;
+  إذا (C == 0x01ac)
+    إرجاع 0x01ad;
   // LATIN CAPITAL LETTER T WITH RETROFLEX HOOK
-  if (C == 0x01ae)
-    return 0x0288;
+  إذا (C == 0x01ae)
+    إرجاع 0x0288;
   // LATIN CAPITAL LETTER U WITH HORN
-  if (C == 0x01af)
-    return 0x01b0;
-  if (C < 0x01b1)
-    return C;
+  إذا (C == 0x01af)
+    إرجاع 0x01b0;
+  إذا (C < 0x01b1)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x01b2)
-    return C + 217;
-  if (C < 0x01b3)
-    return C;
+  إذا (C <= 0x01b2)
+    إرجاع C + 217;
+  إذا (C < 0x01b3)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x01b5 && C % 2 == 1)
-    return C + 1;
+  إذا (C <= 0x01b5 && C % 2 == 1)
+    إرجاع C + 1;
   // LATIN CAPITAL LETTER EZH
-  if (C == 0x01b7)
-    return 0x0292;
-  if (C < 0x01b8)
-    return C;
+  إذا (C == 0x01b7)
+    إرجاع 0x0292;
+  إذا (C < 0x01b8)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x01bc && C % 4 == 0)
-    return C + 1;
+  إذا (C <= 0x01bc && C % 4 == 0)
+    إرجاع C + 1;
   // LATIN CAPITAL LETTER DZ WITH CARON
-  if (C == 0x01c4)
-    return 0x01c6;
+  إذا (C == 0x01c4)
+    إرجاع 0x01c6;
   // LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
-  if (C == 0x01c5)
-    return 0x01c6;
+  إذا (C == 0x01c5)
+    إرجاع 0x01c6;
   // LATIN CAPITAL LETTER LJ
-  if (C == 0x01c7)
-    return 0x01c9;
+  إذا (C == 0x01c7)
+    إرجاع 0x01c9;
   // LATIN CAPITAL LETTER L WITH SMALL LETTER J
-  if (C == 0x01c8)
-    return 0x01c9;
+  إذا (C == 0x01c8)
+    إرجاع 0x01c9;
   // LATIN CAPITAL LETTER NJ
-  if (C == 0x01ca)
-    return 0x01cc;
-  if (C < 0x01cb)
-    return C;
+  إذا (C == 0x01ca)
+    إرجاع 0x01cc;
+  إذا (C < 0x01cb)
+    إرجاع C;
   // 9 characters
-  if (C <= 0x01db && C % 2 == 1)
-    return C + 1;
-  if (C < 0x01de)
-    return C;
+  إذا (C <= 0x01db && C % 2 == 1)
+    إرجاع C + 1;
+  إذا (C < 0x01de)
+    إرجاع C;
   // 9 characters
-  if (C <= 0x01ee)
-    return C | 1;
+  إذا (C <= 0x01ee)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER DZ
-  if (C == 0x01f1)
-    return 0x01f3;
-  if (C < 0x01f2)
-    return C;
+  إذا (C == 0x01f1)
+    إرجاع 0x01f3;
+  إذا (C < 0x01f2)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x01f4)
-    return C | 1;
+  إذا (C <= 0x01f4)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER HWAIR
-  if (C == 0x01f6)
-    return 0x0195;
+  إذا (C == 0x01f6)
+    إرجاع 0x0195;
   // LATIN CAPITAL LETTER WYNN
-  if (C == 0x01f7)
-    return 0x01bf;
-  if (C < 0x01f8)
-    return C;
+  إذا (C == 0x01f7)
+    إرجاع 0x01bf;
+  إذا (C < 0x01f8)
+    إرجاع C;
   // 20 characters
-  if (C <= 0x021e)
-    return C | 1;
+  إذا (C <= 0x021e)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER N WITH LONG RIGHT LEG
-  if (C == 0x0220)
-    return 0x019e;
-  if (C < 0x0222)
-    return C;
+  إذا (C == 0x0220)
+    إرجاع 0x019e;
+  إذا (C < 0x0222)
+    إرجاع C;
   // 9 characters
-  if (C <= 0x0232)
-    return C | 1;
+  إذا (C <= 0x0232)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER A WITH STROKE
-  if (C == 0x023a)
-    return 0x2c65;
+  إذا (C == 0x023a)
+    إرجاع 0x2c65;
   // LATIN CAPITAL LETTER C WITH STROKE
-  if (C == 0x023b)
-    return 0x023c;
+  إذا (C == 0x023b)
+    إرجاع 0x023c;
   // LATIN CAPITAL LETTER L WITH BAR
-  if (C == 0x023d)
-    return 0x019a;
+  إذا (C == 0x023d)
+    إرجاع 0x019a;
   // LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
-  if (C == 0x023e)
-    return 0x2c66;
+  إذا (C == 0x023e)
+    إرجاع 0x2c66;
   // LATIN CAPITAL LETTER GLOTTAL STOP
-  if (C == 0x0241)
-    return 0x0242;
+  إذا (C == 0x0241)
+    إرجاع 0x0242;
   // LATIN CAPITAL LETTER B WITH STROKE
-  if (C == 0x0243)
-    return 0x0180;
+  إذا (C == 0x0243)
+    إرجاع 0x0180;
   // LATIN CAPITAL LETTER U BAR
-  if (C == 0x0244)
-    return 0x0289;
+  إذا (C == 0x0244)
+    إرجاع 0x0289;
   // LATIN CAPITAL LETTER TURNED V
-  if (C == 0x0245)
-    return 0x028c;
-  if (C < 0x0246)
-    return C;
+  إذا (C == 0x0245)
+    إرجاع 0x028c;
+  إذا (C < 0x0246)
+    إرجاع C;
   // 5 characters
-  if (C <= 0x024e)
-    return C | 1;
+  إذا (C <= 0x024e)
+    إرجاع C | 1;
   // COMBINING GREEK YPOGEGRAMMENI
-  if (C == 0x0345)
-    return 0x03b9;
-  if (C < 0x0370)
-    return C;
+  إذا (C == 0x0345)
+    إرجاع 0x03b9;
+  إذا (C < 0x0370)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x0372)
-    return C | 1;
+  إذا (C <= 0x0372)
+    إرجاع C | 1;
   // GREEK CAPITAL LETTER PAMPHYLIAN DIGAMMA
-  if (C == 0x0376)
-    return 0x0377;
+  إذا (C == 0x0376)
+    إرجاع 0x0377;
   // GREEK CAPITAL LETTER YOT
-  if (C == 0x037f)
-    return 0x03f3;
+  إذا (C == 0x037f)
+    إرجاع 0x03f3;
   // GREEK CAPITAL LETTER ALPHA WITH TONOS
-  if (C == 0x0386)
-    return 0x03ac;
-  if (C < 0x0388)
-    return C;
+  إذا (C == 0x0386)
+    إرجاع 0x03ac;
+  إذا (C < 0x0388)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x038a)
-    return C + 37;
+  إذا (C <= 0x038a)
+    إرجاع C + 37;
   // GREEK CAPITAL LETTER OMICRON WITH TONOS
-  if (C == 0x038c)
-    return 0x03cc;
-  if (C < 0x038e)
-    return C;
+  إذا (C == 0x038c)
+    إرجاع 0x03cc;
+  إذا (C < 0x038e)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x038f)
-    return C + 63;
-  if (C < 0x0391)
-    return C;
+  إذا (C <= 0x038f)
+    إرجاع C + 63;
+  إذا (C < 0x0391)
+    إرجاع C;
   // 17 characters
-  if (C <= 0x03a1)
-    return C + 32;
-  if (C < 0x03a3)
-    return C;
+  إذا (C <= 0x03a1)
+    إرجاع C + 32;
+  إذا (C < 0x03a3)
+    إرجاع C;
   // 9 characters
-  if (C <= 0x03ab)
-    return C + 32;
+  إذا (C <= 0x03ab)
+    إرجاع C + 32;
   // GREEK SMALL LETTER FINAL SIGMA
-  if (C == 0x03c2)
-    return 0x03c3;
+  إذا (C == 0x03c2)
+    إرجاع 0x03c3;
   // GREEK CAPITAL KAI SYMBOL
-  if (C == 0x03cf)
-    return 0x03d7;
+  إذا (C == 0x03cf)
+    إرجاع 0x03d7;
   // GREEK BETA SYMBOL
-  if (C == 0x03d0)
-    return 0x03b2;
+  إذا (C == 0x03d0)
+    إرجاع 0x03b2;
   // GREEK THETA SYMBOL
-  if (C == 0x03d1)
-    return 0x03b8;
+  إذا (C == 0x03d1)
+    إرجاع 0x03b8;
   // GREEK PHI SYMBOL
-  if (C == 0x03d5)
-    return 0x03c6;
+  إذا (C == 0x03d5)
+    إرجاع 0x03c6;
   // GREEK PI SYMBOL
-  if (C == 0x03d6)
-    return 0x03c0;
-  if (C < 0x03d8)
-    return C;
+  إذا (C == 0x03d6)
+    إرجاع 0x03c0;
+  إذا (C < 0x03d8)
+    إرجاع C;
   // 12 characters
-  if (C <= 0x03ee)
-    return C | 1;
+  إذا (C <= 0x03ee)
+    إرجاع C | 1;
   // GREEK KAPPA SYMBOL
-  if (C == 0x03f0)
-    return 0x03ba;
+  إذا (C == 0x03f0)
+    إرجاع 0x03ba;
   // GREEK RHO SYMBOL
-  if (C == 0x03f1)
-    return 0x03c1;
+  إذا (C == 0x03f1)
+    إرجاع 0x03c1;
   // GREEK CAPITAL THETA SYMBOL
-  if (C == 0x03f4)
-    return 0x03b8;
+  إذا (C == 0x03f4)
+    إرجاع 0x03b8;
   // GREEK LUNATE EPSILON SYMBOL
-  if (C == 0x03f5)
-    return 0x03b5;
+  إذا (C == 0x03f5)
+    إرجاع 0x03b5;
   // GREEK CAPITAL LETTER SHO
-  if (C == 0x03f7)
-    return 0x03f8;
+  إذا (C == 0x03f7)
+    إرجاع 0x03f8;
   // GREEK CAPITAL LUNATE SIGMA SYMBOL
-  if (C == 0x03f9)
-    return 0x03f2;
+  إذا (C == 0x03f9)
+    إرجاع 0x03f2;
   // GREEK CAPITAL LETTER SAN
-  if (C == 0x03fa)
-    return 0x03fb;
-  if (C < 0x03fd)
-    return C;
+  إذا (C == 0x03fa)
+    إرجاع 0x03fb;
+  إذا (C < 0x03fd)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x03ff)
-    return C + -130;
-  if (C < 0x0400)
-    return C;
+  إذا (C <= 0x03ff)
+    إرجاع C + -130;
+  إذا (C < 0x0400)
+    إرجاع C;
   // 16 characters
-  if (C <= 0x040f)
-    return C + 80;
-  if (C < 0x0410)
-    return C;
+  إذا (C <= 0x040f)
+    إرجاع C + 80;
+  إذا (C < 0x0410)
+    إرجاع C;
   // 32 characters
-  if (C <= 0x042f)
-    return C + 32;
-  if (C < 0x0460)
-    return C;
+  إذا (C <= 0x042f)
+    إرجاع C + 32;
+  إذا (C < 0x0460)
+    إرجاع C;
   // 17 characters
-  if (C <= 0x0480)
-    return C | 1;
-  if (C < 0x048a)
-    return C;
+  إذا (C <= 0x0480)
+    إرجاع C | 1;
+  إذا (C < 0x048a)
+    إرجاع C;
   // 27 characters
-  if (C <= 0x04be)
-    return C | 1;
+  إذا (C <= 0x04be)
+    إرجاع C | 1;
   // CYRILLIC LETTER PALOCHKA
-  if (C == 0x04c0)
-    return 0x04cf;
-  if (C < 0x04c1)
-    return C;
+  إذا (C == 0x04c0)
+    إرجاع 0x04cf;
+  إذا (C < 0x04c1)
+    إرجاع C;
   // 7 characters
-  if (C <= 0x04cd && C % 2 == 1)
-    return C + 1;
-  if (C < 0x04d0)
-    return C;
+  إذا (C <= 0x04cd && C % 2 == 1)
+    إرجاع C + 1;
+  إذا (C < 0x04d0)
+    إرجاع C;
   // 48 characters
-  if (C <= 0x052e)
-    return C | 1;
-  if (C < 0x0531)
-    return C;
+  إذا (C <= 0x052e)
+    إرجاع C | 1;
+  إذا (C < 0x0531)
+    إرجاع C;
   // 38 characters
-  if (C <= 0x0556)
-    return C + 48;
-  if (C < 0x10a0)
-    return C;
+  إذا (C <= 0x0556)
+    إرجاع C + 48;
+  إذا (C < 0x10a0)
+    إرجاع C;
   // 38 characters
-  if (C <= 0x10c5)
-    return C + 7264;
-  if (C < 0x10c7)
-    return C;
+  إذا (C <= 0x10c5)
+    إرجاع C + 7264;
+  إذا (C < 0x10c7)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x10cd && C % 6 == 5)
-    return C + 7264;
-  if (C < 0x13f8)
-    return C;
+  إذا (C <= 0x10cd && C % 6 == 5)
+    إرجاع C + 7264;
+  إذا (C < 0x13f8)
+    إرجاع C;
   // 6 characters
-  if (C <= 0x13fd)
-    return C + -8;
+  إذا (C <= 0x13fd)
+    إرجاع C + -8;
   // CYRILLIC SMALL LETTER ROUNDED VE
-  if (C == 0x1c80)
-    return 0x0432;
+  إذا (C == 0x1c80)
+    إرجاع 0x0432;
   // CYRILLIC SMALL LETTER LONG-LEGGED DE
-  if (C == 0x1c81)
-    return 0x0434;
+  إذا (C == 0x1c81)
+    إرجاع 0x0434;
   // CYRILLIC SMALL LETTER NARROW O
-  if (C == 0x1c82)
-    return 0x043e;
-  if (C < 0x1c83)
-    return C;
+  إذا (C == 0x1c82)
+    إرجاع 0x043e;
+  إذا (C < 0x1c83)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1c84)
-    return C + -6210;
+  إذا (C <= 0x1c84)
+    إرجاع C + -6210;
   // CYRILLIC SMALL LETTER THREE-LEGGED TE
-  if (C == 0x1c85)
-    return 0x0442;
+  إذا (C == 0x1c85)
+    إرجاع 0x0442;
   // CYRILLIC SMALL LETTER TALL HARD SIGN
-  if (C == 0x1c86)
-    return 0x044a;
+  إذا (C == 0x1c86)
+    إرجاع 0x044a;
   // CYRILLIC SMALL LETTER TALL YAT
-  if (C == 0x1c87)
-    return 0x0463;
+  إذا (C == 0x1c87)
+    إرجاع 0x0463;
   // CYRILLIC SMALL LETTER UNBLENDED UK
-  if (C == 0x1c88)
-    return 0xa64b;
+  إذا (C == 0x1c88)
+    إرجاع 0xa64b;
   // CYRILLIC CAPITAL LETTER TJE
-  if (C == 0x1c89)
-    return 0x1c8a;
-  if (C < 0x1c90)
-    return C;
+  إذا (C == 0x1c89)
+    إرجاع 0x1c8a;
+  إذا (C < 0x1c90)
+    إرجاع C;
   // 43 characters
-  if (C <= 0x1cba)
-    return C + -3008;
-  if (C < 0x1cbd)
-    return C;
+  إذا (C <= 0x1cba)
+    إرجاع C + -3008;
+  إذا (C < 0x1cbd)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x1cbf)
-    return C + -3008;
-  if (C < 0x1e00)
-    return C;
+  إذا (C <= 0x1cbf)
+    إرجاع C + -3008;
+  إذا (C < 0x1e00)
+    إرجاع C;
   // 75 characters
-  if (C <= 0x1e94)
-    return C | 1;
+  إذا (C <= 0x1e94)
+    إرجاع C | 1;
   // LATIN SMALL LETTER LONG S WITH DOT ABOVE
-  if (C == 0x1e9b)
-    return 0x1e61;
+  إذا (C == 0x1e9b)
+    إرجاع 0x1e61;
   // LATIN CAPITAL LETTER SHARP S
-  if (C == 0x1e9e)
-    return 0x00df;
-  if (C < 0x1ea0)
-    return C;
+  إذا (C == 0x1e9e)
+    إرجاع 0x00df;
+  إذا (C < 0x1ea0)
+    إرجاع C;
   // 48 characters
-  if (C <= 0x1efe)
-    return C | 1;
-  if (C < 0x1f08)
-    return C;
+  إذا (C <= 0x1efe)
+    إرجاع C | 1;
+  إذا (C < 0x1f08)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1f0f)
-    return C + -8;
-  if (C < 0x1f18)
-    return C;
+  إذا (C <= 0x1f0f)
+    إرجاع C + -8;
+  إذا (C < 0x1f18)
+    إرجاع C;
   // 6 characters
-  if (C <= 0x1f1d)
-    return C + -8;
-  if (C < 0x1f28)
-    return C;
+  إذا (C <= 0x1f1d)
+    إرجاع C + -8;
+  إذا (C < 0x1f28)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1f2f)
-    return C + -8;
-  if (C < 0x1f38)
-    return C;
+  إذا (C <= 0x1f2f)
+    إرجاع C + -8;
+  إذا (C < 0x1f38)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1f3f)
-    return C + -8;
-  if (C < 0x1f48)
-    return C;
+  إذا (C <= 0x1f3f)
+    إرجاع C + -8;
+  إذا (C < 0x1f48)
+    إرجاع C;
   // 6 characters
-  if (C <= 0x1f4d)
-    return C + -8;
-  if (C < 0x1f59)
-    return C;
+  إذا (C <= 0x1f4d)
+    إرجاع C + -8;
+  إذا (C < 0x1f59)
+    إرجاع C;
   // 4 characters
-  if (C <= 0x1f5f && C % 2 == 1)
-    return C + -8;
-  if (C < 0x1f68)
-    return C;
+  إذا (C <= 0x1f5f && C % 2 == 1)
+    إرجاع C + -8;
+  إذا (C < 0x1f68)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1f6f)
-    return C + -8;
-  if (C < 0x1f88)
-    return C;
+  إذا (C <= 0x1f6f)
+    إرجاع C + -8;
+  إذا (C < 0x1f88)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1f8f)
-    return C + -8;
-  if (C < 0x1f98)
-    return C;
+  إذا (C <= 0x1f8f)
+    إرجاع C + -8;
+  إذا (C < 0x1f98)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1f9f)
-    return C + -8;
-  if (C < 0x1fa8)
-    return C;
+  إذا (C <= 0x1f9f)
+    إرجاع C + -8;
+  إذا (C < 0x1fa8)
+    إرجاع C;
   // 8 characters
-  if (C <= 0x1faf)
-    return C + -8;
-  if (C < 0x1fb8)
-    return C;
+  إذا (C <= 0x1faf)
+    إرجاع C + -8;
+  إذا (C < 0x1fb8)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1fb9)
-    return C + -8;
-  if (C < 0x1fba)
-    return C;
+  إذا (C <= 0x1fb9)
+    إرجاع C + -8;
+  إذا (C < 0x1fba)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1fbb)
-    return C + -74;
+  إذا (C <= 0x1fbb)
+    إرجاع C + -74;
   // GREEK CAPITAL LETTER ALPHA WITH PROSGEGRAMMENI
-  if (C == 0x1fbc)
-    return 0x1fb3;
+  إذا (C == 0x1fbc)
+    إرجاع 0x1fb3;
   // GREEK PROSGEGRAMMENI
-  if (C == 0x1fbe)
-    return 0x03b9;
-  if (C < 0x1fc8)
-    return C;
+  إذا (C == 0x1fbe)
+    إرجاع 0x03b9;
+  إذا (C < 0x1fc8)
+    إرجاع C;
   // 4 characters
-  if (C <= 0x1fcb)
-    return C + -86;
+  إذا (C <= 0x1fcb)
+    إرجاع C + -86;
   // GREEK CAPITAL LETTER ETA WITH PROSGEGRAMMENI
-  if (C == 0x1fcc)
-    return 0x1fc3;
+  إذا (C == 0x1fcc)
+    إرجاع 0x1fc3;
   // GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
-  if (C == 0x1fd3)
-    return 0x0390;
-  if (C < 0x1fd8)
-    return C;
+  إذا (C == 0x1fd3)
+    إرجاع 0x0390;
+  إذا (C < 0x1fd8)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1fd9)
-    return C + -8;
-  if (C < 0x1fda)
-    return C;
+  إذا (C <= 0x1fd9)
+    إرجاع C + -8;
+  إذا (C < 0x1fda)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1fdb)
-    return C + -100;
+  إذا (C <= 0x1fdb)
+    إرجاع C + -100;
   // GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
-  if (C == 0x1fe3)
-    return 0x03b0;
-  if (C < 0x1fe8)
-    return C;
+  إذا (C == 0x1fe3)
+    إرجاع 0x03b0;
+  إذا (C < 0x1fe8)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1fe9)
-    return C + -8;
-  if (C < 0x1fea)
-    return C;
+  إذا (C <= 0x1fe9)
+    إرجاع C + -8;
+  إذا (C < 0x1fea)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1feb)
-    return C + -112;
+  إذا (C <= 0x1feb)
+    إرجاع C + -112;
   // GREEK CAPITAL LETTER RHO WITH DASIA
-  if (C == 0x1fec)
-    return 0x1fe5;
-  if (C < 0x1ff8)
-    return C;
+  إذا (C == 0x1fec)
+    إرجاع 0x1fe5;
+  إذا (C < 0x1ff8)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1ff9)
-    return C + -128;
-  if (C < 0x1ffa)
-    return C;
+  إذا (C <= 0x1ff9)
+    إرجاع C + -128;
+  إذا (C < 0x1ffa)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1ffb)
-    return C + -126;
+  إذا (C <= 0x1ffb)
+    إرجاع C + -126;
   // GREEK CAPITAL LETTER OMEGA WITH PROSGEGRAMMENI
-  if (C == 0x1ffc)
-    return 0x1ff3;
+  إذا (C == 0x1ffc)
+    إرجاع 0x1ff3;
   // OHM SIGN
-  if (C == 0x2126)
-    return 0x03c9;
+  إذا (C == 0x2126)
+    إرجاع 0x03c9;
   // KELVIN SIGN
-  if (C == 0x212a)
-    return 0x006b;
+  إذا (C == 0x212a)
+    إرجاع 0x006b;
   // ANGSTROM SIGN
-  if (C == 0x212b)
-    return 0x00e5;
+  إذا (C == 0x212b)
+    إرجاع 0x00e5;
   // TURNED CAPITAL F
-  if (C == 0x2132)
-    return 0x214e;
-  if (C < 0x2160)
-    return C;
+  إذا (C == 0x2132)
+    إرجاع 0x214e;
+  إذا (C < 0x2160)
+    إرجاع C;
   // 16 characters
-  if (C <= 0x216f)
-    return C + 16;
+  إذا (C <= 0x216f)
+    إرجاع C + 16;
   // ROMAN NUMERAL REVERSED ONE HUNDRED
-  if (C == 0x2183)
-    return 0x2184;
-  if (C < 0x24b6)
-    return C;
+  إذا (C == 0x2183)
+    إرجاع 0x2184;
+  إذا (C < 0x24b6)
+    إرجاع C;
   // 26 characters
-  if (C <= 0x24cf)
-    return C + 26;
-  if (C < 0x2c00)
-    return C;
+  إذا (C <= 0x24cf)
+    إرجاع C + 26;
+  إذا (C < 0x2c00)
+    إرجاع C;
   // 48 characters
-  if (C <= 0x2c2f)
-    return C + 48;
+  إذا (C <= 0x2c2f)
+    إرجاع C + 48;
   // LATIN CAPITAL LETTER L WITH DOUBLE BAR
-  if (C == 0x2c60)
-    return 0x2c61;
+  إذا (C == 0x2c60)
+    إرجاع 0x2c61;
   // LATIN CAPITAL LETTER L WITH MIDDLE TILDE
-  if (C == 0x2c62)
-    return 0x026b;
+  إذا (C == 0x2c62)
+    إرجاع 0x026b;
   // LATIN CAPITAL LETTER P WITH STROKE
-  if (C == 0x2c63)
-    return 0x1d7d;
+  إذا (C == 0x2c63)
+    إرجاع 0x1d7d;
   // LATIN CAPITAL LETTER R WITH TAIL
-  if (C == 0x2c64)
-    return 0x027d;
-  if (C < 0x2c67)
-    return C;
+  إذا (C == 0x2c64)
+    إرجاع 0x027d;
+  إذا (C < 0x2c67)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x2c6b && C % 2 == 1)
-    return C + 1;
+  إذا (C <= 0x2c6b && C % 2 == 1)
+    إرجاع C + 1;
   // LATIN CAPITAL LETTER ALPHA
-  if (C == 0x2c6d)
-    return 0x0251;
+  إذا (C == 0x2c6d)
+    إرجاع 0x0251;
   // LATIN CAPITAL LETTER M WITH HOOK
-  if (C == 0x2c6e)
-    return 0x0271;
+  إذا (C == 0x2c6e)
+    إرجاع 0x0271;
   // LATIN CAPITAL LETTER TURNED A
-  if (C == 0x2c6f)
-    return 0x0250;
+  إذا (C == 0x2c6f)
+    إرجاع 0x0250;
   // LATIN CAPITAL LETTER TURNED ALPHA
-  if (C == 0x2c70)
-    return 0x0252;
-  if (C < 0x2c72)
-    return C;
+  إذا (C == 0x2c70)
+    إرجاع 0x0252;
+  إذا (C < 0x2c72)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x2c75 && C % 3 == 2)
-    return C + 1;
-  if (C < 0x2c7e)
-    return C;
+  إذا (C <= 0x2c75 && C % 3 == 2)
+    إرجاع C + 1;
+  إذا (C < 0x2c7e)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x2c7f)
-    return C + -10815;
-  if (C < 0x2c80)
-    return C;
+  إذا (C <= 0x2c7f)
+    إرجاع C + -10815;
+  إذا (C < 0x2c80)
+    إرجاع C;
   // 50 characters
-  if (C <= 0x2ce2)
-    return C | 1;
-  if (C < 0x2ceb)
-    return C;
+  إذا (C <= 0x2ce2)
+    إرجاع C | 1;
+  إذا (C < 0x2ceb)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x2ced && C % 2 == 1)
-    return C + 1;
-  if (C < 0x2cf2)
-    return C;
+  إذا (C <= 0x2ced && C % 2 == 1)
+    إرجاع C + 1;
+  إذا (C < 0x2cf2)
+    إرجاع C;
   // 2 characters
-  if (C <= 0xa640 && C % 31054 == 11506)
-    return C + 1;
-  if (C < 0xa642)
-    return C;
+  إذا (C <= 0xa640 && C % 31054 == 11506)
+    إرجاع C + 1;
+  إذا (C < 0xa642)
+    إرجاع C;
   // 22 characters
-  if (C <= 0xa66c)
-    return C | 1;
-  if (C < 0xa680)
-    return C;
+  إذا (C <= 0xa66c)
+    إرجاع C | 1;
+  إذا (C < 0xa680)
+    إرجاع C;
   // 14 characters
-  if (C <= 0xa69a)
-    return C | 1;
-  if (C < 0xa722)
-    return C;
+  إذا (C <= 0xa69a)
+    إرجاع C | 1;
+  إذا (C < 0xa722)
+    إرجاع C;
   // 7 characters
-  if (C <= 0xa72e)
-    return C | 1;
-  if (C < 0xa732)
-    return C;
+  إذا (C <= 0xa72e)
+    إرجاع C | 1;
+  إذا (C < 0xa732)
+    إرجاع C;
   // 31 characters
-  if (C <= 0xa76e)
-    return C | 1;
-  if (C < 0xa779)
-    return C;
+  إذا (C <= 0xa76e)
+    إرجاع C | 1;
+  إذا (C < 0xa779)
+    إرجاع C;
   // 2 characters
-  if (C <= 0xa77b && C % 2 == 1)
-    return C + 1;
+  إذا (C <= 0xa77b && C % 2 == 1)
+    إرجاع C + 1;
   // LATIN CAPITAL LETTER INSULAR G
-  if (C == 0xa77d)
-    return 0x1d79;
-  if (C < 0xa77e)
-    return C;
+  إذا (C == 0xa77d)
+    إرجاع 0x1d79;
+  إذا (C < 0xa77e)
+    إرجاع C;
   // 5 characters
-  if (C <= 0xa786)
-    return C | 1;
+  إذا (C <= 0xa786)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER SALTILLO
-  if (C == 0xa78b)
-    return 0xa78c;
+  إذا (C == 0xa78b)
+    إرجاع 0xa78c;
   // LATIN CAPITAL LETTER TURNED H
-  if (C == 0xa78d)
-    return 0x0265;
-  if (C < 0xa790)
-    return C;
+  إذا (C == 0xa78d)
+    إرجاع 0x0265;
+  إذا (C < 0xa790)
+    إرجاع C;
   // 2 characters
-  if (C <= 0xa792)
-    return C | 1;
-  if (C < 0xa796)
-    return C;
+  إذا (C <= 0xa792)
+    إرجاع C | 1;
+  إذا (C < 0xa796)
+    إرجاع C;
   // 10 characters
-  if (C <= 0xa7a8)
-    return C | 1;
+  إذا (C <= 0xa7a8)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER H WITH HOOK
-  if (C == 0xa7aa)
-    return 0x0266;
+  إذا (C == 0xa7aa)
+    إرجاع 0x0266;
   // LATIN CAPITAL LETTER REVERSED OPEN E
-  if (C == 0xa7ab)
-    return 0x025c;
+  إذا (C == 0xa7ab)
+    إرجاع 0x025c;
   // LATIN CAPITAL LETTER SCRIPT G
-  if (C == 0xa7ac)
-    return 0x0261;
+  إذا (C == 0xa7ac)
+    إرجاع 0x0261;
   // LATIN CAPITAL LETTER L WITH BELT
-  if (C == 0xa7ad)
-    return 0x026c;
+  إذا (C == 0xa7ad)
+    إرجاع 0x026c;
   // LATIN CAPITAL LETTER SMALL CAPITAL I
-  if (C == 0xa7ae)
-    return 0x026a;
+  إذا (C == 0xa7ae)
+    إرجاع 0x026a;
   // LATIN CAPITAL LETTER TURNED K
-  if (C == 0xa7b0)
-    return 0x029e;
+  إذا (C == 0xa7b0)
+    إرجاع 0x029e;
   // LATIN CAPITAL LETTER TURNED T
-  if (C == 0xa7b1)
-    return 0x0287;
+  إذا (C == 0xa7b1)
+    إرجاع 0x0287;
   // LATIN CAPITAL LETTER J WITH CROSSED-TAIL
-  if (C == 0xa7b2)
-    return 0x029d;
+  إذا (C == 0xa7b2)
+    إرجاع 0x029d;
   // LATIN CAPITAL LETTER CHI
-  if (C == 0xa7b3)
-    return 0xab53;
-  if (C < 0xa7b4)
-    return C;
+  إذا (C == 0xa7b3)
+    إرجاع 0xab53;
+  إذا (C < 0xa7b4)
+    إرجاع C;
   // 8 characters
-  if (C <= 0xa7c2)
-    return C | 1;
+  إذا (C <= 0xa7c2)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER C WITH PALATAL HOOK
-  if (C == 0xa7c4)
-    return 0xa794;
+  إذا (C == 0xa7c4)
+    إرجاع 0xa794;
   // LATIN CAPITAL LETTER S WITH HOOK
-  if (C == 0xa7c5)
-    return 0x0282;
+  إذا (C == 0xa7c5)
+    إرجاع 0x0282;
   // LATIN CAPITAL LETTER Z WITH PALATAL HOOK
-  if (C == 0xa7c6)
-    return 0x1d8e;
-  if (C < 0xa7c7)
-    return C;
+  إذا (C == 0xa7c6)
+    إرجاع 0x1d8e;
+  إذا (C < 0xa7c7)
+    إرجاع C;
   // 2 characters
-  if (C <= 0xa7c9 && C % 2 == 1)
-    return C + 1;
+  إذا (C <= 0xa7c9 && C % 2 == 1)
+    إرجاع C + 1;
   // LATIN CAPITAL LETTER RAMS HORN
-  if (C == 0xa7cb)
-    return 0x0264;
-  if (C < 0xa7cc)
-    return C;
+  إذا (C == 0xa7cb)
+    إرجاع 0x0264;
+  إذا (C < 0xa7cc)
+    إرجاع C;
   // 8 characters
-  if (C <= 0xa7da)
-    return C | 1;
+  إذا (C <= 0xa7da)
+    إرجاع C | 1;
   // LATIN CAPITAL LETTER LAMBDA WITH STROKE
-  if (C == 0xa7dc)
-    return 0x019b;
-  if (C < 0xa7dd)
-    return C;
+  إذا (C == 0xa7dc)
+    إرجاع 0x019b;
+  إذا (C < 0xa7dd)
+    إرجاع C;
   // 2 characters
-  if (C <= 0xa7e2 && C % 5 == 3)
-    return C + -42342;
+  إذا (C <= 0xa7e2 && C % 5 == 3)
+    إرجاع C + -42342;
   // LATIN CAPITAL LETTER REVERSED HALF H
-  if (C == 0xa7f5)
-    return 0xa7f6;
-  if (C < 0xab6c)
-    return C;
+  إذا (C == 0xa7f5)
+    إرجاع 0xa7f6;
+  إذا (C < 0xab6c)
+    إرجاع C;
   // 2 characters
-  if (C <= 0xab6d)
-    return C + -33;
-  if (C < 0xab70)
-    return C;
+  إذا (C <= 0xab6d)
+    إرجاع C + -33;
+  إذا (C < 0xab70)
+    إرجاع C;
   // 80 characters
-  if (C <= 0xabbf)
-    return C + -38864;
+  إذا (C <= 0xabbf)
+    إرجاع C + -38864;
   // LATIN SMALL LIGATURE LONG S T
-  if (C == 0xfb05)
-    return 0xfb06;
-  if (C < 0xff21)
-    return C;
+  إذا (C == 0xfb05)
+    إرجاع 0xfb06;
+  إذا (C < 0xff21)
+    إرجاع C;
   // 26 characters
-  if (C <= 0xff3a)
-    return C + 32;
-  if (C < 0x10400)
-    return C;
+  إذا (C <= 0xff3a)
+    إرجاع C + 32;
+  إذا (C < 0x10400)
+    إرجاع C;
   // 40 characters
-  if (C <= 0x10427)
-    return C + 40;
-  if (C < 0x104b0)
-    return C;
+  إذا (C <= 0x10427)
+    إرجاع C + 40;
+  إذا (C < 0x104b0)
+    إرجاع C;
   // 36 characters
-  if (C <= 0x104d3)
-    return C + 40;
-  if (C < 0x10570)
-    return C;
+  إذا (C <= 0x104d3)
+    إرجاع C + 40;
+  إذا (C < 0x10570)
+    إرجاع C;
   // 11 characters
-  if (C <= 0x1057a)
-    return C + 39;
-  if (C < 0x1057c)
-    return C;
+  إذا (C <= 0x1057a)
+    إرجاع C + 39;
+  إذا (C < 0x1057c)
+    إرجاع C;
   // 15 characters
-  if (C <= 0x1058a)
-    return C + 39;
-  if (C < 0x1058c)
-    return C;
+  إذا (C <= 0x1058a)
+    إرجاع C + 39;
+  إذا (C < 0x1058c)
+    إرجاع C;
   // 7 characters
-  if (C <= 0x10592)
-    return C + 39;
-  if (C < 0x10594)
-    return C;
+  إذا (C <= 0x10592)
+    إرجاع C + 39;
+  إذا (C < 0x10594)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x10595)
-    return C + 39;
-  if (C < 0x10c80)
-    return C;
+  إذا (C <= 0x10595)
+    إرجاع C + 39;
+  إذا (C < 0x10c80)
+    إرجاع C;
   // 51 characters
-  if (C <= 0x10cb2)
-    return C + 64;
-  if (C < 0x10d50)
-    return C;
+  إذا (C <= 0x10cb2)
+    إرجاع C + 64;
+  إذا (C < 0x10d50)
+    إرجاع C;
   // 22 characters
-  if (C <= 0x10d65)
-    return C + 32;
-  if (C < 0x118a0)
-    return C;
+  إذا (C <= 0x10d65)
+    إرجاع C + 32;
+  إذا (C < 0x118a0)
+    إرجاع C;
   // 32 characters
-  if (C <= 0x118bf)
-    return C + 32;
-  if (C < 0x16e40)
-    return C;
+  إذا (C <= 0x118bf)
+    إرجاع C + 32;
+  إذا (C < 0x16e40)
+    إرجاع C;
   // 32 characters
-  if (C <= 0x16e5f)
-    return C + 32;
-  if (C < 0x16ea0)
-    return C;
+  إذا (C <= 0x16e5f)
+    إرجاع C + 32;
+  إذا (C < 0x16ea0)
+    إرجاع C;
   // 25 characters
-  if (C <= 0x16eb8)
-    return C + 27;
-  if (C < 0x1df40)
-    return C;
+  إذا (C <= 0x16eb8)
+    إرجاع C + 27;
+  إذا (C < 0x1df40)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1df48 && C % 8 == 0)
-    return C + 1;
-  if (C < 0x1df4a)
-    return C;
+  إذا (C <= 0x1df48 && C % 8 == 0)
+    إرجاع C + 1;
+  إذا (C < 0x1df4a)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1df4d && C % 3 == 1)
-    return C + 1;
-  if (C < 0x1df51)
-    return C;
+  إذا (C <= 0x1df4d && C % 3 == 1)
+    إرجاع C + 1;
+  إذا (C < 0x1df51)
+    إرجاع C;
   // 2 characters
-  if (C <= 0x1df68 && C % 23 == 0)
-    return C + 1;
-  if (C < 0x1df6a)
-    return C;
+  إذا (C <= 0x1df68 && C % 23 == 0)
+    إرجاع C + 1;
+  إذا (C < 0x1df6a)
+    إرجاع C;
   // 3 characters
-  if (C <= 0x1df6e)
-    return C | 1;
-  if (C < 0x1df72)
-    return C;
+  إذا (C <= 0x1df6e)
+    إرجاع C | 1;
+  إذا (C < 0x1df72)
+    إرجاع C;
   // 7 characters
-  if (C <= 0x1df7e)
-    return C | 1;
+  إذا (C <= 0x1df7e)
+    إرجاع C | 1;
   // LATIN SMALL LIGATURE LONG S WITH DESCENDER S
-  if (C == 0x1df95)
-    return 0x00df;
-  if (C < 0x1e900)
-    return C;
+  إذا (C == 0x1df95)
+    إرجاع 0x00df;
+  إذا (C < 0x1e900)
+    إرجاع C;
   // 34 characters
-  if (C <= 0x1e921)
-    return C + 34;
+  إذا (C <= 0x1e921)
+    إرجاع C + 34;
 
-  return C;
+  إرجاع C;
 }
