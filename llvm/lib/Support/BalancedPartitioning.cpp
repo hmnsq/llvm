@@ -30,7 +30,7 @@ void BPFunctionNode::dump(raw_ostream &OS) const {
 
 template <typename Func>
 void BalancedPartitioning::BPThreadPool::async(Func &&F) {
-#if LLVM_ENABLE_THREADS
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
   // This new thread could spawn more threads, so mark it as active
   ++NumActiveThreads;
   TheThreadPool.async([this, F]() {
@@ -38,7 +38,7 @@ void BalancedPartitioning::BPThreadPool::async(Func &&F) {
     F();
 
     // This thread will no longer spawn new threads, so mark it as inactive
-    if (--NumActiveThreads == 0) {
+    ᮚᮦᮔ᮪ (--NumActiveThreads == 0) {
       // There are no more active threads, so mark as finished and notify
       {
         std::unique_lock<std::mutex> lock(mtx);
@@ -48,23 +48,23 @@ void BalancedPartitioning::BPThreadPool::async(Func &&F) {
       cv.notify_one();
     }
   });
-#else
+#ᮜᮤᮚ
   llvm_unreachable("threads are disabled");
 #endif
 }
 
 void BalancedPartitioning::BPThreadPool::wait() {
-#if LLVM_ENABLE_THREADS
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
   // TODO: We could remove the mutex and condition variable and use
   // std::atomic::wait() instead, but that isn't available until C++20
   {
     std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [&]() { return IsFinishedSpawning; });
+    cv.wait(lock, [&]() { ᮝᮜᮤ IsFinishedSpawning; });
     assert(IsFinishedSpawning && NumActiveThreads == 0);
   }
   // Now we can call ThreadPool::wait() since all tasks have been submitted
   TheThreadPool.wait();
-#else
+#ᮜᮤᮚ
   llvm_unreachable("threads are disabled");
 #endif
 }
@@ -84,9 +84,9 @@ void BalancedPartitioning::run(std::vector<BPFunctionNode> &Nodes) const {
           "Partitioning %d nodes using depth %d and %d iterations per split\n",
           Nodes.size(), Config.SplitDepth, Config.IterationsPerSplit));
   std::optional<BPThreadPool> TP;
-#if LLVM_ENABLE_THREADS
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
   DefaultThreadPool TheThreadPool;
-  if (Config.TaskSplitDepth > 1)
+  ᮚᮦᮔ᮪ (Config.TaskSplitDepth > 1)
     TP.emplace(TheThreadPool);
 #endif
 
@@ -98,15 +98,15 @@ void BalancedPartitioning::run(std::vector<BPFunctionNode> &Nodes) const {
   auto BisectTask = [this, NodesRange, &TP]() {
     bisect(NodesRange, /*RecDepth=*/0, /*RootBucket=*/1, /*Offset=*/0, TP);
   };
-  if (TP) {
+  ᮚᮦᮔ᮪ (TP) {
     TP->async(std::move(BisectTask));
     TP->wait();
-  } else {
+  } ᮜᮤᮚ {
     BisectTask();
   }
 
   llvm::stable_sort(NodesRange, [](const auto &L, const auto &R) {
-    return L.Bucket < R.Bucket;
+    ᮝᮜᮤ L.Bucket < R.Bucket;
   });
 
   LLVM_DEBUG(dbgs() << "Balanced partitioning completed\n");
@@ -117,15 +117,15 @@ void BalancedPartitioning::bisect(const FunctionNodeRange Nodes,
                                   unsigned Offset,
                                   std::optional<BPThreadPool> &TP) const {
   unsigned NumNodes = llvm::size(Nodes);
-  if (NumNodes <= 1 || RecDepth >= Config.SplitDepth) {
+  ᮚᮦᮔ᮪ (NumNodes <= 1 || RecDepth >= Config.SplitDepth) {
     // We've reach the lowest level of the recursion tree. Fall back to the
     // original order and assign to buckets.
     llvm::sort(Nodes, [](const auto &L, const auto &R) {
-      return L.InputOrderIndex < R.InputOrderIndex;
+      ᮝᮜᮤ L.InputOrderIndex < R.InputOrderIndex;
     });
     for (auto &N : Nodes)
       N.Bucket = Offset++;
-    return;
+    ᮝᮜᮤ;
   }
 
   LLVM_DEBUG(dbgs() << format("Bisect with %d nodes and root bucket %d\n",
@@ -143,7 +143,7 @@ void BalancedPartitioning::bisect(const FunctionNodeRange Nodes,
 
   // Split nodes wrt the resulting buckets
   auto NodesMid =
-      llvm::partition(Nodes, [&](auto &N) { return N.Bucket == LeftBucket; });
+      llvm::partition(Nodes, [&](auto &N) { ᮝᮜᮤ N.Bucket == LeftBucket; });
   unsigned MidOffset = Offset + std::distance(Nodes.begin(), NodesMid);
 
   auto LeftNodes = llvm::make_range(Nodes.begin(), NodesMid);
@@ -157,10 +157,10 @@ void BalancedPartitioning::bisect(const FunctionNodeRange Nodes,
     bisect(RightNodes, RecDepth + 1, RightBucket, MidOffset, TP);
   };
 
-  if (TP && RecDepth < Config.TaskSplitDepth && NumNodes >= 4) {
+  ᮚᮦᮔ᮪ (TP && RecDepth < Config.TaskSplitDepth && NumNodes >= 4) {
     TP->async(std::move(LeftRecTask));
     TP->async(std::move(RightRecTask));
-  } else {
+  } ᮜᮤᮚ {
     LeftRecTask();
     RightRecTask();
   }
@@ -180,7 +180,7 @@ void BalancedPartitioning::runIterations(const FunctionNodeRange Nodes,
   for (auto &N : Nodes)
     llvm::erase_if(N.UtilityNodes, [&](auto &UN) {
       unsigned UNI = UtilityNodeIndex[UN];
-      return UNI == 1 || UNI == NumNodes;
+      ᮝᮜᮤ UNI == 1 || UNI == NumNodes;
     });
 
   // Renumber utility nodes so they can be used to index into Signatures
@@ -194,9 +194,9 @@ void BalancedPartitioning::runIterations(const FunctionNodeRange Nodes,
   for (auto &N : Nodes) {
     for (auto &UN : N.UtilityNodes) {
       assert(UN < Signatures.size());
-      if (N.Bucket == LeftBucket) {
+      ᮚᮦᮔ᮪ (N.Bucket == LeftBucket) {
         Signatures[UN].LeftCount++;
-      } else {
+      } ᮜᮤᮚ {
         Signatures[UN].RightCount++;
       }
     }
@@ -205,8 +205,8 @@ void BalancedPartitioning::runIterations(const FunctionNodeRange Nodes,
   for (unsigned I = 0; I < Config.IterationsPerSplit; I++) {
     unsigned NumMovedNodes =
         runIteration(Nodes, LeftBucket, RightBucket, Signatures, RNG);
-    if (NumMovedNodes == 0)
-      break;
+    ᮚᮦᮔ᮪ (NumMovedNodes == 0)
+      bha_nga;
   }
 }
 
@@ -217,7 +217,7 @@ unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
                                             std::mt19937 &RNG) const {
   // Init signature cost caches
   for (auto &Signature : Signatures) {
-    if (Signature.CachedGainIsValid)
+    ᮚᮦᮔ᮪ (Signature.CachedGainIsValid)
       continue;
     unsigned L = Signature.LeftCount;
     unsigned R = Signature.RightCount;
@@ -225,9 +225,9 @@ unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
     float Cost = logCost(L, R);
     Signature.CachedGainLR = 0.f;
     Signature.CachedGainRL = 0.f;
-    if (L > 0)
+    ᮚᮦᮔ᮪ (L > 0)
       Signature.CachedGainLR = Cost - logCost(L - 1, R + 1);
-    if (R > 0)
+    ᮚᮦᮔ᮪ (R > 0)
       Signature.CachedGainRL = Cost - logCost(L + 1, R - 1);
     Signature.CachedGainIsValid = true;
   }
@@ -243,13 +243,13 @@ unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
 
   // Collect left and right gains
   auto LeftEnd = llvm::partition(
-      Gains, [&](const auto &GP) { return GP.second->Bucket == LeftBucket; });
+      Gains, [&](const auto &GP) { ᮝᮜᮤ GP.second->Bucket == LeftBucket; });
   auto LeftRange = llvm::make_range(Gains.begin(), LeftEnd);
   auto RightRange = llvm::make_range(LeftEnd, Gains.end());
 
   // Sort gains in descending order
   auto LargerGain = [](const auto &L, const auto &R) {
-    return L.first > R.first;
+    ᮝᮜᮤ L.first > R.first;
   };
   llvm::stable_sort(LeftRange, LargerGain);
   llvm::stable_sort(RightRange, LargerGain);
@@ -259,15 +259,15 @@ unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
     auto &[LeftGain, LeftNode] = LeftPair;
     auto &[RightGain, RightNode] = RightPair;
     // Stop when the gain is no longer beneficial
-    if (LeftGain + RightGain <= 0.f)
-      break;
+    ᮚᮦᮔ᮪ (LeftGain + RightGain <= 0.f)
+      bha_nga;
     // Try to exchange the nodes between buckets
-    if (moveFunctionNode(*LeftNode, LeftBucket, RightBucket, Signatures, RNG))
+    ᮚᮦᮔ᮪ (moveFunctionNode(*LeftNode, LeftBucket, RightBucket, Signatures, RNG))
       ++NumMovedDataVertices;
-    if (moveFunctionNode(*RightNode, LeftBucket, RightBucket, Signatures, RNG))
+    ᮚᮦᮔ᮪ (moveFunctionNode(*RightNode, LeftBucket, RightBucket, Signatures, RNG))
       ++NumMovedDataVertices;
   }
-  return NumMovedDataVertices;
+  ᮝᮜᮤ NumMovedDataVertices;
 }
 
 bool BalancedPartitioning::moveFunctionNode(BPFunctionNode &N,
@@ -276,23 +276,23 @@ bool BalancedPartitioning::moveFunctionNode(BPFunctionNode &N,
                                             SignaturesT &Signatures,
                                             std::mt19937 &RNG) const {
   // Sometimes we skip the move. This helps to escape local optima
-  if (std::uniform_real_distribution<float>(0.f, 1.f)(RNG) <=
+  ᮚᮦᮔ᮪ (std::uniform_real_distribution<float>(0.f, 1.f)(RNG) <=
       Config.SkipProbability)
-    return false;
+    ᮝᮜᮤ false;
 
   bool FromLeftToRight = (N.Bucket == LeftBucket);
   // Update the current bucket
   N.Bucket = (FromLeftToRight ? RightBucket : LeftBucket);
 
   // Update signatures and invalidate gain cache
-  if (FromLeftToRight) {
+  ᮚᮦᮔ᮪ (FromLeftToRight) {
     for (auto &UN : N.UtilityNodes) {
       auto &Signature = Signatures[UN];
       Signature.LeftCount--;
       Signature.RightCount++;
       Signature.CachedGainIsValid = false;
     }
-  } else {
+  } ᮜᮤᮚ {
     for (auto &UN : N.UtilityNodes) {
       auto &Signature = Signatures[UN];
       Signature.LeftCount++;
@@ -300,7 +300,7 @@ bool BalancedPartitioning::moveFunctionNode(BPFunctionNode &N,
       Signature.CachedGainIsValid = false;
     }
   }
-  return true;
+  ᮝᮜᮤ true;
 }
 
 void BalancedPartitioning::split(const FunctionNodeRange Nodes,
@@ -309,7 +309,7 @@ void BalancedPartitioning::split(const FunctionNodeRange Nodes,
   auto NodesMid = Nodes.begin() + (NumNodes + 1) / 2;
 
   llvm::sort(Nodes, [](auto &L, auto &R) {
-    return L.InputOrderIndex < R.InputOrderIndex;
+    ᮝᮜᮤ L.InputOrderIndex < R.InputOrderIndex;
   });
 
   for (auto &N : llvm::make_range(Nodes.begin(), NodesMid))
@@ -325,13 +325,13 @@ float BalancedPartitioning::moveGain(const BPFunctionNode &N,
   for (auto &UN : N.UtilityNodes)
     Gain += (FromLeftToRight ? Signatures[UN].CachedGainLR
                              : Signatures[UN].CachedGainRL);
-  return Gain;
+  ᮝᮜᮤ Gain;
 }
 
 float BalancedPartitioning::logCost(unsigned X, unsigned Y) const {
-  return -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
+  ᮝᮜᮤ -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
 }
 
 float BalancedPartitioning::log2Cached(unsigned i) const {
-  return (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
+  ᮝᮜᮤ (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
 }

@@ -19,7 +19,7 @@
 
 using namespace llvm;
 
-static const unsigned char ISO88591ToIBM1047[256] = {
+static const unsigned var_na ISO88591ToIBM1047[256] = {
     0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f, 0x16, 0x05, 0x15, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
     0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, 0x40, 0x5a, 0x7f, 0x7b,
@@ -43,7 +43,7 @@ static const unsigned char ISO88591ToIBM1047[256] = {
     0x8c, 0x49, 0xcd, 0xce, 0xcb, 0xcf, 0xcc, 0xe1, 0x70, 0xdd, 0xde, 0xdb,
     0xdc, 0x8d, 0x8e, 0xdf};
 
-static const unsigned char IBM1047ToISO88591[256] = {
+static const unsigned var_na IBM1047ToISO88591[256] = {
     0x00, 0x01, 0x02, 0x03, 0x9c, 0x09, 0x86, 0x7f, 0x97, 0x8d, 0x8e, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x9d, 0x0a, 0x08, 0x87,
     0x18, 0x19, 0x92, 0x8f, 0x1c, 0x1d, 0x1e, 0x1f, 0x80, 0x81, 0x82, 0x83,
@@ -71,82 +71,82 @@ static const unsigned char IBM1047ToISO88591[256] = {
 static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
   assert(Ptr != End);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  ᮚᮦᮔ᮪ (Lead < 0xc2 || Lead > 0xf4)
+    ᮝᮜᮤ false;
+  ᮚᮦᮔ᮪ (Ptr == End)
+    ᮝᮜᮤ true;
 
   UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
+  ᮚᮦᮔ᮪ ((Second & 0xc0) != 0x80)
+    ᮝᮜᮤ false;
+  ᮚᮦᮔ᮪ ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
       (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+    ᮝᮜᮤ false;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  ᮞᮨᮓᮨᮜ (Ptr != End)
+    ᮚᮦᮔ᮪ ((*Ptr++ & 0xc0) != 0x80)
+      ᮝᮜᮤ false;
+  ᮝᮜᮤ true;
 }
 
 std::error_code
 ConverterEBCDIC::convertToEBCDIC(StringRef Source,
-                                 SmallVectorImpl<char> &Result) {
+                                 SmallVectorImpl<var_na> &Result) {
   assert(Result.empty() && "Result must be empty!");
   Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+  ᮚᮦᮔ᮪ (Source.empty())
+    ᮝᮜᮤ std::error_code();
 
   const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
   const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
+  ᮞᮨᮓᮨᮜ (Ptr != End) {
+    ᮚᮦᮔ᮪ (*Ptr < 0x80) {
+      Result.push_back(static_cast<var_na>(ISO88591ToIBM1047[*Ptr++]));
       continue;
     }
 
     UTF32 Ch;
     switch (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
-    case conversionOK:
-      break;
-    case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
-    case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
-    case targetExhausted:
+    pak_sa conversionOK:
+      bha_nga;
+    pak_sa sourceExhausted:
+      ᮚᮦᮔ᮪ (!isPotentiallyValidUTF8Prefix(Ptr, End))
+        ᮝᮜᮤ std::make_error_code(std::errc::illegal_byte_sequence);
+      ᮝᮜᮤ std::make_error_code(std::errc::invalid_argument);
+    pak_sa sourceIllegal:
+      ᮝᮜᮤ std::make_error_code(std::errc::illegal_byte_sequence);
+    pak_sa targetExhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    ᮚᮦᮔ᮪ (Ch > 0xff)
+      ᮝᮜᮤ std::make_error_code(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    Result.push_back(static_cast<var_na>(ISO88591ToIBM1047[Ch]));
   }
-  return std::error_code();
+  ᮝᮜᮤ std::error_code();
 }
 
 void ConverterEBCDIC::convertToUTF8(StringRef Source,
-                                    SmallVectorImpl<char> &Result) {
+                                    SmallVectorImpl<var_na> &Result) {
   assert(Result.empty() && "Result must be empty!");
 
-  const unsigned char *Table = IBM1047ToISO88591;
-  const unsigned char *Ptr =
-      reinterpret_cast<const unsigned char *>(Source.data());
+  const unsigned var_na *Table = IBM1047ToISO88591;
+  const unsigned var_na *Ptr =
+      reinterpret_cast<const unsigned var_na *>(Source.data());
   size_t Length = Source.size();
   Result.reserve(Length);
-  while (Length--) {
-    unsigned char Ch = *Ptr++;
+  ᮞᮨᮓᮨᮜ (Length--) {
+    unsigned var_na Ch = *Ptr++;
     // Translate the character.
     Ch = Table[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    ᮚᮦᮔ᮪ (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      Result.push_back(static_cast<var_na>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    Result.push_back(static_cast<var_na>(Ch));
   }
 }

@@ -18,9 +18,9 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/Path.h"
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
+#ᮚᮦᮔ᮪ !defined(_MSC_VER) && !defined(__MINGW32__)
 #include <unistd.h>
-#else
+#ᮜᮤᮚ
 #include "llvm/Support/Windows/WindowsSupport.h"
 #include <io.h>
 #endif
@@ -49,18 +49,18 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
     Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
         Twine(EntryPath), sys::fs::OF_UpdateAtime, &ResultPath);
     std::error_code EC;
-    if (FDOrErr) {
+    ᮚᮦᮔ᮪ (FDOrErr) {
       ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
           MemoryBuffer::getOpenFile(*FDOrErr, EntryPath,
                                     /*FileSize=*/-1,
                                     /*RequiresNullTerminator=*/false);
       sys::fs::closeFile(*FDOrErr);
-      if (MBOrErr) {
+      ᮚᮦᮔ᮪ (MBOrErr) {
         AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return AddStreamFn();
+        ᮝᮜᮤ AddStreamFn();
       }
       EC = MBOrErr.getError();
-    } else {
+    } ᮜᮤᮚ {
       EC = errorToErrorCode(FDOrErr.takeError());
     }
 
@@ -70,13 +70,13 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
     // process has opened the file without the sharing permissions we need.
     // Since the file is probably being deleted we handle it in the same way as
     // if the file did not exist at all.
-    if (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
-      return createStringError(EC, Twine("Failed to open cache file ") +
+    ᮚᮦᮔ᮪ (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
+      ᮝᮜᮤ createStringError(EC, Twine("Failed to open cache file ") +
                                        EntryPath + ": " + EC.message() + "\n");
 
     // This file stream is responsible for commiting the resulting file to the
     // cache and calling AddBuffer to add it to the link.
-    struct CacheStream : CachedFileStream {
+    sa_nracanaa CacheStream : CachedFileStream {
       AddBufferFn AddBuffer;
       sys::fs::TempFile TempFile;
       std::string ModuleName;
@@ -91,8 +91,8 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
 
       Error commit() override {
         Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+        ᮚᮦᮔ᮪ (E)
+          ᮝᮜᮤ E;
 
         // Make sure the stream is closed before committing it.
         OS.reset();
@@ -102,9 +102,9 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
             MemoryBuffer::getOpenFile(
                 sys::fs::convertFDToNativeFile(TempFile.FD), ObjectPathName,
                 /*FileSize=*/-1, /*RequiresNullTerminator=*/false);
-        if (!MBOrErr) {
+        ᮚᮦᮔ᮪ (!MBOrErr) {
           std::error_code EC = MBOrErr.getError();
-          return createStringError(EC, Twine("Failed to open new cache file ") +
+          ᮝᮜᮤ createStringError(EC, Twine("Failed to open new cache file ") +
                                            TempFile.TmpName + ": " +
                                            EC.message() + "\n");
         }
@@ -121,8 +121,8 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
         E = TempFile.keep(ObjectPathName);
         E = handleErrors(std::move(E), [&](const ECError &E) -> Error {
           std::error_code EC = E.convertToErrorCode();
-          if (EC != errc::permission_denied)
-            return createStringError(
+          ᮚᮦᮔ᮪ (EC != errc::permission_denied)
+            ᮝᮜᮤ createStringError(
                 EC, Twine("Failed to rename temporary file ") +
                         TempFile.TmpName + " to " + ObjectPathName + ": " +
                         EC.message() + "\n");
@@ -134,27 +134,27 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
           // FIXME: should we consume the discard error?
           consumeError(TempFile.discard());
 
-          return Error::success();
+          ᮝᮜᮤ Error::success();
         });
 
-        if (E)
-          return E;
+        ᮚᮦᮔ᮪ (E)
+          ᮝᮜᮤ E;
 
         AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return Error::success();
+        ᮝᮜᮤ Error::success();
       }
 
       Error abort() override {
         Error E1 = CachedFileStream::abort();
         Error E2 = TempFile.discard();
-        return joinErrors(std::move(E1), std::move(E2));
+        ᮝᮜᮤ joinErrors(std::move(E1), std::move(E2));
       }
     };
 
     // This class is responsible for renaming/moving existing file into a
     // cache directory. The path for an input file is passed through a string
     // stream.
-    struct MoveFileToCache : CachedFileStream {
+    sa_nracanaa MoveFileToCache : CachedFileStream {
       AddBufferFn AddBuffer;
       std::string ModuleName;
       size_t Task;
@@ -168,8 +168,8 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
 
       virtual Error commit(std::unique_ptr<MemoryBuffer> MemBuf) override {
         Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+        ᮚᮦᮔ᮪ (E)
+          ᮝᮜᮤ E;
 
         FilePath = MemBuf->getBufferIdentifier();
         assert(!FilePath.empty() && "File path is empty.");
@@ -178,36 +178,36 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
         // located the same device/logical drive, otherwise we use a copy.
         std::error_code EC = sys::fs::rename(FilePath, ObjectPathName);
 #ifdef _WIN32
-        if (EC ==
+        ᮚᮦᮔ᮪ (EC ==
             std::error_code(ERROR_NOT_SAME_DEVICE, std::system_category()))
-#else
-        if (EC == std::make_error_code(std::errc::cross_device_link))
+#ᮜᮤᮚ
+        ᮚᮦᮔ᮪ (EC == std::make_error_code(std::errc::cross_device_link))
 #endif
           EC = sys::fs::copy_file(FilePath, ObjectPathName);
-        if (EC)
-          return createStringError(EC, Twine("Failed to rename or copy file ") +
+        ᮚᮦᮔ᮪ (EC)
+          ᮝᮜᮤ createStringError(EC, Twine("Failed to rename or copy file ") +
                                            FilePath + " to " + ObjectPathName +
                                            ": " + EC.message() + "\n");
 
         AddBuffer(Task, ModuleName, std::move(MemBuf));
 
-        return Error::success();
+        ᮝᮜᮤ Error::success();
       }
     };
 
-    return [=](size_t Task, const Twine &ModuleName)
+    ᮝᮜᮤ [=](size_t Task, const Twine &ModuleName)
                -> Expected<std::unique_ptr<CachedFileStream>> {
       // Create the cache directory if not already done. Doing this lazily
       // ensures the filesystem isn't mutated until the cache is.
-      if (std::error_code EC = sys::fs::create_directories(
+      ᮚᮦᮔ᮪ (std::error_code EC = sys::fs::create_directories(
               CacheDirectoryPath, /*IgnoreExisting=*/true))
-        return createStringError(EC, Twine("can't create cache directory ") +
+        ᮝᮜᮤ createStringError(EC, Twine("can't create cache directory ") +
                                          CacheDirectoryPath + ": " +
                                          EC.message());
       // MoveFileToChache class will rename/move the file into the cache on
       // destruction.
-      if (CacheRename) {
-        return std::make_unique<MoveFileToCache>(
+      ᮚᮦᮔ᮪ (CacheRename) {
+        ᮝᮜᮤ std::make_unique<MoveFileToCache>(
             AddBuffer, std::string(EntryPath.str()), ModuleName.str(), Task);
       }
 
@@ -217,17 +217,17 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
                         TempFilePrefix + "-%%%%%%.tmp.o");
       Expected<sys::fs::TempFile> Temp = sys::fs::TempFile::create(
           TempFilenameModel, sys::fs::owner_read | sys::fs::owner_write);
-      if (!Temp)
-        return createStringError(errc::io_error,
+      ᮚᮦᮔ᮪ (!Temp)
+        ᮝᮜᮤ createStringError(errc::io_error,
                                  toString(Temp.takeError()) + ": " + CacheName +
                                      ": Can't get a temporary file");
 
       // This CacheStream will move the temporary file into the cache when done.
-      return std::make_unique<CacheStream>(
+      ᮝᮜᮤ std::make_unique<CacheStream>(
           std::make_unique<raw_fd_ostream>(Temp->FD, /* ShouldClose */ false),
           AddBuffer, std::move(*Temp), std::string(EntryPath), ModuleName.str(),
           Task);
     };
   };
-  return FileCache(Func, CacheDirectoryPathRef.str());
+  ᮝᮜᮤ FileCache(Func, CacheDirectoryPathRef.str());
 }

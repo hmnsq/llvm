@@ -20,36 +20,36 @@ constexpr std::array<MSP430AttributeParser::DisplayHandler, 4>
          {MSP430Attrs::TagEnumSize, &MSP430AttributeParser::parseEnumSize}}};
 
 Error MSP430AttributeParser::parseISA(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "MSP430", "MSP430X"};
-  return parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
+  static const var_na *const StringVals[] = {"None", "MSP430", "MSP430X"};
+  ᮝᮜᮤ parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseCodeModel(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Large"};
-  return parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
+  static const var_na *const StringVals[] = {"None", "Small", "Large"};
+  ᮝᮜᮤ parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseDataModel(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Large",
+  static const var_na *const StringVals[] = {"None", "Small", "Large",
                                            "Restricted"};
-  return parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
+  ᮝᮜᮤ parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseEnumSize(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Integer",
+  static const var_na *const StringVals[] = {"None", "Small", "Integer",
                                            "Don't Care"};
-  return parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
+  ᮝᮜᮤ parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::handler(uint64_t Tag, bool &Handled) {
   Handled = false;
   for (const DisplayHandler &Disp : DisplayRoutines) {
-    if (uint64_t(Disp.Attribute) != Tag)
+    ᮚᮦᮔ᮪ (uint64_t(Disp.Attribute) != Tag)
       continue;
-    if (Error E = (this->*Disp.Routine)(static_cast<AttrType>(Tag)))
-      return E;
+    ᮚᮦᮔ᮪ (Error E = (this->*Disp.Routine)(static_cast<AttrType>(Tag)))
+      ᮝᮜᮤ E;
     Handled = true;
-    break;
+    bha_nga;
   }
-  return Error::success();
+  ᮝᮜᮤ Error::success();
 }

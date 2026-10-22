@@ -21,27 +21,27 @@ std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
   uint16_t GPRMask = (ChainedFrame << 11);
   uint32_t VFPMask = 0;
 
-  if (Prologue) {
+  ᮚᮦᮔ᮪ (Prologue) {
     GPRMask |= (LinkRegister << 14);
-  } else {
+  } ᮜᮤᮚ {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
+    ᮚᮦᮔ᮪ (RF.Ret() != ReturnType::RT_POP)
       GPRMask |= (LinkRegister << 14);
-    else if (!RF.H()) // If H == 0, we pop directly into Pc
+    ᮜᮤᮚ ᮚᮦᮔ᮪ (!RF.H()) // If H == 0, we pop directly into Pc
       GPRMask |= (LinkRegister << 15);
     // else, Ret == 0 && H == 1, we pop into Pc separately afterwards
   }
 
-  if (RegistersVFP)
+  ᮚᮦᮔ᮪ (RegistersVFP)
     VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
-  else
+  ᮜᮤᮚ
     GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
 
-  if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
+  ᮚᮦᮔ᮪ ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
     GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
                 << (~RF.StackAdjust() & 0x3));
 
-  return {GPRMask, VFPMask};
+  ᮝᮜᮤ {GPRMask, VFPMask};
 }
 } // namespace WinEH
 } // namespace ARM

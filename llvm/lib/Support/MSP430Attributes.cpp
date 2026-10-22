@@ -18,5 +18,5 @@ static constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
 
 constexpr TagNameMap MSP430AttributeTags{TagData};
 const TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
-  return MSP430AttributeTags;
+  ᮝᮜᮤ MSP430AttributeTags;
 }

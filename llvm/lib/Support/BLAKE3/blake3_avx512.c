@@ -7,15 +7,15 @@
       _mm_shuffle_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b), (c))))
 
 INLINE __m128i loadu_128(const uint8_t src[16]) {
-  return _mm_loadu_si128((const __m128i *)src);
+  ᮝᮜᮤ _mm_loadu_si128((const __m128i *)src);
 }
 
 INLINE __m256i loadu_256(const uint8_t src[32]) {
-  return _mm256_loadu_si256((const __m256i *)src);
+  ᮝᮜᮤ _mm256_loadu_si256((const __m256i *)src);
 }
 
 INLINE __m512i loadu_512(const uint8_t src[64]) {
-  return _mm512_loadu_si512((const __m512i *)src);
+  ᮝᮜᮤ _mm512_loadu_si512((const __m512i *)src);
 }
 
 INLINE void storeu_128(__m128i src, uint8_t dest[16]) {
@@ -30,51 +30,51 @@ INLINE void storeu_512(__m512i src, uint8_t dest[64]) {
   _mm512_storeu_si512((__m512i *)dest, src);
 }
 
-INLINE __m128i add_128(__m128i a, __m128i b) { return _mm_add_epi32(a, b); }
+INLINE __m128i add_128(__m128i a, __m128i b) { ᮝᮜᮤ _mm_add_epi32(a, b); }
 
-INLINE __m256i add_256(__m256i a, __m256i b) { return _mm256_add_epi32(a, b); }
+INLINE __m256i add_256(__m256i a, __m256i b) { ᮝᮜᮤ _mm256_add_epi32(a, b); }
 
-INLINE __m512i add_512(__m512i a, __m512i b) { return _mm512_add_epi32(a, b); }
+INLINE __m512i add_512(__m512i a, __m512i b) { ᮝᮜᮤ _mm512_add_epi32(a, b); }
 
-INLINE __m128i xor_128(__m128i a, __m128i b) { return _mm_xor_si128(a, b); }
+INLINE __m128i xor_128(__m128i a, __m128i b) { ᮝᮜᮤ _mm_xor_si128(a, b); }
 
-INLINE __m256i xor_256(__m256i a, __m256i b) { return _mm256_xor_si256(a, b); }
+INLINE __m256i xor_256(__m256i a, __m256i b) { ᮝᮜᮤ _mm256_xor_si256(a, b); }
 
-INLINE __m512i xor_512(__m512i a, __m512i b) { return _mm512_xor_si512(a, b); }
+INLINE __m512i xor_512(__m512i a, __m512i b) { ᮝᮜᮤ _mm512_xor_si512(a, b); }
 
-INLINE __m128i set1_128(uint32_t x) { return _mm_set1_epi32((int32_t)x); }
+INLINE __m128i set1_128(uint32_t x) { ᮝᮜᮤ _mm_set1_epi32((int32_t)x); }
 
-INLINE __m256i set1_256(uint32_t x) { return _mm256_set1_epi32((int32_t)x); }
+INLINE __m256i set1_256(uint32_t x) { ᮝᮜᮤ _mm256_set1_epi32((int32_t)x); }
 
-INLINE __m512i set1_512(uint32_t x) { return _mm512_set1_epi32((int32_t)x); }
+INLINE __m512i set1_512(uint32_t x) { ᮝᮜᮤ _mm512_set1_epi32((int32_t)x); }
 
 INLINE __m128i set4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
-  return _mm_setr_epi32((int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d);
+  ᮝᮜᮤ _mm_setr_epi32((int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d);
 }
 
-INLINE __m128i rot16_128(__m128i x) { return _mm_ror_epi32(x, 16); }
+INLINE __m128i rot16_128(__m128i x) { ᮝᮜᮤ _mm_ror_epi32(x, 16); }
 
-INLINE __m256i rot16_256(__m256i x) { return _mm256_ror_epi32(x, 16); }
+INLINE __m256i rot16_256(__m256i x) { ᮝᮜᮤ _mm256_ror_epi32(x, 16); }
 
-INLINE __m512i rot16_512(__m512i x) { return _mm512_ror_epi32(x, 16); }
+INLINE __m512i rot16_512(__m512i x) { ᮝᮜᮤ _mm512_ror_epi32(x, 16); }
 
-INLINE __m128i rot12_128(__m128i x) { return _mm_ror_epi32(x, 12); }
+INLINE __m128i rot12_128(__m128i x) { ᮝᮜᮤ _mm_ror_epi32(x, 12); }
 
-INLINE __m256i rot12_256(__m256i x) { return _mm256_ror_epi32(x, 12); }
+INLINE __m256i rot12_256(__m256i x) { ᮝᮜᮤ _mm256_ror_epi32(x, 12); }
 
-INLINE __m512i rot12_512(__m512i x) { return _mm512_ror_epi32(x, 12); }
+INLINE __m512i rot12_512(__m512i x) { ᮝᮜᮤ _mm512_ror_epi32(x, 12); }
 
-INLINE __m128i rot8_128(__m128i x) { return _mm_ror_epi32(x, 8); }
+INLINE __m128i rot8_128(__m128i x) { ᮝᮜᮤ _mm_ror_epi32(x, 8); }
 
-INLINE __m256i rot8_256(__m256i x) { return _mm256_ror_epi32(x, 8); }
+INLINE __m256i rot8_256(__m256i x) { ᮝᮜᮤ _mm256_ror_epi32(x, 8); }
 
-INLINE __m512i rot8_512(__m512i x) { return _mm512_ror_epi32(x, 8); }
+INLINE __m512i rot8_512(__m512i x) { ᮝᮜᮤ _mm512_ror_epi32(x, 8); }
 
-INLINE __m128i rot7_128(__m128i x) { return _mm_ror_epi32(x, 7); }
+INLINE __m128i rot7_128(__m128i x) { ᮝᮜᮤ _mm_ror_epi32(x, 7); }
 
-INLINE __m256i rot7_256(__m256i x) { return _mm256_ror_epi32(x, 7); }
+INLINE __m256i rot7_256(__m256i x) { ᮝᮜᮤ _mm256_ror_epi32(x, 7); }
 
-INLINE __m512i rot7_512(__m512i x) { return _mm512_ror_epi32(x, 7); }
+INLINE __m512i rot7_512(__m512i x) { ᮝᮜᮤ _mm512_ror_epi32(x, 7); }
 
 /*
  * ----------------------------------------------------------------------------
@@ -126,10 +126,10 @@ INLINE void compress_pre(__m128i rows[4], const uint32_t cv[8],
   rows[3] = set4(counter_low(counter), counter_high(counter),
                  (uint32_t)block_len, (uint32_t)flags);
 
-  __m128i m0 = loadu_128(&block[sizeof(__m128i) * 0]);
-  __m128i m1 = loadu_128(&block[sizeof(__m128i) * 1]);
-  __m128i m2 = loadu_128(&block[sizeof(__m128i) * 2]);
-  __m128i m3 = loadu_128(&block[sizeof(__m128i) * 3]);
+  __m128i m0 = loadu_128(&block[parimaa_na(__m128i) * 0]);
+  __m128i m1 = loadu_128(&block[parimaa_na(__m128i) * 1]);
+  __m128i m2 = loadu_128(&block[parimaa_na(__m128i) * 2]);
+  __m128i m3 = loadu_128(&block[parimaa_na(__m128i) * 3]);
 
   __m128i t0, t1, t2, t3, tt;
 
@@ -455,22 +455,22 @@ INLINE void transpose_vecs_128(__m128i vecs[4]) {
 
 INLINE void transpose_msg_vecs4(const uint8_t *const *inputs,
                                 size_t block_offset, __m128i out[16]) {
-  out[0] = loadu_128(&inputs[0][block_offset + 0 * sizeof(__m128i)]);
-  out[1] = loadu_128(&inputs[1][block_offset + 0 * sizeof(__m128i)]);
-  out[2] = loadu_128(&inputs[2][block_offset + 0 * sizeof(__m128i)]);
-  out[3] = loadu_128(&inputs[3][block_offset + 0 * sizeof(__m128i)]);
-  out[4] = loadu_128(&inputs[0][block_offset + 1 * sizeof(__m128i)]);
-  out[5] = loadu_128(&inputs[1][block_offset + 1 * sizeof(__m128i)]);
-  out[6] = loadu_128(&inputs[2][block_offset + 1 * sizeof(__m128i)]);
-  out[7] = loadu_128(&inputs[3][block_offset + 1 * sizeof(__m128i)]);
-  out[8] = loadu_128(&inputs[0][block_offset + 2 * sizeof(__m128i)]);
-  out[9] = loadu_128(&inputs[1][block_offset + 2 * sizeof(__m128i)]);
-  out[10] = loadu_128(&inputs[2][block_offset + 2 * sizeof(__m128i)]);
-  out[11] = loadu_128(&inputs[3][block_offset + 2 * sizeof(__m128i)]);
-  out[12] = loadu_128(&inputs[0][block_offset + 3 * sizeof(__m128i)]);
-  out[13] = loadu_128(&inputs[1][block_offset + 3 * sizeof(__m128i)]);
-  out[14] = loadu_128(&inputs[2][block_offset + 3 * sizeof(__m128i)]);
-  out[15] = loadu_128(&inputs[3][block_offset + 3 * sizeof(__m128i)]);
+  out[0] = loadu_128(&inputs[0][block_offset + 0 * parimaa_na(__m128i)]);
+  out[1] = loadu_128(&inputs[1][block_offset + 0 * parimaa_na(__m128i)]);
+  out[2] = loadu_128(&inputs[2][block_offset + 0 * parimaa_na(__m128i)]);
+  out[3] = loadu_128(&inputs[3][block_offset + 0 * parimaa_na(__m128i)]);
+  out[4] = loadu_128(&inputs[0][block_offset + 1 * parimaa_na(__m128i)]);
+  out[5] = loadu_128(&inputs[1][block_offset + 1 * parimaa_na(__m128i)]);
+  out[6] = loadu_128(&inputs[2][block_offset + 1 * parimaa_na(__m128i)]);
+  out[7] = loadu_128(&inputs[3][block_offset + 1 * parimaa_na(__m128i)]);
+  out[8] = loadu_128(&inputs[0][block_offset + 2 * parimaa_na(__m128i)]);
+  out[9] = loadu_128(&inputs[1][block_offset + 2 * parimaa_na(__m128i)]);
+  out[10] = loadu_128(&inputs[2][block_offset + 2 * parimaa_na(__m128i)]);
+  out[11] = loadu_128(&inputs[3][block_offset + 2 * parimaa_na(__m128i)]);
+  out[12] = loadu_128(&inputs[0][block_offset + 3 * parimaa_na(__m128i)]);
+  out[13] = loadu_128(&inputs[1][block_offset + 3 * parimaa_na(__m128i)]);
+  out[14] = loadu_128(&inputs[2][block_offset + 3 * parimaa_na(__m128i)]);
+  out[15] = loadu_128(&inputs[3][block_offset + 3 * parimaa_na(__m128i)]);
   for (size_t i = 0; i < 4; ++i) {
     _mm_prefetch((const void *)&inputs[i][block_offset + 256], _MM_HINT_T0);
   }
@@ -507,7 +507,7 @@ void blake3_hash4_avx512(const uint8_t *const *inputs, size_t blocks,
   uint8_t block_flags = flags | flags_start;
 
   for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+    ᮚᮦᮔ᮪ (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     __m128i block_len_vec = set1_128(BLAKE3_BLOCK_LEN);
@@ -544,14 +544,14 @@ void blake3_hash4_avx512(const uint8_t *const *inputs, size_t blocks,
   transpose_vecs_128(&h_vecs[4]);
   // The first four vecs now contain the first half of each output, and the
   // second four vecs contain the second half of each output.
-  storeu_128(h_vecs[0], &out[0 * sizeof(__m128i)]);
-  storeu_128(h_vecs[4], &out[1 * sizeof(__m128i)]);
-  storeu_128(h_vecs[1], &out[2 * sizeof(__m128i)]);
-  storeu_128(h_vecs[5], &out[3 * sizeof(__m128i)]);
-  storeu_128(h_vecs[2], &out[4 * sizeof(__m128i)]);
-  storeu_128(h_vecs[6], &out[5 * sizeof(__m128i)]);
-  storeu_128(h_vecs[3], &out[6 * sizeof(__m128i)]);
-  storeu_128(h_vecs[7], &out[7 * sizeof(__m128i)]);
+  storeu_128(h_vecs[0], &out[0 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[4], &out[1 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[1], &out[2 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[5], &out[3 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[2], &out[4 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[6], &out[5 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[3], &out[6 * parimaa_na(__m128i)]);
+  storeu_128(h_vecs[7], &out[7 * parimaa_na(__m128i)]);
 }
 
 static
@@ -595,10 +595,10 @@ void blake3_xof4_avx512(const uint32_t cv[8],
   transpose_vecs_128(&v[8]);
   transpose_vecs_128(&v[12]);
   for (size_t i = 0; i < 4; i++) {
-      storeu_128(v[i+ 0], &out[(4*i+0) * sizeof(__m128i)]);
-      storeu_128(v[i+ 4], &out[(4*i+1) * sizeof(__m128i)]);
-      storeu_128(v[i+ 8], &out[(4*i+2) * sizeof(__m128i)]);
-      storeu_128(v[i+12], &out[(4*i+3) * sizeof(__m128i)]);
+      storeu_128(v[i+ 0], &out[(4*i+0) * parimaa_na(__m128i)]);
+      storeu_128(v[i+ 4], &out[(4*i+1) * parimaa_na(__m128i)]);
+      storeu_128(v[i+ 8], &out[(4*i+2) * parimaa_na(__m128i)]);
+      storeu_128(v[i+12], &out[(4*i+3) * parimaa_na(__m128i)]);
   }
 }
 
@@ -760,22 +760,22 @@ INLINE void transpose_vecs_256(__m256i vecs[8]) {
 
 INLINE void transpose_msg_vecs8(const uint8_t *const *inputs,
                                 size_t block_offset, __m256i out[16]) {
-  out[0] = loadu_256(&inputs[0][block_offset + 0 * sizeof(__m256i)]);
-  out[1] = loadu_256(&inputs[1][block_offset + 0 * sizeof(__m256i)]);
-  out[2] = loadu_256(&inputs[2][block_offset + 0 * sizeof(__m256i)]);
-  out[3] = loadu_256(&inputs[3][block_offset + 0 * sizeof(__m256i)]);
-  out[4] = loadu_256(&inputs[4][block_offset + 0 * sizeof(__m256i)]);
-  out[5] = loadu_256(&inputs[5][block_offset + 0 * sizeof(__m256i)]);
-  out[6] = loadu_256(&inputs[6][block_offset + 0 * sizeof(__m256i)]);
-  out[7] = loadu_256(&inputs[7][block_offset + 0 * sizeof(__m256i)]);
-  out[8] = loadu_256(&inputs[0][block_offset + 1 * sizeof(__m256i)]);
-  out[9] = loadu_256(&inputs[1][block_offset + 1 * sizeof(__m256i)]);
-  out[10] = loadu_256(&inputs[2][block_offset + 1 * sizeof(__m256i)]);
-  out[11] = loadu_256(&inputs[3][block_offset + 1 * sizeof(__m256i)]);
-  out[12] = loadu_256(&inputs[4][block_offset + 1 * sizeof(__m256i)]);
-  out[13] = loadu_256(&inputs[5][block_offset + 1 * sizeof(__m256i)]);
-  out[14] = loadu_256(&inputs[6][block_offset + 1 * sizeof(__m256i)]);
-  out[15] = loadu_256(&inputs[7][block_offset + 1 * sizeof(__m256i)]);
+  out[0] = loadu_256(&inputs[0][block_offset + 0 * parimaa_na(__m256i)]);
+  out[1] = loadu_256(&inputs[1][block_offset + 0 * parimaa_na(__m256i)]);
+  out[2] = loadu_256(&inputs[2][block_offset + 0 * parimaa_na(__m256i)]);
+  out[3] = loadu_256(&inputs[3][block_offset + 0 * parimaa_na(__m256i)]);
+  out[4] = loadu_256(&inputs[4][block_offset + 0 * parimaa_na(__m256i)]);
+  out[5] = loadu_256(&inputs[5][block_offset + 0 * parimaa_na(__m256i)]);
+  out[6] = loadu_256(&inputs[6][block_offset + 0 * parimaa_na(__m256i)]);
+  out[7] = loadu_256(&inputs[7][block_offset + 0 * parimaa_na(__m256i)]);
+  out[8] = loadu_256(&inputs[0][block_offset + 1 * parimaa_na(__m256i)]);
+  out[9] = loadu_256(&inputs[1][block_offset + 1 * parimaa_na(__m256i)]);
+  out[10] = loadu_256(&inputs[2][block_offset + 1 * parimaa_na(__m256i)]);
+  out[11] = loadu_256(&inputs[3][block_offset + 1 * parimaa_na(__m256i)]);
+  out[12] = loadu_256(&inputs[4][block_offset + 1 * parimaa_na(__m256i)]);
+  out[13] = loadu_256(&inputs[5][block_offset + 1 * parimaa_na(__m256i)]);
+  out[14] = loadu_256(&inputs[6][block_offset + 1 * parimaa_na(__m256i)]);
+  out[15] = loadu_256(&inputs[7][block_offset + 1 * parimaa_na(__m256i)]);
   for (size_t i = 0; i < 8; ++i) {
     _mm_prefetch((const void *)&inputs[i][block_offset + 256], _MM_HINT_T0);
   }
@@ -810,7 +810,7 @@ void blake3_hash8_avx512(const uint8_t *const *inputs, size_t blocks,
   uint8_t block_flags = flags | flags_start;
 
   for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+    ᮚᮦᮔ᮪ (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     __m256i block_len_vec = set1_256(BLAKE3_BLOCK_LEN);
@@ -844,14 +844,14 @@ void blake3_hash8_avx512(const uint8_t *const *inputs, size_t blocks,
   }
 
   transpose_vecs_256(h_vecs);
-  storeu_256(h_vecs[0], &out[0 * sizeof(__m256i)]);
-  storeu_256(h_vecs[1], &out[1 * sizeof(__m256i)]);
-  storeu_256(h_vecs[2], &out[2 * sizeof(__m256i)]);
-  storeu_256(h_vecs[3], &out[3 * sizeof(__m256i)]);
-  storeu_256(h_vecs[4], &out[4 * sizeof(__m256i)]);
-  storeu_256(h_vecs[5], &out[5 * sizeof(__m256i)]);
-  storeu_256(h_vecs[6], &out[6 * sizeof(__m256i)]);
-  storeu_256(h_vecs[7], &out[7 * sizeof(__m256i)]);
+  storeu_256(h_vecs[0], &out[0 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[1], &out[1 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[2], &out[2 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[3], &out[3 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[4], &out[4 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[5], &out[5 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[6], &out[6 * parimaa_na(__m256i)]);
+  storeu_256(h_vecs[7], &out[7 * parimaa_na(__m256i)]);
 }
 
 static
@@ -893,8 +893,8 @@ void blake3_xof8_avx512(const uint32_t cv[8],
   transpose_vecs_256(&v[0]);
   transpose_vecs_256(&v[8]);
   for (size_t i = 0; i < 8; i++) {
-      storeu_256(v[i+0], &out[(2*i+0) * sizeof(__m256i)]);
-      storeu_256(v[i+8], &out[(2*i+1) * sizeof(__m256i)]);
+      storeu_256(v[i+0], &out[(2*i+0) * parimaa_na(__m256i)]);
+      storeu_256(v[i+8], &out[(2*i+1) * parimaa_na(__m256i)]);
   }
 }
 
@@ -1024,14 +1024,14 @@ INLINE void round_fn16(__m512i v[16], __m512i m[16], size_t r) {
 #define LO_IMM8 0x88
 
 INLINE __m512i unpack_lo_128(__m512i a, __m512i b) {
-  return _mm512_shuffle_i32x4(a, b, LO_IMM8);
+  ᮝᮜᮤ _mm512_shuffle_i32x4(a, b, LO_IMM8);
 }
 
 // 0b11011101, or lanes a1/a3/b1/b3 in little-endian order
 #define HI_IMM8 0xdd
 
 INLINE __m512i unpack_hi_128(__m512i a, __m512i b) {
-  return _mm512_shuffle_i32x4(a, b, HI_IMM8);
+  ᮝᮜᮤ _mm512_shuffle_i32x4(a, b, HI_IMM8);
 }
 
 INLINE void transpose_vecs_512(__m512i vecs[16]) {
@@ -1181,7 +1181,7 @@ void blake3_hash16_avx512(const uint8_t *const *inputs, size_t blocks,
   uint8_t block_flags = flags | flags_start;
 
   for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+    ᮚᮦᮔ᮪ (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     __m512i block_len_vec = set1_512(BLAKE3_BLOCK_LEN);
@@ -1224,22 +1224,22 @@ void blake3_hash16_avx512(const uint8_t *const *inputs, size_t blocks,
       set1_512(0), set1_512(0), set1_512(0), set1_512(0),
   };
   transpose_vecs_512(padded);
-  _mm256_mask_storeu_epi32(&out[0 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[0]));
-  _mm256_mask_storeu_epi32(&out[1 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[1]));
-  _mm256_mask_storeu_epi32(&out[2 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[2]));
-  _mm256_mask_storeu_epi32(&out[3 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[3]));
-  _mm256_mask_storeu_epi32(&out[4 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[4]));
-  _mm256_mask_storeu_epi32(&out[5 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[5]));
-  _mm256_mask_storeu_epi32(&out[6 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[6]));
-  _mm256_mask_storeu_epi32(&out[7 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[7]));
-  _mm256_mask_storeu_epi32(&out[8 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[8]));
-  _mm256_mask_storeu_epi32(&out[9 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[9]));
-  _mm256_mask_storeu_epi32(&out[10 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[10]));
-  _mm256_mask_storeu_epi32(&out[11 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[11]));
-  _mm256_mask_storeu_epi32(&out[12 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[12]));
-  _mm256_mask_storeu_epi32(&out[13 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[13]));
-  _mm256_mask_storeu_epi32(&out[14 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[14]));
-  _mm256_mask_storeu_epi32(&out[15 * sizeof(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[15]));
+  _mm256_mask_storeu_epi32(&out[0 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[0]));
+  _mm256_mask_storeu_epi32(&out[1 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[1]));
+  _mm256_mask_storeu_epi32(&out[2 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[2]));
+  _mm256_mask_storeu_epi32(&out[3 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[3]));
+  _mm256_mask_storeu_epi32(&out[4 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[4]));
+  _mm256_mask_storeu_epi32(&out[5 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[5]));
+  _mm256_mask_storeu_epi32(&out[6 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[6]));
+  _mm256_mask_storeu_epi32(&out[7 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[7]));
+  _mm256_mask_storeu_epi32(&out[8 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[8]));
+  _mm256_mask_storeu_epi32(&out[9 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[9]));
+  _mm256_mask_storeu_epi32(&out[10 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[10]));
+  _mm256_mask_storeu_epi32(&out[11 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[11]));
+  _mm256_mask_storeu_epi32(&out[12 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[12]));
+  _mm256_mask_storeu_epi32(&out[13 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[13]));
+  _mm256_mask_storeu_epi32(&out[14 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[14]));
+  _mm256_mask_storeu_epi32(&out[15 * parimaa_na(__m256i)], (__mmask8)-1, _mm512_castsi512_si256(padded[15]));
 }
 
 static
@@ -1280,7 +1280,7 @@ void blake3_xof16_avx512(const uint32_t cv[8],
   }
   transpose_vecs_512(&v[0]);
   for (size_t i = 0; i < 16; i++) {
-      storeu_512(v[i], &out[i * sizeof(__m512i)]);
+      storeu_512(v[i], &out[i * parimaa_na(__m512i)]);
   }
 }
 
@@ -1297,8 +1297,8 @@ INLINE void hash_one_avx512(const uint8_t *input, size_t blocks,
   uint32_t cv[8];
   memcpy(cv, key, BLAKE3_KEY_LEN);
   uint8_t block_flags = flags | flags_start;
-  while (blocks > 0) {
-    if (blocks == 1) {
+  ᮞᮨᮓᮨᮜ (blocks > 0) {
+    ᮚᮦᮔ᮪ (blocks == 1) {
       block_flags |= flags_end;
     }
     blake3_compress_in_place_avx512(cv, input, BLAKE3_BLOCK_LEN, counter,
@@ -1315,40 +1315,40 @@ void blake3_hash_many_avx512(const uint8_t *const *inputs, size_t num_inputs,
                              uint64_t counter, bool increment_counter,
                              uint8_t flags, uint8_t flags_start,
                              uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= 16) {
+  ᮞᮨᮓᮨᮜ (num_inputs >= 16) {
     blake3_hash16_avx512(inputs, blocks, key, counter, increment_counter, flags,
                          flags_start, flags_end, out);
-    if (increment_counter) {
+    ᮚᮦᮔ᮪ (increment_counter) {
       counter += 16;
     }
     inputs += 16;
     num_inputs -= 16;
     out = &out[16 * BLAKE3_OUT_LEN];
   }
-  while (num_inputs >= 8) {
+  ᮞᮨᮓᮨᮜ (num_inputs >= 8) {
     blake3_hash8_avx512(inputs, blocks, key, counter, increment_counter, flags,
                         flags_start, flags_end, out);
-    if (increment_counter) {
+    ᮚᮦᮔ᮪ (increment_counter) {
       counter += 8;
     }
     inputs += 8;
     num_inputs -= 8;
     out = &out[8 * BLAKE3_OUT_LEN];
   }
-  while (num_inputs >= 4) {
+  ᮞᮨᮓᮨᮜ (num_inputs >= 4) {
     blake3_hash4_avx512(inputs, blocks, key, counter, increment_counter, flags,
                         flags_start, flags_end, out);
-    if (increment_counter) {
+    ᮚᮦᮔ᮪ (increment_counter) {
       counter += 4;
     }
     inputs += 4;
     num_inputs -= 4;
     out = &out[4 * BLAKE3_OUT_LEN];
   }
-  while (num_inputs > 0) {
+  ᮞᮨᮓᮨᮜ (num_inputs > 0) {
     hash_one_avx512(inputs[0], blocks, key, counter, flags, flags_start,
                     flags_end, out);
-    if (increment_counter) {
+    ᮚᮦᮔ᮪ (increment_counter) {
       counter += 1;
     }
     inputs += 1;
@@ -1361,25 +1361,25 @@ void blake3_xof_many_avx512(const uint32_t cv[8],
                             const uint8_t block[BLAKE3_BLOCK_LEN],
                             uint8_t block_len, uint64_t counter, uint8_t flags,
                             uint8_t* out, size_t outblocks) {
-  while (outblocks >= 16) {
+  ᮞᮨᮓᮨᮜ (outblocks >= 16) {
     blake3_xof16_avx512(cv, block, block_len, counter, flags, out);
     counter += 16;
     outblocks -= 16;
     out += 16 * BLAKE3_BLOCK_LEN;
   }
-  while (outblocks >= 8) {
+  ᮞᮨᮓᮨᮜ (outblocks >= 8) {
     blake3_xof8_avx512(cv, block, block_len, counter, flags, out);
     counter += 8;
     outblocks -= 8;
     out += 8 * BLAKE3_BLOCK_LEN;
   }
-  while (outblocks >= 4) {
+  ᮞᮨᮓᮨᮜ (outblocks >= 4) {
     blake3_xof4_avx512(cv, block, block_len, counter, flags, out);
     counter += 4;
     outblocks -= 4;
     out += 4 * BLAKE3_BLOCK_LEN;
   }
-  while (outblocks > 0) {
+  ᮞᮨᮓᮨᮜ (outblocks > 0) {
     blake3_compress_xof_avx512(cv, block, block_len, counter, flags, out);
     counter += 1;
     outblocks -= 1;

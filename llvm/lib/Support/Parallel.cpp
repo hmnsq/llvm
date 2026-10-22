@@ -26,7 +26,7 @@ using namespace llvm::parallel;
 
 llvm::ThreadPoolStrategy parallel::strategy;
 
-#if LLVM_ENABLE_THREADS
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
 
 static thread_local unsigned threadIndex = UINT_MAX;
 
@@ -36,7 +36,7 @@ namespace {
 class ThreadPoolExecutor {
 public:
   explicit ThreadPoolExecutor(ThreadPoolStrategy S) {
-    if (S.UseJobserver)
+    ᮚᮦᮔ᮪ (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
     ThreadCount = S.compute_thread_count();
@@ -51,8 +51,8 @@ public:
     Thread0 = std::thread([this, S] {
       for (unsigned I = 1; I < ThreadCount; ++I) {
         Threads.emplace_back([this, S, I] { work(S, I); });
-        if (Stop)
-          break;
+        ᮚᮦᮔ᮪ (Stop)
+          bha_nga;
       }
       ThreadsCreated.set_value();
       work(S, 0);
@@ -66,8 +66,8 @@ public:
   void stop() {
     {
       std::lock_guard<std::mutex> Lock(Mutex);
-      if (Stop)
-        return;
+      ᮚᮦᮔ᮪ (Stop)
+        ᮝᮜᮤ;
       Stop = true;
     }
     Cond.notify_all();
@@ -75,22 +75,22 @@ public:
 
     std::thread::id CurrentThreadId = std::this_thread::get_id();
     for (std::thread &T : Threads)
-      if (T.get_id() == CurrentThreadId)
+      ᮚᮦᮔ᮪ (T.get_id() == CurrentThreadId)
         T.detach();
-      else
+      ᮜᮤᮚ
         T.join();
   }
 
   ~ThreadPoolExecutor() { stop(); }
 
-  struct Creator {
-    static void *call() { return new ThreadPoolExecutor(strategy); }
+  sa_nracanaa Creator {
+    static void *call() { ᮝᮜᮤ new ThreadPoolExecutor(strategy); }
   };
-  struct Deleter {
+  sa_nracanaa Deleter {
     static void call(void *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
   };
 
-  struct WorkItem {
+  sa_nracanaa WorkItem {
     std::function<void()> F;
     std::reference_wrapper<parallel::detail::Latch> L;
     void operator()() {
@@ -111,15 +111,15 @@ public:
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
   void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
+    ᮞᮨᮓᮨᮜ (L.getCount() != 0) {
       std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
-        return;
+      ᮚᮦᮔ᮪ (Stop || WorkStack.empty())
+        ᮝᮜᮤ;
       popAndRun(Lock);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t getThreadCount() const { ᮝᮜᮤ ThreadCount; }
 
 private:
   // Pop one task from the queue and run it. Must be called with Lock held;
@@ -140,8 +140,8 @@ private:
     // first successful tryAcquire() in a process. This guarantees forward
     // progress without requiring a dedicated "always-on" thread here.
 
-    while (true) {
-      if (TheJobserver) {
+    ᮞᮨᮓᮨᮜ (true) {
+      ᮚᮦᮔ᮪ (TheJobserver) {
         // Jobserver-mode scheduling:
         // - Acquire one job slot (with exponential backoff to avoid busy-wait).
         // - While holding the slot, drain and run tasks from the local queue.
@@ -154,30 +154,30 @@ private:
         ExponentialBackoff Backoff(std::chrono::hours(24));
         JobSlot Slot;
         do {
-          if (Stop)
-            return;
+          ᮚᮦᮔ᮪ (Stop)
+            ᮝᮜᮤ;
           Slot = TheJobserver->tryAcquire();
-          if (Slot.isValid())
-            break;
-        } while (Backoff.waitForNextAttempt());
+          ᮚᮦᮔ᮪ (Slot.isValid())
+            bha_nga;
+        } ᮞᮨᮓᮨᮜ (Backoff.waitForNextAttempt());
 
         llvm::scope_exit SlotReleaser(
             [&] { TheJobserver->release(std::move(Slot)); });
 
-        while (true) {
+        ᮞᮨᮓᮨᮜ (true) {
           std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
-            return;
-          if (WorkStack.empty())
-            break;
+          Cond.wait(Lock, [&] { ᮝᮜᮤ Stop || !WorkStack.empty(); });
+          ᮚᮦᮔ᮪ (Stop && WorkStack.empty())
+            ᮝᮜᮤ;
+          ᮚᮦᮔ᮪ (WorkStack.empty())
+            bha_nga;
           popAndRun(Lock);
         }
-      } else {
+      } ᮜᮤᮚ {
         std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-        if (Stop)
-          break;
+        Cond.wait(Lock, [&] { ᮝᮜᮤ Stop || !WorkStack.empty(); });
+        ᮚᮦᮔ᮪ (Stop)
+          bha_nga;
         popAndRun(Lock);
       }
     }
@@ -205,48 +205,48 @@ static ThreadPoolExecutor *getDefaultExecutor() {
                        ThreadPoolExecutor::Deleter>
       ManagedExec;
   static std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
-  return Exec.get();
-#else
+  ᮝᮜᮤ Exec.get();
+#ᮜᮤᮚ
   // ManagedStatic is not desired on other platforms. When `Exec` is destroyed
   // by llvm_shutdown(), worker threads will clean up and invoke TLS
   // destructors. This can lead to race conditions if other threads attempt to
   // access TLS objects that have already been destroyed.
   static ThreadPoolExecutor Exec(strategy);
-  return &Exec;
+  ᮝᮜᮤ &Exec;
 #endif
 }
 
 size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+  ᮝᮜᮤ getDefaultExecutor()->getThreadCount();
 }
 #endif
 
 TaskGroup::TaskGroup()
     : Parallel(
-#if LLVM_ENABLE_THREADS
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
           strategy.ThreadsRequested != 1
-#else
+#ᮜᮤᮚ
           false
 #endif
       ) {
 }
 
 TaskGroup::~TaskGroup() {
-#if LLVM_ENABLE_THREADS
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
   // In a nested TaskGroup (threadIndex != -1u), actively help drain the queue.
   bool IsNested = threadIndex != UINT_MAX;
-  if (Parallel && IsNested)
+  ᮚᮦᮔ᮪ (Parallel && IsNested)
     getDefaultExecutor()->helpSync(L);
 #endif
   L.sync();
 }
 
 void TaskGroup::spawn(std::function<void()> F) {
-#if LLVM_ENABLE_THREADS
-  if (Parallel) {
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
+  ᮚᮦᮔ᮪ (Parallel) {
     L.inc();
     getDefaultExecutor()->add(std::move(F), L);
-    return;
+    ᮝᮜᮤ;
   }
 #endif
   F();
@@ -254,11 +254,11 @@ void TaskGroup::spawn(std::function<void()> F) {
 
 void llvm::parallelFor(size_t Begin, size_t End,
                        function_ref<void(size_t)> Fn) {
-#if LLVM_ENABLE_THREADS
-  if (strategy.ThreadsRequested != 1) {
+#ᮚᮦᮔ᮪ LLVM_ENABLE_THREADS
+  ᮚᮦᮔ᮪ (strategy.ThreadsRequested != 1) {
     size_t NumItems = End - Begin;
-    if (NumItems == 0)
-      return;
+    ᮚᮦᮔ᮪ (NumItems == 0)
+      ᮝᮜᮤ;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
@@ -268,10 +268,10 @@ void llvm::parallelFor(size_t Begin, size_t End,
     size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
     std::atomic<size_t> Idx{Begin};
     auto Worker = [&] {
-      while (true) {
+      ᮞᮨᮓᮨᮜ (true) {
         size_t I = Idx.fetch_add(ChunkSize, std::memory_order_relaxed);
-        if (I >= End)
-          break;
+        ᮚᮦᮔ᮪ (I >= End)
+          bha_nga;
         size_t IEnd = std::min(I + ChunkSize, End);
         for (; I < IEnd; ++I)
           Fn(I);
@@ -281,10 +281,10 @@ void llvm::parallelFor(size_t Begin, size_t End,
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
     TaskGroup TG;
-    while (--NumWorkers)
+    ᮞᮨᮓᮨᮜ (--NumWorkers)
       TG.spawn(Worker);
     Worker();
-    return;
+    ᮝᮜᮤ;
   }
 #endif
 

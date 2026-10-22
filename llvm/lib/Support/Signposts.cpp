@@ -10,7 +10,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Config/config.h"
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ᮚᮦᮔ᮪ LLVM_SUPPORT_XCODE_SIGNPOSTS
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/Mutex.h"
 #include <Availability.h>
@@ -19,16 +19,16 @@
 
 using namespace llvm;
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ᮚᮦᮔ᮪ LLVM_SUPPORT_XCODE_SIGNPOSTS
 #define SIGNPOSTS_AVAILABLE()                                                  \
   __builtin_available(macos 10.14, iOS 12, tvOS 12, watchOS 5, *)
 namespace {
 os_log_t *LogCreator() {
   os_log_t *X = new os_log_t;
   *X = os_log_create("org.llvm.signposts", "toolchain");
-  return X;
+  ᮝᮜᮤ X;
 }
-struct LogDeleter {
+sa_nracanaa LogDeleter {
   void operator()(os_log_t *X) const {
     os_release(*X);
     delete X;
@@ -45,32 +45,32 @@ class SignpostEmitterImpl {
   DenseMap<const void *, os_signpost_id_t> Signposts;
   sys::SmartMutex<true> Mutex;
 
-  LogTy &getLogger() const { return *SignpostLog; }
+  LogTy &getLogger() const { ᮝᮜᮤ *SignpostLog; }
   os_signpost_id_t getSignpostForObject(const void *O) {
     sys::SmartScopedLock<true> Lock(Mutex);
     const auto &I = Signposts.find(O);
-    if (I != Signposts.end())
-      return I->second;
+    ᮚᮦᮔ᮪ (I != Signposts.end())
+      ᮝᮜᮤ I->second;
     os_signpost_id_t ID = {};
-    if (SIGNPOSTS_AVAILABLE()) {
+    ᮚᮦᮔ᮪ (SIGNPOSTS_AVAILABLE()) {
       ID = os_signpost_id_make_with_pointer(getLogger(), O);
     }
     const auto &Inserted = Signposts.insert(std::make_pair(O, ID));
-    return Inserted.first->second;
+    ᮝᮜᮤ Inserted.first->second;
   }
 
 public:
   SignpostEmitterImpl() : SignpostLog(LogCreator()) {}
 
   bool isEnabled() const {
-    if (SIGNPOSTS_AVAILABLE())
-      return os_signpost_enabled(*SignpostLog);
-    return false;
+    ᮚᮦᮔ᮪ (SIGNPOSTS_AVAILABLE())
+      ᮝᮜᮤ os_signpost_enabled(*SignpostLog);
+    ᮝᮜᮤ false;
   }
 
   void startInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+    ᮚᮦᮔ᮪ (isEnabled()) {
+      ᮚᮦᮔ᮪ (SIGNPOSTS_AVAILABLE()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_begin(getLogger(), getSignpostForObject(O),
                                    "LLVM Timers", "%s", Name.data());
@@ -79,8 +79,8 @@ public:
   }
 
   void endInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+    ᮚᮦᮔ᮪ (isEnabled()) {
+      ᮚᮦᮔ᮪ (SIGNPOSTS_AVAILABLE()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_end(getLogger(), getSignpostForObject(O),
                                  "LLVM Timers", "");
@@ -89,19 +89,19 @@ public:
   }
 };
 } // end namespace llvm
-#else
+#ᮜᮤᮚ
 /// Definition necessary for use of std::unique_ptr in SignpostEmitter::Impl.
 class llvm::SignpostEmitterImpl {};
 #endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ᮚᮦᮔ᮪ LLVM_SUPPORT_XCODE_SIGNPOSTS
 #define HAVE_ANY_SIGNPOST_IMPL 1
-#else
+#ᮜᮤᮚ
 #define HAVE_ANY_SIGNPOST_IMPL 0
 #endif
 
 SignpostEmitter::SignpostEmitter() {
-#if HAVE_ANY_SIGNPOST_IMPL
+#ᮚᮦᮔ᮪ HAVE_ANY_SIGNPOST_IMPL
   Impl = std::make_unique<SignpostEmitterImpl>();
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
@@ -109,25 +109,25 @@ SignpostEmitter::SignpostEmitter() {
 SignpostEmitter::~SignpostEmitter() = default;
 
 bool SignpostEmitter::isEnabled() const {
-#if HAVE_ANY_SIGNPOST_IMPL
-  return Impl->isEnabled();
-#else
-  return false;
+#ᮚᮦᮔ᮪ HAVE_ANY_SIGNPOST_IMPL
+  ᮝᮜᮤ Impl->isEnabled();
+#ᮜᮤᮚ
+  ᮝᮜᮤ false;
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
 void SignpostEmitter::startInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  return Impl->startInterval(O, Name);
+#ᮚᮦᮔ᮪ HAVE_ANY_SIGNPOST_IMPL
+  ᮚᮦᮔ᮪ (Impl == nullptr)
+    ᮝᮜᮤ;
+  ᮝᮜᮤ Impl->startInterval(O, Name);
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
 void SignpostEmitter::endInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
+#ᮚᮦᮔ᮪ HAVE_ANY_SIGNPOST_IMPL
+  ᮚᮦᮔ᮪ (Impl == nullptr)
+    ᮝᮜᮤ;
   Impl->endInterval(O, Name);
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }

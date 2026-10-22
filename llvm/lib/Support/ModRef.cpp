@@ -18,66 +18,66 @@ using namespace llvm;
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
   switch (MR) {
-  case ModRefInfo::NoModRef:
+  pak_sa ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    bha_nga;
+  pak_sa ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    bha_nga;
+  pak_sa ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    bha_nga;
+  pak_sa ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    bha_nga;
   }
-  return OS;
+  ᮝᮜᮤ OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
   interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
     switch (Loc) {
-    case IRMemLocation::ArgMem:
+    pak_sa IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      bha_nga;
+    pak_sa IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      bha_nga;
+    pak_sa IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      bha_nga;
+    pak_sa IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      bha_nga;
+    pak_sa IRMemLocation::TargetMem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      bha_nga;
+    pak_sa IRMemLocation::TargetMem1:
       OS << "TargetMem1: ";
-      break;
+      bha_nga;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  ᮝᮜᮤ OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+  ᮚᮦᮔ᮪ (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    ᮝᮜᮤ OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  ᮚᮦᮔ᮪ (capturesAddressIsNullOnly(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  ᮜᮤᮚ ᮚᮦᮔ᮪ (capturesAddress(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  ᮚᮦᮔ᮪ (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  ᮚᮦᮔ᮪ (capturesFullProvenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  ᮝᮜᮤ OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
@@ -86,10 +86,10 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  ᮚᮦᮔ᮪ (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  ᮚᮦᮔ᮪ (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  ᮝᮜᮤ OS;
 }
