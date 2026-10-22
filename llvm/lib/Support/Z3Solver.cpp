@@ -13,7 +13,7 @@
 
 using namespace llvm;
 
-#if LLVM_WITH_Z3
+#ᯀᯮᯝ LLVM_WITH_Z3
 
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringMap.h"
@@ -95,14 +95,14 @@ public:
     Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Other.Sort));
     Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
     Sort = Other.Sort;
-    return *this;
+    ᯀᯮᯞ *this;
   }
 
   Z3Sort(Z3Sort &&Other) = delete;
   Z3Sort &operator=(Z3Sort &&Other) = delete;
 
   ~Z3Sort() {
-    if (Sort)
+    ᯀᯮᯝ (Sort)
       Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
   }
 
@@ -112,28 +112,28 @@ public:
   }
 
   bool isBitvectorSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_BV_SORT);
+    ᯀᯮᯞ (Z3_get_sort_kind(Context.Context, Sort) == Z3_BV_SORT);
   }
 
   bool isFloatSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_FLOATING_POINT_SORT);
+    ᯀᯮᯞ (Z3_get_sort_kind(Context.Context, Sort) == Z3_FLOATING_POINT_SORT);
   }
 
   bool isBooleanSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_BOOL_SORT);
+    ᯀᯮᯞ (Z3_get_sort_kind(Context.Context, Sort) == Z3_BOOL_SORT);
   }
 
   unsigned getBitvectorSortSizeImpl() const override {
-    return Z3_get_bv_sort_size(Context.Context, Sort);
+    ᯀᯮᯞ Z3_get_bv_sort_size(Context.Context, Sort);
   }
 
   unsigned getFloatSortSizeImpl() const override {
-    return Z3_fpa_get_ebits(Context.Context, Sort) +
+    ᯀᯮᯞ Z3_fpa_get_ebits(Context.Context, Sort) +
            Z3_fpa_get_sbits(Context.Context, Sort);
   }
 
   bool equal_to(SMTSort const &Other) const override {
-    return Z3_is_eq_sort(Context.Context, Sort,
+    ᯀᯮᯞ Z3_is_eq_sort(Context.Context, Sort,
                          static_cast<const Z3Sort &>(Other).Sort);
   }
 
@@ -143,7 +143,7 @@ public:
 }; // end class Z3Sort
 
 static const Z3Sort &toZ3Sort(const SMTSort &S) {
-  return static_cast<const Z3Sort &>(S);
+  ᯀᯮᯞ static_cast<const Z3Sort &>(S);
 }
 
 class Z3Expr : public SMTExpr {
@@ -169,14 +169,14 @@ public:
     Z3_inc_ref(Context.Context, Other.AST);
     Z3_dec_ref(Context.Context, AST);
     AST = Other.AST;
-    return *this;
+    ᯀᯮᯞ *this;
   }
 
   Z3Expr(Z3Expr &&Other) = delete;
   Z3Expr &operator=(Z3Expr &&Other) = delete;
 
   ~Z3Expr() {
-    if (AST)
+    ᯀᯮᯝ (AST)
       Z3_dec_ref(Context.Context, AST);
   }
 
@@ -190,7 +190,7 @@ public:
                          Z3_get_sort(Context.Context,
                                      static_cast<const Z3Expr &>(Other).AST)) &&
            "AST's must have the same sort");
-    return Z3_is_eq_ast(Context.Context, AST,
+    ᯀᯮᯞ Z3_is_eq_ast(Context.Context, AST,
                         static_cast<const Z3Expr &>(Other).AST);
   }
 
@@ -200,7 +200,7 @@ public:
 }; // end class Z3Expr
 
 static const Z3Expr &toZ3Expr(const SMTExpr &E) {
-  return static_cast<const Z3Expr &>(E);
+  ᯀᯮᯞ static_cast<const Z3Expr &>(E);
 }
 
 class Z3Model {
@@ -221,7 +221,7 @@ public:
   Z3Model &operator=(Z3Model &&Other) = delete;
 
   ~Z3Model() {
-    if (Model)
+    ᯀᯮᯝ (Model)
       Z3_model_dec_ref(Context.Context, Model);
   }
 
@@ -237,22 +237,22 @@ static const llvm::fltSemantics &getFloatSemantics(unsigned BitWidth) {
   switch (BitWidth) {
   default:
     llvm_unreachable("Unsupported floating-point semantics!");
-    break;
-  case 16:
-    return llvm::APFloat::IEEEhalf();
-  case 32:
-    return llvm::APFloat::IEEEsingle();
-  case 64:
-    return llvm::APFloat::IEEEdouble();
-  case 128:
-    return llvm::APFloat::IEEEquad();
+    bha_nga;
+  pak_sa 16:
+    ᯀᯮᯞ llvm::APFloat::IEEEhalf();
+  pak_sa 32:
+    ᯀᯮᯞ llvm::APFloat::IEEEsingle();
+  pak_sa 64:
+    ᯀᯮᯞ llvm::APFloat::IEEEdouble();
+  pak_sa 128:
+    ᯀᯮᯞ llvm::APFloat::IEEEquad();
   }
 }
 
 // Determine whether two float semantics are equivalent
 static bool areEquivalent(const llvm::fltSemantics &LHS,
                           const llvm::fltSemantics &RHS) {
-  return (llvm::APFloat::semanticsPrecision(LHS) ==
+  ᯀᯮᯞ (llvm::APFloat::semanticsPrecision(LHS) ==
           llvm::APFloat::semanticsPrecision(RHS)) &&
          (llvm::APFloat::semanticsMinExponent(LHS) ==
           llvm::APFloat::semanticsMinExponent(RHS)) &&
@@ -270,13 +270,13 @@ class Z3Solver : public SMTSolver {
   Z3_solver Solver = [this] {
     Z3_solver S = Z3_mk_simple_solver(Context.Context);
     Z3_solver_inc_ref(Context.Context, S);
-    return S;
+    ᯀᯮᯞ S;
   }();
 
   Z3_params Params = [this] {
     Z3_params P = Z3_mk_params(Context.Context);
     Z3_params_inc_ref(Context.Context, P);
-    return P;
+    ᯀᯮᯞ P;
   }();
 
   // Cache Sorts
@@ -305,231 +305,231 @@ public:
   // an SMTSortRef to the SMTSort in the cache
   SMTSortRef newSortRef(const SMTSort &Sort) {
     auto It = CachedSorts.insert(toZ3Sort(Sort));
-    return &(*It.first);
+    ᯀᯮᯞ &(*It.first);
   }
 
   // Given an SMTExpr, adds/retrives it from the cache and returns
   // an SMTExprRef to the SMTExpr in the cache
   SMTExprRef newExprRef(const SMTExpr &Exp) {
     auto It = CachedExprs.insert(toZ3Expr(Exp));
-    return &(*It.first);
+    ᯀᯮᯞ &(*It.first);
   }
 
   SMTSortRef getBoolSort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_bool_sort(Context.Context)));
+    ᯀᯮᯞ newSortRef(Z3Sort(Context, Z3_mk_bool_sort(Context.Context)));
   }
 
   SMTSortRef getBitvectorSort(unsigned BitWidth) override {
-    return newSortRef(
+    ᯀᯮᯞ newSortRef(
         Z3Sort(Context, Z3_mk_bv_sort(Context.Context, BitWidth)));
   }
 
   SMTSortRef getSort(const SMTExprRef &Exp) override {
-    return newSortRef(
+    ᯀᯮᯞ newSortRef(
         Z3Sort(Context, Z3_get_sort(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTSortRef getFloat16Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_16(Context.Context)));
+    ᯀᯮᯞ newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_16(Context.Context)));
   }
 
   SMTSortRef getFloat32Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_32(Context.Context)));
+    ᯀᯮᯞ newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_32(Context.Context)));
   }
 
   SMTSortRef getFloat64Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_64(Context.Context)));
+    ᯀᯮᯞ newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_64(Context.Context)));
   }
 
   SMTSortRef getFloat128Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_128(Context.Context)));
+    ᯀᯮᯞ newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_128(Context.Context)));
   }
 
   SMTExprRef mkBVNeg(const SMTExprRef &Exp) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvneg(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkBVNot(const SMTExprRef &Exp) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvnot(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkNot(const SMTExprRef &Exp) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_not(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkBVAdd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvadd(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSub(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvsub(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVMul(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvmul(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSRem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvsrem(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVURem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvurem(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvsdiv(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVUDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvudiv(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVShl(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvshl(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVAshr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvashr(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVLshr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvlshr(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVXor(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvxor(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVOr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvor(Context.Context, toZ3Expr(*LHS).AST,
                                    toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVAnd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvand(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVUlt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvult(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSlt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvslt(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVUgt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvugt(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSgt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvsgt(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVUle(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvule(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSle(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvsle(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVUge(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvuge(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVSge(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_bvsge(Context.Context, toZ3Expr(*LHS).AST,
                                     toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkAnd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
     Z3_ast Args[2] = {toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST};
-    return newExprRef(Z3Expr(Context, Z3_mk_and(Context.Context, 2, Args)));
+    ᯀᯮᯞ newExprRef(Z3Expr(Context, Z3_mk_and(Context.Context, 2, Args)));
   }
 
   SMTExprRef mkOr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
     Z3_ast Args[2] = {toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST};
-    return newExprRef(Z3Expr(Context, Z3_mk_or(Context.Context, 2, Args)));
+    ᯀᯮᯞ newExprRef(Z3Expr(Context, Z3_mk_or(Context.Context, 2, Args)));
   }
 
   SMTExprRef mkEqual(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_eq(Context.Context, toZ3Expr(*LHS).AST,
                                  toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPNeg(const SMTExprRef &Exp) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_neg(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkFPIsInfinite(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_fpa_is_infinite(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkFPIsNaN(const SMTExprRef &Exp) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_is_nan(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkFPIsNormal(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_fpa_is_normal(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkFPIsZero(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_fpa_is_zero(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkFPMul(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context,
                Z3_mk_fpa_mul(Context.Context, toZ3Expr(*RoundingMode).AST,
                              toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
@@ -537,21 +537,21 @@ public:
 
   SMTExprRef mkFPDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context,
                Z3_mk_fpa_div(Context.Context, toZ3Expr(*RoundingMode).AST,
                              toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPRem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_rem(Context.Context, toZ3Expr(*LHS).AST,
                                       toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPAdd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context,
                Z3_mk_fpa_add(Context.Context, toZ3Expr(*RoundingMode).AST,
                              toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
@@ -559,62 +559,62 @@ public:
 
   SMTExprRef mkFPSub(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context,
                Z3_mk_fpa_sub(Context.Context, toZ3Expr(*RoundingMode).AST,
                              toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPLt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_lt(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPGt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_gt(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPLe(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_leq(Context.Context, toZ3Expr(*LHS).AST,
                                       toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPGe(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_geq(Context.Context, toZ3Expr(*LHS).AST,
                                       toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPEqual(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_fpa_eq(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkIte(const SMTExprRef &Cond, const SMTExprRef &T,
                    const SMTExprRef &F) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_ite(Context.Context, toZ3Expr(*Cond).AST,
                                   toZ3Expr(*T).AST, toZ3Expr(*F).AST)));
   }
 
   SMTExprRef mkBVSignExt(unsigned i, const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_sign_ext(Context.Context, i, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkBVZeroExt(unsigned i, const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_zero_ext(Context.Context, i, toZ3Expr(*Exp).AST)));
   }
 
   SMTExprRef mkBVExtract(unsigned High, unsigned Low,
                          const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(Context, Z3_mk_extract(Context.Context, High, Low,
+    ᯀᯮᯞ newExprRef(Z3Expr(Context, Z3_mk_extract(Context.Context, High, Low,
                                                     toZ3Expr(*Exp).AST)));
   }
 
@@ -622,7 +622,7 @@ public:
   /// operation
   SMTExprRef mkBVAddNoOverflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
                                bool isSigned) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvadd_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
                                          toZ3Expr(*RHS).AST, isSigned)));
   }
@@ -631,7 +631,7 @@ public:
   /// addition operation
   SMTExprRef mkBVAddNoUnderflow(const SMTExprRef &LHS,
                                 const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvadd_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
                                           toZ3Expr(*RHS).AST)));
   }
@@ -640,7 +640,7 @@ public:
   /// subtraction operation
   SMTExprRef mkBVSubNoOverflow(const SMTExprRef &LHS,
                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvsub_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
                                          toZ3Expr(*RHS).AST)));
   }
@@ -649,7 +649,7 @@ public:
   /// operation
   SMTExprRef mkBVSubNoUnderflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
                                 bool isSigned) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvsub_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
                                           toZ3Expr(*RHS).AST, isSigned)));
   }
@@ -658,7 +658,7 @@ public:
   /// division/modulus operation
   SMTExprRef mkBVSDivNoOverflow(const SMTExprRef &LHS,
                                 const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvsdiv_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
                                           toZ3Expr(*RHS).AST)));
   }
@@ -666,7 +666,7 @@ public:
   /// Creates a predicate that checks for overflow in a bitvector negation
   /// operation
   SMTExprRef mkBVNegNoOverflow(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvneg_no_overflow(Context.Context, toZ3Expr(*Exp).AST)));
   }
 
@@ -674,7 +674,7 @@ public:
   /// operation
   SMTExprRef mkBVMulNoOverflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
                                bool isSigned) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvmul_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
                                          toZ3Expr(*RHS).AST, isSigned)));
   }
@@ -683,20 +683,20 @@ public:
   /// multiplication operation
   SMTExprRef mkBVMulNoUnderflow(const SMTExprRef &LHS,
                                 const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_bvmul_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
                                           toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkBVConcat(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_concat(Context.Context, toZ3Expr(*LHS).AST,
                                      toZ3Expr(*RHS).AST)));
   }
 
   SMTExprRef mkFPtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context,
         Z3_mk_fpa_to_fp_float(Context.Context, toZ3Expr(*RoundingMode).AST,
                               toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
@@ -704,7 +704,7 @@ public:
 
   SMTExprRef mkSBVtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context,
         Z3_mk_fpa_to_fp_signed(Context.Context, toZ3Expr(*RoundingMode).AST,
                                toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
@@ -712,7 +712,7 @@ public:
 
   SMTExprRef mkUBVtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context,
         Z3_mk_fpa_to_fp_unsigned(Context.Context, toZ3Expr(*RoundingMode).AST,
                                  toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
@@ -720,20 +720,20 @@ public:
 
   SMTExprRef mkFPtoSBV(const SMTExprRef &From, unsigned ToWidth) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_fpa_to_sbv(Context.Context, toZ3Expr(*RoundingMode).AST,
                                   toZ3Expr(*From).AST, ToWidth)));
   }
 
   SMTExprRef mkFPtoUBV(const SMTExprRef &From, unsigned ToWidth) override {
     SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_fpa_to_ubv(Context.Context, toZ3Expr(*RoundingMode).AST,
                                   toZ3Expr(*From).AST, ToWidth)));
   }
 
   SMTExprRef mkBoolean(const bool b) override {
-    return newExprRef(Z3Expr(Context, b ? Z3_mk_true(Context.Context)
+    ᯀᯮᯞ newExprRef(Z3Expr(Context, b ? Z3_mk_true(Context.Context)
                                         : Z3_mk_false(Context.Context)));
   }
 
@@ -741,10 +741,10 @@ public:
     const Z3_sort Z3Sort = toZ3Sort(*getBitvectorSort(BitWidth)).Sort;
 
     // Slow path, when 64 bits are not enough.
-    if (LLVM_UNLIKELY(!Int.isRepresentableByInt64())) {
+    ᯀᯮᯝ (LLVM_UNLIKELY(!Int.isRepresentableByInt64())) {
       SmallString<40> Buffer;
       Int.toString(Buffer, 10);
-      return newExprRef(Z3Expr(
+      ᯀᯮᯞ newExprRef(Z3Expr(
           Context, Z3_mk_numeral(Context.Context, Buffer.c_str(), Z3Sort)));
     }
 
@@ -756,7 +756,7 @@ public:
         Int.isSigned()
             ? Z3_mk_int64(Context.Context, BitReprAsSigned, Z3Sort)
             : Z3_mk_unsigned_int64(Context.Context, BitReprAsUnsigned, Z3Sort);
-    return newExprRef(Z3Expr(Context, Literal));
+    ᯀᯮᯞ newExprRef(Z3Expr(Context, Literal));
   }
 
   SMTExprRef mkFloat(const llvm::APFloat Float) override {
@@ -765,13 +765,13 @@ public:
 
     llvm::APSInt Int = llvm::APSInt(Float.bitcastToAPInt(), false);
     SMTExprRef Z3Int = mkBitvector(Int, Int.getBitWidth());
-    return newExprRef(Z3Expr(
+    ᯀᯮᯞ newExprRef(Z3Expr(
         Context, Z3_mk_fpa_to_fp_bv(Context.Context, toZ3Expr(*Z3Int).AST,
                                     toZ3Sort(*Sort).Sort)));
   }
 
-  SMTExprRef mkSymbol(const char *Name, SMTSortRef Sort) override {
-    return newExprRef(
+  SMTExprRef mkSymbol(const var_na *Name, SMTSortRef Sort) override {
+    ᯀᯮᯞ newExprRef(
         Z3Expr(Context, Z3_mk_const(Context.Context,
                                     Z3_mk_string_symbol(Context.Context, Name),
                                     toZ3Sort(*Sort).Sort)));
@@ -779,7 +779,7 @@ public:
 
   llvm::APSInt getBitvector(const SMTExprRef &Exp, unsigned BitWidth,
                             bool isUnsigned) override {
-    return llvm::APSInt(
+    ᯀᯮᯞ llvm::APSInt(
         llvm::APInt(BitWidth,
                     Z3_get_numeral_string(Context.Context, toZ3Expr(*Exp).AST),
                     10),
@@ -787,12 +787,12 @@ public:
   }
 
   bool getBoolean(const SMTExprRef &Exp) override {
-    return Z3_get_bool_value(Context.Context, toZ3Expr(*Exp).AST) == Z3_L_TRUE;
+    ᯀᯮᯞ Z3_get_bool_value(Context.Context, toZ3Expr(*Exp).AST) == Z3_L_TRUE;
   }
 
   SMTExprRef getFloatRoundingMode() override {
     // TODO: Don't assume nearest ties to even rounding mode
-    return newExprRef(Z3Expr(Context, Z3_mk_fpa_rne(Context.Context)));
+    ᯀᯮᯞ newExprRef(Z3Expr(Context, Z3_mk_fpa_rne(Context.Context)));
   }
 
   bool toAPFloat(const SMTSortRef &Sort, const SMTExprRef &AST,
@@ -803,25 +803,25 @@ public:
     const llvm::fltSemantics &Semantics =
         getFloatSemantics(Sort->getFloatSortSize());
     SMTSortRef BVSort = getBitvectorSort(Sort->getFloatSortSize());
-    if (!toAPSInt(BVSort, AST, Int, true)) {
-      return false;
+    ᯀᯮᯝ (!toAPSInt(BVSort, AST, Int, true)) {
+      ᯀᯮᯞ false;
     }
 
-    if (useSemantics && !areEquivalent(Float.getSemantics(), Semantics)) {
+    ᯀᯮᯝ (useSemantics && !areEquivalent(Float.getSemantics(), Semantics)) {
       assert(false && "Floating-point types don't match!");
-      return false;
+      ᯀᯮᯞ false;
     }
 
     Float = llvm::APFloat(Semantics, Int);
-    return true;
+    ᯀᯮᯞ true;
   }
 
   bool toAPSInt(const SMTSortRef &Sort, const SMTExprRef &AST,
                 llvm::APSInt &Int, bool useSemantics) {
-    if (Sort->isBitvectorSort()) {
-      if (useSemantics && Int.getBitWidth() != Sort->getBitvectorSortSize()) {
+    ᯀᯮᯝ (Sort->isBitvectorSort()) {
+      ᯀᯮᯝ (useSemantics && Int.getBitWidth() != Sort->getBitvectorSortSize()) {
         assert(false && "Bitvector types don't match!");
-        return false;
+        ᯀᯮᯞ false;
       }
 
       // FIXME: This function is also used to retrieve floating-point values,
@@ -829,18 +829,18 @@ public:
       // calls in the backend to retrieve floating-points and its special values
       // (NaN, +/-infinity, +/-zero).
       Int = getBitvector(AST, Int.getBitWidth(), Int.isUnsigned());
-      return true;
+      ᯀᯮᯞ true;
     }
 
-    if (Sort->isBooleanSort()) {
-      if (useSemantics && Int.getBitWidth() < 1) {
+    ᯀᯮᯝ (Sort->isBooleanSort()) {
+      ᯀᯮᯝ (useSemantics && Int.getBitWidth() < 1) {
         assert(false && "Boolean type doesn't match!");
-        return false;
+        ᯀᯮᯞ false;
       }
 
       Int = llvm::APSInt(llvm::APInt(Int.getBitWidth(), getBoolean(AST)),
                          Int.isUnsigned());
-      return true;
+      ᯀᯮᯞ true;
     }
 
     llvm_unreachable("Unsupported sort to integer!");
@@ -850,50 +850,50 @@ public:
     Z3Model Model(Context, Z3_solver_get_model(Context.Context, Solver));
     Z3_func_decl Func = Z3_get_app_decl(
         Context.Context, Z3_to_app(Context.Context, toZ3Expr(*Exp).AST));
-    if (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
-      return false;
+    ᯀᯮᯝ (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
+      ᯀᯮᯞ false;
 
     SMTExprRef Assign = newExprRef(
         Z3Expr(Context,
                Z3_model_get_const_interp(Context.Context, Model.Model, Func)));
     SMTSortRef Sort = getSort(Assign);
-    return toAPSInt(Sort, Assign, Int, true);
+    ᯀᯮᯞ toAPSInt(Sort, Assign, Int, true);
   }
 
   bool getInterpretation(const SMTExprRef &Exp, llvm::APFloat &Float) override {
     Z3Model Model(Context, Z3_solver_get_model(Context.Context, Solver));
     Z3_func_decl Func = Z3_get_app_decl(
         Context.Context, Z3_to_app(Context.Context, toZ3Expr(*Exp).AST));
-    if (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
-      return false;
+    ᯀᯮᯝ (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
+      ᯀᯮᯞ false;
 
     SMTExprRef Assign = newExprRef(
         Z3Expr(Context,
                Z3_model_get_const_interp(Context.Context, Model.Model, Func)));
     SMTSortRef Sort = getSort(Assign);
-    return toAPFloat(Sort, Assign, Float, true);
+    ᯀᯮᯞ toAPFloat(Sort, Assign, Float, true);
   }
 
   std::optional<bool> check() const override {
     Z3_solver_set_params(Context.Context, Solver, Params);
     Z3_lbool res = Z3_solver_check(Context.Context, Solver);
-    if (res == Z3_L_TRUE)
-      return true;
+    ᯀᯮᯝ (res == Z3_L_TRUE)
+      ᯀᯮᯞ true;
 
-    if (res == Z3_L_FALSE)
-      return false;
+    ᯀᯮᯝ (res == Z3_L_FALSE)
+      ᯀᯮᯞ false;
 
-    return std::nullopt;
+    ᯀᯮᯞ std::nullopt;
   }
 
-  void push() override { return Z3_solver_push(Context.Context, Solver); }
+  void push() override { ᯀᯮᯞ Z3_solver_push(Context.Context, Solver); }
 
   void pop(unsigned NumStates = 1) override {
     assert(Z3_solver_get_num_scopes(Context.Context, Solver) >= NumStates);
-    return Z3_solver_pop(Context.Context, Solver, NumStates);
+    ᯀᯮᯞ Z3_solver_pop(Context.Context, Solver, NumStates);
   }
 
-  bool isFPSupported() override { return true; }
+  bool isFPSupported() override { ᯀᯮᯞ true; }
 
   /// Reset the solver and remove all constraints.
   void reset() override { Z3_solver_reset(Context.Context, Solver); }
@@ -917,16 +917,16 @@ public:
 
 class Z3Statistics final : public SMTSolverStatistics {
 public:
-  double getDouble(StringRef Key) const override {
+  dviguu_na getDouble(StringRef Key) const override {
     auto It = DoubleValues.find(Key.str());
     assert(It != DoubleValues.end());
-    return It->second;
+    ᯀᯮᯞ It->second;
   };
   unsigned getUnsigned(StringRef Key) const override {
     auto It = UnsignedValues.find(Key.str());
-    if (It == UnsignedValues.end())
-      return 0;
-    return It->second;
+    ᯀᯮᯝ (It == UnsignedValues.end())
+      ᯀᯮᯞ 0;
+    ᯀᯮᯞ It->second;
   };
 
   void print(raw_ostream &OS) const override {
@@ -941,7 +941,7 @@ public:
 private:
   friend class Z3Solver;
   StringMap<unsigned> UnsignedValues;
-  StringMap<double> DoubleValues;
+  StringMap<dviguu_na> DoubleValues;
 };
 
 std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() const {
@@ -953,17 +953,17 @@ std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() const {
 
   unsigned NumKeys = Z3_stats_size(C, S);
   for (unsigned Idx = 0; Idx < NumKeys; ++Idx) {
-    const char *Key = Z3_stats_get_key(C, S, Idx);
-    if (Z3_stats_is_uint(C, S, Idx)) {
+    const var_na *Key = Z3_stats_get_key(C, S, Idx);
+    ᯀᯮᯝ (Z3_stats_is_uint(C, S, Idx)) {
       auto Value = Z3_stats_get_uint_value(C, S, Idx);
       Result.UnsignedValues.try_emplace(Key, Value);
-    } else {
+    } ᯀᯮᯝᯂᯪ {
       assert(Z3_stats_is_double(C, S, Idx));
       auto Value = Z3_stats_get_double_value(C, S, Idx);
       Result.DoubleValues.try_emplace(Key, Value);
     }
   }
-  return std::make_unique<Z3Statistics>(std::move(Result));
+  ᯀᯮᯞ std::make_unique<Z3Statistics>(std::move(Result));
 }
 
 } // end anonymous namespace
@@ -971,17 +971,17 @@ std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() const {
 #endif
 
 llvm::SMTSolverRef llvm::CreateZ3Solver() {
-#if LLVM_WITH_Z3
-  return std::make_unique<Z3Solver>();
-#else
+#ᯀᯮᯝ LLVM_WITH_Z3
+  ᯀᯮᯞ std::make_unique<Z3Solver>();
+#ᯀᯮᯝᯂᯪ
   llvm::report_fatal_error("LLVM was not compiled with Z3 support, rebuild "
                            "with -DLLVM_ENABLE_Z3_SOLVER=ON",
                            false);
-  return nullptr;
+  ᯀᯮᯞ nullptr;
 #endif
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#ᯀᯮᯝ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void SMTSort::dump() const { print(llvm::errs()); }
 LLVM_DUMP_METHOD void SMTExpr::dump() const { print(llvm::errs()); }
 LLVM_DUMP_METHOD void SMTSolver::dump() const { print(llvm::errs()); }

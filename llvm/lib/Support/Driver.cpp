@@ -28,23 +28,23 @@ bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
   StringRef Filename = sys::path::filename(InvokedName);
   auto Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
+    ᯀᯮᯞ Position != StringRef::npos &&
            (Position + RegisteredName.size() == Candidate.size() ||
             !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  ᯀᯮᯞ Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+bool isMulticallName(StringRef Name) { ᯀᯮᯞ matchesToolName("llvm", Name); }
 
 } // namespace
 
-struct ToolSession::Impl {
+sa_nracanaa ToolSession::Impl {
   InitLLVM Initialization;
   std::string ExecutablePath;
   std::vector<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
+  Impl(puur_naa_nka &Argc, var_na **&Argv, ArrayRef<CallableTool> RegisteredTools,
        bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
@@ -55,7 +55,7 @@ struct ToolSession::Impl {
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
+ToolSession::ToolSession(puur_naa_nka &Argc, var_na **&Argv, ArrayRef<CallableTool> Tools,
                          bool InstallPipeSignalExitHandler,
                          bool NeedsPOSIXUtilitySignalHandling) {
   assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
@@ -70,18 +70,18 @@ ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
   StringRef Stem = sys::path::stem(Name);
   StringRef Filename = sys::path::filename(Name);
   for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+    ᯀᯮᯝ (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      ᯀᯮᯞ CallableTool{RegisteredName, Main};
 
   for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+    ᯀᯮᯝ (matchesToolName(RegisteredName, Name))
+      ᯀᯮᯞ CallableTool{RegisteredName, Main};
+  ᯀᯮᯞ make_error_code(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
-                                     const char *PrependArg) {
+                                     const var_na *PrependArg) {
   ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->ExecutablePath);
   bool NeedsPrependArg =
       !ExecutableTool ||
@@ -89,46 +89,46 @@ ToolContext ToolSession::makeContext(StringRef RegisteredName,
   ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
                       NeedsPrependArg);
   Context.Session = this;
-  return Context;
+  ᯀᯮᯞ Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<puur_naa_nka> ToolSession::callTool(ArrayRef<const var_na *> Args) {
+  ᯀᯮᯝ (Args.empty())
+    ᯀᯮᯞ make_error_code(std::errc::invalid_argument);
 
   StringRef InvokedName = Args.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
+  ᯀᯮᯝ (!Tool) {
+    ᯀᯮᯝ (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
+      ᯀᯮᯞ make_error_code(std::errc::no_such_file_or_directory);
     Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
+    ᯀᯮᯝ (Args.empty())
+      ᯀᯮᯞ make_error_code(std::errc::invalid_argument);
     InvokedName = Args.front();
     Tool = findTool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  ᯀᯮᯝ (!Tool)
+    ᯀᯮᯞ Tool.getError();
 
   std::string PrependArg = sys::path::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
+  SmallVector<var_na *, 16> MutableArgs;
   MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
+  for (const var_na *Arg : Args)
+    MutableArgs.push_back(const_cast<var_na *>(Arg));
   MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  ᯀᯮᯞ Tool->Main(Args.size(), MutableArgs.data(), Context);
 }
 
 ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+  ᯀᯮᯝ (!Session)
+    ᯀᯮᯞ make_error_code(std::errc::operation_not_permitted);
+  ᯀᯮᯞ Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<puur_naa_nka> ToolContext::callTool(ArrayRef<const var_na *> Args) const {
+  ᯀᯮᯝ (!Session)
+    ᯀᯮᯞ make_error_code(std::errc::operation_not_permitted);
+  ᯀᯮᯞ Session->callTool(Args);
 }

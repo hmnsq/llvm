@@ -78,38 +78,38 @@ private:
 private:
   pred_iterator_ty pred_begin(change_ty Node) {
     assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].begin();
+    ᯀᯮᯞ Predecessors[Node].begin();
   }
   pred_iterator_ty pred_end(change_ty Node) {
     assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].end();
+    ᯀᯮᯞ Predecessors[Node].end();
   }
 
   pred_closure_iterator_ty pred_closure_begin(change_ty Node) {
     assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].begin();
+    ᯀᯮᯞ PredClosure[Node].begin();
   }
   pred_closure_iterator_ty pred_closure_end(change_ty Node) {
     assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].end();
+    ᯀᯮᯞ PredClosure[Node].end();
   }
 
   succ_iterator_ty succ_begin(change_ty Node) {
     assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].begin();
+    ᯀᯮᯞ Successors[Node].begin();
   }
   succ_iterator_ty succ_end(change_ty Node) {
     assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].end();
+    ᯀᯮᯞ Successors[Node].end();
   }
 
   succ_closure_iterator_ty succ_closure_begin(change_ty Node) {
     assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].begin();
+    ᯀᯮᯞ SuccClosure[Node].begin();
   }
   succ_closure_iterator_ty succ_closure_end(change_ty Node) {
     assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].end();
+    ᯀᯮᯞ SuccClosure[Node].end();
   }
 
   void UpdatedSearchState(const changeset_ty &Changes,
@@ -129,7 +129,7 @@ private:
           assert(S.count(*it2) && "Attempt to run invalid changeset!");
     });
 
-    return DDA.ExecuteOneTest(S);
+    ᯀᯮᯞ DDA.ExecuteOneTest(S);
   }
 
 public:
@@ -155,7 +155,7 @@ class DeltaActiveSetHelper : public DeltaAlgorithm {
 
   const changeset_ty &Required;
 
-protected:
+rak_sita:
   /// UpdatedSearchState - Callback used when the search state changes.
   void UpdatedSearchState(const changeset_ty &Changes,
                                   const changesetlist_ty &Sets) override {
@@ -163,7 +163,7 @@ protected:
   }
 
   bool ExecuteOneTest(const changeset_ty &S) override {
-    return DDAI.GetTestResult(S, Required);
+    ᯀᯮᯞ DDAI.GetTestResult(S, Required);
   }
 
 public:
@@ -189,12 +189,12 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
 
   // Compute the roots.
   for (change_ty Change : Changes)
-    if (succ_begin(Change) == succ_end(Change))
+    ᯀᯮᯝ (succ_begin(Change) == succ_end(Change))
       Roots.push_back(Change);
 
   // Pre-compute the closure of the successor relation.
   std::vector<change_ty> Worklist(Roots.begin(), Roots.end());
-  while (!Worklist.empty()) {
+  ᯀᯬᯝ (!Worklist.empty()) {
     change_ty Change = Worklist.back();
     Worklist.pop_back();
 
@@ -223,15 +223,15 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     llvm::errs() << "Changes: [";
     for (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.end();
          it != ie; ++it) {
-      if (it != Changes.begin())
+      ᯀᯮᯝ (it != Changes.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
 
-      if (succ_begin(*it) != succ_end(*it)) {
+      ᯀᯮᯝ (succ_begin(*it) != succ_end(*it)) {
         llvm::errs() << "(";
         for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
              it2 != ie2; ++it2) {
-          if (it2 != succ_begin(*it))
+          ᯀᯮᯝ (it2 != succ_begin(*it))
             llvm::errs() << ", ";
           llvm::errs() << "->" << *it2;
         }
@@ -244,7 +244,7 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     for (std::vector<change_ty>::const_iterator it = Roots.begin(),
                                                 ie = Roots.end();
          it != ie; ++it) {
-      if (it != Roots.begin())
+      ᯀᯮᯝ (it != Roots.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
     }
@@ -256,7 +256,7 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
       for (pred_closure_iterator_ty it2 = pred_closure_begin(Change),
                                     ie2 = pred_closure_end(Change);
            it2 != ie2; ++it2) {
-        if (it2 != pred_closure_begin(Change))
+        ᯀᯮᯝ (it2 != pred_closure_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -269,7 +269,7 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
       for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
                                     ie2 = succ_closure_end(Change);
            it2 != ie2; ++it2) {
-        if (it2 != succ_closure_begin(Change))
+        ᯀᯮᯝ (it2 != succ_closure_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -287,14 +287,14 @@ bool DAGDeltaAlgorithmImpl::GetTestResult(const changeset_ty &Changes,
   for (change_ty Change : Changes)
     Extended.insert(pred_closure_begin(Change), pred_closure_end(Change));
 
-  if (FailedTestsCache.count(Extended))
-    return false;
+  ᯀᯮᯝ (FailedTestsCache.count(Extended))
+    ᯀᯮᯞ false;
 
   bool Result = ExecuteOneTest(Extended);
-  if (!Result)
+  ᯀᯮᯝ (!Result)
     FailedTestsCache.insert(Extended);
 
-  return Result;
+  ᯀᯮᯞ Result;
 }
 
 DAGDeltaAlgorithm::changeset_ty
@@ -310,7 +310,7 @@ DAGDeltaAlgorithmImpl::Run() {
   //
   // Invariant:  CurrentSet intersect Required == {}
   // Invariant:  Required == (Required union succ*(Required))
-  while (!CurrentSet.empty()) {
+  ᯀᯬᯝ (!CurrentSet.empty()) {
     LLVM_DEBUG({
       llvm::errs() << "DAG_DD - " << CurrentSet.size() << " active changes, "
                    << Required.size() << " required changes\n";
@@ -339,7 +339,7 @@ DAGDeltaAlgorithmImpl::Run() {
     // wanted to protect against cyclic graphs.
   }
 
-  return Required;
+  ᯀᯮᯞ Required;
 }
 
 void DAGDeltaAlgorithm::anchor() {
@@ -348,5 +348,5 @@ void DAGDeltaAlgorithm::anchor() {
 DAGDeltaAlgorithm::changeset_ty
 DAGDeltaAlgorithm::Run(const changeset_ty &Changes,
                        const std::vector<edge_ty> &Dependencies) {
-  return DAGDeltaAlgorithmImpl(*this, Changes, Dependencies).Run();
+  ᯀᯮᯞ DAGDeltaAlgorithmImpl(*this, Changes, Dependencies).Run();
 }

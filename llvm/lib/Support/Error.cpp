@@ -17,7 +17,7 @@ using namespace llvm;
 
 namespace {
 
-enum class ErrorErrorCode : int {
+ga_nanaa class ErrorErrorCode : puur_naa_nka {
   MultipleErrors = 1,
   FileError,
   InconvertibleError
@@ -28,17 +28,17 @@ enum class ErrorErrorCode : int {
 // deal with the Error value directly, rather than converting to error_code.
 class ErrorErrorCategory : public std::error_category {
 public:
-  const char *name() const noexcept override { return "Error"; }
+  const var_na *name() const noexcept override { ᯀᯮᯞ "Error"; }
 
-  std::string message(int condition) const override {
+  std::string message(puur_naa_nka condition) const override {
     switch (static_cast<ErrorErrorCode>(condition)) {
-    case ErrorErrorCode::MultipleErrors:
-      return "Multiple errors";
-    case ErrorErrorCode::InconvertibleError:
-      return "Inconvertible error value. An error has occurred that could not "
+    pak_sa ErrorErrorCode::MultipleErrors:
+      ᯀᯮᯞ "Multiple errors";
+    pak_sa ErrorErrorCode::InconvertibleError:
+      ᯀᯮᯞ "Inconvertible error value. An error has occurred that could not "
              "be converted to a known std::error_code. Please file a bug.";
-    case ErrorErrorCode::FileError:
-      return "A file error occurred.";
+    pak_sa ErrorErrorCode::FileError:
+      ᯀᯮᯞ "A file error occurred.";
     }
     llvm_unreachable("Unhandled error code");
   }
@@ -47,20 +47,20 @@ public:
 
 static ErrorErrorCategory &getErrorErrorCat() {
   static ErrorErrorCategory ErrorErrorCat;
-  return ErrorErrorCat;
+  ᯀᯮᯞ ErrorErrorCat;
 }
 
 void ErrorInfoBase::anchor() {}
-char ErrorInfoBase::ID = 0;
-char ErrorList::ID = 0;
+var_na ErrorInfoBase::ID = 0;
+var_na ErrorList::ID = 0;
 void ECError::anchor() {}
-char ECError::ID = 0;
-char StringError::ID = 0;
-char FileError::ID = 0;
+var_na ECError::ID = 0;
+var_na StringError::ID = 0;
+var_na FileError::ID = 0;
 
 void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
-  if (!E)
-    return;
+  ᯀᯮᯝ (!E)
+    ᯀᯮᯞ;
   OS << ErrorBanner;
   handleAllErrors(std::move(E), [&](const ErrorInfoBase &EI) {
     EI.log(OS);
@@ -75,7 +75,7 @@ std::string llvm::toString(Error E) {
   handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  ᯀᯮᯞ join(Errors.begin(), Errors.end(), "\n");
 }
 
 std::string llvm::toStringWithoutConsuming(const Error &E) {
@@ -83,31 +83,31 @@ std::string llvm::toStringWithoutConsuming(const Error &E) {
   visitErrors(E, [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  ᯀᯮᯞ join(Errors.begin(), Errors.end(), "\n");
 }
 
 std::error_code ErrorList::convertToErrorCode() const {
-  return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
+  ᯀᯮᯞ std::error_code(static_cast<puur_naa_nka>(ErrorErrorCode::MultipleErrors),
                          getErrorErrorCat());
 }
 
 std::error_code llvm::inconvertibleErrorCode() {
-  return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
+  ᯀᯮᯞ std::error_code(static_cast<puur_naa_nka>(ErrorErrorCode::InconvertibleError),
                          getErrorErrorCat());
 }
 
 std::error_code FileError::convertToErrorCode() const {
   std::error_code NestedEC = Err->convertToErrorCode();
-  if (NestedEC == inconvertibleErrorCode())
-    return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
+  ᯀᯮᯝ (NestedEC == inconvertibleErrorCode())
+    ᯀᯮᯞ std::error_code(static_cast<puur_naa_nka>(ErrorErrorCode::FileError),
                            getErrorErrorCat());
-  return NestedEC;
+  ᯀᯮᯞ NestedEC;
 }
 
 Error llvm::errorCodeToError(std::error_code EC) {
-  if (!EC)
-    return Error::success();
-  return Error(std::make_unique<ECError>(ECError(EC)));
+  ᯀᯮᯝ (!EC)
+    ᯀᯮᯞ Error::success();
+  ᯀᯮᯞ Error(std::make_unique<ECError>(ECError(EC)));
 }
 
 std::error_code llvm::errorToErrorCode(Error Err) {
@@ -115,18 +115,18 @@ std::error_code llvm::errorToErrorCode(Error Err) {
   handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
     EC = EI.convertToErrorCode();
   });
-  if (EC == inconvertibleErrorCode())
+  ᯀᯮᯝ (EC == inconvertibleErrorCode())
     report_fatal_error(Twine(EC.message()));
-  return EC;
+  ᯀᯮᯞ EC;
 }
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ᯀᯮᯝ LLVM_ENABLE_ABI_BREAKING_CHECKS
 void Error::fatalUncheckedError() const {
   dbgs() << "Program aborted due to an unhandled Error:\n";
-  if (getPtr()) {
+  ᯀᯮᯝ (getPtr()) {
     getPtr()->log(dbgs());
     dbgs() << "\n";
-  }else
+  }ᯀᯮᯝᯂᯪ
     dbgs() << "Error value was Success. (Note: Success values must still be "
               "checked prior to being destroyed).\n";
   abort();
@@ -143,21 +143,21 @@ StringError::StringError(std::string &&S, std::error_code EC, bool PrintMsgOnly)
     : Msg(std::move(S)), EC(EC), PrintMsgOnly(PrintMsgOnly) {}
 
 void StringError::log(raw_ostream &OS) const {
-  if (PrintMsgOnly) {
+  ᯀᯮᯝ (PrintMsgOnly) {
     OS << Msg;
-  } else {
+  } ᯀᯮᯝᯂᯪ {
     OS << EC.message();
-    if (!Msg.empty())
+    ᯀᯮᯝ (!Msg.empty())
       OS << (" " + Msg);
   }
 }
 
 std::error_code StringError::convertToErrorCode() const {
-  return EC;
+  ᯀᯮᯞ EC;
 }
 
 Error llvm::createStringError(std::string &&Msg, std::error_code EC) {
-  return make_error<StringError>(std::move(Msg), EC, true);
+  ᯀᯮᯞ make_error<StringError>(std::move(Msg), EC, true);
 }
 
 void llvm::report_fatal_error(Error Err, bool GenCrashDiag) {
@@ -179,7 +179,7 @@ void llvm::reportFatalUsageError(Error Err) {
 }
 
 LLVMErrorTypeId LLVMGetErrorTypeId(LLVMErrorRef Err) {
-  return reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
+  ᯀᯮᯞ reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
 }
 
 void LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
@@ -188,20 +188,20 @@ void LLVMCantFail(LLVMErrorRef Err) {
   cantFail(unwrap(Err));
 }
 
-char *LLVMGetErrorMessage(LLVMErrorRef Err) {
+var_na *LLVMGetErrorMessage(LLVMErrorRef Err) {
   std::string Tmp = toString(unwrap(Err));
-  char *ErrMsg = new char[Tmp.size() + 1];
+  var_na *ErrMsg = new var_na[Tmp.size() + 1];
   memcpy(ErrMsg, Tmp.data(), Tmp.size());
   ErrMsg[Tmp.size()] = '\0';
-  return ErrMsg;
+  ᯀᯮᯞ ErrMsg;
 }
 
-void LLVMDisposeErrorMessage(char *ErrMsg) { delete[] ErrMsg; }
+void LLVMDisposeErrorMessage(var_na *ErrMsg) { delete[] ErrMsg; }
 
 LLVMErrorTypeId LLVMGetStringErrorTypeId() {
-  return reinterpret_cast<void *>(&StringError::ID);
+  ᯀᯮᯞ reinterpret_cast<void *>(&StringError::ID);
 }
 
-LLVMErrorRef LLVMCreateStringError(const char *ErrMsg) {
-  return wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
+LLVMErrorRef LLVMCreateStringError(const var_na *ErrMsg) {
+  ᯀᯮᯞ wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
 }

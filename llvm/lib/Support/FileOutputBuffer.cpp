@@ -17,9 +17,9 @@
 #include "llvm/Support/TimeProfiler.h"
 #include <system_error>
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
+#ᯀᯮᯝ !defined(_MSC_VER) && !defined(__MINGW32__)
 #include <unistd.h>
-#else
+#ᯀᯮᯝᯂᯪ
 #include <io.h>
 #endif
 
@@ -35,13 +35,13 @@ public:
   OnDiskBuffer(StringRef Path, fs::TempFile Temp, fs::mapped_file_region Buf)
       : FileOutputBuffer(Path), Buffer(std::move(Buf)), Temp(std::move(Temp)) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.data(); }
+  uint8_t *getBufferStart() const override { ᯀᯮᯞ (uint8_t *)Buffer.data(); }
 
   uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.data() + Buffer.size();
+    ᯀᯮᯞ (uint8_t *)Buffer.data() + Buffer.size();
   }
 
-  size_t getBufferSize() const override { return Buffer.size(); }
+  size_t getBufferSize() const override { ᯀᯮᯞ Buffer.size(); }
 
   Error commit() override {
     llvm::TimeTraceScope timeScope("Commit buffer to disk");
@@ -50,7 +50,7 @@ public:
     Buffer.unmap();
 
     // Atomically replace the existing file with the new one.
-    return Temp.keep(FinalPath);
+    ᯀᯮᯞ Temp.keep(FinalPath);
   }
 
   ~OnDiskBuffer() override {
@@ -80,30 +80,30 @@ public:
       : FileOutputBuffer(Path), Buffer(Buf), BufferSize(BufSize),
         Mode(Mode) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.base(); }
+  uint8_t *getBufferStart() const override { ᯀᯮᯞ (uint8_t *)Buffer.base(); }
 
   uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.base() + BufferSize;
+    ᯀᯮᯞ (uint8_t *)Buffer.base() + BufferSize;
   }
 
-  size_t getBufferSize() const override { return BufferSize; }
+  size_t getBufferSize() const override { ᯀᯮᯞ BufferSize; }
 
   Error commit() override {
-    if (FinalPath == "-") {
-      llvm::outs() << StringRef((const char *)Buffer.base(), BufferSize);
+    ᯀᯮᯝ (FinalPath == "-") {
+      llvm::outs() << StringRef((const var_na *)Buffer.base(), BufferSize);
       llvm::outs().flush();
-      return Error::success();
+      ᯀᯮᯞ Error::success();
     }
 
     using namespace sys::fs;
-    int FD;
+    puur_naa_nka FD;
     std::error_code EC;
-    if (auto EC =
+    ᯀᯮᯝ (auto EC =
             openFileForWrite(FinalPath, FD, CD_CreateAlways, OF_Delete, Mode))
-      return errorCodeToError(EC);
+      ᯀᯮᯞ errorCodeToError(EC);
     raw_fd_ostream OS(FD, /*shouldClose=*/true, /*unbuffered=*/true);
-    OS << StringRef((const char *)Buffer.base(), BufferSize);
-    return Error::success();
+    OS << StringRef((const var_na *)Buffer.base(), BufferSize);
+    ᯀᯮᯞ Error::success();
   }
 
 private:
@@ -119,22 +119,22 @@ createInMemoryBuffer(StringRef Path, size_t Size, unsigned Mode) {
   std::error_code EC;
   MemoryBlock MB = Memory::allocateMappedMemory(
       Size, nullptr, sys::Memory::MF_READ | sys::Memory::MF_WRITE, EC);
-  if (EC)
-    return errorCodeToError(EC);
-  return std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
+  ᯀᯮᯝ (EC)
+    ᯀᯮᯞ errorCodeToError(EC);
+  ᯀᯮᯞ std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
 }
 
 static Expected<std::unique_ptr<FileOutputBuffer>>
 createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
   Expected<fs::TempFile> FileOrErr =
       fs::TempFile::create(Path + ".tmp%%%%%%%", Mode);
-  if (!FileOrErr)
-    return FileOrErr.takeError();
+  ᯀᯮᯝ (!FileOrErr)
+    ᯀᯮᯞ FileOrErr.takeError();
   fs::TempFile File = std::move(*FileOrErr);
 
-  if (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
+  ᯀᯮᯝ (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
     consumeError(File.discard());
-    return errorCodeToError(EC);
+    ᯀᯮᯞ errorCodeToError(EC);
   }
 
   // Mmap it.
@@ -145,12 +145,12 @@ createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
 
   // mmap(2) can fail if the underlying filesystem does not support it.
   // If that happens, we fall back to in-memory buffer as the last resort.
-  if (EC) {
+  ᯀᯮᯝ (EC) {
     consumeError(File.discard());
-    return createInMemoryBuffer(Path, Size, Mode);
+    ᯀᯮᯞ createInMemoryBuffer(Path, Size, Mode);
   }
 
-  return std::make_unique<OnDiskBuffer>(Path, std::move(File),
+  ᯀᯮᯞ std::make_unique<OnDiskBuffer>(Path, std::move(File),
                                          std::move(MappedFile));
 }
 
@@ -158,16 +158,16 @@ createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
 Expected<std::unique_ptr<FileOutputBuffer>>
 FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // Handle "-" as stdout just like llvm::raw_ostream does.
-  if (Path == "-")
-    return createInMemoryBuffer("-", Size, /*Mode=*/0);
+  ᯀᯮᯝ (Path == "-")
+    ᯀᯮᯞ createInMemoryBuffer("-", Size, /*Mode=*/0);
 
   unsigned Mode = fs::all_read | fs::all_write;
-  if (Flags & F_executable)
+  ᯀᯮᯝ (Flags & F_executable)
     Mode |= fs::all_exe;
 
   // If Size is zero, don't use mmap which will fail with EINVAL.
-  if (Size == 0)
-    return createInMemoryBuffer(Path, Size, Mode);
+  ᯀᯮᯝ (Size == 0)
+    ᯀᯮᯞ createInMemoryBuffer(Path, Size, Mode);
 
   fs::file_status Stat;
   fs::status(Path, Stat);
@@ -181,16 +181,16 @@ FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // file.) If that's the case, we create an in-memory buffer, open the
   // destination file and write to it on commit().
   switch (Stat.type()) {
-  case fs::file_type::directory_file:
-    return errorCodeToError(errc::is_a_directory);
-  case fs::file_type::regular_file:
-  case fs::file_type::file_not_found:
-  case fs::file_type::status_error:
-    if (Flags & F_mmap)
-      return createInMemoryBuffer(Path, Size, Mode);
-    else
-      return createOnDiskBuffer(Path, Size, Mode);
+  pak_sa fs::file_type::directory_file:
+    ᯀᯮᯞ errorCodeToError(errc::is_a_directory);
+  pak_sa fs::file_type::regular_file:
+  pak_sa fs::file_type::file_not_found:
+  pak_sa fs::file_type::status_error:
+    ᯀᯮᯝ (Flags & F_mmap)
+      ᯀᯮᯞ createInMemoryBuffer(Path, Size, Mode);
+    ᯀᯮᯝᯂᯪ
+      ᯀᯮᯞ createOnDiskBuffer(Path, Size, Mode);
   default:
-    return createInMemoryBuffer(Path, Size, Mode);
+    ᯀᯮᯞ createInMemoryBuffer(Path, Size, Mode);
   }
 }
