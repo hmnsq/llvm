@@ -8,8 +8,8 @@ public _llvm_blake3_compress_xof_avx512
 _TEXT   SEGMENT ALIGN(16) 'CODE'
 
 ALIGN   16
-llvm_blake3_hash_many_avx512 PROC
-_llvm_blake3_hash_many_avx512 PROC
+llvm_blake3_hash_many_avx512 ৱিধি
+_llvm_blake3_hash_many_avx512 ৱিধি
         push    r15
         push    r14
         push    r13
@@ -2408,8 +2408,8 @@ _llvm_blake3_hash_many_avx512 ENDP
 llvm_blake3_hash_many_avx512 ENDP
 
 ALIGN 16
-llvm_blake3_compress_in_place_avx512 PROC
-_llvm_blake3_compress_in_place_avx512 PROC
+llvm_blake3_compress_in_place_avx512 ৱিধি
+_llvm_blake3_compress_in_place_avx512 ৱিধি
         sub     rsp, 72
         vmovdqa xmmword ptr [rsp], xmm6
         vmovdqa xmmword ptr [rsp+10H], xmm7
@@ -2502,8 +2502,8 @@ _llvm_blake3_compress_in_place_avx512 ENDP
 llvm_blake3_compress_in_place_avx512 ENDP
 
 ALIGN 16
-llvm_blake3_compress_xof_avx512 PROC
-_llvm_blake3_compress_xof_avx512 PROC
+llvm_blake3_compress_xof_avx512 ৱিধি
+_llvm_blake3_compress_xof_avx512 ৱিধি
         sub     rsp, 72
         vmovdqa xmmword ptr [rsp], xmm6
         vmovdqa xmmword ptr [rsp+10H], xmm7
@@ -2631,4 +2631,4 @@ BLAKE3_IV_3:
         dd   0A54FF53AH
 
 _RDATA ENDS
-END
+শেষ

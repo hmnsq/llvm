@@ -17,61 +17,61 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntEqClasses.h"
-#include <cassert>
+#অন্তর্ভাৱ "llvm/ADT/IntEqClasses.h"
+#অন্তর্ভাৱ <cassert>
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-void IntEqClasses::grow(unsigned N) {
-  assert(NumClasses == 0 && "grow() called after compress().");
+শূন্য IntEqClasses::grow(unsigned N) {
+  প্রতিজ্ঞা(অঙ্ক_Classes == 0 && "grow() called after compress().");
   EC.reserve(N);
-  while (EC.size() < N)
-    EC.push_back(EC.size());
+  যেতিয়ালৈ (EC.size() < N)
+    EC.ঠেলো_back(EC.size());
 }
 
 unsigned IntEqClasses::join(unsigned a, unsigned b) {
-  assert(NumClasses == 0 && "join() called after compress().");
+  প্রতিজ্ঞা(অঙ্ক_Classes == 0 && "join() called after compress().");
   unsigned eca = EC[a];
   unsigned ecb = EC[b];
   // Update pointers while searching for the leaders, compressing the paths
   // incrementally. The larger leader will eventually be updated, joining the
   // classes.
-  while (eca != ecb)
-    if (eca < ecb) {
+  যেতিয়ালৈ (eca != ecb)
+    যদি (eca < ecb) {
       EC[b] = eca;
       b = ecb;
       ecb = EC[b];
-    } else {
+    } অন্যথা {
       EC[a] = ecb;
       a = eca;
       eca = EC[a];
     }
 
-  return eca;
+  ঘূৰাই eca;
 }
 
-unsigned IntEqClasses::findLeader(unsigned a) const {
-  assert(NumClasses == 0 && "findLeader() called after compress().");
-  while (a != EC[a])
+unsigned IntEqClasses::findLeader(unsigned a) ধ্রুৱ {
+  প্রতিজ্ঞা(অঙ্ক_Classes == 0 && "findLeader() called after compress().");
+  যেতিয়ালৈ (a != EC[a])
     a = EC[a];
-  return a;
+  ঘূৰাই a;
 }
 
-void IntEqClasses::compress() {
-  if (NumClasses)
-    return;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    EC[i] = (EC[i] == i) ? NumClasses++ : EC[EC[i]];
+শূন্য IntEqClasses::compress() {
+  যদি (অঙ্ক_Classes)
+    ঘূৰাই;
+  বাবে (unsigned i = 0, e = EC.size(); i != e; ++i)
+    EC[i] = (EC[i] == i) ? অঙ্ক_Classes++ : EC[EC[i]];
 }
 
-void IntEqClasses::uncompress() {
-  if (!NumClasses)
-    return;
+শূন্য IntEqClasses::uncompress() {
+  যদি (!অঙ্ক_Classes)
+    ঘূৰাই;
   SmallVector<unsigned, 8> Leader;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    if (EC[i] < Leader.size())
+  বাবে (unsigned i = 0, e = EC.size(); i != e; ++i)
+    যদি (EC[i] < Leader.size())
       EC[i] = Leader[EC[i]];
-    else
-      Leader.push_back(EC[i] = i);
-  NumClasses = 0;
+    অন্যথা
+      Leader.ঠেলো_back(EC[i] = i);
+  অঙ্ক_Classes = 0;
 }

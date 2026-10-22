@@ -10,53 +10,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Errno.h"
-#include "llvm/Config/config.h"
-#include <cstring>
-#include <errno.h>
+#অন্তর্ভাৱ "llvm/Support/Errno.h"
+#অন্তর্ভাৱ "llvm/Config/config.h"
+#অন্তর্ভাৱ <cstring>
+#অন্তর্ভাৱ <errno.h>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-namespace llvm {
-namespace sys {
+নামাকাশ llvm {
+নামাকাশ sys {
 
 std::string StrError() {
-  return StrError(errno);
+  ঘূৰাই StrError(errno);
 }
 
-std::string StrError(int errnum) {
+std::string StrError(পূর্ণাঙ্ক errnum) {
   std::string str;
-  if (errnum == 0)
-    return str;
-#if defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
-  const int MaxErrStrLen = 2000;
-  char buffer[MaxErrStrLen];
+  যদি (errnum == 0)
+    ঘূৰাই str;
+#যদি defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
+  ধ্রুৱ পূর্ণাঙ্ক MaxErrStrLen = 2000;
+  ৱর্ণ buffer[MaxErrStrLen];
   buffer[0] = '\0';
 #endif
 
 #ifdef HAVE_STRERROR_R
   // strerror_r is thread-safe.
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#যদি defined(__GLIBC__) && defined(_GNU_SOURCE)
   // glibc defines its own incompatible version of strerror_r
   // which may not use the buffer supplied.
   str = strerror_r(errnum, buffer, MaxErrStrLen - 1);
-#else
+#অন্যথা
   strerror_r(errnum, buffer, MaxErrStrLen - 1);
   str = buffer;
 #endif
-#elif HAVE_DECL_STRERROR_S // "Windows Secure API"
+#নোচেদ্যদি HAVE_DECL_STRERROR_S // "Windows Secure API"
   strerror_s(buffer, MaxErrStrLen - 1, errnum);
   str = buffer;
-#else
+#অন্যথা
   // Copy the thread un-safe result of strerror into
   // the buffer as fast as possible to minimize impact
   // of collision of strerror in multiple threads.
   str = strerror(errnum);
 #endif
-  return str;
+  ঘূৰাই str;
 }
 
 }  // namespace sys

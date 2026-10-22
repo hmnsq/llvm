@@ -31,14 +31,14 @@ HIDDEN blake3_compress_xof_avx512
 HIDDEN _blake3_compress_xof_avx512
 HIDDEN blake3_xof_many_avx512
 HIDDEN _blake3_xof_many_avx512
-.global _blake3_hash_many_avx512
-.global blake3_hash_many_avx512
-.global blake3_compress_in_place_avx512
-.global _blake3_compress_in_place_avx512
-.global blake3_compress_xof_avx512
-.global _blake3_compress_xof_avx512
-.global blake3_xof_many_avx512
-.global _blake3_xof_many_avx512
+.ৱৈশ্ৱিক _blake3_hash_many_avx512
+.ৱৈশ্ৱিক blake3_hash_many_avx512
+.ৱৈশ্ৱিক blake3_compress_in_place_avx512
+.ৱৈশ্ৱিক _blake3_compress_in_place_avx512
+.ৱৈশ্ৱিক blake3_compress_xof_avx512
+.ৱৈশ্ৱিক _blake3_compress_xof_avx512
+.ৱৈশ্ৱিক blake3_xof_many_avx512
+.ৱৈশ্ৱিক _blake3_xof_many_avx512
 
 #ifdef __APPLE__
 .text
@@ -2577,11 +2577,11 @@ blake3_compress_xof_avx512:
 blake3_xof_many_avx512:
 _blake3_xof_many_avx512:
         _CET_ENDBR
-        mov    r10,QWORD PTR [rsp+0x8]
+        mov    r10,QWORD নির্দেশক [rsp+0x8]
         cmp    r10,0x1
         ja     2f
-        vmovdqu xmm0,XMMWORD PTR [rdi]
-        vmovdqu xmm1,XMMWORD PTR [rdi+0x10]
+        vmovdqu xmm0,XMMWORD নির্দেশক [rdi]
+        vmovdqu xmm1,XMMWORD নির্দেশক [rdi+0x10]
         movzx  eax,r8b
         movzx  edx,dl
         shl    rax,0x20
@@ -2589,13 +2589,13 @@ _blake3_xof_many_avx512:
         vmovq  xmm3,rcx
         vmovq  xmm4,rdx
         vpunpcklqdq xmm3,xmm3,xmm4
-        vmovaps xmm2,XMMWORD PTR [BLAKE3_IV+rip]
-        vmovups xmm8,XMMWORD PTR [rsi]
-        vmovups xmm9,XMMWORD PTR [rsi+0x10]
+        vmovaps xmm2,XMMWORD নির্দেশক [BLAKE3_IV+rip]
+        vmovups xmm8,XMMWORD নির্দেশক [rsi]
+        vmovups xmm9,XMMWORD নির্দেশক [rsi+0x10]
         vshufps xmm4,xmm8,xmm9,0x88
         vshufps xmm5,xmm8,xmm9,0xdd
-        vmovups xmm8,XMMWORD PTR [rsi+0x20]
-        vmovups xmm9,XMMWORD PTR [rsi+0x30]
+        vmovups xmm8,XMMWORD নির্দেশক [rsi+0x20]
+        vmovups xmm9,XMMWORD নির্দেশক [rsi+0x30]
         vshufps xmm6,xmm8,xmm9,0x88
         vshufps xmm7,xmm8,xmm9,0xdd
         vpshufd xmm6,xmm6,0x93
@@ -2655,12 +2655,12 @@ _blake3_xof_many_avx512:
 3:
         vpxor  xmm0,xmm0,xmm2
         vpxor  xmm1,xmm1,xmm3
-        vpxor  xmm2,xmm2,XMMWORD PTR [rdi]
-        vpxor  xmm3,xmm3,XMMWORD PTR [rdi+0x10]
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
+        vpxor  xmm2,xmm2,XMMWORD নির্দেশক [rdi]
+        vpxor  xmm3,xmm3,XMMWORD নির্দেশক [rdi+0x10]
+        vmovdqu XMMWORD নির্দেশক [r9],xmm0
+        vmovdqu XMMWORD নির্দেশক [r9+0x10],xmm1
+        vmovdqu XMMWORD নির্দেশক [r9+0x20],xmm2
+        vmovdqu XMMWORD নির্দেশক [r9+0x30],xmm3
         ret    
 .p2align 6
 2:
@@ -2671,44 +2671,44 @@ _blake3_xof_many_avx512:
         vpbroadcastd zmm0,ecx
         shr    rcx,0x20
         vpbroadcastd zmm1,ecx
-        vpaddd zmm2,zmm0,ZMMWORD PTR [ADD0+rip]
+        vpaddd zmm2,zmm0,ZMMWORD নির্দেশক [ADD0+rip]
         vpcmpltud k1,zmm2,zmm0
-        vpaddd zmm1{k1},zmm1,DWORD PTR [ADD1+rip]{1to16}
-        vmovdqa32 ZMMWORD PTR [rsp],zmm2
-        vmovdqa32 ZMMWORD PTR [rsp+0x40],zmm1
+        vpaddd zmm1{k1},zmm1,DWORD নির্দেশক [ADD1+rip]{1to16}
+        vmovdqa32 ZMMWORD নির্দেশক [rsp],zmm2
+        vmovdqa32 ZMMWORD নির্দেশক [rsp+0x40],zmm1
         cmp    r10,0x10
         jb     2f
 3:
-        vpbroadcastd zmm16,DWORD PTR [rsi]
-        vpbroadcastd zmm17,DWORD PTR [rsi+0x4]
-        vpbroadcastd zmm18,DWORD PTR [rsi+0x8]
-        vpbroadcastd zmm19,DWORD PTR [rsi+0xc]
-        vpbroadcastd zmm20,DWORD PTR [rsi+0x10]
-        vpbroadcastd zmm21,DWORD PTR [rsi+0x14]
-        vpbroadcastd zmm22,DWORD PTR [rsi+0x18]
-        vpbroadcastd zmm23,DWORD PTR [rsi+0x1c]
-        vpbroadcastd zmm24,DWORD PTR [rsi+0x20]
-        vpbroadcastd zmm25,DWORD PTR [rsi+0x24]
-        vpbroadcastd zmm26,DWORD PTR [rsi+0x28]
-        vpbroadcastd zmm27,DWORD PTR [rsi+0x2c]
-        vpbroadcastd zmm28,DWORD PTR [rsi+0x30]
-        vpbroadcastd zmm29,DWORD PTR [rsi+0x34]
-        vpbroadcastd zmm30,DWORD PTR [rsi+0x38]
-        vpbroadcastd zmm31,DWORD PTR [rsi+0x3c]
-        vpbroadcastd zmm0,DWORD PTR [rdi]
-        vpbroadcastd zmm1,DWORD PTR [rdi+0x4]
-        vpbroadcastd zmm2,DWORD PTR [rdi+0x8]
-        vpbroadcastd zmm3,DWORD PTR [rdi+0xc]
-        vpbroadcastd zmm4,DWORD PTR [rdi+0x10]
-        vpbroadcastd zmm5,DWORD PTR [rdi+0x14]
-        vpbroadcastd zmm6,DWORD PTR [rdi+0x18]
-        vpbroadcastd zmm7,DWORD PTR [rdi+0x1c]
-        vpbroadcastd zmm8,DWORD PTR [BLAKE3_IV_0+rip]
-        vpbroadcastd zmm9,DWORD PTR [BLAKE3_IV_1+rip]
-        vpbroadcastd zmm10,DWORD PTR [BLAKE3_IV_2+rip]
-        vpbroadcastd zmm11,DWORD PTR [BLAKE3_IV_3+rip]
-        vmovdqa32 zmm12,ZMMWORD PTR [rsp]
-        vmovdqa32 zmm13,ZMMWORD PTR [rsp+0x40]
+        vpbroadcastd zmm16,DWORD নির্দেশক [rsi]
+        vpbroadcastd zmm17,DWORD নির্দেশক [rsi+0x4]
+        vpbroadcastd zmm18,DWORD নির্দেশক [rsi+0x8]
+        vpbroadcastd zmm19,DWORD নির্দেশক [rsi+0xc]
+        vpbroadcastd zmm20,DWORD নির্দেশক [rsi+0x10]
+        vpbroadcastd zmm21,DWORD নির্দেশক [rsi+0x14]
+        vpbroadcastd zmm22,DWORD নির্দেশক [rsi+0x18]
+        vpbroadcastd zmm23,DWORD নির্দেশক [rsi+0x1c]
+        vpbroadcastd zmm24,DWORD নির্দেশক [rsi+0x20]
+        vpbroadcastd zmm25,DWORD নির্দেশক [rsi+0x24]
+        vpbroadcastd zmm26,DWORD নির্দেশক [rsi+0x28]
+        vpbroadcastd zmm27,DWORD নির্দেশক [rsi+0x2c]
+        vpbroadcastd zmm28,DWORD নির্দেশক [rsi+0x30]
+        vpbroadcastd zmm29,DWORD নির্দেশক [rsi+0x34]
+        vpbroadcastd zmm30,DWORD নির্দেশক [rsi+0x38]
+        vpbroadcastd zmm31,DWORD নির্দেশক [rsi+0x3c]
+        vpbroadcastd zmm0,DWORD নির্দেশক [rdi]
+        vpbroadcastd zmm1,DWORD নির্দেশক [rdi+0x4]
+        vpbroadcastd zmm2,DWORD নির্দেশক [rdi+0x8]
+        vpbroadcastd zmm3,DWORD নির্দেশক [rdi+0xc]
+        vpbroadcastd zmm4,DWORD নির্দেশক [rdi+0x10]
+        vpbroadcastd zmm5,DWORD নির্দেশক [rdi+0x14]
+        vpbroadcastd zmm6,DWORD নির্দেশক [rdi+0x18]
+        vpbroadcastd zmm7,DWORD নির্দেশক [rdi+0x1c]
+        vpbroadcastd zmm8,DWORD নির্দেশক [BLAKE3_IV_0+rip]
+        vpbroadcastd zmm9,DWORD নির্দেশক [BLAKE3_IV_1+rip]
+        vpbroadcastd zmm10,DWORD নির্দেশক [BLAKE3_IV_2+rip]
+        vpbroadcastd zmm11,DWORD নির্দেশক [BLAKE3_IV_3+rip]
+        vmovdqa32 zmm12,ZMMWORD নির্দেশক [rsp]
+        vmovdqa32 zmm13,ZMMWORD নির্দেশক [rsp+0x40]
         vpbroadcastd zmm14,edx
         vpbroadcastd zmm15,r8d
         vpaddd zmm0,zmm0,zmm16
@@ -3503,14 +3503,14 @@ _blake3_xof_many_avx512:
         vpxord zmm5,zmm5,zmm13
         vpxord zmm6,zmm6,zmm14
         vpxord zmm7,zmm7,zmm15
-        vpxord zmm8,zmm8,DWORD PTR [rdi]{1to16}
-        vpxord zmm9,zmm9,DWORD PTR [rdi+0x4]{1to16}
-        vpxord zmm10,zmm10,DWORD PTR [rdi+0x8]{1to16}
-        vpxord zmm11,zmm11,DWORD PTR [rdi+0xc]{1to16}
-        vpxord zmm12,zmm12,DWORD PTR [rdi+0x10]{1to16}
-        vpxord zmm13,zmm13,DWORD PTR [rdi+0x14]{1to16}
-        vpxord zmm14,zmm14,DWORD PTR [rdi+0x18]{1to16}
-        vpxord zmm15,zmm15,DWORD PTR [rdi+0x1c]{1to16}
+        vpxord zmm8,zmm8,DWORD নির্দেশক [rdi]{1to16}
+        vpxord zmm9,zmm9,DWORD নির্দেশক [rdi+0x4]{1to16}
+        vpxord zmm10,zmm10,DWORD নির্দেশক [rdi+0x8]{1to16}
+        vpxord zmm11,zmm11,DWORD নির্দেশক [rdi+0xc]{1to16}
+        vpxord zmm12,zmm12,DWORD নির্দেশক [rdi+0x10]{1to16}
+        vpxord zmm13,zmm13,DWORD নির্দেশক [rdi+0x14]{1to16}
+        vpxord zmm14,zmm14,DWORD নির্দেশক [rdi+0x18]{1to16}
+        vpxord zmm15,zmm15,DWORD নির্দেশক [rdi+0x1c]{1to16}
         vpunpckldq zmm16,zmm0,zmm1
         vpunpckhdq zmm17,zmm0,zmm1
         vpunpckldq zmm18,zmm2,zmm3
@@ -3575,29 +3575,29 @@ _blake3_xof_many_avx512:
         vshufi32x4 zmm13,zmm21,zmm29,0xdd
         vshufi32x4 zmm14,zmm22,zmm30,0xdd
         vshufi32x4 zmm15,zmm23,zmm31,0xdd
-        vmovdqu32 ZMMWORD PTR [r9],zmm0
-        vmovdqu32 ZMMWORD PTR [r9+0x40],zmm1
-        vmovdqu32 ZMMWORD PTR [r9+0x80],zmm2
-        vmovdqu32 ZMMWORD PTR [r9+0xc0],zmm3
-        vmovdqu32 ZMMWORD PTR [r9+0x100],zmm4
-        vmovdqu32 ZMMWORD PTR [r9+0x140],zmm5
-        vmovdqu32 ZMMWORD PTR [r9+0x180],zmm6
-        vmovdqu32 ZMMWORD PTR [r9+0x1c0],zmm7
-        vmovdqu32 ZMMWORD PTR [r9+0x200],zmm8
-        vmovdqu32 ZMMWORD PTR [r9+0x240],zmm9
-        vmovdqu32 ZMMWORD PTR [r9+0x280],zmm10
-        vmovdqu32 ZMMWORD PTR [r9+0x2c0],zmm11
-        vmovdqu32 ZMMWORD PTR [r9+0x300],zmm12
-        vmovdqu32 ZMMWORD PTR [r9+0x340],zmm13
-        vmovdqu32 ZMMWORD PTR [r9+0x380],zmm14
-        vmovdqu32 ZMMWORD PTR [r9+0x3c0],zmm15
-        vmovdqa32 zmm0,ZMMWORD PTR [rsp]
-        vmovdqa32 zmm1,ZMMWORD PTR [rsp+0x40]
-        vpaddd zmm2,zmm0,DWORD PTR [ADD16+rip]{1to16}
+        vmovdqu32 ZMMWORD নির্দেশক [r9],zmm0
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x40],zmm1
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x80],zmm2
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0xc0],zmm3
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x100],zmm4
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x140],zmm5
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x180],zmm6
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x1c0],zmm7
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x200],zmm8
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x240],zmm9
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x280],zmm10
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x2c0],zmm11
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x300],zmm12
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x340],zmm13
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x380],zmm14
+        vmovdqu32 ZMMWORD নির্দেশক [r9+0x3c0],zmm15
+        vmovdqa32 zmm0,ZMMWORD নির্দেশক [rsp]
+        vmovdqa32 zmm1,ZMMWORD নির্দেশক [rsp+0x40]
+        vpaddd zmm2,zmm0,DWORD নির্দেশক [ADD16+rip]{1to16}
         vpcmpltud k1,zmm2,zmm0
-        vpaddd zmm1{k1},zmm1,DWORD PTR [ADD1+rip]{1to16}
-        vmovdqa32 ZMMWORD PTR [rsp],zmm2
-        vmovdqa32 ZMMWORD PTR [rsp+0x40],zmm1
+        vpaddd zmm1{k1},zmm1,DWORD নির্দেশক [ADD1+rip]{1to16}
+        vmovdqa32 ZMMWORD নির্দেশক [rsp],zmm2
+        vmovdqa32 ZMMWORD নির্দেশক [rsp+0x40],zmm1
         add    r9,0x400
         sub    r10,0x10
         cmp    r10,0x10
@@ -3612,36 +3612,36 @@ _blake3_xof_many_avx512:
 2:
         test   r10,0x8
         je     2f
-        vpbroadcastd ymm16,DWORD PTR [rsi]
-        vpbroadcastd ymm17,DWORD PTR [rsi+0x4]
-        vpbroadcastd ymm18,DWORD PTR [rsi+0x8]
-        vpbroadcastd ymm19,DWORD PTR [rsi+0xc]
-        vpbroadcastd ymm20,DWORD PTR [rsi+0x10]
-        vpbroadcastd ymm21,DWORD PTR [rsi+0x14]
-        vpbroadcastd ymm22,DWORD PTR [rsi+0x18]
-        vpbroadcastd ymm23,DWORD PTR [rsi+0x1c]
-        vpbroadcastd ymm24,DWORD PTR [rsi+0x20]
-        vpbroadcastd ymm25,DWORD PTR [rsi+0x24]
-        vpbroadcastd ymm26,DWORD PTR [rsi+0x28]
-        vpbroadcastd ymm27,DWORD PTR [rsi+0x2c]
-        vpbroadcastd ymm28,DWORD PTR [rsi+0x30]
-        vpbroadcastd ymm29,DWORD PTR [rsi+0x34]
-        vpbroadcastd ymm30,DWORD PTR [rsi+0x38]
-        vpbroadcastd ymm31,DWORD PTR [rsi+0x3c]
-        vpbroadcastd ymm0,DWORD PTR [rdi]
-        vpbroadcastd ymm1,DWORD PTR [rdi+0x4]
-        vpbroadcastd ymm2,DWORD PTR [rdi+0x8]
-        vpbroadcastd ymm3,DWORD PTR [rdi+0xc]
-        vpbroadcastd ymm4,DWORD PTR [rdi+0x10]
-        vpbroadcastd ymm5,DWORD PTR [rdi+0x14]
-        vpbroadcastd ymm6,DWORD PTR [rdi+0x18]
-        vpbroadcastd ymm7,DWORD PTR [rdi+0x1c]
-        vpbroadcastd ymm8,DWORD PTR [BLAKE3_IV_0+rip]
-        vpbroadcastd ymm9,DWORD PTR [BLAKE3_IV_1+rip]
-        vpbroadcastd ymm10,DWORD PTR [BLAKE3_IV_2+rip]
-        vpbroadcastd ymm11,DWORD PTR [BLAKE3_IV_3+rip]
-        vmovdqa ymm12,YMMWORD PTR [rsp]
-        vmovdqa ymm13,YMMWORD PTR [rsp+0x40]
+        vpbroadcastd ymm16,DWORD নির্দেশক [rsi]
+        vpbroadcastd ymm17,DWORD নির্দেশক [rsi+0x4]
+        vpbroadcastd ymm18,DWORD নির্দেশক [rsi+0x8]
+        vpbroadcastd ymm19,DWORD নির্দেশক [rsi+0xc]
+        vpbroadcastd ymm20,DWORD নির্দেশক [rsi+0x10]
+        vpbroadcastd ymm21,DWORD নির্দেশক [rsi+0x14]
+        vpbroadcastd ymm22,DWORD নির্দেশক [rsi+0x18]
+        vpbroadcastd ymm23,DWORD নির্দেশক [rsi+0x1c]
+        vpbroadcastd ymm24,DWORD নির্দেশক [rsi+0x20]
+        vpbroadcastd ymm25,DWORD নির্দেশক [rsi+0x24]
+        vpbroadcastd ymm26,DWORD নির্দেশক [rsi+0x28]
+        vpbroadcastd ymm27,DWORD নির্দেশক [rsi+0x2c]
+        vpbroadcastd ymm28,DWORD নির্দেশক [rsi+0x30]
+        vpbroadcastd ymm29,DWORD নির্দেশক [rsi+0x34]
+        vpbroadcastd ymm30,DWORD নির্দেশক [rsi+0x38]
+        vpbroadcastd ymm31,DWORD নির্দেশক [rsi+0x3c]
+        vpbroadcastd ymm0,DWORD নির্দেশক [rdi]
+        vpbroadcastd ymm1,DWORD নির্দেশক [rdi+0x4]
+        vpbroadcastd ymm2,DWORD নির্দেশক [rdi+0x8]
+        vpbroadcastd ymm3,DWORD নির্দেশক [rdi+0xc]
+        vpbroadcastd ymm4,DWORD নির্দেশক [rdi+0x10]
+        vpbroadcastd ymm5,DWORD নির্দেশক [rdi+0x14]
+        vpbroadcastd ymm6,DWORD নির্দেশক [rdi+0x18]
+        vpbroadcastd ymm7,DWORD নির্দেশক [rdi+0x1c]
+        vpbroadcastd ymm8,DWORD নির্দেশক [BLAKE3_IV_0+rip]
+        vpbroadcastd ymm9,DWORD নির্দেশক [BLAKE3_IV_1+rip]
+        vpbroadcastd ymm10,DWORD নির্দেশক [BLAKE3_IV_2+rip]
+        vpbroadcastd ymm11,DWORD নির্দেশক [BLAKE3_IV_3+rip]
+        vmovdqa ymm12,YMMWORD নির্দেশক [rsp]
+        vmovdqa ymm13,YMMWORD নির্দেশক [rsp+0x40]
         vpbroadcastd ymm14,edx
         vpbroadcastd ymm15,r8d
         vpaddd ymm0,ymm0,ymm16
@@ -4436,14 +4436,14 @@ _blake3_xof_many_avx512:
         vpxor  ymm5,ymm5,ymm13
         vpxor  ymm6,ymm6,ymm14
         vpxor  ymm7,ymm7,ymm15
-        vpxord ymm8,ymm8,DWORD PTR [rdi]{1to8}
-        vpxord ymm9,ymm9,DWORD PTR [rdi+0x4]{1to8}
-        vpxord ymm10,ymm10,DWORD PTR [rdi+0x8]{1to8}
-        vpxord ymm11,ymm11,DWORD PTR [rdi+0xc]{1to8}
-        vpxord ymm12,ymm12,DWORD PTR [rdi+0x10]{1to8}
-        vpxord ymm13,ymm13,DWORD PTR [rdi+0x14]{1to8}
-        vpxord ymm14,ymm14,DWORD PTR [rdi+0x18]{1to8}
-        vpxord ymm15,ymm15,DWORD PTR [rdi+0x1c]{1to8}
+        vpxord ymm8,ymm8,DWORD নির্দেশক [rdi]{1to8}
+        vpxord ymm9,ymm9,DWORD নির্দেশক [rdi+0x4]{1to8}
+        vpxord ymm10,ymm10,DWORD নির্দেশক [rdi+0x8]{1to8}
+        vpxord ymm11,ymm11,DWORD নির্দেশক [rdi+0xc]{1to8}
+        vpxord ymm12,ymm12,DWORD নির্দেশক [rdi+0x10]{1to8}
+        vpxord ymm13,ymm13,DWORD নির্দেশক [rdi+0x14]{1to8}
+        vpxord ymm14,ymm14,DWORD নির্দেশক [rdi+0x18]{1to8}
+        vpxord ymm15,ymm15,DWORD নির্দেশক [rdi+0x1c]{1to8}
         vpunpckldq ymm16,ymm0,ymm1
         vpunpckhdq ymm17,ymm0,ymm1
         vpunpckldq ymm18,ymm2,ymm3
@@ -4492,36 +4492,36 @@ _blake3_xof_many_avx512:
         vshufi32x4 ymm29,ymm10,ymm14,0x3
         vshufi32x4 ymm30,ymm3,ymm7,0x3
         vshufi32x4 ymm31,ymm11,ymm15,0x3
-        vmovdqu32 YMMWORD PTR [r9],ymm16
-        vmovdqu32 YMMWORD PTR [r9+0x20],ymm17
-        vmovdqu32 YMMWORD PTR [r9+0x40],ymm18
-        vmovdqu32 YMMWORD PTR [r9+0x60],ymm19
-        vmovdqu32 YMMWORD PTR [r9+0x80],ymm20
-        vmovdqu32 YMMWORD PTR [r9+0xa0],ymm21
-        vmovdqu32 YMMWORD PTR [r9+0xc0],ymm22
-        vmovdqu32 YMMWORD PTR [r9+0xe0],ymm23
-        vmovdqu32 YMMWORD PTR [r9+0x100],ymm24
-        vmovdqu32 YMMWORD PTR [r9+0x120],ymm25
-        vmovdqu32 YMMWORD PTR [r9+0x140],ymm26
-        vmovdqu32 YMMWORD PTR [r9+0x160],ymm27
-        vmovdqu32 YMMWORD PTR [r9+0x180],ymm28
-        vmovdqu32 YMMWORD PTR [r9+0x1a0],ymm29
-        vmovdqu32 YMMWORD PTR [r9+0x1c0],ymm30
-        vmovdqu32 YMMWORD PTR [r9+0x1e0],ymm31
-        vmovdqa ymm0,YMMWORD PTR [rsp+0x20]
-        vmovdqa ymm1,YMMWORD PTR [rsp+0x60]
-        vmovdqa YMMWORD PTR [rsp],ymm0
-        vmovdqa YMMWORD PTR [rsp+0x40],ymm1
+        vmovdqu32 YMMWORD নির্দেশক [r9],ymm16
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x20],ymm17
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x40],ymm18
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x60],ymm19
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x80],ymm20
+        vmovdqu32 YMMWORD নির্দেশক [r9+0xa0],ymm21
+        vmovdqu32 YMMWORD নির্দেশক [r9+0xc0],ymm22
+        vmovdqu32 YMMWORD নির্দেশক [r9+0xe0],ymm23
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x100],ymm24
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x120],ymm25
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x140],ymm26
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x160],ymm27
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x180],ymm28
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x1a0],ymm29
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x1c0],ymm30
+        vmovdqu32 YMMWORD নির্দেশক [r9+0x1e0],ymm31
+        vmovdqa ymm0,YMMWORD নির্দেশক [rsp+0x20]
+        vmovdqa ymm1,YMMWORD নির্দেশক [rsp+0x60]
+        vmovdqa YMMWORD নির্দেশক [rsp],ymm0
+        vmovdqa YMMWORD নির্দেশক [rsp+0x40],ymm1
         add    r9,0x200
         sub    r10,0x8
 2:
         test   r10,0x4
         je     2f
-        vbroadcasti32x4 zmm0,XMMWORD PTR [rdi]
-        vbroadcasti32x4 zmm1,XMMWORD PTR [rdi+0x10]
-        vbroadcasti32x4 zmm2,XMMWORD PTR [BLAKE3_IV+rip]
-        vmovdqa xmm12,XMMWORD PTR [rsp]
-        vmovdqa xmm13,XMMWORD PTR [rsp+0x40]
+        vbroadcasti32x4 zmm0,XMMWORD নির্দেশক [rdi]
+        vbroadcasti32x4 zmm1,XMMWORD নির্দেশক [rdi+0x10]
+        vbroadcasti32x4 zmm2,XMMWORD নির্দেশক [BLAKE3_IV+rip]
+        vmovdqa xmm12,XMMWORD নির্দেশক [rsp]
+        vmovdqa xmm13,XMMWORD নির্দেশক [rsp+0x40]
         vpunpckldq xmm14,xmm12,xmm13
         vpunpckhdq xmm15,xmm12,xmm13
         vpermq ymm14,ymm14,0xdc
@@ -4537,12 +4537,12 @@ _blake3_xof_many_avx512:
         vpblendmd zmm3{k4},zmm13,zmm15
         mov    eax,0xaaaa
         kmovw  k3,eax
-        vbroadcasti32x4 zmm8,XMMWORD PTR [rsi]
-        vbroadcasti32x4 zmm9,XMMWORD PTR [rsi+0x10]
+        vbroadcasti32x4 zmm8,XMMWORD নির্দেশক [rsi]
+        vbroadcasti32x4 zmm9,XMMWORD নির্দেশক [rsi+0x10]
         vshufps zmm4,zmm8,zmm9,0x88
         vshufps zmm5,zmm8,zmm9,0xdd
-        vbroadcasti32x4 zmm8,XMMWORD PTR [rsi+0x20]
-        vbroadcasti32x4 zmm9,XMMWORD PTR [rsi+0x30]
+        vbroadcasti32x4 zmm8,XMMWORD নির্দেশক [rsi+0x20]
+        vbroadcasti32x4 zmm9,XMMWORD নির্দেশক [rsi+0x30]
         vshufps zmm6,zmm8,zmm9,0x88
         vshufps zmm7,zmm8,zmm9,0xdd
         vpshufd zmm6,zmm6,0x93
@@ -4602,53 +4602,53 @@ _blake3_xof_many_avx512:
 3:
         vpxord zmm0,zmm0,zmm2
         vpxord zmm1,zmm1,zmm3
-        vbroadcasti32x4 zmm8,XMMWORD PTR [rdi]
-        vbroadcasti32x4 zmm9,XMMWORD PTR [rdi+0x10]
+        vbroadcasti32x4 zmm8,XMMWORD নির্দেশক [rdi]
+        vbroadcasti32x4 zmm9,XMMWORD নির্দেশক [rdi+0x10]
         vpxord zmm2,zmm2,zmm8
         vpxord zmm3,zmm3,zmm9
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
-        vextracti128 XMMWORD PTR [r9+0x40],ymm0,0x1
-        vextracti128 XMMWORD PTR [r9+0x50],ymm1,0x1
-        vextracti128 XMMWORD PTR [r9+0x60],ymm2,0x1
-        vextracti128 XMMWORD PTR [r9+0x70],ymm3,0x1
-        vextracti32x4 XMMWORD PTR [r9+0x80],zmm0,0x2
-        vextracti32x4 XMMWORD PTR [r9+0x90],zmm1,0x2
-        vextracti32x4 XMMWORD PTR [r9+0xa0],zmm2,0x2
-        vextracti32x4 XMMWORD PTR [r9+0xb0],zmm3,0x2
-        vextracti32x4 XMMWORD PTR [r9+0xc0],zmm0,0x3
-        vextracti32x4 XMMWORD PTR [r9+0xd0],zmm1,0x3
-        vextracti32x4 XMMWORD PTR [r9+0xe0],zmm2,0x3
-        vextracti32x4 XMMWORD PTR [r9+0xf0],zmm3,0x3
-        vmovdqa xmm0,XMMWORD PTR [rsp+0x10]
-        vmovdqa xmm1,XMMWORD PTR [rsp+0x50]
-        vmovdqa XMMWORD PTR [rsp],xmm0
-        vmovdqa XMMWORD PTR [rsp+0x40],xmm1
+        vmovdqu XMMWORD নির্দেশক [r9],xmm0
+        vmovdqu XMMWORD নির্দেশক [r9+0x10],xmm1
+        vmovdqu XMMWORD নির্দেশক [r9+0x20],xmm2
+        vmovdqu XMMWORD নির্দেশক [r9+0x30],xmm3
+        vextracti128 XMMWORD নির্দেশক [r9+0x40],ymm0,0x1
+        vextracti128 XMMWORD নির্দেশক [r9+0x50],ymm1,0x1
+        vextracti128 XMMWORD নির্দেশক [r9+0x60],ymm2,0x1
+        vextracti128 XMMWORD নির্দেশক [r9+0x70],ymm3,0x1
+        vextracti32x4 XMMWORD নির্দেশক [r9+0x80],zmm0,0x2
+        vextracti32x4 XMMWORD নির্দেশক [r9+0x90],zmm1,0x2
+        vextracti32x4 XMMWORD নির্দেশক [r9+0xa0],zmm2,0x2
+        vextracti32x4 XMMWORD নির্দেশক [r9+0xb0],zmm3,0x2
+        vextracti32x4 XMMWORD নির্দেশক [r9+0xc0],zmm0,0x3
+        vextracti32x4 XMMWORD নির্দেশক [r9+0xd0],zmm1,0x3
+        vextracti32x4 XMMWORD নির্দেশক [r9+0xe0],zmm2,0x3
+        vextracti32x4 XMMWORD নির্দেশক [r9+0xf0],zmm3,0x3
+        vmovdqa xmm0,XMMWORD নির্দেশক [rsp+0x10]
+        vmovdqa xmm1,XMMWORD নির্দেশক [rsp+0x50]
+        vmovdqa XMMWORD নির্দেশক [rsp],xmm0
+        vmovdqa XMMWORD নির্দেশক [rsp+0x40],xmm1
         add    r9,0x100
         sub    r10,0x4
 2:
         test   r10,0x2
         je     2f
-        vbroadcasti128 ymm0,XMMWORD PTR [rdi]
-        vbroadcasti128 ymm1,XMMWORD PTR [rdi+0x10]
-        vmovd  xmm13,DWORD PTR [rsp]
-        vpinsrd xmm13,xmm13,DWORD PTR [rsp+0x40],0x1
+        vbroadcasti128 ymm0,XMMWORD নির্দেশক [rdi]
+        vbroadcasti128 ymm1,XMMWORD নির্দেশক [rdi+0x10]
+        vmovd  xmm13,DWORD নির্দেশক [rsp]
+        vpinsrd xmm13,xmm13,DWORD নির্দেশক [rsp+0x40],0x1
         vpinsrd xmm13,xmm13,edx,0x2
-        vmovd  xmm14,DWORD PTR [rsp+0x4]
-        vpinsrd xmm14,xmm14,DWORD PTR [rsp+0x44],0x1
+        vmovd  xmm14,DWORD নির্দেশক [rsp+0x4]
+        vpinsrd xmm14,xmm14,DWORD নির্দেশক [rsp+0x44],0x1
         vpinsrd xmm14,xmm14,edx,0x2
         vinserti128 ymm13,ymm13,xmm14,0x1
-        vbroadcasti128 ymm2,XMMWORD PTR [BLAKE3_IV+rip]
+        vbroadcasti128 ymm2,XMMWORD নির্দেশক [BLAKE3_IV+rip]
         vpbroadcastd ymm8,r8d
         vpblendd ymm3,ymm13,ymm8,0x88
-        vbroadcasti128 ymm8,XMMWORD PTR [rsi]
-        vbroadcasti128 ymm9,XMMWORD PTR [rsi+0x10]
+        vbroadcasti128 ymm8,XMMWORD নির্দেশক [rsi]
+        vbroadcasti128 ymm9,XMMWORD নির্দেশক [rsi+0x10]
         vshufps ymm4,ymm8,ymm9,0x88
         vshufps ymm5,ymm8,ymm9,0xdd
-        vbroadcasti128 ymm8,XMMWORD PTR [rsi+0x20]
-        vbroadcasti128 ymm9,XMMWORD PTR [rsi+0x30]
+        vbroadcasti128 ymm8,XMMWORD নির্দেশক [rsi+0x20]
+        vbroadcasti128 ymm9,XMMWORD নির্দেশক [rsi+0x30]
         vshufps ymm6,ymm8,ymm9,0x88
         vshufps ymm7,ymm8,ymm9,0xdd
         vpshufd ymm6,ymm6,0x93
@@ -4708,40 +4708,40 @@ _blake3_xof_many_avx512:
 3:
         vpxor  ymm0,ymm0,ymm2
         vpxor  ymm1,ymm1,ymm3
-        vbroadcasti128 ymm8,XMMWORD PTR [rdi]
-        vbroadcasti128 ymm9,XMMWORD PTR [rdi+0x10]
+        vbroadcasti128 ymm8,XMMWORD নির্দেশক [rdi]
+        vbroadcasti128 ymm9,XMMWORD নির্দেশক [rdi+0x10]
         vpxor  ymm2,ymm2,ymm8
         vpxor  ymm3,ymm3,ymm9
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
-        vextracti128 XMMWORD PTR [r9+0x40],ymm0,0x1
-        vextracti128 XMMWORD PTR [r9+0x50],ymm1,0x1
-        vextracti128 XMMWORD PTR [r9+0x60],ymm2,0x1
-        vextracti128 XMMWORD PTR [r9+0x70],ymm3,0x1
-        vmovdqu xmm0,XMMWORD PTR [rsp+0x8]
-        vmovdqu xmm1,XMMWORD PTR [rsp+0x48]
-        vmovdqa XMMWORD PTR [rsp],xmm0
-        vmovdqa XMMWORD PTR [rsp+0x40],xmm1
+        vmovdqu XMMWORD নির্দেশক [r9],xmm0
+        vmovdqu XMMWORD নির্দেশক [r9+0x10],xmm1
+        vmovdqu XMMWORD নির্দেশক [r9+0x20],xmm2
+        vmovdqu XMMWORD নির্দেশক [r9+0x30],xmm3
+        vextracti128 XMMWORD নির্দেশক [r9+0x40],ymm0,0x1
+        vextracti128 XMMWORD নির্দেশক [r9+0x50],ymm1,0x1
+        vextracti128 XMMWORD নির্দেশক [r9+0x60],ymm2,0x1
+        vextracti128 XMMWORD নির্দেশক [r9+0x70],ymm3,0x1
+        vmovdqu xmm0,XMMWORD নির্দেশক [rsp+0x8]
+        vmovdqu xmm1,XMMWORD নির্দেশক [rsp+0x48]
+        vmovdqa XMMWORD নির্দেশক [rsp],xmm0
+        vmovdqa XMMWORD নির্দেশক [rsp+0x40],xmm1
         add    r9,0x80
         sub    r10,0x2
 2:
         test   r10,0x1
         je     9b
-        vmovdqu xmm0,XMMWORD PTR [rdi]
-        vmovdqu xmm1,XMMWORD PTR [rdi+0x10]
-        vmovd  xmm14,DWORD PTR [rsp]
-        vpinsrd xmm14,xmm14,DWORD PTR [rsp+0x40],0x1
+        vmovdqu xmm0,XMMWORD নির্দেশক [rdi]
+        vmovdqu xmm1,XMMWORD নির্দেশক [rdi+0x10]
+        vmovd  xmm14,DWORD নির্দেশক [rsp]
+        vpinsrd xmm14,xmm14,DWORD নির্দেশক [rsp+0x40],0x1
         vpinsrd xmm14,xmm14,edx,0x2
-        vmovdqa xmm2,XMMWORD PTR [BLAKE3_IV+rip]
+        vmovdqa xmm2,XMMWORD নির্দেশক [BLAKE3_IV+rip]
         vpinsrd xmm3,xmm14,r8d,0x3
-        vmovups xmm8,XMMWORD PTR [rsi]
-        vmovups xmm9,XMMWORD PTR [rsi+0x10]
+        vmovups xmm8,XMMWORD নির্দেশক [rsi]
+        vmovups xmm9,XMMWORD নির্দেশক [rsi+0x10]
         vshufps xmm4,xmm8,xmm9,0x88
         vshufps xmm5,xmm8,xmm9,0xdd
-        vmovups xmm8,XMMWORD PTR [rsi+0x20]
-        vmovups xmm9,XMMWORD PTR [rsi+0x30]
+        vmovups xmm8,XMMWORD নির্দেশক [rsi+0x20]
+        vmovups xmm9,XMMWORD নির্দেশক [rsi+0x30]
         vshufps xmm6,xmm8,xmm9,0x88
         vshufps xmm7,xmm8,xmm9,0xdd
         vpshufd xmm6,xmm6,0x93
@@ -4801,12 +4801,12 @@ _blake3_xof_many_avx512:
 3:
         vpxor  xmm0,xmm0,xmm2
         vpxor  xmm1,xmm1,xmm3
-        vpxor  xmm2,xmm2,XMMWORD PTR [rdi]
-        vpxor  xmm3,xmm3,XMMWORD PTR [rdi+0x10]
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
+        vpxor  xmm2,xmm2,XMMWORD নির্দেশক [rdi]
+        vpxor  xmm3,xmm3,XMMWORD নির্দেশক [rdi+0x10]
+        vmovdqu XMMWORD নির্দেশক [r9],xmm0
+        vmovdqu XMMWORD নির্দেশক [r9+0x10],xmm1
+        vmovdqu XMMWORD নির্দেশক [r9+0x20],xmm2
+        vmovdqu XMMWORD নির্দেশক [r9+0x30],xmm3
         jmp    9b
 
 

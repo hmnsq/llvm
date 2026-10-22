@@ -38,8 +38,8 @@
 #ifndef LLVM_SUPPORT_REGEX2_H
 #define LLVM_SUPPORT_REGEX2_H
 
-#include "regutils.h"
-#include <stddef.h>
+#অন্তর্ভাৱ "regutils.h"
+#অন্তর্ভাৱ <stddef.h>
 
 /*
  * internals of regex_t
@@ -65,8 +65,8 @@
  * In state representations, an operator's bit is on to signify a state
  * immediately *preceding* "execution" of that operator.
  */
-typedef unsigned long sop;	/* strip operator */
-typedef long sopno;
+প্রকারনির্দেশ unsigned long sop;	/* strip operator */
+প্রকারনির্দেশ long sopno;
 #define	OPRMASK	0xf8000000LU
 #define	OPDMASK	0x07ffffffLU
 #define	OPSHIFT	((unsigned)27)
@@ -108,12 +108,12 @@ typedef long sopno;
  * a string of multi-character elements, and decide the size of the
  * vectors at run time.
  */
-typedef struct {
+প্রকারনির্দেশ সংরচনা {
 	uch *ptr;		/* -> uch [csetsize] */
 	uch mask;		/* bit within array */
 	uch hash;		/* hash code */
 	size_t smultis;
-	char *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
+	ৱর্ণ *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
 } cset;
 /* note that CHadd and CHsub are unsafe, and CHIN doesn't yield 0/1 */
 #define	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->mask, (cs)->hash += (c))
@@ -124,35 +124,35 @@ typedef struct {
 #define	MCin(p, cs, cp)	mcin(p, cs, cp)
 
 /* stuff for character categories */
-typedef unsigned char cat_t;
+প্রকারনির্দেশ unsigned ৱর্ণ cat_t;
 
 /*
  * main compiled-expression structure
  */
-struct re_guts {
-	int magic;
+সংরচনা re_guts {
+	পূর্ণাঙ্ক magic;
 #		define	MAGIC2	((('R'^0200)<<8)|'E')
 	sop *strip;		/* malloced area for strip */
-	int csetsize;		/* number of bits in a cset vector */
-	int ncsets;		/* number of csets in use */
+	পূর্ণাঙ্ক csetsize;		/* number of bits in a cset vector */
+	পূর্ণাঙ্ক ncsets;		/* number of csets in use */
 	cset *sets;		/* -> cset [ncsets] */
 	uch *setbits;		/* -> uch[csetsize][ncsets/CHAR_BIT] */
-	int cflags;		/* copy of llvm_regcomp() cflags argument */
+	পূর্ণাঙ্ক cflags;		/* copy of llvm_regcomp() cflags argument */
 	sopno nstates;		/* = number of sops */
 	sopno firststate;	/* the initial OEND (normally 0) */
 	sopno laststate;	/* the final OEND */
-	int iflags;		/* internal flags */
+	পূর্ণাঙ্ক iflags;		/* internal flags */
 #		define	USEBOL	01	/* used ^ */
 #		define	USEEOL	02	/* used $ */
 #		define	REGEX_BAD	04	/* something wrong */
-	int nbol;		/* number of ^ used */
-	int neol;		/* number of $ used */
-	int ncategories;	/* how many character categories */
+	পূর্ণাঙ্ক nbol;		/* number of ^ used */
+	পূর্ণাঙ্ক neol;		/* number of $ used */
+	পূর্ণাঙ্ক ncategories;	/* how many character categories */
 	cat_t *categories;	/* ->catspace[-CHAR_MIN] */
-	char *must;		/* match must contain this string */
-	int mlen;		/* length of must */
+	ৱর্ণ *must;		/* match must contain this string */
+	পূর্ণাঙ্ক mlen;		/* length of must */
 	size_t nsub;		/* copy of re_nsub */
-	int backrefs;		/* does it use back references? */
+	পূর্ণাঙ্ক backrefs;		/* does it use back references? */
 	sopno nplus;		/* how deep does it nest +s? */
 	/* catspace must be last */
 	cat_t catspace[1];	/* actually [NC] */

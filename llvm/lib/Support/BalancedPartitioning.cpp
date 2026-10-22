@@ -11,327 +11,327 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BalancedPartitioning.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/ThreadPool.h"
+#অন্তর্ভাৱ "llvm/Support/BalancedPartitioning.h"
+#অন্তর্ভাৱ "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#অন্তর্ভাৱ "llvm/Support/Debug.h"
+#অন্তর্ভাৱ "llvm/Support/Format.h"
+#অন্তর্ভাৱ "llvm/Support/FormatVariadic.h"
+#অন্তর্ভাৱ "llvm/Support/ThreadPool.h"
 
-#include <cmath>
+#অন্তর্ভাৱ <cmath>
 
-using namespace llvm;
+using নামাকাশ llvm;
 #define DEBUG_TYPE "balanced-partitioning"
 
-void BPFunctionNode::dump(raw_ostream &OS) const {
+শূন্য BPFunction_গ্ৰন্থি::dump(raw_ostream &OS) ধ্রুৱ {
   OS << formatv("{{ID={0} Utilities={{{1:$[,]}} Bucket={2}}", Id,
                 make_range(UtilityNodes.begin(), UtilityNodes.end()), Bucket);
 }
 
 template <typename Func>
-void BalancedPartitioning::BPThreadPool::async(Func &&F) {
-#if LLVM_ENABLE_THREADS
+শূন্য BalancedPartitioning::BPThreadPool::async(Func &&F) {
+#যদি LLVM_ENABLE_THREADS
   // This new thread could spawn more threads, so mark it as active
-  ++NumActiveThreads;
-  TheThreadPool.async([this, F]() {
+  ++অঙ্ক_Active_Threads;
+  TheThreadPool.async([এতত্, F]() {
     // Run the task
     F();
 
     // This thread will no longer spawn new threads, so mark it as inactive
-    if (--NumActiveThreads == 0) {
+    যদি (--অঙ্ক_Active_Threads == 0) {
       // There are no more active threads, so mark as finished and notify
       {
         std::unique_lock<std::mutex> lock(mtx);
-        assert(!IsFinishedSpawning);
-        IsFinishedSpawning = true;
+        প্রতিজ্ঞা(!IsFinishedSpawning);
+        IsFinishedSpawning = সঁচা;
       }
       cv.notify_one();
     }
   });
-#else
+#অন্যথা
   llvm_unreachable("threads are disabled");
 #endif
 }
 
-void BalancedPartitioning::BPThreadPool::wait() {
-#if LLVM_ENABLE_THREADS
+শূন্য BalancedPartitioning::BPThreadPool::wait() {
+#যদি LLVM_ENABLE_THREADS
   // TODO: We could remove the mutex and condition variable and use
   // std::atomic::wait() instead, but that isn't available until C++20
   {
     std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [&]() { return IsFinishedSpawning; });
-    assert(IsFinishedSpawning && NumActiveThreads == 0);
+    cv.wait(lock, [&]() { ঘূৰাই IsFinishedSpawning; });
+    প্রতিজ্ঞা(IsFinishedSpawning && অঙ্ক_Active_Threads == 0);
   }
   // Now we can call ThreadPool::wait() since all tasks have been submitted
   TheThreadPool.wait();
-#else
+#অন্যথা
   llvm_unreachable("threads are disabled");
 #endif
 }
 
 BalancedPartitioning::BalancedPartitioning(
-    const BalancedPartitioningConfig &Config)
+    ধ্রুৱ BalancedPartitioningConfig &Config)
     : Config(Config) {
   // Pre-computing log2 values
   Log2Cache[0] = 0.0;
-  for (unsigned I = 1; I < LOG_CACHE_SIZE; I++)
+  বাবে (unsigned I = 1; I < LOG_CACHE_SIZE; I++)
     Log2Cache[I] = std::log2(I);
 }
 
-void BalancedPartitioning::run(std::vector<BPFunctionNode> &Nodes) const {
+শূন্য BalancedPartitioning::run(std::vector<BPFunction_গ্ৰন্থি> &Nodes) ধ্রুৱ {
   LLVM_DEBUG(
       dbgs() << format(
           "Partitioning %d nodes using depth %d and %d iterations per split\n",
           Nodes.size(), Config.SplitDepth, Config.IterationsPerSplit));
   std::optional<BPThreadPool> TP;
-#if LLVM_ENABLE_THREADS
+#যদি LLVM_ENABLE_THREADS
   DefaultThreadPool TheThreadPool;
-  if (Config.TaskSplitDepth > 1)
+  যদি (Config.TaskSplitDepth > 1)
     TP.emplace(TheThreadPool);
 #endif
 
   // Record the input order
-  for (unsigned I = 0; I < Nodes.size(); I++)
-    Nodes[I].InputOrderIndex = I;
+  বাবে (unsigned I = 0; I < Nodes.size(); I++)
+    Nodes[I].প্ৰবেশ_Order_Index = I;
 
   auto NodesRange = llvm::make_range(Nodes.begin(), Nodes.end());
-  auto BisectTask = [this, NodesRange, &TP]() {
+  auto BisectTask = [এতত্, NodesRange, &TP]() {
     bisect(NodesRange, /*RecDepth=*/0, /*RootBucket=*/1, /*Offset=*/0, TP);
   };
-  if (TP) {
+  যদি (TP) {
     TP->async(std::move(BisectTask));
     TP->wait();
-  } else {
+  } অন্যথা {
     BisectTask();
   }
 
-  llvm::stable_sort(NodesRange, [](const auto &L, const auto &R) {
-    return L.Bucket < R.Bucket;
+  llvm::stable_sort(NodesRange, [](ধ্রুৱ auto &L, ধ্রুৱ auto &R) {
+    ঘূৰাই L.Bucket < R.Bucket;
   });
 
   LLVM_DEBUG(dbgs() << "Balanced partitioning completed\n");
 }
 
-void BalancedPartitioning::bisect(const FunctionNodeRange Nodes,
-                                  unsigned RecDepth, unsigned RootBucket,
+শূন্য BalancedPartitioning::bisect(ধ্রুৱ Function_গ্ৰন্থি_Range Nodes,
+                                  unsigned RecDepth, unsigned মূল_Bucket,
                                   unsigned Offset,
-                                  std::optional<BPThreadPool> &TP) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  if (NumNodes <= 1 || RecDepth >= Config.SplitDepth) {
+                                  std::optional<BPThreadPool> &TP) ধ্রুৱ {
+  unsigned অঙ্ক_Nodes = llvm::size(Nodes);
+  যদি (অঙ্ক_Nodes <= 1 || RecDepth >= Config.SplitDepth) {
     // We've reach the lowest level of the recursion tree. Fall back to the
     // original order and assign to buckets.
-    llvm::sort(Nodes, [](const auto &L, const auto &R) {
-      return L.InputOrderIndex < R.InputOrderIndex;
+    llvm::sort(Nodes, [](ধ্রুৱ auto &L, ধ্রুৱ auto &R) {
+      ঘূৰাই L.প্ৰবেশ_Order_Index < R.প্ৰবেশ_Order_Index;
     });
-    for (auto &N : Nodes)
+    বাবে (auto &N : Nodes)
       N.Bucket = Offset++;
-    return;
+    ঘূৰাই;
   }
 
   LLVM_DEBUG(dbgs() << format("Bisect with %d nodes and root bucket %d\n",
-                              NumNodes, RootBucket));
+                              অঙ্ক_Nodes, মূল_Bucket));
 
-  std::mt19937 RNG(RootBucket);
+  std::mt19937 RNG(মূল_Bucket);
 
-  unsigned LeftBucket = 2 * RootBucket;
-  unsigned RightBucket = 2 * RootBucket + 1;
+  unsigned বাম_Bucket = 2 * মূল_Bucket;
+  unsigned ডান_Bucket = 2 * মূল_Bucket + 1;
 
   // Split into two and assign to the left and right buckets
-  split(Nodes, LeftBucket);
+  split(Nodes, বাম_Bucket);
 
-  runIterations(Nodes, LeftBucket, RightBucket, RNG);
+  runIterations(Nodes, বাম_Bucket, ডান_Bucket, RNG);
 
   // Split nodes wrt the resulting buckets
   auto NodesMid =
-      llvm::partition(Nodes, [&](auto &N) { return N.Bucket == LeftBucket; });
+      llvm::partition(Nodes, [&](auto &N) { ঘূৰাই N.Bucket == বাম_Bucket; });
   unsigned MidOffset = Offset + std::distance(Nodes.begin(), NodesMid);
 
-  auto LeftNodes = llvm::make_range(Nodes.begin(), NodesMid);
-  auto RightNodes = llvm::make_range(NodesMid, Nodes.end());
+  auto বাম_Nodes = llvm::make_range(Nodes.begin(), NodesMid);
+  auto ডান_Nodes = llvm::make_range(NodesMid, Nodes.end());
 
-  auto LeftRecTask = [this, LeftNodes, RecDepth, LeftBucket, Offset, &TP]() {
-    bisect(LeftNodes, RecDepth + 1, LeftBucket, Offset, TP);
+  auto বাম_Rec_Task = [এতত্, বাম_Nodes, RecDepth, বাম_Bucket, Offset, &TP]() {
+    bisect(বাম_Nodes, RecDepth + 1, বাম_Bucket, Offset, TP);
   };
-  auto RightRecTask = [this, RightNodes, RecDepth, RightBucket, MidOffset,
+  auto ডান_Rec_Task = [এতত্, ডান_Nodes, RecDepth, ডান_Bucket, MidOffset,
                        &TP]() {
-    bisect(RightNodes, RecDepth + 1, RightBucket, MidOffset, TP);
+    bisect(ডান_Nodes, RecDepth + 1, ডান_Bucket, MidOffset, TP);
   };
 
-  if (TP && RecDepth < Config.TaskSplitDepth && NumNodes >= 4) {
-    TP->async(std::move(LeftRecTask));
-    TP->async(std::move(RightRecTask));
-  } else {
-    LeftRecTask();
-    RightRecTask();
+  যদি (TP && RecDepth < Config.TaskSplitDepth && অঙ্ক_Nodes >= 4) {
+    TP->async(std::move(বাম_Rec_Task));
+    TP->async(std::move(ডান_Rec_Task));
+  } অন্যথা {
+    বাম_Rec_Task();
+    ডান_Rec_Task();
   }
 }
 
-void BalancedPartitioning::runIterations(const FunctionNodeRange Nodes,
-                                         unsigned LeftBucket,
-                                         unsigned RightBucket,
-                                         std::mt19937 &RNG) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  DenseMap<BPFunctionNode::UtilityNodeT, unsigned> UtilityNodeIndex;
-  for (auto &N : Nodes)
-    for (auto &UN : N.UtilityNodes)
-      ++UtilityNodeIndex[UN];
+শূন্য BalancedPartitioning::runIterations(ধ্রুৱ Function_গ্ৰন্থি_Range Nodes,
+                                         unsigned বাম_Bucket,
+                                         unsigned ডান_Bucket,
+                                         std::mt19937 &RNG) ধ্রুৱ {
+  unsigned অঙ্ক_Nodes = llvm::size(Nodes);
+  DenseMap<BPFunction_গ্ৰন্থি::Utility_গ্ৰন্থি_T, unsigned> Utility_গ্ৰন্থি_Index;
+  বাবে (auto &N : Nodes)
+    বাবে (auto &UN : N.UtilityNodes)
+      ++Utility_গ্ৰন্থি_Index[UN];
   // Remove utility nodes if they have just one edge or are connected to all
   // functions
-  for (auto &N : Nodes)
+  বাবে (auto &N : Nodes)
     llvm::erase_if(N.UtilityNodes, [&](auto &UN) {
-      unsigned UNI = UtilityNodeIndex[UN];
-      return UNI == 1 || UNI == NumNodes;
+      unsigned UNI = Utility_গ্ৰন্থি_Index[UN];
+      ঘূৰাই UNI == 1 || UNI == অঙ্ক_Nodes;
     });
 
   // Renumber utility nodes so they can be used to index into Signatures
-  UtilityNodeIndex.clear();
-  for (auto &N : Nodes)
-    for (auto &UN : N.UtilityNodes)
-      UN = UtilityNodeIndex.insert({UN, UtilityNodeIndex.size()}).first->second;
+  Utility_গ্ৰন্থি_Index.clear();
+  বাবে (auto &N : Nodes)
+    বাবে (auto &UN : N.UtilityNodes)
+      UN = Utility_গ্ৰন্থি_Index.ঢোকাও({UN, Utility_গ্ৰন্থি_Index.size()}).first->second;
 
   // Initialize signatures
-  SignaturesT Signatures(/*Size=*/UtilityNodeIndex.size());
-  for (auto &N : Nodes) {
-    for (auto &UN : N.UtilityNodes) {
-      assert(UN < Signatures.size());
-      if (N.Bucket == LeftBucket) {
-        Signatures[UN].LeftCount++;
-      } else {
-        Signatures[UN].RightCount++;
+  SignaturesT Signatures(/*Size=*/Utility_গ্ৰন্থি_Index.size());
+  বাবে (auto &N : Nodes) {
+    বাবে (auto &UN : N.UtilityNodes) {
+      প্রতিজ্ঞা(UN < Signatures.size());
+      যদি (N.Bucket == বাম_Bucket) {
+        Signatures[UN].বাম_গুনতি++;
+      } অন্যথা {
+        Signatures[UN].ডান_গুনতি++;
       }
     }
   }
 
-  for (unsigned I = 0; I < Config.IterationsPerSplit; I++) {
-    unsigned NumMovedNodes =
-        runIteration(Nodes, LeftBucket, RightBucket, Signatures, RNG);
-    if (NumMovedNodes == 0)
-      break;
+  বাবে (unsigned I = 0; I < Config.IterationsPerSplit; I++) {
+    unsigned অঙ্ক_Moved_Nodes =
+        runIteration(Nodes, বাম_Bucket, ডান_Bucket, Signatures, RNG);
+    যদি (অঙ্ক_Moved_Nodes == 0)
+      ভঙ্গ;
   }
 }
 
-unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
-                                            unsigned LeftBucket,
-                                            unsigned RightBucket,
+unsigned BalancedPartitioning::runIteration(ধ্রুৱ Function_গ্ৰন্থি_Range Nodes,
+                                            unsigned বাম_Bucket,
+                                            unsigned ডান_Bucket,
                                             SignaturesT &Signatures,
-                                            std::mt19937 &RNG) const {
+                                            std::mt19937 &RNG) ধ্রুৱ {
   // Init signature cost caches
-  for (auto &Signature : Signatures) {
-    if (Signature.CachedGainIsValid)
-      continue;
-    unsigned L = Signature.LeftCount;
-    unsigned R = Signature.RightCount;
-    assert((L > 0 || R > 0) && "incorrect signature");
-    float Cost = logCost(L, R);
+  বাবে (auto &Signature : Signatures) {
+    যদি (Signature.CachedGainIsValid)
+      অনুৱর্ত;
+    unsigned L = Signature.বাম_গুনতি;
+    unsigned R = Signature.ডান_গুনতি;
+    প্রতিজ্ঞা((L > 0 || R > 0) && "incorrect signature");
+    ভিন্ন Cost = logCost(L, R);
     Signature.CachedGainLR = 0.f;
     Signature.CachedGainRL = 0.f;
-    if (L > 0)
+    যদি (L > 0)
       Signature.CachedGainLR = Cost - logCost(L - 1, R + 1);
-    if (R > 0)
+    যদি (R > 0)
       Signature.CachedGainRL = Cost - logCost(L + 1, R - 1);
-    Signature.CachedGainIsValid = true;
+    Signature.CachedGainIsValid = সঁচা;
   }
 
   // Compute move gains
-  using GainPair = std::pair<float, BPFunctionNode *>;
+  using GainPair = std::pair<ভিন্ন, BPFunction_গ্ৰন্থি *>;
   std::vector<GainPair> Gains;
-  for (auto &N : Nodes) {
-    bool FromLeftToRight = (N.Bucket == LeftBucket);
-    float Gain = moveGain(N, FromLeftToRight, Signatures);
-    Gains.push_back(std::make_pair(Gain, &N));
+  বাবে (auto &N : Nodes) {
+    তার্কিক From_বাম_To_ডান = (N.Bucket == বাম_Bucket);
+    ভিন্ন Gain = moveGain(N, From_বাম_To_ডান, Signatures);
+    Gains.ঠেলো_back(std::make_pair(Gain, &N));
   }
 
   // Collect left and right gains
-  auto LeftEnd = llvm::partition(
-      Gains, [&](const auto &GP) { return GP.second->Bucket == LeftBucket; });
-  auto LeftRange = llvm::make_range(Gains.begin(), LeftEnd);
-  auto RightRange = llvm::make_range(LeftEnd, Gains.end());
+  auto বাম_End = llvm::partition(
+      Gains, [&](ধ্রুৱ auto &GP) { ঘূৰাই GP.second->Bucket == বাম_Bucket; });
+  auto বাম_Range = llvm::make_range(Gains.begin(), বাম_End);
+  auto ডান_Range = llvm::make_range(বাম_End, Gains.end());
 
   // Sort gains in descending order
-  auto LargerGain = [](const auto &L, const auto &R) {
-    return L.first > R.first;
+  auto LargerGain = [](ধ্রুৱ auto &L, ধ্রুৱ auto &R) {
+    ঘূৰাই L.first > R.first;
   };
-  llvm::stable_sort(LeftRange, LargerGain);
-  llvm::stable_sort(RightRange, LargerGain);
+  llvm::stable_sort(বাম_Range, LargerGain);
+  llvm::stable_sort(ডান_Range, LargerGain);
 
-  unsigned NumMovedDataVertices = 0;
-  for (auto [LeftPair, RightPair] : llvm::zip(LeftRange, RightRange)) {
-    auto &[LeftGain, LeftNode] = LeftPair;
-    auto &[RightGain, RightNode] = RightPair;
+  unsigned অঙ্ক_Moved_Data_Vertices = 0;
+  বাবে (auto [বাম_Pair, ডান_Pair] : llvm::zip(বাম_Range, ডান_Range)) {
+    auto &[বাম_Gain, বাম_গ্ৰন্থি] = বাম_Pair;
+    auto &[ডান_Gain, ডান_গ্ৰন্থি] = ডান_Pair;
     // Stop when the gain is no longer beneficial
-    if (LeftGain + RightGain <= 0.f)
-      break;
+    যদি (বাম_Gain + ডান_Gain <= 0.f)
+      ভঙ্গ;
     // Try to exchange the nodes between buckets
-    if (moveFunctionNode(*LeftNode, LeftBucket, RightBucket, Signatures, RNG))
-      ++NumMovedDataVertices;
-    if (moveFunctionNode(*RightNode, LeftBucket, RightBucket, Signatures, RNG))
-      ++NumMovedDataVertices;
+    যদি (move_Function_গ্ৰন্থি(*বাম_গ্ৰন্থি, বাম_Bucket, ডান_Bucket, Signatures, RNG))
+      ++অঙ্ক_Moved_Data_Vertices;
+    যদি (move_Function_গ্ৰন্থি(*ডান_গ্ৰন্থি, বাম_Bucket, ডান_Bucket, Signatures, RNG))
+      ++অঙ্ক_Moved_Data_Vertices;
   }
-  return NumMovedDataVertices;
+  ঘূৰাই অঙ্ক_Moved_Data_Vertices;
 }
 
-bool BalancedPartitioning::moveFunctionNode(BPFunctionNode &N,
-                                            unsigned LeftBucket,
-                                            unsigned RightBucket,
+তার্কিক BalancedPartitioning::move_Function_গ্ৰন্থি(BPFunction_গ্ৰন্থি &N,
+                                            unsigned বাম_Bucket,
+                                            unsigned ডান_Bucket,
                                             SignaturesT &Signatures,
-                                            std::mt19937 &RNG) const {
+                                            std::mt19937 &RNG) ধ্রুৱ {
   // Sometimes we skip the move. This helps to escape local optima
-  if (std::uniform_real_distribution<float>(0.f, 1.f)(RNG) <=
+  যদি (std::uniform_real_distribution<ভিন্ন>(0.f, 1.f)(RNG) <=
       Config.SkipProbability)
-    return false;
+    ঘূৰাই মিছা;
 
-  bool FromLeftToRight = (N.Bucket == LeftBucket);
+  তার্কিক From_বাম_To_ডান = (N.Bucket == বাম_Bucket);
   // Update the current bucket
-  N.Bucket = (FromLeftToRight ? RightBucket : LeftBucket);
+  N.Bucket = (From_বাম_To_ডান ? ডান_Bucket : বাম_Bucket);
 
   // Update signatures and invalidate gain cache
-  if (FromLeftToRight) {
-    for (auto &UN : N.UtilityNodes) {
+  যদি (From_বাম_To_ডান) {
+    বাবে (auto &UN : N.UtilityNodes) {
       auto &Signature = Signatures[UN];
-      Signature.LeftCount--;
-      Signature.RightCount++;
-      Signature.CachedGainIsValid = false;
+      Signature.বাম_গুনতি--;
+      Signature.ডান_গুনতি++;
+      Signature.CachedGainIsValid = মিছা;
     }
-  } else {
-    for (auto &UN : N.UtilityNodes) {
+  } অন্যথা {
+    বাবে (auto &UN : N.UtilityNodes) {
       auto &Signature = Signatures[UN];
-      Signature.LeftCount++;
-      Signature.RightCount--;
-      Signature.CachedGainIsValid = false;
+      Signature.বাম_গুনতি++;
+      Signature.ডান_গুনতি--;
+      Signature.CachedGainIsValid = মিছা;
     }
   }
-  return true;
+  ঘূৰাই সঁচা;
 }
 
-void BalancedPartitioning::split(const FunctionNodeRange Nodes,
-                                 unsigned StartBucket) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  auto NodesMid = Nodes.begin() + (NumNodes + 1) / 2;
+শূন্য BalancedPartitioning::split(ধ্রুৱ Function_গ্ৰন্থি_Range Nodes,
+                                 unsigned StartBucket) ধ্রুৱ {
+  unsigned অঙ্ক_Nodes = llvm::size(Nodes);
+  auto NodesMid = Nodes.begin() + (অঙ্ক_Nodes + 1) / 2;
 
   llvm::sort(Nodes, [](auto &L, auto &R) {
-    return L.InputOrderIndex < R.InputOrderIndex;
+    ঘূৰাই L.প্ৰবেশ_Order_Index < R.প্ৰবেশ_Order_Index;
   });
 
-  for (auto &N : llvm::make_range(Nodes.begin(), NodesMid))
+  বাবে (auto &N : llvm::make_range(Nodes.begin(), NodesMid))
     N.Bucket = StartBucket;
-  for (auto &N : llvm::make_range(NodesMid, Nodes.end()))
+  বাবে (auto &N : llvm::make_range(NodesMid, Nodes.end()))
     N.Bucket = StartBucket + 1;
 }
 
-float BalancedPartitioning::moveGain(const BPFunctionNode &N,
-                                     bool FromLeftToRight,
-                                     const SignaturesT &Signatures) {
-  float Gain = 0.f;
-  for (auto &UN : N.UtilityNodes)
-    Gain += (FromLeftToRight ? Signatures[UN].CachedGainLR
+ভিন্ন BalancedPartitioning::moveGain(ধ্রুৱ BPFunction_গ্ৰন্থি &N,
+                                     তার্কিক From_বাম_To_ডান,
+                                     ধ্রুৱ SignaturesT &Signatures) {
+  ভিন্ন Gain = 0.f;
+  বাবে (auto &UN : N.UtilityNodes)
+    Gain += (From_বাম_To_ডান ? Signatures[UN].CachedGainLR
                              : Signatures[UN].CachedGainRL);
-  return Gain;
+  ঘূৰাই Gain;
 }
 
-float BalancedPartitioning::logCost(unsigned X, unsigned Y) const {
-  return -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
+ভিন্ন BalancedPartitioning::logCost(unsigned X, unsigned Y) ধ্রুৱ {
+  ঘূৰাই -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
 }
 
-float BalancedPartitioning::log2Cached(unsigned i) const {
-  return (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
+ভিন্ন BalancedPartitioning::log2Cached(unsigned i) ধ্রুৱ {
+  ঘূৰাই (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
 }
