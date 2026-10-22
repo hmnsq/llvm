@@ -14,21 +14,21 @@
 #include "llvm/Support/Valgrind.h"
 #include <stddef.h>
 
-#if __has_include(<valgrind/valgrind.h>)
+#ប្រសិនបើ __has_include(<valgrind/valgrind.h>)
 #include <valgrind/valgrind.h>
 
 bool llvm::sys::RunningOnValgrind() {
-  return RUNNING_ON_VALGRIND;
+  ត្រឡប់ RUNNING_ON_VALGRIND;
 }
 
 void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
   VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
 }
 
-#else
+#បើមិនដូច្នេះ
 
 bool llvm::sys::RunningOnValgrind() {
-  return false;
+  ត្រឡប់ false;
 }
 
 void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {

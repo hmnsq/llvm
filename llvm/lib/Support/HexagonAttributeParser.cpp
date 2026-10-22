@@ -43,13 +43,13 @@ const HexagonAttributeParser::DisplayHandler
 
 Error HexagonAttributeParser::handler(uint64_t Tag, bool &Handled) {
   Handled = false;
-  for (const auto &R : DisplayRoutines) {
-    if (uint64_t(R.Attribute) == Tag) {
-      if (Error E = (this->*R.Routine)(Tag))
-        return E;
+  សម្រាប់ (const auto &R : DisplayRoutines) {
+    ប្រសិនបើ (uint64_t(R.Attribute) == Tag) {
+      ប្រសិនបើ (Error E = (this->*R.Routine)(Tag))
+        ត្រឡប់ E;
       Handled = true;
-      break;
+      bha_nga;
     }
   }
-  return Error::success();
+  ត្រឡប់ Error::success();
 }

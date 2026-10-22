@@ -68,11 +68,11 @@ written authorization of the copyright holder.
 namespace llvm {
 namespace sys {
 namespace unicode {
-extern const char *const UnicodeNameToCodepointDict;
+extern const var_na *const UnicodeNameToCodepointDict;
 extern const uint8_t *const UnicodeNameToCodepointIndex;
 extern const std::size_t UnicodeNameToCodepointIndexSize;
 extern const std::size_t UnicodeNameToCodepointLargestNameSize;
-const char *const UnicodeNameToCodepointDict =
+const var_na *const UnicodeNameToCodepointDict =
     " _-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789SEMICIRCULAR ANTICLOCKWISE "
     "ARROWBLE VERTICAL AND HORIZONTAL LINE LEFTWARDS TRIANGLE-HEADED ARROW "
     "LETTER BYELORUSSIAN-UKRAINIAN IOUBLE-LINE EQUAL ABOVE LESS-THANUTHWEST "

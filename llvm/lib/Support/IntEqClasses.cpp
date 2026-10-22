@@ -25,7 +25,7 @@ using namespace llvm;
 void IntEqClasses::grow(unsigned N) {
   assert(NumClasses == 0 && "grow() called after compress().");
   EC.reserve(N);
-  while (EC.size() < N)
+  ខណៈពេល (EC.size() < N)
     EC.push_back(EC.size());
 }
 
@@ -36,42 +36,42 @@ unsigned IntEqClasses::join(unsigned a, unsigned b) {
   // Update pointers while searching for the leaders, compressing the paths
   // incrementally. The larger leader will eventually be updated, joining the
   // classes.
-  while (eca != ecb)
-    if (eca < ecb) {
+  ខណៈពេល (eca != ecb)
+    ប្រសិនបើ (eca < ecb) {
       EC[b] = eca;
       b = ecb;
       ecb = EC[b];
-    } else {
+    } បើមិនដូច្នេះ {
       EC[a] = ecb;
       a = eca;
       eca = EC[a];
     }
 
-  return eca;
+  ត្រឡប់ eca;
 }
 
 unsigned IntEqClasses::findLeader(unsigned a) const {
   assert(NumClasses == 0 && "findLeader() called after compress().");
-  while (a != EC[a])
+  ខណៈពេល (a != EC[a])
     a = EC[a];
-  return a;
+  ត្រឡប់ a;
 }
 
 void IntEqClasses::compress() {
-  if (NumClasses)
-    return;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
+  ប្រសិនបើ (NumClasses)
+    ត្រឡប់;
+  សម្រាប់ (unsigned i = 0, e = EC.size(); i != e; ++i)
     EC[i] = (EC[i] == i) ? NumClasses++ : EC[EC[i]];
 }
 
 void IntEqClasses::uncompress() {
-  if (!NumClasses)
-    return;
+  ប្រសិនបើ (!NumClasses)
+    ត្រឡប់;
   SmallVector<unsigned, 8> Leader;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    if (EC[i] < Leader.size())
+  សម្រាប់ (unsigned i = 0, e = EC.size(); i != e; ++i)
+    ប្រសិនបើ (EC[i] < Leader.size())
       EC[i] = Leader[EC[i]];
-    else
+    បើមិនដូច្នេះ
       Leader.push_back(EC[i] = i);
   NumClasses = 0;
 }

@@ -23,10 +23,10 @@ using namespace llvm;
 
 namespace {
 
-struct CrashRecoveryContextImpl;
+sa_nracanaa CrashRecoveryContextImpl;
 static LLVM_THREAD_LOCAL const CrashRecoveryContextImpl *CurrentContext;
 
-struct CrashRecoveryContextImpl {
+sa_nracanaa CrashRecoveryContextImpl {
   // When threads are disabled, this links up all active
   // CrashRecoveryContextImpls.  When threads are enabled there's one thread
   // per CrashRecoveryContext and CurrentContext is a thread-local, so only one
@@ -35,7 +35,7 @@ struct CrashRecoveryContextImpl {
 
   CrashRecoveryContext *CRC;
   ::jmp_buf JumpBuffer;
-  volatile unsigned Failed : 1;
+  ca_ncala unsigned Failed : 1;
   unsigned SwitchedThread : 1;
   unsigned ValidJumpBuffer : 1;
 
@@ -46,14 +46,14 @@ public:
     CurrentContext = this;
   }
   ~CrashRecoveryContextImpl() {
-    if (!SwitchedThread)
+    ប្រសិនបើ (!SwitchedThread)
       CurrentContext = Next;
   }
 
   /// Called when the separate crash-recovery thread was finished, to
   /// indicate that we don't need to clear the thread-local CurrentContext.
   void setSwitchedThread() {
-#if defined(LLVM_ENABLE_THREADS) && LLVM_ENABLE_THREADS != 0
+#ប្រសិនបើ defined(LLVM_ENABLE_THREADS) && LLVM_ENABLE_THREADS != 0
     SwitchedThread = true;
 #endif
   }
@@ -62,7 +62,7 @@ public:
   // 'RetCode' represents the returned error code, as if it was returned by a
   // process. 'Context' represents the signal type on Unix; on Windows, it is
   // the ExceptionContext.
-  void HandleCrash(int RetCode, uintptr_t Context) {
+  void HandleCrash(ចំនួនគត់ RetCode, uintptr_t Context) {
     // Eliminate the current context entry, to avoid re-entering in case the
     // cleanup code crashes.
     CurrentContext = Next;
@@ -70,13 +70,13 @@ public:
     assert(!Failed && "Crash recovery context already failed!");
     Failed = true;
 
-    if (CRC->DumpStackAndCleanupOnFailure)
+    ប្រសិនបើ (CRC->DumpStackAndCleanupOnFailure)
       sys::CleanupOnSignal(Context);
 
     CRC->RetCode = RetCode;
 
     // Jump back to the RunSafely we were called under.
-    if (ValidJumpBuffer)
+    ប្រសិនបើ (ValidJumpBuffer)
       longjmp(JumpBuffer, 1);
 
     // Otherwise let the caller decide of the outcome of the crash. Currently
@@ -86,7 +86,7 @@ public:
 
 std::mutex &getCrashRecoveryContextMutex() {
   static std::mutex CrashRecoveryContextMutex;
-  return CrashRecoveryContextMutex;
+  ត្រឡប់ CrashRecoveryContextMutex;
 }
 
 static bool gCrashRecoveryEnabled = false;
@@ -113,7 +113,7 @@ CrashRecoveryContext::~CrashRecoveryContext() {
   CrashRecoveryContextCleanup *i = head;
   const CrashRecoveryContext *PC = IsRecoveringFromCrash;
   IsRecoveringFromCrash = this;
-  while (i) {
+  ខណៈពេល (i) {
     CrashRecoveryContextCleanup *tmp = i;
     i = tmp->next;
     tmp->cleanupFired = true;
@@ -127,42 +127,42 @@ CrashRecoveryContext::~CrashRecoveryContext() {
 }
 
 bool CrashRecoveryContext::isRecoveringFromCrash() {
-  return IsRecoveringFromCrash != nullptr;
+  ត្រឡប់ IsRecoveringFromCrash != nullptr;
 }
 
 CrashRecoveryContext *CrashRecoveryContext::GetCurrent() {
-  if (!gCrashRecoveryEnabled)
-    return nullptr;
+  ប្រសិនបើ (!gCrashRecoveryEnabled)
+    ត្រឡប់ nullptr;
 
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
-  if (!CRCI)
-    return nullptr;
+  ប្រសិនបើ (!CRCI)
+    ត្រឡប់ nullptr;
 
-  return CRCI->CRC;
+  ត្រឡប់ CRCI->CRC;
 }
 
 void CrashRecoveryContext::Enable(bool NeedsPOSIXUtilitySignalHandling) {
   std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
   // FIXME: Shouldn't this be a refcount or something?
-  if (gCrashRecoveryEnabled)
-    return;
+  ប្រសិនបើ (gCrashRecoveryEnabled)
+    ត្រឡប់;
   gCrashRecoveryEnabled = true;
   installExceptionOrSignalHandlers(NeedsPOSIXUtilitySignalHandling);
 }
 
 void CrashRecoveryContext::Disable() {
   std::lock_guard<std::mutex> L(getCrashRecoveryContextMutex());
-  if (!gCrashRecoveryEnabled)
-    return;
+  ប្រសិនបើ (!gCrashRecoveryEnabled)
+    ត្រឡប់;
   gCrashRecoveryEnabled = false;
   uninstallExceptionOrSignalHandlers();
 }
 
 void CrashRecoveryContext::registerCleanup(CrashRecoveryContextCleanup *cleanup)
 {
-  if (!cleanup)
-    return;
-  if (head)
+  ប្រសិនបើ (!cleanup)
+    ត្រឡប់;
+  ប្រសិនបើ (head)
     head->prev = cleanup;
   cleanup->next = head;
   head = cleanup;
@@ -170,22 +170,22 @@ void CrashRecoveryContext::registerCleanup(CrashRecoveryContextCleanup *cleanup)
 
 void
 CrashRecoveryContext::unregisterCleanup(CrashRecoveryContextCleanup *cleanup) {
-  if (!cleanup)
-    return;
-  if (cleanup == head) {
+  ប្រសិនបើ (!cleanup)
+    ត្រឡប់;
+  ប្រសិនបើ (cleanup == head) {
     head = cleanup->next;
-    if (head)
+    ប្រសិនបើ (head)
       head->prev = nullptr;
   }
-  else {
+  បើមិនដូច្នេះ {
     cleanup->prev->next = cleanup->next;
-    if (cleanup->next)
+    ប្រសិនបើ (cleanup->next)
       cleanup->next->prev = cleanup->prev;
   }
   delete cleanup;
 }
 
-#if defined(_MSC_VER)
+#ប្រសិនបើ defined(_MSC_VER)
 
 #include <windows.h> // for GetExceptionInformation
 
@@ -203,50 +203,50 @@ static void uninstallExceptionOrSignalHandlers() {}
 
 // We need this function because the call to GetExceptionInformation() can only
 // occur inside the __except evaluation block
-static int ExceptionFilter(_EXCEPTION_POINTERS *Except) {
+static ចំនួនគត់ ExceptionFilter(_EXCEPTION_POINTERS *Except) {
   // Lookup the current thread local recovery object.
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  ប្រសិនបើ (!CRCI) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    ត្រឡប់ EXCEPTION_CONTINUE_SEARCH;
   }
 
-  int RetCode = (int)Except->ExceptionRecord->ExceptionCode;
-  if ((RetCode & 0xF0000000) == 0xE0000000)
+  ចំនួនគត់ RetCode = (ចំនួនគត់)Except->ExceptionRecord->ExceptionCode;
+  ប្រសិនបើ ((RetCode & 0xF0000000) == 0xE0000000)
     RetCode &= ~0xF0000000; // this crash was generated by sys::Process::Exit
 
   // Handle the crash
   const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(
       RetCode, reinterpret_cast<uintptr_t>(Except));
 
-  return EXCEPTION_EXECUTE_HANDLER;
+  ត្រឡប់ EXCEPTION_EXECUTE_HANDLER;
 }
 
-#if defined(__clang__) && defined(_M_IX86)
+#ប្រសិនបើ defined(__clang__) && defined(_M_IX86)
 // Work around PR44697.
 __attribute__((optnone))
 #endif
 bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
-  if (!gCrashRecoveryEnabled) {
+  ប្រសិនបើ (!gCrashRecoveryEnabled) {
     Fn();
-    return true;
+    ត្រឡប់ true;
   }
   assert(!Impl && "Crash recovery context already initialized!");
   Impl = new CrashRecoveryContextImpl(this);
   __try {
     Fn();
   } __except (ExceptionFilter(GetExceptionInformation())) {
-    return false;
+    ត្រឡប់ false;
   }
-  return true;
+  ត្រឡប់ true;
 }
 
-#else // !_MSC_VER
+#បើមិនដូច្នេះ // !_MSC_VER
 
-#if defined(_WIN32)
+#ប្រសិនបើ defined(_WIN32)
 // This is a non-MSVC compiler, probably mingw gcc or clang without
 // -fms-extensions. Use vectored exception handling (VEH).
 //
@@ -275,27 +275,27 @@ static LONG CALLBACK ExceptionHandler(PEXCEPTION_POINTERS ExceptionInfo)
   constexpr ULONG DbgPrintExceptionWideC = 0x4001000AL;
   switch (ExceptionInfo->ExceptionRecord->ExceptionCode)
   {
-  case DBG_PRINTEXCEPTION_C:
-  case DbgPrintExceptionWideC:
-  case 0x406D1388:  // set debugger thread name
-    return EXCEPTION_CONTINUE_EXECUTION;
+  pak_sa DBG_PRINTEXCEPTION_C:
+  pak_sa DbgPrintExceptionWideC:
+  pak_sa 0x406D1388:  // set debugger thread name
+    ត្រឡប់ EXCEPTION_CONTINUE_EXECUTION;
   }
 
   // Lookup the current thread local recovery object.
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  ប្រសិនបើ (!CRCI) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    ត្រឡប់ EXCEPTION_CONTINUE_SEARCH;
   }
 
   // TODO: We can capture the stack backtrace here and store it on the
   // implementation if we so choose.
 
-  int RetCode = (int)ExceptionInfo->ExceptionRecord->ExceptionCode;
-  if ((RetCode & 0xF0000000) == 0xE0000000)
+  ចំនួនគត់ RetCode = (ចំនួនគត់)ExceptionInfo->ExceptionRecord->ExceptionCode;
+  ប្រសិនបើ ((RetCode & 0xF0000000) == 0xE0000000)
     RetCode &= ~0xF0000000; // this crash was generated by sys::Process::Exit
 
   // Handle the crash
@@ -326,7 +326,7 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
 
 static void uninstallExceptionOrSignalHandlers() {
   PVOID currentHandle = const_cast<PVOID>(sCurrentExceptionHandle);
-  if (currentHandle) {
+  ប្រសិនបើ (currentHandle) {
     // Now we can remove the vectored exception handler from the chain
     ::RemoveVectoredExceptionHandler(currentHandle);
 
@@ -335,7 +335,7 @@ static void uninstallExceptionOrSignalHandlers() {
   }
 }
 
-#else // !_WIN32
+#បើមិនដូច្នេះ // !_WIN32
 
 // Generic POSIX implementation.
 //
@@ -350,16 +350,16 @@ static void uninstallExceptionOrSignalHandlers() {
 
 #include <signal.h>
 
-static const int Signals[] =
+static const ចំនួនគត់ Signals[] =
     { SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP };
 static const unsigned NumSignals = std::size(Signals);
-static struct sigaction PrevActions[NumSignals];
+static sa_nracanaa sigaction PrevActions[NumSignals];
 
-static void CrashRecoverySignalHandler(int Signal) {
+static void CrashRecoverySignalHandler(ចំនួនគត់ Signal) {
   // Lookup the current thread local recovery object.
   const CrashRecoveryContextImpl *CRCI = CurrentContext;
 
-  if (!CRCI) {
+  ប្រសិនបើ (!CRCI) {
     // We didn't find a crash recovery context -- this means either we got a
     // signal on a thread we didn't expect it on, the application got a signal
     // outside of a crash recovery context, or something else went horribly
@@ -378,7 +378,7 @@ static void CrashRecoverySignalHandler(int Signal) {
     raise(Signal);
 
     // The signal will be thrown once the signal mask is restored.
-    return;
+    ត្រឡប់;
   }
 
   // Unblock the signal we received.
@@ -390,31 +390,31 @@ static void CrashRecoverySignalHandler(int Signal) {
   // Return the same error code as if the program crashed, as mentioned in the
   // section "Exit Status for Commands":
   // https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xcu_chap02.html
-  int RetCode = 128 + Signal;
+  ចំនួនគត់ RetCode = 128 + Signal;
 
   // Don't consider a broken pipe as a crash (see clang/lib/Driver/Driver.cpp)
-  if (Signal == SIGPIPE)
+  ប្រសិនបើ (Signal == SIGPIPE)
     RetCode = EX_IOERR;
 
-  if (CRCI)
+  ប្រសិនបើ (CRCI)
     const_cast<CrashRecoveryContextImpl *>(CRCI)->HandleCrash(RetCode, Signal);
 }
 
 static void
 installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
   // Setup the signal handler.
-  struct sigaction Handler;
+  sa_nracanaa sigaction Handler;
   Handler.sa_handler = CrashRecoverySignalHandler;
   Handler.sa_flags = 0;
   sigemptyset(&Handler.sa_mask);
 
-  for (unsigned i = 0; i != NumSignals; ++i) {
-    if (NeedsPOSIXUtilitySignalHandling) {
+  សម្រាប់ (unsigned i = 0; i != NumSignals; ++i) {
+    ប្រសិនបើ (NeedsPOSIXUtilitySignalHandling) {
       // Don't install the new handler if the signal disposition is SIG_IGN.
-      struct sigaction act;
-      if (sigaction(Signals[i], NULL, &act) == 0 && act.sa_handler != SIG_IGN)
+      sa_nracanaa sigaction act;
+      ប្រសិនបើ (sigaction(Signals[i], NULL, &act) == 0 && act.sa_handler != SIG_IGN)
         sigaction(Signals[i], &Handler, &PrevActions[i]);
-    } else {
+    } បើមិនដូច្នេះ {
       sigaction(Signals[i], &Handler, &PrevActions[i]);
     }
   }
@@ -422,7 +422,7 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
 
 static void uninstallExceptionOrSignalHandlers() {
   // Restore the previous signal handlers.
-  for (unsigned i = 0; i != NumSignals; ++i)
+  សម្រាប់ (unsigned i = 0; i != NumSignals; ++i)
     sigaction(Signals[i], &PrevActions[i], nullptr);
 }
 
@@ -430,31 +430,31 @@ static void uninstallExceptionOrSignalHandlers() {
 
 bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
   // If crash recovery is disabled, do nothing.
-  if (gCrashRecoveryEnabled) {
+  ប្រសិនបើ (gCrashRecoveryEnabled) {
     assert(!Impl && "Crash recovery context already initialized!");
     CrashRecoveryContextImpl *CRCI = new CrashRecoveryContextImpl(this);
     Impl = CRCI;
 
     CRCI->ValidJumpBuffer = true;
-    if (setjmp(CRCI->JumpBuffer) != 0) {
-      return false;
+    ប្រសិនបើ (setjmp(CRCI->JumpBuffer) != 0) {
+      ត្រឡប់ false;
     }
   }
 
   Fn();
-  return true;
+  ត្រឡប់ true;
 }
 
 #endif // !_MSC_VER
 
-[[noreturn]] void CrashRecoveryContext::HandleExit(int RetCode) {
-#if defined(_WIN32)
+[[noreturn]] void CrashRecoveryContext::HandleExit(ចំនួនគត់ RetCode) {
+#ប្រសិនបើ defined(_WIN32)
   // Since the exception code is actually of NTSTATUS type, we use the
   // Microsoft-recommended 0xE prefix, to signify that this is a user error.
   // This value is a combination of the customer field (bit 29) and severity
   // field (bits 30-31) in the NTSTATUS specification.
   ::RaiseException(0xE0000000 | RetCode, 0, 0, NULL);
-#else
+#បើមិនដូច្នេះ
   // On Unix we don't need to raise an exception, we go directly to
   // HandleCrash(), then longjmp will unwind the stack for us.
   CrashRecoveryContextImpl *CRCI = (CrashRecoveryContextImpl *)Impl;
@@ -464,34 +464,34 @@ bool CrashRecoveryContext::RunSafely(function_ref<void()> Fn) {
   llvm_unreachable("Most likely setjmp wasn't called!");
 }
 
-bool CrashRecoveryContext::isCrash(int RetCode) {
-#if defined(_WIN32)
+bool CrashRecoveryContext::isCrash(ចំនួនគត់ RetCode) {
+#ប្រសិនបើ defined(_WIN32)
   // On Windows, the code is interpreted as NTSTATUS. The two high bits
   // represent the severity. Values starting with 0x80000000 are reserved for
   // "warnings"; values of 0xC0000000 and up are for "errors". In practice, both
   // are interpreted as a non-continuable signal.
   unsigned Code = ((unsigned)RetCode & 0xF0000000) >> 28;
-  if (Code != 0xC && Code != 8)
-    return false;
-#else
+  ប្រសិនបើ (Code != 0xC && Code != 8)
+    ត្រឡប់ false;
+#បើមិនដូច្នេះ
   // On Unix, signals are represented by return codes of 128 or higher.
   // Exit code 128 is a reserved value and should not be raised as a signal.
-  if (RetCode <= 128)
-    return false;
+  ប្រសិនបើ (RetCode <= 128)
+    ត្រឡប់ false;
 #endif
-  return true;
+  ត្រឡប់ true;
 }
 
-bool CrashRecoveryContext::throwIfCrash(int RetCode) {
-  if (!isCrash(RetCode))
-    return false;
-#if defined(_WIN32)
+bool CrashRecoveryContext::throwIfCrash(ចំនួនគត់ RetCode) {
+  ប្រសិនបើ (!isCrash(RetCode))
+    ត្រឡប់ false;
+#ប្រសិនបើ defined(_WIN32)
   ::RaiseException(RetCode, 0, 0, NULL);
-#else
+#បើមិនដូច្នេះ
   llvm::sys::unregisterHandlers();
   raise(RetCode - 128);
 #endif
-  return true;
+  ត្រឡប់ true;
 }
 
 // FIXME: Portability.
@@ -503,14 +503,14 @@ static void setThreadBackgroundPriority() {
 
 static bool hasThreadBackgroundPriority() {
 #ifdef __APPLE__
-  return getpriority(PRIO_DARWIN_THREAD, 0) == 1;
-#else
-  return false;
+  ត្រឡប់ getpriority(PRIO_DARWIN_THREAD, 0) == 1;
+#បើមិនដូច្នេះ
+  ត្រឡប់ false;
 #endif
 }
 
 namespace {
-struct RunSafelyOnThreadInfo {
+sa_nracanaa RunSafelyOnThreadInfo {
   function_ref<void()> Fn;
   CrashRecoveryContext *CRC;
   bool UseBackgroundPriority;
@@ -522,7 +522,7 @@ static void RunSafelyOnThread_Dispatch(void *UserData) {
   RunSafelyOnThreadInfo *Info =
     reinterpret_cast<RunSafelyOnThreadInfo*>(UserData);
 
-  if (Info->UseBackgroundPriority)
+  ប្រសិនបើ (Info->UseBackgroundPriority)
     setThreadBackgroundPriority();
 
   Info->Result = Info->CRC->RunSafely(Info->Fn);
@@ -537,12 +537,12 @@ bool CrashRecoveryContext::RunSafelyOnThread(function_ref<void()> Fn,
                       RunSafelyOnThread_Dispatch, &Info);
   Thread.join();
 
-  if (CrashRecoveryContextImpl *CRC = (CrashRecoveryContextImpl *)Impl)
+  ប្រសិនបើ (CrashRecoveryContextImpl *CRC = (CrashRecoveryContextImpl *)Impl)
     CRC->setSwitchedThread();
-  return Info.Result;
+  ត្រឡប់ Info.Result;
 }
 
 bool CrashRecoveryContext::RunSafelyOnNewStack(function_ref<void()> Fn,
                                                unsigned RequestedStackSize) {
-  return RunSafelyOnThread(Fn, RequestedStackSize);
+  ត្រឡប់ RunSafelyOnThread(Fn, RequestedStackSize);
 }

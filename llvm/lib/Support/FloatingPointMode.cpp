@@ -13,49 +13,49 @@ using namespace llvm;
 
 FPClassTest llvm::fneg(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcNegInf)
+  ប្រសិនបើ (Mask & fcNegInf)
     NewMask |= fcPosInf;
-  if (Mask & fcNegNormal)
+  ប្រសិនបើ (Mask & fcNegNormal)
     NewMask |= fcPosNormal;
-  if (Mask & fcNegSubnormal)
+  ប្រសិនបើ (Mask & fcNegSubnormal)
     NewMask |= fcPosSubnormal;
-  if (Mask & fcNegZero)
+  ប្រសិនបើ (Mask & fcNegZero)
     NewMask |= fcPosZero;
-  if (Mask & fcPosZero)
+  ប្រសិនបើ (Mask & fcPosZero)
     NewMask |= fcNegZero;
-  if (Mask & fcPosSubnormal)
+  ប្រសិនបើ (Mask & fcPosSubnormal)
     NewMask |= fcNegSubnormal;
-  if (Mask & fcPosNormal)
+  ប្រសិនបើ (Mask & fcPosNormal)
     NewMask |= fcNegNormal;
-  if (Mask & fcPosInf)
+  ប្រសិនបើ (Mask & fcPosInf)
     NewMask |= fcNegInf;
-  return NewMask;
+  ត្រឡប់ NewMask;
 }
 
 FPClassTest llvm::inverse_fabs(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcPosZero)
+  ប្រសិនបើ (Mask & fcPosZero)
     NewMask |= fcZero;
-  if (Mask & fcPosSubnormal)
+  ប្រសិនបើ (Mask & fcPosSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcPosNormal)
+  ប្រសិនបើ (Mask & fcPosNormal)
     NewMask |= fcNormal;
-  if (Mask & fcPosInf)
+  ប្រសិនបើ (Mask & fcPosInf)
     NewMask |= fcInf;
-  return NewMask;
+  ត្រឡប់ NewMask;
 }
 
 FPClassTest llvm::unknown_sign(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcZero)
+  ប្រសិនបើ (Mask & fcZero)
     NewMask |= fcZero;
-  if (Mask & fcSubnormal)
+  ប្រសិនបើ (Mask & fcSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcNormal)
+  ប្រសិនបើ (Mask & fcNormal)
     NewMask |= fcNormal;
-  if (Mask & fcInf)
+  ប្រសិនបើ (Mask & fcInf)
     NewMask |= fcInf;
-  return NewMask;
+  ត្រឡប់ NewMask;
 }
 
 // Every bitfield has a unique name and one or more aliasing names that cover
@@ -86,14 +86,14 @@ static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
 raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   OS << '(';
 
-  if (Mask == fcNone) {
+  ប្រសិនបើ (Mask == fcNone) {
     OS << "none)";
-    return OS;
+    ត្រឡប់ OS;
   }
 
   ListSeparator LS(" ");
-  for (auto [BitTest, Name] : NoFPClassName) {
-    if ((Mask & BitTest) == BitTest) {
+  សម្រាប់ (auto [BitTest, Name] : NoFPClassName) {
+    ប្រសិនបើ ((Mask & BitTest) == BitTest) {
       OS << LS << Name;
 
       // Clear the bits so we don't print any aliased names later.
@@ -104,17 +104,17 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   assert(Mask == 0 && "didn't print some mask bits");
 
   OS << ')';
-  return OS;
+  ត្រឡប់ OS;
 }
 
 void DenormalFPEnv::print(raw_ostream &OS, bool OmitIfSame) const {
-  if (F32Mode == DefaultMode) {
+  ប្រសិនបើ (F32Mode == DefaultMode) {
     DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
-    return;
+    ត្រឡប់;
   }
 
   // Omit printing the base mode if only the f32 mode isn't the default.
-  if (DefaultMode != DenormalMode::getDefault()) {
+  ប្រសិនបើ (DefaultMode != DenormalMode::getDefault()) {
     DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
     OS << ", ";
   }
@@ -128,50 +128,50 @@ static bool cannotOrderStrictlyGreaterImpl(FPClassTest LHS, FPClassTest RHS,
   LHS &= ~fcNan;
   RHS &= ~fcNan;
 
-  if (LHS == fcNone || RHS == fcNone)
-    return true;
+  ប្រសិនបើ (LHS == fcNone || RHS == fcNone)
+    ត្រឡប់ true;
 
   FPClassTest LowestBitRHS = static_cast<FPClassTest>(RHS & -RHS);
   FPClassTest HighestBitLHS = static_cast<FPClassTest>(1 << Log2_32(LHS));
 
-  if (!OrderedZero) {
+  ប្រសិនបើ (!OrderedZero) {
     // Introduce conflict in zero bits if we're treating them as equal.
-    if (LowestBitRHS == fcNegZero)
+    ប្រសិនបើ (LowestBitRHS == fcNegZero)
       LowestBitRHS = fcPosZero;
-    if (HighestBitLHS == fcNegZero)
+    ប្រសិនបើ (HighestBitLHS == fcNegZero)
       HighestBitLHS = fcPosZero;
   }
 
-  if (LowestBitRHS > HighestBitLHS) {
+  ប្រសិនបើ (LowestBitRHS > HighestBitLHS) {
     assert((LHS & RHS) == fcNone && "no bits should intersect");
-    return true;
+    ត្រឡប់ true;
   }
 
-  if (LowestBitRHS < HighestBitLHS)
-    return false;
+  ប្រសិនបើ (LowestBitRHS < HighestBitLHS)
+    ត្រឡប់ false;
 
   constexpr FPClassTest ExactValuesMask = fcZero | fcInf;
-  return !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
+  ត្រឡប់ !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
 }
 
 bool llvm::cannotOrderStrictlyGreater(FPClassTest LHS, FPClassTest RHS,
                                       bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
+  ត្រឡប់ cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyGreaterEq(FPClassTest LHS, FPClassTest RHS,
                                         bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
+  ត្រឡប់ cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyLess(FPClassTest LHS, FPClassTest RHS,
                                    bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
+  ត្រឡប់ cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyLessEq(FPClassTest LHS, FPClassTest RHS,
                                      bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
+  ត្រឡប់ cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
 }
 
 FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
@@ -190,9 +190,9 @@ FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is smaller
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  ប្រសិនបើ (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  ត្រឡប់ NewMask;
 }
 
 FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
@@ -207,7 +207,7 @@ FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is greater
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  ប្រសិនបើ (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  ត្រឡប់ NewMask;
 }

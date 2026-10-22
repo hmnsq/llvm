@@ -23,5 +23,5 @@ static constexpr TagNameItem tagData[] = {
 
 constexpr TagNameMap RISCVAttributeTags{tagData};
 const TagNameMap &llvm::RISCVAttrs::getRISCVAttributeTags() {
-  return RISCVAttributeTags;
+  ត្រឡប់ RISCVAttributeTags;
 }
