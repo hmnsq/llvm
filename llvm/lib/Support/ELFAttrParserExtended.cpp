@@ -7,80 +7,80 @@
 //
 //===------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttrParserExtended.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cstdint>
+#अन्तर्भाव "llvm/Support/ELFAttrParserExtended.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Support/ELFAttributes.h"
+#अन्तर्भाव "llvm/Support/Errc.h"
+#अन्तर्भाव "llvm/Support/Error.h"
+#अन्तर्भाव "llvm/Support/ScopedPrinter.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव <cstdint>
 
-using namespace llvm;
-using namespace ELFAttrs;
+using नामाकाश llvm;
+using नामाकाश ELFAttrs;
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(unsigned Tag) const {
-  assert(
+ELFExtendedAttrParser::get_Attribute_मूल्य(unsigned Tag) ध्रुव {
+  प्रतिज्ञा(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
-  return std::nullopt;
+  प्रत्यागम std::nullopt;
 }
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(StringRef BuildAttrSubsectionName,
-                                         unsigned Tag) const {
-  for (const auto &SubSection : SubSectionVec) {
-    if (BuildAttrSubsectionName == SubSection.Name)
-      for (const auto &BAItem : SubSection.Content) {
-        if (Tag == BAItem.Tag)
-          return std::optional<unsigned>(BAItem.IntValue);
+ELFExtendedAttrParser::get_Attribute_मूल्य(StringRef BuildAttrSubsectionName,
+                                         unsigned Tag) ध्रुव {
+  प्रति (ध्रुव auto &SubSection : SubSectionVec) {
+    यदि (BuildAttrSubsectionName == SubSection.Name)
+      प्रति (ध्रुव auto &BAItem : SubSection.Content) {
+        यदि (Tag == BAItem.Tag)
+          प्रत्यागम std::optional<unsigned>(BAItem.Int_मूल्य);
       }
   }
-  return std::nullopt;
+  प्रत्यागम std::nullopt;
 }
 
 std::optional<StringRef>
-ELFExtendedAttrParser::getAttributeString(unsigned Tag) const {
-  assert(
+ELFExtendedAttrParser::getAttributeString(unsigned Tag) ध्रुव {
+  प्रतिज्ञा(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
-  return std::nullopt;
+  प्रत्यागम std::nullopt;
 }
 
 std::optional<StringRef>
 ELFExtendedAttrParser::getAttributeString(StringRef BuildAttrSubsectionName,
-                                          unsigned Tag) const {
-  for (const auto &SubSection : SubSectionVec) {
-    if (BuildAttrSubsectionName == SubSection.Name)
-      for (const auto &BAItem : SubSection.Content) {
-        if (Tag == BAItem.Tag)
-          return std::optional<StringRef>(BAItem.StringValue);
+                                          unsigned Tag) ध्रुव {
+  प्रति (ध्रुव auto &SubSection : SubSectionVec) {
+    यदि (BuildAttrSubsectionName == SubSection.Name)
+      प्रति (ध्रुव auto &BAItem : SubSection.Content) {
+        यदि (Tag == BAItem.Tag)
+          प्रत्यागम std::optional<StringRef>(BAItem.String_मूल्य);
       }
   }
-  return std::nullopt;
+  प्रत्यागम std::nullopt;
 }
 
 StringRef
-ELFExtendedAttrParser::getTagName(const StringRef &BuildAttrSubsectionName,
-                                  const unsigned Tag) {
-  for (const auto &Entry : TagsNamesMap) {
-    if (BuildAttrSubsectionName == Entry.SubsectionName)
-      if (Tag == Entry.Tag)
-        return Entry.TagName;
+ELFExtendedAttrParser::getTagName(ध्रुव StringRef &BuildAttrSubsectionName,
+                                  ध्रुव unsigned Tag) {
+  प्रति (ध्रुव auto &Entry : TagsNamesMap) {
+    यदि (BuildAttrSubsectionName == Entry.SubsectionName)
+      यदि (Tag == Entry.Tag)
+        प्रत्यागम Entry.TagName;
   }
-  return "";
+  प्रत्यागम "";
 }
 
 Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
                                    llvm::endianness Endian) {
 
-  unsigned SectionNumber = 0;
+  unsigned Section_संख्या = 0;
   De = DataExtractor(Section, Endian == llvm::endianness::little);
 
   // Early returns have specific errors. Consume the Error in Cursor.
-  struct ClearCursorError {
+  संरचना ClearCursorError {
     DataExtractor::Cursor &Cursor;
     ~ClearCursorError() { consumeError(Cursor.takeError()); }
   } Clear{Cursor};
@@ -102,45 +102,45 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
 
   // Get format-version
   uint8_t FormatVersion = De.getU8(Cursor);
-  if (!Cursor)
-    return Cursor.takeError();
-  if (ELFAttrs::Format_Version != FormatVersion)
-    return createStringError(errc::invalid_argument,
+  यदि (!Cursor)
+    प्रत्यागम Cursor.takeError();
+  यदि (ELFAttrs::Format_Version != FormatVersion)
+    प्रत्यागम createStringError(errc::invalid_argument,
                              "unrecognized format-version: 0x" +
                                  utohexstr(FormatVersion));
 
-  while (!De.eof(Cursor)) {
+  यावत् (!De.eof(Cursor)) {
     uint32_t ExtBASubsectionLength = De.getU32(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
+    यदि (!Cursor)
+      प्रत्यागम Cursor.takeError();
     // Minimal valid Extended Build Attributes subsection size is at
     // least 8: length(4) name(at least a single char + null) optionality(1) and
     // type(1)
     // Extended Build Attributes subsection has to fit inside the section.
-    if (ExtBASubsectionLength < 8 ||
+    यदि (ExtBASubsectionLength < 8 ||
         ExtBASubsectionLength > (Section.size() - Cursor.tell() + 4))
-      return createStringError(
+      प्रत्यागम createStringError(
           errc::invalid_argument,
           "invalid Extended Build Attributes subsection size at offset: " +
               utohexstr(Cursor.tell() - 4));
 
     StringRef VendorName = De.getCStrRef(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
+    यदि (!Cursor)
+      प्रत्यागम Cursor.takeError();
     uint8_t IsOptional = De.getU8(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
-    if (!(0 == IsOptional || 1 == IsOptional))
-      return createStringError(
+    यदि (!Cursor)
+      प्रत्यागम Cursor.takeError();
+    यदि (!(0 == IsOptional || 1 == IsOptional))
+      प्रत्यागम createStringError(
           errc::invalid_argument,
           "\ninvalid Optionality at offset " + utohexstr(Cursor.tell() - 4) +
               ": " + utohexstr(IsOptional) + " (Options are 1|0)");
     StringRef IsOptionalStr = IsOptional ? "optional" : "required";
     uint8_t Type = De.getU8(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
-    if (!(0 == Type || 1 == Type))
-      return createStringError(errc::invalid_argument,
+    यदि (!Cursor)
+      प्रत्यागम Cursor.takeError();
+    यदि (!(0 == Type || 1 == Type))
+      प्रत्यागम createStringError(errc::invalid_argument,
                                "\ninvalid Type at offset " +
                                    utohexstr(Cursor.tell() - 4) + ": " +
                                    utohexstr(Type) + " (Options are 1|0)");
@@ -151,14 +151,14 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     BASubSection.IsOptional = IsOptional;
     BASubSection.ParameterType = Type;
 
-    if (Sw) {
-      Sw->startLine() << "Section " << ++SectionNumber << " {\n";
+    यदि (Sw) {
+      Sw->start_पंक्ति() << "Section " << ++Section_संख्या << " {\n";
       Sw->indent();
-      Sw->printNumber("SectionLength", ExtBASubsectionLength);
-      Sw->startLine() << "VendorName" << ": " << VendorName
+      Sw->print_संख्या("SectionLength", ExtBASubsectionLength);
+      Sw->start_पंक्ति() << "VendorName" << ": " << VendorName
                       << " Optionality: " << IsOptionalStr
                       << " Type: " << TypeStr << "\n";
-      Sw->startLine() << "Attributes {\n";
+      Sw->start_पंक्ति() << "Attributes {\n";
       Sw->indent();
     }
 
@@ -167,48 +167,48 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     // Size: 4 bytes, Vendor Name: VendorName.size() + 1 (null termination),
     // optionality: 1, type: 1
     uint32_t BytesAllButAttributes = 4 + (VendorName.size() + 1) + 1 + 1;
-    while (Cursor.tell() <
+    यावत् (Cursor.tell() <
            (OffsetInSection + ExtBASubsectionLength - BytesAllButAttributes)) {
 
       uint64_t Tag = De.getULEB128(Cursor);
-      if (!Cursor)
-        return Cursor.takeError();
+      यदि (!Cursor)
+        प्रत्यागम Cursor.takeError();
 
       StringRef TagName = getTagName(VendorName, Tag);
 
-      uint64_t ValueInt = 0;
-      std::string ValueStr = "";
-      if (Type) { // type==1 --> ntbs
-        ValueStr = De.getCStrRef(Cursor);
-        if (!Cursor)
-          return Cursor.takeError();
-        if (Sw)
-          Sw->printString("" != TagName ? TagName : utostr(Tag), ValueStr);
-      } else { // type==0 --> uleb128
-        ValueInt = De.getULEB128(Cursor);
-        if (!Cursor)
-          return Cursor.takeError();
-        if (Sw)
-          Sw->printNumber("" != TagName ? TagName : utostr(Tag), ValueInt);
+      uint64_t मूल्य_Int = 0;
+      std::string मूल्य_Str = "";
+      यदि (Type) { // type==1 --> ntbs
+        मूल्य_Str = De.getCStrRef(Cursor);
+        यदि (!Cursor)
+          प्रत्यागम Cursor.takeError();
+        यदि (Sw)
+          Sw->printString("" != TagName ? TagName : utostr(Tag), मूल्य_Str);
+      } अन्यथा { // type==0 --> uleb128
+        मूल्य_Int = De.getULEB128(Cursor);
+        यदि (!Cursor)
+          प्रत्यागम Cursor.takeError();
+        यदि (Sw)
+          Sw->print_संख्या("" != TagName ? TagName : utostr(Tag), मूल्य_Int);
       }
 
       // populate data structure
       BuildAttributeItem BAItem(static_cast<BuildAttributeItem::Types>(Type),
-                                Tag, ValueInt, ValueStr);
-      BASubSection.Content.push_back(BAItem);
+                                Tag, मूल्य_Int, मूल्य_Str);
+      BASubSection.Content.धकेलो_back(BAItem);
     }
-    if (Sw) {
+    यदि (Sw) {
       // Close 'Attributes'
       Sw->unindent();
-      Sw->startLine() << "}\n";
+      Sw->start_पंक्ति() << "}\n";
       // Close 'Section'
       Sw->unindent();
-      Sw->startLine() << "}\n";
+      Sw->start_पंक्ति() << "}\n";
     }
 
     // populate data structure
-    SubSectionVec.push_back(BASubSection);
+    SubSectionVec.धकेलो_back(BASubSection);
   }
 
-  return Cursor.takeError();
+  प्रत्यागम Cursor.takeError();
 }
