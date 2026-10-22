@@ -80,10 +80,10 @@ public:
 
   void addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
 
-  const_iterator begin() const { return Stats.begin(); }
-  const_iterator end() const { return Stats.end(); }
+  const_iterator begin() const { ສົ່ງຄືນ Stats.begin(); }
+  const_iterator end() const { ສົ່ງຄືນ Stats.end(); }
   iterator_range<const_iterator> statistics() const {
-    return {begin(), end()};
+    ສົ່ງຄືນ {begin(), end()};
   }
 
   void reset();
@@ -104,14 +104,14 @@ void TrackingStatistic::RegisterStatistic() {
   // ManagedStatic mutex, doing so with StatLock held would lead to a lock
   // order inversion. To avoid that, we dereference the ManagedStatics first,
   // and only take StatLock afterwards.
-  if (!Initialized.load(std::memory_order_relaxed)) {
+  ຖ້າ (!Initialized.load(std::memory_order_relaxed)) {
     sys::SmartMutex<true> &Lock = *StatLock;
     StatisticInfo &SI = *StatInfo;
     sys::SmartScopedLock<true> Writer(Lock);
     // Check Initialized again after acquiring the lock.
-    if (Initialized.load(std::memory_order_relaxed))
-      return;
-    if (EnableStats || Enabled)
+    ຖ້າ (Initialized.load(std::memory_order_relaxed))
+      ສົ່ງຄືນ;
+    ຖ້າ (EnableStats || Enabled)
       SI.addStatistic(this);
 
     // Remember we have been registered.
@@ -127,7 +127,7 @@ StatisticInfo::StatisticInfo() {
 
 // Print information when destroyed, iff command line option is specified.
 StatisticInfo::~StatisticInfo() {
-  if (EnableStats || PrintOnExit)
+  ຖ້າ (EnableStats || PrintOnExit)
     llvm::PrintStatistics();
 }
 
@@ -136,18 +136,18 @@ void llvm::EnableStatistics(bool DoPrintOnExit) {
   PrintOnExit = DoPrintOnExit;
 }
 
-bool llvm::AreStatisticsEnabled() { return Enabled || EnableStats; }
+bool llvm::AreStatisticsEnabled() { ສົ່ງຄືນ Enabled || EnableStats; }
 
 void StatisticInfo::sort() {
   llvm::stable_sort(
       Stats, [](const TrackingStatistic *LHS, const TrackingStatistic *RHS) {
-        if (int Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
-          return Cmp < 0;
+        ຖ້າ (ຈຳນວນເຕັມ Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
+          ສົ່ງຄືນ Cmp < 0;
 
-        if (int Cmp = std::strcmp(LHS->getName(), RHS->getName()))
-          return Cmp < 0;
+        ຖ້າ (ຈຳນວນເຕັມ Cmp = std::strcmp(LHS->getName(), RHS->getName()))
+          ສົ່ງຄືນ Cmp < 0;
 
-        return std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
+        ສົ່ງຄືນ std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
       });
 }
 
@@ -158,7 +158,7 @@ void StatisticInfo::reset() {
   // again. We're holding the lock so it won't be able to do so until we're
   // finished. Once we've forced it to re-register (after we return), then zero
   // the value.
-  for (auto *Stat : Stats) {
+  ສຳລັບ (auto *Stat : Stats) {
     // Value updates to a statistic that complete before this statement in the
     // iteration for that statistic will be lost as intended.
     Stat->Initialized = false;
@@ -178,7 +178,7 @@ void llvm::PrintStatistics(raw_ostream &OS) {
 
   // Figure out how long the biggest Value and Name fields are.
   unsigned MaxDebugTypeLen = 0, MaxValLen = 0;
-  for (TrackingStatistic *Stat : Stats.Stats) {
+  ສຳລັບ (TrackingStatistic *Stat : Stats.Stats) {
     MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->getValue()).size());
     MaxDebugTypeLen =
         std::max(MaxDebugTypeLen, (unsigned)std::strlen(Stat->getDebugType()));
@@ -192,7 +192,7 @@ void llvm::PrintStatistics(raw_ostream &OS) {
      << "===" << std::string(73, '-') << "===\n\n";
 
   // Print all of the statistics.
-  for (TrackingStatistic *Stat : Stats.Stats)
+  ສຳລັບ (TrackingStatistic *Stat : Stats.Stats)
     OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->getValue(),
                  MaxDebugTypeLen, Stat->getDebugType(), Stat->getDesc());
 
@@ -208,8 +208,8 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
 
   // Print all of the statistics.
   OS << "{\n";
-  const char *delim = "";
-  for (const TrackingStatistic *Stat : Stats.Stats) {
+  const var_na *delim = "";
+  ສຳລັບ (const TrackingStatistic *Stat : Stats.Stats) {
     OS << delim;
     assert(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
            "Statistic group/type name is simple.");
@@ -227,25 +227,25 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
 }
 
 void llvm::PrintStatistics() {
-#if LLVM_ENABLE_STATS
+#ຖ້າ LLVM_ENABLE_STATS
   sys::SmartScopedLock<true> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
   // Statistics not enabled?
-  if (Stats.Stats.empty()) return;
+  ຖ້າ (Stats.Stats.empty()) ສົ່ງຄືນ;
 
   // Get the stream to write to.
   std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-  if (StatsAsJSON)
+  ຖ້າ (StatsAsJSON)
     PrintStatisticsJSON(*OutStream);
-  else
+  ບໍ່ດັ່ງນັ້ນ
     PrintStatistics(*OutStream);
 
-#else
+#ບໍ່ດັ່ງນັ້ນ
   // Check if the -stats option is set instead of checking
   // !Stats.Stats.empty().  In release builds, Statistics operators
   // do nothing, so stats are never Registered.
-  if (EnableStats) {
+  ຖ້າ (EnableStats) {
     // Get the stream to write to.
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
     (*OutStream) << "Statistics are disabled.  "
@@ -258,9 +258,9 @@ std::vector<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
   sys::SmartScopedLock<true> Reader(*StatLock);
   std::vector<std::pair<StringRef, uint64_t>> ReturnStats;
 
-  for (const auto &Stat : StatInfo->statistics())
+  ສຳລັບ (const auto &Stat : StatInfo->statistics())
     ReturnStats.emplace_back(Stat->getName(), Stat->getValue());
-  return ReturnStats;
+  ສົ່ງຄືນ ReturnStats;
 }
 
 void llvm::ResetStatistics() {

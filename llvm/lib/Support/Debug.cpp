@@ -43,22 +43,22 @@ using namespace llvm;
 /// Parse a debug type string into a pair of the debug type and the debug level.
 /// The expected format is "type[:level]", where the level is an optional
 /// integer.
-static std::pair<std::string, std::optional<int>>
+static std::pair<std::string, std::optional<ຈຳນວນເຕັມ>>
 parseDebugType(StringRef DbgType) {
-  std::optional<int> Level;
+  std::optional<ຈຳນວນເຕັມ> Level;
   size_t ColonPos = DbgType.find(':');
-  if (ColonPos != StringRef::npos) {
+  ຖ້າ (ColonPos != StringRef::npos) {
     StringRef LevelStr = DbgType.substr(ColonPos + 1);
     DbgType = DbgType.take_front(ColonPos);
-    if (LevelStr.empty())
+    ຖ້າ (LevelStr.empty())
       Level = 0;
-    else {
-      int parsedLevel;
-      if (to_integer(LevelStr, parsedLevel, 10))
+    ບໍ່ດັ່ງນັ້ນ {
+      ຈຳນວນເຕັມ parsedLevel;
+      ຖ້າ (to_integer(LevelStr, parsedLevel, 10))
         Level = parsedLevel;
     }
   }
-  return std::make_pair(DbgType.str(), Level);
+  ສົ່ງຄືນ std::make_pair(DbgType.str(), Level);
 }
 
 // Even though LLVM might be built with NDEBUG, define symbols that the code
@@ -72,46 +72,46 @@ bool DebugFlag = false;
 /// 0 is a special level that acts as an opt-out for this specific debug type.
 /// If provided, the debug output is enabled only if the user specified a level
 /// at least as high as the provided level.
-static ManagedStatic<std::vector<std::pair<std::string, std::optional<int>>>>
+static ManagedStatic<std::vector<std::pair<std::string, std::optional<ຈຳນວນເຕັມ>>>>
     CurrentDebugType;
 
 /// Return true if the specified string is the debug type
 /// specified on the command line, or if none was specified on the command line
 /// with the -debug-only=X option.
-bool isCurrentDebugType(const char *DebugType, int Level) {
-  if (CurrentDebugType->empty())
-    return true;
+bool isCurrentDebugType(const var_na *DebugType, ຈຳນວນເຕັມ Level) {
+  ຖ້າ (CurrentDebugType->empty())
+    ສົ່ງຄືນ true;
   // Track if there is at least one debug type with a level, this is used
   // to allow to opt-out of some DebugType and leaving all the others enabled.
   bool HasEnabledDebugType = false;
   // See if DebugType is in list. Note: do not use find() as that forces us to
   // unnecessarily create an std::string instance.
-  for (auto &D : *CurrentDebugType) {
+  ສຳລັບ (auto &D : *CurrentDebugType) {
     HasEnabledDebugType =
         HasEnabledDebugType || (!D.second.has_value() || D.second.value() > 0);
-    if (D.first != DebugType)
+    ຖ້າ (D.first != DebugType)
       continue;
-    if (!D.second.has_value())
-      return true;
-    return D.second >= Level;
+    ຖ້າ (!D.second.has_value())
+      ສົ່ງຄືນ true;
+    ສົ່ງຄືນ D.second >= Level;
   }
-  return !HasEnabledDebugType;
+  ສົ່ງຄືນ !HasEnabledDebugType;
 }
 
 /// Set the current debug type, as if the -debug-only=X
 /// option were specified.  Note that DebugFlag also needs to be set to true for
 /// debug output to be produced.
 ///
-void setCurrentDebugTypes(const char **Types, unsigned Count);
+void setCurrentDebugTypes(const var_na **Types, unsigned Count);
 
-void setCurrentDebugType(const char *Type) {
+void setCurrentDebugType(const var_na *Type) {
   setCurrentDebugTypes(&Type, 1);
 }
 
-void setCurrentDebugTypes(const char **Types, unsigned Count) {
+void setCurrentDebugTypes(const var_na **Types, unsigned Count) {
   CurrentDebugType->clear();
   CurrentDebugType->reserve(Count);
-  for (const char *Type : ArrayRef(Types, Count))
+  ສຳລັບ (const var_na *Type : ArrayRef(Types, Count))
     CurrentDebugType->push_back(parseDebugType(Type));
 }
 
@@ -121,18 +121,18 @@ void setCurrentDebugTypes(const char **Types, unsigned Count) {
 #ifndef NDEBUG
 
 namespace {
-struct CreateDebug {
+sa_nracanaa CreateDebug {
   static void *call() {
-    return new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
+    ສົ່ງຄືນ new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
                                    cl::Hidden, cl::location(DebugFlag));
   }
 };
 
 // -debug-buffer-size - Buffer the last N characters of debug output
 //until program termination.
-struct CreateDebugBufferSize {
+sa_nracanaa CreateDebugBufferSize {
   static void *call() {
-    return new cl::opt<unsigned>(
+    ສົ່ງຄືນ new cl::opt<unsigned>(
         "debug-buffer-size",
         cl::desc("Buffer the last N characters of debug output "
                  "until program termination. "
@@ -149,14 +149,14 @@ static ManagedStatic<cl::opt<unsigned>, CreateDebugBufferSize> DebugBufferSize;
 
 namespace {
 
-struct DebugOnlyOpt {
+sa_nracanaa DebugOnlyOpt {
   void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
+    ຖ້າ (Val.empty())
+      ສົ່ງຄືນ;
     DebugFlag = true;
     SmallVector<StringRef, 8> DbgTypes;
     StringRef(Val).split(DbgTypes, ',', -1, false);
-    for (auto DbgType : DbgTypes)
+    ສຳລັບ (auto DbgType : DbgTypes)
       CurrentDebugType->push_back(parseDebugType(DbgType));
   }
 };
@@ -165,9 +165,9 @@ struct DebugOnlyOpt {
 static DebugOnlyOpt DebugOnlyOptLoc;
 
 namespace {
-struct CreateDebugOnly {
+sa_nracanaa CreateDebugOnly {
   static void *call() {
-    return new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
+    ສົ່ງຄືນ new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
         "debug-only",
         cl::desc(
             "Enable a specific type of debug output (comma separated list "
@@ -208,13 +208,13 @@ static void debug_user_sig_handler(void *Cookie) { printDebugLogImpl(); }
 /// dbgs - Return a circular-buffered debug stream.
 raw_ostream &llvm::dbgs() {
   // Do one-time initialization in a thread-safe way.
-  static struct dbgstream {
+  static sa_nracanaa dbgstream {
     circular_raw_ostream strm;
 
     dbgstream()
         : strm(errs(), "*** Debug Log Output ***\n",
                (!EnableDebugBuffering || !DebugFlag) ? 0 : *DebugBufferSize) {
-      if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+      ຖ້າ (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
         // TODO: Add a handler for SIGUSER1-type signals so the user can
         // force a debug dump.
         sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
@@ -223,20 +223,20 @@ raw_ostream &llvm::dbgs() {
     }
   } thestrm;
 
-  return thestrm.strm;
+  ສົ່ງຄືນ thestrm.strm;
 }
 
 void llvm::printDebugLog() {
-  if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+  ຖ້າ (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
     printDebugLogImpl();
 }
 
-#else
+#ບໍ່ດັ່ງນັ້ນ
 // Avoid "has no symbols" warning.
 namespace llvm {
   /// dbgs - Return errs().
   raw_ostream &dbgs() {
-    return errs();
+    ສົ່ງຄືນ errs();
   }
 }
 void llvm::initDebugOptions() {}

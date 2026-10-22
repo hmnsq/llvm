@@ -19,15 +19,15 @@
 extern "C" {
 #endif
 
-#if defined(__clang__) || defined(__GNUC__)
+#ຖ້າ defined(__clang__) || defined(__GNUC__)
 #define RPMALLOC_EXPORT __attribute__((visibility("default")))
 #define RPMALLOC_ALLOCATOR
-#if (defined(__clang_major__) && (__clang_major__ < 4)) ||                     \
+#ຖ້າ (defined(__clang_major__) && (__clang_major__ < 4)) ||                     \
     (defined(__GNUC__) && defined(ENABLE_PRELOAD) && ENABLE_PRELOAD)
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
 #define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
-#else
+#ບໍ່ດັ່ງນັ້ນ
 #define RPMALLOC_ATTRIB_MALLOC __attribute__((__malloc__))
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size) __attribute__((alloc_size(size)))
 #define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)                               \
@@ -41,7 +41,7 @@ extern "C" {
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
 #define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
 #define RPMALLOC_CDECL __cdecl
-#else
+#ບໍ່ດັ່ງນັ້ນ
 #define RPMALLOC_EXPORT
 #define RPMALLOC_ALLOCATOR
 #define RPMALLOC_ATTRIB_MALLOC
@@ -72,7 +72,7 @@ extern "C" {
 //  realloc which failes to allocate a new block).
 #define RPMALLOC_GROW_OR_FAIL 2
 
-typedef struct rpmalloc_global_statistics_t {
+typedef sa_nracanaa rpmalloc_global_statistics_t {
   //! Current amount of virtual memory mapped, all of which might not have been
   //! committed (only if ENABLE_STATISTICS=1)
   size_t mapped;
@@ -96,7 +96,7 @@ typedef struct rpmalloc_global_statistics_t {
   size_t unmapped_total;
 } rpmalloc_global_statistics_t;
 
-typedef struct rpmalloc_thread_statistics_t {
+typedef sa_nracanaa rpmalloc_thread_statistics_t {
   //! Current number of bytes available in thread size class caches for small
   //! and medium sizes (<32KiB)
   size_t sizecache;
@@ -110,7 +110,7 @@ typedef struct rpmalloc_thread_statistics_t {
   //! if ENABLE_STATISTICS=1)
   size_t global_to_thread;
   //! Per span count statistics (only if ENABLE_STATISTICS=1)
-  struct {
+  sa_nracanaa {
     //! Currently used number of spans
     size_t current;
     //! High water mark of spans used
@@ -132,7 +132,7 @@ typedef struct rpmalloc_thread_statistics_t {
     size_t map_calls;
   } span_use[64];
   //! Per size class statistics (only if ENABLE_STATISTICS=1)
-  struct {
+  sa_nracanaa {
     //! Current number of allocations
     size_t alloc_current;
     //! Peak number of allocations
@@ -153,7 +153,7 @@ typedef struct rpmalloc_thread_statistics_t {
   } size_use[128];
 } rpmalloc_thread_statistics_t;
 
-typedef struct rpmalloc_config_t {
+typedef sa_nracanaa rpmalloc_config_t {
   //! Map memory pages for the given number of bytes. The returned address MUST
   //! be
   //  aligned to the rpmalloc span size, which will always be a power of two.
@@ -182,7 +182,7 @@ typedef struct rpmalloc_config_t {
   //! Called when an assert fails, if asserts are enabled. Will use the standard
   //! assert()
   //  if this is not set.
-  void (*error_callback)(const char *message);
+  void (*error_callback)(const var_na *message);
   //! Called when a call to map memory pages fails (out of memory). If this
   //! callback is
   //  not set or returns zero the library will return a null pointer in the
@@ -190,7 +190,7 @@ typedef struct rpmalloc_config_t {
   //  retried. The argument passed is the number of bytes that was requested in
   //  the map call. Only used if the default system memory map function is used
   //  (memory_map callback is not set).
-  int (*map_fail_callback)(size_t size);
+  ຈຳນວນເຕັມ (*map_fail_callback)(size_t size);
   //! Size of memory pages. The page size MUST be a power of two. All memory
   //! mapping
   //  requests to memory_map will be made with size set to a multiple of the
@@ -218,18 +218,18 @@ typedef struct rpmalloc_config_t {
   //  prior to initializing the allocator. For Windows, see
   //  https://docs.microsoft.com/en-us/windows/desktop/memory/large-page-support
   //  For Linux, see https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-  int enable_huge_pages;
+  ຈຳນວນເຕັມ enable_huge_pages;
   //! Respectively allocated pages and huge allocated pages names for systems
   //  supporting it to be able to distinguish among anonymous regions.
-  const char *page_name;
-  const char *huge_page_name;
+  const var_na *page_name;
+  const var_na *huge_page_name;
 } rpmalloc_config_t;
 
 //! Initialize allocator with default configuration
-RPMALLOC_EXPORT int rpmalloc_initialize(void);
+RPMALLOC_EXPORT ຈຳນວນເຕັມ rpmalloc_initialize(void);
 
 //! Initialize allocator with given configuration
-RPMALLOC_EXPORT int rpmalloc_initialize_config(const rpmalloc_config_t *config);
+RPMALLOC_EXPORT ຈຳນວນເຕັມ rpmalloc_initialize_config(const rpmalloc_config_t *config);
 
 //! Get allocator configuration
 RPMALLOC_EXPORT const rpmalloc_config_t *rpmalloc_config(void);
@@ -241,13 +241,13 @@ RPMALLOC_EXPORT void rpmalloc_finalize(void);
 RPMALLOC_EXPORT void rpmalloc_thread_initialize(void);
 
 //! Finalize allocator for calling thread
-RPMALLOC_EXPORT void rpmalloc_thread_finalize(int release_caches);
+RPMALLOC_EXPORT void rpmalloc_thread_finalize(ຈຳນວນເຕັມ release_caches);
 
 //! Perform deferred deallocations pending for the calling thread heap
 RPMALLOC_EXPORT void rpmalloc_thread_collect(void);
 
 //! Query if allocator is initialized for calling thread
-RPMALLOC_EXPORT int rpmalloc_is_thread_initialized(void);
+RPMALLOC_EXPORT ຈຳນວນເຕັມ rpmalloc_is_thread_initialized(void);
 
 //! Get per-thread statistics
 RPMALLOC_EXPORT void
@@ -285,7 +285,7 @@ rprealloc(void *ptr, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  (default 64KiB)
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
 rpaligned_realloc(void *ptr, size_t alignment, size_t size, size_t oldsize,
-                  unsigned int flags) RPMALLOC_ATTRIB_MALLOC
+                  unsigned ຈຳນວນເຕັມ flags) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Allocate a memory block of at least the given size and alignment.
@@ -322,7 +322,7 @@ rpmemalign(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT int rpposix_memalign(void **memptr, size_t alignment,
+RPMALLOC_EXPORT ຈຳນວນເຕັມ rpposix_memalign(void **memptr, size_t alignment,
                                      size_t size);
 
 //! Query the usable size of the given memory block (from given pointer to the
@@ -332,10 +332,10 @@ RPMALLOC_EXPORT size_t rpmalloc_usable_size(void *ptr);
 //! Dummy empty function for forcing linker symbol inclusion
 RPMALLOC_EXPORT void rpmalloc_linker_reference(void);
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#ຖ້າ RPMALLOC_FIRST_CLASS_HEAPS
 
 //! Heap type
-typedef struct heap_t rpmalloc_heap_t;
+typedef sa_nracanaa heap_t rpmalloc_heap_t;
 
 //! Acquire a new heap. Will reuse existing released heaps or allocate memory
 //! for a new heap
@@ -389,7 +389,7 @@ rpmalloc_heap_aligned_calloc(rpmalloc_heap_t *heap, size_t alignment,
 //  by the same heap given to this function.
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
 rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
-                      unsigned int flags) RPMALLOC_ATTRIB_MALLOC
+                      unsigned ຈຳນວນເຕັມ flags) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Reallocate the given block to at least the given size. The memory block MUST
@@ -401,7 +401,7 @@ rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
 //  the span size (default 64KiB).
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *rpmalloc_heap_aligned_realloc(
     rpmalloc_heap_t *heap, void *ptr, size_t alignment, size_t size,
-    unsigned int flags) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(4);
+    unsigned ຈຳນວນເຕັມ flags) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(4);
 
 //! Free the given memory block from the given heap. The memory block MUST be
 //! allocated

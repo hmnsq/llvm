@@ -21,16 +21,16 @@ static const ManagedStaticBase *StaticList = nullptr;
 
 static std::recursive_mutex *getManagedStaticMutex() {
   static std::recursive_mutex m;
-  return &m;
+  ສົ່ງຄືນ &m;
 }
 
 void ManagedStaticBase::RegisterManagedStatic(void *(*Creator)(),
                                               void (*Deleter)(void*)) const {
   assert(Creator);
-  if (llvm_is_multithreaded()) {
+  ຖ້າ (llvm_is_multithreaded()) {
     std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
 
-    if (!Ptr.load(std::memory_order_relaxed)) {
+    ຖ້າ (!Ptr.load(std::memory_order_relaxed)) {
       void *Tmp = Creator();
 
       Ptr.store(Tmp, std::memory_order_release);
@@ -40,7 +40,7 @@ void ManagedStaticBase::RegisterManagedStatic(void *(*Creator)(),
       Next = StaticList;
       StaticList = this;
     }
-  } else {
+  } ບໍ່ດັ່ງນັ້ນ {
     assert(!Ptr && !DeleterFn && !Next &&
            "Partially initialized ManagedStatic!?");
     Ptr = Creator();
@@ -73,6 +73,6 @@ void ManagedStaticBase::destroy() const {
 /// without any other threads executing LLVM APIs.
 /// llvm_shutdown() should be the last use of LLVM APIs.
 void llvm::llvm_shutdown() {
-  while (StaticList)
+  ໃນຂະນະທີ່ (StaticList)
     StaticList->destroy();
 }

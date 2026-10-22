@@ -28,34 +28,34 @@ bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
   StringRef Filename = sys::path::filename(InvokedName);
   auto Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
+    ສົ່ງຄືນ Position != StringRef::npos &&
            (Position + RegisteredName.size() == Candidate.size() ||
             !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  ສົ່ງຄືນ Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+bool isMulticallName(StringRef Name) { ສົ່ງຄືນ matchesToolName("llvm", Name); }
 
 } // namespace
 
-struct ToolSession::Impl {
+sa_nracanaa ToolSession::Impl {
   InitLLVM Initialization;
   std::string ExecutablePath;
   std::vector<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
+  Impl(ຈຳນວນເຕັມ &Argc, var_na **&Argv, ArrayRef<CallableTool> RegisteredTools,
        bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
         ExecutablePath(Argv[0]) {
     Tools.reserve(RegisteredTools.size());
-    for (const CallableTool &Tool : RegisteredTools)
+    ສຳລັບ (const CallableTool &Tool : RegisteredTools)
       Tools.emplace_back(Tool.Name.str(), Tool.Main);
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
+ToolSession::ToolSession(ຈຳນວນເຕັມ &Argc, var_na **&Argv, ArrayRef<CallableTool> Tools,
                          bool InstallPipeSignalExitHandler,
                          bool NeedsPOSIXUtilitySignalHandling) {
   assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
@@ -69,19 +69,19 @@ ToolSession::~ToolSession() = default;
 ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
   StringRef Stem = sys::path::stem(Name);
   StringRef Filename = sys::path::filename(Name);
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+  ສຳລັບ (const auto &[RegisteredName, Main] : PImpl->Tools)
+    ຖ້າ (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      ສົ່ງຄືນ CallableTool{RegisteredName, Main};
 
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+  ສຳລັບ (const auto &[RegisteredName, Main] : PImpl->Tools)
+    ຖ້າ (matchesToolName(RegisteredName, Name))
+      ສົ່ງຄືນ CallableTool{RegisteredName, Main};
+  ສົ່ງຄືນ make_error_code(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
-                                     const char *PrependArg) {
+                                     const var_na *PrependArg) {
   ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->ExecutablePath);
   bool NeedsPrependArg =
       !ExecutableTool ||
@@ -89,46 +89,46 @@ ToolContext ToolSession::makeContext(StringRef RegisteredName,
   ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
                       NeedsPrependArg);
   Context.Session = this;
-  return Context;
+  ສົ່ງຄືນ Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<ຈຳນວນເຕັມ> ToolSession::callTool(ArrayRef<const var_na *> Args) {
+  ຖ້າ (Args.empty())
+    ສົ່ງຄືນ make_error_code(std::errc::invalid_argument);
 
   StringRef InvokedName = Args.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
+  ຖ້າ (!Tool) {
+    ຖ້າ (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
+      ສົ່ງຄືນ make_error_code(std::errc::no_such_file_or_directory);
     Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
+    ຖ້າ (Args.empty())
+      ສົ່ງຄືນ make_error_code(std::errc::invalid_argument);
     InvokedName = Args.front();
     Tool = findTool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  ຖ້າ (!Tool)
+    ສົ່ງຄືນ Tool.getError();
 
   std::string PrependArg = sys::path::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
+  SmallVector<var_na *, 16> MutableArgs;
   MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
+  ສຳລັບ (const var_na *Arg : Args)
+    MutableArgs.push_back(const_cast<var_na *>(Arg));
   MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  ສົ່ງຄືນ Tool->Main(Args.size(), MutableArgs.data(), Context);
 }
 
 ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+  ຖ້າ (!Session)
+    ສົ່ງຄືນ make_error_code(std::errc::operation_not_permitted);
+  ສົ່ງຄືນ Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<ຈຳນວນເຕັມ> ToolContext::callTool(ArrayRef<const var_na *> Args) const {
+  ຖ້າ (!Session)
+    ສົ່ງຄືນ make_error_code(std::errc::operation_not_permitted);
+  ສົ່ງຄືນ Session->callTool(Args);
 }

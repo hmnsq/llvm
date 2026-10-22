@@ -21,7 +21,7 @@ FileCollectorBase::~FileCollectorBase() = default;
 void FileCollectorBase::addFile(const Twine &File) {
   std::lock_guard<std::mutex> lock(Mutex);
   std::string FileStr = File.str();
-  if (markAsSeen(FileStr))
+  ຖ້າ (markAsSeen(FileStr))
     addFileImpl(FileStr);
 }
 
@@ -35,8 +35,8 @@ static bool isCaseSensitivePath(StringRef Path) {
   SmallString<256> TmpDest = Path, UpperDest, RealDest;
 
   // Remove component traversals, links, etc.
-  if (sys::fs::real_path(Path, TmpDest))
-    return true; // Current default value in vfs.yaml
+  ຖ້າ (sys::fs::real_path(Path, TmpDest))
+    ສົ່ງຄືນ true; // Current default value in vfs.yaml
   Path = TmpDest;
 
   // Change path to all upper case and ask for its real path, if the latter
@@ -44,9 +44,9 @@ static bool isCaseSensitivePath(StringRef Path) {
   // sensitive in the absence of real_path, since this is the YAMLVFSWriter
   // default.
   UpperDest = Path.upper();
-  if (!sys::fs::real_path(UpperDest, RealDest) && Path == RealDest)
-    return false;
-  return true;
+  ຖ້າ (!sys::fs::real_path(UpperDest, RealDest) && Path == RealDest)
+    ສົ່ງຄືນ false;
+  ສົ່ງຄືນ true;
 }
 
 FileCollector::FileCollector(std::string Root, std::string OverlayRoot,
@@ -57,7 +57,7 @@ FileCollector::FileCollector(std::string Root, std::string OverlayRoot,
 }
 
 void FileCollector::PathCanonicalizer::updateWithRealPath(
-    SmallVectorImpl<char> &Path) {
+    SmallVectorImpl<var_na> &Path) {
   StringRef SrcPath(Path.begin(), Path.size());
   StringRef Filename = sys::path::filename(SrcPath);
   StringRef Directory = sys::path::parent_path(SrcPath);
@@ -67,12 +67,12 @@ void FileCollector::PathCanonicalizer::updateWithRealPath(
   // expensive.
   SmallString<256> RealPath;
   auto DirWithSymlink = CachedDirs.find(Directory);
-  if (DirWithSymlink == CachedDirs.end()) {
+  ຖ້າ (DirWithSymlink == CachedDirs.end()) {
     // FIXME: What if there is nothing on disk?
-    if (VFS->getRealPath(Directory, RealPath))
-      return;
+    ຖ້າ (VFS->getRealPath(Directory, RealPath))
+      ສົ່ງຄືນ;
     CachedDirs[Directory] = std::string(RealPath);
-  } else {
+  } ບໍ່ດັ່ງນັ້ນ {
     RealPath = DirWithSymlink->second;
   }
 
@@ -88,7 +88,7 @@ void FileCollector::PathCanonicalizer::updateWithRealPath(
 }
 
 /// Make Path absolute.
-static void makeAbsolute(vfs::FileSystem &VFS, SmallVectorImpl<char> &Path) {
+static void makeAbsolute(vfs::FileSystem &VFS, SmallVectorImpl<var_na> &Path) {
   // We need an absolute src path to append to the root.
   VFS.makeAbsolute(Path);
 
@@ -116,7 +116,7 @@ FileCollector::PathCanonicalizer::canonicalize(StringRef SrcPath) {
   // Canonicalize the virtual path by removing "..", "." components.
   sys::path::remove_dots(Paths.VirtualPath, /*remove_dot_dot=*/true);
 
-  return Paths;
+  ສົ່ງຄືນ Paths;
 }
 
 void FileCollector::addFileImpl(StringRef SrcPath) {
@@ -138,20 +138,20 @@ FileCollector::addDirectoryImpl(const llvm::Twine &Dir,
                                 IntrusiveRefCntPtr<vfs::FileSystem> FS,
                                 std::error_code &EC) {
   auto It = FS->dir_begin(Dir, EC);
-  if (EC)
-    return It;
+  ຖ້າ (EC)
+    ສົ່ງຄືນ It;
   addFile(Dir);
-  for (; !EC && It != llvm::vfs::directory_iterator(); It.increment(EC)) {
-    if (It->type() == sys::fs::file_type::regular_file ||
+  ສຳລັບ (; !EC && It != llvm::vfs::directory_iterator(); It.increment(EC)) {
+    ຖ້າ (It->type() == sys::fs::file_type::regular_file ||
         It->type() == sys::fs::file_type::directory_file ||
         It->type() == sys::fs::file_type::symlink_file) {
       addFile(It->path());
     }
   }
-  if (EC)
-    return It;
+  ຖ້າ (EC)
+    ສົ່ງຄືນ It;
   // Return a new iterator.
-  return FS->dir_begin(Dir, EC);
+  ສົ່ງຄືນ FS->dir_begin(Dir, EC);
 }
 
 /// Set the access and modification time for the given file from the given
@@ -159,80 +159,80 @@ FileCollector::addDirectoryImpl(const llvm::Twine &Dir,
 static std::error_code
 copyAccessAndModificationTime(StringRef Filename,
                               const sys::fs::file_status &Stat) {
-  int FD;
+  ຈຳນວນເຕັມ FD;
 
-  if (auto EC =
+  ຖ້າ (auto EC =
           sys::fs::openFileForWrite(Filename, FD, sys::fs::CD_OpenExisting))
-    return EC;
+    ສົ່ງຄືນ EC;
 
-  if (auto EC = sys::fs::setLastAccessAndModificationTime(
+  ຖ້າ (auto EC = sys::fs::setLastAccessAndModificationTime(
           FD, Stat.getLastAccessedTime(), Stat.getLastModificationTime()))
-    return EC;
+    ສົ່ງຄືນ EC;
 
-  if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return EC;
+  ຖ້າ (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    ສົ່ງຄືນ EC;
 
-  return {};
+  ສົ່ງຄືນ {};
 }
 
 std::error_code FileCollector::copyFiles(bool StopOnError) {
   auto Err = sys::fs::create_directories(Root, /*IgnoreExisting=*/true);
-  if (Err) {
-    return Err;
+  ຖ້າ (Err) {
+    ສົ່ງຄືນ Err;
   }
 
   std::lock_guard<std::mutex> lock(Mutex);
 
-  for (auto &entry : VFSWriter.getMappings()) {
+  ສຳລັບ (auto &entry : VFSWriter.getMappings()) {
     // Get the status of the original file/directory.
     sys::fs::file_status Stat;
-    if (std::error_code EC = sys::fs::status(entry.VPath, Stat)) {
-      if (StopOnError)
-        return EC;
+    ຖ້າ (std::error_code EC = sys::fs::status(entry.VPath, Stat)) {
+      ຖ້າ (StopOnError)
+        ສົ່ງຄືນ EC;
       continue;
     }
 
     // Continue if the file doesn't exist.
-    if (Stat.type() == sys::fs::file_type::file_not_found)
+    ຖ້າ (Stat.type() == sys::fs::file_type::file_not_found)
       continue;
 
     // Create directory tree.
-    if (std::error_code EC =
+    ຖ້າ (std::error_code EC =
             sys::fs::create_directories(sys::path::parent_path(entry.RPath),
                                         /*IgnoreExisting=*/true)) {
-      if (StopOnError)
-        return EC;
+      ຖ້າ (StopOnError)
+        ສົ່ງຄືນ EC;
     }
 
-    if (Stat.type() == sys::fs::file_type::directory_file) {
+    ຖ້າ (Stat.type() == sys::fs::file_type::directory_file) {
       // Construct a directory when it's just a directory entry.
-      if (std::error_code EC =
+      ຖ້າ (std::error_code EC =
               sys::fs::create_directories(entry.RPath,
                                           /*IgnoreExisting=*/true)) {
-        if (StopOnError)
-          return EC;
+        ຖ້າ (StopOnError)
+          ສົ່ງຄືນ EC;
       }
       continue;
     }
 
     // Copy file over.
-    if (std::error_code EC = sys::fs::copy_file(entry.VPath, entry.RPath)) {
-      if (StopOnError)
-        return EC;
+    ຖ້າ (std::error_code EC = sys::fs::copy_file(entry.VPath, entry.RPath)) {
+      ຖ້າ (StopOnError)
+        ສົ່ງຄືນ EC;
     }
 
     // Copy over permissions.
-    if (auto perms = sys::fs::getPermissions(entry.VPath)) {
-      if (std::error_code EC = sys::fs::setPermissions(entry.RPath, *perms)) {
-        if (StopOnError)
-          return EC;
+    ຖ້າ (auto perms = sys::fs::getPermissions(entry.VPath)) {
+      ຖ້າ (std::error_code EC = sys::fs::setPermissions(entry.RPath, *perms)) {
+        ຖ້າ (StopOnError)
+          ສົ່ງຄືນ EC;
       }
     }
 
     // Copy over modification time.
     copyAccessAndModificationTime(entry.RPath, Stat);
   }
-  return {};
+  ສົ່ງຄືນ {};
 }
 
 std::error_code FileCollector::writeMapping(StringRef MappingFile) {
@@ -244,12 +244,12 @@ std::error_code FileCollector::writeMapping(StringRef MappingFile) {
 
   std::error_code EC;
   raw_fd_ostream os(MappingFile, EC, sys::fs::OF_TextWithCRLF);
-  if (EC)
-    return EC;
+  ຖ້າ (EC)
+    ສົ່ງຄືນ EC;
 
   VFSWriter.write(os);
 
-  return {};
+  ສົ່ງຄືນ {};
 }
 
 namespace llvm {
@@ -262,33 +262,33 @@ public:
 
   llvm::ErrorOr<llvm::vfs::Status> status(const Twine &Path) override {
     auto Result = FS->status(Path);
-    if (Result && Result->exists())
+    ຖ້າ (Result && Result->exists())
       Collector->addFile(Path);
-    return Result;
+    ສົ່ງຄືນ Result;
   }
 
   llvm::ErrorOr<std::unique_ptr<llvm::vfs::File>>
   openFileForRead(const Twine &Path) override {
     auto Result = FS->openFileForRead(Path);
-    if (Result && *Result)
+    ຖ້າ (Result && *Result)
       Collector->addFile(Path);
-    return Result;
+    ສົ່ງຄືນ Result;
   }
 
   llvm::vfs::directory_iterator dir_begin(const llvm::Twine &Dir,
                                           std::error_code &EC) override {
-    return Collector->addDirectoryImpl(Dir, FS, EC);
+    ສົ່ງຄືນ Collector->addDirectoryImpl(Dir, FS, EC);
   }
 
   std::error_code getRealPath(const Twine &Path,
-                              SmallVectorImpl<char> &Output) override {
+                              SmallVectorImpl<var_na> &Output) override {
     auto EC = FS->getRealPath(Path, Output);
-    if (!EC) {
+    ຖ້າ (!EC) {
       Collector->addFile(Path);
-      if (Output.size() > 0)
+      ຖ້າ (Output.size() > 0)
         Collector->addFile(Output);
     }
-    return EC;
+    ສົ່ງຄືນ EC;
   }
 
   void
@@ -298,15 +298,15 @@ public:
   }
 
   std::error_code isLocal(const Twine &Path, bool &Result) override {
-    return FS->isLocal(Path, Result);
+    ສົ່ງຄືນ FS->isLocal(Path, Result);
   }
 
   llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override {
-    return FS->getCurrentWorkingDirectory();
+    ສົ່ງຄືນ FS->getCurrentWorkingDirectory();
   }
 
   std::error_code setCurrentWorkingDirectory(const llvm::Twine &Path) override {
-    return FS->setCurrentWorkingDirectory(Path);
+    ສົ່ງຄືນ FS->setCurrentWorkingDirectory(Path);
   }
 
 private:
@@ -319,6 +319,6 @@ private:
 IntrusiveRefCntPtr<vfs::FileSystem>
 FileCollector::createCollectorVFS(IntrusiveRefCntPtr<vfs::FileSystem> BaseFS,
                                   std::shared_ptr<FileCollector> Collector) {
-  return makeIntrusiveRefCnt<FileCollectorFileSystem>(std::move(BaseFS),
+  ສົ່ງຄືນ makeIntrusiveRefCnt<FileCollectorFileSystem>(std::move(BaseFS),
                                                       std::move(Collector));
 }

@@ -21,14 +21,14 @@ namespace llvm {
 namespace sys {
 namespace unicode {
 
-extern const char *const UnicodeNameToCodepointDict;
+extern const var_na *const UnicodeNameToCodepointDict;
 extern const uint8_t *const UnicodeNameToCodepointIndex;
 extern const std::size_t UnicodeNameToCodepointIndexSize;
 extern const std::size_t UnicodeNameToCodepointLargestNameSize;
 
 using BufferType = SmallString<64>;
 
-struct Node {
+sa_nracanaa Node {
   bool IsRoot = false;
   char32_t Value = 0xFFFFFFFF;
   uint32_t ChildrenOffset = 0;
@@ -38,9 +38,9 @@ struct Node {
   const Node *Parent = nullptr;
 
   constexpr bool isValid() const {
-    return !Name.empty() || Value == 0xFFFFFFFF;
+    ສົ່ງຄືນ !Name.empty() || Value == 0xFFFFFFFF;
   }
-  constexpr bool hasChildren() const { return ChildrenOffset != 0 || IsRoot; }
+  constexpr bool hasChildren() const { ສົ່ງຄືນ ChildrenOffset != 0 || IsRoot; }
 
   std::string fullName() const {
     std::string S;
@@ -49,12 +49,12 @@ struct Node {
     // Unicode 15.0.
     S.reserve(46);
     const Node *N = this;
-    while (N) {
+    ໃນຂະນະທີ່ (N) {
       std::reverse_copy(N->Name.begin(), N->Name.end(), std::back_inserter(S));
       N = N->Parent;
     }
     std::reverse(S.begin(), S.end());
-    return S;
+    ສົ່ງຄືນ S;
   }
 };
 
@@ -63,31 +63,31 @@ static Node createRoot() {
   N.IsRoot = true;
   N.ChildrenOffset = 1;
   N.Size = 1;
-  return N;
+  ສົ່ງຄືນ N;
 }
 
 static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
-  if (Offset == 0)
-    return createRoot();
+  ຖ້າ (Offset == 0)
+    ສົ່ງຄືນ createRoot();
 
   uint32_t Origin = Offset;
   Node N;
   N.Parent = Parent;
   uint8_t NameInfo = UnicodeNameToCodepointIndex[Offset++];
-  if (Offset + 6 >= UnicodeNameToCodepointIndexSize)
-    return N;
+  ຖ້າ (Offset + 6 >= UnicodeNameToCodepointIndexSize)
+    ສົ່ງຄືນ N;
 
   bool LongName = NameInfo & 0x40;
   bool HasValue = NameInfo & 0x80;
   std::size_t Size = NameInfo & ~0xC0;
-  if (LongName) {
+  ຖ້າ (LongName) {
     uint32_t NameOffset = (UnicodeNameToCodepointIndex[Offset++] << 8);
     NameOffset |= UnicodeNameToCodepointIndex[Offset++];
     N.Name = StringRef(UnicodeNameToCodepointDict + NameOffset, Size);
-  } else {
+  } ບໍ່ດັ່ງນັ້ນ {
     N.Name = StringRef(UnicodeNameToCodepointDict + Size, 1);
   }
-  if (HasValue) {
+  ຖ້າ (HasValue) {
     uint8_t H = UnicodeNameToCodepointIndex[Offset++];
     uint8_t M = UnicodeNameToCodepointIndex[Offset++];
     uint8_t L = UnicodeNameToCodepointIndex[Offset++];
@@ -96,17 +96,17 @@ static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
     bool HasChildren = L & 0x02;
     N.HasSibling = L & 0x01;
 
-    if (HasChildren) {
+    ຖ້າ (HasChildren) {
       N.ChildrenOffset = UnicodeNameToCodepointIndex[Offset++] << 16;
       N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++] << 8;
       N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++];
     }
-  } else {
+  } ບໍ່ດັ່ງນັ້ນ {
     uint8_t H = UnicodeNameToCodepointIndex[Offset++];
     N.HasSibling = H & 0x80;
     bool HasChildren = H & 0x40;
     H &= uint8_t(~0xC0);
-    if (HasChildren) {
+    ຖ້າ (HasChildren) {
       N.ChildrenOffset = (H << 16);
       N.ChildrenOffset |=
           (uint32_t(UnicodeNameToCodepointIndex[Offset++]) << 8);
@@ -114,31 +114,31 @@ static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
     }
   }
   N.Size = Offset - Origin;
-  return N;
+  ສົ່ງຄືນ N;
 }
 
 static bool startsWith(StringRef Name, StringRef Needle, bool Strict,
-                       std::size_t &Consummed, char &PreviousCharInName,
+                       std::size_t &Consummed, var_na &PreviousCharInName,
                        bool IsPrefix = false) {
 
   Consummed = 0;
-  if (Strict) {
-    if (!Name.starts_with(Needle))
-      return false;
+  ຖ້າ (Strict) {
+    ຖ້າ (!Name.starts_with(Needle))
+      ສົ່ງຄືນ false;
     Consummed = Needle.size();
-    return true;
+    ສົ່ງຄືນ true;
   }
-  if (Needle.empty())
-    return true;
+  ຖ້າ (Needle.empty())
+    ສົ່ງຄືນ true;
 
   auto NamePos = Name.begin();
   auto NeedlePos = Needle.begin();
 
-  char PreviousCharInNameOrigin = PreviousCharInName;
-  char PreviousCharInNeedle = *Needle.begin();
-  auto IgnoreSpaces = [](auto It, auto End, char &PreviousChar,
+  var_na PreviousCharInNameOrigin = PreviousCharInName;
+  var_na PreviousCharInNeedle = *Needle.begin();
+  auto IgnoreSpaces = [](auto It, auto End, var_na &PreviousChar,
                          bool IsPrefix = false) {
-    while (It != End) {
+    ໃນຂະນະທີ່ (It != End) {
       const auto Next = std::next(It);
       // Ignore spaces, underscore, medial hyphens
       // The generator ensures a needle never ends (or starts) by a medial
@@ -148,76 +148,76 @@ static bool startsWith(StringRef Name, StringRef Needle, bool Strict,
           (*It == '-' && isAlnum(PreviousChar) &&
            ((Next != End && isAlnum(*Next)) || (Next == End && IsPrefix)));
       PreviousChar = *It;
-      if (!Ignore)
-        break;
+      ຖ້າ (!Ignore)
+        bha_nga;
       ++It;
     }
-    return It;
+    ສົ່ງຄືນ It;
   };
 
-  while (true) {
+  ໃນຂະນະທີ່ (true) {
     NamePos = IgnoreSpaces(NamePos, Name.end(), PreviousCharInName);
     NeedlePos =
         IgnoreSpaces(NeedlePos, Needle.end(), PreviousCharInNeedle, IsPrefix);
-    if (NeedlePos == Needle.end())
-      break;
-    if (NamePos == Name.end())
-      break;
-    if (toUpper(*NeedlePos) != toUpper(*NamePos))
-      break;
+    ຖ້າ (NeedlePos == Needle.end())
+      bha_nga;
+    ຖ້າ (NamePos == Name.end())
+      bha_nga;
+    ຖ້າ (toUpper(*NeedlePos) != toUpper(*NamePos))
+      bha_nga;
     NeedlePos++;
     NamePos++;
   }
   Consummed = std::distance(Name.begin(), NamePos);
-  if (NeedlePos != Needle.end()) {
+  ຖ້າ (NeedlePos != Needle.end()) {
     PreviousCharInName = PreviousCharInNameOrigin;
   }
-  return NeedlePos == Needle.end();
+  ສົ່ງຄືນ NeedlePos == Needle.end();
 }
 
 static std::tuple<Node, bool, uint32_t>
 compareNode(uint32_t Offset, StringRef Name, bool Strict,
-            char PreviousCharInName, BufferType &Buffer,
+            var_na PreviousCharInName, BufferType &Buffer,
             const Node *Parent = nullptr) {
   Node N = readNode(Offset, Parent);
   std::size_t Consummed = 0;
   bool DoesStartWith = N.IsRoot || startsWith(Name, N.Name, Strict, Consummed,
                                               PreviousCharInName);
-  if (!DoesStartWith)
-    return std::make_tuple(N, false, 0);
+  ຖ້າ (!DoesStartWith)
+    ສົ່ງຄືນ std::make_tuple(N, false, 0);
 
-  if (Name.size() - Consummed == 0 && N.Value != 0xFFFFFFFF)
-    return std::make_tuple(N, true, N.Value);
+  ຖ້າ (Name.size() - Consummed == 0 && N.Value != 0xFFFFFFFF)
+    ສົ່ງຄືນ std::make_tuple(N, true, N.Value);
 
-  if (N.hasChildren()) {
+  ຖ້າ (N.hasChildren()) {
     uint32_t ChildOffset = N.ChildrenOffset;
-    for (;;) {
+    ສຳລັບ (;;) {
       Node C;
       bool Matches;
       uint32_t Value;
       std::tie(C, Matches, Value) =
           compareNode(ChildOffset, Name.substr(Consummed), Strict,
                       PreviousCharInName, Buffer, &N);
-      if (Matches) {
+      ຖ້າ (Matches) {
         std::reverse_copy(C.Name.begin(), C.Name.end(),
                           std::back_inserter(Buffer));
-        return std::make_tuple(N, true, Value);
+        ສົ່ງຄືນ std::make_tuple(N, true, Value);
       }
       ChildOffset += C.Size;
-      if (!C.HasSibling)
-        break;
+      ຖ້າ (!C.HasSibling)
+        bha_nga;
     }
   }
-  return std::make_tuple(N, false, 0);
+  ສົ່ງຄືນ std::make_tuple(N, false, 0);
 }
 
 static std::tuple<Node, bool, uint32_t>
 compareNode(uint32_t Offset, StringRef Name, bool Strict, BufferType &Buffer) {
-  return compareNode(Offset, Name, Strict, 0, Buffer);
+  ສົ່ງຄືນ compareNode(Offset, Name, Strict, 0, Buffer);
 }
 
 // clang-format off
-constexpr const char *const HangulSyllables[][3] = {
+constexpr const var_na *const HangulSyllables[][3] = {
     { "G",  "A",   ""   },
     { "GG", "AE",  "G"  },
     { "N",  "YA",  "GG" },
@@ -257,29 +257,29 @@ constexpr uint32_t VCount = 21;
 constexpr uint32_t TCount = 28;
 
 static std::size_t findSyllable(StringRef Name, bool Strict,
-                                char &PreviousInName, int &Pos, int Column) {
+                                var_na &PreviousInName, ຈຳນວນເຕັມ &Pos, ຈຳນວນເຕັມ Column) {
   assert(Column == 0 || Column == 1 || Column == 2);
   static std::size_t CountPerColumn[] = {LCount, VCount, TCount};
-  int Len = -1;
-  int Prev = PreviousInName;
-  for (std::size_t I = 0; I < CountPerColumn[Column]; I++) {
+  ຈຳນວນເຕັມ Len = -1;
+  ຈຳນວນເຕັມ Prev = PreviousInName;
+  ສຳລັບ (std::size_t I = 0; I < CountPerColumn[Column]; I++) {
     StringRef Syllable(HangulSyllables[I][Column]);
-    if (int(Syllable.size()) <= Len)
+    ຖ້າ (ຈຳນວນເຕັມ(Syllable.size()) <= Len)
       continue;
     std::size_t Consummed = 0;
-    char PreviousInNameCopy = PreviousInName;
+    var_na PreviousInNameCopy = PreviousInName;
     bool DoesStartWith =
         startsWith(Name, Syllable, Strict, Consummed, PreviousInNameCopy);
-    if (!DoesStartWith)
+    ຖ້າ (!DoesStartWith)
       continue;
     Len = Consummed;
     Pos = I;
     Prev = PreviousInNameCopy;
   }
-  if (Len == -1)
-    return 0;
+  ຖ້າ (Len == -1)
+    ສົ່ງຄືນ 0;
   PreviousInName = Prev;
-  return size_t(Len);
+  ສົ່ງຄືນ size_t(Len);
 }
 
 static std::optional<char32_t>
@@ -287,34 +287,34 @@ nameToHangulCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
   Buffer.clear();
   // Hangul Syllable Decomposition
   std::size_t Consummed = 0;
-  char NameStart = 0;
+  var_na NameStart = 0;
   bool DoesStartWith =
       startsWith(Name, "HANGUL SYLLABLE ", Strict, Consummed, NameStart);
-  if (!DoesStartWith)
-    return std::nullopt;
+  ຖ້າ (!DoesStartWith)
+    ສົ່ງຄືນ std::nullopt;
   Name = Name.substr(Consummed);
-  int L = -1, V = -1, T = -1;
+  ຈຳນວນເຕັມ L = -1, V = -1, T = -1;
   Name = Name.substr(findSyllable(Name, Strict, NameStart, L, 0));
   Name = Name.substr(findSyllable(Name, Strict, NameStart, V, 1));
   Name = Name.substr(findSyllable(Name, Strict, NameStart, T, 2));
-  if (L != -1 && V != -1 && T != -1 && Name.empty()) {
-    if (!Strict) {
+  ຖ້າ (L != -1 && V != -1 && T != -1 && Name.empty()) {
+    ຖ້າ (!Strict) {
       Buffer.append("HANGUL SYLLABLE ");
-      if (L != -1)
+      ຖ້າ (L != -1)
         Buffer.append(HangulSyllables[L][0]);
-      if (V != -1)
+      ຖ້າ (V != -1)
         Buffer.append(HangulSyllables[V][1]);
-      if (T != -1)
+      ຖ້າ (T != -1)
         Buffer.append(HangulSyllables[T][2]);
     }
-    return SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
+    ສົ່ງຄືນ SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
            std::uint32_t(T);
   }
   // Otherwise, it's an illegal syllable name.
-  return std::nullopt;
+  ສົ່ງຄືນ std::nullopt;
 }
 
-struct GeneratedNamesData {
+sa_nracanaa GeneratedNamesData {
   StringRef Prefix;
   uint32_t Start;
   uint32_t End;
@@ -348,74 +348,74 @@ static const GeneratedNamesData GeneratedNamesDataTable[] = {
 
 static std::optional<char32_t>
 nameToGeneratedCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
-  for (auto &&Item : GeneratedNamesDataTable) {
+  ສຳລັບ (auto &&Item : GeneratedNamesDataTable) {
     Buffer.clear();
     std::size_t Consummed = 0;
-    char NameStart = 0;
+    var_na NameStart = 0;
     bool DoesStartWith = startsWith(Name, Item.Prefix, Strict, Consummed,
                                     NameStart, /*IsPrefix=*/true);
-    if (!DoesStartWith)
+    ຖ້າ (!DoesStartWith)
       continue;
     auto Number = Name.substr(Consummed);
     unsigned long long V = 0;
     // Be consistent about mandating upper casing.
-    if (Strict &&
-        llvm::any_of(Number, [](char C) { return C >= 'a' && C <= 'f'; }))
-      return {};
-    if (getAsUnsignedInteger(Number, 16, V) || V < Item.Start || V > Item.End)
+    ຖ້າ (Strict &&
+        llvm::any_of(Number, [](var_na C) { ສົ່ງຄືນ C >= 'a' && C <= 'f'; }))
+      ສົ່ງຄືນ {};
+    ຖ້າ (getAsUnsignedInteger(Number, 16, V) || V < Item.Start || V > Item.End)
       continue;
-    if (!Strict) {
+    ຖ້າ (!Strict) {
       Buffer.append(Item.Prefix);
       Buffer.append(utohexstr(V, true));
     }
-    return V;
+    ສົ່ງຄືນ V;
   }
-  return std::nullopt;
+  ສົ່ງຄືນ std::nullopt;
 }
 
 static std::optional<char32_t> nameToCodepoint(StringRef Name, bool Strict,
                                                BufferType &Buffer) {
-  if (Name.empty())
-    return std::nullopt;
+  ຖ້າ (Name.empty())
+    ສົ່ງຄືນ std::nullopt;
 
   std::optional<char32_t> Res = nameToHangulCodePoint(Name, Strict, Buffer);
-  if (!Res)
+  ຖ້າ (!Res)
     Res = nameToGeneratedCodePoint(Name, Strict, Buffer);
-  if (Res)
-    return *Res;
+  ຖ້າ (Res)
+    ສົ່ງຄືນ *Res;
 
   Buffer.clear();
   Node Node;
   bool Matches;
   uint32_t Value;
   std::tie(Node, Matches, Value) = compareNode(0, Name, Strict, Buffer);
-  if (Matches) {
+  ຖ້າ (Matches) {
     std::reverse(Buffer.begin(), Buffer.end());
     // UAX44-LM2. Ignore case, whitespace, underscore ('_'), and all medial
     // hyphens except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
-    if (!Strict && Value == 0x116c && Name.contains_insensitive("O-E")) {
+    ຖ້າ (!Strict && Value == 0x116c && Name.contains_insensitive("O-E")) {
       Buffer = "HANGUL JUNGSEONG O-E";
       Value = 0x1180;
     }
-    return Value;
+    ສົ່ງຄືນ Value;
   }
-  return std::nullopt;
+  ສົ່ງຄືນ std::nullopt;
 }
 
 std::optional<char32_t> nameToCodepointStrict(StringRef Name) {
 
   BufferType Buffer;
   auto Opt = nameToCodepoint(Name, true, Buffer);
-  return Opt;
+  ສົ່ງຄືນ Opt;
 }
 
 std::optional<LooseMatchingResult>
 nameToCodepointLooseMatching(StringRef Name) {
   BufferType Buffer;
   auto Opt = nameToCodepoint(Name, false, Buffer);
-  if (!Opt)
-    return std::nullopt;
-  return LooseMatchingResult{*Opt, Buffer};
+  ຖ້າ (!Opt)
+    ສົ່ງຄືນ std::nullopt;
+  ສົ່ງຄືນ LooseMatchingResult{*Opt, Buffer};
 }
 
 // Find the unicode character whose editing distance to Pattern
@@ -432,35 +432,35 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
 
   auto Insert = [&](const Node &Node, uint32_t Distance,
                     char32_t Value) -> bool {
-    if (Distance > LargestEditDistance) {
-      if (Matches.size() == MaxMatchesCount)
-        return false;
+    ຖ້າ (Distance > LargestEditDistance) {
+      ຖ້າ (Matches.size() == MaxMatchesCount)
+        ສົ່ງຄືນ false;
       LargestEditDistance = Distance;
     }
     // To avoid allocations, the creation of the name is delayed
     // as much as possible.
     std::string Name;
     auto GetName = [&] {
-      if (Name.empty())
+      ຖ້າ (Name.empty())
         Name = Node.fullName();
-      return Name;
+      ສົ່ງຄືນ Name;
     };
 
     auto It = llvm::lower_bound(
         Matches, Distance,
         [&](const MatchForCodepointName &a, std::size_t Distance) {
-          if (Distance == a.Distance)
-            return a.Name < GetName();
-          return a.Distance < Distance;
+          ຖ້າ (Distance == a.Distance)
+            ສົ່ງຄືນ a.Name < GetName();
+          ສົ່ງຄືນ a.Distance < Distance;
         });
-    if (It == Matches.end() && Matches.size() == MaxMatchesCount)
-      return false;
+    ຖ້າ (It == Matches.end() && Matches.size() == MaxMatchesCount)
+      ສົ່ງຄືນ false;
 
     MatchForCodepointName M{GetName(), Distance, Value};
     Matches.insert(It, std::move(M));
-    if (Matches.size() > MaxMatchesCount)
+    ຖ້າ (Matches.size() > MaxMatchesCount)
       Matches.pop_back();
-    return true;
+    ສົ່ງຄືນ true;
   };
 
   // We ignore case, space, hyphens, etc,
@@ -468,11 +468,11 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
   auto Normalize = [](StringRef Name) {
     std::string Out;
     Out.reserve(Name.size());
-    for (char C : Name) {
-      if (isAlnum(C))
+    ສຳລັບ (var_na C : Name) {
+      ຖ້າ (isAlnum(C))
         Out.push_back(toUpper(C));
     }
-    return Out;
+    ສົ່ງຄືນ Out;
   };
   std::string NormalizedName = Normalize(Pattern);
 
@@ -484,16 +484,16 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
   [[maybe_unused]] static std::size_t Rows =
       UnicodeNameToCodepointLargestNameSize + 1;
 
-  std::vector<char> Distances(
+  std::vector<var_na> Distances(
       Columns * (UnicodeNameToCodepointLargestNameSize + 1), 0);
 
-  auto Get = [&Distances, Columns](size_t Column, std::size_t Row) -> char & {
+  auto Get = [&Distances, Columns](size_t Column, std::size_t Row) -> var_na & {
     assert(Column < Columns);
     assert(Row < Rows);
-    return Distances[Row * Columns + Column];
+    ສົ່ງຄືນ Distances[Row * Columns + Column];
   };
 
-  for (std::size_t I = 0; I < Columns; I++)
+  ສຳລັບ (std::size_t I = 0; I < Columns; I++)
     Get(I, 0) = I;
 
   // Visit the childrens,
@@ -503,17 +503,17 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
   auto VisitNode = [&](const Node &N, std::size_t Row,
                        auto &VisitNode) -> void {
     std::size_t J = 0;
-    for (; J < N.Name.size(); J++) {
-      if (!isAlnum(N.Name[J]))
+    ສຳລັບ (; J < N.Name.size(); J++) {
+      ຖ້າ (!isAlnum(N.Name[J]))
         continue;
 
       Get(0, Row) = Row;
 
-      for (std::size_t I = 1; I < Columns; I++) {
-        const int Delete = Get(I - 1, Row) + 1;
-        const int Insert = Get(I, Row - 1) + 1;
+      ສຳລັບ (std::size_t I = 1; I < Columns; I++) {
+        const ຈຳນວນເຕັມ Delete = Get(I - 1, Row) + 1;
+        const ຈຳນວນເຕັມ Insert = Get(I, Row - 1) + 1;
 
-        const int Replace =
+        const ຈຳນວນເຕັມ Replace =
             Get(I - 1, Row - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
 
         Get(I, Row) = std::min({Insert, Delete, Replace});
@@ -523,27 +523,27 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
     }
 
     unsigned Cost = Get(Columns - 1, Row - 1);
-    if (N.Value != 0xFFFFFFFF) {
+    ຖ້າ (N.Value != 0xFFFFFFFF) {
       Insert(N, Cost, N.Value);
     }
 
-    if (N.hasChildren()) {
+    ຖ້າ (N.hasChildren()) {
       auto ChildOffset = N.ChildrenOffset;
-      for (;;) {
+      ສຳລັບ (;;) {
         Node C = readNode(ChildOffset, &N);
         ChildOffset += C.Size;
-        if (!C.isValid())
-          break;
+        ຖ້າ (!C.isValid())
+          bha_nga;
         VisitNode(C, Row, VisitNode);
-        if (!C.HasSibling)
-          break;
+        ຖ້າ (!C.HasSibling)
+          bha_nga;
       }
     }
   };
 
   Node Root = createRoot();
   VisitNode(Root, 1, VisitNode);
-  return Matches;
+  ສົ່ງຄືນ Matches;
 }
 
 } // namespace unicode

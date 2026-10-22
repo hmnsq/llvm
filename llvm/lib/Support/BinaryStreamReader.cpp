@@ -27,17 +27,17 @@ BinaryStreamReader::BinaryStreamReader(StringRef Data, endianness Endian)
 
 Error BinaryStreamReader::readLongestContiguousChunk(
     ArrayRef<uint8_t> &Buffer) {
-  if (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
-    return EC;
+  ຖ້າ (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
+    ສົ່ງຄືນ EC;
   Offset += Buffer.size();
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
-  if (auto EC = Stream.readBytes(Offset, Size, Buffer))
-    return EC;
+  ຖ້າ (auto EC = Stream.readBytes(Offset, Size, Buffer))
+    ສົ່ງຄືນ EC;
   Offset += Size;
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readULEB128(uint64_t &Dest) {
@@ -46,13 +46,13 @@ Error BinaryStreamReader::readULEB128(uint64_t &Dest) {
 
   // Copy the encoded ULEB into the buffer.
   do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
+    ຖ້າ (auto Err = readBytes(NextByte, 1))
+      ສົ່ງຄືນ Err;
     EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  } ໃນຂະນະທີ່ (NextByte[0] & 0x80);
 
   Dest = decodeULEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readSLEB128(int64_t &Dest) {
@@ -61,28 +61,28 @@ Error BinaryStreamReader::readSLEB128(int64_t &Dest) {
 
   // Copy the encoded ULEB into the buffer.
   do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
+    ຖ້າ (auto Err = readBytes(NextByte, 1))
+      ສົ່ງຄືນ Err;
     EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  } ໃນຂະນະທີ່ (NextByte[0] & 0x80);
 
   Dest = decodeSLEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readCString(StringRef &Dest) {
   uint64_t OriginalOffset = getOffset();
   uint64_t FoundOffset = 0;
-  while (true) {
+  ໃນຂະນະທີ່ (true) {
     uint64_t ThisOffset = getOffset();
     ArrayRef<uint8_t> Buffer;
-    if (auto EC = readLongestContiguousChunk(Buffer))
-      return EC;
-    StringRef S(reinterpret_cast<const char *>(Buffer.begin()), Buffer.size());
+    ຖ້າ (auto EC = readLongestContiguousChunk(Buffer))
+      ສົ່ງຄືນ EC;
+    StringRef S(reinterpret_cast<const var_na *>(Buffer.begin()), Buffer.size());
     size_t Pos = S.find_first_of('\0');
-    if (LLVM_LIKELY(Pos != StringRef::npos)) {
+    ຖ້າ (LLVM_LIKELY(Pos != StringRef::npos)) {
       FoundOffset = Pos + ThisOffset;
-      break;
+      bha_nga;
     }
   }
   assert(FoundOffset >= OriginalOffset);
@@ -90,70 +90,70 @@ Error BinaryStreamReader::readCString(StringRef &Dest) {
   setOffset(OriginalOffset);
   size_t Length = FoundOffset - OriginalOffset;
 
-  if (auto EC = readFixedString(Dest, Length))
-    return EC;
+  ຖ້າ (auto EC = readFixedString(Dest, Length))
+    ສົ່ງຄືນ EC;
 
   // Now set the offset back to after the null terminator.
   setOffset(FoundOffset + 1);
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readWideString(ArrayRef<UTF16> &Dest) {
   uint64_t Length = 0;
   uint64_t OriginalOffset = getOffset();
   const UTF16 *C;
-  while (true) {
-    if (auto EC = readObject(C))
-      return EC;
-    if (*C == 0x0000)
-      break;
+  ໃນຂະນະທີ່ (true) {
+    ຖ້າ (auto EC = readObject(C))
+      ສົ່ງຄືນ EC;
+    ຖ້າ (*C == 0x0000)
+      bha_nga;
     ++Length;
   }
   uint64_t NewOffset = getOffset();
   setOffset(OriginalOffset);
 
-  if (auto EC = readArray(Dest, Length))
-    return EC;
+  ຖ້າ (auto EC = readArray(Dest, Length))
+    ສົ່ງຄືນ EC;
   setOffset(NewOffset);
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readFixedString(StringRef &Dest, uint32_t Length) {
   ArrayRef<uint8_t> Bytes;
-  if (auto EC = readBytes(Bytes, Length))
-    return EC;
-  Dest = StringRef(reinterpret_cast<const char *>(Bytes.begin()), Bytes.size());
-  return Error::success();
+  ຖ້າ (auto EC = readBytes(Bytes, Length))
+    ສົ່ງຄືນ EC;
+  Dest = StringRef(reinterpret_cast<const var_na *>(Bytes.begin()), Bytes.size());
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref) {
-  return readStreamRef(Ref, bytesRemaining());
+  ສົ່ງຄືນ readStreamRef(Ref, bytesRemaining());
 }
 
 Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref, uint32_t Length) {
-  if (bytesRemaining() < Length)
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+  ຖ້າ (bytesRemaining() < Length)
+    ສົ່ງຄືນ make_error<BinaryStreamError>(stream_error_code::stream_too_short);
   Ref = Stream.slice(Offset, Length);
   Offset += Length;
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::readSubstream(BinarySubstreamRef &Ref,
                                         uint32_t Length) {
   Ref.Offset = getOffset();
-  return readStreamRef(Ref.StreamData, Length);
+  ສົ່ງຄືນ readStreamRef(Ref.StreamData, Length);
 }
 
 Error BinaryStreamReader::skip(uint64_t Amount) {
-  if (Amount > bytesRemaining())
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+  ຖ້າ (Amount > bytesRemaining())
+    ສົ່ງຄືນ make_error<BinaryStreamError>(stream_error_code::stream_too_short);
   Offset += Amount;
-  return Error::success();
+  ສົ່ງຄືນ Error::success();
 }
 
 Error BinaryStreamReader::padToAlignment(uint32_t Align) {
   uint32_t NewOffset = alignTo(Offset, Align);
-  return skip(NewOffset - Offset);
+  ສົ່ງຄືນ skip(NewOffset - Offset);
 }
 
 uint8_t BinaryStreamReader::peek() const {
@@ -161,7 +161,7 @@ uint8_t BinaryStreamReader::peek() const {
   auto EC = Stream.readBytes(Offset, 1, Buffer);
   assert(!EC && "Cannot peek an empty buffer!");
   llvm::consumeError(std::move(EC));
-  return Buffer[0];
+  ສົ່ງຄືນ Buffer[0];
 }
 
 std::pair<BinaryStreamReader, BinaryStreamReader>
@@ -174,5 +174,5 @@ BinaryStreamReader::split(uint64_t Off) const {
   First = First.keep_front(Off);
   BinaryStreamReader W1{First};
   BinaryStreamReader W2{Second};
-  return {W1, W2};
+  ສົ່ງຄືນ {W1, W2};
 }

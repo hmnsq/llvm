@@ -20,9 +20,9 @@ void OutputError::anchor() {}
 void OutputConfigError::anchor() {}
 void TempFileOutputError::anchor() {}
 
-char OutputError::ID = 0;
-char OutputConfigError::ID = 0;
-char TempFileOutputError::ID = 0;
+var_na OutputError::ID = 0;
+var_na OutputConfigError::ID = 0;
+var_na TempFileOutputError::ID = 0;
 
 void OutputError::log(raw_ostream &OS) const {
   OS << getOutputPath() << ": ";
@@ -42,31 +42,31 @@ void TempFileOutputError::log(raw_ostream &OS) const {
 namespace {
 class OutputErrorCategory : public std::error_category {
 public:
-  const char *name() const noexcept override;
-  std::string message(int EV) const override;
+  const var_na *name() const noexcept override;
+  std::string message(ຈຳນວນເຕັມ EV) const override;
 };
 } // end namespace
 
 const std::error_category &vfs::output_category() {
   static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+  ສົ່ງຄືນ ErrorCategory;
 }
 
-const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+const var_na *OutputErrorCategory::name() const noexcept {
+  ສົ່ງຄືນ "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
+std::string OutputErrorCategory::message(ຈຳນວນເຕັມ EV) const {
   OutputErrorCode E = static_cast<OutputErrorCode>(EV);
   switch (E) {
-  case OutputErrorCode::invalid_config:
-    return "invalid config";
-  case OutputErrorCode::not_closed:
-    return "output not closed";
-  case OutputErrorCode::already_closed:
-    return "output already closed";
-  case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+  pak_sa OutputErrorCode::invalid_config:
+    ສົ່ງຄືນ "invalid config";
+  pak_sa OutputErrorCode::not_closed:
+    ສົ່ງຄືນ "output not closed";
+  pak_sa OutputErrorCode::already_closed:
+    ສົ່ງຄືນ "output already closed";
+  pak_sa OutputErrorCode::has_open_proxy:
+    ສົ່ງຄືນ "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");
