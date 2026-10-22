@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/circular_raw_ostream.h"
-#include <algorithm>
-using namespace llvm;
+#अन्तर्भाव "llvm/Support/circular_raw_ostream.h"
+#अन्तर्भाव <algorithm>
+using नामाकाश llvm;
 
-void circular_raw_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (BufferSize == 0) {
-    TheStream->write(Ptr, Size);
-    return;
+शून्य circular_raw_ostream::write_impl(ध्रुव वर्ण *Ptr, size_t Size) {
+  जइ (BufferSize == 0) {
+    TheStream->लिख(Ptr, Size);
+    प्रत्यागम;
   }
 
   // Write into the buffer, wrapping if necessary.
-  while (Size != 0) {
+  जाव (Size != 0) {
     unsigned Bytes =
       std::min(unsigned(Size), unsigned(BufferSize - (Cur - BufferArray)));
     memcpy(Cur, Ptr, Bytes);
     Size -= Bytes;
     Cur += Bytes;
-    if (Cur == BufferArray + BufferSize) {
+    जइ (Cur == BufferArray + BufferSize) {
       // Reset the output pointer to the start of the buffer.
       Cur = BufferArray;
-      Filled = true;
+      Filled = सच्च;
     }
   }
 }
 
-void circular_raw_ostream::flushBufferWithBanner() {
-  if (BufferSize != 0) {
+शून्य circular_raw_ostream::flushBufferWithBanner() {
+  जइ (BufferSize != 0) {
     // Write out the buffer
-    TheStream->write(Banner, std::strlen(Banner));
+    TheStream->लिख(Banner, std::strlen(Banner));
     flushBuffer();
   }
 }

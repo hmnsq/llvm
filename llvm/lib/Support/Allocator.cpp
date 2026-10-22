@@ -10,25 +10,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/PerThreadBumpPtrAllocator.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/Allocator.h"
+#अन्तर्भाव "llvm/Support/PerThreadBumpPtrAllocator.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-#include <atomic>
+#अन्तर्भाव <atomic>
 
-namespace llvm {
+नामाकाश llvm {
 
-namespace detail {
+नामाकाश detail {
 
-void printBumpPtrAllocatorStats(unsigned NumSlabs, size_t TotalMemory) {
-  errs() << "\nNumber of memory regions: " << NumSlabs << '\n'
+शून्य printBumpPtrAllocatorStats(unsigned अङ्कः_Slabs, size_t TotalMemory) {
+  errs() << "\nNumber of memory regions: " << अङ्कः_Slabs << '\n'
          << "Bytes allocated: " << TotalMemory << '\n'
          << " (includes alignment, etc)\n";
 }
 
 } // namespace detail
 
-void PrintRecyclerStats(size_t Size,
+शून्य PrintRecyclerStats(size_t Size,
                         size_t Align,
                         size_t FreeListSize) {
   errs() << "Recycler element size: " << Size << '\n'
@@ -36,10 +36,10 @@ void PrintRecyclerStats(size_t Size,
          << "Number of elements free for recycling: " << FreeListSize << '\n';
 }
 
-namespace parallel::detail {
+नामाकाश parallel::detail {
 unsigned claimPerThreadAllocatorId() {
-  static std::atomic<unsigned> Counter;
-  return Counter.fetch_add(1, std::memory_order_relaxed);
+  स्थिर std::atomic<unsigned> Counter;
+  प्रत्यागम Counter.fetch_add(1, std::memory_order_relaxed);
 }
 } // namespace parallel::detail
 

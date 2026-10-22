@@ -7,42 +7,42 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64AttributeParser.h"
-#include "llvm/Support/AArch64BuildAttributes.h"
+#अन्तर्भाव "llvm/Support/AArch64AttributeParser.h"
+#अन्तर्भाव "llvm/Support/AArch64BuildAttributes.h"
 
 std::vector<llvm::SubsectionAndTagToTagName> &
 llvm::AArch64AttributeParser::returnTagsNamesMap() {
-  static std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
+  स्थिर std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
       {"aeabi_pauthabi", 1, "Tag_PAuth_Platform"},
       {"aeabi_pauthabi", 2, "Tag_PAuth_Schema"},
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  प्रत्यागम TagsNamesMap;
 }
 
 llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
-    const llvm::AArch64AttributeParser &Attributes) {
+    ध्रुव llvm::AArch64AttributeParser &Attributes) {
 
   llvm::AArch64BuildAttrSubsections SubSections;
-  auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+  auto Get_Pauth_मानम् = [&Attributes](unsigned Tag) {
+    प्रत्यागम Attributes.get_Attribute_मानम्("aeabi_pauthabi", Tag).मानम्_or(0);
   };
   SubSections.Pauth.TagPlatform =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
+      Get_Pauth_मानम्(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
   SubSections.Pauth.TagSchema =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
+      Get_Pauth_मानम्(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
 
-  auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
-        .value_or(0);
+  auto Get_Feature_मानम् = [&Attributes](unsigned Tag) {
+    प्रत्यागम Attributes.get_Attribute_मानम्("aeabi_feature_and_bits", Tag)
+        .मानम्_or(0);
   };
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_BTI);
+      Get_Feature_मानम्(llvm::AArch64BuildAttributes::TAG_FEATURE_BTI);
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_PAC) << 1;
+      Get_Feature_मानम्(llvm::AArch64BuildAttributes::TAG_FEATURE_PAC) << 1;
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
+      Get_Feature_मानम्(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
 
-  return SubSections;
+  प्रत्यागम SubSections;
 }

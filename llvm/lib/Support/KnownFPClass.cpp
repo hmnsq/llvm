@@ -11,101 +11,101 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/KnownFPClass.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/KnownBits.h"
+#अन्तर्भाव "llvm/Support/KnownFPClass.h"
+#अन्तर्भाव "llvm/ADT/APFloat.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव "llvm/Support/KnownBits.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-KnownFPClass::KnownFPClass(const APFloat &C)
-    : KnownFPClassesValue(C.classify()) {
+KnownFPClass::KnownFPClass(ध्रुव APFloat &C)
+    : Known_FPClasses_मानम्(C.classify()) {
   setSignBit(C.isNegative());
 }
 
-KnownFPClass KnownFPClass::applyInputDenormalMode(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::apply_निवेशः_Denormal_Mode(ध्रुव KnownFPClass &KnownSrc,
                                                   DenormalMode Mode) {
   KnownFPClass Known = KnownSrc;
-  switch (Mode.Input) {
-  case DenormalMode::IEEE:
-    return Known;
-  case DenormalMode::PreserveSign:
-    if (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
+  विकल्प (Mode.निवेशः) {
+  पक्ष DenormalMode::IEEE:
+    प्रत्यागम Known;
+  पक्ष DenormalMode::PreserveSign:
+    जइ (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
-  case DenormalMode::PositiveZero:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    प्रत्यागम Known;
+  पक्ष DenormalMode::PositiveZero:
+    जइ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    return Known;
-  default:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    प्रत्यागम Known;
+  स्वभाव:
+    जइ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
+    प्रत्यागम Known;
   }
 
   llvm_unreachable("covered switch over denormal mode");
 }
 
-KnownFPClass KnownFPClass::applyOutputDenormalMode(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::applyOutputDenormalMode(ध्रुव KnownFPClass &KnownSrc,
                                                    DenormalMode Mode) {
   KnownFPClass Known = KnownSrc;
-  switch (Mode.Output) {
-  case DenormalMode::IEEE:
-    return Known;
-  case DenormalMode::PreserveSign:
-    if (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
+  विकल्प (Mode.Output) {
+  पक्ष DenormalMode::IEEE:
+    प्रत्यागम Known;
+  पक्ष DenormalMode::PreserveSign:
+    जइ (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
-  case DenormalMode::PositiveZero:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    प्रत्यागम Known;
+  पक्ष DenormalMode::PositiveZero:
+    जइ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    return Known;
-  default:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    प्रत्यागम Known;
+  स्वभाव:
+    जइ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    जइ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
+    प्रत्यागम Known;
   }
 
   llvm_unreachable("covered switch over denormal mode");
 }
 
-bool KnownFPClass::isKnownNeverLogicalZero(DenormalMode Mode) const {
-  return applyInputDenormalMode(*this, Mode).isKnownNeverZero();
+तार्किक KnownFPClass::isKnownNeverLogicalZero(DenormalMode Mode) ध्रुव {
+  प्रत्यागम apply_निवेशः_Denormal_Mode(*एतत्, Mode).isKnownNeverZero();
 }
 
-bool KnownFPClass::isKnownNeverLogicalNegZero(DenormalMode Mode) const {
-  return applyInputDenormalMode(*this, Mode).isKnownNeverNegZero();
+तार्किक KnownFPClass::isKnownNeverLogicalNegZero(DenormalMode Mode) ध्रुव {
+  प्रत्यागम apply_निवेशः_Denormal_Mode(*एतत्, Mode).isKnownNeverNegZero();
 }
 
-bool KnownFPClass::isKnownNeverLogicalPosZero(DenormalMode Mode) const {
-  return applyInputDenormalMode(*this, Mode).isKnownNeverPosZero();
+तार्किक KnownFPClass::isKnownNeverLogicalPosZero(DenormalMode Mode) ध्रुव {
+  प्रत्यागम apply_निवेशः_Denormal_Mode(*एतत्, Mode).isKnownNeverPosZero();
 }
 
-KnownFPClass KnownFPClass::minMaxLike(const KnownFPClass &KnownLHS_,
-                                      const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::minMaxLike(ध्रुव KnownFPClass &KnownLHS_,
+                                      ध्रुव KnownFPClass &KnownRHS_,
                                       MinMaxKind Kind, DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_निवेशः_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_निवेशः_Denormal_Mode(KnownRHS_, Mode);
 
   KnownFPClass Known;
 
@@ -113,61 +113,61 @@ KnownFPClass KnownFPClass::minMaxLike(const KnownFPClass &KnownLHS_,
 
   // The *num functions return the non-NaN operand if only one operand is NaN.
   // FIXME: minnum/maxnum may return a NaN if either operand is a signaling NaN.
-  if ((KnownLHS.isKnownNeverNaN() || KnownRHS.isKnownNeverNaN()) &&
+  जइ ((KnownLHS.isKnownNeverNaN() || KnownRHS.isKnownNeverNaN()) &&
       (Kind == MinMaxKind::minnum || Kind == MinMaxKind::maxnum ||
        Kind == MinMaxKind::minimumnum || Kind == MinMaxKind::maximumnum))
     Known.knownNot(fcNan);
 
-  switch (Kind) {
-  case MinMaxKind::maxnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  विकल्प (Kind) {
+  पक्ष MinMaxKind::maxnum: {
+    जइ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownLHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/false));
-    if (KnownRHS.isKnownNeverNaN())
+                                         /*OrderedZeroSign=*/मिच्छ));
+    जइ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownRHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/false));
-    break;
+                                         /*OrderedZeroSign=*/मिच्छ));
+    भङ्ग;
   }
-  case MinMaxKind::minnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  पक्ष MinMaxKind::minnum: {
+    जइ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownLHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/false));
-    if (KnownRHS.isKnownNeverNaN())
+                                            /*OrderedZeroSign=*/मिच्छ));
+    जइ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownRHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/false));
-    break;
+                                            /*OrderedZeroSign=*/मिच्छ));
+    भङ्ग;
   }
-  case MinMaxKind::maximumnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  पक्ष MinMaxKind::maximumnum: {
+    जइ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownLHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/true));
-    if (KnownRHS.isKnownNeverNaN())
+                                         /*OrderedZeroSign=*/सच्च));
+    जइ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownRHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/true));
-    break;
+                                         /*OrderedZeroSign=*/सच्च));
+    भङ्ग;
   }
-  case MinMaxKind::minimumnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  पक्ष MinMaxKind::minimumnum: {
+    जइ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownLHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/true));
-    if (KnownRHS.isKnownNeverNaN())
+                                            /*OrderedZeroSign=*/सच्च));
+    जइ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownRHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/true));
-    break;
+                                            /*OrderedZeroSign=*/सच्च));
+    भङ्ग;
   }
-  case MinMaxKind::maximum: {
+  पक्ष MinMaxKind::maximum: {
     Known.knownNot(orderedStrictlyLess(KnownLHS.getKnownFPClasses(),
-                                       /*OrderedZeroSign=*/true) |
+                                       /*OrderedZeroSign=*/सच्च) |
                    orderedStrictlyLess(KnownRHS.getKnownFPClasses(),
-                                       /*OrderedZeroSign=*/true));
-    break;
+                                       /*OrderedZeroSign=*/सच्च));
+    भङ्ग;
   }
-  case MinMaxKind::minimum: {
+  पक्ष MinMaxKind::minimum: {
     Known.knownNot(orderedStrictlyGreater(KnownLHS.getKnownFPClasses(),
-                                          /*OrderedZeroSign=*/true) |
+                                          /*OrderedZeroSign=*/सच्च) |
                    orderedStrictlyGreater(KnownRHS.getKnownFPClasses(),
-                                          /*OrderedZeroSign=*/true));
-    break;
+                                          /*OrderedZeroSign=*/सच्च));
+    भङ्ग;
   }
   }
 
@@ -176,10 +176,10 @@ KnownFPClass KnownFPClass::minMaxLike(const KnownFPClass &KnownLHS_,
       KnownLHS.getKnownFPClasses() | KnownRHS.getKnownFPClasses() | fcNan;
   Known.knownNot(~PossibleClasses);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::canonicalize(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::canonicalize(ध्रुव KnownFPClass &KnownSrc,
                                         DenormalMode DenormMode) {
   KnownFPClass Known;
 
@@ -189,134 +189,134 @@ KnownFPClass KnownFPClass::canonicalize(const KnownFPClass &KnownSrc,
 
   // Stronger version of propagateNaN
   // Canonicalize is guaranteed to quiet signaling nans.
-  if (KnownSrc.isKnownNeverNaN())
+  जइ (KnownSrc.isKnownNeverNaN())
     Known.knownNot(fcNan);
-  else
+  अण्णहा
     Known.knownNot(fcSNan);
 
   // FIXME: Missing check of IEEE like types.
 
   // If the parent function flushes denormals, the canonical output cannot be a
   // denormal.
-  if (DenormMode == DenormalMode::getIEEE()) {
-    if (KnownSrc.isKnownNever(fcPosZero))
+  जइ (DenormMode == DenormalMode::getIEEE()) {
+    जइ (KnownSrc.isKnownNever(fcPosZero))
       Known.knownNot(fcPosZero);
-    if (KnownSrc.isKnownNever(fcNegZero))
+    जइ (KnownSrc.isKnownNever(fcNegZero))
       Known.knownNot(fcNegZero);
-    return Known;
+    प्रत्यागम Known;
   }
 
-  if (DenormMode.inputsAreZero() || DenormMode.outputsAreZero())
+  जइ (DenormMode.inputsAreZero() || DenormMode.outputsAreZero())
     Known.knownNot(fcSubnormal);
 
-  if (DenormMode == DenormalMode::getPreserveSign()) {
-    if (KnownSrc.isKnownNever(fcPosZero | fcPosSubnormal))
+  जइ (DenormMode == DenormalMode::getPreserveSign()) {
+    जइ (KnownSrc.isKnownNever(fcPosZero | fcPosSubnormal))
       Known.knownNot(fcPosZero);
-    if (KnownSrc.isKnownNever(fcNegZero | fcNegSubnormal))
+    जइ (KnownSrc.isKnownNever(fcNegZero | fcNegSubnormal))
       Known.knownNot(fcNegZero);
-    return Known;
+    प्रत्यागम Known;
   }
 
-  if (DenormMode.Input == DenormalMode::PositiveZero ||
+  जइ (DenormMode.निवेशः == DenormalMode::PositiveZero ||
       (DenormMode.Output == DenormalMode::PositiveZero &&
-       DenormMode.Input == DenormalMode::IEEE)) {
+       DenormMode.निवेशः == DenormalMode::IEEE)) {
     // -0.0 is not a subnormal and should not be flushed.
-    if (KnownSrc.isKnownNever(fcNegZero))
+    जइ (KnownSrc.isKnownNever(fcNegZero))
       Known.knownNot(fcNegZero);
 
-    if (KnownSrc.isKnownNever(fcPosZero | fcSubnormal))
+    जइ (KnownSrc.isKnownNever(fcPosZero | fcSubnormal))
       Known.knownNot(fcPosZero);
   }
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::bitcast(const fltSemantics &FltSemantics,
-                                   const KnownBits &Bits) {
-  assert(FltSemantics.sizeInBits == Bits.getBitWidth() &&
+KnownFPClass KnownFPClass::bitcast(ध्रुव fltSemantics &FltSemantics,
+                                   ध्रुव KnownBits &Bits) {
+  प्रतिज्ञा(FltSemantics.sizeInBits == Bits.getBitWidth() &&
          "Bitcast operand has incorrect bit width");
   KnownFPClass Known;
 
   // Conflicting known bits do not describe a concrete value. Return unknown.
-  if (Bits.hasConflict())
-    return Known;
+  जइ (Bits.hasConflict())
+    प्रत्यागम Known;
 
   // Return unknown for types we have not validated.
-  auto IsSupported = [](const fltSemantics &Semantics) {
-    switch (APFloat::SemanticsToEnum(Semantics)) {
-    case APFloatBase::S_IEEEhalf:
-    case APFloatBase::S_BFloat:
-    case APFloatBase::S_IEEEsingle:
-    case APFloatBase::S_IEEEdouble:
-    case APFloatBase::S_IEEEquad:
-    case APFloatBase::S_x87DoubleExtended:
-      return true;
-    default:
-      return false;
+  auto IsSupported = [](ध्रुव fltSemantics &Semantics) {
+    विकल्प (APFloat::SemanticsToEnum(Semantics)) {
+    पक्ष APFloatBase::S_IEEEhalf:
+    पक्ष APFloatBase::S_BFloat:
+    पक्ष APFloatBase::S_IEEEsingle:
+    पक्ष APFloatBase::S_IEEEdouble:
+    पक्ष APFloatBase::S_IEEEquad:
+    पक्ष APFloatBase::S_x87DoubleExtended:
+      प्रत्यागम सच्च;
+    स्वभाव:
+      प्रत्यागम मिच्छ;
     }
   };
-  if (!IsSupported(FltSemantics))
-    return Known;
+  जइ (!IsSupported(FltSemantics))
+    प्रत्यागम Known;
 
   // Transfer information from the sign bit.
-  if (Bits.isNonNegative())
+  जइ (Bits.isNonNegative())
     Known.signBitMustBeZero();
-  else if (Bits.isNegative())
+  अण्णहा जइ (Bits.isNegative())
     Known.signBitMustBeOne();
 
-  switch (APFloatBase::SemanticsToEnum(FltSemantics)) {
-  case APFloatBase::S_IEEEhalf:
-  case APFloatBase::S_BFloat:
-  case APFloatBase::S_IEEEsingle:
-  case APFloatBase::S_IEEEdouble:
-  case APFloatBase::S_IEEEquad: {
-    const unsigned MantissaBits = FltSemantics.precision - 1;
-    const APInt ExponentMask = APInt::getBitsSet(
+  विकल्प (APFloatBase::SemanticsToEnum(FltSemantics)) {
+  पक्ष APFloatBase::S_IEEEhalf:
+  पक्ष APFloatBase::S_BFloat:
+  पक्ष APFloatBase::S_IEEEsingle:
+  पक्ष APFloatBase::S_IEEEdouble:
+  पक्ष APFloatBase::S_IEEEquad: {
+    ध्रुव unsigned MantissaBits = FltSemantics.precision - 1;
+    ध्रुव APInt ExponentMask = APInt::getBitsSet(
         FltSemantics.sizeInBits, MantissaBits, FltSemantics.sizeInBits - 1);
-    const APInt MantissaMask =
-        APInt::getLowBitsSet(FltSemantics.sizeInBits, MantissaBits);
+    ध्रुव APInt MantissaMask =
+        APInt::get_नीचः_Bits_Set(FltSemantics.sizeInBits, MantissaBits);
 
-    const bool ExponentKnownAllZeros =
+    ध्रुव तार्किक ExponentKnownAllZeros =
         (Bits.Zero & ExponentMask) == ExponentMask;
-    const bool ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
-    const bool ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
-    const bool ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
+    ध्रुव तार्किक ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
+    ध्रुव तार्किक ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
+    ध्रुव तार्किक ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
 
-    const bool MantissaKnownAllZeros =
+    ध्रुव तार्किक MantissaKnownAllZeros =
         (Bits.Zero & MantissaMask) == MantissaMask;
-    const bool MantissaKnownNotAllZeros = !(Bits.One & MantissaMask).isZero();
+    ध्रुव तार्किक MantissaKnownNotAllZeros = !(Bits.One & MantissaMask).isZero();
 
     // Zero and subnormal require an exponent with all zero bits.
-    if (ExponentKnownNotAllZeros)
+    जइ (ExponentKnownNotAllZeros)
       Known.knownNot(fcZero | fcSubnormal);
 
     // Infinity and NaN require an exponent with all one bits.
-    if (ExponentKnownNotAllOnes)
+    जइ (ExponentKnownNotAllOnes)
       Known.knownNot(fcInf | fcNan);
 
     // Normal values have an exponent that is not all zeros or all ones.
-    if (ExponentKnownAllZeros || ExponentKnownAllOnes)
+    जइ (ExponentKnownAllZeros || ExponentKnownAllOnes)
       Known.knownNot(fcNormal);
 
     // Zero and infinity require a mantissa with all zero bits.
-    if (MantissaKnownNotAllZeros)
+    जइ (MantissaKnownNotAllZeros)
       Known.knownNot(fcZero | fcInf);
 
     // Subnormal and NaN require a non-zero mantissa.
-    if (MantissaKnownAllZeros)
+    जइ (MantissaKnownAllZeros)
       Known.knownNot(fcSubnormal | fcNan);
 
-    const bool QuietBitKnownSet = Bits.One[MantissaBits - 1];
-    const bool QuietBitKnownClear = Bits.Zero[MantissaBits - 1];
+    ध्रुव तार्किक QuietBitKnownSet = Bits.One[MantissaBits - 1];
+    ध्रुव तार्किक QuietBitKnownClear = Bits.Zero[MantissaBits - 1];
 
-    if (QuietBitKnownSet)
+    जइ (QuietBitKnownSet)
       Known.knownNot(fcSNan);
-    else if (QuietBitKnownClear)
+    अण्णहा जइ (QuietBitKnownClear)
       Known.knownNot(fcQNan);
 
-    break;
+    भङ्ग;
   }
-  case APFloatBase::S_x87DoubleExtended: {
+  पक्ष APFloatBase::S_x87DoubleExtended: {
     // Layout of the x87 floating point type:
     // [0:62] fraction
     // [63] explicit integer bit
@@ -327,278 +327,278 @@ KnownFPClass KnownFPClass::bitcast(const fltSemantics &FltSemantics,
     constexpr unsigned BitWidth = 80;
     constexpr unsigned FractionBits = 63;
     constexpr unsigned IntegerBitIndex = FractionBits;
-    const APInt FractionMask = APInt::getLowBitsSet(BitWidth, FractionBits);
-    const APInt ExponentMask =
+    ध्रुव APInt FractionMask = APInt::get_नीचः_Bits_Set(BitWidth, FractionBits);
+    ध्रुव APInt ExponentMask =
         APInt::getBitsSet(BitWidth, FractionBits + 1, BitWidth - 1);
 
-    const bool ExponentKnownAllZeros =
+    ध्रुव तार्किक ExponentKnownAllZeros =
         (Bits.Zero & ExponentMask) == ExponentMask;
-    const bool ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
-    const bool ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
-    const bool ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
-    const bool FractionKnownAllZeros =
+    ध्रुव तार्किक ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
+    ध्रुव तार्किक ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
+    ध्रुव तार्किक ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
+    ध्रुव तार्किक FractionKnownAllZeros =
         (Bits.Zero & FractionMask) == FractionMask;
-    const bool FractionKnownNotAllZeros = !(Bits.One & FractionMask).isZero();
-    const bool IntegerBitKnownSet = Bits.One[IntegerBitIndex];
-    const bool IntegerBitKnownClear = Bits.Zero[IntegerBitIndex];
+    ध्रुव तार्किक FractionKnownNotAllZeros = !(Bits.One & FractionMask).isZero();
+    ध्रुव तार्किक IntegerBitKnownSet = Bits.One[IntegerBitIndex];
+    ध्रुव तार्किक IntegerBitKnownClear = Bits.Zero[IntegerBitIndex];
 
     // zero and subnormal require an exponent with all zero bits and a cleared
     // integer bit.
-    if (ExponentKnownNotAllZeros || IntegerBitKnownSet)
+    जइ (ExponentKnownNotAllZeros || IntegerBitKnownSet)
       Known.knownNot(fcZero | fcSubnormal);
 
     // Zero requires a zero fraction.
-    if (FractionKnownNotAllZeros)
+    जइ (FractionKnownNotAllZeros)
       Known.knownNot(fcZero);
 
     // Infinity requires an exponent with all one bits, a set integer bit, and
     // a zero fraction.
-    if (ExponentKnownNotAllOnes || IntegerBitKnownClear ||
+    जइ (ExponentKnownNotAllOnes || IntegerBitKnownClear ||
         FractionKnownNotAllZeros)
       Known.knownNot(fcInf);
 
     // A normal x87 value has its integer bit set. A zero exponent with that
     // bit set is the x87 pseudodenormal encoding, which APFloat treats as
     // normal.
-    if (IntegerBitKnownClear || ExponentKnownAllOnes)
+    जइ (IntegerBitKnownClear || ExponentKnownAllOnes)
       Known.knownNot(fcNormal);
 
     // A subnormal has a nonzero fraction; NaNs are possible with a zero
     // fraction through pseudoinfinity and unnormal encodings.
-    if (FractionKnownAllZeros)
+    जइ (FractionKnownAllZeros)
       Known.knownNot(fcSubnormal);
 
     // We can rule out NaN if the value has all exponent bits set to zero, or
     // if the value is a canonical normal or infinity.
-    if (ExponentKnownAllZeros ||
+    जइ (ExponentKnownAllZeros ||
         (IntegerBitKnownSet &&
          (ExponentKnownNotAllOnes || FractionKnownAllZeros)))
       Known.knownNot(fcNan);
 
-    const bool QuietBitKnownSet = Bits.One[FractionBits - 1];
-    const bool QuietBitKnownClear = Bits.Zero[FractionBits - 1];
+    ध्रुव तार्किक QuietBitKnownSet = Bits.One[FractionBits - 1];
+    ध्रुव तार्किक QuietBitKnownClear = Bits.Zero[FractionBits - 1];
 
-    if (QuietBitKnownSet)
+    जइ (QuietBitKnownSet)
       Known.knownNot(fcSNan);
-    else if (QuietBitKnownClear)
+    अण्णहा जइ (QuietBitKnownClear)
       Known.knownNot(fcQNan);
 
-    break;
+    भङ्ग;
   }
-  default:
+  स्वभाव:
     llvm_unreachable("unhandled supported type");
   }
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownBits KnownFPClass::toKnownBits(const fltSemantics &FltSemantics) const {
+KnownBits KnownFPClass::toKnownBits(ध्रुव fltSemantics &FltSemantics) ध्रुव {
   KnownBits Known(FltSemantics.sizeInBits);
-  const FPClassTest FPClasses = getKnownFPClasses();
+  ध्रुव FPClassTest FPClasses = getKnownFPClasses();
 
   // Return unknown if poison.
-  if (FPClasses == fcNone)
-    return Known;
+  जइ (FPClasses == fcNone)
+    प्रत्यागम Known;
 
   // Return unknown for types we have not validated.
-  auto IsSupported = [](const fltSemantics &Semantics) {
-    switch (APFloat::SemanticsToEnum(Semantics)) {
-    case APFloatBase::S_IEEEhalf:
-    case APFloatBase::S_BFloat:
-    case APFloatBase::S_IEEEsingle:
-    case APFloatBase::S_IEEEdouble:
-    case APFloatBase::S_IEEEquad:
-    case APFloatBase::S_x87DoubleExtended:
-      return true;
-    default:
-      return false;
+  auto IsSupported = [](ध्रुव fltSemantics &Semantics) {
+    विकल्प (APFloat::SemanticsToEnum(Semantics)) {
+    पक्ष APFloatBase::S_IEEEhalf:
+    पक्ष APFloatBase::S_BFloat:
+    पक्ष APFloatBase::S_IEEEsingle:
+    पक्ष APFloatBase::S_IEEEdouble:
+    पक्ष APFloatBase::S_IEEEquad:
+    पक्ष APFloatBase::S_x87DoubleExtended:
+      प्रत्यागम सच्च;
+    स्वभाव:
+      प्रत्यागम मिच्छ;
     }
   };
-  if (!IsSupported(FltSemantics))
-    return Known;
+  जइ (!IsSupported(FltSemantics))
+    प्रत्यागम Known;
 
-  switch (APFloat::SemanticsToEnum(FltSemantics)) {
-  case APFloatBase::S_IEEEhalf:
-  case APFloatBase::S_BFloat:
-  case APFloatBase::S_IEEEsingle:
-  case APFloatBase::S_IEEEdouble:
-  case APFloatBase::S_IEEEquad: {
+  विकल्प (APFloat::SemanticsToEnum(FltSemantics)) {
+  पक्ष APFloatBase::S_IEEEhalf:
+  पक्ष APFloatBase::S_BFloat:
+  पक्ष APFloatBase::S_IEEEsingle:
+  पक्ष APFloatBase::S_IEEEdouble:
+  पक्ष APFloatBase::S_IEEEquad: {
     // For ieee types, we cannot deduce anything if the source could be normal.
-    if (FPClasses & fcNormal)
-      break;
+    जइ (FPClasses & fcNormal)
+      भङ्ग;
 
     Known.setAllConflict();
 
-    const unsigned BitWidth = FltSemantics.sizeInBits;
-    const unsigned MantissaBits = FltSemantics.precision - 1;
-    const unsigned ExponentBits = BitWidth - MantissaBits - 1;
+    ध्रुव unsigned BitWidth = FltSemantics.sizeInBits;
+    ध्रुव unsigned MantissaBits = FltSemantics.precision - 1;
+    ध्रुव unsigned ExponentBits = BitWidth - MantissaBits - 1;
 
-    APInt MantissaMask = APInt::getLowBitsSet(BitWidth, MantissaBits);
+    APInt MantissaMask = APInt::get_नीचः_Bits_Set(BitWidth, MantissaBits);
     APInt ExponentMask =
         APInt::getBitsSet(BitWidth, MantissaBits, MantissaBits + ExponentBits);
 
-    const unsigned QuietBitIndex = MantissaBits - 1;
+    ध्रुव unsigned QuietBitIndex = MantissaBits - 1;
     APInt PayloadMask = MantissaMask;
     PayloadMask.clearBit(QuietBitIndex);
 
-    if (FPClasses & fcNan) {
+    जइ (FPClasses & fcNan) {
       // Exponent bits cannot be zeros.
       Known.Zero &= ~ExponentMask;
       // No individual payload bit is known.
       Known.Zero &= ~PayloadMask;
       Known.One &= ~PayloadMask;
 
-      if (FPClasses & fcQNan)
+      जइ (FPClasses & fcQNan)
         Known.Zero.clearBit(QuietBitIndex);
-      if (FPClasses & fcSNan)
+      जइ (FPClasses & fcSNan)
         Known.One.clearBit(QuietBitIndex);
     }
-    if (FPClasses & fcInf) {
+    जइ (FPClasses & fcInf) {
       // Exponent bits cannot be zeros.
       Known.Zero &= ~ExponentMask;
       // Mantissa bits cannot be ones.
       Known.One &= ~MantissaMask;
     }
-    if (FPClasses & fcSubnormal) {
+    जइ (FPClasses & fcSubnormal) {
       // Exponent bits cannot be ones.
       Known.One &= ~ExponentMask;
       // Unknown mantissa.
       Known.One &= ~MantissaMask;
       Known.Zero &= ~MantissaMask;
     }
-    if (FPClasses & fcZero) {
+    जइ (FPClasses & fcZero) {
       // Exponent bits cannot be ones.
       Known.One &= ~ExponentMask;
       // Mantissa cannot be ones.
       Known.One &= ~MantissaMask;
     }
 
-    break;
+    भङ्ग;
   }
-  case APFloatBase::S_x87DoubleExtended: {
-    if (!isKnownNever(fcNormal | fcSubnormal | fcNan))
-      break;
+  पक्ष APFloatBase::S_x87DoubleExtended: {
+    जइ (!isKnownNever(fcNormal | fcSubnormal | fcNan))
+      भङ्ग;
 
     Known.setAllConflict();
 
-    if (FPClasses & fcInf)
+    जइ (FPClasses & fcInf)
       Known = Known.intersectWith(KnownBits::makeConstant(
           APFloat::getInf(FltSemantics).bitcastToAPInt()));
 
-    if (FPClasses & fcZero)
+    जइ (FPClasses & fcZero)
       Known = Known.intersectWith(
           KnownBits::makeConstant(APInt::getZero(FltSemantics.sizeInBits)));
 
-    break;
+    भङ्ग;
   }
-  default:
+  स्वभाव:
     llvm_unreachable("unhandled supported semantics");
   }
 
   Known.Zero.clearSignBit();
   Known.One.clearSignBit();
-  if (std::optional<bool> Sign = getSignBit()) {
-    if (*Sign)
+  जइ (std::optional<तार्किक> Sign = getSignBit()) {
+    जइ (*Sign)
       Known.makeNegative();
-    else
+    अण्णहा
       Known.makeNonNegative();
   }
 
-  return Known;
+  प्रत्यागम Known;
 }
 
 // Handle known sign bit and nan cases for fadd, fsub, and fma.
-static KnownFPClass fadd_impl(const KnownFPClass &KnownLHS,
-                              const KnownFPClass &KnownRHS, bool IsFMA) {
+स्थिर KnownFPClass fadd_impl(ध्रुव KnownFPClass &KnownLHS,
+                              ध्रुव KnownFPClass &KnownRHS, तार्किक IsFMA) {
   KnownFPClass Known;
 
   // Adding positive and negative infinity produces NaN, but only if both
   // opposite-sign infinity combinations are possible.
-  if (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
+  जइ (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
       (KnownLHS.isKnownNever(fcPosInf) || KnownRHS.isKnownNever(fcNegInf)) &&
       (KnownLHS.isKnownNever(fcNegInf) || KnownRHS.isKnownNever(fcPosInf)))
     Known.knownNot(fcNan);
 
-  if (KnownLHS.cannotBeOrderedLessThanZero() &&
+  जइ (KnownLHS.cannotBeOrderedLessThanZero() &&
       KnownRHS.cannotBeOrderedLessThanZero()) {
     Known.knownNot(KnownFPClass::OrderedLessThanZeroMask);
 
     // This can't underflow if one of the operands is known normal.
-    if (KnownLHS.isKnownNever(fcZero | fcPosSubnormal) ||
+    जइ (KnownLHS.isKnownNever(fcZero | fcPosSubnormal) ||
         KnownRHS.isKnownNever(fcZero | fcPosSubnormal))
       Known.knownNot(fcZero | fcPosSubnormal);
   }
 
-  if (KnownLHS.cannotBeOrderedGreaterThanZero() &&
+  जइ (KnownLHS.cannotBeOrderedGreaterThanZero() &&
       KnownRHS.cannotBeOrderedGreaterThanZero()) {
     Known.knownNot(KnownFPClass::OrderedGreaterThanZeroMask);
 
     // This can't underflow if one of the operands is known normal.
-    if (KnownLHS.isKnownNever(fcZero | fcNegSubnormal) ||
+    जइ (KnownLHS.isKnownNever(fcZero | fcNegSubnormal) ||
         KnownRHS.isKnownNever(fcZero | fcNegSubnormal))
       Known.knownNot(fcZero | fcNegSubnormal);
   }
 
-  if (!IsFMA) {
+  जइ (!IsFMA) {
     // (fadd x, +0.0) is guaranteed to return +0.0, not -0.0.
-    if (KnownLHS.isKnownNever(fcNegZero) || KnownRHS.isKnownNever(fcNegZero))
+    जइ (KnownLHS.isKnownNever(fcNegZero) || KnownRHS.isKnownNever(fcNegZero))
       Known.knownNot(fcNegZero);
 
     Known.propagateNonSNaN(KnownLHS, KnownRHS);
   }
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::fadd(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fadd(ध्रुव KnownFPClass &KnownLHS_,
+                                ध्रुव KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_निवेशः_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_निवेशः_Denormal_Mode(KnownRHS_, Mode);
 
-  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/false);
+  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/मिच्छ);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fadd_self(const KnownFPClass &KnownSrc_,
+KnownFPClass KnownFPClass::fadd_self(ध्रुव KnownFPClass &KnownSrc_,
                                      DenormalMode Mode) {
-  KnownFPClass KnownSrc = applyInputDenormalMode(KnownSrc_, Mode);
+  KnownFPClass KnownSrc = apply_निवेशः_Denormal_Mode(KnownSrc_, Mode);
 
-  KnownFPClass Known = fadd_impl(KnownSrc, KnownSrc, /*IsFMA=*/false);
+  KnownFPClass Known = fadd_impl(KnownSrc, KnownSrc, /*IsFMA=*/मिच्छ);
 
-  if (KnownSrc.isKnownNever(fcPosSubnormal))
+  जइ (KnownSrc.isKnownNever(fcPosSubnormal))
     Known.knownNot(fcPosSubnormal);
-  if (KnownSrc.isKnownNever(fcNegSubnormal))
+  जइ (KnownSrc.isKnownNever(fcNegSubnormal))
     Known.knownNot(fcNegSubnormal);
 
   // Doubling 0 will give the same 0.
-  if (KnownSrc.isKnownNever(fcPosZero))
+  जइ (KnownSrc.isKnownNever(fcPosZero))
     Known.knownNot(fcPosZero);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fsub(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fsub(ध्रुव KnownFPClass &KnownLHS_,
+                                ध्रुव KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_निवेशः_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_निवेशः_Denormal_Mode(KnownRHS_, Mode);
 
   // fsub(x, y) == fadd(x, -y) as long as we negate after subnormals are
   // flushed.
   KnownRHS.fneg();
 
-  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/false);
+  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/मिच्छ);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fmul(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fmul(ध्रुव KnownFPClass &KnownLHS_,
+                                ध्रुव KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_निवेशः_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_निवेशः_Denormal_Mode(KnownRHS_, Mode);
 
   KnownFPClass Known;
 
@@ -606,75 +606,75 @@ KnownFPClass KnownFPClass::fmul(const KnownFPClass &KnownLHS_,
 
   // +X * +Y or -X * -Y => +Q
   // +X * -Y or -X * +Y => -Q
-  if ((KnownLHS.isKnownNever(fcNegative) &&
+  जइ ((KnownLHS.isKnownNever(fcNegative) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcPositive) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcNegative);
-  if ((KnownLHS.isKnownNever(fcPositive) &&
+  जइ ((KnownLHS.isKnownNever(fcPositive) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcNegative) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcPositive);
 
   // Inf * Y => Inf or NaN
-  if (KnownLHS.isKnownAlways(fcInf | fcNan) ||
+  जइ (KnownLHS.isKnownAlways(fcInf | fcNan) ||
       KnownRHS.isKnownAlways(fcInf | fcNan))
     Known.knownNot(fcNormal | fcSubnormal | fcZero);
 
   // 0 * Y => 0 or NaN
-  if (KnownRHS.isKnownAlways(fcZero | fcNan) ||
+  जइ (KnownRHS.isKnownAlways(fcZero | fcNan) ||
       KnownLHS.isKnownAlways(fcZero | fcNan))
     Known.knownNot(fcNormal | fcSubnormal | fcInf);
 
   // 0 * +/-inf => NaN
-  if (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
+  जइ (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
       (KnownRHS.isKnownNeverInfinity() || KnownLHS.isKnownNeverZero()) &&
       (KnownLHS.isKnownNeverInfinity() || KnownRHS.isKnownNeverZero()))
     Known.knownNot(fcNan);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
 // TODO: This generalizes to known ranges
-KnownFPClass KnownFPClass::fmul(const KnownFPClass &KnownLHS,
-                                const APFloat &CRHS, DenormalMode Mode) {
+KnownFPClass KnownFPClass::fmul(ध्रुव KnownFPClass &KnownLHS,
+                                ध्रुव APFloat &CRHS, DenormalMode Mode) {
   // Match denormal scaling pattern, similar to the case in ldexp. If the
   // constant's exponent is sufficiently large, the result cannot be subnormal.
 
-  const fltSemantics &Flt = CRHS.getSemantics();
+  ध्रुव fltSemantics &Flt = CRHS.getSemantics();
   unsigned Precision = APFloat::semanticsPrecision(Flt);
-  const int MantissaBits = Precision - 1;
+  ध्रुव पूर्णाङ्क MantissaBits = Precision - 1;
 
-  int MinKnownExponent = ilogb(CRHS);
-  bool CannotBeSubnormal = (MinKnownExponent >= MantissaBits);
+  पूर्णाङ्क MinKnownExponent = ilogb(CRHS);
+  तार्किक CannotBeSubnormal = (MinKnownExponent >= MantissaBits);
 
   KnownFPClass Known = KnownFPClass::fmul(KnownLHS, KnownFPClass(CRHS), Mode);
-  if (CannotBeSubnormal)
+  जइ (CannotBeSubnormal)
     Known.knownNot(fcSubnormal);
 
   // Multiply of values <= 1 cannot introduce overflow.
-  if (KnownLHS.isKnownNever(fcInf)) {
-    if (MinKnownExponent < 0)
+  जइ (KnownLHS.isKnownNever(fcInf)) {
+    जइ (MinKnownExponent < 0)
       Known.knownNot(fcInf);
-    else if (MinKnownExponent == 0 && CRHS.compareAbsoluteValue(APFloat::getOne(
+    अण्णहा जइ (MinKnownExponent == 0 && CRHS.compare_Absolute_मानम्(APFloat::getOne(
                                           Flt)) == APFloat::cmpEqual)
       Known.knownNot(fcInf);
   }
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::fdiv(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fdiv(ध्रुव KnownFPClass &KnownLHS_,
+                                ध्रुव KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_निवेशः_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_निवेशः_Denormal_Mode(KnownRHS_, Mode);
 
   KnownFPClass Known;
 
   Known.propagateNonSNaN(KnownLHS, KnownRHS);
 
   // Only 0/0, Inf/Inf produce NaN.
-  if (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
+  जइ (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
       (KnownLHS.isKnownNeverInfinity() || KnownRHS.isKnownNeverInfinity()) &&
       (KnownLHS.isKnownNeverZero() || KnownRHS.isKnownNeverZero())) {
     Known.knownNot(fcNan);
@@ -683,53 +683,53 @@ KnownFPClass KnownFPClass::fdiv(const KnownFPClass &KnownLHS_,
   //  X / -0.0 => -Inf (or NaN)
   // +X / +Y or -X / -Y => +Q
   // +X / -Y or -X / +Y => -Q
-  if ((KnownLHS.isKnownNever(fcNegative) &&
+  जइ ((KnownLHS.isKnownNever(fcNegative) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcPositive) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcNegative);
-  if ((KnownLHS.isKnownNever(fcPositive) &&
+  जइ ((KnownLHS.isKnownNever(fcPositive) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcNegative) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcPositive);
 
   // Normal and subnormal results require two non-zero finite operands.
-  if ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
+  जइ ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
        KnownRHS.isKnownNever(fcNegNormal | fcNegSubnormal)) ||
       (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal) &&
        KnownRHS.isKnownNever(fcPosNormal | fcPosSubnormal)))
     Known.knownNot(fcNegNormal | fcNegSubnormal);
-  if ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
+  जइ ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
        KnownRHS.isKnownNever(fcPosNormal | fcPosSubnormal)) ||
       (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal) &&
        KnownRHS.isKnownNever(fcNegNormal | fcNegSubnormal)))
     Known.knownNot(fcPosNormal | fcPosSubnormal);
 
   // 0 / X => 0 or NaN
-  if (KnownLHS.isKnownAlways(fcZero))
+  जइ (KnownLHS.isKnownAlways(fcZero))
     Known.knownNot(fcSubnormal | fcNormal | fcInf);
 
   // X / 0 => NaN or Inf
-  if (KnownRHS.isKnownAlways(fcZero))
+  जइ (KnownRHS.isKnownAlways(fcZero))
     Known.knownNot(fcFinite);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fdiv_self(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::fdiv_self(ध्रुव KnownFPClass &KnownSrc,
                                      DenormalMode Mode) {
   // X / X is always exactly 1.0 or a NaN.
   KnownFPClass Known(fcNan | fcPosNormal);
 
   Known.propagateNonSNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
+  जइ (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
     Known.knownNot(fcNan);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::frem(const KnownFPClass &KnownLHS,
-                                const KnownFPClass &KnownRHS,
+KnownFPClass KnownFPClass::frem(ध्रुव KnownFPClass &KnownLHS,
+                                ध्रुव KnownFPClass &KnownRHS,
                                 DenormalMode Mode) {
   KnownFPClass Known;
 
@@ -740,56 +740,56 @@ KnownFPClass KnownFPClass::frem(const KnownFPClass &KnownLHS,
   Known.propagateNonSNaN(KnownLHS, KnownRHS);
 
   // frem(Inf, x) and frem(x, 0) produce NaN.
-  if (KnownLHS.isKnownNeverInfOrNaN() && KnownRHS.isKnownNeverNaN() &&
+  जइ (KnownLHS.isKnownNeverInfOrNaN() && KnownRHS.isKnownNeverNaN() &&
       KnownRHS.isKnownNeverLogicalZero(Mode)) {
     Known.knownNot(fcNan);
   }
 
   // The sign for frem is the same as the first operand.
-  if (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal))
+  जइ (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosNormal | fcPosSubnormal);
-  if (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal))
+  जइ (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegNormal | fcNegSubnormal);
 
   // A negative zero result requires a negative finite first operand.
-  if (KnownLHS.isKnownNever(fcNegFinite))
+  जइ (KnownLHS.isKnownNever(fcNegFinite))
     Known.knownNot(fcNegZero);
 
   // A positive zero result can additionally come from a negative finite
   // result being flushed to positive zero.
-  if (KnownLHS.isKnownNever(fcPosFinite) &&
+  जइ (KnownLHS.isKnownNever(fcPosFinite) &&
       KnownLHS.isKnownNeverLogicalPosZero(Mode) &&
       (!Mode.outputsMayBePositiveZero() ||
        KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal)))
     Known.knownNot(fcPosZero);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::frem_self(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::frem_self(ध्रुव KnownFPClass &KnownSrc,
                                      DenormalMode Mode) {
   // X % X is always exactly [+-]0.0 or a NaN.
   KnownFPClass Known(fcNan | fcZero);
 
   Known.propagateNonSNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
+  जइ (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
     Known.knownNot(fcNan);
 
   // The sign of a zero result is the sign of the finite non-zero input.
   // We do not have to worry about subnormal values flushing to zero, since
   // frem(+-0.0, +-0.0) = NaN.
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
+  जइ (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosZero);
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
+  जइ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegZero);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::fma(const KnownFPClass &KnownLHS,
-                               const KnownFPClass &KnownRHS,
-                               const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fma(ध्रुव KnownFPClass &KnownLHS,
+                               ध्रुव KnownFPClass &KnownRHS,
+                               ध्रुव KnownFPClass &KnownAddend,
                                DenormalMode Mode) {
   KnownFPClass Mul = fmul(KnownLHS, KnownRHS, Mode);
 
@@ -798,32 +798,32 @@ KnownFPClass KnownFPClass::fma(const KnownFPClass &KnownLHS,
   //
   // If the multiply is a -0 due to rounding, the final -0 + 0 will be -0,
   // unlike for a separate fadd.
-  KnownFPClass Known = fadd_impl(Mul, KnownAddend, /*IsFMA=*/true);
+  KnownFPClass Known = fadd_impl(Mul, KnownAddend, /*IsFMA=*/सच्च);
 
   // propagateNonSNaN for 3 arguments.
-  if (KnownLHS.isKnownNever(fcSNan) && KnownRHS.isKnownNever(fcSNan) &&
+  जइ (KnownLHS.isKnownNever(fcSNan) && KnownRHS.isKnownNever(fcSNan) &&
       KnownAddend.isKnownNever(fcSNan))
     Known.knownNot(fcSNan);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::fmuladd(const KnownFPClass &KnownLHS,
-                                   const KnownFPClass &KnownRHS,
-                                   const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fmuladd(ध्रुव KnownFPClass &KnownLHS,
+                                   ध्रुव KnownFPClass &KnownRHS,
+                                   ध्रुव KnownFPClass &KnownAddend,
                                    DenormalMode Mode) {
   // fmuladd can lower to either fma(x, y, z) or fadd(fmul(x, y), z). Compute
   // the intersection of both possibilities.
   KnownFPClass FMA = fma(KnownLHS, KnownRHS, KnownAddend, Mode);
   KnownFPClass MulAdd = fadd(fmul(KnownLHS, KnownRHS, Mode), KnownAddend, Mode);
-  return FMA.intersectWith(MulAdd);
+  प्रत्यागम FMA.intersectWith(MulAdd);
 }
 
-KnownFPClass KnownFPClass::fma_square(const KnownFPClass &KnownSquared,
-                                      const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fma_square(ध्रुव KnownFPClass &KnownSquared,
+                                      ध्रुव KnownFPClass &KnownAddend,
                                       DenormalMode Mode) {
   KnownFPClass Squared = square(KnownSquared, Mode);
-  KnownFPClass Known = fadd_impl(Squared, KnownAddend, /*IsFMA=*/true);
+  KnownFPClass Known = fadd_impl(Squared, KnownAddend, /*IsFMA=*/सच्च);
 
   // Since we know the squared input must be positive, the add of opposite sign
   // infinities nan hazard only applies for negative inf.
@@ -831,23 +831,23 @@ KnownFPClass KnownFPClass::fma_square(const KnownFPClass &KnownSquared,
   // TODO: Alternatively to proving addend is not -inf, we could know Squared is
   // not pinf. Other than the degenerate always-subnormal input case, we can't
   // prove that without a known range.
-  if (KnownAddend.isKnownNever(fcNegInf | fcNan) && Squared.isKnownNever(fcNan))
+  जइ (KnownAddend.isKnownNever(fcNegInf | fcNan) && Squared.isKnownNever(fcNan))
     Known.knownNot(fcNan);
 
   Known.propagateNonSNaN(KnownSquared, KnownAddend);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::fmuladd_square(const KnownFPClass &KnownSquared,
-                                          const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fmuladd_square(ध्रुव KnownFPClass &KnownSquared,
+                                          ध्रुव KnownFPClass &KnownAddend,
                                           DenormalMode Mode) {
   KnownFPClass FMA = fma_square(KnownSquared, KnownAddend, Mode);
   KnownFPClass MulAdd = fadd(square(KnownSquared, Mode), KnownAddend, Mode);
-  return FMA.intersectWith(MulAdd);
+  प्रत्यागम FMA.intersectWith(MulAdd);
 }
 
-KnownFPClass KnownFPClass::exp(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::exp(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
   Known.knownNot(fcNegative);
 
@@ -857,55 +857,55 @@ KnownFPClass KnownFPClass::exp(const KnownFPClass &KnownSrc) {
   // exp10(+1.0) = +10.0 are both finite normal values.
 
   // Zero can only be produced if x < -1.0.
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegInf))
+  जइ (KnownSrc.isKnownNever(fcNegNormal | fcNegInf))
     Known.knownNot(fcPosZero);
 
   // Subnormals can only be produced if x < -1.0 and x is finite.
-  if (KnownSrc.isKnownNever(fcNegNormal))
+  जइ (KnownSrc.isKnownNever(fcNegNormal))
     Known.knownNot(fcPosSubnormal);
 
   // Infinity can only be produced if x > +1.0.
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosInf))
+  जइ (KnownSrc.isKnownNever(fcPosNormal | fcPosInf))
     Known.knownNot(fcPosInf);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::log(const KnownFPClass &KnownSrc, DenormalMode Mode,
-                               bool IsMultiUnitFPType) {
+KnownFPClass KnownFPClass::log(ध्रुव KnownFPClass &KnownSrc, DenormalMode Mode,
+                               तार्किक IsMultiUnitFPType) {
   KnownFPClass Known;
 
   // PPCDoubleDouble can represent the exact value of 1.0 + subnormal, and
   // log(1.0 + subnormal) = subnormal.
-  if (!IsMultiUnitFPType)
+  जइ (!IsMultiUnitFPType)
     Known.knownNot(fcNegZero | fcSubnormal);
 
   Known.propagateNonSNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  जइ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
+  जइ (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(fcNan);
 
-  if (KnownSrc.isKnownNeverLogicalZero(Mode))
+  जइ (KnownSrc.isKnownNeverLogicalZero(Mode))
     Known.knownNot(fcNegInf);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::sqrt(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::sqrt(ध्रुव KnownFPClass &KnownSrc,
                                 DenormalMode Mode) {
   KnownFPClass Known;
   Known.knownNot(fcPosSubnormal);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  जइ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
   Known.propagateNonSNaN(KnownSrc);
 
   // Any negative value besides -0 returns a nan.
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
+  जइ (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(fcNan);
 
   // The only negative value that can be returned is -0 for -0 inputs.
@@ -913,30 +913,30 @@ KnownFPClass KnownFPClass::sqrt(const KnownFPClass &KnownSrc,
 
   // If the input denormal mode could be PreserveSign, a negative
   // subnormal input could produce a negative zero output.
-  if (KnownSrc.isKnownNeverLogicalNegZero(Mode))
+  जइ (KnownSrc.isKnownNeverLogicalNegZero(Mode))
     Known.knownNot(fcNegZero);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::sin(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::sin(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   Known.propagateNonSNaN(KnownSrc);
 
   // Return NaN on infinite inputs.
   Known.knownNot(fcInf);
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
+  जइ (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
     Known.knownNot(fcNan);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::cos(const KnownFPClass &KnownSrc) {
-  return sin(KnownSrc);
+KnownFPClass KnownFPClass::cos(ध्रुव KnownFPClass &KnownSrc) {
+  प्रत्यागम sin(KnownSrc);
 }
 
-KnownFPClass KnownFPClass::tan(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::tan(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // tan never returns Inf (tan(+-Inf) = NaN; tan(finite) = finite).
@@ -945,31 +945,31 @@ KnownFPClass KnownFPClass::tan(const KnownFPClass &KnownSrc) {
   Known.propagateNonSNaN(KnownSrc);
 
   // NaN propagates. tan(+-Inf) is NaN.
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
+  जइ (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
     Known.knownNot(fcNan);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::sinh(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::sinh(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // sinh is sign-preserving: sinh(x) < 0 iff x < 0.
-  if (KnownSrc.isKnownNever(fcNegative))
+  जइ (KnownSrc.isKnownNever(fcNegative))
     Known.knownNot(fcNegative);
 
   // A nonzero positive result requires a nonzero positive input.
   // Zero remains possible: sinh(+/-0.0) = +/-0.0, and flushing a subnormal
   // may produce +0.0.
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
+  जइ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
     Known.knownNot(fcPosSubnormal | fcPosNormal | fcPosInf);
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::cosh(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::cosh(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // cosh(x) >= 1 for all real x; cosh(+-Inf) = +Inf. Never negative,
@@ -978,35 +978,35 @@ KnownFPClass KnownFPClass::cosh(const KnownFPClass &KnownSrc) {
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::tanh(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::tanh(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // tanh is bounded to (-1, 1), never Inf.
   Known.knownNot(fcInf);
 
   // tanh is sign-preserving: tanh(x) < 0 iff x < 0.
-  if (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf)) {
+  जइ (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf)) {
     Known.knownNot(fcNegSubnormal | fcNegNormal);
 
     // -0.0 is preserved: tanh(-0.0) = -0.0.
-    if (KnownSrc.isKnownNeverNegZero())
+    जइ (KnownSrc.isKnownNeverNegZero())
       Known.knownNot(fcNegZero);
   }
 
   // Likewise, tanh(x) > 0 iff x > 0. Zero is not ruled out: tanh(+-0.0) =
   // +-0.0, and a flushed subnormal may become +0.0.
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
+  जइ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
     Known.knownNot(fcPosSubnormal | fcPosNormal);
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::asin(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::asin(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // asin is bounded to [-pi/2, pi/2], never Inf.
@@ -1015,18 +1015,18 @@ KnownFPClass KnownFPClass::asin(const KnownFPClass &KnownSrc) {
   Known.propagateNonSNaN(KnownSrc);
 
   // asin is sign-preserving for finite arguments.
-  if (KnownSrc.isKnownNever(fcNegFinite))
+  जइ (KnownSrc.isKnownNever(fcNegFinite))
     Known.knownNot(fcNegFinite);
 
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal))
+  जइ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal))
     Known.knownNot(fcPosSubnormal | fcPosNormal);
 
   // NaN propagates. asin(x) is also NaN for |x| > 1, so we cannot rule
   // out NaN without knowing the source is in [-1, 1].
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::acos(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::acos(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // acos(x) is bounded to [0, pi] for -1 <= x <= 1, and is never negative,
@@ -1037,17 +1037,17 @@ KnownFPClass KnownFPClass::acos(const KnownFPClass &KnownSrc) {
   Known.knownNot(fcNegative | fcInf | fcSubnormal);
 
   // acos(x) == +0.0 iff x == +1.0
-  if (KnownSrc.isKnownNever(fcPosNormal))
+  जइ (KnownSrc.isKnownNever(fcPosNormal))
     Known.knownNot(fcZero);
 
   Known.propagateNonSNaN(KnownSrc);
 
   // NaN propagates. acos(x) is also NaN for |x| > 1, so we cannot rule
   // out NaN without knowing the source is in [-1, 1].
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::atan(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::atan(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // atan is bounded to (-pi/2, pi/2), never Inf. atan(+-Inf) = +-pi/2 (finite).
@@ -1056,27 +1056,27 @@ KnownFPClass KnownFPClass::atan(const KnownFPClass &KnownSrc) {
   // Ruling out Subnormal/Normal from the result requires the
   // input to never be finite-nonzero and never inf, since
   // atan(+-inf) = +-pi/2
-  if (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf))
+  जइ (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf))
     Known.knownNot(fcNegSubnormal | fcNegNormal);
 
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
+  जइ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
     Known.knownNot(fcPosSubnormal | fcPosNormal);
 
   // atan(-0.0) = -0.0. Negative finite inputs may also produce -0.0
   // if the result rounds to a negative subnormal that is flushed to zero.
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal | fcNegZero))
+  जइ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal | fcNegZero))
     Known.knownNot(fcNegZero);
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::atan2(const KnownFPClass &KnownY_,
-                                 const KnownFPClass &KnownX_,
+KnownFPClass KnownFPClass::atan2(ध्रुव KnownFPClass &KnownY_,
+                                 ध्रुव KnownFPClass &KnownX_,
                                  DenormalMode Mode) {
-  KnownFPClass KnownY = applyInputDenormalMode(KnownY_, Mode);
-  KnownFPClass KnownX = applyInputDenormalMode(KnownX_, Mode);
+  KnownFPClass KnownY = apply_निवेशः_Denormal_Mode(KnownY_, Mode);
+  KnownFPClass KnownX = apply_निवेशः_Denormal_Mode(KnownX_, Mode);
   KnownFPClass Known;
 
   // Even though these deductions are correct, we are ignoring the following
@@ -1090,58 +1090,58 @@ KnownFPClass KnownFPClass::atan2(const KnownFPClass &KnownY_,
   Known.propagateNonNaN(KnownY, KnownX);
 
   // If x <= -0.0, then |atan2(y, x)| >= pi/2
-  if (KnownX.isKnownNever(fcPositive))
+  जइ (KnownX.isKnownNever(fcPositive))
     Known.knownNot(fcZero | fcSubnormal);
 
   // If y >= +0.0, then atan2(y, x) >= +0.0
-  if (KnownY.isKnownNever(fcNegative))
+  जइ (KnownY.isKnownNever(fcNegative))
     Known.knownNot(fcNegative);
 
   // If y <= -0.0, then atan2(y, x) <= -0.0
-  if (KnownY.isKnownNever(fcPositive))
+  जइ (KnownY.isKnownNever(fcPositive))
     Known.knownNot(fcPositive);
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fpext(const KnownFPClass &KnownSrc,
-                                 const fltSemantics &DstTy,
-                                 const fltSemantics &SrcTy) {
+KnownFPClass KnownFPClass::fpext(ध्रुव KnownFPClass &KnownSrc,
+                                 ध्रुव fltSemantics &DstTy,
+                                 ध्रुव fltSemantics &SrcTy) {
   // Infinity, nan and zero propagate from source.
   KnownFPClass Known = KnownSrc;
 
   // All subnormal inputs should be in the normal range in the result type.
-  if (APFloat::isRepresentableAsNormalIn(SrcTy, DstTy)) {
-    if (Known.getKnownFPClasses() & fcPosSubnormal)
+  जइ (APFloat::isRepresentableAsNormalIn(SrcTy, DstTy)) {
+    जइ (Known.getKnownFPClasses() & fcPosSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosNormal);
-    if (Known.getKnownFPClasses() & fcNegSubnormal)
+    जइ (Known.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegNormal);
     Known.knownNot(fcSubnormal);
   }
 
   // Sign bit of a nan isn't guaranteed.
-  if (!Known.isKnownNeverNaN())
+  जइ (!Known.isKnownNeverNaN())
     Known.setSignBit(std::nullopt);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::fptrunc(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::fptrunc(ध्रुव KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // Sign should be preserved
   // TODO: Handle cannot be ordered greater than zero
-  if (KnownSrc.cannotBeOrderedLessThanZero())
+  जइ (KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(KnownFPClass::OrderedLessThanZeroMask);
 
   Known.propagateNonNaN(KnownSrc);
 
   // Infinity needs a range check.
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::roundToIntegral(const KnownFPClass &KnownSrc,
-                                           bool MayBeMultiUnitFPType,
+KnownFPClass KnownFPClass::roundToIntegral(ध्रुव KnownFPClass &KnownSrc,
+                                           तार्किक MayBeMultiUnitFPType,
                                            DenormalMode Mode) {
   KnownFPClass Known;
 
@@ -1151,68 +1151,68 @@ KnownFPClass KnownFPClass::roundToIntegral(const KnownFPClass &KnownSrc,
   Known.propagateNonNaN(KnownSrc);
 
   // Pass through infinities, except PPC_FP128 is a special case for intrinsics.
-  if (!MayBeMultiUnitFPType) {
-    if (KnownSrc.isKnownNeverPosInfinity())
+  जइ (!MayBeMultiUnitFPType) {
+    जइ (KnownSrc.isKnownNeverPosInfinity())
       Known.knownNot(fcPosInf);
-    if (KnownSrc.isKnownNeverNegInfinity())
+    जइ (KnownSrc.isKnownNeverNegInfinity())
       Known.knownNot(fcNegInf);
   }
 
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
+  जइ (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosNormal);
 
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
+  जइ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegNormal);
 
   // Negative round ups towards zero produce negative zero.
-  if (KnownSrc.isKnownNever(fcNegFinite))
+  जइ (KnownSrc.isKnownNever(fcNegFinite))
     Known.knownNot(fcNegZero);
 
   // Negative subnormals may flush to positive zero.
-  if (KnownSrc.isKnownNever(fcPosFinite) &&
+  जइ (KnownSrc.isKnownNever(fcPosFinite) &&
       (KnownSrc.isKnownNever(fcNegSubnormal) ||
        !Mode.inputsMayBePositiveZero()))
     Known.knownNot(fcPosZero);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::trunc(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::trunc(ध्रुव KnownFPClass &KnownSrc,
                                  DenormalMode Mode) {
   KnownFPClass Known = roundToIntegral(KnownSrc,
-                                       /*MayBeMultiUnitFPType=*/true, Mode);
+                                       /*MayBeMultiUnitFPType=*/सच्च, Mode);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  जइ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
-  if (KnownSrc.isKnownNeverNegInfinity())
+  जइ (KnownSrc.isKnownNeverNegInfinity())
     Known.knownNot(fcNegInf);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::floor(const KnownFPClass &KnownSrc,
-                                 bool IsMultiUnitFPType, DenormalMode Mode) {
+KnownFPClass KnownFPClass::floor(ध्रुव KnownFPClass &KnownSrc,
+                                 तार्किक IsMultiUnitFPType, DenormalMode Mode) {
   KnownFPClass Known = roundToIntegral(KnownSrc, IsMultiUnitFPType, Mode);
 
   // Applicable for multi-unit floating point types.
-  if (KnownSrc.isKnownNeverPosInfinity())
+  जइ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::ceil(const KnownFPClass &KnownSrc,
-                                bool IsMultiUnitFPType, DenormalMode Mode) {
+KnownFPClass KnownFPClass::ceil(ध्रुव KnownFPClass &KnownSrc,
+                                तार्किक IsMultiUnitFPType, DenormalMode Mode) {
   KnownFPClass Known = roundToIntegral(KnownSrc, IsMultiUnitFPType, Mode);
 
   // Applicable for multi-unit floating point types.
-  if (KnownSrc.isKnownNeverNegInfinity())
+  जइ (KnownSrc.isKnownNeverNegInfinity())
     Known.knownNot(fcNegInf);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::frexp_mant(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::frexp_mant(ध्रुव KnownFPClass &KnownSrc,
                                       DenormalMode Mode) {
   KnownFPClass Known;
 
@@ -1220,103 +1220,103 @@ KnownFPClass KnownFPClass::frexp_mant(const KnownFPClass &KnownSrc,
 
   Known.propagateNonNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  जइ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
-  if (KnownSrc.isKnownNeverNegInfinity())
+  जइ (KnownSrc.isKnownNeverNegInfinity())
     Known.knownNot(fcNegInf);
 
-  if (KnownSrc.isKnownNeverLogicalPosZero(Mode))
+  जइ (KnownSrc.isKnownNeverLogicalPosZero(Mode))
     Known.knownNot(fcPosZero);
 
-  if (KnownSrc.isKnownNeverLogicalNegZero(Mode))
+  जइ (KnownSrc.isKnownNeverLogicalNegZero(Mode))
     Known.knownNot(fcNegZero);
 
   // TODO: These deductions can be improved if subnormal inputs are guaranteed
   // to be flushed to zero.
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
+  जइ (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosNormal);
 
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
+  जइ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegNormal);
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::ldexp(const KnownFPClass &KnownSrc_,
-                                 const APInt &ConstantRangeExpMin,
-                                 const APInt &ConstantRangeExpMax,
-                                 const fltSemantics &Flt, DenormalMode Mode) {
+KnownFPClass KnownFPClass::ldexp(ध्रुव KnownFPClass &KnownSrc_,
+                                 ध्रुव APInt &ConstantRangeExpMin,
+                                 ध्रुव APInt &ConstantRangeExpMax,
+                                 ध्रुव fltSemantics &Flt, DenormalMode Mode) {
   KnownFPClass Known;
 
-  KnownFPClass KnownSrc = applyInputDenormalMode(KnownSrc_, Mode);
+  KnownFPClass KnownSrc = apply_निवेशः_Denormal_Mode(KnownSrc_, Mode);
 
-  if (ConstantRangeExpMin.isZero() && ConstantRangeExpMax.isZero()) {
+  जइ (ConstantRangeExpMin.isZero() && ConstantRangeExpMax.isZero()) {
     // ldexp(x, 0) -> x
     // Here we make sure to properly propagate sNaN and denormals.
     Known.setKnownFPClasses(KnownSrc.getKnownFPClasses() | fcNan);
     Known.propagateNonNaN(KnownSrc);
-    return applyOutputDenormalMode(Known, Mode);
+    प्रत्यागम applyOutputDenormalMode(Known, Mode);
   }
 
   Known.propagateNonNaN(KnownSrc);
 
   // Sign is preserved, but underflows may produce zeroes.
-  if (KnownSrc.isKnownNever(fcNegative))
+  जइ (KnownSrc.isKnownNever(fcNegative))
     Known.knownNot(fcNegative);
-  else if (KnownSrc.cannotBeOrderedLessThanZero())
+  अण्णहा जइ (KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(OrderedLessThanZeroMask);
 
-  if (KnownSrc.isKnownNever(fcPositive))
+  जइ (KnownSrc.isKnownNever(fcPositive))
     Known.knownNot(fcPositive);
-  else if (KnownSrc.cannotBeOrderedGreaterThanZero())
+  अण्णहा जइ (KnownSrc.cannotBeOrderedGreaterThanZero())
     Known.knownNot(OrderedGreaterThanZeroMask);
 
   // TODO: determine when it is safe to rule out subnormal for ppcf128.
-  if (&Flt != &APFloat::PPCDoubleDouble()) {
+  जइ (&Flt != &APFloat::PPCDoubleDouble()) {
     unsigned Precision = APFloat::semanticsPrecision(Flt);
-    const int MantissaBits = Precision - 1;
-    if (ConstantRangeExpMin.sge(MantissaBits))
+    ध्रुव पूर्णाङ्क MantissaBits = Precision - 1;
+    जइ (ConstantRangeExpMin.sge(MantissaBits))
       Known.knownNot(fcSubnormal);
   }
 
-  if (ConstantRangeExpMax.isNonPositive()) {
+  जइ (ConstantRangeExpMax.isNonPositive()) {
     // If we know the power is <= 0, can't introduce inf
-    if (KnownSrc.isKnownNeverPosInfinity())
+    जइ (KnownSrc.isKnownNeverPosInfinity())
       Known.knownNot(fcPosInf);
-    if (KnownSrc.isKnownNeverNegInfinity())
+    जइ (KnownSrc.isKnownNeverNegInfinity())
       Known.knownNot(fcNegInf);
-  } else if (ConstantRangeExpMin.isNonNegative()) {
+  } अण्णहा जइ (ConstantRangeExpMin.isNonNegative()) {
     // If we know the power is >= 0, can't introduce subnormal or zero
-    if (KnownSrc.isKnownNeverPosSubnormal())
+    जइ (KnownSrc.isKnownNeverPosSubnormal())
       Known.knownNot(fcPosSubnormal);
-    if (KnownSrc.isKnownNeverNegSubnormal())
+    जइ (KnownSrc.isKnownNeverNegSubnormal())
       Known.knownNot(fcNegSubnormal);
-    if (KnownSrc.isKnownNeverPosZero())
+    जइ (KnownSrc.isKnownNeverPosZero())
       Known.knownNot(fcPosZero);
-    if (KnownSrc.isKnownNeverNegZero())
+    जइ (KnownSrc.isKnownNeverNegZero())
       Known.knownNot(fcNegZero);
   }
 
-  return applyOutputDenormalMode(Known, Mode);
+  प्रत्यागम applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::ldexp(const KnownFPClass &KnownSrc,
-                                 const KnownBits &ExpBits,
-                                 const fltSemantics &Flt, DenormalMode Mode) {
-  return ldexp(KnownSrc, ExpBits.getSignedMinValue(),
-               ExpBits.getSignedMaxValue(), Flt, Mode);
+KnownFPClass KnownFPClass::ldexp(ध्रुव KnownFPClass &KnownSrc,
+                                 ध्रुव KnownBits &ExpBits,
+                                 ध्रुव fltSemantics &Flt, DenormalMode Mode) {
+  प्रत्यागम ldexp(KnownSrc, ExpBits.get_Signed_Min_मानम्(),
+               ExpBits.get_Signed_Max_मानम्(), Flt, Mode);
 }
 
-KnownFPClass KnownFPClass::pow(const KnownFPClass &KnownLHS,
-                               const KnownFPClass &KnownRHS) {
+KnownFPClass KnownFPClass::pow(ध्रुव KnownFPClass &KnownLHS,
+                               ध्रुव KnownFPClass &KnownRHS) {
   KnownFPClass Known;
 
   Known.propagateNonSNaN(KnownLHS, KnownRHS);
 
   // pow may return NaN if one of the arguments is NaN. NaN may be produced from
   // a non-zero-finite-negative base and a non-integer exponent.
-  if (KnownLHS.isKnownNever(fcNan | fcNegNormal | fcNegSubnormal) &&
+  जइ (KnownLHS.isKnownNever(fcNan | fcNegNormal | fcNegSubnormal) &&
       KnownRHS.isKnownNeverNaN())
     Known.knownNot(fcNan);
 
@@ -1325,46 +1325,46 @@ KnownFPClass KnownFPClass::pow(const KnownFPClass &KnownLHS,
   // normal is unlikely and not worth considering.
 
   // Only a negative base raised to an odd power returns a negative value.
-  if (KnownLHS.isKnownNever(fcNegative)) {
+  जइ (KnownLHS.isKnownNever(fcNegative)) {
     Known.knownNot(fcNegative);
-  } else if (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal)) {
+  } अण्णहा जइ (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal)) {
     Known.knownNot(fcNegNormal | fcNegSubnormal);
     // See if we can also rule out -0.0 or -inf.
     // Here at least one of -0.0 or -inf is a possible base.
 
     // pow(-0.0, odd-positive) = -0.0
     // pow(-inf, odd-negative) = -0.0
-    if ((KnownLHS.isKnownNever(fcNegZero) ||
+    जइ ((KnownLHS.isKnownNever(fcNegZero) ||
          KnownRHS.isKnownNever(fcPosNormal)) &&
         (KnownLHS.isKnownNever(fcNegInf) || KnownRHS.isKnownNever(fcNegNormal)))
       Known.knownNot(fcNegZero);
 
     // pow(-0.0, odd-negative) = -inf
     // pow(-inf, odd-positive) = -inf
-    if ((KnownLHS.isKnownNever(fcNegZero) ||
+    जइ ((KnownLHS.isKnownNever(fcNegZero) ||
          KnownRHS.isKnownNever(fcNegNormal)) &&
         (KnownLHS.isKnownNever(fcNegInf) || KnownRHS.isKnownNever(fcPosNormal)))
       Known.knownNot(fcNegInf);
   }
 
-  return Known;
+  प्रत्यागम Known;
 }
 
-KnownFPClass KnownFPClass::powi(const KnownFPClass &KnownSrc,
-                                const KnownBits &ExponentKnownBits) {
+KnownFPClass KnownFPClass::powi(ध्रुव KnownFPClass &KnownSrc,
+                                ध्रुव KnownBits &ExponentKnownBits) {
   KnownFPClass Known;
   Known.propagateNonNaN(KnownSrc);
 
-  if (ExponentKnownBits.isZero()) {
+  जइ (ExponentKnownBits.isZero()) {
     // powi(QNaN, 0) returns 1.0, and powi(SNaN, 0) may non-deterministically
     // return 1.0 or a NaN.
-    if (KnownSrc.isKnownNever(fcSNan)) {
+    जइ (KnownSrc.isKnownNever(fcSNan)) {
       Known.knownNot(~fcPosNormal);
-      return Known;
+      प्रत्यागम Known;
     }
 
     Known.knownNot(~(fcPosNormal | fcNan));
-    return Known;
+    प्रत्यागम Known;
   }
 
   // Given that exp is an integer, here are the
@@ -1375,26 +1375,26 @@ KnownFPClass KnownFPClass::powi(const KnownFPClass &KnownSrc,
   //   powi(-0, exp)   --> -0 if exp is positive odd.
   //   powi(-inf, exp) --> -0 if exp is negative odd.
   //   powi(-inf, exp) --> -inf if exp is positive odd.
-  if (KnownSrc.isKnownNever(fcNegative) || ExponentKnownBits.isEven()) {
+  जइ (KnownSrc.isKnownNever(fcNegative) || ExponentKnownBits.isEven()) {
     Known.knownNot(fcNegative);
-  } else if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal)) {
+  } अण्णहा जइ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal)) {
     Known.knownNot(fcNegNormal | fcNegSubnormal);
     // See if we can also rule out -0.0 or -inf.
     // Here at least one of -0.0 or -inf is a possible base.
 
     // We already know that ExponentKnownBits.isEven() is false here.
-    const bool IsKnownNeverOddPositive = ExponentKnownBits.isNegative();
-    const bool IsKnownNeverOddNegative = ExponentKnownBits.isNonNegative();
+    ध्रुव तार्किक IsKnownNeverOddPositive = ExponentKnownBits.isNegative();
+    ध्रुव तार्किक IsKnownNeverOddNegative = ExponentKnownBits.isNonNegative();
 
     // powi(-0.0, odd-positive) = -0.0
     // powi(-inf, odd-negative) = -0.0
-    if ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddPositive) &&
+    जइ ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddPositive) &&
         (KnownSrc.isKnownNever(fcNegInf) || IsKnownNeverOddNegative))
       Known.knownNot(fcNegZero);
 
     // powi(-0.0, odd-negative) = -inf
     // powi(-inf, odd-positive) = -inf
-    if ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddNegative) &&
+    जइ ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddNegative) &&
         (KnownSrc.isKnownNever(fcNegInf) || IsKnownNeverOddPositive))
       Known.knownNot(fcNegInf);
   }
@@ -1411,28 +1411,28 @@ KnownFPClass KnownFPClass::powi(const KnownFPClass &KnownSrc,
   //   2. powi(0/nan, exp), exp > 0 can be refinable
   //      to fcNan | fcZero | fcPosNormal.
   {
-    APInt MinExp = ExponentKnownBits.getSignedMinValue();
-    APInt MaxExp = ExponentKnownBits.getSignedMaxValue();
+    APInt MinExp = ExponentKnownBits.get_Signed_Min_मानम्();
+    APInt MaxExp = ExponentKnownBits.get_Signed_Max_मानम्();
 
     // powi(inf, exp), exp > 0
-    bool MayInfSrc =
+    तार्किक MayInfSrc =
         !KnownSrc.isKnownNever(fcInf) && MaxExp.isStrictlyPositive();
 
     // powi(+/-0, exp), exp < 0
-    bool MayDivByZero = !KnownSrc.isKnownNever(fcZero) && MinExp.isNegative();
+    तार्किक MayDivByZero = !KnownSrc.isKnownNever(fcZero) && MinExp.isNegative();
 
     // powi(finite, exp), |exp| > 1
-    bool MayFinite = !KnownSrc.isKnownNever(fcNormal | fcSubnormal);
-    bool MayAbsExpGT1 = MinExp.slt(-1) || MaxExp.sgt(1);
-    bool MayFiniteOverflow = MayFinite && MayAbsExpGT1;
+    तार्किक MayFinite = !KnownSrc.isKnownNever(fcNormal | fcSubnormal);
+    तार्किक MayAbsExpGT1 = MinExp.slt(-1) || MaxExp.sgt(1);
+    तार्किक MayFiniteOverflow = MayFinite && MayAbsExpGT1;
 
     // powi(subnormal, -1)
-    bool MayBeNegOne = ExponentKnownBits.Zero.isZero();
-    bool MaySubnormInv = !KnownSrc.isKnownNever(fcSubnormal) && MayBeNegOne;
+    तार्किक MayBeNegOne = ExponentKnownBits.Zero.isZero();
+    तार्किक MaySubnormInv = !KnownSrc.isKnownNever(fcSubnormal) && MayBeNegOne;
 
-    if (!MayInfSrc && !MayDivByZero && !MayFiniteOverflow && !MaySubnormInv)
+    जइ (!MayInfSrc && !MayDivByZero && !MayFiniteOverflow && !MaySubnormInv)
       Known.knownNot(fcInf);
   }
 
-  return Known;
+  प्रत्यागम Known;
 }

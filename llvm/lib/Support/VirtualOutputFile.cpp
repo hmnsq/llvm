@@ -11,31 +11,31 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputFile.h"
-#include "llvm/Support/VirtualOutputError.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/raw_ostream_proxy.h"
+#अन्तर्भाव "llvm/Support/VirtualOutputFile.h"
+#अन्तर्भाव "llvm/Support/VirtualOutputError.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/raw_ostream_proxy.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using नामाकाश llvm;
+using नामाकाश llvm::vfs;
 
-char OutputFileImpl::ID = 0;
-char NullOutputFileImpl::ID = 0;
+वर्ण OutputFileImpl::ID = 0;
+वर्ण NullOutputFileImpl::ID = 0;
 
-void OutputFileImpl::anchor() {}
-void NullOutputFileImpl::anchor() {}
+शून्य OutputFileImpl::anchor() {}
+शून्य NullOutputFileImpl::anchor() {}
 
-class OutputFile::TrackedProxy : public raw_pwrite_stream_proxy {
-public:
-  void resetProxy() {
+वर्ग OutputFile::TrackedProxy : सार्वजनिक raw_pwrite_stream_proxy {
+सार्वजनिक:
+  शून्य resetProxy() {
     TrackingPointer = nullptr;
     resetProxiedOS();
   }
 
   explicit TrackedProxy(TrackedProxy *&TrackingPointer, raw_pwrite_stream &OS)
       : raw_pwrite_stream_proxy(OS), TrackingPointer(TrackingPointer) {
-    assert(!TrackingPointer && "Expected to add a proxy");
-    TrackingPointer = this;
+    प्रतिज्ञा(!TrackingPointer && "Expected to add a proxy");
+    TrackingPointer = एतत्;
   }
 
   ~TrackedProxy() override { resetProxy(); }
@@ -44,15 +44,15 @@ public:
 };
 
 Expected<std::unique_ptr<raw_pwrite_stream>> OutputFile::createProxy() {
-  if (OpenProxy)
-    return make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
+  जइ (OpenProxy)
+    प्रत्यागम make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
 
-  return std::make_unique<TrackedProxy>(OpenProxy, getOS());
+  प्रत्यागम std::make_unique<TrackedProxy>(OpenProxy, getOS());
 }
 
 Error OutputFile::keep() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  जइ (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
         make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
 
@@ -60,7 +60,7 @@ Error OutputFile::keep() {
   // This is safer than relying on clients to remember to flush(). Also call
   // OutputFile::discard() to give the backend a chance to clean up any
   // side effects (such as temporaries).
-  if (LLVM_UNLIKELY(OpenProxy))
+  जइ (LLVM_UNLIKELY(OpenProxy))
     report_fatal_error(joinErrors(
         make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy),
         discard()));
@@ -68,12 +68,12 @@ Error OutputFile::keep() {
   Error E = Impl->keep();
   Impl = nullptr;
   DiscardOnDestroyHandler = nullptr;
-  return E;
+  प्रत्यागम E;
 }
 
 Error OutputFile::discard() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  जइ (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
         make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
 
@@ -81,30 +81,30 @@ Error OutputFile::discard() {
   // necessarily clean up in the right order. Reset the proxy to flush any
   // current content; if there is another write, there should be quick crash on
   // null dereference.
-  if (OpenProxy)
+  जइ (OpenProxy)
     OpenProxy->resetProxy();
 
   Error E = Impl->discard();
   Impl = nullptr;
   DiscardOnDestroyHandler = nullptr;
-  return E;
+  प्रत्यागम E;
 }
 
-void OutputFile::destroy() {
-  if (!Impl)
-    return;
+शून्य OutputFile::destroy() {
+  जइ (!Impl)
+    प्रत्यागम;
 
   // Clean up the file. Move the discard handler into a local since discard
   // will reset it.
   auto DiscardHandler = std::move(DiscardOnDestroyHandler);
   Error E = discard();
-  assert(!Impl && "Expected discard to destroy Impl");
+  प्रतिज्ञा(!Impl && "Expected discard to destroy Impl");
 
   // If there's no handler, report a fatal error.
-  if (LLVM_UNLIKELY(!DiscardHandler))
+  जइ (LLVM_UNLIKELY(!DiscardHandler))
     llvm::report_fatal_error(joinErrors(
         make_error<OutputError>(getPath(), OutputErrorCode::not_closed),
         std::move(E)));
-  else if (E)
+  अण्णहा जइ (E)
     DiscardHandler(std::move(E));
 }
