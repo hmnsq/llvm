@@ -8,8 +8,8 @@ public _llvm_blake3_compress_xof_sse2
 _TEXT   SEGMENT ALIGN(16) 'CODE'
 
 ALIGN   16
-llvm_blake3_hash_many_sse2 PROC
-_llvm_blake3_hash_many_sse2 PROC
+llvm_blake3_hash_many_sse2 विधि
+_llvm_blake3_hash_many_sse2 विधि
         push    r15
         push    r14
         push    r13
@@ -2037,8 +2037,8 @@ endroundloop1:
 _llvm_blake3_hash_many_sse2 ENDP
 llvm_blake3_hash_many_sse2 ENDP
 
-llvm_blake3_compress_in_place_sse2 PROC
-_llvm_blake3_compress_in_place_sse2 PROC
+llvm_blake3_compress_in_place_sse2 विधि
+_llvm_blake3_compress_in_place_sse2 विधि
         sub     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
@@ -2168,8 +2168,8 @@ _llvm_blake3_compress_in_place_sse2 ENDP
 llvm_blake3_compress_in_place_sse2 ENDP
 
 ALIGN 16
-llvm_blake3_compress_xof_sse2 PROC
-_llvm_blake3_compress_xof_sse2 PROC
+llvm_blake3_compress_xof_sse2 विधि
+_llvm_blake3_compress_xof_sse2 विधि
         sub     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
@@ -2347,4 +2347,4 @@ PBLENDW_0xC0_MASK:
        dd 000000000H, 000000000H, 000000000H, 0FFFFFFFFH
 
 _RDATA ENDS
-END
+अन्त
