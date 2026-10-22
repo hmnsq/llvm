@@ -11,47 +11,47 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/PrettyStackTrace.h"
-#include "llvm-c/ErrorHandling.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/SaveAndRestore.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/Watchdog.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/PrettyStackTrace.h"
+#ضمن "llvm-c/ErrorHandling.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/SaveAndRestore.h"
+#ضمن "llvm/Support/Signals.h"
+#ضمن "llvm/Support/Watchdog.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
 #ifdef __APPLE__
-#include "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallString.h"
 #endif
 
-#include <atomic>
-#include <cassert>
-#include <cstdarg>
-#include <cstdio>
-#include <cstring>
-#include <tuple>
+#ضمن <atomic>
+#ضمن <cassert>
+#ضمن <cstdarg>
+#ضمن <cstdio>
+#ضمن <cstring>
+#ضمن <tuple>
 
-#if __has_include(<CrashReporterClient.h>)
-#include <CrashReporterClient.h>
+#إذا __has_include(<CrashReporterClient.h>)
+#ضمن <CrashReporterClient.h>
 #define LLVM_HAVE_CRASHREPORTERCLIENT_H
 #endif
 
-using namespace llvm;
+using نطاق llvm;
 
-static const char *BugReportMsg =
+ساكن ثابت حرف *Bug_Report_ڤسنن =
     "PLEASE submit a bug report to " BUG_REPORT_URL
     " and include the crash backtrace and instructions to reproduce the bug.\n";
 
 // If backtrace support is not enabled, compile out support for pretty stack
 // traces.  This has the secondary effect of not requiring thread local storage
 // when backtrace support is disabled.
-#if ENABLE_BACKTRACES
+#إذا ENABLE_BACKTRACES
 
 // We need a thread local pointer to manage the stack of our stack trace
 // objects, but we *really* cannot tolerate destructors running and do not want
 // to pay any overhead of synchronizing. As a consequence, we use a raw
 // thread-local variable.
-static LLVM_THREAD_LOCAL PrettyStackTraceEntry *PrettyStackTraceHead = nullptr;
+ساكن LLVM_THREAD_LOCAL Pretty_تيندنن_Trace_Entry *Pretty_تيندنن_Trace_Head = nullptr;
 
 // The use of 'volatile' here is to ensure that any particular thread always
 // reloads the value of the counter. The 'std::atomic' allows us to specify that
@@ -65,63 +65,63 @@ static LLVM_THREAD_LOCAL PrettyStackTraceEntry *PrettyStackTraceHead = nullptr;
 // the current thread". If the user happens to overflow an 'unsigned' with
 // SIGINFO requests, it's possible that some threads will stop responding to it,
 // but the program won't crash.
-static volatile std::atomic<unsigned> GlobalSigInfoGenerationCounter = 1;
-static LLVM_THREAD_LOCAL unsigned ThreadLocalSigInfoGenerationCounter = 0;
+ساكن متطاير std::atomic<unsigned> GlobalSigInfoGenerationCounter = 1;
+ساكن LLVM_THREAD_LOCAL unsigned ThreadLocalSigInfoGenerationCounter = 0;
 
-namespace llvm {
-PrettyStackTraceEntry *ReverseStackTrace(PrettyStackTraceEntry *Head) {
-  PrettyStackTraceEntry *Prev = nullptr;
-  while (Head)
+نطاق llvm {
+Pretty_تيندنن_Trace_Entry *Reverse_تيندنن_Trace(Pretty_تيندنن_Trace_Entry *Head) {
+  Pretty_تيندنن_Trace_Entry *Prev = nullptr;
+  طالما (Head)
     std::tie(Prev, Head, Head->NextEntry) =
         std::make_tuple(Head, Head->NextEntry, Prev);
-  return Prev;
+  أرجع Prev;
 }
 } // namespace llvm
 
-static void PrintStack(raw_ostream &OS) {
+ساكن فراغ Print_تيندنن(raw_ostream &OS) {
   // Print out the stack in reverse order. To avoid recursion (which is likely
   // to fail if we crashed due to stack overflow), we do an up-front pass to
   // reverse the stack, then print it, then reverse it again.
   unsigned ID = 0;
-  SaveAndRestore<PrettyStackTraceEntry *> SavedStack{PrettyStackTraceHead,
+  SaveAndRestore<Pretty_تيندنن_Trace_Entry *> Saved_تيندنن{Pretty_تيندنن_Trace_Head,
                                                      nullptr};
-  PrettyStackTraceEntry *ReversedStack = ReverseStackTrace(SavedStack.get());
-  for (const PrettyStackTraceEntry *Entry = ReversedStack; Entry;
+  Pretty_تيندنن_Trace_Entry *Reversed_تيندنن = Reverse_تيندنن_Trace(Saved_تيندنن.get());
+  لكل (ثابت Pretty_تيندنن_Trace_Entry *Entry = Reversed_تيندنن; Entry;
        Entry = Entry->getNextEntry()) {
     OS << ID++ << ".\t";
     sys::Watchdog W(5);
     Entry->print(OS);
   }
-  llvm::ReverseStackTrace(ReversedStack);
+  llvm::Reverse_تيندنن_Trace(Reversed_تيندنن);
 }
 
 /// Print the current stack trace to the specified stream.
 ///
 /// Marked NOINLINE so it can be called from debuggers.
 LLVM_ATTRIBUTE_NOINLINE
-static void PrintCurStackTrace(raw_ostream &OS) {
+ساكن فراغ Print_Cur_تيندنن_Trace(raw_ostream &OS) {
   // Don't print an empty trace.
-  if (!PrettyStackTraceHead) return;
+  إذا (!Pretty_تيندنن_Trace_Head) أرجع;
 
   // If there are pretty stack frames registered, walk and emit them.
   OS << "Stack dump:\n";
 
-  PrintStack(OS);
+  Print_تيندنن(OS);
   OS.flush();
 }
 
 // Integrate with crash reporter libraries.
-#if defined(__APPLE__) && defined(LLVM_HAVE_CRASHREPORTERCLIENT_H)
+#إذا defined(__APPLE__) && defined(LLVM_HAVE_CRASHREPORTERCLIENT_H)
 //  If any clients of llvm try to link to libCrashReporterClient.a themselves,
 //  only one crash info struct will be used.
-extern "C" {
+خارجي "C" {
 #ifdef CRASHREPORTER_ANNOTATIONS_INITIALIZER
 // Should be available in CRASHREPORTER_ANNOTATIONS_VERSION > 5
 CRASHREPORTER_ANNOTATIONS_INITIALIZER()
-#else
+#وإلا
 // Older CrashReporter annotations layouts
 CRASH_REPORTER_CLIENT_HIDDEN
-struct crashreporter_annotations_t gCRAnnotations
+بنية crashreporter_annotations_t gCRAnnotations
     __attribute__((section("__DATA," CRASHREPORTER_ANNOTATIONS_SECTION))) = {
         CRASHREPORTER_ANNOTATIONS_VERSION,
         0,
@@ -130,24 +130,24 @@ struct crashreporter_annotations_t gCRAnnotations
         0,
         0,
         0,
-#if CRASHREPORTER_ANNOTATIONS_VERSION > 4
+#إذا CRASHREPORTER_ANNOTATIONS_VERSION > 4
         0
 #endif // CRASHREPORTER_ANNOTATIONS_VERSION > 4
 };
 #endif // CRASHREPORTER_ANNOTATIONS_INITIALIZER
 } // extern "C"
-#elif defined(__APPLE__) && HAVE_CRASHREPORTER_INFO
-extern "C" const char *__crashreporter_info__
+#وإلاإذا defined(__APPLE__) && HAVE_CRASHREPORTER_INFO
+خارجي "C" ثابت حرف *__crashreporter_info__
     __attribute__((visibility("hidden"))) = 0;
 asm(".desc ___crashreporter_info__, 0x10");
 #endif
 
-[[maybe_unused]] static void setCrashLogMessage(const char *msg);
-static void setCrashLogMessage(const char *msg) {
+[[maybe_unused]] ساكن فراغ setCrashLogMessage(ثابت حرف *ڤسنن);
+ساكن فراغ setCrashLogMessage(ثابت حرف *ڤسنن) {
 #ifdef LLVM_HAVE_CRASHREPORTERCLIENT_H
-  (void)CRSetCrashLogMessage(msg);
-#elif HAVE_CRASHREPORTER_INFO
-  __crashreporter_info__ = msg;
+  (فراغ)CRSetCrashLogMessage(ڤسنن);
+#وإلاإذا HAVE_CRASHREPORTER_INFO
+  __crashreporter_info__ = ڤسنن;
 #endif
   // Don't reorder subsequent operations: whatever comes after might crash and
   // we want the system crash handling to see the message we just set.
@@ -156,20 +156,20 @@ static void setCrashLogMessage(const char *msg) {
 
 #ifdef __APPLE__
 using CrashHandlerString = SmallString<2048>;
-using CrashHandlerStringStorage = std::byte[sizeof(CrashHandlerString)];
-alignas(CrashHandlerString) static CrashHandlerStringStorage
+using CrashHandlerStringStorage = std::byte[حجم(CrashHandlerString)];
+alignas(CrashHandlerString) ساكن CrashHandlerStringStorage
     crashHandlerStringStorage;
 #endif
 
 /// This callback is run if a fatal signal is delivered to the process, it
 /// prints the pretty stack trace.
-static void CrashHandler(void *) {
-  errs() << BugReportMsg ;
+ساكن فراغ CrashHandler(فراغ *) {
+  errs() << Bug_Report_ڤسنن ;
 
 #ifndef __APPLE__
   // On non-apple systems, just emit the crash stack trace to stderr.
-  PrintCurStackTrace(errs());
-#else
+  Print_Cur_تيندنن_Trace(errs());
+#وإلا
   // Emit the crash stack trace to a SmallString, put it where the system crash
   // handling will find it, and also send it to stderr.
   //
@@ -181,7 +181,7 @@ static void CrashHandler(void *) {
   // signals, however if we're in that situation a race is the least of our
   // worries.
   auto &crashHandlerString =
-      *new (&crashHandlerStringStorage) CrashHandlerString;
+      *جديد (&crashHandlerStringStorage) CrashHandlerString;
 
   // If we crash while trying to print the stack trace, we still want the system
   // crash handling to have some partial information. That'll work out as long
@@ -192,126 +192,126 @@ static void CrashHandler(void *) {
 
   {
     raw_svector_ostream Stream(crashHandlerString);
-    PrintCurStackTrace(Stream);
+    Print_Cur_تيندنن_Trace(Stream);
   }
 
-  if (!crashHandlerString.empty()) {
+  إذا (!crashHandlerString.empty()) {
     setCrashLogMessage(crashHandlerString.c_str());
     errs() << crashHandlerString.str();
-  } else {
+  } وإلا {
     setCrashLogMessage("No crash information.");
   }
 #endif
 }
 
-static void printForSigInfoIfNeeded() {
+ساكن فراغ printForSigInfoIfNeeded() {
   unsigned CurrentSigInfoGeneration =
       GlobalSigInfoGenerationCounter.load(std::memory_order_relaxed);
-  if (ThreadLocalSigInfoGenerationCounter == 0 ||
+  إذا (ThreadLocalSigInfoGenerationCounter == 0 ||
       ThreadLocalSigInfoGenerationCounter == CurrentSigInfoGeneration) {
-    return;
+    أرجع;
   }
 
-  PrintCurStackTrace(errs());
+  Print_Cur_تيندنن_Trace(errs());
   ThreadLocalSigInfoGenerationCounter = CurrentSigInfoGeneration;
 }
 
 #endif // ENABLE_BACKTRACES
 
-void llvm::setBugReportMsg(const char *Msg) {
-  BugReportMsg = Msg;
+فراغ llvm::set_Bug_Report_ڤسنن(ثابت حرف *ڤسنن_2) {
+  Bug_Report_ڤسنن = ڤسنن_2;
 }
 
-const char *llvm::getBugReportMsg() {
-  return BugReportMsg;
+ثابت حرف *llvm::get_Bug_Report_ڤسنن() {
+  أرجع Bug_Report_ڤسنن;
 }
 
-PrettyStackTraceEntry::PrettyStackTraceEntry() {
-#if ENABLE_BACKTRACES
+Pretty_تيندنن_Trace_Entry::Pretty_تيندنن_Trace_Entry() {
+#إذا ENABLE_BACKTRACES
   // Handle SIGINFO first, because we haven't finished constructing yet.
   printForSigInfoIfNeeded();
   // Link ourselves.
-  NextEntry = PrettyStackTraceHead;
-  PrettyStackTraceHead = this;
+  NextEntry = Pretty_تيندنن_Trace_Head;
+  Pretty_تيندنن_Trace_Head = هذا;
 #endif
 }
 
-PrettyStackTraceEntry::~PrettyStackTraceEntry() {
-#if ENABLE_BACKTRACES
-  assert(PrettyStackTraceHead == this &&
+Pretty_تيندنن_Trace_Entry::~Pretty_تيندنن_Trace_Entry() {
+#إذا ENABLE_BACKTRACES
+  أكد(Pretty_تيندنن_Trace_Head == هذا &&
          "Pretty stack trace entry destruction is out of order");
-  PrettyStackTraceHead = NextEntry;
+  Pretty_تيندنن_Trace_Head = NextEntry;
   // Handle SIGINFO first, because we already started destructing.
   printForSigInfoIfNeeded();
 #endif
 }
 
-void PrettyStackTraceString::print(raw_ostream &OS) const { OS << Str << "\n"; }
+فراغ Pretty_تيندنن_Trace_String::print(raw_ostream &OS) ثابت { OS << Str << "\n"; }
 
-PrettyStackTraceFormat::PrettyStackTraceFormat(const char *Format, ...) {
+Pretty_تيندنن_Trace_Format::Pretty_تيندنن_Trace_Format(ثابت حرف *Format, ...) {
   va_list AP;
   va_start(AP, Format);
-  const int SizeOrError = vsnprintf(nullptr, 0, Format, AP);
+  ثابت صحيح SizeOrError = vsnprintf(nullptr, 0, Format, AP);
   va_end(AP);
-  if (SizeOrError < 0) {
-    return;
+  إذا (SizeOrError < 0) {
+    أرجع;
   }
 
-  const int Size = SizeOrError + 1; // '\0'
+  ثابت صحيح Size = SizeOrError + 1; // '\0'
   Str.resize(Size);
   va_start(AP, Format);
   vsnprintf(Str.data(), Size, Format, AP);
   va_end(AP);
 }
 
-void PrettyStackTraceFormat::print(raw_ostream &OS) const { OS << Str << "\n"; }
+فراغ Pretty_تيندنن_Trace_Format::print(raw_ostream &OS) ثابت { OS << Str << "\n"; }
 
-void PrettyStackTraceProgram::print(raw_ostream &OS) const {
+فراغ Pretty_تيندنن_Trace_Program::print(raw_ostream &OS) ثابت {
   OS << "Program arguments: ";
   // Print the argument list.
-  for (int I = 0; I < ArgC; ++I) {
-    const bool HaveSpace = ::strchr(ArgV[I], ' ');
-    if (I)
+  لكل (صحيح I = 0; I < ArgC; ++I) {
+    ثابت منطقي HaveSpace = ::strchr(ArgV[I], ' ');
+    إذا (I)
       OS << ' ';
-    if (HaveSpace)
+    إذا (HaveSpace)
       OS << '"';
     OS.write_escaped(ArgV[I]);
-    if (HaveSpace)
+    إذا (HaveSpace)
       OS << '"';
   }
   OS << '\n';
 }
 
-#if ENABLE_BACKTRACES
-static bool RegisterCrashPrinter() {
+#إذا ENABLE_BACKTRACES
+ساكن منطقي RegisterCrashPrinter() {
   sys::AddSignalHandler(CrashHandler, nullptr);
-  return false;
+  أرجع خطأ;
 }
 #endif
 
-void llvm::EnablePrettyStackTrace() {
-#if ENABLE_BACKTRACES
+فراغ llvm::Enable_Pretty_تيندنن_Trace() {
+#إذا ENABLE_BACKTRACES
   // The first time this is called, we register the crash printer.
-  static bool HandlerRegistered = RegisterCrashPrinter();
-  (void)HandlerRegistered;
+  ساكن منطقي HandlerRegistered = RegisterCrashPrinter();
+  (فراغ)HandlerRegistered;
 #endif
 }
 
-void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
-#if ENABLE_BACKTRACES
-  if (!ShouldEnable) {
+فراغ llvm::Enable_Pretty_تيندنن_Trace_On_Sig_Info_For_This_Thread(منطقي ShouldEnable) {
+#إذا ENABLE_BACKTRACES
+  إذا (!ShouldEnable) {
     ThreadLocalSigInfoGenerationCounter = 0;
-    return;
+    أرجع;
   }
 
   // The first time this is called, we register the SIGINFO handler.
-  static bool HandlerRegistered = []{
+  ساكن منطقي HandlerRegistered = []{
     sys::SetInfoSignalFunction([]{
       GlobalSigInfoGenerationCounter.fetch_add(1, std::memory_order_relaxed);
     });
-    return false;
+    أرجع خطأ;
   }();
-  (void)HandlerRegistered;
+  (فراغ)HandlerRegistered;
 
   // Next, enable it for the current thread.
   ThreadLocalSigInfoGenerationCounter =
@@ -319,21 +319,21 @@ void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
 #endif
 }
 
-const void *llvm::SavePrettyStackState() {
-#if ENABLE_BACKTRACES
-  return PrettyStackTraceHead;
-#else
-  return nullptr;
+ثابت فراغ *llvm::Save_Pretty_تيندنن_State() {
+#إذا ENABLE_BACKTRACES
+  أرجع Pretty_تيندنن_Trace_Head;
+#وإلا
+  أرجع nullptr;
 #endif
 }
 
-void llvm::RestorePrettyStackState(const void *Top) {
-#if ENABLE_BACKTRACES
-  PrettyStackTraceHead =
-      static_cast<PrettyStackTraceEntry *>(const_cast<void *>(Top));
+فراغ llvm::Restore_Pretty_تيندنن_State(ثابت فراغ *اتس) {
+#إذا ENABLE_BACKTRACES
+  Pretty_تيندنن_Trace_Head =
+      static_cast<Pretty_تيندنن_Trace_Entry *>(const_cast<فراغ *>(اتس));
 #endif
 }
 
-void LLVMEnablePrettyStackTrace() {
-  EnablePrettyStackTrace();
+فراغ LLVMEnable_Pretty_تيندنن_Trace() {
+  Enable_Pretty_تيندنن_Trace();
 }

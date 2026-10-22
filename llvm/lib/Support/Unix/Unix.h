@@ -18,27 +18,27 @@
 //===          is guaranteed to work on all UNIX variants.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <assert.h>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <sys/types.h>
-#include <sys/wait.h>
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/Chrono.h"
+#ضمن "llvm/Support/Errno.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن <assert.h>
+#ضمن <cerrno>
+#ضمن <cstdio>
+#ضمن <cstdlib>
+#ضمن <cstring>
+#ضمن <string>
+#ضمن <sys/types.h>
+#ضمن <sys/wait.h>
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#ضمن <unistd.h>
 #endif
 
-#include <sys/time.h>
-#include <time.h>
+#ضمن <sys/time.h>
+#ضمن <time.h>
 
-#include <dlfcn.h>
+#ضمن <dlfcn.h>
 
 # include <fcntl.h>
 
@@ -49,21 +49,21 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
-    return true;
-  if (errnum == -1)
+ساكن مضمن bool Make_Err_ڤسنن(
+  std::string* Err_ڤسنن, ثابت std::string& prefix, صحيح errnum = -1) {
+  إذا (!Err_ڤسنن)
+    أرجع true;
+  إذا (errnum == -1)
     errnum = errno;
-  *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
-  return true;
+  *Err_ڤسنن = prefix + ": " + llvm::sys::StrError(errnum);
+  أرجع true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
-  std::string ErrMsg;
-  MakeErrMsg(&ErrMsg, Msg, errnum);
-  llvm::report_fatal_error(llvm::Twine(ErrMsg));
+[[noreturn]] ساكن مضمن فراغ ReportErrnumFatal(ثابت حرف *ڤسنن_2, صحيح errnum) {
+  std::string Err_ڤسنن;
+  Make_Err_ڤسنن(&Err_ڤسنن, ڤسنن_2, errnum);
+  llvm::report_fatal_error(llvm::Twine(Err_ڤسنن));
 }
 
 namespace llvm {
@@ -71,29 +71,29 @@ namespace sys {
 
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
-inline std::chrono::microseconds toDuration(const struct timeval &TV) {
-  return std::chrono::seconds(TV.tv_sec) +
+مضمن std::chrono::microseconds toDuration(ثابت بنية timeval &TV) {
+  أرجع std::chrono::seconds(TV.tv_sec) +
          std::chrono::microseconds(TV.tv_usec);
 }
 
 /// Convert a time point to struct timespec.
-inline struct timespec toTimeSpec(TimePoint<> TP) {
+مضمن بنية timespec toTimeSpec(TimePoint<> TP) {
   using namespace std::chrono;
 
-  struct timespec RetVal;
+  بنية timespec RetVal;
   RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).کيراءن();
+  أرجع RetVal;
 }
 
 /// Convert a time point to struct timeval.
-inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
+مضمن بنية timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
   using namespace std::chrono;
 
-  struct timeval RetVal;
+  بنية timeval RetVal;
   RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).کيراءن();
+  أرجع RetVal;
 }
 
 } // namespace sys

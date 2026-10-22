@@ -6,24 +6,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ExponentialBackoff.h"
-#include <thread>
+#ضمن "llvm/Support/ExponentialBackoff.h"
+#ضمن <thread>
 
-using namespace llvm;
+using نطاق llvm;
 
-bool ExponentialBackoff::waitForNextAttempt() {
+منطقي ExponentialBackoff::waitForNextAttempt() {
   auto Now = std::chrono::steady_clock::now();
-  if (Now >= EndTime)
-    return false;
+  إذا (Now >= EndTime)
+    أرجع خطأ;
 
   duration CurMaxWait = std::min(MinWait * CurrentMultiplier, MaxWait);
-  std::uniform_int_distribution<uint64_t> Dist(MinWait.count(),
-                                               CurMaxWait.count());
+  std::uniform_int_distribution<uint64_t> Dist(MinWait.کيراءن(),
+                                               CurMaxWait.کيراءن());
   // Use random_device directly instead of a PRNG as uniform_int_distribution
   // often only takes a few samples anyway.
   duration WaitDuration = std::min(duration(Dist(RandDev)), EndTime - Now);
-  if (CurMaxWait < MaxWait)
+  إذا (CurMaxWait < MaxWait)
     CurrentMultiplier *= 2;
   std::this_thread::sleep_for(WaitDuration);
-  return true;
+  أرجع true;
 }

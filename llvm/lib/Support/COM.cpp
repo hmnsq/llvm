@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/COM.h"
+#ضمن "llvm/Support/COM.h"
 
-#include "llvm/Config/llvm-config.h"
+#ضمن "llvm/Config/llvm-config.h"
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
-#include "Unix/COM.inc"
-#elif defined(_WIN32)
-#include "Windows/COM.inc"
+#ضمن "Unix/COM.inc"
+#وإلاإذا defined(_WIN32)
+#ضمن "Windows/COM.inc"
 #endif
