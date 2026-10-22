@@ -6,26 +6,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemAlloc.h"
-#include <new>
+#अन्तर्भाव "llvm/Support/MemAlloc.h"
+#अन्तर्भाव <new>
 
 // These are out of line to have __cpp_aligned_new not affect ABI.
 
-LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS void *
-llvm::allocate_buffer(size_t Size, size_t Alignment) {
-  void *Result = ::operator new(Size,
+LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS शून्य *
+llvm::allocate_buffer(माप_प्रकार Size, माप_प्रकार Alignment) {
+  शून्य *Result = ::चालक नूतन(Size,
 #ifdef __cpp_aligned_new
                                 std::align_val_t(Alignment),
 #endif
                                 std::nothrow);
-  if (Result == nullptr) {
+  यदि (Result == nullptr) {
     report_bad_alloc_error("Buffer allocation failed");
   }
-  return Result;
+  प्रत्यागम Result;
 }
 
-void llvm::deallocate_buffer(void *Ptr, size_t Size, size_t Alignment) {
-  ::operator delete(Ptr
+शून्य llvm::deallocate_buffer(शून्य *Ptr, माप_प्रकार Size, माप_प्रकार Alignment) {
+  ::चालक delete(Ptr
 #ifdef __cpp_sized_deallocation
                     ,
                     Size

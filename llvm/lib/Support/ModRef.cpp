@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ModRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/ModRef.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
-  switch (MR) {
-  case ModRefInfo::NoModRef:
+raw_ostream &llvm::चालक<<(raw_ostream &OS, ModRefInfo MR) {
+  विकल्प (MR) {
+  पक्ष ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    भङ्ग;
+  पक्ष ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    भङ्ग;
+  पक्ष ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    भङ्ग;
+  पक्ष ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    भङ्ग;
   }
-  return OS;
+  प्रत्यागम OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
+raw_ostream &llvm::चालक<<(raw_ostream &OS, MemoryEffects ME) {
   interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
-    switch (Loc) {
-    case IRMemLocation::ArgMem:
+    विकल्प (Loc) {
+    पक्ष IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      भङ्ग;
+    पक्ष IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      भङ्ग;
+    पक्ष IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      भङ्ग;
+    पक्ष IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      भङ्ग;
+    पक्ष IRMemLocation::TargetMem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      भङ्ग;
+    पक्ष IRMemLocation::TargetMem1:
       OS << "TargetMem1: ";
-      break;
+      भङ्ग;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  प्रत्यागम OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+raw_ostream &llvm::चालक<<(raw_ostream &OS, CaptureComponents CC) {
+  यदि (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    प्रत्यागम OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  यदि (capturesAddressIsNullOnly(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  अन्यथा यदि (capturesAddress(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  यदि (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  यदि (capturesFullProvenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  प्रत्यागम OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
+raw_ostream &llvm::चालक<<(raw_ostream &OS, CaptureInfo CI) {
   ListSeparator LS;
   CaptureComponents Other = CI.getOtherComponents();
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  यदि (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  यदि (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  प्रत्यागम OS;
 }
