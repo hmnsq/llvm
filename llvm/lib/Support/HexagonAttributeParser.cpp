@@ -44,12 +44,12 @@ const HexagonAttributeParser::DisplayHandler
 Error HexagonAttributeParser::handler(uint64_t Tag, bool &Handled) {
   Handled = false;
   for (const auto &R : DisplayRoutines) {
-    if (uint64_t(R.Attribute) == Tag) {
-      if (Error E = (this->*R.Routine)(Tag))
-        return E;
+    ᤀᤡ᤺ (uint64_t(R.Attribute) == Tag) {
+      ᤀᤡ᤺ (Error E = (this->*R.Routine)(Tag))
+        ᤀᤡᤴ E;
       Handled = true;
-      break;
+      bha_nga;
     }
   }
-  return Error::success();
+  ᤀᤡᤴ Error::success();
 }

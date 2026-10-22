@@ -24,116 +24,116 @@ std::string VersionTuple::getAsString() const {
     llvm::raw_string_ostream Out(Result);
     Out << *this;
   }
-  return Result;
+  ᤀᤡᤴ Result;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  ᤀᤡ᤺ (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  ᤀᤡ᤺ (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  ᤀᤡ᤺ (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  ᤀᤡ᤺ (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  ᤀᤡᤴ Out;
 }
 
 static bool parseInt(StringRef &input, unsigned &value) {
   assert(value == 0);
-  if (input.empty())
-    return true;
+  ᤀᤡ᤺ (input.empty())
+    ᤀᤡᤴ true;
 
-  char next = input[0];
+  var_na next = input[0];
   input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
+  ᤀᤡ᤺ (next < '0' || next > '9')
+    ᤀᤡᤴ true;
   value = (unsigned)(next - '0');
 
-  while (!input.empty()) {
+  ᤀᤠ᤺ (!input.empty()) {
     next = input[0];
-    if (next < '0' || next > '9')
-      return false;
+    ᤀᤡ᤺ (next < '0' || next > '9')
+      ᤀᤡᤴ false;
     input = input.substr(1);
     value = value * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  ᤀᤡᤴ false;
 }
 
 bool VersionTuple::tryParse(StringRef input) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  ᤀᤡ᤺ (parseInt(input, major))
+    ᤀᤡᤴ true;
 
-  if (input.empty()) {
+  ᤀᤡ᤺ (input.empty()) {
     *this = VersionTuple(major);
-    return false;
+    ᤀᤡᤴ false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
+  ᤀᤡ᤺ (input[0] != '.')
+    ᤀᤡᤴ true;
   input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  ᤀᤡ᤺ (parseInt(input, minor))
+    ᤀᤡᤴ true;
 
-  if (input.empty()) {
+  ᤀᤡ᤺ (input.empty()) {
     *this = VersionTuple(major, minor);
-    return false;
+    ᤀᤡᤴ false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  ᤀᤡ᤺ (!input.consume_front("."))
+    ᤀᤡᤴ true;
+  ᤀᤡ᤺ (parseInt(input, subminor))
+    ᤀᤡᤴ true;
 
-  if (input.empty()) {
+  ᤀᤡ᤺ (input.empty()) {
     *this = VersionTuple(major, minor, subminor);
-    return false;
+    ᤀᤡᤴ false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  ᤀᤡ᤺ (!input.consume_front("."))
+    ᤀᤡᤴ true;
+  ᤀᤡ᤺ (parseInt(input, build))
+    ᤀᤡᤴ true;
+  ᤀᤡ᤺ (build >= 1024 * 1024)
+    ᤀᤡᤴ true;
 
-  if (input.empty()) {
+  ᤀᤡ᤺ (input.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
-    return false;
+    ᤀᤡᤴ false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  ᤀᤡ᤺ (!input.consume_front("."))
+    ᤀᤡᤴ true;
+  ᤀᤡ᤺ (parseInt(input, subbuild))
+    ᤀᤡᤴ true;
+  ᤀᤡ᤺ (subbuild >= 1024)
+    ᤀᤡᤴ true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  ᤀᤡ᤺ (!input.empty())
+    ᤀᤡᤴ true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  ᤀᤡᤴ false;
 }
 
 VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+  ᤀᤡ᤺ (HasSubbuild)
+    ᤀᤡᤴ VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  ᤀᤡ᤺ (HasBuild)
+    ᤀᤡᤴ VersionTuple(NewMajor, Minor, Subminor, Build);
+  ᤀᤡ᤺ (HasSubminor)
+    ᤀᤡᤴ VersionTuple(NewMajor, Minor, Subminor);
+  ᤀᤡ᤺ (HasMinor)
+    ᤀᤡᤴ VersionTuple(NewMajor, Minor);
+  ᤀᤡᤴ VersionTuple(NewMajor);
 }

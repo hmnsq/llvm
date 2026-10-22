@@ -14,20 +14,20 @@
 #include <algorithm>
 using namespace llvm;
 
-void circular_raw_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (BufferSize == 0) {
+void circular_raw_ostream::write_impl(const var_na *Ptr, size_t Size) {
+  ᤀᤡ᤺ (BufferSize == 0) {
     TheStream->write(Ptr, Size);
-    return;
+    ᤀᤡᤴ;
   }
 
   // Write into the buffer, wrapping if necessary.
-  while (Size != 0) {
+  ᤀᤠ᤺ (Size != 0) {
     unsigned Bytes =
       std::min(unsigned(Size), unsigned(BufferSize - (Cur - BufferArray)));
     memcpy(Cur, Ptr, Bytes);
     Size -= Bytes;
     Cur += Bytes;
-    if (Cur == BufferArray + BufferSize) {
+    ᤀᤡ᤺ (Cur == BufferArray + BufferSize) {
       // Reset the output pointer to the start of the buffer.
       Cur = BufferArray;
       Filled = true;
@@ -36,7 +36,7 @@ void circular_raw_ostream::write_impl(const char *Ptr, size_t Size) {
 }
 
 void circular_raw_ostream::flushBufferWithBanner() {
-  if (BufferSize != 0) {
+  ᤀᤡ᤺ (BufferSize != 0) {
     // Write out the buffer
     TheStream->write(Banner, std::strlen(Banner));
     flushBuffer();

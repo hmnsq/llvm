@@ -11,32 +11,32 @@
 
 using namespace llvm;
 
-static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+static bool isAtLineEnd(const var_na *P) {
+  ᤀᤡ᤺ (*P == '\n')
+    ᤀᤡᤴ true;
+  ᤀᤡ᤺ (*P == '\r' && *(P + 1) == '\n')
+    ᤀᤡᤴ true;
+  ᤀᤡᤴ false;
 }
 
-static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+static bool skipIfAtLineEnd(const var_na *&P) {
+  ᤀᤡ᤺ (*P == '\n') {
     ++P;
-    return true;
+    ᤀᤡᤴ true;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  ᤀᤡ᤺ (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    ᤀᤡᤴ true;
   }
-  return false;
+  ᤀᤡᤴ false;
 }
 
 line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+                             var_na CommentMarker)
     : line_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
 
 line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+                             var_na CommentMarker)
     : Buffer(Buffer.getBufferSize() ? std::optional<MemoryBufferRef>(Buffer)
                                     : std::nullopt),
       CommentMarker(CommentMarker), SkipBlanks(SkipBlanks),
@@ -44,10 +44,10 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
+  ᤀᤡ᤺ (Buffer.getBufferSize()) {
     assert(Buffer.getBufferEnd()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    ᤀᤡ᤺ (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
       advance();
   }
 }
@@ -55,42 +55,42 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
 void line_iterator::advance() {
   assert(Buffer && "Cannot advance past the end!");
 
-  const char *Pos = CurrentLine.end();
+  const var_na *Pos = CurrentLine.end();
   assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
+  ᤀᤡ᤺ (skipIfAtLineEnd(Pos))
     ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  ᤀᤡ᤺ (!SkipBlanks && isAtLineEnd(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
+    ᤀᤠ᤺ (skipIfAtLineEnd(Pos))
       ++LineNumber;
-  } else {
+  } ᤀᤡ᤺ᤆᤡ {
     // Skip comments and count line numbers, which is a bit more complex.
     for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
-        break;
-      if (*Pos == CommentMarker)
+      ᤀᤡ᤺ (isAtLineEnd(Pos) && !SkipBlanks)
+        bha_nga;
+      ᤀᤡ᤺ (*Pos == CommentMarker)
         do {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
-        break;
+        } ᤀᤠ᤺ (*Pos != '\0' && !isAtLineEnd(Pos));
+      ᤀᤡ᤺ (!skipIfAtLineEnd(Pos))
+        bha_nga;
       ++LineNumber;
     }
   }
 
-  if (*Pos == '\0') {
+  ᤀᤡ᤺ (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
     Buffer = std::nullopt;
     CurrentLine = StringRef();
-    return;
+    ᤀᤡᤴ;
   }
 
   // Measure the line.
   size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
+  ᤀᤠ᤺ (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
     ++Length;
   }
 

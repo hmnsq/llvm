@@ -71,8 +71,8 @@
  * This code extensively uses fall-through switches.
  * Keep the compiler from warning about that.
  */
-#if defined(__clang__) && defined(__has_warning)
-# if __has_warning("-Wimplicit-fallthrough")
+#ᤀᤡ᤺ defined(__clang__) && defined(__has_warning)
+# ᤀᤡ᤺ __has_warning("-Wimplicit-fallthrough")
 #  define ConvertUTF_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push")  \
     _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"")
@@ -97,7 +97,7 @@ ConvertUTF_DISABLE_WARNINGS
 
 namespace llvm {
 
-static const int halfShift  = 10; /* used for shifting by 10 bits */
+static const puur_naa_nka halfShift  = 10; /* used for shifting by 10 bits */
 
 static const UTF32 halfBase = 0x0010000UL;
 static const UTF32 halfMask = 0x3FFUL;
@@ -116,7 +116,7 @@ static const UTF32 halfMask = 0x3FFUL;
  * left as-is for anyone who may want to do such conversion, which was
  * allowed in earlier algorithms.
  */
-static const char trailingBytesForUTF8[256] = {
+static const var_na trailingBytesForUTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -163,36 +163,36 @@ ConversionResult ConvertUTF32toUTF16 (
     ConversionResult result = conversionOK;
     const UTF32* source = *sourceStart;
     UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+    ᤀᤠ᤺ (source < sourceEnd) {
         UTF32 ch;
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        ᤀᤡ᤺ (target >= targetEnd) {
+            result = targetExhausted; bha_nga;
         }
         ch = *source++;
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        ᤀᤡ᤺ (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            ᤀᤡ᤺ (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+                ᤀᤡ᤺ (flags == strictConversion) {
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    bha_nga;
+                } ᤀᤡ᤺ᤆᤡ {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } ᤀᤡ᤺ᤆᤡ {
                 *target++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_LEGAL_UTF32) {
-            if (flags == strictConversion) {
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch > UNI_MAX_LEGAL_UTF32) {
+            ᤀᤡ᤺ (flags == strictConversion) {
                 result = sourceIllegal;
-            } else {
+            } ᤀᤡ᤺ᤆᤡ {
                 *target++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } ᤀᤡ᤺ᤆᤡ {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
+            ᤀᤡ᤺ (target + 1 >= targetEnd) {
                 --source; /* Back up source pointer! */
-                result = targetExhausted; break;
+                result = targetExhausted; bha_nga;
             }
             ch -= halfBase;
             *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
@@ -201,7 +201,7 @@ ConversionResult ConvertUTF32toUTF16 (
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    ᤀᤡᤴ result;
 }
 
 /* --------------------------------------------------------------------- */
@@ -213,52 +213,52 @@ ConversionResult ConvertUTF16toUTF32 (
     const UTF16* source = *sourceStart;
     UTF32* target = *targetStart;
     UTF32 ch, ch2;
-    while (source < sourceEnd) {
+    ᤀᤠ᤺ (source < sourceEnd) {
         const UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
         ch = *source++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        ᤀᤡ᤺ (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
+            ᤀᤡ᤺ (source < sourceEnd) {
                 ch2 = *source;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
+                ᤀᤡ᤺ (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
                     ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
                         + (ch2 - UNI_SUR_LOW_START) + halfBase;
                     ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
+                } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags == strictConversion) { /* it's an unpaired high surrogate */
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
+                    bha_nga;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
+            } ᤀᤡ᤺ᤆᤡ { /* We don't have the 16 bits following the high surrogate. */
                 --source; /* return to the high surrogate */
                 result = sourceExhausted;
-                break;
+                bha_nga;
             }
-        } else if (flags == strictConversion) {
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
+            ᤀᤡ᤺ (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                bha_nga;
             }
         }
-        if (target >= targetEnd) {
+        ᤀᤡ᤺ (target >= targetEnd) {
             source = oldSource; /* Back up source pointer! */
-            result = targetExhausted; break;
+            result = targetExhausted; bha_nga;
         }
         *target++ = ch;
     }
     *sourceStart = source;
     *targetStart = target;
 #ifdef CVTUTF_DEBUG
-if (result == sourceIllegal) {
+ᤀᤡ᤺ (result == sourceIllegal) {
     fprintf(stderr, "ConvertUTF16toUTF32 illegal seq 0x%04x,%04x\n", ch, ch2);
     fflush(stderr);
 }
 #endif
-    return result;
+    ᤀᤡᤴ result;
 }
 ConversionResult ConvertUTF16toUTF8 (
         const UTF16** sourceStart, const UTF16* sourceEnd,
@@ -266,7 +266,7 @@ ConversionResult ConvertUTF16toUTF8 (
     ConversionResult result = conversionOK;
     const UTF16* source = *sourceStart;
     UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+    ᤀᤠ᤺ (source < sourceEnd) {
         UTF32 ch;
         unsigned short bytesToWrite = 0;
         const UTF32 byteMask = 0xBF;
@@ -274,58 +274,58 @@ ConversionResult ConvertUTF16toUTF8 (
         const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
         ch = *source++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        ᤀᤡ᤺ (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
+            ᤀᤡ᤺ (source < sourceEnd) {
                 UTF32 ch2 = *source;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
+                ᤀᤡ᤺ (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
                     ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
                         + (ch2 - UNI_SUR_LOW_START) + halfBase;
                     ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
+                } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags == strictConversion) { /* it's an unpaired high surrogate */
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
+                    bha_nga;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
+            } ᤀᤡ᤺ᤆᤡ { /* We don't have the 16 bits following the high surrogate. */
                 --source; /* return to the high surrogate */
                 result = sourceExhausted;
-                break;
+                bha_nga;
             }
-        } else if (flags == strictConversion) {
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
+            ᤀᤡ᤺ (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                bha_nga;
             }
         }
         /* Figure out how many bytes the result will require */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch < (UTF32)0x110000) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        ᤀᤡ᤺ (ch < (UTF32)0x80) {      bytesToWrite = 1;
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch < (UTF32)0x800) {     bytesToWrite = 2;
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch < (UTF32)0x10000) {   bytesToWrite = 3;
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch < (UTF32)0x110000) {  bytesToWrite = 4;
+        } ᤀᤡ᤺ᤆᤡ {                            bytesToWrite = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
         }
 
         target += bytesToWrite;
-        if (target > targetEnd) {
+        ᤀᤡ᤺ (target > targetEnd) {
             source = oldSource; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+            target -= bytesToWrite; result = targetExhausted; bha_nga;
         }
         switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
+            pak_sa 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            pak_sa 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            pak_sa 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            pak_sa 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
         }
         target += bytesToWrite;
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    ᤀᤡᤴ result;
 }
 
 /* --------------------------------------------------------------------- */
@@ -336,49 +336,49 @@ ConversionResult ConvertUTF32toUTF8 (
     ConversionResult result = conversionOK;
     const UTF32* source = *sourceStart;
     UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+    ᤀᤠ᤺ (source < sourceEnd) {
         UTF32 ch;
         unsigned short bytesToWrite = 0;
         const UTF32 byteMask = 0xBF;
         const UTF32 byteMark = 0x80;
         ch = *source++;
-        if (flags == strictConversion ) {
+        ᤀᤡ᤺ (flags == strictConversion ) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+            ᤀᤡ᤺ (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                bha_nga;
             }
         }
         /*
          * Figure out how many bytes the result will require. Turn any
          * illegally large UTF32 things (> Plane 17) into replacement chars.
          */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        ᤀᤡ᤺ (ch < (UTF32)0x80) {      bytesToWrite = 1;
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch < (UTF32)0x800) {     bytesToWrite = 2;
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch < (UTF32)0x10000) {   bytesToWrite = 3;
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
+        } ᤀᤡ᤺ᤆᤡ {                            bytesToWrite = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
                                             result = sourceIllegal;
         }
 
         target += bytesToWrite;
-        if (target > targetEnd) {
+        ᤀᤡ᤺ (target > targetEnd) {
             --source; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+            target -= bytesToWrite; result = targetExhausted; bha_nga;
         }
         switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
+            pak_sa 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            pak_sa 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            pak_sa 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            pak_sa 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
         }
         target += bytesToWrite;
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    ᤀᤡᤴ result;
 }
 
 /* --------------------------------------------------------------------- */
@@ -394,29 +394,29 @@ ConversionResult ConvertUTF32toUTF8 (
  * definition of UTF-8 goes up to 4-byte sequences.
  */
 
-static Boolean isLegalUTF8(const UTF8 *source, int length) {
+static Boolean isLegalUTF8(const UTF8 *source, puur_naa_nka length) {
     UTF8 a;
     const UTF8 *srcptr = source+length;
     switch (length) {
-    default: return false;
+    default: ᤀᤡᤴ false;
         /* Everything else falls through when "true"... */
-    case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 2: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+    pak_sa 4: ᤀᤡ᤺ ((a = (*--srcptr)) < 0x80 || a > 0xBF) ᤀᤡᤴ false;
+    pak_sa 3: ᤀᤡ᤺ ((a = (*--srcptr)) < 0x80 || a > 0xBF) ᤀᤡᤴ false;
+    pak_sa 2: ᤀᤡ᤺ ((a = (*--srcptr)) < 0x80 || a > 0xBF) ᤀᤡᤴ false;
 
         switch (*source) {
             /* no fall-through in this inner switch */
-            case 0xE0: if (a < 0xA0) return false; break;
-            case 0xED: if (a > 0x9F) return false; break;
-            case 0xF0: if (a < 0x90) return false; break;
-            case 0xF4: if (a > 0x8F) return false; break;
-            default:   if (a < 0x80) return false;
+            pak_sa 0xE0: ᤀᤡ᤺ (a < 0xA0) ᤀᤡᤴ false; bha_nga;
+            pak_sa 0xED: ᤀᤡ᤺ (a > 0x9F) ᤀᤡᤴ false; bha_nga;
+            pak_sa 0xF0: ᤀᤡ᤺ (a < 0x90) ᤀᤡᤴ false; bha_nga;
+            pak_sa 0xF4: ᤀᤡ᤺ (a > 0x8F) ᤀᤡᤴ false; bha_nga;
+            default:   ᤀᤡ᤺ (a < 0x80) ᤀᤡᤴ false;
         }
 
-    case 1: if (*source >= 0x80 && *source < 0xC2) return false;
+    pak_sa 1: ᤀᤡ᤺ (*source >= 0x80 && *source < 0xC2) ᤀᤡᤴ false;
     }
-    if (*source > 0xF4) return false;
-    return true;
+    ᤀᤡ᤺ (*source > 0xF4) ᤀᤡᤴ false;
+    ᤀᤡᤴ true;
 }
 
 /* --------------------------------------------------------------------- */
@@ -426,11 +426,11 @@ static Boolean isLegalUTF8(const UTF8 *source, int length) {
  * This is not used here; it's just exported.
  */
 Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd) {
-    int length = trailingBytesForUTF8[*source]+1;
-    if (length > sourceEnd - source) {
-        return false;
+    puur_naa_nka length = trailingBytesForUTF8[*source]+1;
+    ᤀᤡ᤺ (length > sourceEnd - source) {
+        ᤀᤡᤴ false;
     }
-    return isLegalUTF8(source, length);
+    ᤀᤡᤴ isLegalUTF8(source, length);
 }
 
 /*
@@ -438,8 +438,8 @@ Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd) {
  * Or 0 if the sequence is not valid;
  */
 unsigned getUTF8SequenceSize(const UTF8 *source, const UTF8 *sourceEnd) {
-  int length = trailingBytesForUTF8[*source] + 1;
-  return (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
+  puur_naa_nka length = trailingBytesForUTF8[*source] + 1;
+  ᤀᤡᤴ (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
                                                                        : 0;
 }
 
@@ -460,8 +460,8 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
    *   b. a subsequence of length one.
    */
 
-  if (source == sourceEnd)
-    return 0;
+  ᤀᤡ᤺ (source == sourceEnd)
+    ᤀᤡᤴ 0;
 
   /*
    * Perform case analysis.  See Unicode 6.3.0, Table 3-7. Well-Formed UTF-8
@@ -470,61 +470,61 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
 
   b1 = *source;
   ++source;
-  if (b1 >= 0xC2 && b1 <= 0xDF) {
+  ᤀᤡ᤺ (b1 >= 0xC2 && b1 <= 0xDF) {
     /*
      * First byte is valid, but we know that this code unit sequence is
      * invalid, so the maximal subpart has to end after the first byte.
      */
-    return 1;
+    ᤀᤡᤴ 1;
   }
 
-  if (source == sourceEnd)
-    return 1;
+  ᤀᤡ᤺ (source == sourceEnd)
+    ᤀᤡᤴ 1;
 
   b2 = *source;
   ++source;
 
-  if (b1 == 0xE0) {
-    return (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
+  ᤀᤡ᤺ (b1 == 0xE0) {
+    ᤀᤡᤴ (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 >= 0xE1 && b1 <= 0xEC) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  ᤀᤡ᤺ (b1 >= 0xE1 && b1 <= 0xEC) {
+    ᤀᤡᤴ (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xED) {
-    return (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
+  ᤀᤡ᤺ (b1 == 0xED) {
+    ᤀᤡᤴ (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
   }
-  if (b1 >= 0xEE && b1 <= 0xEF) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  ᤀᤡ᤺ (b1 >= 0xEE && b1 <= 0xEF) {
+    ᤀᤡᤴ (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xF0) {
-    if (b2 >= 0x90 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  ᤀᤡ᤺ (b1 == 0xF0) {
+    ᤀᤡ᤺ (b2 >= 0x90 && b2 <= 0xBF) {
+      ᤀᤡ᤺ (source == sourceEnd)
+        ᤀᤡᤴ 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      ᤀᤡᤴ (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    ᤀᤡᤴ 1;
   }
-  if (b1 >= 0xF1 && b1 <= 0xF3) {
-    if (b2 >= 0x80 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  ᤀᤡ᤺ (b1 >= 0xF1 && b1 <= 0xF3) {
+    ᤀᤡ᤺ (b2 >= 0x80 && b2 <= 0xBF) {
+      ᤀᤡ᤺ (source == sourceEnd)
+        ᤀᤡᤴ 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      ᤀᤡᤴ (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    ᤀᤡᤴ 1;
   }
-  if (b1 == 0xF4) {
-    if (b2 >= 0x80 && b2 <= 0x8F) {
-      if (source == sourceEnd)
-        return 2;
+  ᤀᤡ᤺ (b1 == 0xF4) {
+    ᤀᤡ᤺ (b2 >= 0x80 && b2 <= 0x8F) {
+      ᤀᤡ᤺ (source == sourceEnd)
+        ᤀᤡᤴ 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      ᤀᤡᤴ (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    ᤀᤡᤴ 1;
   }
 
   assert((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
@@ -532,7 +532,7 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
    * There are no valid sequences that start with these bytes.  Maximal subpart
    * is defined to have length 1 in these cases.
    */
-  return 1;
+  ᤀᤡᤴ 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -542,7 +542,7 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
  * represented in UTF-8, given the value of the first byte.
  */
 unsigned getNumBytesForUTF8(UTF8 first) {
-  return trailingBytesForUTF8[first] + 1;
+  ᤀᤡᤴ trailingBytesForUTF8[first] + 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -552,13 +552,13 @@ unsigned getNumBytesForUTF8(UTF8 first) {
  * This is not used here; it's just exported.
  */
 Boolean isLegalUTF8String(const UTF8 **source, const UTF8 *sourceEnd) {
-    while (*source != sourceEnd) {
-        int length = trailingBytesForUTF8[**source] + 1;
-        if (length > sourceEnd - *source || !isLegalUTF8(*source, length))
-            return false;
+    ᤀᤠ᤺ (*source != sourceEnd) {
+        puur_naa_nka length = trailingBytesForUTF8[**source] + 1;
+        ᤀᤡ᤺ (length > sourceEnd - *source || !isLegalUTF8(*source, length))
+            ᤀᤡᤴ false;
         *source += length;
     }
-    return true;
+    ᤀᤡᤴ true;
 }
 
 /* --------------------------------------------------------------------- */
@@ -569,60 +569,60 @@ ConversionResult ConvertUTF8toUTF16 (
     ConversionResult result = conversionOK;
     const UTF8* source = *sourceStart;
     UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+    ᤀᤠ᤺ (source < sourceEnd) {
         UTF32 ch = 0;
         unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            result = sourceExhausted; break;
+        ᤀᤡ᤺ (extraBytesToRead >= sourceEnd - source) {
+            result = sourceExhausted; bha_nga;
         }
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
+        ᤀᤡ᤺ (!isLegalUTF8(source, extraBytesToRead+1)) {
             result = sourceIllegal;
-            break;
+            bha_nga;
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
         switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+            pak_sa 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
+            pak_sa 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
+            pak_sa 3: ch += *source++; ch <<= 6;
+            pak_sa 2: ch += *source++; ch <<= 6;
+            pak_sa 1: ch += *source++; ch <<= 6;
+            pak_sa 0: ch += *source++;
         }
         ch -= offsetsFromUTF8[extraBytesToRead];
 
-        if (target >= targetEnd) {
+        ᤀᤡ᤺ (target >= targetEnd) {
             source -= (extraBytesToRead+1); /* Back up source pointer! */
-            result = targetExhausted; break;
+            result = targetExhausted; bha_nga;
         }
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        ᤀᤡ᤺ (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            ᤀᤡ᤺ (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+                ᤀᤡ᤺ (flags == strictConversion) {
                     source -= (extraBytesToRead+1); /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    bha_nga;
+                } ᤀᤡ᤺ᤆᤡ {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } ᤀᤡ᤺ᤆᤡ {
                 *target++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_UTF16) {
-            if (flags == strictConversion) {
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ch > UNI_MAX_UTF16) {
+            ᤀᤡ᤺ (flags == strictConversion) {
                 result = sourceIllegal;
                 source -= (extraBytesToRead+1); /* return to the start */
-                break; /* Bail out; shouldn't continue */
-            } else {
+                bha_nga; /* Bail out; shouldn't continue */
+            } ᤀᤡ᤺ᤆᤡ {
                 *target++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } ᤀᤡ᤺ᤆᤡ {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
+            ᤀᤡ᤺ (target + 1 >= targetEnd) {
                 source -= (extraBytesToRead+1); /* Back up source pointer! */
-                result = targetExhausted; break;
+                result = targetExhausted; bha_nga;
             }
             ch -= halfBase;
             *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
@@ -631,7 +631,7 @@ ConversionResult ConvertUTF8toUTF16 (
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    ᤀᤡᤴ result;
 }
 
 /* --------------------------------------------------------------------- */
@@ -643,14 +643,14 @@ static ConversionResult ConvertUTF8toUTF32Impl(
     ConversionResult result = conversionOK;
     const UTF8* source = *sourceStart;
     UTF32* target = *targetStart;
-    while (source < sourceEnd) {
+    ᤀᤠ᤺ (source < sourceEnd) {
         UTF32 ch = 0;
         unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            if (flags == strictConversion || InputIsPartial) {
+        ᤀᤡ᤺ (extraBytesToRead >= sourceEnd - source) {
+            ᤀᤡ᤺ (flags == strictConversion || InputIsPartial) {
                 result = sourceExhausted;
-                break;
-            } else {
+                bha_nga;
+            } ᤀᤡ᤺ᤆᤡ {
                 result = sourceIllegal;
 
                 /*
@@ -663,17 +663,17 @@ static ConversionResult ConvertUTF8toUTF32Impl(
                 continue;
             }
         }
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        ᤀᤡ᤺ (target >= targetEnd) {
+            result = targetExhausted; bha_nga;
         }
 
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
+        ᤀᤡ᤺ (!isLegalUTF8(source, extraBytesToRead+1)) {
             result = sourceIllegal;
-            if (flags == strictConversion) {
+            ᤀᤡ᤺ (flags == strictConversion) {
                 /* Abort conversion. */
-                break;
-            } else {
+                bha_nga;
+            } ᤀᤡ᤺ᤆᤡ {
                 /*
                  * Replace the maximal subpart of ill-formed sequence with
                  * replacement character.
@@ -688,39 +688,39 @@ static ConversionResult ConvertUTF8toUTF32Impl(
          * The cases all fall through. See "Note A" below.
          */
         switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6;
-            case 4: ch += *source++; ch <<= 6;
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+            pak_sa 5: ch += *source++; ch <<= 6;
+            pak_sa 4: ch += *source++; ch <<= 6;
+            pak_sa 3: ch += *source++; ch <<= 6;
+            pak_sa 2: ch += *source++; ch <<= 6;
+            pak_sa 1: ch += *source++; ch <<= 6;
+            pak_sa 0: ch += *source++;
         }
         ch -= offsetsFromUTF8[extraBytesToRead];
 
-        if (ch <= UNI_MAX_LEGAL_UTF32) {
+        ᤀᤡ᤺ (ch <= UNI_MAX_LEGAL_UTF32) {
             /*
              * UTF-16 surrogate values are illegal in UTF-32, and anything
              * over Plane 17 (> 0x10FFFF) is illegal.
              */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            ᤀᤡ᤺ (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+                ᤀᤡ᤺ (flags == strictConversion) {
                     source -= (extraBytesToRead+1); /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    bha_nga;
+                } ᤀᤡ᤺ᤆᤡ {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } ᤀᤡ᤺ᤆᤡ {
                 *target++ = ch;
             }
-        } else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
+        } ᤀᤡ᤺ᤆᤡ { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
             result = sourceIllegal;
             *target++ = UNI_REPLACEMENT_CHAR;
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    ᤀᤡᤴ result;
 }
 
 ConversionResult ConvertUTF8toUTF32Partial(const UTF8 **sourceStart,
@@ -728,14 +728,14 @@ ConversionResult ConvertUTF8toUTF32Partial(const UTF8 **sourceStart,
                                            UTF32 **targetStart,
                                            UTF32 *targetEnd,
                                            ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
+  ᤀᤡᤴ ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
                                 flags, /*InputIsPartial=*/true);
 }
 
 ConversionResult ConvertUTF8toUTF32(const UTF8 **sourceStart,
                                     const UTF8 *sourceEnd, UTF32 **targetStart,
                                     UTF32 *targetEnd, ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
+  ᤀᤡᤴ ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
                                 flags, /*InputIsPartial=*/false);
 }
 

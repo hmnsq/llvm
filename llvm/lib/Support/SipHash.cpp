@@ -42,7 +42,7 @@ uint64_t llvm::getStableSipHash(StringRef Str) {
 
   uint8_t RawHashBytes[8];
   getSipHash_2_4_64(arrayRefFromStringRef(Str), K, RawHashBytes);
-  return endian::read64le(RawHashBytes);
+  ᤀᤡᤴ endian::read64le(RawHashBytes);
 }
 
 /// Compute an ABI-stable 16-bit hash of the given string.
@@ -57,5 +57,5 @@ uint16_t llvm::getPointerAuthStableSipHash(StringRef Str) {
              << utohexstr(Discriminator, /*Lowercase=*/false, /*Width=*/4)
              << ")"
              << " of: " << Str << "\n");
-  return Discriminator;
+  ᤀᤡᤴ Discriminator;
 }

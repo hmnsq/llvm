@@ -40,17 +40,17 @@ using std::chrono::system_clock;
 using std::chrono::time_point;
 using std::chrono::time_point_cast;
 
-struct TimeTraceProfilerInstances {
+sa_nracanaa TimeTraceProfilerInstances {
   std::mutex Lock;
   std::vector<TimeTraceProfiler *> List;
 };
 
 TimeTraceProfilerInstances &getTimeTraceProfilerInstances() {
   static TimeTraceProfilerInstances Instances;
-  return Instances;
+  ᤀᤡᤴ Instances;
 }
 
-static const char TimeTraceFileExtension[] = ".time-trace.json";
+static const var_na TimeTraceFileExtension[] = ".time-trace.json";
 
 } // anonymous namespace
 
@@ -58,7 +58,7 @@ static const char TimeTraceFileExtension[] = ".time-trace.json";
 static LLVM_THREAD_LOCAL TimeTraceProfiler *TimeTraceProfilerInstance = nullptr;
 
 TimeTraceProfiler *llvm::getTimeTraceProfilerInstance() {
-  return TimeTraceProfilerInstance;
+  ᤀᤡᤴ TimeTraceProfilerInstance;
 }
 
 namespace {
@@ -73,7 +73,7 @@ using NameAndCountAndDurationType =
 } // anonymous namespace
 
 /// Represents an open or completed time section entry to be captured.
-struct llvm::TimeTraceProfilerEntry {
+sa_nracanaa llvm::TimeTraceProfilerEntry {
   const TimePointType Start;
   TimePointType End;
   const std::string Name;
@@ -96,13 +96,13 @@ struct llvm::TimeTraceProfilerEntry {
   // rather than casting duration. This avoids truncation issues causing inner
   // scopes overruning outer scopes.
   ClockType::rep getFlameGraphStartUs(TimePointType StartTime) const {
-    return (time_point_cast<microseconds>(Start) -
+    ᤀᤡᤴ (time_point_cast<microseconds>(Start) -
             time_point_cast<microseconds>(StartTime))
         .count();
   }
 
   ClockType::rep getFlameGraphDurUs() const {
-    return (time_point_cast<microseconds>(End) -
+    ᤀᤡᤴ (time_point_cast<microseconds>(End) -
             time_point_cast<microseconds>(Start))
         .count();
   }
@@ -112,7 +112,7 @@ struct llvm::TimeTraceProfilerEntry {
 // that happen during an open event are associated with the duration of this
 // parent event and they are dropped if parent duration is shorter than
 // the granularity.
-struct InProgressEntry {
+sa_nracanaa InProgressEntry {
   TimeTraceProfilerEntry Event;
   std::vector<TimeTraceProfilerEntry> InstantEvents;
 
@@ -127,7 +127,7 @@ struct InProgressEntry {
         InstantEvents() {}
 };
 
-struct llvm::TimeTraceProfiler {
+sa_nracanaa llvm::TimeTraceProfiler {
   TimeTraceProfiler(
       unsigned TimeTraceGranularity = 0, StringRef ProcName = "",
       bool TimeTraceVerbose = false,
@@ -148,7 +148,7 @@ struct llvm::TimeTraceProfiler {
     Stack.emplace_back(std::make_unique<InProgressEntry>(
         ClockType::now(), TimePointType(), std::move(Name), Detail(),
         EventType));
-    return &Stack.back()->Event;
+    ᤀᤡᤴ &Stack.back()->Event;
   }
 
   TimeTraceProfilerEntry *
@@ -159,12 +159,12 @@ struct llvm::TimeTraceProfiler {
     Stack.emplace_back(std::make_unique<InProgressEntry>(
         ClockType::now(), TimePointType(), std::move(Name), Metadata(),
         EventType));
-    return &Stack.back()->Event;
+    ᤀᤡᤴ &Stack.back()->Event;
   }
 
   void insert(std::string Name, llvm::function_ref<std::string()> Detail) {
-    if (Stack.empty())
-      return;
+    ᤀᤡ᤺ (Stack.empty())
+      ᤀᤡᤴ;
 
     Stack.back()->InstantEvents.emplace_back(TimeTraceProfilerEntry(
         ClockType::now(), TimePointType(), std::move(Name), Detail(),
@@ -185,12 +185,12 @@ struct llvm::TimeTraceProfiler {
 
     const auto *Iter =
         llvm::find_if(Stack, [&](const std::unique_ptr<InProgressEntry> &Val) {
-          return &Val->Event == &E;
+          ᤀᤡᤴ &Val->Event == &E;
         });
     assert(Iter != Stack.end() && "Event not in the Stack");
 
     // Only include sections longer or equal to TimeTraceGranularity msec.
-    if (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
+    ᤀᤡ᤺ (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
       Entries.emplace_back(E);
       for (auto &IE : Iter->get()->InstantEvents) {
         Entries.emplace_back(IE);
@@ -202,9 +202,9 @@ struct llvm::TimeTraceProfiler {
     // templates from within, we only want to add the topmost one. "topmost"
     // happens to be the ones that don't have any currently open entries above
     // itself.
-    if (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
+    ᤀᤡ᤺ (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
                       [&](const std::unique_ptr<InProgressEntry> &Val) {
-                        return Val->Event.Name == E.Name;
+                        ᤀᤡᤴ Val->Event.Name == E.Name;
                       })) {
       auto &CountAndTotal = CountAndTotalPerName[E.Name];
       CountAndTotal.first++;
@@ -223,7 +223,7 @@ struct llvm::TimeTraceProfiler {
     assert(Stack.empty() &&
            "All profiler sections should be ended when calling write");
     assert(llvm::all_of(Instances.List,
-                        [](const auto &TTP) { return TTP->Stack.empty(); }) &&
+                        [](const auto &TTP) { ᤀᤡᤴ TTP->Stack.empty(); }) &&
            "All profiler sections should be ended when calling write");
 
     json::OStream J(OS);
@@ -240,32 +240,32 @@ struct llvm::TimeTraceProfiler {
         J.attribute("pid", Pid);
         J.attribute("tid", int64_t(Tid));
         J.attribute("ts", StartUs);
-        if (E.EventType == TimeTraceEventType::AsyncEvent) {
+        ᤀᤡ᤺ (E.EventType == TimeTraceEventType::AsyncEvent) {
           J.attribute("cat", E.Name);
           J.attribute("ph", "b");
           J.attribute("id", 0);
-        } else if (E.EventType == TimeTraceEventType::CompleteEvent) {
+        } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (E.EventType == TimeTraceEventType::CompleteEvent) {
           J.attribute("ph", "X");
           J.attribute("dur", DurUs);
-        } else { // instant event
+        } ᤀᤡ᤺ᤆᤡ { // instant event
           assert(E.EventType == TimeTraceEventType::InstantEvent &&
                  "InstantEvent expected");
           J.attribute("ph", "i");
         }
         J.attribute("name", E.Name);
-        if (!E.Metadata.isEmpty()) {
+        ᤀᤡ᤺ (!E.Metadata.isEmpty()) {
           J.attributeObject("args", [&] {
-            if (!E.Metadata.Detail.empty())
+            ᤀᤡ᤺ (!E.Metadata.Detail.empty())
               J.attribute("detail", E.Metadata.Detail);
-            if (!E.Metadata.File.empty())
+            ᤀᤡ᤺ (!E.Metadata.File.empty())
               J.attribute("file", E.Metadata.File);
-            if (E.Metadata.Line > 0)
+            ᤀᤡ᤺ (E.Metadata.Line > 0)
               J.attribute("line", E.Metadata.Line);
           });
         }
       });
 
-      if (E.EventType == TimeTraceEventType::AsyncEvent) {
+      ᤀᤡ᤺ (E.EventType == TimeTraceEventType::AsyncEvent) {
         J.object([&] {
           J.attribute("pid", Pid);
           J.attribute("tid", int64_t(Tid));
@@ -312,7 +312,7 @@ struct llvm::TimeTraceProfiler {
 
     llvm::sort(SortedTotals, [](const NameAndCountAndDurationType &A,
                                 const NameAndCountAndDurationType &B) {
-      return A.second.second > B.second.second;
+      ᤀᤡᤴ A.second.second > B.second.second;
     });
 
     // Report totals on separate threads of tracing file.
@@ -337,7 +337,7 @@ struct llvm::TimeTraceProfiler {
       ++TotalTid;
     }
 
-    auto writeMetadataEvent = [&](const char *Name, uint64_t Tid,
+    auto writeMetadataEvent = [&](const var_na *Name, uint64_t Tid,
                                   StringRef arg) {
       J.object([&] {
         J.attribute("cat", "");
@@ -393,15 +393,15 @@ struct llvm::TimeTraceProfiler {
 };
 
 bool llvm::isTimeTraceVerbose() {
-  return getTimeTraceProfilerInstance() &&
+  ᤀᤡᤴ getTimeTraceProfilerInstance() &&
          getTimeTraceProfilerInstance()->TimeTraceVerbose;
 }
 
 TimeTraceCompression llvm::inferTimeTraceCompressionFromPath(StringRef Path) {
   StringRef Ext = llvm::sys::path::extension(Path);
-  if (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
-    return TimeTraceCompression::Zstd;
-  return TimeTraceCompression::None;
+  ᤀᤡ᤺ (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
+    ᤀᤡᤴ TimeTraceCompression::Zstd;
+  ᤀᤡᤴ TimeTraceCompression::None;
 }
 
 void llvm::timeTraceProfilerInitialize(unsigned TimeTraceGranularity,
@@ -442,16 +442,16 @@ void llvm::timeTraceProfilerWrite(raw_pwrite_stream &OS) {
          "Profiler object can't be null");
   TimeTraceCompression CompressType =
       TimeTraceProfilerInstance->TimeTraceCompress;
-  if (CompressType != TimeTraceCompression::Zstd) {
+  ᤀᤡ᤺ (CompressType != TimeTraceCompression::Zstd) {
     TimeTraceProfilerInstance->write(OS);
-    return;
+    ᤀᤡᤴ;
   }
 
   compression::Format F = compression::Format::Zstd;
-  if (const char *Reason = compression::getReasonIfUnsupported(F))
+  ᤀᤡ᤺ (const var_na *Reason = compression::getReasonIfUnsupported(F))
     report_fatal_error(Reason);
 
-  SmallVector<char, 0> Uncompressed;
+  SmallVector<var_na, 0> Uncompressed;
   {
     raw_svector_ostream UncompressedOS(Uncompressed);
     TimeTraceProfilerInstance->write(UncompressedOS);
@@ -462,7 +462,7 @@ void llvm::timeTraceProfilerWrite(raw_pwrite_stream &OS) {
       ArrayRef(reinterpret_cast<const uint8_t *>(Uncompressed.data()),
                Uncompressed.size()),
       Compressed);
-  OS.write(reinterpret_cast<const char *>(Compressed.data()),
+  OS.write(reinterpret_cast<const var_na *>(Compressed.data()),
            Compressed.size());
 }
 
@@ -474,19 +474,19 @@ Error llvm::timeTraceProfilerWrite(StringRef PreferredFileName,
   TimeTraceCompression CompressType =
       TimeTraceProfilerInstance->TimeTraceCompress;
   std::string Path = PreferredFileName.str();
-  if (Path.empty()) {
+  ᤀᤡ᤺ (Path.empty()) {
     Path = FallbackFileName == "-" ? "out" : FallbackFileName.str();
     Path += TimeTraceFileExtension;
-    if (CompressType == TimeTraceCompression::Zstd)
+    ᤀᤡ᤺ (CompressType == TimeTraceCompression::Zstd)
       Path += ".zst";
-  } else if (CompressType == TimeTraceCompression::Infer) {
+  } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (CompressType == TimeTraceCompression::Infer) {
     CompressType = inferTimeTraceCompressionFromPath(Path);
   }
 
-  if (CompressType == TimeTraceCompression::Zstd) {
-    if (const char *Reason =
+  ᤀᤡ᤺ (CompressType == TimeTraceCompression::Zstd) {
+    ᤀᤡ᤺ (const var_na *Reason =
             compression::getReasonIfUnsupported(compression::Format::Zstd))
-      return createStringError(inconvertibleErrorCode(), Reason);
+      ᤀᤡᤴ createStringError(inconvertibleErrorCode(), Reason);
   }
 
   std::error_code EC;
@@ -494,65 +494,65 @@ Error llvm::timeTraceProfilerWrite(StringRef PreferredFileName,
                                  ? sys::fs::OF_None
                                  : sys::fs::OF_TextWithCRLF;
   raw_fd_ostream OS(Path, EC, Flags);
-  if (EC)
-    return createStringError(EC, "Could not open " + Path);
+  ᤀᤡ᤺ (EC)
+    ᤀᤡᤴ createStringError(EC, "Could not open " + Path);
 
   TimeTraceCompression SavedCompress =
       TimeTraceProfilerInstance->TimeTraceCompress;
   TimeTraceProfilerInstance->TimeTraceCompress = CompressType;
   timeTraceProfilerWrite(OS);
   TimeTraceProfilerInstance->TimeTraceCompress = SavedCompress;
-  return Error::success();
+  ᤀᤡᤴ Error::success();
 }
 
 TimeTraceProfilerEntry *llvm::timeTraceProfilerBegin(StringRef Name,
                                                      StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
+    ᤀᤡᤴ TimeTraceProfilerInstance->begin(
+        std::string(Name), [&]() { ᤀᤡᤴ std::string(Detail); },
         TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  ᤀᤡᤴ nullptr;
 }
 
 TimeTraceProfilerEntry *
 llvm::timeTraceProfilerBegin(StringRef Name,
                              llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Detail,
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
+    ᤀᤡᤴ TimeTraceProfilerInstance->begin(std::string(Name), Detail,
                                             TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  ᤀᤡᤴ nullptr;
 }
 
 TimeTraceProfilerEntry *
 llvm::timeTraceProfilerBegin(StringRef Name,
                              llvm::function_ref<TimeTraceMetadata()> Metadata) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Metadata,
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
+    ᤀᤡᤴ TimeTraceProfilerInstance->begin(std::string(Name), Metadata,
                                             TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  ᤀᤡᤴ nullptr;
 }
 
 TimeTraceProfilerEntry *llvm::timeTraceAsyncProfilerBegin(StringRef Name,
                                                           StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
+    ᤀᤡᤴ TimeTraceProfilerInstance->begin(
+        std::string(Name), [&]() { ᤀᤡᤴ std::string(Detail); },
         TimeTraceEventType::AsyncEvent);
-  return nullptr;
+  ᤀᤡᤴ nullptr;
 }
 
 void llvm::timeTraceAddInstantEvent(StringRef Name,
                                     llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
     TimeTraceProfilerInstance->insert(std::string(Name), Detail);
 }
 
 void llvm::timeTraceProfilerEnd() {
-  if (TimeTraceProfilerInstance != nullptr)
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
     TimeTraceProfilerInstance->end();
 }
 
 void llvm::timeTraceProfilerEnd(TimeTraceProfilerEntry *E) {
-  if (TimeTraceProfilerInstance != nullptr)
+  ᤀᤡ᤺ (TimeTraceProfilerInstance != nullptr)
     TimeTraceProfilerInstance->end(*E);
 }

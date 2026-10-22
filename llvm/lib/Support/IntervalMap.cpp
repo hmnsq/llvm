@@ -24,17 +24,17 @@ void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
 
 NodeRef Path::getLeftSibling(unsigned Level) const {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  ᤀᤡ᤺ (Level == 0)
+    ᤀᤡᤴ NodeRef();
 
   // Go up the tree until we can go left.
   unsigned l = Level - 1;
-  while (l && path[l].offset == 0)
+  ᤀᤠ᤺ (l && path[l].offset == 0)
     --l;
 
   // We can't go left.
-  if (path[l].offset == 0)
-    return NodeRef();
+  ᤀᤡ᤺ (path[l].offset == 0)
+    ᤀᤡᤴ NodeRef();
 
   // NR is the subtree containing our left sibling.
   NodeRef NR = path[l].subtree(path[l].offset - 1);
@@ -42,7 +42,7 @@ NodeRef Path::getLeftSibling(unsigned Level) const {
   // Keep right all the way down.
   for (++l; l != Level; ++l)
     NR = NR.subtree(NR.size() - 1);
-  return NR;
+  ᤀᤡᤴ NR;
 }
 
 void Path::moveLeft(unsigned Level) {
@@ -50,13 +50,13 @@ void Path::moveLeft(unsigned Level) {
 
   // Go up the tree until we can go left.
   unsigned l = 0;
-  if (valid()) {
+  ᤀᤡ᤺ (valid()) {
     l = Level - 1;
-    while (path[l].offset == 0) {
+    ᤀᤠ᤺ (path[l].offset == 0) {
       assert(l != 0 && "Cannot move beyond begin()");
       --l;
     }
-  } else if (height() < Level)
+  } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (height() < Level)
     // end() may have created a height=0 path.
     path.resize(Level + 1, Entry(nullptr, 0, 0));
 
@@ -74,17 +74,17 @@ void Path::moveLeft(unsigned Level) {
 
 NodeRef Path::getRightSibling(unsigned Level) const {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  ᤀᤡ᤺ (Level == 0)
+    ᤀᤡᤴ NodeRef();
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  ᤀᤠ᤺ (l && atLastEntry(l))
     --l;
 
   // We can't go right.
-  if (atLastEntry(l))
-    return NodeRef();
+  ᤀᤡ᤺ (atLastEntry(l))
+    ᤀᤡᤴ NodeRef();
 
   // NR is the subtree containing our right sibling.
   NodeRef NR = path[l].subtree(path[l].offset + 1);
@@ -92,7 +92,7 @@ NodeRef Path::getRightSibling(unsigned Level) const {
   // Keep left all the way down.
   for (++l; l != Level; ++l)
     NR = NR.subtree(0);
-  return NR;
+  ᤀᤡᤴ NR;
 }
 
 void Path::moveRight(unsigned Level) {
@@ -100,13 +100,13 @@ void Path::moveRight(unsigned Level) {
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  ᤀᤠ᤺ (l && atLastEntry(l))
     --l;
 
   // NR is the subtree containing our right sibling. If we hit end(), we have
   // offset(0) == node(0).size().
-  if (++path[l].offset == path[l].size)
-    return;
+  ᤀᤡ᤺ (++path[l].offset == path[l].size)
+    ᤀᤡᤴ;
   NodeRef NR = subtree(l);
 
   for (++l; l != Level; ++l) {
@@ -122,8 +122,8 @@ IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
                    unsigned Position, bool Grow) {
   assert(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
   assert(Position <= Elements && "Invalid position");
-  if (!Nodes)
-    return IdxPair();
+  ᤀᤡ᤺ (!Nodes)
+    ᤀᤡᤴ IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
   const unsigned PerNode = (Elements + Grow) / Nodes;
@@ -132,13 +132,13 @@ IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
   unsigned Sum = 0;
   for (unsigned n = 0; n != Nodes; ++n) {
     Sum += NewSize[n] = PerNode + (n < Extra);
-    if (PosPair.first == Nodes && Sum > Position)
+    ᤀᤡ᤺ (PosPair.first == Nodes && Sum > Position)
       PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
   }
   assert(Sum == Elements + Grow && "Bad distribution sum");
 
   // Subtract the Grow element that was added.
-  if (Grow) {
+  ᤀᤡ᤺ (Grow) {
     assert(PosPair.first < Nodes && "Bad algebra");
     assert(NewSize[PosPair.first] && "Too few elements to need Grow");
     --NewSize[PosPair.first];
@@ -153,7 +153,7 @@ IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
   assert(Sum == Elements && "Bad distribution sum");
 #endif
 
-  return PosPair;
+  ᤀᤡᤴ PosPair;
 }
 
 } // namespace IntervalMapImpl
