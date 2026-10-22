@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#अन्तर्भाव "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+अचिन्हित Suffix_वृक्ष_गाठ::getStartIdx() स्थिरांक { परत StartIdx; }
+शून्य Suffix_वृक्ष_गाठ::incrementStartIdx(अचिन्हित Inc) { StartIdx += Inc; }
+शून्य Suffix_वृक्ष_गाठ::setConcatLen(अचिन्हित Len) { ConcatLen = Len; }
+अचिन्हित Suffix_वृक्ष_गाठ::getConcatLen() स्थिरांक { परत ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+तार्किक Suffix_वृक्ष_Internal_गाठ::is_मूळ() स्थिरांक {
+  परत getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+अचिन्हित Suffix_वृक्ष_Internal_गाठ::getEndIdx() स्थिरांक { परत EndIdx; }
+शून्य Suffix_वृक्ष_Internal_गाठ::setLink(Suffix_वृक्ष_Internal_गाठ *L) {
+  प्रतिज्ञा(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_वृक्ष_Internal_गाठ *Suffix_वृक्ष_Internal_गाठ::getLink() स्थिरांक { परत Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+अचिन्हित Suffix_वृक्ष_Leaf_गाठ::getEndIdx() स्थिरांक {
+  प्रतिज्ञा(EndIdx && "EndIdx is empty?");
+  परत *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+अचिन्हित Suffix_वृक्ष_Leaf_गाठ::getSuffixIdx() स्थिरांक { परत SuffixIdx; }
+शून्य Suffix_वृक्ष_Leaf_गाठ::setSuffixIdx(अचिन्हित Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+अचिन्हित Suffix_वृक्ष_गाठ::get_डावा_Leaf_Idx() स्थिरांक { परत डावा_Leaf_Idx; }
+अचिन्हित Suffix_वृक्ष_गाठ::get_उजवा_Leaf_Idx() स्थिरांक { परत उजवा_Leaf_Idx; }
+शून्य Suffix_वृक्ष_गाठ::set_डावा_Leaf_Idx(अचिन्हित Idx) { डावा_Leaf_Idx = Idx; }
+शून्य Suffix_वृक्ष_गाठ::set_उजवा_Leaf_Idx(अचिन्हित Idx) { उजवा_Leaf_Idx = Idx; }

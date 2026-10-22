@@ -6,24 +6,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BuryPointer.h"
-#include "llvm/Support/Compiler.h"
-#include <atomic>
+#अन्तर्भाव "llvm/Support/BuryPointer.h"
+#अन्तर्भाव "llvm/Support/Compiler.h"
+#अन्तर्भाव <atomic>
 
-namespace llvm {
+नामाकाश llvm {
 
-void BuryPointer(const void *Ptr) {
+शून्य BuryPointer(स्थिरांक शून्य *Ptr) {
   // This function may be called only a small fixed amount of times per each
   // invocation, otherwise we do actually have a leak which we want to report.
   // If this function is called more than kGraveYardMaxSize times, the pointers
   // will not be properly buried and a leak detector will report a leak, which
   // is what we want in such case.
-  static const size_t kGraveYardMaxSize = 16;
-  LLVM_ATTRIBUTE_USED static const void *GraveYard[kGraveYardMaxSize];
-  static std::atomic<unsigned> GraveYardSize;
-  unsigned Idx = GraveYardSize++;
-  if (Idx >= kGraveYardMaxSize)
-    return;
+  स्थिर स्थिरांक माप_प्रकार kGraveYardMaxSize = 16;
+  LLVM_ATTRIBUTE_USED स्थिर स्थिरांक शून्य *GraveYard[kGraveYardMaxSize];
+  स्थिर std::atomic<अचिन्हित> GraveYardSize;
+  अचिन्हित Idx = GraveYardSize++;
+  जर (Idx >= kGraveYardMaxSize)
+    परत;
   GraveYard[Idx] = Ptr;
 }
 

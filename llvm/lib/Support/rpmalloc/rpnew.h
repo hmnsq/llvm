@@ -13,99 +13,99 @@
 
 #ifdef __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#अन्तर्भाव <new>
+#अन्तर्भाव <rpmalloc.h>
 
 #ifndef __CRTDECL
 #define __CRTDECL
 #endif
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+बाह्य शून्य __CRTDECL चालक delete(शून्य *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+बाह्य शून्य __CRTDECL चालक delete[](शून्य *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL चालक new(std::माप_प्रकार size) noexcept(false) {
+  परत rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL चालक new[](std::माप_प्रकार size) noexcept(false) {
+  परत rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL चालक new(std::माप_प्रकार size,
+                                    स्थिरांक std::nothrow_t &tag) noexcept {
+  (शून्य)आकार(tag);
+  परत rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL चालक new[](std::माप_प्रकार size,
+                                      स्थिरांक std::nothrow_t &tag) noexcept {
+  (शून्य)आकार(tag);
+  परत rpmalloc(size);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#जर (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+बाह्य शून्य __CRTDECL चालक delete(शून्य *p, std::माप_प्रकार size) noexcept {
+  (शून्य)आकार(size);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+बाह्य शून्य __CRTDECL चालक delete[](शून्य *p, std::माप_प्रकार size) noexcept {
+  (शून्य)आकार(size);
   rpfree(p);
 }
 
 #endif
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#जर (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+बाह्य शून्य __CRTDECL चालक delete(शून्य *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (शून्य)आकार(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+बाह्य शून्य __CRTDECL चालक delete[](शून्य *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (शून्य)आकार(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+बाह्य शून्य __CRTDECL चालक delete(शून्य *p, std::माप_प्रकार size,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (शून्य)आकार(size);
+  (शून्य)आकार(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+बाह्य शून्य __CRTDECL चालक delete[](शून्य *p, std::माप_प्रकार size,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (शून्य)आकार(size);
+  (शून्य)आकार(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+बाह्य शून्य *__CRTDECL चालक new(std::माप_प्रकार size,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  परत rpaligned_alloc(static_cast<माप_प्रकार>(align), size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+बाह्य शून्य *__CRTDECL चालक new[](std::माप_प्रकार size,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  परत rpaligned_alloc(static_cast<माप_प्रकार>(align), size);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+बाह्य शून्य *__CRTDECL चालक new(std::माप_प्रकार size, std::align_val_t align,
+                                    स्थिरांक std::nothrow_t &tag) noexcept {
+  (शून्य)आकार(tag);
+  परत rpaligned_alloc(static_cast<माप_प्रकार>(align), size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+बाह्य शून्य *__CRTDECL चालक new[](std::माप_प्रकार size, std::align_val_t align,
+                                      स्थिरांक std::nothrow_t &tag) noexcept {
+  (शून्य)आकार(tag);
+  परत rpaligned_alloc(static_cast<माप_प्रकार>(align), size);
 }
 
 #endif

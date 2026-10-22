@@ -10,53 +10,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Errno.h"
-#include "llvm/Config/config.h"
-#include <cstring>
-#include <errno.h>
+#अन्तर्भाव "llvm/Support/Errno.h"
+#अन्तर्भाव "llvm/Config/config.h"
+#अन्तर्भाव <cstring>
+#अन्तर्भाव <errno.h>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-namespace llvm {
-namespace sys {
+नामाकाश llvm {
+नामाकाश sys {
 
 std::string StrError() {
-  return StrError(errno);
+  परत StrError(त्रुटि_सं);
 }
 
-std::string StrError(int errnum) {
+std::string StrError(पूर्णांक errnum) {
   std::string str;
-  if (errnum == 0)
-    return str;
-#if defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
-  const int MaxErrStrLen = 2000;
-  char buffer[MaxErrStrLen];
+  जर (errnum == 0)
+    परत str;
+#जर defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
+  स्थिरांक पूर्णांक MaxErrStrLen = 2000;
+  अक्षर buffer[MaxErrStrLen];
   buffer[0] = '\0';
 #endif
 
 #ifdef HAVE_STRERROR_R
   // strerror_r is thread-safe.
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#जर defined(__GLIBC__) && defined(_GNU_SOURCE)
   // glibc defines its own incompatible version of strerror_r
   // which may not use the buffer supplied.
   str = strerror_r(errnum, buffer, MaxErrStrLen - 1);
-#else
+#अन्यथा
   strerror_r(errnum, buffer, MaxErrStrLen - 1);
   str = buffer;
 #endif
-#elif HAVE_DECL_STRERROR_S // "Windows Secure API"
+#किंवाजर HAVE_DECL_STRERROR_S // "Windows Secure API"
   strerror_s(buffer, MaxErrStrLen - 1, errnum);
   str = buffer;
-#else
+#अन्यथा
   // Copy the thread un-safe result of strerror into
   // the buffer as fast as possible to minimize impact
   // of collision of strerror in multiple threads.
-  str = strerror(errnum);
+  str = म_त्रुटि(errnum);
 #endif
-  return str;
+  परत str;
 }
 
 }  // namespace sys

@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributeParser.h"
+#अन्तर्भाव "llvm/Support/HexagonAttributeParser.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-const HexagonAttributeParser::DisplayHandler
+स्थिरांक HexagonAttributeParser::DisplayHandler
     HexagonAttributeParser::DisplayRoutines[] = {
         {
             HexagonAttrs::ARCH,
@@ -41,15 +41,15 @@ const HexagonAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         }};
 
-Error HexagonAttributeParser::handler(uint64_t Tag, bool &Handled) {
-  Handled = false;
-  for (const auto &R : DisplayRoutines) {
-    if (uint64_t(R.Attribute) == Tag) {
-      if (Error E = (this->*R.Routine)(Tag))
-        return E;
-      Handled = true;
-      break;
+Error HexagonAttributeParser::handler(uint64_t Tag, तार्किक &Handled) {
+  Handled = असत्य;
+  साठी (स्थिरांक स्वतः &R : DisplayRoutines) {
+    जर (uint64_t(R.Attribute) == Tag) {
+      जर (Error E = (हे->*R.Routine)(Tag))
+        परत E;
+      Handled = सत्य;
+      थांबा;
     }
   }
-  return Error::success();
+  परत Error::success();
 }

@@ -39,20 +39,20 @@
 #define LLVM_SUPPORT_REGUTILS_H
 
 /* utility definitions */
-#define	NC		(CHAR_MAX - CHAR_MIN + 1)
-typedef unsigned char uch;
+#define	NC		(अक्षर_उच्च - अक्षर_न्यून + 1)
+प्रकारव्याख्या अचिन्हित अक्षर uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */
 #ifndef REDEBUG
-#ifndef NDEBUG
-#define	NDEBUG	/* no assertions please */
+#ifndef न_संशोधन
+#define	न_संशोधन	/* no assertions please */
 #endif
 #endif
-#include <assert.h>
+#अन्तर्भाव <assert.h>
 
 /* for old systems with bcopy() but no memmove() */
 #ifdef USEBCOPY
-#define	memmove(d, s, c)	bcopy(s, d, c)
+#define	स_हटाओ(d, s, c)	bcopy(s, d, c)
 #endif
 
 #endif

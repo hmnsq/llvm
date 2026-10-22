@@ -9,76 +9,76 @@
 /// This file implements the CodeGenCoverage class.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CodeGenCoverage.h"
+#अन्तर्भाव "llvm/Support/CodeGenCoverage.h"
 
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/ToolOutputFile.h"
+#अन्तर्भाव "llvm/Support/Endian.h"
+#अन्तर्भाव "llvm/Support/FileSystem.h"
+#अन्तर्भाव "llvm/Support/MemoryBuffer.h"
+#अन्तर्भाव "llvm/Support/Mutex.h"
+#अन्तर्भाव "llvm/Support/Process.h"
+#अन्तर्भाव "llvm/Support/ScopedPrinter.h"
+#अन्तर्भाव "llvm/Support/ToolOutputFile.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-CodeGenCoverage::CodeGenCoverage() = default;
+CodeGenCoverage::CodeGenCoverage() = पूर्वनिर्धारित;
 
-void CodeGenCoverage::setCovered(uint64_t RuleID) {
-  if (RuleCoverage.size() <= RuleID)
-    RuleCoverage.resize(RuleID + 1, false);
-  RuleCoverage[RuleID] = true;
+शून्य CodeGenCoverage::setCovered(uint64_t RuleID) {
+  जर (RuleCoverage.size() <= RuleID)
+    RuleCoverage.resize(RuleID + 1, असत्य);
+  RuleCoverage[RuleID] = सत्य;
 }
 
-bool CodeGenCoverage::isCovered(uint64_t RuleID) const {
-  if (RuleCoverage.size() <= RuleID)
-    return false;
-  return RuleCoverage[RuleID];
+तार्किक CodeGenCoverage::isCovered(uint64_t RuleID) स्थिरांक {
+  जर (RuleCoverage.size() <= RuleID)
+    परत असत्य;
+  परत RuleCoverage[RuleID];
 }
 
 iterator_range<CodeGenCoverage::const_covered_iterator>
-CodeGenCoverage::covered() const {
-  return RuleCoverage.set_bits();
+CodeGenCoverage::covered() स्थिरांक {
+  परत RuleCoverage.set_bits();
 }
 
-bool CodeGenCoverage::parse(MemoryBuffer &Buffer, StringRef BackendName) {
-  const char *CurPtr = Buffer.getBufferStart();
+तार्किक CodeGenCoverage::parse(MemoryBuffer &Buffer, StringRef BackendName) {
+  स्थिरांक अक्षर *CurPtr = Buffer.getBufferStart();
 
-  while (CurPtr != Buffer.getBufferEnd()) {
+  पर्यंत (CurPtr != Buffer.getBufferEnd()) {
     // Read the backend name from the input.
-    const char *LexedBackendName = CurPtr;
-    while (*CurPtr++ != 0)
+    स्थिरांक अक्षर *LexedBackendName = CurPtr;
+    पर्यंत (*CurPtr++ != 0)
       ;
-    if (CurPtr == Buffer.getBufferEnd())
-      return false; // Data is invalid, expected rule id's to follow.
+    जर (CurPtr == Buffer.getBufferEnd())
+      परत असत्य; // Data is invalid, expected rule id's to follow.
 
-    bool IsForThisBackend = BackendName == LexedBackendName;
-    while (CurPtr != Buffer.getBufferEnd()) {
-      if (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
-        return false; // Data is invalid. Not enough bytes for another rule id.
+    तार्किक IsForThisBackend = BackendName == LexedBackendName;
+    पर्यंत (CurPtr != Buffer.getBufferEnd()) {
+      जर (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
+        परत असत्य; // Data is invalid. Not enough bytes for another rule id.
 
       uint64_t RuleID =
           support::endian::read64(CurPtr, llvm::endianness::native);
       CurPtr += 8;
 
       // ~0ull terminates the rule id list.
-      if (RuleID == ~0ull)
-        break;
+      जर (RuleID == ~0ull)
+        थांबा;
 
       // Anything else, is recorded or ignored depending on whether it's
       // intended for the backend we're interested in.
-      if (IsForThisBackend)
+      जर (IsForThisBackend)
         setCovered(RuleID);
     }
   }
 
-  return true;
+  परत सत्य;
 }
 
-bool CodeGenCoverage::emit(StringRef CoveragePrefix,
-                           StringRef BackendName) const {
-  if (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
-    static sys::SmartMutex<true> OutputMutex;
-    sys::SmartScopedLock<true> Lock(OutputMutex);
+तार्किक CodeGenCoverage::emit(StringRef CoveragePrefix,
+                           StringRef BackendName) स्थिरांक {
+  जर (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
+    स्थिर sys::SmartMutex<सत्य> OutputMutex;
+    sys::SmartScopedLock<सत्य> Lock(OutputMutex);
 
     // We can handle locking within a process easily enough but we don't want to
     // manage it between multiple processes. Use the process ID to ensure no
@@ -91,21 +91,21 @@ bool CodeGenCoverage::emit(StringRef CoveragePrefix,
     sys::fs::OpenFlags OpenFlags = sys::fs::OF_Append;
     std::unique_ptr<ToolOutputFile> CoverageFile =
         std::make_unique<ToolOutputFile>(CoverageFilename, EC, OpenFlags);
-    if (EC)
-      return false;
+    जर (EC)
+      परत असत्य;
 
     uint64_t Zero = 0;
     uint64_t InvZero = ~0ull;
     CoverageFile->os() << BackendName;
-    CoverageFile->os().write((const char *)&Zero, sizeof(unsigned char));
-    for (uint64_t I : RuleCoverage.set_bits())
-      CoverageFile->os().write((const char *)&I, sizeof(uint64_t));
-    CoverageFile->os().write((const char *)&InvZero, sizeof(uint64_t));
+    CoverageFile->os().लिख((स्थिरांक अक्षर *)&Zero, आकार(अचिन्हित अक्षर));
+    साठी (uint64_t I : RuleCoverage.set_bits())
+      CoverageFile->os().लिख((स्थिरांक अक्षर *)&I, आकार(uint64_t));
+    CoverageFile->os().लिख((स्थिरांक अक्षर *)&InvZero, आकार(uint64_t));
 
     CoverageFile->keep();
   }
 
-  return true;
+  परत सत्य;
 }
 
-void CodeGenCoverage::reset() { RuleCoverage.resize(0); }
+शून्य CodeGenCoverage::reset() { RuleCoverage.resize(0); }

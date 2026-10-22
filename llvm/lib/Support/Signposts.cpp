@@ -6,71 +6,71 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Signposts.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/config.h"
+#अन्तर्भाव "llvm/Support/Signposts.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Config/config.h"
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/Mutex.h"
-#include <Availability.h>
-#include <os/signpost.h>
+#जर LLVM_SUPPORT_XCODE_SIGNPOSTS
+#अन्तर्भाव "llvm/ADT/DenseMap.h"
+#अन्तर्भाव "llvm/Support/Mutex.h"
+#अन्तर्भाव <Availability.h>
+#अन्तर्भाव <os/signpost.h>
 #endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-using namespace llvm;
+using नामाकाश llvm;
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#जर LLVM_SUPPORT_XCODE_SIGNPOSTS
 #define SIGNPOSTS_AVAILABLE()                                                  \
   __builtin_available(macos 10.14, iOS 12, tvOS 12, watchOS 5, *)
-namespace {
+नामाकाश {
 os_log_t *LogCreator() {
-  os_log_t *X = new os_log_t;
+  os_log_t *X = नवीन os_log_t;
   *X = os_log_create("org.llvm.signposts", "toolchain");
-  return X;
+  परत X;
 }
-struct LogDeleter {
-  void operator()(os_log_t *X) const {
+संरचना LogDeleter {
+  शून्य चालक()(os_log_t *X) स्थिरांक {
     os_release(*X);
     delete X;
   }
 };
 } // end anonymous namespace
 
-namespace llvm {
-class SignpostEmitterImpl {
+नामाकाश llvm {
+वर्ग SignpostEmitterImpl {
   using LogPtrTy = std::unique_ptr<os_log_t, LogDeleter>;
   using LogTy = LogPtrTy::element_type;
 
   LogPtrTy SignpostLog;
-  DenseMap<const void *, os_signpost_id_t> Signposts;
-  sys::SmartMutex<true> Mutex;
+  DenseMap<स्थिरांक शून्य *, os_signpost_id_t> Signposts;
+  sys::SmartMutex<सत्य> Mutex;
 
-  LogTy &getLogger() const { return *SignpostLog; }
-  os_signpost_id_t getSignpostForObject(const void *O) {
-    sys::SmartScopedLock<true> Lock(Mutex);
-    const auto &I = Signposts.find(O);
-    if (I != Signposts.end())
-      return I->second;
+  LogTy &getLogger() स्थिरांक { परत *SignpostLog; }
+  os_signpost_id_t getSignpostForObject(स्थिरांक शून्य *O) {
+    sys::SmartScopedLock<सत्य> Lock(Mutex);
+    स्थिरांक स्वतः &I = Signposts.find(O);
+    जर (I != Signposts.end())
+      परत I->second;
     os_signpost_id_t ID = {};
-    if (SIGNPOSTS_AVAILABLE()) {
+    जर (SIGNPOSTS_AVAILABLE()) {
       ID = os_signpost_id_make_with_pointer(getLogger(), O);
     }
-    const auto &Inserted = Signposts.insert(std::make_pair(O, ID));
-    return Inserted.first->second;
+    स्थिरांक स्वतः &Inserted = Signposts.घाला(std::make_pair(O, ID));
+    परत Inserted.first->second;
   }
 
-public:
+सार्वजनिक:
   SignpostEmitterImpl() : SignpostLog(LogCreator()) {}
 
-  bool isEnabled() const {
-    if (SIGNPOSTS_AVAILABLE())
-      return os_signpost_enabled(*SignpostLog);
-    return false;
+  तार्किक isEnabled() स्थिरांक {
+    जर (SIGNPOSTS_AVAILABLE())
+      परत os_signpost_enabled(*SignpostLog);
+    परत असत्य;
   }
 
-  void startInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  शून्य startInterval(स्थिरांक शून्य *O, llvm::StringRef Name) {
+    जर (isEnabled()) {
+      जर (SIGNPOSTS_AVAILABLE()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_begin(getLogger(), getSignpostForObject(O),
                                    "LLVM Timers", "%s", Name.data());
@@ -78,9 +78,9 @@ public:
     }
   }
 
-  void endInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  शून्य endInterval(स्थिरांक शून्य *O, llvm::StringRef Name) {
+    जर (isEnabled()) {
+      जर (SIGNPOSTS_AVAILABLE()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_end(getLogger(), getSignpostForObject(O),
                                  "LLVM Timers", "");
@@ -89,45 +89,45 @@ public:
   }
 };
 } // end namespace llvm
-#else
+#अन्यथा
 /// Definition necessary for use of std::unique_ptr in SignpostEmitter::Impl.
-class llvm::SignpostEmitterImpl {};
+वर्ग llvm::SignpostEmitterImpl {};
 #endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#जर LLVM_SUPPORT_XCODE_SIGNPOSTS
 #define HAVE_ANY_SIGNPOST_IMPL 1
-#else
+#अन्यथा
 #define HAVE_ANY_SIGNPOST_IMPL 0
 #endif
 
 SignpostEmitter::SignpostEmitter() {
-#if HAVE_ANY_SIGNPOST_IMPL
+#जर HAVE_ANY_SIGNPOST_IMPL
   Impl = std::make_unique<SignpostEmitterImpl>();
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-SignpostEmitter::~SignpostEmitter() = default;
+SignpostEmitter::~SignpostEmitter() = पूर्वनिर्धारित;
 
-bool SignpostEmitter::isEnabled() const {
-#if HAVE_ANY_SIGNPOST_IMPL
-  return Impl->isEnabled();
-#else
-  return false;
+तार्किक SignpostEmitter::isEnabled() स्थिरांक {
+#जर HAVE_ANY_SIGNPOST_IMPL
+  परत Impl->isEnabled();
+#अन्यथा
+  परत असत्य;
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::startInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  return Impl->startInterval(O, Name);
+शून्य SignpostEmitter::startInterval(स्थिरांक शून्य *O, StringRef Name) {
+#जर HAVE_ANY_SIGNPOST_IMPL
+  जर (Impl == nullptr)
+    परत;
+  परत Impl->startInterval(O, Name);
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::endInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
+शून्य SignpostEmitter::endInterval(स्थिरांक शून्य *O, StringRef Name) {
+#जर HAVE_ANY_SIGNPOST_IMPL
+  जर (Impl == nullptr)
+    परत;
   Impl->endInterval(O, Name);
 #endif // if !HAVE_ANY_SIGNPOST_IMPL
 }

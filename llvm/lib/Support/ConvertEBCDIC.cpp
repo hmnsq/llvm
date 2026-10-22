@@ -13,13 +13,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ConvertEBCDIC.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव "llvm/Support/ConvertEBCDIC.h"
+#अन्तर्भाव "llvm/Support/ConvertUTF.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-static const unsigned char ISO88591ToIBM1047[256] = {
+स्थिर स्थिरांक अचिन्हित अक्षर ISO88591ToIBM1047[256] = {
     0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f, 0x16, 0x05, 0x15, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
     0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, 0x40, 0x5a, 0x7f, 0x7b,
@@ -43,7 +43,7 @@ static const unsigned char ISO88591ToIBM1047[256] = {
     0x8c, 0x49, 0xcd, 0xce, 0xcb, 0xcf, 0xcc, 0xe1, 0x70, 0xdd, 0xde, 0xdb,
     0xdc, 0x8d, 0x8e, 0xdf};
 
-static const unsigned char IBM1047ToISO88591[256] = {
+स्थिर स्थिरांक अचिन्हित अक्षर IBM1047ToISO88591[256] = {
     0x00, 0x01, 0x02, 0x03, 0x9c, 0x09, 0x86, 0x7f, 0x97, 0x8d, 0x8e, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x9d, 0x0a, 0x08, 0x87,
     0x18, 0x19, 0x92, 0x8f, 0x1c, 0x1d, 0x1e, 0x1f, 0x80, 0x81, 0x82, 0x83,
@@ -68,85 +68,85 @@ static const unsigned char IBM1047ToISO88591[256] = {
     0xdc, 0xd9, 0xda, 0x9f};
 
 // Returns true if [Ptr, End) can be completed to form a valid UTF-8 sequence.
-static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
-  assert(Ptr != End);
+स्थिर तार्किक isPotentiallyValidUTF8Prefix(स्थिरांक UTF8 *Ptr, स्थिरांक UTF8 *End) {
+  प्रतिज्ञा(Ptr != End);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  जर (Lead < 0xc2 || Lead > 0xf4)
+    परत असत्य;
+  जर (Ptr == End)
+    परत सत्य;
 
   UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
+  जर ((Second & 0xc0) != 0x80)
+    परत असत्य;
+  जर ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
       (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+    परत असत्य;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  पर्यंत (Ptr != End)
+    जर ((*Ptr++ & 0xc0) != 0x80)
+      परत असत्य;
+  परत सत्य;
 }
 
 std::error_code
 ConverterEBCDIC::convertToEBCDIC(StringRef Source,
-                                 SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+                                 SmallVectorImpl<अक्षर> &Result) {
+  प्रतिज्ञा(Result.empty() && "Result must be empty!");
   Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+  जर (Source.empty())
+    परत std::error_code();
 
-  const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
-  const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
-      continue;
+  स्थिरांक UTF8 *Ptr = reinterpret_cast<स्थिरांक UTF8 *>(Source.data());
+  स्थिरांक UTF8 *End = Ptr + Source.size();
+  पर्यंत (Ptr != End) {
+    जर (*Ptr < 0x80) {
+      Result.ढकला_back(static_cast<अक्षर>(ISO88591ToIBM1047[*Ptr++]));
+      सुरूठेवा;
     }
 
     UTF32 Ch;
-    switch (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
-    case conversionOK:
-      break;
-    case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
-    case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
-    case targetExhausted:
+    निवड (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
+    स्थिती conversionOK:
+      थांबा;
+    स्थिती sourceExhausted:
+      जर (!isPotentiallyValidUTF8Prefix(Ptr, End))
+        परत std::make_error_code(std::errc::illegal_byte_sequence);
+      परत std::make_error_code(std::errc::invalid_argument);
+    स्थिती sourceIllegal:
+      परत std::make_error_code(std::errc::illegal_byte_sequence);
+    स्थिती targetExhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    जर (Ch > 0xff)
+      परत std::make_error_code(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    Result.ढकला_back(static_cast<अक्षर>(ISO88591ToIBM1047[Ch]));
   }
-  return std::error_code();
+  परत std::error_code();
 }
 
-void ConverterEBCDIC::convertToUTF8(StringRef Source,
-                                    SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+शून्य ConverterEBCDIC::convertToUTF8(StringRef Source,
+                                    SmallVectorImpl<अक्षर> &Result) {
+  प्रतिज्ञा(Result.empty() && "Result must be empty!");
 
-  const unsigned char *Table = IBM1047ToISO88591;
-  const unsigned char *Ptr =
-      reinterpret_cast<const unsigned char *>(Source.data());
-  size_t Length = Source.size();
+  स्थिरांक अचिन्हित अक्षर *Table = IBM1047ToISO88591;
+  स्थिरांक अचिन्हित अक्षर *Ptr =
+      reinterpret_cast<स्थिरांक अचिन्हित अक्षर *>(Source.data());
+  माप_प्रकार Length = Source.size();
   Result.reserve(Length);
-  while (Length--) {
-    unsigned char Ch = *Ptr++;
+  पर्यंत (Length--) {
+    अचिन्हित अक्षर Ch = *Ptr++;
     // Translate the character.
     Ch = Table[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    जर (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      Result.ढकला_back(static_cast<अक्षर>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    Result.ढकला_back(static_cast<अक्षर>(Ch));
   }
 }

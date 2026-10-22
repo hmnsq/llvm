@@ -11,27 +11,27 @@
 /// instructions.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InstructionCost.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/InstructionCost.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
+शून्य InstructionCost::print(raw_ostream &OS) स्थिरांक {
   using UnsignedCostType = std::make_unsigned_t<CostType>;
-  if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+  जर (isValid()) {
+    UnsignedCostType Abs_मूल्य =
+        (मूल्य < 0) ? -((UnsignedCostType)मूल्य) : ((UnsignedCostType)मूल्य);
+    UnsignedCostType Whole_संख्या = Abs_मूल्य / CostGranularity;
+    UnsignedCostType Remainder = Abs_मूल्य % CostGranularity;
+    जर (मूल्य < 0)
       OS << "-";
     UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
-    while (RemainderHundreds % 10 == 0 && RemainderHundreds)
+    पर्यंत (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
-    if (RemainderHundreds)
+    OS << Whole_संख्या;
+    जर (RemainderHundreds)
       OS << "." << RemainderHundreds;
-  } else {
+  } अन्यथा {
     OS << "Invalid";
   }
 }

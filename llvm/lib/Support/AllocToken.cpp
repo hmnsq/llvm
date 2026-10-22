@@ -10,17 +10,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AllocToken.h"
-#include "llvm/ADT/StringSwitch.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SipHash.h"
+#अन्तर्भाव "llvm/Support/AllocToken.h"
+#अन्तर्भाव "llvm/ADT/StringSwitch.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव "llvm/Support/MathExtras.h"
+#अन्तर्भाव "llvm/Support/SipHash.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
 std::optional<AllocTokenMode>
 llvm::getAllocTokenModeFromString(StringRef Name) {
-  return StringSwitch<std::optional<AllocTokenMode>>(Name)
+  परत StringSwitch<std::optional<AllocTokenMode>>(Name)
       .Case("increment", AllocTokenMode::Increment)
       .Case("random", AllocTokenMode::Random)
       .Case("typehash", AllocTokenMode::TypeHash)
@@ -33,84 +33,84 @@ llvm::getAllocTokenModeFromString(StringRef Name) {
 }
 
 StringRef llvm::getAllocTokenModeAsString(AllocTokenMode Mode) {
-  switch (Mode) {
-  case AllocTokenMode::Increment:
-    return "increment";
-  case AllocTokenMode::Random:
-    return "random";
-  case AllocTokenMode::TypeHash:
-    return "typehash";
-  case AllocTokenMode::TypeHashPointerSplit:
-    return "typehashpointersplit";
-  case AllocTokenMode::TypeFuncHash:
-    return "typefunchash";
-  case AllocTokenMode::TypeFuncHashPointerSplit:
-    return "typefunchashpointersplit";
+  निवड (Mode) {
+  स्थिती AllocTokenMode::Increment:
+    परत "increment";
+  स्थिती AllocTokenMode::Random:
+    परत "random";
+  स्थिती AllocTokenMode::TypeHash:
+    परत "typehash";
+  स्थिती AllocTokenMode::TypeHashPointerSplit:
+    परत "typehashpointersplit";
+  स्थिती AllocTokenMode::TypeFuncHash:
+    परत "typefunchash";
+  स्थिती AllocTokenMode::TypeFuncHashPointerSplit:
+    परत "typefunchashpointersplit";
   }
   llvm_unreachable("Unknown AllocTokenMode");
 }
 
-static uint64_t getStableHash(const AllocTokenMetadata &Metadata,
+स्थिर uint64_t getStableHash(स्थिरांक AllocTokenMetadata &Metadata,
                               uint64_t MaxTokens) {
-  return getStableSipHash(Metadata.TypeName) % MaxTokens;
+  परत getStableSipHash(Metadata.TypeName) % MaxTokens;
 }
 
 /// Splits the Bits bits into: [pointer flag,] type name hash, function name
 /// hash. The function name hash gets Bits / 2 bits. Bits is k if MaxTokens is
 /// 2^k-1 (e.g. SIZE_MAX, tokens in [0, MaxTokens]), or Log2(MaxTokens)
 /// otherwise. With pointer split, the MSB is the pointer flag.
-static uint64_t getTypeFuncHash(const AllocTokenMetadata &Metadata,
-                                uint64_t MaxTokens, bool PointerSplit) {
-  if (MaxTokens == 1)
-    return 0;
-  const unsigned Bits =
+स्थिर uint64_t getTypeFuncHash(स्थिरांक AllocTokenMetadata &Metadata,
+                                uint64_t MaxTokens, तार्किक PointerSplit) {
+  जर (MaxTokens == 1)
+    परत 0;
+  स्थिरांक अचिन्हित Bits =
       isMask_64(MaxTokens) ? llvm::countr_one(MaxTokens) : Log2_64(MaxTokens);
-  const unsigned FuncBits = Bits / 2;
-  unsigned TypeBits = Bits - FuncBits;
+  स्थिरांक अचिन्हित FuncBits = Bits / 2;
+  अचिन्हित TypeBits = Bits - FuncBits;
   uint64_t Token = 0;
-  if (PointerSplit) {
+  जर (PointerSplit) {
     --TypeBits;
     Token = uint64_t(Metadata.ContainsPointer) << (Bits - 1);
   }
   // An empty type name denotes an unknown type.
-  if (!Metadata.TypeName.empty())
+  जर (!Metadata.TypeName.empty())
     Token |= (getStableSipHash(Metadata.TypeName) &
               maskTrailingOnes<uint64_t>(TypeBits))
              << FuncBits;
   Token |= getStableSipHash(*Metadata.FunctionName) &
            maskTrailingOnes<uint64_t>(FuncBits);
-  return Token;
+  परत Token;
 }
 
 std::optional<uint64_t> llvm::getAllocToken(AllocTokenMode Mode,
-                                            const AllocTokenMetadata &Metadata,
+                                            स्थिरांक AllocTokenMetadata &Metadata,
                                             uint64_t MaxTokens) {
-  assert(MaxTokens && "Must provide non-zero max tokens");
+  प्रतिज्ञा(MaxTokens && "Must provide non-zero max tokens");
 
-  switch (Mode) {
-  case AllocTokenMode::Increment:
-  case AllocTokenMode::Random:
+  निवड (Mode) {
+  स्थिती AllocTokenMode::Increment:
+  स्थिती AllocTokenMode::Random:
     // Stateful modes cannot be implemented as a pure function.
-    return std::nullopt;
+    परत std::nullopt;
 
-  case AllocTokenMode::TypeFuncHash:
-  case AllocTokenMode::TypeFuncHashPointerSplit:
-    if (!Metadata.FunctionName)
-      return std::nullopt;
-    return getTypeFuncHash(Metadata, MaxTokens,
+  स्थिती AllocTokenMode::TypeFuncHash:
+  स्थिती AllocTokenMode::TypeFuncHashPointerSplit:
+    जर (!Metadata.FunctionName)
+      परत std::nullopt;
+    परत getTypeFuncHash(Metadata, MaxTokens,
                            Mode == AllocTokenMode::TypeFuncHashPointerSplit);
 
-  case AllocTokenMode::TypeHash:
-    return getStableHash(Metadata, MaxTokens);
+  स्थिती AllocTokenMode::TypeHash:
+    परत getStableHash(Metadata, MaxTokens);
 
-  case AllocTokenMode::TypeHashPointerSplit: {
-    if (MaxTokens == 1)
-      return 0;
-    const uint64_t HalfTokens = MaxTokens / 2;
+  स्थिती AllocTokenMode::TypeHashPointerSplit: {
+    जर (MaxTokens == 1)
+      परत 0;
+    स्थिरांक uint64_t HalfTokens = MaxTokens / 2;
     uint64_t Hash = getStableHash(Metadata, HalfTokens);
-    if (Metadata.ContainsPointer)
+    जर (Metadata.ContainsPointer)
       Hash += HalfTokens;
-    return Hash;
+    परत Hash;
   }
   }
 

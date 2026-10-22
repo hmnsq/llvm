@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव "regex_impl.h"
 
-#include "regutils.h"
+#अन्तर्भाव "regutils.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+स्थिर स्थिरांक अक्षर *regatoi(स्थिरांक llvm_regex_t *, अक्षर *, पूर्णांक);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+स्थिर संरचना rerr {
+	पूर्णांक code;
+	स्थिरांक अक्षर *name;
+	स्थिरांक अक्षर *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -80,56 +80,56 @@ static struct rerr {
  = extern size_t llvm_regerror(int, const llvm_regex_t *, char *, size_t);
  */
 /* ARGSUSED */
-size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+माप_प्रकार
+llvm_regerror(पूर्णांक errcode, स्थिरांक llvm_regex_t *preg, अक्षर *errbuf, माप_प्रकार errbuf_size)
 {
-	struct rerr *r;
-	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	संरचना rerr *r;
+	माप_प्रकार len;
+	पूर्णांक target = errcode &~ REG_ITOA;
+	स्थिरांक अक्षर *s;
+	अक्षर convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	जर (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, आकार convbuf);
+	अन्यथा {
+		साठी (r = rerrs; r->code != 0; r++)
+			जर (r->code == target)
+				थांबा;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
+		जर (errcode&REG_ITOA) {
+			जर (r->code != 0) {
+				प्रतिज्ञा(म_माप(r->name) < आकार(convbuf));
+				(शून्य) llvm_strlcpy(convbuf, r->name, आकार convbuf);
+			} अन्यथा
+				(शून्य)snprintf(convbuf, आकार convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} अन्यथा
 			s = r->explain;
 	}
 
-	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	len = म_माप(s) + 1;
+	जर (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	परत(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+स्थिर स्थिरांक अक्षर *
+regatoi(स्थिरांक llvm_regex_t *preg, अक्षर *localbuf, पूर्णांक localbufsize)
 {
-	struct rerr *r;
+	संरचना rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	साठी (r = rerrs; r->code != 0; r++)
+		जर (म_भेद(r->name, preg->re_endp) == 0)
+			थांबा;
+	जर (r->code == 0)
+		परत("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(शून्य)snprintf(localbuf, localbufsize, "%d", r->code);
+	परत(localbuf);
 }

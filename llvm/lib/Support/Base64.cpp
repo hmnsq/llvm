@@ -7,11 +7,11 @@
 //===----------------------------------------------------------------------===//
 
 #define INVALID_BASE64_BYTE 64
-#include "llvm/Support/Base64.h"
+#अन्तर्भाव "llvm/Support/Base64.h"
 
-static char decodeBase64Byte(uint8_t Ch) {
-  constexpr char Inv = INVALID_BASE64_BYTE;
-  static const char DecodeTable[] = {
+स्थिर अक्षर decodeBase64Byte(uint8_t Ch) {
+  constexpr अक्षर Inv = INVALID_BASE64_BYTE;
+  स्थिर स्थिरांक अक्षर DecodeTable[] = {
       Inv, Inv, Inv, Inv, Inv, Inv, Inv, Inv, // ........
       Inv, Inv, Inv, Inv, Inv, Inv, Inv, Inv, // ........
       Inv, Inv, Inv, Inv, Inv, Inv, Inv, Inv, // ........
@@ -29,64 +29,64 @@ static char decodeBase64Byte(uint8_t Ch) {
       41,  42,  43,  44,  45,  46,  47,  48,  // pqrstuvw
       49,  50,  51                            // xyz.....
   };
-  if (Ch >= sizeof(DecodeTable))
-    return Inv;
-  return DecodeTable[Ch];
+  जर (Ch >= आकार(DecodeTable))
+    परत Inv;
+  परत DecodeTable[Ch];
 }
 
-llvm::Error llvm::decodeBase64(llvm::StringRef Input,
-                               std::vector<char> &Output) {
-  constexpr char Base64InvalidByte = INVALID_BASE64_BYTE;
+llvm::Error llvm::decodeBase64(llvm::StringRef आदान,
+                               std::vector<अक्षर> &Output) {
+  constexpr अक्षर Base64InvalidByte = INVALID_BASE64_BYTE;
   // Invalid table value with short name to fit in the table init below. The
   // invalid value is 64 since valid base64 values are 0 - 63.
   Output.clear();
-  const uint64_t InputLength = Input.size();
-  if (InputLength == 0)
-    return Error::success();
+  स्थिरांक uint64_t आदान_Length = आदान.size();
+  जर (आदान_Length == 0)
+    परत Error::success();
   // Make sure we have a valid input string length which must be a multiple
   // of 4.
-  if ((InputLength % 4) != 0)
-    return createStringError(std::errc::illegal_byte_sequence,
+  जर ((आदान_Length % 4) != 0)
+    परत createStringError(std::errc::illegal_byte_sequence,
                              "Base64 encoded strings must be a multiple of 4 "
                              "bytes in length");
-  const uint64_t FirstValidEqualIdx = InputLength - 2;
-  char Hex64Bytes[4];
-  for (uint64_t Idx = 0; Idx < InputLength; Idx += 4) {
-    for (uint64_t ByteOffset = 0; ByteOffset < 4; ++ByteOffset) {
-      const uint64_t ByteIdx = Idx + ByteOffset;
-      const char Byte = Input[ByteIdx];
-      const char DecodedByte = decodeBase64Byte(Byte);
-      bool Illegal = DecodedByte == Base64InvalidByte;
-      if (!Illegal && Byte == '=') {
-        if (ByteIdx < FirstValidEqualIdx) {
+  स्थिरांक uint64_t FirstValidEqualIdx = आदान_Length - 2;
+  अक्षर Hex64Bytes[4];
+  साठी (uint64_t Idx = 0; Idx < आदान_Length; Idx += 4) {
+    साठी (uint64_t ByteOffset = 0; ByteOffset < 4; ++ByteOffset) {
+      स्थिरांक uint64_t ByteIdx = Idx + ByteOffset;
+      स्थिरांक अक्षर Byte = आदान[ByteIdx];
+      स्थिरांक अक्षर DecodedByte = decodeBase64Byte(Byte);
+      तार्किक Illegal = DecodedByte == Base64InvalidByte;
+      जर (!Illegal && Byte == '=') {
+        जर (ByteIdx < FirstValidEqualIdx) {
           // We have an '=' in the middle of the string which is invalid, only
           // the last two characters can be '=' characters.
-          Illegal = true;
-        } else if (ByteIdx == FirstValidEqualIdx && Input[ByteIdx + 1] != '=') {
+          Illegal = सत्य;
+        } अन्यथा जर (ByteIdx == FirstValidEqualIdx && आदान[ByteIdx + 1] != '=') {
           // We have an equal second to last from the end and the last character
           // is not also an equal, so the '=' character is invalid
-          Illegal = true;
+          Illegal = सत्य;
         }
       }
-      if (Illegal)
-        return createStringError(
+      जर (Illegal)
+        परत createStringError(
             std::errc::illegal_byte_sequence,
             "Invalid Base64 character %#2.2x at index %" PRIu64, Byte, ByteIdx);
       Hex64Bytes[ByteOffset] = DecodedByte;
     }
     // Now we have 6 bits of 3 bytes in value in each of the Hex64Bytes bytes.
     // Extract the right bytes into the Output buffer.
-    Output.push_back((Hex64Bytes[0] << 2) + ((Hex64Bytes[1] >> 4) & 0x03));
-    Output.push_back((Hex64Bytes[1] << 4) + ((Hex64Bytes[2] >> 2) & 0x0f));
-    Output.push_back((Hex64Bytes[2] << 6) + (Hex64Bytes[3] & 0x3f));
+    Output.ढकला_back((Hex64Bytes[0] << 2) + ((Hex64Bytes[1] >> 4) & 0x03));
+    Output.ढकला_back((Hex64Bytes[1] << 4) + ((Hex64Bytes[2] >> 2) & 0x0f));
+    Output.ढकला_back((Hex64Bytes[2] << 6) + (Hex64Bytes[3] & 0x3f));
   }
   // If we had valid trailing '=' characters strip the right number of bytes
   // from the end of the output buffer. We already know that the Input length
   // it a multiple of 4 and is not zero, so direct character access is safe.
-  if (Input.back() == '=') {
-    Output.pop_back();
-    if (Input[InputLength - 2] == '=')
-      Output.pop_back();
+  जर (आदान.back() == '=') {
+    Output.काढा_back();
+    जर (आदान[आदान_Length - 2] == '=')
+      Output.काढा_back();
   }
-  return Error::success();
+  परत Error::success();
 }

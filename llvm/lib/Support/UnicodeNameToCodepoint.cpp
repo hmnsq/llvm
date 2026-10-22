@@ -12,101 +12,101 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Unicode.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Support/Unicode.h"
 
-namespace llvm {
-namespace sys {
-namespace unicode {
+नामाकाश llvm {
+नामाकाश sys {
+नामाकाश unicode {
 
-extern const char *const UnicodeNameToCodepointDict;
-extern const uint8_t *const UnicodeNameToCodepointIndex;
-extern const std::size_t UnicodeNameToCodepointIndexSize;
-extern const std::size_t UnicodeNameToCodepointLargestNameSize;
+बाह्य स्थिरांक अक्षर *स्थिरांक UnicodeNameToCodepointDict;
+बाह्य स्थिरांक uint8_t *स्थिरांक UnicodeNameToCodepointIndex;
+बाह्य स्थिरांक std::माप_प्रकार UnicodeNameToCodepointIndexSize;
+बाह्य स्थिरांक std::माप_प्रकार UnicodeNameToCodepointLargestNameSize;
 
 using BufferType = SmallString<64>;
 
-struct Node {
-  bool IsRoot = false;
-  char32_t Value = 0xFFFFFFFF;
+संरचना गाठ {
+  तार्किक Is_मूळ = असत्य;
+  char32_t मूल्य = 0xFFFFFFFF;
   uint32_t ChildrenOffset = 0;
-  bool HasSibling = false;
+  तार्किक HasSibling = असत्य;
   uint32_t Size = 0;
   StringRef Name;
-  const Node *Parent = nullptr;
+  स्थिरांक गाठ *Parent = nullptr;
 
-  constexpr bool isValid() const {
-    return !Name.empty() || Value == 0xFFFFFFFF;
+  constexpr तार्किक isValid() स्थिरांक {
+    परत !Name.empty() || मूल्य == 0xFFFFFFFF;
   }
-  constexpr bool hasChildren() const { return ChildrenOffset != 0 || IsRoot; }
+  constexpr तार्किक hasChildren() स्थिरांक { परत ChildrenOffset != 0 || Is_मूळ; }
 
-  std::string fullName() const {
+  std::string fullName() स्थिरांक {
     std::string S;
     // Reserve enough space for most unicode code points.
     // The chosen value represent the 99th percentile of name size as of
     // Unicode 15.0.
     S.reserve(46);
-    const Node *N = this;
-    while (N) {
+    स्थिरांक गाठ *N = हे;
+    पर्यंत (N) {
       std::reverse_copy(N->Name.begin(), N->Name.end(), std::back_inserter(S));
       N = N->Parent;
     }
     std::reverse(S.begin(), S.end());
-    return S;
+    परत S;
   }
 };
 
-static Node createRoot() {
-  Node N;
-  N.IsRoot = true;
+स्थिर गाठ create_मूळ() {
+  गाठ N;
+  N.Is_मूळ = सत्य;
   N.ChildrenOffset = 1;
   N.Size = 1;
-  return N;
+  परत N;
 }
 
-static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
-  if (Offset == 0)
-    return createRoot();
+स्थिर गाठ read_गाठ(uint32_t Offset, स्थिरांक गाठ *Parent = nullptr) {
+  जर (Offset == 0)
+    परत create_मूळ();
 
   uint32_t Origin = Offset;
-  Node N;
+  गाठ N;
   N.Parent = Parent;
   uint8_t NameInfo = UnicodeNameToCodepointIndex[Offset++];
-  if (Offset + 6 >= UnicodeNameToCodepointIndexSize)
-    return N;
+  जर (Offset + 6 >= UnicodeNameToCodepointIndexSize)
+    परत N;
 
-  bool LongName = NameInfo & 0x40;
-  bool HasValue = NameInfo & 0x80;
-  std::size_t Size = NameInfo & ~0xC0;
-  if (LongName) {
+  तार्किक LongName = NameInfo & 0x40;
+  तार्किक Has_मूल्य = NameInfo & 0x80;
+  std::माप_प्रकार Size = NameInfo & ~0xC0;
+  जर (LongName) {
     uint32_t NameOffset = (UnicodeNameToCodepointIndex[Offset++] << 8);
     NameOffset |= UnicodeNameToCodepointIndex[Offset++];
     N.Name = StringRef(UnicodeNameToCodepointDict + NameOffset, Size);
-  } else {
+  } अन्यथा {
     N.Name = StringRef(UnicodeNameToCodepointDict + Size, 1);
   }
-  if (HasValue) {
+  जर (Has_मूल्य) {
     uint8_t H = UnicodeNameToCodepointIndex[Offset++];
     uint8_t M = UnicodeNameToCodepointIndex[Offset++];
     uint8_t L = UnicodeNameToCodepointIndex[Offset++];
-    N.Value = ((H << 16) | (M << 8) | L) >> 3;
+    N.मूल्य = ((H << 16) | (M << 8) | L) >> 3;
 
-    bool HasChildren = L & 0x02;
+    तार्किक HasChildren = L & 0x02;
     N.HasSibling = L & 0x01;
 
-    if (HasChildren) {
+    जर (HasChildren) {
       N.ChildrenOffset = UnicodeNameToCodepointIndex[Offset++] << 16;
       N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++] << 8;
       N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++];
     }
-  } else {
+  } अन्यथा {
     uint8_t H = UnicodeNameToCodepointIndex[Offset++];
     N.HasSibling = H & 0x80;
-    bool HasChildren = H & 0x40;
+    तार्किक HasChildren = H & 0x40;
     H &= uint8_t(~0xC0);
-    if (HasChildren) {
+    जर (HasChildren) {
       N.ChildrenOffset = (H << 16);
       N.ChildrenOffset |=
           (uint32_t(UnicodeNameToCodepointIndex[Offset++]) << 8);
@@ -114,110 +114,110 @@ static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
     }
   }
   N.Size = Offset - Origin;
-  return N;
+  परत N;
 }
 
-static bool startsWith(StringRef Name, StringRef Needle, bool Strict,
-                       std::size_t &Consummed, char &PreviousCharInName,
-                       bool IsPrefix = false) {
+स्थिर तार्किक startsWith(StringRef Name, StringRef Needle, तार्किक Strict,
+                       std::माप_प्रकार &Consummed, अक्षर &PreviousCharInName,
+                       तार्किक IsPrefix = असत्य) {
 
   Consummed = 0;
-  if (Strict) {
-    if (!Name.starts_with(Needle))
-      return false;
+  जर (Strict) {
+    जर (!Name.starts_with(Needle))
+      परत असत्य;
     Consummed = Needle.size();
-    return true;
+    परत सत्य;
   }
-  if (Needle.empty())
-    return true;
+  जर (Needle.empty())
+    परत सत्य;
 
-  auto NamePos = Name.begin();
-  auto NeedlePos = Needle.begin();
+  स्वतः NamePos = Name.begin();
+  स्वतः NeedlePos = Needle.begin();
 
-  char PreviousCharInNameOrigin = PreviousCharInName;
-  char PreviousCharInNeedle = *Needle.begin();
-  auto IgnoreSpaces = [](auto It, auto End, char &PreviousChar,
-                         bool IsPrefix = false) {
-    while (It != End) {
-      const auto Next = std::next(It);
+  अक्षर PreviousCharInNameOrigin = PreviousCharInName;
+  अक्षर PreviousCharInNeedle = *Needle.begin();
+  स्वतः IgnoreSpaces = [](स्वतः It, स्वतः End, अक्षर &PreviousChar,
+                         तार्किक IsPrefix = असत्य) {
+    पर्यंत (It != End) {
+      स्थिरांक स्वतः Next = std::next(It);
       // Ignore spaces, underscore, medial hyphens
       // The generator ensures a needle never ends (or starts) by a medial
       // hyphen https://unicode.org/reports/tr44/#UAX44-LM2.
-      bool Ignore =
+      तार्किक Ignore =
           *It == ' ' || *It == '_' ||
           (*It == '-' && isAlnum(PreviousChar) &&
            ((Next != End && isAlnum(*Next)) || (Next == End && IsPrefix)));
       PreviousChar = *It;
-      if (!Ignore)
-        break;
+      जर (!Ignore)
+        थांबा;
       ++It;
     }
-    return It;
+    परत It;
   };
 
-  while (true) {
+  पर्यंत (सत्य) {
     NamePos = IgnoreSpaces(NamePos, Name.end(), PreviousCharInName);
     NeedlePos =
         IgnoreSpaces(NeedlePos, Needle.end(), PreviousCharInNeedle, IsPrefix);
-    if (NeedlePos == Needle.end())
-      break;
-    if (NamePos == Name.end())
-      break;
-    if (toUpper(*NeedlePos) != toUpper(*NamePos))
-      break;
+    जर (NeedlePos == Needle.end())
+      थांबा;
+    जर (NamePos == Name.end())
+      थांबा;
+    जर (toUpper(*NeedlePos) != toUpper(*NamePos))
+      थांबा;
     NeedlePos++;
     NamePos++;
   }
   Consummed = std::distance(Name.begin(), NamePos);
-  if (NeedlePos != Needle.end()) {
+  जर (NeedlePos != Needle.end()) {
     PreviousCharInName = PreviousCharInNameOrigin;
   }
-  return NeedlePos == Needle.end();
+  परत NeedlePos == Needle.end();
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict,
-            char PreviousCharInName, BufferType &Buffer,
-            const Node *Parent = nullptr) {
-  Node N = readNode(Offset, Parent);
-  std::size_t Consummed = 0;
-  bool DoesStartWith = N.IsRoot || startsWith(Name, N.Name, Strict, Consummed,
+स्थिर std::tuple<गाठ, तार्किक, uint32_t>
+compare_गाठ(uint32_t Offset, StringRef Name, तार्किक Strict,
+            अक्षर PreviousCharInName, BufferType &Buffer,
+            स्थिरांक गाठ *Parent = nullptr) {
+  गाठ N = read_गाठ(Offset, Parent);
+  std::माप_प्रकार Consummed = 0;
+  तार्किक DoesStartWith = N.Is_मूळ || startsWith(Name, N.Name, Strict, Consummed,
                                               PreviousCharInName);
-  if (!DoesStartWith)
-    return std::make_tuple(N, false, 0);
+  जर (!DoesStartWith)
+    परत std::make_tuple(N, असत्य, 0);
 
-  if (Name.size() - Consummed == 0 && N.Value != 0xFFFFFFFF)
-    return std::make_tuple(N, true, N.Value);
+  जर (Name.size() - Consummed == 0 && N.मूल्य != 0xFFFFFFFF)
+    परत std::make_tuple(N, सत्य, N.मूल्य);
 
-  if (N.hasChildren()) {
+  जर (N.hasChildren()) {
     uint32_t ChildOffset = N.ChildrenOffset;
-    for (;;) {
-      Node C;
-      bool Matches;
-      uint32_t Value;
-      std::tie(C, Matches, Value) =
-          compareNode(ChildOffset, Name.substr(Consummed), Strict,
+    साठी (;;) {
+      गाठ C;
+      तार्किक Matches;
+      uint32_t मूल्य;
+      std::tie(C, Matches, मूल्य) =
+          compare_गाठ(ChildOffset, Name.substr(Consummed), Strict,
                       PreviousCharInName, Buffer, &N);
-      if (Matches) {
+      जर (Matches) {
         std::reverse_copy(C.Name.begin(), C.Name.end(),
                           std::back_inserter(Buffer));
-        return std::make_tuple(N, true, Value);
+        परत std::make_tuple(N, सत्य, मूल्य);
       }
       ChildOffset += C.Size;
-      if (!C.HasSibling)
-        break;
+      जर (!C.HasSibling)
+        थांबा;
     }
   }
-  return std::make_tuple(N, false, 0);
+  परत std::make_tuple(N, असत्य, 0);
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict, BufferType &Buffer) {
-  return compareNode(Offset, Name, Strict, 0, Buffer);
+स्थिर std::tuple<गाठ, तार्किक, uint32_t>
+compare_गाठ(uint32_t Offset, StringRef Name, तार्किक Strict, BufferType &Buffer) {
+  परत compare_गाठ(Offset, Name, Strict, 0, Buffer);
 }
 
 // clang-format off
-constexpr const char *const HangulSyllables[][3] = {
+constexpr स्थिरांक अक्षर *स्थिरांक HangulSyllables[][3] = {
     { "G",  "A",   ""   },
     { "GG", "AE",  "G"  },
     { "N",  "YA",  "GG" },
@@ -256,72 +256,72 @@ constexpr uint32_t LCount = 19;
 constexpr uint32_t VCount = 21;
 constexpr uint32_t TCount = 28;
 
-static std::size_t findSyllable(StringRef Name, bool Strict,
-                                char &PreviousInName, int &Pos, int Column) {
-  assert(Column == 0 || Column == 1 || Column == 2);
-  static std::size_t CountPerColumn[] = {LCount, VCount, TCount};
-  int Len = -1;
-  int Prev = PreviousInName;
-  for (std::size_t I = 0; I < CountPerColumn[Column]; I++) {
+स्थिर std::माप_प्रकार findSyllable(StringRef Name, तार्किक Strict,
+                                अक्षर &PreviousInName, पूर्णांक &Pos, पूर्णांक Column) {
+  प्रतिज्ञा(Column == 0 || Column == 1 || Column == 2);
+  स्थिर std::माप_प्रकार मोजणी_Per_Column[] = {LCount, VCount, TCount};
+  पूर्णांक Len = -1;
+  पूर्णांक Prev = PreviousInName;
+  साठी (std::माप_प्रकार I = 0; I < मोजणी_Per_Column[Column]; I++) {
     StringRef Syllable(HangulSyllables[I][Column]);
-    if (int(Syllable.size()) <= Len)
-      continue;
-    std::size_t Consummed = 0;
-    char PreviousInNameCopy = PreviousInName;
-    bool DoesStartWith =
+    जर (पूर्णांक(Syllable.size()) <= Len)
+      सुरूठेवा;
+    std::माप_प्रकार Consummed = 0;
+    अक्षर PreviousInNameCopy = PreviousInName;
+    तार्किक DoesStartWith =
         startsWith(Name, Syllable, Strict, Consummed, PreviousInNameCopy);
-    if (!DoesStartWith)
-      continue;
+    जर (!DoesStartWith)
+      सुरूठेवा;
     Len = Consummed;
     Pos = I;
     Prev = PreviousInNameCopy;
   }
-  if (Len == -1)
-    return 0;
+  जर (Len == -1)
+    परत 0;
   PreviousInName = Prev;
-  return size_t(Len);
+  परत माप_प्रकार(Len);
 }
 
-static std::optional<char32_t>
-nameToHangulCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
+स्थिर std::optional<char32_t>
+nameToHangulCodePoint(StringRef Name, तार्किक Strict, BufferType &Buffer) {
   Buffer.clear();
   // Hangul Syllable Decomposition
-  std::size_t Consummed = 0;
-  char NameStart = 0;
-  bool DoesStartWith =
+  std::माप_प्रकार Consummed = 0;
+  अक्षर NameStart = 0;
+  तार्किक DoesStartWith =
       startsWith(Name, "HANGUL SYLLABLE ", Strict, Consummed, NameStart);
-  if (!DoesStartWith)
-    return std::nullopt;
+  जर (!DoesStartWith)
+    परत std::nullopt;
   Name = Name.substr(Consummed);
-  int L = -1, V = -1, T = -1;
+  पूर्णांक L = -1, V = -1, T = -1;
   Name = Name.substr(findSyllable(Name, Strict, NameStart, L, 0));
   Name = Name.substr(findSyllable(Name, Strict, NameStart, V, 1));
   Name = Name.substr(findSyllable(Name, Strict, NameStart, T, 2));
-  if (L != -1 && V != -1 && T != -1 && Name.empty()) {
-    if (!Strict) {
+  जर (L != -1 && V != -1 && T != -1 && Name.empty()) {
+    जर (!Strict) {
       Buffer.append("HANGUL SYLLABLE ");
-      if (L != -1)
+      जर (L != -1)
         Buffer.append(HangulSyllables[L][0]);
-      if (V != -1)
+      जर (V != -1)
         Buffer.append(HangulSyllables[V][1]);
-      if (T != -1)
+      जर (T != -1)
         Buffer.append(HangulSyllables[T][2]);
     }
-    return SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
+    परत SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
            std::uint32_t(T);
   }
   // Otherwise, it's an illegal syllable name.
-  return std::nullopt;
+  परत std::nullopt;
 }
 
-struct GeneratedNamesData {
+संरचना GeneratedNamesData {
   StringRef Prefix;
   uint32_t Start;
   uint32_t End;
 };
 
 // Unicode 18.0 Name Derivation Rule Prefix Strings (extracted/DerivedName.txt)
-static const GeneratedNamesData GeneratedNamesDataTable[] = {
+स्थिर स्थिरांक GeneratedNamesData GeneratedNamesDataTable[] = {
     {"CJK UNIFIED IDEOGRAPH-", 0x3400, 0x4DBF},
     {"CJK UNIFIED IDEOGRAPH-", 0x4E00, 0x9FFF},
     {"CJK UNIFIED IDEOGRAPH-", 0x20000, 0x2A6DF},
@@ -346,204 +346,204 @@ static const GeneratedNamesData GeneratedNamesDataTable[] = {
     {"CJK COMPATIBILITY IDEOGRAPH-", 0x2F800, 0x2FA1D},
 };
 
-static std::optional<char32_t>
-nameToGeneratedCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
-  for (auto &&Item : GeneratedNamesDataTable) {
+स्थिर std::optional<char32_t>
+nameToGeneratedCodePoint(StringRef Name, तार्किक Strict, BufferType &Buffer) {
+  साठी (स्वतः &&Item : GeneratedNamesDataTable) {
     Buffer.clear();
-    std::size_t Consummed = 0;
-    char NameStart = 0;
-    bool DoesStartWith = startsWith(Name, Item.Prefix, Strict, Consummed,
-                                    NameStart, /*IsPrefix=*/true);
-    if (!DoesStartWith)
-      continue;
-    auto Number = Name.substr(Consummed);
-    unsigned long long V = 0;
+    std::माप_प्रकार Consummed = 0;
+    अक्षर NameStart = 0;
+    तार्किक DoesStartWith = startsWith(Name, Item.Prefix, Strict, Consummed,
+                                    NameStart, /*IsPrefix=*/सत्य);
+    जर (!DoesStartWith)
+      सुरूठेवा;
+    स्वतः संख्या = Name.substr(Consummed);
+    अचिन्हित दीर्घ दीर्घ V = 0;
     // Be consistent about mandating upper casing.
-    if (Strict &&
-        llvm::any_of(Number, [](char C) { return C >= 'a' && C <= 'f'; }))
-      return {};
-    if (getAsUnsignedInteger(Number, 16, V) || V < Item.Start || V > Item.End)
-      continue;
-    if (!Strict) {
+    जर (Strict &&
+        llvm::any_of(संख्या, [](अक्षर C) { परत C >= 'a' && C <= 'f'; }))
+      परत {};
+    जर (getAsUnsignedInteger(संख्या, 16, V) || V < Item.Start || V > Item.End)
+      सुरूठेवा;
+    जर (!Strict) {
       Buffer.append(Item.Prefix);
-      Buffer.append(utohexstr(V, true));
+      Buffer.append(utohexstr(V, सत्य));
     }
-    return V;
+    परत V;
   }
-  return std::nullopt;
+  परत std::nullopt;
 }
 
-static std::optional<char32_t> nameToCodepoint(StringRef Name, bool Strict,
+स्थिर std::optional<char32_t> nameToCodepoint(StringRef Name, तार्किक Strict,
                                                BufferType &Buffer) {
-  if (Name.empty())
-    return std::nullopt;
+  जर (Name.empty())
+    परत std::nullopt;
 
   std::optional<char32_t> Res = nameToHangulCodePoint(Name, Strict, Buffer);
-  if (!Res)
+  जर (!Res)
     Res = nameToGeneratedCodePoint(Name, Strict, Buffer);
-  if (Res)
-    return *Res;
+  जर (Res)
+    परत *Res;
 
   Buffer.clear();
-  Node Node;
-  bool Matches;
-  uint32_t Value;
-  std::tie(Node, Matches, Value) = compareNode(0, Name, Strict, Buffer);
-  if (Matches) {
+  गाठ गाठ;
+  तार्किक Matches;
+  uint32_t मूल्य;
+  std::tie(गाठ, Matches, मूल्य) = compare_गाठ(0, Name, Strict, Buffer);
+  जर (Matches) {
     std::reverse(Buffer.begin(), Buffer.end());
     // UAX44-LM2. Ignore case, whitespace, underscore ('_'), and all medial
     // hyphens except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
-    if (!Strict && Value == 0x116c && Name.contains_insensitive("O-E")) {
+    जर (!Strict && मूल्य == 0x116c && Name.contains_insensitive("O-E")) {
       Buffer = "HANGUL JUNGSEONG O-E";
-      Value = 0x1180;
+      मूल्य = 0x1180;
     }
-    return Value;
+    परत मूल्य;
   }
-  return std::nullopt;
+  परत std::nullopt;
 }
 
 std::optional<char32_t> nameToCodepointStrict(StringRef Name) {
 
   BufferType Buffer;
-  auto Opt = nameToCodepoint(Name, true, Buffer);
-  return Opt;
+  स्वतः Opt = nameToCodepoint(Name, सत्य, Buffer);
+  परत Opt;
 }
 
 std::optional<LooseMatchingResult>
 nameToCodepointLooseMatching(StringRef Name) {
   BufferType Buffer;
-  auto Opt = nameToCodepoint(Name, false, Buffer);
-  if (!Opt)
-    return std::nullopt;
-  return LooseMatchingResult{*Opt, Buffer};
+  स्वतः Opt = nameToCodepoint(Name, असत्य, Buffer);
+  जर (!Opt)
+    परत std::nullopt;
+  परत LooseMatchingResult{*Opt, Buffer};
 }
 
 // Find the unicode character whose editing distance to Pattern
 // is shortest, using the Wagner–Fischer algorithm.
 llvm::SmallVector<MatchForCodepointName>
-nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
+nearestMatchesForCodepointName(StringRef Pattern, std::माप_प्रकार Max_Matches_मोजणी) {
   // We maintain a fixed size vector of matches,
   // sorted by distance
   // The worst match (with the biggest distance) are discarded when new elements
   // are added.
-  std::size_t LargestEditDistance = 0;
+  std::माप_प्रकार LargestEditDistance = 0;
   llvm::SmallVector<MatchForCodepointName> Matches;
-  Matches.reserve(MaxMatchesCount + 1);
+  Matches.reserve(Max_Matches_मोजणी + 1);
 
-  auto Insert = [&](const Node &Node, uint32_t Distance,
-                    char32_t Value) -> bool {
-    if (Distance > LargestEditDistance) {
-      if (Matches.size() == MaxMatchesCount)
-        return false;
+  स्वतः घाला_2 = [&](स्थिरांक गाठ &गाठ, uint32_t Distance,
+                    char32_t मूल्य) -> तार्किक {
+    जर (Distance > LargestEditDistance) {
+      जर (Matches.size() == Max_Matches_मोजणी)
+        परत असत्य;
       LargestEditDistance = Distance;
     }
     // To avoid allocations, the creation of the name is delayed
     // as much as possible.
     std::string Name;
-    auto GetName = [&] {
-      if (Name.empty())
-        Name = Node.fullName();
-      return Name;
+    स्वतः GetName = [&] {
+      जर (Name.empty())
+        Name = गाठ.fullName();
+      परत Name;
     };
 
-    auto It = llvm::lower_bound(
+    स्वतः It = llvm::lower_bound(
         Matches, Distance,
-        [&](const MatchForCodepointName &a, std::size_t Distance) {
-          if (Distance == a.Distance)
-            return a.Name < GetName();
-          return a.Distance < Distance;
+        [&](स्थिरांक MatchForCodepointName &a, std::माप_प्रकार Distance) {
+          जर (Distance == a.Distance)
+            परत a.Name < GetName();
+          परत a.Distance < Distance;
         });
-    if (It == Matches.end() && Matches.size() == MaxMatchesCount)
-      return false;
+    जर (It == Matches.end() && Matches.size() == Max_Matches_मोजणी)
+      परत असत्य;
 
-    MatchForCodepointName M{GetName(), Distance, Value};
-    Matches.insert(It, std::move(M));
-    if (Matches.size() > MaxMatchesCount)
-      Matches.pop_back();
-    return true;
+    MatchForCodepointName M{GetName(), Distance, मूल्य};
+    Matches.घाला(It, std::move(M));
+    जर (Matches.size() > Max_Matches_मोजणी)
+      Matches.काढा_back();
+    परत सत्य;
   };
 
   // We ignore case, space, hyphens, etc,
   // in both the search pattern and the prospective names.
-  auto Normalize = [](StringRef Name) {
+  स्वतः Normalize = [](StringRef Name) {
     std::string Out;
     Out.reserve(Name.size());
-    for (char C : Name) {
-      if (isAlnum(C))
-        Out.push_back(toUpper(C));
+    साठी (अक्षर C : Name) {
+      जर (isAlnum(C))
+        Out.ढकला_back(toUpper(C));
     }
-    return Out;
+    परत Out;
   };
   std::string NormalizedName = Normalize(Pattern);
 
   // Allocate a matrix big enough for longest names.
-  const std::size_t Columns =
+  स्थिरांक std::माप_प्रकार Columns =
       std::min(NormalizedName.size(), UnicodeNameToCodepointLargestNameSize) +
       1;
 
-  [[maybe_unused]] static std::size_t Rows =
+  [[maybe_unused]] स्थिर std::माप_प्रकार Rows =
       UnicodeNameToCodepointLargestNameSize + 1;
 
-  std::vector<char> Distances(
+  std::vector<अक्षर> Distances(
       Columns * (UnicodeNameToCodepointLargestNameSize + 1), 0);
 
-  auto Get = [&Distances, Columns](size_t Column, std::size_t Row) -> char & {
-    assert(Column < Columns);
-    assert(Row < Rows);
-    return Distances[Row * Columns + Column];
+  स्वतः Get = [&Distances, Columns](माप_प्रकार Column, std::माप_प्रकार Row) -> अक्षर & {
+    प्रतिज्ञा(Column < Columns);
+    प्रतिज्ञा(Row < Rows);
+    परत Distances[Row * Columns + Column];
   };
 
-  for (std::size_t I = 0; I < Columns; I++)
+  साठी (std::माप_प्रकार I = 0; I < Columns; I++)
     Get(I, 0) = I;
 
   // Visit the childrens,
   // Filling (and overriding) the matrix for the name fragment of each node
   // iteratively. CompleteName is used to collect the actual name of potential
   // match, respecting case and spacing.
-  auto VisitNode = [&](const Node &N, std::size_t Row,
-                       auto &VisitNode) -> void {
-    std::size_t J = 0;
-    for (; J < N.Name.size(); J++) {
-      if (!isAlnum(N.Name[J]))
-        continue;
+  स्वतः Visit_गाठ = [&](स्थिरांक गाठ &N, std::माप_प्रकार Row,
+                       स्वतः &Visit_गाठ) -> शून्य {
+    std::माप_प्रकार J = 0;
+    साठी (; J < N.Name.size(); J++) {
+      जर (!isAlnum(N.Name[J]))
+        सुरूठेवा;
 
       Get(0, Row) = Row;
 
-      for (std::size_t I = 1; I < Columns; I++) {
-        const int Delete = Get(I - 1, Row) + 1;
-        const int Insert = Get(I, Row - 1) + 1;
+      साठी (std::माप_प्रकार I = 1; I < Columns; I++) {
+        स्थिरांक पूर्णांक Delete = Get(I - 1, Row) + 1;
+        स्थिरांक पूर्णांक घाला_2 = Get(I, Row - 1) + 1;
 
-        const int Replace =
+        स्थिरांक पूर्णांक Replace =
             Get(I - 1, Row - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
 
-        Get(I, Row) = std::min({Insert, Delete, Replace});
+        Get(I, Row) = std::min({घाला_2, Delete, Replace});
       }
 
       Row++;
     }
 
-    unsigned Cost = Get(Columns - 1, Row - 1);
-    if (N.Value != 0xFFFFFFFF) {
-      Insert(N, Cost, N.Value);
+    अचिन्हित Cost = Get(Columns - 1, Row - 1);
+    जर (N.मूल्य != 0xFFFFFFFF) {
+      घाला_2(N, Cost, N.मूल्य);
     }
 
-    if (N.hasChildren()) {
-      auto ChildOffset = N.ChildrenOffset;
-      for (;;) {
-        Node C = readNode(ChildOffset, &N);
+    जर (N.hasChildren()) {
+      स्वतः ChildOffset = N.ChildrenOffset;
+      साठी (;;) {
+        गाठ C = read_गाठ(ChildOffset, &N);
         ChildOffset += C.Size;
-        if (!C.isValid())
-          break;
-        VisitNode(C, Row, VisitNode);
-        if (!C.HasSibling)
-          break;
+        जर (!C.isValid())
+          थांबा;
+        Visit_गाठ(C, Row, Visit_गाठ);
+        जर (!C.HasSibling)
+          थांबा;
       }
     }
   };
 
-  Node Root = createRoot();
-  VisitNode(Root, 1, VisitNode);
-  return Matches;
+  गाठ मूळ_2 = create_मूळ();
+  Visit_गाठ(मूळ_2, 1, Visit_गाठ);
+  परत Matches;
 }
 
 } // namespace unicode
