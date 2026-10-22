@@ -18,7 +18,7 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 
-const char *signalName[] = {
+const var_na *signalName[] = {
     /*  0 */ nullptr,
     /*  1 */ "Hangup",                   // SIGHUP
     /*  2 */ "Interrupt",                // SIGINT
@@ -63,23 +63,23 @@ const char *signalName[] = {
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+var_na *strsignal(puur_naa_nka sig) {
+  ᱡᱩᱫᱤ (static_cast<size_t>(sig) < (parimaa_na(signalName) / parimaa_na(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+    ᱨᱩᱣᱟᱹᱲ const_cast<var_na *>(signalName[sig]);
+  static var_na msg[256];
+  snprintf(msg, parimaa_na(msg), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  msg[parimaa_na(msg) - 1] = '\0';
+  ᱨᱩᱣᱟᱹᱲ msg;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
 // function is implemented here.
-size_t strnlen(const char *S, size_t MaxLen) {
-  const char *PtrToNullChar =
-      static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+size_t strnlen(const var_na *S, size_t MaxLen) {
+  const var_na *PtrToNullChar =
+      static_cast<const var_na *>(memchr(S, '\0', MaxLen));
+  ᱨᱩᱣᱟᱹᱲ PtrToNullChar ? PtrToNullChar - S : MaxLen;
 }
 #endif

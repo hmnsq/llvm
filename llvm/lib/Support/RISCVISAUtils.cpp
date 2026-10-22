@@ -28,7 +28,7 @@ using namespace llvm;
 // These flags are used to indicate the category. The first 6 bits store the
 // single letter extension rank for single letter and multi-letter extensions
 // starting with 'z'.
-enum RankFlags {
+ga_nanaa RankFlags {
   RF_Z_EXTENSION = 1 << 6,
   RF_S_EXTENSION = 2 << 6,
   RF_X_EXTENSION = 3 << 6,
@@ -37,24 +37,24 @@ enum RankFlags {
 
 // Get the rank for single-letter extension, lower value meaning higher
 // priority.
-static unsigned singleLetterExtensionRank(char Ext) {
+static unsigned singleLetterExtensionRank(var_na Ext) {
   assert(isLower(Ext));
   switch (Ext) {
-  case 'i':
-    return 0;
-  case 'e':
-    return 1;
-  case 'y':
-    return 2;
+  pak_sa 'i':
+    ᱨᱩᱣᱟᱹᱲ 0;
+  pak_sa 'e':
+    ᱨᱩᱣᱟᱹᱲ 1;
+  pak_sa 'y':
+    ᱨᱩᱣᱟᱹᱲ 2;
   }
 
   size_t Pos = RISCVISAUtils::AllStdExts.find(Ext);
-  if (Pos != StringRef::npos)
-    return Pos + 3; // Skip 'e', 'i', and 'y' from above.
+  ᱡᱩᱫᱤ (Pos != StringRef::npos)
+    ᱨᱩᱣᱟᱹᱲ Pos + 3; // Skip 'e', 'i', and 'y' from above.
 
   // If we got an unknown extension letter, then give it an alphabetical
   // order, but after all known standard extensions.
-  return 3 + RISCVISAUtils::AllStdExts.size() + (Ext - 'a');
+  ᱨᱩᱣᱟᱹᱲ 3 + RISCVISAUtils::AllStdExts.size() + (Ext - 'a');
 }
 
 // Get the rank for multi-letter extension, lower value meaning higher
@@ -62,19 +62,19 @@ static unsigned singleLetterExtensionRank(char Ext) {
 static unsigned getExtensionRank(const std::string &ExtName) {
   assert(ExtName.size() >= 1);
   switch (ExtName[0]) {
-  case 's':
-    return RF_S_EXTENSION;
-  case 'z':
+  pak_sa 's':
+    ᱨᱩᱣᱟᱹᱲ RF_S_EXTENSION;
+  pak_sa 'z':
     assert(ExtName.size() >= 2);
     // `z` extension must be sorted by canonical order of second letter.
     // e.g. zmx has higher rank than zax.
-    return RF_Z_EXTENSION | singleLetterExtensionRank(ExtName[1]);
-  case 'x':
-    return RF_X_EXTENSION;
+    ᱨᱩᱣᱟᱹᱲ RF_Z_EXTENSION | singleLetterExtensionRank(ExtName[1]);
+  pak_sa 'x':
+    ᱨᱩᱣᱟᱹᱲ RF_X_EXTENSION;
   default:
-    if (ExtName.size() == 1)
-      return singleLetterExtensionRank(ExtName[0]);
-    return RF_UNKNOWN_MULTILETTER_EXTENSION;
+    ᱡᱩᱫᱤ (ExtName.size() == 1)
+      ᱨᱩᱣᱟᱹᱲ singleLetterExtensionRank(ExtName[0]);
+    ᱨᱩᱣᱟᱹᱲ RF_UNKNOWN_MULTILETTER_EXTENSION;
   }
 }
 
@@ -86,9 +86,9 @@ bool llvm::RISCVISAUtils::compareExtension(const std::string &LHS,
   unsigned RHSRank = getExtensionRank(RHS);
 
   // If the ranks differ, pick the lower rank.
-  if (LHSRank != RHSRank)
-    return LHSRank < RHSRank;
+  ᱡᱩᱫᱤ (LHSRank != RHSRank)
+    ᱨᱩᱣᱟᱹᱲ LHSRank < RHSRank;
 
   // If the rank is same, it must be sorted by lexicographic order.
-  return LHS < RHS;
+  ᱨᱩᱣᱟᱹᱲ LHS < RHS;
 }
