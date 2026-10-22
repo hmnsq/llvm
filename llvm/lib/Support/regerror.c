@@ -49,10 +49,10 @@
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+static const char *regatoi(const llvm_regex_t *, char *, цео);
 
 static struct rerr {
-	int code;
+	цео code;
 	const char *name;
 	const char *explain;
 } rerrs[] = {
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(цео errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 	struct rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
+	цео target = errcode &~ REG_ITOA;
 	const char *s;
 	char convbuf[50];
 
-	if (errcode == REG_ATOI)
+	ако (errcode == REG_ATOI)
 		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
+	инако {
+		за (r = rerrs; r->code != 0; r++)
+			ако (r->code == target)
 				break;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
+		ако (errcode&REG_ITOA) {
+			ако (r->code != 0) {
 				assert(strlen(r->name) < sizeof(convbuf));
 				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
+			} инако
 				(void)snprintf(convbuf, sizeof convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} инако
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	ако (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	врати(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
 static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+regatoi(const llvm_regex_t *preg, char *localbuf, цео localbufsize)
 {
 	struct rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
+	за (r = rerrs; r->code != 0; r++)
+		ако (strcmp(r->name, preg->re_endp) == 0)
 			break;
-	if (r->code == 0)
-		return("0");
+	ако (r->code == 0)
+		врати("0");
 
 	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	врати(localbuf);
 }

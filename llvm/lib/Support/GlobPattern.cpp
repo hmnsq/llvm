@@ -27,8 +27,8 @@ static Expected<BitVector> expand(StringRef S, StringRef Original) {
   BitVector BV(256, false);
 
   // Expand X-Y.
-  for (;;) {
-    if (S.size() < 3)
+  за (;;) {
+    ако (S.size() < 3)
       break;
 
     uint8_t Start = S[0];
@@ -36,7 +36,7 @@ static Expected<BitVector> expand(StringRef S, StringRef Original) {
 
     // If it doesn't start with something like X-Y,
     // consume the first character and proceed.
-    if (S[1] != '-') {
+    ако (S[1] != '-') {
       BV[Start] = true;
       S = S.substr(1);
       continue;
@@ -44,18 +44,18 @@ static Expected<BitVector> expand(StringRef S, StringRef Original) {
 
     // It must be in the form of X-Y.
     // Validate it and then interpret the range.
-    if (Start > End)
-      return make_error<StringError>("invalid glob pattern: " + Original,
+    ако (Start > End)
+      врати make_error<StringError>("invalid glob pattern: " + Original,
                                      errc::invalid_argument);
 
-    for (int C = Start; C <= End; ++C)
+    за (цео C = Start; C <= End; ++C)
       BV[(uint8_t)C] = true;
     S = S.substr(3);
   }
 
-  for (char C : S)
+  за (char C : S)
     BV[(uint8_t)C] = true;
-  return BV;
+  врати BV;
 }
 
 // Identify brace expansions in S and return the list of patterns they expand
@@ -63,8 +63,8 @@ static Expected<BitVector> expand(StringRef S, StringRef Original) {
 static Expected<SmallVector<std::string, 1>>
 parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
   SmallVector<std::string> SubPatterns = {S.str()};
-  if (!MaxSubPatterns || !S.contains('{'))
-    return std::move(SubPatterns);
+  ако (!MaxSubPatterns || !S.contains('{'))
+    врати std::move(SubPatterns);
 
   struct BraceExpansion {
     size_t Start;
@@ -75,78 +75,78 @@ parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
 
   BraceExpansion *CurrentBE = nullptr;
   size_t TermBegin;
-  for (size_t I = 0, E = S.size(); I != E; ++I) {
-    if (S[I] == '[') {
+  за (size_t I = 0, E = S.size(); I != E; ++I) {
+    ако (S[I] == '[') {
       I = S.find(']', I + 2);
-      if (I == std::string::npos)
-        return make_error<StringError>("invalid glob pattern, unmatched '['",
+      ако (I == std::string::npos)
+        врати make_error<StringError>("invalid glob pattern, unmatched '['",
                                        errc::invalid_argument);
-    } else if (S[I] == '{') {
-      if (CurrentBE)
-        return make_error<StringError>(
+    } инако ако (S[I] == '{') {
+      ако (CurrentBE)
+        врати make_error<StringError>(
             "nested brace expansions are not supported",
             errc::invalid_argument);
       CurrentBE = &BraceExpansions.emplace_back();
       CurrentBE->Start = I;
       TermBegin = I + 1;
-    } else if (S[I] == ',') {
-      if (!CurrentBE)
+    } инако ако (S[I] == ',') {
+      ако (!CurrentBE)
         continue;
       CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
       TermBegin = I + 1;
-    } else if (S[I] == '}') {
-      if (!CurrentBE)
+    } инако ако (S[I] == '}') {
+      ако (!CurrentBE)
         continue;
-      if (CurrentBE->Terms.empty())
-        return make_error<StringError>(
+      ако (CurrentBE->Terms.empty())
+        врати make_error<StringError>(
             "empty or singleton brace expansions are not supported",
             errc::invalid_argument);
       CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
       CurrentBE->Length = I - CurrentBE->Start + 1;
       CurrentBE = nullptr;
-    } else if (S[I] == '\\') {
-      if (++I == E)
-        return make_error<StringError>("invalid glob pattern, stray '\\'",
+    } инако ако (S[I] == '\\') {
+      ако (++I == E)
+        врати make_error<StringError>("invalid glob pattern, stray '\\'",
                                        errc::invalid_argument);
     }
   }
-  if (CurrentBE)
-    return make_error<StringError>("incomplete brace expansion",
+  ако (CurrentBE)
+    врати make_error<StringError>("incomplete brace expansion",
                                    errc::invalid_argument);
 
   size_t NumSubPatterns = 1;
-  for (auto &BE : BraceExpansions) {
-    if (NumSubPatterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
+  за (auto &BE : BraceExpansions) {
+    ако (NumSubPatterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
       NumSubPatterns = std::numeric_limits<size_t>::max();
       break;
     }
     NumSubPatterns *= BE.Terms.size();
   }
-  if (NumSubPatterns > *MaxSubPatterns)
-    return make_error<StringError>("too many brace expansions",
+  ако (NumSubPatterns > *MaxSubPatterns)
+    врати make_error<StringError>("too many brace expansions",
                                    errc::invalid_argument);
   // Replace brace expansions in reverse order so that we don't invalidate
   // earlier start indices
-  for (auto &BE : reverse(BraceExpansions)) {
+  за (auto &BE : reverse(BraceExpansions)) {
     SmallVector<std::string> OrigSubPatterns;
     std::swap(SubPatterns, OrigSubPatterns);
-    for (StringRef Term : BE.Terms)
-      for (StringRef Orig : OrigSubPatterns)
+    за (StringRef Term : BE.Terms)
+      за (StringRef Orig : OrigSubPatterns)
         SubPatterns.emplace_back(Orig).replace(BE.Start, BE.Length, Term);
   }
-  return std::move(SubPatterns);
+  врати std::move(SubPatterns);
 }
 
 static StringRef maxPlainSubstring(StringRef S, bool SlashAgnostic) {
   const char *Metas =
       SlashAgnostic ? PrefixMetacharactersWithSlash : PrefixMetacharacters;
   StringRef Best;
-  while (!S.empty()) {
+  док (!S.empty()) {
     size_t PrefixSize = S.find_first_of(Metas);
-    if (PrefixSize == std::string::npos)
+    ако (PrefixSize == std::string::npos)
       PrefixSize = S.size();
 
-    if (Best.size() < PrefixSize)
+    ако (Best.size() < PrefixSize)
       Best = S.take_front(PrefixSize);
 
     S = S.drop_front(PrefixSize);
@@ -173,13 +173,13 @@ static StringRef maxPlainSubstring(StringRef S, bool SlashAgnostic) {
     case '{':
       // TODO: implement.
       // Fallback to whatever is best for now.
-      return Best;
+      врати Best;
     default:
       S = S.drop_front(1);
     }
   }
 
-  return Best;
+  врати Best;
 }
 
 Expected<GlobPattern> GlobPattern::create(StringRef S,
@@ -196,33 +196,33 @@ Expected<GlobPattern> GlobPattern::create(StringRef S,
 
   // Store the prefix that does not contain any metacharacter.
   Pat.PrefixSize = S.find_first_of(PrefixMetas);
-  if (Pat.PrefixSize == std::string::npos) {
+  ако (Pat.PrefixSize == std::string::npos) {
     Pat.PrefixSize = S.size();
-    return Pat;
+    врати Pat;
   }
   S = S.substr(Pat.PrefixSize);
 
   // Just in case we stop on unmatched opening brackets.
   size_t SuffixStart = S.find_last_of(SuffixMetas);
   assert(SuffixStart != std::string::npos);
-  if (S[SuffixStart] == '\\')
+  ако (S[SuffixStart] == '\\')
     ++SuffixStart;
-  if (SuffixStart < S.size())
+  ако (SuffixStart < S.size())
     ++SuffixStart;
   Pat.SuffixSize = S.size() - SuffixStart;
   S = S.substr(0, SuffixStart);
 
   SmallVector<std::string, 1> SubPats;
-  if (auto Err = parseBraceExpansions(S, MaxSubPatterns).moveInto(SubPats))
-    return std::move(Err);
-  for (StringRef SubPat : SubPats) {
+  ако (auto Err = parseBraceExpansions(S, MaxSubPatterns).moveInto(SubPats))
+    врати std::move(Err);
+  за (StringRef SubPat : SubPats) {
     auto SubGlobOrErr = SubGlobPattern::create(SubPat, SlashAgnostic);
-    if (!SubGlobOrErr)
-      return SubGlobOrErr.takeError();
+    ако (!SubGlobOrErr)
+      врати SubGlobOrErr.takeError();
     Pat.SubGlobs.push_back(*SubGlobOrErr);
   }
 
-  return Pat;
+  врати Pat;
 }
 
 std::optional<std::string> GlobPattern::asLiteral() const {
@@ -230,13 +230,13 @@ std::optional<std::string> GlobPattern::asLiteral() const {
   // this pattern denotes a single string is decided by the sub-patterns, which
   // recorded it while parsing. No sub-pattern at all means there was no
   // metacharacter; more than one means brace expansion produced a choice.
-  if (SubGlobs.size() > 1 || (SubGlobs.size() == 1 && !SubGlobs[0].isLiteral()))
-    return std::nullopt;
+  ако (SubGlobs.size() > 1 || (SubGlobs.size() == 1 && !SubGlobs[0].isLiteral()))
+    врати std::nullopt;
 
   std::string Literal;
   Literal.reserve(Pattern.size());
-  for (size_t I = 0, E = Pattern.size(); I != E; ++I) {
-    if (Pattern[I] == '\\' && I + 1 != E)
+  за (size_t I = 0, E = Pattern.size(); I != E; ++I) {
+    ако (Pattern[I] == '\\' && I + 1 != E)
       ++I;
     Literal.push_back(Pattern[I]);
   }
@@ -244,11 +244,11 @@ std::optional<std::string> GlobPattern::asLiteral() const {
   // In slash-agnostic mode '/' and '\\' match each other, so a pattern holding
   // either matches more than one string. A pattern with no sub-pattern cannot
   // reach here holding one, as both are prefix metacharacters in that mode.
-  if (SlashAgnostic &&
+  ако (SlashAgnostic &&
       StringRef(Literal).find_first_of("/\\") != StringRef::npos)
-    return std::nullopt;
+    врати std::nullopt;
 
-  return Literal;
+  врати Literal;
 }
 
 Expected<GlobPattern::SubGlobPattern>
@@ -257,64 +257,64 @@ GlobPattern::SubGlobPattern::create(StringRef S, bool SlashAgnostic) {
 
   // Parse brackets.
   Pat.Pat.assign(S.begin(), S.end());
-  for (size_t I = 0, E = S.size(); I != E; ++I) {
-    if (S[I] == '[') {
+  за (size_t I = 0, E = S.size(); I != E; ++I) {
+    ако (S[I] == '[') {
       // ']' is allowed as the first character of a character class. '[]' is
       // invalid. So, just skip the first character.
       ++I;
       size_t J = S.find(']', I + 1);
-      if (J == StringRef::npos)
-        return make_error<StringError>("invalid glob pattern, unmatched '['",
+      ако (J == StringRef::npos)
+        врати make_error<StringError>("invalid glob pattern, unmatched '['",
                                        errc::invalid_argument);
       StringRef Chars = S.substr(I, J - I);
       bool Invert = S[I] == '^' || S[I] == '!';
-      if (Invert)
+      ако (Invert)
         Chars = Chars.drop_front();
       Expected<BitVector> BVOrErr = expand(Chars, S);
-      if (!BVOrErr)
-        return BVOrErr.takeError();
+      ако (!BVOrErr)
+        врати BVOrErr.takeError();
       BitVector &BV = *BVOrErr;
-      if (SlashAgnostic && (BV['\\'] || BV['/'])) {
+      ако (SlashAgnostic && (BV['\\'] || BV['/'])) {
         BV.set('\\');
         BV.set('/');
       }
-      if (Invert)
+      ако (Invert)
         BV.flip();
       Pat.Brackets.push_back(Bracket{J + 1, std::move(BV)});
       I = J;
-    } else if (S[I] == '\\') {
-      if (++I == E)
-        return make_error<StringError>("invalid glob pattern, stray '\\'",
+    } инако ако (S[I] == '\\') {
+      ако (++I == E)
+        врати make_error<StringError>("invalid glob pattern, stray '\\'",
                                        errc::invalid_argument);
-    } else if (S[I] == '*' || S[I] == '?') {
+    } инако ако (S[I] == '*' || S[I] == '?') {
       Pat.HasWildcard = true;
     }
   }
-  return Pat;
+  врати Pat;
 }
 
 StringRef GlobPattern::longest_substr() const {
-  return maxPlainSubstring(Pattern.drop_front(PrefixSize).drop_back(SuffixSize),
+  врати maxPlainSubstring(Pattern.drop_front(PrefixSize).drop_back(SuffixSize),
                            SlashAgnostic);
 }
 
 bool GlobPattern::match(StringRef S) const {
-  if (!S.consume_front(prefix()))
-    return false;
-  if (!S.consume_back(suffix()))
-    return false;
-  if (SubGlobs.empty() && S.empty())
-    return true;
-  for (auto &Glob : SubGlobs)
-    if (Glob.match(S, SlashAgnostic))
-      return true;
-  return false;
+  ако (!S.consume_front(prefix()))
+    врати false;
+  ако (!S.consume_back(suffix()))
+    врати false;
+  ако (SubGlobs.empty() && S.empty())
+    врати true;
+  за (auto &Glob : SubGlobs)
+    ако (Glob.match(S, SlashAgnostic))
+      врати true;
+  врати false;
 }
 
 static bool matchChar(char PatC, char QueryC, bool SlashAgnostic) {
-  if (PatC == QueryC)
-    return true;
-  return SlashAgnostic && (PatC == '\\' || PatC == '/') &&
+  ако (PatC == QueryC)
+    врати true;
+  врати SlashAgnostic && (PatC == '\\' || PatC == '/') &&
          (QueryC == '\\' || QueryC == '/');
 }
 
@@ -327,35 +327,35 @@ bool GlobPattern::SubGlobPattern::match(StringRef Str,
              *SavedS = S;
   const char *const PEnd = P + Pat.size(), *const End = S + Str.size();
   size_t B = 0, SavedB = 0;
-  while (S != End) {
-    if (P == PEnd)
+  док (S != End) {
+    ако (P == PEnd)
       ;
-    else if (*P == '*') {
+    инако ако (*P == '*') {
       // The non-* substring on the left of '*' matches the tail of S. Save the
       // positions to be used by backtracking if we see a mismatch later.
       SegmentBegin = ++P;
       SavedS = S;
       SavedB = B;
       continue;
-    } else if (*P == '[') {
-      if (Brackets[B].Bytes[uint8_t(*S)]) {
+    } инако ако (*P == '[') {
+      ако (Brackets[B].Bytes[uint8_t(*S)]) {
         P = Pat.data() + Brackets[B++].NextOffset;
         ++S;
         continue;
       }
-    } else if (*P == '\\') {
-      if (matchChar(*++P, *S, SlashAgnostic)) {
+    } инако ако (*P == '\\') {
+      ако (matchChar(*++P, *S, SlashAgnostic)) {
         ++P;
         ++S;
         continue;
       }
-    } else if (matchChar(*P, *S, SlashAgnostic) || *P == '?') {
+    } инако ако (matchChar(*P, *S, SlashAgnostic) || *P == '?') {
       ++P;
       ++S;
       continue;
     }
-    if (!SegmentBegin)
-      return false;
+    ако (!SegmentBegin)
+      врати false;
     // We have seen a '*'. Backtrack to the saved positions. Shift the S
     // position to probe the next starting position in the segment.
     P = SegmentBegin;
@@ -364,5 +364,5 @@ bool GlobPattern::SubGlobPattern::match(StringRef Str,
   }
   // All bytes in Str have been matched. Return true if the rest part of Pat is
   // empty or contains only '*'.
-  return getPat().find_first_not_of('*', P - Pat.data()) == std::string::npos;
+  врати getPat().find_first_not_of('*', P - Pat.data()) == std::string::npos;
 }

@@ -17,7 +17,7 @@ using namespace llvm;
 
 namespace {
 
-enum class ErrorErrorCode : int {
+enum class ErrorErrorCode : цео {
   MultipleErrors = 1,
   FileError,
   InconvertibleError
@@ -28,17 +28,17 @@ enum class ErrorErrorCode : int {
 // deal with the Error value directly, rather than converting to error_code.
 class ErrorErrorCategory : public std::error_category {
 public:
-  const char *name() const noexcept override { return "Error"; }
+  const char *name() const noexcept override { врати "Error"; }
 
-  std::string message(int condition) const override {
+  std::string message(цео condition) const override {
     switch (static_cast<ErrorErrorCode>(condition)) {
     case ErrorErrorCode::MultipleErrors:
-      return "Multiple errors";
+      врати "Multiple errors";
     case ErrorErrorCode::InconvertibleError:
-      return "Inconvertible error value. An error has occurred that could not "
+      врати "Inconvertible error value. An error has occurred that could not "
              "be converted to a known std::error_code. Please file a bug.";
     case ErrorErrorCode::FileError:
-      return "A file error occurred.";
+      врати "A file error occurred.";
     }
     llvm_unreachable("Unhandled error code");
   }
@@ -47,7 +47,7 @@ public:
 
 static ErrorErrorCategory &getErrorErrorCat() {
   static ErrorErrorCategory ErrorErrorCat;
-  return ErrorErrorCat;
+  врати ErrorErrorCat;
 }
 
 void ErrorInfoBase::anchor() {}
@@ -59,8 +59,8 @@ char StringError::ID = 0;
 char FileError::ID = 0;
 
 void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
-  if (!E)
-    return;
+  ако (!E)
+    врати;
   OS << ErrorBanner;
   handleAllErrors(std::move(E), [&](const ErrorInfoBase &EI) {
     EI.log(OS);
@@ -75,7 +75,7 @@ std::string llvm::toString(Error E) {
   handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  врати join(Errors.begin(), Errors.end(), "\n");
 }
 
 std::string llvm::toStringWithoutConsuming(const Error &E) {
@@ -83,31 +83,31 @@ std::string llvm::toStringWithoutConsuming(const Error &E) {
   visitErrors(E, [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  врати join(Errors.begin(), Errors.end(), "\n");
 }
 
 std::error_code ErrorList::convertToErrorCode() const {
-  return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
+  врати std::error_code(static_cast<цео>(ErrorErrorCode::MultipleErrors),
                          getErrorErrorCat());
 }
 
 std::error_code llvm::inconvertibleErrorCode() {
-  return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
+  врати std::error_code(static_cast<цео>(ErrorErrorCode::InconvertibleError),
                          getErrorErrorCat());
 }
 
 std::error_code FileError::convertToErrorCode() const {
   std::error_code NestedEC = Err->convertToErrorCode();
-  if (NestedEC == inconvertibleErrorCode())
-    return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
+  ако (NestedEC == inconvertibleErrorCode())
+    врати std::error_code(static_cast<цео>(ErrorErrorCode::FileError),
                            getErrorErrorCat());
-  return NestedEC;
+  врати NestedEC;
 }
 
 Error llvm::errorCodeToError(std::error_code EC) {
-  if (!EC)
-    return Error::success();
-  return Error(std::make_unique<ECError>(ECError(EC)));
+  ако (!EC)
+    врати Error::success();
+  врати Error(std::make_unique<ECError>(ECError(EC)));
 }
 
 std::error_code llvm::errorToErrorCode(Error Err) {
@@ -115,18 +115,18 @@ std::error_code llvm::errorToErrorCode(Error Err) {
   handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
     EC = EI.convertToErrorCode();
   });
-  if (EC == inconvertibleErrorCode())
+  ако (EC == inconvertibleErrorCode())
     report_fatal_error(Twine(EC.message()));
-  return EC;
+  врати EC;
 }
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#ако LLVM_ENABLE_ABI_BREAKING_CHECKS
 void Error::fatalUncheckedError() const {
   dbgs() << "Program aborted due to an unhandled Error:\n";
-  if (getPtr()) {
+  ако (getPtr()) {
     getPtr()->log(dbgs());
     dbgs() << "\n";
-  }else
+  }инако
     dbgs() << "Error value was Success. (Note: Success values must still be "
               "checked prior to being destroyed).\n";
   abort();
@@ -143,21 +143,21 @@ StringError::StringError(std::string &&S, std::error_code EC, bool PrintMsgOnly)
     : Msg(std::move(S)), EC(EC), PrintMsgOnly(PrintMsgOnly) {}
 
 void StringError::log(raw_ostream &OS) const {
-  if (PrintMsgOnly) {
+  ако (PrintMsgOnly) {
     OS << Msg;
-  } else {
+  } инако {
     OS << EC.message();
-    if (!Msg.empty())
+    ако (!Msg.empty())
       OS << (" " + Msg);
   }
 }
 
 std::error_code StringError::convertToErrorCode() const {
-  return EC;
+  врати EC;
 }
 
 Error llvm::createStringError(std::string &&Msg, std::error_code EC) {
-  return make_error<StringError>(std::move(Msg), EC, true);
+  врати make_error<StringError>(std::move(Msg), EC, true);
 }
 
 void llvm::report_fatal_error(Error Err, bool GenCrashDiag) {
@@ -179,7 +179,7 @@ void llvm::reportFatalUsageError(Error Err) {
 }
 
 LLVMErrorTypeId LLVMGetErrorTypeId(LLVMErrorRef Err) {
-  return reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
+  врати reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
 }
 
 void LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
@@ -193,15 +193,15 @@ char *LLVMGetErrorMessage(LLVMErrorRef Err) {
   char *ErrMsg = new char[Tmp.size() + 1];
   memcpy(ErrMsg, Tmp.data(), Tmp.size());
   ErrMsg[Tmp.size()] = '\0';
-  return ErrMsg;
+  врати ErrMsg;
 }
 
 void LLVMDisposeErrorMessage(char *ErrMsg) { delete[] ErrMsg; }
 
 LLVMErrorTypeId LLVMGetStringErrorTypeId() {
-  return reinterpret_cast<void *>(&StringError::ID);
+  врати reinterpret_cast<void *>(&StringError::ID);
 }
 
 LLVMErrorRef LLVMCreateStringError(const char *ErrMsg) {
-  return wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
+  врати wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
 }

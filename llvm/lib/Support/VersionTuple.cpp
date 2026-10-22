@@ -24,116 +24,116 @@ std::string VersionTuple::getAsString() const {
     llvm::raw_string_ostream Out(Result);
     Out << *this;
   }
-  return Result;
+  врати Result;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  ако (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  ако (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  ако (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  ако (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  врати Out;
 }
 
 static bool parseInt(StringRef &input, unsigned &value) {
   assert(value == 0);
-  if (input.empty())
-    return true;
+  ако (input.empty())
+    врати true;
 
   char next = input[0];
   input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
+  ако (next < '0' || next > '9')
+    врати true;
   value = (unsigned)(next - '0');
 
-  while (!input.empty()) {
+  док (!input.empty()) {
     next = input[0];
-    if (next < '0' || next > '9')
-      return false;
+    ако (next < '0' || next > '9')
+      врати false;
     input = input.substr(1);
     value = value * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  врати false;
 }
 
 bool VersionTuple::tryParse(StringRef input) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  ако (parseInt(input, major))
+    врати true;
 
-  if (input.empty()) {
+  ако (input.empty()) {
     *this = VersionTuple(major);
-    return false;
+    врати false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
+  ако (input[0] != '.')
+    врати true;
   input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  ако (parseInt(input, minor))
+    врати true;
 
-  if (input.empty()) {
+  ако (input.empty()) {
     *this = VersionTuple(major, minor);
-    return false;
+    врати false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  ако (!input.consume_front("."))
+    врати true;
+  ако (parseInt(input, subminor))
+    врати true;
 
-  if (input.empty()) {
+  ако (input.empty()) {
     *this = VersionTuple(major, minor, subminor);
-    return false;
+    врати false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  ако (!input.consume_front("."))
+    врати true;
+  ако (parseInt(input, build))
+    врати true;
+  ако (build >= 1024 * 1024)
+    врати true;
 
-  if (input.empty()) {
+  ако (input.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
-    return false;
+    врати false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  ако (!input.consume_front("."))
+    врати true;
+  ако (parseInt(input, subbuild))
+    врати true;
+  ако (subbuild >= 1024)
+    врати true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  ако (!input.empty())
+    врати true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  врати false;
 }
 
 VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+  ако (HasSubbuild)
+    врати VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  ако (HasBuild)
+    врати VersionTuple(NewMajor, Minor, Subminor, Build);
+  ако (HasSubminor)
+    врати VersionTuple(NewMajor, Minor, Subminor);
+  ако (HasMinor)
+    врати VersionTuple(NewMajor, Minor);
+  врати VersionTuple(NewMajor);
 }

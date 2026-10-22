@@ -14,13 +14,13 @@ using namespace llvm;
 static std::optional<AlignStyle> translateLocChar(char C) {
   switch (C) {
   case '-':
-    return AlignStyle::Left;
+    врати AlignStyle::Left;
   case '=':
-    return AlignStyle::Center;
+    врати AlignStyle::Center;
   case '+':
-    return AlignStyle::Right;
+    врати AlignStyle::Right;
   default:
-    return std::nullopt;
+    врати std::nullopt;
   }
   LLVM_BUILTIN_UNREACHABLE;
 }
@@ -30,28 +30,28 @@ static bool consumeFieldLayout(StringRef &Spec, AlignStyle &Where,
   Where = AlignStyle::Right;
   Align = 0;
   Pad = ' ';
-  if (Spec.empty())
-    return true;
+  ако (Spec.empty())
+    врати true;
 
-  if (Spec.size() > 1) {
+  ако (Spec.size() > 1) {
     // A maximum of 2 characters at the beginning can be used for something
     // other than the width.
     // If Spec[1] is a loc char, then Spec[0] is a pad char and Spec[2:...]
     // contains the width.
     // Otherwise, if Spec[0] is a loc char, then Spec[1:...] contains the width.
     // Otherwise, Spec[0:...] contains the width.
-    if (auto Loc = translateLocChar(Spec[1])) {
+    ако (auto Loc = translateLocChar(Spec[1])) {
       Pad = Spec[0];
       Where = *Loc;
       Spec = Spec.drop_front(2);
-    } else if (auto Loc = translateLocChar(Spec[0])) {
+    } инако ако (auto Loc = translateLocChar(Spec[0])) {
       Where = *Loc;
       Spec = Spec.drop_front(1);
     }
   }
 
   bool Failed = Spec.consumeInteger(0, Align);
-  return !Failed;
+  врати !Failed;
 }
 
 static std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
@@ -69,52 +69,52 @@ static std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
   // If index is not specified, keep it ~0U to indicate unresolved index.
   RepString.consumeInteger(0, Index);
 
-  if (RepString.consume_front(",")) {
-    if (!consumeFieldLayout(RepString, Where, Align, Pad)) {
+  ако (RepString.consume_front(",")) {
+    ако (!consumeFieldLayout(RepString, Where, Align, Pad)) {
       assert(false && "Invalid replacement field layout specification!");
-      return std::nullopt;
+      врати std::nullopt;
     }
   }
   RepString = RepString.ltrim();
-  if (RepString.consume_front(":")) {
+  ако (RepString.consume_front(":")) {
     Options = RepString;
     RepString = StringRef();
   }
   RepString = RepString.trim();
-  if (!RepString.empty()) {
+  ако (!RepString.empty()) {
     assert(0 && "Unexpected characters found in replacement string!");
-    return std::nullopt;
+    врати std::nullopt;
   }
 
-  return ReplacementItem(Spec, Index, Align, Where, Pad, Options);
+  врати ReplacementItem(Spec, Index, Align, Where, Pad, Options);
 }
 
 static std::pair<std::optional<ReplacementItem>, StringRef>
 splitLiteralAndReplacement(StringRef Fmt) {
   assert(!Fmt.empty());
   // Everything up until the first brace is a literal.
-  if (Fmt.front() != '{') {
+  ако (Fmt.front() != '{') {
     size_t BO = Fmt.find_first_of('{');
-    return {ReplacementItem{Fmt.substr(0, BO)}, Fmt.substr(BO)};
+    врати {ReplacementItem{Fmt.substr(0, BO)}, Fmt.substr(BO)};
   }
 
-  StringRef Braces = Fmt.take_while([](char C) { return C == '{'; });
+  StringRef Braces = Fmt.take_while([](char C) { врати C == '{'; });
   // If there is more than one brace, then some of them are escaped.  Treat
   // these as replacements.
-  if (Braces.size() > 1) {
+  ако (Braces.size() > 1) {
     size_t NumEscapedBraces = Braces.size() / 2;
     StringRef Middle = Fmt.take_front(NumEscapedBraces);
     StringRef Right = Fmt.drop_front(NumEscapedBraces * 2);
-    return {ReplacementItem(Middle), Right};
+    врати {ReplacementItem(Middle), Right};
   }
   // An unterminated open brace is undefined. Assert to indicate that this is
   // undefined and that we consider it an error. When asserts are disabled,
   // build a replacement item with an error message.
   size_t BC = Fmt.find_first_of('}');
-  if (BC == StringRef::npos) {
+  ако (BC == StringRef::npos) {
     assert(false &&
            "Unterminated brace sequence. Escape with {{ for a literal brace.");
-    return {ReplacementItem("Unterminated brace sequence. Escape with {{ for a "
+    врати {ReplacementItem("Unterminated brace sequence. Escape with {{ for a "
                             "literal brace."),
             StringRef()};
   }
@@ -123,18 +123,18 @@ splitLiteralAndReplacement(StringRef Fmt) {
   // this closing brace, treat this portion as literal, and try again with the
   // next one.
   size_t BO2 = Fmt.find_first_of('{', 1);
-  if (BO2 < BC)
-    return {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
+  ако (BO2 < BC)
+    врати {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
 
   StringRef Spec = Fmt.slice(1, BC);
   StringRef Right = Fmt.substr(BC + 1);
 
-  return {parseReplacementItem(Spec), Right};
+  врати {parseReplacementItem(Spec), Right};
 }
 
 #ifndef NDEBUG
 #define ENABLE_VALIDATION 1
-#else
+#инако
 #define ENABLE_VALIDATION 0 // Conveniently enable validation in release mode.
 #endif
 
@@ -144,22 +144,22 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
   SmallVector<ReplacementItem, 2> Replacements;
   unsigned NextAutomaticIndex = 0;
 
-#if ENABLE_VALIDATION
+#ако ENABLE_VALIDATION
   const StringRef SavedFmtStr = Fmt;
   unsigned NumExpectedArgs = 0;
   bool HasExplicitIndex = false;
 #endif
 
-  while (!Fmt.empty()) {
+  док (!Fmt.empty()) {
     std::optional<ReplacementItem> I;
     std::tie(I, Fmt) = splitLiteralAndReplacement(Fmt);
-    if (!I)
+    ако (!I)
       continue;
-    if (I->Type == ReplacementType::Format) {
-      if (I->Index == ~0U)
+    ако (I->Type == ReplacementType::Format) {
+      ако (I->Index == ~0U)
         I->Index = NextAutomaticIndex++;
-#if ENABLE_VALIDATION
-      else
+#ако ENABLE_VALIDATION
+      инако
         HasExplicitIndex = true;
       NumExpectedArgs = std::max(NumExpectedArgs, I->Index + 1);
 #endif
@@ -168,9 +168,9 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
     Replacements.emplace_back(*I);
   }
 
-#if ENABLE_VALIDATION
-  if (!Validate)
-    return Replacements;
+#ако ENABLE_VALIDATION
+  ако (!Validate)
+    врати Replacements;
 
   // Perform additional validation. Verify that the number of arguments matches
   // the number of replacement indices and that there are no holes in the
@@ -180,45 +180,45 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
   // will print an error message as the outout of this formatv() (used when
   // validation is enabled in release mode).
   auto getErrorReplacements = [SavedFmtStr](StringLiteral ErrorMsg) {
-    return SmallVector<ReplacementItem, 2>{
+    врати SmallVector<ReplacementItem, 2>{
         ReplacementItem("Invalid formatv() call: "), ReplacementItem(ErrorMsg),
         ReplacementItem(" for format string: "), ReplacementItem(SavedFmtStr)};
   };
 
-  if (NumExpectedArgs != NumArgs) {
+  ако (NumExpectedArgs != NumArgs) {
     errs() << formatv("Expected {} Args, but got {} for format string '{}'\n",
                       NumExpectedArgs, NumArgs, SavedFmtStr);
     assert(0 && "Invalid formatv() call");
-    return getErrorReplacements("Unexpected number of arguments");
+    врати getErrorReplacements("Unexpected number of arguments");
   }
 
   // Find the number of unique indices seen. All replacement indices
   // are < NumExpectedArgs.
   SmallVector<bool> Indices(NumExpectedArgs);
   unsigned Count = 0;
-  for (const ReplacementItem &I : Replacements) {
-    if (I.Type != ReplacementType::Format || Indices[I.Index])
+  за (const ReplacementItem &I : Replacements) {
+    ако (I.Type != ReplacementType::Format || Indices[I.Index])
       continue;
     Indices[I.Index] = true;
     ++Count;
   }
 
-  if (Count != NumExpectedArgs) {
+  ако (Count != NumExpectedArgs) {
     errs() << formatv(
         "Replacement field indices cannot have holes for format string '{}'\n",
         SavedFmtStr);
     assert(0 && "Invalid format string");
-    return getErrorReplacements("Replacement indices have holes");
+    врати getErrorReplacements("Replacement indices have holes");
   }
 
   // Fail validation if we see both automatic index and explicit index.
-  if (NextAutomaticIndex != 0 && HasExplicitIndex) {
+  ако (NextAutomaticIndex != 0 && HasExplicitIndex) {
     errs() << formatv(
         "Cannot mix automatic and explicit indices for format string '{}'\n",
         SavedFmtStr);
     assert(0 && "Invalid format string");
-    return getErrorReplacements("Cannot mix automatic and explicit indices");
+    врати getErrorReplacements("Cannot mix automatic and explicit indices");
   }
 #endif // ENABLE_VALIDATION
-  return Replacements;
+  врати Replacements;
 }
