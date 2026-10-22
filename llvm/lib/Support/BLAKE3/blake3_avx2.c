@@ -1,45 +1,45 @@
-#include "blake3_impl.h"
+#ضمن "blake3_impl.h"
 
-#include <immintrin.h>
+#ضمن <immintrin.h>
 
 #define DEGREE 8
 
-INLINE __m256i loadu(const uint8_t src[32]) {
-  return _mm256_loadu_si256((const __m256i *)src);
+INLINE __m256i loadu(ثابت uint8_t src[32]) {
+  החזר _mm256_loadu_si256((ثابت __m256i *)src);
 }
 
-INLINE void storeu(__m256i src, uint8_t dest[16]) {
+INLINE فراغ storeu(__m256i src, uint8_t dest[16]) {
   _mm256_storeu_si256((__m256i *)dest, src);
 }
 
-INLINE __m256i addv(__m256i a, __m256i b) { return _mm256_add_epi32(a, b); }
+INLINE __m256i addv(__m256i a, __m256i b) { החזר _mm256_add_epi32(a, b); }
 
 // Note that clang-format doesn't like the name "xor" for some reason.
-INLINE __m256i xorv(__m256i a, __m256i b) { return _mm256_xor_si256(a, b); }
+INLINE __m256i xorv(__m256i a, __m256i b) { החזר _mm256_xor_si256(a, b); }
 
-INLINE __m256i set1(uint32_t x) { return _mm256_set1_epi32((int32_t)x); }
+INLINE __m256i set1(uint32_t x) { החזר _mm256_set1_epi32((int32_t)x); }
 
 INLINE __m256i rot16(__m256i x) {
-  return _mm256_shuffle_epi8(
+  החזר _mm256_shuffle_epi8(
       x, _mm256_set_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2,
                          13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2));
 }
 
 INLINE __m256i rot12(__m256i x) {
-  return _mm256_or_si256(_mm256_srli_epi32(x, 12), _mm256_slli_epi32(x, 32 - 12));
+  החזר _mm256_or_si256(_mm256_srli_epi32(x, 12), _mm256_slli_epi32(x, 32 - 12));
 }
 
 INLINE __m256i rot8(__m256i x) {
-  return _mm256_shuffle_epi8(
+  החזר _mm256_shuffle_epi8(
       x, _mm256_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1,
                          12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1));
 }
 
 INLINE __m256i rot7(__m256i x) {
-  return _mm256_or_si256(_mm256_srli_epi32(x, 7), _mm256_slli_epi32(x, 32 - 7));
+  החזר _mm256_or_si256(_mm256_srli_epi32(x, 7), _mm256_slli_epi32(x, 32 - 7));
 }
 
-INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
+INLINE فراغ round_fn(__m256i v[16], __m256i m[16], size_t r) {
   v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][0]]);
   v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][2]]);
   v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][4]]);
@@ -155,7 +155,7 @@ INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
   v[4] = rot7(v[4]);
 }
 
-INLINE void transpose_vecs(__m256i vecs[DEGREE]) {
+INLINE فراغ transpose_vecs(__m256i vecs[DEGREE]) {
   // Interleave 32-bit lanes. The low unpack is lanes 00/11/44/55, and the high
   // is 22/33/66/77.
   __m256i ab_0145 = _mm256_unpacklo_epi32(vecs[0], vecs[1]);
@@ -189,36 +189,36 @@ INLINE void transpose_vecs(__m256i vecs[DEGREE]) {
   vecs[7] = _mm256_permute2x128_si256(abcd_37, efgh_37, 0x31);
 }
 
-INLINE void transpose_msg_vecs(const uint8_t *const *inputs,
+INLINE فراغ transpose_msg_vecs(ثابت uint8_t *ثابت *inputs,
                                size_t block_offset, __m256i out[16]) {
-  out[0] = loadu(&inputs[0][block_offset + 0 * sizeof(__m256i)]);
-  out[1] = loadu(&inputs[1][block_offset + 0 * sizeof(__m256i)]);
-  out[2] = loadu(&inputs[2][block_offset + 0 * sizeof(__m256i)]);
-  out[3] = loadu(&inputs[3][block_offset + 0 * sizeof(__m256i)]);
-  out[4] = loadu(&inputs[4][block_offset + 0 * sizeof(__m256i)]);
-  out[5] = loadu(&inputs[5][block_offset + 0 * sizeof(__m256i)]);
-  out[6] = loadu(&inputs[6][block_offset + 0 * sizeof(__m256i)]);
-  out[7] = loadu(&inputs[7][block_offset + 0 * sizeof(__m256i)]);
-  out[8] = loadu(&inputs[0][block_offset + 1 * sizeof(__m256i)]);
-  out[9] = loadu(&inputs[1][block_offset + 1 * sizeof(__m256i)]);
-  out[10] = loadu(&inputs[2][block_offset + 1 * sizeof(__m256i)]);
-  out[11] = loadu(&inputs[3][block_offset + 1 * sizeof(__m256i)]);
-  out[12] = loadu(&inputs[4][block_offset + 1 * sizeof(__m256i)]);
-  out[13] = loadu(&inputs[5][block_offset + 1 * sizeof(__m256i)]);
-  out[14] = loadu(&inputs[6][block_offset + 1 * sizeof(__m256i)]);
-  out[15] = loadu(&inputs[7][block_offset + 1 * sizeof(__m256i)]);
-  for (size_t i = 0; i < 8; ++i) {
-    _mm_prefetch((const void *)&inputs[i][block_offset + 256], _MM_HINT_T0);
+  out[0] = loadu(&inputs[0][block_offset + 0 * حجم(__m256i)]);
+  out[1] = loadu(&inputs[1][block_offset + 0 * حجم(__m256i)]);
+  out[2] = loadu(&inputs[2][block_offset + 0 * حجم(__m256i)]);
+  out[3] = loadu(&inputs[3][block_offset + 0 * حجم(__m256i)]);
+  out[4] = loadu(&inputs[4][block_offset + 0 * حجم(__m256i)]);
+  out[5] = loadu(&inputs[5][block_offset + 0 * حجم(__m256i)]);
+  out[6] = loadu(&inputs[6][block_offset + 0 * حجم(__m256i)]);
+  out[7] = loadu(&inputs[7][block_offset + 0 * حجم(__m256i)]);
+  out[8] = loadu(&inputs[0][block_offset + 1 * حجم(__m256i)]);
+  out[9] = loadu(&inputs[1][block_offset + 1 * حجم(__m256i)]);
+  out[10] = loadu(&inputs[2][block_offset + 1 * حجم(__m256i)]);
+  out[11] = loadu(&inputs[3][block_offset + 1 * حجم(__m256i)]);
+  out[12] = loadu(&inputs[4][block_offset + 1 * حجم(__m256i)]);
+  out[13] = loadu(&inputs[5][block_offset + 1 * حجم(__m256i)]);
+  out[14] = loadu(&inputs[6][block_offset + 1 * حجم(__m256i)]);
+  out[15] = loadu(&inputs[7][block_offset + 1 * حجم(__m256i)]);
+  עבור (size_t i = 0; i < 8; ++i) {
+    _mm_prefetch((ثابت فراغ *)&inputs[i][block_offset + 256], _MM_HINT_T0);
   }
   transpose_vecs(&out[0]);
   transpose_vecs(&out[8]);
 }
 
-INLINE void load_counters(uint64_t counter, bool increment_counter,
+INLINE فراغ load_counters(uint64_t counter, bool increment_counter,
                           __m256i *out_lo, __m256i *out_hi) {
-  const __m256i mask = _mm256_set1_epi32(-(int32_t)increment_counter);
-  const __m256i add0 = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
-  const __m256i add1 = _mm256_and_si256(mask, add0);
+  ثابت __m256i mask = _mm256_set1_epi32(-(int32_t)increment_counter);
+  ثابت __m256i add0 = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
+  ثابت __m256i add1 = _mm256_and_si256(mask, add0);
   __m256i l = _mm256_add_epi32(_mm256_set1_epi32((int32_t)counter), add1);
   __m256i carry = _mm256_cmpgt_epi32(_mm256_xor_si256(add1, _mm256_set1_epi32(0x80000000)), 
                                      _mm256_xor_si256(   l, _mm256_set1_epi32(0x80000000)));
@@ -227,9 +227,9 @@ INLINE void load_counters(uint64_t counter, bool increment_counter,
   *out_hi = h;
 }
 
-static
-void blake3_hash8_avx2(const uint8_t *const *inputs, size_t blocks,
-                       const uint32_t key[8], uint64_t counter,
+ساكن
+فراغ blake3_hash8_avx2(ثابت uint8_t *ثابت *inputs, size_t blocks,
+                       ثابت uint32_t key[8], uint64_t counter,
                        bool increment_counter, uint8_t flags,
                        uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
   __m256i h_vecs[8] = {
@@ -241,8 +241,8 @@ void blake3_hash8_avx2(const uint8_t *const *inputs, size_t blocks,
                 &counter_high_vec);
   uint8_t block_flags = flags | flags_start;
 
-  for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+  עבור (size_t block = 0; block < blocks; block++) {
+    אם (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     __m256i block_len_vec = set1(BLAKE3_BLOCK_LEN);
@@ -276,49 +276,49 @@ void blake3_hash8_avx2(const uint8_t *const *inputs, size_t blocks,
   }
 
   transpose_vecs(h_vecs);
-  storeu(h_vecs[0], &out[0 * sizeof(__m256i)]);
-  storeu(h_vecs[1], &out[1 * sizeof(__m256i)]);
-  storeu(h_vecs[2], &out[2 * sizeof(__m256i)]);
-  storeu(h_vecs[3], &out[3 * sizeof(__m256i)]);
-  storeu(h_vecs[4], &out[4 * sizeof(__m256i)]);
-  storeu(h_vecs[5], &out[5 * sizeof(__m256i)]);
-  storeu(h_vecs[6], &out[6 * sizeof(__m256i)]);
-  storeu(h_vecs[7], &out[7 * sizeof(__m256i)]);
+  storeu(h_vecs[0], &out[0 * حجم(__m256i)]);
+  storeu(h_vecs[1], &out[1 * حجم(__m256i)]);
+  storeu(h_vecs[2], &out[2 * حجم(__m256i)]);
+  storeu(h_vecs[3], &out[3 * حجم(__m256i)]);
+  storeu(h_vecs[4], &out[4 * حجم(__m256i)]);
+  storeu(h_vecs[5], &out[5 * حجم(__m256i)]);
+  storeu(h_vecs[6], &out[6 * حجم(__m256i)]);
+  storeu(h_vecs[7], &out[7 * حجم(__m256i)]);
 }
 
-#if !defined(BLAKE3_NO_SSE41)
-void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t num_inputs,
-                            size_t blocks, const uint32_t key[8],
+#אם !defined(BLAKE3_NO_SSE41)
+فراغ blake3_hash_many_sse41(ثابت uint8_t *ثابت *inputs, size_t num_inputs,
+                            size_t blocks, ثابت uint32_t key[8],
                             uint64_t counter, bool increment_counter,
                             uint8_t flags, uint8_t flags_start,
                             uint8_t flags_end, uint8_t *out);
-#else
-void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
-                               size_t blocks, const uint32_t key[8],
+#אחרת
+فراغ blake3_hash_many_portable(ثابت uint8_t *ثابت *inputs, size_t num_inputs,
+                               size_t blocks, ثابت uint32_t key[8],
                                uint64_t counter, bool increment_counter,
                                uint8_t flags, uint8_t flags_start,
                                uint8_t flags_end, uint8_t *out);
 #endif
 
-void blake3_hash_many_avx2(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+فراغ blake3_hash_many_avx2(ثابت uint8_t *ثابت *inputs, size_t num_inputs,
+                           size_t blocks, ثابت uint32_t key[8],
                            uint64_t counter, bool increment_counter,
                            uint8_t flags, uint8_t flags_start,
                            uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= DEGREE) {
+  כלעוד (num_inputs >= DEGREE) {
     blake3_hash8_avx2(inputs, blocks, key, counter, increment_counter, flags,
                       flags_start, flags_end, out);
-    if (increment_counter) {
+    אם (increment_counter) {
       counter += DEGREE;
     }
     inputs += DEGREE;
     num_inputs -= DEGREE;
     out = &out[DEGREE * BLAKE3_OUT_LEN];
   }
-#if !defined(BLAKE3_NO_SSE41)
+#אם !defined(BLAKE3_NO_SSE41)
   blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
                          increment_counter, flags, flags_start, flags_end, out);
-#else
+#אחרת
   blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
                             increment_counter, flags, flags_start, flags_end,
                             out);

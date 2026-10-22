@@ -10,33 +10,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CachePruning.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/WithColor.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/CachePruning.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/WithColor.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
 #define DEBUG_TYPE "cache-pruning"
 
-#include <set>
-#include <system_error>
+#ضمن <set>
+#ضمن <system_error>
 
-using namespace llvm;
+using نطاق llvm;
 
-namespace {
-struct FileInfo {
+نطاق {
+بنية FileInfo {
   sys::TimePoint<> Time;
   uint64_t Size;
   std::string Path;
 
   /// Used to determine which files to prune first. Also used to determine
   /// set membership, so must take into account all fields.
-  bool operator<(const FileInfo &Other) const {
-    return std::tie(Time, Other.Size, Path) <
+  منطقي operator<(ثابت FileInfo &Other) ثابت {
+    החזר std::tie(Time, Other.Size, Path) <
            std::tie(Other.Time, Size, Other.Path);
   }
 };
@@ -44,31 +44,31 @@ struct FileInfo {
 
 /// Write a new timestamp file with the given path. This is used for the pruning
 /// interval option.
-static void writeTimestampFile(StringRef TimestampFile) {
+ساكن فراغ writeTimestampFile(StringRef TimestampFile) {
   std::error_code EC;
   raw_fd_ostream Out(TimestampFile.str(), EC, sys::fs::OF_None);
 }
 
-static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
-  if (Duration.empty())
-    return make_error<StringError>("Duration must not be empty",
+ساكن Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
+  אם (Duration.empty())
+    החזר make_error<StringError>("Duration must not be empty",
                                    inconvertibleErrorCode());
 
   StringRef NumStr = Duration.slice(0, Duration.size()-1);
   uint64_t Num;
-  if (NumStr.getAsInteger(0, Num))
-    return make_error<StringError>("'" + NumStr + "' not an integer",
+  אם (NumStr.getAsInteger(0, Num))
+    החזר make_error<StringError>("'" + NumStr + "' not an integer",
                                    inconvertibleErrorCode());
 
-  switch (Duration.back()) {
-  case 's':
-    return std::chrono::seconds(Num);
-  case 'm':
-    return std::chrono::minutes(Num);
-  case 'h':
-    return std::chrono::hours(Num);
-  default:
-    return make_error<StringError>("'" + Duration +
+  بدل (Duration.back()) {
+  حالة 's':
+    החזר std::chrono::seconds(Num);
+  حالة 'm':
+    החזר std::chrono::minutes(Num);
+  حالة 'h':
+    החזר std::chrono::hours(Num);
+  افتراضي:
+    החזר make_error<StringError>("'" + Duration +
                                        "' must end with one of 's', 'm' or 'h'",
                                    inconvertibleErrorCode());
   }
@@ -78,122 +78,122 @@ Expected<CachePruningPolicy>
 llvm::parseCachePruningPolicy(StringRef PolicyStr) {
   CachePruningPolicy Policy;
   std::pair<StringRef, StringRef> P = {"", PolicyStr};
-  while (!P.second.empty()) {
+  כלעוד (!P.second.empty()) {
     P = P.second.split(':');
 
     StringRef Key, Value;
     std::tie(Key, Value) = P.first.split('=');
-    if (Key == "prune_interval") {
+    אם (Key == "prune_interval") {
       auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+      אם (!DurationOrErr)
+        החזר DurationOrErr.takeError();
       Policy.Interval = *DurationOrErr;
-    } else if (Key == "prune_after") {
+    } אחרת אם (Key == "prune_after") {
       auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+      אם (!DurationOrErr)
+        החזר DurationOrErr.takeError();
       Policy.Expiration = *DurationOrErr;
-    } else if (Key == "cache_size") {
-      if (Value.back() != '%')
-        return make_error<StringError>("'" + Value + "' must be a percentage",
+    } אחרת אם (Key == "cache_size") {
+      אם (Value.back() != '%')
+        החזר make_error<StringError>("'" + Value + "' must be a percentage",
                                        inconvertibleErrorCode());
       StringRef SizeStr = Value.drop_back();
       uint64_t Size;
-      if (SizeStr.getAsInteger(0, Size))
-        return make_error<StringError>("'" + SizeStr + "' not an integer",
+      אם (SizeStr.getAsInteger(0, Size))
+        החזר make_error<StringError>("'" + SizeStr + "' not an integer",
                                        inconvertibleErrorCode());
-      if (Size > 100)
-        return make_error<StringError>("'" + SizeStr +
+      אם (Size > 100)
+        החזר make_error<StringError>("'" + SizeStr +
                                            "' must be between 0 and 100",
                                        inconvertibleErrorCode());
       Policy.MaxSizePercentageOfAvailableSpace = Size;
-    } else if (Key == "cache_size_bytes") {
+    } אחרת אם (Key == "cache_size_bytes") {
       uint64_t Mult = 1;
-      switch (tolower(Value.back())) {
-      case 'k':
+      بدل (tolower(Value.back())) {
+      حالة 'k':
         Mult = 1024;
         Value = Value.drop_back();
-        break;
-      case 'm':
+        اكسر;
+      حالة 'm':
         Mult = 1024 * 1024;
         Value = Value.drop_back();
-        break;
-      case 'g':
+        اكسر;
+      حالة 'g':
         Mult = 1024 * 1024 * 1024;
         Value = Value.drop_back();
-        break;
+        اكسر;
       }
       uint64_t Size;
-      if (Value.getAsInteger(0, Size))
-        return make_error<StringError>("'" + Value + "' not an integer",
+      אם (Value.getAsInteger(0, Size))
+        החזר make_error<StringError>("'" + Value + "' not an integer",
                                        inconvertibleErrorCode());
       Policy.MaxSizeBytes = Size * Mult;
-    } else if (Key == "cache_size_files") {
-      if (Value.getAsInteger(0, Policy.MaxSizeFiles))
-        return make_error<StringError>("'" + Value + "' not an integer",
+    } אחרת אם (Key == "cache_size_files") {
+      אם (Value.getAsInteger(0, Policy.MaxSizeFiles))
+        החזר make_error<StringError>("'" + Value + "' not an integer",
                                        inconvertibleErrorCode());
-    } else {
-      return make_error<StringError>("Unknown key: '" + Key + "'",
+    } אחרת {
+      החזר make_error<StringError>("Unknown key: '" + Key + "'",
                                      inconvertibleErrorCode());
     }
   }
 
-  return Policy;
+  החזר Policy;
 }
 
 /// Prune the cache of files that haven't been accessed in a long time.
-Expected<bool>
+Expected<منطقي>
 llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
-                 const std::vector<std::unique_ptr<MemoryBuffer>> &Files) {
-  using namespace std::chrono;
+                 ثابت std::vector<std::unique_ptr<MemoryBuffer>> &Files) {
+  using نطاق std::chrono;
 
-  if (Path.empty())
-    return false;
+  אם (Path.empty())
+    החזר שקר;
 
-  bool isPathDir;
-  if (sys::fs::is_directory(Path, isPathDir))
-    return false;
+  منطقي isPathDir;
+  אם (sys::fs::is_directory(Path, isPathDir))
+    החזר שקר;
 
-  if (!isPathDir)
-    return false;
+  אם (!isPathDir)
+    החזר שקר;
 
   Policy.MaxSizePercentageOfAvailableSpace =
       std::min(Policy.MaxSizePercentageOfAvailableSpace, 100u);
 
-  if (Policy.Expiration == seconds(0) &&
+  אם (Policy.Expiration == seconds(0) &&
       Policy.MaxSizePercentageOfAvailableSpace == 0 &&
       Policy.MaxSizeBytes == 0 && Policy.MaxSizeFiles == 0) {
     LLVM_DEBUG(dbgs() << "No pruning settings set, exit early\n");
     // Nothing will be pruned, early exit
-    return false;
+    החזר שקר;
   }
 
   // Try to stat() the timestamp file.
   SmallString<128> TimestampFile(Path);
   sys::path::append(TimestampFile, "llvmcache.timestamp");
   sys::fs::file_status FileStatus;
-  const auto CurrentTime = system_clock::now();
-  if (auto EC = sys::fs::status(TimestampFile, FileStatus)) {
-    if (EC == errc::no_such_file_or_directory) {
+  ثابت auto CurrentTime = system_clock::now();
+  אם (auto EC = sys::fs::status(TimestampFile, FileStatus)) {
+    אם (EC == errc::no_such_file_or_directory) {
       // If the timestamp file wasn't there, create one now.
       writeTimestampFile(TimestampFile);
-    } else {
+    } אחרת {
       // Unknown error?
-      return false;
+      החזר שקר;
     }
-  } else {
-    if (!Policy.Interval)
-      return false;
-    if (Policy.Interval != seconds(0)) {
+  } אחרת {
+    אם (!Policy.Interval)
+      החזר שקר;
+    אם (Policy.Interval != seconds(0)) {
       // Check whether the time stamp is older than our pruning interval.
       // If not, do nothing.
-      const auto TimeStampModTime = FileStatus.getLastModificationTime();
+      ثابت auto TimeStampModTime = FileStatus.getLastModificationTime();
       auto TimeStampAge = CurrentTime - TimeStampModTime;
-      if (TimeStampAge <= *Policy.Interval) {
+      אם (TimeStampAge <= *Policy.Interval) {
         LLVM_DEBUG(dbgs() << "Timestamp file too recent ("
                           << duration_cast<seconds>(TimeStampAge).count()
                           << "s old), do not prune.\n");
-        return false;
+        החזר שקר;
       }
     }
     // Write a new timestamp file so that nobody else attempts to prune.
@@ -212,33 +212,33 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   SmallString<128> CachePathNative;
   sys::path::native(Path, CachePathNative);
   // Walk all of the files within this directory.
-  for (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
+  עבור (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
        File != FileEnd && !EC; File.increment(EC)) {
     // Ignore filenames not beginning with "llvmcache-" or "Thin-". This
     // includes the timestamp file as well as any files created by the user.
     // This acts as a safeguard against data loss if the user specifies the
     // wrong directory as their cache directory.
     StringRef filename = sys::path::filename(File->path());
-    if (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
-      continue;
+    אם (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
+      استمر;
 
     // Look at this file. If we can't stat it, there's nothing interesting
     // there.
     ErrorOr<sys::fs::basic_file_status> StatusOrErr = File->status();
-    if (!StatusOrErr) {
+    אם (!StatusOrErr) {
       LLVM_DEBUG(dbgs() << "Ignore " << File->path() << " (can't stat)\n");
-      continue;
+      استمر;
     }
 
     // If the file hasn't been used recently enough, delete it
-    const auto FileAccessTime = StatusOrErr->getLastAccessedTime();
+    ثابت auto FileAccessTime = StatusOrErr->getLastAccessedTime();
     auto FileAge = CurrentTime - FileAccessTime;
-    if (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
+    אם (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
       LLVM_DEBUG(dbgs() << "Remove " << File->path() << " ("
                         << duration_cast<seconds>(FileAge).count()
                         << "s old)\n");
       sys::fs::remove(File->path());
-      continue;
+      استمر;
     }
 
     // Leave it here for now, but add it to the list of size-based pruning.
@@ -264,8 +264,8 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   // files.size() is greater the number of inputs  by one. However, a timestamp
   // file is created and stored in the cache directory if --thinlto-cache-policy
   // option is used. Therefore, files.size() is used as ActualNums.
-  const size_t ActualNums = Files.size();
-  if (Policy.MaxSizeFiles && ActualNums > Policy.MaxSizeFiles)
+  ثابت size_t ActualNums = Files.size();
+  אם (Policy.MaxSizeFiles && ActualNums > Policy.MaxSizeFiles)
     WithColor::warning()
         << "ThinLTO cache pruning happens since the number of created files ("
         << ActualNums << ") exceeds the maximum number of files ("
@@ -273,25 +273,25 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
         << "); consider adjusting --thinlto-cache-policy\n";
 
   // Prune for number of files.
-  if (Policy.MaxSizeFiles)
-    while (NumFiles > Policy.MaxSizeFiles)
+  אם (Policy.MaxSizeFiles)
+    כלעוד (NumFiles > Policy.MaxSizeFiles)
       RemoveCacheFile();
 
   // Prune for size now if needed
-  if (Policy.MaxSizePercentageOfAvailableSpace > 0 || Policy.MaxSizeBytes > 0) {
+  אם (Policy.MaxSizePercentageOfAvailableSpace > 0 || Policy.MaxSizeBytes > 0) {
     auto SpaceInfoOrErr = sys::fs::disk_space(Path);
-    if (!SpaceInfoOrErr) {
+    אם (!SpaceInfoOrErr) {
       auto EC = SpaceInfoOrErr.getError();
-      return createStringError(EC,
+      החזר createStringError(EC,
                                "cannot get available disk space for '%s': '%s'",
                                Path.str().c_str(), EC.message().c_str());
     }
     sys::fs::space_info SpaceInfo = SpaceInfoOrErr.get();
-    auto AvailableSpace = TotalSize + SpaceInfo.free;
+    auto AvailableSpace = TotalSize + SpaceInfo.حرر;
 
-    if (Policy.MaxSizePercentageOfAvailableSpace == 0)
+    אם (Policy.MaxSizePercentageOfAvailableSpace == 0)
       Policy.MaxSizePercentageOfAvailableSpace = 100;
-    if (Policy.MaxSizeBytes == 0)
+    אם (Policy.MaxSizeBytes == 0)
       Policy.MaxSizeBytes = AvailableSpace;
     auto TotalSizeTarget = std::min<uint64_t>(
         AvailableSpace * Policy.MaxSizePercentageOfAvailableSpace / 100ull,
@@ -303,11 +303,11 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
                       << Policy.MaxSizeBytes << " bytes\n");
 
     size_t ActualSizes = 0;
-    for (const auto &File : Files)
-      if (File)
+    עבור (ثابت auto &File : Files)
+      אם (File)
         ActualSizes += File->getBufferSize();
 
-    if (ActualSizes > TotalSizeTarget)
+    אם (ActualSizes > TotalSizeTarget)
       WithColor::warning()
           << "ThinLTO cache pruning happens since the total size of the cache "
              "files consumed by the current link job ("
@@ -316,8 +316,8 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
           << " bytes); consider adjusting --thinlto-cache-policy\n";
 
     // Remove the oldest accessed files first, till we get below the threshold.
-    while (TotalSize > TotalSizeTarget && FileInfo != FileInfos.end())
+    כלעוד (TotalSize > TotalSizeTarget && FileInfo != FileInfos.end())
       RemoveCacheFile();
   }
-  return true;
+  החזר אמת;
 }

@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMBuildAttributes.h"
+#ضمن "llvm/Support/ARMBuildAttributes.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-static const TagNameItem tagData[] = {
+ساكن ثابت TagNameItem tagData[] = {
     {ARMBuildAttrs::File, "Tag_File"},
     {ARMBuildAttrs::Section, "Tag_Section"},
     {ARMBuildAttrs::Symbol, "Tag_Symbol"},
@@ -68,6 +68,6 @@ static const TagNameItem tagData[] = {
 };
 
 constexpr TagNameMap ARMAttributeTags{tagData};
-const TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
-  return ARMAttributeTags;
+ثابت TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
+  החזר ARMAttributeTags;
 }

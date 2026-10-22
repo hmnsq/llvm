@@ -12,38 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RandomNumberGenerator.h"
+#ضمن "llvm/Support/RandomNumberGenerator.h"
 
-#include "DebugOptions.h"
+#ضمن "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/CommandLine.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/raw_ostream.h"
 #ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
-#else
-#include "Unix/Unix.h"
+#ضمن "llvm/Support/Windows/WindowsSupport.h"
+#אחרת
+#ضمن "Unix/Unix.h"
 #endif
 
-using namespace llvm;
+using نطاق llvm;
 
 #define DEBUG_TYPE "rng"
-namespace {
-struct CreateSeed {
-  static void *call() {
-    return new cl::opt<uint64_t>(
+نطاق {
+بنية CreateSeed {
+  ساكن فراغ *call() {
+    החזר جديد cl::opt<uint64_t>(
         "rng-seed", cl::value_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
-void llvm::initRandomSeedOptions() { *Seed; }
+ساكن ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
+فراغ llvm::initRandomSeedOptions() { *Seed; }
 
 RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
-  LLVM_DEBUG(if (*Seed == 0) dbgs()
+  LLVM_DEBUG(אם (*Seed == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
   // Combine seed and salts using std::seed_seq.
@@ -63,34 +63,34 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
 }
 
 RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
-  return Generator();
+  החזר Generator();
 }
 
 // Get random vector of specified size
-std::error_code llvm::getRandomBytes(void *Buffer, size_t Size) {
+std::error_code llvm::getRandomBytes(فراغ *Buffer, size_t Size) {
 #ifdef _WIN32
   HCRYPTPROV hProvider;
-  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
+  אם (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     ScopedCryptContext ScopedHandle(hProvider);
-    if (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
-      return std::error_code();
+    אם (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
+      החזר std::error_code();
   }
-  return std::error_code(GetLastError(), std::system_category());
-#else
-  int Fd = open("/dev/urandom", O_RDONLY);
-  if (Fd != -1) {
+  החזר std::error_code(GetLastError(), std::system_category());
+#אחרת
+  صحيح Fd = open("/dev/urandom", O_RDONLY);
+  אם (Fd != -1) {
     std::error_code Ret;
-    ssize_t BytesRead = read(Fd, Buffer, Size);
-    if (BytesRead == -1)
+    ssize_t BytesRead = اقرأ(Fd, Buffer, Size);
+    אם (BytesRead == -1)
       Ret = errnoAsErrorCode();
-    else if (BytesRead != static_cast<ssize_t>(Size))
+    אחרת אם (BytesRead != static_cast<ssize_t>(Size))
       Ret = std::error_code(EIO, std::system_category());
-    if (close(Fd) == -1)
+    אם (close(Fd) == -1)
       Ret = errnoAsErrorCode();
 
-    return Ret;
+    החזר Ret;
   }
-  return errnoAsErrorCode();
+  החזר errnoAsErrorCode();
 #endif
 }
