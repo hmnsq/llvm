@@ -12,56 +12,56 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TextEncoding.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/ConvertEBCDIC.h"
-#include <system_error>
+#अन्तर्भाव "llvm/Support/TextEncoding.h"
+#अन्तर्भाव "llvm/ADT/SmallString.h"
+#अन्तर्भाव "llvm/ADT/SmallVector.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Config/config.h"
+#अन्तर्भाव "llvm/Support/ConvertEBCDIC.h"
+#अन्तर्भाव <system_error>
 
-#if HAVE_ICU
-#if HAVE_WINDOWS_ICU
-#include <icu.h>
-#else
-#include <unicode/ucnv.h>
+#यदि HAVE_ICU
+#यदि HAVE_WINDOWS_ICU
+#अन्तर्भाव <icu.h>
+#अन्यथा
+#अन्तर्भाव <unicode/ucnv.h>
 #endif
-#elif HAVE_ICONV
-#include <iconv.h>
+#नोचेद्यदि HAVE_ICONV
+#अन्तर्भाव <iconv.h>
 #endif
 
-using namespace llvm;
+using नामाकाश llvm;
 
 // Normalize the charset name with the charset alias matching algorithm proposed
 // in https://www.unicode.org/reports/tr22/tr22-8.html#Charset_Alias_Matching.
-static void normalizeCharSetName(StringRef CSName,
-                                 SmallVectorImpl<char> &Normalized) {
-  bool PrevDigit = false;
-  for (auto Ch : CSName) {
-    if (isAlnum(Ch)) {
+स्थिर शून्य normalizeCharSetName(StringRef CSName,
+                                 SmallVectorImpl<वर्ण> &Normalized) {
+  तार्किक PrevDigit = असत्य;
+  प्रति (auto Ch : CSName) {
+    यदि (isAlnum(Ch)) {
       Ch = toLower(Ch);
-      if (Ch != '0' || PrevDigit) {
+      यदि (Ch != '0' || PrevDigit) {
         PrevDigit = isDigit(Ch);
-        Normalized.push_back(Ch);
+        Normalized.धकेलो_back(Ch);
       }
     }
   }
 }
 
 // Maps the encoding name to enum constant if possible.
-static std::optional<TextEncoding> getKnownEncoding(StringRef Name) {
+स्थिर std::optional<TextEncoding> getKnownEncoding(StringRef Name) {
   SmallString<16> Normalized;
   normalizeCharSetName(Name, Normalized);
-  if (Normalized.equals("utf8"))
-    return TextEncoding::UTF8;
-  if (Normalized.equals("ibm1047"))
-    return TextEncoding::IBM1047;
-  return std::nullopt;
+  यदि (Normalized.equals("utf8"))
+    प्रत्यागम TextEncoding::UTF8;
+  यदि (Normalized.equals("ibm1047"))
+    प्रत्यागम TextEncoding::IBM1047;
+  प्रत्यागम std::nullopt;
 }
 
-[[maybe_unused]] static void HandleOverflow(size_t &Capacity, char *&Output,
+[[maybe_unused]] स्थिर शून्य HandleOverflow(size_t &Capacity, वर्ण *&Output,
                                             size_t &OutputLength,
-                                            SmallVectorImpl<char> &Result) {
+                                            SmallVectorImpl<वर्ण> &Result) {
   // No space left in output buffer. Double the size of the underlying
   // memory in the SmallVectorImpl, adjust pointer and length and continue
   // the conversion.
@@ -69,12 +69,12 @@ static std::optional<TextEncoding> getKnownEncoding(StringRef Name) {
       (Capacity < Result.max_size() / 2) ? 2 * Capacity : Result.max_size();
   Result.resize(0);
   Result.resize_for_overwrite(Capacity);
-  Output = static_cast<char *>(Result.data());
+  Output = static_cast<वर्ण *>(Result.data());
   OutputLength = Capacity;
 }
 
-namespace {
-enum ConversionType {
+नामाकाश {
+गणना ConversionType {
   UTF8ToIBM1047,
   IBM1047ToUTF8,
 };
@@ -84,57 +84,57 @@ enum ConversionType {
 // aforementioned encodings. The use of tables for conversion is only
 // possible because EBCDIC 1047 is a single-byte, stateless encoding; other
 // encodings are not supported.
-class TextEncodingConverterTable final
-    : public details::TextEncodingConverterImplBase {
-  const ConversionType ConvType;
+वर्ग TextEncodingConverterTable final
+    : सार्वजनिक details::TextEncodingConverterImplBase {
+  ध्रुव ConversionType ConvType;
 
-public:
+सार्वजनिक:
   TextEncodingConverterTable(ConversionType ConvType) : ConvType(ConvType) {}
 
   std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+                                SmallVectorImpl<वर्ण> &Result) override;
 
-  void reset() override {}
+  शून्य reset() override {}
 };
 
 std::error_code
 TextEncodingConverterTable::convertString(StringRef Source,
-                                          SmallVectorImpl<char> &Result) {
-  switch (ConvType) {
-  case IBM1047ToUTF8:
+                                          SmallVectorImpl<वर्ण> &Result) {
+  विकल्प (ConvType) {
+  पक्ष IBM1047ToUTF8:
     ConverterEBCDIC::convertToUTF8(Source, Result);
-    return std::error_code();
-  case UTF8ToIBM1047:
-    return ConverterEBCDIC::convertToEBCDIC(Source, Result);
+    प्रत्यागम std::error_code();
+  पक्ष UTF8ToIBM1047:
+    प्रत्यागम ConverterEBCDIC::convertToEBCDIC(Source, Result);
   }
   llvm_unreachable("Invalid ConvType!");
-  return std::error_code();
+  प्रत्यागम std::error_code();
 }
 
-#if HAVE_ICU
-struct UConverterDeleter {
-  void operator()(UConverter *Converter) const {
-    if (Converter)
+#यदि HAVE_ICU
+संरचना UConverterDeleter {
+  शून्य operator()(UConverter *Converter) ध्रुव {
+    यदि (Converter)
       ucnv_close(Converter);
   }
 };
 using UConverterUniquePtr = std::unique_ptr<UConverter, UConverterDeleter>;
 
-class TextEncodingConverterICU final
-    : public details::TextEncodingConverterImplBase {
+वर्ग TextEncodingConverterICU final
+    : सार्वजनिक details::TextEncodingConverterImplBase {
   UConverterUniquePtr FromConvDesc;
   UConverterUniquePtr ToConvDesc;
 
-public:
+सार्वजनिक:
   TextEncodingConverterICU(UConverterUniquePtr FromConverter,
                            UConverterUniquePtr ToConverter)
       : FromConvDesc(std::move(FromConverter)),
         ToConvDesc(std::move(ToConverter)) {}
 
   std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+                                SmallVectorImpl<वर्ण> &Result) override;
 
-  void reset() override;
+  शून्य reset() override;
 };
 
 // TODO: The current implementation discards the partial result and restarts the
@@ -144,71 +144,71 @@ public:
 // TODO: Improve translation of ICU errors to error_code
 std::error_code
 TextEncodingConverterICU::convertString(StringRef Source,
-                                        SmallVectorImpl<char> &Result) {
+                                        SmallVectorImpl<वर्ण> &Result) {
   // Setup the input in case it has no backing data.
-  size_t InputLength = Source.size();
-  const char *In = InputLength ? const_cast<char *>(Source.data()) : "";
+  size_t निवेश_Length = Source.size();
+  ध्रुव वर्ण *In = निवेश_Length ? const_cast<वर्ण *>(Source.data()) : "";
 
   // Setup the output. We directly write into the SmallVector.
   size_t Capacity = Result.capacity();
   size_t OutputLength = Capacity;
   Result.resize_for_overwrite(Capacity);
-  char *Output;
+  वर्ण *Output;
   UErrorCode EC = U_ZERO_ERROR;
 
-  ucnv_setToUCallBack(&*FromConvDesc, UCNV_TO_U_CALLBACK_STOP, NULL, NULL, NULL,
+  ucnv_setToUCallBack(&*FromConvDesc, UCNV_TO_U_CALLBACK_STOP, रिक्त, रिक्त, रिक्त,
                       &EC);
-  ucnv_setFromUCallBack(&*ToConvDesc, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL,
-                        NULL, &EC);
-  assert(U_SUCCESS(EC));
+  ucnv_setFromUCallBack(&*ToConvDesc, UCNV_FROM_U_CALLBACK_STOP, रिक्त, रिक्त,
+                        रिक्त, &EC);
+  प्रतिज्ञा(U_SUCCESS(EC));
 
-  do {
+  कुरु {
     EC = U_ZERO_ERROR;
-    const char *Input = In;
+    ध्रुव वर्ण *निवेश = In;
 
-    Output = static_cast<char *>(Result.data());
-    ucnv_convertEx(&*ToConvDesc, &*FromConvDesc, &Output, Result.end(), &Input,
-                   In + InputLength, /*pivotStart=*/NULL,
-                   /*pivotSource=*/NULL, /*pivotTarget=*/NULL,
-                   /*pivotLimit=*/NULL, /*reset=*/true,
-                   /*flush=*/true, &EC);
-    if (U_FAILURE(EC)) {
-      if (EC == U_BUFFER_OVERFLOW_ERROR) {
-        if (Capacity < Result.max_size()) {
+    Output = static_cast<वर्ण *>(Result.data());
+    ucnv_convertEx(&*ToConvDesc, &*FromConvDesc, &Output, Result.end(), &निवेश,
+                   In + निवेश_Length, /*pivotStart=*/रिक्त,
+                   /*pivotSource=*/रिक्त, /*pivotTarget=*/रिक्त,
+                   /*pivotLimit=*/रिक्त, /*reset=*/सत्य,
+                   /*flush=*/सत्य, &EC);
+    यदि (U_FAILURE(EC)) {
+      यदि (EC == U_BUFFER_OVERFLOW_ERROR) {
+        यदि (Capacity < Result.max_size()) {
           HandleOverflow(Capacity, Output, OutputLength, Result);
-          continue;
-        } else {
+          अनुवर्त;
+        } अन्यथा {
           Result.resize(Output - Result.data());
-          return std::error_code(E2BIG, std::generic_category());
+          प्रत्यागम std::error_code(E2BIG, std::generic_category());
         }
       }
       // Some other error occurred.
       Result.resize(Output - Result.data());
-      return std::error_code(EILSEQ, std::generic_category());
+      प्रत्यागम std::error_code(EILSEQ, std::generic_category());
     }
-    break;
-  } while (true);
+    भङ्ग;
+  } यावत् (सत्य);
 
   Result.resize(Output - Result.data());
-  return std::error_code();
+  प्रत्यागम std::error_code();
 }
 
-void TextEncodingConverterICU::reset() {
+शून्य TextEncodingConverterICU::reset() {
   ucnv_reset(&*FromConvDesc);
   ucnv_reset(&*ToConvDesc);
 }
 
-#elif HAVE_ICONV
-class TextEncodingConverterIconv final
-    : public details::TextEncodingConverterImplBase {
-  class UniqueIconvT {
+#नोचेद्यदि HAVE_ICONV
+वर्ग TextEncodingConverterIconv final
+    : सार्वजनिक details::TextEncodingConverterImplBase {
+  वर्ग UniqueIconvT {
     iconv_t ConvDesc;
 
-  public:
-    operator iconv_t() const { return ConvDesc; }
+  सार्वजनिक:
+    operator iconv_t() ध्रुव { प्रत्यागम ConvDesc; }
     UniqueIconvT(iconv_t CD) : ConvDesc(CD) {}
     ~UniqueIconvT() {
-      if (ConvDesc != (iconv_t)-1) {
+      यदि (ConvDesc != (iconv_t)-1) {
         iconv_close(ConvDesc);
         ConvDesc = (iconv_t)-1;
       }
@@ -217,23 +217,23 @@ class TextEncodingConverterIconv final
       Other.ConvDesc = (iconv_t)-1;
     }
     UniqueIconvT &operator=(UniqueIconvT &&Other) {
-      if (&Other != this) {
+      यदि (&Other != एतत्) {
         ConvDesc = Other.ConvDesc;
         Other.ConvDesc = (iconv_t)-1;
       }
-      return *this;
+      प्रत्यागम *एतत्;
     }
   };
   UniqueIconvT ConvDesc;
 
-public:
+सार्वजनिक:
   TextEncodingConverterIconv(UniqueIconvT ConvDesc)
       : ConvDesc(std::move(ConvDesc)) {}
 
   std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+                                SmallVectorImpl<वर्ण> &Result) override;
 
-  void reset() override;
+  शून्य reset() override;
 };
 
 // TODO: The current implementation discards the partial result and restarts the
@@ -242,63 +242,63 @@ public:
 // result and resume the conversion for the remaining string.
 std::error_code
 TextEncodingConverterIconv::convertString(StringRef Source,
-                                          SmallVectorImpl<char> &Result) {
+                                          SmallVectorImpl<वर्ण> &Result) {
   // Setup the output. We directly write into the SmallVector.
   size_t Capacity = Result.capacity();
-  char *Output = static_cast<char *>(Result.data());
+  वर्ण *Output = static_cast<वर्ण *>(Result.data());
   size_t OutputLength = Capacity;
   Result.resize_for_overwrite(Capacity);
 
   size_t Ret;
   // Handle errors returned from iconv().
   auto HandleError = [&Capacity, &Output, &OutputLength, &Result,
-                      this](size_t Ret) {
-    if (Ret == static_cast<size_t>(-1)) {
+                      एतत्](size_t Ret) {
+    यदि (Ret == static_cast<size_t>(-1)) {
       // An error occurred. Check if we can gracefully handle it.
-      if (errno == E2BIG && Capacity < Result.max_size()) {
+      यदि (errno == E2BIG && Capacity < Result.max_size()) {
         HandleOverflow(Capacity, Output, OutputLength, Result);
         // Reset converter
         reset();
-        return std::error_code();
-      } else {
+        प्रत्यागम std::error_code();
+      } अन्यथा {
         // Some other error occurred.
         Result.resize(Output - Result.data());
-        return std::error_code(errno, std::generic_category());
+        प्रत्यागम std::error_code(errno, std::generic_category());
       }
-    } else {
+    } अन्यथा {
       // A positive return value indicates that some characters were converted
       // in a nonreversible way, that is, replaced with a SUB symbol. Returning
       // an error in this case makes sure that both conversion routines behave
       // in the same way.
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+      प्रत्यागम std::make_error_code(std::errc::illegal_byte_sequence);
     }
   };
 
-  do {
-    size_t InputLength = Source.size();
-    char *Input = const_cast<char *>(Source.data());
-    Ret = iconv(ConvDesc, &Input, &InputLength, &Output, &OutputLength);
-    if (Ret != 0) {
-      if (auto EC = HandleError(Ret))
-        return EC;
-      continue;
+  कुरु {
+    size_t निवेश_Length = Source.size();
+    वर्ण *निवेश = const_cast<वर्ण *>(Source.data());
+    Ret = iconv(ConvDesc, &निवेश, &निवेश_Length, &Output, &OutputLength);
+    यदि (Ret != 0) {
+      यदि (auto EC = HandleError(Ret))
+        प्रत्यागम EC;
+      अनुवर्त;
     }
     // Flush the converter
     Ret = iconv(ConvDesc, nullptr, nullptr, &Output, &OutputLength);
-    if (Ret != 0) {
-      if (auto EC = HandleError(Ret))
-        return EC;
-      continue;
+    यदि (Ret != 0) {
+      यदि (auto EC = HandleError(Ret))
+        प्रत्यागम EC;
+      अनुवर्त;
     }
-    break;
-  } while (true);
+    भङ्ग;
+  } यावत् (सत्य);
 
   // Re-adjust size to actual size.
   Result.resize(Output - Result.data());
-  return std::error_code();
+  प्रत्यागम std::error_code();
 }
 
-inline void TextEncodingConverterIconv::reset() {
+अन्तःस्थ शून्य TextEncodingConverterIconv::reset() {
   iconv(ConvDesc, nullptr, nullptr, nullptr, nullptr);
 }
 
@@ -309,18 +309,18 @@ ErrorOr<TextEncodingConverter>
 TextEncodingConverter::create(TextEncoding CPFrom, TextEncoding CPTo) {
 
   // Text encodings should be distinct.
-  if (CPFrom == CPTo)
-    return std::make_error_code(std::errc::invalid_argument);
+  यदि (CPFrom == CPTo)
+    प्रत्यागम std::make_error_code(std::errc::invalid_argument);
 
   ConversionType Conversion;
-  if (CPFrom == TextEncoding::UTF8 && CPTo == TextEncoding::IBM1047)
+  यदि (CPFrom == TextEncoding::UTF8 && CPTo == TextEncoding::IBM1047)
     Conversion = UTF8ToIBM1047;
-  else if (CPFrom == TextEncoding::IBM1047 && CPTo == TextEncoding::UTF8)
+  अन्यथा यदि (CPFrom == TextEncoding::IBM1047 && CPTo == TextEncoding::UTF8)
     Conversion = IBM1047ToUTF8;
-  else
-    return std::make_error_code(std::errc::invalid_argument);
+  अन्यथा
+    प्रत्यागम std::make_error_code(std::errc::invalid_argument);
 
-  return TextEncodingConverter(
+  प्रत्यागम TextEncodingConverter(
       std::make_unique<TextEncodingConverterTable>(Conversion));
 }
 
@@ -328,32 +328,32 @@ ErrorOr<TextEncodingConverter> TextEncodingConverter::create(StringRef From,
                                                              StringRef To) {
   std::optional<TextEncoding> FromEncoding = getKnownEncoding(From);
   std::optional<TextEncoding> ToEncoding = getKnownEncoding(To);
-  if (FromEncoding && ToEncoding) {
+  यदि (FromEncoding && ToEncoding) {
     ErrorOr<TextEncodingConverter> Converter =
         create(*FromEncoding, *ToEncoding);
-    if (Converter)
-      return Converter;
+    यदि (Converter)
+      प्रत्यागम Converter;
   }
-#if HAVE_ICU
+#यदि HAVE_ICU
   UErrorCode EC = U_ZERO_ERROR;
   UConverterUniquePtr FromConvDesc(ucnv_open(From.str().c_str(), &EC));
-  if (U_FAILURE(EC))
-    return std::make_error_code(std::errc::invalid_argument);
+  यदि (U_FAILURE(EC))
+    प्रत्यागम std::make_error_code(std::errc::invalid_argument);
 
   UConverterUniquePtr ToConvDesc(ucnv_open(To.str().c_str(), &EC));
-  if (U_FAILURE(EC))
-    return std::make_error_code(std::errc::invalid_argument);
+  यदि (U_FAILURE(EC))
+    प्रत्यागम std::make_error_code(std::errc::invalid_argument);
 
   auto Converter = std::make_unique<TextEncodingConverterICU>(
       std::move(FromConvDesc), std::move(ToConvDesc));
-  return TextEncodingConverter(std::move(Converter));
-#elif HAVE_ICONV
+  प्रत्यागम TextEncodingConverter(std::move(Converter));
+#नोचेद्यदि HAVE_ICONV
   iconv_t ConvDesc = iconv_open(To.str().c_str(), From.str().c_str());
-  if (ConvDesc == (iconv_t)-1)
-    return std::make_error_code(std::errc::invalid_argument);
-  return TextEncodingConverter(
+  यदि (ConvDesc == (iconv_t)-1)
+    प्रत्यागम std::make_error_code(std::errc::invalid_argument);
+  प्रत्यागम TextEncodingConverter(
       std::make_unique<TextEncodingConverterIconv>(ConvDesc));
-#else
-  return std::make_error_code(std::errc::invalid_argument);
+#अन्यथा
+  प्रत्यागम std::make_error_code(std::errc::invalid_argument);
 #endif
 }

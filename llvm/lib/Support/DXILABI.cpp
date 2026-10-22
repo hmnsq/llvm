@@ -14,20 +14,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DXILABI.h"
-#include "llvm/Support/ErrorHandling.h"
-using namespace llvm;
+#अन्तर्भाव "llvm/Support/DXILABI.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+using नामाकाश llvm;
 
 StringRef dxil::getResourceClassName(dxil::ResourceClass RC) {
-  switch (RC) {
-  case dxil::ResourceClass::SRV:
-    return "SRV";
-  case dxil::ResourceClass::UAV:
-    return "UAV";
-  case dxil::ResourceClass::CBuffer:
-    return "CBV";
-  case dxil::ResourceClass::Sampler:
-    return "Sampler";
+  विकल्प (RC) {
+  पक्ष dxil::ResourceClass::SRV:
+    प्रत्यागम "SRV";
+  पक्ष dxil::ResourceClass::UAV:
+    प्रत्यागम "UAV";
+  पक्ष dxil::ResourceClass::CBuffer:
+    प्रत्यागम "CBV";
+  पक्ष dxil::ResourceClass::Sampler:
+    प्रत्यागम "Sampler";
   }
   llvm_unreachable("Invalid ResourceClass enum value");
 }
