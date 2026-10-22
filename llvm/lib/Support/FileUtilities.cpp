@@ -11,160 +11,160 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-#include <system_error>
+#ضمن "llvm/Support/FileUtilities.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ErrorOr.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cmath>
+#ضمن <cstdint>
+#ضمن <cstdlib>
+#ضمن <cstring>
+#ضمن <memory>
+#ضمن <system_error>
 
-using namespace llvm;
+using نطاق llvm;
 
-static bool isSignedChar(char C) {
-  return (C == '+' || C == '-');
+ساكن منطقي isSignedChar(حرف C) {
+  أرجع (C == '+' || C == '-');
 }
 
-static bool isExponentChar(char C) {
-  switch (C) {
-  case 'D':  // Strange exponential notation.
-  case 'd':  // Strange exponential notation.
-  case 'e':
-  case 'E': return true;
-  default: return false;
+ساكن منطقي isExponentChar(حرف C) {
+  بدل (C) {
+  حالة 'D':  // Strange exponential notation.
+  حالة 'd':  // Strange exponential notation.
+  حالة 'e':
+  حالة 'E': أرجع true;
+  افتراضي: أرجع خطأ;
   }
 }
 
-static bool isNumberChar(char C) {
-  switch (C) {
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case '.': return true;
-  default: return isSignedChar(C) || isExponentChar(C);
+ساكن منطقي is_سان_Char(حرف C) {
+  بدل (C) {
+  حالة '0': حالة '1': حالة '2': حالة '3': حالة '4':
+  حالة '5': حالة '6': حالة '7': حالة '8': حالة '9':
+  حالة '.': أرجع true;
+  افتراضي: أرجع isSignedChar(C) || isExponentChar(C);
   }
 }
 
-static const char *BackupNumber(const char *Pos, const char *FirstChar) {
+ساكن ثابت حرف *Backup_سان(ثابت حرف *Pos, ثابت حرف *FirstChar) {
   // If we didn't stop in the middle of a number, don't backup.
-  if (!isNumberChar(*Pos)) return Pos;
+  إذا (!is_سان_Char(*Pos)) أرجع Pos;
 
   // Otherwise, return to the start of the number.
-  bool HasPeriod = false;
-  while (Pos > FirstChar && isNumberChar(Pos[-1])) {
+  منطقي HasPeriod = خطأ;
+  طالما (Pos > FirstChar && is_سان_Char(Pos[-1])) {
     // Backup over at most one period.
-    if (Pos[-1] == '.') {
-      if (HasPeriod)
-        break;
+    إذا (Pos[-1] == '.') {
+      إذا (HasPeriod)
+        اكسر;
       HasPeriod = true;
     }
 
     --Pos;
-    if (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
-      break;
+    إذا (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
+      اكسر;
   }
-  return Pos;
+  أرجع Pos;
 }
 
 /// EndOfNumber - Return the first character that is not part of the specified
 /// number.  This assumes that the buffer is null terminated, so it won't fall
 /// off the end.
-static const char *EndOfNumber(const char *Pos) {
-  while (isNumberChar(*Pos))
+ساكن ثابت حرف *End_Of_سان(ثابت حرف *Pos) {
+  طالما (is_سان_Char(*Pos))
     ++Pos;
-  return Pos;
+  أرجع Pos;
 }
 
 /// CompareNumbers - compare two numbers, returning true if they are different.
-static bool CompareNumbers(const char *&F1P, const char *&F2P,
-                           const char *F1End, const char *F2End,
-                           double AbsTolerance, double RelTolerance,
-                           std::string *ErrorMsg) {
-  const char *F1NumEnd, *F2NumEnd;
-  double V1 = 0.0, V2 = 0.0;
+ساكن منطقي CompareNumbers(ثابت حرف *&F1P, ثابت حرف *&F2P,
+                           ثابت حرف *F1End, ثابت حرف *F2End,
+                           مزدوج AbsTolerance, مزدوج RelTolerance,
+                           std::string *Error_ئۇچۇر) {
+  ثابت حرف *F1_رەقەم_End, *F2_رەقەم_End;
+  مزدوج V1 = 0.0, V2 = 0.0;
 
   // If one of the positions is at a space and the other isn't, chomp up 'til
   // the end of the space.
-  while (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
+  طالما (isSpace(static_cast<unsigned حرف>(*F1P)) && F1P != F1End)
     ++F1P;
-  while (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
+  طالما (isSpace(static_cast<unsigned حرف>(*F2P)) && F2P != F2End)
     ++F2P;
 
   // If we stop on numbers, compare their difference.
-  if (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
+  إذا (!is_سان_Char(*F1P) || !is_سان_Char(*F2P)) {
     // The diff failed.
-    F1NumEnd = F1P;
-    F2NumEnd = F2P;
-  } else {
+    F1_رەقەم_End = F1P;
+    F2_رەقەم_End = F2P;
+  } وإلا {
     // Note that some ugliness is built into this to permit support for numbers
     // that use "D" or "d" as their exponential marker, e.g. "1.234D45".  This
     // occurs in 200.sixtrack in spec2k.
-    V1 = strtod(F1P, const_cast<char**>(&F1NumEnd));
-    V2 = strtod(F2P, const_cast<char**>(&F2NumEnd));
+    V1 = strtod(F1P, const_cast<حرف**>(&F1_رەقەم_End));
+    V2 = strtod(F2P, const_cast<حرف**>(&F2_رەقەم_End));
 
-    if (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
+    إذا (*F1_رەقەم_End == 'D' || *F1_رەقەم_End == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F1P, EndOfNumber(F1NumEnd)+1);
+      SmallString<200> StrTmp(F1P, End_Of_سان(F1_رەقەم_End)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F1NumEnd-F1P)] = 'e';
+      StrTmp[static_cast<unsigned>(F1_رەقەم_End-F1P)] = 'e';
 
-      V1 = strtod(&StrTmp[0], const_cast<char**>(&F1NumEnd));
-      F1NumEnd = F1P + (F1NumEnd-&StrTmp[0]);
+      V1 = strtod(&StrTmp[0], const_cast<حرف**>(&F1_رەقەم_End));
+      F1_رەقەم_End = F1P + (F1_رەقەم_End-&StrTmp[0]);
     }
 
-    if (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
+    إذا (*F2_رەقەم_End == 'D' || *F2_رەقەم_End == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F2P, EndOfNumber(F2NumEnd)+1);
+      SmallString<200> StrTmp(F2P, End_Of_سان(F2_رەقەم_End)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F2NumEnd-F2P)] = 'e';
+      StrTmp[static_cast<unsigned>(F2_رەقەم_End-F2P)] = 'e';
 
-      V2 = strtod(&StrTmp[0], const_cast<char**>(&F2NumEnd));
-      F2NumEnd = F2P + (F2NumEnd-&StrTmp[0]);
+      V2 = strtod(&StrTmp[0], const_cast<حرف**>(&F2_رەقەم_End));
+      F2_رەقەم_End = F2P + (F2_رەقەم_End-&StrTmp[0]);
     }
   }
 
-  if (F1NumEnd == F1P || F2NumEnd == F2P) {
-    if (ErrorMsg) {
-      *ErrorMsg = "FP Comparison failed, not a numeric difference between '";
-      *ErrorMsg += F1P[0];
-      *ErrorMsg += "' and '";
-      *ErrorMsg += F2P[0];
-      *ErrorMsg += "'";
+  إذا (F1_رەقەم_End == F1P || F2_رەقەم_End == F2P) {
+    إذا (Error_ئۇچۇر) {
+      *Error_ئۇچۇر = "FP Comparison failed, not a numeric difference between '";
+      *Error_ئۇچۇر += F1P[0];
+      *Error_ئۇچۇر += "' and '";
+      *Error_ئۇچۇر += F2P[0];
+      *Error_ئۇچۇر += "'";
     }
-    return true;
+    أرجع true;
   }
 
   // Check to see if these are inside the absolute tolerance
-  if (AbsTolerance < std::abs(V1-V2)) {
+  إذا (AbsTolerance < std::abs(V1-V2)) {
     // Nope, check the relative tolerance...
-    double Diff;
-    if (V2)
+    مزدوج Diff;
+    إذا (V2)
       Diff = std::abs(V1/V2 - 1.0);
-    else if (V1)
+    وإلا إذا (V1)
       Diff = std::abs(V2/V1 - 1.0);
-    else
+    وإلا
       Diff = 0;  // Both zero.
-    if (Diff > RelTolerance) {
-      if (ErrorMsg) {
-        raw_string_ostream(*ErrorMsg)
+    إذا (Diff > RelTolerance) {
+      إذا (Error_ئۇچۇر) {
+        raw_string_ostream(*Error_ئۇچۇر)
           << "Compared: " << V1 << " and " << V2 << '\n'
           << "abs. diff = " << std::abs(V1-V2) << " rel.diff = " << Diff << '\n'
           << "Out of tolerance: rel/abs: " << RelTolerance << '/'
           << AbsTolerance;
       }
-      return true;
+      أرجع true;
     }
   }
 
   // Otherwise, advance our read pointers to the end of the numbers.
-  F1P = F1NumEnd;  F2P = F2NumEnd;
-  return false;
+  F1P = F1_رەقەم_End;  F2P = F2_رەقەم_End;
+  أرجع خطأ;
 }
 
 /// DiffFilesWithTolerance - Compare the two files specified, returning 0 if the
@@ -175,160 +175,160 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 /// error occurs, allowing the caller to distinguish between a failed diff and a
 /// file system error.
 ///
-int llvm::DiffFilesWithTolerance(StringRef NameA,
+صحيح llvm::DiffFilesWithTolerance(StringRef NameA,
                                  StringRef NameB,
-                                 double AbsTol, double RelTol,
+                                 مزدوج AbsTol, مزدوج RelTol,
                                  std::string *Error) {
   // Now its safe to mmap the files into memory because both files
   // have a non-zero size.
   ErrorOr<std::unique_ptr<MemoryBuffer>> F1OrErr = MemoryBuffer::getFile(NameA);
-  if (std::error_code EC = F1OrErr.getError()) {
-    if (Error)
+  إذا (std::error_code EC = F1OrErr.getError()) {
+    إذا (Error)
       *Error = EC.message();
-    return 2;
+    أرجع 2;
   }
   MemoryBuffer &F1 = *F1OrErr.get();
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> F2OrErr = MemoryBuffer::getFile(NameB);
-  if (std::error_code EC = F2OrErr.getError()) {
-    if (Error)
+  إذا (std::error_code EC = F2OrErr.getError()) {
+    إذا (Error)
       *Error = EC.message();
-    return 2;
+    أرجع 2;
   }
   MemoryBuffer &F2 = *F2OrErr.get();
 
   // Okay, now that we opened the files, scan them for the first difference.
-  const char *File1Start = F1.getBufferStart();
-  const char *File2Start = F2.getBufferStart();
-  const char *File1End = F1.getBufferEnd();
-  const char *File2End = F2.getBufferEnd();
-  const char *F1P = File1Start;
-  const char *F2P = File2Start;
+  ثابت حرف *File1Start = F1.getBufferStart();
+  ثابت حرف *File2Start = F2.getBufferStart();
+  ثابت حرف *File1End = F1.getBufferEnd();
+  ثابت حرف *File2End = F2.getBufferEnd();
+  ثابت حرف *F1P = File1Start;
+  ثابت حرف *F2P = File2Start;
   uint64_t A_size = F1.getBufferSize();
   uint64_t B_size = F2.getBufferSize();
 
   // Are the buffers identical?  Common case: Handle this efficiently.
-  if (A_size == B_size &&
+  إذا (A_size == B_size &&
       std::memcmp(File1Start, File2Start, A_size) == 0)
-    return 0;
+    أرجع 0;
 
   // Otherwise, we are done a tolerances are set.
-  if (AbsTol == 0 && RelTol == 0) {
-    if (Error)
+  إذا (AbsTol == 0 && RelTol == 0) {
+    إذا (Error)
       *Error = "Files differ without tolerance allowance";
-    return 1;   // Files different!
+    أرجع 1;   // Files different!
   }
 
-  bool CompareFailed = false;
-  while (true) {
+  منطقي CompareFailed = خطأ;
+  طالما (true) {
     // Scan for the end of file or next difference.
-    while (F1P < File1End && F2P < File2End && *F1P == *F2P) {
+    طالما (F1P < File1End && F2P < File2End && *F1P == *F2P) {
       ++F1P;
       ++F2P;
     }
 
-    if (F1P >= File1End || F2P >= File2End) break;
+    إذا (F1P >= File1End || F2P >= File2End) اكسر;
 
     // Okay, we must have found a difference.  Backup to the start of the
     // current number each stream is at so that we can compare from the
     // beginning.
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    F1P = Backup_سان(F1P, File1Start);
+    F2P = Backup_سان(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
+    إذا (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
       CompareFailed = true;
-      break;
+      اكسر;
     }
   }
 
   // Okay, we reached the end of file.  If both files are at the end, we
   // succeeded.
-  bool F1AtEnd = F1P >= File1End;
-  bool F2AtEnd = F2P >= File2End;
-  if (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
+  منطقي F1AtEnd = F1P >= File1End;
+  منطقي F2AtEnd = F2P >= File2End;
+  إذا (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
     // Else, we might have run off the end due to a number: backup and retry.
-    if (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
-    if (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    إذا (F1AtEnd && is_سان_Char(F1P[-1])) --F1P;
+    إذا (F2AtEnd && is_سان_Char(F2P[-1])) --F2P;
+    F1P = Backup_سان(F1P, File1Start);
+    F2P = Backup_سان(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
+    إذا (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
       CompareFailed = true;
 
     // If we found the end, we succeeded.
-    if (F1P < File1End || F2P < File2End)
+    إذا (F1P < File1End || F2P < File2End)
       CompareFailed = true;
   }
 
-  return CompareFailed;
+  أرجع CompareFailed;
 }
 
 Expected<FilePermissionsApplier>
-FilePermissionsApplier::create(StringRef InputFilename) {
+FilePermissionsApplier::create(StringRef كىرگۈزۈش_Filename) {
   sys::fs::file_status Status;
 
-  if (InputFilename != "-") {
-    if (auto EC = sys::fs::status(InputFilename, Status))
-      return createFileError(InputFilename, EC);
-  } else {
+  إذا (كىرگۈزۈش_Filename != "-") {
+    إذا (auto EC = sys::fs::status(كىرگۈزۈش_Filename, Status))
+      أرجع createFileError(كىرگۈزۈش_Filename, EC);
+  } وإلا {
     Status.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  return FilePermissionsApplier(InputFilename, Status);
+  أرجع FilePermissionsApplier(كىرگۈزۈش_Filename, Status);
 }
 
 Error FilePermissionsApplier::apply(
-    StringRef OutputFilename, bool CopyDates,
+    StringRef OutputFilename, منطقي CopyDates,
     std::optional<sys::fs::perms> OverwritePermissions) {
-  sys::fs::file_status Status = InputStatus;
+  sys::fs::file_status Status = كىرگۈزۈش_Status;
 
-  if (OverwritePermissions)
+  إذا (OverwritePermissions)
     Status.permissions(*OverwritePermissions);
 
-  int FD = 0;
+  صحيح FD = 0;
 
   // Writing to stdout should not be treated as an error here, just
   // do not set access/modification times or permissions.
-  if (OutputFilename == "-")
-    return Error::success();
+  إذا (OutputFilename == "-")
+    أرجع Error::success();
 
-  if (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
+  إذا (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
                                                      sys::fs::CD_OpenExisting))
-    return createFileError(OutputFilename, EC);
+    أرجع createFileError(OutputFilename, EC);
 
-  if (CopyDates)
-    if (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
+  إذا (CopyDates)
+    إذا (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
             FD, Status.getLastAccessedTime(), Status.getLastModificationTime()))
-      return createFileError(OutputFilename, EC);
+      أرجع createFileError(OutputFilename, EC);
 
   sys::fs::file_status OStat;
-  if (std::error_code EC =
+  إذا (std::error_code EC =
           sys::fs::status(sys::fs::convertFDToNativeFile(FD), OStat))
-    return createFileError(OutputFilename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file) {
+    أرجع createFileError(OutputFilename, EC);
+  إذا (OStat.type() == sys::fs::file_type::regular_file) {
 #ifndef _WIN32
     // Keep ownership if llvm-objcopy is called under root.
-    if (OutputFilename == InputFilename && OStat.getUser() == 0)
+    إذا (OutputFilename == كىرگۈزۈش_Filename && OStat.getUser() == 0)
       sys::fs::changeFileOwnership(FD, Status.getUser(), Status.getGroup());
 #endif
 
     sys::fs::perms Perm = Status.permissions();
-    if (OutputFilename != InputFilename)
+    إذا (OutputFilename != كىرگۈزۈش_Filename)
       Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
 #ifdef _WIN32
-    if (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
-#else
-    if (std::error_code EC = sys::fs::setPermissions(FD, Perm))
+    إذا (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
+#وإلا
+    إذا (std::error_code EC = sys::fs::setPermissions(FD, Perm))
 #endif
-      return createFileError(OutputFilename, EC);
+      أرجع createFileError(OutputFilename, EC);
   }
 
-  if (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return createFileError(OutputFilename, EC);
+  إذا (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    أرجع createFileError(OutputFilename, EC);
 
-  return Error::success();
+  أرجع Error::success();
 }

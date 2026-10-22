@@ -11,43 +11,43 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm-c/ErrorHandling.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/Threading.h"
-#include "llvm/Support/WindowsError.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdlib>
-#include <mutex>
-#include <new>
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm-c/ErrorHandling.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/Errno.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/Signals.h"
+#ضمن "llvm/Support/Threading.h"
+#ضمن "llvm/Support/WindowsError.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cassert>
+#ضمن <cstdlib>
+#ضمن <mutex>
+#ضمن <new>
 
-#if defined(HAVE_UNISTD_H)
+#إذا defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
-#if defined(_WIN32)
+#إذا defined(_WIN32)
 # include <io.h>
 # include <fcntl.h>
 #endif
 
-using namespace llvm;
+using نطاق llvm;
 
-static fatal_error_handler_t ErrorHandler = nullptr;
-static void *ErrorHandlerUserData = nullptr;
+ساكن fatal_error_handler_t ErrorHandler = nullptr;
+ساكن فراغ *ErrorHandlerUserData = nullptr;
 
-static fatal_error_handler_t BadAllocErrorHandler = nullptr;
-static void *BadAllocErrorHandlerUserData = nullptr;
+ساكن fatal_error_handler_t BadAllocErrorHandler = nullptr;
+ساكن فراغ *BadAllocErrorHandlerUserData = nullptr;
 
-#if LLVM_ENABLE_THREADS == 1
+#إذا LLVM_ENABLE_THREADS == 1
 // Mutexes to synchronize installing error handlers and calling error handlers.
 // Do not use ManagedStatic, or that may allocate memory while attempting to
 // report an OOM.
@@ -59,67 +59,67 @@ static void *BadAllocErrorHandlerUserData = nullptr;
 // STL and hide all of its symbols with 'opt -internalize'. To reduce size, it
 // cuts out the threading portions of the hermetic copy of libc++ that it
 // builds. We can remove these ifdefs if that script goes away.
-static std::mutex ErrorHandlerMutex;
-static std::mutex BadAllocErrorHandlerMutex;
+ساكن std::mutex ErrorHandlerMutex;
+ساكن std::mutex BadAllocErrorHandlerMutex;
 #endif
 
-static bool write_retry(int fd, const char *buf, size_t count) {
-  while (count > 0) {
-    ssize_t written = sys::RetryAfterSignal(-1, ::write, fd, buf, count);
-    if (written <= 0)
-      return false;
+ساكن منطقي write_retry(صحيح fd, ثابت حرف *buf, size_t سانى) {
+  طالما (سانى > 0) {
+    ssize_t written = sys::RetryAfterSignal(-1, ::اكتب, fd, buf, سانى);
+    إذا (written <= 0)
+      أرجع خطأ;
     buf += written;
-    count -= written;
+    سانى -= written;
   }
-  return true;
+  أرجع true;
 }
 
-void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
-                                       void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
+فراغ llvm::install_fatal_error_handler(fatal_error_handler_t handler,
+                                       فراغ *user_data) {
+#إذا LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
 #endif
-  assert(!ErrorHandler && "Error handler already registered!\n");
+  أكد(!ErrorHandler && "Error handler already registered!\n");
   ErrorHandler = handler;
   ErrorHandlerUserData = user_data;
 }
 
-void llvm::remove_fatal_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
+فراغ llvm::remove_fatal_error_handler() {
+#إذا LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
 #endif
   ErrorHandler = nullptr;
   ErrorHandlerUserData = nullptr;
 }
 
-void llvm::report_fatal_error(const char *Reason, bool GenCrashDiag) {
+فراغ llvm::report_fatal_error(ثابت حرف *Reason, منطقي GenCrashDiag) {
   report_fatal_error(Twine(Reason), GenCrashDiag);
 }
 
-void llvm::report_fatal_error(StringRef Reason, bool GenCrashDiag) {
+فراغ llvm::report_fatal_error(StringRef Reason, منطقي GenCrashDiag) {
   report_fatal_error(Twine(Reason), GenCrashDiag);
 }
 
-void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
+فراغ llvm::report_fatal_error(ثابت Twine &Reason, منطقي GenCrashDiag) {
   llvm::fatal_error_handler_t handler = nullptr;
-  void* handlerData = nullptr;
+  فراغ* handlerData = nullptr;
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
+#إذا LLVM_ENABLE_THREADS == 1
     std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
 #endif
     handler = ErrorHandler;
     handlerData = ErrorHandlerUserData;
   }
 
-  if (handler) {
+  إذا (handler) {
     handler(handlerData, Reason.str().c_str(), GenCrashDiag);
-  } else {
+  } وإلا {
     // Blast the result out to stderr.  We don't try hard to make sure this
     // succeeds (e.g. handling EINTR) and we can't use errs() here because
     // raw ostreams can call report_fatal_error.
-    SmallVector<char, 64> Buffer;
+    SmallVector<حرف, 64> Buffer;
     raw_svector_ostream OS(Buffer);
     OS << "LLVM ERROR: " << Reason << "\n";
     StringRef MessageStr = OS.str();
@@ -131,76 +131,76 @@ void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
   // files registered with RemoveFileOnSignal.
   sys::RunInterruptHandlers();
 
-  if (GenCrashDiag)
+  إذا (GenCrashDiag)
     abort();
-  else
+  وإلا
     exit(1);
 }
 
-void llvm::reportFatalInternalError(const char *reason) {
+فراغ llvm::reportFatalInternalError(ثابت حرف *reason) {
   report_fatal_error(reason, /*GenCrashDiag=*/true);
 }
-void llvm::reportFatalInternalError(StringRef reason) {
+فراغ llvm::reportFatalInternalError(StringRef reason) {
   report_fatal_error(reason, /*GenCrashDiag=*/true);
 }
-void llvm::reportFatalInternalError(const Twine &reason) {
+فراغ llvm::reportFatalInternalError(ثابت Twine &reason) {
   report_fatal_error(reason, /*GenCrashDiag=*/true);
 }
-void llvm::reportFatalUsageError(const char *reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/false);
+فراغ llvm::reportFatalUsageError(ثابت حرف *reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/خطأ);
 }
-void llvm::reportFatalUsageError(StringRef reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/false);
+فراغ llvm::reportFatalUsageError(StringRef reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/خطأ);
 }
-void llvm::reportFatalUsageError(const Twine &reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/false);
+فراغ llvm::reportFatalUsageError(ثابت Twine &reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/خطأ);
 }
 
-void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
-                                           void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
+فراغ llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
+                                           فراغ *user_data) {
+#إذا LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
 #endif
-  assert(!BadAllocErrorHandler &&
+  أكد(!BadAllocErrorHandler &&
          "Bad alloc error handler already registered!\n");
   BadAllocErrorHandler = handler;
   BadAllocErrorHandlerUserData = user_data;
 }
 
-void llvm::remove_bad_alloc_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
+فراغ llvm::remove_bad_alloc_error_handler() {
+#إذا LLVM_ENABLE_THREADS == 1
   std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
 #endif
   BadAllocErrorHandler = nullptr;
   BadAllocErrorHandlerUserData = nullptr;
 }
 
-void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
+فراغ llvm::report_bad_alloc_error(ثابت حرف *Reason, منطقي GenCrashDiag) {
   fatal_error_handler_t Handler = nullptr;
-  void *HandlerData = nullptr;
+  فراغ *HandlerData = nullptr;
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
+#إذا LLVM_ENABLE_THREADS == 1
     std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
 #endif
     Handler = BadAllocErrorHandler;
     HandlerData = BadAllocErrorHandlerUserData;
   }
 
-  if (Handler) {
+  إذا (Handler) {
     Handler(HandlerData, Reason, GenCrashDiag);
     llvm_unreachable("bad alloc handler should not return");
   }
 
 #ifdef LLVM_ENABLE_EXCEPTIONS
   // If exceptions are enabled, make OOM in malloc look like OOM in new.
-  throw std::bad_alloc();
-#else
+  ارم std::bad_alloc();
+#وإلا
   // Don't call the normal error handler. It may allocate memory. Directly write
   // an OOM to stderr and abort.
-  const char *OOMMessage = "LLVM ERROR: out of memory\n";
-  const char *Newline = "\n";
+  ثابت حرف *OOMMessage = "LLVM ERROR: out of memory\n";
+  ثابت حرف *Newline = "\n";
   write_retry(2, OOMMessage, strlen(OOMMessage));
   write_retry(2, Reason, strlen(Reason));
   write_retry(2, Newline, strlen(Newline));
@@ -211,35 +211,35 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
 #ifdef LLVM_ENABLE_EXCEPTIONS
 // Do not set custom new handler if exceptions are enabled. In this case OOM
 // errors are handled by throwing 'std::bad_alloc'.
-void llvm::install_out_of_memory_new_handler() {
+فراغ llvm::install_out_of_memory_new_handler() {
 }
-#else
+#وإلا
 // Causes crash on allocation failure. It is called prior to the handler set by
 // 'install_bad_alloc_error_handler'.
-static void out_of_memory_new_handler() {
+ساكن فراغ out_of_memory_new_handler() {
   llvm::report_bad_alloc_error("Allocation failed");
 }
 
 // Installs new handler that causes crash on allocation failure. It is called by
 // InitLLVM.
-void llvm::install_out_of_memory_new_handler() {
+فراغ llvm::install_out_of_memory_new_handler() {
   std::new_handler old = std::set_new_handler(out_of_memory_new_handler);
-  (void)old;
-  assert((old == nullptr || old == out_of_memory_new_handler) &&
+  (فراغ)old;
+  أكد((old == nullptr || old == out_of_memory_new_handler) &&
          "new-handler already installed");
 }
 #endif
 
-void llvm::llvm_unreachable_internal(const char *msg, const char *file,
-                                     unsigned line) {
+فراغ llvm::llvm_unreachable_internal(ثابت حرف *ئۇچۇر, ثابت حرف *file,
+                                     unsigned قۇر_2) {
   // This code intentionally doesn't call the ErrorHandler callback, because
   // llvm_unreachable is intended to be used to indicate "impossible"
   // situations, and not legitimate runtime errors.
-  if (msg)
-    dbgs() << msg << "\n";
+  إذا (ئۇچۇر)
+    dbgs() << ئۇچۇر << "\n";
   dbgs() << "UNREACHABLE executed";
-  if (file)
-    dbgs() << " at " << file << ":" << line;
+  إذا (file)
+    dbgs() << " at " << file << ":" << قۇر_2;
   dbgs() << "!\n";
   abort();
 #ifdef LLVM_BUILTIN_UNREACHABLE
@@ -249,29 +249,29 @@ void llvm::llvm_unreachable_internal(const char *msg, const char *file,
 #endif
 }
 
-static void bindingsErrorHandler(void *user_data, const char *reason,
-                                 bool gen_crash_diag) {
+ساكن فراغ bindingsErrorHandler(فراغ *user_data, ثابت حرف *reason,
+                                 منطقي gen_crash_diag) {
   LLVMFatalErrorHandler handler =
       LLVM_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_data);
   handler(reason);
 }
 
-void LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
+فراغ LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
   install_fatal_error_handler(bindingsErrorHandler,
-                              LLVM_EXTENSION reinterpret_cast<void *>(Handler));
+                              LLVM_EXTENSION reinterpret_cast<فراغ *>(Handler));
 }
 
-void LLVMResetFatalErrorHandler() {
+فراغ LLVMResetFatalErrorHandler() {
   remove_fatal_error_handler();
 }
 
 #ifdef _WIN32
 
 #define WIN32_NO_STATUS
-#include "llvm/Support/Windows/WindowsSupport.h"
+#ضمن "llvm/Support/Windows/WindowsSupport.h"
 #undef WIN32_NO_STATUS
-#include <ntstatus.h>
-#include <winerror.h>
+#ضمن <ntstatus.h>
+#ضمن <winerror.h>
 
 // This is equivalent to NtCurrentTeb()->LastStatusValue, but the public
 // _TEB definition does not expose the LastStatusValue field directly.
@@ -285,7 +285,7 @@ void LLVMResetFatalErrorHandler() {
 // For more information, see:
 // https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/teb/index.htm
 // https://github.com/llvm/llvm-project/issues/89137
-extern "C" NTSYSAPI NTSTATUS NTAPI RtlGetLastNtStatus();
+خارجي "C" NTSYSAPI NTSTATUS NTAPI RtlGetLastNtStatus();
 
 // This function obtains the last error code and maps it. It may call
 // RtlGetLastNtStatus, which is a lower level API that can return a
@@ -295,22 +295,22 @@ std::error_code llvm::mapLastWindowsError() {
   // The mapping of NTSTATUS to Win32 error loses some information; special
   // case the generic ERROR_ACCESS_DENIED code to check the underlying
   // NTSTATUS and potentially return a more accurate error code.
-  if (EV == ERROR_ACCESS_DENIED) {
+  إذا (EV == ERROR_ACCESS_DENIED) {
     llvm::errc code = RtlGetLastNtStatus() == STATUS_DELETE_PENDING
                           ? errc::delete_pending
                           : errc::permission_denied;
-    return make_error_code(code);
+    أرجع make_error_code(code);
   }
-  return mapWindowsError(EV);
+  أرجع mapWindowsError(EV);
 }
 
 // I'd rather not double the line count of the following.
 #define MAP_ERR_TO_COND(x, y)                                                  \
-  case x:                                                                      \
-    return make_error_code(errc::y)
+  حالة x:                                                                      \
+    أرجع make_error_code(errc::y)
 
 std::error_code llvm::mapWindowsError(unsigned EV) {
-  switch (EV) {
+  بدل (EV) {
     MAP_ERR_TO_COND(ERROR_ACCESS_DENIED, permission_denied);
     MAP_ERR_TO_COND(ERROR_ALREADY_EXISTS, file_exists);
     MAP_ERR_TO_COND(ERROR_BAD_NETPATH, no_such_file_or_directory);
@@ -365,8 +365,8 @@ std::error_code llvm::mapWindowsError(unsigned EV) {
     MAP_ERR_TO_COND(WSAEINVAL, invalid_argument);
     MAP_ERR_TO_COND(WSAEMFILE, too_many_files_open);
     MAP_ERR_TO_COND(WSAENAMETOOLONG, filename_too_long);
-  default:
-    return std::error_code(EV, std::system_category());
+  افتراضي:
+    أرجع std::error_code(EV, std::system_category());
   }
 }
 
