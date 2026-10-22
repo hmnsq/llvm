@@ -7,80 +7,80 @@
 //
 //===------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttrParserExtended.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cstdint>
+#ضمن "llvm/Support/ELFAttrParserExtended.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/ELFAttributes.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ScopedPrinter.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cstdint>
 
-using namespace llvm;
-using namespace ELFAttrs;
+using نطاق llvm;
+using نطاق ELFAttrs;
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(unsigned Tag) const {
-  assert(
+ELFExtendedAttrParser::get_Attribute_درج(unsigned Tag) ثابت {
+  أكد(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(StringRef BuildAttrSubsectionName,
-                                         unsigned Tag) const {
-  for (const auto &SubSection : SubSectionVec) {
-    if (BuildAttrSubsectionName == SubSection.Name)
-      for (const auto &BAItem : SubSection.Content) {
-        if (Tag == BAItem.Tag)
-          return std::optional<unsigned>(BAItem.IntValue);
+ELFExtendedAttrParser::get_Attribute_درج(StringRef BuildAttrSubsectionName,
+                                         unsigned Tag) ثابت {
+  لكل (ثابت auto &SubSection : SubSectionVec) {
+    إذا (BuildAttrSubsectionName == SubSection.Name)
+      لكل (ثابت auto &BAItem : SubSection.Content) {
+        إذا (Tag == BAItem.Tag)
+          أرجع std::optional<unsigned>(BAItem.Int_درج);
       }
   }
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
 std::optional<StringRef>
-ELFExtendedAttrParser::getAttributeString(unsigned Tag) const {
-  assert(
+ELFExtendedAttrParser::getAttributeString(unsigned Tag) ثابت {
+  أكد(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
 std::optional<StringRef>
 ELFExtendedAttrParser::getAttributeString(StringRef BuildAttrSubsectionName,
-                                          unsigned Tag) const {
-  for (const auto &SubSection : SubSectionVec) {
-    if (BuildAttrSubsectionName == SubSection.Name)
-      for (const auto &BAItem : SubSection.Content) {
-        if (Tag == BAItem.Tag)
-          return std::optional<StringRef>(BAItem.StringValue);
+                                          unsigned Tag) ثابت {
+  لكل (ثابت auto &SubSection : SubSectionVec) {
+    إذا (BuildAttrSubsectionName == SubSection.Name)
+      لكل (ثابت auto &BAItem : SubSection.Content) {
+        إذا (Tag == BAItem.Tag)
+          أرجع std::optional<StringRef>(BAItem.String_درج);
       }
   }
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
 StringRef
-ELFExtendedAttrParser::getTagName(const StringRef &BuildAttrSubsectionName,
-                                  const unsigned Tag) {
-  for (const auto &Entry : TagsNamesMap) {
-    if (BuildAttrSubsectionName == Entry.SubsectionName)
-      if (Tag == Entry.Tag)
-        return Entry.TagName;
+ELFExtendedAttrParser::getTagName(ثابت StringRef &BuildAttrSubsectionName,
+                                  ثابت unsigned Tag) {
+  لكل (ثابت auto &Entry : TagsNamesMap) {
+    إذا (BuildAttrSubsectionName == Entry.SubsectionName)
+      إذا (Tag == Entry.Tag)
+        أرجع Entry.TagName;
   }
-  return "";
+  أرجع "";
 }
 
 Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
                                    llvm::endianness Endian) {
 
-  unsigned SectionNumber = 0;
+  unsigned Section_لمب = 0;
   De = DataExtractor(Section, Endian == llvm::endianness::little);
 
   // Early returns have specific errors. Consume the Error in Cursor.
-  struct ClearCursorError {
+  بنية ClearCursorError {
     DataExtractor::Cursor &Cursor;
     ~ClearCursorError() { consumeError(Cursor.takeError()); }
   } Clear{Cursor};
@@ -102,45 +102,45 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
 
   // Get format-version
   uint8_t FormatVersion = De.getU8(Cursor);
-  if (!Cursor)
-    return Cursor.takeError();
-  if (ELFAttrs::Format_Version != FormatVersion)
-    return createStringError(errc::invalid_argument,
+  إذا (!Cursor)
+    أرجع Cursor.takeError();
+  إذا (ELFAttrs::Format_Version != FormatVersion)
+    أرجع createStringError(errc::invalid_argument,
                              "unrecognized format-version: 0x" +
                                  utohexstr(FormatVersion));
 
-  while (!De.eof(Cursor)) {
+  طالما (!De.eof(Cursor)) {
     uint32_t ExtBASubsectionLength = De.getU32(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
+    إذا (!Cursor)
+      أرجع Cursor.takeError();
     // Minimal valid Extended Build Attributes subsection size is at
     // least 8: length(4) name(at least a single char + null) optionality(1) and
     // type(1)
     // Extended Build Attributes subsection has to fit inside the section.
-    if (ExtBASubsectionLength < 8 ||
+    إذا (ExtBASubsectionLength < 8 ||
         ExtBASubsectionLength > (Section.size() - Cursor.tell() + 4))
-      return createStringError(
+      أرجع createStringError(
           errc::invalid_argument,
           "invalid Extended Build Attributes subsection size at offset: " +
               utohexstr(Cursor.tell() - 4));
 
     StringRef VendorName = De.getCStrRef(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
+    إذا (!Cursor)
+      أرجع Cursor.takeError();
     uint8_t IsOptional = De.getU8(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
-    if (!(0 == IsOptional || 1 == IsOptional))
-      return createStringError(
+    إذا (!Cursor)
+      أرجع Cursor.takeError();
+    إذا (!(0 == IsOptional || 1 == IsOptional))
+      أرجع createStringError(
           errc::invalid_argument,
           "\ninvalid Optionality at offset " + utohexstr(Cursor.tell() - 4) +
               ": " + utohexstr(IsOptional) + " (Options are 1|0)");
     StringRef IsOptionalStr = IsOptional ? "optional" : "required";
     uint8_t Type = De.getU8(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
-    if (!(0 == Type || 1 == Type))
-      return createStringError(errc::invalid_argument,
+    إذا (!Cursor)
+      أرجع Cursor.takeError();
+    إذا (!(0 == Type || 1 == Type))
+      أرجع createStringError(errc::invalid_argument,
                                "\ninvalid Type at offset " +
                                    utohexstr(Cursor.tell() - 4) + ": " +
                                    utohexstr(Type) + " (Options are 1|0)");
@@ -151,14 +151,14 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     BASubSection.IsOptional = IsOptional;
     BASubSection.ParameterType = Type;
 
-    if (Sw) {
-      Sw->startLine() << "Section " << ++SectionNumber << " {\n";
+    إذا (Sw) {
+      Sw->start_لي() << "Section " << ++Section_لمب << " {\n";
       Sw->indent();
-      Sw->printNumber("SectionLength", ExtBASubsectionLength);
-      Sw->startLine() << "VendorName" << ": " << VendorName
+      Sw->بغ_لمب("SectionLength", ExtBASubsectionLength);
+      Sw->start_لي() << "VendorName" << ": " << VendorName
                       << " Optionality: " << IsOptionalStr
                       << " Type: " << TypeStr << "\n";
-      Sw->startLine() << "Attributes {\n";
+      Sw->start_لي() << "Attributes {\n";
       Sw->indent();
     }
 
@@ -167,48 +167,48 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     // Size: 4 bytes, Vendor Name: VendorName.size() + 1 (null termination),
     // optionality: 1, type: 1
     uint32_t BytesAllButAttributes = 4 + (VendorName.size() + 1) + 1 + 1;
-    while (Cursor.tell() <
+    طالما (Cursor.tell() <
            (OffsetInSection + ExtBASubsectionLength - BytesAllButAttributes)) {
 
       uint64_t Tag = De.getULEB128(Cursor);
-      if (!Cursor)
-        return Cursor.takeError();
+      إذا (!Cursor)
+        أرجع Cursor.takeError();
 
       StringRef TagName = getTagName(VendorName, Tag);
 
-      uint64_t ValueInt = 0;
-      std::string ValueStr = "";
-      if (Type) { // type==1 --> ntbs
-        ValueStr = De.getCStrRef(Cursor);
-        if (!Cursor)
-          return Cursor.takeError();
-        if (Sw)
-          Sw->printString("" != TagName ? TagName : utostr(Tag), ValueStr);
-      } else { // type==0 --> uleb128
-        ValueInt = De.getULEB128(Cursor);
-        if (!Cursor)
-          return Cursor.takeError();
-        if (Sw)
-          Sw->printNumber("" != TagName ? TagName : utostr(Tag), ValueInt);
+      uint64_t درج_Int = 0;
+      std::string درج_Str = "";
+      إذا (Type) { // type==1 --> ntbs
+        درج_Str = De.getCStrRef(Cursor);
+        إذا (!Cursor)
+          أرجع Cursor.takeError();
+        إذا (Sw)
+          Sw->بغ_String("" != TagName ? TagName : utostr(Tag), درج_Str);
+      } وإلا { // type==0 --> uleb128
+        درج_Int = De.getULEB128(Cursor);
+        إذا (!Cursor)
+          أرجع Cursor.takeError();
+        إذا (Sw)
+          Sw->بغ_لمب("" != TagName ? TagName : utostr(Tag), درج_Int);
       }
 
       // populate data structure
       BuildAttributeItem BAItem(static_cast<BuildAttributeItem::Types>(Type),
-                                Tag, ValueInt, ValueStr);
-      BASubSection.Content.push_back(BAItem);
+                                Tag, درج_Int, درج_Str);
+      BASubSection.Content.تور_back(BAItem);
     }
-    if (Sw) {
+    إذا (Sw) {
       // Close 'Attributes'
       Sw->unindent();
-      Sw->startLine() << "}\n";
+      Sw->start_لي() << "}\n";
       // Close 'Section'
       Sw->unindent();
-      Sw->startLine() << "}\n";
+      Sw->start_لي() << "}\n";
     }
 
     // populate data structure
-    SubSectionVec.push_back(BASubSection);
+    SubSectionVec.تور_back(BASubSection);
   }
 
-  return Cursor.takeError();
+  أرجع Cursor.takeError();
 }

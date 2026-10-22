@@ -6,50 +6,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamError.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/BinaryStreamError.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-char BinaryStreamError::ID = 0;
+حرف نبيو_Stream_Error::ID = 0;
 
-BinaryStreamError::BinaryStreamError(stream_error_code C)
-    : BinaryStreamError(C, "") {}
+نبيو_Stream_Error::نبيو_Stream_Error(stream_error_code C)
+    : نبيو_Stream_Error(C, "") {}
 
-BinaryStreamError::BinaryStreamError(StringRef Context)
-    : BinaryStreamError(stream_error_code::unspecified, Context) {}
+نبيو_Stream_Error::نبيو_Stream_Error(StringRef Context)
+    : نبيو_Stream_Error(stream_error_code::unspecified, Context) {}
 
-BinaryStreamError::BinaryStreamError(stream_error_code C, StringRef Context)
+نبيو_Stream_Error::نبيو_Stream_Error(stream_error_code C, StringRef Context)
     : Code(C) {
-  ErrMsg = "Stream Error: ";
-  switch (C) {
-  case stream_error_code::unspecified:
-    ErrMsg += "An unspecified error has occurred.";
-    break;
-  case stream_error_code::stream_too_short:
-    ErrMsg += "The stream is too short to perform the requested operation.";
-    break;
-  case stream_error_code::invalid_array_size:
-    ErrMsg += "The buffer size is not a multiple of the array element size.";
-    break;
-  case stream_error_code::invalid_offset:
-    ErrMsg += "The specified offset is invalid for the current stream.";
-    break;
-  case stream_error_code::filesystem_error:
-    ErrMsg += "An I/O error occurred on the file system.";
-    break;
+  Err_سكو = "Stream Error: ";
+  بدل (C) {
+  حالة stream_error_code::unspecified:
+    Err_سكو += "An unspecified error has occurred.";
+    اكسر;
+  حالة stream_error_code::stream_too_short:
+    Err_سكو += "The stream is too short to perform the requested operation.";
+    اكسر;
+  حالة stream_error_code::invalid_array_size:
+    Err_سكو += "The buffer size is not a multiple of the array element size.";
+    اكسر;
+  حالة stream_error_code::invalid_offset:
+    Err_سكو += "The specified offset is invalid for the current stream.";
+    اكسر;
+  حالة stream_error_code::filesystem_error:
+    Err_سكو += "An I/O error occurred on the file system.";
+    اكسر;
   }
 
-  if (!Context.empty()) {
-    ErrMsg += "  ";
-    ErrMsg += Context;
+  إذا (!Context.empty()) {
+    Err_سكو += "  ";
+    Err_سكو += Context;
   }
 }
 
-void BinaryStreamError::log(raw_ostream &OS) const { OS << ErrMsg; }
+فراغ نبيو_Stream_Error::log(raw_ostream &OS) ثابت { OS << Err_سكو; }
 
-StringRef BinaryStreamError::getErrorMessage() const { return ErrMsg; }
+StringRef نبيو_Stream_Error::getErrorMessage() ثابت { أرجع Err_سكو; }
 
-std::error_code BinaryStreamError::convertToErrorCode() const {
-  return inconvertibleErrorCode();
+std::error_code نبيو_Stream_Error::convertToErrorCode() ثابت {
+  أرجع inconvertibleErrorCode();
 }

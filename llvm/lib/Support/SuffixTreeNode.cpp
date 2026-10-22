@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#ضمن "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned Suffix_بشيا_كلي::getStartIdx() ثابت { أرجع StartIdx; }
+فراغ Suffix_بشيا_كلي::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
+فراغ Suffix_بشيا_كلي::setConcatLen(unsigned Len) { ConcatLen = Len; }
+unsigned Suffix_بشيا_كلي::getConcatLen() ثابت { أرجع ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+منطقي Suffix_بشيا_Internal_كلي::is_سيو() ثابت {
+  أرجع getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+unsigned Suffix_بشيا_Internal_كلي::getEndIdx() ثابت { أرجع EndIdx; }
+فراغ Suffix_بشيا_Internal_كلي::setLink(Suffix_بشيا_Internal_كلي *L) {
+  أكد(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_بشيا_Internal_كلي *Suffix_بشيا_Internal_كلي::getLink() ثابت { أرجع Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+unsigned Suffix_بشيا_Leaf_كلي::getEndIdx() ثابت {
+  أكد(EndIdx && "EndIdx is empty?");
+  أرجع *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+unsigned Suffix_بشيا_Leaf_كلي::getSuffixIdx() ثابت { أرجع SuffixIdx; }
+فراغ Suffix_بشيا_Leaf_كلي::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+unsigned Suffix_بشيا_كلي::get_هغو_Leaf_Idx() ثابت { أرجع هغو_Leaf_Idx; }
+unsigned Suffix_بشيا_كلي::get_دام_Leaf_Idx() ثابت { أرجع دام_Leaf_Idx; }
+فراغ Suffix_بشيا_كلي::set_هغو_Leaf_Idx(unsigned Idx) { هغو_Leaf_Idx = Idx; }
+فراغ Suffix_بشيا_كلي::set_دام_Leaf_Idx(unsigned Idx) { دام_Leaf_Idx = Idx; }
