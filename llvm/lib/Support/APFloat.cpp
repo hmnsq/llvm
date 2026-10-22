@@ -11,25 +11,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/FloatingPointMode.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/StringSwitch.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cstring>
-#include <iterator>
-#include <limits.h>
+#ضمن "llvm/ADT/APFloat.h"
+#ضمن "llvm/ADT/APSInt.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/FloatingPointMode.h"
+#ضمن "llvm/ADT/FoldingSet.h"
+#ضمن "llvm/ADT/Hashing.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/StringSwitch.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cstring>
+#ضمن <iterator>
+#ضمن <limits.h>
 
 /// Shared headers from LLVM libc
 /// Make sure to add ${LLVM_SOURCE_DIR}/../libc to include directories.
@@ -39,22 +39,22 @@
 /// math functions to skip setting errnos and floating-point exceptions
 /// explicitly.  We also put them in a separate namespace so that the symbols
 /// do not clash with other libc math builds just in case.
-#define LIBC_NAMESPACE __llvm_libc_apfloat
-#define LIBC_MATH (LIBC_MATH_NO_ERRNO | LIBC_MATH_NO_EXCEPT)
+#تعریف_کړه LIBC_NAMESPACE __llvm_libc_apfloat
+#تعریف_کړه LIBC_MATH (LIBC_MATH_NO_ERRNO | LIBC_MATH_NO_EXCEPT)
 
-#include "shared/math.h"
-#include "shared/math_check_exceptions.h"
+#ضمن "shared/math.h"
+#ضمن "shared/math_check_exceptions.h"
 
-#define APFLOAT_DISPATCH_ON_SEMANTICS(METHOD_CALL)                             \
-  do {                                                                         \
-    if (usesLayout<IEEEFloat>(getSemantics()))                                 \
-      return U.IEEE.METHOD_CALL;                                               \
-    if (usesLayout<DoubleAPFloat>(getSemantics()))                             \
-      return U.Double.METHOD_CALL;                                             \
+#تعریف_کړه APFLOAT_DISPATCH_ON_SEMANTICS(لاره_CALL)                             \
+  افعل {                                                                         \
+    إذا (کاروي_Layout<IEEEFloat>(getSemantics()))                                 \
+      أرجع U.IEEE.لاره_CALL;                                               \
+    إذا (کاروي_Layout<DoubleAPFloat>(getSemantics()))                             \
+      أرجع U.Double.لاره_CALL;                                             \
     llvm_unreachable("Unexpected semantics");                                  \
-  } while (false)
+  } طالما (خطأ)
 
-using namespace llvm;
+کارول نطاق llvm;
 
 /// A macro used to combine two fcCategory enums into one key which can be used
 /// in a switch statement to classify how the interaction of two APFloat's
@@ -62,247 +62,247 @@ using namespace llvm;
 ///
 /// TODO: If clang source code is ever allowed to use constexpr in its own
 /// codebase, change this into a static inline function.
-#define PackCategoriesIntoKey(_lhs, _rhs) ((_lhs) * 4 + (_rhs))
+#تعریف_کړه Pack_Categories_Into_کلی(_lhs, _rhs) ((_lhs) * 4 + (_rhs))
 
 /* Assumed in hexadecimal significand parsing, and conversion to
    hexadecimal strings.  */
-static_assert(APFloatBase::integerPartWidth % 4 == 0, "Part width must be divisible by 4!");
+static_assert(APFloat_بنسټ::integer_Part_پلنوالی % 4 == 0, "Part width must be divisible by 4!");
 
-namespace llvm {
+نطاق llvm {
 
-constexpr fltSemantics APFloatBase::semIEEEhalf = {15, -14, 11, 16};
-constexpr fltSemantics APFloatBase::semBFloat = {127, -126, 8, 16};
-constexpr fltSemantics APFloatBase::semIEEEsingle = {127, -126, 24, 32};
-constexpr fltSemantics APFloatBase::semIEEEdouble = {1023, -1022, 53, 64};
-constexpr fltSemantics APFloatBase::semIEEEquad = {16383, -16382, 113, 128};
-constexpr fltSemantics APFloatBase::semX87DoubleExtended = {
+constexpr fltSemantics APFloat_بنسټ::semIEEEhalf = {15, -14, 11, 16};
+constexpr fltSemantics APFloat_بنسټ::semBFloat = {127, -126, 8, 16};
+constexpr fltSemantics APFloat_بنسټ::semIEEEsingle = {127, -126, 24, 32};
+constexpr fltSemantics APFloat_بنسټ::semIEEEdouble = {1023, -1022, 53, 64};
+constexpr fltSemantics APFloat_بنسټ::semIEEEquad = {16383, -16382, 113, 128};
+constexpr fltSemantics APFloat_بنسټ::semX87DoubleExtended = {
     16383,
     -16382,
     64,
     80,
     fltNonfiniteBehavior::IEEE754,
     fltNanEncoding::IEEE,
-    true,
-    true,
-    true,
-    true,
-    true};
-constexpr fltSemantics APFloatBase::semPPCDoubleDouble = {-1, 0, 0, 128};
-constexpr fltSemantics APFloatBase::semPPCDoubleDoubleLegacy = {
+    ریښتیا,
+    ریښتیا,
+    ریښتیا,
+    ریښتیا,
+    ریښتیا};
+constexpr fltSemantics APFloat_بنسټ::semPPCDoubleDouble = {-1, 0, 0, 128};
+constexpr fltSemantics APFloat_بنسټ::semPPCDoubleDoubleLegacy = {
     1023, -1022 + 53, 53 + 53, 128};
-constexpr fltSemantics APFloatBase::semFloat8E5M2 = {15, -14, 3, 8};
-constexpr fltSemantics APFloatBase::semFloat8E5M2FNUZ = {
+constexpr fltSemantics APFloat_بنسټ::semFloat8E5M2 = {15, -14, 3, 8};
+constexpr fltSemantics APFloat_بنسټ::semFloat8E5M2FNUZ = {
     15, -15, 3, 8, fltNonfiniteBehavior::NanOnly, fltNanEncoding::NegativeZero};
-constexpr fltSemantics APFloatBase::semFloat8E4M3 = {7, -6, 4, 8};
-constexpr fltSemantics APFloatBase::semFloat8E4M3FN = {
+constexpr fltSemantics APFloat_بنسټ::semFloat8E4M3 = {7, -6, 4, 8};
+constexpr fltSemantics APFloat_بنسټ::semFloat8E4M3FN = {
     8, -6, 4, 8, fltNonfiniteBehavior::NanOnly, fltNanEncoding::AllOnes};
-constexpr fltSemantics APFloatBase::semFloat8E4M3FNUZ = {
+constexpr fltSemantics APFloat_بنسټ::semFloat8E4M3FNUZ = {
     7, -7, 4, 8, fltNonfiniteBehavior::NanOnly, fltNanEncoding::NegativeZero};
-constexpr fltSemantics APFloatBase::semFloat8E4M3B11FNUZ = {
+constexpr fltSemantics APFloat_بنسټ::semFloat8E4M3B11FNUZ = {
     4, -10, 4, 8, fltNonfiniteBehavior::NanOnly, fltNanEncoding::NegativeZero};
-constexpr fltSemantics APFloatBase::semFloat8E3M4 = {3, -2, 5, 8};
-constexpr fltSemantics APFloatBase::semFloatTF32 = {127, -126, 11, 19};
-constexpr fltSemantics APFloatBase::semFloat8E8M0FNU = {
+constexpr fltSemantics APFloat_بنسټ::semFloat8E3M4 = {3, -2, 5, 8};
+constexpr fltSemantics APFloat_بنسټ::semFloatTF32 = {127, -126, 11, 19};
+constexpr fltSemantics APFloat_بنسټ::semFloat8E8M0FNU = {
     127,
     -127,
     1,
     8,
     fltNonfiniteBehavior::NanOnly,
     fltNanEncoding::AllOnes,
-    false,
-    false,
-    false,
-    false};
+    خطأ,
+    خطأ,
+    خطأ,
+    خطأ};
 
-constexpr fltSemantics APFloatBase::semFloat8E5M3FNU = {
+constexpr fltSemantics APFloat_بنسټ::semFloat8E5M3FNU = {
     16,
     -14,
     4,
     8,
     fltNonfiniteBehavior::NanOnly,
     fltNanEncoding::AllOnes,
-    true,
-    false,
-    false};
+    ریښتیا,
+    خطأ,
+    خطأ};
 
-constexpr fltSemantics APFloatBase::semFloat6E3M2FN = {
+constexpr fltSemantics APFloat_بنسټ::semFloat6E3M2FN = {
     4, -2, 3, 6, fltNonfiniteBehavior::FiniteOnly};
-constexpr fltSemantics APFloatBase::semFloat6E2M3FN = {
+constexpr fltSemantics APFloat_بنسټ::semFloat6E2M3FN = {
     2, 0, 4, 6, fltNonfiniteBehavior::FiniteOnly};
-constexpr fltSemantics APFloatBase::semFloat4E2M1FN = {
+constexpr fltSemantics APFloat_بنسټ::semFloat4E2M1FN = {
     2, 0, 2, 4, fltNonfiniteBehavior::FiniteOnly};
-constexpr fltSemantics APFloatBase::semBogus = {0, 0, 0, 0};
+constexpr fltSemantics APFloat_بنسټ::semBogus = {0, 0, 0, 0};
 
-const llvm::fltSemantics &APFloatBase::EnumToSemantics(Semantics S) {
-  switch (S) {
-  case S_IEEEhalf:
-    return IEEEhalf();
-  case S_BFloat:
-    return BFloat();
-  case S_IEEEsingle:
-    return IEEEsingle();
-  case S_IEEEdouble:
-    return IEEEdouble();
-  case S_IEEEquad:
-    return IEEEquad();
-  case S_x87DoubleExtended:
-    return x87DoubleExtended();
-  case S_PPCDoubleDouble:
-    return PPCDoubleDouble();
-  case S_PPCDoubleDoubleLegacy:
-    return PPCDoubleDoubleLegacy();
-  case S_Float8E5M2:
-    return Float8E5M2();
-  case S_Float8E5M2FNUZ:
-    return Float8E5M2FNUZ();
-  case S_Float8E4M3:
-    return Float8E4M3();
-  case S_Float8E4M3FN:
-    return Float8E4M3FN();
-  case S_Float8E4M3FNUZ:
-    return Float8E4M3FNUZ();
-  case S_Float8E4M3B11FNUZ:
-    return Float8E4M3B11FNUZ();
-  case S_Float8E3M4:
-    return Float8E3M4();
-  case S_FloatTF32:
-    return FloatTF32();
-  case S_Float8E8M0FNU:
-    return Float8E8M0FNU();
-  case S_Float8E5M3FNU:
-    return Float8E5M3FNU();
-  case S_Float6E3M2FN:
-    return Float6E3M2FN();
-  case S_Float6E2M3FN:
-    return Float6E2M3FN();
-  case S_Float4E2M1FN:
-    return Float4E2M1FN();
+ثابت llvm::fltSemantics &APFloat_بنسټ::Enum_منزل_Semantics(Semantics S) {
+  بدل (S) {
+  حالة S_IEEEhalf:
+    أرجع IEEEhalf();
+  حالة S_BFloat:
+    أرجع BFloat();
+  حالة S_IEEEsingle:
+    أرجع IEEEsingle();
+  حالة S_IEEEdouble:
+    أرجع IEEEdouble();
+  حالة S_IEEEquad:
+    أرجع IEEEquad();
+  حالة S_x87DoubleExtended:
+    أرجع x87DoubleExtended();
+  حالة S_PPCDoubleDouble:
+    أرجع PPCDoubleDouble();
+  حالة S_PPCDoubleDoubleLegacy:
+    أرجع PPCDoubleDoubleLegacy();
+  حالة S_Float8E5M2:
+    أرجع Float8E5M2();
+  حالة S_Float8E5M2FNUZ:
+    أرجع Float8E5M2FNUZ();
+  حالة S_Float8E4M3:
+    أرجع Float8E4M3();
+  حالة S_Float8E4M3FN:
+    أرجع Float8E4M3FN();
+  حالة S_Float8E4M3FNUZ:
+    أرجع Float8E4M3FNUZ();
+  حالة S_Float8E4M3B11FNUZ:
+    أرجع Float8E4M3B11FNUZ();
+  حالة S_Float8E3M4:
+    أرجع Float8E3M4();
+  حالة S_FloatTF32:
+    أرجع FloatTF32();
+  حالة S_Float8E8M0FNU:
+    أرجع Float8E8M0FNU();
+  حالة S_Float8E5M3FNU:
+    أرجع Float8E5M3FNU();
+  حالة S_Float6E3M2FN:
+    أرجع Float6E3M2FN();
+  حالة S_Float6E2M3FN:
+    أرجع Float6E2M3FN();
+  حالة S_Float4E2M1FN:
+    أرجع Float4E2M1FN();
   }
   llvm_unreachable("Unrecognised floating semantics");
 }
 
-APFloatBase::Semantics
-APFloatBase::SemanticsToEnum(const llvm::fltSemantics &Sem) {
-  if (&Sem == &llvm::APFloat::IEEEhalf())
-    return S_IEEEhalf;
-  else if (&Sem == &llvm::APFloat::BFloat())
-    return S_BFloat;
-  else if (&Sem == &llvm::APFloat::IEEEsingle())
-    return S_IEEEsingle;
-  else if (&Sem == &llvm::APFloat::IEEEdouble())
-    return S_IEEEdouble;
-  else if (&Sem == &llvm::APFloat::IEEEquad())
-    return S_IEEEquad;
-  else if (&Sem == &llvm::APFloat::x87DoubleExtended())
-    return S_x87DoubleExtended;
-  else if (&Sem == &llvm::APFloat::PPCDoubleDouble())
-    return S_PPCDoubleDouble;
-  else if (&Sem == &llvm::APFloat::PPCDoubleDoubleLegacy())
-    return S_PPCDoubleDoubleLegacy;
-  else if (&Sem == &llvm::APFloat::Float8E5M2())
-    return S_Float8E5M2;
-  else if (&Sem == &llvm::APFloat::Float8E5M2FNUZ())
-    return S_Float8E5M2FNUZ;
-  else if (&Sem == &llvm::APFloat::Float8E4M3())
-    return S_Float8E4M3;
-  else if (&Sem == &llvm::APFloat::Float8E4M3FN())
-    return S_Float8E4M3FN;
-  else if (&Sem == &llvm::APFloat::Float8E4M3FNUZ())
-    return S_Float8E4M3FNUZ;
-  else if (&Sem == &llvm::APFloat::Float8E4M3B11FNUZ())
-    return S_Float8E4M3B11FNUZ;
-  else if (&Sem == &llvm::APFloat::Float8E3M4())
-    return S_Float8E3M4;
-  else if (&Sem == &llvm::APFloat::FloatTF32())
-    return S_FloatTF32;
-  else if (&Sem == &llvm::APFloat::Float8E8M0FNU())
-    return S_Float8E8M0FNU;
-  else if (&Sem == &llvm::APFloat::Float8E5M3FNU())
-    return S_Float8E5M3FNU;
-  else if (&Sem == &llvm::APFloat::Float6E3M2FN())
-    return S_Float6E3M2FN;
-  else if (&Sem == &llvm::APFloat::Float6E2M3FN())
-    return S_Float6E2M3FN;
-  else if (&Sem == &llvm::APFloat::Float4E2M1FN())
-    return S_Float4E2M1FN;
-  else
+APFloat_بنسټ::Semantics
+APFloat_بنسټ::Semantics_منزل_Enum(ثابت llvm::fltSemantics &Sem) {
+  إذا (&Sem == &llvm::APFloat::IEEEhalf())
+    أرجع S_IEEEhalf;
+  وإلا إذا (&Sem == &llvm::APFloat::BFloat())
+    أرجع S_BFloat;
+  وإلا إذا (&Sem == &llvm::APFloat::IEEEsingle())
+    أرجع S_IEEEsingle;
+  وإلا إذا (&Sem == &llvm::APFloat::IEEEdouble())
+    أرجع S_IEEEdouble;
+  وإلا إذا (&Sem == &llvm::APFloat::IEEEquad())
+    أرجع S_IEEEquad;
+  وإلا إذا (&Sem == &llvm::APFloat::x87DoubleExtended())
+    أرجع S_x87DoubleExtended;
+  وإلا إذا (&Sem == &llvm::APFloat::PPCDoubleDouble())
+    أرجع S_PPCDoubleDouble;
+  وإلا إذا (&Sem == &llvm::APFloat::PPCDoubleDoubleLegacy())
+    أرجع S_PPCDoubleDoubleLegacy;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E5M2())
+    أرجع S_Float8E5M2;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E5M2FNUZ())
+    أرجع S_Float8E5M2FNUZ;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E4M3())
+    أرجع S_Float8E4M3;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E4M3FN())
+    أرجع S_Float8E4M3FN;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E4M3FNUZ())
+    أرجع S_Float8E4M3FNUZ;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E4M3B11FNUZ())
+    أرجع S_Float8E4M3B11FNUZ;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E3M4())
+    أرجع S_Float8E3M4;
+  وإلا إذا (&Sem == &llvm::APFloat::FloatTF32())
+    أرجع S_FloatTF32;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E8M0FNU())
+    أرجع S_Float8E8M0FNU;
+  وإلا إذا (&Sem == &llvm::APFloat::Float8E5M3FNU())
+    أرجع S_Float8E5M3FNU;
+  وإلا إذا (&Sem == &llvm::APFloat::Float6E3M2FN())
+    أرجع S_Float6E3M2FN;
+  وإلا إذا (&Sem == &llvm::APFloat::Float6E2M3FN())
+    أرجع S_Float6E2M3FN;
+  وإلا إذا (&Sem == &llvm::APFloat::Float4E2M1FN())
+    أرجع S_Float4E2M1FN;
+  وإلا
     llvm_unreachable("Unknown floating semantics");
 }
 
-bool APFloatBase::isRepresentableBy(const fltSemantics &A,
-                                    const fltSemantics &B) {
-  return A.maxExponent <= B.maxExponent && A.minExponent >= B.minExponent &&
+منطقي APFloat_بنسټ::isRepresentableBy(ثابت fltSemantics &A,
+                                    ثابت fltSemantics &B) {
+  أرجع A.maxExponent <= B.maxExponent && A.minExponent >= B.minExponent &&
          A.precision <= B.precision;
 }
 
-bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
-                                            const fltSemantics &InitialTo,
-                                            bool IgnoreNaNs) {
-  if (&From == &InitialTo)
-    return true;
+منطقي APFloat_بنسټ::is_Losslessly_Convertible_منزل(ثابت fltSemantics &From,
+                                            ثابت fltSemantics &Initial_منزل,
+                                            منطقي IgnoreNaNs) {
+  إذا (&From == &Initial_منزل)
+    أرجع ریښتیا;
 
   // PPC double-double cannot be described by a conventional exponent range
   // and precision. In particular, converting it to another semantics drops
   // its low double, so conservatively reject conversions from it.
-  if (&From == &semPPCDoubleDouble)
-    return false;
+  إذا (&From == &semPPCDoubleDouble)
+    أرجع خطأ;
 
   // Converting to PPC double-double is lossless exactly when the value fits
   // in its high double. In other words, the conversion is lossless if the
   // conversion to IEEEdouble is lossless.
-  const fltSemantics &To =
-      &InitialTo == &semPPCDoubleDouble ? semIEEEdouble : InitialTo;
+  ثابت fltSemantics &منزل =
+      &Initial_منزل == &semPPCDoubleDouble ? semIEEEdouble : Initial_منزل;
 
-  if (!isRepresentableBy(From, To))
-    return false;
+  إذا (!isRepresentableBy(From, منزل))
+    أرجع خطأ;
 
-  if ((From.hasZero && !To.hasZero) ||
-      (From.hasSignedRepr && !To.hasSignedRepr))
-    return false;
+  إذا ((From.hasZero && !منزل.hasZero) ||
+      (From.hasSignedRepr && !منزل.hasSignedRepr))
+    أرجع خطأ;
 
   // NegativeZero NaN encoding repurposes the negative-zero bit pattern, so a
   // conversion to such a format cannot preserve a source negative zero.
-  bool FromHasSignedZero = From.hasZero && From.hasSignedRepr &&
+  منطقي FromHasSignedZero = From.hasZero && From.hasSignedRepr &&
                            From.nanEncoding != fltNanEncoding::NegativeZero;
-  bool ToHasSignedZero = To.hasZero && To.hasSignedRepr &&
-                         To.nanEncoding != fltNanEncoding::NegativeZero;
-  if (FromHasSignedZero && !ToHasSignedZero)
-    return false;
+  منطقي منزل_Has_Signed_Zero = منزل.hasZero && منزل.hasSignedRepr &&
+                         منزل.nanEncoding != fltNanEncoding::NegativeZero;
+  إذا (FromHasSignedZero && !منزل_Has_Signed_Zero)
+    أرجع خطأ;
 
   // isRepresentableBy compares normalized exponent ranges. Also ensure that
   // the smallest source value, which may be denormal, is represented exactly
   // by the destination semantics.
-  APFloat SmallestFrom = APFloat::getSmallest(From);
-  bool LosesInfo = false;
-  (void)SmallestFrom.convert(To, APFloat::rmNearestTiesToEven, &LosesInfo);
-  if (LosesInfo)
-    return false;
+  APFloat تر_ټولو_کوچنی_From = APFloat::get_تر_ټولو_کوچنی(From);
+  منطقي LosesInfo = خطأ;
+  (فراغ)تر_ټولو_کوچنی_From.convert(منزل, APFloat::rm_تر_ټولو_نږدې_Ties_منزل_Even, &LosesInfo);
+  إذا (LosesInfo)
+    أرجع خطأ;
 
-  if (From.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
-    return true;
+  إذا (From.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+    أرجع ریښتیا;
 
   // Even when NaN representations can be ignored, NaNs must remain NaNs and
   // infinities must remain infinities. Otherwise the conversion can change
   // whether an operation with nnan has poison-producing operands.
-  if (IgnoreNaNs) {
-    if (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
-      return To.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
-    return To.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
+  إذا (IgnoreNaNs) {
+    إذا (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
+      أرجع منزل.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
+    أرجع منزل.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
   }
 
-  if (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
+  إذا (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
     // Converting an IEEE signaling NaN to another semantics quiets it, so the
     // original value cannot be recovered by converting it back.
-    return false;
+    أرجع خطأ;
   }
 
   // NanOnly formats have no signaling NaNs. IEEE semantics can represent
   // their quiet NaNs; conversions between NanOnly formats are conservatively
   // accepted only when they use the same NaN encoding.
-  if (To.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
-    return true;
-  return To.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
-         From.nanEncoding == To.nanEncoding;
+  إذا (منزل.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
+    أرجع ریښتیا;
+  أرجع منزل.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+         From.nanEncoding == منزل.nanEncoding;
 }
 
 /* A tight upper bound on number of parts required to hold the value
@@ -316,127 +316,127 @@ bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
    being zero (consider the trivial case of 1 * 1, tcFullMultiply
    requires two parts to hold the single-part result).  So we add an
    extra one to guarantee enough space whilst multiplying.  */
-[[maybe_unused]] constexpr unsigned maxExponent = 16383;
+[[maybe_ناکارول_شوی]] constexpr بینښه maxExponent = 16383;
 
 // Decimal exponents in the f16 and f32 ranges need at most 2 and 6 parts.
 // Keep 16 parts (128 bytes) inline: enough for 5^413, but not a large stack
 // frame. Longer fractional spellings use heap storage.
-static constexpr unsigned NumPow5PartsOnStack = 16;
+ساكن constexpr بینښه عدد_Pow5_Parts_On_ډېری = 16;
 
-static unsigned int powerOfFivePartsForExponent(unsigned int power) {
-  assert(power <= maxExponent);
+ساكن بینښه صحيح power_د_Five_Parts_For_Exponent(بینښه صحيح power) {
+  أكد(power <= maxExponent);
 
   // 815 / 351 is an upper bound on log2(5).  Reserve an additional part for
   // tcFullMultiply, which writes the full product width even when its most
   // significant part is zero.
-  return 2 + ((power * 815) / (351 * APFloatBase::integerPartWidth));
+  أرجع 2 + ((power * 815) / (351 * APFloat_بنسټ::integer_Part_پلنوالی));
 }
 
-unsigned int APFloatBase::semanticsPrecision(const fltSemantics &semantics) {
-  return semantics.precision;
+بینښه صحيح APFloat_بنسټ::semanticsPrecision(ثابت fltSemantics &semantics) {
+  أرجع semantics.precision;
 }
-APFloatBase::ExponentType
-APFloatBase::semanticsMaxExponent(const fltSemantics &semantics) {
-  return semantics.maxExponent;
+APFloat_بنسټ::ExponentType
+APFloat_بنسټ::semanticsMaxExponent(ثابت fltSemantics &semantics) {
+  أرجع semantics.maxExponent;
 }
-APFloatBase::ExponentType
-APFloatBase::semanticsMinExponent(const fltSemantics &semantics) {
-  return semantics.minExponent;
+APFloat_بنسټ::ExponentType
+APFloat_بنسټ::semanticsMinExponent(ثابت fltSemantics &semantics) {
+  أرجع semantics.minExponent;
 }
-unsigned int APFloatBase::semanticsSizeInBits(const fltSemantics &semantics) {
-  return semantics.sizeInBits;
+بینښه صحيح APFloat_بنسټ::semantics_اندازه_دننه_بټونه(ثابت fltSemantics &semantics) {
+  أرجع semantics.اندازه_دننه_بټونه;
 }
-unsigned int APFloatBase::semanticsIntSizeInBits(const fltSemantics &semantics,
-                                                 bool isSigned) {
+بینښه صحيح APFloat_بنسټ::semantics_Int_اندازه_دننه_بټونه(ثابت fltSemantics &semantics,
+                                                 منطقي isSigned) {
   // The max FP value is pow(2, MaxExponent) * (1 + MaxFraction), so we need
   // at least one more bit than the MaxExponent to hold the max FP value.
-  unsigned int MinBitWidth = semanticsMaxExponent(semantics) + 1;
+  بینښه صحيح Min_بټ_پلنوالی = semanticsMaxExponent(semantics) + 1;
   // Extra sign bit needed.
-  if (isSigned)
-    ++MinBitWidth;
-  return MinBitWidth;
+  إذا (isSigned)
+    ++Min_بټ_پلنوالی;
+  أرجع Min_بټ_پلنوالی;
 }
 
-bool APFloatBase::semanticsHasZero(const fltSemantics &semantics) {
-  return semantics.hasZero;
+منطقي APFloat_بنسټ::semanticsHasZero(ثابت fltSemantics &semantics) {
+  أرجع semantics.hasZero;
 }
 
-bool APFloatBase::semanticsHasSignedRepr(const fltSemantics &semantics) {
-  return semantics.hasSignedRepr;
+منطقي APFloat_بنسټ::semanticsHasSignedRepr(ثابت fltSemantics &semantics) {
+  أرجع semantics.hasSignedRepr;
 }
 
-bool APFloatBase::semanticsHasInf(const fltSemantics &semantics) {
-  return semantics.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
+منطقي APFloat_بنسټ::semanticsHasInf(ثابت fltSemantics &semantics) {
+  أرجع semantics.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
 }
 
-bool APFloatBase::semanticsHasNaN(const fltSemantics &semantics) {
-  return semantics.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
+منطقي APFloat_بنسټ::semanticsHasNaN(ثابت fltSemantics &semantics) {
+  أرجع semantics.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
 }
 
-bool APFloatBase::isIEEELikeFP(const fltSemantics &semantics) {
+منطقي APFloat_بنسټ::isIEEELikeFP(ثابت fltSemantics &semantics) {
   // Keep in sync with Type::isIEEELikeFPTy
-  return SemanticsToEnum(semantics) <= S_IEEEquad;
+  أرجع Semantics_منزل_Enum(semantics) <= S_IEEEquad;
 }
 
-bool APFloatBase::hasSignBitInMSB(const fltSemantics &semantics) {
-  return semantics.hasSignBitInMSB;
+منطقي APFloat_بنسټ::has_Sign_بټ_دننه_MSB(ثابت fltSemantics &semantics) {
+  أرجع semantics.has_Sign_بټ_دننه_MSB;
 }
 
-bool APFloatBase::isRepresentableAsNormalIn(const fltSemantics &Src,
-                                            const fltSemantics &Dst) {
+منطقي APFloat_بنسټ::is_Representable_As_نورمال_دننه(ثابت fltSemantics &Src,
+                                            ثابت fltSemantics &Dst) {
   // Exponent range must be larger.
-  if (Src.maxExponent >= Dst.maxExponent || Src.minExponent <= Dst.minExponent)
-    return false;
+  إذا (Src.maxExponent >= Dst.maxExponent || Src.minExponent <= Dst.minExponent)
+    أرجع خطأ;
 
   // If the mantissa is long enough, the result value could still be denormal
   // with a larger exponent range.
   //
   // FIXME: This condition is probably not accurate but also shouldn't be a
   // practical concern with existing types.
-  return Dst.precision >= Src.precision;
+  أرجع Dst.precision >= Src.precision;
 }
 
-unsigned APFloatBase::getSizeInBits(const fltSemantics &Sem) {
-  return Sem.sizeInBits;
+بینښه APFloat_بنسټ::get_اندازه_دننه_بټونه(ثابت fltSemantics &Sem) {
+  أرجع Sem.اندازه_دننه_بټونه;
 }
 
-static constexpr APFloatBase::ExponentType
-exponentZero(const fltSemantics &semantics) {
-  return semantics.minExponent - 1;
+ساكن constexpr APFloat_بنسټ::ExponentType
+exponentZero(ثابت fltSemantics &semantics) {
+  أرجع semantics.minExponent - 1;
 }
 
-static constexpr APFloatBase::ExponentType
-exponentInf(const fltSemantics &semantics) {
-  return semantics.maxExponent + 1;
+ساكن constexpr APFloat_بنسټ::ExponentType
+exponentInf(ثابت fltSemantics &semantics) {
+  أرجع semantics.maxExponent + 1;
 }
 
-static constexpr APFloatBase::ExponentType
-exponentNaN(const fltSemantics &semantics) {
-  if (semantics.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
-    if (semantics.nanEncoding == fltNanEncoding::NegativeZero)
-      return exponentZero(semantics);
-    if (semantics.hasSignedRepr || semantics.precision > 1)
-      return semantics.maxExponent;
+ساكن constexpr APFloat_بنسټ::ExponentType
+exponentNaN(ثابت fltSemantics &semantics) {
+  إذا (semantics.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+    إذا (semantics.nanEncoding == fltNanEncoding::NegativeZero)
+      أرجع exponentZero(semantics);
+    إذا (semantics.hasSignedRepr || semantics.precision > 1)
+      أرجع semantics.maxExponent;
   }
-  return semantics.maxExponent + 1;
+  أرجع semantics.maxExponent + 1;
 }
 
 /* A bunch of private, handy routines.  */
 
-static inline Error createError(const Twine &Err) {
-  return make_error<StringError>(Err, inconvertibleErrorCode());
+ساكن مضمن Error createError(ثابت Twine &Err) {
+  أرجع make_error<StringError>(Err, inconvertible_Error_کوډ());
 }
 
-static constexpr inline unsigned int partCountForBits(unsigned int bits) {
-  return std::max(1u, (bits + APFloatBase::integerPartWidth - 1) /
-                          APFloatBase::integerPartWidth);
+ساكن constexpr مضمن بینښه صحيح part_شمېر_For_بټونه(بینښه صحيح بټونه) {
+  أرجع std::max(1u, (بټونه + APFloat_بنسټ::integer_Part_پلنوالی - 1) /
+                          APFloat_بنسټ::integer_Part_پلنوالی);
 }
 
 /* Returns 0U-9U.  Return values >= 10U are not digits.  */
-static inline unsigned int
-decDigitValue(unsigned int c)
+ساكن مضمن بینښه صحيح
+dec_Digit_ارزښت(بینښه صحيح c)
 {
-  return c - '0';
+  أرجع c - '0';
 }
 
 /* Return the value of a decimal exponent of the form
@@ -444,114 +444,114 @@ decDigitValue(unsigned int c)
 
    If the exponent overflows, returns a large exponent with the
    appropriate sign.  */
-static Expected<int> readExponent(StringRef::iterator begin,
-                                  StringRef::iterator end) {
-  const unsigned int overlargeExponent = 24000;  /* FIXME.  */
+ساكن Expected<صحيح> readExponent(StringRef::iterator begin,
+                                  StringRef::iterator پای_ټکی) {
+  ثابت بینښه صحيح overlargeExponent = 24000;  /* FIXME.  */
   StringRef::iterator p = begin;
 
   // Treat no exponent as 0 to match binutils
-  if (p == end || ((*p == '-' || *p == '+') && (p + 1) == end))
-    return 0;
+  إذا (p == پای_ټکی || ((*p == '-' || *p == '+') && (p + 1) == پای_ټکی))
+    أرجع 0;
 
-  bool isNegative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  منطقي isNegative = *p == '-';
+  إذا (*p == '-' || *p == '+') {
     p++;
-    if (p == end)
-      return createError("Exponent has no digits");
+    إذا (p == پای_ټکی)
+      أرجع createError("Exponent has no digits");
   }
 
-  unsigned absExponent = decDigitValue(*p++);
-  if (absExponent >= 10U)
-    return createError("Invalid character in exponent");
+  بینښه absExponent = dec_Digit_ارزښت(*p++);
+  إذا (absExponent >= 10U)
+    أرجع createError("Invalid character in exponent");
 
-  for (; p != end; ++p) {
-    unsigned value = decDigitValue(*p);
-    if (value >= 10U)
-      return createError("Invalid character in exponent");
+  لكل (; p != پای_ټکی; ++p) {
+    بینښه ارزښت_2 = dec_Digit_ارزښت(*p);
+    إذا (ارزښت_2 >= 10U)
+      أرجع createError("Invalid character in exponent");
 
-    absExponent = absExponent * 10U + value;
-    if (absExponent >= overlargeExponent) {
+    absExponent = absExponent * 10U + ارزښت_2;
+    إذا (absExponent >= overlargeExponent) {
       absExponent = overlargeExponent;
-      break;
+      اكسر;
     }
   }
 
-  if (isNegative)
-    return -(int) absExponent;
-  else
-    return (int) absExponent;
+  إذا (isNegative)
+    أرجع -(صحيح) absExponent;
+  وإلا
+    أرجع (صحيح) absExponent;
 }
 
 /* This is ugly and needs cleaning up, but I don't immediately see
    how whilst remaining safe.  */
-static Expected<int> totalExponent(StringRef::iterator p,
-                                   StringRef::iterator end,
-                                   int exponentAdjustment) {
-  int exponent = 0;
+ساكن Expected<صحيح> ټول_Exponent(StringRef::iterator p,
+                                   StringRef::iterator پای_ټکی,
+                                   صحيح exponentAdjustment) {
+  صحيح exponent = 0;
 
-  if (p == end)
-    return createError("Exponent has no digits");
+  إذا (p == پای_ټکی)
+    أرجع createError("Exponent has no digits");
 
-  bool negative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  منطقي negative = *p == '-';
+  إذا (*p == '-' || *p == '+') {
     p++;
-    if (p == end)
-      return createError("Exponent has no digits");
+    إذا (p == پای_ټکی)
+      أرجع createError("Exponent has no digits");
   }
 
-  int unsignedExponent = 0;
-  bool overflow = false;
-  for (; p != end; ++p) {
-    unsigned int value;
+  صحيح unsignedExponent = 0;
+  منطقي ډکېدنه_2 = خطأ;
+  لكل (; p != پای_ټکی; ++p) {
+    بینښه صحيح ارزښت_2;
 
-    value = decDigitValue(*p);
-    if (value >= 10U)
-      return createError("Invalid character in exponent");
+    ارزښت_2 = dec_Digit_ارزښت(*p);
+    إذا (ارزښت_2 >= 10U)
+      أرجع createError("Invalid character in exponent");
 
-    unsignedExponent = unsignedExponent * 10 + value;
-    if (unsignedExponent > 32767) {
-      overflow = true;
-      break;
+    unsignedExponent = unsignedExponent * 10 + ارزښت_2;
+    إذا (unsignedExponent > 32767) {
+      ډکېدنه_2 = ریښتیا;
+      اكسر;
     }
   }
 
-  if (exponentAdjustment > 32767 || exponentAdjustment < -32768)
-    overflow = true;
+  إذا (exponentAdjustment > 32767 || exponentAdjustment < -32768)
+    ډکېدنه_2 = ریښتیا;
 
-  if (!overflow) {
+  إذا (!ډکېدنه_2) {
     exponent = unsignedExponent;
-    if (negative)
+    إذا (negative)
       exponent = -exponent;
     exponent += exponentAdjustment;
-    if (exponent > 32767 || exponent < -32768)
-      overflow = true;
+    إذا (exponent > 32767 || exponent < -32768)
+      ډکېدنه_2 = ریښتیا;
   }
 
-  if (overflow)
+  إذا (ډکېدنه_2)
     exponent = negative ? -32768: 32767;
 
-  return exponent;
+  أرجع exponent;
 }
 
-static Expected<StringRef::iterator>
-skipLeadingZeroesAndAnyDot(StringRef::iterator begin, StringRef::iterator end,
+ساكن Expected<StringRef::iterator>
+skipLeadingZeroesAndAnyDot(StringRef::iterator begin, StringRef::iterator پای_ټکی,
                            StringRef::iterator *dot) {
   StringRef::iterator p = begin;
-  *dot = end;
-  while (p != end && *p == '0')
+  *dot = پای_ټکی;
+  طالما (p != پای_ټکی && *p == '0')
     p++;
 
-  if (p != end && *p == '.') {
+  إذا (p != پای_ټکی && *p == '.') {
     *dot = p++;
 
-    if (end - begin == 1)
-      return createError("Significand has no digits");
+    إذا (پای_ټکی - begin == 1)
+      أرجع createError("Significand has no digits");
 
-    while (p != end && *p == '0')
+    طالما (p != پای_ټکی && *p == '0')
       p++;
   }
 
-  return p;
+  أرجع p;
 }
 
 /* Given a normal decimal floating point number of the form
@@ -567,154 +567,154 @@ skipLeadingZeroesAndAnyDot(StringRef::iterator begin, StringRef::iterator end,
    If the value is zero, V->firstSigDigit points to a non-digit, and
    the return exponent is zero.
 */
-struct decimalInfo {
-  const char *firstSigDigit;
-  const char *lastSigDigit;
-  int exponent;
-  int normalizedExponent;
+بنية decimalInfo {
+  ثابت حرف *لومړی_Sig_Digit;
+  ثابت حرف *وروستی_Sig_Digit;
+  صحيح exponent;
+  صحيح normalizedExponent;
 };
 
-static Error interpretDecimal(StringRef::iterator begin,
-                              StringRef::iterator end, decimalInfo *D) {
-  StringRef::iterator dot = end;
+ساكن Error interpretDecimal(StringRef::iterator begin,
+                              StringRef::iterator پای_ټکی, decimalInfo *D) {
+  StringRef::iterator dot = پای_ټکی;
 
-  auto PtrOrErr = skipLeadingZeroesAndAnyDot(begin, end, &dot);
-  if (!PtrOrErr)
-    return PtrOrErr.takeError();
+  خپلکاری PtrOrErr = skipLeadingZeroesAndAnyDot(begin, پای_ټکی, &dot);
+  إذا (!PtrOrErr)
+    أرجع PtrOrErr.takeError();
   StringRef::iterator p = *PtrOrErr;
 
-  D->firstSigDigit = p;
+  D->لومړی_Sig_Digit = p;
   D->exponent = 0;
   D->normalizedExponent = 0;
 
-  for (; p != end; ++p) {
-    if (*p == '.') {
-      if (dot != end)
-        return createError("String contains multiple dots");
+  لكل (; p != پای_ټکی; ++p) {
+    إذا (*p == '.') {
+      إذا (dot != پای_ټکی)
+        أرجع createError("String contains multiple dots");
       dot = p++;
-      if (p == end)
-        break;
+      إذا (p == پای_ټکی)
+        اكسر;
     }
-    if (decDigitValue(*p) >= 10U)
-      break;
+    إذا (dec_Digit_ارزښت(*p) >= 10U)
+      اكسر;
   }
 
-  if (p != end) {
-    if (*p != 'e' && *p != 'E')
-      return createError("Invalid character in significand");
-    if (p == begin)
-      return createError("Significand has no digits");
-    if (dot != end && p - begin == 1)
-      return createError("Significand has no digits");
+  إذا (p != پای_ټکی) {
+    إذا (*p != 'e' && *p != 'E')
+      أرجع createError("Invalid character in significand");
+    إذا (p == begin)
+      أرجع createError("Significand has no digits");
+    إذا (dot != پای_ټکی && p - begin == 1)
+      أرجع createError("Significand has no digits");
 
     /* p points to the first non-digit in the string */
-    auto ExpOrErr = readExponent(p + 1, end);
-    if (!ExpOrErr)
-      return ExpOrErr.takeError();
+    خپلکاری ExpOrErr = readExponent(p + 1, پای_ټکی);
+    إذا (!ExpOrErr)
+      أرجع ExpOrErr.takeError();
     D->exponent = *ExpOrErr;
 
     /* Implied decimal point?  */
-    if (dot == end)
+    إذا (dot == پای_ټکی)
       dot = p;
   }
 
   /* If number is all zeroes accept any exponent.  */
-  if (p != D->firstSigDigit) {
+  إذا (p != D->لومړی_Sig_Digit) {
     /* Drop insignificant trailing zeroes.  */
-    if (p != begin) {
-      do
-        do
+    إذا (p != begin) {
+      افعل
+        افعل
           p--;
-        while (p != begin && *p == '0');
-      while (p != begin && *p == '.');
+        طالما (p != begin && *p == '0');
+      طالما (p != begin && *p == '.');
     }
 
     /* Adjust the exponents for any decimal point.  */
     D->exponent += static_cast<APFloat::ExponentType>((dot - p) - (dot > p));
     D->normalizedExponent = (D->exponent +
-              static_cast<APFloat::ExponentType>((p - D->firstSigDigit)
-                                      - (dot > D->firstSigDigit && dot < p)));
+              static_cast<APFloat::ExponentType>((p - D->لومړی_Sig_Digit)
+                                      - (dot > D->لومړی_Sig_Digit && dot < p)));
   }
 
-  D->lastSigDigit = p;
-  return Error::success();
+  D->وروستی_Sig_Digit = p;
+  أرجع Error::success();
 }
 
 /* Return the trailing fraction of a hexadecimal number.
    DIGITVALUE is the first hex digit of the fraction, P points to
    the next digit.  */
-static Expected<lostFraction>
-trailingHexadecimalFraction(StringRef::iterator p, StringRef::iterator end,
-                            unsigned int digitValue) {
+ساكن Expected<ورک_Fraction>
+trailingHexadecimalFraction(StringRef::iterator p, StringRef::iterator پای_ټکی,
+                            بینښه صحيح digit_ارزښت) {
   /* If the first trailing digit isn't 0 or 8 we can work out the
      fraction immediately.  */
-  if (digitValue > 8)
-    return lfMoreThanHalf;
-  else if (digitValue < 8 && digitValue > 0)
-    return lfLessThanHalf;
+  إذا (digit_ارزښت > 8)
+    أرجع lf_نور_Than_Half;
+  وإلا إذا (digit_ارزښت < 8 && digit_ارزښت > 0)
+    أرجع lfLessThanHalf;
 
   // Otherwise we need to find the first non-zero digit.
-  while (p != end && (*p == '0' || *p == '.'))
+  طالما (p != پای_ټکی && (*p == '0' || *p == '.'))
     p++;
 
-  if (p == end)
-    return createError("Invalid trailing hexadecimal fraction!");
+  إذا (p == پای_ټکی)
+    أرجع createError("Invalid trailing hexadecimal fraction!");
 
-  unsigned hexDigit = hexDigitValue(*p);
+  بینښه hexDigit = hex_Digit_ارزښت(*p);
 
   /* If we ran off the end it is exactly zero or one-half, otherwise
      a little more.  */
-  if (hexDigit == UINT_MAX)
-    return digitValue == 0 ? lfExactlyZero: lfExactlyHalf;
-  else
-    return digitValue == 0 ? lfLessThanHalf: lfMoreThanHalf;
+  إذا (hexDigit == UINT_MAX)
+    أرجع digit_ارزښت == 0 ? lfExactlyZero: lfExactlyHalf;
+  وإلا
+    أرجع digit_ارزښت == 0 ? lfLessThanHalf: lf_نور_Than_Half;
 }
 
 /* Return the fraction lost were a bignum truncated losing the least
    significant BITS bits.  */
-static lostFraction
-lostFractionThroughTruncation(const APFloatBase::integerPart *parts,
-                              unsigned int partCount,
-                              unsigned int bits)
+ساكن ورک_Fraction
+ورک_Fraction_Through_Truncation(ثابت APFloat_بنسټ::integerPart *parts,
+                              بینښه صحيح part_شمېر,
+                              بینښه صحيح بټونه)
 {
-  unsigned lsb = APInt::tcLSB(parts, partCount);
+  بینښه lsb = APInt::tcLSB(parts, part_شمېر);
 
   /* Note this is guaranteed true if bits == 0, or LSB == UINT_MAX.  */
-  if (bits <= lsb)
-    return lfExactlyZero;
-  if (bits == lsb + 1)
-    return lfExactlyHalf;
-  if (bits <= partCount * APFloatBase::integerPartWidth &&
-      APInt::tcExtractBit(parts, bits - 1))
-    return lfMoreThanHalf;
+  إذا (بټونه <= lsb)
+    أرجع lfExactlyZero;
+  إذا (بټونه == lsb + 1)
+    أرجع lfExactlyHalf;
+  إذا (بټونه <= part_شمېر * APFloat_بنسټ::integer_Part_پلنوالی &&
+      APInt::tc_ایستل_بټ(parts, بټونه - 1))
+    أرجع lf_نور_Than_Half;
 
-  return lfLessThanHalf;
+  أرجع lfLessThanHalf;
 }
 
 /* Shift DST right BITS bits noting lost fraction.  */
-static lostFraction
-shiftRight(APFloatBase::integerPart *dst, unsigned int parts, unsigned int bits)
+ساكن ورک_Fraction
+ښويدنه_ښی(APFloat_بنسټ::integerPart *dst, بینښه صحيح parts, بینښه صحيح بټونه)
 {
-  lostFraction lost_fraction = lostFractionThroughTruncation(dst, parts, bits);
+  ورک_Fraction ورک_fraction = ورک_Fraction_Through_Truncation(dst, parts, بټونه);
 
-  APInt::tcShiftRight(dst, parts, bits);
+  APInt::tc_ښويدنه_ښی(dst, parts, بټونه);
 
-  return lost_fraction;
+  أرجع ورک_fraction;
 }
 
 /* Combine the effect of two lost fractions.  */
-static lostFraction
-combineLostFractions(lostFraction moreSignificant,
-                     lostFraction lessSignificant)
+ساكن ورک_Fraction
+combine_ورک_Fractions(ورک_Fraction نور_Significant,
+                     ورک_Fraction lessSignificant)
 {
-  if (lessSignificant != lfExactlyZero) {
-    if (moreSignificant == lfExactlyZero)
-      moreSignificant = lfLessThanHalf;
-    else if (moreSignificant == lfExactlyHalf)
-      moreSignificant = lfMoreThanHalf;
+  إذا (lessSignificant != lfExactlyZero) {
+    إذا (نور_Significant == lfExactlyZero)
+      نور_Significant = lfLessThanHalf;
+    وإلا إذا (نور_Significant == lfExactlyHalf)
+      نور_Significant = lf_نور_Than_Half;
   }
 
-  return moreSignificant;
+  أرجع نور_Significant;
 }
 
 /* The error from the true value, in half-ulps, on multiplying two
@@ -724,109 +724,109 @@ combineLostFractions(lostFraction moreSignificant,
 
    See "How to Read Floating Point Numbers Accurately" by William D
    Clinger.  */
-static unsigned int
-HUerrBound(bool inexactMultiply, unsigned int HUerr1, unsigned int HUerr2)
+ساكن بینښه صحيح
+HUerrBound(منطقي inexactMultiply, بینښه صحيح HUerr1, بینښه صحيح HUerr2)
 {
-  assert(HUerr1 < 2 || HUerr2 < 2 || (HUerr1 + HUerr2 < 8));
+  أكد(HUerr1 < 2 || HUerr2 < 2 || (HUerr1 + HUerr2 < 8));
 
-  if (HUerr1 + HUerr2 == 0)
-    return inexactMultiply * 2;  /* <= inexactMultiply half-ulps.  */
-  else
-    return inexactMultiply + 2 * (HUerr1 + HUerr2);
+  إذا (HUerr1 + HUerr2 == 0)
+    أرجع inexactMultiply * 2;  /* <= inexactMultiply half-ulps.  */
+  وإلا
+    أرجع inexactMultiply + 2 * (HUerr1 + HUerr2);
 }
 
 /* The number of ulps from the boundary (zero, or half if ISNEAREST)
    when the least significant BITS are truncated.  BITS cannot be
    zero.  */
-static APFloatBase::integerPart
-ulpsFromBoundary(const APFloatBase::integerPart *parts, unsigned int bits,
-                 bool isNearest) {
-  assert(bits != 0);
+ساكن APFloat_بنسټ::integerPart
+ulpsFromBoundary(ثابت APFloat_بنسټ::integerPart *parts, بینښه صحيح بټونه,
+                 منطقي is_تر_ټولو_نږدې) {
+  أكد(بټونه != 0);
 
-  bits--;
-  unsigned count = bits / APFloatBase::integerPartWidth;
-  unsigned partBits = bits % APFloatBase::integerPartWidth + 1;
+  بټونه--;
+  بینښه شمېر = بټونه / APFloat_بنسټ::integer_Part_پلنوالی;
+  بینښه part_بټونه = بټونه % APFloat_بنسټ::integer_Part_پلنوالی + 1;
 
-  APFloatBase::integerPart part =
-      parts[count] & (~(APFloatBase::integerPart)0 >>
-                      (APFloatBase::integerPartWidth - partBits));
+  APFloat_بنسټ::integerPart part =
+      parts[شمېر] & (~(APFloat_بنسټ::integerPart)0 >>
+                      (APFloat_بنسټ::integer_Part_پلنوالی - part_بټونه));
 
-  APFloatBase::integerPart boundary;
-  if (isNearest)
-    boundary = (APFloatBase::integerPart) 1 << (partBits - 1);
-  else
+  APFloat_بنسټ::integerPart boundary;
+  إذا (is_تر_ټولو_نږدې)
+    boundary = (APFloat_بنسټ::integerPart) 1 << (part_بټونه - 1);
+  وإلا
     boundary = 0;
 
-  if (count == 0) {
-    if (part - boundary <= boundary - part)
-      return part - boundary;
-    else
-      return boundary - part;
+  إذا (شمېر == 0) {
+    إذا (part - boundary <= boundary - part)
+      أرجع part - boundary;
+    وإلا
+      أرجع boundary - part;
   }
 
-  if (part == boundary) {
-    while (--count)
-      if (parts[count])
-        return ~(APFloatBase::integerPart) 0; /* A lot.  */
+  إذا (part == boundary) {
+    طالما (--شمېر)
+      إذا (parts[شمېر])
+        أرجع ~(APFloat_بنسټ::integerPart) 0; /* A lot.  */
 
-    return parts[0];
-  } else if (part == boundary - 1) {
-    while (--count)
-      if (~parts[count])
-        return ~(APFloatBase::integerPart) 0; /* A lot.  */
+    أرجع parts[0];
+  } وإلا إذا (part == boundary - 1) {
+    طالما (--شمېر)
+      إذا (~parts[شمېر])
+        أرجع ~(APFloat_بنسټ::integerPart) 0; /* A lot.  */
 
-    return -parts[0];
+    أرجع -parts[0];
   }
 
-  return ~(APFloatBase::integerPart) 0; /* A lot.  */
+  أرجع ~(APFloat_بنسټ::integerPart) 0; /* A lot.  */
 }
 
-static constexpr unsigned PowerOfFivePartCounts[] = {1,  1,  2,  3,   5,  10,
+ساكن constexpr بینښه Power_د_Five_Part_Counts[] = {1,  1,  2,  3,   5,  10,
                                                      19, 38, 75, 149, 298};
 
-static constexpr APFloatBase::integerPart PowerOfFiveParts[] = {
-#include "APFloatPowerOfFiveTable.inc"
+ساكن constexpr APFloat_بنسټ::integerPart Power_د_Five_Parts[] = {
+#ضمن "APFloatPowerOfFiveTable.inc"
 };
 
 static_assert([] {
-  unsigned Sum = 0;
-  for (unsigned Count : PowerOfFivePartCounts)
-    Sum += Count;
-  return Sum;
-}() == std::size(PowerOfFiveParts));
+  بینښه مجموعه = 0;
+  لكل (بینښه شمېر_2 : Power_د_Five_Part_Counts)
+    مجموعه += شمېر_2;
+  أرجع مجموعه;
+}() == std::اندازه_2(Power_د_Five_Parts));
 
 /* Place pow(5, power) in DST, and return the number of parts used.
    DST must be at least one part larger than size of the answer.  */
-static unsigned int
-powerOf5(APFloatBase::integerPart *dst, unsigned int power) {
-  static const APFloatBase::integerPart firstEightPowers[] = {
+ساكن بینښه صحيح
+powerOf5(APFloat_بنسټ::integerPart *dst, بینښه صحيح power) {
+  ساكن ثابت APFloat_بنسټ::integerPart لومړی_Eight_Powers[] = {
       1, 5, 25, 125, 625, 3125, 15625, 78125};
 
-  SmallVector<APFloatBase::integerPart, NumPow5PartsOnStack> scratch;
-  scratch.resize_for_overwrite(powerOfFivePartsForExponent(power));
+  Small_ویکټور<APFloat_بنسټ::integerPart, عدد_Pow5_Parts_On_ډېری> scratch;
+  scratch.resize_for_overwrite(power_د_Five_Parts_For_Exponent(power));
 
-  APFloatBase::integerPart *p1, *p2;
-  const APFloatBase::integerPart *pow5;
+  APFloat_بنسټ::integerPart *p1, *p2;
+  ثابت APFloat_بنسټ::integerPart *pow5;
 
   p1 = dst;
-  p2 = scratch.data();
+  p2 = scratch.معلومات();
 
-  *p1 = firstEightPowers[power & 7];
+  *p1 = لومړی_Eight_Powers[power & 7];
   power >>= 3;
 
-  unsigned result = 1;
-  pow5 = PowerOfFiveParts;
+  بینښه پایله_2 = 1;
+  pow5 = Power_د_Five_Parts;
 
-  for (unsigned int n = 0; power; power >>= 1, n++) {
-    unsigned partsCount = PowerOfFivePartCounts[n];
+  لكل (بینښه صحيح n = 0; power; power >>= 1, n++) {
+    بینښه parts_شمېر = Power_د_Five_Part_Counts[n];
 
-    if (power & 1) {
-      APFloatBase::integerPart *tmp;
+    إذا (power & 1) {
+      APFloat_بنسټ::integerPart *tmp;
 
-      APInt::tcFullMultiply(p2, p1, pow5, result, partsCount);
-      result += partsCount;
-      if (p2[result - 1] == 0)
-        result--;
+      APInt::tc_ډک_Multiply(p2, p1, pow5, پایله_2, parts_شمېر);
+      پایله_2 += parts_شمېر;
+      إذا (p2[پایله_2 - 1] == 0)
+        پایله_2--;
 
       /* Now result is in p1 with partsCount parts and p2 is scratch
          space.  */
@@ -835,136 +835,136 @@ powerOf5(APFloatBase::integerPart *dst, unsigned int power) {
       p2 = tmp;
     }
 
-    pow5 += partsCount;
+    pow5 += parts_شمېر;
   }
 
-  if (p1 != dst)
-    APInt::tcAssign(dst, p1, result);
+  إذا (p1 != dst)
+    APInt::tc_ټاکل(dst, p1, پایله_2);
 
-  return result;
+  أرجع پایله_2;
 }
 
 /* Zero at the end to avoid modular arithmetic when adding one; used
    when rounding up during hexadecimal output.  */
-static const char hexDigitsLower[] = "0123456789abcdef0";
-static const char hexDigitsUpper[] = "0123456789ABCDEF0";
-static const char infinityL[] = "infinity";
-static const char infinityU[] = "INFINITY";
-static const char NaNL[] = "nan";
-static const char NaNU[] = "NAN";
+ساكن ثابت حرف hex_Digits_ښکتنی[] = "0123456789abcdef0";
+ساكن ثابت حرف hex_Digits_پاسنی[] = "0123456789ABCDEF0";
+ساكن ثابت حرف infinityL[] = "infinity";
+ساكن ثابت حرف infinityU[] = "INFINITY";
+ساكن ثابت حرف NaNL[] = "nan";
+ساكن ثابت حرف NaNU[] = "NAN";
 
 /* Write out an integerPart in hexadecimal, starting with the most
    significant nibble.  Write out exactly COUNT hexdigits, return
    COUNT.  */
-static unsigned int
-partAsHex (char *dst, APFloatBase::integerPart part, unsigned int count,
-           const char *hexDigitChars)
+ساكن بینښه صحيح
+partAsHex (حرف *dst, APFloat_بنسټ::integerPart part, بینښه صحيح شمېر,
+           ثابت حرف *hexDigitChars)
 {
-  unsigned int result = count;
+  بینښه صحيح پایله_2 = شمېر;
 
-  assert(count != 0 && count <= APFloatBase::integerPartWidth / 4);
+  أكد(شمېر != 0 && شمېر <= APFloat_بنسټ::integer_Part_پلنوالی / 4);
 
-  part >>= (APFloatBase::integerPartWidth - 4 * count);
-  while (count--) {
-    dst[count] = hexDigitChars[part & 0xf];
+  part >>= (APFloat_بنسټ::integer_Part_پلنوالی - 4 * شمېر);
+  طالما (شمېر--) {
+    dst[شمېر] = hexDigitChars[part & 0xf];
     part >>= 4;
   }
 
-  return result;
+  أرجع پایله_2;
 }
 
 /* Write out an unsigned decimal integer.  */
-static char *writeUnsignedDecimal(char *dst, unsigned int n) {
-  char buff[40], *p;
+ساكن حرف *writeUnsignedDecimal(حرف *dst, بینښه صحيح n) {
+  حرف buff[40], *p;
 
   p = buff;
-  do
+  افعل
     *p++ = '0' + n % 10;
-  while (n /= 10);
+  طالما (n /= 10);
 
-  do
+  افعل
     *dst++ = *--p;
-  while (p != buff);
+  طالما (p != buff);
 
-  return dst;
+  أرجع dst;
 }
 
 /* Write out a signed decimal integer.  */
-static char *writeSignedDecimal(char *dst, int value) {
-  if (value < 0) {
+ساكن حرف *writeSignedDecimal(حرف *dst, صحيح ارزښت_2) {
+  إذا (ارزښت_2 < 0) {
     *dst++ = '-';
-    dst = writeUnsignedDecimal(dst, -(unsigned) value);
-  } else {
-    dst = writeUnsignedDecimal(dst, value);
+    dst = writeUnsignedDecimal(dst, -(بینښه) ارزښت_2);
+  } وإلا {
+    dst = writeUnsignedDecimal(dst, ارزښت_2);
   }
 
-  return dst;
+  أرجع dst;
 }
 
 // Compute the ULP of the input using a definition from:
 // Jean-Michel Muller. On the definition of ulp(x). [Research Report] RR-5504,
 // LIP RR-2005-09, INRIA, LIP. 2005, pp.16. inria-00070503
-static APFloat harrisonUlp(const APFloat &X) {
-  const fltSemantics &Sem = X.getSemantics();
-  switch (X.getCategory()) {
-  case APFloat::fcNaN:
-    return APFloat::getQNaN(Sem);
-  case APFloat::fcInfinity:
-    return APFloat::getInf(Sem);
-  case APFloat::fcZero:
-    return APFloat::getSmallest(Sem);
-  case APFloat::fcNormal:
-    break;
+ساكن APFloat harrisonUlp(ثابت APFloat &X) {
+  ثابت fltSemantics &Sem = X.getSemantics();
+  بدل (X.getCategory()) {
+  حالة APFloat::fcNaN:
+    أرجع APFloat::getQNaN(Sem);
+  حالة APFloat::fcInfinity:
+    أرجع APFloat::getInf(Sem);
+  حالة APFloat::fcZero:
+    أرجع APFloat::get_تر_ټولو_کوچنی(Sem);
+  حالة APFloat::fc_نورمال:
+    اكسر;
   }
-  if (X.isDenormal() || X.isSmallestNormalized())
-    return APFloat::getSmallest(Sem);
-  int Exp = ilogb(X);
-  if (X.getExactLog2() != INT_MIN)
+  إذا (X.isDenormal() || X.is_تر_ټولو_کوچنی_Normalized())
+    أرجع APFloat::get_تر_ټولو_کوچنی(Sem);
+  صحيح Exp = ilogb(X);
+  إذا (X.getExactLog2() != INT_MIN)
     Exp -= 1;
-  return scalbn(APFloat::getOne(Sem), Exp - (Sem.precision - 1),
-                APFloat::rmNearestTiesToEven);
+  أرجع scalbn(APFloat::getOne(Sem), Exp - (Sem.precision - 1),
+                APFloat::rm_تر_ټولو_نږدې_Ties_منزل_Even);
 }
 
-namespace detail {
+نطاق detail {
 /* Constructors.  */
-void IEEEFloat::initialize(const fltSemantics *ourSemantics) {
+فراغ IEEEFloat::initialize(ثابت fltSemantics *ourSemantics) {
   semantics = ourSemantics;
-  unsigned count = partCount();
-  if (count > 1)
-    significand.parts = new integerPart[count];
+  بینښه شمېر = part_شمېر();
+  إذا (شمېر > 1)
+    significand.parts = جديد integerPart[شمېر];
 }
 
-void IEEEFloat::freeSignificand() {
-  if (needsCleanup())
-    delete [] significand.parts;
+فراغ IEEEFloat::freeSignificand() {
+  إذا (needsCleanup())
+    ړنګول [] significand.parts;
 }
 
-void IEEEFloat::assign(const IEEEFloat &rhs) {
-  assert(semantics == rhs.semantics);
+فراغ IEEEFloat::ټاکل(ثابت IEEEFloat &rhs) {
+  أكد(semantics == rhs.semantics);
 
   sign = rhs.sign;
   category = rhs.category;
   exponent = rhs.exponent;
-  if (isFiniteNonZero() || category == fcNaN)
+  إذا (isFiniteNonZero() || category == fcNaN)
     copySignificand(rhs);
 }
 
-void IEEEFloat::copySignificand(const IEEEFloat &rhs) {
-  assert(isFiniteNonZero() || category == fcNaN);
-  assert(rhs.partCount() >= partCount());
+فراغ IEEEFloat::copySignificand(ثابت IEEEFloat &rhs) {
+  أكد(isFiniteNonZero() || category == fcNaN);
+  أكد(rhs.part_شمېر() >= part_شمېر());
 
-  APInt::tcAssign(significandParts(), rhs.significandParts(),
-                  partCount());
+  APInt::tc_ټاکل(significandParts(), rhs.significandParts(),
+                  part_شمېر());
 }
 
 /* Make this number a NaN, with an arbitrary but deterministic value
    for the significand.  If double or longer, this is a signalling NaN,
    which may not be ideal.  If float, this is QNaN(0).  */
-void IEEEFloat::makeNaN(bool SNaN, bool Negative, const APInt *fill) {
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+فراغ IEEEFloat::makeNaN(منطقي SNaN, منطقي Negative, ثابت APInt *fill) {
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
     llvm_unreachable("This floating point format does not support NaN");
 
-  if (Negative && !semantics->hasSignedRepr)
+  إذا (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
 
@@ -973,78 +973,78 @@ void IEEEFloat::makeNaN(bool SNaN, bool Negative, const APInt *fill) {
   exponent = exponentNaN();
 
   integerPart *significand = significandParts();
-  unsigned numParts = partCount();
+  بینښه عدد_Parts = part_شمېر();
 
   APInt fill_storage;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
     // Finite-only types do not distinguish signalling and quiet NaN, so
     // make them all signalling.
-    SNaN = false;
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
-      sign = true;
+    SNaN = خطأ;
+    إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
+      sign = ریښتیا;
       fill_storage = APInt::getZero(semantics->precision - 1);
-    } else {
+    } وإلا {
       fill_storage = APInt::getAllOnes(semantics->precision - 1);
     }
     fill = &fill_storage;
   }
 
   // Set the significand bits to the fill.
-  if (!fill || fill->getNumWords() < numParts)
-    APInt::tcSet(significand, 0, numParts);
-  if (fill) {
-    APInt::tcAssign(significand, fill->getRawData(),
-                    std::min(fill->getNumWords(), numParts));
+  إذا (!fill || fill->get_عدد_ټکي() < عدد_Parts)
+    APInt::tc_سېټ(significand, 0, عدد_Parts);
+  إذا (fill) {
+    APInt::tc_ټاکل(significand, fill->get_Raw_معلومات(),
+                    std::min(fill->get_عدد_ټکي(), عدد_Parts));
 
     // Zero out the excess bits of the significand.
-    unsigned bitsToPreserve = semantics->precision - 1;
-    unsigned part = bitsToPreserve / 64;
-    bitsToPreserve %= 64;
-    significand[part] &= ((1ULL << bitsToPreserve) - 1);
-    for (part++; part != numParts; ++part)
+    بینښه بټونه_منزل_Preserve = semantics->precision - 1;
+    بینښه part = بټونه_منزل_Preserve / 64;
+    بټونه_منزل_Preserve %= 64;
+    significand[part] &= ((1ULL << بټونه_منزل_Preserve) - 1);
+    لكل (part++; part != عدد_Parts; ++part)
       significand[part] = 0;
   }
 
-  unsigned QNaNBit =
+  بینښه QNaNBit =
       (semantics->precision >= 2) ? (semantics->precision - 2) : 0;
 
-  if (SNaN) {
+  إذا (SNaN) {
     // We always have to clear the QNaN bit to make it an SNaN.
-    APInt::tcClearBit(significand, QNaNBit);
+    APInt::tc_Clear_بټ(significand, QNaNBit);
 
     // If there are no bits set in the payload, we have to set
     // *something* to make it a NaN instead of an infinity;
     // conventionally, this is the next bit down from the QNaN bit.
-    if (APInt::tcIsZero(significand, numParts))
-      APInt::tcSetBit(significand, QNaNBit - 1);
-  } else if (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
+    إذا (APInt::tcIsZero(significand, عدد_Parts))
+      APInt::tc_سېټ_بټ(significand, QNaNBit - 1);
+  } وإلا إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
     // The only NaN is a quiet NaN, and it has no bits sets in the significand.
     // Do nothing.
-  } else {
+  } وإلا {
     // We always have to set the QNaN bit to make it a QNaN.
-    APInt::tcSetBit(significand, QNaNBit);
+    APInt::tc_سېټ_بټ(significand, QNaNBit);
   }
 
   // For x87 extended precision, we want to make a NaN, not a
   // pseudo-NaN.  Maybe we should expose the ability to make
   // pseudo-NaNs?
-  if (semantics == &APFloatBase::semX87DoubleExtended)
-    APInt::tcSetBit(significand, QNaNBit + 1);
+  إذا (semantics == &APFloat_بنسټ::semX87DoubleExtended)
+    APInt::tc_سېټ_بټ(significand, QNaNBit + 1);
 }
 
-IEEEFloat &IEEEFloat::operator=(const IEEEFloat &rhs) {
-  if (this != &rhs) {
-    if (semantics != rhs.semantics) {
+IEEEFloat &IEEEFloat::چلوونکی=(ثابت IEEEFloat &rhs) {
+  إذا (هذا != &rhs) {
+    إذا (semantics != rhs.semantics) {
       freeSignificand();
       initialize(rhs.semantics);
     }
-    assign(rhs);
+    ټاکل(rhs);
   }
 
-  return *this;
+  أرجع *هذا;
 }
 
-IEEEFloat &IEEEFloat::operator=(IEEEFloat &&rhs) {
+IEEEFloat &IEEEFloat::چلوونکی=(IEEEFloat &&rhs) {
   freeSignificand();
 
   semantics = rhs.semantics;
@@ -1053,180 +1053,180 @@ IEEEFloat &IEEEFloat::operator=(IEEEFloat &&rhs) {
   category = rhs.category;
   sign = rhs.sign;
 
-  rhs.semantics = &APFloatBase::semBogus;
-  return *this;
+  rhs.semantics = &APFloat_بنسټ::semBogus;
+  أرجع *هذا;
 }
 
-bool IEEEFloat::isDenormal() const {
-  return getSemantics().hasDenormals && isFiniteNonZero() &&
+منطقي IEEEFloat::isDenormal() ثابت {
+  أرجع getSemantics().hasDenormals && isFiniteNonZero() &&
          (exponent == semantics->minExponent) &&
-         (APInt::tcExtractBit(significandParts(), semantics->precision - 1) ==
+         (APInt::tc_ایستل_بټ(significandParts(), semantics->precision - 1) ==
           0);
 }
 
-bool IEEEFloat::isSmallest() const {
+منطقي IEEEFloat::is_تر_ټولو_کوچنی() ثابت {
   // The smallest number by magnitude in our format will be the smallest
   // denormal, i.e. the floating point number with exponent being minimum
   // exponent and significand bitwise equal to 1 (i.e. with MSB equal to 0).
-  return isFiniteNonZero() && exponent == semantics->minExponent &&
+  أرجع isFiniteNonZero() && exponent == semantics->minExponent &&
     significandMSB() == 0;
 }
 
-bool IEEEFloat::isSmallestNormalized() const {
-  return getCategory() == fcNormal && exponent == semantics->minExponent &&
+منطقي IEEEFloat::is_تر_ټولو_کوچنی_Normalized() ثابت {
+  أرجع getCategory() == fc_نورمال && exponent == semantics->minExponent &&
          isSignificandAllZerosExceptMSB();
 }
 
-unsigned int IEEEFloat::getNumHighBits() const {
-  const unsigned int PartCount = partCountForBits(semantics->precision);
-  const unsigned int Bits = PartCount * integerPartWidth;
+بینښه صحيح IEEEFloat::get_عدد_لوړ_بټونه() ثابت {
+  ثابت بینښه صحيح Part_شمېر = part_شمېر_For_بټونه(semantics->precision);
+  ثابت بینښه صحيح بټونه_2 = Part_شمېر * integer_Part_پلنوالی;
 
   // Compute how many bits are used in the final word.
   // When precision is just 1, it represents the 'Pth'
   // Precision bit and not the actual significand bit.
-  const unsigned int NumHighBits = (semantics->precision > 1)
-                                       ? (Bits - semantics->precision + 1)
-                                       : (Bits - semantics->precision);
-  return NumHighBits;
+  ثابت بینښه صحيح عدد_لوړ_بټونه = (semantics->precision > 1)
+                                       ? (بټونه_2 - semantics->precision + 1)
+                                       : (بټونه_2 - semantics->precision);
+  أرجع عدد_لوړ_بټونه;
 }
 
-bool IEEEFloat::isSignificandAllOnes() const {
+منطقي IEEEFloat::isSignificandAllOnes() ثابت {
   // Test if the significand excluding the integral bit is all ones. This allows
   // us to test for binade boundaries.
-  const integerPart *Parts = significandParts();
-  const unsigned PartCount = partCountForBits(semantics->precision);
-  for (unsigned i = 0; i < PartCount - 1; i++)
-    if (~Parts[i])
-      return false;
+  ثابت integerPart *Parts = significandParts();
+  ثابت بینښه Part_شمېر = part_شمېر_For_بټونه(semantics->precision);
+  لكل (بینښه i = 0; i < Part_شمېر - 1; i++)
+    إذا (~Parts[i])
+      أرجع خطأ;
 
   // Set the unused high bits to all ones when we compare.
-  const unsigned NumHighBits = getNumHighBits();
-  assert(NumHighBits <= integerPartWidth && NumHighBits > 0 &&
+  ثابت بینښه عدد_لوړ_بټونه = get_عدد_لوړ_بټونه();
+  أكد(عدد_لوړ_بټونه <= integer_Part_پلنوالی && عدد_لوړ_بټونه > 0 &&
          "Can not have more high bits to fill than integerPartWidth");
-  const integerPart HighBitFill =
-    ~integerPart(0) << (integerPartWidth - NumHighBits);
-  if ((semantics->precision <= 1) || (~(Parts[PartCount - 1] | HighBitFill)))
-    return false;
+  ثابت integerPart لوړ_بټ_Fill =
+    ~integerPart(0) << (integer_Part_پلنوالی - عدد_لوړ_بټونه);
+  إذا ((semantics->precision <= 1) || (~(Parts[Part_شمېر - 1] | لوړ_بټ_Fill)))
+    أرجع خطأ;
 
-  return true;
+  أرجع ریښتیا;
 }
 
-bool IEEEFloat::isSignificandAllOnesExceptLSB() const {
+منطقي IEEEFloat::isSignificandAllOnesExceptLSB() ثابت {
   // Test if the significand excluding the integral bit is all ones except for
   // the least significant bit.
-  const integerPart *Parts = significandParts();
+  ثابت integerPart *Parts = significandParts();
 
-  if (Parts[0] & 1)
-    return false;
+  إذا (Parts[0] & 1)
+    أرجع خطأ;
 
-  const unsigned PartCount = partCountForBits(semantics->precision);
-  for (unsigned i = 0; i < PartCount - 1; i++) {
-    if (~Parts[i] & ~unsigned{!i})
-      return false;
+  ثابت بینښه Part_شمېر = part_شمېر_For_بټونه(semantics->precision);
+  لكل (بینښه i = 0; i < Part_شمېر - 1; i++) {
+    إذا (~Parts[i] & ~بینښه{!i})
+      أرجع خطأ;
   }
 
   // Set the unused high bits to all ones when we compare.
-  const unsigned NumHighBits = getNumHighBits();
-  assert(NumHighBits <= integerPartWidth && NumHighBits > 0 &&
+  ثابت بینښه عدد_لوړ_بټونه = get_عدد_لوړ_بټونه();
+  أكد(عدد_لوړ_بټونه <= integer_Part_پلنوالی && عدد_لوړ_بټونه > 0 &&
          "Can not have more high bits to fill than integerPartWidth");
-  const integerPart HighBitFill = ~integerPart(0)
-                                  << (integerPartWidth - NumHighBits);
-  if (~(Parts[PartCount - 1] | HighBitFill | 0x1))
-    return false;
+  ثابت integerPart لوړ_بټ_Fill = ~integerPart(0)
+                                  << (integer_Part_پلنوالی - عدد_لوړ_بټونه);
+  إذا (~(Parts[Part_شمېر - 1] | لوړ_بټ_Fill | 0x1))
+    أرجع خطأ;
 
-  return true;
+  أرجع ریښتیا;
 }
 
-bool IEEEFloat::isSignificandAllZeros() const {
+منطقي IEEEFloat::isSignificandAllZeros() ثابت {
   // Test if the significand excluding the integral bit is all zeros. This
   // allows us to test for binade boundaries.
-  const integerPart *Parts = significandParts();
-  const unsigned PartCount = partCountForBits(semantics->precision);
+  ثابت integerPart *Parts = significandParts();
+  ثابت بینښه Part_شمېر = part_شمېر_For_بټونه(semantics->precision);
 
-  for (unsigned i = 0; i < PartCount - 1; i++)
-    if (Parts[i])
-      return false;
+  لكل (بینښه i = 0; i < Part_شمېر - 1; i++)
+    إذا (Parts[i])
+      أرجع خطأ;
 
   // Compute how many bits are used in the final word.
-  const unsigned NumHighBits = getNumHighBits();
-  assert(NumHighBits < integerPartWidth && "Can not have more high bits to "
+  ثابت بینښه عدد_لوړ_بټونه = get_عدد_لوړ_بټونه();
+  أكد(عدد_لوړ_بټونه < integer_Part_پلنوالی && "Can not have more high bits to "
          "clear than integerPartWidth");
-  const integerPart HighBitMask = ~integerPart(0) >> NumHighBits;
+  ثابت integerPart لوړ_بټ_ماسک = ~integerPart(0) >> عدد_لوړ_بټونه;
 
-  if ((semantics->precision > 1) && (Parts[PartCount - 1] & HighBitMask))
-    return false;
+  إذا ((semantics->precision > 1) && (Parts[Part_شمېر - 1] & لوړ_بټ_ماسک))
+    أرجع خطأ;
 
-  return true;
+  أرجع ریښتیا;
 }
 
-bool IEEEFloat::isSignificandAllZerosExceptMSB() const {
-  const integerPart *Parts = significandParts();
-  const unsigned PartCount = partCountForBits(semantics->precision);
+منطقي IEEEFloat::isSignificandAllZerosExceptMSB() ثابت {
+  ثابت integerPart *Parts = significandParts();
+  ثابت بینښه Part_شمېر = part_شمېر_For_بټونه(semantics->precision);
 
-  for (unsigned i = 0; i < PartCount - 1; i++) {
-    if (Parts[i])
-      return false;
+  لكل (بینښه i = 0; i < Part_شمېر - 1; i++) {
+    إذا (Parts[i])
+      أرجع خطأ;
   }
 
-  const unsigned NumHighBits = getNumHighBits();
-  const integerPart MSBMask = integerPart(1)
-                              << (integerPartWidth - NumHighBits);
-  return ((semantics->precision <= 1) || (Parts[PartCount - 1] == MSBMask));
+  ثابت بینښه عدد_لوړ_بټونه = get_عدد_لوړ_بټونه();
+  ثابت integerPart MSBMask = integerPart(1)
+                              << (integer_Part_پلنوالی - عدد_لوړ_بټونه);
+  أرجع ((semantics->precision <= 1) || (Parts[Part_شمېر - 1] == MSBMask));
 }
 
-bool IEEEFloat::isLargest() const {
-  bool IsMaxExp = isFiniteNonZero() && exponent == semantics->maxExponent;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+منطقي IEEEFloat::is_تر_ټولو_لوی() ثابت {
+  منطقي IsMaxExp = isFiniteNonZero() && exponent == semantics->maxExponent;
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes) {
     // The largest number by magnitude in our format will be the floating point
     // number with maximum exponent and with significand that is all ones except
     // the LSB.
-    return (IsMaxExp && APFloat::hasSignificand(*semantics))
+    أرجع (IsMaxExp && APFloat::hasSignificand(*semantics))
                ? isSignificandAllOnesExceptLSB()
                : IsMaxExp;
-  } else {
+  } وإلا {
     // The largest number by magnitude in our format will be the floating point
     // number with maximum exponent and with significand that is all ones.
-    return IsMaxExp && isSignificandAllOnes();
+    أرجع IsMaxExp && isSignificandAllOnes();
   }
 }
 
-bool IEEEFloat::isInteger() const {
+منطقي IEEEFloat::isInteger() ثابت {
   // This could be made more efficient; I'm going for obviously correct.
-  if (!isFinite()) return false;
-  IEEEFloat truncated = *this;
-  truncated.roundToIntegral(rmTowardZero);
-  return compare(truncated) == cmpEqual;
+  إذا (!isFinite()) أرجع خطأ;
+  IEEEFloat truncated = *هذا;
+  truncated.پړاو_منزل_Integral(rmTowardZero);
+  أرجع compare(truncated) == cmpEqual;
 }
 
-bool IEEEFloat::bitwiseIsEqual(const IEEEFloat &rhs) const {
-  if (this == &rhs)
-    return true;
-  if (semantics != rhs.semantics ||
+منطقي IEEEFloat::bitwiseIsEqual(ثابت IEEEFloat &rhs) ثابت {
+  إذا (هذا == &rhs)
+    أرجع ریښتیا;
+  إذا (semantics != rhs.semantics ||
       category != rhs.category ||
       sign != rhs.sign)
-    return false;
-  if (category==fcZero || category==fcInfinity)
-    return true;
+    أرجع خطأ;
+  إذا (category==fcZero || category==fcInfinity)
+    أرجع ریښتیا;
 
-  if (isFiniteNonZero() && exponent != rhs.exponent)
-    return false;
+  إذا (isFiniteNonZero() && exponent != rhs.exponent)
+    أرجع خطأ;
 
-  return std::equal(significandParts(), significandParts() + partCount(),
+  أرجع std::equal(significandParts(), significandParts() + part_شمېر(),
                     rhs.significandParts());
 }
 
-IEEEFloat::IEEEFloat(const fltSemantics &ourSemantics, integerPart value) {
+IEEEFloat::IEEEFloat(ثابت fltSemantics &ourSemantics, integerPart ارزښت_2) {
   initialize(&ourSemantics);
   sign = 0;
-  category = fcNormal;
+  category = fc_نورمال;
   zeroSignificand();
   exponent = ourSemantics.precision - 1;
-  significandParts()[0] = value;
-  normalize(rmNearestTiesToEven, lfExactlyZero);
+  significandParts()[0] = ارزښت_2;
+  normalize(rm_تر_ټولو_نږدې_Ties_منزل_Even, lfExactlyZero);
 }
 
-IEEEFloat::IEEEFloat(const fltSemantics &ourSemantics) {
+IEEEFloat::IEEEFloat(ثابت fltSemantics &ourSemantics) {
   initialize(&ourSemantics);
   // The Float8E8MOFNU format does not have a representation
   // for zero. So, use the closest representation instead.
@@ -1234,106 +1234,106 @@ IEEEFloat::IEEEFloat(const fltSemantics &ourSemantics) {
   // normal value (which is the smallestNormalized here).
   // Hence, we call makeSmallestNormalized (where category is
   // 'fcNormal') instead of makeZero (where category is 'fcZero').
-  ourSemantics.hasZero ? makeZero(false) : makeSmallestNormalized(false);
+  ourSemantics.hasZero ? makeZero(خطأ) : make_تر_ټولو_کوچنی_Normalized(خطأ);
 }
 
 // Delegate to the previous constructor, because later copy constructor may
 // actually inspects category, which can't be garbage.
-IEEEFloat::IEEEFloat(const fltSemantics &ourSemantics, uninitializedTag tag)
+IEEEFloat::IEEEFloat(ثابت fltSemantics &ourSemantics, uninitialized_نښان نښان_2)
     : IEEEFloat(ourSemantics) {}
 
-IEEEFloat::IEEEFloat(const IEEEFloat &rhs) {
+IEEEFloat::IEEEFloat(ثابت IEEEFloat &rhs) {
   initialize(rhs.semantics);
-  assign(rhs);
+  ټاکل(rhs);
 }
 
-IEEEFloat::IEEEFloat(IEEEFloat &&rhs) : semantics(&APFloatBase::semBogus) {
-  *this = std::move(rhs);
+IEEEFloat::IEEEFloat(IEEEFloat &&rhs) : semantics(&APFloat_بنسټ::semBogus) {
+  *هذا = std::move(rhs);
 }
 
 IEEEFloat::~IEEEFloat() { freeSignificand(); }
 
-unsigned int IEEEFloat::partCount() const {
-  return partCountForBits(semantics->precision + 1);
+بینښه صحيح IEEEFloat::part_شمېر() ثابت {
+  أرجع part_شمېر_For_بټونه(semantics->precision + 1);
 }
 
-const APFloat::integerPart *IEEEFloat::significandParts() const {
-  return const_cast<IEEEFloat *>(this)->significandParts();
+ثابت APFloat::integerPart *IEEEFloat::significandParts() ثابت {
+  أرجع const_cast<IEEEFloat *>(هذا)->significandParts();
 }
 
 APFloat::integerPart *IEEEFloat::significandParts() {
-  if (partCount() > 1)
-    return significand.parts;
-  else
-    return &significand.part;
+  إذا (part_شمېر() > 1)
+    أرجع significand.parts;
+  وإلا
+    أرجع &significand.part;
 }
 
-void IEEEFloat::zeroSignificand() {
-  APInt::tcSet(significandParts(), 0, partCount());
+فراغ IEEEFloat::zeroSignificand() {
+  APInt::tc_سېټ(significandParts(), 0, part_شمېر());
 }
 
 /* Increment an fcNormal floating point number's significand.  */
-void IEEEFloat::incrementSignificand() {
-  [[maybe_unused]] integerPart carry =
-      APInt::tcIncrement(significandParts(), partCount());
+فراغ IEEEFloat::incrementSignificand() {
+  [[maybe_ناکارول_شوی]] integerPart لېږد =
+      APInt::tcIncrement(significandParts(), part_شمېر());
 
   /* Our callers should never cause us to overflow.  */
-  assert(carry == 0);
+  أكد(لېږد == 0);
 }
 
 /* Add the significand of the RHS.  Returns the carry flag.  */
-APFloat::integerPart IEEEFloat::addSignificand(const IEEEFloat &rhs) {
+APFloat::integerPart IEEEFloat::جمع_کړه_Significand(ثابت IEEEFloat &rhs) {
   integerPart *parts = significandParts();
 
-  assert(semantics == rhs.semantics);
-  assert(exponent == rhs.exponent);
+  أكد(semantics == rhs.semantics);
+  أكد(exponent == rhs.exponent);
 
-  return APInt::tcAdd(parts, rhs.significandParts(), 0, partCount());
+  أرجع APInt::tc_جمع_کړه(parts, rhs.significandParts(), 0, part_شمېر());
 }
 
 /* Subtract the significand of the RHS with a borrow flag.  Returns
    the borrow flag.  */
-APFloat::integerPart IEEEFloat::subtractSignificand(const IEEEFloat &rhs,
+APFloat::integerPart IEEEFloat::کمول_Significand(ثابت IEEEFloat &rhs,
                                                     integerPart borrow) {
   integerPart *parts = significandParts();
 
-  assert(semantics == rhs.semantics);
-  assert(exponent == rhs.exponent);
+  أكد(semantics == rhs.semantics);
+  أكد(exponent == rhs.exponent);
 
-  return APInt::tcSubtract(parts, rhs.significandParts(), borrow,
-                           partCount());
+  أرجع APInt::tc_کمول(parts, rhs.significandParts(), borrow,
+                           part_شمېر());
 }
 
 /* Multiply the significand of the RHS.  If ADDEND is non-NULL, add it
    on to the full-precision result of the multiplication.  Returns the
    lost fraction.  */
-lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
+ورک_Fraction IEEEFloat::multiplySignificand(ثابت IEEEFloat &rhs,
                                             IEEEFloat addend,
-                                            bool ignoreAddend) {
+                                            منطقي ignoreAddend) {
   integerPart scratch[4];
-  bool ignored;
+  منطقي ignored;
 
-  assert(semantics == rhs.semantics);
+  أكد(semantics == rhs.semantics);
 
-  unsigned precision = semantics->precision;
+  بینښه precision = semantics->precision;
 
   // Allocate space for twice as many bits as the original significand, plus one
   // extra bit for the addition to overflow into.
-  unsigned newPartsCount = partCountForBits(precision * 2 + 1);
+  بینښه new_Parts_شمېر = part_شمېر_For_بټونه(precision * 2 + 1);
 
   // FIXME: Replace with SmallVector<4>.
-  integerPart *fullSignificand =
-      newPartsCount > 4 ? new integerPart[newPartsCount] : scratch;
+  integerPart *ډک_Significand =
+      new_Parts_شمېر > 4 ? جديد integerPart[new_Parts_شمېر] : scratch;
 
   integerPart *lhsSignificand = significandParts();
-  unsigned partsCount = partCount();
+  بینښه parts_شمېر = part_شمېر();
 
-  APInt::tcFullMultiply(fullSignificand, lhsSignificand,
-                        rhs.significandParts(), partsCount, partsCount);
+  APInt::tc_ډک_Multiply(ډک_Significand, lhsSignificand,
+                        rhs.significandParts(), parts_شمېر, parts_شمېر);
 
-  lostFraction lost_fraction = lfExactlyZero;
+  ورک_Fraction ورک_fraction = lfExactlyZero;
   // One, not zero, based MSB.
-  unsigned omsb = APInt::tcMSB(fullSignificand, newPartsCount) + 1;
+  بینښه omsb = APInt::tcMSB(ډک_Significand, new_Parts_شمېر) + 1;
   exponent += rhs.exponent;
 
   // Assume the operands involved in the multiplication are single-precision
@@ -1348,18 +1348,18 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
   // toward left by two bits, and adjust exponent accordingly.
   exponent += 2;
 
-  if (!ignoreAddend && addend.isNonZero()) {
+  إذا (!ignoreAddend && addend.isNonZero()) {
     // The intermediate result of the multiplication has "2 * precision"
     // signicant bit; adjust the addend to be consistent with mul result.
     //
     Significand savedSignificand = significand;
-    const fltSemantics *savedSemantics = semantics;
+    ثابت fltSemantics *savedSemantics = semantics;
 
     // Normalize our MSB to one below the top bit to allow for overflow.
-    unsigned extendedPrecision = 2 * precision + 1;
-    if (omsb != extendedPrecision - 1) {
-      assert(extendedPrecision > omsb);
-      APInt::tcShiftLeft(fullSignificand, newPartsCount,
+    بینښه extendedPrecision = 2 * precision + 1;
+    إذا (omsb != extendedPrecision - 1) {
+      أكد(extendedPrecision > omsb);
+      APInt::tc_ښويدنه_کیڼ(ډک_Significand, new_Parts_شمېر,
                          (extendedPrecision - 1) - omsb);
       exponent -= (extendedPrecision - 1) - omsb;
     }
@@ -1368,36 +1368,36 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
     fltSemantics extendedSemantics = *semantics;
     extendedSemantics.precision = extendedPrecision;
 
-    if (newPartsCount == 1)
-      significand.part = fullSignificand[0];
-    else
-      significand.parts = fullSignificand;
+    إذا (new_Parts_شمېر == 1)
+      significand.part = ډک_Significand[0];
+    وإلا
+      significand.parts = ډک_Significand;
     semantics = &extendedSemantics;
 
     // Make a copy so we can convert it to the extended semantics.
     // Note that we cannot convert the addend directly, as the extendedSemantics
     // is a local variable (which we take a reference to).
     IEEEFloat extendedAddend(addend);
-    [[maybe_unused]] opStatus status = extendedAddend.convert(
+    [[maybe_ناکارول_شوی]] op_حالت حالت_2 = extendedAddend.convert(
         extendedSemantics, APFloat::rmTowardZero, &ignored);
-    assert(status == APFloat::opOK);
+    أكد(حالت_2 == APFloat::opOK);
 
     // Shift the significand of the addend right by one bit. This guarantees
     // that the high bit of the significand is zero (same as fullSignificand),
     // so the addition will overflow (if it does overflow at all) into the top bit.
-    lost_fraction = extendedAddend.shiftSignificandRight(1);
-    assert(lost_fraction == lfExactlyZero &&
+    ورک_fraction = extendedAddend.ښويدنه_Significand_ښی(1);
+    أكد(ورک_fraction == lfExactlyZero &&
            "Lost precision while shifting addend for fused-multiply-add.");
 
-    lost_fraction = addOrSubtractSignificand(extendedAddend, false);
+    ورک_fraction = جمع_کړه_Or_کمول_Significand(extendedAddend, خطأ);
 
     /* Restore our state.  */
-    if (newPartsCount == 1)
-      fullSignificand[0] = significand.part;
+    إذا (new_Parts_شمېر == 1)
+      ډک_Significand[0] = significand.part;
     significand = savedSignificand;
     semantics = savedSemantics;
 
-    omsb = APInt::tcMSB(fullSignificand, newPartsCount) + 1;
+    omsb = APInt::tcMSB(ډک_Significand, new_Parts_شمېر) + 1;
   }
 
   // Convert the result having "2 * precision" significant-bits back to the one
@@ -1413,209 +1413,209 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
   // Note that the result is not normalized when "omsb < precision". So, the
   // caller needs to call IEEEFloat::normalize() if normalized value is
   // expected.
-  if (omsb > precision) {
-    unsigned int bits, significantParts;
-    lostFraction lf;
+  إذا (omsb > precision) {
+    بینښه صحيح بټونه, significantParts;
+    ورک_Fraction lf;
 
-    bits = omsb - precision;
-    significantParts = partCountForBits(omsb);
-    lf = shiftRight(fullSignificand, significantParts, bits);
-    lost_fraction = combineLostFractions(lf, lost_fraction);
-    exponent += bits;
+    بټونه = omsb - precision;
+    significantParts = part_شمېر_For_بټونه(omsb);
+    lf = ښويدنه_ښی(ډک_Significand, significantParts, بټونه);
+    ورک_fraction = combine_ورک_Fractions(lf, ورک_fraction);
+    exponent += بټونه;
   }
 
-  APInt::tcAssign(lhsSignificand, fullSignificand, partsCount);
+  APInt::tc_ټاکل(lhsSignificand, ډک_Significand, parts_شمېر);
 
-  if (newPartsCount > 4)
-    delete [] fullSignificand;
+  إذا (new_Parts_شمېر > 4)
+    ړنګول [] ډک_Significand;
 
-  return lost_fraction;
+  أرجع ورک_fraction;
 }
 
-lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs) {
+ورک_Fraction IEEEFloat::multiplySignificand(ثابت IEEEFloat &rhs) {
   // When the given semantics has zero, the addend here is a zero.
   // i.e . it belongs to the 'fcZero' category.
   // But when the semantics does not support zero, we need to
   // explicitly convey that this addend should be ignored
   // for multiplication.
-  return multiplySignificand(rhs, IEEEFloat(*semantics), !semantics->hasZero);
+  أرجع multiplySignificand(rhs, IEEEFloat(*semantics), !semantics->hasZero);
 }
 
 /* Multiply the significands of LHS and RHS to DST.  */
-lostFraction IEEEFloat::divideSignificand(const IEEEFloat &rhs) {
+ورک_Fraction IEEEFloat::divideSignificand(ثابت IEEEFloat &rhs) {
   integerPart scratch[4];
 
-  assert(semantics == rhs.semantics);
+  أكد(semantics == rhs.semantics);
 
   integerPart *lhsSignificand = significandParts();
-  const integerPart *rhsSignificand = rhs.significandParts();
-  unsigned partsCount = partCount();
+  ثابت integerPart *rhsSignificand = rhs.significandParts();
+  بینښه parts_شمېر = part_شمېر();
 
   integerPart *dividend =
-      partsCount > 2 ? new integerPart[partsCount * 2] : scratch;
-  integerPart *divisor = dividend + partsCount;
+      parts_شمېر > 2 ? جديد integerPart[parts_شمېر * 2] : scratch;
+  integerPart *وېشونکی = dividend + parts_شمېر;
 
   /* Copy the dividend and divisor as they will be modified in-place.  */
-  for (unsigned i = 0; i < partsCount; i++) {
+  لكل (بینښه i = 0; i < parts_شمېر; i++) {
     dividend[i] = lhsSignificand[i];
-    divisor[i] = rhsSignificand[i];
+    وېشونکی[i] = rhsSignificand[i];
     lhsSignificand[i] = 0;
   }
 
   exponent -= rhs.exponent;
 
-  unsigned int precision = semantics->precision;
+  بینښه صحيح precision = semantics->precision;
 
   /* Normalize the divisor.  */
-  unsigned bit = precision - APInt::tcMSB(divisor, partsCount) - 1;
-  if (bit) {
-    exponent += bit;
-    APInt::tcShiftLeft(divisor, partsCount, bit);
+  بینښه بټ = precision - APInt::tcMSB(وېشونکی, parts_شمېر) - 1;
+  إذا (بټ) {
+    exponent += بټ;
+    APInt::tc_ښويدنه_کیڼ(وېشونکی, parts_شمېر, بټ);
   }
 
   /* Normalize the dividend.  */
-  bit = precision - APInt::tcMSB(dividend, partsCount) - 1;
-  if (bit) {
-    exponent -= bit;
-    APInt::tcShiftLeft(dividend, partsCount, bit);
+  بټ = precision - APInt::tcMSB(dividend, parts_شمېر) - 1;
+  إذا (بټ) {
+    exponent -= بټ;
+    APInt::tc_ښويدنه_کیڼ(dividend, parts_شمېر, بټ);
   }
 
   /* Ensure the dividend >= divisor initially for the loop below.
      Incidentally, this means that the division loop below is
      guaranteed to set the integer bit to one.  */
-  if (APInt::tcCompare(dividend, divisor, partsCount) < 0) {
+  إذا (APInt::tcCompare(dividend, وېشونکی, parts_شمېر) < 0) {
     exponent--;
-    APInt::tcShiftLeft(dividend, partsCount, 1);
-    assert(APInt::tcCompare(dividend, divisor, partsCount) >= 0);
+    APInt::tc_ښويدنه_کیڼ(dividend, parts_شمېر, 1);
+    أكد(APInt::tcCompare(dividend, وېشونکی, parts_شمېر) >= 0);
   }
 
   /* Long division.  */
-  for (bit = precision; bit; bit -= 1) {
-    if (APInt::tcCompare(dividend, divisor, partsCount) >= 0) {
-      APInt::tcSubtract(dividend, divisor, 0, partsCount);
-      APInt::tcSetBit(lhsSignificand, bit - 1);
+  لكل (بټ = precision; بټ; بټ -= 1) {
+    إذا (APInt::tcCompare(dividend, وېشونکی, parts_شمېر) >= 0) {
+      APInt::tc_کمول(dividend, وېشونکی, 0, parts_شمېر);
+      APInt::tc_سېټ_بټ(lhsSignificand, بټ - 1);
     }
 
-    APInt::tcShiftLeft(dividend, partsCount, 1);
+    APInt::tc_ښويدنه_کیڼ(dividend, parts_شمېر, 1);
   }
 
   /* Figure out the lost fraction.  */
-  int cmp = APInt::tcCompare(dividend, divisor, partsCount);
+  صحيح cmp = APInt::tcCompare(dividend, وېشونکی, parts_شمېر);
 
-  lostFraction lost_fraction;
-  if (cmp > 0)
-    lost_fraction = lfMoreThanHalf;
-  else if (cmp == 0)
-    lost_fraction = lfExactlyHalf;
-  else if (APInt::tcIsZero(dividend, partsCount))
-    lost_fraction = lfExactlyZero;
-  else
-    lost_fraction = lfLessThanHalf;
+  ورک_Fraction ورک_fraction;
+  إذا (cmp > 0)
+    ورک_fraction = lf_نور_Than_Half;
+  وإلا إذا (cmp == 0)
+    ورک_fraction = lfExactlyHalf;
+  وإلا إذا (APInt::tcIsZero(dividend, parts_شمېر))
+    ورک_fraction = lfExactlyZero;
+  وإلا
+    ورک_fraction = lfLessThanHalf;
 
-  if (partsCount > 2)
-    delete [] dividend;
+  إذا (parts_شمېر > 2)
+    ړنګول [] dividend;
 
-  return lost_fraction;
+  أرجع ورک_fraction;
 }
 
-unsigned int IEEEFloat::significandMSB() const {
-  return APInt::tcMSB(significandParts(), partCount());
+بینښه صحيح IEEEFloat::significandMSB() ثابت {
+  أرجع APInt::tcMSB(significandParts(), part_شمېر());
 }
 
-unsigned int IEEEFloat::significandLSB() const {
-  return APInt::tcLSB(significandParts(), partCount());
+بینښه صحيح IEEEFloat::significandLSB() ثابت {
+  أرجع APInt::tcLSB(significandParts(), part_شمېر());
 }
 
 /* Note that a zero result is NOT normalized to fcZero.  */
-lostFraction IEEEFloat::shiftSignificandRight(unsigned int bits) {
+ورک_Fraction IEEEFloat::ښويدنه_Significand_ښی(بینښه صحيح بټونه) {
   /* Our exponent should not overflow.  */
-  assert((ExponentType) (exponent + bits) >= exponent);
+  أكد((ExponentType) (exponent + بټونه) >= exponent);
 
-  exponent += bits;
+  exponent += بټونه;
 
-  return shiftRight(significandParts(), partCount(), bits);
+  أرجع ښويدنه_ښی(significandParts(), part_شمېر(), بټونه);
 }
 
 /* Shift the significand left BITS bits, subtract BITS from its exponent.  */
-void IEEEFloat::shiftSignificandLeft(unsigned int bits) {
-  assert(bits < semantics->precision ||
-         (semantics->precision == 1 && bits <= 1));
+فراغ IEEEFloat::ښويدنه_Significand_کیڼ(بینښه صحيح بټونه) {
+  أكد(بټونه < semantics->precision ||
+         (semantics->precision == 1 && بټونه <= 1));
 
-  if (bits) {
-    unsigned int partsCount = partCount();
+  إذا (بټونه) {
+    بینښه صحيح parts_شمېر = part_شمېر();
 
-    APInt::tcShiftLeft(significandParts(), partsCount, bits);
-    exponent -= bits;
+    APInt::tc_ښويدنه_کیڼ(significandParts(), parts_شمېر, بټونه);
+    exponent -= بټونه;
 
-    assert(!APInt::tcIsZero(significandParts(), partsCount));
+    أكد(!APInt::tcIsZero(significandParts(), parts_شمېر));
   }
 }
 
-APFloat::cmpResult IEEEFloat::compareAbsoluteValue(const IEEEFloat &rhs) const {
-  assert(semantics == rhs.semantics);
-  assert(isFiniteNonZero());
-  assert(rhs.isFiniteNonZero());
+APFloat::cmp_پایله IEEEFloat::compare_Absolute_ارزښت(ثابت IEEEFloat &rhs) ثابت {
+  أكد(semantics == rhs.semantics);
+  أكد(isFiniteNonZero());
+  أكد(rhs.isFiniteNonZero());
 
-  int compare = exponent - rhs.exponent;
+  صحيح compare = exponent - rhs.exponent;
 
   /* If exponents are equal, do an unsigned bignum comparison of the
      significands.  */
-  if (compare == 0)
+  إذا (compare == 0)
     compare = APInt::tcCompare(significandParts(), rhs.significandParts(),
-                               partCount());
+                               part_شمېر());
 
-  if (compare > 0)
-    return cmpGreaterThan;
-  else if (compare < 0)
-    return cmpLessThan;
-  else
-    return cmpEqual;
+  إذا (compare > 0)
+    أرجع cmpGreaterThan;
+  وإلا إذا (compare < 0)
+    أرجع cmpLessThan;
+  وإلا
+    أرجع cmpEqual;
 }
 
 /* Set the least significant BITS bits of a bignum, clear the
    rest.  */
-static void tcSetLeastSignificantBits(APInt::WordType *dst, unsigned parts,
-                                      unsigned bits) {
-  unsigned i = 0;
-  while (bits > APInt::APINT_BITS_PER_WORD) {
-    dst[i++] = ~(APInt::WordType)0;
-    bits -= APInt::APINT_BITS_PER_WORD;
+ساكن فراغ tc_سېټ_لږترلږه_Significant_بټونه(APInt::کلمه_Type *dst, بینښه parts,
+                                      بینښه بټونه) {
+  بینښه i = 0;
+  طالما (بټونه > APInt::APINT_بټونه_فی_کلمه) {
+    dst[i++] = ~(APInt::کلمه_Type)0;
+    بټونه -= APInt::APINT_بټونه_فی_کلمه;
   }
 
-  if (bits)
-    dst[i++] = ~(APInt::WordType)0 >> (APInt::APINT_BITS_PER_WORD - bits);
+  إذا (بټونه)
+    dst[i++] = ~(APInt::کلمه_Type)0 >> (APInt::APINT_بټونه_فی_کلمه - بټونه);
 
-  while (i < parts)
+  طالما (i < parts)
     dst[i++] = 0;
 }
 
 /* Handle overflow.  Sign is preserved.  We either become infinity or
    the largest finite number.  */
-APFloat::opStatus IEEEFloat::handleOverflow(roundingMode rounding_mode) {
-  if (semantics->nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly) {
+APFloat::op_حالت IEEEFloat::handle_ډکېدنه(rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  إذا (semantics->nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly) {
     /* Infinity?  */
-    if (rounding_mode == rmNearestTiesToEven ||
-        rounding_mode == rmNearestTiesToAway ||
-        (rounding_mode == rmTowardPositive && !sign) ||
-        (rounding_mode == rmTowardNegative && sign)) {
-      if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
-        makeNaN(false, sign);
-      else
+    إذا (rounding_ډېرپېښ_2 == rm_تر_ټولو_نږدې_Ties_منزل_Even ||
+        rounding_ډېرپېښ_2 == rm_تر_ټولو_نږدې_Ties_منزل_Away ||
+        (rounding_ډېرپېښ_2 == rm_Toward_مثبت && !sign) ||
+        (rounding_ډېرپېښ_2 == rmTowardNegative && sign)) {
+      إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
+        makeNaN(خطأ, sign);
+      وإلا
         category = fcInfinity;
-      return static_cast<opStatus>(opOverflow | opInexact);
+      أرجع static_cast<op_حالت>(op_ډکېدنه | opInexact);
     }
   }
 
   /* Otherwise we become the largest finite number.  */
-  category = fcNormal;
+  category = fc_نورمال;
   exponent = semantics->maxExponent;
-  tcSetLeastSignificantBits(significandParts(), partCount(),
+  tc_سېټ_لږترلږه_Significant_بټونه(significandParts(), part_شمېر(),
                             semantics->precision);
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes)
-    APInt::tcClearBit(significandParts(), 0);
+    APInt::tc_Clear_بټ(significandParts(), 0);
 
-  return opInexact;
+  أرجع opInexact;
 }
 
 /* Returns TRUE if, when truncating the current number, with BIT the
@@ -1623,296 +1623,296 @@ APFloat::opStatus IEEEFloat::handleOverflow(roundingMode rounding_mode) {
    would need to be rounded away from zero (i.e., by increasing the
    signficand).  This routine must work for fcZero of both signs, and
    fcNormal numbers.  */
-bool IEEEFloat::roundAwayFromZero(roundingMode rounding_mode,
-                                  lostFraction lost_fraction,
-                                  unsigned int bit) const {
+منطقي IEEEFloat::پړاو_Away_From_Zero(rounding_ډېرپېښ rounding_ډېرپېښ_2,
+                                  ورک_Fraction ورک_fraction,
+                                  بینښه صحيح بټ) ثابت {
   /* NaNs and infinities should not have lost fractions.  */
-  assert(isFiniteNonZero() || category == fcZero);
+  أكد(isFiniteNonZero() || category == fcZero);
 
   /* Current callers never pass this so we don't handle it.  */
-  assert(lost_fraction != lfExactlyZero);
+  أكد(ورک_fraction != lfExactlyZero);
 
-  switch (rounding_mode) {
-  case rmNearestTiesToAway:
-    return lost_fraction == lfExactlyHalf || lost_fraction == lfMoreThanHalf;
+  بدل (rounding_ډېرپېښ_2) {
+  حالة rm_تر_ټولو_نږدې_Ties_منزل_Away:
+    أرجع ورک_fraction == lfExactlyHalf || ورک_fraction == lf_نور_Than_Half;
 
-  case rmNearestTiesToEven:
-    if (lost_fraction == lfMoreThanHalf)
-      return true;
+  حالة rm_تر_ټولو_نږدې_Ties_منزل_Even:
+    إذا (ورک_fraction == lf_نور_Than_Half)
+      أرجع ریښتیا;
 
     /* Our zeroes don't have a significand to test.  */
-    if (lost_fraction == lfExactlyHalf && category != fcZero)
-      return APInt::tcExtractBit(significandParts(), bit);
+    إذا (ورک_fraction == lfExactlyHalf && category != fcZero)
+      أرجع APInt::tc_ایستل_بټ(significandParts(), بټ);
 
-    return false;
+    أرجع خطأ;
 
-  case rmTowardZero:
-    return false;
+  حالة rmTowardZero:
+    أرجع خطأ;
 
-  case rmTowardPositive:
-    return !sign;
+  حالة rm_Toward_مثبت:
+    أرجع !sign;
 
-  case rmTowardNegative:
-    return sign;
+  حالة rmTowardNegative:
+    أرجع sign;
 
-  default:
-    break;
+  افتراضي:
+    اكسر;
   }
   llvm_unreachable("Invalid rounding mode found");
 }
 
-APFloat::opStatus IEEEFloat::normalize(roundingMode rounding_mode,
-                                       lostFraction lost_fraction) {
-  if (!isFiniteNonZero())
-    return opOK;
+APFloat::op_حالت IEEEFloat::normalize(rounding_ډېرپېښ rounding_ډېرپېښ_2,
+                                       ورک_Fraction ورک_fraction) {
+  إذا (!isFiniteNonZero())
+    أرجع opOK;
 
   /* Before rounding normalize the exponent of fcNormal numbers.  */
   /* One, not zero, based MSB.  */
-  unsigned omsb = significandMSB() + 1;
+  بینښه omsb = significandMSB() + 1;
 
   // Only skip this `if` if the value is exactly zero.
-  if (omsb || lost_fraction != lfExactlyZero) {
+  إذا (omsb || ورک_fraction != lfExactlyZero) {
     /* OMSB is numbered from 1.  We want to place it in the integer
        bit numbered PRECISION if possible, with a compensating change in
        the exponent.  */
-    int exponentChange = omsb - semantics->precision;
+    صحيح exponentChange = omsb - semantics->precision;
 
     /* If the resulting exponent is too high, overflow according to
        the rounding mode.  */
-    if (exponent + exponentChange > semantics->maxExponent)
-      return handleOverflow(rounding_mode);
+    إذا (exponent + exponentChange > semantics->maxExponent)
+      أرجع handle_ډکېدنه(rounding_ډېرپېښ_2);
 
     /* Subnormal numbers have exponent minExponent, and their MSB
        is forced based on that.  */
-    if (exponent + exponentChange < semantics->minExponent)
+    إذا (exponent + exponentChange < semantics->minExponent)
       exponentChange = semantics->minExponent - exponent;
 
     /* Shifting left is easy as we don't lose precision.  */
-    if (exponentChange < 0) {
-      assert(lost_fraction == lfExactlyZero);
+    إذا (exponentChange < 0) {
+      أكد(ورک_fraction == lfExactlyZero);
 
-      shiftSignificandLeft(-exponentChange);
+      ښويدنه_Significand_کیڼ(-exponentChange);
 
-      return opOK;
+      أرجع opOK;
     }
 
-    if (exponentChange > 0) {
-      lostFraction lf;
+    إذا (exponentChange > 0) {
+      ورک_Fraction lf;
 
       /* Shift right and capture any new lost fraction.  */
-      lf = shiftSignificandRight(exponentChange);
+      lf = ښويدنه_Significand_ښی(exponentChange);
 
-      lost_fraction = combineLostFractions(lf, lost_fraction);
+      ورک_fraction = combine_ورک_Fractions(lf, ورک_fraction);
 
       /* Keep OMSB up-to-date.  */
-      if (omsb > (unsigned) exponentChange)
+      إذا (omsb > (بینښه) exponentChange)
         omsb -= exponentChange;
-      else
+      وإلا
         omsb = 0;
     }
   }
 
   // The all-ones values is an overflow if NaN is all ones. If NaN is
   // represented by negative zero, then it is a valid finite value.
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes &&
       exponent == semantics->maxExponent && isSignificandAllOnes())
-    return handleOverflow(rounding_mode);
+    أرجع handle_ډکېدنه(rounding_ډېرپېښ_2);
 
   /* Now round the number according to rounding_mode given the lost
      fraction.  */
 
   /* As specified in IEEE 754, since we do not trap we do not report
      underflow for exact results.  */
-  if (lost_fraction == lfExactlyZero) {
+  إذا (ورک_fraction == lfExactlyZero) {
     /* Canonicalize zeroes.  */
-    if (omsb == 0) {
+    إذا (omsb == 0) {
       category = fcZero;
-      if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-        sign = false;
-      if (!semantics->hasZero)
-        makeSmallestNormalized(false);
+      إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+        sign = خطأ;
+      إذا (!semantics->hasZero)
+        make_تر_ټولو_کوچنی_Normalized(خطأ);
     }
 
-    return opOK;
+    أرجع opOK;
   }
 
   /* Increment the significand if we're rounding away from zero.  */
-  if (roundAwayFromZero(rounding_mode, lost_fraction, 0)) {
-    if (omsb == 0)
+  إذا (پړاو_Away_From_Zero(rounding_ډېرپېښ_2, ورک_fraction, 0)) {
+    إذا (omsb == 0)
       exponent = semantics->minExponent;
 
     incrementSignificand();
     omsb = significandMSB() + 1;
 
     /* Did the significand increment overflow?  */
-    if (omsb == (unsigned) semantics->precision + 1) {
+    إذا (omsb == (بینښه) semantics->precision + 1) {
       /* Renormalize by incrementing the exponent and shifting our
          significand right one.  However if we already have the
          maximum exponent we overflow to infinity.  */
-      if (exponent == semantics->maxExponent)
+      إذا (exponent == semantics->maxExponent)
         // Invoke overflow handling with a rounding mode that will guarantee
         // that the result gets turned into the correct infinity representation.
         // This is needed instead of just setting the category to infinity to
         // account for 8-bit floating point types that have no inf, only NaN.
-        return handleOverflow(sign ? rmTowardNegative : rmTowardPositive);
+        أرجع handle_ډکېدنه(sign ? rmTowardNegative : rm_Toward_مثبت);
 
-      shiftSignificandRight(1);
+      ښويدنه_Significand_ښی(1);
 
-      return opInexact;
+      أرجع opInexact;
     }
 
     // The all-ones values is an overflow if NaN is all ones. If NaN is
     // represented by negative zero, then it is a valid finite value.
-    if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+    إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
         semantics->nanEncoding == fltNanEncoding::AllOnes &&
         exponent == semantics->maxExponent && isSignificandAllOnes())
-      return handleOverflow(rounding_mode);
+      أرجع handle_ډکېدنه(rounding_ډېرپېښ_2);
   }
 
   /* The normal case - we were and are not denormal, and any
      significand increment above didn't overflow.  */
-  if (omsb == semantics->precision)
-    return opInexact;
+  إذا (omsb == semantics->precision)
+    أرجع opInexact;
 
   /* We have a non-zero denormal.  */
-  assert(omsb < semantics->precision);
+  أكد(omsb < semantics->precision);
 
   /* Canonicalize zeroes.  */
-  if (omsb == 0) {
+  إذا (omsb == 0) {
     category = fcZero;
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-      sign = false;
+    إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      sign = خطأ;
     // This condition handles the case where the semantics
     // does not have zero but uses the all-zero encoding
     // to represent the smallest normal value.
-    if (!semantics->hasZero)
-      makeSmallestNormalized(false);
+    إذا (!semantics->hasZero)
+      make_تر_ټولو_کوچنی_Normalized(خطأ);
   }
 
   /* The fcZero case is a denormal that underflowed to zero.  */
-  return (opStatus) (opUnderflow | opInexact);
+  أرجع (op_حالت) (opUnderflow | opInexact);
 }
 
-APFloat::opStatus IEEEFloat::addOrSubtractSpecials(const IEEEFloat &rhs,
-                                                   bool subtract) {
-  switch (PackCategoriesIntoKey(category, rhs.category)) {
-  default:
-    llvm_unreachable(nullptr);
+APFloat::op_حالت IEEEFloat::جمع_کړه_Or_کمول_Specials(ثابت IEEEFloat &rhs,
+                                                   منطقي کمول) {
+  بدل (Pack_Categories_Into_کلی(category, rhs.category)) {
+  افتراضي:
+    llvm_unreachable(تش_اشاره);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    assign(rhs);
+  حالة Pack_Categories_Into_کلی(fcZero, fcNaN):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcNaN):
+    ټاکل(rhs);
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-    if (isSignaling()) {
+  حالة Pack_Categories_Into_کلی(fcNaN, fcZero):
+  حالة Pack_Categories_Into_کلی(fcNaN, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcNaN):
+    إذا (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      أرجع opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    أرجع rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcZero):
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fcInfinity):
     category = fcInfinity;
-    sign = rhs.sign ^ subtract;
-    return opOK;
+    sign = rhs.sign ^ کمول;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-    assign(rhs);
-    sign = rhs.sign ^ subtract;
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fcZero, fc_نورمال):
+    ټاکل(rhs);
+    sign = rhs.sign ^ کمول;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  حالة Pack_Categories_Into_کلی(fcZero, fcZero):
     /* Sign depends on rounding mode; handled by caller.  */
-    return opOK;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcInfinity):
     /* Differently signed infinities can only be validly
        subtracted.  */
-    if (((sign ^ rhs.sign)!=0) != subtract) {
+    إذا (((sign ^ rhs.sign)!=0) != کمول) {
       makeNaN();
-      return opInvalidOp;
+      أرجع opInvalidOp;
     }
 
-    return opOK;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opDivByZero;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fc_نورمال):
+    أرجع opDivByZero;
   }
 }
 
 /* Add or subtract two normal numbers.  */
-lostFraction IEEEFloat::addOrSubtractSignificand(const IEEEFloat &rhs,
-                                                 bool subtract) {
-  [[maybe_unused]] integerPart carry = 0;
-  lostFraction lost_fraction;
+ورک_Fraction IEEEFloat::جمع_کړه_Or_کمول_Significand(ثابت IEEEFloat &rhs,
+                                                 منطقي کمول) {
+  [[maybe_ناکارول_شوی]] integerPart لېږد = 0;
+  ورک_Fraction ورک_fraction;
 
   /* Determine if the operation on the absolute values is effectively
      an addition or subtraction.  */
-  subtract ^= static_cast<bool>(sign ^ rhs.sign);
+  کمول ^= static_cast<منطقي>(sign ^ rhs.sign);
 
   /* Are we bigger exponent-wise than the RHS?  */
-  int bits = exponent - rhs.exponent;
+  صحيح بټونه = exponent - rhs.exponent;
 
   /* Subtraction is more subtle than one might naively expect.  */
-  if (subtract) {
-    if ((bits < 0) && !semantics->hasSignedRepr)
+  إذا (کمول) {
+    إذا ((بټونه < 0) && !semantics->hasSignedRepr)
       llvm_unreachable(
           "This floating point format does not support signed values");
 
-    IEEEFloat temp_rhs(rhs);
-    bool lost_fraction_is_from_rhs = false;
+    IEEEFloat لنډمهاله_rhs(rhs);
+    منطقي ورک_fraction_is_from_rhs = خطأ;
 
-    if (bits == 0)
-      lost_fraction = lfExactlyZero;
-    else if (bits > 0) {
-      lost_fraction = temp_rhs.shiftSignificandRight(bits - 1);
-      lost_fraction_is_from_rhs = true;
-      shiftSignificandLeft(1);
-    } else {
-      lost_fraction = shiftSignificandRight(-bits - 1);
-      temp_rhs.shiftSignificandLeft(1);
+    إذا (بټونه == 0)
+      ورک_fraction = lfExactlyZero;
+    وإلا إذا (بټونه > 0) {
+      ورک_fraction = لنډمهاله_rhs.ښويدنه_Significand_ښی(بټونه - 1);
+      ورک_fraction_is_from_rhs = ریښتیا;
+      ښويدنه_Significand_کیڼ(1);
+    } وإلا {
+      ورک_fraction = ښويدنه_Significand_ښی(-بټونه - 1);
+      لنډمهاله_rhs.ښويدنه_Significand_کیڼ(1);
     }
 
     // Should we reverse the subtraction.
-    cmpResult cmp_result = compareAbsoluteValue(temp_rhs);
-    if (cmp_result == cmpLessThan) {
-      bool borrow =
-          lost_fraction != lfExactlyZero && !lost_fraction_is_from_rhs;
-      if (borrow) {
+    cmp_پایله cmp_پایله_2 = compare_Absolute_ارزښت(لنډمهاله_rhs);
+    إذا (cmp_پایله_2 == cmpLessThan) {
+      منطقي borrow =
+          ورک_fraction != lfExactlyZero && !ورک_fraction_is_from_rhs;
+      إذا (borrow) {
         // The lost fraction is being subtracted, borrow from the significand
         // and invert `lost_fraction`.
-        if (lost_fraction == lfLessThanHalf)
-          lost_fraction = lfMoreThanHalf;
-        else if (lost_fraction == lfMoreThanHalf)
-          lost_fraction = lfLessThanHalf;
+        إذا (ورک_fraction == lfLessThanHalf)
+          ورک_fraction = lf_نور_Than_Half;
+        وإلا إذا (ورک_fraction == lf_نور_Than_Half)
+          ورک_fraction = lfLessThanHalf;
       }
-      carry = temp_rhs.subtractSignificand(*this, borrow);
-      copySignificand(temp_rhs);
+      لېږد = لنډمهاله_rhs.کمول_Significand(*هذا, borrow);
+      copySignificand(لنډمهاله_rhs);
       sign = !sign;
-    } else if (cmp_result == cmpGreaterThan) {
-      bool borrow = lost_fraction != lfExactlyZero && lost_fraction_is_from_rhs;
-      if (borrow) {
+    } وإلا إذا (cmp_پایله_2 == cmpGreaterThan) {
+      منطقي borrow = ورک_fraction != lfExactlyZero && ورک_fraction_is_from_rhs;
+      إذا (borrow) {
         // The lost fraction is being subtracted, borrow from the significand
         // and invert `lost_fraction`.
-        if (lost_fraction == lfLessThanHalf)
-          lost_fraction = lfMoreThanHalf;
-        else if (lost_fraction == lfMoreThanHalf)
-          lost_fraction = lfLessThanHalf;
+        إذا (ورک_fraction == lfLessThanHalf)
+          ورک_fraction = lf_نور_Than_Half;
+        وإلا إذا (ورک_fraction == lf_نور_Than_Half)
+          ورک_fraction = lfLessThanHalf;
       }
-      carry = subtractSignificand(temp_rhs, borrow);
-    } else { // cmpEqual
+      لېږد = کمول_Significand(لنډمهاله_rhs, borrow);
+    } وإلا { // cmpEqual
       zeroSignificand();
-      if (lost_fraction != lfExactlyZero && lost_fraction_is_from_rhs) {
+      إذا (ورک_fraction != lfExactlyZero && ورک_fraction_is_from_rhs) {
         // rhs is slightly larger due to the lost fraction, flip the sign.
         sign = !sign;
       }
@@ -1920,292 +1920,292 @@ lostFraction IEEEFloat::addOrSubtractSignificand(const IEEEFloat &rhs,
 
     /* The code above is intended to ensure that no borrow is
        necessary.  */
-    assert(!carry);
-  } else {
-    if (bits > 0) {
-      IEEEFloat temp_rhs(rhs);
+    أكد(!لېږد);
+  } وإلا {
+    إذا (بټونه > 0) {
+      IEEEFloat لنډمهاله_rhs(rhs);
 
-      lost_fraction = temp_rhs.shiftSignificandRight(bits);
-      carry = addSignificand(temp_rhs);
-    } else {
-      lost_fraction = shiftSignificandRight(-bits);
-      carry = addSignificand(rhs);
+      ورک_fraction = لنډمهاله_rhs.ښويدنه_Significand_ښی(بټونه);
+      لېږد = جمع_کړه_Significand(لنډمهاله_rhs);
+    } وإلا {
+      ورک_fraction = ښويدنه_Significand_ښی(-بټونه);
+      لېږد = جمع_کړه_Significand(rhs);
     }
 
     /* We have a guard bit; generating a carry cannot happen.  */
-    assert(!carry);
+    أكد(!لېږد);
   }
 
-  return lost_fraction;
+  أرجع ورک_fraction;
 }
 
-APFloat::opStatus IEEEFloat::multiplySpecials(const IEEEFloat &rhs) {
-  switch (PackCategoriesIntoKey(category, rhs.category)) {
-  default:
-    llvm_unreachable(nullptr);
+APFloat::op_حالت IEEEFloat::multiplySpecials(ثابت IEEEFloat &rhs) {
+  بدل (Pack_Categories_Into_کلی(category, rhs.category)) {
+  افتراضي:
+    llvm_unreachable(تش_اشاره);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    assign(rhs);
-    sign = false;
+  حالة Pack_Categories_Into_کلی(fcZero, fcNaN):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcNaN):
+    ټاکل(rhs);
+    sign = خطأ;
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcZero):
+  حالة Pack_Categories_Into_کلی(fcNaN, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcNaN):
     sign ^= rhs.sign; // restore the original sign
-    if (isSignaling()) {
+    إذا (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      أرجع opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    أرجع rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcInfinity):
     category = fcInfinity;
-    return opOK;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  حالة Pack_Categories_Into_کلی(fcZero, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcZero):
+  حالة Pack_Categories_Into_کلی(fcZero, fcZero):
     category = fcZero;
-    return opOK;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
+  حالة Pack_Categories_Into_کلی(fcZero, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcZero):
     makeNaN();
-    return opInvalidOp;
+    أرجع opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fc_نورمال):
+    أرجع opOK;
   }
 }
 
-APFloat::opStatus IEEEFloat::divideSpecials(const IEEEFloat &rhs) {
-  switch (PackCategoriesIntoKey(category, rhs.category)) {
-  default:
-    llvm_unreachable(nullptr);
+APFloat::op_حالت IEEEFloat::divideSpecials(ثابت IEEEFloat &rhs) {
+  بدل (Pack_Categories_Into_کلی(category, rhs.category)) {
+  افتراضي:
+    llvm_unreachable(تش_اشاره);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    assign(rhs);
-    sign = false;
+  حالة Pack_Categories_Into_کلی(fcZero, fcNaN):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcNaN):
+    ټاکل(rhs);
+    sign = خطأ;
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcZero):
+  حالة Pack_Categories_Into_کلی(fcNaN, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcNaN):
     sign ^= rhs.sign; // restore the original sign
-    if (isSignaling()) {
+    إذا (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      أرجع opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    أرجع rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcZero, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fc_نورمال):
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcInfinity):
     category = fcZero;
-    return opOK;
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-    if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
-      makeNaN(false, sign);
-    else
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcZero):
+    إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
+      makeNaN(خطأ, sign);
+    وإلا
       category = fcInfinity;
-    return opDivByZero;
+    أرجع opDivByZero;
 
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fcZero):
     makeNaN();
-    return opInvalidOp;
+    أرجع opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fc_نورمال):
+    أرجع opOK;
   }
 }
 
-APFloat::opStatus IEEEFloat::modSpecials(const IEEEFloat &rhs) {
-  switch (PackCategoriesIntoKey(category, rhs.category)) {
-  default:
-    llvm_unreachable(nullptr);
+APFloat::op_حالت IEEEFloat::modSpecials(ثابت IEEEFloat &rhs) {
+  بدل (Pack_Categories_Into_کلی(category, rhs.category)) {
+  افتراضي:
+    llvm_unreachable(تش_اشاره);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    assign(rhs);
+  حالة Pack_Categories_Into_کلی(fcZero, fcNaN):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcNaN):
+    ټاکل(rhs);
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-    if (isSignaling()) {
+  حالة Pack_Categories_Into_کلی(fcNaN, fcZero):
+  حالة Pack_Categories_Into_کلی(fcNaN, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcNaN):
+    إذا (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      أرجع opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    أرجع rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fcZero, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcInfinity):
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fcZero):
     makeNaN();
-    return opInvalidOp;
+    أرجع opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fc_نورمال):
+    أرجع opOK;
   }
 }
 
-APFloat::opStatus IEEEFloat::remainderSpecials(const IEEEFloat &rhs) {
-  switch (PackCategoriesIntoKey(category, rhs.category)) {
-  default:
-    llvm_unreachable(nullptr);
+APFloat::op_حالت IEEEFloat::remainderSpecials(ثابت IEEEFloat &rhs) {
+  بدل (Pack_Categories_Into_کلی(category, rhs.category)) {
+  افتراضي:
+    llvm_unreachable(تش_اشاره);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    assign(rhs);
+  حالة Pack_Categories_Into_کلی(fcZero, fcNaN):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcNaN):
+    ټاکل(rhs);
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-    if (isSignaling()) {
+  حالة Pack_Categories_Into_کلی(fcNaN, fcZero):
+  حالة Pack_Categories_Into_کلی(fcNaN, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcNaN):
+    إذا (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      أرجع opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    أرجع rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-    return opOK;
+  حالة Pack_Categories_Into_کلی(fcZero, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcInfinity):
+    أرجع opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcZero):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fcZero):
     makeNaN();
-    return opInvalidOp;
+    أرجع opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opDivByZero; // fake status, indicating this is not a special case
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fc_نورمال):
+    أرجع opDivByZero; // fake status, indicating this is not a special case
   }
 }
 
 /* Change sign.  */
-void IEEEFloat::changeSign() {
+فراغ IEEEFloat::changeSign() {
   // With NaN-as-negative-zero, neither NaN or negative zero can change
   // their signs.
-  if (semantics->nanEncoding == fltNanEncoding::NegativeZero &&
+  إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero &&
       (isZero() || isNaN()))
-    return;
+    أرجع;
   /* Look mummy, this one's easy.  */
   sign = !sign;
 }
 
 /* Normalized addition or subtraction.  */
-APFloat::opStatus IEEEFloat::addOrSubtract(const IEEEFloat &rhs,
-                                           roundingMode rounding_mode,
-                                           bool subtract) {
-  opStatus fs = addOrSubtractSpecials(rhs, subtract);
+APFloat::op_حالت IEEEFloat::جمع_کړه_Or_کمول(ثابت IEEEFloat &rhs,
+                                           rounding_ډېرپېښ rounding_ډېرپېښ_2,
+                                           منطقي کمول) {
+  op_حالت fs = جمع_کړه_Or_کمول_Specials(rhs, کمول);
 
   /* This return code means it was not a simple case.  */
-  if (fs == opDivByZero) {
-    lostFraction lost_fraction;
+  إذا (fs == opDivByZero) {
+    ورک_Fraction ورک_fraction;
 
-    lost_fraction = addOrSubtractSignificand(rhs, subtract);
-    fs = normalize(rounding_mode, lost_fraction);
+    ورک_fraction = جمع_کړه_Or_کمول_Significand(rhs, کمول);
+    fs = normalize(rounding_ډېرپېښ_2, ورک_fraction);
 
     /* Can only be zero if we lost no fraction.  */
-    assert(category != fcZero || lost_fraction == lfExactlyZero);
+    أكد(category != fcZero || ورک_fraction == lfExactlyZero);
   }
 
   /* If two numbers add (exactly) to zero, IEEE 754 decrees it is a
      positive zero unless rounding to minus infinity, except that
      adding two like-signed zeroes gives that zero.  */
-  if (category == fcZero) {
-    if (rhs.category != fcZero || (sign == rhs.sign) == subtract)
-      sign = (rounding_mode == rmTowardNegative);
+  إذا (category == fcZero) {
+    إذا (rhs.category != fcZero || (sign == rhs.sign) == کمول)
+      sign = (rounding_ډېرپېښ_2 == rmTowardNegative);
     // NaN-in-negative-zero means zeros need to be normalized to +0.
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-      sign = false;
+    إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      sign = خطأ;
   }
 
-  return fs;
+  أرجع fs;
 }
 
 /* Normalized addition.  */
-APFloat::opStatus IEEEFloat::add(const IEEEFloat &rhs,
-                                 roundingMode rounding_mode) {
-  return addOrSubtract(rhs, rounding_mode, false);
+APFloat::op_حالت IEEEFloat::جمع_کړه(ثابت IEEEFloat &rhs,
+                                 rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  أرجع جمع_کړه_Or_کمول(rhs, rounding_ډېرپېښ_2, خطأ);
 }
 
 /* Normalized subtraction.  */
-APFloat::opStatus IEEEFloat::subtract(const IEEEFloat &rhs,
-                                      roundingMode rounding_mode) {
-  return addOrSubtract(rhs, rounding_mode, true);
+APFloat::op_حالت IEEEFloat::کمول(ثابت IEEEFloat &rhs,
+                                      rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  أرجع جمع_کړه_Or_کمول(rhs, rounding_ډېرپېښ_2, ریښتیا);
 }
 
 /* Normalized multiply.  */
-APFloat::opStatus IEEEFloat::multiply(const IEEEFloat &rhs,
-                                      roundingMode rounding_mode) {
+APFloat::op_حالت IEEEFloat::multiply(ثابت IEEEFloat &rhs,
+                                      rounding_ډېرپېښ rounding_ډېرپېښ_2) {
   sign ^= rhs.sign;
-  opStatus fs = multiplySpecials(rhs);
+  op_حالت fs = multiplySpecials(rhs);
 
-  if (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
-    sign = false;
-  if (isFiniteNonZero()) {
-    lostFraction lost_fraction = multiplySignificand(rhs);
-    fs = normalize(rounding_mode, lost_fraction);
-    if (lost_fraction != lfExactlyZero)
-      fs = (opStatus) (fs | opInexact);
+  إذا (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    sign = خطأ;
+  إذا (isFiniteNonZero()) {
+    ورک_Fraction ورک_fraction = multiplySignificand(rhs);
+    fs = normalize(rounding_ډېرپېښ_2, ورک_fraction);
+    إذا (ورک_fraction != lfExactlyZero)
+      fs = (op_حالت) (fs | opInexact);
   }
 
-  return fs;
+  أرجع fs;
 }
 
 /* Normalized divide.  */
-APFloat::opStatus IEEEFloat::divide(const IEEEFloat &rhs,
-                                    roundingMode rounding_mode) {
+APFloat::op_حالت IEEEFloat::divide(ثابت IEEEFloat &rhs,
+                                    rounding_ډېرپېښ rounding_ډېرپېښ_2) {
   sign ^= rhs.sign;
-  opStatus fs = divideSpecials(rhs);
+  op_حالت fs = divideSpecials(rhs);
 
-  if (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
-    sign = false;
-  if (isFiniteNonZero()) {
-    lostFraction lost_fraction = divideSignificand(rhs);
-    fs = normalize(rounding_mode, lost_fraction);
-    if (lost_fraction != lfExactlyZero)
-      fs = (opStatus) (fs | opInexact);
+  إذا (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    sign = خطأ;
+  إذا (isFiniteNonZero()) {
+    ورک_Fraction ورک_fraction = divideSignificand(rhs);
+    fs = normalize(rounding_ډېرپېښ_2, ورک_fraction);
+    إذا (ورک_fraction != lfExactlyZero)
+      fs = (op_حالت) (fs | opInexact);
   }
 
-  return fs;
+  أرجع fs;
 }
 
 /* Normalized remainder.  */
-APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
-  unsigned int origSign = sign;
+APFloat::op_حالت IEEEFloat::remainder(ثابت IEEEFloat &rhs) {
+  بینښه صحيح origSign = sign;
 
   // First handle the special cases.
-  opStatus fs = remainderSpecials(rhs);
-  if (fs != opDivByZero)
-    return fs;
+  op_حالت fs = remainderSpecials(rhs);
+  إذا (fs != opDivByZero)
+    أرجع fs;
 
   fs = opOK;
 
@@ -2214,15 +2214,15 @@ APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
   // value we currently posses must be less than twice the denom (as we are
   // using the same semantics).
   IEEEFloat P2 = rhs;
-  if (P2.add(rhs, rmNearestTiesToEven) == opOK) {
+  إذا (P2.جمع_کړه(rhs, rm_تر_ټولو_نږدې_Ties_منزل_Even) == opOK) {
     fs = mod(P2);
-    assert(fs == opOK);
+    أكد(fs == opOK);
   }
 
   // Lets work with absolute numbers.
   IEEEFloat P = rhs;
-  P.sign = false;
-  sign = false;
+  P.sign = خطأ;
+  sign = خطأ;
 
   //
   // To calculate the remainder we use the following scheme.
@@ -2258,70 +2258,70 @@ APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
   //
 
   // Extend the semantics to prevent an overflow/underflow or inexact result.
-  bool losesInfo;
+  منطقي losesInfo;
   fltSemantics extendedSemantics = *semantics;
   extendedSemantics.maxExponent++;
   extendedSemantics.minExponent--;
   extendedSemantics.precision += 2;
 
-  IEEEFloat VEx = *this;
-  fs = VEx.convert(extendedSemantics, rmNearestTiesToEven, &losesInfo);
-  assert(fs == opOK && !losesInfo);
+  IEEEFloat VEx = *هذا;
+  fs = VEx.convert(extendedSemantics, rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
+  أكد(fs == opOK && !losesInfo);
   IEEEFloat PEx = P;
-  fs = PEx.convert(extendedSemantics, rmNearestTiesToEven, &losesInfo);
-  assert(fs == opOK && !losesInfo);
+  fs = PEx.convert(extendedSemantics, rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
+  أكد(fs == opOK && !losesInfo);
 
   // It is simpler to work with 2x instead of 0.5p, and we do not need to lose
   // any fraction.
-  fs = VEx.add(VEx, rmNearestTiesToEven);
-  assert(fs == opOK);
+  fs = VEx.جمع_کړه(VEx, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+  أكد(fs == opOK);
 
-  if (VEx.compare(PEx) == cmpGreaterThan) {
-    fs = subtract(P, rmNearestTiesToEven);
-    assert(fs == opOK);
+  إذا (VEx.compare(PEx) == cmpGreaterThan) {
+    fs = کمول(P, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+    أكد(fs == opOK);
 
     // Make VEx = this.add(this), but because we have different semantics, we do
     // not want to `convert` again, so we just subtract PEx twice (which equals
     // to the desired value).
-    fs = VEx.subtract(PEx, rmNearestTiesToEven);
-    assert(fs == opOK);
-    fs = VEx.subtract(PEx, rmNearestTiesToEven);
-    assert(fs == opOK);
+    fs = VEx.کمول(PEx, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+    أكد(fs == opOK);
+    fs = VEx.کمول(PEx, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+    أكد(fs == opOK);
 
-    cmpResult result = VEx.compare(PEx);
-    if (result == cmpGreaterThan || result == cmpEqual) {
-      fs = subtract(P, rmNearestTiesToEven);
-      assert(fs == opOK);
+    cmp_پایله پایله_2 = VEx.compare(PEx);
+    إذا (پایله_2 == cmpGreaterThan || پایله_2 == cmpEqual) {
+      fs = کمول(P, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+      أكد(fs == opOK);
     }
   }
 
-  if (isZero()) {
+  إذا (isZero()) {
     sign = origSign;    // IEEE754 requires this
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
       // But some 8-bit floats only have positive 0.
-      sign = false;
-  } else {
+      sign = خطأ;
+  } وإلا {
     sign ^= origSign;
   }
-  return fs;
+  أرجع fs;
 }
 
 /* Normalized llvm frem (C fmod). */
-APFloat::opStatus IEEEFloat::mod(const IEEEFloat &rhs) {
-  opStatus fs = modSpecials(rhs);
-  unsigned int origSign = sign;
+APFloat::op_حالت IEEEFloat::mod(ثابت IEEEFloat &rhs) {
+  op_حالت fs = modSpecials(rhs);
+  بینښه صحيح origSign = sign;
 
-  while (isFiniteNonZero() && rhs.isFiniteNonZero() &&
-         compareAbsoluteValue(rhs) != cmpLessThan) {
-    int Exp = ilogb(*this) - ilogb(rhs);
-    IEEEFloat V = scalbn(rhs, Exp, rmNearestTiesToEven);
+  طالما (isFiniteNonZero() && rhs.isFiniteNonZero() &&
+         compare_Absolute_ارزښت(rhs) != cmpLessThan) {
+    صحيح Exp = ilogb(*هذا) - ilogb(rhs);
+    IEEEFloat V = scalbn(rhs, Exp, rm_تر_ټولو_نږدې_Ties_منزل_Even);
     // V can overflow to NaN with fltNonfiniteBehavior::NanOnly, so explicitly
     // check for it.
-    if (V.isNaN() || compareAbsoluteValue(V) == cmpLessThan)
-      V = scalbn(rhs, Exp - 1, rmNearestTiesToEven);
+    إذا (V.isNaN() || compare_Absolute_ارزښت(V) == cmpLessThan)
+      V = scalbn(rhs, Exp - 1, rm_تر_ټولو_نږدې_Ties_منزل_Even);
     V.sign = sign;
 
-    fs = subtract(V, rmNearestTiesToEven);
+    fs = کمول(V, rm_تر_ټولو_نږدې_Ties_منزل_Even);
 
     // When the semantics supports zero, this loop's
     // exit-condition is handled by the 'isFiniteNonZero'
@@ -2330,49 +2330,49 @@ APFloat::opStatus IEEEFloat::mod(const IEEEFloat &rhs) {
     // minimum possible value, (and any further subtract
     // will underflow to the same value) explicitly
     // provide an exit-path here.
-    if (!semantics->hasZero && this->isSmallest())
-      break;
+    إذا (!semantics->hasZero && هذا->is_تر_ټولو_کوچنی())
+      اكسر;
 
-    assert(fs==opOK);
+    أكد(fs==opOK);
   }
-  if (isZero()) {
+  إذا (isZero()) {
     sign = origSign; // fmod requires this
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-      sign = false;
+    إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      sign = خطأ;
   }
-  return fs;
+  أرجع fs;
 }
 
 /* Normalized fused-multiply-add.  */
-APFloat::opStatus IEEEFloat::fusedMultiplyAdd(const IEEEFloat &multiplicand,
-                                              const IEEEFloat &addend,
-                                              roundingMode rounding_mode) {
-  opStatus fs;
+APFloat::op_حالت IEEEFloat::fused_Multiply_جمع_کړه(ثابت IEEEFloat &multiplicand,
+                                              ثابت IEEEFloat &addend,
+                                              rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  op_حالت fs;
 
   /* Post-multiplication sign, before addition.  */
   sign ^= multiplicand.sign;
 
   /* If and only if all arguments are normal do we need to do an
      extended-precision calculation.  */
-  if (isFiniteNonZero() &&
+  إذا (isFiniteNonZero() &&
       multiplicand.isFiniteNonZero() &&
       addend.isFinite()) {
-    lostFraction lost_fraction;
+    ورک_Fraction ورک_fraction;
 
-    lost_fraction = multiplySignificand(multiplicand, addend);
-    fs = normalize(rounding_mode, lost_fraction);
-    if (lost_fraction != lfExactlyZero)
-      fs = (opStatus) (fs | opInexact);
+    ورک_fraction = multiplySignificand(multiplicand, addend);
+    fs = normalize(rounding_ډېرپېښ_2, ورک_fraction);
+    إذا (ورک_fraction != lfExactlyZero)
+      fs = (op_حالت) (fs | opInexact);
 
     /* If two numbers add (exactly) to zero, IEEE 754 decrees it is a
        positive zero unless rounding to minus infinity, except that
        adding two like-signed zeroes gives that zero.  */
-    if (category == fcZero && !(fs & opUnderflow) && sign != addend.sign) {
-      sign = (rounding_mode == rmTowardNegative);
-      if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-        sign = false;
+    إذا (category == fcZero && !(fs & opUnderflow) && sign != addend.sign) {
+      sign = (rounding_ډېرپېښ_2 == rmTowardNegative);
+      إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+        sign = خطأ;
     }
-  } else {
+  } وإلا {
     fs = multiplySpecials(multiplicand);
 
     /* FS can only be opOK or opInvalidOp.  There is no more work
@@ -2382,16 +2382,16 @@ APFloat::opStatus IEEEFloat::fusedMultiplyAdd(const IEEEFloat &multiplicand,
 
        If we need to do the addition we can do so with normal
        precision.  */
-    if (fs == opOK)
-      fs = addOrSubtract(addend, rounding_mode, false);
+    إذا (fs == opOK)
+      fs = جمع_کړه_Or_کمول(addend, rounding_ډېرپېښ_2, خطأ);
   }
 
-  return fs;
+  أرجع fs;
 }
 
 /* Rounding-mode correct round to integral value.  */
-APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
-  if (isInfinity())
+APFloat::op_حالت IEEEFloat::پړاو_منزل_Integral(rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  إذا (isInfinity())
     // [IEEE Std 754-2008 6.1]:
     // The behavior of infinity in floating-point arithmetic is derived from the
     // limiting cases of real arithmetic with operands of arbitrarily
@@ -2399,10 +2399,10 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
     // ...
     // Operations on infinite operands are usually exact and therefore signal no
     // exceptions ...
-    return opOK;
+    أرجع opOK;
 
-  if (isNaN()) {
-    if (isSignaling()) {
+  إذا (isNaN()) {
+    إذا (isSignaling()) {
       // [IEEE Std 754-2008 6.2]:
       // Under default exception handling, any operation signaling an invalid
       // operation exception and for which a floating-point result is to be
@@ -2413,8 +2413,8 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
       // handling, signal the invalid operation exception(see 7.2) for every
       // general-computational and signaling-computational operation except for
       // the conversions described in 5.12.
-      return opInvalidOp;
-    } else {
+      أرجع opInvalidOp;
+    } وإلا {
       // [IEEE Std 754-2008 6.2]:
       // For an operation with quiet NaN inputs, other than maximum and minimum
       // operations, if a floating-point result is to be delivered the result
@@ -2424,23 +2424,23 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
       // one or more input NaNs, none of them signaling, shall signal no
       // exception, except fusedMultiplyAdd might signal the invalid operation
       // exception(see 7.2).
-      return opOK;
+      أرجع opOK;
     }
   }
 
-  if (isZero()) {
+  إذا (isZero()) {
     // [IEEE Std 754-2008 6.3]:
     // ... the sign of the result of conversions, the quantize operation, the
     // roundToIntegral operations, and the roundToIntegralExact(see 5.3.1) is
     // the sign of the first or only operand.
-    return opOK;
+    أرجع opOK;
   }
 
   // If the exponent is large enough, we know that this value is already
   // integral, and the arithmetic below would potentially cause it to saturate
   // to +/-Inf.  Bail out early instead.
-  if (exponent + 1 >= (int)APFloat::semanticsPrecision(*semantics))
-    return opOK;
+  إذا (exponent + 1 >= (صحيح)APFloat::semanticsPrecision(*semantics))
+    أرجع opOK;
 
   // The algorithm here is quite simple: we add 2^(p-1), where p is the
   // precision of our format, and then subtract it back off again.  The choice
@@ -2448,100 +2448,100 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
   // for our integral rounding as well.
   // NOTE: When the input value is negative, we do subtraction followed by
   // addition instead.
-  APInt IntegerConstant(NextPowerOf2(APFloat::semanticsPrecision(*semantics)),
+  APInt IntegerConstant(بل_Power_Of2(APFloat::semanticsPrecision(*semantics)),
                         1);
   IntegerConstant <<= APFloat::semanticsPrecision(*semantics) - 1;
   IEEEFloat MagicConstant(*semantics);
-  opStatus fs = MagicConstant.convertFromAPInt(IntegerConstant, false,
-                                               rmNearestTiesToEven);
-  assert(fs == opOK);
+  op_حالت fs = MagicConstant.convertFromAPInt(IntegerConstant, خطأ,
+                                               rm_تر_ټولو_نږدې_Ties_منزل_Even);
+  أكد(fs == opOK);
   MagicConstant.sign = sign;
 
   // Preserve the input sign so that we can handle the case of zero result
   // correctly.
-  bool inputSign = isNegative();
+  منطقي ننوت_Sign = isNegative();
 
-  fs = add(MagicConstant, rounding_mode);
+  fs = جمع_کړه(MagicConstant, rounding_ډېرپېښ_2);
 
   // Current value and 'MagicConstant' are both integers, so the result of the
   // subtraction is always exact according to Sterbenz' lemma.
-  subtract(MagicConstant, rounding_mode);
+  کمول(MagicConstant, rounding_ډېرپېښ_2);
 
   // Restore the input sign.
-  if (inputSign != isNegative())
+  إذا (ننوت_Sign != isNegative())
     changeSign();
 
-  return fs;
+  أرجع fs;
 }
 
 /* Comparison requires normalized numbers.  */
-APFloat::cmpResult IEEEFloat::compare(const IEEEFloat &rhs) const {
-  assert(semantics == rhs.semantics);
+APFloat::cmp_پایله IEEEFloat::compare(ثابت IEEEFloat &rhs) ثابت {
+  أكد(semantics == rhs.semantics);
 
-  switch (PackCategoriesIntoKey(category, rhs.category)) {
-  default:
-    llvm_unreachable(nullptr);
+  بدل (Pack_Categories_Into_کلی(category, rhs.category)) {
+  افتراضي:
+    llvm_unreachable(تش_اشاره);
 
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    return cmpUnordered;
+  حالة Pack_Categories_Into_کلی(fcNaN, fcZero):
+  حالة Pack_Categories_Into_کلی(fcNaN, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcNaN, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcZero, fcNaN):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcNaN):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcNaN):
+    أرجع cmpUnordered;
 
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-    if (sign)
-      return cmpLessThan;
-    else
-      return cmpGreaterThan;
+  حالة Pack_Categories_Into_کلی(fcInfinity, fc_نورمال):
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcZero):
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcZero):
+    إذا (sign)
+      أرجع cmpLessThan;
+    وإلا
+      أرجع cmpGreaterThan;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-    if (rhs.sign)
-      return cmpGreaterThan;
-    else
-      return cmpLessThan;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fcInfinity):
+  حالة Pack_Categories_Into_کلی(fcZero, fc_نورمال):
+    إذا (rhs.sign)
+      أرجع cmpGreaterThan;
+    وإلا
+      أرجع cmpLessThan;
 
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-    if (sign == rhs.sign)
-      return cmpEqual;
-    else if (sign)
-      return cmpLessThan;
-    else
-      return cmpGreaterThan;
+  حالة Pack_Categories_Into_کلی(fcInfinity, fcInfinity):
+    إذا (sign == rhs.sign)
+      أرجع cmpEqual;
+    وإلا إذا (sign)
+      أرجع cmpLessThan;
+    وإلا
+      أرجع cmpGreaterThan;
 
-  case PackCategoriesIntoKey(fcZero, fcZero):
-    return cmpEqual;
+  حالة Pack_Categories_Into_کلی(fcZero, fcZero):
+    أرجع cmpEqual;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    break;
+  حالة Pack_Categories_Into_کلی(fc_نورمال, fc_نورمال):
+    اكسر;
   }
 
-  cmpResult result;
+  cmp_پایله پایله_2;
   /* Two normal numbers.  Do they have the same sign?  */
-  if (sign != rhs.sign) {
-    if (sign)
-      result = cmpLessThan;
-    else
-      result = cmpGreaterThan;
-  } else {
+  إذا (sign != rhs.sign) {
+    إذا (sign)
+      پایله_2 = cmpLessThan;
+    وإلا
+      پایله_2 = cmpGreaterThan;
+  } وإلا {
     /* Compare absolute values; invert result if negative.  */
-    result = compareAbsoluteValue(rhs);
+    پایله_2 = compare_Absolute_ارزښت(rhs);
 
-    if (sign) {
-      if (result == cmpLessThan)
-        result = cmpGreaterThan;
-      else if (result == cmpGreaterThan)
-        result = cmpLessThan;
+    إذا (sign) {
+      إذا (پایله_2 == cmpLessThan)
+        پایله_2 = cmpGreaterThan;
+      وإلا إذا (پایله_2 == cmpGreaterThan)
+        پایله_2 = cmpLessThan;
     }
   }
 
-  return result;
+  أرجع پایله_2;
 }
 
 /// IEEEFloat::convert - convert a value of one floating point type to another.
@@ -2551,26 +2551,26 @@ APFloat::cmpResult IEEEFloat::compare(const IEEEFloat &rhs) const {
 /// original value (this is almost the same as return value==fsOK, but there
 /// are edge cases where this is not so).
 
-APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
-                                     roundingMode rounding_mode,
-                                     bool *losesInfo) {
-  opStatus fs;
-  const fltSemantics &fromSemantics = *semantics;
-  bool is_signaling = isSignaling();
+APFloat::op_حالت IEEEFloat::convert(ثابت fltSemantics &منزل_Semantics,
+                                     rounding_ډېرپېښ rounding_ډېرپېښ_2,
+                                     منطقي *losesInfo) {
+  op_حالت fs;
+  ثابت fltSemantics &fromSemantics = *semantics;
+  منطقي is_signaling = isSignaling();
 
-  lostFraction lostFraction = lfExactlyZero;
-  unsigned newPartCount = partCountForBits(toSemantics.precision + 1);
-  unsigned oldPartCount = partCount();
-  int shift = toSemantics.precision - fromSemantics.precision;
+  ورک_Fraction ورک_Fraction = lfExactlyZero;
+  بینښه new_Part_شمېر = part_شمېر_For_بټونه(منزل_Semantics.precision + 1);
+  بینښه old_Part_شمېر = part_شمېر();
+  صحيح ښويدنه = منزل_Semantics.precision - fromSemantics.precision;
 
-  bool X86SpecialNan = false;
-  if (&fromSemantics == &APFloatBase::semX87DoubleExtended &&
-      &toSemantics != &APFloatBase::semX87DoubleExtended && category == fcNaN &&
+  منطقي X86SpecialNan = خطأ;
+  إذا (&fromSemantics == &APFloat_بنسټ::semX87DoubleExtended &&
+      &منزل_Semantics != &APFloat_بنسټ::semX87DoubleExtended && category == fcNaN &&
       (!(*significandParts() & 0x8000000000000000ULL) ||
        !(*significandParts() & 0x4000000000000000ULL))) {
     // x86 has some unusual NaNs which cannot be represented in any other
     // format; note them here.
-    X86SpecialNan = true;
+    X86SpecialNan = ریښتیا;
   }
 
   // If this is a truncation of a denormal number, and the target semantics
@@ -2580,109 +2580,109 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
   // of performing excessive shift.
   // Also do a similar trick in case shifting denormal would produce zero
   // significand as this case isn't handled correctly by normalize.
-  if (shift < 0 && isFiniteNonZero()) {
-    int omsb = significandMSB() + 1;
-    int exponentChange = omsb - fromSemantics.precision;
-    if (exponent + exponentChange < toSemantics.minExponent)
-      exponentChange = toSemantics.minExponent - exponent;
-    exponentChange = std::max(exponentChange, shift);
-    if (exponentChange < 0) {
-      shift -= exponentChange;
+  إذا (ښويدنه < 0 && isFiniteNonZero()) {
+    صحيح omsb = significandMSB() + 1;
+    صحيح exponentChange = omsb - fromSemantics.precision;
+    إذا (exponent + exponentChange < منزل_Semantics.minExponent)
+      exponentChange = منزل_Semantics.minExponent - exponent;
+    exponentChange = std::max(exponentChange, ښويدنه);
+    إذا (exponentChange < 0) {
+      ښويدنه -= exponentChange;
       exponent += exponentChange;
-    } else if (omsb <= -shift) {
-      exponentChange = omsb + shift - 1; // leave at least one bit set
-      shift -= exponentChange;
+    } وإلا إذا (omsb <= -ښويدنه) {
+      exponentChange = omsb + ښويدنه - 1; // leave at least one bit set
+      ښويدنه -= exponentChange;
       exponent += exponentChange;
     }
   }
 
   // If this is a truncation, perform the shift before we narrow the storage.
-  if (shift < 0 && (isFiniteNonZero() ||
+  إذا (ښويدنه < 0 && (isFiniteNonZero() ||
                     (category == fcNaN && semantics->nonFiniteBehavior !=
                                               fltNonfiniteBehavior::NanOnly)))
-    lostFraction = shiftRight(significandParts(), oldPartCount, -shift);
+    ورک_Fraction = ښويدنه_ښی(significandParts(), old_Part_شمېر, -ښويدنه);
 
   // Fix the storage so it can hold to new value.
-  if (newPartCount > oldPartCount) {
+  إذا (new_Part_شمېر > old_Part_شمېر) {
     // The new type requires more storage; make it available.
     integerPart *newParts;
-    newParts = new integerPart[newPartCount];
-    APInt::tcSet(newParts, 0, newPartCount);
-    if (isFiniteNonZero() || category==fcNaN)
-      APInt::tcAssign(newParts, significandParts(), oldPartCount);
+    newParts = جديد integerPart[new_Part_شمېر];
+    APInt::tc_سېټ(newParts, 0, new_Part_شمېر);
+    إذا (isFiniteNonZero() || category==fcNaN)
+      APInt::tc_ټاکل(newParts, significandParts(), old_Part_شمېر);
     freeSignificand();
     significand.parts = newParts;
-  } else if (newPartCount == 1 && oldPartCount != 1) {
+  } وإلا إذا (new_Part_شمېر == 1 && old_Part_شمېر != 1) {
     // Switch to built-in storage for a single part.
     integerPart newPart = 0;
-    if (isFiniteNonZero() || category==fcNaN)
+    إذا (isFiniteNonZero() || category==fcNaN)
       newPart = significandParts()[0];
     freeSignificand();
     significand.part = newPart;
   }
 
   // Now that we have the right storage, switch the semantics.
-  semantics = &toSemantics;
+  semantics = &منزل_Semantics;
 
   // If this is an extension, perform the shift now that the storage is
   // available.
-  if (shift > 0 && (isFiniteNonZero() || category==fcNaN))
-    APInt::tcShiftLeft(significandParts(), newPartCount, shift);
+  إذا (ښويدنه > 0 && (isFiniteNonZero() || category==fcNaN))
+    APInt::tc_ښويدنه_کیڼ(significandParts(), new_Part_شمېر, ښويدنه);
 
-  if (isFiniteNonZero()) {
-    fs = normalize(rounding_mode, lostFraction);
+  إذا (isFiniteNonZero()) {
+    fs = normalize(rounding_ډېرپېښ_2, ورک_Fraction);
     *losesInfo = (fs != opOK);
-  } else if (category == fcNaN) {
-    if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+  } وإلا إذا (category == fcNaN) {
+    إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
       *losesInfo =
           fromSemantics.nonFiniteBehavior != fltNonfiniteBehavior::NanOnly;
-      makeNaN(false, sign);
+      makeNaN(خطأ, sign);
       fs = is_signaling ? opInvalidOp : opOK;
-    } else {
+    } وإلا {
       // If NaN is negative zero, we need to create a new NaN to avoid
       // converting NaN to -Inf.
-      if (fromSemantics.nanEncoding == fltNanEncoding::NegativeZero &&
+      إذا (fromSemantics.nanEncoding == fltNanEncoding::NegativeZero &&
           semantics->nanEncoding != fltNanEncoding::NegativeZero)
-        makeNaN(false, false);
+        makeNaN(خطأ, خطأ);
 
       // If the source has no significand, there are no payload bits to carry
       // over, and an all-zero significand would encode an Inf. Create a new
       // NaN.
-      if (!APFloat::hasSignificand(fromSemantics))
-        makeNaN(false, sign);
+      إذا (!APFloat::hasSignificand(fromSemantics))
+        makeNaN(خطأ, sign);
 
-      *losesInfo = lostFraction != lfExactlyZero || X86SpecialNan;
+      *losesInfo = ورک_Fraction != lfExactlyZero || X86SpecialNan;
 
       // For x87 extended precision, we want to make a NaN, not a special NaN
       // if the input wasn't special either.
-      if (!X86SpecialNan && semantics == &APFloatBase::semX87DoubleExtended)
-        APInt::tcSetBit(significandParts(), semantics->precision - 1);
+      إذا (!X86SpecialNan && semantics == &APFloat_بنسټ::semX87DoubleExtended)
+        APInt::tc_سېټ_بټ(significandParts(), semantics->precision - 1);
 
       // Convert of sNaN creates qNaN and raises an exception (invalid op).
       // This also guarantees that a sNaN does not become Inf on a truncation
       // that loses all payload bits.
-      if (is_signaling) {
+      إذا (is_signaling) {
         makeQuiet();
         fs = opInvalidOp;
-      } else {
+      } وإلا {
         fs = opOK;
       }
     }
-  } else if (category == fcInfinity &&
+  } وإلا إذا (category == fcInfinity &&
              semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
-    makeNaN(false, sign);
-    *losesInfo = true;
+    makeNaN(خطأ, sign);
+    *losesInfo = ریښتیا;
     fs = opInexact;
-  } else if (category == fcZero &&
+  } وإلا إذا (category == fcZero &&
              semantics->nanEncoding == fltNanEncoding::NegativeZero) {
     // Negative zero loses info, but positive zero doesn't.
     *losesInfo =
         fromSemantics.nanEncoding != fltNanEncoding::NegativeZero && sign;
     fs = *losesInfo ? opInexact : opOK;
     // NaN is negative zero means -0 -> +0, which can lose information
-    sign = false;
-  } else {
-    *losesInfo = false;
+    sign = خطأ;
+  } وإلا {
+    *losesInfo = خطأ;
     fs = opOK;
   }
 
@@ -2690,16 +2690,16 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
   // The paths above only report what rounding lost, so report these here too:
   // a caller that checks losesInfo would otherwise accept a result the target
   // cannot represent, and printing that result asserts.
-  if ((sign && !semantics->hasSignedRepr) ||
+  إذا ((sign && !semantics->hasSignedRepr) ||
       (category == fcZero && !semantics->hasZero)) {
-    *losesInfo = true;
-    if (fs == opOK)
+    *losesInfo = ریښتیا;
+    إذا (fs == opOK)
       fs = opInexact;
   }
 
-  if (category == fcZero && !semantics->hasZero)
-    makeSmallestNormalized(false);
-  return fs;
+  إذا (category == fcZero && !semantics->hasZero)
+    make_تر_ټولو_کوچنی_Normalized(خطأ);
+  أرجع fs;
 }
 
 /* Convert a floating point number to an integer according to the
@@ -2712,106 +2712,106 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
 
    Note that for conversions to integer type the C standard requires
    round-to-zero to always be used.  */
-APFloat::opStatus IEEEFloat::convertToSignExtendedInteger(
-    MutableArrayRef<integerPart> parts, unsigned int width, bool isSigned,
-    roundingMode rounding_mode, bool *isExact) const {
-  *isExact = false;
+APFloat::op_حالت IEEEFloat::convert_منزل_Sign_Extended_Integer(
+    MutableArrayRef<integerPart> parts, بینښه صحيح پلنوالی_2, منطقي isSigned,
+    rounding_ډېرپېښ rounding_ډېرپېښ_2, منطقي *isExact) ثابت {
+  *isExact = خطأ;
 
   /* Handle the three special cases first.  */
-  if (category == fcInfinity || category == fcNaN)
-    return opInvalidOp;
+  إذا (category == fcInfinity || category == fcNaN)
+    أرجع opInvalidOp;
 
-  unsigned dstPartsCount = partCountForBits(width);
-  assert(dstPartsCount <= parts.size() && "Integer too big");
+  بینښه dst_Parts_شمېر = part_شمېر_For_بټونه(پلنوالی_2);
+  أكد(dst_Parts_شمېر <= parts.اندازه_2() && "Integer too big");
 
-  if (category == fcZero) {
-    APInt::tcSet(parts.data(), 0, dstPartsCount);
+  إذا (category == fcZero) {
+    APInt::tc_سېټ(parts.معلومات(), 0, dst_Parts_شمېر);
     // Negative zero can't be represented as an int.
     *isExact = !sign;
-    return opOK;
+    أرجع opOK;
   }
 
-  const integerPart *src = significandParts();
+  ثابت integerPart *src = significandParts();
 
-  unsigned truncatedBits;
+  بینښه truncated_بټونه;
   /* Step 1: place our absolute value, with any fraction truncated, in
      the destination.  */
-  if (exponent < 0) {
+  إذا (exponent < 0) {
     /* Our absolute value is less than one; truncate everything.  */
-    APInt::tcSet(parts.data(), 0, dstPartsCount);
+    APInt::tc_سېټ(parts.معلومات(), 0, dst_Parts_شمېر);
     /* For exponent -1 the integer bit represents .5, look at that.
        For smaller exponents leftmost truncated bit is 0. */
-    truncatedBits = semantics->precision -1U - exponent;
-  } else {
+    truncated_بټونه = semantics->precision -1U - exponent;
+  } وإلا {
     /* We want the most significant (exponent + 1) bits; the rest are
        truncated.  */
-    unsigned int bits = exponent + 1U;
+    بینښه صحيح بټونه = exponent + 1U;
 
     /* Hopelessly large in magnitude?  */
-    if (bits > width)
-      return opInvalidOp;
+    إذا (بټونه > پلنوالی_2)
+      أرجع opInvalidOp;
 
-    if (bits < semantics->precision) {
+    إذا (بټونه < semantics->precision) {
       /* We truncate (semantics->precision - bits) bits.  */
-      truncatedBits = semantics->precision - bits;
-      APInt::tcExtract(parts.data(), dstPartsCount, src, bits, truncatedBits);
-    } else {
+      truncated_بټونه = semantics->precision - بټونه;
+      APInt::tc_ایستل(parts.معلومات(), dst_Parts_شمېر, src, بټونه, truncated_بټونه);
+    } وإلا {
       /* We want at least as many bits as are available.  */
-      APInt::tcExtract(parts.data(), dstPartsCount, src, semantics->precision,
+      APInt::tc_ایستل(parts.معلومات(), dst_Parts_شمېر, src, semantics->precision,
                        0);
-      APInt::tcShiftLeft(parts.data(), dstPartsCount,
-                         bits - semantics->precision);
-      truncatedBits = 0;
+      APInt::tc_ښويدنه_کیڼ(parts.معلومات(), dst_Parts_شمېر,
+                         بټونه - semantics->precision);
+      truncated_بټونه = 0;
     }
   }
 
   /* Step 2: work out any lost fraction, and increment the absolute
      value if we would round away from zero.  */
-  lostFraction lost_fraction;
-  if (truncatedBits) {
-    lost_fraction = lostFractionThroughTruncation(src, partCount(),
-                                                  truncatedBits);
-    if (lost_fraction != lfExactlyZero &&
-        roundAwayFromZero(rounding_mode, lost_fraction, truncatedBits)) {
-      if (APInt::tcIncrement(parts.data(), dstPartsCount))
-        return opInvalidOp;     /* Overflow.  */
+  ورک_Fraction ورک_fraction;
+  إذا (truncated_بټونه) {
+    ورک_fraction = ورک_Fraction_Through_Truncation(src, part_شمېر(),
+                                                  truncated_بټونه);
+    إذا (ورک_fraction != lfExactlyZero &&
+        پړاو_Away_From_Zero(rounding_ډېرپېښ_2, ورک_fraction, truncated_بټونه)) {
+      إذا (APInt::tcIncrement(parts.معلومات(), dst_Parts_شمېر))
+        أرجع opInvalidOp;     /* Overflow.  */
     }
-  } else {
-    lost_fraction = lfExactlyZero;
+  } وإلا {
+    ورک_fraction = lfExactlyZero;
   }
 
   /* Step 3: check if we fit in the destination.  */
-  unsigned int omsb = APInt::tcMSB(parts.data(), dstPartsCount) + 1;
+  بینښه صحيح omsb = APInt::tcMSB(parts.معلومات(), dst_Parts_شمېر) + 1;
 
-  if (sign) {
-    if (!isSigned) {
+  إذا (sign) {
+    إذا (!isSigned) {
       /* Negative numbers cannot be represented as unsigned.  */
-      if (omsb != 0)
-        return opInvalidOp;
-    } else {
+      إذا (omsb != 0)
+        أرجع opInvalidOp;
+    } وإلا {
       /* It takes omsb bits to represent the unsigned integer value.
          We lose a bit for the sign, but care is needed as the
          maximally negative integer is a special case.  */
-      if (omsb == width &&
-          APInt::tcLSB(parts.data(), dstPartsCount) + 1 != omsb)
-        return opInvalidOp;
+      إذا (omsb == پلنوالی_2 &&
+          APInt::tcLSB(parts.معلومات(), dst_Parts_شمېر) + 1 != omsb)
+        أرجع opInvalidOp;
 
       /* This case can happen because of rounding.  */
-      if (omsb > width)
-        return opInvalidOp;
+      إذا (omsb > پلنوالی_2)
+        أرجع opInvalidOp;
     }
 
-    APInt::tcNegate (parts.data(), dstPartsCount);
-  } else {
-    if (omsb >= width + !isSigned)
-      return opInvalidOp;
+    APInt::tcNegate (parts.معلومات(), dst_Parts_شمېر);
+  } وإلا {
+    إذا (omsb >= پلنوالی_2 + !isSigned)
+      أرجع opInvalidOp;
   }
 
-  if (lost_fraction == lfExactlyZero) {
-    *isExact = true;
-    return opOK;
+  إذا (ورک_fraction == lfExactlyZero) {
+    *isExact = ریښتیا;
+    أرجع opOK;
   }
-  return opInexact;
+  أرجع opInexact;
 }
 
 /* Same as convertToSignExtendedInteger, except we provide
@@ -2823,239 +2823,239 @@ APFloat::opStatus IEEEFloat::convertToSignExtendedInteger(
    the original value.  This is almost equivalent to result==opOK,
    except for negative zeroes.
 */
-APFloat::opStatus
-IEEEFloat::convertToInteger(MutableArrayRef<integerPart> parts,
-                            unsigned int width, bool isSigned,
-                            roundingMode rounding_mode, bool *isExact) const {
-  opStatus fs = convertToSignExtendedInteger(parts, width, isSigned,
-                                             rounding_mode, isExact);
+APFloat::op_حالت
+IEEEFloat::convert_منزل_Integer(MutableArrayRef<integerPart> parts,
+                            بینښه صحيح پلنوالی_2, منطقي isSigned,
+                            rounding_ډېرپېښ rounding_ډېرپېښ_2, منطقي *isExact) ثابت {
+  op_حالت fs = convert_منزل_Sign_Extended_Integer(parts, پلنوالی_2, isSigned,
+                                             rounding_ډېرپېښ_2, isExact);
 
-  if (fs == opInvalidOp) {
-    unsigned int bits, dstPartsCount;
+  إذا (fs == opInvalidOp) {
+    بینښه صحيح بټونه, dst_Parts_شمېر;
 
-    dstPartsCount = partCountForBits(width);
-    assert(dstPartsCount <= parts.size() && "Integer too big");
+    dst_Parts_شمېر = part_شمېر_For_بټونه(پلنوالی_2);
+    أكد(dst_Parts_شمېر <= parts.اندازه_2() && "Integer too big");
 
-    if (category == fcNaN)
-      bits = 0;
-    else if (sign)
-      bits = isSigned;
-    else
-      bits = width - isSigned;
+    إذا (category == fcNaN)
+      بټونه = 0;
+    وإلا إذا (sign)
+      بټونه = isSigned;
+    وإلا
+      بټونه = پلنوالی_2 - isSigned;
 
-    tcSetLeastSignificantBits(parts.data(), dstPartsCount, bits);
-    if (sign && isSigned)
-      APInt::tcShiftLeft(parts.data(), dstPartsCount, width - 1);
+    tc_سېټ_لږترلږه_Significant_بټونه(parts.معلومات(), dst_Parts_شمېر, بټونه);
+    إذا (sign && isSigned)
+      APInt::tc_ښويدنه_کیڼ(parts.معلومات(), dst_Parts_شمېر, پلنوالی_2 - 1);
   }
 
-  return fs;
+  أرجع fs;
 }
 
 /* Convert an unsigned integer SRC to a floating point number,
    rounding according to ROUNDING_MODE.  The sign of the floating
    point number is not modified.  */
-APFloat::opStatus IEEEFloat::convertFromUnsignedParts(
-    const integerPart *src, unsigned int srcCount, roundingMode rounding_mode) {
-  category = fcNormal;
-  unsigned omsb = APInt::tcMSB(src, srcCount) + 1;
+APFloat::op_حالت IEEEFloat::convertFromUnsignedParts(
+    ثابت integerPart *src, بینښه صحيح src_شمېر, rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  category = fc_نورمال;
+  بینښه omsb = APInt::tcMSB(src, src_شمېر) + 1;
   integerPart *dst = significandParts();
-  unsigned dstCount = partCount();
-  unsigned precision = semantics->precision;
+  بینښه dst_شمېر = part_شمېر();
+  بینښه precision = semantics->precision;
 
   /* We want the most significant PRECISION bits of SRC.  There may not
      be that many; extract what we can.  */
-  lostFraction lost_fraction;
-  if (precision <= omsb) {
+  ورک_Fraction ورک_fraction;
+  إذا (precision <= omsb) {
     exponent = omsb - 1;
-    lost_fraction = lostFractionThroughTruncation(src, srcCount,
+    ورک_fraction = ورک_Fraction_Through_Truncation(src, src_شمېر,
                                                   omsb - precision);
-    APInt::tcExtract(dst, dstCount, src, precision, omsb - precision);
-  } else {
+    APInt::tc_ایستل(dst, dst_شمېر, src, precision, omsb - precision);
+  } وإلا {
     exponent = precision - 1;
-    lost_fraction = lfExactlyZero;
-    APInt::tcExtract(dst, dstCount, src, omsb, 0);
+    ورک_fraction = lfExactlyZero;
+    APInt::tc_ایستل(dst, dst_شمېر, src, omsb, 0);
   }
 
-  return normalize(rounding_mode, lost_fraction);
+  أرجع normalize(rounding_ډېرپېښ_2, ورک_fraction);
 }
 
-APFloat::opStatus IEEEFloat::convertFromAPInt(const APInt &Val, bool isSigned,
-                                              roundingMode rounding_mode) {
-  unsigned int partCount = Val.getNumWords();
+APFloat::op_حالت IEEEFloat::convertFromAPInt(ثابت APInt &Val, منطقي isSigned,
+                                              rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  بینښه صحيح part_شمېر = Val.get_عدد_ټکي();
   APInt api = Val;
 
-  sign = false;
-  if (isSigned && api.isNegative()) {
-    sign = true;
+  sign = خطأ;
+  إذا (isSigned && api.isNegative()) {
+    sign = ریښتیا;
     api = -api;
   }
 
-  return convertFromUnsignedParts(api.getRawData(), partCount, rounding_mode);
+  أرجع convertFromUnsignedParts(api.get_Raw_معلومات(), part_شمېر, rounding_ډېرپېښ_2);
 }
 
-Expected<APFloat::opStatus>
+Expected<APFloat::op_حالت>
 IEEEFloat::convertFromHexadecimalString(StringRef s,
-                                        roundingMode rounding_mode) {
-  lostFraction lost_fraction = lfExactlyZero;
+                                        rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  ورک_Fraction ورک_fraction = lfExactlyZero;
 
-  category = fcNormal;
+  category = fc_نورمال;
   zeroSignificand();
   exponent = 0;
 
   integerPart *significand = significandParts();
-  unsigned partsCount = partCount();
-  unsigned bitPos = partsCount * integerPartWidth;
-  bool computedTrailingFraction = false;
+  بینښه parts_شمېر = part_شمېر();
+  بینښه بټ_Pos = parts_شمېر * integer_Part_پلنوالی;
+  منطقي computedTrailingFraction = خطأ;
 
   // Skip leading zeroes and any (hexa)decimal point.
   StringRef::iterator begin = s.begin();
-  StringRef::iterator end = s.end();
+  StringRef::iterator پای_ټکی = s.پای_ټکی();
   StringRef::iterator dot;
-  auto PtrOrErr = skipLeadingZeroesAndAnyDot(begin, end, &dot);
-  if (!PtrOrErr)
-    return PtrOrErr.takeError();
+  خپلکاری PtrOrErr = skipLeadingZeroesAndAnyDot(begin, پای_ټکی, &dot);
+  إذا (!PtrOrErr)
+    أرجع PtrOrErr.takeError();
   StringRef::iterator p = *PtrOrErr;
-  StringRef::iterator firstSignificantDigit = p;
+  StringRef::iterator لومړی_Significant_Digit = p;
 
-  while (p != end) {
-    integerPart hex_value;
+  طالما (p != پای_ټکی) {
+    integerPart hex_ارزښت;
 
-    if (*p == '.') {
-      if (dot != end)
-        return createError("String contains multiple dots");
+    إذا (*p == '.') {
+      إذا (dot != پای_ټکی)
+        أرجع createError("String contains multiple dots");
       dot = p++;
-      continue;
+      استمر;
     }
 
-    hex_value = hexDigitValue(*p);
-    if (hex_value == UINT_MAX)
-      break;
+    hex_ارزښت = hex_Digit_ارزښت(*p);
+    إذا (hex_ارزښت == UINT_MAX)
+      اكسر;
 
     p++;
 
     // Store the number while we have space.
-    if (bitPos) {
-      bitPos -= 4;
-      hex_value <<= bitPos % integerPartWidth;
-      significand[bitPos / integerPartWidth] |= hex_value;
-    } else if (!computedTrailingFraction) {
-      auto FractOrErr = trailingHexadecimalFraction(p, end, hex_value);
-      if (!FractOrErr)
-        return FractOrErr.takeError();
-      lost_fraction = *FractOrErr;
-      computedTrailingFraction = true;
+    إذا (بټ_Pos) {
+      بټ_Pos -= 4;
+      hex_ارزښت <<= بټ_Pos % integer_Part_پلنوالی;
+      significand[بټ_Pos / integer_Part_پلنوالی] |= hex_ارزښت;
+    } وإلا إذا (!computedTrailingFraction) {
+      خپلکاری FractOrErr = trailingHexadecimalFraction(p, پای_ټکی, hex_ارزښت);
+      إذا (!FractOrErr)
+        أرجع FractOrErr.takeError();
+      ورک_fraction = *FractOrErr;
+      computedTrailingFraction = ریښتیا;
     }
   }
 
   /* Hex floats require an exponent but not a hexadecimal point.  */
-  if (p == end)
-    return createError("Hex strings require an exponent");
-  if (*p != 'p' && *p != 'P')
-    return createError("Invalid character in significand");
-  if (p == begin)
-    return createError("Significand has no digits");
-  if (dot != end && p - begin == 1)
-    return createError("Significand has no digits");
+  إذا (p == پای_ټکی)
+    أرجع createError("Hex strings require an exponent");
+  إذا (*p != 'p' && *p != 'P')
+    أرجع createError("Invalid character in significand");
+  إذا (p == begin)
+    أرجع createError("Significand has no digits");
+  إذا (dot != پای_ټکی && p - begin == 1)
+    أرجع createError("Significand has no digits");
 
   /* Ignore the exponent if we are zero.  */
-  if (p != firstSignificantDigit) {
-    int expAdjustment;
+  إذا (p != لومړی_Significant_Digit) {
+    صحيح expAdjustment;
 
     /* Implicit hexadecimal point?  */
-    if (dot == end)
+    إذا (dot == پای_ټکی)
       dot = p;
 
     /* Calculate the exponent adjustment implicit in the number of
        significant digits.  */
-    expAdjustment = static_cast<int>(dot - firstSignificantDigit);
-    if (expAdjustment < 0)
+    expAdjustment = static_cast<صحيح>(dot - لومړی_Significant_Digit);
+    إذا (expAdjustment < 0)
       expAdjustment++;
     expAdjustment = expAdjustment * 4 - 1;
 
     /* Adjust for writing the significand starting at the most
        significant nibble.  */
     expAdjustment += semantics->precision;
-    expAdjustment -= partsCount * integerPartWidth;
+    expAdjustment -= parts_شمېر * integer_Part_پلنوالی;
 
     /* Adjust for the given exponent.  */
-    auto ExpOrErr = totalExponent(p + 1, end, expAdjustment);
-    if (!ExpOrErr)
-      return ExpOrErr.takeError();
+    خپلکاری ExpOrErr = ټول_Exponent(p + 1, پای_ټکی, expAdjustment);
+    إذا (!ExpOrErr)
+      أرجع ExpOrErr.takeError();
     exponent = *ExpOrErr;
   }
 
-  return normalize(rounding_mode, lost_fraction);
+  أرجع normalize(rounding_ډېرپېښ_2, ورک_fraction);
 }
 
-APFloat::opStatus
-IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
-                                        unsigned sigPartCount, int exp,
-                                        roundingMode rounding_mode) {
+APFloat::op_حالت
+IEEEFloat::پړاو_Significand_With_Exponent(ثابت integerPart *decSigParts,
+                                        بینښه sig_Part_شمېر, صحيح توانیز_تابع,
+                                        rounding_ډېرپېښ rounding_ډېرپېښ_2) {
   fltSemantics calcSemantics = { 32767, -32767, 0, 0 };
-  unsigned int power = exp >= 0 ? exp : -exp;
-  unsigned int pow5PartCapacity = powerOfFivePartsForExponent(power);
-  SmallVector<integerPart, NumPow5PartsOnStack> pow5Parts;
-  pow5Parts.resize_for_overwrite(pow5PartCapacity);
+  بینښه صحيح power = توانیز_تابع >= 0 ? توانیز_تابع : -توانیز_تابع;
+  بینښه صحيح pow5_Part_ظرفیت = power_د_Five_Parts_For_Exponent(power);
+  Small_ویکټور<integerPart, عدد_Pow5_Parts_On_ډېری> pow5Parts;
+  pow5Parts.resize_for_overwrite(pow5_Part_ظرفیت);
 
-  bool isNearest = rounding_mode == rmNearestTiesToEven ||
-                   rounding_mode == rmNearestTiesToAway;
+  منطقي is_تر_ټولو_نږدې = rounding_ډېرپېښ_2 == rm_تر_ټولو_نږدې_Ties_منزل_Even ||
+                   rounding_ډېرپېښ_2 == rm_تر_ټولو_نږدې_Ties_منزل_Away;
 
-  unsigned parts = partCountForBits(semantics->precision + 11);
+  بینښه parts = part_شمېر_For_بټونه(semantics->precision + 11);
 
   /* Calculate pow(5, abs(exp)).  */
-  unsigned pow5PartCount = powerOf5(pow5Parts.data(), power);
+  بینښه pow5_Part_شمېر = powerOf5(pow5Parts.معلومات(), power);
 
-  for (;; parts *= 2) {
-    unsigned int excessPrecision, truncatedBits;
+  لكل (;; parts *= 2) {
+    بینښه صحيح excessPrecision, truncated_بټونه;
 
-    calcSemantics.precision = parts * integerPartWidth - 1;
+    calcSemantics.precision = parts * integer_Part_پلنوالی - 1;
     excessPrecision = calcSemantics.precision - semantics->precision;
-    truncatedBits = excessPrecision;
+    truncated_بټونه = excessPrecision;
 
     IEEEFloat decSig(calcSemantics, uninitialized);
     decSig.makeZero(sign);
     IEEEFloat pow5(calcSemantics);
 
-    opStatus sigStatus = decSig.convertFromUnsignedParts(
-        decSigParts, sigPartCount, rmNearestTiesToEven);
-    opStatus powStatus = pow5.convertFromUnsignedParts(
-        pow5Parts.data(), pow5PartCount, rmNearestTiesToEven);
+    op_حالت sig_حالت = decSig.convertFromUnsignedParts(
+        decSigParts, sig_Part_شمېر, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+    op_حالت pow_حالت = pow5.convertFromUnsignedParts(
+        pow5Parts.معلومات(), pow5_Part_شمېر, rm_تر_ټولو_نږدې_Ties_منزل_Even);
     /* Add exp, as 10^n = 5^n * 2^n.  */
-    decSig.exponent += exp;
+    decSig.exponent += توانیز_تابع;
 
-    lostFraction calcLostFraction;
+    ورک_Fraction calc_ورک_Fraction;
     integerPart HUerr, HUdistance;
-    unsigned int powHUerr;
+    بینښه صحيح powHUerr;
 
-    if (exp >= 0) {
+    إذا (توانیز_تابع >= 0) {
       /* multiplySignificand leaves the precision-th bit set to 1.  */
-      calcLostFraction = decSig.multiplySignificand(pow5);
-      powHUerr = powStatus != opOK;
-    } else {
-      calcLostFraction = decSig.divideSignificand(pow5);
+      calc_ورک_Fraction = decSig.multiplySignificand(pow5);
+      powHUerr = pow_حالت != opOK;
+    } وإلا {
+      calc_ورک_Fraction = decSig.divideSignificand(pow5);
       /* Denormal numbers have less precision.  */
-      if (decSig.exponent < semantics->minExponent) {
+      إذا (decSig.exponent < semantics->minExponent) {
         excessPrecision += (semantics->minExponent - decSig.exponent);
-        truncatedBits = excessPrecision;
+        truncated_بټونه = excessPrecision;
         excessPrecision = std::min(excessPrecision, calcSemantics.precision);
       }
       /* Extra half-ulp lost in reciprocal of exponent.  */
-      powHUerr = (powStatus == opOK && calcLostFraction == lfExactlyZero) ? 0:2;
+      powHUerr = (pow_حالت == opOK && calc_ورک_Fraction == lfExactlyZero) ? 0:2;
     }
 
     /* Both multiplySignificand and divideSignificand return the
        result with the integer bit set.  */
-    assert(APInt::tcExtractBit
+    أكد(APInt::tc_ایستل_بټ
            (decSig.significandParts(), calcSemantics.precision - 1) == 1);
 
-    HUerr = HUerrBound(calcLostFraction != lfExactlyZero, sigStatus != opOK,
+    HUerr = HUerrBound(calc_ورک_Fraction != lfExactlyZero, sig_حالت != opOK,
                        powHUerr);
     HUdistance = 2 * ulpsFromBoundary(decSig.significandParts(),
-                                      excessPrecision, isNearest);
+                                      excessPrecision, is_تر_ټولو_نږدې);
 
     /* Are we guaranteed to round correctly if we truncate?  */
-    if (HUdistance >= HUerr) {
-      APInt::tcExtract(significandParts(), partCount(), decSig.significandParts(),
+    إذا (HUdistance >= HUerr) {
+      APInt::tc_ایستل(significandParts(), part_شمېر(), decSig.significandParts(),
                        calcSemantics.precision - excessPrecision,
                        excessPrecision);
       /* Take the exponent of decSig.  If we tcExtract-ed less bits
@@ -3063,24 +3063,24 @@ IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
          implicit right shift.  */
       exponent = (decSig.exponent + semantics->precision
                   - (calcSemantics.precision - excessPrecision));
-      calcLostFraction = lostFractionThroughTruncation(decSig.significandParts(),
-                                                       decSig.partCount(),
-                                                       truncatedBits);
-      return static_cast<opStatus>(normalize(rounding_mode, calcLostFraction) |
-                                   ((sigStatus | powStatus) & opInexact));
+      calc_ورک_Fraction = ورک_Fraction_Through_Truncation(decSig.significandParts(),
+                                                       decSig.part_شمېر(),
+                                                       truncated_بټونه);
+      أرجع static_cast<op_حالت>(normalize(rounding_ډېرپېښ_2, calc_ورک_Fraction) |
+                                   ((sig_حالت | pow_حالت) & opInexact));
     }
   }
 }
 
-Expected<APFloat::opStatus>
-IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
+Expected<APFloat::op_حالت>
+IEEEFloat::convertFromDecimalString(StringRef str, rounding_ډېرپېښ rounding_ډېرپېښ_2) {
   decimalInfo D;
-  opStatus fs;
+  op_حالت fs;
 
   /* Scan the text.  */
   StringRef::iterator p = str.begin();
-  if (Error Err = interpretDecimal(p, str.end(), &D))
-    return std::move(Err);
+  إذا (Error Err = interpretDecimal(p, str.پای_ټکی(), &D))
+    أرجع std::move(Err);
 
   /* Handle the quick cases.  First the case of no significant digits,
      i.e. zero, and then exponents that are obviously too large or too
@@ -3106,196 +3106,196 @@ IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
   // D->firstSigDigit equals str.end(), every digit must be a zero and there can
   // be at most one dot. On the other hand, if we have a zero with a non-zero
   // exponent, then we know that D.firstSigDigit will be non-numeric.
-  if (D.firstSigDigit == str.end() || decDigitValue(*D.firstSigDigit) >= 10U) {
+  إذا (D.لومړی_Sig_Digit == str.پای_ټکی() || dec_Digit_ارزښت(*D.لومړی_Sig_Digit) >= 10U) {
     category = fcZero;
     fs = opOK;
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-      sign = false;
-    if (!semantics->hasZero)
-      makeSmallestNormalized(false);
+    إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      sign = خطأ;
+    إذا (!semantics->hasZero)
+      make_تر_ټولو_کوچنی_Normalized(خطأ);
 
     /* Check whether the normalized exponent is high enough to overflow
        max during the log-rebasing in the max-exponent check below. */
-  } else if (D.normalizedExponent - 1 > INT_MAX / 42039) {
-    fs = handleOverflow(rounding_mode);
+  } وإلا إذا (D.normalizedExponent - 1 > لوی_عدد / 42039) {
+    fs = handle_ډکېدنه(rounding_ډېرپېښ_2);
 
   /* If it wasn't, then it also wasn't high enough to overflow max
      during the log-rebasing in the min-exponent check.  Check that it
      won't overflow min in either check, then perform the min-exponent
      check. */
-  } else if (D.normalizedExponent - 1 < INT_MIN / 42039 ||
+  } وإلا إذا (D.normalizedExponent - 1 < INT_MIN / 42039 ||
              (D.normalizedExponent + 1) * 28738 <=
-               8651 * (semantics->minExponent - (int) semantics->precision)) {
+               8651 * (semantics->minExponent - (صحيح) semantics->precision)) {
     /* Underflow to zero and round.  */
-    category = fcNormal;
+    category = fc_نورمال;
     zeroSignificand();
-    fs = normalize(rounding_mode, lfLessThanHalf);
+    fs = normalize(rounding_ډېرپېښ_2, lfLessThanHalf);
 
   /* We can finally safely perform the max-exponent check. */
-  } else if ((D.normalizedExponent - 1) * 42039
+  } وإلا إذا ((D.normalizedExponent - 1) * 42039
              >= 12655 * semantics->maxExponent) {
     /* Overflow and round.  */
-    fs = handleOverflow(rounding_mode);
-  } else {
+    fs = handle_ډکېدنه(rounding_ډېرپېښ_2);
+  } وإلا {
     integerPart *decSignificand;
-    unsigned int partCount;
+    بینښه صحيح part_شمېر;
 
     /* A tight upper bound on number of bits required to hold an
        N-digit decimal integer is N * 196 / 59.  Allocate enough space
        to hold the full significand, and an extra part required by
        tcMultiplyPart.  */
-    partCount = static_cast<unsigned int>(D.lastSigDigit - D.firstSigDigit) + 1;
-    partCount = partCountForBits(1 + 196 * partCount / 59);
-    decSignificand = new integerPart[partCount + 1];
-    partCount = 0;
+    part_شمېر = static_cast<بینښه صحيح>(D.وروستی_Sig_Digit - D.لومړی_Sig_Digit) + 1;
+    part_شمېر = part_شمېر_For_بټونه(1 + 196 * part_شمېر / 59);
+    decSignificand = جديد integerPart[part_شمېر + 1];
+    part_شمېر = 0;
 
     /* Convert to binary efficiently - we do almost all multiplication
        in an integerPart.  When this would overflow do we do a single
        bignum multiplication, and then revert again to multiplication
        in an integerPart.  */
-    do {
-      integerPart decValue, val, multiplier;
+    افعل {
+      integerPart dec_ارزښت, val, multiplier;
 
       val = 0;
       multiplier = 1;
 
-      do {
-        if (*p == '.') {
+      افعل {
+        إذا (*p == '.') {
           p++;
-          if (p == str.end()) {
-            break;
+          إذا (p == str.پای_ټکی()) {
+            اكسر;
           }
         }
-        decValue = decDigitValue(*p++);
-        if (decValue >= 10U) {
-          delete[] decSignificand;
-          return createError("Invalid character in significand");
+        dec_ارزښت = dec_Digit_ارزښت(*p++);
+        إذا (dec_ارزښت >= 10U) {
+          ړنګول[] decSignificand;
+          أرجع createError("Invalid character in significand");
         }
         multiplier *= 10;
-        val = val * 10 + decValue;
+        val = val * 10 + dec_ارزښت;
         /* The maximum number that can be multiplied by ten with any
            digit added without overflowing an integerPart.  */
-      } while (p <= D.lastSigDigit && multiplier <= (~ (integerPart) 0 - 9) / 10);
+      } طالما (p <= D.وروستی_Sig_Digit && multiplier <= (~ (integerPart) 0 - 9) / 10);
 
       /* Multiply out the current part.  */
       APInt::tcMultiplyPart(decSignificand, decSignificand, multiplier, val,
-                            partCount, partCount + 1, false);
+                            part_شمېر, part_شمېر + 1, خطأ);
 
       /* If we used another part (likely but not guaranteed), increase
          the count.  */
-      if (decSignificand[partCount])
-        partCount++;
-    } while (p <= D.lastSigDigit);
+      إذا (decSignificand[part_شمېر])
+        part_شمېر++;
+    } طالما (p <= D.وروستی_Sig_Digit);
 
-    category = fcNormal;
-    fs = roundSignificandWithExponent(decSignificand, partCount,
-                                      D.exponent, rounding_mode);
+    category = fc_نورمال;
+    fs = پړاو_Significand_With_Exponent(decSignificand, part_شمېر,
+                                      D.exponent, rounding_ډېرپېښ_2);
 
-    delete [] decSignificand;
+    ړنګول [] decSignificand;
   }
 
-  return fs;
+  أرجع fs;
 }
 
-bool IEEEFloat::convertFromStringSpecials(StringRef str) {
-  const size_t MIN_NAME_SIZE = 3;
+منطقي IEEEFloat::convertFromStringSpecials(StringRef str) {
+  ثابت size_t MIN_NAME_اندازه = 3;
 
-  if (str.size() < MIN_NAME_SIZE)
-    return false;
+  إذا (str.اندازه_2() < MIN_NAME_اندازه)
+    أرجع خطأ;
 
-  if (str == "inf" || str == "INFINITY" || str == "+Inf" || str == "+inf") {
-    makeInf(false);
-    return true;
+  إذا (str == "inf" || str == "INFINITY" || str == "+Inf" || str == "+inf") {
+    makeInf(خطأ);
+    أرجع ریښتیا;
   }
 
-  bool IsNegative = str.consume_front("-");
-  if (IsNegative) {
-    if (str.size() < MIN_NAME_SIZE)
-      return false;
+  منطقي IsNegative = str.consume_front("-");
+  إذا (IsNegative) {
+    إذا (str.اندازه_2() < MIN_NAME_اندازه)
+      أرجع خطأ;
 
-    if (str == "inf" || str == "INFINITY" || str == "Inf") {
-      makeInf(true);
-      return true;
+    إذا (str == "inf" || str == "INFINITY" || str == "Inf") {
+      makeInf(ریښتیا);
+      أرجع ریښتیا;
     }
   }
 
   // If we have a 's' (or 'S') prefix, then this is a Signaling NaN.
-  bool IsSignaling = str.consume_front_insensitive("s");
-  if (IsSignaling) {
-    if (str.size() < MIN_NAME_SIZE)
-      return false;
+  منطقي IsSignaling = str.consume_front_insensitive("s");
+  إذا (IsSignaling) {
+    إذا (str.اندازه_2() < MIN_NAME_اندازه)
+      أرجع خطأ;
   }
 
-  if (str.consume_front("nan") || str.consume_front("NaN")) {
+  إذا (str.consume_front("nan") || str.consume_front("NaN")) {
     // A NaN without payload.
-    if (str.empty()) {
+    إذا (str.تشه()) {
       makeNaN(IsSignaling, IsNegative);
-      return true;
+      أرجع ریښتیا;
     }
 
     // Allow the payload to be inside parentheses.
-    if (str.front() == '(') {
+    إذا (str.front() == '(') {
       // Parentheses should be balanced (and not empty).
-      if (str.size() <= 2 || str.back() != ')')
-        return false;
+      إذا (str.اندازه_2() <= 2 || str.شا() != ')')
+        أرجع خطأ;
 
-      str = str.slice(1, str.size() - 1);
+      str = str.ټوټه(1, str.اندازه_2() - 1);
     }
 
     // Determine the payload number's radix.
-    unsigned Radix = 10;
-    if (str[0] == '0') {
-      if (str.size() > 1 && tolower(str[1]) == 'x') {
+    بینښه Radix = 10;
+    إذا (str[0] == '0') {
+      إذا (str.اندازه_2() > 1 && tolower(str[1]) == 'x') {
         str = str.drop_front(2);
         Radix = 16;
-      } else {
+      } وإلا {
         Radix = 8;
       }
     }
 
     // Parse the payload and make the NaN.
     APInt Payload;
-    if (!str.getAsInteger(Radix, Payload)) {
+    إذا (!str.getAsInteger(Radix, Payload)) {
       makeNaN(IsSignaling, IsNegative, &Payload);
-      return true;
+      أرجع ریښتیا;
     }
   }
 
-  return false;
+  أرجع خطأ;
 }
 
-Expected<APFloat::opStatus>
-IEEEFloat::convertFromString(StringRef str, roundingMode rounding_mode) {
-  if (str.empty())
-    return createError("Invalid string length");
+Expected<APFloat::op_حالت>
+IEEEFloat::convertFromString(StringRef str, rounding_ډېرپېښ rounding_ډېرپېښ_2) {
+  إذا (str.تشه())
+    أرجع createError("Invalid string length");
 
   // Handle special cases.
-  if (convertFromStringSpecials(str))
-    return opOK;
+  إذا (convertFromStringSpecials(str))
+    أرجع opOK;
 
   /* Handle a leading minus sign.  */
   StringRef::iterator p = str.begin();
-  size_t slen = str.size();
+  size_t slen = str.اندازه_2();
   sign = *p == '-' ? 1 : 0;
-  if (sign && !semantics->hasSignedRepr)
+  إذا (sign && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
 
-  if (*p == '-' || *p == '+') {
+  إذا (*p == '-' || *p == '+') {
     p++;
     slen--;
-    if (!slen)
-      return createError("String has no digits");
+    إذا (!slen)
+      أرجع createError("String has no digits");
   }
 
-  if (slen >= 2 && p[0] == '0' && (p[1] == 'x' || p[1] == 'X')) {
-    if (slen == 2)
-      return createError("Invalid string");
-    return convertFromHexadecimalString(StringRef(p + 2, slen - 2),
-                                        rounding_mode);
+  إذا (slen >= 2 && p[0] == '0' && (p[1] == 'x' || p[1] == 'X')) {
+    إذا (slen == 2)
+      أرجع createError("Invalid string");
+    أرجع convertFromHexadecimalString(StringRef(p + 2, slen - 2),
+                                        rounding_ډېرپېښ_2);
   }
 
-  return convertFromDecimalString(StringRef(p, slen), rounding_mode);
+  أرجع convertFromDecimalString(StringRef(p, slen), rounding_ډېرپېښ_2);
 }
 
 /* Write out a hexadecimal representation of the floating point value
@@ -3322,85 +3322,85 @@ IEEEFloat::convertFromString(StringRef str, roundingMode rounding_mode) {
    1 (normal numbers) or 2 (normal numbers rounded-away-from-zero with
    any other digits zero).
 */
-unsigned int IEEEFloat::convertToHexString(char *dst, unsigned int hexDigits,
-                                           bool upperCase,
-                                           roundingMode rounding_mode) const {
-  char *p = dst;
-  if (sign)
+بینښه صحيح IEEEFloat::convert_منزل_Hex_String(حرف *dst, بینښه صحيح hexDigits,
+                                           منطقي پاسنی_Case,
+                                           rounding_ډېرپېښ rounding_ډېرپېښ_2) ثابت {
+  حرف *p = dst;
+  إذا (sign)
     *dst++ = '-';
 
-  switch (category) {
-  case fcInfinity:
-    memcpy (dst, upperCase ? infinityU: infinityL, sizeof infinityU - 1);
-    dst += sizeof infinityL - 1;
-    break;
+  بدل (category) {
+  حالة fcInfinity:
+    حافظه_نقل (dst, پاسنی_Case ? infinityU: infinityL, حجم infinityU - 1);
+    dst += حجم infinityL - 1;
+    اكسر;
 
-  case fcNaN:
-    memcpy (dst, upperCase ? NaNU: NaNL, sizeof NaNU - 1);
-    dst += sizeof NaNU - 1;
-    break;
+  حالة fcNaN:
+    حافظه_نقل (dst, پاسنی_Case ? NaNU: NaNL, حجم NaNU - 1);
+    dst += حجم NaNU - 1;
+    اكسر;
 
-  case fcZero:
+  حالة fcZero:
     *dst++ = '0';
-    *dst++ = upperCase ? 'X': 'x';
+    *dst++ = پاسنی_Case ? 'X': 'x';
     *dst++ = '0';
-    if (hexDigits > 1) {
+    إذا (hexDigits > 1) {
       *dst++ = '.';
       memset (dst, '0', hexDigits - 1);
       dst += hexDigits - 1;
     }
-    *dst++ = upperCase ? 'P': 'p';
+    *dst++ = پاسنی_Case ? 'P': 'p';
     *dst++ = '0';
-    break;
+    اكسر;
 
-  case fcNormal:
-    dst = convertNormalToHexString (dst, hexDigits, upperCase, rounding_mode);
-    break;
+  حالة fc_نورمال:
+    dst = convert_نورمال_منزل_Hex_String (dst, hexDigits, پاسنی_Case, rounding_ډېرپېښ_2);
+    اكسر;
   }
 
   *dst = 0;
 
-  return static_cast<unsigned int>(dst - p);
+  أرجع static_cast<بینښه صحيح>(dst - p);
 }
 
 /* Does the hard work of outputting the correctly rounded hexadecimal
    form of a normal floating point number with the specified number of
    hexadecimal digits.  If HEXDIGITS is zero the minimum number of
    digits necessary to print the value precisely is output.  */
-char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
-                                          bool upperCase,
-                                          roundingMode rounding_mode) const {
+حرف *IEEEFloat::convert_نورمال_منزل_Hex_String(حرف *dst, بینښه صحيح hexDigits,
+                                          منطقي پاسنی_Case,
+                                          rounding_ډېرپېښ rounding_ډېرپېښ_2) ثابت {
   *dst++ = '0';
-  *dst++ = upperCase ? 'X': 'x';
+  *dst++ = پاسنی_Case ? 'X': 'x';
 
-  bool roundUp = false;
-  const char *hexDigitChars = upperCase ? hexDigitsUpper : hexDigitsLower;
+  منطقي پړاو_پورته = خطأ;
+  ثابت حرف *hexDigitChars = پاسنی_Case ? hex_Digits_پاسنی : hex_Digits_ښکتنی;
 
-  const integerPart *significand = significandParts();
-  unsigned partsCount = partCount();
+  ثابت integerPart *significand = significandParts();
+  بینښه parts_شمېر = part_شمېر();
 
   /* +3 because the first digit only uses the single integer bit, so
      we have 3 virtual zero most-significant-bits.  */
-  unsigned valueBits = semantics->precision + 3;
-  unsigned shift = integerPartWidth - valueBits % integerPartWidth;
+  بینښه ارزښت_بټونه = semantics->precision + 3;
+  بینښه ښويدنه = integer_Part_پلنوالی - ارزښت_بټونه % integer_Part_پلنوالی;
 
   /* The natural number of digits required ignoring trailing
      insignificant zeroes.  */
-  unsigned outputDigits = (valueBits - significandLSB() + 3) / 4;
+  بینښه outputDigits = (ارزښت_بټونه - significandLSB() + 3) / 4;
 
   /* hexDigits of zero means use the required number for the
      precision.  Otherwise, see if we are truncating.  If we are,
      find out if we need to round away from zero.  */
-  if (hexDigits) {
-    if (hexDigits < outputDigits) {
+  إذا (hexDigits) {
+    إذا (hexDigits < outputDigits) {
       /* We are dropping non-zero bits, so need to check how to round.
          "bits" is the number of dropped bits.  */
-      unsigned int bits;
-      lostFraction fraction;
+      بینښه صحيح بټونه;
+      ورک_Fraction fraction;
 
-      bits = valueBits - hexDigits * 4;
-      fraction = lostFractionThroughTruncation (significand, partsCount, bits);
-      roundUp = roundAwayFromZero(rounding_mode, fraction, bits);
+      بټونه = ارزښت_بټونه - hexDigits * 4;
+      fraction = ورک_Fraction_Through_Truncation (significand, parts_شمېر, بټونه);
+      پړاو_پورته = پړاو_Away_From_Zero(rounding_ډېرپېښ_2, fraction, بټونه);
     }
     outputDigits = hexDigits;
   }
@@ -3408,40 +3408,40 @@ char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
   /* Write the digits consecutively, and start writing in the location
      of the hexadecimal point.  We move the most significant digit
      left and add the hexadecimal point later.  */
-  char *p = ++dst;
+  حرف *p = ++dst;
 
-  unsigned count = (valueBits + integerPartWidth - 1) / integerPartWidth;
+  بینښه شمېر = (ارزښت_بټونه + integer_Part_پلنوالی - 1) / integer_Part_پلنوالی;
 
-  while (outputDigits && count) {
+  طالما (outputDigits && شمېر) {
     integerPart part;
 
     /* Put the most significant integerPartWidth bits in "part".  */
-    if (--count == partsCount)
+    إذا (--شمېر == parts_شمېر)
       part = 0;  /* An imaginary higher zero part.  */
-    else
-      part = significand[count] << shift;
+    وإلا
+      part = significand[شمېر] << ښويدنه;
 
-    if (count && shift)
-      part |= significand[count - 1] >> (integerPartWidth - shift);
+    إذا (شمېر && ښويدنه)
+      part |= significand[شمېر - 1] >> (integer_Part_پلنوالی - ښويدنه);
 
     /* Convert as much of "part" to hexdigits as we can.  */
-    unsigned int curDigits = integerPartWidth / 4;
+    بینښه صحيح curDigits = integer_Part_پلنوالی / 4;
 
     curDigits = std::min(curDigits, outputDigits);
     dst += partAsHex (dst, part, curDigits, hexDigitChars);
     outputDigits -= curDigits;
   }
 
-  if (roundUp) {
-    char *q = dst;
+  إذا (پړاو_پورته) {
+    حرف *q = dst;
 
     /* Note that hexDigitChars has a trailing '0'.  */
-    do {
+    افعل {
       q--;
-      *q = hexDigitChars[hexDigitValue (*q) + 1];
-    } while (*q == '0');
-    assert(q >= p);
-  } else {
+      *q = hexDigitChars[hex_Digit_ارزښت (*q) + 1];
+    } طالما (*q == '0');
+    أكد(q >= p);
+  } وإلا {
     /* Add trailing zeroes.  */
     memset (dst, '0', outputDigits);
     dst += outputDigits;
@@ -3451,30 +3451,30 @@ char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
      is something after the decimal point add it.  This must come
      after rounding above.  */
   p[-1] = p[0];
-  if (dst -1 == p)
+  إذا (dst -1 == p)
     dst--;
-  else
+  وإلا
     p[0] = '.';
 
   /* Finally output the exponent.  */
-  *dst++ = upperCase ? 'P': 'p';
+  *dst++ = پاسنی_Case ? 'P': 'p';
 
-  return writeSignedDecimal (dst, exponent);
+  أرجع writeSignedDecimal (dst, exponent);
 }
 
-hash_code hash_value(const IEEEFloat &Arg) {
-  if (!Arg.isFiniteNonZero())
-    return hash_combine((uint8_t)Arg.category,
+hash_کوډ hash_ارزښت(ثابت IEEEFloat &Arg) {
+  إذا (!Arg.isFiniteNonZero())
+    أرجع hash_combine((uint8_t)Arg.category,
                         // NaN has no sign, fix it at zero.
                         Arg.isNaN() ? (uint8_t)0 : (uint8_t)Arg.sign,
                         Arg.semantics->precision);
 
   // Normal floats need their exponent and significand hashed.
-  return hash_combine((uint8_t)Arg.category, (uint8_t)Arg.sign,
+  أرجع hash_combine((uint8_t)Arg.category, (uint8_t)Arg.sign,
                       Arg.semantics->precision, Arg.exponent,
                       hash_combine_range(
                         Arg.significandParts(),
-                        Arg.significandParts() + Arg.partCount()));
+                        Arg.significandParts() + Arg.part_شمېر()));
 }
 
 // Conversion from APFloat to/from host float/double.  It may eventually be
@@ -3486,18 +3486,18 @@ hash_code hash_value(const IEEEFloat &Arg) {
 // Denormals have exponent minExponent in APFloat, but minExponent-1 in
 // the actual IEEE respresentations.  We compensate for that here.
 
-APInt IEEEFloat::convertF80LongDoubleAPFloatToAPInt() const {
-  assert(partCount() == 2);
-  return convertIEEEFloatToAPInt<APFloatBase::semX87DoubleExtended>();
+APInt IEEEFloat::convert_F80_Long_Double_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 2);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semX87DoubleExtended>();
 }
 
-APInt IEEEFloat::convertPPCDoubleDoubleLegacyAPFloatToAPInt() const {
-  assert(semantics ==
-         (const llvm::fltSemantics *)&APFloatBase::semPPCDoubleDoubleLegacy);
-  assert(partCount()==2);
+APInt IEEEFloat::convert_PPCDouble_Double_Legacy_APFloat_منزل_APInt() ثابت {
+  أكد(semantics ==
+         (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semPPCDoubleDoubleLegacy);
+  أكد(part_شمېر()==2);
 
-  uint64_t words[2];
-  bool losesInfo;
+  uint64_t ټکي[2];
+  منطقي losesInfo;
 
   // Convert number to double.  To avoid spurious underflows, we re-
   // normalize against the "double" minExponent first, and only *then*
@@ -3506,322 +3506,322 @@ APInt IEEEFloat::convertPPCDoubleDoubleLegacyAPFloatToAPInt() const {
   // Declare fltSemantics before APFloat that uses it (and
   // saves pointer to it) to ensure correct destruction order.
   fltSemantics extendedSemantics = *semantics;
-  extendedSemantics.minExponent = APFloatBase::semIEEEdouble.minExponent;
-  IEEEFloat extended(*this);
-  [[maybe_unused]] opStatus fs =
-      extended.convert(extendedSemantics, rmNearestTiesToEven, &losesInfo);
-  assert(fs == opOK && !losesInfo);
+  extendedSemantics.minExponent = APFloat_بنسټ::semIEEEdouble.minExponent;
+  IEEEFloat extended(*هذا);
+  [[maybe_ناکارول_شوی]] op_حالت fs =
+      extended.convert(extendedSemantics, rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
+  أكد(fs == opOK && !losesInfo);
 
   IEEEFloat u(extended);
-  fs = u.convert(APFloatBase::semIEEEdouble, rmNearestTiesToEven, &losesInfo);
-  assert(fs == opOK || fs == opInexact);
-  words[0] = *u.convertDoubleAPFloatToAPInt().getRawData();
+  fs = u.convert(APFloat_بنسټ::semIEEEdouble, rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
+  أكد(fs == opOK || fs == opInexact);
+  ټکي[0] = *u.convert_Double_APFloat_منزل_APInt().get_Raw_معلومات();
 
   // If conversion was exact or resulted in a special case, we're done;
   // just set the second double to zero.  Otherwise, re-convert back to
   // the extended format and compute the difference.  This now should
   // convert exactly to double.
-  if (u.isFiniteNonZero() && losesInfo) {
-    fs = u.convert(extendedSemantics, rmNearestTiesToEven, &losesInfo);
-    assert(fs == opOK && !losesInfo);
+  إذا (u.isFiniteNonZero() && losesInfo) {
+    fs = u.convert(extendedSemantics, rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
+    أكد(fs == opOK && !losesInfo);
 
     IEEEFloat v(extended);
-    v.subtract(u, rmNearestTiesToEven);
-    fs = v.convert(APFloatBase::semIEEEdouble, rmNearestTiesToEven, &losesInfo);
-    assert(fs == opOK && !losesInfo);
-    words[1] = *v.convertDoubleAPFloatToAPInt().getRawData();
-  } else {
-    words[1] = 0;
+    v.کمول(u, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+    fs = v.convert(APFloat_بنسټ::semIEEEdouble, rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
+    أكد(fs == opOK && !losesInfo);
+    ټکي[1] = *v.convert_Double_APFloat_منزل_APInt().get_Raw_معلومات();
+  } وإلا {
+    ټکي[1] = 0;
   }
 
-  return APInt(128, words);
+  أرجع APInt(128, ټکي);
 }
 
-template <const fltSemantics &S>
-APInt IEEEFloat::convertIEEEFloatToAPInt() const {
-  assert(semantics == &S);
-  constexpr unsigned int trailing_significand_bits =
-      S.precision - 1 + S.hasExplicitIntegerBit;
-  constexpr int integer_bit_part = (S.precision - 1) / integerPartWidth;
-  constexpr integerPart integer_bit = integerPart{1}
-                                      << ((S.precision - 1) % integerPartWidth);
-  constexpr uint64_t significand_mask = integer_bit - 1;
-  constexpr unsigned int exponent_bits =
-      S.sizeInBits - (S.hasSignedRepr ? 1 : 0) - trailing_significand_bits;
-  static_assert(exponent_bits < 64);
-  constexpr uint64_t exponent_mask = (uint64_t{1} << exponent_bits) - 1;
-  constexpr bool is_zero_exp_reserved = S.hasDenormals || S.hasZero;
-  constexpr int bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
+کينډۍ <ثابت fltSemantics &S>
+APInt IEEEFloat::convert_IEEEFloat_منزل_APInt() ثابت {
+  أكد(semantics == &S);
+  constexpr بینښه صحيح trailing_significand_بټونه =
+      S.precision - 1 + S.has_Explicit_Integer_بټ;
+  constexpr صحيح integer_بټ_part = (S.precision - 1) / integer_Part_پلنوالی;
+  constexpr integerPart integer_بټ = integerPart{1}
+                                      << ((S.precision - 1) % integer_Part_پلنوالی);
+  constexpr uint64_t significand_ماسک = integer_بټ - 1;
+  constexpr بینښه صحيح exponent_بټونه =
+      S.اندازه_دننه_بټونه - (S.hasSignedRepr ? 1 : 0) - trailing_significand_بټونه;
+  static_assert(exponent_بټونه < 64);
+  constexpr uint64_t exponent_ماسک = (uint64_t{1} << exponent_بټونه) - 1;
+  constexpr منطقي is_zero_exp_reserved = S.hasDenormals || S.hasZero;
+  constexpr صحيح bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
 
   uint64_t myexponent;
-  std::array<integerPart, partCountForBits(trailing_significand_bits)>
+  std::array<integerPart, part_شمېر_For_بټونه(trailing_significand_بټونه)>
       mysignificand;
 
-  if (isFiniteNonZero()) {
+  إذا (isFiniteNonZero()) {
     myexponent = exponent + bias;
-    std::copy_n(significandParts(), mysignificand.size(),
+    std::copy_n(significandParts(), mysignificand.اندازه_2(),
                 mysignificand.begin());
-    if (myexponent == 1 &&
-        !(significandParts()[integer_bit_part] & integer_bit))
+    إذا (myexponent == 1 &&
+        !(significandParts()[integer_بټ_part] & integer_بټ))
       myexponent = 0; // denormal
-  } else if (category == fcZero) {
-    if (!S.hasZero)
+  } وإلا إذا (category == fcZero) {
+    إذا (!S.hasZero)
       llvm_unreachable("semantics does not support zero!");
     myexponent = ::exponentZero(S) + bias;
     mysignificand.fill(0);
-  } else if (category == fcInfinity) {
-    if (S.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
+  } وإلا إذا (category == fcInfinity) {
+    إذا (S.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
         S.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
       llvm_unreachable("semantics don't support inf!");
     myexponent = ::exponentInf(S) + bias;
     mysignificand.fill(0);
-    if constexpr (S.hasExplicitIntegerBit) {
-      mysignificand[0] = integerPart{1} << (trailing_significand_bits - 1);
+    إذا constexpr (S.has_Explicit_Integer_بټ) {
+      mysignificand[0] = integerPart{1} << (trailing_significand_بټونه - 1);
     }
-  } else {
-    assert(category == fcNaN && "Unknown category!");
-    if (S.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+  } وإلا {
+    أكد(category == fcNaN && "Unknown category!");
+    إذا (S.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
       llvm_unreachable("semantics don't support NaN!");
     myexponent = ::exponentNaN(S) + bias;
-    std::copy_n(significandParts(), mysignificand.size(),
+    std::copy_n(significandParts(), mysignificand.اندازه_2(),
                 mysignificand.begin());
   }
-  std::array<uint64_t, (S.sizeInBits + 63) / 64> words;
-  auto words_iter =
-      std::copy_n(mysignificand.begin(), mysignificand.size(), words.begin());
-  if constexpr (!S.hasExplicitIntegerBit) {
-    if constexpr (significand_mask != 0 || trailing_significand_bits == 0) {
+  std::array<uint64_t, (S.اندازه_دننه_بټونه + 63) / 64> ټکي;
+  خپلکاری ټکي_iter =
+      std::copy_n(mysignificand.begin(), mysignificand.اندازه_2(), ټکي.begin());
+  إذا constexpr (!S.has_Explicit_Integer_بټ) {
+    إذا constexpr (significand_ماسک != 0 || trailing_significand_بټونه == 0) {
       // Clear the integer bit.
-      words[mysignificand.size() - 1] &= significand_mask;
+      ټکي[mysignificand.اندازه_2() - 1] &= significand_ماسک;
     }
   }
-  std::fill(words_iter, words.end(), uint64_t{0});
-  constexpr size_t last_word = words.size() - 1;
-  if constexpr (S.hasSignedRepr) {
+  std::fill(ټکي_iter, ټکي.پای_ټکی(), uint64_t{0});
+  constexpr size_t وروستی_کلمه = ټکي.اندازه_2() - 1;
+  إذا constexpr (S.hasSignedRepr) {
     uint64_t shifted_sign = static_cast<uint64_t>(sign & 1)
-                            << ((S.sizeInBits - 1) % 64);
-    words[last_word] |= shifted_sign;
+                            << ((S.اندازه_دننه_بټونه - 1) % 64);
+    ټکي[وروستی_کلمه] |= shifted_sign;
   }
-  uint64_t shifted_exponent = (myexponent & exponent_mask)
-                              << (trailing_significand_bits % 64);
-  words[last_word] |= shifted_exponent;
-  if constexpr (last_word == 0) {
-    return APInt(S.sizeInBits, words[0]);
+  uint64_t shifted_exponent = (myexponent & exponent_ماسک)
+                              << (trailing_significand_بټونه % 64);
+  ټکي[وروستی_کلمه] |= shifted_exponent;
+  إذا constexpr (وروستی_کلمه == 0) {
+    أرجع APInt(S.اندازه_دننه_بټونه, ټکي[0]);
   }
-  return APInt(S.sizeInBits, words);
+  أرجع APInt(S.اندازه_دننه_بټونه, ټکي);
 }
 
-APInt IEEEFloat::convertQuadrupleAPFloatToAPInt() const {
-  assert(partCount() == 2);
-  return convertIEEEFloatToAPInt<APFloatBase::semIEEEquad>();
+APInt IEEEFloat::convert_Quadruple_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 2);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semIEEEquad>();
 }
 
-APInt IEEEFloat::convertDoubleAPFloatToAPInt() const {
-  assert(partCount()==1);
-  return convertIEEEFloatToAPInt<APFloatBase::semIEEEdouble>();
+APInt IEEEFloat::convert_Double_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر()==1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semIEEEdouble>();
 }
 
-APInt IEEEFloat::convertFloatAPFloatToAPInt() const {
-  assert(partCount()==1);
-  return convertIEEEFloatToAPInt<APFloatBase::semIEEEsingle>();
+APInt IEEEFloat::convert_Float_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر()==1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semIEEEsingle>();
 }
 
-APInt IEEEFloat::convertBFloatAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semBFloat>();
+APInt IEEEFloat::convert_BFloat_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semBFloat>();
 }
 
-APInt IEEEFloat::convertHalfAPFloatToAPInt() const {
-  assert(partCount()==1);
-  return convertIEEEFloatToAPInt<APFloatBase::APFloatBase::semIEEEhalf>();
+APInt IEEEFloat::convert_Half_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر()==1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::APFloat_بنسټ::semIEEEhalf>();
 }
 
-APInt IEEEFloat::convertFloat8E5M2APFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M2>();
+APInt IEEEFloat::convert_Float8_E5_M2_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E5M2>();
 }
 
-APInt IEEEFloat::convertFloat8E5M2FNUZAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M2FNUZ>();
+APInt IEEEFloat::convert_Float8_E5_M2_FNUZAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E5M2FNUZ>();
 }
 
-APInt IEEEFloat::convertFloat8E4M3APFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3>();
+APInt IEEEFloat::convert_Float8_E4_M3_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E4M3>();
 }
 
-APInt IEEEFloat::convertFloat8E4M3FNAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3FN>();
+APInt IEEEFloat::convert_Float8_E4_M3_FNAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E4M3FN>();
 }
 
-APInt IEEEFloat::convertFloat8E4M3FNUZAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3FNUZ>();
+APInt IEEEFloat::convert_Float8_E4_M3_FNUZAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E4M3FNUZ>();
 }
 
-APInt IEEEFloat::convertFloat8E4M3B11FNUZAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3B11FNUZ>();
+APInt IEEEFloat::convert_Float8_E4_M3_B11_FNUZAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E4M3B11FNUZ>();
 }
 
-APInt IEEEFloat::convertFloat8E3M4APFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E3M4>();
+APInt IEEEFloat::convert_Float8_E3_M4_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E3M4>();
 }
 
-APInt IEEEFloat::convertFloatTF32APFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloatTF32>();
+APInt IEEEFloat::convert_Float_TF32_APFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloatTF32>();
 }
 
-APInt IEEEFloat::convertFloat8E8M0FNUAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E8M0FNU>();
+APInt IEEEFloat::convert_Float8_E8_M0_FNUAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E8M0FNU>();
 }
 
-APInt IEEEFloat::convertFloat8E5M3FNUAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M3FNU>();
+APInt IEEEFloat::convert_Float8_E5_M3_FNUAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat8E5M3FNU>();
 }
 
-APInt IEEEFloat::convertFloat6E3M2FNAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat6E3M2FN>();
+APInt IEEEFloat::convert_Float6_E3_M2_FNAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat6E3M2FN>();
 }
 
-APInt IEEEFloat::convertFloat6E2M3FNAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat6E2M3FN>();
+APInt IEEEFloat::convert_Float6_E2_M3_FNAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat6E2M3FN>();
 }
 
-APInt IEEEFloat::convertFloat4E2M1FNAPFloatToAPInt() const {
-  assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat4E2M1FN>();
+APInt IEEEFloat::convert_Float4_E2_M1_FNAPFloat_منزل_APInt() ثابت {
+  أكد(part_شمېر() == 1);
+  أرجع convert_IEEEFloat_منزل_APInt<APFloat_بنسټ::semFloat4E2M1FN>();
 }
 
 // This function creates an APInt that is just a bit map of the floating
 // point constant as it would appear in memory.  It is not a conversion,
 // and treating the result as a normal integer is unlikely to be useful.
 
-APInt IEEEFloat::bitcastToAPInt() const {
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEhalf)
-    return convertHalfAPFloatToAPInt();
+APInt IEEEFloat::bitcast_منزل_APInt() ثابت {
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEhalf)
+    أرجع convert_Half_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semBFloat)
-    return convertBFloatAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semBFloat)
+    أرجع convert_BFloat_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEsingle)
-    return convertFloatAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEsingle)
+    أرجع convert_Float_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEdouble)
-    return convertDoubleAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEdouble)
+    أرجع convert_Double_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEquad)
-    return convertQuadrupleAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEquad)
+    أرجع convert_Quadruple_APFloat_منزل_APInt();
 
-  if (semantics ==
-      (const llvm::fltSemantics *)&APFloatBase::semX87DoubleExtended)
-    return convertF80LongDoubleAPFloatToAPInt();
+  إذا (semantics ==
+      (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semX87DoubleExtended)
+    أرجع convert_F80_Long_Double_APFloat_منزل_APInt();
 
-  if (semantics ==
-      (const llvm::fltSemantics *)&APFloatBase::semPPCDoubleDoubleLegacy)
-    return convertPPCDoubleDoubleLegacyAPFloatToAPInt();
+  إذا (semantics ==
+      (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semPPCDoubleDoubleLegacy)
+    أرجع convert_PPCDouble_Double_Legacy_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M2)
-    return convertFloat8E5M2APFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E5M2)
+    أرجع convert_Float8_E5_M2_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M2FNUZ)
-    return convertFloat8E5M2FNUZAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E5M2FNUZ)
+    أرجع convert_Float8_E5_M2_FNUZAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3)
-    return convertFloat8E4M3APFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E4M3)
+    أرجع convert_Float8_E4_M3_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3FN)
-    return convertFloat8E4M3FNAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E4M3FN)
+    أرجع convert_Float8_E4_M3_FNAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3FNUZ)
-    return convertFloat8E4M3FNUZAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E4M3FNUZ)
+    أرجع convert_Float8_E4_M3_FNUZAPFloat_منزل_APInt();
 
-  if (semantics ==
-      (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3B11FNUZ)
-    return convertFloat8E4M3B11FNUZAPFloatToAPInt();
+  إذا (semantics ==
+      (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E4M3B11FNUZ)
+    أرجع convert_Float8_E4_M3_B11_FNUZAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E3M4)
-    return convertFloat8E3M4APFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E3M4)
+    أرجع convert_Float8_E3_M4_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloatTF32)
-    return convertFloatTF32APFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloatTF32)
+    أرجع convert_Float_TF32_APFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E8M0FNU)
-    return convertFloat8E8M0FNUAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E8M0FNU)
+    أرجع convert_Float8_E8_M0_FNUAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M3FNU)
-    return convertFloat8E5M3FNUAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat8E5M3FNU)
+    أرجع convert_Float8_E5_M3_FNUAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat6E3M2FN)
-    return convertFloat6E3M2FNAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat6E3M2FN)
+    أرجع convert_Float6_E3_M2_FNAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat6E2M3FN)
-    return convertFloat6E2M3FNAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat6E2M3FN)
+    أرجع convert_Float6_E2_M3_FNAPFloat_منزل_APInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat4E2M1FN)
-    return convertFloat4E2M1FNAPFloatToAPInt();
+  إذا (semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semFloat4E2M1FN)
+    أرجع convert_Float4_E2_M1_FNAPFloat_منزل_APInt();
 
   llvm_unreachable("unknown format!");
 }
 
-float IEEEFloat::convertToFloat() const {
-  assert(semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEsingle &&
+عائم IEEEFloat::convert_منزل_Float() ثابت {
+  أكد(semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEsingle &&
          "Float semantics are not IEEEsingle");
-  APInt api = bitcastToAPInt();
-  return api.bitsToFloat();
+  APInt api = bitcast_منزل_APInt();
+  أرجع api.بټونه_منزل_Float();
 }
 
-double IEEEFloat::convertToDouble() const {
-  assert(semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEdouble &&
+مزدوج IEEEFloat::convert_منزل_Double() ثابت {
+  أكد(semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEdouble &&
          "Float semantics are not IEEEdouble");
-  APInt api = bitcastToAPInt();
-  return api.bitsToDouble();
+  APInt api = bitcast_منزل_APInt();
+  أرجع api.بټونه_منزل_Double();
 }
 
-#ifdef HAS_IEE754_FLOAT128
-float128 IEEEFloat::convertToQuad() const {
-  assert(semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEquad &&
+#که_تعریف_شوی HAS_IEE754_FLOAT128
+float128 IEEEFloat::convert_منزل_Quad() ثابت {
+  أكد(semantics == (ثابت llvm::fltSemantics *)&APFloat_بنسټ::semIEEEquad &&
          "Float semantics are not IEEEquads");
-  APInt api = bitcastToAPInt();
-  return api.bitsToQuad();
+  APInt api = bitcast_منزل_APInt();
+  أرجع api.بټونه_منزل_Quad();
 }
-#endif
+#د_که_پای
 
-void IEEEFloat::initFromF80LongDoubleAPInt(const APInt &api) {
-  return initFromIEEEAPInt<APFloatBase::semX87DoubleExtended>(api);
+فراغ IEEEFloat::initFromF80LongDoubleAPInt(ثابت APInt &api) {
+  أرجع initFromIEEEAPInt<APFloat_بنسټ::semX87DoubleExtended>(api);
 }
 
-void IEEEFloat::initFromPPCDoubleDoubleLegacyAPInt(const APInt &api) {
-  uint64_t i1 = api.getRawData()[0];
-  uint64_t i2 = api.getRawData()[1];
-  bool losesInfo;
+فراغ IEEEFloat::initFromPPCDoubleDoubleLegacyAPInt(ثابت APInt &api) {
+  uint64_t i1 = api.get_Raw_معلومات()[0];
+  uint64_t i2 = api.get_Raw_معلومات()[1];
+  منطقي losesInfo;
 
   // Get the first double and convert to our format.
   initFromDoubleAPInt(APInt(64, i1));
-  [[maybe_unused]] opStatus fs = convert(APFloatBase::semPPCDoubleDoubleLegacy,
-                                         rmNearestTiesToEven, &losesInfo);
+  [[maybe_ناکارول_شوی]] op_حالت fs = convert(APFloat_بنسټ::semPPCDoubleDoubleLegacy,
+                                         rm_تر_ټولو_نږدې_Ties_منزل_Even, &losesInfo);
   // (convert may return opInvalidOp if i1 is an sNaN).
-  assert((fs == opOK || fs == opInvalidOp) && !losesInfo);
+  أكد((fs == opOK || fs == opInvalidOp) && !losesInfo);
 
   // Unless we have a special case, add in second double.
-  if (isFiniteNonZero()) {
-    IEEEFloat v(APFloatBase::semIEEEdouble, APInt(64, i2));
+  إذا (isFiniteNonZero()) {
+    IEEEFloat v(APFloat_بنسټ::semIEEEdouble, APInt(64, i2));
     // The first double determines the category, so ignore a non-canonical
     // second double.
-    if (v.isFinite()) {
-      fs = v.convert(APFloatBase::semPPCDoubleDoubleLegacy, rmNearestTiesToEven,
+    إذا (v.isFinite()) {
+      fs = v.convert(APFloat_بنسټ::semPPCDoubleDoubleLegacy, rm_تر_ټولو_نږدې_Ties_منزل_Even,
                      &losesInfo);
-      assert(fs == opOK && !losesInfo);
+      أكد(fs == opOK && !losesInfo);
 
-      add(v, rmNearestTiesToEven);
+      جمع_کړه(v, rm_تر_ټولو_نږدې_Ties_منزل_Even);
     }
   }
 }
@@ -3831,43 +3831,43 @@ void IEEEFloat::initFromPPCDoubleDoubleLegacyAPInt(const APInt &api) {
 // No encodings for {zero, infinities or denorms}.
 // NaN is represented by all 1's.
 // Bias is 127.
-void IEEEFloat::initFromFloat8E8M0FNUAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E8M0FNU>(api);
+فراغ IEEEFloat::initFromFloat8E8M0FNUAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E8M0FNU>(api);
 }
 
-void IEEEFloat::initFromFloat8E5M3FNUAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E5M3FNU>(api);
+فراغ IEEEFloat::initFromFloat8E5M3FNUAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E5M3FNU>(api);
 }
 
-template <const fltSemantics &S>
-void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
-  assert(api.getBitWidth() == S.sizeInBits);
+کينډۍ <ثابت fltSemantics &S>
+فراغ IEEEFloat::initFromIEEEAPInt(ثابت APInt &api) {
+  أكد(api.get_بټ_پلنوالی() == S.اندازه_دننه_بټونه);
 
-  constexpr unsigned int trailing_significand_bits =
-      S.precision - 1 + S.hasExplicitIntegerBit;
-  constexpr integerPart integer_bit =
-      integerPart{1} << (trailing_significand_bits % integerPartWidth);
-  constexpr uint64_t significand_mask = integer_bit - 1;
-  constexpr unsigned int exponent_bits =
-      S.sizeInBits - (S.hasSignedRepr ? 1 : 0) - trailing_significand_bits;
-  static_assert(exponent_bits < 64);
-  constexpr unsigned int stored_significand_parts =
-      partCountForBits(trailing_significand_bits + 1);
-  constexpr uint64_t exponent_mask = (uint64_t{1} << exponent_bits) - 1;
-  constexpr bool is_zero_exp_reserved = S.hasDenormals || S.hasZero;
-  constexpr int bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
-  constexpr bool has_significand = trailing_significand_bits > 0;
+  constexpr بینښه صحيح trailing_significand_بټونه =
+      S.precision - 1 + S.has_Explicit_Integer_بټ;
+  constexpr integerPart integer_بټ =
+      integerPart{1} << (trailing_significand_بټونه % integer_Part_پلنوالی);
+  constexpr uint64_t significand_ماسک = integer_بټ - 1;
+  constexpr بینښه صحيح exponent_بټونه =
+      S.اندازه_دننه_بټونه - (S.hasSignedRepr ? 1 : 0) - trailing_significand_بټونه;
+  static_assert(exponent_بټونه < 64);
+  constexpr بینښه صحيح stored_significand_parts =
+      part_شمېر_For_بټونه(trailing_significand_بټونه + 1);
+  constexpr uint64_t exponent_ماسک = (uint64_t{1} << exponent_بټونه) - 1;
+  constexpr منطقي is_zero_exp_reserved = S.hasDenormals || S.hasZero;
+  constexpr صحيح bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
+  constexpr منطقي has_significand = trailing_significand_بټونه > 0;
 
   // Copy the bits of the significand. We need to clear out the exponent and
   // sign bit in the last word.
   std::array<integerPart, stored_significand_parts> mysignificand;
-  if constexpr (has_significand) {
-    std::copy_n(api.getRawData(), mysignificand.size(), mysignificand.begin());
-    if constexpr (significand_mask != 0 || S.precision >= integerPartWidth) {
-      mysignificand[mysignificand.size() - 1] &= significand_mask;
+  إذا constexpr (has_significand) {
+    std::copy_n(api.get_Raw_معلومات(), mysignificand.اندازه_2(), mysignificand.begin());
+    إذا constexpr (significand_ماسک != 0 || S.precision >= integer_Part_پلنوالی) {
+      mysignificand[mysignificand.اندازه_2() - 1] &= significand_ماسک;
     }
-  } else {
-    std::fill_n(mysignificand.begin(), mysignificand.size(), 0);
+  } وإلا {
+    std::fill_n(mysignificand.begin(), mysignificand.اندازه_2(), 0);
     // Always set integer bit to 1 for consistency in APFloat's internal
     // representation.
     mysignificand[0] = 1;
@@ -3875,246 +3875,246 @@ void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
 
   // We assume the last word holds the sign bit, the exponent, and potentially
   // some of the trailing significand field.
-  uint64_t last_word = api.getRawData()[api.getNumWords() - 1];
+  uint64_t وروستی_کلمه = api.get_Raw_معلومات()[api.get_عدد_ټکي() - 1];
   uint64_t myexponent =
-      (last_word >> (trailing_significand_bits % 64)) & exponent_mask;
+      (وروستی_کلمه >> (trailing_significand_بټونه % 64)) & exponent_ماسک;
 
   initialize(&S);
-  assert(partCount() == mysignificand.size());
+  أكد(part_شمېر() == mysignificand.اندازه_2());
 
   sign = S.hasSignedRepr
-             ? static_cast<unsigned int>(last_word >> ((S.sizeInBits - 1) % 64))
+             ? static_cast<بینښه صحيح>(وروستی_کلمه >> ((S.اندازه_دننه_بټونه - 1) % 64))
              : 0;
 
-  bool all_zero_significand =
-      has_significand && llvm::all_of(mysignificand, equal_to(0));
+  منطقي all_zero_significand =
+      has_significand && llvm::all_د(mysignificand, equal_منزل(0));
 
-  bool is_zero = myexponent == 0 && all_zero_significand && S.hasZero;
+  منطقي is_zero = myexponent == 0 && all_zero_significand && S.hasZero;
 
-  if constexpr (S.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
-    bool is_inf = false;
+  إذا constexpr (S.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
+    منطقي is_inf = خطأ;
 
-    if constexpr (S.hasExplicitIntegerBit) {
+    إذا constexpr (S.has_Explicit_Integer_بټ) {
       // This is only used and tested for x87DoubleExtended
       static_assert(S.precision == 64);
-      constexpr integerPart significand_mask_no_int_bit =
-          (uint64_t{1} << (trailing_significand_bits - 1)) - 1;
-      const integerPart myintegerbit =
-          mysignificand[0] >> (trailing_significand_bits - 1);
+      constexpr integerPart significand_ماسک_no_int_بټ =
+          (uint64_t{1} << (trailing_significand_بټونه - 1)) - 1;
+      ثابت integerPart myintegerbit =
+          mysignificand[0] >> (trailing_significand_بټونه - 1);
 
       is_inf = myexponent - bias == ::exponentInf(S) && myintegerbit == 1 &&
-               (mysignificand[0] & significand_mask_no_int_bit) == 0;
-    } else {
+               (mysignificand[0] & significand_ماسک_no_int_بټ) == 0;
+    } وإلا {
       is_inf = myexponent - bias == ::exponentInf(S) && all_zero_significand;
     }
 
-    if (is_inf) {
+    إذا (is_inf) {
       makeInf(sign);
-      return;
+      أرجع;
     }
   }
 
-  bool is_nan = false;
+  منطقي is_nan = خطأ;
 
-  if constexpr (S.nanEncoding == fltNanEncoding::IEEE) {
-    if constexpr (S.hasExplicitIntegerBit) {
+  إذا constexpr (S.nanEncoding == fltNanEncoding::IEEE) {
+    إذا constexpr (S.has_Explicit_Integer_بټ) {
       // This is only used and tested for x87DoubleExtended
       static_assert(S.precision == 64);
-      const integerPart myintegerbit =
-          mysignificand[0] >> (trailing_significand_bits - 1);
-      constexpr integerPart significand_mask_no_int_bit =
-          (uint64_t{1} << (trailing_significand_bits - 1)) - 1;
+      ثابت integerPart myintegerbit =
+          mysignificand[0] >> (trailing_significand_بټونه - 1);
+      constexpr integerPart significand_ماسک_no_int_بټ =
+          (uint64_t{1} << (trailing_significand_بټونه - 1)) - 1;
 
-      if (myexponent - bias == ::exponentNaN(S) &&
-          (mysignificand[0] & significand_mask_no_int_bit) != 0) {
+      إذا (myexponent - bias == ::exponentNaN(S) &&
+          (mysignificand[0] & significand_ماسک_no_int_بټ) != 0) {
         // regular NaN and pseudoNaN
-        is_nan = true;
-      } else if (myexponent - bias == ::exponentNaN(S) &&
-                 (mysignificand[0] & significand_mask_no_int_bit) == 0) {
+        is_nan = ریښتیا;
+      } وإلا إذا (myexponent - bias == ::exponentNaN(S) &&
+                 (mysignificand[0] & significand_ماسک_no_int_بټ) == 0) {
         // pseudoinfinity
-        is_nan = true;
-      } else if (myexponent - bias != ::exponentNaN(S) && myexponent != 0 &&
+        is_nan = ریښتیا;
+      } وإلا إذا (myexponent - bias != ::exponentNaN(S) && myexponent != 0 &&
                  myintegerbit == 0) {
         // unnormal
-        is_nan = true;
+        is_nan = ریښتیا;
       }
-    } else {
+    } وإلا {
       is_nan = myexponent - bias == ::exponentNaN(S) && !all_zero_significand;
     }
-  } else if constexpr (S.nanEncoding == fltNanEncoding::AllOnes) {
-    bool all_ones_significand =
-        std::all_of(mysignificand.begin(), mysignificand.end() - 1,
-                    [](integerPart bits) { return bits == ~integerPart{0}; }) &&
-        (!significand_mask ||
-         mysignificand[mysignificand.size() - 1] == significand_mask);
+  } وإلا إذا constexpr (S.nanEncoding == fltNanEncoding::AllOnes) {
+    منطقي all_ones_significand =
+        std::all_د(mysignificand.begin(), mysignificand.پای_ټکی() - 1,
+                    [](integerPart بټونه) { أرجع بټونه == ~integerPart{0}; }) &&
+        (!significand_ماسک ||
+         mysignificand[mysignificand.اندازه_2() - 1] == significand_ماسک);
     is_nan = myexponent - bias == ::exponentNaN(S) && all_ones_significand;
-  } else if constexpr (S.nanEncoding == fltNanEncoding::NegativeZero) {
+  } وإلا إذا constexpr (S.nanEncoding == fltNanEncoding::NegativeZero) {
     is_nan = is_zero && sign;
   }
 
-  if (is_nan) {
+  إذا (is_nan) {
     category = fcNaN;
     exponent = ::exponentNaN(S);
-    std::copy_n(mysignificand.begin(), mysignificand.size(),
+    std::copy_n(mysignificand.begin(), mysignificand.اندازه_2(),
                 significandParts());
-    return;
+    أرجع;
   }
 
-  if (is_zero) {
+  إذا (is_zero) {
     makeZero(sign);
-    return;
+    أرجع;
   }
 
-  category = fcNormal;
+  category = fc_نورمال;
   exponent = myexponent - bias;
-  std::copy_n(mysignificand.begin(), mysignificand.size(), significandParts());
-  if (myexponent == 0 && S.hasDenormals) // denormal
+  std::copy_n(mysignificand.begin(), mysignificand.اندازه_2(), significandParts());
+  إذا (myexponent == 0 && S.hasDenormals) // denormal
     exponent = S.minExponent;
-  else {
-    if constexpr (!S.hasExplicitIntegerBit) {
-      significandParts()[mysignificand.size() - 1] |= integer_bit;
+  وإلا {
+    إذا constexpr (!S.has_Explicit_Integer_بټ) {
+      significandParts()[mysignificand.اندازه_2() - 1] |= integer_بټ;
     }
   }
 }
 
-void IEEEFloat::initFromQuadrupleAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semIEEEquad>(api);
+فراغ IEEEFloat::initFromQuadrupleAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semIEEEquad>(api);
 }
 
-void IEEEFloat::initFromDoubleAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semIEEEdouble>(api);
+فراغ IEEEFloat::initFromDoubleAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semIEEEdouble>(api);
 }
 
-void IEEEFloat::initFromFloatAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semIEEEsingle>(api);
+فراغ IEEEFloat::initFromFloatAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semIEEEsingle>(api);
 }
 
-void IEEEFloat::initFromBFloatAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semBFloat>(api);
+فراغ IEEEFloat::initFromBFloatAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semBFloat>(api);
 }
 
-void IEEEFloat::initFromHalfAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semIEEEhalf>(api);
+فراغ IEEEFloat::initFromHalfAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semIEEEhalf>(api);
 }
 
-void IEEEFloat::initFromFloat8E5M2APInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E5M2>(api);
+فراغ IEEEFloat::initFromFloat8E5M2APInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E5M2>(api);
 }
 
-void IEEEFloat::initFromFloat8E5M2FNUZAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E5M2FNUZ>(api);
+فراغ IEEEFloat::initFromFloat8E5M2FNUZAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E5M2FNUZ>(api);
 }
 
-void IEEEFloat::initFromFloat8E4M3APInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E4M3>(api);
+فراغ IEEEFloat::initFromFloat8E4M3APInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E4M3>(api);
 }
 
-void IEEEFloat::initFromFloat8E4M3FNAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E4M3FN>(api);
+فراغ IEEEFloat::initFromFloat8E4M3FNAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E4M3FN>(api);
 }
 
-void IEEEFloat::initFromFloat8E4M3FNUZAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E4M3FNUZ>(api);
+فراغ IEEEFloat::initFromFloat8E4M3FNUZAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E4M3FNUZ>(api);
 }
 
-void IEEEFloat::initFromFloat8E4M3B11FNUZAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E4M3B11FNUZ>(api);
+فراغ IEEEFloat::initFromFloat8E4M3B11FNUZAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E4M3B11FNUZ>(api);
 }
 
-void IEEEFloat::initFromFloat8E3M4APInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat8E3M4>(api);
+فراغ IEEEFloat::initFromFloat8E3M4APInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat8E3M4>(api);
 }
 
-void IEEEFloat::initFromFloatTF32APInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloatTF32>(api);
+فراغ IEEEFloat::initFromFloatTF32APInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloatTF32>(api);
 }
 
-void IEEEFloat::initFromFloat6E3M2FNAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat6E3M2FN>(api);
+فراغ IEEEFloat::initFromFloat6E3M2FNAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat6E3M2FN>(api);
 }
 
-void IEEEFloat::initFromFloat6E2M3FNAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat6E2M3FN>(api);
+فراغ IEEEFloat::initFromFloat6E2M3FNAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat6E2M3FN>(api);
 }
 
-void IEEEFloat::initFromFloat4E2M1FNAPInt(const APInt &api) {
-  initFromIEEEAPInt<APFloatBase::semFloat4E2M1FN>(api);
+فراغ IEEEFloat::initFromFloat4E2M1FNAPInt(ثابت APInt &api) {
+  initFromIEEEAPInt<APFloat_بنسټ::semFloat4E2M1FN>(api);
 }
 
 /// Treat api as containing the bits of a floating point number.
-void IEEEFloat::initFromAPInt(const fltSemantics *Sem, const APInt &api) {
-  assert(api.getBitWidth() == Sem->sizeInBits);
-  if (Sem == &APFloatBase::semIEEEhalf)
-    return initFromHalfAPInt(api);
-  if (Sem == &APFloatBase::semBFloat)
-    return initFromBFloatAPInt(api);
-  if (Sem == &APFloatBase::semIEEEsingle)
-    return initFromFloatAPInt(api);
-  if (Sem == &APFloatBase::semIEEEdouble)
-    return initFromDoubleAPInt(api);
-  if (Sem == &APFloatBase::semIEEEquad)
-    return initFromQuadrupleAPInt(api);
-  if (Sem == &APFloatBase::semX87DoubleExtended)
-    return initFromF80LongDoubleAPInt(api);
-  if (Sem == &APFloatBase::semPPCDoubleDoubleLegacy)
-    return initFromPPCDoubleDoubleLegacyAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E5M2)
-    return initFromFloat8E5M2APInt(api);
-  if (Sem == &APFloatBase::semFloat8E5M2FNUZ)
-    return initFromFloat8E5M2FNUZAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3)
-    return initFromFloat8E4M3APInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3FN)
-    return initFromFloat8E4M3FNAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3FNUZ)
-    return initFromFloat8E4M3FNUZAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3B11FNUZ)
-    return initFromFloat8E4M3B11FNUZAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E3M4)
-    return initFromFloat8E3M4APInt(api);
-  if (Sem == &APFloatBase::semFloatTF32)
-    return initFromFloatTF32APInt(api);
-  if (Sem == &APFloatBase::semFloat8E8M0FNU)
-    return initFromFloat8E8M0FNUAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E5M3FNU)
-    return initFromFloat8E5M3FNUAPInt(api);
-  if (Sem == &APFloatBase::semFloat6E3M2FN)
-    return initFromFloat6E3M2FNAPInt(api);
-  if (Sem == &APFloatBase::semFloat6E2M3FN)
-    return initFromFloat6E2M3FNAPInt(api);
-  if (Sem == &APFloatBase::semFloat4E2M1FN)
-    return initFromFloat4E2M1FNAPInt(api);
+فراغ IEEEFloat::initFromAPInt(ثابت fltSemantics *Sem, ثابت APInt &api) {
+  أكد(api.get_بټ_پلنوالی() == Sem->اندازه_دننه_بټونه);
+  إذا (Sem == &APFloat_بنسټ::semIEEEhalf)
+    أرجع initFromHalfAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semBFloat)
+    أرجع initFromBFloatAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semIEEEsingle)
+    أرجع initFromFloatAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semIEEEdouble)
+    أرجع initFromDoubleAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semIEEEquad)
+    أرجع initFromQuadrupleAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semX87DoubleExtended)
+    أرجع initFromF80LongDoubleAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semPPCDoubleDoubleLegacy)
+    أرجع initFromPPCDoubleDoubleLegacyAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E5M2)
+    أرجع initFromFloat8E5M2APInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E5M2FNUZ)
+    أرجع initFromFloat8E5M2FNUZAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E4M3)
+    أرجع initFromFloat8E4M3APInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E4M3FN)
+    أرجع initFromFloat8E4M3FNAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E4M3FNUZ)
+    أرجع initFromFloat8E4M3FNUZAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E4M3B11FNUZ)
+    أرجع initFromFloat8E4M3B11FNUZAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E3M4)
+    أرجع initFromFloat8E3M4APInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloatTF32)
+    أرجع initFromFloatTF32APInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E8M0FNU)
+    أرجع initFromFloat8E8M0FNUAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat8E5M3FNU)
+    أرجع initFromFloat8E5M3FNUAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat6E3M2FN)
+    أرجع initFromFloat6E3M2FNAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat6E2M3FN)
+    أرجع initFromFloat6E2M3FNAPInt(api);
+  إذا (Sem == &APFloat_بنسټ::semFloat4E2M1FN)
+    أرجع initFromFloat4E2M1FNAPInt(api);
 
   llvm_unreachable("unsupported semantics");
 }
 
 /// Make this number the largest magnitude normal number in the given
 /// semantics.
-void IEEEFloat::makeLargest(bool Negative) {
-  if (Negative && !semantics->hasSignedRepr)
+فراغ IEEEFloat::make_تر_ټولو_لوی(منطقي Negative) {
+  إذا (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
   // We want (in interchange format):
   //   sign = {Negative}
   //   exponent = 1..10
   //   significand = 1..1
-  category = fcNormal;
+  category = fc_نورمال;
   sign = Negative;
   exponent = semantics->maxExponent;
 
   // Use memset to set all but the highest integerPart to all ones.
   integerPart *significand = significandParts();
-  unsigned PartCount = partCount();
-  memset(significand, 0xFF, sizeof(integerPart)*(PartCount - 1));
+  بینښه Part_شمېر = part_شمېر();
+  memset(significand, 0xFF, حجم(integerPart)*(Part_شمېر - 1));
 
   // Set the high integerPart especially setting all unused top bits for
   // internal consistency.
-  const unsigned NumUnusedHighBits =
-    PartCount*integerPartWidth - semantics->precision;
-  significand[PartCount - 1] = (NumUnusedHighBits < integerPartWidth)
-                                   ? (~integerPart(0) >> NumUnusedHighBits)
+  ثابت بینښه عدد_ناکارول_شوی_لوړ_بټونه =
+    Part_شمېر*integer_Part_پلنوالی - semantics->precision;
+  significand[Part_شمېر - 1] = (عدد_ناکارول_شوی_لوړ_بټونه < integer_Part_پلنوالی)
+                                   ? (~integerPart(0) >> عدد_ناکارول_شوی_لوړ_بټونه)
                                    : 0;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes &&
       (semantics->precision > 1))
     significand[0] &= ~integerPart(1);
@@ -4122,22 +4122,22 @@ void IEEEFloat::makeLargest(bool Negative) {
 
 /// Make this number the smallest magnitude denormal number in the given
 /// semantics.
-void IEEEFloat::makeSmallest(bool Negative) {
-  if (Negative && !semantics->hasSignedRepr)
+فراغ IEEEFloat::make_تر_ټولو_کوچنی(منطقي Negative) {
+  إذا (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
   // We want (in interchange format):
   //   sign = {Negative}
   //   exponent = 0..0
   //   significand = 0..01
-  category = fcNormal;
+  category = fc_نورمال;
   sign = Negative;
   exponent = semantics->minExponent;
-  APInt::tcSet(significandParts(), 1, partCount());
+  APInt::tc_سېټ(significandParts(), 1, part_شمېر());
 }
 
-void IEEEFloat::makeSmallestNormalized(bool Negative) {
-  if (Negative && !semantics->hasSignedRepr)
+فراغ IEEEFloat::make_تر_ټولو_کوچنی_Normalized(منطقي Negative) {
+  إذا (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
   // We want (in interchange format):
@@ -4145,119 +4145,119 @@ void IEEEFloat::makeSmallestNormalized(bool Negative) {
   //   exponent = 0..0
   //   significand = 10..0
 
-  category = fcNormal;
+  category = fc_نورمال;
   zeroSignificand();
   sign = Negative;
   exponent = semantics->minExponent;
-  APInt::tcSetBit(significandParts(), semantics->precision - 1);
+  APInt::tc_سېټ_بټ(significandParts(), semantics->precision - 1);
 }
 
-IEEEFloat::IEEEFloat(const fltSemantics &Sem, const APInt &API) {
+IEEEFloat::IEEEFloat(ثابت fltSemantics &Sem, ثابت APInt &API) {
   initFromAPInt(&Sem, API);
 }
 
-IEEEFloat::IEEEFloat(float f) {
-  initFromAPInt(&APFloatBase::semIEEEsingle, APInt::floatToBits(f));
+IEEEFloat::IEEEFloat(عائم f) {
+  initFromAPInt(&APFloat_بنسټ::semIEEEsingle, APInt::float_منزل_بټونه(f));
 }
 
-IEEEFloat::IEEEFloat(double d) {
-  initFromAPInt(&APFloatBase::semIEEEdouble, APInt::doubleToBits(d));
+IEEEFloat::IEEEFloat(مزدوج d) {
+  initFromAPInt(&APFloat_بنسټ::semIEEEdouble, APInt::double_منزل_بټونه(d));
 }
 
-namespace {
-  void append(SmallVectorImpl<char> &Buffer, StringRef Str) {
-    Buffer.append(Str.begin(), Str.end());
+نطاق {
+  فراغ append(Small_ویکټور_Impl<حرف> &بفر, StringRef Str) {
+    بفر.append(Str.begin(), Str.پای_ټکی());
   }
 
   /// Removes data from the given significand until it is no more
   /// precise than is required for the desired precision.
-  void AdjustToPrecision(APInt &significand,
-                         int &exp, unsigned FormatPrecision) {
-    unsigned bits = significand.getActiveBits();
+  فراغ Adjust_منزل_Precision(APInt &significand,
+                         صحيح &توانیز_تابع, بینښه FormatPrecision) {
+    بینښه بټونه = significand.get_فعال_بټونه();
 
     // 196/59 is a very slight overestimate of lg_2(10).
-    unsigned bitsRequired = (FormatPrecision * 196 + 58) / 59;
+    بینښه بټونه_Required = (FormatPrecision * 196 + 58) / 59;
 
-    if (bits <= bitsRequired) return;
+    إذا (بټونه <= بټونه_Required) أرجع;
 
-    unsigned tensRemovable = (bits - bitsRequired) * 59 / 196;
-    if (!tensRemovable) return;
+    بینښه tensRemovable = (بټونه - بټونه_Required) * 59 / 196;
+    إذا (!tensRemovable) أرجع;
 
-    exp += tensRemovable;
+    توانیز_تابع += tensRemovable;
 
-    APInt divisor(significand.getBitWidth(), 1);
-    APInt powten(significand.getBitWidth(), 10);
-    while (true) {
-      if (tensRemovable & 1)
-        divisor *= powten;
+    APInt وېشونکی(significand.get_بټ_پلنوالی(), 1);
+    APInt powten(significand.get_بټ_پلنوالی(), 10);
+    طالما (ریښتیا) {
+      إذا (tensRemovable & 1)
+        وېشونکی *= powten;
       tensRemovable >>= 1;
-      if (!tensRemovable) break;
+      إذا (!tensRemovable) اكسر;
       powten *= powten;
     }
 
-    significand = significand.udiv(divisor);
+    significand = significand.udiv(وېشونکی);
 
     // Truncate the significand down to its active bit count.
-    significand = significand.trunc(significand.getActiveBits());
+    significand = significand.trunc(significand.get_فعال_بټونه());
   }
 
 
-  void AdjustToPrecision(SmallVectorImpl<char> &buffer,
-                         int &exp, unsigned FormatPrecision) {
-    unsigned N = buffer.size();
-    if (N <= FormatPrecision) return;
+  فراغ Adjust_منزل_Precision(Small_ویکټور_Impl<حرف> &بفر_2,
+                         صحيح &توانیز_تابع, بینښه FormatPrecision) {
+    بینښه N = بفر_2.اندازه_2();
+    إذا (N <= FormatPrecision) أرجع;
 
     // The most significant figures are the last ones in the buffer.
-    unsigned FirstSignificant = N - FormatPrecision;
+    بینښه لومړی_Significant = N - FormatPrecision;
 
     // Round.
     // FIXME: this probably shouldn't use 'round half up'.
 
     // Rounding down is just a truncation, except we also want to drop
     // trailing zeros from the new result.
-    if (buffer[FirstSignificant - 1] < '5') {
-      while (FirstSignificant < N && buffer[FirstSignificant] == '0')
-        FirstSignificant++;
+    إذا (بفر_2[لومړی_Significant - 1] < '5') {
+      طالما (لومړی_Significant < N && بفر_2[لومړی_Significant] == '0')
+        لومړی_Significant++;
 
-      exp += FirstSignificant;
-      buffer.erase(&buffer[0], &buffer[FirstSignificant]);
-      return;
+      توانیز_تابع += لومړی_Significant;
+      بفر_2.erase(&بفر_2[0], &بفر_2[لومړی_Significant]);
+      أرجع;
     }
 
     // Rounding up requires a decimal add-with-carry.  If we continue
     // the carry, the newly-introduced zeros will just be truncated.
-    for (unsigned I = FirstSignificant; I != N; ++I) {
-      if (buffer[I] == '9') {
-        FirstSignificant++;
-      } else {
-        buffer[I]++;
-        break;
+    لكل (بینښه I = لومړی_Significant; I != N; ++I) {
+      إذا (بفر_2[I] == '9') {
+        لومړی_Significant++;
+      } وإلا {
+        بفر_2[I]++;
+        اكسر;
       }
     }
 
     // If we carried through, we have exactly one digit of precision.
-    if (FirstSignificant == N) {
-      exp += FirstSignificant;
-      buffer.clear();
-      buffer.push_back('1');
-      return;
+    إذا (لومړی_Significant == N) {
+      توانیز_تابع += لومړی_Significant;
+      بفر_2.clear();
+      بفر_2.ټېل_شا('1');
+      أرجع;
     }
 
-    exp += FirstSignificant;
-    buffer.erase(&buffer[0], &buffer[FirstSignificant]);
+    توانیز_تابع += لومړی_Significant;
+    بفر_2.erase(&بفر_2[0], &بفر_2[لومړی_Significant]);
   }
 
-  void toStringImpl(SmallVectorImpl<char> &Str, const bool isNeg, int exp,
-                    APInt significand, unsigned FormatPrecision,
-                    unsigned FormatMaxPadding, bool TruncateZero) {
-    const int semanticsPrecision = significand.getBitWidth();
+  فراغ منزل_String_Impl(Small_ویکټور_Impl<حرف> &Str, ثابت منطقي isNeg, صحيح توانیز_تابع,
+                    APInt significand, بینښه FormatPrecision,
+                    بینښه FormatMaxPadding, منطقي TruncateZero) {
+    ثابت صحيح semanticsPrecision = significand.get_بټ_پلنوالی();
 
-    if (isNeg)
-      Str.push_back('-');
+    إذا (isNeg)
+      Str.ټېل_شا('-');
 
     // Set FormatPrecision if zero.  We want to do this before we
     // truncate trailing zeros, as those are part of the precision.
-    if (!FormatPrecision) {
+    إذا (!FormatPrecision) {
       // We use enough digits so the number can be round-tripped back to an
       // APFloat. The formula comes from "How to Print Floating-Point Numbers
       // Accurately" by Steele and White.
@@ -4269,20 +4269,20 @@ namespace {
     }
 
     // Ignore trailing binary zeros.
-    int trailingZeros = significand.countr_zero();
-    exp += trailingZeros;
-    significand.lshrInPlace(trailingZeros);
+    صحيح trailingZeros = significand.countr_zero();
+    توانیز_تابع += trailingZeros;
+    significand.lshr_دننه_ځای_پرځای_کړه(trailingZeros);
 
     // Change the exponent from 2^e to 10^e.
-    if (exp == 0) {
+    إذا (توانیز_تابع == 0) {
       // Nothing to do.
-    } else if (exp > 0) {
+    } وإلا إذا (توانیز_تابع > 0) {
       // Just shift left.
-      significand = significand.zext(semanticsPrecision + exp);
-      significand <<= exp;
-      exp = 0;
-    } else { /* exp < 0 */
-      int texp = -exp;
+      significand = significand.zext(semanticsPrecision + توانیز_تابع);
+      significand <<= توانیز_تابع;
+      توانیز_تابع = 0;
+    } وإلا { /* exp < 0 */
+      صحيح texp = -توانیز_تابع;
 
       // We transform this using the identity:
       //   (N)(2^-e) == (N)(5^e)(10^-e)
@@ -4293,30 +4293,30 @@ namespace {
       //                 <= semantics->precision + e * 137 / 59
       //   (log_2(5) ~ 2.321928 < 2.322034 ~ 137/59)
 
-      unsigned precision = semanticsPrecision + (137 * texp + 136) / 59;
+      بینښه precision = semanticsPrecision + (137 * texp + 136) / 59;
 
       // Multiply significand by 5^e.
       //   N * 5^0101 == N * 5^(1*1) * 5^(0*2) * 5^(1*4) * 5^(0*8)
       significand = significand.zext(precision);
-      APInt five_to_the_i(precision, 5);
-      while (true) {
-        if (texp & 1)
-          significand *= five_to_the_i;
+      APInt five_منزل_the_i(precision, 5);
+      طالما (ریښتیا) {
+        إذا (texp & 1)
+          significand *= five_منزل_the_i;
 
         texp >>= 1;
-        if (!texp)
-          break;
-        five_to_the_i *= five_to_the_i;
+        إذا (!texp)
+          اكسر;
+        five_منزل_the_i *= five_منزل_the_i;
       }
     }
 
-    AdjustToPrecision(significand, exp, FormatPrecision);
+    Adjust_منزل_Precision(significand, توانیز_تابع, FormatPrecision);
 
-    SmallVector<char, 256> buffer;
+    Small_ویکټور<حرف, 256> بفر_2;
 
     // Fill the buffer.
-    unsigned precision = significand.getBitWidth();
-    if (precision < 4) {
+    بینښه precision = significand.get_بټ_پلنوالی();
+    إذا (precision < 4) {
       // We need enough precision to store the value 10.
       precision = 4;
       significand = significand.zext(precision);
@@ -4324,189 +4324,189 @@ namespace {
     APInt ten(precision, 10);
     APInt digit(precision, 0);
 
-    bool inTrail = true;
-    while (significand != 0) {
+    منطقي دننه_Trail = ریښتیا;
+    طالما (significand != 0) {
       // digit <- significand % 10
       // significand <- significand / 10
       APInt::udivrem(significand, ten, significand, digit);
 
-      unsigned d = digit.getZExtValue();
+      بینښه d = digit.get_ZExt_ارزښت();
 
       // Drop trailing zeros.
-      if (inTrail && !d)
-        exp++;
-      else {
-        buffer.push_back((char) ('0' + d));
-        inTrail = false;
+      إذا (دننه_Trail && !d)
+        توانیز_تابع++;
+      وإلا {
+        بفر_2.ټېل_شا((حرف) ('0' + d));
+        دننه_Trail = خطأ;
       }
     }
 
-    assert(!buffer.empty() && "no characters in buffer!");
+    أكد(!بفر_2.تشه() && "no characters in buffer!");
 
     // Drop down to FormatPrecision.
     // TODO: don't do more precise calculations above than are required.
-    AdjustToPrecision(buffer, exp, FormatPrecision);
+    Adjust_منزل_Precision(بفر_2, توانیز_تابع, FormatPrecision);
 
-    unsigned NDigits = buffer.size();
+    بینښه NDigits = بفر_2.اندازه_2();
 
     // Check whether we should use scientific notation.
-    bool FormatScientific;
-    if (!FormatMaxPadding) {
-      FormatScientific = true;
-    } else {
-      if (exp >= 0) {
+    منطقي FormatScientific;
+    إذا (!FormatMaxPadding) {
+      FormatScientific = ریښتیا;
+    } وإلا {
+      إذا (توانیز_تابع >= 0) {
         // 765e3 --> 765000
         //              ^^^
         // But we shouldn't make the number look more precise than it is.
-        FormatScientific = ((unsigned) exp > FormatMaxPadding ||
-                            NDigits + (unsigned) exp > FormatPrecision);
-      } else {
+        FormatScientific = ((بینښه) توانیز_تابع > FormatMaxPadding ||
+                            NDigits + (بینښه) توانیز_تابع > FormatPrecision);
+      } وإلا {
         // Power of the most significant digit.
-        int MSD = exp + (int) (NDigits - 1);
-        if (MSD >= 0) {
+        صحيح MSD = توانیز_تابع + (صحيح) (NDigits - 1);
+        إذا (MSD >= 0) {
           // 765e-2 == 7.65
-          FormatScientific = false;
-        } else {
+          FormatScientific = خطأ;
+        } وإلا {
           // 765e-5 == 0.00765
           //           ^ ^^
-          FormatScientific = ((unsigned) -MSD) > FormatMaxPadding;
+          FormatScientific = ((بینښه) -MSD) > FormatMaxPadding;
         }
       }
     }
 
     // Scientific formatting is pretty straightforward.
-    if (FormatScientific) {
-      exp += (NDigits - 1);
+    إذا (FormatScientific) {
+      توانیز_تابع += (NDigits - 1);
 
-      Str.push_back(buffer[NDigits-1]);
-      Str.push_back('.');
-      if (NDigits == 1 && TruncateZero)
-        Str.push_back('0');
-      else
-        for (unsigned I = 1; I != NDigits; ++I)
-          Str.push_back(buffer[NDigits-1-I]);
+      Str.ټېل_شا(بفر_2[NDigits-1]);
+      Str.ټېل_شا('.');
+      إذا (NDigits == 1 && TruncateZero)
+        Str.ټېل_شا('0');
+      وإلا
+        لكل (بینښه I = 1; I != NDigits; ++I)
+          Str.ټېل_شا(بفر_2[NDigits-1-I]);
       // Fill with zeros up to FormatPrecision.
-      if (!TruncateZero && FormatPrecision > NDigits - 1)
+      إذا (!TruncateZero && FormatPrecision > NDigits - 1)
         Str.append(FormatPrecision - NDigits + 1, '0');
       // For !TruncateZero we use lower 'e'.
-      Str.push_back(TruncateZero ? 'E' : 'e');
+      Str.ټېل_شا(TruncateZero ? 'E' : 'e');
 
-      Str.push_back(exp >= 0 ? '+' : '-');
-      if (exp < 0)
-        exp = -exp;
-      SmallVector<char, 6> expbuf;
-      do {
-        expbuf.push_back((char) ('0' + (exp % 10)));
-        exp /= 10;
-      } while (exp);
+      Str.ټېل_شا(توانیز_تابع >= 0 ? '+' : '-');
+      إذا (توانیز_تابع < 0)
+        توانیز_تابع = -توانیز_تابع;
+      Small_ویکټور<حرف, 6> expbuf;
+      افعل {
+        expbuf.ټېل_شا((حرف) ('0' + (توانیز_تابع % 10)));
+        توانیز_تابع /= 10;
+      } طالما (توانیز_تابع);
       // Exponent always at least two digits if we do not truncate zeros.
-      if (!TruncateZero && expbuf.size() < 2)
-        expbuf.push_back('0');
-      for (unsigned I = 0, E = expbuf.size(); I != E; ++I)
-        Str.push_back(expbuf[E-1-I]);
-      return;
+      إذا (!TruncateZero && expbuf.اندازه_2() < 2)
+        expbuf.ټېل_شا('0');
+      لكل (بینښه I = 0, E = expbuf.اندازه_2(); I != E; ++I)
+        Str.ټېل_شا(expbuf[E-1-I]);
+      أرجع;
     }
 
     // Non-scientific, positive exponents.
-    if (exp >= 0) {
-      for (unsigned I = 0; I != NDigits; ++I)
-        Str.push_back(buffer[NDigits-1-I]);
-      for (unsigned I = 0; I != (unsigned) exp; ++I)
-        Str.push_back('0');
-      return;
+    إذا (توانیز_تابع >= 0) {
+      لكل (بینښه I = 0; I != NDigits; ++I)
+        Str.ټېل_شا(بفر_2[NDigits-1-I]);
+      لكل (بینښه I = 0; I != (بینښه) توانیز_تابع; ++I)
+        Str.ټېل_شا('0');
+      أرجع;
     }
 
     // Non-scientific, negative exponents.
 
     // The number of digits to the left of the decimal point.
-    int NWholeDigits = exp + (int) NDigits;
+    صحيح NWholeDigits = توانیز_تابع + (صحيح) NDigits;
 
-    unsigned I = 0;
-    if (NWholeDigits > 0) {
-      for (; I != (unsigned) NWholeDigits; ++I)
-        Str.push_back(buffer[NDigits-I-1]);
-      Str.push_back('.');
-    } else {
-      unsigned NZeros = 1 + (unsigned) -NWholeDigits;
+    بینښه I = 0;
+    إذا (NWholeDigits > 0) {
+      لكل (; I != (بینښه) NWholeDigits; ++I)
+        Str.ټېل_شا(بفر_2[NDigits-I-1]);
+      Str.ټېل_شا('.');
+    } وإلا {
+      بینښه NZeros = 1 + (بینښه) -NWholeDigits;
 
-      Str.push_back('0');
-      Str.push_back('.');
-      for (unsigned Z = 1; Z != NZeros; ++Z)
-        Str.push_back('0');
+      Str.ټېل_شا('0');
+      Str.ټېل_شا('.');
+      لكل (بینښه Z = 1; Z != NZeros; ++Z)
+        Str.ټېل_شا('0');
     }
 
-    for (; I != NDigits; ++I)
-      Str.push_back(buffer[NDigits-I-1]);
+    لكل (; I != NDigits; ++I)
+      Str.ټېل_شا(بفر_2[NDigits-I-1]);
 
   }
 } // namespace
 
-void IEEEFloat::toString(SmallVectorImpl<char> &Str, unsigned FormatPrecision,
-                         unsigned FormatMaxPadding, bool TruncateZero) const {
-  switch (category) {
-  case fcInfinity:
-    if (isNegative())
-      return append(Str, "-Inf");
-    else
-      return append(Str, "+Inf");
+فراغ IEEEFloat::منزل_String(Small_ویکټور_Impl<حرف> &Str, بینښه FormatPrecision,
+                         بینښه FormatMaxPadding, منطقي TruncateZero) ثابت {
+  بدل (category) {
+  حالة fcInfinity:
+    إذا (isNegative())
+      أرجع append(Str, "-Inf");
+    وإلا
+      أرجع append(Str, "+Inf");
 
-  case fcNaN: return append(Str, "NaN");
+  حالة fcNaN: أرجع append(Str, "NaN");
 
-  case fcZero:
-    if (isNegative())
-      Str.push_back('-');
+  حالة fcZero:
+    إذا (isNegative())
+      Str.ټېل_شا('-');
 
-    if (!FormatMaxPadding) {
-      if (TruncateZero)
+    إذا (!FormatMaxPadding) {
+      إذا (TruncateZero)
         append(Str, "0.0E+0");
-      else {
+      وإلا {
         append(Str, "0.0");
-        if (FormatPrecision > 1)
+        إذا (FormatPrecision > 1)
           Str.append(FormatPrecision - 1, '0');
         append(Str, "e+00");
       }
-    } else {
-      Str.push_back('0');
+    } وإلا {
+      Str.ټېل_شا('0');
     }
-    return;
+    أرجع;
 
-  case fcNormal:
-    break;
+  حالة fc_نورمال:
+    اكسر;
   }
 
   // Decompose the number into an APInt and an exponent.
-  int exp = exponent - ((int) semantics->precision - 1);
+  صحيح توانیز_تابع = exponent - ((صحيح) semantics->precision - 1);
   APInt significand(
       semantics->precision,
-      ArrayRef(significandParts(), partCountForBits(semantics->precision)));
+      ArrayRef(significandParts(), part_شمېر_For_بټونه(semantics->precision)));
 
-  toStringImpl(Str, isNegative(), exp, significand, FormatPrecision,
+  منزل_String_Impl(Str, isNegative(), توانیز_تابع, significand, FormatPrecision,
                FormatMaxPadding, TruncateZero);
 
 }
 
-int IEEEFloat::getExactLog2Abs() const {
-  if (!isFinite() || isZero())
-    return INT_MIN;
+صحيح IEEEFloat::getExactLog2Abs() ثابت {
+  إذا (!isFinite() || isZero())
+    أرجع INT_MIN;
 
-  const integerPart *Parts = significandParts();
-  const int PartCount = partCountForBits(semantics->precision);
+  ثابت integerPart *Parts = significandParts();
+  ثابت صحيح Part_شمېر = part_شمېر_For_بټونه(semantics->precision);
 
-  int PopCount = 0;
-  for (int i = 0; i < PartCount; ++i) {
-    PopCount += llvm::popcount(Parts[i]);
-    if (PopCount > 1)
-      return INT_MIN;
+  صحيح راوباسه_شمېر = 0;
+  لكل (صحيح i = 0; i < Part_شمېر; ++i) {
+    راوباسه_شمېر += llvm::popcount(Parts[i]);
+    إذا (راوباسه_شمېر > 1)
+      أرجع INT_MIN;
   }
 
-  if (exponent != semantics->minExponent)
-    return exponent;
+  إذا (exponent != semantics->minExponent)
+    أرجع exponent;
 
-  int CountrParts = 0;
-  for (int i = 0; i < PartCount;
-       ++i, CountrParts += APInt::APINT_BITS_PER_WORD) {
-    if (Parts[i] != 0) {
-      return exponent - semantics->precision + CountrParts +
+  صحيح CountrParts = 0;
+  لكل (صحيح i = 0; i < Part_شمېر;
+       ++i, CountrParts += APInt::APINT_بټونه_فی_کلمه) {
+    إذا (Parts[i] != 0) {
+      أرجع exponent - semantics->precision + CountrParts +
              llvm::countr_zero(Parts[i]) + 1;
     }
   }
@@ -4514,86 +4514,86 @@ int IEEEFloat::getExactLog2Abs() const {
   llvm_unreachable("didn't find the set bit");
 }
 
-bool IEEEFloat::isSignaling() const {
-  if (!isNaN())
-    return false;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
+منطقي IEEEFloat::isSignaling() ثابت {
+  إذا (!isNaN())
+    أرجع خطأ;
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
       semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
-    return false;
+    أرجع خطأ;
 
   // IEEE-754R 2008 6.2.1: A signaling NaN bit string should be encoded with the
   // first bit of the trailing significand being 0.
-  return !APInt::tcExtractBit(significandParts(), semantics->precision - 2);
+  أرجع !APInt::tc_ایستل_بټ(significandParts(), semantics->precision - 2);
 }
 
 /// IEEE-754R 2008 5.3.1: nextUp/nextDown.
 ///
 /// *NOTE* since nextDown(x) = -nextUp(-x), we only implement nextUp with
 /// appropriate sign switching before/after the computation.
-APFloat::opStatus IEEEFloat::next(bool nextDown) {
+APFloat::op_حالت IEEEFloat::بل(منطقي بل_ښکته) {
   // If we are performing nextDown, swap sign so we have -x.
-  if (nextDown)
+  إذا (بل_ښکته)
     changeSign();
 
   // Compute nextUp(x)
-  opStatus result = opOK;
+  op_حالت پایله_2 = opOK;
 
   // Handle each float category separately.
-  switch (category) {
-  case fcInfinity:
+  بدل (category) {
+  حالة fcInfinity:
     // nextUp(+inf) = +inf
-    if (!isNegative())
-      break;
+    إذا (!isNegative())
+      اكسر;
     // nextUp(-inf) = -getLargest()
-    makeLargest(true);
-    break;
-  case fcNaN:
+    make_تر_ټولو_لوی(ریښتیا);
+    اكسر;
+  حالة fcNaN:
     // IEEE-754R 2008 6.2 Par 2: nextUp(sNaN) = qNaN. Set Invalid flag.
     // IEEE-754R 2008 6.2: nextUp(qNaN) = qNaN. Must be identity so we do not
     //                     change the payload.
-    if (isSignaling()) {
-      result = opInvalidOp;
+    إذا (isSignaling()) {
+      پایله_2 = opInvalidOp;
       // For consistency, propagate the sign of the sNaN to the qNaN.
-      makeNaN(false, isNegative(), nullptr);
+      makeNaN(خطأ, isNegative(), تش_اشاره);
     }
-    break;
-  case fcZero:
+    اكسر;
+  حالة fcZero:
     // nextUp(pm 0) = +getSmallest()
-    makeSmallest(false);
-    break;
-  case fcNormal:
+    make_تر_ټولو_کوچنی(خطأ);
+    اكسر;
+  حالة fc_نورمال:
     // nextUp(-getSmallest()) = -0
-    if (isSmallest() && isNegative()) {
-      APInt::tcSet(significandParts(), 0, partCount());
+    إذا (is_تر_ټولو_کوچنی() && isNegative()) {
+      APInt::tc_سېټ(significandParts(), 0, part_شمېر());
       category = fcZero;
       exponent = 0;
-      if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
-        sign = false;
-      if (!semantics->hasZero)
-        makeSmallestNormalized(false);
-      break;
+      إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+        sign = خطأ;
+      إذا (!semantics->hasZero)
+        make_تر_ټولو_کوچنی_Normalized(خطأ);
+      اكسر;
     }
 
-    if (isLargest() && !isNegative()) {
-      if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+    إذا (is_تر_ټولو_لوی() && !isNegative()) {
+      إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
         // nextUp(getLargest()) == NAN
         makeNaN();
-        break;
-      } else if (semantics->nonFiniteBehavior ==
+        اكسر;
+      } وإلا إذا (semantics->nonFiniteBehavior ==
                  fltNonfiniteBehavior::FiniteOnly) {
         // nextUp(getLargest()) == getLargest()
-        break;
-      } else {
+        اكسر;
+      } وإلا {
         // nextUp(getLargest()) == INFINITY
-        APInt::tcSet(significandParts(), 0, partCount());
+        APInt::tc_سېټ(significandParts(), 0, part_شمېر());
         category = fcInfinity;
         exponent = semantics->maxExponent + 1;
-        break;
+        اكسر;
       }
     }
 
     // nextUp(normal) == normal + inc.
-    if (isNegative()) {
+    إذا (isNegative()) {
       // If we are negative, we need to decrement the significand.
 
       // We only cross a binade boundary that requires adjusting the exponent
@@ -4601,7 +4601,7 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
       //   1. exponent != semantics->minExponent. This implies we are not in the
       //   smallest binade or are dealing with denormals.
       //   2. Our significand excluding the integral bit is all zeros.
-      bool WillCrossBinadeBoundary =
+      منطقي WillCrossBinadeBoundary =
         exponent != semantics->minExponent && isSignificandAllZeros();
 
       // Decrement the significand.
@@ -4618,16 +4618,16 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
       //   since we set the integral bit to 0 when we represent denormals, we
       //   just decrement the significand.
       integerPart *Parts = significandParts();
-      APInt::tcDecrement(Parts, partCount());
+      APInt::tcDecrement(Parts, part_شمېر());
 
-      if (WillCrossBinadeBoundary) {
+      إذا (WillCrossBinadeBoundary) {
         // Our result is a normal number. Do the following:
         // 1. Set the integral bit to 1.
         // 2. Decrement the exponent.
-        APInt::tcSetBit(Parts, semantics->precision - 1);
+        APInt::tc_سېټ_بټ(Parts, semantics->precision - 1);
         exponent--;
       }
-    } else {
+    } وإلا {
       // If we are positive, we need to increment the significand.
 
       // We only cross a binade boundary that requires adjusting the exponent if
@@ -4638,106 +4638,106 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
       // smallest normal binade have the same exponent in our representation.
       // If there are only exponents, any increment always crosses the
       // BinadeBoundary.
-      bool WillCrossBinadeBoundary = !APFloat::hasSignificand(*semantics) ||
+      منطقي WillCrossBinadeBoundary = !APFloat::hasSignificand(*semantics) ||
                                      (!isDenormal() && isSignificandAllOnes());
 
-      if (WillCrossBinadeBoundary) {
+      إذا (WillCrossBinadeBoundary) {
         integerPart *Parts = significandParts();
-        APInt::tcSet(Parts, 0, partCount());
-        APInt::tcSetBit(Parts, semantics->precision - 1);
-        assert(exponent != semantics->maxExponent &&
+        APInt::tc_سېټ(Parts, 0, part_شمېر());
+        APInt::tc_سېټ_بټ(Parts, semantics->precision - 1);
+        أكد(exponent != semantics->maxExponent &&
                "We can not increment an exponent beyond the maxExponent allowed"
                " by the given floating point semantics.");
         exponent++;
-      } else {
+      } وإلا {
         incrementSignificand();
       }
     }
-    break;
+    اكسر;
   }
 
   // If we are performing nextDown, swap sign so we have -nextUp(-x)
-  if (nextDown)
+  إذا (بل_ښکته)
     changeSign();
 
-  return result;
+  أرجع پایله_2;
 }
 
-APInt IEEEFloat::getNaNPayload() const {
-  assert(isNaN() && "Can only be called on NaN values");
+APInt IEEEFloat::getNaNPayload() ثابت {
+  أكد(isNaN() && "Can only be called on NaN values");
   // Number of bits in the payload, excluding the (maybe implied) integer bit.
-  unsigned Bits = semantics->precision - 1;
-  return APInt(Bits, ArrayRef(significandParts(), partCountForBits(Bits)));
+  بینښه بټونه_2 = semantics->precision - 1;
+  أرجع APInt(بټونه_2, ArrayRef(significandParts(), part_شمېر_For_بټونه(بټونه_2)));
 }
 
-APFloatBase::ExponentType IEEEFloat::exponentNaN() const {
-  return ::exponentNaN(*semantics);
+APFloat_بنسټ::ExponentType IEEEFloat::exponentNaN() ثابت {
+  أرجع ::exponentNaN(*semantics);
 }
 
-APFloatBase::ExponentType IEEEFloat::exponentInf() const {
-  return ::exponentInf(*semantics);
+APFloat_بنسټ::ExponentType IEEEFloat::exponentInf() ثابت {
+  أرجع ::exponentInf(*semantics);
 }
 
-APFloatBase::ExponentType IEEEFloat::exponentZero() const {
-  return ::exponentZero(*semantics);
+APFloat_بنسټ::ExponentType IEEEFloat::exponentZero() ثابت {
+  أرجع ::exponentZero(*semantics);
 }
 
-void IEEEFloat::makeInf(bool Negative) {
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+فراغ IEEEFloat::makeInf(منطقي Negative) {
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
     llvm_unreachable("This floating point format does not support Inf");
 
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+  إذا (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
     // There is no Inf, so make NaN instead.
-    makeNaN(false, Negative);
-    return;
+    makeNaN(خطأ, Negative);
+    أرجع;
   }
   category = fcInfinity;
   sign = Negative;
   exponent = exponentInf();
-  APInt::tcSet(significandParts(), 0, partCount());
+  APInt::tc_سېټ(significandParts(), 0, part_شمېر());
 }
 
-void IEEEFloat::makeZero(bool Negative) {
-  if (!semantics->hasZero)
+فراغ IEEEFloat::makeZero(منطقي Negative) {
+  إذا (!semantics->hasZero)
     llvm_unreachable("This floating point format does not support Zero");
 
   category = fcZero;
   sign = Negative;
-  if (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
+  إذا (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
     // Merge negative zero to positive because 0b10000...000 is used for NaN
-    sign = false;
+    sign = خطأ;
   }
   exponent = exponentZero();
-  APInt::tcSet(significandParts(), 0, partCount());
+  APInt::tc_سېټ(significandParts(), 0, part_شمېر());
 }
 
-void IEEEFloat::makeQuiet() {
-  assert(isNaN());
-  if (semantics->nonFiniteBehavior != fltNonfiniteBehavior::NanOnly)
-    APInt::tcSetBit(significandParts(), semantics->precision - 2);
+فراغ IEEEFloat::makeQuiet() {
+  أكد(isNaN());
+  إذا (semantics->nonFiniteBehavior != fltNonfiniteBehavior::NanOnly)
+    APInt::tc_سېټ_بټ(significandParts(), semantics->precision - 2);
 }
 
-int ilogb(const IEEEFloat &Arg) {
-  if (Arg.isNaN())
-    return APFloat::IEK_NaN;
-  if (Arg.isZero())
-    return APFloat::IEK_Zero;
-  if (Arg.isInfinity())
-    return APFloat::IEK_Inf;
-  if (!Arg.isDenormal())
-    return Arg.exponent;
+صحيح ilogb(ثابت IEEEFloat &Arg) {
+  إذا (Arg.isNaN())
+    أرجع APFloat::IEK_NaN;
+  إذا (Arg.isZero())
+    أرجع APFloat::IEK_Zero;
+  إذا (Arg.isInfinity())
+    أرجع APFloat::IEK_Inf;
+  إذا (!Arg.isDenormal())
+    أرجع Arg.exponent;
 
   IEEEFloat Normalized(Arg);
-  int SignificandBits = Arg.getSemantics().precision - 1;
+  صحيح Significand_بټونه = Arg.getSemantics().precision - 1;
 
-  Normalized.exponent += SignificandBits;
-  Normalized.normalize(APFloat::rmNearestTiesToEven, lfExactlyZero);
-  return Normalized.exponent - SignificandBits;
+  Normalized.exponent += Significand_بټونه;
+  Normalized.normalize(APFloat::rm_تر_ټولو_نږدې_Ties_منزل_Even, lfExactlyZero);
+  أرجع Normalized.exponent - Significand_بټونه;
 }
 
-IEEEFloat scalbn(IEEEFloat X, int Exp, roundingMode RoundingMode) {
-  auto MaxExp = X.getSemantics().maxExponent;
-  auto MinExp = X.getSemantics().minExponent;
+IEEEFloat scalbn(IEEEFloat X, صحيح Exp, rounding_ډېرپېښ Rounding_ډېرپېښ) {
+  خپلکاری MaxExp = X.getSemantics().maxExponent;
+  خپلکاری MinExp = X.getSemantics().minExponent;
 
   // If Exp is wildly out-of-scale, simply adding it to X.exponent will
   // overflow; clamp it to a safe range before adding, but ensure that the range
@@ -4745,98 +4745,98 @@ IEEEFloat scalbn(IEEEFloat X, int Exp, roundingMode RoundingMode) {
   // need to support is the difference between the largest possible exponent and
   // the normalized exponent of half the smallest denormal.
 
-  int SignificandBits = X.getSemantics().precision - 1;
-  int MaxIncrement = MaxExp - (MinExp - SignificandBits) + 1;
+  صحيح Significand_بټونه = X.getSemantics().precision - 1;
+  صحيح MaxIncrement = MaxExp - (MinExp - Significand_بټونه) + 1;
 
   // Clamp to one past the range ends to let normalize handle overlflow.
   X.exponent += std::clamp(Exp, -MaxIncrement - 1, MaxIncrement);
-  X.normalize(RoundingMode, lfExactlyZero);
-  if (X.isNaN())
+  X.normalize(Rounding_ډېرپېښ, lfExactlyZero);
+  إذا (X.isNaN())
     X.makeQuiet();
-  return X;
+  أرجع X;
 }
 
-IEEEFloat frexp(const IEEEFloat &Val, int &Exp, roundingMode RM) {
+IEEEFloat frexp(ثابت IEEEFloat &Val, صحيح &Exp, rounding_ډېرپېښ RM) {
   Exp = ilogb(Val);
 
   // Quiet signalling nans.
-  if (Exp == APFloat::IEK_NaN) {
+  إذا (Exp == APFloat::IEK_NaN) {
     IEEEFloat Quiet(Val);
     Quiet.makeQuiet();
-    return Quiet;
+    أرجع Quiet;
   }
 
-  if (Exp == APFloat::IEK_Inf)
-    return Val;
+  إذا (Exp == APFloat::IEK_Inf)
+    أرجع Val;
 
   // 1 is added because frexp is defined to return a normalized fraction in
   // +/-[0.5, 1.0), rather than the usual +/-[1.0, 2.0).
   Exp = Exp == APFloat::IEK_Zero ? 0 : Exp + 1;
-  return scalbn(Val, -Exp, RM);
+  أرجع scalbn(Val, -Exp, RM);
 }
 
-DoubleAPFloat::DoubleAPFloat(const fltSemantics &S)
+DoubleAPFloat::DoubleAPFloat(ثابت fltSemantics &S)
     : Semantics(&S),
-      Floats(new APFloat[2]{APFloat(APFloatBase::semIEEEdouble),
-                            APFloat(APFloatBase::semIEEEdouble)}) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
+      Floats(جديد APFloat[2]{APFloat(APFloat_بنسټ::semIEEEdouble),
+                            APFloat(APFloat_بنسټ::semIEEEdouble)}) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
 }
 
-DoubleAPFloat::DoubleAPFloat(const fltSemantics &S, uninitializedTag)
-    : Semantics(&S), Floats(new APFloat[2]{
-                         APFloat(APFloatBase::semIEEEdouble, uninitialized),
-                         APFloat(APFloatBase::semIEEEdouble, uninitialized)}) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
+DoubleAPFloat::DoubleAPFloat(ثابت fltSemantics &S, uninitialized_نښان)
+    : Semantics(&S), Floats(جديد APFloat[2]{
+                         APFloat(APFloat_بنسټ::semIEEEdouble, uninitialized),
+                         APFloat(APFloat_بنسټ::semIEEEdouble, uninitialized)}) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
 }
 
-DoubleAPFloat::DoubleAPFloat(const fltSemantics &S, integerPart I)
+DoubleAPFloat::DoubleAPFloat(ثابت fltSemantics &S, integerPart I)
     : Semantics(&S),
-      Floats(new APFloat[2]{APFloat(APFloatBase::semIEEEdouble, I),
-                            APFloat(APFloatBase::semIEEEdouble)}) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
+      Floats(جديد APFloat[2]{APFloat(APFloat_بنسټ::semIEEEdouble, I),
+                            APFloat(APFloat_بنسټ::semIEEEdouble)}) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
 }
 
-DoubleAPFloat::DoubleAPFloat(const fltSemantics &S, const APInt &I)
+DoubleAPFloat::DoubleAPFloat(ثابت fltSemantics &S, ثابت APInt &I)
     : Semantics(&S),
-      Floats(new APFloat[2]{
-          APFloat(APFloatBase::semIEEEdouble, APInt(64, I.getRawData()[0])),
-          APFloat(APFloatBase::semIEEEdouble, APInt(64, I.getRawData()[1]))}) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
+      Floats(جديد APFloat[2]{
+          APFloat(APFloat_بنسټ::semIEEEdouble, APInt(64, I.get_Raw_معلومات()[0])),
+          APFloat(APFloat_بنسټ::semIEEEdouble, APInt(64, I.get_Raw_معلومات()[1]))}) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
 }
 
-DoubleAPFloat::DoubleAPFloat(const fltSemantics &S, APFloat &&First,
-                             APFloat &&Second)
+DoubleAPFloat::DoubleAPFloat(ثابت fltSemantics &S, APFloat &&لومړی,
+                             APFloat &&دوهم)
     : Semantics(&S),
-      Floats(new APFloat[2]{std::move(First), std::move(Second)}) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
-  assert(&Floats[0].getSemantics() == &APFloatBase::semIEEEdouble);
-  assert(&Floats[1].getSemantics() == &APFloatBase::semIEEEdouble);
+      Floats(جديد APFloat[2]{std::move(لومړی), std::move(دوهم)}) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
+  أكد(&Floats[0].getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أكد(&Floats[1].getSemantics() == &APFloat_بنسټ::semIEEEdouble);
 }
 
-DoubleAPFloat::DoubleAPFloat(const DoubleAPFloat &RHS)
+DoubleAPFloat::DoubleAPFloat(ثابت DoubleAPFloat &RHS)
     : Semantics(RHS.Semantics),
-      Floats(RHS.Floats ? new APFloat[2]{APFloat(RHS.Floats[0]),
+      Floats(RHS.Floats ? جديد APFloat[2]{APFloat(RHS.Floats[0]),
                                          APFloat(RHS.Floats[1])}
-                        : nullptr) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
+                        : تش_اشاره) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
 }
 
 DoubleAPFloat::DoubleAPFloat(DoubleAPFloat &&RHS)
     : Semantics(RHS.Semantics), Floats(RHS.Floats) {
-  RHS.Semantics = &APFloatBase::semBogus;
-  RHS.Floats = nullptr;
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble);
+  RHS.Semantics = &APFloat_بنسټ::semBogus;
+  RHS.Floats = تش_اشاره;
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble);
 }
 
-DoubleAPFloat &DoubleAPFloat::operator=(const DoubleAPFloat &RHS) {
-  if (Semantics == RHS.Semantics && RHS.Floats) {
+DoubleAPFloat &DoubleAPFloat::چلوونکی=(ثابت DoubleAPFloat &RHS) {
+  إذا (Semantics == RHS.Semantics && RHS.Floats) {
     Floats[0] = RHS.Floats[0];
     Floats[1] = RHS.Floats[1];
-  } else if (this != &RHS) {
-    this->~DoubleAPFloat();
-    new (this) DoubleAPFloat(RHS);
+  } وإلا إذا (هذا != &RHS) {
+    هذا->~DoubleAPFloat();
+    جديد (هذا) DoubleAPFloat(RHS);
   }
-  return *this;
+  أرجع *هذا;
 }
 
 // Returns a result such that:
@@ -4845,160 +4845,160 @@ DoubleAPFloat &DoubleAPFloat::operator=(const DoubleAPFloat &RHS) {
 // 3. Hi + Lo == X + Y
 //
 // Requires that log2(X) >= log2(Y).
-static std::pair<APFloat, APFloat> fastTwoSum(APFloat X, APFloat Y) {
-  if (!X.isFinite())
-    return {X, APFloat::getZero(X.getSemantics(), /*Negative=*/false)};
+ساكن std::pair<APFloat, APFloat> fast_Two_مجموعه(APFloat X, APFloat Y) {
+  إذا (!X.isFinite())
+    أرجع {X, APFloat::getZero(X.getSemantics(), /*Negative=*/خطأ)};
   APFloat Hi = X + Y;
   APFloat Delta = Hi - X;
   APFloat Lo = Y - Delta;
-  return {Hi, Lo};
+  أرجع {Hi, Lo};
 }
 
 // Implement addition, subtraction, multiplication and division based on:
 // "Software for Doubled-Precision Floating-Point Computations",
 // by Seppo Linnainmaa, ACM TOMS vol 7 no 3, September 1981, pages 272-283.
-APFloat::opStatus DoubleAPFloat::addImpl(const APFloat &a, const APFloat &aa,
-                                         const APFloat &c, const APFloat &cc,
-                                         roundingMode RM) {
-  int Status = opOK;
+APFloat::op_حالت DoubleAPFloat::جمع_کړه_Impl(ثابت APFloat &a, ثابت APFloat &aa,
+                                         ثابت APFloat &c, ثابت APFloat &cc,
+                                         rounding_ډېرپېښ RM) {
+  صحيح حالت = opOK;
   APFloat z = a;
-  Status |= z.add(c, RM);
-  if (!z.isFinite()) {
-    if (!z.isInfinity()) {
+  حالت |= z.جمع_کړه(c, RM);
+  إذا (!z.isFinite()) {
+    إذا (!z.isInfinity()) {
       Floats[0] = std::move(z);
-      Floats[1].makeZero(/* Neg = */ false);
-      return (opStatus)Status;
+      Floats[1].makeZero(/* Neg = */ خطأ);
+      أرجع (op_حالت)حالت;
     }
-    Status = opOK;
-    auto AComparedToC = a.compareAbsoluteValue(c);
+    حالت = opOK;
+    خپلکاری ACompared_منزل_C = a.compare_Absolute_ارزښت(c);
     z = cc;
-    Status |= z.add(aa, RM);
-    if (AComparedToC == APFloat::cmpGreaterThan) {
+    حالت |= z.جمع_کړه(aa, RM);
+    إذا (ACompared_منزل_C == APFloat::cmpGreaterThan) {
       // z = cc + aa + c + a;
-      Status |= z.add(c, RM);
-      Status |= z.add(a, RM);
-    } else {
+      حالت |= z.جمع_کړه(c, RM);
+      حالت |= z.جمع_کړه(a, RM);
+    } وإلا {
       // z = cc + aa + a + c;
-      Status |= z.add(a, RM);
-      Status |= z.add(c, RM);
+      حالت |= z.جمع_کړه(a, RM);
+      حالت |= z.جمع_کړه(c, RM);
     }
-    if (!z.isFinite()) {
+    إذا (!z.isFinite()) {
       Floats[0] = std::move(z);
-      Floats[1].makeZero(/* Neg = */ false);
-      return (opStatus)Status;
+      Floats[1].makeZero(/* Neg = */ خطأ);
+      أرجع (op_حالت)حالت;
     }
     Floats[0] = z;
     APFloat zz = aa;
-    Status |= zz.add(cc, RM);
-    if (AComparedToC == APFloat::cmpGreaterThan) {
+    حالت |= zz.جمع_کړه(cc, RM);
+    إذا (ACompared_منزل_C == APFloat::cmpGreaterThan) {
       // Floats[1] = a - z + c + zz;
       Floats[1] = a;
-      Status |= Floats[1].subtract(z, RM);
-      Status |= Floats[1].add(c, RM);
-      Status |= Floats[1].add(zz, RM);
-    } else {
+      حالت |= Floats[1].کمول(z, RM);
+      حالت |= Floats[1].جمع_کړه(c, RM);
+      حالت |= Floats[1].جمع_کړه(zz, RM);
+    } وإلا {
       // Floats[1] = c - z + a + zz;
       Floats[1] = c;
-      Status |= Floats[1].subtract(z, RM);
-      Status |= Floats[1].add(a, RM);
-      Status |= Floats[1].add(zz, RM);
+      حالت |= Floats[1].کمول(z, RM);
+      حالت |= Floats[1].جمع_کړه(a, RM);
+      حالت |= Floats[1].جمع_کړه(zz, RM);
     }
-  } else {
+  } وإلا {
     // q = a - z;
     APFloat q = a;
-    Status |= q.subtract(z, RM);
+    حالت |= q.کمول(z, RM);
 
     // zz = q + c + (a - (q + z)) + aa + cc;
     // Compute a - (q + z) as -((q + z) - a) to avoid temporary copies.
-    auto zz = q;
-    Status |= zz.add(c, RM);
-    Status |= q.add(z, RM);
-    Status |= q.subtract(a, RM);
+    خپلکاری zz = q;
+    حالت |= zz.جمع_کړه(c, RM);
+    حالت |= q.جمع_کړه(z, RM);
+    حالت |= q.کمول(a, RM);
     q.changeSign();
-    Status |= zz.add(q, RM);
-    Status |= zz.add(aa, RM);
-    Status |= zz.add(cc, RM);
-    if (zz.isZero() && !zz.isNegative()) {
+    حالت |= zz.جمع_کړه(q, RM);
+    حالت |= zz.جمع_کړه(aa, RM);
+    حالت |= zz.جمع_کړه(cc, RM);
+    إذا (zz.isZero() && !zz.isNegative()) {
       Floats[0] = std::move(z);
-      Floats[1].makeZero(/* Neg = */ false);
-      return opOK;
+      Floats[1].makeZero(/* Neg = */ خطأ);
+      أرجع opOK;
     }
     Floats[0] = z;
-    Status |= Floats[0].add(zz, RM);
-    if (!Floats[0].isFinite()) {
-      Floats[1].makeZero(/* Neg = */ false);
-      return (opStatus)Status;
+    حالت |= Floats[0].جمع_کړه(zz, RM);
+    إذا (!Floats[0].isFinite()) {
+      Floats[1].makeZero(/* Neg = */ خطأ);
+      أرجع (op_حالت)حالت;
     }
     Floats[1] = std::move(z);
-    Status |= Floats[1].subtract(Floats[0], RM);
-    Status |= Floats[1].add(zz, RM);
+    حالت |= Floats[1].کمول(Floats[0], RM);
+    حالت |= Floats[1].جمع_کړه(zz, RM);
   }
-  return (opStatus)Status;
+  أرجع (op_حالت)حالت;
 }
 
-APFloat::opStatus DoubleAPFloat::addWithSpecial(const DoubleAPFloat &LHS,
-                                                const DoubleAPFloat &RHS,
-                                                DoubleAPFloat &Out,
-                                                roundingMode RM) {
-  if (LHS.getCategory() == fcNaN) {
-    Out = LHS;
-    return opOK;
+APFloat::op_حالت DoubleAPFloat::جمع_کړه_With_Special(ثابت DoubleAPFloat &LHS,
+                                                ثابت DoubleAPFloat &RHS,
+                                                DoubleAPFloat &بهر,
+                                                rounding_ډېرپېښ RM) {
+  إذا (LHS.getCategory() == fcNaN) {
+    بهر = LHS;
+    أرجع opOK;
   }
-  if (RHS.getCategory() == fcNaN) {
-    Out = RHS;
-    return opOK;
+  إذا (RHS.getCategory() == fcNaN) {
+    بهر = RHS;
+    أرجع opOK;
   }
-  if (LHS.getCategory() == fcZero) {
-    Out = RHS;
-    return opOK;
+  إذا (LHS.getCategory() == fcZero) {
+    بهر = RHS;
+    أرجع opOK;
   }
-  if (RHS.getCategory() == fcZero) {
-    Out = LHS;
-    return opOK;
+  إذا (RHS.getCategory() == fcZero) {
+    بهر = LHS;
+    أرجع opOK;
   }
-  if (LHS.getCategory() == fcInfinity && RHS.getCategory() == fcInfinity &&
+  إذا (LHS.getCategory() == fcInfinity && RHS.getCategory() == fcInfinity &&
       LHS.isNegative() != RHS.isNegative()) {
-    Out.makeNaN(false, Out.isNegative(), nullptr);
-    return opInvalidOp;
+    بهر.makeNaN(خطأ, بهر.isNegative(), تش_اشاره);
+    أرجع opInvalidOp;
   }
-  if (LHS.getCategory() == fcInfinity) {
-    Out = LHS;
-    return opOK;
+  إذا (LHS.getCategory() == fcInfinity) {
+    بهر = LHS;
+    أرجع opOK;
   }
-  if (RHS.getCategory() == fcInfinity) {
-    Out = RHS;
-    return opOK;
+  إذا (RHS.getCategory() == fcInfinity) {
+    بهر = RHS;
+    أرجع opOK;
   }
-  assert(LHS.getCategory() == fcNormal && RHS.getCategory() == fcNormal);
+  أكد(LHS.getCategory() == fc_نورمال && RHS.getCategory() == fc_نورمال);
 
   APFloat A(LHS.Floats[0]), AA(LHS.Floats[1]), C(RHS.Floats[0]),
       CC(RHS.Floats[1]);
-  assert(&A.getSemantics() == &APFloatBase::semIEEEdouble);
-  assert(&AA.getSemantics() == &APFloatBase::semIEEEdouble);
-  assert(&C.getSemantics() == &APFloatBase::semIEEEdouble);
-  assert(&CC.getSemantics() == &APFloatBase::semIEEEdouble);
-  assert(&Out.Floats[0].getSemantics() == &APFloatBase::semIEEEdouble);
-  assert(&Out.Floats[1].getSemantics() == &APFloatBase::semIEEEdouble);
-  return Out.addImpl(A, AA, C, CC, RM);
+  أكد(&A.getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أكد(&AA.getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أكد(&C.getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أكد(&CC.getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أكد(&بهر.Floats[0].getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أكد(&بهر.Floats[1].getSemantics() == &APFloat_بنسټ::semIEEEdouble);
+  أرجع بهر.جمع_کړه_Impl(A, AA, C, CC, RM);
 }
 
-APFloat::opStatus DoubleAPFloat::add(const DoubleAPFloat &RHS,
-                                     roundingMode RM) {
-  return addWithSpecial(*this, RHS, *this, RM);
+APFloat::op_حالت DoubleAPFloat::جمع_کړه(ثابت DoubleAPFloat &RHS,
+                                     rounding_ډېرپېښ RM) {
+  أرجع جمع_کړه_With_Special(*هذا, RHS, *هذا, RM);
 }
 
-APFloat::opStatus DoubleAPFloat::subtract(const DoubleAPFloat &RHS,
-                                          roundingMode RM) {
+APFloat::op_حالت DoubleAPFloat::کمول(ثابت DoubleAPFloat &RHS,
+                                          rounding_ډېرپېښ RM) {
   changeSign();
-  auto Ret = add(RHS, RM);
+  خپلکاری Ret = جمع_کړه(RHS, RM);
   changeSign();
-  return Ret;
+  أرجع Ret;
 }
 
-APFloat::opStatus DoubleAPFloat::multiply(const DoubleAPFloat &RHS,
-                                          APFloat::roundingMode RM) {
-  const auto &LHS = *this;
-  auto &Out = *this;
+APFloat::op_حالت DoubleAPFloat::multiply(ثابت DoubleAPFloat &RHS,
+                                          APFloat::rounding_ډېرپېښ RM) {
+  ثابت خپلکاری &LHS = *هذا;
+  خپلکاری &بهر = *هذا;
   /* Interesting observation: For special categories, finding the lowest
      common ancestor of the following layered graph gives the correct
      return category:
@@ -5007,349 +5007,349 @@ APFloat::opStatus DoubleAPFloat::multiply(const DoubleAPFloat &RHS,
        /   \
      Zero  Inf
        \   /
-       Normal
+نورمال
 
      e.g. NaN * NaN = NaN
           Zero * Inf = NaN
           Normal * Zero = Zero
           Normal * Inf = Inf
   */
-  if (LHS.getCategory() == fcNaN) {
-    Out = LHS;
-    return opOK;
+  إذا (LHS.getCategory() == fcNaN) {
+    بهر = LHS;
+    أرجع opOK;
   }
-  if (RHS.getCategory() == fcNaN) {
-    Out = RHS;
-    return opOK;
+  إذا (RHS.getCategory() == fcNaN) {
+    بهر = RHS;
+    أرجع opOK;
   }
-  if ((LHS.getCategory() == fcZero && RHS.getCategory() == fcInfinity) ||
+  إذا ((LHS.getCategory() == fcZero && RHS.getCategory() == fcInfinity) ||
       (LHS.getCategory() == fcInfinity && RHS.getCategory() == fcZero)) {
-    Out.makeNaN(false, false, nullptr);
-    return opOK;
+    بهر.makeNaN(خطأ, خطأ, تش_اشاره);
+    أرجع opOK;
   }
-  if (LHS.getCategory() == fcZero || LHS.getCategory() == fcInfinity) {
-    Out = LHS;
-    return opOK;
+  إذا (LHS.getCategory() == fcZero || LHS.getCategory() == fcInfinity) {
+    بهر = LHS;
+    أرجع opOK;
   }
-  if (RHS.getCategory() == fcZero || RHS.getCategory() == fcInfinity) {
-    Out = RHS;
-    return opOK;
+  إذا (RHS.getCategory() == fcZero || RHS.getCategory() == fcInfinity) {
+    بهر = RHS;
+    أرجع opOK;
   }
-  assert(LHS.getCategory() == fcNormal && RHS.getCategory() == fcNormal &&
+  أكد(LHS.getCategory() == fc_نورمال && RHS.getCategory() == fc_نورمال &&
          "Special cases not handled exhaustively");
 
-  int Status = opOK;
+  صحيح حالت = opOK;
   APFloat A = Floats[0], B = Floats[1], C = RHS.Floats[0], D = RHS.Floats[1];
   // t = a * c
   APFloat T = A;
-  Status |= T.multiply(C, RM);
-  if (!T.isFiniteNonZero()) {
+  حالت |= T.multiply(C, RM);
+  إذا (!T.isFiniteNonZero()) {
     Floats[0] = std::move(T);
-    Floats[1].makeZero(/* Neg = */ false);
-    return (opStatus)Status;
+    Floats[1].makeZero(/* Neg = */ خطأ);
+    أرجع (op_حالت)حالت;
   }
 
   // tau = fmsub(a, c, t), that is -fmadd(-a, c, t).
   APFloat Tau = A;
   T.changeSign();
-  Status |= Tau.fusedMultiplyAdd(C, T, RM);
+  حالت |= Tau.fused_Multiply_جمع_کړه(C, T, RM);
   T.changeSign();
   {
     // v = a * d
     APFloat V = A;
-    Status |= V.multiply(D, RM);
+    حالت |= V.multiply(D, RM);
     // w = b * c
     APFloat W = B;
-    Status |= W.multiply(C, RM);
-    Status |= V.add(W, RM);
+    حالت |= W.multiply(C, RM);
+    حالت |= V.جمع_کړه(W, RM);
     // tau += v + w
-    Status |= Tau.add(V, RM);
+    حالت |= Tau.جمع_کړه(V, RM);
   }
   // u = t + tau
   APFloat U = T;
-  Status |= U.add(Tau, RM);
+  حالت |= U.جمع_کړه(Tau, RM);
 
   Floats[0] = U;
-  if (!U.isFinite()) {
-    Floats[1].makeZero(/* Neg = */ false);
-  } else {
+  إذا (!U.isFinite()) {
+    Floats[1].makeZero(/* Neg = */ خطأ);
+  } وإلا {
     // Floats[1] = (t - u) + tau
-    Status |= T.subtract(U, RM);
-    Status |= T.add(Tau, RM);
+    حالت |= T.کمول(U, RM);
+    حالت |= T.جمع_کړه(Tau, RM);
     Floats[1] = std::move(T);
   }
-  return (opStatus)Status;
+  أرجع (op_حالت)حالت;
 }
 
-APFloat::opStatus DoubleAPFloat::divide(const DoubleAPFloat &RHS,
-                                        APFloat::roundingMode RM) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت DoubleAPFloat::divide(ثابت DoubleAPFloat &RHS,
+                                        APFloat::rounding_ډېرپېښ RM) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  APFloat Tmp(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt());
-  auto Ret = Tmp.divide(
-      APFloat(APFloatBase::semPPCDoubleDoubleLegacy, RHS.bitcastToAPInt()), RM);
-  *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  APFloat Tmp(APFloat_بنسټ::semPPCDoubleDoubleLegacy, bitcast_منزل_APInt());
+  خپلکاری Ret = Tmp.divide(
+      APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy, RHS.bitcast_منزل_APInt()), RM);
+  *هذا = DoubleAPFloat(APFloat_بنسټ::semPPCDoubleDouble, Tmp.bitcast_منزل_APInt());
+  أرجع Ret;
 }
 
-APFloat::opStatus DoubleAPFloat::remainder(const DoubleAPFloat &RHS) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت DoubleAPFloat::remainder(ثابت DoubleAPFloat &RHS) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  APFloat Tmp(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt());
-  auto Ret = Tmp.remainder(
-      APFloat(APFloatBase::semPPCDoubleDoubleLegacy, RHS.bitcastToAPInt()));
-  *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  APFloat Tmp(APFloat_بنسټ::semPPCDoubleDoubleLegacy, bitcast_منزل_APInt());
+  خپلکاری Ret = Tmp.remainder(
+      APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy, RHS.bitcast_منزل_APInt()));
+  *هذا = DoubleAPFloat(APFloat_بنسټ::semPPCDoubleDouble, Tmp.bitcast_منزل_APInt());
+  أرجع Ret;
 }
 
-APFloat::opStatus DoubleAPFloat::mod(const DoubleAPFloat &RHS) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت DoubleAPFloat::mod(ثابت DoubleAPFloat &RHS) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  APFloat Tmp(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt());
-  auto Ret = Tmp.mod(
-      APFloat(APFloatBase::semPPCDoubleDoubleLegacy, RHS.bitcastToAPInt()));
-  *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  APFloat Tmp(APFloat_بنسټ::semPPCDoubleDoubleLegacy, bitcast_منزل_APInt());
+  خپلکاری Ret = Tmp.mod(
+      APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy, RHS.bitcast_منزل_APInt()));
+  *هذا = DoubleAPFloat(APFloat_بنسټ::semPPCDoubleDouble, Tmp.bitcast_منزل_APInt());
+  أرجع Ret;
 }
 
-APFloat::opStatus
-DoubleAPFloat::fusedMultiplyAdd(const DoubleAPFloat &Multiplicand,
-                                const DoubleAPFloat &Addend,
-                                APFloat::roundingMode RM) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت
+DoubleAPFloat::fused_Multiply_جمع_کړه(ثابت DoubleAPFloat &Multiplicand,
+                                ثابت DoubleAPFloat &Addend,
+                                APFloat::rounding_ډېرپېښ RM) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  APFloat Tmp(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt());
-  auto Ret = Tmp.fusedMultiplyAdd(
-      APFloat(APFloatBase::semPPCDoubleDoubleLegacy,
-              Multiplicand.bitcastToAPInt()),
-      APFloat(APFloatBase::semPPCDoubleDoubleLegacy, Addend.bitcastToAPInt()),
+  APFloat Tmp(APFloat_بنسټ::semPPCDoubleDoubleLegacy, bitcast_منزل_APInt());
+  خپلکاری Ret = Tmp.fused_Multiply_جمع_کړه(
+      APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy,
+              Multiplicand.bitcast_منزل_APInt()),
+      APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy, Addend.bitcast_منزل_APInt()),
       RM);
-  *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  *هذا = DoubleAPFloat(APFloat_بنسټ::semPPCDoubleDouble, Tmp.bitcast_منزل_APInt());
+  أرجع Ret;
 }
 
-APFloat::opStatus DoubleAPFloat::roundToIntegral(APFloat::roundingMode RM) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت DoubleAPFloat::پړاو_منزل_Integral(APFloat::rounding_ډېرپېښ RM) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  const APFloat &Hi = getFirst();
-  const APFloat &Lo = getSecond();
+  ثابت APFloat &Hi = get_لومړی();
+  ثابت APFloat &Lo = get_دوهم();
 
   APFloat RoundedHi = Hi;
-  const opStatus HiStatus = RoundedHi.roundToIntegral(RM);
+  ثابت op_حالت Hi_حالت = RoundedHi.پړاو_منزل_Integral(RM);
 
   // We can reduce the problem to just the high part if the input:
   // 1. Represents a non-finite value.
   // 2. Has a component which is zero.
-  if (!Hi.isFiniteNonZero() || Lo.isZero()) {
+  إذا (!Hi.isFiniteNonZero() || Lo.isZero()) {
     Floats[0] = std::move(RoundedHi);
-    Floats[1].makeZero(/*Neg=*/false);
-    return HiStatus;
+    Floats[1].makeZero(/*Neg=*/خطأ);
+    أرجع Hi_حالت;
   }
 
   // Adjust `Rounded` in the direction of `TieBreaker` if `ToRound` was at a
   // halfway point.
-  auto RoundToNearestHelper = [](APFloat ToRound, APFloat Rounded,
+  خپلکاری پړاو_منزل_تر_ټولو_نږدې_Helper = [](APFloat منزل_پړاو, APFloat Rounded,
                                  APFloat TieBreaker) {
     // RoundingError tells us which direction we rounded:
     //   - RoundingError > 0: we rounded up.
     //   - RoundingError < 0: we rounded down.
     // Sterbenz' lemma ensures that RoundingError is exact.
-    const APFloat RoundingError = Rounded - ToRound;
-    if (TieBreaker.isNonZero() &&
+    ثابت APFloat RoundingError = Rounded - منزل_پړاو;
+    إذا (TieBreaker.isNonZero() &&
         TieBreaker.isNegative() != RoundingError.isNegative() &&
-        abs(RoundingError).isExactlyValue(0.5))
-      Rounded.add(
+        مطلق_قیمت(RoundingError).is_Exactly_ارزښت(0.5))
+      Rounded.جمع_کړه(
           APFloat::getOne(Rounded.getSemantics(), TieBreaker.isNegative()),
-          rmNearestTiesToEven);
-    return Rounded;
+          rm_تر_ټولو_نږدې_Ties_منزل_Even);
+    أرجع Rounded;
   };
 
   // Case 1: Hi is not an integer.
   // Special cases are for rounding modes that are sensitive to ties.
-  if (RoundedHi != Hi) {
+  إذا (RoundedHi != Hi) {
     // We need to consider the case where Hi was between two integers and the
     // rounding mode broke the tie when, in fact, Lo may have had a different
     // sign than Hi.
-    if (RM == rmNearestTiesToAway || RM == rmNearestTiesToEven)
-      RoundedHi = RoundToNearestHelper(Hi, RoundedHi, Lo);
+    إذا (RM == rm_تر_ټولو_نږدې_Ties_منزل_Away || RM == rm_تر_ټولو_نږدې_Ties_منزل_Even)
+      RoundedHi = پړاو_منزل_تر_ټولو_نږدې_Helper(Hi, RoundedHi, Lo);
 
     Floats[0] = std::move(RoundedHi);
-    Floats[1].makeZero(/*Neg=*/false);
-    return HiStatus;
+    Floats[1].makeZero(/*Neg=*/خطأ);
+    أرجع Hi_حالت;
   }
 
   // Case 2: Hi is an integer.
   // Special cases are for rounding modes which are rounding towards or away from zero.
-  RoundingMode LoRoundingMode;
-  if (RM == rmTowardZero)
+  Rounding_ډېرپېښ Lo_Rounding_ډېرپېښ;
+  إذا (RM == rmTowardZero)
     // When our input is positive, we want the Lo component rounded toward
     // negative infinity to get the smallest result magnitude. Likewise,
     // negative inputs want the Lo component rounded toward positive infinity.
-    LoRoundingMode = isNegative() ? rmTowardPositive : rmTowardNegative;
-  else
-    LoRoundingMode = RM;
+    Lo_Rounding_ډېرپېښ = isNegative() ? rm_Toward_مثبت : rmTowardNegative;
+  وإلا
+    Lo_Rounding_ډېرپېښ = RM;
 
   APFloat RoundedLo = Lo;
-  const opStatus LoStatus = RoundedLo.roundToIntegral(LoRoundingMode);
-  if (LoRoundingMode == rmNearestTiesToAway)
+  ثابت op_حالت Lo_حالت = RoundedLo.پړاو_منزل_Integral(Lo_Rounding_ډېرپېښ);
+  إذا (Lo_Rounding_ډېرپېښ == rm_تر_ټولو_نږدې_Ties_منزل_Away)
     // We need to consider the case where Lo was between two integers and the
     // rounding mode broke the tie when, in fact, Hi may have had a different
     // sign than Lo.
-    RoundedLo = RoundToNearestHelper(Lo, RoundedLo, Hi);
+    RoundedLo = پړاو_منزل_تر_ټولو_نږدې_Helper(Lo, RoundedLo, Hi);
 
   // We must ensure that the final result has no overlap between the two APFloat values.
-  std::tie(RoundedHi, RoundedLo) = fastTwoSum(RoundedHi, RoundedLo);
+  std::tie(RoundedHi, RoundedLo) = fast_Two_مجموعه(RoundedHi, RoundedLo);
 
   Floats[0] = std::move(RoundedHi);
   Floats[1] = std::move(RoundedLo);
-  return LoStatus;
+  أرجع Lo_حالت;
 }
 
-void DoubleAPFloat::changeSign() {
+فراغ DoubleAPFloat::changeSign() {
   Floats[0].changeSign();
   Floats[1].changeSign();
 }
 
-APFloat::cmpResult
-DoubleAPFloat::compareAbsoluteValue(const DoubleAPFloat &RHS) const {
+APFloat::cmp_پایله
+DoubleAPFloat::compare_Absolute_ارزښت(ثابت DoubleAPFloat &RHS) ثابت {
   // Compare absolute values of the high parts.
-  const cmpResult HiPartCmp = Floats[0].compareAbsoluteValue(RHS.Floats[0]);
-  if (HiPartCmp != cmpEqual)
-    return HiPartCmp;
+  ثابت cmp_پایله HiPartCmp = Floats[0].compare_Absolute_ارزښت(RHS.Floats[0]);
+  إذا (HiPartCmp != cmpEqual)
+    أرجع HiPartCmp;
 
   // Zero, regardless of sign, is equal.
-  if (Floats[1].isZero() && RHS.Floats[1].isZero())
-    return cmpEqual;
+  إذا (Floats[1].isZero() && RHS.Floats[1].isZero())
+    أرجع cmpEqual;
 
   // At this point, |this->Hi| == |RHS.Hi|.
   // The magnitude is |Hi+Lo| which is Hi+|Lo| if signs of Hi and Lo are the
   // same, and Hi-|Lo| if signs are different.
-  const bool ThisIsSubtractive =
+  ثابت منطقي ThisIsSubtractive =
       Floats[0].isNegative() != Floats[1].isNegative();
-  const bool RHSIsSubtractive =
+  ثابت منطقي RHSIsSubtractive =
       RHS.Floats[0].isNegative() != RHS.Floats[1].isNegative();
 
   // Case 1: The low part of 'this' is zero.
-  if (Floats[1].isZero())
+  إذا (Floats[1].isZero())
     // We are comparing |Hi| vs. |Hi| ± |RHS.Lo|.
     // If RHS is subtractive, its magnitude is smaller.
     // If RHS is additive, its magnitude is larger.
-    return RHSIsSubtractive ? cmpGreaterThan : cmpLessThan;
+    أرجع RHSIsSubtractive ? cmpGreaterThan : cmpLessThan;
 
   // Case 2: The low part of 'RHS' is zero (and we know 'this' is not).
-  if (RHS.Floats[1].isZero())
+  إذا (RHS.Floats[1].isZero())
     // We are comparing |Hi| ± |This.Lo| vs. |Hi|.
     // If 'this' is subtractive, its magnitude is smaller.
     // If 'this' is additive, its magnitude is larger.
-    return ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
+    أرجع ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
 
   // If their natures differ, the additive one is larger.
-  if (ThisIsSubtractive != RHSIsSubtractive)
-    return ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
+  إذا (ThisIsSubtractive != RHSIsSubtractive)
+    أرجع ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
 
   // Case 3: Both are additive (Hi+|Lo|) or both are subtractive (Hi-|Lo|).
   // The comparison now depends on the magnitude of the low parts.
-  const cmpResult LoPartCmp = Floats[1].compareAbsoluteValue(RHS.Floats[1]);
+  ثابت cmp_پایله LoPartCmp = Floats[1].compare_Absolute_ارزښت(RHS.Floats[1]);
 
-  if (ThisIsSubtractive) {
+  إذا (ThisIsSubtractive) {
     // Both are subtractive (Hi-|Lo|), so the comparison of |Lo| is inverted.
-    if (LoPartCmp == cmpLessThan)
-      return cmpGreaterThan;
-    if (LoPartCmp == cmpGreaterThan)
-      return cmpLessThan;
+    إذا (LoPartCmp == cmpLessThan)
+      أرجع cmpGreaterThan;
+    إذا (LoPartCmp == cmpGreaterThan)
+      أرجع cmpLessThan;
   }
 
   // If additive, the comparison of |Lo| is direct.
   // If equal, they are equal.
-  return LoPartCmp;
+  أرجع LoPartCmp;
 }
 
-APFloat::fltCategory DoubleAPFloat::getCategory() const {
-  return Floats[0].getCategory();
+APFloat::fltCategory DoubleAPFloat::getCategory() ثابت {
+  أرجع Floats[0].getCategory();
 }
 
-bool DoubleAPFloat::isNegative() const { return Floats[0].isNegative(); }
+منطقي DoubleAPFloat::isNegative() ثابت { أرجع Floats[0].isNegative(); }
 
-void DoubleAPFloat::makeInf(bool Neg) {
+فراغ DoubleAPFloat::makeInf(منطقي Neg) {
   Floats[0].makeInf(Neg);
-  Floats[1].makeZero(/* Neg = */ false);
+  Floats[1].makeZero(/* Neg = */ خطأ);
 }
 
-void DoubleAPFloat::makeZero(bool Neg) {
+فراغ DoubleAPFloat::makeZero(منطقي Neg) {
   Floats[0].makeZero(Neg);
-  Floats[1].makeZero(/* Neg = */ false);
+  Floats[1].makeZero(/* Neg = */ خطأ);
 }
 
-void DoubleAPFloat::makeLargest(bool Neg) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+فراغ DoubleAPFloat::make_تر_ټولو_لوی(منطقي Neg) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
   Floats[0] =
-      APFloat(APFloatBase::semIEEEdouble, APInt(64, 0x7fefffffffffffffull));
+      APFloat(APFloat_بنسټ::semIEEEdouble, APInt(64, 0x7fefffffffffffffull));
   Floats[1] =
-      APFloat(APFloatBase::semIEEEdouble, APInt(64, 0x7c8ffffffffffffeull));
-  if (Neg)
+      APFloat(APFloat_بنسټ::semIEEEdouble, APInt(64, 0x7c8ffffffffffffeull));
+  إذا (Neg)
     changeSign();
 }
 
-void DoubleAPFloat::makeSmallest(bool Neg) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+فراغ DoubleAPFloat::make_تر_ټولو_کوچنی(منطقي Neg) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  Floats[0].makeSmallest(Neg);
-  Floats[1].makeZero(/* Neg = */ false);
+  Floats[0].make_تر_ټولو_کوچنی(Neg);
+  Floats[1].makeZero(/* Neg = */ خطأ);
 }
 
-void DoubleAPFloat::makeSmallestNormalized(bool Neg) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+فراغ DoubleAPFloat::make_تر_ټولو_کوچنی_Normalized(منطقي Neg) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
   Floats[0] =
-      APFloat(APFloatBase::semIEEEdouble, APInt(64, 0x0360000000000000ull));
-  if (Neg)
+      APFloat(APFloat_بنسټ::semIEEEdouble, APInt(64, 0x0360000000000000ull));
+  إذا (Neg)
     Floats[0].changeSign();
-  Floats[1].makeZero(/* Neg = */ false);
+  Floats[1].makeZero(/* Neg = */ خطأ);
 }
 
-void DoubleAPFloat::makeNaN(bool SNaN, bool Neg, const APInt *fill) {
+فراغ DoubleAPFloat::makeNaN(منطقي SNaN, منطقي Neg, ثابت APInt *fill) {
   Floats[0].makeNaN(SNaN, Neg, fill);
-  Floats[1].makeZero(/* Neg = */ false);
+  Floats[1].makeZero(/* Neg = */ خطأ);
 }
 
-APFloat::cmpResult DoubleAPFloat::compare(const DoubleAPFloat &RHS) const {
-  auto Result = Floats[0].compare(RHS.Floats[0]);
+APFloat::cmp_پایله DoubleAPFloat::compare(ثابت DoubleAPFloat &RHS) ثابت {
+  خپلکاری پایله = Floats[0].compare(RHS.Floats[0]);
   // |Float[0]| > |Float[1]|
-  if (Result == APFloat::cmpEqual)
-    return Floats[1].compare(RHS.Floats[1]);
-  return Result;
+  إذا (پایله == APFloat::cmpEqual)
+    أرجع Floats[1].compare(RHS.Floats[1]);
+  أرجع پایله;
 }
 
-bool DoubleAPFloat::bitwiseIsEqual(const DoubleAPFloat &RHS) const {
-  return Floats[0].bitwiseIsEqual(RHS.Floats[0]) &&
+منطقي DoubleAPFloat::bitwiseIsEqual(ثابت DoubleAPFloat &RHS) ثابت {
+  أرجع Floats[0].bitwiseIsEqual(RHS.Floats[0]) &&
          Floats[1].bitwiseIsEqual(RHS.Floats[1]);
 }
 
-hash_code hash_value(const DoubleAPFloat &Arg) {
-  if (Arg.Floats)
-    return hash_combine(hash_value(Arg.Floats[0]), hash_value(Arg.Floats[1]));
-  return hash_combine(Arg.Semantics);
+hash_کوډ hash_ارزښت(ثابت DoubleAPFloat &Arg) {
+  إذا (Arg.Floats)
+    أرجع hash_combine(hash_ارزښت(Arg.Floats[0]), hash_ارزښت(Arg.Floats[1]));
+  أرجع hash_combine(Arg.Semantics);
 }
 
-APInt DoubleAPFloat::bitcastToAPInt() const {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APInt DoubleAPFloat::bitcast_منزل_APInt() ثابت {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  uint64_t Data[] = {
-      Floats[0].bitcastToAPInt().getRawData()[0],
-      Floats[1].bitcastToAPInt().getRawData()[0],
+  uint64_t معلومات_2[] = {
+      Floats[0].bitcast_منزل_APInt().get_Raw_معلومات()[0],
+      Floats[1].bitcast_منزل_APInt().get_Raw_معلومات()[0],
   };
-  return APInt(128, Data);
+  أرجع APInt(128, معلومات_2);
 }
 
-Expected<APFloat::opStatus> DoubleAPFloat::convertFromString(StringRef S,
-                                                             roundingMode RM) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+Expected<APFloat::op_حالت> DoubleAPFloat::convertFromString(StringRef S,
+                                                             rounding_ډېرپېښ RM) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  APFloat Tmp(APFloatBase::semPPCDoubleDoubleLegacy);
-  auto Ret = Tmp.convertFromString(S, RM);
-  *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  APFloat Tmp(APFloat_بنسټ::semPPCDoubleDoubleLegacy);
+  خپلکاری Ret = Tmp.convertFromString(S, RM);
+  *هذا = DoubleAPFloat(APFloat_بنسټ::semPPCDoubleDouble, Tmp.bitcast_منزل_APInt());
+  أرجع Ret;
 }
 
 // The double-double lattice of values corresponds to numbers which obey:
@@ -5358,168 +5358,168 @@ Expected<APFloat::opStatus> DoubleAPFloat::convertFromString(StringRef S,
 //
 // nextUp must choose the smallest output > input that follows these rules.
 // nexDown must choose the largest output < input that follows these rules.
-APFloat::opStatus DoubleAPFloat::next(bool nextDown) {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت DoubleAPFloat::بل(منطقي بل_ښکته) {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
   // nextDown(x) = -nextUp(-x)
-  if (nextDown) {
+  إذا (بل_ښکته) {
     changeSign();
-    APFloat::opStatus Result = next(/*nextDown=*/false);
+    APFloat::op_حالت پایله = بل(/*nextDown=*/خطأ);
     changeSign();
-    return Result;
+    أرجع پایله;
   }
-  switch (getCategory()) {
-  case fcInfinity:
+  بدل (getCategory()) {
+  حالة fcInfinity:
     // nextUp(+inf) = +inf
     // nextUp(-inf) = -getLargest()
-    if (isNegative())
-      makeLargest(true);
-    return opOK;
+    إذا (isNegative())
+      make_تر_ټولو_لوی(ریښتیا);
+    أرجع opOK;
 
-  case fcNaN:
+  حالة fcNaN:
     // IEEE-754R 2008 6.2 Par 2: nextUp(sNaN) = qNaN. Set Invalid flag.
     // IEEE-754R 2008 6.2: nextUp(qNaN) = qNaN. Must be identity so we do not
     //                     change the payload.
-    if (getFirst().isSignaling()) {
+    إذا (get_لومړی().isSignaling()) {
       // For consistency, propagate the sign of the sNaN to the qNaN.
-      makeNaN(false, isNegative(), nullptr);
-      return opInvalidOp;
+      makeNaN(خطأ, isNegative(), تش_اشاره);
+      أرجع opInvalidOp;
     }
-    return opOK;
+    أرجع opOK;
 
-  case fcZero:
+  حالة fcZero:
     // nextUp(pm 0) = +getSmallest()
-    makeSmallest(false);
-    return opOK;
+    make_تر_ټولو_کوچنی(خطأ);
+    أرجع opOK;
 
-  case fcNormal:
-    break;
+  حالة fc_نورمال:
+    اكسر;
   }
 
-  const APFloat &HiOld = getFirst();
-  const APFloat &LoOld = getSecond();
+  ثابت APFloat &HiOld = get_لومړی();
+  ثابت APFloat &LoOld = get_دوهم();
 
-  APFloat NextLo = LoOld;
-  NextLo.next(/*nextDown=*/false);
+  APFloat بل_Lo = LoOld;
+  بل_Lo.بل(/*nextDown=*/خطأ);
 
   // We want to admit values where:
   // 1. abs(Lo) <= ulp(Hi)/2
   // 2. Hi == RTNE(Hi + lo)
-  auto InLattice = [](const APFloat &Hi, const APFloat &Lo) {
-    return Hi + Lo == Hi;
+  خپلکاری دننه_Lattice = [](ثابت APFloat &Hi, ثابت APFloat &Lo) {
+    أرجع Hi + Lo == Hi;
   };
 
   // Check if (HiOld, nextUp(LoOld) is in the lattice.
-  if (InLattice(HiOld, NextLo)) {
+  إذا (دننه_Lattice(HiOld, بل_Lo)) {
     // Yes, the result is (HiOld, nextUp(LoOld)).
-    Floats[1] = std::move(NextLo);
+    Floats[1] = std::move(بل_Lo);
 
     // TODO: Because we currently rely on semPPCDoubleDoubleLegacy, our maximum
     // value is defined to have exactly 106 bits of precision. This limitation
     // results in semPPCDoubleDouble being unable to reach its maximum canonical
     // value.
-    DoubleAPFloat Largest{*Semantics, uninitialized};
-    Largest.makeLargest(/*Neg=*/false);
-    if (compare(Largest) == cmpGreaterThan)
-      makeInf(/*Neg=*/false);
+    DoubleAPFloat تر_ټولو_لوی{*Semantics, uninitialized};
+    تر_ټولو_لوی.make_تر_ټولو_لوی(/*Neg=*/خطأ);
+    إذا (compare(تر_ټولو_لوی) == cmpGreaterThan)
+      makeInf(/*Neg=*/خطأ);
 
-    return opOK;
+    أرجع opOK;
   }
 
   // Now we need to handle the cases where (HiOld, nextUp(LoOld)) is not the
   // correct result. We know the new hi component will be nextUp(HiOld) but our
   // lattice rules make it a little ambiguous what the correct NextLo must be.
-  APFloat NextHi = HiOld;
-  NextHi.next(/*nextDown=*/false);
+  APFloat بل_Hi = HiOld;
+  بل_Hi.بل(/*nextDown=*/خطأ);
 
   // nextUp(getLargest()) == INFINITY
-  if (NextHi.isInfinity()) {
-    makeInf(/*Neg=*/false);
-    return opOK;
+  إذا (بل_Hi.isInfinity()) {
+    makeInf(/*Neg=*/خطأ);
+    أرجع opOK;
   }
 
   // IEEE 754-2019 5.3.1:
   // "If x is the negative number of least magnitude in x's format, nextUp(x) is
   // -0."
-  if (NextHi.isZero()) {
-    makeZero(/*Neg=*/true);
-    return opOK;
+  إذا (بل_Hi.isZero()) {
+    makeZero(/*Neg=*/ریښتیا);
+    أرجع opOK;
   }
 
   // abs(NextLo) must be <= ulp(NextHi)/2. We want NextLo to be as close to
   // negative infinity as possible.
-  NextLo = neg(scalbn(harrisonUlp(NextHi), -1, rmTowardZero));
-  if (!InLattice(NextHi, NextLo))
+  بل_Lo = neg(scalbn(harrisonUlp(بل_Hi), -1, rmTowardZero));
+  إذا (!دننه_Lattice(بل_Hi, بل_Lo))
     // RTNE may mean that Lo must be < ulp(NextHi) / 2 so we bump NextLo.
-    NextLo.next(/*nextDown=*/false);
+    بل_Lo.بل(/*nextDown=*/خطأ);
 
-  Floats[0] = std::move(NextHi);
-  Floats[1] = std::move(NextLo);
+  Floats[0] = std::move(بل_Hi);
+  Floats[1] = std::move(بل_Lo);
 
-  return opOK;
+  أرجع opOK;
 }
 
-APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
-    MutableArrayRef<integerPart> Input, unsigned int Width, bool IsSigned,
-    roundingMode RM, bool *IsExact) const {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+APFloat::op_حالت DoubleAPFloat::convert_منزل_Sign_Extended_Integer(
+    MutableArrayRef<integerPart> ننوت, بینښه صحيح پلنوالی, منطقي IsSigned,
+    rounding_ډېرپېښ RM, منطقي *IsExact) ثابت {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
 
   // If Hi is not finite, or Lo is zero, the value is entirely represented
   // by Hi. Delegate to the simpler single-APFloat conversion.
-  if (!getFirst().isFiniteNonZero() || getSecond().isZero())
-    return getFirst().convertToInteger(Input, Width, IsSigned, RM, IsExact);
+  إذا (!get_لومړی().isFiniteNonZero() || get_دوهم().isZero())
+    أرجع get_لومړی().convert_منزل_Integer(ننوت, پلنوالی, IsSigned, RM, IsExact);
 
   // First, round the full double-double value to an integral value. This
   // simplifies the rest of the function, as we no longer need to consider
   // fractional parts.
-  *IsExact = false;
-  DoubleAPFloat Integral = *this;
-  const opStatus RoundStatus = Integral.roundToIntegral(RM);
-  if (RoundStatus == opInvalidOp)
-    return opInvalidOp;
-  const APFloat &IntegralHi = Integral.getFirst();
-  const APFloat &IntegralLo = Integral.getSecond();
+  *IsExact = خطأ;
+  DoubleAPFloat Integral = *هذا;
+  ثابت op_حالت پړاو_حالت = Integral.پړاو_منزل_Integral(RM);
+  إذا (پړاو_حالت == opInvalidOp)
+    أرجع opInvalidOp;
+  ثابت APFloat &IntegralHi = Integral.get_لومړی();
+  ثابت APFloat &IntegralLo = Integral.get_دوهم();
 
   // If rounding results in either component being zero, the sum is trivial.
   // Delegate to the simpler single-APFloat conversion.
-  bool HiIsExact;
-  if (IntegralHi.isZero() || IntegralLo.isZero()) {
-    const opStatus HiStatus =
-        IntegralHi.convertToInteger(Input, Width, IsSigned, RM, &HiIsExact);
+  منطقي HiIsExact;
+  إذا (IntegralHi.isZero() || IntegralLo.isZero()) {
+    ثابت op_حالت Hi_حالت =
+        IntegralHi.convert_منزل_Integer(ننوت, پلنوالی, IsSigned, RM, &HiIsExact);
     // The conversion from an integer-valued float to an APInt may fail if the
     // result would be out of range.  Regardless, taking this path is only
     // possible if rounding occurred during the initial `roundToIntegral`.
-    return HiStatus == opOK ? opInexact : HiStatus;
+    أرجع Hi_حالت == opOK ? opInexact : Hi_حالت;
   }
 
   // A negative number cannot be represented by an unsigned integer.
   // Since a double-double is canonical, if Hi is negative, the sum is negative.
-  if (!IsSigned && IntegralHi.isNegative())
-    return opInvalidOp;
+  إذا (!IsSigned && IntegralHi.isNegative())
+    أرجع opInvalidOp;
 
   // Handle the special boundary case where |Hi| is exactly the power of two
   // that marks the edge of the integer's range (e.g., 2^63 for int64_t). In
   // this situation, Hi itself won't fit, but the sum Hi + Lo might.
   // `PositiveOverflowWidth` is the bit number for this boundary (N-1 for
   // signed, N for unsigned).
-  bool LoIsExact;
-  const int HiExactLog2 = IntegralHi.getExactLog2Abs();
-  const unsigned PositiveOverflowWidth = IsSigned ? Width - 1 : Width;
-  if (HiExactLog2 >= 0 &&
-      static_cast<unsigned>(HiExactLog2) == PositiveOverflowWidth) {
+  منطقي LoIsExact;
+  ثابت صحيح HiExactLog2 = IntegralHi.getExactLog2Abs();
+  ثابت بینښه مثبت_ډکېدنه_پلنوالی = IsSigned ? پلنوالی - 1 : پلنوالی;
+  إذا (HiExactLog2 >= 0 &&
+      static_cast<بینښه>(HiExactLog2) == مثبت_ډکېدنه_پلنوالی) {
     // If Hi and Lo have the same sign, |Hi + Lo| > |Hi|, so the sum is
     // guaranteed to overflow. E.g., for uint128_t, (2^128, 1) overflows.
-    if (IntegralHi.isNegative() == IntegralLo.isNegative())
-      return opInvalidOp;
+    إذا (IntegralHi.isNegative() == IntegralLo.isNegative())
+      أرجع opInvalidOp;
 
     // If the signs differ, the sum will fit. We can compute the result using
     // properties of two's complement arithmetic without a wide intermediate
     // integer. E.g., for uint128_t, (2^128, -1) should be 2^128 - 1.
-    const opStatus LoStatus = IntegralLo.convertToInteger(
-        Input, Width, /*IsSigned=*/true, RM, &LoIsExact);
-    if (LoStatus == opInvalidOp)
-      return opInvalidOp;
+    ثابت op_حالت Lo_حالت = IntegralLo.convert_منزل_Integer(
+        ننوت, پلنوالی, /*IsSigned=*/ریښتیا, RM, &LoIsExact);
+    إذا (Lo_حالت == opInvalidOp)
+      أرجع opInvalidOp;
 
     // Adjust the bit pattern of Lo to account for Hi's value:
     //  - For unsigned (Hi=2^Width): `2^Width + Lo` in `Width`-bit
@@ -5528,163 +5528,163 @@ APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
     //  - For signed (Hi=2^(Width-1)): The sum `2^(Width-1) + Lo` (where Lo<0)
     //    can be computed by taking the two's complement pattern for `Lo` and
     //    clearing the sign bit.
-    if (IsSigned && !IntegralHi.isNegative())
-      APInt::tcClearBit(Input.data(), PositiveOverflowWidth);
-    *IsExact = RoundStatus == opOK;
-    return RoundStatus;
+    إذا (IsSigned && !IntegralHi.isNegative())
+      APInt::tc_Clear_بټ(ننوت.معلومات(), مثبت_ډکېدنه_پلنوالی);
+    *IsExact = پړاو_حالت == opOK;
+    أرجع پړاو_حالت;
   }
 
   // Convert Hi into an integer.  This may not fit but that is OK: we know that
   // Hi + Lo would not fit either in this situation.
-  const opStatus HiStatus = IntegralHi.convertToInteger(
-      Input, Width, IsSigned, rmTowardZero, &HiIsExact);
-  if (HiStatus == opInvalidOp)
-    return HiStatus;
+  ثابت op_حالت Hi_حالت = IntegralHi.convert_منزل_Integer(
+      ننوت, پلنوالی, IsSigned, rmTowardZero, &HiIsExact);
+  إذا (Hi_حالت == opInvalidOp)
+    أرجع Hi_حالت;
 
   // Convert Lo into a temporary integer of the same width.
-  APSInt LoResult{Width, /*isUnsigned=*/!IsSigned};
-  const opStatus LoStatus =
-      IntegralLo.convertToInteger(LoResult, rmTowardZero, &LoIsExact);
-  if (LoStatus == opInvalidOp)
-    return LoStatus;
+  APSInt Lo_پایله{پلنوالی, /*isUnsigned=*/!IsSigned};
+  ثابت op_حالت Lo_حالت =
+      IntegralLo.convert_منزل_Integer(Lo_پایله, rmTowardZero, &LoIsExact);
+  إذا (Lo_حالت == opInvalidOp)
+    أرجع Lo_حالت;
 
   // Add Lo to Hi. This addition is guaranteed not to overflow because of the
   // double-double canonicalization rule (`|Lo| <= ulp(Hi)/2`). The only case
   // where the sum could cross the integer type's boundary is when Hi is a
   // power of two, which is handled by the special case block above.
-  APInt::tcAdd(Input.data(), LoResult.getRawData(), /*carry=*/0, Input.size());
+  APInt::tc_جمع_کړه(ننوت.معلومات(), Lo_پایله.get_Raw_معلومات(), /*carry=*/0, ننوت.اندازه_2());
 
-  *IsExact = RoundStatus == opOK;
-  return RoundStatus;
+  *IsExact = پړاو_حالت == opOK;
+  أرجع پړاو_حالت;
 }
 
-APFloat::opStatus
-DoubleAPFloat::convertToInteger(MutableArrayRef<integerPart> Input,
-                                unsigned int Width, bool IsSigned,
-                                roundingMode RM, bool *IsExact) const {
-  opStatus FS =
-      convertToSignExtendedInteger(Input, Width, IsSigned, RM, IsExact);
+APFloat::op_حالت
+DoubleAPFloat::convert_منزل_Integer(MutableArrayRef<integerPart> ننوت,
+                                بینښه صحيح پلنوالی, منطقي IsSigned,
+                                rounding_ډېرپېښ RM, منطقي *IsExact) ثابت {
+  op_حالت FS =
+      convert_منزل_Sign_Extended_Integer(ننوت, پلنوالی, IsSigned, RM, IsExact);
 
-  if (FS == opInvalidOp) {
-    const unsigned DstPartsCount = partCountForBits(Width);
-    assert(DstPartsCount <= Input.size() && "Integer too big");
+  إذا (FS == opInvalidOp) {
+    ثابت بینښه Dst_Parts_شمېر = part_شمېر_For_بټونه(پلنوالی);
+    أكد(Dst_Parts_شمېر <= ننوت.اندازه_2() && "Integer too big");
 
-    unsigned Bits;
-    if (getCategory() == fcNaN)
-      Bits = 0;
-    else if (isNegative())
-      Bits = IsSigned;
-    else
-      Bits = Width - IsSigned;
+    بینښه بټونه_2;
+    إذا (getCategory() == fcNaN)
+      بټونه_2 = 0;
+    وإلا إذا (isNegative())
+      بټونه_2 = IsSigned;
+    وإلا
+      بټونه_2 = پلنوالی - IsSigned;
 
-    tcSetLeastSignificantBits(Input.data(), DstPartsCount, Bits);
-    if (isNegative() && IsSigned)
-      APInt::tcShiftLeft(Input.data(), DstPartsCount, Width - 1);
+    tc_سېټ_لږترلږه_Significant_بټونه(ننوت.معلومات(), Dst_Parts_شمېر, بټونه_2);
+    إذا (isNegative() && IsSigned)
+      APInt::tc_ښويدنه_کیڼ(ننوت.معلومات(), Dst_Parts_شمېر, پلنوالی - 1);
   }
 
-  return FS;
+  أرجع FS;
 }
 
-APFloat::opStatus DoubleAPFloat::handleOverflow(roundingMode RM) {
-  switch (RM) {
-  case APFloat::rmTowardZero:
-    makeLargest(/*Neg=*/isNegative());
-    break;
-  case APFloat::rmTowardNegative:
-    if (isNegative())
-      makeInf(/*Neg=*/true);
-    else
-      makeLargest(/*Neg=*/false);
-    break;
-  case APFloat::rmTowardPositive:
-    if (isNegative())
-      makeLargest(/*Neg=*/true);
-    else
-      makeInf(/*Neg=*/false);
-    break;
-  case APFloat::rmNearestTiesToAway:
-  case APFloat::rmNearestTiesToEven:
+APFloat::op_حالت DoubleAPFloat::handle_ډکېدنه(rounding_ډېرپېښ RM) {
+  بدل (RM) {
+  حالة APFloat::rmTowardZero:
+    make_تر_ټولو_لوی(/*Neg=*/isNegative());
+    اكسر;
+  حالة APFloat::rmTowardNegative:
+    إذا (isNegative())
+      makeInf(/*Neg=*/ریښتیا);
+    وإلا
+      make_تر_ټولو_لوی(/*Neg=*/خطأ);
+    اكسر;
+  حالة APFloat::rm_Toward_مثبت:
+    إذا (isNegative())
+      make_تر_ټولو_لوی(/*Neg=*/ریښتیا);
+    وإلا
+      makeInf(/*Neg=*/خطأ);
+    اكسر;
+  حالة APFloat::rm_تر_ټولو_نږدې_Ties_منزل_Away:
+  حالة APFloat::rm_تر_ټولو_نږدې_Ties_منزل_Even:
     makeInf(/*Neg=*/isNegative());
-    break;
-  default:
+    اكسر;
+  افتراضي:
     llvm_unreachable("Invalid rounding mode found");
   }
-  opStatus S = opInexact;
-  if (!getFirst().isFinite())
-    S = static_cast<opStatus>(S | opOverflow);
-  return S;
+  op_حالت S = opInexact;
+  إذا (!get_لومړی().isFinite())
+    S = static_cast<op_حالت>(S | op_ډکېدنه);
+  أرجع S;
 }
 
-APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
-    const integerPart *Src, unsigned int SrcCount, roundingMode RM) {
+APFloat::op_حالت DoubleAPFloat::convertFromUnsignedParts(
+    ثابت integerPart *Src, بینښه صحيح Src_شمېر, rounding_ډېرپېښ RM) {
   // Find the most significant bit of the source integer. APInt::tcMSB returns
   // UINT_MAX for a zero value.
-  const unsigned SrcMSB = APInt::tcMSB(Src, SrcCount);
-  if (SrcMSB == UINT_MAX) {
+  ثابت بینښه SrcMSB = APInt::tcMSB(Src, Src_شمېر);
+  إذا (SrcMSB == UINT_MAX) {
     // The source integer is 0.
-    makeZero(/*Neg=*/false);
-    return opOK;
+    makeZero(/*Neg=*/خطأ);
+    أرجع opOK;
   }
 
   // Create a minimally-sized APInt to represent the source value.
-  const unsigned SrcBitWidth = SrcMSB + 1;
-  APSInt SrcInt{APInt{/*numBits=*/SrcBitWidth, ArrayRef(Src, SrcCount)},
-                /*isUnsigned=*/true};
+  ثابت بینښه Src_بټ_پلنوالی = SrcMSB + 1;
+  APSInt SrcInt{APInt{/*numBits=*/Src_بټ_پلنوالی, ArrayRef(Src, Src_شمېر)},
+                /*isUnsigned=*/ریښتیا};
 
   // Stage 1: Initial Approximation.
   // Convert the source integer SrcInt to the Hi part of the DoubleAPFloat.
   // We use round-to-nearest because it minimizes the initial error, which is
   // crucial for the subsequent steps.
-  APFloat Hi{getFirst().getSemantics()};
-  Hi.convertFromAPInt(SrcInt, /*IsSigned=*/false, rmNearestTiesToEven);
+  APFloat Hi{get_لومړی().getSemantics()};
+  Hi.convertFromAPInt(SrcInt, /*IsSigned=*/خطأ, rm_تر_ټولو_نږدې_Ties_منزل_Even);
 
   // If the first approximation already overflows, the number is too large.
   // NOTE: The underlying semantics are *more* conservative when choosing to
   // overflow because their notion of ULP is much larger. As such, it is always
   // safe to overflow at the DoubleAPFloat level if the APFloat overflows.
-  if (!Hi.isFinite())
-    return handleOverflow(RM);
+  إذا (!Hi.isFinite())
+    أرجع handle_ډکېدنه(RM);
 
   // Stage 2: Exact Error Calculation.
   // Calculate the exact error of the first approximation: Error = SrcInt - Hi.
   // This is done by converting Hi back to an integer and subtracting it from
   // the original source.
-  bool HiAsIntIsExact;
+  منطقي HiAsIntIsExact;
   // Create an integer representation of Hi. Its width is determined by the
   // exponent of Hi, ensuring it's just large enough. This width can exceed
   // SrcBitWidth if the conversion to Hi rounded up to a power of two.
   // accurately when converted back to an integer.
-  APSInt HiAsInt{static_cast<uint32_t>(ilogb(Hi) + 1), /*isUnsigned=*/true};
-  Hi.convertToInteger(HiAsInt, rmNearestTiesToEven, &HiAsIntIsExact);
-  const APInt Error = SrcInt.zext(HiAsInt.getBitWidth()) - HiAsInt;
+  APSInt HiAsInt{static_cast<uint32_t>(ilogb(Hi) + 1), /*isUnsigned=*/ریښتیا};
+  Hi.convert_منزل_Integer(HiAsInt, rm_تر_ټولو_نږدې_Ties_منزل_Even, &HiAsIntIsExact);
+  ثابت APInt Error = SrcInt.zext(HiAsInt.get_بټ_پلنوالی()) - HiAsInt;
 
   // Stage 3: Error Approximation and Rounding.
   // Convert the integer error into the Lo part of the DoubleAPFloat. This step
   // captures the remainder of the original number. The rounding mode for this
   // conversion (LoRM) may need to be adjusted from the user-requested RM to
   // ensure the final sum (Hi + Lo) rounds correctly.
-  roundingMode LoRM = RM;
+  rounding_ډېرپېښ LoRM = RM;
   // Adjustments are only necessary when the initial approximation Hi was an
   // overestimate, making the Error negative.
-  if (Error.isNegative()) {
-    if (RM == rmNearestTiesToAway) {
+  إذا (Error.isNegative()) {
+    إذا (RM == rm_تر_ټولو_نږدې_Ties_منزل_Away) {
       // For rmNearestTiesToAway, a tie should round away from zero. Since
       // SrcInt is positive, this means rounding toward +infinity.
       // A standard conversion of a negative Error would round ties toward
       // -infinity, causing the final sum Hi + Lo to be smaller. To
       // counteract this, we detect the tie case and override the rounding
       // mode for Lo to rmTowardPositive.
-      const unsigned ErrorActiveBits = Error.getSignificantBits() - 1;
-      const unsigned LoPrecision = getSecond().getSemantics().precision;
-      if (ErrorActiveBits > LoPrecision) {
-        const unsigned RoundingBoundary = ErrorActiveBits - LoPrecision;
+      ثابت بینښه Error_فعال_بټونه = Error.get_Significant_بټونه() - 1;
+      ثابت بینښه LoPrecision = get_دوهم().getSemantics().precision;
+      إذا (Error_فعال_بټونه > LoPrecision) {
+        ثابت بینښه RoundingBoundary = Error_فعال_بټونه - LoPrecision;
         // A tie occurs when the bits to be truncated are of the form 100...0.
         // This is detected by checking if the number of trailing zeros is
         // exactly one less than the number of bits being truncated.
-        if (Error.countTrailingZeros() == RoundingBoundary - 1)
-          LoRM = rmTowardPositive;
+        إذا (Error.شمېر_Trailing_Zeros() == RoundingBoundary - 1)
+          LoRM = rm_Toward_مثبت;
       }
-    } else if (RM == rmTowardZero) {
+    } وإلا إذا (RM == rmTowardZero) {
       // For rmTowardZero, the final positive result must be truncated (rounded
       // down). When Hi is an overestimate, Error is negative. A standard
       // rmTowardZero conversion of Error would make it *less* negative,
@@ -5694,146 +5694,146 @@ APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
     }
   }
 
-  APFloat Lo{getSecond().getSemantics()};
-  opStatus Status = Lo.convertFromAPInt(Error, /*IsSigned=*/true, LoRM);
+  APFloat Lo{get_دوهم().getSemantics()};
+  op_حالت حالت = Lo.convertFromAPInt(Error, /*IsSigned=*/ریښتیا, LoRM);
 
   // Renormalize the pair (Hi, Lo) into a canonical DoubleAPFloat form where the
   // components do not overlap. fastTwoSum performs this operation.
-  std::tie(Hi, Lo) = fastTwoSum(Hi, Lo);
+  std::tie(Hi, Lo) = fast_Two_مجموعه(Hi, Lo);
   Floats[0] = std::move(Hi);
   Floats[1] = std::move(Lo);
 
   // A final check for overflow is needed because fastTwoSum can cause a
   // carry-out from Lo that pushes Hi to infinity.
-  if (!getFirst().isFinite())
-    return handleOverflow(RM);
+  إذا (!get_لومړی().isFinite())
+    أرجع handle_ډکېدنه(RM);
 
   // The largest DoubleAPFloat must be canonical. Values which are larger are
   // not canonical and are equivalent to overflow.
-  if (getFirst().isFiniteNonZero() && Floats[0].isLargest()) {
-    DoubleAPFloat Largest{*Semantics};
-    Largest.makeLargest(/*Neg=*/false);
-    if (compare(Largest) == APFloat::cmpGreaterThan)
-      return handleOverflow(RM);
+  إذا (get_لومړی().isFiniteNonZero() && Floats[0].is_تر_ټولو_لوی()) {
+    DoubleAPFloat تر_ټولو_لوی{*Semantics};
+    تر_ټولو_لوی.make_تر_ټولو_لوی(/*Neg=*/خطأ);
+    إذا (compare(تر_ټولو_لوی) == APFloat::cmpGreaterThan)
+      أرجع handle_ډکېدنه(RM);
   }
 
   // The final status of the operation is determined by the conversion of the
   // error term. If Lo could represent Error exactly, the entire conversion
   // is exact. Otherwise, it's inexact.
-  return Status;
+  أرجع حالت;
 }
 
-APFloat::opStatus DoubleAPFloat::convertFromAPInt(const APInt &Input,
-                                                  bool IsSigned,
-                                                  roundingMode RM) {
-  const bool NegateInput = IsSigned && Input.isNegative();
-  APInt API = Input;
-  if (NegateInput)
+APFloat::op_حالت DoubleAPFloat::convertFromAPInt(ثابت APInt &ننوت,
+                                                  منطقي IsSigned,
+                                                  rounding_ډېرپېښ RM) {
+  ثابت منطقي Negate_ننوت = IsSigned && ننوت.isNegative();
+  APInt API = ننوت;
+  إذا (Negate_ننوت)
     API.negate();
 
-  const APFloat::opStatus Status =
-      convertFromUnsignedParts(API.getRawData(), API.getNumWords(), RM);
-  if (NegateInput)
+  ثابت APFloat::op_حالت حالت =
+      convertFromUnsignedParts(API.get_Raw_معلومات(), API.get_عدد_ټکي(), RM);
+  إذا (Negate_ننوت)
     changeSign();
-  return Status;
+  أرجع حالت;
 }
 
-unsigned int DoubleAPFloat::convertToHexString(char *DST,
-                                               unsigned int HexDigits,
-                                               bool UpperCase,
-                                               roundingMode RM) const {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+بینښه صحيح DoubleAPFloat::convert_منزل_Hex_String(حرف *DST,
+                                               بینښه صحيح HexDigits,
+                                               منطقي پاسنی_Case_2,
+                                               rounding_ډېرپېښ RM) ثابت {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  return APFloat(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt())
-      .convertToHexString(DST, HexDigits, UpperCase, RM);
+  أرجع APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy, bitcast_منزل_APInt())
+      .convert_منزل_Hex_String(DST, HexDigits, پاسنی_Case_2, RM);
 }
 
-bool DoubleAPFloat::isDenormal() const {
-  return getCategory() == fcNormal &&
+منطقي DoubleAPFloat::isDenormal() ثابت {
+  أرجع getCategory() == fc_نورمال &&
          (Floats[0].isDenormal() || Floats[1].isDenormal() ||
           // (double)(Hi + Lo) == Hi defines a normal number.
           Floats[0] != Floats[0] + Floats[1]);
 }
 
-bool DoubleAPFloat::isSmallest() const {
-  if (getCategory() != fcNormal)
-    return false;
-  DoubleAPFloat Tmp(*this);
-  Tmp.makeSmallest(this->isNegative());
-  return Tmp.compare(*this) == cmpEqual;
+منطقي DoubleAPFloat::is_تر_ټولو_کوچنی() ثابت {
+  إذا (getCategory() != fc_نورمال)
+    أرجع خطأ;
+  DoubleAPFloat Tmp(*هذا);
+  Tmp.make_تر_ټولو_کوچنی(هذا->isNegative());
+  أرجع Tmp.compare(*هذا) == cmpEqual;
 }
 
-bool DoubleAPFloat::isSmallestNormalized() const {
-  if (getCategory() != fcNormal)
-    return false;
+منطقي DoubleAPFloat::is_تر_ټولو_کوچنی_Normalized() ثابت {
+  إذا (getCategory() != fc_نورمال)
+    أرجع خطأ;
 
-  DoubleAPFloat Tmp(*this);
-  Tmp.makeSmallestNormalized(this->isNegative());
-  return Tmp.compare(*this) == cmpEqual;
+  DoubleAPFloat Tmp(*هذا);
+  Tmp.make_تر_ټولو_کوچنی_Normalized(هذا->isNegative());
+  أرجع Tmp.compare(*هذا) == cmpEqual;
 }
 
-bool DoubleAPFloat::isLargest() const {
-  if (getCategory() != fcNormal)
-    return false;
-  DoubleAPFloat Tmp(*this);
-  Tmp.makeLargest(this->isNegative());
-  return Tmp.compare(*this) == cmpEqual;
+منطقي DoubleAPFloat::is_تر_ټولو_لوی() ثابت {
+  إذا (getCategory() != fc_نورمال)
+    أرجع خطأ;
+  DoubleAPFloat Tmp(*هذا);
+  Tmp.make_تر_ټولو_لوی(هذا->isNegative());
+  أرجع Tmp.compare(*هذا) == cmpEqual;
 }
 
-bool DoubleAPFloat::isInteger() const {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+منطقي DoubleAPFloat::isInteger() ثابت {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  return Floats[0].isInteger() && Floats[1].isInteger();
+  أرجع Floats[0].isInteger() && Floats[1].isInteger();
 }
 
-void DoubleAPFloat::toString(SmallVectorImpl<char> &Str,
-                             unsigned FormatPrecision,
-                             unsigned FormatMaxPadding,
-                             bool TruncateZero) const {
-  assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
+فراغ DoubleAPFloat::منزل_String(Small_ویکټور_Impl<حرف> &Str,
+                             بینښه FormatPrecision,
+                             بینښه FormatMaxPadding,
+                             منطقي TruncateZero) ثابت {
+  أكد(Semantics == &APFloat_بنسټ::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  APFloat(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt())
-      .toString(Str, FormatPrecision, FormatMaxPadding, TruncateZero);
+  APFloat(APFloat_بنسټ::semPPCDoubleDoubleLegacy, bitcast_منزل_APInt())
+      .منزل_String(Str, FormatPrecision, FormatMaxPadding, TruncateZero);
 }
 
-int DoubleAPFloat::getExactLog2Abs() const {
+صحيح DoubleAPFloat::getExactLog2Abs() ثابت {
   // In order for Hi + Lo to be a power of two, the following must be true:
   // 1. Hi must be a power of two.
   // 2. Lo must be zero.
-  if (getSecond().isNonZero())
-    return INT_MIN;
-  return getFirst().getExactLog2Abs();
+  إذا (get_دوهم().isNonZero())
+    أرجع INT_MIN;
+  أرجع get_لومړی().getExactLog2Abs();
 }
 
-int ilogb(const DoubleAPFloat &Arg) {
-  const APFloat &Hi = Arg.getFirst();
-  const APFloat &Lo = Arg.getSecond();
-  int IlogbResult = ilogb(Hi);
+صحيح ilogb(ثابت DoubleAPFloat &Arg) {
+  ثابت APFloat &Hi = Arg.get_لومړی();
+  ثابت APFloat &Lo = Arg.get_دوهم();
+  صحيح Ilogb_پایله = ilogb(Hi);
   // Zero and non-finite values can delegate to ilogb(Hi).
-  if (Arg.getCategory() != fcNormal)
-    return IlogbResult;
+  إذا (Arg.getCategory() != fc_نورمال)
+    أرجع Ilogb_پایله;
   // If Lo can't change the binade, we can delegate to ilogb(Hi).
-  if (Lo.isZero() || Hi.isNegative() == Lo.isNegative())
-    return IlogbResult;
-  if (Hi.getExactLog2Abs() == INT_MIN)
-    return IlogbResult;
+  إذا (Lo.isZero() || Hi.isNegative() == Lo.isNegative())
+    أرجع Ilogb_پایله;
+  إذا (Hi.getExactLog2Abs() == INT_MIN)
+    أرجع Ilogb_پایله;
   // Numbers of the form 2^a - 2^b or -2^a + 2^b are almost powers of two but
   // get nudged out of the binade by the low component.
-  return IlogbResult - 1;
+  أرجع Ilogb_پایله - 1;
 }
 
-DoubleAPFloat scalbn(const DoubleAPFloat &Arg, int Exp,
-                     APFloat::roundingMode RM) {
-  assert(Arg.Semantics == &APFloatBase::PPCDoubleDouble() &&
+DoubleAPFloat scalbn(ثابت DoubleAPFloat &Arg, صحيح Exp,
+                     APFloat::rounding_ډېرپېښ RM) {
+  أكد(Arg.Semantics == &APFloat_بنسټ::PPCDoubleDouble() &&
          "Unexpected Semantics");
-  return DoubleAPFloat(APFloatBase::PPCDoubleDouble(),
+  أرجع DoubleAPFloat(APFloat_بنسټ::PPCDoubleDouble(),
                        scalbn(Arg.Floats[0], Exp, RM),
                        scalbn(Arg.Floats[1], Exp, RM));
 }
 
-DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
-                    APFloat::roundingMode RM) {
-  assert(Arg.Semantics == &APFloatBase::PPCDoubleDouble() &&
+DoubleAPFloat frexp(ثابت DoubleAPFloat &Arg, صحيح &Exp,
+                    APFloat::rounding_ډېرپېښ RM) {
+  أكد(Arg.Semantics == &APFloat_بنسټ::PPCDoubleDouble() &&
          "Unexpected Semantics");
 
   // Get the unbiased exponent e of the number, where |Arg| = m * 2^e for m in
@@ -5842,75 +5842,75 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
 
   // For NaNs, quiet any signaling NaN and return the result, as per standard
   // practice.
-  if (Exp == APFloat::IEK_NaN) {
+  إذا (Exp == APFloat::IEK_NaN) {
     DoubleAPFloat Quiet{Arg};
-    Quiet.getFirst() = Quiet.getFirst().makeQuiet();
-    return Quiet;
+    Quiet.get_لومړی() = Quiet.get_لومړی().makeQuiet();
+    أرجع Quiet;
   }
 
   // For infinity, return it unchanged. The exponent remains IEK_Inf.
-  if (Exp == APFloat::IEK_Inf)
-    return Arg;
+  إذا (Exp == APFloat::IEK_Inf)
+    أرجع Arg;
 
   // For zero, the fraction is zero and the standard requires the exponent be 0.
-  if (Exp == APFloat::IEK_Zero) {
+  إذا (Exp == APFloat::IEK_Zero) {
     Exp = 0;
-    return Arg;
+    أرجع Arg;
   }
 
-  const APFloat &Hi = Arg.getFirst();
-  const APFloat &Lo = Arg.getSecond();
+  ثابت APFloat &Hi = Arg.get_لومړی();
+  ثابت APFloat &Lo = Arg.get_دوهم();
 
   // frexp requires the fraction's absolute value to be in [0.5, 1.0).
   // ilogb provides an exponent for an absolute value in [1.0, 2.0).
   // Increment the exponent to ensure the fraction is in the correct range.
   ++Exp;
 
-  const bool SignsDisagree = Hi.isNegative() != Lo.isNegative();
-  APFloat Second = Lo;
-  if (Arg.getCategory() == APFloat::fcNormal && Lo.isFiniteNonZero()) {
-    roundingMode LoRoundingMode;
+  ثابت منطقي SignsDisagree = Hi.isNegative() != Lo.isNegative();
+  APFloat دوهم = Lo;
+  إذا (Arg.getCategory() == APFloat::fc_نورمال && Lo.isFiniteNonZero()) {
+    rounding_ډېرپېښ Lo_Rounding_ډېرپېښ;
     // The interpretation of rmTowardZero depends on the sign of the combined
     // Arg rather than the sign of the component.
-    if (RM == rmTowardZero)
-      LoRoundingMode = Arg.isNegative() ? rmTowardPositive : rmTowardNegative;
+    إذا (RM == rmTowardZero)
+      Lo_Rounding_ډېرپېښ = Arg.isNegative() ? rm_Toward_مثبت : rmTowardNegative;
     // For rmNearestTiesToAway, we face a similar problem. If signs disagree,
     // Lo is a correction *toward* zero relative to Hi. Rounding Lo
     // "away from zero" based on its own sign would move the value in the
     // wrong direction. As a safe proxy, we use rmNearestTiesToEven, which is
     // direction-agnostic. We only need to bother with this if Lo is scaled
     // down.
-    else if (RM == rmNearestTiesToAway && SignsDisagree && Exp > 0)
-      LoRoundingMode = rmNearestTiesToEven;
-    else
-      LoRoundingMode = RM;
-    Second = scalbn(Lo, -Exp, LoRoundingMode);
+    وإلا إذا (RM == rm_تر_ټولو_نږدې_Ties_منزل_Away && SignsDisagree && Exp > 0)
+      Lo_Rounding_ډېرپېښ = rm_تر_ټولو_نږدې_Ties_منزل_Even;
+    وإلا
+      Lo_Rounding_ډېرپېښ = RM;
+    دوهم = scalbn(Lo, -Exp, Lo_Rounding_ډېرپېښ);
     // The rmNearestTiesToEven proxy is correct most of the time, but it
     // differs from rmNearestTiesToAway when the scaled value of Lo is an
     // exact midpoint.
     // NOTE: This is morally equivalent to roundTiesTowardZero.
-    if (RM == rmNearestTiesToAway && LoRoundingMode == rmNearestTiesToEven) {
+    إذا (RM == rm_تر_ټولو_نږدې_Ties_منزل_Away && Lo_Rounding_ډېرپېښ == rm_تر_ټولو_نږدې_Ties_منزل_Even) {
       // Re-scale the result back to check if rounding occurred.
-      const APFloat RecomposedLo = scalbn(Second, Exp, rmNearestTiesToEven);
-      if (RecomposedLo != Lo) {
+      ثابت APFloat RecomposedLo = scalbn(دوهم, Exp, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+      إذا (RecomposedLo != Lo) {
         // RoundingError tells us which direction we rounded:
         //   - RoundingError > 0: we rounded up.
         //   - RoundingError < 0: we down up.
-        const APFloat RoundingError = RecomposedLo - Lo;
+        ثابت APFloat RoundingError = RecomposedLo - Lo;
         // Determine if scalbn(Lo, -Exp) landed exactly on a midpoint.
         // We do this by checking if the absolute rounding error is exactly
         // half a ULP of the result.
-        const APFloat UlpOfSecond = harrisonUlp(Second);
-        const APFloat ScaledUlpOfSecond =
-            scalbn(UlpOfSecond, Exp - 1, rmNearestTiesToEven);
-        const bool IsMidpoint = abs(RoundingError) == ScaledUlpOfSecond;
-        const bool RoundedLoAway =
-            Second.isNegative() == RoundingError.isNegative();
+        ثابت APFloat Ulp_د_دوهم = harrisonUlp(دوهم);
+        ثابت APFloat Scaled_Ulp_د_دوهم =
+            scalbn(Ulp_د_دوهم, Exp - 1, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+        ثابت منطقي IsMidpoint = مطلق_قیمت(RoundingError) == Scaled_Ulp_د_دوهم;
+        ثابت منطقي RoundedLoAway =
+            دوهم.isNegative() == RoundingError.isNegative();
         // The sign of Hi and Lo disagree and we rounded Lo away: we must
         // decrease the magnitude of Second to increase the magnitude
         // First+Second.
-        if (IsMidpoint && RoundedLoAway)
-          Second.next(/*nextDown=*/!Second.isNegative());
+        إذا (IsMidpoint && RoundedLoAway)
+          دوهم.بل(/*nextDown=*/!دوهم.isNegative());
       }
     }
     // Handle a tricky edge case where Arg is slightly less than a power of two
@@ -5925,76 +5925,76 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
     // the scaled Lo underflowed to zero. The fix: Increment Exp to k+1. This
     // adjusts the scale factor, causing Hi to be scaled to 0.5, which is a
     // valid fraction.
-    if (Second.isZero() && SignsDisagree && Hi.getExactLog2Abs() != INT_MIN)
+    إذا (دوهم.isZero() && SignsDisagree && Hi.getExactLog2Abs() != INT_MIN)
       ++Exp;
   }
 
-  APFloat First = scalbn(Hi, -Exp, RM);
-  return DoubleAPFloat(APFloatBase::PPCDoubleDouble(), std::move(First),
-                       std::move(Second));
+  APFloat لومړی = scalbn(Hi, -Exp, RM);
+  أرجع DoubleAPFloat(APFloat_بنسټ::PPCDoubleDouble(), std::move(لومړی),
+                       std::move(دوهم));
 }
 
-APInt DoubleAPFloat::getNaNPayload() const { return Floats[0].getNaNPayload(); }
+APInt DoubleAPFloat::getNaNPayload() ثابت { أرجع Floats[0].getNaNPayload(); }
 } // namespace detail
 
-APFloat::Storage::Storage(IEEEFloat F, const fltSemantics &Semantics) {
-  if (usesLayout<IEEEFloat>(Semantics)) {
-    new (&IEEE) IEEEFloat(std::move(F));
-    return;
+APFloat::Storage::Storage(IEEEFloat F, ثابت fltSemantics &Semantics) {
+  إذا (کاروي_Layout<IEEEFloat>(Semantics)) {
+    جديد (&IEEE) IEEEFloat(std::move(F));
+    أرجع;
   }
-  if (usesLayout<DoubleAPFloat>(Semantics)) {
-    const fltSemantics& S = F.getSemantics();
-    new (&Double) DoubleAPFloat(Semantics, APFloat(std::move(F), S),
-                                APFloat(APFloatBase::IEEEdouble()));
-    return;
+  إذا (کاروي_Layout<DoubleAPFloat>(Semantics)) {
+    ثابت fltSemantics& S = F.getSemantics();
+    جديد (&Double) DoubleAPFloat(Semantics, APFloat(std::move(F), S),
+                                APFloat(APFloat_بنسټ::IEEEdouble()));
+    أرجع;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
-Expected<APFloat::opStatus> APFloat::convertFromString(StringRef Str,
-                                                       roundingMode RM) {
+Expected<APFloat::op_حالت> APFloat::convertFromString(StringRef Str,
+                                                       rounding_ډېرپېښ RM) {
   APFLOAT_DISPATCH_ON_SEMANTICS(convertFromString(Str, RM));
 }
 
-hash_code hash_value(const APFloat &Arg) {
-  if (APFloat::usesLayout<detail::IEEEFloat>(Arg.getSemantics()))
-    return hash_value(Arg.U.IEEE);
-  if (APFloat::usesLayout<detail::DoubleAPFloat>(Arg.getSemantics()))
-    return hash_value(Arg.U.Double);
+hash_کوډ hash_ارزښت(ثابت APFloat &Arg) {
+  إذا (APFloat::کاروي_Layout<detail::IEEEFloat>(Arg.getSemantics()))
+    أرجع hash_ارزښت(Arg.U.IEEE);
+  إذا (APFloat::کاروي_Layout<detail::DoubleAPFloat>(Arg.getSemantics()))
+    أرجع hash_ارزښت(Arg.U.Double);
   llvm_unreachable("Unexpected semantics");
 }
 
-APFloat::APFloat(const fltSemantics &Semantics, StringRef S)
+APFloat::APFloat(ثابت fltSemantics &Semantics, StringRef S)
     : APFloat(Semantics) {
-  auto StatusOrErr = convertFromString(S, rmNearestTiesToEven);
-  assert(StatusOrErr && "Invalid floating point representation");
-  consumeError(StatusOrErr.takeError());
+  خپلکاری حالت_Or_Err = convertFromString(S, rm_تر_ټولو_نږدې_Ties_منزل_Even);
+  أكد(حالت_Or_Err && "Invalid floating point representation");
+  consumeError(حالت_Or_Err.takeError());
 }
 
-FPClassTest APFloat::classify() const {
-  if (isZero())
-    return isNegative() ? fcNegZero : fcPosZero;
-  if (isNormal())
-    return isNegative() ? fcNegNormal : fcPosNormal;
-  if (isDenormal())
-    return isNegative() ? fcNegSubnormal : fcPosSubnormal;
-  if (isInfinity())
-    return isNegative() ? fcNegInf : fcPosInf;
-  assert(isNaN() && "Other class of FP constant");
-  return isSignaling() ? fcSNan : fcQNan;
+FPClassTest APFloat::classify() ثابت {
+  إذا (isZero())
+    أرجع isNegative() ? fcNegZero : fcPosZero;
+  إذا (is_نورمال())
+    أرجع isNegative() ? fc_Neg_نورمال : fc_Pos_نورمال;
+  إذا (isDenormal())
+    أرجع isNegative() ? fcNegSubnormal : fcPosSubnormal;
+  إذا (isInfinity())
+    أرجع isNegative() ? fcNegInf : fcPosInf;
+  أكد(isNaN() && "Other class of FP constant");
+  أرجع isSignaling() ? fcSNan : fcQNan;
 }
 
-bool APFloat::getExactInverse(APFloat *Inv) const {
+منطقي APFloat::getExactInverse(APFloat *Inv) ثابت {
   // Only finite, non-zero numbers can have a useful, representable inverse.
   // This check filters out +/- zero, +/- infinity, and NaN.
-  if (!isFiniteNonZero())
-    return false;
+  إذا (!isFiniteNonZero())
+    أرجع خطأ;
 
   // Historically, this function rejects subnormal inputs.  One reason why this
   // might be important is that subnormals may behave differently under FTZ/DAZ
   // runtime behavior.
-  if (isDenormal())
-    return false;
+  إذا (isDenormal())
+    أرجع خطأ;
 
   // A number has an exact, representable inverse if and only if it is a power
   // of two.
@@ -6013,9 +6013,9 @@ bool APFloat::getExactInverse(APFloat *Inv) const {
 
   // getExactLog2Abs() returns the integer exponent if the number is a power of
   // two or INT_MIN if it is not.
-  const int Exp = getExactLog2Abs();
-  if (Exp == INT_MIN)
-    return false;
+  ثابت صحيح Exp = getExactLog2Abs();
+  إذا (Exp == INT_MIN)
+    أرجع خطأ;
 
   // The inverse of +/- 2^Exp is +/- 2^(-Exp). We can compute this by
   // scaling 1.0 by the negated exponent.
@@ -6026,283 +6026,283 @@ bool APFloat::getExactInverse(APFloat *Inv) const {
   // scalbn might round if the resulting exponent -Exp is outside the
   // representable range, causing overflow (to infinity) or underflow. We
   // must verify that the result is still the exact power of two we expect.
-  if (Reciprocal.getExactLog2Abs() != -Exp)
-    return false;
+  إذا (Reciprocal.getExactLog2Abs() != -Exp)
+    أرجع خطأ;
 
   // Avoid multiplication with a subnormal, it is not safe on all platforms and
   // may be slower than a normal division.
-  if (Reciprocal.isDenormal())
-    return false;
+  إذا (Reciprocal.isDenormal())
+    أرجع خطأ;
 
-  assert(Reciprocal.isFiniteNonZero());
+  أكد(Reciprocal.isFiniteNonZero());
 
-  if (Inv)
+  إذا (Inv)
     *Inv = std::move(Reciprocal);
 
-  return true;
+  أرجع ریښتیا;
 }
 
-APFloat::opStatus APFloat::convert(const fltSemantics &ToSemantics,
-                                   roundingMode RM, bool *losesInfo) {
-  if (&getSemantics() == &ToSemantics) {
-    *losesInfo = false;
-    return opOK;
+APFloat::op_حالت APFloat::convert(ثابت fltSemantics &منزل_Semantics_2,
+                                   rounding_ډېرپېښ RM, منطقي *losesInfo) {
+  إذا (&getSemantics() == &منزل_Semantics_2) {
+    *losesInfo = خطأ;
+    أرجع opOK;
   }
-  if (usesLayout<IEEEFloat>(getSemantics()) &&
-      usesLayout<IEEEFloat>(ToSemantics))
-    return U.IEEE.convert(ToSemantics, RM, losesInfo);
-  if (usesLayout<IEEEFloat>(getSemantics()) &&
-      usesLayout<DoubleAPFloat>(ToSemantics)) {
-    assert(&ToSemantics == &APFloatBase::semPPCDoubleDouble);
-    auto Ret =
-        U.IEEE.convert(APFloatBase::semPPCDoubleDoubleLegacy, RM, losesInfo);
-    *this = APFloat(ToSemantics, U.IEEE.bitcastToAPInt());
-    return Ret;
+  إذا (کاروي_Layout<IEEEFloat>(getSemantics()) &&
+      کاروي_Layout<IEEEFloat>(منزل_Semantics_2))
+    أرجع U.IEEE.convert(منزل_Semantics_2, RM, losesInfo);
+  إذا (کاروي_Layout<IEEEFloat>(getSemantics()) &&
+      کاروي_Layout<DoubleAPFloat>(منزل_Semantics_2)) {
+    أكد(&منزل_Semantics_2 == &APFloat_بنسټ::semPPCDoubleDouble);
+    خپلکاری Ret =
+        U.IEEE.convert(APFloat_بنسټ::semPPCDoubleDoubleLegacy, RM, losesInfo);
+    *هذا = APFloat(منزل_Semantics_2, U.IEEE.bitcast_منزل_APInt());
+    أرجع Ret;
   }
-  if (usesLayout<DoubleAPFloat>(getSemantics()) &&
-      usesLayout<IEEEFloat>(ToSemantics)) {
-    auto Ret = getIEEE().convert(ToSemantics, RM, losesInfo);
-    *this = APFloat(std::move(getIEEE()), ToSemantics);
-    return Ret;
+  إذا (کاروي_Layout<DoubleAPFloat>(getSemantics()) &&
+      کاروي_Layout<IEEEFloat>(منزل_Semantics_2)) {
+    خپلکاری Ret = getIEEE().convert(منزل_Semantics_2, RM, losesInfo);
+    *هذا = APFloat(std::move(getIEEE()), منزل_Semantics_2);
+    أرجع Ret;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
-APFloat APFloat::getAllOnesValue(const fltSemantics &Semantics) {
-  return APFloat(Semantics, APInt::getAllOnes(Semantics.sizeInBits));
+APFloat APFloat::get_All_Ones_ارزښت(ثابت fltSemantics &Semantics) {
+  أرجع APFloat(Semantics, APInt::getAllOnes(Semantics.اندازه_دننه_بټونه));
 }
 
-void APFloat::print(raw_ostream &OS) const {
-  SmallVector<char, 16> Buffer;
-  toString(Buffer);
-  OS << Buffer;
+فراغ APFloat::print(raw_ostream &OS) ثابت {
+  Small_ویکټور<حرف, 16> بفر;
+  منزل_String(بفر);
+  OS << بفر;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void APFloat::dump() const {
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_لاره فراغ APFloat::dump() ثابت {
   print(dbgs());
   dbgs() << '\n';
 }
-#endif
+#د_که_پای
 
-void APFloat::Profile(FoldingSetNodeID &NID) const {
-  NID.Add(bitcastToAPInt());
+فراغ APFloat::Profile(Folding_سېټ_غوټه_ID &NID) ثابت {
+  NID.جمع_کړه_2(bitcast_منزل_APInt());
 }
 
-APFloat::opStatus APFloat::convertToInteger(APSInt &result,
-                                            roundingMode rounding_mode,
-                                            bool *isExact) const {
-  unsigned bitWidth = result.getBitWidth();
-  SmallVector<uint64_t, 4> parts(result.getNumWords());
-  opStatus status = convertToInteger(parts, bitWidth, result.isSigned(),
-                                     rounding_mode, isExact);
+APFloat::op_حالت APFloat::convert_منزل_Integer(APSInt &پایله_2,
+                                            rounding_ډېرپېښ rounding_ډېرپېښ_2,
+                                            منطقي *isExact) ثابت {
+  بینښه بټ_پلنوالی = پایله_2.get_بټ_پلنوالی();
+  Small_ویکټور<uint64_t, 4> parts(پایله_2.get_عدد_ټکي());
+  op_حالت حالت_2 = convert_منزل_Integer(parts, بټ_پلنوالی, پایله_2.isSigned(),
+                                     rounding_ډېرپېښ_2, isExact);
   // Keeps the original signed-ness.
-  result = APInt(bitWidth, parts);
-  return status;
+  پایله_2 = APInt(بټ_پلنوالی, parts);
+  أرجع حالت_2;
 }
 
-double APFloat::convertToDouble() const {
-  if (&getSemantics() == &APFloatBase::semIEEEdouble)
-    return getIEEE().convertToDouble();
-  assert(isRepresentableBy(getSemantics(), semIEEEdouble) &&
+مزدوج APFloat::convert_منزل_Double() ثابت {
+  إذا (&getSemantics() == &APFloat_بنسټ::semIEEEdouble)
+    أرجع getIEEE().convert_منزل_Double();
+  أكد(isRepresentableBy(getSemantics(), semIEEEdouble) &&
          "Float semantics is not representable by IEEEdouble");
-  APFloat Temp = *this;
-  bool LosesInfo;
-  [[maybe_unused]] opStatus St =
-      Temp.convert(APFloatBase::semIEEEdouble, rmNearestTiesToEven, &LosesInfo);
-  assert(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
-  return Temp.getIEEE().convertToDouble();
+  APFloat لنډمهاله = *هذا;
+  منطقي LosesInfo;
+  [[maybe_ناکارول_شوی]] op_حالت St =
+      لنډمهاله.convert(APFloat_بنسټ::semIEEEdouble, rm_تر_ټولو_نږدې_Ties_منزل_Even, &LosesInfo);
+  أكد(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
+  أرجع لنډمهاله.getIEEE().convert_منزل_Double();
 }
 
-#ifdef HAS_IEE754_FLOAT128
-float128 APFloat::convertToQuad() const {
-  if (&getSemantics() == &APFloatBase::semIEEEquad)
-    return getIEEE().convertToQuad();
-  assert(isRepresentableBy(getSemantics(), semIEEEquad) &&
+#که_تعریف_شوی HAS_IEE754_FLOAT128
+float128 APFloat::convert_منزل_Quad() ثابت {
+  إذا (&getSemantics() == &APFloat_بنسټ::semIEEEquad)
+    أرجع getIEEE().convert_منزل_Quad();
+  أكد(isRepresentableBy(getSemantics(), semIEEEquad) &&
          "Float semantics is not representable by IEEEquad");
-  APFloat Temp = *this;
-  bool LosesInfo;
-  [[maybe_unused]] opStatus St =
-      Temp.convert(APFloatBase::semIEEEquad, rmNearestTiesToEven, &LosesInfo);
-  assert(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
-  return Temp.getIEEE().convertToQuad();
+  APFloat لنډمهاله = *هذا;
+  منطقي LosesInfo;
+  [[maybe_ناکارول_شوی]] op_حالت St =
+      لنډمهاله.convert(APFloat_بنسټ::semIEEEquad, rm_تر_ټولو_نږدې_Ties_منزل_Even, &LosesInfo);
+  أكد(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
+  أرجع لنډمهاله.getIEEE().convert_منزل_Quad();
 }
-#endif
+#د_که_پای
 
-float APFloat::convertToFloat() const {
-  if (&getSemantics() == &APFloatBase::semIEEEsingle)
-    return getIEEE().convertToFloat();
-  assert(isRepresentableBy(getSemantics(), semIEEEsingle) &&
+عائم APFloat::convert_منزل_Float() ثابت {
+  إذا (&getSemantics() == &APFloat_بنسټ::semIEEEsingle)
+    أرجع getIEEE().convert_منزل_Float();
+  أكد(isRepresentableBy(getSemantics(), semIEEEsingle) &&
          "Float semantics is not representable by IEEEsingle");
-  APFloat Temp = *this;
-  bool LosesInfo;
-  [[maybe_unused]] opStatus St =
-      Temp.convert(APFloatBase::semIEEEsingle, rmNearestTiesToEven, &LosesInfo);
-  assert(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
-  return Temp.getIEEE().convertToFloat();
+  APFloat لنډمهاله = *هذا;
+  منطقي LosesInfo;
+  [[maybe_ناکارول_شوی]] op_حالت St =
+      لنډمهاله.convert(APFloat_بنسټ::semIEEEsingle, rm_تر_ټولو_نږدې_Ties_منزل_Even, &LosesInfo);
+  أكد(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
+  أرجع لنډمهاله.getIEEE().convert_منزل_Float();
 }
 
-unsigned APFloatBase::getArbitraryFPFormatSizeInBits(StringRef Format) {
-  return StringSwitch<unsigned>(Format)
-      .Case("Float8E5M2", getSizeInBits(semFloat8E5M2))
-      .Case("Float8E5M2FNUZ", getSizeInBits(semFloat8E5M2FNUZ))
-      .Case("Float8E4M3", getSizeInBits(semFloat8E4M3))
-      .Case("Float8E4M3FN", getSizeInBits(semFloat8E4M3FN))
-      .Case("Float8E4M3FNUZ", getSizeInBits(semFloat8E4M3FNUZ))
-      .Case("Float8E4M3B11FNUZ", getSizeInBits(semFloat8E4M3B11FNUZ))
-      .Case("Float8E3M4", getSizeInBits(semFloat8E3M4))
-      .Case("Float8E8M0FNU", getSizeInBits(semFloat8E8M0FNU))
-      .Case("Float6E3M2FN", getSizeInBits(semFloat6E3M2FN))
-      .Case("Float6E2M3FN", getSizeInBits(semFloat6E2M3FN))
-      .Case("Float4E2M1FN", getSizeInBits(semFloat4E2M1FN))
-      .Case("Float8E5M3FNU", getSizeInBits(semFloat8E5M3FNU))
+بینښه APFloat_بنسټ::get_Arbitrary_FPFormat_اندازه_دننه_بټونه(StringRef Format) {
+  أرجع StringSwitch<بینښه>(Format)
+      .Case("Float8E5M2", get_اندازه_دننه_بټونه(semFloat8E5M2))
+      .Case("Float8E5M2FNUZ", get_اندازه_دننه_بټونه(semFloat8E5M2FNUZ))
+      .Case("Float8E4M3", get_اندازه_دننه_بټونه(semFloat8E4M3))
+      .Case("Float8E4M3FN", get_اندازه_دننه_بټونه(semFloat8E4M3FN))
+      .Case("Float8E4M3FNUZ", get_اندازه_دننه_بټونه(semFloat8E4M3FNUZ))
+      .Case("Float8E4M3B11FNUZ", get_اندازه_دننه_بټونه(semFloat8E4M3B11FNUZ))
+      .Case("Float8E3M4", get_اندازه_دننه_بټونه(semFloat8E3M4))
+      .Case("Float8E8M0FNU", get_اندازه_دننه_بټونه(semFloat8E8M0FNU))
+      .Case("Float6E3M2FN", get_اندازه_دننه_بټونه(semFloat6E3M2FN))
+      .Case("Float6E2M3FN", get_اندازه_دننه_بټونه(semFloat6E2M3FN))
+      .Case("Float4E2M1FN", get_اندازه_دننه_بټونه(semFloat4E2M1FN))
+      .Case("Float8E5M3FNU", get_اندازه_دننه_بټونه(semFloat8E5M3FNU))
       .Default(0);
 }
 
-bool APFloatBase::isValidArbitraryFPFormat(StringRef Format) {
-  return getArbitraryFPFormatSizeInBits(Format) != 0;
+منطقي APFloat_بنسټ::isValidArbitraryFPFormat(StringRef Format) {
+  أرجع get_Arbitrary_FPFormat_اندازه_دننه_بټونه(Format) != 0;
 }
 
-const fltSemantics *APFloatBase::getArbitraryFPSemantics(StringRef Format) {
+ثابت fltSemantics *APFloat_بنسټ::getArbitraryFPSemantics(StringRef Format) {
   // TODO: extend to remaining arbitrary FP types: Float8E4M3, Float8E3M4,
   // Float8E5M2FNUZ, Float8E4M3FNUZ, Float8E4M3B11FNUZ, Float8E8M0FNU.
-  return StringSwitch<const fltSemantics *>(Format)
+  أرجع StringSwitch<ثابت fltSemantics *>(Format)
       .Case("Float8E5M2", &semFloat8E5M2)
       .Case("Float8E4M3FN", &semFloat8E4M3FN)
       .Case("Float8E5M3FNU", &semFloat8E5M3FNU)
       .Case("Float4E2M1FN", &semFloat4E2M1FN)
       .Case("Float6E3M2FN", &semFloat6E3M2FN)
       .Case("Float6E2M3FN", &semFloat6E2M3FN)
-      .Default(nullptr);
+      .Default(تش_اشاره);
 }
 
 APFloat::Storage::~Storage() {
-  if (usesLayout<IEEEFloat>(*semantics)) {
+  إذا (کاروي_Layout<IEEEFloat>(*semantics)) {
     IEEE.~IEEEFloat();
-    return;
+    أرجع;
   }
-  if (usesLayout<DoubleAPFloat>(*semantics)) {
+  إذا (کاروي_Layout<DoubleAPFloat>(*semantics)) {
     Double.~DoubleAPFloat();
-    return;
+    أرجع;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
-APFloat::Storage::Storage(const APFloat::Storage &RHS) {
-  if (usesLayout<IEEEFloat>(*RHS.semantics)) {
-    new (this) IEEEFloat(RHS.IEEE);
-    return;
+APFloat::Storage::Storage(ثابت APFloat::Storage &RHS) {
+  إذا (کاروي_Layout<IEEEFloat>(*RHS.semantics)) {
+    جديد (هذا) IEEEFloat(RHS.IEEE);
+    أرجع;
   }
-  if (usesLayout<DoubleAPFloat>(*RHS.semantics)) {
-    new (this) DoubleAPFloat(RHS.Double);
-    return;
+  إذا (کاروي_Layout<DoubleAPFloat>(*RHS.semantics)) {
+    جديد (هذا) DoubleAPFloat(RHS.Double);
+    أرجع;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
 APFloat::Storage::Storage(APFloat::Storage &&RHS) {
-  if (usesLayout<IEEEFloat>(*RHS.semantics)) {
-    new (this) IEEEFloat(std::move(RHS.IEEE));
-    return;
+  إذا (کاروي_Layout<IEEEFloat>(*RHS.semantics)) {
+    جديد (هذا) IEEEFloat(std::move(RHS.IEEE));
+    أرجع;
   }
-  if (usesLayout<DoubleAPFloat>(*RHS.semantics)) {
-    new (this) DoubleAPFloat(std::move(RHS.Double));
-    return;
+  إذا (کاروي_Layout<DoubleAPFloat>(*RHS.semantics)) {
+    جديد (هذا) DoubleAPFloat(std::move(RHS.Double));
+    أرجع;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
-APFloat::Storage &APFloat::Storage::operator=(const APFloat::Storage &RHS) {
-  if (usesLayout<IEEEFloat>(*semantics) &&
-      usesLayout<IEEEFloat>(*RHS.semantics)) {
+APFloat::Storage &APFloat::Storage::چلوونکی=(ثابت APFloat::Storage &RHS) {
+  إذا (کاروي_Layout<IEEEFloat>(*semantics) &&
+      کاروي_Layout<IEEEFloat>(*RHS.semantics)) {
     IEEE = RHS.IEEE;
-  } else if (usesLayout<DoubleAPFloat>(*semantics) &&
-             usesLayout<DoubleAPFloat>(*RHS.semantics)) {
+  } وإلا إذا (کاروي_Layout<DoubleAPFloat>(*semantics) &&
+             کاروي_Layout<DoubleAPFloat>(*RHS.semantics)) {
     Double = RHS.Double;
-  } else if (this != &RHS) {
-    this->~Storage();
-    new (this) Storage(RHS);
+  } وإلا إذا (هذا != &RHS) {
+    هذا->~Storage();
+    جديد (هذا) Storage(RHS);
   }
-  return *this;
+  أرجع *هذا;
 }
 
-APFloat::Storage &APFloat::Storage::operator=(APFloat::Storage &&RHS) {
-  if (usesLayout<IEEEFloat>(*semantics) &&
-      usesLayout<IEEEFloat>(*RHS.semantics)) {
+APFloat::Storage &APFloat::Storage::چلوونکی=(APFloat::Storage &&RHS) {
+  إذا (کاروي_Layout<IEEEFloat>(*semantics) &&
+      کاروي_Layout<IEEEFloat>(*RHS.semantics)) {
     IEEE = std::move(RHS.IEEE);
-  } else if (usesLayout<DoubleAPFloat>(*semantics) &&
-             usesLayout<DoubleAPFloat>(*RHS.semantics)) {
+  } وإلا إذا (کاروي_Layout<DoubleAPFloat>(*semantics) &&
+             کاروي_Layout<DoubleAPFloat>(*RHS.semantics)) {
     Double = std::move(RHS.Double);
-  } else if (this != &RHS) {
-    this->~Storage();
-    new (this) Storage(std::move(RHS));
+  } وإلا إذا (هذا != &RHS) {
+    هذا->~Storage();
+    جديد (هذا) Storage(std::move(RHS));
   }
-  return *this;
+  أرجع *هذا;
 }
 
-namespace {
+نطاق {
 
-APFloat::opStatus getOpStatusFromLibc(int libc_exceptions) {
-  APFloat::opStatus status = APFloat::opOK;
-  if (libc_exceptions & FE_INVALID)
-    status = static_cast<APFloat::opStatus>(status | APFloat::opInvalidOp);
-  if (libc_exceptions & FE_DIVBYZERO)
-    status = static_cast<APFloat::opStatus>(status | APFloat::opDivByZero);
-  if (libc_exceptions & FE_OVERFLOW)
-    status = static_cast<APFloat::opStatus>(status | APFloat::opOverflow);
-  if (libc_exceptions & FE_UNDERFLOW)
-    status = static_cast<APFloat::opStatus>(status | APFloat::opUnderflow);
-  if (libc_exceptions & FE_INEXACT)
-    status = static_cast<APFloat::opStatus>(status | APFloat::opInexact);
-  return status;
+APFloat::op_حالت get_Op_حالت_From_Libc(صحيح libc_exceptions) {
+  APFloat::op_حالت حالت_2 = APFloat::opOK;
+  إذا (libc_exceptions & FE_INVALID)
+    حالت_2 = static_cast<APFloat::op_حالت>(حالت_2 | APFloat::opInvalidOp);
+  إذا (libc_exceptions & FE_DIVBYZERO)
+    حالت_2 = static_cast<APFloat::op_حالت>(حالت_2 | APFloat::opDivByZero);
+  إذا (libc_exceptions & FE_ډکېدنه)
+    حالت_2 = static_cast<APFloat::op_حالت>(حالت_2 | APFloat::op_ډکېدنه);
+  إذا (libc_exceptions & FE_UNDERFLOW)
+    حالت_2 = static_cast<APFloat::op_حالت>(حالت_2 | APFloat::opUnderflow);
+  إذا (libc_exceptions & FE_INEXACT)
+    حالت_2 = static_cast<APFloat::op_حالت>(حالت_2 | APFloat::opInexact);
+  أرجع حالت_2;
 }
 
 } // namespace
 
 // TODO: Support other rounding modes when LLVM libc math implement static
 // roundings.
-std::optional<APFloat> exp(const APFloat &x, RoundingMode rounding_mode,
-                           APFloat::opStatus *status) {
+std::optional<APFloat> توانیز_تابع(ثابت APFloat &x, Rounding_ډېرپېښ rounding_ډېرپېښ_2,
+                           APFloat::op_حالت *حالت_2) {
 
-  if (rounding_mode == APFloatBase::rmNearestTiesToEven) {
-    if (APFloat::SemanticsToEnum(x.getSemantics()) ==
-        APFloatBase::S_IEEEsingle) {
-      float x_val = x.convertToFloat();
-      int exc =
+  إذا (rounding_ډېرپېښ_2 == APFloat_بنسټ::rm_تر_ټولو_نږدې_Ties_منزل_Even) {
+    إذا (APFloat::Semantics_منزل_Enum(x.getSemantics()) ==
+        APFloat_بنسټ::S_IEEEsingle) {
+      عائم x_val = x.convert_منزل_Float();
+      صحيح exc =
           LIBC_NAMESPACE::shared::check::exp_exceptions(x_val, FE_TONEAREST);
-      if (status) {
-        *status = getOpStatusFromLibc(exc);
-        if (x.isSignaling()) {
+      إذا (حالت_2) {
+        *حالت_2 = get_Op_حالت_From_Libc(exc);
+        إذا (x.isSignaling()) {
           // 32-bit x86 will silence sNaN when loading floats, so we explicitly
           // add the INVALID exception here.
-          *status =
-              static_cast<APFloat::opStatus>(*status | APFloat::opInvalidOp);
+          *حالت_2 =
+              static_cast<APFloat::op_حالت>(*حالت_2 | APFloat::opInvalidOp);
         }
       }
-      float result = LIBC_NAMESPACE::shared::expf(x_val);
-      return APFloat(result);
+      عائم پایله_2 = LIBC_NAMESPACE::shared::expf(x_val);
+      أرجع APFloat(پایله_2);
     }
-    if (APFloat::SemanticsToEnum(x.getSemantics()) ==
-        APFloatBase::S_IEEEdouble) {
-      double x_val = x.convertToDouble();
-      int exc =
+    إذا (APFloat::Semantics_منزل_Enum(x.getSemantics()) ==
+        APFloat_بنسټ::S_IEEEdouble) {
+      مزدوج x_val = x.convert_منزل_Double();
+      صحيح exc =
           LIBC_NAMESPACE::shared::check::exp_exceptions(x_val, FE_TONEAREST);
-      if (status) {
-        *status = getOpStatusFromLibc(exc);
-        if (x.isSignaling()) {
+      إذا (حالت_2) {
+        *حالت_2 = get_Op_حالت_From_Libc(exc);
+        إذا (x.isSignaling()) {
           // 32-bit x86 will silence sNaN when loading floats, so we explicitly
           // add the INVALID exception here.
-          *status =
-              static_cast<APFloat::opStatus>(*status | APFloat::opInvalidOp);
+          *حالت_2 =
+              static_cast<APFloat::op_حالت>(*حالت_2 | APFloat::opInvalidOp);
         }
       }
-      double result = LIBC_NAMESPACE::shared::exp(x_val);
-      return APFloat(result);
+      مزدوج پایله_2 = LIBC_NAMESPACE::shared::توانیز_تابع(x_val);
+      أرجع APFloat(پایله_2);
     }
   }
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
 } // namespace llvm
 
-#undef APFLOAT_DISPATCH_ON_SEMANTICS
+#تعریف_لغوه APFLOAT_DISPATCH_ON_SEMANTICS

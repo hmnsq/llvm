@@ -6,47 +6,47 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/Format.h"
+#ضمن "llvm/Support/ScopedPrinter.h"
+#ضمن "llvm/Support/Format.h"
 
-using namespace llvm;
+کارول نطاق llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, const HexNumber &Value) {
-  OS << "0x" << utohexstr(Value.Value);
-  return OS;
+raw_ostream &llvm::چلوونکی<<(raw_ostream &OS, ثابت Hex_شمېره &ارزښت) {
+  OS << "0x" << utohexstr(ارزښت.ارزښت);
+  أرجع OS;
 }
 
-void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
-                                    ArrayRef<uint8_t> Data, bool Block,
-                                    uint32_t StartOffset) {
-  if (Data.size() > 16)
-    Block = true;
+فراغ ScopedPrinter::print_دوګونی_Impl(StringRef Label, StringRef Str,
+                                    ArrayRef<uint8_t> معلومات_2, منطقي بلاک_2,
+                                    uint32_t پیل_دننه_واټن) {
+  إذا (معلومات_2.اندازه_2() > 16)
+    بلاک_2 = ریښتیا;
 
-  if (Block) {
-    startLine() << Label;
-    if (!Str.empty())
+  إذا (بلاک_2) {
+    پیل_کرښه() << Label;
+    إذا (!Str.تشه())
       OS << ": " << Str;
     OS << " (\n";
-    if (!Data.empty())
-      OS << format_bytes_with_ascii(Data, StartOffset, 16, 4,
-                                    (IndentLevel + 1) * 2, true)
+    إذا (!معلومات_2.تشه())
+      OS << format_بایټونه_with_ascii(معلومات_2, پیل_دننه_واټن, 16, 4,
+                                    (IndentLevel + 1) * 2, ریښتیا)
          << "\n";
-    startLine() << ")\n";
-  } else {
-    startLine() << Label << ":";
-    if (!Str.empty())
+    پیل_کرښه() << ")\n";
+  } وإلا {
+    پیل_کرښه() << Label << ":";
+    إذا (!Str.تشه())
       OS << " " << Str;
-    OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, true)
+    OS << " (" << format_بایټونه(معلومات_2, std::nullopt, معلومات_2.اندازه_2(), 1, 0, ریښتیا)
        << ")\n";
   }
 }
 
 JSONScopedPrinter::JSONScopedPrinter(
-    raw_ostream &OS, bool PrettyPrint,
+    raw_ostream &OS, منطقي PrettyPrint,
     std::unique_ptr<DelimitedScope> &&OuterScope)
-    : ScopedPrinter(OS, ScopedPrinter::ScopedPrinterKind::JSON),
+    : ScopedPrinter(OS, ScopedPrinter::Scoped_Printer_ډول::JSON),
       JOS(OS, /*Indent=*/PrettyPrint ? 2 : 0),
       OuterScope(std::move(OuterScope)) {
-  if (this->OuterScope)
-    this->OuterScope->setPrinter(*this);
+  إذا (هذا->OuterScope)
+    هذا->OuterScope->سېټ_Printer(*هذا);
 }

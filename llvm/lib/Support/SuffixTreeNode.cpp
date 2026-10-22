@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#ضمن "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+کارول نطاق llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+بینښه Suffix_ونه_غوټه::get_پیل_Idx() ثابت { أرجع پیل_Idx; }
+فراغ Suffix_ونه_غوټه::increment_پیل_Idx(بینښه Inc) { پیل_Idx += Inc; }
+فراغ Suffix_ونه_غوټه::سېټ_Concat_Len(بینښه Len) { ConcatLen = Len; }
+بینښه Suffix_ونه_غوټه::getConcatLen() ثابت { أرجع ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+منطقي Suffix_ونه_دننی_غوټه::is_ریښه() ثابت {
+  أرجع get_پیل_Idx() == تشه_Idx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+بینښه Suffix_ونه_دننی_غوټه::get_پای_ټکی_Idx() ثابت { أرجع پای_ټکی_Idx; }
+فراغ Suffix_ونه_دننی_غوټه::سېټ_Link(Suffix_ونه_دننی_غوټه *L) {
+  أكد(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_ونه_دننی_غوټه *Suffix_ونه_دننی_غوټه::getLink() ثابت { أرجع Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+بینښه Suffix_ونه_ونې_پاڼه_غوټه::get_پای_ټکی_Idx() ثابت {
+  أكد(پای_ټکی_Idx && "EndIdx is empty?");
+  أرجع *پای_ټکی_Idx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+بینښه Suffix_ونه_ونې_پاڼه_غوټه::getSuffixIdx() ثابت { أرجع SuffixIdx; }
+فراغ Suffix_ونه_ونې_پاڼه_غوټه::سېټ_Suffix_Idx(بینښه Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+بینښه Suffix_ونه_غوټه::get_کیڼ_ونې_پاڼه_Idx() ثابت { أرجع کیڼ_ونې_پاڼه_Idx; }
+بینښه Suffix_ونه_غوټه::get_ښی_ونې_پاڼه_Idx() ثابت { أرجع ښی_ونې_پاڼه_Idx; }
+فراغ Suffix_ونه_غوټه::سېټ_کیڼ_ونې_پاڼه_Idx(بینښه Idx) { کیڼ_ونې_پاڼه_Idx = Idx; }
+فراغ Suffix_ونه_غوټه::سېټ_ښی_ونې_پاڼه_Idx(بینښه Idx) { ښی_ونې_پاڼه_Idx = Idx; }

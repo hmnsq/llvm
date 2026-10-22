@@ -11,327 +11,327 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BalancedPartitioning.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/ThreadPool.h"
+#ضمن "llvm/Support/BalancedPartitioning.h"
+#ضمن "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/FormatVariadic.h"
+#ضمن "llvm/Support/ThreadPool.h"
 
-#include <cmath>
+#ضمن <cmath>
 
-using namespace llvm;
-#define DEBUG_TYPE "balanced-partitioning"
+کارول نطاق llvm;
+#تعریف_کړه DEBUG_TYPE "balanced-partitioning"
 
-void BPFunctionNode::dump(raw_ostream &OS) const {
+فراغ BPFunction_غوټه::dump(raw_ostream &OS) ثابت {
   OS << formatv("{{ID={0} Utilities={{{1:$[,]}} Bucket={2}}", Id,
-                make_range(UtilityNodes.begin(), UtilityNodes.end()), Bucket);
+                make_range(UtilityNodes.begin(), UtilityNodes.پای_ټکی()), لوښی);
 }
 
-template <typename Func>
-void BalancedPartitioning::BPThreadPool::async(Func &&F) {
-#if LLVM_ENABLE_THREADS
+کينډۍ <ډول_نوم Func>
+فراغ متوازن_Partitioning::BPThreadPool::async(Func &&F) {
+#إذا LLVM_ENABLE_تارونه
   // This new thread could spawn more threads, so mark it as active
-  ++NumActiveThreads;
-  TheThreadPool.async([this, F]() {
+  ++عدد_فعال_تارونه;
+  TheThreadPool.async([هذا, F]() {
     // Run the task
     F();
 
     // This thread will no longer spawn new threads, so mark it as inactive
-    if (--NumActiveThreads == 0) {
+    إذا (--عدد_فعال_تارونه == 0) {
       // There are no more active threads, so mark as finished and notify
       {
-        std::unique_lock<std::mutex> lock(mtx);
-        assert(!IsFinishedSpawning);
-        IsFinishedSpawning = true;
+        std::unique_قلف<std::mutex> قلف(mtx);
+        أكد(!Is_پای_ته_رسېدلی_Spawning);
+        Is_پای_ته_رسېدلی_Spawning = ریښتیا;
       }
       cv.notify_one();
     }
   });
-#else
+#وإلا
   llvm_unreachable("threads are disabled");
-#endif
+#د_که_پای
 }
 
-void BalancedPartitioning::BPThreadPool::wait() {
-#if LLVM_ENABLE_THREADS
+فراغ متوازن_Partitioning::BPThreadPool::wait() {
+#إذا LLVM_ENABLE_تارونه
   // TODO: We could remove the mutex and condition variable and use
   // std::atomic::wait() instead, but that isn't available until C++20
   {
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [&]() { return IsFinishedSpawning; });
-    assert(IsFinishedSpawning && NumActiveThreads == 0);
+    std::unique_قلف<std::mutex> قلف(mtx);
+    cv.wait(قلف, [&]() { أرجع Is_پای_ته_رسېدلی_Spawning; });
+    أكد(Is_پای_ته_رسېدلی_Spawning && عدد_فعال_تارونه == 0);
   }
   // Now we can call ThreadPool::wait() since all tasks have been submitted
   TheThreadPool.wait();
-#else
+#وإلا
   llvm_unreachable("threads are disabled");
-#endif
+#د_که_پای
 }
 
-BalancedPartitioning::BalancedPartitioning(
-    const BalancedPartitioningConfig &Config)
+متوازن_Partitioning::متوازن_Partitioning(
+    ثابت متوازن_Partitioning_Config &Config)
     : Config(Config) {
   // Pre-computing log2 values
   Log2Cache[0] = 0.0;
-  for (unsigned I = 1; I < LOG_CACHE_SIZE; I++)
+  لكل (بینښه I = 1; I < LOG_CACHE_اندازه; I++)
     Log2Cache[I] = std::log2(I);
 }
 
-void BalancedPartitioning::run(std::vector<BPFunctionNode> &Nodes) const {
+فراغ متوازن_Partitioning::پرلپسې(std::ویکټور<BPFunction_غوټه> &Nodes) ثابت {
   LLVM_DEBUG(
       dbgs() << format(
           "Partitioning %d nodes using depth %d and %d iterations per split\n",
-          Nodes.size(), Config.SplitDepth, Config.IterationsPerSplit));
+          Nodes.اندازه_2(), Config.وېشل_ژوروالی, Config.Iterations_فی_وېشل));
   std::optional<BPThreadPool> TP;
-#if LLVM_ENABLE_THREADS
+#إذا LLVM_ENABLE_تارونه
   DefaultThreadPool TheThreadPool;
-  if (Config.TaskSplitDepth > 1)
+  إذا (Config.Task_وېشل_ژوروالی > 1)
     TP.emplace(TheThreadPool);
-#endif
+#د_که_پای
 
   // Record the input order
-  for (unsigned I = 0; I < Nodes.size(); I++)
-    Nodes[I].InputOrderIndex = I;
+  لكل (بینښه I = 0; I < Nodes.اندازه_2(); I++)
+    Nodes[I].ننوت_ترتیب_شاخص = I;
 
-  auto NodesRange = llvm::make_range(Nodes.begin(), Nodes.end());
-  auto BisectTask = [this, NodesRange, &TP]() {
+  خپلکاری NodesRange = llvm::make_range(Nodes.begin(), Nodes.پای_ټکی());
+  خپلکاری BisectTask = [هذا, NodesRange, &TP]() {
     bisect(NodesRange, /*RecDepth=*/0, /*RootBucket=*/1, /*Offset=*/0, TP);
   };
-  if (TP) {
+  إذا (TP) {
     TP->async(std::move(BisectTask));
     TP->wait();
-  } else {
+  } وإلا {
     BisectTask();
   }
 
-  llvm::stable_sort(NodesRange, [](const auto &L, const auto &R) {
-    return L.Bucket < R.Bucket;
+  llvm::stable_ترتیبول(NodesRange, [](ثابت خپلکاری &L, ثابت خپلکاری &R) {
+    أرجع L.لوښی < R.لوښی;
   });
 
   LLVM_DEBUG(dbgs() << "Balanced partitioning completed\n");
 }
 
-void BalancedPartitioning::bisect(const FunctionNodeRange Nodes,
-                                  unsigned RecDepth, unsigned RootBucket,
-                                  unsigned Offset,
-                                  std::optional<BPThreadPool> &TP) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  if (NumNodes <= 1 || RecDepth >= Config.SplitDepth) {
+فراغ متوازن_Partitioning::bisect(ثابت Function_غوټه_Range Nodes,
+                                  بینښه Rec_ژوروالی, بینښه ریښه_لوښی,
+                                  بینښه دننه_واټن,
+                                  std::optional<BPThreadPool> &TP) ثابت {
+  بینښه عدد_Nodes = llvm::اندازه_2(Nodes);
+  إذا (عدد_Nodes <= 1 || Rec_ژوروالی >= Config.وېشل_ژوروالی) {
     // We've reach the lowest level of the recursion tree. Fall back to the
     // original order and assign to buckets.
-    llvm::sort(Nodes, [](const auto &L, const auto &R) {
-      return L.InputOrderIndex < R.InputOrderIndex;
+    llvm::ترتیبول(Nodes, [](ثابت خپلکاری &L, ثابت خپلکاری &R) {
+      أرجع L.ننوت_ترتیب_شاخص < R.ننوت_ترتیب_شاخص;
     });
-    for (auto &N : Nodes)
-      N.Bucket = Offset++;
-    return;
+    لكل (خپلکاری &N : Nodes)
+      N.لوښی = دننه_واټن++;
+    أرجع;
   }
 
   LLVM_DEBUG(dbgs() << format("Bisect with %d nodes and root bucket %d\n",
-                              NumNodes, RootBucket));
+                              عدد_Nodes, ریښه_لوښی));
 
-  std::mt19937 RNG(RootBucket);
+  std::mt19937 RNG(ریښه_لوښی);
 
-  unsigned LeftBucket = 2 * RootBucket;
-  unsigned RightBucket = 2 * RootBucket + 1;
+  بینښه کیڼ_لوښی = 2 * ریښه_لوښی;
+  بینښه ښی_لوښی = 2 * ریښه_لوښی + 1;
 
   // Split into two and assign to the left and right buckets
-  split(Nodes, LeftBucket);
+  وېشل(Nodes, کیڼ_لوښی);
 
-  runIterations(Nodes, LeftBucket, RightBucket, RNG);
+  پرلپسې_Iterations(Nodes, کیڼ_لوښی, ښی_لوښی, RNG);
 
   // Split nodes wrt the resulting buckets
-  auto NodesMid =
-      llvm::partition(Nodes, [&](auto &N) { return N.Bucket == LeftBucket; });
-  unsigned MidOffset = Offset + std::distance(Nodes.begin(), NodesMid);
+  خپلکاری NodesMid =
+      llvm::برخه_کول(Nodes, [&](خپلکاری &N) { أرجع N.لوښی == کیڼ_لوښی; });
+  بینښه Mid_دننه_واټن = دننه_واټن + std::واټن(Nodes.begin(), NodesMid);
 
-  auto LeftNodes = llvm::make_range(Nodes.begin(), NodesMid);
-  auto RightNodes = llvm::make_range(NodesMid, Nodes.end());
+  خپلکاری کیڼ_Nodes = llvm::make_range(Nodes.begin(), NodesMid);
+  خپلکاری ښی_Nodes = llvm::make_range(NodesMid, Nodes.پای_ټکی());
 
-  auto LeftRecTask = [this, LeftNodes, RecDepth, LeftBucket, Offset, &TP]() {
-    bisect(LeftNodes, RecDepth + 1, LeftBucket, Offset, TP);
+  خپلکاری کیڼ_Rec_Task = [هذا, کیڼ_Nodes, Rec_ژوروالی, کیڼ_لوښی, دننه_واټن, &TP]() {
+    bisect(کیڼ_Nodes, Rec_ژوروالی + 1, کیڼ_لوښی, دننه_واټن, TP);
   };
-  auto RightRecTask = [this, RightNodes, RecDepth, RightBucket, MidOffset,
+  خپلکاری ښی_Rec_Task = [هذا, ښی_Nodes, Rec_ژوروالی, ښی_لوښی, Mid_دننه_واټن,
                        &TP]() {
-    bisect(RightNodes, RecDepth + 1, RightBucket, MidOffset, TP);
+    bisect(ښی_Nodes, Rec_ژوروالی + 1, ښی_لوښی, Mid_دننه_واټن, TP);
   };
 
-  if (TP && RecDepth < Config.TaskSplitDepth && NumNodes >= 4) {
-    TP->async(std::move(LeftRecTask));
-    TP->async(std::move(RightRecTask));
-  } else {
-    LeftRecTask();
-    RightRecTask();
+  إذا (TP && Rec_ژوروالی < Config.Task_وېشل_ژوروالی && عدد_Nodes >= 4) {
+    TP->async(std::move(کیڼ_Rec_Task));
+    TP->async(std::move(ښی_Rec_Task));
+  } وإلا {
+    کیڼ_Rec_Task();
+    ښی_Rec_Task();
   }
 }
 
-void BalancedPartitioning::runIterations(const FunctionNodeRange Nodes,
-                                         unsigned LeftBucket,
-                                         unsigned RightBucket,
-                                         std::mt19937 &RNG) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  DenseMap<BPFunctionNode::UtilityNodeT, unsigned> UtilityNodeIndex;
-  for (auto &N : Nodes)
-    for (auto &UN : N.UtilityNodes)
-      ++UtilityNodeIndex[UN];
+فراغ متوازن_Partitioning::پرلپسې_Iterations(ثابت Function_غوټه_Range Nodes,
+                                         بینښه کیڼ_لوښی,
+                                         بینښه ښی_لوښی,
+                                         std::mt19937 &RNG) ثابت {
+  بینښه عدد_Nodes = llvm::اندازه_2(Nodes);
+  DenseMap<BPFunction_غوټه::Utility_غوټه_T, بینښه> Utility_غوټه_شاخص;
+  لكل (خپلکاری &N : Nodes)
+    لكل (خپلکاری &UN : N.UtilityNodes)
+      ++Utility_غوټه_شاخص[UN];
   // Remove utility nodes if they have just one edge or are connected to all
   // functions
-  for (auto &N : Nodes)
-    llvm::erase_if(N.UtilityNodes, [&](auto &UN) {
-      unsigned UNI = UtilityNodeIndex[UN];
-      return UNI == 1 || UNI == NumNodes;
+  لكل (خپلکاری &N : Nodes)
+    llvm::erase_if(N.UtilityNodes, [&](خپلکاری &UN) {
+      بینښه UNI = Utility_غوټه_شاخص[UN];
+      أرجع UNI == 1 || UNI == عدد_Nodes;
     });
 
   // Renumber utility nodes so they can be used to index into Signatures
-  UtilityNodeIndex.clear();
-  for (auto &N : Nodes)
-    for (auto &UN : N.UtilityNodes)
-      UN = UtilityNodeIndex.insert({UN, UtilityNodeIndex.size()}).first->second;
+  Utility_غوټه_شاخص.clear();
+  لكل (خپلکاری &N : Nodes)
+    لكل (خپلکاری &UN : N.UtilityNodes)
+      UN = Utility_غوټه_شاخص.ورننباسه({UN, Utility_غوټه_شاخص.اندازه_2()}).لومړی_2->دوهم_2;
 
   // Initialize signatures
-  SignaturesT Signatures(/*Size=*/UtilityNodeIndex.size());
-  for (auto &N : Nodes) {
-    for (auto &UN : N.UtilityNodes) {
-      assert(UN < Signatures.size());
-      if (N.Bucket == LeftBucket) {
-        Signatures[UN].LeftCount++;
-      } else {
-        Signatures[UN].RightCount++;
+  SignaturesT Signatures(/*Size=*/Utility_غوټه_شاخص.اندازه_2());
+  لكل (خپلکاری &N : Nodes) {
+    لكل (خپلکاری &UN : N.UtilityNodes) {
+      أكد(UN < Signatures.اندازه_2());
+      إذا (N.لوښی == کیڼ_لوښی) {
+        Signatures[UN].کیڼ_شمېر++;
+      } وإلا {
+        Signatures[UN].ښی_شمېر++;
       }
     }
   }
 
-  for (unsigned I = 0; I < Config.IterationsPerSplit; I++) {
-    unsigned NumMovedNodes =
-        runIteration(Nodes, LeftBucket, RightBucket, Signatures, RNG);
-    if (NumMovedNodes == 0)
-      break;
+  لكل (بینښه I = 0; I < Config.Iterations_فی_وېشل; I++) {
+    بینښه عدد_Moved_Nodes =
+        پرلپسې_Iteration(Nodes, کیڼ_لوښی, ښی_لوښی, Signatures, RNG);
+    إذا (عدد_Moved_Nodes == 0)
+      اكسر;
   }
 }
 
-unsigned BalancedPartitioning::runIteration(const FunctionNodeRange Nodes,
-                                            unsigned LeftBucket,
-                                            unsigned RightBucket,
+بینښه متوازن_Partitioning::پرلپسې_Iteration(ثابت Function_غوټه_Range Nodes,
+                                            بینښه کیڼ_لوښی,
+                                            بینښه ښی_لوښی,
                                             SignaturesT &Signatures,
-                                            std::mt19937 &RNG) const {
+                                            std::mt19937 &RNG) ثابت {
   // Init signature cost caches
-  for (auto &Signature : Signatures) {
-    if (Signature.CachedGainIsValid)
-      continue;
-    unsigned L = Signature.LeftCount;
-    unsigned R = Signature.RightCount;
-    assert((L > 0 || R > 0) && "incorrect signature");
-    float Cost = logCost(L, R);
+  لكل (خپلکاری &Signature : Signatures) {
+    إذا (Signature.CachedGainIsValid)
+      استمر;
+    بینښه L = Signature.کیڼ_شمېر;
+    بینښه R = Signature.ښی_شمېر;
+    أكد((L > 0 || R > 0) && "incorrect signature");
+    عائم لګښت = log_لګښت(L, R);
     Signature.CachedGainLR = 0.f;
     Signature.CachedGainRL = 0.f;
-    if (L > 0)
-      Signature.CachedGainLR = Cost - logCost(L - 1, R + 1);
-    if (R > 0)
-      Signature.CachedGainRL = Cost - logCost(L + 1, R - 1);
-    Signature.CachedGainIsValid = true;
+    إذا (L > 0)
+      Signature.CachedGainLR = لګښت - log_لګښت(L - 1, R + 1);
+    إذا (R > 0)
+      Signature.CachedGainRL = لګښت - log_لګښت(L + 1, R - 1);
+    Signature.CachedGainIsValid = ریښتیا;
   }
 
   // Compute move gains
-  using GainPair = std::pair<float, BPFunctionNode *>;
-  std::vector<GainPair> Gains;
-  for (auto &N : Nodes) {
-    bool FromLeftToRight = (N.Bucket == LeftBucket);
-    float Gain = moveGain(N, FromLeftToRight, Signatures);
-    Gains.push_back(std::make_pair(Gain, &N));
+  کارول GainPair = std::pair<عائم, BPFunction_غوټه *>;
+  std::ویکټور<GainPair> Gains;
+  لكل (خپلکاری &N : Nodes) {
+    منطقي From_کیڼ_منزل_ښی = (N.لوښی == کیڼ_لوښی);
+    عائم Gain = moveGain(N, From_کیڼ_منزل_ښی, Signatures);
+    Gains.ټېل_شا(std::make_pair(Gain, &N));
   }
 
   // Collect left and right gains
-  auto LeftEnd = llvm::partition(
-      Gains, [&](const auto &GP) { return GP.second->Bucket == LeftBucket; });
-  auto LeftRange = llvm::make_range(Gains.begin(), LeftEnd);
-  auto RightRange = llvm::make_range(LeftEnd, Gains.end());
+  خپلکاری کیڼ_پای_ټکی = llvm::برخه_کول(
+      Gains, [&](ثابت خپلکاری &GP) { أرجع GP.دوهم_2->لوښی == کیڼ_لوښی; });
+  خپلکاری کیڼ_Range = llvm::make_range(Gains.begin(), کیڼ_پای_ټکی);
+  خپلکاری ښی_Range = llvm::make_range(کیڼ_پای_ټکی, Gains.پای_ټکی());
 
   // Sort gains in descending order
-  auto LargerGain = [](const auto &L, const auto &R) {
-    return L.first > R.first;
+  خپلکاری LargerGain = [](ثابت خپلکاری &L, ثابت خپلکاری &R) {
+    أرجع L.لومړی_2 > R.لومړی_2;
   };
-  llvm::stable_sort(LeftRange, LargerGain);
-  llvm::stable_sort(RightRange, LargerGain);
+  llvm::stable_ترتیبول(کیڼ_Range, LargerGain);
+  llvm::stable_ترتیبول(ښی_Range, LargerGain);
 
-  unsigned NumMovedDataVertices = 0;
-  for (auto [LeftPair, RightPair] : llvm::zip(LeftRange, RightRange)) {
-    auto &[LeftGain, LeftNode] = LeftPair;
-    auto &[RightGain, RightNode] = RightPair;
+  بینښه عدد_Moved_معلومات_Vertices = 0;
+  لكل (خپلکاری [کیڼ_Pair, ښی_Pair] : llvm::zip(کیڼ_Range, ښی_Range)) {
+    خپلکاری &[کیڼ_Gain, کیڼ_غوټه] = کیڼ_Pair;
+    خپلکاری &[ښی_Gain, ښی_غوټه] = ښی_Pair;
     // Stop when the gain is no longer beneficial
-    if (LeftGain + RightGain <= 0.f)
-      break;
+    إذا (کیڼ_Gain + ښی_Gain <= 0.f)
+      اكسر;
     // Try to exchange the nodes between buckets
-    if (moveFunctionNode(*LeftNode, LeftBucket, RightBucket, Signatures, RNG))
-      ++NumMovedDataVertices;
-    if (moveFunctionNode(*RightNode, LeftBucket, RightBucket, Signatures, RNG))
-      ++NumMovedDataVertices;
+    إذا (move_Function_غوټه(*کیڼ_غوټه, کیڼ_لوښی, ښی_لوښی, Signatures, RNG))
+      ++عدد_Moved_معلومات_Vertices;
+    إذا (move_Function_غوټه(*ښی_غوټه, کیڼ_لوښی, ښی_لوښی, Signatures, RNG))
+      ++عدد_Moved_معلومات_Vertices;
   }
-  return NumMovedDataVertices;
+  أرجع عدد_Moved_معلومات_Vertices;
 }
 
-bool BalancedPartitioning::moveFunctionNode(BPFunctionNode &N,
-                                            unsigned LeftBucket,
-                                            unsigned RightBucket,
+منطقي متوازن_Partitioning::move_Function_غوټه(BPFunction_غوټه &N,
+                                            بینښه کیڼ_لوښی,
+                                            بینښه ښی_لوښی,
                                             SignaturesT &Signatures,
-                                            std::mt19937 &RNG) const {
+                                            std::mt19937 &RNG) ثابت {
   // Sometimes we skip the move. This helps to escape local optima
-  if (std::uniform_real_distribution<float>(0.f, 1.f)(RNG) <=
+  إذا (std::یوشان_real_distribution<عائم>(0.f, 1.f)(RNG) <=
       Config.SkipProbability)
-    return false;
+    أرجع خطأ;
 
-  bool FromLeftToRight = (N.Bucket == LeftBucket);
+  منطقي From_کیڼ_منزل_ښی = (N.لوښی == کیڼ_لوښی);
   // Update the current bucket
-  N.Bucket = (FromLeftToRight ? RightBucket : LeftBucket);
+  N.لوښی = (From_کیڼ_منزل_ښی ? ښی_لوښی : کیڼ_لوښی);
 
   // Update signatures and invalidate gain cache
-  if (FromLeftToRight) {
-    for (auto &UN : N.UtilityNodes) {
-      auto &Signature = Signatures[UN];
-      Signature.LeftCount--;
-      Signature.RightCount++;
-      Signature.CachedGainIsValid = false;
+  إذا (From_کیڼ_منزل_ښی) {
+    لكل (خپلکاری &UN : N.UtilityNodes) {
+      خپلکاری &Signature = Signatures[UN];
+      Signature.کیڼ_شمېر--;
+      Signature.ښی_شمېر++;
+      Signature.CachedGainIsValid = خطأ;
     }
-  } else {
-    for (auto &UN : N.UtilityNodes) {
-      auto &Signature = Signatures[UN];
-      Signature.LeftCount++;
-      Signature.RightCount--;
-      Signature.CachedGainIsValid = false;
+  } وإلا {
+    لكل (خپلکاری &UN : N.UtilityNodes) {
+      خپلکاری &Signature = Signatures[UN];
+      Signature.کیڼ_شمېر++;
+      Signature.ښی_شمېر--;
+      Signature.CachedGainIsValid = خطأ;
     }
   }
-  return true;
+  أرجع ریښتیا;
 }
 
-void BalancedPartitioning::split(const FunctionNodeRange Nodes,
-                                 unsigned StartBucket) const {
-  unsigned NumNodes = llvm::size(Nodes);
-  auto NodesMid = Nodes.begin() + (NumNodes + 1) / 2;
+فراغ متوازن_Partitioning::وېشل(ثابت Function_غوټه_Range Nodes,
+                                 بینښه پیل_لوښی) ثابت {
+  بینښه عدد_Nodes = llvm::اندازه_2(Nodes);
+  خپلکاری NodesMid = Nodes.begin() + (عدد_Nodes + 1) / 2;
 
-  llvm::sort(Nodes, [](auto &L, auto &R) {
-    return L.InputOrderIndex < R.InputOrderIndex;
+  llvm::ترتیبول(Nodes, [](خپلکاری &L, خپلکاری &R) {
+    أرجع L.ننوت_ترتیب_شاخص < R.ننوت_ترتیب_شاخص;
   });
 
-  for (auto &N : llvm::make_range(Nodes.begin(), NodesMid))
-    N.Bucket = StartBucket;
-  for (auto &N : llvm::make_range(NodesMid, Nodes.end()))
-    N.Bucket = StartBucket + 1;
+  لكل (خپلکاری &N : llvm::make_range(Nodes.begin(), NodesMid))
+    N.لوښی = پیل_لوښی;
+  لكل (خپلکاری &N : llvm::make_range(NodesMid, Nodes.پای_ټکی()))
+    N.لوښی = پیل_لوښی + 1;
 }
 
-float BalancedPartitioning::moveGain(const BPFunctionNode &N,
-                                     bool FromLeftToRight,
-                                     const SignaturesT &Signatures) {
-  float Gain = 0.f;
-  for (auto &UN : N.UtilityNodes)
-    Gain += (FromLeftToRight ? Signatures[UN].CachedGainLR
+عائم متوازن_Partitioning::moveGain(ثابت BPFunction_غوټه &N,
+                                     منطقي From_کیڼ_منزل_ښی,
+                                     ثابت SignaturesT &Signatures) {
+  عائم Gain = 0.f;
+  لكل (خپلکاری &UN : N.UtilityNodes)
+    Gain += (From_کیڼ_منزل_ښی ? Signatures[UN].CachedGainLR
                              : Signatures[UN].CachedGainRL);
-  return Gain;
+  أرجع Gain;
 }
 
-float BalancedPartitioning::logCost(unsigned X, unsigned Y) const {
-  return -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
+عائم متوازن_Partitioning::log_لګښت(بینښه X, بینښه Y) ثابت {
+  أرجع -(X * log2Cached(X + 1) + Y * log2Cached(Y + 1));
 }
 
-float BalancedPartitioning::log2Cached(unsigned i) const {
-  return (i < LOG_CACHE_SIZE) ? Log2Cache[i] : std::log2(i);
+عائم متوازن_Partitioning::log2Cached(بینښه i) ثابت {
+  أرجع (i < LOG_CACHE_اندازه) ? Log2Cache[i] : std::log2(i);
 }

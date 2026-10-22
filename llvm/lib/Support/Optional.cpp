@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-llvm::raw_ostream &llvm::operator<<(raw_ostream &OS, std::nullopt_t) {
-  return OS << "None";
+llvm::raw_ostream &llvm::چلوونکی<<(raw_ostream &OS, std::nullopt_t) {
+  أرجع OS << "None";
 }

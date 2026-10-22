@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Memory.h"
+#ضمن "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#که_نه_تعریف_شوی NDEBUG
+#ضمن "llvm/Support/raw_ostream.h"
+#د_که_پای // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#که_تعریف_شوی LLVM_ON_UNIX
+#ضمن "Unix/Memory.inc"
+#د_که_پای
+#که_تعریف_شوی _WIN32
+#ضمن "Windows/Memory.inc"
+#د_که_پای
 
-#ifndef NDEBUG
+#که_نه_تعریف_شوی NDEBUG
 
-namespace llvm {
-namespace sys {
+نطاق llvm {
+نطاق sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &چلوونکی<<(raw_ostream &OS, ثابت حافظه_2::ProtectionFlags &PF) {
+  أكد((PF & ~(حافظه_2::MF_READ | حافظه_2::MF_WRITE | حافظه_2::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
-            << (PF & Memory::MF_WRITE ? 'W' : '-')
-            << (PF & Memory::MF_EXEC ? 'X' : '-');
+  أرجع OS << (PF & حافظه_2::MF_READ ? 'R' : '-')
+            << (PF & حافظه_2::MF_WRITE ? 'W' : '-')
+            << (PF & حافظه_2::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &چلوونکی<<(raw_ostream &OS, ثابت حافظه_بلاک &MB) {
+  أرجع OS << "[ " << MB.بنسټ_2() << " .. "
+            << (فراغ *)((حرف *)MB.بنسټ_2() + MB.allocated_اندازه()) << " ] ("
+            << MB.allocated_اندازه() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#د_که_پای // ifndef NDEBUG

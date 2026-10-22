@@ -6,400 +6,400 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdint>
-#include <cstring>
-#include <string>
-#include <vector>
+#ضمن "llvm/Support/YAMLTraits.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Support/Casting.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/LineIterator.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/VersionTuple.h"
+#ضمن "llvm/Support/YAMLParser.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cassert>
+#ضمن <cstdint>
+#ضمن <cstring>
+#ضمن <string>
+#ضمن <vector>
 
-using namespace llvm;
-using namespace yaml;
+کارول نطاق llvm;
+کارول نطاق yaml;
 
 //===----------------------------------------------------------------------===//
 //  IO
 //===----------------------------------------------------------------------===//
 
-IO::IO(void *Context) : Ctxt(Context) {}
+IO::IO(فراغ *Context) : Ctxt(Context) {}
 
-IO::~IO() = default;
+IO::~IO() = افتراضي;
 
-void *IO::getContext() const {
-  return Ctxt;
+فراغ *IO::getContext() ثابت {
+  أرجع Ctxt;
 }
 
-void IO::setContext(void *Context) {
+فراغ IO::سېټ_Context(فراغ *Context) {
   Ctxt = Context;
 }
 
-void IO::setAllowUnknownKeys(bool Allow) {
+فراغ IO::سېټ_Allow_Unknown_کلیګانې(منطقي Allow) {
   llvm_unreachable("Only supported for Input");
 }
 
 //===----------------------------------------------------------------------===//
-//  Input
+//ننوت
 //===----------------------------------------------------------------------===//
 
-Input::Input(StringRef InputContent, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(InputContent, SrcMgr, false, &EC)) {
-  if (DiagHandler)
-    SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
+ننوت::ننوت(StringRef ننوت_Content, فراغ *Ctxt,
+             سرچینه_Mgr::DiagHandlerTy DiagHandler, فراغ *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(جديد بهیر(ننوت_Content, SrcMgr, خطأ, &EC)) {
+  إذا (DiagHandler)
+    SrcMgr.سېټ_Diag_Handler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::Input(MemoryBufferRef Input, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(Input, SrcMgr, false, &EC)) {
-  if (DiagHandler)
-    SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
+ننوت::ننوت(حافظه_بفر_Ref ننوت, فراغ *Ctxt,
+             سرچینه_Mgr::DiagHandlerTy DiagHandler, فراغ *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(جديد بهیر(ننوت, SrcMgr, خطأ, &EC)) {
+  إذا (DiagHandler)
+    SrcMgr.سېټ_Diag_Handler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::~Input() = default;
+ننوت::~ننوت() = افتراضي;
 
-std::error_code Input::error() { return EC; }
+std::error_کوډ ننوت::error() { أرجع EC; }
 
-bool Input::outputting() const {
-  return false;
+منطقي ننوت::outputting() ثابت {
+  أرجع خطأ;
 }
 
-bool Input::setCurrentDocument() {
-  if (DocIterator != Strm->end()) {
-    Node *N = DocIterator->getRoot();
-    if (!N) {
-      EC = make_error_code(errc::invalid_argument);
-      return false;
+منطقي ننوت::سېټ_Current_Document() {
+  إذا (DocIterator != Strm->پای_ټکی()) {
+    غوټه *N = DocIterator->get_ریښه();
+    إذا (!N) {
+      EC = make_error_کوډ(errc::invalid_دلیل);
+      أرجع خطأ;
     }
 
-    if (isa<NullNode>(N)) {
+    إذا (isa<Null_غوټه>(N)) {
       // Empty files are allowed and ignored
       ++DocIterator;
-      return setCurrentDocument();
+      أرجع سېټ_Current_Document();
     }
     releaseHNodeBuffers();
-    TopNode = createHNodes(N);
-    CurrentNode = TopNode;
-    return true;
+    سر_غوټه = createHNodes(N);
+    Current_غوټه = سر_غوټه;
+    أرجع ریښتیا;
   }
-  return false;
+  أرجع خطأ;
 }
 
-bool Input::nextDocument() {
-  return ++DocIterator != Strm->end();
+منطقي ننوت::بل_Document() {
+  أرجع ++DocIterator != Strm->پای_ټکی();
 }
 
-const Node *Input::getCurrentNode() const {
-  return CurrentNode ? CurrentNode->_node : nullptr;
+ثابت غوټه *ننوت::get_Current_غوټه() ثابت {
+  أرجع Current_غوټه ? Current_غوټه->غوټه_2 : تش_اشاره;
 }
 
-bool Input::mapTag(StringRef Tag, bool Default) {
+منطقي ننوت::map_نښان(StringRef نښان, منطقي Default) {
   // CurrentNode can be null if setCurrentDocument() was unable to
   // parse the document because it was invalid or empty.
-  if (!CurrentNode)
-    return false;
+  إذا (!Current_غوټه)
+    أرجع خطأ;
 
-  std::string foundTag = CurrentNode->_node->getVerbatimTag();
-  if (foundTag.empty()) {
+  std::string وموندل_نښان = Current_غوټه->غوټه_2->get_Verbatim_نښان();
+  إذا (وموندل_نښان.تشه()) {
     // If no tag found and 'Tag' is the default, say it was found.
-    return Default;
+    أرجع Default;
   }
   // Return true iff found tag matches supplied tag.
-  return Tag == foundTag;
+  أرجع نښان == وموندل_نښان;
 }
 
-void Input::beginMapping() {
-  if (EC)
-    return;
+فراغ ننوت::beginMapping() {
+  إذا (EC)
+    أرجع;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (MN) {
-    MN->ValidKeys.clear();
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_غوټه);
+  إذا (MN) {
+    MN->Valid_کلیګانې.clear();
   }
 }
 
-std::vector<StringRef> Input::keys() {
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  std::vector<StringRef> Ret;
-  if (!MN) {
-    setError(CurrentNode, "not a mapping");
-    return Ret;
+std::ویکټور<StringRef> ننوت::کلیګانې() {
+  MapHNode *MN = dyn_cast<MapHNode>(Current_غوټه);
+  std::ویکټور<StringRef> Ret;
+  إذا (!MN) {
+    سېټ_Error(Current_غوټه, "not a mapping");
+    أرجع Ret;
   }
-  for (auto &P : MN->Mapping)
-    Ret.push_back(P.first());
-  return Ret;
+  لكل (خپلکاری &P : MN->Mapping)
+    Ret.ټېل_شا(P.لومړی_2());
+  أرجع Ret;
 }
 
-bool Input::preflightKey(StringRef Key, bool Required, bool, bool &UseDefault,
-                         void *&SaveInfo) {
-  UseDefault = false;
-  if (EC)
-    return false;
+منطقي ننوت::preflight_کلی(StringRef کلی, منطقي Required, منطقي, منطقي &UseDefault,
+                         فراغ *&SaveInfo) {
+  UseDefault = خطأ;
+  إذا (EC)
+    أرجع خطأ;
 
   // CurrentNode is null for empty documents, which is an error in case required
   // nodes are present.
-  if (!CurrentNode) {
-    if (Required)
-      EC = make_error_code(errc::invalid_argument);
-    else
-      UseDefault = true;
-    return false;
+  إذا (!Current_غوټه) {
+    إذا (Required)
+      EC = make_error_کوډ(errc::invalid_دلیل);
+    وإلا
+      UseDefault = ریښتیا;
+    أرجع خطأ;
   }
 
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  if (!MN) {
-    if (Required || !isa<EmptyHNode>(CurrentNode))
-      setError(CurrentNode, "not a mapping");
-    else
-      UseDefault = true;
-    return false;
+  MapHNode *MN = dyn_cast<MapHNode>(Current_غوټه);
+  إذا (!MN) {
+    إذا (Required || !isa<تشه_HNode>(Current_غوټه))
+      سېټ_Error(Current_غوټه, "not a mapping");
+    وإلا
+      UseDefault = ریښتیا;
+    أرجع خطأ;
   }
-  MN->ValidKeys.push_back(Key.str());
-  HNode *Value = MN->Mapping[Key].first;
-  if (!Value) {
-    if (Required)
-      setError(CurrentNode, Twine("missing required key '") + Key + "'");
-    else
-      UseDefault = true;
-    return false;
+  MN->Valid_کلیګانې.ټېل_شا(کلی.str());
+  HNode *ارزښت = MN->Mapping[کلی].لومړی_2;
+  إذا (!ارزښت) {
+    إذا (Required)
+      سېټ_Error(Current_غوټه, Twine("missing required key '") + کلی + "'");
+    وإلا
+      UseDefault = ریښتیا;
+    أرجع خطأ;
   }
-  SaveInfo = CurrentNode;
-  CurrentNode = Value;
-  return true;
+  SaveInfo = Current_غوټه;
+  Current_غوټه = ارزښت;
+  أرجع ریښتیا;
 }
 
-void Input::postflightKey(void *saveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(saveInfo);
+فراغ ننوت::postflight_کلی(فراغ *saveInfo) {
+  Current_غوټه = reinterpret_cast<HNode *>(saveInfo);
 }
 
-void Input::endMapping() {
-  if (EC)
-    return;
+فراغ ننوت::پای_ټکی_Mapping() {
+  إذا (EC)
+    أرجع;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (!MN)
-    return;
-  for (const auto &NN : MN->Mapping) {
-    if (!is_contained(MN->ValidKeys, NN.first())) {
-      const SMRange &ReportLoc = NN.second.second;
-      if (!AllowUnknownKeys) {
-        setError(ReportLoc, Twine("unknown key '") + NN.first() + "'");
-        break;
-      } else
-        reportWarning(ReportLoc, Twine("unknown key '") + NN.first() + "'");
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_غوټه);
+  إذا (!MN)
+    أرجع;
+  لكل (ثابت خپلکاری &NN : MN->Mapping) {
+    إذا (!is_contained(MN->Valid_کلیګانې, NN.لومړی_2())) {
+      ثابت SMRange &ReportLoc = NN.دوهم_2.دوهم_2;
+      إذا (!Allow_Unknown_کلیګانې) {
+        سېټ_Error(ReportLoc, Twine("unknown key '") + NN.لومړی_2() + "'");
+        اكسر;
+      } وإلا
+        reportWarning(ReportLoc, Twine("unknown key '") + NN.لومړی_2() + "'");
     }
   }
 }
 
-void Input::beginFlowMapping() { beginMapping(); }
+فراغ ننوت::beginFlowMapping() { beginMapping(); }
 
-void Input::endFlowMapping() { endMapping(); }
+فراغ ننوت::پای_ټکی_Flow_Mapping() { پای_ټکی_Mapping(); }
 
-unsigned Input::beginSequence() {
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
-    return SQ->Entries.size();
-  if (isa<EmptyHNode>(CurrentNode))
-    return 0;
+بینښه ننوت::beginSequence() {
+  إذا (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_غوټه))
+    أرجع SQ->Entries.اندازه_2();
+  إذا (isa<تشه_HNode>(Current_غوټه))
+    أرجع 0;
   // Treat case where there's a scalar "null" value as an empty sequence.
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (isNull(SN->value()))
-      return 0;
+  إذا (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_غوټه)) {
+    إذا (isNull(SN->ارزښت_2()))
+      أرجع 0;
   }
   // Any other type of HNode is an error.
-  setError(CurrentNode, "not a sequence");
-  return 0;
+  سېټ_Error(Current_غوټه, "not a sequence");
+  أرجع 0;
 }
 
-void Input::endSequence() {
+فراغ ننوت::پای_ټکی_Sequence() {
 }
 
-bool Input::preflightElement(unsigned Index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[Index];
-    return true;
+منطقي ننوت::preflightElement(بینښه شاخص_2, فراغ *&SaveInfo) {
+  إذا (EC)
+    أرجع خطأ;
+  إذا (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_غوټه)) {
+    SaveInfo = Current_غوټه;
+    Current_غوټه = SQ->Entries[شاخص_2];
+    أرجع ریښتیا;
   }
-  return false;
+  أرجع خطأ;
 }
 
-void Input::postflightElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+فراغ ننوت::postflightElement(فراغ *SaveInfo) {
+  Current_غوټه = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-unsigned Input::beginFlowSequence() { return beginSequence(); }
+بینښه ننوت::beginFlowSequence() { أرجع beginSequence(); }
 
-bool Input::preflightFlowElement(unsigned index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[index];
-    return true;
+منطقي ننوت::preflightFlowElement(بینښه شاخص, فراغ *&SaveInfo) {
+  إذا (EC)
+    أرجع خطأ;
+  إذا (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_غوټه)) {
+    SaveInfo = Current_غوټه;
+    Current_غوټه = SQ->Entries[شاخص];
+    أرجع ریښتیا;
   }
-  return false;
+  أرجع خطأ;
 }
 
-void Input::postflightFlowElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+فراغ ننوت::postflightFlowElement(فراغ *SaveInfo) {
+  Current_غوټه = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-void Input::endFlowSequence() {
+فراغ ننوت::پای_ټکی_Flow_Sequence() {
 }
 
-void Input::beginEnumScalar() {
-  ScalarMatchFound = false;
+فراغ ننوت::beginEnumScalar() {
+  Scalar_سمون_وموندل = خطأ;
 }
 
-bool Input::matchEnumScalar(StringRef Str, bool) {
-  if (ScalarMatchFound)
-    return false;
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (SN->value() == Str) {
-      ScalarMatchFound = true;
-      return true;
+منطقي ننوت::سمون_Enum_Scalar(StringRef Str, منطقي) {
+  إذا (Scalar_سمون_وموندل)
+    أرجع خطأ;
+  إذا (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_غوټه)) {
+    إذا (SN->ارزښت_2() == Str) {
+      Scalar_سمون_وموندل = ریښتیا;
+      أرجع ریښتیا;
     }
   }
-  return false;
+  أرجع خطأ;
 }
 
-bool Input::matchEnumFallback() {
-  if (ScalarMatchFound)
-    return false;
-  ScalarMatchFound = true;
-  return true;
+منطقي ننوت::سمون_Enum_Fallback() {
+  إذا (Scalar_سمون_وموندل)
+    أرجع خطأ;
+  Scalar_سمون_وموندل = ریښتیا;
+  أرجع ریښتیا;
 }
 
-void Input::endEnumScalar() {
-  if (!ScalarMatchFound) {
-    setError(CurrentNode, "unknown enumerated scalar");
+فراغ ننوت::پای_ټکی_Enum_Scalar() {
+  إذا (!Scalar_سمون_وموندل) {
+    سېټ_Error(Current_غوټه, "unknown enumerated scalar");
   }
 }
 
-bool Input::beginBitSetScalar(bool &DoClear) {
-  BitValuesUsed.clear();
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    BitValuesUsed.resize(SQ->Entries.size());
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+منطقي ننوت::begin_بټ_سېټ_Scalar(منطقي &DoClear) {
+  بټ_ارزښتونه_کارول_شوی.clear();
+  إذا (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_غوټه)) {
+    بټ_ارزښتونه_کارول_شوی.resize(SQ->Entries.اندازه_2());
+  } وإلا {
+    سېټ_Error(Current_غوټه, "expected sequence of bit values");
   }
-  DoClear = true;
-  return true;
+  DoClear = ریښتیا;
+  أرجع ریښتیا;
 }
 
-bool Input::bitSetMatch(StringRef Str, bool) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    unsigned Index = 0;
-    for (auto &N : SQ->Entries) {
-      if (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
-        if (SN->value() == Str) {
-          BitValuesUsed[Index] = true;
-          return true;
+منطقي ننوت::بټ_سېټ_سمون(StringRef Str, منطقي) {
+  إذا (EC)
+    أرجع خطأ;
+  إذا (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_غوټه)) {
+    بینښه شاخص_2 = 0;
+    لكل (خپلکاری &N : SQ->Entries) {
+      إذا (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
+        إذا (SN->ارزښت_2() == Str) {
+          بټ_ارزښتونه_کارول_شوی[شاخص_2] = ریښتیا;
+          أرجع ریښتیا;
         }
-      } else {
-        setError(CurrentNode, "unexpected scalar in sequence of bit values");
+      } وإلا {
+        سېټ_Error(Current_غوټه, "unexpected scalar in sequence of bit values");
       }
-      ++Index;
+      ++شاخص_2;
     }
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+  } وإلا {
+    سېټ_Error(Current_غوټه, "expected sequence of bit values");
   }
-  return false;
+  أرجع خطأ;
 }
 
-void Input::endBitSetScalar() {
-  if (EC)
-    return;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    assert(BitValuesUsed.size() == SQ->Entries.size());
-    for (unsigned i = 0; i < SQ->Entries.size(); ++i) {
-      if (!BitValuesUsed[i]) {
-        setError(SQ->Entries[i], "unknown bit value");
-        return;
+فراغ ننوت::پای_ټکی_بټ_سېټ_Scalar() {
+  إذا (EC)
+    أرجع;
+  إذا (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_غوټه)) {
+    أكد(بټ_ارزښتونه_کارول_شوی.اندازه_2() == SQ->Entries.اندازه_2());
+    لكل (بینښه i = 0; i < SQ->Entries.اندازه_2(); ++i) {
+      إذا (!بټ_ارزښتونه_کارول_شوی[i]) {
+        سېټ_Error(SQ->Entries[i], "unknown bit value");
+        أرجع;
       }
     }
   }
 }
 
-void Input::scalarString(StringRef &S, QuotingType) {
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    S = SN->value();
-  } else {
-    setError(CurrentNode, "unexpected scalar");
+فراغ ننوت::scalarString(StringRef &S, QuotingType) {
+  إذا (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_غوټه)) {
+    S = SN->ارزښت_2();
+  } وإلا {
+    سېټ_Error(Current_غوټه, "unexpected scalar");
   }
 }
 
-void Input::blockScalarString(StringRef &S) { scalarString(S, QuotingType::None); }
+فراغ ننوت::بلاک_Scalar_String(StringRef &S) { scalarString(S, QuotingType::None); }
 
-void Input::scalarTag(std::string &Tag) {
-  Tag = CurrentNode->_node->getVerbatimTag();
+فراغ ننوت::scalar_نښان(std::string &نښان) {
+  نښان = Current_غوټه->غوټه_2->get_Verbatim_نښان();
 }
 
-void Input::setError(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  setError(hnode->_node, message);
+فراغ ننوت::سېټ_Error(HNode *hnode, ثابت Twine &پیغام_2) {
+  أكد(hnode && "HNode must not be NULL");
+  سېټ_Error(hnode->غوټه_2, پیغام_2);
 }
 
-NodeKind Input::getNodeKind() {
-  if (isa<ScalarHNode>(CurrentNode))
-    return NodeKind::Scalar;
-  else if (isa<MapHNode>(CurrentNode))
-    return NodeKind::Map;
-  else if (isa<SequenceHNode>(CurrentNode))
-    return NodeKind::Sequence;
+غوټه_ډول ننوت::get_غوټه_ډول() {
+  إذا (isa<ScalarHNode>(Current_غوټه))
+    أرجع غوټه_ډول::Scalar;
+  وإلا إذا (isa<MapHNode>(Current_غوټه))
+    أرجع غوټه_ډول::Map;
+  وإلا إذا (isa<SequenceHNode>(Current_غوټه))
+    أرجع غوټه_ډول::Sequence;
   llvm_unreachable("Unsupported node kind");
 }
 
-void Input::setError(Node *node, const Twine &message) {
-  Strm->printError(node, message);
-  EC = make_error_code(errc::invalid_argument);
+فراغ ننوت::سېټ_Error(غوټه *غوټه_3, ثابت Twine &پیغام_2) {
+  Strm->printError(غوټه_3, پیغام_2);
+  EC = make_error_کوډ(errc::invalid_دلیل);
 }
 
-void Input::setError(const SMRange &range, const Twine &message) {
-  Strm->printError(range, message);
-  EC = make_error_code(errc::invalid_argument);
+فراغ ننوت::سېټ_Error(ثابت SMRange &range, ثابت Twine &پیغام_2) {
+  Strm->printError(range, پیغام_2);
+  EC = make_error_کوډ(errc::invalid_دلیل);
 }
 
-void Input::reportWarning(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  Strm->printError(hnode->_node, message, SourceMgr::DK_Warning);
+فراغ ننوت::reportWarning(HNode *hnode, ثابت Twine &پیغام_2) {
+  أكد(hnode && "HNode must not be NULL");
+  Strm->printError(hnode->غوټه_2, پیغام_2, سرچینه_Mgr::DK_Warning);
 }
 
-void Input::reportWarning(Node *node, const Twine &message) {
-  Strm->printError(node, message, SourceMgr::DK_Warning);
+فراغ ننوت::reportWarning(غوټه *غوټه_3, ثابت Twine &پیغام_2) {
+  Strm->printError(غوټه_3, پیغام_2, سرچینه_Mgr::DK_Warning);
 }
 
-void Input::reportWarning(const SMRange &range, const Twine &message) {
-  Strm->printError(range, message, SourceMgr::DK_Warning);
+فراغ ننوت::reportWarning(ثابت SMRange &range, ثابت Twine &پیغام_2) {
+  Strm->printError(range, پیغام_2, سرچینه_Mgr::DK_Warning);
 }
 
-void Input::releaseHNodeBuffers() {
-  EmptyHNodeAllocator.DestroyAll();
+فراغ ننوت::releaseHNodeBuffers() {
+  تشه_HNode_Allocator.DestroyAll();
   ScalarHNodeAllocator.DestroyAll();
   SequenceHNodeAllocator.DestroyAll();
   MapHNodeAllocator.DestroyAll();
 }
 
-void Input::saveAliasHNode(Node *N, HNode *HN) {
+فراغ ننوت::saveAliasHNode(غوټه *N, HNode *HN) {
   StringRef Anchor = N->getAnchor();
-  if (!Anchor.empty())
+  إذا (!Anchor.تشه())
     // YAML 1.2.2 - 3.2.2.2. Anchors and Aliases:
     //
     // An alias event refers to the most recent event in the serialization
@@ -409,403 +409,403 @@ void Input::saveAliasHNode(Node *N, HNode *HN) {
     AliasMap[Anchor] = HN;
 }
 
-Input::HNode *Input::createHNodes(Node *N) {
+ننوت::HNode *ننوت::createHNodes(غوټه *N) {
   SmallString<128> StringStorage;
-  switch (N->getType()) {
-  case Node::NK_Scalar: {
-    ScalarNode *SN = dyn_cast<ScalarNode>(N);
-    StringRef KeyStr = SN->getValue(StringStorage);
-    if (!StringStorage.empty()) {
+  بدل (N->getType()) {
+  حالة غوټه::NK_Scalar: {
+    Scalar_غوټه *SN = dyn_cast<Scalar_غوټه>(N);
+    StringRef کلی_Str = SN->get_ارزښت(StringStorage);
+    إذا (!StringStorage.تشه()) {
       // Copy string to permanent storage
-      KeyStr = StringStorage.str().copy(StringAllocator);
+      کلی_Str = StringStorage.str().copy(StringAllocator);
     }
-    auto *SHNode = new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, KeyStr);
+    خپلکاری *SHNode = جديد (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, کلی_Str);
     saveAliasHNode(SN, SHNode);
-    return SHNode;
+    أرجع SHNode;
   }
-  case Node::NK_BlockScalar: {
-    BlockScalarNode *BSN = dyn_cast<BlockScalarNode>(N);
-    StringRef ValueCopy = BSN->getValue().copy(StringAllocator);
-    auto *BSHNode =
-        new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ValueCopy);
+  حالة غوټه::NK_بلاک_Scalar: {
+    بلاک_Scalar_غوټه *BSN = dyn_cast<بلاک_Scalar_غوټه>(N);
+    StringRef ارزښت_Copy = BSN->get_ارزښت().copy(StringAllocator);
+    خپلکاری *BSHNode =
+        جديد (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ارزښت_Copy);
     saveAliasHNode(BSN, BSHNode);
-    return BSHNode;
+    أرجع BSHNode;
   }
-  case Node::NK_Sequence: {
-    SequenceNode *SQ = dyn_cast<SequenceNode>(N);
-    auto SQHNode = new (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
-    for (Node &SN : *SQ) {
-      auto Entry = createHNodes(&SN);
-      if (EC)
-        break;
-      SQHNode->Entries.push_back(Entry);
+  حالة غوټه::NK_Sequence: {
+    Sequence_غوټه *SQ = dyn_cast<Sequence_غوټه>(N);
+    خپلکاری SQHNode = جديد (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
+    لكل (غوټه &SN : *SQ) {
+      خپلکاری ثبت = createHNodes(&SN);
+      إذا (EC)
+        اكسر;
+      SQHNode->Entries.ټېل_شا(ثبت);
     }
     saveAliasHNode(SQ, SQHNode);
-    return SQHNode;
+    أرجع SQHNode;
   }
-  case Node::NK_Mapping: {
-    MappingNode *Map = dyn_cast<MappingNode>(N);
-    auto mapHNode = new (MapHNodeAllocator.Allocate()) MapHNode(N);
-    for (KeyValueNode &KVN : *Map) {
-      Node *KeyNode = KVN.getKey();
-      ScalarNode *Key = dyn_cast_if_present<ScalarNode>(KeyNode);
-      Node *Value = KVN.getValue();
-      if (!Key || !Value) {
-        if (!Key)
-          setError(KeyNode, "Map key must be a scalar");
-        if (!Value)
-          setError(KeyNode, "Map value must not be empty");
-        break;
+  حالة غوټه::NK_Mapping: {
+    Mapping_غوټه *Map = dyn_cast<Mapping_غوټه>(N);
+    خپلکاری mapHNode = جديد (MapHNodeAllocator.Allocate()) MapHNode(N);
+    لكل (کلی_ارزښت_غوټه &KVN : *Map) {
+      غوټه *کلی_غوټه = KVN.get_کلی();
+      Scalar_غوټه *کلی = dyn_cast_if_present<Scalar_غوټه>(کلی_غوټه);
+      غوټه *ارزښت = KVN.get_ارزښت();
+      إذا (!کلی || !ارزښت) {
+        إذا (!کلی)
+          سېټ_Error(کلی_غوټه, "Map key must be a scalar");
+        إذا (!ارزښت)
+          سېټ_Error(کلی_غوټه, "Map value must not be empty");
+        اكسر;
       }
       StringStorage.clear();
-      StringRef KeyStr = Key->getValue(StringStorage);
-      if (!StringStorage.empty()) {
+      StringRef کلی_Str = کلی->get_ارزښت(StringStorage);
+      إذا (!StringStorage.تشه()) {
         // Copy string to permanent storage
-        KeyStr = StringStorage.str().copy(StringAllocator);
+        کلی_Str = StringStorage.str().copy(StringAllocator);
       }
-      if (mapHNode->Mapping.count(KeyStr))
+      إذا (mapHNode->Mapping.شمېر(کلی_Str))
         // From YAML spec: "The content of a mapping node is an unordered set of
         // key/value node pairs, with the restriction that each of the keys is
         // unique."
-        setError(KeyNode, Twine("duplicated mapping key '") + KeyStr + "'");
-      auto ValueHNode = createHNodes(Value);
-      if (EC)
-        break;
-      mapHNode->Mapping[KeyStr] =
-          std::make_pair(std::move(ValueHNode), KeyNode->getSourceRange());
+        سېټ_Error(کلی_غوټه, Twine("duplicated mapping key '") + کلی_Str + "'");
+      خپلکاری ارزښت_HNode = createHNodes(ارزښت);
+      إذا (EC)
+        اكسر;
+      mapHNode->Mapping[کلی_Str] =
+          std::make_pair(std::move(ارزښت_HNode), کلی_غوټه->get_سرچینه_Range());
     }
     saveAliasHNode(Map, mapHNode);
-    return std::move(mapHNode);
+    أرجع std::move(mapHNode);
   }
-  case Node::NK_Null:
+  حالة غوټه::NK_Null:
     // TODO: Anchor is not set for NullNode in the parser. Update the parser to
     // faithfully preserve anchors.
-    return new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
-  case Node::NK_Alias: {
-    AliasNode *AN = dyn_cast<AliasNode>(N);
-    auto AliasName = AN->getName();
-    auto AHN = AliasMap.find(AliasName);
-    if (AHN == AliasMap.end()) {
-      setError(AN, Twine("undefined alias '" + AliasName + "'"));
-      return nullptr;
+    أرجع جديد (تشه_HNode_Allocator.Allocate()) تشه_HNode(N);
+  حالة غوټه::NK_Alias: {
+    Alias_غوټه *AN = dyn_cast<Alias_غوټه>(N);
+    خپلکاری AliasName = AN->getName();
+    خپلکاری AHN = AliasMap.پیدا_کړه(AliasName);
+    إذا (AHN == AliasMap.پای_ټکی()) {
+      سېټ_Error(AN, Twine("undefined alias '" + AliasName + "'"));
+      أرجع تش_اشاره;
     }
-    return AHN->second;
+    أرجع AHN->دوهم_2;
   }
-  default:
-    setError(N, "unknown node kind");
-    return nullptr;
+  افتراضي:
+    سېټ_Error(N, "unknown node kind");
+    أرجع تش_اشاره;
   }
 }
 
-void Input::setError(const Twine &Message) {
-  setError(CurrentNode, Message);
+فراغ ننوت::سېټ_Error(ثابت Twine &پیغام_3) {
+  سېټ_Error(Current_غوټه, پیغام_3);
 }
 
-void Input::setAllowUnknownKeys(bool Allow) { AllowUnknownKeys = Allow; }
+فراغ ننوت::سېټ_Allow_Unknown_کلیګانې(منطقي Allow) { Allow_Unknown_کلیګانې = Allow; }
 
-bool Input::canElideEmptySequence() {
-  return false;
+منطقي ننوت::can_Elide_تشه_Sequence() {
+  أرجع خطأ;
 }
 
 //===----------------------------------------------------------------------===//
 //  Output
 //===----------------------------------------------------------------------===//
 
-Output::Output(raw_ostream &yout, void *context, int WrapColumn)
-    : IO(context), Out(yout), WrapColumn(WrapColumn) {}
+Output::Output(raw_ostream &yout, فراغ *context, صحيح Wrap_ستنه)
+    : IO(context), بهر(yout), Wrap_ستنه(Wrap_ستنه) {}
 
-Output::~Output() = default;
+Output::~Output() = افتراضي;
 
-bool Output::outputting() const {
-  return true;
+منطقي Output::outputting() ثابت {
+  أرجع ریښتیا;
 }
 
-void Output::beginMapping() {
-  StateStack.push_back(inMapFirstKey);
+فراغ Output::beginMapping() {
+  State_ډېری.ټېل_شا(دننه_Map_لومړی_کلی);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
 }
 
-bool Output::mapTag(StringRef Tag, bool Use) {
-  if (Use) {
+منطقي Output::map_نښان(StringRef نښان, منطقي Use) {
+  إذا (Use) {
     // If this tag is being written inside a sequence we should write the start
     // of the sequence before writing the tag, otherwise the tag won't be
     // attached to the element in the sequence, but rather the sequence itself.
-    bool SequenceElement = false;
-    if (StateStack.size() > 1) {
-      auto &E = StateStack[StateStack.size() - 2];
-      SequenceElement = inSeqAnyElement(E) || inFlowSeqAnyElement(E);
+    منطقي SequenceElement = خطأ;
+    إذا (State_ډېری.اندازه_2() > 1) {
+      خپلکاری &E = State_ډېری[State_ډېری.اندازه_2() - 2];
+      SequenceElement = دننه_Seq_Any_Element(E) || دننه_Flow_Seq_Any_Element(E);
     }
-    if (SequenceElement && StateStack.back() == inMapFirstKey) {
-      newLineCheck();
-    } else {
+    إذا (SequenceElement && State_ډېری.شا() == دننه_Map_لومړی_کلی) {
+      new_کرښه_Check();
+    } وإلا {
       output(" ");
     }
-    output(Tag);
-    if (SequenceElement) {
+    output(نښان);
+    إذا (SequenceElement) {
       // If we're writing the tag during the first element of a map, the tag
       // takes the place of the first element in the sequence.
-      if (StateStack.back() == inMapFirstKey) {
-        StateStack.pop_back();
-        StateStack.push_back(inMapOtherKey);
+      إذا (State_ډېری.شا() == دننه_Map_لومړی_کلی) {
+        State_ډېری.راوباسه_شا();
+        State_ډېری.ټېل_شا(دننه_Map_Other_کلی);
       }
       // Tags inside maps in sequences should act as keys in the map from a
       // formatting perspective, so we always want a newline in a sequence.
       Padding = "\n";
     }
   }
-  return Use;
+  أرجع Use;
 }
 
-void Output::endMapping() {
+فراغ Output::پای_ټکی_Mapping() {
   // If we did not map anything, we should explicitly emit an empty map
-  if (StateStack.back() == inMapFirstKey) {
+  إذا (State_ډېری.شا() == دننه_Map_لومړی_کلی) {
     Padding = PaddingBeforeContainer;
-    newLineCheck();
+    new_کرښه_Check();
     output("{}");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_ډېری.راوباسه_شا();
 }
 
-std::vector<StringRef> Output::keys() {
+std::ویکټور<StringRef> Output::کلیګانې() {
   report_fatal_error("invalid call");
 }
 
-bool Output::preflightKey(StringRef Key, bool Required, bool SameAsDefault,
-                          bool &UseDefault, void *&SaveInfo) {
-  UseDefault = false;
-  SaveInfo = nullptr;
-  if (Required || !SameAsDefault || WriteDefaultValues) {
-    auto State = StateStack.back();
-    if (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
-      flowKey(Key);
-    } else {
-      newLineCheck();
-      paddedKey(Key);
+منطقي Output::preflight_کلی(StringRef کلی, منطقي Required, منطقي SameAsDefault,
+                          منطقي &UseDefault, فراغ *&SaveInfo) {
+  UseDefault = خطأ;
+  SaveInfo = تش_اشاره;
+  إذا (Required || !SameAsDefault || Write_Default_ارزښتونه) {
+    خپلکاری State = State_ډېری.شا();
+    إذا (State == دننه_Flow_Map_لومړی_کلی || State == دننه_Flow_Map_Other_کلی) {
+      flow_کلی(کلی);
+    } وإلا {
+      new_کرښه_Check();
+      padded_کلی(کلی);
     }
-    return true;
+    أرجع ریښتیا;
   }
-  return false;
+  أرجع خطأ;
 }
 
-void Output::postflightKey(void *) {
-  if (StateStack.back() == inMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inMapOtherKey);
-  } else if (StateStack.back() == inFlowMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowMapOtherKey);
+فراغ Output::postflight_کلی(فراغ *) {
+  إذا (State_ډېری.شا() == دننه_Map_لومړی_کلی) {
+    State_ډېری.راوباسه_شا();
+    State_ډېری.ټېل_شا(دننه_Map_Other_کلی);
+  } وإلا إذا (State_ډېری.شا() == دننه_Flow_Map_لومړی_کلی) {
+    State_ډېری.راوباسه_شا();
+    State_ډېری.ټېل_شا(دننه_Flow_Map_Other_کلی);
   }
 }
 
-void Output::beginFlowMapping() {
-  StateStack.push_back(inFlowMapFirstKey);
-  newLineCheck();
-  ColumnAtMapFlowStart = Column;
+فراغ Output::beginFlowMapping() {
+  State_ډېری.ټېل_شا(دننه_Flow_Map_لومړی_کلی);
+  new_کرښه_Check();
+  ستنه_At_Map_Flow_پیل = ستنه;
   output("{ ");
 }
 
-void Output::endFlowMapping() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" }");
+فراغ Output::پای_ټکی_Flow_Mapping() {
+  State_ډېری.راوباسه_شا();
+  output_پورته_منزل_پای_ټکی_د_کرښه(" }");
 }
 
-void Output::beginDocuments() {
-  outputUpToEndOfLine("---");
+فراغ Output::beginDocuments() {
+  output_پورته_منزل_پای_ټکی_د_کرښه("---");
 }
 
-bool Output::preflightDocument(unsigned index) {
-  if (index > 0)
-    outputUpToEndOfLine("\n---");
-  return true;
+منطقي Output::preflightDocument(بینښه شاخص) {
+  إذا (شاخص > 0)
+    output_پورته_منزل_پای_ټکی_د_کرښه("\n---");
+  أرجع ریښتیا;
 }
 
-void Output::postflightDocument() {
+فراغ Output::postflightDocument() {
 }
 
-void Output::endDocuments() {
+فراغ Output::پای_ټکی_Documents() {
   output("\n...\n");
 }
 
-unsigned Output::beginSequence() {
-  StateStack.push_back(inSeqFirstElement);
+بینښه Output::beginSequence() {
+  State_ډېری.ټېل_شا(دننه_Seq_لومړی_Element);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
-  return 0;
+  أرجع 0;
 }
 
-void Output::endSequence() {
+فراغ Output::پای_ټکی_Sequence() {
   // If we did not emit anything, we should explicitly emit an empty sequence
-  if (StateStack.back() == inSeqFirstElement) {
+  إذا (State_ډېری.شا() == دننه_Seq_لومړی_Element) {
     Padding = PaddingBeforeContainer;
-    newLineCheck(/*EmptySequence=*/true);
+    new_کرښه_Check(/*EmptySequence=*/ریښتیا);
     output("[]");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_ډېری.راوباسه_شا();
 }
 
-bool Output::preflightElement(unsigned, void *&SaveInfo) {
-  SaveInfo = nullptr;
-  return true;
+منطقي Output::preflightElement(بینښه, فراغ *&SaveInfo) {
+  SaveInfo = تش_اشاره;
+  أرجع ریښتیا;
 }
 
-void Output::postflightElement(void *) {
-  if (StateStack.back() == inSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inSeqOtherElement);
-  } else if (StateStack.back() == inFlowSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowSeqOtherElement);
+فراغ Output::postflightElement(فراغ *) {
+  إذا (State_ډېری.شا() == دننه_Seq_لومړی_Element) {
+    State_ډېری.راوباسه_شا();
+    State_ډېری.ټېل_شا(دننه_Seq_Other_Element);
+  } وإلا إذا (State_ډېری.شا() == دننه_Flow_Seq_لومړی_Element) {
+    State_ډېری.راوباسه_شا();
+    State_ډېری.ټېل_شا(دننه_Flow_Seq_Other_Element);
   }
 }
 
-unsigned Output::beginFlowSequence() {
-  StateStack.push_back(inFlowSeqFirstElement);
-  newLineCheck();
-  ColumnAtFlowStart = Column;
+بینښه Output::beginFlowSequence() {
+  State_ډېری.ټېل_شا(دننه_Flow_Seq_لومړی_Element);
+  new_کرښه_Check();
+  ستنه_At_Flow_پیل = ستنه;
   output("[ ");
-  NeedFlowSequenceComma = false;
-  return 0;
+  NeedFlowSequenceComma = خطأ;
+  أرجع 0;
 }
 
-void Output::endFlowSequence() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" ]");
+فراغ Output::پای_ټکی_Flow_Sequence() {
+  State_ډېری.راوباسه_شا();
+  output_پورته_منزل_پای_ټکی_د_کرښه(" ]");
 }
 
-bool Output::preflightFlowElement(unsigned, void *&SaveInfo) {
-  if (NeedFlowSequenceComma)
+منطقي Output::preflightFlowElement(بینښه, فراغ *&SaveInfo) {
+  إذا (NeedFlowSequenceComma)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  إذا (Wrap_ستنه && ستنه > Wrap_ستنه) {
     output("\n");
-    for (int i = 0; i < ColumnAtFlowStart; ++i)
+    لكل (صحيح i = 0; i < ستنه_At_Flow_پیل; ++i)
       output(" ");
-    Column = ColumnAtFlowStart;
+    ستنه = ستنه_At_Flow_پیل;
     output("  ");
   }
-  SaveInfo = nullptr;
-  return true;
+  SaveInfo = تش_اشاره;
+  أرجع ریښتیا;
 }
 
-void Output::postflightFlowElement(void *) {
-  NeedFlowSequenceComma = true;
+فراغ Output::postflightFlowElement(فراغ *) {
+  NeedFlowSequenceComma = ریښتیا;
 }
 
-void Output::beginEnumScalar() {
-  EnumerationMatchFound = false;
+فراغ Output::beginEnumScalar() {
+  Enumeration_سمون_وموندل = خطأ;
 }
 
-bool Output::matchEnumScalar(StringRef Str, bool Match) {
-  if (Match && !EnumerationMatchFound) {
-    newLineCheck();
-    outputUpToEndOfLine(Str);
-    EnumerationMatchFound = true;
+منطقي Output::سمون_Enum_Scalar(StringRef Str, منطقي سمون_2) {
+  إذا (سمون_2 && !Enumeration_سمون_وموندل) {
+    new_کرښه_Check();
+    output_پورته_منزل_پای_ټکی_د_کرښه(Str);
+    Enumeration_سمون_وموندل = ریښتیا;
   }
-  return false;
+  أرجع خطأ;
 }
 
-bool Output::matchEnumFallback() {
-  if (EnumerationMatchFound)
-    return false;
-  EnumerationMatchFound = true;
-  return true;
+منطقي Output::سمون_Enum_Fallback() {
+  إذا (Enumeration_سمون_وموندل)
+    أرجع خطأ;
+  Enumeration_سمون_وموندل = ریښتیا;
+  أرجع ریښتیا;
 }
 
-void Output::endEnumScalar() {
-  if (!EnumerationMatchFound)
+فراغ Output::پای_ټکی_Enum_Scalar() {
+  إذا (!Enumeration_سمون_وموندل)
     llvm_unreachable("bad runtime enum value");
 }
 
-bool Output::beginBitSetScalar(bool &DoClear) {
-  newLineCheck();
+منطقي Output::begin_بټ_سېټ_Scalar(منطقي &DoClear) {
+  new_کرښه_Check();
   output("[ ");
-  NeedBitValueComma = false;
-  DoClear = false;
-  return true;
+  Need_بټ_ارزښت_Comma = خطأ;
+  DoClear = خطأ;
+  أرجع ریښتیا;
 }
 
-bool Output::bitSetMatch(StringRef Str, bool Matches) {
-  if (Matches) {
-    if (NeedBitValueComma)
+منطقي Output::بټ_سېټ_سمون(StringRef Str, منطقي Matches) {
+  إذا (Matches) {
+    إذا (Need_بټ_ارزښت_Comma)
       output(", ");
     output(Str);
-    NeedBitValueComma = true;
+    Need_بټ_ارزښت_Comma = ریښتیا;
   }
-  return false;
+  أرجع خطأ;
 }
 
-void Output::endBitSetScalar() {
-  outputUpToEndOfLine(" ]");
+فراغ Output::پای_ټکی_بټ_سېټ_Scalar() {
+  output_پورته_منزل_پای_ټکی_د_کرښه(" ]");
 }
 
-void Output::scalarString(StringRef &S, QuotingType MustQuote) {
-  newLineCheck();
-  if (S.empty()) {
+فراغ Output::scalarString(StringRef &S, QuotingType MustQuote) {
+  new_کرښه_Check();
+  إذا (S.تشه()) {
     // Print '' for the empty string because leaving the field empty is not
     // allowed.
-    outputUpToEndOfLine("''");
-    return;
+    output_پورته_منزل_پای_ټکی_د_کرښه("''");
+    أرجع;
   }
   output(S, MustQuote);
-  outputUpToEndOfLine("");
+  output_پورته_منزل_پای_ټکی_د_کرښه("");
 }
 
-void Output::blockScalarString(StringRef &S) {
-  if (!StateStack.empty())
-    newLineCheck();
+فراغ Output::بلاک_Scalar_String(StringRef &S) {
+  إذا (!State_ډېری.تشه())
+    new_کرښه_Check();
   output(" |");
 
-  unsigned Indent = StateStack.empty() ? 1 : StateStack.size();
+  بینښه Indent = State_ډېری.تشه() ? 1 : State_ډېری.اندازه_2();
 
-  auto Buffer = MemoryBuffer::getMemBuffer(S, "", false);
-  for (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
-    outputNewLine();
-    for (unsigned I = 0; I < Indent; ++I) {
+  خپلکاری بفر = حافظه_بفر::get_Mem_بفر(S, "", خطأ);
+  لكل (کرښه_iterator کرښې(*بفر, خطأ); !کرښې.is_at_پای_ټکی(); ++کرښې) {
+    output_New_کرښه();
+    لكل (بینښه I = 0; I < Indent; ++I) {
       output("  ");
     }
-    output(*Lines);
+    output(*کرښې);
   }
-  outputUpToEndOfLine("");
+  output_پورته_منزل_پای_ټکی_د_کرښه("");
 }
 
-void Output::scalarTag(std::string &Tag) {
-  if (Tag.empty())
-    return;
-  newLineCheck();
-  output(Tag);
+فراغ Output::scalar_نښان(std::string &نښان) {
+  إذا (نښان.تشه())
+    أرجع;
+  new_کرښه_Check();
+  output(نښان);
   output(" ");
 }
 
-void Output::setError(const Twine &message) {
+فراغ Output::سېټ_Error(ثابت Twine &پیغام_2) {
 }
 
-std::error_code Output::error() { return {}; }
+std::error_کوډ Output::error() { أرجع {}; }
 
-bool Output::canElideEmptySequence() {
+منطقي Output::can_Elide_تشه_Sequence() {
   // Normally, with an optional key/value where the value is an empty sequence,
   // the whole key/value can be not written.  But, that produces wrong yaml
   // if the key/value is the only thing in the map and the map is used in
   // a sequence.  This detects if the this sequence is the first key/value
   // in map that itself is embedded in a sequence.
-  if (StateStack.size() < 2)
-    return true;
-  if (StateStack.back() != inMapFirstKey)
-    return true;
-  return !inSeqAnyElement(StateStack[StateStack.size() - 2]);
+  إذا (State_ډېری.اندازه_2() < 2)
+    أرجع ریښتیا;
+  إذا (State_ډېری.شا() != دننه_Map_لومړی_کلی)
+    أرجع ریښتیا;
+  أرجع !دننه_Seq_Any_Element(State_ډېری[State_ډېری.اندازه_2() - 2]);
 }
 
-void Output::output(StringRef s) {
-  Column += s.size();
-  Out << s;
+فراغ Output::output(StringRef s) {
+  ستنه += s.اندازه_2();
+  بهر << s;
 }
 
-void Output::output(StringRef S, QuotingType MustQuote) {
-  if (MustQuote == QuotingType::None) {
+فراغ Output::output(StringRef S, QuotingType MustQuote) {
+  إذا (MustQuote == QuotingType::None) {
     // Only quote if we must.
     output(S);
-    return;
+    أرجع;
   }
 
   StringLiteral Quote = MustQuote == QuotingType::Single ? StringLiteral("'")
@@ -816,380 +816,380 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   // characters may be present, and will be escaped using a variety of
   // unicode-scalar and special short-form escapes. This is handled in
   // yaml::escape.
-  if (MustQuote == QuotingType::Double) {
-    output(yaml::escape(S, /* EscapePrintable= */ false));
+  إذا (MustQuote == QuotingType::Double) {
+    output(yaml::escape(S, /* EscapePrintable= */ خطأ));
     output(Quote);
-    return;
+    أرجع;
   }
 
-  unsigned i = 0;
-  unsigned j = 0;
-  unsigned End = S.size();
-  const char *Base = S.data();
+  بینښه i = 0;
+  بینښه j = 0;
+  بینښه پای_ټکی_2 = S.اندازه_2();
+  ثابت حرف *بنسټ = S.معلومات();
 
   // When using single-quoted strings, any single quote ' must be doubled to be
   // escaped.
-  while (j < End) {
-    if (S[j] == '\'') {                   // Escape quotes.
-      output(StringRef(&Base[i], j - i)); // "flush".
+  طالما (j < پای_ټکی_2) {
+    إذا (S[j] == '\'') {                   // Escape quotes.
+      output(StringRef(&بنسټ[i], j - i)); // "flush".
       output(StringLiteral("''"));        // Print it as ''
       i = j + 1;
     }
     ++j;
   }
-  output(StringRef(&Base[i], j - i));
+  output(StringRef(&بنسټ[i], j - i));
   output(Quote); // Ending quote.
 }
 
-void Output::outputUpToEndOfLine(StringRef s) {
+فراغ Output::output_پورته_منزل_پای_ټکی_د_کرښه(StringRef s) {
   output(s);
-  if (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
-                             !inFlowMapAnyKey(StateStack.back())))
+  إذا (State_ډېری.تشه() || (!دننه_Flow_Seq_Any_Element(State_ډېری.شا()) &&
+                             !دننه_Flow_Map_Any_کلی(State_ډېری.شا())))
     Padding = "\n";
 }
 
-void Output::outputNewLine() {
-  Out << "\n";
-  Column = 0;
+فراغ Output::output_New_کرښه() {
+  بهر << "\n";
+  ستنه = 0;
 }
 
 // if seq at top, indent as if map, then add "- "
 // if seq in middle, use "- " if firstKey, else use "  "
 //
 
-void Output::newLineCheck(bool EmptySequence) {
-  if (Padding != "\n") {
+فراغ Output::new_کرښه_Check(منطقي تشه_Sequence) {
+  إذا (Padding != "\n") {
     output(Padding);
     Padding = {};
-    return;
+    أرجع;
   }
-  outputNewLine();
+  output_New_کرښه();
   Padding = {};
 
-  if (StateStack.size() == 0 || EmptySequence)
-    return;
+  إذا (State_ډېری.اندازه_2() == 0 || تشه_Sequence)
+    أرجع;
 
-  unsigned Indent = StateStack.size() - 1;
-  bool PossiblyNestedSeq = false;
-  auto I = StateStack.rbegin(), E = StateStack.rend();
+  بینښه Indent = State_ډېری.اندازه_2() - 1;
+  منطقي PossiblyNestedSeq = خطأ;
+  خپلکاری I = State_ډېری.rbegin(), E = State_ډېری.rend();
 
-  if (inSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true; // Not possibly but always.
+  إذا (دننه_Seq_Any_Element(*I)) {
+    PossiblyNestedSeq = ریښتیا; // Not possibly but always.
     ++Indent;
-  } else if (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
-             inFlowSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true;
+  } وإلا إذا (*I == دننه_Map_لومړی_کلی || *I == دننه_Flow_Map_لومړی_کلی ||
+             دننه_Flow_Seq_Any_Element(*I)) {
+    PossiblyNestedSeq = ریښتیا;
     ++I; // Skip back().
   }
 
-  unsigned OutputDashCount = 0;
-  if (PossiblyNestedSeq) {
+  بینښه Output_Dash_شمېر = 0;
+  إذا (PossiblyNestedSeq) {
     // Count up consecutive inSeqFirstElement from the end, unless
     // inSeqFirstElement is the top of nested sequence.
-    while (I != E) {
+    طالما (I != E) {
       // Don't count the top of nested sequence.
-      if (!inSeqAnyElement(*I))
-        break;
+      إذا (!دننه_Seq_Any_Element(*I))
+        اكسر;
 
-      ++OutputDashCount;
+      ++Output_Dash_شمېر;
 
       // Stop counting if consecutive inSeqFirstElement ends.
-      if (*I++ != inSeqFirstElement)
-        break;
+      إذا (*I++ != دننه_Seq_لومړی_Element)
+        اكسر;
     }
   }
 
-  for (unsigned I = OutputDashCount; I < Indent; ++I)
+  لكل (بینښه I = Output_Dash_شمېر; I < Indent; ++I)
     output("  ");
 
-  for (unsigned I = 0; I < OutputDashCount; ++I)
+  لكل (بینښه I = 0; I < Output_Dash_شمېر; ++I)
     output("- ");
 }
 
-void Output::paddedKey(StringRef key) {
-  output(key, needsQuotes(key, false));
+فراغ Output::padded_کلی(StringRef کلی_2) {
+  output(کلی_2, needsQuotes(کلی_2, خطأ));
   output(":");
-  const char *spaces = "                ";
-  if (key.size() < strlen(spaces))
-    Padding = &spaces[key.size()];
-  else
+  ثابت حرف *spaces = "                ";
+  إذا (کلی_2.اندازه_2() < مزي_اوږدوالی(spaces))
+    Padding = &spaces[کلی_2.اندازه_2()];
+  وإلا
     Padding = " ";
 }
 
-void Output::flowKey(StringRef Key) {
-  if (StateStack.back() == inFlowMapOtherKey)
+فراغ Output::flow_کلی(StringRef کلی) {
+  إذا (State_ډېری.شا() == دننه_Flow_Map_Other_کلی)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  إذا (Wrap_ستنه && ستنه > Wrap_ستنه) {
     output("\n");
-    for (int I = 0; I < ColumnAtMapFlowStart; ++I)
+    لكل (صحيح I = 0; I < ستنه_At_Map_Flow_پیل; ++I)
       output(" ");
-    Column = ColumnAtMapFlowStart;
+    ستنه = ستنه_At_Map_Flow_پیل;
     output("  ");
   }
-  output(Key, needsQuotes(Key, false));
+  output(کلی, needsQuotes(کلی, خطأ));
   output(": ");
 }
 
-NodeKind Output::getNodeKind() { report_fatal_error("invalid call"); }
+غوټه_ډول Output::get_غوټه_ډول() { report_fatal_error("invalid call"); }
 
-bool Output::inSeqAnyElement(InState State) {
-  return State == inSeqFirstElement || State == inSeqOtherElement;
+منطقي Output::دننه_Seq_Any_Element(دننه_State State) {
+  أرجع State == دننه_Seq_لومړی_Element || State == دننه_Seq_Other_Element;
 }
 
-bool Output::inFlowSeqAnyElement(InState State) {
-  return State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
+منطقي Output::دننه_Flow_Seq_Any_Element(دننه_State State) {
+  أرجع State == دننه_Flow_Seq_لومړی_Element || State == دننه_Flow_Seq_Other_Element;
 }
 
-bool Output::inMapAnyKey(InState State) {
-  return State == inMapFirstKey || State == inMapOtherKey;
+منطقي Output::دننه_Map_Any_کلی(دننه_State State) {
+  أرجع State == دننه_Map_لومړی_کلی || State == دننه_Map_Other_کلی;
 }
 
-bool Output::inFlowMapAnyKey(InState State) {
-  return State == inFlowMapFirstKey || State == inFlowMapOtherKey;
+منطقي Output::دننه_Flow_Map_Any_کلی(دننه_State State) {
+  أرجع State == دننه_Flow_Map_لومړی_کلی || State == دننه_Flow_Map_Other_کلی;
 }
 
 //===----------------------------------------------------------------------===//
 //  traits for built-in types
 //===----------------------------------------------------------------------===//
 
-void ScalarTraits<bool>::output(const bool &Val, void *, raw_ostream &Out) {
-  Out << (Val ? "true" : "false");
+فراغ ScalarTraits<منطقي>::output(ثابت منطقي &Val, فراغ *, raw_ostream &بهر) {
+  بهر << (Val ? "true" : "false");
 }
 
-StringRef ScalarTraits<bool>::input(StringRef Scalar, void *, bool &Val) {
-  if (std::optional<bool> Parsed = parseBool(Scalar)) {
+StringRef ScalarTraits<منطقي>::ننوت_2(StringRef Scalar, فراغ *, منطقي &Val) {
+  إذا (std::optional<منطقي> Parsed = parseBool(Scalar)) {
     Val = *Parsed;
-    return StringRef();
+    أرجع StringRef();
   }
-  return "invalid boolean";
+  أرجع "invalid boolean";
 }
 
-void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
-                                     raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<StringRef>::output(ثابت StringRef &Val, فراغ *,
+                                     raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<StringRef>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<StringRef>::ننوت_2(StringRef Scalar, فراغ *,
                                          StringRef &Val) {
   Val = Scalar;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<std::string>::output(const std::string &Val, void *,
-                                       raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<std::string>::output(ثابت std::string &Val, فراغ *,
+                                       raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<std::string>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<std::string>::ننوت_2(StringRef Scalar, فراغ *,
                                            std::string &Val) {
   Val = Scalar.str();
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
-                                   raw_ostream &Out) {
+فراغ ScalarTraits<uint8_t>::output(ثابت uint8_t &Val, فراغ *,
+                                   raw_ostream &بهر) {
   // use temp uin32_t because ostream thinks uint8_t is a character
-  uint32_t Num = Val;
-  Out << Num;
+  uint32_t عدد = Val;
+  بهر << عدد;
 }
 
-StringRef ScalarTraits<uint8_t>::input(StringRef Scalar, void *, uint8_t &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFF)
-    return "out of range number";
+StringRef ScalarTraits<uint8_t>::ننوت_2(StringRef Scalar, فراغ *, uint8_t &Val) {
+  بینښه اوږد اوږد n;
+  إذا (getAsUnsignedInteger(Scalar, 0, n))
+    أرجع "invalid number";
+  إذا (n > 0xFF)
+    أرجع "out of range number";
   Val = n;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
-                                    raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<uint16_t>::output(ثابت uint16_t &Val, فراغ *,
+                                    raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<uint16_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint16_t>::ننوت_2(StringRef Scalar, فراغ *,
                                         uint16_t &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFF)
-    return "out of range number";
+  بینښه اوږد اوږد n;
+  إذا (getAsUnsignedInteger(Scalar, 0, n))
+    أرجع "invalid number";
+  إذا (n > 0xFFFF)
+    أرجع "out of range number";
   Val = n;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
-                                    raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<uint32_t>::output(ثابت uint32_t &Val, فراغ *,
+                                    raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<uint32_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint32_t>::ننوت_2(StringRef Scalar, فراغ *,
                                         uint32_t &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range number";
+  بینښه اوږد اوږد n;
+  إذا (getAsUnsignedInteger(Scalar, 0, n))
+    أرجع "invalid number";
+  إذا (n > 0xFFFFFFFFUL)
+    أرجع "out of range number";
   Val = n;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
-                                    raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<uint64_t>::output(ثابت uint64_t &Val, فراغ *,
+                                    raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<uint64_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint64_t>::ننوت_2(StringRef Scalar, فراغ *,
                                         uint64_t &Val) {
-  unsigned long long N;
-  if (getAsUnsignedInteger(Scalar, 0, N))
-    return "invalid number";
+  بینښه اوږد اوږد N;
+  إذا (getAsUnsignedInteger(Scalar, 0, N))
+    أرجع "invalid number";
   Val = N;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
+فراغ ScalarTraits<int8_t>::output(ثابت int8_t &Val, فراغ *, raw_ostream &بهر) {
   // use temp in32_t because ostream thinks int8_t is a character
-  int32_t Num = Val;
-  Out << Num;
+  int32_t عدد = Val;
+  بهر << عدد;
 }
 
-StringRef ScalarTraits<int8_t>::input(StringRef Scalar, void *, int8_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > 127) || (N < -128))
-    return "out of range number";
+StringRef ScalarTraits<int8_t>::ننوت_2(StringRef Scalar, فراغ *, int8_t &Val) {
+  اوږد اوږد N;
+  إذا (getAsSignedInteger(Scalar, 0, N))
+    أرجع "invalid number";
+  إذا ((N > 127) || (N < -128))
+    أرجع "out of range number";
   Val = N;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
-                                   raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<int16_t>::output(ثابت int16_t &Val, فراغ *,
+                                   raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<int16_t>::input(StringRef Scalar, void *, int16_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT16_MAX) || (N < INT16_MIN))
-    return "out of range number";
+StringRef ScalarTraits<int16_t>::ننوت_2(StringRef Scalar, فراغ *, int16_t &Val) {
+  اوږد اوږد N;
+  إذا (getAsSignedInteger(Scalar, 0, N))
+    أرجع "invalid number";
+  إذا ((N > INT16_MAX) || (N < INT16_MIN))
+    أرجع "out of range number";
   Val = N;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
-                                   raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<int32_t>::output(ثابت int32_t &Val, فراغ *,
+                                   raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<int32_t>::input(StringRef Scalar, void *, int32_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT32_MAX) || (N < INT32_MIN))
-    return "out of range number";
+StringRef ScalarTraits<int32_t>::ننوت_2(StringRef Scalar, فراغ *, int32_t &Val) {
+  اوږد اوږد N;
+  إذا (getAsSignedInteger(Scalar, 0, N))
+    أرجع "invalid number";
+  إذا ((N > INT32_MAX) || (N < INT32_MIN))
+    أرجع "out of range number";
   Val = N;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
-                                   raw_ostream &Out) {
-  Out << Val;
+فراغ ScalarTraits<int64_t>::output(ثابت int64_t &Val, فراغ *,
+                                   raw_ostream &بهر) {
+  بهر << Val;
 }
 
-StringRef ScalarTraits<int64_t>::input(StringRef Scalar, void *, int64_t &Val) {
-  long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
+StringRef ScalarTraits<int64_t>::ننوت_2(StringRef Scalar, فراغ *, int64_t &Val) {
+  اوږد اوږد N;
+  إذا (getAsSignedInteger(Scalar, 0, N))
+    أرجع "invalid number";
   Val = N;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
-  Out << format("%g", Val);
+فراغ ScalarTraits<مزدوج>::output(ثابت مزدوج &Val, فراغ *, raw_ostream &بهر) {
+  بهر << format("%g", Val);
 }
 
-StringRef ScalarTraits<double>::input(StringRef Scalar, void *, double &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<مزدوج>::ننوت_2(StringRef Scalar, فراغ *, مزدوج &Val) {
+  إذا (منزل_float(Scalar, Val))
+    أرجع StringRef();
+  أرجع "invalid floating point number";
 }
 
-void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
-  Out << format("%g", Val);
+فراغ ScalarTraits<عائم>::output(ثابت عائم &Val, فراغ *, raw_ostream &بهر) {
+  بهر << format("%g", Val);
 }
 
-StringRef ScalarTraits<float>::input(StringRef Scalar, void *, float &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<عائم>::ننوت_2(StringRef Scalar, فراغ *, عائم &Val) {
+  إذا (منزل_float(Scalar, Val))
+    أرجع StringRef();
+  أرجع "invalid floating point number";
 }
 
-void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX8, (uint8_t)Val);
+فراغ ScalarTraits<Hex8>::output(ثابت Hex8 &Val, فراغ *, raw_ostream &بهر) {
+  بهر << format("0x%" PRIX8, (uint8_t)Val);
 }
 
-StringRef ScalarTraits<Hex8>::input(StringRef Scalar, void *, Hex8 &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex8 number";
-  if (n > 0xFF)
-    return "out of range hex8 number";
+StringRef ScalarTraits<Hex8>::ننوت_2(StringRef Scalar, فراغ *, Hex8 &Val) {
+  بینښه اوږد اوږد n;
+  إذا (getAsUnsignedInteger(Scalar, 0, n))
+    أرجع "invalid hex8 number";
+  إذا (n > 0xFF)
+    أرجع "out of range hex8 number";
   Val = n;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX16, (uint16_t)Val);
+فراغ ScalarTraits<Hex16>::output(ثابت Hex16 &Val, فراغ *, raw_ostream &بهر) {
+  بهر << format("0x%" PRIX16, (uint16_t)Val);
 }
 
-StringRef ScalarTraits<Hex16>::input(StringRef Scalar, void *, Hex16 &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex16 number";
-  if (n > 0xFFFF)
-    return "out of range hex16 number";
+StringRef ScalarTraits<Hex16>::ننوت_2(StringRef Scalar, فراغ *, Hex16 &Val) {
+  بینښه اوږد اوږد n;
+  إذا (getAsUnsignedInteger(Scalar, 0, n))
+    أرجع "invalid hex16 number";
+  إذا (n > 0xFFFF)
+    أرجع "out of range hex16 number";
   Val = n;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX32, (uint32_t)Val);
+فراغ ScalarTraits<Hex32>::output(ثابت Hex32 &Val, فراغ *, raw_ostream &بهر) {
+  بهر << format("0x%" PRIX32, (uint32_t)Val);
 }
 
-StringRef ScalarTraits<Hex32>::input(StringRef Scalar, void *, Hex32 &Val) {
-  unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex32 number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range hex32 number";
+StringRef ScalarTraits<Hex32>::ننوت_2(StringRef Scalar, فراغ *, Hex32 &Val) {
+  بینښه اوږد اوږد n;
+  إذا (getAsUnsignedInteger(Scalar, 0, n))
+    أرجع "invalid hex32 number";
+  إذا (n > 0xFFFFFFFFUL)
+    أرجع "out of range hex32 number";
   Val = n;
-  return StringRef();
+  أرجع StringRef();
 }
 
-void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
-  Out << format("0x%" PRIX64, (uint64_t)Val);
+فراغ ScalarTraits<Hex64>::output(ثابت Hex64 &Val, فراغ *, raw_ostream &بهر) {
+  بهر << format("0x%" PRIX64, (uint64_t)Val);
 }
 
-StringRef ScalarTraits<Hex64>::input(StringRef Scalar, void *, Hex64 &Val) {
-  unsigned long long Num;
-  if (getAsUnsignedInteger(Scalar, 0, Num))
-    return "invalid hex64 number";
-  Val = Num;
-  return StringRef();
+StringRef ScalarTraits<Hex64>::ننوت_2(StringRef Scalar, فراغ *, Hex64 &Val) {
+  بینښه اوږد اوږد عدد;
+  إذا (getAsUnsignedInteger(Scalar, 0, عدد))
+    أرجع "invalid hex64 number";
+  Val = عدد;
+  أرجع StringRef();
 }
 
-void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
-                                        llvm::raw_ostream &Out) {
-  Out << Val.getAsString();
+فراغ ScalarTraits<نسخه_Tuple>::output(ثابت نسخه_Tuple &Val, فراغ *,
+                                        llvm::raw_ostream &بهر) {
+  بهر << Val.getAsString();
 }
 
-StringRef ScalarTraits<VersionTuple>::input(StringRef Scalar, void *,
-                                            VersionTuple &Val) {
-  if (Val.tryParse(Scalar))
-    return "invalid version format";
-  return StringRef();
+StringRef ScalarTraits<نسخه_Tuple>::ننوت_2(StringRef Scalar, فراغ *,
+                                            نسخه_Tuple &Val) {
+  إذا (Val.tryParse(Scalar))
+    أرجع "invalid version format";
+  أرجع StringRef();
 }

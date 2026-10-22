@@ -10,50 +10,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Atomic.h"
-#include "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Atomic.h"
+#ضمن "llvm/Config/llvm-config.h"
 
-using namespace llvm;
+کارول نطاق llvm;
 
-#if defined(_MSC_VER)
-#include <intrin.h>
+#إذا defined(_MSC_VER)
+#ضمن <intrin.h>
 
 // We must include windows.h after intrin.h.
-#include <windows.h>
-#undef MemoryFence
-#endif
+#ضمن <windows.h>
+#تعریف_لغوه حافظه_Fence
+#د_که_پای
 
-#if defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
-#define GNU_ATOMICS
-#endif
+#إذا defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
+#تعریف_کړه GNU_ATOMICS
+#د_که_پای
 
-void sys::MemoryFence() {
-#if LLVM_HAS_ATOMICS == 0
-  return;
-#else
-#  if defined(GNU_ATOMICS)
+فراغ sys::حافظه_Fence() {
+#إذا LLVM_HAS_ATOMICS == 0
+  أرجع;
+#وإلا
+#  إذا defined(GNU_ATOMICS)
   __sync_synchronize();
 #  elif defined(_MSC_VER)
-  MemoryBarrier();
-#  else
-# error No memory fence implementation for your platform!
+  حافظه_Barrier();
+#  وإلا
+# error No حافظه fence implementation لكل your platform!
 #  endif
-#endif
+#د_که_پای
 }
 
-sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
-                                  sys::cas_flag new_value,
-                                  sys::cas_flag old_value) {
-#if LLVM_HAS_ATOMICS == 0
-  sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
-  return result;
-#elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
-#elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
-#else
-#  error No compare-and-swap implementation for your platform!
-#endif
+sys::cas_flag sys::Compare_And_بدلون(متطاير sys::cas_flag* ptr,
+                                  sys::cas_flag new_ارزښت,
+                                  sys::cas_flag old_ارزښت) {
+#إذا LLVM_HAS_ATOMICS == 0
+  sys::cas_flag پایله_2 = *ptr;
+  إذا (پایله_2 == old_ارزښت)
+    *ptr = new_ارزښت;
+  أرجع پایله_2;
+#وإلاإذا defined(GNU_ATOMICS)
+  أرجع __sync_val_compare_and_swap(ptr, old_ارزښت, new_ارزښت);
+#وإلاإذا defined(_MSC_VER)
+  أرجع InterlockedCompareExchange(ptr, new_ارزښت, old_ارزښت);
+#وإلا
+#  error No compare-and-بدلون implementation لكل your platform!
+#د_که_پای
 }

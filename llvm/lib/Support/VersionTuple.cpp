@@ -11,129 +11,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#ضمن "llvm/Support/VersionTuple.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cassert>
 
-using namespace llvm;
+کارول نطاق llvm;
 
-std::string VersionTuple::getAsString() const {
-  std::string Result;
+std::string نسخه_Tuple::getAsString() ثابت {
+  std::string پایله;
   {
-    llvm::raw_string_ostream Out(Result);
-    Out << *this;
+    llvm::raw_string_ostream بهر(پایله);
+    بهر << *هذا;
   }
-  return Result;
+  أرجع پایله;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
-  Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
-    Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
-    Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
-    Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
-    Out << '.' << *Subbuild;
-  return Out;
+raw_ostream &llvm::چلوونکی<<(raw_ostream &بهر, ثابت نسخه_Tuple &V) {
+  بهر << V.getMajor();
+  إذا (std::optional<بینښه> Minor = V.getMinor())
+    بهر << '.' << *Minor;
+  إذا (std::optional<بینښه> Subminor = V.getSubminor())
+    بهر << '.' << *Subminor;
+  إذا (std::optional<بینښه> Build = V.getBuild())
+    بهر << '.' << *Build;
+  إذا (std::optional<بینښه> Subbuild = V.getSubbuild())
+    بهر << '.' << *Subbuild;
+  أرجع بهر;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
-    return true;
+ساكن منطقي parseInt(StringRef &ننوت_2, بینښه &ارزښت_2) {
+  أكد(ارزښت_2 == 0);
+  إذا (ننوت_2.تشه())
+    أرجع ریښتیا;
 
-  char next = input[0];
-  input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
-  value = (unsigned)(next - '0');
+  حرف بل = ننوت_2[0];
+  ننوت_2 = ننوت_2.substr(1);
+  إذا (بل < '0' || بل > '9')
+    أرجع ریښتیا;
+  ارزښت_2 = (بینښه)(بل - '0');
 
-  while (!input.empty()) {
-    next = input[0];
-    if (next < '0' || next > '9')
-      return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+  طالما (!ننوت_2.تشه()) {
+    بل = ننوت_2[0];
+    إذا (بل < '0' || بل > '9')
+      أرجع خطأ;
+    ننوت_2 = ننوت_2.substr(1);
+    ارزښت_2 = ارزښت_2 * 10 + (بینښه)(بل - '0');
   }
 
-  return false;
+  أرجع خطأ;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
-  unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
+منطقي نسخه_Tuple::tryParse(StringRef ننوت_2) {
+  بینښه major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  إذا (parseInt(ننوت_2, major))
+    أرجع ریښتیا;
 
-  if (input.empty()) {
-    *this = VersionTuple(major);
-    return false;
+  إذا (ننوت_2.تشه()) {
+    *هذا = نسخه_Tuple(major);
+    أرجع خطأ;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  إذا (ننوت_2[0] != '.')
+    أرجع ریښتیا;
+  ننوت_2 = ننوت_2.substr(1);
+  إذا (parseInt(ننوت_2, minor))
+    أرجع ریښتیا;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor);
-    return false;
+  إذا (ننوت_2.تشه()) {
+    *هذا = نسخه_Tuple(major, minor);
+    أرجع خطأ;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  إذا (!ننوت_2.consume_front("."))
+    أرجع ریښتیا;
+  إذا (parseInt(ننوت_2, subminor))
+    أرجع ریښتیا;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor);
-    return false;
+  إذا (ننوت_2.تشه()) {
+    *هذا = نسخه_Tuple(major, minor, subminor);
+    أرجع خطأ;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  إذا (!ننوت_2.consume_front("."))
+    أرجع ریښتیا;
+  إذا (parseInt(ننوت_2, build))
+    أرجع ریښتیا;
+  إذا (build >= 1024 * 1024)
+    أرجع ریښتیا;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor, build);
-    return false;
+  إذا (ننوت_2.تشه()) {
+    *هذا = نسخه_Tuple(major, minor, subminor, build);
+    أرجع خطأ;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  إذا (!ننوت_2.consume_front("."))
+    أرجع ریښتیا;
+  إذا (parseInt(ننوت_2, subbuild))
+    أرجع ریښتیا;
+  إذا (subbuild >= 1024)
+    أرجع ریښتیا;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  إذا (!ننوت_2.تشه())
+    أرجع ریښتیا;
 
-  *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  *هذا = نسخه_Tuple(major, minor, subminor, build, subbuild);
+  أرجع خطأ;
 }
 
-VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+نسخه_Tuple نسخه_Tuple::withMajorReplaced(بینښه NewMajor) ثابت {
+  إذا (HasSubbuild)
+    أرجع نسخه_Tuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  إذا (HasBuild)
+    أرجع نسخه_Tuple(NewMajor, Minor, Subminor, Build);
+  إذا (HasSubminor)
+    أرجع نسخه_Tuple(NewMajor, Minor, Subminor);
+  إذا (HasMinor)
+    أرجع نسخه_Tuple(NewMajor, Minor);
+  أرجع نسخه_Tuple(NewMajor);
 }

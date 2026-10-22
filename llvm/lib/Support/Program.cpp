@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Program.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
-using namespace sys;
+#ضمن "llvm/Support/Program.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/raw_ostream.h"
+کارول نطاق llvm;
+کارول نطاق sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-static bool Execute(ProcessInfo &PI, StringRef Program,
-                    ArrayRef<StringRef> Args,
+ساكن منطقي Execute(ProcessInfo &PI, StringRef پروګرام_2,
+                    ArrayRef<StringRef> دلیلونه,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
-                    BitVector *AffinityMask, bool DetachProcess);
+                    بینښه حافظه_حد, std::string *Err_پیغام,
+                    بټ_ویکټور *Affinity_ماسک, منطقي DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+صحيح sys::ExecuteAndWait(StringRef پروګرام_2, ArrayRef<StringRef> دلیلونه,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
-                        unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        بینښه Seconds_منزل_Wait, بینښه حافظه_حد,
+                        std::string *Err_پیغام, منطقي *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
-                        BitVector *AffinityMask) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                        بټ_ویکټور *Affinity_ماسک) {
+  أكد(Redirects.تشه() || Redirects.اندازه_2() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-              AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
-      *ExecutionFailed = false;
-    ProcessInfo Result = Wait(
-        PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
-    return Result.ReturnCode;
+  إذا (Execute(PI, پروګرام_2, دلیلونه, Env, Redirects, حافظه_حد, Err_پیغام,
+              Affinity_ماسک, /*DetachProcess=*/خطأ)) {
+    إذا (ExecutionFailed)
+      *ExecutionFailed = خطأ;
+    ProcessInfo پایله = Wait(
+        PI, Seconds_منزل_Wait == 0 ? std::nullopt : std::optional(Seconds_منزل_Wait),
+        Err_پیغام, ProcStat);
+    أرجع پایله.Return_کوډ;
   }
 
-  if (ExecutionFailed)
-    *ExecutionFailed = true;
+  إذا (ExecutionFailed)
+    *ExecutionFailed = ریښتیا;
 
-  return -1;
+  أرجع -1;
 }
 
-ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
+ProcessInfo sys::ExecuteNoWait(StringRef پروګرام_2, ArrayRef<StringRef> دلیلونه,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
-                               bool *ExecutionFailed, BitVector *AffinityMask,
-                               bool DetachProcess) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                               بینښه حافظه_حد, std::string *Err_پیغام,
+                               منطقي *ExecutionFailed, بټ_ویکټور *Affinity_ماسک,
+                               منطقي DetachProcess) {
+  أكد(Redirects.تشه() || Redirects.اندازه_2() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
-    *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-               AffinityMask, DetachProcess))
-    if (ExecutionFailed)
-      *ExecutionFailed = true;
+  إذا (ExecutionFailed)
+    *ExecutionFailed = خطأ;
+  إذا (!Execute(PI, پروګرام_2, دلیلونه, Env, Redirects, حافظه_حد, Err_پیغام,
+               Affinity_ماسک, DetachProcess))
+    إذا (ExecutionFailed)
+      *ExecutionFailed = ریښتیا;
 
-  return PI;
+  أرجع PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
-  SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+منطقي sys::command_کرښه_ځاییږي_Within_System_Limits(StringRef پروګرام_2,
+                                            ArrayRef<ثابت حرف *> دلیلونه) {
+  Small_ویکټور<StringRef, 8> String_Ref_دلیلونه(دلیلونه);
+  أرجع command_کرښه_ځاییږي_Within_System_Limits(پروګرام_2, String_Ref_دلیلونه);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+فراغ sys::printArg(raw_ostream &OS, StringRef Arg, منطقي Quote) {
+  ثابت منطقي Escape = Arg.پیدا_کړه_لومړی_د(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  إذا (!Quote && !Escape) {
     OS << Arg;
-    return;
+    أرجع;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  لكل (ثابت خپلکاری c : Arg) {
+    إذا (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }
@@ -97,9 +97,9 @@ void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Program.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Program.inc"
-#endif
+#که_تعریف_شوی LLVM_ON_UNIX
+#ضمن "Unix/Program.inc"
+#د_که_پای
+#که_تعریف_شوی _WIN32
+#ضمن "Windows/Program.inc"
+#د_که_پای

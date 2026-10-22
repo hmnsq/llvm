@@ -11,19 +11,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ThreadPool.h"
+#ضمن "llvm/Support/ThreadPool.h"
 
-#include "llvm/Config/llvm-config.h"
+#ضمن "llvm/Config/llvm-config.h"
 
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/Threading.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/ADT/ScopeExit.h"
+#ضمن "llvm/Support/ExponentialBackoff.h"
+#ضمن "llvm/Support/FormatVariadic.h"
+#ضمن "llvm/Support/Threading.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+کارول نطاق llvm;
 
-ThreadPoolInterface::~ThreadPoolInterface() = default;
+ThreadPoolInterface::~ThreadPoolInterface() = افتراضي;
 
 // A note on thread groups: Tasks are by default in no group (represented
 // by nullptr ThreadPoolTaskGroup pointer in the Tasks queue) and functionality
@@ -33,82 +33,82 @@ ThreadPoolInterface::~ThreadPoolInterface() = default;
 // queue, and functions called to work only on tasks from one group take that
 // pointer.
 
-#if LLVM_ENABLE_THREADS
+#إذا LLVM_ENABLE_تارونه
 
 StdThreadPool::StdThreadPool(ThreadPoolStrategy S)
-    : Strategy(S), MaxThreadCount(S.compute_thread_count()) {
-  if (Strategy.UseJobserver)
+    : Strategy(S), Max_Thread_شمېر(S.compute_thread_شمېر()) {
+  إذا (Strategy.UseJobserver)
     TheJobserver = JobserverClient::getInstance();
 }
 
-void StdThreadPool::grow(int requested) {
-  llvm::sys::ScopedWriter LockGuard(ThreadsLock);
-  if (Threads.size() >= MaxThreadCount)
-    return; // Already hit the max thread pool size.
-  int newThreadCount = std::min<int>(requested, MaxThreadCount);
-  while (static_cast<int>(Threads.size()) < newThreadCount) {
-    int ThreadID = Threads.size();
-    Threads.emplace_back([this, ThreadID] {
-      set_thread_name(formatv("llvm-worker-{0}", ThreadID));
+فراغ StdThreadPool::grow(صحيح requested) {
+  llvm::sys::ScopedWriter قلف_Guard(تارونه_قلف);
+  إذا (تارونه.اندازه_2() >= Max_Thread_شمېر)
+    أرجع; // Already hit the max thread pool size.
+  صحيح new_Thread_شمېر = std::min<صحيح>(requested, Max_Thread_شمېر);
+  طالما (static_cast<صحيح>(تارونه.اندازه_2()) < new_Thread_شمېر) {
+    صحيح ThreadID = تارونه.اندازه_2();
+    تارونه.emplace_شا([هذا, ThreadID] {
+      سېټ_thread_name(formatv("llvm-worker-{0}", ThreadID));
       Strategy.apply_thread_strategy(ThreadID);
       // Note on jobserver deadlock avoidance:
       // GNU Make grants each invoked process one implicit job slot.
       // JobserverClient::tryAcquire() returns that implicit slot on the first
       // successful call in a process, ensuring forward progress without a
       // dedicated "always-on" thread.
-      if (TheJobserver)
+      إذا (TheJobserver)
         processTasksWithJobserver();
-      else
-        processTasks(nullptr);
+      وإلا
+        processTasks(تش_اشاره);
     });
   }
 }
 
-#ifndef NDEBUG
+#که_نه_تعریف_شوی NDEBUG
 // The group of the tasks run by the current thread.
-static LLVM_THREAD_LOCAL std::vector<ThreadPoolTaskGroup *>
-    *CurrentThreadTaskGroups = nullptr;
-#endif
+ساكن LLVM_THREAD_LOCAL std::ویکټور<Thread_Pool_Task_ډله *>
+    *CurrentThreadTaskGroups = تش_اشاره;
+#د_که_پای
 
 // WaitingForGroup == nullptr means all tasks regardless of their group.
-void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
-  while (true) {
-    llvm::unique_function<void()> Task;
-    ThreadPoolTaskGroup *GroupOfTask;
+فراغ StdThreadPool::processTasks(Thread_Pool_Task_ډله *انتظار_For_ډله) {
+  طالما (ریښتیا) {
+    llvm::unique_function<فراغ()> Task;
+    Thread_Pool_Task_ډله *ډله_د_Task;
     {
-      std::unique_lock<std::mutex> LockGuard(QueueLock);
-      bool workCompletedForGroup = false; // Result of workCompletedUnlocked()
+      std::unique_قلف<std::mutex> قلف_Guard(کتار_قلف);
+      منطقي work_Completed_For_ډله = خطأ; // Result of workCompletedUnlocked()
       // Wait for tasks to be pushed in the queue
-      QueueCondition.wait(LockGuard, [&] {
-        return !EnableFlag || !Tasks.empty() ||
-               (WaitingForGroup != nullptr &&
-                (workCompletedForGroup =
-                     workCompletedUnlocked(WaitingForGroup)));
+      کتار_Condition.wait(قلف_Guard, [&] {
+        أرجع !EnableFlag || !Tasks.تشه() ||
+               (انتظار_For_ډله != تش_اشاره &&
+                (work_Completed_For_ډله =
+                     workCompletedUnlocked(انتظار_For_ډله)));
       });
       // Exit condition
-      if (!EnableFlag && Tasks.empty())
-        return;
-      if (WaitingForGroup != nullptr && workCompletedForGroup)
-        return;
+      إذا (!EnableFlag && Tasks.تشه())
+        أرجع;
+      إذا (انتظار_For_ډله != تش_اشاره && work_Completed_For_ډله)
+        أرجع;
       // Yeah, we have a task, grab it and release the lock on the queue
 
       // We first need to signal that we are active before popping the queue
       // in order for wait() to properly detect that even if the queue is
       // empty, there is still a task in flight.
-      ++ActiveThreads;
-      Task = std::move(Tasks.front().first);
-      GroupOfTask = Tasks.front().second;
+      ++فعال_تارونه;
+      Task = std::move(Tasks.front().لومړی_2);
+      ډله_د_Task = Tasks.front().دوهم_2;
       // Need to count active threads in each group separately, ActiveThreads
       // would never be 0 if waiting for another group inside a wait.
-      if (GroupOfTask != nullptr)
-        ++ActiveGroups[GroupOfTask]; // Increment or set to 1 if new item
-      Tasks.pop_front();
+      إذا (ډله_د_Task != تش_اشاره)
+        ++فعال_Groups[ډله_د_Task]; // Increment or set to 1 if new item
+      Tasks.راوباسه_front();
     }
-#ifndef NDEBUG
-    if (CurrentThreadTaskGroups == nullptr)
-      CurrentThreadTaskGroups = new std::vector<ThreadPoolTaskGroup *>;
-    CurrentThreadTaskGroups->push_back(GroupOfTask);
-#endif
+#که_نه_تعریف_شوی NDEBUG
+    إذا (CurrentThreadTaskGroups == تش_اشاره)
+      CurrentThreadTaskGroups = جديد std::ویکټور<Thread_Pool_Task_ډله *>;
+    CurrentThreadTaskGroups->ټېل_شا(ډله_د_Task);
+#د_که_پای
 
     // Run the task we just grabbed. This also destroys the task once run to
     // release any resources held by it through RAII captured objects.
@@ -118,37 +118,37 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
     // place here, at the same point as the task itself is executed.
     std::exchange(Task, {})();
 
-#ifndef NDEBUG
-    CurrentThreadTaskGroups->pop_back();
-    if (CurrentThreadTaskGroups->empty()) {
-      delete CurrentThreadTaskGroups;
-      CurrentThreadTaskGroups = nullptr;
+#که_نه_تعریف_شوی NDEBUG
+    CurrentThreadTaskGroups->راوباسه_شا();
+    إذا (CurrentThreadTaskGroups->تشه()) {
+      ړنګول CurrentThreadTaskGroups;
+      CurrentThreadTaskGroups = تش_اشاره;
     }
-#endif
+#د_که_پای
 
-    bool Notify;
-    bool NotifyGroup;
+    منطقي Notify;
+    منطقي Notify_ډله;
     {
       // Adjust `ActiveThreads`, in case someone waits on StdThreadPool::wait()
-      std::lock_guard<std::mutex> LockGuard(QueueLock);
-      --ActiveThreads;
-      if (GroupOfTask != nullptr) {
-        auto A = ActiveGroups.find(GroupOfTask);
-        if (--(A->second) == 0)
-          ActiveGroups.erase(A);
+      std::قلف_guard<std::mutex> قلف_Guard(کتار_قلف);
+      --فعال_تارونه;
+      إذا (ډله_د_Task != تش_اشاره) {
+        خپلکاری A = فعال_Groups.پیدا_کړه(ډله_د_Task);
+        إذا (--(A->دوهم_2) == 0)
+          فعال_Groups.erase(A);
       }
-      Notify = workCompletedUnlocked(GroupOfTask);
-      NotifyGroup = GroupOfTask != nullptr && Notify;
+      Notify = workCompletedUnlocked(ډله_د_Task);
+      Notify_ډله = ډله_د_Task != تش_اشاره && Notify;
     }
     // Notify task completion if this is the last active thread, in case
     // someone waits on StdThreadPool::wait().
-    if (Notify)
+    إذا (Notify)
       CompletionCondition.notify_all();
     // If this was a task in a group, notify also threads waiting for tasks
     // in this function on QueueCondition, to make a recursive wait() return
     // after the group it's been waiting for has finished.
-    if (NotifyGroup)
-      QueueCondition.notify_all();
+    إذا (Notify_ډله)
+      کتار_Condition.notify_all();
   }
 }
 
@@ -156,32 +156,32 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
 /// This function uses a two-level queue; it first acquires a job slot from the
 /// external jobserver, then retrieves a task from the internal queue.
 /// This allows the thread pool to cooperate with build systems like `make -j`.
-void StdThreadPool::processTasksWithJobserver() {
-  while (true) {
+فراغ StdThreadPool::processTasksWithJobserver() {
+  طالما (ریښتیا) {
     // Acquire a job slot from the external jobserver.
     // This polls for a slot and yields the thread to avoid a high-CPU wait.
-    JobSlot Slot;
+    دنده_خونه خونه;
     // The timeout for the backoff can be very long, as the shutdown
     // is checked on each iteration. The sleep duration is capped by MaxWait
     // in ExponentialBackoff, so shutdown latency is not a problem.
-    ExponentialBackoff Backoff(std::chrono::hours(24));
-    bool AcquiredToken = false;
-    do {
+    توانیز_Backoff Backoff(std::chrono::hours(24));
+    منطقي AcquiredToken = خطأ;
+    افعل {
       // Return if the thread pool is shutting down.
       {
-        std::unique_lock<std::mutex> LockGuard(QueueLock);
-        if (!EnableFlag)
-          return;
+        std::unique_قلف<std::mutex> قلف_Guard(کتار_قلف);
+        إذا (!EnableFlag)
+          أرجع;
       }
 
-      Slot = TheJobserver->tryAcquire();
-      if (Slot.isValid()) {
-        AcquiredToken = true;
-        break;
+      خونه = TheJobserver->tryAcquire();
+      إذا (خونه.isValid()) {
+        AcquiredToken = ریښتیا;
+        اكسر;
       }
-    } while (Backoff.waitForNextAttempt());
+    } طالما (Backoff.wait_For_بل_Attempt());
 
-    if (!AcquiredToken) {
+    إذا (!AcquiredToken) {
       // This is practically unreachable with a 24h timeout and indicates a
       // deeper problem if hit.
       report_fatal_error("Timed out waiting for jobserver token.");
@@ -189,38 +189,38 @@ void StdThreadPool::processTasksWithJobserver() {
 
     // `llvm::scope_exit` guarantees the job slot is released, even if the
     // task throws or we exit early. This prevents deadlocking the build.
-    llvm::scope_exit SlotReleaser(
-        [&] { TheJobserver->release(std::move(Slot)); });
+    llvm::scope_exit خونه_Releaser(
+        [&] { TheJobserver->release(std::move(خونه)); });
 
     // While we hold a job slot, process tasks from the internal queue.
-    while (true) {
-      llvm::unique_function<void()> Task;
-      ThreadPoolTaskGroup *GroupOfTask = nullptr;
+    طالما (ریښتیا) {
+      llvm::unique_function<فراغ()> Task;
+      Thread_Pool_Task_ډله *ډله_د_Task = تش_اشاره;
 
       {
-        std::unique_lock<std::mutex> LockGuard(QueueLock);
+        std::unique_قلف<std::mutex> قلف_Guard(کتار_قلف);
 
         // Wait until a task is available or the pool is shutting down.
-        QueueCondition.wait(LockGuard,
-                            [&] { return !EnableFlag || !Tasks.empty(); });
+        کتار_Condition.wait(قلف_Guard,
+                            [&] { أرجع !EnableFlag || !Tasks.تشه(); });
 
         // If shutting down and the queue is empty, the thread can terminate.
-        if (!EnableFlag && Tasks.empty())
-          return;
+        إذا (!EnableFlag && Tasks.تشه())
+          أرجع;
 
         // If the queue is empty, we're done processing tasks for now.
         // Break the inner loop to release the job slot.
-        if (Tasks.empty())
-          break;
+        إذا (Tasks.تشه())
+          اكسر;
 
         // A task is available. Mark it as active before releasing the lock
         // to prevent race conditions with `wait()`.
-        ++ActiveThreads;
-        Task = std::move(Tasks.front().first);
-        GroupOfTask = Tasks.front().second;
-        if (GroupOfTask != nullptr)
-          ++ActiveGroups[GroupOfTask];
-        Tasks.pop_front();
+        ++فعال_تارونه;
+        Task = std::move(Tasks.front().لومړی_2);
+        ډله_د_Task = Tasks.front().دوهم_2;
+        إذا (ډله_د_Task != تش_اشاره)
+          ++فعال_Groups[ډله_د_Task];
+        Tasks.راوباسه_front();
       } // The queue lock is released.
 
       // Run the task. The job slot remains acquired during execution.
@@ -228,100 +228,100 @@ void StdThreadPool::processTasksWithJobserver() {
 
       // The task has finished. Update the active count and notify any waiters.
       {
-        std::lock_guard<std::mutex> LockGuard(QueueLock);
-        --ActiveThreads;
-        if (GroupOfTask != nullptr) {
-          auto A = ActiveGroups.find(GroupOfTask);
-          if (--(A->second) == 0)
-            ActiveGroups.erase(A);
+        std::قلف_guard<std::mutex> قلف_Guard(کتار_قلف);
+        --فعال_تارونه;
+        إذا (ډله_د_Task != تش_اشاره) {
+          خپلکاری A = فعال_Groups.پیدا_کړه(ډله_د_Task);
+          إذا (--(A->دوهم_2) == 0)
+            فعال_Groups.erase(A);
         }
         // If all tasks are complete, notify any waiting threads.
-        if (workCompletedUnlocked(nullptr))
+        إذا (workCompletedUnlocked(تش_اشاره))
           CompletionCondition.notify_all();
       }
     }
   }
 }
-bool StdThreadPool::workCompletedUnlocked(ThreadPoolTaskGroup *Group) const {
-  if (Group == nullptr)
-    return !ActiveThreads && Tasks.empty();
-  return ActiveGroups.count(Group) == 0 &&
-         !llvm::is_contained(llvm::make_second_range(Tasks), Group);
+منطقي StdThreadPool::workCompletedUnlocked(Thread_Pool_Task_ډله *ډله) ثابت {
+  إذا (ډله == تش_اشاره)
+    أرجع !فعال_تارونه && Tasks.تشه();
+  أرجع فعال_Groups.شمېر(ډله) == 0 &&
+         !llvm::is_contained(llvm::make_دوهم_range(Tasks), ډله);
 }
 
-void StdThreadPool::wait() {
-  assert(!isWorkerThread()); // Would deadlock waiting for itself.
+فراغ StdThreadPool::wait() {
+  أكد(!is_کارګر_Thread()); // Would deadlock waiting for itself.
   // Wait for all threads to complete and the queue to be empty
-  std::unique_lock<std::mutex> LockGuard(QueueLock);
-  CompletionCondition.wait(LockGuard,
-                           [&] { return workCompletedUnlocked(nullptr); });
+  std::unique_قلف<std::mutex> قلف_Guard(کتار_قلف);
+  CompletionCondition.wait(قلف_Guard,
+                           [&] { أرجع workCompletedUnlocked(تش_اشاره); });
 }
 
-void StdThreadPool::wait(ThreadPoolTaskGroup &Group) {
+فراغ StdThreadPool::wait(Thread_Pool_Task_ډله &ډله) {
   // Wait for all threads in the group to complete.
-  if (!isWorkerThread()) {
-    std::unique_lock<std::mutex> LockGuard(QueueLock);
-    CompletionCondition.wait(LockGuard,
-                             [&] { return workCompletedUnlocked(&Group); });
-    return;
+  إذا (!is_کارګر_Thread()) {
+    std::unique_قلف<std::mutex> قلف_Guard(کتار_قلف);
+    CompletionCondition.wait(قلف_Guard,
+                             [&] { أرجع workCompletedUnlocked(&ډله); });
+    أرجع;
   }
   // Make sure to not deadlock waiting for oneself.
-  assert(CurrentThreadTaskGroups == nullptr ||
-         !llvm::is_contained(*CurrentThreadTaskGroups, &Group));
+  أكد(CurrentThreadTaskGroups == تش_اشاره ||
+         !llvm::is_contained(*CurrentThreadTaskGroups, &ډله));
   // Handle the case of recursive call from another task in a different group,
   // in which case process tasks while waiting to keep the thread busy and avoid
   // possible deadlock.
-  processTasks(&Group);
+  processTasks(&ډله);
 }
 
-bool StdThreadPool::isWorkerThread() const {
-  llvm::sys::ScopedReader LockGuard(ThreadsLock);
+منطقي StdThreadPool::is_کارګر_Thread() ثابت {
+  llvm::sys::ScopedReader قلف_Guard(تارونه_قلف);
   llvm::thread::id CurrentThreadId = llvm::this_thread::get_id();
-  for (const llvm::thread &Thread : Threads)
-    if (CurrentThreadId == Thread.get_id())
-      return true;
-  return false;
+  لكل (ثابت llvm::thread &Thread : تارونه)
+    إذا (CurrentThreadId == Thread.get_id())
+      أرجع ریښتیا;
+  أرجع خطأ;
 }
 
 // The destructor joins all threads, waiting for completion.
 StdThreadPool::~StdThreadPool() {
   {
-    std::unique_lock<std::mutex> LockGuard(QueueLock);
-    EnableFlag = false;
+    std::unique_قلف<std::mutex> قلف_Guard(کتار_قلف);
+    EnableFlag = خطأ;
   }
-  QueueCondition.notify_all();
-  llvm::sys::ScopedReader LockGuard(ThreadsLock);
-  for (auto &Worker : Threads)
-    Worker.join();
+  کتار_Condition.notify_all();
+  llvm::sys::ScopedReader قلف_Guard(تارونه_قلف);
+  لكل (خپلکاری &کارګر : تارونه)
+    کارګر.join();
 }
 
-#endif // LLVM_ENABLE_THREADS Disabled
+#د_که_پای // LLVM_ENABLE_THREADS Disabled
 
 // No threads are launched, issue a warning if ThreadCount is not 0
 SingleThreadExecutor::SingleThreadExecutor(ThreadPoolStrategy S) {
-  int ThreadCount = S.compute_thread_count();
-  if (ThreadCount != 1) {
-    errs() << "Warning: request a ThreadPool with " << ThreadCount
+  صحيح Thread_شمېر = S.compute_thread_شمېر();
+  إذا (Thread_شمېر != 1) {
+    errs() << "Warning: request a ThreadPool with " << Thread_شمېر
            << " threads, but LLVM_ENABLE_THREADS has been turned off\n";
   }
 }
 
-void SingleThreadExecutor::wait() {
+فراغ SingleThreadExecutor::wait() {
   // Sequential implementation running the tasks
-  while (!Tasks.empty()) {
-    auto Task = std::move(Tasks.front().first);
-    Tasks.pop_front();
+  طالما (!Tasks.تشه()) {
+    خپلکاری Task = std::move(Tasks.front().لومړی_2);
+    Tasks.راوباسه_front();
     Task();
   }
 }
 
-void SingleThreadExecutor::wait(ThreadPoolTaskGroup &) {
+فراغ SingleThreadExecutor::wait(Thread_Pool_Task_ډله &) {
   // Simply wait for all, this works even if recursive (the running task
   // is already removed from the queue).
   wait();
 }
 
-bool SingleThreadExecutor::isWorkerThread() const {
+منطقي SingleThreadExecutor::is_کارګر_Thread() ثابت {
   report_fatal_error("LLVM compiled without multithreading");
 }
 

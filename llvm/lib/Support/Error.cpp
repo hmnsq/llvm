@@ -6,19 +6,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Error.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <system_error>
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن <system_error>
 
-using namespace llvm;
+کارول نطاق llvm;
 
-namespace {
+نطاق {
 
-enum class ErrorErrorCode : int {
-  MultipleErrors = 1,
+تعداد صنف Error_Error_کوډ : صحيح {
+  مضرب_Errors = 1,
   FileError,
   InconvertibleError
 };
@@ -26,182 +26,182 @@ enum class ErrorErrorCode : int {
 // FIXME: This class is only here to support the transition to llvm::Error. It
 // will be removed once this transition is complete. Clients should prefer to
 // deal with the Error value directly, rather than converting to error_code.
-class ErrorErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override { return "Error"; }
+صنف ErrorErrorCategory : عام std::error_category {
+عام:
+  ثابت حرف *name() ثابت noexcept override { أرجع "Error"; }
 
-  std::string message(int condition) const override {
-    switch (static_cast<ErrorErrorCode>(condition)) {
-    case ErrorErrorCode::MultipleErrors:
-      return "Multiple errors";
-    case ErrorErrorCode::InconvertibleError:
-      return "Inconvertible error value. An error has occurred that could not "
+  std::string پیغام_2(صحيح condition) ثابت override {
+    بدل (static_cast<Error_Error_کوډ>(condition)) {
+    حالة Error_Error_کوډ::مضرب_Errors:
+      أرجع "Multiple errors";
+    حالة Error_Error_کوډ::InconvertibleError:
+      أرجع "Inconvertible error value. An error has occurred that could not "
              "be converted to a known std::error_code. Please file a bug.";
-    case ErrorErrorCode::FileError:
-      return "A file error occurred.";
+    حالة Error_Error_کوډ::FileError:
+      أرجع "A file error occurred.";
     }
     llvm_unreachable("Unhandled error code");
   }
 };
 }
 
-static ErrorErrorCategory &getErrorErrorCat() {
-  static ErrorErrorCategory ErrorErrorCat;
-  return ErrorErrorCat;
+ساكن ErrorErrorCategory &getErrorErrorCat() {
+  ساكن ErrorErrorCategory ErrorErrorCat;
+  أرجع ErrorErrorCat;
 }
 
-void ErrorInfoBase::anchor() {}
-char ErrorInfoBase::ID = 0;
-char ErrorList::ID = 0;
-void ECError::anchor() {}
-char ECError::ID = 0;
-char StringError::ID = 0;
-char FileError::ID = 0;
+فراغ Error_Info_بنسټ::anchor() {}
+حرف Error_Info_بنسټ::ID = 0;
+حرف ErrorList::ID = 0;
+فراغ ECError::anchor() {}
+حرف ECError::ID = 0;
+حرف StringError::ID = 0;
+حرف FileError::ID = 0;
 
-void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
-  if (!E)
-    return;
+فراغ llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
+  إذا (!E)
+    أرجع;
   OS << ErrorBanner;
-  handleAllErrors(std::move(E), [&](const ErrorInfoBase &EI) {
-    EI.log(OS);
+  handleAllErrors(std::move(E), [&](ثابت Error_Info_بنسټ &EI) {
+    EI.لوګاریتم(OS);
     OS << "\n";
   });
 }
 
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
-std::string llvm::toString(Error E) {
-  SmallVector<std::string, 2> Errors;
-  handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+std::string llvm::منزل_String(Error E) {
+  Small_ویکټور<std::string, 2> Errors;
+  handleAllErrors(std::move(E), [&Errors](ثابت Error_Info_بنسټ &EI) {
+    Errors.ټېل_شا(EI.پیغام_2());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  أرجع join(Errors.begin(), Errors.پای_ټکی(), "\n");
 }
 
-std::string llvm::toStringWithoutConsuming(const Error &E) {
-  SmallVector<std::string, 2> Errors;
-  visitErrors(E, [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+std::string llvm::منزل_String_Without_Consuming(ثابت Error &E) {
+  Small_ویکټور<std::string, 2> Errors;
+  لیدنه_Errors(E, [&Errors](ثابت Error_Info_بنسټ &EI) {
+    Errors.ټېل_شا(EI.پیغام_2());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  أرجع join(Errors.begin(), Errors.پای_ټکی(), "\n");
 }
 
-std::error_code ErrorList::convertToErrorCode() const {
-  return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
+std::error_کوډ ErrorList::convert_منزل_Error_کوډ() ثابت {
+  أرجع std::error_کوډ(static_cast<صحيح>(Error_Error_کوډ::مضرب_Errors),
                          getErrorErrorCat());
 }
 
-std::error_code llvm::inconvertibleErrorCode() {
-  return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
+std::error_کوډ llvm::inconvertible_Error_کوډ() {
+  أرجع std::error_کوډ(static_cast<صحيح>(Error_Error_کوډ::InconvertibleError),
                          getErrorErrorCat());
 }
 
-std::error_code FileError::convertToErrorCode() const {
-  std::error_code NestedEC = Err->convertToErrorCode();
-  if (NestedEC == inconvertibleErrorCode())
-    return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
+std::error_کوډ FileError::convert_منزل_Error_کوډ() ثابت {
+  std::error_کوډ NestedEC = Err->convert_منزل_Error_کوډ();
+  إذا (NestedEC == inconvertible_Error_کوډ())
+    أرجع std::error_کوډ(static_cast<صحيح>(Error_Error_کوډ::FileError),
                            getErrorErrorCat());
-  return NestedEC;
+  أرجع NestedEC;
 }
 
-Error llvm::errorCodeToError(std::error_code EC) {
-  if (!EC)
-    return Error::success();
-  return Error(std::make_unique<ECError>(ECError(EC)));
+Error llvm::error_کوډ_منزل_Error(std::error_کوډ EC) {
+  إذا (!EC)
+    أرجع Error::success();
+  أرجع Error(std::make_unique<ECError>(ECError(EC)));
 }
 
-std::error_code llvm::errorToErrorCode(Error Err) {
-  std::error_code EC;
-  handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
-    EC = EI.convertToErrorCode();
+std::error_کوډ llvm::error_منزل_Error_کوډ(Error Err) {
+  std::error_کوډ EC;
+  handleAllErrors(std::move(Err), [&](ثابت Error_Info_بنسټ &EI) {
+    EC = EI.convert_منزل_Error_کوډ();
   });
-  if (EC == inconvertibleErrorCode())
-    report_fatal_error(Twine(EC.message()));
-  return EC;
+  إذا (EC == inconvertible_Error_کوډ())
+    report_fatal_error(Twine(EC.پیغام_2()));
+  أرجع EC;
 }
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
-void Error::fatalUncheckedError() const {
+#إذا LLVM_ENABLE_ABI_BREAKING_CHECKS
+فراغ Error::fatalUncheckedError() ثابت {
   dbgs() << "Program aborted due to an unhandled Error:\n";
-  if (getPtr()) {
-    getPtr()->log(dbgs());
+  إذا (getPtr()) {
+    getPtr()->لوګاریتم(dbgs());
     dbgs() << "\n";
-  }else
+  }وإلا
     dbgs() << "Error value was Success. (Note: Success values must still be "
               "checked prior to being destroyed).\n";
   abort();
 }
-#endif
+#د_که_پای
 
-StringError::StringError(std::error_code EC, const Twine &S)
-    : Msg(S.str()), EC(EC) {}
+StringError::StringError(std::error_کوډ EC, ثابت Twine &S)
+    : پیغام_4(S.str()), EC(EC) {}
 
-StringError::StringError(const Twine &S, std::error_code EC)
-    : Msg(S.str()), EC(EC), PrintMsgOnly(true) {}
+StringError::StringError(ثابت Twine &S, std::error_کوډ EC)
+    : پیغام_4(S.str()), EC(EC), Print_پیغام_Only(ریښتیا) {}
 
-StringError::StringError(std::string &&S, std::error_code EC, bool PrintMsgOnly)
-    : Msg(std::move(S)), EC(EC), PrintMsgOnly(PrintMsgOnly) {}
+StringError::StringError(std::string &&S, std::error_کوډ EC, منطقي Print_پیغام_Only)
+    : پیغام_4(std::move(S)), EC(EC), Print_پیغام_Only(Print_پیغام_Only) {}
 
-void StringError::log(raw_ostream &OS) const {
-  if (PrintMsgOnly) {
-    OS << Msg;
-  } else {
-    OS << EC.message();
-    if (!Msg.empty())
-      OS << (" " + Msg);
+فراغ StringError::لوګاریتم(raw_ostream &OS) ثابت {
+  إذا (Print_پیغام_Only) {
+    OS << پیغام_4;
+  } وإلا {
+    OS << EC.پیغام_2();
+    إذا (!پیغام_4.تشه())
+      OS << (" " + پیغام_4);
   }
 }
 
-std::error_code StringError::convertToErrorCode() const {
-  return EC;
+std::error_کوډ StringError::convert_منزل_Error_کوډ() ثابت {
+  أرجع EC;
 }
 
-Error llvm::createStringError(std::string &&Msg, std::error_code EC) {
-  return make_error<StringError>(std::move(Msg), EC, true);
+Error llvm::createStringError(std::string &&پیغام_4, std::error_کوډ EC) {
+  أرجع make_error<StringError>(std::move(پیغام_4), EC, ریښتیا);
 }
 
-void llvm::report_fatal_error(Error Err, bool GenCrashDiag) {
-  assert(Err && "report_fatal_error called with success value");
-  std::string ErrMsg;
+فراغ llvm::report_fatal_error(Error Err, منطقي GenCrashDiag) {
+  أكد(Err && "report_fatal_error called with success value");
+  std::string Err_پیغام;
   {
-    raw_string_ostream ErrStream(ErrMsg);
-    logAllUnhandledErrors(std::move(Err), ErrStream);
+    raw_string_ostream Err_بهیر(Err_پیغام);
+    logAllUnhandledErrors(std::move(Err), Err_بهیر);
   }
-  report_fatal_error(Twine(ErrMsg), GenCrashDiag);
+  report_fatal_error(Twine(Err_پیغام), GenCrashDiag);
 }
 
-void llvm::reportFatalInternalError(Error Err) {
-  report_fatal_error(std::move(Err), /*GenCrashDiag=*/true);
+فراغ llvm::report_Fatal_دننی_Error(Error Err) {
+  report_fatal_error(std::move(Err), /*GenCrashDiag=*/ریښتیا);
 }
 
-void llvm::reportFatalUsageError(Error Err) {
-  report_fatal_error(std::move(Err), /*GenCrashDiag=*/false);
+فراغ llvm::reportFatalUsageError(Error Err) {
+  report_fatal_error(std::move(Err), /*GenCrashDiag=*/خطأ);
 }
 
 LLVMErrorTypeId LLVMGetErrorTypeId(LLVMErrorRef Err) {
-  return reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
+  أرجع reinterpret_cast<Error_Info_بنسټ *>(Err)->dynamicClassID();
 }
 
-void LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
+فراغ LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
 
-void LLVMCantFail(LLVMErrorRef Err) {
+فراغ LLVMCantFail(LLVMErrorRef Err) {
   cantFail(unwrap(Err));
 }
 
-char *LLVMGetErrorMessage(LLVMErrorRef Err) {
-  std::string Tmp = toString(unwrap(Err));
-  char *ErrMsg = new char[Tmp.size() + 1];
-  memcpy(ErrMsg, Tmp.data(), Tmp.size());
-  ErrMsg[Tmp.size()] = '\0';
-  return ErrMsg;
+حرف *LLVMGet_Error_پیغام(LLVMErrorRef Err) {
+  std::string Tmp = منزل_String(unwrap(Err));
+  حرف *Err_پیغام = جديد حرف[Tmp.اندازه_2() + 1];
+  حافظه_نقل(Err_پیغام, Tmp.معلومات(), Tmp.اندازه_2());
+  Err_پیغام[Tmp.اندازه_2()] = '\0';
+  أرجع Err_پیغام;
 }
 
-void LLVMDisposeErrorMessage(char *ErrMsg) { delete[] ErrMsg; }
+فراغ LLVMDispose_Error_پیغام(حرف *Err_پیغام) { ړنګول[] Err_پیغام; }
 
 LLVMErrorTypeId LLVMGetStringErrorTypeId() {
-  return reinterpret_cast<void *>(&StringError::ID);
+  أرجع reinterpret_cast<فراغ *>(&StringError::ID);
 }
 
-LLVMErrorRef LLVMCreateStringError(const char *ErrMsg) {
-  return wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
+LLVMErrorRef LLVMCreateStringError(ثابت حرف *Err_پیغام) {
+  أرجع wrap(make_error<StringError>(Err_پیغام, inconvertible_Error_کوډ()));
 }

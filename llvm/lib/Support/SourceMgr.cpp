@@ -12,224 +12,224 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/Locale.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/Support/WithColor.h"
-#include "llvm/Support/raw_ostream.h"
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <limits>
-#include <memory>
-#include <string>
-#include <utility>
+#ضمن "llvm/Support/SourceMgr.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Support/ErrorOr.h"
+#ضمن "llvm/Support/Locale.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/SMLoc.h"
+#ضمن "llvm/Support/VirtualFileSystem.h"
+#ضمن "llvm/Support/WithColor.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <algorithm>
+#ضمن <cassert>
+#ضمن <cstddef>
+#ضمن <limits>
+#ضمن <memory>
+#ضمن <string>
+#ضمن <utility>
 
-using namespace llvm;
+کارول نطاق llvm;
 
-static const size_t TabStop = 8;
+ساكن ثابت size_t TabStop = 8;
 
 // Out of line to avoid needing definition of vfs::FileSystem in header.
-SourceMgr::SourceMgr() = default;
-SourceMgr::SourceMgr(IntrusiveRefCntPtr<vfs::FileSystem> FS)
+سرچینه_Mgr::سرچینه_Mgr() = افتراضي;
+سرچینه_Mgr::سرچینه_Mgr(IntrusiveRefCntPtr<vfs::FileSystem> FS)
     : FS(std::move(FS)) {}
-SourceMgr::SourceMgr(SourceMgr &&) = default;
-SourceMgr &SourceMgr::operator=(SourceMgr &&) = default;
-SourceMgr::~SourceMgr() = default;
+سرچینه_Mgr::سرچینه_Mgr(سرچینه_Mgr &&) = افتراضي;
+سرچینه_Mgr &سرچینه_Mgr::چلوونکی=(سرچینه_Mgr &&) = افتراضي;
+سرچینه_Mgr::~سرچینه_Mgr() = افتراضي;
 
-IntrusiveRefCntPtr<vfs::FileSystem> SourceMgr::getVirtualFileSystem() const {
-  return FS;
+IntrusiveRefCntPtr<vfs::FileSystem> سرچینه_Mgr::getVirtualFileSystem() ثابت {
+  أرجع FS;
 }
 
-void SourceMgr::setVirtualFileSystem(IntrusiveRefCntPtr<vfs::FileSystem> FS) {
-  this->FS = std::move(FS);
+فراغ سرچینه_Mgr::سېټ_Virtual_File_System(IntrusiveRefCntPtr<vfs::FileSystem> FS) {
+  هذا->FS = std::move(FS);
 }
 
-unsigned SourceMgr::AddIncludeFile(const std::string &Filename,
+بینښه سرچینه_Mgr::جمع_کړه_Include_File(ثابت std::string &Filename,
                                    SMLoc IncludeLoc,
                                    std::string &IncludedFile) {
-  ErrorOr<std::unique_ptr<MemoryBuffer>> NewBufOrErr =
+  ErrorOr<std::unique_ptr<حافظه_بفر>> NewBufOrErr =
       OpenIncludeFile(Filename, IncludedFile);
-  if (!NewBufOrErr)
-    return 0;
+  إذا (!NewBufOrErr)
+    أرجع 0;
 
-  return AddNewSourceBuffer(std::move(*NewBufOrErr), IncludeLoc);
+  أرجع جمع_کړه_New_سرچینه_بفر(std::move(*NewBufOrErr), IncludeLoc);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-SourceMgr::OpenIncludeFile(const std::string &Filename,
+ErrorOr<std::unique_ptr<حافظه_بفر>>
+سرچینه_Mgr::OpenIncludeFile(ثابت std::string &Filename,
                            std::string &IncludedFile,
-                           bool RequiresNullTerminator) {
-  auto GetFile = [this, RequiresNullTerminator](StringRef Path) {
-    return FS ? FS->getBufferForFile(Path, /*FileSize=*/-1,
+                           منطقي RequiresNullTerminator) {
+  خپلکاری GetFile = [هذا, RequiresNullTerminator](StringRef لار) {
+    أرجع FS ? FS->get_بفر_For_File(لار, /*FileSize=*/-1,
                                      RequiresNullTerminator)
-              : MemoryBuffer::getFile(Path, /*IsText=*/false,
+              : حافظه_بفر::getFile(لار, /*IsText=*/خطأ,
                                       RequiresNullTerminator);
   };
 
-  ErrorOr<std::unique_ptr<MemoryBuffer>> NewBufOrErr = GetFile(Filename);
+  ErrorOr<std::unique_ptr<حافظه_بفر>> NewBufOrErr = GetFile(Filename);
 
-  SmallString<64> Buffer(Filename);
+  SmallString<64> بفر(Filename);
   // If the file didn't exist directly, see if it's in an include path.
-  for (unsigned i = 0, e = IncludeDirectories.size(); i != e && !NewBufOrErr;
+  لكل (بینښه i = 0, e = IncludeDirectories.اندازه_2(); i != e && !NewBufOrErr;
        ++i) {
-    Buffer = IncludeDirectories[i];
-    sys::path::append(Buffer, Filename);
-    NewBufOrErr = GetFile(Buffer);
+    بفر = IncludeDirectories[i];
+    sys::لار_2::append(بفر, Filename);
+    NewBufOrErr = GetFile(بفر);
   }
 
-  if (NewBufOrErr)
-    IncludedFile = static_cast<std::string>(Buffer);
+  إذا (NewBufOrErr)
+    IncludedFile = static_cast<std::string>(بفر);
 
-  return NewBufOrErr;
+  أرجع NewBufOrErr;
 }
 
-unsigned SourceMgr::FindBufferContainingLoc(SMLoc Loc) const {
-  for (unsigned i = 0, e = Buffers.size(); i != e; ++i)
-    if (Loc.getPointer() >= Buffers[i].Buffer->getBufferStart() &&
+بینښه سرچینه_Mgr::پیدا_کړه_بفر_Containing_Loc(SMLoc Loc) ثابت {
+  لكل (بینښه i = 0, e = Buffers.اندازه_2(); i != e; ++i)
+    إذا (Loc.get_اشاره_ګر() >= Buffers[i].بفر->get_بفر_پیل() &&
         // Use <= here so that a pointer to the null at the end of the buffer
         // is included as part of the buffer.
-        Loc.getPointer() <= Buffers[i].Buffer->getBufferEnd())
-      return i + 1;
-  return 0;
+        Loc.get_اشاره_ګر() <= Buffers[i].بفر->get_بفر_پای_ټکی())
+      أرجع i + 1;
+  أرجع 0;
 }
 
-template <typename T>
-static std::vector<T> &GetOrCreateOffsetCache(void *&OffsetCache,
-                                              MemoryBuffer *Buffer) {
-  if (OffsetCache)
-    return *static_cast<std::vector<T> *>(OffsetCache);
+کينډۍ <ډول_نوم T>
+ساكن std::ویکټور<T> &Get_Or_Create_دننه_واټن_Cache(فراغ *&دننه_واټن_Cache,
+                                              حافظه_بفر *بفر) {
+  إذا (دننه_واټن_Cache)
+    أرجع *static_cast<std::ویکټور<T> *>(دننه_واټن_Cache);
 
   // Lazily fill in the offset cache.
-  auto *Offsets = new std::vector<T>();
-  size_t Sz = Buffer->getBufferSize();
-  assert(Sz <= std::numeric_limits<T>::max());
-  StringRef S = Buffer->getBuffer();
-  for (size_t N = 0; N < Sz; ++N) {
-    if (S[N] == '\n')
-      Offsets->push_back(static_cast<T>(N));
+  خپلکاری *Offsets = جديد std::ویکټور<T>();
+  size_t Sz = بفر->get_بفر_اندازه();
+  أكد(Sz <= std::numeric_limits<T>::max());
+  StringRef S = بفر->get_بفر();
+  لكل (size_t N = 0; N < Sz; ++N) {
+    إذا (S[N] == '\n')
+      Offsets->ټېل_شا(static_cast<T>(N));
   }
 
-  OffsetCache = Offsets;
-  return *Offsets;
+  دننه_واټن_Cache = Offsets;
+  أرجع *Offsets;
 }
 
-template <typename T>
-std::pair<unsigned, unsigned>
-SourceMgr::SrcBuffer::getLineAndColumnSpecialized(const char *Ptr) const {
-  std::vector<T> &Offsets =
-      GetOrCreateOffsetCache<T>(OffsetCache, Buffer.get());
+کينډۍ <ډول_نوم T>
+std::pair<بینښه, بینښه>
+سرچینه_Mgr::Src_بفر::get_کرښه_And_ستنه_Specialized(ثابت حرف *Ptr) ثابت {
+  std::ویکټور<T> &Offsets =
+      Get_Or_Create_دننه_واټن_Cache<T>(دننه_واټن_Cache, بفر.get());
 
-  const char *BufStart = Buffer->getBufferStart();
-  assert(Ptr >= BufStart && Ptr <= Buffer->getBufferEnd());
-  ptrdiff_t PtrDiff = Ptr - BufStart;
-  assert(PtrDiff >= 0 &&
+  ثابت حرف *Buf_پیل = بفر->get_بفر_پیل();
+  أكد(Ptr >= Buf_پیل && Ptr <= بفر->get_بفر_پای_ټکی());
+  ptrdiff_t PtrDiff = Ptr - Buf_پیل;
+  أكد(PtrDiff >= 0 &&
          static_cast<size_t>(PtrDiff) <= std::numeric_limits<T>::max());
-  T PtrOffset = static_cast<T>(PtrDiff);
+  T Ptr_دننه_واټن = static_cast<T>(PtrDiff);
 
   // llvm::lower_bound gives the number of EOL before PtrOffset. Add 1 to get
   // the line number.
-  auto I = llvm::lower_bound(Offsets, PtrOffset);
-  unsigned LineNo = I - Offsets.begin() + 1;
+  خپلکاری I = llvm::ښکتنی_bound(Offsets, Ptr_دننه_واټن);
+  بینښه کرښه_No = I - Offsets.begin() + 1;
 
   // The column number is the distance from the previous EOL (or the start of
   // the buffer) to the pointer.
-  T LineStartOffs = (I == Offsets.begin()) ? 0 : (I[-1] + 1);
-  unsigned ColNo = PtrOffset - LineStartOffs + 1;
-  return {LineNo, ColNo};
+  T کرښه_پیل_Offs = (I == Offsets.begin()) ? 0 : (I[-1] + 1);
+  بینښه ستون_No = Ptr_دننه_واټن - کرښه_پیل_Offs + 1;
+  أرجع {کرښه_No, ستون_No};
 }
 
 /// Look up a given \p Ptr in the buffer, determining which line and column
 /// it came from.
-LLVM_ABI std::pair<unsigned, unsigned>
-SourceMgr::SrcBuffer::getLineAndColumn(const char *Ptr) const {
-  size_t Sz = Buffer->getBufferSize();
-  if (Sz <= std::numeric_limits<uint8_t>::max())
-    return getLineAndColumnSpecialized<uint8_t>(Ptr);
-  if (Sz <= std::numeric_limits<uint16_t>::max())
-    return getLineAndColumnSpecialized<uint16_t>(Ptr);
-  if (Sz <= std::numeric_limits<uint32_t>::max())
-    return getLineAndColumnSpecialized<uint32_t>(Ptr);
-  return getLineAndColumnSpecialized<uint64_t>(Ptr);
+LLVM_ABI std::pair<بینښه, بینښه>
+سرچینه_Mgr::Src_بفر::get_کرښه_And_ستنه(ثابت حرف *Ptr) ثابت {
+  size_t Sz = بفر->get_بفر_اندازه();
+  إذا (Sz <= std::numeric_limits<uint8_t>::max())
+    أرجع get_کرښه_And_ستنه_Specialized<uint8_t>(Ptr);
+  إذا (Sz <= std::numeric_limits<uint16_t>::max())
+    أرجع get_کرښه_And_ستنه_Specialized<uint16_t>(Ptr);
+  إذا (Sz <= std::numeric_limits<uint32_t>::max())
+    أرجع get_کرښه_And_ستنه_Specialized<uint32_t>(Ptr);
+  أرجع get_کرښه_And_ستنه_Specialized<uint64_t>(Ptr);
 }
 
-template <typename T>
-const char *SourceMgr::SrcBuffer::getPointerForLineNumberSpecialized(
-    unsigned LineNo) const {
-  std::vector<T> &Offsets =
-      GetOrCreateOffsetCache<T>(OffsetCache, Buffer.get());
+کينډۍ <ډول_نوم T>
+ثابت حرف *سرچینه_Mgr::Src_بفر::get_اشاره_ګر_For_کرښه_شمېره_Specialized(
+    بینښه کرښه_No) ثابت {
+  std::ویکټور<T> &Offsets =
+      Get_Or_Create_دننه_واټن_Cache<T>(دننه_واټن_Cache, بفر.get());
 
   // We start counting line and column numbers from 1.
-  if (LineNo != 0)
-    --LineNo;
+  إذا (کرښه_No != 0)
+    --کرښه_No;
 
-  const char *BufStart = Buffer->getBufferStart();
+  ثابت حرف *Buf_پیل = بفر->get_بفر_پیل();
 
   // The offset cache contains the location of the \n for the specified line,
   // we want the start of the line.  As such, we look for the previous entry.
-  if (LineNo == 0)
-    return BufStart;
-  if (LineNo > Offsets.size())
-    return nullptr;
-  return BufStart + Offsets[LineNo - 1] + 1;
+  إذا (کرښه_No == 0)
+    أرجع Buf_پیل;
+  إذا (کرښه_No > Offsets.اندازه_2())
+    أرجع تش_اشاره;
+  أرجع Buf_پیل + Offsets[کرښه_No - 1] + 1;
 }
 
 /// Return a pointer to the first character of the specified line number or
 /// null if the line number is invalid.
-const char *
-SourceMgr::SrcBuffer::getPointerForLineNumber(unsigned LineNo) const {
-  size_t Sz = Buffer->getBufferSize();
-  if (Sz <= std::numeric_limits<uint8_t>::max())
-    return getPointerForLineNumberSpecialized<uint8_t>(LineNo);
-  else if (Sz <= std::numeric_limits<uint16_t>::max())
-    return getPointerForLineNumberSpecialized<uint16_t>(LineNo);
-  else if (Sz <= std::numeric_limits<uint32_t>::max())
-    return getPointerForLineNumberSpecialized<uint32_t>(LineNo);
-  else
-    return getPointerForLineNumberSpecialized<uint64_t>(LineNo);
+ثابت حرف *
+سرچینه_Mgr::Src_بفر::get_اشاره_ګر_For_کرښه_شمېره(بینښه کرښه_No) ثابت {
+  size_t Sz = بفر->get_بفر_اندازه();
+  إذا (Sz <= std::numeric_limits<uint8_t>::max())
+    أرجع get_اشاره_ګر_For_کرښه_شمېره_Specialized<uint8_t>(کرښه_No);
+  وإلا إذا (Sz <= std::numeric_limits<uint16_t>::max())
+    أرجع get_اشاره_ګر_For_کرښه_شمېره_Specialized<uint16_t>(کرښه_No);
+  وإلا إذا (Sz <= std::numeric_limits<uint32_t>::max())
+    أرجع get_اشاره_ګر_For_کرښه_شمېره_Specialized<uint32_t>(کرښه_No);
+  وإلا
+    أرجع get_اشاره_ګر_For_کرښه_شمېره_Specialized<uint64_t>(کرښه_No);
 }
 
-SourceMgr::SrcBuffer::SrcBuffer(SourceMgr::SrcBuffer &&Other)
-    : Buffer(std::move(Other.Buffer)), OffsetCache(Other.OffsetCache),
+سرچینه_Mgr::Src_بفر::Src_بفر(سرچینه_Mgr::Src_بفر &&Other)
+    : بفر(std::move(Other.بفر)), دننه_واټن_Cache(Other.دننه_واټن_Cache),
       IncludeLoc(Other.IncludeLoc) {
-  Other.OffsetCache = nullptr;
+  Other.دننه_واټن_Cache = تش_اشاره;
 }
 
-SourceMgr::SrcBuffer::~SrcBuffer() {
-  if (OffsetCache) {
-    size_t Sz = Buffer->getBufferSize();
-    if (Sz <= std::numeric_limits<uint8_t>::max())
-      delete static_cast<std::vector<uint8_t> *>(OffsetCache);
-    else if (Sz <= std::numeric_limits<uint16_t>::max())
-      delete static_cast<std::vector<uint16_t> *>(OffsetCache);
-    else if (Sz <= std::numeric_limits<uint32_t>::max())
-      delete static_cast<std::vector<uint32_t> *>(OffsetCache);
-    else
-      delete static_cast<std::vector<uint64_t> *>(OffsetCache);
-    OffsetCache = nullptr;
+سرچینه_Mgr::Src_بفر::~Src_بفر() {
+  إذا (دننه_واټن_Cache) {
+    size_t Sz = بفر->get_بفر_اندازه();
+    إذا (Sz <= std::numeric_limits<uint8_t>::max())
+      ړنګول static_cast<std::ویکټور<uint8_t> *>(دننه_واټن_Cache);
+    وإلا إذا (Sz <= std::numeric_limits<uint16_t>::max())
+      ړنګول static_cast<std::ویکټور<uint16_t> *>(دننه_واټن_Cache);
+    وإلا إذا (Sz <= std::numeric_limits<uint32_t>::max())
+      ړنګول static_cast<std::ویکټور<uint32_t> *>(دننه_واټن_Cache);
+    وإلا
+      ړنګول static_cast<std::ویکټور<uint64_t> *>(دننه_واټن_Cache);
+    دننه_واټن_Cache = تش_اشاره;
   }
 }
 
-std::pair<unsigned, unsigned>
-SourceMgr::getLineAndColumn(SMLoc Loc, unsigned BufferID) const {
-  if (!BufferID)
-    BufferID = FindBufferContainingLoc(Loc);
-  assert(BufferID && "Invalid location!");
+std::pair<بینښه, بینښه>
+سرچینه_Mgr::get_کرښه_And_ستنه(SMLoc Loc, بینښه بفر_ID) ثابت {
+  إذا (!بفر_ID)
+    بفر_ID = پیدا_کړه_بفر_Containing_Loc(Loc);
+  أكد(بفر_ID && "Invalid location!");
 
-  auto &SB = getBufferInfo(BufferID);
-  const char *Ptr = Loc.getPointer();
+  خپلکاری &SB = get_بفر_Info(بفر_ID);
+  ثابت حرف *Ptr = Loc.get_اشاره_ګر();
 
-  return SB.getLineAndColumn(Ptr);
+  أرجع SB.get_کرښه_And_ستنه(Ptr);
 }
 
 // FIXME: Note that the formatting of source locations is spread between
@@ -240,221 +240,221 @@ SourceMgr::getLineAndColumn(SMLoc Loc, unsigned BufferID) const {
 /// Get a string with the source location formatted in the standard
 /// style, but without the line offset. If \p IncludePath is true, the path
 /// is included. If false, only the file name and extension are included.
-std::string SourceMgr::getFormattedLocationNoOffset(SMLoc Loc,
-                                                    bool IncludePath) const {
-  auto BufferID = FindBufferContainingLoc(Loc);
-  assert(BufferID && "Invalid location!");
-  auto FileSpec = getBufferInfo(BufferID).Buffer->getBufferIdentifier();
+std::string سرچینه_Mgr::get_Formatted_Location_No_دننه_واټن(SMLoc Loc,
+                                                    منطقي Include_لار) ثابت {
+  خپلکاری بفر_ID = پیدا_کړه_بفر_Containing_Loc(Loc);
+  أكد(بفر_ID && "Invalid location!");
+  خپلکاری FileSpec = get_بفر_Info(بفر_ID).بفر->get_بفر_Identifier();
 
-  if (IncludePath) {
-    return FileSpec.str() + ":" + std::to_string(FindLineNumber(Loc, BufferID));
-  } else {
-    auto I = FileSpec.find_last_of("/\\");
-    I = (I == FileSpec.size()) ? 0 : (I + 1);
-    return FileSpec.substr(I).str() + ":" +
-           std::to_string(FindLineNumber(Loc, BufferID));
+  إذا (Include_لار) {
+    أرجع FileSpec.str() + ":" + std::منزل_string(پیدا_کړه_کرښه_شمېره(Loc, بفر_ID));
+  } وإلا {
+    خپلکاری I = FileSpec.پیدا_کړه_وروستی_د("/\\");
+    I = (I == FileSpec.اندازه_2()) ? 0 : (I + 1);
+    أرجع FileSpec.substr(I).str() + ":" +
+           std::منزل_string(پیدا_کړه_کرښه_شمېره(Loc, بفر_ID));
   }
 }
 
 /// Given a line and column number in a mapped buffer, turn it into an SMLoc.
 /// This will return a null SMLoc if the line/column location is invalid.
-SMLoc SourceMgr::FindLocForLineAndColumn(unsigned BufferID, unsigned LineNo,
-                                         unsigned ColNo) {
-  auto &SB = getBufferInfo(BufferID);
-  const char *Ptr = SB.getPointerForLineNumber(LineNo);
-  if (!Ptr)
-    return SMLoc();
+SMLoc سرچینه_Mgr::پیدا_کړه_Loc_For_کرښه_And_ستنه(بینښه بفر_ID, بینښه کرښه_No,
+                                         بینښه ستون_No) {
+  خپلکاری &SB = get_بفر_Info(بفر_ID);
+  ثابت حرف *Ptr = SB.get_اشاره_ګر_For_کرښه_شمېره(کرښه_No);
+  إذا (!Ptr)
+    أرجع SMLoc();
 
   // We start counting line and column numbers from 1.
-  if (ColNo != 0)
-    --ColNo;
+  إذا (ستون_No != 0)
+    --ستون_No;
 
   // If we have a column number, validate it.
-  if (ColNo) {
+  إذا (ستون_No) {
     // Make sure the location is within the current line.
-    if (Ptr + ColNo > SB.Buffer->getBufferEnd())
-      return SMLoc();
+    إذا (Ptr + ستون_No > SB.بفر->get_بفر_پای_ټکی())
+      أرجع SMLoc();
 
     // Make sure there is no newline in the way.
-    if (StringRef(Ptr, ColNo).find_first_of("\n\r") != StringRef::npos)
-      return SMLoc();
+    إذا (StringRef(Ptr, ستون_No).پیدا_کړه_لومړی_د("\n\r") != StringRef::npos)
+      أرجع SMLoc();
 
-    Ptr += ColNo;
+    Ptr += ستون_No;
   }
 
-  return SMLoc::getFromPointer(Ptr);
+  أرجع SMLoc::get_From_اشاره_ګر(Ptr);
 }
 
-void SourceMgr::PrintIncludeStack(SMLoc IncludeLoc, raw_ostream &OS) const {
-  if (IncludeLoc == SMLoc())
-    return; // Top of stack.
+فراغ سرچینه_Mgr::Print_Include_ډېری(SMLoc IncludeLoc, raw_ostream &OS) ثابت {
+  إذا (IncludeLoc == SMLoc())
+    أرجع; // Top of stack.
 
-  unsigned CurBuf = FindBufferContainingLoc(IncludeLoc);
-  assert(CurBuf && "Invalid or unspecified location!");
+  بینښه CurBuf = پیدا_کړه_بفر_Containing_Loc(IncludeLoc);
+  أكد(CurBuf && "Invalid or unspecified location!");
 
-  PrintIncludeStack(getBufferInfo(CurBuf).IncludeLoc, OS);
+  Print_Include_ډېری(get_بفر_Info(CurBuf).IncludeLoc, OS);
 
-  OS << "Included from " << getBufferInfo(CurBuf).Buffer->getBufferIdentifier()
-     << ":" << FindLineNumber(IncludeLoc, CurBuf) << ":\n";
+  OS << "Included from " << get_بفر_Info(CurBuf).بفر->get_بفر_Identifier()
+     << ":" << پیدا_کړه_کرښه_شمېره(IncludeLoc, CurBuf) << ":\n";
 }
 
-void SourceMgr::printIncludeStackForDiagnostic(SMLoc Loc,
-                                               raw_ostream &OS) const {
-  if (!Loc.isValid())
-    return;
-  unsigned DiagCurBuffer = FindBufferContainingLoc(Loc);
-  if (DiagCurBuffer && DiagCurBuffer != getMainFileID()) {
-    SMLoc ParentIncludeLoc = getParentIncludeLoc(DiagCurBuffer);
+فراغ سرچینه_Mgr::print_Include_ډېری_For_Diagnostic(SMLoc Loc,
+                                               raw_ostream &OS) ثابت {
+  إذا (!Loc.isValid())
+    أرجع;
+  بینښه Diag_Cur_بفر = پیدا_کړه_بفر_Containing_Loc(Loc);
+  إذا (Diag_Cur_بفر && Diag_Cur_بفر != getMainFileID()) {
+    SMLoc پلار_Include_Loc = get_پلار_Include_Loc(Diag_Cur_بفر);
     // Ignore macro instantiation buffers to avoid redundant include stacks.
-    PrintIncludeStack(ParentIncludeLoc, OS);
+    Print_Include_ډېری(پلار_Include_Loc, OS);
   }
 }
 
-SMDiagnostic SourceMgr::GetMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
-                                   const Twine &Msg, ArrayRef<SMRange> Ranges,
-                                   ArrayRef<SMFixIt> FixIts) const {
+SMDiagnostic سرچینه_Mgr::Get_پیغام(SMLoc Loc, سرچینه_Mgr::Diag_ډول ډول_2,
+                                   ثابت Twine &پیغام_4, ArrayRef<SMRange> Ranges,
+                                   ArrayRef<SMFixIt> FixIts) ثابت {
   // First thing to do: find the current buffer containing the specified
   // location to pull out the source line.
-  SmallVector<std::pair<unsigned, unsigned>, 4> ColRanges;
-  std::pair<unsigned, unsigned> LineAndCol;
-  StringRef BufferID = "<unknown>";
-  StringRef LineStr;
+  Small_ویکټور<std::pair<بینښه, بینښه>, 4> ستون_Ranges;
+  std::pair<بینښه, بینښه> کرښه_And_ستون;
+  StringRef بفر_ID = "<unknown>";
+  StringRef کرښه_Str;
 
-  if (Loc.isValid()) {
-    unsigned CurBuf = FindBufferContainingLoc(Loc);
-    assert(CurBuf && "Invalid or unspecified location!");
+  إذا (Loc.isValid()) {
+    بینښه CurBuf = پیدا_کړه_بفر_Containing_Loc(Loc);
+    أكد(CurBuf && "Invalid or unspecified location!");
 
-    const MemoryBuffer *CurMB = getMemoryBuffer(CurBuf);
-    BufferID = CurMB->getBufferIdentifier();
+    ثابت حافظه_بفر *CurMB = get_حافظه_بفر(CurBuf);
+    بفر_ID = CurMB->get_بفر_Identifier();
 
     // Scan backward to find the start of the line.
-    const char *LineStart = Loc.getPointer();
-    const char *BufStart = CurMB->getBufferStart();
-    while (LineStart != BufStart && LineStart[-1] != '\n' &&
-           LineStart[-1] != '\r')
-      --LineStart;
+    ثابت حرف *کرښه_پیل = Loc.get_اشاره_ګر();
+    ثابت حرف *Buf_پیل = CurMB->get_بفر_پیل();
+    طالما (کرښه_پیل != Buf_پیل && کرښه_پیل[-1] != '\n' &&
+           کرښه_پیل[-1] != '\r')
+      --کرښه_پیل;
 
     // Get the end of the line.
-    const char *LineEnd = Loc.getPointer();
-    const char *BufEnd = CurMB->getBufferEnd();
-    while (LineEnd != BufEnd && LineEnd[0] != '\n' && LineEnd[0] != '\r')
-      ++LineEnd;
-    LineStr = StringRef(LineStart, LineEnd - LineStart);
+    ثابت حرف *کرښه_پای_ټکی = Loc.get_اشاره_ګر();
+    ثابت حرف *Buf_پای_ټکی = CurMB->get_بفر_پای_ټکی();
+    طالما (کرښه_پای_ټکی != Buf_پای_ټکی && کرښه_پای_ټکی[0] != '\n' && کرښه_پای_ټکی[0] != '\r')
+      ++کرښه_پای_ټکی;
+    کرښه_Str = StringRef(کرښه_پیل, کرښه_پای_ټکی - کرښه_پیل);
 
     // Convert any ranges to column ranges that only intersect the line of the
     // location.
-    for (SMRange R : Ranges) {
-      if (!R.isValid())
-        continue;
+    لكل (SMRange R : Ranges) {
+      إذا (!R.isValid())
+        استمر;
 
       // If the line doesn't contain any part of the range, then ignore it.
-      if (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
-        continue;
+      إذا (R.پیل.get_اشاره_ګر() > کرښه_پای_ټکی || R.پای_ټکی_2.get_اشاره_ګر() < کرښه_پیل)
+        استمر;
 
       // Ignore pieces of the range that go onto other lines.
-      if (R.Start.getPointer() < LineStart)
-        R.Start = SMLoc::getFromPointer(LineStart);
-      if (R.End.getPointer() > LineEnd)
-        R.End = SMLoc::getFromPointer(LineEnd);
+      إذا (R.پیل.get_اشاره_ګر() < کرښه_پیل)
+        R.پیل = SMLoc::get_From_اشاره_ګر(کرښه_پیل);
+      إذا (R.پای_ټکی_2.get_اشاره_ګر() > کرښه_پای_ټکی)
+        R.پای_ټکی_2 = SMLoc::get_From_اشاره_ګر(کرښه_پای_ټکی);
 
       // Translate from SMLoc ranges to column ranges.
       // FIXME: Handle multibyte characters.
-      ColRanges.push_back(std::make_pair(R.Start.getPointer() - LineStart,
-                                         R.End.getPointer() - LineStart));
+      ستون_Ranges.ټېل_شا(std::make_pair(R.پیل.get_اشاره_ګر() - کرښه_پیل,
+                                         R.پای_ټکی_2.get_اشاره_ګر() - کرښه_پیل));
     }
 
-    LineAndCol = getLineAndColumn(Loc, CurBuf);
+    کرښه_And_ستون = get_کرښه_And_ستنه(Loc, CurBuf);
   }
 
-  return SMDiagnostic(*this, Loc, BufferID, LineAndCol.first,
-                      LineAndCol.second - 1, Kind, Msg.str(), LineStr,
-                      ColRanges, FixIts);
+  أرجع SMDiagnostic(*هذا, Loc, بفر_ID, کرښه_And_ستون.لومړی_2,
+                      کرښه_And_ستون.دوهم_2 - 1, ډول_2, پیغام_4.str(), کرښه_Str,
+                      ستون_Ranges, FixIts);
 }
 
-void SourceMgr::PrintMessage(raw_ostream &OS, const SMDiagnostic &Diagnostic,
-                             bool ShowColors) const {
+فراغ سرچینه_Mgr::Print_پیغام(raw_ostream &OS, ثابت SMDiagnostic &Diagnostic,
+                             منطقي ShowColors) ثابت {
   // Report the message with the diagnostic handler if present.
-  if (DiagHandler) {
+  إذا (DiagHandler) {
     DiagHandler(Diagnostic, DiagContext);
-    return;
+    أرجع;
   }
 
-  if (Diagnostic.getLoc().isValid()) {
-    unsigned CurBuf = FindBufferContainingLoc(Diagnostic.getLoc());
-    assert(CurBuf && "Invalid or unspecified location!");
-    PrintIncludeStack(getBufferInfo(CurBuf).IncludeLoc, OS);
+  إذا (Diagnostic.getLoc().isValid()) {
+    بینښه CurBuf = پیدا_کړه_بفر_Containing_Loc(Diagnostic.getLoc());
+    أكد(CurBuf && "Invalid or unspecified location!");
+    Print_Include_ډېری(get_بفر_Info(CurBuf).IncludeLoc, OS);
   }
 
-  Diagnostic.print(nullptr, OS, ShowColors);
+  Diagnostic.print(تش_اشاره, OS, ShowColors);
 }
 
-void SourceMgr::PrintMessage(raw_ostream &OS, SMLoc Loc,
-                             SourceMgr::DiagKind Kind, const Twine &Msg,
+فراغ سرچینه_Mgr::Print_پیغام(raw_ostream &OS, SMLoc Loc,
+                             سرچینه_Mgr::Diag_ډول ډول_2, ثابت Twine &پیغام_4,
                              ArrayRef<SMRange> Ranges, ArrayRef<SMFixIt> FixIts,
-                             bool ShowColors) const {
-  PrintMessage(OS, GetMessage(Loc, Kind, Msg, Ranges, FixIts), ShowColors);
+                             منطقي ShowColors) ثابت {
+  Print_پیغام(OS, Get_پیغام(Loc, ډول_2, پیغام_4, Ranges, FixIts), ShowColors);
 }
 
-void SourceMgr::PrintMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
-                             const Twine &Msg, ArrayRef<SMRange> Ranges,
-                             ArrayRef<SMFixIt> FixIts, bool ShowColors) const {
-  PrintMessage(errs(), Loc, Kind, Msg, Ranges, FixIts, ShowColors);
+فراغ سرچینه_Mgr::Print_پیغام(SMLoc Loc, سرچینه_Mgr::Diag_ډول ډول_2,
+                             ثابت Twine &پیغام_4, ArrayRef<SMRange> Ranges,
+                             ArrayRef<SMFixIt> FixIts, منطقي ShowColors) ثابت {
+  Print_پیغام(errs(), Loc, ډول_2, پیغام_4, Ranges, FixIts, ShowColors);
 }
 
 //===----------------------------------------------------------------------===//
 // SMFixIt Implementation
 //===----------------------------------------------------------------------===//
 
-SMFixIt::SMFixIt(SMRange R, const Twine &Replacement)
-    : Range(R), Text(Replacement.str()) {
-  assert(R.isValid());
+SMFixIt::SMFixIt(SMRange R, ثابت Twine &Replacement)
+    : Range(R), متن_2(Replacement.str()) {
+  أكد(R.isValid());
 }
 
 //===----------------------------------------------------------------------===//
 // SMDiagnostic Implementation
 //===----------------------------------------------------------------------===//
 
-SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLoc L, StringRef FN, int Line,
-                           int Col, SourceMgr::DiagKind Kind, StringRef Msg,
-                           StringRef LineStr,
-                           ArrayRef<std::pair<unsigned, unsigned>> Ranges,
+SMDiagnostic::SMDiagnostic(ثابت سرچینه_Mgr &sm, SMLoc L, StringRef FN, صحيح کرښه,
+                           صحيح ستون, سرچینه_Mgr::Diag_ډول ډول_2, StringRef پیغام_4,
+                           StringRef کرښه_Str,
+                           ArrayRef<std::pair<بینښه, بینښه>> Ranges,
                            ArrayRef<SMFixIt> Hints)
-    : SM(&sm), Loc(L), Filename(std::string(FN)), LineNo(Line), ColumnNo(Col),
-      Kind(Kind), Message(Msg), LineContents(LineStr), Ranges(Ranges.vec()),
+    : SM(&sm), Loc(L), Filename(std::string(FN)), کرښه_No(کرښه), ستنه_No(ستون),
+      ډول_2(ډول_2), پیغام_3(پیغام_4), کرښه_Contents(کرښه_Str), Ranges(Ranges.vec()),
       FixIts(Hints) {
-  llvm::sort(FixIts);
+  llvm::ترتیبول(FixIts);
 }
 
-static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
+ساكن فراغ build_Fix_It_کرښه(std::string &Caret_کرښه, std::string &Fix_It_کرښه,
                            ArrayRef<SMFixIt> FixIts,
-                           ArrayRef<char> SourceLine) {
-  if (FixIts.empty())
-    return;
+                           ArrayRef<حرف> سرچینه_کرښه) {
+  إذا (FixIts.تشه())
+    أرجع;
 
-  const char *LineStart = SourceLine.begin();
-  const char *LineEnd = SourceLine.end();
+  ثابت حرف *کرښه_پیل = سرچینه_کرښه.begin();
+  ثابت حرف *کرښه_پای_ټکی = سرچینه_کرښه.پای_ټکی();
 
-  size_t PrevHintEndCol = 0;
+  size_t Prev_Hint_پای_ټکی_ستون = 0;
 
-  for (const llvm::SMFixIt &Fixit : FixIts) {
+  لكل (ثابت llvm::SMFixIt &Fixit : FixIts) {
     // If the fixit contains a newline or tab, ignore it.
-    if (Fixit.getText().find_first_of("\n\r\t") != StringRef::npos)
-      continue;
+    إذا (Fixit.get_متن().پیدا_کړه_لومړی_د("\n\r\t") != StringRef::npos)
+      استمر;
 
     SMRange R = Fixit.getRange();
 
     // If the line doesn't contain any part of the range, then ignore it.
-    if (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
-      continue;
+    إذا (R.پیل.get_اشاره_ګر() > کرښه_پای_ټکی || R.پای_ټکی_2.get_اشاره_ګر() < کرښه_پیل)
+      استمر;
 
     // Translate from SMLoc to column.
     // Ignore pieces of the range that go onto other lines.
     // FIXME: Handle multibyte characters in the source line.
-    unsigned FirstCol;
-    if (R.Start.getPointer() < LineStart)
-      FirstCol = 0;
-    else
-      FirstCol = R.Start.getPointer() - LineStart;
+    بینښه لومړی_ستون;
+    إذا (R.پیل.get_اشاره_ګر() < کرښه_پیل)
+      لومړی_ستون = 0;
+    وإلا
+      لومړی_ستون = R.پیل.get_اشاره_ګر() - کرښه_پیل;
 
     // If we inserted a long previous hint, push this one forwards, and add
     // an extra space to show that this is not part of the previous
@@ -463,192 +463,192 @@ static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
     //
     // Note that if this hint is located immediately after the previous
     // hint, no space will be added, since the location is more important.
-    unsigned HintCol = FirstCol;
-    if (HintCol < PrevHintEndCol)
-      HintCol = PrevHintEndCol + 1;
+    بینښه Hint_ستون = لومړی_ستون;
+    إذا (Hint_ستون < Prev_Hint_پای_ټکی_ستون)
+      Hint_ستون = Prev_Hint_پای_ټکی_ستون + 1;
 
     // FIXME: This assertion is intended to catch unintended use of multibyte
     // characters in fixits. If we decide to do this, we'll have to track
     // separate byte widths for the source and fixit lines.
-    assert((size_t)sys::locale::columnWidth(Fixit.getText()) ==
-           Fixit.getText().size());
+    أكد((size_t)sys::locale::ستنه_پلنوالی(Fixit.get_متن()) ==
+           Fixit.get_متن().اندازه_2());
 
     // This relies on one byte per column in our fixit hints.
-    unsigned LastColumnModified = HintCol + Fixit.getText().size();
-    if (LastColumnModified > FixItLine.size())
-      FixItLine.resize(LastColumnModified, ' ');
+    بینښه وروستی_ستنه_Modified = Hint_ستون + Fixit.get_متن().اندازه_2();
+    إذا (وروستی_ستنه_Modified > Fix_It_کرښه.اندازه_2())
+      Fix_It_کرښه.resize(وروستی_ستنه_Modified, ' ');
 
-    llvm::copy(Fixit.getText(), FixItLine.begin() + HintCol);
+    llvm::copy(Fixit.get_متن(), Fix_It_کرښه.begin() + Hint_ستون);
 
-    PrevHintEndCol = LastColumnModified;
+    Prev_Hint_پای_ټکی_ستون = وروستی_ستنه_Modified;
 
     // For replacements, mark the removal range with '~'.
     // FIXME: Handle multibyte characters in the source line.
-    unsigned LastCol;
-    if (R.End.getPointer() >= LineEnd)
-      LastCol = LineEnd - LineStart;
-    else
-      LastCol = R.End.getPointer() - LineStart;
+    بینښه وروستی_ستون;
+    إذا (R.پای_ټکی_2.get_اشاره_ګر() >= کرښه_پای_ټکی)
+      وروستی_ستون = کرښه_پای_ټکی - کرښه_پیل;
+    وإلا
+      وروستی_ستون = R.پای_ټکی_2.get_اشاره_ګر() - کرښه_پیل;
 
-    std::fill(&CaretLine[FirstCol], &CaretLine[LastCol], '~');
+    std::fill(&Caret_کرښه[لومړی_ستون], &Caret_کرښه[وروستی_ستون], '~');
   }
 }
 
-static void printSourceLine(raw_ostream &S, StringRef LineContents) {
+ساكن فراغ print_سرچینه_کرښه(raw_ostream &S, StringRef کرښه_Contents) {
   // Print out the source line one character at a time, so we can expand tabs.
-  for (unsigned i = 0, e = LineContents.size(), OutCol = 0; i != e; ++i) {
-    size_t NextTab = LineContents.find('\t', i);
+  لكل (بینښه i = 0, e = کرښه_Contents.اندازه_2(), بهر_ستون = 0; i != e; ++i) {
+    size_t بل_Tab = کرښه_Contents.پیدا_کړه('\t', i);
     // If there were no tabs left, print the rest, we are done.
-    if (NextTab == StringRef::npos) {
-      S << LineContents.drop_front(i);
-      break;
+    إذا (بل_Tab == StringRef::npos) {
+      S << کرښه_Contents.drop_front(i);
+      اكسر;
     }
 
     // Otherwise, print from i to NextTab.
-    S << LineContents.slice(i, NextTab);
-    OutCol += NextTab - i;
-    i = NextTab;
+    S << کرښه_Contents.ټوټه(i, بل_Tab);
+    بهر_ستون += بل_Tab - i;
+    i = بل_Tab;
 
     // If we have a tab, emit at least one space, then round up to 8 columns.
-    do {
+    افعل {
       S << ' ';
-      ++OutCol;
-    } while ((OutCol % TabStop) != 0);
+      ++بهر_ستون;
+    } طالما ((بهر_ستون % TabStop) != 0);
   }
   S << '\n';
 }
 
-static bool isNonASCII(char c) { return c & 0x80; }
+ساكن منطقي isNonASCII(حرف c) { أرجع c & 0x80; }
 
-void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
-                         bool ShowKindLabel, bool ShowLocation) const {
-  ColorMode Mode = ShowColors ? ColorMode::Auto : ColorMode::Disable;
+فراغ SMDiagnostic::print(ثابت حرف *ProgName, raw_ostream &OS, منطقي ShowColors,
+                         منطقي Show_ډول_Label, منطقي ShowLocation) ثابت {
+  Color_ډېرپېښ ډېرپېښ = ShowColors ? Color_ډېرپېښ::Auto : Color_ډېرپېښ::Disable;
 
   {
-    WithColor S(OS, raw_ostream::SAVEDCOLOR, true, false, Mode);
+    WithColor S(OS, raw_ostream::SAVEDCOLOR, ریښتیا, خطأ, ډېرپېښ);
 
-    if (ProgName && ProgName[0])
+    إذا (ProgName && ProgName[0])
       S << ProgName << ": ";
 
-    if (ShowLocation && !Filename.empty()) {
-      if (Filename == "-")
+    إذا (ShowLocation && !Filename.تشه()) {
+      إذا (Filename == "-")
         S << "<stdin>";
-      else
+      وإلا
         S << Filename;
 
-      if (LineNo != -1) {
-        S << ':' << LineNo;
-        if (ColumnNo != -1)
-          S << ':' << (ColumnNo + 1);
+      إذا (کرښه_No != -1) {
+        S << ':' << کرښه_No;
+        إذا (ستنه_No != -1)
+          S << ':' << (ستنه_No + 1);
       }
       S << ": ";
     }
   }
 
-  if (ShowKindLabel) {
-    switch (Kind) {
-    case SourceMgr::DK_Error:
+  إذا (Show_ډول_Label) {
+    بدل (ډول_2) {
+    حالة سرچینه_Mgr::DK_Error:
       WithColor::error(OS, "", !ShowColors);
-      break;
-    case SourceMgr::DK_Warning:
+      اكسر;
+    حالة سرچینه_Mgr::DK_Warning:
       WithColor::warning(OS, "", !ShowColors);
-      break;
-    case SourceMgr::DK_Note:
+      اكسر;
+    حالة سرچینه_Mgr::DK_Note:
       WithColor::note(OS, "", !ShowColors);
-      break;
-    case SourceMgr::DK_Remark:
+      اكسر;
+    حالة سرچینه_Mgr::DK_Remark:
       WithColor::remark(OS, "", !ShowColors);
-      break;
+      اكسر;
     }
   }
 
-  WithColor(OS, raw_ostream::SAVEDCOLOR, true, false, Mode) << Message << '\n';
+  WithColor(OS, raw_ostream::SAVEDCOLOR, ریښتیا, خطأ, ډېرپېښ) << پیغام_3 << '\n';
 
-  if (LineNo == -1 || ColumnNo == -1)
-    return;
+  إذا (کرښه_No == -1 || ستنه_No == -1)
+    أرجع;
 
   // FIXME: If there are multibyte or multi-column characters in the source, all
   // our ranges will be wrong. To do this properly, we'll need a byte-to-column
   // map like Clang's TextDiagnostic. For now, we'll just handle tabs by
   // expanding them later, and bail out rather than show incorrect ranges and
   // misaligned fixits for any other odd characters.
-  if (any_of(LineContents, isNonASCII)) {
-    printSourceLine(OS, LineContents);
-    return;
+  إذا (any_د(کرښه_Contents, isNonASCII)) {
+    print_سرچینه_کرښه(OS, کرښه_Contents);
+    أرجع;
   }
-  size_t NumColumns = LineContents.size();
+  size_t عدد_Columns = کرښه_Contents.اندازه_2();
 
   // Build the line with the caret and ranges.
-  std::string CaretLine(NumColumns + 1, ' ');
+  std::string Caret_کرښه(عدد_Columns + 1, ' ');
 
   // Expand any ranges.
-  for (const std::pair<unsigned, unsigned> &R : Ranges)
-    std::fill(&CaretLine[R.first],
-              &CaretLine[std::min((size_t)R.second, CaretLine.size())], '~');
+  لكل (ثابت std::pair<بینښه, بینښه> &R : Ranges)
+    std::fill(&Caret_کرښه[R.لومړی_2],
+              &Caret_کرښه[std::min((size_t)R.دوهم_2, Caret_کرښه.اندازه_2())], '~');
 
   // Add any fix-its.
   // FIXME: Find the beginning of the line properly for multibyte characters.
-  std::string FixItInsertionLine;
-  buildFixItLine(CaretLine, FixItInsertionLine, FixIts,
-                 ArrayRef(Loc.getPointer() - ColumnNo, LineContents.size()));
+  std::string Fix_It_Insertion_کرښه;
+  build_Fix_It_کرښه(Caret_کرښه, Fix_It_Insertion_کرښه, FixIts,
+                 ArrayRef(Loc.get_اشاره_ګر() - ستنه_No, کرښه_Contents.اندازه_2()));
 
   // Finally, plop on the caret.
-  if (unsigned(ColumnNo) <= NumColumns)
-    CaretLine[ColumnNo] = '^';
-  else
-    CaretLine[NumColumns] = '^';
+  إذا (بینښه(ستنه_No) <= عدد_Columns)
+    Caret_کرښه[ستنه_No] = '^';
+  وإلا
+    Caret_کرښه[عدد_Columns] = '^';
 
   // ... and remove trailing whitespace so the output doesn't wrap for it.  We
   // know that the line isn't completely empty because it has the caret in it at
   // least.
-  CaretLine.erase(CaretLine.find_last_not_of(' ') + 1);
+  Caret_کرښه.erase(Caret_کرښه.پیدا_کړه_وروستی_not_د(' ') + 1);
 
-  printSourceLine(OS, LineContents);
+  print_سرچینه_کرښه(OS, کرښه_Contents);
 
   {
-    ColorMode Mode = ShowColors ? ColorMode::Auto : ColorMode::Disable;
-    WithColor S(OS, raw_ostream::GREEN, true, false, Mode);
+    Color_ډېرپېښ ډېرپېښ = ShowColors ? Color_ډېرپېښ::Auto : Color_ډېرپېښ::Disable;
+    WithColor S(OS, raw_ostream::GREEN, ریښتیا, خطأ, ډېرپېښ);
 
     // Print out the caret line, matching tabs in the source line.
-    for (unsigned i = 0, e = CaretLine.size(), OutCol = 0; i != e; ++i) {
-      if (i >= LineContents.size() || LineContents[i] != '\t') {
-        S << CaretLine[i];
-        ++OutCol;
-        continue;
+    لكل (بینښه i = 0, e = Caret_کرښه.اندازه_2(), بهر_ستون = 0; i != e; ++i) {
+      إذا (i >= کرښه_Contents.اندازه_2() || کرښه_Contents[i] != '\t') {
+        S << Caret_کرښه[i];
+        ++بهر_ستون;
+        استمر;
       }
 
       // Okay, we have a tab.  Insert the appropriate number of characters.
-      do {
-        S << CaretLine[i];
-        ++OutCol;
-      } while ((OutCol % TabStop) != 0);
+      افعل {
+        S << Caret_کرښه[i];
+        ++بهر_ستون;
+      } طالما ((بهر_ستون % TabStop) != 0);
     }
     S << '\n';
   }
 
   // Print out the replacement line, matching tabs in the source line.
-  if (FixItInsertionLine.empty())
-    return;
+  إذا (Fix_It_Insertion_کرښه.تشه())
+    أرجع;
 
-  for (size_t i = 0, e = FixItInsertionLine.size(), OutCol = 0; i < e; ++i) {
-    if (i >= LineContents.size() || LineContents[i] != '\t') {
-      OS << FixItInsertionLine[i];
-      ++OutCol;
-      continue;
+  لكل (size_t i = 0, e = Fix_It_Insertion_کرښه.اندازه_2(), بهر_ستون = 0; i < e; ++i) {
+    إذا (i >= کرښه_Contents.اندازه_2() || کرښه_Contents[i] != '\t') {
+      OS << Fix_It_Insertion_کرښه[i];
+      ++بهر_ستون;
+      استمر;
     }
 
     // Okay, we have a tab.  Insert the appropriate number of characters.
-    do {
-      OS << FixItInsertionLine[i];
+    افعل {
+      OS << Fix_It_Insertion_کرښه[i];
       // FIXME: This is trying not to break up replacements, but then to re-sync
       // with the tabs between replacements. This will fail, though, if two
       // fix-it replacements are exactly adjacent, or if a fix-it contains a
       // space. Really we should be precomputing column widths, which we'll
       // need anyway for multibyte chars.
-      if (FixItInsertionLine[i] != ' ')
+      إذا (Fix_It_Insertion_کرښه[i] != ' ')
         ++i;
-      ++OutCol;
-    } while (((OutCol % TabStop) != 0) && i != e);
+      ++بهر_ستون;
+    } طالما (((بهر_ستون % TabStop) != 0) && i != e);
   }
   OS << '\n';
 }

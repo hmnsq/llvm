@@ -6,29 +6,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/ELFAttributes.h"
+#ضمن "llvm/ADT/StringRef.h"
 
-using namespace llvm;
+کارول نطاق llvm;
 
-StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
-                                     bool hasTagPrefix) {
-  auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
-  StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+StringRef ELFAttrs::attrTypeAsString(بینښه attr, نښان_Name_Map نښان_Name_Map_2,
+                                     منطقي has_نښان_مختاړی) {
+  خپلکاری نښان_Name_It = پیدا_کړه_if(
+      نښان_Name_Map_2, [attr](ثابت نښان_Name_توکی توکی_2) { أرجع توکی_2.attr == attr; });
+  إذا (نښان_Name_It == نښان_Name_Map_2.پای_ټکی())
+    أرجع "";
+  StringRef نښان_Name = نښان_Name_It->نښان_Name;
+  أرجع has_نښان_مختاړی ? نښان_Name : نښان_Name.drop_front(4);
 }
 
-std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
-                                                     TagNameMap tagNameMap) {
-  bool hasTagPrefix = tag.starts_with("Tag_");
-  auto tagNameIt =
-      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+std::optional<بینښه> ELFAttrs::attrTypeFromString(StringRef نښان_2,
+                                                     نښان_Name_Map نښان_Name_Map_2) {
+  منطقي has_نښان_مختاړی = نښان_2.starts_with("Tag_");
+  خپلکاری نښان_Name_It =
+      پیدا_کړه_if(نښان_Name_Map_2, [نښان_2, has_نښان_مختاړی](ثابت نښان_Name_توکی توکی_2) {
+        أرجع توکی_2.نښان_Name.drop_front(has_نښان_مختاړی ? 0 : 4) == نښان_2;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  إذا (نښان_Name_It == نښان_Name_Map_2.پای_ټکی())
+    أرجع std::nullopt;
+  أرجع نښان_Name_It->attr;
 }

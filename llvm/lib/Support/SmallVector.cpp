@@ -10,102 +10,102 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/MemAlloc.h"
-#include <cstdint>
-#ifdef LLVM_ENABLE_EXCEPTIONS
-#include <stdexcept>
-#endif
-using namespace llvm;
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/Support/MemAlloc.h"
+#ضمن <cstdint>
+#که_تعریف_شوی LLVM_ENABLE_EXCEPTIONS
+#ضمن <stdexcept>
+#د_که_پای
+کارول نطاق llvm;
 
 // Check that no bytes are wasted and everything is well-aligned.
-namespace {
+نطاق {
 // These structures may cause binary compat warnings on AIX. Suppress the
 // warning since we are only using these types for the static assertions below.
-#if defined(_AIX)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Waix-compat"
-#endif
-struct Struct16B {
-  alignas(16) void *X;
+#إذا defined(_AIX)
+#لارښوونه GCC diagnostic ټېل
+#لارښوونه GCC diagnostic ignored "-Waix-compat"
+#د_که_پای
+بنية Struct16B {
+  alignas(16) فراغ *X;
 };
-struct Struct32B {
-  alignas(32) void *X;
+بنية Struct32B {
+  alignas(32) فراغ *X;
 };
-#if defined(_AIX)
-#pragma GCC diagnostic pop
-#endif
+#إذا defined(_AIX)
+#لارښوونه GCC diagnostic راوباسه
+#د_که_پای
 }
-static_assert(sizeof(SmallVector<void *, 0>) ==
-                  sizeof(unsigned) * 2 + sizeof(void *),
+static_assert(حجم(Small_ویکټور<فراغ *, 0>) ==
+                  حجم(بینښه) * 2 + حجم(فراغ *),
               "wasted space in SmallVector size 0");
-static_assert(alignof(SmallVector<Struct16B, 0>) >= alignof(Struct16B),
+static_assert(alignof(Small_ویکټور<Struct16B, 0>) >= alignof(Struct16B),
               "wrong alignment for 16-byte aligned T");
-static_assert(alignof(SmallVector<Struct32B, 0>) >= alignof(Struct32B),
+static_assert(alignof(Small_ویکټور<Struct32B, 0>) >= alignof(Struct32B),
               "wrong alignment for 32-byte aligned T");
-static_assert(sizeof(SmallVector<Struct16B, 0>) >= alignof(Struct16B),
+static_assert(حجم(Small_ویکټور<Struct16B, 0>) >= alignof(Struct16B),
               "missing padding for 16-byte aligned T");
-static_assert(sizeof(SmallVector<Struct32B, 0>) >= alignof(Struct32B),
+static_assert(حجم(Small_ویکټور<Struct32B, 0>) >= alignof(Struct32B),
               "missing padding for 32-byte aligned T");
-static_assert(sizeof(SmallVector<void *, 1>) ==
-                  sizeof(unsigned) * 2 + sizeof(void *) * 2,
+static_assert(حجم(Small_ویکټور<فراغ *, 1>) ==
+                  حجم(بینښه) * 2 + حجم(فراغ *) * 2,
               "wasted space in SmallVector size 1");
 
-static_assert(sizeof(SmallVector<char, 0>) ==
-                  sizeof(void *) * 2 + sizeof(void *),
+static_assert(حجم(Small_ویکټور<حرف, 0>) ==
+                  حجم(فراغ *) * 2 + حجم(فراغ *),
               "1 byte elements have word-sized type for size and capacity");
 
 /// Report that MinSize doesn't fit into this vector's size type. Throws
 /// std::length_error or calls report_fatal_error.
-[[noreturn]] static void report_size_overflow(size_t MinSize, size_t MaxSize);
-static void report_size_overflow(size_t MinSize, size_t MaxSize) {
+[[noreturn]] ساكن فراغ report_اندازه_ډکېدنه(size_t Min_اندازه, size_t Max_اندازه);
+ساكن فراغ report_اندازه_ډکېدنه(size_t Min_اندازه, size_t Max_اندازه) {
   std::string Reason = "SmallVector unable to grow. Requested capacity (" +
-                       std::to_string(MinSize) +
+                       std::منزل_string(Min_اندازه) +
                        ") is larger than maximum value for size type (" +
-                       std::to_string(MaxSize) + ")";
-#ifdef LLVM_ENABLE_EXCEPTIONS
-  throw std::length_error(Reason);
-#else
+                       std::منزل_string(Max_اندازه) + ")";
+#که_تعریف_شوی LLVM_ENABLE_EXCEPTIONS
+  ارم std::اوږدتیا_error(Reason);
+#وإلا
   report_fatal_error(Twine(Reason));
-#endif
+#د_که_پای
 }
 
 /// Report that this vector is already at maximum capacity. Throws
 /// std::length_error or calls report_fatal_error.
-[[noreturn]] static void report_at_maximum_capacity(size_t MaxSize);
-static void report_at_maximum_capacity(size_t MaxSize) {
+[[noreturn]] ساكن فراغ report_at_اعظمي_ظرفیت(size_t Max_اندازه);
+ساكن فراغ report_at_اعظمي_ظرفیت(size_t Max_اندازه) {
   std::string Reason =
       "SmallVector capacity unable to grow. Already at maximum size " +
-      std::to_string(MaxSize);
-#ifdef LLVM_ENABLE_EXCEPTIONS
-  throw std::length_error(Reason);
-#else
+      std::منزل_string(Max_اندازه);
+#که_تعریف_شوی LLVM_ENABLE_EXCEPTIONS
+  ارم std::اوږدتیا_error(Reason);
+#وإلا
   report_fatal_error(Twine(Reason));
-#endif
+#د_که_پای
 }
 
 // Note: Moving this function into the header may cause performance regression.
-template <class Size_T>
-static size_t getNewCapacity(size_t MinSize, size_t TSize, size_t OldCapacity) {
-  constexpr size_t MaxSize = std::numeric_limits<Size_T>::max();
+کينډۍ <صنف اندازه_T>
+ساكن size_t get_New_ظرفیت(size_t Min_اندازه, size_t TSize, size_t Old_ظرفیت) {
+  constexpr size_t Max_اندازه = std::numeric_limits<اندازه_T>::max();
 
   // Ensure we can fit the new capacity.
   // This is only going to be applicable when the capacity is 32 bit.
-  if (MinSize > MaxSize)
-    report_size_overflow(MinSize, MaxSize);
+  إذا (Min_اندازه > Max_اندازه)
+    report_اندازه_ډکېدنه(Min_اندازه, Max_اندازه);
 
   // Ensure we can meet the guarantee of space for at least one more element.
   // The above check alone will not catch the case where grow is called with a
   // default MinSize of 0, but the current capacity cannot be increased.
   // This is only going to be applicable when the capacity is 32 bit.
-  if (OldCapacity == MaxSize)
-    report_at_maximum_capacity(MaxSize);
+  إذا (Old_ظرفیت == Max_اندازه)
+    report_at_اعظمي_ظرفیت(Max_اندازه);
 
   // In theory 2*capacity can overflow if the capacity is 64 bit, but the
   // original capacity would never be large enough for this to be a problem.
-  size_t NewCapacity = 2 * OldCapacity + 1; // Always grow.
-  return std::clamp(NewCapacity, MinSize, MaxSize);
+  size_t New_ظرفیت = 2 * Old_ظرفیت + 1; // Always grow.
+  أرجع std::clamp(New_ظرفیت, Min_اندازه, Max_اندازه);
 }
 
 /// If vector was first created with capacity 0, getFirstEl() points to the
@@ -118,65 +118,65 @@ static size_t getNewCapacity(size_t MinSize, size_t TSize, size_t OldCapacity) {
 /// space, and happens to allocate precisely at BeginX.
 /// This is unlikely to be called often, but resolves a memory leak when the
 /// situation does occur.
-static void *replaceAllocation(void *NewElts, size_t TSize, size_t NewCapacity,
+ساكن فراغ *replace_ویش(فراغ *NewElts, size_t TSize, size_t New_ظرفیت,
                                size_t VSize = 0) {
-  void *NewEltsReplace = llvm::safe_malloc(NewCapacity * TSize);
-  if (VSize)
-    memcpy(NewEltsReplace, NewElts, VSize * TSize);
-  free(NewElts);
-  return NewEltsReplace;
+  فراغ *NewEltsReplace = llvm::خوندي_malloc(New_ظرفیت * TSize);
+  إذا (VSize)
+    حافظه_نقل(NewEltsReplace, NewElts, VSize * TSize);
+  حرر(NewElts);
+  أرجع NewEltsReplace;
 }
 
 // Note: Moving this function into the header may cause performance regression.
-template <class Size_T>
-void *SmallVectorBase<Size_T>::mallocForGrow(void *FirstEl, size_t MinSize,
+کينډۍ <صنف اندازه_T>
+فراغ *Small_ویکټور_بنسټ<اندازه_T>::mallocForGrow(فراغ *لومړی_El, size_t Min_اندازه,
                                              size_t TSize,
-                                             size_t &NewCapacity) {
-  NewCapacity = getNewCapacity<Size_T>(MinSize, TSize, this->capacity());
+                                             size_t &New_ظرفیت) {
+  New_ظرفیت = get_New_ظرفیت<اندازه_T>(Min_اندازه, TSize, هذا->ظرفیت_2());
   // Even if capacity is not 0 now, if the vector was originally created with
   // capacity 0, it's possible for the malloc to return FirstEl.
-  void *NewElts = llvm::safe_malloc(NewCapacity * TSize);
-  if (NewElts == FirstEl)
-    NewElts = replaceAllocation(NewElts, TSize, NewCapacity);
-  return NewElts;
+  فراغ *NewElts = llvm::خوندي_malloc(New_ظرفیت * TSize);
+  إذا (NewElts == لومړی_El)
+    NewElts = replace_ویش(NewElts, TSize, New_ظرفیت);
+  أرجع NewElts;
 }
 
 // Note: Moving this function into the header may cause performance regression.
-template <class Size_T>
-void SmallVectorBase<Size_T>::grow_pod(void *FirstEl, size_t MinSize,
+کينډۍ <صنف اندازه_T>
+فراغ Small_ویکټور_بنسټ<اندازه_T>::grow_pod(فراغ *لومړی_El, size_t Min_اندازه,
                                        size_t TSize) {
-  size_t NewCapacity = getNewCapacity<Size_T>(MinSize, TSize, this->capacity());
-  void *NewElts;
-  if (BeginX == FirstEl) {
-    NewElts = llvm::safe_malloc(NewCapacity * TSize);
-    if (NewElts == FirstEl)
-      NewElts = replaceAllocation(NewElts, TSize, NewCapacity);
+  size_t New_ظرفیت = get_New_ظرفیت<اندازه_T>(Min_اندازه, TSize, هذا->ظرفیت_2());
+  فراغ *NewElts;
+  إذا (BeginX == لومړی_El) {
+    NewElts = llvm::خوندي_malloc(New_ظرفیت * TSize);
+    إذا (NewElts == لومړی_El)
+      NewElts = replace_ویش(NewElts, TSize, New_ظرفیت);
 
     // Copy the elements over.  No need to run dtors on PODs.
-    memcpy(NewElts, this->BeginX, size() * TSize);
-  } else {
+    حافظه_نقل(NewElts, هذا->BeginX, اندازه_2() * TSize);
+  } وإلا {
     // If this wasn't grown from the inline copy, grow the allocated space.
-    NewElts = llvm::safe_realloc(this->BeginX, NewCapacity * TSize);
-    if (NewElts == FirstEl)
-      NewElts = replaceAllocation(NewElts, TSize, NewCapacity, size());
+    NewElts = llvm::خوندي_realloc(هذا->BeginX, New_ظرفیت * TSize);
+    إذا (NewElts == لومړی_El)
+      NewElts = replace_ویش(NewElts, TSize, New_ظرفیت, اندازه_2());
   }
 
-  this->set_allocation_range(NewElts, NewCapacity);
+  هذا->سېټ_ویش_range(NewElts, New_ظرفیت);
 }
 
-template class llvm::SmallVectorBase<uint32_t>;
+کينډۍ صنف llvm::Small_ویکټور_بنسټ<uint32_t>;
 
 // Disable the uint64_t instantiation for 32-bit builds.
 // Both uint32_t and uint64_t instantiations are needed for 64-bit builds.
 // This instantiation will never be used in 32-bit builds, and will cause
 // warnings when sizeof(Size_T) > sizeof(size_t).
-#if SIZE_MAX > UINT32_MAX
-template class llvm::SmallVectorBase<uint64_t>;
+#إذا SIZE_MAX > UINT32_MAX
+کينډۍ صنف llvm::Small_ویکټور_بنسټ<uint64_t>;
 
 // Assertions to ensure this #if stays in sync with SmallVectorSizeType.
-static_assert(sizeof(SmallVectorSizeType<char>) == sizeof(uint64_t),
+static_assert(حجم(Small_ویکټور_اندازه_Type<حرف>) == حجم(uint64_t),
               "Expected SmallVectorBase<uint64_t> variant to be in use.");
-#else
-static_assert(sizeof(SmallVectorSizeType<char>) == sizeof(uint32_t),
+#وإلا
+static_assert(حجم(Small_ویکټور_اندازه_Type<حرف>) == حجم(uint32_t),
               "Expected SmallVectorBase<uint32_t> variant to be in use.");
-#endif
+#د_که_پای

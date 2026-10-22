@@ -6,84 +6,84 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/TrieRawHashMap.h"
-#include "llvm/ADT/LazyAtomicPointer.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/TrieHashIndexGenerator.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/ThreadSafeAllocator.h"
-#include "llvm/Support/TrailingObjects.h"
-#include "llvm/Support/raw_ostream.h"
-#include <memory>
+#ضمن "llvm/ADT/TrieRawHashMap.h"
+#ضمن "llvm/ADT/LazyAtomicPointer.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/TrieHashIndexGenerator.h"
+#ضمن "llvm/Support/Allocator.h"
+#ضمن "llvm/Support/Casting.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/ThreadSafeAllocator.h"
+#ضمن "llvm/Support/TrailingObjects.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <memory>
 
-using namespace llvm;
+کارول نطاق llvm;
 
-namespace {
-struct TrieNode {
-  const bool IsSubtrie = false;
+نطاق {
+بنية Trie_غوټه {
+  ثابت منطقي IsSubtrie = خطأ;
 
-  TrieNode(bool IsSubtrie) : IsSubtrie(IsSubtrie) {}
+  Trie_غوټه(منطقي IsSubtrie) : IsSubtrie(IsSubtrie) {}
 
-  static void *operator new(size_t Size) { return ::operator new(Size); }
-  void operator delete(void *Ptr) { ::operator delete(Ptr); }
+  ساكن فراغ *چلوونکی جديد(size_t اندازه) { أرجع ::چلوونکی جديد(اندازه); }
+  فراغ چلوونکی ړنګول(فراغ *Ptr) { ::چلوونکی ړنګول(Ptr); }
 };
 
-struct TrieContent final : public TrieNode {
-  const uint8_t ContentOffset;
-  const uint8_t HashSize;
-  const uint8_t HashOffset;
+بنية TrieContent final : عام Trie_غوټه {
+  ثابت uint8_t Content_دننه_واټن;
+  ثابت uint8_t Hash_اندازه;
+  ثابت uint8_t Hash_دننه_واټن;
 
-  void *getValuePointer() const {
-    auto *Content = reinterpret_cast<const uint8_t *>(this) + ContentOffset;
-    return const_cast<uint8_t *>(Content);
+  فراغ *get_ارزښت_اشاره_ګر() ثابت {
+    خپلکاری *Content = reinterpret_cast<ثابت uint8_t *>(هذا) + Content_دننه_واټن;
+    أرجع const_cast<uint8_t *>(Content);
   }
 
-  ArrayRef<uint8_t> getHash() const {
-    auto *Begin = reinterpret_cast<const uint8_t *>(this) + HashOffset;
-    return ArrayRef(Begin, Begin + HashSize);
+  ArrayRef<uint8_t> getHash() ثابت {
+    خپلکاری *Begin = reinterpret_cast<ثابت uint8_t *>(هذا) + Hash_دننه_واټن;
+    أرجع ArrayRef(Begin, Begin + Hash_اندازه);
   }
 
-  TrieContent(size_t ContentOffset, size_t HashSize, size_t HashOffset)
-      : TrieNode(/*IsSubtrie=*/false), ContentOffset(ContentOffset),
-        HashSize(HashSize), HashOffset(HashOffset) {}
+  TrieContent(size_t Content_دننه_واټن, size_t Hash_اندازه, size_t Hash_دننه_واټن)
+      : Trie_غوټه(/*IsSubtrie=*/خطأ), Content_دننه_واټن(Content_دننه_واټن),
+        Hash_اندازه(Hash_اندازه), Hash_دننه_واټن(Hash_دننه_واټن) {}
 
-  static bool classof(const TrieNode *TN) { return !TN->IsSubtrie; }
+  ساكن منطقي classof(ثابت Trie_غوټه *TN) { أرجع !TN->IsSubtrie; }
 };
 
-static_assert(sizeof(TrieContent) ==
-                  ThreadSafeTrieRawHashMapBase::TrieContentBaseSize,
+static_assert(حجم(TrieContent) ==
+                  Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::Trie_Content_بنسټ_اندازه,
               "Check header assumption!");
 
-class TrieSubtrie final
-    : public TrieNode,
-      private TrailingObjects<TrieSubtrie, LazyAtomicPointer<TrieNode>> {
-public:
-  using Slot = LazyAtomicPointer<TrieNode>;
+صنف TrieSubtrie final
+    : عام Trie_غوټه,
+      خاص TrailingObjects<TrieSubtrie, Lazy_Atomic_اشاره_ګر<Trie_غوټه>> {
+عام:
+  کارول خونه = Lazy_Atomic_اشاره_ګر<Trie_غوټه>;
 
-  Slot &get(size_t I) { return getTrailingObjects()[I]; }
-  TrieNode *load(size_t I) { return get(I).load(); }
+  خونه &get(size_t I) { أرجع getTrailingObjects()[I]; }
+  Trie_غوټه *بارول(size_t I) { أرجع get(I).بارول(); }
 
-  unsigned size() const { return Size; }
+  بینښه اندازه_2() ثابت { أرجع اندازه; }
 
   TrieSubtrie *
-  sink(size_t I, TrieContent &Content, size_t NumSubtrieBits, size_t NewI,
+  sink(size_t I, TrieContent &Content, size_t عدد_Subtrie_بټونه, size_t NewI,
        function_ref<TrieSubtrie *(std::unique_ptr<TrieSubtrie>)> Saver);
 
-  static std::unique_ptr<TrieSubtrie> create(size_t StartBit, size_t NumBits);
+  ساكن std::unique_ptr<TrieSubtrie> create(size_t پیل_بټ, size_t عدد_بټونه_2);
 
-  explicit TrieSubtrie(size_t StartBit, size_t NumBits);
+  څرګند TrieSubtrie(size_t پیل_بټ, size_t عدد_بټونه_2);
 
-  static bool classof(const TrieNode *TN) { return TN->IsSubtrie; }
+  ساكن منطقي classof(ثابت Trie_غوټه *TN) { أرجع TN->IsSubtrie; }
 
-  static constexpr size_t sizeToAlloc(unsigned NumBits) {
-    assert(NumBits < 20 && "Tries should have fewer than ~1M slots");
-    unsigned Count = 1u << NumBits;
-    return totalSizeToAlloc<LazyAtomicPointer<TrieNode>>(Count);
+  ساكن constexpr size_t اندازه_منزل_Alloc(بینښه عدد_بټونه_2) {
+    أكد(عدد_بټونه_2 < 20 && "Tries should have fewer than ~1M slots");
+    بینښه شمېر_2 = 1u << عدد_بټونه_2;
+    أرجع ټول_اندازه_منزل_Alloc<Lazy_Atomic_اشاره_ګر<Trie_غوټه>>(شمېر_2);
   }
 
-private:
+خاص:
   // FIXME: Use a bitset to speed up access:
   //
   //     std::array<std::atomic<uint64_t>, NumSlots/64> IsSet;
@@ -104,33 +104,33 @@ private:
   //       ;
 
   // For debugging.
-  unsigned StartBit = 0;
-  unsigned NumBits = 0;
-  unsigned Size = 0;
-  friend class llvm::ThreadSafeTrieRawHashMapBase;
-  friend class TrailingObjects;
+  بینښه پیل_بټ = 0;
+  بینښه عدد_بټونه_2 = 0;
+  بینښه اندازه = 0;
+  ملګری صنف llvm::Thread_خوندي_Trie_Raw_Hash_Map_بنسټ;
+  ملګری صنف TrailingObjects;
 
-public:
+عام:
   /// Linked list for ownership of tries. The pointer is owned by TrieSubtrie.
-  std::atomic<TrieSubtrie *> Next;
+  std::atomic<TrieSubtrie *> بل_2;
 };
 } // end namespace
 
-std::unique_ptr<TrieSubtrie> TrieSubtrie::create(size_t StartBit,
-                                                 size_t NumBits) {
-  void *Memory = ::operator new(sizeToAlloc(NumBits));
-  TrieSubtrie *S = ::new (Memory) TrieSubtrie(StartBit, NumBits);
-  return std::unique_ptr<TrieSubtrie>(S);
+std::unique_ptr<TrieSubtrie> TrieSubtrie::create(size_t پیل_بټ,
+                                                 size_t عدد_بټونه_2) {
+  فراغ *حافظه_2 = ::چلوونکی جديد(اندازه_منزل_Alloc(عدد_بټونه_2));
+  TrieSubtrie *S = ::جديد (حافظه_2) TrieSubtrie(پیل_بټ, عدد_بټونه_2);
+  أرجع std::unique_ptr<TrieSubtrie>(S);
 }
 
-TrieSubtrie::TrieSubtrie(size_t StartBit, size_t NumBits)
-    : TrieNode(true), StartBit(StartBit), NumBits(NumBits), Size(1u << NumBits),
-      Next(nullptr) {
-  for (unsigned I = 0; I < Size; ++I)
-    new (&get(I)) Slot(nullptr);
+TrieSubtrie::TrieSubtrie(size_t پیل_بټ, size_t عدد_بټونه_2)
+    : Trie_غوټه(ریښتیا), پیل_بټ(پیل_بټ), عدد_بټونه_2(عدد_بټونه_2), اندازه(1u << عدد_بټونه_2),
+      بل_2(تش_اشاره) {
+  لكل (بینښه I = 0; I < اندازه; ++I)
+    جديد (&get(I)) خونه(تش_اشاره);
 
   static_assert(
-      std::is_trivially_destructible<LazyAtomicPointer<TrieNode>>::value,
+      std::is_trivially_destructible<Lazy_Atomic_اشاره_ګر<Trie_غوټه>>::ارزښت_2,
       "Expected no work in destructor for TrieNode");
 }
 
@@ -138,378 +138,378 @@ TrieSubtrie::TrieSubtrie(size_t StartBit, size_t NumBits)
 // the index of existing object in the trie. In this case, a new sub-trie needs
 // to be allocated to hold existing object.
 TrieSubtrie *TrieSubtrie::sink(
-    size_t I, TrieContent &Content, size_t NumSubtrieBits, size_t NewI,
+    size_t I, TrieContent &Content, size_t عدد_Subtrie_بټونه, size_t NewI,
     function_ref<TrieSubtrie *(std::unique_ptr<TrieSubtrie>)> Saver) {
   // Create a new sub-trie that points to the existing object with the new
   // index for the next level.
-  assert(NumSubtrieBits > 0);
-  std::unique_ptr<TrieSubtrie> S = create(StartBit + NumBits, NumSubtrieBits);
+  أكد(عدد_Subtrie_بټونه > 0);
+  std::unique_ptr<TrieSubtrie> S = create(پیل_بټ + عدد_بټونه_2, عدد_Subtrie_بټونه);
 
-  assert(NewI < Size);
+  أكد(NewI < اندازه);
   S->get(NewI).store(&Content);
 
   // Using compare_exchange to atomically add back the new sub-trie to the trie
   // in the place of the exsiting object.
-  TrieNode *ExistingNode = &Content;
-  assert(I < Size);
-  if (get(I).compare_exchange_strong(ExistingNode, S.get()))
-    return Saver(std::move(S));
+  Trie_غوټه *Existing_غوټه = &Content;
+  أكد(I < اندازه);
+  إذا (get(I).compare_exchange_strong(Existing_غوټه, S.get()))
+    أرجع Saver(std::move(S));
 
   // Another thread created a subtrie already. Return it and let "S" be
   // destructed.
-  return cast<TrieSubtrie>(ExistingNode);
+  أرجع cast<TrieSubtrie>(Existing_غوټه);
 }
 
-class ThreadSafeTrieRawHashMapBase::ImplType final
-    : private TrailingObjects<ThreadSafeTrieRawHashMapBase::ImplType,
+صنف Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::ImplType final
+    : خاص TrailingObjects<Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::ImplType,
                               TrieSubtrie> {
-public:
-  static std::unique_ptr<ImplType> create(size_t StartBit, size_t NumBits) {
-    size_t Size = sizeof(ImplType) + TrieSubtrie::sizeToAlloc(NumBits);
-    void *Memory = ::operator new(Size);
-    ImplType *Impl = ::new (Memory) ImplType(StartBit, NumBits);
-    return std::unique_ptr<ImplType>(Impl);
+عام:
+  ساكن std::unique_ptr<ImplType> create(size_t پیل_بټ, size_t عدد_بټونه_2) {
+    size_t اندازه = حجم(ImplType) + TrieSubtrie::اندازه_منزل_Alloc(عدد_بټونه_2);
+    فراغ *حافظه_2 = ::چلوونکی جديد(اندازه);
+    ImplType *Impl = ::جديد (حافظه_2) ImplType(پیل_بټ, عدد_بټونه_2);
+    أرجع std::unique_ptr<ImplType>(Impl);
   }
 
   // Save the Subtrie into the ownship list of the trie structure in a
   // thread-safe way. The ownership transfer is done by compare_exchange the
   // pointer value inside the unique_ptr.
   TrieSubtrie *save(std::unique_ptr<TrieSubtrie> S) {
-    assert(!S->Next && "Expected S to a freshly-constructed leaf");
+    أكد(!S->بل_2 && "Expected S to a freshly-constructed leaf");
 
-    TrieSubtrie *CurrentHead = nullptr;
+    TrieSubtrie *Current_سر = تش_اشاره;
     // Add ownership of "S" to front of the list, so that Root -> S ->
     // Root.Next. This works by repeatedly setting S->Next to a candidate value
     // of Root.Next (initially nullptr), then setting Root.Next to S once the
     // candidate matches reality.
-    while (!getRoot()->Next.compare_exchange_weak(CurrentHead, S.get()))
-      S->Next.exchange(CurrentHead);
+    طالما (!get_ریښه()->بل_2.compare_exchange_weak(Current_سر, S.get()))
+      S->بل_2.exchange(Current_سر);
 
     // Ownership transferred to subtrie successfully. Release the unique_ptr.
-    return S.release();
+    أرجع S.release();
   }
 
   // Get the root which is the trailing object.
-  TrieSubtrie *getRoot() { return getTrailingObjects(); }
+  TrieSubtrie *get_ریښه() { أرجع getTrailingObjects(); }
 
-  static void *operator new(size_t Size) { return ::operator new(Size); }
-  void operator delete(void *Ptr) { ::operator delete(Ptr); }
+  ساكن فراغ *چلوونکی جديد(size_t اندازه) { أرجع ::چلوونکی جديد(اندازه); }
+  فراغ چلوونکی ړنګول(فراغ *Ptr) { ::چلوونکی ړنګول(Ptr); }
 
   /// FIXME: This should take a function that allocates and constructs the
   /// content lazily (taking the hash as a separate parameter), in case of
   /// collision.
-  ThreadSafeAllocator<BumpPtrAllocator> ContentAlloc;
+  Thread_خوندي_Allocator<BumpPtrAllocator> ContentAlloc;
 
-private:
-  friend class TrailingObjects;
+خاص:
+  ملګری صنف TrailingObjects;
 
-  ImplType(size_t StartBit, size_t NumBits) {
-    ::new (getRoot()) TrieSubtrie(StartBit, NumBits);
+  ImplType(size_t پیل_بټ, size_t عدد_بټونه_2) {
+    ::جديد (get_ریښه()) TrieSubtrie(پیل_بټ, عدد_بټونه_2);
   }
 };
 
-ThreadSafeTrieRawHashMapBase::ImplType &
-ThreadSafeTrieRawHashMapBase::getOrCreateImpl() {
-  if (ImplType *Impl = ImplPtr.load())
-    return *Impl;
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::ImplType &
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::getOrCreateImpl() {
+  إذا (ImplType *Impl = ImplPtr.بارول())
+    أرجع *Impl;
 
   // Create a new ImplType and store it if another thread doesn't do so first.
   // If another thread wins this one is destroyed locally.
-  std::unique_ptr<ImplType> Impl = ImplType::create(0, NumRootBits);
-  ImplType *ExistingImpl = nullptr;
+  std::unique_ptr<ImplType> Impl = ImplType::create(0, عدد_ریښه_بټونه);
+  ImplType *ExistingImpl = تش_اشاره;
 
   // If the ownership transferred succesfully, release unique_ptr and return
   // the pointer to the new ImplType.
-  if (ImplPtr.compare_exchange_strong(ExistingImpl, Impl.get()))
-    return *Impl.release();
+  إذا (ImplPtr.compare_exchange_strong(ExistingImpl, Impl.get()))
+    أرجع *Impl.release();
 
   // Already created, return the existing ImplType.
-  return *ExistingImpl;
+  أرجع *ExistingImpl;
 }
 
-ThreadSafeTrieRawHashMapBase::PointerBase
-ThreadSafeTrieRawHashMapBase::find(ArrayRef<uint8_t> Hash) const {
-  assert(!Hash.empty() && "Uninitialized hash");
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::پیدا_کړه(ArrayRef<uint8_t> Hash) ثابت {
+  أكد(!Hash.تشه() && "Uninitialized hash");
 
-  ImplType *Impl = ImplPtr.load();
-  if (!Impl)
-    return PointerBase();
+  ImplType *Impl = ImplPtr.بارول();
+  إذا (!Impl)
+    أرجع اشاره_ګر_بنسټ();
 
-  TrieSubtrie *S = Impl->getRoot();
-  TrieHashIndexGenerator IndexGen{NumRootBits, NumSubtrieBits, Hash};
-  size_t Index = IndexGen.next();
-  while (Index != IndexGen.end()) {
+  TrieSubtrie *S = Impl->get_ریښه();
+  Trie_Hash_شاخص_Generator شاخص_Gen{عدد_ریښه_بټونه, عدد_Subtrie_بټونه, Hash};
+  size_t شاخص_2 = شاخص_Gen.بل();
+  طالما (شاخص_2 != شاخص_Gen.پای_ټکی()) {
     // Try to set the content.
-    TrieNode *Existing = S->get(Index);
-    if (!Existing)
-      return PointerBase(S, Index, *IndexGen.StartBit);
+    Trie_غوټه *Existing = S->get(شاخص_2);
+    إذا (!Existing)
+      أرجع اشاره_ګر_بنسټ(S, شاخص_2, *شاخص_Gen.پیل_بټ);
 
     // Check for an exact match.
-    if (auto *ExistingContent = dyn_cast<TrieContent>(Existing))
-      return ExistingContent->getHash() == Hash
-                 ? PointerBase(ExistingContent->getValuePointer())
-                 : PointerBase(S, Index, *IndexGen.StartBit);
+    إذا (خپلکاری *ExistingContent = dyn_cast<TrieContent>(Existing))
+      أرجع ExistingContent->getHash() == Hash
+                 ? اشاره_ګر_بنسټ(ExistingContent->get_ارزښت_اشاره_ګر())
+                 : اشاره_ګر_بنسټ(S, شاخص_2, *شاخص_Gen.پیل_بټ);
 
-    Index = IndexGen.next();
+    شاخص_2 = شاخص_Gen.بل();
     S = cast<TrieSubtrie>(Existing);
   }
   llvm_unreachable("failed to locate the node after consuming all hash bytes");
 }
 
-ThreadSafeTrieRawHashMapBase::PointerBase ThreadSafeTrieRawHashMapBase::insert(
-    PointerBase Hint, ArrayRef<uint8_t> Hash,
-    function_ref<const uint8_t *(void *Mem, ArrayRef<uint8_t> Hash)>
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::ورننباسه(
+    اشاره_ګر_بنسټ Hint, ArrayRef<uint8_t> Hash,
+    function_ref<ثابت uint8_t *(فراغ *Mem, ArrayRef<uint8_t> Hash)>
         Constructor) {
-  assert(!Hash.empty() && "Uninitialized hash");
+  أكد(!Hash.تشه() && "Uninitialized hash");
 
   ImplType &Impl = getOrCreateImpl();
-  TrieSubtrie *S = Impl.getRoot();
-  TrieHashIndexGenerator IndexGen{NumRootBits, NumSubtrieBits, Hash};
-  size_t Index;
-  if (Hint.isHint()) {
+  TrieSubtrie *S = Impl.get_ریښه();
+  Trie_Hash_شاخص_Generator شاخص_Gen{عدد_ریښه_بټونه, عدد_Subtrie_بټونه, Hash};
+  size_t شاخص_2;
+  إذا (Hint.isHint()) {
     S = static_cast<TrieSubtrie *>(Hint.P);
-    Index = IndexGen.hint(Hint.I, Hint.B);
-  } else {
-    Index = IndexGen.next();
+    شاخص_2 = شاخص_Gen.hint(Hint.I, Hint.B);
+  } وإلا {
+    شاخص_2 = شاخص_Gen.بل();
   }
 
-  while (Index != IndexGen.end()) {
+  طالما (شاخص_2 != شاخص_Gen.پای_ټکی()) {
     // Load the node from the slot, allocating and calling the constructor if
     // the slot is empty.
-    bool Generated = false;
-    TrieNode &Existing = S->get(Index).loadOrGenerate([&]() {
-      Generated = true;
+    منطقي Generated = خطأ;
+    Trie_غوټه &Existing = S->get(شاخص_2).بارول_Or_Generate([&]() {
+      Generated = ریښتیا;
 
       // Construct the value itself at the tail.
-      uint8_t *Memory = reinterpret_cast<uint8_t *>(
-          Impl.ContentAlloc.Allocate(ContentAllocSize, ContentAllocAlign));
-      const uint8_t *HashStorage = Constructor(Memory + ContentOffset, Hash);
+      uint8_t *حافظه_2 = reinterpret_cast<uint8_t *>(
+          Impl.ContentAlloc.Allocate(Content_Alloc_اندازه, ContentAllocAlign));
+      ثابت uint8_t *HashStorage = Constructor(حافظه_2 + Content_دننه_واټن, Hash);
 
       // Construct the TrieContent header, passing in the offset to the hash.
-      TrieContent *Content = ::new (Memory)
-          TrieContent(ContentOffset, Hash.size(), HashStorage - Memory);
-      assert(Hash == Content->getHash() && "Hash not properly initialized");
-      return Content;
+      TrieContent *Content = ::جديد (حافظه_2)
+          TrieContent(Content_دننه_واټن, Hash.اندازه_2(), HashStorage - حافظه_2);
+      أكد(Hash == Content->getHash() && "Hash not properly initialized");
+      أرجع Content;
     });
     // If we just generated it, return it!
-    if (Generated)
-      return PointerBase(cast<TrieContent>(Existing).getValuePointer());
+    إذا (Generated)
+      أرجع اشاره_ګر_بنسټ(cast<TrieContent>(Existing).get_ارزښت_اشاره_ګر());
 
-    if (auto *ST = dyn_cast<TrieSubtrie>(&Existing)) {
+    إذا (خپلکاری *ST = dyn_cast<TrieSubtrie>(&Existing)) {
       S = ST;
-      Index = IndexGen.next();
-      continue;
+      شاخص_2 = شاخص_Gen.بل();
+      استمر;
     }
 
     // Return the existing content if it's an exact match!
-    auto &ExistingContent = cast<TrieContent>(Existing);
-    if (ExistingContent.getHash() == Hash)
-      return PointerBase(ExistingContent.getValuePointer());
+    خپلکاری &ExistingContent = cast<TrieContent>(Existing);
+    إذا (ExistingContent.getHash() == Hash)
+      أرجع اشاره_ګر_بنسټ(ExistingContent.get_ارزښت_اشاره_ګر());
 
     // Sink the existing content as long as the indexes match.
-    size_t NextIndex = IndexGen.next();
-    while (NextIndex != IndexGen.end()) {
-      size_t NewIndexForExistingContent =
-          IndexGen.getCollidingBits(ExistingContent.getHash());
-      S = S->sink(Index, ExistingContent, IndexGen.getNumBits(),
-                  NewIndexForExistingContent,
+    size_t بل_شاخص = شاخص_Gen.بل();
+    طالما (بل_شاخص != شاخص_Gen.پای_ټکی()) {
+      size_t New_شاخص_For_Existing_Content =
+          شاخص_Gen.get_Colliding_بټونه(ExistingContent.getHash());
+      S = S->sink(شاخص_2, ExistingContent, شاخص_Gen.get_عدد_بټونه(),
+                  New_شاخص_For_Existing_Content,
                   [&Impl](std::unique_ptr<TrieSubtrie> S) {
-                    return Impl.save(std::move(S));
+                    أرجع Impl.save(std::move(S));
                   });
-      Index = NextIndex;
+      شاخص_2 = بل_شاخص;
 
       // Found the difference.
-      if (NextIndex != NewIndexForExistingContent)
-        break;
+      إذا (بل_شاخص != New_شاخص_For_Existing_Content)
+        اكسر;
 
-      NextIndex = IndexGen.next();
+      بل_شاخص = شاخص_Gen.بل();
     }
   }
   llvm_unreachable("failed to insert the node after consuming all hash bytes");
 }
 
-ThreadSafeTrieRawHashMapBase::ThreadSafeTrieRawHashMapBase(
-    size_t ContentAllocSize, size_t ContentAllocAlign, size_t ContentOffset,
-    std::optional<size_t> NumRootBits, std::optional<size_t> NumSubtrieBits)
-    : ContentAllocSize(ContentAllocSize), ContentAllocAlign(ContentAllocAlign),
-      ContentOffset(ContentOffset),
-      NumRootBits(NumRootBits.value_or(DefaultNumRootBits)),
-      NumSubtrieBits(NumSubtrieBits.value_or(DefaultNumSubtrieBits)),
-      ImplPtr(nullptr) {
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::Thread_خوندي_Trie_Raw_Hash_Map_بنسټ(
+    size_t Content_Alloc_اندازه, size_t ContentAllocAlign, size_t Content_دننه_واټن,
+    std::optional<size_t> عدد_ریښه_بټونه, std::optional<size_t> عدد_Subtrie_بټونه)
+    : Content_Alloc_اندازه(Content_Alloc_اندازه), ContentAllocAlign(ContentAllocAlign),
+      Content_دننه_واټن(Content_دننه_واټن),
+      عدد_ریښه_بټونه(عدد_ریښه_بټونه.ارزښت_or(Default_عدد_ریښه_بټونه)),
+      عدد_Subtrie_بټونه(عدد_Subtrie_بټونه.ارزښت_or(Default_عدد_Subtrie_بټونه)),
+      ImplPtr(تش_اشاره) {
   // Assertion checks for reasonable configuration. The settings below are not
   // hard limits on most platforms, but a reasonable configuration should fall
   // within those limits.
-  assert((!NumRootBits || *NumRootBits < 20) &&
+  أكد((!عدد_ریښه_بټونه || *عدد_ریښه_بټونه < 20) &&
          "Root should have fewer than ~1M slots");
-  assert((!NumSubtrieBits || *NumSubtrieBits < 10) &&
+  أكد((!عدد_Subtrie_بټونه || *عدد_Subtrie_بټونه < 10) &&
          "Subtries should have fewer than ~1K slots");
 }
 
-ThreadSafeTrieRawHashMapBase::ThreadSafeTrieRawHashMapBase(
-    ThreadSafeTrieRawHashMapBase &&RHS)
-    : ContentAllocSize(RHS.ContentAllocSize),
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::Thread_خوندي_Trie_Raw_Hash_Map_بنسټ(
+    Thread_خوندي_Trie_Raw_Hash_Map_بنسټ &&RHS)
+    : Content_Alloc_اندازه(RHS.Content_Alloc_اندازه),
       ContentAllocAlign(RHS.ContentAllocAlign),
-      ContentOffset(RHS.ContentOffset), NumRootBits(RHS.NumRootBits),
-      NumSubtrieBits(RHS.NumSubtrieBits) {
+      Content_دننه_واټن(RHS.Content_دننه_واټن), عدد_ریښه_بټونه(RHS.عدد_ریښه_بټونه),
+      عدد_Subtrie_بټونه(RHS.عدد_Subtrie_بټونه) {
   // Steal the root from RHS.
-  ImplPtr = RHS.ImplPtr.exchange(nullptr);
+  ImplPtr = RHS.ImplPtr.exchange(تش_اشاره);
 }
 
-ThreadSafeTrieRawHashMapBase::~ThreadSafeTrieRawHashMapBase() {
-  assert(!ImplPtr.load() && "Expected subclass to call destroyImpl()");
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::~Thread_خوندي_Trie_Raw_Hash_Map_بنسټ() {
+  أكد(!ImplPtr.بارول() && "Expected subclass to call destroyImpl()");
 }
 
-void ThreadSafeTrieRawHashMapBase::destroyImpl(
-    function_ref<void(void *)> Destructor) {
-  std::unique_ptr<ImplType> Impl(ImplPtr.exchange(nullptr));
-  if (!Impl)
-    return;
+فراغ Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::destroyImpl(
+    function_ref<فراغ(فراغ *)> Destructor) {
+  std::unique_ptr<ImplType> Impl(ImplPtr.exchange(تش_اشاره));
+  إذا (!Impl)
+    أرجع;
 
   // Destroy content nodes throughout trie. Avoid destroying any subtries since
   // we need TrieNode::classof() to find the content nodes.
   //
   // FIXME: Once we have bitsets (see FIXME in TrieSubtrie class), use them
   // facilitate sparse iteration here.
-  if (Destructor)
-    for (TrieSubtrie *Trie = Impl->getRoot(); Trie; Trie = Trie->Next.load())
-      for (unsigned I = 0; I < Trie->size(); ++I)
-        if (auto *Content = dyn_cast_or_null<TrieContent>(Trie->load(I)))
-          Destructor(Content->getValuePointer());
+  إذا (Destructor)
+    لكل (TrieSubtrie *Trie = Impl->get_ریښه(); Trie; Trie = Trie->بل_2.بارول())
+      لكل (بینښه I = 0; I < Trie->اندازه_2(); ++I)
+        إذا (خپلکاری *Content = dyn_cast_or_null<TrieContent>(Trie->بارول(I)))
+          Destructor(Content->get_ارزښت_اشاره_ګر());
 
   // Destroy the subtries. Incidentally, this destroys them in the reverse order
   // of saving.
-  TrieSubtrie *Trie = Impl->getRoot()->Next;
-  while (Trie) {
-    TrieSubtrie *Next = Trie->Next.exchange(nullptr);
-    delete Trie;
-    Trie = Next;
+  TrieSubtrie *Trie = Impl->get_ریښه()->بل_2;
+  طالما (Trie) {
+    TrieSubtrie *بل_2 = Trie->بل_2.exchange(تش_اشاره);
+    ړنګول Trie;
+    Trie = بل_2;
   }
 }
 
-ThreadSafeTrieRawHashMapBase::PointerBase
-ThreadSafeTrieRawHashMapBase::getRoot() const {
-  ImplType *Impl = ImplPtr.load();
-  if (!Impl)
-    return PointerBase();
-  return PointerBase(Impl->getRoot());
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_ریښه() ثابت {
+  ImplType *Impl = ImplPtr.بارول();
+  إذا (!Impl)
+    أرجع اشاره_ګر_بنسټ();
+  أرجع اشاره_ګر_بنسټ(Impl->get_ریښه());
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getStartBit(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return 0;
-  if (auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P))
-    return S->StartBit;
-  return 0;
+بینښه Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_پیل_بټ(
+    Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ P) ثابت {
+  أكد(!P.isHint() && "Not a valid trie");
+  إذا (!P.P)
+    أرجع 0;
+  إذا (خپلکاری *S = dyn_cast<TrieSubtrie>((Trie_غوټه *)P.P))
+    أرجع S->پیل_بټ;
+  أرجع 0;
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getNumBits(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return 0;
-  if (auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P))
-    return S->NumBits;
-  return 0;
+بینښه Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_عدد_بټونه(
+    Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ P) ثابت {
+  أكد(!P.isHint() && "Not a valid trie");
+  إذا (!P.P)
+    أرجع 0;
+  إذا (خپلکاری *S = dyn_cast<TrieSubtrie>((Trie_غوټه *)P.P))
+    أرجع S->عدد_بټونه_2;
+  أرجع 0;
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getNumSlotUsed(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return 0;
-  auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P);
-  if (!S)
-    return 0;
-  unsigned Num = 0;
-  for (unsigned I = 0, E = S->size(); I < E; ++I)
-    if (S->load(I))
-      ++Num;
-  return Num;
+بینښه Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_عدد_خونه_کارول_شوی(
+    Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ P) ثابت {
+  أكد(!P.isHint() && "Not a valid trie");
+  إذا (!P.P)
+    أرجع 0;
+  خپلکاری *S = dyn_cast<TrieSubtrie>((Trie_غوټه *)P.P);
+  إذا (!S)
+    أرجع 0;
+  بینښه عدد = 0;
+  لكل (بینښه I = 0, E = S->اندازه_2(); I < E; ++I)
+    إذا (S->بارول(I))
+      ++عدد;
+  أرجع عدد;
 }
 
-std::string ThreadSafeTrieRawHashMapBase::getTriePrefixAsString(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return "";
+std::string Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_Trie_مختاړی_As_String(
+    Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ P) ثابت {
+  أكد(!P.isHint() && "Not a valid trie");
+  إذا (!P.P)
+    أرجع "";
 
-  auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P);
-  if (!S || !S->IsSubtrie)
-    return "";
+  خپلکاری *S = dyn_cast<TrieSubtrie>((Trie_غوټه *)P.P);
+  إذا (!S || !S->IsSubtrie)
+    أرجع "";
 
   // Find a TrieContent node which has hash stored. Depth search following the
   // first used slot until a TrieContent node is found.
   TrieSubtrie *Current = S;
-  TrieContent *Node = nullptr;
-  while (Current) {
-    TrieSubtrie *Next = nullptr;
+  TrieContent *غوټه = تش_اشاره;
+  طالما (Current) {
+    TrieSubtrie *بل_2 = تش_اشاره;
     // Find first used slot in the trie.
-    for (unsigned I = 0, E = Current->size(); I < E; ++I) {
-      auto *S = Current->load(I);
-      if (!S)
-        continue;
+    لكل (بینښه I = 0, E = Current->اندازه_2(); I < E; ++I) {
+      خپلکاری *S = Current->بارول(I);
+      إذا (!S)
+        استمر;
 
-      if (auto *Content = dyn_cast<TrieContent>(S))
-        Node = Content;
-      else if (auto *Sub = dyn_cast<TrieSubtrie>(S))
-        Next = Sub;
-      break;
+      إذا (خپلکاری *Content = dyn_cast<TrieContent>(S))
+        غوټه = Content;
+      وإلا إذا (خپلکاری *Sub = dyn_cast<TrieSubtrie>(S))
+        بل_2 = Sub;
+      اكسر;
     }
 
     // Found the node.
-    if (Node)
-      break;
+    إذا (غوټه)
+      اكسر;
 
     // Continue to the next level if the node is not found.
-    Current = Next;
+    Current = بل_2;
   }
 
-  assert(Node && "malformed trie, cannot find TrieContent on leaf node");
+  أكد(غوټه && "malformed trie, cannot find TrieContent on leaf node");
   // The prefix for the current trie is the first `StartBit` of the content
   // stored underneath this subtrie.
   std::string Str;
   raw_string_ostream SS(Str);
 
-  unsigned StartFullBytes = (S->StartBit + 1) / 8 - 1;
-  SS << toHex(toStringRef(Node->getHash()).take_front(StartFullBytes),
-              /*LowerCase=*/true);
+  بینښه پیل_ډک_بایټونه = (S->پیل_بټ + 1) / 8 - 1;
+  SS << منزل_Hex(منزل_String_Ref(غوټه->getHash()).take_front(پیل_ډک_بایټونه),
+              /*LowerCase=*/ریښتیا);
 
   // For the part of the prefix that doesn't fill a byte, print raw bit values.
-  std::string Bits;
-  for (unsigned I = StartFullBytes * 8, E = S->StartBit; I < E; ++I) {
-    unsigned Index = I / 8;
-    unsigned Offset = 7 - I % 8;
-    Bits.push_back('0' + ((Node->getHash()[Index] >> Offset) & 1));
+  std::string بټونه_2;
+  لكل (بینښه I = پیل_ډک_بایټونه * 8, E = S->پیل_بټ; I < E; ++I) {
+    بینښه شاخص_2 = I / 8;
+    بینښه دننه_واټن = 7 - I % 8;
+    بټونه_2.ټېل_شا('0' + ((غوټه->getHash()[شاخص_2] >> دننه_واټن) & 1));
   }
 
-  if (!Bits.empty())
-    SS << "[" << Bits << "]";
+  إذا (!بټونه_2.تشه())
+    SS << "[" << بټونه_2 << "]";
 
-  return SS.str();
+  أرجع SS.str();
 }
 
-unsigned ThreadSafeTrieRawHashMapBase::getNumTries() const {
-  ImplType *Impl = ImplPtr.load();
-  if (!Impl)
-    return 0;
-  unsigned Num = 0;
-  for (TrieSubtrie *Trie = Impl->getRoot(); Trie; Trie = Trie->Next.load())
-    ++Num;
-  return Num;
+بینښه Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_عدد_Tries() ثابت {
+  ImplType *Impl = ImplPtr.بارول();
+  إذا (!Impl)
+    أرجع 0;
+  بینښه عدد = 0;
+  لكل (TrieSubtrie *Trie = Impl->get_ریښه(); Trie; Trie = Trie->بل_2.بارول())
+    ++عدد;
+  أرجع عدد;
 }
 
-ThreadSafeTrieRawHashMapBase::PointerBase
-ThreadSafeTrieRawHashMapBase::getNextTrie(
-    ThreadSafeTrieRawHashMapBase::PointerBase P) const {
-  assert(!P.isHint() && "Not a valid trie");
-  if (!P.P)
-    return PointerBase();
-  auto *S = dyn_cast<TrieSubtrie>((TrieNode *)P.P);
-  if (!S)
-    return PointerBase();
-  if (auto *E = S->Next.load())
-    return PointerBase(E);
-  return PointerBase();
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ
+Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::get_بل_Trie(
+    Thread_خوندي_Trie_Raw_Hash_Map_بنسټ::اشاره_ګر_بنسټ P) ثابت {
+  أكد(!P.isHint() && "Not a valid trie");
+  إذا (!P.P)
+    أرجع اشاره_ګر_بنسټ();
+  خپلکاری *S = dyn_cast<TrieSubtrie>((Trie_غوټه *)P.P);
+  إذا (!S)
+    أرجع اشاره_ګر_بنسټ();
+  إذا (خپلکاری *E = S->بل_2.بارول())
+    أرجع اشاره_ګر_بنسټ(E);
+  أرجع اشاره_ګر_بنسټ();
 }

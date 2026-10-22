@@ -35,24 +35,24 @@
  *	@(#)utils.h	8.3 (Berkeley) 3/20/94
  */
 
-#ifndef LLVM_SUPPORT_REGUTILS_H
-#define LLVM_SUPPORT_REGUTILS_H
+#که_نه_تعریف_شوی LLVM_SUPPORT_REGUTILS_H
+#تعریف_کړه LLVM_SUPPORT_REGUTILS_H
 
 /* utility definitions */
-#define	NC		(CHAR_MAX - CHAR_MIN + 1)
-typedef unsigned char uch;
+#تعریف_کړه	NC		(CHAR_MAX - CHAR_MIN + 1)
+تعريفنوع بینښه حرف uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */
-#ifndef REDEBUG
-#ifndef NDEBUG
-#define	NDEBUG	/* no assertions please */
-#endif
-#endif
-#include <assert.h>
+#که_نه_تعریف_شوی REDEBUG
+#که_نه_تعریف_شوی NDEBUG
+#تعریف_کړه	NDEBUG	/* no assertions please */
+#د_که_پای
+#د_که_پای
+#ضمن <assert.h>
 
 /* for old systems with bcopy() but no memmove() */
-#ifdef USEBCOPY
-#define	memmove(d, s, c)	bcopy(s, d, c)
-#endif
+#که_تعریف_شوی USEBCOPY
+#تعریف_کړه	memmove(d, s, c)	bcopy(s, d, c)
+#د_که_پای
 
-#endif
+#د_که_پای

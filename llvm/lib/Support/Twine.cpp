@@ -6,176 +6,176 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/FormatVariadic.h"
+#ضمن "llvm/Support/raw_ostream.h"
+کارول نطاق llvm;
 
-std::string Twine::str() const {
+std::string Twine::str() ثابت {
   // If we're storing only a std::string, just return it.
-  if (LHSKind == StdStringKind && RHSKind == EmptyKind)
-    return *LHS.stdString;
+  إذا (LHSKind == Std_String_ډول && RHSKind == تشه_ډول)
+    أرجع *LHS.stdString;
 
   // If we're storing a formatv_object, we can avoid an extra copy by formatting
   // it immediately and returning the result.
-  if (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
-    return LHS.formatvObject->str();
+  إذا (LHSKind == Formatv_Object_ډول && RHSKind == تشه_ډول)
+    أرجع LHS.formatvObject->str();
 
   // Otherwise, flatten and copy the contents first.
   SmallString<256> Vec;
-  return toStringRef(Vec).str();
+  أرجع منزل_String_Ref(Vec).str();
 }
 
-void Twine::toVector(SmallVectorImpl<char> &Out) const {
-  raw_svector_ostream OS(Out);
+فراغ Twine::منزل_ویکټور(Small_ویکټور_Impl<حرف> &بهر) ثابت {
+  raw_svector_ostream OS(بهر);
   print(OS);
 }
 
-StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
-  if (isUnary()) {
-    switch (getLHSKind()) {
-    case CStringKind:
+StringRef Twine::منزل_Null_Terminated_String_Ref(Small_ویکټور_Impl<حرف> &بهر) ثابت {
+  إذا (isUnary()) {
+    بدل (getLHSKind()) {
+    حالة CString_ډول:
       // Already null terminated, yay!
-      return StringRef(LHS.cString);
-    case StdStringKind: {
-      const std::string *str = LHS.stdString;
-      return StringRef(str->c_str(), str->size());
+      أرجع StringRef(LHS.cString);
+    حالة Std_String_ډول: {
+      ثابت std::string *str = LHS.stdString;
+      أرجع StringRef(str->c_str(), str->اندازه_2());
     }
-    case StringLiteralKind:
-      return StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
-    default:
-      break;
+    حالة String_Literal_ډول:
+      أرجع StringRef(LHS.ptr_And_اوږدتیا.ptr, LHS.ptr_And_اوږدتیا.اوږدتیا_2);
+    افتراضي:
+      اكسر;
     }
   }
-  toVector(Out);
-  Out.push_back(0);
-  Out.pop_back();
-  return StringRef(Out.data(), Out.size());
+  منزل_ویکټور(بهر);
+  بهر.ټېل_شا(0);
+  بهر.راوباسه_شا();
+  أرجع StringRef(بهر.معلومات(), بهر.اندازه_2());
 }
 
-void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
-    break;
-  case Twine::EmptyKind:
-    break;
-  case Twine::TwineKind:
+فراغ Twine::print_One_ماشوم(raw_ostream &OS, ماشوم Ptr, غوټه_ډول ډول_2) ثابت {
+  بدل (ډول_2) {
+  حالة Twine::Null_ډول:
+    اكسر;
+  حالة Twine::تشه_ډول:
+    اكسر;
+  حالة Twine::Twine_ډول:
     Ptr.twine->print(OS);
-    break;
-  case Twine::CStringKind:
+    اكسر;
+  حالة Twine::CString_ډول:
     OS << Ptr.cString;
-    break;
-  case Twine::StdStringKind:
+    اكسر;
+  حالة Twine::Std_String_ډول:
     OS << *Ptr.stdString;
-    break;
-  case Twine::PtrAndLengthKind:
-  case Twine::StringLiteralKind:
-    OS << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length);
-    break;
-  case Twine::FormatvObjectKind:
+    اكسر;
+  حالة Twine::Ptr_And_اوږدتیا_ډول:
+  حالة Twine::String_Literal_ډول:
+    OS << StringRef(Ptr.ptr_And_اوږدتیا.ptr, Ptr.ptr_And_اوږدتیا.اوږدتیا_2);
+    اكسر;
+  حالة Twine::Formatv_Object_ډول:
     OS << *Ptr.formatvObject;
-    break;
-  case Twine::CharKind:
+    اكسر;
+  حالة Twine::Char_ډول:
     OS << Ptr.character;
-    break;
-  case Twine::DecUIKind:
+    اكسر;
+  حالة Twine::DecUIKind:
     OS << Ptr.decUI;
-    break;
-  case Twine::DecIKind:
+    اكسر;
+  حالة Twine::DecIKind:
     OS << Ptr.decI;
-    break;
-  case Twine::DecULKind:
+    اكسر;
+  حالة Twine::DecULKind:
     OS << Ptr.decUL;
-    break;
-  case Twine::DecLKind:
+    اكسر;
+  حالة Twine::DecLKind:
     OS << Ptr.decL;
-    break;
-  case Twine::DecULLKind:
+    اكسر;
+  حالة Twine::DecULLKind:
     OS << Ptr.decULL;
-    break;
-  case Twine::DecLLKind:
+    اكسر;
+  حالة Twine::DecLLKind:
     OS << Ptr.decLL;
-    break;
-  case Twine::UHexKind:
+    اكسر;
+  حالة Twine::UHex_ډول:
     OS.write_hex(Ptr.uHex);
-    break;
+    اكسر;
   }
 }
 
-void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
+فراغ Twine::print_One_ماشوم_Repr(raw_ostream &OS, ماشوم Ptr, غوټه_ډول ډول_2) ثابت {
+  بدل (ډول_2) {
+  حالة Twine::Null_ډول:
     OS << "null";
-    break;
-  case Twine::EmptyKind:
+    اكسر;
+  حالة Twine::تشه_ډول:
     OS << "empty";
-    break;
-  case Twine::TwineKind:
+    اكسر;
+  حالة Twine::Twine_ډول:
     OS << "rope:";
     Ptr.twine->printRepr(OS);
-    break;
-  case Twine::CStringKind:
+    اكسر;
+  حالة Twine::CString_ډول:
     OS << "cstring:\"" << Ptr.cString << "\"";
-    break;
-  case Twine::StdStringKind:
+    اكسر;
+  حالة Twine::Std_String_ډول:
     OS << "std::string:\"" << Ptr.stdString << "\"";
-    break;
-  case Twine::PtrAndLengthKind:
+    اكسر;
+  حالة Twine::Ptr_And_اوږدتیا_ډول:
     OS << "ptrAndLength:\""
-       << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::StringLiteralKind:
+       << StringRef(Ptr.ptr_And_اوږدتیا.ptr, Ptr.ptr_And_اوږدتیا.اوږدتیا_2) << "\"";
+    اكسر;
+  حالة Twine::String_Literal_ډول:
     OS << "constexprPtrAndLength:\""
-       << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::FormatvObjectKind:
+       << StringRef(Ptr.ptr_And_اوږدتیا.ptr, Ptr.ptr_And_اوږدتیا.اوږدتیا_2) << "\"";
+    اكسر;
+  حالة Twine::Formatv_Object_ډول:
     OS << "formatv:\"" << *Ptr.formatvObject << "\"";
-    break;
-  case Twine::CharKind:
+    اكسر;
+  حالة Twine::Char_ډول:
     OS << "char:\"" << Ptr.character << "\"";
-    break;
-  case Twine::DecUIKind:
+    اكسر;
+  حالة Twine::DecUIKind:
     OS << "decUI:\"" << Ptr.decUI << "\"";
-    break;
-  case Twine::DecIKind:
+    اكسر;
+  حالة Twine::DecIKind:
     OS << "decI:\"" << Ptr.decI << "\"";
-    break;
-  case Twine::DecULKind:
+    اكسر;
+  حالة Twine::DecULKind:
     OS << "decUL:\"" << Ptr.decUL << "\"";
-    break;
-  case Twine::DecLKind:
+    اكسر;
+  حالة Twine::DecLKind:
     OS << "decL:\"" << Ptr.decL << "\"";
-    break;
-  case Twine::DecULLKind:
+    اكسر;
+  حالة Twine::DecULLKind:
     OS << "decULL:\"" << Ptr.decULL << "\"";
-    break;
-  case Twine::DecLLKind:
+    اكسر;
+  حالة Twine::DecLLKind:
     OS << "decLL:\"" << Ptr.decLL << "\"";
-    break;
-  case Twine::UHexKind:
+    اكسر;
+  حالة Twine::UHex_ډول:
     OS << "uhex:\"" << Ptr.uHex << "\"";
-    break;
+    اكسر;
   }
 }
 
-void Twine::print(raw_ostream &OS) const {
-  printOneChild(OS, LHS, getLHSKind());
-  printOneChild(OS, RHS, getRHSKind());
+فراغ Twine::print(raw_ostream &OS) ثابت {
+  print_One_ماشوم(OS, LHS, getLHSKind());
+  print_One_ماشوم(OS, RHS, getRHSKind());
 }
 
-void Twine::printRepr(raw_ostream &OS) const {
+فراغ Twine::printRepr(raw_ostream &OS) ثابت {
   OS << "(Twine ";
-  printOneChildRepr(OS, LHS, getLHSKind());
+  print_One_ماشوم_Repr(OS, LHS, getLHSKind());
   OS << " ";
-  printOneChildRepr(OS, RHS, getRHSKind());
+  print_One_ماشوم_Repr(OS, RHS, getRHSKind());
   OS << ")";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_لاره فراغ Twine::dump() ثابت { print(dbgs()); }
 
-LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }
-#endif
+LLVM_DUMP_لاره فراغ Twine::dumpRepr() ثابت { printRepr(dbgs()); }
+#د_که_پای

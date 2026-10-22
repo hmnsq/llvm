@@ -7,42 +7,42 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64AttributeParser.h"
-#include "llvm/Support/AArch64BuildAttributes.h"
+#ضمن "llvm/Support/AArch64AttributeParser.h"
+#ضمن "llvm/Support/AArch64BuildAttributes.h"
 
-std::vector<llvm::SubsectionAndTagToTagName> &
-llvm::AArch64AttributeParser::returnTagsNamesMap() {
-  static std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
+std::ویکټور<llvm::Subsection_And_نښان_منزل_نښان_Name> &
+llvm::AArch64AttributeParser::return_نښانونه_نومونه_Map() {
+  ساكن std::ویکټور<Subsection_And_نښان_منزل_نښان_Name> نښانونه_نومونه_Map = {
       {"aeabi_pauthabi", 1, "Tag_PAuth_Platform"},
       {"aeabi_pauthabi", 2, "Tag_PAuth_Schema"},
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  أرجع نښانونه_نومونه_Map;
 }
 
-llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
-    const llvm::AArch64AttributeParser &Attributes) {
+llvm::AArch64BuildAttrSubsections llvm::ایستل_Build_ځانګړتیاوې_Subsections(
+    ثابت llvm::AArch64AttributeParser &ځانګړتیاوې) {
 
   llvm::AArch64BuildAttrSubsections SubSections;
-  auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+  خپلکاری Get_Pauth_ارزښت = [&ځانګړتیاوې](بینښه نښان) {
+    أرجع ځانګړتیاوې.get_Attribute_ارزښت("aeabi_pauthabi", نښان).ارزښت_or(0);
   };
-  SubSections.Pauth.TagPlatform =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
-  SubSections.Pauth.TagSchema =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
+  SubSections.Pauth.نښان_Platform =
+      Get_Pauth_ارزښت(llvm::AArch64_Build_ځانګړتیاوې::نښان_PAUTH_PLATFORM);
+  SubSections.Pauth.نښان_Schema =
+      Get_Pauth_ارزښت(llvm::AArch64_Build_ځانګړتیاوې::نښان_PAUTH_SCHEMA);
 
-  auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
-        .value_or(0);
+  خپلکاری Get_Feature_ارزښت = [&ځانګړتیاوې](بینښه نښان) {
+    أرجع ځانګړتیاوې.get_Attribute_ارزښت("aeabi_feature_and_bits", نښان)
+        .ارزښت_or(0);
   };
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_BTI);
+      Get_Feature_ارزښت(llvm::AArch64_Build_ځانګړتیاوې::نښان_FEATURE_BTI);
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_PAC) << 1;
+      Get_Feature_ارزښت(llvm::AArch64_Build_ځانګړتیاوې::نښان_FEATURE_PAC) << 1;
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
+      Get_Feature_ارزښت(llvm::AArch64_Build_ځانګړتیاوې::نښان_FEATURE_GCS) << 2;
 
-  return SubSections;
+  أرجع SubSections;
 }

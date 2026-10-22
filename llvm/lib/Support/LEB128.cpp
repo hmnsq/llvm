@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LEB128.h"
+#ضمن "llvm/Support/LEB128.h"
 
-namespace llvm {
+نطاق llvm {
 
 /// Utility function to get the size of the ULEB128-encoded value.
-unsigned getULEB128Size(uint64_t Value) {
-  unsigned Size = 0;
-  do {
-    Value >>= 7;
-    Size += sizeof(int8_t);
-  } while (Value);
-  return Size;
+بینښه get_ULEB128_اندازه(uint64_t ارزښت) {
+  بینښه اندازه = 0;
+  افعل {
+    ارزښت >>= 7;
+    اندازه += حجم(int8_t);
+  } طالما (ارزښت);
+  أرجع اندازه;
 }
 
 /// Utility function to get the size of the SLEB128-encoded value.
-unsigned getSLEB128Size(int64_t Value) {
-  unsigned Size = 0;
-  int Sign = Value >> (8 * sizeof(Value) - 1);
-  bool IsMore;
+بینښه get_SLEB128_اندازه(int64_t ارزښت) {
+  بینښه اندازه = 0;
+  صحيح Sign = ارزښت >> (8 * حجم(ارزښت) - 1);
+  منطقي Is_نور;
 
-  do {
-    unsigned Byte = Value & 0x7f;
-    Value >>= 7;
-    IsMore = Value != Sign || ((Byte ^ Sign) & 0x40) != 0;
-    Size += sizeof(int8_t);
-  } while (IsMore);
-  return Size;
+  افعل {
+    بینښه Byte = ارزښت & 0x7f;
+    ارزښت >>= 7;
+    Is_نور = ارزښت != Sign || ((Byte ^ Sign) & 0x40) != 0;
+    اندازه += حجم(int8_t);
+  } طالما (Is_نور);
+  أرجع اندازه;
 }
 
 }  // namespace llvm

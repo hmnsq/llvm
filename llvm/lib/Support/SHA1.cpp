@@ -14,291 +14,291 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SHA1.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <string.h>
+#ضمن "llvm/Support/SHA1.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/Endian.h"
+#ضمن "llvm/Support/SwapByteOrder.h"
+#ضمن <string.h>
 
-using namespace llvm;
+کارول نطاق llvm;
 
-static inline uint32_t rol(uint32_t Number, int Bits) {
-  return (Number << Bits) | (Number >> (32 - Bits));
+ساكن مضمن uint32_t rol(uint32_t شمېره, صحيح بټونه_2) {
+  أرجع (شمېره << بټونه_2) | (شمېره >> (32 - بټونه_2));
 }
 
-static inline uint32_t blk0(uint32_t *Buf, int I) { return Buf[I]; }
+ساكن مضمن uint32_t blk0(uint32_t *Buf, صحيح I) { أرجع Buf[I]; }
 
-static inline uint32_t blk(uint32_t *Buf, int I) {
+ساكن مضمن uint32_t blk(uint32_t *Buf, صحيح I) {
   Buf[I & 15] = rol(Buf[(I + 13) & 15] ^ Buf[(I + 8) & 15] ^ Buf[(I + 2) & 15] ^
                         Buf[I & 15],
                     1);
-  return Buf[I & 15];
+  أرجع Buf[I & 15];
 }
 
-static inline void r0(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ساكن مضمن فراغ r0(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, صحيح I, uint32_t *Buf) {
   E += ((B & (C ^ D)) ^ D) + blk0(Buf, I) + 0x5A827999 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r1(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ساكن مضمن فراغ r1(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, صحيح I, uint32_t *Buf) {
   E += ((B & (C ^ D)) ^ D) + blk(Buf, I) + 0x5A827999 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r2(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ساكن مضمن فراغ r2(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, صحيح I, uint32_t *Buf) {
   E += (B ^ C ^ D) + blk(Buf, I) + 0x6ED9EBA1 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r3(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ساكن مضمن فراغ r3(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, صحيح I, uint32_t *Buf) {
   E += (((B | C) & D) | (B & C)) + blk(Buf, I) + 0x8F1BBCDC + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ساكن مضمن فراغ r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, صحيح I, uint32_t *Buf) {
   E += (B ^ C ^ D) + blk(Buf, I) + 0xCA62C1D6 + rol(A, 5);
   B = rol(B, 30);
 }
 
-/* code */
-#define SHA1_K0 0x5a827999
-#define SHA1_K20 0x6ed9eba1
-#define SHA1_K40 0x8f1bbcdc
-#define SHA1_K60 0xca62c1d6
+/*کوډ*/
+#تعریف_کړه SHA1_K0 0x5a827999
+#تعریف_کړه SHA1_K20 0x6ed9eba1
+#تعریف_کړه SHA1_K40 0x8f1bbcdc
+#تعریف_کړه SHA1_K60 0xca62c1d6
 
-#define SEED_0 0x67452301
-#define SEED_1 0xefcdab89
-#define SEED_2 0x98badcfe
-#define SEED_3 0x10325476
-#define SEED_4 0xc3d2e1f0
+#تعریف_کړه تخم_0 0x67452301
+#تعریف_کړه تخم_1 0xefcdab89
+#تعریف_کړه تخم_2_2 0x98badcfe
+#تعریف_کړه تخم_3 0x10325476
+#تعریف_کړه تخم_4 0xc3d2e1f0
 
-void SHA1::init() {
-  InternalState.State[0] = SEED_0;
-  InternalState.State[1] = SEED_1;
-  InternalState.State[2] = SEED_2;
-  InternalState.State[3] = SEED_3;
-  InternalState.State[4] = SEED_4;
-  InternalState.ByteCount = 0;
-  InternalState.BufferOffset = 0;
+فراغ SHA1::init() {
+  دننی_State.State[0] = تخم_0;
+  دننی_State.State[1] = تخم_1;
+  دننی_State.State[2] = تخم_2_2;
+  دننی_State.State[3] = تخم_3;
+  دننی_State.State[4] = تخم_4;
+  دننی_State.Byte_شمېر = 0;
+  دننی_State.بفر_دننه_واټن = 0;
 }
 
-void SHA1::hashBlock() {
-  uint32_t A = InternalState.State[0];
-  uint32_t B = InternalState.State[1];
-  uint32_t C = InternalState.State[2];
-  uint32_t D = InternalState.State[3];
-  uint32_t E = InternalState.State[4];
+فراغ SHA1::hash_بلاک() {
+  uint32_t A = دننی_State.State[0];
+  uint32_t B = دننی_State.State[1];
+  uint32_t C = دننی_State.State[2];
+  uint32_t D = دننی_State.State[3];
+  uint32_t E = دننی_State.State[4];
 
   // 4 rounds of 20 operations each. Loop unrolled.
-  r0(A, B, C, D, E, 0, InternalState.Buffer.L);
-  r0(E, A, B, C, D, 1, InternalState.Buffer.L);
-  r0(D, E, A, B, C, 2, InternalState.Buffer.L);
-  r0(C, D, E, A, B, 3, InternalState.Buffer.L);
-  r0(B, C, D, E, A, 4, InternalState.Buffer.L);
-  r0(A, B, C, D, E, 5, InternalState.Buffer.L);
-  r0(E, A, B, C, D, 6, InternalState.Buffer.L);
-  r0(D, E, A, B, C, 7, InternalState.Buffer.L);
-  r0(C, D, E, A, B, 8, InternalState.Buffer.L);
-  r0(B, C, D, E, A, 9, InternalState.Buffer.L);
-  r0(A, B, C, D, E, 10, InternalState.Buffer.L);
-  r0(E, A, B, C, D, 11, InternalState.Buffer.L);
-  r0(D, E, A, B, C, 12, InternalState.Buffer.L);
-  r0(C, D, E, A, B, 13, InternalState.Buffer.L);
-  r0(B, C, D, E, A, 14, InternalState.Buffer.L);
-  r0(A, B, C, D, E, 15, InternalState.Buffer.L);
-  r1(E, A, B, C, D, 16, InternalState.Buffer.L);
-  r1(D, E, A, B, C, 17, InternalState.Buffer.L);
-  r1(C, D, E, A, B, 18, InternalState.Buffer.L);
-  r1(B, C, D, E, A, 19, InternalState.Buffer.L);
+  r0(A, B, C, D, E, 0, دننی_State.بفر.L);
+  r0(E, A, B, C, D, 1, دننی_State.بفر.L);
+  r0(D, E, A, B, C, 2, دننی_State.بفر.L);
+  r0(C, D, E, A, B, 3, دننی_State.بفر.L);
+  r0(B, C, D, E, A, 4, دننی_State.بفر.L);
+  r0(A, B, C, D, E, 5, دننی_State.بفر.L);
+  r0(E, A, B, C, D, 6, دننی_State.بفر.L);
+  r0(D, E, A, B, C, 7, دننی_State.بفر.L);
+  r0(C, D, E, A, B, 8, دننی_State.بفر.L);
+  r0(B, C, D, E, A, 9, دننی_State.بفر.L);
+  r0(A, B, C, D, E, 10, دننی_State.بفر.L);
+  r0(E, A, B, C, D, 11, دننی_State.بفر.L);
+  r0(D, E, A, B, C, 12, دننی_State.بفر.L);
+  r0(C, D, E, A, B, 13, دننی_State.بفر.L);
+  r0(B, C, D, E, A, 14, دننی_State.بفر.L);
+  r0(A, B, C, D, E, 15, دننی_State.بفر.L);
+  r1(E, A, B, C, D, 16, دننی_State.بفر.L);
+  r1(D, E, A, B, C, 17, دننی_State.بفر.L);
+  r1(C, D, E, A, B, 18, دننی_State.بفر.L);
+  r1(B, C, D, E, A, 19, دننی_State.بفر.L);
 
-  r2(A, B, C, D, E, 20, InternalState.Buffer.L);
-  r2(E, A, B, C, D, 21, InternalState.Buffer.L);
-  r2(D, E, A, B, C, 22, InternalState.Buffer.L);
-  r2(C, D, E, A, B, 23, InternalState.Buffer.L);
-  r2(B, C, D, E, A, 24, InternalState.Buffer.L);
-  r2(A, B, C, D, E, 25, InternalState.Buffer.L);
-  r2(E, A, B, C, D, 26, InternalState.Buffer.L);
-  r2(D, E, A, B, C, 27, InternalState.Buffer.L);
-  r2(C, D, E, A, B, 28, InternalState.Buffer.L);
-  r2(B, C, D, E, A, 29, InternalState.Buffer.L);
-  r2(A, B, C, D, E, 30, InternalState.Buffer.L);
-  r2(E, A, B, C, D, 31, InternalState.Buffer.L);
-  r2(D, E, A, B, C, 32, InternalState.Buffer.L);
-  r2(C, D, E, A, B, 33, InternalState.Buffer.L);
-  r2(B, C, D, E, A, 34, InternalState.Buffer.L);
-  r2(A, B, C, D, E, 35, InternalState.Buffer.L);
-  r2(E, A, B, C, D, 36, InternalState.Buffer.L);
-  r2(D, E, A, B, C, 37, InternalState.Buffer.L);
-  r2(C, D, E, A, B, 38, InternalState.Buffer.L);
-  r2(B, C, D, E, A, 39, InternalState.Buffer.L);
+  r2(A, B, C, D, E, 20, دننی_State.بفر.L);
+  r2(E, A, B, C, D, 21, دننی_State.بفر.L);
+  r2(D, E, A, B, C, 22, دننی_State.بفر.L);
+  r2(C, D, E, A, B, 23, دننی_State.بفر.L);
+  r2(B, C, D, E, A, 24, دننی_State.بفر.L);
+  r2(A, B, C, D, E, 25, دننی_State.بفر.L);
+  r2(E, A, B, C, D, 26, دننی_State.بفر.L);
+  r2(D, E, A, B, C, 27, دننی_State.بفر.L);
+  r2(C, D, E, A, B, 28, دننی_State.بفر.L);
+  r2(B, C, D, E, A, 29, دننی_State.بفر.L);
+  r2(A, B, C, D, E, 30, دننی_State.بفر.L);
+  r2(E, A, B, C, D, 31, دننی_State.بفر.L);
+  r2(D, E, A, B, C, 32, دننی_State.بفر.L);
+  r2(C, D, E, A, B, 33, دننی_State.بفر.L);
+  r2(B, C, D, E, A, 34, دننی_State.بفر.L);
+  r2(A, B, C, D, E, 35, دننی_State.بفر.L);
+  r2(E, A, B, C, D, 36, دننی_State.بفر.L);
+  r2(D, E, A, B, C, 37, دننی_State.بفر.L);
+  r2(C, D, E, A, B, 38, دننی_State.بفر.L);
+  r2(B, C, D, E, A, 39, دننی_State.بفر.L);
 
-  r3(A, B, C, D, E, 40, InternalState.Buffer.L);
-  r3(E, A, B, C, D, 41, InternalState.Buffer.L);
-  r3(D, E, A, B, C, 42, InternalState.Buffer.L);
-  r3(C, D, E, A, B, 43, InternalState.Buffer.L);
-  r3(B, C, D, E, A, 44, InternalState.Buffer.L);
-  r3(A, B, C, D, E, 45, InternalState.Buffer.L);
-  r3(E, A, B, C, D, 46, InternalState.Buffer.L);
-  r3(D, E, A, B, C, 47, InternalState.Buffer.L);
-  r3(C, D, E, A, B, 48, InternalState.Buffer.L);
-  r3(B, C, D, E, A, 49, InternalState.Buffer.L);
-  r3(A, B, C, D, E, 50, InternalState.Buffer.L);
-  r3(E, A, B, C, D, 51, InternalState.Buffer.L);
-  r3(D, E, A, B, C, 52, InternalState.Buffer.L);
-  r3(C, D, E, A, B, 53, InternalState.Buffer.L);
-  r3(B, C, D, E, A, 54, InternalState.Buffer.L);
-  r3(A, B, C, D, E, 55, InternalState.Buffer.L);
-  r3(E, A, B, C, D, 56, InternalState.Buffer.L);
-  r3(D, E, A, B, C, 57, InternalState.Buffer.L);
-  r3(C, D, E, A, B, 58, InternalState.Buffer.L);
-  r3(B, C, D, E, A, 59, InternalState.Buffer.L);
+  r3(A, B, C, D, E, 40, دننی_State.بفر.L);
+  r3(E, A, B, C, D, 41, دننی_State.بفر.L);
+  r3(D, E, A, B, C, 42, دننی_State.بفر.L);
+  r3(C, D, E, A, B, 43, دننی_State.بفر.L);
+  r3(B, C, D, E, A, 44, دننی_State.بفر.L);
+  r3(A, B, C, D, E, 45, دننی_State.بفر.L);
+  r3(E, A, B, C, D, 46, دننی_State.بفر.L);
+  r3(D, E, A, B, C, 47, دننی_State.بفر.L);
+  r3(C, D, E, A, B, 48, دننی_State.بفر.L);
+  r3(B, C, D, E, A, 49, دننی_State.بفر.L);
+  r3(A, B, C, D, E, 50, دننی_State.بفر.L);
+  r3(E, A, B, C, D, 51, دننی_State.بفر.L);
+  r3(D, E, A, B, C, 52, دننی_State.بفر.L);
+  r3(C, D, E, A, B, 53, دننی_State.بفر.L);
+  r3(B, C, D, E, A, 54, دننی_State.بفر.L);
+  r3(A, B, C, D, E, 55, دننی_State.بفر.L);
+  r3(E, A, B, C, D, 56, دننی_State.بفر.L);
+  r3(D, E, A, B, C, 57, دننی_State.بفر.L);
+  r3(C, D, E, A, B, 58, دننی_State.بفر.L);
+  r3(B, C, D, E, A, 59, دننی_State.بفر.L);
 
-  r4(A, B, C, D, E, 60, InternalState.Buffer.L);
-  r4(E, A, B, C, D, 61, InternalState.Buffer.L);
-  r4(D, E, A, B, C, 62, InternalState.Buffer.L);
-  r4(C, D, E, A, B, 63, InternalState.Buffer.L);
-  r4(B, C, D, E, A, 64, InternalState.Buffer.L);
-  r4(A, B, C, D, E, 65, InternalState.Buffer.L);
-  r4(E, A, B, C, D, 66, InternalState.Buffer.L);
-  r4(D, E, A, B, C, 67, InternalState.Buffer.L);
-  r4(C, D, E, A, B, 68, InternalState.Buffer.L);
-  r4(B, C, D, E, A, 69, InternalState.Buffer.L);
-  r4(A, B, C, D, E, 70, InternalState.Buffer.L);
-  r4(E, A, B, C, D, 71, InternalState.Buffer.L);
-  r4(D, E, A, B, C, 72, InternalState.Buffer.L);
-  r4(C, D, E, A, B, 73, InternalState.Buffer.L);
-  r4(B, C, D, E, A, 74, InternalState.Buffer.L);
-  r4(A, B, C, D, E, 75, InternalState.Buffer.L);
-  r4(E, A, B, C, D, 76, InternalState.Buffer.L);
-  r4(D, E, A, B, C, 77, InternalState.Buffer.L);
-  r4(C, D, E, A, B, 78, InternalState.Buffer.L);
-  r4(B, C, D, E, A, 79, InternalState.Buffer.L);
+  r4(A, B, C, D, E, 60, دننی_State.بفر.L);
+  r4(E, A, B, C, D, 61, دننی_State.بفر.L);
+  r4(D, E, A, B, C, 62, دننی_State.بفر.L);
+  r4(C, D, E, A, B, 63, دننی_State.بفر.L);
+  r4(B, C, D, E, A, 64, دننی_State.بفر.L);
+  r4(A, B, C, D, E, 65, دننی_State.بفر.L);
+  r4(E, A, B, C, D, 66, دننی_State.بفر.L);
+  r4(D, E, A, B, C, 67, دننی_State.بفر.L);
+  r4(C, D, E, A, B, 68, دننی_State.بفر.L);
+  r4(B, C, D, E, A, 69, دننی_State.بفر.L);
+  r4(A, B, C, D, E, 70, دننی_State.بفر.L);
+  r4(E, A, B, C, D, 71, دننی_State.بفر.L);
+  r4(D, E, A, B, C, 72, دننی_State.بفر.L);
+  r4(C, D, E, A, B, 73, دننی_State.بفر.L);
+  r4(B, C, D, E, A, 74, دننی_State.بفر.L);
+  r4(A, B, C, D, E, 75, دننی_State.بفر.L);
+  r4(E, A, B, C, D, 76, دننی_State.بفر.L);
+  r4(D, E, A, B, C, 77, دننی_State.بفر.L);
+  r4(C, D, E, A, B, 78, دننی_State.بفر.L);
+  r4(B, C, D, E, A, 79, دننی_State.بفر.L);
 
-  InternalState.State[0] += A;
-  InternalState.State[1] += B;
-  InternalState.State[2] += C;
-  InternalState.State[3] += D;
-  InternalState.State[4] += E;
+  دننی_State.State[0] += A;
+  دننی_State.State[1] += B;
+  دننی_State.State[2] += C;
+  دننی_State.State[3] += D;
+  دننی_State.State[4] += E;
 }
 
-void SHA1::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
-    InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
-    InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
+فراغ SHA1::جمع_کړه_Uncounted(uint8_t معلومات_2) {
+  إذا constexpr (sys::IsBigEndianHost)
+    دننی_State.بفر.C[دننی_State.بفر_دننه_واټن] = معلومات_2;
+  وإلا
+    دننی_State.بفر.C[دننی_State.بفر_دننه_واټن ^ 3] = معلومات_2;
 
-  InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
-    hashBlock();
-    InternalState.BufferOffset = 0;
+  دننی_State.بفر_دننه_واټن++;
+  إذا (دننی_State.بفر_دننه_واټن == بلاک_اوږدتیا) {
+    hash_بلاک();
+    دننی_State.بفر_دننه_واټن = 0;
   }
 }
 
-void SHA1::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
-  addUncounted(Data);
+فراغ SHA1::writebyte(uint8_t معلومات_2) {
+  ++دننی_State.Byte_شمېر;
+  جمع_کړه_Uncounted(معلومات_2);
 }
 
-void SHA1::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+فراغ SHA1::update(ArrayRef<uint8_t> معلومات_2) {
+  دننی_State.Byte_شمېر += معلومات_2.اندازه_2();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
-    const size_t Remainder = std::min<size_t>(
-        Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
-    for (size_t I = 0; I < Remainder; ++I)
-      addUncounted(Data[I]);
-    Data = Data.drop_front(Remainder);
+  إذا (دننی_State.بفر_دننه_واټن > 0) {
+    ثابت size_t Remainder = std::min<size_t>(
+        معلومات_2.اندازه_2(), بلاک_اوږدتیا - دننی_State.بفر_دننه_واټن);
+    لكل (size_t I = 0; I < Remainder; ++I)
+      جمع_کړه_Uncounted(معلومات_2[I]);
+    معلومات_2 = معلومات_2.drop_front(Remainder);
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
-    assert(InternalState.BufferOffset == 0);
-    static_assert(BLOCK_LENGTH % 4 == 0);
-    constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
-    for (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
-      InternalState.Buffer.L[I] = support::endian::read32be(&Data[I * 4]);
-    hashBlock();
-    Data = Data.drop_front(BLOCK_LENGTH);
+  طالما (معلومات_2.اندازه_2() >= بلاک_اوږدتیا) {
+    أكد(دننی_State.بفر_دننه_واټن == 0);
+    static_assert(بلاک_اوږدتیا % 4 == 0);
+    constexpr size_t بلاک_اوږدتیا_32 = بلاک_اوږدتیا / 4;
+    لكل (size_t I = 0; I < بلاک_اوږدتیا_32; ++I)
+      دننی_State.بفر.L[I] = support::endian::read32be(&معلومات_2[I * 4]);
+    hash_بلاک();
+    معلومات_2 = معلومات_2.drop_front(بلاک_اوږدتیا);
   }
 
   // Finish the remainder.
-  for (uint8_t C : Data)
-    addUncounted(C);
+  لكل (uint8_t C : معلومات_2)
+    جمع_کړه_Uncounted(C);
 }
 
-void SHA1::update(StringRef Str) {
+فراغ SHA1::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<حرف *>(Str.معلومات()), Str.اندازه_2()));
 }
 
-void SHA1::pad() {
+فراغ SHA1::pad() {
   // Implement SHA-1 padding (fips180-2 5.1.1)
 
   // Pad with 0x80 followed by 0x00 until the end of the block
-  addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
-    addUncounted(0x00);
+  جمع_کړه_Uncounted(0x80);
+  طالما (دننی_State.بفر_دننه_واټن != 56)
+    جمع_کړه_Uncounted(0x00);
 
   // Append length in the last 8 bytes
-  addUncounted(0); // We're only using 32 bit lengths
-  addUncounted(0); // But SHA-1 supports 64 bit lengths
-  addUncounted(0); // So zero pad the top bits
-  addUncounted(InternalState.ByteCount >> 29); // Shifting to multiply by 8
-  addUncounted(InternalState.ByteCount >>
+  جمع_کړه_Uncounted(0); // We're only using 32 bit lengths
+  جمع_کړه_Uncounted(0); // But SHA-1 supports 64 bit lengths
+  جمع_کړه_Uncounted(0); // So zero pad the top bits
+  جمع_کړه_Uncounted(دننی_State.Byte_شمېر >> 29); // Shifting to multiply by 8
+  جمع_کړه_Uncounted(دننی_State.Byte_شمېر >>
                21); // as SHA-1 supports bitstreams as well as
-  addUncounted(InternalState.ByteCount >> 13); // byte.
-  addUncounted(InternalState.ByteCount >> 5);
-  addUncounted(InternalState.ByteCount << 3);
+  جمع_کړه_Uncounted(دننی_State.Byte_شمېر >> 13); // byte.
+  جمع_کړه_Uncounted(دننی_State.Byte_شمېر >> 5);
+  جمع_کړه_Uncounted(دننی_State.Byte_شمېر << 3);
 }
 
-void SHA1::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
+فراغ SHA1::final(std::array<uint32_t, HASH_اوږدتیا / 4> &Hash_پایله) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  إذا constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 5; i++) {
-      HashResult[i] = InternalState.State[i];
+    لكل (صحيح i = 0; i < 5; i++) {
+      Hash_پایله[i] = دننی_State.State[i];
     }
-  } else {
+  } وإلا {
     // Swap byte order back
-    for (int i = 0; i < 5; i++) {
-      HashResult[i] = llvm::byteswap(InternalState.State[i]);
+    لكل (صحيح i = 0; i < 5; i++) {
+      Hash_پایله[i] = llvm::byteswap(دننی_State.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 20> SHA1::final() {
-  union {
-    std::array<uint32_t, HASH_LENGTH / 4> HashResult;
-    std::array<uint8_t, HASH_LENGTH> ReturnResult;
+  اتحاد {
+    std::array<uint32_t, HASH_اوږدتیا / 4> Hash_پایله;
+    std::array<uint8_t, HASH_اوږدتیا> Return_پایله;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
-  final(HashResult);
-  return ReturnResult;
+  static_assert(حجم(Hash_پایله) == حجم(Return_پایله));
+  final(Hash_پایله);
+  أرجع Return_پایله;
 }
 
-std::array<uint8_t, 20> SHA1::result() {
-  auto StateToRestore = InternalState;
+std::array<uint8_t, 20> SHA1::پایله_2() {
+  خپلکاری State_منزل_Restore = دننی_State;
 
-  auto Hash = final();
+  خپلکاری Hash = final();
 
   // Restore the state
-  InternalState = StateToRestore;
+  دننی_State = State_منزل_Restore;
 
   // Return pointer to hash (20 characters)
-  return Hash;
+  أرجع Hash;
 }
 
-std::array<uint8_t, 20> SHA1::hash(ArrayRef<uint8_t> Data) {
+std::array<uint8_t, 20> SHA1::hash(ArrayRef<uint8_t> معلومات_2) {
   SHA1 Hash;
-  Hash.update(Data);
-  return Hash.final();
+  Hash.update(معلومات_2);
+  أرجع Hash.final();
 }

@@ -6,99 +6,99 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamWriter.h"
+#ضمن "llvm/Support/BinaryStreamWriter.h"
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/BinaryStreamReader.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/BinaryStreamReader.h"
+#ضمن "llvm/Support/BinaryStreamRef.h"
+#ضمن "llvm/Support/LEB128.h"
 
-using namespace llvm;
+کارول نطاق llvm;
 
-BinaryStreamWriter::BinaryStreamWriter(WritableBinaryStreamRef Ref)
-    : Stream(Ref) {}
+دوګونی_بهیر_Writer::دوګونی_بهیر_Writer(Writable_دوګونی_بهیر_Ref Ref)
+    : بهیر(Ref) {}
 
-BinaryStreamWriter::BinaryStreamWriter(WritableBinaryStream &Stream)
-    : Stream(Stream) {}
+دوګونی_بهیر_Writer::دوګونی_بهیر_Writer(Writable_دوګونی_بهیر &بهیر)
+    : بهیر(بهیر) {}
 
-BinaryStreamWriter::BinaryStreamWriter(MutableArrayRef<uint8_t> Data,
+دوګونی_بهیر_Writer::دوګونی_بهیر_Writer(MutableArrayRef<uint8_t> معلومات_2,
                                        llvm::endianness Endian)
-    : Stream(Data, Endian) {}
+    : بهیر(معلومات_2, Endian) {}
 
-Error BinaryStreamWriter::writeBytes(ArrayRef<uint8_t> Buffer) {
-  if (auto EC = Stream.writeBytes(Offset, Buffer))
-    return EC;
-  Offset += Buffer.size();
-  return Error::success();
+Error دوګونی_بهیر_Writer::write_بایټونه(ArrayRef<uint8_t> بفر) {
+  إذا (خپلکاری EC = بهیر.write_بایټونه(دننه_واټن, بفر))
+    أرجع EC;
+  دننه_واټن += بفر.اندازه_2();
+  أرجع Error::success();
 }
 
-Error BinaryStreamWriter::writeULEB128(uint64_t Value) {
-  uint8_t EncodedBytes[10] = {0};
-  unsigned Size = encodeULEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+Error دوګونی_بهیر_Writer::writeULEB128(uint64_t ارزښت) {
+  uint8_t Encoded_بایټونه[10] = {0};
+  بینښه اندازه = encodeULEB128(ارزښت, &Encoded_بایټونه[0]);
+  أرجع write_بایټونه({Encoded_بایټونه, اندازه});
 }
 
-Error BinaryStreamWriter::writeSLEB128(int64_t Value) {
-  uint8_t EncodedBytes[10] = {0};
-  unsigned Size = encodeSLEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+Error دوګونی_بهیر_Writer::writeSLEB128(int64_t ارزښت) {
+  uint8_t Encoded_بایټونه[10] = {0};
+  بینښه اندازه = encodeSLEB128(ارزښت, &Encoded_بایټونه[0]);
+  أرجع write_بایټونه({Encoded_بایټونه, اندازه});
 }
 
-Error BinaryStreamWriter::writeCString(StringRef Str) {
-  if (auto EC = writeFixedString(Str))
-    return EC;
-  if (auto EC = writeObject('\0'))
-    return EC;
+Error دوګونی_بهیر_Writer::writeCString(StringRef Str) {
+  إذا (خپلکاری EC = writeFixedString(Str))
+    أرجع EC;
+  إذا (خپلکاری EC = writeObject('\0'))
+    أرجع EC;
 
-  return Error::success();
+  أرجع Error::success();
 }
 
-Error BinaryStreamWriter::writeFixedString(StringRef Str) {
+Error دوګونی_بهیر_Writer::writeFixedString(StringRef Str) {
 
-  return writeBytes(arrayRefFromStringRef(Str));
+  أرجع write_بایټونه(arrayRefFromStringRef(Str));
 }
 
-Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref) {
-  return writeStreamRef(Ref, Ref.getLength());
+Error دوګونی_بهیر_Writer::write_بهیر_Ref(دوګونی_بهیر_Ref Ref) {
+  أرجع write_بهیر_Ref(Ref, Ref.get_اوږدتیا());
 }
 
-Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref, uint64_t Length) {
-  BinaryStreamReader SrcReader(Ref.slice(0, Length));
+Error دوګونی_بهیر_Writer::write_بهیر_Ref(دوګونی_بهیر_Ref Ref, uint64_t اوږدتیا) {
+  دوګونی_بهیر_Reader SrcReader(Ref.ټوټه(0, اوږدتیا));
   // This is a bit tricky.  If we just call readBytes, we are requiring that it
   // return us the entire stream as a contiguous buffer.  There is no guarantee
   // this can be satisfied by returning a reference straight from the buffer, as
   // an implementation may not store all data in a single contiguous buffer.  So
   // we iterate over each contiguous chunk, writing each one in succession.
-  while (SrcReader.bytesRemaining() > 0) {
+  طالما (SrcReader.بایټونه_پاتې_شوی() > 0) {
     ArrayRef<uint8_t> Chunk;
-    if (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
-      return EC;
-    if (auto EC = writeBytes(Chunk))
-      return EC;
+    إذا (خپلکاری EC = SrcReader.readLongestContiguousChunk(Chunk))
+      أرجع EC;
+    إذا (خپلکاری EC = write_بایټونه(Chunk))
+      أرجع EC;
   }
-  return Error::success();
+  أرجع Error::success();
 }
 
-std::pair<BinaryStreamWriter, BinaryStreamWriter>
-BinaryStreamWriter::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+std::pair<دوګونی_بهیر_Writer, دوګونی_بهیر_Writer>
+دوګونی_بهیر_Writer::وېشل(uint64_t Off) ثابت {
+  أكد(get_اوږدتیا() >= Off);
 
-  WritableBinaryStreamRef First = Stream.drop_front(Offset);
+  Writable_دوګونی_بهیر_Ref لومړی = بهیر.drop_front(دننه_واټن);
 
-  WritableBinaryStreamRef Second = First.drop_front(Off);
-  First = First.keep_front(Off);
-  BinaryStreamWriter W1{First};
-  BinaryStreamWriter W2{Second};
-  return {W1, W2};
+  Writable_دوګونی_بهیر_Ref دوهم = لومړی.drop_front(Off);
+  لومړی = لومړی.keep_front(Off);
+  دوګونی_بهیر_Writer W1{لومړی};
+  دوګونی_بهیر_Writer W2{دوهم};
+  أرجع {W1, W2};
 }
 
-Error BinaryStreamWriter::padToAlignment(uint32_t Align) {
-  uint64_t NewOffset = alignTo(Offset, Align);
-  const uint64_t ZerosSize = 64;
-  static constexpr char Zeros[ZerosSize] = {};
-  while (Offset < NewOffset)
-    if (auto E = writeArray(
-            ArrayRef<char>(Zeros, std::min(ZerosSize, NewOffset - Offset))))
-      return E;
-  return Error::success();
+Error دوګونی_بهیر_Writer::pad_منزل_Alignment(uint32_t Align) {
+  uint64_t New_دننه_واټن = align_منزل(دننه_واټن, Align);
+  ثابت uint64_t Zeros_اندازه = 64;
+  ساكن constexpr حرف Zeros[Zeros_اندازه] = {};
+  طالما (دننه_واټن < New_دننه_واټن)
+    إذا (خپلکاری E = writeArray(
+            ArrayRef<حرف>(Zeros, std::min(Zeros_اندازه, New_دننه_واټن - دننه_واټن))))
+      أرجع E;
+  أرجع Error::success();
 }

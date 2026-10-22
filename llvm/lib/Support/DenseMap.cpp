@@ -6,53 +6,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/MemAlloc.h"
-#include <cstring>
+#ضمن "llvm/ADT/DenseMap.h"
+#ضمن "llvm/Support/MemAlloc.h"
+#ضمن <cstring>
 
-using namespace llvm;
-using namespace llvm::densemap;
-using namespace llvm::densemap::detail;
+کارول نطاق llvm;
+کارول نطاق llvm::densemap;
+کارول نطاق llvm::densemap::detail;
 
 // A nonzero FixedSize turns the bucket copy into a couple of stores.
-template <size_t FixedSize, bool InlinePtrHash>
-static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
-                       const void *SrcBuckets, const UsedT *SrcUsed,
-                       unsigned SrcNumBuckets, size_t RuntimeSize,
-                       BucketHasher Hasher) {
-  const size_t BucketSize = FixedSize ? FixedSize : RuntimeSize;
-  char *Dst = static_cast<char *>(DstBuckets);
-  const char *Src = static_cast<const char *>(SrcBuckets);
-  forEachUsed(SrcUsed, SrcNumBuckets, [&](unsigned I) {
-    const char *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
-    unsigned Hash;
-    if constexpr (InlinePtrHash) {
-      void *Key;
-      std::memcpy(&Key, SrcBucket, sizeof(Key));
-      Hash = DenseMapInfo<void *>::getHashValue(Key);
-    } else {
-      Hash = Hasher(SrcBucket);
+کينډۍ <size_t Fixed_اندازه, منطقي InlinePtrHash>
+ساكن فراغ rehashLoop(فراغ *DstBuckets, کارول_شوی_T *Dst_کارول_شوی, بینښه ماسک,
+                       ثابت فراغ *SrcBuckets, ثابت کارول_شوی_T *Src_کارول_شوی,
+                       بینښه Src_عدد_Buckets, size_t Runtime_اندازه,
+                       لوښی_Hasher Hasher) {
+  ثابت size_t لوښی_اندازه = Fixed_اندازه ? Fixed_اندازه : Runtime_اندازه;
+  حرف *Dst = static_cast<حرف *>(DstBuckets);
+  ثابت حرف *Src = static_cast<ثابت حرف *>(SrcBuckets);
+  for_Each_کارول_شوی(Src_کارول_شوی, Src_عدد_Buckets, [&](بینښه I) {
+    ثابت حرف *Src_لوښی = Src + static_cast<size_t>(I) * لوښی_اندازه;
+    بینښه Hash;
+    إذا constexpr (InlinePtrHash) {
+      فراغ *کلی;
+      std::حافظه_نقل(&کلی, Src_لوښی, حجم(کلی));
+      Hash = DenseMapInfo<فراغ *>::get_Hash_ارزښت(کلی);
+    } وإلا {
+      Hash = Hasher(Src_لوښی);
     }
-    unsigned BucketNo = Hash & Mask;
-    while (used(DstUsed, BucketNo))
-      BucketNo = (BucketNo + 1) & Mask;
-    std::memcpy(Dst + static_cast<size_t>(BucketNo) * BucketSize, SrcBucket,
-                BucketSize);
-    setUsed(DstUsed, BucketNo);
+    بینښه لوښی_No = Hash & ماسک;
+    طالما (کارول_شوی(Dst_کارول_شوی, لوښی_No))
+      لوښی_No = (لوښی_No + 1) & ماسک;
+    std::حافظه_نقل(Dst + static_cast<size_t>(لوښی_No) * لوښی_اندازه, Src_لوښی,
+                لوښی_اندازه);
+    سېټ_کارول_شوی(Dst_کارول_شوی, لوښی_No);
   });
 }
 
-template <bool InlinePtrHash>
-static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
-                         const void *Src, const UsedT *SrcUsed,
-                         unsigned SrcNumBuckets, size_t BucketSize,
-                         BucketHasher Hasher) {
+کينډۍ <منطقي InlinePtrHash>
+ساكن فراغ rehash_By_اندازه(فراغ *Dst, کارول_شوی_T *Dst_کارول_شوی, بینښه ماسک,
+                         ثابت فراغ *Src, ثابت کارول_شوی_T *Src_کارول_شوی,
+                         بینښه Src_عدد_Buckets, size_t لوښی_اندازه,
+                         لوښی_Hasher Hasher) {
   // The bucket sizes of 95% of the grow instantiations in an LLVM build.
-  switch (BucketSize) {
-#define REHASH_CASE(N)                                                         \
-  case N:                                                                      \
-    return rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
-                                        SrcNumBuckets, BucketSize, Hasher);
+  بدل (لوښی_اندازه) {
+#تعریف_کړه REHASH_CASE(N)                                                         \
+  حالة N:                                                                      \
+    أرجع rehashLoop<N, InlinePtrHash>(Dst, Dst_کارول_شوی, ماسک, Src, Src_کارول_شوی,      \
+                                        Src_عدد_Buckets, لوښی_اندازه, Hasher);
     REHASH_CASE(4)
     REHASH_CASE(8)
     REHASH_CASE(12)
@@ -61,41 +61,41 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
     REHASH_CASE(32)
     REHASH_CASE(40)
     REHASH_CASE(48)
-#undef REHASH_CASE
-  default:
-    return rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
-                                        SrcNumBuckets, BucketSize, Hasher);
+#تعریف_لغوه REHASH_CASE
+  افتراضي:
+    أرجع rehashLoop<0, InlinePtrHash>(Dst, Dst_کارول_شوی, ماسک, Src, Src_کارول_شوی,
+                                        Src_عدد_Buckets, لوښی_اندازه, Hasher);
   }
 }
 
-void densemap::detail::rehashRelocatable(void *Dst, UsedT *DstUsed,
-                                         unsigned DstNumBuckets,
-                                         const void *Src, const UsedT *SrcUsed,
-                                         unsigned SrcNumBuckets,
-                                         size_t BucketSize,
-                                         BucketHasher Hasher) {
-  const unsigned Mask = DstNumBuckets - 1;
-  if (!Hasher)
-    return rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
-                              BucketSize, Hasher);
-  return rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
-                             BucketSize, Hasher);
+فراغ densemap::detail::rehashRelocatable(فراغ *Dst, کارول_شوی_T *Dst_کارول_شوی,
+                                         بینښه Dst_عدد_Buckets,
+                                         ثابت فراغ *Src, ثابت کارول_شوی_T *Src_کارول_شوی,
+                                         بینښه Src_عدد_Buckets,
+                                         size_t لوښی_اندازه,
+                                         لوښی_Hasher Hasher) {
+  ثابت بینښه ماسک = Dst_عدد_Buckets - 1;
+  إذا (!Hasher)
+    أرجع rehash_By_اندازه<ریښتیا>(Dst, Dst_کارول_شوی, ماسک, Src, Src_کارول_شوی, Src_عدد_Buckets,
+                              لوښی_اندازه, Hasher);
+  أرجع rehash_By_اندازه<خطأ>(Dst, Dst_کارول_شوی, ماسک, Src, Src_کارول_شوی, Src_عدد_Buckets,
+                             لوښی_اندازه, Hasher);
 }
 
-void *densemap::detail::growRelocatable(void *OldBuckets, const UsedT *OldUsed,
-                                        unsigned OldNumBuckets,
-                                        unsigned NewNumBuckets,
-                                        size_t BucketSize, size_t Align,
-                                        BucketHasher Hasher, bool FreeOld) {
-  void *Storage = allocate_buffer(allocBytes(BucketSize, NewNumBuckets), Align);
-  UsedT *NewUsed = usedFor(Storage, BucketSize, NewNumBuckets);
-  clearUsed(NewUsed, NewNumBuckets);
-  if (OldNumBuckets) {
-    rehashRelocatable(Storage, NewUsed, NewNumBuckets, OldBuckets, OldUsed,
-                      OldNumBuckets, BucketSize, Hasher);
-    if (FreeOld)
-      deallocate_buffer(OldBuckets, allocBytes(BucketSize, OldNumBuckets),
+فراغ *densemap::detail::growRelocatable(فراغ *OldBuckets, ثابت کارول_شوی_T *Old_کارول_شوی,
+                                        بینښه Old_عدد_Buckets,
+                                        بینښه New_عدد_Buckets,
+                                        size_t لوښی_اندازه, size_t Align,
+                                        لوښی_Hasher Hasher, منطقي FreeOld) {
+  فراغ *Storage = allocate_بفر(alloc_بایټونه(لوښی_اندازه, New_عدد_Buckets), Align);
+  کارول_شوی_T *New_کارول_شوی = کارول_شوی_For(Storage, لوښی_اندازه, New_عدد_Buckets);
+  clear_کارول_شوی(New_کارول_شوی, New_عدد_Buckets);
+  إذا (Old_عدد_Buckets) {
+    rehashRelocatable(Storage, New_کارول_شوی, New_عدد_Buckets, OldBuckets, Old_کارول_شوی,
+                      Old_عدد_Buckets, لوښی_اندازه, Hasher);
+    إذا (FreeOld)
+      deallocate_بفر(OldBuckets, alloc_بایټونه(لوښی_اندازه, Old_عدد_Buckets),
                         Align);
   }
-  return Storage;
+  أرجع Storage;
 }

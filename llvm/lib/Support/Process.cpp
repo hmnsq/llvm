@@ -10,20 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Process.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/CrashRecoveryContext.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/Path.h"
 
-#include <optional>
-#include <stdlib.h> // for _Exit
+#ضمن <optional>
+#ضمن <stdlib.h> // for _Exit
 
-using namespace llvm;
-using namespace sys;
+کارول نطاق llvm;
+کارول نطاق sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
@@ -31,45 +31,45 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+Process::پیدا_کړه_دننه_Env_لار(StringRef EnvName, StringRef FileName, حرف Separator) {
+  أرجع پیدا_کړه_دننه_Env_لار(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
-                       ArrayRef<std::string> IgnoreList, char Separator) {
-  assert(!path::is_absolute(FileName));
-  std::optional<std::string> FoundPath;
-  std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+Process::پیدا_کړه_دننه_Env_لار(StringRef EnvName, StringRef FileName,
+                       ArrayRef<std::string> IgnoreList, حرف Separator) {
+  أكد(!لار_2::is_absolute(FileName));
+  std::optional<std::string> وموندل_لار;
+  std::optional<std::string> Opt_لار = Process::GetEnv(EnvName);
+  إذا (!Opt_لار)
+    أرجع وموندل_لار;
 
-  const char EnvPathSeparatorStr[] = {Separator, '\0'};
-  SmallVector<StringRef, 8> Dirs;
-  SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
+  ثابت حرف Env_لار_Separator_Str[] = {Separator, '\0'};
+  Small_ویکټور<StringRef, 8> Dirs;
+  وېشل_String(*Opt_لار, Dirs, Env_لار_Separator_Str);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
-      continue;
+  لكل (StringRef Dir : Dirs) {
+    إذا (Dir.تشه())
+      استمر;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
-      continue;
+    إذا (any_د(IgnoreList, [&](StringRef S) { أرجع fs::equivalent(S, Dir); }))
+      استمر;
 
-    SmallString<128> FilePath(Dir);
-    path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
-      FoundPath = std::string(FilePath);
-      break;
+    SmallString<128> File_لار(Dir);
+    لار_2::append(File_لار, FileName);
+    إذا (fs::exists(Twine(File_لار))) {
+      وموندل_لار = std::string(File_لار);
+      اكسر;
     }
   }
 
-  return FoundPath;
+  أرجع وموندل_لار;
 }
 
 // clang-format off
-#define COLOR(FGBG, CODE, BOLD) "\033[0;" BOLD FGBG CODE "m"
+#تعریف_کړه COLOR(FGBG, کوډ_3, BOLD) "\033[0;" BOLD FGBG کوډ_3 "m"
 
-#define ALLCOLORS(FGBG, BRIGHT, BOLD) \
+#تعریف_کړه ALLCOLORS(FGBG, BRIGHT, BOLD) \
   {                           \
     COLOR(FGBG, "0", BOLD),   \
     COLOR(FGBG, "1", BOLD),   \
@@ -95,7 +95,7 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
 //                           |  |   codes
 //                           |  |   |
 //                           |  |   |
-static const char colorcodes[2][2][16][11] = {
+ساكن ثابت حرف colorcodes[2][2][16][11] = {
     { ALLCOLORS("3", "9", ""), ALLCOLORS("3", "9", "1;"),},
     { ALLCOLORS("4", "10", ""), ALLCOLORS("4", "10", "1;")}
 };
@@ -103,24 +103,24 @@ static const char colorcodes[2][2][16][11] = {
 
 // A CMake option controls wheter we emit core dumps by default. An application
 // may disable core dumps by calling Process::PreventCoreFiles().
-static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
+ساكن منطقي coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+منطقي Process::AreCoreFilesPrevented() { أرجع coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
-    CRC->HandleExit(RetCode);
+[[noreturn]] فراغ Process::Exit(صحيح Ret_کوډ, منطقي NoCleanup) {
+  إذا (CrashRecoveryContext *دوراني_ازموینه = CrashRecoveryContext::GetCurrent())
+    دوراني_ازموینه->HandleExit(Ret_کوډ);
 
-  if (NoCleanup)
-    ExitNoCleanup(RetCode);
-  else
-    ::exit(RetCode);
+  إذا (NoCleanup)
+    ExitNoCleanup(Ret_کوډ);
+  وإلا
+    ::وتل(Ret_کوډ);
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Process.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Process.inc"
-#endif
+#که_تعریف_شوی LLVM_ON_UNIX
+#ضمن "Unix/Process.inc"
+#د_که_پای
+#که_تعریف_شوی _WIN32
+#ضمن "Windows/Process.inc"
+#د_که_پای

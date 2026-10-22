@@ -10,167 +10,167 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileOutputBuffer.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Memory.h"
-#include "llvm/Support/TimeProfiler.h"
-#include <system_error>
+#ضمن "llvm/Support/FileOutputBuffer.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/Memory.h"
+#ضمن "llvm/Support/TimeProfiler.h"
+#ضمن <system_error>
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
+#إذا !defined(_MSC_VER) && !defined(__MINGW32__)
+#ضمن <unistd.h>
+#وإلا
+#ضمن <io.h>
+#د_که_پای
 
-using namespace llvm;
-using namespace llvm::sys;
+کارول نطاق llvm;
+کارول نطاق llvm::sys;
 
-namespace {
+نطاق {
 // A FileOutputBuffer which creates a temporary file in the same directory
 // as the final output file. The final output file is atomically replaced
 // with the temporary file on commit().
-class OnDiskBuffer : public FileOutputBuffer {
-public:
-  OnDiskBuffer(StringRef Path, fs::TempFile Temp, fs::mapped_file_region Buf)
-      : FileOutputBuffer(Path), Buffer(std::move(Buf)), Temp(std::move(Temp)) {}
+صنف On_Disk_بفر : عام File_Output_بفر {
+عام:
+  On_Disk_بفر(StringRef لار, fs::لنډمهاله_File لنډمهاله, fs::mapped_file_region Buf)
+      : File_Output_بفر(لار), بفر(std::move(Buf)), لنډمهاله(std::move(لنډمهاله)) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.data(); }
+  uint8_t *get_بفر_پیل() ثابت override { أرجع (uint8_t *)بفر.معلومات(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.data() + Buffer.size();
+  uint8_t *get_بفر_پای_ټکی() ثابت override {
+    أرجع (uint8_t *)بفر.معلومات() + بفر.اندازه_2();
   }
 
-  size_t getBufferSize() const override { return Buffer.size(); }
+  size_t get_بفر_اندازه() ثابت override { أرجع بفر.اندازه_2(); }
 
   Error commit() override {
-    llvm::TimeTraceScope timeScope("Commit buffer to disk");
+    llvm::وخت_Trace_Scope وخت_Scope("Commit buffer to disk");
 
     // Unmap buffer, letting OS flush dirty pages to file on disk.
-    Buffer.unmap();
+    بفر.unmap();
 
     // Atomically replace the existing file with the new one.
-    return Temp.keep(FinalPath);
+    أرجع لنډمهاله.keep(Final_لار);
   }
 
-  ~OnDiskBuffer() override {
+  ~On_Disk_بفر() override {
     // Close the mapping before deleting the temp file, so that the removal
     // succeeds.
-    Buffer.unmap();
-    consumeError(Temp.discard());
+    بفر.unmap();
+    consumeError(لنډمهاله.discard());
   }
 
-  void discard() override {
+  فراغ discard() override {
     // Delete the temp file if it still was open, but keeping the mapping
     // active.
-    consumeError(Temp.discard());
+    consumeError(لنډمهاله.discard());
   }
 
-private:
-  fs::mapped_file_region Buffer;
-  fs::TempFile Temp;
+خاص:
+  fs::mapped_file_region بفر;
+  fs::لنډمهاله_File لنډمهاله;
 };
 
 // A FileOutputBuffer which keeps data in memory and writes to the final
 // output file on commit(). This is used only when we cannot use OnDiskBuffer.
-class InMemoryBuffer : public FileOutputBuffer {
-public:
-  InMemoryBuffer(StringRef Path, MemoryBlock Buf, std::size_t BufSize,
-                 unsigned Mode)
-      : FileOutputBuffer(Path), Buffer(Buf), BufferSize(BufSize),
-        Mode(Mode) {}
+صنف دننه_حافظه_بفر : عام File_Output_بفر {
+عام:
+  دننه_حافظه_بفر(StringRef لار, حافظه_بلاک Buf, std::size_t Buf_اندازه,
+                 بینښه ډېرپېښ)
+      : File_Output_بفر(لار), بفر(Buf), بفر_اندازه(Buf_اندازه),
+        ډېرپېښ(ډېرپېښ) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.base(); }
+  uint8_t *get_بفر_پیل() ثابت override { أرجع (uint8_t *)بفر.بنسټ_2(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.base() + BufferSize;
+  uint8_t *get_بفر_پای_ټکی() ثابت override {
+    أرجع (uint8_t *)بفر.بنسټ_2() + بفر_اندازه;
   }
 
-  size_t getBufferSize() const override { return BufferSize; }
+  size_t get_بفر_اندازه() ثابت override { أرجع بفر_اندازه; }
 
   Error commit() override {
-    if (FinalPath == "-") {
-      llvm::outs() << StringRef((const char *)Buffer.base(), BufferSize);
+    إذا (Final_لار == "-") {
+      llvm::outs() << StringRef((ثابت حرف *)بفر.بنسټ_2(), بفر_اندازه);
       llvm::outs().flush();
-      return Error::success();
+      أرجع Error::success();
     }
 
-    using namespace sys::fs;
-    int FD;
-    std::error_code EC;
-    if (auto EC =
-            openFileForWrite(FinalPath, FD, CD_CreateAlways, OF_Delete, Mode))
-      return errorCodeToError(EC);
-    raw_fd_ostream OS(FD, /*shouldClose=*/true, /*unbuffered=*/true);
-    OS << StringRef((const char *)Buffer.base(), BufferSize);
-    return Error::success();
+    کارول نطاق sys::fs;
+    صحيح FD;
+    std::error_کوډ EC;
+    إذا (خپلکاری EC =
+            openFileForWrite(Final_لار, FD, CD_CreateAlways, د_Delete, ډېرپېښ))
+      أرجع error_کوډ_منزل_Error(EC);
+    raw_fd_ostream OS(FD, /*shouldClose=*/ریښتیا, /*unbuffered=*/ریښتیا);
+    OS << StringRef((ثابت حرف *)بفر.بنسټ_2(), بفر_اندازه);
+    أرجع Error::success();
   }
 
-private:
+خاص:
   // Buffer may actually contain a larger memory block than BufferSize
-  OwningMemoryBlock Buffer;
-  size_t BufferSize;
-  unsigned Mode;
+  Owning_حافظه_بلاک بفر;
+  size_t بفر_اندازه;
+  بینښه ډېرپېښ;
 };
 } // namespace
 
-static Expected<std::unique_ptr<InMemoryBuffer>>
-createInMemoryBuffer(StringRef Path, size_t Size, unsigned Mode) {
-  std::error_code EC;
-  MemoryBlock MB = Memory::allocateMappedMemory(
-      Size, nullptr, sys::Memory::MF_READ | sys::Memory::MF_WRITE, EC);
-  if (EC)
-    return errorCodeToError(EC);
-  return std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
+ساكن Expected<std::unique_ptr<دننه_حافظه_بفر>>
+create_دننه_حافظه_بفر(StringRef لار, size_t اندازه, بینښه ډېرپېښ) {
+  std::error_کوډ EC;
+  حافظه_بلاک MB = حافظه_2::allocate_Mapped_حافظه(
+      اندازه, تش_اشاره, sys::حافظه_2::MF_READ | sys::حافظه_2::MF_WRITE, EC);
+  إذا (EC)
+    أرجع error_کوډ_منزل_Error(EC);
+  أرجع std::make_unique<دننه_حافظه_بفر>(لار, MB, اندازه, ډېرپېښ);
 }
 
-static Expected<std::unique_ptr<FileOutputBuffer>>
-createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
-  Expected<fs::TempFile> FileOrErr =
-      fs::TempFile::create(Path + ".tmp%%%%%%%", Mode);
-  if (!FileOrErr)
-    return FileOrErr.takeError();
-  fs::TempFile File = std::move(*FileOrErr);
+ساكن Expected<std::unique_ptr<File_Output_بفر>>
+create_On_Disk_بفر(StringRef لار, size_t اندازه, بینښه ډېرپېښ) {
+  Expected<fs::لنډمهاله_File> FileOrErr =
+      fs::لنډمهاله_File::create(لار + ".tmp%%%%%%%", ډېرپېښ);
+  إذا (!FileOrErr)
+    أرجع FileOrErr.takeError();
+  fs::لنډمهاله_File File = std::move(*FileOrErr);
 
-  if (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
+  إذا (خپلکاری EC = fs::resize_file_before_mapping_readwrite(File.FD, اندازه)) {
     consumeError(File.discard());
-    return errorCodeToError(EC);
+    أرجع error_کوډ_منزل_Error(EC);
   }
 
   // Mmap it.
-  std::error_code EC;
+  std::error_کوډ EC;
   fs::mapped_file_region MappedFile =
       fs::mapped_file_region(fs::convertFDToNativeFile(File.FD),
-                             fs::mapped_file_region::readwrite, Size, 0, EC);
+                             fs::mapped_file_region::readwrite, اندازه, 0, EC);
 
   // mmap(2) can fail if the underlying filesystem does not support it.
   // If that happens, we fall back to in-memory buffer as the last resort.
-  if (EC) {
+  إذا (EC) {
     consumeError(File.discard());
-    return createInMemoryBuffer(Path, Size, Mode);
+    أرجع create_دننه_حافظه_بفر(لار, اندازه, ډېرپېښ);
   }
 
-  return std::make_unique<OnDiskBuffer>(Path, std::move(File),
+  أرجع std::make_unique<On_Disk_بفر>(لار, std::move(File),
                                          std::move(MappedFile));
 }
 
 // Create an instance of FileOutputBuffer.
-Expected<std::unique_ptr<FileOutputBuffer>>
-FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
+Expected<std::unique_ptr<File_Output_بفر>>
+File_Output_بفر::create(StringRef لار, size_t اندازه, بینښه Flags) {
   // Handle "-" as stdout just like llvm::raw_ostream does.
-  if (Path == "-")
-    return createInMemoryBuffer("-", Size, /*Mode=*/0);
+  إذا (لار == "-")
+    أرجع create_دننه_حافظه_بفر("-", اندازه, /*Mode=*/0);
 
-  unsigned Mode = fs::all_read | fs::all_write;
-  if (Flags & F_executable)
-    Mode |= fs::all_exe;
+  بینښه ډېرپېښ = fs::all_read | fs::all_write;
+  إذا (Flags & F_executable)
+    ډېرپېښ |= fs::all_exe;
 
   // If Size is zero, don't use mmap which will fail with EINVAL.
-  if (Size == 0)
-    return createInMemoryBuffer(Path, Size, Mode);
+  إذا (اندازه == 0)
+    أرجع create_دننه_حافظه_بفر(لار, اندازه, ډېرپېښ);
 
-  fs::file_status Stat;
-  fs::status(Path, Stat);
+  fs::file_حالت Stat;
+  fs::حالت_2(لار, Stat);
 
   // Usually, we want to create OnDiskBuffer to create a temporary file in
   // the same directory as the destination file and atomically replaces it
@@ -180,17 +180,17 @@ FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // use rename (e.g. we don't want to replace /dev/null with a regular
   // file.) If that's the case, we create an in-memory buffer, open the
   // destination file and write to it on commit().
-  switch (Stat.type()) {
-  case fs::file_type::directory_file:
-    return errorCodeToError(errc::is_a_directory);
-  case fs::file_type::regular_file:
-  case fs::file_type::file_not_found:
-  case fs::file_type::status_error:
-    if (Flags & F_mmap)
-      return createInMemoryBuffer(Path, Size, Mode);
-    else
-      return createOnDiskBuffer(Path, Size, Mode);
-  default:
-    return createInMemoryBuffer(Path, Size, Mode);
+  بدل (Stat.type()) {
+  حالة fs::file_type::directory_file:
+    أرجع error_کوډ_منزل_Error(errc::is_a_directory);
+  حالة fs::file_type::regular_file:
+  حالة fs::file_type::file_not_وموندل:
+  حالة fs::file_type::حالت_error:
+    إذا (Flags & F_mmap)
+      أرجع create_دننه_حافظه_بفر(لار, اندازه, ډېرپېښ);
+    وإلا
+      أرجع create_On_Disk_بفر(لار, اندازه, ډېرپېښ);
+  افتراضي:
+    أرجع create_دننه_حافظه_بفر(لار, اندازه, ډېرپېښ);
   }
 }

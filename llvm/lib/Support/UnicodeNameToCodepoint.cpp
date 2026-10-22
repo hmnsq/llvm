@@ -12,212 +12,212 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Unicode.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/Unicode.h"
 
-namespace llvm {
-namespace sys {
-namespace unicode {
+نطاق llvm {
+نطاق sys {
+نطاق unicode {
 
-extern const char *const UnicodeNameToCodepointDict;
-extern const uint8_t *const UnicodeNameToCodepointIndex;
-extern const std::size_t UnicodeNameToCodepointIndexSize;
-extern const std::size_t UnicodeNameToCodepointLargestNameSize;
+خارجي ثابت حرف *ثابت Unicode_Name_منزل_Codepoint_Dict;
+خارجي ثابت uint8_t *ثابت Unicode_Name_منزل_Codepoint_شاخص;
+خارجي ثابت std::size_t Unicode_Name_منزل_Codepoint_شاخص_اندازه;
+خارجي ثابت std::size_t Unicode_Name_منزل_Codepoint_تر_ټولو_لوی_Name_اندازه;
 
-using BufferType = SmallString<64>;
+کارول بفر_Type = SmallString<64>;
 
-struct Node {
-  bool IsRoot = false;
-  char32_t Value = 0xFFFFFFFF;
-  uint32_t ChildrenOffset = 0;
-  bool HasSibling = false;
-  uint32_t Size = 0;
+بنية غوټه {
+  منطقي Is_ریښه = خطأ;
+  char32_t ارزښت = 0xFFFFFFFF;
+  uint32_t Children_دننه_واټن = 0;
+  منطقي HasSibling = خطأ;
+  uint32_t اندازه = 0;
   StringRef Name;
-  const Node *Parent = nullptr;
+  ثابت غوټه *پلار_2 = تش_اشاره;
 
-  constexpr bool isValid() const {
-    return !Name.empty() || Value == 0xFFFFFFFF;
+  constexpr منطقي isValid() ثابت {
+    أرجع !Name.تشه() || ارزښت == 0xFFFFFFFF;
   }
-  constexpr bool hasChildren() const { return ChildrenOffset != 0 || IsRoot; }
+  constexpr منطقي hasChildren() ثابت { أرجع Children_دننه_واټن != 0 || Is_ریښه; }
 
-  std::string fullName() const {
+  std::string ډک_Name() ثابت {
     std::string S;
     // Reserve enough space for most unicode code points.
     // The chosen value represent the 99th percentile of name size as of
     // Unicode 15.0.
     S.reserve(46);
-    const Node *N = this;
-    while (N) {
-      std::reverse_copy(N->Name.begin(), N->Name.end(), std::back_inserter(S));
-      N = N->Parent;
+    ثابت غوټه *N = هذا;
+    طالما (N) {
+      std::سرچپه_copy(N->Name.begin(), N->Name.پای_ټکی(), std::شا_inserter(S));
+      N = N->پلار_2;
     }
-    std::reverse(S.begin(), S.end());
-    return S;
+    std::سرچپه(S.begin(), S.پای_ټکی());
+    أرجع S;
   }
 };
 
-static Node createRoot() {
-  Node N;
-  N.IsRoot = true;
-  N.ChildrenOffset = 1;
-  N.Size = 1;
-  return N;
+ساكن غوټه create_ریښه() {
+  غوټه N;
+  N.Is_ریښه = ریښتیا;
+  N.Children_دننه_واټن = 1;
+  N.اندازه = 1;
+  أرجع N;
 }
 
-static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
-  if (Offset == 0)
-    return createRoot();
+ساكن غوټه read_غوټه(uint32_t دننه_واټن, ثابت غوټه *پلار_2 = تش_اشاره) {
+  إذا (دننه_واټن == 0)
+    أرجع create_ریښه();
 
-  uint32_t Origin = Offset;
-  Node N;
-  N.Parent = Parent;
-  uint8_t NameInfo = UnicodeNameToCodepointIndex[Offset++];
-  if (Offset + 6 >= UnicodeNameToCodepointIndexSize)
-    return N;
+  uint32_t Origin = دننه_واټن;
+  غوټه N;
+  N.پلار_2 = پلار_2;
+  uint8_t NameInfo = Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
+  إذا (دننه_واټن + 6 >= Unicode_Name_منزل_Codepoint_شاخص_اندازه)
+    أرجع N;
 
-  bool LongName = NameInfo & 0x40;
-  bool HasValue = NameInfo & 0x80;
-  std::size_t Size = NameInfo & ~0xC0;
-  if (LongName) {
-    uint32_t NameOffset = (UnicodeNameToCodepointIndex[Offset++] << 8);
-    NameOffset |= UnicodeNameToCodepointIndex[Offset++];
-    N.Name = StringRef(UnicodeNameToCodepointDict + NameOffset, Size);
-  } else {
-    N.Name = StringRef(UnicodeNameToCodepointDict + Size, 1);
+  منطقي LongName = NameInfo & 0x40;
+  منطقي Has_ارزښت = NameInfo & 0x80;
+  std::size_t اندازه = NameInfo & ~0xC0;
+  إذا (LongName) {
+    uint32_t Name_دننه_واټن = (Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++] << 8);
+    Name_دننه_واټن |= Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
+    N.Name = StringRef(Unicode_Name_منزل_Codepoint_Dict + Name_دننه_واټن, اندازه);
+  } وإلا {
+    N.Name = StringRef(Unicode_Name_منزل_Codepoint_Dict + اندازه, 1);
   }
-  if (HasValue) {
-    uint8_t H = UnicodeNameToCodepointIndex[Offset++];
-    uint8_t M = UnicodeNameToCodepointIndex[Offset++];
-    uint8_t L = UnicodeNameToCodepointIndex[Offset++];
-    N.Value = ((H << 16) | (M << 8) | L) >> 3;
+  إذا (Has_ارزښت) {
+    uint8_t H = Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
+    uint8_t M = Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
+    uint8_t L = Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
+    N.ارزښت = ((H << 16) | (M << 8) | L) >> 3;
 
-    bool HasChildren = L & 0x02;
+    منطقي HasChildren = L & 0x02;
     N.HasSibling = L & 0x01;
 
-    if (HasChildren) {
-      N.ChildrenOffset = UnicodeNameToCodepointIndex[Offset++] << 16;
-      N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++] << 8;
-      N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++];
+    إذا (HasChildren) {
+      N.Children_دننه_واټن = Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++] << 16;
+      N.Children_دننه_واټن |= Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++] << 8;
+      N.Children_دننه_واټن |= Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
     }
-  } else {
-    uint8_t H = UnicodeNameToCodepointIndex[Offset++];
+  } وإلا {
+    uint8_t H = Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
     N.HasSibling = H & 0x80;
-    bool HasChildren = H & 0x40;
+    منطقي HasChildren = H & 0x40;
     H &= uint8_t(~0xC0);
-    if (HasChildren) {
-      N.ChildrenOffset = (H << 16);
-      N.ChildrenOffset |=
-          (uint32_t(UnicodeNameToCodepointIndex[Offset++]) << 8);
-      N.ChildrenOffset |= UnicodeNameToCodepointIndex[Offset++];
+    إذا (HasChildren) {
+      N.Children_دننه_واټن = (H << 16);
+      N.Children_دننه_واټن |=
+          (uint32_t(Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++]) << 8);
+      N.Children_دننه_واټن |= Unicode_Name_منزل_Codepoint_شاخص[دننه_واټن++];
     }
   }
-  N.Size = Offset - Origin;
-  return N;
+  N.اندازه = دننه_واټن - Origin;
+  أرجع N;
 }
 
-static bool startsWith(StringRef Name, StringRef Needle, bool Strict,
-                       std::size_t &Consummed, char &PreviousCharInName,
-                       bool IsPrefix = false) {
+ساكن منطقي startsWith(StringRef Name, StringRef Needle, منطقي Strict,
+                       std::size_t &Consummed, حرف &پخوانی_Char_دننه_Name,
+                       منطقي Is_مختاړی = خطأ) {
 
   Consummed = 0;
-  if (Strict) {
-    if (!Name.starts_with(Needle))
-      return false;
-    Consummed = Needle.size();
-    return true;
+  إذا (Strict) {
+    إذا (!Name.starts_with(Needle))
+      أرجع خطأ;
+    Consummed = Needle.اندازه_2();
+    أرجع ریښتیا;
   }
-  if (Needle.empty())
-    return true;
+  إذا (Needle.تشه())
+    أرجع ریښتیا;
 
-  auto NamePos = Name.begin();
-  auto NeedlePos = Needle.begin();
+  خپلکاری NamePos = Name.begin();
+  خپلکاری NeedlePos = Needle.begin();
 
-  char PreviousCharInNameOrigin = PreviousCharInName;
-  char PreviousCharInNeedle = *Needle.begin();
-  auto IgnoreSpaces = [](auto It, auto End, char &PreviousChar,
-                         bool IsPrefix = false) {
-    while (It != End) {
-      const auto Next = std::next(It);
+  حرف پخوانی_Char_دننه_Name_Origin = پخوانی_Char_دننه_Name;
+  حرف پخوانی_Char_دننه_Needle = *Needle.begin();
+  خپلکاری IgnoreSpaces = [](خپلکاری It, خپلکاری پای_ټکی_2, حرف &پخوانی_Char,
+                         منطقي Is_مختاړی = خطأ) {
+    طالما (It != پای_ټکی_2) {
+      ثابت خپلکاری بل_2 = std::بل(It);
       // Ignore spaces, underscore, medial hyphens
       // The generator ensures a needle never ends (or starts) by a medial
       // hyphen https://unicode.org/reports/tr44/#UAX44-LM2.
-      bool Ignore =
+      منطقي Ignore =
           *It == ' ' || *It == '_' ||
-          (*It == '-' && isAlnum(PreviousChar) &&
-           ((Next != End && isAlnum(*Next)) || (Next == End && IsPrefix)));
-      PreviousChar = *It;
-      if (!Ignore)
-        break;
+          (*It == '-' && isAlnum(پخوانی_Char) &&
+           ((بل_2 != پای_ټکی_2 && isAlnum(*بل_2)) || (بل_2 == پای_ټکی_2 && Is_مختاړی)));
+      پخوانی_Char = *It;
+      إذا (!Ignore)
+        اكسر;
       ++It;
     }
-    return It;
+    أرجع It;
   };
 
-  while (true) {
-    NamePos = IgnoreSpaces(NamePos, Name.end(), PreviousCharInName);
+  طالما (ریښتیا) {
+    NamePos = IgnoreSpaces(NamePos, Name.پای_ټکی(), پخوانی_Char_دننه_Name);
     NeedlePos =
-        IgnoreSpaces(NeedlePos, Needle.end(), PreviousCharInNeedle, IsPrefix);
-    if (NeedlePos == Needle.end())
-      break;
-    if (NamePos == Name.end())
-      break;
-    if (toUpper(*NeedlePos) != toUpper(*NamePos))
-      break;
+        IgnoreSpaces(NeedlePos, Needle.پای_ټکی(), پخوانی_Char_دننه_Needle, Is_مختاړی);
+    إذا (NeedlePos == Needle.پای_ټکی())
+      اكسر;
+    إذا (NamePos == Name.پای_ټکی())
+      اكسر;
+    إذا (منزل_پاسنی(*NeedlePos) != منزل_پاسنی(*NamePos))
+      اكسر;
     NeedlePos++;
     NamePos++;
   }
-  Consummed = std::distance(Name.begin(), NamePos);
-  if (NeedlePos != Needle.end()) {
-    PreviousCharInName = PreviousCharInNameOrigin;
+  Consummed = std::واټن(Name.begin(), NamePos);
+  إذا (NeedlePos != Needle.پای_ټکی()) {
+    پخوانی_Char_دننه_Name = پخوانی_Char_دننه_Name_Origin;
   }
-  return NeedlePos == Needle.end();
+  أرجع NeedlePos == Needle.پای_ټکی();
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict,
-            char PreviousCharInName, BufferType &Buffer,
-            const Node *Parent = nullptr) {
-  Node N = readNode(Offset, Parent);
+ساكن std::tuple<غوټه, منطقي, uint32_t>
+compare_غوټه(uint32_t دننه_واټن, StringRef Name, منطقي Strict,
+            حرف پخوانی_Char_دننه_Name, بفر_Type &بفر,
+            ثابت غوټه *پلار_2 = تش_اشاره) {
+  غوټه N = read_غوټه(دننه_واټن, پلار_2);
   std::size_t Consummed = 0;
-  bool DoesStartWith = N.IsRoot || startsWith(Name, N.Name, Strict, Consummed,
-                                              PreviousCharInName);
-  if (!DoesStartWith)
-    return std::make_tuple(N, false, 0);
+  منطقي Does_پیل_With = N.Is_ریښه || startsWith(Name, N.Name, Strict, Consummed,
+                                              پخوانی_Char_دننه_Name);
+  إذا (!Does_پیل_With)
+    أرجع std::make_tuple(N, خطأ, 0);
 
-  if (Name.size() - Consummed == 0 && N.Value != 0xFFFFFFFF)
-    return std::make_tuple(N, true, N.Value);
+  إذا (Name.اندازه_2() - Consummed == 0 && N.ارزښت != 0xFFFFFFFF)
+    أرجع std::make_tuple(N, ریښتیا, N.ارزښت);
 
-  if (N.hasChildren()) {
-    uint32_t ChildOffset = N.ChildrenOffset;
-    for (;;) {
-      Node C;
-      bool Matches;
-      uint32_t Value;
-      std::tie(C, Matches, Value) =
-          compareNode(ChildOffset, Name.substr(Consummed), Strict,
-                      PreviousCharInName, Buffer, &N);
-      if (Matches) {
-        std::reverse_copy(C.Name.begin(), C.Name.end(),
-                          std::back_inserter(Buffer));
-        return std::make_tuple(N, true, Value);
+  إذا (N.hasChildren()) {
+    uint32_t ماشوم_دننه_واټن = N.Children_دننه_واټن;
+    لكل (;;) {
+      غوټه C;
+      منطقي Matches;
+      uint32_t ارزښت;
+      std::tie(C, Matches, ارزښت) =
+          compare_غوټه(ماشوم_دننه_واټن, Name.substr(Consummed), Strict,
+                      پخوانی_Char_دننه_Name, بفر, &N);
+      إذا (Matches) {
+        std::سرچپه_copy(C.Name.begin(), C.Name.پای_ټکی(),
+                          std::شا_inserter(بفر));
+        أرجع std::make_tuple(N, ریښتیا, ارزښت);
       }
-      ChildOffset += C.Size;
-      if (!C.HasSibling)
-        break;
+      ماشوم_دننه_واټن += C.اندازه;
+      إذا (!C.HasSibling)
+        اكسر;
     }
   }
-  return std::make_tuple(N, false, 0);
+  أرجع std::make_tuple(N, خطأ, 0);
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict, BufferType &Buffer) {
-  return compareNode(Offset, Name, Strict, 0, Buffer);
+ساكن std::tuple<غوټه, منطقي, uint32_t>
+compare_غوټه(uint32_t دننه_واټن, StringRef Name, منطقي Strict, بفر_Type &بفر) {
+  أرجع compare_غوټه(دننه_واټن, Name, Strict, 0, بفر);
 }
 
 // clang-format off
-constexpr const char *const HangulSyllables[][3] = {
+constexpr ثابت حرف *ثابت HangulSyllables[][3] = {
     { "G",  "A",   ""   },
     { "GG", "AE",  "G"  },
     { "N",  "YA",  "GG" },
@@ -256,72 +256,72 @@ constexpr uint32_t LCount = 19;
 constexpr uint32_t VCount = 21;
 constexpr uint32_t TCount = 28;
 
-static std::size_t findSyllable(StringRef Name, bool Strict,
-                                char &PreviousInName, int &Pos, int Column) {
-  assert(Column == 0 || Column == 1 || Column == 2);
-  static std::size_t CountPerColumn[] = {LCount, VCount, TCount};
-  int Len = -1;
-  int Prev = PreviousInName;
-  for (std::size_t I = 0; I < CountPerColumn[Column]; I++) {
-    StringRef Syllable(HangulSyllables[I][Column]);
-    if (int(Syllable.size()) <= Len)
-      continue;
+ساكن std::size_t پیدا_کړه_Syllable(StringRef Name, منطقي Strict,
+                                حرف &پخوانی_دننه_Name, صحيح &Pos, صحيح ستنه) {
+  أكد(ستنه == 0 || ستنه == 1 || ستنه == 2);
+  ساكن std::size_t شمېر_فی_ستنه[] = {LCount, VCount, TCount};
+  صحيح Len = -1;
+  صحيح Prev = پخوانی_دننه_Name;
+  لكل (std::size_t I = 0; I < شمېر_فی_ستنه[ستنه]; I++) {
+    StringRef Syllable(HangulSyllables[I][ستنه]);
+    إذا (صحيح(Syllable.اندازه_2()) <= Len)
+      استمر;
     std::size_t Consummed = 0;
-    char PreviousInNameCopy = PreviousInName;
-    bool DoesStartWith =
-        startsWith(Name, Syllable, Strict, Consummed, PreviousInNameCopy);
-    if (!DoesStartWith)
-      continue;
+    حرف پخوانی_دننه_Name_Copy = پخوانی_دننه_Name;
+    منطقي Does_پیل_With =
+        startsWith(Name, Syllable, Strict, Consummed, پخوانی_دننه_Name_Copy);
+    إذا (!Does_پیل_With)
+      استمر;
     Len = Consummed;
     Pos = I;
-    Prev = PreviousInNameCopy;
+    Prev = پخوانی_دننه_Name_Copy;
   }
-  if (Len == -1)
-    return 0;
-  PreviousInName = Prev;
-  return size_t(Len);
+  إذا (Len == -1)
+    أرجع 0;
+  پخوانی_دننه_Name = Prev;
+  أرجع size_t(Len);
 }
 
-static std::optional<char32_t>
-nameToHangulCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
-  Buffer.clear();
+ساكن std::optional<char32_t>
+name_منزل_Hangul_کوډ_ټکی(StringRef Name, منطقي Strict, بفر_Type &بفر) {
+  بفر.clear();
   // Hangul Syllable Decomposition
   std::size_t Consummed = 0;
-  char NameStart = 0;
-  bool DoesStartWith =
-      startsWith(Name, "HANGUL SYLLABLE ", Strict, Consummed, NameStart);
-  if (!DoesStartWith)
-    return std::nullopt;
+  حرف Name_پیل = 0;
+  منطقي Does_پیل_With =
+      startsWith(Name, "HANGUL SYLLABLE ", Strict, Consummed, Name_پیل);
+  إذا (!Does_پیل_With)
+    أرجع std::nullopt;
   Name = Name.substr(Consummed);
-  int L = -1, V = -1, T = -1;
-  Name = Name.substr(findSyllable(Name, Strict, NameStart, L, 0));
-  Name = Name.substr(findSyllable(Name, Strict, NameStart, V, 1));
-  Name = Name.substr(findSyllable(Name, Strict, NameStart, T, 2));
-  if (L != -1 && V != -1 && T != -1 && Name.empty()) {
-    if (!Strict) {
-      Buffer.append("HANGUL SYLLABLE ");
-      if (L != -1)
-        Buffer.append(HangulSyllables[L][0]);
-      if (V != -1)
-        Buffer.append(HangulSyllables[V][1]);
-      if (T != -1)
-        Buffer.append(HangulSyllables[T][2]);
+  صحيح L = -1, V = -1, T = -1;
+  Name = Name.substr(پیدا_کړه_Syllable(Name, Strict, Name_پیل, L, 0));
+  Name = Name.substr(پیدا_کړه_Syllable(Name, Strict, Name_پیل, V, 1));
+  Name = Name.substr(پیدا_کړه_Syllable(Name, Strict, Name_پیل, T, 2));
+  إذا (L != -1 && V != -1 && T != -1 && Name.تشه()) {
+    إذا (!Strict) {
+      بفر.append("HANGUL SYLLABLE ");
+      إذا (L != -1)
+        بفر.append(HangulSyllables[L][0]);
+      إذا (V != -1)
+        بفر.append(HangulSyllables[V][1]);
+      إذا (T != -1)
+        بفر.append(HangulSyllables[T][2]);
     }
-    return SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
+    أرجع SBase + (std::uint32_t(L) * VCount + std::uint32_t(V)) * TCount +
            std::uint32_t(T);
   }
   // Otherwise, it's an illegal syllable name.
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
-struct GeneratedNamesData {
-  StringRef Prefix;
-  uint32_t Start;
-  uint32_t End;
+بنية Generated_نومونه_معلومات {
+  StringRef مختاړی;
+  uint32_t پیل;
+  uint32_t پای_ټکی_2;
 };
 
 // Unicode 18.0 Name Derivation Rule Prefix Strings (extracted/DerivedName.txt)
-static const GeneratedNamesData GeneratedNamesDataTable[] = {
+ساكن ثابت Generated_نومونه_معلومات Generated_نومونه_معلومات_جدول[] = {
     {"CJK UNIFIED IDEOGRAPH-", 0x3400, 0x4DBF},
     {"CJK UNIFIED IDEOGRAPH-", 0x4E00, 0x9FFF},
     {"CJK UNIFIED IDEOGRAPH-", 0x20000, 0x2A6DF},
@@ -346,204 +346,204 @@ static const GeneratedNamesData GeneratedNamesDataTable[] = {
     {"CJK COMPATIBILITY IDEOGRAPH-", 0x2F800, 0x2FA1D},
 };
 
-static std::optional<char32_t>
-nameToGeneratedCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
-  for (auto &&Item : GeneratedNamesDataTable) {
-    Buffer.clear();
+ساكن std::optional<char32_t>
+name_منزل_Generated_کوډ_ټکی(StringRef Name, منطقي Strict, بفر_Type &بفر) {
+  لكل (خپلکاری &&توکی : Generated_نومونه_معلومات_جدول) {
+    بفر.clear();
     std::size_t Consummed = 0;
-    char NameStart = 0;
-    bool DoesStartWith = startsWith(Name, Item.Prefix, Strict, Consummed,
-                                    NameStart, /*IsPrefix=*/true);
-    if (!DoesStartWith)
-      continue;
-    auto Number = Name.substr(Consummed);
-    unsigned long long V = 0;
+    حرف Name_پیل = 0;
+    منطقي Does_پیل_With = startsWith(Name, توکی.مختاړی, Strict, Consummed,
+                                    Name_پیل, /*IsPrefix=*/ریښتیا);
+    إذا (!Does_پیل_With)
+      استمر;
+    خپلکاری شمېره = Name.substr(Consummed);
+    بینښه اوږد اوږد V = 0;
     // Be consistent about mandating upper casing.
-    if (Strict &&
-        llvm::any_of(Number, [](char C) { return C >= 'a' && C <= 'f'; }))
-      return {};
-    if (getAsUnsignedInteger(Number, 16, V) || V < Item.Start || V > Item.End)
-      continue;
-    if (!Strict) {
-      Buffer.append(Item.Prefix);
-      Buffer.append(utohexstr(V, true));
+    إذا (Strict &&
+        llvm::any_د(شمېره, [](حرف C) { أرجع C >= 'a' && C <= 'f'; }))
+      أرجع {};
+    إذا (getAsUnsignedInteger(شمېره, 16, V) || V < توکی.پیل || V > توکی.پای_ټکی_2)
+      استمر;
+    إذا (!Strict) {
+      بفر.append(توکی.مختاړی);
+      بفر.append(utohexstr(V, ریښتیا));
     }
-    return V;
+    أرجع V;
   }
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
-static std::optional<char32_t> nameToCodepoint(StringRef Name, bool Strict,
-                                               BufferType &Buffer) {
-  if (Name.empty())
-    return std::nullopt;
+ساكن std::optional<char32_t> name_منزل_Codepoint(StringRef Name, منطقي Strict,
+                                               بفر_Type &بفر) {
+  إذا (Name.تشه())
+    أرجع std::nullopt;
 
-  std::optional<char32_t> Res = nameToHangulCodePoint(Name, Strict, Buffer);
-  if (!Res)
-    Res = nameToGeneratedCodePoint(Name, Strict, Buffer);
-  if (Res)
-    return *Res;
+  std::optional<char32_t> Res = name_منزل_Hangul_کوډ_ټکی(Name, Strict, بفر);
+  إذا (!Res)
+    Res = name_منزل_Generated_کوډ_ټکی(Name, Strict, بفر);
+  إذا (Res)
+    أرجع *Res;
 
-  Buffer.clear();
-  Node Node;
-  bool Matches;
-  uint32_t Value;
-  std::tie(Node, Matches, Value) = compareNode(0, Name, Strict, Buffer);
-  if (Matches) {
-    std::reverse(Buffer.begin(), Buffer.end());
+  بفر.clear();
+  غوټه غوټه;
+  منطقي Matches;
+  uint32_t ارزښت;
+  std::tie(غوټه, Matches, ارزښت) = compare_غوټه(0, Name, Strict, بفر);
+  إذا (Matches) {
+    std::سرچپه(بفر.begin(), بفر.پای_ټکی());
     // UAX44-LM2. Ignore case, whitespace, underscore ('_'), and all medial
     // hyphens except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
-    if (!Strict && Value == 0x116c && Name.contains_insensitive("O-E")) {
-      Buffer = "HANGUL JUNGSEONG O-E";
-      Value = 0x1180;
+    إذا (!Strict && ارزښت == 0x116c && Name.لري_insensitive("O-E")) {
+      بفر = "HANGUL JUNGSEONG O-E";
+      ارزښت = 0x1180;
     }
-    return Value;
+    أرجع ارزښت;
   }
-  return std::nullopt;
+  أرجع std::nullopt;
 }
 
-std::optional<char32_t> nameToCodepointStrict(StringRef Name) {
+std::optional<char32_t> name_منزل_Codepoint_Strict(StringRef Name) {
 
-  BufferType Buffer;
-  auto Opt = nameToCodepoint(Name, true, Buffer);
-  return Opt;
+  بفر_Type بفر;
+  خپلکاری Opt = name_منزل_Codepoint(Name, ریښتیا, بفر);
+  أرجع Opt;
 }
 
-std::optional<LooseMatchingResult>
-nameToCodepointLooseMatching(StringRef Name) {
-  BufferType Buffer;
-  auto Opt = nameToCodepoint(Name, false, Buffer);
-  if (!Opt)
-    return std::nullopt;
-  return LooseMatchingResult{*Opt, Buffer};
+std::optional<Loose_Matching_پایله>
+name_منزل_Codepoint_Loose_Matching(StringRef Name) {
+  بفر_Type بفر;
+  خپلکاری Opt = name_منزل_Codepoint(Name, خطأ, بفر);
+  إذا (!Opt)
+    أرجع std::nullopt;
+  أرجع Loose_Matching_پایله{*Opt, بفر};
 }
 
 // Find the unicode character whose editing distance to Pattern
 // is shortest, using the Wagner–Fischer algorithm.
-llvm::SmallVector<MatchForCodepointName>
-nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
+llvm::Small_ویکټور<سمون_For_Codepoint_Name>
+تر_ټولو_نږدې_Matches_For_Codepoint_Name(StringRef نمونه, std::size_t Max_Matches_شمېر) {
   // We maintain a fixed size vector of matches,
   // sorted by distance
   // The worst match (with the biggest distance) are discarded when new elements
   // are added.
-  std::size_t LargestEditDistance = 0;
-  llvm::SmallVector<MatchForCodepointName> Matches;
-  Matches.reserve(MaxMatchesCount + 1);
+  std::size_t تر_ټولو_لوی_Edit_واټن = 0;
+  llvm::Small_ویکټور<سمون_For_Codepoint_Name> Matches;
+  Matches.reserve(Max_Matches_شمېر + 1);
 
-  auto Insert = [&](const Node &Node, uint32_t Distance,
-                    char32_t Value) -> bool {
-    if (Distance > LargestEditDistance) {
-      if (Matches.size() == MaxMatchesCount)
-        return false;
-      LargestEditDistance = Distance;
+  خپلکاری ورننباسه_2 = [&](ثابت غوټه &غوټه, uint32_t واټن_2,
+                    char32_t ارزښت) -> منطقي {
+    إذا (واټن_2 > تر_ټولو_لوی_Edit_واټن) {
+      إذا (Matches.اندازه_2() == Max_Matches_شمېر)
+        أرجع خطأ;
+      تر_ټولو_لوی_Edit_واټن = واټن_2;
     }
     // To avoid allocations, the creation of the name is delayed
     // as much as possible.
     std::string Name;
-    auto GetName = [&] {
-      if (Name.empty())
-        Name = Node.fullName();
-      return Name;
+    خپلکاری GetName = [&] {
+      إذا (Name.تشه())
+        Name = غوټه.ډک_Name();
+      أرجع Name;
     };
 
-    auto It = llvm::lower_bound(
-        Matches, Distance,
-        [&](const MatchForCodepointName &a, std::size_t Distance) {
-          if (Distance == a.Distance)
-            return a.Name < GetName();
-          return a.Distance < Distance;
+    خپلکاری It = llvm::ښکتنی_bound(
+        Matches, واټن_2,
+        [&](ثابت سمون_For_Codepoint_Name &a, std::size_t واټن_2) {
+          إذا (واټن_2 == a.واټن_2)
+            أرجع a.Name < GetName();
+          أرجع a.واټن_2 < واټن_2;
         });
-    if (It == Matches.end() && Matches.size() == MaxMatchesCount)
-      return false;
+    إذا (It == Matches.پای_ټکی() && Matches.اندازه_2() == Max_Matches_شمېر)
+      أرجع خطأ;
 
-    MatchForCodepointName M{GetName(), Distance, Value};
-    Matches.insert(It, std::move(M));
-    if (Matches.size() > MaxMatchesCount)
-      Matches.pop_back();
-    return true;
+    سمون_For_Codepoint_Name M{GetName(), واټن_2, ارزښت};
+    Matches.ورننباسه(It, std::move(M));
+    إذا (Matches.اندازه_2() > Max_Matches_شمېر)
+      Matches.راوباسه_شا();
+    أرجع ریښتیا;
   };
 
   // We ignore case, space, hyphens, etc,
   // in both the search pattern and the prospective names.
-  auto Normalize = [](StringRef Name) {
-    std::string Out;
-    Out.reserve(Name.size());
-    for (char C : Name) {
-      if (isAlnum(C))
-        Out.push_back(toUpper(C));
+  خپلکاری Normalize = [](StringRef Name) {
+    std::string بهر;
+    بهر.reserve(Name.اندازه_2());
+    لكل (حرف C : Name) {
+      إذا (isAlnum(C))
+        بهر.ټېل_شا(منزل_پاسنی(C));
     }
-    return Out;
+    أرجع بهر;
   };
-  std::string NormalizedName = Normalize(Pattern);
+  std::string NormalizedName = Normalize(نمونه);
 
   // Allocate a matrix big enough for longest names.
-  const std::size_t Columns =
-      std::min(NormalizedName.size(), UnicodeNameToCodepointLargestNameSize) +
+  ثابت std::size_t Columns =
+      std::min(NormalizedName.اندازه_2(), Unicode_Name_منزل_Codepoint_تر_ټولو_لوی_Name_اندازه) +
       1;
 
-  [[maybe_unused]] static std::size_t Rows =
-      UnicodeNameToCodepointLargestNameSize + 1;
+  [[maybe_ناکارول_شوی]] ساكن std::size_t لیکې_2 =
+      Unicode_Name_منزل_Codepoint_تر_ټولو_لوی_Name_اندازه + 1;
 
-  std::vector<char> Distances(
-      Columns * (UnicodeNameToCodepointLargestNameSize + 1), 0);
+  std::ویکټور<حرف> Distances(
+      Columns * (Unicode_Name_منزل_Codepoint_تر_ټولو_لوی_Name_اندازه + 1), 0);
 
-  auto Get = [&Distances, Columns](size_t Column, std::size_t Row) -> char & {
-    assert(Column < Columns);
-    assert(Row < Rows);
-    return Distances[Row * Columns + Column];
+  خپلکاری Get = [&Distances, Columns](size_t ستنه, std::size_t لیکه) -> حرف & {
+    أكد(ستنه < Columns);
+    أكد(لیکه < لیکې_2);
+    أرجع Distances[لیکه * Columns + ستنه];
   };
 
-  for (std::size_t I = 0; I < Columns; I++)
+  لكل (std::size_t I = 0; I < Columns; I++)
     Get(I, 0) = I;
 
   // Visit the childrens,
   // Filling (and overriding) the matrix for the name fragment of each node
   // iteratively. CompleteName is used to collect the actual name of potential
   // match, respecting case and spacing.
-  auto VisitNode = [&](const Node &N, std::size_t Row,
-                       auto &VisitNode) -> void {
+  خپلکاری لیدنه_غوټه = [&](ثابت غوټه &N, std::size_t لیکه,
+                       خپلکاری &لیدنه_غوټه) -> فراغ {
     std::size_t J = 0;
-    for (; J < N.Name.size(); J++) {
-      if (!isAlnum(N.Name[J]))
-        continue;
+    لكل (; J < N.Name.اندازه_2(); J++) {
+      إذا (!isAlnum(N.Name[J]))
+        استمر;
 
-      Get(0, Row) = Row;
+      Get(0, لیکه) = لیکه;
 
-      for (std::size_t I = 1; I < Columns; I++) {
-        const int Delete = Get(I - 1, Row) + 1;
-        const int Insert = Get(I, Row - 1) + 1;
+      لكل (std::size_t I = 1; I < Columns; I++) {
+        ثابت صحيح Delete = Get(I - 1, لیکه) + 1;
+        ثابت صحيح ورننباسه_2 = Get(I, لیکه - 1) + 1;
 
-        const int Replace =
-            Get(I - 1, Row - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
+        ثابت صحيح Replace =
+            Get(I - 1, لیکه - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
 
-        Get(I, Row) = std::min({Insert, Delete, Replace});
+        Get(I, لیکه) = std::min({ورننباسه_2, Delete, Replace});
       }
 
-      Row++;
+      لیکه++;
     }
 
-    unsigned Cost = Get(Columns - 1, Row - 1);
-    if (N.Value != 0xFFFFFFFF) {
-      Insert(N, Cost, N.Value);
+    بینښه لګښت = Get(Columns - 1, لیکه - 1);
+    إذا (N.ارزښت != 0xFFFFFFFF) {
+      ورننباسه_2(N, لګښت, N.ارزښت);
     }
 
-    if (N.hasChildren()) {
-      auto ChildOffset = N.ChildrenOffset;
-      for (;;) {
-        Node C = readNode(ChildOffset, &N);
-        ChildOffset += C.Size;
-        if (!C.isValid())
-          break;
-        VisitNode(C, Row, VisitNode);
-        if (!C.HasSibling)
-          break;
+    إذا (N.hasChildren()) {
+      خپلکاری ماشوم_دننه_واټن = N.Children_دننه_واټن;
+      لكل (;;) {
+        غوټه C = read_غوټه(ماشوم_دننه_واټن, &N);
+        ماشوم_دننه_واټن += C.اندازه;
+        إذا (!C.isValid())
+          اكسر;
+        لیدنه_غوټه(C, لیکه, لیدنه_غوټه);
+        إذا (!C.HasSibling)
+          اكسر;
       }
     }
   };
 
-  Node Root = createRoot();
-  VisitNode(Root, 1, VisitNode);
-  return Matches;
+  غوټه ریښه_2 = create_ریښه();
+  لیدنه_غوټه(ریښه_2, 1, لیدنه_غوټه);
+  أرجع Matches;
 }
 
 } // namespace unicode
