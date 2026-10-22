@@ -6,400 +6,400 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdint>
-#include <cstring>
-#include <string>
-#include <vector>
+#অন্তর্ভাব "llvm/Support/YAMLTraits.h"
+#অন্তর্ভাব "llvm/ADT/STLExtras.h"
+#অন্তর্ভাব "llvm/ADT/SmallString.h"
+#অন্তর্ভাব "llvm/ADT/StringExtras.h"
+#অন্তর্ভাব "llvm/ADT/StringRef.h"
+#অন্তর্ভাব "llvm/ADT/Twine.h"
+#অন্তর্ভাব "llvm/Support/Casting.h"
+#অন্তর্ভাব "llvm/Support/Errc.h"
+#অন্তর্ভাব "llvm/Support/ErrorHandling.h"
+#অন্তর্ভাব "llvm/Support/Format.h"
+#অন্তর্ভাব "llvm/Support/LineIterator.h"
+#অন্তর্ভাব "llvm/Support/MemoryBuffer.h"
+#অন্তর্ভাব "llvm/Support/VersionTuple.h"
+#অন্তর্ভাব "llvm/Support/YAMLParser.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব <cassert>
+#অন্তর্ভাব <cstdint>
+#অন্তর্ভাব <cstring>
+#অন্তর্ভাব <string>
+#অন্তর্ভাব <vector>
 
-using namespace llvm;
-using namespace yaml;
+using নামাকাশ llvm;
+using নামাকাশ yaml;
 
 //===----------------------------------------------------------------------===//
 //  IO
 //===----------------------------------------------------------------------===//
 
-IO::IO(void *Context) : Ctxt(Context) {}
+IO::IO(শূন্য *Context) : Ctxt(Context) {}
 
-IO::~IO() = default;
+IO::~IO() = পূর্বনির্ধারিত;
 
-void *IO::getContext() const {
-  return Ctxt;
+শূন্য *IO::getContext() ধ্রুবক {
+  ফেরত Ctxt;
 }
 
-void IO::setContext(void *Context) {
+শূন্য IO::setContext(শূন্য *Context) {
   Ctxt = Context;
 }
 
-void IO::setAllowUnknownKeys(bool Allow) {
+শূন্য IO::set_Allow_Unknown_চাবিগুলি(যৌক্তিক Allow) {
   llvm_unreachable("Only supported for Input");
 }
 
 //===----------------------------------------------------------------------===//
-//  Input
+//প্রবেশ
 //===----------------------------------------------------------------------===//
 
-Input::Input(StringRef InputContent, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(InputContent, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+প্রবেশ::প্রবেশ(StringRef প্রবেশ_Content, শূন্য *Ctxt,
+             SourceMgr::DiagHandlerTy DiagHandler, শূন্য *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(নতুন Stream(প্রবেশ_Content, SrcMgr, মিথ্যা, &EC)) {
+  যদি (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::Input(MemoryBufferRef Input, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(Input, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+প্রবেশ::প্রবেশ(Memory_বাফার_Ref প্রবেশ, শূন্য *Ctxt,
+             SourceMgr::DiagHandlerTy DiagHandler, শূন্য *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(নতুন Stream(প্রবেশ, SrcMgr, মিথ্যা, &EC)) {
+  যদি (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::~Input() = default;
+প্রবেশ::~প্রবেশ() = পূর্বনির্ধারিত;
 
-std::error_code Input::error() { return EC; }
+std::error_code প্রবেশ::error() { ফেরত EC; }
 
-bool Input::outputting() const {
-  return false;
+যৌক্তিক প্রবেশ::outputting() ধ্রুবক {
+  ফেরত মিথ্যা;
 }
 
-bool Input::setCurrentDocument() {
-  if (DocIterator != Strm->end()) {
-    Node *N = DocIterator->getRoot();
-    if (!N) {
+যৌক্তিক প্রবেশ::setCurrentDocument() {
+  যদি (DocIterator != Strm->end()) {
+    গ্রন্থি *N = DocIterator->get_মূল();
+    যদি (!N) {
       EC = make_error_code(errc::invalid_argument);
-      return false;
+      ফেরত মিথ্যা;
     }
 
-    if (isa<NullNode>(N)) {
+    যদি (isa<Null_গ্রন্থি>(N)) {
       // Empty files are allowed and ignored
       ++DocIterator;
-      return setCurrentDocument();
+      ফেরত setCurrentDocument();
     }
     releaseHNodeBuffers();
-    TopNode = createHNodes(N);
-    CurrentNode = TopNode;
-    return true;
+    শীর্ষ_গ্রন্থি = createHNodes(N);
+    Current_গ্রন্থি = শীর্ষ_গ্রন্থি;
+    ফেরত সত্য;
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-bool Input::nextDocument() {
-  return ++DocIterator != Strm->end();
+যৌক্তিক প্রবেশ::পরবর্তী_Document() {
+  ফেরত ++DocIterator != Strm->end();
 }
 
-const Node *Input::getCurrentNode() const {
-  return CurrentNode ? CurrentNode->_node : nullptr;
+ধ্রুবক গ্রন্থি *প্রবেশ::get_Current_গ্রন্থি() ধ্রুবক {
+  ফেরত Current_গ্রন্থি ? Current_গ্রন্থি->গ্রন্থি_2 : nullptr;
 }
 
-bool Input::mapTag(StringRef Tag, bool Default) {
+যৌক্তিক প্রবেশ::mapTag(StringRef Tag, যৌক্তিক Default) {
   // CurrentNode can be null if setCurrentDocument() was unable to
   // parse the document because it was invalid or empty.
-  if (!CurrentNode)
-    return false;
+  যদি (!Current_গ্রন্থি)
+    ফেরত মিথ্যা;
 
-  std::string foundTag = CurrentNode->_node->getVerbatimTag();
-  if (foundTag.empty()) {
+  std::string foundTag = Current_গ্রন্থি->গ্রন্থি_2->getVerbatimTag();
+  যদি (foundTag.empty()) {
     // If no tag found and 'Tag' is the default, say it was found.
-    return Default;
+    ফেরত Default;
   }
   // Return true iff found tag matches supplied tag.
-  return Tag == foundTag;
+  ফেরত Tag == foundTag;
 }
 
-void Input::beginMapping() {
-  if (EC)
-    return;
+শূন্য প্রবেশ::beginMapping() {
+  যদি (EC)
+    ফেরত;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (MN) {
-    MN->ValidKeys.clear();
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_গ্রন্থি);
+  যদি (MN) {
+    MN->Valid_চাবিগুলি.clear();
   }
 }
 
-std::vector<StringRef> Input::keys() {
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
+std::vector<StringRef> প্রবেশ::চাবিগুলি() {
+  MapHNode *MN = dyn_cast<MapHNode>(Current_গ্রন্থি);
   std::vector<StringRef> Ret;
-  if (!MN) {
-    setError(CurrentNode, "not a mapping");
-    return Ret;
+  যদি (!MN) {
+    setError(Current_গ্রন্থি, "not a mapping");
+    ফেরত Ret;
   }
-  for (auto &P : MN->Mapping)
-    Ret.push_back(P.first());
-  return Ret;
+  জন্য (auto &P : MN->Mapping)
+    Ret.ঠেলো_back(P.first());
+  ফেরত Ret;
 }
 
-bool Input::preflightKey(StringRef Key, bool Required, bool, bool &UseDefault,
-                         void *&SaveInfo) {
-  UseDefault = false;
-  if (EC)
-    return false;
+যৌক্তিক প্রবেশ::preflight_চাবি(StringRef চাবি, যৌক্তিক Required, যৌক্তিক, যৌক্তিক &UseDefault,
+                         শূন্য *&SaveInfo) {
+  UseDefault = মিথ্যা;
+  যদি (EC)
+    ফেরত মিথ্যা;
 
   // CurrentNode is null for empty documents, which is an error in case required
   // nodes are present.
-  if (!CurrentNode) {
-    if (Required)
+  যদি (!Current_গ্রন্থি) {
+    যদি (Required)
       EC = make_error_code(errc::invalid_argument);
-    else
-      UseDefault = true;
-    return false;
+    অন্যথা
+      UseDefault = সত্য;
+    ফেরত মিথ্যা;
   }
 
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  if (!MN) {
-    if (Required || !isa<EmptyHNode>(CurrentNode))
-      setError(CurrentNode, "not a mapping");
-    else
-      UseDefault = true;
-    return false;
+  MapHNode *MN = dyn_cast<MapHNode>(Current_গ্রন্থি);
+  যদি (!MN) {
+    যদি (Required || !isa<EmptyHNode>(Current_গ্রন্থি))
+      setError(Current_গ্রন্থি, "not a mapping");
+    অন্যথা
+      UseDefault = সত্য;
+    ফেরত মিথ্যা;
   }
-  MN->ValidKeys.push_back(Key.str());
-  HNode *Value = MN->Mapping[Key].first;
-  if (!Value) {
-    if (Required)
-      setError(CurrentNode, Twine("missing required key '") + Key + "'");
-    else
-      UseDefault = true;
-    return false;
+  MN->Valid_চাবিগুলি.ঠেলো_back(চাবি.str());
+  HNode *মান = MN->Mapping[চাবি].first;
+  যদি (!মান) {
+    যদি (Required)
+      setError(Current_গ্রন্থি, Twine("missing required key '") + চাবি + "'");
+    অন্যথা
+      UseDefault = সত্য;
+    ফেরত মিথ্যা;
   }
-  SaveInfo = CurrentNode;
-  CurrentNode = Value;
-  return true;
+  SaveInfo = Current_গ্রন্থি;
+  Current_গ্রন্থি = মান;
+  ফেরত সত্য;
 }
 
-void Input::postflightKey(void *saveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(saveInfo);
+শূন্য প্রবেশ::postflight_চাবি(শূন্য *saveInfo) {
+  Current_গ্রন্থি = reinterpret_cast<HNode *>(saveInfo);
 }
 
-void Input::endMapping() {
-  if (EC)
-    return;
+শূন্য প্রবেশ::endMapping() {
+  যদি (EC)
+    ফেরত;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (!MN)
-    return;
-  for (const auto &NN : MN->Mapping) {
-    if (!is_contained(MN->ValidKeys, NN.first())) {
-      const SMRange &ReportLoc = NN.second.second;
-      if (!AllowUnknownKeys) {
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_গ্রন্থি);
+  যদি (!MN)
+    ফেরত;
+  জন্য (ধ্রুবক auto &NN : MN->Mapping) {
+    যদি (!is_contained(MN->Valid_চাবিগুলি, NN.first())) {
+      ধ্রুবক SMRange &ReportLoc = NN.second.second;
+      যদি (!Allow_Unknown_চাবিগুলি) {
         setError(ReportLoc, Twine("unknown key '") + NN.first() + "'");
-        break;
-      } else
+        বিরতি;
+      } অন্যথা
         reportWarning(ReportLoc, Twine("unknown key '") + NN.first() + "'");
     }
   }
 }
 
-void Input::beginFlowMapping() { beginMapping(); }
+শূন্য প্রবেশ::beginFlowMapping() { beginMapping(); }
 
-void Input::endFlowMapping() { endMapping(); }
+শূন্য প্রবেশ::endFlowMapping() { endMapping(); }
 
-unsigned Input::beginSequence() {
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
-    return SQ->Entries.size();
-  if (isa<EmptyHNode>(CurrentNode))
-    return 0;
+unsigned প্রবেশ::beginSequence() {
+  যদি (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_গ্রন্থি))
+    ফেরত SQ->Entries.আকার_3();
+  যদি (isa<EmptyHNode>(Current_গ্রন্থি))
+    ফেরত 0;
   // Treat case where there's a scalar "null" value as an empty sequence.
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (isNull(SN->value()))
-      return 0;
+  যদি (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_গ্রন্থি)) {
+    যদি (isNull(SN->মান_2()))
+      ফেরত 0;
   }
   // Any other type of HNode is an error.
-  setError(CurrentNode, "not a sequence");
-  return 0;
+  setError(Current_গ্রন্থি, "not a sequence");
+  ফেরত 0;
 }
 
-void Input::endSequence() {
+শূন্য প্রবেশ::endSequence() {
 }
 
-bool Input::preflightElement(unsigned Index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[Index];
-    return true;
+যৌক্তিক প্রবেশ::preflightElement(unsigned সূচক_2, শূন্য *&SaveInfo) {
+  যদি (EC)
+    ফেরত মিথ্যা;
+  যদি (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_গ্রন্থি)) {
+    SaveInfo = Current_গ্রন্থি;
+    Current_গ্রন্থি = SQ->Entries[সূচক_2];
+    ফেরত সত্য;
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-void Input::postflightElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+শূন্য প্রবেশ::postflightElement(শূন্য *SaveInfo) {
+  Current_গ্রন্থি = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-unsigned Input::beginFlowSequence() { return beginSequence(); }
+unsigned প্রবেশ::beginFlowSequence() { ফেরত beginSequence(); }
 
-bool Input::preflightFlowElement(unsigned index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[index];
-    return true;
+যৌক্তিক প্রবেশ::preflightFlowElement(unsigned সূচক, শূন্য *&SaveInfo) {
+  যদি (EC)
+    ফেরত মিথ্যা;
+  যদি (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_গ্রন্থি)) {
+    SaveInfo = Current_গ্রন্থি;
+    Current_গ্রন্থি = SQ->Entries[সূচক];
+    ফেরত সত্য;
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-void Input::postflightFlowElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+শূন্য প্রবেশ::postflightFlowElement(শূন্য *SaveInfo) {
+  Current_গ্রন্থি = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-void Input::endFlowSequence() {
+শূন্য প্রবেশ::endFlowSequence() {
 }
 
-void Input::beginEnumScalar() {
-  ScalarMatchFound = false;
+শূন্য প্রবেশ::beginEnumScalar() {
+  ScalarMatchFound = মিথ্যা;
 }
 
-bool Input::matchEnumScalar(StringRef Str, bool) {
-  if (ScalarMatchFound)
-    return false;
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (SN->value() == Str) {
-      ScalarMatchFound = true;
-      return true;
+যৌক্তিক প্রবেশ::matchEnumScalar(StringRef Str, যৌক্তিক) {
+  যদি (ScalarMatchFound)
+    ফেরত মিথ্যা;
+  যদি (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_গ্রন্থি)) {
+    যদি (SN->মান_2() == Str) {
+      ScalarMatchFound = সত্য;
+      ফেরত সত্য;
     }
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-bool Input::matchEnumFallback() {
-  if (ScalarMatchFound)
-    return false;
-  ScalarMatchFound = true;
-  return true;
+যৌক্তিক প্রবেশ::matchEnumFallback() {
+  যদি (ScalarMatchFound)
+    ফেরত মিথ্যা;
+  ScalarMatchFound = সত্য;
+  ফেরত সত্য;
 }
 
-void Input::endEnumScalar() {
-  if (!ScalarMatchFound) {
-    setError(CurrentNode, "unknown enumerated scalar");
+শূন্য প্রবেশ::endEnumScalar() {
+  যদি (!ScalarMatchFound) {
+    setError(Current_গ্রন্থি, "unknown enumerated scalar");
   }
 }
 
-bool Input::beginBitSetScalar(bool &DoClear) {
-  BitValuesUsed.clear();
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    BitValuesUsed.resize(SQ->Entries.size());
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+যৌক্তিক প্রবেশ::beginBitSetScalar(যৌক্তিক &DoClear) {
+  Bit_মানসমূহ_Used.clear();
+  যদি (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_গ্রন্থি)) {
+    Bit_মানসমূহ_Used.resize(SQ->Entries.আকার_3());
+  } অন্যথা {
+    setError(Current_গ্রন্থি, "expected sequence of bit values");
   }
-  DoClear = true;
-  return true;
+  DoClear = সত্য;
+  ফেরত সত্য;
 }
 
-bool Input::bitSetMatch(StringRef Str, bool) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    unsigned Index = 0;
-    for (auto &N : SQ->Entries) {
-      if (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
-        if (SN->value() == Str) {
-          BitValuesUsed[Index] = true;
-          return true;
+যৌক্তিক প্রবেশ::bitSetMatch(StringRef Str, যৌক্তিক) {
+  যদি (EC)
+    ফেরত মিথ্যা;
+  যদি (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_গ্রন্থি)) {
+    unsigned সূচক_2 = 0;
+    জন্য (auto &N : SQ->Entries) {
+      যদি (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
+        যদি (SN->মান_2() == Str) {
+          Bit_মানসমূহ_Used[সূচক_2] = সত্য;
+          ফেরত সত্য;
         }
-      } else {
-        setError(CurrentNode, "unexpected scalar in sequence of bit values");
+      } অন্যথা {
+        setError(Current_গ্রন্থি, "unexpected scalar in sequence of bit values");
       }
-      ++Index;
+      ++সূচক_2;
     }
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+  } অন্যথা {
+    setError(Current_গ্রন্থি, "expected sequence of bit values");
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-void Input::endBitSetScalar() {
-  if (EC)
-    return;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    assert(BitValuesUsed.size() == SQ->Entries.size());
-    for (unsigned i = 0; i < SQ->Entries.size(); ++i) {
-      if (!BitValuesUsed[i]) {
+শূন্য প্রবেশ::endBitSetScalar() {
+  যদি (EC)
+    ফেরত;
+  যদি (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_গ্রন্থি)) {
+    প্রতিজ্ঞা(Bit_মানসমূহ_Used.আকার_3() == SQ->Entries.আকার_3());
+    জন্য (unsigned i = 0; i < SQ->Entries.আকার_3(); ++i) {
+      যদি (!Bit_মানসমূহ_Used[i]) {
         setError(SQ->Entries[i], "unknown bit value");
-        return;
+        ফেরত;
       }
     }
   }
 }
 
-void Input::scalarString(StringRef &S, QuotingType) {
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    S = SN->value();
-  } else {
-    setError(CurrentNode, "unexpected scalar");
+শূন্য প্রবেশ::scalarString(StringRef &S, QuotingType) {
+  যদি (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_গ্রন্থি)) {
+    S = SN->মান_2();
+  } অন্যথা {
+    setError(Current_গ্রন্থি, "unexpected scalar");
   }
 }
 
-void Input::blockScalarString(StringRef &S) { scalarString(S, QuotingType::None); }
+শূন্য প্রবেশ::blockScalarString(StringRef &S) { scalarString(S, QuotingType::None); }
 
-void Input::scalarTag(std::string &Tag) {
-  Tag = CurrentNode->_node->getVerbatimTag();
+শূন্য প্রবেশ::scalarTag(std::string &Tag) {
+  Tag = Current_গ্রন্থি->গ্রন্থি_2->getVerbatimTag();
 }
 
-void Input::setError(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  setError(hnode->_node, message);
+শূন্য প্রবেশ::setError(HNode *hnode, ধ্রুবক Twine &message) {
+  প্রতিজ্ঞা(hnode && "HNode must not be NULL");
+  setError(hnode->গ্রন্থি_2, message);
 }
 
-NodeKind Input::getNodeKind() {
-  if (isa<ScalarHNode>(CurrentNode))
-    return NodeKind::Scalar;
-  else if (isa<MapHNode>(CurrentNode))
-    return NodeKind::Map;
-  else if (isa<SequenceHNode>(CurrentNode))
-    return NodeKind::Sequence;
+গ্রন্থি_Kind প্রবেশ::get_গ্রন্থি_Kind() {
+  যদি (isa<ScalarHNode>(Current_গ্রন্থি))
+    ফেরত গ্রন্থি_Kind::Scalar;
+  অন্যথা যদি (isa<MapHNode>(Current_গ্রন্থি))
+    ফেরত গ্রন্থি_Kind::Map;
+  অন্যথা যদি (isa<SequenceHNode>(Current_গ্রন্থি))
+    ফেরত গ্রন্থি_Kind::Sequence;
   llvm_unreachable("Unsupported node kind");
 }
 
-void Input::setError(Node *node, const Twine &message) {
-  Strm->printError(node, message);
+শূন্য প্রবেশ::setError(গ্রন্থি *গ্রন্থি_3, ধ্রুবক Twine &message) {
+  Strm->printError(গ্রন্থি_3, message);
   EC = make_error_code(errc::invalid_argument);
 }
 
-void Input::setError(const SMRange &range, const Twine &message) {
+শূন্য প্রবেশ::setError(ধ্রুবক SMRange &range, ধ্রুবক Twine &message) {
   Strm->printError(range, message);
   EC = make_error_code(errc::invalid_argument);
 }
 
-void Input::reportWarning(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  Strm->printError(hnode->_node, message, SourceMgr::DK_Warning);
+শূন্য প্রবেশ::reportWarning(HNode *hnode, ধ্রুবক Twine &message) {
+  প্রতিজ্ঞা(hnode && "HNode must not be NULL");
+  Strm->printError(hnode->গ্রন্থি_2, message, SourceMgr::DK_Warning);
 }
 
-void Input::reportWarning(Node *node, const Twine &message) {
-  Strm->printError(node, message, SourceMgr::DK_Warning);
+শূন্য প্রবেশ::reportWarning(গ্রন্থি *গ্রন্থি_3, ধ্রুবক Twine &message) {
+  Strm->printError(গ্রন্থি_3, message, SourceMgr::DK_Warning);
 }
 
-void Input::reportWarning(const SMRange &range, const Twine &message) {
+শূন্য প্রবেশ::reportWarning(ধ্রুবক SMRange &range, ধ্রুবক Twine &message) {
   Strm->printError(range, message, SourceMgr::DK_Warning);
 }
 
-void Input::releaseHNodeBuffers() {
+শূন্য প্রবেশ::releaseHNodeBuffers() {
   EmptyHNodeAllocator.DestroyAll();
   ScalarHNodeAllocator.DestroyAll();
   SequenceHNodeAllocator.DestroyAll();
   MapHNodeAllocator.DestroyAll();
 }
 
-void Input::saveAliasHNode(Node *N, HNode *HN) {
+শূন্য প্রবেশ::saveAliasHNode(গ্রন্থি *N, HNode *HN) {
   StringRef Anchor = N->getAnchor();
-  if (!Anchor.empty())
+  যদি (!Anchor.empty())
     // YAML 1.2.2 - 3.2.2.2. Anchors and Aliases:
     //
     // An alias event refers to the most recent event in the serialization
@@ -409,403 +409,403 @@ void Input::saveAliasHNode(Node *N, HNode *HN) {
     AliasMap[Anchor] = HN;
 }
 
-Input::HNode *Input::createHNodes(Node *N) {
+প্রবেশ::HNode *প্রবেশ::createHNodes(গ্রন্থি *N) {
   SmallString<128> StringStorage;
-  switch (N->getType()) {
-  case Node::NK_Scalar: {
-    ScalarNode *SN = dyn_cast<ScalarNode>(N);
-    StringRef KeyStr = SN->getValue(StringStorage);
-    if (!StringStorage.empty()) {
+  নির্বাচন (N->getType()) {
+  ক্ষেত্র গ্রন্থি::NK_Scalar: {
+    Scalar_গ্রন্থি *SN = dyn_cast<Scalar_গ্রন্থি>(N);
+    StringRef চাবি_Str = SN->get_মান(StringStorage);
+    যদি (!StringStorage.empty()) {
       // Copy string to permanent storage
-      KeyStr = StringStorage.str().copy(StringAllocator);
+      চাবি_Str = StringStorage.str().copy(StringAllocator);
     }
-    auto *SHNode = new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, KeyStr);
+    auto *SHNode = নতুন (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, চাবি_Str);
     saveAliasHNode(SN, SHNode);
-    return SHNode;
+    ফেরত SHNode;
   }
-  case Node::NK_BlockScalar: {
-    BlockScalarNode *BSN = dyn_cast<BlockScalarNode>(N);
-    StringRef ValueCopy = BSN->getValue().copy(StringAllocator);
+  ক্ষেত্র গ্রন্থি::NK_BlockScalar: {
+    Block_Scalar_গ্রন্থি *BSN = dyn_cast<Block_Scalar_গ্রন্থি>(N);
+    StringRef মান_Copy = BSN->get_মান().copy(StringAllocator);
     auto *BSHNode =
-        new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ValueCopy);
+        নতুন (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, মান_Copy);
     saveAliasHNode(BSN, BSHNode);
-    return BSHNode;
+    ফেরত BSHNode;
   }
-  case Node::NK_Sequence: {
-    SequenceNode *SQ = dyn_cast<SequenceNode>(N);
-    auto SQHNode = new (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
-    for (Node &SN : *SQ) {
+  ক্ষেত্র গ্রন্থি::NK_Sequence: {
+    Sequence_গ্রন্থি *SQ = dyn_cast<Sequence_গ্রন্থি>(N);
+    auto SQHNode = নতুন (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
+    জন্য (গ্রন্থি &SN : *SQ) {
       auto Entry = createHNodes(&SN);
-      if (EC)
-        break;
-      SQHNode->Entries.push_back(Entry);
+      যদি (EC)
+        বিরতি;
+      SQHNode->Entries.ঠেলো_back(Entry);
     }
     saveAliasHNode(SQ, SQHNode);
-    return SQHNode;
+    ফেরত SQHNode;
   }
-  case Node::NK_Mapping: {
-    MappingNode *Map = dyn_cast<MappingNode>(N);
-    auto mapHNode = new (MapHNodeAllocator.Allocate()) MapHNode(N);
-    for (KeyValueNode &KVN : *Map) {
-      Node *KeyNode = KVN.getKey();
-      ScalarNode *Key = dyn_cast_if_present<ScalarNode>(KeyNode);
-      Node *Value = KVN.getValue();
-      if (!Key || !Value) {
-        if (!Key)
-          setError(KeyNode, "Map key must be a scalar");
-        if (!Value)
-          setError(KeyNode, "Map value must not be empty");
-        break;
+  ক্ষেত্র গ্রন্থি::NK_Mapping: {
+    Mapping_গ্রন্থি *Map = dyn_cast<Mapping_গ্রন্থি>(N);
+    auto mapHNode = নতুন (MapHNodeAllocator.Allocate()) MapHNode(N);
+    জন্য (চাবি_মান_গ্রন্থি &KVN : *Map) {
+      গ্রন্থি *চাবি_গ্রন্থি = KVN.get_চাবি();
+      Scalar_গ্রন্থি *চাবি = dyn_cast_if_present<Scalar_গ্রন্থি>(চাবি_গ্রন্থি);
+      গ্রন্থি *মান = KVN.get_মান();
+      যদি (!চাবি || !মান) {
+        যদি (!চাবি)
+          setError(চাবি_গ্রন্থি, "Map key must be a scalar");
+        যদি (!মান)
+          setError(চাবি_গ্রন্থি, "Map value must not be empty");
+        বিরতি;
       }
       StringStorage.clear();
-      StringRef KeyStr = Key->getValue(StringStorage);
-      if (!StringStorage.empty()) {
+      StringRef চাবি_Str = চাবি->get_মান(StringStorage);
+      যদি (!StringStorage.empty()) {
         // Copy string to permanent storage
-        KeyStr = StringStorage.str().copy(StringAllocator);
+        চাবি_Str = StringStorage.str().copy(StringAllocator);
       }
-      if (mapHNode->Mapping.count(KeyStr))
+      যদি (mapHNode->Mapping.গুনতি(চাবি_Str))
         // From YAML spec: "The content of a mapping node is an unordered set of
         // key/value node pairs, with the restriction that each of the keys is
         // unique."
-        setError(KeyNode, Twine("duplicated mapping key '") + KeyStr + "'");
-      auto ValueHNode = createHNodes(Value);
-      if (EC)
-        break;
-      mapHNode->Mapping[KeyStr] =
-          std::make_pair(std::move(ValueHNode), KeyNode->getSourceRange());
+        setError(চাবি_গ্রন্থি, Twine("duplicated mapping key '") + চাবি_Str + "'");
+      auto মান_HNode = createHNodes(মান);
+      যদি (EC)
+        বিরতি;
+      mapHNode->Mapping[চাবি_Str] =
+          std::make_pair(std::move(মান_HNode), চাবি_গ্রন্থি->getSourceRange());
     }
     saveAliasHNode(Map, mapHNode);
-    return std::move(mapHNode);
+    ফেরত std::move(mapHNode);
   }
-  case Node::NK_Null:
+  ক্ষেত্র গ্রন্থি::NK_Null:
     // TODO: Anchor is not set for NullNode in the parser. Update the parser to
     // faithfully preserve anchors.
-    return new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
-  case Node::NK_Alias: {
-    AliasNode *AN = dyn_cast<AliasNode>(N);
+    ফেরত নতুন (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
+  ক্ষেত্র গ্রন্থি::NK_Alias: {
+    Alias_গ্রন্থি *AN = dyn_cast<Alias_গ্রন্থি>(N);
     auto AliasName = AN->getName();
     auto AHN = AliasMap.find(AliasName);
-    if (AHN == AliasMap.end()) {
+    যদি (AHN == AliasMap.end()) {
       setError(AN, Twine("undefined alias '" + AliasName + "'"));
-      return nullptr;
+      ফেরত nullptr;
     }
-    return AHN->second;
+    ফেরত AHN->second;
   }
-  default:
+  পূর্বনির্ধারিত:
     setError(N, "unknown node kind");
-    return nullptr;
+    ফেরত nullptr;
   }
 }
 
-void Input::setError(const Twine &Message) {
-  setError(CurrentNode, Message);
+শূন্য প্রবেশ::setError(ধ্রুবক Twine &Message) {
+  setError(Current_গ্রন্থি, Message);
 }
 
-void Input::setAllowUnknownKeys(bool Allow) { AllowUnknownKeys = Allow; }
+শূন্য প্রবেশ::set_Allow_Unknown_চাবিগুলি(যৌক্তিক Allow) { Allow_Unknown_চাবিগুলি = Allow; }
 
-bool Input::canElideEmptySequence() {
-  return false;
+যৌক্তিক প্রবেশ::canElideEmptySequence() {
+  ফেরত মিথ্যা;
 }
 
 //===----------------------------------------------------------------------===//
 //  Output
 //===----------------------------------------------------------------------===//
 
-Output::Output(raw_ostream &yout, void *context, int WrapColumn)
+Output::Output(raw_ostream &yout, শূন্য *context, পূর্ণসংখ্যা WrapColumn)
     : IO(context), Out(yout), WrapColumn(WrapColumn) {}
 
-Output::~Output() = default;
+Output::~Output() = পূর্বনির্ধারিত;
 
-bool Output::outputting() const {
-  return true;
+যৌক্তিক Output::outputting() ধ্রুবক {
+  ফেরত সত্য;
 }
 
-void Output::beginMapping() {
-  StateStack.push_back(inMapFirstKey);
+শূন্য Output::beginMapping() {
+  State_স্তূপ.ঠেলো_back(in_Map_First_চাবি);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
 }
 
-bool Output::mapTag(StringRef Tag, bool Use) {
-  if (Use) {
+যৌক্তিক Output::mapTag(StringRef Tag, যৌক্তিক Use) {
+  যদি (Use) {
     // If this tag is being written inside a sequence we should write the start
     // of the sequence before writing the tag, otherwise the tag won't be
     // attached to the element in the sequence, but rather the sequence itself.
-    bool SequenceElement = false;
-    if (StateStack.size() > 1) {
-      auto &E = StateStack[StateStack.size() - 2];
+    যৌক্তিক SequenceElement = মিথ্যা;
+    যদি (State_স্তূপ.আকার_3() > 1) {
+      auto &E = State_স্তূপ[State_স্তূপ.আকার_3() - 2];
       SequenceElement = inSeqAnyElement(E) || inFlowSeqAnyElement(E);
     }
-    if (SequenceElement && StateStack.back() == inMapFirstKey) {
-      newLineCheck();
-    } else {
+    যদি (SequenceElement && State_স্তূপ.back() == in_Map_First_চাবি) {
+      new_সারি_Check();
+    } অন্যথা {
       output(" ");
     }
     output(Tag);
-    if (SequenceElement) {
+    যদি (SequenceElement) {
       // If we're writing the tag during the first element of a map, the tag
       // takes the place of the first element in the sequence.
-      if (StateStack.back() == inMapFirstKey) {
-        StateStack.pop_back();
-        StateStack.push_back(inMapOtherKey);
+      যদি (State_স্তূপ.back() == in_Map_First_চাবি) {
+        State_স্তূপ.বের_করো_back();
+        State_স্তূপ.ঠেলো_back(in_Map_Other_চাবি);
       }
       // Tags inside maps in sequences should act as keys in the map from a
       // formatting perspective, so we always want a newline in a sequence.
       Padding = "\n";
     }
   }
-  return Use;
+  ফেরত Use;
 }
 
-void Output::endMapping() {
+শূন্য Output::endMapping() {
   // If we did not map anything, we should explicitly emit an empty map
-  if (StateStack.back() == inMapFirstKey) {
+  যদি (State_স্তূপ.back() == in_Map_First_চাবি) {
     Padding = PaddingBeforeContainer;
-    newLineCheck();
+    new_সারি_Check();
     output("{}");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_স্তূপ.বের_করো_back();
 }
 
-std::vector<StringRef> Output::keys() {
+std::vector<StringRef> Output::চাবিগুলি() {
   report_fatal_error("invalid call");
 }
 
-bool Output::preflightKey(StringRef Key, bool Required, bool SameAsDefault,
-                          bool &UseDefault, void *&SaveInfo) {
-  UseDefault = false;
+যৌক্তিক Output::preflight_চাবি(StringRef চাবি, যৌক্তিক Required, যৌক্তিক SameAsDefault,
+                          যৌক্তিক &UseDefault, শূন্য *&SaveInfo) {
+  UseDefault = মিথ্যা;
   SaveInfo = nullptr;
-  if (Required || !SameAsDefault || WriteDefaultValues) {
-    auto State = StateStack.back();
-    if (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
-      flowKey(Key);
-    } else {
-      newLineCheck();
-      paddedKey(Key);
+  যদি (Required || !SameAsDefault || Write_Default_মানসমূহ) {
+    auto State = State_স্তূপ.back();
+    যদি (State == in_Flow_Map_First_চাবি || State == in_Flow_Map_Other_চাবি) {
+      flow_চাবি(চাবি);
+    } অন্যথা {
+      new_সারি_Check();
+      padded_চাবি(চাবি);
     }
-    return true;
+    ফেরত সত্য;
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-void Output::postflightKey(void *) {
-  if (StateStack.back() == inMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inMapOtherKey);
-  } else if (StateStack.back() == inFlowMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowMapOtherKey);
+শূন্য Output::postflight_চাবি(শূন্য *) {
+  যদি (State_স্তূপ.back() == in_Map_First_চাবি) {
+    State_স্তূপ.বের_করো_back();
+    State_স্তূপ.ঠেলো_back(in_Map_Other_চাবি);
+  } অন্যথা যদি (State_স্তূপ.back() == in_Flow_Map_First_চাবি) {
+    State_স্তূপ.বের_করো_back();
+    State_স্তূপ.ঠেলো_back(in_Flow_Map_Other_চাবি);
   }
 }
 
-void Output::beginFlowMapping() {
-  StateStack.push_back(inFlowMapFirstKey);
-  newLineCheck();
+শূন্য Output::beginFlowMapping() {
+  State_স্তূপ.ঠেলো_back(in_Flow_Map_First_চাবি);
+  new_সারি_Check();
   ColumnAtMapFlowStart = Column;
   output("{ ");
 }
 
-void Output::endFlowMapping() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" }");
+শূন্য Output::endFlowMapping() {
+  State_স্তূপ.বের_করো_back();
+  output_Up_To_End_Of_সারি(" }");
 }
 
-void Output::beginDocuments() {
-  outputUpToEndOfLine("---");
+শূন্য Output::beginDocuments() {
+  output_Up_To_End_Of_সারি("---");
 }
 
-bool Output::preflightDocument(unsigned index) {
-  if (index > 0)
-    outputUpToEndOfLine("\n---");
-  return true;
+যৌক্তিক Output::preflightDocument(unsigned সূচক) {
+  যদি (সূচক > 0)
+    output_Up_To_End_Of_সারি("\n---");
+  ফেরত সত্য;
 }
 
-void Output::postflightDocument() {
+শূন্য Output::postflightDocument() {
 }
 
-void Output::endDocuments() {
+শূন্য Output::endDocuments() {
   output("\n...\n");
 }
 
 unsigned Output::beginSequence() {
-  StateStack.push_back(inSeqFirstElement);
+  State_স্তূপ.ঠেলো_back(inSeqFirstElement);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
-  return 0;
+  ফেরত 0;
 }
 
-void Output::endSequence() {
+শূন্য Output::endSequence() {
   // If we did not emit anything, we should explicitly emit an empty sequence
-  if (StateStack.back() == inSeqFirstElement) {
+  যদি (State_স্তূপ.back() == inSeqFirstElement) {
     Padding = PaddingBeforeContainer;
-    newLineCheck(/*EmptySequence=*/true);
+    new_সারি_Check(/*EmptySequence=*/সত্য);
     output("[]");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_স্তূপ.বের_করো_back();
 }
 
-bool Output::preflightElement(unsigned, void *&SaveInfo) {
+যৌক্তিক Output::preflightElement(unsigned, শূন্য *&SaveInfo) {
   SaveInfo = nullptr;
-  return true;
+  ফেরত সত্য;
 }
 
-void Output::postflightElement(void *) {
-  if (StateStack.back() == inSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inSeqOtherElement);
-  } else if (StateStack.back() == inFlowSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowSeqOtherElement);
+শূন্য Output::postflightElement(শূন্য *) {
+  যদি (State_স্তূপ.back() == inSeqFirstElement) {
+    State_স্তূপ.বের_করো_back();
+    State_স্তূপ.ঠেলো_back(inSeqOtherElement);
+  } অন্যথা যদি (State_স্তূপ.back() == inFlowSeqFirstElement) {
+    State_স্তূপ.বের_করো_back();
+    State_স্তূপ.ঠেলো_back(inFlowSeqOtherElement);
   }
 }
 
 unsigned Output::beginFlowSequence() {
-  StateStack.push_back(inFlowSeqFirstElement);
-  newLineCheck();
+  State_স্তূপ.ঠেলো_back(inFlowSeqFirstElement);
+  new_সারি_Check();
   ColumnAtFlowStart = Column;
   output("[ ");
-  NeedFlowSequenceComma = false;
-  return 0;
+  NeedFlowSequenceComma = মিথ্যা;
+  ফেরত 0;
 }
 
-void Output::endFlowSequence() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" ]");
+শূন্য Output::endFlowSequence() {
+  State_স্তূপ.বের_করো_back();
+  output_Up_To_End_Of_সারি(" ]");
 }
 
-bool Output::preflightFlowElement(unsigned, void *&SaveInfo) {
-  if (NeedFlowSequenceComma)
+যৌক্তিক Output::preflightFlowElement(unsigned, শূন্য *&SaveInfo) {
+  যদি (NeedFlowSequenceComma)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  যদি (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int i = 0; i < ColumnAtFlowStart; ++i)
+    জন্য (পূর্ণসংখ্যা i = 0; i < ColumnAtFlowStart; ++i)
       output(" ");
     Column = ColumnAtFlowStart;
     output("  ");
   }
   SaveInfo = nullptr;
-  return true;
+  ফেরত সত্য;
 }
 
-void Output::postflightFlowElement(void *) {
-  NeedFlowSequenceComma = true;
+শূন্য Output::postflightFlowElement(শূন্য *) {
+  NeedFlowSequenceComma = সত্য;
 }
 
-void Output::beginEnumScalar() {
-  EnumerationMatchFound = false;
+শূন্য Output::beginEnumScalar() {
+  EnumerationMatchFound = মিথ্যা;
 }
 
-bool Output::matchEnumScalar(StringRef Str, bool Match) {
-  if (Match && !EnumerationMatchFound) {
-    newLineCheck();
-    outputUpToEndOfLine(Str);
-    EnumerationMatchFound = true;
+যৌক্তিক Output::matchEnumScalar(StringRef Str, যৌক্তিক Match) {
+  যদি (Match && !EnumerationMatchFound) {
+    new_সারি_Check();
+    output_Up_To_End_Of_সারি(Str);
+    EnumerationMatchFound = সত্য;
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-bool Output::matchEnumFallback() {
-  if (EnumerationMatchFound)
-    return false;
-  EnumerationMatchFound = true;
-  return true;
+যৌক্তিক Output::matchEnumFallback() {
+  যদি (EnumerationMatchFound)
+    ফেরত মিথ্যা;
+  EnumerationMatchFound = সত্য;
+  ফেরত সত্য;
 }
 
-void Output::endEnumScalar() {
-  if (!EnumerationMatchFound)
+শূন্য Output::endEnumScalar() {
+  যদি (!EnumerationMatchFound)
     llvm_unreachable("bad runtime enum value");
 }
 
-bool Output::beginBitSetScalar(bool &DoClear) {
-  newLineCheck();
+যৌক্তিক Output::beginBitSetScalar(যৌক্তিক &DoClear) {
+  new_সারি_Check();
   output("[ ");
-  NeedBitValueComma = false;
-  DoClear = false;
-  return true;
+  Need_Bit_মান_Comma = মিথ্যা;
+  DoClear = মিথ্যা;
+  ফেরত সত্য;
 }
 
-bool Output::bitSetMatch(StringRef Str, bool Matches) {
-  if (Matches) {
-    if (NeedBitValueComma)
+যৌক্তিক Output::bitSetMatch(StringRef Str, যৌক্তিক Matches) {
+  যদি (Matches) {
+    যদি (Need_Bit_মান_Comma)
       output(", ");
     output(Str);
-    NeedBitValueComma = true;
+    Need_Bit_মান_Comma = সত্য;
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-void Output::endBitSetScalar() {
-  outputUpToEndOfLine(" ]");
+শূন্য Output::endBitSetScalar() {
+  output_Up_To_End_Of_সারি(" ]");
 }
 
-void Output::scalarString(StringRef &S, QuotingType MustQuote) {
-  newLineCheck();
-  if (S.empty()) {
+শূন্য Output::scalarString(StringRef &S, QuotingType MustQuote) {
+  new_সারি_Check();
+  যদি (S.empty()) {
     // Print '' for the empty string because leaving the field empty is not
     // allowed.
-    outputUpToEndOfLine("''");
-    return;
+    output_Up_To_End_Of_সারি("''");
+    ফেরত;
   }
   output(S, MustQuote);
-  outputUpToEndOfLine("");
+  output_Up_To_End_Of_সারি("");
 }
 
-void Output::blockScalarString(StringRef &S) {
-  if (!StateStack.empty())
-    newLineCheck();
+শূন্য Output::blockScalarString(StringRef &S) {
+  যদি (!State_স্তূপ.empty())
+    new_সারি_Check();
   output(" |");
 
-  unsigned Indent = StateStack.empty() ? 1 : StateStack.size();
+  unsigned Indent = State_স্তূপ.empty() ? 1 : State_স্তূপ.আকার_3();
 
-  auto Buffer = MemoryBuffer::getMemBuffer(S, "", false);
-  for (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
-    outputNewLine();
-    for (unsigned I = 0; I < Indent; ++I) {
+  auto বাফার = Memory_বাফার::get_Mem_বাফার(S, "", মিথ্যা);
+  জন্য (সারি_iterator সারিগুলি(*বাফার, মিথ্যা); !সারিগুলি.is_at_end(); ++সারিগুলি) {
+    output_New_সারি();
+    জন্য (unsigned I = 0; I < Indent; ++I) {
       output("  ");
     }
-    output(*Lines);
+    output(*সারিগুলি);
   }
-  outputUpToEndOfLine("");
+  output_Up_To_End_Of_সারি("");
 }
 
-void Output::scalarTag(std::string &Tag) {
-  if (Tag.empty())
-    return;
-  newLineCheck();
+শূন্য Output::scalarTag(std::string &Tag) {
+  যদি (Tag.empty())
+    ফেরত;
+  new_সারি_Check();
   output(Tag);
   output(" ");
 }
 
-void Output::setError(const Twine &message) {
+শূন্য Output::setError(ধ্রুবক Twine &message) {
 }
 
-std::error_code Output::error() { return {}; }
+std::error_code Output::error() { ফেরত {}; }
 
-bool Output::canElideEmptySequence() {
+যৌক্তিক Output::canElideEmptySequence() {
   // Normally, with an optional key/value where the value is an empty sequence,
   // the whole key/value can be not written.  But, that produces wrong yaml
   // if the key/value is the only thing in the map and the map is used in
   // a sequence.  This detects if the this sequence is the first key/value
   // in map that itself is embedded in a sequence.
-  if (StateStack.size() < 2)
-    return true;
-  if (StateStack.back() != inMapFirstKey)
-    return true;
-  return !inSeqAnyElement(StateStack[StateStack.size() - 2]);
+  যদি (State_স্তূপ.আকার_3() < 2)
+    ফেরত সত্য;
+  যদি (State_স্তূপ.back() != in_Map_First_চাবি)
+    ফেরত সত্য;
+  ফেরত !inSeqAnyElement(State_স্তূপ[State_স্তূপ.আকার_3() - 2]);
 }
 
-void Output::output(StringRef s) {
-  Column += s.size();
+শূন্য Output::output(StringRef s) {
+  Column += s.আকার_3();
   Out << s;
 }
 
-void Output::output(StringRef S, QuotingType MustQuote) {
-  if (MustQuote == QuotingType::None) {
+শূন্য Output::output(StringRef S, QuotingType MustQuote) {
+  যদি (MustQuote == QuotingType::None) {
     // Only quote if we must.
     output(S);
-    return;
+    ফেরত;
   }
 
   StringLiteral Quote = MustQuote == QuotingType::Single ? StringLiteral("'")
@@ -816,21 +816,21 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   // characters may be present, and will be escaped using a variety of
   // unicode-scalar and special short-form escapes. This is handled in
   // yaml::escape.
-  if (MustQuote == QuotingType::Double) {
-    output(yaml::escape(S, /* EscapePrintable= */ false));
+  যদি (MustQuote == QuotingType::Double) {
+    output(yaml::escape(S, /* EscapePrintable= */ মিথ্যা));
     output(Quote);
-    return;
+    ফেরত;
   }
 
   unsigned i = 0;
   unsigned j = 0;
-  unsigned End = S.size();
-  const char *Base = S.data();
+  unsigned End = S.আকার_3();
+  ধ্রুবক অক্ষর *Base = S.তথ্য();
 
   // When using single-quoted strings, any single quote ' must be doubled to be
   // escaped.
-  while (j < End) {
-    if (S[j] == '\'') {                   // Escape quotes.
+  যখন (j < End) {
+    যদি (S[j] == '\'') {                   // Escape quotes.
       output(StringRef(&Base[i], j - i)); // "flush".
       output(StringLiteral("''"));        // Print it as ''
       i = j + 1;
@@ -841,14 +841,14 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   output(Quote); // Ending quote.
 }
 
-void Output::outputUpToEndOfLine(StringRef s) {
+শূন্য Output::output_Up_To_End_Of_সারি(StringRef s) {
   output(s);
-  if (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
-                             !inFlowMapAnyKey(StateStack.back())))
+  যদি (State_স্তূপ.empty() || (!inFlowSeqAnyElement(State_স্তূপ.back()) &&
+                             !in_Flow_Map_Any_চাবি(State_স্তূপ.back())))
     Padding = "\n";
 }
 
-void Output::outputNewLine() {
+শূন্য Output::output_New_সারি() {
   Out << "\n";
   Column = 0;
 }
@@ -857,339 +857,339 @@ void Output::outputNewLine() {
 // if seq in middle, use "- " if firstKey, else use "  "
 //
 
-void Output::newLineCheck(bool EmptySequence) {
-  if (Padding != "\n") {
+শূন্য Output::new_সারি_Check(যৌক্তিক EmptySequence) {
+  যদি (Padding != "\n") {
     output(Padding);
     Padding = {};
-    return;
+    ফেরত;
   }
-  outputNewLine();
+  output_New_সারি();
   Padding = {};
 
-  if (StateStack.size() == 0 || EmptySequence)
-    return;
+  যদি (State_স্তূপ.আকার_3() == 0 || EmptySequence)
+    ফেরত;
 
-  unsigned Indent = StateStack.size() - 1;
-  bool PossiblyNestedSeq = false;
-  auto I = StateStack.rbegin(), E = StateStack.rend();
+  unsigned Indent = State_স্তূপ.আকার_3() - 1;
+  যৌক্তিক PossiblyNestedSeq = মিথ্যা;
+  auto I = State_স্তূপ.rbegin(), E = State_স্তূপ.rend();
 
-  if (inSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true; // Not possibly but always.
+  যদি (inSeqAnyElement(*I)) {
+    PossiblyNestedSeq = সত্য; // Not possibly but always.
     ++Indent;
-  } else if (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
+  } অন্যথা যদি (*I == in_Map_First_চাবি || *I == in_Flow_Map_First_চাবি ||
              inFlowSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true;
+    PossiblyNestedSeq = সত্য;
     ++I; // Skip back().
   }
 
-  unsigned OutputDashCount = 0;
-  if (PossiblyNestedSeq) {
+  unsigned Output_Dash_গুনতি = 0;
+  যদি (PossiblyNestedSeq) {
     // Count up consecutive inSeqFirstElement from the end, unless
     // inSeqFirstElement is the top of nested sequence.
-    while (I != E) {
+    যখন (I != E) {
       // Don't count the top of nested sequence.
-      if (!inSeqAnyElement(*I))
-        break;
+      যদি (!inSeqAnyElement(*I))
+        বিরতি;
 
-      ++OutputDashCount;
+      ++Output_Dash_গুনতি;
 
       // Stop counting if consecutive inSeqFirstElement ends.
-      if (*I++ != inSeqFirstElement)
-        break;
+      যদি (*I++ != inSeqFirstElement)
+        বিরতি;
     }
   }
 
-  for (unsigned I = OutputDashCount; I < Indent; ++I)
+  জন্য (unsigned I = Output_Dash_গুনতি; I < Indent; ++I)
     output("  ");
 
-  for (unsigned I = 0; I < OutputDashCount; ++I)
+  জন্য (unsigned I = 0; I < Output_Dash_গুনতি; ++I)
     output("- ");
 }
 
-void Output::paddedKey(StringRef key) {
-  output(key, needsQuotes(key, false));
+শূন্য Output::padded_চাবি(StringRef চাবি_2) {
+  output(চাবি_2, needsQuotes(চাবি_2, মিথ্যা));
   output(":");
-  const char *spaces = "                ";
-  if (key.size() < strlen(spaces))
-    Padding = &spaces[key.size()];
-  else
+  ধ্রুবক অক্ষর *spaces = "                ";
+  যদি (চাবি_2.আকার_3() < strlen(spaces))
+    Padding = &spaces[চাবি_2.আকার_3()];
+  অন্যথা
     Padding = " ";
 }
 
-void Output::flowKey(StringRef Key) {
-  if (StateStack.back() == inFlowMapOtherKey)
+শূন্য Output::flow_চাবি(StringRef চাবি) {
+  যদি (State_স্তূপ.back() == in_Flow_Map_Other_চাবি)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  যদি (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int I = 0; I < ColumnAtMapFlowStart; ++I)
+    জন্য (পূর্ণসংখ্যা I = 0; I < ColumnAtMapFlowStart; ++I)
       output(" ");
     Column = ColumnAtMapFlowStart;
     output("  ");
   }
-  output(Key, needsQuotes(Key, false));
+  output(চাবি, needsQuotes(চাবি, মিথ্যা));
   output(": ");
 }
 
-NodeKind Output::getNodeKind() { report_fatal_error("invalid call"); }
+গ্রন্থি_Kind Output::get_গ্রন্থি_Kind() { report_fatal_error("invalid call"); }
 
-bool Output::inSeqAnyElement(InState State) {
-  return State == inSeqFirstElement || State == inSeqOtherElement;
+যৌক্তিক Output::inSeqAnyElement(InState State) {
+  ফেরত State == inSeqFirstElement || State == inSeqOtherElement;
 }
 
-bool Output::inFlowSeqAnyElement(InState State) {
-  return State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
+যৌক্তিক Output::inFlowSeqAnyElement(InState State) {
+  ফেরত State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
 }
 
-bool Output::inMapAnyKey(InState State) {
-  return State == inMapFirstKey || State == inMapOtherKey;
+যৌক্তিক Output::in_Map_Any_চাবি(InState State) {
+  ফেরত State == in_Map_First_চাবি || State == in_Map_Other_চাবি;
 }
 
-bool Output::inFlowMapAnyKey(InState State) {
-  return State == inFlowMapFirstKey || State == inFlowMapOtherKey;
+যৌক্তিক Output::in_Flow_Map_Any_চাবি(InState State) {
+  ফেরত State == in_Flow_Map_First_চাবি || State == in_Flow_Map_Other_চাবি;
 }
 
 //===----------------------------------------------------------------------===//
 //  traits for built-in types
 //===----------------------------------------------------------------------===//
 
-void ScalarTraits<bool>::output(const bool &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<যৌক্তিক>::output(ধ্রুবক যৌক্তিক &Val, শূন্য *, raw_ostream &Out) {
   Out << (Val ? "true" : "false");
 }
 
-StringRef ScalarTraits<bool>::input(StringRef Scalar, void *, bool &Val) {
-  if (std::optional<bool> Parsed = parseBool(Scalar)) {
+StringRef ScalarTraits<যৌক্তিক>::প্রবেশ_2(StringRef Scalar, শূন্য *, যৌক্তিক &Val) {
+  যদি (std::optional<যৌক্তিক> Parsed = parseBool(Scalar)) {
     Val = *Parsed;
-    return StringRef();
+    ফেরত StringRef();
   }
-  return "invalid boolean";
+  ফেরত "invalid boolean";
 }
 
-void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
+শূন্য ScalarTraits<StringRef>::output(ধ্রুবক StringRef &Val, শূন্য *,
                                      raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<StringRef>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<StringRef>::প্রবেশ_2(StringRef Scalar, শূন্য *,
                                          StringRef &Val) {
   Val = Scalar;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<std::string>::output(const std::string &Val, void *,
+শূন্য ScalarTraits<std::string>::output(ধ্রুবক std::string &Val, শূন্য *,
                                        raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<std::string>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<std::string>::প্রবেশ_2(StringRef Scalar, শূন্য *,
                                            std::string &Val) {
   Val = Scalar.str();
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
+শূন্য ScalarTraits<uint8_t>::output(ধ্রুবক uint8_t &Val, শূন্য *,
                                    raw_ostream &Out) {
   // use temp uin32_t because ostream thinks uint8_t is a character
-  uint32_t Num = Val;
-  Out << Num;
+  uint32_t অঙ্ক = Val;
+  Out << অঙ্ক;
 }
 
-StringRef ScalarTraits<uint8_t>::input(StringRef Scalar, void *, uint8_t &Val) {
+StringRef ScalarTraits<uint8_t>::প্রবেশ_2(StringRef Scalar, শূন্য *, uint8_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFF)
-    return "out of range number";
+  যদি (getAsUnsignedInteger(Scalar, 0, n))
+    ফেরত "invalid number";
+  যদি (n > 0xFF)
+    ফেরত "out of range number";
   Val = n;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
+শূন্য ScalarTraits<uint16_t>::output(ধ্রুবক uint16_t &Val, শূন্য *,
                                     raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<uint16_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint16_t>::প্রবেশ_2(StringRef Scalar, শূন্য *,
                                         uint16_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFF)
-    return "out of range number";
+  যদি (getAsUnsignedInteger(Scalar, 0, n))
+    ফেরত "invalid number";
+  যদি (n > 0xFFFF)
+    ফেরত "out of range number";
   Val = n;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
+শূন্য ScalarTraits<uint32_t>::output(ধ্রুবক uint32_t &Val, শূন্য *,
                                     raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<uint32_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint32_t>::প্রবেশ_2(StringRef Scalar, শূন্য *,
                                         uint32_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range number";
+  যদি (getAsUnsignedInteger(Scalar, 0, n))
+    ফেরত "invalid number";
+  যদি (n > 0xFFFFFFFFUL)
+    ফেরত "out of range number";
   Val = n;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
+শূন্য ScalarTraits<uint64_t>::output(ধ্রুবক uint64_t &Val, শূন্য *,
                                     raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<uint64_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint64_t>::প্রবেশ_2(StringRef Scalar, শূন্য *,
                                         uint64_t &Val) {
   unsigned long long N;
-  if (getAsUnsignedInteger(Scalar, 0, N))
-    return "invalid number";
+  যদি (getAsUnsignedInteger(Scalar, 0, N))
+    ফেরত "invalid number";
   Val = N;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<int8_t>::output(ধ্রুবক int8_t &Val, শূন্য *, raw_ostream &Out) {
   // use temp in32_t because ostream thinks int8_t is a character
-  int32_t Num = Val;
-  Out << Num;
+  int32_t অঙ্ক = Val;
+  Out << অঙ্ক;
 }
 
-StringRef ScalarTraits<int8_t>::input(StringRef Scalar, void *, int8_t &Val) {
+StringRef ScalarTraits<int8_t>::প্রবেশ_2(StringRef Scalar, শূন্য *, int8_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > 127) || (N < -128))
-    return "out of range number";
+  যদি (getAsSignedInteger(Scalar, 0, N))
+    ফেরত "invalid number";
+  যদি ((N > 127) || (N < -128))
+    ফেরত "out of range number";
   Val = N;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
+শূন্য ScalarTraits<int16_t>::output(ধ্রুবক int16_t &Val, শূন্য *,
                                    raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<int16_t>::input(StringRef Scalar, void *, int16_t &Val) {
+StringRef ScalarTraits<int16_t>::প্রবেশ_2(StringRef Scalar, শূন্য *, int16_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT16_MAX) || (N < INT16_MIN))
-    return "out of range number";
+  যদি (getAsSignedInteger(Scalar, 0, N))
+    ফেরত "invalid number";
+  যদি ((N > INT16_MAX) || (N < INT16_MIN))
+    ফেরত "out of range number";
   Val = N;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
+শূন্য ScalarTraits<int32_t>::output(ধ্রুবক int32_t &Val, শূন্য *,
                                    raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<int32_t>::input(StringRef Scalar, void *, int32_t &Val) {
+StringRef ScalarTraits<int32_t>::প্রবেশ_2(StringRef Scalar, শূন্য *, int32_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT32_MAX) || (N < INT32_MIN))
-    return "out of range number";
+  যদি (getAsSignedInteger(Scalar, 0, N))
+    ফেরত "invalid number";
+  যদি ((N > INT32_MAX) || (N < INT32_MIN))
+    ফেরত "out of range number";
   Val = N;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
+শূন্য ScalarTraits<int64_t>::output(ধ্রুবক int64_t &Val, শূন্য *,
                                    raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<int64_t>::input(StringRef Scalar, void *, int64_t &Val) {
+StringRef ScalarTraits<int64_t>::প্রবেশ_2(StringRef Scalar, শূন্য *, int64_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
+  যদি (getAsSignedInteger(Scalar, 0, N))
+    ফেরত "invalid number";
   Val = N;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<দ্বিগুণ>::output(ধ্রুবক দ্বিগুণ &Val, শূন্য *, raw_ostream &Out) {
   Out << format("%g", Val);
 }
 
-StringRef ScalarTraits<double>::input(StringRef Scalar, void *, double &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<দ্বিগুণ>::প্রবেশ_2(StringRef Scalar, শূন্য *, দ্বিগুণ &Val) {
+  যদি (to_float(Scalar, Val))
+    ফেরত StringRef();
+  ফেরত "invalid floating point number";
 }
 
-void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<দশমিক>::output(ধ্রুবক দশমিক &Val, শূন্য *, raw_ostream &Out) {
   Out << format("%g", Val);
 }
 
-StringRef ScalarTraits<float>::input(StringRef Scalar, void *, float &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<দশমিক>::প্রবেশ_2(StringRef Scalar, শূন্য *, দশমিক &Val) {
+  যদি (to_float(Scalar, Val))
+    ফেরত StringRef();
+  ফেরত "invalid floating point number";
 }
 
-void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<Hex8>::output(ধ্রুবক Hex8 &Val, শূন্য *, raw_ostream &Out) {
   Out << format("0x%" PRIX8, (uint8_t)Val);
 }
 
-StringRef ScalarTraits<Hex8>::input(StringRef Scalar, void *, Hex8 &Val) {
+StringRef ScalarTraits<Hex8>::প্রবেশ_2(StringRef Scalar, শূন্য *, Hex8 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex8 number";
-  if (n > 0xFF)
-    return "out of range hex8 number";
+  যদি (getAsUnsignedInteger(Scalar, 0, n))
+    ফেরত "invalid hex8 number";
+  যদি (n > 0xFF)
+    ফেরত "out of range hex8 number";
   Val = n;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<Hex16>::output(ধ্রুবক Hex16 &Val, শূন্য *, raw_ostream &Out) {
   Out << format("0x%" PRIX16, (uint16_t)Val);
 }
 
-StringRef ScalarTraits<Hex16>::input(StringRef Scalar, void *, Hex16 &Val) {
+StringRef ScalarTraits<Hex16>::প্রবেশ_2(StringRef Scalar, শূন্য *, Hex16 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex16 number";
-  if (n > 0xFFFF)
-    return "out of range hex16 number";
+  যদি (getAsUnsignedInteger(Scalar, 0, n))
+    ফেরত "invalid hex16 number";
+  যদি (n > 0xFFFF)
+    ফেরত "out of range hex16 number";
   Val = n;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<Hex32>::output(ধ্রুবক Hex32 &Val, শূন্য *, raw_ostream &Out) {
   Out << format("0x%" PRIX32, (uint32_t)Val);
 }
 
-StringRef ScalarTraits<Hex32>::input(StringRef Scalar, void *, Hex32 &Val) {
+StringRef ScalarTraits<Hex32>::প্রবেশ_2(StringRef Scalar, শূন্য *, Hex32 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex32 number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range hex32 number";
+  যদি (getAsUnsignedInteger(Scalar, 0, n))
+    ফেরত "invalid hex32 number";
+  যদি (n > 0xFFFFFFFFUL)
+    ফেরত "out of range hex32 number";
   Val = n;
-  return StringRef();
+  ফেরত StringRef();
 }
 
-void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
+শূন্য ScalarTraits<Hex64>::output(ধ্রুবক Hex64 &Val, শূন্য *, raw_ostream &Out) {
   Out << format("0x%" PRIX64, (uint64_t)Val);
 }
 
-StringRef ScalarTraits<Hex64>::input(StringRef Scalar, void *, Hex64 &Val) {
-  unsigned long long Num;
-  if (getAsUnsignedInteger(Scalar, 0, Num))
-    return "invalid hex64 number";
-  Val = Num;
-  return StringRef();
+StringRef ScalarTraits<Hex64>::প্রবেশ_2(StringRef Scalar, শূন্য *, Hex64 &Val) {
+  unsigned long long অঙ্ক;
+  যদি (getAsUnsignedInteger(Scalar, 0, অঙ্ক))
+    ফেরত "invalid hex64 number";
+  Val = অঙ্ক;
+  ফেরত StringRef();
 }
 
-void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
+শূন্য ScalarTraits<VersionTuple>::output(ধ্রুবক VersionTuple &Val, শূন্য *,
                                         llvm::raw_ostream &Out) {
   Out << Val.getAsString();
 }
 
-StringRef ScalarTraits<VersionTuple>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<VersionTuple>::প্রবেশ_2(StringRef Scalar, শূন্য *,
                                             VersionTuple &Val) {
-  if (Val.tryParse(Scalar))
-    return "invalid version format";
-  return StringRef();
+  যদি (Val.tryParse(Scalar))
+    ফেরত "invalid version format";
+  ফেরত StringRef();
 }

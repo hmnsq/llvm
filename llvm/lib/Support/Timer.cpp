@@ -10,33 +10,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Timer.h"
+#অন্তর্ভাব "llvm/Support/Timer.h"
 
-#include "DebugOptions.h"
+#অন্তর্ভাব "DebugOptions.h"
 
-#include "llvm/ADT/Statistic.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signposts.h"
-#include "llvm/Support/raw_ostream.h"
-#include <limits>
-#include <optional>
+#অন্তর্ভাব "llvm/ADT/Statistic.h"
+#অন্তর্ভাব "llvm/ADT/StringMap.h"
+#অন্তর্ভাব "llvm/Config/config.h"
+#অন্তর্ভাব "llvm/Support/CommandLine.h"
+#অন্তর্ভাব "llvm/Support/FileSystem.h"
+#অন্তর্ভাব "llvm/Support/Format.h"
+#অন্তর্ভাব "llvm/Support/ManagedStatic.h"
+#অন্তর্ভাব "llvm/Support/Mutex.h"
+#অন্তর্ভাব "llvm/Support/Process.h"
+#অন্তর্ভাব "llvm/Support/Signposts.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব <limits>
+#অন্তর্ভাব <optional>
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#যদি HAVE_UNISTD_H
+#অন্তর্ভাব <unistd.h>
 #endif
 
 #ifdef HAVE_PROC_PID_RUSAGE
-#include <libproc.h>
+#অন্তর্ভাব <libproc.h>
 #endif
 
-using namespace llvm;
+using নামাকাশ llvm;
 
 //===----------------------------------------------------------------------===//
 // Forward declarations for Managed Timer Globals getters.
@@ -45,158 +45,158 @@ using namespace llvm;
 // access. Use of getters also has the benefit of making it a bit more explicit
 // that a global is being used.
 //===----------------------------------------------------------------------===//
-namespace {
-class Name2PairMap;
+নামাকাশ {
+শ্রেণী Name2PairMap;
 }
 
-static std::string &libSupportInfoOutputFilename();
-static bool trackSpace();
-static bool sortTimers();
+স্থির std::string &libSupportInfoOutputFilename();
+স্থির যৌক্তিক trackSpace();
+স্থির যৌক্তিক sortTimers();
 [[maybe_unused]]
-static SignpostEmitter &signposts();
-static sys::SmartMutex<true> &timerLock();
-static TimerGroup &defaultTimerGroup();
-static Name2PairMap &namedGroupedTimers();
-static bool isTimerGlobalsConstructed();
+স্থির SignpostEmitter &signposts();
+স্থির sys::SmartMutex<সত্য> &timerLock();
+স্থির TimerGroup &defaultTimerGroup();
+স্থির Name2PairMap &namedGroupedTimers();
+স্থির যৌক্তিক isTimerGlobalsConstructed();
 
 //===----------------------------------------------------------------------===//
 //
 //===----------------------------------------------------------------------===//
 
 std::unique_ptr<raw_ostream> llvm::CreateInfoOutputFile() {
-  const std::string &OutputFilename = libSupportInfoOutputFilename();
-  if (OutputFilename.empty())
-    return std::make_unique<raw_fd_ostream>(2, false); // stderr.
-  if (OutputFilename == "-")
-    return std::make_unique<raw_fd_ostream>(1, false); // stdout.
+  ধ্রুবক std::string &OutputFilename = libSupportInfoOutputFilename();
+  যদি (OutputFilename.empty())
+    ফেরত std::make_unique<raw_fd_ostream>(2, মিথ্যা); // stderr.
+  যদি (OutputFilename == "-")
+    ফেরত std::make_unique<raw_fd_ostream>(1, মিথ্যা); // stdout.
 
   // Append mode is used because the info output file is opened and closed
   // each time -stats or -time-passes wants to print output to it. To
   // compensate for this, the test-suite Makefiles have code to delete the
   // info output file before running commands which write to it.
   std::error_code EC;
-  auto Result = std::make_unique<raw_fd_ostream>(
+  auto ফলাফল = std::make_unique<raw_fd_ostream>(
       OutputFilename, EC, sys::fs::OF_Append | sys::fs::OF_TextWithCRLF);
-  if (!EC)
-    return Result;
+  যদি (!EC)
+    ফেরত ফলাফল;
 
   errs() << "Error opening info-output-file '"
     << OutputFilename << " for appending!\n";
-  return std::make_unique<raw_fd_ostream>(2, false); // stderr.
+  ফেরত std::make_unique<raw_fd_ostream>(2, মিথ্যা); // stderr.
 }
 
 //===----------------------------------------------------------------------===//
 // Timer Implementation
 //===----------------------------------------------------------------------===//
 
-void Timer::init(StringRef TimerName, StringRef TimerDescription) {
+শূন্য Timer::init(StringRef TimerName, StringRef TimerDescription) {
   init(TimerName, TimerDescription, defaultTimerGroup());
 }
 
-void Timer::init(StringRef TimerName, StringRef TimerDescription,
+শূন্য Timer::init(StringRef TimerName, StringRef TimerDescription,
                  TimerGroup &tg) {
-  assert(!TG && "Timer already initialized");
+  প্রতিজ্ঞা(!TG && "Timer already initialized");
   Name.assign(TimerName.begin(), TimerName.end());
   Description.assign(TimerDescription.begin(), TimerDescription.end());
-  Running = Triggered = false;
+  Running = Triggered = মিথ্যা;
   TG = &tg;
-  TG->addTimer(*this);
+  TG->addTimer(*এই);
 }
 
 Timer::~Timer() {
-  if (!TG) return;  // Never initialized, or already cleared.
-  TG->removeTimer(*this);
+  যদি (!TG) ফেরত;  // Never initialized, or already cleared.
+  TG->removeTimer(*এই);
 }
 
-static inline size_t getMemUsage() {
-  if (!trackSpace())
-    return 0;
-  return sys::Process::GetMallocUsage();
+স্থির অন্তঃরেখ size_t getMemUsage() {
+  যদি (!trackSpace())
+    ফেরত 0;
+  ফেরত sys::Process::GetMallocUsage();
 }
 
-static uint64_t getCurInstructionsExecuted() {
-#if defined(HAVE_UNISTD_H) && defined(HAVE_PROC_PID_RUSAGE) &&                 \
+স্থির uint64_t getCurInstructionsExecuted() {
+#যদি defined(HAVE_UNISTD_H) && defined(HAVE_PROC_PID_RUSAGE) &&                 \
     defined(RUSAGE_INFO_V4)
-  struct rusage_info_v4 ru;
-  if (proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru) == 0) {
-    return ru.ri_instructions;
+  কাঠামো rusage_info_v4 ru;
+  যদি (proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru) == 0) {
+    ফেরত ru.ri_instructions;
   }
 #endif
-  return 0;
+  ফেরত 0;
 }
 
-TimeRecord TimeRecord::getCurrentTime(bool Start) {
-  using Seconds = std::chrono::duration<double, std::ratio<1>>;
-  TimeRecord Result;
+TimeRecord TimeRecord::getCurrentTime(যৌক্তিক Start) {
+  using Seconds = std::chrono::duration<দ্বিগুণ, std::ratio<1>>;
+  TimeRecord ফলাফল;
   sys::TimePoint<> now;
   std::chrono::nanoseconds user, sys;
 
-  if (Start) {
-    Result.MemUsed = getMemUsage();
-    Result.InstructionsExecuted = getCurInstructionsExecuted();
+  যদি (Start) {
+    ফলাফল.MemUsed = getMemUsage();
+    ফলাফল.InstructionsExecuted = getCurInstructionsExecuted();
     sys::Process::GetTimeUsage(now, user, sys);
-  } else {
+  } অন্যথা {
     sys::Process::GetTimeUsage(now, user, sys);
-    Result.InstructionsExecuted = getCurInstructionsExecuted();
-    Result.MemUsed = getMemUsage();
+    ফলাফল.InstructionsExecuted = getCurInstructionsExecuted();
+    ফলাফল.MemUsed = getMemUsage();
   }
 
-  Result.WallTime = Seconds(now.time_since_epoch()).count();
-  Result.UserTime = Seconds(user).count();
-  Result.SystemTime = Seconds(sys).count();
-  return Result;
+  ফলাফল.WallTime = Seconds(now.time_since_epoch()).গুনতি();
+  ফলাফল.UserTime = Seconds(user).গুনতি();
+  ফলাফল.SystemTime = Seconds(sys).গুনতি();
+  ফেরত ফলাফল;
 }
 
-void Timer::startTimer() {
-  assert(!Running && "Cannot start a running timer");
-  Running = Triggered = true;
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-  signposts().startInterval(this, getName());
+শূন্য Timer::startTimer() {
+  প্রতিজ্ঞা(!Running && "Cannot start a running timer");
+  Running = Triggered = সত্য;
+#যদি LLVM_SUPPORT_XCODE_SIGNPOSTS
+  signposts().startInterval(এই, getName());
 #endif
-  StartTime = TimeRecord::getCurrentTime(true);
+  StartTime = TimeRecord::getCurrentTime(সত্য);
 }
 
-void Timer::stopTimer() {
-  assert(Running && "Cannot stop a paused timer");
-  Running = false;
-  Time += TimeRecord::getCurrentTime(false);
+শূন্য Timer::stopTimer() {
+  প্রতিজ্ঞা(Running && "Cannot stop a paused timer");
+  Running = মিথ্যা;
+  Time += TimeRecord::getCurrentTime(মিথ্যা);
   Time -= StartTime;
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-  signposts().endInterval(this, getName());
+#যদি LLVM_SUPPORT_XCODE_SIGNPOSTS
+  signposts().endInterval(এই, getName());
 #endif
 }
 
-void Timer::clear() {
-  Running = Triggered = false;
+শূন্য Timer::clear() {
+  Running = Triggered = মিথ্যা;
   Time = StartTime = TimeRecord();
 }
 
-void Timer::yieldTo(Timer &O) {
+শূন্য Timer::yieldTo(Timer &O) {
   stopTimer();
   O.startTimer();
 }
 
-static void printVal(double Val, double Total, raw_ostream &OS) {
-  if (Total < 1e-7)   // Avoid dividing by zero.
+স্থির শূন্য printVal(দ্বিগুণ Val, দ্বিগুণ যোগ_2, raw_ostream &OS) {
+  যদি (যোগ_2 < 1e-7)   // Avoid dividing by zero.
     OS << "        -----     ";
-  else
-    OS << format("  %7.4f (%5.1f%%)", Val, Val*100/Total);
+  অন্যথা
+    OS << format("  %7.4f (%5.1f%%)", Val, Val*100/যোগ_2);
 }
 
-void TimeRecord::print(const TimeRecord &Total, raw_ostream &OS) const {
-  if (Total.getUserTime())
-    printVal(getUserTime(), Total.getUserTime(), OS);
-  if (Total.getSystemTime())
-    printVal(getSystemTime(), Total.getSystemTime(), OS);
-  if (Total.getProcessTime())
-    printVal(getProcessTime(), Total.getProcessTime(), OS);
-  printVal(getWallTime(), Total.getWallTime(), OS);
+শূন্য TimeRecord::print(ধ্রুবক TimeRecord &যোগ_2, raw_ostream &OS) ধ্রুবক {
+  যদি (যোগ_2.getUserTime())
+    printVal(getUserTime(), যোগ_2.getUserTime(), OS);
+  যদি (যোগ_2.getSystemTime())
+    printVal(getSystemTime(), যোগ_2.getSystemTime(), OS);
+  যদি (যোগ_2.getProcessTime())
+    printVal(getProcessTime(), যোগ_2.getProcessTime(), OS);
+  printVal(getWallTime(), যোগ_2.getWallTime(), OS);
 
   OS << "  ";
 
-  if (Total.getMemUsed())
+  যদি (যোগ_2.getMemUsed())
     OS << format("%9" PRId64 "  ", (int64_t)getMemUsed());
-  if (Total.getInstructionsExecuted())
+  যদি (যোগ_2.getInstructionsExecuted())
     OS << format("%9" PRId64 "  ", (int64_t)getInstructionsExecuted());
 }
 
@@ -205,45 +205,45 @@ void TimeRecord::print(const TimeRecord &Total, raw_ostream &OS) const {
 //   NamedRegionTimer Implementation
 //===----------------------------------------------------------------------===//
 
-namespace {
+নামাকাশ {
 
 using Name2TimerMap = StringMap<Timer>;
 
-class Name2PairMap {
+শ্রেণী Name2PairMap {
   StringMap<std::pair<TimerGroup*, Name2TimerMap> > Map;
-public:
+সর্বজনীন:
   ~Name2PairMap() {
-    for (StringMap<std::pair<TimerGroup*, Name2TimerMap> >::iterator
+    জন্য (StringMap<std::pair<TimerGroup*, Name2TimerMap> >::iterator
          I = Map.begin(), E = Map.end(); I != E; ++I)
       delete I->second.first;
   }
 
   Timer &get(StringRef Name, StringRef Description, StringRef GroupName,
              StringRef GroupDescription) {
-    sys::SmartScopedLock<true> L(timerLock());
+    sys::SmartScopedLock<সত্য> L(timerLock());
 
     std::pair<TimerGroup *, Name2TimerMap> &GroupEntry =
         getGroupEntry(GroupName, GroupDescription);
     Timer &T = GroupEntry.second[Name];
-    if (!T.isInitialized())
+    যদি (!T.isInitialized())
       T.init(Name, Description, *GroupEntry.first);
-    return T;
+    ফেরত T;
   }
 
   TimerGroup &getTimerGroup(StringRef GroupName, StringRef GroupDescription) {
-    sys::SmartScopedLock<true> L(timerLock());
-    return *getGroupEntry(GroupName, GroupDescription).first;
+    sys::SmartScopedLock<সত্য> L(timerLock());
+    ফেরত *getGroupEntry(GroupName, GroupDescription).first;
   }
 
-private:
+ব্যক্তিগত:
   std::pair<TimerGroup *, Name2TimerMap> &
   getGroupEntry(StringRef GroupName, StringRef GroupDescription) {
     std::pair<TimerGroup *, Name2TimerMap> &GroupEntry = Map[GroupName];
-    if (!GroupEntry.first)
+    যদি (!GroupEntry.first)
       GroupEntry.first =
-          new TimerGroup(GroupName, GroupDescription, /*PrintOnExit=*/true);
+          নতুন TimerGroup(GroupName, GroupDescription, /*PrintOnExit=*/সত্য);
 
-    return GroupEntry;
+    ফেরত GroupEntry;
   }
 };
 
@@ -251,7 +251,7 @@ private:
 
 NamedRegionTimer::NamedRegionTimer(StringRef Name, StringRef Description,
                                    StringRef GroupName,
-                                   StringRef GroupDescription, bool Enabled)
+                                   StringRef GroupDescription, যৌক্তিক Enabled)
     : TimeRegion(!Enabled
                      ? nullptr
                      : &namedGroupedTimers().get(Name, Description, GroupName,
@@ -259,7 +259,7 @@ NamedRegionTimer::NamedRegionTimer(StringRef Name, StringRef Description,
 
 TimerGroup &NamedRegionTimer::getNamedTimerGroup(StringRef GroupName,
                                                  StringRef GroupDescription) {
-  return namedGroupedTimers().getTimerGroup(GroupName, GroupDescription);
+  ফেরত namedGroupedTimers().getTimerGroup(GroupName, GroupDescription);
 }
 
 //===----------------------------------------------------------------------===//
@@ -268,231 +268,231 @@ TimerGroup &NamedRegionTimer::getNamedTimerGroup(StringRef GroupName,
 
 /// This is the global list of TimerGroups, maintained by the TimerGroup
 /// ctor/dtor and is protected by the timerLock lock.
-static TimerGroup *TimerGroupList = nullptr;
+স্থির TimerGroup *TimerGroupList = nullptr;
 
 TimerGroup::TimerGroup(StringRef Name, StringRef Description,
-                       sys::SmartMutex<true> &lock, bool PrintOnExit)
+                       sys::SmartMutex<সত্য> &lock, যৌক্তিক PrintOnExit)
     : Name(Name.begin(), Name.end()),
       Description(Description.begin(), Description.end()),
       PrintOnExit(PrintOnExit) {
   // Add the group to TimerGroupList.
-  sys::SmartScopedLock<true> L(lock);
-  if (TimerGroupList)
-    TimerGroupList->Prev = &Next;
-  Next = TimerGroupList;
-  Prev = &TimerGroupList;
-  TimerGroupList = this;
+  sys::SmartScopedLock<সত্য> L(lock);
+  যদি (TimerGroupList)
+    TimerGroupList->পূর্ব_2 = &পরবর্তী_2;
+  পরবর্তী_2 = TimerGroupList;
+  পূর্ব_2 = &TimerGroupList;
+  TimerGroupList = এই;
 }
 
-TimerGroup::TimerGroup(StringRef Name, StringRef Description, bool PrintOnExit)
+TimerGroup::TimerGroup(StringRef Name, StringRef Description, যৌক্তিক PrintOnExit)
     : TimerGroup(Name, Description, timerLock(), PrintOnExit) {}
 
 TimerGroup::TimerGroup(StringRef Name, StringRef Description,
-                       const StringMap<TimeRecord> &Records, bool PrintOnExit)
+                       ধ্রুবক StringMap<TimeRecord> &Records, যৌক্তিক PrintOnExit)
     : TimerGroup(Name, Description, PrintOnExit) {
-  TimersToPrint.reserve(Records.size());
-  for (const auto &P : Records)
-    TimersToPrint.emplace_back(P.getValue(), std::string(P.getKey()),
-                               std::string(P.getKey()));
-  assert(TimersToPrint.size() == Records.size() && "Size mismatch");
+  TimersToPrint.reserve(Records.আকার_3());
+  জন্য (ধ্রুবক auto &P : Records)
+    TimersToPrint.emplace_back(P.get_মান(), std::string(P.get_চাবি()),
+                               std::string(P.get_চাবি()));
+  প্রতিজ্ঞা(TimersToPrint.আকার_3() == Records.আকার_3() && "Size mismatch");
 }
 
 TimerGroup::~TimerGroup() {
   // If the timer group is destroyed before the timers it owns, accumulate and
   // print the timing data.
-  while (FirstTimer)
+  যখন (FirstTimer)
     removeTimer(*FirstTimer);
 
-  if (!TimersToPrint.empty() && PrintOnExit) {
+  যদি (!TimersToPrint.empty() && PrintOnExit) {
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
     PrintQueuedTimers(*OutStream);
   }
 
   auto unlink = [&]() {
-    *Prev = Next;
-    if (Next)
-      Next->Prev = Prev;
+    *পূর্ব_2 = পরবর্তী_2;
+    যদি (পরবর্তী_2)
+      পরবর্তী_2->পূর্ব_2 = পূর্ব_2;
   };
 
   // TimerGlobals is always created implicity, through a call to timerLock(),
   // when a TimeGroup is created. On CRT shutdown, the TimerGlobals instance
   // might have been destroyed already. Avoid re-creating it if calling
   // timerLock().
-  if (!isTimerGlobalsConstructed()) {
+  যদি (!isTimerGlobalsConstructed()) {
     unlink();
-    return;
+    ফেরত;
   }
 
   // Remove the group from the TimerGroupList.
-  sys::SmartScopedLock<true> L(timerLock());
+  sys::SmartScopedLock<সত্য> L(timerLock());
   unlink();
 }
 
-void TimerGroup::removeTimer(Timer &T) {
-  sys::SmartScopedLock<true> L(timerLock());
+শূন্য TimerGroup::removeTimer(Timer &T) {
+  sys::SmartScopedLock<সত্য> L(timerLock());
 
   // If the timer was started, move its data to TimersToPrint.
-  if (T.hasTriggered())
+  যদি (T.hasTriggered())
     TimersToPrint.emplace_back(T.Time, T.Name, T.Description);
 
   T.TG = nullptr;
 
   // Unlink the timer from our list.
-  *T.Prev = T.Next;
-  if (T.Next)
-    T.Next->Prev = T.Prev;
+  *T.পূর্ব_2 = T.পরবর্তী_2;
+  যদি (T.পরবর্তী_2)
+    T.পরবর্তী_2->পূর্ব_2 = T.পূর্ব_2;
 }
 
-void TimerGroup::addTimer(Timer &T) {
-  sys::SmartScopedLock<true> L(timerLock());
+শূন্য TimerGroup::addTimer(Timer &T) {
+  sys::SmartScopedLock<সত্য> L(timerLock());
 
   // Add the timer to our list.
-  if (FirstTimer)
-    FirstTimer->Prev = &T.Next;
-  T.Next = FirstTimer;
-  T.Prev = &FirstTimer;
+  যদি (FirstTimer)
+    FirstTimer->পূর্ব_2 = &T.পরবর্তী_2;
+  T.পরবর্তী_2 = FirstTimer;
+  T.পূর্ব_2 = &FirstTimer;
   FirstTimer = &T;
 }
 
-void TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
+শূন্য TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
   // Perhaps sort the timers in descending order by amount of time taken.
-  if (sortTimers())
+  যদি (sortTimers())
     llvm::sort(TimersToPrint);
 
-  TimeRecord Total;
-  for (const PrintRecord &Record : TimersToPrint)
-    Total += Record.Time;
+  TimeRecord যোগ_2;
+  জন্য (ধ্রুবক PrintRecord &Record : TimersToPrint)
+    যোগ_2 += Record.Time;
 
   // Print out timing header.
   OS << "===" << std::string(73, '-') << "===\n";
   // Figure out how many spaces to indent TimerGroup name.
-  unsigned Padding = (80-Description.length())/2;
-  if (Padding > 80) Padding = 0;         // Don't allow "negative" numbers
+  unsigned Padding = (80-Description.দৈর্ঘ্য_2())/2;
+  যদি (Padding > 80) Padding = 0;         // Don't allow "negative" numbers
   OS.indent(Padding) << Description << '\n';
   OS << "===" << std::string(73, '-') << "===\n";
 
   // If this is not an collection of ungrouped times, print the total time.
   // Ungrouped timers don't really make sense to add up.  We still print the
   // TOTAL line to make the percentages make sense.
-  if (this != &defaultTimerGroup())
+  যদি (এই != &defaultTimerGroup())
     OS << format("  Total Execution Time: %5.4f seconds (%5.4f wall clock)\n",
-                 Total.getProcessTime(), Total.getWallTime());
+                 যোগ_2.getProcessTime(), যোগ_2.getWallTime());
   OS << '\n';
 
-  if (Total.getUserTime())
+  যদি (যোগ_2.getUserTime())
     OS << "   ---User Time---";
-  if (Total.getSystemTime())
+  যদি (যোগ_2.getSystemTime())
     OS << "   --System Time--";
-  if (Total.getProcessTime())
+  যদি (যোগ_2.getProcessTime())
     OS << "   --User+System--";
   OS << "   ---Wall Time---";
-  if (Total.getMemUsed())
+  যদি (যোগ_2.getMemUsed())
     OS << "  ---Mem---";
-  if (Total.getInstructionsExecuted())
+  যদি (যোগ_2.getInstructionsExecuted())
     OS << "  ---Instr---";
   OS << "  --- Name ---\n";
 
   // Loop through all of the timing data, printing it out.
-  for (const PrintRecord &Record : llvm::reverse(TimersToPrint)) {
-    Record.Time.print(Total, OS);
+  জন্য (ধ্রুবক PrintRecord &Record : llvm::reverse(TimersToPrint)) {
+    Record.Time.print(যোগ_2, OS);
     OS << Record.Description << '\n';
   }
 
-  Total.print(Total, OS);
+  যোগ_2.print(যোগ_2, OS);
   OS << "Total\n\n";
   OS.flush();
 
   TimersToPrint.clear();
 }
 
-void TimerGroup::prepareToPrintList(bool ResetTime) {
+শূন্য TimerGroup::prepareToPrintList(যৌক্তিক ResetTime) {
   // See if any of our timers were started, if so add them to TimersToPrint.
-  for (Timer *T = FirstTimer; T; T = T->Next) {
-    if (!T->hasTriggered()) continue;
-    bool WasRunning = T->isRunning();
-    if (WasRunning)
+  জন্য (Timer *T = FirstTimer; T; T = T->পরবর্তী_2) {
+    যদি (!T->hasTriggered()) চালু;
+    যৌক্তিক WasRunning = T->isRunning();
+    যদি (WasRunning)
       T->stopTimer();
 
     TimersToPrint.emplace_back(T->Time, T->Name, T->Description);
 
-    if (ResetTime)
+    যদি (ResetTime)
       T->clear();
 
-    if (WasRunning)
+    যদি (WasRunning)
       T->startTimer();
   }
 }
 
-void TimerGroup::print(raw_ostream &OS, bool ResetAfterPrint) {
+শূন্য TimerGroup::print(raw_ostream &OS, যৌক্তিক ResetAfterPrint) {
   {
     // After preparing the timers we can free the lock
-    sys::SmartScopedLock<true> L(timerLock());
+    sys::SmartScopedLock<সত্য> L(timerLock());
     prepareToPrintList(ResetAfterPrint);
   }
 
   // If any timers were started, print the group.
-  if (!TimersToPrint.empty())
+  যদি (!TimersToPrint.empty())
     PrintQueuedTimers(OS);
 }
 
-void TimerGroup::clear() {
-  sys::SmartScopedLock<true> L(timerLock());
-  for (Timer *T = FirstTimer; T; T = T->Next)
+শূন্য TimerGroup::clear() {
+  sys::SmartScopedLock<সত্য> L(timerLock());
+  জন্য (Timer *T = FirstTimer; T; T = T->পরবর্তী_2)
     T->clear();
 }
 
-void TimerGroup::printAll(raw_ostream &OS) {
-  sys::SmartScopedLock<true> L(timerLock());
+শূন্য TimerGroup::printAll(raw_ostream &OS) {
+  sys::SmartScopedLock<সত্য> L(timerLock());
 
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+  জন্য (TimerGroup *TG = TimerGroupList; TG; TG = TG->পরবর্তী_2)
     TG->print(OS);
 }
 
-void TimerGroup::clearAll() {
-  sys::SmartScopedLock<true> L(timerLock());
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+শূন্য TimerGroup::clearAll() {
+  sys::SmartScopedLock<সত্য> L(timerLock());
+  জন্য (TimerGroup *TG = TimerGroupList; TG; TG = TG->পরবর্তী_2)
     TG->clear();
 }
 
-void TimerGroup::printJSONValue(raw_ostream &OS, const PrintRecord &R,
-                                const char *suffix, double Value) {
-  constexpr auto max_digits10 = std::numeric_limits<double>::max_digits10;
+শূন্য TimerGroup::printJSONValue(raw_ostream &OS, ধ্রুবক PrintRecord &R,
+                                ধ্রুবক অক্ষর *suffix, দ্বিগুণ মান) {
+  constexpr auto max_digits10 = std::numeric_limits<দ্বিগুণ>::max_digits10;
   OS << "\t\"time." << Name << '.' << R.Name << suffix
-     << "\": " << format("%.*e", max_digits10 - 1, Value);
+     << "\": " << format("%.*e", max_digits10 - 1, মান);
 }
 
-const char *TimerGroup::printJSONValues(raw_ostream &OS, const char *delim) {
-  sys::SmartScopedLock<true> L(timerLock());
+ধ্রুবক অক্ষর *TimerGroup::printJSONValues(raw_ostream &OS, ধ্রুবক অক্ষর *delim) {
+  sys::SmartScopedLock<সত্য> L(timerLock());
 
-  prepareToPrintList(false);
-  for (const PrintRecord &R : TimersToPrint) {
+  prepareToPrintList(মিথ্যা);
+  জন্য (ধ্রুবক PrintRecord &R : TimersToPrint) {
     OS << delim;
     delim = ",\n";
 
-    const TimeRecord &T = R.Time;
+    ধ্রুবক TimeRecord &T = R.Time;
     printJSONValue(OS, R, ".wall", T.getWallTime());
     OS << delim;
     printJSONValue(OS, R, ".user", T.getUserTime());
     OS << delim;
     printJSONValue(OS, R, ".sys", T.getSystemTime());
-    if (T.getMemUsed()) {
+    যদি (T.getMemUsed()) {
       OS << delim;
       printJSONValue(OS, R, ".mem", T.getMemUsed());
     }
-    if (T.getInstructionsExecuted()) {
+    যদি (T.getInstructionsExecuted()) {
       OS << delim;
       printJSONValue(OS, R, ".instr", T.getInstructionsExecuted());
     }
   }
   TimersToPrint.clear();
-  return delim;
+  ফেরত delim;
 }
 
-const char *TimerGroup::printAllJSONValues(raw_ostream &OS, const char *delim) {
-  sys::SmartScopedLock<true> L(timerLock());
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+ধ্রুবক অক্ষর *TimerGroup::printAllJSONValues(raw_ostream &OS, ধ্রুবক অক্ষর *delim) {
+  sys::SmartScopedLock<সত্য> L(timerLock());
+  জন্য (TimerGroup *TG = TimerGroupList; TG; TG = TG->পরবর্তী_2)
     delim = TG->printJSONValues(OS, delim);
-  return delim;
+  ফেরত delim;
 }
 
 //===----------------------------------------------------------------------===//
@@ -513,26 +513,26 @@ const char *TimerGroup::printAllJSONValues(raw_ostream &OS, const char *delim) {
 // needed until later during compilation. These are lazily constructed in order
 // to reduce launch time.
 //===----------------------------------------------------------------------===//
-class llvm::TimerGlobals {
-public:
+শ্রেণী llvm::TimerGlobals {
+সর্বজনীন:
   std::string LibSupportInfoOutputFilename;
-  cl::opt<std::string, true> InfoOutputFilename{
-      "info-output-file", cl::value_desc("filename"),
+  cl::opt<std::string, সত্য> InfoOutputFilename{
+      "info-output-file", cl::মান_desc("filename"),
       cl::desc("File to append -stats and -timer output to"), cl::Hidden,
       cl::location(LibSupportInfoOutputFilename)};
-  cl::opt<bool> TrackSpace{
+  cl::opt<যৌক্তিক> TrackSpace{
       "track-memory",
       cl::desc("Enable -time-passes memory tracking (this may be slow)"),
       cl::Hidden};
-  cl::opt<bool> SortTimers{
+  cl::opt<যৌক্তিক> SortTimers{
       "sort-timers",
       cl::desc("In the report, sort the timers in each group in wall clock"
                " time order"),
-      cl::init(true), cl::Hidden};
+      cl::init(সত্য), cl::Hidden};
 
-  sys::SmartMutex<true> TimerLock;
+  sys::SmartMutex<সত্য> TimerLock;
   TimerGroup DefaultTimerGroup{"misc", "Miscellaneous Ungrouped Timers",
-                               TimerLock, /*PrintOnExit=*/true};
+                               TimerLock, /*PrintOnExit=*/সত্য};
   SignpostEmitter Signposts;
 
   // Order of these members and initialization below is important. For example
@@ -543,36 +543,36 @@ public:
 
   TimerGlobals &initDeferred() {
     std::call_once(InitDeferredFlag,
-                   [this]() { NamedGroupedTimersPtr.emplace(); });
-    return *this;
+                   [এই]() { NamedGroupedTimersPtr.emplace(); });
+    ফেরত *এই;
   }
 };
 
-static ManagedStatic<TimerGlobals> ManagedTimerGlobals;
+স্থির ManagedStatic<TimerGlobals> ManagedTimerGlobals;
 
-static std::string &libSupportInfoOutputFilename() {
-  return ManagedTimerGlobals->LibSupportInfoOutputFilename;
+স্থির std::string &libSupportInfoOutputFilename() {
+  ফেরত ManagedTimerGlobals->LibSupportInfoOutputFilename;
 }
-static bool trackSpace() { return ManagedTimerGlobals->TrackSpace; }
-static bool sortTimers() { return ManagedTimerGlobals->SortTimers; }
-static SignpostEmitter &signposts() { return ManagedTimerGlobals->Signposts; }
-static sys::SmartMutex<true> &timerLock() {
-  return ManagedTimerGlobals->TimerLock;
+স্থির যৌক্তিক trackSpace() { ফেরত ManagedTimerGlobals->TrackSpace; }
+স্থির যৌক্তিক sortTimers() { ফেরত ManagedTimerGlobals->SortTimers; }
+স্থির SignpostEmitter &signposts() { ফেরত ManagedTimerGlobals->Signposts; }
+স্থির sys::SmartMutex<সত্য> &timerLock() {
+  ফেরত ManagedTimerGlobals->TimerLock;
 }
-static TimerGroup &defaultTimerGroup() {
-  return ManagedTimerGlobals->DefaultTimerGroup;
+স্থির TimerGroup &defaultTimerGroup() {
+  ফেরত ManagedTimerGlobals->DefaultTimerGroup;
 }
-static Name2PairMap &namedGroupedTimers() {
-  return *ManagedTimerGlobals->initDeferred().NamedGroupedTimersPtr;
+স্থির Name2PairMap &namedGroupedTimers() {
+  ফেরত *ManagedTimerGlobals->initDeferred().NamedGroupedTimersPtr;
 }
 
-void llvm::initTimerOptions() { *ManagedTimerGlobals; }
-void TimerGroup::constructForStatistics() {
+শূন্য llvm::initTimerOptions() { *ManagedTimerGlobals; }
+শূন্য TimerGroup::constructForStatistics() {
   ManagedTimerGlobals->initDeferred();
 }
 
-void *TimerGroup::acquireTimerGlobals() { return ManagedTimerGlobals.claim(); }
+শূন্য *TimerGroup::acquireTimerGlobals() { ফেরত ManagedTimerGlobals.claim(); }
 
-static bool isTimerGlobalsConstructed() {
-  return ManagedTimerGlobals.isConstructed();
+স্থির যৌক্তিক isTimerGlobalsConstructed() {
+  ফেরত ManagedTimerGlobals.isConstructed();
 }

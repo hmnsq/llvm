@@ -6,281 +6,281 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DataExtractor.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/LEB128.h"
-#include "llvm/Support/SwapByteOrder.h"
+#অন্তর্ভাব "llvm/Support/DataExtractor.h"
+#অন্তর্ভাব "llvm/ADT/StringExtras.h"
+#অন্তর্ভাব "llvm/Support/Errc.h"
+#অন্তর্ভাব "llvm/Support/ErrorHandling.h"
+#অন্তর্ভাব "llvm/Support/LEB128.h"
+#অন্তর্ভাব "llvm/Support/SwapByteOrder.h"
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-bool DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
-                                Error *E) const {
-  if (isValidOffsetForDataOfSize(Offset, Size))
-    return true;
-  if (E) {
-    if (Offset <= Data.size())
+যৌক্তিক তথ্য_Extractor::prepareRead(uint64_t Offset, uint64_t আকার_2,
+                                Error *E) ধ্রুবক {
+  যদি (is_Valid_Offset_For_তথ্য_Of_আকার(Offset, আকার_2))
+    ফেরত সত্য;
+  যদি (E) {
+    যদি (Offset <= তথ্য_2.আকার_3())
       *E = createStringError(
           errc::illegal_byte_sequence,
           "unexpected end of data at offset 0x%zx while reading [0x%" PRIx64
           ", 0x%" PRIx64 ")",
-          Data.size(), Offset, Offset + Size);
-    else
+          তথ্য_2.আকার_3(), Offset, Offset + আকার_2);
+    অন্যথা
       *E = createStringError(errc::invalid_argument,
                              "offset 0x%" PRIx64
                              " is beyond the end of data at 0x%zx",
-                             Offset, Data.size());
+                             Offset, তথ্য_2.আকার_3());
   }
-  return false;
+  ফেরত মিথ্যা;
 }
 
-static bool isError(Error *E) { return E && *E; }
+স্থির যৌক্তিক isError(Error *E) { ফেরত E && *E; }
 
 template <typename T>
-T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) const {
+T তথ্য_Extractor::getU(uint64_t *offset_ptr, Error *Err) ধ্রুবক {
   ErrorAsOutParameter ErrAsOut(Err);
   T val = 0;
-  if (isError(Err))
-    return val;
+  যদি (isError(Err))
+    ফেরত val;
 
   uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, sizeof(T), Err))
-    return val;
-  std::memcpy(&val, &Data.data()[offset], sizeof(val));
-  if (sys::IsLittleEndianHost != IsLittleEndian)
+  যদি (!prepareRead(offset, আকার(T), Err))
+    ফেরত val;
+  std::memcpy(&val, &তথ্য_2.তথ্য()[offset], আকার(val));
+  যদি (sys::IsLittleEndianHost != IsLittleEndian)
     sys::swapByteOrder(val);
 
   // Advance the offset
-  *offset_ptr += sizeof(val);
-  return val;
+  *offset_ptr += আকার(val);
+  ফেরত val;
 }
 
 template <typename T>
-T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
-                        Error *Err) const {
+T *তথ্য_Extractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t গুনতি,
+                        Error *Err) ধ্রুবক {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return nullptr;
+  যদি (isError(Err))
+    ফেরত nullptr;
 
   uint64_t offset = *offset_ptr;
 
-  if (!prepareRead(offset, sizeof(*dst) * count, Err))
-    return nullptr;
-  for (T *value_ptr = dst, *end = dst + count; value_ptr != end;
-       ++value_ptr, offset += sizeof(*dst))
-    *value_ptr = getU<T>(offset_ptr, Err);
+  যদি (!prepareRead(offset, আকার(*dst) * গুনতি, Err))
+    ফেরত nullptr;
+  জন্য (T *মান_ptr = dst, *end = dst + গুনতি; মান_ptr != end;
+       ++মান_ptr, offset += আকার(*dst))
+    *মান_ptr = getU<T>(offset_ptr, Err);
   // Advance the offset
   *offset_ptr = offset;
   // Return a non-NULL pointer to the converted data as an indicator of
   // success
-  return dst;
+  ফেরত dst;
 }
 
-uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint8_t>(offset_ptr, Err);
+uint8_t তথ্য_Extractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) ধ্রুবক {
+  ফেরত getU<uint8_t>(offset_ptr, Err);
 }
 
-uint8_t *DataExtractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
-                              uint32_t count) const {
-  return getUs<uint8_t>(offset_ptr, dst, count, nullptr);
+uint8_t *তথ্য_Extractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
+                              uint32_t গুনতি) ধ্রুবক {
+  ফেরত getUs<uint8_t>(offset_ptr, dst, গুনতি, nullptr);
 }
 
-uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t Count) const {
-  return getUs<uint8_t>(&C.Offset, Dst, Count, &C.Err);
+uint8_t *তথ্য_Extractor::getU8(Cursor &C, uint8_t *Dst, uint32_t গুনতি_2) ধ্রুবক {
+  ফেরত getUs<uint8_t>(&C.Offset, Dst, গুনতি_2, &C.Err);
 }
 
-uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint16_t>(offset_ptr, Err);
+uint16_t তথ্য_Extractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) ধ্রুবক {
+  ফেরত getU<uint16_t>(offset_ptr, Err);
 }
 
-uint16_t *DataExtractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
-                                uint32_t count) const {
-  return getUs<uint16_t>(offset_ptr, dst, count, nullptr);
+uint16_t *তথ্য_Extractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
+                                uint32_t গুনতি) ধ্রুবক {
+  ফেরত getUs<uint16_t>(offset_ptr, dst, গুনতি, nullptr);
 }
 
-uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) const {
+uint32_t তথ্য_Extractor::getU24(uint64_t *OffsetPtr, Error *Err) ধ্রুবক {
   uint24_t ExtractedVal = getU<uint24_t>(OffsetPtr, Err);
   // The 3 bytes are in the correct byte order for the host.
-  return ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
+  ফেরত ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
 }
 
-uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint32_t>(offset_ptr, Err);
+uint32_t তথ্য_Extractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) ধ্রুবক {
+  ফেরত getU<uint32_t>(offset_ptr, Err);
 }
 
-uint32_t *DataExtractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
-                                uint32_t count) const {
-  return getUs<uint32_t>(offset_ptr, dst, count, nullptr);
+uint32_t *তথ্য_Extractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
+                                uint32_t গুনতি) ধ্রুবক {
+  ফেরত getUs<uint32_t>(offset_ptr, dst, গুনতি, nullptr);
 }
 
-uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint64_t>(offset_ptr, Err);
+uint64_t তথ্য_Extractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) ধ্রুবক {
+  ফেরত getU<uint64_t>(offset_ptr, Err);
 }
 
-uint64_t *DataExtractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
-                                uint32_t count) const {
-  return getUs<uint64_t>(offset_ptr, dst, count, nullptr);
+uint64_t *তথ্য_Extractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
+                                uint32_t গুনতি) ধ্রুবক {
+  ফেরত getUs<uint64_t>(offset_ptr, dst, গুনতি, nullptr);
 }
 
-uint64_t DataExtractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_size,
-                                    llvm::Error *Err) const {
-  switch (byte_size) {
-  case 1:
-    return getU8(offset_ptr, Err);
-  case 2:
-    return getU16(offset_ptr, Err);
-  case 4:
-    return getU32(offset_ptr, Err);
-  case 8:
-    return getU64(offset_ptr, Err);
+uint64_t তথ্য_Extractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_আকার,
+                                    llvm::Error *Err) ধ্রুবক {
+  নির্বাচন (byte_আকার) {
+  ক্ষেত্র 1:
+    ফেরত getU8(offset_ptr, Err);
+  ক্ষেত্র 2:
+    ফেরত getU16(offset_ptr, Err);
+  ক্ষেত্র 4:
+    ফেরত getU32(offset_ptr, Err);
+  ক্ষেত্র 8:
+    ফেরত getU64(offset_ptr, Err);
   }
 
   // For any other byte size, read the bytes and swap/shift if necessary.
   ErrorAsOutParameter ErrAsOut(Err);
   uint64_t val = 0;
-  if (isError(Err))
-    return val;
+  যদি (isError(Err))
+    ফেরত val;
   uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, byte_size, Err))
-    return val;
+  যদি (!prepareRead(offset, byte_আকার, Err))
+    ফেরত val;
   // Copy into the least significant bytes of val regardless of host
   // endianness.
-  std::memcpy(reinterpret_cast<char *>(&val) +
-                  (sys::IsLittleEndianHost ? 0 : 8 - byte_size),
-              &Data.data()[offset], byte_size);
+  std::memcpy(reinterpret_cast<অক্ষর *>(&val) +
+                  (sys::IsLittleEndianHost ? 0 : 8 - byte_আকার),
+              &তথ্য_2.তথ্য()[offset], byte_আকার);
   // Swap the least significant bytes of val if endianness doesn't match.
-  if (sys::IsLittleEndianHost != IsLittleEndian)
-    val = sys::getSwappedBytes(val) >> (8 * (8 - byte_size));
+  যদি (sys::IsLittleEndianHost != IsLittleEndian)
+    val = sys::getSwappedBytes(val) >> (8 * (8 - byte_আকার));
 
-  *offset_ptr += byte_size;
-  return val;
+  *offset_ptr += byte_আকার;
+  ফেরত val;
 }
 
 int64_t
-DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) const {
-  switch (byte_size) {
-  case 1:
-    return getS8(offset_ptr);
-  case 2:
-    return getS16(offset_ptr);
-  case 4:
-    return getS32(offset_ptr);
-  case 8:
-    return getS64(offset_ptr);
+তথ্য_Extractor::getSigned(uint64_t *offset_ptr, uint32_t byte_আকার) ধ্রুবক {
+  নির্বাচন (byte_আকার) {
+  ক্ষেত্র 1:
+    ফেরত getS8(offset_ptr);
+  ক্ষেত্র 2:
+    ফেরত getS16(offset_ptr);
+  ক্ষেত্র 4:
+    ফেরত getS32(offset_ptr);
+  ক্ষেত্র 8:
+    ফেরত getS64(offset_ptr);
   }
   llvm_unreachable("getSigned unhandled case!");
 }
 
-StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) const {
+StringRef তথ্য_Extractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) ধ্রুবক {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+  যদি (isError(Err))
+    ফেরত StringRef();
 
   uint64_t Start = *OffsetPtr;
-  StringRef::size_type Pos = Data.find('\0', Start);
-  if (Pos != StringRef::npos) {
+  StringRef::আকার_type Pos = তথ্য_2.find('\0', Start);
+  যদি (Pos != StringRef::npos) {
     *OffsetPtr = Pos + 1;
-    return StringRef(Data.data() + Start, Pos - Start);
+    ফেরত StringRef(তথ্য_2.তথ্য() + Start, Pos - Start);
   }
-  if (Err)
+  যদি (Err)
     *Err = createStringError(errc::illegal_byte_sequence,
                              "no null terminated string at offset 0x%" PRIx64,
                              Start);
-  return StringRef();
+  ফেরত StringRef();
 }
 
-StringRef DataExtractor::getFixedLengthString(uint64_t *OffsetPtr,
-                                              uint64_t Length,
-                                              StringRef TrimChars) const {
-  StringRef Bytes(getBytes(OffsetPtr, Length));
-  return Bytes.trim(TrimChars);
+StringRef তথ্য_Extractor::get_Fixed_দৈর্ঘ্য_String(uint64_t *OffsetPtr,
+                                              uint64_t দৈর্ঘ্য,
+                                              StringRef TrimChars) ধ্রুবক {
+  StringRef Bytes(getBytes(OffsetPtr, দৈর্ঘ্য));
+  ফেরত Bytes.trim(TrimChars);
 }
 
-StringRef DataExtractor::getBytes(uint64_t *OffsetPtr, uint64_t Length,
-                                  Error *Err) const {
+StringRef তথ্য_Extractor::getBytes(uint64_t *OffsetPtr, uint64_t দৈর্ঘ্য,
+                                  Error *Err) ধ্রুবক {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+  যদি (isError(Err))
+    ফেরত StringRef();
 
-  if (!prepareRead(*OffsetPtr, Length, Err))
-    return StringRef();
+  যদি (!prepareRead(*OffsetPtr, দৈর্ঘ্য, Err))
+    ফেরত StringRef();
 
-  StringRef Result = Data.substr(*OffsetPtr, Length);
-  *OffsetPtr += Length;
-  return Result;
+  StringRef ফলাফল = তথ্য_2.substr(*OffsetPtr, দৈর্ঘ্য);
+  *OffsetPtr += দৈর্ঘ্য;
+  ফেরত ফলাফল;
 }
 
 template <typename T>
-static T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
-                   T (&Decoder)(const uint8_t *p, unsigned *n,
-                                const uint8_t *end, const char **error)) {
-  ArrayRef<uint8_t> Bytes = arrayRefFromStringRef(Data);
-  assert(*OffsetPtr <= Bytes.size());
+স্থির T getLEB128(StringRef তথ্য_2, uint64_t *OffsetPtr, Error *Err,
+                   T (&Decoder)(ধ্রুবক uint8_t *p, unsigned *n,
+                                ধ্রুবক uint8_t *end, ধ্রুবক অক্ষর **error)) {
+  ArrayRef<uint8_t> Bytes = arrayRefFromStringRef(তথ্য_2);
+  প্রতিজ্ঞা(*OffsetPtr <= Bytes.আকার_3());
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return T();
+  যদি (isError(Err))
+    ফেরত T();
 
-  const char *error = nullptr;
+  ধ্রুবক অক্ষর *error = nullptr;
   unsigned bytes_read;
-  T result =
-      Decoder(Bytes.data() + *OffsetPtr, &bytes_read, Bytes.end(), &error);
-  if (error) {
-    if (Err)
+  T ফলাফল_2 =
+      Decoder(Bytes.তথ্য() + *OffsetPtr, &bytes_read, Bytes.end(), &error);
+  যদি (error) {
+    যদি (Err)
       *Err = createStringError(errc::illegal_byte_sequence,
                                "unable to decode LEB128 at offset 0x%8.8" PRIx64
                                ": %s",
                                *OffsetPtr, error);
-    return T();
+    ফেরত T();
   }
   *OffsetPtr += bytes_read;
-  return result;
+  ফেরত ফলাফল_2;
 }
 
-uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeULEB128);
+uint64_t তথ্য_Extractor::getULEB128(uint64_t *offset_ptr, Error *Err) ধ্রুবক {
+  ফেরত getLEB128(তথ্য_2, offset_ptr, Err, decodeULEB128);
 }
 
-int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeSLEB128);
+int64_t তথ্য_Extractor::getSLEB128(uint64_t *offset_ptr, Error *Err) ধ্রুবক {
+  ফেরত getLEB128(তথ্য_2, offset_ptr, Err, decodeSLEB128);
 }
 
-APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
+APSInt তথ্য_Extractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) ধ্রুবক {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return APSInt();
+  যদি (isError(Err))
+    ফেরত APSInt();
 
   uint64_t Offset = *OffsetPtr;
-  APInt Value;
+  APInt মান;
   unsigned Shift = 0;
   uint8_t Byte;
-  do {
-    if (!prepareRead(Offset, 1, Err))
-      return APSInt();
-    Byte = Data[Offset++];
+  করো {
+    যদি (!prepareRead(Offset, 1, Err))
+      ফেরত APSInt();
+    Byte = তথ্য_2[Offset++];
     APInt Slice(7, Byte & 0x7f);
-    if (Shift == 0)
-      Value = Slice;
-    else {
-      Value = Value.zext(Shift + 7);
-      Value.insertBits(Slice, Shift);
+    যদি (Shift == 0)
+      মান = Slice;
+    অন্যথা {
+      মান = মান.zext(Shift + 7);
+      মান.ঢোকাও_Bits(Slice, Shift);
     }
     Shift += 7;
-  } while (Byte & 0x80);
+  } যখন (Byte & 0x80);
 
   // Sign extend Value to at least 64 bits to match getSLEB128.
-  if (Shift < 64)
-    Value = Value.sext(64);
+  যদি (Shift < 64)
+    মান = মান.sext(64);
 
   *OffsetPtr = Offset;
-  return APSInt(std::move(Value), /*isUnsigned=*/false);
+  ফেরত APSInt(std::move(মান), /*isUnsigned=*/মিথ্যা);
 }
 
-void DataExtractor::skip(Cursor &C, uint64_t Length) const {
+শূন্য তথ্য_Extractor::skip(Cursor &C, uint64_t দৈর্ঘ্য) ধ্রুবক {
   ErrorAsOutParameter ErrAsOut(C.Err);
-  if (isError(&C.Err))
-    return;
+  যদি (isError(&C.Err))
+    ফেরত;
 
-  if (prepareRead(C.Offset, Length, &C.Err))
-    C.Offset += Length;
+  যদি (prepareRead(C.Offset, দৈর্ঘ্য, &C.Err))
+    C.Offset += দৈর্ঘ্য;
 }

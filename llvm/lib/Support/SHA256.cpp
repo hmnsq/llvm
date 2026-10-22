@@ -19,14 +19,14 @@
  */
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SHA256.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <string.h>
+#অন্তর্ভাব "llvm/Support/SHA256.h"
+#অন্তর্ভাব "llvm/ADT/ArrayRef.h"
+#অন্তর্ভাব "llvm/ADT/StringRef.h"
+#অন্তর্ভাব "llvm/Support/Endian.h"
+#অন্তর্ভাব "llvm/Support/SwapByteOrder.h"
+#অন্তর্ভাব <string.h>
 
-namespace llvm {
+নামাকাশ llvm {
 
 #define SHR(x, c) ((x) >> (c))
 #define ROTR(x, n) (((x) >> n) | ((x) << (32 - (n))))
@@ -41,14 +41,14 @@ namespace llvm {
 #define SIGMA_3(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
 
 #define F_EXPAND(A, B, C, D, E, F, G, H, M1, M2, M3, M4, k)                    \
-  do {                                                                         \
+  করো {                                                                         \
     H += SIGMA_1(E) + CH(E, F, G) + M1 + k;                                    \
     D += H;                                                                    \
     H += SIGMA_0(A) + MAJ(A, B, C);                                            \
     M1 += SIGMA_2(M2) + M3 + SIGMA_3(M4);                                      \
-  } while (0);
+  } যখন (0);
 
-void SHA256::init() {
+শূন্য SHA256::init() {
   InternalState.State[0] = 0x6A09E667;
   InternalState.State[1] = 0xBB67AE85;
   InternalState.State[2] = 0x3C6EF372;
@@ -57,11 +57,11 @@ void SHA256::init() {
   InternalState.State[5] = 0x9B05688C;
   InternalState.State[6] = 0x1F83D9AB;
   InternalState.State[7] = 0x5BE0CD19;
-  InternalState.ByteCount = 0;
-  InternalState.BufferOffset = 0;
+  InternalState.Byte_গুনতি = 0;
+  InternalState.বাফার_Offset = 0;
 }
 
-void SHA256::hashBlock() {
+শূন্য SHA256::hashBlock() {
   uint32_t A = InternalState.State[0];
   uint32_t B = InternalState.State[1];
   uint32_t C = InternalState.State[2];
@@ -71,22 +71,22 @@ void SHA256::hashBlock() {
   uint32_t G = InternalState.State[6];
   uint32_t H = InternalState.State[7];
 
-  uint32_t W00 = InternalState.Buffer.L[0];
-  uint32_t W01 = InternalState.Buffer.L[1];
-  uint32_t W02 = InternalState.Buffer.L[2];
-  uint32_t W03 = InternalState.Buffer.L[3];
-  uint32_t W04 = InternalState.Buffer.L[4];
-  uint32_t W05 = InternalState.Buffer.L[5];
-  uint32_t W06 = InternalState.Buffer.L[6];
-  uint32_t W07 = InternalState.Buffer.L[7];
-  uint32_t W08 = InternalState.Buffer.L[8];
-  uint32_t W09 = InternalState.Buffer.L[9];
-  uint32_t W10 = InternalState.Buffer.L[10];
-  uint32_t W11 = InternalState.Buffer.L[11];
-  uint32_t W12 = InternalState.Buffer.L[12];
-  uint32_t W13 = InternalState.Buffer.L[13];
-  uint32_t W14 = InternalState.Buffer.L[14];
-  uint32_t W15 = InternalState.Buffer.L[15];
+  uint32_t W00 = InternalState.বাফার.L[0];
+  uint32_t W01 = InternalState.বাফার.L[1];
+  uint32_t W02 = InternalState.বাফার.L[2];
+  uint32_t W03 = InternalState.বাফার.L[3];
+  uint32_t W04 = InternalState.বাফার.L[4];
+  uint32_t W05 = InternalState.বাফার.L[5];
+  uint32_t W06 = InternalState.বাফার.L[6];
+  uint32_t W07 = InternalState.বাফার.L[7];
+  uint32_t W08 = InternalState.বাফার.L[8];
+  uint32_t W09 = InternalState.বাফার.L[9];
+  uint32_t W10 = InternalState.বাফার.L[10];
+  uint32_t W11 = InternalState.বাফার.L[11];
+  uint32_t W12 = InternalState.বাফার.L[12];
+  uint32_t W13 = InternalState.বাফার.L[13];
+  uint32_t W14 = InternalState.বাফার.L[14];
+  uint32_t W15 = InternalState.বাফার.L[15];
 
   F_EXPAND(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0x428A2F98);
   F_EXPAND(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0x71374491);
@@ -166,66 +166,66 @@ void SHA256::hashBlock() {
   InternalState.State[7] += H;
 }
 
-void SHA256::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
-    InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
-    InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
+শূন্য SHA256::addUncounted(uint8_t তথ্য_2) {
+  যদি constexpr (sys::IsBigEndianHost)
+    InternalState.বাফার.C[InternalState.বাফার_Offset] = তথ্য_2;
+  অন্যথা
+    InternalState.বাফার.C[InternalState.বাফার_Offset ^ 3] = তথ্য_2;
 
-  InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
+  InternalState.বাফার_Offset++;
+  যদি (InternalState.বাফার_Offset == BLOCK_দৈর্ঘ্য) {
     hashBlock();
-    InternalState.BufferOffset = 0;
+    InternalState.বাফার_Offset = 0;
   }
 }
 
-void SHA256::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
-  addUncounted(Data);
+শূন্য SHA256::writebyte(uint8_t তথ্য_2) {
+  ++InternalState.Byte_গুনতি;
+  addUncounted(তথ্য_2);
 }
 
-void SHA256::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+শূন্য SHA256::update(ArrayRef<uint8_t> তথ্য_2) {
+  InternalState.Byte_গুনতি += তথ্য_2.আকার_3();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
-    const size_t Remainder = std::min<size_t>(
-        Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
-    for (size_t I = 0; I < Remainder; ++I)
-      addUncounted(Data[I]);
-    Data = Data.drop_front(Remainder);
+  যদি (InternalState.বাফার_Offset > 0) {
+    ধ্রুবক size_t Remainder = std::min<size_t>(
+        তথ্য_2.আকার_3(), BLOCK_দৈর্ঘ্য - InternalState.বাফার_Offset);
+    জন্য (size_t I = 0; I < Remainder; ++I)
+      addUncounted(তথ্য_2[I]);
+    তথ্য_2 = তথ্য_2.drop_front(Remainder);
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
-    assert(InternalState.BufferOffset == 0);
-    static_assert(BLOCK_LENGTH % 4 == 0);
-    constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
-    for (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
-      InternalState.Buffer.L[I] = support::endian::read32be(&Data[I * 4]);
+  যখন (তথ্য_2.আকার_3() >= BLOCK_দৈর্ঘ্য) {
+    প্রতিজ্ঞা(InternalState.বাফার_Offset == 0);
+    static_assert(BLOCK_দৈর্ঘ্য % 4 == 0);
+    constexpr size_t BLOCK_দৈর্ঘ্য_32 = BLOCK_দৈর্ঘ্য / 4;
+    জন্য (size_t I = 0; I < BLOCK_দৈর্ঘ্য_32; ++I)
+      InternalState.বাফার.L[I] = support::endian::read32be(&তথ্য_2[I * 4]);
     hashBlock();
-    Data = Data.drop_front(BLOCK_LENGTH);
+    তথ্য_2 = তথ্য_2.drop_front(BLOCK_দৈর্ঘ্য);
   }
 
   // Finish the remainder.
-  for (uint8_t C : Data)
+  জন্য (uint8_t C : তথ্য_2)
     addUncounted(C);
 }
 
-void SHA256::update(StringRef Str) {
+শূন্য SHA256::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<অক্ষর *>(Str.তথ্য()), Str.আকার_3()));
 }
 
-void SHA256::pad() {
+শূন্য SHA256::pad() {
   // Implement SHA-2 padding (fips180-2 5.1.1)
 
   // Pad with 0x80 followed by 0x00 until the end of the block
   addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
+  যখন (InternalState.বাফার_Offset != 56)
     addUncounted(0x00);
 
-  uint64_t len = InternalState.ByteCount << 3; // bit size
+  uint64_t len = InternalState.Byte_গুনতি << 3; // bit size
 
   // Append length in the last 8 bytes big edian encoded
   addUncounted(len >> 56);
@@ -238,34 +238,34 @@ void SHA256::pad() {
   addUncounted(len);
 }
 
-void SHA256::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
+শূন্য SHA256::final(std::array<uint32_t, HASH_দৈর্ঘ্য / 4> &Hash_ফলাফল) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  যদি constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 8; i++) {
-      HashResult[i] = InternalState.State[i];
+    জন্য (পূর্ণসংখ্যা i = 0; i < 8; i++) {
+      Hash_ফলাফল[i] = InternalState.State[i];
     }
-  } else {
+  } অন্যথা {
     // Swap byte order back
-    for (int i = 0; i < 8; i++) {
-      HashResult[i] = llvm::byteswap(InternalState.State[i]);
+    জন্য (পূর্ণসংখ্যা i = 0; i < 8; i++) {
+      Hash_ফলাফল[i] = llvm::byteswap(InternalState.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 32> SHA256::final() {
-  union {
-    std::array<uint32_t, HASH_LENGTH / 4> HashResult;
-    std::array<uint8_t, HASH_LENGTH> ReturnResult;
+  সংঘ {
+    std::array<uint32_t, HASH_দৈর্ঘ্য / 4> Hash_ফলাফল;
+    std::array<uint8_t, HASH_দৈর্ঘ্য> Return_ফলাফল;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
-  final(HashResult);
-  return ReturnResult;
+  static_assert(আকার(Hash_ফলাফল) == আকার(Return_ফলাফল));
+  final(Hash_ফলাফল);
+  ফেরত Return_ফলাফল;
 }
 
-std::array<uint8_t, 32> SHA256::result() {
+std::array<uint8_t, 32> SHA256::ফলাফল_2() {
   auto StateToRestore = InternalState;
 
   auto Hash = final();
@@ -274,13 +274,13 @@ std::array<uint8_t, 32> SHA256::result() {
   InternalState = StateToRestore;
 
   // Return pointer to hash (32 characters)
-  return Hash;
+  ফেরত Hash;
 }
 
-std::array<uint8_t, 32> SHA256::hash(ArrayRef<uint8_t> Data) {
+std::array<uint8_t, 32> SHA256::hash(ArrayRef<uint8_t> তথ্য_2) {
   SHA256 Hash;
-  Hash.update(Data);
-  return Hash.final();
+  Hash.update(তথ্য_2);
+  ফেরত Hash.final();
 }
 
 } // namespace llvm

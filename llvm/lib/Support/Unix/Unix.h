@@ -18,27 +18,27 @@
 //===          is guaranteed to work on all UNIX variants.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <assert.h>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <sys/types.h>
-#include <sys/wait.h>
+#অন্তর্ভাব "llvm/Config/config.h"
+#অন্তর্ভাব "llvm/Support/Chrono.h"
+#অন্তর্ভাব "llvm/Support/Errno.h"
+#অন্তর্ভাব "llvm/Support/ErrorHandling.h"
+#অন্তর্ভাব <assert.h>
+#অন্তর্ভাব <cerrno>
+#অন্তর্ভাব <cstdio>
+#অন্তর্ভাব <cstdlib>
+#অন্তর্ভাব <cstring>
+#অন্তর্ভাব <string>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <sys/wait.h>
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#অন্তর্ভাব <unistd.h>
 #endif
 
-#include <sys/time.h>
-#include <time.h>
+#অন্তর্ভাব <sys/time.h>
+#অন্তর্ভাব <time.h>
 
-#include <dlfcn.h>
+#অন্তর্ভাব <dlfcn.h>
 
 # include <fcntl.h>
 
@@ -49,21 +49,21 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
-    return true;
-  if (errnum == -1)
+স্থির অন্তঃরেখ bool Make_Err_বার্তা(
+  std::string* Err_বার্তা, ধ্রুবক std::string& prefix, পূর্ণসংখ্যা errnum = -1) {
+  যদি (!Err_বার্তা)
+    ফেরত true;
+  যদি (errnum == -1)
     errnum = errno;
-  *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
-  return true;
+  *Err_বার্তা = prefix + ": " + llvm::sys::StrError(errnum);
+  ফেরত true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
-  std::string ErrMsg;
-  MakeErrMsg(&ErrMsg, Msg, errnum);
-  llvm::report_fatal_error(llvm::Twine(ErrMsg));
+[[noreturn]] স্থির অন্তঃরেখ শূন্য ReportErrnumFatal(ধ্রুবক অক্ষর *বার্তা_2, পূর্ণসংখ্যা errnum) {
+  std::string Err_বার্তা;
+  Make_Err_বার্তা(&Err_বার্তা, বার্তা_2, errnum);
+  llvm::report_fatal_error(llvm::Twine(Err_বার্তা));
 }
 
 namespace llvm {
@@ -71,29 +71,29 @@ namespace sys {
 
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
-inline std::chrono::microseconds toDuration(const struct timeval &TV) {
-  return std::chrono::seconds(TV.tv_sec) +
+অন্তঃরেখ std::chrono::microseconds toDuration(ধ্রুবক কাঠামো timeval &TV) {
+  ফেরত std::chrono::seconds(TV.tv_sec) +
          std::chrono::microseconds(TV.tv_usec);
 }
 
 /// Convert a time point to struct timespec.
-inline struct timespec toTimeSpec(TimePoint<> TP) {
+অন্তঃরেখ কাঠামো timespec toTimeSpec(TimePoint<> TP) {
   using namespace std::chrono;
 
-  struct timespec RetVal;
+  কাঠামো timespec RetVal;
   RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).গুনতি();
+  ফেরত RetVal;
 }
 
 /// Convert a time point to struct timeval.
-inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
+অন্তঃরেখ কাঠামো timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
   using namespace std::chrono;
 
-  struct timeval RetVal;
+  কাঠামো timeval RetVal;
   RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).গুনতি();
+  ফেরত RetVal;
 }
 
 } // namespace sys

@@ -6,65 +6,65 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/RewriteBuffer.h"
-#include "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব "llvm/ADT/RewriteBuffer.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-raw_ostream &RewriteBuffer::write(raw_ostream &Stream) const {
+raw_ostream &Rewrite_বাফার::লিখ(raw_ostream &Stream) ধ্রুবক {
   // Walk RewriteRope chunks efficiently using MoveToNextPiece() instead of the
   // character iterator.
-  for (RopePieceBTreeIterator I = begin(), E = end(); I != E;
-       I.MoveToNextPiece())
+  জন্য (RopePieceBTreeIterator I = begin(), E = end(); I != E;
+       I.Move_To_পরবর্তী_Piece())
     Stream << I.piece();
-  return Stream;
+  ফেরত Stream;
 }
 
 /// Return true if this character is non-new-line whitespace:
 /// ' ', '\\t', '\\f', '\\v', '\\r'.
-static inline bool isWhitespaceExceptNL(unsigned char c) {
-  return c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
+স্থির অন্তঃরেখ যৌক্তিক isWhitespaceExceptNL(unsigned অক্ষর c) {
+  ফেরত c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
 }
 
-void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
-                               bool removeLineIfEmpty) {
+শূন্য Rewrite_বাফার::RemoveText(unsigned OrigOffset, unsigned আকার_2,
+                               যৌক্তিক remove_সারি_If_Empty) {
   // Nothing to remove, exit early.
-  if (Size == 0)
-    return;
+  যদি (আকার_2 == 0)
+    ফেরত;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, true);
-  assert(RealOffset + Size <= Buffer.size() && "Invalid location");
+  unsigned RealOffset = getMappedOffset(OrigOffset, সত্য);
+  প্রতিজ্ঞা(RealOffset + আকার_2 <= বাফার.আকার_3() && "Invalid location");
 
   // Remove the dead characters.
-  Buffer.erase(RealOffset, Size);
+  বাফার.erase(RealOffset, আকার_2);
 
   // Add a delta so that future changes are offset correctly.
-  AddReplaceDelta(OrigOffset, -Size);
+  AddReplaceDelta(OrigOffset, -আকার_2);
 
-  if (removeLineIfEmpty) {
+  যদি (remove_সারি_If_Empty) {
     // Find the line that the remove occurred and if it is completely empty
     // remove the line as well.
 
-    iterator curLineStart = begin();
-    unsigned curLineStartOffs = 0;
+    iterator cur_সারি_Start = begin();
+    unsigned cur_সারি_Start_Offs = 0;
     iterator posI = begin();
-    for (unsigned i = 0; i != RealOffset; ++i) {
-      if (*posI == '\n') {
-        curLineStart = posI;
-        ++curLineStart;
-        curLineStartOffs = i + 1;
+    জন্য (unsigned i = 0; i != RealOffset; ++i) {
+      যদি (*posI == '\n') {
+        cur_সারি_Start = posI;
+        ++cur_সারি_Start;
+        cur_সারি_Start_Offs = i + 1;
       }
       ++posI;
     }
 
-    unsigned lineSize = 0;
-    posI = curLineStart;
-    while (posI != end() && isWhitespaceExceptNL(*posI)) {
+    unsigned সারি_আকার = 0;
+    posI = cur_সারি_Start;
+    যখন (posI != end() && isWhitespaceExceptNL(*posI)) {
       ++posI;
-      ++lineSize;
+      ++সারি_আকার;
     }
-    if (posI != end() && *posI == '\n') {
-      Buffer.erase(curLineStartOffs, lineSize + 1 /* + '\n'*/);
+    যদি (posI != end() && *posI == '\n') {
+      বাফার.erase(cur_সারি_Start_Offs, সারি_আকার + 1 /* + '\n'*/);
       // FIXME: Here, the offset of the start of the line is supposed to be
       // expressed in terms of the original input not the "real" rewrite
       // buffer.  How do we compute that reliably?  It might be tempting to use
@@ -76,32 +76,32 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
       // clang::Rewriter::RewriteOptions::RemoveLineIfEmpty.  A reproducer for
       // the implementation below is the test RemoveLineIfEmpty in
       // clang/unittests/Rewrite/RewriteBufferTest.cpp.
-      AddReplaceDelta(curLineStartOffs, -(lineSize + 1 /* + '\n'*/));
+      AddReplaceDelta(cur_সারি_Start_Offs, -(সারি_আকার + 1 /* + '\n'*/));
     }
   }
 }
 
-void RewriteBuffer::InsertText(unsigned OrigOffset, StringRef Str,
-                               bool InsertAfter) {
+শূন্য Rewrite_বাফার::ঢোকাও_Text_2(unsigned OrigOffset, StringRef Str,
+                               যৌক্তিক ঢোকাও_After) {
   // Nothing to insert, exit early.
-  if (Str.empty())
-    return;
+  যদি (Str.empty())
+    ফেরত;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, InsertAfter);
-  Buffer.insert(RealOffset, Str.begin(), Str.end());
+  unsigned RealOffset = getMappedOffset(OrigOffset, ঢোকাও_After);
+  বাফার.ঢোকাও(RealOffset, Str.begin(), Str.end());
 
   // Add a delta so that future changes are offset correctly.
-  AddInsertDelta(OrigOffset, Str.size());
+  Add_ঢোকাও_Delta(OrigOffset, Str.আকার_3());
 }
 
 /// ReplaceText - This method replaces a range of characters in the input
 /// buffer with a new string.  This is effectively a combined "remove+insert"
 /// operation.
-void RewriteBuffer::ReplaceText(unsigned OrigOffset, unsigned OrigLength,
+শূন্য Rewrite_বাফার::ReplaceText(unsigned OrigOffset, unsigned Orig_দৈর্ঘ্য,
                                 StringRef NewStr) {
-  unsigned RealOffset = getMappedOffset(OrigOffset, true);
-  Buffer.erase(RealOffset, OrigLength);
-  Buffer.insert(RealOffset, NewStr.begin(), NewStr.end());
-  if (OrigLength != NewStr.size())
-    AddReplaceDelta(OrigOffset, NewStr.size() - OrigLength);
+  unsigned RealOffset = getMappedOffset(OrigOffset, সত্য);
+  বাফার.erase(RealOffset, Orig_দৈর্ঘ্য);
+  বাফার.ঢোকাও(RealOffset, NewStr.begin(), NewStr.end());
+  যদি (Orig_দৈর্ঘ্য != NewStr.আকার_3())
+    AddReplaceDelta(OrigOffset, NewStr.আকার_3() - Orig_দৈর্ঘ্য);
 }

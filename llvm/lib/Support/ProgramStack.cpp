@@ -6,9 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ProgramStack.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
+#অন্তর্ভাব "llvm/Support/ProgramStack.h"
+#অন্তর্ভাব "llvm/Config/config.h"
+#অন্তর্ভাব "llvm/Support/Compiler.h"
 
 #ifdef LLVM_ON_UNIX
 # include <sys/resource.h> // for getrlimit
@@ -18,44 +18,44 @@
 # include <intrin.h>  // for _AddressOfReturnAddress
 #endif
 
-#include "llvm/Support/thread.h"
+#অন্তর্ভাব "llvm/Support/thread.h"
 
-#include <cstdlib>
+#অন্তর্ভাব <cstdlib>
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-uintptr_t llvm::getStackPointer() {
-#if __GNUC__ || __has_builtin(__builtin_frame_address)
-  return (uintptr_t)__builtin_frame_address(0);
-#elif defined(_MSC_VER)
-  return (uintptr_t)_AddressOfReturnAddress();
-#else
-  volatile char CharOnStack = 0;
+uintptr_t llvm::get_স্তূপ_Pointer() {
+#যদি __GNUC__ || __has_builtin(__builtin_frame_address)
+  ফেরত (uintptr_t)__builtin_frame_address(0);
+#নতুবা_যদি defined(_MSC_VER)
+  ফেরত (uintptr_t)_AddressOfReturnAddress();
+#অন্যথা
+  অস্থির অক্ষর Char_On_স্তূপ = 0;
   // The volatile store here is intended to escape the local variable, to
   // prevent the compiler from optimizing CharOnStack into anything other
   // than a char on the stack.
   //
   // Tested on: MSVC 2015 - 2019, GCC 4.9 - 9, Clang 3.2 - 9, ICC 13 - 19.
-  char *volatile Ptr = &CharOnStack;
-  return (uintptr_t)Ptr;
+  অক্ষর *অস্থির Ptr = &Char_On_স্তূপ;
+  ফেরত (uintptr_t)Ptr;
 #endif
 }
 
-unsigned llvm::getDefaultStackSize() {
+unsigned llvm::get_Default_স্তূপ_আকার() {
 #ifdef LLVM_ON_UNIX
   rlimit RL;
   getrlimit(RLIMIT_STACK, &RL);
-  return RL.rlim_cur;
-#else
+  ফেরত RL.rlim_cur;
+#অন্যথা
   // Clang recursively parses, instantiates templates, and evaluates constant
   // expressions. We've found 8MiB to be a reasonable stack size given the way
   // Clang works and the way C++ is commonly written.
-  return 8 << 20;
+  ফেরত 8 << 20;
 #endif
 }
 
-void llvm::runOnNewStack(unsigned StackSize, function_ref<void()> Fn) {
+শূন্য llvm::run_On_New_স্তূপ(unsigned স্তূপ_আকার, function_ref<শূন্য()> Fn) {
   llvm::thread Thread(
-      StackSize == 0 ? std::nullopt : std::optional<unsigned>(StackSize), Fn);
+      স্তূপ_আকার == 0 ? std::nullopt : std::optional<unsigned>(স্তূপ_আকার), Fn);
   Thread.join();
 }

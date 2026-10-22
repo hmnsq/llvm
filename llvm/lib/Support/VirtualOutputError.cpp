@@ -11,62 +11,62 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputError.h"
+#অন্তর্ভাব "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using নামাকাশ llvm;
+using নামাকাশ llvm::vfs;
 
-void OutputError::anchor() {}
-void OutputConfigError::anchor() {}
-void TempFileOutputError::anchor() {}
+শূন্য OutputError::anchor() {}
+শূন্য OutputConfigError::anchor() {}
+শূন্য অস্থায়ী_File_Output_Error::anchor() {}
 
-char OutputError::ID = 0;
-char OutputConfigError::ID = 0;
-char TempFileOutputError::ID = 0;
+অক্ষর OutputError::ID = 0;
+অক্ষর OutputConfigError::ID = 0;
+অক্ষর অস্থায়ী_File_Output_Error::ID = 0;
 
-void OutputError::log(raw_ostream &OS) const {
+শূন্য OutputError::log(raw_ostream &OS) ধ্রুবক {
   OS << getOutputPath() << ": ";
   ECError::log(OS);
 }
 
-void OutputConfigError::log(raw_ostream &OS) const {
+শূন্য OutputConfigError::log(raw_ostream &OS) ধ্রুবক {
   OutputError::log(OS);
   OS << ": " << Config;
 }
 
-void TempFileOutputError::log(raw_ostream &OS) const {
-  OS << getTempPath() << " => ";
+শূন্য অস্থায়ী_File_Output_Error::log(raw_ostream &OS) ধ্রুবক {
+  OS << get_অস্থায়ী_Path() << " => ";
   OutputError::log(OS);
 }
 
-namespace {
-class OutputErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override;
-  std::string message(int EV) const override;
+নামাকাশ {
+শ্রেণী OutputErrorCategory : সর্বজনীন std::error_category {
+সর্বজনীন:
+  ধ্রুবক অক্ষর *name() ধ্রুবক noexcept override;
+  std::string message(পূর্ণসংখ্যা EV) ধ্রুবক override;
 };
 } // end namespace
 
-const std::error_category &vfs::output_category() {
-  static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+ধ্রুবক std::error_category &vfs::output_category() {
+  স্থির OutputErrorCategory ErrorCategory;
+  ফেরত ErrorCategory;
 }
 
-const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+ধ্রুবক অক্ষর *OutputErrorCategory::name() ধ্রুবক noexcept {
+  ফেরত "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
+std::string OutputErrorCategory::message(পূর্ণসংখ্যা EV) ধ্রুবক {
   OutputErrorCode E = static_cast<OutputErrorCode>(EV);
-  switch (E) {
-  case OutputErrorCode::invalid_config:
-    return "invalid config";
-  case OutputErrorCode::not_closed:
-    return "output not closed";
-  case OutputErrorCode::already_closed:
-    return "output already closed";
-  case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+  নির্বাচন (E) {
+  ক্ষেত্র OutputErrorCode::invalid_config:
+    ফেরত "invalid config";
+  ক্ষেত্র OutputErrorCode::not_closed:
+    ফেরত "output not closed";
+  ক্ষেত্র OutputErrorCode::already_closed:
+    ফেরত "output already closed";
+  ক্ষেত্র OutputErrorCode::has_open_proxy:
+    ফেরত "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");

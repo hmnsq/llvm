@@ -10,152 +10,152 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RWMutex.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Allocator.h"
+#অন্তর্ভাব "llvm/Support/RWMutex.h"
+#অন্তর্ভাব "llvm/Config/config.h"
+#অন্তর্ভাব "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#অন্তর্ভাব "llvm/Support/Allocator.h"
 
-#if defined(LLVM_USE_RW_MUTEX_IMPL)
-using namespace llvm;
-using namespace sys;
+#যদি defined(LLVM_USE_RW_MUTEX_IMPL)
+using নামাকাশ llvm;
+using নামাকাশ sys;
 
-#if !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
+#যদি !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
 // Define all methods as no-ops if threading is explicitly disabled
 
-RWMutexImpl::RWMutexImpl() = default;
-RWMutexImpl::~RWMutexImpl() = default;
+RWMutexImpl::RWMutexImpl() = পূর্বনির্ধারিত;
+RWMutexImpl::~RWMutexImpl() = পূর্বনির্ধারিত;
 
-bool RWMutexImpl::lock_shared() { return true; }
-bool RWMutexImpl::unlock_shared() { return true; }
-bool RWMutexImpl::try_lock_shared() { return true; }
-bool RWMutexImpl::lock() { return true; }
-bool RWMutexImpl::unlock() { return true; }
-bool RWMutexImpl::try_lock() { return true; }
+যৌক্তিক RWMutexImpl::lock_shared() { ফেরত সত্য; }
+যৌক্তিক RWMutexImpl::unlock_shared() { ফেরত সত্য; }
+যৌক্তিক RWMutexImpl::try_lock_shared() { ফেরত সত্য; }
+যৌক্তিক RWMutexImpl::lock() { ফেরত সত্য; }
+যৌক্তিক RWMutexImpl::unlock() { ফেরত সত্য; }
+যৌক্তিক RWMutexImpl::try_lock() { ফেরত সত্য; }
 
-#else
+#অন্যথা
 
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
+#যদি defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
 
-#include <cassert>
-#include <cstdlib>
-#include <pthread.h>
+#অন্তর্ভাব <cassert>
+#অন্তর্ভাব <cstdlib>
+#অন্তর্ভাব <pthread.h>
 
 // Construct a RWMutex using pthread calls
 RWMutexImpl::RWMutexImpl()
 {
   // Declare the pthread_rwlock data structures
   pthread_rwlock_t* rwlock =
-    static_cast<pthread_rwlock_t*>(safe_malloc(sizeof(pthread_rwlock_t)));
+    static_cast<pthread_rwlock_t*>(safe_malloc(আকার(pthread_rwlock_t)));
 
 #ifdef __APPLE__
   // Workaround a bug/mis-feature in Darwin's pthread_rwlock_init.
-  bzero(rwlock, sizeof(pthread_rwlock_t));
+  bzero(rwlock, আকার(pthread_rwlock_t));
 #endif
 
   // Initialize the rwlock
-  int errorcode = pthread_rwlock_init(rwlock, nullptr);
-  (void)errorcode;
-  assert(errorcode == 0);
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_init(rwlock, nullptr);
+  (শূন্য)errorcode;
+  প্রতিজ্ঞা(errorcode == 0);
 
   // Assign the data member
-  data_ = rwlock;
+  তথ্য_3 = rwlock;
 }
 
 // Destruct a RWMutex
 RWMutexImpl::~RWMutexImpl()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
   pthread_rwlock_destroy(rwlock);
-  free(rwlock);
+  মুক্ত(rwlock);
 }
 
-bool
+যৌক্তিক
 RWMutexImpl::lock_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_rdlock(rwlock);
-  return errorcode == 0;
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_rdlock(rwlock);
+  ফেরত errorcode == 0;
 }
 
-bool
+যৌক্তিক
 RWMutexImpl::unlock_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_unlock(rwlock);
+  ফেরত errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+যৌক্তিক RWMutexImpl::try_lock_shared() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_tryrdlock(rwlock);
-  return errorcode == 0;
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_tryrdlock(rwlock);
+  ফেরত errorcode == 0;
 }
 
-bool
+যৌক্তিক
 RWMutexImpl::lock()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_wrlock(rwlock);
-  return errorcode == 0;
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_wrlock(rwlock);
+  ফেরত errorcode == 0;
 }
 
-bool
+যৌক্তিক
 RWMutexImpl::unlock()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_unlock(rwlock);
+  ফেরত errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+যৌক্তিক RWMutexImpl::try_lock() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(তথ্য_3);
+  প্রতিজ্ঞা(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_trywrlock(rwlock);
-  return errorcode == 0;
+  পূর্ণসংখ্যা errorcode = pthread_rwlock_trywrlock(rwlock);
+  ফেরত errorcode == 0;
 }
 
-#else
+#অন্যথা
 
-RWMutexImpl::RWMutexImpl() : data_(new MutexImpl(false)) { }
+RWMutexImpl::RWMutexImpl() : তথ্য_3(নতুন MutexImpl(মিথ্যা)) { }
 
 RWMutexImpl::~RWMutexImpl() {
-  delete static_cast<MutexImpl *>(data_);
+  delete static_cast<MutexImpl *>(তথ্য_3);
 }
 
-bool RWMutexImpl::lock_shared() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+যৌক্তিক RWMutexImpl::lock_shared() {
+  ফেরত static_cast<MutexImpl *>(তথ্য_3)->acquire();
 }
 
-bool RWMutexImpl::unlock_shared() {
-  return static_cast<MutexImpl *>(data_)->release();
+যৌক্তিক RWMutexImpl::unlock_shared() {
+  ফেরত static_cast<MutexImpl *>(তথ্য_3)->release();
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+যৌক্তিক RWMutexImpl::try_lock_shared() {
+  ফেরত static_cast<MutexImpl *>(তথ্য_3)->tryacquire();
 }
 
-bool RWMutexImpl::lock() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+যৌক্তিক RWMutexImpl::lock() {
+  ফেরত static_cast<MutexImpl *>(তথ্য_3)->acquire();
 }
 
-bool RWMutexImpl::unlock() {
-  return static_cast<MutexImpl *>(data_)->release();
+যৌক্তিক RWMutexImpl::unlock() {
+  ফেরত static_cast<MutexImpl *>(তথ্য_3)->release();
 }
 
-bool RWMutexImpl::try_lock() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+যৌক্তিক RWMutexImpl::try_lock() {
+  ফেরত static_cast<MutexImpl *>(তথ্য_3)->tryacquire();
 }
 
 #endif

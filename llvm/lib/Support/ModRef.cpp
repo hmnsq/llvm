@@ -10,74 +10,74 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ModRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
+#অন্তর্ভাব "llvm/Support/ModRef.h"
+#অন্তর্ভাব "llvm/ADT/STLExtras.h"
+#অন্তর্ভাব "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+using নামাকাশ llvm;
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
-  switch (MR) {
-  case ModRefInfo::NoModRef:
+  নির্বাচন (MR) {
+  ক্ষেত্র ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    বিরতি;
+  ক্ষেত্র ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    বিরতি;
+  ক্ষেত্র ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    বিরতি;
+  ক্ষেত্র ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    বিরতি;
   }
-  return OS;
+  ফেরত OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
   interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
-    switch (Loc) {
-    case IRMemLocation::ArgMem:
+    নির্বাচন (Loc) {
+    ক্ষেত্র IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      বিরতি;
+    ক্ষেত্র IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      বিরতি;
+    ক্ষেত্র IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      বিরতি;
+    ক্ষেত্র IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      বিরতি;
+    ক্ষেত্র IRMemLocation::TargetMem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      বিরতি;
+    ক্ষেত্র IRMemLocation::TargetMem1:
       OS << "TargetMem1: ";
-      break;
+      বিরতি;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  ফেরত OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+  যদি (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    ফেরত OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  যদি (capturesAddressIsNullOnly(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  অন্যথা যদি (capturesAddress(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  যদি (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  যদি (capturesFullProvenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  ফেরত OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
@@ -86,10 +86,10 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  যদি (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  যদি (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  ফেরত OS;
 }

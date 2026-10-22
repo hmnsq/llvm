@@ -6,37 +6,37 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileCollector.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
+#অন্তর্ভাব "llvm/Support/FileCollector.h"
+#অন্তর্ভাব "llvm/ADT/SmallString.h"
+#অন্তর্ভাব "llvm/ADT/Twine.h"
+#অন্তর্ভাব "llvm/Support/FileSystem.h"
+#অন্তর্ভাব "llvm/Support/Path.h"
+#অন্তর্ভাব "llvm/Support/Process.h"
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-FileCollectorBase::FileCollectorBase() = default;
-FileCollectorBase::~FileCollectorBase() = default;
+FileCollectorBase::FileCollectorBase() = পূর্বনির্ধারিত;
+FileCollectorBase::~FileCollectorBase() = পূর্বনির্ধারিত;
 
-void FileCollectorBase::addFile(const Twine &File) {
+শূন্য FileCollectorBase::addFile(ধ্রুবক Twine &File) {
   std::lock_guard<std::mutex> lock(Mutex);
   std::string FileStr = File.str();
-  if (markAsSeen(FileStr))
+  যদি (markAsSeen(FileStr))
     addFileImpl(FileStr);
 }
 
-void FileCollectorBase::addDirectory(const Twine &Dir) {
-  assert(sys::fs::is_directory(Dir));
+শূন্য FileCollectorBase::addDirectory(ধ্রুবক Twine &Dir) {
+  প্রতিজ্ঞা(sys::fs::is_directory(Dir));
   std::error_code EC;
   addDirectoryImpl(Dir, vfs::getRealFileSystem(), EC);
 }
 
-static bool isCaseSensitivePath(StringRef Path) {
+স্থির যৌক্তিক isCaseSensitivePath(StringRef Path) {
   SmallString<256> TmpDest = Path, UpperDest, RealDest;
 
   // Remove component traversals, links, etc.
-  if (sys::fs::real_path(Path, TmpDest))
-    return true; // Current default value in vfs.yaml
+  যদি (sys::fs::real_path(Path, TmpDest))
+    ফেরত সত্য; // Current default value in vfs.yaml
   Path = TmpDest;
 
   // Change path to all upper case and ask for its real path, if the latter
@@ -44,21 +44,21 @@ static bool isCaseSensitivePath(StringRef Path) {
   // sensitive in the absence of real_path, since this is the YAMLVFSWriter
   // default.
   UpperDest = Path.upper();
-  if (!sys::fs::real_path(UpperDest, RealDest) && Path == RealDest)
-    return false;
-  return true;
+  যদি (!sys::fs::real_path(UpperDest, RealDest) && Path == RealDest)
+    ফেরত মিথ্যা;
+  ফেরত সত্য;
 }
 
-FileCollector::FileCollector(std::string Root, std::string OverlayRoot,
+FileCollector::FileCollector(std::string মূল_2, std::string Overlay_মূল,
                              IntrusiveRefCntPtr<vfs::FileSystem> VFS)
-    : Root(Root), OverlayRoot(OverlayRoot), Canonicalizer(std::move(VFS)) {
-  assert(sys::path::is_absolute(Root) && "Root not absolute");
-  assert(sys::path::is_absolute(OverlayRoot) && "OverlayRoot not absolute");
+    : মূল_2(মূল_2), Overlay_মূল(Overlay_মূল), Canonicalizer(std::move(VFS)) {
+  প্রতিজ্ঞা(sys::path::is_absolute(মূল_2) && "Root not absolute");
+  প্রতিজ্ঞা(sys::path::is_absolute(Overlay_মূল) && "OverlayRoot not absolute");
 }
 
-void FileCollector::PathCanonicalizer::updateWithRealPath(
-    SmallVectorImpl<char> &Path) {
-  StringRef SrcPath(Path.begin(), Path.size());
+শূন্য FileCollector::PathCanonicalizer::updateWithRealPath(
+    SmallVectorImpl<অক্ষর> &Path) {
+  StringRef SrcPath(Path.begin(), Path.আকার_3());
   StringRef Filename = sys::path::filename(SrcPath);
   StringRef Directory = sys::path::parent_path(SrcPath);
 
@@ -67,12 +67,12 @@ void FileCollector::PathCanonicalizer::updateWithRealPath(
   // expensive.
   SmallString<256> RealPath;
   auto DirWithSymlink = CachedDirs.find(Directory);
-  if (DirWithSymlink == CachedDirs.end()) {
+  যদি (DirWithSymlink == CachedDirs.end()) {
     // FIXME: What if there is nothing on disk?
-    if (VFS->getRealPath(Directory, RealPath))
-      return;
+    যদি (VFS->getRealPath(Directory, RealPath))
+      ফেরত;
     CachedDirs[Directory] = std::string(RealPath);
-  } else {
+  } অন্যথা {
     RealPath = DirWithSymlink->second;
   }
 
@@ -88,7 +88,7 @@ void FileCollector::PathCanonicalizer::updateWithRealPath(
 }
 
 /// Make Path absolute.
-static void makeAbsolute(vfs::FileSystem &VFS, SmallVectorImpl<char> &Path) {
+স্থির শূন্য makeAbsolute(vfs::FileSystem &VFS, SmallVectorImpl<অক্ষর> &Path) {
   // We need an absolute src path to append to the root.
   VFS.makeAbsolute(Path);
 
@@ -97,7 +97,7 @@ static void makeAbsolute(vfs::FileSystem &VFS, SmallVectorImpl<char> &Path) {
 
   // Remove redundant leading "./" pieces and consecutive separators.
   Path.erase(Path.begin(), sys::path::remove_leading_dotslash(
-                               StringRef(Path.begin(), Path.size()))
+                               StringRef(Path.begin(), Path.আকার_3()))
                                .begin());
 }
 
@@ -114,15 +114,15 @@ FileCollector::PathCanonicalizer::canonicalize(StringRef SrcPath) {
   updateWithRealPath(Paths.CopyFrom);
 
   // Canonicalize the virtual path by removing "..", "." components.
-  sys::path::remove_dots(Paths.VirtualPath, /*remove_dot_dot=*/true);
+  sys::path::remove_dots(Paths.VirtualPath, /*remove_dot_dot=*/সত্য);
 
-  return Paths;
+  ফেরত Paths;
 }
 
-void FileCollector::addFileImpl(StringRef SrcPath) {
+শূন্য FileCollector::addFileImpl(StringRef SrcPath) {
   PathCanonicalizer::PathStorage Paths = Canonicalizer.canonicalize(SrcPath);
 
-  SmallString<256> DstPath = StringRef(Root);
+  SmallString<256> DstPath = StringRef(মূল_2);
   sys::path::append(DstPath, sys::path::relative_path(Paths.CopyFrom));
 
   // Always map a canonical src path to its real path into the YAML, by doing
@@ -134,182 +134,182 @@ void FileCollector::addFileImpl(StringRef SrcPath) {
 }
 
 llvm::vfs::directory_iterator
-FileCollector::addDirectoryImpl(const llvm::Twine &Dir,
+FileCollector::addDirectoryImpl(ধ্রুবক llvm::Twine &Dir,
                                 IntrusiveRefCntPtr<vfs::FileSystem> FS,
                                 std::error_code &EC) {
   auto It = FS->dir_begin(Dir, EC);
-  if (EC)
-    return It;
+  যদি (EC)
+    ফেরত It;
   addFile(Dir);
-  for (; !EC && It != llvm::vfs::directory_iterator(); It.increment(EC)) {
-    if (It->type() == sys::fs::file_type::regular_file ||
+  জন্য (; !EC && It != llvm::vfs::directory_iterator(); It.increment(EC)) {
+    যদি (It->type() == sys::fs::file_type::regular_file ||
         It->type() == sys::fs::file_type::directory_file ||
         It->type() == sys::fs::file_type::symlink_file) {
       addFile(It->path());
     }
   }
-  if (EC)
-    return It;
+  যদি (EC)
+    ফেরত It;
   // Return a new iterator.
-  return FS->dir_begin(Dir, EC);
+  ফেরত FS->dir_begin(Dir, EC);
 }
 
 /// Set the access and modification time for the given file from the given
 /// status object.
-static std::error_code
+স্থির std::error_code
 copyAccessAndModificationTime(StringRef Filename,
-                              const sys::fs::file_status &Stat) {
-  int FD;
+                              ধ্রুবক sys::fs::file_status &Stat) {
+  পূর্ণসংখ্যা FD;
 
-  if (auto EC =
+  যদি (auto EC =
           sys::fs::openFileForWrite(Filename, FD, sys::fs::CD_OpenExisting))
-    return EC;
+    ফেরত EC;
 
-  if (auto EC = sys::fs::setLastAccessAndModificationTime(
+  যদি (auto EC = sys::fs::setLastAccessAndModificationTime(
           FD, Stat.getLastAccessedTime(), Stat.getLastModificationTime()))
-    return EC;
+    ফেরত EC;
 
-  if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return EC;
+  যদি (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    ফেরত EC;
 
-  return {};
+  ফেরত {};
 }
 
-std::error_code FileCollector::copyFiles(bool StopOnError) {
-  auto Err = sys::fs::create_directories(Root, /*IgnoreExisting=*/true);
-  if (Err) {
-    return Err;
+std::error_code FileCollector::copyFiles(যৌক্তিক StopOnError) {
+  auto Err = sys::fs::create_directories(মূল_2, /*IgnoreExisting=*/সত্য);
+  যদি (Err) {
+    ফেরত Err;
   }
 
   std::lock_guard<std::mutex> lock(Mutex);
 
-  for (auto &entry : VFSWriter.getMappings()) {
+  জন্য (auto &entry : VFSWriter.getMappings()) {
     // Get the status of the original file/directory.
     sys::fs::file_status Stat;
-    if (std::error_code EC = sys::fs::status(entry.VPath, Stat)) {
-      if (StopOnError)
-        return EC;
-      continue;
+    যদি (std::error_code EC = sys::fs::status(entry.VPath, Stat)) {
+      যদি (StopOnError)
+        ফেরত EC;
+      চালু;
     }
 
     // Continue if the file doesn't exist.
-    if (Stat.type() == sys::fs::file_type::file_not_found)
-      continue;
+    যদি (Stat.type() == sys::fs::file_type::file_not_found)
+      চালু;
 
     // Create directory tree.
-    if (std::error_code EC =
+    যদি (std::error_code EC =
             sys::fs::create_directories(sys::path::parent_path(entry.RPath),
-                                        /*IgnoreExisting=*/true)) {
-      if (StopOnError)
-        return EC;
+                                        /*IgnoreExisting=*/সত্য)) {
+      যদি (StopOnError)
+        ফেরত EC;
     }
 
-    if (Stat.type() == sys::fs::file_type::directory_file) {
+    যদি (Stat.type() == sys::fs::file_type::directory_file) {
       // Construct a directory when it's just a directory entry.
-      if (std::error_code EC =
+      যদি (std::error_code EC =
               sys::fs::create_directories(entry.RPath,
-                                          /*IgnoreExisting=*/true)) {
-        if (StopOnError)
-          return EC;
+                                          /*IgnoreExisting=*/সত্য)) {
+        যদি (StopOnError)
+          ফেরত EC;
       }
-      continue;
+      চালু;
     }
 
     // Copy file over.
-    if (std::error_code EC = sys::fs::copy_file(entry.VPath, entry.RPath)) {
-      if (StopOnError)
-        return EC;
+    যদি (std::error_code EC = sys::fs::copy_file(entry.VPath, entry.RPath)) {
+      যদি (StopOnError)
+        ফেরত EC;
     }
 
     // Copy over permissions.
-    if (auto perms = sys::fs::getPermissions(entry.VPath)) {
-      if (std::error_code EC = sys::fs::setPermissions(entry.RPath, *perms)) {
-        if (StopOnError)
-          return EC;
+    যদি (auto perms = sys::fs::getPermissions(entry.VPath)) {
+      যদি (std::error_code EC = sys::fs::setPermissions(entry.RPath, *perms)) {
+        যদি (StopOnError)
+          ফেরত EC;
       }
     }
 
     // Copy over modification time.
     copyAccessAndModificationTime(entry.RPath, Stat);
   }
-  return {};
+  ফেরত {};
 }
 
 std::error_code FileCollector::writeMapping(StringRef MappingFile) {
   std::lock_guard<std::mutex> lock(Mutex);
 
-  VFSWriter.setOverlayDir(OverlayRoot);
-  VFSWriter.setCaseSensitivity(isCaseSensitivePath(OverlayRoot));
-  VFSWriter.setUseExternalNames(false);
+  VFSWriter.setOverlayDir(Overlay_মূল);
+  VFSWriter.setCaseSensitivity(isCaseSensitivePath(Overlay_মূল));
+  VFSWriter.setUseExternalNames(মিথ্যা);
 
   std::error_code EC;
   raw_fd_ostream os(MappingFile, EC, sys::fs::OF_TextWithCRLF);
-  if (EC)
-    return EC;
+  যদি (EC)
+    ফেরত EC;
 
-  VFSWriter.write(os);
+  VFSWriter.লিখ(os);
 
-  return {};
+  ফেরত {};
 }
 
-namespace llvm {
+নামাকাশ llvm {
 
-class FileCollectorFileSystem : public vfs::FileSystem {
-public:
+শ্রেণী FileCollectorFileSystem : সর্বজনীন vfs::FileSystem {
+সর্বজনীন:
   explicit FileCollectorFileSystem(IntrusiveRefCntPtr<vfs::FileSystem> FS,
                                    std::shared_ptr<FileCollector> Collector)
       : FS(std::move(FS)), Collector(std::move(Collector)) {}
 
-  llvm::ErrorOr<llvm::vfs::Status> status(const Twine &Path) override {
-    auto Result = FS->status(Path);
-    if (Result && Result->exists())
+  llvm::ErrorOr<llvm::vfs::Status> status(ধ্রুবক Twine &Path) override {
+    auto ফলাফল = FS->status(Path);
+    যদি (ফলাফল && ফলাফল->exists())
       Collector->addFile(Path);
-    return Result;
+    ফেরত ফলাফল;
   }
 
   llvm::ErrorOr<std::unique_ptr<llvm::vfs::File>>
-  openFileForRead(const Twine &Path) override {
-    auto Result = FS->openFileForRead(Path);
-    if (Result && *Result)
+  openFileForRead(ধ্রুবক Twine &Path) override {
+    auto ফলাফল = FS->openFileForRead(Path);
+    যদি (ফলাফল && *ফলাফল)
       Collector->addFile(Path);
-    return Result;
+    ফেরত ফলাফল;
   }
 
-  llvm::vfs::directory_iterator dir_begin(const llvm::Twine &Dir,
+  llvm::vfs::directory_iterator dir_begin(ধ্রুবক llvm::Twine &Dir,
                                           std::error_code &EC) override {
-    return Collector->addDirectoryImpl(Dir, FS, EC);
+    ফেরত Collector->addDirectoryImpl(Dir, FS, EC);
   }
 
-  std::error_code getRealPath(const Twine &Path,
-                              SmallVectorImpl<char> &Output) override {
+  std::error_code getRealPath(ধ্রুবক Twine &Path,
+                              SmallVectorImpl<অক্ষর> &Output) override {
     auto EC = FS->getRealPath(Path, Output);
-    if (!EC) {
+    যদি (!EC) {
       Collector->addFile(Path);
-      if (Output.size() > 0)
+      যদি (Output.আকার_3() > 0)
         Collector->addFile(Output);
     }
-    return EC;
+    ফেরত EC;
   }
 
-  void
-  getDirectoryContentRealSources(const Twine &Dir,
+  শূন্য
+  getDirectoryContentRealSources(ধ্রুবক Twine &Dir,
                                  SmallVectorImpl<std::string> &Out) override {
     FS->getDirectoryContentRealSources(Dir, Out);
   }
 
-  std::error_code isLocal(const Twine &Path, bool &Result) override {
-    return FS->isLocal(Path, Result);
+  std::error_code isLocal(ধ্রুবক Twine &Path, যৌক্তিক &ফলাফল) override {
+    ফেরত FS->isLocal(Path, ফলাফল);
   }
 
-  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override {
-    return FS->getCurrentWorkingDirectory();
+  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() ধ্রুবক override {
+    ফেরত FS->getCurrentWorkingDirectory();
   }
 
-  std::error_code setCurrentWorkingDirectory(const llvm::Twine &Path) override {
-    return FS->setCurrentWorkingDirectory(Path);
+  std::error_code setCurrentWorkingDirectory(ধ্রুবক llvm::Twine &Path) override {
+    ফেরত FS->setCurrentWorkingDirectory(Path);
   }
 
-private:
+ব্যক্তিগত:
   IntrusiveRefCntPtr<vfs::FileSystem> FS;
   std::shared_ptr<FileCollector> Collector;
 };
@@ -319,6 +319,6 @@ private:
 IntrusiveRefCntPtr<vfs::FileSystem>
 FileCollector::createCollectorVFS(IntrusiveRefCntPtr<vfs::FileSystem> BaseFS,
                                   std::shared_ptr<FileCollector> Collector) {
-  return makeIntrusiveRefCnt<FileCollectorFileSystem>(std::move(BaseFS),
+  ফেরত makeIntrusiveRefCnt<FileCollectorFileSystem>(std::move(BaseFS),
                                                       std::move(Collector));
 }

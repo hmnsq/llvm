@@ -11,27 +11,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Valgrind.h"
-#include <stddef.h>
+#অন্তর্ভাব "llvm/Support/Valgrind.h"
+#অন্তর্ভাব <stddef.h>
 
-#if __has_include(<valgrind/valgrind.h>)
-#include <valgrind/valgrind.h>
+#যদি __has_include(<valgrind/valgrind.h>)
+#অন্তর্ভাব <valgrind/valgrind.h>
 
-bool llvm::sys::RunningOnValgrind() {
-  return RUNNING_ON_VALGRIND;
+যৌক্তিক llvm::sys::RunningOnValgrind() {
+  ফেরত RUNNING_ON_VALGRIND;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+শূন্য llvm::sys::ValgrindDiscardTranslations(ধ্রুবক শূন্য *Addr, size_t Len) {
   VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
 }
 
-#else
+#অন্যথা
 
-bool llvm::sys::RunningOnValgrind() {
-  return false;
+যৌক্তিক llvm::sys::RunningOnValgrind() {
+  ফেরত মিথ্যা;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+শূন্য llvm::sys::ValgrindDiscardTranslations(ধ্রুবক শূন্য *Addr, size_t Len) {
 }
 
 #endif
