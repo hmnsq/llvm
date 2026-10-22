@@ -11,142 +11,142 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APFixedPoint.h"
-#include "llvm/ADT/APFloat.h"
+#ضمن "llvm/ADT/APFixedPoint.h"
+#ضمن "llvm/ADT/APFloat.h"
 
-#include <cmath>
+#ضمن <cmath>
 
-namespace llvm {
+نطاق llvm {
 
-void FixedPointSemantics::print(llvm::raw_ostream &OS) const {
-  OS << "width=" << getWidth() << ", ";
-  if (isValidLegacySema())
+فراغ Fixed_نقطو_Semantics::print(llvm::raw_ostream &OS) ثابت {
+  OS << "width=" << get_ويڪر() << ", ";
+  إذا (isValidLegacySema())
     OS << "scale=" << getScale() << ", ";
-  OS << "msb=" << getMsbWeight() << ", ";
-  OS << "lsb=" << getLsbWeight() << ", ";
+  OS << "msb=" << get_Msb_وزن() << ", ";
+  OS << "lsb=" << get_Lsb_وزن() << ", ";
   OS << "IsSigned=" << IsSigned << ", ";
   OS << "HasUnsignedPadding=" << HasUnsignedPadding << ", ";
   OS << "IsSaturated=" << IsSaturated;
 }
 
-uint32_t FixedPointSemantics::toOpaqueInt() const {
-  return llvm::bit_cast<uint32_t>(*this);
+uint32_t Fixed_نقطو_Semantics::منزل_Opaque_Int() ثابت {
+  أرجع llvm::ٻٽو_انگ_cast<uint32_t>(*هذا);
 }
 
-FixedPointSemantics FixedPointSemantics::getFromOpaqueInt(uint32_t I) {
-  FixedPointSemantics F(0, 0, false, false, false);
-  std::memcpy(&F, &I, sizeof(F));
-  return F;
+Fixed_نقطو_Semantics Fixed_نقطو_Semantics::getFromOpaqueInt(uint32_t I) {
+  Fixed_نقطو_Semantics F(0, 0, خطأ, خطأ, خطأ);
+  std::يادگيري_نقل(&F, &I, حجم(F));
+  أرجع F;
 }
 
-APFixedPoint APFixedPoint::convert(const FixedPointSemantics &DstSema,
-                                   bool *Overflow) const {
+APFixed_نقطو APFixed_نقطو::convert(ثابت Fixed_نقطو_Semantics &DstSema,
+                                   منطقي *حد_کان_مٿي) ثابت {
   APSInt NewVal = Val;
-  int RelativeUpscale = getLsbWeight() - DstSema.getLsbWeight();
-  if (Overflow)
-    *Overflow = false;
+  صحيح RelativeUpscale = get_Lsb_وزن() - DstSema.get_Lsb_وزن();
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = خطأ;
 
-  if (RelativeUpscale > 0)
-    NewVal = NewVal.extend(NewVal.getBitWidth() + RelativeUpscale);
+  إذا (RelativeUpscale > 0)
+    NewVal = NewVal.extend(NewVal.get_ٻٽو_انگ_ويڪر() + RelativeUpscale);
   NewVal = NewVal.relativeShl(RelativeUpscale);
 
-  auto Mask = APInt::getBitsSetFrom(
-      NewVal.getBitWidth(),
-      std::min(DstSema.getIntegralBits() - DstSema.getLsbWeight(),
-               NewVal.getBitWidth()));
-  APInt Masked(NewVal & Mask);
+  خودڪار نقاب = APInt::get_بٽ_سيٽ_From(
+      NewVal.get_ٻٽو_انگ_ويڪر(),
+      std::min(DstSema.get_Integral_بٽ() - DstSema.get_Lsb_وزن(),
+               NewVal.get_ٻٽو_انگ_ويڪر()));
+  APInt Masked(NewVal & نقاب);
 
   // Change in the bits above the sign
-  if (!(Masked == Mask || Masked == 0)) {
+  إذا (!(Masked == نقاب || Masked == 0)) {
     // Found overflow in the bits above the sign
-    if (DstSema.isSaturated())
-      NewVal = NewVal.isNegative() ? Mask : ~Mask;
-    else if (Overflow)
-      *Overflow = true;
+    إذا (DstSema.isSaturated())
+      NewVal = NewVal.isNegative() ? نقاب : ~نقاب;
+    وإلا إذا (حد_کان_مٿي)
+      *حد_کان_مٿي = سچ;
   }
 
   // If the dst semantics are unsigned, but our value is signed and negative, we
   // clamp to zero.
-  if (!DstSema.isSigned() && NewVal.isSigned() && NewVal.isNegative()) {
+  إذا (!DstSema.isSigned() && NewVal.isSigned() && NewVal.isNegative()) {
     // Found negative overflow for unsigned result
-    if (DstSema.isSaturated())
+    إذا (DstSema.isSaturated())
       NewVal = 0;
-    else if (Overflow)
-      *Overflow = true;
+    وإلا إذا (حد_کان_مٿي)
+      *حد_کان_مٿي = سچ;
   }
 
-  NewVal = NewVal.extOrTrunc(DstSema.getWidth());
-  NewVal.setIsSigned(DstSema.isSigned());
-  return APFixedPoint(NewVal, DstSema);
+  NewVal = NewVal.extOrTrunc(DstSema.get_ويڪر());
+  NewVal.سيٽ_Is_Signed(DstSema.isSigned());
+  أرجع APFixed_نقطو(NewVal, DstSema);
 }
 
-int APFixedPoint::compare(const APFixedPoint &Other) const {
-  APSInt ThisVal = getValue();
-  APSInt OtherVal = Other.getValue();
-  bool ThisSigned = Val.isSigned();
-  bool OtherSigned = OtherVal.isSigned();
+صحيح APFixed_نقطو::compare(ثابت APFixed_نقطو &Other) ثابت {
+  APSInt ThisVal = get_قدر();
+  APSInt OtherVal = Other.get_قدر();
+  منطقي ThisSigned = Val.isSigned();
+  منطقي OtherSigned = OtherVal.isSigned();
 
-  int CommonLsb = std::min(getLsbWeight(), Other.getLsbWeight());
-  int CommonMsb = std::max(getMsbWeight(), Other.getMsbWeight());
-  unsigned CommonWidth = CommonMsb - CommonLsb + 1;
+  صحيح CommonLsb = std::min(get_Lsb_وزن(), Other.get_Lsb_وزن());
+  صحيح CommonMsb = std::max(get_Msb_وزن(), Other.get_Msb_وزن());
+  بنانشان Common_ويڪر = CommonMsb - CommonLsb + 1;
 
-  ThisVal = ThisVal.extOrTrunc(CommonWidth);
-  OtherVal = OtherVal.extOrTrunc(CommonWidth);
+  ThisVal = ThisVal.extOrTrunc(Common_ويڪر);
+  OtherVal = OtherVal.extOrTrunc(Common_ويڪر);
 
-  ThisVal = ThisVal.shl(getLsbWeight() - CommonLsb);
-  OtherVal = OtherVal.shl(Other.getLsbWeight() - CommonLsb);
+  ThisVal = ThisVal.shl(get_Lsb_وزن() - CommonLsb);
+  OtherVal = OtherVal.shl(Other.get_Lsb_وزن() - CommonLsb);
 
-  if (ThisSigned && OtherSigned) {
-    if (ThisVal.sgt(OtherVal))
-      return 1;
-    else if (ThisVal.slt(OtherVal))
-      return -1;
-  } else if (!ThisSigned && !OtherSigned) {
-    if (ThisVal.ugt(OtherVal))
-      return 1;
-    else if (ThisVal.ult(OtherVal))
-      return -1;
-  } else if (ThisSigned && !OtherSigned) {
-    if (ThisVal.isSignBitSet())
-      return -1;
-    else if (ThisVal.ugt(OtherVal))
-      return 1;
-    else if (ThisVal.ult(OtherVal))
-      return -1;
-  } else {
+  إذا (ThisSigned && OtherSigned) {
+    إذا (ThisVal.sgt(OtherVal))
+      أرجع 1;
+    وإلا إذا (ThisVal.slt(OtherVal))
+      أرجع -1;
+  } وإلا إذا (!ThisSigned && !OtherSigned) {
+    إذا (ThisVal.ugt(OtherVal))
+      أرجع 1;
+    وإلا إذا (ThisVal.ult(OtherVal))
+      أرجع -1;
+  } وإلا إذا (ThisSigned && !OtherSigned) {
+    إذا (ThisVal.is_Sign_ٻٽو_انگ_سيٽ())
+      أرجع -1;
+    وإلا إذا (ThisVal.ugt(OtherVal))
+      أرجع 1;
+    وإلا إذا (ThisVal.ult(OtherVal))
+      أرجع -1;
+  } وإلا {
     // !ThisSigned && OtherSigned
-    if (OtherVal.isSignBitSet())
-      return 1;
-    else if (ThisVal.ugt(OtherVal))
-      return 1;
-    else if (ThisVal.ult(OtherVal))
-      return -1;
+    إذا (OtherVal.is_Sign_ٻٽو_انگ_سيٽ())
+      أرجع 1;
+    وإلا إذا (ThisVal.ugt(OtherVal))
+      أرجع 1;
+    وإلا إذا (ThisVal.ult(OtherVal))
+      أرجع -1;
   }
 
-  return 0;
+  أرجع 0;
 }
 
-APFixedPoint APFixedPoint::getMax(const FixedPointSemantics &Sema) {
-  bool IsUnsigned = !Sema.isSigned();
-  auto Val = APSInt::getMaxValue(Sema.getWidth(), IsUnsigned);
-  if (IsUnsigned && Sema.hasUnsignedPadding())
+APFixed_نقطو APFixed_نقطو::getMax(ثابت Fixed_نقطو_Semantics &Sema) {
+  منطقي IsUnsigned = !Sema.isSigned();
+  خودڪار Val = APSInt::get_Max_قدر(Sema.get_ويڪر(), IsUnsigned);
+  إذا (IsUnsigned && Sema.hasUnsignedPadding())
     Val = Val.lshr(1);
-  return APFixedPoint(Val, Sema);
+  أرجع APFixed_نقطو(Val, Sema);
 }
 
-APFixedPoint APFixedPoint::getMin(const FixedPointSemantics &Sema) {
-  auto Val = APSInt::getMinValue(Sema.getWidth(), !Sema.isSigned());
-  return APFixedPoint(Val, Sema);
+APFixed_نقطو APFixed_نقطو::getMin(ثابت Fixed_نقطو_Semantics &Sema) {
+  خودڪار Val = APSInt::get_Min_قدر(Sema.get_ويڪر(), !Sema.isSigned());
+  أرجع APFixed_نقطو(Val, Sema);
 }
 
-APFixedPoint APFixedPoint::getEpsilon(const FixedPointSemantics &Sema) {
-  APSInt Val(Sema.getWidth(), !Sema.isSigned());
-  Val.setBit(/*BitPosition=*/0);
-  return APFixedPoint(Val, Sema);
+APFixed_نقطو APFixed_نقطو::getEpsilon(ثابت Fixed_نقطو_Semantics &Sema) {
+  APSInt Val(Sema.get_ويڪر(), !Sema.isSigned());
+  Val.سيٽ_ٻٽو_انگ(/*BitPosition=*/0);
+  أرجع APFixed_نقطو(Val, Sema);
 }
 
-bool FixedPointSemantics::fitsInFloatSemantics(
-    const fltSemantics &FloatSema) const {
+منطقي Fixed_نقطو_Semantics::سمائي_اندريون_Float_Semantics(
+    ثابت fltSemantics &FloatSema) ثابت {
   // A fixed point semantic fits in a floating point semantic if the maximum
   // and minimum values as integers of the fixed point semantic can fit in the
   // floating point semantic.
@@ -155,108 +155,108 @@ bool FixedPointSemantics::fitsInFloatSemantics(
   // maximum/minimum value will not fit either, so the floating point semantic
   // cannot be used to perform such a rescaling.
 
-  APSInt MaxInt = APFixedPoint::getMax(*this).getValue();
+  APSInt MaxInt = APFixed_نقطو::getMax(*هذا).get_قدر();
   APFloat F(FloatSema);
-  APFloat::opStatus Status = F.convertFromAPInt(MaxInt, MaxInt.isSigned(),
-                                                APFloat::rmNearestTiesToAway);
-  if ((Status & APFloat::opOverflow) || !isSigned())
-    return !(Status & APFloat::opOverflow);
+  APFloat::op_حالت حالت = F.convertFromAPInt(MaxInt, MaxInt.isSigned(),
+                                                APFloat::rm_سڀ_کان_ويجهو_Ties_منزل_Away);
+  إذا ((حالت & APFloat::op_حد_کان_مٿي) || !isSigned())
+    أرجع !(حالت & APFloat::op_حد_کان_مٿي);
 
-  APSInt MinInt = APFixedPoint::getMin(*this).getValue();
-  Status = F.convertFromAPInt(MinInt, MinInt.isSigned(),
-                              APFloat::rmNearestTiesToAway);
-  return !(Status & APFloat::opOverflow);
+  APSInt MinInt = APFixed_نقطو::getMin(*هذا).get_قدر();
+  حالت = F.convertFromAPInt(MinInt, MinInt.isSigned(),
+                              APFloat::rm_سڀ_کان_ويجهو_Ties_منزل_Away);
+  أرجع !(حالت & APFloat::op_حد_کان_مٿي);
 }
 
-FixedPointSemantics FixedPointSemantics::getCommonSemantics(
-    const FixedPointSemantics &Other) const {
-  int CommonLsb = std::min(getLsbWeight(), Other.getLsbWeight());
-  int CommonMSb = std::max(getMsbWeight() - hasSignOrPaddingBit(),
-                           Other.getMsbWeight() - Other.hasSignOrPaddingBit());
-  unsigned CommonWidth = CommonMSb - CommonLsb + 1;
+Fixed_نقطو_Semantics Fixed_نقطو_Semantics::getCommonSemantics(
+    ثابت Fixed_نقطو_Semantics &Other) ثابت {
+  صحيح CommonLsb = std::min(get_Lsb_وزن(), Other.get_Lsb_وزن());
+  صحيح CommonMSb = std::max(get_Msb_وزن() - has_Sign_Or_Padding_ٻٽو_انگ(),
+                           Other.get_Msb_وزن() - Other.has_Sign_Or_Padding_ٻٽو_انگ());
+  بنانشان Common_ويڪر = CommonMSb - CommonLsb + 1;
 
-  bool ResultIsSigned = isSigned() || Other.isSigned();
-  bool ResultIsSaturated = isSaturated() || Other.isSaturated();
-  bool ResultHasUnsignedPadding = false;
-  if (!ResultIsSigned) {
+  منطقي نتيجو_Is_Signed = isSigned() || Other.isSigned();
+  منطقي نتيجو_Is_Saturated = isSaturated() || Other.isSaturated();
+  منطقي نتيجو_Has_Unsigned_Padding = خطأ;
+  إذا (!نتيجو_Is_Signed) {
     // Both are unsigned.
-    ResultHasUnsignedPadding = hasUnsignedPadding() &&
-                               Other.hasUnsignedPadding() && !ResultIsSaturated;
+    نتيجو_Has_Unsigned_Padding = hasUnsignedPadding() &&
+                               Other.hasUnsignedPadding() && !نتيجو_Is_Saturated;
   }
 
   // If the result is signed, add an extra bit for the sign. Otherwise, if it is
   // unsigned and has unsigned padding, we only need to add the extra padding
   // bit back if we are not saturating.
-  if (ResultIsSigned || ResultHasUnsignedPadding)
-    CommonWidth++;
+  إذا (نتيجو_Is_Signed || نتيجو_Has_Unsigned_Padding)
+    Common_ويڪر++;
 
-  return FixedPointSemantics(CommonWidth, Lsb{CommonLsb}, ResultIsSigned,
-                             ResultIsSaturated, ResultHasUnsignedPadding);
+  أرجع Fixed_نقطو_Semantics(Common_ويڪر, Lsb{CommonLsb}, نتيجو_Is_Signed,
+                             نتيجو_Is_Saturated, نتيجو_Has_Unsigned_Padding);
 }
 
-APFixedPoint APFixedPoint::add(const APFixedPoint &Other,
-                               bool *Overflow) const {
-  auto CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
-  APFixedPoint ConvertedThis = convert(CommonFXSema);
-  APFixedPoint ConvertedOther = Other.convert(CommonFXSema);
-  APSInt ThisVal = ConvertedThis.getValue();
-  APSInt OtherVal = ConvertedOther.getValue();
-  bool Overflowed = false;
+APFixed_نقطو APFixed_نقطو::جوڙيو(ثابت APFixed_نقطو &Other,
+                               منطقي *حد_کان_مٿي) ثابت {
+  خودڪار CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
+  APFixed_نقطو ConvertedThis = convert(CommonFXSema);
+  APFixed_نقطو ConvertedOther = Other.convert(CommonFXSema);
+  APSInt ThisVal = ConvertedThis.get_قدر();
+  APSInt OtherVal = ConvertedOther.get_قدر();
+  منطقي Overflowed = خطأ;
 
-  APSInt Result;
-  if (CommonFXSema.isSaturated()) {
-    Result = CommonFXSema.isSigned() ? ThisVal.sadd_sat(OtherVal)
+  APSInt نتيجو;
+  إذا (CommonFXSema.isSaturated()) {
+    نتيجو = CommonFXSema.isSigned() ? ThisVal.sadd_sat(OtherVal)
                                      : ThisVal.uadd_sat(OtherVal);
-  } else {
-    Result = ThisVal.isSigned() ? ThisVal.sadd_ov(OtherVal, Overflowed)
+  } وإلا {
+    نتيجو = ThisVal.isSigned() ? ThisVal.sadd_ov(OtherVal, Overflowed)
                                 : ThisVal.uadd_ov(OtherVal, Overflowed);
   }
 
-  if (Overflow)
-    *Overflow = Overflowed;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = Overflowed;
 
-  return APFixedPoint(Result, CommonFXSema);
+  أرجع APFixed_نقطو(نتيجو, CommonFXSema);
 }
 
-APFixedPoint APFixedPoint::sub(const APFixedPoint &Other,
-                               bool *Overflow) const {
-  auto CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
-  APFixedPoint ConvertedThis = convert(CommonFXSema);
-  APFixedPoint ConvertedOther = Other.convert(CommonFXSema);
-  APSInt ThisVal = ConvertedThis.getValue();
-  APSInt OtherVal = ConvertedOther.getValue();
-  bool Overflowed = false;
+APFixed_نقطو APFixed_نقطو::sub(ثابت APFixed_نقطو &Other,
+                               منطقي *حد_کان_مٿي) ثابت {
+  خودڪار CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
+  APFixed_نقطو ConvertedThis = convert(CommonFXSema);
+  APFixed_نقطو ConvertedOther = Other.convert(CommonFXSema);
+  APSInt ThisVal = ConvertedThis.get_قدر();
+  APSInt OtherVal = ConvertedOther.get_قدر();
+  منطقي Overflowed = خطأ;
 
-  APSInt Result;
-  if (CommonFXSema.isSaturated()) {
-    Result = CommonFXSema.isSigned() ? ThisVal.ssub_sat(OtherVal)
+  APSInt نتيجو;
+  إذا (CommonFXSema.isSaturated()) {
+    نتيجو = CommonFXSema.isSigned() ? ThisVal.ssub_sat(OtherVal)
                                      : ThisVal.usub_sat(OtherVal);
-  } else {
-    Result = ThisVal.isSigned() ? ThisVal.ssub_ov(OtherVal, Overflowed)
+  } وإلا {
+    نتيجو = ThisVal.isSigned() ? ThisVal.ssub_ov(OtherVal, Overflowed)
                                 : ThisVal.usub_ov(OtherVal, Overflowed);
   }
 
-  if (Overflow)
-    *Overflow = Overflowed;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = Overflowed;
 
-  return APFixedPoint(Result, CommonFXSema);
+  أرجع APFixed_نقطو(نتيجو, CommonFXSema);
 }
 
-APFixedPoint APFixedPoint::mul(const APFixedPoint &Other,
-                               bool *Overflow) const {
-  auto CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
-  APFixedPoint ConvertedThis = convert(CommonFXSema);
-  APFixedPoint ConvertedOther = Other.convert(CommonFXSema);
-  APSInt ThisVal = ConvertedThis.getValue();
-  APSInt OtherVal = ConvertedOther.getValue();
-  bool Overflowed = false;
+APFixed_نقطو APFixed_نقطو::mul(ثابت APFixed_نقطو &Other,
+                               منطقي *حد_کان_مٿي) ثابت {
+  خودڪار CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
+  APFixed_نقطو ConvertedThis = convert(CommonFXSema);
+  APFixed_نقطو ConvertedOther = Other.convert(CommonFXSema);
+  APSInt ThisVal = ConvertedThis.get_قدر();
+  APSInt OtherVal = ConvertedOther.get_قدر();
+  منطقي Overflowed = خطأ;
 
   // Widen the LHS and RHS so we can perform a full multiplication.
-  unsigned Wide = CommonFXSema.getWidth() * 2;
-  if (CommonFXSema.isSigned()) {
+  بنانشان Wide = CommonFXSema.get_ويڪر() * 2;
+  إذا (CommonFXSema.isSigned()) {
     ThisVal = ThisVal.sext(Wide);
     OtherVal = OtherVal.sext(Wide);
-  } else {
+  } وإلا {
     ThisVal = ThisVal.zext(Wide);
     OtherVal = OtherVal.zext(Wide);
   }
@@ -268,362 +268,362 @@ APFixedPoint APFixedPoint::mul(const APFixedPoint &Other,
   // outside the representable range. We interpret the spec as allowing us to
   // perform the rounding step first, avoiding the overflow case that would
   // arise.
-  APSInt Result;
-  if (CommonFXSema.isSigned())
-    Result = ThisVal.smul_ov(OtherVal, Overflowed)
-                 .relativeAShl(CommonFXSema.getLsbWeight());
-  else
-    Result = ThisVal.umul_ov(OtherVal, Overflowed)
-                 .relativeLShl(CommonFXSema.getLsbWeight());
-  assert(!Overflowed && "Full multiplication cannot overflow!");
-  Result.setIsSigned(CommonFXSema.isSigned());
+  APSInt نتيجو;
+  إذا (CommonFXSema.isSigned())
+    نتيجو = ThisVal.smul_ov(OtherVal, Overflowed)
+                 .relativeAShl(CommonFXSema.get_Lsb_وزن());
+  وإلا
+    نتيجو = ThisVal.umul_ov(OtherVal, Overflowed)
+                 .relativeLShl(CommonFXSema.get_Lsb_وزن());
+  أكد(!Overflowed && "Full multiplication cannot overflow!");
+  نتيجو.سيٽ_Is_Signed(CommonFXSema.isSigned());
 
   // If our result lies outside of the representative range of the common
   // semantic, we either have overflow or saturation.
-  APSInt Max = APFixedPoint::getMax(CommonFXSema).getValue()
+  APSInt Max = APFixed_نقطو::getMax(CommonFXSema).get_قدر()
                                                  .extOrTrunc(Wide);
-  APSInt Min = APFixedPoint::getMin(CommonFXSema).getValue()
+  APSInt Min = APFixed_نقطو::getMin(CommonFXSema).get_قدر()
                                                  .extOrTrunc(Wide);
-  if (CommonFXSema.isSaturated()) {
-    if (Result < Min)
-      Result = std::move(Min);
-    else if (Result > Max)
-      Result = std::move(Max);
-  } else {
-    Overflowed = Result < Min || Result > Max;
+  إذا (CommonFXSema.isSaturated()) {
+    إذا (نتيجو < Min)
+      نتيجو = std::move(Min);
+    وإلا إذا (نتيجو > Max)
+      نتيجو = std::move(Max);
+  } وإلا {
+    Overflowed = نتيجو < Min || نتيجو > Max;
   }
 
-  if (Overflow)
-    *Overflow = Overflowed;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = Overflowed;
 
-  return APFixedPoint(Result.sextOrTrunc(CommonFXSema.getWidth()),
+  أرجع APFixed_نقطو(نتيجو.sextOrTrunc(CommonFXSema.get_ويڪر()),
                       CommonFXSema);
 }
 
-APFixedPoint APFixedPoint::div(const APFixedPoint &Other,
-                               bool *Overflow) const {
-  auto CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
-  APFixedPoint ConvertedThis = convert(CommonFXSema);
-  APFixedPoint ConvertedOther = Other.convert(CommonFXSema);
-  APSInt ThisVal = ConvertedThis.getValue();
-  APSInt OtherVal = ConvertedOther.getValue();
-  bool Overflowed = false;
+APFixed_نقطو APFixed_نقطو::div(ثابت APFixed_نقطو &Other,
+                               منطقي *حد_کان_مٿي) ثابت {
+  خودڪار CommonFXSema = Sema.getCommonSemantics(Other.getSemantics());
+  APFixed_نقطو ConvertedThis = convert(CommonFXSema);
+  APFixed_نقطو ConvertedOther = Other.convert(CommonFXSema);
+  APSInt ThisVal = ConvertedThis.get_قدر();
+  APSInt OtherVal = ConvertedOther.get_قدر();
+  منطقي Overflowed = خطأ;
 
   // Widen the LHS and RHS so we can perform a full division.
   // Also make sure that there will be enough space for the shift below to not
-  // overflow
-  unsigned Wide =
-      CommonFXSema.getWidth() * 2 + std::max(-CommonFXSema.getMsbWeight(), 0);
-  if (CommonFXSema.isSigned()) {
+  //حد_کان_مٿي
+  بنانشان Wide =
+      CommonFXSema.get_ويڪر() * 2 + std::max(-CommonFXSema.get_Msb_وزن(), 0);
+  إذا (CommonFXSema.isSigned()) {
     ThisVal = ThisVal.sext(Wide);
     OtherVal = OtherVal.sext(Wide);
-  } else {
+  } وإلا {
     ThisVal = ThisVal.zext(Wide);
     OtherVal = OtherVal.zext(Wide);
   }
 
   // Upscale to compensate for the loss of precision from division, and
   // perform the full division.
-  if (CommonFXSema.getLsbWeight() < 0)
-    ThisVal = ThisVal.shl(-CommonFXSema.getLsbWeight());
-  else if (CommonFXSema.getLsbWeight() > 0)
-    OtherVal = OtherVal.shl(CommonFXSema.getLsbWeight());
-  APSInt Result;
-  if (CommonFXSema.isSigned()) {
+  إذا (CommonFXSema.get_Lsb_وزن() < 0)
+    ThisVal = ThisVal.shl(-CommonFXSema.get_Lsb_وزن());
+  وإلا إذا (CommonFXSema.get_Lsb_وزن() > 0)
+    OtherVal = OtherVal.shl(CommonFXSema.get_Lsb_وزن());
+  APSInt نتيجو;
+  إذا (CommonFXSema.isSigned()) {
     APInt Rem;
-    APInt::sdivrem(ThisVal, OtherVal, Result, Rem);
+    APInt::sdivrem(ThisVal, OtherVal, نتيجو, Rem);
     // If the quotient is negative and the remainder is nonzero, round
     // towards negative infinity by subtracting epsilon from the result.
-    if (ThisVal.isNegative() != OtherVal.isNegative() && !Rem.isZero())
-      Result = Result - 1;
-  } else {
-    Result = ThisVal.udiv(OtherVal);
+    إذا (ThisVal.isNegative() != OtherVal.isNegative() && !Rem.isZero())
+      نتيجو = نتيجو - 1;
+  } وإلا {
+    نتيجو = ThisVal.udiv(OtherVal);
   }
-  Result.setIsSigned(CommonFXSema.isSigned());
+  نتيجو.سيٽ_Is_Signed(CommonFXSema.isSigned());
 
   // If our result lies outside of the representative range of the common
   // semantic, we either have overflow or saturation.
-  APSInt Max = APFixedPoint::getMax(CommonFXSema).getValue()
+  APSInt Max = APFixed_نقطو::getMax(CommonFXSema).get_قدر()
                                                  .extOrTrunc(Wide);
-  APSInt Min = APFixedPoint::getMin(CommonFXSema).getValue()
+  APSInt Min = APFixed_نقطو::getMin(CommonFXSema).get_قدر()
                                                  .extOrTrunc(Wide);
-  if (CommonFXSema.isSaturated()) {
-    if (Result < Min)
-      Result = std::move(Min);
-    else if (Result > Max)
-      Result = std::move(Max);
-  } else {
-    Overflowed = Result < Min || Result > Max;
+  إذا (CommonFXSema.isSaturated()) {
+    إذا (نتيجو < Min)
+      نتيجو = std::move(Min);
+    وإلا إذا (نتيجو > Max)
+      نتيجو = std::move(Max);
+  } وإلا {
+    Overflowed = نتيجو < Min || نتيجو > Max;
   }
 
-  if (Overflow)
-    *Overflow = Overflowed;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = Overflowed;
 
-  return APFixedPoint(Result.sextOrTrunc(CommonFXSema.getWidth()),
+  أرجع APFixed_نقطو(نتيجو.sextOrTrunc(CommonFXSema.get_ويڪر()),
                       CommonFXSema);
 }
 
-APFixedPoint APFixedPoint::shl(unsigned Amt, bool *Overflow) const {
+APFixed_نقطو APFixed_نقطو::shl(بنانشان Amt, منطقي *حد_کان_مٿي) ثابت {
   APSInt ThisVal = Val;
-  bool Overflowed = false;
+  منطقي Overflowed = خطأ;
 
   // Widen the LHS.
-  unsigned Wide = Sema.getWidth() * 2;
-  if (Sema.isSigned())
+  بنانشان Wide = Sema.get_ويڪر() * 2;
+  إذا (Sema.isSigned())
     ThisVal = ThisVal.sext(Wide);
-  else
+  وإلا
     ThisVal = ThisVal.zext(Wide);
 
   // Clamp the shift amount at the original width, and perform the shift.
-  Amt = std::min(Amt, ThisVal.getBitWidth());
-  APSInt Result = ThisVal << Amt;
-  Result.setIsSigned(Sema.isSigned());
+  Amt = std::min(Amt, ThisVal.get_ٻٽو_انگ_ويڪر());
+  APSInt نتيجو = ThisVal << Amt;
+  نتيجو.سيٽ_Is_Signed(Sema.isSigned());
 
   // If our result lies outside of the representative range of the
   // semantic, we either have overflow or saturation.
-  APSInt Max = APFixedPoint::getMax(Sema).getValue().extOrTrunc(Wide);
-  APSInt Min = APFixedPoint::getMin(Sema).getValue().extOrTrunc(Wide);
-  if (Sema.isSaturated()) {
-    if (Result < Min)
-      Result = std::move(Min);
-    else if (Result > Max)
-      Result = std::move(Max);
-  } else {
-    Overflowed = Result < Min || Result > Max;
+  APSInt Max = APFixed_نقطو::getMax(Sema).get_قدر().extOrTrunc(Wide);
+  APSInt Min = APFixed_نقطو::getMin(Sema).get_قدر().extOrTrunc(Wide);
+  إذا (Sema.isSaturated()) {
+    إذا (نتيجو < Min)
+      نتيجو = std::move(Min);
+    وإلا إذا (نتيجو > Max)
+      نتيجو = std::move(Max);
+  } وإلا {
+    Overflowed = نتيجو < Min || نتيجو > Max;
   }
 
-  if (Overflow)
-    *Overflow = Overflowed;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = Overflowed;
 
-  return APFixedPoint(Result.sextOrTrunc(Sema.getWidth()), Sema);
+  أرجع APFixed_نقطو(نتيجو.sextOrTrunc(Sema.get_ويڪر()), Sema);
 }
 
-void APFixedPoint::toString(SmallVectorImpl<char> &Str) const {
-  APSInt Val = getValue();
-  int Lsb = getLsbWeight();
-  int OrigWidth = getWidth();
+فراغ APFixed_نقطو::منزل_String(Small_ويڪٽر_Impl<حرف> &Str) ثابت {
+  APSInt Val = get_قدر();
+  صحيح Lsb = get_Lsb_وزن();
+  صحيح Orig_ويڪر = get_ويڪر();
 
-  if (Lsb >= 0) {
+  إذا (Lsb >= 0) {
     APSInt IntPart = Val;
-    IntPart = IntPart.extend(IntPart.getBitWidth() + Lsb);
+    IntPart = IntPart.extend(IntPart.get_ٻٽو_انگ_ويڪر() + Lsb);
     IntPart <<= Lsb;
-    IntPart.toString(Str, /*Radix=*/10);
-    Str.push_back('.');
-    Str.push_back('0');
-    return;
+    IntPart.منزل_String(Str, /*Radix=*/10);
+    Str.ڌڪو_پٺ('.');
+    Str.ڌڪو_پٺ('0');
+    أرجع;
   }
 
-  if (Val.isSigned() && Val.isNegative()) {
+  إذا (Val.isSigned() && Val.isNegative()) {
     Val = -Val;
-    Val.setIsUnsigned(true);
-    Str.push_back('-');
+    Val.سيٽ_Is_Unsigned(سچ);
+    Str.ڌڪو_پٺ('-');
   }
 
-  int Scale = -getLsbWeight();
-  APSInt IntPart = (OrigWidth > Scale) ? (Val >> Scale) : APSInt::get(0);
+  صحيح Scale = -get_Lsb_وزن();
+  APSInt IntPart = (Orig_ويڪر > Scale) ? (Val >> Scale) : APSInt::get(0);
 
   // Add 4 digits to hold the value after multiplying 10 (the radix)
-  unsigned Width = std::max(OrigWidth, Scale) + 4;
-  APInt FractPart = Val.zextOrTrunc(Scale).zext(Width);
-  APInt FractPartMask = APInt::getAllOnes(Scale).zext(Width);
-  APInt RadixInt = APInt(Width, 10);
+  بنانشان ويڪر = std::max(Orig_ويڪر, Scale) + 4;
+  APInt FractPart = Val.zextOrTrunc(Scale).zext(ويڪر);
+  APInt Fract_Part_نقاب = APInt::getAllOnes(Scale).zext(ويڪر);
+  APInt RadixInt = APInt(ويڪر, 10);
 
-  IntPart.toString(Str, /*Radix=*/10);
-  Str.push_back('.');
-  do {
+  IntPart.منزل_String(Str, /*Radix=*/10);
+  Str.ڌڪو_پٺ('.');
+  افعل {
     (FractPart * RadixInt)
         .lshr(Scale)
-        .toString(Str, /*Radix=*/10, Val.isSigned());
-    FractPart = (FractPart * RadixInt) & FractPartMask;
-  } while (FractPart != 0);
+        .منزل_String(Str, /*Radix=*/10, Val.isSigned());
+    FractPart = (FractPart * RadixInt) & Fract_Part_نقاب;
+  } طالما (FractPart != 0);
 }
 
-void APFixedPoint::print(raw_ostream &OS) const {
-  OS << "APFixedPoint(" << toString() << ", {";
+فراغ APFixed_نقطو::print(raw_ostream &OS) ثابت {
+  OS << "APFixedPoint(" << منزل_String() << ", {";
   Sema.print(OS);
   OS << "})";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void APFixedPoint::dump() const { print(llvm::errs()); }
-#endif
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_طريقو فراغ APFixed_نقطو::dump() ثابت { print(llvm::errs()); }
+#جيڪڏهن_پورو
 
-APFixedPoint APFixedPoint::negate(bool *Overflow) const {
-  if (!isSaturated()) {
-    if (Overflow)
-      *Overflow =
-          (!isSigned() && Val != 0) || (isSigned() && Val.isMinSignedValue());
-    return APFixedPoint(-Val, Sema);
+APFixed_نقطو APFixed_نقطو::negate(منطقي *حد_کان_مٿي) ثابت {
+  إذا (!isSaturated()) {
+    إذا (حد_کان_مٿي)
+      *حد_کان_مٿي =
+          (!isSigned() && Val != 0) || (isSigned() && Val.is_Min_Signed_قدر());
+    أرجع APFixed_نقطو(-Val, Sema);
   }
 
   // We never overflow for saturation
-  if (Overflow)
-    *Overflow = false;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = خطأ;
 
-  if (isSigned())
-    return Val.isMinSignedValue() ? getMax(Sema) : APFixedPoint(-Val, Sema);
-  else
-    return APFixedPoint(Sema);
+  إذا (isSigned())
+    أرجع Val.is_Min_Signed_قدر() ? getMax(Sema) : APFixed_نقطو(-Val, Sema);
+  وإلا
+    أرجع APFixed_نقطو(Sema);
 }
 
-APSInt APFixedPoint::convertToInt(unsigned DstWidth, bool DstSign,
-                                  bool *Overflow) const {
-  APSInt Result = getIntPart();
-  unsigned SrcWidth = getWidth();
+APSInt APFixed_نقطو::convert_منزل_Int(بنانشان Dst_ويڪر, منطقي DstSign,
+                                  منطقي *حد_کان_مٿي) ثابت {
+  APSInt نتيجو = getIntPart();
+  بنانشان Src_ويڪر = get_ويڪر();
 
-  APSInt DstMin = APSInt::getMinValue(DstWidth, !DstSign);
-  APSInt DstMax = APSInt::getMaxValue(DstWidth, !DstSign);
+  APSInt DstMin = APSInt::get_Min_قدر(Dst_ويڪر, !DstSign);
+  APSInt DstMax = APSInt::get_Max_قدر(Dst_ويڪر, !DstSign);
 
-  if (SrcWidth < DstWidth) {
-    Result = Result.extend(DstWidth);
-  } else if (SrcWidth > DstWidth) {
-    DstMin = DstMin.extend(SrcWidth);
-    DstMax = DstMax.extend(SrcWidth);
+  إذا (Src_ويڪر < Dst_ويڪر) {
+    نتيجو = نتيجو.extend(Dst_ويڪر);
+  } وإلا إذا (Src_ويڪر > Dst_ويڪر) {
+    DstMin = DstMin.extend(Src_ويڪر);
+    DstMax = DstMax.extend(Src_ويڪر);
   }
 
-  if (Overflow) {
-    if (Result.isSigned() && !DstSign) {
-      *Overflow = Result.isNegative() || Result.ugt(DstMax);
-    } else if (Result.isUnsigned() && DstSign) {
-      *Overflow = Result.ugt(DstMax);
-    } else {
-      *Overflow = Result < DstMin || Result > DstMax;
+  إذا (حد_کان_مٿي) {
+    إذا (نتيجو.isSigned() && !DstSign) {
+      *حد_کان_مٿي = نتيجو.isNegative() || نتيجو.ugt(DstMax);
+    } وإلا إذا (نتيجو.isUnsigned() && DstSign) {
+      *حد_کان_مٿي = نتيجو.ugt(DstMax);
+    } وإلا {
+      *حد_کان_مٿي = نتيجو < DstMin || نتيجو > DstMax;
     }
   }
 
-  Result.setIsSigned(DstSign);
-  return Result.extOrTrunc(DstWidth);
+  نتيجو.سيٽ_Is_Signed(DstSign);
+  أرجع نتيجو.extOrTrunc(Dst_ويڪر);
 }
 
-const fltSemantics *APFixedPoint::promoteFloatSemantics(const fltSemantics *S) {
-  if (S == &APFloat::BFloat())
-    return &APFloat::IEEEdouble();
-  else if (S == &APFloat::IEEEhalf())
-    return &APFloat::IEEEsingle();
-  else if (S == &APFloat::IEEEsingle())
-    return &APFloat::IEEEdouble();
-  else if (S == &APFloat::IEEEdouble())
-    return &APFloat::IEEEquad();
+ثابت fltSemantics *APFixed_نقطو::promoteFloatSemantics(ثابت fltSemantics *S) {
+  إذا (S == &APFloat::BFloat())
+    أرجع &APFloat::IEEEdouble();
+  وإلا إذا (S == &APFloat::IEEEhalf())
+    أرجع &APFloat::IEEEsingle();
+  وإلا إذا (S == &APFloat::IEEEsingle())
+    أرجع &APFloat::IEEEdouble();
+  وإلا إذا (S == &APFloat::IEEEdouble())
+    أرجع &APFloat::IEEEquad();
   llvm_unreachable("Could not promote float type!");
 }
 
-APFloat APFixedPoint::convertToFloat(const fltSemantics &FloatSema) const {
+APFloat APFixed_نقطو::convert_منزل_Float(ثابت fltSemantics &FloatSema) ثابت {
   // For some operations, rounding mode has an effect on the result, while
   // other operations are lossless and should never result in rounding.
   // To signify which these operations are, we define two rounding modes here.
-  APFloat::roundingMode RM = APFloat::rmNearestTiesToEven;
-  APFloat::roundingMode LosslessRM = APFloat::rmTowardZero;
+  APFloat::rounding_گهڻائي RM = APFloat::rm_سڀ_کان_ويجهو_Ties_منزل_Even;
+  APFloat::rounding_گهڻائي LosslessRM = APFloat::rmTowardZero;
 
   // Make sure that we are operating in a type that works with this fixed-point
   // semantic.
-  const fltSemantics *OpSema = &FloatSema;
-  while (!Sema.fitsInFloatSemantics(*OpSema))
+  ثابت fltSemantics *OpSema = &FloatSema;
+  طالما (!Sema.سمائي_اندريون_Float_Semantics(*OpSema))
     OpSema = promoteFloatSemantics(OpSema);
 
   // Convert the fixed point value bits as an integer. If the floating point
   // value does not have the required precision, we will round according to the
   // given mode.
   APFloat Flt(*OpSema);
-  APFloat::opStatus S = Flt.convertFromAPInt(Val, Sema.isSigned(), RM);
+  APFloat::op_حالت S = Flt.convertFromAPInt(Val, Sema.isSigned(), RM);
 
   // If we cared about checking for precision loss, we could look at this
   // status.
-  (void)S;
+  (فراغ)S;
 
   // Scale down the integer value in the float to match the correct scaling
   // factor.
-  APFloat ScaleFactor(std::pow(2, Sema.getLsbWeight()));
-  bool Ignored;
-  ScaleFactor.convert(*OpSema, LosslessRM, &Ignored);
-  Flt.multiply(ScaleFactor, LosslessRM);
+  APFloat Scale_ضرب_ڪندڙ(std::قوت(2, Sema.get_Lsb_وزن()));
+  منطقي Ignored;
+  Scale_ضرب_ڪندڙ.convert(*OpSema, LosslessRM, &Ignored);
+  Flt.multiply(Scale_ضرب_ڪندڙ, LosslessRM);
 
-  if (OpSema != &FloatSema)
+  إذا (OpSema != &FloatSema)
     Flt.convert(FloatSema, RM, &Ignored);
 
-  return Flt;
+  أرجع Flt;
 }
 
-APFixedPoint APFixedPoint::getFromIntValue(const APSInt &Value,
-                                           const FixedPointSemantics &DstFXSema,
-                                           bool *Overflow) {
-  FixedPointSemantics IntFXSema = FixedPointSemantics::GetIntegerSemantics(
-      Value.getBitWidth(), Value.isSigned());
-  return APFixedPoint(Value, IntFXSema).convert(DstFXSema, Overflow);
+APFixed_نقطو APFixed_نقطو::get_From_Int_قدر(ثابت APSInt &قدر,
+                                           ثابت Fixed_نقطو_Semantics &DstFXSema,
+                                           منطقي *حد_کان_مٿي) {
+  Fixed_نقطو_Semantics IntFXSema = Fixed_نقطو_Semantics::GetIntegerSemantics(
+      قدر.get_ٻٽو_انگ_ويڪر(), قدر.isSigned());
+  أرجع APFixed_نقطو(قدر, IntFXSema).convert(DstFXSema, حد_کان_مٿي);
 }
 
-APFixedPoint
-APFixedPoint::getFromFloatValue(const APFloat &Value,
-                                const FixedPointSemantics &DstFXSema,
-                                bool *Overflow) {
+APFixed_نقطو
+APFixed_نقطو::get_From_Float_قدر(ثابت APFloat &قدر,
+                                ثابت Fixed_نقطو_Semantics &DstFXSema,
+                                منطقي *حد_کان_مٿي) {
   // For some operations, rounding mode has an effect on the result, while
   // other operations are lossless and should never result in rounding.
   // To signify which these operations are, we define two rounding modes here,
   // even though they are the same mode.
-  APFloat::roundingMode RM = APFloat::rmTowardZero;
-  APFloat::roundingMode LosslessRM = APFloat::rmTowardZero;
+  APFloat::rounding_گهڻائي RM = APFloat::rmTowardZero;
+  APFloat::rounding_گهڻائي LosslessRM = APFloat::rmTowardZero;
 
-  const fltSemantics &FloatSema = Value.getSemantics();
+  ثابت fltSemantics &FloatSema = قدر.getSemantics();
 
-  if (Value.isNaN()) {
+  إذا (قدر.isNaN()) {
     // Handle NaN immediately.
-    if (Overflow)
-      *Overflow = true;
-    return APFixedPoint(DstFXSema);
+    إذا (حد_کان_مٿي)
+      *حد_کان_مٿي = سچ;
+    أرجع APFixed_نقطو(DstFXSema);
   }
 
   // Make sure that we are operating in a type that works with this fixed-point
   // semantic.
-  const fltSemantics *OpSema = &FloatSema;
-  while (!DstFXSema.fitsInFloatSemantics(*OpSema))
+  ثابت fltSemantics *OpSema = &FloatSema;
+  طالما (!DstFXSema.سمائي_اندريون_Float_Semantics(*OpSema))
     OpSema = promoteFloatSemantics(OpSema);
 
-  APFloat Val = Value;
+  APFloat Val = قدر;
 
-  bool Ignored;
-  if (&FloatSema != OpSema)
+  منطقي Ignored;
+  إذا (&FloatSema != OpSema)
     Val.convert(*OpSema, LosslessRM, &Ignored);
 
   // Scale up the float so that the 'fractional' part of the mantissa ends up in
   // the integer range instead. Rounding mode is irrelevant here.
   // It is fine if this overflows to infinity even for saturating types,
   // since we will use floating point comparisons to check for saturation.
-  APFloat ScaleFactor(std::pow(2, -DstFXSema.getLsbWeight()));
-  ScaleFactor.convert(*OpSema, LosslessRM, &Ignored);
-  Val.multiply(ScaleFactor, LosslessRM);
+  APFloat Scale_ضرب_ڪندڙ(std::قوت(2, -DstFXSema.get_Lsb_وزن()));
+  Scale_ضرب_ڪندڙ.convert(*OpSema, LosslessRM, &Ignored);
+  Val.multiply(Scale_ضرب_ڪندڙ, LosslessRM);
 
   // Convert to the integral representation of the value. This rounding mode
   // is significant.
-  APSInt Res(DstFXSema.getWidth(), !DstFXSema.isSigned());
-  Val.convertToInteger(Res, RM, &Ignored);
+  APSInt Res(DstFXSema.get_ويڪر(), !DstFXSema.isSigned());
+  Val.convert_منزل_Integer(Res, RM, &Ignored);
 
   // Round the integral value and scale back. This makes the
   // overflow calculations below work properly. If we do not round here,
   // we risk checking for overflow with a value that is outside the
   // representable range of the fixed-point semantic even though no overflow
   // would occur had we rounded first.
-  ScaleFactor = APFloat(std::pow(2, DstFXSema.getLsbWeight()));
-  ScaleFactor.convert(*OpSema, LosslessRM, &Ignored);
-  Val.roundToIntegral(RM);
-  Val.multiply(ScaleFactor, LosslessRM);
+  Scale_ضرب_ڪندڙ = APFloat(std::قوت(2, DstFXSema.get_Lsb_وزن()));
+  Scale_ضرب_ڪندڙ.convert(*OpSema, LosslessRM, &Ignored);
+  Val.ڦيرو_منزل_Integral(RM);
+  Val.multiply(Scale_ضرب_ڪندڙ, LosslessRM);
 
   // Check for overflow/saturation by checking if the floating point value
   // is outside the range representable by the fixed-point value.
-  APFloat FloatMax = getMax(DstFXSema).convertToFloat(*OpSema);
-  APFloat FloatMin = getMin(DstFXSema).convertToFloat(*OpSema);
-  bool Overflowed = false;
-  if (DstFXSema.isSaturated()) {
-    if (Val > FloatMax)
-      Res = getMax(DstFXSema).getValue();
-    else if (Val < FloatMin)
-      Res = getMin(DstFXSema).getValue();
-  } else {
+  APFloat FloatMax = getMax(DstFXSema).convert_منزل_Float(*OpSema);
+  APFloat FloatMin = getMin(DstFXSema).convert_منزل_Float(*OpSema);
+  منطقي Overflowed = خطأ;
+  إذا (DstFXSema.isSaturated()) {
+    إذا (Val > FloatMax)
+      Res = getMax(DstFXSema).get_قدر();
+    وإلا إذا (Val < FloatMin)
+      Res = getMin(DstFXSema).get_قدر();
+  } وإلا {
     Overflowed = Val > FloatMax || Val < FloatMin;
   }
 
-  if (Overflow)
-    *Overflow = Overflowed;
+  إذا (حد_کان_مٿي)
+    *حد_کان_مٿي = Overflowed;
 
-  return APFixedPoint(Res, DstFXSema);
+  أرجع APFixed_نقطو(Res, DstFXSema);
 }
 
 } // namespace llvm

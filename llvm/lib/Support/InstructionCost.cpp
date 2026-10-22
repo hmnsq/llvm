@@ -11,27 +11,27 @@
 /// instructions.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InstructionCost.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/InstructionCost.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
-  using UnsignedCostType = std::make_unsigned_t<CostType>;
-  if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+فراغ Instruction_لاڳت::print(raw_ostream &OS) ثابت {
+  استعمال Unsigned_لاڳت_Type = std::make_unsigned_t<لاڳت_Type>;
+  إذا (isValid()) {
+    Unsigned_لاڳت_Type Abs_قدر =
+        (قدر < 0) ? -((Unsigned_لاڳت_Type)قدر) : ((Unsigned_لاڳت_Type)قدر);
+    Unsigned_لاڳت_Type سڄو_عدد = Abs_قدر / لاڳت_Granularity;
+    Unsigned_لاڳت_Type Remainder = Abs_قدر % لاڳت_Granularity;
+    إذا (قدر < 0)
       OS << "-";
-    UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
-    while (RemainderHundreds % 10 == 0 && RemainderHundreds)
+    Unsigned_لاڳت_Type RemainderHundreds = (Remainder * 100) / لاڳت_Granularity;
+    طالما (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
-    if (RemainderHundreds)
+    OS << سڄو_عدد;
+    إذا (RemainderHundreds)
       OS << "." << RemainderHundreds;
-  } else {
+  } وإلا {
     OS << "Invalid";
   }
 }

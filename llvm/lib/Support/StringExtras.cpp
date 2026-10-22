@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cctype>
 
-using namespace llvm;
+استعمال نطاق llvm;
 
 /// getToken - This function extracts one token from source, ignoring any
 /// leading characters that appear in the Delimiters string, and ending the
@@ -23,111 +23,111 @@ using namespace llvm;
 /// there are no tokens in the source string, an empty string is returned.
 /// The function returns a pair containing the extracted token and the
 /// remaining tail string.
-std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
+std::pair<StringRef, StringRef> llvm::getToken(StringRef ذريعو,
                                                StringRef Delimiters) {
   // Figure out where the token starts.
-  StringRef::size_type Start = Source.find_first_not_of(Delimiters);
+  StringRef::سائيز_type شروعات = ذريعو.ڳوليو_پهريون_not_جو(Delimiters);
 
   // Find the next occurrence of the delimiter.
-  StringRef::size_type End = Source.find_first_of(Delimiters, Start);
+  StringRef::سائيز_type پڇاڙي_2 = ذريعو.ڳوليو_پهريون_جو(Delimiters, شروعات);
 
-  return {Source.slice(Start, End), Source.substr(End)};
+  أرجع {ذريعو.ٽڪرو(شروعات, پڇاڙي_2), ذريعو.substr(پڇاڙي_2)};
 }
 
 /// SplitString - Split up the specified string according to the specified
 /// delimiters, appending the result fragments to the output list.
-void llvm::SplitString(StringRef Source,
-                       SmallVectorImpl<StringRef> &OutFragments,
+فراغ llvm::ورهايو_String(StringRef ذريعو,
+                       Small_ويڪٽر_Impl<StringRef> &ٻاهريون_Fragments,
                        StringRef Delimiters) {
-  std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
-    OutFragments.push_back(S.first);
-    S = getToken(S.second, Delimiters);
+  std::pair<StringRef, StringRef> S = getToken(ذريعو, Delimiters);
+  طالما (!S.پهريون_2.خالي_جايون()) {
+    ٻاهريون_Fragments.ڌڪو_پٺ(S.پهريون_2);
+    S = getToken(S.ٻيو_2, Delimiters);
   }
 }
 
-void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned char C : Name) {
-    if (C == '\\')
-      Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
-      Out << C;
-    else
-      Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
+فراغ llvm::printEscapedString(StringRef Name, raw_ostream &ٻاهريون) {
+  لكل (بنانشان حرف C : Name) {
+    إذا (C == '\\')
+      ٻاهريون << '\\' << C;
+    وإلا إذا (isPrint(C) && C != '"')
+      ٻاهريون << C;
+    وإلا
+      ٻاهريون << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
-      Out << "&amp;";
-    else if (C == '<')
-      Out << "&lt;";
-    else if (C == '>')
-      Out << "&gt;";
-    else if (C == '\"')
-      Out << "&quot;";
-    else if (C == '\'')
-      Out << "&apos;";
-    else
-      Out << C;
+فراغ llvm::printHTMLEscaped(StringRef String, raw_ostream &ٻاهريون) {
+  لكل (حرف C : String) {
+    إذا (C == '&')
+      ٻاهريون << "&amp;";
+    وإلا إذا (C == '<')
+      ٻاهريون << "&lt;";
+    وإلا إذا (C == '>')
+      ٻاهريون << "&gt;";
+    وإلا إذا (C == '\"')
+      ٻاهريون << "&quot;";
+    وإلا إذا (C == '\'')
+      ٻاهريون << "&apos;";
+    وإلا
+      ٻاهريون << C;
   }
 }
 
-void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
-    Out << toLower(C);
+فراغ llvm::print_هيٺاهون_Case(StringRef String, raw_ostream &ٻاهريون) {
+  لكل (ثابت حرف C : String)
+    ٻاهريون << منزل_هيٺاهون(C);
 }
 
-void llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
-  for (unsigned char C : String) {
-    if (isAlnum(C) || StringRef("-_.~").contains(C))
-      Out << C;
-    else
-      Out << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
+فراغ llvm::printPercentEncoded(StringRef String, raw_ostream &ٻاهريون) {
+  لكل (بنانشان حرف C : String) {
+    إذا (isAlnum(C) || StringRef("-_.~").شامل_آهي(C))
+      ٻاهريون << C;
+    وإلا
+      ٻاهريون << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+std::string llvm::convert_منزل_Snake_From_Camel_Case(StringRef داخلا_2) {
+  إذا (داخلا_2.خالي_جايون())
+    أرجع "";
 
   std::string snakeCase;
-  snakeCase.reserve(input.size());
-  auto check = [&input](size_t j, function_ref<bool(int)> predicate) {
-    return j < input.size() && predicate(input[j]);
+  snakeCase.reserve(داخلا_2.سائيز_2());
+  خودڪار check = [&داخلا_2](size_t j, function_ref<منطقي(صحيح)> predicate) {
+    أرجع j < داخلا_2.سائيز_2() && predicate(داخلا_2[j]);
   };
-  for (size_t i = 0; i < input.size(); ++i) {
-    snakeCase.push_back(tolower(input[i]));
+  لكل (size_t i = 0; i < داخلا_2.سائيز_2(); ++i) {
+    snakeCase.ڌڪو_پٺ(tolower(داخلا_2[i]));
     // Handles "runs" of capitals, such as in OPName -> op_name.
-    if (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
-      snakeCase.push_back('_');
-    if ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
-      snakeCase.push_back('_');
+    إذا (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
+      snakeCase.ڌڪو_پٺ('_');
+    إذا ((check(i, islower) || check(i, انگ_آهي)) && check(i + 1, isupper))
+      snakeCase.ڌڪو_پٺ('_');
   }
-  return snakeCase;
+  أرجع snakeCase;
 }
 
-std::string llvm::convertToCamelFromSnakeCase(StringRef input,
-                                              bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+std::string llvm::convert_منزل_Camel_From_Snake_Case(StringRef داخلا_2,
+                                              منطقي capitalize_پهريون) {
+  إذا (داخلا_2.خالي_جايون())
+    أرجع "";
 
   std::string output;
-  output.reserve(input.size());
+  output.reserve(داخلا_2.سائيز_2());
 
   // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
-    output.push_back(llvm::toUpper(input.front()));
-  else
-    output.push_back(input.front());
+  إذا (capitalize_پهريون && std::islower(داخلا_2.front()))
+    output.ڌڪو_پٺ(llvm::منزل_مٿانهون(داخلا_2.front()));
+  وإلا
+    output.ڌڪو_پٺ(داخلا_2.front());
 
   // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
-      output.push_back(llvm::toUpper(input[++pos]));
-    else
-      output.push_back(input[pos]);
+  لكل (size_t pos = 1, e = داخلا_2.سائيز_2(); pos < e; ++pos) {
+    إذا (داخلا_2[pos] == '_' && pos != (e - 1) && std::islower(داخلا_2[pos + 1]))
+      output.ڌڪو_پٺ(llvm::منزل_مٿانهون(داخلا_2[++pos]));
+    وإلا
+      output.ڌڪو_پٺ(داخلا_2[pos]);
   }
-  return output;
+  أرجع output;
 }

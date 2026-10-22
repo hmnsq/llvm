@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#ضمن <sys/types.h>
+#ضمن <stdio.h>
+#ضمن <string.h>
+#ضمن <ctype.h>
+#ضمن <limits.h>
+#ضمن <stdlib.h>
+#ضمن "regex_impl.h"
 
-#include "regutils.h"
+#ضمن "regutils.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#جيڪڏهن_وصف_ٿيل _MSC_VER
+#وصف_ڪريو snprintf _snprintf
+#جيڪڏهن_پورو
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+ساكن ثابت حرف *regatoi(ثابت llvm_regex_t *, حرف *, صحيح);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+ساكن بنية rerr {
+	صحيح ڪوڊ_2;
+	ثابت حرف *name;
+	ثابت حرف *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -69,7 +69,7 @@ static struct rerr {
 	{ REG_ERANGE,	"REG_ERANGE",	"invalid character range" },
 	{ REG_ESPACE,	"REG_ESPACE",	"out of memory" },
 	{ REG_BADRPT,	"REG_BADRPT",	"repetition-operator operand invalid" },
-	{ REG_EMPTY,	"REG_EMPTY",	"empty (sub)expression" },
+	{ REG_خالي_جايون,	"REG_EMPTY",	"empty (sub)expression" },
 	{ REG_ASSERT,	"REG_ASSERT",	"\"can't happen\" -- you found a bug" },
 	{ REG_INVARG,	"REG_INVARG",	"invalid argument to regex routine" },
 	{ 0,		"",		"*** unknown regexp error code ***" }
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(صحيح errcode, ثابت llvm_regex_t *preg, حرف *errbuf, size_t errbuf_سائيز)
 {
-	struct rerr *r;
+	بنية rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	صحيح هدف = errcode &~ REG_ITOA;
+	ثابت حرف *s;
+	حرف convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	إذا (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, حجم convbuf);
+	وإلا {
+		لكل (r = rerrs; r->ڪوڊ_2 != 0; r++)
+			إذا (r->ڪوڊ_2 == هدف)
+				اكسر;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
-				    "REG_0x%x", target);
+		إذا (errcode&REG_ITOA) {
+			إذا (r->ڪوڊ_2 != 0) {
+				أكد(لڙي_ڊيگهه(r->name) < حجم(convbuf));
+				(فراغ) llvm_strlcpy(convbuf, r->name, حجم convbuf);
+			} وإلا
+				(فراغ)snprintf(convbuf, حجم convbuf,
+				    "REG_0x%x", هدف);
 			s = convbuf;
-		} else
+		} وإلا
 			s = r->explain;
 	}
 
-	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
-		llvm_strlcpy(errbuf, s, errbuf_size);
+	len = لڙي_ڊيگهه(s) + 1;
+	إذا (errbuf_سائيز > 0) {
+		llvm_strlcpy(errbuf, s, errbuf_سائيز);
 	}
 
-	return(len);
+	أرجع(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+ساكن ثابت حرف *
+regatoi(ثابت llvm_regex_t *preg, حرف *localbuf, صحيح localbufsize)
 {
-	struct rerr *r;
+	بنية rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	لكل (r = rerrs; r->ڪوڊ_2 != 0; r++)
+		إذا (strcmp(r->name, preg->re_endp) == 0)
+			اكسر;
+	إذا (r->ڪوڊ_2 == 0)
+		أرجع("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(فراغ)snprintf(localbuf, localbufsize, "%d", r->ڪوڊ_2);
+	أرجع(localbuf);
 }

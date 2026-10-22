@@ -10,154 +10,154 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RWMutex.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Allocator.h"
+#ضمن "llvm/Support/RWMutex.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#ضمن "llvm/Support/Allocator.h"
 
-#if defined(LLVM_USE_RW_MUTEX_IMPL)
-using namespace llvm;
-using namespace sys;
+#إذا defined(LLVM_USE_RW_MUTEX_IMPL)
+استعمال نطاق llvm;
+استعمال نطاق sys;
 
-#if !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
+#إذا !defined(LLVM_ENABLE_ڌاڳا) || LLVM_ENABLE_ڌاڳا == 0
 // Define all methods as no-ops if threading is explicitly disabled
 
-RWMutexImpl::RWMutexImpl() = default;
-RWMutexImpl::~RWMutexImpl() = default;
+RWMutexImpl::RWMutexImpl() = افتراضي;
+RWMutexImpl::~RWMutexImpl() = افتراضي;
 
-bool RWMutexImpl::lock_shared() { return true; }
-bool RWMutexImpl::unlock_shared() { return true; }
-bool RWMutexImpl::try_lock_shared() { return true; }
-bool RWMutexImpl::lock() { return true; }
-bool RWMutexImpl::unlock() { return true; }
-bool RWMutexImpl::try_lock() { return true; }
+منطقي RWMutexImpl::تالو_shared() { أرجع سچ; }
+منطقي RWMutexImpl::unlock_shared() { أرجع سچ; }
+منطقي RWMutexImpl::try_تالو_shared() { أرجع سچ; }
+منطقي RWMutexImpl::تالو() { أرجع سچ; }
+منطقي RWMutexImpl::unlock() { أرجع سچ; }
+منطقي RWMutexImpl::try_تالو_2() { أرجع سچ; }
 
-#else
+#وإلا
 
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
+#إذا defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
 
-#include <cassert>
-#include <cstdlib>
-#include <pthread.h>
+#ضمن <cassert>
+#ضمن <cstdlib>
+#ضمن <pthread.h>
 
 // Construct a RWMutex using pthread calls
 RWMutexImpl::RWMutexImpl()
 {
   // Declare the pthread_rwlock data structures
   pthread_rwlock_t* rwlock =
-    static_cast<pthread_rwlock_t*>(safe_malloc(sizeof(pthread_rwlock_t)));
+    static_cast<pthread_rwlock_t*>(محفوظ_malloc(حجم(pthread_rwlock_t)));
 
-#ifdef __APPLE__
+#جيڪڏهن_وصف_ٿيل __APPLE__
   // Workaround a bug/mis-feature in Darwin's pthread_rwlock_init.
-  bzero(rwlock, sizeof(pthread_rwlock_t));
-#endif
+  bzero(rwlock, حجم(pthread_rwlock_t));
+#جيڪڏهن_پورو
 
   // Initialize the rwlock
-  int errorcode = pthread_rwlock_init(rwlock, nullptr);
-  (void)errorcode;
-  assert(errorcode == 0);
+  صحيح errorcode = pthread_rwlock_init(rwlock, خالي_اشارو);
+  (فراغ)errorcode;
+  أكد(errorcode == 0);
 
   // Assign the data member
-  data_ = rwlock;
+  معلومات_3 = rwlock;
 }
 
 // Destruct a RWMutex
 RWMutexImpl::~RWMutexImpl()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
   pthread_rwlock_destroy(rwlock);
-  free(rwlock);
+  حرر(rwlock);
 }
 
-bool
-RWMutexImpl::lock_shared()
+منطقي
+RWMutexImpl::تالو_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
 
-  int errorcode = pthread_rwlock_rdlock(rwlock);
-  return errorcode == 0;
+  صحيح errorcode = pthread_rwlock_rdlock(rwlock);
+  أرجع errorcode == 0;
 }
 
-bool
+منطقي
 RWMutexImpl::unlock_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  صحيح errorcode = pthread_rwlock_unlock(rwlock);
+  أرجع errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+منطقي RWMutexImpl::try_تالو_shared() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
 
-  int errorcode = pthread_rwlock_tryrdlock(rwlock);
-  return errorcode == 0;
+  صحيح errorcode = pthread_rwlock_tryrdlock(rwlock);
+  أرجع errorcode == 0;
 }
 
-bool
-RWMutexImpl::lock()
+منطقي
+RWMutexImpl::تالو()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
 
-  int errorcode = pthread_rwlock_wrlock(rwlock);
-  return errorcode == 0;
+  صحيح errorcode = pthread_rwlock_wrlock(rwlock);
+  أرجع errorcode == 0;
 }
 
-bool
+منطقي
 RWMutexImpl::unlock()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  صحيح errorcode = pthread_rwlock_unlock(rwlock);
+  أرجع errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+منطقي RWMutexImpl::try_تالو_2() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(معلومات_3);
+  أكد(rwlock != خالي_اشارو);
 
-  int errorcode = pthread_rwlock_trywrlock(rwlock);
-  return errorcode == 0;
+  صحيح errorcode = pthread_rwlock_trywrlock(rwlock);
+  أرجع errorcode == 0;
 }
 
-#else
+#وإلا
 
-RWMutexImpl::RWMutexImpl() : data_(new MutexImpl(false)) { }
+RWMutexImpl::RWMutexImpl() : معلومات_3(جديد MutexImpl(خطأ)) { }
 
 RWMutexImpl::~RWMutexImpl() {
-  delete static_cast<MutexImpl *>(data_);
+  ميٽيو static_cast<MutexImpl *>(معلومات_3);
 }
 
-bool RWMutexImpl::lock_shared() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+منطقي RWMutexImpl::تالو_shared() {
+  أرجع static_cast<MutexImpl *>(معلومات_3)->acquire();
 }
 
-bool RWMutexImpl::unlock_shared() {
-  return static_cast<MutexImpl *>(data_)->release();
+منطقي RWMutexImpl::unlock_shared() {
+  أرجع static_cast<MutexImpl *>(معلومات_3)->release();
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+منطقي RWMutexImpl::try_تالو_shared() {
+  أرجع static_cast<MutexImpl *>(معلومات_3)->tryacquire();
 }
 
-bool RWMutexImpl::lock() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+منطقي RWMutexImpl::تالو() {
+  أرجع static_cast<MutexImpl *>(معلومات_3)->acquire();
 }
 
-bool RWMutexImpl::unlock() {
-  return static_cast<MutexImpl *>(data_)->release();
+منطقي RWMutexImpl::unlock() {
+  أرجع static_cast<MutexImpl *>(معلومات_3)->release();
 }
 
-bool RWMutexImpl::try_lock() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+منطقي RWMutexImpl::try_تالو_2() {
+  أرجع static_cast<MutexImpl *>(معلومات_3)->tryacquire();
 }
 
-#endif
-#endif
-#endif
+#جيڪڏهن_پورو
+#جيڪڏهن_پورو
+#جيڪڏهن_پورو

@@ -12,56 +12,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Caching.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
+#ضمن "llvm/Support/Caching.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/Path.h"
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include "llvm/Support/Windows/WindowsSupport.h"
-#include <io.h>
-#endif
+#إذا !defined(_MSC_VER) && !defined(__MINGW32__)
+#ضمن <unistd.h>
+#وإلا
+#ضمن "llvm/Support/Windows/WindowsSupport.h"
+#ضمن <io.h>
+#جيڪڏهن_پورو
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
-                                     const Twine &TempFilePrefixRef,
-                                     const Twine &CacheDirectoryPathRef,
-                                     AddBufferFn AddBuffer, bool CacheRename) {
+Expected<FileCache> llvm::localCache(ثابت Twine &CacheNameRef,
+                                     ثابت Twine &عارضي_File_اڳياڙي_Ref,
+                                     ثابت Twine &Cache_Directory_رستو_Ref,
+                                     جوڙيو_بفر_Fn جوڙيو_بفر, منطقي CacheRename) {
 
   // Create local copies which are safely captured-by-copy in lambdas
-  SmallString<64> CacheName, TempFilePrefix, CacheDirectoryPath;
-  CacheNameRef.toVector(CacheName);
-  TempFilePrefixRef.toVector(TempFilePrefix);
-  CacheDirectoryPathRef.toVector(CacheDirectoryPath);
+  SmallString<64> CacheName, عارضي_File_اڳياڙي, Cache_Directory_رستو;
+  CacheNameRef.منزل_ويڪٽر(CacheName);
+  عارضي_File_اڳياڙي_Ref.منزل_ويڪٽر(عارضي_File_اڳياڙي);
+  Cache_Directory_رستو_Ref.منزل_ويڪٽر(Cache_Directory_رستو);
 
-  auto Func = [=](unsigned Task, StringRef Key,
-                  const Twine &ModuleName) -> Expected<AddStreamFn> {
+  خودڪار Func = [=](بنانشان Task, StringRef ڪنجي,
+                  ثابت Twine &ModuleName) -> Expected<جوڙيو_وهڪرو_Fn> {
     // This choice of file name allows the cache to be pruned (see pruneCache()
     // in include/llvm/Support/CachePruning.h).
-    SmallString<64> EntryPath;
-    sys::path::append(EntryPath, CacheDirectoryPath, "llvmcache-" + Key);
+    SmallString<64> داخلا_رستو;
+    sys::رستو_2::append(داخلا_رستو, Cache_Directory_رستو, "llvmcache-" + ڪنجي);
     // First, see if we have a cache hit.
-    SmallString<64> ResultPath;
+    SmallString<64> نتيجو_رستو;
     Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
-        Twine(EntryPath), sys::fs::OF_UpdateAtime, &ResultPath);
-    std::error_code EC;
-    if (FDOrErr) {
-      ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-          MemoryBuffer::getOpenFile(*FDOrErr, EntryPath,
+        Twine(داخلا_رستو), sys::fs::جو_Update_Atime, &نتيجو_رستو);
+    std::error_ڪوڊ EC;
+    إذا (FDOrErr) {
+      ErrorOr<std::unique_ptr<يادگيري_بفر>> MBOrErr =
+          يادگيري_بفر::getOpenFile(*FDOrErr, داخلا_رستو,
                                     /*FileSize=*/-1,
-                                    /*RequiresNullTerminator=*/false);
+                                    /*RequiresNullTerminator=*/خطأ);
       sys::fs::closeFile(*FDOrErr);
-      if (MBOrErr) {
-        AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return AddStreamFn();
+      إذا (MBOrErr) {
+        جوڙيو_بفر(Task, ModuleName, std::move(*MBOrErr));
+        أرجع جوڙيو_وهڪرو_Fn();
       }
       EC = MBOrErr.getError();
-    } else {
-      EC = errorToErrorCode(FDOrErr.takeError());
+    } وإلا {
+      EC = error_منزل_Error_ڪوڊ(FDOrErr.takeError());
     }
 
     // On Windows we can fail to open a cache file with a permission denied
@@ -70,43 +70,43 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
     // process has opened the file without the sharing permissions we need.
     // Since the file is probably being deleted we handle it in the same way as
     // if the file did not exist at all.
-    if (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
-      return createStringError(EC, Twine("Failed to open cache file ") +
-                                       EntryPath + ": " + EC.message() + "\n");
+    إذا (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
+      أرجع createStringError(EC, Twine("Failed to open cache file ") +
+                                       داخلا_رستو + ": " + EC.پيغام() + "\n");
 
     // This file stream is responsible for commiting the resulting file to the
     // cache and calling AddBuffer to add it to the link.
-    struct CacheStream : CachedFileStream {
-      AddBufferFn AddBuffer;
-      sys::fs::TempFile TempFile;
+    بنية Cache_وهڪرو : Cached_File_وهڪرو {
+      جوڙيو_بفر_Fn جوڙيو_بفر;
+      sys::fs::عارضي_File عارضي_File;
       std::string ModuleName;
-      unsigned Task;
+      بنانشان Task;
 
-      CacheStream(std::unique_ptr<raw_pwrite_stream> OS, AddBufferFn AddBuffer,
-                  sys::fs::TempFile TempFile, std::string EntryPath,
-                  std::string ModuleName, unsigned Task)
-          : CachedFileStream(std::move(OS), std::move(EntryPath)),
-            AddBuffer(std::move(AddBuffer)), TempFile(std::move(TempFile)),
+      Cache_وهڪرو(std::unique_ptr<raw_pwrite_وهڪرو> OS, جوڙيو_بفر_Fn جوڙيو_بفر,
+                  sys::fs::عارضي_File عارضي_File, std::string داخلا_رستو,
+                  std::string ModuleName, بنانشان Task)
+          : Cached_File_وهڪرو(std::move(OS), std::move(داخلا_رستو)),
+            جوڙيو_بفر(std::move(جوڙيو_بفر)), عارضي_File(std::move(عارضي_File)),
             ModuleName(ModuleName), Task(Task) {}
 
       Error commit() override {
-        Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+        Error E = Cached_File_وهڪرو::commit();
+        إذا (E)
+          أرجع E;
 
         // Make sure the stream is closed before committing it.
         OS.reset();
 
         // Open the file first to avoid racing with a cache pruner.
-        ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-            MemoryBuffer::getOpenFile(
-                sys::fs::convertFDToNativeFile(TempFile.FD), ObjectPathName,
-                /*FileSize=*/-1, /*RequiresNullTerminator=*/false);
-        if (!MBOrErr) {
-          std::error_code EC = MBOrErr.getError();
-          return createStringError(EC, Twine("Failed to open new cache file ") +
-                                           TempFile.TmpName + ": " +
-                                           EC.message() + "\n");
+        ErrorOr<std::unique_ptr<يادگيري_بفر>> MBOrErr =
+            يادگيري_بفر::getOpenFile(
+                sys::fs::convertFDToNativeFile(عارضي_File.FD), Object_رستو_Name,
+                /*FileSize=*/-1, /*RequiresNullTerminator=*/خطأ);
+        إذا (!MBOrErr) {
+          std::error_ڪوڊ EC = MBOrErr.getError();
+          أرجع createStringError(EC, Twine("Failed to open new cache file ") +
+                                           عارضي_File.TmpName + ": " +
+                                           EC.پيغام() + "\n");
         }
 
         // On POSIX systems, this will atomically replace the destination if
@@ -118,116 +118,116 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
         // AddBuffer a copy of the bytes we wrote in that case. We do this
         // instead of just using the existing file, because the pruner might
         // delete the file before we get a chance to use it.
-        E = TempFile.keep(ObjectPathName);
-        E = handleErrors(std::move(E), [&](const ECError &E) -> Error {
-          std::error_code EC = E.convertToErrorCode();
-          if (EC != errc::permission_denied)
-            return createStringError(
+        E = عارضي_File.keep(Object_رستو_Name);
+        E = handleErrors(std::move(E), [&](ثابت ECError &E) -> Error {
+          std::error_ڪوڊ EC = E.convert_منزل_Error_ڪوڊ();
+          إذا (EC != errc::permission_denied)
+            أرجع createStringError(
                 EC, Twine("Failed to rename temporary file ") +
-                        TempFile.TmpName + " to " + ObjectPathName + ": " +
-                        EC.message() + "\n");
+                        عارضي_File.TmpName + " to " + Object_رستو_Name + ": " +
+                        EC.پيغام() + "\n");
 
-          auto MBCopy = MemoryBuffer::getMemBufferCopy((*MBOrErr)->getBuffer(),
-                                                       ObjectPathName);
+          خودڪار MBCopy = يادگيري_بفر::get_Mem_بفر_Copy((*MBOrErr)->get_بفر(),
+                                                       Object_رستو_Name);
           MBOrErr = std::move(MBCopy);
 
           // FIXME: should we consume the discard error?
-          consumeError(TempFile.discard());
+          consumeError(عارضي_File.discard());
 
-          return Error::success();
+          أرجع Error::success();
         });
 
-        if (E)
-          return E;
+        إذا (E)
+          أرجع E;
 
-        AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return Error::success();
+        جوڙيو_بفر(Task, ModuleName, std::move(*MBOrErr));
+        أرجع Error::success();
       }
 
       Error abort() override {
-        Error E1 = CachedFileStream::abort();
-        Error E2 = TempFile.discard();
-        return joinErrors(std::move(E1), std::move(E2));
+        Error E1 = Cached_File_وهڪرو::abort();
+        Error E2 = عارضي_File.discard();
+        أرجع joinErrors(std::move(E1), std::move(E2));
       }
     };
 
     // This class is responsible for renaming/moving existing file into a
     // cache directory. The path for an input file is passed through a string
     // stream.
-    struct MoveFileToCache : CachedFileStream {
-      AddBufferFn AddBuffer;
+    بنية Move_File_منزل_Cache : Cached_File_وهڪرو {
+      جوڙيو_بفر_Fn جوڙيو_بفر;
       std::string ModuleName;
       size_t Task;
-      StringRef FilePath;
+      StringRef File_رستو;
 
-      MoveFileToCache(AddBufferFn AddBuffer, std::string EntryPath,
+      Move_File_منزل_Cache(جوڙيو_بفر_Fn جوڙيو_بفر, std::string داخلا_رستو,
                       std::string ModuleID, size_t Task)
-          : CachedFileStream({}, std::move(EntryPath)),
-            AddBuffer(std::move(AddBuffer)), ModuleName(ModuleID), Task(Task) {}
-      virtual ~MoveFileToCache() = default;
+          : Cached_File_وهڪرو({}, std::move(داخلا_رستو)),
+            جوڙيو_بفر(std::move(جوڙيو_بفر)), ModuleName(ModuleID), Task(Task) {}
+      مجازي ~Move_File_منزل_Cache() = افتراضي;
 
-      virtual Error commit(std::unique_ptr<MemoryBuffer> MemBuf) override {
-        Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+      مجازي Error commit(std::unique_ptr<يادگيري_بفر> MemBuf) override {
+        Error E = Cached_File_وهڪرو::commit();
+        إذا (E)
+          أرجع E;
 
-        FilePath = MemBuf->getBufferIdentifier();
-        assert(!FilePath.empty() && "File path is empty.");
+        File_رستو = MemBuf->get_بفر_Identifier();
+        أكد(!File_رستو.خالي_جايون() && "File path is empty.");
 
         // Rename/move native object file into cache directory, if they are
         // located the same device/logical drive, otherwise we use a copy.
-        std::error_code EC = sys::fs::rename(FilePath, ObjectPathName);
-#ifdef _WIN32
-        if (EC ==
-            std::error_code(ERROR_NOT_SAME_DEVICE, std::system_category()))
-#else
-        if (EC == std::make_error_code(std::errc::cross_device_link))
-#endif
-          EC = sys::fs::copy_file(FilePath, ObjectPathName);
-        if (EC)
-          return createStringError(EC, Twine("Failed to rename or copy file ") +
-                                           FilePath + " to " + ObjectPathName +
-                                           ": " + EC.message() + "\n");
+        std::error_ڪوڊ EC = sys::fs::rename(File_رستو, Object_رستو_Name);
+#جيڪڏهن_وصف_ٿيل _WIN32
+        إذا (EC ==
+            std::error_ڪوڊ(ERROR_NOT_SAME_DEVICE, std::system_category()))
+#وإلا
+        إذا (EC == std::make_error_ڪوڊ(std::errc::cross_device_link))
+#جيڪڏهن_پورو
+          EC = sys::fs::copy_file(File_رستو, Object_رستو_Name);
+        إذا (EC)
+          أرجع createStringError(EC, Twine("Failed to rename or copy file ") +
+                                           File_رستو + " to " + Object_رستو_Name +
+                                           ": " + EC.پيغام() + "\n");
 
-        AddBuffer(Task, ModuleName, std::move(MemBuf));
+        جوڙيو_بفر(Task, ModuleName, std::move(MemBuf));
 
-        return Error::success();
+        أرجع Error::success();
       }
     };
 
-    return [=](size_t Task, const Twine &ModuleName)
-               -> Expected<std::unique_ptr<CachedFileStream>> {
+    أرجع [=](size_t Task, ثابت Twine &ModuleName)
+               -> Expected<std::unique_ptr<Cached_File_وهڪرو>> {
       // Create the cache directory if not already done. Doing this lazily
       // ensures the filesystem isn't mutated until the cache is.
-      if (std::error_code EC = sys::fs::create_directories(
-              CacheDirectoryPath, /*IgnoreExisting=*/true))
-        return createStringError(EC, Twine("can't create cache directory ") +
-                                         CacheDirectoryPath + ": " +
-                                         EC.message());
+      إذا (std::error_ڪوڊ EC = sys::fs::create_directories(
+              Cache_Directory_رستو, /*IgnoreExisting=*/سچ))
+        أرجع createStringError(EC, Twine("can't create cache directory ") +
+                                         Cache_Directory_رستو + ": " +
+                                         EC.پيغام());
       // MoveFileToChache class will rename/move the file into the cache on
       // destruction.
-      if (CacheRename) {
-        return std::make_unique<MoveFileToCache>(
-            AddBuffer, std::string(EntryPath.str()), ModuleName.str(), Task);
+      إذا (CacheRename) {
+        أرجع std::make_unique<Move_File_منزل_Cache>(
+            جوڙيو_بفر, std::string(داخلا_رستو.str()), ModuleName.str(), Task);
       }
 
       // Write to a temporary to avoid race condition
-      SmallString<64> TempFilenameModel;
-      sys::path::append(TempFilenameModel, CacheDirectoryPath,
-                        TempFilePrefix + "-%%%%%%.tmp.o");
-      Expected<sys::fs::TempFile> Temp = sys::fs::TempFile::create(
-          TempFilenameModel, sys::fs::owner_read | sys::fs::owner_write);
-      if (!Temp)
-        return createStringError(errc::io_error,
-                                 toString(Temp.takeError()) + ": " + CacheName +
+      SmallString<64> عارضي_Filename_Model;
+      sys::رستو_2::append(عارضي_Filename_Model, Cache_Directory_رستو,
+                        عارضي_File_اڳياڙي + "-%%%%%%.tmp.o");
+      Expected<sys::fs::عارضي_File> عارضي = sys::fs::عارضي_File::create(
+          عارضي_Filename_Model, sys::fs::owner_read | sys::fs::owner_write);
+      إذا (!عارضي)
+        أرجع createStringError(errc::io_error,
+                                 منزل_String(عارضي.takeError()) + ": " + CacheName +
                                      ": Can't get a temporary file");
 
       // This CacheStream will move the temporary file into the cache when done.
-      return std::make_unique<CacheStream>(
-          std::make_unique<raw_fd_ostream>(Temp->FD, /* ShouldClose */ false),
-          AddBuffer, std::move(*Temp), std::string(EntryPath), ModuleName.str(),
+      أرجع std::make_unique<Cache_وهڪرو>(
+          std::make_unique<raw_fd_ostream>(عارضي->FD, /* ShouldClose */ خطأ),
+          جوڙيو_بفر, std::move(*عارضي), std::string(داخلا_رستو), ModuleName.str(),
           Task);
     };
   };
-  return FileCache(Func, CacheDirectoryPathRef.str());
+  أرجع FileCache(Func, Cache_Directory_رستو_Ref.str());
 }

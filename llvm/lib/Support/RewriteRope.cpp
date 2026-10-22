@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/RewriteRope.h"
-#include "llvm/Support/Casting.h"
-#include <algorithm>
-#include <cassert>
-#include <cstring>
+#ضمن "llvm/ADT/RewriteRope.h"
+#ضمن "llvm/Support/Casting.h"
+#ضمن <algorithm>
+#ضمن <cassert>
+#ضمن <cstring>
 
-using namespace llvm;
+استعمال نطاق llvm;
 
 /// RewriteRope is a "strong" string class, designed to make insertions and
 /// deletions in the middle of the string nearly constant time (really, they are
@@ -61,7 +61,7 @@ using namespace llvm;
 ///     RopePieceBTreeInterior - An interior node in the B+ Tree, which manages
 ///          up to '2*WidthFactor' other nodes in the tree.
 
-namespace {
+نطاق {
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeNode Class
@@ -73,31 +73,31 @@ namespace {
 /// important, this node knows the full extend of the node, including any
 /// children that it has.  This allows efficient skipping over entire subtrees
 /// when looking for an offset in the BTree.
-class RopePieceBTreeNode {
-protected:
+صنف Rope_Piece_BTree_ڳنڍ {
+محمي:
   /// WidthFactor - This controls the number of K/V slots held in the BTree:
   /// how wide it is.  Each level of the BTree is guaranteed to have at least
   /// 'WidthFactor' elements in it (either ropepieces or children), (except
   /// the root, which may have less) and may have at most 2*WidthFactor
   /// elements.
-  enum { WidthFactor = 8 };
+  تعداد { ويڪر_ضرب_ڪندڙ = 8 };
 
   /// Size - This is the number of bytes of file this node (including any
   /// potential children) covers.
-  unsigned Size = 0;
+  بنانشان سائيز = 0;
 
   /// IsLeaf - True if this is an instance of RopePieceBTreeLeaf, false if it
   /// is an instance of RopePieceBTreeInterior.
-  bool IsLeaf;
+  منطقي Is_پن;
 
-  RopePieceBTreeNode(bool isLeaf) : IsLeaf(isLeaf) {}
-  ~RopePieceBTreeNode() = default;
+  Rope_Piece_BTree_ڳنڍ(منطقي is_پن) : Is_پن(is_پن) {}
+  ~Rope_Piece_BTree_ڳنڍ() = افتراضي;
 
-public:
-  bool isLeaf() const { return IsLeaf; }
-  unsigned size() const { return Size; }
+عام:
+  منطقي is_پن() ثابت { أرجع Is_پن; }
+  بنانشان سائيز_2() ثابت { أرجع سائيز; }
 
-  void Destroy();
+  فراغ Destroy();
 
   /// split - Split the range containing the specified offset so that we are
   /// guaranteed that there is a place to do an insertion at the specified
@@ -105,7 +105,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_ڳنڍ *ورهايو(بنانشان وٿي);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -113,11 +113,11 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_ڳنڍ *وجهو(بنانشان وٿي, ثابت RopePiece &R);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  فراغ erase(بنانشان وٿي, بنانشان انگ_بائيٽون);
 };
 
 //===----------------------------------------------------------------------===//
@@ -131,72 +131,72 @@ public:
 /// over the leaves efficient, they maintain a singly linked list through the
 /// NextLeaf field.  This allows the B+Tree forward iterator to be constant
 /// time for all increments.
-class RopePieceBTreeLeaf : public RopePieceBTreeNode {
+صنف Rope_Piece_BTree_پن : عام Rope_Piece_BTree_ڳنڍ {
   /// NumPieces - This holds the number of rope pieces currently active in the
   /// Pieces array.
-  unsigned char NumPieces = 0;
+  بنانشان حرف انگ_Pieces = 0;
 
   /// Pieces - This tracks the file chunks currently in this leaf.
-  RopePiece Pieces[2 * WidthFactor];
+  RopePiece Pieces[2 * ويڪر_ضرب_ڪندڙ];
 
   /// NextLeaf - This is a pointer to the next leaf in the tree, allowing
   /// efficient in-order forward iteration of the tree without traversal.
-  RopePieceBTreeLeaf **PrevLeaf = nullptr;
-  RopePieceBTreeLeaf *NextLeaf = nullptr;
+  Rope_Piece_BTree_پن **Prev_پن = خالي_اشارو;
+  Rope_Piece_BTree_پن *ايندڙ_پن = خالي_اشارو;
 
-public:
-  RopePieceBTreeLeaf() : RopePieceBTreeNode(true) {}
+عام:
+  Rope_Piece_BTree_پن() : Rope_Piece_BTree_ڳنڍ(سچ) {}
 
-  ~RopePieceBTreeLeaf() {
-    if (PrevLeaf || NextLeaf)
-      removeFromLeafInOrder();
+  ~Rope_Piece_BTree_پن() {
+    إذا (Prev_پن || ايندڙ_پن)
+      remove_From_پن_اندريون_ترتيب();
     clear();
   }
 
-  bool isFull() const { return NumPieces == 2 * WidthFactor; }
+  منطقي is_ڀريل() ثابت { أرجع انگ_Pieces == 2 * ويڪر_ضرب_ڪندڙ; }
 
   /// clear - Remove all rope pieces from this leaf.
-  void clear() {
-    while (NumPieces)
-      Pieces[--NumPieces] = RopePiece();
-    Size = 0;
+  فراغ clear() {
+    طالما (انگ_Pieces)
+      Pieces[--انگ_Pieces] = RopePiece();
+    سائيز = 0;
   }
 
-  unsigned getNumPieces() const { return NumPieces; }
+  بنانشان get_انگ_Pieces() ثابت { أرجع انگ_Pieces; }
 
-  const RopePiece &getPiece(unsigned i) const {
-    assert(i < getNumPieces() && "Invalid piece ID");
-    return Pieces[i];
+  ثابت RopePiece &getPiece(بنانشان i) ثابت {
+    أكد(i < get_انگ_Pieces() && "Invalid piece ID");
+    أرجع Pieces[i];
   }
 
-  const RopePieceBTreeLeaf *getNextLeafInOrder() const { return NextLeaf; }
+  ثابت Rope_Piece_BTree_پن *get_ايندڙ_پن_اندريون_ترتيب() ثابت { أرجع ايندڙ_پن; }
 
-  void insertAfterLeafInOrder(RopePieceBTreeLeaf *Node) {
-    assert(!PrevLeaf && !NextLeaf && "Already in ordering");
+  فراغ وجهو_After_پن_اندريون_ترتيب(Rope_Piece_BTree_پن *ڳنڍ) {
+    أكد(!Prev_پن && !ايندڙ_پن && "Already in ordering");
 
-    NextLeaf = Node->NextLeaf;
-    if (NextLeaf)
-      NextLeaf->PrevLeaf = &NextLeaf;
-    PrevLeaf = &Node->NextLeaf;
-    Node->NextLeaf = this;
+    ايندڙ_پن = ڳنڍ->ايندڙ_پن;
+    إذا (ايندڙ_پن)
+      ايندڙ_پن->Prev_پن = &ايندڙ_پن;
+    Prev_پن = &ڳنڍ->ايندڙ_پن;
+    ڳنڍ->ايندڙ_پن = هذا;
   }
 
-  void removeFromLeafInOrder() {
-    if (PrevLeaf) {
-      *PrevLeaf = NextLeaf;
-      if (NextLeaf)
-        NextLeaf->PrevLeaf = PrevLeaf;
-    } else if (NextLeaf) {
-      NextLeaf->PrevLeaf = nullptr;
+  فراغ remove_From_پن_اندريون_ترتيب() {
+    إذا (Prev_پن) {
+      *Prev_پن = ايندڙ_پن;
+      إذا (ايندڙ_پن)
+        ايندڙ_پن->Prev_پن = Prev_پن;
+    } وإلا إذا (ايندڙ_پن) {
+      ايندڙ_پن->Prev_پن = خالي_اشارو;
     }
   }
 
   /// FullRecomputeSizeLocally - This method recomputes the 'Size' field by
   /// summing the size of all RopePieces.
-  void FullRecomputeSizeLocally() {
-    Size = 0;
-    for (unsigned i = 0, e = getNumPieces(); i != e; ++i)
-      Size += getPiece(i).size();
+  فراغ ڀريل_Recompute_سائيز_Locally() {
+    سائيز = 0;
+    لكل (بنانشان i = 0, e = get_انگ_Pieces(); i != e; ++i)
+      سائيز += getPiece(i).سائيز_2();
   }
 
   /// split - Split the range containing the specified offset so that we are
@@ -205,7 +205,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_ڳنڍ *ورهايو(بنانشان وٿي);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -213,13 +213,13 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_ڳنڍ *وجهو(بنانشان وٿي, ثابت RopePiece &R);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  فراغ erase(بنانشان وٿي, بنانشان انگ_بائيٽون);
 
-  static bool classof(const RopePieceBTreeNode *N) { return N->isLeaf(); }
+  ساكن منطقي classof(ثابت Rope_Piece_BTree_ڳنڍ *N) { أرجع N->is_پن(); }
 };
 
 } // namespace
@@ -230,39 +230,39 @@ public:
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeLeaf::split(unsigned Offset) {
+Rope_Piece_BTree_ڳنڍ *Rope_Piece_BTree_پن::ورهايو(بنانشان وٿي) {
   // Find the insertion point.  We are guaranteed that there is a split at the
   // specified offset so find it.
-  if (Offset == 0 || Offset == size()) {
+  إذا (وٿي == 0 || وٿي == سائيز_2()) {
     // Fastpath for a common case.  There is already a splitpoint at the end.
-    return nullptr;
+    أرجع خالي_اشارو;
   }
 
   // Find the piece that this offset lands in.
-  unsigned PieceOffs = 0;
-  unsigned i = 0;
-  while (Offset >= PieceOffs + Pieces[i].size()) {
-    PieceOffs += Pieces[i].size();
+  بنانشان PieceOffs = 0;
+  بنانشان i = 0;
+  طالما (وٿي >= PieceOffs + Pieces[i].سائيز_2()) {
+    PieceOffs += Pieces[i].سائيز_2();
     ++i;
   }
 
   // If there is already a split point at the specified offset, just return
   // success.
-  if (PieceOffs == Offset)
-    return nullptr;
+  إذا (PieceOffs == وٿي)
+    أرجع خالي_اشارو;
 
   // Otherwise, we need to split piece 'i' at Offset-PieceOffs.  Convert Offset
   // to being Piece relative.
-  unsigned IntraPieceOffset = Offset - PieceOffs;
+  بنانشان Intra_Piece_وٿي = وٿي - PieceOffs;
 
   // We do this by shrinking the RopePiece and then doing an insert of the tail.
-  RopePiece Tail(Pieces[i].StrData, Pieces[i].StartOffs + IntraPieceOffset,
-                 Pieces[i].EndOffs);
-  Size -= Pieces[i].size();
-  Pieces[i].EndOffs = Pieces[i].StartOffs + IntraPieceOffset;
-  Size += Pieces[i].size();
+  RopePiece پڇ(Pieces[i].Str_معلومات, Pieces[i].شروعات_Offs + Intra_Piece_وٿي,
+                 Pieces[i].پڇاڙي_Offs);
+  سائيز -= Pieces[i].سائيز_2();
+  Pieces[i].پڇاڙي_Offs = Pieces[i].شروعات_Offs + Intra_Piece_وٿي;
+  سائيز += Pieces[i].سائيز_2();
 
-  return insert(Offset, Tail);
+  أرجع وجهو(وٿي, پڇ);
 }
 
 /// insert - Insert the specified RopePiece into this tree node at the
@@ -270,31 +270,31 @@ RopePieceBTreeNode *RopePieceBTreeLeaf::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeLeaf::insert(unsigned Offset,
-                                               const RopePiece &R) {
+Rope_Piece_BTree_ڳنڍ *Rope_Piece_BTree_پن::وجهو(بنانشان وٿي,
+                                               ثابت RopePiece &R) {
   // If this node is not full, insert the piece.
-  if (!isFull()) {
+  إذا (!is_ڀريل()) {
     // Find the insertion point.  We are guaranteed that there is a split at the
     // specified offset so find it.
-    unsigned i = 0, e = getNumPieces();
-    if (Offset == size()) {
+    بنانشان i = 0, e = get_انگ_Pieces();
+    إذا (وٿي == سائيز_2()) {
       // Fastpath for a common case.
       i = e;
-    } else {
-      unsigned SlotOffs = 0;
-      for (; Offset > SlotOffs; ++i)
-        SlotOffs += getPiece(i).size();
-      assert(SlotOffs == Offset && "Split didn't occur before insertion!");
+    } وإلا {
+      بنانشان جڳهه_Offs = 0;
+      لكل (; وٿي > جڳهه_Offs; ++i)
+        جڳهه_Offs += getPiece(i).سائيز_2();
+      أكد(جڳهه_Offs == وٿي && "Split didn't occur before insertion!");
     }
 
     // For an insertion into a non-full leaf node, just insert the value in
     // its sorted position.  This requires moving later values over.
-    for (; i != e; --e)
+    لكل (; i != e; --e)
       Pieces[e] = Pieces[e - 1];
     Pieces[i] = R;
-    ++NumPieces;
-    Size += R.size();
-    return nullptr;
+    ++انگ_Pieces;
+    سائيز += R.سائيز_2();
+    أرجع خالي_اشارو;
   }
 
   // Otherwise, if this is leaf is full, split it in two halves.  Since this
@@ -303,136 +303,136 @@ RopePieceBTreeNode *RopePieceBTreeLeaf::insert(unsigned Offset,
   // move the last 'WidthFactor' values into the RHS child.
 
   // Create the new node.
-  RopePieceBTreeLeaf *NewNode = new RopePieceBTreeLeaf();
+  Rope_Piece_BTree_پن *New_ڳنڍ = جديد Rope_Piece_BTree_پن();
 
   // Move over the last 'WidthFactor' values from here to NewNode.
-  std::copy(&Pieces[WidthFactor], &Pieces[2 * WidthFactor],
-            &NewNode->Pieces[0]);
+  std::copy(&Pieces[ويڪر_ضرب_ڪندڙ], &Pieces[2 * ويڪر_ضرب_ڪندڙ],
+            &New_ڳنڍ->Pieces[0]);
   // Replace old pieces with null RopePieces to drop refcounts.
-  std::fill(&Pieces[WidthFactor], &Pieces[2 * WidthFactor], RopePiece());
+  std::fill(&Pieces[ويڪر_ضرب_ڪندڙ], &Pieces[2 * ويڪر_ضرب_ڪندڙ], RopePiece());
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumPieces = NumPieces = WidthFactor;
+  New_ڳنڍ->انگ_Pieces = انگ_Pieces = ويڪر_ضرب_ڪندڙ;
 
   // Recompute the two nodes' size.
-  NewNode->FullRecomputeSizeLocally();
-  FullRecomputeSizeLocally();
+  New_ڳنڍ->ڀريل_Recompute_سائيز_Locally();
+  ڀريل_Recompute_سائيز_Locally();
 
   // Update the list of leaves.
-  NewNode->insertAfterLeafInOrder(this);
+  New_ڳنڍ->وجهو_After_پن_اندريون_ترتيب(هذا);
 
   // These insertions can't fail.
-  if (this->size() >= Offset)
-    this->insert(Offset, R);
-  else
-    NewNode->insert(Offset - this->size(), R);
-  return NewNode;
+  إذا (هذا->سائيز_2() >= وٿي)
+    هذا->وجهو(وٿي, R);
+  وإلا
+    New_ڳنڍ->وجهو(وٿي - هذا->سائيز_2(), R);
+  أرجع New_ڳنڍ;
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeLeaf::erase(unsigned Offset, unsigned NumBytes) {
+فراغ Rope_Piece_BTree_پن::erase(بنانشان وٿي, بنانشان انگ_بائيٽون) {
   // Since we are guaranteed that there is a split at Offset, we start by
   // finding the Piece that starts there.
-  unsigned PieceOffs = 0;
-  unsigned i = 0;
-  for (; Offset > PieceOffs; ++i)
-    PieceOffs += getPiece(i).size();
-  assert(PieceOffs == Offset && "Split didn't occur before erase!");
+  بنانشان PieceOffs = 0;
+  بنانشان i = 0;
+  لكل (; وٿي > PieceOffs; ++i)
+    PieceOffs += getPiece(i).سائيز_2();
+  أكد(PieceOffs == وٿي && "Split didn't occur before erase!");
 
-  unsigned StartPiece = i;
+  بنانشان شروعات_Piece = i;
 
   // Figure out how many pieces completely cover 'NumBytes'.  We want to remove
   // all of them.
-  for (; Offset + NumBytes > PieceOffs + getPiece(i).size(); ++i)
-    PieceOffs += getPiece(i).size();
+  لكل (; وٿي + انگ_بائيٽون > PieceOffs + getPiece(i).سائيز_2(); ++i)
+    PieceOffs += getPiece(i).سائيز_2();
 
   // If we exactly include the last one, include it in the region to delete.
-  if (Offset + NumBytes == PieceOffs + getPiece(i).size()) {
-    PieceOffs += getPiece(i).size();
+  إذا (وٿي + انگ_بائيٽون == PieceOffs + getPiece(i).سائيز_2()) {
+    PieceOffs += getPiece(i).سائيز_2();
     ++i;
   }
 
   // If we completely cover some RopePieces, erase them now.
-  if (i != StartPiece) {
-    unsigned NumDeleted = i - StartPiece;
-    for (; i != getNumPieces(); ++i)
-      Pieces[i - NumDeleted] = Pieces[i];
+  إذا (i != شروعات_Piece) {
+    بنانشان انگ_Deleted = i - شروعات_Piece;
+    لكل (; i != get_انگ_Pieces(); ++i)
+      Pieces[i - انگ_Deleted] = Pieces[i];
 
     // Drop references to dead rope pieces.
-    std::fill(&Pieces[getNumPieces() - NumDeleted], &Pieces[getNumPieces()],
+    std::fill(&Pieces[get_انگ_Pieces() - انگ_Deleted], &Pieces[get_انگ_Pieces()],
               RopePiece());
-    NumPieces -= NumDeleted;
+    انگ_Pieces -= انگ_Deleted;
 
-    unsigned CoverBytes = PieceOffs - Offset;
-    NumBytes -= CoverBytes;
-    Size -= CoverBytes;
+    بنانشان Cover_بائيٽون = PieceOffs - وٿي;
+    انگ_بائيٽون -= Cover_بائيٽون;
+    سائيز -= Cover_بائيٽون;
   }
 
   // If we completely removed some stuff, we could be done.
-  if (NumBytes == 0)
-    return;
+  إذا (انگ_بائيٽون == 0)
+    أرجع;
 
   // Okay, now might be erasing part of some Piece.  If this is the case, then
   // move the start point of the piece.
-  assert(getPiece(StartPiece).size() > NumBytes);
-  Pieces[StartPiece].StartOffs += NumBytes;
+  أكد(getPiece(شروعات_Piece).سائيز_2() > انگ_بائيٽون);
+  Pieces[شروعات_Piece].شروعات_Offs += انگ_بائيٽون;
 
   // The size of this node just shrunk by NumBytes.
-  Size -= NumBytes;
+  سائيز -= انگ_بائيٽون;
 }
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeInterior Class
 //===----------------------------------------------------------------------===//
 
-namespace {
+نطاق {
 
 /// RopePieceBTreeInterior - This represents an interior node in the B+Tree,
 /// which holds up to 2*WidthFactor pointers to child nodes.
-class RopePieceBTreeInterior : public RopePieceBTreeNode {
+صنف RopePieceBTreeInterior : عام Rope_Piece_BTree_ڳنڍ {
   /// NumChildren - This holds the number of children currently active in the
   /// Children array.
-  unsigned char NumChildren = 0;
+  بنانشان حرف انگ_Children = 0;
 
-  RopePieceBTreeNode *Children[2 * WidthFactor];
+  Rope_Piece_BTree_ڳنڍ *Children[2 * ويڪر_ضرب_ڪندڙ];
 
-public:
-  RopePieceBTreeInterior() : RopePieceBTreeNode(false) {}
+عام:
+  RopePieceBTreeInterior() : Rope_Piece_BTree_ڳنڍ(خطأ) {}
 
-  RopePieceBTreeInterior(RopePieceBTreeNode *LHS, RopePieceBTreeNode *RHS)
-      : RopePieceBTreeNode(false) {
+  RopePieceBTreeInterior(Rope_Piece_BTree_ڳنڍ *LHS, Rope_Piece_BTree_ڳنڍ *RHS)
+      : Rope_Piece_BTree_ڳنڍ(خطأ) {
     Children[0] = LHS;
     Children[1] = RHS;
-    NumChildren = 2;
-    Size = LHS->size() + RHS->size();
+    انگ_Children = 2;
+    سائيز = LHS->سائيز_2() + RHS->سائيز_2();
   }
 
   ~RopePieceBTreeInterior() {
-    for (unsigned i = 0, e = getNumChildren(); i != e; ++i)
+    لكل (بنانشان i = 0, e = get_انگ_Children(); i != e; ++i)
       Children[i]->Destroy();
   }
 
-  bool isFull() const { return NumChildren == 2 * WidthFactor; }
+  منطقي is_ڀريل() ثابت { أرجع انگ_Children == 2 * ويڪر_ضرب_ڪندڙ; }
 
-  unsigned getNumChildren() const { return NumChildren; }
+  بنانشان get_انگ_Children() ثابت { أرجع انگ_Children; }
 
-  const RopePieceBTreeNode *getChild(unsigned i) const {
-    assert(i < NumChildren && "invalid child #");
-    return Children[i];
+  ثابت Rope_Piece_BTree_ڳنڍ *get_ٻار(بنانشان i) ثابت {
+    أكد(i < انگ_Children && "invalid child #");
+    أرجع Children[i];
   }
 
-  RopePieceBTreeNode *getChild(unsigned i) {
-    assert(i < NumChildren && "invalid child #");
-    return Children[i];
+  Rope_Piece_BTree_ڳنڍ *get_ٻار(بنانشان i) {
+    أكد(i < انگ_Children && "invalid child #");
+    أرجع Children[i];
   }
 
   /// FullRecomputeSizeLocally - Recompute the Size field of this node by
   /// summing up the sizes of the child nodes.
-  void FullRecomputeSizeLocally() {
-    Size = 0;
-    for (unsigned i = 0, e = getNumChildren(); i != e; ++i)
-      Size += getChild(i)->size();
+  فراغ ڀريل_Recompute_سائيز_Locally() {
+    سائيز = 0;
+    لكل (بنانشان i = 0, e = get_انگ_Children(); i != e; ++i)
+      سائيز += get_ٻار(i)->سائيز_2();
   }
 
   /// split - Split the range containing the specified offset so that we are
@@ -441,7 +441,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_ڳنڍ *ورهايو(بنانشان وٿي);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -449,17 +449,17 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_ڳنڍ *وجهو(بنانشان وٿي, ثابت RopePiece &R);
 
   /// HandleChildPiece - A child propagated an insertion result up to us.
   /// Insert the new child, and/or propagate the result further up the tree.
-  RopePieceBTreeNode *HandleChildPiece(unsigned i, RopePieceBTreeNode *RHS);
+  Rope_Piece_BTree_ڳنڍ *Handle_ٻار_Piece(بنانشان i, Rope_Piece_BTree_ڳنڍ *RHS);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  فراغ erase(بنانشان وٿي, بنانشان انگ_بائيٽون);
 
-  static bool classof(const RopePieceBTreeNode *N) { return !N->isLeaf(); }
+  ساكن منطقي classof(ثابت Rope_Piece_BTree_ڳنڍ *N) { أرجع !N->is_پن(); }
 };
 
 } // namespace
@@ -470,24 +470,24 @@ public:
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeInterior::split(unsigned Offset) {
+Rope_Piece_BTree_ڳنڍ *RopePieceBTreeInterior::ورهايو(بنانشان وٿي) {
   // Figure out which child to split.
-  if (Offset == 0 || Offset == size())
-    return nullptr; // If we have an exact offset, we're already split.
+  إذا (وٿي == 0 || وٿي == سائيز_2())
+    أرجع خالي_اشارو; // If we have an exact offset, we're already split.
 
-  unsigned ChildOffset = 0;
-  unsigned i = 0;
-  for (; Offset >= ChildOffset + getChild(i)->size(); ++i)
-    ChildOffset += getChild(i)->size();
+  بنانشان ٻار_وٿي = 0;
+  بنانشان i = 0;
+  لكل (; وٿي >= ٻار_وٿي + get_ٻار(i)->سائيز_2(); ++i)
+    ٻار_وٿي += get_ٻار(i)->سائيز_2();
 
   // If already split there, we're done.
-  if (ChildOffset == Offset)
-    return nullptr;
+  إذا (ٻار_وٿي == وٿي)
+    أرجع خالي_اشارو;
 
   // Otherwise, recursively split the child.
-  if (RopePieceBTreeNode *RHS = getChild(i)->split(Offset - ChildOffset))
-    return HandleChildPiece(i, RHS);
-  return nullptr; // Done!
+  إذا (Rope_Piece_BTree_ڳنڍ *RHS = get_ٻار(i)->ورهايو(وٿي - ٻار_وٿي))
+    أرجع Handle_ٻار_Piece(i, RHS);
+  أرجع خالي_اشارو; // Done!
 }
 
 /// insert - Insert the specified ropepiece into this tree node at the
@@ -496,116 +496,116 @@ RopePieceBTreeNode *RopePieceBTreeInterior::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeInterior::insert(unsigned Offset,
-                                                   const RopePiece &R) {
+Rope_Piece_BTree_ڳنڍ *RopePieceBTreeInterior::وجهو(بنانشان وٿي,
+                                                   ثابت RopePiece &R) {
   // Find the insertion point.  We are guaranteed that there is a split at the
   // specified offset so find it.
-  unsigned i = 0, e = getNumChildren();
+  بنانشان i = 0, e = get_انگ_Children();
 
-  unsigned ChildOffs = 0;
-  if (Offset == size()) {
+  بنانشان ٻار_Offs = 0;
+  إذا (وٿي == سائيز_2()) {
     // Fastpath for a common case.  Insert at end of last child.
     i = e - 1;
-    ChildOffs = size() - getChild(i)->size();
-  } else {
-    for (; Offset > ChildOffs + getChild(i)->size(); ++i)
-      ChildOffs += getChild(i)->size();
+    ٻار_Offs = سائيز_2() - get_ٻار(i)->سائيز_2();
+  } وإلا {
+    لكل (; وٿي > ٻار_Offs + get_ٻار(i)->سائيز_2(); ++i)
+      ٻار_Offs += get_ٻار(i)->سائيز_2();
   }
 
-  Size += R.size();
+  سائيز += R.سائيز_2();
 
   // Insert at the end of this child.
-  if (RopePieceBTreeNode *RHS = getChild(i)->insert(Offset - ChildOffs, R))
-    return HandleChildPiece(i, RHS);
+  إذا (Rope_Piece_BTree_ڳنڍ *RHS = get_ٻار(i)->وجهو(وٿي - ٻار_Offs, R))
+    أرجع Handle_ٻار_Piece(i, RHS);
 
-  return nullptr;
+  أرجع خالي_اشارو;
 }
 
 /// HandleChildPiece - A child propagated an insertion result up to us.
 /// Insert the new child, and/or propagate the result further up the tree.
-RopePieceBTreeNode *
-RopePieceBTreeInterior::HandleChildPiece(unsigned i, RopePieceBTreeNode *RHS) {
+Rope_Piece_BTree_ڳنڍ *
+RopePieceBTreeInterior::Handle_ٻار_Piece(بنانشان i, Rope_Piece_BTree_ڳنڍ *RHS) {
   // Otherwise the child propagated a subtree up to us as a new child.  See if
   // we have space for it here.
-  if (!isFull()) {
+  إذا (!is_ڀريل()) {
     // Insert RHS after child 'i'.
-    if (i + 1 != getNumChildren())
+    إذا (i + 1 != get_انگ_Children())
       memmove(&Children[i + 2], &Children[i + 1],
-              (getNumChildren() - i - 1) * sizeof(Children[0]));
+              (get_انگ_Children() - i - 1) * حجم(Children[0]));
     Children[i + 1] = RHS;
-    ++NumChildren;
-    return nullptr;
+    ++انگ_Children;
+    أرجع خالي_اشارو;
   }
 
   // Okay, this node is full.  Split it in half, moving WidthFactor children to
   // a newly allocated interior node.
 
   // Create the new node.
-  RopePieceBTreeInterior *NewNode = new RopePieceBTreeInterior();
+  RopePieceBTreeInterior *New_ڳنڍ = جديد RopePieceBTreeInterior();
 
   // Move over the last 'WidthFactor' values from here to NewNode.
-  memcpy(&NewNode->Children[0], &Children[WidthFactor],
-         WidthFactor * sizeof(Children[0]));
+  يادگيري_نقل(&New_ڳنڍ->Children[0], &Children[ويڪر_ضرب_ڪندڙ],
+         ويڪر_ضرب_ڪندڙ * حجم(Children[0]));
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumChildren = NumChildren = WidthFactor;
+  New_ڳنڍ->انگ_Children = انگ_Children = ويڪر_ضرب_ڪندڙ;
 
   // Finally, insert the two new children in the side the can (now) hold them.
   // These insertions can't fail.
-  if (i < WidthFactor)
-    this->HandleChildPiece(i, RHS);
-  else
-    NewNode->HandleChildPiece(i - WidthFactor, RHS);
+  إذا (i < ويڪر_ضرب_ڪندڙ)
+    هذا->Handle_ٻار_Piece(i, RHS);
+  وإلا
+    New_ڳنڍ->Handle_ٻار_Piece(i - ويڪر_ضرب_ڪندڙ, RHS);
 
   // Recompute the two nodes' size.
-  NewNode->FullRecomputeSizeLocally();
-  FullRecomputeSizeLocally();
-  return NewNode;
+  New_ڳنڍ->ڀريل_Recompute_سائيز_Locally();
+  ڀريل_Recompute_سائيز_Locally();
+  أرجع New_ڳنڍ;
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeInterior::erase(unsigned Offset, unsigned NumBytes) {
+فراغ RopePieceBTreeInterior::erase(بنانشان وٿي, بنانشان انگ_بائيٽون) {
   // This will shrink this node by NumBytes.
-  Size -= NumBytes;
+  سائيز -= انگ_بائيٽون;
 
   // Find the first child that overlaps with Offset.
-  unsigned i = 0;
-  for (; Offset >= getChild(i)->size(); ++i)
-    Offset -= getChild(i)->size();
+  بنانشان i = 0;
+  لكل (; وٿي >= get_ٻار(i)->سائيز_2(); ++i)
+    وٿي -= get_ٻار(i)->سائيز_2();
 
   // Propagate the delete request into overlapping children, or completely
   // delete the children as appropriate.
-  while (NumBytes) {
-    RopePieceBTreeNode *CurChild = getChild(i);
+  طالما (انگ_بائيٽون) {
+    Rope_Piece_BTree_ڳنڍ *Cur_ٻار = get_ٻار(i);
 
     // If we are deleting something contained entirely in the child, pass on the
     // request.
-    if (Offset + NumBytes < CurChild->size()) {
-      CurChild->erase(Offset, NumBytes);
-      return;
+    إذا (وٿي + انگ_بائيٽون < Cur_ٻار->سائيز_2()) {
+      Cur_ٻار->erase(وٿي, انگ_بائيٽون);
+      أرجع;
     }
 
     // If this deletion request starts somewhere in the middle of the child, it
     // must be deleting to the end of the child.
-    if (Offset) {
-      unsigned BytesFromChild = CurChild->size() - Offset;
-      CurChild->erase(Offset, BytesFromChild);
-      NumBytes -= BytesFromChild;
+    إذا (وٿي) {
+      بنانشان بائيٽون_From_ٻار = Cur_ٻار->سائيز_2() - وٿي;
+      Cur_ٻار->erase(وٿي, بائيٽون_From_ٻار);
+      انگ_بائيٽون -= بائيٽون_From_ٻار;
       // Start at the beginning of the next child.
-      Offset = 0;
+      وٿي = 0;
       ++i;
-      continue;
+      استمر;
     }
 
     // If the deletion request completely covers the child, delete it and move
     // the rest down.
-    NumBytes -= CurChild->size();
-    CurChild->Destroy();
-    --NumChildren;
-    if (i != getNumChildren())
+    انگ_بائيٽون -= Cur_ٻار->سائيز_2();
+    Cur_ٻار->Destroy();
+    --انگ_Children;
+    إذا (i != get_انگ_Children())
       memmove(&Children[i], &Children[i + 1],
-              (getNumChildren() - i) * sizeof(Children[0]));
+              (get_انگ_Children() - i) * حجم(Children[0]));
   }
 }
 
@@ -613,11 +613,11 @@ void RopePieceBTreeInterior::erase(unsigned Offset, unsigned NumBytes) {
 // RopePieceBTreeNode Implementation
 //===----------------------------------------------------------------------===//
 
-void RopePieceBTreeNode::Destroy() {
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    delete Leaf;
-  else
-    delete cast<RopePieceBTreeInterior>(this);
+فراغ Rope_Piece_BTree_ڳنڍ::Destroy() {
+  إذا (خودڪار *پن = dyn_cast<Rope_Piece_BTree_پن>(هذا))
+    ميٽيو پن;
+  وإلا
+    ميٽيو cast<RopePieceBTreeInterior>(هذا);
 }
 
 /// split - Split the range containing the specified offset so that we are
@@ -626,11 +626,11 @@ void RopePieceBTreeNode::Destroy() {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeNode::split(unsigned Offset) {
-  assert(Offset <= size() && "Invalid offset to split!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->split(Offset);
-  return cast<RopePieceBTreeInterior>(this)->split(Offset);
+Rope_Piece_BTree_ڳنڍ *Rope_Piece_BTree_ڳنڍ::ورهايو(بنانشان وٿي) {
+  أكد(وٿي <= سائيز_2() && "Invalid offset to split!");
+  إذا (خودڪار *پن = dyn_cast<Rope_Piece_BTree_پن>(هذا))
+    أرجع پن->ورهايو(وٿي);
+  أرجع cast<RopePieceBTreeInterior>(هذا)->ورهايو(وٿي);
 }
 
 /// insert - Insert the specified ropepiece into this tree node at the
@@ -639,71 +639,71 @@ RopePieceBTreeNode *RopePieceBTreeNode::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeNode::insert(unsigned Offset,
-                                               const RopePiece &R) {
-  assert(Offset <= size() && "Invalid offset to insert!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->insert(Offset, R);
-  return cast<RopePieceBTreeInterior>(this)->insert(Offset, R);
+Rope_Piece_BTree_ڳنڍ *Rope_Piece_BTree_ڳنڍ::وجهو(بنانشان وٿي,
+                                               ثابت RopePiece &R) {
+  أكد(وٿي <= سائيز_2() && "Invalid offset to insert!");
+  إذا (خودڪار *پن = dyn_cast<Rope_Piece_BTree_پن>(هذا))
+    أرجع پن->وجهو(وٿي, R);
+  أرجع cast<RopePieceBTreeInterior>(هذا)->وجهو(وٿي, R);
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeNode::erase(unsigned Offset, unsigned NumBytes) {
-  assert(Offset + NumBytes <= size() && "Invalid offset to erase!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->erase(Offset, NumBytes);
-  return cast<RopePieceBTreeInterior>(this)->erase(Offset, NumBytes);
+فراغ Rope_Piece_BTree_ڳنڍ::erase(بنانشان وٿي, بنانشان انگ_بائيٽون) {
+  أكد(وٿي + انگ_بائيٽون <= سائيز_2() && "Invalid offset to erase!");
+  إذا (خودڪار *پن = dyn_cast<Rope_Piece_BTree_پن>(هذا))
+    أرجع پن->erase(وٿي, انگ_بائيٽون);
+  أرجع cast<RopePieceBTreeInterior>(هذا)->erase(وٿي, انگ_بائيٽون);
 }
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeIterator Implementation
 //===----------------------------------------------------------------------===//
 
-static const RopePieceBTreeLeaf *getCN(const void *P) {
-  return static_cast<const RopePieceBTreeLeaf *>(P);
+ساكن ثابت Rope_Piece_BTree_پن *getCN(ثابت فراغ *P) {
+  أرجع static_cast<ثابت Rope_Piece_BTree_پن *>(P);
 }
 
 // begin iterator.
-RopePieceBTreeIterator::RopePieceBTreeIterator(const void *n) {
-  const auto *N = static_cast<const RopePieceBTreeNode *>(n);
+RopePieceBTreeIterator::RopePieceBTreeIterator(ثابت فراغ *n) {
+  ثابت خودڪار *N = static_cast<ثابت Rope_Piece_BTree_ڳنڍ *>(n);
 
   // Walk down the left side of the tree until we get to a leaf.
-  while (const auto *IN = dyn_cast<RopePieceBTreeInterior>(N))
-    N = IN->getChild(0);
+  طالما (ثابت خودڪار *اندريون = dyn_cast<RopePieceBTreeInterior>(N))
+    N = اندريون->get_ٻار(0);
 
   // We must have at least one leaf.
-  CurNode = cast<RopePieceBTreeLeaf>(N);
+  Cur_ڳنڍ = cast<Rope_Piece_BTree_پن>(N);
 
   // If we found a leaf that happens to be empty, skip over it until we get
   // to something full.
-  while (CurNode && getCN(CurNode)->getNumPieces() == 0)
-    CurNode = getCN(CurNode)->getNextLeafInOrder();
+  طالما (Cur_ڳنڍ && getCN(Cur_ڳنڍ)->get_انگ_Pieces() == 0)
+    Cur_ڳنڍ = getCN(Cur_ڳنڍ)->get_ايندڙ_پن_اندريون_ترتيب();
 
-  if (CurNode)
-    CurPiece = &getCN(CurNode)->getPiece(0);
-  else // Empty tree, this is an end() iterator.
-    CurPiece = nullptr;
+  إذا (Cur_ڳنڍ)
+    CurPiece = &getCN(Cur_ڳنڍ)->getPiece(0);
+  وإلا // Empty tree, this is an end() iterator.
+    CurPiece = خالي_اشارو;
   CurChar = 0;
 }
 
-void RopePieceBTreeIterator::MoveToNextPiece() {
-  if (CurPiece !=
-      &getCN(CurNode)->getPiece(getCN(CurNode)->getNumPieces() - 1)) {
+فراغ RopePieceBTreeIterator::Move_منزل_ايندڙ_Piece() {
+  إذا (CurPiece !=
+      &getCN(Cur_ڳنڍ)->getPiece(getCN(Cur_ڳنڍ)->get_انگ_Pieces() - 1)) {
     CurChar = 0;
     ++CurPiece;
-    return;
+    أرجع;
   }
 
   // Find the next non-empty leaf node.
-  do
-    CurNode = getCN(CurNode)->getNextLeafInOrder();
-  while (CurNode && getCN(CurNode)->getNumPieces() == 0);
+  افعل
+    Cur_ڳنڍ = getCN(Cur_ڳنڍ)->get_ايندڙ_پن_اندريون_ترتيب();
+  طالما (Cur_ڳنڍ && getCN(Cur_ڳنڍ)->get_انگ_Pieces() == 0);
 
-  if (CurNode)
-    CurPiece = &getCN(CurNode)->getPiece(0);
-  else // Hit end().
-    CurPiece = nullptr;
+  إذا (Cur_ڳنڍ)
+    CurPiece = &getCN(Cur_ڳنڍ)->getPiece(0);
+  وإلا // Hit end().
+    CurPiece = خالي_اشارو;
   CurChar = 0;
 }
 
@@ -711,47 +711,47 @@ void RopePieceBTreeIterator::MoveToNextPiece() {
 // RopePieceBTree Implementation
 //===----------------------------------------------------------------------===//
 
-static RopePieceBTreeNode *getRoot(void *P) {
-  return static_cast<RopePieceBTreeNode *>(P);
+ساكن Rope_Piece_BTree_ڳنڍ *get_پاڙ(فراغ *P) {
+  أرجع static_cast<Rope_Piece_BTree_ڳنڍ *>(P);
 }
 
-RopePieceBTree::RopePieceBTree() { Root = new RopePieceBTreeLeaf(); }
+RopePieceBTree::RopePieceBTree() { پاڙ_2 = جديد Rope_Piece_BTree_پن(); }
 
-RopePieceBTree::RopePieceBTree(const RopePieceBTree &RHS) {
-  assert(RHS.empty() && "Can't copy non-empty tree yet");
-  Root = new RopePieceBTreeLeaf();
+RopePieceBTree::RopePieceBTree(ثابت RopePieceBTree &RHS) {
+  أكد(RHS.خالي_جايون() && "Can't copy non-empty tree yet");
+  پاڙ_2 = جديد Rope_Piece_BTree_پن();
 }
 
-RopePieceBTree::~RopePieceBTree() { getRoot(Root)->Destroy(); }
+RopePieceBTree::~RopePieceBTree() { get_پاڙ(پاڙ_2)->Destroy(); }
 
-unsigned RopePieceBTree::size() const { return getRoot(Root)->size(); }
+بنانشان RopePieceBTree::سائيز_2() ثابت { أرجع get_پاڙ(پاڙ_2)->سائيز_2(); }
 
-void RopePieceBTree::clear() {
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(getRoot(Root)))
-    Leaf->clear();
-  else {
-    getRoot(Root)->Destroy();
-    Root = new RopePieceBTreeLeaf();
+فراغ RopePieceBTree::clear() {
+  إذا (خودڪار *پن = dyn_cast<Rope_Piece_BTree_پن>(get_پاڙ(پاڙ_2)))
+    پن->clear();
+  وإلا {
+    get_پاڙ(پاڙ_2)->Destroy();
+    پاڙ_2 = جديد Rope_Piece_BTree_پن();
   }
 }
 
-void RopePieceBTree::insert(unsigned Offset, const RopePiece &R) {
+فراغ RopePieceBTree::وجهو(بنانشان وٿي, ثابت RopePiece &R) {
   // #1. Split at Offset.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->split(Offset))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  إذا (Rope_Piece_BTree_ڳنڍ *RHS = get_پاڙ(پاڙ_2)->ورهايو(وٿي))
+    پاڙ_2 = جديد RopePieceBTreeInterior(get_پاڙ(پاڙ_2), RHS);
 
   // #2. Do the insertion.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->insert(Offset, R))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  إذا (Rope_Piece_BTree_ڳنڍ *RHS = get_پاڙ(پاڙ_2)->وجهو(وٿي, R))
+    پاڙ_2 = جديد RopePieceBTreeInterior(get_پاڙ(پاڙ_2), RHS);
 }
 
-void RopePieceBTree::erase(unsigned Offset, unsigned NumBytes) {
+فراغ RopePieceBTree::erase(بنانشان وٿي, بنانشان انگ_بائيٽون) {
   // #1. Split at Offset.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->split(Offset))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  إذا (Rope_Piece_BTree_ڳنڍ *RHS = get_پاڙ(پاڙ_2)->ورهايو(وٿي))
+    پاڙ_2 = جديد RopePieceBTreeInterior(get_پاڙ(پاڙ_2), RHS);
 
   // #2. Do the erasing.
-  getRoot(Root)->erase(Offset, NumBytes);
+  get_پاڙ(پاڙ_2)->erase(وٿي, انگ_بائيٽون);
 }
 
 //===----------------------------------------------------------------------===//
@@ -762,36 +762,36 @@ void RopePieceBTree::erase(unsigned Offset, unsigned NumBytes) {
 /// RopeRefCountString, and return a RopePiece that represents it.  This uses
 /// the AllocBuffer object to aggregate requests for small strings into one
 /// allocation instead of doing tons of tiny allocations.
-RopePiece RewriteRope::MakeRopeString(const char *Start, const char *End) {
-  unsigned Len = End - Start;
-  assert(Len && "Zero length RopePiece is invalid!");
+RopePiece RewriteRope::MakeRopeString(ثابت حرف *شروعات, ثابت حرف *پڇاڙي_2) {
+  بنانشان Len = پڇاڙي_2 - شروعات;
+  أكد(Len && "Zero length RopePiece is invalid!");
 
   // If we have space for this string in the current alloc buffer, use it.
-  if (AllocOffs + Len <= AllocChunkSize) {
-    memcpy(AllocBuffer->Data + AllocOffs, Start, Len);
+  إذا (AllocOffs + Len <= Alloc_Chunk_سائيز) {
+    يادگيري_نقل(Alloc_بفر->معلومات_2 + AllocOffs, شروعات, Len);
     AllocOffs += Len;
-    return RopePiece(AllocBuffer, AllocOffs - Len, AllocOffs);
+    أرجع RopePiece(Alloc_بفر, AllocOffs - Len, AllocOffs);
   }
 
   // If we don't have enough room because this specific allocation is huge,
   // just allocate a new rope piece for it alone.
-  if (Len > AllocChunkSize) {
-    unsigned Size = End - Start + sizeof(RopeRefCountString) - 1;
-    auto *Res = reinterpret_cast<RopeRefCountString *>(new char[Size]);
-    Res->RefCount = 0;
-    memcpy(Res->Data, Start, End - Start);
-    return RopePiece(Res, 0, End - Start);
+  إذا (Len > Alloc_Chunk_سائيز) {
+    بنانشان سائيز = پڇاڙي_2 - شروعات + حجم(Rope_Ref_ڳڻپ_String) - 1;
+    خودڪار *Res = reinterpret_cast<Rope_Ref_ڳڻپ_String *>(جديد حرف[سائيز]);
+    Res->Ref_ڳڻپ = 0;
+    يادگيري_نقل(Res->معلومات_2, شروعات, پڇاڙي_2 - شروعات);
+    أرجع RopePiece(Res, 0, پڇاڙي_2 - شروعات);
   }
 
   // Otherwise, this was a small request but we just don't have space for it
   // Make a new chunk and share it with later allocations.
 
-  unsigned AllocSize = offsetof(RopeRefCountString, Data) + AllocChunkSize;
-  auto *Res = reinterpret_cast<RopeRefCountString *>(new char[AllocSize]);
-  Res->RefCount = 0;
-  memcpy(Res->Data, Start, Len);
-  AllocBuffer = Res;
+  بنانشان Alloc_سائيز = offsetof(Rope_Ref_ڳڻپ_String, معلومات_2) + Alloc_Chunk_سائيز;
+  خودڪار *Res = reinterpret_cast<Rope_Ref_ڳڻپ_String *>(جديد حرف[Alloc_سائيز]);
+  Res->Ref_ڳڻپ = 0;
+  يادگيري_نقل(Res->معلومات_2, شروعات, Len);
+  Alloc_بفر = Res;
   AllocOffs = Len;
 
-  return RopePiece(AllocBuffer, 0, Len);
+  أرجع RopePiece(Alloc_بفر, 0, Len);
 }

@@ -6,118 +6,118 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/BinaryByteStream.h"
+#ضمن "llvm/Support/BinaryStreamRef.h"
+#ضمن "llvm/Support/BinaryByteStream.h"
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-namespace {
+نطاق {
 
-class ArrayRefImpl : public BinaryStream {
-public:
-  ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
+صنف ArrayRefImpl : عام ٻٽو_وهڪرو {
+عام:
+  ArrayRefImpl(ArrayRef<uint8_t> معلومات_2, endianness Endian) : BBS(معلومات_2, Endian) {}
 
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() ثابت override { أرجع BBS.getEndian(); }
+  Error read_بائيٽون(uint64_t وٿي, uint64_t سائيز,
+                  ArrayRef<uint8_t> &بفر) override {
+    أرجع BBS.read_بائيٽون(وٿي, سائيز, بفر);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t وٿي,
+                                   ArrayRef<uint8_t> &بفر) override {
+    أرجع BBS.readLongestContiguousChunk(وٿي, بفر);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_ڊيگهائي() override { أرجع BBS.get_ڊيگهائي(); }
 
-private:
-  BinaryByteStream BBS;
+خاص:
+  ٻٽو_Byte_وهڪرو BBS;
 };
 
-class MutableArrayRefImpl : public WritableBinaryStream {
-public:
-  MutableArrayRefImpl(MutableArrayRef<uint8_t> Data, endianness Endian)
-      : BBS(Data, Endian) {}
+صنف MutableArrayRefImpl : عام Writable_ٻٽو_وهڪرو {
+عام:
+  MutableArrayRefImpl(MutableArrayRef<uint8_t> معلومات_2, endianness Endian)
+      : BBS(معلومات_2, Endian) {}
 
   // Inherited via WritableBinaryStream
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() ثابت override { أرجع BBS.getEndian(); }
+  Error read_بائيٽون(uint64_t وٿي, uint64_t سائيز,
+                  ArrayRef<uint8_t> &بفر) override {
+    أرجع BBS.read_بائيٽون(وٿي, سائيز, بفر);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t وٿي,
+                                   ArrayRef<uint8_t> &بفر) override {
+    أرجع BBS.readLongestContiguousChunk(وٿي, بفر);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_ڊيگهائي() override { أرجع BBS.get_ڊيگهائي(); }
 
-  Error writeBytes(uint64_t Offset, ArrayRef<uint8_t> Data) override {
-    return BBS.writeBytes(Offset, Data);
+  Error write_بائيٽون(uint64_t وٿي, ArrayRef<uint8_t> معلومات_2) override {
+    أرجع BBS.write_بائيٽون(وٿي, معلومات_2);
   }
-  Error commit() override { return BBS.commit(); }
+  Error commit() override { أرجع BBS.commit(); }
 
-private:
-  MutableBinaryByteStream BBS;
+خاص:
+  Mutable_ٻٽو_Byte_وهڪرو BBS;
 };
 } // namespace
 
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream, uint64_t Offset,
-                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
-BinaryStreamRef::BinaryStreamRef(ArrayRef<uint8_t> Data, endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
-                          Data.size()) {}
-BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
-    : BinaryStreamRef(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
+ٻٽو_وهڪرو_Ref::ٻٽو_وهڪرو_Ref(ٻٽو_وهڪرو &وهڪرو)
+    : ٻٽو_وهڪرو_Ref_بنياد(وهڪرو) {}
+ٻٽو_وهڪرو_Ref::ٻٽو_وهڪرو_Ref(ٻٽو_وهڪرو &وهڪرو, uint64_t وٿي,
+                                 std::optional<uint64_t> ڊيگهائي)
+    : ٻٽو_وهڪرو_Ref_بنياد(وهڪرو, وٿي, ڊيگهائي) {}
+ٻٽو_وهڪرو_Ref::ٻٽو_وهڪرو_Ref(ArrayRef<uint8_t> معلومات_2, endianness Endian)
+    : ٻٽو_وهڪرو_Ref_بنياد(std::make_shared<ArrayRefImpl>(معلومات_2, Endian), 0,
+                          معلومات_2.سائيز_2()) {}
+ٻٽو_وهڪرو_Ref::ٻٽو_وهڪرو_Ref(StringRef معلومات_2, endianness Endian)
+    : ٻٽو_وهڪرو_Ref(ArrayRef(معلومات_2.بائيٽون_begin(), معلومات_2.بائيٽون_پڇاڙي()), Endian) {}
 
-Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
-                                 ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, Size))
-    return EC;
-  return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
+Error ٻٽو_وهڪرو_Ref::read_بائيٽون(uint64_t وٿي, uint64_t سائيز,
+                                 ArrayRef<uint8_t> &بفر) ثابت {
+  إذا (خودڪار EC = check_وٿي_For_Read(وٿي, سائيز))
+    أرجع EC;
+  أرجع BorrowedImpl->read_بائيٽون(View_وٿي + وٿي, سائيز, بفر);
 }
 
-Error BinaryStreamRef::readLongestContiguousChunk(
-    uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, 1))
-    return EC;
+Error ٻٽو_وهڪرو_Ref::readLongestContiguousChunk(
+    uint64_t وٿي, ArrayRef<uint8_t> &بفر) ثابت {
+  إذا (خودڪار EC = check_وٿي_For_Read(وٿي, 1))
+    أرجع EC;
 
-  if (auto EC =
-          BorrowedImpl->readLongestContiguousChunk(ViewOffset + Offset, Buffer))
-    return EC;
+  إذا (خودڪار EC =
+          BorrowedImpl->readLongestContiguousChunk(View_وٿي + وٿي, بفر))
+    أرجع EC;
   // This StreamRef might refer to a smaller window over a larger stream.  In
   // that case we will have read out more bytes than we should return, because
   // we should not read past the end of the current view.
-  uint64_t MaxLength = getLength() - Offset;
-  if (Buffer.size() > MaxLength)
-    Buffer = Buffer.slice(0, MaxLength);
-  return Error::success();
+  uint64_t Max_ڊيگهائي = get_ڊيگهائي() - وٿي;
+  إذا (بفر.سائيز_2() > Max_ڊيگهائي)
+    بفر = بفر.ٽڪرو(0, Max_ڊيگهائي);
+  أرجع Error::success();
 }
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
+Writable_ٻٽو_وهڪرو_Ref::Writable_ٻٽو_وهڪرو_Ref(Writable_ٻٽو_وهڪرو &وهڪرو)
+    : ٻٽو_وهڪرو_Ref_بنياد(وهڪرو) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream,
-                                                 uint64_t Offset,
-                                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
+Writable_ٻٽو_وهڪرو_Ref::Writable_ٻٽو_وهڪرو_Ref(Writable_ٻٽو_وهڪرو &وهڪرو,
+                                                 uint64_t وٿي,
+                                                 std::optional<uint64_t> ڊيگهائي)
+    : ٻٽو_وهڪرو_Ref_بنياد(وهڪرو, وٿي, ڊيگهائي) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
+Writable_ٻٽو_وهڪرو_Ref::Writable_ٻٽو_وهڪرو_Ref(MutableArrayRef<uint8_t> معلومات_2,
                                                  endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<MutableArrayRefImpl>(Data, Endian),
-                          0, Data.size()) {}
+    : ٻٽو_وهڪرو_Ref_بنياد(std::make_shared<MutableArrayRefImpl>(معلومات_2, Endian),
+                          0, معلومات_2.سائيز_2()) {}
 
-Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
-                                          ArrayRef<uint8_t> Data) const {
-  if (auto EC = checkOffsetForWrite(Offset, Data.size()))
-    return EC;
+Error Writable_ٻٽو_وهڪرو_Ref::write_بائيٽون(uint64_t وٿي,
+                                          ArrayRef<uint8_t> معلومات_2) ثابت {
+  إذا (خودڪار EC = check_وٿي_For_Write(وٿي, معلومات_2.سائيز_2()))
+    أرجع EC;
 
-  return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
+  أرجع BorrowedImpl->write_بائيٽون(View_وٿي + وٿي, معلومات_2);
 }
 
-WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+Writable_ٻٽو_وهڪرو_Ref::عامل ٻٽو_وهڪرو_Ref() ثابت {
+  أرجع ٻٽو_وهڪرو_Ref(*BorrowedImpl, View_وٿي, ڊيگهائي);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error Writable_ٻٽو_وهڪرو_Ref::commit() { أرجع BorrowedImpl->commit(); }

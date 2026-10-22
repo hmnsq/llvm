@@ -35,16 +35,16 @@
  *	@(#)regex2.h	8.4 (Berkeley) 3/20/94
  */
 
-#ifndef LLVM_SUPPORT_REGEX2_H
-#define LLVM_SUPPORT_REGEX2_H
+#جيڪڏهن_وصف_نه_ٿيل LLVM_SUPPORT_REGEX2_H
+#وصف_ڪريو LLVM_SUPPORT_REGEX2_H
 
-#include "regutils.h"
-#include <stddef.h>
+#ضمن "regutils.h"
+#ضمن <stddef.h>
 
 /*
  * internals of regex_t
  */
-#define	MAGIC1	((('r'^0200)<<8) | 'e')
+#وصف_ڪريو	MAGIC1	((('r'^0200)<<8) | 'e')
 
 /*
  * The internal representation is a *strip*, a sequence of
@@ -65,36 +65,36 @@
  * In state representations, an operator's bit is on to signify a state
  * immediately *preceding* "execution" of that operator.
  */
-typedef unsigned long sop;	/* strip operator */
-typedef long sopno;
-#define	OPRMASK	0xf8000000LU
-#define	OPDMASK	0x07ffffffLU
-#define	OPSHIFT	((unsigned)27)
-#define	OP(n)	((n)&OPRMASK)
-#define	OPND(n)	((n)&OPDMASK)
-#define	SOP(op, opnd)	((op)|(opnd))
+تعريفنوع بنانشان ڊگهو sop;	/* strip operator */
+تعريفنوع ڊگهو sopno;
+#وصف_ڪريو	OPRMASK	0xf8000000LU
+#وصف_ڪريو	OPDMASK	0x07ffffffLU
+#وصف_ڪريو	OPSHIFT	((بنانشان)27)
+#وصف_ڪريو	OP(n)	((n)&OPRMASK)
+#وصف_ڪريو	OPND(n)	((n)&OPDMASK)
+#وصف_ڪريو	SOP(op, opnd)	((op)|(opnd))
 /* operators			   meaning	operand			*/
 /*						(back, fwd are offsets)	*/
-#define	OEND	(1LU<<OPSHIFT)	/* endmarker	-			*/
-#define	OCHAR	(2LU<<OPSHIFT)	/* character	unsigned char		*/
-#define	OBOL	(3LU<<OPSHIFT)	/* left anchor	-			*/
-#define	OEOL	(4LU<<OPSHIFT)	/* right anchor	-			*/
-#define	OANY	(5LU<<OPSHIFT)	/* .		-			*/
-#define	OANYOF	(6LU<<OPSHIFT)	/* [...]	set number		*/
-#define	OBACK_	(7LU<<OPSHIFT)	/* begin \d	paren number		*/
-#define	O_BACK	(8LU<<OPSHIFT)	/* end \d	paren number		*/
-#define	OPLUS_	(9LU<<OPSHIFT)	/* + prefix	fwd to suffix		*/
-#define	O_PLUS	(10LU<<OPSHIFT)	/* + suffix	back to prefix		*/
-#define	OQUEST_	(11LU<<OPSHIFT)	/* ? prefix	fwd to suffix		*/
-#define	O_QUEST	(12LU<<OPSHIFT)	/* ? suffix	back to prefix		*/
-#define	OLPAREN	(13LU<<OPSHIFT)	/* (		fwd to )		*/
-#define	ORPAREN	(14LU<<OPSHIFT)	/* )		back to (		*/
-#define	OCH_	(15LU<<OPSHIFT)	/* begin choice	fwd to OOR2		*/
-#define	OOR1	(16LU<<OPSHIFT)	/* | pt. 1	back to OOR1 or OCH_	*/
-#define	OOR2	(17LU<<OPSHIFT)	/* | pt. 2	fwd to OOR2 or O_CH	*/
-#define	O_CH	(18LU<<OPSHIFT)	/* end choice	back to OOR1		*/
-#define	OBOW	(19LU<<OPSHIFT)	/* begin word	-			*/
-#define	OEOW	(20LU<<OPSHIFT)	/* end word	-			*/
+#وصف_ڪريو	OEND	(1LU<<OPSHIFT)	/* endmarker	-			*/
+#وصف_ڪريو	OCHAR	(2LU<<OPSHIFT)	/* character	unsigned char		*/
+#وصف_ڪريو	OBOL	(3LU<<OPSHIFT)	/* left anchor	-			*/
+#وصف_ڪريو	OEOL	(4LU<<OPSHIFT)	/* right anchor	-			*/
+#وصف_ڪريو	OANY	(5LU<<OPSHIFT)	/* .		-			*/
+#وصف_ڪريو	OANYOF	(6LU<<OPSHIFT)	/* [...]	set number		*/
+#وصف_ڪريو	OBACK_	(7LU<<OPSHIFT)	/* begin \d	paren number		*/
+#وصف_ڪريو	O_پٺ	(8LU<<OPSHIFT)	/* end \d	paren number		*/
+#وصف_ڪريو	OPLUS_	(9LU<<OPSHIFT)	/* + prefix	fwd to suffix		*/
+#وصف_ڪريو	O_PLUS	(10LU<<OPSHIFT)	/* + suffix	back to prefix		*/
+#وصف_ڪريو	OQUEST_	(11LU<<OPSHIFT)	/* ? prefix	fwd to suffix		*/
+#وصف_ڪريو	O_QUEST	(12LU<<OPSHIFT)	/* ? suffix	back to prefix		*/
+#وصف_ڪريو	OLPAREN	(13LU<<OPSHIFT)	/* (		fwd to )		*/
+#وصف_ڪريو	ORPAREN	(14LU<<OPSHIFT)	/* )		back to (		*/
+#وصف_ڪريو	OCH_	(15LU<<OPSHIFT)	/* begin choice	fwd to OOR2		*/
+#وصف_ڪريو	OOR1	(16LU<<OPSHIFT)	/* | pt. 1	back to OOR1 or OCH_	*/
+#وصف_ڪريو	OOR2	(17LU<<OPSHIFT)	/* | pt. 2	fwd to OOR2 or O_CH	*/
+#وصف_ڪريو	O_CH	(18LU<<OPSHIFT)	/* end choice	back to OOR1		*/
+#وصف_ڪريو	OBOW	(19LU<<OPSHIFT)	/* begin word	-			*/
+#وصف_ڪريو	OEOW	(20LU<<OPSHIFT)	/* end word	-			*/
 
 /*
  * Structure for [] character-set representation.  Character sets are
@@ -108,58 +108,58 @@ typedef long sopno;
  * a string of multi-character elements, and decide the size of the
  * vectors at run time.
  */
-typedef struct {
+تعريفنوع بنية {
 	uch *ptr;		/* -> uch [csetsize] */
-	uch mask;		/* bit within array */
+	uch نقاب_2;		/* bit within array */
 	uch hash;		/* hash code */
 	size_t smultis;
-	char *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
+	حرف *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
 } cset;
 /* note that CHadd and CHsub are unsafe, and CHIN doesn't yield 0/1 */
-#define	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->mask, (cs)->hash += (c))
-#define	CHsub(cs, c)	((cs)->ptr[(uch)(c)] &= ~(cs)->mask, (cs)->hash -= (c))
-#define	CHIN(cs, c)	((cs)->ptr[(uch)(c)] & (cs)->mask)
-#define	MCadd(p, cs, cp)	mcadd(p, cs, cp)	/* llvm_regcomp() internal fns */
-#define	MCsub(p, cs, cp)	mcsub(p, cs, cp)
-#define	MCin(p, cs, cp)	mcin(p, cs, cp)
+#وصف_ڪريو	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->نقاب_2, (cs)->hash += (c))
+#وصف_ڪريو	CHsub(cs, c)	((cs)->ptr[(uch)(c)] &= ~(cs)->نقاب_2, (cs)->hash -= (c))
+#وصف_ڪريو	CHIN(cs, c)	((cs)->ptr[(uch)(c)] & (cs)->نقاب_2)
+#وصف_ڪريو	MCadd(p, cs, cp)	mcadd(p, cs, cp)	/* llvm_regcomp() internal fns */
+#وصف_ڪريو	MCsub(p, cs, cp)	mcsub(p, cs, cp)
+#وصف_ڪريو	MCin(p, cs, cp)	mcin(p, cs, cp)
 
 /* stuff for character categories */
-typedef unsigned char cat_t;
+تعريفنوع بنانشان حرف cat_t;
 
 /*
  * main compiled-expression structure
  */
-struct re_guts {
-	int magic;
+بنية re_guts {
+	صحيح magic;
 #		define	MAGIC2	((('R'^0200)<<8)|'E')
 	sop *strip;		/* malloced area for strip */
-	int csetsize;		/* number of bits in a cset vector */
-	int ncsets;		/* number of csets in use */
+	صحيح csetsize;		/* number of bits in a cset vector */
+	صحيح ncsets;		/* number of csets in use */
 	cset *sets;		/* -> cset [ncsets] */
 	uch *setbits;		/* -> uch[csetsize][ncsets/CHAR_BIT] */
-	int cflags;		/* copy of llvm_regcomp() cflags argument */
+	صحيح cflags;		/* copy of llvm_regcomp() cflags argument */
 	sopno nstates;		/* = number of sops */
 	sopno firststate;	/* the initial OEND (normally 0) */
 	sopno laststate;	/* the final OEND */
-	int iflags;		/* internal flags */
+	صحيح iflags;		/* internal flags */
 #		define	USEBOL	01	/* used ^ */
 #		define	USEEOL	02	/* used $ */
 #		define	REGEX_BAD	04	/* something wrong */
-	int nbol;		/* number of ^ used */
-	int neol;		/* number of $ used */
-	int ncategories;	/* how many character categories */
+	صحيح nbol;		/* number of ^ used */
+	صحيح neol;		/* number of $ used */
+	صحيح ncategories;	/* how many character categories */
 	cat_t *categories;	/* ->catspace[-CHAR_MIN] */
-	char *must;		/* match must contain this string */
-	int mlen;		/* length of must */
+	حرف *must;		/* match must contain this string */
+	صحيح mlen;		/* length of must */
 	size_t nsub;		/* copy of re_nsub */
-	int backrefs;		/* does it use back references? */
+	صحيح backrefs;		/* does it use back references? */
 	sopno nplus;		/* how deep does it nest +s? */
 	/* catspace must be last */
 	cat_t catspace[1];	/* actually [NC] */
 };
 
 /* misc utilities */
-#define	OUT	(CHAR_MAX+1)	/* a non-character value */
-#define	ISWORD(c)	(isalnum(c&0xff) || (c) == '_')
+#وصف_ڪريو	ٻاهريون_3	(CHAR_MAX+1)	/* a non-character value */
+#وصف_ڪريو	ISWORD(c)	(اکر_يا_انگ(c&0xff) || (c) == '_')
 
-#endif
+#جيڪڏهن_پورو

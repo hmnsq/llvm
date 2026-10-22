@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMBuildAttributes.h"
+#ضمن "llvm/Support/ARMBuildAttributes.h"
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-static const TagNameItem tagData[] = {
+ساكن ثابت ٽيگ_Name_شي ٽيگ_معلومات[] = {
     {ARMBuildAttrs::File, "Tag_File"},
     {ARMBuildAttrs::Section, "Tag_Section"},
-    {ARMBuildAttrs::Symbol, "Tag_Symbol"},
+    {ARMBuildAttrs::نشان, "Tag_Symbol"},
     {ARMBuildAttrs::CPU_raw_name, "Tag_CPU_raw_name"},
     {ARMBuildAttrs::CPU_name, "Tag_CPU_name"},
     {ARMBuildAttrs::CPU_arch, "Tag_CPU_arch"},
@@ -26,21 +26,21 @@ static const TagNameItem tagData[] = {
     {ARMBuildAttrs::MVE_arch, "Tag_MVE_arch"},
     {ARMBuildAttrs::PCS_config, "Tag_PCS_config"},
     {ARMBuildAttrs::ABI_PCS_R9_use, "Tag_ABI_PCS_R9_use"},
-    {ARMBuildAttrs::ABI_PCS_RW_data, "Tag_ABI_PCS_RW_data"},
-    {ARMBuildAttrs::ABI_PCS_RO_data, "Tag_ABI_PCS_RO_data"},
+    {ARMBuildAttrs::ABI_PCS_RW_معلومات, "Tag_ABI_PCS_RW_data"},
+    {ARMBuildAttrs::ABI_PCS_RO_معلومات, "Tag_ABI_PCS_RO_data"},
     {ARMBuildAttrs::ABI_PCS_GOT_use, "Tag_ABI_PCS_GOT_use"},
     {ARMBuildAttrs::ABI_PCS_wchar_t, "Tag_ABI_PCS_wchar_t"},
     {ARMBuildAttrs::ABI_FP_rounding, "Tag_ABI_FP_rounding"},
     {ARMBuildAttrs::ABI_FP_denormal, "Tag_ABI_FP_denormal"},
     {ARMBuildAttrs::ABI_FP_exceptions, "Tag_ABI_FP_exceptions"},
     {ARMBuildAttrs::ABI_FP_user_exceptions, "Tag_ABI_FP_user_exceptions"},
-    {ARMBuildAttrs::ABI_FP_number_model, "Tag_ABI_FP_number_model"},
+    {ARMBuildAttrs::ABI_FP_عدد_model, "Tag_ABI_FP_number_model"},
     {ARMBuildAttrs::ABI_align_needed, "Tag_ABI_align_needed"},
     {ARMBuildAttrs::ABI_align_preserved, "Tag_ABI_align_preserved"},
-    {ARMBuildAttrs::ABI_enum_size, "Tag_ABI_enum_size"},
+    {ARMBuildAttrs::ABI_enum_سائيز, "Tag_ABI_enum_size"},
     {ARMBuildAttrs::ABI_HardFP_use, "Tag_ABI_HardFP_use"},
-    {ARMBuildAttrs::ABI_VFP_args, "Tag_ABI_VFP_args"},
-    {ARMBuildAttrs::ABI_WMMX_args, "Tag_ABI_WMMX_args"},
+    {ARMBuildAttrs::ABI_VFP_دليلون, "Tag_ABI_VFP_args"},
+    {ARMBuildAttrs::ABI_WMMX_دليلون, "Tag_ABI_WMMX_args"},
     {ARMBuildAttrs::ABI_optimization_goals, "Tag_ABI_optimization_goals"},
     {ARMBuildAttrs::ABI_FP_optimization_goals, "Tag_ABI_FP_optimization_goals"},
     {ARMBuildAttrs::compatibility, "Tag_compatibility"},
@@ -67,7 +67,7 @@ static const TagNameItem tagData[] = {
     {ARMBuildAttrs::ABI_align_preserved, "Tag_ABI_align8_preserved"},
 };
 
-constexpr TagNameMap ARMAttributeTags{tagData};
-const TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
-  return ARMAttributeTags;
+constexpr ٽيگ_Name_Map ARMAttribute_ٽيگ_فهرست{ٽيگ_معلومات};
+ثابت ٽيگ_Name_Map &llvm::ARMBuildAttrs::get_ARMAttribute_ٽيگ_فهرست() {
+  أرجع ARMAttribute_ٽيگ_فهرست;
 }

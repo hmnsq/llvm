@@ -10,107 +10,107 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AllocToken.h"
-#include "llvm/ADT/StringSwitch.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SipHash.h"
+#ضمن "llvm/Support/AllocToken.h"
+#ضمن "llvm/ADT/StringSwitch.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/SipHash.h"
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-std::optional<AllocTokenMode>
-llvm::getAllocTokenModeFromString(StringRef Name) {
-  return StringSwitch<std::optional<AllocTokenMode>>(Name)
-      .Case("increment", AllocTokenMode::Increment)
-      .Case("random", AllocTokenMode::Random)
-      .Case("typehash", AllocTokenMode::TypeHash)
-      .Case("typehashpointersplit", AllocTokenMode::TypeHashPointerSplit)
-      .Case("typefunchash", AllocTokenMode::TypeFuncHash)
+std::optional<Alloc_Token_گهڻائي>
+llvm::get_Alloc_Token_گهڻائي_From_String(StringRef Name) {
+  أرجع StringSwitch<std::optional<Alloc_Token_گهڻائي>>(Name)
+      .Case("increment", Alloc_Token_گهڻائي::Increment)
+      .Case("random", Alloc_Token_گهڻائي::Random)
+      .Case("typehash", Alloc_Token_گهڻائي::TypeHash)
+      .Case("typehashpointersplit", Alloc_Token_گهڻائي::Type_Hash_اشارو_ورهايو)
+      .Case("typefunchash", Alloc_Token_گهڻائي::TypeFuncHash)
       .Case("typefunchashpointersplit",
-            AllocTokenMode::TypeFuncHashPointerSplit)
-      .Case("default", DefaultAllocTokenMode)
+            Alloc_Token_گهڻائي::Type_Func_Hash_اشارو_ورهايو)
+      .Case("default", Default_Alloc_Token_گهڻائي)
       .Default(std::nullopt);
 }
 
-StringRef llvm::getAllocTokenModeAsString(AllocTokenMode Mode) {
-  switch (Mode) {
-  case AllocTokenMode::Increment:
-    return "increment";
-  case AllocTokenMode::Random:
-    return "random";
-  case AllocTokenMode::TypeHash:
-    return "typehash";
-  case AllocTokenMode::TypeHashPointerSplit:
-    return "typehashpointersplit";
-  case AllocTokenMode::TypeFuncHash:
-    return "typefunchash";
-  case AllocTokenMode::TypeFuncHashPointerSplit:
-    return "typefunchashpointersplit";
+StringRef llvm::get_Alloc_Token_گهڻائي_As_String(Alloc_Token_گهڻائي گهڻائي) {
+  بدل (گهڻائي) {
+  حالة Alloc_Token_گهڻائي::Increment:
+    أرجع "increment";
+  حالة Alloc_Token_گهڻائي::Random:
+    أرجع "random";
+  حالة Alloc_Token_گهڻائي::TypeHash:
+    أرجع "typehash";
+  حالة Alloc_Token_گهڻائي::Type_Hash_اشارو_ورهايو:
+    أرجع "typehashpointersplit";
+  حالة Alloc_Token_گهڻائي::TypeFuncHash:
+    أرجع "typefunchash";
+  حالة Alloc_Token_گهڻائي::Type_Func_Hash_اشارو_ورهايو:
+    أرجع "typefunchashpointersplit";
   }
   llvm_unreachable("Unknown AllocTokenMode");
 }
 
-static uint64_t getStableHash(const AllocTokenMetadata &Metadata,
-                              uint64_t MaxTokens) {
-  return getStableSipHash(Metadata.TypeName) % MaxTokens;
+ساكن uint64_t getStableHash(ثابت AllocTokenMetadata &Metadata,
+                              uint64_t Max_ٽوڪن) {
+  أرجع getStableSipHash(Metadata.TypeName) % Max_ٽوڪن;
 }
 
 /// Splits the Bits bits into: [pointer flag,] type name hash, function name
 /// hash. The function name hash gets Bits / 2 bits. Bits is k if MaxTokens is
 /// 2^k-1 (e.g. SIZE_MAX, tokens in [0, MaxTokens]), or Log2(MaxTokens)
 /// otherwise. With pointer split, the MSB is the pointer flag.
-static uint64_t getTypeFuncHash(const AllocTokenMetadata &Metadata,
-                                uint64_t MaxTokens, bool PointerSplit) {
-  if (MaxTokens == 1)
-    return 0;
-  const unsigned Bits =
-      isMask_64(MaxTokens) ? llvm::countr_one(MaxTokens) : Log2_64(MaxTokens);
-  const unsigned FuncBits = Bits / 2;
-  unsigned TypeBits = Bits - FuncBits;
+ساكن uint64_t getTypeFuncHash(ثابت AllocTokenMetadata &Metadata,
+                                uint64_t Max_ٽوڪن, منطقي اشارو_ورهايو) {
+  إذا (Max_ٽوڪن == 1)
+    أرجع 0;
+  ثابت بنانشان بٽ_2 =
+      is_نقاب_64(Max_ٽوڪن) ? llvm::countr_one(Max_ٽوڪن) : Log2_64(Max_ٽوڪن);
+  ثابت بنانشان Func_بٽ = بٽ_2 / 2;
+  بنانشان Type_بٽ = بٽ_2 - Func_بٽ;
   uint64_t Token = 0;
-  if (PointerSplit) {
-    --TypeBits;
-    Token = uint64_t(Metadata.ContainsPointer) << (Bits - 1);
+  إذا (اشارو_ورهايو) {
+    --Type_بٽ;
+    Token = uint64_t(Metadata.شامل_آهي_اشارو) << (بٽ_2 - 1);
   }
   // An empty type name denotes an unknown type.
-  if (!Metadata.TypeName.empty())
+  إذا (!Metadata.TypeName.خالي_جايون())
     Token |= (getStableSipHash(Metadata.TypeName) &
-              maskTrailingOnes<uint64_t>(TypeBits))
-             << FuncBits;
+              نقاب_Trailing_Ones<uint64_t>(Type_بٽ))
+             << Func_بٽ;
   Token |= getStableSipHash(*Metadata.FunctionName) &
-           maskTrailingOnes<uint64_t>(FuncBits);
-  return Token;
+           نقاب_Trailing_Ones<uint64_t>(Func_بٽ);
+  أرجع Token;
 }
 
-std::optional<uint64_t> llvm::getAllocToken(AllocTokenMode Mode,
-                                            const AllocTokenMetadata &Metadata,
-                                            uint64_t MaxTokens) {
-  assert(MaxTokens && "Must provide non-zero max tokens");
+std::optional<uint64_t> llvm::getAllocToken(Alloc_Token_گهڻائي گهڻائي,
+                                            ثابت AllocTokenMetadata &Metadata,
+                                            uint64_t Max_ٽوڪن) {
+  أكد(Max_ٽوڪن && "Must provide non-zero max tokens");
 
-  switch (Mode) {
-  case AllocTokenMode::Increment:
-  case AllocTokenMode::Random:
+  بدل (گهڻائي) {
+  حالة Alloc_Token_گهڻائي::Increment:
+  حالة Alloc_Token_گهڻائي::Random:
     // Stateful modes cannot be implemented as a pure function.
-    return std::nullopt;
+    أرجع std::nullopt;
 
-  case AllocTokenMode::TypeFuncHash:
-  case AllocTokenMode::TypeFuncHashPointerSplit:
-    if (!Metadata.FunctionName)
-      return std::nullopt;
-    return getTypeFuncHash(Metadata, MaxTokens,
-                           Mode == AllocTokenMode::TypeFuncHashPointerSplit);
+  حالة Alloc_Token_گهڻائي::TypeFuncHash:
+  حالة Alloc_Token_گهڻائي::Type_Func_Hash_اشارو_ورهايو:
+    إذا (!Metadata.FunctionName)
+      أرجع std::nullopt;
+    أرجع getTypeFuncHash(Metadata, Max_ٽوڪن,
+                           گهڻائي == Alloc_Token_گهڻائي::Type_Func_Hash_اشارو_ورهايو);
 
-  case AllocTokenMode::TypeHash:
-    return getStableHash(Metadata, MaxTokens);
+  حالة Alloc_Token_گهڻائي::TypeHash:
+    أرجع getStableHash(Metadata, Max_ٽوڪن);
 
-  case AllocTokenMode::TypeHashPointerSplit: {
-    if (MaxTokens == 1)
-      return 0;
-    const uint64_t HalfTokens = MaxTokens / 2;
-    uint64_t Hash = getStableHash(Metadata, HalfTokens);
-    if (Metadata.ContainsPointer)
-      Hash += HalfTokens;
-    return Hash;
+  حالة Alloc_Token_گهڻائي::Type_Hash_اشارو_ورهايو: {
+    إذا (Max_ٽوڪن == 1)
+      أرجع 0;
+    ثابت uint64_t Half_ٽوڪن = Max_ٽوڪن / 2;
+    uint64_t Hash = getStableHash(Metadata, Half_ٽوڪن);
+    إذا (Metadata.شامل_آهي_اشارو)
+      Hash += Half_ٽوڪن;
+    أرجع Hash;
   }
   }
 

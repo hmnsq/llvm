@@ -6,116 +6,116 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SlowDynamicAPInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/ADT/SlowDynamicAPInt.h"
+#ضمن "llvm/ADT/Hashing.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::detail;
+استعمال نطاق llvm;
+استعمال نطاق llvm::detail;
 
 SlowDynamicAPInt::SlowDynamicAPInt(int64_t Val)
-    : Val(64, Val, /*isSigned=*/true) {}
+    : Val(64, Val, /*isSigned=*/سچ) {}
 SlowDynamicAPInt::SlowDynamicAPInt() : SlowDynamicAPInt(0) {}
-SlowDynamicAPInt::SlowDynamicAPInt(const APInt &Val) : Val(Val) {}
-SlowDynamicAPInt &SlowDynamicAPInt::operator=(int64_t Val) {
-  return *this = SlowDynamicAPInt(Val);
+SlowDynamicAPInt::SlowDynamicAPInt(ثابت APInt &Val) : Val(Val) {}
+SlowDynamicAPInt &SlowDynamicAPInt::عامل=(int64_t Val) {
+  أرجع *هذا = SlowDynamicAPInt(Val);
 }
-SlowDynamicAPInt::operator int64_t() const { return Val.getSExtValue(); }
+SlowDynamicAPInt::عامل int64_t() ثابت { أرجع Val.get_SExt_قدر(); }
 
-hash_code llvm::detail::hash_value(const SlowDynamicAPInt &X) {
-  return hash_value(X.Val);
+hash_ڪوڊ llvm::detail::hash_قدر(ثابت SlowDynamicAPInt &X) {
+  أرجع hash_قدر(X.Val);
 }
 
 /// ---------------------------------------------------------------------------
 /// Convenience operator overloads for int64_t.
 /// ---------------------------------------------------------------------------
-SlowDynamicAPInt &llvm::detail::operator+=(SlowDynamicAPInt &A, int64_t B) {
-  return A += SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::عامل+=(SlowDynamicAPInt &A, int64_t B) {
+  أرجع A += SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator-=(SlowDynamicAPInt &A, int64_t B) {
-  return A -= SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::عامل-=(SlowDynamicAPInt &A, int64_t B) {
+  أرجع A -= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator*=(SlowDynamicAPInt &A, int64_t B) {
-  return A *= SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::عامل*=(SlowDynamicAPInt &A, int64_t B) {
+  أرجع A *= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator/=(SlowDynamicAPInt &A, int64_t B) {
-  return A /= SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::عامل/=(SlowDynamicAPInt &A, int64_t B) {
+  أرجع A /= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator%=(SlowDynamicAPInt &A, int64_t B) {
-  return A %= SlowDynamicAPInt(B);
-}
-
-bool llvm::detail::operator==(const SlowDynamicAPInt &A, int64_t B) {
-  return A == SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator!=(const SlowDynamicAPInt &A, int64_t B) {
-  return A != SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator>(const SlowDynamicAPInt &A, int64_t B) {
-  return A > SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator<(const SlowDynamicAPInt &A, int64_t B) {
-  return A < SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator<=(const SlowDynamicAPInt &A, int64_t B) {
-  return A <= SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator>=(const SlowDynamicAPInt &A, int64_t B) {
-  return A >= SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator+(const SlowDynamicAPInt &A, int64_t B) {
-  return A + SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator-(const SlowDynamicAPInt &A, int64_t B) {
-  return A - SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator*(const SlowDynamicAPInt &A, int64_t B) {
-  return A * SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator/(const SlowDynamicAPInt &A, int64_t B) {
-  return A / SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator%(const SlowDynamicAPInt &A, int64_t B) {
-  return A % SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::عامل%=(SlowDynamicAPInt &A, int64_t B) {
+  أرجع A %= SlowDynamicAPInt(B);
 }
 
-bool llvm::detail::operator==(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) == B;
+منطقي llvm::detail::عامل==(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A == SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator!=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) != B;
+منطقي llvm::detail::عامل!=(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A != SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator>(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) > B;
+منطقي llvm::detail::عامل>(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A > SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator<(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) < B;
+منطقي llvm::detail::عامل<(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A < SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator<=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) <= B;
+منطقي llvm::detail::عامل<=(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A <= SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator>=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) >= B;
+منطقي llvm::detail::عامل>=(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A >= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator+(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) + B;
+SlowDynamicAPInt llvm::detail::عامل+(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A + SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator-(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) - B;
+SlowDynamicAPInt llvm::detail::عامل-(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A - SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator*(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) * B;
+SlowDynamicAPInt llvm::detail::عامل*(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A * SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator/(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) / B;
+SlowDynamicAPInt llvm::detail::عامل/(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A / SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator%(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) % B;
+SlowDynamicAPInt llvm::detail::عامل%(ثابت SlowDynamicAPInt &A, int64_t B) {
+  أرجع A % SlowDynamicAPInt(B);
 }
 
-static unsigned getMaxWidth(const APInt &A, const APInt &B) {
-  return std::max(A.getBitWidth(), B.getBitWidth());
+منطقي llvm::detail::عامل==(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) == B;
+}
+منطقي llvm::detail::عامل!=(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) != B;
+}
+منطقي llvm::detail::عامل>(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) > B;
+}
+منطقي llvm::detail::عامل<(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) < B;
+}
+منطقي llvm::detail::عامل<=(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) <= B;
+}
+منطقي llvm::detail::عامل>=(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) >= B;
+}
+SlowDynamicAPInt llvm::detail::عامل+(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) + B;
+}
+SlowDynamicAPInt llvm::detail::عامل-(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) - B;
+}
+SlowDynamicAPInt llvm::detail::عامل*(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) * B;
+}
+SlowDynamicAPInt llvm::detail::عامل/(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) / B;
+}
+SlowDynamicAPInt llvm::detail::عامل%(int64_t A, ثابت SlowDynamicAPInt &B) {
+  أرجع SlowDynamicAPInt(A) % B;
+}
+
+ساكن بنانشان get_Max_ويڪر(ثابت APInt &A, ثابت APInt &B) {
+  أرجع std::max(A.get_ٻٽو_انگ_ويڪر(), B.get_ٻٽو_انگ_ويڪر());
 }
 
 /// ---------------------------------------------------------------------------
@@ -123,29 +123,29 @@ static unsigned getMaxWidth(const APInt &A, const APInt &B) {
 /// ---------------------------------------------------------------------------
 
 // TODO: consider instead making APInt::compare available and using that.
-bool SlowDynamicAPInt::operator==(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width) == O.Val.sext(Width);
+منطقي SlowDynamicAPInt::عامل==(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = get_Max_ويڪر(Val, O.Val);
+  أرجع Val.sext(ويڪر) == O.Val.sext(ويڪر);
 }
-bool SlowDynamicAPInt::operator!=(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width) != O.Val.sext(Width);
+منطقي SlowDynamicAPInt::عامل!=(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = get_Max_ويڪر(Val, O.Val);
+  أرجع Val.sext(ويڪر) != O.Val.sext(ويڪر);
 }
-bool SlowDynamicAPInt::operator>(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sgt(O.Val.sext(Width));
+منطقي SlowDynamicAPInt::عامل>(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = get_Max_ويڪر(Val, O.Val);
+  أرجع Val.sext(ويڪر).sgt(O.Val.sext(ويڪر));
 }
-bool SlowDynamicAPInt::operator<(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).slt(O.Val.sext(Width));
+منطقي SlowDynamicAPInt::عامل<(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = get_Max_ويڪر(Val, O.Val);
+  أرجع Val.sext(ويڪر).slt(O.Val.sext(ويڪر));
 }
-bool SlowDynamicAPInt::operator<=(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sle(O.Val.sext(Width));
+منطقي SlowDynamicAPInt::عامل<=(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = get_Max_ويڪر(Val, O.Val);
+  أرجع Val.sext(ويڪر).sle(O.Val.sext(ويڪر));
 }
-bool SlowDynamicAPInt::operator>=(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sge(O.Val.sext(Width));
+منطقي SlowDynamicAPInt::عامل>=(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = get_Max_ويڪر(Val, O.Val);
+  أرجع Val.sext(ويڪر).sge(O.Val.sext(ويڪر));
 }
 
 /// ---------------------------------------------------------------------------
@@ -156,133 +156,133 @@ bool SlowDynamicAPInt::operator>=(const SlowDynamicAPInt &O) const {
 /// If the overflow bit becomes set, resize a and b to double the width and
 /// call op(a, b, overflow), returning its result. The operation with double
 /// widths should not also overflow.
-APInt runOpWithExpandOnOverflow(
-    const APInt &A, const APInt &B,
-    function_ref<APInt(const APInt &, const APInt &, bool &Overflow)> Op) {
-  bool Overflow;
-  unsigned Width = getMaxWidth(A, B);
-  APInt Ret = Op(A.sext(Width), B.sext(Width), Overflow);
-  if (!Overflow)
-    return Ret;
+APInt لاڳيتو_Op_With_Expand_On_حد_کان_مٿي(
+    ثابت APInt &A, ثابت APInt &B,
+    function_ref<APInt(ثابت APInt &, ثابت APInt &, منطقي &حد_کان_مٿي)> Op) {
+  منطقي حد_کان_مٿي;
+  بنانشان ويڪر = get_Max_ويڪر(A, B);
+  APInt Ret = Op(A.sext(ويڪر), B.sext(ويڪر), حد_کان_مٿي);
+  إذا (!حد_کان_مٿي)
+    أرجع Ret;
 
-  Width *= 2;
-  Ret = Op(A.sext(Width), B.sext(Width), Overflow);
-  assert(!Overflow && "double width should be sufficient to avoid overflow!");
-  return Ret;
+  ويڪر *= 2;
+  Ret = Op(A.sext(ويڪر), B.sext(ويڪر), حد_کان_مٿي);
+  أكد(!حد_کان_مٿي && "double width should be sufficient to avoid overflow!");
+  أرجع Ret;
 }
 
-SlowDynamicAPInt SlowDynamicAPInt::operator+(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::sadd_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::عامل+(ثابت SlowDynamicAPInt &O) ثابت {
+  أرجع SlowDynamicAPInt(
+      لاڳيتو_Op_With_Expand_On_حد_کان_مٿي(Val, O.Val, std::mem_fn(&APInt::sadd_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator-(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::ssub_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::عامل-(ثابت SlowDynamicAPInt &O) ثابت {
+  أرجع SlowDynamicAPInt(
+      لاڳيتو_Op_With_Expand_On_حد_کان_مٿي(Val, O.Val, std::mem_fn(&APInt::ssub_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator*(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::smul_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::عامل*(ثابت SlowDynamicAPInt &O) ثابت {
+  أرجع SlowDynamicAPInt(
+      لاڳيتو_Op_With_Expand_On_حد_کان_مٿي(Val, O.Val, std::mem_fn(&APInt::smul_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator/(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::sdiv_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::عامل/(ثابت SlowDynamicAPInt &O) ثابت {
+  أرجع SlowDynamicAPInt(
+      لاڳيتو_Op_With_Expand_On_حد_کان_مٿي(Val, O.Val, std::mem_fn(&APInt::sdiv_ov)));
 }
-SlowDynamicAPInt llvm::detail::abs(const SlowDynamicAPInt &X) {
-  return X >= 0 ? X : -X;
+SlowDynamicAPInt llvm::detail::مطلق_قدر(ثابت SlowDynamicAPInt &X) {
+  أرجع X >= 0 ? X : -X;
 }
-SlowDynamicAPInt llvm::detail::ceilDiv(const SlowDynamicAPInt &LHS,
-                                       const SlowDynamicAPInt &RHS) {
-  if (RHS == -1)
-    return -LHS;
-  unsigned Width = getMaxWidth(LHS.Val, RHS.Val);
-  return SlowDynamicAPInt(APIntOps::RoundingSDiv(
-      LHS.Val.sext(Width), RHS.Val.sext(Width), APInt::Rounding::UP));
+SlowDynamicAPInt llvm::detail::ceilDiv(ثابت SlowDynamicAPInt &LHS,
+                                       ثابت SlowDynamicAPInt &RHS) {
+  إذا (RHS == -1)
+    أرجع -LHS;
+  بنانشان ويڪر = get_Max_ويڪر(LHS.Val, RHS.Val);
+  أرجع SlowDynamicAPInt(APIntOps::RoundingSDiv(
+      LHS.Val.sext(ويڪر), RHS.Val.sext(ويڪر), APInt::Rounding::مٿي));
 }
-SlowDynamicAPInt llvm::detail::floorDiv(const SlowDynamicAPInt &LHS,
-                                        const SlowDynamicAPInt &RHS) {
-  if (RHS == -1)
-    return -LHS;
-  unsigned Width = getMaxWidth(LHS.Val, RHS.Val);
-  return SlowDynamicAPInt(APIntOps::RoundingSDiv(
-      LHS.Val.sext(Width), RHS.Val.sext(Width), APInt::Rounding::DOWN));
+SlowDynamicAPInt llvm::detail::floorDiv(ثابت SlowDynamicAPInt &LHS,
+                                        ثابت SlowDynamicAPInt &RHS) {
+  إذا (RHS == -1)
+    أرجع -LHS;
+  بنانشان ويڪر = get_Max_ويڪر(LHS.Val, RHS.Val);
+  أرجع SlowDynamicAPInt(APIntOps::RoundingSDiv(
+      LHS.Val.sext(ويڪر), RHS.Val.sext(ويڪر), APInt::Rounding::هيٺ_ڏانهن));
 }
 // The RHS is always expected to be positive, and the result
 /// is always non-negative.
-SlowDynamicAPInt llvm::detail::mod(const SlowDynamicAPInt &LHS,
-                                   const SlowDynamicAPInt &RHS) {
-  assert(RHS >= 1 && "mod is only supported for positive divisors!");
-  return LHS % RHS < 0 ? LHS % RHS + RHS : LHS % RHS;
+SlowDynamicAPInt llvm::detail::mod(ثابت SlowDynamicAPInt &LHS,
+                                   ثابت SlowDynamicAPInt &RHS) {
+  أكد(RHS >= 1 && "mod is only supported for positive divisors!");
+  أرجع LHS % RHS < 0 ? LHS % RHS + RHS : LHS % RHS;
 }
 
-SlowDynamicAPInt llvm::detail::gcd(const SlowDynamicAPInt &A,
-                                   const SlowDynamicAPInt &B) {
-  assert(A >= 0 && B >= 0 && "operands must be non-negative!");
-  unsigned Width = getMaxWidth(A.Val, B.Val);
-  return SlowDynamicAPInt(
-      APIntOps::GreatestCommonDivisor(A.Val.sext(Width), B.Val.sext(Width)));
+SlowDynamicAPInt llvm::detail::وڏو_گڏيل_ونڊيندڙ(ثابت SlowDynamicAPInt &A,
+                                   ثابت SlowDynamicAPInt &B) {
+  أكد(A >= 0 && B >= 0 && "operands must be non-negative!");
+  بنانشان ويڪر = get_Max_ويڪر(A.Val, B.Val);
+  أرجع SlowDynamicAPInt(
+      APIntOps::Greatest_Common_ورهائيندڙ(A.Val.sext(ويڪر), B.Val.sext(ويڪر)));
 }
 
 /// Returns the least common multiple of A and B.
-SlowDynamicAPInt llvm::detail::lcm(const SlowDynamicAPInt &A,
-                                   const SlowDynamicAPInt &B) {
-  SlowDynamicAPInt X = abs(A);
-  SlowDynamicAPInt Y = abs(B);
-  return (X * Y) / gcd(X, Y);
+SlowDynamicAPInt llvm::detail::lcm(ثابت SlowDynamicAPInt &A,
+                                   ثابت SlowDynamicAPInt &B) {
+  SlowDynamicAPInt X = مطلق_قدر(A);
+  SlowDynamicAPInt Y = مطلق_قدر(B);
+  أرجع (X * Y) / وڏو_گڏيل_ونڊيندڙ(X, Y);
 }
 
 /// This operation cannot overflow.
-SlowDynamicAPInt SlowDynamicAPInt::operator%(const SlowDynamicAPInt &O) const {
-  unsigned Width = std::max(Val.getBitWidth(), O.Val.getBitWidth());
-  return SlowDynamicAPInt(Val.sext(Width).srem(O.Val.sext(Width)));
+SlowDynamicAPInt SlowDynamicAPInt::عامل%(ثابت SlowDynamicAPInt &O) ثابت {
+  بنانشان ويڪر = std::max(Val.get_ٻٽو_انگ_ويڪر(), O.Val.get_ٻٽو_انگ_ويڪر());
+  أرجع SlowDynamicAPInt(Val.sext(ويڪر).srem(O.Val.sext(ويڪر)));
 }
 
-SlowDynamicAPInt SlowDynamicAPInt::operator-() const {
-  if (Val.isMinSignedValue()) {
+SlowDynamicAPInt SlowDynamicAPInt::عامل-() ثابت {
+  إذا (Val.is_Min_Signed_قدر()) {
     /// Overflow only occurs when the value is the minimum possible value.
-    APInt Ret = Val.sext(2 * Val.getBitWidth());
-    return SlowDynamicAPInt(-Ret);
+    APInt Ret = Val.sext(2 * Val.get_ٻٽو_انگ_ويڪر());
+    أرجع SlowDynamicAPInt(-Ret);
   }
-  return SlowDynamicAPInt(-Val);
+  أرجع SlowDynamicAPInt(-Val);
 }
 
 /// ---------------------------------------------------------------------------
 /// Assignment operators, preincrement, predecrement.
 /// ---------------------------------------------------------------------------
-SlowDynamicAPInt &SlowDynamicAPInt::operator+=(const SlowDynamicAPInt &O) {
-  *this = *this + O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل+=(ثابت SlowDynamicAPInt &O) {
+  *هذا = *هذا + O;
+  أرجع *هذا;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator-=(const SlowDynamicAPInt &O) {
-  *this = *this - O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل-=(ثابت SlowDynamicAPInt &O) {
+  *هذا = *هذا - O;
+  أرجع *هذا;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator*=(const SlowDynamicAPInt &O) {
-  *this = *this * O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل*=(ثابت SlowDynamicAPInt &O) {
+  *هذا = *هذا * O;
+  أرجع *هذا;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator/=(const SlowDynamicAPInt &O) {
-  *this = *this / O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل/=(ثابت SlowDynamicAPInt &O) {
+  *هذا = *هذا / O;
+  أرجع *هذا;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator%=(const SlowDynamicAPInt &O) {
-  *this = *this % O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل%=(ثابت SlowDynamicAPInt &O) {
+  *هذا = *هذا % O;
+  أرجع *هذا;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator++() {
-  *this += 1;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل++() {
+  *هذا += 1;
+  أرجع *هذا;
 }
 
-SlowDynamicAPInt &SlowDynamicAPInt::operator--() {
-  *this -= 1;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::عامل--() {
+  *هذا -= 1;
+  أرجع *هذا;
 }
 
 /// ---------------------------------------------------------------------------
 /// Printing.
 /// ---------------------------------------------------------------------------
-void SlowDynamicAPInt::print(raw_ostream &OS) const { OS << Val; }
+فراغ SlowDynamicAPInt::print(raw_ostream &OS) ثابت { OS << Val; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void SlowDynamicAPInt::dump() const { print(dbgs()); }
-#endif
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_طريقو فراغ SlowDynamicAPInt::dump() ثابت { print(dbgs()); }
+#جيڪڏهن_پورو

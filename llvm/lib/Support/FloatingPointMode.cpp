@@ -6,56 +6,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/FloatingPointMode.h"
-#include "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/FloatingPointMode.h"
+#ضمن "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-FPClassTest llvm::fneg(FPClassTest Mask) {
-  FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcNegInf)
-    NewMask |= fcPosInf;
-  if (Mask & fcNegNormal)
-    NewMask |= fcPosNormal;
-  if (Mask & fcNegSubnormal)
-    NewMask |= fcPosSubnormal;
-  if (Mask & fcNegZero)
-    NewMask |= fcPosZero;
-  if (Mask & fcPosZero)
-    NewMask |= fcNegZero;
-  if (Mask & fcPosSubnormal)
-    NewMask |= fcNegSubnormal;
-  if (Mask & fcPosNormal)
-    NewMask |= fcNegNormal;
-  if (Mask & fcPosInf)
-    NewMask |= fcNegInf;
-  return NewMask;
+FPClassTest llvm::fneg(FPClassTest نقاب) {
+  FPClassTest New_نقاب = نقاب & fcNan;
+  إذا (نقاب & fcNegInf)
+    New_نقاب |= fcPosInf;
+  إذا (نقاب & fc_Neg_عام)
+    New_نقاب |= fc_Pos_عام;
+  إذا (نقاب & fcNegSubnormal)
+    New_نقاب |= fcPosSubnormal;
+  إذا (نقاب & fcNegZero)
+    New_نقاب |= fcPosZero;
+  إذا (نقاب & fcPosZero)
+    New_نقاب |= fcNegZero;
+  إذا (نقاب & fcPosSubnormal)
+    New_نقاب |= fcNegSubnormal;
+  إذا (نقاب & fc_Pos_عام)
+    New_نقاب |= fc_Neg_عام;
+  إذا (نقاب & fcPosInf)
+    New_نقاب |= fcNegInf;
+  أرجع New_نقاب;
 }
 
-FPClassTest llvm::inverse_fabs(FPClassTest Mask) {
-  FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcPosZero)
-    NewMask |= fcZero;
-  if (Mask & fcPosSubnormal)
-    NewMask |= fcSubnormal;
-  if (Mask & fcPosNormal)
-    NewMask |= fcNormal;
-  if (Mask & fcPosInf)
-    NewMask |= fcInf;
-  return NewMask;
+FPClassTest llvm::inverse_fabs(FPClassTest نقاب) {
+  FPClassTest New_نقاب = نقاب & fcNan;
+  إذا (نقاب & fcPosZero)
+    New_نقاب |= fcZero;
+  إذا (نقاب & fcPosSubnormal)
+    New_نقاب |= fcSubnormal;
+  إذا (نقاب & fc_Pos_عام)
+    New_نقاب |= fc_عام;
+  إذا (نقاب & fcPosInf)
+    New_نقاب |= fcInf;
+  أرجع New_نقاب;
 }
 
-FPClassTest llvm::unknown_sign(FPClassTest Mask) {
-  FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcZero)
-    NewMask |= fcZero;
-  if (Mask & fcSubnormal)
-    NewMask |= fcSubnormal;
-  if (Mask & fcNormal)
-    NewMask |= fcNormal;
-  if (Mask & fcInf)
-    NewMask |= fcInf;
-  return NewMask;
+FPClassTest llvm::unknown_sign(FPClassTest نقاب) {
+  FPClassTest New_نقاب = نقاب & fcNan;
+  إذا (نقاب & fcZero)
+    New_نقاب |= fcZero;
+  إذا (نقاب & fcSubnormal)
+    New_نقاب |= fcSubnormal;
+  إذا (نقاب & fc_عام)
+    New_نقاب |= fc_عام;
+  إذا (نقاب & fcInf)
+    New_نقاب |= fcInf;
+  أرجع New_نقاب;
 }
 
 // Every bitfield has a unique name and one or more aliasing names that cover
@@ -64,7 +64,7 @@ FPClassTest llvm::unknown_sign(FPClassTest Mask) {
 //
 // Bits are consumed as printed. Each field should only be represented in one
 // printed field.
-static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
+ساكن constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
   {fcAllFlags, "all"},
   {fcNan, "nan"},
   {fcSNan, "snan"},
@@ -78,105 +78,105 @@ static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
   {fcSubnormal, "sub"},
   {fcNegSubnormal, "nsub"},
   {fcPosSubnormal, "psub"},
-  {fcNormal, "norm"},
-  {fcNegNormal, "nnorm"},
-  {fcPosNormal, "pnorm"}
+  {fc_عام, "norm"},
+  {fc_Neg_عام, "nnorm"},
+  {fc_Pos_عام, "pnorm"}
 };
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
+raw_ostream &llvm::عامل<<(raw_ostream &OS, FPClassTest نقاب) {
   OS << '(';
 
-  if (Mask == fcNone) {
+  إذا (نقاب == fcNone) {
     OS << "none)";
-    return OS;
+    أرجع OS;
   }
 
   ListSeparator LS(" ");
-  for (auto [BitTest, Name] : NoFPClassName) {
-    if ((Mask & BitTest) == BitTest) {
+  لكل (خودڪار [ٻٽو_انگ_Test, Name] : NoFPClassName) {
+    إذا ((نقاب & ٻٽو_انگ_Test) == ٻٽو_انگ_Test) {
       OS << LS << Name;
 
       // Clear the bits so we don't print any aliased names later.
-      Mask &= ~BitTest;
+      نقاب &= ~ٻٽو_انگ_Test;
     }
   }
 
-  assert(Mask == 0 && "didn't print some mask bits");
+  أكد(نقاب == 0 && "didn't print some mask bits");
 
   OS << ')';
-  return OS;
+  أرجع OS;
 }
 
-void DenormalFPEnv::print(raw_ostream &OS, bool OmitIfSame) const {
-  if (F32Mode == DefaultMode) {
-    DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
-    return;
+فراغ DenormalFPEnv::print(raw_ostream &OS, منطقي OmitIfSame) ثابت {
+  إذا (F32_گهڻائي == Default_گهڻائي) {
+    Default_گهڻائي.print(OS, /*Legacy=*/خطأ, OmitIfSame);
+    أرجع;
   }
 
   // Omit printing the base mode if only the f32 mode isn't the default.
-  if (DefaultMode != DenormalMode::getDefault()) {
-    DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
+  إذا (Default_گهڻائي != Denormal_گهڻائي::getDefault()) {
+    Default_گهڻائي.print(OS, /*Legacy=*/خطأ, OmitIfSame);
     OS << ", ";
   }
 
   OS << "float: ";
-  F32Mode.print(OS, /*Legacy=*/false, OmitIfSame);
+  F32_گهڻائي.print(OS, /*Legacy=*/خطأ, OmitIfSame);
 }
 
-static bool cannotOrderStrictlyGreaterImpl(FPClassTest LHS, FPClassTest RHS,
-                                           bool OrEqual, bool OrderedZero) {
+ساكن منطقي cannot_ترتيب_Strictly_Greater_Impl(FPClassTest LHS, FPClassTest RHS,
+                                           منطقي OrEqual, منطقي OrderedZero) {
   LHS &= ~fcNan;
   RHS &= ~fcNan;
 
-  if (LHS == fcNone || RHS == fcNone)
-    return true;
+  إذا (LHS == fcNone || RHS == fcNone)
+    أرجع سچ;
 
-  FPClassTest LowestBitRHS = static_cast<FPClassTest>(RHS & -RHS);
-  FPClassTest HighestBitLHS = static_cast<FPClassTest>(1 << Log2_32(LHS));
+  FPClassTest سڀ_کان_هيٺ_ٻٽو_انگ_RHS = static_cast<FPClassTest>(RHS & -RHS);
+  FPClassTest Highest_ٻٽو_انگ_LHS = static_cast<FPClassTest>(1 << Log2_32(LHS));
 
-  if (!OrderedZero) {
+  إذا (!OrderedZero) {
     // Introduce conflict in zero bits if we're treating them as equal.
-    if (LowestBitRHS == fcNegZero)
-      LowestBitRHS = fcPosZero;
-    if (HighestBitLHS == fcNegZero)
-      HighestBitLHS = fcPosZero;
+    إذا (سڀ_کان_هيٺ_ٻٽو_انگ_RHS == fcNegZero)
+      سڀ_کان_هيٺ_ٻٽو_انگ_RHS = fcPosZero;
+    إذا (Highest_ٻٽو_انگ_LHS == fcNegZero)
+      Highest_ٻٽو_انگ_LHS = fcPosZero;
   }
 
-  if (LowestBitRHS > HighestBitLHS) {
-    assert((LHS & RHS) == fcNone && "no bits should intersect");
-    return true;
+  إذا (سڀ_کان_هيٺ_ٻٽو_انگ_RHS > Highest_ٻٽو_انگ_LHS) {
+    أكد((LHS & RHS) == fcNone && "no bits should intersect");
+    أرجع سچ;
   }
 
-  if (LowestBitRHS < HighestBitLHS)
-    return false;
+  إذا (سڀ_کان_هيٺ_ٻٽو_انگ_RHS < Highest_ٻٽو_انگ_LHS)
+    أرجع خطأ;
 
-  constexpr FPClassTest ExactValuesMask = fcZero | fcInf;
-  return !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
+  constexpr FPClassTest Exact_قدرون_نقاب = fcZero | fcInf;
+  أرجع !OrEqual && (سڀ_کان_هيٺ_ٻٽو_انگ_RHS & Exact_قدرون_نقاب) != fcNone;
 }
 
-bool llvm::cannotOrderStrictlyGreater(FPClassTest LHS, FPClassTest RHS,
-                                      bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
+منطقي llvm::cannot_ترتيب_Strictly_Greater(FPClassTest LHS, FPClassTest RHS,
+                                      منطقي OrderedZeroSign) {
+  أرجع cannot_ترتيب_Strictly_Greater_Impl(LHS, RHS, خطأ, OrderedZeroSign);
 }
 
-bool llvm::cannotOrderStrictlyGreaterEq(FPClassTest LHS, FPClassTest RHS,
-                                        bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
+منطقي llvm::cannot_ترتيب_Strictly_Greater_Eq(FPClassTest LHS, FPClassTest RHS,
+                                        منطقي OrderedZeroSign) {
+  أرجع cannot_ترتيب_Strictly_Greater_Impl(LHS, RHS, سچ, OrderedZeroSign);
 }
 
-bool llvm::cannotOrderStrictlyLess(FPClassTest LHS, FPClassTest RHS,
-                                   bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
+منطقي llvm::cannot_ترتيب_Strictly_Less(FPClassTest LHS, FPClassTest RHS,
+                                   منطقي OrderedZeroSign) {
+  أرجع cannot_ترتيب_Strictly_Greater_Impl(RHS, LHS, خطأ, OrderedZeroSign);
 }
 
-bool llvm::cannotOrderStrictlyLessEq(FPClassTest LHS, FPClassTest RHS,
-                                     bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
+منطقي llvm::cannot_ترتيب_Strictly_Less_Eq(FPClassTest LHS, FPClassTest RHS,
+                                     منطقي OrderedZeroSign) {
+  أرجع cannot_ترتيب_Strictly_Greater_Impl(RHS, LHS, سچ, OrderedZeroSign);
 }
 
-FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
+FPClassTest llvm::orderedStrictlyLess(FPClassTest نقاب, منطقي OrderedZeroSign) {
   // Ignores NaN
-  Mask &= ~fcNan;
+  نقاب &= ~fcNan;
   // Since the classes are ordered bits, we can get all classes which are
   // smaller than all classes in Known by setting all trailing 0 bits to 1,
   // and setting the other bits to 0.
@@ -184,30 +184,30 @@ FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
   // mask based on that.
   // For example: 0b1111000000 = fcPositive
   //           -> 0b0000111111 = fcNegative | fcNan
-  FPClassTest NewMask = static_cast<FPClassTest>(
-      maskTrailingOnes<unsigned>(countr_zero<unsigned>(Mask)) & fcAllFlags);
+  FPClassTest New_نقاب = static_cast<FPClassTest>(
+      نقاب_Trailing_Ones<بنانشان>(countr_zero<بنانشان>(نقاب)) & fcAllFlags);
   // Remove NaNs
-  NewMask &= ~fcNan;
+  New_نقاب &= ~fcNan;
   // We cannot conclude that only one zero is smaller
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
-    NewMask &= ~fcZero;
-  return NewMask;
+  إذا (!OrderedZeroSign && ((New_نقاب & fcZero) != fcZero))
+    New_نقاب &= ~fcZero;
+  أرجع New_نقاب;
 }
 
-FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
-                                         bool OrderedZeroSign) {
+FPClassTest llvm::orderedStrictlyGreater(FPClassTest نقاب,
+                                         منطقي OrderedZeroSign) {
   // Counting the number of leading 0 bits and create a mask based on that,
   // removing the leading 1s that are outside the bitfield:
   // For example: 0b0000111100 = fcNegative
   //           -> 0b1111000000 = fcPositive
-  FPClassTest NewMask = static_cast<FPClassTest>(
-      maskLeadingOnes<unsigned>(countl_zero<unsigned>(Mask)) & fcAllFlags);
+  FPClassTest New_نقاب = static_cast<FPClassTest>(
+      نقاب_Leading_Ones<بنانشان>(countl_zero<بنانشان>(نقاب)) & fcAllFlags);
   // Remove NaNs
-  NewMask &= ~fcNan;
+  New_نقاب &= ~fcNan;
   // We cannot conclude that only one zero is greater
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
-    NewMask &= ~fcZero;
-  return NewMask;
+  إذا (!OrderedZeroSign && ((New_نقاب & fcZero) != fcZero))
+    New_نقاب &= ~fcZero;
+  أرجع New_نقاب;
 }

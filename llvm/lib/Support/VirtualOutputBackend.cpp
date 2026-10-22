@@ -11,30 +11,30 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputBackend.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Support/VirtualOutputError.h"
+#ضمن "llvm/Support/VirtualOutputBackend.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+استعمال نطاق llvm;
+استعمال نطاق llvm::vfs;
 
-void OutputBackend::anchor() {}
+فراغ OutputBackend::anchor() {}
 
 Expected<OutputFile>
-OutputBackend::createFile(const Twine &Path,
+OutputBackend::createFile(ثابت Twine &رستو,
                           std::optional<OutputConfig> Config) {
-  SmallString<128> PathStorage;
-  Path.toVector(PathStorage);
+  SmallString<128> رستو_Storage;
+  رستو.منزل_ويڪٽر(رستو_Storage);
 
-  if (Config) {
+  إذا (Config) {
     // Check for invalid configs.
-    if (!Config->getText() && Config->getCRLF())
-      return make_error<OutputConfigError>(*Config, PathStorage);
+    إذا (!Config->get_متن() && Config->getCRLF())
+      أرجع make_error<OutputConfigError>(*Config, رستو_Storage);
   }
 
   std::unique_ptr<OutputFileImpl> Impl;
-  if (Error E = createFileImpl(PathStorage, Config).moveInto(Impl))
-    return std::move(E);
-  assert(Impl && "Expected valid Impl or Error");
-  return OutputFile(PathStorage, std::move(Impl));
+  إذا (Error E = createFileImpl(رستو_Storage, Config).moveInto(Impl))
+    أرجع std::move(E);
+  أكد(Impl && "Expected valid Impl or Error");
+  أرجع OutputFile(رستو_Storage, std::move(Impl));
 }

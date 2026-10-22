@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/circular_raw_ostream.h"
-#include <algorithm>
-using namespace llvm;
+#ضمن "llvm/Support/circular_raw_ostream.h"
+#ضمن <algorithm>
+استعمال نطاق llvm;
 
-void circular_raw_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (BufferSize == 0) {
-    TheStream->write(Ptr, Size);
-    return;
+فراغ circular_raw_ostream::write_impl(ثابت حرف *Ptr, size_t سائيز) {
+  إذا (بفر_سائيز == 0) {
+    The_وهڪرو->اكتب(Ptr, سائيز);
+    أرجع;
   }
 
   // Write into the buffer, wrapping if necessary.
-  while (Size != 0) {
-    unsigned Bytes =
-      std::min(unsigned(Size), unsigned(BufferSize - (Cur - BufferArray)));
-    memcpy(Cur, Ptr, Bytes);
-    Size -= Bytes;
-    Cur += Bytes;
-    if (Cur == BufferArray + BufferSize) {
+  طالما (سائيز != 0) {
+    بنانشان بائيٽون_2 =
+      std::min(بنانشان(سائيز), بنانشان(بفر_سائيز - (Cur - بفر_Array)));
+    يادگيري_نقل(Cur, Ptr, بائيٽون_2);
+    سائيز -= بائيٽون_2;
+    Cur += بائيٽون_2;
+    إذا (Cur == بفر_Array + بفر_سائيز) {
       // Reset the output pointer to the start of the buffer.
-      Cur = BufferArray;
-      Filled = true;
+      Cur = بفر_Array;
+      Filled = سچ;
     }
   }
 }
 
-void circular_raw_ostream::flushBufferWithBanner() {
-  if (BufferSize != 0) {
+فراغ circular_raw_ostream::flush_بفر_With_Banner() {
+  إذا (بفر_سائيز != 0) {
     // Write out the buffer
-    TheStream->write(Banner, std::strlen(Banner));
-    flushBuffer();
+    The_وهڪرو->اكتب(Banner, std::لڙي_ڊيگهه(Banner));
+    flush_بفر();
   }
 }

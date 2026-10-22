@@ -6,19 +6,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Config/abi-breaking.h"
+#ضمن "llvm/Config/abi-breaking.h"
 
-#ifndef _MSC_VER
-namespace llvm {
+#جيڪڏهن_وصف_نه_ٿيل _MSC_VER
+نطاق llvm {
 
 // One of these two variables will be referenced by a symbol defined in
 // llvm-config.h. We provide a link-time (or load time for DSO) failure when
 // there is a mismatch in the build configuration of the API client and LLVM.
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
-int EnableABIBreakingChecks;
-#else
-int DisableABIBreakingChecks;
-#endif
+#إذا LLVM_ENABLE_ABI_BREAKING_CHECKS
+صحيح EnableABIBreakingChecks;
+#وإلا
+صحيح DisableABIBreakingChecks;
+#جيڪڏهن_پورو
 
 } // end namespace llvm
-#endif
+#جيڪڏهن_پورو

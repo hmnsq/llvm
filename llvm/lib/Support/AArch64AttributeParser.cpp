@@ -7,42 +7,42 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64AttributeParser.h"
-#include "llvm/Support/AArch64BuildAttributes.h"
+#ضمن "llvm/Support/AArch64AttributeParser.h"
+#ضمن "llvm/Support/AArch64BuildAttributes.h"
 
-std::vector<llvm::SubsectionAndTagToTagName> &
-llvm::AArch64AttributeParser::returnTagsNamesMap() {
-  static std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
+std::ويڪٽر<llvm::Subsection_And_ٽيگ_منزل_ٽيگ_Name> &
+llvm::AArch64AttributeParser::return_ٽيگ_فهرست_نالا_Map() {
+  ساكن std::ويڪٽر<Subsection_And_ٽيگ_منزل_ٽيگ_Name> ٽيگ_فهرست_نالا_Map = {
       {"aeabi_pauthabi", 1, "Tag_PAuth_Platform"},
       {"aeabi_pauthabi", 2, "Tag_PAuth_Schema"},
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  أرجع ٽيگ_فهرست_نالا_Map;
 }
 
-llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
-    const llvm::AArch64AttributeParser &Attributes) {
+llvm::AArch64BuildAttrSubsections llvm::ڪڍو_Build_خاصيتون_Subsections(
+    ثابت llvm::AArch64AttributeParser &خاصيتون) {
 
   llvm::AArch64BuildAttrSubsections SubSections;
-  auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+  خودڪار Get_Pauth_قدر = [&خاصيتون](بنانشان ٽيگ) {
+    أرجع خاصيتون.get_Attribute_قدر("aeabi_pauthabi", ٽيگ).قدر_or(0);
   };
-  SubSections.Pauth.TagPlatform =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
-  SubSections.Pauth.TagSchema =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
+  SubSections.Pauth.ٽيگ_Platform =
+      Get_Pauth_قدر(llvm::AArch64_Build_خاصيتون::ٽيگ_PAUTH_PLATFORM);
+  SubSections.Pauth.ٽيگ_Schema =
+      Get_Pauth_قدر(llvm::AArch64_Build_خاصيتون::ٽيگ_PAUTH_SCHEMA);
 
-  auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
-        .value_or(0);
+  خودڪار Get_Feature_قدر = [&خاصيتون](بنانشان ٽيگ) {
+    أرجع خاصيتون.get_Attribute_قدر("aeabi_feature_and_bits", ٽيگ)
+        .قدر_or(0);
   };
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_BTI);
+      Get_Feature_قدر(llvm::AArch64_Build_خاصيتون::ٽيگ_FEATURE_BTI);
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_PAC) << 1;
+      Get_Feature_قدر(llvm::AArch64_Build_خاصيتون::ٽيگ_FEATURE_PAC) << 1;
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
+      Get_Feature_قدر(llvm::AArch64_Build_خاصيتون::ٽيگ_FEATURE_GCS) << 2;
 
-  return SubSections;
+  أرجع SubSections;
 }

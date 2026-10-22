@@ -13,122 +13,122 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SpecialCaseList.h"
-#include "llvm/ADT/RadixTree.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/iterator_range.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/GlobPattern.h"
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Regex.h"
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/Support/WithColor.h"
-#include <assert.h>
-#include <memory>
-#include <mutex>
-#include <stdio.h>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <variant>
-#include <vector>
+#ضمن "llvm/Support/SpecialCaseList.h"
+#ضمن "llvm/ADT/RadixTree.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringMap.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/iterator_range.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/GlobPattern.h"
+#ضمن "llvm/Support/LineIterator.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/Regex.h"
+#ضمن "llvm/Support/VirtualFileSystem.h"
+#ضمن "llvm/Support/WithColor.h"
+#ضمن <assert.h>
+#ضمن <memory>
+#ضمن <mutex>
+#ضمن <stdio.h>
+#ضمن <string>
+#ضمن <system_error>
+#ضمن <utility>
+#ضمن <variant>
+#ضمن <vector>
 
-namespace llvm {
+نطاق llvm {
 
-namespace {
+نطاق {
 
 // Lagacy v1 matcher.
-class RegexMatcher {
-public:
-  Error insert(StringRef Pattern, unsigned LineNumber, bool SlashAgnostic);
-  unsigned match(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+صنف RegexMatcher {
+عام:
+  Error وجهو(StringRef نمونو, بنانشان سٽ_عدد, منطقي SlashAgnostic);
+  بنانشان ميلاپ(StringRef Query) ثابت;
+  StringRef ڳوليو_قاعدو(بنانشان سٽ_No) ثابت;
 
-private:
-  struct Reg {
-    Reg(StringRef Name, unsigned LineNo, Regex &&Rg)
-        : Name(Name), LineNo(LineNo), Rg(std::move(Rg)) {}
+خاص:
+  بنية Reg {
+    Reg(StringRef Name, بنانشان سٽ_No, Regex &&Rg)
+        : Name(Name), سٽ_No(سٽ_No), Rg(std::move(Rg)) {}
     StringRef Name;
-    unsigned LineNo;
+    بنانشان سٽ_No;
     Regex Rg;
   };
 
-  std::vector<Reg> RegExes;
+  std::ويڪٽر<Reg> RegExes;
 };
 
-class GlobMatcher {
-public:
-  Error insert(StringRef Pattern, unsigned LineNumber, bool SlashAgnostic);
-  unsigned match(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+صنف GlobMatcher {
+عام:
+  Error وجهو(StringRef نمونو, بنانشان سٽ_عدد, منطقي SlashAgnostic);
+  بنانشان ميلاپ(StringRef Query) ثابت;
+  StringRef ڳوليو_قاعدو(بنانشان سٽ_No) ثابت;
 
-private:
-  struct Glob {
-    Glob(StringRef Name, unsigned LineNo, GlobPattern &&Pattern)
-        : Name(Name), LineNo(LineNo), Pattern(std::move(Pattern)) {}
+خاص:
+  بنية Glob {
+    Glob(StringRef Name, بنانشان سٽ_No, Glob_نمونو &&نمونو)
+        : Name(Name), سٽ_No(سٽ_No), نمونو(std::move(نمونو)) {}
     StringRef Name;
-    unsigned LineNo;
-    GlobPattern Pattern;
+    بنانشان سٽ_No;
+    Glob_نمونو نمونو;
   };
 
-  void LazyInit() const;
+  فراغ LazyInit() ثابت;
 
-  std::vector<GlobMatcher::Glob> Globs;
+  std::ويڪٽر<GlobMatcher::Glob> Globs;
 
-  mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    RadixTree<iterator_range<StringRef::const_reverse_iterator>,
-                              SmallVector<int, 1>>>
-      PrefixSuffixToGlob;
+  بدلجندڙ Radix_وڻ<iterator_range<StringRef::const_iterator>,
+                    Radix_وڻ<iterator_range<StringRef::const_ابتو_iterator>,
+                              Small_ويڪٽر<صحيح, 1>>>
+      اڳياڙي_Suffix_منزل_Glob;
 
-  mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    SmallVector<int, 1>>
-      SubstrToGlob;
+  بدلجندڙ Radix_وڻ<iterator_range<StringRef::const_iterator>,
+                    Small_ويڪٽر<صحيح, 1>>
+      Substr_منزل_Glob;
 
-  mutable bool Initialized = false;
+  بدلجندڙ منطقي Initialized = خطأ;
 };
 
-struct QueryOptions {
-  bool UseGlobs = true;
-  bool RemoveDotSlash = false;
-  bool WarnDotSlashMatch = false;
-  bool SlashAgnostic = false;
+بنية QueryOptions {
+  منطقي UseGlobs = سچ;
+  منطقي RemoveDotSlash = خطأ;
+  منطقي Warn_Dot_Slash_ميلاپ = خطأ;
+  منطقي SlashAgnostic = خطأ;
 };
 
 /// Represents a set of patterns and their line numbers
-class Matcher {
-public:
-  explicit Matcher(QueryOptions QOpts);
+صنف Matcher {
+عام:
+  واضح Matcher(QueryOptions QOpts);
 
-  Error insert(StringRef Pattern, unsigned LineNumber);
-  unsigned match(StringRef Query) const;
+  Error وجهو(StringRef نمونو, بنانشان سٽ_عدد);
+  بنانشان ميلاپ(StringRef Query) ثابت;
 
-  bool matchAny(StringRef Query) const { return match(Query); }
+  منطقي ميلاپ_Any(StringRef Query) ثابت { أرجع ميلاپ(Query); }
 
-private:
-  unsigned matchInternal(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+خاص:
+  بنانشان ميلاپ_اندروني(StringRef Query) ثابت;
+  StringRef ڳوليو_قاعدو(بنانشان سٽ_No) ثابت;
 
   std::variant<RegexMatcher, GlobMatcher> M;
   QueryOptions Options;
-  mutable std::once_flag Warned;
+  بدلجندڙ std::once_flag Warned;
 };
 
-Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
-                           bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument,
+Error RegexMatcher::وجهو(StringRef نمونو, بنانشان سٽ_عدد,
+                           منطقي SlashAgnostic) {
+  إذا (نمونو.خالي_جايون())
+    أرجع createStringError(errc::invalid_دليل,
                              "Supplied regex was blank");
 
   // Replace * with .*
-  auto Regexp = Pattern.str();
-  for (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
-       pos += strlen(".*")) {
-    Regexp.replace(pos, strlen("*"), ".*");
+  خودڪار Regexp = نمونو.str();
+  لكل (size_t pos = 0; (pos = Regexp.ڳوليو('*', pos)) != std::string::npos;
+       pos += لڙي_ڊيگهه(".*")) {
+    Regexp.replace(pos, لڙي_ڊيگهه("*"), ".*");
   }
 
   Regexp = (Twine("^(") + StringRef(Regexp) + ")$").str();
@@ -136,135 +136,135 @@ Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
   // Check that the regexp is valid.
   Regex CheckRE(Regexp);
   std::string REError;
-  if (!CheckRE.isValid(REError))
-    return createStringError(errc::invalid_argument, REError);
+  إذا (!CheckRE.isValid(REError))
+    أرجع createStringError(errc::invalid_دليل, REError);
 
-  RegExes.emplace_back(Pattern, LineNumber, std::move(CheckRE));
-  return Error::success();
+  RegExes.emplace_پٺ(نمونو, سٽ_عدد, std::move(CheckRE));
+  أرجع Error::success();
 }
 
-unsigned RegexMatcher::match(StringRef Query) const {
-  for (const auto &R : reverse(RegExes))
-    if (R.Rg.match(Query))
-      return R.LineNo;
-  return 0;
+بنانشان RegexMatcher::ميلاپ(StringRef Query) ثابت {
+  لكل (ثابت خودڪار &R : ابتو(RegExes))
+    إذا (R.Rg.ميلاپ(Query))
+      أرجع R.سٽ_No;
+  أرجع 0;
 }
 
-StringRef RegexMatcher::findRule(unsigned LineNo) const {
-  for (const auto &R : RegExes)
-    if (R.LineNo == LineNo)
-      return R.Name;
+StringRef RegexMatcher::ڳوليو_قاعدو(بنانشان سٽ_No) ثابت {
+  لكل (ثابت خودڪار &R : RegExes)
+    إذا (R.سٽ_No == سٽ_No)
+      أرجع R.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  أرجع {};
 }
 
-Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
-                          bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument, "Supplied glob was blank");
+Error GlobMatcher::وجهو(StringRef نمونو, بنانشان سٽ_عدد,
+                          منطقي SlashAgnostic) {
+  إذا (نمونو.خالي_جايون())
+    أرجع createStringError(errc::invalid_دليل, "Supplied glob was blank");
 
-  auto Res =
-      GlobPattern::create(Pattern, /*MaxSubPatterns=*/1024, SlashAgnostic);
-  if (auto Err = Res.takeError())
-    return Err;
-  Globs.emplace_back(Pattern, LineNumber, std::move(Res.get()));
-  return Error::success();
+  خودڪار Res =
+      Glob_نمونو::create(نمونو, /*MaxSubPatterns=*/1024, SlashAgnostic);
+  إذا (خودڪار Err = Res.takeError())
+    أرجع Err;
+  Globs.emplace_پٺ(نمونو, سٽ_عدد, std::move(Res.get()));
+  أرجع Error::success();
 }
 
-void GlobMatcher::LazyInit() const {
-  if (LLVM_LIKELY(Initialized))
-    return;
-  Initialized = true;
-  for (const auto &[Idx, G] : enumerate(Globs)) {
-    StringRef Prefix = G.Pattern.prefix();
-    StringRef Suffix = G.Pattern.suffix();
+فراغ GlobMatcher::LazyInit() ثابت {
+  إذا (LLVM_LIKELY(Initialized))
+    أرجع;
+  Initialized = سچ;
+  لكل (ثابت خودڪار &[Idx, G] : enumerate(Globs)) {
+    StringRef اڳياڙي = G.نمونو.اڳياڙي_2();
+    StringRef Suffix = G.نمونو.suffix();
 
-    if (Suffix.empty() && Prefix.empty()) {
+    إذا (Suffix.خالي_جايون() && اڳياڙي.خالي_جايون()) {
       // If both prefix and suffix are empty put into special tree to search by
       // substring in a middle.
-      StringRef Substr = G.Pattern.longest_substr();
-      if (!Substr.empty()) {
+      StringRef Substr = G.نمونو.longest_substr();
+      إذا (!Substr.خالي_جايون()) {
         // But only if substring is not empty. Searching this tree is more
         // expensive.
-        auto &V = SubstrToGlob.emplace(Substr).first->second;
-        V.emplace_back(Idx);
-        continue;
+        خودڪار &V = Substr_منزل_Glob.emplace(Substr).پهريون_2->ٻيو_2;
+        V.emplace_پٺ(Idx);
+        استمر;
       }
     }
 
-    auto &SToGlob = PrefixSuffixToGlob.emplace(Prefix).first->second;
-    auto &V = SToGlob.emplace(reverse(Suffix)).first->second;
-    V.emplace_back(Idx);
+    خودڪار &SToGlob = اڳياڙي_Suffix_منزل_Glob.emplace(اڳياڙي).پهريون_2->ٻيو_2;
+    خودڪار &V = SToGlob.emplace(ابتو(Suffix)).پهريون_2->ٻيو_2;
+    V.emplace_پٺ(Idx);
   }
 }
 
-unsigned GlobMatcher::match(StringRef Query) const {
+بنانشان GlobMatcher::ميلاپ(StringRef Query) ثابت {
   LazyInit();
 
-  int Best = -1;
-  if (!PrefixSuffixToGlob.empty()) {
-    for (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
-      for (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
-            break;
-          const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
-            Best = Idx;
+  صحيح بهترين = -1;
+  إذا (!اڳياڙي_Suffix_منزل_Glob.خالي_جايون()) {
+    لكل (ثابت خودڪار &[_, SToGlob] : اڳياڙي_Suffix_منزل_Glob.ڳوليو_prefixes(Query)) {
+      لكل (ثابت خودڪار &[_, V] : SToGlob.ڳوليو_prefixes(ابتو(Query))) {
+        لكل (صحيح Idx : ابتو(V)) {
+          إذا (بهترين > Idx)
+            اكسر;
+          ثابت GlobMatcher::Glob &G = Globs[Idx];
+          إذا (G.نمونو.ميلاپ(Query)) {
+            بهترين = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
             // prefix group. However, we continue searching other prefix groups
             // in the map, as they may contain a better match overall.
-            break;
+            اكسر;
           }
         }
       }
     }
   }
 
-  if (!SubstrToGlob.empty()) {
+  إذا (!Substr_منزل_Glob.خالي_جايون()) {
     // As we don't know when substring exactly starts, we will try all
     // possibilities. In most cases search will fail on first characters.
-    for (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
-      for (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
-            break;
-          const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
-            Best = Idx;
+    لكل (StringRef Q = Query; !Q.خالي_جايون(); Q = Q.drop_front()) {
+      لكل (ثابت خودڪار &[_, V] : Substr_منزل_Glob.ڳوليو_prefixes(Q)) {
+        لكل (صحيح Idx : ابتو(V)) {
+          إذا (بهترين > Idx)
+            اكسر;
+          ثابت GlobMatcher::Glob &G = Globs[Idx];
+          إذا (G.نمونو.ميلاپ(Query)) {
+            بهترين = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
             // prefix group. However, we continue searching other prefix groups
             // in the map, as they may contain a better match overall.
-            break;
+            اكسر;
           }
         }
       }
     }
   }
-  return Best < 0 ? 0 : Globs[Best].LineNo;
+  أرجع بهترين < 0 ? 0 : Globs[بهترين].سٽ_No;
 }
 
-StringRef GlobMatcher::findRule(unsigned LineNo) const {
-  for (const auto &G : Globs)
-    if (G.LineNo == LineNo)
-      return G.Name;
+StringRef GlobMatcher::ڳوليو_قاعدو(بنانشان سٽ_No) ثابت {
+  لكل (ثابت خودڪار &G : Globs)
+    إذا (G.سٽ_No == سٽ_No)
+      أرجع G.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  أرجع {};
 }
 
 Matcher::Matcher(QueryOptions QOpts) : Options(QOpts) {
-  if (Options.UseGlobs)
+  إذا (Options.UseGlobs)
     M.emplace<GlobMatcher>();
-  else
+  وإلا
     M.emplace<RegexMatcher>();
 }
 
-Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
-  return std::visit(
-      [&](auto &V) {
-        return V.insert(Pattern, LineNumber, Options.SlashAgnostic);
+Error Matcher::وجهو(StringRef نمونو, بنانشان سٽ_عدد) {
+  أرجع std::گهمو(
+      [&](خودڪار &V) {
+        أرجع V.وجهو(نمونو, سٽ_عدد, Options.SlashAgnostic);
       },
       M);
 }
@@ -281,47 +281,47 @@ Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
 //   (canonicalized and non-canonicalized) to maintain backward compatibility.
 //   If a match only works with the old behavior (non-canonicalized), a warning
 //   is emitted.
-unsigned Matcher::match(StringRef Query) const {
-  if (!Options.RemoveDotSlash)
-    return matchInternal(Query);
+بنانشان Matcher::ميلاپ(StringRef Query) ثابت {
+  إذا (!Options.RemoveDotSlash)
+    أرجع ميلاپ_اندروني(Query);
 
-  if (!Options.WarnDotSlashMatch)
-    return matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
+  إذا (!Options.Warn_Dot_Slash_ميلاپ)
+    أرجع ميلاپ_اندروني(llvm::sys::رستو_2::remove_leading_dotslash(Query));
 
-  StringRef FixedQuery = llvm::sys::path::remove_leading_dotslash(Query);
-  unsigned FixedMatched = matchInternal(FixedQuery);
-  if (FixedQuery == Query)
-    return FixedMatched;
+  StringRef FixedQuery = llvm::sys::رستو_2::remove_leading_dotslash(Query);
+  بنانشان FixedMatched = ميلاپ_اندروني(FixedQuery);
+  إذا (FixedQuery == Query)
+    أرجع FixedMatched;
 
-  unsigned OriginalMatch = matchInternal(Query);
-  if (OriginalMatch > FixedMatched) {
+  بنانشان Original_ميلاپ = ميلاپ_اندروني(Query);
+  إذا (Original_ميلاپ > FixedMatched) {
     std::call_once(Warned, [&]() {
       WithColor::warning() << "Deprecated behaviour: pattern '"
-                           << findRule(OriginalMatch) << "' matches '" << Query
+                           << ڳوليو_قاعدو(Original_ميلاپ) << "' matches '" << Query
                            << "', update it to match '" << FixedQuery
                            << "' instead (further warnings suppressed).\n";
     });
   }
-  return std::max(OriginalMatch, FixedMatched);
+  أرجع std::max(Original_ميلاپ, FixedMatched);
 }
 
-unsigned Matcher::matchInternal(StringRef Query) const {
-  return std::visit([&](auto &V) -> unsigned { return V.match(Query); }, M);
+بنانشان Matcher::ميلاپ_اندروني(StringRef Query) ثابت {
+  أرجع std::گهمو([&](خودڪار &V) -> بنانشان { أرجع V.ميلاپ(Query); }, M);
 }
 
-StringRef Matcher::findRule(unsigned LineNo) const {
-  return std::visit([&](auto &V) -> StringRef { return V.findRule(LineNo); },
+StringRef Matcher::ڳوليو_قاعدو(بنانشان سٽ_No) ثابت {
+  أرجع std::گهمو([&](خودڪار &V) -> StringRef { أرجع V.ڳوليو_قاعدو(سٽ_No); },
                     M);
 }
 } // namespace
 
-class SpecialCaseList::Section::SectionImpl {
-public:
-  const Matcher *findMatcher(StringRef Prefix, StringRef Category) const;
+صنف SpecialCaseList::Section::SectionImpl {
+عام:
+  ثابت Matcher *ڳوليو_Matcher(StringRef اڳياڙي, StringRef Category) ثابت;
 
-  using SectionEntries = StringMap<StringMap<Matcher>>;
+  استعمال SectionEntries = StringMap<StringMap<Matcher>>;
 
-  explicit SectionImpl(QueryOptions QOpts) : SectionMatcher(QOpts) {}
+  واضح SectionImpl(QueryOptions QOpts) : SectionMatcher(QOpts) {}
 
   Matcher SectionMatcher;
   SectionEntries Entries;
@@ -329,92 +329,92 @@ public:
 
 // TODO: Refactor this to return Expected<...>
 std::unique_ptr<SpecialCaseList>
-SpecialCaseList::create(const std::vector<std::string> &Paths,
+SpecialCaseList::create(ثابت std::ويڪٽر<std::string> &Paths,
                         llvm::vfs::FileSystem &FS, std::string &Error) {
-  std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(Paths, FS, Error))
-    return SCL;
-  return nullptr;
+  std::unique_ptr<SpecialCaseList> SCL(جديد SpecialCaseList());
+  إذا (SCL->create_اندروني(Paths, FS, Error))
+    أرجع SCL;
+  أرجع خالي_اشارو;
 }
 
-std::unique_ptr<SpecialCaseList> SpecialCaseList::create(const MemoryBuffer *MB,
+std::unique_ptr<SpecialCaseList> SpecialCaseList::create(ثابت يادگيري_بفر *MB,
                                                          std::string &Error) {
-  std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(MB, Error))
-    return SCL;
-  return nullptr;
+  std::unique_ptr<SpecialCaseList> SCL(جديد SpecialCaseList());
+  إذا (SCL->create_اندروني(MB, Error))
+    أرجع SCL;
+  أرجع خالي_اشارو;
 }
 
 std::unique_ptr<SpecialCaseList>
-SpecialCaseList::createOrDie(const std::vector<std::string> &Paths,
+SpecialCaseList::createOrDie(ثابت std::ويڪٽر<std::string> &Paths,
                              llvm::vfs::FileSystem &FS) {
   std::string Error;
-  if (auto SCL = create(Paths, FS, Error))
-    return SCL;
+  إذا (خودڪار SCL = create(Paths, FS, Error))
+    أرجع SCL;
   report_fatal_error(Twine(Error));
 }
 
-bool SpecialCaseList::createInternal(const std::vector<std::string> &Paths,
+منطقي SpecialCaseList::create_اندروني(ثابت std::ويڪٽر<std::string> &Paths,
                                      vfs::FileSystem &VFS, std::string &Error) {
-  for (size_t i = 0; i < Paths.size(); ++i) {
-    const auto &Path = Paths[i];
-    ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
-        VFS.getBufferForFile(Path);
-    if (std::error_code EC = FileOrErr.getError()) {
-      Error = (Twine("can't open file '") + Path + "': " + EC.message()).str();
-      return false;
+  لكل (size_t i = 0; i < Paths.سائيز_2(); ++i) {
+    ثابت خودڪار &رستو = Paths[i];
+    ErrorOr<std::unique_ptr<يادگيري_بفر>> FileOrErr =
+        VFS.get_بفر_For_File(رستو);
+    إذا (std::error_ڪوڊ EC = FileOrErr.getError()) {
+      Error = (Twine("can't open file '") + رستو + "': " + EC.پيغام()).str();
+      أرجع خطأ;
     }
     std::string ParseError;
-    if (!parse(i, FileOrErr.get().get(), ParseError)) {
-      Error = (Twine("error parsing file '") + Path + "': " + ParseError).str();
-      return false;
+    إذا (!parse(i, FileOrErr.get().get(), ParseError)) {
+      Error = (Twine("error parsing file '") + رستو + "': " + ParseError).str();
+      أرجع خطأ;
     }
   }
-  return true;
+  أرجع سچ;
 }
 
-bool SpecialCaseList::createInternal(const MemoryBuffer *MB,
+منطقي SpecialCaseList::create_اندروني(ثابت يادگيري_بفر *MB,
                                      std::string &Error) {
-  if (!parse(0, MB, Error))
-    return false;
-  return true;
+  إذا (!parse(0, MB, Error))
+    أرجع خطأ;
+  أرجع سچ;
 }
 
 Expected<SpecialCaseList::Section *>
-SpecialCaseList::addSection(StringRef SectionStr, unsigned FileNo,
-                            unsigned LineNo, bool UseGlobs) {
+SpecialCaseList::جوڙيو_Section(StringRef SectionStr, بنانشان FileNo,
+                            بنانشان سٽ_No, منطقي UseGlobs) {
   SectionStr = SectionStr.copy(StrAlloc);
-  Sections.emplace_back(SectionStr, FileNo, UseGlobs);
-  auto &Section = Sections.back();
+  Sections.emplace_پٺ(SectionStr, FileNo, UseGlobs);
+  خودڪار &Section = Sections.پٺ();
 
-  if (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
-    return createStringError(errc::invalid_argument,
-                             "malformed section at line " + Twine(LineNo) +
+  إذا (خودڪار Err = Section.Impl->SectionMatcher.وجهو(SectionStr, سٽ_No)) {
+    أرجع createStringError(errc::invalid_دليل,
+                             "malformed section at line " + Twine(سٽ_No) +
                                  ": '" + SectionStr +
-                                 "': " + toString(std::move(Err)));
+                                 "': " + منزل_String(std::move(Err)));
   }
 
-  return &Section;
+  أرجع &Section;
 }
 
-bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
+منطقي SpecialCaseList::parse(بنانشان FileIdx, ثابت يادگيري_بفر *MB,
                             std::string &Error) {
-  unsigned long long Version = 2;
+  بنانشان ڊگهو ڊگهو نسخو = 2;
 
-  StringRef Header = MB->getBuffer();
-  if (Header.consume_front("#!special-case-list-v"))
-    consumeUnsignedInteger(Header, 10, Version);
+  StringRef سرو = MB->get_بفر();
+  إذا (سرو.consume_front("#!special-case-list-v"))
+    consumeUnsignedInteger(سرو, 10, نسخو);
 
-  auto MinVersion = [&](unsigned V) { return Version >= V; };
+  خودڪار Min_نسخو = [&](بنانشان V) { أرجع نسخو >= V; };
 
   // In https://reviews.llvm.org/D154014 we added glob support and planned
   // to remove regex support in patterns. We temporarily support the
   // original behavior using regexes if "#!special-case-list-v1" is the
   // first line of the file. For more details, see
   // https://discourse.llvm.org/t/use-glob-instead-of-regex-for-specialcaselists/71666
-  bool UseGlobs = MinVersion(2);
-  bool RemoveDotSlash = MinVersion(3);
-  bool WarnDotSlash = MinVersion(4) && !MinVersion(5);
+  منطقي UseGlobs = Min_نسخو(2);
+  منطقي RemoveDotSlash = Min_نسخو(3);
+  منطقي WarnDotSlash = Min_نسخو(4) && !Min_نسخو(5);
   // TODO: Improve efficiency on Windows.
   // `SlashAgnostic` makes `GlobMatcher` lookup inefficient by reducing the part
   // of the pattern handled by the RadixTree. This was already the case even
@@ -422,135 +422,135 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   // needed to represent Windows backslashes. A possible, but not unique,
   // solution is to assume (or convert Windows query) backslashes, and
   // preprocess the Glob pattern to use different escape sequences.
-  bool SlashAgnostic = MinVersion(4) && llvm::sys::path::is_style_windows(
-                                            llvm::sys::path::Style::native);
+  منطقي SlashAgnostic = Min_نسخو(4) && llvm::sys::رستو_2::is_style_windows(
+                                            llvm::sys::رستو_2::Style::native);
 
-  auto ErrOrSection = addSection("*", FileIdx, 1, true);
-  if (auto Err = ErrOrSection.takeError()) {
-    Error = toString(std::move(Err));
-    return false;
+  خودڪار ErrOrSection = جوڙيو_Section("*", FileIdx, 1, سچ);
+  إذا (خودڪار Err = ErrOrSection.takeError()) {
+    Error = منزل_String(std::move(Err));
+    أرجع خطأ;
   }
   Section::SectionImpl *CurrentImpl = ErrOrSection.get()->Impl.get();
 
   // This is the current list of prefixes for all existing users matching file
   // path. We may need parametrization in constructor in future.
-  constexpr StringRef PathPrefixes[] = {"src", "!src", "mainfile", "source"};
+  constexpr StringRef رستو_Prefixes[] = {"src", "!src", "mainfile", "source"};
 
-  for (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
-       !LineIt.is_at_eof(); LineIt++) {
-    unsigned LineNo = LineIt.line_number();
-    StringRef Line = LineIt->trim();
-    if (Line.empty())
-      continue;
+  لكل (سٽ_iterator سٽ_It(*MB, /*SkipBlanks=*/سچ, /*CommentMarker=*/'#');
+       !سٽ_It.is_at_eof(); سٽ_It++) {
+    بنانشان سٽ_No = سٽ_It.سٽ_عدد_2();
+    StringRef سٽ = سٽ_It->trim();
+    إذا (سٽ.خالي_جايون())
+      استمر;
 
     // Save section names
-    if (Line.starts_with("[")) {
-      if (!Line.ends_with("]")) {
+    إذا (سٽ.starts_with("[")) {
+      إذا (!سٽ.پڇاڙيون_with("]")) {
         Error =
-            ("malformed section header on line " + Twine(LineNo) + ": " + Line)
+            ("malformed section header on line " + Twine(سٽ_No) + ": " + سٽ)
                 .str();
-        return false;
+        أرجع خطأ;
       }
 
-      auto ErrOrSection =
-          addSection(Line.drop_front().drop_back(), FileIdx, LineNo, UseGlobs);
-      if (auto Err = ErrOrSection.takeError()) {
-        Error = toString(std::move(Err));
-        return false;
+      خودڪار ErrOrSection =
+          جوڙيو_Section(سٽ.drop_front().drop_پٺ(), FileIdx, سٽ_No, UseGlobs);
+      إذا (خودڪار Err = ErrOrSection.takeError()) {
+        Error = منزل_String(std::move(Err));
+        أرجع خطأ;
       }
       CurrentImpl = ErrOrSection.get()->Impl.get();
-      continue;
+      استمر;
     }
 
     // Get our prefix and unparsed glob.
-    auto [Prefix, Postfix] = Line.split(":");
-    if (Postfix.empty()) {
+    خودڪار [اڳياڙي, Postfix] = سٽ.ورهايو(":");
+    إذا (Postfix.خالي_جايون()) {
       // Missing ':' in the line.
-      Error = ("malformed line " + Twine(LineNo) + ": '" + Line + "'").str();
-      return false;
+      Error = ("malformed line " + Twine(سٽ_No) + ": '" + سٽ + "'").str();
+      أرجع خطأ;
     }
 
     QueryOptions QOpts;
     QOpts.UseGlobs = UseGlobs;
-    if (llvm::is_contained(PathPrefixes, Prefix)) {
+    إذا (llvm::is_contained(رستو_Prefixes, اڳياڙي)) {
       QOpts.RemoveDotSlash = RemoveDotSlash;
-      QOpts.WarnDotSlashMatch = WarnDotSlash;
+      QOpts.Warn_Dot_Slash_ميلاپ = WarnDotSlash;
       QOpts.SlashAgnostic = SlashAgnostic;
     }
 
-    auto [Pattern, Category] = Postfix.split("=");
-    auto [It, _] = CurrentImpl->Entries[Prefix].try_emplace(Category, QOpts);
-    Pattern = Pattern.copy(StrAlloc);
-    if (auto Err = It->second.insert(Pattern, LineNo)) {
+    خودڪار [نمونو, Category] = Postfix.ورهايو("=");
+    خودڪار [It, _] = CurrentImpl->Entries[اڳياڙي].try_emplace(Category, QOpts);
+    نمونو = نمونو.copy(StrAlloc);
+    إذا (خودڪار Err = It->ٻيو_2.وجهو(نمونو, سٽ_No)) {
       Error =
           (Twine("malformed ") + (UseGlobs ? "glob" : "regex") + " in line " +
-           Twine(LineNo) + ": '" + Pattern + "': " + toString(std::move(Err)))
+           Twine(سٽ_No) + ": '" + نمونو + "': " + منزل_String(std::move(Err)))
               .str();
-      return false;
+      أرجع خطأ;
     }
   }
 
-  return true;
+  أرجع سچ;
 }
 
-SpecialCaseList::~SpecialCaseList() = default;
+SpecialCaseList::~SpecialCaseList() = افتراضي;
 
-bool SpecialCaseList::inSection(StringRef Section, StringRef Prefix,
-                                StringRef Query, StringRef Category) const {
-  auto [FileIdx, LineNo] = inSectionBlame(Section, Prefix, Query, Category);
-  return LineNo;
+منطقي SpecialCaseList::اندريون_Section(StringRef Section, StringRef اڳياڙي,
+                                StringRef Query, StringRef Category) ثابت {
+  خودڪار [FileIdx, سٽ_No] = اندريون_Section_Blame(Section, اڳياڙي, Query, Category);
+  أرجع سٽ_No;
 }
 
-std::pair<unsigned, unsigned>
-SpecialCaseList::inSectionBlame(StringRef Section, StringRef Prefix,
-                                StringRef Query, StringRef Category) const {
-  for (const auto &S : reverse(Sections)) {
-    if (S.Impl->SectionMatcher.matchAny(Section)) {
-      unsigned Blame = S.getLastMatch(Prefix, Query, Category);
-      if (Blame)
-        return {S.FileIdx, Blame};
+std::pair<بنانشان, بنانشان>
+SpecialCaseList::اندريون_Section_Blame(StringRef Section, StringRef اڳياڙي,
+                                StringRef Query, StringRef Category) ثابت {
+  لكل (ثابت خودڪار &S : ابتو(Sections)) {
+    إذا (S.Impl->SectionMatcher.ميلاپ_Any(Section)) {
+      بنانشان Blame = S.get_آخري_ميلاپ(اڳياڙي, Query, Category);
+      إذا (Blame)
+        أرجع {S.FileIdx, Blame};
     }
   }
-  return NotFound;
+  أرجع Not_مليو;
 }
 
-SpecialCaseList::Section::Section(StringRef Str, unsigned FileIdx,
-                                  bool UseGlobs)
+SpecialCaseList::Section::Section(StringRef Str, بنانشان FileIdx,
+                                  منطقي UseGlobs)
     : Name(Str), FileIdx(FileIdx),
       Impl(std::make_unique<SectionImpl>(
-          QueryOptions{UseGlobs, /*RemoveDotSlash=*/false})) {}
+          QueryOptions{UseGlobs, /*RemoveDotSlash=*/خطأ})) {}
 
-SpecialCaseList::Section::Section(Section &&) = default;
+SpecialCaseList::Section::Section(Section &&) = افتراضي;
 
-SpecialCaseList::Section::~Section() = default;
+SpecialCaseList::Section::~Section() = افتراضي;
 
-bool SpecialCaseList::Section::matchName(StringRef Name) const {
-  return Impl->SectionMatcher.matchAny(Name);
+منطقي SpecialCaseList::Section::ميلاپ_Name(StringRef Name) ثابت {
+  أرجع Impl->SectionMatcher.ميلاپ_Any(Name);
 }
 
-const Matcher *
-SpecialCaseList::Section::SectionImpl::findMatcher(StringRef Prefix,
-                                                   StringRef Category) const {
-  SectionEntries::const_iterator I = Entries.find(Prefix);
-  if (I == Entries.end())
-    return nullptr;
-  StringMap<Matcher>::const_iterator II = I->second.find(Category);
-  if (II == I->second.end())
-    return nullptr;
+ثابت Matcher *
+SpecialCaseList::Section::SectionImpl::ڳوليو_Matcher(StringRef اڳياڙي,
+                                                   StringRef Category) ثابت {
+  SectionEntries::const_iterator I = Entries.ڳوليو(اڳياڙي);
+  إذا (I == Entries.پڇاڙي())
+    أرجع خالي_اشارو;
+  StringMap<Matcher>::const_iterator II = I->ٻيو_2.ڳوليو(Category);
+  إذا (II == I->ٻيو_2.پڇاڙي())
+    أرجع خالي_اشارو;
 
-  return &II->second;
+  أرجع &II->ٻيو_2;
 }
 
-unsigned SpecialCaseList::Section::getLastMatch(StringRef Prefix,
+بنانشان SpecialCaseList::Section::get_آخري_ميلاپ(StringRef اڳياڙي,
                                                 StringRef Query,
-                                                StringRef Category) const {
-  if (const Matcher *M = Impl->findMatcher(Prefix, Category))
-    return M->match(Query);
-  return 0;
+                                                StringRef Category) ثابت {
+  إذا (ثابت Matcher *M = Impl->ڳوليو_Matcher(اڳياڙي, Category))
+    أرجع M->ميلاپ(Query);
+  أرجع 0;
 }
 
-bool SpecialCaseList::Section::hasPrefix(StringRef Prefix) const {
-  return Impl->Entries.contains(Prefix);
+منطقي SpecialCaseList::Section::has_اڳياڙي(StringRef اڳياڙي) ثابت {
+  أرجع Impl->Entries.شامل_آهي(اڳياڙي);
 }
 
 } // namespace llvm

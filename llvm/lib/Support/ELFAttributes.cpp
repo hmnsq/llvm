@@ -6,29 +6,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/ELFAttributes.h"
+#ضمن "llvm/ADT/StringRef.h"
 
-using namespace llvm;
+استعمال نطاق llvm;
 
-StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
-                                     bool hasTagPrefix) {
-  auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
-  StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+StringRef ELFAttrs::attrTypeAsString(بنانشان attr, ٽيگ_Name_Map ٽيگ_Name_Map_2,
+                                     منطقي has_ٽيگ_اڳياڙي) {
+  خودڪار ٽيگ_Name_It = ڳوليو_if(
+      ٽيگ_Name_Map_2, [attr](ثابت ٽيگ_Name_شي شي_2) { أرجع شي_2.attr == attr; });
+  إذا (ٽيگ_Name_It == ٽيگ_Name_Map_2.پڇاڙي())
+    أرجع "";
+  StringRef ٽيگ_Name = ٽيگ_Name_It->ٽيگ_Name;
+  أرجع has_ٽيگ_اڳياڙي ? ٽيگ_Name : ٽيگ_Name.drop_front(4);
 }
 
-std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
-                                                     TagNameMap tagNameMap) {
-  bool hasTagPrefix = tag.starts_with("Tag_");
-  auto tagNameIt =
-      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+std::optional<بنانشان> ELFAttrs::attrTypeFromString(StringRef ٽيگ_2,
+                                                     ٽيگ_Name_Map ٽيگ_Name_Map_2) {
+  منطقي has_ٽيگ_اڳياڙي = ٽيگ_2.starts_with("Tag_");
+  خودڪار ٽيگ_Name_It =
+      ڳوليو_if(ٽيگ_Name_Map_2, [ٽيگ_2, has_ٽيگ_اڳياڙي](ثابت ٽيگ_Name_شي شي_2) {
+        أرجع شي_2.ٽيگ_Name.drop_front(has_ٽيگ_اڳياڙي ? 0 : 4) == ٽيگ_2;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  إذا (ٽيگ_Name_It == ٽيگ_Name_Map_2.پڇاڙي())
+    أرجع std::nullopt;
+  أرجع ٽيگ_Name_It->attr;
 }

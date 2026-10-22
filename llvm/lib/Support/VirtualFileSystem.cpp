@@ -10,258 +10,258 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/IntrusiveRefCntPtr.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/iterator_range.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FileSystem/UniqueID.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <atomic>
-#include <cassert>
-#include <cstdint>
-#include <iterator>
-#include <limits>
-#include <map>
-#include <memory>
-#include <optional>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#ضمن "llvm/Support/VirtualFileSystem.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/DenseMap.h"
+#ضمن "llvm/ADT/IntrusiveRefCntPtr.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/ADT/StringSet.h"
+#ضمن "llvm/ADT/Twine.h"
+#ضمن "llvm/ADT/iterator_range.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Casting.h"
+#ضمن "llvm/Support/Chrono.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/ErrorOr.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/FileSystem/UniqueID.h"
+#ضمن "llvm/Support/IOSandbox.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/SMLoc.h"
+#ضمن "llvm/Support/SourceMgr.h"
+#ضمن "llvm/Support/YAMLParser.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <atomic>
+#ضمن <cassert>
+#ضمن <cstdint>
+#ضمن <iterator>
+#ضمن <limits>
+#ضمن <map>
+#ضمن <memory>
+#ضمن <optional>
+#ضمن <string>
+#ضمن <system_error>
+#ضمن <utility>
+#ضمن <vector>
 
-using namespace llvm;
-using namespace llvm::vfs;
+استعمال نطاق llvm;
+استعمال نطاق llvm::vfs;
 
-using llvm::sys::fs::file_status;
-using llvm::sys::fs::file_t;
-using llvm::sys::fs::file_type;
-using llvm::sys::fs::perms;
-using llvm::sys::fs::UniqueID;
+استعمال llvm::sys::fs::file_حالت;
+استعمال llvm::sys::fs::file_t;
+استعمال llvm::sys::fs::file_type;
+استعمال llvm::sys::fs::perms;
+استعمال llvm::sys::fs::UniqueID;
 
-Status::Status(const file_status &Status)
-    : UID(Status.getUniqueID()), MTime(Status.getLastModificationTime()),
-      User(Status.getUser()), Group(Status.getGroup()), Size(Status.getSize()),
-      Type(Status.type()), Perms(Status.permissions()) {}
+حالت::حالت(ثابت file_حالت &حالت)
+    : UID(حالت.getUniqueID()), MTime(حالت.get_آخري_Modification_وقت()),
+      User(حالت.getUser()), گروهه(حالت.get_گروهه()), سائيز(حالت.get_سائيز()),
+      Type(حالت.type()), Perms(حالت.permissions()) {}
 
-Status::Status(const Twine &Name, UniqueID UID, sys::TimePoint<> MTime,
-               uint32_t User, uint32_t Group, uint64_t Size, file_type Type,
+حالت::حالت(ثابت Twine &Name, UniqueID UID, sys::وقت_نقطو<> MTime,
+               uint32_t User, uint32_t گروهه, uint64_t سائيز, file_type Type,
                perms Perms)
-    : Name(Name.str()), UID(UID), MTime(MTime), User(User), Group(Group),
-      Size(Size), Type(Type), Perms(Perms) {}
+    : Name(Name.str()), UID(UID), MTime(MTime), User(User), گروهه(گروهه),
+      سائيز(سائيز), Type(Type), Perms(Perms) {}
 
-Status Status::copyWithNewSize(const Status &In, uint64_t NewSize) {
-  return Status(In.getName(), In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), NewSize, In.getType(),
-                In.getPermissions());
+حالت حالت::copy_With_New_سائيز(ثابت حالت &اندريون_2, uint64_t New_سائيز) {
+  أرجع حالت(اندريون_2.getName(), اندريون_2.getUniqueID(), اندريون_2.get_آخري_Modification_وقت(),
+                اندريون_2.getUser(), اندريون_2.get_گروهه(), New_سائيز, اندريون_2.getType(),
+                اندريون_2.getPermissions());
 }
 
-Status Status::copyWithNewName(const Status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), In.getSize(), In.getType(),
-                In.getPermissions());
+حالت حالت::copyWithNewName(ثابت حالت &اندريون_2, ثابت Twine &NewName) {
+  أرجع حالت(NewName, اندريون_2.getUniqueID(), اندريون_2.get_آخري_Modification_وقت(),
+                اندريون_2.getUser(), اندريون_2.get_گروهه(), اندريون_2.get_سائيز(), اندريون_2.getType(),
+                اندريون_2.getPermissions());
 }
 
-Status Status::copyWithNewName(const file_status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), In.getSize(), In.type(),
-                In.permissions());
+حالت حالت::copyWithNewName(ثابت file_حالت &اندريون_2, ثابت Twine &NewName) {
+  أرجع حالت(NewName, اندريون_2.getUniqueID(), اندريون_2.get_آخري_Modification_وقت(),
+                اندريون_2.getUser(), اندريون_2.get_گروهه(), اندريون_2.get_سائيز(), اندريون_2.type(),
+                اندريون_2.permissions());
 }
 
-bool Status::equivalent(const Status &Other) const {
-  assert(isStatusKnown() && Other.isStatusKnown());
-  return getUniqueID() == Other.getUniqueID();
+منطقي حالت::equivalent(ثابت حالت &Other) ثابت {
+  أكد(is_حالت_معلوم() && Other.is_حالت_معلوم());
+  أرجع getUniqueID() == Other.getUniqueID();
 }
 
-bool Status::isDirectory() const { return Type == file_type::directory_file; }
+منطقي حالت::isDirectory() ثابت { أرجع Type == file_type::directory_file; }
 
-bool Status::isRegularFile() const { return Type == file_type::regular_file; }
+منطقي حالت::isRegularFile() ثابت { أرجع Type == file_type::regular_file; }
 
-bool Status::isOther() const {
-  return exists() && !isRegularFile() && !isDirectory() && !isSymlink();
+منطقي حالت::isOther() ثابت {
+  أرجع exists() && !isRegularFile() && !isDirectory() && !isSymlink();
 }
 
-bool Status::isSymlink() const { return Type == file_type::symlink_file; }
+منطقي حالت::isSymlink() ثابت { أرجع Type == file_type::symlink_file; }
 
-bool Status::isStatusKnown() const { return Type != file_type::status_error; }
+منطقي حالت::is_حالت_معلوم() ثابت { أرجع Type != file_type::حالت_error; }
 
-bool Status::exists() const {
-  return isStatusKnown() && Type != file_type::file_not_found;
+منطقي حالت::exists() ثابت {
+  أرجع is_حالت_معلوم() && Type != file_type::file_not_مليو;
 }
 
-File::~File() = default;
+File::~File() = افتراضي;
 
-FileSystem::~FileSystem() = default;
+FileSystem::~FileSystem() = افتراضي;
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-FileSystem::getBufferForFile(const llvm::Twine &Name, int64_t FileSize,
-                             bool RequiresNullTerminator, bool IsVolatile,
-                             bool IsText) {
-  auto F = IsText ? openFileForRead(Name) : openFileForReadBinary(Name);
-  if (!F)
-    return F.getError();
+ErrorOr<std::unique_ptr<يادگيري_بفر>>
+FileSystem::get_بفر_For_File(ثابت llvm::Twine &Name, int64_t File_سائيز,
+                             منطقي RequiresNullTerminator, منطقي IsVolatile,
+                             منطقي Is_متن) {
+  خودڪار F = Is_متن ? openFileForRead(Name) : open_File_For_Read_ٻٽو(Name);
+  إذا (!F)
+    أرجع F.getError();
 
-  return (*F)->getBuffer(Name, FileSize, RequiresNullTerminator, IsVolatile);
+  أرجع (*F)->get_بفر(Name, File_سائيز, RequiresNullTerminator, IsVolatile);
 }
 
-std::error_code FileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
-  if (llvm::sys::path::is_absolute(Path))
-    return {};
+std::error_ڪوڊ FileSystem::makeAbsolute(Small_ويڪٽر_Impl<حرف> &رستو) ثابت {
+  إذا (llvm::sys::رستو_2::is_absolute(رستو))
+    أرجع {};
 
-  auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  خودڪار WorkingDir = getCurrentWorkingDirectory();
+  إذا (!WorkingDir)
+    أرجع WorkingDir.getError();
 
-  sys::path::make_absolute(WorkingDir.get(), Path);
-  return {};
+  sys::رستو_2::make_absolute(WorkingDir.get(), رستو);
+  أرجع {};
 }
 
-std::error_code FileSystem::getRealPath(const Twine &Path,
-                                        SmallVectorImpl<char> &Output) {
-  return errc::operation_not_permitted;
+std::error_ڪوڊ FileSystem::get_Real_رستو(ثابت Twine &رستو,
+                                        Small_ويڪٽر_Impl<حرف> &Output) {
+  أرجع errc::operation_not_permitted;
 }
 
-std::error_code FileSystem::isLocal(const Twine &Path, bool &Result) {
-  return errc::operation_not_permitted;
+std::error_ڪوڊ FileSystem::isLocal(ثابت Twine &رستو, منطقي &نتيجو) {
+  أرجع errc::operation_not_permitted;
 }
 
-bool FileSystem::exists(const Twine &Path) {
-  auto Status = status(Path);
-  return Status && Status->exists();
+منطقي FileSystem::exists(ثابت Twine &رستو) {
+  خودڪار حالت = حالت_2(رستو);
+  أرجع حالت && حالت->exists();
 }
 
-llvm::ErrorOr<bool> FileSystem::equivalent(const Twine &A, const Twine &B) {
-  auto StatusA = status(A);
-  if (!StatusA)
-    return StatusA.getError();
-  auto StatusB = status(B);
-  if (!StatusB)
-    return StatusB.getError();
-  return StatusA->equivalent(*StatusB);
+llvm::ErrorOr<منطقي> FileSystem::equivalent(ثابت Twine &A, ثابت Twine &B) {
+  خودڪار حالت_A = حالت_2(A);
+  إذا (!حالت_A)
+    أرجع حالت_A.getError();
+  خودڪار حالت_B = حالت_2(B);
+  إذا (!حالت_B)
+    أرجع حالت_B.getError();
+  أرجع حالت_A->equivalent(*حالت_B);
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-void FileSystem::dump() const { print(dbgs(), PrintType::RecursiveContents); }
-#endif
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+فراغ FileSystem::dump() ثابت { print(dbgs(), PrintType::RecursiveContents); }
+#جيڪڏهن_پورو
 
-#ifndef NDEBUG
-static bool isTraversalComponent(StringRef Component) {
-  return Component == ".." || Component == ".";
+#جيڪڏهن_وصف_نه_ٿيل NDEBUG
+ساكن منطقي isTraversalComponent(StringRef Component) {
+  أرجع Component == ".." || Component == ".";
 }
 
-static bool pathHasTraversal(StringRef Path) {
-  using namespace llvm::sys;
+ساكن منطقي رستو_Has_Traversal(StringRef رستو) {
+  استعمال نطاق llvm::sys;
 
-  for (StringRef Comp : llvm::make_range(path::begin(Path), path::end(Path)))
-    if (isTraversalComponent(Comp))
-      return true;
-  return false;
+  لكل (StringRef Comp : llvm::make_range(رستو_2::begin(رستو), رستو_2::پڇاڙي(رستو)))
+    إذا (isTraversalComponent(Comp))
+      أرجع سچ;
+  أرجع خطأ;
 }
-#endif
+#جيڪڏهن_پورو
 
 //===-----------------------------------------------------------------------===/
 // RealFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-namespace {
+نطاق {
 
 /// Wrapper around a raw file descriptor.
-class RealFile : public File {
-  friend class RealFileSystem;
+صنف RealFile : عام File {
+  دوست صنف RealFileSystem;
 
   file_t FD;
-  Status S;
+  حالت S;
   std::string RealName;
 
-  RealFile(file_t RawFD, StringRef NewName, StringRef NewRealPathName)
+  RealFile(file_t RawFD, StringRef NewName, StringRef New_Real_رستو_Name)
       : FD(RawFD), S(NewName, {}, {}, {}, {}, {},
-                     llvm::sys::fs::file_type::status_error, {}),
-        RealName(NewRealPathName.str()) {
-    assert(FD.isValid() && "Invalid or inactive file descriptor");
+                     llvm::sys::fs::file_type::حالت_error, {}),
+        RealName(New_Real_رستو_Name.str()) {
+    أكد(FD.isValid() && "Invalid or inactive file descriptor");
   }
 
-public:
+عام:
   ~RealFile() override;
 
-  ErrorOr<Status> status() override;
+  ErrorOr<حالت> حالت_2() override;
   ErrorOr<std::string> getName() override;
-  ErrorOr<std::unique_ptr<MemoryBuffer>> getBuffer(const Twine &Name,
-                                                   int64_t FileSize,
-                                                   bool RequiresNullTerminator,
-                                                   bool IsVolatile) override;
-  std::error_code close() override;
-  void setPath(const Twine &Path) override;
+  ErrorOr<std::unique_ptr<يادگيري_بفر>> get_بفر(ثابت Twine &Name,
+                                                   int64_t File_سائيز,
+                                                   منطقي RequiresNullTerminator,
+                                                   منطقي IsVolatile) override;
+  std::error_ڪوڊ close() override;
+  فراغ سيٽ_رستو(ثابت Twine &رستو) override;
 };
 
 } // namespace
 
 RealFile::~RealFile() { close(); }
 
-ErrorOr<Status> RealFile::status() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<حالت> RealFile::حالت_2() {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot stat closed file");
-  if (!S.isStatusKnown()) {
-    file_status RealStatus;
-    if (std::error_code EC = sys::fs::status(FD, RealStatus))
-      return EC;
-    S = Status::copyWithNewName(RealStatus, S.getName());
+  أكد(FD.isValid() && "cannot stat closed file");
+  إذا (!S.is_حالت_معلوم()) {
+    file_حالت Real_حالت;
+    إذا (std::error_ڪوڊ EC = sys::fs::حالت_2(FD, Real_حالت))
+      أرجع EC;
+    S = حالت::copyWithNewName(Real_حالت, S.getName());
   }
-  return S;
+  أرجع S;
 }
 
 ErrorOr<std::string> RealFile::getName() {
-  return RealName.empty() ? S.getName().str() : RealName;
+  أرجع RealName.خالي_جايون() ? S.getName().str() : RealName;
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-RealFile::getBuffer(const Twine &Name, int64_t FileSize,
-                    bool RequiresNullTerminator, bool IsVolatile) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<std::unique_ptr<يادگيري_بفر>>
+RealFile::get_بفر(ثابت Twine &Name, int64_t File_سائيز,
+                    منطقي RequiresNullTerminator, منطقي IsVolatile) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot get buffer for closed file");
-  return MemoryBuffer::getOpenFile(FD, Name, FileSize, RequiresNullTerminator,
+  أكد(FD.isValid() && "cannot get buffer for closed file");
+  أرجع يادگيري_بفر::getOpenFile(FD, Name, File_سائيز, RequiresNullTerminator,
                                    IsVolatile);
 }
 
-std::error_code RealFile::close() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_ڪوڊ RealFile::close() {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  std::error_code EC = sys::fs::closeFile(FD);
+  std::error_ڪوڊ EC = sys::fs::closeFile(FD);
   FD = file_t::Invalid;
-  return EC;
+  أرجع EC;
 }
 
-void RealFile::setPath(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+فراغ RealFile::سيٽ_رستو(ثابت Twine &رستو) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  RealName = Path.str();
-  if (auto Status = status())
-    S = Status.get().copyWithNewName(Status.get(), Path);
+  RealName = رستو.str();
+  إذا (خودڪار حالت = حالت_2())
+    S = حالت.get().copyWithNewName(حالت.get(), رستو);
 }
 
-namespace {
+نطاق {
 
 /// A file system according to your operating system.
 /// This may be linked to the process's working directory, or maintain its own.
@@ -271,64 +271,64 @@ namespace {
 /// A more principled approach would be to push this down a level, modelling
 /// the working dir as an llvm::sys::fs::WorkingDir or similar.
 /// This would enable the use of openat()-style functions on some platforms.
-class RealFileSystem : public FileSystem {
-public:
-  explicit RealFileSystem(bool LinkCWDToProcess) {
-    if (!LinkCWDToProcess) {
+صنف RealFileSystem : عام FileSystem {
+عام:
+  واضح RealFileSystem(منطقي LinkCWDToProcess) {
+    إذا (!LinkCWDToProcess) {
       SmallString<128> PWD, RealPWD;
-      if (std::error_code EC = llvm::sys::fs::current_path(PWD))
+      إذا (std::error_ڪوڊ EC = llvm::sys::fs::current_رستو(PWD))
         WD = std::move(EC);
-      else if (llvm::sys::fs::real_path(PWD, RealPWD))
+      وإلا إذا (llvm::sys::fs::real_رستو(PWD, RealPWD))
         WD = WorkingDirectory{PWD, PWD};
-      else
+      وإلا
         WD = WorkingDirectory{PWD, RealPWD};
     }
   }
 
-  ErrorOr<Status> status(const Twine &Path) override;
-  ErrorOr<std::unique_ptr<File>> openFileForRead(const Twine &Path) override;
+  ErrorOr<حالت> حالت_2(ثابت Twine &رستو) override;
+  ErrorOr<std::unique_ptr<File>> openFileForRead(ثابت Twine &رستو) override;
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadBinary(const Twine &Path) override;
-  directory_iterator dir_begin(const Twine &Dir, std::error_code &EC) override;
+  open_File_For_Read_ٻٽو(ثابت Twine &رستو) override;
+  directory_iterator dir_begin(ثابت Twine &Dir, std::error_ڪوڊ &EC) override;
 
-  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override;
-  std::error_code setCurrentWorkingDirectory(const Twine &Path) override;
-  std::error_code isLocal(const Twine &Path, bool &Result) override;
-  void
-  getDirectoryContentRealSources(const Twine &Dir,
-                                 SmallVectorImpl<std::string> &Out) override {
-    Out.push_back(Dir.str());
+  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() ثابت override;
+  std::error_ڪوڊ سيٽ_Current_Working_Directory(ثابت Twine &رستو) override;
+  std::error_ڪوڊ isLocal(ثابت Twine &رستو, منطقي &نتيجو) override;
+  فراغ
+  getDirectoryContentRealSources(ثابت Twine &Dir,
+                                 Small_ويڪٽر_Impl<std::string> &ٻاهريون) override {
+    ٻاهريون.ڌڪو_پٺ(Dir.str());
   }
-  std::error_code getRealPath(const Twine &Path,
-                              SmallVectorImpl<char> &Output) override;
+  std::error_ڪوڊ get_Real_رستو(ثابت Twine &رستو,
+                              Small_ويڪٽر_Impl<حرف> &Output) override;
 
-protected:
-  void printImpl(raw_ostream &OS, PrintType Type,
-                 unsigned IndentLevel) const override;
+محمي:
+  فراغ printImpl(raw_ostream &OS, PrintType Type,
+                 بنانشان IndentLevel) ثابت override;
 
-private:
+خاص:
   // If this FS has its own working dir, use it to make Path absolute.
   // The returned twine is safe to use as long as both Storage and Path live.
-  Twine adjustPath(const Twine &Path, SmallVectorImpl<char> &Storage) const {
-    if (!WD || !*WD)
-      return Path;
-    Path.toVector(Storage);
-    sys::path::make_absolute(WD->get().Resolved, Storage);
-    return Storage;
+  Twine adjust_رستو(ثابت Twine &رستو, Small_ويڪٽر_Impl<حرف> &Storage) ثابت {
+    إذا (!WD || !*WD)
+      أرجع رستو;
+    رستو.منزل_ويڪٽر(Storage);
+    sys::رستو_2::make_absolute(WD->get().Resolved, Storage);
+    أرجع Storage;
   }
 
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadWithFlags(const Twine &Name, sys::fs::OpenFlags Flags) {
+  openFileForReadWithFlags(ثابت Twine &Name, sys::fs::OpenFlags Flags) {
     SmallString<256> RealName, Storage;
     Expected<file_t> FDOrErr = sys::fs::openNativeFileForRead(
-        adjustPath(Name, Storage), Flags, &RealName);
-    if (!FDOrErr)
-      return errorToErrorCode(FDOrErr.takeError());
-    return std::unique_ptr<File>(
-        new RealFile(*FDOrErr, Name.str(), RealName.str()));
+        adjust_رستو(Name, Storage), Flags, &RealName);
+    إذا (!FDOrErr)
+      أرجع error_منزل_Error_ڪوڊ(FDOrErr.takeError());
+    أرجع std::unique_ptr<File>(
+        جديد RealFile(*FDOrErr, Name.str(), RealName.str()));
   }
 
-  struct WorkingDirectory {
+  بنية WorkingDirectory {
     // The current working directory, without symlinks resolved. (echo $PWD).
     SmallString<128> Specified;
     // The current working directory, with links resolved. (readlink .).
@@ -339,342 +339,342 @@ private:
 
 } // namespace
 
-ErrorOr<Status> RealFileSystem::status(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<حالت> RealFileSystem::حالت_2(ثابت Twine &رستو) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  sys::fs::file_status RealStatus;
-  if (std::error_code EC =
-          sys::fs::status(adjustPath(Path, Storage), RealStatus))
-    return EC;
-  return Status::copyWithNewName(RealStatus, Path);
+  sys::fs::file_حالت Real_حالت;
+  إذا (std::error_ڪوڊ EC =
+          sys::fs::حالت_2(adjust_رستو(رستو, Storage), Real_حالت))
+    أرجع EC;
+  أرجع حالت::copyWithNewName(Real_حالت, رستو);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForRead(const Twine &Name) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+RealFileSystem::openFileForRead(ثابت Twine &Name) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_Text);
+  أرجع openFileForReadWithFlags(Name, sys::fs::جو_متن);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForReadBinary(const Twine &Name) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+RealFileSystem::open_File_For_Read_ٻٽو(ثابت Twine &Name) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_None);
+  أرجع openFileForReadWithFlags(Name, sys::fs::جو_None);
 }
 
-llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() const {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() ثابت {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (WD && *WD)
-    return std::string(WD->get().Specified);
-  if (WD)
-    return WD->getError();
+  إذا (WD && *WD)
+    أرجع std::string(WD->get().Specified);
+  إذا (WD)
+    أرجع WD->getError();
 
   SmallString<128> Dir;
-  if (std::error_code EC = llvm::sys::fs::current_path(Dir))
-    return EC;
-  return std::string(Dir);
+  إذا (std::error_ڪوڊ EC = llvm::sys::fs::current_رستو(Dir))
+    أرجع EC;
+  أرجع std::string(Dir);
 }
 
-std::error_code RealFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_ڪوڊ RealFileSystem::سيٽ_Current_Working_Directory(ثابت Twine &رستو) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (!WD)
-    return llvm::sys::fs::set_current_path(Path);
+  إذا (!WD)
+    أرجع llvm::sys::fs::سيٽ_current_رستو(رستو);
 
   SmallString<128> Absolute, Resolved, Storage;
-  adjustPath(Path, Storage).toVector(Absolute);
-  bool IsDir;
-  if (auto Err = llvm::sys::fs::is_directory(Absolute, IsDir))
-    return Err;
-  if (!IsDir)
-    return std::make_error_code(std::errc::not_a_directory);
-  if (auto Err = llvm::sys::fs::real_path(Absolute, Resolved))
-    return Err;
+  adjust_رستو(رستو, Storage).منزل_ويڪٽر(Absolute);
+  منطقي IsDir;
+  إذا (خودڪار Err = llvm::sys::fs::is_directory(Absolute, IsDir))
+    أرجع Err;
+  إذا (!IsDir)
+    أرجع std::make_error_ڪوڊ(std::errc::not_a_directory);
+  إذا (خودڪار Err = llvm::sys::fs::real_رستو(Absolute, Resolved))
+    أرجع Err;
   WD = WorkingDirectory{Absolute, Resolved};
-  return std::error_code();
+  أرجع std::error_ڪوڊ();
 }
 
-std::error_code RealFileSystem::isLocal(const Twine &Path, bool &Result) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_ڪوڊ RealFileSystem::isLocal(ثابت Twine &رستو, منطقي &نتيجو) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::is_local(adjustPath(Path, Storage), Result);
+  أرجع llvm::sys::fs::is_local(adjust_رستو(رستو, Storage), نتيجو);
 }
 
-std::error_code RealFileSystem::getRealPath(const Twine &Path,
-                                            SmallVectorImpl<char> &Output) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_ڪوڊ RealFileSystem::get_Real_رستو(ثابت Twine &رستو,
+                                            Small_ويڪٽر_Impl<حرف> &Output) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::real_path(adjustPath(Path, Storage), Output);
+  أرجع llvm::sys::fs::real_رستو(adjust_رستو(رستو, Storage), Output);
 }
 
-void RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                               unsigned IndentLevel) const {
+فراغ RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                               بنانشان IndentLevel) ثابت {
   printIndent(OS, IndentLevel);
   OS << "RealFileSystem using ";
-  if (WD)
+  إذا (WD)
     OS << "own";
-  else
+  وإلا
     OS << "process";
   OS << " CWD\n";
 }
 
 IntrusiveRefCntPtr<FileSystem> vfs::getRealFileSystem() {
-  static IntrusiveRefCntPtr<FileSystem> FS =
-      makeIntrusiveRefCnt<RealFileSystem>(true);
+  ساكن IntrusiveRefCntPtr<FileSystem> FS =
+      makeIntrusiveRefCnt<RealFileSystem>(سچ);
   sys::sandbox::violationIfEnabled();
 
-  return FS;
+  أرجع FS;
 }
 
 std::unique_ptr<FileSystem> vfs::createPhysicalFileSystem() {
   sys::sandbox::violationIfEnabled();
 
-  return std::make_unique<RealFileSystem>(false);
+  أرجع std::make_unique<RealFileSystem>(خطأ);
 }
 
-namespace {
+نطاق {
 
-class RealFSDirIter : public llvm::vfs::detail::DirIterImpl {
+صنف RealFSDirIter : عام llvm::vfs::detail::DirIterImpl {
   llvm::sys::fs::directory_iterator Iter;
 
-public:
-  RealFSDirIter(const Twine &Path, std::error_code &EC) {
-    auto BypassSandbox = sys::sandbox::scopedDisable();
+عام:
+  RealFSDirIter(ثابت Twine &رستو, std::error_ڪوڊ &EC) {
+    خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-    Iter = sys::fs::directory_iterator(Path, EC);
-    if (Iter != sys::fs::directory_iterator())
-      CurrentEntry = directory_entry(Iter->path(), Iter->type());
+    Iter = sys::fs::directory_iterator(رستو, EC);
+    إذا (Iter != sys::fs::directory_iterator())
+      Current_داخلا = directory_داخلا(Iter->رستو_2(), Iter->type());
   }
 
-  std::error_code increment() override {
-    auto BypassSandbox = sys::sandbox::scopedDisable();
+  std::error_ڪوڊ increment() override {
+    خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
-    std::error_code EC;
+    std::error_ڪوڊ EC;
     Iter.increment(EC);
-    CurrentEntry = (Iter == llvm::sys::fs::directory_iterator())
-                       ? directory_entry()
-                       : directory_entry(Iter->path(), Iter->type());
-    return EC;
+    Current_داخلا = (Iter == llvm::sys::fs::directory_iterator())
+                       ? directory_داخلا()
+                       : directory_داخلا(Iter->رستو_2(), Iter->type());
+    أرجع EC;
   }
 };
 
 } // namespace
 
-directory_iterator RealFileSystem::dir_begin(const Twine &Dir,
-                                             std::error_code &EC) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+directory_iterator RealFileSystem::dir_begin(ثابت Twine &Dir,
+                                             std::error_ڪوڊ &EC) {
+  خودڪار BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<128> Storage;
-  return directory_iterator(
-      std::make_shared<RealFSDirIter>(adjustPath(Dir, Storage), EC));
+  أرجع directory_iterator(
+      std::make_shared<RealFSDirIter>(adjust_رستو(Dir, Storage), EC));
 }
 
 //===-----------------------------------------------------------------------===/
 // OverlayFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-OverlayFileSystem::OverlayFileSystem(IntrusiveRefCntPtr<FileSystem> BaseFS) {
-  FSList.push_back(std::move(BaseFS));
+OverlayFileSystem::OverlayFileSystem(IntrusiveRefCntPtr<FileSystem> بنياد_FS) {
+  FSList.ڌڪو_پٺ(std::move(بنياد_FS));
 }
 
-void OverlayFileSystem::pushOverlay(IntrusiveRefCntPtr<FileSystem> FS) {
-  FSList.push_back(FS);
+فراغ OverlayFileSystem::ڌڪو_Overlay(IntrusiveRefCntPtr<FileSystem> FS) {
+  FSList.ڌڪو_پٺ(FS);
   // Synchronize added file systems by duplicating the working directory from
   // the first one in the list.
-  FS->setCurrentWorkingDirectory(getCurrentWorkingDirectory().get());
+  FS->سيٽ_Current_Working_Directory(getCurrentWorkingDirectory().get());
 }
 
-ErrorOr<Status> OverlayFileSystem::status(const Twine &Path) {
+ErrorOr<حالت> OverlayFileSystem::حالت_2(ثابت Twine &رستو) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    ErrorOr<Status> Status = (*I)->status(Path);
-    if (Status || Status.getError() != llvm::errc::no_such_file_or_directory)
-      return Status;
+  لكل (iterator I = overlays_begin(), E = overlays_پڇاڙي(); I != E; ++I) {
+    ErrorOr<حالت> حالت = (*I)->حالت_2(رستو);
+    إذا (حالت || حالت.getError() != llvm::errc::no_such_file_or_directory)
+      أرجع حالت;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  أرجع make_error_ڪوڊ(llvm::errc::no_such_file_or_directory);
 }
 
-bool OverlayFileSystem::exists(const Twine &Path) {
+منطقي OverlayFileSystem::exists(ثابت Twine &رستو) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    if ((*I)->exists(Path))
-      return true;
+  لكل (iterator I = overlays_begin(), E = overlays_پڇاڙي(); I != E; ++I) {
+    إذا ((*I)->exists(رستو))
+      أرجع سچ;
   }
-  return false;
+  أرجع خطأ;
 }
 
 ErrorOr<std::unique_ptr<File>>
-OverlayFileSystem::openFileForRead(const llvm::Twine &Path) {
+OverlayFileSystem::openFileForRead(ثابت llvm::Twine &رستو) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    auto Result = (*I)->openFileForRead(Path);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+  لكل (iterator I = overlays_begin(), E = overlays_پڇاڙي(); I != E; ++I) {
+    خودڪار نتيجو = (*I)->openFileForRead(رستو);
+    إذا (نتيجو || نتيجو.getError() != llvm::errc::no_such_file_or_directory)
+      أرجع نتيجو;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  أرجع make_error_ڪوڊ(llvm::errc::no_such_file_or_directory);
 }
 
 llvm::ErrorOr<std::string>
-OverlayFileSystem::getCurrentWorkingDirectory() const {
+OverlayFileSystem::getCurrentWorkingDirectory() ثابت {
   // All file systems are synchronized, just take the first working directory.
-  return FSList.front()->getCurrentWorkingDirectory();
+  أرجع FSList.front()->getCurrentWorkingDirectory();
 }
 
-std::error_code
-OverlayFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  for (auto &FS : FSList)
-    if (std::error_code EC = FS->setCurrentWorkingDirectory(Path))
-      return EC;
-  return {};
+std::error_ڪوڊ
+OverlayFileSystem::سيٽ_Current_Working_Directory(ثابت Twine &رستو) {
+  لكل (خودڪار &FS : FSList)
+    إذا (std::error_ڪوڊ EC = FS->سيٽ_Current_Working_Directory(رستو))
+      أرجع EC;
+  أرجع {};
 }
 
-std::error_code OverlayFileSystem::isLocal(const Twine &Path, bool &Result) {
-  for (auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->isLocal(Path, Result);
-  return errc::no_such_file_or_directory;
+std::error_ڪوڊ OverlayFileSystem::isLocal(ثابت Twine &رستو, منطقي &نتيجو) {
+  لكل (خودڪار &FS : FSList)
+    إذا (FS->exists(رستو))
+      أرجع FS->isLocal(رستو, نتيجو);
+  أرجع errc::no_such_file_or_directory;
 }
 
-std::error_code OverlayFileSystem::getRealPath(const Twine &Path,
-                                               SmallVectorImpl<char> &Output) {
-  for (const auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->getRealPath(Path, Output);
-  return errc::no_such_file_or_directory;
+std::error_ڪوڊ OverlayFileSystem::get_Real_رستو(ثابت Twine &رستو,
+                                               Small_ويڪٽر_Impl<حرف> &Output) {
+  لكل (ثابت خودڪار &FS : FSList)
+    إذا (FS->exists(رستو))
+      أرجع FS->get_Real_رستو(رستو, Output);
+  أرجع errc::no_such_file_or_directory;
 }
 
-void OverlayFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
+فراغ OverlayFileSystem::getDirectoryContentRealSources(
+    ثابت Twine &Dir, Small_ويڪٽر_Impl<std::string> &ٻاهريون) {
   // All layers contribute.
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I)
-    (*I)->getDirectoryContentRealSources(Dir, Out);
+  لكل (iterator I = overlays_begin(), E = overlays_پڇاڙي(); I != E; ++I)
+    (*I)->getDirectoryContentRealSources(Dir, ٻاهريون);
 }
 
-void OverlayFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  for (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
+فراغ OverlayFileSystem::گهمو_ٻار_File_Systems(گهمو_Callback_Ty Callback) {
+  لكل (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
     Callback(*FS);
-    FS->visitChildFileSystems(Callback);
+    FS->گهمو_ٻار_File_Systems(Callback);
   }
 }
 
-void OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                  unsigned IndentLevel) const {
+فراغ OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                  بنانشان IndentLevel) ثابت {
   printIndent(OS, IndentLevel);
   OS << "OverlayFileSystem\n";
-  if (Type == PrintType::Summary)
-    return;
+  إذا (Type == PrintType::Summary)
+    أرجع;
 
-  if (Type == PrintType::Contents)
+  إذا (Type == PrintType::Contents)
     Type = PrintType::Summary;
-  for (const auto &FS : overlays_range())
+  لكل (ثابت خودڪار &FS : overlays_range())
     FS->print(OS, Type, IndentLevel + 1);
 }
 
-llvm::vfs::detail::DirIterImpl::~DirIterImpl() = default;
+llvm::vfs::detail::DirIterImpl::~DirIterImpl() = افتراضي;
 
-namespace {
+نطاق {
 
 /// Combines and deduplicates directory entries across multiple file systems.
-class CombiningDirIterImpl : public llvm::vfs::detail::DirIterImpl {
-  using FileSystemPtr = llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>;
+صنف CombiningDirIterImpl : عام llvm::vfs::detail::DirIterImpl {
+  استعمال FileSystemPtr = llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>;
 
   /// Iterators to combine, processed in reverse order.
-  SmallVector<directory_iterator, 8> IterList;
+  Small_ويڪٽر<directory_iterator, 8> IterList;
   /// The iterator currently being traversed.
   directory_iterator CurrentDirIter;
   /// The set of names already returned as entries.
-  llvm::StringSet<> SeenNames;
+  llvm::String_سيٽ<> ڏٺل_نالا;
 
   /// Sets \c CurrentDirIter to the next iterator in the list, or leaves it as
   /// is (at its end position) if we've already gone through them all.
-  std::error_code incrementIter(bool IsFirstTime) {
-    while (!IterList.empty()) {
-      CurrentDirIter = IterList.back();
-      IterList.pop_back();
-      if (CurrentDirIter != directory_iterator())
-        break; // found
+  std::error_ڪوڊ incrementIter(منطقي Is_پهريون_وقت) {
+    طالما (!IterList.خالي_جايون()) {
+      CurrentDirIter = IterList.پٺ();
+      IterList.ڪڍو_پٺ();
+      إذا (CurrentDirIter != directory_iterator())
+        اكسر; //مليو
     }
 
-    if (IsFirstTime && CurrentDirIter == directory_iterator())
-      return errc::no_such_file_or_directory;
-    return {};
+    إذا (Is_پهريون_وقت && CurrentDirIter == directory_iterator())
+      أرجع errc::no_such_file_or_directory;
+    أرجع {};
   }
 
-  std::error_code incrementDirIter(bool IsFirstTime) {
-    assert((IsFirstTime || CurrentDirIter != directory_iterator()) &&
+  std::error_ڪوڊ incrementDirIter(منطقي Is_پهريون_وقت) {
+    أكد((Is_پهريون_وقت || CurrentDirIter != directory_iterator()) &&
            "incrementing past end");
-    std::error_code EC;
-    if (!IsFirstTime)
+    std::error_ڪوڊ EC;
+    إذا (!Is_پهريون_وقت)
       CurrentDirIter.increment(EC);
-    if (!EC && CurrentDirIter == directory_iterator())
-      EC = incrementIter(IsFirstTime);
-    return EC;
+    إذا (!EC && CurrentDirIter == directory_iterator())
+      EC = incrementIter(Is_پهريون_وقت);
+    أرجع EC;
   }
 
-  std::error_code incrementImpl(bool IsFirstTime) {
-    while (true) {
-      std::error_code EC = incrementDirIter(IsFirstTime);
-      if (EC || CurrentDirIter == directory_iterator()) {
-        CurrentEntry = directory_entry();
-        return EC;
+  std::error_ڪوڊ incrementImpl(منطقي Is_پهريون_وقت) {
+    طالما (سچ) {
+      std::error_ڪوڊ EC = incrementDirIter(Is_پهريون_وقت);
+      إذا (EC || CurrentDirIter == directory_iterator()) {
+        Current_داخلا = directory_داخلا();
+        أرجع EC;
       }
-      CurrentEntry = *CurrentDirIter;
-      StringRef Name = llvm::sys::path::filename(CurrentEntry.path());
-      if (SeenNames.insert(Name).second)
-        return EC; // name not seen before
+      Current_داخلا = *CurrentDirIter;
+      StringRef Name = llvm::sys::رستو_2::filename(Current_داخلا.رستو_2());
+      إذا (ڏٺل_نالا.وجهو(Name).ٻيو_2)
+        أرجع EC; // name not seen before
     }
     llvm_unreachable("returned above");
   }
 
-public:
+عام:
   CombiningDirIterImpl(ArrayRef<FileSystemPtr> FileSystems, std::string Dir,
-                       std::error_code &EC) {
-    for (const auto &FS : FileSystems) {
-      std::error_code FEC;
+                       std::error_ڪوڊ &EC) {
+    لكل (ثابت خودڪار &FS : FileSystems) {
+      std::error_ڪوڊ FEC;
       directory_iterator Iter = FS->dir_begin(Dir, FEC);
-      if (FEC && FEC != errc::no_such_file_or_directory) {
+      إذا (FEC && FEC != errc::no_such_file_or_directory) {
         EC = FEC;
-        return;
+        أرجع;
       }
-      if (!FEC)
-        IterList.push_back(Iter);
+      إذا (!FEC)
+        IterList.ڌڪو_پٺ(Iter);
     }
-    EC = incrementImpl(true);
+    EC = incrementImpl(سچ);
   }
 
   CombiningDirIterImpl(ArrayRef<directory_iterator> DirIters,
-                       std::error_code &EC)
+                       std::error_ڪوڊ &EC)
       : IterList(DirIters) {
-    EC = incrementImpl(true);
+    EC = incrementImpl(سچ);
   }
 
-  std::error_code increment() override { return incrementImpl(false); }
+  std::error_ڪوڊ increment() override { أرجع incrementImpl(خطأ); }
 };
 
 } // namespace
 
-directory_iterator OverlayFileSystem::dir_begin(const Twine &Dir,
-                                                std::error_code &EC) {
+directory_iterator OverlayFileSystem::dir_begin(ثابت Twine &Dir,
+                                                std::error_ڪوڊ &EC) {
   directory_iterator Combined = directory_iterator(
       std::make_shared<CombiningDirIterImpl>(FSList, Dir.str(), EC));
-  if (EC)
-    return {};
-  return Combined;
+  إذا (EC)
+    أرجع {};
+  أرجع Combined;
 }
 
-void ProxyFileSystem::anchor() {}
+فراغ ProxyFileSystem::anchor() {}
 
-namespace llvm {
-namespace vfs {
+نطاق llvm {
+نطاق vfs {
 
-namespace detail {
+نطاق detail {
 
-enum InMemoryNodeKind {
+تعداد اندريون_يادگيري_ڳنڍ_قسم {
   IME_File,
   IME_Directory,
   IME_HardLink,
@@ -683,172 +683,172 @@ enum InMemoryNodeKind {
 
 /// The in memory file system is a tree of Nodes. Every node can either be a
 /// file, symlink, hardlink or a directory.
-class InMemoryNode {
-  InMemoryNodeKind Kind;
+صنف اندريون_يادگيري_ڳنڍ {
+  اندريون_يادگيري_ڳنڍ_قسم قسم_2;
   std::string FileName;
 
-public:
-  InMemoryNode(llvm::StringRef FileName, InMemoryNodeKind Kind)
-      : Kind(Kind), FileName(std::string(llvm::sys::path::filename(FileName))) {
+عام:
+  اندريون_يادگيري_ڳنڍ(llvm::StringRef FileName, اندريون_يادگيري_ڳنڍ_قسم قسم_2)
+      : قسم_2(قسم_2), FileName(std::string(llvm::sys::رستو_2::filename(FileName))) {
   }
-  virtual ~InMemoryNode() = default;
+  مجازي ~اندريون_يادگيري_ڳنڍ() = افتراضي;
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  virtual Status getStatus(const Twine &RequestedName) const = 0;
+  مجازي حالت get_حالت(ثابت Twine &RequestedName) ثابت = 0;
 
   /// Get the filename of this node (the name without the directory part).
-  StringRef getFileName() const { return FileName; }
-  InMemoryNodeKind getKind() const { return Kind; }
-  virtual std::string toString(unsigned Indent) const = 0;
+  StringRef getFileName() ثابت { أرجع FileName; }
+  اندريون_يادگيري_ڳنڍ_قسم get_قسم() ثابت { أرجع قسم_2; }
+  مجازي std::string منزل_String(بنانشان Indent) ثابت = 0;
 };
 
-class InMemoryFile : public InMemoryNode {
-  Status Stat;
-  std::unique_ptr<llvm::MemoryBuffer> Buffer;
+صنف اندريون_يادگيري_File : عام اندريون_يادگيري_ڳنڍ {
+  حالت Stat;
+  std::unique_ptr<llvm::يادگيري_بفر> بفر;
 
-public:
-  InMemoryFile(Status Stat, std::unique_ptr<llvm::MemoryBuffer> Buffer)
-      : InMemoryNode(Stat.getName(), IME_File), Stat(std::move(Stat)),
-        Buffer(std::move(Buffer)) {}
+عام:
+  اندريون_يادگيري_File(حالت Stat, std::unique_ptr<llvm::يادگيري_بفر> بفر)
+      : اندريون_يادگيري_ڳنڍ(Stat.getName(), IME_File), Stat(std::move(Stat)),
+        بفر(std::move(بفر)) {}
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  حالت get_حالت(ثابت Twine &RequestedName) ثابت override {
+    أرجع حالت::copyWithNewName(Stat, RequestedName);
   }
-  llvm::MemoryBuffer *getBuffer() const { return Buffer.get(); }
+  llvm::يادگيري_بفر *get_بفر() ثابت { أرجع بفر.get(); }
 
-  std::string toString(unsigned Indent) const override {
-    return (std::string(Indent, ' ') + Stat.getName() + "\n").str();
-  }
-
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_File;
-  }
-};
-
-namespace {
-
-class InMemoryHardLink : public InMemoryNode {
-  const InMemoryFile &ResolvedFile;
-
-public:
-  InMemoryHardLink(StringRef Path, const InMemoryFile &ResolvedFile)
-      : InMemoryNode(Path, IME_HardLink), ResolvedFile(ResolvedFile) {}
-  const InMemoryFile &getResolvedFile() const { return ResolvedFile; }
-
-  Status getStatus(const Twine &RequestedName) const override {
-    return ResolvedFile.getStatus(RequestedName);
+  std::string منزل_String(بنانشان Indent) ثابت override {
+    أرجع (std::string(Indent, ' ') + Stat.getName() + "\n").str();
   }
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "HardLink to -> " +
-           ResolvedFile.toString(0);
-  }
-
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_HardLink;
+  ساكن منطقي classof(ثابت اندريون_يادگيري_ڳنڍ *N) {
+    أرجع N->get_قسم() == IME_File;
   }
 };
 
-class InMemorySymbolicLink : public InMemoryNode {
-  std::string TargetPath;
-  Status Stat;
+نطاق {
 
-public:
-  InMemorySymbolicLink(StringRef Path, StringRef TargetPath, Status Stat)
-      : InMemoryNode(Path, IME_SymbolicLink), TargetPath(std::move(TargetPath)),
+صنف اندريون_يادگيري_Hard_Link : عام اندريون_يادگيري_ڳنڍ {
+  ثابت اندريون_يادگيري_File &ResolvedFile;
+
+عام:
+  اندريون_يادگيري_Hard_Link(StringRef رستو, ثابت اندريون_يادگيري_File &ResolvedFile)
+      : اندريون_يادگيري_ڳنڍ(رستو, IME_HardLink), ResolvedFile(ResolvedFile) {}
+  ثابت اندريون_يادگيري_File &getResolvedFile() ثابت { أرجع ResolvedFile; }
+
+  حالت get_حالت(ثابت Twine &RequestedName) ثابت override {
+    أرجع ResolvedFile.get_حالت(RequestedName);
+  }
+
+  std::string منزل_String(بنانشان Indent) ثابت override {
+    أرجع std::string(Indent, ' ') + "HardLink to -> " +
+           ResolvedFile.منزل_String(0);
+  }
+
+  ساكن منطقي classof(ثابت اندريون_يادگيري_ڳنڍ *N) {
+    أرجع N->get_قسم() == IME_HardLink;
+  }
+};
+
+صنف اندريون_يادگيري_Symbolic_Link : عام اندريون_يادگيري_ڳنڍ {
+  std::string هدف_رستو;
+  حالت Stat;
+
+عام:
+  اندريون_يادگيري_Symbolic_Link(StringRef رستو, StringRef هدف_رستو, حالت Stat)
+      : اندريون_يادگيري_ڳنڍ(رستو, IME_SymbolicLink), هدف_رستو(std::move(هدف_رستو)),
         Stat(Stat) {}
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "SymbolicLink to -> " + TargetPath;
+  std::string منزل_String(بنانشان Indent) ثابت override {
+    أرجع std::string(Indent, ' ') + "SymbolicLink to -> " + هدف_رستو;
   }
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  حالت get_حالت(ثابت Twine &RequestedName) ثابت override {
+    أرجع حالت::copyWithNewName(Stat, RequestedName);
   }
 
-  StringRef getTargetPath() const { return TargetPath; }
+  StringRef get_هدف_رستو() ثابت { أرجع هدف_رستو; }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_SymbolicLink;
+  ساكن منطقي classof(ثابت اندريون_يادگيري_ڳنڍ *N) {
+    أرجع N->get_قسم() == IME_SymbolicLink;
   }
 };
 
 /// Adapt a InMemoryFile for VFS' File interface.  The goal is to make
 /// \p InMemoryFileAdaptor mimic as much as possible the behavior of
 /// \p RealFile.
-class InMemoryFileAdaptor : public File {
-  const InMemoryFile &Node;
+صنف اندريون_يادگيري_File_Adaptor : عام File {
+  ثابت اندريون_يادگيري_File &ڳنڍ;
   /// The name to use when returning a Status for this file.
   std::string RequestedName;
 
-public:
-  explicit InMemoryFileAdaptor(const InMemoryFile &Node,
+عام:
+  واضح اندريون_يادگيري_File_Adaptor(ثابت اندريون_يادگيري_File &ڳنڍ,
                                std::string RequestedName)
-      : Node(Node), RequestedName(std::move(RequestedName)) {}
+      : ڳنڍ(ڳنڍ), RequestedName(std::move(RequestedName)) {}
 
-  llvm::ErrorOr<Status> status() override {
-    return Node.getStatus(RequestedName);
+  llvm::ErrorOr<حالت> حالت_2() override {
+    أرجع ڳنڍ.get_حالت(RequestedName);
   }
 
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
-            bool IsVolatile) override {
-    llvm::MemoryBuffer *Buf = Node.getBuffer();
-    return llvm::MemoryBuffer::getMemBuffer(
-        Buf->getBuffer(), Buf->getBufferIdentifier(), RequiresNullTerminator);
+  llvm::ErrorOr<std::unique_ptr<llvm::يادگيري_بفر>>
+  get_بفر(ثابت Twine &Name, int64_t File_سائيز, منطقي RequiresNullTerminator,
+            منطقي IsVolatile) override {
+    llvm::يادگيري_بفر *Buf = ڳنڍ.get_بفر();
+    أرجع llvm::يادگيري_بفر::get_Mem_بفر(
+        Buf->get_بفر(), Buf->get_بفر_Identifier(), RequiresNullTerminator);
   }
 
-  std::error_code close() override { return {}; }
+  std::error_ڪوڊ close() override { أرجع {}; }
 
-  void setPath(const Twine &Path) override { RequestedName = Path.str(); }
+  فراغ سيٽ_رستو(ثابت Twine &رستو) override { RequestedName = رستو.str(); }
 };
 } // namespace
 
-class InMemoryDirectory : public InMemoryNode {
-  Status Stat;
-  std::map<std::string, std::unique_ptr<InMemoryNode>, std::less<>> Entries;
+صنف اندريون_يادگيري_Directory : عام اندريون_يادگيري_ڳنڍ {
+  حالت Stat;
+  std::map<std::string, std::unique_ptr<اندريون_يادگيري_ڳنڍ>, std::less<>> Entries;
 
-public:
-  InMemoryDirectory(Status Stat)
-      : InMemoryNode(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
+عام:
+  اندريون_يادگيري_Directory(حالت Stat)
+      : اندريون_يادگيري_ڳنڍ(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  حالت get_حالت(ثابت Twine &RequestedName) ثابت override {
+    أرجع حالت::copyWithNewName(Stat, RequestedName);
   }
 
-  UniqueID getUniqueID() const { return Stat.getUniqueID(); }
+  UniqueID getUniqueID() ثابت { أرجع Stat.getUniqueID(); }
 
-  InMemoryNode *getChild(StringRef Name) const {
-    auto I = Entries.find(Name);
-    if (I != Entries.end())
-      return I->second.get();
-    return nullptr;
+  اندريون_يادگيري_ڳنڍ *get_ٻار(StringRef Name) ثابت {
+    خودڪار I = Entries.ڳوليو(Name);
+    إذا (I != Entries.پڇاڙي())
+      أرجع I->ٻيو_2.get();
+    أرجع خالي_اشارو;
   }
 
-  InMemoryNode *addChild(StringRef Name, std::unique_ptr<InMemoryNode> Child) {
-    return Entries.emplace(Name, std::move(Child)).first->second.get();
+  اندريون_يادگيري_ڳنڍ *جوڙيو_ٻار(StringRef Name, std::unique_ptr<اندريون_يادگيري_ڳنڍ> ٻار) {
+    أرجع Entries.emplace(Name, std::move(ٻار)).پهريون_2->ٻيو_2.get();
   }
 
-  using const_iterator = decltype(Entries)::const_iterator;
+  استعمال const_iterator = decltype(Entries)::const_iterator;
 
-  const_iterator begin() const { return Entries.begin(); }
-  const_iterator end() const { return Entries.end(); }
+  const_iterator begin() ثابت { أرجع Entries.begin(); }
+  const_iterator پڇاڙي() ثابت { أرجع Entries.پڇاڙي(); }
 
-  std::string toString(unsigned Indent) const override {
-    std::string Result =
+  std::string منزل_String(بنانشان Indent) ثابت override {
+    std::string نتيجو =
         (std::string(Indent, ' ') + Stat.getName() + "\n").str();
-    for (const auto &Entry : Entries)
-      Result += Entry.second->toString(Indent + 2);
-    return Result;
+    لكل (ثابت خودڪار &داخلا_3 : Entries)
+      نتيجو += داخلا_3.ٻيو_2->منزل_String(Indent + 2);
+    أرجع نتيجو;
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_Directory;
+  ساكن منطقي classof(ثابت اندريون_يادگيري_ڳنڍ *N) {
+    أرجع N->get_قسم() == IME_Directory;
   }
 };
 
@@ -857,401 +857,401 @@ public:
 // The UniqueID of in-memory files is derived from path and content.
 // This avoids difficulties in creating exactly equivalent in-memory FSes,
 // as often needed in multithreaded programs.
-static sys::fs::UniqueID getUniqueID(hash_code Hash) {
-  return sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
+ساكن sys::fs::UniqueID getUniqueID(hash_ڪوڊ Hash) {
+  أرجع sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
                            uint64_t(size_t(Hash)));
 }
-static sys::fs::UniqueID getFileID(sys::fs::UniqueID Parent,
+ساكن sys::fs::UniqueID getFileID(sys::fs::UniqueID والد_2,
                                    llvm::StringRef Name,
                                    llvm::StringRef Contents) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name, Contents));
+  أرجع getUniqueID(llvm::hash_combine(والد_2.getFile(), Name, Contents));
 }
-static sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID Parent,
+ساكن sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID والد_2,
                                         llvm::StringRef Name) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name));
+  أرجع getUniqueID(llvm::hash_combine(والد_2.getFile(), Name));
 }
 
-Status detail::NewInMemoryNodeInfo::makeStatus() const {
+حالت detail::New_اندريون_يادگيري_ڳنڍ_Info::make_حالت() ثابت {
   UniqueID UID =
       (Type == sys::fs::file_type::directory_file)
           ? getDirectoryID(DirUID, Name)
-          : getFileID(DirUID, Name, Buffer ? Buffer->getBuffer() : "");
+          : getFileID(DirUID, Name, بفر ? بفر->get_بفر() : "");
 
-  return Status(Path, UID, llvm::sys::toTimePoint(ModificationTime), User,
-                Group, Buffer ? Buffer->getBufferSize() : 0, Type, Perms);
+  أرجع حالت(رستو, UID, llvm::sys::منزل_وقت_نقطو(Modification_وقت), User,
+                گروهه, بفر ? بفر->get_بفر_سائيز() : 0, Type, Perms);
 }
 
-InMemoryFileSystem::InMemoryFileSystem(bool UseNormalizedPaths)
-    : Root(new detail::InMemoryDirectory(
-          Status("", getDirectoryID(llvm::sys::fs::UniqueID(), ""),
-                 llvm::sys::TimePoint<>(), 0, 0, 0,
+اندريون_يادگيري_File_System::اندريون_يادگيري_File_System(منطقي UseNormalizedPaths)
+    : پاڙ_2(جديد detail::اندريون_يادگيري_Directory(
+          حالت("", getDirectoryID(llvm::sys::fs::UniqueID(), ""),
+                 llvm::sys::وقت_نقطو<>(), 0, 0, 0,
                  llvm::sys::fs::file_type::directory_file,
                  llvm::sys::fs::perms::all_all))),
       UseNormalizedPaths(UseNormalizedPaths) {}
 
-InMemoryFileSystem::~InMemoryFileSystem() = default;
+اندريون_يادگيري_File_System::~اندريون_يادگيري_File_System() = افتراضي;
 
-std::string InMemoryFileSystem::toString() const {
-  return Root->toString(/*Indent=*/0);
+std::string اندريون_يادگيري_File_System::منزل_String() ثابت {
+  أرجع پاڙ_2->منزل_String(/*Indent=*/0);
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
-                                 std::unique_ptr<llvm::MemoryBuffer> Buffer,
+منطقي اندريون_يادگيري_File_System::جوڙيو_File(ثابت Twine &P, time_t Modification_وقت,
+                                 std::unique_ptr<llvm::يادگيري_بفر> بفر,
                                  std::optional<uint32_t> User,
-                                 std::optional<uint32_t> Group,
+                                 std::optional<uint32_t> گروهه,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms,
-                                 MakeNodeFn MakeNode) {
-  SmallString<128> Path;
-  P.toVector(Path);
+                                 Make_ڳنڍ_Fn Make_ڳنڍ) {
+  SmallString<128> رستو;
+  P.منزل_ويڪٽر(رستو);
 
   // Fix up relative paths. This just prepends the current working directory.
-  std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  std::error_ڪوڊ EC = makeAbsolute(رستو);
+  أكد(!EC);
+  (فراغ)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  إذا (useNormalizedPaths())
+    llvm::sys::رستو_2::remove_dots(رستو, /*remove_dot_dot=*/سچ);
 
-  if (Path.empty())
-    return false;
+  إذا (رستو.خالي_جايون())
+    أرجع خطأ;
 
-  detail::InMemoryDirectory *Dir = Root.get();
-  auto I = llvm::sys::path::begin(Path), E = sys::path::end(Path);
-  const auto ResolvedUser = User.value_or(0);
-  const auto ResolvedGroup = Group.value_or(0);
-  const auto ResolvedType = Type.value_or(sys::fs::file_type::regular_file);
-  const auto ResolvedPerms = Perms.value_or(sys::fs::all_all);
+  detail::اندريون_يادگيري_Directory *Dir = پاڙ_2.get();
+  خودڪار I = llvm::sys::رستو_2::begin(رستو), E = sys::رستو_2::پڇاڙي(رستو);
+  ثابت خودڪار ResolvedUser = User.قدر_or(0);
+  ثابت خودڪار Resolved_گروهه = گروهه.قدر_or(0);
+  ثابت خودڪار ResolvedType = Type.قدر_or(sys::fs::file_type::regular_file);
+  ثابت خودڪار ResolvedPerms = Perms.قدر_or(sys::fs::all_all);
   // Any intermediate directories we create should be accessible by
   // the owner, even if Perms says otherwise for the final path.
-  const auto NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
+  ثابت خودڪار NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
 
   StringRef Name = *I;
-  while (true) {
+  طالما (سچ) {
     Name = *I;
     ++I;
-    if (I == E)
-      break;
-    detail::InMemoryNode *Node = Dir->getChild(Name);
-    if (!Node) {
+    إذا (I == E)
+      اكسر;
+    detail::اندريون_يادگيري_ڳنڍ *ڳنڍ = Dir->get_ٻار(Name);
+    إذا (!ڳنڍ) {
       // This isn't the last element, so we create a new directory.
-      Status Stat(
-          StringRef(Path.str().begin(), Name.end() - Path.str().begin()),
+      حالت Stat(
+          StringRef(رستو.str().begin(), Name.پڇاڙي() - رستو.str().begin()),
           getDirectoryID(Dir->getUniqueID(), Name),
-          llvm::sys::toTimePoint(ModificationTime), ResolvedUser, ResolvedGroup,
+          llvm::sys::منزل_وقت_نقطو(Modification_وقت), ResolvedUser, Resolved_گروهه,
           0, sys::fs::file_type::directory_file, NewDirectoryPerms);
-      Dir = cast<detail::InMemoryDirectory>(Dir->addChild(
-          Name, std::make_unique<detail::InMemoryDirectory>(std::move(Stat))));
-      continue;
+      Dir = cast<detail::اندريون_يادگيري_Directory>(Dir->جوڙيو_ٻار(
+          Name, std::make_unique<detail::اندريون_يادگيري_Directory>(std::move(Stat))));
+      استمر;
     }
     // Creating file under another file.
-    if (!isa<detail::InMemoryDirectory>(Node))
-      return false;
-    Dir = cast<detail::InMemoryDirectory>(Node);
+    إذا (!isa<detail::اندريون_يادگيري_Directory>(ڳنڍ))
+      أرجع خطأ;
+    Dir = cast<detail::اندريون_يادگيري_Directory>(ڳنڍ);
   }
-  detail::InMemoryNode *Node = Dir->getChild(Name);
-  if (!Node) {
-    Dir->addChild(Name,
-                  MakeNode({Dir->getUniqueID(), Path, Name, ModificationTime,
-                            std::move(Buffer), ResolvedUser, ResolvedGroup,
+  detail::اندريون_يادگيري_ڳنڍ *ڳنڍ = Dir->get_ٻار(Name);
+  إذا (!ڳنڍ) {
+    Dir->جوڙيو_ٻار(Name,
+                  Make_ڳنڍ({Dir->getUniqueID(), رستو, Name, Modification_وقت,
+                            std::move(بفر), ResolvedUser, Resolved_گروهه,
                             ResolvedType, ResolvedPerms}));
-    return true;
+    أرجع سچ;
   }
-  if (isa<detail::InMemoryDirectory>(Node))
-    return ResolvedType == sys::fs::file_type::directory_file;
+  إذا (isa<detail::اندريون_يادگيري_Directory>(ڳنڍ))
+    أرجع ResolvedType == sys::fs::file_type::directory_file;
 
-  assert((isa<detail::InMemoryFile>(Node) ||
-          isa<detail::InMemoryHardLink>(Node)) &&
+  أكد((isa<detail::اندريون_يادگيري_File>(ڳنڍ) ||
+          isa<detail::اندريون_يادگيري_Hard_Link>(ڳنڍ)) &&
          "Must be either file, hardlink or directory!");
 
   // Return false only if the new file is different from the existing one.
-  if (auto *Link = dyn_cast<detail::InMemoryHardLink>(Node)) {
-    return Link->getResolvedFile().getBuffer()->getBuffer() ==
-           Buffer->getBuffer();
+  إذا (خودڪار *Link = dyn_cast<detail::اندريون_يادگيري_Hard_Link>(ڳنڍ)) {
+    أرجع Link->getResolvedFile().get_بفر()->get_بفر() ==
+           بفر->get_بفر();
   }
-  return cast<detail::InMemoryFile>(Node)->getBuffer()->getBuffer() ==
-         Buffer->getBuffer();
+  أرجع cast<detail::اندريون_يادگيري_File>(ڳنڍ)->get_بفر()->get_بفر() ==
+         بفر->get_بفر();
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
-                                 std::unique_ptr<llvm::MemoryBuffer> Buffer,
+منطقي اندريون_يادگيري_File_System::جوڙيو_File(ثابت Twine &P, time_t Modification_وقت,
+                                 std::unique_ptr<llvm::يادگيري_بفر> بفر,
                                  std::optional<uint32_t> User,
-                                 std::optional<uint32_t> Group,
+                                 std::optional<uint32_t> گروهه,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, std::move(Buffer), User, Group, Type,
+  أرجع جوڙيو_File(P, Modification_وقت, std::move(بفر), User, گروهه, Type,
                  Perms,
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
-                   Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
-                       Stat, std::move(NNI.Buffer));
+                 [](detail::New_اندريون_يادگيري_ڳنڍ_Info NNI)
+                     -> std::unique_ptr<detail::اندريون_يادگيري_ڳنڍ> {
+                   حالت Stat = NNI.make_حالت();
+                   إذا (Stat.getType() == sys::fs::file_type::directory_file)
+                     أرجع std::make_unique<detail::اندريون_يادگيري_Directory>(Stat);
+                   أرجع std::make_unique<detail::اندريون_يادگيري_File>(
+                       Stat, std::move(NNI.بفر));
                  });
 }
 
-bool InMemoryFileSystem::addFileNoOwn(
-    const Twine &P, time_t ModificationTime,
-    const llvm::MemoryBufferRef &Buffer, std::optional<uint32_t> User,
-    std::optional<uint32_t> Group, std::optional<llvm::sys::fs::file_type> Type,
+منطقي اندريون_يادگيري_File_System::جوڙيو_File_No_Own(
+    ثابت Twine &P, time_t Modification_وقت,
+    ثابت llvm::يادگيري_بفر_Ref &بفر, std::optional<uint32_t> User,
+    std::optional<uint32_t> گروهه, std::optional<llvm::sys::fs::file_type> Type,
     std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, llvm::MemoryBuffer::getMemBuffer(Buffer),
-                 std::move(User), std::move(Group), std::move(Type),
+  أرجع جوڙيو_File(P, Modification_وقت, llvm::يادگيري_بفر::get_Mem_بفر(بفر),
+                 std::move(User), std::move(گروهه), std::move(Type),
                  std::move(Perms),
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
-                   Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
-                       Stat, std::move(NNI.Buffer));
+                 [](detail::New_اندريون_يادگيري_ڳنڍ_Info NNI)
+                     -> std::unique_ptr<detail::اندريون_يادگيري_ڳنڍ> {
+                   حالت Stat = NNI.make_حالت();
+                   إذا (Stat.getType() == sys::fs::file_type::directory_file)
+                     أرجع std::make_unique<detail::اندريون_يادگيري_Directory>(Stat);
+                   أرجع std::make_unique<detail::اندريون_يادگيري_File>(
+                       Stat, std::move(NNI.بفر));
                  });
 }
 
-detail::NamedNodeOrError
-InMemoryFileSystem::lookupNode(const Twine &P, bool FollowFinalSymlink,
-                               size_t SymlinkDepth) const {
-  SmallString<128> Path;
-  P.toVector(Path);
+detail::Named_ڳنڍ_Or_Error
+اندريون_يادگيري_File_System::lookup_ڳنڍ(ثابت Twine &P, منطقي FollowFinalSymlink,
+                               size_t Symlink_اونهائي) ثابت {
+  SmallString<128> رستو;
+  P.منزل_ويڪٽر(رستو);
 
   // Fix up relative paths. This just prepends the current working directory.
-  std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  std::error_ڪوڊ EC = makeAbsolute(رستو);
+  أكد(!EC);
+  (فراغ)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  إذا (useNormalizedPaths())
+    llvm::sys::رستو_2::remove_dots(رستو, /*remove_dot_dot=*/سچ);
 
-  const detail::InMemoryDirectory *Dir = Root.get();
-  if (Path.empty())
-    return detail::NamedNodeOrError(Path, Dir);
+  ثابت detail::اندريون_يادگيري_Directory *Dir = پاڙ_2.get();
+  إذا (رستو.خالي_جايون())
+    أرجع detail::Named_ڳنڍ_Or_Error(رستو, Dir);
 
-  auto I = llvm::sys::path::begin(Path), E = llvm::sys::path::end(Path);
-  while (true) {
-    detail::InMemoryNode *Node = Dir->getChild(*I);
+  خودڪار I = llvm::sys::رستو_2::begin(رستو), E = llvm::sys::رستو_2::پڇاڙي(رستو);
+  طالما (سچ) {
+    detail::اندريون_يادگيري_ڳنڍ *ڳنڍ = Dir->get_ٻار(*I);
     ++I;
-    if (!Node)
-      return errc::no_such_file_or_directory;
+    إذا (!ڳنڍ)
+      أرجع errc::no_such_file_or_directory;
 
-    if (auto Symlink = dyn_cast<detail::InMemorySymbolicLink>(Node)) {
+    إذا (خودڪار Symlink = dyn_cast<detail::اندريون_يادگيري_Symbolic_Link>(ڳنڍ)) {
       // If we're at the end of the path, and we're not following through
       // terminal symlinks, then we're done.
-      if (I == E && !FollowFinalSymlink)
-        return detail::NamedNodeOrError(Path, Symlink);
+      إذا (I == E && !FollowFinalSymlink)
+        أرجع detail::Named_ڳنڍ_Or_Error(رستو, Symlink);
 
-      if (SymlinkDepth > InMemoryFileSystem::MaxSymlinkDepth)
-        return errc::no_such_file_or_directory;
+      إذا (Symlink_اونهائي > اندريون_يادگيري_File_System::Max_Symlink_اونهائي)
+        أرجع errc::no_such_file_or_directory;
 
-      SmallString<128> TargetPath = Symlink->getTargetPath();
-      if (std::error_code EC = makeAbsolute(TargetPath))
-        return EC;
+      SmallString<128> هدف_رستو = Symlink->get_هدف_رستو();
+      إذا (std::error_ڪوڊ EC = makeAbsolute(هدف_رستو))
+        أرجع EC;
 
       // Keep going with the target. We always want to follow symlinks here
       // because we're either at the end of a path that we want to follow, or
       // not at the end of a path, in which case we need to follow the symlink
       // regardless.
-      auto Target =
-          lookupNode(TargetPath, /*FollowFinalSymlink=*/true, SymlinkDepth + 1);
-      if (!Target || I == E)
-        return Target;
+      خودڪار هدف_2 =
+          lookup_ڳنڍ(هدف_رستو, /*FollowFinalSymlink=*/سچ, Symlink_اونهائي + 1);
+      إذا (!هدف_2 || I == E)
+        أرجع هدف_2;
 
-      if (!isa<detail::InMemoryDirectory>(*Target))
-        return errc::no_such_file_or_directory;
+      إذا (!isa<detail::اندريون_يادگيري_Directory>(*هدف_2))
+        أرجع errc::no_such_file_or_directory;
 
       // Otherwise, continue on the search in the symlinked directory.
-      Dir = cast<detail::InMemoryDirectory>(*Target);
-      continue;
+      Dir = cast<detail::اندريون_يادگيري_Directory>(*هدف_2);
+      استمر;
     }
 
     // Return the file if it's at the end of the path.
-    if (auto File = dyn_cast<detail::InMemoryFile>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, File);
-      return errc::no_such_file_or_directory;
+    إذا (خودڪار File = dyn_cast<detail::اندريون_يادگيري_File>(ڳنڍ)) {
+      إذا (I == E)
+        أرجع detail::Named_ڳنڍ_Or_Error(رستو, File);
+      أرجع errc::no_such_file_or_directory;
     }
 
     // If Node is HardLink then return the resolved file.
-    if (auto File = dyn_cast<detail::InMemoryHardLink>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, &File->getResolvedFile());
-      return errc::no_such_file_or_directory;
+    إذا (خودڪار File = dyn_cast<detail::اندريون_يادگيري_Hard_Link>(ڳنڍ)) {
+      إذا (I == E)
+        أرجع detail::Named_ڳنڍ_Or_Error(رستو, &File->getResolvedFile());
+      أرجع errc::no_such_file_or_directory;
     }
     // Traverse directories.
-    Dir = cast<detail::InMemoryDirectory>(Node);
-    if (I == E)
-      return detail::NamedNodeOrError(Path, Dir);
+    Dir = cast<detail::اندريون_يادگيري_Directory>(ڳنڍ);
+    إذا (I == E)
+      أرجع detail::Named_ڳنڍ_Or_Error(رستو, Dir);
   }
 }
 
-bool InMemoryFileSystem::addHardLink(const Twine &NewLink,
-                                     const Twine &Target) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
+منطقي اندريون_يادگيري_File_System::جوڙيو_Hard_Link(ثابت Twine &NewLink,
+                                     ثابت Twine &هدف_2) {
+  خودڪار New_Link_ڳنڍ = lookup_ڳنڍ(NewLink, /*FollowFinalSymlink=*/خطأ);
   // Whether symlinks in the hardlink target are followed is
   // implementation-defined in POSIX.
   // We're following symlinks here to be consistent with macOS.
-  auto TargetNode = lookupNode(Target, /*FollowFinalSymlink=*/true);
+  خودڪار هدف_ڳنڍ = lookup_ڳنڍ(هدف_2, /*FollowFinalSymlink=*/سچ);
   // FromPath must not have been added before. ToPath must have been added
   // before. Resolved ToPath must be a File.
-  if (!TargetNode || NewLinkNode || !isa<detail::InMemoryFile>(*TargetNode))
-    return false;
-  return addFile(NewLink, 0, nullptr, std::nullopt, std::nullopt, std::nullopt,
-                 std::nullopt, [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemoryHardLink>(
-                       NNI.Path.str(),
-                       *cast<detail::InMemoryFile>(*TargetNode));
+  إذا (!هدف_ڳنڍ || New_Link_ڳنڍ || !isa<detail::اندريون_يادگيري_File>(*هدف_ڳنڍ))
+    أرجع خطأ;
+  أرجع جوڙيو_File(NewLink, 0, خالي_اشارو, std::nullopt, std::nullopt, std::nullopt,
+                 std::nullopt, [&](detail::New_اندريون_يادگيري_ڳنڍ_Info NNI) {
+                   أرجع std::make_unique<detail::اندريون_يادگيري_Hard_Link>(
+                       NNI.رستو.str(),
+                       *cast<detail::اندريون_يادگيري_File>(*هدف_ڳنڍ));
                  });
 }
 
-bool InMemoryFileSystem::addSymbolicLink(
-    const Twine &NewLink, const Twine &Target, time_t ModificationTime,
-    std::optional<uint32_t> User, std::optional<uint32_t> Group,
+منطقي اندريون_يادگيري_File_System::جوڙيو_Symbolic_Link(
+    ثابت Twine &NewLink, ثابت Twine &هدف_2, time_t Modification_وقت,
+    std::optional<uint32_t> User, std::optional<uint32_t> گروهه,
     std::optional<llvm::sys::fs::perms> Perms) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
-  if (NewLinkNode)
-    return false;
+  خودڪار New_Link_ڳنڍ = lookup_ڳنڍ(NewLink, /*FollowFinalSymlink=*/خطأ);
+  إذا (New_Link_ڳنڍ)
+    أرجع خطأ;
 
-  SmallString<128> NewLinkStr, TargetStr;
-  NewLink.toVector(NewLinkStr);
-  Target.toVector(TargetStr);
+  SmallString<128> NewLinkStr, هدف_Str;
+  NewLink.منزل_ويڪٽر(NewLinkStr);
+  هدف_2.منزل_ويڪٽر(هدف_Str);
 
-  return addFile(NewLinkStr, ModificationTime, nullptr, User, Group,
+  أرجع جوڙيو_File(NewLinkStr, Modification_وقت, خالي_اشارو, User, گروهه,
                  sys::fs::file_type::symlink_file, Perms,
-                 [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemorySymbolicLink>(
-                       NewLinkStr, TargetStr, NNI.makeStatus());
+                 [&](detail::New_اندريون_يادگيري_ڳنڍ_Info NNI) {
+                   أرجع std::make_unique<detail::اندريون_يادگيري_Symbolic_Link>(
+                       NewLinkStr, هدف_Str, NNI.make_حالت());
                  });
 }
 
-llvm::ErrorOr<Status> InMemoryFileSystem::status(const Twine &Path) {
-  auto Node = lookupNode(Path, /*FollowFinalSymlink=*/true);
-  if (Node)
-    return (*Node)->getStatus(Path);
-  return Node.getError();
+llvm::ErrorOr<حالت> اندريون_يادگيري_File_System::حالت_2(ثابت Twine &رستو) {
+  خودڪار ڳنڍ = lookup_ڳنڍ(رستو, /*FollowFinalSymlink=*/سچ);
+  إذا (ڳنڍ)
+    أرجع (*ڳنڍ)->get_حالت(رستو);
+  أرجع ڳنڍ.getError();
 }
 
 llvm::ErrorOr<std::unique_ptr<File>>
-InMemoryFileSystem::openFileForRead(const Twine &Path) {
-  auto Node = lookupNode(Path,/*FollowFinalSymlink=*/true);
-  if (!Node)
-    return Node.getError();
+اندريون_يادگيري_File_System::openFileForRead(ثابت Twine &رستو) {
+  خودڪار ڳنڍ = lookup_ڳنڍ(رستو,/*FollowFinalSymlink=*/سچ);
+  إذا (!ڳنڍ)
+    أرجع ڳنڍ.getError();
 
   // When we have a file provide a heap-allocated wrapper for the memory buffer
   // to match the ownership semantics for File.
-  if (auto *F = dyn_cast<detail::InMemoryFile>(*Node))
-    return std::unique_ptr<File>(
-        new detail::InMemoryFileAdaptor(*F, Path.str()));
+  إذا (خودڪار *F = dyn_cast<detail::اندريون_يادگيري_File>(*ڳنڍ))
+    أرجع std::unique_ptr<File>(
+        جديد detail::اندريون_يادگيري_File_Adaptor(*F, رستو.str()));
 
   // FIXME: errc::not_a_file?
-  return make_error_code(llvm::errc::invalid_argument);
+  أرجع make_error_ڪوڊ(llvm::errc::invalid_دليل);
 }
 
 /// Adaptor from InMemoryDir::iterator to directory_iterator.
-class InMemoryFileSystem::DirIterator : public llvm::vfs::detail::DirIterImpl {
-  const InMemoryFileSystem *FS;
-  detail::InMemoryDirectory::const_iterator I;
-  detail::InMemoryDirectory::const_iterator E;
+صنف اندريون_يادگيري_File_System::DirIterator : عام llvm::vfs::detail::DirIterImpl {
+  ثابت اندريون_يادگيري_File_System *FS;
+  detail::اندريون_يادگيري_Directory::const_iterator I;
+  detail::اندريون_يادگيري_Directory::const_iterator E;
   std::string RequestedDirName;
 
-  void setCurrentEntry() {
-    if (I != E) {
-      SmallString<256> Path(RequestedDirName);
-      llvm::sys::path::append(Path, I->second->getFileName());
+  فراغ سيٽ_Current_داخلا() {
+    إذا (I != E) {
+      SmallString<256> رستو(RequestedDirName);
+      llvm::sys::رستو_2::append(رستو, I->ٻيو_2->getFileName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch (I->second->getKind()) {
-      case detail::IME_File:
-      case detail::IME_HardLink:
+      بدل (I->ٻيو_2->get_قسم()) {
+      حالة detail::IME_File:
+      حالة detail::IME_HardLink:
         Type = sys::fs::file_type::regular_file;
-        break;
-      case detail::IME_Directory:
+        اكسر;
+      حالة detail::IME_Directory:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case detail::IME_SymbolicLink:
-        if (auto SymlinkTarget =
-                FS->lookupNode(Path, /*FollowFinalSymlink=*/true)) {
-          Path = SymlinkTarget.getName();
-          Type = (*SymlinkTarget)->getStatus(Path).getType();
+        اكسر;
+      حالة detail::IME_SymbolicLink:
+        إذا (خودڪار Symlink_هدف =
+                FS->lookup_ڳنڍ(رستو, /*FollowFinalSymlink=*/سچ)) {
+          رستو = Symlink_هدف.getName();
+          Type = (*Symlink_هدف)->get_حالت(رستو).getType();
         }
-        break;
+        اكسر;
       }
-      CurrentEntry = directory_entry(std::string(Path), Type);
-    } else {
+      Current_داخلا = directory_داخلا(std::string(رستو), Type);
+    } وإلا {
       // When we're at the end, make CurrentEntry invalid and DirIterImpl will
       // do the rest.
-      CurrentEntry = directory_entry();
+      Current_داخلا = directory_داخلا();
     }
   }
 
-public:
-  DirIterator() = default;
+عام:
+  DirIterator() = افتراضي;
 
-  DirIterator(const InMemoryFileSystem *FS,
-              const detail::InMemoryDirectory &Dir,
+  DirIterator(ثابت اندريون_يادگيري_File_System *FS,
+              ثابت detail::اندريون_يادگيري_Directory &Dir,
               std::string RequestedDirName)
-      : FS(FS), I(Dir.begin()), E(Dir.end()),
+      : FS(FS), I(Dir.begin()), E(Dir.پڇاڙي()),
         RequestedDirName(std::move(RequestedDirName)) {
-    setCurrentEntry();
+    سيٽ_Current_داخلا();
   }
 
-  std::error_code increment() override {
+  std::error_ڪوڊ increment() override {
     ++I;
-    setCurrentEntry();
-    return {};
+    سيٽ_Current_داخلا();
+    أرجع {};
   }
 };
 
-directory_iterator InMemoryFileSystem::dir_begin(const Twine &Dir,
-                                                 std::error_code &EC) {
-  auto Node = lookupNode(Dir, /*FollowFinalSymlink=*/true);
-  if (!Node) {
-    EC = Node.getError();
-    return directory_iterator(std::make_shared<DirIterator>());
+directory_iterator اندريون_يادگيري_File_System::dir_begin(ثابت Twine &Dir,
+                                                 std::error_ڪوڊ &EC) {
+  خودڪار ڳنڍ = lookup_ڳنڍ(Dir, /*FollowFinalSymlink=*/سچ);
+  إذا (!ڳنڍ) {
+    EC = ڳنڍ.getError();
+    أرجع directory_iterator(std::make_shared<DirIterator>());
   }
 
-  if (auto *DirNode = dyn_cast<detail::InMemoryDirectory>(*Node))
-    return directory_iterator(
-        std::make_shared<DirIterator>(this, *DirNode, Dir.str()));
+  إذا (خودڪار *Dir_ڳنڍ = dyn_cast<detail::اندريون_يادگيري_Directory>(*ڳنڍ))
+    أرجع directory_iterator(
+        std::make_shared<DirIterator>(هذا, *Dir_ڳنڍ, Dir.str()));
 
-  EC = make_error_code(llvm::errc::not_a_directory);
-  return directory_iterator(std::make_shared<DirIterator>());
+  EC = make_error_ڪوڊ(llvm::errc::not_a_directory);
+  أرجع directory_iterator(std::make_shared<DirIterator>());
 }
 
-std::error_code InMemoryFileSystem::setCurrentWorkingDirectory(const Twine &P) {
-  SmallString<128> Path;
-  P.toVector(Path);
+std::error_ڪوڊ اندريون_يادگيري_File_System::سيٽ_Current_Working_Directory(ثابت Twine &P) {
+  SmallString<128> رستو;
+  P.منزل_ويڪٽر(رستو);
 
   // Fix up relative paths. This just prepends the current working directory.
-  std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  std::error_ڪوڊ EC = makeAbsolute(رستو);
+  أكد(!EC);
+  (فراغ)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  إذا (useNormalizedPaths())
+    llvm::sys::رستو_2::remove_dots(رستو, /*remove_dot_dot=*/سچ);
 
-  if (!Path.empty())
-    WorkingDirectory = std::string(Path);
-  return {};
+  إذا (!رستو.خالي_جايون())
+    WorkingDirectory = std::string(رستو);
+  أرجع {};
 }
 
-std::error_code InMemoryFileSystem::getRealPath(const Twine &Path,
-                                                SmallVectorImpl<char> &Output) {
-  auto CWD = getCurrentWorkingDirectory();
-  if (!CWD || CWD->empty())
-    return errc::operation_not_permitted;
-  Path.toVector(Output);
-  if (auto EC = makeAbsolute(Output))
-    return EC;
-  llvm::sys::path::remove_dots(Output, /*remove_dot_dot=*/true);
-  return {};
+std::error_ڪوڊ اندريون_يادگيري_File_System::get_Real_رستو(ثابت Twine &رستو,
+                                                Small_ويڪٽر_Impl<حرف> &Output) {
+  خودڪار CWD = getCurrentWorkingDirectory();
+  إذا (!CWD || CWD->خالي_جايون())
+    أرجع errc::operation_not_permitted;
+  رستو.منزل_ويڪٽر(Output);
+  إذا (خودڪار EC = makeAbsolute(Output))
+    أرجع EC;
+  llvm::sys::رستو_2::remove_dots(Output, /*remove_dot_dot=*/سچ);
+  أرجع {};
 }
 
-std::error_code InMemoryFileSystem::isLocal(const Twine &Path, bool &Result) {
-  Result = false;
-  return {};
+std::error_ڪوڊ اندريون_يادگيري_File_System::isLocal(ثابت Twine &رستو, منطقي &نتيجو) {
+  نتيجو = خطأ;
+  أرجع {};
 }
 
-void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
-                                   unsigned IndentLevel) const {
+فراغ اندريون_يادگيري_File_System::printImpl(raw_ostream &OS, PrintType PrintContents,
+                                   بنانشان IndentLevel) ثابت {
   printIndent(OS, IndentLevel);
   OS << "InMemoryFileSystem\n";
 }
@@ -1263,38 +1263,38 @@ void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
 // RedirectingFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-namespace {
+نطاق {
 
-static llvm::sys::path::Style getExistingStyle(llvm::StringRef Path) {
+ساكن llvm::sys::رستو_2::Style getExistingStyle(llvm::StringRef رستو) {
   // Detect the path style in use by checking the first separator.
-  llvm::sys::path::Style style = llvm::sys::path::Style::native;
-  const size_t n = Path.find_first_of("/\\");
+  llvm::sys::رستو_2::Style style = llvm::sys::رستو_2::Style::native;
+  ثابت size_t n = رستو.ڳوليو_پهريون_جو("/\\");
   // Can't distinguish between posix and windows_slash here.
-  if (n != static_cast<size_t>(-1))
-    style = (Path[n] == '/') ? llvm::sys::path::Style::posix
-                             : llvm::sys::path::Style::windows_backslash;
-  return style;
+  إذا (n != static_cast<size_t>(-1))
+    style = (رستو[n] == '/') ? llvm::sys::رستو_2::Style::posix
+                             : llvm::sys::رستو_2::Style::windows_backslash;
+  أرجع style;
 }
 
 /// Removes leading "./" as well as path components like ".." and ".".
-static llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
+ساكن llvm::SmallString<256> canonicalize(llvm::StringRef رستو) {
   // First detect the path style in use by checking the first separator.
-  llvm::sys::path::Style style = getExistingStyle(Path);
+  llvm::sys::رستو_2::Style style = getExistingStyle(رستو);
 
   // Now remove the dots.  Explicitly specifying the path style prevents the
   // direction of the slashes from changing.
-  llvm::SmallString<256> result =
-      llvm::sys::path::remove_leading_dotslash(Path, style);
-  llvm::sys::path::remove_dots(result, /*remove_dot_dot=*/true, style);
-  return result;
+  llvm::SmallString<256> نتيجو_2 =
+      llvm::sys::رستو_2::remove_leading_dotslash(رستو, style);
+  llvm::sys::رستو_2::remove_dots(نتيجو_2, /*remove_dot_dot=*/سچ, style);
+  أرجع نتيجو_2;
 }
 
 /// Whether the error and entry specify a file/directory that was not found.
-static bool isFileNotFound(std::error_code EC,
-                           RedirectingFileSystem::Entry *E = nullptr) {
-  if (E && !isa<RedirectingFileSystem::DirectoryRemapEntry>(E))
-    return false;
-  return EC == llvm::errc::no_such_file_or_directory;
+ساكن منطقي is_File_Not_مليو(std::error_ڪوڊ EC,
+                           RedirectingFileSystem::داخلا_3 *E = خالي_اشارو) {
+  إذا (E && !isa<RedirectingFileSystem::Directory_Remap_داخلا>(E))
+    أرجع خطأ;
+  أرجع EC == llvm::errc::no_such_file_or_directory;
 }
 
 } // anonymous namespace
@@ -1302,322 +1302,322 @@ static bool isFileNotFound(std::error_code EC,
 
 RedirectingFileSystem::RedirectingFileSystem(IntrusiveRefCntPtr<FileSystem> FS)
     : ExternalFS(std::move(FS)) {
-  assert(ExternalFS && "RedirectingFileSystem requires an external FS");
-  if (auto ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
+  أكد(ExternalFS && "RedirectingFileSystem requires an external FS");
+  إذا (خودڪار ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
     WorkingDirectory = *ExternalWorkingDirectory;
 }
 
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory entries.
-class llvm::vfs::RedirectingFSDirIterImpl
-    : public llvm::vfs::detail::DirIterImpl {
+صنف llvm::vfs::RedirectingFSDirIterImpl
+    : عام llvm::vfs::detail::DirIterImpl {
   std::string Dir;
-  RedirectingFileSystem::DirectoryEntry::iterator Current, End;
+  RedirectingFileSystem::Directory_داخلا::iterator Current, پڇاڙي_2;
 
-  std::error_code incrementImpl(bool IsFirstTime) {
-    assert((IsFirstTime || Current != End) && "cannot iterate past end");
-    if (!IsFirstTime)
+  std::error_ڪوڊ incrementImpl(منطقي Is_پهريون_وقت) {
+    أكد((Is_پهريون_وقت || Current != پڇاڙي_2) && "cannot iterate past end");
+    إذا (!Is_پهريون_وقت)
       ++Current;
-    if (Current != End) {
-      SmallString<128> PathStr(Dir);
-      llvm::sys::path::append(PathStr, (*Current)->getName());
+    إذا (Current != پڇاڙي_2) {
+      SmallString<128> رستو_Str(Dir);
+      llvm::sys::رستو_2::append(رستو_Str, (*Current)->getName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch ((*Current)->getKind()) {
-      case RedirectingFileSystem::EK_Directory:
+      بدل ((*Current)->get_قسم()) {
+      حالة RedirectingFileSystem::EK_Directory:
         [[fallthrough]];
-      case RedirectingFileSystem::EK_DirectoryRemap:
+      حالة RedirectingFileSystem::EK_DirectoryRemap:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case RedirectingFileSystem::EK_File:
+        اكسر;
+      حالة RedirectingFileSystem::EK_File:
         Type = sys::fs::file_type::regular_file;
-        break;
+        اكسر;
       }
-      CurrentEntry = directory_entry(std::string(PathStr), Type);
-    } else {
-      CurrentEntry = directory_entry();
+      Current_داخلا = directory_داخلا(std::string(رستو_Str), Type);
+    } وإلا {
+      Current_داخلا = directory_داخلا();
     }
-    return {};
+    أرجع {};
   };
 
-public:
+عام:
   RedirectingFSDirIterImpl(
-      const Twine &Path, RedirectingFileSystem::DirectoryEntry::iterator Begin,
-      RedirectingFileSystem::DirectoryEntry::iterator End, std::error_code &EC)
-      : Dir(Path.str()), Current(Begin), End(End) {
-    EC = incrementImpl(/*IsFirstTime=*/true);
+      ثابت Twine &رستو, RedirectingFileSystem::Directory_داخلا::iterator Begin,
+      RedirectingFileSystem::Directory_داخلا::iterator پڇاڙي_2, std::error_ڪوڊ &EC)
+      : Dir(رستو.str()), Current(Begin), پڇاڙي_2(پڇاڙي_2) {
+    EC = incrementImpl(/*IsFirstTime=*/سچ);
   }
 
-  std::error_code increment() override {
-    return incrementImpl(/*IsFirstTime=*/false);
+  std::error_ڪوڊ increment() override {
+    أرجع incrementImpl(/*IsFirstTime=*/خطأ);
   }
 };
 
-namespace {
+نطاق {
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory remap entries that maps the paths reported by the external
 /// file system's directory iterator back to the virtual directory's path.
-class RedirectingFSDirRemapIterImpl : public llvm::vfs::detail::DirIterImpl {
+صنف RedirectingFSDirRemapIterImpl : عام llvm::vfs::detail::DirIterImpl {
   std::string Dir;
-  llvm::sys::path::Style DirStyle;
+  llvm::sys::رستو_2::Style DirStyle;
   llvm::vfs::directory_iterator ExternalIter;
 
-public:
-  RedirectingFSDirRemapIterImpl(std::string DirPath,
+عام:
+  RedirectingFSDirRemapIterImpl(std::string Dir_رستو,
                                 llvm::vfs::directory_iterator ExtIter)
-      : Dir(std::move(DirPath)), DirStyle(getExistingStyle(Dir)),
+      : Dir(std::move(Dir_رستو)), DirStyle(getExistingStyle(Dir)),
         ExternalIter(ExtIter) {
-    if (ExternalIter != llvm::vfs::directory_iterator())
-      setCurrentEntry();
+    إذا (ExternalIter != llvm::vfs::directory_iterator())
+      سيٽ_Current_داخلا();
   }
 
-  void setCurrentEntry() {
-    StringRef ExternalPath = ExternalIter->path();
-    llvm::sys::path::Style ExternalStyle = getExistingStyle(ExternalPath);
-    StringRef File = llvm::sys::path::filename(ExternalPath, ExternalStyle);
+  فراغ سيٽ_Current_داخلا() {
+    StringRef External_رستو = ExternalIter->رستو_2();
+    llvm::sys::رستو_2::Style ExternalStyle = getExistingStyle(External_رستو);
+    StringRef File = llvm::sys::رستو_2::filename(External_رستو, ExternalStyle);
 
-    SmallString<128> NewPath(Dir);
-    llvm::sys::path::append(NewPath, DirStyle, File);
+    SmallString<128> New_رستو(Dir);
+    llvm::sys::رستو_2::append(New_رستو, DirStyle, File);
 
-    CurrentEntry = directory_entry(std::string(NewPath), ExternalIter->type());
+    Current_داخلا = directory_داخلا(std::string(New_رستو), ExternalIter->type());
   }
 
-  std::error_code increment() override {
-    std::error_code EC;
+  std::error_ڪوڊ increment() override {
+    std::error_ڪوڊ EC;
     ExternalIter.increment(EC);
-    if (!EC && ExternalIter != llvm::vfs::directory_iterator())
-      setCurrentEntry();
-    else
-      CurrentEntry = directory_entry();
-    return EC;
+    إذا (!EC && ExternalIter != llvm::vfs::directory_iterator())
+      سيٽ_Current_داخلا();
+    وإلا
+      Current_داخلا = directory_داخلا();
+    أرجع EC;
   }
 };
 } // namespace
 
 llvm::ErrorOr<std::string>
-RedirectingFileSystem::getCurrentWorkingDirectory() const {
-  return WorkingDirectory;
+RedirectingFileSystem::getCurrentWorkingDirectory() ثابت {
+  أرجع WorkingDirectory;
 }
 
-std::error_code
-RedirectingFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
+std::error_ڪوڊ
+RedirectingFileSystem::سيٽ_Current_Working_Directory(ثابت Twine &رستو) {
   // Don't change the working directory if the path doesn't exist.
-  if (!exists(Path))
-    return errc::no_such_file_or_directory;
+  إذا (!exists(رستو))
+    أرجع errc::no_such_file_or_directory;
 
-  SmallString<128> AbsolutePath;
-  Path.toVector(AbsolutePath);
-  if (std::error_code EC = makeAbsolute(AbsolutePath))
-    return EC;
-  WorkingDirectory = std::string(AbsolutePath);
-  return {};
+  SmallString<128> Absolute_رستو;
+  رستو.منزل_ويڪٽر(Absolute_رستو);
+  إذا (std::error_ڪوڊ EC = makeAbsolute(Absolute_رستو))
+    أرجع EC;
+  WorkingDirectory = std::string(Absolute_رستو);
+  أرجع {};
 }
 
-std::error_code RedirectingFileSystem::isLocal(const Twine &Path_,
-                                               bool &Result) {
-  SmallString<256> Path;
-  Path_.toVector(Path);
+std::error_ڪوڊ RedirectingFileSystem::isLocal(ثابت Twine &رستو_3,
+                                               منطقي &نتيجو) {
+  SmallString<256> رستو;
+  رستو_3.منزل_ويڪٽر(رستو);
 
-  if (makeAbsolute(Path))
-    return {};
+  إذا (makeAbsolute(رستو))
+    أرجع {};
 
-  return ExternalFS->isLocal(Path, Result);
+  أرجع ExternalFS->isLocal(رستو, نتيجو);
 }
 
-std::error_code RedirectingFileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
+std::error_ڪوڊ RedirectingFileSystem::makeAbsolute(Small_ويڪٽر_Impl<حرف> &رستو) ثابت {
   // is_absolute(..., Style::windows_*) accepts paths with both slash types.
-  if (llvm::sys::path::is_absolute(Path, llvm::sys::path::Style::posix) ||
-      llvm::sys::path::is_absolute(Path,
-                                   llvm::sys::path::Style::windows_backslash))
+  إذا (llvm::sys::رستو_2::is_absolute(رستو, llvm::sys::رستو_2::Style::posix) ||
+      llvm::sys::رستو_2::is_absolute(رستو,
+                                   llvm::sys::رستو_2::Style::windows_backslash))
     // This covers windows absolute path with forward slash as well, as the
     // forward slashes are treated as path separation in llvm::path
     // regardless of what path::Style is used.
-    return {};
+    أرجع {};
 
-  auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  خودڪار WorkingDir = getCurrentWorkingDirectory();
+  إذا (!WorkingDir)
+    أرجع WorkingDir.getError();
 
-  return makeAbsolute(WorkingDir.get(), Path);
+  أرجع makeAbsolute(WorkingDir.get(), رستو);
 }
 
-std::error_code
+std::error_ڪوڊ
 RedirectingFileSystem::makeAbsolute(StringRef WorkingDir,
-                                    SmallVectorImpl<char> &Path) const {
+                                    Small_ويڪٽر_Impl<حرف> &رستو) ثابت {
   // We can't use sys::fs::make_absolute because that assumes the path style
   // is native and there is no way to override that.  Since we know WorkingDir
   // is absolute, we can use it to determine which style we actually have and
   // append Path ourselves.
-  if (!WorkingDir.empty() &&
-      !sys::path::is_absolute(WorkingDir, sys::path::Style::posix) &&
-      !sys::path::is_absolute(WorkingDir,
-                              sys::path::Style::windows_backslash)) {
-    return std::error_code();
+  إذا (!WorkingDir.خالي_جايون() &&
+      !sys::رستو_2::is_absolute(WorkingDir, sys::رستو_2::Style::posix) &&
+      !sys::رستو_2::is_absolute(WorkingDir,
+                              sys::رستو_2::Style::windows_backslash)) {
+    أرجع std::error_ڪوڊ();
   }
-  sys::path::Style style = sys::path::Style::windows_backslash;
-  if (sys::path::is_absolute(WorkingDir, sys::path::Style::posix)) {
-    style = sys::path::Style::posix;
-  } else {
+  sys::رستو_2::Style style = sys::رستو_2::Style::windows_backslash;
+  إذا (sys::رستو_2::is_absolute(WorkingDir, sys::رستو_2::Style::posix)) {
+    style = sys::رستو_2::Style::posix;
+  } وإلا {
     // Distinguish between windows_backslash and windows_slash; getExistingStyle
     // returns posix for a path with windows_slash.
-    if (getExistingStyle(WorkingDir) != sys::path::Style::windows_backslash)
-      style = sys::path::Style::windows_slash;
+    إذا (getExistingStyle(WorkingDir) != sys::رستو_2::Style::windows_backslash)
+      style = sys::رستو_2::Style::windows_slash;
   }
 
-  std::string Result = std::string(WorkingDir);
-  StringRef Dir(Result);
-  if (!Dir.ends_with(sys::path::get_separator(style))) {
-    Result += sys::path::get_separator(style);
+  std::string نتيجو = std::string(WorkingDir);
+  StringRef Dir(نتيجو);
+  إذا (!Dir.پڇاڙيون_with(sys::رستو_2::get_separator(style))) {
+    نتيجو += sys::رستو_2::get_separator(style);
   }
   // backslashes '\' are legit path charactors under POSIX. Windows APIs
   // like CreateFile accepts forward slashes '/' as path
   // separator (even when mixed with backslashes). Therefore,
   // `Path` should be directly appended to `WorkingDir` without converting
   // path separator.
-  Result.append(Path.data(), Path.size());
-  Path.assign(Result.begin(), Result.end());
+  نتيجو.append(رستو.معلومات(), رستو.سائيز_2());
+  رستو.سونپيو(نتيجو.begin(), نتيجو.پڇاڙي());
 
-  return {};
+  أرجع {};
 }
 
-directory_iterator RedirectingFileSystem::dir_begin(const Twine &Dir,
-                                                    std::error_code &EC) {
-  SmallString<256> Path;
-  Dir.toVector(Path);
+directory_iterator RedirectingFileSystem::dir_begin(ثابت Twine &Dir,
+                                                    std::error_ڪوڊ &EC) {
+  SmallString<256> رستو;
+  Dir.منزل_ويڪٽر(رستو);
 
-  EC = makeAbsolute(Path);
-  if (EC)
-    return {};
+  EC = makeAbsolute(رستو);
+  إذا (EC)
+    أرجع {};
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
-    if (Redirection != RedirectKind::RedirectOnly &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->dir_begin(Path, EC);
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو = lookup_رستو(رستو);
+  إذا (!نتيجو) {
+    إذا (Redirection != Redirect_قسم::RedirectOnly &&
+        is_File_Not_مليو(نتيجو.getError()))
+      أرجع ExternalFS->dir_begin(رستو, EC);
 
-    EC = Result.getError();
-    return {};
+    EC = نتيجو.getError();
+    أرجع {};
   }
 
   // Use status to make sure the path exists and refers to a directory.
-  ErrorOr<Status> S = status(Path, Dir, *Result);
-  if (!S) {
-    if (Redirection != RedirectKind::RedirectOnly &&
-        isFileNotFound(S.getError(), Result->E))
-      return ExternalFS->dir_begin(Dir, EC);
+  ErrorOr<حالت> S = حالت_2(رستو, Dir, *نتيجو);
+  إذا (!S) {
+    إذا (Redirection != Redirect_قسم::RedirectOnly &&
+        is_File_Not_مليو(S.getError(), نتيجو->E))
+      أرجع ExternalFS->dir_begin(Dir, EC);
 
     EC = S.getError();
-    return {};
+    أرجع {};
   }
 
-  if (!S->isDirectory()) {
+  إذا (!S->isDirectory()) {
     EC = errc::not_a_directory;
-    return {};
+    أرجع {};
   }
 
   // Create the appropriate directory iterator based on whether we found a
   // DirectoryRemapEntry or DirectoryEntry.
   directory_iterator RedirectIter;
-  std::error_code RedirectEC;
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
-    auto RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
+  std::error_ڪوڊ RedirectEC;
+  إذا (خودڪار ExtRedirect = نتيجو->getExternalRedirect()) {
+    خودڪار RE = cast<RedirectingFileSystem::Remap_داخلا>(نتيجو->E);
     RedirectIter = ExternalFS->dir_begin(*ExtRedirect, RedirectEC);
 
-    if (!RE->useExternalName(UseExternalNames)) {
+    إذا (!RE->useExternalName(Use_External_نالا)) {
       // Update the paths in the results to use the virtual directory's path.
       RedirectIter =
           directory_iterator(std::make_shared<RedirectingFSDirRemapIterImpl>(
-              std::string(Path), RedirectIter));
+              std::string(رستو), RedirectIter));
     }
-  } else {
-    auto DE = cast<DirectoryEntry>(Result->E);
+  } وإلا {
+    خودڪار DE = cast<Directory_داخلا>(نتيجو->E);
     RedirectIter =
         directory_iterator(std::make_shared<RedirectingFSDirIterImpl>(
-            Path, DE->contents_begin(), DE->contents_end(), RedirectEC));
+            رستو, DE->contents_begin(), DE->contents_پڇاڙي(), RedirectEC));
   }
 
-  if (RedirectEC) {
-    if (RedirectEC != errc::no_such_file_or_directory) {
+  إذا (RedirectEC) {
+    إذا (RedirectEC != errc::no_such_file_or_directory) {
       EC = RedirectEC;
-      return {};
+      أرجع {};
     }
     RedirectIter = {};
   }
 
-  if (Redirection == RedirectKind::RedirectOnly) {
+  إذا (Redirection == Redirect_قسم::RedirectOnly) {
     EC = RedirectEC;
-    return RedirectIter;
+    أرجع RedirectIter;
   }
 
-  std::error_code ExternalEC;
-  directory_iterator ExternalIter = ExternalFS->dir_begin(Path, ExternalEC);
-  if (ExternalEC) {
-    if (ExternalEC != errc::no_such_file_or_directory) {
+  std::error_ڪوڊ ExternalEC;
+  directory_iterator ExternalIter = ExternalFS->dir_begin(رستو, ExternalEC);
+  إذا (ExternalEC) {
+    إذا (ExternalEC != errc::no_such_file_or_directory) {
       EC = ExternalEC;
-      return {};
+      أرجع {};
     }
     ExternalIter = {};
   }
 
-  SmallVector<directory_iterator, 2> Iters;
-  switch (Redirection) {
-  case RedirectKind::Fallthrough:
-    Iters.push_back(ExternalIter);
-    Iters.push_back(RedirectIter);
-    break;
-  case RedirectKind::Fallback:
-    Iters.push_back(RedirectIter);
-    Iters.push_back(ExternalIter);
-    break;
-  default:
+  Small_ويڪٽر<directory_iterator, 2> Iters;
+  بدل (Redirection) {
+  حالة Redirect_قسم::Fallthrough:
+    Iters.ڌڪو_پٺ(ExternalIter);
+    Iters.ڌڪو_پٺ(RedirectIter);
+    اكسر;
+  حالة Redirect_قسم::Fallback:
+    Iters.ڌڪو_پٺ(RedirectIter);
+    Iters.ڌڪو_پٺ(ExternalIter);
+    اكسر;
+  افتراضي:
     llvm_unreachable("unhandled RedirectKind");
   }
 
   directory_iterator Combined{
       std::make_shared<CombiningDirIterImpl>(Iters, EC)};
-  if (EC)
-    return {};
-  return Combined;
+  إذا (EC)
+    أرجع {};
+  أرجع Combined;
 }
 
-void RedirectingFileSystem::setOverlayFileDir(StringRef Dir) {
+فراغ RedirectingFileSystem::سيٽ_Overlay_File_Dir(StringRef Dir) {
   OverlayFileDir = Dir.str();
 }
 
-StringRef RedirectingFileSystem::getOverlayFileDir() const {
-  return OverlayFileDir;
+StringRef RedirectingFileSystem::getOverlayFileDir() ثابت {
+  أرجع OverlayFileDir;
 }
 
-void RedirectingFileSystem::setFallthrough(bool Fallthrough) {
-  if (Fallthrough) {
-    Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-  } else {
-    Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
+فراغ RedirectingFileSystem::سيٽ_Fallthrough(منطقي Fallthrough) {
+  إذا (Fallthrough) {
+    Redirection = RedirectingFileSystem::Redirect_قسم::Fallthrough;
+  } وإلا {
+    Redirection = RedirectingFileSystem::Redirect_قسم::RedirectOnly;
   }
 }
 
-void RedirectingFileSystem::setRedirection(
-    RedirectingFileSystem::RedirectKind Kind) {
-  Redirection = Kind;
+فراغ RedirectingFileSystem::سيٽ_Redirection(
+    RedirectingFileSystem::Redirect_قسم قسم_2) {
+  Redirection = قسم_2;
 }
 
-std::vector<StringRef> RedirectingFileSystem::getRoots() const {
-  std::vector<StringRef> R;
-  R.reserve(Roots.size());
-  for (const auto &Root : Roots)
-    R.push_back(Root->getName());
-  return R;
+std::ويڪٽر<StringRef> RedirectingFileSystem::getRoots() ثابت {
+  std::ويڪٽر<StringRef> R;
+  R.reserve(Roots.سائيز_2());
+  لكل (ثابت خودڪار &پاڙ_2 : Roots)
+    R.ڌڪو_پٺ(پاڙ_2->getName());
+  أرجع R;
 }
 
-void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                      unsigned IndentLevel) const {
+فراغ RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                      بنانشان IndentLevel) ثابت {
   printIndent(OS, IndentLevel);
   OS << "RedirectingFileSystem (UseExternalNames: "
-     << (UseExternalNames ? "true" : "false") << ")\n";
-  if (Type == PrintType::Summary)
-    return;
+     << (Use_External_نالا ? "true" : "false") << ")\n";
+  إذا (Type == PrintType::Summary)
+    أرجع;
 
-  for (const auto &Root : Roots)
-    printEntry(OS, Root.get(), IndentLevel);
+  لكل (ثابت خودڪار &پاڙ_2 : Roots)
+    print_داخلا(OS, پاڙ_2.get(), IndentLevel);
 
   printIndent(OS, IndentLevel);
   OS << "ExternalFS:\n";
@@ -1625,624 +1625,624 @@ void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
                     IndentLevel + 1);
 }
 
-void RedirectingFileSystem::printEntry(raw_ostream &OS,
-                                       RedirectingFileSystem::Entry *E,
-                                       unsigned IndentLevel) const {
+فراغ RedirectingFileSystem::print_داخلا(raw_ostream &OS,
+                                       RedirectingFileSystem::داخلا_3 *E,
+                                       بنانشان IndentLevel) ثابت {
   printIndent(OS, IndentLevel);
   OS << "'" << E->getName() << "'";
 
-  switch (E->getKind()) {
-  case EK_Directory: {
-    auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(E);
+  بدل (E->get_قسم()) {
+  حالة EK_Directory: {
+    خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(E);
 
     OS << "\n";
-    for (std::unique_ptr<Entry> &SubEntry :
-         llvm::make_range(DE->contents_begin(), DE->contents_end()))
-      printEntry(OS, SubEntry.get(), IndentLevel + 1);
-    break;
+    لكل (std::unique_ptr<داخلا_3> &Sub_داخلا :
+         llvm::make_range(DE->contents_begin(), DE->contents_پڇاڙي()))
+      print_داخلا(OS, Sub_داخلا.get(), IndentLevel + 1);
+    اكسر;
   }
-  case EK_DirectoryRemap:
-  case EK_File: {
-    auto *RE = cast<RedirectingFileSystem::RemapEntry>(E);
-    OS << " -> '" << RE->getExternalContentsPath() << "'";
-    switch (RE->getUseName()) {
-    case NK_NotSet:
-      break;
-    case NK_External:
+  حالة EK_DirectoryRemap:
+  حالة EK_File: {
+    خودڪار *RE = cast<RedirectingFileSystem::Remap_داخلا>(E);
+    OS << " -> '" << RE->get_External_Contents_رستو() << "'";
+    بدل (RE->getUseName()) {
+    حالة NK_Not_سيٽ:
+      اكسر;
+    حالة NK_External:
       OS << " (UseExternalName: true)";
-      break;
-    case NK_Virtual:
+      اكسر;
+    حالة NK_Virtual:
       OS << " (UseExternalName: false)";
-      break;
+      اكسر;
     }
     OS << "\n";
-    break;
+    اكسر;
   }
   }
 }
 
-void RedirectingFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  if (ExternalFS) {
+فراغ RedirectingFileSystem::گهمو_ٻار_File_Systems(گهمو_Callback_Ty Callback) {
+  إذا (ExternalFS) {
     Callback(*ExternalFS);
-    ExternalFS->visitChildFileSystems(Callback);
+    ExternalFS->گهمو_ٻار_File_Systems(Callback);
   }
 }
 
 /// A helper class to hold the common YAML parsing state.
-class llvm::vfs::RedirectingFileSystemParser {
-  yaml::Stream &Stream;
+صنف llvm::vfs::RedirectingFileSystemParser {
+  yaml::وهڪرو &وهڪرو;
 
-  void error(yaml::Node *N, const Twine &Msg) { Stream.printError(N, Msg); }
+  فراغ error(yaml::ڳنڍ *N, ثابت Twine &نياپو_2) { وهڪرو.printError(N, نياپو_2); }
 
   // false on error
-  bool parseScalarString(yaml::Node *N, StringRef &Result,
-                         SmallVectorImpl<char> &Storage) {
-    const auto *S = dyn_cast_if_present<yaml::ScalarNode>(N);
+  منطقي parseScalarString(yaml::ڳنڍ *N, StringRef &نتيجو,
+                         Small_ويڪٽر_Impl<حرف> &Storage) {
+    ثابت خودڪار *S = dyn_cast_if_present<yaml::Scalar_ڳنڍ>(N);
 
-    if (!S) {
+    إذا (!S) {
       error(N, "expected string");
-      return false;
+      أرجع خطأ;
     }
-    Result = S->getValue(Storage);
-    return true;
+    نتيجو = S->get_قدر(Storage);
+    أرجع سچ;
   }
 
   // false on error
-  bool parseScalarBool(yaml::Node *N, bool &Result) {
+  منطقي parseScalarBool(yaml::ڳنڍ *N, منطقي &نتيجو) {
     SmallString<5> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return false;
+    StringRef قدر;
+    إذا (!parseScalarString(N, قدر, Storage))
+      أرجع خطأ;
 
-    if (Value.equals_insensitive("true") || Value.equals_insensitive("on") ||
-        Value.equals_insensitive("yes") || Value == "1") {
-      Result = true;
-      return true;
-    } else if (Value.equals_insensitive("false") ||
-               Value.equals_insensitive("off") ||
-               Value.equals_insensitive("no") || Value == "0") {
-      Result = false;
-      return true;
+    إذا (قدر.equals_insensitive("true") || قدر.equals_insensitive("on") ||
+        قدر.equals_insensitive("yes") || قدر == "1") {
+      نتيجو = سچ;
+      أرجع سچ;
+    } وإلا إذا (قدر.equals_insensitive("false") ||
+               قدر.equals_insensitive("off") ||
+               قدر.equals_insensitive("no") || قدر == "0") {
+      نتيجو = خطأ;
+      أرجع سچ;
     }
 
     error(N, "expected boolean value");
-    return false;
+    أرجع خطأ;
   }
 
-  std::optional<RedirectingFileSystem::RedirectKind>
-  parseRedirectKind(yaml::Node *N) {
+  std::optional<RedirectingFileSystem::Redirect_قسم>
+  parse_Redirect_قسم(yaml::ڳنڍ *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
+    StringRef قدر;
+    إذا (!parseScalarString(N, قدر, Storage))
+      أرجع std::nullopt;
 
-    if (Value.equals_insensitive("fallthrough")) {
-      return RedirectingFileSystem::RedirectKind::Fallthrough;
-    } else if (Value.equals_insensitive("fallback")) {
-      return RedirectingFileSystem::RedirectKind::Fallback;
-    } else if (Value.equals_insensitive("redirect-only")) {
-      return RedirectingFileSystem::RedirectKind::RedirectOnly;
+    إذا (قدر.equals_insensitive("fallthrough")) {
+      أرجع RedirectingFileSystem::Redirect_قسم::Fallthrough;
+    } وإلا إذا (قدر.equals_insensitive("fallback")) {
+      أرجع RedirectingFileSystem::Redirect_قسم::Fallback;
+    } وإلا إذا (قدر.equals_insensitive("redirect-only")) {
+      أرجع RedirectingFileSystem::Redirect_قسم::RedirectOnly;
     }
-    return std::nullopt;
+    أرجع std::nullopt;
   }
 
-  std::optional<RedirectingFileSystem::RootRelativeKind>
-  parseRootRelativeKind(yaml::Node *N) {
+  std::optional<RedirectingFileSystem::پاڙ_Relative_قسم>
+  parse_پاڙ_Relative_قسم(yaml::ڳنڍ *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
-    if (Value.equals_insensitive("cwd")) {
-      return RedirectingFileSystem::RootRelativeKind::CWD;
-    } else if (Value.equals_insensitive("overlay-dir")) {
-      return RedirectingFileSystem::RootRelativeKind::OverlayDir;
+    StringRef قدر;
+    إذا (!parseScalarString(N, قدر, Storage))
+      أرجع std::nullopt;
+    إذا (قدر.equals_insensitive("cwd")) {
+      أرجع RedirectingFileSystem::پاڙ_Relative_قسم::CWD;
+    } وإلا إذا (قدر.equals_insensitive("overlay-dir")) {
+      أرجع RedirectingFileSystem::پاڙ_Relative_قسم::OverlayDir;
     }
-    return std::nullopt;
+    أرجع std::nullopt;
   }
 
-  struct KeyStatus {
-    bool Required;
-    bool Seen = false;
+  بنية ڪنجي_حالت {
+    منطقي Required;
+    منطقي ڏٺل = خطأ;
 
-    KeyStatus(bool Required = false) : Required(Required) {}
+    ڪنجي_حالت(منطقي Required = خطأ) : Required(Required) {}
   };
 
-  using KeyStatusPair = std::pair<StringRef, KeyStatus>;
+  استعمال ڪنجي_حالت_Pair = std::pair<StringRef, ڪنجي_حالت>;
 
   // false on error
-  bool checkDuplicateOrUnknownKey(yaml::Node *KeyNode, StringRef Key,
-                                  DenseMap<StringRef, KeyStatus> &Keys) {
-    auto It = Keys.find(Key);
-    if (It == Keys.end()) {
-      error(KeyNode, "unknown key");
-      return false;
+  منطقي check_Duplicate_Or_Unknown_ڪنجي(yaml::ڳنڍ *ڪنجي_ڳنڍ, StringRef ڪنجي,
+                                  DenseMap<StringRef, ڪنجي_حالت> &ڪنجيون_2) {
+    خودڪار It = ڪنجيون_2.ڳوليو(ڪنجي);
+    إذا (It == ڪنجيون_2.پڇاڙي()) {
+      error(ڪنجي_ڳنڍ, "unknown key");
+      أرجع خطأ;
     }
-    KeyStatus &S = It->second;
-    if (S.Seen) {
-      error(KeyNode, Twine("duplicate key '") + Key + "'");
-      return false;
+    ڪنجي_حالت &S = It->ٻيو_2;
+    إذا (S.ڏٺل) {
+      error(ڪنجي_ڳنڍ, Twine("duplicate key '") + ڪنجي + "'");
+      أرجع خطأ;
     }
-    S.Seen = true;
-    return true;
+    S.ڏٺل = سچ;
+    أرجع سچ;
   }
 
   // false on error
-  bool checkMissingKeys(yaml::Node *Obj, DenseMap<StringRef, KeyStatus> &Keys) {
-    for (const auto &I : Keys) {
-      if (I.second.Required && !I.second.Seen) {
-        error(Obj, Twine("missing key '") + I.first + "'");
-        return false;
+  منطقي check_Missing_ڪنجيون(yaml::ڳنڍ *Obj, DenseMap<StringRef, ڪنجي_حالت> &ڪنجيون_2) {
+    لكل (ثابت خودڪار &I : ڪنجيون_2) {
+      إذا (I.ٻيو_2.Required && !I.ٻيو_2.ڏٺل) {
+        error(Obj, Twine("missing key '") + I.پهريون_2 + "'");
+        أرجع خطأ;
       }
     }
-    return true;
+    أرجع سچ;
   }
 
-public:
-  static RedirectingFileSystem::Entry *
-  lookupOrCreateEntry(RedirectingFileSystem *FS, StringRef Name,
-                      RedirectingFileSystem::Entry *ParentEntry = nullptr) {
-    if (!ParentEntry) { // Look for a existent root
-      for (const auto &Root : FS->Roots) {
-        if (Name == Root->getName()) {
-          ParentEntry = Root.get();
-          return ParentEntry;
+عام:
+  ساكن RedirectingFileSystem::داخلا_3 *
+  lookup_Or_Create_داخلا(RedirectingFileSystem *FS, StringRef Name,
+                      RedirectingFileSystem::داخلا_3 *والد_داخلا = خالي_اشارو) {
+    إذا (!والد_داخلا) { // Look for a existent root
+      لكل (ثابت خودڪار &پاڙ_2 : FS->Roots) {
+        إذا (Name == پاڙ_2->getName()) {
+          والد_داخلا = پاڙ_2.get();
+          أرجع والد_داخلا;
         }
       }
-    } else { // Advance to the next component
-      auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &Content :
-           llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-        auto *DirContent =
-            dyn_cast<RedirectingFileSystem::DirectoryEntry>(Content.get());
-        if (DirContent && Name == Content->getName())
-          return DirContent;
+    } وإلا { // Advance to the next component
+      خودڪار *DE = dyn_cast<RedirectingFileSystem::Directory_داخلا>(والد_داخلا);
+      لكل (std::unique_ptr<RedirectingFileSystem::داخلا_3> &Content :
+           llvm::make_range(DE->contents_begin(), DE->contents_پڇاڙي())) {
+        خودڪار *DirContent =
+            dyn_cast<RedirectingFileSystem::Directory_داخلا>(Content.get());
+        إذا (DirContent && Name == Content->getName())
+          أرجع DirContent;
       }
     }
 
     // ... or create a new one
-    std::unique_ptr<RedirectingFileSystem::Entry> E =
-        std::make_unique<RedirectingFileSystem::DirectoryEntry>(
-            Name, Status("", getNextVirtualUniqueID(),
+    std::unique_ptr<RedirectingFileSystem::داخلا_3> E =
+        std::make_unique<RedirectingFileSystem::Directory_داخلا>(
+            Name, حالت("", get_ايندڙ_Virtual_Unique_ID(),
                          std::chrono::system_clock::now(), 0, 0, 0,
                          file_type::directory_file, sys::fs::all_all));
 
-    if (!ParentEntry) { // Add a new root to the overlay
-      FS->Roots.push_back(std::move(E));
-      ParentEntry = FS->Roots.back().get();
-      return ParentEntry;
+    إذا (!والد_داخلا) { // Add a new root to the overlay
+      FS->Roots.ڌڪو_پٺ(std::move(E));
+      والد_داخلا = FS->Roots.پٺ().get();
+      أرجع والد_داخلا;
     }
 
-    auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
-    DE->addContent(std::move(E));
-    return DE->getLastContent();
+    خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(والد_داخلا);
+    DE->جوڙيو_Content(std::move(E));
+    أرجع DE->get_آخري_Content();
   }
 
-private:
-  void uniqueOverlayTree(RedirectingFileSystem *FS,
-                         RedirectingFileSystem::Entry *SrcE,
-                         RedirectingFileSystem::Entry *NewParentE = nullptr) {
+خاص:
+  فراغ unique_Overlay_وڻ(RedirectingFileSystem *FS,
+                         RedirectingFileSystem::داخلا_3 *SrcE,
+                         RedirectingFileSystem::داخلا_3 *New_والد_E = خالي_اشارو) {
     StringRef Name = SrcE->getName();
-    switch (SrcE->getKind()) {
-    case RedirectingFileSystem::EK_Directory: {
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
+    بدل (SrcE->get_قسم()) {
+    حالة RedirectingFileSystem::EK_Directory: {
+      خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(SrcE);
       // Empty directories could be present in the YAML as a way to
       // describe a file for a current directory after some of its subdir
       // is parsed. This only leads to redundant walks, ignore it.
-      if (!Name.empty())
-        NewParentE = lookupOrCreateEntry(FS, Name, NewParentE);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
-           llvm::make_range(DE->contents_begin(), DE->contents_end()))
-        uniqueOverlayTree(FS, SubEntry.get(), NewParentE);
-      break;
+      إذا (!Name.خالي_جايون())
+        New_والد_E = lookup_Or_Create_داخلا(FS, Name, New_والد_E);
+      لكل (std::unique_ptr<RedirectingFileSystem::داخلا_3> &Sub_داخلا :
+           llvm::make_range(DE->contents_begin(), DE->contents_پڇاڙي()))
+        unique_Overlay_وڻ(FS, Sub_داخلا.get(), New_والد_E);
+      اكسر;
     }
-    case RedirectingFileSystem::EK_DirectoryRemap: {
-      assert(NewParentE && "Parent entry must exist");
-      auto *DR = cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
-      DE->addContent(
-          std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
-              Name, DR->getExternalContentsPath(), DR->getUseName()));
-      break;
+    حالة RedirectingFileSystem::EK_DirectoryRemap: {
+      أكد(New_والد_E && "Parent entry must exist");
+      خودڪار *DR = cast<RedirectingFileSystem::Directory_Remap_داخلا>(SrcE);
+      خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(New_والد_E);
+      DE->جوڙيو_Content(
+          std::make_unique<RedirectingFileSystem::Directory_Remap_داخلا>(
+              Name, DR->get_External_Contents_رستو(), DR->getUseName()));
+      اكسر;
     }
-    case RedirectingFileSystem::EK_File: {
-      assert(NewParentE && "Parent entry must exist");
-      auto *FE = cast<RedirectingFileSystem::FileEntry>(SrcE);
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
-      DE->addContent(std::make_unique<RedirectingFileSystem::FileEntry>(
-          Name, FE->getExternalContentsPath(), FE->getUseName()));
-      break;
+    حالة RedirectingFileSystem::EK_File: {
+      أكد(New_والد_E && "Parent entry must exist");
+      خودڪار *FE = cast<RedirectingFileSystem::File_داخلا>(SrcE);
+      خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(New_والد_E);
+      DE->جوڙيو_Content(std::make_unique<RedirectingFileSystem::File_داخلا>(
+          Name, FE->get_External_Contents_رستو(), FE->getUseName()));
+      اكسر;
     }
     }
   }
 
-  std::unique_ptr<RedirectingFileSystem::Entry>
-  parseEntry(yaml::Node *N, RedirectingFileSystem *FS, bool IsRootEntry) {
-    auto *M = dyn_cast<yaml::MappingNode>(N);
-    if (!M) {
+  std::unique_ptr<RedirectingFileSystem::داخلا_3>
+  parse_داخلا(yaml::ڳنڍ *N, RedirectingFileSystem *FS, منطقي Is_پاڙ_داخلا) {
+    خودڪار *M = dyn_cast<yaml::Mapping_ڳنڍ>(N);
+    إذا (!M) {
       error(N, "expected mapping node for file or directory entry");
-      return nullptr;
+      أرجع خالي_اشارو;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("name", true),
-        KeyStatusPair("type", true),
-        KeyStatusPair("contents", false),
-        KeyStatusPair("external-contents", false),
-        KeyStatusPair("use-external-name", false),
+    ڪنجي_حالت_Pair Fields[] = {
+        ڪنجي_حالت_Pair("name", سچ),
+        ڪنجي_حالت_Pair("type", سچ),
+        ڪنجي_حالت_Pair("contents", خطأ),
+        ڪنجي_حالت_Pair("external-contents", خطأ),
+        ڪنجي_حالت_Pair("use-external-name", خطأ),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
+    DenseMap<StringRef, ڪنجي_حالت> ڪنجيون_2(std::begin(Fields), std::پڇاڙي(Fields));
 
-    enum { CF_NotSet, CF_List, CF_External } ContentsField = CF_NotSet;
-    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>>
-        EntryArrayContents;
-    SmallString<256> ExternalContentsPath;
+    تعداد { CF_Not_سيٽ, CF_List, CF_External } Contents_ميدان = CF_Not_سيٽ;
+    std::ويڪٽر<std::unique_ptr<RedirectingFileSystem::داخلا_3>>
+        داخلا_Array_Contents;
+    SmallString<256> External_Contents_رستو;
     SmallString<256> Name;
-    yaml::Node *NameValueNode = nullptr;
-    auto UseExternalName = RedirectingFileSystem::NK_NotSet;
-    RedirectingFileSystem::EntryKind Kind;
+    yaml::ڳنڍ *Name_قدر_ڳنڍ = خالي_اشارو;
+    خودڪار UseExternalName = RedirectingFileSystem::NK_Not_سيٽ;
+    RedirectingFileSystem::داخلا_قسم قسم_2;
 
-    for (auto &I : *M) {
-      StringRef Key;
+    لكل (خودڪار &I : *M) {
+      StringRef ڪنجي;
       // Reuse the buffer for key and value, since we don't look at key after
       // parsing value.
-      SmallString<256> Buffer;
-      if (!parseScalarString(I.getKey(), Key, Buffer))
-        return nullptr;
+      SmallString<256> بفر;
+      إذا (!parseScalarString(I.get_ڪنجي(), ڪنجي, بفر))
+        أرجع خالي_اشارو;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return nullptr;
+      إذا (!check_Duplicate_Or_Unknown_ڪنجي(I.get_ڪنجي(), ڪنجي, ڪنجيون_2))
+        أرجع خالي_اشارو;
 
-      StringRef Value;
-      if (Key == "name") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+      StringRef قدر;
+      إذا (ڪنجي == "name") {
+        إذا (!parseScalarString(I.get_قدر(), قدر, بفر))
+          أرجع خالي_اشارو;
 
-        NameValueNode = I.getValue();
+        Name_قدر_ڳنڍ = I.get_قدر();
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
-        Name = canonicalize(Value).str();
-      } else if (Key == "type") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
-        if (Value == "file")
-          Kind = RedirectingFileSystem::EK_File;
-        else if (Value == "directory")
-          Kind = RedirectingFileSystem::EK_Directory;
-        else if (Value == "directory-remap")
-          Kind = RedirectingFileSystem::EK_DirectoryRemap;
-        else {
-          error(I.getValue(), "unknown value for 'type'");
-          return nullptr;
+        Name = canonicalize(قدر).str();
+      } وإلا إذا (ڪنجي == "type") {
+        إذا (!parseScalarString(I.get_قدر(), قدر, بفر))
+          أرجع خالي_اشارو;
+        إذا (قدر == "file")
+          قسم_2 = RedirectingFileSystem::EK_File;
+        وإلا إذا (قدر == "directory")
+          قسم_2 = RedirectingFileSystem::EK_Directory;
+        وإلا إذا (قدر == "directory-remap")
+          قسم_2 = RedirectingFileSystem::EK_DirectoryRemap;
+        وإلا {
+          error(I.get_قدر(), "unknown value for 'type'");
+          أرجع خالي_اشارو;
         }
-      } else if (Key == "contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } وإلا إذا (ڪنجي == "contents") {
+        إذا (Contents_ميدان != CF_Not_سيٽ) {
+          error(I.get_ڪنجي(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          أرجع خالي_اشارو;
         }
-        ContentsField = CF_List;
-        auto *Contents = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Contents) {
+        Contents_ميدان = CF_List;
+        خودڪار *Contents = dyn_cast_if_present<yaml::Sequence_ڳنڍ>(I.get_قدر());
+        إذا (!Contents) {
           // FIXME: this is only for directories, what about files?
-          error(I.getValue(), "expected array");
-          return nullptr;
+          error(I.get_قدر(), "expected array");
+          أرجع خالي_اشارو;
         }
 
-        for (auto &I : *Contents) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
-                  parseEntry(&I, FS, /*IsRootEntry*/ false))
-            EntryArrayContents.push_back(std::move(E));
-          else
-            return nullptr;
+        لكل (خودڪار &I : *Contents) {
+          إذا (std::unique_ptr<RedirectingFileSystem::داخلا_3> E =
+                  parse_داخلا(&I, FS, /*IsRootEntry*/ خطأ))
+            داخلا_Array_Contents.ڌڪو_پٺ(std::move(E));
+          وإلا
+            أرجع خالي_اشارو;
         }
-      } else if (Key == "external-contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } وإلا إذا (ڪنجي == "external-contents") {
+        إذا (Contents_ميدان != CF_Not_سيٽ) {
+          error(I.get_ڪنجي(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          أرجع خالي_اشارو;
         }
-        ContentsField = CF_External;
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+        Contents_ميدان = CF_External;
+        إذا (!parseScalarString(I.get_قدر(), قدر, بفر))
+          أرجع خالي_اشارو;
 
-        SmallString<256> FullPath;
-        if (FS->IsRelativeOverlay) {
-          FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() &&
+        SmallString<256> ڀريل_رستو;
+        إذا (FS->IsRelativeOverlay) {
+          ڀريل_رستو = FS->getOverlayFileDir();
+          أكد(!ڀريل_رستو.خالي_جايون() &&
                  "External contents prefix directory must exist");
-          SmallString<256> AbsFullPath = Value;
-          if (FS->makeAbsolute(FullPath, AbsFullPath)) {
+          SmallString<256> Abs_ڀريل_رستو = قدر;
+          إذا (FS->makeAbsolute(ڀريل_رستو, Abs_ڀريل_رستو)) {
             error(N, "failed to make 'external-contents' absolute");
-            return nullptr;
+            أرجع خالي_اشارو;
           }
-          FullPath = AbsFullPath;
-        } else {
-          FullPath = Value;
+          ڀريل_رستو = Abs_ڀريل_رستو;
+        } وإلا {
+          ڀريل_رستو = قدر;
         }
 
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
-        FullPath = canonicalize(FullPath);
-        ExternalContentsPath = FullPath.str();
-      } else if (Key == "use-external-name") {
-        bool Val;
-        if (!parseScalarBool(I.getValue(), Val))
-          return nullptr;
+        ڀريل_رستو = canonicalize(ڀريل_رستو);
+        External_Contents_رستو = ڀريل_رستو.str();
+      } وإلا إذا (ڪنجي == "use-external-name") {
+        منطقي Val;
+        إذا (!parseScalarBool(I.get_قدر(), Val))
+          أرجع خالي_اشارو;
         UseExternalName = Val ? RedirectingFileSystem::NK_External
                               : RedirectingFileSystem::NK_Virtual;
-      } else {
+      } وإلا {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return nullptr;
+    إذا (وهڪرو.failed())
+      أرجع خالي_اشارو;
 
     // check for missing keys
-    if (ContentsField == CF_NotSet) {
+    إذا (Contents_ميدان == CF_Not_سيٽ) {
       error(N, "missing key 'contents' or 'external-contents'");
-      return nullptr;
+      أرجع خالي_اشارو;
     }
-    if (!checkMissingKeys(N, Keys))
-      return nullptr;
+    إذا (!check_Missing_ڪنجيون(N, ڪنجيون_2))
+      أرجع خالي_اشارو;
 
     // check invalid configuration
-    if (Kind == RedirectingFileSystem::EK_Directory &&
-        UseExternalName != RedirectingFileSystem::NK_NotSet) {
+    إذا (قسم_2 == RedirectingFileSystem::EK_Directory &&
+        UseExternalName != RedirectingFileSystem::NK_Not_سيٽ) {
       error(N, "'use-external-name' is not supported for 'directory' entries");
-      return nullptr;
+      أرجع خالي_اشارو;
     }
 
-    if (Kind == RedirectingFileSystem::EK_DirectoryRemap &&
-        ContentsField == CF_List) {
+    إذا (قسم_2 == RedirectingFileSystem::EK_DirectoryRemap &&
+        Contents_ميدان == CF_List) {
       error(N, "'contents' is not supported for 'directory-remap' entries");
-      return nullptr;
+      أرجع خالي_اشارو;
     }
 
-    sys::path::Style path_style = sys::path::Style::native;
-    if (IsRootEntry) {
+    sys::رستو_2::Style رستو_style = sys::رستو_2::Style::native;
+    إذا (Is_پاڙ_داخلا) {
       // VFS root entries may be in either Posix or Windows style.  Figure out
       // which style we have, and use it consistently.
-      if (sys::path::is_absolute(Name, sys::path::Style::posix)) {
-        path_style = sys::path::Style::posix;
-      } else if (sys::path::is_absolute(Name,
-                                        sys::path::Style::windows_backslash)) {
-        path_style = sys::path::Style::windows_backslash;
-      } else {
+      إذا (sys::رستو_2::is_absolute(Name, sys::رستو_2::Style::posix)) {
+        رستو_style = sys::رستو_2::Style::posix;
+      } وإلا إذا (sys::رستو_2::is_absolute(Name,
+                                        sys::رستو_2::Style::windows_backslash)) {
+        رستو_style = sys::رستو_2::Style::windows_backslash;
+      } وإلا {
         // Relative VFS root entries are made absolute to either the overlay
         // directory, or the current working directory, then we can determine
         // the path style from that.
-        std::error_code EC;
-        if (FS->RootRelative ==
-            RedirectingFileSystem::RootRelativeKind::OverlayDir) {
-          StringRef FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() && "Overlay file directory must exist");
-          EC = FS->makeAbsolute(FullPath, Name);
+        std::error_ڪوڊ EC;
+        إذا (FS->پاڙ_Relative ==
+            RedirectingFileSystem::پاڙ_Relative_قسم::OverlayDir) {
+          StringRef ڀريل_رستو = FS->getOverlayFileDir();
+          أكد(!ڀريل_رستو.خالي_جايون() && "Overlay file directory must exist");
+          EC = FS->makeAbsolute(ڀريل_رستو, Name);
           Name = canonicalize(Name);
-        } else {
+        } وإلا {
           EC = FS->makeAbsolute(Name);
         }
-        if (EC) {
-          assert(NameValueNode && "Name presence should be checked earlier");
+        إذا (EC) {
+          أكد(Name_قدر_ڳنڍ && "Name presence should be checked earlier");
           error(
-              NameValueNode,
+              Name_قدر_ڳنڍ,
               "entry with relative path at the root level is not discoverable");
-          return nullptr;
+          أرجع خالي_اشارو;
         }
-        path_style = sys::path::is_absolute(Name, sys::path::Style::posix)
-                         ? sys::path::Style::posix
-                         : sys::path::Style::windows_backslash;
+        رستو_style = sys::رستو_2::is_absolute(Name, sys::رستو_2::Style::posix)
+                         ? sys::رستو_2::Style::posix
+                         : sys::رستو_2::Style::windows_backslash;
       }
       // is::path::is_absolute(Name, sys::path::Style::windows_backslash) will
       // return true even if `Name` is using forward slashes. Distinguish
       // between windows_backslash and windows_slash.
-      if (path_style == sys::path::Style::windows_backslash &&
-          getExistingStyle(Name) != sys::path::Style::windows_backslash)
-        path_style = sys::path::Style::windows_slash;
+      إذا (رستو_style == sys::رستو_2::Style::windows_backslash &&
+          getExistingStyle(Name) != sys::رستو_2::Style::windows_backslash)
+        رستو_style = sys::رستو_2::Style::windows_slash;
     }
 
     // Remove trailing slash(es), being careful not to remove the root path
     StringRef Trimmed = Name;
-    size_t RootPathLen = sys::path::root_path(Trimmed, path_style).size();
-    while (Trimmed.size() > RootPathLen &&
-           sys::path::is_separator(Trimmed.back(), path_style))
-      Trimmed = Trimmed.slice(0, Trimmed.size() - 1);
+    size_t پاڙ_رستو_Len = sys::رستو_2::پاڙ_رستو_2(Trimmed, رستو_style).سائيز_2();
+    طالما (Trimmed.سائيز_2() > پاڙ_رستو_Len &&
+           sys::رستو_2::is_separator(Trimmed.پٺ(), رستو_style))
+      Trimmed = Trimmed.ٽڪرو(0, Trimmed.سائيز_2() - 1);
 
     // Get the last component
-    StringRef LastComponent = sys::path::filename(Trimmed, path_style);
+    StringRef آخري_Component = sys::رستو_2::filename(Trimmed, رستو_style);
 
-    std::unique_ptr<RedirectingFileSystem::Entry> Result;
-    switch (Kind) {
-    case RedirectingFileSystem::EK_File:
-      Result = std::make_unique<RedirectingFileSystem::FileEntry>(
-          LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_DirectoryRemap:
-      Result = std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
-          LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_Directory:
-      Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
-          LastComponent, std::move(EntryArrayContents),
-          Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
+    std::unique_ptr<RedirectingFileSystem::داخلا_3> نتيجو;
+    بدل (قسم_2) {
+    حالة RedirectingFileSystem::EK_File:
+      نتيجو = std::make_unique<RedirectingFileSystem::File_داخلا>(
+          آخري_Component, std::move(External_Contents_رستو), UseExternalName);
+      اكسر;
+    حالة RedirectingFileSystem::EK_DirectoryRemap:
+      نتيجو = std::make_unique<RedirectingFileSystem::Directory_Remap_داخلا>(
+          آخري_Component, std::move(External_Contents_رستو), UseExternalName);
+      اكسر;
+    حالة RedirectingFileSystem::EK_Directory:
+      نتيجو = std::make_unique<RedirectingFileSystem::Directory_داخلا>(
+          آخري_Component, std::move(داخلا_Array_Contents),
+          حالت("", get_ايندڙ_Virtual_Unique_ID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
-      break;
+      اكسر;
     }
 
-    StringRef Parent = sys::path::parent_path(Trimmed, path_style);
-    if (Parent.empty())
-      return Result;
+    StringRef والد_2 = sys::رستو_2::والد_رستو(Trimmed, رستو_style);
+    إذا (والد_2.خالي_جايون())
+      أرجع نتيجو;
 
     // if 'name' contains multiple components, create implicit directory entries
-    for (sys::path::reverse_iterator I = sys::path::rbegin(Parent, path_style),
-                                     E = sys::path::rend(Parent);
+    لكل (sys::رستو_2::ابتو_iterator I = sys::رستو_2::rbegin(والد_2, رستو_style),
+                                     E = sys::رستو_2::rend(والد_2);
          I != E; ++I) {
-      std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> Entries;
-      Entries.push_back(std::move(Result));
-      Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
+      std::ويڪٽر<std::unique_ptr<RedirectingFileSystem::داخلا_3>> Entries;
+      Entries.ڌڪو_پٺ(std::move(نتيجو));
+      نتيجو = std::make_unique<RedirectingFileSystem::Directory_داخلا>(
           *I, std::move(Entries),
-          Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
+          حالت("", get_ايندڙ_Virtual_Unique_ID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
     }
-    return Result;
+    أرجع نتيجو;
   }
 
-public:
-  RedirectingFileSystemParser(yaml::Stream &S) : Stream(S) {}
+عام:
+  RedirectingFileSystemParser(yaml::وهڪرو &S) : وهڪرو(S) {}
 
   // false on error
-  bool parse(yaml::Node *Root, RedirectingFileSystem *FS) {
-    auto *Top = dyn_cast<yaml::MappingNode>(Root);
-    if (!Top) {
-      error(Root, "expected mapping node");
-      return false;
+  منطقي parse(yaml::ڳنڍ *پاڙ_2, RedirectingFileSystem *FS) {
+    خودڪار *چوٽي = dyn_cast<yaml::Mapping_ڳنڍ>(پاڙ_2);
+    إذا (!چوٽي) {
+      error(پاڙ_2, "expected mapping node");
+      أرجع خطأ;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("version", true),
-        KeyStatusPair("case-sensitive", false),
-        KeyStatusPair("use-external-names", false),
-        KeyStatusPair("root-relative", false),
-        KeyStatusPair("overlay-relative", false),
-        KeyStatusPair("fallthrough", false),
-        KeyStatusPair("redirecting-with", false),
-        KeyStatusPair("roots", true),
+    ڪنجي_حالت_Pair Fields[] = {
+        ڪنجي_حالت_Pair("version", سچ),
+        ڪنجي_حالت_Pair("case-sensitive", خطأ),
+        ڪنجي_حالت_Pair("use-external-names", خطأ),
+        ڪنجي_حالت_Pair("root-relative", خطأ),
+        ڪنجي_حالت_Pair("overlay-relative", خطأ),
+        ڪنجي_حالت_Pair("fallthrough", خطأ),
+        ڪنجي_حالت_Pair("redirecting-with", خطأ),
+        ڪنجي_حالت_Pair("roots", سچ),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
-    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> RootEntries;
+    DenseMap<StringRef, ڪنجي_حالت> ڪنجيون_2(std::begin(Fields), std::پڇاڙي(Fields));
+    std::ويڪٽر<std::unique_ptr<RedirectingFileSystem::داخلا_3>> پاڙ_Entries;
 
     // Parse configuration and 'roots'
-    for (auto &I : *Top) {
-      SmallString<10> KeyBuffer;
-      StringRef Key;
-      if (!parseScalarString(I.getKey(), Key, KeyBuffer))
-        return false;
+    لكل (خودڪار &I : *چوٽي) {
+      SmallString<10> ڪنجي_بفر;
+      StringRef ڪنجي;
+      إذا (!parseScalarString(I.get_ڪنجي(), ڪنجي, ڪنجي_بفر))
+        أرجع خطأ;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return false;
+      إذا (!check_Duplicate_Or_Unknown_ڪنجي(I.get_ڪنجي(), ڪنجي, ڪنجيون_2))
+        أرجع خطأ;
 
-      if (Key == "roots") {
-        auto *Roots = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Roots) {
-          error(I.getValue(), "expected array");
-          return false;
+      إذا (ڪنجي == "roots") {
+        خودڪار *Roots = dyn_cast_if_present<yaml::Sequence_ڳنڍ>(I.get_قدر());
+        إذا (!Roots) {
+          error(I.get_قدر(), "expected array");
+          أرجع خطأ;
         }
 
-        for (auto &I : *Roots) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
-                  parseEntry(&I, FS, /*IsRootEntry*/ true))
-            RootEntries.push_back(std::move(E));
-          else
-            return false;
+        لكل (خودڪار &I : *Roots) {
+          إذا (std::unique_ptr<RedirectingFileSystem::داخلا_3> E =
+                  parse_داخلا(&I, FS, /*IsRootEntry*/ سچ))
+            پاڙ_Entries.ڌڪو_پٺ(std::move(E));
+          وإلا
+            أرجع خطأ;
         }
-      } else if (Key == "version") {
-        StringRef VersionString;
+      } وإلا إذا (ڪنجي == "version") {
+        StringRef نسخو_String;
         SmallString<4> Storage;
-        if (!parseScalarString(I.getValue(), VersionString, Storage))
-          return false;
-        int Version;
-        if (VersionString.getAsInteger<int>(10, Version)) {
-          error(I.getValue(), "expected integer");
-          return false;
+        إذا (!parseScalarString(I.get_قدر(), نسخو_String, Storage))
+          أرجع خطأ;
+        صحيح نسخو;
+        إذا (نسخو_String.getAsInteger<صحيح>(10, نسخو)) {
+          error(I.get_قدر(), "expected integer");
+          أرجع خطأ;
         }
-        if (Version < 0) {
-          error(I.getValue(), "invalid version number");
-          return false;
+        إذا (نسخو < 0) {
+          error(I.get_قدر(), "invalid version number");
+          أرجع خطأ;
         }
-        if (Version != 0) {
-          error(I.getValue(), "version mismatch, expected 0");
-          return false;
+        إذا (نسخو != 0) {
+          error(I.get_قدر(), "version mismatch, expected 0");
+          أرجع خطأ;
         }
-      } else if (Key == "case-sensitive") {
-        if (!parseScalarBool(I.getValue(), FS->CaseSensitive))
-          return false;
-      } else if (Key == "overlay-relative") {
-        if (!parseScalarBool(I.getValue(), FS->IsRelativeOverlay))
-          return false;
-      } else if (Key == "use-external-names") {
-        if (!parseScalarBool(I.getValue(), FS->UseExternalNames))
-          return false;
-      } else if (Key == "fallthrough") {
-        if (Keys["redirecting-with"].Seen) {
-          error(I.getValue(),
+      } وإلا إذا (ڪنجي == "case-sensitive") {
+        إذا (!parseScalarBool(I.get_قدر(), FS->CaseSensitive))
+          أرجع خطأ;
+      } وإلا إذا (ڪنجي == "overlay-relative") {
+        إذا (!parseScalarBool(I.get_قدر(), FS->IsRelativeOverlay))
+          أرجع خطأ;
+      } وإلا إذا (ڪنجي == "use-external-names") {
+        إذا (!parseScalarBool(I.get_قدر(), FS->Use_External_نالا))
+          أرجع خطأ;
+      } وإلا إذا (ڪنجي == "fallthrough") {
+        إذا (ڪنجيون_2["redirecting-with"].ڏٺل) {
+          error(I.get_قدر(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          أرجع خطأ;
         }
 
-        bool ShouldFallthrough = false;
-        if (!parseScalarBool(I.getValue(), ShouldFallthrough))
-          return false;
+        منطقي ShouldFallthrough = خطأ;
+        إذا (!parseScalarBool(I.get_قدر(), ShouldFallthrough))
+          أرجع خطأ;
 
-        if (ShouldFallthrough) {
-          FS->Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-        } else {
-          FS->Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
+        إذا (ShouldFallthrough) {
+          FS->Redirection = RedirectingFileSystem::Redirect_قسم::Fallthrough;
+        } وإلا {
+          FS->Redirection = RedirectingFileSystem::Redirect_قسم::RedirectOnly;
         }
-      } else if (Key == "redirecting-with") {
-        if (Keys["fallthrough"].Seen) {
-          error(I.getValue(),
+      } وإلا إذا (ڪنجي == "redirecting-with") {
+        إذا (ڪنجيون_2["fallthrough"].ڏٺل) {
+          error(I.get_قدر(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          أرجع خطأ;
         }
 
-        if (auto Kind = parseRedirectKind(I.getValue())) {
-          FS->Redirection = *Kind;
-        } else {
-          error(I.getValue(), "expected valid redirect kind");
-          return false;
+        إذا (خودڪار قسم_2 = parse_Redirect_قسم(I.get_قدر())) {
+          FS->Redirection = *قسم_2;
+        } وإلا {
+          error(I.get_قدر(), "expected valid redirect kind");
+          أرجع خطأ;
         }
-      } else if (Key == "root-relative") {
-        if (auto Kind = parseRootRelativeKind(I.getValue())) {
-          FS->RootRelative = *Kind;
-        } else {
-          error(I.getValue(), "expected valid root-relative kind");
-          return false;
+      } وإلا إذا (ڪنجي == "root-relative") {
+        إذا (خودڪار قسم_2 = parse_پاڙ_Relative_قسم(I.get_قدر())) {
+          FS->پاڙ_Relative = *قسم_2;
+        } وإلا {
+          error(I.get_قدر(), "expected valid root-relative kind");
+          أرجع خطأ;
         }
-      } else {
+      } وإلا {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return false;
+    إذا (وهڪرو.failed())
+      أرجع خطأ;
 
-    if (!checkMissingKeys(Top, Keys))
-      return false;
+    إذا (!check_Missing_ڪنجيون(چوٽي, ڪنجيون_2))
+      أرجع خطأ;
 
     // Now that we sucessefully parsed the YAML file, canonicalize the internal
     // representation to a proper directory tree so that we can search faster
     // inside the VFS.
-    for (auto &E : RootEntries)
-      uniqueOverlayTree(FS, E.get());
+    لكل (خودڪار &E : پاڙ_Entries)
+      unique_Overlay_وڻ(FS, E.get());
 
-    return true;
+    أرجع سچ;
   }
 };
 
 std::unique_ptr<RedirectingFileSystem>
-RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
-                              SourceMgr::DiagHandlerTy DiagHandler,
-                              StringRef YAMLFilePath, void *DiagContext,
+RedirectingFileSystem::create(std::unique_ptr<يادگيري_بفر> بفر,
+                              ذريعو_Mgr::DiagHandlerTy DiagHandler,
+                              StringRef YAMLFile_رستو, فراغ *DiagContext,
                               IntrusiveRefCntPtr<FileSystem> ExternalFS) {
-  SourceMgr SM;
-  yaml::Stream Stream(Buffer->getMemBufferRef(), SM);
+  ذريعو_Mgr SM;
+  yaml::وهڪرو وهڪرو(بفر->get_Mem_بفر_Ref(), SM);
 
-  SM.setDiagHandler(DiagHandler, DiagContext);
-  yaml::document_iterator DI = Stream.begin();
-  yaml::Node *Root = DI->getRoot();
-  if (DI == Stream.end() || !Root) {
-    SM.PrintMessage(SMLoc(), SourceMgr::DK_Error, "expected root node");
-    return nullptr;
+  SM.سيٽ_Diag_Handler(DiagHandler, DiagContext);
+  yaml::document_iterator DI = وهڪرو.begin();
+  yaml::ڳنڍ *پاڙ_2 = DI->get_پاڙ();
+  إذا (DI == وهڪرو.پڇاڙي() || !پاڙ_2) {
+    SM.Print_پيغام(SMLoc(), ذريعو_Mgr::DK_Error, "expected root node");
+    أرجع خالي_اشارو;
   }
 
-  RedirectingFileSystemParser P(Stream);
+  RedirectingFileSystemParser P(وهڪرو);
 
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
+      جديد RedirectingFileSystem(ExternalFS));
 
-  if (!YAMLFilePath.empty()) {
+  إذا (!YAMLFile_رستو.خالي_جايون()) {
     // Use the YAML path from -ivfsoverlay to compute the dir to be prefixed
     // to each 'external-contents' path.
     //
@@ -2251,654 +2251,654 @@ RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
     // yields:
     //  FS->OverlayFileDir => /<absolute_path_to>/dummy.cache/vfs
     //
-    SmallString<256> OverlayAbsDir = sys::path::parent_path(YAMLFilePath);
-    std::error_code EC = FS->makeAbsolute(OverlayAbsDir);
-    assert(!EC && "Overlay dir final path must be absolute");
-    (void)EC;
-    FS->setOverlayFileDir(OverlayAbsDir);
+    SmallString<256> OverlayAbsDir = sys::رستو_2::والد_رستو(YAMLFile_رستو);
+    std::error_ڪوڊ EC = FS->makeAbsolute(OverlayAbsDir);
+    أكد(!EC && "Overlay dir final path must be absolute");
+    (فراغ)EC;
+    FS->سيٽ_Overlay_File_Dir(OverlayAbsDir);
   }
 
-  if (!P.parse(Root, FS.get()))
-    return nullptr;
+  إذا (!P.parse(پاڙ_2, FS.get()))
+    أرجع خالي_اشارو;
 
-  return FS;
+  أرجع FS;
 }
 
 std::unique_ptr<RedirectingFileSystem> RedirectingFileSystem::create(
     ArrayRef<std::pair<std::string, std::string>> RemappedFiles,
-    bool UseExternalNames, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
+    منطقي Use_External_نالا, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
-  FS->UseExternalNames = UseExternalNames;
+      جديد RedirectingFileSystem(ExternalFS));
+  FS->Use_External_نالا = Use_External_نالا;
 
-  StringMap<RedirectingFileSystem::Entry *> Entries;
+  StringMap<RedirectingFileSystem::داخلا_3 *> Entries;
 
-  for (auto &Mapping : llvm::reverse(RemappedFiles)) {
-    SmallString<128> From = StringRef(Mapping.first);
-    SmallString<128> To = StringRef(Mapping.second);
+  لكل (خودڪار &Mapping : llvm::ابتو(RemappedFiles)) {
+    SmallString<128> From = StringRef(Mapping.پهريون_2);
+    SmallString<128> منزل = StringRef(Mapping.ٻيو_2);
     {
-      auto EC = ExternalFS->makeAbsolute(From);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      خودڪار EC = ExternalFS->makeAbsolute(From);
+      (فراغ)EC;
+      أكد(!EC && "Could not make absolute path");
     }
 
     // Check if we've already mapped this file. The first one we see (in the
     // reverse iteration) wins.
-    RedirectingFileSystem::Entry *&ToEntry = Entries[From];
-    if (ToEntry)
-      continue;
+    RedirectingFileSystem::داخلا_3 *&منزل_داخلا = Entries[From];
+    إذا (منزل_داخلا)
+      استمر;
 
     // Add parent directories.
-    RedirectingFileSystem::Entry *Parent = nullptr;
-    StringRef FromDirectory = llvm::sys::path::parent_path(From);
-    for (auto I = llvm::sys::path::begin(FromDirectory),
-              E = llvm::sys::path::end(FromDirectory);
+    RedirectingFileSystem::داخلا_3 *والد_2 = خالي_اشارو;
+    StringRef FromDirectory = llvm::sys::رستو_2::والد_رستو(From);
+    لكل (خودڪار I = llvm::sys::رستو_2::begin(FromDirectory),
+              E = llvm::sys::رستو_2::پڇاڙي(FromDirectory);
          I != E; ++I) {
-      Parent = RedirectingFileSystemParser::lookupOrCreateEntry(FS.get(), *I,
-                                                                Parent);
+      والد_2 = RedirectingFileSystemParser::lookup_Or_Create_داخلا(FS.get(), *I,
+                                                                والد_2);
     }
-    assert(Parent && "File without a directory?");
+    أكد(والد_2 && "File without a directory?");
     {
-      auto EC = ExternalFS->makeAbsolute(To);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      خودڪار EC = ExternalFS->makeAbsolute(منزل);
+      (فراغ)EC;
+      أكد(!EC && "Could not make absolute path");
     }
 
     // Add the file.
-    auto NewFile = std::make_unique<RedirectingFileSystem::FileEntry>(
-        llvm::sys::path::filename(From), To,
-        UseExternalNames ? RedirectingFileSystem::NK_External
+    خودڪار NewFile = std::make_unique<RedirectingFileSystem::File_داخلا>(
+        llvm::sys::رستو_2::filename(From), منزل,
+        Use_External_نالا ? RedirectingFileSystem::NK_External
                          : RedirectingFileSystem::NK_Virtual);
-    ToEntry = NewFile.get();
-    cast<RedirectingFileSystem::DirectoryEntry>(Parent)->addContent(
+    منزل_داخلا = NewFile.get();
+    cast<RedirectingFileSystem::Directory_داخلا>(والد_2)->جوڙيو_Content(
         std::move(NewFile));
   }
 
-  return FS;
+  أرجع FS;
 }
 
-RedirectingFileSystem::LookupResult::LookupResult(
-    Entry *E, sys::path::const_iterator Start, sys::path::const_iterator End)
+RedirectingFileSystem::Lookup_نتيجو::Lookup_نتيجو(
+    داخلا_3 *E, sys::رستو_2::const_iterator شروعات, sys::رستو_2::const_iterator پڇاڙي_2)
     : E(E) {
-  assert(E != nullptr);
+  أكد(E != خالي_اشارو);
   // If the matched entry is a DirectoryRemapEntry, set ExternalRedirect to the
   // path of the directory it maps to in the external file system plus any
   // remaining path components in the provided iterator.
-  if (auto *DRE = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(E)) {
-    SmallString<256> Redirect(DRE->getExternalContentsPath());
-    sys::path::append(Redirect, Start, End,
-                      getExistingStyle(DRE->getExternalContentsPath()));
+  إذا (خودڪار *DRE = dyn_cast<RedirectingFileSystem::Directory_Remap_داخلا>(E)) {
+    SmallString<256> Redirect(DRE->get_External_Contents_رستو());
+    sys::رستو_2::append(Redirect, شروعات, پڇاڙي_2,
+                      getExistingStyle(DRE->get_External_Contents_رستو()));
     ExternalRedirect = std::string(Redirect);
   }
 }
 
-void RedirectingFileSystem::LookupResult::getPath(
-    llvm::SmallVectorImpl<char> &Result) const {
-  Result.clear();
-  for (Entry *Parent : Parents)
-    llvm::sys::path::append(Result, Parent->getName());
-  llvm::sys::path::append(Result, E->getName());
+فراغ RedirectingFileSystem::Lookup_نتيجو::get_رستو(
+    llvm::Small_ويڪٽر_Impl<حرف> &نتيجو) ثابت {
+  نتيجو.clear();
+  لكل (داخلا_3 *والد_2 : Parents)
+    llvm::sys::رستو_2::append(نتيجو, والد_2->getName());
+  llvm::sys::رستو_2::append(نتيجو, E->getName());
 }
 
-std::error_code RedirectingFileSystem::makeCanonicalForLookup(
-    SmallVectorImpl<char> &Path) const {
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+std::error_ڪوڊ RedirectingFileSystem::makeCanonicalForLookup(
+    Small_ويڪٽر_Impl<حرف> &رستو) ثابت {
+  إذا (std::error_ڪوڊ EC = makeAbsolute(رستو))
+    أرجع EC;
 
-  llvm::SmallString<256> CanonicalPath =
-      canonicalize(StringRef(Path.data(), Path.size()));
-  if (CanonicalPath.empty())
-    return make_error_code(llvm::errc::invalid_argument);
+  llvm::SmallString<256> Canonical_رستو =
+      canonicalize(StringRef(رستو.معلومات(), رستو.سائيز_2()));
+  إذا (Canonical_رستو.خالي_جايون())
+    أرجع make_error_ڪوڊ(llvm::errc::invalid_دليل);
 
-  Path.assign(CanonicalPath.begin(), CanonicalPath.end());
-  return {};
+  رستو.سونپيو(Canonical_رستو.begin(), Canonical_رستو.پڇاڙي());
+  أرجع {};
 }
 
-ErrorOr<RedirectingFileSystem::LookupResult>
-RedirectingFileSystem::lookupPath(StringRef Path) const {
-  llvm::SmallString<128> CanonicalPath(Path);
-  if (std::error_code EC = makeCanonicalForLookup(CanonicalPath))
-    return EC;
+ErrorOr<RedirectingFileSystem::Lookup_نتيجو>
+RedirectingFileSystem::lookup_رستو(StringRef رستو) ثابت {
+  llvm::SmallString<128> Canonical_رستو(رستو);
+  إذا (std::error_ڪوڊ EC = makeCanonicalForLookup(Canonical_رستو))
+    أرجع EC;
 
   // RedirectOnly means the VFS is always used.
-  if (UsageTrackingActive && Redirection == RedirectKind::RedirectOnly)
-    HasBeenUsed = true;
+  إذا (Usage_Tracking_سرگرم && Redirection == Redirect_قسم::RedirectOnly)
+    Has_Been_استعمال_ٿيل = سچ;
 
-  sys::path::const_iterator Start = sys::path::begin(CanonicalPath);
-  sys::path::const_iterator End = sys::path::end(CanonicalPath);
-  llvm::SmallVector<Entry *, 32> Entries;
-  for (const auto &Root : Roots) {
-    ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, Root.get(), Entries);
-    if (UsageTrackingActive && Result && isa<RemapEntry>(Result->E))
-      HasBeenUsed = true;
-    if (Result) {
-      Result->Parents = std::move(Entries);
-      return Result;
+  sys::رستو_2::const_iterator شروعات = sys::رستو_2::begin(Canonical_رستو);
+  sys::رستو_2::const_iterator پڇاڙي_2 = sys::رستو_2::پڇاڙي(Canonical_رستو);
+  llvm::Small_ويڪٽر<داخلا_3 *, 32> Entries;
+  لكل (ثابت خودڪار &پاڙ_2 : Roots) {
+    ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو =
+        lookup_رستو_Impl(شروعات, پڇاڙي_2, پاڙ_2.get(), Entries);
+    إذا (Usage_Tracking_سرگرم && نتيجو && isa<Remap_داخلا>(نتيجو->E))
+      Has_Been_استعمال_ٿيل = سچ;
+    إذا (نتيجو) {
+      نتيجو->Parents = std::move(Entries);
+      أرجع نتيجو;
     }
 
-    if (Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+    إذا (نتيجو.getError() != llvm::errc::no_such_file_or_directory)
+      أرجع نتيجو;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  أرجع make_error_ڪوڊ(llvm::errc::no_such_file_or_directory);
 }
 
-ErrorOr<RedirectingFileSystem::LookupResult>
-RedirectingFileSystem::lookupPathImpl(
-    sys::path::const_iterator Start, sys::path::const_iterator End,
-    RedirectingFileSystem::Entry *From,
-    llvm::SmallVectorImpl<Entry *> &Entries) const {
-  assert(!isTraversalComponent(*Start) &&
+ErrorOr<RedirectingFileSystem::Lookup_نتيجو>
+RedirectingFileSystem::lookup_رستو_Impl(
+    sys::رستو_2::const_iterator شروعات, sys::رستو_2::const_iterator پڇاڙي_2,
+    RedirectingFileSystem::داخلا_3 *From,
+    llvm::Small_ويڪٽر_Impl<داخلا_3 *> &Entries) ثابت {
+  أكد(!isTraversalComponent(*شروعات) &&
          !isTraversalComponent(From->getName()) &&
          "Paths should not contain traversal components");
 
   StringRef FromName = From->getName();
 
   // Forward the search to the next component in case this is an empty one.
-  if (!FromName.empty()) {
-    if (!pathComponentMatches(*Start, FromName))
-      return make_error_code(llvm::errc::no_such_file_or_directory);
+  إذا (!FromName.خالي_جايون()) {
+    إذا (!رستو_Component_Matches(*شروعات, FromName))
+      أرجع make_error_ڪوڊ(llvm::errc::no_such_file_or_directory);
 
-    ++Start;
+    ++شروعات;
 
-    if (Start == End) {
+    إذا (شروعات == پڇاڙي_2) {
       // Match!
-      return LookupResult(From, Start, End);
+      أرجع Lookup_نتيجو(From, شروعات, پڇاڙي_2);
     }
   }
 
-  if (isa<RedirectingFileSystem::FileEntry>(From))
-    return make_error_code(llvm::errc::not_a_directory);
+  إذا (isa<RedirectingFileSystem::File_داخلا>(From))
+    أرجع make_error_ڪوڊ(llvm::errc::not_a_directory);
 
-  if (isa<RedirectingFileSystem::DirectoryRemapEntry>(From))
-    return LookupResult(From, Start, End);
+  إذا (isa<RedirectingFileSystem::Directory_Remap_داخلا>(From))
+    أرجع Lookup_نتيجو(From, شروعات, پڇاڙي_2);
 
-  auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(From);
-  for (const std::unique_ptr<RedirectingFileSystem::Entry> &DirEntry :
-       llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-    Entries.push_back(From);
-    ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, DirEntry.get(), Entries);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
-    Entries.pop_back();
+  خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(From);
+  لكل (ثابت std::unique_ptr<RedirectingFileSystem::داخلا_3> &Dir_داخلا :
+       llvm::make_range(DE->contents_begin(), DE->contents_پڇاڙي())) {
+    Entries.ڌڪو_پٺ(From);
+    ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو =
+        lookup_رستو_Impl(شروعات, پڇاڙي_2, Dir_داخلا.get(), Entries);
+    إذا (نتيجو || نتيجو.getError() != llvm::errc::no_such_file_or_directory)
+      أرجع نتيجو;
+    Entries.ڪڍو_پٺ();
   }
 
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  أرجع make_error_ڪوڊ(llvm::errc::no_such_file_or_directory);
 }
 
-static Status getRedirectedFileStatus(const Twine &OriginalPath,
-                                      bool UseExternalNames,
-                                      Status ExternalStatus) {
+ساكن حالت get_Redirected_File_حالت(ثابت Twine &Original_رستو,
+                                      منطقي Use_External_نالا,
+                                      حالت External_حالت) {
   // The path has been mapped by some nested VFS and exposes an external path,
   // don't override it with the original path.
-  if (ExternalStatus.ExposesExternalVFSPath)
-    return ExternalStatus;
+  إذا (External_حالت.ExposesExternalVFSPath)
+    أرجع External_حالت;
 
-  Status S = ExternalStatus;
-  if (!UseExternalNames)
-    S = Status::copyWithNewName(S, OriginalPath);
-  else
-    S.ExposesExternalVFSPath = true;
-  return S;
+  حالت S = External_حالت;
+  إذا (!Use_External_نالا)
+    S = حالت::copyWithNewName(S, Original_رستو);
+  وإلا
+    S.ExposesExternalVFSPath = سچ;
+  أرجع S;
 }
 
-ErrorOr<Status> RedirectingFileSystem::status(
-    const Twine &LookupPath, const Twine &OriginalPath,
-    const RedirectingFileSystem::LookupResult &Result) {
-  if (std::optional<StringRef> ExtRedirect = Result.getExternalRedirect()) {
-    SmallString<256> RemappedPath((*ExtRedirect).str());
-    if (std::error_code EC = makeAbsolute(RemappedPath))
-      return EC;
+ErrorOr<حالت> RedirectingFileSystem::حالت_2(
+    ثابت Twine &Lookup_رستو, ثابت Twine &Original_رستو,
+    ثابت RedirectingFileSystem::Lookup_نتيجو &نتيجو) {
+  إذا (std::optional<StringRef> ExtRedirect = نتيجو.getExternalRedirect()) {
+    SmallString<256> Remapped_رستو((*ExtRedirect).str());
+    إذا (std::error_ڪوڊ EC = makeAbsolute(Remapped_رستو))
+      أرجع EC;
 
-    ErrorOr<Status> S = ExternalFS->status(RemappedPath);
-    if (!S)
-      return S;
-    S = Status::copyWithNewName(*S, *ExtRedirect);
-    auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result.E);
-    return getRedirectedFileStatus(OriginalPath,
-                                   RE->useExternalName(UseExternalNames), *S);
+    ErrorOr<حالت> S = ExternalFS->حالت_2(Remapped_رستو);
+    إذا (!S)
+      أرجع S;
+    S = حالت::copyWithNewName(*S, *ExtRedirect);
+    خودڪار *RE = cast<RedirectingFileSystem::Remap_داخلا>(نتيجو.E);
+    أرجع get_Redirected_File_حالت(Original_رستو,
+                                   RE->useExternalName(Use_External_نالا), *S);
   }
 
-  auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(Result.E);
-  return Status::copyWithNewName(DE->getStatus(), LookupPath);
+  خودڪار *DE = cast<RedirectingFileSystem::Directory_داخلا>(نتيجو.E);
+  أرجع حالت::copyWithNewName(DE->get_حالت(), Lookup_رستو);
 }
 
-ErrorOr<Status>
-RedirectingFileSystem::getExternalStatus(const Twine &LookupPath,
-                                         const Twine &OriginalPath) const {
-  auto Result = ExternalFS->status(LookupPath);
+ErrorOr<حالت>
+RedirectingFileSystem::get_External_حالت(ثابت Twine &Lookup_رستو,
+                                         ثابت Twine &Original_رستو) ثابت {
+  خودڪار نتيجو = ExternalFS->حالت_2(Lookup_رستو);
 
   // The path has been mapped by some nested VFS, don't override it with the
   // original path.
-  if (!Result || Result->ExposesExternalVFSPath)
-    return Result;
-  return Status::copyWithNewName(Result.get(), OriginalPath);
+  إذا (!نتيجو || نتيجو->ExposesExternalVFSPath)
+    أرجع نتيجو;
+  أرجع حالت::copyWithNewName(نتيجو.get(), Original_رستو);
 }
 
-ErrorOr<Status> RedirectingFileSystem::status(const Twine &OriginalPath) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+ErrorOr<حالت> RedirectingFileSystem::حالت_2(ثابت Twine &Original_رستو) {
+  SmallString<256> رستو;
+  Original_رستو.منزل_ويڪٽر(رستو);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  إذا (std::error_ڪوڊ EC = makeAbsolute(رستو))
+    أرجع EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  إذا (Redirection == Redirect_قسم::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    ErrorOr<Status> S = getExternalStatus(Path, OriginalPath);
-    if (S)
-      return S;
+    ErrorOr<حالت> S = get_External_حالت(رستو, Original_رستو);
+    إذا (S)
+      أرجع S;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو = lookup_رستو(رستو);
+  إذا (!نتيجو) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return getExternalStatus(Path, OriginalPath);
-    return Result.getError();
+    إذا (Redirection == Redirect_قسم::Fallthrough &&
+        is_File_Not_مليو(نتيجو.getError()))
+      أرجع get_External_حالت(رستو, Original_رستو);
+    أرجع نتيجو.getError();
   }
 
-  ErrorOr<Status> S = status(Path, OriginalPath, *Result);
-  if (!S && Redirection == RedirectKind::Fallthrough &&
-      isFileNotFound(S.getError(), Result->E)) {
+  ErrorOr<حالت> S = حالت_2(رستو, Original_رستو, *نتيجو);
+  إذا (!S && Redirection == Redirect_قسم::Fallthrough &&
+      is_File_Not_مليو(S.getError(), نتيجو->E)) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return getExternalStatus(Path, OriginalPath);
+    أرجع get_External_حالت(رستو, Original_رستو);
   }
 
-  return S;
+  أرجع S;
 }
 
-bool RedirectingFileSystem::exists(const Twine &OriginalPath) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+منطقي RedirectingFileSystem::exists(ثابت Twine &Original_رستو) {
+  SmallString<256> رستو;
+  Original_رستو.منزل_ويڪٽر(رستو);
 
-  if (makeAbsolute(Path))
-    return false;
+  إذا (makeAbsolute(رستو))
+    أرجع خطأ;
 
-  if (Redirection == RedirectKind::Fallback) {
+  إذا (Redirection == Redirect_قسم::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    if (ExternalFS->exists(Path))
-      return true;
+    إذا (ExternalFS->exists(رستو))
+      أرجع سچ;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو = lookup_رستو(رستو);
+  إذا (!نتيجو) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->exists(Path);
-    return false;
+    إذا (Redirection == Redirect_قسم::Fallthrough &&
+        is_File_Not_مليو(نتيجو.getError()))
+      أرجع ExternalFS->exists(رستو);
+    أرجع خطأ;
   }
 
-  std::optional<StringRef> ExtRedirect = Result->getExternalRedirect();
-  if (!ExtRedirect) {
-    assert(isa<RedirectingFileSystem::DirectoryEntry>(Result->E));
-    return true;
+  std::optional<StringRef> ExtRedirect = نتيجو->getExternalRedirect();
+  إذا (!ExtRedirect) {
+    أكد(isa<RedirectingFileSystem::Directory_داخلا>(نتيجو->E));
+    أرجع سچ;
   }
 
-  SmallString<256> RemappedPath((*ExtRedirect).str());
-  if (makeAbsolute(RemappedPath))
-    return false;
+  SmallString<256> Remapped_رستو((*ExtRedirect).str());
+  إذا (makeAbsolute(Remapped_رستو))
+    أرجع خطأ;
 
-  if (ExternalFS->exists(RemappedPath))
-    return true;
+  إذا (ExternalFS->exists(Remapped_رستو))
+    أرجع سچ;
 
-  if (Redirection == RedirectKind::Fallthrough) {
+  إذا (Redirection == Redirect_قسم::Fallthrough) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return ExternalFS->exists(Path);
+    أرجع ExternalFS->exists(رستو);
   }
 
-  return false;
+  أرجع خطأ;
 }
 
-namespace {
+نطاق {
 
 /// Provide a file wrapper with an overriden status.
-class FileWithFixedStatus : public File {
+صنف File_With_Fixed_حالت : عام File {
   std::unique_ptr<File> InnerFile;
-  Status S;
+  حالت S;
 
-public:
-  FileWithFixedStatus(std::unique_ptr<File> InnerFile, Status S)
+عام:
+  File_With_Fixed_حالت(std::unique_ptr<File> InnerFile, حالت S)
       : InnerFile(std::move(InnerFile)), S(std::move(S)) {}
 
-  ErrorOr<Status> status() override { return S; }
-  ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
+  ErrorOr<حالت> حالت_2() override { أرجع S; }
+  ErrorOr<std::unique_ptr<llvm::يادگيري_بفر>>
 
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
-            bool IsVolatile) override {
-    return InnerFile->getBuffer(Name, FileSize, RequiresNullTerminator,
+  get_بفر(ثابت Twine &Name, int64_t File_سائيز, منطقي RequiresNullTerminator,
+            منطقي IsVolatile) override {
+    أرجع InnerFile->get_بفر(Name, File_سائيز, RequiresNullTerminator,
                                 IsVolatile);
   }
 
-  std::error_code close() override { return InnerFile->close(); }
+  std::error_ڪوڊ close() override { أرجع InnerFile->close(); }
 
-  void setPath(const Twine &Path) override { S = S.copyWithNewName(S, Path); }
+  فراغ سيٽ_رستو(ثابت Twine &رستو) override { S = S.copyWithNewName(S, رستو); }
 };
 
 } // namespace
 
 ErrorOr<std::unique_ptr<File>>
-File::getWithPath(ErrorOr<std::unique_ptr<File>> Result, const Twine &P) {
+File::get_With_رستو(ErrorOr<std::unique_ptr<File>> نتيجو, ثابت Twine &P) {
   // See \c getRedirectedFileStatus - don't update path if it's exposing an
   // external path.
-  if (!Result || (*Result)->status()->ExposesExternalVFSPath)
-    return Result;
+  إذا (!نتيجو || (*نتيجو)->حالت_2()->ExposesExternalVFSPath)
+    أرجع نتيجو;
 
-  ErrorOr<std::unique_ptr<File>> F = std::move(*Result);
-  auto Name = F->get()->getName();
-  if (Name && Name.get() != P.str())
-    F->get()->setPath(P);
-  return F;
+  ErrorOr<std::unique_ptr<File>> F = std::move(*نتيجو);
+  خودڪار Name = F->get()->getName();
+  إذا (Name && Name.get() != P.str())
+    F->get()->سيٽ_رستو(P);
+  أرجع F;
 }
 
 ErrorOr<std::unique_ptr<File>>
-RedirectingFileSystem::openFileForRead(const Twine &OriginalPath) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+RedirectingFileSystem::openFileForRead(ثابت Twine &Original_رستو) {
+  SmallString<256> رستو;
+  Original_رستو.منزل_ويڪٽر(رستو);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  إذا (std::error_ڪوڊ EC = makeAbsolute(رستو))
+    أرجع EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  إذا (Redirection == Redirect_قسم::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    auto F = File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    if (F)
-      return F;
+    خودڪار F = File::get_With_رستو(ExternalFS->openFileForRead(رستو), Original_رستو);
+    إذا (F)
+      أرجع F;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو = lookup_رستو(رستو);
+  إذا (!نتيجو) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    return Result.getError();
+    إذا (Redirection == Redirect_قسم::Fallthrough &&
+        is_File_Not_مليو(نتيجو.getError()))
+      أرجع File::get_With_رستو(ExternalFS->openFileForRead(رستو), Original_رستو);
+    أرجع نتيجو.getError();
   }
 
-  if (!Result->getExternalRedirect()) // FIXME: errc::not_a_file?
-    return make_error_code(llvm::errc::invalid_argument);
+  إذا (!نتيجو->getExternalRedirect()) // FIXME: errc::not_a_file?
+    أرجع make_error_ڪوڊ(llvm::errc::invalid_دليل);
 
-  StringRef ExtRedirect = *Result->getExternalRedirect();
-  SmallString<256> RemappedPath(ExtRedirect.str());
-  if (std::error_code EC = makeAbsolute(RemappedPath))
-    return EC;
+  StringRef ExtRedirect = *نتيجو->getExternalRedirect();
+  SmallString<256> Remapped_رستو(ExtRedirect.str());
+  إذا (std::error_ڪوڊ EC = makeAbsolute(Remapped_رستو))
+    أرجع EC;
 
-  auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
+  خودڪار *RE = cast<RedirectingFileSystem::Remap_داخلا>(نتيجو->E);
 
-  auto ExternalFile =
-      File::getWithPath(ExternalFS->openFileForRead(RemappedPath), ExtRedirect);
-  if (!ExternalFile) {
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(ExternalFile.getError(), Result->E)) {
+  خودڪار ExternalFile =
+      File::get_With_رستو(ExternalFS->openFileForRead(Remapped_رستو), ExtRedirect);
+  إذا (!ExternalFile) {
+    إذا (Redirection == Redirect_قسم::Fallthrough &&
+        is_File_Not_مليو(ExternalFile.getError(), نتيجو->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+      أرجع File::get_With_رستو(ExternalFS->openFileForRead(رستو), Original_رستو);
     }
-    return ExternalFile;
+    أرجع ExternalFile;
   }
 
-  auto ExternalStatus = (*ExternalFile)->status();
-  if (!ExternalStatus)
-    return ExternalStatus.getError();
+  خودڪار External_حالت = (*ExternalFile)->حالت_2();
+  إذا (!External_حالت)
+    أرجع External_حالت.getError();
 
   // Otherwise, the file was successfully remapped. Mark it as such. Also
   // replace the underlying path if the external name is being used.
-  Status S = getRedirectedFileStatus(
-      OriginalPath, RE->useExternalName(UseExternalNames), *ExternalStatus);
-  return std::unique_ptr<File>(
-      std::make_unique<FileWithFixedStatus>(std::move(*ExternalFile), S));
+  حالت S = get_Redirected_File_حالت(
+      Original_رستو, RE->useExternalName(Use_External_نالا), *External_حالت);
+  أرجع std::unique_ptr<File>(
+      std::make_unique<File_With_Fixed_حالت>(std::move(*ExternalFile), S));
 }
 
-std::error_code
-RedirectingFileSystem::getRealPath(const Twine &OriginalPath,
-                                   SmallVectorImpl<char> &Output) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+std::error_ڪوڊ
+RedirectingFileSystem::get_Real_رستو(ثابت Twine &Original_رستو,
+                                   Small_ويڪٽر_Impl<حرف> &Output) {
+  SmallString<256> رستو;
+  Original_رستو.منزل_ويڪٽر(رستو);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  إذا (std::error_ڪوڊ EC = makeAbsolute(رستو))
+    أرجع EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  إذا (Redirection == Redirect_قسم::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    std::error_code EC = ExternalFS->getRealPath(Path, Output);
-    if (!EC)
-      return EC;
+    std::error_ڪوڊ EC = ExternalFS->get_Real_رستو(رستو, Output);
+    إذا (!EC)
+      أرجع EC;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو = lookup_رستو(رستو);
+  إذا (!نتيجو) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->getRealPath(Path, Output);
-    return Result.getError();
+    إذا (Redirection == Redirect_قسم::Fallthrough &&
+        is_File_Not_مليو(نتيجو.getError()))
+      أرجع ExternalFS->get_Real_رستو(رستو, Output);
+    أرجع نتيجو.getError();
   }
 
   // If we found FileEntry or DirectoryRemapEntry, look up the mapped
   // path in the external file system.
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
-    auto P = ExternalFS->getRealPath(*ExtRedirect, Output);
-    if (P && Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(P, Result->E)) {
+  إذا (خودڪار ExtRedirect = نتيجو->getExternalRedirect()) {
+    خودڪار P = ExternalFS->get_Real_رستو(*ExtRedirect, Output);
+    إذا (P && Redirection == Redirect_قسم::Fallthrough &&
+        is_File_Not_مليو(P, نتيجو->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return ExternalFS->getRealPath(Path, Output);
+      أرجع ExternalFS->get_Real_رستو(رستو, Output);
     }
-    return P;
+    أرجع P;
   }
 
   // We found a DirectoryEntry, which does not have a single external contents
   // path. Use the canonical virtual path.
-  if (Redirection == RedirectKind::Fallthrough) {
-    Result->getPath(Output);
-    return {};
+  إذا (Redirection == Redirect_قسم::Fallthrough) {
+    نتيجو->get_رستو(Output);
+    أرجع {};
   }
-  return llvm::errc::invalid_argument;
+  أرجع llvm::errc::invalid_دليل;
 }
 
-void RedirectingFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
-  SmallString<256> Path;
-  Dir.toVector(Path);
+فراغ RedirectingFileSystem::getDirectoryContentRealSources(
+    ثابت Twine &Dir, Small_ويڪٽر_Impl<std::string> &ٻاهريون) {
+  SmallString<256> رستو;
+  Dir.منزل_ويڪٽر(رستو);
 
-  if (makeAbsolute(Path))
-    return;
+  إذا (makeAbsolute(رستو))
+    أرجع;
 
   // Fallthrough and Fallback both consult ExternalFS, differing only in order.
-  const bool ConsultsExternalFS = Redirection != RedirectKind::RedirectOnly;
+  ثابت منطقي ConsultsExternalFS = Redirection != Redirect_قسم::RedirectOnly;
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> نتيجو = lookup_رستو(رستو);
+  إذا (!نتيجو) {
     // dir_begin() delegates entirely to ExternalFS.
-    if (ConsultsExternalFS)
-      ExternalFS->getDirectoryContentRealSources(Path, Out);
-    return;
+    إذا (ConsultsExternalFS)
+      ExternalFS->getDirectoryContentRealSources(رستو, ٻاهريون);
+    أرجع;
   }
 
-  switch (Result->E->getKind()) {
-  case EK_File:
-    return;
-  case EK_Directory:
+  بدل (نتيجو->E->get_قسم()) {
+  حالة EK_File:
+    أرجع;
+  حالة EK_Directory:
     // The names come from the overlay, which has no location in ExternalFS.
-    break;
-  case EK_DirectoryRemap: {
+    اكسر;
+  حالة EK_DirectoryRemap: {
     // Make the target absolute as status() does, so a relative
     // 'external-contents' is not passed down raw.
-    SmallString<256> RemappedPath(*Result->getExternalRedirect());
-    if (!makeAbsolute(RemappedPath))
-      ExternalFS->getDirectoryContentRealSources(RemappedPath, Out);
-    break;
+    SmallString<256> Remapped_رستو(*نتيجو->getExternalRedirect());
+    إذا (!makeAbsolute(Remapped_رستو))
+      ExternalFS->getDirectoryContentRealSources(Remapped_رستو, ٻاهريون);
+    اكسر;
   }
   }
 
   // dir_begin() also iterates the original path in ExternalFS.
-  if (ConsultsExternalFS)
-    ExternalFS->getDirectoryContentRealSources(Path, Out);
+  إذا (ConsultsExternalFS)
+    ExternalFS->getDirectoryContentRealSources(رستو, ٻاهريون);
 }
 
 std::unique_ptr<FileSystem>
-vfs::getVFSFromYAML(std::unique_ptr<MemoryBuffer> Buffer,
-                    SourceMgr::DiagHandlerTy DiagHandler,
-                    StringRef YAMLFilePath, void *DiagContext,
+vfs::getVFSFromYAML(std::unique_ptr<يادگيري_بفر> بفر,
+                    ذريعو_Mgr::DiagHandlerTy DiagHandler,
+                    StringRef YAMLFile_رستو, فراغ *DiagContext,
                     IntrusiveRefCntPtr<FileSystem> ExternalFS) {
-  return RedirectingFileSystem::create(std::move(Buffer), DiagHandler,
-                                       YAMLFilePath, DiagContext,
+  أرجع RedirectingFileSystem::create(std::move(بفر), DiagHandler,
+                                       YAMLFile_رستو, DiagContext,
                                        std::move(ExternalFS));
 }
 
-static void getVFSEntries(RedirectingFileSystem::Entry *SrcE,
-                          SmallVectorImpl<StringRef> &Path,
-                          SmallVectorImpl<YAMLVFSEntry> &Entries) {
-  auto Kind = SrcE->getKind();
-  if (Kind == RedirectingFileSystem::EK_Directory) {
-    auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
-    assert(DE && "Must be a directory");
-    for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
-         llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-      Path.push_back(SubEntry->getName());
-      getVFSEntries(SubEntry.get(), Path, Entries);
-      Path.pop_back();
+ساكن فراغ getVFSEntries(RedirectingFileSystem::داخلا_3 *SrcE,
+                          Small_ويڪٽر_Impl<StringRef> &رستو,
+                          Small_ويڪٽر_Impl<YAMLVFSEntry> &Entries) {
+  خودڪار قسم_2 = SrcE->get_قسم();
+  إذا (قسم_2 == RedirectingFileSystem::EK_Directory) {
+    خودڪار *DE = dyn_cast<RedirectingFileSystem::Directory_داخلا>(SrcE);
+    أكد(DE && "Must be a directory");
+    لكل (std::unique_ptr<RedirectingFileSystem::داخلا_3> &Sub_داخلا :
+         llvm::make_range(DE->contents_begin(), DE->contents_پڇاڙي())) {
+      رستو.ڌڪو_پٺ(Sub_داخلا->getName());
+      getVFSEntries(Sub_داخلا.get(), رستو, Entries);
+      رستو.ڪڍو_پٺ();
     }
-    return;
+    أرجع;
   }
 
-  if (Kind == RedirectingFileSystem::EK_DirectoryRemap) {
-    auto *DR = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-    assert(DR && "Must be a directory remap");
+  إذا (قسم_2 == RedirectingFileSystem::EK_DirectoryRemap) {
+    خودڪار *DR = dyn_cast<RedirectingFileSystem::Directory_Remap_داخلا>(SrcE);
+    أكد(DR && "Must be a directory remap");
     SmallString<128> VPath;
-    for (auto &Comp : Path)
-      llvm::sys::path::append(VPath, Comp);
-    Entries.push_back(
-        YAMLVFSEntry(VPath.c_str(), DR->getExternalContentsPath()));
-    return;
+    لكل (خودڪار &Comp : رستو)
+      llvm::sys::رستو_2::append(VPath, Comp);
+    Entries.ڌڪو_پٺ(
+        YAMLVFSEntry(VPath.c_str(), DR->get_External_Contents_رستو()));
+    أرجع;
   }
 
-  assert(Kind == RedirectingFileSystem::EK_File && "Must be a EK_File");
-  auto *FE = dyn_cast<RedirectingFileSystem::FileEntry>(SrcE);
-  assert(FE && "Must be a file");
+  أكد(قسم_2 == RedirectingFileSystem::EK_File && "Must be a EK_File");
+  خودڪار *FE = dyn_cast<RedirectingFileSystem::File_داخلا>(SrcE);
+  أكد(FE && "Must be a file");
   SmallString<128> VPath;
-  for (auto &Comp : Path)
-    llvm::sys::path::append(VPath, Comp);
-  Entries.push_back(YAMLVFSEntry(VPath.c_str(), FE->getExternalContentsPath()));
+  لكل (خودڪار &Comp : رستو)
+    llvm::sys::رستو_2::append(VPath, Comp);
+  Entries.ڌڪو_پٺ(YAMLVFSEntry(VPath.c_str(), FE->get_External_Contents_رستو()));
 }
 
-void vfs::collectVFSEntries(RedirectingFileSystem &VFS,
-                            SmallVectorImpl<YAMLVFSEntry> &CollectedEntries) {
-  ErrorOr<RedirectingFileSystem::LookupResult> RootResult = VFS.lookupPath("/");
-  if (!RootResult)
-    return;
-  SmallVector<StringRef, 8> Components;
-  Components.push_back("/");
-  getVFSEntries(RootResult->E, Components, CollectedEntries);
+فراغ vfs::collectVFSEntries(RedirectingFileSystem &VFS,
+                            Small_ويڪٽر_Impl<YAMLVFSEntry> &CollectedEntries) {
+  ErrorOr<RedirectingFileSystem::Lookup_نتيجو> پاڙ_نتيجو = VFS.lookup_رستو("/");
+  إذا (!پاڙ_نتيجو)
+    أرجع;
+  Small_ويڪٽر<StringRef, 8> Components;
+  Components.ڌڪو_پٺ("/");
+  getVFSEntries(پاڙ_نتيجو->E, Components, CollectedEntries);
 }
 
-UniqueID vfs::getNextVirtualUniqueID() {
-  static std::atomic<unsigned> UID;
-  unsigned ID = ++UID;
+UniqueID vfs::get_ايندڙ_Virtual_Unique_ID() {
+  ساكن std::atomic<بنانشان> UID;
+  بنانشان ID = ++UID;
   // The following assumes that uint64_t max will never collide with a real
   // dev_t value from the OS.
-  return UniqueID(std::numeric_limits<uint64_t>::max(), ID);
+  أرجع UniqueID(std::numeric_limits<uint64_t>::max(), ID);
 }
 
-void YAMLVFSWriter::addEntry(StringRef VirtualPath, StringRef RealPath,
-                             bool IsDirectory) {
-  assert(sys::path::is_absolute(VirtualPath) && "virtual path not absolute");
-  assert(sys::path::is_absolute(RealPath) && "real path not absolute");
-  assert(!pathHasTraversal(VirtualPath) && "path traversal is not supported");
-  Mappings.emplace_back(VirtualPath, RealPath, IsDirectory);
+فراغ YAMLVFSWriter::جوڙيو_داخلا(StringRef Virtual_رستو, StringRef Real_رستو,
+                             منطقي IsDirectory) {
+  أكد(sys::رستو_2::is_absolute(Virtual_رستو) && "virtual path not absolute");
+  أكد(sys::رستو_2::is_absolute(Real_رستو) && "real path not absolute");
+  أكد(!رستو_Has_Traversal(Virtual_رستو) && "path traversal is not supported");
+  Mappings.emplace_پٺ(Virtual_رستو, Real_رستو, IsDirectory);
 }
 
-void YAMLVFSWriter::addFileMapping(StringRef VirtualPath, StringRef RealPath) {
-  addEntry(VirtualPath, RealPath, /*IsDirectory=*/false);
+فراغ YAMLVFSWriter::جوڙيو_File_Mapping(StringRef Virtual_رستو, StringRef Real_رستو) {
+  جوڙيو_داخلا(Virtual_رستو, Real_رستو, /*IsDirectory=*/خطأ);
 }
 
-void YAMLVFSWriter::addDirectoryMapping(StringRef VirtualPath,
-                                        StringRef RealPath) {
-  addEntry(VirtualPath, RealPath, /*IsDirectory=*/true);
+فراغ YAMLVFSWriter::جوڙيو_Directory_Mapping(StringRef Virtual_رستو,
+                                        StringRef Real_رستو) {
+  جوڙيو_داخلا(Virtual_رستو, Real_رستو, /*IsDirectory=*/سچ);
 }
 
-namespace {
+نطاق {
 
-class JSONWriter {
+صنف JSONWriter {
   llvm::raw_ostream &OS;
-  SmallVector<StringRef, 16> DirStack;
+  Small_ويڪٽر<StringRef, 16> Dir_ڍير;
 
-  unsigned getDirIndent() { return 4 * DirStack.size(); }
-  unsigned getFileIndent() { return 4 * (DirStack.size() + 1); }
-  bool containedIn(StringRef Parent, StringRef Path);
-  StringRef containedPart(StringRef Parent, StringRef Path);
-  void startDirectory(StringRef Path);
-  void endDirectory();
-  void writeEntry(StringRef VPath, StringRef RPath);
+  بنانشان getDirIndent() { أرجع 4 * Dir_ڍير.سائيز_2(); }
+  بنانشان getFileIndent() { أرجع 4 * (Dir_ڍير.سائيز_2() + 1); }
+  منطقي contained_اندريون(StringRef والد_2, StringRef رستو);
+  StringRef containedPart(StringRef والد_2, StringRef رستو);
+  فراغ شروعات_Directory(StringRef رستو);
+  فراغ پڇاڙي_Directory();
+  فراغ write_داخلا(StringRef VPath, StringRef RPath);
 
-public:
+عام:
   JSONWriter(llvm::raw_ostream &OS) : OS(OS) {}
 
-  void write(ArrayRef<YAMLVFSEntry> Entries,
-             std::optional<bool> UseExternalNames,
-             std::optional<bool> IsCaseSensitive,
-             std::optional<bool> IsOverlayRelative, StringRef OverlayDir);
+  فراغ اكتب(ArrayRef<YAMLVFSEntry> Entries,
+             std::optional<منطقي> Use_External_نالا,
+             std::optional<منطقي> IsCaseSensitive,
+             std::optional<منطقي> IsOverlayRelative, StringRef OverlayDir);
 };
 
 } // namespace
 
-bool JSONWriter::containedIn(StringRef Parent, StringRef Path) {
-  using namespace llvm::sys;
+منطقي JSONWriter::contained_اندريون(StringRef والد_2, StringRef رستو) {
+  استعمال نطاق llvm::sys;
 
   // Compare each path component.
-  auto IParent = path::begin(Parent), EParent = path::end(Parent);
-  for (auto IChild = path::begin(Path), EChild = path::end(Path);
+  خودڪار IParent = رستو_2::begin(والد_2), EParent = رستو_2::پڇاڙي(والد_2);
+  لكل (خودڪار IChild = رستو_2::begin(رستو), EChild = رستو_2::پڇاڙي(رستو);
        IParent != EParent && IChild != EChild; ++IParent, ++IChild) {
-    if (*IParent != *IChild)
-      return false;
+    إذا (*IParent != *IChild)
+      أرجع خطأ;
   }
   // Have we exhausted the parent path?
-  return IParent == EParent;
+  أرجع IParent == EParent;
 }
 
-StringRef JSONWriter::containedPart(StringRef Parent, StringRef Path) {
-  assert(!Parent.empty());
-  assert(containedIn(Parent, Path));
-  return Path.substr(Parent.size() + 1);
+StringRef JSONWriter::containedPart(StringRef والد_2, StringRef رستو) {
+  أكد(!والد_2.خالي_جايون());
+  أكد(contained_اندريون(والد_2, رستو));
+  أرجع رستو.substr(والد_2.سائيز_2() + 1);
 }
 
-void JSONWriter::startDirectory(StringRef Path) {
+فراغ JSONWriter::شروعات_Directory(StringRef رستو) {
   StringRef Name =
-      DirStack.empty() ? Path : containedPart(DirStack.back(), Path);
-  DirStack.push_back(Path);
-  unsigned Indent = getDirIndent();
+      Dir_ڍير.خالي_جايون() ? رستو : containedPart(Dir_ڍير.پٺ(), رستو);
+  Dir_ڍير.ڌڪو_پٺ(رستو);
+  بنانشان Indent = getDirIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'directory',\n";
   OS.indent(Indent + 2) << "'name': \"" << llvm::yaml::escape(Name) << "\",\n";
   OS.indent(Indent + 2) << "'contents': [\n";
 }
 
-void JSONWriter::endDirectory() {
-  unsigned Indent = getDirIndent();
+فراغ JSONWriter::پڇاڙي_Directory() {
+  بنانشان Indent = getDirIndent();
   OS.indent(Indent + 2) << "]\n";
   OS.indent(Indent) << "}";
 
-  DirStack.pop_back();
+  Dir_ڍير.ڪڍو_پٺ();
 }
 
-void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
-  unsigned Indent = getFileIndent();
+فراغ JSONWriter::write_داخلا(StringRef VPath, StringRef RPath) {
+  بنانشان Indent = getFileIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'file',\n";
   OS.indent(Indent + 2) << "'name': \"" << llvm::yaml::escape(VPath) << "\",\n";
@@ -2907,84 +2907,84 @@ void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
   OS.indent(Indent) << "}";
 }
 
-void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
-                       std::optional<bool> UseExternalNames,
-                       std::optional<bool> IsCaseSensitive,
-                       std::optional<bool> IsOverlayRelative,
+فراغ JSONWriter::اكتب(ArrayRef<YAMLVFSEntry> Entries,
+                       std::optional<منطقي> Use_External_نالا,
+                       std::optional<منطقي> IsCaseSensitive,
+                       std::optional<منطقي> IsOverlayRelative,
                        StringRef OverlayDir) {
-  using namespace llvm::sys;
+  استعمال نطاق llvm::sys;
 
   OS << "{\n"
         "  'version': 0,\n";
-  if (IsCaseSensitive)
+  إذا (IsCaseSensitive)
     OS << "  'case-sensitive': '" << (*IsCaseSensitive ? "true" : "false")
        << "',\n";
-  if (UseExternalNames)
-    OS << "  'use-external-names': '" << (*UseExternalNames ? "true" : "false")
+  إذا (Use_External_نالا)
+    OS << "  'use-external-names': '" << (*Use_External_نالا ? "true" : "false")
        << "',\n";
-  bool UseOverlayRelative = false;
-  if (IsOverlayRelative) {
+  منطقي UseOverlayRelative = خطأ;
+  إذا (IsOverlayRelative) {
     UseOverlayRelative = *IsOverlayRelative;
     OS << "  'overlay-relative': '" << (UseOverlayRelative ? "true" : "false")
        << "',\n";
   }
   OS << "  'roots': [\n";
 
-  if (!Entries.empty()) {
-    const YAMLVFSEntry &Entry = Entries.front();
+  إذا (!Entries.خالي_جايون()) {
+    ثابت YAMLVFSEntry &داخلا_3 = Entries.front();
 
-    startDirectory(
-      Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath)
+    شروعات_Directory(
+      داخلا_3.IsDirectory ? داخلا_3.VPath : رستو_2::والد_رستو(داخلا_3.VPath)
     );
 
-    StringRef RPath = Entry.RPath;
-    if (UseOverlayRelative) {
-      assert(RPath.starts_with(OverlayDir) &&
+    StringRef RPath = داخلا_3.RPath;
+    إذا (UseOverlayRelative) {
+      أكد(RPath.starts_with(OverlayDir) &&
              "Overlay dir must be contained in RPath");
-      RPath = RPath.substr(OverlayDir.size());
+      RPath = RPath.substr(OverlayDir.سائيز_2());
     }
 
-    bool IsCurrentDirEmpty = true;
-    if (!Entry.IsDirectory) {
-      writeEntry(path::filename(Entry.VPath), RPath);
-      IsCurrentDirEmpty = false;
+    منطقي Is_Current_Dir_خالي_جايون = سچ;
+    إذا (!داخلا_3.IsDirectory) {
+      write_داخلا(رستو_2::filename(داخلا_3.VPath), RPath);
+      Is_Current_Dir_خالي_جايون = خطأ;
     }
 
-    for (const auto &Entry : Entries.slice(1)) {
+    لكل (ثابت خودڪار &داخلا_3 : Entries.ٽڪرو(1)) {
       StringRef Dir =
-          Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath);
-      if (Dir == DirStack.back()) {
-        if (!IsCurrentDirEmpty) {
+          داخلا_3.IsDirectory ? داخلا_3.VPath : رستو_2::والد_رستو(داخلا_3.VPath);
+      إذا (Dir == Dir_ڍير.پٺ()) {
+        إذا (!Is_Current_Dir_خالي_جايون) {
           OS << ",\n";
         }
-      } else {
-        bool IsDirPoppedFromStack = false;
-        while (!DirStack.empty() && !containedIn(DirStack.back(), Dir)) {
+      } وإلا {
+        منطقي Is_Dir_Popped_From_ڍير = خطأ;
+        طالما (!Dir_ڍير.خالي_جايون() && !contained_اندريون(Dir_ڍير.پٺ(), Dir)) {
           OS << "\n";
-          endDirectory();
-          IsDirPoppedFromStack = true;
+          پڇاڙي_Directory();
+          Is_Dir_Popped_From_ڍير = سچ;
         }
-        if (IsDirPoppedFromStack || !IsCurrentDirEmpty) {
+        إذا (Is_Dir_Popped_From_ڍير || !Is_Current_Dir_خالي_جايون) {
           OS << ",\n";
         }
-        startDirectory(Dir);
-        IsCurrentDirEmpty = true;
+        شروعات_Directory(Dir);
+        Is_Current_Dir_خالي_جايون = سچ;
       }
-      StringRef RPath = Entry.RPath;
-      if (UseOverlayRelative) {
-        assert(RPath.starts_with(OverlayDir) &&
+      StringRef RPath = داخلا_3.RPath;
+      إذا (UseOverlayRelative) {
+        أكد(RPath.starts_with(OverlayDir) &&
                "Overlay dir must be contained in RPath");
-        RPath = RPath.substr(OverlayDir.size());
+        RPath = RPath.substr(OverlayDir.سائيز_2());
       }
-      if (!Entry.IsDirectory) {
-        writeEntry(path::filename(Entry.VPath), RPath);
-        IsCurrentDirEmpty = false;
+      إذا (!داخلا_3.IsDirectory) {
+        write_داخلا(رستو_2::filename(داخلا_3.VPath), RPath);
+        Is_Current_Dir_خالي_جايون = خطأ;
       }
     }
 
-    while (!DirStack.empty()) {
+    طالما (!Dir_ڍير.خالي_جايون()) {
       OS << "\n";
-      endDirectory();
+      پڇاڙي_Directory();
     }
     OS << "\n";
   }
@@ -2993,68 +2993,68 @@ void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
      << "}\n";
 }
 
-void YAMLVFSWriter::write(llvm::raw_ostream &OS) {
-  llvm::sort(Mappings, [](const YAMLVFSEntry &LHS, const YAMLVFSEntry &RHS) {
-    return LHS.VPath < RHS.VPath;
+فراغ YAMLVFSWriter::اكتب(llvm::raw_ostream &OS) {
+  llvm::ترتيب_ڏيو(Mappings, [](ثابت YAMLVFSEntry &LHS, ثابت YAMLVFSEntry &RHS) {
+    أرجع LHS.VPath < RHS.VPath;
   });
 
-  JSONWriter(OS).write(Mappings, UseExternalNames, IsCaseSensitive,
+  JSONWriter(OS).اكتب(Mappings, Use_External_نالا, IsCaseSensitive,
                        IsOverlayRelative, OverlayDir);
 }
 
 vfs::recursive_directory_iterator::recursive_directory_iterator(
-    FileSystem &FS_, const Twine &Path, std::error_code &EC)
+    FileSystem &FS_, ثابت Twine &رستو, std::error_ڪوڊ &EC)
     : FS(&FS_) {
-  directory_iterator I = FS->dir_begin(Path, EC);
-  if (I != directory_iterator()) {
+  directory_iterator I = FS->dir_begin(رستو, EC);
+  إذا (I != directory_iterator()) {
     State = std::make_shared<detail::RecDirIterState>();
-    State->Stack.push_back(I);
+    State->ڍير.ڌڪو_پٺ(I);
   }
 }
 
 vfs::recursive_directory_iterator &
-recursive_directory_iterator::increment(std::error_code &EC) {
-  assert(FS && State && !State->Stack.empty() && "incrementing past end");
-  assert(!State->Stack.back()->path().empty() && "non-canonical end iterator");
-  vfs::directory_iterator End;
+recursive_directory_iterator::increment(std::error_ڪوڊ &EC) {
+  أكد(FS && State && !State->ڍير.خالي_جايون() && "incrementing past end");
+  أكد(!State->ڍير.پٺ()->رستو_2().خالي_جايون() && "non-canonical end iterator");
+  vfs::directory_iterator پڇاڙي_2;
 
-  if (State->HasNoPushRequest)
-    State->HasNoPushRequest = false;
-  else {
-    if (State->Stack.back()->type() == sys::fs::file_type::directory_file) {
+  إذا (State->Has_No_ڌڪو_Request)
+    State->Has_No_ڌڪو_Request = خطأ;
+  وإلا {
+    إذا (State->ڍير.پٺ()->type() == sys::fs::file_type::directory_file) {
       vfs::directory_iterator I =
-          FS->dir_begin(State->Stack.back()->path(), EC);
-      if (I != End) {
-        State->Stack.push_back(I);
-        return *this;
+          FS->dir_begin(State->ڍير.پٺ()->رستو_2(), EC);
+      إذا (I != پڇاڙي_2) {
+        State->ڍير.ڌڪو_پٺ(I);
+        أرجع *هذا;
       }
     }
   }
 
-  while (!State->Stack.empty() && State->Stack.back().increment(EC) == End)
-    State->Stack.pop_back();
+  طالما (!State->ڍير.خالي_جايون() && State->ڍير.پٺ().increment(EC) == پڇاڙي_2)
+    State->ڍير.ڪڍو_پٺ();
 
-  if (State->Stack.empty())
+  إذا (State->ڍير.خالي_جايون())
     State.reset(); // end iterator
 
-  return *this;
+  أرجع *هذا;
 }
 
-const char FileSystem::ID = 0;
-const char OverlayFileSystem::ID = 0;
-const char ProxyFileSystem::ID = 0;
-const char InMemoryFileSystem::ID = 0;
-const char RedirectingFileSystem::ID = 0;
+ثابت حرف FileSystem::ID = 0;
+ثابت حرف OverlayFileSystem::ID = 0;
+ثابت حرف ProxyFileSystem::ID = 0;
+ثابت حرف اندريون_يادگيري_File_System::ID = 0;
+ثابت حرف RedirectingFileSystem::ID = 0;
 
-unsigned ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::useCount(
-    const FileSystem *FS) {
-  return FS->UseCount();
+بنانشان ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::use_ڳڻپ(
+    ثابت FileSystem *FS) {
+  أرجع FS->Use_ڳڻپ();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
+فراغ ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
   FS->Retain();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
+فراغ ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
   FS->Release();
 }

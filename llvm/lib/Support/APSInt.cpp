@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/StringRef.h"
-#include <cassert>
+#ضمن "llvm/ADT/APSInt.h"
+#ضمن "llvm/ADT/FoldingSet.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن <cassert>
 
-using namespace llvm;
+استعمال نطاق llvm;
 
 APSInt::APSInt(StringRef Str) {
-  assert(!Str.empty() && "Invalid string length");
+  أكد(!Str.خالي_جايون() && "Invalid string length");
 
   // (Over-)estimate the required number of bits.
-  unsigned NumBits = ((Str.size() * 64) / 19) + 2;
-  APInt Tmp(NumBits, Str, /*radix=*/10);
-  if (Str[0] == '-') {
-    unsigned MinBits = Tmp.getSignificantBits();
-    if (MinBits < NumBits)
-      Tmp = Tmp.trunc(std::max<unsigned>(1, MinBits));
-    *this = APSInt(Tmp, /*isUnsigned=*/false);
-    return;
+  بنانشان انگ_بٽ_2 = ((Str.سائيز_2() * 64) / 19) + 2;
+  APInt Tmp(انگ_بٽ_2, Str, /*radix=*/10);
+  إذا (Str[0] == '-') {
+    بنانشان Min_بٽ = Tmp.get_Significant_بٽ();
+    إذا (Min_بٽ < انگ_بٽ_2)
+      Tmp = Tmp.trunc(std::max<بنانشان>(1, Min_بٽ));
+    *هذا = APSInt(Tmp, /*isUnsigned=*/خطأ);
+    أرجع;
   }
-  unsigned ActiveBits = Tmp.getActiveBits();
-  if (ActiveBits < NumBits)
-    Tmp = Tmp.trunc(std::max<unsigned>(1, ActiveBits));
-  *this = APSInt(Tmp, /*isUnsigned=*/true);
+  بنانشان سرگرم_بٽ = Tmp.get_سرگرم_بٽ();
+  إذا (سرگرم_بٽ < انگ_بٽ_2)
+    Tmp = Tmp.trunc(std::max<بنانشان>(1, سرگرم_بٽ));
+  *هذا = APSInt(Tmp, /*isUnsigned=*/سچ);
 }
 
-void APSInt::Profile(FoldingSetNodeID& ID) const {
-  ID.AddInteger((unsigned) (IsUnsigned ? 1 : 0));
+فراغ APSInt::Profile(Folding_سيٽ_ڳنڍ_ID& ID) ثابت {
+  ID.جوڙيو_Integer((بنانشان) (IsUnsigned ? 1 : 0));
   APInt::Profile(ID);
 }

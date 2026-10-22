@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributes.h"
+#ضمن "llvm/Support/HexagonAttributes.h"
 
-using namespace llvm;
-using namespace llvm::HexagonAttrs;
+استعمال نطاق llvm;
+استعمال نطاق llvm::HexagonAttrs;
 
-static constexpr TagNameItem TagData[] = {
+ساكن constexpr ٽيگ_Name_شي ٽيگ_معلومات_2[] = {
     {ARCH, "Tag_arch"},
     {HVXARCH, "Tag_hvx_arch"},
     {HVXIEEEFP, "Tag_hvx_ieeefp"},
@@ -21,7 +21,7 @@ static constexpr TagNameItem TagData[] = {
     {CABAC, "Tag_cabac"},
 };
 
-constexpr TagNameMap HexagonAttributeTags{TagData};
-const TagNameMap &llvm::HexagonAttrs::getHexagonAttributeTags() {
-  return HexagonAttributeTags;
+constexpr ٽيگ_Name_Map Hexagon_Attribute_ٽيگ_فهرست{ٽيگ_معلومات_2};
+ثابت ٽيگ_Name_Map &llvm::HexagonAttrs::get_Hexagon_Attribute_ٽيگ_فهرست() {
+  أرجع Hexagon_Attribute_ٽيگ_فهرست;
 }

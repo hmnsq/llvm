@@ -11,100 +11,100 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputFile.h"
-#include "llvm/Support/VirtualOutputError.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/raw_ostream_proxy.h"
+#ضمن "llvm/Support/VirtualOutputFile.h"
+#ضمن "llvm/Support/VirtualOutputError.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/raw_ostream_proxy.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+استعمال نطاق llvm;
+استعمال نطاق llvm::vfs;
 
-char OutputFileImpl::ID = 0;
-char NullOutputFileImpl::ID = 0;
+حرف OutputFileImpl::ID = 0;
+حرف NullOutputFileImpl::ID = 0;
 
-void OutputFileImpl::anchor() {}
-void NullOutputFileImpl::anchor() {}
+فراغ OutputFileImpl::anchor() {}
+فراغ NullOutputFileImpl::anchor() {}
 
-class OutputFile::TrackedProxy : public raw_pwrite_stream_proxy {
-public:
-  void resetProxy() {
-    TrackingPointer = nullptr;
+صنف OutputFile::TrackedProxy : عام raw_pwrite_وهڪرو_proxy {
+عام:
+  فراغ resetProxy() {
+    Tracking_اشارو = خالي_اشارو;
     resetProxiedOS();
   }
 
-  explicit TrackedProxy(TrackedProxy *&TrackingPointer, raw_pwrite_stream &OS)
-      : raw_pwrite_stream_proxy(OS), TrackingPointer(TrackingPointer) {
-    assert(!TrackingPointer && "Expected to add a proxy");
-    TrackingPointer = this;
+  واضح TrackedProxy(TrackedProxy *&Tracking_اشارو, raw_pwrite_وهڪرو &OS)
+      : raw_pwrite_وهڪرو_proxy(OS), Tracking_اشارو(Tracking_اشارو) {
+    أكد(!Tracking_اشارو && "Expected to add a proxy");
+    Tracking_اشارو = هذا;
   }
 
   ~TrackedProxy() override { resetProxy(); }
 
-  TrackedProxy *&TrackingPointer;
+  TrackedProxy *&Tracking_اشارو;
 };
 
-Expected<std::unique_ptr<raw_pwrite_stream>> OutputFile::createProxy() {
-  if (OpenProxy)
-    return make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
+Expected<std::unique_ptr<raw_pwrite_وهڪرو>> OutputFile::createProxy() {
+  إذا (OpenProxy)
+    أرجع make_error<OutputError>(get_رستو(), Output_Error_ڪوڊ::has_open_proxy);
 
-  return std::make_unique<TrackedProxy>(OpenProxy, getOS());
+  أرجع std::make_unique<TrackedProxy>(OpenProxy, getOS());
 }
 
 Error OutputFile::keep() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  إذا (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
-        make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
+        make_error<OutputError>(get_رستو(), Output_Error_ڪوڊ::already_closed));
 
   // Report a fatal error if there's an open proxy and the file is being kept.
   // This is safer than relying on clients to remember to flush(). Also call
   // OutputFile::discard() to give the backend a chance to clean up any
   // side effects (such as temporaries).
-  if (LLVM_UNLIKELY(OpenProxy))
+  إذا (LLVM_UNLIKELY(OpenProxy))
     report_fatal_error(joinErrors(
-        make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy),
+        make_error<OutputError>(get_رستو(), Output_Error_ڪوڊ::has_open_proxy),
         discard()));
 
   Error E = Impl->keep();
-  Impl = nullptr;
-  DiscardOnDestroyHandler = nullptr;
-  return E;
+  Impl = خالي_اشارو;
+  DiscardOnDestroyHandler = خالي_اشارو;
+  أرجع E;
 }
 
 Error OutputFile::discard() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  إذا (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
-        make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
+        make_error<OutputError>(get_رستو(), Output_Error_ڪوڊ::already_closed));
 
   // Be lenient about open proxies since client teardown paths won't
   // necessarily clean up in the right order. Reset the proxy to flush any
   // current content; if there is another write, there should be quick crash on
   // null dereference.
-  if (OpenProxy)
+  إذا (OpenProxy)
     OpenProxy->resetProxy();
 
   Error E = Impl->discard();
-  Impl = nullptr;
-  DiscardOnDestroyHandler = nullptr;
-  return E;
+  Impl = خالي_اشارو;
+  DiscardOnDestroyHandler = خالي_اشارو;
+  أرجع E;
 }
 
-void OutputFile::destroy() {
-  if (!Impl)
-    return;
+فراغ OutputFile::destroy() {
+  إذا (!Impl)
+    أرجع;
 
   // Clean up the file. Move the discard handler into a local since discard
   // will reset it.
-  auto DiscardHandler = std::move(DiscardOnDestroyHandler);
+  خودڪار DiscardHandler = std::move(DiscardOnDestroyHandler);
   Error E = discard();
-  assert(!Impl && "Expected discard to destroy Impl");
+  أكد(!Impl && "Expected discard to destroy Impl");
 
   // If there's no handler, report a fatal error.
-  if (LLVM_UNLIKELY(!DiscardHandler))
+  إذا (LLVM_UNLIKELY(!DiscardHandler))
     llvm::report_fatal_error(joinErrors(
-        make_error<OutputError>(getPath(), OutputErrorCode::not_closed),
+        make_error<OutputError>(get_رستو(), Output_Error_ڪوڊ::not_closed),
         std::move(E)));
-  else if (E)
+  وإلا إذا (E)
     DiscardHandler(std::move(E));
 }

@@ -11,212 +11,212 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <cassert>
-#include <cstring>
-using namespace llvm;
+#ضمن "llvm/ADT/FoldingSet.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/Allocator.h"
+#ضمن "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/SwapByteOrder.h"
+#ضمن <cassert>
+#ضمن <cstring>
+استعمال نطاق llvm;
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeIDRef Implementation
 
-bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
-  if (LHS.size() != RHS.size())
-    return LHS.size() < RHS.size();
-  return memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
+منطقي llvm::عامل<(Folding_سيٽ_ڳنڍ_IDRef LHS, Folding_سيٽ_ڳنڍ_IDRef RHS) {
+  إذا (LHS.سائيز_2() != RHS.سائيز_2())
+    أرجع LHS.سائيز_2() < RHS.سائيز_2();
+  أرجع memcmp(LHS.معلومات(), RHS.معلومات(), LHS.سائيز_2() * حجم(بنانشان)) < 0;
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeID Implementation
 
-void FoldingSetNodeID::AddString(StringRef String) {
-  unsigned Size = String.size();
+فراغ Folding_سيٽ_ڳنڍ_ID::جوڙيو_String(StringRef String) {
+  بنانشان سائيز = String.سائيز_2();
 
-  unsigned NumInserts = 1 + divideCeil(Size, 4);
-  Bits.reserve(Bits.size() + NumInserts);
+  بنانشان انگ_Inserts = 1 + divideCeil(سائيز, 4);
+  بٽ_2.reserve(بٽ_2.سائيز_2() + انگ_Inserts);
 
-  Bits.push_back(Size);
-  if (!Size)
-    return;
+  بٽ_2.ڌڪو_پٺ(سائيز);
+  إذا (!سائيز)
+    أرجع;
 
-  unsigned Units = Size / 4;
-  unsigned Pos = 0;
-  const unsigned *Base = (const unsigned *)String.data();
+  بنانشان Units = سائيز / 4;
+  بنانشان Pos = 0;
+  ثابت بنانشان *بنياد = (ثابت بنانشان *)String.معلومات();
 
   // If the string is aligned do a bulk transfer.
-  if (!((intptr_t)Base & 3)) {
-    Bits.append(Base, Base + Units);
+  إذا (!((intptr_t)بنياد & 3)) {
+    بٽ_2.append(بنياد, بنياد + Units);
     Pos = (Units + 1) * 4;
-  } else {
+  } وإلا {
     // Otherwise do it the hard way.
     // To be compatible with above bulk transfer, we need to take endianness
     // into account.
     static_assert(sys::IsBigEndianHost || sys::IsLittleEndianHost,
                   "Unexpected host endianness");
-    if (sys::IsBigEndianHost) {
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 4] << 24) |
-                     ((unsigned char)String[Pos - 3] << 16) |
-                     ((unsigned char)String[Pos - 2] << 8) |
-                     (unsigned char)String[Pos - 1];
-        Bits.push_back(V);
+    إذا (sys::IsBigEndianHost) {
+      لكل (Pos += 4; Pos <= سائيز; Pos += 4) {
+        بنانشان V = ((بنانشان حرف)String[Pos - 4] << 24) |
+                     ((بنانشان حرف)String[Pos - 3] << 16) |
+                     ((بنانشان حرف)String[Pos - 2] << 8) |
+                     (بنانشان حرف)String[Pos - 1];
+        بٽ_2.ڌڪو_پٺ(V);
       }
-    } else { // Little-endian host
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 1] << 24) |
-                     ((unsigned char)String[Pos - 2] << 16) |
-                     ((unsigned char)String[Pos - 3] << 8) |
-                     (unsigned char)String[Pos - 4];
-        Bits.push_back(V);
+    } وإلا { // Little-endian host
+      لكل (Pos += 4; Pos <= سائيز; Pos += 4) {
+        بنانشان V = ((بنانشان حرف)String[Pos - 1] << 24) |
+                     ((بنانشان حرف)String[Pos - 2] << 16) |
+                     ((بنانشان حرف)String[Pos - 3] << 8) |
+                     (بنانشان حرف)String[Pos - 4];
+        بٽ_2.ڌڪو_پٺ(V);
       }
     }
   }
 
   // With the leftover bits.
-  unsigned V = 0;
+  بنانشان V = 0;
   // Pos will have overshot size by 4 - #bytes left over.
   // No need to take endianness into account here - this is always executed.
-  switch (Pos - Size) {
-  case 1:
-    V = (V << 8) | (unsigned char)String[Size - 3];
+  بدل (Pos - سائيز) {
+  حالة 1:
+    V = (V << 8) | (بنانشان حرف)String[سائيز - 3];
     [[fallthrough]];
-  case 2:
-    V = (V << 8) | (unsigned char)String[Size - 2];
+  حالة 2:
+    V = (V << 8) | (بنانشان حرف)String[سائيز - 2];
     [[fallthrough]];
-  case 3:
-    V = (V << 8) | (unsigned char)String[Size - 1];
-    break;
-  default:
-    return; // Nothing left.
+  حالة 3:
+    V = (V << 8) | (بنانشان حرف)String[سائيز - 1];
+    اكسر;
+  افتراضي:
+    أرجع; // Nothing left.
   }
 
-  Bits.push_back(V);
+  بٽ_2.ڌڪو_پٺ(V);
 }
 
-void FoldingSetNodeID::AddNodeID(const FoldingSetNodeID &ID) {
-  Bits.append(ID.Bits.begin(), ID.Bits.end());
+فراغ Folding_سيٽ_ڳنڍ_ID::جوڙيو_ڳنڍ_ID(ثابت Folding_سيٽ_ڳنڍ_ID &ID) {
+  بٽ_2.append(ID.بٽ_2.begin(), ID.بٽ_2.پڇاڙي());
 }
 
-FoldingSetNodeIDRef
-FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
-  unsigned *New = Allocator.Allocate<unsigned>(Bits.size());
-  llvm::uninitialized_copy(Bits, New);
-  return FoldingSetNodeIDRef(New, Bits.size());
+Folding_سيٽ_ڳنڍ_IDRef
+Folding_سيٽ_ڳنڍ_ID::Intern(BumpPtrAllocator &Allocator) ثابت {
+  بنانشان *New = Allocator.Allocate<بنانشان>(بٽ_2.سائيز_2());
+  llvm::uninitialized_copy(بٽ_2, New);
+  أرجع Folding_سيٽ_ڳنڍ_IDRef(New, بٽ_2.سائيز_2());
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetBase Implementation
 
-FoldingSetBase::FoldingSetBase(unsigned Log2InitSize) {
-  assert(5 < Log2InitSize && Log2InitSize < 32 &&
+Folding_سيٽ_بنياد::Folding_سيٽ_بنياد(بنانشان Log2_Init_سائيز) {
+  أكد(5 < Log2_Init_سائيز && Log2_Init_سائيز < 32 &&
          "Initial hash table size out of range");
-  NumBuckets = 1 << Log2InitSize;
-  Buckets = static_cast<FoldingSetNode **>(
-      safe_calloc(NumBuckets, sizeof(FoldingSetNode *)));
+  انگ_Buckets = 1 << Log2_Init_سائيز;
+  Buckets = static_cast<Folding_سيٽ_ڳنڍ **>(
+      محفوظ_calloc(انگ_Buckets, حجم(Folding_سيٽ_ڳنڍ *)));
 }
 
-FoldingSetBase::FoldingSetBase(FoldingSetBase &&Arg)
-    : Buckets(std::exchange(Arg.Buckets, nullptr)),
-      NumBuckets(std::exchange(Arg.NumBuckets, 0)),
-      NumNodes(std::exchange(Arg.NumNodes, 0)) {
+Folding_سيٽ_بنياد::Folding_سيٽ_بنياد(Folding_سيٽ_بنياد &&Arg)
+    : Buckets(std::exchange(Arg.Buckets, خالي_اشارو)),
+      انگ_Buckets(std::exchange(Arg.انگ_Buckets, 0)),
+      انگ_Nodes(std::exchange(Arg.انگ_Nodes, 0)) {
   Arg.incrementEpoch();
 }
 
-FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
-  if (this == &RHS)
-    return *this;
+Folding_سيٽ_بنياد &Folding_سيٽ_بنياد::عامل=(Folding_سيٽ_بنياد &&RHS) {
+  إذا (هذا == &RHS)
+    أرجع *هذا;
 
   incrementEpoch();
   RHS.incrementEpoch();
-  free(Buckets); // This may be null if the set is in a moved-from state.
-  Buckets = std::exchange(RHS.Buckets, nullptr);
-  NumBuckets = std::exchange(RHS.NumBuckets, 0);
-  NumNodes = std::exchange(RHS.NumNodes, 0);
-  return *this;
+  حرر(Buckets); // This may be null if the set is in a moved-from state.
+  Buckets = std::exchange(RHS.Buckets, خالي_اشارو);
+  انگ_Buckets = std::exchange(RHS.انگ_Buckets, 0);
+  انگ_Nodes = std::exchange(RHS.انگ_Nodes, 0);
+  أرجع *هذا;
 }
 
-FoldingSetBase::~FoldingSetBase() { free(Buckets); }
+Folding_سيٽ_بنياد::~Folding_سيٽ_بنياد() { حرر(Buckets); }
 
-void FoldingSetBase::clear() {
+فراغ Folding_سيٽ_بنياد::clear() {
   incrementEpoch();
   // Stale hashes are unreachable, so only the occupancy needs resetting.
-  if (NumBuckets)
-    memset(Buckets, 0, NumBuckets * sizeof(FoldingSetNode *));
-  NumNodes = 0;
+  إذا (انگ_Buckets)
+    memset(Buckets, 0, انگ_Buckets * حجم(Folding_سيٽ_ڳنڍ *));
+  انگ_Nodes = 0;
 }
 
-void FoldingSetBase::placeNode(FoldingSetNode *N, uint32_t Hash) {
-  unsigned Mask = NumBuckets - 1;
-  unsigned I = Hash & Mask;
-  while (Buckets[I]) {
-    assert(Buckets[I] != N && "Node already in the folding set");
-    I = (I + 1) & Mask;
+فراغ Folding_سيٽ_بنياد::رکو_ڳنڍ(Folding_سيٽ_ڳنڍ *N, uint32_t Hash) {
+  بنانشان نقاب = انگ_Buckets - 1;
+  بنانشان I = Hash & نقاب;
+  طالما (Buckets[I]) {
+    أكد(Buckets[I] != N && "Node already in the folding set");
+    I = (I + 1) & نقاب;
   }
   Buckets[I] = N;
-  ++NumNodes;
+  ++انگ_Nodes;
 }
 
-void FoldingSetBase::grow(unsigned MinNumBuckets) {
+فراغ Folding_سيٽ_بنياد::grow(بنانشان Min_انگ_Buckets) {
   // The floor is the smallest size the constructor accepts.
-  unsigned NewBucketCount = std::max(64u, llvm::bit_ceil(MinNumBuckets));
-  assert(NewBucketCount > NumBuckets && "Can't shrink a folding set");
+  بنانشان New_ٻالٽي_ڳڻپ = std::max(64u, llvm::ٻٽو_انگ_ceil(Min_انگ_Buckets));
+  أكد(New_ٻالٽي_ڳڻپ > انگ_Buckets && "Can't shrink a folding set");
 
-  FoldingSetBase Tmp(llvm::Log2_32(NewBucketCount));
-  for (unsigned I = 0; I != NumBuckets; ++I)
-    if (FoldingSetNode *N = Buckets[I])
-      Tmp.placeNode(N, N->getFoldingSetHash());
+  Folding_سيٽ_بنياد Tmp(llvm::Log2_32(New_ٻالٽي_ڳڻپ));
+  لكل (بنانشان I = 0; I != انگ_Buckets; ++I)
+    إذا (Folding_سيٽ_ڳنڍ *N = Buckets[I])
+      Tmp.رکو_ڳنڍ(N, N->get_Folding_سيٽ_Hash());
 
-  *this = std::move(Tmp);
+  *هذا = std::move(Tmp);
 }
 
-void FoldingSetBase::reserve(unsigned N) {
-  if (N * 4 <= NumBuckets * 3)
-    return;
+فراغ Folding_سيٽ_بنياد::reserve(بنانشان N) {
+  إذا (N * 4 <= انگ_Buckets * 3)
+    أرجع;
   // N + (N + 2) / 3 is ceil(4N/3).
   grow(N + (N + 2) / 3);
 }
 
-void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
-  assert(N && "Cannot insert a null node");
-  assert(Token && "Invalid token!");
+فراغ Folding_سيٽ_بنياد::وجهو(Folding_سيٽ_ڳنڍ *N, Folding_سيٽ_وجهو_Token Token) {
+  أكد(N && "Cannot insert a null node");
+  أكد(Token && "Invalid token!");
   incrementEpoch();
-  if (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
-    grow(NumBuckets * 2);
+  إذا (LLVM_UNLIKELY((انگ_Nodes + 1) * 4 > انگ_Buckets * 3))
+    grow(انگ_Buckets * 2);
   uint32_t Hash = Token.Hash;
-  placeNode(N, Hash);
-  N->setFoldingSetHash(Hash);
+  رکو_ڳنڍ(N, Hash);
+  N->سيٽ_Folding_سيٽ_Hash(Hash);
 }
 
-bool FoldingSetBase::erase(FoldingSetNode *N) {
-  uint32_t Hash = N->getFoldingSetHash();
-  if (Hash == FoldingSetNodeIDRef::NotAHash)
-    return false; // Never inserted.
+منطقي Folding_سيٽ_بنياد::erase(Folding_سيٽ_ڳنڍ *N) {
+  uint32_t Hash = N->get_Folding_سيٽ_Hash();
+  إذا (Hash == Folding_سيٽ_ڳنڍ_IDRef::NotAHash)
+    أرجع خطأ; // Never inserted.
 
-  unsigned Mask = NumBuckets - 1;
-  unsigned I = Hash & Mask;
-  while (Buckets[I] != N) {
-    if (LLVM_UNLIKELY(!Buckets[I]))
-      return false; // Not in folding set.
-    I = (I + 1) & Mask;
+  بنانشان نقاب = انگ_Buckets - 1;
+  بنانشان I = Hash & نقاب;
+  طالما (Buckets[I] != N) {
+    إذا (LLVM_UNLIKELY(!Buckets[I]))
+      أرجع خطأ; // Not in folding set.
+    I = (I + 1) & نقاب;
   }
 
   incrementEpoch();
 
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  for (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
-    unsigned Ideal = Buckets[J]->getFoldingSetHash();
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+  لكل (بنانشان J = (I + 1) & نقاب; Buckets[J]; J = (J + 1) & نقاب) {
+    بنانشان Ideal = Buckets[J]->get_Folding_سيٽ_Hash();
+    إذا (((I - Ideal) & نقاب) < ((J - Ideal) & نقاب)) {
       Buckets[I] = Buckets[J];
       I = J;
     }
   }
-  Buckets[I] = nullptr;
-  N->setFoldingSetHash(FoldingSetNodeIDRef::NotAHash);
-  --NumNodes;
-  return true;
+  Buckets[I] = خالي_اشارو;
+  N->سيٽ_Folding_سيٽ_Hash(Folding_سيٽ_ڳنڍ_IDRef::NotAHash);
+  --انگ_Nodes;
+  أرجع سچ;
 }
