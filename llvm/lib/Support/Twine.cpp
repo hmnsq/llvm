@@ -16,148 +16,148 @@ using namespace llvm;
 
 std::string Twine::str() const {
   // If we're storing only a std::string, just return it.
-  if (LHSKind == StdStringKind && RHSKind == EmptyKind)
-    return *LHS.stdString;
+  ᬬᬾᬦ᭄ (LHSKind == StdStringKind && RHSKind == EmptyKind)
+    ᬯᬮᬶ *LHS.stdString;
 
   // If we're storing a formatv_object, we can avoid an extra copy by formatting
   // it immediately and returning the result.
-  if (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
-    return LHS.formatvObject->str();
+  ᬬᬾᬦ᭄ (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
+    ᬯᬮᬶ LHS.formatvObject->str();
 
   // Otherwise, flatten and copy the contents first.
   SmallString<256> Vec;
-  return toStringRef(Vec).str();
+  ᬯᬮᬶ toStringRef(Vec).str();
 }
 
-void Twine::toVector(SmallVectorImpl<char> &Out) const {
+void Twine::toVector(SmallVectorImpl<var_na> &Out) const {
   raw_svector_ostream OS(Out);
   print(OS);
 }
 
-StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
-  if (isUnary()) {
+StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<var_na> &Out) const {
+  ᬬᬾᬦ᭄ (isUnary()) {
     switch (getLHSKind()) {
-    case CStringKind:
+    pak_sa CStringKind:
       // Already null terminated, yay!
-      return StringRef(LHS.cString);
-    case StdStringKind: {
+      ᬯᬮᬶ StringRef(LHS.cString);
+    pak_sa StdStringKind: {
       const std::string *str = LHS.stdString;
-      return StringRef(str->c_str(), str->size());
+      ᬯᬮᬶ StringRef(str->c_str(), str->size());
     }
-    case StringLiteralKind:
-      return StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
+    pak_sa StringLiteralKind:
+      ᬯᬮᬶ StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
     default:
-      break;
+      bha_nga;
     }
   }
   toVector(Out);
   Out.push_back(0);
   Out.pop_back();
-  return StringRef(Out.data(), Out.size());
+  ᬯᬮᬶ StringRef(Out.data(), Out.size());
 }
 
 void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
   switch (Kind) {
-  case Twine::NullKind:
-    break;
-  case Twine::EmptyKind:
-    break;
-  case Twine::TwineKind:
+  pak_sa Twine::NullKind:
+    bha_nga;
+  pak_sa Twine::EmptyKind:
+    bha_nga;
+  pak_sa Twine::TwineKind:
     Ptr.twine->print(OS);
-    break;
-  case Twine::CStringKind:
+    bha_nga;
+  pak_sa Twine::CStringKind:
     OS << Ptr.cString;
-    break;
-  case Twine::StdStringKind:
+    bha_nga;
+  pak_sa Twine::StdStringKind:
     OS << *Ptr.stdString;
-    break;
-  case Twine::PtrAndLengthKind:
-  case Twine::StringLiteralKind:
+    bha_nga;
+  pak_sa Twine::PtrAndLengthKind:
+  pak_sa Twine::StringLiteralKind:
     OS << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length);
-    break;
-  case Twine::FormatvObjectKind:
+    bha_nga;
+  pak_sa Twine::FormatvObjectKind:
     OS << *Ptr.formatvObject;
-    break;
-  case Twine::CharKind:
+    bha_nga;
+  pak_sa Twine::CharKind:
     OS << Ptr.character;
-    break;
-  case Twine::DecUIKind:
+    bha_nga;
+  pak_sa Twine::DecUIKind:
     OS << Ptr.decUI;
-    break;
-  case Twine::DecIKind:
+    bha_nga;
+  pak_sa Twine::DecIKind:
     OS << Ptr.decI;
-    break;
-  case Twine::DecULKind:
+    bha_nga;
+  pak_sa Twine::DecULKind:
     OS << Ptr.decUL;
-    break;
-  case Twine::DecLKind:
+    bha_nga;
+  pak_sa Twine::DecLKind:
     OS << Ptr.decL;
-    break;
-  case Twine::DecULLKind:
+    bha_nga;
+  pak_sa Twine::DecULLKind:
     OS << Ptr.decULL;
-    break;
-  case Twine::DecLLKind:
+    bha_nga;
+  pak_sa Twine::DecLLKind:
     OS << Ptr.decLL;
-    break;
-  case Twine::UHexKind:
+    bha_nga;
+  pak_sa Twine::UHexKind:
     OS.write_hex(Ptr.uHex);
-    break;
+    bha_nga;
   }
 }
 
 void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
   switch (Kind) {
-  case Twine::NullKind:
+  pak_sa Twine::NullKind:
     OS << "null";
-    break;
-  case Twine::EmptyKind:
+    bha_nga;
+  pak_sa Twine::EmptyKind:
     OS << "empty";
-    break;
-  case Twine::TwineKind:
+    bha_nga;
+  pak_sa Twine::TwineKind:
     OS << "rope:";
     Ptr.twine->printRepr(OS);
-    break;
-  case Twine::CStringKind:
+    bha_nga;
+  pak_sa Twine::CStringKind:
     OS << "cstring:\"" << Ptr.cString << "\"";
-    break;
-  case Twine::StdStringKind:
+    bha_nga;
+  pak_sa Twine::StdStringKind:
     OS << "std::string:\"" << Ptr.stdString << "\"";
-    break;
-  case Twine::PtrAndLengthKind:
+    bha_nga;
+  pak_sa Twine::PtrAndLengthKind:
     OS << "ptrAndLength:\""
        << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::StringLiteralKind:
+    bha_nga;
+  pak_sa Twine::StringLiteralKind:
     OS << "constexprPtrAndLength:\""
        << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::FormatvObjectKind:
+    bha_nga;
+  pak_sa Twine::FormatvObjectKind:
     OS << "formatv:\"" << *Ptr.formatvObject << "\"";
-    break;
-  case Twine::CharKind:
+    bha_nga;
+  pak_sa Twine::CharKind:
     OS << "char:\"" << Ptr.character << "\"";
-    break;
-  case Twine::DecUIKind:
+    bha_nga;
+  pak_sa Twine::DecUIKind:
     OS << "decUI:\"" << Ptr.decUI << "\"";
-    break;
-  case Twine::DecIKind:
+    bha_nga;
+  pak_sa Twine::DecIKind:
     OS << "decI:\"" << Ptr.decI << "\"";
-    break;
-  case Twine::DecULKind:
+    bha_nga;
+  pak_sa Twine::DecULKind:
     OS << "decUL:\"" << Ptr.decUL << "\"";
-    break;
-  case Twine::DecLKind:
+    bha_nga;
+  pak_sa Twine::DecLKind:
     OS << "decL:\"" << Ptr.decL << "\"";
-    break;
-  case Twine::DecULLKind:
+    bha_nga;
+  pak_sa Twine::DecULLKind:
     OS << "decULL:\"" << Ptr.decULL << "\"";
-    break;
-  case Twine::DecLLKind:
+    bha_nga;
+  pak_sa Twine::DecLLKind:
     OS << "decLL:\"" << Ptr.decLL << "\"";
-    break;
-  case Twine::UHexKind:
+    bha_nga;
+  pak_sa Twine::UHexKind:
     OS << "uhex:\"" << Ptr.uHex << "\"";
-    break;
+    bha_nga;
   }
 }
 
@@ -174,7 +174,7 @@ void Twine::printRepr(raw_ostream &OS) const {
   OS << ")";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#ᬬᬾᬦ᭄ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
 
 LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }

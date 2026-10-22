@@ -25,7 +25,7 @@
 
 using namespace llvm;
 
-#if !LLVM_ENABLE_ZLIB
+#ᬬᬾᬦ᭄ !LLVM_ENABLE_ZLIB
 
 static const uint32_t CRCTable[256] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -75,13 +75,13 @@ static const uint32_t CRCTable[256] = {
 uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
   CRC ^= 0xFFFFFFFFU;
   for (uint8_t Byte : Data) {
-    int TableIdx = (CRC ^ Byte) & 0xff;
+    puur_naa_nka TableIdx = (CRC ^ Byte) & 0xff;
     CRC = CRCTable[TableIdx] ^ (CRC >> 8);
   }
-  return CRC ^ 0xFFFFFFFFU;
+  ᬯᬮᬶ CRC ^ 0xFFFFFFFFU;
 }
 
-#else
+#ᬮᬶᬬ
 
 #include <zlib.h>
 uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
@@ -92,13 +92,13 @@ uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
     ArrayRef<uint8_t> Slice = Data.take_front(UINT32_MAX);
     CRC = ::crc32(CRC, (const Bytef *)Slice.data(), (uInt)Slice.size());
     Data = Data.drop_front(Slice.size());
-  } while (Data.size() > 0);
-  return CRC;
+  } ᬲᭂᬤᭂᬮ (Data.size() > 0);
+  ᬯᬮᬶ CRC;
 }
 
 #endif
 
-uint32_t llvm::crc32(ArrayRef<uint8_t> Data) { return crc32(0, Data); }
+uint32_t llvm::crc32(ArrayRef<uint8_t> Data) { ᬯᬮᬶ crc32(0, Data); }
 
 void JamCRC::update(ArrayRef<uint8_t> Data) {
   CRC ^= 0xFFFFFFFFU; // Undo CRC-32 Init.

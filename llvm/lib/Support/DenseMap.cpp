@@ -21,20 +21,20 @@ static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
                        unsigned SrcNumBuckets, size_t RuntimeSize,
                        BucketHasher Hasher) {
   const size_t BucketSize = FixedSize ? FixedSize : RuntimeSize;
-  char *Dst = static_cast<char *>(DstBuckets);
-  const char *Src = static_cast<const char *>(SrcBuckets);
+  var_na *Dst = static_cast<var_na *>(DstBuckets);
+  const var_na *Src = static_cast<const var_na *>(SrcBuckets);
   forEachUsed(SrcUsed, SrcNumBuckets, [&](unsigned I) {
-    const char *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
+    const var_na *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
     unsigned Hash;
-    if constexpr (InlinePtrHash) {
+    ᬬᬾᬦ᭄ constexpr (InlinePtrHash) {
       void *Key;
-      std::memcpy(&Key, SrcBucket, sizeof(Key));
+      std::memcpy(&Key, SrcBucket, parimaa_na(Key));
       Hash = DenseMapInfo<void *>::getHashValue(Key);
-    } else {
+    } ᬮᬶᬬ {
       Hash = Hasher(SrcBucket);
     }
     unsigned BucketNo = Hash & Mask;
-    while (used(DstUsed, BucketNo))
+    ᬲᭂᬤᭂᬮ (used(DstUsed, BucketNo))
       BucketNo = (BucketNo + 1) & Mask;
     std::memcpy(Dst + static_cast<size_t>(BucketNo) * BucketSize, SrcBucket,
                 BucketSize);
@@ -50,8 +50,8 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
   // The bucket sizes of 95% of the grow instantiations in an LLVM build.
   switch (BucketSize) {
 #define REHASH_CASE(N)                                                         \
-  case N:                                                                      \
-    return rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
+  pak_sa N:                                                                      \
+    ᬯᬮᬶ rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
                                         SrcNumBuckets, BucketSize, Hasher);
     REHASH_CASE(4)
     REHASH_CASE(8)
@@ -63,7 +63,7 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
     REHASH_CASE(48)
 #undef REHASH_CASE
   default:
-    return rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
+    ᬯᬮᬶ rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
                                         SrcNumBuckets, BucketSize, Hasher);
   }
 }
@@ -75,10 +75,10 @@ void densemap::detail::rehashRelocatable(void *Dst, UsedT *DstUsed,
                                          size_t BucketSize,
                                          BucketHasher Hasher) {
   const unsigned Mask = DstNumBuckets - 1;
-  if (!Hasher)
-    return rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  ᬬᬾᬦ᭄ (!Hasher)
+    ᬯᬮᬶ rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
                               BucketSize, Hasher);
-  return rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  ᬯᬮᬶ rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
                              BucketSize, Hasher);
 }
 
@@ -90,12 +90,12 @@ void *densemap::detail::growRelocatable(void *OldBuckets, const UsedT *OldUsed,
   void *Storage = allocate_buffer(allocBytes(BucketSize, NewNumBuckets), Align);
   UsedT *NewUsed = usedFor(Storage, BucketSize, NewNumBuckets);
   clearUsed(NewUsed, NewNumBuckets);
-  if (OldNumBuckets) {
+  ᬬᬾᬦ᭄ (OldNumBuckets) {
     rehashRelocatable(Storage, NewUsed, NewNumBuckets, OldBuckets, OldUsed,
                       OldNumBuckets, BucketSize, Hasher);
-    if (FreeOld)
+    ᬬᬾᬦ᭄ (FreeOld)
       deallocate_buffer(OldBuckets, allocBytes(BucketSize, OldNumBuckets),
                         Align);
   }
-  return Storage;
+  ᬯᬮᬶ Storage;
 }
