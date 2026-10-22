@@ -38,8 +38,8 @@
 #ifndef LLVM_SUPPORT_REGEX2_H
 #define LLVM_SUPPORT_REGEX2_H
 
-#include "regutils.h"
-#include <stddef.h>
+#अन्तर्भाव "regutils.h"
+#अन्तर्भाव <stddef.h>
 
 /*
  * internals of regex_t
@@ -65,11 +65,11 @@
  * In state representations, an operator's bit is on to signify a state
  * immediately *preceding* "execution" of that operator.
  */
-typedef unsigned long sop;	/* strip operator */
-typedef long sopno;
+प्रकारनिर्देश अचिन्हित दीर्घ sop;	/* strip operator */
+प्रकारनिर्देश दीर्घ sopno;
 #define	OPRMASK	0xf8000000LU
 #define	OPDMASK	0x07ffffffLU
-#define	OPSHIFT	((unsigned)27)
+#define	OPSHIFT	((अचिन्हित)27)
 #define	OP(n)	((n)&OPRMASK)
 #define	OPND(n)	((n)&OPDMASK)
 #define	SOP(op, opnd)	((op)|(opnd))
@@ -108,12 +108,12 @@ typedef long sopno;
  * a string of multi-character elements, and decide the size of the
  * vectors at run time.
  */
-typedef struct {
+प्रकारनिर्देश संरचना {
 	uch *ptr;		/* -> uch [csetsize] */
 	uch mask;		/* bit within array */
 	uch hash;		/* hash code */
-	size_t smultis;
-	char *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
+	माप_प्रकार smultis;
+	वर्ण *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
 } cset;
 /* note that CHadd and CHsub are unsafe, and CHIN doesn't yield 0/1 */
 #define	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->mask, (cs)->hash += (c))
@@ -124,42 +124,42 @@ typedef struct {
 #define	MCin(p, cs, cp)	mcin(p, cs, cp)
 
 /* stuff for character categories */
-typedef unsigned char cat_t;
+प्रकारनिर्देश अचिन्हित वर्ण cat_t;
 
 /*
  * main compiled-expression structure
  */
-struct re_guts {
-	int magic;
+संरचना re_guts {
+	पूर्णाङ्क magic;
 #		define	MAGIC2	((('R'^0200)<<8)|'E')
 	sop *strip;		/* malloced area for strip */
-	int csetsize;		/* number of bits in a cset vector */
-	int ncsets;		/* number of csets in use */
+	पूर्णाङ्क csetsize;		/* number of bits in a cset vector */
+	पूर्णाङ्क ncsets;		/* number of csets in use */
 	cset *sets;		/* -> cset [ncsets] */
 	uch *setbits;		/* -> uch[csetsize][ncsets/CHAR_BIT] */
-	int cflags;		/* copy of llvm_regcomp() cflags argument */
+	पूर्णाङ्क cflags;		/* copy of llvm_regcomp() cflags argument */
 	sopno nstates;		/* = number of sops */
 	sopno firststate;	/* the initial OEND (normally 0) */
 	sopno laststate;	/* the final OEND */
-	int iflags;		/* internal flags */
+	पूर्णाङ्क iflags;		/* internal flags */
 #		define	USEBOL	01	/* used ^ */
 #		define	USEEOL	02	/* used $ */
 #		define	REGEX_BAD	04	/* something wrong */
-	int nbol;		/* number of ^ used */
-	int neol;		/* number of $ used */
-	int ncategories;	/* how many character categories */
+	पूर्णाङ्क nbol;		/* number of ^ used */
+	पूर्णाङ्क neol;		/* number of $ used */
+	पूर्णाङ्क ncategories;	/* how many character categories */
 	cat_t *categories;	/* ->catspace[-CHAR_MIN] */
-	char *must;		/* match must contain this string */
-	int mlen;		/* length of must */
-	size_t nsub;		/* copy of re_nsub */
-	int backrefs;		/* does it use back references? */
+	वर्ण *must;		/* match must contain this string */
+	पूर्णाङ्क mlen;		/* length of must */
+	माप_प्रकार nsub;		/* copy of re_nsub */
+	पूर्णाङ्क backrefs;		/* does it use back references? */
 	sopno nplus;		/* how deep does it nest +s? */
 	/* catspace must be last */
 	cat_t catspace[1];	/* actually [NC] */
 };
 
 /* misc utilities */
-#define	OUT	(CHAR_MAX+1)	/* a non-character value */
-#define	ISWORD(c)	(isalnum(c&0xff) || (c) == '_')
+#define	OUT	(अक्षर_उच्च+1)	/* a non-character value */
+#define	ISWORD(c)	(है_अक्षर_अंक(c&0xff) || (c) == '_')
 
 #endif
