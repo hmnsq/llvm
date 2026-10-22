@@ -10,154 +10,154 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RWMutex.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Allocator.h"
+#అన్తర్భావ "llvm/Support/RWMutex.h"
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#అన్తర్భావ "llvm/Support/Allocator.h"
 
-#if defined(LLVM_USE_RW_MUTEX_IMPL)
-using namespace llvm;
-using namespace sys;
+#ఒకవేళ defined(LLVM_USE_RW_MUTEX_IMPL)
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ sys;
 
-#if !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
+#ఒకవేళ !defined(LLVM_ENABLE_దారాలు) || LLVM_ENABLE_దారాలు == 0
 // Define all methods as no-ops if threading is explicitly disabled
 
-RWMutexImpl::RWMutexImpl() = default;
-RWMutexImpl::~RWMutexImpl() = default;
+RWMutexImpl::RWMutexImpl() = అప్రమేయ;
+RWMutexImpl::~RWMutexImpl() = అప్రమేయ;
 
-bool RWMutexImpl::lock_shared() { return true; }
-bool RWMutexImpl::unlock_shared() { return true; }
-bool RWMutexImpl::try_lock_shared() { return true; }
-bool RWMutexImpl::lock() { return true; }
-bool RWMutexImpl::unlock() { return true; }
-bool RWMutexImpl::try_lock() { return true; }
+తార్కిక RWMutexImpl::తాళం_shared() { తిరిగి నిజం; }
+తార్కిక RWMutexImpl::unlock_shared() { తిరిగి నిజం; }
+తార్కిక RWMutexImpl::try_తాళం_shared() { తిరిగి నిజం; }
+తార్కిక RWMutexImpl::తాళం_2() { తిరిగి నిజం; }
+తార్కిక RWMutexImpl::unlock() { తిరిగి నిజం; }
+తార్కిక RWMutexImpl::try_తాళం_2() { తిరిగి నిజం; }
 
-#else
+#లేకపోతే
 
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
+#ఒకవేళ defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
 
-#include <cassert>
-#include <cstdlib>
-#include <pthread.h>
+#అన్తర్భావ <cassert>
+#అన్తర్భావ <cstdlib>
+#అన్తర్భావ <pthread.h>
 
 // Construct a RWMutex using pthread calls
 RWMutexImpl::RWMutexImpl()
 {
   // Declare the pthread_rwlock data structures
   pthread_rwlock_t* rwlock =
-    static_cast<pthread_rwlock_t*>(safe_malloc(sizeof(pthread_rwlock_t)));
+    static_cast<pthread_rwlock_t*>(సురక్షిత_malloc(పరిమాణం(pthread_rwlock_t)));
 
-#ifdef __APPLE__
+#నిర్వచితమైతే __APPLE__
   // Workaround a bug/mis-feature in Darwin's pthread_rwlock_init.
-  bzero(rwlock, sizeof(pthread_rwlock_t));
-#endif
+  bzero(rwlock, పరిమాణం(pthread_rwlock_t));
+#అయితే_ముగింపు
 
   // Initialize the rwlock
-  int errorcode = pthread_rwlock_init(rwlock, nullptr);
-  (void)errorcode;
-  assert(errorcode == 0);
+  పూర్ణాంకం errorcode = pthread_rwlock_init(rwlock, శూన్యసూచిక);
+  (శూన్య)errorcode;
+  ప్రతిజ్ఞా(errorcode == 0);
 
   // Assign the data member
-  data_ = rwlock;
+  దత్తాంశం_3 = rwlock;
 }
 
 // Destruct a RWMutex
 RWMutexImpl::~RWMutexImpl()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
   pthread_rwlock_destroy(rwlock);
-  free(rwlock);
+  విడుదల(rwlock);
 }
 
-bool
-RWMutexImpl::lock_shared()
+తార్కిక
+RWMutexImpl::తాళం_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
 
-  int errorcode = pthread_rwlock_rdlock(rwlock);
-  return errorcode == 0;
+  పూర్ణాంకం errorcode = pthread_rwlock_rdlock(rwlock);
+  తిరిగి errorcode == 0;
 }
 
-bool
+తార్కిక
 RWMutexImpl::unlock_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  పూర్ణాంకం errorcode = pthread_rwlock_unlock(rwlock);
+  తిరిగి errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+తార్కిక RWMutexImpl::try_తాళం_shared() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
 
-  int errorcode = pthread_rwlock_tryrdlock(rwlock);
-  return errorcode == 0;
+  పూర్ణాంకం errorcode = pthread_rwlock_tryrdlock(rwlock);
+  తిరిగి errorcode == 0;
 }
 
-bool
-RWMutexImpl::lock()
+తార్కిక
+RWMutexImpl::తాళం_2()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
 
-  int errorcode = pthread_rwlock_wrlock(rwlock);
-  return errorcode == 0;
+  పూర్ణాంకం errorcode = pthread_rwlock_wrlock(rwlock);
+  తిరిగి errorcode == 0;
 }
 
-bool
+తార్కిక
 RWMutexImpl::unlock()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  పూర్ణాంకం errorcode = pthread_rwlock_unlock(rwlock);
+  తిరిగి errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+తార్కిక RWMutexImpl::try_తాళం_2() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(దత్తాంశం_3);
+  ప్రతిజ్ఞా(rwlock != శూన్యసూచిక);
 
-  int errorcode = pthread_rwlock_trywrlock(rwlock);
-  return errorcode == 0;
+  పూర్ణాంకం errorcode = pthread_rwlock_trywrlock(rwlock);
+  తిరిగి errorcode == 0;
 }
 
-#else
+#లేకపోతే
 
-RWMutexImpl::RWMutexImpl() : data_(new MutexImpl(false)) { }
+RWMutexImpl::RWMutexImpl() : దత్తాంశం_3(కొత్త MutexImpl(అబద్ధం)) { }
 
 RWMutexImpl::~RWMutexImpl() {
-  delete static_cast<MutexImpl *>(data_);
+  తొలగించు static_cast<MutexImpl *>(దత్తాంశం_3);
 }
 
-bool RWMutexImpl::lock_shared() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+తార్కిక RWMutexImpl::తాళం_shared() {
+  తిరిగి static_cast<MutexImpl *>(దత్తాంశం_3)->acquire();
 }
 
-bool RWMutexImpl::unlock_shared() {
-  return static_cast<MutexImpl *>(data_)->release();
+తార్కిక RWMutexImpl::unlock_shared() {
+  తిరిగి static_cast<MutexImpl *>(దత్తాంశం_3)->release();
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+తార్కిక RWMutexImpl::try_తాళం_shared() {
+  తిరిగి static_cast<MutexImpl *>(దత్తాంశం_3)->tryacquire();
 }
 
-bool RWMutexImpl::lock() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+తార్కిక RWMutexImpl::తాళం_2() {
+  తిరిగి static_cast<MutexImpl *>(దత్తాంశం_3)->acquire();
 }
 
-bool RWMutexImpl::unlock() {
-  return static_cast<MutexImpl *>(data_)->release();
+తార్కిక RWMutexImpl::unlock() {
+  తిరిగి static_cast<MutexImpl *>(దత్తాంశం_3)->release();
 }
 
-bool RWMutexImpl::try_lock() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+తార్కిక RWMutexImpl::try_తాళం_2() {
+  తిరిగి static_cast<MutexImpl *>(దత్తాంశం_3)->tryacquire();
 }
 
-#endif
-#endif
-#endif
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+#అయితే_ముగింపు

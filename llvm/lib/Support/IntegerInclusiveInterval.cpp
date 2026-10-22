@@ -12,114 +12,114 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/IntegerInclusiveInterval.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Regex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <string>
+#అన్తర్భావ "llvm/Support/IntegerInclusiveInterval.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/Error.h"
+#అన్తర్భావ "llvm/Support/Regex.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <string>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-namespace llvm::IntegerInclusiveIntervalUtils {
+నామాకాశ llvm::IntegerInclusiveIntervalUtils {
 
-Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
+Expected<IntervalList> parseIntervals(StringRef Str, అక్షరం Separator) {
   IntervalList Intervals;
 
-  if (Str.empty())
-    return std::move(Intervals);
+  ఒకవేళ (Str.ఖాళీలు())
+    తిరిగి std::move(Intervals);
 
   // Regex to match either single number or interval "num1-num2".
-  const Regex IntervalRegex("^([0-9]+)(-([0-9]+))?$");
+  స్థిరరాశి Regex IntervalRegex("^([0-9]+)(-([0-9]+))?$");
 
-  for (StringRef Part : llvm::split(Str, Separator)) {
+  కొరకు (StringRef Part : llvm::విభజించు(Str, Separator)) {
     Part = Part.trim();
-    if (Part.empty())
-      continue;
+    ఒకవేళ (Part.ఖాళీలు())
+      కొనసాగు;
 
-    SmallVector<StringRef, 4> Matches;
-    if (!IntervalRegex.match(Part, &Matches))
-      return createStringError(std::errc::invalid_argument,
+    Small_సదిశ<StringRef, 4> Matches;
+    ఒకవేళ (!IntervalRegex.సరిపోలిక(Part, &Matches))
+      తిరిగి createStringError(std::errc::invalid_వాదం,
                                "Invalid interval format: '%s'",
                                Part.str().c_str());
 
-    int64_t Begin, End;
-    if (Matches[1].getAsInteger(10, Begin))
-      return createStringError(std::errc::invalid_argument,
+    int64_t Begin, చివర_2;
+    ఒకవేళ (Matches[1].getAsInteger(10, Begin))
+      తిరిగి createStringError(std::errc::invalid_వాదం,
                                "Failed to parse number: '%s'",
                                Matches[1].str().c_str());
 
-    if (!Matches[3].empty()) {
+    ఒకవేళ (!Matches[3].ఖాళీలు()) {
       // Interval format "begin-end".
-      if (Matches[3].getAsInteger(10, End))
-        return createStringError(std::errc::invalid_argument,
+      ఒకవేళ (Matches[3].getAsInteger(10, చివర_2))
+        తిరిగి createStringError(std::errc::invalid_వాదం,
                                  "Failed to parse number: '%s'",
                                  Matches[3].str().c_str());
-      if (Begin >= End)
-        return createStringError(std::errc::invalid_argument,
-                                 "Invalid interval: %lld >= %lld", Begin, End);
-    } else
+      ఒకవేళ (Begin >= చివర_2)
+        తిరిగి createStringError(std::errc::invalid_వాదం,
+                                 "Invalid interval: %lld >= %lld", Begin, చివర_2);
+    } లేకపోతే
       // Single number.
-      End = Begin;
+      చివర_2 = Begin;
 
     // Check ordering constraint (intervals must be in increasing order).
-    if (!Intervals.empty() && Begin <= Intervals.back().getEnd())
-      return createStringError(
-          std::errc::invalid_argument,
+    ఒకవేళ (!Intervals.ఖాళీలు() && Begin <= Intervals.వెనుక().get_చివర())
+      తిరిగి createStringError(
+          std::errc::invalid_వాదం,
           "Expected intervals to be in increasing order: %lld <= %lld", Begin,
-          Intervals.back().getEnd());
+          Intervals.వెనుక().get_చివర());
 
-    Intervals.push_back(IntegerInclusiveInterval(Begin, End));
+    Intervals.నెట్టు_వెనుక(IntegerInclusiveInterval(Begin, చివర_2));
   }
 
-  return Intervals;
+  తిరిగి Intervals;
 }
 
-bool contains(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t Value) {
-  for (const IntegerInclusiveInterval &It : Intervals) {
-    if (It.contains(Value))
-      return true;
+తార్కిక కలిగియుంది(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t విలువ) {
+  కొరకు (స్థిరరాశి IntegerInclusiveInterval &It : Intervals) {
+    ఒకవేళ (It.కలిగియుంది(విలువ))
+      తిరిగి నిజం;
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-void printIntervals(raw_ostream &OS,
+శూన్య printIntervals(raw_ostream &OS,
                     ArrayRef<IntegerInclusiveInterval> Intervals,
-                    char Separator) {
-  if (Intervals.empty()) {
+                    అక్షరం Separator) {
+  ఒకవేళ (Intervals.ఖాళీలు()) {
     OS << "empty";
-    return;
+    తిరిగి;
   }
 
   std::string Sep(1, Separator);
   ListSeparator LS(Sep);
-  for (const IntegerInclusiveInterval &It : Intervals) {
+  కొరకు (స్థిరరాశి IntegerInclusiveInterval &It : Intervals) {
     OS << LS;
     It.print(OS);
   }
 }
 
 IntervalList
-mergeAdjacentIntervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
-  if (Intervals.empty())
-    return {};
+విలీనం_Adjacent_Intervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
+  ఒకవేళ (Intervals.ఖాళీలు())
+    తిరిగి {};
 
-  IntervalList Result;
-  Result.push_back(Intervals[0]);
+  IntervalList ఫలితం;
+  ఫలితం.నెట్టు_వెనుక(Intervals[0]);
 
-  for (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
-    IntegerInclusiveInterval &Last = Result.back();
+  కొరకు (స్థిరరాశి IntegerInclusiveInterval &Current : Intervals.drop_front()) {
+    IntegerInclusiveInterval &చివరి = ఫలితం.వెనుక();
     // Check if current interval is adjacent to the last merged interval.
-    if (Current.getBegin() == Last.getEnd() + 1) {
+    ఒకవేళ (Current.getBegin() == చివరి.get_చివర() + 1) {
       // Merge by extending the end of the last interval.
-      Last.setEnd(Current.getEnd());
-    } else {
+      చివరి.సమితి_చివర(Current.get_చివర());
+    } లేకపోతే {
       // Not adjacent, add as separate interval.
-      Result.push_back(Current);
+      ఫలితం.నెట్టు_వెనుక(Current);
     }
   }
 
-  return Result;
+  తిరిగి ఫలితం;
 }
 
 } // end namespace llvm::IntegerInclusiveIntervalUtils

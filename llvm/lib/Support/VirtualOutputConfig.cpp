@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/VirtualOutputConfig.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::సమితి_Open_Flags(స్థిరరాశి sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
-  using namespace llvm::sys::fs;
-  return Flags & OF_Text
-             ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+  ఉపయోగించి నామాకాశ llvm::sys::fs;
+  తిరిగి Flags & యొక్క_పాఠ్యం
+             ? సమితి_పాఠ్యం().సమితి_CRLF(Flags & యొక్క_CRLF).సమితి_Append(Flags & యొక్క_Append)
+             : సమితి_ద్విమాన().సమితి_Append(Flags & యొక్క_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+శూన్య OutputConfig::print(raw_ostream &OS) స్థిరరాశి {
   OS << "{";
-  bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
-      IsFirst = false;
-    else
+  తార్కిక Is_మొదటి = నిజం;
+  స్వయంచాలక printFlag = [&](StringRef FlagName, తార్కిక విలువ) {
+    ఒకవేళ (Is_మొదటి)
+      Is_మొదటి = అబద్ధం;
+    లేకపోతే
       OS << ",";
-    if (!Value)
+    ఒకవేళ (!విలువ)
       OS << "No";
     OS << FlagName;
   };
 
-#define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+#నిర్వచించు HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
+  ఒకవేళ (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#అన్తర్భావ "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_పద్ధతి శూన్య OutputConfig::dump() స్థిరరాశి { print(dbgs()); }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  తిరిగి OS;
 }

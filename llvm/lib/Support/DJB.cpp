@@ -10,74 +10,74 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DJB.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Unicode.h"
+#అన్తర్భావ "llvm/Support/DJB.h"
+#అన్తర్భావ "llvm/ADT/ArrayRef.h"
+#అన్తర్భావ "llvm/Support/Compiler.h"
+#అన్తర్భావ "llvm/Support/ConvertUTF.h"
+#అన్తర్భావ "llvm/Support/Unicode.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-static UTF32 chopOneUTF32(StringRef &Buffer) {
+స్థిర UTF32 chopOneUTF32(StringRef &బఫరు) {
   UTF32 C;
-  const UTF8 *const Begin8Const =
-      reinterpret_cast<const UTF8 *>(Buffer.begin());
-  const UTF8 *Begin8 = Begin8Const;
+  స్థిరరాశి UTF8 *స్థిరరాశి Begin8Const =
+      reinterpret_cast<స్థిరరాశి UTF8 *>(బఫరు.begin());
+  స్థిరరాశి UTF8 *Begin8 = Begin8Const;
   UTF32 *Begin32 = &C;
 
   // In lenient mode we will always end up with a "reasonable" value in C for
   // non-empty input.
-  assert(!Buffer.empty());
-  ConvertUTF8toUTF32(&Begin8, reinterpret_cast<const UTF8 *>(Buffer.end()),
+  ప్రతిజ్ఞా(!బఫరు.ఖాళీలు());
+  ConvertUTF8toUTF32(&Begin8, reinterpret_cast<స్థిరరాశి UTF8 *>(బఫరు.చివర()),
                      &Begin32, &C + 1, lenientConversion);
-  Buffer = Buffer.drop_front(Begin8 - Begin8Const);
-  return C;
+  బఫరు = బఫరు.drop_front(Begin8 - Begin8Const);
+  తిరిగి C;
 }
 
-static StringRef toUTF8(UTF32 C, MutableArrayRef<UTF8> Storage) {
-  const UTF32 *Begin32 = &C;
+స్థిర StringRef గమ్యం_UTF8(UTF32 C, MutableArrayRef<UTF8> Storage) {
+  స్థిరరాశి UTF32 *Begin32 = &C;
   UTF8 *Begin8 = Storage.begin();
 
   // The case-folded output should always be a valid unicode character, so use
   // strict mode here.
-  ConversionResult CR = ConvertUTF32toUTF8(&Begin32, &C + 1, &Begin8,
-                                           Storage.end(), strictConversion);
-  assert(CR == conversionOK && "Case folding produced invalid char?");
-  (void)CR;
-  return StringRef(reinterpret_cast<char *>(Storage.begin()),
+  Conversion_ఫలితం CR = ConvertUTF32toUTF8(&Begin32, &C + 1, &Begin8,
+                                           Storage.చివర(), strictConversion);
+  ప్రతిజ్ఞా(CR == conversionOK && "Case folding produced invalid char?");
+  (శూన్య)CR;
+  తిరిగి StringRef(reinterpret_cast<అక్షరం *>(Storage.begin()),
                    Begin8 - Storage.begin());
 }
 
-static UTF32 foldCharDwarf(UTF32 C) {
+స్థిర UTF32 foldCharDwarf(UTF32 C) {
   // DWARF v5 addition to the unicode folding rules.
   // Fold "Latin Small Letter Dotless I" and "Latin Capital Letter I With Dot
   // Above" into "i".
-  if (C == 0x130 || C == 0x131)
-    return 'i';
-  return sys::unicode::foldCharSimple(C);
+  ఒకవేళ (C == 0x130 || C == 0x131)
+    తిరిగి 'i';
+  తిరిగి sys::unicode::foldCharSimple(C);
 }
 
-static std::optional<uint32_t> fastCaseFoldingDjbHash(StringRef Buffer,
+స్థిర std::optional<uint32_t> fastCaseFoldingDjbHash(StringRef బఫరు,
                                                       uint32_t H) {
-  bool AllASCII = true;
-  for (unsigned char C : Buffer) {
+  తార్కిక AllASCII = నిజం;
+  కొరకు (గుర్తులేని అక్షరం C : బఫరు) {
     H = H * 33 + ('A' <= C && C <= 'Z' ? C - 'A' + 'a' : C);
     AllASCII &= C <= 0x7f;
   }
-  if (AllASCII)
-    return H;
-  return std::nullopt;
+  ఒకవేళ (AllASCII)
+    తిరిగి H;
+  తిరిగి std::nullopt;
 }
 
-uint32_t llvm::caseFoldingDjbHash(StringRef Buffer, uint32_t H) {
-  if (std::optional<uint32_t> Result = fastCaseFoldingDjbHash(Buffer, H))
-    return *Result;
+uint32_t llvm::caseFoldingDjbHash(StringRef బఫరు, uint32_t H) {
+  ఒకవేళ (std::optional<uint32_t> ఫలితం = fastCaseFoldingDjbHash(బఫరు, H))
+    తిరిగి *ఫలితం;
 
-  std::array<UTF8, UNI_MAX_UTF8_BYTES_PER_CODE_POINT> Storage;
-  while (!Buffer.empty()) {
-    UTF32 C = foldCharDwarf(chopOneUTF32(Buffer));
-    StringRef Folded = toUTF8(C, Storage);
+  std::array<UTF8, UNI_MAX_UTF8_బైట్లు_చొప్పున_సంకేతం_బిందువు> Storage;
+  అయితే (!బఫరు.ఖాళీలు()) {
+    UTF32 C = foldCharDwarf(chopOneUTF32(బఫరు));
+    StringRef Folded = గమ్యం_UTF8(C, Storage);
     H = djbHash(Folded, H);
   }
-  return H;
+  తిరిగి H;
 }

@@ -6,65 +6,65 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/RewriteBuffer.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/ADT/RewriteBuffer.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-raw_ostream &RewriteBuffer::write(raw_ostream &Stream) const {
+raw_ostream &Rewrite_బఫరు::లిఖ(raw_ostream &ప్రవాహం) స్థిరరాశి {
   // Walk RewriteRope chunks efficiently using MoveToNextPiece() instead of the
   // character iterator.
-  for (RopePieceBTreeIterator I = begin(), E = end(); I != E;
-       I.MoveToNextPiece())
-    Stream << I.piece();
-  return Stream;
+  కొరకు (RopePieceBTreeIterator I = begin(), E = చివర(); I != E;
+       I.Move_గమ్యం_తదుపరి_Piece())
+    ప్రవాహం << I.piece();
+  తిరిగి ప్రవాహం;
 }
 
 /// Return true if this character is non-new-line whitespace:
 /// ' ', '\\t', '\\f', '\\v', '\\r'.
-static inline bool isWhitespaceExceptNL(unsigned char c) {
-  return c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
+స్థిర అంతఃవరుస తార్కిక isWhitespaceExceptNL(గుర్తులేని అక్షరం c) {
+  తిరిగి c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
 }
 
-void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
-                               bool removeLineIfEmpty) {
+శూన్య Rewrite_బఫరు::Remove_పాఠ్యం(గుర్తులేని Orig_స్థానభ్రంశం, గుర్తులేని కొలత,
+                               తార్కిక remove_పంక్తి_If_ఖాళీలు) {
   // Nothing to remove, exit early.
-  if (Size == 0)
-    return;
+  ఒకవేళ (కొలత == 0)
+    తిరిగి;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, true);
-  assert(RealOffset + Size <= Buffer.size() && "Invalid location");
+  గుర్తులేని Real_స్థానభ్రంశం = get_Mapped_స్థానభ్రంశం(Orig_స్థానభ్రంశం, నిజం);
+  ప్రతిజ్ఞా(Real_స్థానభ్రంశం + కొలత <= బఫరు.కొలత_2() && "Invalid location");
 
   // Remove the dead characters.
-  Buffer.erase(RealOffset, Size);
+  బఫరు.erase(Real_స్థానభ్రంశం, కొలత);
 
   // Add a delta so that future changes are offset correctly.
-  AddReplaceDelta(OrigOffset, -Size);
+  కూడు_Replace_Delta(Orig_స్థానభ్రంశం, -కొలత);
 
-  if (removeLineIfEmpty) {
+  ఒకవేళ (remove_పంక్తి_If_ఖాళీలు) {
     // Find the line that the remove occurred and if it is completely empty
     // remove the line as well.
 
-    iterator curLineStart = begin();
-    unsigned curLineStartOffs = 0;
+    iterator cur_పంక్తి_ప్రారంభం = begin();
+    గుర్తులేని cur_పంక్తి_ప్రారంభం_Offs = 0;
     iterator posI = begin();
-    for (unsigned i = 0; i != RealOffset; ++i) {
-      if (*posI == '\n') {
-        curLineStart = posI;
-        ++curLineStart;
-        curLineStartOffs = i + 1;
+    కొరకు (గుర్తులేని i = 0; i != Real_స్థానభ్రంశం; ++i) {
+      ఒకవేళ (*posI == '\n') {
+        cur_పంక్తి_ప్రారంభం = posI;
+        ++cur_పంక్తి_ప్రారంభం;
+        cur_పంక్తి_ప్రారంభం_Offs = i + 1;
       }
       ++posI;
     }
 
-    unsigned lineSize = 0;
-    posI = curLineStart;
-    while (posI != end() && isWhitespaceExceptNL(*posI)) {
+    గుర్తులేని పంక్తి_కొలత = 0;
+    posI = cur_పంక్తి_ప్రారంభం;
+    అయితే (posI != చివర() && isWhitespaceExceptNL(*posI)) {
       ++posI;
-      ++lineSize;
+      ++పంక్తి_కొలత;
     }
-    if (posI != end() && *posI == '\n') {
-      Buffer.erase(curLineStartOffs, lineSize + 1 /* + '\n'*/);
+    ఒకవేళ (posI != చివర() && *posI == '\n') {
+      బఫరు.erase(cur_పంక్తి_ప్రారంభం_Offs, పంక్తి_కొలత + 1 /* + '\n'*/);
       // FIXME: Here, the offset of the start of the line is supposed to be
       // expressed in terms of the original input not the "real" rewrite
       // buffer.  How do we compute that reliably?  It might be tempting to use
@@ -76,32 +76,32 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
       // clang::Rewriter::RewriteOptions::RemoveLineIfEmpty.  A reproducer for
       // the implementation below is the test RemoveLineIfEmpty in
       // clang/unittests/Rewrite/RewriteBufferTest.cpp.
-      AddReplaceDelta(curLineStartOffs, -(lineSize + 1 /* + '\n'*/));
+      కూడు_Replace_Delta(cur_పంక్తి_ప్రారంభం_Offs, -(పంక్తి_కొలత + 1 /* + '\n'*/));
     }
   }
 }
 
-void RewriteBuffer::InsertText(unsigned OrigOffset, StringRef Str,
-                               bool InsertAfter) {
+శూన్య Rewrite_బఫరు::చొప్పించు_పాఠ్యం_2(గుర్తులేని Orig_స్థానభ్రంశం, StringRef Str,
+                               తార్కిక చొప్పించు_After) {
   // Nothing to insert, exit early.
-  if (Str.empty())
-    return;
+  ఒకవేళ (Str.ఖాళీలు())
+    తిరిగి;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, InsertAfter);
-  Buffer.insert(RealOffset, Str.begin(), Str.end());
+  గుర్తులేని Real_స్థానభ్రంశం = get_Mapped_స్థానభ్రంశం(Orig_స్థానభ్రంశం, చొప్పించు_After);
+  బఫరు.చొప్పించు(Real_స్థానభ్రంశం, Str.begin(), Str.చివర());
 
   // Add a delta so that future changes are offset correctly.
-  AddInsertDelta(OrigOffset, Str.size());
+  కూడు_చొప్పించు_Delta(Orig_స్థానభ్రంశం, Str.కొలత_2());
 }
 
 /// ReplaceText - This method replaces a range of characters in the input
 /// buffer with a new string.  This is effectively a combined "remove+insert"
 /// operation.
-void RewriteBuffer::ReplaceText(unsigned OrigOffset, unsigned OrigLength,
+శూన్య Rewrite_బఫరు::Replace_పాఠ్యం(గుర్తులేని Orig_స్థానభ్రంశం, గుర్తులేని Orig_నిడివి,
                                 StringRef NewStr) {
-  unsigned RealOffset = getMappedOffset(OrigOffset, true);
-  Buffer.erase(RealOffset, OrigLength);
-  Buffer.insert(RealOffset, NewStr.begin(), NewStr.end());
-  if (OrigLength != NewStr.size())
-    AddReplaceDelta(OrigOffset, NewStr.size() - OrigLength);
+  గుర్తులేని Real_స్థానభ్రంశం = get_Mapped_స్థానభ్రంశం(Orig_స్థానభ్రంశం, నిజం);
+  బఫరు.erase(Real_స్థానభ్రంశం, Orig_నిడివి);
+  బఫరు.చొప్పించు(Real_స్థానభ్రంశం, NewStr.begin(), NewStr.చివర());
+  ఒకవేళ (Orig_నిడివి != NewStr.కొలత_2())
+    కూడు_Replace_Delta(Orig_స్థానభ్రంశం, NewStr.కొలత_2() - Orig_నిడివి);
 }

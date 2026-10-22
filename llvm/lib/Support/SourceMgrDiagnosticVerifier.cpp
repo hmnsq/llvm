@@ -6,250 +6,250 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SourceMgrDiagnosticVerifier.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/SourceMgrDiagnosticVerifier.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 /// Given a diagnostic kind, return a human readable string for it.
-static StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
-  switch (kind) {
-  case SourceMgr::DK_Note:
-    return "note";
-  case SourceMgr::DK_Warning:
-    return "warning";
-  case SourceMgr::DK_Error:
-    return "error";
-  case SourceMgr::DK_Remark:
-    return "remark";
+స్థిర StringRef get_Diag_రకం_Str(ఆధారం_Mgr::Diag_రకం రకం_2) {
+  ఎంపిక (రకం_2) {
+  స్థితి ఆధారం_Mgr::DK_Note:
+    తిరిగి "note";
+  స్థితి ఆధారం_Mgr::DK_Warning:
+    తిరిగి "warning";
+  స్థితి ఆధారం_Mgr::DK_Error:
+    తిరిగి "error";
+  స్థితి ఆధారం_Mgr::DK_Remark:
+    తిరిగి "remark";
   }
   llvm_unreachable("Unknown SourceMgr::DiagKind");
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
-    raw_ostream &os, SourceMgr &mgr, const Twine &msg) const {
-  if (fileLoc.isValid()) {
-    SMRange range(fileLoc, SMLoc::getFromPointer(fileLoc.getPointer() +
-                                                 substring.size()));
-    mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg, range);
-  } else {
-    mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg);
+తార్కిక ఆధారం_Mgr_Diagnostic_Verifier::ExpectedDiag::emitError(
+    raw_ostream &os, ఆధారం_Mgr &mgr, స్థిరరాశి Twine &సందేశం) స్థిరరాశి {
+  ఒకవేళ (fileLoc.isValid()) {
+    SMRange range(fileLoc, SMLoc::get_From_సూచిక(fileLoc.get_సూచిక() +
+                                                 substring.కొలత_2()));
+    mgr.Print_సందేశం(os, fileLoc, ఆధారం_Mgr::DK_Error, సందేశం, range);
+  } లేకపోతే {
+    mgr.Print_సందేశం(os, fileLoc, ఆధారం_Mgr::DK_Error, సందేశం);
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::match(StringRef str) const {
+తార్కిక ఆధారం_Mgr_Diagnostic_Verifier::ExpectedDiag::సరిపోలిక(StringRef str) స్థిరరాశి {
   // If this isn't a regex diagnostic, we simply check if the string was
   // contained.
-  if (substringRegex)
-    return substringRegex->match(str);
-  return str.contains(substring);
+  ఒకవేళ (substringRegex)
+    తిరిగి substringRegex->సరిపోలిక(str);
+  తిరిగి str.కలిగియుంది(substring);
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
-                                                             SourceMgr &mgr) {
+తార్కిక ఆధారం_Mgr_Diagnostic_Verifier::ExpectedDiag::computeRegex(raw_ostream &os,
+                                                             ఆధారం_Mgr &mgr) {
   std::string regexStr;
   raw_string_ostream regexOS(regexStr);
-  StringRef strToProcess = substring;
-  while (!strToProcess.empty()) {
+  StringRef str_గమ్యం_Process = substring;
+  అయితే (!str_గమ్యం_Process.ఖాళీలు()) {
     // Find the next regex block.
-    size_t regexIt = strToProcess.find("{{");
-    if (regexIt == StringRef::npos) {
-      regexOS << Regex::escape(strToProcess);
-      break;
+    size_t regexIt = str_గమ్యం_Process.కనుగొను("{{");
+    ఒకవేళ (regexIt == StringRef::npos) {
+      regexOS << Regex::escape(str_గమ్యం_Process);
+      ఆపు;
     }
-    regexOS << Regex::escape(strToProcess.take_front(regexIt));
-    strToProcess = strToProcess.drop_front(regexIt + 2);
+    regexOS << Regex::escape(str_గమ్యం_Process.take_front(regexIt));
+    str_గమ్యం_Process = str_గమ్యం_Process.drop_front(regexIt + 2);
 
     // Find the end of the regex block.
-    size_t regexEndIt = strToProcess.find("}}");
-    if (regexEndIt == StringRef::npos)
-      return emitError(os, mgr, "found start of regex with no end '}}'");
-    StringRef regexBlock = strToProcess.take_front(regexEndIt);
+    size_t regex_చివర_It = str_గమ్యం_Process.కనుగొను("}}");
+    ఒకవేళ (regex_చివర_It == StringRef::npos)
+      తిరిగి emitError(os, mgr, "found start of regex with no end '}}'");
+    StringRef regex_ఖండం = str_గమ్యం_Process.take_front(regex_చివర_It);
 
     // Validate that the regex is actually valid.
     std::string regexError;
-    if (!Regex(regexBlock).isValid(regexError))
-      return emitError(os, mgr, "invalid regex: " + regexError);
+    ఒకవేళ (!Regex(regex_ఖండం).isValid(regexError))
+      తిరిగి emitError(os, mgr, "invalid regex: " + regexError);
 
-    regexOS << '(' << regexBlock << ')';
-    strToProcess = strToProcess.drop_front(regexEndIt + 2);
+    regexOS << '(' << regex_ఖండం << ')';
+    str_గమ్యం_Process = str_గమ్యం_Process.drop_front(regex_చివర_It + 2);
   }
   substringRegex = Regex(regexStr);
-  return true;
+  తిరిగి నిజం;
 }
 
-MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>
-SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
-                                                  SourceMgr &mgr,
-                                                  const MemoryBuffer *buf) {
+MutableArrayRef<ఆధారం_Mgr_Diagnostic_Verifier::ExpectedDiag>
+ఆధారం_Mgr_Diagnostic_Verifier::computeExpectedDiags(raw_ostream &os,
+                                                  ఆధారం_Mgr &mgr,
+                                                  స్థిరరాశి జ్ఞాపకం_బఫరు *buf) {
   // If the buffer is invalid, return an empty list.
-  if (!buf)
-    return {};
-  auto &expectedDiags = expectedDiagsPerFile[buf->getBufferIdentifier()];
+  ఒకవేళ (!buf)
+    తిరిగి {};
+  స్వయంచాలక &expectedDiags = expected_Diags_చొప్పున_File[buf->get_బఫరు_Identifier()];
 
   // The number of the last line that did not correlate to a designator.
-  unsigned lastNonDesignatorLine = 0;
+  గుర్తులేని చివరి_Non_Designator_పంక్తి = 0;
 
   // The indices of designators that apply to the next non designator line.
-  SmallVector<unsigned, 1> designatorsForNextLine;
+  Small_సదిశ<గుర్తులేని, 1> designators_For_తదుపరి_పంక్తి;
 
   // Scan the file for expected-* designators.
-  SmallVector<StringRef, 100> lines;
-  buf->getBuffer().split(lines, '\n');
-  for (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
-    SmallVector<StringRef, 4> matches;
-    if (!expected.match(lines[lineNo].rtrim(), &matches)) {
+  Small_సదిశ<StringRef, 100> పంక్తులు_2;
+  buf->get_బఫరు().విభజించు(పంక్తులు_2, '\n');
+  కొరకు (గుర్తులేని పంక్తి_No_2 = 0, e = పంక్తులు_2.కొలత_2(); పంక్తి_No_2 < e; ++పంక్తి_No_2) {
+    Small_సదిశ<StringRef, 4> matches;
+    ఒకవేళ (!expected.సరిపోలిక(పంక్తులు_2[పంక్తి_No_2].rtrim(), &matches)) {
       // Check for designators that apply to this line.
-      if (!designatorsForNextLine.empty()) {
-        for (unsigned diagIndex : designatorsForNextLine)
-          expectedDiags[diagIndex].lineNo = lineNo + 1;
-        designatorsForNextLine.clear();
+      ఒకవేళ (!designators_For_తదుపరి_పంక్తి.ఖాళీలు()) {
+        కొరకు (గుర్తులేని diag_సూచీ : designators_For_తదుపరి_పంక్తి)
+          expectedDiags[diag_సూచీ].పంక్తి_No_2 = పంక్తి_No_2 + 1;
+        designators_For_తదుపరి_పంక్తి.clear();
       }
-      lastNonDesignatorLine = lineNo;
-      continue;
+      చివరి_Non_Designator_పంక్తి = పంక్తి_No_2;
+      కొనసాగు;
     }
 
     // Point to the start of expected-*.
-    SMLoc expectedStart = SMLoc::getFromPointer(matches[0].data());
+    SMLoc expected_ప్రారంభం = SMLoc::get_From_సూచిక(matches[0].దత్తాంశం());
 
-    SourceMgr::DiagKind kind;
-    if (matches[1] == "error")
-      kind = SourceMgr::DK_Error;
-    else if (matches[1] == "warning")
-      kind = SourceMgr::DK_Warning;
-    else if (matches[1] == "remark")
-      kind = SourceMgr::DK_Remark;
-    else {
-      assert(matches[1] == "note");
-      kind = SourceMgr::DK_Note;
+    ఆధారం_Mgr::Diag_రకం రకం_2;
+    ఒకవేళ (matches[1] == "error")
+      రకం_2 = ఆధారం_Mgr::DK_Error;
+    లేకపోతే ఒకవేళ (matches[1] == "warning")
+      రకం_2 = ఆధారం_Mgr::DK_Warning;
+    లేకపోతే ఒకవేళ (matches[1] == "remark")
+      రకం_2 = ఆధారం_Mgr::DK_Remark;
+    లేకపోతే {
+      ప్రతిజ్ఞా(matches[1] == "note");
+      రకం_2 = ఆధారం_Mgr::DK_Note;
     }
-    ExpectedDiag record(kind, lineNo + 1, expectedStart, matches[5]);
+    ExpectedDiag రికార్డు_2(రకం_2, పంక్తి_No_2 + 1, expected_ప్రారంభం, matches[5]);
 
     // Check to see if this is a regex match, i.e. it includes the `-re`.
-    if (!matches[2].empty() && !record.computeRegex(os, mgr)) {
-      ok = false;
-      continue;
+    ఒకవేళ (!matches[2].ఖాళీలు() && !రికార్డు_2.computeRegex(os, mgr)) {
+      ok = అబద్ధం;
+      కొనసాగు;
     }
 
-    StringRef offsetMatch = matches[3];
-    if (!offsetMatch.empty()) {
-      offsetMatch = offsetMatch.drop_front(1);
+    StringRef స్థానభ్రంశం_సరిపోలిక = matches[3];
+    ఒకవేళ (!స్థానభ్రంశం_సరిపోలిక.ఖాళీలు()) {
+      స్థానభ్రంశం_సరిపోలిక = స్థానభ్రంశం_సరిపోలిక.drop_front(1);
 
       // Get the integer value without the @ and +/- prefix.
-      if (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
-        int offset;
-        offsetMatch.drop_front().getAsInteger(0, offset);
+      ఒకవేళ (స్థానభ్రంశం_సరిపోలిక[0] == '+' || స్థానభ్రంశం_సరిపోలిక[0] == '-') {
+        పూర్ణాంకం స్థానభ్రంశం_2;
+        స్థానభ్రంశం_సరిపోలిక.drop_front().getAsInteger(0, స్థానభ్రంశం_2);
 
-        if (offsetMatch.front() == '+')
-          record.lineNo += offset;
-        else
-          record.lineNo -= offset;
-      } else if (offsetMatch.consume_front("unknown")) {
+        ఒకవేళ (స్థానభ్రంశం_సరిపోలిక.front() == '+')
+          రికార్డు_2.పంక్తి_No_2 += స్థానభ్రంశం_2;
+        లేకపోతే
+          రికార్డు_2.పంక్తి_No_2 -= స్థానభ్రంశం_2;
+      } లేకపోతే ఒకవేళ (స్థానభ్రంశం_సరిపోలిక.consume_front("unknown")) {
         // This is matching unknown locations.
-        record.fileLoc = SMLoc();
-        expectedUnknownLocDiags.emplace_back(std::move(record));
-        continue;
-      } else if (offsetMatch.consume_front("above")) {
+        రికార్డు_2.fileLoc = SMLoc();
+        expectedUnknownLocDiags.emplace_వెనుక(std::move(రికార్డు_2));
+        కొనసాగు;
+      } లేకపోతే ఒకవేళ (స్థానభ్రంశం_సరిపోలిక.consume_front("above")) {
         // If the designator applies 'above' we add it to the last non
         // designator line.
-        record.lineNo = lastNonDesignatorLine + 1;
-      } else {
+        రికార్డు_2.పంక్తి_No_2 = చివరి_Non_Designator_పంక్తి + 1;
+      } లేకపోతే {
         // Otherwise, this is a 'below' designator and applies to the next
         // non-designator line.
-        assert(offsetMatch.consume_front("below"));
-        designatorsForNextLine.push_back(expectedDiags.size());
+        ప్రతిజ్ఞా(స్థానభ్రంశం_సరిపోలిక.consume_front("below"));
+        designators_For_తదుపరి_పంక్తి.నెట్టు_వెనుక(expectedDiags.కొలత_2());
 
         // Set the line number to the last in the case that this designator
         // ends up dangling.
-        record.lineNo = e;
+        రికార్డు_2.పంక్తి_No_2 = e;
       }
     }
-    expectedDiags.emplace_back(std::move(record));
+    expectedDiags.emplace_వెనుక(std::move(రికార్డు_2));
   }
-  return expectedDiags;
+  తిరిగి expectedDiags;
 }
 
-std::optional<MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>>
-SourceMgrDiagnosticVerifier::getExpectedDiags(StringRef bufName) {
-  auto expectedDiags = expectedDiagsPerFile.find(bufName);
-  if (expectedDiags != expectedDiagsPerFile.end())
-    return MutableArrayRef<ExpectedDiag>(expectedDiags->second);
-  return std::nullopt;
+std::optional<MutableArrayRef<ఆధారం_Mgr_Diagnostic_Verifier::ExpectedDiag>>
+ఆధారం_Mgr_Diagnostic_Verifier::getExpectedDiags(StringRef bufName) {
+  స్వయంచాలక expectedDiags = expected_Diags_చొప్పున_File.కనుగొను(bufName);
+  ఒకవేళ (expectedDiags != expected_Diags_చొప్పున_File.చివర())
+    తిరిగి MutableArrayRef<ExpectedDiag>(expectedDiags->రెండవ_2);
+  తిరిగి std::nullopt;
 }
 
-SourceMgrDiagnosticVerifier::MatchResult
-SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
-                                     SourceMgr::DiagKind kind, bool hasLoc,
-                                     const MemoryBuffer *buf, unsigned lineNo,
-                                     StringRef message, bool reportUnexpected) {
+ఆధారం_Mgr_Diagnostic_Verifier::సరిపోలిక_ఫలితం
+ఆధారం_Mgr_Diagnostic_Verifier::process(raw_ostream &os, ఆధారం_Mgr &mgr,
+                                     ఆధారం_Mgr::Diag_రకం రకం_2, తార్కిక hasLoc,
+                                     స్థిరరాశి జ్ఞాపకం_బఫరు *buf, గుర్తులేని పంక్తి_No_2,
+                                     StringRef సందేశం_2, తార్కిక reportUnexpected) {
   MutableArrayRef<ExpectedDiag> diags;
-  if (hasLoc) {
+  ఒకవేళ (hasLoc) {
     // If the buffer couldn't be resolved, `diags` stays empty: a diagnostic
     // with a location in an unknown file can never match anything.
-    if (buf) {
-      if (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
+    ఒకవేళ (buf) {
+      ఒకవేళ (స్వయంచాలక maybeDiags = getExpectedDiags(buf->get_బఫరు_Identifier()))
         diags = *maybeDiags;
-      else
+      లేకపోతే
         diags = computeExpectedDiags(os, mgr, buf);
     }
-  } else {
+  } లేకపోతే {
     diags = expectedUnknownLocDiags;
   }
 
   // Search for a matching expected diagnostic.
   // If we find something that is close then emit a more specific error.
-  ExpectedDiag *nearMiss = nullptr;
+  ExpectedDiag *near_తప్పిపోవు = శూన్యసూచిక;
 
   // If this was an expected error, remember that we saw it and return.
-  for (auto &e : diags) {
+  కొరకు (స్వయంచాలక &e : diags) {
     // File line must match (unless it's an unknown location).
-    if (hasLoc && e.lineNo != lineNo)
-      continue;
-    if (e.match(message)) {
-      if (e.kind == kind) {
-        e.matched = true;
-        return MatchResult::Matched;
+    ఒకవేళ (hasLoc && e.పంక్తి_No_2 != పంక్తి_No_2)
+      కొనసాగు;
+    ఒకవేళ (e.సరిపోలిక(సందేశం_2)) {
+      ఒకవేళ (e.రకం_2 == రకం_2) {
+        e.matched = నిజం;
+        తిరిగి సరిపోలిక_ఫలితం::Matched;
       }
 
       // If this only differs based on the diagnostic kind, then consider it
       // to be a near miss.
-      nearMiss = &e;
+      near_తప్పిపోవు = &e;
     }
   }
 
-  if (!reportUnexpected)
-    return MatchResult::Ignored;
+  ఒకవేళ (!reportUnexpected)
+    తిరిగి సరిపోలిక_ఫలితం::Ignored;
 
-  ok = false;
+  ok = అబద్ధం;
 
   // Otherwise, emit an error for the near miss.
-  if (nearMiss) {
-    mgr.PrintMessage(os, nearMiss->fileLoc, SourceMgr::DK_Error,
-                     "'" + getDiagKindStr(kind) +
+  ఒకవేళ (near_తప్పిపోవు) {
+    mgr.Print_సందేశం(os, near_తప్పిపోవు->fileLoc, ఆధారం_Mgr::DK_Error,
+                     "'" + get_Diag_రకం_Str(రకం_2) +
                          "' diagnostic emitted when expecting a '" +
-                         getDiagKindStr(nearMiss->kind) + "'");
-    return MatchResult::NearMiss;
+                         get_Diag_రకం_Str(near_తప్పిపోవు->రకం_2) + "'");
+    తిరిగి సరిపోలిక_ఫలితం::Near_తప్పిపోవు;
   }
-  return MatchResult::Unexpected;
+  తిరిగి సరిపోలిక_ఫలితం::Unexpected;
 }
 
-bool SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
+తార్కిక ఆధారం_Mgr_Diagnostic_Verifier::verify(raw_ostream &os, ఆధారం_Mgr &mgr) {
   // Verify that all expected errors were seen.
-  auto checkExpectedDiags = [&](ExpectedDiag &diag) {
-    if (!diag.matched) {
+  స్వయంచాలక checkExpectedDiags = [&](ExpectedDiag &diag) {
+    ఒకవేళ (!diag.matched) {
       diag.emitError(os, mgr,
-                     "expected " + getDiagKindStr(diag.kind) + " \"" +
+                     "expected " + get_Diag_రకం_Str(diag.రకం_2) + " \"" +
                          diag.substring + "\" was not produced");
-      ok = false;
+      ok = అబద్ధం;
     }
   };
-  for (auto &expectedDiagsPair : expectedDiagsPerFile)
-    for (auto &diag : expectedDiagsPair.second)
+  కొరకు (స్వయంచాలక &expectedDiagsPair : expected_Diags_చొప్పున_File)
+    కొరకు (స్వయంచాలక &diag : expectedDiagsPair.రెండవ_2)
       checkExpectedDiags(diag);
-  for (auto &diag : expectedUnknownLocDiags)
+  కొరకు (స్వయంచాలక &diag : expectedUnknownLocDiags)
     checkExpectedDiags(diag);
-  expectedDiagsPerFile.clear();
-  return ok;
+  expected_Diags_చొప్పున_File.clear();
+  తిరిగి ok;
 }

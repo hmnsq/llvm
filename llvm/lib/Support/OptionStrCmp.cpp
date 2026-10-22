@@ -6,10 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/OptionStrCmp.h"
-#include "llvm/ADT/STLExtras.h"
+#అన్తర్భావ "llvm/Support/OptionStrCmp.h"
+#అన్తర్భావ "llvm/ADT/STLExtras.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 // Comparison function for Option strings (option names & prefixes).
 // The ordering is *almost* case-insensitive lexicographic, with an exception.
@@ -17,27 +17,27 @@ using namespace llvm;
 // precede any other options which prefix them). Additionally, if two options
 // are identical ignoring case, they are ordered according to case sensitive
 // ordering if `FallbackCaseSensitive` is true.
-int llvm::StrCmpOptionName(StringRef A, StringRef B,
-                           bool FallbackCaseSensitive) {
-  size_t MinSize = std::min(A.size(), B.size());
-  if (int Res = A.substr(0, MinSize).compare_insensitive(B.substr(0, MinSize)))
-    return Res;
+పూర్ణాంకం llvm::StrCmpOptionName(StringRef A, StringRef B,
+                           తార్కిక FallbackCaseSensitive) {
+  size_t Min_కొలత = std::min(A.కొలత_2(), B.కొలత_2());
+  ఒకవేళ (పూర్ణాంకం Res = A.substr(0, Min_కొలత).compare_insensitive(B.substr(0, Min_కొలత)))
+    తిరిగి Res;
 
   // If they are identical ignoring case, use case sensitive ordering.
-  if (A.size() == B.size())
-    return FallbackCaseSensitive ? A.compare(B) : 0;
+  ఒకవేళ (A.కొలత_2() == B.కొలత_2())
+    తిరిగి FallbackCaseSensitive ? A.compare(B) : 0;
 
-  return (A.size() == MinSize) ? 1 /* A is a prefix of B. */
+  తిరిగి (A.కొలత_2() == Min_కొలత) ? 1 /* A is a prefix of B. */
                                : -1 /* B is a prefix of A */;
 }
 
 // Comparison function for Option prefixes.
-int llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
+పూర్ణాంకం llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
                                ArrayRef<StringRef> BPrefixes) {
-  for (const auto &[APre, BPre] : zip(APrefixes, BPrefixes)) {
-    if (int Cmp = StrCmpOptionName(APre, BPre))
-      return Cmp;
+  కొరకు (స్థిరరాశి స్వయంచాలక &[APre, BPre] : zip(APrefixes, BPrefixes)) {
+    ఒకవేళ (పూర్ణాంకం Cmp = StrCmpOptionName(APre, BPre))
+      తిరిగి Cmp;
   }
   // Both prefixes are identical.
-  return 0;
+  తిరిగి 0;
 }

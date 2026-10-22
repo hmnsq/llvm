@@ -11,66 +11,66 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __MVS__
+#నిర్వచితమైతే __MVS__
 
-#include "llvm/Support/AutoConvert.h"
-#include <cassert>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#అన్తర్భావ "llvm/Support/AutoConvert.h"
+#అన్తర్భావ <cassert>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <unistd.h>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-static int savedStdHandleAutoConversionMode[3] = {-1, -1, -1};
+స్థిర పూర్ణాంకం saved_Std_Handle_Auto_Conversion_బహుళకం[3] = {-1, -1, -1};
 
-int disablezOSAutoConversion(int FD) {
-  static const struct f_cnvrt Convert = {
+పూర్ణాంకం disablezOSAutoConversion(పూర్ణాంకం FD) {
+  స్థిర స్థిరరాశి నిర్మాణం f_cnvrt Convert = {
       SETCVTOFF, // cvtcmd
       0,         // pccsid
       0,         // fccsid
   };
 
-  return fcntl(FD, F_CONTROL_CVT, &Convert);
+  తిరిగి fcntl(FD, F_CONTROL_CVT, &Convert);
 }
 
-int restorezOSStdHandleAutoConversion(int FD) {
-  assert(FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO);
-  if (savedStdHandleAutoConversionMode[FD] == -1)
-    return 0;
-  struct f_cnvrt Cvt = {
-      savedStdHandleAutoConversionMode[FD], // cvtcmd
+పూర్ణాంకం restorezOSStdHandleAutoConversion(పూర్ణాంకం FD) {
+  ప్రతిజ్ఞా(FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO);
+  ఒకవేళ (saved_Std_Handle_Auto_Conversion_బహుళకం[FD] == -1)
+    తిరిగి 0;
+  నిర్మాణం f_cnvrt Cvt = {
+      saved_Std_Handle_Auto_Conversion_బహుళకం[FD], // cvtcmd
       0,                                    // pccsid
       0,                                    // fccsid
   };
-  return (fcntl(FD, F_CONTROL_CVT, &Cvt));
+  తిరిగి (fcntl(FD, F_CONTROL_CVT, &Cvt));
 }
 
-int enablezOSAutoConversion(int FD) {
-  struct f_cnvrt Query = {
+పూర్ణాంకం enablezOSAutoConversion(పూర్ణాంకం FD) {
+  నిర్మాణం f_cnvrt Query = {
       QUERYCVT, // cvtcmd
       0,        // pccsid
       0,        // fccsid
   };
 
-  if (fcntl(FD, F_CONTROL_CVT, &Query) == -1)
-    return -1;
+  ఒకవేళ (fcntl(FD, F_CONTROL_CVT, &Query) == -1)
+    తిరిగి -1;
 
   // We don't need conversion for UTF-8 tagged files.
   // TODO: Remove the assumption of ISO8859-1 = UTF-8 here when we fully resolve
   // problems related to UTF-8 tagged source files.
   // When the pccsid is not ISO8859-1, autoconversion is still needed.
-  if (Query.pccsid == CCSID_ISO8859_1 &&
+  ఒకవేళ (Query.pccsid == CCSID_ISO8859_1 &&
       (Query.fccsid == CCSID_UTF_8 || Query.fccsid == CCSID_ISO8859_1))
-    return 0;
+    తిరిగి 0;
 
   // Save the state of std handles before we make changes to it.
-  if ((FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO) &&
-      savedStdHandleAutoConversionMode[FD] == -1)
-    savedStdHandleAutoConversionMode[FD] = Query.cvtcmd;
+  ఒకవేళ ((FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO) &&
+      saved_Std_Handle_Auto_Conversion_బహుళకం[FD] == -1)
+    saved_Std_Handle_Auto_Conversion_బహుళకం[FD] = Query.cvtcmd;
 
-  if (FD == STDOUT_FILENO || FD == STDERR_FILENO)
+  ఒకవేళ (FD == STDOUT_FILENO || FD == STDERR_FILENO)
     Query.cvtcmd = SETCVTON;
-  else
+  లేకపోతే
     Query.cvtcmd = SETCVTALL;
 
   Query.pccsid =
@@ -79,94 +79,94 @@ int enablezOSAutoConversion(int FD) {
           : CCSID_UTF_8;
   // Assume untagged files to be IBM-1047 encoded.
   Query.fccsid = (Query.fccsid == FT_UNTAGGED) ? CCSID_IBM_1047 : Query.fccsid;
-  return fcntl(FD, F_CONTROL_CVT, &Query);
+  తిరిగి fcntl(FD, F_CONTROL_CVT, &Query);
 }
 
-int enablezOSAutoConversionCcsid(int FD, int ccsid) {
-  struct f_cnvrt cvt = {
+పూర్ణాంకం enablezOSAutoConversionCcsid(పూర్ణాంకం FD, పూర్ణాంకం ccsid) {
+  నిర్మాణం f_cnvrt cvt = {
       SETCVTALL,   // cvtcmd
       CCSID_UTF_8, // pccsid
       0,           // fccsid
   };
-  if (ccsid == FT_UNTAGGED)
-    return -1;
+  ఒకవేళ (ccsid == FT_UNTAGGED)
+    తిరిగి -1;
   cvt.fccsid = ccsid;
-  return fcntl(FD, F_CONTROL_CVT, &cvt);
+  తిరిగి fcntl(FD, F_CONTROL_CVT, &cvt);
 }
 
-std::error_code llvm::setzOSFileTag(sys::fs::file_t FD, int CCSID,
-                                    bool IsText) {
-  assert((!IsText || (CCSID != FT_UNTAGGED && CCSID != FT_BINARY)) &&
+std::error_సంకేతం llvm::setz_OSFile_ట్యాగ్(sys::fs::file_t FD, పూర్ణాంకం CCSID,
+                                    తార్కిక Is_పాఠ్యం) {
+  ప్రతిజ్ఞా((!Is_పాఠ్యం || (CCSID != FT_UNTAGGED && CCSID != FT_ద్విమాన)) &&
          "FT_UNTAGGED and FT_BINARY are not allowed for text files");
-  struct file_tag Tag;
-  Tag.ft_ccsid = CCSID;
-  Tag.ft_txtflag = IsText;
-  Tag.ft_deferred = 0;
-  Tag.ft_rsvflags = 0;
+  నిర్మాణం file_ట్యాగ్ ట్యాగ్;
+  ట్యాగ్.ft_ccsid = CCSID;
+  ట్యాగ్.ft_txtflag = Is_పాఠ్యం;
+  ట్యాగ్.ft_deferred = 0;
+  ట్యాగ్.ft_rsvflags = 0;
 
-  if (fcntl(FD.get(), F_SETTAG, &Tag) == -1) {
-    if (errno == ENOSYS)
+  ఒకవేళ (fcntl(FD.get(), F_SETTAG, &ట్యాగ్) == -1) {
+    ఒకవేళ (errno == ENOSYS)
       // Some file systems do not support filetags.
       // Ignore ENOSYS error to allow compilation.
       errno = 0;
-    else
-      return errnoAsErrorCode();
+    లేకపోతే
+      తిరిగి errno_As_Error_సంకేతం();
   }
-  return std::error_code();
+  తిరిగి std::error_సంకేతం();
 }
 
-ErrorOr<__ccsid_t> llvm::getzOSFileTag(const Twine &FileName,
-                                       const sys::fs::file_t FD) {
+ErrorOr<__ccsid_t> llvm::getz_OSFile_ట్యాగ్(స్థిరరాశి Twine &FileName,
+                                       స్థిరరాశి sys::fs::file_t FD) {
   // If we have a file descriptor, use it to find out file tagging. Otherwise we
   // need to use stat() with the file path.
-  if (FD != -1) {
-    struct f_cnvrt Query = {
+  ఒకవేళ (FD != -1) {
+    నిర్మాణం f_cnvrt Query = {
         QUERYCVT, // cvtcmd
         0,        // pccsid
         0,        // fccsid
     };
-    if (fcntl(FD.get(), F_CONTROL_CVT, &Query) == -1)
-      return std::error_code(errno, std::generic_category());
-    return Query.fccsid;
+    ఒకవేళ (fcntl(FD.get(), F_CONTROL_CVT, &Query) == -1)
+      తిరిగి std::error_సంకేతం(errno, std::generic_category());
+    తిరిగి Query.fccsid;
   }
-  struct stat Attr;
-  if (stat(FileName.str().c_str(), &Attr) == -1)
-    return std::error_code(errno, std::generic_category());
-  return Attr.st_tag.ft_ccsid;
+  నిర్మాణం stat Attr;
+  ఒకవేళ (stat(FileName.str().c_str(), &Attr) == -1)
+    తిరిగి std::error_సంకేతం(errno, std::generic_category());
+  తిరిగి Attr.st_ట్యాగ్.ft_ccsid;
 }
 
-ErrorOr<bool> llvm::needzOSConversion(const Twine &FileName,
-                                      const sys::fs::file_t FD) {
-  ErrorOr<__ccsid_t> Ccsid = getzOSFileTag(FileName, FD);
-  if (std::error_code EC = Ccsid.getError())
-    return EC;
+ErrorOr<తార్కిక> llvm::needzOSConversion(స్థిరరాశి Twine &FileName,
+                                      స్థిరరాశి sys::fs::file_t FD) {
+  ErrorOr<__ccsid_t> Ccsid = getz_OSFile_ట్యాగ్(FileName, FD);
+  ఒకవేళ (std::error_సంకేతం EC = Ccsid.getError())
+    తిరిగి EC;
   // We don't need conversion for UTF-8 tagged files or binary files.
   // TODO: Remove the assumption of ISO8859-1 = UTF-8 here when we fully resolve
   // problems related to UTF-8 tagged source files.
-  switch (*Ccsid) {
-  case CCSID_UTF_8:
-  case CCSID_ISO8859_1:
-  case FT_BINARY:
-    return false;
-  default:
-    return true;
+  ఎంపిక (*Ccsid) {
+  స్థితి CCSID_UTF_8:
+  స్థితి CCSID_ISO8859_1:
+  స్థితి FT_ద్విమాన:
+    తిరిగి అబద్ధం;
+  అప్రమేయ:
+    తిరిగి నిజం;
   }
 }
 
-std::error_code
-llvm::copyFileTagAttributes(const std::string &Source,
-                            const sys::fs::file_t DestinationFD) {
-  struct stat SourceAttributes;
-  if (stat(Source.c_str(), &SourceAttributes) == -1)
-    return std::error_code(errno, std::generic_category());
+std::error_సంకేతం
+llvm::copy_File_ట్యాగ్_లక్షణాలు(స్థిరరాశి std::string &ఆధారం,
+                            స్థిరరాశి sys::fs::file_t DestinationFD) {
+  నిర్మాణం stat ఆధారం_లక్షణాలు;
+  ఒకవేళ (stat(ఆధారం.c_str(), &ఆధారం_లక్షణాలు) == -1)
+    తిరిగి std::error_సంకేతం(errno, std::generic_category());
 
-  if (SourceAttributes.st_tag.ft_txtflag)
-    if (enablezOSAutoConversionCcsid(DestinationFD.get(),
-                                     SourceAttributes.st_tag.ft_ccsid) == -1)
-      return errnoAsErrorCode();
+  ఒకవేళ (ఆధారం_లక్షణాలు.st_ట్యాగ్.ft_txtflag)
+    ఒకవేళ (enablezOSAutoConversionCcsid(DestinationFD.get(),
+                                     ఆధారం_లక్షణాలు.st_ట్యాగ్.ft_ccsid) == -1)
+      తిరిగి errno_As_Error_సంకేతం();
 
-  return setzOSFileTag(DestinationFD, SourceAttributes.st_tag.ft_ccsid,
-                       SourceAttributes.st_tag.ft_txtflag);
+  తిరిగి setz_OSFile_ట్యాగ్(DestinationFD, ఆధారం_లక్షణాలు.st_ట్యాగ్.ft_ccsid,
+                       ఆధారం_లక్షణాలు.st_ట్యాగ్.ft_txtflag);
 }
 
-#endif //__MVS__
+#అయితే_ముగింపు //__MVS__

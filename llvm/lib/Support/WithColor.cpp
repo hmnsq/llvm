@@ -6,35 +6,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/WithColor.h"
+#అన్తర్భావ "llvm/Support/WithColor.h"
 
-#include "DebugOptions.h"
+#అన్తర్భావ "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
+#అన్తర్భావ "llvm/Support/CommandLine.h"
+#అన్తర్భావ "llvm/Support/Error.h"
+#అన్తర్భావ "llvm/Support/ManagedStatic.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 cl::OptionCategory &llvm::getColorCategory() {
-  static cl::OptionCategory ColorCategory("Color Options");
-  return ColorCategory;
+  స్థిర cl::OptionCategory ColorCategory("Color Options");
+  తిరిగి ColorCategory;
 }
-namespace {
-struct CreateUseColor {
-  static void *call() {
-    return new cl::opt<cl::boolOrDefault>(
+నామాకాశ {
+నిర్మాణం CreateUseColor {
+  స్థిర శూన్య *call() {
+    తిరిగి కొత్త cl::opt<cl::boolOrDefault>(
         "color", cl::cat(getColorCategory()),
         cl::desc("Use colors in output (default=autodetect)"),
         cl::init(cl::boolOrDefault::BOU_UNSET));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
-void llvm::initWithColorOptions() { *UseColor; }
+స్థిర ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
+శూన్య llvm::initWithColorOptions() { *UseColor; }
 
-static bool DefaultAutoDetectFunction(const raw_ostream &OS) {
-  return *UseColor == cl::boolOrDefault::BOU_UNSET
+స్థిర తార్కిక DefaultAutoDetectFunction(స్థిరరాశి raw_ostream &OS) {
+  తిరిగి *UseColor == cl::boolOrDefault::BOU_UNSET
              ? OS.has_colors()
              : *UseColor == cl::boolOrDefault::BOU_TRUE;
 }
@@ -42,137 +42,137 @@ static bool DefaultAutoDetectFunction(const raw_ostream &OS) {
 WithColor::AutoDetectFunctionType WithColor::AutoDetectFunction =
     DefaultAutoDetectFunction;
 
-WithColor::WithColor(raw_ostream &OS, HighlightColor Color, ColorMode Mode)
-    : OS(OS), Mode(Mode) {
+WithColor::WithColor(raw_ostream &OS, HighlightColor Color, Color_బహుళకం బహుళకం)
+    : OS(OS), బహుళకం(బహుళకం) {
   // Detect color from terminal type unless the user passed the --color option.
-  if (colorsEnabled()) {
-    switch (Color) {
-    case HighlightColor::Address:
+  ఒకవేళ (colorsEnabled()) {
+    ఎంపిక (Color) {
+    స్థితి HighlightColor::చిరునామా:
       OS.changeColor(raw_ostream::YELLOW);
-      break;
-    case HighlightColor::String:
+      ఆపు;
+    స్థితి HighlightColor::String:
       OS.changeColor(raw_ostream::GREEN);
-      break;
-    case HighlightColor::Tag:
+      ఆపు;
+    స్థితి HighlightColor::ట్యాగ్:
       OS.changeColor(raw_ostream::BLUE);
-      break;
-    case HighlightColor::Attribute:
+      ఆపు;
+    స్థితి HighlightColor::Attribute:
       OS.changeColor(raw_ostream::CYAN);
-      break;
-    case HighlightColor::Enumerator:
+      ఆపు;
+    స్థితి HighlightColor::Enumerator:
       OS.changeColor(raw_ostream::MAGENTA);
-      break;
-    case HighlightColor::Macro:
+      ఆపు;
+    స్థితి HighlightColor::Macro:
       OS.changeColor(raw_ostream::RED);
-      break;
-    case HighlightColor::Error:
-      OS.changeColor(raw_ostream::RED, true);
-      break;
-    case HighlightColor::Warning:
-      OS.changeColor(raw_ostream::MAGENTA, true);
-      break;
-    case HighlightColor::Note:
-      OS.changeColor(raw_ostream::BLACK, true);
-      break;
-    case HighlightColor::Remark:
-      OS.changeColor(raw_ostream::BLUE, true);
-      break;
+      ఆపు;
+    స్థితి HighlightColor::Error:
+      OS.changeColor(raw_ostream::RED, నిజం);
+      ఆపు;
+    స్థితి HighlightColor::Warning:
+      OS.changeColor(raw_ostream::MAGENTA, నిజం);
+      ఆపు;
+    స్థితి HighlightColor::Note:
+      OS.changeColor(raw_ostream::BLACK, నిజం);
+      ఆపు;
+    స్థితి HighlightColor::Remark:
+      OS.changeColor(raw_ostream::BLUE, నిజం);
+      ఆపు;
     }
   }
 }
 
-raw_ostream &WithColor::error() { return error(errs()); }
+raw_ostream &WithColor::error() { తిరిగి error(errs()); }
 
-raw_ostream &WithColor::warning() { return warning(errs()); }
+raw_ostream &WithColor::warning() { తిరిగి warning(errs()); }
 
-raw_ostream &WithColor::note() { return note(errs()); }
+raw_ostream &WithColor::note() { తిరిగి note(errs()); }
 
-raw_ostream &WithColor::remark() { return remark(errs()); }
+raw_ostream &WithColor::remark() { తిరిగి remark(errs()); }
 
-raw_ostream &WithColor::error(raw_ostream &OS, StringRef Prefix,
-                              bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Error,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::error(raw_ostream &OS, StringRef ఉపసర్గ,
+                              తార్కిక DisableColors) {
+  ఒకవేళ (!ఉపసర్గ.ఖాళీలు())
+    OS << ఉపసర్గ << ": ";
+  తిరిగి WithColor(OS, HighlightColor::Error,
+                   DisableColors ? Color_బహుళకం::Disable : Color_బహుళకం::Auto)
              .get()
          << "error: ";
 }
 
-raw_ostream &WithColor::warning(raw_ostream &OS, StringRef Prefix,
-                                bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Warning,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::warning(raw_ostream &OS, StringRef ఉపసర్గ,
+                                తార్కిక DisableColors) {
+  ఒకవేళ (!ఉపసర్గ.ఖాళీలు())
+    OS << ఉపసర్గ << ": ";
+  తిరిగి WithColor(OS, HighlightColor::Warning,
+                   DisableColors ? Color_బహుళకం::Disable : Color_బహుళకం::Auto)
              .get()
          << "warning: ";
 }
 
-raw_ostream &WithColor::note(raw_ostream &OS, StringRef Prefix,
-                             bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Note,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::note(raw_ostream &OS, StringRef ఉపసర్గ,
+                             తార్కిక DisableColors) {
+  ఒకవేళ (!ఉపసర్గ.ఖాళీలు())
+    OS << ఉపసర్గ << ": ";
+  తిరిగి WithColor(OS, HighlightColor::Note,
+                   DisableColors ? Color_బహుళకం::Disable : Color_బహుళకం::Auto)
              .get()
          << "note: ";
 }
 
-raw_ostream &WithColor::remark(raw_ostream &OS, StringRef Prefix,
-                               bool DisableColors) {
-  if (!Prefix.empty())
-    OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Remark,
-                   DisableColors ? ColorMode::Disable : ColorMode::Auto)
+raw_ostream &WithColor::remark(raw_ostream &OS, StringRef ఉపసర్గ,
+                               తార్కిక DisableColors) {
+  ఒకవేళ (!ఉపసర్గ.ఖాళీలు())
+    OS << ఉపసర్గ << ": ";
+  తిరిగి WithColor(OS, HighlightColor::Remark,
+                   DisableColors ? Color_బహుళకం::Disable : Color_బహుళకం::Auto)
              .get()
          << "remark: ";
 }
 
-bool WithColor::colorsEnabled() {
-  switch (Mode) {
-  case ColorMode::Enable:
-    return true;
-  case ColorMode::Disable:
-    return false;
-  case ColorMode::Auto:
-    return AutoDetectFunction(OS);
+తార్కిక WithColor::colorsEnabled() {
+  ఎంపిక (బహుళకం) {
+  స్థితి Color_బహుళకం::Enable:
+    తిరిగి నిజం;
+  స్థితి Color_బహుళకం::Disable:
+    తిరిగి అబద్ధం;
+  స్థితి Color_బహుళకం::Auto:
+    తిరిగి AutoDetectFunction(OS);
   }
   llvm_unreachable("All cases handled above.");
 }
 
-WithColor &WithColor::changeColor(raw_ostream::Colors Color, bool Bold,
-                                  bool BG) {
-  if (colorsEnabled())
+WithColor &WithColor::changeColor(raw_ostream::Colors Color, తార్కిక Bold,
+                                  తార్కిక BG) {
+  ఒకవేళ (colorsEnabled())
     OS.changeColor(Color, Bold, BG);
-  return *this;
+  తిరిగి *ఇది;
 }
 
 WithColor &WithColor::resetColor() {
-  if (colorsEnabled())
+  ఒకవేళ (colorsEnabled())
     OS.resetColor();
-  return *this;
+  తిరిగి *ఇది;
 }
 
 WithColor::~WithColor() { resetColor(); }
 
-void WithColor::defaultErrorHandler(Error Err) {
-  handleAllErrors(std::move(Err), [](ErrorInfoBase &Info) {
-    WithColor::error() << Info.message() << '\n';
+శూన్య WithColor::defaultErrorHandler(Error Err) {
+  handleAllErrors(std::move(Err), [](Error_Info_పునాది &Info) {
+    WithColor::error() << Info.సందేశం_2() << '\n';
   });
 }
 
-void WithColor::defaultWarningHandler(Error Warning) {
-  handleAllErrors(std::move(Warning), [](ErrorInfoBase &Info) {
-    WithColor::warning() << Info.message() << '\n';
+శూన్య WithColor::defaultWarningHandler(Error Warning) {
+  handleAllErrors(std::move(Warning), [](Error_Info_పునాది &Info) {
+    WithColor::warning() << Info.సందేశం_2() << '\n';
   });
 }
 
 WithColor::AutoDetectFunctionType WithColor::defaultAutoDetectFunction() {
-  return DefaultAutoDetectFunction;
+  తిరిగి DefaultAutoDetectFunction;
 }
 
-void WithColor::setAutoDetectFunction(
+శూన్య WithColor::సమితి_Auto_Detect_Function(
     AutoDetectFunctionType NewAutoDetectFunction) {
   AutoDetectFunction = NewAutoDetectFunction;
 }

@@ -12,14 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __MVS__
-#include <stdio.h>
-#include <string.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
+#నిర్వచితమైతే __MVS__
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/resource.h>
+#అన్తర్భావ <sys/wait.h>
 
-const char *signalName[] = {
-    /*  0 */ nullptr,
+స్థిరరాశి అక్షరం *signalName[] = {
+    /*  0 */ శూన్యసూచిక,
     /*  1 */ "Hangup",                   // SIGHUP
     /*  2 */ "Interrupt",                // SIGINT
     /*  3 */ "Aborted",                  // SIGABRT
@@ -55,31 +55,31 @@ const char *signalName[] = {
     /* 33 */ "OMVS subsystem shutdown",  // SIGDANGER
     /* 34 */ "Thread stop",              // SIGTHSTOP
     /* 35 */ "Thread resume",            // SIGTHCONT
-    /* 36 */ nullptr,                    // n/a
+    /* 36 */ శూన్యసూచిక,                    // n/a
     /* 37 */ "Toggle syscall trace",     // SIGTRACE
-    /* 38 */ nullptr,                    // SIGDCE
+    /* 38 */ శూన్యసూచిక,                    // SIGDCE
     /* 39 */ "System dump",              // SIGDUMP
 };
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+అక్షరం *strsignal(పూర్ణాంకం sig) {
+  ఒకవేళ (static_cast<size_t>(sig) < (పరిమాణం(signalName) / పరిమాణం(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+    తిరిగి const_cast<అక్షరం *>(signalName[sig]);
+  స్థిర అక్షరం సందేశం[256];
+  snprintf(సందేశం, పరిమాణం(సందేశం), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  సందేశం[పరిమాణం(సందేశం) - 1] = '\0';
+  తిరిగి సందేశం;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
 // function is implemented here.
-size_t strnlen(const char *S, size_t MaxLen) {
-  const char *PtrToNullChar =
-      static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+size_t strnlen(స్థిరరాశి అక్షరం *S, size_t MaxLen) {
+  స్థిరరాశి అక్షరం *Ptr_గమ్యం_Null_Char =
+      static_cast<స్థిరరాశి అక్షరం *>(memchr(S, '\0', MaxLen));
+  తిరిగి Ptr_గమ్యం_Null_Char ? Ptr_గమ్యం_Null_Char - S : MaxLen;
 }
-#endif
+#అయితే_ముగింపు

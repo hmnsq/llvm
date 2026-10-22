@@ -6,20 +6,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/ARMBuildAttributes.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include <optional>
+#అన్తర్భావ "llvm/Support/ARMAttributeParser.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/ARMBuildAttributes.h"
+#అన్తర్భావ "llvm/Support/Errc.h"
+#అన్తర్భావ "llvm/Support/ScopedPrinter.h"
+#అన్తర్భావ <optional>
 
-using namespace llvm;
-using namespace llvm::ARMBuildAttrs;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::ARMBuildAttrs;
 
-#define ATTRIBUTE_HANDLER(attr)                                                \
+#నిర్వచించు ATTRIBUTE_HANDLER(attr)                                                \
   { ARMBuildAttrs::attr, &ARMAttributeParser::attr }
 
-const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
+స్థిరరాశి ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
     {
         {ARMBuildAttrs::CPU_raw_name, &ARMAttributeParser::stringAttribute},
         {ARMBuildAttrs::CPU_name, &ARMAttributeParser::stringAttribute},
@@ -33,21 +33,21 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
         ATTRIBUTE_HANDLER(MVE_arch),
         ATTRIBUTE_HANDLER(PCS_config),
         ATTRIBUTE_HANDLER(ABI_PCS_R9_use),
-        ATTRIBUTE_HANDLER(ABI_PCS_RW_data),
-        ATTRIBUTE_HANDLER(ABI_PCS_RO_data),
+        ATTRIBUTE_HANDLER(ABI_PCS_RW_దత్తాంశం),
+        ATTRIBUTE_HANDLER(ABI_PCS_RO_దత్తాంశం),
         ATTRIBUTE_HANDLER(ABI_PCS_GOT_use),
         ATTRIBUTE_HANDLER(ABI_PCS_wchar_t),
         ATTRIBUTE_HANDLER(ABI_FP_rounding),
         ATTRIBUTE_HANDLER(ABI_FP_denormal),
         ATTRIBUTE_HANDLER(ABI_FP_exceptions),
         ATTRIBUTE_HANDLER(ABI_FP_user_exceptions),
-        ATTRIBUTE_HANDLER(ABI_FP_number_model),
+        ATTRIBUTE_HANDLER(ABI_FP_సంఖ్య_model),
         ATTRIBUTE_HANDLER(ABI_align_needed),
         ATTRIBUTE_HANDLER(ABI_align_preserved),
-        ATTRIBUTE_HANDLER(ABI_enum_size),
+        ATTRIBUTE_HANDLER(ABI_enum_కొలత),
         ATTRIBUTE_HANDLER(ABI_HardFP_use),
-        ATTRIBUTE_HANDLER(ABI_VFP_args),
-        ATTRIBUTE_HANDLER(ABI_WMMX_args),
+        ATTRIBUTE_HANDLER(ABI_VFP_వాదనలు),
+        ATTRIBUTE_HANDLER(ABI_WMMX_వాదనలు),
         ATTRIBUTE_HANDLER(ABI_optimization_goals),
         ATTRIBUTE_HANDLER(ABI_FP_optimization_goals),
         ATTRIBUTE_HANDLER(compatibility),
@@ -67,24 +67,24 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
         ATTRIBUTE_HANDLER(also_compatible_with),
 };
 
-#undef ATTRIBUTE_HANDLER
+#నిర్వచనం_రద్దు ATTRIBUTE_HANDLER
 
-Error ARMAttributeParser::stringAttribute(AttrType tag) {
-  StringRef tagName =
-      ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
+Error ARMAttributeParser::stringAttribute(AttrType ట్యాగ్_2) {
+  StringRef ట్యాగ్_Name =
+      ELFAttrs::attrTypeAsString(ట్యాగ్_2, ట్యాగ్_గమ్యం_String_Map, /*hasTagPrefix=*/అబద్ధం);
   StringRef desc = de.getCStrRef(cursor);
 
-  if (sw) {
+  ఒకవేళ (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    if (!tagName.empty())
-      sw->printString("TagName", tagName);
+    sw->print_సంఖ్య("Tag", ట్యాగ్_2);
+    ఒకవేళ (!ట్యాగ్_Name.ఖాళీలు())
+      sw->printString("TagName", ట్యాగ్_Name);
     sw->printString("Value", desc);
   }
-  return Error::success();
+  తిరిగి Error::success();
 }
 
-static const char *const CPU_arch_strings[] = {"Pre-v4",
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి CPU_arch_అక్షరశ్రేణులు[] = {"Pre-v4",
                                                "ARM v4",
                                                "ARM v4T",
                                                "ARM v5T",
@@ -102,70 +102,70 @@ static const char *const CPU_arch_strings[] = {"Pre-v4",
                                                "ARM v8-R",
                                                "ARM v8-M Baseline",
                                                "ARM v8-M Mainline",
-                                               nullptr,
-                                               nullptr,
-                                               nullptr,
+                                               శూన్యసూచిక,
+                                               శూన్యసూచిక,
+                                               శూన్యసూచిక,
                                                "ARM v8.1-M Mainline",
                                                "ARM v9-A"};
 
-Error ARMAttributeParser::CPU_arch(AttrType tag) {
-  return parseStringAttribute("CPU_arch", tag, ArrayRef(CPU_arch_strings));
+Error ARMAttributeParser::CPU_arch(AttrType ట్యాగ్_2) {
+  తిరిగి parseStringAttribute("CPU_arch", ట్యాగ్_2, ArrayRef(CPU_arch_అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error ARMAttributeParser::CPU_arch_profile(AttrType ట్యాగ్_2) {
+  uint64_t విలువ_2 = de.getULEB128(cursor);
 
   StringRef profile;
-  switch (value) {
-  default: profile = "Unknown"; break;
-  case 'A': profile = "Application"; break;
-  case 'R': profile = "Real-time"; break;
-  case 'M': profile = "Microcontroller"; break;
-  case 'S': profile = "Classic"; break;
-  case 0: profile = "None"; break;
+  ఎంపిక (విలువ_2) {
+  అప్రమేయ: profile = "Unknown"; ఆపు;
+  స్థితి 'A': profile = "Application"; ఆపు;
+  స్థితి 'R': profile = "Real-time"; ఆపు;
+  స్థితి 'M': profile = "Microcontroller"; ఆపు;
+  స్థితి 'S': profile = "Classic"; ఆపు;
+  స్థితి 0: profile = "None"; ఆపు;
   }
 
-  printAttribute(tag, value, profile);
-  return Error::success();
+  printAttribute(ట్యాగ్_2, విలువ_2, profile);
+  తిరిగి Error::success();
 }
 
-Error ARMAttributeParser::ARM_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("ARM_ISA_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::ARM_ISA_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Permitted"};
+  తిరిగి parseStringAttribute("ARM_ISA_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::THUMB_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Thumb-1", "Thumb-2",
+Error ARMAttributeParser::THUMB_ISA_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Thumb-1", "Thumb-2",
                                         "Permitted"};
-  return parseStringAttribute("THUMB_ISA_use", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("THUMB_ISA_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::FP_arch(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::FP_arch(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {
       "Not Permitted", "VFPv1",     "VFPv2",      "VFPv3",         "VFPv3-D16",
       "VFPv4",         "VFPv4-D16", "ARMv8-a FP", "ARMv8-a FP-D16"};
-  return parseStringAttribute("FP_arch", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("FP_arch", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::WMMX_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
-  return parseStringAttribute("WMMX_arch", tag, ArrayRef(strings));
+Error ARMAttributeParser::WMMX_arch(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
+  తిరిగి parseStringAttribute("WMMX_arch", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::Advanced_SIMD_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
+Error ARMAttributeParser::Advanced_SIMD_arch(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
                                         "ARMv8-a NEON", "ARMv8.1-a NEON"};
-  return parseStringAttribute("Advanced_SIMD_arch", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("Advanced_SIMD_arch", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::MVE_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "MVE integer",
+Error ARMAttributeParser::MVE_arch(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "MVE integer",
                                         "MVE integer and float"};
-  return parseStringAttribute("MVE_arch", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("MVE_arch", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::PCS_config(AttrType tag) {
-  static const char *const strings[] = {"None",
+Error ARMAttributeParser::PCS_config(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"None",
                                         "Bare Platform",
                                         "Linux Application",
                                         "Linux DSO",
@@ -173,329 +173,329 @@ Error ARMAttributeParser::PCS_config(AttrType tag) {
                                         "Reserved (Palm OS)",
                                         "Symbian OS 2004",
                                         "Reserved (Symbian OS)"};
-  return parseStringAttribute("PCS_config", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("PCS_config", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_PCS_R9_use(AttrType tag) {
-  static const char *const strings[] = {"v6", "Static Base", "TLS", "Unused"};
-  return parseStringAttribute("ABI_PCS_R9_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_PCS_R9_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"v6", "Static Base", "TLS", "Unused"};
+  తిరిగి parseStringAttribute("ABI_PCS_R9_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_PCS_RW_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+Error ARMAttributeParser::ABI_PCS_RW_దత్తాంశం(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Absolute", "PC-relative",
                                         "SB-relative", "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RW_data", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_PCS_RW_data", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_PCS_RO_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+Error ARMAttributeParser::ABI_PCS_RO_దత్తాంశం(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Absolute", "PC-relative",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RO_data", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_PCS_RO_data", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_PCS_GOT_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Direct",
+Error ARMAttributeParser::ABI_PCS_GOT_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Direct",
                                         "GOT-Indirect"};
-  return parseStringAttribute("ABI_PCS_GOT_use", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_PCS_GOT_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_PCS_wchar_t(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Unknown", "2-byte",
+Error ARMAttributeParser::ABI_PCS_wchar_t(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Unknown", "2-byte",
                                         "Unknown", "4-byte"};
-  return parseStringAttribute("ABI_PCS_wchar_t", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_PCS_wchar_t", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_FP_rounding(AttrType tag) {
-  static const char *const strings[] = {"IEEE-754", "Runtime"};
-  return parseStringAttribute("ABI_FP_rounding", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_rounding(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"IEEE-754", "Runtime"};
+  తిరిగి parseStringAttribute("ABI_FP_rounding", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_FP_denormal(AttrType tag) {
-  static const char *const strings[] = {"Unsupported", "IEEE-754", "Sign Only"};
-  return parseStringAttribute("ABI_FP_denormal", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_denormal(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Unsupported", "IEEE-754", "Sign Only"};
+  తిరిగి parseStringAttribute("ABI_FP_denormal", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_FP_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_exceptions", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_exceptions(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "IEEE-754"};
+  తిరిగి parseStringAttribute("ABI_FP_exceptions", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
-Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "IEEE-754"};
+  తిరిగి parseStringAttribute("ABI_FP_user_exceptions", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_FP_number_model(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Finite Only", "RTABI",
+Error ARMAttributeParser::ABI_FP_సంఖ్య_model(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Finite Only", "RTABI",
                                         "IEEE-754"};
-  return parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_FP_number_model", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_align_needed(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "8-byte alignment",
+Error ARMAttributeParser::ABI_align_needed(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "8-byte alignment",
                                         "4-byte alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t విలువ_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = strings[value];
-  else if (value <= 12)
-    description = "8-byte alignment, " + utostr(1ULL << value) +
+  ఒకవేళ (విలువ_2 < std::కొలత_2(అక్షరశ్రేణులు))
+    description = అక్షరశ్రేణులు[విలువ_2];
+  లేకపోతే ఒకవేళ (విలువ_2 <= 12)
+    description = "8-byte alignment, " + utostr(1ULL << విలువ_2) +
                   "-byte extended alignment";
-  else
+  లేకపోతే
     description = "Invalid";
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(ట్యాగ్_2, విలువ_2, description);
+  తిరిగి Error::success();
 }
 
-Error ARMAttributeParser::ABI_align_preserved(AttrType tag) {
-  static const char *strings[] = {"Not Required", "8-byte data alignment",
+Error ARMAttributeParser::ABI_align_preserved(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *అక్షరశ్రేణులు[] = {"Not Required", "8-byte data alignment",
                                   "8-byte data and code alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t విలువ_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = std::string(strings[value]);
-  else if (value <= 12)
+  ఒకవేళ (విలువ_2 < std::కొలత_2(అక్షరశ్రేణులు))
+    description = std::string(అక్షరశ్రేణులు[విలువ_2]);
+  లేకపోతే ఒకవేళ (విలువ_2 <= 12)
     description = std::string("8-byte stack alignment, ") +
-                  utostr(1ULL << value) + std::string("-byte data alignment");
-  else
+                  utostr(1ULL << విలువ_2) + std::string("-byte data alignment");
+  లేకపోతే
     description = "Invalid";
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(ట్యాగ్_2, విలువ_2, description);
+  తిరిగి Error::success();
 }
 
-Error ARMAttributeParser::ABI_enum_size(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Packed", "Int32",
+Error ARMAttributeParser::ABI_enum_కొలత(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Packed", "Int32",
                                         "External Int32"};
-  return parseStringAttribute("ABI_enum_size", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_enum_size", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_HardFP_use(AttrType tag) {
-  static const char *const strings[] = {"Tag_FP_arch", "Single-Precision",
+Error ARMAttributeParser::ABI_HardFP_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Tag_FP_arch", "Single-Precision",
                                         "Reserved", "Tag_FP_arch (deprecated)"};
-  return parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_HardFP_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_VFP_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "AAPCS VFP", "Custom",
+Error ARMAttributeParser::ABI_VFP_వాదనలు(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"AAPCS", "AAPCS VFP", "Custom",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_VFP_args", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_WMMX_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "iWMMX", "Custom"};
-  return parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_WMMX_వాదనలు(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"AAPCS", "iWMMX", "Custom"};
+  తిరిగి parseStringAttribute("ABI_WMMX_args", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::ABI_optimization_goals(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {
       "None",          "Speed",           "Aggressive Speed",
       "Size",          "Aggressive Size", "Debugging",
       "Best Debugging"};
-  return parseStringAttribute("ABI_optimization_goals", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_optimization_goals", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_FP_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::ABI_FP_optimization_goals(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {
       "None",     "Speed",        "Aggressive Speed", "Size", "Aggressive Size",
       "Accuracy", "Best Accuracy"};
-  return parseStringAttribute("ABI_FP_optimization_goals", tag,
-                              ArrayRef(strings));
+  తిరిగి parseStringAttribute("ABI_FP_optimization_goals", ట్యాగ్_2,
+                              ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::compatibility(AttrType tag) {
+Error ARMAttributeParser::compatibility(AttrType ట్యాగ్_2) {
   uint64_t integer = de.getULEB128(cursor);
   StringRef string = de.getCStrRef(cursor);
 
-  if (sw) {
+  ఒకవేళ (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->startLine() << "Value: " << integer << ", " << string << '\n';
+    sw->print_సంఖ్య("Tag", ట్యాగ్_2);
+    sw->ప్రారంభం_పంక్తి() << "Value: " << integer << ", " << string << '\n';
     sw->printString("TagName",
-                    ELFAttrs::attrTypeAsString(tag, tagToStringMap,
-                                               /*hasTagPrefix=*/false));
-    switch (integer) {
-    case 0:
+                    ELFAttrs::attrTypeAsString(ట్యాగ్_2, ట్యాగ్_గమ్యం_String_Map,
+                                               /*hasTagPrefix=*/అబద్ధం));
+    ఎంపిక (integer) {
+    స్థితి 0:
       sw->printString("Description", StringRef("No Specific Requirements"));
-      break;
-    case 1:
+      ఆపు;
+    స్థితి 1:
       sw->printString("Description", StringRef("AEABI Conformant"));
-      break;
-    default:
+      ఆపు;
+    అప్రమేయ:
       sw->printString("Description", StringRef("AEABI Non-Conformant"));
-      break;
+      ఆపు;
     }
   }
-  return Error::success();
+  తిరిగి Error::success();
 }
 
-Error ARMAttributeParser::CPU_unaligned_access(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "v6-style"};
-  return parseStringAttribute("CPU_unaligned_access", tag, ArrayRef(strings));
+Error ARMAttributeParser::CPU_unaligned_access(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "v6-style"};
+  తిరిగి parseStringAttribute("CPU_unaligned_access", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::FP_HP_extension(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Permitted"};
-  return parseStringAttribute("FP_HP_extension", tag, ArrayRef(strings));
+Error ARMAttributeParser::FP_HP_extension(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"If Available", "Permitted"};
+  తిరిగి parseStringAttribute("FP_HP_extension", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::ABI_FP_16bit_format(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754", "VFPv3"};
-  return parseStringAttribute("ABI_FP_16bit_format", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_16bit_format(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "IEEE-754", "VFPv3"};
+  తిరిగి parseStringAttribute("ABI_FP_16bit_format", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::MPextension_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("MPextension_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::MPextension_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Permitted"};
+  తిరిగి parseStringAttribute("MPextension_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::DIV_use(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Not Permitted",
+Error ARMAttributeParser::DIV_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"If Available", "Not Permitted",
                                         "Permitted"};
-  return parseStringAttribute("DIV_use", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("DIV_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::DSP_extension(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("DSP_extension", tag, ArrayRef(strings));
+Error ARMAttributeParser::DSP_extension(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Permitted"};
+  తిరిగి parseStringAttribute("DSP_extension", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::T2EE_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("T2EE_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::T2EE_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted", "Permitted"};
+  తిరిగి parseStringAttribute("T2EE_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::Virtualization_use(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::Virtualization_use(AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {
       "Not Permitted", "TrustZone", "Virtualization Extensions",
       "TrustZone + Virtualization Extensions"};
-  return parseStringAttribute("Virtualization_use", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("Virtualization_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::PAC_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+Error ARMAttributeParser::PAC_extension(ARMBuildAttrs::AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("PAC_extension", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("PAC_extension", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::BTI_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+Error ARMAttributeParser::BTI_extension(ARMBuildAttrs::AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("BTI_extension", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("BTI_extension", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::PACRET_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("PACRET_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::PACRET_use(ARMBuildAttrs::AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Used", "Used"};
+  తిరిగి parseStringAttribute("PACRET_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("BTI_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"Not Used", "Used"};
+  తిరిగి parseStringAttribute("BTI_use", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error ARMAttributeParser::nodefaults(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
-  printAttribute(tag, value, "Unspecified Tags UNDEFINED");
-  return Error::success();
+Error ARMAttributeParser::nodefaults(AttrType ట్యాగ్_2) {
+  uint64_t విలువ_2 = de.getULEB128(cursor);
+  printAttribute(ట్యాగ్_2, విలువ_2, "Unspecified Tags UNDEFINED");
+  తిరిగి Error::success();
 }
 
-Error ARMAttributeParser::also_compatible_with(AttrType tag) {
+Error ARMAttributeParser::also_compatible_with(AttrType ట్యాగ్_2) {
   // Parse value as a C string first in order to print it in escaped form later.
   // Then, parse it again to catch errors or to pretty print if Tag_CPU_arch.
-  std::optional<Error> returnValue;
+  std::optional<Error> return_విలువ;
 
   SmallString<8> Description;
-  raw_svector_ostream DescStream(Description);
+  raw_svector_ostream Desc_ప్రవాహం(Description);
 
-  uint64_t InitialOffset = cursor.tell();
-  StringRef RawStringValue = de.getCStrRef(cursor);
-  uint64_t FinalOffset = cursor.tell();
-  cursor.seek(InitialOffset);
-  uint64_t InnerTag = de.getULEB128(cursor);
+  uint64_t Initial_స్థానభ్రంశం = cursor.tell();
+  StringRef Raw_String_విలువ = de.getCStrRef(cursor);
+  uint64_t Final_స్థానభ్రంశం = cursor.tell();
+  cursor.seek(Initial_స్థానభ్రంశం);
+  uint64_t Inner_ట్యాగ్ = de.getULEB128(cursor);
 
-  bool ValidInnerTag =
-      any_of(tagToStringMap, [InnerTag](const TagNameItem &Item) {
-        return Item.attr == InnerTag;
+  తార్కిక Valid_Inner_ట్యాగ్ =
+      any_యొక్క(ట్యాగ్_గమ్యం_String_Map, [Inner_ట్యాగ్](స్థిరరాశి ట్యాగ్_Name_అంశం &అంశం) {
+        తిరిగి అంశం.attr == Inner_ట్యాగ్;
       });
 
-  if (!ValidInnerTag) {
-    returnValue =
-        createStringError(errc::argument_out_of_domain,
-                          Twine(InnerTag) + " is not a valid tag number");
-  } else {
-    switch (InnerTag) {
-    case ARMBuildAttrs::CPU_arch: {
-      uint64_t InnerValue = de.getULEB128(cursor);
-      auto strings = ArrayRef(CPU_arch_strings);
-      if (InnerValue >= strings.size()) {
-        returnValue = createStringError(
-            errc::argument_out_of_domain,
-            Twine(InnerValue) + " is not a valid " +
-                ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
+  ఒకవేళ (!Valid_Inner_ట్యాగ్) {
+    return_విలువ =
+        createStringError(errc::వాదం_బహిర్గతం_యొక్క_domain,
+                          Twine(Inner_ట్యాగ్) + " is not a valid tag number");
+  } లేకపోతే {
+    ఎంపిక (Inner_ట్యాగ్) {
+    స్థితి ARMBuildAttrs::CPU_arch: {
+      uint64_t Inner_విలువ = de.getULEB128(cursor);
+      స్వయంచాలక అక్షరశ్రేణులు = ArrayRef(CPU_arch_అక్షరశ్రేణులు);
+      ఒకవేళ (Inner_విలువ >= అక్షరశ్రేణులు.కొలత_2()) {
+        return_విలువ = createStringError(
+            errc::వాదం_బహిర్గతం_యొక్క_domain,
+            Twine(Inner_విలువ) + " is not a valid " +
+                ELFAttrs::attrTypeAsString(Inner_ట్యాగ్, ట్యాగ్_గమ్యం_String_Map) +
                 " value");
-      } else {
-        DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                   << " = " << InnerValue;
-        if (strings[InnerValue])
-          DescStream << " (" << strings[InnerValue] << ')';
+      } లేకపోతే {
+        Desc_ప్రవాహం << ELFAttrs::attrTypeAsString(Inner_ట్యాగ్, ట్యాగ్_గమ్యం_String_Map)
+                   << " = " << Inner_విలువ;
+        ఒకవేళ (అక్షరశ్రేణులు[Inner_విలువ])
+          Desc_ప్రవాహం << " (" << అక్షరశ్రేణులు[Inner_విలువ] << ')';
       }
-      break;
+      ఆపు;
     }
-    case ARMBuildAttrs::also_compatible_with:
-      returnValue = createStringError(
-          errc::invalid_argument,
-          ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
+    స్థితి ARMBuildAttrs::also_compatible_with:
+      return_విలువ = createStringError(
+          errc::invalid_వాదం,
+          ELFAttrs::attrTypeAsString(Inner_ట్యాగ్, ట్యాగ్_గమ్యం_String_Map) +
               " cannot be recursively defined");
-      break;
-    case ARMBuildAttrs::CPU_raw_name:
-    case ARMBuildAttrs::CPU_name:
-    case ARMBuildAttrs::compatibility:
-    case ARMBuildAttrs::conformance: {
-      StringRef InnerValue = de.getCStrRef(cursor);
-      DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
-      break;
+      ఆపు;
+    స్థితి ARMBuildAttrs::CPU_raw_name:
+    స్థితి ARMBuildAttrs::CPU_name:
+    స్థితి ARMBuildAttrs::compatibility:
+    స్థితి ARMBuildAttrs::conformance: {
+      StringRef Inner_విలువ = de.getCStrRef(cursor);
+      Desc_ప్రవాహం << ELFAttrs::attrTypeAsString(Inner_ట్యాగ్, ట్యాగ్_గమ్యం_String_Map)
+                 << " = " << Inner_విలువ;
+      ఆపు;
     }
-    default: {
-      uint64_t InnerValue = de.getULEB128(cursor);
-      DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
+    అప్రమేయ: {
+      uint64_t Inner_విలువ = de.getULEB128(cursor);
+      Desc_ప్రవాహం << ELFAttrs::attrTypeAsString(Inner_ట్యాగ్, ట్యాగ్_గమ్యం_String_Map)
+                 << " = " << Inner_విలువ;
     }
     }
   }
 
-  setAttributeString(tag, RawStringValue);
-  if (sw) {
+  సమితి_Attribute_String(ట్యాగ్_2, Raw_String_విలువ);
+  ఒకవేళ (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
+    sw->print_సంఖ్య("Tag", ట్యాగ్_2);
     sw->printString("TagName",
-                    ELFAttrs::attrTypeAsString(tag, tagToStringMap, false));
-    sw->printStringEscaped("Value", RawStringValue);
-    if (!Description.empty()) {
+                    ELFAttrs::attrTypeAsString(ట్యాగ్_2, ట్యాగ్_గమ్యం_String_Map, అబద్ధం));
+    sw->printStringEscaped("Value", Raw_String_విలువ);
+    ఒకవేళ (!Description.ఖాళీలు()) {
       sw->printString("Description", Description);
     }
   }
 
-  cursor.seek(FinalOffset);
+  cursor.seek(Final_స్థానభ్రంశం);
 
-  return returnValue ? std::move(*returnValue) : Error::success();
+  తిరిగి return_విలువ ? std::move(*return_విలువ) : Error::success();
 }
 
-Error ARMAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(static_cast<AttrType>(tag)))
-        return e;
-      handled = true;
-      break;
+Error ARMAttributeParser::handler(uint64_t ట్యాగ్_2, తార్కిక &handled) {
+  handled = అబద్ధం;
+  కొరకు (స్థిరరాశి స్వయంచాలక &AH : displayRoutines) {
+    ఒకవేళ (uint64_t(AH.attribute) == ట్యాగ్_2) {
+      ఒకవేళ (Error e = (ఇది->*AH.routine)(static_cast<AttrType>(ట్యాగ్_2)))
+        తిరిగి e;
+      handled = నిజం;
+      ఆపు;
     }
   }
 
-  return Error::success();
+  తిరిగి Error::success();
 }

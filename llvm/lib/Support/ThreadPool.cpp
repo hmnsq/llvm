@@ -11,19 +11,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ThreadPool.h"
+#అన్తర్భావ "llvm/Support/ThreadPool.h"
 
-#include "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
 
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/Threading.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/ADT/ScopeExit.h"
+#అన్తర్భావ "llvm/Support/ExponentialBackoff.h"
+#అన్తర్భావ "llvm/Support/FormatVariadic.h"
+#అన్తర్భావ "llvm/Support/Threading.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-ThreadPoolInterface::~ThreadPoolInterface() = default;
+ThreadPoolInterface::~ThreadPoolInterface() = అప్రమేయ;
 
 // A note on thread groups: Tasks are by default in no group (represented
 // by nullptr ThreadPoolTaskGroup pointer in the Tasks queue) and functionality
@@ -33,82 +33,82 @@ ThreadPoolInterface::~ThreadPoolInterface() = default;
 // queue, and functions called to work only on tasks from one group take that
 // pointer.
 
-#if LLVM_ENABLE_THREADS
+#ఒకవేళ LLVM_ENABLE_దారాలు
 
 StdThreadPool::StdThreadPool(ThreadPoolStrategy S)
-    : Strategy(S), MaxThreadCount(S.compute_thread_count()) {
-  if (Strategy.UseJobserver)
+    : Strategy(S), Max_Thread_లెక్క(S.compute_thread_లెక్క()) {
+  ఒకవేళ (Strategy.UseJobserver)
     TheJobserver = JobserverClient::getInstance();
 }
 
-void StdThreadPool::grow(int requested) {
-  llvm::sys::ScopedWriter LockGuard(ThreadsLock);
-  if (Threads.size() >= MaxThreadCount)
-    return; // Already hit the max thread pool size.
-  int newThreadCount = std::min<int>(requested, MaxThreadCount);
-  while (static_cast<int>(Threads.size()) < newThreadCount) {
-    int ThreadID = Threads.size();
-    Threads.emplace_back([this, ThreadID] {
-      set_thread_name(formatv("llvm-worker-{0}", ThreadID));
+శూన్య StdThreadPool::grow(పూర్ణాంకం requested) {
+  llvm::sys::ScopedWriter తాళం_Guard(దారాలు_తాళం);
+  ఒకవేళ (దారాలు.కొలత_2() >= Max_Thread_లెక్క)
+    తిరిగి; // Already hit the max thread pool size.
+  పూర్ణాంకం new_Thread_లెక్క = std::min<పూర్ణాంకం>(requested, Max_Thread_లెక్క);
+  అయితే (static_cast<పూర్ణాంకం>(దారాలు.కొలత_2()) < new_Thread_లెక్క) {
+    పూర్ణాంకం ThreadID = దారాలు.కొలత_2();
+    దారాలు.emplace_వెనుక([ఇది, ThreadID] {
+      సమితి_thread_name(formatv("llvm-worker-{0}", ThreadID));
       Strategy.apply_thread_strategy(ThreadID);
       // Note on jobserver deadlock avoidance:
       // GNU Make grants each invoked process one implicit job slot.
       // JobserverClient::tryAcquire() returns that implicit slot on the first
       // successful call in a process, ensuring forward progress without a
       // dedicated "always-on" thread.
-      if (TheJobserver)
+      ఒకవేళ (TheJobserver)
         processTasksWithJobserver();
-      else
-        processTasks(nullptr);
+      లేకపోతే
+        processTasks(శూన్యసూచిక);
     });
   }
 }
 
-#ifndef NDEBUG
+#నిర్వచితం_కాకపోతే NDEBUG
 // The group of the tasks run by the current thread.
-static LLVM_THREAD_LOCAL std::vector<ThreadPoolTaskGroup *>
-    *CurrentThreadTaskGroups = nullptr;
-#endif
+స్థిర LLVM_THREAD_LOCAL std::సదిశ<Thread_Pool_Task_సమూహం *>
+    *CurrentThreadTaskGroups = శూన్యసూచిక;
+#అయితే_ముగింపు
 
 // WaitingForGroup == nullptr means all tasks regardless of their group.
-void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
-  while (true) {
-    llvm::unique_function<void()> Task;
-    ThreadPoolTaskGroup *GroupOfTask;
+శూన్య StdThreadPool::processTasks(Thread_Pool_Task_సమూహం *నిరీక్షణ_For_సమూహం) {
+  అయితే (నిజం) {
+    llvm::unique_function<శూన్య()> Task;
+    Thread_Pool_Task_సమూహం *సమూహం_యొక్క_Task;
     {
-      std::unique_lock<std::mutex> LockGuard(QueueLock);
-      bool workCompletedForGroup = false; // Result of workCompletedUnlocked()
+      std::unique_తాళం<std::mutex> తాళం_Guard(వరుస_తాళం);
+      తార్కిక work_Completed_For_సమూహం = అబద్ధం; // Result of workCompletedUnlocked()
       // Wait for tasks to be pushed in the queue
-      QueueCondition.wait(LockGuard, [&] {
-        return !EnableFlag || !Tasks.empty() ||
-               (WaitingForGroup != nullptr &&
-                (workCompletedForGroup =
-                     workCompletedUnlocked(WaitingForGroup)));
+      వరుస_Condition.wait(తాళం_Guard, [&] {
+        తిరిగి !EnableFlag || !Tasks.ఖాళీలు() ||
+               (నిరీక్షణ_For_సమూహం != శూన్యసూచిక &&
+                (work_Completed_For_సమూహం =
+                     workCompletedUnlocked(నిరీక్షణ_For_సమూహం)));
       });
       // Exit condition
-      if (!EnableFlag && Tasks.empty())
-        return;
-      if (WaitingForGroup != nullptr && workCompletedForGroup)
-        return;
+      ఒకవేళ (!EnableFlag && Tasks.ఖాళీలు())
+        తిరిగి;
+      ఒకవేళ (నిరీక్షణ_For_సమూహం != శూన్యసూచిక && work_Completed_For_సమూహం)
+        తిరిగి;
       // Yeah, we have a task, grab it and release the lock on the queue
 
       // We first need to signal that we are active before popping the queue
       // in order for wait() to properly detect that even if the queue is
       // empty, there is still a task in flight.
-      ++ActiveThreads;
-      Task = std::move(Tasks.front().first);
-      GroupOfTask = Tasks.front().second;
+      ++చురుకైన_దారాలు;
+      Task = std::move(Tasks.front().మొదటి_2);
+      సమూహం_యొక్క_Task = Tasks.front().రెండవ_2;
       // Need to count active threads in each group separately, ActiveThreads
       // would never be 0 if waiting for another group inside a wait.
-      if (GroupOfTask != nullptr)
-        ++ActiveGroups[GroupOfTask]; // Increment or set to 1 if new item
-      Tasks.pop_front();
+      ఒకవేళ (సమూహం_యొక్క_Task != శూన్యసూచిక)
+        ++చురుకైన_Groups[సమూహం_యొక్క_Task]; // Increment or set to 1 if new item
+      Tasks.తీయి_front();
     }
-#ifndef NDEBUG
-    if (CurrentThreadTaskGroups == nullptr)
-      CurrentThreadTaskGroups = new std::vector<ThreadPoolTaskGroup *>;
-    CurrentThreadTaskGroups->push_back(GroupOfTask);
-#endif
+#నిర్వచితం_కాకపోతే NDEBUG
+    ఒకవేళ (CurrentThreadTaskGroups == శూన్యసూచిక)
+      CurrentThreadTaskGroups = కొత్త std::సదిశ<Thread_Pool_Task_సమూహం *>;
+    CurrentThreadTaskGroups->నెట్టు_వెనుక(సమూహం_యొక్క_Task);
+#అయితే_ముగింపు
 
     // Run the task we just grabbed. This also destroys the task once run to
     // release any resources held by it through RAII captured objects.
@@ -118,37 +118,37 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
     // place here, at the same point as the task itself is executed.
     std::exchange(Task, {})();
 
-#ifndef NDEBUG
-    CurrentThreadTaskGroups->pop_back();
-    if (CurrentThreadTaskGroups->empty()) {
-      delete CurrentThreadTaskGroups;
-      CurrentThreadTaskGroups = nullptr;
+#నిర్వచితం_కాకపోతే NDEBUG
+    CurrentThreadTaskGroups->తీయి_వెనుక();
+    ఒకవేళ (CurrentThreadTaskGroups->ఖాళీలు()) {
+      తొలగించు CurrentThreadTaskGroups;
+      CurrentThreadTaskGroups = శూన్యసూచిక;
     }
-#endif
+#అయితే_ముగింపు
 
-    bool Notify;
-    bool NotifyGroup;
+    తార్కిక Notify;
+    తార్కిక Notify_సమూహం;
     {
       // Adjust `ActiveThreads`, in case someone waits on StdThreadPool::wait()
-      std::lock_guard<std::mutex> LockGuard(QueueLock);
-      --ActiveThreads;
-      if (GroupOfTask != nullptr) {
-        auto A = ActiveGroups.find(GroupOfTask);
-        if (--(A->second) == 0)
-          ActiveGroups.erase(A);
+      std::తాళం_guard<std::mutex> తాళం_Guard(వరుస_తాళం);
+      --చురుకైన_దారాలు;
+      ఒకవేళ (సమూహం_యొక్క_Task != శూన్యసూచిక) {
+        స్వయంచాలక A = చురుకైన_Groups.కనుగొను(సమూహం_యొక్క_Task);
+        ఒకవేళ (--(A->రెండవ_2) == 0)
+          చురుకైన_Groups.erase(A);
       }
-      Notify = workCompletedUnlocked(GroupOfTask);
-      NotifyGroup = GroupOfTask != nullptr && Notify;
+      Notify = workCompletedUnlocked(సమూహం_యొక్క_Task);
+      Notify_సమూహం = సమూహం_యొక్క_Task != శూన్యసూచిక && Notify;
     }
     // Notify task completion if this is the last active thread, in case
     // someone waits on StdThreadPool::wait().
-    if (Notify)
+    ఒకవేళ (Notify)
       CompletionCondition.notify_all();
     // If this was a task in a group, notify also threads waiting for tasks
     // in this function on QueueCondition, to make a recursive wait() return
     // after the group it's been waiting for has finished.
-    if (NotifyGroup)
-      QueueCondition.notify_all();
+    ఒకవేళ (Notify_సమూహం)
+      వరుస_Condition.notify_all();
   }
 }
 
@@ -156,32 +156,32 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
 /// This function uses a two-level queue; it first acquires a job slot from the
 /// external jobserver, then retrieves a task from the internal queue.
 /// This allows the thread pool to cooperate with build systems like `make -j`.
-void StdThreadPool::processTasksWithJobserver() {
-  while (true) {
+శూన్య StdThreadPool::processTasksWithJobserver() {
+  అయితే (నిజం) {
     // Acquire a job slot from the external jobserver.
     // This polls for a slot and yields the thread to avoid a high-CPU wait.
-    JobSlot Slot;
+    పని_స్థానం స్థానం;
     // The timeout for the backoff can be very long, as the shutdown
     // is checked on each iteration. The sleep duration is capped by MaxWait
     // in ExponentialBackoff, so shutdown latency is not a problem.
-    ExponentialBackoff Backoff(std::chrono::hours(24));
-    bool AcquiredToken = false;
-    do {
+    ఘాతాంక_Backoff Backoff(std::chrono::hours(24));
+    తార్కిక AcquiredToken = అబద్ధం;
+    చేయి {
       // Return if the thread pool is shutting down.
       {
-        std::unique_lock<std::mutex> LockGuard(QueueLock);
-        if (!EnableFlag)
-          return;
+        std::unique_తాళం<std::mutex> తాళం_Guard(వరుస_తాళం);
+        ఒకవేళ (!EnableFlag)
+          తిరిగి;
       }
 
-      Slot = TheJobserver->tryAcquire();
-      if (Slot.isValid()) {
-        AcquiredToken = true;
-        break;
+      స్థానం = TheJobserver->tryAcquire();
+      ఒకవేళ (స్థానం.isValid()) {
+        AcquiredToken = నిజం;
+        ఆపు;
       }
-    } while (Backoff.waitForNextAttempt());
+    } అయితే (Backoff.wait_For_తదుపరి_Attempt());
 
-    if (!AcquiredToken) {
+    ఒకవేళ (!AcquiredToken) {
       // This is practically unreachable with a 24h timeout and indicates a
       // deeper problem if hit.
       report_fatal_error("Timed out waiting for jobserver token.");
@@ -189,38 +189,38 @@ void StdThreadPool::processTasksWithJobserver() {
 
     // `llvm::scope_exit` guarantees the job slot is released, even if the
     // task throws or we exit early. This prevents deadlocking the build.
-    llvm::scope_exit SlotReleaser(
-        [&] { TheJobserver->release(std::move(Slot)); });
+    llvm::scope_exit స్థానం_Releaser(
+        [&] { TheJobserver->release(std::move(స్థానం)); });
 
     // While we hold a job slot, process tasks from the internal queue.
-    while (true) {
-      llvm::unique_function<void()> Task;
-      ThreadPoolTaskGroup *GroupOfTask = nullptr;
+    అయితే (నిజం) {
+      llvm::unique_function<శూన్య()> Task;
+      Thread_Pool_Task_సమూహం *సమూహం_యొక్క_Task = శూన్యసూచిక;
 
       {
-        std::unique_lock<std::mutex> LockGuard(QueueLock);
+        std::unique_తాళం<std::mutex> తాళం_Guard(వరుస_తాళం);
 
         // Wait until a task is available or the pool is shutting down.
-        QueueCondition.wait(LockGuard,
-                            [&] { return !EnableFlag || !Tasks.empty(); });
+        వరుస_Condition.wait(తాళం_Guard,
+                            [&] { తిరిగి !EnableFlag || !Tasks.ఖాళీలు(); });
 
         // If shutting down and the queue is empty, the thread can terminate.
-        if (!EnableFlag && Tasks.empty())
-          return;
+        ఒకవేళ (!EnableFlag && Tasks.ఖాళీలు())
+          తిరిగి;
 
         // If the queue is empty, we're done processing tasks for now.
         // Break the inner loop to release the job slot.
-        if (Tasks.empty())
-          break;
+        ఒకవేళ (Tasks.ఖాళీలు())
+          ఆపు;
 
         // A task is available. Mark it as active before releasing the lock
         // to prevent race conditions with `wait()`.
-        ++ActiveThreads;
-        Task = std::move(Tasks.front().first);
-        GroupOfTask = Tasks.front().second;
-        if (GroupOfTask != nullptr)
-          ++ActiveGroups[GroupOfTask];
-        Tasks.pop_front();
+        ++చురుకైన_దారాలు;
+        Task = std::move(Tasks.front().మొదటి_2);
+        సమూహం_యొక్క_Task = Tasks.front().రెండవ_2;
+        ఒకవేళ (సమూహం_యొక్క_Task != శూన్యసూచిక)
+          ++చురుకైన_Groups[సమూహం_యొక్క_Task];
+        Tasks.తీయి_front();
       } // The queue lock is released.
 
       // Run the task. The job slot remains acquired during execution.
@@ -228,100 +228,100 @@ void StdThreadPool::processTasksWithJobserver() {
 
       // The task has finished. Update the active count and notify any waiters.
       {
-        std::lock_guard<std::mutex> LockGuard(QueueLock);
-        --ActiveThreads;
-        if (GroupOfTask != nullptr) {
-          auto A = ActiveGroups.find(GroupOfTask);
-          if (--(A->second) == 0)
-            ActiveGroups.erase(A);
+        std::తాళం_guard<std::mutex> తాళం_Guard(వరుస_తాళం);
+        --చురుకైన_దారాలు;
+        ఒకవేళ (సమూహం_యొక్క_Task != శూన్యసూచిక) {
+          స్వయంచాలక A = చురుకైన_Groups.కనుగొను(సమూహం_యొక్క_Task);
+          ఒకవేళ (--(A->రెండవ_2) == 0)
+            చురుకైన_Groups.erase(A);
         }
         // If all tasks are complete, notify any waiting threads.
-        if (workCompletedUnlocked(nullptr))
+        ఒకవేళ (workCompletedUnlocked(శూన్యసూచిక))
           CompletionCondition.notify_all();
       }
     }
   }
 }
-bool StdThreadPool::workCompletedUnlocked(ThreadPoolTaskGroup *Group) const {
-  if (Group == nullptr)
-    return !ActiveThreads && Tasks.empty();
-  return ActiveGroups.count(Group) == 0 &&
-         !llvm::is_contained(llvm::make_second_range(Tasks), Group);
+తార్కిక StdThreadPool::workCompletedUnlocked(Thread_Pool_Task_సమూహం *సమూహం) స్థిరరాశి {
+  ఒకవేళ (సమూహం == శూన్యసూచిక)
+    తిరిగి !చురుకైన_దారాలు && Tasks.ఖాళీలు();
+  తిరిగి చురుకైన_Groups.లెక్క(సమూహం) == 0 &&
+         !llvm::is_contained(llvm::make_రెండవ_range(Tasks), సమూహం);
 }
 
-void StdThreadPool::wait() {
-  assert(!isWorkerThread()); // Would deadlock waiting for itself.
+శూన్య StdThreadPool::wait() {
+  ప్రతిజ్ఞా(!is_కార్మికుడు_Thread()); // Would deadlock waiting for itself.
   // Wait for all threads to complete and the queue to be empty
-  std::unique_lock<std::mutex> LockGuard(QueueLock);
-  CompletionCondition.wait(LockGuard,
-                           [&] { return workCompletedUnlocked(nullptr); });
+  std::unique_తాళం<std::mutex> తాళం_Guard(వరుస_తాళం);
+  CompletionCondition.wait(తాళం_Guard,
+                           [&] { తిరిగి workCompletedUnlocked(శూన్యసూచిక); });
 }
 
-void StdThreadPool::wait(ThreadPoolTaskGroup &Group) {
+శూన్య StdThreadPool::wait(Thread_Pool_Task_సమూహం &సమూహం) {
   // Wait for all threads in the group to complete.
-  if (!isWorkerThread()) {
-    std::unique_lock<std::mutex> LockGuard(QueueLock);
-    CompletionCondition.wait(LockGuard,
-                             [&] { return workCompletedUnlocked(&Group); });
-    return;
+  ఒకవేళ (!is_కార్మికుడు_Thread()) {
+    std::unique_తాళం<std::mutex> తాళం_Guard(వరుస_తాళం);
+    CompletionCondition.wait(తాళం_Guard,
+                             [&] { తిరిగి workCompletedUnlocked(&సమూహం); });
+    తిరిగి;
   }
   // Make sure to not deadlock waiting for oneself.
-  assert(CurrentThreadTaskGroups == nullptr ||
-         !llvm::is_contained(*CurrentThreadTaskGroups, &Group));
+  ప్రతిజ్ఞా(CurrentThreadTaskGroups == శూన్యసూచిక ||
+         !llvm::is_contained(*CurrentThreadTaskGroups, &సమూహం));
   // Handle the case of recursive call from another task in a different group,
   // in which case process tasks while waiting to keep the thread busy and avoid
   // possible deadlock.
-  processTasks(&Group);
+  processTasks(&సమూహం);
 }
 
-bool StdThreadPool::isWorkerThread() const {
-  llvm::sys::ScopedReader LockGuard(ThreadsLock);
+తార్కిక StdThreadPool::is_కార్మికుడు_Thread() స్థిరరాశి {
+  llvm::sys::ScopedReader తాళం_Guard(దారాలు_తాళం);
   llvm::thread::id CurrentThreadId = llvm::this_thread::get_id();
-  for (const llvm::thread &Thread : Threads)
-    if (CurrentThreadId == Thread.get_id())
-      return true;
-  return false;
+  కొరకు (స్థిరరాశి llvm::thread &Thread : దారాలు)
+    ఒకవేళ (CurrentThreadId == Thread.get_id())
+      తిరిగి నిజం;
+  తిరిగి అబద్ధం;
 }
 
 // The destructor joins all threads, waiting for completion.
 StdThreadPool::~StdThreadPool() {
   {
-    std::unique_lock<std::mutex> LockGuard(QueueLock);
-    EnableFlag = false;
+    std::unique_తాళం<std::mutex> తాళం_Guard(వరుస_తాళం);
+    EnableFlag = అబద్ధం;
   }
-  QueueCondition.notify_all();
-  llvm::sys::ScopedReader LockGuard(ThreadsLock);
-  for (auto &Worker : Threads)
-    Worker.join();
+  వరుస_Condition.notify_all();
+  llvm::sys::ScopedReader తాళం_Guard(దారాలు_తాళం);
+  కొరకు (స్వయంచాలక &కార్మికుడు : దారాలు)
+    కార్మికుడు.join();
 }
 
-#endif // LLVM_ENABLE_THREADS Disabled
+#అయితే_ముగింపు // LLVM_ENABLE_THREADS Disabled
 
 // No threads are launched, issue a warning if ThreadCount is not 0
 SingleThreadExecutor::SingleThreadExecutor(ThreadPoolStrategy S) {
-  int ThreadCount = S.compute_thread_count();
-  if (ThreadCount != 1) {
-    errs() << "Warning: request a ThreadPool with " << ThreadCount
+  పూర్ణాంకం Thread_లెక్క = S.compute_thread_లెక్క();
+  ఒకవేళ (Thread_లెక్క != 1) {
+    errs() << "Warning: request a ThreadPool with " << Thread_లెక్క
            << " threads, but LLVM_ENABLE_THREADS has been turned off\n";
   }
 }
 
-void SingleThreadExecutor::wait() {
+శూన్య SingleThreadExecutor::wait() {
   // Sequential implementation running the tasks
-  while (!Tasks.empty()) {
-    auto Task = std::move(Tasks.front().first);
-    Tasks.pop_front();
+  అయితే (!Tasks.ఖాళీలు()) {
+    స్వయంచాలక Task = std::move(Tasks.front().మొదటి_2);
+    Tasks.తీయి_front();
     Task();
   }
 }
 
-void SingleThreadExecutor::wait(ThreadPoolTaskGroup &) {
+శూన్య SingleThreadExecutor::wait(Thread_Pool_Task_సమూహం &) {
   // Simply wait for all, this works even if recursive (the running task
   // is already removed from the queue).
   wait();
 }
 
-bool SingleThreadExecutor::isWorkerThread() const {
+తార్కిక SingleThreadExecutor::is_కార్మికుడు_Thread() స్థిరరాశి {
   report_fatal_error("LLVM compiled without multithreading");
 }
 

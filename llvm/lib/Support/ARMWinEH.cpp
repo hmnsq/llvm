@@ -6,42 +6,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMWinEH.h"
+#అన్తర్భావ "llvm/Support/ARMWinEH.h"
 
-namespace llvm {
-namespace ARM {
-namespace WinEH {
-std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
-                                                bool Prologue) {
-  uint8_t NumRegisters = RF.Reg();
+నామాకాశ llvm {
+నామాకాశ ARM {
+నామాకాశ WinEH {
+std::pair<uint16_t, uint32_t> Saved_రిజిస్టరు_ముసుగు(స్థిరరాశి RuntimeFunction &RF,
+                                                తార్కిక Prologue) {
+  uint8_t అంకె_Registers = RF.Reg();
   uint8_t RegistersVFP = RF.R();
-  uint8_t LinkRegister = RF.L();
-  uint8_t ChainedFrame = RF.C();
+  uint8_t Link_రిజిస్టరు = RF.L();
+  uint8_t Chained_చట్రం = RF.C();
 
-  uint16_t GPRMask = (ChainedFrame << 11);
+  uint16_t GPRMask = (Chained_చట్రం << 11);
   uint32_t VFPMask = 0;
 
-  if (Prologue) {
-    GPRMask |= (LinkRegister << 14);
-  } else {
+  ఒకవేళ (Prologue) {
+    GPRMask |= (Link_రిజిస్టరు << 14);
+  } లేకపోతే {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
-      GPRMask |= (LinkRegister << 14);
-    else if (!RF.H()) // If H == 0, we pop directly into Pc
-      GPRMask |= (LinkRegister << 15);
+    ఒకవేళ (RF.Ret() != ReturnType::RT_తీయి)
+      GPRMask |= (Link_రిజిస్టరు << 14);
+    లేకపోతే ఒకవేళ (!RF.H()) // If H == 0, we pop directly into Pc
+      GPRMask |= (Link_రిజిస్టరు << 15);
     // else, Ret == 0 && H == 1, we pop into Pc separately afterwards
   }
 
-  if (RegistersVFP)
-    VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
-  else
-    GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
+  ఒకవేళ (RegistersVFP)
+    VFPMask |= (((1 << ((అంకె_Registers + 1) % 8)) - 1) << 8);
+  లేకపోతే
+    GPRMask |= (((1 << (అంకె_Registers + 1)) - 1) << 4);
 
-  if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
-    GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
-                << (~RF.StackAdjust() & 0x3));
+  ఒకవేళ ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
+    GPRMask |= (((1 << ((RF.దొంతర_Adjust() & 0x3) + 1)) - 1)
+                << (~RF.దొంతర_Adjust() & 0x3));
 
-  return {GPRMask, VFPMask};
+  తిరిగి {GPRMask, VFPMask};
 }
 } // namespace WinEH
 } // namespace ARM

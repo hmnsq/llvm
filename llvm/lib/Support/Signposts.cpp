@@ -6,128 +6,128 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Signposts.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Support/Signposts.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/Config/config.h"
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/Mutex.h"
-#include <Availability.h>
-#include <os/signpost.h>
-#endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ఒకవేళ LLVM_SUPPORT_XCODE_SIGNPOSTS
+#అన్తర్భావ "llvm/ADT/DenseMap.h"
+#అన్తర్భావ "llvm/Support/Mutex.h"
+#అన్తర్భావ <Availability.h>
+#అన్తర్భావ <os/signpost.h>
+#అయితే_ముగింపు // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#define SIGNPOSTS_AVAILABLE()                                                  \
+#ఒకవేళ LLVM_SUPPORT_XCODE_SIGNPOSTS
+#నిర్వచించు SIGNPOSTS_అందుబాటు()                                                  \
   __builtin_available(macos 10.14, iOS 12, tvOS 12, watchOS 5, *)
-namespace {
+నామాకాశ {
 os_log_t *LogCreator() {
-  os_log_t *X = new os_log_t;
+  os_log_t *X = కొత్త os_log_t;
   *X = os_log_create("org.llvm.signposts", "toolchain");
-  return X;
+  తిరిగి X;
 }
-struct LogDeleter {
-  void operator()(os_log_t *X) const {
+నిర్మాణం LogDeleter {
+  శూన్య క్రియాకారకం()(os_log_t *X) స్థిరరాశి {
     os_release(*X);
-    delete X;
+    తొలగించు X;
   }
 };
 } // end anonymous namespace
 
-namespace llvm {
-class SignpostEmitterImpl {
-  using LogPtrTy = std::unique_ptr<os_log_t, LogDeleter>;
-  using LogTy = LogPtrTy::element_type;
+నామాకాశ llvm {
+తరగతి SignpostEmitterImpl {
+  ఉపయోగించి LogPtrTy = std::unique_ptr<os_log_t, LogDeleter>;
+  ఉపయోగించి LogTy = LogPtrTy::element_type;
 
   LogPtrTy SignpostLog;
-  DenseMap<const void *, os_signpost_id_t> Signposts;
-  sys::SmartMutex<true> Mutex;
+  DenseMap<స్థిరరాశి శూన్య *, os_signpost_id_t> Signposts;
+  sys::SmartMutex<నిజం> Mutex;
 
-  LogTy &getLogger() const { return *SignpostLog; }
-  os_signpost_id_t getSignpostForObject(const void *O) {
-    sys::SmartScopedLock<true> Lock(Mutex);
-    const auto &I = Signposts.find(O);
-    if (I != Signposts.end())
-      return I->second;
+  LogTy &getLogger() స్థిరరాశి { తిరిగి *SignpostLog; }
+  os_signpost_id_t getSignpostForObject(స్థిరరాశి శూన్య *O) {
+    sys::Smart_Scoped_తాళం<నిజం> తాళం_3(Mutex);
+    స్థిరరాశి స్వయంచాలక &I = Signposts.కనుగొను(O);
+    ఒకవేళ (I != Signposts.చివర())
+      తిరిగి I->రెండవ_2;
     os_signpost_id_t ID = {};
-    if (SIGNPOSTS_AVAILABLE()) {
-      ID = os_signpost_id_make_with_pointer(getLogger(), O);
+    ఒకవేళ (SIGNPOSTS_అందుబాటు()) {
+      ID = os_signpost_id_make_with_సూచిక(getLogger(), O);
     }
-    const auto &Inserted = Signposts.insert(std::make_pair(O, ID));
-    return Inserted.first->second;
+    స్థిరరాశి స్వయంచాలక &Inserted = Signposts.చొప్పించు(std::make_pair(O, ID));
+    తిరిగి Inserted.మొదటి_2->రెండవ_2;
   }
 
-public:
+బహిరంగ:
   SignpostEmitterImpl() : SignpostLog(LogCreator()) {}
 
-  bool isEnabled() const {
-    if (SIGNPOSTS_AVAILABLE())
-      return os_signpost_enabled(*SignpostLog);
-    return false;
+  తార్కిక isEnabled() స్థిరరాశి {
+    ఒకవేళ (SIGNPOSTS_అందుబాటు())
+      తిరిగి os_signpost_enabled(*SignpostLog);
+    తిరిగి అబద్ధం;
   }
 
-  void startInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  శూన్య ప్రారంభం_Interval(స్థిరరాశి శూన్య *O, llvm::StringRef Name) {
+    ఒకవేళ (isEnabled()) {
+      ఒకవేళ (SIGNPOSTS_అందుబాటు()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_begin(getLogger(), getSignpostForObject(O),
-                                   "LLVM Timers", "%s", Name.data());
+                                   "LLVM Timers", "%s", Name.దత్తాంశం());
       }
     }
   }
 
-  void endInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  శూన్య చివర_Interval(స్థిరరాశి శూన్య *O, llvm::StringRef Name) {
+    ఒకవేళ (isEnabled()) {
+      ఒకవేళ (SIGNPOSTS_అందుబాటు()) {
         // Both strings used here are required to be constant literal strings.
-        os_signpost_interval_end(getLogger(), getSignpostForObject(O),
+        os_signpost_interval_చివర(getLogger(), getSignpostForObject(O),
                                  "LLVM Timers", "");
       }
     }
   }
 };
 } // end namespace llvm
-#else
+#లేకపోతే
 /// Definition necessary for use of std::unique_ptr in SignpostEmitter::Impl.
-class llvm::SignpostEmitterImpl {};
-#endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
+తరగతి llvm::SignpostEmitterImpl {};
+#అయితే_ముగింపు // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#define HAVE_ANY_SIGNPOST_IMPL 1
-#else
-#define HAVE_ANY_SIGNPOST_IMPL 0
-#endif
+#ఒకవేళ LLVM_SUPPORT_XCODE_SIGNPOSTS
+#నిర్వచించు HAVE_ANY_SIGNPOST_IMPL 1
+#లేకపోతే
+#నిర్వచించు HAVE_ANY_SIGNPOST_IMPL 0
+#అయితే_ముగింపు
 
 SignpostEmitter::SignpostEmitter() {
-#if HAVE_ANY_SIGNPOST_IMPL
+#ఒకవేళ HAVE_ANY_SIGNPOST_IMPL
   Impl = std::make_unique<SignpostEmitterImpl>();
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+#అయితే_ముగింపు // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-SignpostEmitter::~SignpostEmitter() = default;
+SignpostEmitter::~SignpostEmitter() = అప్రమేయ;
 
-bool SignpostEmitter::isEnabled() const {
-#if HAVE_ANY_SIGNPOST_IMPL
-  return Impl->isEnabled();
-#else
-  return false;
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+తార్కిక SignpostEmitter::isEnabled() స్థిరరాశి {
+#ఒకవేళ HAVE_ANY_SIGNPOST_IMPL
+  తిరిగి Impl->isEnabled();
+#లేకపోతే
+  తిరిగి అబద్ధం;
+#అయితే_ముగింపు // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::startInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  return Impl->startInterval(O, Name);
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+శూన్య SignpostEmitter::ప్రారంభం_Interval(స్థిరరాశి శూన్య *O, StringRef Name) {
+#ఒకవేళ HAVE_ANY_SIGNPOST_IMPL
+  ఒకవేళ (Impl == శూన్యసూచిక)
+    తిరిగి;
+  తిరిగి Impl->ప్రారంభం_Interval(O, Name);
+#అయితే_ముగింపు // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::endInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  Impl->endInterval(O, Name);
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+శూన్య SignpostEmitter::చివర_Interval(స్థిరరాశి శూన్య *O, StringRef Name) {
+#ఒకవేళ HAVE_ANY_SIGNPOST_IMPL
+  ఒకవేళ (Impl == శూన్యసూచిక)
+    తిరిగి;
+  Impl->చివర_Interval(O, Name);
+#అయితే_ముగింపు // if !HAVE_ANY_SIGNPOST_IMPL
 }

@@ -10,53 +10,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Errno.h"
-#include "llvm/Config/config.h"
-#include <cstring>
-#include <errno.h>
+#అన్తర్భావ "llvm/Support/Errno.h"
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ <cstring>
+#అన్తర్భావ <errno.h>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-namespace llvm {
-namespace sys {
+నామాకాశ llvm {
+నామాకాశ sys {
 
 std::string StrError() {
-  return StrError(errno);
+  తిరిగి StrError(errno);
 }
 
-std::string StrError(int errnum) {
+std::string StrError(పూర్ణాంకం errnum) {
   std::string str;
-  if (errnum == 0)
-    return str;
-#if defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
-  const int MaxErrStrLen = 2000;
-  char buffer[MaxErrStrLen];
-  buffer[0] = '\0';
-#endif
+  ఒకవేళ (errnum == 0)
+    తిరిగి str;
+#ఒకవేళ defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
+  స్థిరరాశి పూర్ణాంకం MaxErrStrLen = 2000;
+  అక్షరం బఫరు_2[MaxErrStrLen];
+  బఫరు_2[0] = '\0';
+#అయితే_ముగింపు
 
-#ifdef HAVE_STRERROR_R
+#నిర్వచితమైతే HAVE_STRERROR_R
   // strerror_r is thread-safe.
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#ఒకవేళ defined(__GLIBC__) && defined(_GNU_SOURCE)
   // glibc defines its own incompatible version of strerror_r
   // which may not use the buffer supplied.
-  str = strerror_r(errnum, buffer, MaxErrStrLen - 1);
-#else
-  strerror_r(errnum, buffer, MaxErrStrLen - 1);
-  str = buffer;
-#endif
-#elif HAVE_DECL_STRERROR_S // "Windows Secure API"
-  strerror_s(buffer, MaxErrStrLen - 1, errnum);
-  str = buffer;
-#else
+  str = strerror_r(errnum, బఫరు_2, MaxErrStrLen - 1);
+#లేకపోతే
+  strerror_r(errnum, బఫరు_2, MaxErrStrLen - 1);
+  str = బఫరు_2;
+#అయితే_ముగింపు
+#లేదావేళ HAVE_DECL_STRERROR_S // "Windows Secure API"
+  strerror_s(బఫరు_2, MaxErrStrLen - 1, errnum);
+  str = బఫరు_2;
+#లేకపోతే
   // Copy the thread un-safe result of strerror into
   // the buffer as fast as possible to minimize impact
   // of collision of strerror in multiple threads.
   str = strerror(errnum);
-#endif
-  return str;
+#అయితే_ముగింపు
+  తిరిగి str;
 }
 
 }  // namespace sys

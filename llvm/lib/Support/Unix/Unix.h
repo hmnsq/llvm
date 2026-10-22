@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_SUPPORT_UNIX_UNIX_H
-#define LLVM_LIB_SUPPORT_UNIX_UNIX_H
+#నిర్వచితం_కాకపోతే LLVM_LIB_SUPPORT_UNIX_UNIX_H
+#నిర్వచించు LLVM_LIB_SUPPORT_UNIX_UNIX_H
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only generic UNIX code that
 //===          is guaranteed to work on all UNIX variants.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <assert.h>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <sys/types.h>
-#include <sys/wait.h>
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Support/Chrono.h"
+#అన్తర్భావ "llvm/Support/Errno.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ <assert.h>
+#అన్తర్భావ <cerrno>
+#అన్తర్భావ <cstdio>
+#అన్తర్భావ <cstdlib>
+#అన్తర్భావ <cstring>
+#అన్తర్భావ <string>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/wait.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#నిర్వచితమైతే HAVE_UNISTD_H
+#అన్తర్భావ <unistd.h>
+#అయితే_ముగింపు
 
-#include <sys/time.h>
-#include <time.h>
+#అన్తర్భావ <sys/time.h>
+#అన్తర్భావ <time.h>
 
-#include <dlfcn.h>
+#అన్తర్భావ <dlfcn.h>
 
 # include <fcntl.h>
 
@@ -49,21 +49,21 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
-    return true;
-  if (errnum == -1)
+స్థిర అంతఃవరుస bool Make_Err_సందేశం(
+  std::string* Err_సందేశం, స్థిరరాశి std::string& ఉపసర్గ_2, పూర్ణాంకం errnum = -1) {
+  ఒకవేళ (!Err_సందేశం)
+    తిరిగి true;
+  ఒకవేళ (errnum == -1)
     errnum = errno;
-  *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
-  return true;
+  *Err_సందేశం = ఉపసర్గ_2 + ": " + llvm::sys::StrError(errnum);
+  తిరిగి true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
-  std::string ErrMsg;
-  MakeErrMsg(&ErrMsg, Msg, errnum);
-  llvm::report_fatal_error(llvm::Twine(ErrMsg));
+[[noreturn]] స్థిర అంతఃవరుస శూన్య ReportErrnumFatal(స్థిరరాశి అక్షరం *సందేశం_4, పూర్ణాంకం errnum) {
+  std::string Err_సందేశం;
+  Make_Err_సందేశం(&Err_సందేశం, సందేశం_4, errnum);
+  llvm::report_fatal_error(llvm::Twine(Err_సందేశం));
 }
 
 namespace llvm {
@@ -71,32 +71,32 @@ namespace sys {
 
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
-inline std::chrono::microseconds toDuration(const struct timeval &TV) {
-  return std::chrono::seconds(TV.tv_sec) +
+అంతఃవరుస std::chrono::microseconds గమ్యం_Duration(స్థిరరాశి నిర్మాణం timeval &TV) {
+  తిరిగి std::chrono::seconds(TV.tv_sec) +
          std::chrono::microseconds(TV.tv_usec);
 }
 
 /// Convert a time point to struct timespec.
-inline struct timespec toTimeSpec(TimePoint<> TP) {
+అంతఃవరుస నిర్మాణం timespec గమ్యం_సమయం_Spec(సమయం_బిందువు<> TP) {
   using namespace std::chrono;
 
-  struct timespec RetVal;
-  RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  నిర్మాణం timespec RetVal;
+  RetVal.tv_sec = గమ్యం_సమయం_T(TP);
+  RetVal.tv_nsec = (TP.సమయం_since_epoch() % seconds(1)).లెక్క();
+  తిరిగి RetVal;
 }
 
 /// Convert a time point to struct timeval.
-inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
+అంతఃవరుస నిర్మాణం timeval గమ్యం_సమయం_Val(సమయం_బిందువు<std::chrono::microseconds> TP) {
   using namespace std::chrono;
 
-  struct timeval RetVal;
-  RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  నిర్మాణం timeval RetVal;
+  RetVal.tv_sec = గమ్యం_సమయం_T(TP);
+  RetVal.tv_usec = (TP.సమయం_since_epoch() % seconds(1)).లెక్క();
+  తిరిగి RetVal;
 }
 
 } // namespace sys
 } // namespace llvm
 
-#endif
+#అయితే_ముగింపు

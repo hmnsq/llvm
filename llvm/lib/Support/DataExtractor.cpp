@@ -6,281 +6,281 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DataExtractor.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/LEB128.h"
-#include "llvm/Support/SwapByteOrder.h"
+#అన్తర్భావ "llvm/Support/DataExtractor.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/Errc.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ "llvm/Support/LEB128.h"
+#అన్తర్భావ "llvm/Support/SwapByteOrder.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-bool DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
-                                Error *E) const {
-  if (isValidOffsetForDataOfSize(Offset, Size))
-    return true;
-  if (E) {
-    if (Offset <= Data.size())
+తార్కిక దత్తాంశం_Extractor::prepareRead(uint64_t స్థానభ్రంశం, uint64_t కొలత,
+                                Error *E) స్థిరరాశి {
+  ఒకవేళ (is_Valid_స్థానభ్రంశం_For_దత్తాంశం_యొక్క_కొలత(స్థానభ్రంశం, కొలత))
+    తిరిగి నిజం;
+  ఒకవేళ (E) {
+    ఒకవేళ (స్థానభ్రంశం <= దత్తాంశం_2.కొలత_2())
       *E = createStringError(
           errc::illegal_byte_sequence,
           "unexpected end of data at offset 0x%zx while reading [0x%" PRIx64
           ", 0x%" PRIx64 ")",
-          Data.size(), Offset, Offset + Size);
-    else
-      *E = createStringError(errc::invalid_argument,
+          దత్తాంశం_2.కొలత_2(), స్థానభ్రంశం, స్థానభ్రంశం + కొలత);
+    లేకపోతే
+      *E = createStringError(errc::invalid_వాదం,
                              "offset 0x%" PRIx64
                              " is beyond the end of data at 0x%zx",
-                             Offset, Data.size());
+                             స్థానభ్రంశం, దత్తాంశం_2.కొలత_2());
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-static bool isError(Error *E) { return E && *E; }
+స్థిర తార్కిక isError(Error *E) { తిరిగి E && *E; }
 
-template <typename T>
-T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
+మూస <రకం_పేరు T>
+T దత్తాంశం_Extractor::getU(uint64_t *స్థానభ్రంశం_ptr, Error *Err) స్థిరరాశి {
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
   T val = 0;
-  if (isError(Err))
-    return val;
+  ఒకవేళ (isError(Err))
+    తిరిగి val;
 
-  uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, sizeof(T), Err))
-    return val;
-  std::memcpy(&val, &Data.data()[offset], sizeof(val));
-  if (sys::IsLittleEndianHost != IsLittleEndian)
-    sys::swapByteOrder(val);
+  uint64_t స్థానభ్రంశం_2 = *స్థానభ్రంశం_ptr;
+  ఒకవేళ (!prepareRead(స్థానభ్రంశం_2, పరిమాణం(T), Err))
+    తిరిగి val;
+  std::జ్ఞాపకం_నకలు(&val, &దత్తాంశం_2.దత్తాంశం()[స్థానభ్రంశం_2], పరిమాణం(val));
+  ఒకవేళ (sys::IsLittleEndianHost != IsLittleEndian)
+    sys::మార్పిడి_Byte_క్రమం(val);
 
   // Advance the offset
-  *offset_ptr += sizeof(val);
-  return val;
+  *స్థానభ్రంశం_ptr += పరిమాణం(val);
+  తిరిగి val;
 }
 
-template <typename T>
-T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
-                        Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return nullptr;
+మూస <రకం_పేరు T>
+T *దత్తాంశం_Extractor::getUs(uint64_t *స్థానభ్రంశం_ptr, T *dst, uint32_t లెక్క,
+                        Error *Err) స్థిరరాశి {
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
+  ఒకవేళ (isError(Err))
+    తిరిగి శూన్యసూచిక;
 
-  uint64_t offset = *offset_ptr;
+  uint64_t స్థానభ్రంశం_2 = *స్థానభ్రంశం_ptr;
 
-  if (!prepareRead(offset, sizeof(*dst) * count, Err))
-    return nullptr;
-  for (T *value_ptr = dst, *end = dst + count; value_ptr != end;
-       ++value_ptr, offset += sizeof(*dst))
-    *value_ptr = getU<T>(offset_ptr, Err);
+  ఒకవేళ (!prepareRead(స్థానభ్రంశం_2, పరిమాణం(*dst) * లెక్క, Err))
+    తిరిగి శూన్యసూచిక;
+  కొరకు (T *విలువ_ptr = dst, *చివర = dst + లెక్క; విలువ_ptr != చివర;
+       ++విలువ_ptr, స్థానభ్రంశం_2 += పరిమాణం(*dst))
+    *విలువ_ptr = getU<T>(స్థానభ్రంశం_ptr, Err);
   // Advance the offset
-  *offset_ptr = offset;
+  *స్థానభ్రంశం_ptr = స్థానభ్రంశం_2;
   // Return a non-NULL pointer to the converted data as an indicator of
   // success
-  return dst;
+  తిరిగి dst;
 }
 
-uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint8_t>(offset_ptr, Err);
+uint8_t దత్తాంశం_Extractor::getU8(uint64_t *స్థానభ్రంశం_ptr, llvm::Error *Err) స్థిరరాశి {
+  తిరిగి getU<uint8_t>(స్థానభ్రంశం_ptr, Err);
 }
 
-uint8_t *DataExtractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
-                              uint32_t count) const {
-  return getUs<uint8_t>(offset_ptr, dst, count, nullptr);
+uint8_t *దత్తాంశం_Extractor::getU8(uint64_t *స్థానభ్రంశం_ptr, uint8_t *dst,
+                              uint32_t లెక్క) స్థిరరాశి {
+  తిరిగి getUs<uint8_t>(స్థానభ్రంశం_ptr, dst, లెక్క, శూన్యసూచిక);
 }
 
-uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t Count) const {
-  return getUs<uint8_t>(&C.Offset, Dst, Count, &C.Err);
+uint8_t *దత్తాంశం_Extractor::getU8(Cursor &C, uint8_t *Dst, uint32_t లెక్క_2) స్థిరరాశి {
+  తిరిగి getUs<uint8_t>(&C.స్థానభ్రంశం, Dst, లెక్క_2, &C.Err);
 }
 
-uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint16_t>(offset_ptr, Err);
+uint16_t దత్తాంశం_Extractor::getU16(uint64_t *స్థానభ్రంశం_ptr, llvm::Error *Err) స్థిరరాశి {
+  తిరిగి getU<uint16_t>(స్థానభ్రంశం_ptr, Err);
 }
 
-uint16_t *DataExtractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
-                                uint32_t count) const {
-  return getUs<uint16_t>(offset_ptr, dst, count, nullptr);
+uint16_t *దత్తాంశం_Extractor::getU16(uint64_t *స్థానభ్రంశం_ptr, uint16_t *dst,
+                                uint32_t లెక్క) స్థిరరాశి {
+  తిరిగి getUs<uint16_t>(స్థానభ్రంశం_ptr, dst, లెక్క, శూన్యసూచిక);
 }
 
-uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) const {
-  uint24_t ExtractedVal = getU<uint24_t>(OffsetPtr, Err);
+uint32_t దత్తాంశం_Extractor::getU24(uint64_t *స్థానభ్రంశం_Ptr, Error *Err) స్థిరరాశి {
+  uint24_t ExtractedVal = getU<uint24_t>(స్థానభ్రంశం_Ptr, Err);
   // The 3 bytes are in the correct byte order for the host.
-  return ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
+  తిరిగి ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
 }
 
-uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint32_t>(offset_ptr, Err);
+uint32_t దత్తాంశం_Extractor::getU32(uint64_t *స్థానభ్రంశం_ptr, llvm::Error *Err) స్థిరరాశి {
+  తిరిగి getU<uint32_t>(స్థానభ్రంశం_ptr, Err);
 }
 
-uint32_t *DataExtractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
-                                uint32_t count) const {
-  return getUs<uint32_t>(offset_ptr, dst, count, nullptr);
+uint32_t *దత్తాంశం_Extractor::getU32(uint64_t *స్థానభ్రంశం_ptr, uint32_t *dst,
+                                uint32_t లెక్క) స్థిరరాశి {
+  తిరిగి getUs<uint32_t>(స్థానభ్రంశం_ptr, dst, లెక్క, శూన్యసూచిక);
 }
 
-uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint64_t>(offset_ptr, Err);
+uint64_t దత్తాంశం_Extractor::getU64(uint64_t *స్థానభ్రంశం_ptr, llvm::Error *Err) స్థిరరాశి {
+  తిరిగి getU<uint64_t>(స్థానభ్రంశం_ptr, Err);
 }
 
-uint64_t *DataExtractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
-                                uint32_t count) const {
-  return getUs<uint64_t>(offset_ptr, dst, count, nullptr);
+uint64_t *దత్తాంశం_Extractor::getU64(uint64_t *స్థానభ్రంశం_ptr, uint64_t *dst,
+                                uint32_t లెక్క) స్థిరరాశి {
+  తిరిగి getUs<uint64_t>(స్థానభ్రంశం_ptr, dst, లెక్క, శూన్యసూచిక);
 }
 
-uint64_t DataExtractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_size,
-                                    llvm::Error *Err) const {
-  switch (byte_size) {
-  case 1:
-    return getU8(offset_ptr, Err);
-  case 2:
-    return getU16(offset_ptr, Err);
-  case 4:
-    return getU32(offset_ptr, Err);
-  case 8:
-    return getU64(offset_ptr, Err);
+uint64_t దత్తాంశం_Extractor::getUnsigned(uint64_t *స్థానభ్రంశం_ptr, uint32_t byte_కొలత,
+                                    llvm::Error *Err) స్థిరరాశి {
+  ఎంపిక (byte_కొలత) {
+  స్థితి 1:
+    తిరిగి getU8(స్థానభ్రంశం_ptr, Err);
+  స్థితి 2:
+    తిరిగి getU16(స్థానభ్రంశం_ptr, Err);
+  స్థితి 4:
+    తిరిగి getU32(స్థానభ్రంశం_ptr, Err);
+  స్థితి 8:
+    తిరిగి getU64(స్థానభ్రంశం_ptr, Err);
   }
 
   // For any other byte size, read the bytes and swap/shift if necessary.
-  ErrorAsOutParameter ErrAsOut(Err);
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
   uint64_t val = 0;
-  if (isError(Err))
-    return val;
-  uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, byte_size, Err))
-    return val;
+  ఒకవేళ (isError(Err))
+    తిరిగి val;
+  uint64_t స్థానభ్రంశం_2 = *స్థానభ్రంశం_ptr;
+  ఒకవేళ (!prepareRead(స్థానభ్రంశం_2, byte_కొలత, Err))
+    తిరిగి val;
   // Copy into the least significant bytes of val regardless of host
   // endianness.
-  std::memcpy(reinterpret_cast<char *>(&val) +
-                  (sys::IsLittleEndianHost ? 0 : 8 - byte_size),
-              &Data.data()[offset], byte_size);
+  std::జ్ఞాపకం_నకలు(reinterpret_cast<అక్షరం *>(&val) +
+                  (sys::IsLittleEndianHost ? 0 : 8 - byte_కొలత),
+              &దత్తాంశం_2.దత్తాంశం()[స్థానభ్రంశం_2], byte_కొలత);
   // Swap the least significant bytes of val if endianness doesn't match.
-  if (sys::IsLittleEndianHost != IsLittleEndian)
-    val = sys::getSwappedBytes(val) >> (8 * (8 - byte_size));
+  ఒకవేళ (sys::IsLittleEndianHost != IsLittleEndian)
+    val = sys::get_Swapped_బైట్లు(val) >> (8 * (8 - byte_కొలత));
 
-  *offset_ptr += byte_size;
-  return val;
+  *స్థానభ్రంశం_ptr += byte_కొలత;
+  తిరిగి val;
 }
 
 int64_t
-DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) const {
-  switch (byte_size) {
-  case 1:
-    return getS8(offset_ptr);
-  case 2:
-    return getS16(offset_ptr);
-  case 4:
-    return getS32(offset_ptr);
-  case 8:
-    return getS64(offset_ptr);
+దత్తాంశం_Extractor::getSigned(uint64_t *స్థానభ్రంశం_ptr, uint32_t byte_కొలత) స్థిరరాశి {
+  ఎంపిక (byte_కొలత) {
+  స్థితి 1:
+    తిరిగి getS8(స్థానభ్రంశం_ptr);
+  స్థితి 2:
+    తిరిగి getS16(స్థానభ్రంశం_ptr);
+  స్థితి 4:
+    తిరిగి getS32(స్థానభ్రంశం_ptr);
+  స్థితి 8:
+    తిరిగి getS64(స్థానభ్రంశం_ptr);
   }
   llvm_unreachable("getSigned unhandled case!");
 }
 
-StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+StringRef దత్తాంశం_Extractor::getCStrRef(uint64_t *స్థానభ్రంశం_Ptr, Error *Err) స్థిరరాశి {
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
+  ఒకవేళ (isError(Err))
+    తిరిగి StringRef();
 
-  uint64_t Start = *OffsetPtr;
-  StringRef::size_type Pos = Data.find('\0', Start);
-  if (Pos != StringRef::npos) {
-    *OffsetPtr = Pos + 1;
-    return StringRef(Data.data() + Start, Pos - Start);
+  uint64_t ప్రారంభం = *స్థానభ్రంశం_Ptr;
+  StringRef::కొలత_type Pos = దత్తాంశం_2.కనుగొను('\0', ప్రారంభం);
+  ఒకవేళ (Pos != StringRef::npos) {
+    *స్థానభ్రంశం_Ptr = Pos + 1;
+    తిరిగి StringRef(దత్తాంశం_2.దత్తాంశం() + ప్రారంభం, Pos - ప్రారంభం);
   }
-  if (Err)
+  ఒకవేళ (Err)
     *Err = createStringError(errc::illegal_byte_sequence,
                              "no null terminated string at offset 0x%" PRIx64,
-                             Start);
-  return StringRef();
+                             ప్రారంభం);
+  తిరిగి StringRef();
 }
 
-StringRef DataExtractor::getFixedLengthString(uint64_t *OffsetPtr,
-                                              uint64_t Length,
-                                              StringRef TrimChars) const {
-  StringRef Bytes(getBytes(OffsetPtr, Length));
-  return Bytes.trim(TrimChars);
+StringRef దత్తాంశం_Extractor::get_Fixed_నిడివి_String(uint64_t *స్థానభ్రంశం_Ptr,
+                                              uint64_t నిడివి,
+                                              StringRef TrimChars) స్థిరరాశి {
+  StringRef బైట్లు_2(get_బైట్లు(స్థానభ్రంశం_Ptr, నిడివి));
+  తిరిగి బైట్లు_2.trim(TrimChars);
 }
 
-StringRef DataExtractor::getBytes(uint64_t *OffsetPtr, uint64_t Length,
-                                  Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+StringRef దత్తాంశం_Extractor::get_బైట్లు(uint64_t *స్థానభ్రంశం_Ptr, uint64_t నిడివి,
+                                  Error *Err) స్థిరరాశి {
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
+  ఒకవేళ (isError(Err))
+    తిరిగి StringRef();
 
-  if (!prepareRead(*OffsetPtr, Length, Err))
-    return StringRef();
+  ఒకవేళ (!prepareRead(*స్థానభ్రంశం_Ptr, నిడివి, Err))
+    తిరిగి StringRef();
 
-  StringRef Result = Data.substr(*OffsetPtr, Length);
-  *OffsetPtr += Length;
-  return Result;
+  StringRef ఫలితం = దత్తాంశం_2.substr(*స్థానభ్రంశం_Ptr, నిడివి);
+  *స్థానభ్రంశం_Ptr += నిడివి;
+  తిరిగి ఫలితం;
 }
 
-template <typename T>
-static T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
-                   T (&Decoder)(const uint8_t *p, unsigned *n,
-                                const uint8_t *end, const char **error)) {
-  ArrayRef<uint8_t> Bytes = arrayRefFromStringRef(Data);
-  assert(*OffsetPtr <= Bytes.size());
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return T();
+మూస <రకం_పేరు T>
+స్థిర T getLEB128(StringRef దత్తాంశం_2, uint64_t *స్థానభ్రంశం_Ptr, Error *Err,
+                   T (&Decoder)(స్థిరరాశి uint8_t *p, గుర్తులేని *n,
+                                స్థిరరాశి uint8_t *చివర, స్థిరరాశి అక్షరం **error)) {
+  ArrayRef<uint8_t> బైట్లు_2 = arrayRefFromStringRef(దత్తాంశం_2);
+  ప్రతిజ్ఞా(*స్థానభ్రంశం_Ptr <= బైట్లు_2.కొలత_2());
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
+  ఒకవేళ (isError(Err))
+    తిరిగి T();
 
-  const char *error = nullptr;
-  unsigned bytes_read;
-  T result =
-      Decoder(Bytes.data() + *OffsetPtr, &bytes_read, Bytes.end(), &error);
-  if (error) {
-    if (Err)
+  స్థిరరాశి అక్షరం *error = శూన్యసూచిక;
+  గుర్తులేని బైట్లు_read;
+  T ఫలితం_2 =
+      Decoder(బైట్లు_2.దత్తాంశం() + *స్థానభ్రంశం_Ptr, &బైట్లు_read, బైట్లు_2.చివర(), &error);
+  ఒకవేళ (error) {
+    ఒకవేళ (Err)
       *Err = createStringError(errc::illegal_byte_sequence,
                                "unable to decode LEB128 at offset 0x%8.8" PRIx64
                                ": %s",
-                               *OffsetPtr, error);
-    return T();
+                               *స్థానభ్రంశం_Ptr, error);
+    తిరిగి T();
   }
-  *OffsetPtr += bytes_read;
-  return result;
+  *స్థానభ్రంశం_Ptr += బైట్లు_read;
+  తిరిగి ఫలితం_2;
 }
 
-uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeULEB128);
+uint64_t దత్తాంశం_Extractor::getULEB128(uint64_t *స్థానభ్రంశం_ptr, Error *Err) స్థిరరాశి {
+  తిరిగి getLEB128(దత్తాంశం_2, స్థానభ్రంశం_ptr, Err, decodeULEB128);
 }
 
-int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeSLEB128);
+int64_t దత్తాంశం_Extractor::getSLEB128(uint64_t *స్థానభ్రంశం_ptr, Error *Err) స్థిరరాశి {
+  తిరిగి getLEB128(దత్తాంశం_2, స్థానభ్రంశం_ptr, Err, decodeSLEB128);
 }
 
-APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
-  ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return APSInt();
+APSInt దత్తాంశం_Extractor::getSLEB128APSInt(uint64_t *స్థానభ్రంశం_Ptr, Error *Err) స్థిరరాశి {
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(Err);
+  ఒకవేళ (isError(Err))
+    తిరిగి APSInt();
 
-  uint64_t Offset = *OffsetPtr;
-  APInt Value;
-  unsigned Shift = 0;
+  uint64_t స్థానభ్రంశం = *స్థానభ్రంశం_Ptr;
+  APInt విలువ;
+  గుర్తులేని జరుపు_2 = 0;
   uint8_t Byte;
-  do {
-    if (!prepareRead(Offset, 1, Err))
-      return APSInt();
-    Byte = Data[Offset++];
-    APInt Slice(7, Byte & 0x7f);
-    if (Shift == 0)
-      Value = Slice;
-    else {
-      Value = Value.zext(Shift + 7);
-      Value.insertBits(Slice, Shift);
+  చేయి {
+    ఒకవేళ (!prepareRead(స్థానభ్రంశం, 1, Err))
+      తిరిగి APSInt();
+    Byte = దత్తాంశం_2[స్థానభ్రంశం++];
+    APInt ముక్క_2(7, Byte & 0x7f);
+    ఒకవేళ (జరుపు_2 == 0)
+      విలువ = ముక్క_2;
+    లేకపోతే {
+      విలువ = విలువ.zext(జరుపు_2 + 7);
+      విలువ.చొప్పించు_బిట్లు(ముక్క_2, జరుపు_2);
     }
-    Shift += 7;
-  } while (Byte & 0x80);
+    జరుపు_2 += 7;
+  } అయితే (Byte & 0x80);
 
   // Sign extend Value to at least 64 bits to match getSLEB128.
-  if (Shift < 64)
-    Value = Value.sext(64);
+  ఒకవేళ (జరుపు_2 < 64)
+    విలువ = విలువ.sext(64);
 
-  *OffsetPtr = Offset;
-  return APSInt(std::move(Value), /*isUnsigned=*/false);
+  *స్థానభ్రంశం_Ptr = స్థానభ్రంశం;
+  తిరిగి APSInt(std::move(విలువ), /*isUnsigned=*/అబద్ధం);
 }
 
-void DataExtractor::skip(Cursor &C, uint64_t Length) const {
-  ErrorAsOutParameter ErrAsOut(C.Err);
-  if (isError(&C.Err))
-    return;
+శూన్య దత్తాంశం_Extractor::skip(Cursor &C, uint64_t నిడివి) స్థిరరాశి {
+  Error_As_బహిర్గతం_Parameter Err_As_బహిర్గతం(C.Err);
+  ఒకవేళ (isError(&C.Err))
+    తిరిగి;
 
-  if (prepareRead(C.Offset, Length, &C.Err))
-    C.Offset += Length;
+  ఒకవేళ (prepareRead(C.స్థానభ్రంశం, నిడివి, &C.Err))
+    C.స్థానభ్రంశం += నిడివి;
 }

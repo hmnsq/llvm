@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ "regex_impl.h"
 
-#include "regutils.h"
+#అన్తర్భావ "regutils.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#నిర్వచితమైతే _MSC_VER
+#నిర్వచించు snprintf _snprintf
+#అయితే_ముగింపు
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+స్థిర స్థిరరాశి అక్షరం *regatoi(స్థిరరాశి llvm_regex_t *, అక్షరం *, పూర్ణాంకం);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+స్థిర నిర్మాణం rerr {
+	పూర్ణాంకం సంకేతం_3;
+	స్థిరరాశి అక్షరం *name;
+	స్థిరరాశి అక్షరం *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -69,7 +69,7 @@ static struct rerr {
 	{ REG_ERANGE,	"REG_ERANGE",	"invalid character range" },
 	{ REG_ESPACE,	"REG_ESPACE",	"out of memory" },
 	{ REG_BADRPT,	"REG_BADRPT",	"repetition-operator operand invalid" },
-	{ REG_EMPTY,	"REG_EMPTY",	"empty (sub)expression" },
+	{ REG_ఖాళీలు,	"REG_EMPTY",	"empty (sub)expression" },
 	{ REG_ASSERT,	"REG_ASSERT",	"\"can't happen\" -- you found a bug" },
 	{ REG_INVARG,	"REG_INVARG",	"invalid argument to regex routine" },
 	{ 0,		"",		"*** unknown regexp error code ***" }
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(పూర్ణాంకం errcode, స్థిరరాశి llvm_regex_t *preg, అక్షరం *errbuf, size_t errbuf_కొలత)
 {
-	struct rerr *r;
+	నిర్మాణం rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	పూర్ణాంకం లక్ష్యం = errcode &~ REG_ITOA;
+	స్థిరరాశి అక్షరం *s;
+	అక్షరం convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	ఒకవేళ (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, పరిమాణం convbuf);
+	లేకపోతే {
+		కొరకు (r = rerrs; r->సంకేతం_3 != 0; r++)
+			ఒకవేళ (r->సంకేతం_3 == లక్ష్యం)
+				ఆపు;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
-				    "REG_0x%x", target);
+		ఒకవేళ (errcode&REG_ITOA) {
+			ఒకవేళ (r->సంకేతం_3 != 0) {
+				ప్రతిజ్ఞా(అక్షరశ్రేణి_పొడవు(r->name) < పరిమాణం(convbuf));
+				(శూన్య) llvm_strlcpy(convbuf, r->name, పరిమాణం convbuf);
+			} లేకపోతే
+				(శూన్య)snprintf(convbuf, పరిమాణం convbuf,
+				    "REG_0x%x", లక్ష్యం);
 			s = convbuf;
-		} else
+		} లేకపోతే
 			s = r->explain;
 	}
 
-	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
-		llvm_strlcpy(errbuf, s, errbuf_size);
+	len = అక్షరశ్రేణి_పొడవు(s) + 1;
+	ఒకవేళ (errbuf_కొలత > 0) {
+		llvm_strlcpy(errbuf, s, errbuf_కొలత);
 	}
 
-	return(len);
+	తిరిగి(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+స్థిర స్థిరరాశి అక్షరం *
+regatoi(స్థిరరాశి llvm_regex_t *preg, అక్షరం *localbuf, పూర్ణాంకం localbufsize)
 {
-	struct rerr *r;
+	నిర్మాణం rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	కొరకు (r = rerrs; r->సంకేతం_3 != 0; r++)
+		ఒకవేళ (strcmp(r->name, preg->re_endp) == 0)
+			ఆపు;
+	ఒకవేళ (r->సంకేతం_3 == 0)
+		తిరిగి("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(శూన్య)snprintf(localbuf, localbufsize, "%d", r->సంకేతం_3);
+	తిరిగి(localbuf);
 }

@@ -6,312 +6,312 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/bit.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <string>
-#include <vector>
+#అన్తర్భావ "llvm/ADT/ArrayRef.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/ADT/bit.h"
+#అన్తర్భావ "llvm/Support/ConvertUTF.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ <string>
+#అన్తర్భావ <vector>
 
-namespace llvm {
+నామాకాశ llvm {
 
-bool ConvertUTF8toWide(unsigned WideCharWidth, llvm::StringRef Source,
-                       char *&ResultPtr, const UTF8 *&ErrorPtr) {
-  assert(WideCharWidth == 1 || WideCharWidth == 2 || WideCharWidth == 4);
-  ConversionResult result = conversionOK;
+తార్కిక ConvertUTF8toWide(గుర్తులేని Wide_Char_వెడల్పు, llvm::StringRef ఆధారం,
+                       అక్షరం *&ఫలితం_Ptr, స్థిరరాశి UTF8 *&ErrorPtr) {
+  ప్రతిజ్ఞా(Wide_Char_వెడల్పు == 1 || Wide_Char_వెడల్పు == 2 || Wide_Char_వెడల్పు == 4);
+  Conversion_ఫలితం ఫలితం_2 = conversionOK;
   // Copy the character span over.
-  if (WideCharWidth == 1) {
-    const UTF8 *Pos = reinterpret_cast<const UTF8*>(Source.begin());
-    if (!isLegalUTF8String(&Pos, reinterpret_cast<const UTF8*>(Source.end()))) {
-      result = sourceIllegal;
+  ఒకవేళ (Wide_Char_వెడల్పు == 1) {
+    స్థిరరాశి UTF8 *Pos = reinterpret_cast<స్థిరరాశి UTF8*>(ఆధారం.begin());
+    ఒకవేళ (!isLegalUTF8String(&Pos, reinterpret_cast<స్థిరరాశి UTF8*>(ఆధారం.చివర()))) {
+      ఫలితం_2 = ఆధారం_Illegal;
       ErrorPtr = Pos;
-    } else {
-      memcpy(ResultPtr, Source.data(), Source.size());
-      ResultPtr += Source.size();
+    } లేకపోతే {
+      జ్ఞాపకం_నకలు(ఫలితం_Ptr, ఆధారం.దత్తాంశం(), ఆధారం.కొలత_2());
+      ఫలితం_Ptr += ఆధారం.కొలత_2();
     }
-  } else if (WideCharWidth == 2) {
-    const UTF8 *sourceStart = (const UTF8*)Source.data();
+  } లేకపోతే ఒకవేళ (Wide_Char_వెడల్పు == 2) {
+    స్థిరరాశి UTF8 *ఆధారం_ప్రారంభం = (స్థిరరాశి UTF8*)ఆధారం.దత్తాంశం();
     // FIXME: Make the type of the result buffer correct instead of
     // using reinterpret_cast.
-    UTF16 *targetStart = reinterpret_cast<UTF16 *>(ResultPtr);
+    UTF16 *లక్ష్యం_ప్రారంభం = reinterpret_cast<UTF16 *>(ఫలితం_Ptr);
     ConversionFlags flags = strictConversion;
-    result =
-        ConvertUTF8toUTF16(&sourceStart, sourceStart + Source.size(),
-                           &targetStart, targetStart + Source.size(), flags);
-    if (result == conversionOK)
-      ResultPtr = reinterpret_cast<char *>(targetStart);
-    else
-      ErrorPtr = sourceStart;
-  } else if (WideCharWidth == 4) {
-    const UTF8 *sourceStart = (const UTF8 *)Source.data();
+    ఫలితం_2 =
+        ConvertUTF8toUTF16(&ఆధారం_ప్రారంభం, ఆధారం_ప్రారంభం + ఆధారం.కొలత_2(),
+                           &లక్ష్యం_ప్రారంభం, లక్ష్యం_ప్రారంభం + ఆధారం.కొలత_2(), flags);
+    ఒకవేళ (ఫలితం_2 == conversionOK)
+      ఫలితం_Ptr = reinterpret_cast<అక్షరం *>(లక్ష్యం_ప్రారంభం);
+    లేకపోతే
+      ErrorPtr = ఆధారం_ప్రారంభం;
+  } లేకపోతే ఒకవేళ (Wide_Char_వెడల్పు == 4) {
+    స్థిరరాశి UTF8 *ఆధారం_ప్రారంభం = (స్థిరరాశి UTF8 *)ఆధారం.దత్తాంశం();
     // FIXME: Make the type of the result buffer correct instead of
     // using reinterpret_cast.
-    UTF32 *targetStart = reinterpret_cast<UTF32 *>(ResultPtr);
+    UTF32 *లక్ష్యం_ప్రారంభం = reinterpret_cast<UTF32 *>(ఫలితం_Ptr);
     ConversionFlags flags = strictConversion;
-    result =
-        ConvertUTF8toUTF32(&sourceStart, sourceStart + Source.size(),
-                           &targetStart, targetStart + Source.size(), flags);
-    if (result == conversionOK)
-      ResultPtr = reinterpret_cast<char *>(targetStart);
-    else
-      ErrorPtr = sourceStart;
+    ఫలితం_2 =
+        ConvertUTF8toUTF32(&ఆధారం_ప్రారంభం, ఆధారం_ప్రారంభం + ఆధారం.కొలత_2(),
+                           &లక్ష్యం_ప్రారంభం, లక్ష్యం_ప్రారంభం + ఆధారం.కొలత_2(), flags);
+    ఒకవేళ (ఫలితం_2 == conversionOK)
+      ఫలితం_Ptr = reinterpret_cast<అక్షరం *>(లక్ష్యం_ప్రారంభం);
+    లేకపోతే
+      ErrorPtr = ఆధారం_ప్రారంభం;
   }
-  assert((result != targetExhausted) &&
+  ప్రతిజ్ఞా((ఫలితం_2 != లక్ష్యం_Exhausted) &&
          "ConvertUTF8toUTFXX exhausted target buffer");
-  return result == conversionOK;
+  తిరిగి ఫలితం_2 == conversionOK;
 }
 
-bool ConvertCodePointToUTF8(unsigned Source, char *&ResultPtr) {
-  const UTF32 *SourceStart = &Source;
-  const UTF32 *SourceEnd = SourceStart + 1;
-  UTF8 *TargetStart = reinterpret_cast<UTF8 *>(ResultPtr);
-  UTF8 *TargetEnd = TargetStart + 4;
-  ConversionResult CR = ConvertUTF32toUTF8(
-      &SourceStart, SourceEnd, &TargetStart, TargetEnd, strictConversion);
-  if (CR != conversionOK)
-    return false;
+తార్కిక Convert_సంకేతం_బిందువు_గమ్యం_UTF8(గుర్తులేని ఆధారం, అక్షరం *&ఫలితం_Ptr) {
+  స్థిరరాశి UTF32 *ఆధారం_ప్రారంభం_2 = &ఆధారం;
+  స్థిరరాశి UTF32 *ఆధారం_చివర_2 = ఆధారం_ప్రారంభం_2 + 1;
+  UTF8 *లక్ష్యం_ప్రారంభం_2 = reinterpret_cast<UTF8 *>(ఫలితం_Ptr);
+  UTF8 *లక్ష్యం_చివర_2 = లక్ష్యం_ప్రారంభం_2 + 4;
+  Conversion_ఫలితం CR = ConvertUTF32toUTF8(
+      &ఆధారం_ప్రారంభం_2, ఆధారం_చివర_2, &లక్ష్యం_ప్రారంభం_2, లక్ష్యం_చివర_2, strictConversion);
+  ఒకవేళ (CR != conversionOK)
+    తిరిగి అబద్ధం;
 
-  ResultPtr = reinterpret_cast<char *>(TargetStart);
-  return true;
+  ఫలితం_Ptr = reinterpret_cast<అక్షరం *>(లక్ష్యం_ప్రారంభం_2);
+  తిరిగి నిజం;
 }
 
-bool hasUTF16ByteOrderMark(ArrayRef<char> S) {
-  return (S.size() >= 2 && ((S[0] == '\xff' && S[1] == '\xfe') ||
+తార్కిక has_UTF16_Byte_క్రమం_Mark(ArrayRef<అక్షరం> S) {
+  తిరిగి (S.కొలత_2() >= 2 && ((S[0] == '\xff' && S[1] == '\xfe') ||
                             (S[0] == '\xfe' && S[1] == '\xff')));
 }
 
-bool convertUTF16ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
-  assert(Out.empty());
+తార్కిక convert_UTF16_గమ్యం_UTF8_String(ArrayRef<అక్షరం> Src_బైట్లు, std::string &బహిర్గతం) {
+  ప్రతిజ్ఞా(బహిర్గతం.ఖాళీలు());
 
   // Error out on an uneven byte count.
-  if (SrcBytes.size() % 2)
-    return false;
+  ఒకవేళ (Src_బైట్లు.కొలత_2() % 2)
+    తిరిగి అబద్ధం;
 
   // Avoid OOB by returning early on empty input.
-  if (SrcBytes.empty())
-    return true;
+  ఒకవేళ (Src_బైట్లు.ఖాళీలు())
+    తిరిగి నిజం;
 
-  const UTF16 *Src = reinterpret_cast<const UTF16 *>(SrcBytes.begin());
-  const UTF16 *SrcEnd = reinterpret_cast<const UTF16 *>(SrcBytes.end());
+  స్థిరరాశి UTF16 *Src = reinterpret_cast<స్థిరరాశి UTF16 *>(Src_బైట్లు.begin());
+  స్థిరరాశి UTF16 *Src_చివర = reinterpret_cast<స్థిరరాశి UTF16 *>(Src_బైట్లు.చివర());
 
-  assert((uintptr_t)Src % sizeof(UTF16) == 0);
+  ప్రతిజ్ఞా((uintptr_t)Src % పరిమాణం(UTF16) == 0);
 
   // Byteswap if necessary.
-  std::vector<UTF16> ByteSwapped;
-  if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
-    for (UTF16 &I : ByteSwapped)
+  std::సదిశ<UTF16> ByteSwapped;
+  ఒకవేళ (Src[0] == UNI_UTF16_BYTE_క్రమం_MARK_SWAPPED) {
+    ByteSwapped.చొప్పించు(ByteSwapped.చివర(), Src, Src_చివర);
+    కొరకు (UTF16 &I : ByteSwapped)
       I = llvm::byteswap<uint16_t>(I);
     Src = &ByteSwapped[0];
-    SrcEnd = &ByteSwapped[ByteSwapped.size() - 1] + 1;
+    Src_చివర = &ByteSwapped[ByteSwapped.కొలత_2() - 1] + 1;
   }
 
   // Skip the BOM for conversion.
-  if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_NATIVE)
+  ఒకవేళ (Src[0] == UNI_UTF16_BYTE_క్రమం_MARK_NATIVE)
     Src++;
 
   // Just allocate enough space up front.  We'll shrink it later.  Allocate
   // enough that we can fit a null terminator without reallocating.
-  Out.resize(SrcBytes.size() * UNI_MAX_UTF8_BYTES_PER_CODE_POINT + 1);
-  UTF8 *Dst = reinterpret_cast<UTF8 *>(&Out[0]);
-  UTF8 *DstEnd = Dst + Out.size();
+  బహిర్గతం.resize(Src_బైట్లు.కొలత_2() * UNI_MAX_UTF8_బైట్లు_చొప్పున_సంకేతం_బిందువు + 1);
+  UTF8 *Dst = reinterpret_cast<UTF8 *>(&బహిర్గతం[0]);
+  UTF8 *Dst_చివర = Dst + బహిర్గతం.కొలత_2();
 
-  ConversionResult CR =
-      ConvertUTF16toUTF8(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  Conversion_ఫలితం CR =
+      ConvertUTF16toUTF8(&Src, Src_చివర, &Dst, Dst_చివర, strictConversion);
+  ప్రతిజ్ఞా(CR != లక్ష్యం_Exhausted);
 
-  if (CR != conversionOK) {
-    Out.clear();
-    return false;
+  ఒకవేళ (CR != conversionOK) {
+    బహిర్గతం.clear();
+    తిరిగి అబద్ధం;
   }
 
-  Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
-  return true;
+  బహిర్గతం.resize(reinterpret_cast<అక్షరం *>(Dst) - &బహిర్గతం[0]);
+  బహిర్గతం.నెట్టు_వెనుక(0);
+  బహిర్గతం.తీయి_వెనుక();
+  తిరిగి నిజం;
 }
 
-bool convertUTF16ToUTF8String(ArrayRef<UTF16> Src, std::string &Out) {
-  return convertUTF16ToUTF8String(
-      llvm::ArrayRef<char>(reinterpret_cast<const char *>(Src.data()),
-                           Src.size() * sizeof(UTF16)),
-      Out);
+తార్కిక convert_UTF16_గమ్యం_UTF8_String(ArrayRef<UTF16> Src, std::string &బహిర్గతం) {
+  తిరిగి convert_UTF16_గమ్యం_UTF8_String(
+      llvm::ArrayRef<అక్షరం>(reinterpret_cast<స్థిరరాశి అక్షరం *>(Src.దత్తాంశం()),
+                           Src.కొలత_2() * పరిమాణం(UTF16)),
+      బహిర్గతం);
 }
 
-bool convertUTF32ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
-  assert(Out.empty());
+తార్కిక convert_UTF32_గమ్యం_UTF8_String(ArrayRef<అక్షరం> Src_బైట్లు, std::string &బహిర్గతం) {
+  ప్రతిజ్ఞా(బహిర్గతం.ఖాళీలు());
 
   // Error out on an uneven byte count.
-  if (SrcBytes.size() % 4)
-    return false;
+  ఒకవేళ (Src_బైట్లు.కొలత_2() % 4)
+    తిరిగి అబద్ధం;
 
   // Avoid OOB by returning early on empty input.
-  if (SrcBytes.empty())
-    return true;
+  ఒకవేళ (Src_బైట్లు.ఖాళీలు())
+    తిరిగి నిజం;
 
-  const UTF32 *Src = reinterpret_cast<const UTF32 *>(SrcBytes.begin());
-  const UTF32 *SrcEnd = reinterpret_cast<const UTF32 *>(SrcBytes.end());
+  స్థిరరాశి UTF32 *Src = reinterpret_cast<స్థిరరాశి UTF32 *>(Src_బైట్లు.begin());
+  స్థిరరాశి UTF32 *Src_చివర = reinterpret_cast<స్థిరరాశి UTF32 *>(Src_బైట్లు.చివర());
 
-  assert((uintptr_t)Src % sizeof(UTF32) == 0);
+  ప్రతిజ్ఞా((uintptr_t)Src % పరిమాణం(UTF32) == 0);
 
   // Byteswap if necessary.
-  std::vector<UTF32> ByteSwapped;
-  if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
-    for (UTF32 &I : ByteSwapped)
+  std::సదిశ<UTF32> ByteSwapped;
+  ఒకవేళ (Src[0] == UNI_UTF32_BYTE_క్రమం_MARK_SWAPPED) {
+    ByteSwapped.చొప్పించు(ByteSwapped.చివర(), Src, Src_చివర);
+    కొరకు (UTF32 &I : ByteSwapped)
       I = llvm::byteswap<uint32_t>(I);
     Src = &ByteSwapped[0];
-    SrcEnd = &ByteSwapped[ByteSwapped.size() - 1] + 1;
+    Src_చివర = &ByteSwapped[ByteSwapped.కొలత_2() - 1] + 1;
   }
 
   // Skip the BOM for conversion.
-  if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_NATIVE)
+  ఒకవేళ (Src[0] == UNI_UTF32_BYTE_క్రమం_MARK_NATIVE)
     Src++;
 
   // Just allocate enough space up front.  We'll shrink it later.  Allocate
   // enough that we can fit a null terminator without reallocating.
-  Out.resize(SrcBytes.size() * UNI_MAX_UTF8_BYTES_PER_CODE_POINT + 1);
-  UTF8 *Dst = reinterpret_cast<UTF8 *>(&Out[0]);
-  UTF8 *DstEnd = Dst + Out.size();
+  బహిర్గతం.resize(Src_బైట్లు.కొలత_2() * UNI_MAX_UTF8_బైట్లు_చొప్పున_సంకేతం_బిందువు + 1);
+  UTF8 *Dst = reinterpret_cast<UTF8 *>(&బహిర్గతం[0]);
+  UTF8 *Dst_చివర = Dst + బహిర్గతం.కొలత_2();
 
-  ConversionResult CR =
-      ConvertUTF32toUTF8(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  Conversion_ఫలితం CR =
+      ConvertUTF32toUTF8(&Src, Src_చివర, &Dst, Dst_చివర, strictConversion);
+  ప్రతిజ్ఞా(CR != లక్ష్యం_Exhausted);
 
-  if (CR != conversionOK) {
-    Out.clear();
-    return false;
+  ఒకవేళ (CR != conversionOK) {
+    బహిర్గతం.clear();
+    తిరిగి అబద్ధం;
   }
 
-  Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
-  return true;
+  బహిర్గతం.resize(reinterpret_cast<అక్షరం *>(Dst) - &బహిర్గతం[0]);
+  బహిర్గతం.నెట్టు_వెనుక(0);
+  బహిర్గతం.తీయి_వెనుక();
+  తిరిగి నిజం;
 }
 
-bool convertUTF32ToUTF8String(ArrayRef<UTF32> Src, std::string &Out) {
-  return convertUTF32ToUTF8String(
-      llvm::ArrayRef<char>(reinterpret_cast<const char *>(Src.data()),
-                           Src.size() * sizeof(UTF32)),
-      Out);
+తార్కిక convert_UTF32_గమ్యం_UTF8_String(ArrayRef<UTF32> Src, std::string &బహిర్గతం) {
+  తిరిగి convert_UTF32_గమ్యం_UTF8_String(
+      llvm::ArrayRef<అక్షరం>(reinterpret_cast<స్థిరరాశి అక్షరం *>(Src.దత్తాంశం()),
+                           Src.కొలత_2() * పరిమాణం(UTF32)),
+      బహిర్గతం);
 }
 
-bool convertUTF8ToUTF16String(StringRef SrcUTF8,
-                              SmallVectorImpl<UTF16> &DstUTF16) {
-  assert(DstUTF16.empty());
+తార్కిక convert_UTF8_గమ్యం_UTF16_String(StringRef SrcUTF8,
+                              Small_సదిశ_Impl<UTF16> &DstUTF16) {
+  ప్రతిజ్ఞా(DstUTF16.ఖాళీలు());
 
   // Avoid OOB by returning early on empty input.
-  if (SrcUTF8.empty()) {
-    DstUTF16.push_back(0);
-    DstUTF16.pop_back();
-    return true;
+  ఒకవేళ (SrcUTF8.ఖాళీలు()) {
+    DstUTF16.నెట్టు_వెనుక(0);
+    DstUTF16.తీయి_వెనుక();
+    తిరిగి నిజం;
   }
 
-  const UTF8 *Src = reinterpret_cast<const UTF8 *>(SrcUTF8.begin());
-  const UTF8 *SrcEnd = reinterpret_cast<const UTF8 *>(SrcUTF8.end());
+  స్థిరరాశి UTF8 *Src = reinterpret_cast<స్థిరరాశి UTF8 *>(SrcUTF8.begin());
+  స్థిరరాశి UTF8 *Src_చివర = reinterpret_cast<స్థిరరాశి UTF8 *>(SrcUTF8.చివర());
 
   // Allocate the same number of UTF-16 code units as UTF-8 code units. Encoding
   // as UTF-16 should always require the same amount or less code units than the
   // UTF-8 encoding.  Allocate one extra byte for the null terminator though,
   // so that someone calling DstUTF16.data() gets a null terminated string.
   // We resize down later so we don't have to worry that this over allocates.
-  DstUTF16.resize(SrcUTF8.size()+1);
+  DstUTF16.resize(SrcUTF8.కొలత_2()+1);
   UTF16 *Dst = &DstUTF16[0];
-  UTF16 *DstEnd = Dst + DstUTF16.size();
+  UTF16 *Dst_చివర = Dst + DstUTF16.కొలత_2();
 
-  ConversionResult CR =
-      ConvertUTF8toUTF16(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  Conversion_ఫలితం CR =
+      ConvertUTF8toUTF16(&Src, Src_చివర, &Dst, Dst_చివర, strictConversion);
+  ప్రతిజ్ఞా(CR != లక్ష్యం_Exhausted);
 
-  if (CR != conversionOK) {
+  ఒకవేళ (CR != conversionOK) {
     DstUTF16.clear();
-    return false;
+    తిరిగి అబద్ధం;
   }
 
   DstUTF16.resize(Dst - &DstUTF16[0]);
-  DstUTF16.push_back(0);
-  DstUTF16.pop_back();
-  return true;
+  DstUTF16.నెట్టు_వెనుక(0);
+  DstUTF16.తీయి_వెనుక();
+  తిరిగి నిజం;
 }
 
-static_assert(sizeof(wchar_t) == 1 || sizeof(wchar_t) == 2 ||
-                  sizeof(wchar_t) == 4,
+static_assert(పరిమాణం(wchar_t) == 1 || పరిమాణం(wchar_t) == 2 ||
+                  పరిమాణం(wchar_t) == 4,
               "Expected wchar_t to be 1, 2, or 4 bytes");
 
-template <typename TResult>
-static inline bool ConvertUTF8toWideInternal(llvm::StringRef Source,
-                                             TResult &Result) {
+మూస <రకం_పేరు TResult>
+స్థిర అంతఃవరుస తార్కిక Convert_UTF8to_Wide_అంతర్గత(llvm::StringRef ఆధారం,
+                                             TResult &ఫలితం) {
   // Even in the case of UTF-16, the number of bytes in a UTF-8 string is
   // at least as large as the number of elements in the resulting wide
   // string, because surrogate pairs take at least 4 bytes in UTF-8.
-  Result.resize(Source.size() + 1);
-  char *ResultPtr = reinterpret_cast<char *>(&Result[0]);
-  const UTF8 *ErrorPtr;
-  if (!ConvertUTF8toWide(sizeof(wchar_t), Source, ResultPtr, ErrorPtr)) {
-    Result.clear();
-    return false;
+  ఫలితం.resize(ఆధారం.కొలత_2() + 1);
+  అక్షరం *ఫలితం_Ptr = reinterpret_cast<అక్షరం *>(&ఫలితం[0]);
+  స్థిరరాశి UTF8 *ErrorPtr;
+  ఒకవేళ (!ConvertUTF8toWide(పరిమాణం(wchar_t), ఆధారం, ఫలితం_Ptr, ErrorPtr)) {
+    ఫలితం.clear();
+    తిరిగి అబద్ధం;
   }
-  Result.resize(reinterpret_cast<wchar_t *>(ResultPtr) - &Result[0]);
-  return true;
+  ఫలితం.resize(reinterpret_cast<wchar_t *>(ఫలితం_Ptr) - &ఫలితం[0]);
+  తిరిగి నిజం;
 }
 
-bool ConvertUTF8toWide(llvm::StringRef Source, std::wstring &Result) {
-  return ConvertUTF8toWideInternal(Source, Result);
+తార్కిక ConvertUTF8toWide(llvm::StringRef ఆధారం, std::wstring &ఫలితం) {
+  తిరిగి Convert_UTF8to_Wide_అంతర్గత(ఆధారం, ఫలితం);
 }
 
-bool ConvertUTF8toWide(const char *Source, std::wstring &Result) {
-  if (!Source) {
-    Result.clear();
-    return true;
+తార్కిక ConvertUTF8toWide(స్థిరరాశి అక్షరం *ఆధారం, std::wstring &ఫలితం) {
+  ఒకవేళ (!ఆధారం) {
+    ఫలితం.clear();
+    తిరిగి నిజం;
   }
-  return ConvertUTF8toWide(llvm::StringRef(Source), Result);
+  తిరిగి ConvertUTF8toWide(llvm::StringRef(ఆధారం), ఫలితం);
 }
 
-bool convertWideToUTF8(std::wstring_view Source, std::string &Result) {
-  if (sizeof(wchar_t) == 1) {
-    const UTF8 *Start = reinterpret_cast<const UTF8 *>(Source.data());
-    const UTF8 *End =
-        reinterpret_cast<const UTF8 *>(Source.data() + Source.size());
-    if (!isLegalUTF8String(&Start, End))
-      return false;
-    Result.resize(Source.size());
-    memcpy(&Result[0], Source.data(), Source.size());
-    return true;
-  } else if (sizeof(wchar_t) == 2) {
-    return convertUTF16ToUTF8String(
-        llvm::ArrayRef<UTF16>(reinterpret_cast<const UTF16 *>(Source.data()),
-                              Source.size()),
-        Result);
-  } else if (sizeof(wchar_t) == 4) {
-    const UTF32 *Start = reinterpret_cast<const UTF32 *>(Source.data());
-    const UTF32 *End =
-        reinterpret_cast<const UTF32 *>(Source.data() + Source.size());
-    Result.resize(UNI_MAX_UTF8_BYTES_PER_CODE_POINT * Source.size());
-    UTF8 *ResultPtr = reinterpret_cast<UTF8 *>(&Result[0]);
-    UTF8 *ResultEnd = reinterpret_cast<UTF8 *>(&Result[0] + Result.size());
-    if (ConvertUTF32toUTF8(&Start, End, &ResultPtr, ResultEnd,
+తార్కిక convert_Wide_గమ్యం_UTF8(std::wstring_view ఆధారం, std::string &ఫలితం) {
+  ఒకవేళ (పరిమాణం(wchar_t) == 1) {
+    స్థిరరాశి UTF8 *ప్రారంభం = reinterpret_cast<స్థిరరాశి UTF8 *>(ఆధారం.దత్తాంశం());
+    స్థిరరాశి UTF8 *చివర_2 =
+        reinterpret_cast<స్థిరరాశి UTF8 *>(ఆధారం.దత్తాంశం() + ఆధారం.కొలత_2());
+    ఒకవేళ (!isLegalUTF8String(&ప్రారంభం, చివర_2))
+      తిరిగి అబద్ధం;
+    ఫలితం.resize(ఆధారం.కొలత_2());
+    జ్ఞాపకం_నకలు(&ఫలితం[0], ఆధారం.దత్తాంశం(), ఆధారం.కొలత_2());
+    తిరిగి నిజం;
+  } లేకపోతే ఒకవేళ (పరిమాణం(wchar_t) == 2) {
+    తిరిగి convert_UTF16_గమ్యం_UTF8_String(
+        llvm::ArrayRef<UTF16>(reinterpret_cast<స్థిరరాశి UTF16 *>(ఆధారం.దత్తాంశం()),
+                              ఆధారం.కొలత_2()),
+        ఫలితం);
+  } లేకపోతే ఒకవేళ (పరిమాణం(wchar_t) == 4) {
+    స్థిరరాశి UTF32 *ప్రారంభం = reinterpret_cast<స్థిరరాశి UTF32 *>(ఆధారం.దత్తాంశం());
+    స్థిరరాశి UTF32 *చివర_2 =
+        reinterpret_cast<స్థిరరాశి UTF32 *>(ఆధారం.దత్తాంశం() + ఆధారం.కొలత_2());
+    ఫలితం.resize(UNI_MAX_UTF8_బైట్లు_చొప్పున_సంకేతం_బిందువు * ఆధారం.కొలత_2());
+    UTF8 *ఫలితం_Ptr = reinterpret_cast<UTF8 *>(&ఫలితం[0]);
+    UTF8 *ఫలితం_చివర = reinterpret_cast<UTF8 *>(&ఫలితం[0] + ఫలితం.కొలత_2());
+    ఒకవేళ (ConvertUTF32toUTF8(&ప్రారంభం, చివర_2, &ఫలితం_Ptr, ఫలితం_చివర,
                            strictConversion) == conversionOK) {
-      Result.resize(reinterpret_cast<char *>(ResultPtr) - &Result[0]);
-      return true;
-    } else {
-      Result.clear();
-      return false;
+      ఫలితం.resize(reinterpret_cast<అక్షరం *>(ఫలితం_Ptr) - &ఫలితం[0]);
+      తిరిగి నిజం;
+    } లేకపోతే {
+      ఫలితం.clear();
+      తిరిగి అబద్ధం;
     }
-  } else {
+  } లేకపోతే {
     llvm_unreachable(
         "Control should never reach this point; see static_assert further up");
   }
 }
 
-bool IsSingleCodeUnitUTF8Codepoint(unsigned V) { return V <= 0x7F; }
+తార్కిక Is_Single_సంకేతం_Unit_UTF8_Codepoint(గుర్తులేని V) { తిరిగి V <= 0x7F; }
 
-bool IsSingleCodeUnitUTF16Codepoint(unsigned V) {
-  return V <= 0xD7FF || (V >= 0xE000 && V <= 0xFFFF);
+తార్కిక Is_Single_సంకేతం_Unit_UTF16_Codepoint(గుర్తులేని V) {
+  తిరిగి V <= 0xD7FF || (V >= 0xE000 && V <= 0xFFFF);
 }
 
-bool IsSingleCodeUnitUTF32Codepoint(unsigned V) {
-  return V <= 0xD7FF || (V >= 0xE000 && V <= 0x10FFFF);
+తార్కిక Is_Single_సంకేతం_Unit_UTF32_Codepoint(గుర్తులేని V) {
+  తిరిగి V <= 0xD7FF || (V >= 0xE000 && V <= 0x10FFFF);
 }
 
 } // end namespace llvm

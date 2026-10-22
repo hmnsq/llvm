@@ -23,116 +23,116 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Debug.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/circular_raw_ostream.h"
-#include "llvm/Support/raw_ostream.h"
-#include <utility>
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/CommandLine.h"
+#అన్తర్భావ "llvm/Support/ManagedStatic.h"
+#అన్తర్భావ "llvm/Support/Signals.h"
+#అన్తర్భావ "llvm/Support/circular_raw_ostream.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <utility>
 
-#include "DebugOptions.h"
+#అన్తర్భావ "DebugOptions.h"
 
-#undef isCurrentDebugType
-#undef setCurrentDebugType
-#undef setCurrentDebugTypes
+#నిర్వచనం_రద్దు isCurrentDebugType
+#నిర్వచనం_రద్దు సమితి_Current_Debug_Type
+#నిర్వచనం_రద్దు సమితి_Current_Debug_Types
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 /// Parse a debug type string into a pair of the debug type and the debug level.
 /// The expected format is "type[:level]", where the level is an optional
 /// integer.
-static std::pair<std::string, std::optional<int>>
+స్థిర std::pair<std::string, std::optional<పూర్ణాంకం>>
 parseDebugType(StringRef DbgType) {
-  std::optional<int> Level;
-  size_t ColonPos = DbgType.find(':');
-  if (ColonPos != StringRef::npos) {
+  std::optional<పూర్ణాంకం> Level;
+  size_t ColonPos = DbgType.కనుగొను(':');
+  ఒకవేళ (ColonPos != StringRef::npos) {
     StringRef LevelStr = DbgType.substr(ColonPos + 1);
     DbgType = DbgType.take_front(ColonPos);
-    if (LevelStr.empty())
+    ఒకవేళ (LevelStr.ఖాళీలు())
       Level = 0;
-    else {
-      int parsedLevel;
-      if (to_integer(LevelStr, parsedLevel, 10))
+    లేకపోతే {
+      పూర్ణాంకం parsedLevel;
+      ఒకవేళ (గమ్యం_integer(LevelStr, parsedLevel, 10))
         Level = parsedLevel;
     }
   }
-  return std::make_pair(DbgType.str(), Level);
+  తిరిగి std::make_pair(DbgType.str(), Level);
 }
 
 // Even though LLVM might be built with NDEBUG, define symbols that the code
 // built without NDEBUG can depend on via the llvm/Support/Debug.h header.
-namespace llvm {
+నామాకాశ llvm {
 /// Exported boolean set by the -debug option.
-bool DebugFlag = false;
+తార్కిక DebugFlag = అబద్ధం;
 
 /// The current debug type and an optional debug level.
 /// The debug level is the verbosity of the debug output.
 /// 0 is a special level that acts as an opt-out for this specific debug type.
 /// If provided, the debug output is enabled only if the user specified a level
 /// at least as high as the provided level.
-static ManagedStatic<std::vector<std::pair<std::string, std::optional<int>>>>
+స్థిర ManagedStatic<std::సదిశ<std::pair<std::string, std::optional<పూర్ణాంకం>>>>
     CurrentDebugType;
 
 /// Return true if the specified string is the debug type
 /// specified on the command line, or if none was specified on the command line
 /// with the -debug-only=X option.
-bool isCurrentDebugType(const char *DebugType, int Level) {
-  if (CurrentDebugType->empty())
-    return true;
+తార్కిక isCurrentDebugType(స్థిరరాశి అక్షరం *DebugType, పూర్ణాంకం Level) {
+  ఒకవేళ (CurrentDebugType->ఖాళీలు())
+    తిరిగి నిజం;
   // Track if there is at least one debug type with a level, this is used
   // to allow to opt-out of some DebugType and leaving all the others enabled.
-  bool HasEnabledDebugType = false;
+  తార్కిక HasEnabledDebugType = అబద్ధం;
   // See if DebugType is in list. Note: do not use find() as that forces us to
   // unnecessarily create an std::string instance.
-  for (auto &D : *CurrentDebugType) {
+  కొరకు (స్వయంచాలక &D : *CurrentDebugType) {
     HasEnabledDebugType =
-        HasEnabledDebugType || (!D.second.has_value() || D.second.value() > 0);
-    if (D.first != DebugType)
-      continue;
-    if (!D.second.has_value())
-      return true;
-    return D.second >= Level;
+        HasEnabledDebugType || (!D.రెండవ_2.has_విలువ_2() || D.రెండవ_2.విలువ_2() > 0);
+    ఒకవేళ (D.మొదటి_2 != DebugType)
+      కొనసాగు;
+    ఒకవేళ (!D.రెండవ_2.has_విలువ_2())
+      తిరిగి నిజం;
+    తిరిగి D.రెండవ_2 >= Level;
   }
-  return !HasEnabledDebugType;
+  తిరిగి !HasEnabledDebugType;
 }
 
 /// Set the current debug type, as if the -debug-only=X
 /// option were specified.  Note that DebugFlag also needs to be set to true for
 /// debug output to be produced.
 ///
-void setCurrentDebugTypes(const char **Types, unsigned Count);
+శూన్య సమితి_Current_Debug_Types(స్థిరరాశి అక్షరం **Types, గుర్తులేని లెక్క_2);
 
-void setCurrentDebugType(const char *Type) {
-  setCurrentDebugTypes(&Type, 1);
+శూన్య సమితి_Current_Debug_Type(స్థిరరాశి అక్షరం *Type) {
+  సమితి_Current_Debug_Types(&Type, 1);
 }
 
-void setCurrentDebugTypes(const char **Types, unsigned Count) {
+శూన్య సమితి_Current_Debug_Types(స్థిరరాశి అక్షరం **Types, గుర్తులేని లెక్క_2) {
   CurrentDebugType->clear();
-  CurrentDebugType->reserve(Count);
-  for (const char *Type : ArrayRef(Types, Count))
-    CurrentDebugType->push_back(parseDebugType(Type));
+  CurrentDebugType->reserve(లెక్క_2);
+  కొరకు (స్థిరరాశి అక్షరం *Type : ArrayRef(Types, లెక్క_2))
+    CurrentDebugType->నెట్టు_వెనుక(parseDebugType(Type));
 }
 
 } // namespace llvm
 
 // All Debug.h functionality is a no-op in NDEBUG mode.
-#ifndef NDEBUG
+#నిర్వచితం_కాకపోతే NDEBUG
 
-namespace {
-struct CreateDebug {
-  static void *call() {
-    return new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
+నామాకాశ {
+నిర్మాణం CreateDebug {
+  స్థిర శూన్య *call() {
+    తిరిగి కొత్త cl::opt<తార్కిక, నిజం>("debug", cl::desc("Enable debug output"),
                                    cl::Hidden, cl::location(DebugFlag));
   }
 };
 
 // -debug-buffer-size - Buffer the last N characters of debug output
 //until program termination.
-struct CreateDebugBufferSize {
-  static void *call() {
-    return new cl::opt<unsigned>(
+నిర్మాణం Create_Debug_బఫరు_కొలత {
+  స్థిర శూన్య *call() {
+    తిరిగి కొత్త cl::opt<గుర్తులేని>(
         "debug-buffer-size",
         cl::desc("Buffer the last N characters of debug output "
                  "until program termination. "
@@ -144,30 +144,30 @@ struct CreateDebugBufferSize {
 
 // -debug - Command line option to enable the DEBUG statements in the passes.
 // This flag may only be enabled in debug builds.
-static ManagedStatic<cl::opt<bool, true>, CreateDebug> Debug;
-static ManagedStatic<cl::opt<unsigned>, CreateDebugBufferSize> DebugBufferSize;
+స్థిర ManagedStatic<cl::opt<తార్కిక, నిజం>, CreateDebug> Debug;
+స్థిర ManagedStatic<cl::opt<గుర్తులేని>, Create_Debug_బఫరు_కొలత> Debug_బఫరు_కొలత;
 
-namespace {
+నామాకాశ {
 
-struct DebugOnlyOpt {
-  void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
-    DebugFlag = true;
-    SmallVector<StringRef, 8> DbgTypes;
-    StringRef(Val).split(DbgTypes, ',', -1, false);
-    for (auto DbgType : DbgTypes)
-      CurrentDebugType->push_back(parseDebugType(DbgType));
+నిర్మాణం DebugOnlyOpt {
+  శూన్య క్రియాకారకం=(స్థిరరాశి std::string &Val) స్థిరరాశి {
+    ఒకవేళ (Val.ఖాళీలు())
+      తిరిగి;
+    DebugFlag = నిజం;
+    Small_సదిశ<StringRef, 8> DbgTypes;
+    StringRef(Val).విభజించు(DbgTypes, ',', -1, అబద్ధం);
+    కొరకు (స్వయంచాలక DbgType : DbgTypes)
+      CurrentDebugType->నెట్టు_వెనుక(parseDebugType(DbgType));
   }
 };
 } // namespace
 
-static DebugOnlyOpt DebugOnlyOptLoc;
+స్థిర DebugOnlyOpt DebugOnlyOptLoc;
 
-namespace {
-struct CreateDebugOnly {
-  static void *call() {
-    return new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
+నామాకాశ {
+నిర్మాణం CreateDebugOnly {
+  స్థిర శూన్య *call() {
+    తిరిగి కొత్త cl::opt<DebugOnlyOpt, నిజం, cl::parser<std::string>>(
         "debug-only",
         cl::desc(
             "Enable a specific type of debug output (comma separated list "
@@ -176,74 +176,74 @@ struct CreateDebugOnly {
             "control the verbosity of the output. Setting a debug-type level "
             "to zero acts as an opt-out for this specific debug-type without "
             "affecting the others."),
-        cl::Hidden, cl::value_desc("debug string"),
-        cl::location(DebugOnlyOptLoc), cl::ValueRequired);
+        cl::Hidden, cl::విలువ_desc("debug string"),
+        cl::location(DebugOnlyOptLoc), cl::విలువ_Required);
   }
 };
 } // namespace
 
-static ManagedStatic<cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>,
+స్థిర ManagedStatic<cl::opt<DebugOnlyOpt, నిజం, cl::parser<std::string>>,
                      CreateDebugOnly>
     DebugOnly;
 
-void llvm::initDebugOptions() {
+శూన్య llvm::initDebugOptions() {
   *Debug;
-  *DebugBufferSize;
+  *Debug_బఫరు_కొలత;
   *DebugOnly;
 }
 
-static void printDebugLogImpl() {
+స్థిర శూన్య printDebugLogImpl() {
   // This is a bit sneaky.  Since this is under #ifndef NDEBUG, we
   // know that debug mode is enabled and dbgs() really is a
   // circular_raw_ostream.  If NDEBUG is defined, then dbgs() ==
   // errs() but this will never be invoked.
   llvm::circular_raw_ostream &dbgout =
       static_cast<circular_raw_ostream &>(llvm::dbgs());
-  dbgout.flushBufferWithBanner();
+  dbgout.flush_బఫరు_With_Banner();
 }
 
 // Signal handlers - dump debug output on termination.
-static void debug_user_sig_handler(void *Cookie) { printDebugLogImpl(); }
+స్థిర శూన్య debug_user_sig_handler(శూన్య *Cookie) { printDebugLogImpl(); }
 
 /// dbgs - Return a circular-buffered debug stream.
 raw_ostream &llvm::dbgs() {
   // Do one-time initialization in a thread-safe way.
-  static struct dbgstream {
+  స్థిర నిర్మాణం dbgstream {
     circular_raw_ostream strm;
 
     dbgstream()
         : strm(errs(), "*** Debug Log Output ***\n",
-               (!EnableDebugBuffering || !DebugFlag) ? 0 : *DebugBufferSize) {
-      if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+               (!EnableDebugBuffering || !DebugFlag) ? 0 : *Debug_బఫరు_కొలత) {
+      ఒకవేళ (EnableDebugBuffering && DebugFlag && *Debug_బఫరు_కొలత != 0)
         // TODO: Add a handler for SIGUSER1-type signals so the user can
         // force a debug dump.
-        sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
+        sys::కూడు_Signal_Handler(&debug_user_sig_handler, శూన్యసూచిక);
       // Otherwise we've already set the debug stream buffer size to
       // zero, disabling buffering so it will output directly to errs().
     }
   } thestrm;
 
-  return thestrm.strm;
+  తిరిగి thestrm.strm;
 }
 
-void llvm::printDebugLog() {
-  if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+శూన్య llvm::printDebugLog() {
+  ఒకవేళ (EnableDebugBuffering && DebugFlag && *Debug_బఫరు_కొలత != 0)
     printDebugLogImpl();
 }
 
-#else
+#లేకపోతే
 // Avoid "has no symbols" warning.
-namespace llvm {
+నామాకాశ llvm {
   /// dbgs - Return errs().
   raw_ostream &dbgs() {
-    return errs();
+    తిరిగి errs();
   }
 }
-void llvm::initDebugOptions() {}
+శూన్య llvm::initDebugOptions() {}
 
-void llvm::printDebugLog() {}
-#endif
+శూన్య llvm::printDebugLog() {}
+#అయితే_ముగింపు
 
 /// EnableDebugBuffering - Turn on signal handler installation.
 ///
-bool llvm::EnableDebugBuffering = false;
+తార్కిక llvm::EnableDebugBuffering = అబద్ధం;

@@ -10,150 +10,150 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntervalMap.h"
-#include <cassert>
+#అన్తర్భావ "llvm/ADT/IntervalMap.h"
+#అన్తర్భావ <cassert>
 
-namespace llvm {
-namespace IntervalMapImpl {
+నామాకాశ llvm {
+నామాకాశ IntervalMapImpl {
 
-void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
-  assert(!path.empty() && "Can't replace missing root");
-  path.front() = Entry(Root, Size, Offsets.first);
-  path.insert(path.begin() + 1, Entry(subtree(0), Offsets.second));
+శూన్య మార్గం::replace_మూలం(శూన్య *మూలం_2, గుర్తులేని కొలత, IdxPair Offsets) {
+  ప్రతిజ్ఞా(!మార్గం_2.ఖాళీలు() && "Can't replace missing root");
+  మార్గం_2.front() = నమోదు_2(మూలం_2, కొలత, Offsets.మొదటి_2);
+  మార్గం_2.చొప్పించు(మార్గం_2.begin() + 1, నమోదు_2(subtree(0), Offsets.రెండవ_2));
 }
 
-NodeRef Path::getLeftSibling(unsigned Level) const {
+కణుపు_Ref మార్గం::get_ఎడమ_Sibling(గుర్తులేని Level) స్థిరరాశి {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  ఒకవేళ (Level == 0)
+    తిరిగి కణుపు_Ref();
 
   // Go up the tree until we can go left.
-  unsigned l = Level - 1;
-  while (l && path[l].offset == 0)
+  గుర్తులేని l = Level - 1;
+  అయితే (l && మార్గం_2[l].స్థానభ్రంశం_2 == 0)
     --l;
 
   // We can't go left.
-  if (path[l].offset == 0)
-    return NodeRef();
+  ఒకవేళ (మార్గం_2[l].స్థానభ్రంశం_2 == 0)
+    తిరిగి కణుపు_Ref();
 
   // NR is the subtree containing our left sibling.
-  NodeRef NR = path[l].subtree(path[l].offset - 1);
+  కణుపు_Ref NR = మార్గం_2[l].subtree(మార్గం_2[l].స్థానభ్రంశం_2 - 1);
 
   // Keep right all the way down.
-  for (++l; l != Level; ++l)
-    NR = NR.subtree(NR.size() - 1);
-  return NR;
+  కొరకు (++l; l != Level; ++l)
+    NR = NR.subtree(NR.కొలత_2() - 1);
+  తిరిగి NR;
 }
 
-void Path::moveLeft(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+శూన్య మార్గం::move_ఎడమ(గుర్తులేని Level) {
+  ప్రతిజ్ఞా(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go left.
-  unsigned l = 0;
-  if (valid()) {
+  గుర్తులేని l = 0;
+  ఒకవేళ (valid()) {
     l = Level - 1;
-    while (path[l].offset == 0) {
-      assert(l != 0 && "Cannot move beyond begin()");
+    అయితే (మార్గం_2[l].స్థానభ్రంశం_2 == 0) {
+      ప్రతిజ్ఞా(l != 0 && "Cannot move beyond begin()");
       --l;
     }
-  } else if (height() < Level)
+  } లేకపోతే ఒకవేళ (ఎత్తు() < Level)
     // end() may have created a height=0 path.
-    path.resize(Level + 1, Entry(nullptr, 0, 0));
+    మార్గం_2.resize(Level + 1, నమోదు_2(శూన్యసూచిక, 0, 0));
 
   // NR is the subtree containing our left sibling.
-  --path[l].offset;
-  NodeRef NR = subtree(l);
+  --మార్గం_2[l].స్థానభ్రంశం_2;
+  కణుపు_Ref NR = subtree(l);
 
   // Get the rightmost node in the subtree.
-  for (++l; l != Level; ++l) {
-    path[l] = Entry(NR, NR.size() - 1);
-    NR = NR.subtree(NR.size() - 1);
+  కొరకు (++l; l != Level; ++l) {
+    మార్గం_2[l] = నమోదు_2(NR, NR.కొలత_2() - 1);
+    NR = NR.subtree(NR.కొలత_2() - 1);
   }
-  path[l] = Entry(NR, NR.size() - 1);
+  మార్గం_2[l] = నమోదు_2(NR, NR.కొలత_2() - 1);
 }
 
-NodeRef Path::getRightSibling(unsigned Level) const {
+కణుపు_Ref మార్గం::get_కుడి_Sibling(గుర్తులేని Level) స్థిరరాశి {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  ఒకవేళ (Level == 0)
+    తిరిగి కణుపు_Ref();
 
   // Go up the tree until we can go right.
-  unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  గుర్తులేని l = Level - 1;
+  అయితే (l && at_చివరి_నమోదు(l))
     --l;
 
   // We can't go right.
-  if (atLastEntry(l))
-    return NodeRef();
+  ఒకవేళ (at_చివరి_నమోదు(l))
+    తిరిగి కణుపు_Ref();
 
   // NR is the subtree containing our right sibling.
-  NodeRef NR = path[l].subtree(path[l].offset + 1);
+  కణుపు_Ref NR = మార్గం_2[l].subtree(మార్గం_2[l].స్థానభ్రంశం_2 + 1);
 
   // Keep left all the way down.
-  for (++l; l != Level; ++l)
+  కొరకు (++l; l != Level; ++l)
     NR = NR.subtree(0);
-  return NR;
+  తిరిగి NR;
 }
 
-void Path::moveRight(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+శూన్య మార్గం::move_కుడి(గుర్తులేని Level) {
+  ప్రతిజ్ఞా(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go right.
-  unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  గుర్తులేని l = Level - 1;
+  అయితే (l && at_చివరి_నమోదు(l))
     --l;
 
   // NR is the subtree containing our right sibling. If we hit end(), we have
   // offset(0) == node(0).size().
-  if (++path[l].offset == path[l].size)
-    return;
-  NodeRef NR = subtree(l);
+  ఒకవేళ (++మార్గం_2[l].స్థానభ్రంశం_2 == మార్గం_2[l].కొలత_2)
+    తిరిగి;
+  కణుపు_Ref NR = subtree(l);
 
-  for (++l; l != Level; ++l) {
-    path[l] = Entry(NR, 0);
+  కొరకు (++l; l != Level; ++l) {
+    మార్గం_2[l] = నమోదు_2(NR, 0);
     NR = NR.subtree(0);
   }
-  path[l] = Entry(NR, 0);
+  మార్గం_2[l] = నమోదు_2(NR, 0);
 }
 
 
-IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
-                   const unsigned *CurSize, unsigned NewSize[],
-                   unsigned Position, bool Grow) {
-  assert(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
-  assert(Position <= Elements && "Invalid position");
-  if (!Nodes)
-    return IdxPair();
+IdxPair distribute(గుర్తులేని Nodes, గుర్తులేని Elements, గుర్తులేని సామర్థ్యం,
+                   స్థిరరాశి గుర్తులేని *Cur_కొలత, గుర్తులేని New_కొలత[],
+                   గుర్తులేని Position, తార్కిక Grow) {
+  ప్రతిజ్ఞా(Elements + Grow <= Nodes * సామర్థ్యం && "Not enough room for elements");
+  ప్రతిజ్ఞా(Position <= Elements && "Invalid position");
+  ఒకవేళ (!Nodes)
+    తిరిగి IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
-  const unsigned PerNode = (Elements + Grow) / Nodes;
-  const unsigned Extra = (Elements + Grow) % Nodes;
+  స్థిరరాశి గుర్తులేని చొప్పున_కణుపు = (Elements + Grow) / Nodes;
+  స్థిరరాశి గుర్తులేని Extra = (Elements + Grow) % Nodes;
   IdxPair PosPair = IdxPair(Nodes, 0);
-  unsigned Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    Sum += NewSize[n] = PerNode + (n < Extra);
-    if (PosPair.first == Nodes && Sum > Position)
-      PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
+  గుర్తులేని కూడిక = 0;
+  కొరకు (గుర్తులేని n = 0; n != Nodes; ++n) {
+    కూడిక += New_కొలత[n] = చొప్పున_కణుపు + (n < Extra);
+    ఒకవేళ (PosPair.మొదటి_2 == Nodes && కూడిక > Position)
+      PosPair = IdxPair(n, Position - (కూడిక - New_కొలత[n]));
   }
-  assert(Sum == Elements + Grow && "Bad distribution sum");
+  ప్రతిజ్ఞా(కూడిక == Elements + Grow && "Bad distribution sum");
 
   // Subtract the Grow element that was added.
-  if (Grow) {
-    assert(PosPair.first < Nodes && "Bad algebra");
-    assert(NewSize[PosPair.first] && "Too few elements to need Grow");
-    --NewSize[PosPair.first];
+  ఒకవేళ (Grow) {
+    ప్రతిజ్ఞా(PosPair.మొదటి_2 < Nodes && "Bad algebra");
+    ప్రతిజ్ఞా(New_కొలత[PosPair.మొదటి_2] && "Too few elements to need Grow");
+    --New_కొలత[PosPair.మొదటి_2];
   }
 
-#ifndef NDEBUG
-  Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    assert(NewSize[n] <= Capacity && "Overallocated node");
-    Sum += NewSize[n];
+#నిర్వచితం_కాకపోతే NDEBUG
+  కూడిక = 0;
+  కొరకు (గుర్తులేని n = 0; n != Nodes; ++n) {
+    ప్రతిజ్ఞా(New_కొలత[n] <= సామర్థ్యం && "Overallocated node");
+    కూడిక += New_కొలత[n];
   }
-  assert(Sum == Elements && "Bad distribution sum");
-#endif
+  ప్రతిజ్ఞా(కూడిక == Elements && "Bad distribution sum");
+#అయితే_ముగింపు
 
-  return PosPair;
+  తిరిగి PosPair;
 }
 
 } // namespace IntervalMapImpl

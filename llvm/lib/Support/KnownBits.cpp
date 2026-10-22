@@ -11,369 +11,369 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/KnownBits.h"
-#include "llvm/ADT/Sequence.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#అన్తర్భావ "llvm/Support/KnownBits.h"
+#అన్తర్భావ "llvm/ADT/Sequence.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <cassert>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-KnownBits KnownBits::flipSignBit(const KnownBits &Val) {
-  unsigned SignBitPosition = Val.getBitWidth() - 1;
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::flip_Sign_బిట్టు(స్థిరరాశి తెలిసిన_బిట్లు &Val) {
+  గుర్తులేని Sign_బిట్టు_Position = Val.get_బిట్టు_వెడల్పు() - 1;
   APInt Zero = Val.Zero;
   APInt One = Val.One;
-  Zero.setBitVal(SignBitPosition, Val.One[SignBitPosition]);
-  One.setBitVal(SignBitPosition, Val.Zero[SignBitPosition]);
-  return KnownBits(Zero, One);
+  Zero.సమితి_బిట్టు_Val(Sign_బిట్టు_Position, Val.One[Sign_బిట్టు_Position]);
+  One.సమితి_బిట్టు_Val(Sign_బిట్టు_Position, Val.Zero[Sign_బిట్టు_Position]);
+  తిరిగి తెలిసిన_బిట్లు(Zero, One);
 }
 
-static KnownBits computeForAddCarry(const KnownBits &LHS, const KnownBits &RHS,
-                                    bool CarryZero, bool CarryOne) {
+స్థిర తెలిసిన_బిట్లు compute_For_కూడు_వాహకం(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                                    తార్కిక వాహకం_Zero, తార్కిక వాహకం_One) {
 
-  APInt PossibleSumZero = LHS.getMaxValue() + RHS.getMaxValue() + !CarryZero;
-  APInt PossibleSumOne = LHS.getMinValue() + RHS.getMinValue() + CarryOne;
+  APInt Possible_కూడిక_Zero = LHS.get_Max_విలువ() + RHS.get_Max_విలువ() + !వాహకం_Zero;
+  APInt Possible_కూడిక_One = LHS.get_Min_విలువ() + RHS.get_Min_విలువ() + వాహకం_One;
 
   // Compute known bits of the carry.
-  APInt CarryKnownZero = ~(PossibleSumZero ^ LHS.Zero ^ RHS.Zero);
-  APInt CarryKnownOne = PossibleSumOne ^ LHS.One ^ RHS.One;
+  APInt వాహకం_తెలిసిన_Zero = ~(Possible_కూడిక_Zero ^ LHS.Zero ^ RHS.Zero);
+  APInt వాహకం_తెలిసిన_One = Possible_కూడిక_One ^ LHS.One ^ RHS.One;
 
   // Compute set of known bits (where all three relevant bits are known).
   APInt LHSKnownUnion = LHS.Zero | LHS.One;
   APInt RHSKnownUnion = RHS.Zero | RHS.One;
-  APInt CarryKnownUnion = std::move(CarryKnownZero) | CarryKnownOne;
-  APInt Known = std::move(LHSKnownUnion) & RHSKnownUnion & CarryKnownUnion;
+  APInt వాహకం_తెలిసిన_Union = std::move(వాహకం_తెలిసిన_Zero) | వాహకం_తెలిసిన_One;
+  APInt తెలిసిన = std::move(LHSKnownUnion) & RHSKnownUnion & వాహకం_తెలిసిన_Union;
 
   // Compute known bits of the result.
-  KnownBits KnownOut;
-  KnownOut.Zero = ~std::move(PossibleSumZero) & Known;
-  KnownOut.One = std::move(PossibleSumOne) & Known;
-  return KnownOut;
+  తెలిసిన_బిట్లు తెలిసిన_బహిర్గతం;
+  తెలిసిన_బహిర్గతం.Zero = ~std::move(Possible_కూడిక_Zero) & తెలిసిన;
+  తెలిసిన_బహిర్గతం.One = std::move(Possible_కూడిక_One) & తెలిసిన;
+  తిరిగి తెలిసిన_బహిర్గతం;
 }
 
-KnownBits KnownBits::computeForAddCarry(
-    const KnownBits &LHS, const KnownBits &RHS, const KnownBits &Carry) {
-  assert(Carry.getBitWidth() == 1 && "Carry must be 1-bit");
-  return ::computeForAddCarry(
-      LHS, RHS, Carry.Zero.getBoolValue(), Carry.One.getBoolValue());
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::compute_For_కూడు_వాహకం(
+    స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS, స్థిరరాశి తెలిసిన_బిట్లు &వాహకం_2) {
+  ప్రతిజ్ఞా(వాహకం_2.get_బిట్టు_వెడల్పు() == 1 && "Carry must be 1-bit");
+  తిరిగి ::compute_For_కూడు_వాహకం(
+      LHS, RHS, వాహకం_2.Zero.get_Bool_విలువ(), వాహకం_2.One.get_Bool_విలువ());
 }
 
-KnownBits KnownBits::computeForAddSub(bool Add, bool NSW, bool NUW,
-                                      const KnownBits &LHS,
-                                      const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  KnownBits KnownOut(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::compute_For_కూడు_Sub(తార్కిక కూడు_2, తార్కిక NSW, తార్కిక NUW,
+                                      స్థిరరాశి తెలిసిన_బిట్లు &LHS,
+                                      స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు తెలిసిన_బహిర్గతం(బిట్టు_వెడల్పు_2);
   // This can be a relatively expensive helper, so optimistically save some
   // work.
-  if (LHS.isUnknown() && RHS.isUnknown())
-    return KnownOut;
+  ఒకవేళ (LHS.isUnknown() && RHS.isUnknown())
+    తిరిగి తెలిసిన_బహిర్గతం;
 
-  if (!LHS.isUnknown() && !RHS.isUnknown()) {
-    if (Add) {
+  ఒకవేళ (!LHS.isUnknown() && !RHS.isUnknown()) {
+    ఒకవేళ (కూడు_2) {
       // Sum = LHS + RHS + 0
-      KnownOut = ::computeForAddCarry(LHS, RHS, /*CarryZero=*/true,
-                                      /*CarryOne=*/false);
-    } else {
+      తెలిసిన_బహిర్గతం = ::compute_For_కూడు_వాహకం(LHS, RHS, /*CarryZero=*/నిజం,
+                                      /*CarryOne=*/అబద్ధం);
+    } లేకపోతే {
       // Sum = LHS + ~RHS + 1
-      KnownBits NotRHS = RHS;
-      std::swap(NotRHS.Zero, NotRHS.One);
-      KnownOut = ::computeForAddCarry(LHS, NotRHS, /*CarryZero=*/false,
-                                      /*CarryOne=*/true);
+      తెలిసిన_బిట్లు NotRHS = RHS;
+      std::మార్పిడి(NotRHS.Zero, NotRHS.One);
+      తెలిసిన_బహిర్గతం = ::compute_For_కూడు_వాహకం(LHS, NotRHS, /*CarryZero=*/అబద్ధం,
+                                      /*CarryOne=*/నిజం);
     }
   }
 
   // Handle add/sub given nsw and/or nuw.
-  if (NUW) {
-    if (Add) {
+  ఒకవేళ (NUW) {
+    ఒకవేళ (కూడు_2) {
       // (add nuw X, Y)
-      APInt MinVal = LHS.getMinValue().uadd_sat(RHS.getMinValue());
+      APInt MinVal = LHS.get_Min_విలువ().uadd_sat(RHS.get_Min_విలువ());
       // None of the adds can end up overflowing, so min consecutive highbits
       // in minimum possible of X + Y must all remain set.
-      if (NSW) {
-        unsigned NumBits = MinVal.trunc(BitWidth - 1).countl_one();
+      ఒకవేళ (NSW) {
+        గుర్తులేని అంకె_బిట్లు_2 = MinVal.trunc(బిట్టు_వెడల్పు_2 - 1).countl_one();
         // If we have NSW as well, we also know we can't overflow the signbit so
         // can start counting from 1 bit back.
-        KnownOut.One.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
+        తెలిసిన_బహిర్గతం.One.సమితి_బిట్లు(బిట్టు_వెడల్పు_2 - 1 - అంకె_బిట్లు_2, బిట్టు_వెడల్పు_2 - 1);
       }
-      KnownOut.One.setHighBits(MinVal.countl_one());
-    } else {
+      తెలిసిన_బహిర్గతం.One.సమితి_ఎగువ_బిట్లు(MinVal.countl_one());
+    } లేకపోతే {
       // (sub nuw X, Y)
-      APInt MaxVal = LHS.getMaxValue().usub_sat(RHS.getMinValue());
+      APInt MaxVal = LHS.get_Max_విలువ().usub_sat(RHS.get_Min_విలువ());
       // None of the subs can overflow at any point, so any common high bits
       // will subtract away and result in zeros.
-      if (NSW) {
+      ఒకవేళ (NSW) {
         // If we have NSW as well, we also know we can't overflow the signbit so
         // can start counting from 1 bit back.
-        unsigned NumBits = MaxVal.trunc(BitWidth - 1).countl_zero();
-        KnownOut.Zero.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
+        గుర్తులేని అంకె_బిట్లు_2 = MaxVal.trunc(బిట్టు_వెడల్పు_2 - 1).countl_zero();
+        తెలిసిన_బహిర్గతం.Zero.సమితి_బిట్లు(బిట్టు_వెడల్పు_2 - 1 - అంకె_బిట్లు_2, బిట్టు_వెడల్పు_2 - 1);
       }
-      KnownOut.Zero.setHighBits(MaxVal.countl_zero());
+      తెలిసిన_బహిర్గతం.Zero.సమితి_ఎగువ_బిట్లు(MaxVal.countl_zero());
     }
   }
 
-  if (NSW) {
+  ఒకవేళ (NSW) {
     APInt MinVal;
     APInt MaxVal;
-    if (Add) {
+    ఒకవేళ (కూడు_2) {
       // (add nsw X, Y)
-      MinVal = LHS.getSignedMinValue().sadd_sat(RHS.getSignedMinValue());
-      MaxVal = LHS.getSignedMaxValue().sadd_sat(RHS.getSignedMaxValue());
-    } else {
+      MinVal = LHS.get_Signed_Min_విలువ().sadd_sat(RHS.get_Signed_Min_విలువ());
+      MaxVal = LHS.get_Signed_Max_విలువ().sadd_sat(RHS.get_Signed_Max_విలువ());
+    } లేకపోతే {
       // (sub nsw X, Y)
-      MinVal = LHS.getSignedMinValue().ssub_sat(RHS.getSignedMaxValue());
-      MaxVal = LHS.getSignedMaxValue().ssub_sat(RHS.getSignedMinValue());
+      MinVal = LHS.get_Signed_Min_విలువ().ssub_sat(RHS.get_Signed_Max_విలువ());
+      MaxVal = LHS.get_Signed_Max_విలువ().ssub_sat(RHS.get_Signed_Min_విలువ());
     }
-    if (MinVal.isNonNegative()) {
+    ఒకవేళ (MinVal.isNonNegative()) {
       // If min is non-negative, result will always be non-neg (can't overflow
       // around).
-      unsigned NumBits = MinVal.trunc(BitWidth - 1).countl_one();
-      KnownOut.One.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
-      KnownOut.Zero.setSignBit();
+      గుర్తులేని అంకె_బిట్లు_2 = MinVal.trunc(బిట్టు_వెడల్పు_2 - 1).countl_one();
+      తెలిసిన_బహిర్గతం.One.సమితి_బిట్లు(బిట్టు_వెడల్పు_2 - 1 - అంకె_బిట్లు_2, బిట్టు_వెడల్పు_2 - 1);
+      తెలిసిన_బహిర్గతం.Zero.సమితి_Sign_బిట్టు();
     }
-    if (MaxVal.isNegative()) {
+    ఒకవేళ (MaxVal.isNegative()) {
       // If max is negative, result will always be neg (can't overflow around).
-      unsigned NumBits = MaxVal.trunc(BitWidth - 1).countl_zero();
-      KnownOut.Zero.setBits(BitWidth - 1 - NumBits, BitWidth - 1);
-      KnownOut.One.setSignBit();
+      గుర్తులేని అంకె_బిట్లు_2 = MaxVal.trunc(బిట్టు_వెడల్పు_2 - 1).countl_zero();
+      తెలిసిన_బహిర్గతం.Zero.సమితి_బిట్లు(బిట్టు_వెడల్పు_2 - 1 - అంకె_బిట్లు_2, బిట్టు_వెడల్పు_2 - 1);
+      తెలిసిన_బహిర్గతం.One.సమితి_Sign_బిట్టు();
     }
   }
 
   // Just return 0 if the nsw/nuw is violated and we have poison.
-  if (KnownOut.hasConflict())
-    KnownOut.setAllZero();
-  return KnownOut;
+  ఒకవేళ (తెలిసిన_బహిర్గతం.hasConflict())
+    తెలిసిన_బహిర్గతం.సమితి_All_Zero();
+  తిరిగి తెలిసిన_బహిర్గతం;
 }
 
-KnownBits KnownBits::computeForSubBorrow(const KnownBits &LHS, KnownBits RHS,
-                                         const KnownBits &Borrow) {
-  assert(Borrow.getBitWidth() == 1 && "Borrow must be 1-bit");
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::computeForSubBorrow(స్థిరరాశి తెలిసిన_బిట్లు &LHS, తెలిసిన_బిట్లు RHS,
+                                         స్థిరరాశి తెలిసిన_బిట్లు &Borrow) {
+  ప్రతిజ్ఞా(Borrow.get_బిట్టు_వెడల్పు() == 1 && "Borrow must be 1-bit");
 
   // LHS - RHS = LHS + ~RHS + 1
   // Carry 1 - Borrow in ::computeForAddCarry
-  std::swap(RHS.Zero, RHS.One);
-  return ::computeForAddCarry(LHS, RHS,
-                              /*CarryZero=*/Borrow.One.getBoolValue(),
-                              /*CarryOne=*/Borrow.Zero.getBoolValue());
+  std::మార్పిడి(RHS.Zero, RHS.One);
+  తిరిగి ::compute_For_కూడు_వాహకం(LHS, RHS,
+                              /*CarryZero=*/Borrow.One.get_Bool_విలువ(),
+                              /*CarryOne=*/Borrow.Zero.get_Bool_విలువ());
 }
 
-KnownBits KnownBits::truncSSat(unsigned BitWidth) const {
-  unsigned InputBits = getBitWidth();
-  APInt MinInRange = APInt::getSignedMinValue(BitWidth).sext(InputBits);
-  APInt MaxInRange = APInt::getSignedMaxValue(BitWidth).sext(InputBits);
-  APInt InputMin = getSignedMinValue();
-  APInt InputMax = getSignedMaxValue();
-  KnownBits Known(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::truncSSat(గుర్తులేని బిట్టు_వెడల్పు_2) స్థిరరాశి {
+  గుర్తులేని ఆదానం_బిట్లు = get_బిట్టు_వెడల్పు();
+  APInt Min_లోపల_Range = APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2).sext(ఆదానం_బిట్లు);
+  APInt Max_లోపల_Range = APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2).sext(ఆదానం_బిట్లు);
+  APInt ఆదానం_Min = get_Signed_Min_విలువ();
+  APInt ఆదానం_Max = get_Signed_Max_విలువ();
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
 
   // Case 1: All values fit - just truncate
-  if (InputMin.sge(MinInRange) && InputMax.sle(MaxInRange)) {
-    Known = trunc(BitWidth);
+  ఒకవేళ (ఆదానం_Min.sge(Min_లోపల_Range) && ఆదానం_Max.sle(Max_లోపల_Range)) {
+    తెలిసిన = trunc(బిట్టు_వెడల్పు_2);
   }
   // Case 2: All saturate to min
-  else if (InputMax.slt(MinInRange)) {
-    Known = KnownBits::makeConstant(APInt::getSignedMinValue(BitWidth));
+  లేకపోతే ఒకవేళ (ఆదానం_Max.slt(Min_లోపల_Range)) {
+    తెలిసిన = తెలిసిన_బిట్లు::makeConstant(APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2));
   }
   // Case 3: All saturate to max
-  else if (InputMin.sgt(MaxInRange)) {
-    Known = KnownBits::makeConstant(APInt::getSignedMaxValue(BitWidth));
+  లేకపోతే ఒకవేళ (ఆదానం_Min.sgt(Max_లోపల_Range)) {
+    తెలిసిన = తెలిసిన_బిట్లు::makeConstant(APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2));
   }
   // Case 4: All non-negative, some fit, some saturate to max
-  else if (InputMin.isNonNegative()) {
+  లేకపోతే ఒకవేళ (ఆదానం_Min.isNonNegative()) {
     // Output: truncated OR max saturation
     // Max saturation has only sign bit as 0
-    Known.Zero = APInt(BitWidth, 0);
-    Known.Zero.setBit(BitWidth - 1); // Sign bit always 0
+    తెలిసిన.Zero = APInt(బిట్టు_వెడల్పు_2, 0);
+    తెలిసిన.Zero.సమితి_బిట్టు(బిట్టు_వెడల్పు_2 - 1); // Sign bit always 0
     // Max saturation has all lower bits as 1, so preserve InputOneLower
-    Known.One = One.trunc(BitWidth);
-    Known.One.clearBit(BitWidth - 1); // Sign bit is 0, not 1
+    తెలిసిన.One = One.trunc(బిట్టు_వెడల్పు_2);
+    తెలిసిన.One.clear_బిట్టు(బిట్టు_వెడల్పు_2 - 1); // Sign bit is 0, not 1
   }
   // Case 5: All negative, some fit, some saturate to min
-  else if (InputMax.isNegative()) {
+  లేకపోతే ఒకవేళ (ఆదానం_Max.isNegative()) {
     // Output: truncated OR min saturation
     // Min saturation has all lower bits as 0, so preserve InputZeroLower
-    Known.Zero = Zero.trunc(BitWidth);
-    Known.Zero.clearBit(BitWidth - 1); // Sign bit is 1, not 0
+    తెలిసిన.Zero = Zero.trunc(బిట్టు_వెడల్పు_2);
+    తెలిసిన.Zero.clear_బిట్టు(బిట్టు_వెడల్పు_2 - 1); // Sign bit is 1, not 0
     // Min saturation has only sign bit as 1
-    Known.One = APInt(BitWidth, 0);
-    Known.One.setBit(BitWidth - 1); // Sign bit always 1
+    తెలిసిన.One = APInt(బిట్టు_వెడల్పు_2, 0);
+    తెలిసిన.One.సమితి_బిట్టు(బిట్టు_వెడల్పు_2 - 1); // Sign bit always 1
   }
   // Case 6: Mixed positive and negative
-  else {
+  లేకపోతే {
     // Output: min saturation, truncated, or max saturation
-    APInt InputZeroLower = Zero.trunc(BitWidth);
-    APInt InputOneLower = One.trunc(BitWidth);
-    APInt MinSat = APInt::getSignedMinValue(BitWidth);
-    APInt MaxSat = APInt::getSignedMaxValue(BitWidth);
-    KnownBits MinSatKB = KnownBits::makeConstant(MinSat);
-    KnownBits MaxSatKB = KnownBits::makeConstant(MaxSat);
-    if (InputMax.sle(MaxInRange)) {
+    APInt ఆదానం_Zero_క్రింది = Zero.trunc(బిట్టు_వెడల్పు_2);
+    APInt ఆదానం_One_క్రింది = One.trunc(బిట్టు_వెడల్పు_2);
+    APInt MinSat = APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2);
+    APInt MaxSat = APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2);
+    తెలిసిన_బిట్లు MinSatKB = తెలిసిన_బిట్లు::makeConstant(MinSat);
+    తెలిసిన_బిట్లు MaxSatKB = తెలిసిన_బిట్లు::makeConstant(MaxSat);
+    ఒకవేళ (ఆదానం_Max.sle(Max_లోపల_Range)) {
       // Positive values fit, only negatives saturate to min
-      Known.Zero = InputZeroLower & MinSatKB.Zero;
-      Known.One = InputOneLower & MinSatKB.One;
-    } else if (InputMin.sge(MinInRange)) {
+      తెలిసిన.Zero = ఆదానం_Zero_క్రింది & MinSatKB.Zero;
+      తెలిసిన.One = ఆదానం_One_క్రింది & MinSatKB.One;
+    } లేకపోతే ఒకవేళ (ఆదానం_Min.sge(Min_లోపల_Range)) {
       // Negative values fit, only positives saturate to max
-      Known.Zero = InputZeroLower & MaxSatKB.Zero;
-      Known.One = InputOneLower & MaxSatKB.One;
-    } else {
+      తెలిసిన.Zero = ఆదానం_Zero_క్రింది & MaxSatKB.Zero;
+      తెలిసిన.One = ఆదానం_One_క్రింది & MaxSatKB.One;
+    } లేకపోతే {
       // Both positive and negative values might saturate
-      Known.Zero = InputZeroLower & MinSatKB.Zero & MaxSatKB.Zero;
-      Known.One = InputOneLower & MinSatKB.One & MaxSatKB.One;
+      తెలిసిన.Zero = ఆదానం_Zero_క్రింది & MinSatKB.Zero & MaxSatKB.Zero;
+      తెలిసిన.One = ఆదానం_One_క్రింది & MinSatKB.One & MaxSatKB.One;
     }
   }
-  return Known;
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::truncSSatU(unsigned BitWidth) const {
-  unsigned InputBits = getBitWidth();
-  APInt MaxInRange = APInt::getAllOnes(BitWidth).zext(InputBits);
-  APInt InputMin = getSignedMinValue();
-  APInt InputMax = getSignedMaxValue();
-  KnownBits Known(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::truncSSatU(గుర్తులేని బిట్టు_వెడల్పు_2) స్థిరరాశి {
+  గుర్తులేని ఆదానం_బిట్లు = get_బిట్టు_వెడల్పు();
+  APInt Max_లోపల_Range = APInt::getAllOnes(బిట్టు_వెడల్పు_2).zext(ఆదానం_బిట్లు);
+  APInt ఆదానం_Min = get_Signed_Min_విలువ();
+  APInt ఆదానం_Max = get_Signed_Max_విలువ();
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
 
-  if (isNegative()) {
-    Known.setAllZero();
-  } else if (InputMin.isNonNegative() && InputMax.ule(MaxInRange)) {
-    Known = trunc(BitWidth);
-  } else if (InputMin.isNonNegative() && InputMin.ugt(MaxInRange)) {
-    Known.setAllOnes();
-  } else if (InputMin.isNonNegative()) {
+  ఒకవేళ (isNegative()) {
+    తెలిసిన.సమితి_All_Zero();
+  } లేకపోతే ఒకవేళ (ఆదానం_Min.isNonNegative() && ఆదానం_Max.ule(Max_లోపల_Range)) {
+    తెలిసిన = trunc(బిట్టు_వెడల్పు_2);
+  } లేకపోతే ఒకవేళ (ఆదానం_Min.isNonNegative() && ఆదానం_Min.ugt(Max_లోపల_Range)) {
+    తెలిసిన.సమితి_All_Ones();
+  } లేకపోతే ఒకవేళ (ఆదానం_Min.isNonNegative()) {
     // All non-negative but mixed: some fit, some saturate to all-ones
     // No common zero bits (saturation is all-ones)
-    Known.Zero = APInt(BitWidth, 0);
+    తెలిసిన.Zero = APInt(బిట్టు_వెడల్పు_2, 0);
     // Common one bits: bits that are 1 in input stay 1
-    Known.One = One.trunc(BitWidth);
-  } else {
+    తెలిసిన.One = One.trunc(బిట్టు_వెడల్పు_2);
+  } లేకపోతే {
     // Mixed: sign bit unknown
-    if (InputMax.ule(MaxInRange)) {
+    ఒకవేళ (ఆదానం_Max.ule(Max_లోపల_Range)) {
       // Positive values all fit (no saturation to all-ones)
       // Output: all-zeros (negatives) OR truncated (positives)
-      Known.Zero = Zero.trunc(BitWidth);
-      Known.One = APInt(BitWidth, 0);
-    } else {
+      తెలిసిన.Zero = Zero.trunc(బిట్టు_వెడల్పు_2);
+      తెలిసిన.One = APInt(బిట్టు_వెడల్పు_2, 0);
+    } లేకపోతే {
       // Positive values might saturate to all-ones
       // Output: all-zeros OR truncated OR all-ones
       // No common bits
-      Known.Zero = APInt(BitWidth, 0);
-      Known.One = APInt(BitWidth, 0);
+      తెలిసిన.Zero = APInt(బిట్టు_వెడల్పు_2, 0);
+      తెలిసిన.One = APInt(బిట్టు_వెడల్పు_2, 0);
     }
   }
-  return Known;
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::truncUSat(unsigned BitWidth) const {
-  unsigned InputBits = getBitWidth();
-  APInt MaxInRange = APInt::getLowBitsSet(InputBits, BitWidth);
-  APInt InputMax = getMaxValue();
-  APInt InputMin = getMinValue();
-  KnownBits Known(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::truncUSat(గుర్తులేని బిట్టు_వెడల్పు_2) స్థిరరాశి {
+  గుర్తులేని ఆదానం_బిట్లు = get_బిట్టు_వెడల్పు();
+  APInt Max_లోపల_Range = APInt::get_దిగువ_బిట్లు_సమితి(ఆదానం_బిట్లు, బిట్టు_వెడల్పు_2);
+  APInt ఆదానం_Max = get_Max_విలువ();
+  APInt ఆదానం_Min = get_Min_విలువ();
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
 
-  if (InputMax.ule(MaxInRange)) {
-    Known = trunc(BitWidth);
-  } else if (InputMin.ugt(MaxInRange)) {
-    Known.setAllOnes();
-  } else {
-    Known.resetAll();
-    Known.One = One.trunc(BitWidth);
+  ఒకవేళ (ఆదానం_Max.ule(Max_లోపల_Range)) {
+    తెలిసిన = trunc(బిట్టు_వెడల్పు_2);
+  } లేకపోతే ఒకవేళ (ఆదానం_Min.ugt(Max_లోపల_Range)) {
+    తెలిసిన.సమితి_All_Ones();
+  } లేకపోతే {
+    తెలిసిన.resetAll();
+    తెలిసిన.One = One.trunc(బిట్టు_వెడల్పు_2);
   }
-  return Known;
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::sextInReg(unsigned SrcBitWidth) const {
-  unsigned BitWidth = getBitWidth();
-  assert(0 < SrcBitWidth && SrcBitWidth <= BitWidth &&
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::sext_లోపల_Reg(గుర్తులేని Src_బిట్టు_వెడల్పు) స్థిరరాశి {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(0 < Src_బిట్టు_వెడల్పు && Src_బిట్టు_వెడల్పు <= బిట్టు_వెడల్పు_2 &&
          "Illegal sext-in-register");
 
-  if (SrcBitWidth == BitWidth)
-    return *this;
+  ఒకవేళ (Src_బిట్టు_వెడల్పు == బిట్టు_వెడల్పు_2)
+    తిరిగి *ఇది;
 
-  unsigned ExtBits = BitWidth - SrcBitWidth;
-  KnownBits Result;
-  Result.One = One << ExtBits;
-  Result.Zero = Zero << ExtBits;
-  Result.One.ashrInPlace(ExtBits);
-  Result.Zero.ashrInPlace(ExtBits);
-  return Result;
+  గుర్తులేని Ext_బిట్లు = బిట్టు_వెడల్పు_2 - Src_బిట్టు_వెడల్పు;
+  తెలిసిన_బిట్లు ఫలితం;
+  ఫలితం.One = One << Ext_బిట్లు;
+  ఫలితం.Zero = Zero << Ext_బిట్లు;
+  ఫలితం.One.ashr_లోపల_ఉంచు(Ext_బిట్లు);
+  ఫలితం.Zero.ashr_లోపల_ఉంచు(Ext_బిట్లు);
+  తిరిగి ఫలితం;
 }
 
-KnownBits KnownBits::makeGE(const APInt &Val) const {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::makeGE(స్థిరరాశి APInt &Val) స్థిరరాశి {
   // Count the number of leading bit positions where our underlying value is
   // known to be less than or equal to Val.
-  unsigned N = (Zero | Val).countl_one();
+  గుర్తులేని N = (Zero | Val).countl_one();
 
   // For each of those bit positions, if Val has a 1 in that bit then our
   // underlying value must also have a 1.
   APInt MaskedVal(Val);
-  MaskedVal.clearLowBits(getBitWidth() - N);
-  return KnownBits(Zero, One | MaskedVal);
+  MaskedVal.clear_దిగువ_బిట్లు(get_బిట్టు_వెడల్పు() - N);
+  తిరిగి తెలిసిన_బిట్లు(Zero, One | MaskedVal);
 }
 
-KnownBits KnownBits::umax(const KnownBits &LHS, const KnownBits &RHS) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::umax(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // If we can prove that LHS >= RHS then use LHS as the result. Likewise for
   // RHS. Ideally our caller would already have spotted these cases and
   // optimized away the umax operation, but we handle them here for
   // completeness.
-  if (LHS.getMinValue().uge(RHS.getMaxValue()))
-    return LHS;
-  if (RHS.getMinValue().uge(LHS.getMaxValue()))
-    return RHS;
+  ఒకవేళ (LHS.get_Min_విలువ().uge(RHS.get_Max_విలువ()))
+    తిరిగి LHS;
+  ఒకవేళ (RHS.get_Min_విలువ().uge(LHS.get_Max_విలువ()))
+    తిరిగి RHS;
 
   // If the result of the umax is LHS then it must be greater than or equal to
   // the minimum possible value of RHS. Likewise for RHS. Any known bits that
   // are common to these two values are also known in the result.
-  KnownBits L = LHS.makeGE(RHS.getMinValue());
-  KnownBits R = RHS.makeGE(LHS.getMinValue());
-  return L.intersectWith(R);
+  తెలిసిన_బిట్లు L = LHS.makeGE(RHS.get_Min_విలువ());
+  తెలిసిన_బిట్లు R = RHS.makeGE(LHS.get_Min_విలువ());
+  తిరిగి L.intersectWith(R);
 }
 
-KnownBits KnownBits::umin(const KnownBits &LHS, const KnownBits &RHS) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::umin(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // Flip the range of values: [0, 0xFFFFFFFF] <-> [0xFFFFFFFF, 0]
-  auto Flip = [](const KnownBits &Val) { return KnownBits(Val.One, Val.Zero); };
-  return Flip(umax(Flip(LHS), Flip(RHS)));
+  స్వయంచాలక Flip = [](స్థిరరాశి తెలిసిన_బిట్లు &Val) { తిరిగి తెలిసిన_బిట్లు(Val.One, Val.Zero); };
+  తిరిగి Flip(umax(Flip(LHS), Flip(RHS)));
 }
 
-KnownBits KnownBits::smax(const KnownBits &LHS, const KnownBits &RHS) {
-  return flipSignBit(umax(flipSignBit(LHS), flipSignBit(RHS)));
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::smax(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి flip_Sign_బిట్టు(umax(flip_Sign_బిట్టు(LHS), flip_Sign_బిట్టు(RHS)));
 }
 
-KnownBits KnownBits::smin(const KnownBits &LHS, const KnownBits &RHS) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::smin(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // Flip the range of values: [-0x80000000, 0x7FFFFFFF] <-> [0xFFFFFFFF, 0]
-  auto Flip = [](const KnownBits &Val) {
-    unsigned SignBitPosition = Val.getBitWidth() - 1;
+  స్వయంచాలక Flip = [](స్థిరరాశి తెలిసిన_బిట్లు &Val) {
+    గుర్తులేని Sign_బిట్టు_Position = Val.get_బిట్టు_వెడల్పు() - 1;
     APInt Zero = Val.One;
     APInt One = Val.Zero;
-    Zero.setBitVal(SignBitPosition, Val.Zero[SignBitPosition]);
-    One.setBitVal(SignBitPosition, Val.One[SignBitPosition]);
-    return KnownBits(Zero, One);
+    Zero.సమితి_బిట్టు_Val(Sign_బిట్టు_Position, Val.Zero[Sign_బిట్టు_Position]);
+    One.సమితి_బిట్టు_Val(Sign_బిట్టు_Position, Val.One[Sign_బిట్టు_Position]);
+    తిరిగి తెలిసిన_బిట్లు(Zero, One);
   };
-  return Flip(umax(Flip(LHS), Flip(RHS)));
+  తిరిగి Flip(umax(Flip(LHS), Flip(RHS)));
 }
 
-KnownBits KnownBits::abdu(const KnownBits &LHS, const KnownBits &RHS) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::abdu(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // If we know which argument is larger, return (sub LHS, RHS) or
   // (sub RHS, LHS) directly.
-  if (LHS.getMinValue().uge(RHS.getMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, LHS,
+  ఒకవేళ (LHS.get_Min_విలువ().uge(RHS.get_Max_విలువ()))
+    తిరిగి compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/అబద్ధం, LHS,
                             RHS);
-  if (RHS.getMinValue().uge(LHS.getMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, RHS,
+  ఒకవేళ (RHS.get_Min_విలువ().uge(LHS.get_Max_విలువ()))
+    తిరిగి compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/అబద్ధం, RHS,
                             LHS);
 
   // By construction, the subtraction in abdu never has unsigned overflow.
   // Find the common bits between (sub nuw LHS, RHS) and (sub nuw RHS, LHS).
-  KnownBits Diff0 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, LHS, RHS);
-  KnownBits Diff1 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, RHS, LHS);
-  return Diff0.intersectWith(Diff1);
+  తెలిసిన_బిట్లు Diff0 =
+      compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/నిజం, LHS, RHS);
+  తెలిసిన_బిట్లు Diff1 =
+      compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/నిజం, RHS, LHS);
+  తిరిగి Diff0.intersectWith(Diff1);
 }
 
-KnownBits KnownBits::abds(KnownBits LHS, KnownBits RHS) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::abds(తెలిసిన_బిట్లు LHS, తెలిసిన_బిట్లు RHS) {
   // If we know which argument is larger, return (sub LHS, RHS) or
   // (sub RHS, LHS) directly.
-  if (LHS.getSignedMinValue().sge(RHS.getSignedMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, LHS,
+  ఒకవేళ (LHS.get_Signed_Min_విలువ().sge(RHS.get_Signed_Max_విలువ()))
+    తిరిగి compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/అబద్ధం, LHS,
                             RHS);
-  if (RHS.getSignedMinValue().sge(LHS.getSignedMaxValue()))
-    return computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/false, RHS,
+  ఒకవేళ (RHS.get_Signed_Min_విలువ().sge(LHS.get_Signed_Max_విలువ()))
+    తిరిగి compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/అబద్ధం, RHS,
                             LHS);
 
   // Shift both arguments from the signed range to the unsigned range, e.g. from
@@ -382,420 +382,420 @@ KnownBits KnownBits::abds(KnownBits LHS, KnownBits RHS) {
   // Note that we can't just use "sub nsw" instead because abds has signed
   // inputs but an unsigned result, which makes the overflow conditions
   // different.
-  unsigned SignBitPosition = LHS.getBitWidth() - 1;
-  for (auto Arg : {&LHS, &RHS}) {
-    bool Tmp = Arg->Zero[SignBitPosition];
-    Arg->Zero.setBitVal(SignBitPosition, Arg->One[SignBitPosition]);
-    Arg->One.setBitVal(SignBitPosition, Tmp);
+  గుర్తులేని Sign_బిట్టు_Position = LHS.get_బిట్టు_వెడల్పు() - 1;
+  కొరకు (స్వయంచాలక Arg : {&LHS, &RHS}) {
+    తార్కిక Tmp = Arg->Zero[Sign_బిట్టు_Position];
+    Arg->Zero.సమితి_బిట్టు_Val(Sign_బిట్టు_Position, Arg->One[Sign_బిట్టు_Position]);
+    Arg->One.సమితి_బిట్టు_Val(Sign_బిట్టు_Position, Tmp);
   }
 
   // Find the common bits between (sub nuw LHS, RHS) and (sub nuw RHS, LHS).
-  KnownBits Diff0 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, LHS, RHS);
-  KnownBits Diff1 =
-      computeForAddSub(/*Add=*/false, /*NSW=*/false, /*NUW=*/true, RHS, LHS);
-  return Diff0.intersectWith(Diff1);
+  తెలిసిన_బిట్లు Diff0 =
+      compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/నిజం, LHS, RHS);
+  తెలిసిన_బిట్లు Diff1 =
+      compute_For_కూడు_Sub(/*Add=*/అబద్ధం, /*NSW=*/అబద్ధం, /*NUW=*/నిజం, RHS, LHS);
+  తిరిగి Diff0.intersectWith(Diff1);
 }
 
-static unsigned getMaxShiftAmount(const APInt &MaxValue, unsigned BitWidth) {
-  if (isPowerOf2_32(BitWidth))
+స్థిర గుర్తులేని get_Max_జరుపు_Amount(స్థిరరాశి APInt &Max_విలువ, గుర్తులేని బిట్టు_వెడల్పు_2) {
+  ఒకవేళ (isPowerOf2_32(బిట్టు_వెడల్పు_2))
     // Clamp to the shift amount's width: a narrower amount is already
     // < BitWidth, so this stays a valid upper bound.
-    return MaxValue.extractBitsAsZExtValue(
-        std::min(Log2_32(BitWidth), MaxValue.getBitWidth()), 0);
+    తిరిగి Max_విలువ.వెలికితీయి_బిట్లు_As_ZExt_విలువ(
+        std::min(Log2_32(బిట్టు_వెడల్పు_2), Max_విలువ.get_బిట్టు_వెడల్పు()), 0);
   // This is only an approximate upper bound.
-  return MaxValue.getLimitedValue(BitWidth - 1);
+  తిరిగి Max_విలువ.get_Limited_విలువ(బిట్టు_వెడల్పు_2 - 1);
 }
 
-KnownBits KnownBits::shl(const KnownBits &LHS, const KnownBits &RHS, bool NUW,
-                         bool NSW, bool ShAmtNonZero) {
-  unsigned BitWidth = LHS.getBitWidth();
-  auto ShiftByConst = [&](const KnownBits &LHS, unsigned ShiftAmt) {
-    KnownBits Known;
-    bool ShiftedOutZero, ShiftedOutOne;
-    Known.Zero = LHS.Zero.ushl_ov(ShiftAmt, ShiftedOutZero);
-    Known.Zero.setLowBits(ShiftAmt);
-    Known.One = LHS.One.ushl_ov(ShiftAmt, ShiftedOutOne);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::shl(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS, తార్కిక NUW,
+                         తార్కిక NSW, తార్కిక ShAmtNonZero) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  స్వయంచాలక జరుపు_By_Const = [&](స్థిరరాశి తెలిసిన_బిట్లు &LHS, గుర్తులేని జరుపు_Amt_2) {
+    తెలిసిన_బిట్లు తెలిసిన;
+    తార్కిక Shifted_బహిర్గతం_Zero, Shifted_బహిర్గతం_One;
+    తెలిసిన.Zero = LHS.Zero.ushl_ov(జరుపు_Amt_2, Shifted_బహిర్గతం_Zero);
+    తెలిసిన.Zero.సమితి_దిగువ_బిట్లు(జరుపు_Amt_2);
+    తెలిసిన.One = LHS.One.ushl_ov(జరుపు_Amt_2, Shifted_బహిర్గతం_One);
 
     // All cases returning poison have been handled by MaxShiftAmount already.
-    if (NSW) {
-      if (NUW && ShiftAmt != 0)
+    ఒకవేళ (NSW) {
+      ఒకవేళ (NUW && జరుపు_Amt_2 != 0)
         // NUW means we can assume anything shifted out was a zero.
-        ShiftedOutZero = true;
+        Shifted_బహిర్గతం_Zero = నిజం;
 
-      if (ShiftedOutZero)
-        Known.makeNonNegative();
-      else if (ShiftedOutOne)
-        Known.makeNegative();
+      ఒకవేళ (Shifted_బహిర్గతం_Zero)
+        తెలిసిన.makeNonNegative();
+      లేకపోతే ఒకవేళ (Shifted_బహిర్గతం_One)
+        తెలిసిన.makeNegative();
     }
-    return Known;
+    తిరిగి తెలిసిన;
   };
 
   // Fast path for a common case when LHS is completely unknown.
-  KnownBits Known(BitWidth);
-  unsigned MinShiftAmount = RHS.getMinValue().getLimitedValue(BitWidth);
-  if (MinShiftAmount == 0 && ShAmtNonZero)
-    MinShiftAmount = 1;
-  if (LHS.isUnknown()) {
-    Known.Zero.setLowBits(MinShiftAmount);
-    if (NUW && NSW && MinShiftAmount != 0)
-      Known.makeNonNegative();
-    return Known;
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
+  గుర్తులేని Min_జరుపు_Amount = RHS.get_Min_విలువ().get_Limited_విలువ(బిట్టు_వెడల్పు_2);
+  ఒకవేళ (Min_జరుపు_Amount == 0 && ShAmtNonZero)
+    Min_జరుపు_Amount = 1;
+  ఒకవేళ (LHS.isUnknown()) {
+    తెలిసిన.Zero.సమితి_దిగువ_బిట్లు(Min_జరుపు_Amount);
+    ఒకవేళ (NUW && NSW && Min_జరుపు_Amount != 0)
+      తెలిసిన.makeNonNegative();
+    తిరిగి తెలిసిన;
   }
 
   // Determine maximum shift amount, taking NUW/NSW flags into account.
-  APInt MaxValue = RHS.getMaxValue();
-  unsigned MaxShiftAmount = getMaxShiftAmount(MaxValue, BitWidth);
-  if (NUW && NSW)
-    MaxShiftAmount = std::min(MaxShiftAmount, LHS.countMaxLeadingZeros() - 1);
-  if (NUW)
-    MaxShiftAmount = std::min(MaxShiftAmount, LHS.countMaxLeadingZeros());
-  if (NSW)
-    MaxShiftAmount = std::min(
-        MaxShiftAmount,
-        std::max(LHS.countMaxLeadingZeros(), LHS.countMaxLeadingOnes()) - 1);
+  APInt Max_విలువ = RHS.get_Max_విలువ();
+  గుర్తులేని Max_జరుపు_Amount = get_Max_జరుపు_Amount(Max_విలువ, బిట్టు_వెడల్పు_2);
+  ఒకవేళ (NUW && NSW)
+    Max_జరుపు_Amount = std::min(Max_జరుపు_Amount, LHS.లెక్క_Max_Leading_Zeros() - 1);
+  ఒకవేళ (NUW)
+    Max_జరుపు_Amount = std::min(Max_జరుపు_Amount, LHS.లెక్క_Max_Leading_Zeros());
+  ఒకవేళ (NSW)
+    Max_జరుపు_Amount = std::min(
+        Max_జరుపు_Amount,
+        std::max(LHS.లెక్క_Max_Leading_Zeros(), LHS.లెక్క_Max_Leading_Ones()) - 1);
 
   // Fast path for common case where the shift amount is unknown.
-  if (MinShiftAmount == 0 && MaxShiftAmount == BitWidth - 1 &&
-      isPowerOf2_32(BitWidth)) {
-    Known.Zero.setLowBits(LHS.countMinTrailingZeros());
-    if (LHS.isAllOnes())
-      Known.One.setSignBit();
-    if (NSW) {
-      if (LHS.isNonNegative())
-        Known.makeNonNegative();
-      if (LHS.isNegative())
-        Known.makeNegative();
+  ఒకవేళ (Min_జరుపు_Amount == 0 && Max_జరుపు_Amount == బిట్టు_వెడల్పు_2 - 1 &&
+      isPowerOf2_32(బిట్టు_వెడల్పు_2)) {
+    తెలిసిన.Zero.సమితి_దిగువ_బిట్లు(LHS.లెక్క_Min_Trailing_Zeros());
+    ఒకవేళ (LHS.isAllOnes())
+      తెలిసిన.One.సమితి_Sign_బిట్టు();
+    ఒకవేళ (NSW) {
+      ఒకవేళ (LHS.isNonNegative())
+        తెలిసిన.makeNonNegative();
+      ఒకవేళ (LHS.isNegative())
+        తెలిసిన.makeNegative();
     }
-    return Known;
+    తిరిగి తెలిసిన;
   }
 
   // Find the common bits from all possible shifts.
-  unsigned ShiftAmtZeroMask = RHS.Zero.zextOrTrunc(32).getZExtValue();
-  unsigned ShiftAmtOneMask = RHS.One.zextOrTrunc(32).getZExtValue();
-  Known.setAllConflict();
-  for (unsigned ShiftAmt = MinShiftAmount; ShiftAmt <= MaxShiftAmount;
-       ++ShiftAmt) {
+  గుర్తులేని జరుపు_Amt_Zero_ముసుగు = RHS.Zero.zextOrTrunc(32).get_ZExt_విలువ();
+  గుర్తులేని జరుపు_Amt_One_ముసుగు = RHS.One.zextOrTrunc(32).get_ZExt_విలువ();
+  తెలిసిన.సమితి_All_Conflict();
+  కొరకు (గుర్తులేని జరుపు_Amt_2 = Min_జరుపు_Amount; జరుపు_Amt_2 <= Max_జరుపు_Amount;
+       ++జరుపు_Amt_2) {
     // Skip if the shift amount is impossible.
-    if ((ShiftAmtZeroMask & ShiftAmt) != 0 ||
-        (ShiftAmtOneMask | ShiftAmt) != ShiftAmt)
-      continue;
-    Known = Known.intersectWith(ShiftByConst(LHS, ShiftAmt));
-    if (Known.isUnknown())
-      break;
+    ఒకవేళ ((జరుపు_Amt_Zero_ముసుగు & జరుపు_Amt_2) != 0 ||
+        (జరుపు_Amt_One_ముసుగు | జరుపు_Amt_2) != జరుపు_Amt_2)
+      కొనసాగు;
+    తెలిసిన = తెలిసిన.intersectWith(జరుపు_By_Const(LHS, జరుపు_Amt_2));
+    ఒకవేళ (తెలిసిన.isUnknown())
+      ఆపు;
   }
 
   // All shift amounts may result in poison.
-  if (Known.hasConflict())
-    Known.setAllZero();
-  return Known;
+  ఒకవేళ (తెలిసిన.hasConflict())
+    తెలిసిన.సమితి_All_Zero();
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::lshr(const KnownBits &LHS, const KnownBits &RHS,
-                          bool ShAmtNonZero, bool Exact) {
-  unsigned BitWidth = LHS.getBitWidth();
-  auto ShiftByConst = [&](const KnownBits &LHS, unsigned ShiftAmt) {
-    KnownBits Known = LHS;
-    Known >>= ShiftAmt;
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::lshr(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                          తార్కిక ShAmtNonZero, తార్కిక Exact) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  స్వయంచాలక జరుపు_By_Const = [&](స్థిరరాశి తెలిసిన_బిట్లు &LHS, గుర్తులేని జరుపు_Amt_2) {
+    తెలిసిన_బిట్లు తెలిసిన = LHS;
+    తెలిసిన >>= జరుపు_Amt_2;
     // High bits are known zero.
-    Known.Zero.setHighBits(ShiftAmt);
-    return Known;
+    తెలిసిన.Zero.సమితి_ఎగువ_బిట్లు(జరుపు_Amt_2);
+    తిరిగి తెలిసిన;
   };
 
   // Fast path for a common case when LHS is completely unknown.
-  KnownBits Known(BitWidth);
-  unsigned MinShiftAmount = RHS.getMinValue().getLimitedValue(BitWidth);
-  if (MinShiftAmount == 0 && ShAmtNonZero)
-    MinShiftAmount = 1;
-  if (LHS.isUnknown()) {
-    Known.Zero.setHighBits(MinShiftAmount);
-    return Known;
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
+  గుర్తులేని Min_జరుపు_Amount = RHS.get_Min_విలువ().get_Limited_విలువ(బిట్టు_వెడల్పు_2);
+  ఒకవేళ (Min_జరుపు_Amount == 0 && ShAmtNonZero)
+    Min_జరుపు_Amount = 1;
+  ఒకవేళ (LHS.isUnknown()) {
+    తెలిసిన.Zero.సమితి_ఎగువ_బిట్లు(Min_జరుపు_Amount);
+    తిరిగి తెలిసిన;
   }
 
   // Find the common bits from all possible shifts.
-  APInt MaxValue = RHS.getMaxValue();
-  unsigned MaxShiftAmount = getMaxShiftAmount(MaxValue, BitWidth);
+  APInt Max_విలువ = RHS.get_Max_విలువ();
+  గుర్తులేని Max_జరుపు_Amount = get_Max_జరుపు_Amount(Max_విలువ, బిట్టు_వెడల్పు_2);
 
   // If exact, bound MaxShiftAmount to first known 1 in LHS.
-  if (Exact) {
-    unsigned FirstOne = LHS.countMaxTrailingZeros();
-    if (FirstOne < MinShiftAmount) {
+  ఒకవేళ (Exact) {
+    గుర్తులేని మొదటి_One = LHS.లెక్క_Max_Trailing_Zeros();
+    ఒకవేళ (మొదటి_One < Min_జరుపు_Amount) {
       // Always poison. Return zero because we don't like returning conflict.
-      Known.setAllZero();
-      return Known;
+      తెలిసిన.సమితి_All_Zero();
+      తిరిగి తెలిసిన;
     }
-    MaxShiftAmount = std::min(MaxShiftAmount, FirstOne);
+    Max_జరుపు_Amount = std::min(Max_జరుపు_Amount, మొదటి_One);
   }
 
-  unsigned ShiftAmtZeroMask = RHS.Zero.zextOrTrunc(32).getZExtValue();
-  unsigned ShiftAmtOneMask = RHS.One.zextOrTrunc(32).getZExtValue();
-  Known.setAllConflict();
-  for (unsigned ShiftAmt = MinShiftAmount; ShiftAmt <= MaxShiftAmount;
-       ++ShiftAmt) {
+  గుర్తులేని జరుపు_Amt_Zero_ముసుగు = RHS.Zero.zextOrTrunc(32).get_ZExt_విలువ();
+  గుర్తులేని జరుపు_Amt_One_ముసుగు = RHS.One.zextOrTrunc(32).get_ZExt_విలువ();
+  తెలిసిన.సమితి_All_Conflict();
+  కొరకు (గుర్తులేని జరుపు_Amt_2 = Min_జరుపు_Amount; జరుపు_Amt_2 <= Max_జరుపు_Amount;
+       ++జరుపు_Amt_2) {
     // Skip if the shift amount is impossible.
-    if ((ShiftAmtZeroMask & ShiftAmt) != 0 ||
-        (ShiftAmtOneMask | ShiftAmt) != ShiftAmt)
-      continue;
-    Known = Known.intersectWith(ShiftByConst(LHS, ShiftAmt));
-    if (Known.isUnknown())
-      break;
+    ఒకవేళ ((జరుపు_Amt_Zero_ముసుగు & జరుపు_Amt_2) != 0 ||
+        (జరుపు_Amt_One_ముసుగు | జరుపు_Amt_2) != జరుపు_Amt_2)
+      కొనసాగు;
+    తెలిసిన = తెలిసిన.intersectWith(జరుపు_By_Const(LHS, జరుపు_Amt_2));
+    ఒకవేళ (తెలిసిన.isUnknown())
+      ఆపు;
   }
 
   // All shift amounts may result in poison.
-  if (Known.hasConflict())
-    Known.setAllZero();
-  return Known;
+  ఒకవేళ (తెలిసిన.hasConflict())
+    తెలిసిన.సమితి_All_Zero();
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::ashr(const KnownBits &LHS, const KnownBits &RHS,
-                          bool ShAmtNonZero, bool Exact) {
-  unsigned BitWidth = LHS.getBitWidth();
-  auto ShiftByConst = [&](const KnownBits &LHS, unsigned ShiftAmt) {
-    KnownBits Known = LHS;
-    Known.Zero.ashrInPlace(ShiftAmt);
-    Known.One.ashrInPlace(ShiftAmt);
-    return Known;
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::ashr(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                          తార్కిక ShAmtNonZero, తార్కిక Exact) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  స్వయంచాలక జరుపు_By_Const = [&](స్థిరరాశి తెలిసిన_బిట్లు &LHS, గుర్తులేని జరుపు_Amt_2) {
+    తెలిసిన_బిట్లు తెలిసిన = LHS;
+    తెలిసిన.Zero.ashr_లోపల_ఉంచు(జరుపు_Amt_2);
+    తెలిసిన.One.ashr_లోపల_ఉంచు(జరుపు_Amt_2);
+    తిరిగి తెలిసిన;
   };
 
   // Fast path for a common case when LHS is completely unknown.
-  KnownBits Known(BitWidth);
-  unsigned MinShiftAmount = RHS.getMinValue().getLimitedValue(BitWidth);
-  if (MinShiftAmount == 0 && ShAmtNonZero)
-    MinShiftAmount = 1;
-  if (LHS.isUnknown()) {
-    if (MinShiftAmount == BitWidth) {
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
+  గుర్తులేని Min_జరుపు_Amount = RHS.get_Min_విలువ().get_Limited_విలువ(బిట్టు_వెడల్పు_2);
+  ఒకవేళ (Min_జరుపు_Amount == 0 && ShAmtNonZero)
+    Min_జరుపు_Amount = 1;
+  ఒకవేళ (LHS.isUnknown()) {
+    ఒకవేళ (Min_జరుపు_Amount == బిట్టు_వెడల్పు_2) {
       // Always poison. Return zero because we don't like returning conflict.
-      Known.setAllZero();
-      return Known;
+      తెలిసిన.సమితి_All_Zero();
+      తిరిగి తెలిసిన;
     }
-    return Known;
+    తిరిగి తెలిసిన;
   }
 
   // Find the common bits from all possible shifts.
-  APInt MaxValue = RHS.getMaxValue();
-  unsigned MaxShiftAmount = getMaxShiftAmount(MaxValue, BitWidth);
+  APInt Max_విలువ = RHS.get_Max_విలువ();
+  గుర్తులేని Max_జరుపు_Amount = get_Max_జరుపు_Amount(Max_విలువ, బిట్టు_వెడల్పు_2);
 
   // If exact, bound MaxShiftAmount to first known 1 in LHS.
-  if (Exact) {
-    unsigned FirstOne = LHS.countMaxTrailingZeros();
-    if (FirstOne < MinShiftAmount) {
+  ఒకవేళ (Exact) {
+    గుర్తులేని మొదటి_One = LHS.లెక్క_Max_Trailing_Zeros();
+    ఒకవేళ (మొదటి_One < Min_జరుపు_Amount) {
       // Always poison. Return zero because we don't like returning conflict.
-      Known.setAllZero();
-      return Known;
+      తెలిసిన.సమితి_All_Zero();
+      తిరిగి తెలిసిన;
     }
-    MaxShiftAmount = std::min(MaxShiftAmount, FirstOne);
+    Max_జరుపు_Amount = std::min(Max_జరుపు_Amount, మొదటి_One);
   }
 
-  unsigned ShiftAmtZeroMask = RHS.Zero.zextOrTrunc(32).getZExtValue();
-  unsigned ShiftAmtOneMask = RHS.One.zextOrTrunc(32).getZExtValue();
-  Known.setAllConflict();
-  for (unsigned ShiftAmt = MinShiftAmount; ShiftAmt <= MaxShiftAmount;
-      ++ShiftAmt) {
+  గుర్తులేని జరుపు_Amt_Zero_ముసుగు = RHS.Zero.zextOrTrunc(32).get_ZExt_విలువ();
+  గుర్తులేని జరుపు_Amt_One_ముసుగు = RHS.One.zextOrTrunc(32).get_ZExt_విలువ();
+  తెలిసిన.సమితి_All_Conflict();
+  కొరకు (గుర్తులేని జరుపు_Amt_2 = Min_జరుపు_Amount; జరుపు_Amt_2 <= Max_జరుపు_Amount;
+      ++జరుపు_Amt_2) {
     // Skip if the shift amount is impossible.
-    if ((ShiftAmtZeroMask & ShiftAmt) != 0 ||
-        (ShiftAmtOneMask | ShiftAmt) != ShiftAmt)
-      continue;
-    Known = Known.intersectWith(ShiftByConst(LHS, ShiftAmt));
-    if (Known.isUnknown())
-      break;
+    ఒకవేళ ((జరుపు_Amt_Zero_ముసుగు & జరుపు_Amt_2) != 0 ||
+        (జరుపు_Amt_One_ముసుగు | జరుపు_Amt_2) != జరుపు_Amt_2)
+      కొనసాగు;
+    తెలిసిన = తెలిసిన.intersectWith(జరుపు_By_Const(LHS, జరుపు_Amt_2));
+    ఒకవేళ (తెలిసిన.isUnknown())
+      ఆపు;
   }
 
   // All shift amounts may result in poison.
-  if (Known.hasConflict())
-    Known.setAllZero();
-  return Known;
+  ఒకవేళ (తెలిసిన.hasConflict())
+    తెలిసిన.సమితి_All_Zero();
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::fshl(const KnownBits &LHS, const KnownBits &RHS,
-                          const APInt &Amt) {
-  return KnownBits(APIntOps::fshl(LHS.Zero, RHS.Zero, Amt),
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::fshl(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                          స్థిరరాశి APInt &Amt) {
+  తిరిగి తెలిసిన_బిట్లు(APIntOps::fshl(LHS.Zero, RHS.Zero, Amt),
                    APIntOps::fshl(LHS.One, RHS.One, Amt));
 }
 
-KnownBits KnownBits::fshr(const KnownBits &LHS, const KnownBits &RHS,
-                          const APInt &Amt) {
-  return KnownBits(APIntOps::fshr(LHS.Zero, RHS.Zero, Amt),
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::fshr(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                          స్థిరరాశి APInt &Amt) {
+  తిరిగి తెలిసిన_బిట్లు(APIntOps::fshr(LHS.Zero, RHS.Zero, Amt),
                    APIntOps::fshr(LHS.One, RHS.One, Amt));
 }
 
-KnownBits KnownBits::clmul(const KnownBits &LHS, const KnownBits &RHS) {
-  KnownBits Res =
-      makeConstant(APIntOps::clmul(LHS.getMinValue(), RHS.getMinValue()));
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::clmul(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తెలిసిన_బిట్లు Res =
+      makeConstant(APIntOps::clmul(LHS.get_Min_విలువ(), RHS.get_Min_విలువ()));
 
   // This is the same operation as clmul except it accumulates the result with
   // an OR instead of an XOR.
-  auto ClMulOr = [](const APInt &LHS, const APInt &RHS) {
-    unsigned BW = LHS.getBitWidth();
-    assert(BW == RHS.getBitWidth() && "Operand mismatch");
-    APInt Result(BW, 0);
-    for (unsigned I :
-         seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
-      if (RHS[I])
-        Result |= LHS << I;
-    return Result;
+  స్వయంచాలక ClMulOr = [](స్థిరరాశి APInt &LHS, స్థిరరాశి APInt &RHS) {
+    గుర్తులేని BW = LHS.get_బిట్టు_వెడల్పు();
+    ప్రతిజ్ఞా(BW == RHS.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+    APInt ఫలితం(BW, 0);
+    కొరకు (గుర్తులేని I :
+         seq(std::min(RHS.get_చురుకైన_బిట్లు(), BW - LHS.countr_zero())))
+      ఒకవేళ (RHS[I])
+        ఫలితం |= LHS << I;
+    తిరిగి ఫలితం;
   };
 
   // Bits in the result are known if, for every corresponding pair of input
   // bits, both input bits are known or either input bit is known to be zero.
-  APInt Known = ~(ClMulOr(~LHS.Zero & ~LHS.One, ~RHS.Zero) |
+  APInt తెలిసిన = ~(ClMulOr(~LHS.Zero & ~LHS.One, ~RHS.Zero) |
                   ClMulOr(~LHS.Zero, ~RHS.Zero & ~RHS.One));
-  Res.Zero &= Known;
-  Res.One &= Known;
+  Res.Zero &= తెలిసిన;
+  Res.One &= తెలిసిన;
 
-  return Res;
+  తిరిగి Res;
 }
 
-KnownBits KnownBits::pext(const KnownBits &Val, const KnownBits &Mask) {
-  unsigned BitWidth = Val.getBitWidth();
-  KnownBits Res(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::pext(స్థిరరాశి తెలిసిన_బిట్లు &Val, స్థిరరాశి తెలిసిన_బిట్లు &ముసుగు) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = Val.get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు Res(బిట్టు_వెడల్పు_2);
   // We start by asserting that bits cannot be 0 and cannot be 1, then clear
   // Res bits where we know a bit could have some value.
-  Res.setAllConflict();
+  Res.సమితి_All_Conflict();
 
   // For each source position I where Mask[I] could be 1, the output position J
   // lies in [M0, M1], where M0 and M1 track the range of possible 1-bit counts
   // seen so far in Mask. Note that M0=M1 as long as bits in Mask are known;
   // otherwise, the range of possible output positions widens.
-  unsigned M0 = 0, M1 = 0;
-  for (unsigned I = 0; I < BitWidth; ++I) {
-    if (!Mask.Zero[I]) {
+  గుర్తులేని M0 = 0, M1 = 0;
+  కొరకు (గుర్తులేని I = 0; I < బిట్టు_వెడల్పు_2; ++I) {
+    ఒకవేళ (!ముసుగు.Zero[I]) {
       // Mask[I] could be 1, so we decide what value the Res bits could have.
-      if (!Val.Zero[I])
+      ఒకవేళ (!Val.Zero[I])
         // Val[I] could be 1 => Res[J] for J in [M0, M1] could be 1
-        Res.Zero.clearBits(M0, M1 + 1);
-      if (!Val.One[I])
+        Res.Zero.clear_బిట్లు(M0, M1 + 1);
+      ఒకవేళ (!Val.One[I])
         // Val[I] could be 0 => Res[J] for J in [M0, M1] could be 0
-        Res.One.clearBits(M0, M1 + 1);
+        Res.One.clear_బిట్లు(M0, M1 + 1);
     }
-    if (Mask.One[I])
+    ఒకవేళ (ముసుగు.One[I])
       ++M0, ++M1;
-    else if (!Mask.Zero[I])
+    లేకపోతే ఒకవేళ (!ముసుగు.Zero[I])
       ++M1;
   }
 
   // Output bits at J >= M0 may have no source (popcount(Mask) may be <= J), so
   // they may be 0.
-  Res.One.clearBits(M0, BitWidth);
-  return Res;
+  Res.One.clear_బిట్లు(M0, బిట్టు_వెడల్పు_2);
+  తిరిగి Res;
 }
 
-KnownBits KnownBits::pdep(const KnownBits &Val, const KnownBits &Mask) {
-  unsigned BitWidth = Val.getBitWidth();
-  KnownBits Res(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::pdep(స్థిరరాశి తెలిసిన_బిట్లు &Val, స్థిరరాశి తెలిసిన_బిట్లు &ముసుగు) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = Val.get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు Res(బిట్టు_వెడల్పు_2);
   // We start by asserting that bits cannot be 0 and cannot be 1, then clear
   // Res bits where we know a bit could have some value.
-  Res.setAllConflict();
+  Res.సమితి_All_Conflict();
 
   // For each output position I where Mask[I] could be 1, the source position J
   // lies in [M0, M1], where M0 and M1 track the range of possible 1-bit counts
   // seen so far in Mask. Note that M0=M1 as long as bits in Mask are known;
   // otherwise, the range of possible source positions widens.
-  unsigned M0 = 0, M1 = 0;
-  for (unsigned I = 0; I < BitWidth; ++I) {
-    if (!Mask.One[I])
+  గుర్తులేని M0 = 0, M1 = 0;
+  కొరకు (గుర్తులేని I = 0; I < బిట్టు_వెడల్పు_2; ++I) {
+    ఒకవేళ (!ముసుగు.One[I])
       // Mask[I] could be 0 => Res[I] could be 0
-      Res.One.clearBit(I);
-    if (!Mask.Zero[I]) {
+      Res.One.clear_బిట్టు(I);
+    ఒకవేళ (!ముసుగు.Zero[I]) {
       // Mask[I] could be 1, so we check what value the Val bits could have.
-      APInt Range = APInt::getBitsSet(BitWidth, M0, M1 + 1);
-      if (!Range.isSubsetOf(Val.One))
+      APInt Range = APInt::get_బిట్లు_సమితి(బిట్టు_వెడల్పు_2, M0, M1 + 1);
+      ఒకవేళ (!Range.is_Subset_యొక్క(Val.One))
         // Any Val[J] for J in [M0, M1] could be 0 => Res[I] could be 0
-        Res.One.clearBit(I);
-      if (!Range.isSubsetOf(Val.Zero))
+        Res.One.clear_బిట్టు(I);
+      ఒకవేళ (!Range.is_Subset_యొక్క(Val.Zero))
         // Any Val[J] for J in [M0, M1] could be 1 => Res[I] could be 1
-        Res.Zero.clearBit(I);
+        Res.Zero.clear_బిట్టు(I);
     }
-    if (Mask.One[I])
+    ఒకవేళ (ముసుగు.One[I])
       ++M0, ++M1;
-    else if (!Mask.Zero[I])
+    లేకపోతే ఒకవేళ (!ముసుగు.Zero[I])
       ++M1;
   }
-  return Res;
+  తిరిగి Res;
 }
 
-std::optional<bool> KnownBits::eq(const KnownBits &LHS, const KnownBits &RHS) {
-  if (LHS.isConstant() && RHS.isConstant())
-    return LHS.getConstant() == RHS.getConstant();
-  if (LHS.One.intersects(RHS.Zero) || RHS.One.intersects(LHS.Zero))
-    return false;
-  return std::nullopt;
+std::optional<తార్కిక> తెలిసిన_బిట్లు::eq(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  ఒకవేళ (LHS.isConstant() && RHS.isConstant())
+    తిరిగి LHS.getConstant() == RHS.getConstant();
+  ఒకవేళ (LHS.One.intersects(RHS.Zero) || RHS.One.intersects(LHS.Zero))
+    తిరిగి అబద్ధం;
+  తిరిగి std::nullopt;
 }
 
-std::optional<bool> KnownBits::ne(const KnownBits &LHS, const KnownBits &RHS) {
-  if (std::optional<bool> KnownEQ = eq(LHS, RHS))
-    return !*KnownEQ;
-  return std::nullopt;
+std::optional<తార్కిక> తెలిసిన_బిట్లు::ne(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  ఒకవేళ (std::optional<తార్కిక> తెలిసిన_EQ = eq(LHS, RHS))
+    తిరిగి !*తెలిసిన_EQ;
+  తిరిగి std::nullopt;
 }
 
-std::optional<bool> KnownBits::ugt(const KnownBits &LHS, const KnownBits &RHS) {
+std::optional<తార్కిక> తెలిసిన_బిట్లు::ugt(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // LHS >u RHS -> false if umax(LHS) <= umax(RHS)
-  if (LHS.getMaxValue().ule(RHS.getMinValue()))
-    return false;
+  ఒకవేళ (LHS.get_Max_విలువ().ule(RHS.get_Min_విలువ()))
+    తిరిగి అబద్ధం;
   // LHS >u RHS -> true if umin(LHS) > umax(RHS)
-  if (LHS.getMinValue().ugt(RHS.getMaxValue()))
-    return true;
-  return std::nullopt;
+  ఒకవేళ (LHS.get_Min_విలువ().ugt(RHS.get_Max_విలువ()))
+    తిరిగి నిజం;
+  తిరిగి std::nullopt;
 }
 
-std::optional<bool> KnownBits::uge(const KnownBits &LHS, const KnownBits &RHS) {
-  if (std::optional<bool> IsUGT = ugt(RHS, LHS))
-    return !*IsUGT;
-  return std::nullopt;
+std::optional<తార్కిక> తెలిసిన_బిట్లు::uge(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  ఒకవేళ (std::optional<తార్కిక> IsUGT = ugt(RHS, LHS))
+    తిరిగి !*IsUGT;
+  తిరిగి std::nullopt;
 }
 
-std::optional<bool> KnownBits::ult(const KnownBits &LHS, const KnownBits &RHS) {
-  return ugt(RHS, LHS);
+std::optional<తార్కిక> తెలిసిన_బిట్లు::ult(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి ugt(RHS, LHS);
 }
 
-std::optional<bool> KnownBits::ule(const KnownBits &LHS, const KnownBits &RHS) {
-  return uge(RHS, LHS);
+std::optional<తార్కిక> తెలిసిన_బిట్లు::ule(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి uge(RHS, LHS);
 }
 
-std::optional<bool> KnownBits::sgt(const KnownBits &LHS, const KnownBits &RHS) {
+std::optional<తార్కిక> తెలిసిన_బిట్లు::sgt(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // LHS >s RHS -> false if smax(LHS) <= smax(RHS)
-  if (LHS.getSignedMaxValue().sle(RHS.getSignedMinValue()))
-    return false;
+  ఒకవేళ (LHS.get_Signed_Max_విలువ().sle(RHS.get_Signed_Min_విలువ()))
+    తిరిగి అబద్ధం;
   // LHS >s RHS -> true if smin(LHS) > smax(RHS)
-  if (LHS.getSignedMinValue().sgt(RHS.getSignedMaxValue()))
-    return true;
-  return std::nullopt;
+  ఒకవేళ (LHS.get_Signed_Min_విలువ().sgt(RHS.get_Signed_Max_విలువ()))
+    తిరిగి నిజం;
+  తిరిగి std::nullopt;
 }
 
-std::optional<bool> KnownBits::sge(const KnownBits &LHS, const KnownBits &RHS) {
-  if (std::optional<bool> KnownSGT = sgt(RHS, LHS))
-    return !*KnownSGT;
-  return std::nullopt;
+std::optional<తార్కిక> తెలిసిన_బిట్లు::sge(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  ఒకవేళ (std::optional<తార్కిక> తెలిసిన_SGT = sgt(RHS, LHS))
+    తిరిగి !*తెలిసిన_SGT;
+  తిరిగి std::nullopt;
 }
 
-std::optional<bool> KnownBits::slt(const KnownBits &LHS, const KnownBits &RHS) {
-  return sgt(RHS, LHS);
+std::optional<తార్కిక> తెలిసిన_బిట్లు::slt(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి sgt(RHS, LHS);
 }
 
-std::optional<bool> KnownBits::sle(const KnownBits &LHS, const KnownBits &RHS) {
-  return sge(RHS, LHS);
+std::optional<తార్కిక> తెలిసిన_బిట్లు::sle(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి sge(RHS, LHS);
 }
 
-KnownBits KnownBits::abs(bool IntMinIsPoison) const {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::నిరపేక్ష(తార్కిక IntMinIsPoison) స్థిరరాశి {
   // If the source's MSB is zero then we know the rest of the bits already.
-  if (isNonNegative())
-    return *this;
+  ఒకవేళ (isNonNegative())
+    తిరిగి *ఇది;
 
   // Absolute value preserves trailing zero count.
-  KnownBits KnownAbs(getBitWidth());
+  తెలిసిన_బిట్లు తెలిసిన_Abs(get_బిట్టు_వెడల్పు());
 
   // If the input is negative, then abs(x) == -x.
-  if (isNegative()) {
-    KnownBits Tmp = *this;
+  ఒకవేళ (isNegative()) {
+    తెలిసిన_బిట్లు Tmp = *ఇది;
     // Special case for IntMinIsPoison. We know the sign bit is set and we know
     // all the rest of the bits except one to be zero. Since we have
     // IntMinIsPoison, that final bit MUST be a one, as otherwise the input is
     // INT_MIN.
-    if (IntMinIsPoison && (Zero.popcount() + 2) == getBitWidth())
-      Tmp.One.setBit(countMinTrailingZeros());
+    ఒకవేళ (IntMinIsPoison && (Zero.popcount() + 2) == get_బిట్టు_వెడల్పు())
+      Tmp.One.సమితి_బిట్టు(లెక్క_Min_Trailing_Zeros());
 
-    KnownAbs = computeForAddSub(
-        /*Add*/ false, IntMinIsPoison, /*NUW=*/false,
-        KnownBits::makeConstant(APInt(getBitWidth(), 0)), Tmp);
+    తెలిసిన_Abs = compute_For_కూడు_Sub(
+        /*కూడు*/ అబద్ధం, IntMinIsPoison, /*NUW=*/అబద్ధం,
+        తెలిసిన_బిట్లు::makeConstant(APInt(get_బిట్టు_వెడల్పు(), 0)), Tmp);
 
     // One more special case for IntMinIsPoison. If we don't know any ones other
     // than the signbit, we know for certain that all the unknowns can't be
@@ -804,45 +804,45 @@ KnownBits KnownBits::abs(bool IntMinIsPoison) const {
     // the low bits can't be all zeros, so the +1 in (~x + 1) cannot carry up
     // to the high bits. If we know a known INT_MIN input skip this. The result
     // is poison anyways.
-    if (IntMinIsPoison && Tmp.countMinPopulation() == 1 &&
-        Tmp.countMaxPopulation() != 1) {
-      Tmp.One.clearSignBit();
-      Tmp.Zero.setSignBit();
-      KnownAbs.One.setBits(getBitWidth() - Tmp.countMinLeadingZeros(),
-                           getBitWidth() - 1);
+    ఒకవేళ (IntMinIsPoison && Tmp.లెక్క_Min_Population() == 1 &&
+        Tmp.లెక్క_Max_Population() != 1) {
+      Tmp.One.clear_Sign_బిట్టు();
+      Tmp.Zero.సమితి_Sign_బిట్టు();
+      తెలిసిన_Abs.One.సమితి_బిట్లు(get_బిట్టు_వెడల్పు() - Tmp.లెక్క_Min_Leading_Zeros(),
+                           get_బిట్టు_వెడల్పు() - 1);
     }
 
-  } else {
-    unsigned MaxTZ = countMaxTrailingZeros();
-    unsigned MinTZ = countMinTrailingZeros();
+  } లేకపోతే {
+    గుర్తులేని MaxTZ = లెక్క_Max_Trailing_Zeros();
+    గుర్తులేని MinTZ = లెక్క_Min_Trailing_Zeros();
 
-    KnownAbs.Zero.setLowBits(MinTZ);
+    తెలిసిన_Abs.Zero.సమితి_దిగువ_బిట్లు(MinTZ);
     // If we know the lowest set 1, then preserve it.
-    if (MaxTZ == MinTZ && MaxTZ < getBitWidth())
-      KnownAbs.One.setBit(MaxTZ);
+    ఒకవేళ (MaxTZ == MinTZ && MaxTZ < get_బిట్టు_వెడల్పు())
+      తెలిసిన_Abs.One.సమితి_బిట్టు(MaxTZ);
 
     // We only know that the absolute values's MSB will be zero if INT_MIN is
     // poison, or there is a set bit that isn't the sign bit (otherwise it could
     // be INT_MIN).
-    if (IntMinIsPoison || (!One.isZero() && !One.isMinSignedValue())) {
-      KnownAbs.One.clearSignBit();
-      KnownAbs.Zero.setSignBit();
+    ఒకవేళ (IntMinIsPoison || (!One.isZero() && !One.is_Min_Signed_విలువ())) {
+      తెలిసిన_Abs.One.clear_Sign_బిట్టు();
+      తెలిసిన_Abs.Zero.సమితి_Sign_బిట్టు();
     }
   }
 
-  return KnownAbs;
+  తిరిగి తెలిసిన_Abs;
 }
 
-KnownBits KnownBits::reduceAdd(unsigned NumElts) const {
-  if (NumElts == 0)
-    return KnownBits(getBitWidth());
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::reduce_కూడు(గుర్తులేని అంకె_Elts) స్థిరరాశి {
+  ఒకవేళ (అంకె_Elts == 0)
+    తిరిగి తెలిసిన_బిట్లు(get_బిట్టు_వెడల్పు());
 
-  unsigned BitWidth = getBitWidth();
-  KnownBits Result(BitWidth);
+  గుర్తులేని బిట్టు_వెడల్పు_2 = get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు ఫలితం(బిట్టు_వెడల్పు_2);
 
-  if (isConstant())
+  ఒకవేళ (isConstant())
     // If all elements are the same constant, we can simply compute it
-    return KnownBits::makeConstant(NumElts * getConstant());
+    తిరిగి తెలిసిన_బిట్లు::makeConstant(అంకె_Elts * getConstant());
 
   // The main idea is as follows.
   //
@@ -858,222 +858,222 @@ KnownBits KnownBits::reduceAdd(unsigned NumElts) const {
   //   L' = L - ceil(log2(N))
   //
   // Similar logic can be applied to leading ones.
-  unsigned LostBits = Log2_32_Ceil(NumElts);
+  గుర్తులేని కోల్పోయిన_బిట్లు = Log2_32_Ceil(అంకె_Elts);
 
-  if (isNonNegative()) {
-    unsigned LeadingZeros = countMinLeadingZeros();
-    LeadingZeros = LeadingZeros > LostBits ? LeadingZeros - LostBits : 0;
-    Result.Zero.setHighBits(LeadingZeros);
-  } else if (isNegative()) {
-    unsigned LeadingOnes = countMinLeadingOnes();
-    LeadingOnes = LeadingOnes > LostBits ? LeadingOnes - LostBits : 0;
-    Result.One.setHighBits(LeadingOnes);
+  ఒకవేళ (isNonNegative()) {
+    గుర్తులేని LeadingZeros = లెక్క_Min_Leading_Zeros();
+    LeadingZeros = LeadingZeros > కోల్పోయిన_బిట్లు ? LeadingZeros - కోల్పోయిన_బిట్లు : 0;
+    ఫలితం.Zero.సమితి_ఎగువ_బిట్లు(LeadingZeros);
+  } లేకపోతే ఒకవేళ (isNegative()) {
+    గుర్తులేని LeadingOnes = లెక్క_Min_Leading_Ones();
+    LeadingOnes = LeadingOnes > కోల్పోయిన_బిట్లు ? LeadingOnes - కోల్పోయిన_బిట్లు : 0;
+    ఫలితం.One.సమితి_ఎగువ_బిట్లు(LeadingOnes);
   }
 
-  return Result;
+  తిరిగి ఫలితం;
 }
 
-static KnownBits computeForSatAddSub(bool Add, bool Signed,
-                                     const KnownBits &LHS,
-                                     const KnownBits &RHS) {
+స్థిర తెలిసిన_బిట్లు compute_For_Sat_కూడు_Sub(తార్కిక కూడు_2, తార్కిక Signed,
+                                     స్థిరరాశి తెలిసిన_బిట్లు &LHS,
+                                     స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // We don't see NSW even for sadd/ssub as we want to check if the result has
   // signed overflow.
-  unsigned BitWidth = LHS.getBitWidth();
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
 
-  std::optional<bool> Overflow;
+  std::optional<తార్కిక> అధికప్రవాహం;
   // Even if we can't entirely rule out overflow, we may be able to rule out
   // overflow in one direction. This allows us to potentially keep some of the
   // add/sub bits. I.e if we can't overflow in the positive direction we won't
   // clamp to INT_MAX so we can keep low 0s from the add/sub result.
-  bool MayNegClamp = true;
-  bool MayPosClamp = true;
-  if (Signed) {
+  తార్కిక MayNegClamp = నిజం;
+  తార్కిక MayPosClamp = నిజం;
+  ఒకవేళ (Signed) {
     // Easy cases we can rule out any overflow.
-    if (Add && ((LHS.isNegative() && RHS.isNonNegative()) ||
+    ఒకవేళ (కూడు_2 && ((LHS.isNegative() && RHS.isNonNegative()) ||
                 (LHS.isNonNegative() && RHS.isNegative())))
-      Overflow = false;
-    else if (!Add && (((LHS.isNegative() && RHS.isNegative()) ||
+      అధికప్రవాహం = అబద్ధం;
+    లేకపోతే ఒకవేళ (!కూడు_2 && (((LHS.isNegative() && RHS.isNegative()) ||
                        (LHS.isNonNegative() && RHS.isNonNegative()))))
-      Overflow = false;
-    else {
+      అధికప్రవాహం = అబద్ధం;
+    లేకపోతే {
       // Check if we may overflow. If we can't rule out overflow then check if
       // we can rule out a direction at least.
-      KnownBits UnsignedLHS = LHS;
-      KnownBits UnsignedRHS = RHS;
+      తెలిసిన_బిట్లు UnsignedLHS = LHS;
+      తెలిసిన_బిట్లు UnsignedRHS = RHS;
       // Get version of LHS/RHS with clearer signbit. This allows us to detect
       // how the addition/subtraction might overflow into the signbit. Then
       // using the actual known signbits of LHS/RHS, we can figure out which
       // overflows are/aren't possible.
-      UnsignedLHS.One.clearSignBit();
-      UnsignedLHS.Zero.setSignBit();
-      UnsignedRHS.One.clearSignBit();
-      UnsignedRHS.Zero.setSignBit();
-      KnownBits Res =
-          KnownBits::computeForAddSub(Add, /*NSW=*/false,
-                                      /*NUW=*/false, UnsignedLHS, UnsignedRHS);
-      if (Add) {
-        if (Res.isNegative()) {
+      UnsignedLHS.One.clear_Sign_బిట్టు();
+      UnsignedLHS.Zero.సమితి_Sign_బిట్టు();
+      UnsignedRHS.One.clear_Sign_బిట్టు();
+      UnsignedRHS.Zero.సమితి_Sign_బిట్టు();
+      తెలిసిన_బిట్లు Res =
+          తెలిసిన_బిట్లు::compute_For_కూడు_Sub(కూడు_2, /*NSW=*/అబద్ధం,
+                                      /*NUW=*/అబద్ధం, UnsignedLHS, UnsignedRHS);
+      ఒకవేళ (కూడు_2) {
+        ఒకవేళ (Res.isNegative()) {
           // Only overflow scenario is Pos + Pos.
-          MayNegClamp = false;
+          MayNegClamp = అబద్ధం;
           // Pos + Pos will overflow with extra signbit.
-          if (LHS.isNonNegative() && RHS.isNonNegative())
-            Overflow = true;
-        } else if (Res.isNonNegative()) {
+          ఒకవేళ (LHS.isNonNegative() && RHS.isNonNegative())
+            అధికప్రవాహం = నిజం;
+        } లేకపోతే ఒకవేళ (Res.isNonNegative()) {
           // Only overflow scenario is Neg + Neg
-          MayPosClamp = false;
+          MayPosClamp = అబద్ధం;
           // Neg + Neg will overflow without extra signbit.
-          if (LHS.isNegative() && RHS.isNegative())
-            Overflow = true;
+          ఒకవేళ (LHS.isNegative() && RHS.isNegative())
+            అధికప్రవాహం = నిజం;
         }
         // We will never clamp to the opposite sign of N-bit result.
-        if (LHS.isNegative() || RHS.isNegative())
-          MayPosClamp = false;
-        if (LHS.isNonNegative() || RHS.isNonNegative())
-          MayNegClamp = false;
-      } else {
-        if (Res.isNegative()) {
+        ఒకవేళ (LHS.isNegative() || RHS.isNegative())
+          MayPosClamp = అబద్ధం;
+        ఒకవేళ (LHS.isNonNegative() || RHS.isNonNegative())
+          MayNegClamp = అబద్ధం;
+      } లేకపోతే {
+        ఒకవేళ (Res.isNegative()) {
           // Only overflow scenario is Neg - Pos.
-          MayPosClamp = false;
+          MayPosClamp = అబద్ధం;
           // Neg - Pos will overflow with extra signbit.
-          if (LHS.isNegative() && RHS.isNonNegative())
-            Overflow = true;
-        } else if (Res.isNonNegative()) {
+          ఒకవేళ (LHS.isNegative() && RHS.isNonNegative())
+            అధికప్రవాహం = నిజం;
+        } లేకపోతే ఒకవేళ (Res.isNonNegative()) {
           // Only overflow scenario is Pos - Neg.
-          MayNegClamp = false;
+          MayNegClamp = అబద్ధం;
           // Pos - Neg will overflow without extra signbit.
-          if (LHS.isNonNegative() && RHS.isNegative())
-            Overflow = true;
+          ఒకవేళ (LHS.isNonNegative() && RHS.isNegative())
+            అధికప్రవాహం = నిజం;
         }
         // We will never clamp to the opposite sign of N-bit result.
-        if (LHS.isNegative() || RHS.isNonNegative())
-          MayPosClamp = false;
-        if (LHS.isNonNegative() || RHS.isNegative())
-          MayNegClamp = false;
+        ఒకవేళ (LHS.isNegative() || RHS.isNonNegative())
+          MayPosClamp = అబద్ధం;
+        ఒకవేళ (LHS.isNonNegative() || RHS.isNegative())
+          MayNegClamp = అబద్ధం;
       }
     }
     // If we have ruled out all clamping, we will never overflow.
-    if (!MayNegClamp && !MayPosClamp)
-      Overflow = false;
-  } else if (Add) {
+    ఒకవేళ (!MayNegClamp && !MayPosClamp)
+      అధికప్రవాహం = అబద్ధం;
+  } లేకపోతే ఒకవేళ (కూడు_2) {
     // uadd.sat
-    bool Of;
-    (void)LHS.getMaxValue().uadd_ov(RHS.getMaxValue(), Of);
-    if (!Of) {
-      Overflow = false;
-    } else {
-      (void)LHS.getMinValue().uadd_ov(RHS.getMinValue(), Of);
-      if (Of)
-        Overflow = true;
+    తార్కిక యొక్క;
+    (శూన్య)LHS.get_Max_విలువ().uadd_ov(RHS.get_Max_విలువ(), యొక్క);
+    ఒకవేళ (!యొక్క) {
+      అధికప్రవాహం = అబద్ధం;
+    } లేకపోతే {
+      (శూన్య)LHS.get_Min_విలువ().uadd_ov(RHS.get_Min_విలువ(), యొక్క);
+      ఒకవేళ (యొక్క)
+        అధికప్రవాహం = నిజం;
     }
-  } else {
+  } లేకపోతే {
     // usub.sat
-    bool Of;
-    (void)LHS.getMinValue().usub_ov(RHS.getMaxValue(), Of);
-    if (!Of) {
-      Overflow = false;
-    } else {
-      (void)LHS.getMaxValue().usub_ov(RHS.getMinValue(), Of);
-      if (Of)
-        Overflow = true;
+    తార్కిక యొక్క;
+    (శూన్య)LHS.get_Min_విలువ().usub_ov(RHS.get_Max_విలువ(), యొక్క);
+    ఒకవేళ (!యొక్క) {
+      అధికప్రవాహం = అబద్ధం;
+    } లేకపోతే {
+      (శూన్య)LHS.get_Max_విలువ().usub_ov(RHS.get_Min_విలువ(), యొక్క);
+      ఒకవేళ (యొక్క)
+        అధికప్రవాహం = నిజం;
     }
   }
 
-  KnownBits Res = KnownBits::computeForAddSub(Add, /*NSW=*/Signed,
+  తెలిసిన_బిట్లు Res = తెలిసిన_బిట్లు::compute_For_కూడు_Sub(కూడు_2, /*NSW=*/Signed,
                                               /*NUW=*/!Signed, LHS, RHS);
 
-  if (Overflow) {
+  ఒకవేళ (అధికప్రవాహం) {
     // We know whether or not we overflowed.
-    if (!(*Overflow)) {
+    ఒకవేళ (!(*అధికప్రవాహం)) {
       // No overflow.
-      return Res;
+      తిరిగి Res;
     }
 
     // We overflowed
     APInt C;
-    if (Signed) {
+    ఒకవేళ (Signed) {
       // sadd.sat / ssub.sat
-      assert(!LHS.isSignUnknown() &&
+      ప్రతిజ్ఞా(!LHS.isSignUnknown() &&
              "We somehow know overflow without knowing input sign");
-      C = LHS.isNegative() ? APInt::getSignedMinValue(BitWidth)
-                           : APInt::getSignedMaxValue(BitWidth);
-    } else if (Add) {
+      C = LHS.isNegative() ? APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2)
+                           : APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2);
+    } లేకపోతే ఒకవేళ (కూడు_2) {
       // uadd.sat
-      C = APInt::getMaxValue(BitWidth);
-    } else {
+      C = APInt::get_Max_విలువ(బిట్టు_వెడల్పు_2);
+    } లేకపోతే {
       // uadd.sat
-      C = APInt::getMinValue(BitWidth);
+      C = APInt::get_Min_విలువ(బిట్టు_వెడల్పు_2);
     }
 
     Res.One = C;
     Res.Zero = ~C;
-    return Res;
+    తిరిగి Res;
   }
 
   // We don't know if we overflowed.
-  if (Signed) {
+  ఒకవేళ (Signed) {
     // sadd.sat/ssub.sat
     // We can keep our information about the sign bits.
-    if (MayPosClamp)
-      Res.Zero.clearLowBits(BitWidth - 1);
-    if (MayNegClamp)
-      Res.One.clearLowBits(BitWidth - 1);
-  } else if (Add) {
+    ఒకవేళ (MayPosClamp)
+      Res.Zero.clear_దిగువ_బిట్లు(బిట్టు_వెడల్పు_2 - 1);
+    ఒకవేళ (MayNegClamp)
+      Res.One.clear_దిగువ_బిట్లు(బిట్టు_వెడల్పు_2 - 1);
+  } లేకపోతే ఒకవేళ (కూడు_2) {
     // uadd.sat
     // We need to clear all the known zeros as we can only use the leading ones.
-    Res.Zero.clearAllBits();
-  } else {
+    Res.Zero.clear_All_బిట్లు();
+  } లేకపోతే {
     // usub.sat
     // We need to clear all the known ones as we can only use the leading zero.
-    Res.One.clearAllBits();
+    Res.One.clear_All_బిట్లు();
   }
 
-  return Res;
+  తిరిగి Res;
 }
 
-KnownBits KnownBits::sadd_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ true, /*Signed*/ true, LHS, RHS);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::sadd_sat(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి compute_For_Sat_కూడు_Sub(/*కూడు*/ నిజం, /*Signed*/ నిజం, LHS, RHS);
 }
-KnownBits KnownBits::ssub_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ false, /*Signed*/ true, LHS, RHS);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::ssub_sat(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి compute_For_Sat_కూడు_Sub(/*కూడు*/ అబద్ధం, /*Signed*/ నిజం, LHS, RHS);
 }
-KnownBits KnownBits::uadd_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ true, /*Signed*/ false, LHS, RHS);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::uadd_sat(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి compute_For_Sat_కూడు_Sub(/*కూడు*/ నిజం, /*Signed*/ అబద్ధం, LHS, RHS);
 }
-KnownBits KnownBits::usub_sat(const KnownBits &LHS, const KnownBits &RHS) {
-  return computeForSatAddSub(/*Add*/ false, /*Signed*/ false, LHS, RHS);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::usub_sat(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి compute_For_Sat_కూడు_Sub(/*కూడు*/ అబద్ధం, /*Signed*/ అబద్ధం, LHS, RHS);
 }
 
-static KnownBits avgComputeU(KnownBits LHS, KnownBits RHS, bool IsCeil) {
-  unsigned BitWidth = LHS.getBitWidth();
-  LHS = LHS.zext(BitWidth + 1);
-  RHS = RHS.zext(BitWidth + 1);
+స్థిర తెలిసిన_బిట్లు avgComputeU(తెలిసిన_బిట్లు LHS, తెలిసిన_బిట్లు RHS, తార్కిక IsCeil) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  LHS = LHS.zext(బిట్టు_వెడల్పు_2 + 1);
+  RHS = RHS.zext(బిట్టు_వెడల్పు_2 + 1);
   LHS =
-      computeForAddCarry(LHS, RHS, /*CarryZero*/ !IsCeil, /*CarryOne*/ IsCeil);
-  LHS = LHS.extractBits(BitWidth, 1);
-  return LHS;
+      compute_For_కూడు_వాహకం(LHS, RHS, /*CarryZero*/ !IsCeil, /*CarryOne*/ IsCeil);
+  LHS = LHS.వెలికితీయి_బిట్లు(బిట్టు_వెడల్పు_2, 1);
+  తిరిగి LHS;
 }
 
-KnownBits KnownBits::avgFloorS(const KnownBits &LHS, const KnownBits &RHS) {
-  return flipSignBit(avgFloorU(flipSignBit(LHS), flipSignBit(RHS)));
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::avgFloorS(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి flip_Sign_బిట్టు(avgFloorU(flip_Sign_బిట్టు(LHS), flip_Sign_బిట్టు(RHS)));
 }
 
-KnownBits KnownBits::avgFloorU(const KnownBits &LHS, const KnownBits &RHS) {
-  return avgComputeU(LHS, RHS, /*IsCeil=*/false);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::avgFloorU(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి avgComputeU(LHS, RHS, /*IsCeil=*/అబద్ధం);
 }
 
-KnownBits KnownBits::avgCeilS(const KnownBits &LHS, const KnownBits &RHS) {
-  return flipSignBit(avgCeilU(flipSignBit(LHS), flipSignBit(RHS)));
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::avgCeilS(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి flip_Sign_బిట్టు(avgCeilU(flip_Sign_బిట్టు(LHS), flip_Sign_బిట్టు(RHS)));
 }
 
-KnownBits KnownBits::avgCeilU(const KnownBits &LHS, const KnownBits &RHS) {
-  return avgComputeU(LHS, RHS, /*IsCeil=*/true);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::avgCeilU(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తిరిగి avgComputeU(LHS, RHS, /*IsCeil=*/నిజం);
 }
 
-KnownBits KnownBits::mul(const KnownBits &LHS, const KnownBits &RHS,
-                         bool NoUndefSelfMultiply) {
-  unsigned BitWidth = LHS.getBitWidth();
-  assert(BitWidth == RHS.getBitWidth() && "Operand mismatch");
-  assert((!NoUndefSelfMultiply || LHS == RHS) &&
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::mul(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                         తార్కిక NoUndefSelfMultiply) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+  ప్రతిజ్ఞా((!NoUndefSelfMultiply || LHS == RHS) &&
          "Self multiplication knownbits mismatch");
 
   // Compute the high known-0 bits by multiplying the unsigned max of each side.
@@ -1081,14 +1081,14 @@ KnownBits KnownBits::mul(const KnownBits &LHS, const KnownBits &RHS,
   // result. But if we know a value is a power-of-2 for example, then this
   // computes one more leading zero.
   // TODO: This could be generalized to number of sign bits (negative numbers).
-  APInt UMaxLHS = LHS.getMaxValue();
-  APInt UMaxRHS = RHS.getMaxValue();
+  APInt UMaxLHS = LHS.get_Max_విలువ();
+  APInt UMaxRHS = RHS.get_Max_విలువ();
 
   // For leading zeros in the result to be valid, the unsigned max product must
   // fit in the bitwidth (it must not overflow).
-  bool HasOverflow;
-  APInt UMaxResult = UMaxLHS.umul_ov(UMaxRHS, HasOverflow);
-  unsigned LeadZ = HasOverflow ? 0 : UMaxResult.countl_zero();
+  తార్కిక Has_అధికప్రవాహం;
+  APInt UMax_ఫలితం = UMaxLHS.umul_ov(UMaxRHS, Has_అధికప్రవాహం);
+  గుర్తులేని LeadZ = Has_అధికప్రవాహం ? 0 : UMax_ఫలితం.countl_zero();
 
   // The result of the bottom bits of an integer multiply can be
   // inferred by looking at the bottom bits of both operands and
@@ -1135,213 +1135,213 @@ KnownBits KnownBits::mul(const KnownBits &LHS, const KnownBits &RHS,
 
   // How many times we'd be able to divide each argument by 2 (shr by 1).
   // This gives us the number of trailing zeros on the multiplication result.
-  unsigned TrailBitsKnownLHS = (LHS.Zero | LHS.One).countr_one();
-  unsigned TrailBitsKnownRHS = (RHS.Zero | RHS.One).countr_one();
-  unsigned TrailZeroLHS = LHS.countMinTrailingZeros();
-  unsigned TrailZeroRHS = RHS.countMinTrailingZeros();
-  unsigned TrailZ = TrailZeroLHS + TrailZeroRHS;
+  గుర్తులేని Trail_బిట్లు_తెలిసిన_LHS = (LHS.Zero | LHS.One).countr_one();
+  గుర్తులేని Trail_బిట్లు_తెలిసిన_RHS = (RHS.Zero | RHS.One).countr_one();
+  గుర్తులేని TrailZeroLHS = LHS.లెక్క_Min_Trailing_Zeros();
+  గుర్తులేని TrailZeroRHS = RHS.లెక్క_Min_Trailing_Zeros();
+  గుర్తులేని TrailZ = TrailZeroLHS + TrailZeroRHS;
 
   // Figure out the fewest known-bits operand.
-  unsigned SmallestOperand = std::min(TrailBitsKnownLHS - TrailZeroLHS,
-                                      TrailBitsKnownRHS - TrailZeroRHS);
-  unsigned ResultBitsKnown = std::min(SmallestOperand + TrailZ, BitWidth);
+  గుర్తులేని అతిచిన్న_నిర్వాహ్యం = std::min(Trail_బిట్లు_తెలిసిన_LHS - TrailZeroLHS,
+                                      Trail_బిట్లు_తెలిసిన_RHS - TrailZeroRHS);
+  గుర్తులేని ఫలితం_బిట్లు_తెలిసిన = std::min(అతిచిన్న_నిర్వాహ్యం + TrailZ, బిట్టు_వెడల్పు_2);
 
   // The lower ResultBitsKnown bits of this are known.
-  APInt BottomKnown = LHS.One * RHS.One;
+  APInt Bottom_తెలిసిన = LHS.One * RHS.One;
 
-  KnownBits Res(BitWidth);
-  Res.Zero.setHighBits(LeadZ);
-  Res.Zero |= (~BottomKnown).getLoBits(ResultBitsKnown);
-  Res.One = BottomKnown.getLoBits(ResultBitsKnown);
+  తెలిసిన_బిట్లు Res(బిట్టు_వెడల్పు_2);
+  Res.Zero.సమితి_ఎగువ_బిట్లు(LeadZ);
+  Res.Zero |= (~Bottom_తెలిసిన).get_Lo_బిట్లు(ఫలితం_బిట్లు_తెలిసిన);
+  Res.One = Bottom_తెలిసిన.get_Lo_బిట్లు(ఫలితం_బిట్లు_తెలిసిన);
 
-  if (NoUndefSelfMultiply) {
+  ఒకవేళ (NoUndefSelfMultiply) {
     // If X has at least TZ trailing zeroes, then bit (2 * TZ + 1) must be zero.
-    unsigned TwoTZP1 = 2 * TrailZeroLHS + 1;
-    if (TwoTZP1 < BitWidth)
-      Res.Zero.setBit(TwoTZP1);
+    గుర్తులేని TwoTZP1 = 2 * TrailZeroLHS + 1;
+    ఒకవేళ (TwoTZP1 < బిట్టు_వెడల్పు_2)
+      Res.Zero.సమితి_బిట్టు(TwoTZP1);
 
     // If X has exactly TZ trailing zeros, then bit (2 * TZ + 2) must also be
     // zero.
-    if (TrailZeroLHS < BitWidth && LHS.One[TrailZeroLHS]) {
-      unsigned TwoTZP2 = TwoTZP1 + 1;
-      if (TwoTZP2 < BitWidth)
-        Res.Zero.setBit(TwoTZP2);
+    ఒకవేళ (TrailZeroLHS < బిట్టు_వెడల్పు_2 && LHS.One[TrailZeroLHS]) {
+      గుర్తులేని TwoTZP2 = TwoTZP1 + 1;
+      ఒకవేళ (TwoTZP2 < బిట్టు_వెడల్పు_2)
+        Res.Zero.సమితి_బిట్టు(TwoTZP2);
     }
   }
 
-  return Res;
+  తిరిగి Res;
 }
 
-KnownBits KnownBits::mulhs(const KnownBits &LHS, const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  assert(BitWidth == RHS.getBitWidth() && "Operand mismatch");
-  KnownBits WideLHS = LHS.sext(2 * BitWidth);
-  KnownBits WideRHS = RHS.sext(2 * BitWidth);
-  return mul(WideLHS, WideRHS).extractBits(BitWidth, BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::mulhs(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+  తెలిసిన_బిట్లు WideLHS = LHS.sext(2 * బిట్టు_వెడల్పు_2);
+  తెలిసిన_బిట్లు WideRHS = RHS.sext(2 * బిట్టు_వెడల్పు_2);
+  తిరిగి mul(WideLHS, WideRHS).వెలికితీయి_బిట్లు(బిట్టు_వెడల్పు_2, బిట్టు_వెడల్పు_2);
 }
 
-KnownBits KnownBits::mulhu(const KnownBits &LHS, const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  assert(BitWidth == RHS.getBitWidth() && "Operand mismatch");
-  KnownBits WideLHS = LHS.zext(2 * BitWidth);
-  KnownBits WideRHS = RHS.zext(2 * BitWidth);
-  return mul(WideLHS, WideRHS).extractBits(BitWidth, BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::mulhu(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+  తెలిసిన_బిట్లు WideLHS = LHS.zext(2 * బిట్టు_వెడల్పు_2);
+  తెలిసిన_బిట్లు WideRHS = RHS.zext(2 * బిట్టు_వెడల్పు_2);
+  తిరిగి mul(WideLHS, WideRHS).వెలికితీయి_బిట్లు(బిట్టు_వెడల్పు_2, బిట్టు_వెడల్పు_2);
 }
 
-static KnownBits divComputeLowBit(KnownBits Known, const KnownBits &LHS,
-                                  const KnownBits &RHS, bool Exact) {
+స్థిర తెలిసిన_బిట్లు div_Compute_దిగువ_బిట్టు(తెలిసిన_బిట్లు తెలిసిన, స్థిరరాశి తెలిసిన_బిట్లు &LHS,
+                                  స్థిరరాశి తెలిసిన_బిట్లు &RHS, తార్కిక Exact) {
 
-  if (!Exact)
-    return Known;
+  ఒకవేళ (!Exact)
+    తిరిగి తెలిసిన;
 
   // If LHS is Odd, the result is Odd no matter what.
   // Odd / Odd -> Odd
   // Odd / Even -> Impossible (because its exact division)
-  if (LHS.One[0])
-    Known.One.setBit(0);
+  ఒకవేళ (LHS.One[0])
+    తెలిసిన.One.సమితి_బిట్టు(0);
 
-  int MinTZ =
-      (int)LHS.countMinTrailingZeros() - (int)RHS.countMaxTrailingZeros();
-  int MaxTZ =
-      (int)LHS.countMaxTrailingZeros() - (int)RHS.countMinTrailingZeros();
-  if (MinTZ >= 0) {
+  పూర్ణాంకం MinTZ =
+      (పూర్ణాంకం)LHS.లెక్క_Min_Trailing_Zeros() - (పూర్ణాంకం)RHS.లెక్క_Max_Trailing_Zeros();
+  పూర్ణాంకం MaxTZ =
+      (పూర్ణాంకం)LHS.లెక్క_Max_Trailing_Zeros() - (పూర్ణాంకం)RHS.లెక్క_Min_Trailing_Zeros();
+  ఒకవేళ (MinTZ >= 0) {
     // Result has at least MinTZ trailing zeros.
-    Known.Zero.setLowBits(MinTZ);
-    if (MinTZ == MaxTZ) {
+    తెలిసిన.Zero.సమితి_దిగువ_బిట్లు(MinTZ);
+    ఒకవేళ (MinTZ == MaxTZ) {
       // Result has exactly MinTZ trailing zeros.
-      Known.One.setBit(MinTZ);
+      తెలిసిన.One.సమితి_బిట్టు(MinTZ);
     }
-  } else if (MaxTZ < 0) {
+  } లేకపోతే ఒకవేళ (MaxTZ < 0) {
     // Poison Result
-    Known.setAllZero();
+    తెలిసిన.సమితి_All_Zero();
   }
 
   // In the KnownBits exhaustive tests, we have poison inputs for exact values
   // a LOT. If we have a conflict, just return all zeros.
-  if (Known.hasConflict())
-    Known.setAllZero();
+  ఒకవేళ (తెలిసిన.hasConflict())
+    తెలిసిన.సమితి_All_Zero();
 
-  return Known;
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::sdiv(const KnownBits &LHS, const KnownBits &RHS,
-                          bool Exact) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::sdiv(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                          తార్కిక Exact) {
   // Equivalent of `udiv`. We must have caught this before it was folded.
-  if (LHS.isNonNegative() && RHS.isNonNegative())
-    return udiv(LHS, RHS, Exact);
+  ఒకవేళ (LHS.isNonNegative() && RHS.isNonNegative())
+    తిరిగి udiv(LHS, RHS, Exact);
 
-  unsigned BitWidth = LHS.getBitWidth();
-  KnownBits Known(BitWidth);
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
 
-  if (LHS.isZero() || RHS.isZero()) {
+  ఒకవేళ (LHS.isZero() || RHS.isZero()) {
     // Result is either known Zero or UB. Return Zero either way.
     // Checking this earlier saves us a lot of special cases later on.
-    Known.setAllZero();
-    return Known;
+    తెలిసిన.సమితి_All_Zero();
+    తిరిగి తెలిసిన;
   }
 
   std::optional<APInt> Res;
-  if (LHS.isNegative() && RHS.isNegative()) {
+  ఒకవేళ (LHS.isNegative() && RHS.isNegative()) {
     // Result non-negative.
-    APInt Denom = RHS.getSignedMaxValue();
-    APInt Num = LHS.getSignedMinValue();
+    APInt Denom = RHS.get_Signed_Max_విలువ();
+    APInt అంకె = LHS.get_Signed_Min_విలువ();
     // INT_MIN/-1 would be a poison result (impossible). Estimate the division
     // as signed max (we will only set sign bit in the result).
-    Res = (Num.isMinSignedValue() && Denom.isAllOnes())
-              ? APInt::getSignedMaxValue(BitWidth)
-              : Num.sdiv(Denom);
-  } else if (LHS.isNegative() && RHS.isNonNegative()) {
+    Res = (అంకె.is_Min_Signed_విలువ() && Denom.isAllOnes())
+              ? APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2)
+              : అంకె.sdiv(Denom);
+  } లేకపోతే ఒకవేళ (LHS.isNegative() && RHS.isNonNegative()) {
     // Result is negative if Exact OR -LHS u>= RHS.
-    if (Exact || (-LHS.getSignedMaxValue()).uge(RHS.getSignedMaxValue())) {
-      APInt Denom = RHS.getSignedMinValue();
-      APInt Num = LHS.getSignedMinValue();
+    ఒకవేళ (Exact || (-LHS.get_Signed_Max_విలువ()).uge(RHS.get_Signed_Max_విలువ())) {
+      APInt Denom = RHS.get_Signed_Min_విలువ();
+      APInt అంకె = LHS.get_Signed_Min_విలువ();
       // If the denominator may be zero, use the lowest unknown bit as the
       // minimum non-zero denominator, matching udiv.
-      if (Denom.isZero())
-        Denom.setBit(RHS.countMinTrailingZeros());
-      Res = Num.sdiv(Denom);
+      ఒకవేళ (Denom.isZero())
+        Denom.సమితి_బిట్టు(RHS.లెక్క_Min_Trailing_Zeros());
+      Res = అంకె.sdiv(Denom);
     }
-  } else if (LHS.isStrictlyPositive() && RHS.isNegative()) {
+  } లేకపోతే ఒకవేళ (LHS.is_Strictly_ధనాత్మక() && RHS.isNegative()) {
     // Result is negative if Exact OR LHS u>= -RHS.
-    if (Exact || LHS.getSignedMinValue().uge(-RHS.getSignedMinValue())) {
-      APInt Denom = RHS.getSignedMaxValue();
-      APInt Num = LHS.getSignedMaxValue();
-      Res = Num.sdiv(Denom);
+    ఒకవేళ (Exact || LHS.get_Signed_Min_విలువ().uge(-RHS.get_Signed_Min_విలువ())) {
+      APInt Denom = RHS.get_Signed_Max_విలువ();
+      APInt అంకె = LHS.get_Signed_Max_విలువ();
+      Res = అంకె.sdiv(Denom);
     }
   }
 
-  if (Res) {
-    if (Res->isNonNegative()) {
-      unsigned LeadZ = Res->countLeadingZeros();
-      Known.Zero.setHighBits(LeadZ);
-    } else {
-      unsigned LeadO = Res->countLeadingOnes();
-      Known.One.setHighBits(LeadO);
+  ఒకవేళ (Res) {
+    ఒకవేళ (Res->isNonNegative()) {
+      గుర్తులేని LeadZ = Res->లెక్క_Leading_Zeros();
+      తెలిసిన.Zero.సమితి_ఎగువ_బిట్లు(LeadZ);
+    } లేకపోతే {
+      గుర్తులేని LeadO = Res->లెక్క_Leading_Ones();
+      తెలిసిన.One.సమితి_ఎగువ_బిట్లు(LeadO);
     }
   }
 
-  Known = divComputeLowBit(Known, LHS, RHS, Exact);
-  return Known;
+  తెలిసిన = div_Compute_దిగువ_బిట్టు(తెలిసిన, LHS, RHS, Exact);
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::udiv(const KnownBits &LHS, const KnownBits &RHS,
-                          bool Exact) {
-  unsigned BitWidth = LHS.getBitWidth();
-  KnownBits Known(BitWidth);
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::udiv(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS,
+                          తార్కిక Exact) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
 
-  if (LHS.isZero() || RHS.isZero()) {
+  ఒకవేళ (LHS.isZero() || RHS.isZero()) {
     // Result is either known Zero or UB. Return Zero either way.
     // Checking this earlier saves us a lot of special cases later on.
-    Known.setAllZero();
-    return Known;
+    తెలిసిన.సమితి_All_Zero();
+    తిరిగి తెలిసిన;
   }
 
   // A zero denominator is UB, so the minimum attainable denominator is the
   // smallest non-zero value consistent with the known bits.
-  APInt MinDenom = RHS.getMinValue();
-  if (MinDenom.isZero())
-    MinDenom.setBit(RHS.countMinTrailingZeros());
+  APInt MinDenom = RHS.get_Min_విలువ();
+  ఒకవేళ (MinDenom.isZero())
+    MinDenom.సమితి_బిట్టు(RHS.లెక్క_Min_Trailing_Zeros());
 
   // The quotient grows when the numerator grows and shrinks when the
   // denominator grows, and all four operand bounds are attainable, so the
   // result is in [MinNum / MaxDenom, MaxNum / MinDenom]. Keep the common
   // leading bits of the two bounds (as ConstantRange::toKnownBits does),
   // which can include leading ones, not just leading zeros.
-  APInt MaxRes = LHS.getMaxValue().udiv(MinDenom);
-  APInt MinRes = LHS.getMinValue().udiv(RHS.getMaxValue());
+  APInt MaxRes = LHS.get_Max_విలువ().udiv(MinDenom);
+  APInt MinRes = LHS.get_Min_విలువ().udiv(RHS.get_Max_విలువ());
 
-  Known = KnownBits::makeConstant(MinRes);
-  if (std::optional<unsigned> DifferentBit =
-          APIntOps::GetMostSignificantDifferentBit(MinRes, MaxRes)) {
-    Known.Zero.clearLowBits(*DifferentBit + 1);
-    Known.One.clearLowBits(*DifferentBit + 1);
+  తెలిసిన = తెలిసిన_బిట్లు::makeConstant(MinRes);
+  ఒకవేళ (std::optional<గుర్తులేని> Different_బిట్టు =
+          APIntOps::Get_Most_Significant_Different_బిట్టు(MinRes, MaxRes)) {
+    తెలిసిన.Zero.clear_దిగువ_బిట్లు(*Different_బిట్టు + 1);
+    తెలిసిన.One.clear_దిగువ_బిట్లు(*Different_బిట్టు + 1);
   }
 
-  Known = divComputeLowBit(Known, LHS, RHS, Exact);
+  తెలిసిన = div_Compute_దిగువ_బిట్టు(తెలిసిన, LHS, RHS, Exact);
 
-  return Known;
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::remGetLowBits(const KnownBits &LHS, const KnownBits &RHS) {
-  unsigned BitWidth = LHS.getBitWidth();
-  if (!RHS.isZero() && RHS.Zero[0]) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::rem_Get_దిగువ_బిట్లు(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.get_బిట్టు_వెడల్పు();
+  ఒకవేళ (!RHS.isZero() && RHS.Zero[0]) {
     // rem X, Y where Y[0:N] is zero will preserve X[0:N] in the result.
-    unsigned RHSZeros = RHS.countMinTrailingZeros();
-    APInt Mask = APInt::getLowBitsSet(BitWidth, RHSZeros);
-    APInt OnesMask = LHS.One & Mask;
-    APInt ZerosMask = LHS.Zero & Mask;
-    return KnownBits(ZerosMask, OnesMask);
+    గుర్తులేని RHSZeros = RHS.లెక్క_Min_Trailing_Zeros();
+    APInt ముసుగు = APInt::get_దిగువ_బిట్లు_సమితి(బిట్టు_వెడల్పు_2, RHSZeros);
+    APInt Ones_ముసుగు = LHS.One & ముసుగు;
+    APInt Zeros_ముసుగు = LHS.Zero & ముసుగు;
+    తిరిగి తెలిసిన_బిట్లు(Zeros_ముసుగు, Ones_ముసుగు);
   }
-  return KnownBits(BitWidth);
+  తిరిగి తెలిసిన_బిట్లు(బిట్టు_వెడల్పు_2);
 }
 
-KnownBits KnownBits::urem(const KnownBits &LHS, const KnownBits &RHS) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::urem(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // L % R for L < R is L. (A zero divisor is UB, and if MinR is zero this
   // condition cannot hold anyway.)
-  if (LHS.getMaxValue().ult(RHS.getMinValue()))
-    return LHS;
+  ఒకవేళ (LHS.get_Max_విలువ().ult(RHS.get_Min_విలువ()))
+    తిరిగి LHS;
 
-  KnownBits Known = remGetLowBits(LHS, RHS);
+  తెలిసిన_బిట్లు తెలిసిన = rem_Get_దిగువ_బిట్లు(LHS, RHS);
 
   // L % R is at most L and, since a zero divisor is UB, strictly less than
   // R, so the result has at least as many leading zeros as
@@ -1349,127 +1349,127 @@ KnownBits KnownBits::urem(const KnownBits &LHS, const KnownBits &RHS) {
   // constant R this computes the exact L & (R - 1): remGetLowBits preserved
   // the low bits and this clears the bits from log2(R) up. If R is known to
   // be zero, MaxR - 1 wraps around, which is harmless: every input is UB.
-  APInt MaxRes = APIntOps::umin(LHS.getMaxValue(), RHS.getMaxValue() - 1);
-  Known.Zero.setHighBits(MaxRes.countLeadingZeros());
-  return Known;
+  APInt MaxRes = APIntOps::umin(LHS.get_Max_విలువ(), RHS.get_Max_విలువ() - 1);
+  తెలిసిన.Zero.సమితి_ఎగువ_బిట్లు(MaxRes.లెక్క_Leading_Zeros());
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::srem(const KnownBits &LHS, const KnownBits &RHS) {
-  KnownBits Known = remGetLowBits(LHS, RHS);
-  if (RHS.isConstant() && RHS.getConstant().isPowerOf2()) {
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::srem(స్థిరరాశి తెలిసిన_బిట్లు &LHS, స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
+  తెలిసిన_బిట్లు తెలిసిన = rem_Get_దిగువ_బిట్లు(LHS, RHS);
+  ఒకవేళ (RHS.isConstant() && RHS.getConstant().isPowerOf2()) {
     // NB: Low bits are set in `remGetLowBits`.
-    APInt LowBits = RHS.getConstant() - 1;
+    APInt దిగువ_బిట్లు = RHS.getConstant() - 1;
     // If the first operand is non-negative or has all low bits zero, then
     // the upper bits are all zero.
-    if (LHS.isNonNegative() || LowBits.isSubsetOf(LHS.Zero))
-      Known.Zero |= ~LowBits;
+    ఒకవేళ (LHS.isNonNegative() || దిగువ_బిట్లు.is_Subset_యొక్క(LHS.Zero))
+      తెలిసిన.Zero |= ~దిగువ_బిట్లు;
 
     // If the first operand is negative and not all low bits are zero, then
     // the upper bits are all one.
-    if (LHS.isNegative() && LowBits.intersects(LHS.One))
-      Known.One |= ~LowBits;
-    return Known;
+    ఒకవేళ (LHS.isNegative() && దిగువ_బిట్లు.intersects(LHS.One))
+      తెలిసిన.One |= ~దిగువ_బిట్లు;
+    తిరిగి తెలిసిన;
   }
 
   // The sign bit is the LHS's sign bit, except when the result of the
   // remainder is zero. The magnitude of the result should be less than or
   // equal to the magnitude of either operand.
-  if (LHS.isNegative() && Known.isNonZero())
-    Known.One.setHighBits(
-        std::max(LHS.countMinLeadingOnes(), RHS.countMinSignBits()));
-  else if (LHS.isNonNegative())
-    Known.Zero.setHighBits(
-        std::max(LHS.countMinLeadingZeros(), RHS.countMinSignBits()));
-  return Known;
+  ఒకవేళ (LHS.isNegative() && తెలిసిన.isNonZero())
+    తెలిసిన.One.సమితి_ఎగువ_బిట్లు(
+        std::max(LHS.లెక్క_Min_Leading_Ones(), RHS.లెక్క_Min_Sign_బిట్లు()));
+  లేకపోతే ఒకవేళ (LHS.isNonNegative())
+    తెలిసిన.Zero.సమితి_ఎగువ_బిట్లు(
+        std::max(LHS.లెక్క_Min_Leading_Zeros(), RHS.లెక్క_Min_Sign_బిట్లు()));
+  తిరిగి తెలిసిన;
 }
 
-KnownBits &KnownBits::operator&=(const KnownBits &RHS) {
+తెలిసిన_బిట్లు &తెలిసిన_బిట్లు::క్రియాకారకం&=(స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // Result bit is 0 if either operand bit is 0.
   Zero |= RHS.Zero;
   // Result bit is 1 if both operand bits are 1.
   One &= RHS.One;
-  return *this;
+  తిరిగి *ఇది;
 }
 
-KnownBits &KnownBits::operator|=(const KnownBits &RHS) {
+తెలిసిన_బిట్లు &తెలిసిన_బిట్లు::క్రియాకారకం|=(స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // Result bit is 0 if both operand bits are 0.
   Zero &= RHS.Zero;
   // Result bit is 1 if either operand bit is 1.
   One |= RHS.One;
-  return *this;
+  తిరిగి *ఇది;
 }
 
-KnownBits &KnownBits::operator^=(const KnownBits &RHS) {
+తెలిసిన_బిట్లు &తెలిసిన_బిట్లు::క్రియాకారకం^=(స్థిరరాశి తెలిసిన_బిట్లు &RHS) {
   // Result bit is 0 if both operand bits are 0 or both are 1.
   APInt Z = (Zero & RHS.Zero) | (One & RHS.One);
   // Result bit is 1 if one operand bit is 0 and the other is 1.
   One = (Zero & RHS.One) | (One & RHS.Zero);
   Zero = std::move(Z);
-  return *this;
+  తిరిగి *ఇది;
 }
 
-KnownBits KnownBits::blsi() const {
-  unsigned BitWidth = getBitWidth();
-  KnownBits Known(Zero, APInt(BitWidth, 0));
-  unsigned Max = countMaxTrailingZeros();
-  Known.Zero.setBitsFrom(std::min(Max + 1, BitWidth));
-  unsigned Min = countMinTrailingZeros();
-  if (Max == Min && Max < BitWidth)
-    Known.One.setBit(Max);
-  return Known;
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::blsi() స్థిరరాశి {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు తెలిసిన(Zero, APInt(బిట్టు_వెడల్పు_2, 0));
+  గుర్తులేని Max = లెక్క_Max_Trailing_Zeros();
+  తెలిసిన.Zero.సమితి_బిట్లు_From(std::min(Max + 1, బిట్టు_వెడల్పు_2));
+  గుర్తులేని Min = లెక్క_Min_Trailing_Zeros();
+  ఒకవేళ (Max == Min && Max < బిట్టు_వెడల్పు_2)
+    తెలిసిన.One.సమితి_బిట్టు(Max);
+  తిరిగి తెలిసిన;
 }
 
-KnownBits KnownBits::blsmsk() const {
-  unsigned BitWidth = getBitWidth();
-  KnownBits Known(BitWidth);
-  unsigned Max = countMaxTrailingZeros();
-  Known.Zero.setBitsFrom(std::min(Max + 1, BitWidth));
-  unsigned Min = countMinTrailingZeros();
-  Known.One.setLowBits(std::min(Min + 1, BitWidth));
-  return Known;
+తెలిసిన_బిట్లు తెలిసిన_బిట్లు::blsmsk() స్థిరరాశి {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = get_బిట్టు_వెడల్పు();
+  తెలిసిన_బిట్లు తెలిసిన(బిట్టు_వెడల్పు_2);
+  గుర్తులేని Max = లెక్క_Max_Trailing_Zeros();
+  తెలిసిన.Zero.సమితి_బిట్లు_From(std::min(Max + 1, బిట్టు_వెడల్పు_2));
+  గుర్తులేని Min = లెక్క_Min_Trailing_Zeros();
+  తెలిసిన.One.సమితి_దిగువ_బిట్లు(std::min(Min + 1, బిట్టు_వెడల్పు_2));
+  తిరిగి తెలిసిన;
 }
 
-void KnownBits::print(raw_ostream &OS) const {
-  unsigned BitWidth = getBitWidth();
-  for (unsigned I = 0; I < BitWidth; ++I) {
-    unsigned N = BitWidth - I - 1;
-    if (Zero[N] && One[N])
+శూన్య తెలిసిన_బిట్లు::print(raw_ostream &OS) స్థిరరాశి {
+  గుర్తులేని బిట్టు_వెడల్పు_2 = get_బిట్టు_వెడల్పు();
+  కొరకు (గుర్తులేని I = 0; I < బిట్టు_వెడల్పు_2; ++I) {
+    గుర్తులేని N = బిట్టు_వెడల్పు_2 - I - 1;
+    ఒకవేళ (Zero[N] && One[N])
       OS << "!";
-    else if (Zero[N])
+    లేకపోతే ఒకవేళ (Zero[N])
       OS << "0";
-    else if (One[N])
+    లేకపోతే ఒకవేళ (One[N])
       OS << "1";
-    else
+    లేకపోతే
       OS << "?";
   }
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void KnownBits::dump() const {
+#ఒకవేళ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_పద్ధతి శూన్య తెలిసిన_బిట్లు::dump() స్థిరరాశి {
   print(dbgs());
   dbgs() << "\n";
 }
-#endif
+#అయితే_ముగింపు
 
-unsigned llvm::SignBitsOps::rot(unsigned SrcSignBits, unsigned BitWidth,
+గుర్తులేని llvm::Sign_బిట్లు_Ops::rot(గుర్తులేని Src_Sign_బిట్లు, గుర్తులేని బిట్టు_వెడల్పు_2,
                                 std::optional<APInt> RotAmt,
-                                bool IsRotateRight) {
+                                తార్కిక Is_Rotate_కుడి) {
   // If we're rotating an 0/-1 value, then it stays an 0/-1 value.
-  if (SrcSignBits == BitWidth)
-    return BitWidth;
+  ఒకవేళ (Src_Sign_బిట్లు == బిట్టు_వెడల్పు_2)
+    తిరిగి బిట్టు_వెడల్పు_2;
 
-  if (!RotAmt)
-    return 1;
+  ఒకవేళ (!RotAmt)
+    తిరిగి 1;
 
-  unsigned Amt = RotAmt->urem(BitWidth);
+  గుర్తులేని Amt = RotAmt->urem(బిట్టు_వెడల్పు_2);
 
   // Handle rotate right by N like a rotate left by BitWidth-N.
-  if (IsRotateRight)
-    Amt = (BitWidth - Amt) % BitWidth;
+  ఒకవేళ (Is_Rotate_కుడి)
+    Amt = (బిట్టు_వెడల్పు_2 - Amt) % బిట్టు_వెడల్పు_2;
 
   // If we aren't rotating out all of the known-in sign bits, return the
   // number that are left. This handles rotl(sext(x), 1) for example.
-  if (SrcSignBits > Amt + 1)
-    return SrcSignBits - Amt;
-  return 1;
+  ఒకవేళ (Src_Sign_బిట్లు > Amt + 1)
+    తిరిగి Src_Sign_బిట్లు - Amt;
+  తిరిగి 1;
 }

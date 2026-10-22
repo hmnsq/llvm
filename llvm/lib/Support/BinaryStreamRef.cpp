@@ -6,118 +6,118 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/BinaryByteStream.h"
+#అన్తర్భావ "llvm/Support/BinaryStreamRef.h"
+#అన్తర్భావ "llvm/Support/BinaryByteStream.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-namespace {
+నామాకాశ {
 
-class ArrayRefImpl : public BinaryStream {
-public:
-  ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
+తరగతి ArrayRefImpl : బహిరంగ ద్విమాన_ప్రవాహం {
+బహిరంగ:
+  ArrayRefImpl(ArrayRef<uint8_t> దత్తాంశం_2, endianness Endian) : BBS(దత్తాంశం_2, Endian) {}
 
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() స్థిరరాశి override { తిరిగి BBS.getEndian(); }
+  Error read_బైట్లు(uint64_t స్థానభ్రంశం, uint64_t కొలత,
+                  ArrayRef<uint8_t> &బఫరు) override {
+    తిరిగి BBS.read_బైట్లు(స్థానభ్రంశం, కొలత, బఫరు);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t స్థానభ్రంశం,
+                                   ArrayRef<uint8_t> &బఫరు) override {
+    తిరిగి BBS.readLongestContiguousChunk(స్థానభ్రంశం, బఫరు);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_నిడివి() override { తిరిగి BBS.get_నిడివి(); }
 
-private:
-  BinaryByteStream BBS;
+అంతరంగ:
+  ద్విమాన_Byte_ప్రవాహం BBS;
 };
 
-class MutableArrayRefImpl : public WritableBinaryStream {
-public:
-  MutableArrayRefImpl(MutableArrayRef<uint8_t> Data, endianness Endian)
-      : BBS(Data, Endian) {}
+తరగతి MutableArrayRefImpl : బహిరంగ Writable_ద్విమాన_ప్రవాహం {
+బహిరంగ:
+  MutableArrayRefImpl(MutableArrayRef<uint8_t> దత్తాంశం_2, endianness Endian)
+      : BBS(దత్తాంశం_2, Endian) {}
 
   // Inherited via WritableBinaryStream
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() స్థిరరాశి override { తిరిగి BBS.getEndian(); }
+  Error read_బైట్లు(uint64_t స్థానభ్రంశం, uint64_t కొలత,
+                  ArrayRef<uint8_t> &బఫరు) override {
+    తిరిగి BBS.read_బైట్లు(స్థానభ్రంశం, కొలత, బఫరు);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t స్థానభ్రంశం,
+                                   ArrayRef<uint8_t> &బఫరు) override {
+    తిరిగి BBS.readLongestContiguousChunk(స్థానభ్రంశం, బఫరు);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_నిడివి() override { తిరిగి BBS.get_నిడివి(); }
 
-  Error writeBytes(uint64_t Offset, ArrayRef<uint8_t> Data) override {
-    return BBS.writeBytes(Offset, Data);
+  Error write_బైట్లు(uint64_t స్థానభ్రంశం, ArrayRef<uint8_t> దత్తాంశం_2) override {
+    తిరిగి BBS.write_బైట్లు(స్థానభ్రంశం, దత్తాంశం_2);
   }
-  Error commit() override { return BBS.commit(); }
+  Error commit() override { తిరిగి BBS.commit(); }
 
-private:
-  MutableBinaryByteStream BBS;
+అంతరంగ:
+  Mutable_ద్విమాన_Byte_ప్రవాహం BBS;
 };
 } // namespace
 
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream, uint64_t Offset,
-                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
-BinaryStreamRef::BinaryStreamRef(ArrayRef<uint8_t> Data, endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
-                          Data.size()) {}
-BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
-    : BinaryStreamRef(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
+ద్విమాన_ప్రవాహం_Ref::ద్విమాన_ప్రవాహం_Ref(ద్విమాన_ప్రవాహం &ప్రవాహం)
+    : ద్విమాన_ప్రవాహం_Ref_పునాది(ప్రవాహం) {}
+ద్విమాన_ప్రవాహం_Ref::ద్విమాన_ప్రవాహం_Ref(ద్విమాన_ప్రవాహం &ప్రవాహం, uint64_t స్థానభ్రంశం,
+                                 std::optional<uint64_t> నిడివి)
+    : ద్విమాన_ప్రవాహం_Ref_పునాది(ప్రవాహం, స్థానభ్రంశం, నిడివి) {}
+ద్విమాన_ప్రవాహం_Ref::ద్విమాన_ప్రవాహం_Ref(ArrayRef<uint8_t> దత్తాంశం_2, endianness Endian)
+    : ద్విమాన_ప్రవాహం_Ref_పునాది(std::make_shared<ArrayRefImpl>(దత్తాంశం_2, Endian), 0,
+                          దత్తాంశం_2.కొలత_2()) {}
+ద్విమాన_ప్రవాహం_Ref::ద్విమాన_ప్రవాహం_Ref(StringRef దత్తాంశం_2, endianness Endian)
+    : ద్విమాన_ప్రవాహం_Ref(ArrayRef(దత్తాంశం_2.బైట్లు_begin(), దత్తాంశం_2.బైట్లు_చివర()), Endian) {}
 
-Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
-                                 ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, Size))
-    return EC;
-  return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
+Error ద్విమాన_ప్రవాహం_Ref::read_బైట్లు(uint64_t స్థానభ్రంశం, uint64_t కొలత,
+                                 ArrayRef<uint8_t> &బఫరు) స్థిరరాశి {
+  ఒకవేళ (స్వయంచాలక EC = check_స్థానభ్రంశం_For_Read(స్థానభ్రంశం, కొలత))
+    తిరిగి EC;
+  తిరిగి BorrowedImpl->read_బైట్లు(View_స్థానభ్రంశం + స్థానభ్రంశం, కొలత, బఫరు);
 }
 
-Error BinaryStreamRef::readLongestContiguousChunk(
-    uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, 1))
-    return EC;
+Error ద్విమాన_ప్రవాహం_Ref::readLongestContiguousChunk(
+    uint64_t స్థానభ్రంశం, ArrayRef<uint8_t> &బఫరు) స్థిరరాశి {
+  ఒకవేళ (స్వయంచాలక EC = check_స్థానభ్రంశం_For_Read(స్థానభ్రంశం, 1))
+    తిరిగి EC;
 
-  if (auto EC =
-          BorrowedImpl->readLongestContiguousChunk(ViewOffset + Offset, Buffer))
-    return EC;
+  ఒకవేళ (స్వయంచాలక EC =
+          BorrowedImpl->readLongestContiguousChunk(View_స్థానభ్రంశం + స్థానభ్రంశం, బఫరు))
+    తిరిగి EC;
   // This StreamRef might refer to a smaller window over a larger stream.  In
   // that case we will have read out more bytes than we should return, because
   // we should not read past the end of the current view.
-  uint64_t MaxLength = getLength() - Offset;
-  if (Buffer.size() > MaxLength)
-    Buffer = Buffer.slice(0, MaxLength);
-  return Error::success();
+  uint64_t Max_నిడివి = get_నిడివి() - స్థానభ్రంశం;
+  ఒకవేళ (బఫరు.కొలత_2() > Max_నిడివి)
+    బఫరు = బఫరు.ముక్క(0, Max_నిడివి);
+  తిరిగి Error::success();
 }
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
+Writable_ద్విమాన_ప్రవాహం_Ref::Writable_ద్విమాన_ప్రవాహం_Ref(Writable_ద్విమాన_ప్రవాహం &ప్రవాహం)
+    : ద్విమాన_ప్రవాహం_Ref_పునాది(ప్రవాహం) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream,
-                                                 uint64_t Offset,
-                                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
+Writable_ద్విమాన_ప్రవాహం_Ref::Writable_ద్విమాన_ప్రవాహం_Ref(Writable_ద్విమాన_ప్రవాహం &ప్రవాహం,
+                                                 uint64_t స్థానభ్రంశం,
+                                                 std::optional<uint64_t> నిడివి)
+    : ద్విమాన_ప్రవాహం_Ref_పునాది(ప్రవాహం, స్థానభ్రంశం, నిడివి) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
+Writable_ద్విమాన_ప్రవాహం_Ref::Writable_ద్విమాన_ప్రవాహం_Ref(MutableArrayRef<uint8_t> దత్తాంశం_2,
                                                  endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<MutableArrayRefImpl>(Data, Endian),
-                          0, Data.size()) {}
+    : ద్విమాన_ప్రవాహం_Ref_పునాది(std::make_shared<MutableArrayRefImpl>(దత్తాంశం_2, Endian),
+                          0, దత్తాంశం_2.కొలత_2()) {}
 
-Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
-                                          ArrayRef<uint8_t> Data) const {
-  if (auto EC = checkOffsetForWrite(Offset, Data.size()))
-    return EC;
+Error Writable_ద్విమాన_ప్రవాహం_Ref::write_బైట్లు(uint64_t స్థానభ్రంశం,
+                                          ArrayRef<uint8_t> దత్తాంశం_2) స్థిరరాశి {
+  ఒకవేళ (స్వయంచాలక EC = check_స్థానభ్రంశం_For_Write(స్థానభ్రంశం, దత్తాంశం_2.కొలత_2()))
+    తిరిగి EC;
 
-  return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
+  తిరిగి BorrowedImpl->write_బైట్లు(View_స్థానభ్రంశం + స్థానభ్రంశం, దత్తాంశం_2);
 }
 
-WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+Writable_ద్విమాన_ప్రవాహం_Ref::క్రియాకారకం ద్విమాన_ప్రవాహం_Ref() స్థిరరాశి {
+  తిరిగి ద్విమాన_ప్రవాహం_Ref(*BorrowedImpl, View_స్థానభ్రంశం, నిడివి);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error Writable_ద్విమాన_ప్రవాహం_Ref::commit() { తిరిగి BorrowedImpl->commit(); }

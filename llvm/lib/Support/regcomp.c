@@ -35,26 +35,26 @@
  *	@(#)regcomp.c	8.5 (Berkeley) 3/20/94
  */
 
-#include "regex_impl.h"
-#include <ctype.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+#అన్తర్భావ "regex_impl.h"
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <stdint.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/types.h>
 
-#include "regex2.h"
-#include "regutils.h"
+#అన్తర్భావ "regex2.h"
+#అన్తర్భావ "regutils.h"
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Support/Compiler.h"
 
 /* character-class table */
-static struct cclass {
-  const char *name;
-  const char *chars;
-  const char *multis;
+స్థిర నిర్మాణం cclass {
+  స్థిరరాశి అక్షరం *name;
+  స్థిరరాశి అక్షరం *chars;
+  స్థిరరాశి అక్షరం *multis;
 } cclasses[] = {
     {"alnum", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\
 0123456789",
@@ -76,12 +76,12 @@ static struct cclass {
     {"space", "\t\n\v\f\r ", ""},
     {"upper", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", ""},
     {"xdigit", "0123456789ABCDEFabcdef", ""},
-    {NULL, 0, ""}};
+    {ఖాళీ, 0, ""}};
 
 /* character-name table */
-static struct cname {
-  const char *name;
-  char code;
+స్థిర నిర్మాణం cname {
+  స్థిరరాశి అక్షరం *name;
+  అక్షరం సంకేతం_3;
 } cnames[] = {{"NUL", '\0'},
               {"SOH", '\001'},
               {"STX", '\002'},
@@ -177,186 +177,186 @@ static struct cname {
               {"right-curly-bracket", '}'},
               {"tilde", '~'},
               {"DEL", '\177'},
-              {NULL, 0}};
+              {ఖాళీ, 0}};
 
 /*
  * parse structure, passed up and down to avoid global variables and
  * other clumsinesses
  */
-struct parse {
-  const char *next; /* next character in RE */
-  const char *end;  /* end of string (-> NUL normally) */
-  int error;        /* has an error been seen? */
+నిర్మాణం parse {
+  స్థిరరాశి అక్షరం *తదుపరి; /* next character in RE */
+  స్థిరరాశి అక్షరం *చివర;  /* end of string (-> NUL normally) */
+  పూర్ణాంకం error;        /* has an error been seen? */
   sop *strip;       /* malloced strip */
   sopno ssize;      /* malloced strip size (allocated) */
   sopno slen;       /* malloced strip length (used) */
-  int ncsalloc;     /* number of csets allocated */
-  struct re_guts *g;
-#define NPAREN 21       /* we need to remember () 1-20 for back refs */
+  పూర్ణాంకం ncsalloc;     /* number of csets allocated */
+  నిర్మాణం re_guts *g;
+#నిర్వచించు NPAREN 21       /* we need to remember () 1-20 for back refs */
   sopno pbegin[NPAREN]; /* -> ( ([0] unused) */
   sopno pend[NPAREN];   /* -> ) ([0] unused) */
 };
 
-static void p_ere(struct parse *, int);
-static void p_ere_exp(struct parse *);
-static void p_str(struct parse *);
-static void p_bre(struct parse *, int, int);
-static int p_simp_re(struct parse *, int);
-static int p_count(struct parse *);
-static void p_bracket(struct parse *);
-static void p_b_term(struct parse *, cset *);
-static void p_b_cclass(struct parse *, cset *);
-static void p_b_eclass(struct parse *, cset *);
-static char p_b_symbol(struct parse *);
-static char p_b_coll_elem(struct parse *, int);
-static char othercase(int);
-static void bothcases(struct parse *, int);
-static void uncased(struct parse *, int);
-static void ordinary(struct parse *, int);
-static void nonnewline(struct parse *);
-static void repeat(struct parse *, sopno, int, int);
-static int seterr(struct parse *, int);
-static cset *allocset(struct parse *);
-static void freeset(struct parse *, cset *);
-static int freezeset(struct parse *, cset *);
-static int firstch(struct parse *, cset *);
-static int nch(struct parse *, cset *);
-static void mcadd(struct parse *, cset *, const char *);
-static void mcinvert(struct parse *, cset *);
-static void mccase(struct parse *, cset *);
-static int isinsets(struct re_guts *, int);
-static int samesets(struct re_guts *, int, int);
-static void categorize(struct parse *, struct re_guts *);
-static sopno dupl(struct parse *, sopno, sopno);
-static void doemit(struct parse *, sop, size_t);
-static void doinsert(struct parse *, sop, size_t, sopno);
-static void dofwd(struct parse *, sopno, sop);
-static void enlarge(struct parse *, sopno);
-static void stripsnug(struct parse *, struct re_guts *);
-static void findmust(struct parse *, struct re_guts *);
-static sopno pluscount(struct parse *, struct re_guts *);
+స్థిర శూన్య p_ere(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర శూన్య p_ere_exp(నిర్మాణం parse *);
+స్థిర శూన్య p_str(నిర్మాణం parse *);
+స్థిర శూన్య p_bre(నిర్మాణం parse *, పూర్ణాంకం, పూర్ణాంకం);
+స్థిర పూర్ణాంకం p_simp_re(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర పూర్ణాంకం p_లెక్క(నిర్మాణం parse *);
+స్థిర శూన్య p_bracket(నిర్మాణం parse *);
+స్థిర శూన్య p_b_పదం(నిర్మాణం parse *, cset *);
+స్థిర శూన్య p_b_cclass(నిర్మాణం parse *, cset *);
+స్థిర శూన్య p_b_eclass(నిర్మాణం parse *, cset *);
+స్థిర అక్షరం p_b_చిహ్నం(నిర్మాణం parse *);
+స్థిర అక్షరం p_b_coll_elem(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర అక్షరం othercase(పూర్ణాంకం);
+స్థిర శూన్య bothcases(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర శూన్య uncased(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర శూన్య ordinary(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర శూన్య nonnewline(నిర్మాణం parse *);
+స్థిర శూన్య repeat(నిర్మాణం parse *, sopno, పూర్ణాంకం, పూర్ణాంకం);
+స్థిర పూర్ణాంకం seterr(నిర్మాణం parse *, పూర్ణాంకం);
+స్థిర cset *allocset(నిర్మాణం parse *);
+స్థిర శూన్య freeset(నిర్మాణం parse *, cset *);
+స్థిర పూర్ణాంకం freezeset(నిర్మాణం parse *, cset *);
+స్థిర పూర్ణాంకం firstch(నిర్మాణం parse *, cset *);
+స్థిర పూర్ణాంకం nch(నిర్మాణం parse *, cset *);
+స్థిర శూన్య mcadd(నిర్మాణం parse *, cset *, స్థిరరాశి అక్షరం *);
+స్థిర శూన్య mcinvert(నిర్మాణం parse *, cset *);
+స్థిర శూన్య mccase(నిర్మాణం parse *, cset *);
+స్థిర పూర్ణాంకం isinsets(నిర్మాణం re_guts *, పూర్ణాంకం);
+స్థిర పూర్ణాంకం samesets(నిర్మాణం re_guts *, పూర్ణాంకం, పూర్ణాంకం);
+స్థిర శూన్య categorize(నిర్మాణం parse *, నిర్మాణం re_guts *);
+స్థిర sopno dupl(నిర్మాణం parse *, sopno, sopno);
+స్థిర శూన్య doemit(నిర్మాణం parse *, sop, size_t);
+స్థిర శూన్య doinsert(నిర్మాణం parse *, sop, size_t, sopno);
+స్థిర శూన్య dofwd(నిర్మాణం parse *, sopno, sop);
+స్థిర శూన్య enlarge(నిర్మాణం parse *, sopno);
+స్థిర శూన్య stripsnug(నిర్మాణం parse *, నిర్మాణం re_guts *);
+స్థిర శూన్య findmust(నిర్మాణం parse *, నిర్మాణం re_guts *);
+స్థిర sopno pluscount(నిర్మాణం parse *, నిర్మాణం re_guts *);
 
-static char nuls[10]; /* place to point scanner in event of error */
+స్థిర అక్షరం nuls[10]; /* place to point scanner in event of error */
 
 /*
  * macros for use with parse structure
  * BEWARE:  these know that the parse structure is named `p' !!!
  */
-#define PEEK() (*p->next)
-#define PEEK2() (*(p->next + 1))
-#define MORE() (p->end - p->next > 0)
-#define MORE2() (p->end - p->next > 1)
-#define SEE(c) (MORE() && PEEK() == (c))
-#define SEETWO(a, b) (MORE2() && PEEK() == (a) && PEEK2() == (b))
-#define EAT(c) ((SEE(c)) ? (NEXT(), 1) : 0)
-#define EATTWO(a, b) ((SEETWO(a, b)) ? (NEXT2(), 1) : 0)
-#define NEXT() (p->next++)
-#define NEXT2() (p->next += 2)
-#define NEXTn(n) (p->next += (n))
-#define GETNEXT() (*p->next++)
-#define SETERROR(e) seterr(p, (e))
-#define REQUIRE(co, e) (void)((co) || SETERROR(e))
-#define MUSTSEE(c, e) (REQUIRE(MORE() && PEEK() == (c), e))
-#define MUSTEAT(c, e) (REQUIRE(MORE() && GETNEXT() == (c), e))
-#define MUSTNOTSEE(c, e) (REQUIRE(!MORE() || PEEK() != (c), e))
-#define EMIT(op, sopnd) doemit(p, (sop)(op), (size_t)(sopnd))
-#define INSERT(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
-#define AHEAD(pos) dofwd(p, pos, HERE() - (pos))
-#define ASTERN(sop, pos) EMIT(sop, HERE() - pos)
-#define HERE() (p->slen)
-#define THERE() (p->slen - 1)
-#define THERETHERE() (p->slen - 2)
-#define DROP(n) (p->slen -= (n))
+#నిర్వచించు PEEK() (*p->తదుపరి)
+#నిర్వచించు PEEK2() (*(p->తదుపరి + 1))
+#నిర్వచించు మరిన్ని() (p->చివర - p->తదుపరి > 0)
+#నిర్వచించు MORE2() (p->చివర - p->తదుపరి > 1)
+#నిర్వచించు SEE(c) (మరిన్ని() && PEEK() == (c))
+#నిర్వచించు SEETWO(a, b) (MORE2() && PEEK() == (a) && PEEK2() == (b))
+#నిర్వచించు EAT(c) ((SEE(c)) ? (తదుపరి_3(), 1) : 0)
+#నిర్వచించు EATTWO(a, b) ((SEETWO(a, b)) ? (NEXT2(), 1) : 0)
+#నిర్వచించు తదుపరి_3() (p->తదుపరి++)
+#నిర్వచించు NEXT2() (p->తదుపరి += 2)
+#నిర్వచించు NEXTn(n) (p->తదుపరి += (n))
+#నిర్వచించు GETNEXT() (*p->తదుపరి++)
+#నిర్వచించు SETERROR(e) seterr(p, (e))
+#నిర్వచించు REQUIRE(co, e) (శూన్య)((co) || SETERROR(e))
+#నిర్వచించు MUSTSEE(c, e) (REQUIRE(మరిన్ని() && PEEK() == (c), e))
+#నిర్వచించు MUSTEAT(c, e) (REQUIRE(మరిన్ని() && GETNEXT() == (c), e))
+#నిర్వచించు MUSTNOTSEE(c, e) (REQUIRE(!మరిన్ని() || PEEK() != (c), e))
+#నిర్వచించు EMIT(op, sopnd) doemit(p, (sop)(op), (size_t)(sopnd))
+#నిర్వచించు చొప్పించు_3(op, pos) doinsert(p, (sop)(op), ఇక్కడ() - (pos) + 1, pos)
+#నిర్వచించు AHEAD(pos) dofwd(p, pos, ఇక్కడ() - (pos))
+#నిర్వచించు ASTERN(sop, pos) EMIT(sop, ఇక్కడ() - pos)
+#నిర్వచించు ఇక్కడ() (p->slen)
+#నిర్వచించు THERE() (p->slen - 1)
+#నిర్వచించు THERETHERE() (p->slen - 2)
+#నిర్వచించు DROP(n) (p->slen -= (n))
 
-#ifdef _POSIX2_RE_DUP_MAX
-#define DUPMAX _POSIX2_RE_DUP_MAX
-#else
-#define DUPMAX 255
-#endif
-#define REGINFINITY (DUPMAX + 1)
+#నిర్వచితమైతే _POSIX2_RE_DUP_MAX
+#నిర్వచించు DUPMAX _POSIX2_RE_DUP_MAX
+#లేకపోతే
+#నిర్వచించు DUPMAX 255
+#అయితే_ముగింపు
+#నిర్వచించు REGINFINITY (DUPMAX + 1)
 
-#ifndef NDEBUG
-static int never = 0; /* for use in asserts; shuts lint up */
-#else
-#define never 0 /* some <assert.h>s have bugs too */
-#endif
+#నిర్వచితం_కాకపోతే NDEBUG
+స్థిర పూర్ణాంకం never = 0; /* for use in asserts; shuts lint up */
+#లేకపోతే
+#నిర్వచించు never 0 /* some <assert.h>s have bugs too */
+#అయితే_ముగింపు
 
 /*
  - llvm_regcomp - interface for parser and compilation
  */
-int /* 0 success, otherwise REG_something */
-llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
-  struct parse pa;
-  struct re_guts *g;
-  struct parse *p = &pa;
-  int i;
+పూర్ణాంకం /* 0 success, otherwise REG_something */
+llvm_regcomp(llvm_regex_t *preg, స్థిరరాశి అక్షరం *నమూనా_2, పూర్ణాంకం cflags) {
+  నిర్మాణం parse pa;
+  నిర్మాణం re_guts *g;
+  నిర్మాణం parse *p = &pa;
+  పూర్ణాంకం i;
   size_t len;
-#ifdef REDEBUG
-#define GOODFLAGS(f) (f)
-#else
-#define GOODFLAGS(f) ((f) & ~REG_DUMP)
-#endif
+#నిర్వచితమైతే REDEBUG
+#నిర్వచించు GOODFLAGS(f) (f)
+#లేకపోతే
+#నిర్వచించు GOODFLAGS(f) ((f) & ~REG_DUMP)
+#అయితే_ముగింపు
 
   cflags = GOODFLAGS(cflags);
-  if ((cflags & REG_EXTENDED) && (cflags & REG_NOSPEC))
-    return (REG_INVARG);
+  ఒకవేళ ((cflags & REG_EXTENDED) && (cflags & REG_NOSPEC))
+    తిరిగి (REG_INVARG);
 
-  if (cflags & REG_PEND) {
-    if (preg->re_endp < pattern)
-      return (REG_INVARG);
-    len = preg->re_endp - pattern;
-  } else {
-    len = strlen(pattern);
+  ఒకవేళ (cflags & REG_PEND) {
+    ఒకవేళ (preg->re_endp < నమూనా_2)
+      తిరిగి (REG_INVARG);
+    len = preg->re_endp - నమూనా_2;
+  } లేకపోతే {
+    len = అక్షరశ్రేణి_పొడవు(నమూనా_2);
   }
 
   /* do the mallocs early so failure handling is easy */
-  g = (struct re_guts *)malloc(sizeof(struct re_guts) +
-                               (NC - 1) * sizeof(cat_t));
-  if (g == NULL)
-    return (REG_ESPACE);
+  g = (నిర్మాణం re_guts *)జ్ఞాపకం_ఇవ్వు(పరిమాణం(నిర్మాణం re_guts) +
+                               (NC - 1) * పరిమాణం(cat_t));
+  ఒకవేళ (g == ఖాళీ)
+    తిరిగి (REG_ESPACE);
   p->ssize = len / (size_t)2 * (size_t)3 + (size_t)1; /* ugh */
-  p->strip = (sop *)calloc(p->ssize, sizeof(sop));
+  p->strip = (sop *)సున్నా_జ్ఞాపకం_ఇవ్వు(p->ssize, పరిమాణం(sop));
   p->slen = 0;
-  if (p->strip == NULL) {
-    free((char *)g);
-    return (REG_ESPACE);
+  ఒకవేళ (p->strip == ఖాళీ) {
+    విడుదల((అక్షరం *)g);
+    తిరిగి (REG_ESPACE);
   }
 
   /* set things up */
   p->g = g;
-  p->next = pattern;
-  p->end = p->next + len;
+  p->తదుపరి = నమూనా_2;
+  p->చివర = p->తదుపరి + len;
   p->error = 0;
   p->ncsalloc = 0;
-  for (i = 0; i < NPAREN; i++) {
+  కొరకు (i = 0; i < NPAREN; i++) {
     p->pbegin[i] = 0;
     p->pend[i] = 0;
   }
   g->csetsize = NC;
-  g->sets = NULL;
-  g->setbits = NULL;
+  g->sets = ఖాళీ;
+  g->setbits = ఖాళీ;
   g->ncsets = 0;
   g->cflags = cflags;
   g->iflags = 0;
   g->nbol = 0;
   g->neol = 0;
-  g->must = NULL;
+  g->must = ఖాళీ;
   g->mlen = 0;
   g->nsub = 0;
   g->ncategories = 1; /* category 0 is "everything else" */
   g->categories = &g->catspace[-(CHAR_MIN)];
-  (void)memset((char *)g->catspace, 0, NC * sizeof(cat_t));
+  (శూన్య)memset((అక్షరం *)g->catspace, 0, NC * పరిమాణం(cat_t));
   g->backrefs = 0;
 
   /* do it */
   EMIT(OEND, 0);
   g->firststate = THERE();
-  if (cflags & REG_EXTENDED)
-    p_ere(p, OUT);
-  else if (cflags & REG_NOSPEC)
+  ఒకవేళ (cflags & REG_EXTENDED)
+    p_ere(p, బహిర్గతం_3);
+  లేకపోతే ఒకవేళ (cflags & REG_NOSPEC)
     p_str(p);
-  else
-    p_bre(p, OUT, OUT);
+  లేకపోతే
+    p_bre(p, బహిర్గతం_3, బహిర్గతం_3);
   EMIT(OEND, 0);
   g->laststate = THERE();
 
@@ -369,96 +369,96 @@ llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
   preg->re_nsub = g->nsub;
   preg->re_g = g;
   preg->re_magic = MAGIC1;
-#ifndef REDEBUG
+#నిర్వచితం_కాకపోతే REDEBUG
   /* not debugging, so can't rely on the assert() in llvm_regexec() */
-  if (g->iflags & REGEX_BAD)
+  ఒకవేళ (g->iflags & REGEX_BAD)
     SETERROR(REG_ASSERT);
-#endif
+#అయితే_ముగింపు
 
   /* win or lose, we're done */
-  if (p->error != 0) /* lose */
+  ఒకవేళ (p->error != 0) /* lose */
     llvm_regfree(preg);
-  return (p->error);
+  తిరిగి (p->error);
 }
 
 /*
  - p_ere - ERE parser top level, concatenation and alternation
  */
-static void p_ere(struct parse *p,
-                  int stop) /* character this ERE should end at */
+స్థిర శూన్య p_ere(నిర్మాణం parse *p,
+                  పూర్ణాంకం stop) /* character this ERE should end at */
 {
-  char c;
+  అక్షరం c;
   sopno prevback = 0;
   sopno prevfwd = 0;
   sopno conc;
-  int first = 1; /* is this the first alternative? */
+  పూర్ణాంకం మొదటి_2 = 1; /* is this the first alternative? */
 
-  for (;;) {
+  కొరకు (;;) {
     /* do a bunch of concatenated expressions */
-    conc = HERE();
-    while (MORE() && (c = PEEK()) != '|' && c != stop)
+    conc = ఇక్కడ();
+    అయితే (మరిన్ని() && (c = PEEK()) != '|' && c != stop)
       p_ere_exp(p);
-    REQUIRE(HERE() != conc, REG_EMPTY); /* require nonempty */
+    REQUIRE(ఇక్కడ() != conc, REG_ఖాళీలు); /* require nonempty */
 
-    if (!EAT('|'))
-      break; /* NOTE BREAK OUT */
+    ఒకవేళ (!EAT('|'))
+      ఆపు; /* NOTE BREAK OUT */
 
-    if (first) {
-      INSERT(OCH_, conc); /* offset is wrong */
+    ఒకవేళ (మొదటి_2) {
+      చొప్పించు_3(OCH_, conc); /* offset is wrong */
       prevfwd = conc;
       prevback = conc;
-      first = 0;
+      మొదటి_2 = 0;
     }
     ASTERN(OOR1, prevback);
     prevback = THERE();
     AHEAD(prevfwd); /* fix previous offset */
-    prevfwd = HERE();
+    prevfwd = ఇక్కడ();
     EMIT(OOR2, 0); /* offset is very wrong */
   }
 
-  if (!first) { /* tail-end fixups */
+  ఒకవేళ (!మొదటి_2) { /* tail-end fixups */
     AHEAD(prevfwd);
     ASTERN(O_CH, prevback);
   }
 
-  assert(!MORE() || SEE(stop));
+  ప్రతిజ్ఞా(!మరిన్ని() || SEE(stop));
 }
 
 /*
  - p_ere_exp - parse one subERE, an atom possibly followed by a repetition op
  */
-static void p_ere_exp(struct parse *p) {
-  char c;
+స్థిర శూన్య p_ere_exp(నిర్మాణం parse *p) {
+  అక్షరం c;
   sopno pos;
-  int count;
-  int count2;
-  int backrefnum;
+  పూర్ణాంకం లెక్క;
+  పూర్ణాంకం count2;
+  పూర్ణాంకం backrefnum;
   sopno subno;
-  int wascaret = 0;
+  పూర్ణాంకం wascaret = 0;
 
-  assert(MORE()); /* caller should have ensured this */
+  ప్రతిజ్ఞా(మరిన్ని()); /* caller should have ensured this */
   c = GETNEXT();
 
-  pos = HERE();
-  switch (c) {
-  case '(':
-    REQUIRE(MORE(), REG_EPAREN);
+  pos = ఇక్కడ();
+  ఎంపిక (c) {
+  స్థితి '(':
+    REQUIRE(మరిన్ని(), REG_EPAREN);
     p->g->nsub++;
     subno = p->g->nsub;
-    if (subno < NPAREN)
-      p->pbegin[subno] = HERE();
+    ఒకవేళ (subno < NPAREN)
+      p->pbegin[subno] = ఇక్కడ();
     EMIT(OLPAREN, subno);
-    if (!SEE(')'))
+    ఒకవేళ (!SEE(')'))
       p_ere(p, ')');
-    if (subno < NPAREN) {
-      p->pend[subno] = HERE();
-      assert(p->pend[subno] != 0);
+    ఒకవేళ (subno < NPAREN) {
+      p->pend[subno] = ఇక్కడ();
+      ప్రతిజ్ఞా(p->pend[subno] != 0);
     }
     EMIT(ORPAREN, subno);
     MUSTEAT(')', REG_EPAREN);
-    break;
-#ifndef POSIX_MISTAKE
-  case ')': /* happens only if no current unmatched ( */
+    ఆపు;
+#నిర్వచితం_కాకపోతే POSIX_MISTAKE
+  స్థితి ')': /* happens only if no current unmatched ( */
     /*
      * You may ask, why the ifndef?  Because I didn't notice
      * this until slightly too late for 1003.2, and none of the
@@ -467,47 +467,47 @@ static void p_ere_exp(struct parse *p) {
      * we can get it fixed.
      */
     SETERROR(REG_EPAREN);
-    break;
-#endif
-  case '^':
+    ఆపు;
+#అయితే_ముగింపు
+  స్థితి '^':
     EMIT(OBOL, 0);
     p->g->iflags |= USEBOL;
     p->g->nbol++;
     wascaret = 1;
-    break;
-  case '$':
+    ఆపు;
+  స్థితి '$':
     EMIT(OEOL, 0);
     p->g->iflags |= USEEOL;
     p->g->neol++;
-    break;
-  case '|':
-    SETERROR(REG_EMPTY);
-    break;
-  case '*':
-  case '+':
-  case '?':
+    ఆపు;
+  స్థితి '|':
+    SETERROR(REG_ఖాళీలు);
+    ఆపు;
+  స్థితి '*':
+  స్థితి '+':
+  స్థితి '?':
     SETERROR(REG_BADRPT);
-    break;
-  case '.':
-    if (p->g->cflags & REG_NEWLINE)
+    ఆపు;
+  స్థితి '.':
+    ఒకవేళ (p->g->cflags & REG_NEWLINE)
       nonnewline(p);
-    else
+    లేకపోతే
       EMIT(OANY, 0);
-    break;
-  case '[':
+    ఆపు;
+  స్థితి '[':
     p_bracket(p);
-    break;
-  case '\\':
-    REQUIRE(MORE(), REG_EESCAPE);
+    ఆపు;
+  స్థితి '\\':
+    REQUIRE(మరిన్ని(), REG_EESCAPE);
     c = GETNEXT();
-    if (c >= '1' && c <= '9') {
+    ఒకవేళ (c >= '1' && c <= '9') {
       /* \[0-9] is taken to be a back-reference to a previously specified
        * matching group. backrefnum will hold the number. The matching
        * group must exist (i.e. if \4 is found there must have been at
        * least 4 matching groups specified in the pattern previously).
        */
       backrefnum = c - '0';
-    } else if (c == 'g') {
+    } లేకపోతే ఒకవేళ (c == 'g') {
       /* Support back-references with index greater 9.
        * These look like that: \g{n}
        * Extract the number inside the brackets.
@@ -515,139 +515,139 @@ static void p_ere_exp(struct parse *p) {
       MUSTEAT('{', REG_BADRPT);
 
       backrefnum = 0;
-      while (MORE() && isdigit(PEEK())) {
+      అయితే (మరిన్ని() && అంకెనా(PEEK())) {
         c = GETNEXT();
         backrefnum = backrefnum * 10 + c - '0';
       }
       MUSTEAT('}', REG_BADRPT);
-    } else if (c == 'n') {
+    } లేకపోతే ఒకవేళ (c == 'n') {
       ordinary(p, '\n');
-      break;
-    } else if (c == 't') {
+      ఆపు;
+    } లేకపోతే ఒకవేళ (c == 't') {
       ordinary(p, '\t');
-      break;
-    } else if (c == 'x') {
+      ఆపు;
+    } లేకపోతే ఒకవేళ (c == 'x') {
       /* Support \xAA hexadecimal escape sequences. \x must be followed by
        * exactly two hex digits, otherwise it is interpreted literally.
        */
-      char hexstr[3] = {0};
-      char *hexp;
-      int val;
-      if (MORE2()) {
+      అక్షరం hexstr[3] = {0};
+      అక్షరం *hexp;
+      పూర్ణాంకం val;
+      ఒకవేళ (MORE2()) {
         hexstr[0] = PEEK();
         hexstr[1] = PEEK2();
         val = strtol(hexstr, &hexp, 16);
-        if (*hexp == '\0') {
+        ఒకవేళ (*hexp == '\0') {
           NEXT2();
-          uncased(p, (char)val);
-          break;
+          uncased(p, (అక్షరం)val);
+          ఆపు;
         }
       }
       ordinary(p, 'x');
-      break;
-    } else {
+      ఆపు;
+    } లేకపోతే {
       /* Other chars are simply themselves when escaped with a backslash.
        */
       ordinary(p, c);
-      break;
+      ఆపు;
     }
 
-    if (backrefnum >= NPAREN) {
+    ఒకవేళ (backrefnum >= NPAREN) {
       SETERROR(REG_ESUBREG);
-      break;
+      ఆపు;
     }
 
-    if (p->pend[backrefnum] == 0) {
+    ఒకవేళ (p->pend[backrefnum] == 0) {
       SETERROR(REG_ESUBREG);
-      break;
+      ఆపు;
     }
 
     /* Make sure everything checks out and emit the sequence
      * that marks a back-reference to the parse structure.
      */
-    assert(backrefnum <= p->g->nsub);
+    ప్రతిజ్ఞా(backrefnum <= p->g->nsub);
     EMIT(OBACK_, backrefnum);
-    assert(p->pbegin[backrefnum] != 0);
-    assert(OP(p->strip[p->pbegin[backrefnum]]) == OLPAREN);
-    assert(OP(p->strip[p->pend[backrefnum]]) == ORPAREN);
-    (void)dupl(p, p->pbegin[backrefnum] + 1, p->pend[backrefnum]);
-    EMIT(O_BACK, backrefnum);
+    ప్రతిజ్ఞా(p->pbegin[backrefnum] != 0);
+    ప్రతిజ్ఞా(OP(p->strip[p->pbegin[backrefnum]]) == OLPAREN);
+    ప్రతిజ్ఞా(OP(p->strip[p->pend[backrefnum]]) == ORPAREN);
+    (శూన్య)dupl(p, p->pbegin[backrefnum] + 1, p->pend[backrefnum]);
+    EMIT(O_వెనుక, backrefnum);
     p->g->backrefs = 1;
-    break;
-  case '{': /* okay as ordinary except if digit follows */
-    REQUIRE(!MORE() || !isdigit((uch)PEEK()), REG_BADRPT);
+    ఆపు;
+  స్థితి '{': /* okay as ordinary except if digit follows */
+    REQUIRE(!మరిన్ని() || !అంకెనా((uch)PEEK()), REG_BADRPT);
     LLVM_FALLTHROUGH;
-  default:
+  అప్రమేయ:
     ordinary(p, c);
-    break;
+    ఆపు;
   }
 
-  if (!MORE())
-    return;
+  ఒకవేళ (!మరిన్ని())
+    తిరిగి;
   c = PEEK();
   /* we call { a repetition if followed by a digit */
-  if (!(c == '*' || c == '+' || c == '?' ||
-        (c == '{' && MORE2() && isdigit((uch)PEEK2()))))
-    return; /* no repetition, we're done */
-  NEXT();
+  ఒకవేళ (!(c == '*' || c == '+' || c == '?' ||
+        (c == '{' && MORE2() && అంకెనా((uch)PEEK2()))))
+    తిరిగి; /* no repetition, we're done */
+  తదుపరి_3();
 
   REQUIRE(!wascaret, REG_BADRPT);
-  switch (c) {
-  case '*': /* implemented as +? */
+  ఎంపిక (c) {
+  స్థితి '*': /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    చొప్పించు_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    చొప్పించు_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
-    break;
-  case '+':
-    INSERT(OPLUS_, pos);
+    ఆపు;
+  స్థితి '+':
+    చొప్పించు_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    break;
-  case '?':
+    ఆపు;
+  స్థితి '?':
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, pos); /* offset slightly wrong */
+    చొప్పించు_3(OCH_, pos); /* offset slightly wrong */
     ASTERN(OOR1, pos); /* this one's right */
     AHEAD(pos);        /* fix the OCH_ */
     EMIT(OOR2, 0);     /* offset very wrong... */
     AHEAD(THERE());    /* ...so fix it */
     ASTERN(O_CH, THERETHERE());
-    break;
-  case '{':
-    count = p_count(p);
-    if (EAT(',')) {
-      if (isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
-      } else /* single number with comma */
+    ఆపు;
+  స్థితి '{':
+    లెక్క = p_లెక్క(p);
+    ఒకవేళ (EAT(',')) {
+      ఒకవేళ (అంకెనా((uch)PEEK())) {
+        count2 = p_లెక్క(p);
+        REQUIRE(లెక్క <= count2, REG_BADBR);
+      } లేకపోతే /* single number with comma */
         count2 = REGINFINITY;
-    } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
-    if (!EAT('}')) { /* error heuristics */
-      while (MORE() && PEEK() != '}')
-        NEXT();
-      REQUIRE(MORE(), REG_EBRACE);
+    } లేకపోతే /* just a single number */
+      count2 = లెక్క;
+    repeat(p, pos, లెక్క, count2);
+    ఒకవేళ (!EAT('}')) { /* error heuristics */
+      అయితే (మరిన్ని() && PEEK() != '}')
+        తదుపరి_3();
+      REQUIRE(మరిన్ని(), REG_EBRACE);
       SETERROR(REG_BADBR);
     }
-    break;
+    ఆపు;
   }
 
-  if (!MORE())
-    return;
+  ఒకవేళ (!మరిన్ని())
+    తిరిగి;
   c = PEEK();
-  if (!(c == '*' || c == '+' || c == '?' ||
-        (c == '{' && MORE2() && isdigit((uch)PEEK2()))))
-    return;
+  ఒకవేళ (!(c == '*' || c == '+' || c == '?' ||
+        (c == '{' && MORE2() && అంకెనా((uch)PEEK2()))))
+    తిరిగి;
   SETERROR(REG_BADRPT);
 }
 
 /*
  - p_str - string (no metacharacters) "parser"
  */
-static void p_str(struct parse *p) {
-  REQUIRE(MORE(), REG_EMPTY);
-  while (MORE())
+స్థిర శూన్య p_str(నిర్మాణం parse *p) {
+  REQUIRE(మరిన్ని(), REG_ఖాళీలు);
+  అయితే (మరిన్ని())
     ordinary(p, GETNEXT());
 }
 
@@ -661,164 +661,164 @@ static void p_str(struct parse *p) {
  * category in such cases.  This is fairly harmless; not worth fixing.
  * The amount of lookahead needed to avoid this kludge is excessive.
  */
-static void p_bre(struct parse *p, int end1, /* first terminating character */
-                  int end2)                  /* second terminating character */
+స్థిర శూన్య p_bre(నిర్మాణం parse *p, పూర్ణాంకం end1, /* first terminating character */
+                  పూర్ణాంకం end2)                  /* second terminating character */
 {
-  sopno start = HERE();
-  int first = 1; /* first subexpression? */
-  int wasdollar = 0;
+  sopno ప్రారంభం_2 = ఇక్కడ();
+  పూర్ణాంకం మొదటి_2 = 1; /* first subexpression? */
+  పూర్ణాంకం wasdollar = 0;
 
-  if (EAT('^')) {
+  ఒకవేళ (EAT('^')) {
     EMIT(OBOL, 0);
     p->g->iflags |= USEBOL;
     p->g->nbol++;
   }
-  while (MORE() && !SEETWO(end1, end2)) {
-    wasdollar = p_simp_re(p, first);
-    first = 0;
+  అయితే (మరిన్ని() && !SEETWO(end1, end2)) {
+    wasdollar = p_simp_re(p, మొదటి_2);
+    మొదటి_2 = 0;
   }
-  if (wasdollar) { /* oops, that was a trailing anchor */
+  ఒకవేళ (wasdollar) { /* oops, that was a trailing anchor */
     DROP(1);
     EMIT(OEOL, 0);
     p->g->iflags |= USEEOL;
     p->g->neol++;
   }
 
-  REQUIRE(HERE() != start, REG_EMPTY); /* require nonempty */
+  REQUIRE(ఇక్కడ() != ప్రారంభం_2, REG_ఖాళీలు); /* require nonempty */
 }
 
 /*
  - p_simp_re - parse a simple RE, an atom possibly followed by a repetition
  */
-static int /* was the simple RE an unbackslashed $? */
-p_simp_re(struct parse *p,
-          int starordinary) /* is a leading * an ordinary character? */
+స్థిర పూర్ణాంకం /* was the simple RE an unbackslashed $? */
+p_simp_re(నిర్మాణం parse *p,
+          పూర్ణాంకం starordinary) /* is a leading * an ordinary character? */
 {
-  int c;
-  int count;
-  int count2;
+  పూర్ణాంకం c;
+  పూర్ణాంకం లెక్క;
+  పూర్ణాంకం count2;
   sopno pos;
-  int i;
+  పూర్ణాంకం i;
   sopno subno;
-#define BACKSL (1 << CHAR_BIT)
+#నిర్వచించు BACKSL (1 << CHAR_BIT)
 
-  pos = HERE(); /* repetition op, if any, covers from here */
+  pos = ఇక్కడ(); /* repetition op, if any, covers from here */
 
-  assert(MORE()); /* caller should have ensured this */
+  ప్రతిజ్ఞా(మరిన్ని()); /* caller should have ensured this */
   c = GETNEXT();
-  if (c == '\\') {
-    REQUIRE(MORE(), REG_EESCAPE);
+  ఒకవేళ (c == '\\') {
+    REQUIRE(మరిన్ని(), REG_EESCAPE);
     c = BACKSL | GETNEXT();
   }
-  switch (c) {
-  case '.':
-    if (p->g->cflags & REG_NEWLINE)
+  ఎంపిక (c) {
+  స్థితి '.':
+    ఒకవేళ (p->g->cflags & REG_NEWLINE)
       nonnewline(p);
-    else
+    లేకపోతే
       EMIT(OANY, 0);
-    break;
-  case '[':
+    ఆపు;
+  స్థితి '[':
     p_bracket(p);
-    break;
-  case BACKSL | '{':
+    ఆపు;
+  స్థితి BACKSL | '{':
     SETERROR(REG_BADRPT);
-    break;
-  case BACKSL | '(':
+    ఆపు;
+  స్థితి BACKSL | '(':
     p->g->nsub++;
     subno = p->g->nsub;
-    if (subno < NPAREN)
-      p->pbegin[subno] = HERE();
+    ఒకవేళ (subno < NPAREN)
+      p->pbegin[subno] = ఇక్కడ();
     EMIT(OLPAREN, subno);
     /* the MORE here is an error heuristic */
-    if (MORE() && !SEETWO('\\', ')'))
+    ఒకవేళ (మరిన్ని() && !SEETWO('\\', ')'))
       p_bre(p, '\\', ')');
-    if (subno < NPAREN) {
-      p->pend[subno] = HERE();
-      assert(p->pend[subno] != 0);
+    ఒకవేళ (subno < NPAREN) {
+      p->pend[subno] = ఇక్కడ();
+      ప్రతిజ్ఞా(p->pend[subno] != 0);
     }
     EMIT(ORPAREN, subno);
     REQUIRE(EATTWO('\\', ')'), REG_EPAREN);
-    break;
-  case BACKSL | ')': /* should not get here -- must be user */
-  case BACKSL | '}':
+    ఆపు;
+  స్థితి BACKSL | ')': /* should not get here -- must be user */
+  స్థితి BACKSL | '}':
     SETERROR(REG_EPAREN);
-    break;
-  case BACKSL | '1':
-  case BACKSL | '2':
-  case BACKSL | '3':
-  case BACKSL | '4':
-  case BACKSL | '5':
-  case BACKSL | '6':
-  case BACKSL | '7':
-  case BACKSL | '8':
-  case BACKSL | '9':
+    ఆపు;
+  స్థితి BACKSL | '1':
+  స్థితి BACKSL | '2':
+  స్థితి BACKSL | '3':
+  స్థితి BACKSL | '4':
+  స్థితి BACKSL | '5':
+  స్థితి BACKSL | '6':
+  స్థితి BACKSL | '7':
+  స్థితి BACKSL | '8':
+  స్థితి BACKSL | '9':
     i = (c & ~BACKSL) - '0';
-    assert(i < NPAREN);
-    if (p->pend[i] != 0) {
-      assert(i <= p->g->nsub);
+    ప్రతిజ్ఞా(i < NPAREN);
+    ఒకవేళ (p->pend[i] != 0) {
+      ప్రతిజ్ఞా(i <= p->g->nsub);
       EMIT(OBACK_, i);
-      assert(p->pbegin[i] != 0);
-      assert(OP(p->strip[p->pbegin[i]]) == OLPAREN);
-      assert(OP(p->strip[p->pend[i]]) == ORPAREN);
-      (void)dupl(p, p->pbegin[i] + 1, p->pend[i]);
-      EMIT(O_BACK, i);
-    } else {
+      ప్రతిజ్ఞా(p->pbegin[i] != 0);
+      ప్రతిజ్ఞా(OP(p->strip[p->pbegin[i]]) == OLPAREN);
+      ప్రతిజ్ఞా(OP(p->strip[p->pend[i]]) == ORPAREN);
+      (శూన్య)dupl(p, p->pbegin[i] + 1, p->pend[i]);
+      EMIT(O_వెనుక, i);
+    } లేకపోతే {
       SETERROR(REG_ESUBREG);
     }
     p->g->backrefs = 1;
-    break;
-  case '*':
+    ఆపు;
+  స్థితి '*':
     REQUIRE(starordinary, REG_BADRPT);
     LLVM_FALLTHROUGH;
-  default:
-    ordinary(p, (char)c);
-    break;
+  అప్రమేయ:
+    ordinary(p, (అక్షరం)c);
+    ఆపు;
   }
 
-  if (EAT('*')) { /* implemented as +? */
+  ఒకవేళ (EAT('*')) { /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    చొప్పించు_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    చొప్పించు_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
-  } else if (EATTWO('\\', '{')) {
-    count = p_count(p);
-    if (EAT(',')) {
-      if (MORE() && isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
-      } else /* single number with comma */
+  } లేకపోతే ఒకవేళ (EATTWO('\\', '{')) {
+    లెక్క = p_లెక్క(p);
+    ఒకవేళ (EAT(',')) {
+      ఒకవేళ (మరిన్ని() && అంకెనా((uch)PEEK())) {
+        count2 = p_లెక్క(p);
+        REQUIRE(లెక్క <= count2, REG_BADBR);
+      } లేకపోతే /* single number with comma */
         count2 = REGINFINITY;
-    } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
-    if (!EATTWO('\\', '}')) { /* error heuristics */
-      while (MORE() && !SEETWO('\\', '}'))
-        NEXT();
-      REQUIRE(MORE(), REG_EBRACE);
+    } లేకపోతే /* just a single number */
+      count2 = లెక్క;
+    repeat(p, pos, లెక్క, count2);
+    ఒకవేళ (!EATTWO('\\', '}')) { /* error heuristics */
+      అయితే (మరిన్ని() && !SEETWO('\\', '}'))
+        తదుపరి_3();
+      REQUIRE(మరిన్ని(), REG_EBRACE);
       SETERROR(REG_BADBR);
     }
-  } else if (c == '$') /* $ (but not \$) ends it */
-    return (1);
+  } లేకపోతే ఒకవేళ (c == '$') /* $ (but not \$) ends it */
+    తిరిగి (1);
 
-  return (0);
+  తిరిగి (0);
 }
 
 /*
  - p_count - parse a repetition count
  */
-static int /* the value */
-p_count(struct parse *p) {
-  int count = 0;
-  int ndigits = 0;
+స్థిర పూర్ణాంకం /* the value */
+p_లెక్క(నిర్మాణం parse *p) {
+  పూర్ణాంకం లెక్క = 0;
+  పూర్ణాంకం ndigits = 0;
 
-  while (MORE() && isdigit((uch)PEEK()) && count <= DUPMAX) {
-    count = count * 10 + (GETNEXT() - '0');
+  అయితే (మరిన్ని() && అంకెనా((uch)PEEK()) && లెక్క <= DUPMAX) {
+    లెక్క = లెక్క * 10 + (GETNEXT() - '0');
     ndigits++;
   }
 
-  REQUIRE(ndigits > 0 && count <= DUPMAX, REG_BADBR);
-  return (count);
+  REQUIRE(ndigits > 0 && లెక్క <= DUPMAX, REG_BADBR);
+  తిరిగి (లెక్క);
 }
 
 /*
@@ -827,79 +827,79 @@ p_count(struct parse *p) {
  * Note a significant property of this code:  if the allocset() did SETERROR,
  * no set operations are done.
  */
-static void p_bracket(struct parse *p) {
+స్థిర శూన్య p_bracket(నిర్మాణం parse *p) {
   cset *cs;
-  int invert = 0;
+  పూర్ణాంకం invert = 0;
 
   /* Dept of Truly Sickening Special-Case Kludges */
-  if (p->end - p->next > 5) {
-    if (strncmp(p->next, "[:<:]]", 6) == 0) {
+  ఒకవేళ (p->చివర - p->తదుపరి > 5) {
+    ఒకవేళ (అక్షరశ్రేణి_పోలిక(p->తదుపరి, "[:<:]]", 6) == 0) {
       EMIT(OBOW, 0);
       NEXTn(6);
-      return;
+      తిరిగి;
     }
-    if (strncmp(p->next, "[:>:]]", 6) == 0) {
+    ఒకవేళ (అక్షరశ్రేణి_పోలిక(p->తదుపరి, "[:>:]]", 6) == 0) {
       EMIT(OEOW, 0);
       NEXTn(6);
-      return;
+      తిరిగి;
     }
   }
 
-  if ((cs = allocset(p)) == NULL) {
+  ఒకవేళ ((cs = allocset(p)) == ఖాళీ) {
     /* allocset did set error status in p */
-    return;
+    తిరిగి;
   }
 
-  if (EAT('^'))
+  ఒకవేళ (EAT('^'))
     invert++; /* make note to invert set at end */
-  if (EAT(']'))
+  ఒకవేళ (EAT(']'))
     CHadd(cs, ']');
-  else if (EAT('-'))
+  లేకపోతే ఒకవేళ (EAT('-'))
     CHadd(cs, '-');
-  while (MORE() && PEEK() != ']' && !SEETWO('-', ']'))
-    p_b_term(p, cs);
-  if (EAT('-'))
+  అయితే (మరిన్ని() && PEEK() != ']' && !SEETWO('-', ']'))
+    p_b_పదం(p, cs);
+  ఒకవేళ (EAT('-'))
     CHadd(cs, '-');
   MUSTEAT(']', REG_EBRACK);
 
-  if (p->error != 0) { /* don't mess things up further */
+  ఒకవేళ (p->error != 0) { /* don't mess things up further */
     freeset(p, cs);
-    return;
+    తిరిగి;
   }
 
-  if (p->g->cflags & REG_ICASE) {
-    int i;
-    int ci;
+  ఒకవేళ (p->g->cflags & REG_ICASE) {
+    పూర్ణాంకం i;
+    పూర్ణాంకం ci;
 
-    for (i = p->g->csetsize - 1; i >= 0; i--)
-      if (CHIN(cs, i) && isalpha(i)) {
+    కొరకు (i = p->g->csetsize - 1; i >= 0; i--)
+      ఒకవేళ (CHIN(cs, i) && అక్షరమా(i)) {
         ci = othercase(i);
-        if (ci != i)
+        ఒకవేళ (ci != i)
           CHadd(cs, ci);
       }
-    if (cs->multis != NULL)
+    ఒకవేళ (cs->multis != ఖాళీ)
       mccase(p, cs);
   }
-  if (invert) {
-    int i;
+  ఒకవేళ (invert) {
+    పూర్ణాంకం i;
 
-    for (i = p->g->csetsize - 1; i >= 0; i--)
-      if (CHIN(cs, i))
+    కొరకు (i = p->g->csetsize - 1; i >= 0; i--)
+      ఒకవేళ (CHIN(cs, i))
         CHsub(cs, i);
-      else
+      లేకపోతే
         CHadd(cs, i);
-    if (p->g->cflags & REG_NEWLINE)
+    ఒకవేళ (p->g->cflags & REG_NEWLINE)
       CHsub(cs, '\n');
-    if (cs->multis != NULL)
+    ఒకవేళ (cs->multis != ఖాళీ)
       mcinvert(p, cs);
   }
 
-  assert(cs->multis == NULL); /* xxx */
+  ప్రతిజ్ఞా(cs->multis == ఖాళీ); /* xxx */
 
-  if (nch(p, cs) == 1) { /* optimize singleton sets */
+  ఒకవేళ (nch(p, cs) == 1) { /* optimize singleton sets */
     ordinary(p, firstch(p, cs));
     freeset(p, cs);
-  } else {
+  } లేకపోతే {
     EMIT(OANYOF, freezeset(p, cs));
   }
 }
@@ -907,91 +907,91 @@ static void p_bracket(struct parse *p) {
 /*
  - p_b_term - parse one term of a bracketed character list
  */
-static void p_b_term(struct parse *p, cset *cs) {
-  char c;
-  char start, finish;
-  int i;
+స్థిర శూన్య p_b_పదం(నిర్మాణం parse *p, cset *cs) {
+  అక్షరం c;
+  అక్షరం ప్రారంభం_2, ముగింపు_2;
+  పూర్ణాంకం i;
 
   /* classify what we've got */
-  switch ((MORE()) ? PEEK() : '\0') {
-  case '[':
+  ఎంపిక ((మరిన్ని()) ? PEEK() : '\0') {
+  స్థితి '[':
     c = (MORE2()) ? PEEK2() : '\0';
-    break;
-  case '-':
+    ఆపు;
+  స్థితి '-':
     SETERROR(REG_ERANGE);
-    return; /* NOTE RETURN */
-    break;
-  default:
+    తిరిగి; /* NOTE RETURN */
+    ఆపు;
+  అప్రమేయ:
     c = '\0';
-    break;
+    ఆపు;
   }
 
-  switch (c) {
-  case ':': /* character class */
+  ఎంపిక (c) {
+  స్థితి ':': /* character class */
     NEXT2();
-    REQUIRE(MORE(), REG_EBRACK);
+    REQUIRE(మరిన్ని(), REG_EBRACK);
     c = PEEK();
     REQUIRE(c != '-' && c != ']', REG_ECTYPE);
     p_b_cclass(p, cs);
-    REQUIRE(MORE(), REG_EBRACK);
+    REQUIRE(మరిన్ని(), REG_EBRACK);
     REQUIRE(EATTWO(':', ']'), REG_ECTYPE);
-    break;
-  case '=': /* equivalence class */
+    ఆపు;
+  స్థితి '=': /* equivalence class */
     NEXT2();
-    REQUIRE(MORE(), REG_EBRACK);
+    REQUIRE(మరిన్ని(), REG_EBRACK);
     c = PEEK();
     REQUIRE(c != '-' && c != ']', REG_ECOLLATE);
     p_b_eclass(p, cs);
-    REQUIRE(MORE(), REG_EBRACK);
+    REQUIRE(మరిన్ని(), REG_EBRACK);
     REQUIRE(EATTWO('=', ']'), REG_ECOLLATE);
-    break;
-  default: /* symbol, ordinary character, or range */
+    ఆపు;
+  అప్రమేయ: /* symbol, ordinary character, or range */
            /* xxx revision needed for multichar stuff */
-    start = p_b_symbol(p);
-    if (SEE('-') && MORE2() && PEEK2() != ']') {
+    ప్రారంభం_2 = p_b_చిహ్నం(p);
+    ఒకవేళ (SEE('-') && MORE2() && PEEK2() != ']') {
       /* range */
-      NEXT();
-      if (EAT('-'))
-        finish = '-';
-      else
-        finish = p_b_symbol(p);
-    } else {
-      finish = start;
+      తదుపరి_3();
+      ఒకవేళ (EAT('-'))
+        ముగింపు_2 = '-';
+      లేకపోతే
+        ముగింపు_2 = p_b_చిహ్నం(p);
+    } లేకపోతే {
+      ముగింపు_2 = ప్రారంభం_2;
     }
     /* xxx what about signed chars here... */
-    REQUIRE(start <= finish, REG_ERANGE);
-    for (i = start; i <= finish; i++)
+    REQUIRE(ప్రారంభం_2 <= ముగింపు_2, REG_ERANGE);
+    కొరకు (i = ప్రారంభం_2; i <= ముగింపు_2; i++)
       CHadd(cs, i);
-    break;
+    ఆపు;
   }
 }
 
 /*
  - p_b_cclass - parse a character-class name and deal with it
  */
-static void p_b_cclass(struct parse *p, cset *cs) {
-  const char *sp = p->next;
-  struct cclass *cp;
+స్థిర శూన్య p_b_cclass(నిర్మాణం parse *p, cset *cs) {
+  స్థిరరాశి అక్షరం *sp = p->తదుపరి;
+  నిర్మాణం cclass *cp;
   size_t len;
-  const char *u;
-  char c;
+  స్థిరరాశి అక్షరం *u;
+  అక్షరం c;
 
-  while (MORE() && isalpha((uch)PEEK()))
-    NEXT();
-  len = p->next - sp;
-  for (cp = cclasses; cp->name != NULL; cp++)
-    if (strncmp(cp->name, sp, len) == 0 && cp->name[len] == '\0')
-      break;
-  if (cp->name == NULL) {
+  అయితే (మరిన్ని() && అక్షరమా((uch)PEEK()))
+    తదుపరి_3();
+  len = p->తదుపరి - sp;
+  కొరకు (cp = cclasses; cp->name != ఖాళీ; cp++)
+    ఒకవేళ (అక్షరశ్రేణి_పోలిక(cp->name, sp, len) == 0 && cp->name[len] == '\0')
+      ఆపు;
+  ఒకవేళ (cp->name == ఖాళీ) {
     /* oops, didn't find it */
     SETERROR(REG_ECTYPE);
-    return;
+    తిరిగి;
   }
 
   u = cp->chars;
-  while ((c = *u++) != '\0')
+  అయితే ((c = *u++) != '\0')
     CHadd(cs, c);
-  for (u = cp->multis; *u != '\0'; u += strlen(u) + 1)
+  కొరకు (u = cp->multis; *u != '\0'; u += అక్షరశ్రేణి_పొడవు(u) + 1)
     MCadd(p, cs, u);
 }
 
@@ -1000,8 +1000,8 @@ static void p_b_cclass(struct parse *p, cset *cs) {
  *
  * This implementation is incomplete. xxx
  */
-static void p_b_eclass(struct parse *p, cset *cs) {
-  char c;
+స్థిర శూన్య p_b_eclass(నిర్మాణం parse *p, cset *cs) {
+  అక్షరం c;
 
   c = p_b_coll_elem(p, '=');
   CHadd(cs, c);
@@ -1010,59 +1010,59 @@ static void p_b_eclass(struct parse *p, cset *cs) {
 /*
  - p_b_symbol - parse a character or [..]ed multicharacter collating symbol
  */
-static char /* value of symbol */
-p_b_symbol(struct parse *p) {
-  char value;
+స్థిర అక్షరం /* value of symbol */
+p_b_చిహ్నం(నిర్మాణం parse *p) {
+  అక్షరం విలువ_2;
 
-  REQUIRE(MORE(), REG_EBRACK);
-  if (!EATTWO('[', '.'))
-    return (GETNEXT());
+  REQUIRE(మరిన్ని(), REG_EBRACK);
+  ఒకవేళ (!EATTWO('[', '.'))
+    తిరిగి (GETNEXT());
 
   /* collating symbol */
-  value = p_b_coll_elem(p, '.');
+  విలువ_2 = p_b_coll_elem(p, '.');
   REQUIRE(EATTWO('.', ']'), REG_ECOLLATE);
-  return (value);
+  తిరిగి (విలువ_2);
 }
 
 /*
  - p_b_coll_elem - parse a collating-element name and look it up
  */
-static char                              /* value of collating element */
-p_b_coll_elem(struct parse *p, int endc) /* name ended by endc,']' */
+స్థిర అక్షరం                              /* value of collating element */
+p_b_coll_elem(నిర్మాణం parse *p, పూర్ణాంకం endc) /* name ended by endc,']' */
 {
-  const char *sp = p->next;
-  struct cname *cp;
+  స్థిరరాశి అక్షరం *sp = p->తదుపరి;
+  నిర్మాణం cname *cp;
   size_t len;
 
-  while (MORE() && !SEETWO(endc, ']'))
-    NEXT();
-  if (!MORE()) {
+  అయితే (మరిన్ని() && !SEETWO(endc, ']'))
+    తదుపరి_3();
+  ఒకవేళ (!మరిన్ని()) {
     SETERROR(REG_EBRACK);
-    return (0);
+    తిరిగి (0);
   }
-  len = p->next - sp;
-  for (cp = cnames; cp->name != NULL; cp++)
-    if (strncmp(cp->name, sp, len) == 0 && strlen(cp->name) == len)
-      return (cp->code); /* known name */
-  if (len == 1)
-    return (*sp);         /* single character */
+  len = p->తదుపరి - sp;
+  కొరకు (cp = cnames; cp->name != ఖాళీ; cp++)
+    ఒకవేళ (అక్షరశ్రేణి_పోలిక(cp->name, sp, len) == 0 && అక్షరశ్రేణి_పొడవు(cp->name) == len)
+      తిరిగి (cp->సంకేతం_3); /* known name */
+  ఒకవేళ (len == 1)
+    తిరిగి (*sp);         /* single character */
   SETERROR(REG_ECOLLATE); /* neither */
-  return (0);
+  తిరిగి (0);
 }
 
 /*
  - othercase - return the case counterpart of an alphabetic
  */
-static char /* if no counterpart, return ch */
-othercase(int ch) {
+స్థిర అక్షరం /* if no counterpart, return ch */
+othercase(పూర్ణాంకం ch) {
   ch = (uch)ch;
-  assert(isalpha(ch));
-  if (isupper(ch))
-    return ((uch)tolower(ch));
-  else if (islower(ch))
-    return ((uch)toupper(ch));
-  else /* peculiar, but could happen */
-    return (ch);
+  ప్రతిజ్ఞా(అక్షరమా(ch));
+  ఒకవేళ (isupper(ch))
+    తిరిగి ((uch)tolower(ch));
+  లేకపోతే ఒకవేళ (islower(ch))
+    తిరిగి ((uch)పెద్ద_అక్షరం(ch));
+  లేకపోతే /* peculiar, but could happen */
+    తిరిగి (ch);
 }
 
 /*
@@ -1070,42 +1070,42 @@ othercase(int ch) {
  *
  * Boy, is this implementation ever a kludge...
  */
-static void bothcases(struct parse *p, int ch) {
-  const char *oldnext = p->next;
-  const char *oldend = p->end;
-  char bracket[3];
+స్థిర శూన్య bothcases(నిర్మాణం parse *p, పూర్ణాంకం ch) {
+  స్థిరరాశి అక్షరం *oldnext = p->తదుపరి;
+  స్థిరరాశి అక్షరం *oldend = p->చివర;
+  అక్షరం bracket[3];
 
   ch = (uch)ch;
-  assert(othercase(ch) != ch); /* p_bracket() would recurse */
-  p->next = bracket;
-  p->end = bracket + 2;
+  ప్రతిజ్ఞా(othercase(ch) != ch); /* p_bracket() would recurse */
+  p->తదుపరి = bracket;
+  p->చివర = bracket + 2;
   bracket[0] = ch;
   bracket[1] = ']';
   bracket[2] = '\0';
   p_bracket(p);
-  assert(p->next == bracket + 2);
-  p->next = oldnext;
-  p->end = oldend;
+  ప్రతిజ్ఞా(p->తదుపరి == bracket + 2);
+  p->తదుపరి = oldnext;
+  p->చివర = oldend;
 }
 
 /*
  - uncased - emit an ordinary character that is never treated as cased
  */
-static void uncased(struct parse *p, int ch) {
+స్థిర శూన్య uncased(నిర్మాణం parse *p, పూర్ణాంకం ch) {
   cat_t *cap = p->g->categories;
 
   EMIT(OCHAR, (uch)ch);
-  if (cap[ch] == 0)
+  ఒకవేళ (cap[ch] == 0)
     cap[ch] = p->g->ncategories++;
 }
 
 /*
  - ordinary - emit an ordinary character
  */
-static void ordinary(struct parse *p, int ch) {
-  if ((p->g->cflags & REG_ICASE) && isalpha((uch)ch) && othercase(ch) != ch)
+స్థిర శూన్య ordinary(నిర్మాణం parse *p, పూర్ణాంకం ch) {
+  ఒకవేళ ((p->g->cflags & REG_ICASE) && అక్షరమా((uch)ch) && othercase(ch) != ch)
     bothcases(p, ch);
-  else
+  లేకపోతే
     uncased(p, ch);
 }
 
@@ -1114,170 +1114,170 @@ static void ordinary(struct parse *p, int ch) {
  *
  * Boy, is this implementation ever a kludge...
  */
-static void nonnewline(struct parse *p) {
-  const char *oldnext = p->next;
-  const char *oldend = p->end;
-  static const char bracket[4] = {'^', '\n', ']', '\0'};
+స్థిర శూన్య nonnewline(నిర్మాణం parse *p) {
+  స్థిరరాశి అక్షరం *oldnext = p->తదుపరి;
+  స్థిరరాశి అక్షరం *oldend = p->చివర;
+  స్థిర స్థిరరాశి అక్షరం bracket[4] = {'^', '\n', ']', '\0'};
 
-  p->next = bracket;
-  p->end = bracket + 3;
+  p->తదుపరి = bracket;
+  p->చివర = bracket + 3;
   p_bracket(p);
-  assert(p->next == bracket + 3);
-  p->next = oldnext;
-  p->end = oldend;
+  ప్రతిజ్ఞా(p->తదుపరి == bracket + 3);
+  p->తదుపరి = oldnext;
+  p->చివర = oldend;
 }
 
 /*
  - repeat - generate code for a bounded repetition, recursively if needed
  */
-static void repeat(struct parse *p,
-                   sopno start, /* operand from here to end of strip */
-                   int from,    /* repeated from this number */
-                   int to)      /* to this number of times (maybe INFINITY) */
+స్థిర శూన్య repeat(నిర్మాణం parse *p,
+                   sopno ప్రారంభం_2, /* operand from here to end of strip */
+                   పూర్ణాంకం from,    /* repeated from this number */
+                   పూర్ణాంకం గమ్యం_2)      /* to this number of times (maybe INFINITY) */
 {
-  sopno finish = HERE();
-#define N 2
-#define INF 3
-#define REP(f, t) ((f) * 8 + (t))
-#define MAP(n) (((n) <= 1) ? (n) : ((n) == REGINFINITY) ? INF : N)
+  sopno ముగింపు_2 = ఇక్కడ();
+#నిర్వచించు N 2
+#నిర్వచించు INF 3
+#నిర్వచించు REP(f, t) ((f) * 8 + (t))
+#నిర్వచించు MAP(n) (((n) <= 1) ? (n) : ((n) == REGINFINITY) ? INF : N)
   sopno copy;
 
-  if (p->error != 0) /* head off possible runaway recursion */
-    return;
+  ఒకవేళ (p->error != 0) /* head off possible runaway recursion */
+    తిరిగి;
 
-  assert(from <= to);
+  ప్రతిజ్ఞా(from <= గమ్యం_2);
 
-  switch (REP(MAP(from), MAP(to))) {
-  case REP(0, 0):         /* must be user doing this */
-    DROP(finish - start); /* drop the operand */
-    break;
-  case REP(0, 1):   /* as x{1,1}? */
-  case REP(0, N):   /* as x{1,n}? */
-  case REP(0, INF): /* as x{1,}? */
+  ఎంపిక (REP(MAP(from), MAP(గమ్యం_2))) {
+  స్థితి REP(0, 0):         /* must be user doing this */
+    DROP(ముగింపు_2 - ప్రారంభం_2); /* drop the operand */
+    ఆపు;
+  స్థితి REP(0, 1):   /* as x{1,1}? */
+  స్థితి REP(0, N):   /* as x{1,n}? */
+  స్థితి REP(0, INF): /* as x{1,}? */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start); /* offset is wrong... */
-    repeat(p, start + 1, 1, to);
-    ASTERN(OOR1, start);
-    AHEAD(start); /* ... fix it */
+    చొప్పించు_3(OCH_, ప్రారంభం_2); /* offset is wrong... */
+    repeat(p, ప్రారంభం_2 + 1, 1, గమ్యం_2);
+    ASTERN(OOR1, ప్రారంభం_2);
+    AHEAD(ప్రారంభం_2); /* ... fix it */
     EMIT(OOR2, 0);
     AHEAD(THERE());
     ASTERN(O_CH, THERETHERE());
-    break;
-  case REP(1, 1): /* trivial case */
-    /* done */
-    break;
-  case REP(1, N): /* as x?x{1,n-1} */
+    ఆపు;
+  స్థితి REP(1, 1): /* trivial case */
+    /*పూర్తి*/
+    ఆపు;
+  స్థితి REP(1, N): /* as x?x{1,n-1} */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start);
-    ASTERN(OOR1, start);
-    AHEAD(start);
+    చొప్పించు_3(OCH_, ప్రారంభం_2);
+    ASTERN(OOR1, ప్రారంభం_2);
+    AHEAD(ప్రారంభం_2);
     EMIT(OOR2, 0);  /* offset very wrong... */
     AHEAD(THERE()); /* ...so fix it */
     ASTERN(O_CH, THERETHERE());
-    copy = dupl(p, start + 1, finish + 1);
-    assert(copy == finish + 4);
-    repeat(p, copy, 1, to - 1);
-    break;
-  case REP(1, INF): /* as x+ */
-    INSERT(OPLUS_, start);
-    ASTERN(O_PLUS, start);
-    break;
-  case REP(N, N): /* as xx{m-1,n-1} */
-    copy = dupl(p, start, finish);
-    repeat(p, copy, from - 1, to - 1);
-    break;
-  case REP(N, INF): /* as xx{n-1,INF} */
-    copy = dupl(p, start, finish);
-    repeat(p, copy, from - 1, to);
-    break;
-  default:                /* "can't happen" */
+    copy = dupl(p, ప్రారంభం_2 + 1, ముగింపు_2 + 1);
+    ప్రతిజ్ఞా(copy == ముగింపు_2 + 4);
+    repeat(p, copy, 1, గమ్యం_2 - 1);
+    ఆపు;
+  స్థితి REP(1, INF): /* as x+ */
+    చొప్పించు_3(OPLUS_, ప్రారంభం_2);
+    ASTERN(O_PLUS, ప్రారంభం_2);
+    ఆపు;
+  స్థితి REP(N, N): /* as xx{m-1,n-1} */
+    copy = dupl(p, ప్రారంభం_2, ముగింపు_2);
+    repeat(p, copy, from - 1, గమ్యం_2 - 1);
+    ఆపు;
+  స్థితి REP(N, INF): /* as xx{n-1,INF} */
+    copy = dupl(p, ప్రారంభం_2, ముగింపు_2);
+    repeat(p, copy, from - 1, గమ్యం_2);
+    ఆపు;
+  అప్రమేయ:                /* "can't happen" */
     SETERROR(REG_ASSERT); /* just in case */
-    break;
+    ఆపు;
   }
 }
 
 /*
  - seterr - set an error condition
  */
-static int /* useless but makes type checking happy */
-seterr(struct parse *p, int e) {
-  if (p->error == 0) /* keep earliest error condition */
+స్థిర పూర్ణాంకం /* useless but makes type checking happy */
+seterr(నిర్మాణం parse *p, పూర్ణాంకం e) {
+  ఒకవేళ (p->error == 0) /* keep earliest error condition */
     p->error = e;
-  p->next = nuls; /* try to bring things to a halt */
-  p->end = nuls;
-  return (0); /* make the return value well-defined */
+  p->తదుపరి = nuls; /* try to bring things to a halt */
+  p->చివర = nuls;
+  తిరిగి (0); /* make the return value well-defined */
 }
 
 /*
  - allocset - allocate a set of characters for []
  */
-static cset *allocset(struct parse *p) {
-  int no = p->g->ncsets++;
+స్థిర cset *allocset(నిర్మాణం parse *p) {
+  పూర్ణాంకం no = p->g->ncsets++;
   size_t nc;
   size_t nbytes;
   cset *cs;
   size_t css = (size_t)p->g->csetsize;
-  int i;
+  పూర్ణాంకం i;
 
-  if (no >= p->ncsalloc) { /* need another column of space */
-    void *ptr;
+  ఒకవేళ (no >= p->ncsalloc) { /* need another column of space */
+    శూన్య *ptr;
 
     p->ncsalloc += CHAR_BIT;
     nc = p->ncsalloc;
-    if (nc > SIZE_MAX / sizeof(cset))
-      goto nomem;
-    assert(nc % CHAR_BIT == 0);
+    ఒకవేళ (nc > SIZE_MAX / పరిమాణం(cset))
+      వెళ్ళు nomem;
+    ప్రతిజ్ఞా(nc % CHAR_BIT == 0);
     nbytes = nc / CHAR_BIT * css;
 
-    ptr = (cset *)realloc((char *)p->g->sets, nc * sizeof(cset));
-    if (ptr == NULL)
-      goto nomem;
+    ptr = (cset *)realloc((అక్షరం *)p->g->sets, nc * పరిమాణం(cset));
+    ఒకవేళ (ptr == ఖాళీ)
+      వెళ్ళు nomem;
     p->g->sets = ptr;
 
-    ptr = (uch *)realloc((char *)p->g->setbits, nbytes);
-    if (ptr == NULL)
-      goto nomem;
+    ptr = (uch *)realloc((అక్షరం *)p->g->setbits, nbytes);
+    ఒకవేళ (ptr == ఖాళీ)
+      వెళ్ళు nomem;
     p->g->setbits = ptr;
 
-    for (i = 0; i < no; i++)
+    కొరకు (i = 0; i < no; i++)
       p->g->sets[i].ptr = p->g->setbits + css * (i / CHAR_BIT);
 
-    (void)memset((char *)p->g->setbits + (nbytes - css), 0, css);
+    (శూన్య)memset((అక్షరం *)p->g->setbits + (nbytes - css), 0, css);
   }
   /* XXX should not happen */
-  if (p->g->sets == NULL || p->g->setbits == NULL)
-    goto nomem;
+  ఒకవేళ (p->g->sets == ఖాళీ || p->g->setbits == ఖాళీ)
+    వెళ్ళు nomem;
 
   cs = &p->g->sets[no];
   cs->ptr = p->g->setbits + css * ((no) / CHAR_BIT);
-  cs->mask = 1 << ((no) % CHAR_BIT);
+  cs->ముసుగు_2 = 1 << ((no) % CHAR_BIT);
   cs->hash = 0;
   cs->smultis = 0;
-  cs->multis = NULL;
+  cs->multis = ఖాళీ;
 
-  return (cs);
+  తిరిగి (cs);
 nomem:
-  free(p->g->sets);
-  p->g->sets = NULL;
-  free(p->g->setbits);
-  p->g->setbits = NULL;
+  విడుదల(p->g->sets);
+  p->g->sets = ఖాళీ;
+  విడుదల(p->g->setbits);
+  p->g->setbits = ఖాళీ;
 
   SETERROR(REG_ESPACE);
   /* caller's responsibility not to do set ops */
-  return (NULL);
+  తిరిగి (ఖాళీ);
 }
 
 /*
  - freeset - free a now-unused set
  */
-static void freeset(struct parse *p, cset *cs) {
+స్థిర శూన్య freeset(నిర్మాణం parse *p, cset *cs) {
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *శిఖరం_2 = &p->g->sets[p->g->ncsets];
   size_t css = (size_t)p->g->csetsize;
 
-  for (i = 0; i < css; i++)
+  కొరకు (i = 0; i < css; i++)
     CHsub(cs, i);
-  if (cs == top - 1) /* recover only the easy case */
+  ఒకవేళ (cs == శిఖరం_2 - 1) /* recover only the easy case */
     p->g->ncsets--;
 }
 
@@ -1290,77 +1290,77 @@ static void freeset(struct parse *p, cset *cs) {
  * is done using addition rather than xor -- all ASCII [aA] sets xor to
  * the same value!
  */
-static int /* set number */
-freezeset(struct parse *p, cset *cs) {
+స్థిర పూర్ణాంకం /* set number */
+freezeset(నిర్మాణం parse *p, cset *cs) {
   uch h = cs->hash;
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *శిఖరం_2 = &p->g->sets[p->g->ncsets];
   cset *cs2;
   size_t css = (size_t)p->g->csetsize;
 
   /* look for an earlier one which is the same */
-  for (cs2 = &p->g->sets[0]; cs2 < top; cs2++)
-    if (cs2->hash == h && cs2 != cs) {
+  కొరకు (cs2 = &p->g->sets[0]; cs2 < శిఖరం_2; cs2++)
+    ఒకవేళ (cs2->hash == h && cs2 != cs) {
       /* maybe */
-      for (i = 0; i < css; i++)
-        if (!!CHIN(cs2, i) != !!CHIN(cs, i))
-          break; /* no */
-      if (i == css)
-        break; /* yes */
+      కొరకు (i = 0; i < css; i++)
+        ఒకవేళ (!!CHIN(cs2, i) != !!CHIN(cs, i))
+          ఆపు; /* no */
+      ఒకవేళ (i == css)
+        ఆపు; /* yes */
     }
 
-  if (cs2 < top) { /* found one */
+  ఒకవేళ (cs2 < శిఖరం_2) { /* found one */
     freeset(p, cs);
     cs = cs2;
   }
 
-  return ((int)(cs - p->g->sets));
+  తిరిగి ((పూర్ణాంకం)(cs - p->g->sets));
 }
 
 /*
  - firstch - return first character in a set (which must have at least one)
  */
-static int /* character; there is no "none" value */
-firstch(struct parse *p, cset *cs) {
+స్థిర పూర్ణాంకం /* character; there is no "none" value */
+firstch(నిర్మాణం parse *p, cset *cs) {
   size_t i;
   size_t css = (size_t)p->g->csetsize;
 
-  for (i = 0; i < css; i++)
-    if (CHIN(cs, i))
-      return ((char)i);
-  assert(never);
-  return (0); /* arbitrary */
+  కొరకు (i = 0; i < css; i++)
+    ఒకవేళ (CHIN(cs, i))
+      తిరిగి ((అక్షరం)i);
+  ప్రతిజ్ఞా(never);
+  తిరిగి (0); /* arbitrary */
 }
 
 /*
  - nch - number of characters in a set
  */
-static int nch(struct parse *p, cset *cs) {
+స్థిర పూర్ణాంకం nch(నిర్మాణం parse *p, cset *cs) {
   size_t i;
   size_t css = (size_t)p->g->csetsize;
-  int n = 0;
+  పూర్ణాంకం n = 0;
 
-  for (i = 0; i < css; i++)
-    if (CHIN(cs, i))
+  కొరకు (i = 0; i < css; i++)
+    ఒకవేళ (CHIN(cs, i))
       n++;
-  return (n);
+  తిరిగి (n);
 }
 
 /*
  - mcadd - add a collating element to a cset
  */
-static void mcadd(struct parse *p, cset *cs, const char *cp) {
+స్థిర శూన్య mcadd(నిర్మాణం parse *p, cset *cs, స్థిరరాశి అక్షరం *cp) {
   size_t oldend = cs->smultis;
-  void *np;
+  శూన్య *np;
 
-  cs->smultis += strlen(cp) + 1;
+  cs->smultis += అక్షరశ్రేణి_పొడవు(cp) + 1;
   np = realloc(cs->multis, cs->smultis);
-  if (np == NULL) {
-    if (cs->multis)
-      free(cs->multis);
-    cs->multis = NULL;
+  ఒకవేళ (np == ఖాళీ) {
+    ఒకవేళ (cs->multis)
+      విడుదల(cs->multis);
+    cs->multis = ఖాళీ;
     SETERROR(REG_ESPACE);
-    return;
+    తిరిగి;
   }
   cs->multis = np;
 
@@ -1374,8 +1374,8 @@ static void mcadd(struct parse *p, cset *cs, const char *cp) {
  * is deferred.
  */
 /* ARGSUSED */
-static void mcinvert(struct parse *p, cset *cs) {
-  assert(cs->multis == NULL); /* xxx */
+స్థిర శూన్య mcinvert(నిర్మాణం parse *p, cset *cs) {
+  ప్రతిజ్ఞా(cs->multis == ఖాళీ); /* xxx */
 }
 
 /*
@@ -1385,62 +1385,62 @@ static void mcinvert(struct parse *p, cset *cs) {
  * is deferred.
  */
 /* ARGSUSED */
-static void mccase(struct parse *p, cset *cs) {
-  assert(cs->multis == NULL); /* xxx */
+స్థిర శూన్య mccase(నిర్మాణం parse *p, cset *cs) {
+  ప్రతిజ్ఞా(cs->multis == ఖాళీ); /* xxx */
 }
 
 /*
  - isinsets - is this character in any sets?
  */
-static int /* predicate */
-isinsets(struct re_guts *g, int c) {
-  uch *col;
-  int i;
-  int ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
-  unsigned uc = (uch)c;
+స్థిర పూర్ణాంకం /* predicate */
+isinsets(నిర్మాణం re_guts *g, పూర్ణాంకం c) {
+  uch *నిలువు_2;
+  పూర్ణాంకం i;
+  పూర్ణాంకం ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
+  గుర్తులేని uc = (uch)c;
 
-  for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
-    if (col[uc] != 0)
-      return (1);
-  return (0);
+  కొరకు (i = 0, నిలువు_2 = g->setbits; i < ncols; i++, నిలువు_2 += g->csetsize)
+    ఒకవేళ (నిలువు_2[uc] != 0)
+      తిరిగి (1);
+  తిరిగి (0);
 }
 
 /*
  - samesets - are these two characters in exactly the same sets?
  */
-static int /* predicate */
-samesets(struct re_guts *g, int c1, int c2) {
-  uch *col;
-  int i;
-  int ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
-  unsigned uc1 = (uch)c1;
-  unsigned uc2 = (uch)c2;
+స్థిర పూర్ణాంకం /* predicate */
+samesets(నిర్మాణం re_guts *g, పూర్ణాంకం c1, పూర్ణాంకం c2) {
+  uch *నిలువు_2;
+  పూర్ణాంకం i;
+  పూర్ణాంకం ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
+  గుర్తులేని uc1 = (uch)c1;
+  గుర్తులేని uc2 = (uch)c2;
 
-  for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
-    if (col[uc1] != col[uc2])
-      return (0);
-  return (1);
+  కొరకు (i = 0, నిలువు_2 = g->setbits; i < ncols; i++, నిలువు_2 += g->csetsize)
+    ఒకవేళ (నిలువు_2[uc1] != నిలువు_2[uc2])
+      తిరిగి (0);
+  తిరిగి (1);
 }
 
 /*
  - categorize - sort out character categories
  */
-static void categorize(struct parse *p, struct re_guts *g) {
+స్థిర శూన్య categorize(నిర్మాణం parse *p, నిర్మాణం re_guts *g) {
   cat_t *cats = g->categories;
-  int c;
-  int c2;
+  పూర్ణాంకం c;
+  పూర్ణాంకం c2;
   cat_t cat;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ఒకవేళ (p->error != 0)
+    తిరిగి;
 
-  for (c = CHAR_MIN; c <= CHAR_MAX; c++)
-    if (cats[c] == 0 && isinsets(g, c)) {
+  కొరకు (c = CHAR_MIN; c <= CHAR_MAX; c++)
+    ఒకవేళ (cats[c] == 0 && isinsets(g, c)) {
       cat = g->ncategories++;
       cats[c] = cat;
-      for (c2 = c + 1; c2 <= CHAR_MAX; c2++)
-        if (cats[c2] == 0 && samesets(g, c, c2))
+      కొరకు (c2 = c + 1; c2 <= CHAR_MAX; c2++)
+        ఒకవేళ (cats[c2] == 0 && samesets(g, c, c2))
           cats[c2] = cat;
     }
 }
@@ -1448,22 +1448,22 @@ static void categorize(struct parse *p, struct re_guts *g) {
 /*
  - dupl - emit a duplicate of a bunch of sops
  */
-static sopno                       /* start of duplicate */
-dupl(struct parse *p, sopno start, /* from here */
-     sopno finish)                 /* to this less one */
+స్థిర sopno                       /* start of duplicate */
+dupl(నిర్మాణం parse *p, sopno ప్రారంభం_2, /* from here */
+     sopno ముగింపు_2)                 /* to this less one */
 {
-  sopno ret = HERE();
-  sopno len = finish - start;
+  sopno ret = ఇక్కడ();
+  sopno len = ముగింపు_2 - ప్రారంభం_2;
 
-  assert(finish >= start);
-  if (len == 0)
-    return (ret);
+  ప్రతిజ్ఞా(ముగింపు_2 >= ప్రారంభం_2);
+  ఒకవేళ (len == 0)
+    తిరిగి (ret);
   enlarge(p, p->ssize + len); /* this many unexpected additions */
-  assert(p->ssize >= p->slen + len);
-  (void)memmove((char *)(p->strip + p->slen), (char *)(p->strip + start),
-                (size_t)len * sizeof(sop));
+  ప్రతిజ్ఞా(p->ssize >= p->slen + len);
+  (శూన్య)memmove((అక్షరం *)(p->strip + p->slen), (అక్షరం *)(p->strip + ప్రారంభం_2),
+                (size_t)len * పరిమాణం(sop));
   p->slen += len;
-  return (ret);
+  తిరిగి (ret);
 }
 
 /*
@@ -1473,18 +1473,18 @@ dupl(struct parse *p, sopno start, /* from here */
  * hard-case backup, but it's just too big and messy unless there are
  * some changes to the data structures.  Maybe later.
  */
-static void doemit(struct parse *p, sop op, size_t opnd) {
+స్థిర శూన్య doemit(నిర్మాణం parse *p, sop op, size_t opnd) {
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ఒకవేళ (p->error != 0)
+    తిరిగి;
 
   /* deal with oversize operands ("can't happen", more or less) */
-  assert(opnd < 1 << OPSHIFT);
+  ప్రతిజ్ఞా(opnd < 1 << OPSHIFT);
 
   /* deal with undersized strip */
-  if (p->slen >= p->ssize)
+  ఒకవేళ (p->slen >= p->ssize)
     enlarge(p, (p->ssize + 1) / 2 * 3); /* +50% */
-  assert(p->slen < p->ssize);
+  ప్రతిజ్ఞా(p->slen < p->ssize);
 
   /* finally, it's all reduced to the easy case */
   p->strip[p->slen++] = SOP(op, opnd);
@@ -1493,84 +1493,84 @@ static void doemit(struct parse *p, sop op, size_t opnd) {
 /*
  - doinsert - insert a sop into the strip
  */
-static void doinsert(struct parse *p, sop op, size_t opnd, sopno pos) {
+స్థిర శూన్య doinsert(నిర్మాణం parse *p, sop op, size_t opnd, sopno pos) {
   sopno sn;
   sop s;
-  int i;
+  పూర్ణాంకం i;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ఒకవేళ (p->error != 0)
+    తిరిగి;
 
-  sn = HERE();
+  sn = ఇక్కడ();
   EMIT(op, opnd); /* do checks, ensure space */
-  assert(HERE() == sn + 1);
+  ప్రతిజ్ఞా(ఇక్కడ() == sn + 1);
   s = p->strip[sn];
 
   /* adjust paren pointers */
-  assert(pos > 0);
-  for (i = 1; i < NPAREN; i++) {
-    if (p->pbegin[i] >= pos) {
+  ప్రతిజ్ఞా(pos > 0);
+  కొరకు (i = 1; i < NPAREN; i++) {
+    ఒకవేళ (p->pbegin[i] >= pos) {
       p->pbegin[i]++;
     }
-    if (p->pend[i] >= pos) {
+    ఒకవేళ (p->pend[i] >= pos) {
       p->pend[i]++;
     }
   }
 
-  memmove((char *)&p->strip[pos + 1], (char *)&p->strip[pos],
-          (HERE() - pos - 1) * sizeof(sop));
+  memmove((అక్షరం *)&p->strip[pos + 1], (అక్షరం *)&p->strip[pos],
+          (ఇక్కడ() - pos - 1) * పరిమాణం(sop));
   p->strip[pos] = s;
 }
 
 /*
  - dofwd - complete a forward reference
  */
-static void dofwd(struct parse *p, sopno pos, sop value) {
+స్థిర శూన్య dofwd(నిర్మాణం parse *p, sopno pos, sop విలువ_2) {
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ఒకవేళ (p->error != 0)
+    తిరిగి;
 
-  assert(value < 1 << OPSHIFT);
-  p->strip[pos] = OP(p->strip[pos]) | value;
+  ప్రతిజ్ఞా(విలువ_2 < 1 << OPSHIFT);
+  p->strip[pos] = OP(p->strip[pos]) | విలువ_2;
 }
 
 /*
  - enlarge - enlarge the strip
  */
-static void enlarge(struct parse *p, sopno size) {
+స్థిర శూన్య enlarge(నిర్మాణం parse *p, sopno కొలత_2) {
   sop *sp;
 
-  if (p->ssize >= size)
-    return;
+  ఒకవేళ (p->ssize >= కొలత_2)
+    తిరిగి;
 
-  if ((uintptr_t)size > SIZE_MAX / sizeof(sop)) {
+  ఒకవేళ ((uintptr_t)కొలత_2 > SIZE_MAX / పరిమాణం(sop)) {
     SETERROR(REG_ESPACE);
-    return;
+    తిరిగి;
   }
 
-  sp = (sop *)realloc(p->strip, size * sizeof(sop));
-  if (sp == NULL) {
+  sp = (sop *)realloc(p->strip, కొలత_2 * పరిమాణం(sop));
+  ఒకవేళ (sp == ఖాళీ) {
     SETERROR(REG_ESPACE);
-    return;
+    తిరిగి;
   }
   p->strip = sp;
-  p->ssize = size;
+  p->ssize = కొలత_2;
 }
 
 /*
  - stripsnug - compact the strip
  */
-static void stripsnug(struct parse *p, struct re_guts *g) {
+స్థిర శూన్య stripsnug(నిర్మాణం parse *p, నిర్మాణం re_guts *g) {
   g->nstates = p->slen;
-  if ((uintptr_t)p->slen > SIZE_MAX / sizeof(sop)) {
+  ఒకవేళ ((uintptr_t)p->slen > SIZE_MAX / పరిమాణం(sop)) {
     g->strip = p->strip;
     SETERROR(REG_ESPACE);
-    return;
+    తిరిగి;
   }
 
-  g->strip = (sop *)realloc((char *)p->strip, p->slen * sizeof(sop));
-  if (g->strip == NULL) {
+  g->strip = (sop *)realloc((అక్షరం *)p->strip, p->slen * పరిమాణం(sop));
+  ఒకవేళ (g->strip == ఖాళీ) {
     SETERROR(REG_ESPACE);
     g->strip = p->strip;
   }
@@ -1585,106 +1585,106 @@ static void stripsnug(struct parse *p, struct re_guts *g) {
  *
  * Note that must and mlen got initialized during setup.
  */
-static void findmust(struct parse *p, struct re_guts *g) {
-  sop *scan;
-  sop *start = 0;    /* start initialized in the default case, after that */
+స్థిర శూన్య findmust(నిర్మాణం parse *p, నిర్మాణం re_guts *g) {
+  sop *పరిశీలన;
+  sop *ప్రారంభం_2 = 0;    /* start initialized in the default case, after that */
   sop *newstart = 0; /* newstart was initialized in the OCHAR case */
   sopno newlen;
   sop s;
-  char *cp;
+  అక్షరం *cp;
   sopno i;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ఒకవేళ (p->error != 0)
+    తిరిగి;
 
   /* find the longest OCHAR sequence in strip */
   newlen = 0;
-  scan = g->strip + 1;
-  do {
-    s = *scan++;
-    switch (OP(s)) {
-    case OCHAR:        /* sequence member */
-      if (newlen == 0) /* new sequence */
-        newstart = scan - 1;
+  పరిశీలన = g->strip + 1;
+  చేయి {
+    s = *పరిశీలన++;
+    ఎంపిక (OP(s)) {
+    స్థితి OCHAR:        /* sequence member */
+      ఒకవేళ (newlen == 0) /* new sequence */
+        newstart = పరిశీలన - 1;
       newlen++;
-      break;
-    case OPLUS_: /* things that don't break one */
-    case OLPAREN:
-    case ORPAREN:
-      break;
-    case OQUEST_: /* things that must be skipped */
-    case OCH_:
-      scan--;
-      do {
-        scan += OPND(s);
-        s = *scan;
+      ఆపు;
+    స్థితి OPLUS_: /* things that don't break one */
+    స్థితి OLPAREN:
+    స్థితి ORPAREN:
+      ఆపు;
+    స్థితి OQUEST_: /* things that must be skipped */
+    స్థితి OCH_:
+      పరిశీలన--;
+      చేయి {
+        పరిశీలన += OPND(s);
+        s = *పరిశీలన;
         /* assert() interferes w debug printouts */
-        if (OP(s) != O_QUEST && OP(s) != O_CH && OP(s) != OOR2) {
+        ఒకవేళ (OP(s) != O_QUEST && OP(s) != O_CH && OP(s) != OOR2) {
           g->iflags |= REGEX_BAD;
-          return;
+          తిరిగి;
         }
-      } while (OP(s) != O_QUEST && OP(s) != O_CH);
+      } అయితే (OP(s) != O_QUEST && OP(s) != O_CH);
       LLVM_FALLTHROUGH;
-    default:                  /* things that break a sequence */
-      if (newlen > g->mlen) { /* ends one */
-        start = newstart;
+    అప్రమేయ:                  /* things that break a sequence */
+      ఒకవేళ (newlen > g->mlen) { /* ends one */
+        ప్రారంభం_2 = newstart;
         g->mlen = newlen;
       }
       newlen = 0;
-      break;
+      ఆపు;
     }
-  } while (OP(s) != OEND);
+  } అయితే (OP(s) != OEND);
 
-  if (g->mlen == 0) /* there isn't one */
-    return;
+  ఒకవేళ (g->mlen == 0) /* there isn't one */
+    తిరిగి;
 
   /* turn it into a character string */
-  g->must = malloc((size_t)g->mlen + 1);
-  if (g->must == NULL) { /* argh; just forget it */
+  g->must = జ్ఞాపకం_ఇవ్వు((size_t)g->mlen + 1);
+  ఒకవేళ (g->must == ఖాళీ) { /* argh; just forget it */
     g->mlen = 0;
-    return;
+    తిరిగి;
   }
   cp = g->must;
-  scan = start;
-  for (i = g->mlen; i > 0; i--) {
-    while (OP(s = *scan++) != OCHAR)
-      continue;
-    assert(cp < g->must + g->mlen);
-    *cp++ = (char)OPND(s);
+  పరిశీలన = ప్రారంభం_2;
+  కొరకు (i = g->mlen; i > 0; i--) {
+    అయితే (OP(s = *పరిశీలన++) != OCHAR)
+      కొనసాగు;
+    ప్రతిజ్ఞా(cp < g->must + g->mlen);
+    *cp++ = (అక్షరం)OPND(s);
   }
-  assert(cp == g->must + g->mlen);
+  ప్రతిజ్ఞా(cp == g->must + g->mlen);
   *cp++ = '\0'; /* just on general principles */
 }
 
 /*
  - pluscount - count + nesting
  */
-static sopno /* nesting depth */
-pluscount(struct parse *p, struct re_guts *g) {
-  sop *scan;
+స్థిర sopno /* nesting depth */
+pluscount(నిర్మాణం parse *p, నిర్మాణం re_guts *g) {
+  sop *పరిశీలన;
   sop s;
   sopno plusnest = 0;
   sopno maxnest = 0;
 
-  if (p->error != 0)
-    return (0); /* there may not be an OEND */
+  ఒకవేళ (p->error != 0)
+    తిరిగి (0); /* there may not be an OEND */
 
-  scan = g->strip + 1;
-  do {
-    s = *scan++;
-    switch (OP(s)) {
-    case OPLUS_:
+  పరిశీలన = g->strip + 1;
+  చేయి {
+    s = *పరిశీలన++;
+    ఎంపిక (OP(s)) {
+    స్థితి OPLUS_:
       plusnest++;
-      break;
-    case O_PLUS:
-      if (plusnest > maxnest)
+      ఆపు;
+    స్థితి O_PLUS:
+      ఒకవేళ (plusnest > maxnest)
         maxnest = plusnest;
       plusnest--;
-      break;
+      ఆపు;
     }
-  } while (OP(s) != OEND);
-  if (plusnest != 0)
+  } అయితే (OP(s) != OEND);
+  ఒకవేళ (plusnest != 0)
     g->iflags |= REGEX_BAD;
-  return (maxnest);
+  తిరిగి (maxnest);
 }

@@ -6,103 +6,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Parallel.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/Jobserver.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Threading.h"
+#అన్తర్భావ "llvm/Support/Parallel.h"
+#అన్తర్భావ "llvm/ADT/ScopeExit.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Support/ExponentialBackoff.h"
+#అన్తర్భావ "llvm/Support/Jobserver.h"
+#అన్తర్భావ "llvm/Support/ManagedStatic.h"
+#అన్తర్భావ "llvm/Support/Threading.h"
 
-#include <atomic>
-#include <future>
-#include <memory>
-#include <mutex>
-#include <thread>
-#include <vector>
+#అన్తర్భావ <atomic>
+#అన్తర్భావ <future>
+#అన్తర్భావ <memory>
+#అన్తర్భావ <mutex>
+#అన్తర్భావ <thread>
+#అన్తర్భావ <vector>
 
-using namespace llvm;
-using namespace llvm::parallel;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::parallel;
 
 llvm::ThreadPoolStrategy parallel::strategy;
 
-#if LLVM_ENABLE_THREADS
+#ఒకవేళ LLVM_ENABLE_దారాలు
 
-static thread_local unsigned threadIndex = UINT_MAX;
+స్థిర thread_local గుర్తులేని thread_సూచీ = UINT_MAX;
 
-namespace {
+నామాకాశ {
 
 /// Runs closures on a thread pool in filo order.
-class ThreadPoolExecutor {
-public:
-  explicit ThreadPoolExecutor(ThreadPoolStrategy S) {
-    if (S.UseJobserver)
+తరగతి ThreadPoolExecutor {
+బహిరంగ:
+  స్పష్టమైన ThreadPoolExecutor(ThreadPoolStrategy S) {
+    ఒకవేళ (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
-    ThreadCount = S.compute_thread_count();
+    Thread_లెక్క = S.compute_thread_లెక్క();
     // Spawn all but one of the threads in another thread as spawning threads
     // can take a while.
-    Threads.reserve(ThreadCount);
-    Threads.resize(1);
-    std::lock_guard<std::mutex> Lock(Mutex);
+    దారాలు.reserve(Thread_లెక్క);
+    దారాలు.resize(1);
+    std::తాళం_guard<std::mutex> తాళం_3(Mutex);
     // Use operator[] before creating the thread to avoid data race in .size()
     // in 'safe libc++' mode.
-    auto &Thread0 = Threads[0];
-    Thread0 = std::thread([this, S] {
-      for (unsigned I = 1; I < ThreadCount; ++I) {
-        Threads.emplace_back([this, S, I] { work(S, I); });
-        if (Stop)
-          break;
+    స్వయంచాలక &Thread0 = దారాలు[0];
+    Thread0 = std::thread([ఇది, S] {
+      కొరకు (గుర్తులేని I = 1; I < Thread_లెక్క; ++I) {
+        దారాలు.emplace_వెనుక([ఇది, S, I] { work(S, I); });
+        ఒకవేళ (Stop)
+          ఆపు;
       }
-      ThreadsCreated.set_value();
+      దారాలు_Created.సమితి_విలువ();
       work(S, 0);
     });
   }
 
   // To make sure the thread pool executor can only be created with a parallel
   // strategy.
-  ThreadPoolExecutor() = delete;
+  ThreadPoolExecutor() = తొలగించు;
 
-  void stop() {
+  శూన్య stop() {
     {
-      std::lock_guard<std::mutex> Lock(Mutex);
-      if (Stop)
-        return;
-      Stop = true;
+      std::తాళం_guard<std::mutex> తాళం_3(Mutex);
+      ఒకవేళ (Stop)
+        తిరిగి;
+      Stop = నిజం;
     }
     Cond.notify_all();
-    ThreadsCreated.get_future().wait();
+    దారాలు_Created.get_future().wait();
 
     std::thread::id CurrentThreadId = std::this_thread::get_id();
-    for (std::thread &T : Threads)
-      if (T.get_id() == CurrentThreadId)
+    కొరకు (std::thread &T : దారాలు)
+      ఒకవేళ (T.get_id() == CurrentThreadId)
         T.detach();
-      else
+      లేకపోతే
         T.join();
   }
 
   ~ThreadPoolExecutor() { stop(); }
 
-  struct Creator {
-    static void *call() { return new ThreadPoolExecutor(strategy); }
+  నిర్మాణం Creator {
+    స్థిర శూన్య *call() { తిరిగి కొత్త ThreadPoolExecutor(strategy); }
   };
-  struct Deleter {
-    static void call(void *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
+  నిర్మాణం Deleter {
+    స్థిర శూన్య call(శూన్య *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
   };
 
-  struct WorkItem {
-    std::function<void()> F;
+  నిర్మాణం Work_అంశం {
+    std::function<శూన్య()> F;
     std::reference_wrapper<parallel::detail::Latch> L;
-    void operator()() {
+    శూన్య క్రియాకారకం()() {
       F();
       L.get().dec();
     }
   };
 
-  void add(std::function<void()> F, parallel::detail::Latch &L) {
+  శూన్య కూడు(std::function<శూన్య()> F, parallel::detail::Latch &L) {
     {
-      std::lock_guard<std::mutex> Lock(Mutex);
-      WorkStack.push_back({std::move(F), std::ref(L)});
+      std::తాళం_guard<std::mutex> తాళం_3(Mutex);
+      Work_దొంతర.నెట్టు_వెనుక({std::move(F), std::ref(L)});
     }
     Cond.notify_one();
   }
@@ -110,29 +110,29 @@ public:
   // Execute tasks from the work queue until the latch reaches zero.
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
-  void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
-      std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
-        return;
-      popAndRun(Lock);
+  శూన్య helpSync(స్థిరరాశి parallel::detail::Latch &L) {
+    అయితే (L.get_లెక్క() != 0) {
+      std::unique_తాళం<std::mutex> తాళం_3(Mutex);
+      ఒకవేళ (Stop || Work_దొంతర.ఖాళీలు())
+        తిరిగి;
+      తీయి_And_నిరంతరం(తాళం_3);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t get_Thread_లెక్క() స్థిరరాశి { తిరిగి Thread_లెక్క; }
 
-private:
+అంతరంగ:
   // Pop one task from the queue and run it. Must be called with Lock held;
   // releases Lock before executing the task.
-  void popAndRun(std::unique_lock<std::mutex> &Lock) {
-    auto Item = std::move(WorkStack.back());
-    WorkStack.pop_back();
-    Lock.unlock();
-    Item();
+  శూన్య తీయి_And_నిరంతరం(std::unique_తాళం<std::mutex> &తాళం_3) {
+    స్వయంచాలక అంశం = std::move(Work_దొంతర.వెనుక());
+    Work_దొంతర.తీయి_వెనుక();
+    తాళం_3.unlock();
+    అంశం();
   }
 
-  void work(ThreadPoolStrategy S, unsigned ThreadID) {
-    threadIndex = ThreadID;
+  శూన్య work(ThreadPoolStrategy S, గుర్తులేని ThreadID) {
+    thread_సూచీ = ThreadID;
     S.apply_thread_strategy(ThreadID);
     // Note on jobserver deadlock avoidance:
     // GNU Make grants each invoked process one implicit job slot. Our
@@ -140,8 +140,8 @@ private:
     // first successful tryAcquire() in a process. This guarantees forward
     // progress without requiring a dedicated "always-on" thread here.
 
-    while (true) {
-      if (TheJobserver) {
+    అయితే (నిజం) {
+      ఒకవేళ (TheJobserver) {
         // Jobserver-mode scheduling:
         // - Acquire one job slot (with exponential backoff to avoid busy-wait).
         // - While holding the slot, drain and run tasks from the local queue.
@@ -151,143 +151,143 @@ private:
         // the jobserver’s global concurrency limit. With K available slots,
         // up to K workers run tasks in parallel; within each worker tasks run
         // sequentially until the local queue is empty.
-        ExponentialBackoff Backoff(std::chrono::hours(24));
-        JobSlot Slot;
-        do {
-          if (Stop)
-            return;
-          Slot = TheJobserver->tryAcquire();
-          if (Slot.isValid())
-            break;
-        } while (Backoff.waitForNextAttempt());
+        ఘాతాంక_Backoff Backoff(std::chrono::hours(24));
+        పని_స్థానం స్థానం;
+        చేయి {
+          ఒకవేళ (Stop)
+            తిరిగి;
+          స్థానం = TheJobserver->tryAcquire();
+          ఒకవేళ (స్థానం.isValid())
+            ఆపు;
+        } అయితే (Backoff.wait_For_తదుపరి_Attempt());
 
-        llvm::scope_exit SlotReleaser(
-            [&] { TheJobserver->release(std::move(Slot)); });
+        llvm::scope_exit స్థానం_Releaser(
+            [&] { TheJobserver->release(std::move(స్థానం)); });
 
-        while (true) {
-          std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
-            return;
-          if (WorkStack.empty())
-            break;
-          popAndRun(Lock);
+        అయితే (నిజం) {
+          std::unique_తాళం<std::mutex> తాళం_3(Mutex);
+          Cond.wait(తాళం_3, [&] { తిరిగి Stop || !Work_దొంతర.ఖాళీలు(); });
+          ఒకవేళ (Stop && Work_దొంతర.ఖాళీలు())
+            తిరిగి;
+          ఒకవేళ (Work_దొంతర.ఖాళీలు())
+            ఆపు;
+          తీయి_And_నిరంతరం(తాళం_3);
         }
-      } else {
-        std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-        if (Stop)
-          break;
-        popAndRun(Lock);
+      } లేకపోతే {
+        std::unique_తాళం<std::mutex> తాళం_3(Mutex);
+        Cond.wait(తాళం_3, [&] { తిరిగి Stop || !Work_దొంతర.ఖాళీలు(); });
+        ఒకవేళ (Stop)
+          ఆపు;
+        తీయి_And_నిరంతరం(తాళం_3);
       }
     }
   }
 
-  std::atomic<bool> Stop{false};
-  std::vector<WorkItem> WorkStack;
+  std::atomic<తార్కిక> Stop{అబద్ధం};
+  std::సదిశ<Work_అంశం> Work_దొంతర;
   std::mutex Mutex;
   std::condition_variable Cond;
-  std::promise<void> ThreadsCreated;
-  std::vector<std::thread> Threads;
-  unsigned ThreadCount;
+  std::promise<శూన్య> దారాలు_Created;
+  std::సదిశ<std::thread> దారాలు;
+  గుర్తులేని Thread_లెక్క;
 
-  JobserverClient *TheJobserver = nullptr;
+  JobserverClient *TheJobserver = శూన్యసూచిక;
 };
 } // namespace
 
-static ThreadPoolExecutor *getDefaultExecutor() {
-#ifdef _WIN32
+స్థిర ThreadPoolExecutor *getDefaultExecutor() {
+#నిర్వచితమైతే _WIN32
   // The ManagedStatic enables the ThreadPoolExecutor to be stopped via
   // llvm_shutdown() on Windows. This is important to avoid various race
   // conditions at process exit that can cause crashes or deadlocks.
 
-  static ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
+  స్థిర ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
                        ThreadPoolExecutor::Deleter>
       ManagedExec;
-  static std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
-  return Exec.get();
-#else
+  స్థిర std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
+  తిరిగి Exec.get();
+#లేకపోతే
   // ManagedStatic is not desired on other platforms. When `Exec` is destroyed
   // by llvm_shutdown(), worker threads will clean up and invoke TLS
   // destructors. This can lead to race conditions if other threads attempt to
   // access TLS objects that have already been destroyed.
-  static ThreadPoolExecutor Exec(strategy);
-  return &Exec;
-#endif
+  స్థిర ThreadPoolExecutor Exec(strategy);
+  తిరిగి &Exec;
+#అయితే_ముగింపు
 }
 
-size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+size_t parallel::get_Thread_లెక్క() {
+  తిరిగి getDefaultExecutor()->get_Thread_లెక్క();
 }
-#endif
+#అయితే_ముగింపు
 
-TaskGroup::TaskGroup()
+Task_సమూహం::Task_సమూహం()
     : Parallel(
-#if LLVM_ENABLE_THREADS
-          strategy.ThreadsRequested != 1
-#else
-          false
-#endif
+#ఒకవేళ LLVM_ENABLE_దారాలు
+          strategy.దారాలు_Requested != 1
+#లేకపోతే
+          అబద్ధం
+#అయితే_ముగింపు
       ) {
 }
 
-TaskGroup::~TaskGroup() {
-#if LLVM_ENABLE_THREADS
+Task_సమూహం::~Task_సమూహం() {
+#ఒకవేళ LLVM_ENABLE_దారాలు
   // In a nested TaskGroup (threadIndex != -1u), actively help drain the queue.
-  bool IsNested = threadIndex != UINT_MAX;
-  if (Parallel && IsNested)
+  తార్కిక IsNested = thread_సూచీ != UINT_MAX;
+  ఒకవేళ (Parallel && IsNested)
     getDefaultExecutor()->helpSync(L);
-#endif
-  L.sync();
+#అయితే_ముగింపు
+  L.సమకాలీకరణ();
 }
 
-void TaskGroup::spawn(std::function<void()> F) {
-#if LLVM_ENABLE_THREADS
-  if (Parallel) {
+శూన్య Task_సమూహం::spawn(std::function<శూన్య()> F) {
+#ఒకవేళ LLVM_ENABLE_దారాలు
+  ఒకవేళ (Parallel) {
     L.inc();
-    getDefaultExecutor()->add(std::move(F), L);
-    return;
+    getDefaultExecutor()->కూడు(std::move(F), L);
+    తిరిగి;
   }
-#endif
+#అయితే_ముగింపు
   F();
 }
 
-void llvm::parallelFor(size_t Begin, size_t End,
-                       function_ref<void(size_t)> Fn) {
-#if LLVM_ENABLE_THREADS
-  if (strategy.ThreadsRequested != 1) {
-    size_t NumItems = End - Begin;
-    if (NumItems == 0)
-      return;
+శూన్య llvm::parallelFor(size_t Begin, size_t చివర_2,
+                       function_ref<శూన్య(size_t)> Fn) {
+#ఒకవేళ LLVM_ENABLE_దారాలు
+  ఒకవేళ (strategy.దారాలు_Requested != 1) {
+    size_t అంకె_వస్తువులు = చివర_2 - Begin;
+    ఒకవేళ (అంకె_వస్తువులు == 0)
+      తిరిగి;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
     // While 2 vs 4 vs 8 makes no measurable difference, 4 is used as a
     // reasonable default.
-    size_t NumWorkers = std::min<size_t>(NumItems, getThreadCount());
-    size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
+    size_t అంకె_Workers = std::min<size_t>(అంకె_వస్తువులు, get_Thread_లెక్క());
+    size_t Chunk_కొలత = std::max(size_t(1), అంకె_వస్తువులు / (అంకె_Workers * 4));
     std::atomic<size_t> Idx{Begin};
-    auto Worker = [&] {
-      while (true) {
-        size_t I = Idx.fetch_add(ChunkSize, std::memory_order_relaxed);
-        if (I >= End)
-          break;
-        size_t IEnd = std::min(I + ChunkSize, End);
-        for (; I < IEnd; ++I)
+    స్వయంచాలక కార్మికుడు = [&] {
+      అయితే (నిజం) {
+        size_t I = Idx.fetch_కూడు(Chunk_కొలత, std::memory_order_relaxed);
+        ఒకవేళ (I >= చివర_2)
+          ఆపు;
+        size_t IEnd = std::min(I + Chunk_కొలత, చివర_2);
+        కొరకు (; I < IEnd; ++I)
           Fn(I);
       }
     };
 
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
-    TaskGroup TG;
-    while (--NumWorkers)
-      TG.spawn(Worker);
-    Worker();
-    return;
+    Task_సమూహం TG;
+    అయితే (--అంకె_Workers)
+      TG.spawn(కార్మికుడు);
+    కార్మికుడు();
+    తిరిగి;
   }
-#endif
+#అయితే_ముగింపు
 
-  for (; Begin != End; ++Begin)
+  కొరకు (; Begin != చివర_2; ++Begin)
     Fn(Begin);
 }

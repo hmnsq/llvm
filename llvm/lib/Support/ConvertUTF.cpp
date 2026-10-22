@@ -61,51 +61,51 @@
 
 ------------------------------------------------------------------------ */
 
-#include "llvm/Support/ConvertUTF.h"
-#ifdef CVTUTF_DEBUG
-#include <stdio.h>
-#endif
-#include <assert.h>
+#అన్తర్భావ "llvm/Support/ConvertUTF.h"
+#నిర్వచితమైతే CVTUTF_DEBUG
+#అన్తర్భావ <stdio.h>
+#అయితే_ముగింపు
+#అన్తర్భావ <assert.h>
 
 /*
  * This code extensively uses fall-through switches.
  * Keep the compiler from warning about that.
  */
-#if defined(__clang__) && defined(__has_warning)
-# if __has_warning("-Wimplicit-fallthrough")
+#ఒకవేళ defined(__clang__) && defined(__has_warning)
+# ఒకవేళ __has_warning("-Wimplicit-fallthrough")
 #  define ConvertUTF_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push")  \
     _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"")
 #  define ConvertUTF_RESTORE_WARNINGS \
     _Pragma("clang diagnostic pop")
 # endif
-#elif defined(__GNUC__)
+#లేదావేళ defined(__GNUC__)
 # define ConvertUTF_DISABLE_WARNINGS \
    _Pragma("GCC diagnostic push")    \
    _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"")
 # define ConvertUTF_RESTORE_WARNINGS \
    _Pragma("GCC diagnostic pop")
-#endif
-#ifndef ConvertUTF_DISABLE_WARNINGS
+#అయితే_ముగింపు
+#నిర్వచితం_కాకపోతే ConvertUTF_DISABLE_WARNINGS
 # define ConvertUTF_DISABLE_WARNINGS
-#endif
-#ifndef ConvertUTF_RESTORE_WARNINGS
+#అయితే_ముగింపు
+#నిర్వచితం_కాకపోతే ConvertUTF_RESTORE_WARNINGS
 # define ConvertUTF_RESTORE_WARNINGS
-#endif
+#అయితే_ముగింపు
 
 ConvertUTF_DISABLE_WARNINGS
 
-namespace llvm {
+నామాకాశ llvm {
 
-static const int halfShift  = 10; /* used for shifting by 10 bits */
+స్థిర స్థిరరాశి పూర్ణాంకం half_జరుపు  = 10; /* used for shifting by 10 bits */
 
-static const UTF32 halfBase = 0x0010000UL;
-static const UTF32 halfMask = 0x3FFUL;
+స్థిర స్థిరరాశి UTF32 half_పునాది = 0x0010000UL;
+స్థిర స్థిరరాశి UTF32 half_ముసుగు = 0x3FFUL;
 
-#define UNI_SUR_HIGH_START  (UTF32)0xD800
-#define UNI_SUR_HIGH_END    (UTF32)0xDBFF
-#define UNI_SUR_LOW_START   (UTF32)0xDC00
-#define UNI_SUR_LOW_END     (UTF32)0xDFFF
+#నిర్వచించు UNI_SUR_ఎగువ_ప్రారంభం  (UTF32)0xD800
+#నిర్వచించు UNI_SUR_ఎగువ_చివర    (UTF32)0xDBFF
+#నిర్వచించు UNI_SUR_దిగువ_ప్రారంభం   (UTF32)0xDC00
+#నిర్వచించు UNI_SUR_దిగువ_చివర     (UTF32)0xDFFF
 
 /* --------------------------------------------------------------------- */
 
@@ -116,7 +116,7 @@ static const UTF32 halfMask = 0x3FFUL;
  * left as-is for anyone who may want to do such conversion, which was
  * allowed in earlier algorithms.
  */
-static const char trailingBytesForUTF8[256] = {
+స్థిర స్థిరరాశి అక్షరం trailing_బైట్లు_For_UTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -132,7 +132,7 @@ static const char trailingBytesForUTF8[256] = {
  * This table contains as many values as there might be trailing bytes
  * in a UTF-8 sequence.
  */
-static const UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
+స్థిర స్థిరరాశి UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
                      0x03C82080UL, 0xFA082080UL, 0x82082080UL };
 
 /*
@@ -142,7 +142,7 @@ static const UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080
  * (I.e., one byte sequence, two byte... etc.). Remember that sequencs
  * for *legal* UTF-8 will be 4 or fewer bytes total.
  */
-static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+స్థిర స్థిరరాశి UTF8 మొదటి_Byte_Mark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
 /* --------------------------------------------------------------------- */
 
@@ -157,228 +157,228 @@ static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC 
 
 /* --------------------------------------------------------------------- */
 
-ConversionResult ConvertUTF32toUTF16 (
-        const UTF32** sourceStart, const UTF32* sourceEnd,
-        UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags) {
-    ConversionResult result = conversionOK;
-    const UTF32* source = *sourceStart;
-    UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+Conversion_ఫలితం ConvertUTF32toUTF16 (
+        స్థిరరాశి UTF32** ఆధారం_ప్రారంభం, స్థిరరాశి UTF32* ఆధారం_చివర,
+        UTF16** లక్ష్యం_ప్రారంభం, UTF16* లక్ష్యం_చివర, ConversionFlags flags) {
+    Conversion_ఫలితం ఫలితం_2 = conversionOK;
+    స్థిరరాశి UTF32* ఆధారం_2 = *ఆధారం_ప్రారంభం;
+    UTF16* లక్ష్యం = *లక్ష్యం_ప్రారంభం;
+    అయితే (ఆధారం_2 < ఆధారం_చివర) {
         UTF32 ch;
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        ఒకవేళ (లక్ష్యం >= లక్ష్యం_చివర) {
+            ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
         }
-        ch = *source++;
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        ch = *ఆధారం_2++;
+        ఒకవేళ (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
-                    --source; /* return to the illegal value itself */
-                    result = sourceIllegal;
-                    break;
-                } else {
-                    *target++ = UNI_REPLACEMENT_CHAR;
+            ఒకవేళ (ch >= UNI_SUR_ఎగువ_ప్రారంభం && ch <= UNI_SUR_దిగువ_చివర) {
+                ఒకవేళ (flags == strictConversion) {
+                    --ఆధారం_2; /* return to the illegal value itself */
+                    ఫలితం_2 = ఆధారం_Illegal;
+                    ఆపు;
+                } లేకపోతే {
+                    *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
-                *target++ = (UTF16)ch; /* normal case */
+            } లేకపోతే {
+                *లక్ష్యం++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_LEGAL_UTF32) {
-            if (flags == strictConversion) {
-                result = sourceIllegal;
-            } else {
-                *target++ = UNI_REPLACEMENT_CHAR;
+        } లేకపోతే ఒకవేళ (ch > UNI_MAX_LEGAL_UTF32) {
+            ఒకవేళ (flags == strictConversion) {
+                ఫలితం_2 = ఆధారం_Illegal;
+            } లేకపోతే {
+                *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } లేకపోతే {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
-                --source; /* Back up source pointer! */
-                result = targetExhausted; break;
+            ఒకవేళ (లక్ష్యం + 1 >= లక్ష్యం_చివర) {
+                --ఆధారం_2; /* Back up source pointer! */
+                ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
             }
-            ch -= halfBase;
-            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+            ch -= half_పునాది;
+            *లక్ష్యం++ = (UTF16)((ch >> half_జరుపు) + UNI_SUR_ఎగువ_ప్రారంభం);
+            *లక్ష్యం++ = (UTF16)((ch & half_ముసుగు) + UNI_SUR_దిగువ_ప్రారంభం);
         }
     }
-    *sourceStart = source;
-    *targetStart = target;
-    return result;
+    *ఆధారం_ప్రారంభం = ఆధారం_2;
+    *లక్ష్యం_ప్రారంభం = లక్ష్యం;
+    తిరిగి ఫలితం_2;
 }
 
 /* --------------------------------------------------------------------- */
 
-ConversionResult ConvertUTF16toUTF32 (
-        const UTF16** sourceStart, const UTF16* sourceEnd,
-        UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags) {
-    ConversionResult result = conversionOK;
-    const UTF16* source = *sourceStart;
-    UTF32* target = *targetStart;
+Conversion_ఫలితం ConvertUTF16toUTF32 (
+        స్థిరరాశి UTF16** ఆధారం_ప్రారంభం, స్థిరరాశి UTF16* ఆధారం_చివర,
+        UTF32** లక్ష్యం_ప్రారంభం, UTF32* లక్ష్యం_చివర, ConversionFlags flags) {
+    Conversion_ఫలితం ఫలితం_2 = conversionOK;
+    స్థిరరాశి UTF16* ఆధారం_2 = *ఆధారం_ప్రారంభం;
+    UTF32* లక్ష్యం = *లక్ష్యం_ప్రారంభం;
     UTF32 ch, ch2;
-    while (source < sourceEnd) {
-        const UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
-        ch = *source++;
+    అయితే (ఆధారం_2 < ఆధారం_చివర) {
+        స్థిరరాశి UTF16* old_ఆధారం = ఆధారం_2; /*  In case we have to back up because of target overflow. */
+        ch = *ఆధారం_2++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        ఒకవేళ (ch >= UNI_SUR_ఎగువ_ప్రారంభం && ch <= UNI_SUR_ఎగువ_చివర) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
-                ch2 = *source;
+            ఒకవేళ (ఆధారం_2 < ఆధారం_చివర) {
+                ch2 = *ఆధారం_2;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-                    ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
-                        + (ch2 - UNI_SUR_LOW_START) + halfBase;
-                    ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
-                    --source; /* return to the illegal value itself */
-                    result = sourceIllegal;
-                    break;
+                ఒకవేళ (ch2 >= UNI_SUR_దిగువ_ప్రారంభం && ch2 <= UNI_SUR_దిగువ_చివర) {
+                    ch = ((ch - UNI_SUR_ఎగువ_ప్రారంభం) << half_జరుపు)
+                        + (ch2 - UNI_SUR_దిగువ_ప్రారంభం) + half_పునాది;
+                    ++ఆధారం_2;
+                } లేకపోతే ఒకవేళ (flags == strictConversion) { /* it's an unpaired high surrogate */
+                    --ఆధారం_2; /* return to the illegal value itself */
+                    ఫలితం_2 = ఆధారం_Illegal;
+                    ఆపు;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
-                --source; /* return to the high surrogate */
-                result = sourceExhausted;
-                break;
+            } లేకపోతే { /* We don't have the 16 bits following the high surrogate. */
+                --ఆధారం_2; /* return to the high surrogate */
+                ఫలితం_2 = ఆధారం_Exhausted;
+                ఆపు;
             }
-        } else if (flags == strictConversion) {
+        } లేకపోతే ఒకవేళ (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
-                --source; /* return to the illegal value itself */
-                result = sourceIllegal;
-                break;
+            ఒకవేళ (ch >= UNI_SUR_దిగువ_ప్రారంభం && ch <= UNI_SUR_దిగువ_చివర) {
+                --ఆధారం_2; /* return to the illegal value itself */
+                ఫలితం_2 = ఆధారం_Illegal;
+                ఆపు;
             }
         }
-        if (target >= targetEnd) {
-            source = oldSource; /* Back up source pointer! */
-            result = targetExhausted; break;
+        ఒకవేళ (లక్ష్యం >= లక్ష్యం_చివర) {
+            ఆధారం_2 = old_ఆధారం; /* Back up source pointer! */
+            ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
         }
-        *target++ = ch;
+        *లక్ష్యం++ = ch;
     }
-    *sourceStart = source;
-    *targetStart = target;
-#ifdef CVTUTF_DEBUG
-if (result == sourceIllegal) {
+    *ఆధారం_ప్రారంభం = ఆధారం_2;
+    *లక్ష్యం_ప్రారంభం = లక్ష్యం;
+#నిర్వచితమైతే CVTUTF_DEBUG
+ఒకవేళ (ఫలితం_2 == ఆధారం_Illegal) {
     fprintf(stderr, "ConvertUTF16toUTF32 illegal seq 0x%04x,%04x\n", ch, ch2);
     fflush(stderr);
 }
-#endif
-    return result;
+#అయితే_ముగింపు
+    తిరిగి ఫలితం_2;
 }
-ConversionResult ConvertUTF16toUTF8 (
-        const UTF16** sourceStart, const UTF16* sourceEnd,
-        UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags) {
-    ConversionResult result = conversionOK;
-    const UTF16* source = *sourceStart;
-    UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+Conversion_ఫలితం ConvertUTF16toUTF8 (
+        స్థిరరాశి UTF16** ఆధారం_ప్రారంభం, స్థిరరాశి UTF16* ఆధారం_చివర,
+        UTF8** లక్ష్యం_ప్రారంభం, UTF8* లక్ష్యం_చివర, ConversionFlags flags) {
+    Conversion_ఫలితం ఫలితం_2 = conversionOK;
+    స్థిరరాశి UTF16* ఆధారం_2 = *ఆధారం_ప్రారంభం;
+    UTF8* లక్ష్యం = *లక్ష్యం_ప్రారంభం;
+    అయితే (ఆధారం_2 < ఆధారం_చివర) {
         UTF32 ch;
-        unsigned short bytesToWrite = 0;
-        const UTF32 byteMask = 0xBF;
-        const UTF32 byteMark = 0x80;
-        const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
-        ch = *source++;
+        గుర్తులేని పొట్టి బైట్లు_గమ్యం_Write = 0;
+        స్థిరరాశి UTF32 byte_ముసుగు = 0xBF;
+        స్థిరరాశి UTF32 byteMark = 0x80;
+        స్థిరరాశి UTF16* old_ఆధారం = ఆధారం_2; /* In case we have to back up because of target overflow. */
+        ch = *ఆధారం_2++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        ఒకవేళ (ch >= UNI_SUR_ఎగువ_ప్రారంభం && ch <= UNI_SUR_ఎగువ_చివర) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
-                UTF32 ch2 = *source;
+            ఒకవేళ (ఆధారం_2 < ఆధారం_చివర) {
+                UTF32 ch2 = *ఆధారం_2;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-                    ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
-                        + (ch2 - UNI_SUR_LOW_START) + halfBase;
-                    ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
-                    --source; /* return to the illegal value itself */
-                    result = sourceIllegal;
-                    break;
+                ఒకవేళ (ch2 >= UNI_SUR_దిగువ_ప్రారంభం && ch2 <= UNI_SUR_దిగువ_చివర) {
+                    ch = ((ch - UNI_SUR_ఎగువ_ప్రారంభం) << half_జరుపు)
+                        + (ch2 - UNI_SUR_దిగువ_ప్రారంభం) + half_పునాది;
+                    ++ఆధారం_2;
+                } లేకపోతే ఒకవేళ (flags == strictConversion) { /* it's an unpaired high surrogate */
+                    --ఆధారం_2; /* return to the illegal value itself */
+                    ఫలితం_2 = ఆధారం_Illegal;
+                    ఆపు;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
-                --source; /* return to the high surrogate */
-                result = sourceExhausted;
-                break;
+            } లేకపోతే { /* We don't have the 16 bits following the high surrogate. */
+                --ఆధారం_2; /* return to the high surrogate */
+                ఫలితం_2 = ఆధారం_Exhausted;
+                ఆపు;
             }
-        } else if (flags == strictConversion) {
+        } లేకపోతే ఒకవేళ (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
-                --source; /* return to the illegal value itself */
-                result = sourceIllegal;
-                break;
+            ఒకవేళ (ch >= UNI_SUR_దిగువ_ప్రారంభం && ch <= UNI_SUR_దిగువ_చివర) {
+                --ఆధారం_2; /* return to the illegal value itself */
+                ఫలితం_2 = ఆధారం_Illegal;
+                ఆపు;
             }
         }
         /* Figure out how many bytes the result will require */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch < (UTF32)0x110000) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        ఒకవేళ (ch < (UTF32)0x80) {      బైట్లు_గమ్యం_Write = 1;
+        } లేకపోతే ఒకవేళ (ch < (UTF32)0x800) {     బైట్లు_గమ్యం_Write = 2;
+        } లేకపోతే ఒకవేళ (ch < (UTF32)0x10000) {   బైట్లు_గమ్యం_Write = 3;
+        } లేకపోతే ఒకవేళ (ch < (UTF32)0x110000) {  బైట్లు_గమ్యం_Write = 4;
+        } లేకపోతే {                            బైట్లు_గమ్యం_Write = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
         }
 
-        target += bytesToWrite;
-        if (target > targetEnd) {
-            source = oldSource; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+        లక్ష్యం += బైట్లు_గమ్యం_Write;
+        ఒకవేళ (లక్ష్యం > లక్ష్యం_చివర) {
+            ఆధారం_2 = old_ఆధారం; /* Back up source pointer! */
+            లక్ష్యం -= బైట్లు_గమ్యం_Write; ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
         }
-        switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
+        ఎంపిక (బైట్లు_గమ్యం_Write) { /* note: everything falls through. */
+            స్థితి 4: *--లక్ష్యం = (UTF8)((ch | byteMark) & byte_ముసుగు); ch >>= 6;
+            స్థితి 3: *--లక్ష్యం = (UTF8)((ch | byteMark) & byte_ముసుగు); ch >>= 6;
+            స్థితి 2: *--లక్ష్యం = (UTF8)((ch | byteMark) & byte_ముసుగు); ch >>= 6;
+            స్థితి 1: *--లక్ష్యం =  (UTF8)(ch | మొదటి_Byte_Mark[బైట్లు_గమ్యం_Write]);
         }
-        target += bytesToWrite;
+        లక్ష్యం += బైట్లు_గమ్యం_Write;
     }
-    *sourceStart = source;
-    *targetStart = target;
-    return result;
+    *ఆధారం_ప్రారంభం = ఆధారం_2;
+    *లక్ష్యం_ప్రారంభం = లక్ష్యం;
+    తిరిగి ఫలితం_2;
 }
 
 /* --------------------------------------------------------------------- */
 
-ConversionResult ConvertUTF32toUTF8 (
-        const UTF32** sourceStart, const UTF32* sourceEnd,
-        UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags) {
-    ConversionResult result = conversionOK;
-    const UTF32* source = *sourceStart;
-    UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+Conversion_ఫలితం ConvertUTF32toUTF8 (
+        స్థిరరాశి UTF32** ఆధారం_ప్రారంభం, స్థిరరాశి UTF32* ఆధారం_చివర,
+        UTF8** లక్ష్యం_ప్రారంభం, UTF8* లక్ష్యం_చివర, ConversionFlags flags) {
+    Conversion_ఫలితం ఫలితం_2 = conversionOK;
+    స్థిరరాశి UTF32* ఆధారం_2 = *ఆధారం_ప్రారంభం;
+    UTF8* లక్ష్యం = *లక్ష్యం_ప్రారంభం;
+    అయితే (ఆధారం_2 < ఆధారం_చివర) {
         UTF32 ch;
-        unsigned short bytesToWrite = 0;
-        const UTF32 byteMask = 0xBF;
-        const UTF32 byteMark = 0x80;
-        ch = *source++;
-        if (flags == strictConversion ) {
+        గుర్తులేని పొట్టి బైట్లు_గమ్యం_Write = 0;
+        స్థిరరాశి UTF32 byte_ముసుగు = 0xBF;
+        స్థిరరాశి UTF32 byteMark = 0x80;
+        ch = *ఆధారం_2++;
+        ఒకవేళ (flags == strictConversion ) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                --source; /* return to the illegal value itself */
-                result = sourceIllegal;
-                break;
+            ఒకవేళ (ch >= UNI_SUR_ఎగువ_ప్రారంభం && ch <= UNI_SUR_దిగువ_చివర) {
+                --ఆధారం_2; /* return to the illegal value itself */
+                ఫలితం_2 = ఆధారం_Illegal;
+                ఆపు;
             }
         }
         /*
          * Figure out how many bytes the result will require. Turn any
          * illegally large UTF32 things (> Plane 17) into replacement chars.
          */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        ఒకవేళ (ch < (UTF32)0x80) {      బైట్లు_గమ్యం_Write = 1;
+        } లేకపోతే ఒకవేళ (ch < (UTF32)0x800) {     బైట్లు_గమ్యం_Write = 2;
+        } లేకపోతే ఒకవేళ (ch < (UTF32)0x10000) {   బైట్లు_గమ్యం_Write = 3;
+        } లేకపోతే ఒకవేళ (ch <= UNI_MAX_LEGAL_UTF32) {  బైట్లు_గమ్యం_Write = 4;
+        } లేకపోతే {                            బైట్లు_గమ్యం_Write = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
-                                            result = sourceIllegal;
+                                            ఫలితం_2 = ఆధారం_Illegal;
         }
 
-        target += bytesToWrite;
-        if (target > targetEnd) {
-            --source; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+        లక్ష్యం += బైట్లు_గమ్యం_Write;
+        ఒకవేళ (లక్ష్యం > లక్ష్యం_చివర) {
+            --ఆధారం_2; /* Back up source pointer! */
+            లక్ష్యం -= బైట్లు_గమ్యం_Write; ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
         }
-        switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
+        ఎంపిక (బైట్లు_గమ్యం_Write) { /* note: everything falls through. */
+            స్థితి 4: *--లక్ష్యం = (UTF8)((ch | byteMark) & byte_ముసుగు); ch >>= 6;
+            స్థితి 3: *--లక్ష్యం = (UTF8)((ch | byteMark) & byte_ముసుగు); ch >>= 6;
+            స్థితి 2: *--లక్ష్యం = (UTF8)((ch | byteMark) & byte_ముసుగు); ch >>= 6;
+            స్థితి 1: *--లక్ష్యం = (UTF8) (ch | మొదటి_Byte_Mark[బైట్లు_గమ్యం_Write]);
         }
-        target += bytesToWrite;
+        లక్ష్యం += బైట్లు_గమ్యం_Write;
     }
-    *sourceStart = source;
-    *targetStart = target;
-    return result;
+    *ఆధారం_ప్రారంభం = ఆధారం_2;
+    *లక్ష్యం_ప్రారంభం = లక్ష్యం;
+    తిరిగి ఫలితం_2;
 }
 
 /* --------------------------------------------------------------------- */
@@ -394,29 +394,29 @@ ConversionResult ConvertUTF32toUTF8 (
  * definition of UTF-8 goes up to 4-byte sequences.
  */
 
-static Boolean isLegalUTF8(const UTF8 *source, int length) {
+స్థిర Boolean isLegalUTF8(స్థిరరాశి UTF8 *ఆధారం_2, పూర్ణాంకం నిడివి_2) {
     UTF8 a;
-    const UTF8 *srcptr = source+length;
-    switch (length) {
-    default: return false;
+    స్థిరరాశి UTF8 *srcptr = ఆధారం_2+నిడివి_2;
+    ఎంపిక (నిడివి_2) {
+    అప్రమేయ: తిరిగి అబద్ధం;
         /* Everything else falls through when "true"... */
-    case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 2: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+    స్థితి 4: ఒకవేళ ((a = (*--srcptr)) < 0x80 || a > 0xBF) తిరిగి అబద్ధం;
+    స్థితి 3: ఒకవేళ ((a = (*--srcptr)) < 0x80 || a > 0xBF) తిరిగి అబద్ధం;
+    స్థితి 2: ఒకవేళ ((a = (*--srcptr)) < 0x80 || a > 0xBF) తిరిగి అబద్ధం;
 
-        switch (*source) {
+        ఎంపిక (*ఆధారం_2) {
             /* no fall-through in this inner switch */
-            case 0xE0: if (a < 0xA0) return false; break;
-            case 0xED: if (a > 0x9F) return false; break;
-            case 0xF0: if (a < 0x90) return false; break;
-            case 0xF4: if (a > 0x8F) return false; break;
-            default:   if (a < 0x80) return false;
+            స్థితి 0xE0: ఒకవేళ (a < 0xA0) తిరిగి అబద్ధం; ఆపు;
+            స్థితి 0xED: ఒకవేళ (a > 0x9F) తిరిగి అబద్ధం; ఆపు;
+            స్థితి 0xF0: ఒకవేళ (a < 0x90) తిరిగి అబద్ధం; ఆపు;
+            స్థితి 0xF4: ఒకవేళ (a > 0x8F) తిరిగి అబద్ధం; ఆపు;
+            అప్రమేయ:   ఒకవేళ (a < 0x80) తిరిగి అబద్ధం;
         }
 
-    case 1: if (*source >= 0x80 && *source < 0xC2) return false;
+    స్థితి 1: ఒకవేళ (*ఆధారం_2 >= 0x80 && *ఆధారం_2 < 0xC2) తిరిగి అబద్ధం;
     }
-    if (*source > 0xF4) return false;
-    return true;
+    ఒకవేళ (*ఆధారం_2 > 0xF4) తిరిగి అబద్ధం;
+    తిరిగి నిజం;
 }
 
 /* --------------------------------------------------------------------- */
@@ -425,31 +425,31 @@ static Boolean isLegalUTF8(const UTF8 *source, int length) {
  * Exported function to return whether a UTF-8 sequence is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd) {
-    int length = trailingBytesForUTF8[*source]+1;
-    if (length > sourceEnd - source) {
-        return false;
+Boolean isLegalUTF8Sequence(స్థిరరాశి UTF8 *ఆధారం_2, స్థిరరాశి UTF8 *ఆధారం_చివర) {
+    పూర్ణాంకం నిడివి_2 = trailing_బైట్లు_For_UTF8[*ఆధారం_2]+1;
+    ఒకవేళ (నిడివి_2 > ఆధారం_చివర - ఆధారం_2) {
+        తిరిగి అబద్ధం;
     }
-    return isLegalUTF8(source, length);
+    తిరిగి isLegalUTF8(ఆధారం_2, నిడివి_2);
 }
 
 /*
  * Exported function to return the size of the first utf-8 code unit sequence,
  * Or 0 if the sequence is not valid;
  */
-unsigned getUTF8SequenceSize(const UTF8 *source, const UTF8 *sourceEnd) {
-  int length = trailingBytesForUTF8[*source] + 1;
-  return (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
+గుర్తులేని get_UTF8_Sequence_కొలత(స్థిరరాశి UTF8 *ఆధారం_2, స్థిరరాశి UTF8 *ఆధారం_చివర) {
+  పూర్ణాంకం నిడివి_2 = trailing_బైట్లు_For_UTF8[*ఆధారం_2] + 1;
+  తిరిగి (నిడివి_2 <= ఆధారం_చివర - ఆధారం_2 && isLegalUTF8(ఆధారం_2, నిడివి_2)) ? నిడివి_2
                                                                        : 0;
 }
 
 /* --------------------------------------------------------------------- */
 
-unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
-                                                   const UTF8 *sourceEnd) {
+గుర్తులేని కనుగొను_Maximal_Subpart_యొక్క_Ill_Formed_UTF8_Sequence(స్థిరరాశి UTF8 *ఆధారం_2,
+                                                   స్థిరరాశి UTF8 *ఆధారం_చివర) {
   UTF8 b1, b2, b3;
 
-  assert(!isLegalUTF8Sequence(source, sourceEnd));
+  ప్రతిజ్ఞా(!isLegalUTF8Sequence(ఆధారం_2, ఆధారం_చివర));
 
   /*
    * Unicode 6.3.0, D93b:
@@ -460,79 +460,79 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
    *   b. a subsequence of length one.
    */
 
-  if (source == sourceEnd)
-    return 0;
+  ఒకవేళ (ఆధారం_2 == ఆధారం_చివర)
+    తిరిగి 0;
 
   /*
    * Perform case analysis.  See Unicode 6.3.0, Table 3-7. Well-Formed UTF-8
    * Byte Sequences.
    */
 
-  b1 = *source;
-  ++source;
-  if (b1 >= 0xC2 && b1 <= 0xDF) {
+  b1 = *ఆధారం_2;
+  ++ఆధారం_2;
+  ఒకవేళ (b1 >= 0xC2 && b1 <= 0xDF) {
     /*
      * First byte is valid, but we know that this code unit sequence is
      * invalid, so the maximal subpart has to end after the first byte.
      */
-    return 1;
+    తిరిగి 1;
   }
 
-  if (source == sourceEnd)
-    return 1;
+  ఒకవేళ (ఆధారం_2 == ఆధారం_చివర)
+    తిరిగి 1;
 
-  b2 = *source;
-  ++source;
+  b2 = *ఆధారం_2;
+  ++ఆధారం_2;
 
-  if (b1 == 0xE0) {
-    return (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
+  ఒకవేళ (b1 == 0xE0) {
+    తిరిగి (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 >= 0xE1 && b1 <= 0xEC) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  ఒకవేళ (b1 >= 0xE1 && b1 <= 0xEC) {
+    తిరిగి (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xED) {
-    return (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
+  ఒకవేళ (b1 == 0xED) {
+    తిరిగి (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
   }
-  if (b1 >= 0xEE && b1 <= 0xEF) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  ఒకవేళ (b1 >= 0xEE && b1 <= 0xEF) {
+    తిరిగి (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xF0) {
-    if (b2 >= 0x90 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  ఒకవేళ (b1 == 0xF0) {
+    ఒకవేళ (b2 >= 0x90 && b2 <= 0xBF) {
+      ఒకవేళ (ఆధారం_2 == ఆధారం_చివర)
+        తిరిగి 2;
 
-      b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      b3 = *ఆధారం_2;
+      తిరిగి (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    తిరిగి 1;
   }
-  if (b1 >= 0xF1 && b1 <= 0xF3) {
-    if (b2 >= 0x80 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  ఒకవేళ (b1 >= 0xF1 && b1 <= 0xF3) {
+    ఒకవేళ (b2 >= 0x80 && b2 <= 0xBF) {
+      ఒకవేళ (ఆధారం_2 == ఆధారం_చివర)
+        తిరిగి 2;
 
-      b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      b3 = *ఆధారం_2;
+      తిరిగి (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    తిరిగి 1;
   }
-  if (b1 == 0xF4) {
-    if (b2 >= 0x80 && b2 <= 0x8F) {
-      if (source == sourceEnd)
-        return 2;
+  ఒకవేళ (b1 == 0xF4) {
+    ఒకవేళ (b2 >= 0x80 && b2 <= 0x8F) {
+      ఒకవేళ (ఆధారం_2 == ఆధారం_చివర)
+        తిరిగి 2;
 
-      b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      b3 = *ఆధారం_2;
+      తిరిగి (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    తిరిగి 1;
   }
 
-  assert((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
+  ప్రతిజ్ఞా((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
   /*
    * There are no valid sequences that start with these bytes.  Maximal subpart
    * is defined to have length 1 in these cases.
    */
-  return 1;
+  తిరిగి 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -541,8 +541,8 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
  * Exported function to return the total number of bytes in a codepoint
  * represented in UTF-8, given the value of the first byte.
  */
-unsigned getNumBytesForUTF8(UTF8 first) {
-  return trailingBytesForUTF8[first] + 1;
+గుర్తులేని get_అంకె_బైట్లు_For_UTF8(UTF8 మొదటి_2) {
+  తిరిగి trailing_బైట్లు_For_UTF8[మొదటి_2] + 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -551,192 +551,192 @@ unsigned getNumBytesForUTF8(UTF8 first) {
  * Exported function to return whether a UTF-8 string is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean isLegalUTF8String(const UTF8 **source, const UTF8 *sourceEnd) {
-    while (*source != sourceEnd) {
-        int length = trailingBytesForUTF8[**source] + 1;
-        if (length > sourceEnd - *source || !isLegalUTF8(*source, length))
-            return false;
-        *source += length;
+Boolean isLegalUTF8String(స్థిరరాశి UTF8 **ఆధారం_2, స్థిరరాశి UTF8 *ఆధారం_చివర) {
+    అయితే (*ఆధారం_2 != ఆధారం_చివర) {
+        పూర్ణాంకం నిడివి_2 = trailing_బైట్లు_For_UTF8[**ఆధారం_2] + 1;
+        ఒకవేళ (నిడివి_2 > ఆధారం_చివర - *ఆధారం_2 || !isLegalUTF8(*ఆధారం_2, నిడివి_2))
+            తిరిగి అబద్ధం;
+        *ఆధారం_2 += నిడివి_2;
     }
-    return true;
+    తిరిగి నిజం;
 }
 
 /* --------------------------------------------------------------------- */
 
-ConversionResult ConvertUTF8toUTF16 (
-        const UTF8** sourceStart, const UTF8* sourceEnd,
-        UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags) {
-    ConversionResult result = conversionOK;
-    const UTF8* source = *sourceStart;
-    UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+Conversion_ఫలితం ConvertUTF8toUTF16 (
+        స్థిరరాశి UTF8** ఆధారం_ప్రారంభం, స్థిరరాశి UTF8* ఆధారం_చివర,
+        UTF16** లక్ష్యం_ప్రారంభం, UTF16* లక్ష్యం_చివర, ConversionFlags flags) {
+    Conversion_ఫలితం ఫలితం_2 = conversionOK;
+    స్థిరరాశి UTF8* ఆధారం_2 = *ఆధారం_ప్రారంభం;
+    UTF16* లక్ష్యం = *లక్ష్యం_ప్రారంభం;
+    అయితే (ఆధారం_2 < ఆధారం_చివర) {
         UTF32 ch = 0;
-        unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            result = sourceExhausted; break;
+        గుర్తులేని పొట్టి extra_బైట్లు_గమ్యం_Read = trailing_బైట్లు_For_UTF8[*ఆధారం_2];
+        ఒకవేళ (extra_బైట్లు_గమ్యం_Read >= ఆధారం_చివర - ఆధారం_2) {
+            ఫలితం_2 = ఆధారం_Exhausted; ఆపు;
         }
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
-            result = sourceIllegal;
-            break;
+        ఒకవేళ (!isLegalUTF8(ఆధారం_2, extra_బైట్లు_గమ్యం_Read+1)) {
+            ఫలితం_2 = ఆధారం_Illegal;
+            ఆపు;
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
-        switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+        ఎంపిక (extra_బైట్లు_గమ్యం_Read) {
+            స్థితి 5: ch += *ఆధారం_2++; ch <<= 6; /* remember, illegal UTF-8 */
+            స్థితి 4: ch += *ఆధారం_2++; ch <<= 6; /* remember, illegal UTF-8 */
+            స్థితి 3: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 2: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 1: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 0: ch += *ఆధారం_2++;
         }
-        ch -= offsetsFromUTF8[extraBytesToRead];
+        ch -= offsetsFromUTF8[extra_బైట్లు_గమ్యం_Read];
 
-        if (target >= targetEnd) {
-            source -= (extraBytesToRead+1); /* Back up source pointer! */
-            result = targetExhausted; break;
+        ఒకవేళ (లక్ష్యం >= లక్ష్యం_చివర) {
+            ఆధారం_2 -= (extra_బైట్లు_గమ్యం_Read+1); /* Back up source pointer! */
+            ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
         }
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        ఒకవేళ (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
-                    source -= (extraBytesToRead+1); /* return to the illegal value itself */
-                    result = sourceIllegal;
-                    break;
-                } else {
-                    *target++ = UNI_REPLACEMENT_CHAR;
+            ఒకవేళ (ch >= UNI_SUR_ఎగువ_ప్రారంభం && ch <= UNI_SUR_దిగువ_చివర) {
+                ఒకవేళ (flags == strictConversion) {
+                    ఆధారం_2 -= (extra_బైట్లు_గమ్యం_Read+1); /* return to the illegal value itself */
+                    ఫలితం_2 = ఆధారం_Illegal;
+                    ఆపు;
+                } లేకపోతే {
+                    *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
-                *target++ = (UTF16)ch; /* normal case */
+            } లేకపోతే {
+                *లక్ష్యం++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_UTF16) {
-            if (flags == strictConversion) {
-                result = sourceIllegal;
-                source -= (extraBytesToRead+1); /* return to the start */
-                break; /* Bail out; shouldn't continue */
-            } else {
-                *target++ = UNI_REPLACEMENT_CHAR;
+        } లేకపోతే ఒకవేళ (ch > UNI_MAX_UTF16) {
+            ఒకవేళ (flags == strictConversion) {
+                ఫలితం_2 = ఆధారం_Illegal;
+                ఆధారం_2 -= (extra_బైట్లు_గమ్యం_Read+1); /* return to the start */
+                ఆపు; /* Bail out; shouldn't continue */
+            } లేకపోతే {
+                *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } లేకపోతే {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
-                source -= (extraBytesToRead+1); /* Back up source pointer! */
-                result = targetExhausted; break;
+            ఒకవేళ (లక్ష్యం + 1 >= లక్ష్యం_చివర) {
+                ఆధారం_2 -= (extra_బైట్లు_గమ్యం_Read+1); /* Back up source pointer! */
+                ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
             }
-            ch -= halfBase;
-            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+            ch -= half_పునాది;
+            *లక్ష్యం++ = (UTF16)((ch >> half_జరుపు) + UNI_SUR_ఎగువ_ప్రారంభం);
+            *లక్ష్యం++ = (UTF16)((ch & half_ముసుగు) + UNI_SUR_దిగువ_ప్రారంభం);
         }
     }
-    *sourceStart = source;
-    *targetStart = target;
-    return result;
+    *ఆధారం_ప్రారంభం = ఆధారం_2;
+    *లక్ష్యం_ప్రారంభం = లక్ష్యం;
+    తిరిగి ఫలితం_2;
 }
 
 /* --------------------------------------------------------------------- */
 
-static ConversionResult ConvertUTF8toUTF32Impl(
-        const UTF8** sourceStart, const UTF8* sourceEnd,
-        UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags,
-        Boolean InputIsPartial) {
-    ConversionResult result = conversionOK;
-    const UTF8* source = *sourceStart;
-    UTF32* target = *targetStart;
-    while (source < sourceEnd) {
+స్థిర Conversion_ఫలితం ConvertUTF8toUTF32Impl(
+        స్థిరరాశి UTF8** ఆధారం_ప్రారంభం, స్థిరరాశి UTF8* ఆధారం_చివర,
+        UTF32** లక్ష్యం_ప్రారంభం, UTF32* లక్ష్యం_చివర, ConversionFlags flags,
+        Boolean ఆదానం_Is_Partial) {
+    Conversion_ఫలితం ఫలితం_2 = conversionOK;
+    స్థిరరాశి UTF8* ఆధారం_2 = *ఆధారం_ప్రారంభం;
+    UTF32* లక్ష్యం = *లక్ష్యం_ప్రారంభం;
+    అయితే (ఆధారం_2 < ఆధారం_చివర) {
         UTF32 ch = 0;
-        unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            if (flags == strictConversion || InputIsPartial) {
-                result = sourceExhausted;
-                break;
-            } else {
-                result = sourceIllegal;
+        గుర్తులేని పొట్టి extra_బైట్లు_గమ్యం_Read = trailing_బైట్లు_For_UTF8[*ఆధారం_2];
+        ఒకవేళ (extra_బైట్లు_గమ్యం_Read >= ఆధారం_చివర - ఆధారం_2) {
+            ఒకవేళ (flags == strictConversion || ఆదానం_Is_Partial) {
+                ఫలితం_2 = ఆధారం_Exhausted;
+                ఆపు;
+            } లేకపోతే {
+                ఫలితం_2 = ఆధారం_Illegal;
 
                 /*
                  * Replace the maximal subpart of ill-formed sequence with
                  * replacement character.
                  */
-                source += findMaximalSubpartOfIllFormedUTF8Sequence(source,
-                                                                    sourceEnd);
-                *target++ = UNI_REPLACEMENT_CHAR;
-                continue;
+                ఆధారం_2 += కనుగొను_Maximal_Subpart_యొక్క_Ill_Formed_UTF8_Sequence(ఆధారం_2,
+                                                                    ఆధారం_చివర);
+                *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
+                కొనసాగు;
             }
         }
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        ఒకవేళ (లక్ష్యం >= లక్ష్యం_చివర) {
+            ఫలితం_2 = లక్ష్యం_Exhausted; ఆపు;
         }
 
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
-            result = sourceIllegal;
-            if (flags == strictConversion) {
+        ఒకవేళ (!isLegalUTF8(ఆధారం_2, extra_బైట్లు_గమ్యం_Read+1)) {
+            ఫలితం_2 = ఆధారం_Illegal;
+            ఒకవేళ (flags == strictConversion) {
                 /* Abort conversion. */
-                break;
-            } else {
+                ఆపు;
+            } లేకపోతే {
                 /*
                  * Replace the maximal subpart of ill-formed sequence with
                  * replacement character.
                  */
-                source += findMaximalSubpartOfIllFormedUTF8Sequence(source,
-                                                                    sourceEnd);
-                *target++ = UNI_REPLACEMENT_CHAR;
-                continue;
+                ఆధారం_2 += కనుగొను_Maximal_Subpart_యొక్క_Ill_Formed_UTF8_Sequence(ఆధారం_2,
+                                                                    ఆధారం_చివర);
+                *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
+                కొనసాగు;
             }
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
-        switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6;
-            case 4: ch += *source++; ch <<= 6;
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+        ఎంపిక (extra_బైట్లు_గమ్యం_Read) {
+            స్థితి 5: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 4: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 3: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 2: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 1: ch += *ఆధారం_2++; ch <<= 6;
+            స్థితి 0: ch += *ఆధారం_2++;
         }
-        ch -= offsetsFromUTF8[extraBytesToRead];
+        ch -= offsetsFromUTF8[extra_బైట్లు_గమ్యం_Read];
 
-        if (ch <= UNI_MAX_LEGAL_UTF32) {
+        ఒకవేళ (ch <= UNI_MAX_LEGAL_UTF32) {
             /*
              * UTF-16 surrogate values are illegal in UTF-32, and anything
              * over Plane 17 (> 0x10FFFF) is illegal.
              */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
-                    source -= (extraBytesToRead+1); /* return to the illegal value itself */
-                    result = sourceIllegal;
-                    break;
-                } else {
-                    *target++ = UNI_REPLACEMENT_CHAR;
+            ఒకవేళ (ch >= UNI_SUR_ఎగువ_ప్రారంభం && ch <= UNI_SUR_దిగువ_చివర) {
+                ఒకవేళ (flags == strictConversion) {
+                    ఆధారం_2 -= (extra_బైట్లు_గమ్యం_Read+1); /* return to the illegal value itself */
+                    ఫలితం_2 = ఆధారం_Illegal;
+                    ఆపు;
+                } లేకపోతే {
+                    *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
-                *target++ = ch;
+            } లేకపోతే {
+                *లక్ష్యం++ = ch;
             }
-        } else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
-            result = sourceIllegal;
-            *target++ = UNI_REPLACEMENT_CHAR;
+        } లేకపోతే { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
+            ఫలితం_2 = ఆధారం_Illegal;
+            *లక్ష్యం++ = UNI_REPLACEMENT_CHAR;
         }
     }
-    *sourceStart = source;
-    *targetStart = target;
-    return result;
+    *ఆధారం_ప్రారంభం = ఆధారం_2;
+    *లక్ష్యం_ప్రారంభం = లక్ష్యం;
+    తిరిగి ఫలితం_2;
 }
 
-ConversionResult ConvertUTF8toUTF32Partial(const UTF8 **sourceStart,
-                                           const UTF8 *sourceEnd,
-                                           UTF32 **targetStart,
-                                           UTF32 *targetEnd,
+Conversion_ఫలితం ConvertUTF8toUTF32Partial(స్థిరరాశి UTF8 **ఆధారం_ప్రారంభం,
+                                           స్థిరరాశి UTF8 *ఆధారం_చివర,
+                                           UTF32 **లక్ష్యం_ప్రారంభం,
+                                           UTF32 *లక్ష్యం_చివర,
                                            ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
-                                flags, /*InputIsPartial=*/true);
+  తిరిగి ConvertUTF8toUTF32Impl(ఆధారం_ప్రారంభం, ఆధారం_చివర, లక్ష్యం_ప్రారంభం, లక్ష్యం_చివర,
+                                flags, /*InputIsPartial=*/నిజం);
 }
 
-ConversionResult ConvertUTF8toUTF32(const UTF8 **sourceStart,
-                                    const UTF8 *sourceEnd, UTF32 **targetStart,
-                                    UTF32 *targetEnd, ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
-                                flags, /*InputIsPartial=*/false);
+Conversion_ఫలితం ConvertUTF8toUTF32(స్థిరరాశి UTF8 **ఆధారం_ప్రారంభం,
+                                    స్థిరరాశి UTF8 *ఆధారం_చివర, UTF32 **లక్ష్యం_ప్రారంభం,
+                                    UTF32 *లక్ష్యం_చివర, ConversionFlags flags) {
+  తిరిగి ConvertUTF8toUTF32Impl(ఆధారం_ప్రారంభం, ఆధారం_చివర, లక్ష్యం_ప్రారంభం, లక్ష్యం_చివర,
+                                flags, /*InputIsPartial=*/అబద్ధం);
 }
 
 /* ---------------------------------------------------------------------

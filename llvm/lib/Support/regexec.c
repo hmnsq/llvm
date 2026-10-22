@@ -42,93 +42,93 @@
  * macros that code uses.  This lets the same code operate on two different
  * representations for state sets.
  */
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
-#include "regex_impl.h"
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#అన్తర్భావ "regutils.h"
+#అన్తర్భావ "regex2.h"
 
 /* macros for manipulating states, small version */
 /* FIXME: 'states' is assumed as 'long' on small version. */
-#define	states1	long		/* for later use in llvm_regexec() decision */
-#define	states	states1
-#define	CLEAR(v)	((v) = 0)
-#define	SET0(v, n)	((v) &= ~((unsigned long)1 << (n)))
-#define	SET1(v, n)	((v) |= (unsigned long)1 << (n))
-#define	ISSET(v, n)	(((v) & ((unsigned long)1 << (n))) != 0)
-#define	ASSIGN(d, s)	((d) = (s))
-#define	EQ(a, b)	((a) == (b))
-#define	STATEVARS	long dummy	/* dummy version */
-#define	STATESETUP(m, n)	/* nothing */
-#define	STATETEARDOWN(m)	/* nothing */
-#define	SETUP(v)	((v) = 0)
-#define	onestate	long
-#define	INIT(o, n)	((o) = (unsigned long)1 << (n))
-#define	INC(o)		((o) = (unsigned long)(o) << 1)
-#define	ISSTATEIN(v, o)	(((v) & (o)) != 0)
+#నిర్వచించు	states1	దీర్ఘ		/* for later use in llvm_regexec() decision */
+#నిర్వచించు	స్థితులు	states1
+#నిర్వచించు	CLEAR(v)	((v) = 0)
+#నిర్వచించు	SET0(v, n)	((v) &= ~((గుర్తులేని దీర్ఘ)1 << (n)))
+#నిర్వచించు	SET1(v, n)	((v) |= (గుర్తులేని దీర్ఘ)1 << (n))
+#నిర్వచించు	ISSET(v, n)	(((v) & ((గుర్తులేని దీర్ఘ)1 << (n))) != 0)
+#నిర్వచించు	కేటాయించు_3(d, s)	((d) = (s))
+#నిర్వచించు	EQ(a, b)	((a) == (b))
+#నిర్వచించు	STATEVARS	దీర్ఘ dummy	/* dummy version */
+#నిర్వచించు	STATESETUP(m, n)	/* nothing */
+#నిర్వచించు	STATETEARDOWN(m)	/* nothing */
+#నిర్వచించు	అమరిక(v)	((v) = 0)
+#నిర్వచించు	onestate	దీర్ఘ
+#నిర్వచించు	INIT(o, n)	((o) = (గుర్తులేని దీర్ఘ)1 << (n))
+#నిర్వచించు	INC(o)		((o) = (గుర్తులేని దీర్ఘ)(o) << 1)
+#నిర్వచించు	ISSTATEIN(v, o)	(((v) & (o)) != 0)
 /* some abbreviations; note that some of these know variable names! */
 /* do "if I'm here, I can also be there" etc without branches */
-#define	FWD(dst, src, n)	((dst) |= ((unsigned long)(src)&(here)) << (n))
-#define	BACK(dst, src, n)	((dst) |= ((unsigned long)(src)&(here)) >> (n))
-#define	ISSETBACK(v, n)		(((v) & ((unsigned long)here >> (n))) != 0)
+#నిర్వచించు	FWD(dst, src, n)	((dst) |= ((గుర్తులేని దీర్ఘ)(src)&(ఇక్కడ_2)) << (n))
+#నిర్వచించు	వెనుక_2(dst, src, n)	((dst) |= ((గుర్తులేని దీర్ఘ)(src)&(ఇక్కడ_2)) >> (n))
+#నిర్వచించు	ISSETBACK(v, n)		(((v) & ((గుర్తులేని దీర్ఘ)ఇక్కడ_2 >> (n))) != 0)
 /* function names */
-#define SNAMES			/* engine.inc looks after details */
+#నిర్వచించు SNAMES			/* engine.inc looks after details */
 
-#include "regengine.inc"
+#అన్తర్భావ "regengine.inc"
 
 /* now undo things */
-#undef	states
-#undef	CLEAR
-#undef	SET0
-#undef	SET1
-#undef	ISSET
-#undef	ASSIGN
-#undef	EQ
-#undef	STATEVARS
-#undef	STATESETUP
-#undef	STATETEARDOWN
-#undef	SETUP
-#undef	onestate
-#undef	INIT
-#undef	INC
-#undef	ISSTATEIN
-#undef	FWD
-#undef	BACK
-#undef	ISSETBACK
-#undef	SNAMES
+#నిర్వచనం_రద్దు	స్థితులు
+#నిర్వచనం_రద్దు	CLEAR
+#నిర్వచనం_రద్దు	SET0
+#నిర్వచనం_రద్దు	SET1
+#నిర్వచనం_రద్దు	ISSET
+#నిర్వచనం_రద్దు	కేటాయించు_3
+#నిర్వచనం_రద్దు	EQ
+#నిర్వచనం_రద్దు	STATEVARS
+#నిర్వచనం_రద్దు	STATESETUP
+#నిర్వచనం_రద్దు	STATETEARDOWN
+#నిర్వచనం_రద్దు	అమరిక
+#నిర్వచనం_రద్దు	onestate
+#నిర్వచనం_రద్దు	INIT
+#నిర్వచనం_రద్దు	INC
+#నిర్వచనం_రద్దు	ISSTATEIN
+#నిర్వచనం_రద్దు	FWD
+#నిర్వచనం_రద్దు	వెనుక_2
+#నిర్వచనం_రద్దు	ISSETBACK
+#నిర్వచనం_రద్దు	SNAMES
 
 /* macros for manipulating states, large version */
-#define	states	char *
-#define	CLEAR(v)	memset(v, 0, m->g->nstates)
-#define	SET0(v, n)	((v)[n] = 0)
-#define	SET1(v, n)	((v)[n] = 1)
-#define	ISSET(v, n)	((v)[n])
-#define	ASSIGN(d, s)	memmove(d, s, m->g->nstates)
-#define	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
-#define	STATEVARS	long vn; char *space
-#define	STATESETUP(m, nv)	{ (m)->space = malloc((nv)*(m)->g->nstates); \
-				if ((m)->space == NULL) return(REG_ESPACE); \
+#నిర్వచించు	స్థితులు	అక్షరం *
+#నిర్వచించు	CLEAR(v)	memset(v, 0, m->g->nstates)
+#నిర్వచించు	SET0(v, n)	((v)[n] = 0)
+#నిర్వచించు	SET1(v, n)	((v)[n] = 1)
+#నిర్వచించు	ISSET(v, n)	((v)[n])
+#నిర్వచించు	కేటాయించు_3(d, s)	memmove(d, s, m->g->nstates)
+#నిర్వచించు	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
+#నిర్వచించు	STATEVARS	దీర్ఘ vn; అక్షరం *space
+#నిర్వచించు	STATESETUP(m, nv)	{ (m)->space = జ్ఞాపకం_ఇవ్వు((nv)*(m)->g->nstates); \
+				ఒకవేళ ((m)->space == ఖాళీ) తిరిగి(REG_ESPACE); \
 				(m)->vn = 0; }
-#define	STATETEARDOWN(m)	{ free((m)->space); }
-#define	SETUP(v)	((v) = &m->space[m->vn++ * m->g->nstates])
-#define	onestate	long
-#define	INIT(o, n)	((o) = (n))
-#define	INC(o)	((o)++)
-#define	ISSTATEIN(v, o)	((v)[o])
+#నిర్వచించు	STATETEARDOWN(m)	{ విడుదల((m)->space); }
+#నిర్వచించు	అమరిక(v)	((v) = &m->space[m->vn++ * m->g->nstates])
+#నిర్వచించు	onestate	దీర్ఘ
+#నిర్వచించు	INIT(o, n)	((o) = (n))
+#నిర్వచించు	INC(o)	((o)++)
+#నిర్వచించు	ISSTATEIN(v, o)	((v)[o])
 /* some abbreviations; note that some of these know variable names! */
 /* do "if I'm here, I can also be there" etc without branches */
-#define	FWD(dst, src, n)	((dst)[here+(n)] |= (src)[here])
-#define	BACK(dst, src, n)	((dst)[here-(n)] |= (src)[here])
-#define	ISSETBACK(v, n)	((v)[here - (n)])
+#నిర్వచించు	FWD(dst, src, n)	((dst)[ఇక్కడ_2+(n)] |= (src)[ఇక్కడ_2])
+#నిర్వచించు	వెనుక_2(dst, src, n)	((dst)[ఇక్కడ_2-(n)] |= (src)[ఇక్కడ_2])
+#నిర్వచించు	ISSETBACK(v, n)	((v)[ఇక్కడ_2 - (n)])
 /* function names */
-#define	LNAMES			/* flag */
+#నిర్వచించు	LNAMES			/* flag */
 
-#include "regengine.inc"
+#అన్తర్భావ "regengine.inc"
 
 /*
  - llvm_regexec - interface for matching
@@ -137,26 +137,26 @@
  * when choosing which matcher to call.  Also, by this point the matchers
  * have been prototyped.
  */
-int				/* 0 success, REG_NOMATCH failure */
-llvm_regexec(const llvm_regex_t *preg, const char *string, size_t nmatch,
-             llvm_regmatch_t pmatch[], int eflags)
+పూర్ణాంకం				/* 0 success, REG_NOMATCH failure */
+llvm_regexec(స్థిరరాశి llvm_regex_t *preg, స్థిరరాశి అక్షరం *string, size_t nmatch,
+             llvm_regmatch_t pmatch[], పూర్ణాంకం eflags)
 {
-	struct re_guts *g = preg->re_g;
-#ifdef REDEBUG
+	నిర్మాణం re_guts *g = preg->re_g;
+#నిర్వచితమైతే REDEBUG
 #	define	GOODFLAGS(f)	(f)
-#else
+#లేకపోతే
 #	define	GOODFLAGS(f)	((f)&(REG_NOTBOL|REG_NOTEOL|REG_STARTEND))
-#endif
+#అయితే_ముగింపు
 
-	if (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
-		return(REG_BADPAT);
-	assert(!(g->iflags&REGEX_BAD));
-	if (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
-		return(REG_BADPAT);
+	ఒకవేళ (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
+		తిరిగి(REG_BADPAT);
+	ప్రతిజ్ఞా(!(g->iflags&REGEX_BAD));
+	ఒకవేళ (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
+		తిరిగి(REG_BADPAT);
 	eflags = GOODFLAGS(eflags);
 
-	if (g->nstates <= (long)(CHAR_BIT*sizeof(states1)) && !(eflags&REG_LARGE))
-		return(smatcher(g, string, nmatch, pmatch, eflags));
-	else
-		return(lmatcher(g, string, nmatch, pmatch, eflags));
+	ఒకవేళ (g->nstates <= (దీర్ఘ)(CHAR_BIT*పరిమాణం(states1)) && !(eflags&REG_LARGE))
+		తిరిగి(smatcher(g, string, nmatch, pmatch, eflags));
+	లేకపోతే
+		తిరిగి(lmatcher(g, string, nmatch, pmatch, eflags));
 }

@@ -6,176 +6,176 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
+#అన్తర్భావ "llvm/ADT/Twine.h"
+#అన్తర్భావ "llvm/ADT/SmallString.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/FormatVariadic.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+ఉపయోగించి నామాకాశ llvm;
 
-std::string Twine::str() const {
+std::string Twine::str() స్థిరరాశి {
   // If we're storing only a std::string, just return it.
-  if (LHSKind == StdStringKind && RHSKind == EmptyKind)
-    return *LHS.stdString;
+  ఒకవేళ (LHSKind == Std_String_రకం && RHSKind == ఖాళీలు_రకం)
+    తిరిగి *LHS.stdString;
 
   // If we're storing a formatv_object, we can avoid an extra copy by formatting
   // it immediately and returning the result.
-  if (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
-    return LHS.formatvObject->str();
+  ఒకవేళ (LHSKind == Formatv_Object_రకం && RHSKind == ఖాళీలు_రకం)
+    తిరిగి LHS.formatvObject->str();
 
   // Otherwise, flatten and copy the contents first.
   SmallString<256> Vec;
-  return toStringRef(Vec).str();
+  తిరిగి గమ్యం_String_Ref(Vec).str();
 }
 
-void Twine::toVector(SmallVectorImpl<char> &Out) const {
-  raw_svector_ostream OS(Out);
+శూన్య Twine::గమ్యం_సదిశ(Small_సదిశ_Impl<అక్షరం> &బహిర్గతం) స్థిరరాశి {
+  raw_svector_ostream OS(బహిర్గతం);
   print(OS);
 }
 
-StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
-  if (isUnary()) {
-    switch (getLHSKind()) {
-    case CStringKind:
+StringRef Twine::గమ్యం_Null_Terminated_String_Ref(Small_సదిశ_Impl<అక్షరం> &బహిర్గతం) స్థిరరాశి {
+  ఒకవేళ (isUnary()) {
+    ఎంపిక (getLHSKind()) {
+    స్థితి CString_రకం:
       // Already null terminated, yay!
-      return StringRef(LHS.cString);
-    case StdStringKind: {
-      const std::string *str = LHS.stdString;
-      return StringRef(str->c_str(), str->size());
+      తిరిగి StringRef(LHS.cString);
+    స్థితి Std_String_రకం: {
+      స్థిరరాశి std::string *str = LHS.stdString;
+      తిరిగి StringRef(str->c_str(), str->కొలత_2());
     }
-    case StringLiteralKind:
-      return StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
-    default:
-      break;
+    స్థితి String_Literal_రకం:
+      తిరిగి StringRef(LHS.ptr_And_నిడివి.ptr, LHS.ptr_And_నిడివి.నిడివి_2);
+    అప్రమేయ:
+      ఆపు;
     }
   }
-  toVector(Out);
-  Out.push_back(0);
-  Out.pop_back();
-  return StringRef(Out.data(), Out.size());
+  గమ్యం_సదిశ(బహిర్గతం);
+  బహిర్గతం.నెట్టు_వెనుక(0);
+  బహిర్గతం.తీయి_వెనుక();
+  తిరిగి StringRef(బహిర్గతం.దత్తాంశం(), బహిర్గతం.కొలత_2());
 }
 
-void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
-    break;
-  case Twine::EmptyKind:
-    break;
-  case Twine::TwineKind:
+శూన్య Twine::print_One_బిడ్డ(raw_ostream &OS, బిడ్డ Ptr, కణుపు_రకం రకం_3) స్థిరరాశి {
+  ఎంపిక (రకం_3) {
+  స్థితి Twine::Null_రకం:
+    ఆపు;
+  స్థితి Twine::ఖాళీలు_రకం:
+    ఆపు;
+  స్థితి Twine::Twine_రకం:
     Ptr.twine->print(OS);
-    break;
-  case Twine::CStringKind:
+    ఆపు;
+  స్థితి Twine::CString_రకం:
     OS << Ptr.cString;
-    break;
-  case Twine::StdStringKind:
+    ఆపు;
+  స్థితి Twine::Std_String_రకం:
     OS << *Ptr.stdString;
-    break;
-  case Twine::PtrAndLengthKind:
-  case Twine::StringLiteralKind:
-    OS << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length);
-    break;
-  case Twine::FormatvObjectKind:
+    ఆపు;
+  స్థితి Twine::Ptr_And_నిడివి_రకం:
+  స్థితి Twine::String_Literal_రకం:
+    OS << StringRef(Ptr.ptr_And_నిడివి.ptr, Ptr.ptr_And_నిడివి.నిడివి_2);
+    ఆపు;
+  స్థితి Twine::Formatv_Object_రకం:
     OS << *Ptr.formatvObject;
-    break;
-  case Twine::CharKind:
+    ఆపు;
+  స్థితి Twine::Char_రకం:
     OS << Ptr.character;
-    break;
-  case Twine::DecUIKind:
+    ఆపు;
+  స్థితి Twine::DecUIKind:
     OS << Ptr.decUI;
-    break;
-  case Twine::DecIKind:
+    ఆపు;
+  స్థితి Twine::DecIKind:
     OS << Ptr.decI;
-    break;
-  case Twine::DecULKind:
+    ఆపు;
+  స్థితి Twine::DecULKind:
     OS << Ptr.decUL;
-    break;
-  case Twine::DecLKind:
+    ఆపు;
+  స్థితి Twine::DecLKind:
     OS << Ptr.decL;
-    break;
-  case Twine::DecULLKind:
+    ఆపు;
+  స్థితి Twine::DecULLKind:
     OS << Ptr.decULL;
-    break;
-  case Twine::DecLLKind:
+    ఆపు;
+  స్థితి Twine::DecLLKind:
     OS << Ptr.decLL;
-    break;
-  case Twine::UHexKind:
+    ఆపు;
+  స్థితి Twine::UHex_రకం:
     OS.write_hex(Ptr.uHex);
-    break;
+    ఆపు;
   }
 }
 
-void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
+శూన్య Twine::print_One_బిడ్డ_Repr(raw_ostream &OS, బిడ్డ Ptr, కణుపు_రకం రకం_3) స్థిరరాశి {
+  ఎంపిక (రకం_3) {
+  స్థితి Twine::Null_రకం:
     OS << "null";
-    break;
-  case Twine::EmptyKind:
+    ఆపు;
+  స్థితి Twine::ఖాళీలు_రకం:
     OS << "empty";
-    break;
-  case Twine::TwineKind:
+    ఆపు;
+  స్థితి Twine::Twine_రకం:
     OS << "rope:";
     Ptr.twine->printRepr(OS);
-    break;
-  case Twine::CStringKind:
+    ఆపు;
+  స్థితి Twine::CString_రకం:
     OS << "cstring:\"" << Ptr.cString << "\"";
-    break;
-  case Twine::StdStringKind:
+    ఆపు;
+  స్థితి Twine::Std_String_రకం:
     OS << "std::string:\"" << Ptr.stdString << "\"";
-    break;
-  case Twine::PtrAndLengthKind:
+    ఆపు;
+  స్థితి Twine::Ptr_And_నిడివి_రకం:
     OS << "ptrAndLength:\""
-       << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::StringLiteralKind:
+       << StringRef(Ptr.ptr_And_నిడివి.ptr, Ptr.ptr_And_నిడివి.నిడివి_2) << "\"";
+    ఆపు;
+  స్థితి Twine::String_Literal_రకం:
     OS << "constexprPtrAndLength:\""
-       << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::FormatvObjectKind:
+       << StringRef(Ptr.ptr_And_నిడివి.ptr, Ptr.ptr_And_నిడివి.నిడివి_2) << "\"";
+    ఆపు;
+  స్థితి Twine::Formatv_Object_రకం:
     OS << "formatv:\"" << *Ptr.formatvObject << "\"";
-    break;
-  case Twine::CharKind:
+    ఆపు;
+  స్థితి Twine::Char_రకం:
     OS << "char:\"" << Ptr.character << "\"";
-    break;
-  case Twine::DecUIKind:
+    ఆపు;
+  స్థితి Twine::DecUIKind:
     OS << "decUI:\"" << Ptr.decUI << "\"";
-    break;
-  case Twine::DecIKind:
+    ఆపు;
+  స్థితి Twine::DecIKind:
     OS << "decI:\"" << Ptr.decI << "\"";
-    break;
-  case Twine::DecULKind:
+    ఆపు;
+  స్థితి Twine::DecULKind:
     OS << "decUL:\"" << Ptr.decUL << "\"";
-    break;
-  case Twine::DecLKind:
+    ఆపు;
+  స్థితి Twine::DecLKind:
     OS << "decL:\"" << Ptr.decL << "\"";
-    break;
-  case Twine::DecULLKind:
+    ఆపు;
+  స్థితి Twine::DecULLKind:
     OS << "decULL:\"" << Ptr.decULL << "\"";
-    break;
-  case Twine::DecLLKind:
+    ఆపు;
+  స్థితి Twine::DecLLKind:
     OS << "decLL:\"" << Ptr.decLL << "\"";
-    break;
-  case Twine::UHexKind:
+    ఆపు;
+  స్థితి Twine::UHex_రకం:
     OS << "uhex:\"" << Ptr.uHex << "\"";
-    break;
+    ఆపు;
   }
 }
 
-void Twine::print(raw_ostream &OS) const {
-  printOneChild(OS, LHS, getLHSKind());
-  printOneChild(OS, RHS, getRHSKind());
+శూన్య Twine::print(raw_ostream &OS) స్థిరరాశి {
+  print_One_బిడ్డ(OS, LHS, getLHSKind());
+  print_One_బిడ్డ(OS, RHS, getRHSKind());
 }
 
-void Twine::printRepr(raw_ostream &OS) const {
+శూన్య Twine::printRepr(raw_ostream &OS) స్థిరరాశి {
   OS << "(Twine ";
-  printOneChildRepr(OS, LHS, getLHSKind());
+  print_One_బిడ్డ_Repr(OS, LHS, getLHSKind());
   OS << " ";
-  printOneChildRepr(OS, RHS, getRHSKind());
+  print_One_బిడ్డ_Repr(OS, RHS, getRHSKind());
   OS << ")";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
+#ఒకవేళ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_పద్ధతి శూన్య Twine::dump() స్థిరరాశి { print(dbgs()); }
 
-LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }
-#endif
+LLVM_DUMP_పద్ధతి శూన్య Twine::dumpRepr() స్థిరరాశి { printRepr(dbgs()); }
+#అయితే_ముగింపు

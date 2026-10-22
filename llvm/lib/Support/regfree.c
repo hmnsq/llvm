@@ -35,38 +35,38 @@
  *	@(#)regfree.c	8.3 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#అన్తర్భావ "regutils.h"
+#అన్తర్భావ "regex2.h"
 
 /*
  - llvm_regfree - free everything
  */
-void
+శూన్య
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	నిర్మాణం re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	ఒకవేళ (preg->re_magic != MAGIC1)	/* oops */
+		తిరిగి;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	ఒకవేళ (g == ఖాళీ || g->magic != MAGIC2)	/* oops again */
+		తిరిగి;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
-		free(g->must);
-	free((char *)g);
+	ఒకవేళ (g->strip != ఖాళీ)
+		విడుదల((అక్షరం *)g->strip);
+	ఒకవేళ (g->sets != ఖాళీ)
+		విడుదల((అక్షరం *)g->sets);
+	ఒకవేళ (g->setbits != ఖాళీ)
+		విడుదల((అక్షరం *)g->setbits);
+	ఒకవేళ (g->must != ఖాళీ)
+		విడుదల(g->must);
+	విడుదల((అక్షరం *)g);
 }

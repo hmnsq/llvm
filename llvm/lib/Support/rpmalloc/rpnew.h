@@ -11,103 +11,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __cplusplus
+#నిర్వచితమైతే __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#అన్తర్భావ <new>
+#అన్తర్భావ <rpmalloc.h>
 
-#ifndef __CRTDECL
-#define __CRTDECL
-#endif
+#నిర్వచితం_కాకపోతే __CRTDECL
+#నిర్వచించు __CRTDECL
+#అయితే_ముగింపు
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete(శూన్య *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete[](శూన్య *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new(std::size_t కొలత_2) noexcept(false) {
+  తిరిగి rpmalloc(కొలత_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new[](std::size_t కొలత_2) noexcept(false) {
+  తిరిగి rpmalloc(కొలత_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new(std::size_t కొలత_2,
+                                    స్థిరరాశి std::nothrow_t &ట్యాగ్_2) noexcept {
+  (శూన్య)పరిమాణం(ట్యాగ్_2);
+  తిరిగి rpmalloc(కొలత_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new[](std::size_t కొలత_2,
+                                      స్థిరరాశి std::nothrow_t &ట్యాగ్_2) noexcept {
+  (శూన్య)పరిమాణం(ట్యాగ్_2);
+  తిరిగి rpmalloc(కొలత_2);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#ఒకవేళ (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete(శూన్య *p, std::size_t కొలత_2) noexcept {
+  (శూన్య)పరిమాణం(కొలత_2);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete[](శూన్య *p, std::size_t కొలత_2) noexcept {
+  (శూన్య)పరిమాణం(కొలత_2);
   rpfree(p);
 }
 
-#endif
+#అయితే_ముగింపు
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#ఒకవేళ (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete(శూన్య *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (శూన్య)పరిమాణం(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete[](శూన్య *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (శూన్య)పరిమాణం(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete(శూన్య *p, std::size_t కొలత_2,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (శూన్య)పరిమాణం(కొలత_2);
+  (శూన్య)పరిమాణం(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+బాహ్య శూన్య __CRTDECL క్రియాకారకం delete[](శూన్య *p, std::size_t కొలత_2,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (శూన్య)పరిమాణం(కొలత_2);
+  (శూన్య)పరిమాణం(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new(std::size_t కొలత_2,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  తిరిగి rpaligned_alloc(static_cast<size_t>(align), కొలత_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new[](std::size_t కొలత_2,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  తిరిగి rpaligned_alloc(static_cast<size_t>(align), కొలత_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new(std::size_t కొలత_2, std::align_val_t align,
+                                    స్థిరరాశి std::nothrow_t &ట్యాగ్_2) noexcept {
+  (శూన్య)పరిమాణం(ట్యాగ్_2);
+  తిరిగి rpaligned_alloc(static_cast<size_t>(align), కొలత_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+బాహ్య శూన్య *__CRTDECL క్రియాకారకం new[](std::size_t కొలత_2, std::align_val_t align,
+                                      స్థిరరాశి std::nothrow_t &ట్యాగ్_2) noexcept {
+  (శూన్య)పరిమాణం(ట్యాగ్_2);
+  తిరిగి rpaligned_alloc(static_cast<size_t>(align), కొలత_2);
 }
 
-#endif
+#అయితే_ముగింపు
 
-#endif
+#అయితే_ముగింపు

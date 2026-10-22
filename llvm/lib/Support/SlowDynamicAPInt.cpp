@@ -6,116 +6,116 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SlowDynamicAPInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/ADT/SlowDynamicAPInt.h"
+#అన్తర్భావ "llvm/ADT/Hashing.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::detail;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::detail;
 
 SlowDynamicAPInt::SlowDynamicAPInt(int64_t Val)
-    : Val(64, Val, /*isSigned=*/true) {}
+    : Val(64, Val, /*isSigned=*/నిజం) {}
 SlowDynamicAPInt::SlowDynamicAPInt() : SlowDynamicAPInt(0) {}
-SlowDynamicAPInt::SlowDynamicAPInt(const APInt &Val) : Val(Val) {}
-SlowDynamicAPInt &SlowDynamicAPInt::operator=(int64_t Val) {
-  return *this = SlowDynamicAPInt(Val);
+SlowDynamicAPInt::SlowDynamicAPInt(స్థిరరాశి APInt &Val) : Val(Val) {}
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం=(int64_t Val) {
+  తిరిగి *ఇది = SlowDynamicAPInt(Val);
 }
-SlowDynamicAPInt::operator int64_t() const { return Val.getSExtValue(); }
+SlowDynamicAPInt::క్రియాకారకం int64_t() స్థిరరాశి { తిరిగి Val.get_SExt_విలువ(); }
 
-hash_code llvm::detail::hash_value(const SlowDynamicAPInt &X) {
-  return hash_value(X.Val);
+hash_సంకేతం llvm::detail::hash_విలువ(స్థిరరాశి SlowDynamicAPInt &X) {
+  తిరిగి hash_విలువ(X.Val);
 }
 
 /// ---------------------------------------------------------------------------
 /// Convenience operator overloads for int64_t.
 /// ---------------------------------------------------------------------------
-SlowDynamicAPInt &llvm::detail::operator+=(SlowDynamicAPInt &A, int64_t B) {
-  return A += SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::క్రియాకారకం+=(SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A += SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator-=(SlowDynamicAPInt &A, int64_t B) {
-  return A -= SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::క్రియాకారకం-=(SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A -= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator*=(SlowDynamicAPInt &A, int64_t B) {
-  return A *= SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::క్రియాకారకం*=(SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A *= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator/=(SlowDynamicAPInt &A, int64_t B) {
-  return A /= SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::క్రియాకారకం/=(SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A /= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt &llvm::detail::operator%=(SlowDynamicAPInt &A, int64_t B) {
-  return A %= SlowDynamicAPInt(B);
-}
-
-bool llvm::detail::operator==(const SlowDynamicAPInt &A, int64_t B) {
-  return A == SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator!=(const SlowDynamicAPInt &A, int64_t B) {
-  return A != SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator>(const SlowDynamicAPInt &A, int64_t B) {
-  return A > SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator<(const SlowDynamicAPInt &A, int64_t B) {
-  return A < SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator<=(const SlowDynamicAPInt &A, int64_t B) {
-  return A <= SlowDynamicAPInt(B);
-}
-bool llvm::detail::operator>=(const SlowDynamicAPInt &A, int64_t B) {
-  return A >= SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator+(const SlowDynamicAPInt &A, int64_t B) {
-  return A + SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator-(const SlowDynamicAPInt &A, int64_t B) {
-  return A - SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator*(const SlowDynamicAPInt &A, int64_t B) {
-  return A * SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator/(const SlowDynamicAPInt &A, int64_t B) {
-  return A / SlowDynamicAPInt(B);
-}
-SlowDynamicAPInt llvm::detail::operator%(const SlowDynamicAPInt &A, int64_t B) {
-  return A % SlowDynamicAPInt(B);
+SlowDynamicAPInt &llvm::detail::క్రియాకారకం%=(SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A %= SlowDynamicAPInt(B);
 }
 
-bool llvm::detail::operator==(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) == B;
+తార్కిక llvm::detail::క్రియాకారకం==(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A == SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator!=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) != B;
+తార్కిక llvm::detail::క్రియాకారకం!=(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A != SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator>(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) > B;
+తార్కిక llvm::detail::క్రియాకారకం>(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A > SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator<(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) < B;
+తార్కిక llvm::detail::క్రియాకారకం<(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A < SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator<=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) <= B;
+తార్కిక llvm::detail::క్రియాకారకం<=(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A <= SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator>=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) >= B;
+తార్కిక llvm::detail::క్రియాకారకం>=(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A >= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator+(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) + B;
+SlowDynamicAPInt llvm::detail::క్రియాకారకం+(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A + SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator-(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) - B;
+SlowDynamicAPInt llvm::detail::క్రియాకారకం-(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A - SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator*(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) * B;
+SlowDynamicAPInt llvm::detail::క్రియాకారకం*(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A * SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator/(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) / B;
+SlowDynamicAPInt llvm::detail::క్రియాకారకం/(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A / SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator%(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) % B;
+SlowDynamicAPInt llvm::detail::క్రియాకారకం%(స్థిరరాశి SlowDynamicAPInt &A, int64_t B) {
+  తిరిగి A % SlowDynamicAPInt(B);
 }
 
-static unsigned getMaxWidth(const APInt &A, const APInt &B) {
-  return std::max(A.getBitWidth(), B.getBitWidth());
+తార్కిక llvm::detail::క్రియాకారకం==(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) == B;
+}
+తార్కిక llvm::detail::క్రియాకారకం!=(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) != B;
+}
+తార్కిక llvm::detail::క్రియాకారకం>(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) > B;
+}
+తార్కిక llvm::detail::క్రియాకారకం<(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) < B;
+}
+తార్కిక llvm::detail::క్రియాకారకం<=(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) <= B;
+}
+తార్కిక llvm::detail::క్రియాకారకం>=(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) >= B;
+}
+SlowDynamicAPInt llvm::detail::క్రియాకారకం+(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) + B;
+}
+SlowDynamicAPInt llvm::detail::క్రియాకారకం-(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) - B;
+}
+SlowDynamicAPInt llvm::detail::క్రియాకారకం*(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) * B;
+}
+SlowDynamicAPInt llvm::detail::క్రియాకారకం/(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) / B;
+}
+SlowDynamicAPInt llvm::detail::క్రియాకారకం%(int64_t A, స్థిరరాశి SlowDynamicAPInt &B) {
+  తిరిగి SlowDynamicAPInt(A) % B;
+}
+
+స్థిర గుర్తులేని get_Max_వెడల్పు(స్థిరరాశి APInt &A, స్థిరరాశి APInt &B) {
+  తిరిగి std::max(A.get_బిట్టు_వెడల్పు(), B.get_బిట్టు_వెడల్పు());
 }
 
 /// ---------------------------------------------------------------------------
@@ -123,29 +123,29 @@ static unsigned getMaxWidth(const APInt &A, const APInt &B) {
 /// ---------------------------------------------------------------------------
 
 // TODO: consider instead making APInt::compare available and using that.
-bool SlowDynamicAPInt::operator==(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width) == O.Val.sext(Width);
+తార్కిక SlowDynamicAPInt::క్రియాకారకం==(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(Val, O.Val);
+  తిరిగి Val.sext(వెడల్పు) == O.Val.sext(వెడల్పు);
 }
-bool SlowDynamicAPInt::operator!=(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width) != O.Val.sext(Width);
+తార్కిక SlowDynamicAPInt::క్రియాకారకం!=(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(Val, O.Val);
+  తిరిగి Val.sext(వెడల్పు) != O.Val.sext(వెడల్పు);
 }
-bool SlowDynamicAPInt::operator>(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sgt(O.Val.sext(Width));
+తార్కిక SlowDynamicAPInt::క్రియాకారకం>(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(Val, O.Val);
+  తిరిగి Val.sext(వెడల్పు).sgt(O.Val.sext(వెడల్పు));
 }
-bool SlowDynamicAPInt::operator<(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).slt(O.Val.sext(Width));
+తార్కిక SlowDynamicAPInt::క్రియాకారకం<(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(Val, O.Val);
+  తిరిగి Val.sext(వెడల్పు).slt(O.Val.sext(వెడల్పు));
 }
-bool SlowDynamicAPInt::operator<=(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sle(O.Val.sext(Width));
+తార్కిక SlowDynamicAPInt::క్రియాకారకం<=(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(Val, O.Val);
+  తిరిగి Val.sext(వెడల్పు).sle(O.Val.sext(వెడల్పు));
 }
-bool SlowDynamicAPInt::operator>=(const SlowDynamicAPInt &O) const {
-  unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sge(O.Val.sext(Width));
+తార్కిక SlowDynamicAPInt::క్రియాకారకం>=(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(Val, O.Val);
+  తిరిగి Val.sext(వెడల్పు).sge(O.Val.sext(వెడల్పు));
 }
 
 /// ---------------------------------------------------------------------------
@@ -156,133 +156,133 @@ bool SlowDynamicAPInt::operator>=(const SlowDynamicAPInt &O) const {
 /// If the overflow bit becomes set, resize a and b to double the width and
 /// call op(a, b, overflow), returning its result. The operation with double
 /// widths should not also overflow.
-APInt runOpWithExpandOnOverflow(
-    const APInt &A, const APInt &B,
-    function_ref<APInt(const APInt &, const APInt &, bool &Overflow)> Op) {
-  bool Overflow;
-  unsigned Width = getMaxWidth(A, B);
-  APInt Ret = Op(A.sext(Width), B.sext(Width), Overflow);
-  if (!Overflow)
-    return Ret;
+APInt నిరంతరం_Op_With_Expand_On_అధికప్రవాహం(
+    స్థిరరాశి APInt &A, స్థిరరాశి APInt &B,
+    function_ref<APInt(స్థిరరాశి APInt &, స్థిరరాశి APInt &, తార్కిక &అధికప్రవాహం)> Op) {
+  తార్కిక అధికప్రవాహం;
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(A, B);
+  APInt Ret = Op(A.sext(వెడల్పు), B.sext(వెడల్పు), అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Ret;
 
-  Width *= 2;
-  Ret = Op(A.sext(Width), B.sext(Width), Overflow);
-  assert(!Overflow && "double width should be sufficient to avoid overflow!");
-  return Ret;
+  వెడల్పు *= 2;
+  Ret = Op(A.sext(వెడల్పు), B.sext(వెడల్పు), అధికప్రవాహం);
+  ప్రతిజ్ఞా(!అధికప్రవాహం && "double width should be sufficient to avoid overflow!");
+  తిరిగి Ret;
 }
 
-SlowDynamicAPInt SlowDynamicAPInt::operator+(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::sadd_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::క్రియాకారకం+(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  తిరిగి SlowDynamicAPInt(
+      నిరంతరం_Op_With_Expand_On_అధికప్రవాహం(Val, O.Val, std::mem_fn(&APInt::sadd_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator-(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::ssub_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::క్రియాకారకం-(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  తిరిగి SlowDynamicAPInt(
+      నిరంతరం_Op_With_Expand_On_అధికప్రవాహం(Val, O.Val, std::mem_fn(&APInt::ssub_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator*(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::smul_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::క్రియాకారకం*(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  తిరిగి SlowDynamicAPInt(
+      నిరంతరం_Op_With_Expand_On_అధికప్రవాహం(Val, O.Val, std::mem_fn(&APInt::smul_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator/(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
-      runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::sdiv_ov)));
+SlowDynamicAPInt SlowDynamicAPInt::క్రియాకారకం/(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  తిరిగి SlowDynamicAPInt(
+      నిరంతరం_Op_With_Expand_On_అధికప్రవాహం(Val, O.Val, std::mem_fn(&APInt::sdiv_ov)));
 }
-SlowDynamicAPInt llvm::detail::abs(const SlowDynamicAPInt &X) {
-  return X >= 0 ? X : -X;
+SlowDynamicAPInt llvm::detail::నిరపేక్ష(స్థిరరాశి SlowDynamicAPInt &X) {
+  తిరిగి X >= 0 ? X : -X;
 }
-SlowDynamicAPInt llvm::detail::ceilDiv(const SlowDynamicAPInt &LHS,
-                                       const SlowDynamicAPInt &RHS) {
-  if (RHS == -1)
-    return -LHS;
-  unsigned Width = getMaxWidth(LHS.Val, RHS.Val);
-  return SlowDynamicAPInt(APIntOps::RoundingSDiv(
-      LHS.Val.sext(Width), RHS.Val.sext(Width), APInt::Rounding::UP));
+SlowDynamicAPInt llvm::detail::ceilDiv(స్థిరరాశి SlowDynamicAPInt &LHS,
+                                       స్థిరరాశి SlowDynamicAPInt &RHS) {
+  ఒకవేళ (RHS == -1)
+    తిరిగి -LHS;
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(LHS.Val, RHS.Val);
+  తిరిగి SlowDynamicAPInt(APIntOps::RoundingSDiv(
+      LHS.Val.sext(వెడల్పు), RHS.Val.sext(వెడల్పు), APInt::Rounding::పైకి));
 }
-SlowDynamicAPInt llvm::detail::floorDiv(const SlowDynamicAPInt &LHS,
-                                        const SlowDynamicAPInt &RHS) {
-  if (RHS == -1)
-    return -LHS;
-  unsigned Width = getMaxWidth(LHS.Val, RHS.Val);
-  return SlowDynamicAPInt(APIntOps::RoundingSDiv(
-      LHS.Val.sext(Width), RHS.Val.sext(Width), APInt::Rounding::DOWN));
+SlowDynamicAPInt llvm::detail::floorDiv(స్థిరరాశి SlowDynamicAPInt &LHS,
+                                        స్థిరరాశి SlowDynamicAPInt &RHS) {
+  ఒకవేళ (RHS == -1)
+    తిరిగి -LHS;
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(LHS.Val, RHS.Val);
+  తిరిగి SlowDynamicAPInt(APIntOps::RoundingSDiv(
+      LHS.Val.sext(వెడల్పు), RHS.Val.sext(వెడల్పు), APInt::Rounding::కిందికి));
 }
 // The RHS is always expected to be positive, and the result
 /// is always non-negative.
-SlowDynamicAPInt llvm::detail::mod(const SlowDynamicAPInt &LHS,
-                                   const SlowDynamicAPInt &RHS) {
-  assert(RHS >= 1 && "mod is only supported for positive divisors!");
-  return LHS % RHS < 0 ? LHS % RHS + RHS : LHS % RHS;
+SlowDynamicAPInt llvm::detail::mod(స్థిరరాశి SlowDynamicAPInt &LHS,
+                                   స్థిరరాశి SlowDynamicAPInt &RHS) {
+  ప్రతిజ్ఞా(RHS >= 1 && "mod is only supported for positive divisors!");
+  తిరిగి LHS % RHS < 0 ? LHS % RHS + RHS : LHS % RHS;
 }
 
-SlowDynamicAPInt llvm::detail::gcd(const SlowDynamicAPInt &A,
-                                   const SlowDynamicAPInt &B) {
-  assert(A >= 0 && B >= 0 && "operands must be non-negative!");
-  unsigned Width = getMaxWidth(A.Val, B.Val);
-  return SlowDynamicAPInt(
-      APIntOps::GreatestCommonDivisor(A.Val.sext(Width), B.Val.sext(Width)));
+SlowDynamicAPInt llvm::detail::గరిష్ఠ_సామాన్య_భాజకం(స్థిరరాశి SlowDynamicAPInt &A,
+                                   స్థిరరాశి SlowDynamicAPInt &B) {
+  ప్రతిజ్ఞా(A >= 0 && B >= 0 && "operands must be non-negative!");
+  గుర్తులేని వెడల్పు = get_Max_వెడల్పు(A.Val, B.Val);
+  తిరిగి SlowDynamicAPInt(
+      APIntOps::Greatest_Common_భాజకం(A.Val.sext(వెడల్పు), B.Val.sext(వెడల్పు)));
 }
 
 /// Returns the least common multiple of A and B.
-SlowDynamicAPInt llvm::detail::lcm(const SlowDynamicAPInt &A,
-                                   const SlowDynamicAPInt &B) {
-  SlowDynamicAPInt X = abs(A);
-  SlowDynamicAPInt Y = abs(B);
-  return (X * Y) / gcd(X, Y);
+SlowDynamicAPInt llvm::detail::lcm(స్థిరరాశి SlowDynamicAPInt &A,
+                                   స్థిరరాశి SlowDynamicAPInt &B) {
+  SlowDynamicAPInt X = నిరపేక్ష(A);
+  SlowDynamicAPInt Y = నిరపేక్ష(B);
+  తిరిగి (X * Y) / గరిష్ఠ_సామాన్య_భాజకం(X, Y);
 }
 
 /// This operation cannot overflow.
-SlowDynamicAPInt SlowDynamicAPInt::operator%(const SlowDynamicAPInt &O) const {
-  unsigned Width = std::max(Val.getBitWidth(), O.Val.getBitWidth());
-  return SlowDynamicAPInt(Val.sext(Width).srem(O.Val.sext(Width)));
+SlowDynamicAPInt SlowDynamicAPInt::క్రియాకారకం%(స్థిరరాశి SlowDynamicAPInt &O) స్థిరరాశి {
+  గుర్తులేని వెడల్పు = std::max(Val.get_బిట్టు_వెడల్పు(), O.Val.get_బిట్టు_వెడల్పు());
+  తిరిగి SlowDynamicAPInt(Val.sext(వెడల్పు).srem(O.Val.sext(వెడల్పు)));
 }
 
-SlowDynamicAPInt SlowDynamicAPInt::operator-() const {
-  if (Val.isMinSignedValue()) {
+SlowDynamicAPInt SlowDynamicAPInt::క్రియాకారకం-() స్థిరరాశి {
+  ఒకవేళ (Val.is_Min_Signed_విలువ()) {
     /// Overflow only occurs when the value is the minimum possible value.
-    APInt Ret = Val.sext(2 * Val.getBitWidth());
-    return SlowDynamicAPInt(-Ret);
+    APInt Ret = Val.sext(2 * Val.get_బిట్టు_వెడల్పు());
+    తిరిగి SlowDynamicAPInt(-Ret);
   }
-  return SlowDynamicAPInt(-Val);
+  తిరిగి SlowDynamicAPInt(-Val);
 }
 
 /// ---------------------------------------------------------------------------
 /// Assignment operators, preincrement, predecrement.
 /// ---------------------------------------------------------------------------
-SlowDynamicAPInt &SlowDynamicAPInt::operator+=(const SlowDynamicAPInt &O) {
-  *this = *this + O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం+=(స్థిరరాశి SlowDynamicAPInt &O) {
+  *ఇది = *ఇది + O;
+  తిరిగి *ఇది;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator-=(const SlowDynamicAPInt &O) {
-  *this = *this - O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం-=(స్థిరరాశి SlowDynamicAPInt &O) {
+  *ఇది = *ఇది - O;
+  తిరిగి *ఇది;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator*=(const SlowDynamicAPInt &O) {
-  *this = *this * O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం*=(స్థిరరాశి SlowDynamicAPInt &O) {
+  *ఇది = *ఇది * O;
+  తిరిగి *ఇది;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator/=(const SlowDynamicAPInt &O) {
-  *this = *this / O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం/=(స్థిరరాశి SlowDynamicAPInt &O) {
+  *ఇది = *ఇది / O;
+  తిరిగి *ఇది;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator%=(const SlowDynamicAPInt &O) {
-  *this = *this % O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం%=(స్థిరరాశి SlowDynamicAPInt &O) {
+  *ఇది = *ఇది % O;
+  తిరిగి *ఇది;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator++() {
-  *this += 1;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం++() {
+  *ఇది += 1;
+  తిరిగి *ఇది;
 }
 
-SlowDynamicAPInt &SlowDynamicAPInt::operator--() {
-  *this -= 1;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::క్రియాకారకం--() {
+  *ఇది -= 1;
+  తిరిగి *ఇది;
 }
 
 /// ---------------------------------------------------------------------------
 /// Printing.
 /// ---------------------------------------------------------------------------
-void SlowDynamicAPInt::print(raw_ostream &OS) const { OS << Val; }
+శూన్య SlowDynamicAPInt::print(raw_ostream &OS) స్థిరరాశి { OS << Val; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void SlowDynamicAPInt::dump() const { print(dbgs()); }
-#endif
+#ఒకవేళ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_పద్ధతి శూన్య SlowDynamicAPInt::dump() స్థిరరాశి { print(dbgs()); }
+#అయితే_ముగింపు

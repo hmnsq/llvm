@@ -11,27 +11,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Valgrind.h"
-#include <stddef.h>
+#అన్తర్భావ "llvm/Support/Valgrind.h"
+#అన్తర్భావ <stddef.h>
 
-#if __has_include(<valgrind/valgrind.h>)
-#include <valgrind/valgrind.h>
+#ఒకవేళ __has_include(<valgrind/valgrind.h>)
+#అన్తర్భావ <valgrind/valgrind.h>
 
-bool llvm::sys::RunningOnValgrind() {
-  return RUNNING_ON_VALGRIND;
+తార్కిక llvm::sys::RunningOnValgrind() {
+  తిరిగి RUNNING_ON_VALGRIND;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+శూన్య llvm::sys::ValgrindDiscardTranslations(స్థిరరాశి శూన్య *Addr, size_t Len) {
   VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
 }
 
-#else
+#లేకపోతే
 
-bool llvm::sys::RunningOnValgrind() {
-  return false;
+తార్కిక llvm::sys::RunningOnValgrind() {
+  తిరిగి అబద్ధం;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+శూన్య llvm::sys::ValgrindDiscardTranslations(స్థిరరాశి శూన్య *Addr, size_t Len) {
 }
 
-#endif
+#అయితే_ముగింపు

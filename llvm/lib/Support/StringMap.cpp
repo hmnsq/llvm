@@ -10,62 +10,62 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ReverseIteration.h"
+#అన్తర్భావ "llvm/ADT/StringMap.h"
+#అన్తర్భావ "llvm/Support/MathExtras.h"
+#అన్తర్భావ "llvm/Support/ReverseIteration.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 /// Returns the number of buckets to allocate to ensure that the DenseMap can
 /// accommodate \p NumEntries without need to grow().
-static inline unsigned getMinBucketToReserveForEntries(unsigned NumEntries) {
+స్థిర అంతఃవరుస గుర్తులేని get_Min_పాత్ర_గమ్యం_Reserve_For_Entries(గుర్తులేని అంకె_Entries) {
   // Ensure that "NumEntries * 4 < NumBuckets * 3"
-  if (NumEntries == 0)
-    return 0;
+  ఒకవేళ (అంకె_Entries == 0)
+    తిరిగి 0;
   // +1 is required because of the strict equality.
   // For example if NumEntries is 48, we need to return 401.
-  return NextPowerOf2(NumEntries * 4 / 3 + 1);
+  తిరిగి తదుపరి_Power_Of2(అంకె_Entries * 4 / 3 + 1);
 }
 
-static inline StringMapEntryBase **createTable(unsigned NewNumBuckets) {
-  auto **Table = static_cast<StringMapEntryBase **>(safe_calloc(
-      NewNumBuckets + 1, sizeof(StringMapEntryBase **) + sizeof(unsigned)));
+స్థిర అంతఃవరుస String_Map_నమోదు_పునాది **create_పట్టిక(గుర్తులేని New_అంకె_Buckets) {
+  స్వయంచాలక **పట్టిక = static_cast<String_Map_నమోదు_పునాది **>(సురక్షిత_calloc(
+      New_అంకె_Buckets + 1, పరిమాణం(String_Map_నమోదు_పునాది **) + పరిమాణం(గుర్తులేని)));
 
   // Allocate one extra bucket, set it to look filled so the iterators stop at
   // end.
-  Table[NewNumBuckets] = (StringMapEntryBase *)2;
-  return Table;
+  పట్టిక[New_అంకె_Buckets] = (String_Map_నమోదు_పునాది *)2;
+  తిరిగి పట్టిక;
 }
 
-static inline unsigned *getHashTable(StringMapEntryBase **TheTable,
-                                     unsigned NumBuckets) {
-  return reinterpret_cast<unsigned *>(TheTable + NumBuckets + 1);
+స్థిర అంతఃవరుస గుర్తులేని *get_Hash_పట్టిక(String_Map_నమోదు_పునాది **The_పట్టిక,
+                                     గుర్తులేని అంకె_Buckets) {
+  తిరిగి reinterpret_cast<గుర్తులేని *>(The_పట్టిక + అంకె_Buckets + 1);
 }
 
-uint32_t StringMapImpl::hash(StringRef Key) { return xxh3_64bits(Key); }
+uint32_t StringMapImpl::hash(StringRef కీలకం) { తిరిగి xxh3_64bits(కీలకం); }
 
-StringMapImpl::StringMapImpl(unsigned InitSize, unsigned itemSize)
-    : ItemSize(itemSize) {
+StringMapImpl::StringMapImpl(గుర్తులేని Init_కొలత, గుర్తులేని అంశం_కొలత)
+    : అంశం_కొలత_2(అంశం_కొలత) {
   // If a size is specified, initialize the table with that many buckets.
-  if (InitSize) {
+  ఒకవేళ (Init_కొలత) {
     // The table will grow when the number of entries reach 3/4 of the number of
     // buckets. To guarantee that "InitSize" number of entries can be inserted
     // in the table without growing, we allocate just what is needed here.
-    init(getMinBucketToReserveForEntries(InitSize));
+    init(get_Min_పాత్ర_గమ్యం_Reserve_For_Entries(Init_కొలత));
   }
 }
 
-void StringMapImpl::init(unsigned InitSize) {
-  assert((InitSize & (InitSize - 1)) == 0 &&
+శూన్య StringMapImpl::init(గుర్తులేని Init_కొలత) {
+  ప్రతిజ్ఞా((Init_కొలత & (Init_కొలత - 1)) == 0 &&
          "Init Size must be a power of 2 or zero!");
 
-  unsigned NewNumBuckets = InitSize ? InitSize : 16;
-  NumItems = 0;
+  గుర్తులేని New_అంకె_Buckets = Init_కొలత ? Init_కొలత : 16;
+  అంకె_వస్తువులు = 0;
 
-  TheTable = createTable(NewNumBuckets);
+  The_పట్టిక = create_పట్టిక(New_అంకె_Buckets);
 
   // Set the member only if TheTable was successfully allocated
-  NumBuckets = NewNumBuckets;
+  అంకె_Buckets = New_అంకె_Buckets;
 }
 
 /// LookupBucketFor - Look up the bucket that the specified string should end
@@ -73,28 +73,28 @@ void StringMapImpl::init(unsigned InitSize) {
 /// specified bucket will be non-null.  Otherwise, it will be null.  In either
 /// case, the FullHashValue field of the bucket will be set to the hash value
 /// of the string.
-unsigned StringMapImpl::LookupBucketFor(StringRef Name,
-                                        uint32_t FullHashValue) {
-#ifdef EXPENSIVE_CHECKS
-  assert(FullHashValue == hash(Name));
-#endif
+గుర్తులేని StringMapImpl::Lookup_పాత్ర_For(StringRef Name,
+                                        uint32_t నిండిన_Hash_విలువ) {
+#నిర్వచితమైతే EXPENSIVE_CHECKS
+  ప్రతిజ్ఞా(నిండిన_Hash_విలువ == hash(Name));
+#అయితే_ముగింపు
   // Hash table unallocated so far?
-  if (NumBuckets == 0)
+  ఒకవేళ (అంకె_Buckets == 0)
     init(16);
-  if constexpr (shouldReverseIterate())
-    FullHashValue = ~FullHashValue;
-  unsigned BucketNo = FullHashValue & (NumBuckets - 1);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  ఒకవేళ constexpr (should_తిరగేయి_Iterate())
+    నిండిన_Hash_విలువ = ~నిండిన_Hash_విలువ;
+  గుర్తులేని పాత్ర_No = నిండిన_Hash_విలువ & (అంకె_Buckets - 1);
+  గుర్తులేని *Hash_పట్టిక = get_Hash_పట్టిక(The_పట్టిక, అంకె_Buckets);
 
-  while (true) {
-    StringMapEntryBase *BucketItem = TheTable[BucketNo];
+  అయితే (నిజం) {
+    String_Map_నమోదు_పునాది *పాత్ర_అంశం = The_పట్టిక[పాత్ర_No];
     // If we found an empty bucket, this key isn't in the table yet, return it.
-    if (LLVM_LIKELY(!BucketItem)) {
-      HashTable[BucketNo] = FullHashValue;
-      return BucketNo;
+    ఒకవేళ (LLVM_LIKELY(!పాత్ర_అంశం)) {
+      Hash_పట్టిక[పాత్ర_No] = నిండిన_Hash_విలువ;
+      తిరిగి పాత్ర_No;
     }
 
-    if (LLVM_LIKELY(HashTable[BucketNo] == FullHashValue)) {
+    ఒకవేళ (LLVM_LIKELY(Hash_పట్టిక[పాత్ర_No] == నిండిన_Hash_విలువ)) {
       // If the full hash value matches, check deeply for a match.  The common
       // case here is that we are only looking at the buckets (for item info
       // being non-null and for the full hash value) not at the items.  This
@@ -102,39 +102,39 @@ unsigned StringMapImpl::LookupBucketFor(StringRef Name,
 
       // Do the comparison like this because Name isn't necessarily
       // null-terminated!
-      char *ItemStr = (char *)BucketItem + ItemSize;
-      if (Name == StringRef(ItemStr, BucketItem->getKeyLength())) {
+      అక్షరం *అంశం_Str = (అక్షరం *)పాత్ర_అంశం + అంశం_కొలత_2;
+      ఒకవేళ (Name == StringRef(అంశం_Str, పాత్ర_అంశం->get_కీలకం_నిడివి())) {
         // We found a match!
-        return BucketNo;
+        తిరిగి పాత్ర_No;
       }
     }
 
     // Okay, we didn't find the item.  Probe to the next bucket.
-    BucketNo = (BucketNo + 1) & (NumBuckets - 1);
+    పాత్ర_No = (పాత్ర_No + 1) & (అంకె_Buckets - 1);
   }
 }
 
 /// FindKey - Look up the bucket that contains the specified key. If it exists
 /// in the map, return the bucket number of the key.  Otherwise return -1.
 /// This does not modify the map.
-int StringMapImpl::FindKey(StringRef Key, uint32_t FullHashValue) const {
-  if (NumBuckets == 0)
-    return -1; // Really empty table?
-#ifdef EXPENSIVE_CHECKS
-  assert(FullHashValue == hash(Key));
-#endif
-  if constexpr (shouldReverseIterate())
-    FullHashValue = ~FullHashValue;
-  unsigned BucketNo = FullHashValue & (NumBuckets - 1);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+పూర్ణాంకం StringMapImpl::కనుగొను_కీలకం(StringRef కీలకం, uint32_t నిండిన_Hash_విలువ) స్థిరరాశి {
+  ఒకవేళ (అంకె_Buckets == 0)
+    తిరిగి -1; // Really empty table?
+#నిర్వచితమైతే EXPENSIVE_CHECKS
+  ప్రతిజ్ఞా(నిండిన_Hash_విలువ == hash(కీలకం));
+#అయితే_ముగింపు
+  ఒకవేళ constexpr (should_తిరగేయి_Iterate())
+    నిండిన_Hash_విలువ = ~నిండిన_Hash_విలువ;
+  గుర్తులేని పాత్ర_No = నిండిన_Hash_విలువ & (అంకె_Buckets - 1);
+  గుర్తులేని *Hash_పట్టిక = get_Hash_పట్టిక(The_పట్టిక, అంకె_Buckets);
 
-  while (true) {
-    StringMapEntryBase *BucketItem = TheTable[BucketNo];
+  అయితే (నిజం) {
+    String_Map_నమోదు_పునాది *పాత్ర_అంశం = The_పట్టిక[పాత్ర_No];
     // If we found an empty bucket, this key isn't in the table yet, return.
-    if (LLVM_LIKELY(!BucketItem))
-      return -1;
+    ఒకవేళ (LLVM_LIKELY(!పాత్ర_అంశం))
+      తిరిగి -1;
 
-    if (LLVM_LIKELY(HashTable[BucketNo] == FullHashValue)) {
+    ఒకవేళ (LLVM_LIKELY(Hash_పట్టిక[పాత్ర_No] == నిండిన_Hash_విలువ)) {
       // If the full hash value matches, check deeply for a match.  The common
       // case here is that we are only looking at the buckets (for item info
       // being non-null and for the full hash value) not at the items.  This
@@ -142,93 +142,93 @@ int StringMapImpl::FindKey(StringRef Key, uint32_t FullHashValue) const {
 
       // Do the comparison like this because NameStart isn't necessarily
       // null-terminated!
-      char *ItemStr = (char *)BucketItem + ItemSize;
-      if (Key == StringRef(ItemStr, BucketItem->getKeyLength())) {
+      అక్షరం *అంశం_Str = (అక్షరం *)పాత్ర_అంశం + అంశం_కొలత_2;
+      ఒకవేళ (కీలకం == StringRef(అంశం_Str, పాత్ర_అంశం->get_కీలకం_నిడివి())) {
         // We found a match!
-        return BucketNo;
+        తిరిగి పాత్ర_No;
       }
     }
 
     // Okay, we didn't find the item.  Probe to the next bucket.
-    BucketNo = (BucketNo + 1) & (NumBuckets - 1);
+    పాత్ర_No = (పాత్ర_No + 1) & (అంకె_Buckets - 1);
   }
 }
 
 /// RemoveKey - Remove the specified StringMapEntry from the table, but do not
 /// delete it.  This aborts if the value isn't in the table.
-void StringMapImpl::RemoveKey(StringMapEntryBase *V) {
-  const char *VStr = (char *)V + ItemSize;
-  StringMapEntryBase *V2 = RemoveKey(StringRef(VStr, V->getKeyLength()));
-  (void)V2;
-  assert(V == V2 && "Didn't find key?");
+శూన్య StringMapImpl::Remove_కీలకం(String_Map_నమోదు_పునాది *V) {
+  స్థిరరాశి అక్షరం *VStr = (అక్షరం *)V + అంశం_కొలత_2;
+  String_Map_నమోదు_పునాది *V2 = Remove_కీలకం(StringRef(VStr, V->get_కీలకం_నిడివి()));
+  (శూన్య)V2;
+  ప్రతిజ్ఞా(V == V2 && "Didn't find key?");
 }
 
 // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
 // whose probe path crosses the hole.
-void StringMapImpl::removeBucket(unsigned Bucket) {
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
-  unsigned Mask = NumBuckets - 1;
-  unsigned I = Bucket, J = I;
-  while ((J = (J + 1) & Mask), TheTable[J]) {
-    unsigned Ideal = HashTable[J];
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
-      TheTable[I] = TheTable[J];
-      HashTable[I] = HashTable[J];
+శూన్య StringMapImpl::remove_పాత్ర(గుర్తులేని పాత్ర) {
+  గుర్తులేని *Hash_పట్టిక = get_Hash_పట్టిక(The_పట్టిక, అంకె_Buckets);
+  గుర్తులేని ముసుగు = అంకె_Buckets - 1;
+  గుర్తులేని I = పాత్ర, J = I;
+  అయితే ((J = (J + 1) & ముసుగు), The_పట్టిక[J]) {
+    గుర్తులేని Ideal = Hash_పట్టిక[J];
+    ఒకవేళ (((I - Ideal) & ముసుగు) < ((J - Ideal) & ముసుగు)) {
+      The_పట్టిక[I] = The_పట్టిక[J];
+      Hash_పట్టిక[I] = Hash_పట్టిక[J];
       I = J;
     }
   }
-  TheTable[I] = nullptr;
-  --NumItems;
+  The_పట్టిక[I] = శూన్యసూచిక;
+  --అంకె_వస్తువులు;
 }
 
-StringMapEntryBase *StringMapImpl::RemoveKey(StringRef Key) {
-  int Bucket = FindKey(Key);
-  if (Bucket == -1)
-    return nullptr;
+String_Map_నమోదు_పునాది *StringMapImpl::Remove_కీలకం(StringRef కీలకం) {
+  పూర్ణాంకం పాత్ర = కనుగొను_కీలకం(కీలకం);
+  ఒకవేళ (పాత్ర == -1)
+    తిరిగి శూన్యసూచిక;
 
-  StringMapEntryBase *Result = TheTable[Bucket];
-  removeBucket(Bucket);
-  return Result;
+  String_Map_నమోదు_పునాది *ఫలితం = The_పట్టిక[పాత్ర];
+  remove_పాత్ర(పాత్ర);
+  తిరిగి ఫలితం;
 }
 
 /// RehashTable - Grow the table, redistributing values into the buckets with
 /// the appropriate mod-of-hashtable-size.
-unsigned StringMapImpl::RehashTable(unsigned BucketNo) {
-  unsigned NewSize;
+గుర్తులేని StringMapImpl::Rehash_పట్టిక(గుర్తులేని పాత్ర_No) {
+  గుర్తులేని New_కొలత;
   // If the hash table is now more than 3/4 full, grow the table.
-  if (LLVM_UNLIKELY(NumItems * 4 > NumBuckets * 3)) {
-    NewSize = NumBuckets * 2;
-  } else {
-    return BucketNo;
+  ఒకవేళ (LLVM_UNLIKELY(అంకె_వస్తువులు * 4 > అంకె_Buckets * 3)) {
+    New_కొలత = అంకె_Buckets * 2;
+  } లేకపోతే {
+    తిరిగి పాత్ర_No;
   }
 
-  unsigned NewBucketNo = BucketNo;
-  auto **NewTableArray = createTable(NewSize);
-  unsigned *NewHashArray = getHashTable(NewTableArray, NewSize);
-  unsigned *HashTable = getHashTable(TheTable, NumBuckets);
+  గుర్తులేని New_పాత్ర_No = పాత్ర_No;
+  స్వయంచాలక **New_పట్టిక_Array = create_పట్టిక(New_కొలత);
+  గుర్తులేని *NewHashArray = get_Hash_పట్టిక(New_పట్టిక_Array, New_కొలత);
+  గుర్తులేని *Hash_పట్టిక = get_Hash_పట్టిక(The_పట్టిక, అంకె_Buckets);
 
   // Rehash all the items into their new buckets.  Luckily :) we already have
   // the hash values available, so we don't have to rehash any strings.
-  for (unsigned I = 0, E = NumBuckets; I != E; ++I) {
-    StringMapEntryBase *Bucket = TheTable[I];
-    if (Bucket) {
+  కొరకు (గుర్తులేని I = 0, E = అంకె_Buckets; I != E; ++I) {
+    String_Map_నమోదు_పునాది *పాత్ర = The_పట్టిక[I];
+    ఒకవేళ (పాత్ర) {
       // If the bucket is not available, probe for a spot.
-      unsigned FullHash = HashTable[I];
-      unsigned NewBucket = FullHash & (NewSize - 1);
-      while (NewTableArray[NewBucket])
-        NewBucket = (NewBucket + 1) & (NewSize - 1);
+      గుర్తులేని నిండిన_Hash = Hash_పట్టిక[I];
+      గుర్తులేని New_పాత్ర = నిండిన_Hash & (New_కొలత - 1);
+      అయితే (New_పట్టిక_Array[New_పాత్ర])
+        New_పాత్ర = (New_పాత్ర + 1) & (New_కొలత - 1);
 
       // Finally found a slot.  Fill it in.
-      NewTableArray[NewBucket] = Bucket;
-      NewHashArray[NewBucket] = FullHash;
-      if (I == BucketNo)
-        NewBucketNo = NewBucket;
+      New_పట్టిక_Array[New_పాత్ర] = పాత్ర;
+      NewHashArray[New_పాత్ర] = నిండిన_Hash;
+      ఒకవేళ (I == పాత్ర_No)
+        New_పాత్ర_No = New_పాత్ర;
     }
   }
 
-  free(TheTable);
+  విడుదల(The_పట్టిక);
 
-  TheTable = NewTableArray;
-  NumBuckets = NewSize;
-  return NewBucketNo;
+  The_పట్టిక = New_పట్టిక_Array;
+  అంకె_Buckets = New_కొలత;
+  తిరిగి New_పాత్ర_No;
 }

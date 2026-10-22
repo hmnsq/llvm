@@ -6,129 +6,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Driver.h"
+#అన్తర్భావ "llvm/Support/Driver.h"
 
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/ADT/SmallVector.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/InitLLVM.h"
+#అన్తర్భావ "llvm/Support/Path.h"
 
-#include <cassert>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#అన్తర్భావ <cassert>
+#అన్తర్భావ <string>
+#అన్తర్భావ <system_error>
+#అన్తర్భావ <utility>
+#అన్తర్భావ <vector>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-namespace {
+నామాకాశ {
 
-bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
-  StringRef Stem = sys::path::stem(InvokedName);
-  StringRef Filename = sys::path::filename(InvokedName);
-  auto Matches = [RegisteredName](StringRef Candidate) {
+తార్కిక matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
+  StringRef Stem = sys::మార్గం_2::stem(InvokedName);
+  StringRef Filename = sys::మార్గం_2::filename(InvokedName);
+  స్వయంచాలక Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
-           (Position + RegisteredName.size() == Candidate.size() ||
-            !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
+    తిరిగి Position != StringRef::npos &&
+           (Position + RegisteredName.కొలత_2() == Candidate.కొలత_2() ||
+            !llvm::isAlnum(Candidate[Position + RegisteredName.కొలత_2()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  తిరిగి Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+తార్కిక isMulticallName(StringRef Name) { తిరిగి matchesToolName("llvm", Name); }
 
 } // namespace
 
-struct ToolSession::Impl {
+నిర్మాణం ToolSession::Impl {
   InitLLVM Initialization;
-  std::string ExecutablePath;
-  std::vector<std::pair<std::string, ToolMainFn>> Tools;
+  std::string Executable_మార్గం;
+  std::సదిశ<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
-       bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
+  Impl(పూర్ణాంకం &Argc, అక్షరం **&Argv, ArrayRef<CallableTool> RegisteredTools,
+       తార్కిక InstallPipeSignalExitHandler, తార్కిక NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
-        ExecutablePath(Argv[0]) {
-    Tools.reserve(RegisteredTools.size());
-    for (const CallableTool &Tool : RegisteredTools)
-      Tools.emplace_back(Tool.Name.str(), Tool.Main);
+        Executable_మార్గం(Argv[0]) {
+    Tools.reserve(RegisteredTools.కొలత_2());
+    కొరకు (స్థిరరాశి CallableTool &Tool : RegisteredTools)
+      Tools.emplace_వెనుక(Tool.Name.str(), Tool.Main);
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
-                         bool InstallPipeSignalExitHandler,
-                         bool NeedsPOSIXUtilitySignalHandling) {
-  assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
+ToolSession::ToolSession(పూర్ణాంకం &Argc, అక్షరం **&Argv, ArrayRef<CallableTool> Tools,
+                         తార్కిక InstallPipeSignalExitHandler,
+                         తార్కిక NeedsPOSIXUtilitySignalHandling) {
+  ప్రతిజ్ఞా(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
   PImpl =
       std::make_unique<Impl>(Argc, Argv, Tools, InstallPipeSignalExitHandler,
                              NeedsPOSIXUtilitySignalHandling);
 }
 
-ToolSession::~ToolSession() = default;
+ToolSession::~ToolSession() = అప్రమేయ;
 
-ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
-  StringRef Stem = sys::path::stem(Name);
-  StringRef Filename = sys::path::filename(Name);
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+ErrorOr<CallableTool> ToolSession::కనుగొను_Tool(StringRef Name) స్థిరరాశి {
+  StringRef Stem = sys::మార్గం_2::stem(Name);
+  StringRef Filename = sys::మార్గం_2::filename(Name);
+  కొరకు (స్థిరరాశి స్వయంచాలక &[RegisteredName, Main] : PImpl->Tools)
+    ఒకవేళ (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      తిరిగి CallableTool{RegisteredName, Main};
 
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+  కొరకు (స్థిరరాశి స్వయంచాలక &[RegisteredName, Main] : PImpl->Tools)
+    ఒకవేళ (matchesToolName(RegisteredName, Name))
+      తిరిగి CallableTool{RegisteredName, Main};
+  తిరిగి make_error_సంకేతం(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
-                                     const char *PrependArg) {
-  ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->ExecutablePath);
-  bool NeedsPrependArg =
+                                     స్థిరరాశి అక్షరం *PrependArg) {
+  ErrorOr<CallableTool> ExecutableTool = కనుగొను_Tool(PImpl->Executable_మార్గం);
+  తార్కిక NeedsPrependArg =
       !ExecutableTool ||
       !ExecutableTool->Name.equals_insensitive(RegisteredName);
-  ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
+  ToolContext Context(PImpl->Executable_మార్గం.c_str(), PrependArg,
                       NeedsPrependArg);
-  Context.Session = this;
-  return Context;
+  Context.Session = ఇది;
+  తిరిగి Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<పూర్ణాంకం> ToolSession::callTool(ArrayRef<స్థిరరాశి అక్షరం *> వాదనలు) {
+  ఒకవేళ (వాదనలు.ఖాళీలు())
+    తిరిగి make_error_సంకేతం(std::errc::invalid_వాదం);
 
-  StringRef InvokedName = Args.front();
-  ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
-    Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
-    InvokedName = Args.front();
-    Tool = findTool(InvokedName);
+  StringRef InvokedName = వాదనలు.front();
+  ErrorOr<CallableTool> Tool = కనుగొను_Tool(InvokedName);
+  ఒకవేళ (!Tool) {
+    ఒకవేళ (InvokedName != PImpl->Executable_మార్గం && !isMulticallName(InvokedName))
+      తిరిగి make_error_సంకేతం(std::errc::no_such_file_or_directory);
+    వాదనలు = వాదనలు.drop_front();
+    ఒకవేళ (వాదనలు.ఖాళీలు())
+      తిరిగి make_error_సంకేతం(std::errc::invalid_వాదం);
+    InvokedName = వాదనలు.front();
+    Tool = కనుగొను_Tool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  ఒకవేళ (!Tool)
+    తిరిగి Tool.getError();
 
-  std::string PrependArg = sys::path::stem(InvokedName).str();
+  std::string PrependArg = sys::మార్గం_2::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
-  MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
-  MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  Small_సదిశ<అక్షరం *, 16> Mutable_వాదనలు;
+  Mutable_వాదనలు.reserve(వాదనలు.కొలత_2() + 1);
+  కొరకు (స్థిరరాశి అక్షరం *Arg : వాదనలు)
+    Mutable_వాదనలు.నెట్టు_వెనుక(const_cast<అక్షరం *>(Arg));
+  Mutable_వాదనలు.నెట్టు_వెనుక(శూన్యసూచిక);
+  తిరిగి Tool->Main(వాదనలు.కొలత_2(), Mutable_వాదనలు.దత్తాంశం(), Context);
 }
 
-ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) స్థిరరాశి {
+  ఒకవేళ (!Session)
+    తిరిగి make_error_సంకేతం(std::errc::operation_not_permitted);
+  తిరిగి Session->కనుగొను_Tool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<పూర్ణాంకం> ToolContext::callTool(ArrayRef<స్థిరరాశి అక్షరం *> వాదనలు) స్థిరరాశి {
+  ఒకవేళ (!Session)
+    తిరిగి make_error_సంకేతం(std::errc::operation_not_permitted);
+  తిరిగి Session->callTool(వాదనలు);
 }

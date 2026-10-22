@@ -1,97 +1,97 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdint.h>
 
-#include "blake3_impl.h"
+#అన్తర్భావ "blake3_impl.h"
 
-#if defined(_MSC_VER)
-#include <Windows.h>
-#endif
+#ఒకవేళ defined(_MSC_VER)
+#అన్తర్భావ <Windows.h>
+#అయితే_ముగింపు
 
-#if defined(IS_X86)
-#if defined(_MSC_VER)
-#include <intrin.h>
-#elif defined(__GNUC__)
-#include <immintrin.h>
-#else
-#undef IS_X86 /* Unimplemented! */
-#endif
-#endif
+#ఒకవేళ defined(IS_X86)
+#ఒకవేళ defined(_MSC_VER)
+#అన్తర్భావ <intrin.h>
+#లేదావేళ defined(__GNUC__)
+#అన్తర్భావ <immintrin.h>
+#లేకపోతే
+#నిర్వచనం_రద్దు IS_X86 /* Unimplemented! */
+#అయితే_ముగింపు
+#అయితే_ముగింపు
 
-#if !defined(BLAKE3_ATOMICS)
-#if defined(__has_include)
-#if __has_include(<stdatomic.h>) && !defined(_MSC_VER)
-#define BLAKE3_ATOMICS 1
-#else
-#define BLAKE3_ATOMICS 0
-#endif /* __has_include(<stdatomic.h>) && !defined(_MSC_VER) */
-#else
-#define BLAKE3_ATOMICS 0
-#endif /* defined(__has_include) */
-#endif /* BLAKE3_ATOMICS */
+#ఒకవేళ !defined(BLAKE3_ATOMICS)
+#ఒకవేళ defined(__has_include)
+#ఒకవేళ __has_include(<stdatomic.h>) && !defined(_MSC_VER)
+#నిర్వచించు BLAKE3_ATOMICS 1
+#లేకపోతే
+#నిర్వచించు BLAKE3_ATOMICS 0
+#అయితే_ముగింపు /* __has_include(<stdatomic.h>) && !defined(_MSC_VER) */
+#లేకపోతే
+#నిర్వచించు BLAKE3_ATOMICS 0
+#అయితే_ముగింపు /* defined(__has_include) */
+#అయితే_ముగింపు /* BLAKE3_ATOMICS */
 
-#if BLAKE3_ATOMICS
-#define ATOMIC_INT _Atomic int
-#define ATOMIC_LOAD(x) x
-#define ATOMIC_STORE(x, y) x = y
-#elif defined(_MSC_VER)
-#define ATOMIC_INT LONG
-#define ATOMIC_LOAD(x) InterlockedOr(&x, 0)
-#define ATOMIC_STORE(x, y) InterlockedExchange(&x, y)
-#else
-#define ATOMIC_INT int
-#define ATOMIC_LOAD(x) x
-#define ATOMIC_STORE(x, y) x = y
-#endif
+#ఒకవేళ BLAKE3_ATOMICS
+#నిర్వచించు ATOMIC_INT _Atomic పూర్ణాంకం
+#నిర్వచించు ATOMIC_ఎక్కించు(x) x
+#నిర్వచించు ATOMIC_STORE(x, y) x = y
+#లేదావేళ defined(_MSC_VER)
+#నిర్వచించు ATOMIC_INT LONG
+#నిర్వచించు ATOMIC_ఎక్కించు(x) InterlockedOr(&x, 0)
+#నిర్వచించు ATOMIC_STORE(x, y) InterlockedExchange(&x, y)
+#లేకపోతే
+#నిర్వచించు ATOMIC_INT పూర్ణాంకం
+#నిర్వచించు ATOMIC_ఎక్కించు(x) x
+#నిర్వచించు ATOMIC_STORE(x, y) x = y
+#అయితే_ముగింపు
 
-#define MAYBE_UNUSED(x) (void)((x))
+#నిర్వచించు MAYBE_వాడని(x) (శూన్య)((x))
 
-#if defined(IS_X86)
-static uint64_t xgetbv(void) {
-#if defined(_MSC_VER)
-  return _xgetbv(0);
-#else
+#ఒకవేళ defined(IS_X86)
+స్థిర uint64_t xgetbv(శూన్య) {
+#ఒకవేళ defined(_MSC_VER)
+  తిరిగి _xgetbv(0);
+#లేకపోతే
   uint32_t eax = 0, edx = 0;
   __asm__ __volatile__("xgetbv\n" : "=a"(eax), "=d"(edx) : "c"(0));
-  return ((uint64_t)edx << 32) | eax;
-#endif
+  తిరిగి ((uint64_t)edx << 32) | eax;
+#అయితే_ముగింపు
 }
 
-static void cpuid(uint32_t out[4], uint32_t id) {
-#if defined(_MSC_VER)
-  __cpuid((int *)out, id);
-#elif defined(__i386__) || defined(_M_IX86)
+స్థిర శూన్య cpuid(uint32_t బహిర్గతం_2[4], uint32_t id) {
+#ఒకవేళ defined(_MSC_VER)
+  __cpuid((పూర్ణాంకం *)బహిర్గతం_2, id);
+#లేదావేళ defined(__i386__) || defined(_M_IX86)
   __asm__ __volatile__("movl %%ebx, %1\n"
                        "cpuid\n"
                        "xchgl %1, %%ebx\n"
-                       : "=a"(out[0]), "=r"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(బహిర్గతం_2[0]), "=r"(బహిర్గతం_2[1]), "=c"(బహిర్గతం_2[2]), "=d"(బహిర్గతం_2[3])
                        : "a"(id));
-#else
+#లేకపోతే
   __asm__ __volatile__("cpuid\n"
-                       : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(బహిర్గతం_2[0]), "=b"(బహిర్గతం_2[1]), "=c"(బహిర్గతం_2[2]), "=d"(బహిర్గతం_2[3])
                        : "a"(id));
-#endif
+#అయితే_ముగింపు
 }
 
-static void cpuidex(uint32_t out[4], uint32_t id, uint32_t sid) {
-#if defined(_MSC_VER)
-  __cpuidex((int *)out, id, sid);
-#elif defined(__i386__) || defined(_M_IX86)
+స్థిర శూన్య cpuidex(uint32_t బహిర్గతం_2[4], uint32_t id, uint32_t sid) {
+#ఒకవేళ defined(_MSC_VER)
+  __cpuidex((పూర్ణాంకం *)బహిర్గతం_2, id, sid);
+#లేదావేళ defined(__i386__) || defined(_M_IX86)
   __asm__ __volatile__("movl %%ebx, %1\n"
                        "cpuid\n"
                        "xchgl %1, %%ebx\n"
-                       : "=a"(out[0]), "=r"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(బహిర్గతం_2[0]), "=r"(బహిర్గతం_2[1]), "=c"(బహిర్గతం_2[2]), "=d"(బహిర్గతం_2[3])
                        : "a"(id), "c"(sid));
-#else
+#లేకపోతే
   __asm__ __volatile__("cpuid\n"
-                       : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(బహిర్గతం_2[0]), "=b"(బహిర్గతం_2[1]), "=c"(బహిర్గతం_2[2]), "=d"(బహిర్గతం_2[3])
                        : "a"(id), "c"(sid));
-#endif
+#అయితే_ముగింపు
 }
 
-#endif
+#అయితే_ముగింపు
 
-enum cpu_feature {
+గణన cpu_feature {
   SSE2 = 1 << 0,
   SSSE3 = 1 << 1,
   SSE41 = 1 << 2,
@@ -103,231 +103,231 @@ enum cpu_feature {
   UNDEFINED = 1 << 30
 };
 
-#if !defined(BLAKE3_TESTING)
-static /* Allow the variable to be controlled manually for testing */
-#endif
+#ఒకవేళ !defined(BLAKE3_TESTING)
+స్థిర /* Allow the variable to be controlled manually for testing */
+#అయితే_ముగింపు
     ATOMIC_INT g_cpu_features = UNDEFINED;
 
-LLVM_ATTRIBUTE_USED
-#if !defined(BLAKE3_TESTING)
-static
-#endif
-    enum cpu_feature
-    get_cpu_features(void) {
+LLVM_ATTRIBUTE_వాడిన
+#ఒకవేళ !defined(BLAKE3_TESTING)
+స్థిర
+#అయితే_ముగింపు
+    గణన cpu_feature
+    get_cpu_features(శూన్య) {
 
   /* If TSAN detects a data race here, try compiling with -DBLAKE3_ATOMICS=1 */
-  enum cpu_feature features = ATOMIC_LOAD(g_cpu_features);
-  if (features != UNDEFINED) {
-    return features;
-  } else {
-#if defined(IS_X86)
+  గణన cpu_feature features = ATOMIC_ఎక్కించు(g_cpu_features);
+  ఒకవేళ (features != UNDEFINED) {
+    తిరిగి features;
+  } లేకపోతే {
+#ఒకవేళ defined(IS_X86)
     uint32_t regs[4] = {0};
     uint32_t *eax = &regs[0], *ebx = &regs[1], *ecx = &regs[2], *edx = &regs[3];
-    (void)edx;
+    (శూన్య)edx;
     features = 0;
     cpuid(regs, 0);
-    const int max_id = *eax;
+    స్థిరరాశి పూర్ణాంకం max_id = *eax;
     cpuid(regs, 1);
-#if defined(__amd64__) || defined(_M_X64)
+#ఒకవేళ defined(__amd64__) || defined(_M_X64)
     features |= SSE2;
-#else
-    if (*edx & (1UL << 26))
+#లేకపోతే
+    ఒకవేళ (*edx & (1UL << 26))
       features |= SSE2;
-#endif
-    if (*ecx & (1UL << 9))
+#అయితే_ముగింపు
+    ఒకవేళ (*ecx & (1UL << 9))
       features |= SSSE3;
-    if (*ecx & (1UL << 19))
+    ఒకవేళ (*ecx & (1UL << 19))
       features |= SSE41;
 
-    if (*ecx & (1UL << 27)) { // OSXSAVE
-      const uint64_t mask = xgetbv();
-      if ((mask & 6) == 6) { // SSE and AVX states
-        if (*ecx & (1UL << 28))
+    ఒకవేళ (*ecx & (1UL << 27)) { // OSXSAVE
+      స్థిరరాశి uint64_t ముసుగు_2 = xgetbv();
+      ఒకవేళ ((ముసుగు_2 & 6) == 6) { // SSE and AVX states
+        ఒకవేళ (*ecx & (1UL << 28))
           features |= AVX;
-        if (max_id >= 7) {
+        ఒకవేళ (max_id >= 7) {
           cpuidex(regs, 7, 0);
-          if (*ebx & (1UL << 5))
+          ఒకవేళ (*ebx & (1UL << 5))
             features |= AVX2;
-          if ((mask & 224) == 224) { // Opmask, ZMM_Hi256, Hi16_Zmm
-            if (*ebx & (1UL << 31))
+          ఒకవేళ ((ముసుగు_2 & 224) == 224) { // Opmask, ZMM_Hi256, Hi16_Zmm
+            ఒకవేళ (*ebx & (1UL << 31))
               features |= AVX512VL;
-            if (*ebx & (1UL << 16))
+            ఒకవేళ (*ebx & (1UL << 16))
               features |= AVX512F;
           }
         }
       }
     }
     ATOMIC_STORE(g_cpu_features, features);
-    return features;
-#else
+    తిరిగి features;
+#లేకపోతే
     /* How to detect NEON? */
-    return 0;
-#endif
+    తిరిగి 0;
+#అయితే_ముగింపు
   }
 }
 
-void blake3_compress_in_place(uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
+శూన్య blake3_compress_లోపల_ఉంచు(uint32_t cv[8],
+                              స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                              uint8_t ఖండం_len, uint64_t counter,
                               uint8_t flags) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_compress_in_place_avx512(cv, block, block_len, counter, flags);
-    return;
+#ఒకవేళ defined(IS_X86)
+  స్థిరరాశి గణన cpu_feature features = get_cpu_features();
+  MAYBE_వాడని(features);
+#ఒకవేళ !defined(BLAKE3_NO_AVX512)
+  ఒకవేళ (features & AVX512VL) {
+    blake3_compress_లోపల_ఉంచు_avx512(cv, ఖండం, ఖండం_len, counter, flags);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_compress_in_place_sse41(cv, block, block_len, counter, flags);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE41)
+  ఒకవేళ (features & SSE41) {
+    blake3_compress_లోపల_ఉంచు_sse41(cv, ఖండం, ఖండం_len, counter, flags);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_compress_in_place_sse2(cv, block, block_len, counter, flags);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE2)
+  ఒకవేళ (features & SSE2) {
+    blake3_compress_లోపల_ఉంచు_sse2(cv, ఖండం, ఖండం_len, counter, flags);
+    తిరిగి;
   }
-#endif
-#endif
-  blake3_compress_in_place_portable(cv, block, block_len, counter, flags);
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+  blake3_compress_లోపల_ఉంచు_portable(cv, ఖండం, ఖండం_len, counter, flags);
 }
 
-void blake3_compress_xof(const uint32_t cv[8],
-                         const uint8_t block[BLAKE3_BLOCK_LEN],
-                         uint8_t block_len, uint64_t counter, uint8_t flags,
-                         uint8_t out[64]) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_compress_xof_avx512(cv, block, block_len, counter, flags, out);
-    return;
+శూన్య blake3_compress_xof(స్థిరరాశి uint32_t cv[8],
+                         స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                         uint8_t ఖండం_len, uint64_t counter, uint8_t flags,
+                         uint8_t బహిర్గతం_2[64]) {
+#ఒకవేళ defined(IS_X86)
+  స్థిరరాశి గణన cpu_feature features = get_cpu_features();
+  MAYBE_వాడని(features);
+#ఒకవేళ !defined(BLAKE3_NO_AVX512)
+  ఒకవేళ (features & AVX512VL) {
+    blake3_compress_xof_avx512(cv, ఖండం, ఖండం_len, counter, flags, బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_compress_xof_sse41(cv, block, block_len, counter, flags, out);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE41)
+  ఒకవేళ (features & SSE41) {
+    blake3_compress_xof_sse41(cv, ఖండం, ఖండం_len, counter, flags, బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_compress_xof_sse2(cv, block, block_len, counter, flags, out);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE2)
+  ఒకవేళ (features & SSE2) {
+    blake3_compress_xof_sse2(cv, ఖండం, ఖండం_len, counter, flags, బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#endif
-  blake3_compress_xof_portable(cv, block, block_len, counter, flags, out);
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+  blake3_compress_xof_portable(cv, ఖండం, ఖండం_len, counter, flags, బహిర్గతం_2);
 }
 
 
-void blake3_xof_many(const uint32_t cv[8],
-                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                     uint8_t block_len, uint64_t counter, uint8_t flags,
-                     uint8_t out[64], size_t outblocks) {
-  if (outblocks == 0) {
+శూన్య blake3_xof_many(స్థిరరాశి uint32_t cv[8],
+                     స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                     uint8_t ఖండం_len, uint64_t counter, uint8_t flags,
+                     uint8_t బహిర్గతం_2[64], size_t outblocks) {
+  ఒకవేళ (outblocks == 0) {
     // The current assembly implementation always outputs at least 1 block.
-    return;
+    తిరిగి;
   }
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_xof_many_avx512(cv, block, block_len, counter, flags, out, outblocks);
-    return;
+#ఒకవేళ defined(IS_X86)
+  స్థిరరాశి గణన cpu_feature features = get_cpu_features();
+  MAYBE_వాడని(features);
+#ఒకవేళ !defined(_WIN32) && !defined(__CYGWIN__) && !defined(BLAKE3_NO_AVX512)
+  ఒకవేళ (features & AVX512VL) {
+    blake3_xof_many_avx512(cv, ఖండం, ఖండం_len, counter, flags, బహిర్గతం_2, outblocks);
+    తిరిగి;
   }
-#endif
-#endif
-  for(size_t i = 0; i < outblocks; ++i) {
-    blake3_compress_xof(cv, block, block_len, counter + i, flags, out + 64*i);
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+  కొరకు(size_t i = 0; i < outblocks; ++i) {
+    blake3_compress_xof(cv, ఖండం, ఖండం_len, counter + i, flags, బహిర్గతం_2 + 64*i);
   }
 }
 
-void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
-                      size_t blocks, const uint32_t key[8], uint64_t counter,
+శూన్య blake3_hash_many(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                      size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8], uint64_t counter,
                       bool increment_counter, uint8_t flags,
-                      uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    blake3_hash_many_avx512(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
-    return;
+                      uint8_t flags_ప్రారంభం, uint8_t flags_చివర, uint8_t *బహిర్గతం_2) {
+#ఒకవేళ defined(IS_X86)
+  స్థిరరాశి గణన cpu_feature features = get_cpu_features();
+  MAYBE_వాడని(features);
+#ఒకవేళ !defined(BLAKE3_NO_AVX512)
+  ఒకవేళ ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    blake3_hash_many_avx512(inputs, అంకె_inputs, ఖండాలు, కీలకం_2, counter,
+                            increment_counter, flags, flags_ప్రారంభం, flags_చివర,
+                            బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_AVX2)
-  if (features & AVX2) {
-    blake3_hash_many_avx2(inputs, num_inputs, blocks, key, counter,
-                          increment_counter, flags, flags_start, flags_end,
-                          out);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_AVX2)
+  ఒకవేళ (features & AVX2) {
+    blake3_hash_many_avx2(inputs, అంకె_inputs, ఖండాలు, కీలకం_2, counter,
+                          increment_counter, flags, flags_ప్రారంభం, flags_చివర,
+                          బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
-                           increment_counter, flags, flags_start, flags_end,
-                           out);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE41)
+  ఒకవేళ (features & SSE41) {
+    blake3_hash_many_sse41(inputs, అంకె_inputs, ఖండాలు, కీలకం_2, counter,
+                           increment_counter, flags, flags_ప్రారంభం, flags_చివర,
+                           బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_hash_many_sse2(inputs, num_inputs, blocks, key, counter,
-                          increment_counter, flags, flags_start, flags_end,
-                          out);
-    return;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE2)
+  ఒకవేళ (features & SSE2) {
+    blake3_hash_many_sse2(inputs, అంకె_inputs, ఖండాలు, కీలకం_2, counter,
+                          increment_counter, flags, flags_ప్రారంభం, flags_చివర,
+                          బహిర్గతం_2);
+    తిరిగి;
   }
-#endif
-#endif
+#అయితే_ముగింపు
+#అయితే_ముగింపు
 
-#if BLAKE3_USE_NEON == 1
-  blake3_hash_many_neon(inputs, num_inputs, blocks, key, counter,
-                        increment_counter, flags, flags_start, flags_end, out);
-  return;
-#endif
+#ఒకవేళ BLAKE3_USE_NEON == 1
+  blake3_hash_many_neon(inputs, అంకె_inputs, ఖండాలు, కీలకం_2, counter,
+                        increment_counter, flags, flags_ప్రారంభం, flags_చివర, బహిర్గతం_2);
+  తిరిగి;
+#అయితే_ముగింపు
 
-  blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
+  blake3_hash_many_portable(inputs, అంకె_inputs, ఖండాలు, కీలకం_2, counter,
+                            increment_counter, flags, flags_ప్రారంభం, flags_చివర,
+                            బహిర్గతం_2);
 }
 
 // The dynamically detected SIMD degree of the current platform.
-size_t blake3_simd_degree(void) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    return 16;
+size_t blake3_simd_degree(శూన్య) {
+#ఒకవేళ defined(IS_X86)
+  స్థిరరాశి గణన cpu_feature features = get_cpu_features();
+  MAYBE_వాడని(features);
+#ఒకవేళ !defined(BLAKE3_NO_AVX512)
+  ఒకవేళ ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    తిరిగి 16;
   }
-#endif
-#if !defined(BLAKE3_NO_AVX2)
-  if (features & AVX2) {
-    return 8;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_AVX2)
+  ఒకవేళ (features & AVX2) {
+    తిరిగి 8;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    return 4;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE41)
+  ఒకవేళ (features & SSE41) {
+    తిరిగి 4;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    return 4;
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE2)
+  ఒకవేళ (features & SSE2) {
+    తిరిగి 4;
   }
-#endif
-#endif
-#if BLAKE3_USE_NEON == 1
-  return 4;
-#endif
-  return 1;
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+#ఒకవేళ BLAKE3_USE_NEON == 1
+  తిరిగి 4;
+#అయితే_ముగింపు
+  తిరిగి 1;
 }

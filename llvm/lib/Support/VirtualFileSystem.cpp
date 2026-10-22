@@ -10,258 +10,258 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/IntrusiveRefCntPtr.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/iterator_range.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FileSystem/UniqueID.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <atomic>
-#include <cassert>
-#include <cstdint>
-#include <iterator>
-#include <limits>
-#include <map>
-#include <memory>
-#include <optional>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#అన్తర్భావ "llvm/Support/VirtualFileSystem.h"
+#అన్తర్భావ "llvm/ADT/ArrayRef.h"
+#అన్తర్భావ "llvm/ADT/DenseMap.h"
+#అన్తర్భావ "llvm/ADT/IntrusiveRefCntPtr.h"
+#అన్తర్భావ "llvm/ADT/STLExtras.h"
+#అన్తర్భావ "llvm/ADT/SmallString.h"
+#అన్తర్భావ "llvm/ADT/SmallVector.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/ADT/StringSet.h"
+#అన్తర్భావ "llvm/ADT/Twine.h"
+#అన్తర్భావ "llvm/ADT/iterator_range.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Support/Casting.h"
+#అన్తర్భావ "llvm/Support/Chrono.h"
+#అన్తర్భావ "llvm/Support/Compiler.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/Errc.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ "llvm/Support/ErrorOr.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/FileSystem/UniqueID.h"
+#అన్తర్భావ "llvm/Support/IOSandbox.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/Support/SMLoc.h"
+#అన్తర్భావ "llvm/Support/SourceMgr.h"
+#అన్తర్భావ "llvm/Support/YAMLParser.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <atomic>
+#అన్తర్భావ <cassert>
+#అన్తర్భావ <cstdint>
+#అన్తర్భావ <iterator>
+#అన్తర్భావ <limits>
+#అన్తర్భావ <map>
+#అన్తర్భావ <memory>
+#అన్తర్భావ <optional>
+#అన్తర్భావ <string>
+#అన్తర్భావ <system_error>
+#అన్తర్భావ <utility>
+#అన్తర్భావ <vector>
 
-using namespace llvm;
-using namespace llvm::vfs;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::vfs;
 
-using llvm::sys::fs::file_status;
-using llvm::sys::fs::file_t;
-using llvm::sys::fs::file_type;
-using llvm::sys::fs::perms;
-using llvm::sys::fs::UniqueID;
+ఉపయోగించి llvm::sys::fs::file_స్థితి;
+ఉపయోగించి llvm::sys::fs::file_t;
+ఉపయోగించి llvm::sys::fs::file_type;
+ఉపయోగించి llvm::sys::fs::perms;
+ఉపయోగించి llvm::sys::fs::UniqueID;
 
-Status::Status(const file_status &Status)
-    : UID(Status.getUniqueID()), MTime(Status.getLastModificationTime()),
-      User(Status.getUser()), Group(Status.getGroup()), Size(Status.getSize()),
-      Type(Status.type()), Perms(Status.permissions()) {}
+స్థితి_2::స్థితి_2(స్థిరరాశి file_స్థితి &స్థితి_2)
+    : UID(స్థితి_2.getUniqueID()), MTime(స్థితి_2.get_చివరి_Modification_సమయం()),
+      User(స్థితి_2.getUser()), సమూహం(స్థితి_2.get_సమూహం()), కొలత(స్థితి_2.get_కొలత()),
+      Type(స్థితి_2.type()), Perms(స్థితి_2.permissions()) {}
 
-Status::Status(const Twine &Name, UniqueID UID, sys::TimePoint<> MTime,
-               uint32_t User, uint32_t Group, uint64_t Size, file_type Type,
+స్థితి_2::స్థితి_2(స్థిరరాశి Twine &Name, UniqueID UID, sys::సమయం_బిందువు<> MTime,
+               uint32_t User, uint32_t సమూహం, uint64_t కొలత, file_type Type,
                perms Perms)
-    : Name(Name.str()), UID(UID), MTime(MTime), User(User), Group(Group),
-      Size(Size), Type(Type), Perms(Perms) {}
+    : Name(Name.str()), UID(UID), MTime(MTime), User(User), సమూహం(సమూహం),
+      కొలత(కొలత), Type(Type), Perms(Perms) {}
 
-Status Status::copyWithNewSize(const Status &In, uint64_t NewSize) {
-  return Status(In.getName(), In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), NewSize, In.getType(),
-                In.getPermissions());
+స్థితి_2 స్థితి_2::copy_With_New_కొలత(స్థిరరాశి స్థితి_2 &లోపల_2, uint64_t New_కొలత) {
+  తిరిగి స్థితి_2(లోపల_2.getName(), లోపల_2.getUniqueID(), లోపల_2.get_చివరి_Modification_సమయం(),
+                లోపల_2.getUser(), లోపల_2.get_సమూహం(), New_కొలత, లోపల_2.getType(),
+                లోపల_2.getPermissions());
 }
 
-Status Status::copyWithNewName(const Status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), In.getSize(), In.getType(),
-                In.getPermissions());
+స్థితి_2 స్థితి_2::copyWithNewName(స్థిరరాశి స్థితి_2 &లోపల_2, స్థిరరాశి Twine &NewName) {
+  తిరిగి స్థితి_2(NewName, లోపల_2.getUniqueID(), లోపల_2.get_చివరి_Modification_సమయం(),
+                లోపల_2.getUser(), లోపల_2.get_సమూహం(), లోపల_2.get_కొలత(), లోపల_2.getType(),
+                లోపల_2.getPermissions());
 }
 
-Status Status::copyWithNewName(const file_status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), In.getSize(), In.type(),
-                In.permissions());
+స్థితి_2 స్థితి_2::copyWithNewName(స్థిరరాశి file_స్థితి &లోపల_2, స్థిరరాశి Twine &NewName) {
+  తిరిగి స్థితి_2(NewName, లోపల_2.getUniqueID(), లోపల_2.get_చివరి_Modification_సమయం(),
+                లోపల_2.getUser(), లోపల_2.get_సమూహం(), లోపల_2.get_కొలత(), లోపల_2.type(),
+                లోపల_2.permissions());
 }
 
-bool Status::equivalent(const Status &Other) const {
-  assert(isStatusKnown() && Other.isStatusKnown());
-  return getUniqueID() == Other.getUniqueID();
+తార్కిక స్థితి_2::equivalent(స్థిరరాశి స్థితి_2 &Other) స్థిరరాశి {
+  ప్రతిజ్ఞా(is_స్థితి_తెలిసిన() && Other.is_స్థితి_తెలిసిన());
+  తిరిగి getUniqueID() == Other.getUniqueID();
 }
 
-bool Status::isDirectory() const { return Type == file_type::directory_file; }
+తార్కిక స్థితి_2::isDirectory() స్థిరరాశి { తిరిగి Type == file_type::directory_file; }
 
-bool Status::isRegularFile() const { return Type == file_type::regular_file; }
+తార్కిక స్థితి_2::isRegularFile() స్థిరరాశి { తిరిగి Type == file_type::regular_file; }
 
-bool Status::isOther() const {
-  return exists() && !isRegularFile() && !isDirectory() && !isSymlink();
+తార్కిక స్థితి_2::isOther() స్థిరరాశి {
+  తిరిగి exists() && !isRegularFile() && !isDirectory() && !isSymlink();
 }
 
-bool Status::isSymlink() const { return Type == file_type::symlink_file; }
+తార్కిక స్థితి_2::isSymlink() స్థిరరాశి { తిరిగి Type == file_type::symlink_file; }
 
-bool Status::isStatusKnown() const { return Type != file_type::status_error; }
+తార్కిక స్థితి_2::is_స్థితి_తెలిసిన() స్థిరరాశి { తిరిగి Type != file_type::స్థితి_error; }
 
-bool Status::exists() const {
-  return isStatusKnown() && Type != file_type::file_not_found;
+తార్కిక స్థితి_2::exists() స్థిరరాశి {
+  తిరిగి is_స్థితి_తెలిసిన() && Type != file_type::file_not_దొరికింది;
 }
 
-File::~File() = default;
+File::~File() = అప్రమేయ;
 
-FileSystem::~FileSystem() = default;
+FileSystem::~FileSystem() = అప్రమేయ;
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-FileSystem::getBufferForFile(const llvm::Twine &Name, int64_t FileSize,
-                             bool RequiresNullTerminator, bool IsVolatile,
-                             bool IsText) {
-  auto F = IsText ? openFileForRead(Name) : openFileForReadBinary(Name);
-  if (!F)
-    return F.getError();
+ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>>
+FileSystem::get_బఫరు_For_File(స్థిరరాశి llvm::Twine &Name, int64_t File_కొలత,
+                             తార్కిక RequiresNullTerminator, తార్కిక IsVolatile,
+                             తార్కిక Is_పాఠ్యం) {
+  స్వయంచాలక F = Is_పాఠ్యం ? openFileForRead(Name) : open_File_For_Read_ద్విమాన(Name);
+  ఒకవేళ (!F)
+    తిరిగి F.getError();
 
-  return (*F)->getBuffer(Name, FileSize, RequiresNullTerminator, IsVolatile);
+  తిరిగి (*F)->get_బఫరు(Name, File_కొలత, RequiresNullTerminator, IsVolatile);
 }
 
-std::error_code FileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
-  if (llvm::sys::path::is_absolute(Path))
-    return {};
+std::error_సంకేతం FileSystem::makeAbsolute(Small_సదిశ_Impl<అక్షరం> &మార్గం) స్థిరరాశి {
+  ఒకవేళ (llvm::sys::మార్గం_2::is_absolute(మార్గం))
+    తిరిగి {};
 
-  auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  స్వయంచాలక WorkingDir = getCurrentWorkingDirectory();
+  ఒకవేళ (!WorkingDir)
+    తిరిగి WorkingDir.getError();
 
-  sys::path::make_absolute(WorkingDir.get(), Path);
-  return {};
+  sys::మార్గం_2::make_absolute(WorkingDir.get(), మార్గం);
+  తిరిగి {};
 }
 
-std::error_code FileSystem::getRealPath(const Twine &Path,
-                                        SmallVectorImpl<char> &Output) {
-  return errc::operation_not_permitted;
+std::error_సంకేతం FileSystem::get_Real_మార్గం(స్థిరరాశి Twine &మార్గం,
+                                        Small_సదిశ_Impl<అక్షరం> &Output) {
+  తిరిగి errc::operation_not_permitted;
 }
 
-std::error_code FileSystem::isLocal(const Twine &Path, bool &Result) {
-  return errc::operation_not_permitted;
+std::error_సంకేతం FileSystem::isLocal(స్థిరరాశి Twine &మార్గం, తార్కిక &ఫలితం) {
+  తిరిగి errc::operation_not_permitted;
 }
 
-bool FileSystem::exists(const Twine &Path) {
-  auto Status = status(Path);
-  return Status && Status->exists();
+తార్కిక FileSystem::exists(స్థిరరాశి Twine &మార్గం) {
+  స్వయంచాలక స్థితి_2 = స్థితి_3(మార్గం);
+  తిరిగి స్థితి_2 && స్థితి_2->exists();
 }
 
-llvm::ErrorOr<bool> FileSystem::equivalent(const Twine &A, const Twine &B) {
-  auto StatusA = status(A);
-  if (!StatusA)
-    return StatusA.getError();
-  auto StatusB = status(B);
-  if (!StatusB)
-    return StatusB.getError();
-  return StatusA->equivalent(*StatusB);
+llvm::ErrorOr<తార్కిక> FileSystem::equivalent(స్థిరరాశి Twine &A, స్థిరరాశి Twine &B) {
+  స్వయంచాలక స్థితి_A = స్థితి_3(A);
+  ఒకవేళ (!స్థితి_A)
+    తిరిగి స్థితి_A.getError();
+  స్వయంచాలక స్థితి_B = స్థితి_3(B);
+  ఒకవేళ (!స్థితి_B)
+    తిరిగి స్థితి_B.getError();
+  తిరిగి స్థితి_A->equivalent(*స్థితి_B);
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-void FileSystem::dump() const { print(dbgs(), PrintType::RecursiveContents); }
-#endif
+#ఒకవేళ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+శూన్య FileSystem::dump() స్థిరరాశి { print(dbgs(), PrintType::RecursiveContents); }
+#అయితే_ముగింపు
 
-#ifndef NDEBUG
-static bool isTraversalComponent(StringRef Component) {
-  return Component == ".." || Component == ".";
+#నిర్వచితం_కాకపోతే NDEBUG
+స్థిర తార్కిక isTraversalComponent(StringRef Component) {
+  తిరిగి Component == ".." || Component == ".";
 }
 
-static bool pathHasTraversal(StringRef Path) {
-  using namespace llvm::sys;
+స్థిర తార్కిక మార్గం_Has_Traversal(StringRef మార్గం) {
+  ఉపయోగించి నామాకాశ llvm::sys;
 
-  for (StringRef Comp : llvm::make_range(path::begin(Path), path::end(Path)))
-    if (isTraversalComponent(Comp))
-      return true;
-  return false;
+  కొరకు (StringRef Comp : llvm::make_range(మార్గం_2::begin(మార్గం), మార్గం_2::చివర(మార్గం)))
+    ఒకవేళ (isTraversalComponent(Comp))
+      తిరిగి నిజం;
+  తిరిగి అబద్ధం;
 }
-#endif
+#అయితే_ముగింపు
 
 //===-----------------------------------------------------------------------===/
 // RealFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-namespace {
+నామాకాశ {
 
 /// Wrapper around a raw file descriptor.
-class RealFile : public File {
-  friend class RealFileSystem;
+తరగతి RealFile : బహిరంగ File {
+  మిత్ర తరగతి RealFileSystem;
 
   file_t FD;
-  Status S;
+  స్థితి_2 S;
   std::string RealName;
 
-  RealFile(file_t RawFD, StringRef NewName, StringRef NewRealPathName)
+  RealFile(file_t RawFD, StringRef NewName, StringRef New_Real_మార్గం_Name)
       : FD(RawFD), S(NewName, {}, {}, {}, {}, {},
-                     llvm::sys::fs::file_type::status_error, {}),
-        RealName(NewRealPathName.str()) {
-    assert(FD.isValid() && "Invalid or inactive file descriptor");
+                     llvm::sys::fs::file_type::స్థితి_error, {}),
+        RealName(New_Real_మార్గం_Name.str()) {
+    ప్రతిజ్ఞా(FD.isValid() && "Invalid or inactive file descriptor");
   }
 
-public:
+బహిరంగ:
   ~RealFile() override;
 
-  ErrorOr<Status> status() override;
+  ErrorOr<స్థితి_2> స్థితి_3() override;
   ErrorOr<std::string> getName() override;
-  ErrorOr<std::unique_ptr<MemoryBuffer>> getBuffer(const Twine &Name,
-                                                   int64_t FileSize,
-                                                   bool RequiresNullTerminator,
-                                                   bool IsVolatile) override;
-  std::error_code close() override;
-  void setPath(const Twine &Path) override;
+  ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>> get_బఫరు(స్థిరరాశి Twine &Name,
+                                                   int64_t File_కొలత,
+                                                   తార్కిక RequiresNullTerminator,
+                                                   తార్కిక IsVolatile) override;
+  std::error_సంకేతం close() override;
+  శూన్య సమితి_మార్గం(స్థిరరాశి Twine &మార్గం) override;
 };
 
 } // namespace
 
 RealFile::~RealFile() { close(); }
 
-ErrorOr<Status> RealFile::status() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<స్థితి_2> RealFile::స్థితి_3() {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot stat closed file");
-  if (!S.isStatusKnown()) {
-    file_status RealStatus;
-    if (std::error_code EC = sys::fs::status(FD, RealStatus))
-      return EC;
-    S = Status::copyWithNewName(RealStatus, S.getName());
+  ప్రతిజ్ఞా(FD.isValid() && "cannot stat closed file");
+  ఒకవేళ (!S.is_స్థితి_తెలిసిన()) {
+    file_స్థితి Real_స్థితి;
+    ఒకవేళ (std::error_సంకేతం EC = sys::fs::స్థితి_3(FD, Real_స్థితి))
+      తిరిగి EC;
+    S = స్థితి_2::copyWithNewName(Real_స్థితి, S.getName());
   }
-  return S;
+  తిరిగి S;
 }
 
 ErrorOr<std::string> RealFile::getName() {
-  return RealName.empty() ? S.getName().str() : RealName;
+  తిరిగి RealName.ఖాళీలు() ? S.getName().str() : RealName;
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-RealFile::getBuffer(const Twine &Name, int64_t FileSize,
-                    bool RequiresNullTerminator, bool IsVolatile) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>>
+RealFile::get_బఫరు(స్థిరరాశి Twine &Name, int64_t File_కొలత,
+                    తార్కిక RequiresNullTerminator, తార్కిక IsVolatile) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot get buffer for closed file");
-  return MemoryBuffer::getOpenFile(FD, Name, FileSize, RequiresNullTerminator,
+  ప్రతిజ్ఞా(FD.isValid() && "cannot get buffer for closed file");
+  తిరిగి జ్ఞాపకం_బఫరు::getOpenFile(FD, Name, File_కొలత, RequiresNullTerminator,
                                    IsVolatile);
 }
 
-std::error_code RealFile::close() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_సంకేతం RealFile::close() {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  std::error_code EC = sys::fs::closeFile(FD);
+  std::error_సంకేతం EC = sys::fs::closeFile(FD);
   FD = file_t::Invalid;
-  return EC;
+  తిరిగి EC;
 }
 
-void RealFile::setPath(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+శూన్య RealFile::సమితి_మార్గం(స్థిరరాశి Twine &మార్గం) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  RealName = Path.str();
-  if (auto Status = status())
-    S = Status.get().copyWithNewName(Status.get(), Path);
+  RealName = మార్గం.str();
+  ఒకవేళ (స్వయంచాలక స్థితి_2 = స్థితి_3())
+    S = స్థితి_2.get().copyWithNewName(స్థితి_2.get(), మార్గం);
 }
 
-namespace {
+నామాకాశ {
 
 /// A file system according to your operating system.
 /// This may be linked to the process's working directory, or maintain its own.
@@ -271,64 +271,64 @@ namespace {
 /// A more principled approach would be to push this down a level, modelling
 /// the working dir as an llvm::sys::fs::WorkingDir or similar.
 /// This would enable the use of openat()-style functions on some platforms.
-class RealFileSystem : public FileSystem {
-public:
-  explicit RealFileSystem(bool LinkCWDToProcess) {
-    if (!LinkCWDToProcess) {
+తరగతి RealFileSystem : బహిరంగ FileSystem {
+బహిరంగ:
+  స్పష్టమైన RealFileSystem(తార్కిక LinkCWDToProcess) {
+    ఒకవేళ (!LinkCWDToProcess) {
       SmallString<128> PWD, RealPWD;
-      if (std::error_code EC = llvm::sys::fs::current_path(PWD))
+      ఒకవేళ (std::error_సంకేతం EC = llvm::sys::fs::current_మార్గం(PWD))
         WD = std::move(EC);
-      else if (llvm::sys::fs::real_path(PWD, RealPWD))
+      లేకపోతే ఒకవేళ (llvm::sys::fs::real_మార్గం(PWD, RealPWD))
         WD = WorkingDirectory{PWD, PWD};
-      else
+      లేకపోతే
         WD = WorkingDirectory{PWD, RealPWD};
     }
   }
 
-  ErrorOr<Status> status(const Twine &Path) override;
-  ErrorOr<std::unique_ptr<File>> openFileForRead(const Twine &Path) override;
+  ErrorOr<స్థితి_2> స్థితి_3(స్థిరరాశి Twine &మార్గం) override;
+  ErrorOr<std::unique_ptr<File>> openFileForRead(స్థిరరాశి Twine &మార్గం) override;
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadBinary(const Twine &Path) override;
-  directory_iterator dir_begin(const Twine &Dir, std::error_code &EC) override;
+  open_File_For_Read_ద్విమాన(స్థిరరాశి Twine &మార్గం) override;
+  directory_iterator dir_begin(స్థిరరాశి Twine &Dir, std::error_సంకేతం &EC) override;
 
-  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override;
-  std::error_code setCurrentWorkingDirectory(const Twine &Path) override;
-  std::error_code isLocal(const Twine &Path, bool &Result) override;
-  void
-  getDirectoryContentRealSources(const Twine &Dir,
-                                 SmallVectorImpl<std::string> &Out) override {
-    Out.push_back(Dir.str());
+  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() స్థిరరాశి override;
+  std::error_సంకేతం సమితి_Current_Working_Directory(స్థిరరాశి Twine &మార్గం) override;
+  std::error_సంకేతం isLocal(స్థిరరాశి Twine &మార్గం, తార్కిక &ఫలితం) override;
+  శూన్య
+  getDirectoryContentRealSources(స్థిరరాశి Twine &Dir,
+                                 Small_సదిశ_Impl<std::string> &బహిర్గతం) override {
+    బహిర్గతం.నెట్టు_వెనుక(Dir.str());
   }
-  std::error_code getRealPath(const Twine &Path,
-                              SmallVectorImpl<char> &Output) override;
+  std::error_సంకేతం get_Real_మార్గం(స్థిరరాశి Twine &మార్గం,
+                              Small_సదిశ_Impl<అక్షరం> &Output) override;
 
-protected:
-  void printImpl(raw_ostream &OS, PrintType Type,
-                 unsigned IndentLevel) const override;
+రక్షిత:
+  శూన్య printImpl(raw_ostream &OS, PrintType Type,
+                 గుర్తులేని IndentLevel) స్థిరరాశి override;
 
-private:
+అంతరంగ:
   // If this FS has its own working dir, use it to make Path absolute.
   // The returned twine is safe to use as long as both Storage and Path live.
-  Twine adjustPath(const Twine &Path, SmallVectorImpl<char> &Storage) const {
-    if (!WD || !*WD)
-      return Path;
-    Path.toVector(Storage);
-    sys::path::make_absolute(WD->get().Resolved, Storage);
-    return Storage;
+  Twine adjust_మార్గం(స్థిరరాశి Twine &మార్గం, Small_సదిశ_Impl<అక్షరం> &Storage) స్థిరరాశి {
+    ఒకవేళ (!WD || !*WD)
+      తిరిగి మార్గం;
+    మార్గం.గమ్యం_సదిశ(Storage);
+    sys::మార్గం_2::make_absolute(WD->get().Resolved, Storage);
+    తిరిగి Storage;
   }
 
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadWithFlags(const Twine &Name, sys::fs::OpenFlags Flags) {
+  openFileForReadWithFlags(స్థిరరాశి Twine &Name, sys::fs::OpenFlags Flags) {
     SmallString<256> RealName, Storage;
     Expected<file_t> FDOrErr = sys::fs::openNativeFileForRead(
-        adjustPath(Name, Storage), Flags, &RealName);
-    if (!FDOrErr)
-      return errorToErrorCode(FDOrErr.takeError());
-    return std::unique_ptr<File>(
-        new RealFile(*FDOrErr, Name.str(), RealName.str()));
+        adjust_మార్గం(Name, Storage), Flags, &RealName);
+    ఒకవేళ (!FDOrErr)
+      తిరిగి error_గమ్యం_Error_సంకేతం(FDOrErr.takeError());
+    తిరిగి std::unique_ptr<File>(
+        కొత్త RealFile(*FDOrErr, Name.str(), RealName.str()));
   }
 
-  struct WorkingDirectory {
+  నిర్మాణం WorkingDirectory {
     // The current working directory, without symlinks resolved. (echo $PWD).
     SmallString<128> Specified;
     // The current working directory, with links resolved. (readlink .).
@@ -339,342 +339,342 @@ private:
 
 } // namespace
 
-ErrorOr<Status> RealFileSystem::status(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<స్థితి_2> RealFileSystem::స్థితి_3(స్థిరరాశి Twine &మార్గం) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  sys::fs::file_status RealStatus;
-  if (std::error_code EC =
-          sys::fs::status(adjustPath(Path, Storage), RealStatus))
-    return EC;
-  return Status::copyWithNewName(RealStatus, Path);
+  sys::fs::file_స్థితి Real_స్థితి;
+  ఒకవేళ (std::error_సంకేతం EC =
+          sys::fs::స్థితి_3(adjust_మార్గం(మార్గం, Storage), Real_స్థితి))
+    తిరిగి EC;
+  తిరిగి స్థితి_2::copyWithNewName(Real_స్థితి, మార్గం);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForRead(const Twine &Name) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+RealFileSystem::openFileForRead(స్థిరరాశి Twine &Name) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_Text);
+  తిరిగి openFileForReadWithFlags(Name, sys::fs::యొక్క_పాఠ్యం);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForReadBinary(const Twine &Name) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+RealFileSystem::open_File_For_Read_ద్విమాన(స్థిరరాశి Twine &Name) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_None);
+  తిరిగి openFileForReadWithFlags(Name, sys::fs::యొక్క_None);
 }
 
-llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() const {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() స్థిరరాశి {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (WD && *WD)
-    return std::string(WD->get().Specified);
-  if (WD)
-    return WD->getError();
+  ఒకవేళ (WD && *WD)
+    తిరిగి std::string(WD->get().Specified);
+  ఒకవేళ (WD)
+    తిరిగి WD->getError();
 
   SmallString<128> Dir;
-  if (std::error_code EC = llvm::sys::fs::current_path(Dir))
-    return EC;
-  return std::string(Dir);
+  ఒకవేళ (std::error_సంకేతం EC = llvm::sys::fs::current_మార్గం(Dir))
+    తిరిగి EC;
+  తిరిగి std::string(Dir);
 }
 
-std::error_code RealFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_సంకేతం RealFileSystem::సమితి_Current_Working_Directory(స్థిరరాశి Twine &మార్గం) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (!WD)
-    return llvm::sys::fs::set_current_path(Path);
+  ఒకవేళ (!WD)
+    తిరిగి llvm::sys::fs::సమితి_current_మార్గం(మార్గం);
 
   SmallString<128> Absolute, Resolved, Storage;
-  adjustPath(Path, Storage).toVector(Absolute);
-  bool IsDir;
-  if (auto Err = llvm::sys::fs::is_directory(Absolute, IsDir))
-    return Err;
-  if (!IsDir)
-    return std::make_error_code(std::errc::not_a_directory);
-  if (auto Err = llvm::sys::fs::real_path(Absolute, Resolved))
-    return Err;
+  adjust_మార్గం(మార్గం, Storage).గమ్యం_సదిశ(Absolute);
+  తార్కిక IsDir;
+  ఒకవేళ (స్వయంచాలక Err = llvm::sys::fs::is_directory(Absolute, IsDir))
+    తిరిగి Err;
+  ఒకవేళ (!IsDir)
+    తిరిగి std::make_error_సంకేతం(std::errc::not_a_directory);
+  ఒకవేళ (స్వయంచాలక Err = llvm::sys::fs::real_మార్గం(Absolute, Resolved))
+    తిరిగి Err;
   WD = WorkingDirectory{Absolute, Resolved};
-  return std::error_code();
+  తిరిగి std::error_సంకేతం();
 }
 
-std::error_code RealFileSystem::isLocal(const Twine &Path, bool &Result) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_సంకేతం RealFileSystem::isLocal(స్థిరరాశి Twine &మార్గం, తార్కిక &ఫలితం) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::is_local(adjustPath(Path, Storage), Result);
+  తిరిగి llvm::sys::fs::is_local(adjust_మార్గం(మార్గం, Storage), ఫలితం);
 }
 
-std::error_code RealFileSystem::getRealPath(const Twine &Path,
-                                            SmallVectorImpl<char> &Output) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_సంకేతం RealFileSystem::get_Real_మార్గం(స్థిరరాశి Twine &మార్గం,
+                                            Small_సదిశ_Impl<అక్షరం> &Output) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::real_path(adjustPath(Path, Storage), Output);
+  తిరిగి llvm::sys::fs::real_మార్గం(adjust_మార్గం(మార్గం, Storage), Output);
 }
 
-void RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                               unsigned IndentLevel) const {
+శూన్య RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                               గుర్తులేని IndentLevel) స్థిరరాశి {
   printIndent(OS, IndentLevel);
   OS << "RealFileSystem using ";
-  if (WD)
+  ఒకవేళ (WD)
     OS << "own";
-  else
+  లేకపోతే
     OS << "process";
   OS << " CWD\n";
 }
 
 IntrusiveRefCntPtr<FileSystem> vfs::getRealFileSystem() {
-  static IntrusiveRefCntPtr<FileSystem> FS =
-      makeIntrusiveRefCnt<RealFileSystem>(true);
+  స్థిర IntrusiveRefCntPtr<FileSystem> FS =
+      makeIntrusiveRefCnt<RealFileSystem>(నిజం);
   sys::sandbox::violationIfEnabled();
 
-  return FS;
+  తిరిగి FS;
 }
 
 std::unique_ptr<FileSystem> vfs::createPhysicalFileSystem() {
   sys::sandbox::violationIfEnabled();
 
-  return std::make_unique<RealFileSystem>(false);
+  తిరిగి std::make_unique<RealFileSystem>(అబద్ధం);
 }
 
-namespace {
+నామాకాశ {
 
-class RealFSDirIter : public llvm::vfs::detail::DirIterImpl {
+తరగతి RealFSDirIter : బహిరంగ llvm::vfs::detail::DirIterImpl {
   llvm::sys::fs::directory_iterator Iter;
 
-public:
-  RealFSDirIter(const Twine &Path, std::error_code &EC) {
-    auto BypassSandbox = sys::sandbox::scopedDisable();
+బహిరంగ:
+  RealFSDirIter(స్థిరరాశి Twine &మార్గం, std::error_సంకేతం &EC) {
+    స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-    Iter = sys::fs::directory_iterator(Path, EC);
-    if (Iter != sys::fs::directory_iterator())
-      CurrentEntry = directory_entry(Iter->path(), Iter->type());
+    Iter = sys::fs::directory_iterator(మార్గం, EC);
+    ఒకవేళ (Iter != sys::fs::directory_iterator())
+      Current_నమోదు = directory_నమోదు(Iter->మార్గం_2(), Iter->type());
   }
 
-  std::error_code increment() override {
-    auto BypassSandbox = sys::sandbox::scopedDisable();
+  std::error_సంకేతం increment() override {
+    స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
-    std::error_code EC;
+    std::error_సంకేతం EC;
     Iter.increment(EC);
-    CurrentEntry = (Iter == llvm::sys::fs::directory_iterator())
-                       ? directory_entry()
-                       : directory_entry(Iter->path(), Iter->type());
-    return EC;
+    Current_నమోదు = (Iter == llvm::sys::fs::directory_iterator())
+                       ? directory_నమోదు()
+                       : directory_నమోదు(Iter->మార్గం_2(), Iter->type());
+    తిరిగి EC;
   }
 };
 
 } // namespace
 
-directory_iterator RealFileSystem::dir_begin(const Twine &Dir,
-                                             std::error_code &EC) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+directory_iterator RealFileSystem::dir_begin(స్థిరరాశి Twine &Dir,
+                                             std::error_సంకేతం &EC) {
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<128> Storage;
-  return directory_iterator(
-      std::make_shared<RealFSDirIter>(adjustPath(Dir, Storage), EC));
+  తిరిగి directory_iterator(
+      std::make_shared<RealFSDirIter>(adjust_మార్గం(Dir, Storage), EC));
 }
 
 //===-----------------------------------------------------------------------===/
 // OverlayFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-OverlayFileSystem::OverlayFileSystem(IntrusiveRefCntPtr<FileSystem> BaseFS) {
-  FSList.push_back(std::move(BaseFS));
+OverlayFileSystem::OverlayFileSystem(IntrusiveRefCntPtr<FileSystem> పునాది_FS) {
+  FSList.నెట్టు_వెనుక(std::move(పునాది_FS));
 }
 
-void OverlayFileSystem::pushOverlay(IntrusiveRefCntPtr<FileSystem> FS) {
-  FSList.push_back(FS);
+శూన్య OverlayFileSystem::నెట్టు_Overlay(IntrusiveRefCntPtr<FileSystem> FS) {
+  FSList.నెట్టు_వెనుక(FS);
   // Synchronize added file systems by duplicating the working directory from
   // the first one in the list.
-  FS->setCurrentWorkingDirectory(getCurrentWorkingDirectory().get());
+  FS->సమితి_Current_Working_Directory(getCurrentWorkingDirectory().get());
 }
 
-ErrorOr<Status> OverlayFileSystem::status(const Twine &Path) {
+ErrorOr<స్థితి_2> OverlayFileSystem::స్థితి_3(స్థిరరాశి Twine &మార్గం) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    ErrorOr<Status> Status = (*I)->status(Path);
-    if (Status || Status.getError() != llvm::errc::no_such_file_or_directory)
-      return Status;
+  కొరకు (iterator I = overlays_begin(), E = overlays_చివర(); I != E; ++I) {
+    ErrorOr<స్థితి_2> స్థితి_2 = (*I)->స్థితి_3(మార్గం);
+    ఒకవేళ (స్థితి_2 || స్థితి_2.getError() != llvm::errc::no_such_file_or_directory)
+      తిరిగి స్థితి_2;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  తిరిగి make_error_సంకేతం(llvm::errc::no_such_file_or_directory);
 }
 
-bool OverlayFileSystem::exists(const Twine &Path) {
+తార్కిక OverlayFileSystem::exists(స్థిరరాశి Twine &మార్గం) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    if ((*I)->exists(Path))
-      return true;
+  కొరకు (iterator I = overlays_begin(), E = overlays_చివర(); I != E; ++I) {
+    ఒకవేళ ((*I)->exists(మార్గం))
+      తిరిగి నిజం;
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
 ErrorOr<std::unique_ptr<File>>
-OverlayFileSystem::openFileForRead(const llvm::Twine &Path) {
+OverlayFileSystem::openFileForRead(స్థిరరాశి llvm::Twine &మార్గం) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    auto Result = (*I)->openFileForRead(Path);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+  కొరకు (iterator I = overlays_begin(), E = overlays_చివర(); I != E; ++I) {
+    స్వయంచాలక ఫలితం = (*I)->openFileForRead(మార్గం);
+    ఒకవేళ (ఫలితం || ఫలితం.getError() != llvm::errc::no_such_file_or_directory)
+      తిరిగి ఫలితం;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  తిరిగి make_error_సంకేతం(llvm::errc::no_such_file_or_directory);
 }
 
 llvm::ErrorOr<std::string>
-OverlayFileSystem::getCurrentWorkingDirectory() const {
+OverlayFileSystem::getCurrentWorkingDirectory() స్థిరరాశి {
   // All file systems are synchronized, just take the first working directory.
-  return FSList.front()->getCurrentWorkingDirectory();
+  తిరిగి FSList.front()->getCurrentWorkingDirectory();
 }
 
-std::error_code
-OverlayFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  for (auto &FS : FSList)
-    if (std::error_code EC = FS->setCurrentWorkingDirectory(Path))
-      return EC;
-  return {};
+std::error_సంకేతం
+OverlayFileSystem::సమితి_Current_Working_Directory(స్థిరరాశి Twine &మార్గం) {
+  కొరకు (స్వయంచాలక &FS : FSList)
+    ఒకవేళ (std::error_సంకేతం EC = FS->సమితి_Current_Working_Directory(మార్గం))
+      తిరిగి EC;
+  తిరిగి {};
 }
 
-std::error_code OverlayFileSystem::isLocal(const Twine &Path, bool &Result) {
-  for (auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->isLocal(Path, Result);
-  return errc::no_such_file_or_directory;
+std::error_సంకేతం OverlayFileSystem::isLocal(స్థిరరాశి Twine &మార్గం, తార్కిక &ఫలితం) {
+  కొరకు (స్వయంచాలక &FS : FSList)
+    ఒకవేళ (FS->exists(మార్గం))
+      తిరిగి FS->isLocal(మార్గం, ఫలితం);
+  తిరిగి errc::no_such_file_or_directory;
 }
 
-std::error_code OverlayFileSystem::getRealPath(const Twine &Path,
-                                               SmallVectorImpl<char> &Output) {
-  for (const auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->getRealPath(Path, Output);
-  return errc::no_such_file_or_directory;
+std::error_సంకేతం OverlayFileSystem::get_Real_మార్గం(స్థిరరాశి Twine &మార్గం,
+                                               Small_సదిశ_Impl<అక్షరం> &Output) {
+  కొరకు (స్థిరరాశి స్వయంచాలక &FS : FSList)
+    ఒకవేళ (FS->exists(మార్గం))
+      తిరిగి FS->get_Real_మార్గం(మార్గం, Output);
+  తిరిగి errc::no_such_file_or_directory;
 }
 
-void OverlayFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
+శూన్య OverlayFileSystem::getDirectoryContentRealSources(
+    స్థిరరాశి Twine &Dir, Small_సదిశ_Impl<std::string> &బహిర్గతం) {
   // All layers contribute.
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I)
-    (*I)->getDirectoryContentRealSources(Dir, Out);
+  కొరకు (iterator I = overlays_begin(), E = overlays_చివర(); I != E; ++I)
+    (*I)->getDirectoryContentRealSources(Dir, బహిర్గతం);
 }
 
-void OverlayFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  for (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
+శూన్య OverlayFileSystem::సందర్శించు_బిడ్డ_File_Systems(సందర్శించు_Callback_Ty Callback) {
+  కొరకు (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
     Callback(*FS);
-    FS->visitChildFileSystems(Callback);
+    FS->సందర్శించు_బిడ్డ_File_Systems(Callback);
   }
 }
 
-void OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                  unsigned IndentLevel) const {
+శూన్య OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                  గుర్తులేని IndentLevel) స్థిరరాశి {
   printIndent(OS, IndentLevel);
   OS << "OverlayFileSystem\n";
-  if (Type == PrintType::Summary)
-    return;
+  ఒకవేళ (Type == PrintType::Summary)
+    తిరిగి;
 
-  if (Type == PrintType::Contents)
+  ఒకవేళ (Type == PrintType::Contents)
     Type = PrintType::Summary;
-  for (const auto &FS : overlays_range())
+  కొరకు (స్థిరరాశి స్వయంచాలక &FS : overlays_range())
     FS->print(OS, Type, IndentLevel + 1);
 }
 
-llvm::vfs::detail::DirIterImpl::~DirIterImpl() = default;
+llvm::vfs::detail::DirIterImpl::~DirIterImpl() = అప్రమేయ;
 
-namespace {
+నామాకాశ {
 
 /// Combines and deduplicates directory entries across multiple file systems.
-class CombiningDirIterImpl : public llvm::vfs::detail::DirIterImpl {
-  using FileSystemPtr = llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>;
+తరగతి CombiningDirIterImpl : బహిరంగ llvm::vfs::detail::DirIterImpl {
+  ఉపయోగించి FileSystemPtr = llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>;
 
   /// Iterators to combine, processed in reverse order.
-  SmallVector<directory_iterator, 8> IterList;
+  Small_సదిశ<directory_iterator, 8> IterList;
   /// The iterator currently being traversed.
   directory_iterator CurrentDirIter;
   /// The set of names already returned as entries.
-  llvm::StringSet<> SeenNames;
+  llvm::String_సమితి<> చూసిన_పేర్లు;
 
   /// Sets \c CurrentDirIter to the next iterator in the list, or leaves it as
   /// is (at its end position) if we've already gone through them all.
-  std::error_code incrementIter(bool IsFirstTime) {
-    while (!IterList.empty()) {
-      CurrentDirIter = IterList.back();
-      IterList.pop_back();
-      if (CurrentDirIter != directory_iterator())
-        break; // found
+  std::error_సంకేతం incrementIter(తార్కిక Is_మొదటి_సమయం) {
+    అయితే (!IterList.ఖాళీలు()) {
+      CurrentDirIter = IterList.వెనుక();
+      IterList.తీయి_వెనుక();
+      ఒకవేళ (CurrentDirIter != directory_iterator())
+        ఆపు; //దొరికింది
     }
 
-    if (IsFirstTime && CurrentDirIter == directory_iterator())
-      return errc::no_such_file_or_directory;
-    return {};
+    ఒకవేళ (Is_మొదటి_సమయం && CurrentDirIter == directory_iterator())
+      తిరిగి errc::no_such_file_or_directory;
+    తిరిగి {};
   }
 
-  std::error_code incrementDirIter(bool IsFirstTime) {
-    assert((IsFirstTime || CurrentDirIter != directory_iterator()) &&
+  std::error_సంకేతం incrementDirIter(తార్కిక Is_మొదటి_సమయం) {
+    ప్రతిజ్ఞా((Is_మొదటి_సమయం || CurrentDirIter != directory_iterator()) &&
            "incrementing past end");
-    std::error_code EC;
-    if (!IsFirstTime)
+    std::error_సంకేతం EC;
+    ఒకవేళ (!Is_మొదటి_సమయం)
       CurrentDirIter.increment(EC);
-    if (!EC && CurrentDirIter == directory_iterator())
-      EC = incrementIter(IsFirstTime);
-    return EC;
+    ఒకవేళ (!EC && CurrentDirIter == directory_iterator())
+      EC = incrementIter(Is_మొదటి_సమయం);
+    తిరిగి EC;
   }
 
-  std::error_code incrementImpl(bool IsFirstTime) {
-    while (true) {
-      std::error_code EC = incrementDirIter(IsFirstTime);
-      if (EC || CurrentDirIter == directory_iterator()) {
-        CurrentEntry = directory_entry();
-        return EC;
+  std::error_సంకేతం incrementImpl(తార్కిక Is_మొదటి_సమయం) {
+    అయితే (నిజం) {
+      std::error_సంకేతం EC = incrementDirIter(Is_మొదటి_సమయం);
+      ఒకవేళ (EC || CurrentDirIter == directory_iterator()) {
+        Current_నమోదు = directory_నమోదు();
+        తిరిగి EC;
       }
-      CurrentEntry = *CurrentDirIter;
-      StringRef Name = llvm::sys::path::filename(CurrentEntry.path());
-      if (SeenNames.insert(Name).second)
-        return EC; // name not seen before
+      Current_నమోదు = *CurrentDirIter;
+      StringRef Name = llvm::sys::మార్గం_2::filename(Current_నమోదు.మార్గం_2());
+      ఒకవేళ (చూసిన_పేర్లు.చొప్పించు(Name).రెండవ_2)
+        తిరిగి EC; // name not seen before
     }
     llvm_unreachable("returned above");
   }
 
-public:
+బహిరంగ:
   CombiningDirIterImpl(ArrayRef<FileSystemPtr> FileSystems, std::string Dir,
-                       std::error_code &EC) {
-    for (const auto &FS : FileSystems) {
-      std::error_code FEC;
+                       std::error_సంకేతం &EC) {
+    కొరకు (స్థిరరాశి స్వయంచాలక &FS : FileSystems) {
+      std::error_సంకేతం FEC;
       directory_iterator Iter = FS->dir_begin(Dir, FEC);
-      if (FEC && FEC != errc::no_such_file_or_directory) {
+      ఒకవేళ (FEC && FEC != errc::no_such_file_or_directory) {
         EC = FEC;
-        return;
+        తిరిగి;
       }
-      if (!FEC)
-        IterList.push_back(Iter);
+      ఒకవేళ (!FEC)
+        IterList.నెట్టు_వెనుక(Iter);
     }
-    EC = incrementImpl(true);
+    EC = incrementImpl(నిజం);
   }
 
   CombiningDirIterImpl(ArrayRef<directory_iterator> DirIters,
-                       std::error_code &EC)
+                       std::error_సంకేతం &EC)
       : IterList(DirIters) {
-    EC = incrementImpl(true);
+    EC = incrementImpl(నిజం);
   }
 
-  std::error_code increment() override { return incrementImpl(false); }
+  std::error_సంకేతం increment() override { తిరిగి incrementImpl(అబద్ధం); }
 };
 
 } // namespace
 
-directory_iterator OverlayFileSystem::dir_begin(const Twine &Dir,
-                                                std::error_code &EC) {
+directory_iterator OverlayFileSystem::dir_begin(స్థిరరాశి Twine &Dir,
+                                                std::error_సంకేతం &EC) {
   directory_iterator Combined = directory_iterator(
       std::make_shared<CombiningDirIterImpl>(FSList, Dir.str(), EC));
-  if (EC)
-    return {};
-  return Combined;
+  ఒకవేళ (EC)
+    తిరిగి {};
+  తిరిగి Combined;
 }
 
-void ProxyFileSystem::anchor() {}
+శూన్య ProxyFileSystem::anchor() {}
 
-namespace llvm {
-namespace vfs {
+నామాకాశ llvm {
+నామాకాశ vfs {
 
-namespace detail {
+నామాకాశ detail {
 
-enum InMemoryNodeKind {
+గణన లోపల_జ్ఞాపకం_కణుపు_రకం {
   IME_File,
   IME_Directory,
   IME_HardLink,
@@ -683,172 +683,172 @@ enum InMemoryNodeKind {
 
 /// The in memory file system is a tree of Nodes. Every node can either be a
 /// file, symlink, hardlink or a directory.
-class InMemoryNode {
-  InMemoryNodeKind Kind;
+తరగతి లోపల_జ్ఞాపకం_కణుపు {
+  లోపల_జ్ఞాపకం_కణుపు_రకం రకం_3;
   std::string FileName;
 
-public:
-  InMemoryNode(llvm::StringRef FileName, InMemoryNodeKind Kind)
-      : Kind(Kind), FileName(std::string(llvm::sys::path::filename(FileName))) {
+బహిరంగ:
+  లోపల_జ్ఞాపకం_కణుపు(llvm::StringRef FileName, లోపల_జ్ఞాపకం_కణుపు_రకం రకం_3)
+      : రకం_3(రకం_3), FileName(std::string(llvm::sys::మార్గం_2::filename(FileName))) {
   }
-  virtual ~InMemoryNode() = default;
+  మాయా ~లోపల_జ్ఞాపకం_కణుపు() = అప్రమేయ;
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  virtual Status getStatus(const Twine &RequestedName) const = 0;
+  మాయా స్థితి_2 get_స్థితి(స్థిరరాశి Twine &RequestedName) స్థిరరాశి = 0;
 
   /// Get the filename of this node (the name without the directory part).
-  StringRef getFileName() const { return FileName; }
-  InMemoryNodeKind getKind() const { return Kind; }
-  virtual std::string toString(unsigned Indent) const = 0;
+  StringRef getFileName() స్థిరరాశి { తిరిగి FileName; }
+  లోపల_జ్ఞాపకం_కణుపు_రకం get_రకం() స్థిరరాశి { తిరిగి రకం_3; }
+  మాయా std::string గమ్యం_String(గుర్తులేని Indent) స్థిరరాశి = 0;
 };
 
-class InMemoryFile : public InMemoryNode {
-  Status Stat;
-  std::unique_ptr<llvm::MemoryBuffer> Buffer;
+తరగతి లోపల_జ్ఞాపకం_File : బహిరంగ లోపల_జ్ఞాపకం_కణుపు {
+  స్థితి_2 Stat;
+  std::unique_ptr<llvm::జ్ఞాపకం_బఫరు> బఫరు;
 
-public:
-  InMemoryFile(Status Stat, std::unique_ptr<llvm::MemoryBuffer> Buffer)
-      : InMemoryNode(Stat.getName(), IME_File), Stat(std::move(Stat)),
-        Buffer(std::move(Buffer)) {}
+బహిరంగ:
+  లోపల_జ్ఞాపకం_File(స్థితి_2 Stat, std::unique_ptr<llvm::జ్ఞాపకం_బఫరు> బఫరు)
+      : లోపల_జ్ఞాపకం_కణుపు(Stat.getName(), IME_File), Stat(std::move(Stat)),
+        బఫరు(std::move(బఫరు)) {}
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  స్థితి_2 get_స్థితి(స్థిరరాశి Twine &RequestedName) స్థిరరాశి override {
+    తిరిగి స్థితి_2::copyWithNewName(Stat, RequestedName);
   }
-  llvm::MemoryBuffer *getBuffer() const { return Buffer.get(); }
+  llvm::జ్ఞాపకం_బఫరు *get_బఫరు() స్థిరరాశి { తిరిగి బఫరు.get(); }
 
-  std::string toString(unsigned Indent) const override {
-    return (std::string(Indent, ' ') + Stat.getName() + "\n").str();
-  }
-
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_File;
-  }
-};
-
-namespace {
-
-class InMemoryHardLink : public InMemoryNode {
-  const InMemoryFile &ResolvedFile;
-
-public:
-  InMemoryHardLink(StringRef Path, const InMemoryFile &ResolvedFile)
-      : InMemoryNode(Path, IME_HardLink), ResolvedFile(ResolvedFile) {}
-  const InMemoryFile &getResolvedFile() const { return ResolvedFile; }
-
-  Status getStatus(const Twine &RequestedName) const override {
-    return ResolvedFile.getStatus(RequestedName);
+  std::string గమ్యం_String(గుర్తులేని Indent) స్థిరరాశి override {
+    తిరిగి (std::string(Indent, ' ') + Stat.getName() + "\n").str();
   }
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "HardLink to -> " +
-           ResolvedFile.toString(0);
-  }
-
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_HardLink;
+  స్థిర తార్కిక classof(స్థిరరాశి లోపల_జ్ఞాపకం_కణుపు *N) {
+    తిరిగి N->get_రకం() == IME_File;
   }
 };
 
-class InMemorySymbolicLink : public InMemoryNode {
-  std::string TargetPath;
-  Status Stat;
+నామాకాశ {
 
-public:
-  InMemorySymbolicLink(StringRef Path, StringRef TargetPath, Status Stat)
-      : InMemoryNode(Path, IME_SymbolicLink), TargetPath(std::move(TargetPath)),
+తరగతి లోపల_జ్ఞాపకం_Hard_Link : బహిరంగ లోపల_జ్ఞాపకం_కణుపు {
+  స్థిరరాశి లోపల_జ్ఞాపకం_File &ResolvedFile;
+
+బహిరంగ:
+  లోపల_జ్ఞాపకం_Hard_Link(StringRef మార్గం, స్థిరరాశి లోపల_జ్ఞాపకం_File &ResolvedFile)
+      : లోపల_జ్ఞాపకం_కణుపు(మార్గం, IME_HardLink), ResolvedFile(ResolvedFile) {}
+  స్థిరరాశి లోపల_జ్ఞాపకం_File &getResolvedFile() స్థిరరాశి { తిరిగి ResolvedFile; }
+
+  స్థితి_2 get_స్థితి(స్థిరరాశి Twine &RequestedName) స్థిరరాశి override {
+    తిరిగి ResolvedFile.get_స్థితి(RequestedName);
+  }
+
+  std::string గమ్యం_String(గుర్తులేని Indent) స్థిరరాశి override {
+    తిరిగి std::string(Indent, ' ') + "HardLink to -> " +
+           ResolvedFile.గమ్యం_String(0);
+  }
+
+  స్థిర తార్కిక classof(స్థిరరాశి లోపల_జ్ఞాపకం_కణుపు *N) {
+    తిరిగి N->get_రకం() == IME_HardLink;
+  }
+};
+
+తరగతి లోపల_జ్ఞాపకం_Symbolic_Link : బహిరంగ లోపల_జ్ఞాపకం_కణుపు {
+  std::string లక్ష్యం_మార్గం;
+  స్థితి_2 Stat;
+
+బహిరంగ:
+  లోపల_జ్ఞాపకం_Symbolic_Link(StringRef మార్గం, StringRef లక్ష్యం_మార్గం, స్థితి_2 Stat)
+      : లోపల_జ్ఞాపకం_కణుపు(మార్గం, IME_SymbolicLink), లక్ష్యం_మార్గం(std::move(లక్ష్యం_మార్గం)),
         Stat(Stat) {}
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "SymbolicLink to -> " + TargetPath;
+  std::string గమ్యం_String(గుర్తులేని Indent) స్థిరరాశి override {
+    తిరిగి std::string(Indent, ' ') + "SymbolicLink to -> " + లక్ష్యం_మార్గం;
   }
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  స్థితి_2 get_స్థితి(స్థిరరాశి Twine &RequestedName) స్థిరరాశి override {
+    తిరిగి స్థితి_2::copyWithNewName(Stat, RequestedName);
   }
 
-  StringRef getTargetPath() const { return TargetPath; }
+  StringRef get_లక్ష్యం_మార్గం() స్థిరరాశి { తిరిగి లక్ష్యం_మార్గం; }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_SymbolicLink;
+  స్థిర తార్కిక classof(స్థిరరాశి లోపల_జ్ఞాపకం_కణుపు *N) {
+    తిరిగి N->get_రకం() == IME_SymbolicLink;
   }
 };
 
 /// Adapt a InMemoryFile for VFS' File interface.  The goal is to make
 /// \p InMemoryFileAdaptor mimic as much as possible the behavior of
 /// \p RealFile.
-class InMemoryFileAdaptor : public File {
-  const InMemoryFile &Node;
+తరగతి లోపల_జ్ఞాపకం_File_Adaptor : బహిరంగ File {
+  స్థిరరాశి లోపల_జ్ఞాపకం_File &కణుపు;
   /// The name to use when returning a Status for this file.
   std::string RequestedName;
 
-public:
-  explicit InMemoryFileAdaptor(const InMemoryFile &Node,
+బహిరంగ:
+  స్పష్టమైన లోపల_జ్ఞాపకం_File_Adaptor(స్థిరరాశి లోపల_జ్ఞాపకం_File &కణుపు,
                                std::string RequestedName)
-      : Node(Node), RequestedName(std::move(RequestedName)) {}
+      : కణుపు(కణుపు), RequestedName(std::move(RequestedName)) {}
 
-  llvm::ErrorOr<Status> status() override {
-    return Node.getStatus(RequestedName);
+  llvm::ErrorOr<స్థితి_2> స్థితి_3() override {
+    తిరిగి కణుపు.get_స్థితి(RequestedName);
   }
 
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
-            bool IsVolatile) override {
-    llvm::MemoryBuffer *Buf = Node.getBuffer();
-    return llvm::MemoryBuffer::getMemBuffer(
-        Buf->getBuffer(), Buf->getBufferIdentifier(), RequiresNullTerminator);
+  llvm::ErrorOr<std::unique_ptr<llvm::జ్ఞాపకం_బఫరు>>
+  get_బఫరు(స్థిరరాశి Twine &Name, int64_t File_కొలత, తార్కిక RequiresNullTerminator,
+            తార్కిక IsVolatile) override {
+    llvm::జ్ఞాపకం_బఫరు *Buf = కణుపు.get_బఫరు();
+    తిరిగి llvm::జ్ఞాపకం_బఫరు::get_Mem_బఫరు(
+        Buf->get_బఫరు(), Buf->get_బఫరు_Identifier(), RequiresNullTerminator);
   }
 
-  std::error_code close() override { return {}; }
+  std::error_సంకేతం close() override { తిరిగి {}; }
 
-  void setPath(const Twine &Path) override { RequestedName = Path.str(); }
+  శూన్య సమితి_మార్గం(స్థిరరాశి Twine &మార్గం) override { RequestedName = మార్గం.str(); }
 };
 } // namespace
 
-class InMemoryDirectory : public InMemoryNode {
-  Status Stat;
-  std::map<std::string, std::unique_ptr<InMemoryNode>, std::less<>> Entries;
+తరగతి లోపల_జ్ఞాపకం_Directory : బహిరంగ లోపల_జ్ఞాపకం_కణుపు {
+  స్థితి_2 Stat;
+  std::map<std::string, std::unique_ptr<లోపల_జ్ఞాపకం_కణుపు>, std::less<>> Entries;
 
-public:
-  InMemoryDirectory(Status Stat)
-      : InMemoryNode(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
+బహిరంగ:
+  లోపల_జ్ఞాపకం_Directory(స్థితి_2 Stat)
+      : లోపల_జ్ఞాపకం_కణుపు(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  స్థితి_2 get_స్థితి(స్థిరరాశి Twine &RequestedName) స్థిరరాశి override {
+    తిరిగి స్థితి_2::copyWithNewName(Stat, RequestedName);
   }
 
-  UniqueID getUniqueID() const { return Stat.getUniqueID(); }
+  UniqueID getUniqueID() స్థిరరాశి { తిరిగి Stat.getUniqueID(); }
 
-  InMemoryNode *getChild(StringRef Name) const {
-    auto I = Entries.find(Name);
-    if (I != Entries.end())
-      return I->second.get();
-    return nullptr;
+  లోపల_జ్ఞాపకం_కణుపు *get_బిడ్డ(StringRef Name) స్థిరరాశి {
+    స్వయంచాలక I = Entries.కనుగొను(Name);
+    ఒకవేళ (I != Entries.చివర())
+      తిరిగి I->రెండవ_2.get();
+    తిరిగి శూన్యసూచిక;
   }
 
-  InMemoryNode *addChild(StringRef Name, std::unique_ptr<InMemoryNode> Child) {
-    return Entries.emplace(Name, std::move(Child)).first->second.get();
+  లోపల_జ్ఞాపకం_కణుపు *కూడు_బిడ్డ(StringRef Name, std::unique_ptr<లోపల_జ్ఞాపకం_కణుపు> బిడ్డ) {
+    తిరిగి Entries.emplace(Name, std::move(బిడ్డ)).మొదటి_2->రెండవ_2.get();
   }
 
-  using const_iterator = decltype(Entries)::const_iterator;
+  ఉపయోగించి const_iterator = decltype(Entries)::const_iterator;
 
-  const_iterator begin() const { return Entries.begin(); }
-  const_iterator end() const { return Entries.end(); }
+  const_iterator begin() స్థిరరాశి { తిరిగి Entries.begin(); }
+  const_iterator చివర() స్థిరరాశి { తిరిగి Entries.చివర(); }
 
-  std::string toString(unsigned Indent) const override {
-    std::string Result =
+  std::string గమ్యం_String(గుర్తులేని Indent) స్థిరరాశి override {
+    std::string ఫలితం =
         (std::string(Indent, ' ') + Stat.getName() + "\n").str();
-    for (const auto &Entry : Entries)
-      Result += Entry.second->toString(Indent + 2);
-    return Result;
+    కొరకు (స్థిరరాశి స్వయంచాలక &నమోదు_2 : Entries)
+      ఫలితం += నమోదు_2.రెండవ_2->గమ్యం_String(Indent + 2);
+    తిరిగి ఫలితం;
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_Directory;
+  స్థిర తార్కిక classof(స్థిరరాశి లోపల_జ్ఞాపకం_కణుపు *N) {
+    తిరిగి N->get_రకం() == IME_Directory;
   }
 };
 
@@ -857,401 +857,401 @@ public:
 // The UniqueID of in-memory files is derived from path and content.
 // This avoids difficulties in creating exactly equivalent in-memory FSes,
 // as often needed in multithreaded programs.
-static sys::fs::UniqueID getUniqueID(hash_code Hash) {
-  return sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
+స్థిర sys::fs::UniqueID getUniqueID(hash_సంకేతం Hash) {
+  తిరిగి sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
                            uint64_t(size_t(Hash)));
 }
-static sys::fs::UniqueID getFileID(sys::fs::UniqueID Parent,
+స్థిర sys::fs::UniqueID getFileID(sys::fs::UniqueID మాతృ_2,
                                    llvm::StringRef Name,
                                    llvm::StringRef Contents) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name, Contents));
+  తిరిగి getUniqueID(llvm::hash_combine(మాతృ_2.getFile(), Name, Contents));
 }
-static sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID Parent,
+స్థిర sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID మాతృ_2,
                                         llvm::StringRef Name) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name));
+  తిరిగి getUniqueID(llvm::hash_combine(మాతృ_2.getFile(), Name));
 }
 
-Status detail::NewInMemoryNodeInfo::makeStatus() const {
+స్థితి_2 detail::New_లోపల_జ్ఞాపకం_కణుపు_Info::make_స్థితి() స్థిరరాశి {
   UniqueID UID =
       (Type == sys::fs::file_type::directory_file)
           ? getDirectoryID(DirUID, Name)
-          : getFileID(DirUID, Name, Buffer ? Buffer->getBuffer() : "");
+          : getFileID(DirUID, Name, బఫరు ? బఫరు->get_బఫరు() : "");
 
-  return Status(Path, UID, llvm::sys::toTimePoint(ModificationTime), User,
-                Group, Buffer ? Buffer->getBufferSize() : 0, Type, Perms);
+  తిరిగి స్థితి_2(మార్గం, UID, llvm::sys::గమ్యం_సమయం_బిందువు(Modification_సమయం), User,
+                సమూహం, బఫరు ? బఫరు->get_బఫరు_కొలత() : 0, Type, Perms);
 }
 
-InMemoryFileSystem::InMemoryFileSystem(bool UseNormalizedPaths)
-    : Root(new detail::InMemoryDirectory(
-          Status("", getDirectoryID(llvm::sys::fs::UniqueID(), ""),
-                 llvm::sys::TimePoint<>(), 0, 0, 0,
+లోపల_జ్ఞాపకం_File_System::లోపల_జ్ఞాపకం_File_System(తార్కిక UseNormalizedPaths)
+    : మూలం_2(కొత్త detail::లోపల_జ్ఞాపకం_Directory(
+          స్థితి_2("", getDirectoryID(llvm::sys::fs::UniqueID(), ""),
+                 llvm::sys::సమయం_బిందువు<>(), 0, 0, 0,
                  llvm::sys::fs::file_type::directory_file,
                  llvm::sys::fs::perms::all_all))),
       UseNormalizedPaths(UseNormalizedPaths) {}
 
-InMemoryFileSystem::~InMemoryFileSystem() = default;
+లోపల_జ్ఞాపకం_File_System::~లోపల_జ్ఞాపకం_File_System() = అప్రమేయ;
 
-std::string InMemoryFileSystem::toString() const {
-  return Root->toString(/*Indent=*/0);
+std::string లోపల_జ్ఞాపకం_File_System::గమ్యం_String() స్థిరరాశి {
+  తిరిగి మూలం_2->గమ్యం_String(/*Indent=*/0);
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
-                                 std::unique_ptr<llvm::MemoryBuffer> Buffer,
+తార్కిక లోపల_జ్ఞాపకం_File_System::కూడు_File(స్థిరరాశి Twine &P, time_t Modification_సమయం,
+                                 std::unique_ptr<llvm::జ్ఞాపకం_బఫరు> బఫరు,
                                  std::optional<uint32_t> User,
-                                 std::optional<uint32_t> Group,
+                                 std::optional<uint32_t> సమూహం,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms,
-                                 MakeNodeFn MakeNode) {
-  SmallString<128> Path;
-  P.toVector(Path);
+                                 Make_కణుపు_Fn Make_కణుపు) {
+  SmallString<128> మార్గం;
+  P.గమ్యం_సదిశ(మార్గం);
 
   // Fix up relative paths. This just prepends the current working directory.
-  std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  std::error_సంకేతం EC = makeAbsolute(మార్గం);
+  ప్రతిజ్ఞా(!EC);
+  (శూన్య)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  ఒకవేళ (useNormalizedPaths())
+    llvm::sys::మార్గం_2::remove_dots(మార్గం, /*remove_dot_dot=*/నిజం);
 
-  if (Path.empty())
-    return false;
+  ఒకవేళ (మార్గం.ఖాళీలు())
+    తిరిగి అబద్ధం;
 
-  detail::InMemoryDirectory *Dir = Root.get();
-  auto I = llvm::sys::path::begin(Path), E = sys::path::end(Path);
-  const auto ResolvedUser = User.value_or(0);
-  const auto ResolvedGroup = Group.value_or(0);
-  const auto ResolvedType = Type.value_or(sys::fs::file_type::regular_file);
-  const auto ResolvedPerms = Perms.value_or(sys::fs::all_all);
+  detail::లోపల_జ్ఞాపకం_Directory *Dir = మూలం_2.get();
+  స్వయంచాలక I = llvm::sys::మార్గం_2::begin(మార్గం), E = sys::మార్గం_2::చివర(మార్గం);
+  స్థిరరాశి స్వయంచాలక ResolvedUser = User.విలువ_or(0);
+  స్థిరరాశి స్వయంచాలక Resolved_సమూహం = సమూహం.విలువ_or(0);
+  స్థిరరాశి స్వయంచాలక ResolvedType = Type.విలువ_or(sys::fs::file_type::regular_file);
+  స్థిరరాశి స్వయంచాలక ResolvedPerms = Perms.విలువ_or(sys::fs::all_all);
   // Any intermediate directories we create should be accessible by
   // the owner, even if Perms says otherwise for the final path.
-  const auto NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
+  స్థిరరాశి స్వయంచాలక NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
 
   StringRef Name = *I;
-  while (true) {
+  అయితే (నిజం) {
     Name = *I;
     ++I;
-    if (I == E)
-      break;
-    detail::InMemoryNode *Node = Dir->getChild(Name);
-    if (!Node) {
+    ఒకవేళ (I == E)
+      ఆపు;
+    detail::లోపల_జ్ఞాపకం_కణుపు *కణుపు = Dir->get_బిడ్డ(Name);
+    ఒకవేళ (!కణుపు) {
       // This isn't the last element, so we create a new directory.
-      Status Stat(
-          StringRef(Path.str().begin(), Name.end() - Path.str().begin()),
+      స్థితి_2 Stat(
+          StringRef(మార్గం.str().begin(), Name.చివర() - మార్గం.str().begin()),
           getDirectoryID(Dir->getUniqueID(), Name),
-          llvm::sys::toTimePoint(ModificationTime), ResolvedUser, ResolvedGroup,
+          llvm::sys::గమ్యం_సమయం_బిందువు(Modification_సమయం), ResolvedUser, Resolved_సమూహం,
           0, sys::fs::file_type::directory_file, NewDirectoryPerms);
-      Dir = cast<detail::InMemoryDirectory>(Dir->addChild(
-          Name, std::make_unique<detail::InMemoryDirectory>(std::move(Stat))));
-      continue;
+      Dir = cast<detail::లోపల_జ్ఞాపకం_Directory>(Dir->కూడు_బిడ్డ(
+          Name, std::make_unique<detail::లోపల_జ్ఞాపకం_Directory>(std::move(Stat))));
+      కొనసాగు;
     }
     // Creating file under another file.
-    if (!isa<detail::InMemoryDirectory>(Node))
-      return false;
-    Dir = cast<detail::InMemoryDirectory>(Node);
+    ఒకవేళ (!isa<detail::లోపల_జ్ఞాపకం_Directory>(కణుపు))
+      తిరిగి అబద్ధం;
+    Dir = cast<detail::లోపల_జ్ఞాపకం_Directory>(కణుపు);
   }
-  detail::InMemoryNode *Node = Dir->getChild(Name);
-  if (!Node) {
-    Dir->addChild(Name,
-                  MakeNode({Dir->getUniqueID(), Path, Name, ModificationTime,
-                            std::move(Buffer), ResolvedUser, ResolvedGroup,
+  detail::లోపల_జ్ఞాపకం_కణుపు *కణుపు = Dir->get_బిడ్డ(Name);
+  ఒకవేళ (!కణుపు) {
+    Dir->కూడు_బిడ్డ(Name,
+                  Make_కణుపు({Dir->getUniqueID(), మార్గం, Name, Modification_సమయం,
+                            std::move(బఫరు), ResolvedUser, Resolved_సమూహం,
                             ResolvedType, ResolvedPerms}));
-    return true;
+    తిరిగి నిజం;
   }
-  if (isa<detail::InMemoryDirectory>(Node))
-    return ResolvedType == sys::fs::file_type::directory_file;
+  ఒకవేళ (isa<detail::లోపల_జ్ఞాపకం_Directory>(కణుపు))
+    తిరిగి ResolvedType == sys::fs::file_type::directory_file;
 
-  assert((isa<detail::InMemoryFile>(Node) ||
-          isa<detail::InMemoryHardLink>(Node)) &&
+  ప్రతిజ్ఞా((isa<detail::లోపల_జ్ఞాపకం_File>(కణుపు) ||
+          isa<detail::లోపల_జ్ఞాపకం_Hard_Link>(కణుపు)) &&
          "Must be either file, hardlink or directory!");
 
   // Return false only if the new file is different from the existing one.
-  if (auto *Link = dyn_cast<detail::InMemoryHardLink>(Node)) {
-    return Link->getResolvedFile().getBuffer()->getBuffer() ==
-           Buffer->getBuffer();
+  ఒకవేళ (స్వయంచాలక *Link = dyn_cast<detail::లోపల_జ్ఞాపకం_Hard_Link>(కణుపు)) {
+    తిరిగి Link->getResolvedFile().get_బఫరు()->get_బఫరు() ==
+           బఫరు->get_బఫరు();
   }
-  return cast<detail::InMemoryFile>(Node)->getBuffer()->getBuffer() ==
-         Buffer->getBuffer();
+  తిరిగి cast<detail::లోపల_జ్ఞాపకం_File>(కణుపు)->get_బఫరు()->get_బఫరు() ==
+         బఫరు->get_బఫరు();
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
-                                 std::unique_ptr<llvm::MemoryBuffer> Buffer,
+తార్కిక లోపల_జ్ఞాపకం_File_System::కూడు_File(స్థిరరాశి Twine &P, time_t Modification_సమయం,
+                                 std::unique_ptr<llvm::జ్ఞాపకం_బఫరు> బఫరు,
                                  std::optional<uint32_t> User,
-                                 std::optional<uint32_t> Group,
+                                 std::optional<uint32_t> సమూహం,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, std::move(Buffer), User, Group, Type,
+  తిరిగి కూడు_File(P, Modification_సమయం, std::move(బఫరు), User, సమూహం, Type,
                  Perms,
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
-                   Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
-                       Stat, std::move(NNI.Buffer));
+                 [](detail::New_లోపల_జ్ఞాపకం_కణుపు_Info NNI)
+                     -> std::unique_ptr<detail::లోపల_జ్ఞాపకం_కణుపు> {
+                   స్థితి_2 Stat = NNI.make_స్థితి();
+                   ఒకవేళ (Stat.getType() == sys::fs::file_type::directory_file)
+                     తిరిగి std::make_unique<detail::లోపల_జ్ఞాపకం_Directory>(Stat);
+                   తిరిగి std::make_unique<detail::లోపల_జ్ఞాపకం_File>(
+                       Stat, std::move(NNI.బఫరు));
                  });
 }
 
-bool InMemoryFileSystem::addFileNoOwn(
-    const Twine &P, time_t ModificationTime,
-    const llvm::MemoryBufferRef &Buffer, std::optional<uint32_t> User,
-    std::optional<uint32_t> Group, std::optional<llvm::sys::fs::file_type> Type,
+తార్కిక లోపల_జ్ఞాపకం_File_System::కూడు_File_No_Own(
+    స్థిరరాశి Twine &P, time_t Modification_సమయం,
+    స్థిరరాశి llvm::జ్ఞాపకం_బఫరు_Ref &బఫరు, std::optional<uint32_t> User,
+    std::optional<uint32_t> సమూహం, std::optional<llvm::sys::fs::file_type> Type,
     std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, llvm::MemoryBuffer::getMemBuffer(Buffer),
-                 std::move(User), std::move(Group), std::move(Type),
+  తిరిగి కూడు_File(P, Modification_సమయం, llvm::జ్ఞాపకం_బఫరు::get_Mem_బఫరు(బఫరు),
+                 std::move(User), std::move(సమూహం), std::move(Type),
                  std::move(Perms),
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
-                   Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
-                       Stat, std::move(NNI.Buffer));
+                 [](detail::New_లోపల_జ్ఞాపకం_కణుపు_Info NNI)
+                     -> std::unique_ptr<detail::లోపల_జ్ఞాపకం_కణుపు> {
+                   స్థితి_2 Stat = NNI.make_స్థితి();
+                   ఒకవేళ (Stat.getType() == sys::fs::file_type::directory_file)
+                     తిరిగి std::make_unique<detail::లోపల_జ్ఞాపకం_Directory>(Stat);
+                   తిరిగి std::make_unique<detail::లోపల_జ్ఞాపకం_File>(
+                       Stat, std::move(NNI.బఫరు));
                  });
 }
 
-detail::NamedNodeOrError
-InMemoryFileSystem::lookupNode(const Twine &P, bool FollowFinalSymlink,
-                               size_t SymlinkDepth) const {
-  SmallString<128> Path;
-  P.toVector(Path);
+detail::Named_కణుపు_Or_Error
+లోపల_జ్ఞాపకం_File_System::lookup_కణుపు(స్థిరరాశి Twine &P, తార్కిక FollowFinalSymlink,
+                               size_t Symlink_లోతు) స్థిరరాశి {
+  SmallString<128> మార్గం;
+  P.గమ్యం_సదిశ(మార్గం);
 
   // Fix up relative paths. This just prepends the current working directory.
-  std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  std::error_సంకేతం EC = makeAbsolute(మార్గం);
+  ప్రతిజ్ఞా(!EC);
+  (శూన్య)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  ఒకవేళ (useNormalizedPaths())
+    llvm::sys::మార్గం_2::remove_dots(మార్గం, /*remove_dot_dot=*/నిజం);
 
-  const detail::InMemoryDirectory *Dir = Root.get();
-  if (Path.empty())
-    return detail::NamedNodeOrError(Path, Dir);
+  స్థిరరాశి detail::లోపల_జ్ఞాపకం_Directory *Dir = మూలం_2.get();
+  ఒకవేళ (మార్గం.ఖాళీలు())
+    తిరిగి detail::Named_కణుపు_Or_Error(మార్గం, Dir);
 
-  auto I = llvm::sys::path::begin(Path), E = llvm::sys::path::end(Path);
-  while (true) {
-    detail::InMemoryNode *Node = Dir->getChild(*I);
+  స్వయంచాలక I = llvm::sys::మార్గం_2::begin(మార్గం), E = llvm::sys::మార్గం_2::చివర(మార్గం);
+  అయితే (నిజం) {
+    detail::లోపల_జ్ఞాపకం_కణుపు *కణుపు = Dir->get_బిడ్డ(*I);
     ++I;
-    if (!Node)
-      return errc::no_such_file_or_directory;
+    ఒకవేళ (!కణుపు)
+      తిరిగి errc::no_such_file_or_directory;
 
-    if (auto Symlink = dyn_cast<detail::InMemorySymbolicLink>(Node)) {
+    ఒకవేళ (స్వయంచాలక Symlink = dyn_cast<detail::లోపల_జ్ఞాపకం_Symbolic_Link>(కణుపు)) {
       // If we're at the end of the path, and we're not following through
       // terminal symlinks, then we're done.
-      if (I == E && !FollowFinalSymlink)
-        return detail::NamedNodeOrError(Path, Symlink);
+      ఒకవేళ (I == E && !FollowFinalSymlink)
+        తిరిగి detail::Named_కణుపు_Or_Error(మార్గం, Symlink);
 
-      if (SymlinkDepth > InMemoryFileSystem::MaxSymlinkDepth)
-        return errc::no_such_file_or_directory;
+      ఒకవేళ (Symlink_లోతు > లోపల_జ్ఞాపకం_File_System::Max_Symlink_లోతు)
+        తిరిగి errc::no_such_file_or_directory;
 
-      SmallString<128> TargetPath = Symlink->getTargetPath();
-      if (std::error_code EC = makeAbsolute(TargetPath))
-        return EC;
+      SmallString<128> లక్ష్యం_మార్గం = Symlink->get_లక్ష్యం_మార్గం();
+      ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(లక్ష్యం_మార్గం))
+        తిరిగి EC;
 
       // Keep going with the target. We always want to follow symlinks here
       // because we're either at the end of a path that we want to follow, or
       // not at the end of a path, in which case we need to follow the symlink
       // regardless.
-      auto Target =
-          lookupNode(TargetPath, /*FollowFinalSymlink=*/true, SymlinkDepth + 1);
-      if (!Target || I == E)
-        return Target;
+      స్వయంచాలక లక్ష్యం_2 =
+          lookup_కణుపు(లక్ష్యం_మార్గం, /*FollowFinalSymlink=*/నిజం, Symlink_లోతు + 1);
+      ఒకవేళ (!లక్ష్యం_2 || I == E)
+        తిరిగి లక్ష్యం_2;
 
-      if (!isa<detail::InMemoryDirectory>(*Target))
-        return errc::no_such_file_or_directory;
+      ఒకవేళ (!isa<detail::లోపల_జ్ఞాపకం_Directory>(*లక్ష్యం_2))
+        తిరిగి errc::no_such_file_or_directory;
 
       // Otherwise, continue on the search in the symlinked directory.
-      Dir = cast<detail::InMemoryDirectory>(*Target);
-      continue;
+      Dir = cast<detail::లోపల_జ్ఞాపకం_Directory>(*లక్ష్యం_2);
+      కొనసాగు;
     }
 
     // Return the file if it's at the end of the path.
-    if (auto File = dyn_cast<detail::InMemoryFile>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, File);
-      return errc::no_such_file_or_directory;
+    ఒకవేళ (స్వయంచాలక File = dyn_cast<detail::లోపల_జ్ఞాపకం_File>(కణుపు)) {
+      ఒకవేళ (I == E)
+        తిరిగి detail::Named_కణుపు_Or_Error(మార్గం, File);
+      తిరిగి errc::no_such_file_or_directory;
     }
 
     // If Node is HardLink then return the resolved file.
-    if (auto File = dyn_cast<detail::InMemoryHardLink>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, &File->getResolvedFile());
-      return errc::no_such_file_or_directory;
+    ఒకవేళ (స్వయంచాలక File = dyn_cast<detail::లోపల_జ్ఞాపకం_Hard_Link>(కణుపు)) {
+      ఒకవేళ (I == E)
+        తిరిగి detail::Named_కణుపు_Or_Error(మార్గం, &File->getResolvedFile());
+      తిరిగి errc::no_such_file_or_directory;
     }
     // Traverse directories.
-    Dir = cast<detail::InMemoryDirectory>(Node);
-    if (I == E)
-      return detail::NamedNodeOrError(Path, Dir);
+    Dir = cast<detail::లోపల_జ్ఞాపకం_Directory>(కణుపు);
+    ఒకవేళ (I == E)
+      తిరిగి detail::Named_కణుపు_Or_Error(మార్గం, Dir);
   }
 }
 
-bool InMemoryFileSystem::addHardLink(const Twine &NewLink,
-                                     const Twine &Target) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
+తార్కిక లోపల_జ్ఞాపకం_File_System::కూడు_Hard_Link(స్థిరరాశి Twine &NewLink,
+                                     స్థిరరాశి Twine &లక్ష్యం_2) {
+  స్వయంచాలక New_Link_కణుపు = lookup_కణుపు(NewLink, /*FollowFinalSymlink=*/అబద్ధం);
   // Whether symlinks in the hardlink target are followed is
   // implementation-defined in POSIX.
   // We're following symlinks here to be consistent with macOS.
-  auto TargetNode = lookupNode(Target, /*FollowFinalSymlink=*/true);
+  స్వయంచాలక లక్ష్యం_కణుపు = lookup_కణుపు(లక్ష్యం_2, /*FollowFinalSymlink=*/నిజం);
   // FromPath must not have been added before. ToPath must have been added
   // before. Resolved ToPath must be a File.
-  if (!TargetNode || NewLinkNode || !isa<detail::InMemoryFile>(*TargetNode))
-    return false;
-  return addFile(NewLink, 0, nullptr, std::nullopt, std::nullopt, std::nullopt,
-                 std::nullopt, [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemoryHardLink>(
-                       NNI.Path.str(),
-                       *cast<detail::InMemoryFile>(*TargetNode));
+  ఒకవేళ (!లక్ష్యం_కణుపు || New_Link_కణుపు || !isa<detail::లోపల_జ్ఞాపకం_File>(*లక్ష్యం_కణుపు))
+    తిరిగి అబద్ధం;
+  తిరిగి కూడు_File(NewLink, 0, శూన్యసూచిక, std::nullopt, std::nullopt, std::nullopt,
+                 std::nullopt, [&](detail::New_లోపల_జ్ఞాపకం_కణుపు_Info NNI) {
+                   తిరిగి std::make_unique<detail::లోపల_జ్ఞాపకం_Hard_Link>(
+                       NNI.మార్గం.str(),
+                       *cast<detail::లోపల_జ్ఞాపకం_File>(*లక్ష్యం_కణుపు));
                  });
 }
 
-bool InMemoryFileSystem::addSymbolicLink(
-    const Twine &NewLink, const Twine &Target, time_t ModificationTime,
-    std::optional<uint32_t> User, std::optional<uint32_t> Group,
+తార్కిక లోపల_జ్ఞాపకం_File_System::కూడు_Symbolic_Link(
+    స్థిరరాశి Twine &NewLink, స్థిరరాశి Twine &లక్ష్యం_2, time_t Modification_సమయం,
+    std::optional<uint32_t> User, std::optional<uint32_t> సమూహం,
     std::optional<llvm::sys::fs::perms> Perms) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
-  if (NewLinkNode)
-    return false;
+  స్వయంచాలక New_Link_కణుపు = lookup_కణుపు(NewLink, /*FollowFinalSymlink=*/అబద్ధం);
+  ఒకవేళ (New_Link_కణుపు)
+    తిరిగి అబద్ధం;
 
-  SmallString<128> NewLinkStr, TargetStr;
-  NewLink.toVector(NewLinkStr);
-  Target.toVector(TargetStr);
+  SmallString<128> NewLinkStr, లక్ష్యం_Str;
+  NewLink.గమ్యం_సదిశ(NewLinkStr);
+  లక్ష్యం_2.గమ్యం_సదిశ(లక్ష్యం_Str);
 
-  return addFile(NewLinkStr, ModificationTime, nullptr, User, Group,
+  తిరిగి కూడు_File(NewLinkStr, Modification_సమయం, శూన్యసూచిక, User, సమూహం,
                  sys::fs::file_type::symlink_file, Perms,
-                 [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemorySymbolicLink>(
-                       NewLinkStr, TargetStr, NNI.makeStatus());
+                 [&](detail::New_లోపల_జ్ఞాపకం_కణుపు_Info NNI) {
+                   తిరిగి std::make_unique<detail::లోపల_జ్ఞాపకం_Symbolic_Link>(
+                       NewLinkStr, లక్ష్యం_Str, NNI.make_స్థితి());
                  });
 }
 
-llvm::ErrorOr<Status> InMemoryFileSystem::status(const Twine &Path) {
-  auto Node = lookupNode(Path, /*FollowFinalSymlink=*/true);
-  if (Node)
-    return (*Node)->getStatus(Path);
-  return Node.getError();
+llvm::ErrorOr<స్థితి_2> లోపల_జ్ఞాపకం_File_System::స్థితి_3(స్థిరరాశి Twine &మార్గం) {
+  స్వయంచాలక కణుపు = lookup_కణుపు(మార్గం, /*FollowFinalSymlink=*/నిజం);
+  ఒకవేళ (కణుపు)
+    తిరిగి (*కణుపు)->get_స్థితి(మార్గం);
+  తిరిగి కణుపు.getError();
 }
 
 llvm::ErrorOr<std::unique_ptr<File>>
-InMemoryFileSystem::openFileForRead(const Twine &Path) {
-  auto Node = lookupNode(Path,/*FollowFinalSymlink=*/true);
-  if (!Node)
-    return Node.getError();
+లోపల_జ్ఞాపకం_File_System::openFileForRead(స్థిరరాశి Twine &మార్గం) {
+  స్వయంచాలక కణుపు = lookup_కణుపు(మార్గం,/*FollowFinalSymlink=*/నిజం);
+  ఒకవేళ (!కణుపు)
+    తిరిగి కణుపు.getError();
 
   // When we have a file provide a heap-allocated wrapper for the memory buffer
   // to match the ownership semantics for File.
-  if (auto *F = dyn_cast<detail::InMemoryFile>(*Node))
-    return std::unique_ptr<File>(
-        new detail::InMemoryFileAdaptor(*F, Path.str()));
+  ఒకవేళ (స్వయంచాలక *F = dyn_cast<detail::లోపల_జ్ఞాపకం_File>(*కణుపు))
+    తిరిగి std::unique_ptr<File>(
+        కొత్త detail::లోపల_జ్ఞాపకం_File_Adaptor(*F, మార్గం.str()));
 
   // FIXME: errc::not_a_file?
-  return make_error_code(llvm::errc::invalid_argument);
+  తిరిగి make_error_సంకేతం(llvm::errc::invalid_వాదం);
 }
 
 /// Adaptor from InMemoryDir::iterator to directory_iterator.
-class InMemoryFileSystem::DirIterator : public llvm::vfs::detail::DirIterImpl {
-  const InMemoryFileSystem *FS;
-  detail::InMemoryDirectory::const_iterator I;
-  detail::InMemoryDirectory::const_iterator E;
+తరగతి లోపల_జ్ఞాపకం_File_System::DirIterator : బహిరంగ llvm::vfs::detail::DirIterImpl {
+  స్థిరరాశి లోపల_జ్ఞాపకం_File_System *FS;
+  detail::లోపల_జ్ఞాపకం_Directory::const_iterator I;
+  detail::లోపల_జ్ఞాపకం_Directory::const_iterator E;
   std::string RequestedDirName;
 
-  void setCurrentEntry() {
-    if (I != E) {
-      SmallString<256> Path(RequestedDirName);
-      llvm::sys::path::append(Path, I->second->getFileName());
+  శూన్య సమితి_Current_నమోదు() {
+    ఒకవేళ (I != E) {
+      SmallString<256> మార్గం(RequestedDirName);
+      llvm::sys::మార్గం_2::append(మార్గం, I->రెండవ_2->getFileName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch (I->second->getKind()) {
-      case detail::IME_File:
-      case detail::IME_HardLink:
+      ఎంపిక (I->రెండవ_2->get_రకం()) {
+      స్థితి detail::IME_File:
+      స్థితి detail::IME_HardLink:
         Type = sys::fs::file_type::regular_file;
-        break;
-      case detail::IME_Directory:
+        ఆపు;
+      స్థితి detail::IME_Directory:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case detail::IME_SymbolicLink:
-        if (auto SymlinkTarget =
-                FS->lookupNode(Path, /*FollowFinalSymlink=*/true)) {
-          Path = SymlinkTarget.getName();
-          Type = (*SymlinkTarget)->getStatus(Path).getType();
+        ఆపు;
+      స్థితి detail::IME_SymbolicLink:
+        ఒకవేళ (స్వయంచాలక Symlink_లక్ష్యం =
+                FS->lookup_కణుపు(మార్గం, /*FollowFinalSymlink=*/నిజం)) {
+          మార్గం = Symlink_లక్ష్యం.getName();
+          Type = (*Symlink_లక్ష్యం)->get_స్థితి(మార్గం).getType();
         }
-        break;
+        ఆపు;
       }
-      CurrentEntry = directory_entry(std::string(Path), Type);
-    } else {
+      Current_నమోదు = directory_నమోదు(std::string(మార్గం), Type);
+    } లేకపోతే {
       // When we're at the end, make CurrentEntry invalid and DirIterImpl will
       // do the rest.
-      CurrentEntry = directory_entry();
+      Current_నమోదు = directory_నమోదు();
     }
   }
 
-public:
-  DirIterator() = default;
+బహిరంగ:
+  DirIterator() = అప్రమేయ;
 
-  DirIterator(const InMemoryFileSystem *FS,
-              const detail::InMemoryDirectory &Dir,
+  DirIterator(స్థిరరాశి లోపల_జ్ఞాపకం_File_System *FS,
+              స్థిరరాశి detail::లోపల_జ్ఞాపకం_Directory &Dir,
               std::string RequestedDirName)
-      : FS(FS), I(Dir.begin()), E(Dir.end()),
+      : FS(FS), I(Dir.begin()), E(Dir.చివర()),
         RequestedDirName(std::move(RequestedDirName)) {
-    setCurrentEntry();
+    సమితి_Current_నమోదు();
   }
 
-  std::error_code increment() override {
+  std::error_సంకేతం increment() override {
     ++I;
-    setCurrentEntry();
-    return {};
+    సమితి_Current_నమోదు();
+    తిరిగి {};
   }
 };
 
-directory_iterator InMemoryFileSystem::dir_begin(const Twine &Dir,
-                                                 std::error_code &EC) {
-  auto Node = lookupNode(Dir, /*FollowFinalSymlink=*/true);
-  if (!Node) {
-    EC = Node.getError();
-    return directory_iterator(std::make_shared<DirIterator>());
+directory_iterator లోపల_జ్ఞాపకం_File_System::dir_begin(స్థిరరాశి Twine &Dir,
+                                                 std::error_సంకేతం &EC) {
+  స్వయంచాలక కణుపు = lookup_కణుపు(Dir, /*FollowFinalSymlink=*/నిజం);
+  ఒకవేళ (!కణుపు) {
+    EC = కణుపు.getError();
+    తిరిగి directory_iterator(std::make_shared<DirIterator>());
   }
 
-  if (auto *DirNode = dyn_cast<detail::InMemoryDirectory>(*Node))
-    return directory_iterator(
-        std::make_shared<DirIterator>(this, *DirNode, Dir.str()));
+  ఒకవేళ (స్వయంచాలక *Dir_కణుపు = dyn_cast<detail::లోపల_జ్ఞాపకం_Directory>(*కణుపు))
+    తిరిగి directory_iterator(
+        std::make_shared<DirIterator>(ఇది, *Dir_కణుపు, Dir.str()));
 
-  EC = make_error_code(llvm::errc::not_a_directory);
-  return directory_iterator(std::make_shared<DirIterator>());
+  EC = make_error_సంకేతం(llvm::errc::not_a_directory);
+  తిరిగి directory_iterator(std::make_shared<DirIterator>());
 }
 
-std::error_code InMemoryFileSystem::setCurrentWorkingDirectory(const Twine &P) {
-  SmallString<128> Path;
-  P.toVector(Path);
+std::error_సంకేతం లోపల_జ్ఞాపకం_File_System::సమితి_Current_Working_Directory(స్థిరరాశి Twine &P) {
+  SmallString<128> మార్గం;
+  P.గమ్యం_సదిశ(మార్గం);
 
   // Fix up relative paths. This just prepends the current working directory.
-  std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  std::error_సంకేతం EC = makeAbsolute(మార్గం);
+  ప్రతిజ్ఞా(!EC);
+  (శూన్య)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  ఒకవేళ (useNormalizedPaths())
+    llvm::sys::మార్గం_2::remove_dots(మార్గం, /*remove_dot_dot=*/నిజం);
 
-  if (!Path.empty())
-    WorkingDirectory = std::string(Path);
-  return {};
+  ఒకవేళ (!మార్గం.ఖాళీలు())
+    WorkingDirectory = std::string(మార్గం);
+  తిరిగి {};
 }
 
-std::error_code InMemoryFileSystem::getRealPath(const Twine &Path,
-                                                SmallVectorImpl<char> &Output) {
-  auto CWD = getCurrentWorkingDirectory();
-  if (!CWD || CWD->empty())
-    return errc::operation_not_permitted;
-  Path.toVector(Output);
-  if (auto EC = makeAbsolute(Output))
-    return EC;
-  llvm::sys::path::remove_dots(Output, /*remove_dot_dot=*/true);
-  return {};
+std::error_సంకేతం లోపల_జ్ఞాపకం_File_System::get_Real_మార్గం(స్థిరరాశి Twine &మార్గం,
+                                                Small_సదిశ_Impl<అక్షరం> &Output) {
+  స్వయంచాలక CWD = getCurrentWorkingDirectory();
+  ఒకవేళ (!CWD || CWD->ఖాళీలు())
+    తిరిగి errc::operation_not_permitted;
+  మార్గం.గమ్యం_సదిశ(Output);
+  ఒకవేళ (స్వయంచాలక EC = makeAbsolute(Output))
+    తిరిగి EC;
+  llvm::sys::మార్గం_2::remove_dots(Output, /*remove_dot_dot=*/నిజం);
+  తిరిగి {};
 }
 
-std::error_code InMemoryFileSystem::isLocal(const Twine &Path, bool &Result) {
-  Result = false;
-  return {};
+std::error_సంకేతం లోపల_జ్ఞాపకం_File_System::isLocal(స్థిరరాశి Twine &మార్గం, తార్కిక &ఫలితం) {
+  ఫలితం = అబద్ధం;
+  తిరిగి {};
 }
 
-void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
-                                   unsigned IndentLevel) const {
+శూన్య లోపల_జ్ఞాపకం_File_System::printImpl(raw_ostream &OS, PrintType PrintContents,
+                                   గుర్తులేని IndentLevel) స్థిరరాశి {
   printIndent(OS, IndentLevel);
   OS << "InMemoryFileSystem\n";
 }
@@ -1263,38 +1263,38 @@ void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
 // RedirectingFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-namespace {
+నామాకాశ {
 
-static llvm::sys::path::Style getExistingStyle(llvm::StringRef Path) {
+స్థిర llvm::sys::మార్గం_2::Style getExistingStyle(llvm::StringRef మార్గం) {
   // Detect the path style in use by checking the first separator.
-  llvm::sys::path::Style style = llvm::sys::path::Style::native;
-  const size_t n = Path.find_first_of("/\\");
+  llvm::sys::మార్గం_2::Style style = llvm::sys::మార్గం_2::Style::native;
+  స్థిరరాశి size_t n = మార్గం.కనుగొను_మొదటి_యొక్క("/\\");
   // Can't distinguish between posix and windows_slash here.
-  if (n != static_cast<size_t>(-1))
-    style = (Path[n] == '/') ? llvm::sys::path::Style::posix
-                             : llvm::sys::path::Style::windows_backslash;
-  return style;
+  ఒకవేళ (n != static_cast<size_t>(-1))
+    style = (మార్గం[n] == '/') ? llvm::sys::మార్గం_2::Style::posix
+                             : llvm::sys::మార్గం_2::Style::windows_backslash;
+  తిరిగి style;
 }
 
 /// Removes leading "./" as well as path components like ".." and ".".
-static llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
+స్థిర llvm::SmallString<256> canonicalize(llvm::StringRef మార్గం) {
   // First detect the path style in use by checking the first separator.
-  llvm::sys::path::Style style = getExistingStyle(Path);
+  llvm::sys::మార్గం_2::Style style = getExistingStyle(మార్గం);
 
   // Now remove the dots.  Explicitly specifying the path style prevents the
   // direction of the slashes from changing.
-  llvm::SmallString<256> result =
-      llvm::sys::path::remove_leading_dotslash(Path, style);
-  llvm::sys::path::remove_dots(result, /*remove_dot_dot=*/true, style);
-  return result;
+  llvm::SmallString<256> ఫలితం_2 =
+      llvm::sys::మార్గం_2::remove_leading_dotslash(మార్గం, style);
+  llvm::sys::మార్గం_2::remove_dots(ఫలితం_2, /*remove_dot_dot=*/నిజం, style);
+  తిరిగి ఫలితం_2;
 }
 
 /// Whether the error and entry specify a file/directory that was not found.
-static bool isFileNotFound(std::error_code EC,
-                           RedirectingFileSystem::Entry *E = nullptr) {
-  if (E && !isa<RedirectingFileSystem::DirectoryRemapEntry>(E))
-    return false;
-  return EC == llvm::errc::no_such_file_or_directory;
+స్థిర తార్కిక is_File_Not_దొరికింది(std::error_సంకేతం EC,
+                           RedirectingFileSystem::నమోదు_2 *E = శూన్యసూచిక) {
+  ఒకవేళ (E && !isa<RedirectingFileSystem::Directory_Remap_నమోదు>(E))
+    తిరిగి అబద్ధం;
+  తిరిగి EC == llvm::errc::no_such_file_or_directory;
 }
 
 } // anonymous namespace
@@ -1302,322 +1302,322 @@ static bool isFileNotFound(std::error_code EC,
 
 RedirectingFileSystem::RedirectingFileSystem(IntrusiveRefCntPtr<FileSystem> FS)
     : ExternalFS(std::move(FS)) {
-  assert(ExternalFS && "RedirectingFileSystem requires an external FS");
-  if (auto ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
+  ప్రతిజ్ఞా(ExternalFS && "RedirectingFileSystem requires an external FS");
+  ఒకవేళ (స్వయంచాలక ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
     WorkingDirectory = *ExternalWorkingDirectory;
 }
 
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory entries.
-class llvm::vfs::RedirectingFSDirIterImpl
-    : public llvm::vfs::detail::DirIterImpl {
+తరగతి llvm::vfs::RedirectingFSDirIterImpl
+    : బహిరంగ llvm::vfs::detail::DirIterImpl {
   std::string Dir;
-  RedirectingFileSystem::DirectoryEntry::iterator Current, End;
+  RedirectingFileSystem::Directory_నమోదు::iterator Current, చివర_2;
 
-  std::error_code incrementImpl(bool IsFirstTime) {
-    assert((IsFirstTime || Current != End) && "cannot iterate past end");
-    if (!IsFirstTime)
+  std::error_సంకేతం incrementImpl(తార్కిక Is_మొదటి_సమయం) {
+    ప్రతిజ్ఞా((Is_మొదటి_సమయం || Current != చివర_2) && "cannot iterate past end");
+    ఒకవేళ (!Is_మొదటి_సమయం)
       ++Current;
-    if (Current != End) {
-      SmallString<128> PathStr(Dir);
-      llvm::sys::path::append(PathStr, (*Current)->getName());
+    ఒకవేళ (Current != చివర_2) {
+      SmallString<128> మార్గం_Str(Dir);
+      llvm::sys::మార్గం_2::append(మార్గం_Str, (*Current)->getName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch ((*Current)->getKind()) {
-      case RedirectingFileSystem::EK_Directory:
+      ఎంపిక ((*Current)->get_రకం()) {
+      స్థితి RedirectingFileSystem::EK_Directory:
         [[fallthrough]];
-      case RedirectingFileSystem::EK_DirectoryRemap:
+      స్థితి RedirectingFileSystem::EK_DirectoryRemap:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case RedirectingFileSystem::EK_File:
+        ఆపు;
+      స్థితి RedirectingFileSystem::EK_File:
         Type = sys::fs::file_type::regular_file;
-        break;
+        ఆపు;
       }
-      CurrentEntry = directory_entry(std::string(PathStr), Type);
-    } else {
-      CurrentEntry = directory_entry();
+      Current_నమోదు = directory_నమోదు(std::string(మార్గం_Str), Type);
+    } లేకపోతే {
+      Current_నమోదు = directory_నమోదు();
     }
-    return {};
+    తిరిగి {};
   };
 
-public:
+బహిరంగ:
   RedirectingFSDirIterImpl(
-      const Twine &Path, RedirectingFileSystem::DirectoryEntry::iterator Begin,
-      RedirectingFileSystem::DirectoryEntry::iterator End, std::error_code &EC)
-      : Dir(Path.str()), Current(Begin), End(End) {
-    EC = incrementImpl(/*IsFirstTime=*/true);
+      స్థిరరాశి Twine &మార్గం, RedirectingFileSystem::Directory_నమోదు::iterator Begin,
+      RedirectingFileSystem::Directory_నమోదు::iterator చివర_2, std::error_సంకేతం &EC)
+      : Dir(మార్గం.str()), Current(Begin), చివర_2(చివర_2) {
+    EC = incrementImpl(/*IsFirstTime=*/నిజం);
   }
 
-  std::error_code increment() override {
-    return incrementImpl(/*IsFirstTime=*/false);
+  std::error_సంకేతం increment() override {
+    తిరిగి incrementImpl(/*IsFirstTime=*/అబద్ధం);
   }
 };
 
-namespace {
+నామాకాశ {
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory remap entries that maps the paths reported by the external
 /// file system's directory iterator back to the virtual directory's path.
-class RedirectingFSDirRemapIterImpl : public llvm::vfs::detail::DirIterImpl {
+తరగతి RedirectingFSDirRemapIterImpl : బహిరంగ llvm::vfs::detail::DirIterImpl {
   std::string Dir;
-  llvm::sys::path::Style DirStyle;
+  llvm::sys::మార్గం_2::Style DirStyle;
   llvm::vfs::directory_iterator ExternalIter;
 
-public:
-  RedirectingFSDirRemapIterImpl(std::string DirPath,
+బహిరంగ:
+  RedirectingFSDirRemapIterImpl(std::string Dir_మార్గం,
                                 llvm::vfs::directory_iterator ExtIter)
-      : Dir(std::move(DirPath)), DirStyle(getExistingStyle(Dir)),
+      : Dir(std::move(Dir_మార్గం)), DirStyle(getExistingStyle(Dir)),
         ExternalIter(ExtIter) {
-    if (ExternalIter != llvm::vfs::directory_iterator())
-      setCurrentEntry();
+    ఒకవేళ (ExternalIter != llvm::vfs::directory_iterator())
+      సమితి_Current_నమోదు();
   }
 
-  void setCurrentEntry() {
-    StringRef ExternalPath = ExternalIter->path();
-    llvm::sys::path::Style ExternalStyle = getExistingStyle(ExternalPath);
-    StringRef File = llvm::sys::path::filename(ExternalPath, ExternalStyle);
+  శూన్య సమితి_Current_నమోదు() {
+    StringRef External_మార్గం = ExternalIter->మార్గం_2();
+    llvm::sys::మార్గం_2::Style ExternalStyle = getExistingStyle(External_మార్గం);
+    StringRef File = llvm::sys::మార్గం_2::filename(External_మార్గం, ExternalStyle);
 
-    SmallString<128> NewPath(Dir);
-    llvm::sys::path::append(NewPath, DirStyle, File);
+    SmallString<128> New_మార్గం(Dir);
+    llvm::sys::మార్గం_2::append(New_మార్గం, DirStyle, File);
 
-    CurrentEntry = directory_entry(std::string(NewPath), ExternalIter->type());
+    Current_నమోదు = directory_నమోదు(std::string(New_మార్గం), ExternalIter->type());
   }
 
-  std::error_code increment() override {
-    std::error_code EC;
+  std::error_సంకేతం increment() override {
+    std::error_సంకేతం EC;
     ExternalIter.increment(EC);
-    if (!EC && ExternalIter != llvm::vfs::directory_iterator())
-      setCurrentEntry();
-    else
-      CurrentEntry = directory_entry();
-    return EC;
+    ఒకవేళ (!EC && ExternalIter != llvm::vfs::directory_iterator())
+      సమితి_Current_నమోదు();
+    లేకపోతే
+      Current_నమోదు = directory_నమోదు();
+    తిరిగి EC;
   }
 };
 } // namespace
 
 llvm::ErrorOr<std::string>
-RedirectingFileSystem::getCurrentWorkingDirectory() const {
-  return WorkingDirectory;
+RedirectingFileSystem::getCurrentWorkingDirectory() స్థిరరాశి {
+  తిరిగి WorkingDirectory;
 }
 
-std::error_code
-RedirectingFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
+std::error_సంకేతం
+RedirectingFileSystem::సమితి_Current_Working_Directory(స్థిరరాశి Twine &మార్గం) {
   // Don't change the working directory if the path doesn't exist.
-  if (!exists(Path))
-    return errc::no_such_file_or_directory;
+  ఒకవేళ (!exists(మార్గం))
+    తిరిగి errc::no_such_file_or_directory;
 
-  SmallString<128> AbsolutePath;
-  Path.toVector(AbsolutePath);
-  if (std::error_code EC = makeAbsolute(AbsolutePath))
-    return EC;
-  WorkingDirectory = std::string(AbsolutePath);
-  return {};
+  SmallString<128> Absolute_మార్గం;
+  మార్గం.గమ్యం_సదిశ(Absolute_మార్గం);
+  ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(Absolute_మార్గం))
+    తిరిగి EC;
+  WorkingDirectory = std::string(Absolute_మార్గం);
+  తిరిగి {};
 }
 
-std::error_code RedirectingFileSystem::isLocal(const Twine &Path_,
-                                               bool &Result) {
-  SmallString<256> Path;
-  Path_.toVector(Path);
+std::error_సంకేతం RedirectingFileSystem::isLocal(స్థిరరాశి Twine &మార్గం_3,
+                                               తార్కిక &ఫలితం) {
+  SmallString<256> మార్గం;
+  మార్గం_3.గమ్యం_సదిశ(మార్గం);
 
-  if (makeAbsolute(Path))
-    return {};
+  ఒకవేళ (makeAbsolute(మార్గం))
+    తిరిగి {};
 
-  return ExternalFS->isLocal(Path, Result);
+  తిరిగి ExternalFS->isLocal(మార్గం, ఫలితం);
 }
 
-std::error_code RedirectingFileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
+std::error_సంకేతం RedirectingFileSystem::makeAbsolute(Small_సదిశ_Impl<అక్షరం> &మార్గం) స్థిరరాశి {
   // is_absolute(..., Style::windows_*) accepts paths with both slash types.
-  if (llvm::sys::path::is_absolute(Path, llvm::sys::path::Style::posix) ||
-      llvm::sys::path::is_absolute(Path,
-                                   llvm::sys::path::Style::windows_backslash))
+  ఒకవేళ (llvm::sys::మార్గం_2::is_absolute(మార్గం, llvm::sys::మార్గం_2::Style::posix) ||
+      llvm::sys::మార్గం_2::is_absolute(మార్గం,
+                                   llvm::sys::మార్గం_2::Style::windows_backslash))
     // This covers windows absolute path with forward slash as well, as the
     // forward slashes are treated as path separation in llvm::path
     // regardless of what path::Style is used.
-    return {};
+    తిరిగి {};
 
-  auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  స్వయంచాలక WorkingDir = getCurrentWorkingDirectory();
+  ఒకవేళ (!WorkingDir)
+    తిరిగి WorkingDir.getError();
 
-  return makeAbsolute(WorkingDir.get(), Path);
+  తిరిగి makeAbsolute(WorkingDir.get(), మార్గం);
 }
 
-std::error_code
+std::error_సంకేతం
 RedirectingFileSystem::makeAbsolute(StringRef WorkingDir,
-                                    SmallVectorImpl<char> &Path) const {
+                                    Small_సదిశ_Impl<అక్షరం> &మార్గం) స్థిరరాశి {
   // We can't use sys::fs::make_absolute because that assumes the path style
   // is native and there is no way to override that.  Since we know WorkingDir
   // is absolute, we can use it to determine which style we actually have and
   // append Path ourselves.
-  if (!WorkingDir.empty() &&
-      !sys::path::is_absolute(WorkingDir, sys::path::Style::posix) &&
-      !sys::path::is_absolute(WorkingDir,
-                              sys::path::Style::windows_backslash)) {
-    return std::error_code();
+  ఒకవేళ (!WorkingDir.ఖాళీలు() &&
+      !sys::మార్గం_2::is_absolute(WorkingDir, sys::మార్గం_2::Style::posix) &&
+      !sys::మార్గం_2::is_absolute(WorkingDir,
+                              sys::మార్గం_2::Style::windows_backslash)) {
+    తిరిగి std::error_సంకేతం();
   }
-  sys::path::Style style = sys::path::Style::windows_backslash;
-  if (sys::path::is_absolute(WorkingDir, sys::path::Style::posix)) {
-    style = sys::path::Style::posix;
-  } else {
+  sys::మార్గం_2::Style style = sys::మార్గం_2::Style::windows_backslash;
+  ఒకవేళ (sys::మార్గం_2::is_absolute(WorkingDir, sys::మార్గం_2::Style::posix)) {
+    style = sys::మార్గం_2::Style::posix;
+  } లేకపోతే {
     // Distinguish between windows_backslash and windows_slash; getExistingStyle
     // returns posix for a path with windows_slash.
-    if (getExistingStyle(WorkingDir) != sys::path::Style::windows_backslash)
-      style = sys::path::Style::windows_slash;
+    ఒకవేళ (getExistingStyle(WorkingDir) != sys::మార్గం_2::Style::windows_backslash)
+      style = sys::మార్గం_2::Style::windows_slash;
   }
 
-  std::string Result = std::string(WorkingDir);
-  StringRef Dir(Result);
-  if (!Dir.ends_with(sys::path::get_separator(style))) {
-    Result += sys::path::get_separator(style);
+  std::string ఫలితం = std::string(WorkingDir);
+  StringRef Dir(ఫలితం);
+  ఒకవేళ (!Dir.చివర్లు_with(sys::మార్గం_2::get_separator(style))) {
+    ఫలితం += sys::మార్గం_2::get_separator(style);
   }
   // backslashes '\' are legit path charactors under POSIX. Windows APIs
   // like CreateFile accepts forward slashes '/' as path
   // separator (even when mixed with backslashes). Therefore,
   // `Path` should be directly appended to `WorkingDir` without converting
   // path separator.
-  Result.append(Path.data(), Path.size());
-  Path.assign(Result.begin(), Result.end());
+  ఫలితం.append(మార్గం.దత్తాంశం(), మార్గం.కొలత_2());
+  మార్గం.కేటాయించు(ఫలితం.begin(), ఫలితం.చివర());
 
-  return {};
+  తిరిగి {};
 }
 
-directory_iterator RedirectingFileSystem::dir_begin(const Twine &Dir,
-                                                    std::error_code &EC) {
-  SmallString<256> Path;
-  Dir.toVector(Path);
+directory_iterator RedirectingFileSystem::dir_begin(స్థిరరాశి Twine &Dir,
+                                                    std::error_సంకేతం &EC) {
+  SmallString<256> మార్గం;
+  Dir.గమ్యం_సదిశ(మార్గం);
 
-  EC = makeAbsolute(Path);
-  if (EC)
-    return {};
+  EC = makeAbsolute(మార్గం);
+  ఒకవేళ (EC)
+    తిరిగి {};
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
-    if (Redirection != RedirectKind::RedirectOnly &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->dir_begin(Path, EC);
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం = lookup_మార్గం(మార్గం);
+  ఒకవేళ (!ఫలితం) {
+    ఒకవేళ (Redirection != Redirect_రకం::RedirectOnly &&
+        is_File_Not_దొరికింది(ఫలితం.getError()))
+      తిరిగి ExternalFS->dir_begin(మార్గం, EC);
 
-    EC = Result.getError();
-    return {};
+    EC = ఫలితం.getError();
+    తిరిగి {};
   }
 
   // Use status to make sure the path exists and refers to a directory.
-  ErrorOr<Status> S = status(Path, Dir, *Result);
-  if (!S) {
-    if (Redirection != RedirectKind::RedirectOnly &&
-        isFileNotFound(S.getError(), Result->E))
-      return ExternalFS->dir_begin(Dir, EC);
+  ErrorOr<స్థితి_2> S = స్థితి_3(మార్గం, Dir, *ఫలితం);
+  ఒకవేళ (!S) {
+    ఒకవేళ (Redirection != Redirect_రకం::RedirectOnly &&
+        is_File_Not_దొరికింది(S.getError(), ఫలితం->E))
+      తిరిగి ExternalFS->dir_begin(Dir, EC);
 
     EC = S.getError();
-    return {};
+    తిరిగి {};
   }
 
-  if (!S->isDirectory()) {
+  ఒకవేళ (!S->isDirectory()) {
     EC = errc::not_a_directory;
-    return {};
+    తిరిగి {};
   }
 
   // Create the appropriate directory iterator based on whether we found a
   // DirectoryRemapEntry or DirectoryEntry.
   directory_iterator RedirectIter;
-  std::error_code RedirectEC;
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
-    auto RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
+  std::error_సంకేతం RedirectEC;
+  ఒకవేళ (స్వయంచాలక ExtRedirect = ఫలితం->getExternalRedirect()) {
+    స్వయంచాలక RE = cast<RedirectingFileSystem::Remap_నమోదు>(ఫలితం->E);
     RedirectIter = ExternalFS->dir_begin(*ExtRedirect, RedirectEC);
 
-    if (!RE->useExternalName(UseExternalNames)) {
+    ఒకవేళ (!RE->useExternalName(Use_External_పేర్లు)) {
       // Update the paths in the results to use the virtual directory's path.
       RedirectIter =
           directory_iterator(std::make_shared<RedirectingFSDirRemapIterImpl>(
-              std::string(Path), RedirectIter));
+              std::string(మార్గం), RedirectIter));
     }
-  } else {
-    auto DE = cast<DirectoryEntry>(Result->E);
+  } లేకపోతే {
+    స్వయంచాలక DE = cast<Directory_నమోదు>(ఫలితం->E);
     RedirectIter =
         directory_iterator(std::make_shared<RedirectingFSDirIterImpl>(
-            Path, DE->contents_begin(), DE->contents_end(), RedirectEC));
+            మార్గం, DE->contents_begin(), DE->contents_చివర(), RedirectEC));
   }
 
-  if (RedirectEC) {
-    if (RedirectEC != errc::no_such_file_or_directory) {
+  ఒకవేళ (RedirectEC) {
+    ఒకవేళ (RedirectEC != errc::no_such_file_or_directory) {
       EC = RedirectEC;
-      return {};
+      తిరిగి {};
     }
     RedirectIter = {};
   }
 
-  if (Redirection == RedirectKind::RedirectOnly) {
+  ఒకవేళ (Redirection == Redirect_రకం::RedirectOnly) {
     EC = RedirectEC;
-    return RedirectIter;
+    తిరిగి RedirectIter;
   }
 
-  std::error_code ExternalEC;
-  directory_iterator ExternalIter = ExternalFS->dir_begin(Path, ExternalEC);
-  if (ExternalEC) {
-    if (ExternalEC != errc::no_such_file_or_directory) {
+  std::error_సంకేతం ExternalEC;
+  directory_iterator ExternalIter = ExternalFS->dir_begin(మార్గం, ExternalEC);
+  ఒకవేళ (ExternalEC) {
+    ఒకవేళ (ExternalEC != errc::no_such_file_or_directory) {
       EC = ExternalEC;
-      return {};
+      తిరిగి {};
     }
     ExternalIter = {};
   }
 
-  SmallVector<directory_iterator, 2> Iters;
-  switch (Redirection) {
-  case RedirectKind::Fallthrough:
-    Iters.push_back(ExternalIter);
-    Iters.push_back(RedirectIter);
-    break;
-  case RedirectKind::Fallback:
-    Iters.push_back(RedirectIter);
-    Iters.push_back(ExternalIter);
-    break;
-  default:
+  Small_సదిశ<directory_iterator, 2> Iters;
+  ఎంపిక (Redirection) {
+  స్థితి Redirect_రకం::Fallthrough:
+    Iters.నెట్టు_వెనుక(ExternalIter);
+    Iters.నెట్టు_వెనుక(RedirectIter);
+    ఆపు;
+  స్థితి Redirect_రకం::Fallback:
+    Iters.నెట్టు_వెనుక(RedirectIter);
+    Iters.నెట్టు_వెనుక(ExternalIter);
+    ఆపు;
+  అప్రమేయ:
     llvm_unreachable("unhandled RedirectKind");
   }
 
   directory_iterator Combined{
       std::make_shared<CombiningDirIterImpl>(Iters, EC)};
-  if (EC)
-    return {};
-  return Combined;
+  ఒకవేళ (EC)
+    తిరిగి {};
+  తిరిగి Combined;
 }
 
-void RedirectingFileSystem::setOverlayFileDir(StringRef Dir) {
+శూన్య RedirectingFileSystem::సమితి_Overlay_File_Dir(StringRef Dir) {
   OverlayFileDir = Dir.str();
 }
 
-StringRef RedirectingFileSystem::getOverlayFileDir() const {
-  return OverlayFileDir;
+StringRef RedirectingFileSystem::getOverlayFileDir() స్థిరరాశి {
+  తిరిగి OverlayFileDir;
 }
 
-void RedirectingFileSystem::setFallthrough(bool Fallthrough) {
-  if (Fallthrough) {
-    Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-  } else {
-    Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
+శూన్య RedirectingFileSystem::సమితి_Fallthrough(తార్కిక Fallthrough) {
+  ఒకవేళ (Fallthrough) {
+    Redirection = RedirectingFileSystem::Redirect_రకం::Fallthrough;
+  } లేకపోతే {
+    Redirection = RedirectingFileSystem::Redirect_రకం::RedirectOnly;
   }
 }
 
-void RedirectingFileSystem::setRedirection(
-    RedirectingFileSystem::RedirectKind Kind) {
-  Redirection = Kind;
+శూన్య RedirectingFileSystem::సమితి_Redirection(
+    RedirectingFileSystem::Redirect_రకం రకం_3) {
+  Redirection = రకం_3;
 }
 
-std::vector<StringRef> RedirectingFileSystem::getRoots() const {
-  std::vector<StringRef> R;
-  R.reserve(Roots.size());
-  for (const auto &Root : Roots)
-    R.push_back(Root->getName());
-  return R;
+std::సదిశ<StringRef> RedirectingFileSystem::getRoots() స్థిరరాశి {
+  std::సదిశ<StringRef> R;
+  R.reserve(Roots.కొలత_2());
+  కొరకు (స్థిరరాశి స్వయంచాలక &మూలం_2 : Roots)
+    R.నెట్టు_వెనుక(మూలం_2->getName());
+  తిరిగి R;
 }
 
-void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                      unsigned IndentLevel) const {
+శూన్య RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                      గుర్తులేని IndentLevel) స్థిరరాశి {
   printIndent(OS, IndentLevel);
   OS << "RedirectingFileSystem (UseExternalNames: "
-     << (UseExternalNames ? "true" : "false") << ")\n";
-  if (Type == PrintType::Summary)
-    return;
+     << (Use_External_పేర్లు ? "true" : "false") << ")\n";
+  ఒకవేళ (Type == PrintType::Summary)
+    తిరిగి;
 
-  for (const auto &Root : Roots)
-    printEntry(OS, Root.get(), IndentLevel);
+  కొరకు (స్థిరరాశి స్వయంచాలక &మూలం_2 : Roots)
+    print_నమోదు(OS, మూలం_2.get(), IndentLevel);
 
   printIndent(OS, IndentLevel);
   OS << "ExternalFS:\n";
@@ -1625,624 +1625,624 @@ void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
                     IndentLevel + 1);
 }
 
-void RedirectingFileSystem::printEntry(raw_ostream &OS,
-                                       RedirectingFileSystem::Entry *E,
-                                       unsigned IndentLevel) const {
+శూన్య RedirectingFileSystem::print_నమోదు(raw_ostream &OS,
+                                       RedirectingFileSystem::నమోదు_2 *E,
+                                       గుర్తులేని IndentLevel) స్థిరరాశి {
   printIndent(OS, IndentLevel);
   OS << "'" << E->getName() << "'";
 
-  switch (E->getKind()) {
-  case EK_Directory: {
-    auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(E);
+  ఎంపిక (E->get_రకం()) {
+  స్థితి EK_Directory: {
+    స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(E);
 
     OS << "\n";
-    for (std::unique_ptr<Entry> &SubEntry :
-         llvm::make_range(DE->contents_begin(), DE->contents_end()))
-      printEntry(OS, SubEntry.get(), IndentLevel + 1);
-    break;
+    కొరకు (std::unique_ptr<నమోదు_2> &Sub_నమోదు :
+         llvm::make_range(DE->contents_begin(), DE->contents_చివర()))
+      print_నమోదు(OS, Sub_నమోదు.get(), IndentLevel + 1);
+    ఆపు;
   }
-  case EK_DirectoryRemap:
-  case EK_File: {
-    auto *RE = cast<RedirectingFileSystem::RemapEntry>(E);
-    OS << " -> '" << RE->getExternalContentsPath() << "'";
-    switch (RE->getUseName()) {
-    case NK_NotSet:
-      break;
-    case NK_External:
+  స్థితి EK_DirectoryRemap:
+  స్థితి EK_File: {
+    స్వయంచాలక *RE = cast<RedirectingFileSystem::Remap_నమోదు>(E);
+    OS << " -> '" << RE->get_External_Contents_మార్గం() << "'";
+    ఎంపిక (RE->getUseName()) {
+    స్థితి NK_Not_సమితి:
+      ఆపు;
+    స్థితి NK_External:
       OS << " (UseExternalName: true)";
-      break;
-    case NK_Virtual:
+      ఆపు;
+    స్థితి NK_Virtual:
       OS << " (UseExternalName: false)";
-      break;
+      ఆపు;
     }
     OS << "\n";
-    break;
+    ఆపు;
   }
   }
 }
 
-void RedirectingFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  if (ExternalFS) {
+శూన్య RedirectingFileSystem::సందర్శించు_బిడ్డ_File_Systems(సందర్శించు_Callback_Ty Callback) {
+  ఒకవేళ (ExternalFS) {
     Callback(*ExternalFS);
-    ExternalFS->visitChildFileSystems(Callback);
+    ExternalFS->సందర్శించు_బిడ్డ_File_Systems(Callback);
   }
 }
 
 /// A helper class to hold the common YAML parsing state.
-class llvm::vfs::RedirectingFileSystemParser {
-  yaml::Stream &Stream;
+తరగతి llvm::vfs::RedirectingFileSystemParser {
+  yaml::ప్రవాహం &ప్రవాహం;
 
-  void error(yaml::Node *N, const Twine &Msg) { Stream.printError(N, Msg); }
+  శూన్య error(yaml::కణుపు *N, స్థిరరాశి Twine &సందేశం_4) { ప్రవాహం.printError(N, సందేశం_4); }
 
   // false on error
-  bool parseScalarString(yaml::Node *N, StringRef &Result,
-                         SmallVectorImpl<char> &Storage) {
-    const auto *S = dyn_cast_if_present<yaml::ScalarNode>(N);
+  తార్కిక parseScalarString(yaml::కణుపు *N, StringRef &ఫలితం,
+                         Small_సదిశ_Impl<అక్షరం> &Storage) {
+    స్థిరరాశి స్వయంచాలక *S = dyn_cast_if_present<yaml::Scalar_కణుపు>(N);
 
-    if (!S) {
+    ఒకవేళ (!S) {
       error(N, "expected string");
-      return false;
+      తిరిగి అబద్ధం;
     }
-    Result = S->getValue(Storage);
-    return true;
+    ఫలితం = S->get_విలువ(Storage);
+    తిరిగి నిజం;
   }
 
   // false on error
-  bool parseScalarBool(yaml::Node *N, bool &Result) {
+  తార్కిక parseScalarBool(yaml::కణుపు *N, తార్కిక &ఫలితం) {
     SmallString<5> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return false;
+    StringRef విలువ;
+    ఒకవేళ (!parseScalarString(N, విలువ, Storage))
+      తిరిగి అబద్ధం;
 
-    if (Value.equals_insensitive("true") || Value.equals_insensitive("on") ||
-        Value.equals_insensitive("yes") || Value == "1") {
-      Result = true;
-      return true;
-    } else if (Value.equals_insensitive("false") ||
-               Value.equals_insensitive("off") ||
-               Value.equals_insensitive("no") || Value == "0") {
-      Result = false;
-      return true;
+    ఒకవేళ (విలువ.equals_insensitive("true") || విలువ.equals_insensitive("on") ||
+        విలువ.equals_insensitive("yes") || విలువ == "1") {
+      ఫలితం = నిజం;
+      తిరిగి నిజం;
+    } లేకపోతే ఒకవేళ (విలువ.equals_insensitive("false") ||
+               విలువ.equals_insensitive("off") ||
+               విలువ.equals_insensitive("no") || విలువ == "0") {
+      ఫలితం = అబద్ధం;
+      తిరిగి నిజం;
     }
 
     error(N, "expected boolean value");
-    return false;
+    తిరిగి అబద్ధం;
   }
 
-  std::optional<RedirectingFileSystem::RedirectKind>
-  parseRedirectKind(yaml::Node *N) {
+  std::optional<RedirectingFileSystem::Redirect_రకం>
+  parse_Redirect_రకం(yaml::కణుపు *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
+    StringRef విలువ;
+    ఒకవేళ (!parseScalarString(N, విలువ, Storage))
+      తిరిగి std::nullopt;
 
-    if (Value.equals_insensitive("fallthrough")) {
-      return RedirectingFileSystem::RedirectKind::Fallthrough;
-    } else if (Value.equals_insensitive("fallback")) {
-      return RedirectingFileSystem::RedirectKind::Fallback;
-    } else if (Value.equals_insensitive("redirect-only")) {
-      return RedirectingFileSystem::RedirectKind::RedirectOnly;
+    ఒకవేళ (విలువ.equals_insensitive("fallthrough")) {
+      తిరిగి RedirectingFileSystem::Redirect_రకం::Fallthrough;
+    } లేకపోతే ఒకవేళ (విలువ.equals_insensitive("fallback")) {
+      తిరిగి RedirectingFileSystem::Redirect_రకం::Fallback;
+    } లేకపోతే ఒకవేళ (విలువ.equals_insensitive("redirect-only")) {
+      తిరిగి RedirectingFileSystem::Redirect_రకం::RedirectOnly;
     }
-    return std::nullopt;
+    తిరిగి std::nullopt;
   }
 
-  std::optional<RedirectingFileSystem::RootRelativeKind>
-  parseRootRelativeKind(yaml::Node *N) {
+  std::optional<RedirectingFileSystem::మూలం_Relative_రకం>
+  parse_మూలం_Relative_రకం(yaml::కణుపు *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
-    if (Value.equals_insensitive("cwd")) {
-      return RedirectingFileSystem::RootRelativeKind::CWD;
-    } else if (Value.equals_insensitive("overlay-dir")) {
-      return RedirectingFileSystem::RootRelativeKind::OverlayDir;
+    StringRef విలువ;
+    ఒకవేళ (!parseScalarString(N, విలువ, Storage))
+      తిరిగి std::nullopt;
+    ఒకవేళ (విలువ.equals_insensitive("cwd")) {
+      తిరిగి RedirectingFileSystem::మూలం_Relative_రకం::CWD;
+    } లేకపోతే ఒకవేళ (విలువ.equals_insensitive("overlay-dir")) {
+      తిరిగి RedirectingFileSystem::మూలం_Relative_రకం::OverlayDir;
     }
-    return std::nullopt;
+    తిరిగి std::nullopt;
   }
 
-  struct KeyStatus {
-    bool Required;
-    bool Seen = false;
+  నిర్మాణం కీలకం_స్థితి {
+    తార్కిక Required;
+    తార్కిక చూసిన = అబద్ధం;
 
-    KeyStatus(bool Required = false) : Required(Required) {}
+    కీలకం_స్థితి(తార్కిక Required = అబద్ధం) : Required(Required) {}
   };
 
-  using KeyStatusPair = std::pair<StringRef, KeyStatus>;
+  ఉపయోగించి కీలకం_స్థితి_Pair = std::pair<StringRef, కీలకం_స్థితి>;
 
   // false on error
-  bool checkDuplicateOrUnknownKey(yaml::Node *KeyNode, StringRef Key,
-                                  DenseMap<StringRef, KeyStatus> &Keys) {
-    auto It = Keys.find(Key);
-    if (It == Keys.end()) {
-      error(KeyNode, "unknown key");
-      return false;
+  తార్కిక check_Duplicate_Or_Unknown_కీలకం(yaml::కణుపు *కీలకం_కణుపు, StringRef కీలకం,
+                                  DenseMap<StringRef, కీలకం_స్థితి> &కీలకాలు_2) {
+    స్వయంచాలక It = కీలకాలు_2.కనుగొను(కీలకం);
+    ఒకవేళ (It == కీలకాలు_2.చివర()) {
+      error(కీలకం_కణుపు, "unknown key");
+      తిరిగి అబద్ధం;
     }
-    KeyStatus &S = It->second;
-    if (S.Seen) {
-      error(KeyNode, Twine("duplicate key '") + Key + "'");
-      return false;
+    కీలకం_స్థితి &S = It->రెండవ_2;
+    ఒకవేళ (S.చూసిన) {
+      error(కీలకం_కణుపు, Twine("duplicate key '") + కీలకం + "'");
+      తిరిగి అబద్ధం;
     }
-    S.Seen = true;
-    return true;
+    S.చూసిన = నిజం;
+    తిరిగి నిజం;
   }
 
   // false on error
-  bool checkMissingKeys(yaml::Node *Obj, DenseMap<StringRef, KeyStatus> &Keys) {
-    for (const auto &I : Keys) {
-      if (I.second.Required && !I.second.Seen) {
-        error(Obj, Twine("missing key '") + I.first + "'");
-        return false;
+  తార్కిక check_Missing_కీలకాలు(yaml::కణుపు *Obj, DenseMap<StringRef, కీలకం_స్థితి> &కీలకాలు_2) {
+    కొరకు (స్థిరరాశి స్వయంచాలక &I : కీలకాలు_2) {
+      ఒకవేళ (I.రెండవ_2.Required && !I.రెండవ_2.చూసిన) {
+        error(Obj, Twine("missing key '") + I.మొదటి_2 + "'");
+        తిరిగి అబద్ధం;
       }
     }
-    return true;
+    తిరిగి నిజం;
   }
 
-public:
-  static RedirectingFileSystem::Entry *
-  lookupOrCreateEntry(RedirectingFileSystem *FS, StringRef Name,
-                      RedirectingFileSystem::Entry *ParentEntry = nullptr) {
-    if (!ParentEntry) { // Look for a existent root
-      for (const auto &Root : FS->Roots) {
-        if (Name == Root->getName()) {
-          ParentEntry = Root.get();
-          return ParentEntry;
+బహిరంగ:
+  స్థిర RedirectingFileSystem::నమోదు_2 *
+  lookup_Or_Create_నమోదు(RedirectingFileSystem *FS, StringRef Name,
+                      RedirectingFileSystem::నమోదు_2 *మాతృ_నమోదు = శూన్యసూచిక) {
+    ఒకవేళ (!మాతృ_నమోదు) { // Look for a existent root
+      కొరకు (స్థిరరాశి స్వయంచాలక &మూలం_2 : FS->Roots) {
+        ఒకవేళ (Name == మూలం_2->getName()) {
+          మాతృ_నమోదు = మూలం_2.get();
+          తిరిగి మాతృ_నమోదు;
         }
       }
-    } else { // Advance to the next component
-      auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &Content :
-           llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-        auto *DirContent =
-            dyn_cast<RedirectingFileSystem::DirectoryEntry>(Content.get());
-        if (DirContent && Name == Content->getName())
-          return DirContent;
+    } లేకపోతే { // Advance to the next component
+      స్వయంచాలక *DE = dyn_cast<RedirectingFileSystem::Directory_నమోదు>(మాతృ_నమోదు);
+      కొరకు (std::unique_ptr<RedirectingFileSystem::నమోదు_2> &Content :
+           llvm::make_range(DE->contents_begin(), DE->contents_చివర())) {
+        స్వయంచాలక *DirContent =
+            dyn_cast<RedirectingFileSystem::Directory_నమోదు>(Content.get());
+        ఒకవేళ (DirContent && Name == Content->getName())
+          తిరిగి DirContent;
       }
     }
 
     // ... or create a new one
-    std::unique_ptr<RedirectingFileSystem::Entry> E =
-        std::make_unique<RedirectingFileSystem::DirectoryEntry>(
-            Name, Status("", getNextVirtualUniqueID(),
+    std::unique_ptr<RedirectingFileSystem::నమోదు_2> E =
+        std::make_unique<RedirectingFileSystem::Directory_నమోదు>(
+            Name, స్థితి_2("", get_తదుపరి_Virtual_Unique_ID(),
                          std::chrono::system_clock::now(), 0, 0, 0,
                          file_type::directory_file, sys::fs::all_all));
 
-    if (!ParentEntry) { // Add a new root to the overlay
-      FS->Roots.push_back(std::move(E));
-      ParentEntry = FS->Roots.back().get();
-      return ParentEntry;
+    ఒకవేళ (!మాతృ_నమోదు) { // Add a new root to the overlay
+      FS->Roots.నెట్టు_వెనుక(std::move(E));
+      మాతృ_నమోదు = FS->Roots.వెనుక().get();
+      తిరిగి మాతృ_నమోదు;
     }
 
-    auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
-    DE->addContent(std::move(E));
-    return DE->getLastContent();
+    స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(మాతృ_నమోదు);
+    DE->కూడు_Content(std::move(E));
+    తిరిగి DE->get_చివరి_Content();
   }
 
-private:
-  void uniqueOverlayTree(RedirectingFileSystem *FS,
-                         RedirectingFileSystem::Entry *SrcE,
-                         RedirectingFileSystem::Entry *NewParentE = nullptr) {
+అంతరంగ:
+  శూన్య unique_Overlay_వృక్షం(RedirectingFileSystem *FS,
+                         RedirectingFileSystem::నమోదు_2 *SrcE,
+                         RedirectingFileSystem::నమోదు_2 *New_మాతృ_E = శూన్యసూచిక) {
     StringRef Name = SrcE->getName();
-    switch (SrcE->getKind()) {
-    case RedirectingFileSystem::EK_Directory: {
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
+    ఎంపిక (SrcE->get_రకం()) {
+    స్థితి RedirectingFileSystem::EK_Directory: {
+      స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(SrcE);
       // Empty directories could be present in the YAML as a way to
       // describe a file for a current directory after some of its subdir
       // is parsed. This only leads to redundant walks, ignore it.
-      if (!Name.empty())
-        NewParentE = lookupOrCreateEntry(FS, Name, NewParentE);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
-           llvm::make_range(DE->contents_begin(), DE->contents_end()))
-        uniqueOverlayTree(FS, SubEntry.get(), NewParentE);
-      break;
+      ఒకవేళ (!Name.ఖాళీలు())
+        New_మాతృ_E = lookup_Or_Create_నమోదు(FS, Name, New_మాతృ_E);
+      కొరకు (std::unique_ptr<RedirectingFileSystem::నమోదు_2> &Sub_నమోదు :
+           llvm::make_range(DE->contents_begin(), DE->contents_చివర()))
+        unique_Overlay_వృక్షం(FS, Sub_నమోదు.get(), New_మాతృ_E);
+      ఆపు;
     }
-    case RedirectingFileSystem::EK_DirectoryRemap: {
-      assert(NewParentE && "Parent entry must exist");
-      auto *DR = cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
-      DE->addContent(
-          std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
-              Name, DR->getExternalContentsPath(), DR->getUseName()));
-      break;
+    స్థితి RedirectingFileSystem::EK_DirectoryRemap: {
+      ప్రతిజ్ఞా(New_మాతృ_E && "Parent entry must exist");
+      స్వయంచాలక *DR = cast<RedirectingFileSystem::Directory_Remap_నమోదు>(SrcE);
+      స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(New_మాతృ_E);
+      DE->కూడు_Content(
+          std::make_unique<RedirectingFileSystem::Directory_Remap_నమోదు>(
+              Name, DR->get_External_Contents_మార్గం(), DR->getUseName()));
+      ఆపు;
     }
-    case RedirectingFileSystem::EK_File: {
-      assert(NewParentE && "Parent entry must exist");
-      auto *FE = cast<RedirectingFileSystem::FileEntry>(SrcE);
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
-      DE->addContent(std::make_unique<RedirectingFileSystem::FileEntry>(
-          Name, FE->getExternalContentsPath(), FE->getUseName()));
-      break;
+    స్థితి RedirectingFileSystem::EK_File: {
+      ప్రతిజ్ఞా(New_మాతృ_E && "Parent entry must exist");
+      స్వయంచాలక *FE = cast<RedirectingFileSystem::File_నమోదు>(SrcE);
+      స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(New_మాతృ_E);
+      DE->కూడు_Content(std::make_unique<RedirectingFileSystem::File_నమోదు>(
+          Name, FE->get_External_Contents_మార్గం(), FE->getUseName()));
+      ఆపు;
     }
     }
   }
 
-  std::unique_ptr<RedirectingFileSystem::Entry>
-  parseEntry(yaml::Node *N, RedirectingFileSystem *FS, bool IsRootEntry) {
-    auto *M = dyn_cast<yaml::MappingNode>(N);
-    if (!M) {
+  std::unique_ptr<RedirectingFileSystem::నమోదు_2>
+  parse_నమోదు(yaml::కణుపు *N, RedirectingFileSystem *FS, తార్కిక Is_మూలం_నమోదు) {
+    స్వయంచాలక *M = dyn_cast<yaml::Mapping_కణుపు>(N);
+    ఒకవేళ (!M) {
       error(N, "expected mapping node for file or directory entry");
-      return nullptr;
+      తిరిగి శూన్యసూచిక;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("name", true),
-        KeyStatusPair("type", true),
-        KeyStatusPair("contents", false),
-        KeyStatusPair("external-contents", false),
-        KeyStatusPair("use-external-name", false),
+    కీలకం_స్థితి_Pair Fields[] = {
+        కీలకం_స్థితి_Pair("name", నిజం),
+        కీలకం_స్థితి_Pair("type", నిజం),
+        కీలకం_స్థితి_Pair("contents", అబద్ధం),
+        కీలకం_స్థితి_Pair("external-contents", అబద్ధం),
+        కీలకం_స్థితి_Pair("use-external-name", అబద్ధం),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
+    DenseMap<StringRef, కీలకం_స్థితి> కీలకాలు_2(std::begin(Fields), std::చివర(Fields));
 
-    enum { CF_NotSet, CF_List, CF_External } ContentsField = CF_NotSet;
-    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>>
-        EntryArrayContents;
-    SmallString<256> ExternalContentsPath;
+    గణన { CF_Not_సమితి, CF_List, CF_External } Contents_క్షేత్రం = CF_Not_సమితి;
+    std::సదిశ<std::unique_ptr<RedirectingFileSystem::నమోదు_2>>
+        నమోదు_Array_Contents;
+    SmallString<256> External_Contents_మార్గం;
     SmallString<256> Name;
-    yaml::Node *NameValueNode = nullptr;
-    auto UseExternalName = RedirectingFileSystem::NK_NotSet;
-    RedirectingFileSystem::EntryKind Kind;
+    yaml::కణుపు *Name_విలువ_కణుపు = శూన్యసూచిక;
+    స్వయంచాలక UseExternalName = RedirectingFileSystem::NK_Not_సమితి;
+    RedirectingFileSystem::నమోదు_రకం రకం_3;
 
-    for (auto &I : *M) {
-      StringRef Key;
+    కొరకు (స్వయంచాలక &I : *M) {
+      StringRef కీలకం;
       // Reuse the buffer for key and value, since we don't look at key after
       // parsing value.
-      SmallString<256> Buffer;
-      if (!parseScalarString(I.getKey(), Key, Buffer))
-        return nullptr;
+      SmallString<256> బఫరు;
+      ఒకవేళ (!parseScalarString(I.get_కీలకం(), కీలకం, బఫరు))
+        తిరిగి శూన్యసూచిక;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return nullptr;
+      ఒకవేళ (!check_Duplicate_Or_Unknown_కీలకం(I.get_కీలకం(), కీలకం, కీలకాలు_2))
+        తిరిగి శూన్యసూచిక;
 
-      StringRef Value;
-      if (Key == "name") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+      StringRef విలువ;
+      ఒకవేళ (కీలకం == "name") {
+        ఒకవేళ (!parseScalarString(I.get_విలువ(), విలువ, బఫరు))
+          తిరిగి శూన్యసూచిక;
 
-        NameValueNode = I.getValue();
+        Name_విలువ_కణుపు = I.get_విలువ();
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
-        Name = canonicalize(Value).str();
-      } else if (Key == "type") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
-        if (Value == "file")
-          Kind = RedirectingFileSystem::EK_File;
-        else if (Value == "directory")
-          Kind = RedirectingFileSystem::EK_Directory;
-        else if (Value == "directory-remap")
-          Kind = RedirectingFileSystem::EK_DirectoryRemap;
-        else {
-          error(I.getValue(), "unknown value for 'type'");
-          return nullptr;
+        Name = canonicalize(విలువ).str();
+      } లేకపోతే ఒకవేళ (కీలకం == "type") {
+        ఒకవేళ (!parseScalarString(I.get_విలువ(), విలువ, బఫరు))
+          తిరిగి శూన్యసూచిక;
+        ఒకవేళ (విలువ == "file")
+          రకం_3 = RedirectingFileSystem::EK_File;
+        లేకపోతే ఒకవేళ (విలువ == "directory")
+          రకం_3 = RedirectingFileSystem::EK_Directory;
+        లేకపోతే ఒకవేళ (విలువ == "directory-remap")
+          రకం_3 = RedirectingFileSystem::EK_DirectoryRemap;
+        లేకపోతే {
+          error(I.get_విలువ(), "unknown value for 'type'");
+          తిరిగి శూన్యసూచిక;
         }
-      } else if (Key == "contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } లేకపోతే ఒకవేళ (కీలకం == "contents") {
+        ఒకవేళ (Contents_క్షేత్రం != CF_Not_సమితి) {
+          error(I.get_కీలకం(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          తిరిగి శూన్యసూచిక;
         }
-        ContentsField = CF_List;
-        auto *Contents = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Contents) {
+        Contents_క్షేత్రం = CF_List;
+        స్వయంచాలక *Contents = dyn_cast_if_present<yaml::Sequence_కణుపు>(I.get_విలువ());
+        ఒకవేళ (!Contents) {
           // FIXME: this is only for directories, what about files?
-          error(I.getValue(), "expected array");
-          return nullptr;
+          error(I.get_విలువ(), "expected array");
+          తిరిగి శూన్యసూచిక;
         }
 
-        for (auto &I : *Contents) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
-                  parseEntry(&I, FS, /*IsRootEntry*/ false))
-            EntryArrayContents.push_back(std::move(E));
-          else
-            return nullptr;
+        కొరకు (స్వయంచాలక &I : *Contents) {
+          ఒకవేళ (std::unique_ptr<RedirectingFileSystem::నమోదు_2> E =
+                  parse_నమోదు(&I, FS, /*IsRootEntry*/ అబద్ధం))
+            నమోదు_Array_Contents.నెట్టు_వెనుక(std::move(E));
+          లేకపోతే
+            తిరిగి శూన్యసూచిక;
         }
-      } else if (Key == "external-contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } లేకపోతే ఒకవేళ (కీలకం == "external-contents") {
+        ఒకవేళ (Contents_క్షేత్రం != CF_Not_సమితి) {
+          error(I.get_కీలకం(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          తిరిగి శూన్యసూచిక;
         }
-        ContentsField = CF_External;
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+        Contents_క్షేత్రం = CF_External;
+        ఒకవేళ (!parseScalarString(I.get_విలువ(), విలువ, బఫరు))
+          తిరిగి శూన్యసూచిక;
 
-        SmallString<256> FullPath;
-        if (FS->IsRelativeOverlay) {
-          FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() &&
+        SmallString<256> నిండిన_మార్గం;
+        ఒకవేళ (FS->IsRelativeOverlay) {
+          నిండిన_మార్గం = FS->getOverlayFileDir();
+          ప్రతిజ్ఞా(!నిండిన_మార్గం.ఖాళీలు() &&
                  "External contents prefix directory must exist");
-          SmallString<256> AbsFullPath = Value;
-          if (FS->makeAbsolute(FullPath, AbsFullPath)) {
+          SmallString<256> Abs_నిండిన_మార్గం = విలువ;
+          ఒకవేళ (FS->makeAbsolute(నిండిన_మార్గం, Abs_నిండిన_మార్గం)) {
             error(N, "failed to make 'external-contents' absolute");
-            return nullptr;
+            తిరిగి శూన్యసూచిక;
           }
-          FullPath = AbsFullPath;
-        } else {
-          FullPath = Value;
+          నిండిన_మార్గం = Abs_నిండిన_మార్గం;
+        } లేకపోతే {
+          నిండిన_మార్గం = విలువ;
         }
 
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
-        FullPath = canonicalize(FullPath);
-        ExternalContentsPath = FullPath.str();
-      } else if (Key == "use-external-name") {
-        bool Val;
-        if (!parseScalarBool(I.getValue(), Val))
-          return nullptr;
+        నిండిన_మార్గం = canonicalize(నిండిన_మార్గం);
+        External_Contents_మార్గం = నిండిన_మార్గం.str();
+      } లేకపోతే ఒకవేళ (కీలకం == "use-external-name") {
+        తార్కిక Val;
+        ఒకవేళ (!parseScalarBool(I.get_విలువ(), Val))
+          తిరిగి శూన్యసూచిక;
         UseExternalName = Val ? RedirectingFileSystem::NK_External
                               : RedirectingFileSystem::NK_Virtual;
-      } else {
+      } లేకపోతే {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return nullptr;
+    ఒకవేళ (ప్రవాహం.failed())
+      తిరిగి శూన్యసూచిక;
 
     // check for missing keys
-    if (ContentsField == CF_NotSet) {
+    ఒకవేళ (Contents_క్షేత్రం == CF_Not_సమితి) {
       error(N, "missing key 'contents' or 'external-contents'");
-      return nullptr;
+      తిరిగి శూన్యసూచిక;
     }
-    if (!checkMissingKeys(N, Keys))
-      return nullptr;
+    ఒకవేళ (!check_Missing_కీలకాలు(N, కీలకాలు_2))
+      తిరిగి శూన్యసూచిక;
 
     // check invalid configuration
-    if (Kind == RedirectingFileSystem::EK_Directory &&
-        UseExternalName != RedirectingFileSystem::NK_NotSet) {
+    ఒకవేళ (రకం_3 == RedirectingFileSystem::EK_Directory &&
+        UseExternalName != RedirectingFileSystem::NK_Not_సమితి) {
       error(N, "'use-external-name' is not supported for 'directory' entries");
-      return nullptr;
+      తిరిగి శూన్యసూచిక;
     }
 
-    if (Kind == RedirectingFileSystem::EK_DirectoryRemap &&
-        ContentsField == CF_List) {
+    ఒకవేళ (రకం_3 == RedirectingFileSystem::EK_DirectoryRemap &&
+        Contents_క్షేత్రం == CF_List) {
       error(N, "'contents' is not supported for 'directory-remap' entries");
-      return nullptr;
+      తిరిగి శూన్యసూచిక;
     }
 
-    sys::path::Style path_style = sys::path::Style::native;
-    if (IsRootEntry) {
+    sys::మార్గం_2::Style మార్గం_style = sys::మార్గం_2::Style::native;
+    ఒకవేళ (Is_మూలం_నమోదు) {
       // VFS root entries may be in either Posix or Windows style.  Figure out
       // which style we have, and use it consistently.
-      if (sys::path::is_absolute(Name, sys::path::Style::posix)) {
-        path_style = sys::path::Style::posix;
-      } else if (sys::path::is_absolute(Name,
-                                        sys::path::Style::windows_backslash)) {
-        path_style = sys::path::Style::windows_backslash;
-      } else {
+      ఒకవేళ (sys::మార్గం_2::is_absolute(Name, sys::మార్గం_2::Style::posix)) {
+        మార్గం_style = sys::మార్గం_2::Style::posix;
+      } లేకపోతే ఒకవేళ (sys::మార్గం_2::is_absolute(Name,
+                                        sys::మార్గం_2::Style::windows_backslash)) {
+        మార్గం_style = sys::మార్గం_2::Style::windows_backslash;
+      } లేకపోతే {
         // Relative VFS root entries are made absolute to either the overlay
         // directory, or the current working directory, then we can determine
         // the path style from that.
-        std::error_code EC;
-        if (FS->RootRelative ==
-            RedirectingFileSystem::RootRelativeKind::OverlayDir) {
-          StringRef FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() && "Overlay file directory must exist");
-          EC = FS->makeAbsolute(FullPath, Name);
+        std::error_సంకేతం EC;
+        ఒకవేళ (FS->మూలం_Relative ==
+            RedirectingFileSystem::మూలం_Relative_రకం::OverlayDir) {
+          StringRef నిండిన_మార్గం = FS->getOverlayFileDir();
+          ప్రతిజ్ఞా(!నిండిన_మార్గం.ఖాళీలు() && "Overlay file directory must exist");
+          EC = FS->makeAbsolute(నిండిన_మార్గం, Name);
           Name = canonicalize(Name);
-        } else {
+        } లేకపోతే {
           EC = FS->makeAbsolute(Name);
         }
-        if (EC) {
-          assert(NameValueNode && "Name presence should be checked earlier");
+        ఒకవేళ (EC) {
+          ప్రతిజ్ఞా(Name_విలువ_కణుపు && "Name presence should be checked earlier");
           error(
-              NameValueNode,
+              Name_విలువ_కణుపు,
               "entry with relative path at the root level is not discoverable");
-          return nullptr;
+          తిరిగి శూన్యసూచిక;
         }
-        path_style = sys::path::is_absolute(Name, sys::path::Style::posix)
-                         ? sys::path::Style::posix
-                         : sys::path::Style::windows_backslash;
+        మార్గం_style = sys::మార్గం_2::is_absolute(Name, sys::మార్గం_2::Style::posix)
+                         ? sys::మార్గం_2::Style::posix
+                         : sys::మార్గం_2::Style::windows_backslash;
       }
       // is::path::is_absolute(Name, sys::path::Style::windows_backslash) will
       // return true even if `Name` is using forward slashes. Distinguish
       // between windows_backslash and windows_slash.
-      if (path_style == sys::path::Style::windows_backslash &&
-          getExistingStyle(Name) != sys::path::Style::windows_backslash)
-        path_style = sys::path::Style::windows_slash;
+      ఒకవేళ (మార్గం_style == sys::మార్గం_2::Style::windows_backslash &&
+          getExistingStyle(Name) != sys::మార్గం_2::Style::windows_backslash)
+        మార్గం_style = sys::మార్గం_2::Style::windows_slash;
     }
 
     // Remove trailing slash(es), being careful not to remove the root path
     StringRef Trimmed = Name;
-    size_t RootPathLen = sys::path::root_path(Trimmed, path_style).size();
-    while (Trimmed.size() > RootPathLen &&
-           sys::path::is_separator(Trimmed.back(), path_style))
-      Trimmed = Trimmed.slice(0, Trimmed.size() - 1);
+    size_t మూలం_మార్గం_Len = sys::మార్గం_2::మూలం_మార్గం_2(Trimmed, మార్గం_style).కొలత_2();
+    అయితే (Trimmed.కొలత_2() > మూలం_మార్గం_Len &&
+           sys::మార్గం_2::is_separator(Trimmed.వెనుక(), మార్గం_style))
+      Trimmed = Trimmed.ముక్క(0, Trimmed.కొలత_2() - 1);
 
     // Get the last component
-    StringRef LastComponent = sys::path::filename(Trimmed, path_style);
+    StringRef చివరి_Component = sys::మార్గం_2::filename(Trimmed, మార్గం_style);
 
-    std::unique_ptr<RedirectingFileSystem::Entry> Result;
-    switch (Kind) {
-    case RedirectingFileSystem::EK_File:
-      Result = std::make_unique<RedirectingFileSystem::FileEntry>(
-          LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_DirectoryRemap:
-      Result = std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
-          LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_Directory:
-      Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
-          LastComponent, std::move(EntryArrayContents),
-          Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
+    std::unique_ptr<RedirectingFileSystem::నమోదు_2> ఫలితం;
+    ఎంపిక (రకం_3) {
+    స్థితి RedirectingFileSystem::EK_File:
+      ఫలితం = std::make_unique<RedirectingFileSystem::File_నమోదు>(
+          చివరి_Component, std::move(External_Contents_మార్గం), UseExternalName);
+      ఆపు;
+    స్థితి RedirectingFileSystem::EK_DirectoryRemap:
+      ఫలితం = std::make_unique<RedirectingFileSystem::Directory_Remap_నమోదు>(
+          చివరి_Component, std::move(External_Contents_మార్గం), UseExternalName);
+      ఆపు;
+    స్థితి RedirectingFileSystem::EK_Directory:
+      ఫలితం = std::make_unique<RedirectingFileSystem::Directory_నమోదు>(
+          చివరి_Component, std::move(నమోదు_Array_Contents),
+          స్థితి_2("", get_తదుపరి_Virtual_Unique_ID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
-      break;
+      ఆపు;
     }
 
-    StringRef Parent = sys::path::parent_path(Trimmed, path_style);
-    if (Parent.empty())
-      return Result;
+    StringRef మాతృ_2 = sys::మార్గం_2::మాతృ_మార్గం(Trimmed, మార్గం_style);
+    ఒకవేళ (మాతృ_2.ఖాళీలు())
+      తిరిగి ఫలితం;
 
     // if 'name' contains multiple components, create implicit directory entries
-    for (sys::path::reverse_iterator I = sys::path::rbegin(Parent, path_style),
-                                     E = sys::path::rend(Parent);
+    కొరకు (sys::మార్గం_2::తిరగేయి_iterator I = sys::మార్గం_2::rbegin(మాతృ_2, మార్గం_style),
+                                     E = sys::మార్గం_2::rend(మాతృ_2);
          I != E; ++I) {
-      std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> Entries;
-      Entries.push_back(std::move(Result));
-      Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
+      std::సదిశ<std::unique_ptr<RedirectingFileSystem::నమోదు_2>> Entries;
+      Entries.నెట్టు_వెనుక(std::move(ఫలితం));
+      ఫలితం = std::make_unique<RedirectingFileSystem::Directory_నమోదు>(
           *I, std::move(Entries),
-          Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
+          స్థితి_2("", get_తదుపరి_Virtual_Unique_ID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
     }
-    return Result;
+    తిరిగి ఫలితం;
   }
 
-public:
-  RedirectingFileSystemParser(yaml::Stream &S) : Stream(S) {}
+బహిరంగ:
+  RedirectingFileSystemParser(yaml::ప్రవాహం &S) : ప్రవాహం(S) {}
 
   // false on error
-  bool parse(yaml::Node *Root, RedirectingFileSystem *FS) {
-    auto *Top = dyn_cast<yaml::MappingNode>(Root);
-    if (!Top) {
-      error(Root, "expected mapping node");
-      return false;
+  తార్కిక parse(yaml::కణుపు *మూలం_2, RedirectingFileSystem *FS) {
+    స్వయంచాలక *శిఖరం = dyn_cast<yaml::Mapping_కణుపు>(మూలం_2);
+    ఒకవేళ (!శిఖరం) {
+      error(మూలం_2, "expected mapping node");
+      తిరిగి అబద్ధం;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("version", true),
-        KeyStatusPair("case-sensitive", false),
-        KeyStatusPair("use-external-names", false),
-        KeyStatusPair("root-relative", false),
-        KeyStatusPair("overlay-relative", false),
-        KeyStatusPair("fallthrough", false),
-        KeyStatusPair("redirecting-with", false),
-        KeyStatusPair("roots", true),
+    కీలకం_స్థితి_Pair Fields[] = {
+        కీలకం_స్థితి_Pair("version", నిజం),
+        కీలకం_స్థితి_Pair("case-sensitive", అబద్ధం),
+        కీలకం_స్థితి_Pair("use-external-names", అబద్ధం),
+        కీలకం_స్థితి_Pair("root-relative", అబద్ధం),
+        కీలకం_స్థితి_Pair("overlay-relative", అబద్ధం),
+        కీలకం_స్థితి_Pair("fallthrough", అబద్ధం),
+        కీలకం_స్థితి_Pair("redirecting-with", అబద్ధం),
+        కీలకం_స్థితి_Pair("roots", నిజం),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
-    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> RootEntries;
+    DenseMap<StringRef, కీలకం_స్థితి> కీలకాలు_2(std::begin(Fields), std::చివర(Fields));
+    std::సదిశ<std::unique_ptr<RedirectingFileSystem::నమోదు_2>> మూలం_Entries;
 
     // Parse configuration and 'roots'
-    for (auto &I : *Top) {
-      SmallString<10> KeyBuffer;
-      StringRef Key;
-      if (!parseScalarString(I.getKey(), Key, KeyBuffer))
-        return false;
+    కొరకు (స్వయంచాలక &I : *శిఖరం) {
+      SmallString<10> కీలకం_బఫరు;
+      StringRef కీలకం;
+      ఒకవేళ (!parseScalarString(I.get_కీలకం(), కీలకం, కీలకం_బఫరు))
+        తిరిగి అబద్ధం;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return false;
+      ఒకవేళ (!check_Duplicate_Or_Unknown_కీలకం(I.get_కీలకం(), కీలకం, కీలకాలు_2))
+        తిరిగి అబద్ధం;
 
-      if (Key == "roots") {
-        auto *Roots = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Roots) {
-          error(I.getValue(), "expected array");
-          return false;
+      ఒకవేళ (కీలకం == "roots") {
+        స్వయంచాలక *Roots = dyn_cast_if_present<yaml::Sequence_కణుపు>(I.get_విలువ());
+        ఒకవేళ (!Roots) {
+          error(I.get_విలువ(), "expected array");
+          తిరిగి అబద్ధం;
         }
 
-        for (auto &I : *Roots) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
-                  parseEntry(&I, FS, /*IsRootEntry*/ true))
-            RootEntries.push_back(std::move(E));
-          else
-            return false;
+        కొరకు (స్వయంచాలక &I : *Roots) {
+          ఒకవేళ (std::unique_ptr<RedirectingFileSystem::నమోదు_2> E =
+                  parse_నమోదు(&I, FS, /*IsRootEntry*/ నిజం))
+            మూలం_Entries.నెట్టు_వెనుక(std::move(E));
+          లేకపోతే
+            తిరిగి అబద్ధం;
         }
-      } else if (Key == "version") {
-        StringRef VersionString;
+      } లేకపోతే ఒకవేళ (కీలకం == "version") {
+        StringRef సంస్కరణ_String;
         SmallString<4> Storage;
-        if (!parseScalarString(I.getValue(), VersionString, Storage))
-          return false;
-        int Version;
-        if (VersionString.getAsInteger<int>(10, Version)) {
-          error(I.getValue(), "expected integer");
-          return false;
+        ఒకవేళ (!parseScalarString(I.get_విలువ(), సంస్కరణ_String, Storage))
+          తిరిగి అబద్ధం;
+        పూర్ణాంకం సంస్కరణ;
+        ఒకవేళ (సంస్కరణ_String.getAsInteger<పూర్ణాంకం>(10, సంస్కరణ)) {
+          error(I.get_విలువ(), "expected integer");
+          తిరిగి అబద్ధం;
         }
-        if (Version < 0) {
-          error(I.getValue(), "invalid version number");
-          return false;
+        ఒకవేళ (సంస్కరణ < 0) {
+          error(I.get_విలువ(), "invalid version number");
+          తిరిగి అబద్ధం;
         }
-        if (Version != 0) {
-          error(I.getValue(), "version mismatch, expected 0");
-          return false;
+        ఒకవేళ (సంస్కరణ != 0) {
+          error(I.get_విలువ(), "version mismatch, expected 0");
+          తిరిగి అబద్ధం;
         }
-      } else if (Key == "case-sensitive") {
-        if (!parseScalarBool(I.getValue(), FS->CaseSensitive))
-          return false;
-      } else if (Key == "overlay-relative") {
-        if (!parseScalarBool(I.getValue(), FS->IsRelativeOverlay))
-          return false;
-      } else if (Key == "use-external-names") {
-        if (!parseScalarBool(I.getValue(), FS->UseExternalNames))
-          return false;
-      } else if (Key == "fallthrough") {
-        if (Keys["redirecting-with"].Seen) {
-          error(I.getValue(),
+      } లేకపోతే ఒకవేళ (కీలకం == "case-sensitive") {
+        ఒకవేళ (!parseScalarBool(I.get_విలువ(), FS->CaseSensitive))
+          తిరిగి అబద్ధం;
+      } లేకపోతే ఒకవేళ (కీలకం == "overlay-relative") {
+        ఒకవేళ (!parseScalarBool(I.get_విలువ(), FS->IsRelativeOverlay))
+          తిరిగి అబద్ధం;
+      } లేకపోతే ఒకవేళ (కీలకం == "use-external-names") {
+        ఒకవేళ (!parseScalarBool(I.get_విలువ(), FS->Use_External_పేర్లు))
+          తిరిగి అబద్ధం;
+      } లేకపోతే ఒకవేళ (కీలకం == "fallthrough") {
+        ఒకవేళ (కీలకాలు_2["redirecting-with"].చూసిన) {
+          error(I.get_విలువ(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          తిరిగి అబద్ధం;
         }
 
-        bool ShouldFallthrough = false;
-        if (!parseScalarBool(I.getValue(), ShouldFallthrough))
-          return false;
+        తార్కిక ShouldFallthrough = అబద్ధం;
+        ఒకవేళ (!parseScalarBool(I.get_విలువ(), ShouldFallthrough))
+          తిరిగి అబద్ధం;
 
-        if (ShouldFallthrough) {
-          FS->Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-        } else {
-          FS->Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
+        ఒకవేళ (ShouldFallthrough) {
+          FS->Redirection = RedirectingFileSystem::Redirect_రకం::Fallthrough;
+        } లేకపోతే {
+          FS->Redirection = RedirectingFileSystem::Redirect_రకం::RedirectOnly;
         }
-      } else if (Key == "redirecting-with") {
-        if (Keys["fallthrough"].Seen) {
-          error(I.getValue(),
+      } లేకపోతే ఒకవేళ (కీలకం == "redirecting-with") {
+        ఒకవేళ (కీలకాలు_2["fallthrough"].చూసిన) {
+          error(I.get_విలువ(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          తిరిగి అబద్ధం;
         }
 
-        if (auto Kind = parseRedirectKind(I.getValue())) {
-          FS->Redirection = *Kind;
-        } else {
-          error(I.getValue(), "expected valid redirect kind");
-          return false;
+        ఒకవేళ (స్వయంచాలక రకం_3 = parse_Redirect_రకం(I.get_విలువ())) {
+          FS->Redirection = *రకం_3;
+        } లేకపోతే {
+          error(I.get_విలువ(), "expected valid redirect kind");
+          తిరిగి అబద్ధం;
         }
-      } else if (Key == "root-relative") {
-        if (auto Kind = parseRootRelativeKind(I.getValue())) {
-          FS->RootRelative = *Kind;
-        } else {
-          error(I.getValue(), "expected valid root-relative kind");
-          return false;
+      } లేకపోతే ఒకవేళ (కీలకం == "root-relative") {
+        ఒకవేళ (స్వయంచాలక రకం_3 = parse_మూలం_Relative_రకం(I.get_విలువ())) {
+          FS->మూలం_Relative = *రకం_3;
+        } లేకపోతే {
+          error(I.get_విలువ(), "expected valid root-relative kind");
+          తిరిగి అబద్ధం;
         }
-      } else {
+      } లేకపోతే {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return false;
+    ఒకవేళ (ప్రవాహం.failed())
+      తిరిగి అబద్ధం;
 
-    if (!checkMissingKeys(Top, Keys))
-      return false;
+    ఒకవేళ (!check_Missing_కీలకాలు(శిఖరం, కీలకాలు_2))
+      తిరిగి అబద్ధం;
 
     // Now that we sucessefully parsed the YAML file, canonicalize the internal
     // representation to a proper directory tree so that we can search faster
     // inside the VFS.
-    for (auto &E : RootEntries)
-      uniqueOverlayTree(FS, E.get());
+    కొరకు (స్వయంచాలక &E : మూలం_Entries)
+      unique_Overlay_వృక్షం(FS, E.get());
 
-    return true;
+    తిరిగి నిజం;
   }
 };
 
 std::unique_ptr<RedirectingFileSystem>
-RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
-                              SourceMgr::DiagHandlerTy DiagHandler,
-                              StringRef YAMLFilePath, void *DiagContext,
+RedirectingFileSystem::create(std::unique_ptr<జ్ఞాపకం_బఫరు> బఫరు,
+                              ఆధారం_Mgr::DiagHandlerTy DiagHandler,
+                              StringRef YAMLFile_మార్గం, శూన్య *DiagContext,
                               IntrusiveRefCntPtr<FileSystem> ExternalFS) {
-  SourceMgr SM;
-  yaml::Stream Stream(Buffer->getMemBufferRef(), SM);
+  ఆధారం_Mgr SM;
+  yaml::ప్రవాహం ప్రవాహం(బఫరు->get_Mem_బఫరు_Ref(), SM);
 
-  SM.setDiagHandler(DiagHandler, DiagContext);
-  yaml::document_iterator DI = Stream.begin();
-  yaml::Node *Root = DI->getRoot();
-  if (DI == Stream.end() || !Root) {
-    SM.PrintMessage(SMLoc(), SourceMgr::DK_Error, "expected root node");
-    return nullptr;
+  SM.సమితి_Diag_Handler(DiagHandler, DiagContext);
+  yaml::document_iterator DI = ప్రవాహం.begin();
+  yaml::కణుపు *మూలం_2 = DI->get_మూలం();
+  ఒకవేళ (DI == ప్రవాహం.చివర() || !మూలం_2) {
+    SM.Print_సందేశం(SMLoc(), ఆధారం_Mgr::DK_Error, "expected root node");
+    తిరిగి శూన్యసూచిక;
   }
 
-  RedirectingFileSystemParser P(Stream);
+  RedirectingFileSystemParser P(ప్రవాహం);
 
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
+      కొత్త RedirectingFileSystem(ExternalFS));
 
-  if (!YAMLFilePath.empty()) {
+  ఒకవేళ (!YAMLFile_మార్గం.ఖాళీలు()) {
     // Use the YAML path from -ivfsoverlay to compute the dir to be prefixed
     // to each 'external-contents' path.
     //
@@ -2251,654 +2251,654 @@ RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
     // yields:
     //  FS->OverlayFileDir => /<absolute_path_to>/dummy.cache/vfs
     //
-    SmallString<256> OverlayAbsDir = sys::path::parent_path(YAMLFilePath);
-    std::error_code EC = FS->makeAbsolute(OverlayAbsDir);
-    assert(!EC && "Overlay dir final path must be absolute");
-    (void)EC;
-    FS->setOverlayFileDir(OverlayAbsDir);
+    SmallString<256> OverlayAbsDir = sys::మార్గం_2::మాతృ_మార్గం(YAMLFile_మార్గం);
+    std::error_సంకేతం EC = FS->makeAbsolute(OverlayAbsDir);
+    ప్రతిజ్ఞా(!EC && "Overlay dir final path must be absolute");
+    (శూన్య)EC;
+    FS->సమితి_Overlay_File_Dir(OverlayAbsDir);
   }
 
-  if (!P.parse(Root, FS.get()))
-    return nullptr;
+  ఒకవేళ (!P.parse(మూలం_2, FS.get()))
+    తిరిగి శూన్యసూచిక;
 
-  return FS;
+  తిరిగి FS;
 }
 
 std::unique_ptr<RedirectingFileSystem> RedirectingFileSystem::create(
     ArrayRef<std::pair<std::string, std::string>> RemappedFiles,
-    bool UseExternalNames, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
+    తార్కిక Use_External_పేర్లు, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
-  FS->UseExternalNames = UseExternalNames;
+      కొత్త RedirectingFileSystem(ExternalFS));
+  FS->Use_External_పేర్లు = Use_External_పేర్లు;
 
-  StringMap<RedirectingFileSystem::Entry *> Entries;
+  StringMap<RedirectingFileSystem::నమోదు_2 *> Entries;
 
-  for (auto &Mapping : llvm::reverse(RemappedFiles)) {
-    SmallString<128> From = StringRef(Mapping.first);
-    SmallString<128> To = StringRef(Mapping.second);
+  కొరకు (స్వయంచాలక &Mapping : llvm::తిరగేయి(RemappedFiles)) {
+    SmallString<128> From = StringRef(Mapping.మొదటి_2);
+    SmallString<128> గమ్యం = StringRef(Mapping.రెండవ_2);
     {
-      auto EC = ExternalFS->makeAbsolute(From);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      స్వయంచాలక EC = ExternalFS->makeAbsolute(From);
+      (శూన్య)EC;
+      ప్రతిజ్ఞా(!EC && "Could not make absolute path");
     }
 
     // Check if we've already mapped this file. The first one we see (in the
     // reverse iteration) wins.
-    RedirectingFileSystem::Entry *&ToEntry = Entries[From];
-    if (ToEntry)
-      continue;
+    RedirectingFileSystem::నమోదు_2 *&గమ్యం_నమోదు = Entries[From];
+    ఒకవేళ (గమ్యం_నమోదు)
+      కొనసాగు;
 
     // Add parent directories.
-    RedirectingFileSystem::Entry *Parent = nullptr;
-    StringRef FromDirectory = llvm::sys::path::parent_path(From);
-    for (auto I = llvm::sys::path::begin(FromDirectory),
-              E = llvm::sys::path::end(FromDirectory);
+    RedirectingFileSystem::నమోదు_2 *మాతృ_2 = శూన్యసూచిక;
+    StringRef FromDirectory = llvm::sys::మార్గం_2::మాతృ_మార్గం(From);
+    కొరకు (స్వయంచాలక I = llvm::sys::మార్గం_2::begin(FromDirectory),
+              E = llvm::sys::మార్గం_2::చివర(FromDirectory);
          I != E; ++I) {
-      Parent = RedirectingFileSystemParser::lookupOrCreateEntry(FS.get(), *I,
-                                                                Parent);
+      మాతృ_2 = RedirectingFileSystemParser::lookup_Or_Create_నమోదు(FS.get(), *I,
+                                                                మాతృ_2);
     }
-    assert(Parent && "File without a directory?");
+    ప్రతిజ్ఞా(మాతృ_2 && "File without a directory?");
     {
-      auto EC = ExternalFS->makeAbsolute(To);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      స్వయంచాలక EC = ExternalFS->makeAbsolute(గమ్యం);
+      (శూన్య)EC;
+      ప్రతిజ్ఞా(!EC && "Could not make absolute path");
     }
 
     // Add the file.
-    auto NewFile = std::make_unique<RedirectingFileSystem::FileEntry>(
-        llvm::sys::path::filename(From), To,
-        UseExternalNames ? RedirectingFileSystem::NK_External
+    స్వయంచాలక NewFile = std::make_unique<RedirectingFileSystem::File_నమోదు>(
+        llvm::sys::మార్గం_2::filename(From), గమ్యం,
+        Use_External_పేర్లు ? RedirectingFileSystem::NK_External
                          : RedirectingFileSystem::NK_Virtual);
-    ToEntry = NewFile.get();
-    cast<RedirectingFileSystem::DirectoryEntry>(Parent)->addContent(
+    గమ్యం_నమోదు = NewFile.get();
+    cast<RedirectingFileSystem::Directory_నమోదు>(మాతృ_2)->కూడు_Content(
         std::move(NewFile));
   }
 
-  return FS;
+  తిరిగి FS;
 }
 
-RedirectingFileSystem::LookupResult::LookupResult(
-    Entry *E, sys::path::const_iterator Start, sys::path::const_iterator End)
+RedirectingFileSystem::Lookup_ఫలితం::Lookup_ఫలితం(
+    నమోదు_2 *E, sys::మార్గం_2::const_iterator ప్రారంభం, sys::మార్గం_2::const_iterator చివర_2)
     : E(E) {
-  assert(E != nullptr);
+  ప్రతిజ్ఞా(E != శూన్యసూచిక);
   // If the matched entry is a DirectoryRemapEntry, set ExternalRedirect to the
   // path of the directory it maps to in the external file system plus any
   // remaining path components in the provided iterator.
-  if (auto *DRE = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(E)) {
-    SmallString<256> Redirect(DRE->getExternalContentsPath());
-    sys::path::append(Redirect, Start, End,
-                      getExistingStyle(DRE->getExternalContentsPath()));
+  ఒకవేళ (స్వయంచాలక *DRE = dyn_cast<RedirectingFileSystem::Directory_Remap_నమోదు>(E)) {
+    SmallString<256> Redirect(DRE->get_External_Contents_మార్గం());
+    sys::మార్గం_2::append(Redirect, ప్రారంభం, చివర_2,
+                      getExistingStyle(DRE->get_External_Contents_మార్గం()));
     ExternalRedirect = std::string(Redirect);
   }
 }
 
-void RedirectingFileSystem::LookupResult::getPath(
-    llvm::SmallVectorImpl<char> &Result) const {
-  Result.clear();
-  for (Entry *Parent : Parents)
-    llvm::sys::path::append(Result, Parent->getName());
-  llvm::sys::path::append(Result, E->getName());
+శూన్య RedirectingFileSystem::Lookup_ఫలితం::get_మార్గం(
+    llvm::Small_సదిశ_Impl<అక్షరం> &ఫలితం) స్థిరరాశి {
+  ఫలితం.clear();
+  కొరకు (నమోదు_2 *మాతృ_2 : Parents)
+    llvm::sys::మార్గం_2::append(ఫలితం, మాతృ_2->getName());
+  llvm::sys::మార్గం_2::append(ఫలితం, E->getName());
 }
 
-std::error_code RedirectingFileSystem::makeCanonicalForLookup(
-    SmallVectorImpl<char> &Path) const {
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+std::error_సంకేతం RedirectingFileSystem::makeCanonicalForLookup(
+    Small_సదిశ_Impl<అక్షరం> &మార్గం) స్థిరరాశి {
+  ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(మార్గం))
+    తిరిగి EC;
 
-  llvm::SmallString<256> CanonicalPath =
-      canonicalize(StringRef(Path.data(), Path.size()));
-  if (CanonicalPath.empty())
-    return make_error_code(llvm::errc::invalid_argument);
+  llvm::SmallString<256> Canonical_మార్గం =
+      canonicalize(StringRef(మార్గం.దత్తాంశం(), మార్గం.కొలత_2()));
+  ఒకవేళ (Canonical_మార్గం.ఖాళీలు())
+    తిరిగి make_error_సంకేతం(llvm::errc::invalid_వాదం);
 
-  Path.assign(CanonicalPath.begin(), CanonicalPath.end());
-  return {};
+  మార్గం.కేటాయించు(Canonical_మార్గం.begin(), Canonical_మార్గం.చివర());
+  తిరిగి {};
 }
 
-ErrorOr<RedirectingFileSystem::LookupResult>
-RedirectingFileSystem::lookupPath(StringRef Path) const {
-  llvm::SmallString<128> CanonicalPath(Path);
-  if (std::error_code EC = makeCanonicalForLookup(CanonicalPath))
-    return EC;
+ErrorOr<RedirectingFileSystem::Lookup_ఫలితం>
+RedirectingFileSystem::lookup_మార్గం(StringRef మార్గం) స్థిరరాశి {
+  llvm::SmallString<128> Canonical_మార్గం(మార్గం);
+  ఒకవేళ (std::error_సంకేతం EC = makeCanonicalForLookup(Canonical_మార్గం))
+    తిరిగి EC;
 
   // RedirectOnly means the VFS is always used.
-  if (UsageTrackingActive && Redirection == RedirectKind::RedirectOnly)
-    HasBeenUsed = true;
+  ఒకవేళ (Usage_Tracking_చురుకైన && Redirection == Redirect_రకం::RedirectOnly)
+    Has_Been_వాడిన = నిజం;
 
-  sys::path::const_iterator Start = sys::path::begin(CanonicalPath);
-  sys::path::const_iterator End = sys::path::end(CanonicalPath);
-  llvm::SmallVector<Entry *, 32> Entries;
-  for (const auto &Root : Roots) {
-    ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, Root.get(), Entries);
-    if (UsageTrackingActive && Result && isa<RemapEntry>(Result->E))
-      HasBeenUsed = true;
-    if (Result) {
-      Result->Parents = std::move(Entries);
-      return Result;
+  sys::మార్గం_2::const_iterator ప్రారంభం = sys::మార్గం_2::begin(Canonical_మార్గం);
+  sys::మార్గం_2::const_iterator చివర_2 = sys::మార్గం_2::చివర(Canonical_మార్గం);
+  llvm::Small_సదిశ<నమోదు_2 *, 32> Entries;
+  కొరకు (స్థిరరాశి స్వయంచాలక &మూలం_2 : Roots) {
+    ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం =
+        lookup_మార్గం_Impl(ప్రారంభం, చివర_2, మూలం_2.get(), Entries);
+    ఒకవేళ (Usage_Tracking_చురుకైన && ఫలితం && isa<Remap_నమోదు>(ఫలితం->E))
+      Has_Been_వాడిన = నిజం;
+    ఒకవేళ (ఫలితం) {
+      ఫలితం->Parents = std::move(Entries);
+      తిరిగి ఫలితం;
     }
 
-    if (Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+    ఒకవేళ (ఫలితం.getError() != llvm::errc::no_such_file_or_directory)
+      తిరిగి ఫలితం;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  తిరిగి make_error_సంకేతం(llvm::errc::no_such_file_or_directory);
 }
 
-ErrorOr<RedirectingFileSystem::LookupResult>
-RedirectingFileSystem::lookupPathImpl(
-    sys::path::const_iterator Start, sys::path::const_iterator End,
-    RedirectingFileSystem::Entry *From,
-    llvm::SmallVectorImpl<Entry *> &Entries) const {
-  assert(!isTraversalComponent(*Start) &&
+ErrorOr<RedirectingFileSystem::Lookup_ఫలితం>
+RedirectingFileSystem::lookup_మార్గం_Impl(
+    sys::మార్గం_2::const_iterator ప్రారంభం, sys::మార్గం_2::const_iterator చివర_2,
+    RedirectingFileSystem::నమోదు_2 *From,
+    llvm::Small_సదిశ_Impl<నమోదు_2 *> &Entries) స్థిరరాశి {
+  ప్రతిజ్ఞా(!isTraversalComponent(*ప్రారంభం) &&
          !isTraversalComponent(From->getName()) &&
          "Paths should not contain traversal components");
 
   StringRef FromName = From->getName();
 
   // Forward the search to the next component in case this is an empty one.
-  if (!FromName.empty()) {
-    if (!pathComponentMatches(*Start, FromName))
-      return make_error_code(llvm::errc::no_such_file_or_directory);
+  ఒకవేళ (!FromName.ఖాళీలు()) {
+    ఒకవేళ (!మార్గం_Component_Matches(*ప్రారంభం, FromName))
+      తిరిగి make_error_సంకేతం(llvm::errc::no_such_file_or_directory);
 
-    ++Start;
+    ++ప్రారంభం;
 
-    if (Start == End) {
+    ఒకవేళ (ప్రారంభం == చివర_2) {
       // Match!
-      return LookupResult(From, Start, End);
+      తిరిగి Lookup_ఫలితం(From, ప్రారంభం, చివర_2);
     }
   }
 
-  if (isa<RedirectingFileSystem::FileEntry>(From))
-    return make_error_code(llvm::errc::not_a_directory);
+  ఒకవేళ (isa<RedirectingFileSystem::File_నమోదు>(From))
+    తిరిగి make_error_సంకేతం(llvm::errc::not_a_directory);
 
-  if (isa<RedirectingFileSystem::DirectoryRemapEntry>(From))
-    return LookupResult(From, Start, End);
+  ఒకవేళ (isa<RedirectingFileSystem::Directory_Remap_నమోదు>(From))
+    తిరిగి Lookup_ఫలితం(From, ప్రారంభం, చివర_2);
 
-  auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(From);
-  for (const std::unique_ptr<RedirectingFileSystem::Entry> &DirEntry :
-       llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-    Entries.push_back(From);
-    ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, DirEntry.get(), Entries);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
-    Entries.pop_back();
+  స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(From);
+  కొరకు (స్థిరరాశి std::unique_ptr<RedirectingFileSystem::నమోదు_2> &Dir_నమోదు :
+       llvm::make_range(DE->contents_begin(), DE->contents_చివర())) {
+    Entries.నెట్టు_వెనుక(From);
+    ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం =
+        lookup_మార్గం_Impl(ప్రారంభం, చివర_2, Dir_నమోదు.get(), Entries);
+    ఒకవేళ (ఫలితం || ఫలితం.getError() != llvm::errc::no_such_file_or_directory)
+      తిరిగి ఫలితం;
+    Entries.తీయి_వెనుక();
   }
 
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  తిరిగి make_error_సంకేతం(llvm::errc::no_such_file_or_directory);
 }
 
-static Status getRedirectedFileStatus(const Twine &OriginalPath,
-                                      bool UseExternalNames,
-                                      Status ExternalStatus) {
+స్థిర స్థితి_2 get_Redirected_File_స్థితి(స్థిరరాశి Twine &Original_మార్గం,
+                                      తార్కిక Use_External_పేర్లు,
+                                      స్థితి_2 External_స్థితి) {
   // The path has been mapped by some nested VFS and exposes an external path,
   // don't override it with the original path.
-  if (ExternalStatus.ExposesExternalVFSPath)
-    return ExternalStatus;
+  ఒకవేళ (External_స్థితి.ExposesExternalVFSPath)
+    తిరిగి External_స్థితి;
 
-  Status S = ExternalStatus;
-  if (!UseExternalNames)
-    S = Status::copyWithNewName(S, OriginalPath);
-  else
-    S.ExposesExternalVFSPath = true;
-  return S;
+  స్థితి_2 S = External_స్థితి;
+  ఒకవేళ (!Use_External_పేర్లు)
+    S = స్థితి_2::copyWithNewName(S, Original_మార్గం);
+  లేకపోతే
+    S.ExposesExternalVFSPath = నిజం;
+  తిరిగి S;
 }
 
-ErrorOr<Status> RedirectingFileSystem::status(
-    const Twine &LookupPath, const Twine &OriginalPath,
-    const RedirectingFileSystem::LookupResult &Result) {
-  if (std::optional<StringRef> ExtRedirect = Result.getExternalRedirect()) {
-    SmallString<256> RemappedPath((*ExtRedirect).str());
-    if (std::error_code EC = makeAbsolute(RemappedPath))
-      return EC;
+ErrorOr<స్థితి_2> RedirectingFileSystem::స్థితి_3(
+    స్థిరరాశి Twine &Lookup_మార్గం, స్థిరరాశి Twine &Original_మార్గం,
+    స్థిరరాశి RedirectingFileSystem::Lookup_ఫలితం &ఫలితం) {
+  ఒకవేళ (std::optional<StringRef> ExtRedirect = ఫలితం.getExternalRedirect()) {
+    SmallString<256> Remapped_మార్గం((*ExtRedirect).str());
+    ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(Remapped_మార్గం))
+      తిరిగి EC;
 
-    ErrorOr<Status> S = ExternalFS->status(RemappedPath);
-    if (!S)
-      return S;
-    S = Status::copyWithNewName(*S, *ExtRedirect);
-    auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result.E);
-    return getRedirectedFileStatus(OriginalPath,
-                                   RE->useExternalName(UseExternalNames), *S);
+    ErrorOr<స్థితి_2> S = ExternalFS->స్థితి_3(Remapped_మార్గం);
+    ఒకవేళ (!S)
+      తిరిగి S;
+    S = స్థితి_2::copyWithNewName(*S, *ExtRedirect);
+    స్వయంచాలక *RE = cast<RedirectingFileSystem::Remap_నమోదు>(ఫలితం.E);
+    తిరిగి get_Redirected_File_స్థితి(Original_మార్గం,
+                                   RE->useExternalName(Use_External_పేర్లు), *S);
   }
 
-  auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(Result.E);
-  return Status::copyWithNewName(DE->getStatus(), LookupPath);
+  స్వయంచాలక *DE = cast<RedirectingFileSystem::Directory_నమోదు>(ఫలితం.E);
+  తిరిగి స్థితి_2::copyWithNewName(DE->get_స్థితి(), Lookup_మార్గం);
 }
 
-ErrorOr<Status>
-RedirectingFileSystem::getExternalStatus(const Twine &LookupPath,
-                                         const Twine &OriginalPath) const {
-  auto Result = ExternalFS->status(LookupPath);
+ErrorOr<స్థితి_2>
+RedirectingFileSystem::get_External_స్థితి(స్థిరరాశి Twine &Lookup_మార్గం,
+                                         స్థిరరాశి Twine &Original_మార్గం) స్థిరరాశి {
+  స్వయంచాలక ఫలితం = ExternalFS->స్థితి_3(Lookup_మార్గం);
 
   // The path has been mapped by some nested VFS, don't override it with the
   // original path.
-  if (!Result || Result->ExposesExternalVFSPath)
-    return Result;
-  return Status::copyWithNewName(Result.get(), OriginalPath);
+  ఒకవేళ (!ఫలితం || ఫలితం->ExposesExternalVFSPath)
+    తిరిగి ఫలితం;
+  తిరిగి స్థితి_2::copyWithNewName(ఫలితం.get(), Original_మార్గం);
 }
 
-ErrorOr<Status> RedirectingFileSystem::status(const Twine &OriginalPath) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+ErrorOr<స్థితి_2> RedirectingFileSystem::స్థితి_3(స్థిరరాశి Twine &Original_మార్గం) {
+  SmallString<256> మార్గం;
+  Original_మార్గం.గమ్యం_సదిశ(మార్గం);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(మార్గం))
+    తిరిగి EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  ఒకవేళ (Redirection == Redirect_రకం::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    ErrorOr<Status> S = getExternalStatus(Path, OriginalPath);
-    if (S)
-      return S;
+    ErrorOr<స్థితి_2> S = get_External_స్థితి(మార్గం, Original_మార్గం);
+    ఒకవేళ (S)
+      తిరిగి S;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం = lookup_మార్గం(మార్గం);
+  ఒకవేళ (!ఫలితం) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return getExternalStatus(Path, OriginalPath);
-    return Result.getError();
+    ఒకవేళ (Redirection == Redirect_రకం::Fallthrough &&
+        is_File_Not_దొరికింది(ఫలితం.getError()))
+      తిరిగి get_External_స్థితి(మార్గం, Original_మార్గం);
+    తిరిగి ఫలితం.getError();
   }
 
-  ErrorOr<Status> S = status(Path, OriginalPath, *Result);
-  if (!S && Redirection == RedirectKind::Fallthrough &&
-      isFileNotFound(S.getError(), Result->E)) {
+  ErrorOr<స్థితి_2> S = స్థితి_3(మార్గం, Original_మార్గం, *ఫలితం);
+  ఒకవేళ (!S && Redirection == Redirect_రకం::Fallthrough &&
+      is_File_Not_దొరికింది(S.getError(), ఫలితం->E)) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return getExternalStatus(Path, OriginalPath);
+    తిరిగి get_External_స్థితి(మార్గం, Original_మార్గం);
   }
 
-  return S;
+  తిరిగి S;
 }
 
-bool RedirectingFileSystem::exists(const Twine &OriginalPath) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+తార్కిక RedirectingFileSystem::exists(స్థిరరాశి Twine &Original_మార్గం) {
+  SmallString<256> మార్గం;
+  Original_మార్గం.గమ్యం_సదిశ(మార్గం);
 
-  if (makeAbsolute(Path))
-    return false;
+  ఒకవేళ (makeAbsolute(మార్గం))
+    తిరిగి అబద్ధం;
 
-  if (Redirection == RedirectKind::Fallback) {
+  ఒకవేళ (Redirection == Redirect_రకం::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    if (ExternalFS->exists(Path))
-      return true;
+    ఒకవేళ (ExternalFS->exists(మార్గం))
+      తిరిగి నిజం;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం = lookup_మార్గం(మార్గం);
+  ఒకవేళ (!ఫలితం) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->exists(Path);
-    return false;
+    ఒకవేళ (Redirection == Redirect_రకం::Fallthrough &&
+        is_File_Not_దొరికింది(ఫలితం.getError()))
+      తిరిగి ExternalFS->exists(మార్గం);
+    తిరిగి అబద్ధం;
   }
 
-  std::optional<StringRef> ExtRedirect = Result->getExternalRedirect();
-  if (!ExtRedirect) {
-    assert(isa<RedirectingFileSystem::DirectoryEntry>(Result->E));
-    return true;
+  std::optional<StringRef> ExtRedirect = ఫలితం->getExternalRedirect();
+  ఒకవేళ (!ExtRedirect) {
+    ప్రతిజ్ఞా(isa<RedirectingFileSystem::Directory_నమోదు>(ఫలితం->E));
+    తిరిగి నిజం;
   }
 
-  SmallString<256> RemappedPath((*ExtRedirect).str());
-  if (makeAbsolute(RemappedPath))
-    return false;
+  SmallString<256> Remapped_మార్గం((*ExtRedirect).str());
+  ఒకవేళ (makeAbsolute(Remapped_మార్గం))
+    తిరిగి అబద్ధం;
 
-  if (ExternalFS->exists(RemappedPath))
-    return true;
+  ఒకవేళ (ExternalFS->exists(Remapped_మార్గం))
+    తిరిగి నిజం;
 
-  if (Redirection == RedirectKind::Fallthrough) {
+  ఒకవేళ (Redirection == Redirect_రకం::Fallthrough) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return ExternalFS->exists(Path);
+    తిరిగి ExternalFS->exists(మార్గం);
   }
 
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-namespace {
+నామాకాశ {
 
 /// Provide a file wrapper with an overriden status.
-class FileWithFixedStatus : public File {
+తరగతి File_With_Fixed_స్థితి : బహిరంగ File {
   std::unique_ptr<File> InnerFile;
-  Status S;
+  స్థితి_2 S;
 
-public:
-  FileWithFixedStatus(std::unique_ptr<File> InnerFile, Status S)
+బహిరంగ:
+  File_With_Fixed_స్థితి(std::unique_ptr<File> InnerFile, స్థితి_2 S)
       : InnerFile(std::move(InnerFile)), S(std::move(S)) {}
 
-  ErrorOr<Status> status() override { return S; }
-  ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
+  ErrorOr<స్థితి_2> స్థితి_3() override { తిరిగి S; }
+  ErrorOr<std::unique_ptr<llvm::జ్ఞాపకం_బఫరు>>
 
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
-            bool IsVolatile) override {
-    return InnerFile->getBuffer(Name, FileSize, RequiresNullTerminator,
+  get_బఫరు(స్థిరరాశి Twine &Name, int64_t File_కొలత, తార్కిక RequiresNullTerminator,
+            తార్కిక IsVolatile) override {
+    తిరిగి InnerFile->get_బఫరు(Name, File_కొలత, RequiresNullTerminator,
                                 IsVolatile);
   }
 
-  std::error_code close() override { return InnerFile->close(); }
+  std::error_సంకేతం close() override { తిరిగి InnerFile->close(); }
 
-  void setPath(const Twine &Path) override { S = S.copyWithNewName(S, Path); }
+  శూన్య సమితి_మార్గం(స్థిరరాశి Twine &మార్గం) override { S = S.copyWithNewName(S, మార్గం); }
 };
 
 } // namespace
 
 ErrorOr<std::unique_ptr<File>>
-File::getWithPath(ErrorOr<std::unique_ptr<File>> Result, const Twine &P) {
+File::get_With_మార్గం(ErrorOr<std::unique_ptr<File>> ఫలితం, స్థిరరాశి Twine &P) {
   // See \c getRedirectedFileStatus - don't update path if it's exposing an
   // external path.
-  if (!Result || (*Result)->status()->ExposesExternalVFSPath)
-    return Result;
+  ఒకవేళ (!ఫలితం || (*ఫలితం)->స్థితి_3()->ExposesExternalVFSPath)
+    తిరిగి ఫలితం;
 
-  ErrorOr<std::unique_ptr<File>> F = std::move(*Result);
-  auto Name = F->get()->getName();
-  if (Name && Name.get() != P.str())
-    F->get()->setPath(P);
-  return F;
+  ErrorOr<std::unique_ptr<File>> F = std::move(*ఫలితం);
+  స్వయంచాలక Name = F->get()->getName();
+  ఒకవేళ (Name && Name.get() != P.str())
+    F->get()->సమితి_మార్గం(P);
+  తిరిగి F;
 }
 
 ErrorOr<std::unique_ptr<File>>
-RedirectingFileSystem::openFileForRead(const Twine &OriginalPath) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+RedirectingFileSystem::openFileForRead(స్థిరరాశి Twine &Original_మార్గం) {
+  SmallString<256> మార్గం;
+  Original_మార్గం.గమ్యం_సదిశ(మార్గం);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(మార్గం))
+    తిరిగి EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  ఒకవేళ (Redirection == Redirect_రకం::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    auto F = File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    if (F)
-      return F;
+    స్వయంచాలక F = File::get_With_మార్గం(ExternalFS->openFileForRead(మార్గం), Original_మార్గం);
+    ఒకవేళ (F)
+      తిరిగి F;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం = lookup_మార్గం(మార్గం);
+  ఒకవేళ (!ఫలితం) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    return Result.getError();
+    ఒకవేళ (Redirection == Redirect_రకం::Fallthrough &&
+        is_File_Not_దొరికింది(ఫలితం.getError()))
+      తిరిగి File::get_With_మార్గం(ExternalFS->openFileForRead(మార్గం), Original_మార్గం);
+    తిరిగి ఫలితం.getError();
   }
 
-  if (!Result->getExternalRedirect()) // FIXME: errc::not_a_file?
-    return make_error_code(llvm::errc::invalid_argument);
+  ఒకవేళ (!ఫలితం->getExternalRedirect()) // FIXME: errc::not_a_file?
+    తిరిగి make_error_సంకేతం(llvm::errc::invalid_వాదం);
 
-  StringRef ExtRedirect = *Result->getExternalRedirect();
-  SmallString<256> RemappedPath(ExtRedirect.str());
-  if (std::error_code EC = makeAbsolute(RemappedPath))
-    return EC;
+  StringRef ExtRedirect = *ఫలితం->getExternalRedirect();
+  SmallString<256> Remapped_మార్గం(ExtRedirect.str());
+  ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(Remapped_మార్గం))
+    తిరిగి EC;
 
-  auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
+  స్వయంచాలక *RE = cast<RedirectingFileSystem::Remap_నమోదు>(ఫలితం->E);
 
-  auto ExternalFile =
-      File::getWithPath(ExternalFS->openFileForRead(RemappedPath), ExtRedirect);
-  if (!ExternalFile) {
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(ExternalFile.getError(), Result->E)) {
+  స్వయంచాలక ExternalFile =
+      File::get_With_మార్గం(ExternalFS->openFileForRead(Remapped_మార్గం), ExtRedirect);
+  ఒకవేళ (!ExternalFile) {
+    ఒకవేళ (Redirection == Redirect_రకం::Fallthrough &&
+        is_File_Not_దొరికింది(ExternalFile.getError(), ఫలితం->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+      తిరిగి File::get_With_మార్గం(ExternalFS->openFileForRead(మార్గం), Original_మార్గం);
     }
-    return ExternalFile;
+    తిరిగి ExternalFile;
   }
 
-  auto ExternalStatus = (*ExternalFile)->status();
-  if (!ExternalStatus)
-    return ExternalStatus.getError();
+  స్వయంచాలక External_స్థితి = (*ExternalFile)->స్థితి_3();
+  ఒకవేళ (!External_స్థితి)
+    తిరిగి External_స్థితి.getError();
 
   // Otherwise, the file was successfully remapped. Mark it as such. Also
   // replace the underlying path if the external name is being used.
-  Status S = getRedirectedFileStatus(
-      OriginalPath, RE->useExternalName(UseExternalNames), *ExternalStatus);
-  return std::unique_ptr<File>(
-      std::make_unique<FileWithFixedStatus>(std::move(*ExternalFile), S));
+  స్థితి_2 S = get_Redirected_File_స్థితి(
+      Original_మార్గం, RE->useExternalName(Use_External_పేర్లు), *External_స్థితి);
+  తిరిగి std::unique_ptr<File>(
+      std::make_unique<File_With_Fixed_స్థితి>(std::move(*ExternalFile), S));
 }
 
-std::error_code
-RedirectingFileSystem::getRealPath(const Twine &OriginalPath,
-                                   SmallVectorImpl<char> &Output) {
-  SmallString<256> Path;
-  OriginalPath.toVector(Path);
+std::error_సంకేతం
+RedirectingFileSystem::get_Real_మార్గం(స్థిరరాశి Twine &Original_మార్గం,
+                                   Small_సదిశ_Impl<అక్షరం> &Output) {
+  SmallString<256> మార్గం;
+  Original_మార్గం.గమ్యం_సదిశ(మార్గం);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  ఒకవేళ (std::error_సంకేతం EC = makeAbsolute(మార్గం))
+    తిరిగి EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  ఒకవేళ (Redirection == Redirect_రకం::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    std::error_code EC = ExternalFS->getRealPath(Path, Output);
-    if (!EC)
-      return EC;
+    std::error_సంకేతం EC = ExternalFS->get_Real_మార్గం(మార్గం, Output);
+    ఒకవేళ (!EC)
+      తిరిగి EC;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం = lookup_మార్గం(మార్గం);
+  ఒకవేళ (!ఫలితం) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->getRealPath(Path, Output);
-    return Result.getError();
+    ఒకవేళ (Redirection == Redirect_రకం::Fallthrough &&
+        is_File_Not_దొరికింది(ఫలితం.getError()))
+      తిరిగి ExternalFS->get_Real_మార్గం(మార్గం, Output);
+    తిరిగి ఫలితం.getError();
   }
 
   // If we found FileEntry or DirectoryRemapEntry, look up the mapped
   // path in the external file system.
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
-    auto P = ExternalFS->getRealPath(*ExtRedirect, Output);
-    if (P && Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(P, Result->E)) {
+  ఒకవేళ (స్వయంచాలక ExtRedirect = ఫలితం->getExternalRedirect()) {
+    స్వయంచాలక P = ExternalFS->get_Real_మార్గం(*ExtRedirect, Output);
+    ఒకవేళ (P && Redirection == Redirect_రకం::Fallthrough &&
+        is_File_Not_దొరికింది(P, ఫలితం->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return ExternalFS->getRealPath(Path, Output);
+      తిరిగి ExternalFS->get_Real_మార్గం(మార్గం, Output);
     }
-    return P;
+    తిరిగి P;
   }
 
   // We found a DirectoryEntry, which does not have a single external contents
   // path. Use the canonical virtual path.
-  if (Redirection == RedirectKind::Fallthrough) {
-    Result->getPath(Output);
-    return {};
+  ఒకవేళ (Redirection == Redirect_రకం::Fallthrough) {
+    ఫలితం->get_మార్గం(Output);
+    తిరిగి {};
   }
-  return llvm::errc::invalid_argument;
+  తిరిగి llvm::errc::invalid_వాదం;
 }
 
-void RedirectingFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
-  SmallString<256> Path;
-  Dir.toVector(Path);
+శూన్య RedirectingFileSystem::getDirectoryContentRealSources(
+    స్థిరరాశి Twine &Dir, Small_సదిశ_Impl<std::string> &బహిర్గతం) {
+  SmallString<256> మార్గం;
+  Dir.గమ్యం_సదిశ(మార్గం);
 
-  if (makeAbsolute(Path))
-    return;
+  ఒకవేళ (makeAbsolute(మార్గం))
+    తిరిగి;
 
   // Fallthrough and Fallback both consult ExternalFS, differing only in order.
-  const bool ConsultsExternalFS = Redirection != RedirectKind::RedirectOnly;
+  స్థిరరాశి తార్కిక ConsultsExternalFS = Redirection != Redirect_రకం::RedirectOnly;
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> ఫలితం = lookup_మార్గం(మార్గం);
+  ఒకవేళ (!ఫలితం) {
     // dir_begin() delegates entirely to ExternalFS.
-    if (ConsultsExternalFS)
-      ExternalFS->getDirectoryContentRealSources(Path, Out);
-    return;
+    ఒకవేళ (ConsultsExternalFS)
+      ExternalFS->getDirectoryContentRealSources(మార్గం, బహిర్గతం);
+    తిరిగి;
   }
 
-  switch (Result->E->getKind()) {
-  case EK_File:
-    return;
-  case EK_Directory:
+  ఎంపిక (ఫలితం->E->get_రకం()) {
+  స్థితి EK_File:
+    తిరిగి;
+  స్థితి EK_Directory:
     // The names come from the overlay, which has no location in ExternalFS.
-    break;
-  case EK_DirectoryRemap: {
+    ఆపు;
+  స్థితి EK_DirectoryRemap: {
     // Make the target absolute as status() does, so a relative
     // 'external-contents' is not passed down raw.
-    SmallString<256> RemappedPath(*Result->getExternalRedirect());
-    if (!makeAbsolute(RemappedPath))
-      ExternalFS->getDirectoryContentRealSources(RemappedPath, Out);
-    break;
+    SmallString<256> Remapped_మార్గం(*ఫలితం->getExternalRedirect());
+    ఒకవేళ (!makeAbsolute(Remapped_మార్గం))
+      ExternalFS->getDirectoryContentRealSources(Remapped_మార్గం, బహిర్గతం);
+    ఆపు;
   }
   }
 
   // dir_begin() also iterates the original path in ExternalFS.
-  if (ConsultsExternalFS)
-    ExternalFS->getDirectoryContentRealSources(Path, Out);
+  ఒకవేళ (ConsultsExternalFS)
+    ExternalFS->getDirectoryContentRealSources(మార్గం, బహిర్గతం);
 }
 
 std::unique_ptr<FileSystem>
-vfs::getVFSFromYAML(std::unique_ptr<MemoryBuffer> Buffer,
-                    SourceMgr::DiagHandlerTy DiagHandler,
-                    StringRef YAMLFilePath, void *DiagContext,
+vfs::getVFSFromYAML(std::unique_ptr<జ్ఞాపకం_బఫరు> బఫరు,
+                    ఆధారం_Mgr::DiagHandlerTy DiagHandler,
+                    StringRef YAMLFile_మార్గం, శూన్య *DiagContext,
                     IntrusiveRefCntPtr<FileSystem> ExternalFS) {
-  return RedirectingFileSystem::create(std::move(Buffer), DiagHandler,
-                                       YAMLFilePath, DiagContext,
+  తిరిగి RedirectingFileSystem::create(std::move(బఫరు), DiagHandler,
+                                       YAMLFile_మార్గం, DiagContext,
                                        std::move(ExternalFS));
 }
 
-static void getVFSEntries(RedirectingFileSystem::Entry *SrcE,
-                          SmallVectorImpl<StringRef> &Path,
-                          SmallVectorImpl<YAMLVFSEntry> &Entries) {
-  auto Kind = SrcE->getKind();
-  if (Kind == RedirectingFileSystem::EK_Directory) {
-    auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
-    assert(DE && "Must be a directory");
-    for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
-         llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-      Path.push_back(SubEntry->getName());
-      getVFSEntries(SubEntry.get(), Path, Entries);
-      Path.pop_back();
+స్థిర శూన్య getVFSEntries(RedirectingFileSystem::నమోదు_2 *SrcE,
+                          Small_సదిశ_Impl<StringRef> &మార్గం,
+                          Small_సదిశ_Impl<YAMLVFSEntry> &Entries) {
+  స్వయంచాలక రకం_3 = SrcE->get_రకం();
+  ఒకవేళ (రకం_3 == RedirectingFileSystem::EK_Directory) {
+    స్వయంచాలక *DE = dyn_cast<RedirectingFileSystem::Directory_నమోదు>(SrcE);
+    ప్రతిజ్ఞా(DE && "Must be a directory");
+    కొరకు (std::unique_ptr<RedirectingFileSystem::నమోదు_2> &Sub_నమోదు :
+         llvm::make_range(DE->contents_begin(), DE->contents_చివర())) {
+      మార్గం.నెట్టు_వెనుక(Sub_నమోదు->getName());
+      getVFSEntries(Sub_నమోదు.get(), మార్గం, Entries);
+      మార్గం.తీయి_వెనుక();
     }
-    return;
+    తిరిగి;
   }
 
-  if (Kind == RedirectingFileSystem::EK_DirectoryRemap) {
-    auto *DR = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-    assert(DR && "Must be a directory remap");
+  ఒకవేళ (రకం_3 == RedirectingFileSystem::EK_DirectoryRemap) {
+    స్వయంచాలక *DR = dyn_cast<RedirectingFileSystem::Directory_Remap_నమోదు>(SrcE);
+    ప్రతిజ్ఞా(DR && "Must be a directory remap");
     SmallString<128> VPath;
-    for (auto &Comp : Path)
-      llvm::sys::path::append(VPath, Comp);
-    Entries.push_back(
-        YAMLVFSEntry(VPath.c_str(), DR->getExternalContentsPath()));
-    return;
+    కొరకు (స్వయంచాలక &Comp : మార్గం)
+      llvm::sys::మార్గం_2::append(VPath, Comp);
+    Entries.నెట్టు_వెనుక(
+        YAMLVFSEntry(VPath.c_str(), DR->get_External_Contents_మార్గం()));
+    తిరిగి;
   }
 
-  assert(Kind == RedirectingFileSystem::EK_File && "Must be a EK_File");
-  auto *FE = dyn_cast<RedirectingFileSystem::FileEntry>(SrcE);
-  assert(FE && "Must be a file");
+  ప్రతిజ్ఞా(రకం_3 == RedirectingFileSystem::EK_File && "Must be a EK_File");
+  స్వయంచాలక *FE = dyn_cast<RedirectingFileSystem::File_నమోదు>(SrcE);
+  ప్రతిజ్ఞా(FE && "Must be a file");
   SmallString<128> VPath;
-  for (auto &Comp : Path)
-    llvm::sys::path::append(VPath, Comp);
-  Entries.push_back(YAMLVFSEntry(VPath.c_str(), FE->getExternalContentsPath()));
+  కొరకు (స్వయంచాలక &Comp : మార్గం)
+    llvm::sys::మార్గం_2::append(VPath, Comp);
+  Entries.నెట్టు_వెనుక(YAMLVFSEntry(VPath.c_str(), FE->get_External_Contents_మార్గం()));
 }
 
-void vfs::collectVFSEntries(RedirectingFileSystem &VFS,
-                            SmallVectorImpl<YAMLVFSEntry> &CollectedEntries) {
-  ErrorOr<RedirectingFileSystem::LookupResult> RootResult = VFS.lookupPath("/");
-  if (!RootResult)
-    return;
-  SmallVector<StringRef, 8> Components;
-  Components.push_back("/");
-  getVFSEntries(RootResult->E, Components, CollectedEntries);
+శూన్య vfs::collectVFSEntries(RedirectingFileSystem &VFS,
+                            Small_సదిశ_Impl<YAMLVFSEntry> &CollectedEntries) {
+  ErrorOr<RedirectingFileSystem::Lookup_ఫలితం> మూలం_ఫలితం = VFS.lookup_మార్గం("/");
+  ఒకవేళ (!మూలం_ఫలితం)
+    తిరిగి;
+  Small_సదిశ<StringRef, 8> Components;
+  Components.నెట్టు_వెనుక("/");
+  getVFSEntries(మూలం_ఫలితం->E, Components, CollectedEntries);
 }
 
-UniqueID vfs::getNextVirtualUniqueID() {
-  static std::atomic<unsigned> UID;
-  unsigned ID = ++UID;
+UniqueID vfs::get_తదుపరి_Virtual_Unique_ID() {
+  స్థిర std::atomic<గుర్తులేని> UID;
+  గుర్తులేని ID = ++UID;
   // The following assumes that uint64_t max will never collide with a real
   // dev_t value from the OS.
-  return UniqueID(std::numeric_limits<uint64_t>::max(), ID);
+  తిరిగి UniqueID(std::numeric_limits<uint64_t>::max(), ID);
 }
 
-void YAMLVFSWriter::addEntry(StringRef VirtualPath, StringRef RealPath,
-                             bool IsDirectory) {
-  assert(sys::path::is_absolute(VirtualPath) && "virtual path not absolute");
-  assert(sys::path::is_absolute(RealPath) && "real path not absolute");
-  assert(!pathHasTraversal(VirtualPath) && "path traversal is not supported");
-  Mappings.emplace_back(VirtualPath, RealPath, IsDirectory);
+శూన్య YAMLVFSWriter::కూడు_నమోదు(StringRef Virtual_మార్గం, StringRef Real_మార్గం,
+                             తార్కిక IsDirectory) {
+  ప్రతిజ్ఞా(sys::మార్గం_2::is_absolute(Virtual_మార్గం) && "virtual path not absolute");
+  ప్రతిజ్ఞా(sys::మార్గం_2::is_absolute(Real_మార్గం) && "real path not absolute");
+  ప్రతిజ్ఞా(!మార్గం_Has_Traversal(Virtual_మార్గం) && "path traversal is not supported");
+  Mappings.emplace_వెనుక(Virtual_మార్గం, Real_మార్గం, IsDirectory);
 }
 
-void YAMLVFSWriter::addFileMapping(StringRef VirtualPath, StringRef RealPath) {
-  addEntry(VirtualPath, RealPath, /*IsDirectory=*/false);
+శూన్య YAMLVFSWriter::కూడు_File_Mapping(StringRef Virtual_మార్గం, StringRef Real_మార్గం) {
+  కూడు_నమోదు(Virtual_మార్గం, Real_మార్గం, /*IsDirectory=*/అబద్ధం);
 }
 
-void YAMLVFSWriter::addDirectoryMapping(StringRef VirtualPath,
-                                        StringRef RealPath) {
-  addEntry(VirtualPath, RealPath, /*IsDirectory=*/true);
+శూన్య YAMLVFSWriter::కూడు_Directory_Mapping(StringRef Virtual_మార్గం,
+                                        StringRef Real_మార్గం) {
+  కూడు_నమోదు(Virtual_మార్గం, Real_మార్గం, /*IsDirectory=*/నిజం);
 }
 
-namespace {
+నామాకాశ {
 
-class JSONWriter {
+తరగతి JSONWriter {
   llvm::raw_ostream &OS;
-  SmallVector<StringRef, 16> DirStack;
+  Small_సదిశ<StringRef, 16> Dir_దొంతర;
 
-  unsigned getDirIndent() { return 4 * DirStack.size(); }
-  unsigned getFileIndent() { return 4 * (DirStack.size() + 1); }
-  bool containedIn(StringRef Parent, StringRef Path);
-  StringRef containedPart(StringRef Parent, StringRef Path);
-  void startDirectory(StringRef Path);
-  void endDirectory();
-  void writeEntry(StringRef VPath, StringRef RPath);
+  గుర్తులేని getDirIndent() { తిరిగి 4 * Dir_దొంతర.కొలత_2(); }
+  గుర్తులేని getFileIndent() { తిరిగి 4 * (Dir_దొంతర.కొలత_2() + 1); }
+  తార్కిక contained_లోపల(StringRef మాతృ_2, StringRef మార్గం);
+  StringRef containedPart(StringRef మాతృ_2, StringRef మార్గం);
+  శూన్య ప్రారంభం_Directory(StringRef మార్గం);
+  శూన్య చివర_Directory();
+  శూన్య write_నమోదు(StringRef VPath, StringRef RPath);
 
-public:
+బహిరంగ:
   JSONWriter(llvm::raw_ostream &OS) : OS(OS) {}
 
-  void write(ArrayRef<YAMLVFSEntry> Entries,
-             std::optional<bool> UseExternalNames,
-             std::optional<bool> IsCaseSensitive,
-             std::optional<bool> IsOverlayRelative, StringRef OverlayDir);
+  శూన్య లిఖ(ArrayRef<YAMLVFSEntry> Entries,
+             std::optional<తార్కిక> Use_External_పేర్లు,
+             std::optional<తార్కిక> IsCaseSensitive,
+             std::optional<తార్కిక> IsOverlayRelative, StringRef OverlayDir);
 };
 
 } // namespace
 
-bool JSONWriter::containedIn(StringRef Parent, StringRef Path) {
-  using namespace llvm::sys;
+తార్కిక JSONWriter::contained_లోపల(StringRef మాతృ_2, StringRef మార్గం) {
+  ఉపయోగించి నామాకాశ llvm::sys;
 
   // Compare each path component.
-  auto IParent = path::begin(Parent), EParent = path::end(Parent);
-  for (auto IChild = path::begin(Path), EChild = path::end(Path);
+  స్వయంచాలక IParent = మార్గం_2::begin(మాతృ_2), EParent = మార్గం_2::చివర(మాతృ_2);
+  కొరకు (స్వయంచాలక IChild = మార్గం_2::begin(మార్గం), EChild = మార్గం_2::చివర(మార్గం);
        IParent != EParent && IChild != EChild; ++IParent, ++IChild) {
-    if (*IParent != *IChild)
-      return false;
+    ఒకవేళ (*IParent != *IChild)
+      తిరిగి అబద్ధం;
   }
   // Have we exhausted the parent path?
-  return IParent == EParent;
+  తిరిగి IParent == EParent;
 }
 
-StringRef JSONWriter::containedPart(StringRef Parent, StringRef Path) {
-  assert(!Parent.empty());
-  assert(containedIn(Parent, Path));
-  return Path.substr(Parent.size() + 1);
+StringRef JSONWriter::containedPart(StringRef మాతృ_2, StringRef మార్గం) {
+  ప్రతిజ్ఞా(!మాతృ_2.ఖాళీలు());
+  ప్రతిజ్ఞా(contained_లోపల(మాతృ_2, మార్గం));
+  తిరిగి మార్గం.substr(మాతృ_2.కొలత_2() + 1);
 }
 
-void JSONWriter::startDirectory(StringRef Path) {
+శూన్య JSONWriter::ప్రారంభం_Directory(StringRef మార్గం) {
   StringRef Name =
-      DirStack.empty() ? Path : containedPart(DirStack.back(), Path);
-  DirStack.push_back(Path);
-  unsigned Indent = getDirIndent();
+      Dir_దొంతర.ఖాళీలు() ? మార్గం : containedPart(Dir_దొంతర.వెనుక(), మార్గం);
+  Dir_దొంతర.నెట్టు_వెనుక(మార్గం);
+  గుర్తులేని Indent = getDirIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'directory',\n";
   OS.indent(Indent + 2) << "'name': \"" << llvm::yaml::escape(Name) << "\",\n";
   OS.indent(Indent + 2) << "'contents': [\n";
 }
 
-void JSONWriter::endDirectory() {
-  unsigned Indent = getDirIndent();
+శూన్య JSONWriter::చివర_Directory() {
+  గుర్తులేని Indent = getDirIndent();
   OS.indent(Indent + 2) << "]\n";
   OS.indent(Indent) << "}";
 
-  DirStack.pop_back();
+  Dir_దొంతర.తీయి_వెనుక();
 }
 
-void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
-  unsigned Indent = getFileIndent();
+శూన్య JSONWriter::write_నమోదు(StringRef VPath, StringRef RPath) {
+  గుర్తులేని Indent = getFileIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'file',\n";
   OS.indent(Indent + 2) << "'name': \"" << llvm::yaml::escape(VPath) << "\",\n";
@@ -2907,84 +2907,84 @@ void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
   OS.indent(Indent) << "}";
 }
 
-void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
-                       std::optional<bool> UseExternalNames,
-                       std::optional<bool> IsCaseSensitive,
-                       std::optional<bool> IsOverlayRelative,
+శూన్య JSONWriter::లిఖ(ArrayRef<YAMLVFSEntry> Entries,
+                       std::optional<తార్కిక> Use_External_పేర్లు,
+                       std::optional<తార్కిక> IsCaseSensitive,
+                       std::optional<తార్కిక> IsOverlayRelative,
                        StringRef OverlayDir) {
-  using namespace llvm::sys;
+  ఉపయోగించి నామాకాశ llvm::sys;
 
   OS << "{\n"
         "  'version': 0,\n";
-  if (IsCaseSensitive)
+  ఒకవేళ (IsCaseSensitive)
     OS << "  'case-sensitive': '" << (*IsCaseSensitive ? "true" : "false")
        << "',\n";
-  if (UseExternalNames)
-    OS << "  'use-external-names': '" << (*UseExternalNames ? "true" : "false")
+  ఒకవేళ (Use_External_పేర్లు)
+    OS << "  'use-external-names': '" << (*Use_External_పేర్లు ? "true" : "false")
        << "',\n";
-  bool UseOverlayRelative = false;
-  if (IsOverlayRelative) {
+  తార్కిక UseOverlayRelative = అబద్ధం;
+  ఒకవేళ (IsOverlayRelative) {
     UseOverlayRelative = *IsOverlayRelative;
     OS << "  'overlay-relative': '" << (UseOverlayRelative ? "true" : "false")
        << "',\n";
   }
   OS << "  'roots': [\n";
 
-  if (!Entries.empty()) {
-    const YAMLVFSEntry &Entry = Entries.front();
+  ఒకవేళ (!Entries.ఖాళీలు()) {
+    స్థిరరాశి YAMLVFSEntry &నమోదు_2 = Entries.front();
 
-    startDirectory(
-      Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath)
+    ప్రారంభం_Directory(
+      నమోదు_2.IsDirectory ? నమోదు_2.VPath : మార్గం_2::మాతృ_మార్గం(నమోదు_2.VPath)
     );
 
-    StringRef RPath = Entry.RPath;
-    if (UseOverlayRelative) {
-      assert(RPath.starts_with(OverlayDir) &&
+    StringRef RPath = నమోదు_2.RPath;
+    ఒకవేళ (UseOverlayRelative) {
+      ప్రతిజ్ఞా(RPath.starts_with(OverlayDir) &&
              "Overlay dir must be contained in RPath");
-      RPath = RPath.substr(OverlayDir.size());
+      RPath = RPath.substr(OverlayDir.కొలత_2());
     }
 
-    bool IsCurrentDirEmpty = true;
-    if (!Entry.IsDirectory) {
-      writeEntry(path::filename(Entry.VPath), RPath);
-      IsCurrentDirEmpty = false;
+    తార్కిక Is_Current_Dir_ఖాళీలు = నిజం;
+    ఒకవేళ (!నమోదు_2.IsDirectory) {
+      write_నమోదు(మార్గం_2::filename(నమోదు_2.VPath), RPath);
+      Is_Current_Dir_ఖాళీలు = అబద్ధం;
     }
 
-    for (const auto &Entry : Entries.slice(1)) {
+    కొరకు (స్థిరరాశి స్వయంచాలక &నమోదు_2 : Entries.ముక్క(1)) {
       StringRef Dir =
-          Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath);
-      if (Dir == DirStack.back()) {
-        if (!IsCurrentDirEmpty) {
+          నమోదు_2.IsDirectory ? నమోదు_2.VPath : మార్గం_2::మాతృ_మార్గం(నమోదు_2.VPath);
+      ఒకవేళ (Dir == Dir_దొంతర.వెనుక()) {
+        ఒకవేళ (!Is_Current_Dir_ఖాళీలు) {
           OS << ",\n";
         }
-      } else {
-        bool IsDirPoppedFromStack = false;
-        while (!DirStack.empty() && !containedIn(DirStack.back(), Dir)) {
+      } లేకపోతే {
+        తార్కిక Is_Dir_Popped_From_దొంతర = అబద్ధం;
+        అయితే (!Dir_దొంతర.ఖాళీలు() && !contained_లోపల(Dir_దొంతర.వెనుక(), Dir)) {
           OS << "\n";
-          endDirectory();
-          IsDirPoppedFromStack = true;
+          చివర_Directory();
+          Is_Dir_Popped_From_దొంతర = నిజం;
         }
-        if (IsDirPoppedFromStack || !IsCurrentDirEmpty) {
+        ఒకవేళ (Is_Dir_Popped_From_దొంతర || !Is_Current_Dir_ఖాళీలు) {
           OS << ",\n";
         }
-        startDirectory(Dir);
-        IsCurrentDirEmpty = true;
+        ప్రారంభం_Directory(Dir);
+        Is_Current_Dir_ఖాళీలు = నిజం;
       }
-      StringRef RPath = Entry.RPath;
-      if (UseOverlayRelative) {
-        assert(RPath.starts_with(OverlayDir) &&
+      StringRef RPath = నమోదు_2.RPath;
+      ఒకవేళ (UseOverlayRelative) {
+        ప్రతిజ్ఞా(RPath.starts_with(OverlayDir) &&
                "Overlay dir must be contained in RPath");
-        RPath = RPath.substr(OverlayDir.size());
+        RPath = RPath.substr(OverlayDir.కొలత_2());
       }
-      if (!Entry.IsDirectory) {
-        writeEntry(path::filename(Entry.VPath), RPath);
-        IsCurrentDirEmpty = false;
+      ఒకవేళ (!నమోదు_2.IsDirectory) {
+        write_నమోదు(మార్గం_2::filename(నమోదు_2.VPath), RPath);
+        Is_Current_Dir_ఖాళీలు = అబద్ధం;
       }
     }
 
-    while (!DirStack.empty()) {
+    అయితే (!Dir_దొంతర.ఖాళీలు()) {
       OS << "\n";
-      endDirectory();
+      చివర_Directory();
     }
     OS << "\n";
   }
@@ -2993,68 +2993,68 @@ void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
      << "}\n";
 }
 
-void YAMLVFSWriter::write(llvm::raw_ostream &OS) {
-  llvm::sort(Mappings, [](const YAMLVFSEntry &LHS, const YAMLVFSEntry &RHS) {
-    return LHS.VPath < RHS.VPath;
+శూన్య YAMLVFSWriter::లిఖ(llvm::raw_ostream &OS) {
+  llvm::క్రమీకరించు(Mappings, [](స్థిరరాశి YAMLVFSEntry &LHS, స్థిరరాశి YAMLVFSEntry &RHS) {
+    తిరిగి LHS.VPath < RHS.VPath;
   });
 
-  JSONWriter(OS).write(Mappings, UseExternalNames, IsCaseSensitive,
+  JSONWriter(OS).లిఖ(Mappings, Use_External_పేర్లు, IsCaseSensitive,
                        IsOverlayRelative, OverlayDir);
 }
 
 vfs::recursive_directory_iterator::recursive_directory_iterator(
-    FileSystem &FS_, const Twine &Path, std::error_code &EC)
+    FileSystem &FS_, స్థిరరాశి Twine &మార్గం, std::error_సంకేతం &EC)
     : FS(&FS_) {
-  directory_iterator I = FS->dir_begin(Path, EC);
-  if (I != directory_iterator()) {
+  directory_iterator I = FS->dir_begin(మార్గం, EC);
+  ఒకవేళ (I != directory_iterator()) {
     State = std::make_shared<detail::RecDirIterState>();
-    State->Stack.push_back(I);
+    State->దొంతర.నెట్టు_వెనుక(I);
   }
 }
 
 vfs::recursive_directory_iterator &
-recursive_directory_iterator::increment(std::error_code &EC) {
-  assert(FS && State && !State->Stack.empty() && "incrementing past end");
-  assert(!State->Stack.back()->path().empty() && "non-canonical end iterator");
-  vfs::directory_iterator End;
+recursive_directory_iterator::increment(std::error_సంకేతం &EC) {
+  ప్రతిజ్ఞా(FS && State && !State->దొంతర.ఖాళీలు() && "incrementing past end");
+  ప్రతిజ్ఞా(!State->దొంతర.వెనుక()->మార్గం_2().ఖాళీలు() && "non-canonical end iterator");
+  vfs::directory_iterator చివర_2;
 
-  if (State->HasNoPushRequest)
-    State->HasNoPushRequest = false;
-  else {
-    if (State->Stack.back()->type() == sys::fs::file_type::directory_file) {
+  ఒకవేళ (State->Has_No_నెట్టు_Request)
+    State->Has_No_నెట్టు_Request = అబద్ధం;
+  లేకపోతే {
+    ఒకవేళ (State->దొంతర.వెనుక()->type() == sys::fs::file_type::directory_file) {
       vfs::directory_iterator I =
-          FS->dir_begin(State->Stack.back()->path(), EC);
-      if (I != End) {
-        State->Stack.push_back(I);
-        return *this;
+          FS->dir_begin(State->దొంతర.వెనుక()->మార్గం_2(), EC);
+      ఒకవేళ (I != చివర_2) {
+        State->దొంతర.నెట్టు_వెనుక(I);
+        తిరిగి *ఇది;
       }
     }
   }
 
-  while (!State->Stack.empty() && State->Stack.back().increment(EC) == End)
-    State->Stack.pop_back();
+  అయితే (!State->దొంతర.ఖాళీలు() && State->దొంతర.వెనుక().increment(EC) == చివర_2)
+    State->దొంతర.తీయి_వెనుక();
 
-  if (State->Stack.empty())
+  ఒకవేళ (State->దొంతర.ఖాళీలు())
     State.reset(); // end iterator
 
-  return *this;
+  తిరిగి *ఇది;
 }
 
-const char FileSystem::ID = 0;
-const char OverlayFileSystem::ID = 0;
-const char ProxyFileSystem::ID = 0;
-const char InMemoryFileSystem::ID = 0;
-const char RedirectingFileSystem::ID = 0;
+స్థిరరాశి అక్షరం FileSystem::ID = 0;
+స్థిరరాశి అక్షరం OverlayFileSystem::ID = 0;
+స్థిరరాశి అక్షరం ProxyFileSystem::ID = 0;
+స్థిరరాశి అక్షరం లోపల_జ్ఞాపకం_File_System::ID = 0;
+స్థిరరాశి అక్షరం RedirectingFileSystem::ID = 0;
 
-unsigned ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::useCount(
-    const FileSystem *FS) {
-  return FS->UseCount();
+గుర్తులేని ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::use_లెక్క(
+    స్థిరరాశి FileSystem *FS) {
+  తిరిగి FS->Use_లెక్క();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
+శూన్య ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
   FS->Retain();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
+శూన్య ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
   FS->Release();
 }

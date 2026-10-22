@@ -10,352 +10,352 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/GlobPattern.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Errc.h"
+#అన్తర్భావ "llvm/Support/GlobPattern.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/Support/Errc.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-static constexpr char PrefixMetacharacters[] = "?*[{\\";
-static constexpr char SuffixMetacharacters[] = "?*[]{}\\";
-static constexpr char PrefixMetacharactersWithSlash[] = "?*[{\\/";
-static constexpr char SuffixMetacharactersWithSlash[] = "?*[]{}\\/";
+స్థిర constexpr అక్షరం ఉపసర్గ_Metacharacters[] = "?*[{\\";
+స్థిర constexpr అక్షరం SuffixMetacharacters[] = "?*[]{}\\";
+స్థిర constexpr అక్షరం ఉపసర్గ_Metacharacters_With_Slash[] = "?*[{\\/";
+స్థిర constexpr అక్షరం SuffixMetacharactersWithSlash[] = "?*[]{}\\/";
 
 // Expands character ranges and returns a bitmap.
 // For example, "a-cf-hz" is expanded to "abcfghz".
-static Expected<BitVector> expand(StringRef S, StringRef Original) {
-  BitVector BV(256, false);
+స్థిర Expected<బిట్టు_సదిశ> expand(StringRef S, StringRef Original) {
+  బిట్టు_సదిశ BV(256, అబద్ధం);
 
   // Expand X-Y.
-  for (;;) {
-    if (S.size() < 3)
-      break;
+  కొరకు (;;) {
+    ఒకవేళ (S.కొలత_2() < 3)
+      ఆపు;
 
-    uint8_t Start = S[0];
-    uint8_t End = S[2];
+    uint8_t ప్రారంభం = S[0];
+    uint8_t చివర_2 = S[2];
 
     // If it doesn't start with something like X-Y,
     // consume the first character and proceed.
-    if (S[1] != '-') {
-      BV[Start] = true;
+    ఒకవేళ (S[1] != '-') {
+      BV[ప్రారంభం] = నిజం;
       S = S.substr(1);
-      continue;
+      కొనసాగు;
     }
 
     // It must be in the form of X-Y.
     // Validate it and then interpret the range.
-    if (Start > End)
-      return make_error<StringError>("invalid glob pattern: " + Original,
-                                     errc::invalid_argument);
+    ఒకవేళ (ప్రారంభం > చివర_2)
+      తిరిగి make_error<StringError>("invalid glob pattern: " + Original,
+                                     errc::invalid_వాదం);
 
-    for (int C = Start; C <= End; ++C)
-      BV[(uint8_t)C] = true;
+    కొరకు (పూర్ణాంకం C = ప్రారంభం; C <= చివర_2; ++C)
+      BV[(uint8_t)C] = నిజం;
     S = S.substr(3);
   }
 
-  for (char C : S)
-    BV[(uint8_t)C] = true;
-  return BV;
+  కొరకు (అక్షరం C : S)
+    BV[(uint8_t)C] = నిజం;
+  తిరిగి BV;
 }
 
 // Identify brace expansions in S and return the list of patterns they expand
 // into.
-static Expected<SmallVector<std::string, 1>>
+స్థిర Expected<Small_సదిశ<std::string, 1>>
 parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
-  SmallVector<std::string> SubPatterns = {S.str()};
-  if (!MaxSubPatterns || !S.contains('{'))
-    return std::move(SubPatterns);
+  Small_సదిశ<std::string> SubPatterns = {S.str()};
+  ఒకవేళ (!MaxSubPatterns || !S.కలిగియుంది('{'))
+    తిరిగి std::move(SubPatterns);
 
-  struct BraceExpansion {
-    size_t Start;
-    size_t Length;
-    SmallVector<StringRef, 2> Terms;
+  నిర్మాణం BraceExpansion {
+    size_t ప్రారంభం;
+    size_t నిడివి;
+    Small_సదిశ<StringRef, 2> Terms;
   };
-  SmallVector<BraceExpansion, 0> BraceExpansions;
+  Small_సదిశ<BraceExpansion, 0> BraceExpansions;
 
-  BraceExpansion *CurrentBE = nullptr;
-  size_t TermBegin;
-  for (size_t I = 0, E = S.size(); I != E; ++I) {
-    if (S[I] == '[') {
-      I = S.find(']', I + 2);
-      if (I == std::string::npos)
-        return make_error<StringError>("invalid glob pattern, unmatched '['",
-                                       errc::invalid_argument);
-    } else if (S[I] == '{') {
-      if (CurrentBE)
-        return make_error<StringError>(
+  BraceExpansion *CurrentBE = శూన్యసూచిక;
+  size_t పదం_Begin;
+  కొరకు (size_t I = 0, E = S.కొలత_2(); I != E; ++I) {
+    ఒకవేళ (S[I] == '[') {
+      I = S.కనుగొను(']', I + 2);
+      ఒకవేళ (I == std::string::npos)
+        తిరిగి make_error<StringError>("invalid glob pattern, unmatched '['",
+                                       errc::invalid_వాదం);
+    } లేకపోతే ఒకవేళ (S[I] == '{') {
+      ఒకవేళ (CurrentBE)
+        తిరిగి make_error<StringError>(
             "nested brace expansions are not supported",
-            errc::invalid_argument);
-      CurrentBE = &BraceExpansions.emplace_back();
-      CurrentBE->Start = I;
-      TermBegin = I + 1;
-    } else if (S[I] == ',') {
-      if (!CurrentBE)
-        continue;
-      CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
-      TermBegin = I + 1;
-    } else if (S[I] == '}') {
-      if (!CurrentBE)
-        continue;
-      if (CurrentBE->Terms.empty())
-        return make_error<StringError>(
+            errc::invalid_వాదం);
+      CurrentBE = &BraceExpansions.emplace_వెనుక();
+      CurrentBE->ప్రారంభం = I;
+      పదం_Begin = I + 1;
+    } లేకపోతే ఒకవేళ (S[I] == ',') {
+      ఒకవేళ (!CurrentBE)
+        కొనసాగు;
+      CurrentBE->Terms.నెట్టు_వెనుక(S.substr(పదం_Begin, I - పదం_Begin));
+      పదం_Begin = I + 1;
+    } లేకపోతే ఒకవేళ (S[I] == '}') {
+      ఒకవేళ (!CurrentBE)
+        కొనసాగు;
+      ఒకవేళ (CurrentBE->Terms.ఖాళీలు())
+        తిరిగి make_error<StringError>(
             "empty or singleton brace expansions are not supported",
-            errc::invalid_argument);
-      CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
-      CurrentBE->Length = I - CurrentBE->Start + 1;
-      CurrentBE = nullptr;
-    } else if (S[I] == '\\') {
-      if (++I == E)
-        return make_error<StringError>("invalid glob pattern, stray '\\'",
-                                       errc::invalid_argument);
+            errc::invalid_వాదం);
+      CurrentBE->Terms.నెట్టు_వెనుక(S.substr(పదం_Begin, I - పదం_Begin));
+      CurrentBE->నిడివి = I - CurrentBE->ప్రారంభం + 1;
+      CurrentBE = శూన్యసూచిక;
+    } లేకపోతే ఒకవేళ (S[I] == '\\') {
+      ఒకవేళ (++I == E)
+        తిరిగి make_error<StringError>("invalid glob pattern, stray '\\'",
+                                       errc::invalid_వాదం);
     }
   }
-  if (CurrentBE)
-    return make_error<StringError>("incomplete brace expansion",
-                                   errc::invalid_argument);
+  ఒకవేళ (CurrentBE)
+    తిరిగి make_error<StringError>("incomplete brace expansion",
+                                   errc::invalid_వాదం);
 
-  size_t NumSubPatterns = 1;
-  for (auto &BE : BraceExpansions) {
-    if (NumSubPatterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
-      NumSubPatterns = std::numeric_limits<size_t>::max();
-      break;
+  size_t అంకె_Sub_Patterns = 1;
+  కొరకు (స్వయంచాలక &BE : BraceExpansions) {
+    ఒకవేళ (అంకె_Sub_Patterns > std::numeric_limits<size_t>::max() / BE.Terms.కొలత_2()) {
+      అంకె_Sub_Patterns = std::numeric_limits<size_t>::max();
+      ఆపు;
     }
-    NumSubPatterns *= BE.Terms.size();
+    అంకె_Sub_Patterns *= BE.Terms.కొలత_2();
   }
-  if (NumSubPatterns > *MaxSubPatterns)
-    return make_error<StringError>("too many brace expansions",
-                                   errc::invalid_argument);
+  ఒకవేళ (అంకె_Sub_Patterns > *MaxSubPatterns)
+    తిరిగి make_error<StringError>("too many brace expansions",
+                                   errc::invalid_వాదం);
   // Replace brace expansions in reverse order so that we don't invalidate
   // earlier start indices
-  for (auto &BE : reverse(BraceExpansions)) {
-    SmallVector<std::string> OrigSubPatterns;
-    std::swap(SubPatterns, OrigSubPatterns);
-    for (StringRef Term : BE.Terms)
-      for (StringRef Orig : OrigSubPatterns)
-        SubPatterns.emplace_back(Orig).replace(BE.Start, BE.Length, Term);
+  కొరకు (స్వయంచాలక &BE : తిరగేయి(BraceExpansions)) {
+    Small_సదిశ<std::string> OrigSubPatterns;
+    std::మార్పిడి(SubPatterns, OrigSubPatterns);
+    కొరకు (StringRef పదం : BE.Terms)
+      కొరకు (StringRef Orig : OrigSubPatterns)
+        SubPatterns.emplace_వెనుక(Orig).replace(BE.ప్రారంభం, BE.నిడివి, పదం);
   }
-  return std::move(SubPatterns);
+  తిరిగి std::move(SubPatterns);
 }
 
-static StringRef maxPlainSubstring(StringRef S, bool SlashAgnostic) {
-  const char *Metas =
-      SlashAgnostic ? PrefixMetacharactersWithSlash : PrefixMetacharacters;
-  StringRef Best;
-  while (!S.empty()) {
-    size_t PrefixSize = S.find_first_of(Metas);
-    if (PrefixSize == std::string::npos)
-      PrefixSize = S.size();
+స్థిర StringRef maxPlainSubstring(StringRef S, తార్కిక SlashAgnostic) {
+  స్థిరరాశి అక్షరం *Metas =
+      SlashAgnostic ? ఉపసర్గ_Metacharacters_With_Slash : ఉపసర్గ_Metacharacters;
+  StringRef ఉత్తమ;
+  అయితే (!S.ఖాళీలు()) {
+    size_t ఉపసర్గ_కొలత = S.కనుగొను_మొదటి_యొక్క(Metas);
+    ఒకవేళ (ఉపసర్గ_కొలత == std::string::npos)
+      ఉపసర్గ_కొలత = S.కొలత_2();
 
-    if (Best.size() < PrefixSize)
-      Best = S.take_front(PrefixSize);
+    ఒకవేళ (ఉత్తమ.కొలత_2() < ఉపసర్గ_కొలత)
+      ఉత్తమ = S.take_front(ఉపసర్గ_కొలత);
 
-    S = S.drop_front(PrefixSize);
+    S = S.drop_front(ఉపసర్గ_కొలత);
 
     // It's impossible, as the first and last characters of the input string
     // must be Glob special characters, otherwise they would be parts of
     // the prefix or the suffix.
-    assert(!S.empty());
+    ప్రతిజ్ఞా(!S.ఖాళీలు());
 
-    switch (S.front()) {
-    case '\\':
+    ఎంపిక (S.front()) {
+    స్థితి '\\':
       S = S.drop_front(2);
-      break;
-    case '[': {
+      ఆపు;
+    స్థితి '[': {
       // Drop '[' and the first character which can be ']'.
       S = S.drop_front(2);
-      size_t EndBracket = S.find_first_of("]");
+      size_t చివర_Bracket = S.కనుగొను_మొదటి_యొక్క("]");
       // Should not be possible, SubGlobPattern::create should fail on invalid
       // pattern before we get here.
-      assert(EndBracket != std::string::npos);
-      S = S.drop_front(EndBracket + 1);
-      break;
+      ప్రతిజ్ఞా(చివర_Bracket != std::string::npos);
+      S = S.drop_front(చివర_Bracket + 1);
+      ఆపు;
     }
-    case '{':
+    స్థితి '{':
       // TODO: implement.
       // Fallback to whatever is best for now.
-      return Best;
-    default:
+      తిరిగి ఉత్తమ;
+    అప్రమేయ:
       S = S.drop_front(1);
     }
   }
 
-  return Best;
+  తిరిగి ఉత్తమ;
 }
 
-Expected<GlobPattern> GlobPattern::create(StringRef S,
+Expected<Glob_నమూనా> Glob_నమూనా::create(StringRef S,
                                           std::optional<size_t> MaxSubPatterns,
-                                          bool SlashAgnostic) {
-  GlobPattern Pat;
+                                          తార్కిక SlashAgnostic) {
+  Glob_నమూనా Pat;
   Pat.SlashAgnostic = SlashAgnostic;
-  Pat.Pattern = S;
+  Pat.నమూనా = S;
 
-  const char *PrefixMetas =
-      SlashAgnostic ? PrefixMetacharactersWithSlash : PrefixMetacharacters;
-  const char *SuffixMetas =
+  స్థిరరాశి అక్షరం *ఉపసర్గ_Metas =
+      SlashAgnostic ? ఉపసర్గ_Metacharacters_With_Slash : ఉపసర్గ_Metacharacters;
+  స్థిరరాశి అక్షరం *SuffixMetas =
       SlashAgnostic ? SuffixMetacharactersWithSlash : SuffixMetacharacters;
 
   // Store the prefix that does not contain any metacharacter.
-  Pat.PrefixSize = S.find_first_of(PrefixMetas);
-  if (Pat.PrefixSize == std::string::npos) {
-    Pat.PrefixSize = S.size();
-    return Pat;
+  Pat.ఉపసర్గ_కొలత = S.కనుగొను_మొదటి_యొక్క(ఉపసర్గ_Metas);
+  ఒకవేళ (Pat.ఉపసర్గ_కొలత == std::string::npos) {
+    Pat.ఉపసర్గ_కొలత = S.కొలత_2();
+    తిరిగి Pat;
   }
-  S = S.substr(Pat.PrefixSize);
+  S = S.substr(Pat.ఉపసర్గ_కొలత);
 
   // Just in case we stop on unmatched opening brackets.
-  size_t SuffixStart = S.find_last_of(SuffixMetas);
-  assert(SuffixStart != std::string::npos);
-  if (S[SuffixStart] == '\\')
-    ++SuffixStart;
-  if (SuffixStart < S.size())
-    ++SuffixStart;
-  Pat.SuffixSize = S.size() - SuffixStart;
-  S = S.substr(0, SuffixStart);
+  size_t Suffix_ప్రారంభం = S.కనుగొను_చివరి_యొక్క(SuffixMetas);
+  ప్రతిజ్ఞా(Suffix_ప్రారంభం != std::string::npos);
+  ఒకవేళ (S[Suffix_ప్రారంభం] == '\\')
+    ++Suffix_ప్రారంభం;
+  ఒకవేళ (Suffix_ప్రారంభం < S.కొలత_2())
+    ++Suffix_ప్రారంభం;
+  Pat.Suffix_కొలత = S.కొలత_2() - Suffix_ప్రారంభం;
+  S = S.substr(0, Suffix_ప్రారంభం);
 
-  SmallVector<std::string, 1> SubPats;
-  if (auto Err = parseBraceExpansions(S, MaxSubPatterns).moveInto(SubPats))
-    return std::move(Err);
-  for (StringRef SubPat : SubPats) {
-    auto SubGlobOrErr = SubGlobPattern::create(SubPat, SlashAgnostic);
-    if (!SubGlobOrErr)
-      return SubGlobOrErr.takeError();
-    Pat.SubGlobs.push_back(*SubGlobOrErr);
+  Small_సదిశ<std::string, 1> SubPats;
+  ఒకవేళ (స్వయంచాలక Err = parseBraceExpansions(S, MaxSubPatterns).moveInto(SubPats))
+    తిరిగి std::move(Err);
+  కొరకు (StringRef SubPat : SubPats) {
+    స్వయంచాలక SubGlobOrErr = Sub_Glob_నమూనా::create(SubPat, SlashAgnostic);
+    ఒకవేళ (!SubGlobOrErr)
+      తిరిగి SubGlobOrErr.takeError();
+    Pat.SubGlobs.నెట్టు_వెనుక(*SubGlobOrErr);
   }
 
-  return Pat;
+  తిరిగి Pat;
 }
 
-std::optional<std::string> GlobPattern::asLiteral() const {
+std::optional<std::string> Glob_నమూనా::asLiteral() స్థిరరాశి {
   // The prefix and suffix are metacharacter-free by construction, so whether
   // this pattern denotes a single string is decided by the sub-patterns, which
   // recorded it while parsing. No sub-pattern at all means there was no
   // metacharacter; more than one means brace expansion produced a choice.
-  if (SubGlobs.size() > 1 || (SubGlobs.size() == 1 && !SubGlobs[0].isLiteral()))
-    return std::nullopt;
+  ఒకవేళ (SubGlobs.కొలత_2() > 1 || (SubGlobs.కొలత_2() == 1 && !SubGlobs[0].isLiteral()))
+    తిరిగి std::nullopt;
 
   std::string Literal;
-  Literal.reserve(Pattern.size());
-  for (size_t I = 0, E = Pattern.size(); I != E; ++I) {
-    if (Pattern[I] == '\\' && I + 1 != E)
+  Literal.reserve(నమూనా.కొలత_2());
+  కొరకు (size_t I = 0, E = నమూనా.కొలత_2(); I != E; ++I) {
+    ఒకవేళ (నమూనా[I] == '\\' && I + 1 != E)
       ++I;
-    Literal.push_back(Pattern[I]);
+    Literal.నెట్టు_వెనుక(నమూనా[I]);
   }
 
   // In slash-agnostic mode '/' and '\\' match each other, so a pattern holding
   // either matches more than one string. A pattern with no sub-pattern cannot
   // reach here holding one, as both are prefix metacharacters in that mode.
-  if (SlashAgnostic &&
-      StringRef(Literal).find_first_of("/\\") != StringRef::npos)
-    return std::nullopt;
+  ఒకవేళ (SlashAgnostic &&
+      StringRef(Literal).కనుగొను_మొదటి_యొక్క("/\\") != StringRef::npos)
+    తిరిగి std::nullopt;
 
-  return Literal;
+  తిరిగి Literal;
 }
 
-Expected<GlobPattern::SubGlobPattern>
-GlobPattern::SubGlobPattern::create(StringRef S, bool SlashAgnostic) {
-  SubGlobPattern Pat;
+Expected<Glob_నమూనా::Sub_Glob_నమూనా>
+Glob_నమూనా::Sub_Glob_నమూనా::create(StringRef S, తార్కిక SlashAgnostic) {
+  Sub_Glob_నమూనా Pat;
 
   // Parse brackets.
-  Pat.Pat.assign(S.begin(), S.end());
-  for (size_t I = 0, E = S.size(); I != E; ++I) {
-    if (S[I] == '[') {
+  Pat.Pat.కేటాయించు(S.begin(), S.చివర());
+  కొరకు (size_t I = 0, E = S.కొలత_2(); I != E; ++I) {
+    ఒకవేళ (S[I] == '[') {
       // ']' is allowed as the first character of a character class. '[]' is
       // invalid. So, just skip the first character.
       ++I;
-      size_t J = S.find(']', I + 1);
-      if (J == StringRef::npos)
-        return make_error<StringError>("invalid glob pattern, unmatched '['",
-                                       errc::invalid_argument);
+      size_t J = S.కనుగొను(']', I + 1);
+      ఒకవేళ (J == StringRef::npos)
+        తిరిగి make_error<StringError>("invalid glob pattern, unmatched '['",
+                                       errc::invalid_వాదం);
       StringRef Chars = S.substr(I, J - I);
-      bool Invert = S[I] == '^' || S[I] == '!';
-      if (Invert)
+      తార్కిక Invert = S[I] == '^' || S[I] == '!';
+      ఒకవేళ (Invert)
         Chars = Chars.drop_front();
-      Expected<BitVector> BVOrErr = expand(Chars, S);
-      if (!BVOrErr)
-        return BVOrErr.takeError();
-      BitVector &BV = *BVOrErr;
-      if (SlashAgnostic && (BV['\\'] || BV['/'])) {
-        BV.set('\\');
-        BV.set('/');
+      Expected<బిట్టు_సదిశ> BVOrErr = expand(Chars, S);
+      ఒకవేళ (!BVOrErr)
+        తిరిగి BVOrErr.takeError();
+      బిట్టు_సదిశ &BV = *BVOrErr;
+      ఒకవేళ (SlashAgnostic && (BV['\\'] || BV['/'])) {
+        BV.సమితి('\\');
+        BV.సమితి('/');
       }
-      if (Invert)
+      ఒకవేళ (Invert)
         BV.flip();
-      Pat.Brackets.push_back(Bracket{J + 1, std::move(BV)});
+      Pat.Brackets.నెట్టు_వెనుక(Bracket{J + 1, std::move(BV)});
       I = J;
-    } else if (S[I] == '\\') {
-      if (++I == E)
-        return make_error<StringError>("invalid glob pattern, stray '\\'",
-                                       errc::invalid_argument);
-    } else if (S[I] == '*' || S[I] == '?') {
-      Pat.HasWildcard = true;
+    } లేకపోతే ఒకవేళ (S[I] == '\\') {
+      ఒకవేళ (++I == E)
+        తిరిగి make_error<StringError>("invalid glob pattern, stray '\\'",
+                                       errc::invalid_వాదం);
+    } లేకపోతే ఒకవేళ (S[I] == '*' || S[I] == '?') {
+      Pat.HasWildcard = నిజం;
     }
   }
-  return Pat;
+  తిరిగి Pat;
 }
 
-StringRef GlobPattern::longest_substr() const {
-  return maxPlainSubstring(Pattern.drop_front(PrefixSize).drop_back(SuffixSize),
+StringRef Glob_నమూనా::longest_substr() స్థిరరాశి {
+  తిరిగి maxPlainSubstring(నమూనా.drop_front(ఉపసర్గ_కొలత).drop_వెనుక(Suffix_కొలత),
                            SlashAgnostic);
 }
 
-bool GlobPattern::match(StringRef S) const {
-  if (!S.consume_front(prefix()))
-    return false;
-  if (!S.consume_back(suffix()))
-    return false;
-  if (SubGlobs.empty() && S.empty())
-    return true;
-  for (auto &Glob : SubGlobs)
-    if (Glob.match(S, SlashAgnostic))
-      return true;
-  return false;
+తార్కిక Glob_నమూనా::సరిపోలిక(StringRef S) స్థిరరాశి {
+  ఒకవేళ (!S.consume_front(ఉపసర్గ_2()))
+    తిరిగి అబద్ధం;
+  ఒకవేళ (!S.consume_వెనుక(suffix()))
+    తిరిగి అబద్ధం;
+  ఒకవేళ (SubGlobs.ఖాళీలు() && S.ఖాళీలు())
+    తిరిగి నిజం;
+  కొరకు (స్వయంచాలక &Glob : SubGlobs)
+    ఒకవేళ (Glob.సరిపోలిక(S, SlashAgnostic))
+      తిరిగి నిజం;
+  తిరిగి అబద్ధం;
 }
 
-static bool matchChar(char PatC, char QueryC, bool SlashAgnostic) {
-  if (PatC == QueryC)
-    return true;
-  return SlashAgnostic && (PatC == '\\' || PatC == '/') &&
+స్థిర తార్కిక సరిపోలిక_Char(అక్షరం PatC, అక్షరం QueryC, తార్కిక SlashAgnostic) {
+  ఒకవేళ (PatC == QueryC)
+    తిరిగి నిజం;
+  తిరిగి SlashAgnostic && (PatC == '\\' || PatC == '/') &&
          (QueryC == '\\' || QueryC == '/');
 }
 
 // Factor the pattern into segments split by '*'. The segment is matched
 // sequentianlly by finding the first occurrence past the end of the previous
 // match.
-bool GlobPattern::SubGlobPattern::match(StringRef Str,
-                                        bool SlashAgnostic) const {
-  const char *P = Pat.data(), *SegmentBegin = nullptr, *S = Str.data(),
+తార్కిక Glob_నమూనా::Sub_Glob_నమూనా::సరిపోలిక(StringRef Str,
+                                        తార్కిక SlashAgnostic) స్థిరరాశి {
+  స్థిరరాశి అక్షరం *P = Pat.దత్తాంశం(), *SegmentBegin = శూన్యసూచిక, *S = Str.దత్తాంశం(),
              *SavedS = S;
-  const char *const PEnd = P + Pat.size(), *const End = S + Str.size();
+  స్థిరరాశి అక్షరం *స్థిరరాశి PEnd = P + Pat.కొలత_2(), *స్థిరరాశి చివర_2 = S + Str.కొలత_2();
   size_t B = 0, SavedB = 0;
-  while (S != End) {
-    if (P == PEnd)
+  అయితే (S != చివర_2) {
+    ఒకవేళ (P == PEnd)
       ;
-    else if (*P == '*') {
+    లేకపోతే ఒకవేళ (*P == '*') {
       // The non-* substring on the left of '*' matches the tail of S. Save the
       // positions to be used by backtracking if we see a mismatch later.
       SegmentBegin = ++P;
       SavedS = S;
       SavedB = B;
-      continue;
-    } else if (*P == '[') {
-      if (Brackets[B].Bytes[uint8_t(*S)]) {
-        P = Pat.data() + Brackets[B++].NextOffset;
+      కొనసాగు;
+    } లేకపోతే ఒకవేళ (*P == '[') {
+      ఒకవేళ (Brackets[B].బైట్లు_2[uint8_t(*S)]) {
+        P = Pat.దత్తాంశం() + Brackets[B++].తదుపరి_స్థానభ్రంశం;
         ++S;
-        continue;
+        కొనసాగు;
       }
-    } else if (*P == '\\') {
-      if (matchChar(*++P, *S, SlashAgnostic)) {
+    } లేకపోతే ఒకవేళ (*P == '\\') {
+      ఒకవేళ (సరిపోలిక_Char(*++P, *S, SlashAgnostic)) {
         ++P;
         ++S;
-        continue;
+        కొనసాగు;
       }
-    } else if (matchChar(*P, *S, SlashAgnostic) || *P == '?') {
+    } లేకపోతే ఒకవేళ (సరిపోలిక_Char(*P, *S, SlashAgnostic) || *P == '?') {
       ++P;
       ++S;
-      continue;
+      కొనసాగు;
     }
-    if (!SegmentBegin)
-      return false;
+    ఒకవేళ (!SegmentBegin)
+      తిరిగి అబద్ధం;
     // We have seen a '*'. Backtrack to the saved positions. Shift the S
     // position to probe the next starting position in the segment.
     P = SegmentBegin;
@@ -364,5 +364,5 @@ bool GlobPattern::SubGlobPattern::match(StringRef Str,
   }
   // All bytes in Str have been matched. Return true if the rest part of Pat is
   // empty or contains only '*'.
-  return getPat().find_first_not_of('*', P - Pat.data()) == std::string::npos;
+  తిరిగి getPat().కనుగొను_మొదటి_not_యొక్క('*', P - Pat.దత్తాంశం()) == std::string::npos;
 }

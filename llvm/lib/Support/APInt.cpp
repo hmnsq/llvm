@@ -11,587 +11,587 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APInt.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/Sequence.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/bit.h"
-#include "llvm/Support/Alignment.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <optional>
+#అన్తర్భావ "llvm/ADT/APInt.h"
+#అన్తర్భావ "llvm/ADT/ArrayRef.h"
+#అన్తర్భావ "llvm/ADT/FoldingSet.h"
+#అన్తర్భావ "llvm/ADT/Hashing.h"
+#అన్తర్భావ "llvm/ADT/Sequence.h"
+#అన్తర్భావ "llvm/ADT/SmallString.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/ADT/bit.h"
+#అన్తర్భావ "llvm/Support/Alignment.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ "llvm/Support/MathExtras.h"
+#అన్తర్భావ "llvm/Support/SwapByteOrder.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <cmath>
+#అన్తర్భావ <optional>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-#define DEBUG_TYPE "apint"
+#నిర్వచించు DEBUG_TYPE "apint"
 
 /// A utility function for allocating memory, checking for allocation failures,
 /// and ensuring the contents are zeroed.
-inline static uint64_t* getClearedMemory(unsigned numWords) {
-  return new uint64_t[numWords]();
+అంతఃవరుస స్థిర uint64_t* get_Cleared_జ్ఞాపకం(గుర్తులేని అంకె_పదాలు) {
+  తిరిగి కొత్త uint64_t[అంకె_పదాలు]();
 }
 
 /// A utility function for allocating memory and checking for allocation
 /// failure.  The content is not zeroed.
-inline static uint64_t* getMemory(unsigned numWords) {
-  return new uint64_t[numWords];
+అంతఃవరుస స్థిర uint64_t* get_జ్ఞాపకం(గుర్తులేని అంకె_పదాలు) {
+  తిరిగి కొత్త uint64_t[అంకె_పదాలు];
 }
 
 /// A utility function that converts a character to a digit.
-inline static unsigned getDigit(char cdigit, uint8_t radix) {
-  unsigned r;
+అంతఃవరుస స్థిర గుర్తులేని getDigit(అక్షరం cdigit, uint8_t radix) {
+  గుర్తులేని r;
 
-  if (radix == 16 || radix == 36) {
+  ఒకవేళ (radix == 16 || radix == 36) {
     r = cdigit - '0';
-    if (r <= 9)
-      return r;
+    ఒకవేళ (r <= 9)
+      తిరిగి r;
 
     r = cdigit - 'A';
-    if (r <= radix - 11U)
-      return r + 10;
+    ఒకవేళ (r <= radix - 11U)
+      తిరిగి r + 10;
 
     r = cdigit - 'a';
-    if (r <= radix - 11U)
-      return r + 10;
+    ఒకవేళ (r <= radix - 11U)
+      తిరిగి r + 10;
 
     radix = 10;
   }
 
   r = cdigit - '0';
-  if (r < radix)
-    return r;
+  ఒకవేళ (r < radix)
+    తిరిగి r;
 
-  return UINT_MAX;
+  తిరిగి UINT_MAX;
 }
 
 
-void APInt::initSlowCase(uint64_t val, bool isSigned) {
-  if (isSigned && int64_t(val) < 0) {
-    U.pVal = getMemory(getNumWords());
+శూన్య APInt::initSlowCase(uint64_t val, తార్కిక isSigned) {
+  ఒకవేళ (isSigned && int64_t(val) < 0) {
+    U.pVal = get_జ్ఞాపకం(get_అంకె_పదాలు());
     U.pVal[0] = val;
-    memset(&U.pVal[1], 0xFF, APINT_WORD_SIZE * (getNumWords() - 1));
-    clearUnusedBits();
-  } else {
-    U.pVal = getClearedMemory(getNumWords());
+    memset(&U.pVal[1], 0xFF, APINT_మాట_కొలత * (get_అంకె_పదాలు() - 1));
+    clear_వాడని_బిట్లు();
+  } లేకపోతే {
+    U.pVal = get_Cleared_జ్ఞాపకం(get_అంకె_పదాలు());
     U.pVal[0] = val;
   }
 }
 
-void APInt::initSlowCase(const APInt& that) {
-  U.pVal = getMemory(getNumWords());
-  memcpy(U.pVal, that.U.pVal, getNumWords() * APINT_WORD_SIZE);
+శూన్య APInt::initSlowCase(స్థిరరాశి APInt& that) {
+  U.pVal = get_జ్ఞాపకం(get_అంకె_పదాలు());
+  జ్ఞాపకం_నకలు(U.pVal, that.U.pVal, get_అంకె_పదాలు() * APINT_మాట_కొలత);
 }
 
-void APInt::initFromArray(ArrayRef<uint64_t> bigVal) {
-  assert(bigVal.data() && "Null pointer detected!");
-  if (LLVM_LIKELY(isSingleWord()))
+శూన్య APInt::initFromArray(ArrayRef<uint64_t> bigVal) {
+  ప్రతిజ్ఞా(bigVal.దత్తాంశం() && "Null pointer detected!");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL = bigVal[0];
-  else {
+  లేకపోతే {
     // Get memory, cleared to 0
-    U.pVal = getClearedMemory(getNumWords());
+    U.pVal = get_Cleared_జ్ఞాపకం(get_అంకె_పదాలు());
     // Calculate the number of words to copy
-    unsigned words = std::min<unsigned>(bigVal.size(), getNumWords());
+    గుర్తులేని పదాలు = std::min<గుర్తులేని>(bigVal.కొలత_2(), get_అంకె_పదాలు());
     // Copy the words from bigVal to pVal
-    memcpy(U.pVal, bigVal.data(), words * APINT_WORD_SIZE);
+    జ్ఞాపకం_నకలు(U.pVal, bigVal.దత్తాంశం(), పదాలు * APINT_మాట_కొలత);
   }
   // Make sure unused high bits are cleared
-  clearUnusedBits();
+  clear_వాడని_బిట్లు();
 }
 
-APInt::APInt(unsigned numBits, ArrayRef<uint64_t> bigVal) : BitWidth(numBits) {
+APInt::APInt(గుర్తులేని అంకె_బిట్లు, ArrayRef<uint64_t> bigVal) : బిట్టు_వెడల్పు_2(అంకె_బిట్లు) {
   initFromArray(bigVal);
 }
 
-APInt::APInt(unsigned numbits, StringRef Str, uint8_t radix)
-    : BitWidth(numbits) {
+APInt::APInt(గుర్తులేని numbits, StringRef Str, uint8_t radix)
+    : బిట్టు_వెడల్పు_2(numbits) {
   fromString(numbits, Str, radix);
 }
 
-void APInt::reallocate(unsigned NewBitWidth) {
+శూన్య APInt::reallocate(గుర్తులేని New_బిట్టు_వెడల్పు) {
   // If the number of words is the same we can just change the width and stop.
-  if (getNumWords() == getNumWords(NewBitWidth)) {
-    BitWidth = NewBitWidth;
-    return;
+  ఒకవేళ (get_అంకె_పదాలు() == get_అంకె_పదాలు(New_బిట్టు_వెడల్పు)) {
+    బిట్టు_వెడల్పు_2 = New_బిట్టు_వెడల్పు;
+    తిరిగి;
   }
 
   // If we have an allocation, delete it.
-  if (LLVM_UNLIKELY(!isSingleWord()))
-    delete [] U.pVal;
+  ఒకవేళ (LLVM_UNLIKELY(!is_Single_మాట()))
+    తొలగించు [] U.pVal;
 
   // Update BitWidth.
-  BitWidth = NewBitWidth;
+  బిట్టు_వెడల్పు_2 = New_బిట్టు_వెడల్పు;
 
   // If we are supposed to have an allocation, create it.
-  if (LLVM_UNLIKELY(!isSingleWord()))
-    U.pVal = getMemory(getNumWords());
+  ఒకవేళ (LLVM_UNLIKELY(!is_Single_మాట()))
+    U.pVal = get_జ్ఞాపకం(get_అంకె_పదాలు());
 }
 
-void APInt::assignSlowCase(const APInt &RHS) {
+శూన్య APInt::కేటాయించు_Slow_Case(స్థిరరాశి APInt &RHS) {
   // Don't do anything for X = X
-  if (this == &RHS)
-    return;
+  ఒకవేళ (ఇది == &RHS)
+    తిరిగి;
 
   // Adjust the bit width and handle allocations as necessary.
-  reallocate(RHS.getBitWidth());
+  reallocate(RHS.get_బిట్టు_వెడల్పు());
 
   // Copy the data.
-  if (LLVM_LIKELY(isSingleWord()))
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL = RHS.U.VAL;
-  else
-    memcpy(U.pVal, RHS.U.pVal, getNumWords() * APINT_WORD_SIZE);
+  లేకపోతే
+    జ్ఞాపకం_నకలు(U.pVal, RHS.U.pVal, get_అంకె_పదాలు() * APINT_మాట_కొలత);
 }
 
 /// This method 'profiles' an APInt for use with FoldingSet.
-void APInt::Profile(FoldingSetNodeID& ID) const {
-  ID.AddInteger(BitWidth);
+శూన్య APInt::Profile(Folding_సమితి_కణుపు_ID& ID) స్థిరరాశి {
+  ID.కూడు_Integer(బిట్టు_వెడల్పు_2);
 
-  if (LLVM_LIKELY(isSingleWord())) {
-    ID.AddInteger(U.VAL);
-    return;
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    ID.కూడు_Integer(U.VAL);
+    తిరిగి;
   }
 
-  unsigned NumWords = getNumWords();
-  for (unsigned i = 0; i < NumWords; ++i)
-    ID.AddInteger(U.pVal[i]);
+  గుర్తులేని అంకె_పదాలు_2 = get_అంకె_పదాలు();
+  కొరకు (గుర్తులేని i = 0; i < అంకె_పదాలు_2; ++i)
+    ID.కూడు_Integer(U.pVal[i]);
 }
 
-bool APInt::isAligned(Align A) const {
-  if (isZero())
-    return true;
-  const unsigned TrailingZeroes = countr_zero();
-  const unsigned MinimumTrailingZeroes = Log2(A);
-  return TrailingZeroes >= MinimumTrailingZeroes;
+తార్కిక APInt::isAligned(Align A) స్థిరరాశి {
+  ఒకవేళ (isZero())
+    తిరిగి నిజం;
+  స్థిరరాశి గుర్తులేని TrailingZeroes = countr_zero();
+  స్థిరరాశి గుర్తులేని MinimumTrailingZeroes = Log2(A);
+  తిరిగి TrailingZeroes >= MinimumTrailingZeroes;
 }
 
 /// Prefix increment operator. Increments the APInt by one.
-APInt& APInt::operator++() {
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::క్రియాకారకం++() {
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     ++U.VAL;
-  else
-    tcIncrement(U.pVal, getNumWords());
-  return clearUnusedBits();
+  లేకపోతే
+    tcIncrement(U.pVal, get_అంకె_పదాలు());
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
 /// Prefix decrement operator. Decrements the APInt by one.
-APInt& APInt::operator--() {
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::క్రియాకారకం--() {
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     --U.VAL;
-  else
-    tcDecrement(U.pVal, getNumWords());
-  return clearUnusedBits();
+  లేకపోతే
+    tcDecrement(U.pVal, get_అంకె_పదాలు());
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
 /// Adds the RHS APInt to this APInt.
 /// @returns this, after addition of RHS.
 /// Addition assignment operator.
-APInt& APInt::operator+=(const APInt& RHS) {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::క్రియాకారకం+=(స్థిరరాశి APInt& RHS) {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be the same");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL += RHS.U.VAL;
-  else
-    tcAdd(U.pVal, RHS.U.pVal, 0, getNumWords());
-  return clearUnusedBits();
+  లేకపోతే
+    tc_కూడు(U.pVal, RHS.U.pVal, 0, get_అంకె_పదాలు());
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
-APInt& APInt::operator+=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::క్రియాకారకం+=(uint64_t RHS) {
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL += RHS;
-  else
-    tcAddPart(U.pVal, RHS, getNumWords());
-  return clearUnusedBits();
+  లేకపోతే
+    tc_కూడు_Part(U.pVal, RHS, get_అంకె_పదాలు());
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
 /// Subtracts the RHS APInt from this APInt
 /// @returns this, after subtraction
 /// Subtraction assignment operator.
-APInt& APInt::operator-=(const APInt& RHS) {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::క్రియాకారకం-=(స్థిరరాశి APInt& RHS) {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be the same");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL -= RHS.U.VAL;
-  else
-    tcSubtract(U.pVal, RHS.U.pVal, 0, getNumWords());
-  return clearUnusedBits();
+  లేకపోతే
+    tc_వ్యవకలనం(U.pVal, RHS.U.pVal, 0, get_అంకె_పదాలు());
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
-APInt& APInt::operator-=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::క్రియాకారకం-=(uint64_t RHS) {
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL -= RHS;
-  else
-    tcSubtractPart(U.pVal, RHS, getNumWords());
-  return clearUnusedBits();
+  లేకపోతే
+    tc_వ్యవకలనం_Part(U.pVal, RHS, get_అంకె_పదాలు());
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
-APInt APInt::operator*(const APInt& RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(BitWidth, U.VAL * RHS.U.VAL, /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+APInt APInt::క్రియాకారకం*(స్థిరరాశి APInt& RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be the same");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, U.VAL * RHS.U.VAL, /*isSigned=*/అబద్ధం,
+                 /*implicitTrunc=*/నిజం);
 
-  APInt Result(getMemory(getNumWords()), getBitWidth());
-  tcMultiply(Result.U.pVal, U.pVal, RHS.U.pVal, getNumWords());
-  Result.clearUnusedBits();
-  return Result;
+  APInt ఫలితం(get_జ్ఞాపకం(get_అంకె_పదాలు()), get_బిట్టు_వెడల్పు());
+  tcMultiply(ఫలితం.U.pVal, U.pVal, RHS.U.pVal, get_అంకె_పదాలు());
+  ఫలితం.clear_వాడని_బిట్లు();
+  తిరిగి ఫలితం;
 }
 
-void APInt::andAssignSlowCase(const APInt &RHS) {
-  WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+శూన్య APInt::and_కేటాయించు_Slow_Case(స్థిరరాశి APInt &RHS) {
+  మాట_Type *dst = U.pVal, *rhs = RHS.U.pVal;
+  కొరకు (size_t i = 0, e = get_అంకె_పదాలు(); i != e; ++i)
     dst[i] &= rhs[i];
 }
 
-void APInt::orAssignSlowCase(const APInt &RHS) {
-  WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+శూన్య APInt::or_కేటాయించు_Slow_Case(స్థిరరాశి APInt &RHS) {
+  మాట_Type *dst = U.pVal, *rhs = RHS.U.pVal;
+  కొరకు (size_t i = 0, e = get_అంకె_పదాలు(); i != e; ++i)
     dst[i] |= rhs[i];
 }
 
-void APInt::xorAssignSlowCase(const APInt &RHS) {
-  WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+శూన్య APInt::xor_కేటాయించు_Slow_Case(స్థిరరాశి APInt &RHS) {
+  మాట_Type *dst = U.pVal, *rhs = RHS.U.pVal;
+  కొరకు (size_t i = 0, e = get_అంకె_పదాలు(); i != e; ++i)
     dst[i] ^= rhs[i];
 }
 
-APInt &APInt::operator*=(const APInt &RHS) {
-  *this = *this * RHS;
-  return *this;
+APInt &APInt::క్రియాకారకం*=(స్థిరరాశి APInt &RHS) {
+  *ఇది = *ఇది * RHS;
+  తిరిగి *ఇది;
 }
 
-APInt& APInt::operator*=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord())) {
+APInt& APInt::క్రియాకారకం*=(uint64_t RHS) {
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
     U.VAL *= RHS;
-  } else {
-    unsigned NumWords = getNumWords();
-    tcMultiplyPart(U.pVal, U.pVal, RHS, 0, NumWords, NumWords, false);
+  } లేకపోతే {
+    గుర్తులేని అంకె_పదాలు_2 = get_అంకె_పదాలు();
+    tcMultiplyPart(U.pVal, U.pVal, RHS, 0, అంకె_పదాలు_2, అంకె_పదాలు_2, అబద్ధం);
   }
-  return clearUnusedBits();
+  తిరిగి clear_వాడని_బిట్లు();
 }
 
-bool APInt::equalSlowCase(const APInt &RHS) const {
-  return std::equal(U.pVal, U.pVal + getNumWords(), RHS.U.pVal);
+తార్కిక APInt::equalSlowCase(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తిరిగి std::equal(U.pVal, U.pVal + get_అంకె_పదాలు(), RHS.U.pVal);
 }
 
-int APInt::compare(const APInt& RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
-  if (LLVM_LIKELY(isSingleWord()))
-    return U.VAL < RHS.U.VAL ? -1 : U.VAL > RHS.U.VAL;
+పూర్ణాంకం APInt::compare(స్థిరరాశి APInt& RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be same for comparison");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
+    తిరిగి U.VAL < RHS.U.VAL ? -1 : U.VAL > RHS.U.VAL;
 
-  return tcCompare(U.pVal, RHS.U.pVal, getNumWords());
+  తిరిగి tcCompare(U.pVal, RHS.U.pVal, get_అంకె_పదాలు());
 }
 
-int APInt::compareSigned(const APInt& RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
-  if (LLVM_LIKELY(isSingleWord())) {
-    int64_t lhsSext = SignExtend64(U.VAL, BitWidth);
-    int64_t rhsSext = SignExtend64(RHS.U.VAL, BitWidth);
-    return lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
+పూర్ణాంకం APInt::compareSigned(స్థిరరాశి APInt& RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be same for comparison");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    int64_t lhsSext = SignExtend64(U.VAL, బిట్టు_వెడల్పు_2);
+    int64_t rhsSext = SignExtend64(RHS.U.VAL, బిట్టు_వెడల్పు_2);
+    తిరిగి lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
   }
 
-  bool lhsNeg = isNegative();
-  bool rhsNeg = RHS.isNegative();
+  తార్కిక lhsNeg = isNegative();
+  తార్కిక rhsNeg = RHS.isNegative();
 
   // If the sign bits don't match, then (LHS < RHS) if LHS is negative
-  if (lhsNeg != rhsNeg)
-    return lhsNeg ? -1 : 1;
+  ఒకవేళ (lhsNeg != rhsNeg)
+    తిరిగి lhsNeg ? -1 : 1;
 
   // Otherwise we can just use an unsigned comparison, because even negative
   // numbers compare correctly this way if both have the same signed-ness.
-  return tcCompare(U.pVal, RHS.U.pVal, getNumWords());
+  తిరిగి tcCompare(U.pVal, RHS.U.pVal, get_అంకె_పదాలు());
 }
 
-void APInt::setBitsSlowCase(unsigned loBit, unsigned hiBit) {
-  unsigned loWord = whichWord(loBit);
-  unsigned hiWord = whichWord(hiBit);
+శూన్య APInt::సమితి_బిట్లు_Slow_Case(గుర్తులేని lo_బిట్టు, గుర్తులేని hi_బిట్టు) {
+  గుర్తులేని lo_మాట = which_మాట(lo_బిట్టు);
+  గుర్తులేని hi_మాట = which_మాట(hi_బిట్టు);
 
   // Create an initial mask for the low word with zeros below loBit.
-  uint64_t loMask = WORDTYPE_MAX << whichBit(loBit);
+  uint64_t lo_ముసుగు = WORDTYPE_MAX << which_బిట్టు(lo_బిట్టు);
 
   // If hiBit is not aligned, we need a high mask.
-  unsigned hiShiftAmt = whichBit(hiBit);
-  if (hiShiftAmt != 0) {
+  గుర్తులేని hi_జరుపు_Amt = which_బిట్టు(hi_బిట్టు);
+  ఒకవేళ (hi_జరుపు_Amt != 0) {
     // Create a high mask with zeros above hiBit.
-    uint64_t hiMask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - hiShiftAmt);
+    uint64_t hi_ముసుగు = WORDTYPE_MAX >> (APINT_బిట్లు_చొప్పున_మాట - hi_జరుపు_Amt);
     // If loWord and hiWord are equal, then we combine the masks. Otherwise,
     // set the bits in hiWord.
-    if (hiWord == loWord)
-      loMask &= hiMask;
-    else
-      U.pVal[hiWord] |= hiMask;
+    ఒకవేళ (hi_మాట == lo_మాట)
+      lo_ముసుగు &= hi_ముసుగు;
+    లేకపోతే
+      U.pVal[hi_మాట] |= hi_ముసుగు;
   }
   // Apply the mask to the low word.
-  U.pVal[loWord] |= loMask;
+  U.pVal[lo_మాట] |= lo_ముసుగు;
 
   // Fill any words between loWord and hiWord with all ones.
-  for (unsigned word = loWord + 1; word < hiWord; ++word)
-    U.pVal[word] = WORDTYPE_MAX;
+  కొరకు (గుర్తులేని మాట = lo_మాట + 1; మాట < hi_మాట; ++మాట)
+    U.pVal[మాట] = WORDTYPE_MAX;
 }
 
-void APInt::clearBitsSlowCase(unsigned LoBit, unsigned HiBit) {
-  unsigned LoWord = whichWord(LoBit);
-  unsigned HiWord = whichWord(HiBit);
+శూన్య APInt::clear_బిట్లు_Slow_Case(గుర్తులేని Lo_బిట్టు, గుర్తులేని Hi_బిట్టు) {
+  గుర్తులేని Lo_మాట = which_మాట(Lo_బిట్టు);
+  గుర్తులేని Hi_మాట = which_మాట(Hi_బిట్టు);
 
   // Create an initial mask for the low word with ones below loBit.
-  uint64_t LoMask = ~(WORDTYPE_MAX << whichBit(LoBit));
+  uint64_t Lo_ముసుగు = ~(WORDTYPE_MAX << which_బిట్టు(Lo_బిట్టు));
 
   // If HiBit is not aligned, we need a high mask.
-  unsigned HiShiftAmt = whichBit(HiBit);
-  if (HiShiftAmt != 0) {
+  గుర్తులేని Hi_జరుపు_Amt = which_బిట్టు(Hi_బిట్టు);
+  ఒకవేళ (Hi_జరుపు_Amt != 0) {
     // Create a high mask with ones above HiBit.
-    uint64_t HiMask = ~(WORDTYPE_MAX >> (APINT_BITS_PER_WORD - HiShiftAmt));
+    uint64_t Hi_ముసుగు = ~(WORDTYPE_MAX >> (APINT_బిట్లు_చొప్పున_మాట - Hi_జరుపు_Amt));
     // If LoWord and HiWord are equal, then we combine the masks. Otherwise,
     // clear the bits in HiWord.
-    if (HiWord == LoWord)
-      LoMask |= HiMask;
-    else
-      U.pVal[HiWord] &= HiMask;
+    ఒకవేళ (Hi_మాట == Lo_మాట)
+      Lo_ముసుగు |= Hi_ముసుగు;
+    లేకపోతే
+      U.pVal[Hi_మాట] &= Hi_ముసుగు;
   }
   // Apply the mask to the low word.
-  U.pVal[LoWord] &= LoMask;
+  U.pVal[Lo_మాట] &= Lo_ముసుగు;
 
   // Fill any words between LoWord and HiWord with all zeros.
-  for (unsigned Word = LoWord + 1; Word < HiWord; ++Word)
-    U.pVal[Word] = 0;
+  కొరకు (గుర్తులేని మాట_2 = Lo_మాట + 1; మాట_2 < Hi_మాట; ++మాట_2)
+    U.pVal[మాట_2] = 0;
 }
 
 // Complement a bignum in-place.
-static void tcComplement(APInt::WordType *dst, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
+స్థిర శూన్య tcComplement(APInt::మాట_Type *dst, గుర్తులేని parts) {
+  కొరకు (గుర్తులేని i = 0; i < parts; i++)
     dst[i] = ~dst[i];
 }
 
 /// Toggle every bit to its opposite value.
-void APInt::flipAllBitsSlowCase() {
-  tcComplement(U.pVal, getNumWords());
-  clearUnusedBits();
+శూన్య APInt::flip_All_బిట్లు_Slow_Case() {
+  tcComplement(U.pVal, get_అంకె_పదాలు());
+  clear_వాడని_బిట్లు();
 }
 
 /// Concatenate the bits from "NewLSB" onto the bottom of *this.  This is
 /// equivalent to:
 ///   (this->zext(NewWidth) << NewLSB.getBitWidth()) | NewLSB.zext(NewWidth)
 /// In the slow case, we know the result is large.
-APInt APInt::concatSlowCase(const APInt &NewLSB) const {
-  unsigned NewWidth = getBitWidth() + NewLSB.getBitWidth();
-  APInt Result = NewLSB.zext(NewWidth);
-  Result.insertBits(*this, NewLSB.getBitWidth());
-  return Result;
+APInt APInt::concatSlowCase(స్థిరరాశి APInt &NewLSB) స్థిరరాశి {
+  గుర్తులేని New_వెడల్పు = get_బిట్టు_వెడల్పు() + NewLSB.get_బిట్టు_వెడల్పు();
+  APInt ఫలితం = NewLSB.zext(New_వెడల్పు);
+  ఫలితం.చొప్పించు_బిట్లు(*ఇది, NewLSB.get_బిట్టు_వెడల్పు());
+  తిరిగి ఫలితం;
 }
 
 /// Toggle a given bit to its opposite value whose position is given
 /// as "bitPosition".
 /// Toggles a given bit to its opposite value.
-void APInt::flipBit(unsigned bitPosition) {
-  assert(bitPosition < BitWidth && "Out of the bit-width range!");
-  setBitVal(bitPosition, !(*this)[bitPosition]);
+శూన్య APInt::flip_బిట్టు(గుర్తులేని బిట్టు_Position) {
+  ప్రతిజ్ఞా(బిట్టు_Position < బిట్టు_వెడల్పు_2 && "Out of the bit-width range!");
+  సమితి_బిట్టు_Val(బిట్టు_Position, !(*ఇది)[బిట్టు_Position]);
 }
 
-void APInt::insertBits(const APInt &subBits, unsigned bitPosition) {
-  unsigned subBitWidth = subBits.getBitWidth();
-  assert((subBitWidth + bitPosition) <= BitWidth && "Illegal bit insertion");
+శూన్య APInt::చొప్పించు_బిట్లు(స్థిరరాశి APInt &sub_బిట్లు, గుర్తులేని బిట్టు_Position) {
+  గుర్తులేని sub_బిట్టు_వెడల్పు = sub_బిట్లు.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా((sub_బిట్టు_వెడల్పు + బిట్టు_Position) <= బిట్టు_వెడల్పు_2 && "Illegal bit insertion");
 
   // inserting no bits is a noop.
-  if (subBitWidth == 0)
-    return;
+  ఒకవేళ (sub_బిట్టు_వెడల్పు == 0)
+    తిరిగి;
 
   // Insertion is a direct copy.
-  if (subBitWidth == BitWidth) {
-    *this = subBits;
-    return;
+  ఒకవేళ (sub_బిట్టు_వెడల్పు == బిట్టు_వెడల్పు_2) {
+    *ఇది = sub_బిట్లు;
+    తిరిగి;
   }
 
   // Single word result can be done as a direct bitmask.
-  if (LLVM_LIKELY(isSingleWord())) {
-    uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
-    U.VAL &= ~(mask << bitPosition);
-    U.VAL |= (subBits.U.VAL << bitPosition);
-    return;
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    uint64_t ముసుగు_2 = WORDTYPE_MAX >> (APINT_బిట్లు_చొప్పున_మాట - sub_బిట్టు_వెడల్పు);
+    U.VAL &= ~(ముసుగు_2 << బిట్టు_Position);
+    U.VAL |= (sub_బిట్లు.U.VAL << బిట్టు_Position);
+    తిరిగి;
   }
 
-  unsigned loBit = whichBit(bitPosition);
-  unsigned loWord = whichWord(bitPosition);
-  unsigned hi1Word = whichWord(bitPosition + subBitWidth - 1);
+  గుర్తులేని lo_బిట్టు = which_బిట్టు(బిట్టు_Position);
+  గుర్తులేని lo_మాట = which_మాట(బిట్టు_Position);
+  గుర్తులేని hi1_మాట = which_మాట(బిట్టు_Position + sub_బిట్టు_వెడల్పు - 1);
 
   // Insertion within a single word can be done as a direct bitmask.
-  if (loWord == hi1Word) {
-    uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
-    U.pVal[loWord] &= ~(mask << loBit);
-    U.pVal[loWord] |= (subBits.U.VAL << loBit);
-    return;
+  ఒకవేళ (lo_మాట == hi1_మాట) {
+    uint64_t ముసుగు_2 = WORDTYPE_MAX >> (APINT_బిట్లు_చొప్పున_మాట - sub_బిట్టు_వెడల్పు);
+    U.pVal[lo_మాట] &= ~(ముసుగు_2 << lo_బిట్టు);
+    U.pVal[lo_మాట] |= (sub_బిట్లు.U.VAL << lo_బిట్టు);
+    తిరిగి;
   }
 
   // Insert on word boundaries.
-  if (loBit == 0) {
+  ఒకవేళ (lo_బిట్టు == 0) {
     // Direct copy whole words.
-    unsigned numWholeSubWords = subBitWidth / APINT_BITS_PER_WORD;
-    memcpy(U.pVal + loWord, subBits.getRawData(),
-           numWholeSubWords * APINT_WORD_SIZE);
+    గుర్తులేని అంకె_సంపూర్ణ_Sub_పదాలు = sub_బిట్టు_వెడల్పు / APINT_బిట్లు_చొప్పున_మాట;
+    జ్ఞాపకం_నకలు(U.pVal + lo_మాట, sub_బిట్లు.get_Raw_దత్తాంశం(),
+           అంకె_సంపూర్ణ_Sub_పదాలు * APINT_మాట_కొలత);
 
     // Mask+insert remaining bits.
-    unsigned remainingBits = subBitWidth % APINT_BITS_PER_WORD;
-    if (remainingBits != 0) {
-      uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - remainingBits);
-      U.pVal[hi1Word] &= ~mask;
-      U.pVal[hi1Word] |= subBits.getWord(subBitWidth - 1);
+    గుర్తులేని మిగిలిన_బిట్లు = sub_బిట్టు_వెడల్పు % APINT_బిట్లు_చొప్పున_మాట;
+    ఒకవేళ (మిగిలిన_బిట్లు != 0) {
+      uint64_t ముసుగు_2 = WORDTYPE_MAX >> (APINT_బిట్లు_చొప్పున_మాట - మిగిలిన_బిట్లు);
+      U.pVal[hi1_మాట] &= ~ముసుగు_2;
+      U.pVal[hi1_మాట] |= sub_బిట్లు.get_మాట(sub_బిట్టు_వెడల్పు - 1);
     }
-    return;
+    తిరిగి;
   }
 
   // General case - set/clear individual bits in dst based on src.
   // TODO - there is scope for optimization here, but at the moment this code
   // path is barely used so prefer readability over performance.
-  for (unsigned i = 0; i != subBitWidth; ++i)
-    setBitVal(bitPosition + i, subBits[i]);
+  కొరకు (గుర్తులేని i = 0; i != sub_బిట్టు_వెడల్పు; ++i)
+    సమితి_బిట్టు_Val(బిట్టు_Position + i, sub_బిట్లు[i]);
 }
 
-void APInt::insertBits(uint64_t subBits, unsigned bitPosition, unsigned numBits) {
-  uint64_t maskBits = maskTrailingOnes<uint64_t>(numBits);
-  subBits &= maskBits;
-  if (LLVM_LIKELY(isSingleWord())) {
-    U.VAL &= ~(maskBits << bitPosition);
-    U.VAL |= subBits << bitPosition;
-    return;
+శూన్య APInt::చొప్పించు_బిట్లు(uint64_t sub_బిట్లు, గుర్తులేని బిట్టు_Position, గుర్తులేని అంకె_బిట్లు) {
+  uint64_t ముసుగు_బిట్లు = ముసుగు_Trailing_Ones<uint64_t>(అంకె_బిట్లు);
+  sub_బిట్లు &= ముసుగు_బిట్లు;
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    U.VAL &= ~(ముసుగు_బిట్లు << బిట్టు_Position);
+    U.VAL |= sub_బిట్లు << బిట్టు_Position;
+    తిరిగి;
   }
 
-  unsigned loBit = whichBit(bitPosition);
-  unsigned loWord = whichWord(bitPosition);
-  unsigned hiWord = whichWord(bitPosition + numBits - 1);
-  if (loWord == hiWord) {
-    U.pVal[loWord] &= ~(maskBits << loBit);
-    U.pVal[loWord] |= subBits << loBit;
-    return;
+  గుర్తులేని lo_బిట్టు = which_బిట్టు(బిట్టు_Position);
+  గుర్తులేని lo_మాట = which_మాట(బిట్టు_Position);
+  గుర్తులేని hi_మాట = which_మాట(బిట్టు_Position + అంకె_బిట్లు - 1);
+  ఒకవేళ (lo_మాట == hi_మాట) {
+    U.pVal[lo_మాట] &= ~(ముసుగు_బిట్లు << lo_బిట్టు);
+    U.pVal[lo_మాట] |= sub_బిట్లు << lo_బిట్టు;
+    తిరిగి;
   }
 
-  static_assert(8 * sizeof(WordType) <= 64, "This code assumes only two words affected");
-  unsigned wordBits = 8 * sizeof(WordType);
-  U.pVal[loWord] &= ~(maskBits << loBit);
-  U.pVal[loWord] |= subBits << loBit;
+  static_assert(8 * పరిమాణం(మాట_Type) <= 64, "This code assumes only two words affected");
+  గుర్తులేని మాట_బిట్లు = 8 * పరిమాణం(మాట_Type);
+  U.pVal[lo_మాట] &= ~(ముసుగు_బిట్లు << lo_బిట్టు);
+  U.pVal[lo_మాట] |= sub_బిట్లు << lo_బిట్టు;
 
-  U.pVal[hiWord] &= ~(maskBits >> (wordBits - loBit));
-  U.pVal[hiWord] |= subBits >> (wordBits - loBit);
+  U.pVal[hi_మాట] &= ~(ముసుగు_బిట్లు >> (మాట_బిట్లు - lo_బిట్టు));
+  U.pVal[hi_మాట] |= sub_బిట్లు >> (మాట_బిట్లు - lo_బిట్టు);
 }
 
-APInt APInt::extractBits(unsigned numBits, unsigned bitPosition) const {
-  assert(bitPosition < BitWidth && (numBits + bitPosition) <= BitWidth &&
+APInt APInt::వెలికితీయి_బిట్లు(గుర్తులేని అంకె_బిట్లు, గుర్తులేని బిట్టు_Position) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_Position < బిట్టు_వెడల్పు_2 && (అంకె_బిట్లు + బిట్టు_Position) <= బిట్టు_వెడల్పు_2 &&
          "Illegal bit extraction");
 
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(numBits, U.VAL >> bitPosition, /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
+    తిరిగి APInt(అంకె_బిట్లు, U.VAL >> బిట్టు_Position, /*isSigned=*/అబద్ధం,
+                 /*implicitTrunc=*/నిజం);
 
-  unsigned loBit = whichBit(bitPosition);
-  unsigned loWord = whichWord(bitPosition);
-  unsigned hiWord = whichWord(bitPosition + numBits - 1);
+  గుర్తులేని lo_బిట్టు = which_బిట్టు(బిట్టు_Position);
+  గుర్తులేని lo_మాట = which_మాట(బిట్టు_Position);
+  గుర్తులేని hi_మాట = which_మాట(బిట్టు_Position + అంకె_బిట్లు - 1);
 
   // Single word result extracting bits from a single word source.
-  if (loWord == hiWord)
-    return APInt(numBits, U.pVal[loWord] >> loBit, /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+  ఒకవేళ (lo_మాట == hi_మాట)
+    తిరిగి APInt(అంకె_బిట్లు, U.pVal[lo_మాట] >> lo_బిట్టు, /*isSigned=*/అబద్ధం,
+                 /*implicitTrunc=*/నిజం);
 
   // Extracting bits that start on a source word boundary can be done
   // as a fast memory copy.
-  if (loBit == 0)
-    return APInt(numBits, ArrayRef(U.pVal + loWord, 1 + hiWord - loWord));
+  ఒకవేళ (lo_బిట్టు == 0)
+    తిరిగి APInt(అంకె_బిట్లు, ArrayRef(U.pVal + lo_మాట, 1 + hi_మాట - lo_మాట));
 
   // General case - shift + copy source words directly into place.
-  APInt Result(numBits, 0);
-  unsigned NumSrcWords = getNumWords();
-  unsigned NumDstWords = Result.getNumWords();
+  APInt ఫలితం(అంకె_బిట్లు, 0);
+  గుర్తులేని అంకె_Src_పదాలు = get_అంకె_పదాలు();
+  గుర్తులేని అంకె_Dst_పదాలు = ఫలితం.get_అంకె_పదాలు();
 
   uint64_t *DestPtr =
-      LLVM_LIKELY(Result.isSingleWord()) ? &Result.U.VAL : Result.U.pVal;
-  for (unsigned word = 0; word < NumDstWords; ++word) {
-    uint64_t w0 = U.pVal[loWord + word];
+      LLVM_LIKELY(ఫలితం.is_Single_మాట()) ? &ఫలితం.U.VAL : ఫలితం.U.pVal;
+  కొరకు (గుర్తులేని మాట = 0; మాట < అంకె_Dst_పదాలు; ++మాట) {
+    uint64_t w0 = U.pVal[lo_మాట + మాట];
     uint64_t w1 =
-        (loWord + word + 1) < NumSrcWords ? U.pVal[loWord + word + 1] : 0;
-    DestPtr[word] = (w0 >> loBit) | (w1 << (APINT_BITS_PER_WORD - loBit));
+        (lo_మాట + మాట + 1) < అంకె_Src_పదాలు ? U.pVal[lo_మాట + మాట + 1] : 0;
+    DestPtr[మాట] = (w0 >> lo_బిట్టు) | (w1 << (APINT_బిట్లు_చొప్పున_మాట - lo_బిట్టు));
   }
 
-  return Result.clearUnusedBits();
+  తిరిగి ఫలితం.clear_వాడని_బిట్లు();
 }
 
-uint64_t APInt::extractBitsAsZExtValue(unsigned numBits,
-                                       unsigned bitPosition) const {
-  assert(bitPosition < BitWidth && (numBits + bitPosition) <= BitWidth &&
+uint64_t APInt::వెలికితీయి_బిట్లు_As_ZExt_విలువ(గుర్తులేని అంకె_బిట్లు,
+                                       గుర్తులేని బిట్టు_Position) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_Position < బిట్టు_వెడల్పు_2 && (అంకె_బిట్లు + బిట్టు_Position) <= బిట్టు_వెడల్పు_2 &&
          "Illegal bit extraction");
-  assert(numBits <= 64 && "Illegal bit extraction");
+  ప్రతిజ్ఞా(అంకె_బిట్లు <= 64 && "Illegal bit extraction");
 
-  uint64_t maskBits = maskTrailingOnes<uint64_t>(numBits);
-  if (LLVM_LIKELY(isSingleWord()))
-    return (U.VAL >> bitPosition) & maskBits;
+  uint64_t ముసుగు_బిట్లు = ముసుగు_Trailing_Ones<uint64_t>(అంకె_బిట్లు);
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
+    తిరిగి (U.VAL >> బిట్టు_Position) & ముసుగు_బిట్లు;
 
-  static_assert(APINT_BITS_PER_WORD >= 64,
+  static_assert(APINT_బిట్లు_చొప్పున_మాట >= 64,
                 "This code assumes only two words affected");
-  unsigned loBit = whichBit(bitPosition);
-  unsigned loWord = whichWord(bitPosition);
-  unsigned hiWord = whichWord(bitPosition + numBits - 1);
-  if (loWord == hiWord)
-    return (U.pVal[loWord] >> loBit) & maskBits;
+  గుర్తులేని lo_బిట్టు = which_బిట్టు(బిట్టు_Position);
+  గుర్తులేని lo_మాట = which_మాట(బిట్టు_Position);
+  గుర్తులేని hi_మాట = which_మాట(బిట్టు_Position + అంకె_బిట్లు - 1);
+  ఒకవేళ (lo_మాట == hi_మాట)
+    తిరిగి (U.pVal[lo_మాట] >> lo_బిట్టు) & ముసుగు_బిట్లు;
 
-  uint64_t retBits = U.pVal[loWord] >> loBit;
-  retBits |= U.pVal[hiWord] << (APINT_BITS_PER_WORD - loBit);
-  retBits &= maskBits;
-  return retBits;
+  uint64_t ret_బిట్లు = U.pVal[lo_మాట] >> lo_బిట్టు;
+  ret_బిట్లు |= U.pVal[hi_మాట] << (APINT_బిట్లు_చొప్పున_మాట - lo_బిట్టు);
+  ret_బిట్లు &= ముసుగు_బిట్లు;
+  తిరిగి ret_బిట్లు;
 }
 
-unsigned APInt::getSufficientBitsNeeded(StringRef Str, uint8_t Radix) {
-  assert(!Str.empty() && "Invalid string length");
-  size_t StrLen = Str.size();
+గుర్తులేని APInt::get_Sufficient_బిట్లు_Needed(StringRef Str, uint8_t Radix) {
+  ప్రతిజ్ఞా(!Str.ఖాళీలు() && "Invalid string length");
+  size_t StrLen = Str.కొలత_2();
 
   // Each computation below needs to know if it's negative.
-  unsigned IsNegative = false;
-  if (Str[0] == '-' || Str[0] == '+') {
+  గుర్తులేని IsNegative = అబద్ధం;
+  ఒకవేళ (Str[0] == '-' || Str[0] == '+') {
     IsNegative = Str[0] == '-';
     StrLen--;
-    assert(StrLen && "String is only a sign, needs a value.");
+    ప్రతిజ్ఞా(StrLen && "String is only a sign, needs a value.");
   }
 
   // For radixes of power-of-two values, the bits required is accurately and
   // easily computed.
-  if (Radix == 2)
-    return StrLen + IsNegative;
-  if (Radix == 8)
-    return StrLen * 3 + IsNegative;
-  if (Radix == 16)
-    return StrLen * 4 + IsNegative;
+  ఒకవేళ (Radix == 2)
+    తిరిగి StrLen + IsNegative;
+  ఒకవేళ (Radix == 8)
+    తిరిగి StrLen * 3 + IsNegative;
+  ఒకవేళ (Radix == 16)
+    తిరిగి StrLen * 4 + IsNegative;
 
   // Compute a sufficient number of bits that is always large enough but might
   // be too large. This avoids the assertion in the constructor. This
   // calculation doesn't work appropriately for the numbers 0-9, so just use 4
   // bits in that case.
-  if (Radix == 10)
-    return (StrLen == 1 ? 4 : StrLen * 64 / 18) + IsNegative;
+  ఒకవేళ (Radix == 10)
+    తిరిగి (StrLen == 1 ? 4 : StrLen * 64 / 18) + IsNegative;
 
-  assert(Radix == 36);
-  return (StrLen == 1 ? 7 : StrLen * 16 / 3) + IsNegative;
+  ప్రతిజ్ఞా(Radix == 36);
+  తిరిగి (StrLen == 1 ? 7 : StrLen * 16 / 3) + IsNegative;
 }
 
-unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
+గుర్తులేని APInt::get_బిట్లు_Needed(StringRef str, uint8_t radix) {
   // Compute a sufficient number of bits that is always large enough but might
   // be too large.
-  unsigned sufficient = getSufficientBitsNeeded(str, radix);
+  గుర్తులేని sufficient = get_Sufficient_బిట్లు_Needed(str, radix);
 
   // For bases 2, 8, and 16, the sufficient number of bits is exact and we can
   // return the value directly. For bases 10 and 36, we need to do extra work.
-  if (radix == 2 || radix == 8 || radix == 16)
-    return sufficient;
+  ఒకవేళ (radix == 2 || radix == 8 || radix == 16)
+    తిరిగి sufficient;
 
   // This is grossly inefficient but accurate. We could probably do something
   // with a computation of roughly slen*64/20 and then adjust by the value of
   // the first few digits. But, I'm not sure how accurate that could be.
-  size_t slen = str.size();
+  size_t slen = str.కొలత_2();
 
   // Each computation below needs to know if it's negative.
   StringRef::iterator p = str.begin();
-  unsigned isNegative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  గుర్తులేని isNegative = *p == '-';
+  ఒకవేళ (*p == '-' || *p == '+') {
     p++;
     slen--;
-    assert(slen && "String is only a sign, needs a value.");
+    ప్రతిజ్ఞా(slen && "String is only a sign, needs a value.");
   }
 
 
@@ -601,254 +601,254 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
   // Compute how many bits are required. If the log is infinite, assume we need
   // just bit. If the log is exact and value is negative, then the value is
   // MinSignedValue with (log + 1) bits.
-  unsigned log = tmp.logBase2();
-  if (log == (unsigned)-1) {
-    return isNegative + 1;
-  } else if (isNegative && tmp.isPowerOf2()) {
-    return isNegative + log;
-  } else {
-    return isNegative + log + 1;
+  గుర్తులేని సంవర్గమానం = tmp.logBase2();
+  ఒకవేళ (సంవర్గమానం == (గుర్తులేని)-1) {
+    తిరిగి isNegative + 1;
+  } లేకపోతే ఒకవేళ (isNegative && tmp.isPowerOf2()) {
+    తిరిగి isNegative + సంవర్గమానం;
+  } లేకపోతే {
+    తిరిగి isNegative + సంవర్గమానం + 1;
   }
 }
 
-hash_code llvm::hash_value(const APInt &Arg) {
-  if (LLVM_LIKELY(Arg.isSingleWord()))
-    return hash_combine(Arg.BitWidth, Arg.U.VAL);
+hash_సంకేతం llvm::hash_విలువ(స్థిరరాశి APInt &Arg) {
+  ఒకవేళ (LLVM_LIKELY(Arg.is_Single_మాట()))
+    తిరిగి hash_combine(Arg.బిట్టు_వెడల్పు_2, Arg.U.VAL);
 
-  return hash_combine(
-      Arg.BitWidth,
-      hash_combine_range(Arg.U.pVal, Arg.U.pVal + Arg.getNumWords()));
+  తిరిగి hash_combine(
+      Arg.బిట్టు_వెడల్పు_2,
+      hash_combine_range(Arg.U.pVal, Arg.U.pVal + Arg.get_అంకె_పదాలు()));
 }
 
-unsigned DenseMapInfo<APInt, void>::getHashValue(const APInt &Key) {
-  return static_cast<unsigned>(hash_value(Key));
+గుర్తులేని DenseMapInfo<APInt, శూన్య>::get_Hash_విలువ(స్థిరరాశి APInt &కీలకం) {
+  తిరిగి static_cast<గుర్తులేని>(hash_విలువ(కీలకం));
 }
 
-bool APInt::isSplat(unsigned SplatSizeInBits) const {
-  assert(getBitWidth() % SplatSizeInBits == 0 &&
+తార్కిక APInt::isSplat(గుర్తులేని Splat_కొలత_లోపల_బిట్లు) స్థిరరాశి {
+  ప్రతిజ్ఞా(get_బిట్టు_వెడల్పు() % Splat_కొలత_లోపల_బిట్లు == 0 &&
          "SplatSizeInBits must divide width!");
   // We can check that all parts of an integer are equal by making use of a
   // little trick: rotate and check if it's still the same value.
-  return *this == rotl(SplatSizeInBits);
+  తిరిగి *ఇది == rotl(Splat_కొలత_లోపల_బిట్లు);
 }
 
 /// This function returns the high "numBits" bits of this APInt.
-APInt APInt::getHiBits(unsigned numBits) const {
-  return this->lshr(BitWidth - numBits);
+APInt APInt::get_Hi_బిట్లు(గుర్తులేని అంకె_బిట్లు) స్థిరరాశి {
+  తిరిగి ఇది->lshr(బిట్టు_వెడల్పు_2 - అంకె_బిట్లు);
 }
 
 /// This function returns the low "numBits" bits of this APInt.
-APInt APInt::getLoBits(unsigned numBits) const {
-  APInt Result(getLowBitsSet(BitWidth, numBits));
-  Result &= *this;
-  return Result;
+APInt APInt::get_Lo_బిట్లు(గుర్తులేని అంకె_బిట్లు) స్థిరరాశి {
+  APInt ఫలితం(get_దిగువ_బిట్లు_సమితి(బిట్టు_వెడల్పు_2, అంకె_బిట్లు));
+  ఫలితం &= *ఇది;
+  తిరిగి ఫలితం;
 }
 
 /// Return a value containing V broadcasted over NewLen bits.
-APInt APInt::getSplat(unsigned NewLen, const APInt &V) {
-  assert(NewLen >= V.getBitWidth() && "Can't splat to smaller bit width!");
+APInt APInt::getSplat(గుర్తులేని NewLen, స్థిరరాశి APInt &V) {
+  ప్రతిజ్ఞా(NewLen >= V.get_బిట్టు_వెడల్పు() && "Can't splat to smaller bit width!");
 
   APInt Val = V.zext(NewLen);
-  for (unsigned I = V.getBitWidth(); I < NewLen; I <<= 1)
+  కొరకు (గుర్తులేని I = V.get_బిట్టు_వెడల్పు(); I < NewLen; I <<= 1)
     Val |= Val << I;
 
-  return Val;
+  తిరిగి Val;
 }
 
-unsigned APInt::countLeadingZerosSlowCase() const {
-  unsigned Count = 0;
-  for (int i = getNumWords() - 1; i >= 0; --i) {
+గుర్తులేని APInt::లెక్క_Leading_Zeros_Slow_Case() స్థిరరాశి {
+  గుర్తులేని లెక్క_2 = 0;
+  కొరకు (పూర్ణాంకం i = get_అంకె_పదాలు() - 1; i >= 0; --i) {
     uint64_t V = U.pVal[i];
-    if (V == 0)
-      Count += APINT_BITS_PER_WORD;
-    else {
-      Count += llvm::countl_zero(V);
-      break;
+    ఒకవేళ (V == 0)
+      లెక్క_2 += APINT_బిట్లు_చొప్పున_మాట;
+    లేకపోతే {
+      లెక్క_2 += llvm::countl_zero(V);
+      ఆపు;
     }
   }
   // Adjust for unused bits in the most significant word (they are zero).
-  unsigned Mod = BitWidth % APINT_BITS_PER_WORD;
-  Count -= Mod > 0 ? APINT_BITS_PER_WORD - Mod : 0;
-  return Count;
+  గుర్తులేని Mod = బిట్టు_వెడల్పు_2 % APINT_బిట్లు_చొప్పున_మాట;
+  లెక్క_2 -= Mod > 0 ? APINT_బిట్లు_చొప్పున_మాట - Mod : 0;
+  తిరిగి లెక్క_2;
 }
 
-unsigned APInt::countLeadingOnesSlowCase() const {
-  unsigned highWordBits = BitWidth % APINT_BITS_PER_WORD;
-  unsigned shift;
-  if (!highWordBits) {
-    highWordBits = APINT_BITS_PER_WORD;
-    shift = 0;
-  } else {
-    shift = APINT_BITS_PER_WORD - highWordBits;
+గుర్తులేని APInt::లెక్క_Leading_Ones_Slow_Case() స్థిరరాశి {
+  గుర్తులేని ఎగువ_మాట_బిట్లు = బిట్టు_వెడల్పు_2 % APINT_బిట్లు_చొప్పున_మాట;
+  గుర్తులేని జరుపు;
+  ఒకవేళ (!ఎగువ_మాట_బిట్లు) {
+    ఎగువ_మాట_బిట్లు = APINT_బిట్లు_చొప్పున_మాట;
+    జరుపు = 0;
+  } లేకపోతే {
+    జరుపు = APINT_బిట్లు_చొప్పున_మాట - ఎగువ_మాట_బిట్లు;
   }
-  int i = getNumWords() - 1;
-  unsigned Count = llvm::countl_one(U.pVal[i] << shift);
-  if (Count == highWordBits) {
-    for (i--; i >= 0; --i) {
-      if (U.pVal[i] == WORDTYPE_MAX)
-        Count += APINT_BITS_PER_WORD;
-      else {
-        Count += llvm::countl_one(U.pVal[i]);
-        break;
+  పూర్ణాంకం i = get_అంకె_పదాలు() - 1;
+  గుర్తులేని లెక్క_2 = llvm::countl_one(U.pVal[i] << జరుపు);
+  ఒకవేళ (లెక్క_2 == ఎగువ_మాట_బిట్లు) {
+    కొరకు (i--; i >= 0; --i) {
+      ఒకవేళ (U.pVal[i] == WORDTYPE_MAX)
+        లెక్క_2 += APINT_బిట్లు_చొప్పున_మాట;
+      లేకపోతే {
+        లెక్క_2 += llvm::countl_one(U.pVal[i]);
+        ఆపు;
       }
     }
   }
-  return Count;
+  తిరిగి లెక్క_2;
 }
 
-unsigned APInt::countTrailingZerosSlowCase() const {
-  unsigned Count = 0;
-  unsigned i = 0;
-  for (; i < getNumWords() && U.pVal[i] == 0; ++i)
-    Count += APINT_BITS_PER_WORD;
-  if (i < getNumWords())
-    Count += llvm::countr_zero(U.pVal[i]);
-  return std::min(Count, BitWidth);
+గుర్తులేని APInt::లెక్క_Trailing_Zeros_Slow_Case() స్థిరరాశి {
+  గుర్తులేని లెక్క_2 = 0;
+  గుర్తులేని i = 0;
+  కొరకు (; i < get_అంకె_పదాలు() && U.pVal[i] == 0; ++i)
+    లెక్క_2 += APINT_బిట్లు_చొప్పున_మాట;
+  ఒకవేళ (i < get_అంకె_పదాలు())
+    లెక్క_2 += llvm::countr_zero(U.pVal[i]);
+  తిరిగి std::min(లెక్క_2, బిట్టు_వెడల్పు_2);
 }
 
-unsigned APInt::countTrailingOnesSlowCase() const {
-  unsigned Count = 0;
-  unsigned i = 0;
-  for (; i < getNumWords() && U.pVal[i] == WORDTYPE_MAX; ++i)
-    Count += APINT_BITS_PER_WORD;
-  if (i < getNumWords())
-    Count += llvm::countr_one(U.pVal[i]);
-  assert(Count <= BitWidth);
-  return Count;
+గుర్తులేని APInt::లెక్క_Trailing_Ones_Slow_Case() స్థిరరాశి {
+  గుర్తులేని లెక్క_2 = 0;
+  గుర్తులేని i = 0;
+  కొరకు (; i < get_అంకె_పదాలు() && U.pVal[i] == WORDTYPE_MAX; ++i)
+    లెక్క_2 += APINT_బిట్లు_చొప్పున_మాట;
+  ఒకవేళ (i < get_అంకె_పదాలు())
+    లెక్క_2 += llvm::countr_one(U.pVal[i]);
+  ప్రతిజ్ఞా(లెక్క_2 <= బిట్టు_వెడల్పు_2);
+  తిరిగి లెక్క_2;
 }
 
-unsigned APInt::countPopulationSlowCase() const {
-  unsigned Count = 0;
-  for (unsigned i = 0; i < getNumWords(); ++i)
-    Count += llvm::popcount(U.pVal[i]);
-  return Count;
+గుర్తులేని APInt::లెక్క_Population_Slow_Case() స్థిరరాశి {
+  గుర్తులేని లెక్క_2 = 0;
+  కొరకు (గుర్తులేని i = 0; i < get_అంకె_పదాలు(); ++i)
+    లెక్క_2 += llvm::popcount(U.pVal[i]);
+  తిరిగి లెక్క_2;
 }
 
-bool APInt::isPowerOf2SlowCase() const {
-  unsigned Count = 0;
-  for (unsigned i = 0; i < getNumWords(); ++i) {
-    Count += llvm::popcount(U.pVal[i]);
-    if (Count > 1)
-      return false;
+తార్కిక APInt::isPowerOf2SlowCase() స్థిరరాశి {
+  గుర్తులేని లెక్క_2 = 0;
+  కొరకు (గుర్తులేని i = 0; i < get_అంకె_పదాలు(); ++i) {
+    లెక్క_2 += llvm::popcount(U.pVal[i]);
+    ఒకవేళ (లెక్క_2 > 1)
+      తిరిగి అబద్ధం;
   }
-  return Count == 1;
+  తిరిగి లెక్క_2 == 1;
 }
 
-bool APInt::intersectsSlowCase(const APInt &RHS) const {
-  for (unsigned i = 0, e = getNumWords(); i != e; ++i)
-    if ((U.pVal[i] & RHS.U.pVal[i]) != 0)
-      return true;
+తార్కిక APInt::intersectsSlowCase(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  కొరకు (గుర్తులేని i = 0, e = get_అంకె_పదాలు(); i != e; ++i)
+    ఒకవేళ ((U.pVal[i] & RHS.U.pVal[i]) != 0)
+      తిరిగి నిజం;
 
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-bool APInt::isSubsetOfSlowCase(const APInt &RHS) const {
-  for (unsigned i = 0, e = getNumWords(); i != e; ++i)
-    if ((U.pVal[i] & ~RHS.U.pVal[i]) != 0)
-      return false;
+తార్కిక APInt::is_Subset_యొక్క_Slow_Case(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  కొరకు (గుర్తులేని i = 0, e = get_అంకె_పదాలు(); i != e; ++i)
+    ఒకవేళ ((U.pVal[i] & ~RHS.U.pVal[i]) != 0)
+      తిరిగి అబద్ధం;
 
-  return true;
+  తిరిగి నిజం;
 }
 
-bool APInt::isInverseOfSlowCase(const APInt &RHS) const {
-  const unsigned Last = getNumWords() - 1;
-  for (unsigned I = 0; I != Last; ++I)
-    if ((U.pVal[I] ^ RHS.U.pVal[I]) != WORDTYPE_MAX)
-      return false;
+తార్కిక APInt::is_Inverse_యొక్క_Slow_Case(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  స్థిరరాశి గుర్తులేని చివరి = get_అంకె_పదాలు() - 1;
+  కొరకు (గుర్తులేని I = 0; I != చివరి; ++I)
+    ఒకవేళ ((U.pVal[I] ^ RHS.U.pVal[I]) != WORDTYPE_MAX)
+      తిరిగి అబద్ధం;
 
-  unsigned TailBits = BitWidth - Last * APINT_BITS_PER_WORD;
-  WordType TailMask = llvm::maskTrailingOnes<WordType>(TailBits);
-  return (U.pVal[Last] ^ RHS.U.pVal[Last]) == TailMask;
+  గుర్తులేని తోక_బిట్లు = బిట్టు_వెడల్పు_2 - చివరి * APINT_బిట్లు_చొప్పున_మాట;
+  మాట_Type తోక_ముసుగు = llvm::ముసుగు_Trailing_Ones<మాట_Type>(తోక_బిట్లు);
+  తిరిగి (U.pVal[చివరి] ^ RHS.U.pVal[చివరి]) == తోక_ముసుగు;
 }
 
-APInt APInt::byteSwap() const {
-  assert(BitWidth >= 16 && BitWidth % 8 == 0 && "Cannot byteswap!");
-  if (BitWidth == 16)
-    return APInt(BitWidth, llvm::byteswap<uint16_t>(U.VAL));
-  if (BitWidth == 32)
-    return APInt(BitWidth, llvm::byteswap<uint32_t>(U.VAL));
-  if (BitWidth <= 64) {
+APInt APInt::byte_మార్పిడి() స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 >= 16 && బిట్టు_వెడల్పు_2 % 8 == 0 && "Cannot byteswap!");
+  ఒకవేళ (బిట్టు_వెడల్పు_2 == 16)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, llvm::byteswap<uint16_t>(U.VAL));
+  ఒకవేళ (బిట్టు_వెడల్పు_2 == 32)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, llvm::byteswap<uint32_t>(U.VAL));
+  ఒకవేళ (బిట్టు_వెడల్పు_2 <= 64) {
     uint64_t Tmp1 = llvm::byteswap<uint64_t>(U.VAL);
-    Tmp1 >>= (64 - BitWidth);
-    return APInt(BitWidth, Tmp1);
+    Tmp1 >>= (64 - బిట్టు_వెడల్పు_2);
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, Tmp1);
   }
 
-  APInt Result(getNumWords() * APINT_BITS_PER_WORD, 0);
-  for (unsigned I = 0, N = getNumWords(); I != N; ++I)
-    Result.U.pVal[I] = llvm::byteswap<uint64_t>(U.pVal[N - I - 1]);
-  if (Result.BitWidth != BitWidth) {
-    Result.lshrInPlace(Result.BitWidth - BitWidth);
-    Result.BitWidth = BitWidth;
+  APInt ఫలితం(get_అంకె_పదాలు() * APINT_బిట్లు_చొప్పున_మాట, 0);
+  కొరకు (గుర్తులేని I = 0, N = get_అంకె_పదాలు(); I != N; ++I)
+    ఫలితం.U.pVal[I] = llvm::byteswap<uint64_t>(U.pVal[N - I - 1]);
+  ఒకవేళ (ఫలితం.బిట్టు_వెడల్పు_2 != బిట్టు_వెడల్పు_2) {
+    ఫలితం.lshr_లోపల_ఉంచు(ఫలితం.బిట్టు_వెడల్పు_2 - బిట్టు_వెడల్పు_2);
+    ఫలితం.బిట్టు_వెడల్పు_2 = బిట్టు_వెడల్పు_2;
   }
-  return Result;
+  తిరిగి ఫలితం;
 }
 
-APInt APInt::reverseBits() const {
-  if (LLVM_LIKELY(isSingleWord())) {
-    switch (BitWidth) {
-    case 64:
-      return APInt(BitWidth, llvm::reverseBits<uint64_t>(U.VAL));
-    case 32:
-      return APInt(BitWidth, llvm::reverseBits<uint32_t>(U.VAL));
-    case 16:
-      return APInt(BitWidth, llvm::reverseBits<uint16_t>(U.VAL));
-    case 8:
-      return APInt(BitWidth, llvm::reverseBits<uint8_t>(U.VAL));
-    case 1: // fallthrough
-    case 0:
-      return *this;
-    default:
-      return APInt(BitWidth,
-                   llvm::reverseBits<uint64_t>(U.VAL) >> (64 - BitWidth));
+APInt APInt::తిరగేయి_బిట్లు() స్థిరరాశి {
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    ఎంపిక (బిట్టు_వెడల్పు_2) {
+    స్థితి 64:
+      తిరిగి APInt(బిట్టు_వెడల్పు_2, llvm::తిరగేయి_బిట్లు<uint64_t>(U.VAL));
+    స్థితి 32:
+      తిరిగి APInt(బిట్టు_వెడల్పు_2, llvm::తిరగేయి_బిట్లు<uint32_t>(U.VAL));
+    స్థితి 16:
+      తిరిగి APInt(బిట్టు_వెడల్పు_2, llvm::తిరగేయి_బిట్లు<uint16_t>(U.VAL));
+    స్థితి 8:
+      తిరిగి APInt(బిట్టు_వెడల్పు_2, llvm::తిరగేయి_బిట్లు<uint8_t>(U.VAL));
+    స్థితి 1: // fallthrough
+    స్థితి 0:
+      తిరిగి *ఇది;
+    అప్రమేయ:
+      తిరిగి APInt(బిట్టు_వెడల్పు_2,
+                   llvm::తిరగేయి_బిట్లు<uint64_t>(U.VAL) >> (64 - బిట్టు_వెడల్పు_2));
     }
   }
 
-  APInt Result(BitWidth, 0);
-  unsigned NumWords = getNumWords();
-  unsigned ExcessBits = NumWords * APINT_BITS_PER_WORD - BitWidth;
-  if (ExcessBits == 0) {
+  APInt ఫలితం(బిట్టు_వెడల్పు_2, 0);
+  గుర్తులేని అంకె_పదాలు_2 = get_అంకె_పదాలు();
+  గుర్తులేని Excess_బిట్లు = అంకె_పదాలు_2 * APINT_బిట్లు_చొప్పున_మాట - బిట్టు_వెడల్పు_2;
+  ఒకవేళ (Excess_బిట్లు == 0) {
     // Fast path. No cross-word shift needed.
-    for (unsigned I = 0; I < NumWords; ++I)
-      Result.U.pVal[I] = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 1 - I]);
-    return Result;
+    కొరకు (గుర్తులేని I = 0; I < అంకె_పదాలు_2; ++I)
+      ఫలితం.U.pVal[I] = llvm::తిరగేయి_బిట్లు<uint64_t>(U.pVal[అంకె_పదాలు_2 - 1 - I]);
+    తిరిగి ఫలితం;
   }
   // Holds reversed bits of the previous (more significant) word.
-  uint64_t PrevRev = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 1]);
-  for (unsigned I = 0; I < NumWords - 1; ++I) {
-    uint64_t CurrRev = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 2 - I]);
-    Result.U.pVal[I] = (PrevRev >> ExcessBits) | (CurrRev << (64 - ExcessBits));
+  uint64_t PrevRev = llvm::తిరగేయి_బిట్లు<uint64_t>(U.pVal[అంకె_పదాలు_2 - 1]);
+  కొరకు (గుర్తులేని I = 0; I < అంకె_పదాలు_2 - 1; ++I) {
+    uint64_t CurrRev = llvm::తిరగేయి_బిట్లు<uint64_t>(U.pVal[అంకె_పదాలు_2 - 2 - I]);
+    ఫలితం.U.pVal[I] = (PrevRev >> Excess_బిట్లు) | (CurrRev << (64 - Excess_బిట్లు));
     PrevRev = CurrRev;
   }
-  Result.U.pVal[NumWords - 1] = PrevRev >> ExcessBits;
-  return Result;
+  ఫలితం.U.pVal[అంకె_పదాలు_2 - 1] = PrevRev >> Excess_బిట్లు;
+  తిరిగి ఫలితం;
 }
 
-APInt llvm::APIntOps::GreatestCommonDivisor(APInt A, APInt B, bool IsSigned) {
+APInt llvm::APIntOps::Greatest_Common_భాజకం(APInt A, APInt B, తార్కిక IsSigned) {
   // Take absolute value if IsSigned.
-  if (IsSigned) {
-    A = A.abs();
-    B = B.abs();
+  ఒకవేళ (IsSigned) {
+    A = A.నిరపేక్ష();
+    B = B.నిరపేక్ష();
   }
 
   // Fast-path a common case.
-  if (A == B) return A;
+  ఒకవేళ (A == B) తిరిగి A;
 
   // Corner cases: if either operand is zero, the other is the gcd.
-  if (!A) return B;
-  if (!B) return A;
+  ఒకవేళ (!A) తిరిగి B;
+  ఒకవేళ (!B) తిరిగి A;
 
   // Count common powers of 2 and remove all other powers of 2.
-  unsigned Pow2;
+  గుర్తులేని Pow2;
   {
-    unsigned Pow2_A = A.countr_zero();
-    unsigned Pow2_B = B.countr_zero();
-    if (Pow2_A > Pow2_B) {
-      A.lshrInPlace(Pow2_A - Pow2_B);
+    గుర్తులేని Pow2_A = A.countr_zero();
+    గుర్తులేని Pow2_B = B.countr_zero();
+    ఒకవేళ (Pow2_A > Pow2_B) {
+      A.lshr_లోపల_ఉంచు(Pow2_A - Pow2_B);
       Pow2 = Pow2_B;
-    } else if (Pow2_B > Pow2_A) {
-      B.lshrInPlace(Pow2_B - Pow2_A);
+    } లేకపోతే ఒకవేళ (Pow2_B > Pow2_A) {
+      B.lshr_లోపల_ఉంచు(Pow2_B - Pow2_A);
       Pow2 = Pow2_A;
-    } else {
+    } లేకపోతే {
       Pow2 = Pow2_A;
     }
   }
@@ -859,49 +859,49 @@ APInt llvm::APIntOps::GreatestCommonDivisor(APInt A, APInt B, bool IsSigned) {
   //
   // This is a modified version of Stein's algorithm, taking advantage of
   // efficient countTrailingZeros().
-  while (A != B) {
-    if (A.ugt(B)) {
+  అయితే (A != B) {
+    ఒకవేళ (A.ugt(B)) {
       A -= B;
-      A.lshrInPlace(A.countr_zero() - Pow2);
-    } else {
+      A.lshr_లోపల_ఉంచు(A.countr_zero() - Pow2);
+    } లేకపోతే {
       B -= A;
-      B.lshrInPlace(B.countr_zero() - Pow2);
+      B.lshr_లోపల_ఉంచు(B.countr_zero() - Pow2);
     }
   }
 
-  return A;
+  తిరిగి A;
 }
 
-APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
-  uint64_t I = bit_cast<uint64_t>(Double);
+APInt llvm::APIntOps::విడత_Double_గమ్యం_APInt(ద్విగుణ Double, గుర్తులేని వెడల్పు_2) {
+  uint64_t I = బిట్టు_cast<uint64_t>(Double);
 
   // Get the sign bit from the highest order bit
-  bool isNeg = I >> 63;
+  తార్కిక isNeg = I >> 63;
 
   // Get the 11-bit exponent and adjust for the 1023 bit bias
-  int64_t exp = ((I >> 52) & 0x7ff) - 1023;
+  int64_t ఘాతాంకం = ((I >> 52) & 0x7ff) - 1023;
 
   // If the exponent is negative, the value is < 0 so just return 0.
-  if (exp < 0)
-    return APInt(width, 0u);
+  ఒకవేళ (ఘాతాంకం < 0)
+    తిరిగి APInt(వెడల్పు_2, 0u);
 
   // Extract the mantissa by clearing the top 12 bits (sign + exponent).
   uint64_t mantissa = (I & (~0ULL >> 12)) | 1ULL << 52;
 
   // If the exponent doesn't shift all bits out of the mantissa
-  if (exp < 52)
-    return isNeg ? -APInt(width, mantissa >> (52 - exp)) :
-                    APInt(width, mantissa >> (52 - exp));
+  ఒకవేళ (ఘాతాంకం < 52)
+    తిరిగి isNeg ? -APInt(వెడల్పు_2, mantissa >> (52 - ఘాతాంకం)) :
+                    APInt(వెడల్పు_2, mantissa >> (52 - ఘాతాంకం));
 
   // If the client didn't provide enough bits for us to shift the mantissa into
   // then the result is undefined, just return 0
-  if (width <= exp - 52)
-    return APInt(width, 0);
+  ఒకవేళ (వెడల్పు_2 <= ఘాతాంకం - 52)
+    తిరిగి APInt(వెడల్పు_2, 0);
 
   // Otherwise, we have to shift the mantissa bits up to the right location
-  APInt Tmp(width, mantissa);
-  Tmp <<= (unsigned)exp - 52;
-  return isNeg ? -Tmp : Tmp;
+  APInt Tmp(వెడల్పు_2, mantissa);
+  Tmp <<= (గుర్తులేని)ఘాతాంకం - 52;
+  తిరిగి isNeg ? -Tmp : Tmp;
 }
 
 /// This function converts this APInt to a double.
@@ -911,298 +911,298 @@ APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
 /// |-------------------------------------- |
 /// |  1[63]   11[62-52]   52[51-00]   1023 |
 ///  --------------------------------------
-double APInt::roundToDouble(bool isSigned) const {
+ద్విగుణ APInt::విడత_గమ్యం_Double(తార్కిక isSigned) స్థిరరాశి {
   // Handle the simple case where the value is contained in one uint64_t.
   // It is wrong to optimize getWord(0) to VAL; there might be more than one word.
-  if (LLVM_LIKELY(isSingleWord() || getActiveBits() <= APINT_BITS_PER_WORD)) {
-    if (isSigned) {
-      int64_t sext = SignExtend64(getWord(0), BitWidth);
-      return double(sext);
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట() || get_చురుకైన_బిట్లు() <= APINT_బిట్లు_చొప్పున_మాట)) {
+    ఒకవేళ (isSigned) {
+      int64_t sext = SignExtend64(get_మాట(0), బిట్టు_వెడల్పు_2);
+      తిరిగి ద్విగుణ(sext);
     }
-    return double(getWord(0));
+    తిరిగి ద్విగుణ(get_మాట(0));
   }
 
   // Determine if the value is negative.
-  bool isNeg = isSigned ? (*this)[BitWidth-1] : false;
+  తార్కిక isNeg = isSigned ? (*ఇది)[బిట్టు_వెడల్పు_2-1] : అబద్ధం;
 
   // Construct the absolute value if we're negative.
-  APInt Tmp(isNeg ? -(*this) : (*this));
+  APInt Tmp(isNeg ? -(*ఇది) : (*ఇది));
 
   // Figure out how many bits we're using.
-  unsigned n = Tmp.getActiveBits();
+  గుర్తులేని n = Tmp.get_చురుకైన_బిట్లు();
 
   // The exponent (without bias normalization) is just the number of bits
   // we are using. Note that the sign bit is gone since we constructed the
   // absolute value.
-  uint64_t exp = n;
+  uint64_t ఘాతాంకం = n;
 
   // Return infinity for exponent overflow
-  if (exp > 1023) {
-    if (!isSigned || !isNeg)
-      return std::numeric_limits<double>::infinity();
-    else
-      return -std::numeric_limits<double>::infinity();
+  ఒకవేళ (ఘాతాంకం > 1023) {
+    ఒకవేళ (!isSigned || !isNeg)
+      తిరిగి std::numeric_limits<ద్విగుణ>::infinity();
+    లేకపోతే
+      తిరిగి -std::numeric_limits<ద్విగుణ>::infinity();
   }
-  exp += 1023; // Increment for 1023 bias
+  ఘాతాంకం += 1023; // Increment for 1023 bias
 
   // Number of bits in mantissa is 52. To obtain the mantissa value, we must
   // extract the high 52 bits from the correct words in pVal.
   uint64_t mantissa;
-  unsigned hiWord = whichWord(n-1);
-  if (hiWord == 0) {
+  గుర్తులేని hi_మాట = which_మాట(n-1);
+  ఒకవేళ (hi_మాట == 0) {
     mantissa = Tmp.U.pVal[0];
-    if (n > 52)
+    ఒకవేళ (n > 52)
       mantissa >>= n - 52; // shift down, we want the top 52 bits.
-  } else {
-    assert(hiWord > 0 && "huh?");
-    uint64_t hibits = Tmp.U.pVal[hiWord] << (52 - n % APINT_BITS_PER_WORD);
-    uint64_t lobits = Tmp.U.pVal[hiWord-1] >> (11 + n % APINT_BITS_PER_WORD);
+  } లేకపోతే {
+    ప్రతిజ్ఞా(hi_మాట > 0 && "huh?");
+    uint64_t hibits = Tmp.U.pVal[hi_మాట] << (52 - n % APINT_బిట్లు_చొప్పున_మాట);
+    uint64_t lobits = Tmp.U.pVal[hi_మాట-1] >> (11 + n % APINT_బిట్లు_చొప్పున_మాట);
     mantissa = hibits | lobits;
   }
 
   // The leading bit of mantissa is implicit, so get rid of it.
-  uint64_t sign = isNeg ? (1ULL << (APINT_BITS_PER_WORD - 1)) : 0;
-  uint64_t I = sign | (exp << 52) | mantissa;
-  return bit_cast<double>(I);
+  uint64_t sign = isNeg ? (1ULL << (APINT_బిట్లు_చొప్పున_మాట - 1)) : 0;
+  uint64_t I = sign | (ఘాతాంకం << 52) | mantissa;
+  తిరిగి బిట్టు_cast<ద్విగుణ>(I);
 }
 
 // Truncate to new width.
-APInt APInt::trunc(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::trunc(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ప్రతిజ్ఞా(వెడల్పు_2 <= బిట్టు_వెడల్పు_2 && "Invalid APInt Truncate request");
 
-  if (width <= APINT_BITS_PER_WORD)
-    return APInt(width, getRawData()[0], /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+  ఒకవేళ (వెడల్పు_2 <= APINT_బిట్లు_చొప్పున_మాట)
+    తిరిగి APInt(వెడల్పు_2, get_Raw_దత్తాంశం()[0], /*isSigned=*/అబద్ధం,
+                 /*implicitTrunc=*/నిజం);
 
-  if (width == BitWidth)
-    return *this;
+  ఒకవేళ (వెడల్పు_2 == బిట్టు_వెడల్పు_2)
+    తిరిగి *ఇది;
 
-  APInt Result(getMemory(getNumWords(width)), width);
+  APInt ఫలితం(get_జ్ఞాపకం(get_అంకె_పదాలు(వెడల్పు_2)), వెడల్పు_2);
 
   // Copy full words.
-  unsigned i;
-  for (i = 0; i != width / APINT_BITS_PER_WORD; i++)
-    Result.U.pVal[i] = U.pVal[i];
+  గుర్తులేని i;
+  కొరకు (i = 0; i != వెడల్పు_2 / APINT_బిట్లు_చొప్పున_మాట; i++)
+    ఫలితం.U.pVal[i] = U.pVal[i];
 
   // Truncate and copy any partial word.
-  unsigned bits = (0 - width) % APINT_BITS_PER_WORD;
-  if (bits != 0)
-    Result.U.pVal[i] = U.pVal[i] << bits >> bits;
+  గుర్తులేని బిట్లు = (0 - వెడల్పు_2) % APINT_బిట్లు_చొప్పున_మాట;
+  ఒకవేళ (బిట్లు != 0)
+    ఫలితం.U.pVal[i] = U.pVal[i] << బిట్లు >> బిట్లు;
 
-  return Result;
+  తిరిగి ఫలితం;
 }
 
 // Truncate to new width with unsigned saturation.
-APInt APInt::truncUSat(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::truncUSat(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ప్రతిజ్ఞా(వెడల్పు_2 <= బిట్టు_వెడల్పు_2 && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isIntN(width))
-    return trunc(width);
+  ఒకవేళ (isIntN(వెడల్పు_2))
+    తిరిగి trunc(వెడల్పు_2);
   // If not, then just return the new limit.
-  return APInt::getMaxValue(width);
+  తిరిగి APInt::get_Max_విలువ(వెడల్పు_2);
 }
 
 // Truncate to new width with signed saturation to signed result.
-APInt APInt::truncSSat(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::truncSSat(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ప్రతిజ్ఞా(వెడల్పు_2 <= బిట్టు_వెడల్పు_2 && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isSignedIntN(width))
-    return trunc(width);
+  ఒకవేళ (isSignedIntN(వెడల్పు_2))
+    తిరిగి trunc(వెడల్పు_2);
   // If not, then just return the new limits.
-  return isNegative() ? APInt::getSignedMinValue(width)
-                      : APInt::getSignedMaxValue(width);
+  తిరిగి isNegative() ? APInt::get_Signed_Min_విలువ(వెడల్పు_2)
+                      : APInt::get_Signed_Max_విలువ(వెడల్పు_2);
 }
 
 // Truncate to new width with signed saturation to unsigned result.
-APInt APInt::truncSSatU(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::truncSSatU(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ప్రతిజ్ఞా(వెడల్పు_2 <= బిట్టు_వెడల్పు_2 && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isIntN(width))
-    return trunc(width);
+  ఒకవేళ (isIntN(వెడల్పు_2))
+    తిరిగి trunc(వెడల్పు_2);
   // If not, then just return the new limits.
-  return isNegative() ? APInt::getZero(width) : APInt::getMaxValue(width);
+  తిరిగి isNegative() ? APInt::getZero(వెడల్పు_2) : APInt::get_Max_విలువ(వెడల్పు_2);
 }
 
 // Sign extend to a new width.
-APInt APInt::sext(unsigned Width) const {
-  assert(Width >= BitWidth && "Invalid APInt SignExtend request");
+APInt APInt::sext(గుర్తులేని వెడల్పు) స్థిరరాశి {
+  ప్రతిజ్ఞా(వెడల్పు >= బిట్టు_వెడల్పు_2 && "Invalid APInt SignExtend request");
 
-  if (Width <= APINT_BITS_PER_WORD)
-    return APInt(Width, SignExtend64(U.VAL, BitWidth), /*isSigned=*/true);
+  ఒకవేళ (వెడల్పు <= APINT_బిట్లు_చొప్పున_మాట)
+    తిరిగి APInt(వెడల్పు, SignExtend64(U.VAL, బిట్టు_వెడల్పు_2), /*isSigned=*/నిజం);
 
-  if (Width == BitWidth)
-    return *this;
+  ఒకవేళ (వెడల్పు == బిట్టు_వెడల్పు_2)
+    తిరిగి *ఇది;
 
-  APInt Result(getMemory(getNumWords(Width)), Width);
+  APInt ఫలితం(get_జ్ఞాపకం(get_అంకె_పదాలు(వెడల్పు)), వెడల్పు);
 
   // Copy words.
-  std::memcpy(Result.U.pVal, getRawData(), getNumWords() * APINT_WORD_SIZE);
+  std::జ్ఞాపకం_నకలు(ఫలితం.U.pVal, get_Raw_దత్తాంశం(), get_అంకె_పదాలు() * APINT_మాట_కొలత);
 
   // Sign extend the last word since there may be unused bits in the input.
-  Result.U.pVal[getNumWords() - 1] =
-      SignExtend64(Result.U.pVal[getNumWords() - 1],
-                   ((BitWidth - 1) % APINT_BITS_PER_WORD) + 1);
+  ఫలితం.U.pVal[get_అంకె_పదాలు() - 1] =
+      SignExtend64(ఫలితం.U.pVal[get_అంకె_పదాలు() - 1],
+                   ((బిట్టు_వెడల్పు_2 - 1) % APINT_బిట్లు_చొప్పున_మాట) + 1);
 
   // Fill with sign bits.
-  std::memset(Result.U.pVal + getNumWords(), isNegative() ? -1 : 0,
-              (Result.getNumWords() - getNumWords()) * APINT_WORD_SIZE);
-  Result.clearUnusedBits();
-  return Result;
+  std::memset(ఫలితం.U.pVal + get_అంకె_పదాలు(), isNegative() ? -1 : 0,
+              (ఫలితం.get_అంకె_పదాలు() - get_అంకె_పదాలు()) * APINT_మాట_కొలత);
+  ఫలితం.clear_వాడని_బిట్లు();
+  తిరిగి ఫలితం;
 }
 
 //  Zero extend to a new width.
-APInt APInt::zext(unsigned width) const {
-  assert(width >= BitWidth && "Invalid APInt ZeroExtend request");
+APInt APInt::zext(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ప్రతిజ్ఞా(వెడల్పు_2 >= బిట్టు_వెడల్పు_2 && "Invalid APInt ZeroExtend request");
 
-  if (width <= APINT_BITS_PER_WORD)
-    return APInt(width, U.VAL);
+  ఒకవేళ (వెడల్పు_2 <= APINT_బిట్లు_చొప్పున_మాట)
+    తిరిగి APInt(వెడల్పు_2, U.VAL);
 
-  if (width == BitWidth)
-    return *this;
+  ఒకవేళ (వెడల్పు_2 == బిట్టు_వెడల్పు_2)
+    తిరిగి *ఇది;
 
-  APInt Result(getMemory(getNumWords(width)), width);
+  APInt ఫలితం(get_జ్ఞాపకం(get_అంకె_పదాలు(వెడల్పు_2)), వెడల్పు_2);
 
   // Copy words.
-  std::memcpy(Result.U.pVal, getRawData(), getNumWords() * APINT_WORD_SIZE);
+  std::జ్ఞాపకం_నకలు(ఫలితం.U.pVal, get_Raw_దత్తాంశం(), get_అంకె_పదాలు() * APINT_మాట_కొలత);
 
   // Zero remaining words.
-  std::memset(Result.U.pVal + getNumWords(), 0,
-              (Result.getNumWords() - getNumWords()) * APINT_WORD_SIZE);
+  std::memset(ఫలితం.U.pVal + get_అంకె_పదాలు(), 0,
+              (ఫలితం.get_అంకె_పదాలు() - get_అంకె_పదాలు()) * APINT_మాట_కొలత);
 
-  return Result;
+  తిరిగి ఫలితం;
 }
 
-APInt APInt::zextOrTrunc(unsigned width) const {
-  if (BitWidth < width)
-    return zext(width);
-  if (BitWidth > width)
-    return trunc(width);
-  return *this;
+APInt APInt::zextOrTrunc(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ఒకవేళ (బిట్టు_వెడల్పు_2 < వెడల్పు_2)
+    తిరిగి zext(వెడల్పు_2);
+  ఒకవేళ (బిట్టు_వెడల్పు_2 > వెడల్పు_2)
+    తిరిగి trunc(వెడల్పు_2);
+  తిరిగి *ఇది;
 }
 
-APInt APInt::sextOrTrunc(unsigned width) const {
-  if (BitWidth < width)
-    return sext(width);
-  if (BitWidth > width)
-    return trunc(width);
-  return *this;
-}
-
-/// Arithmetic right-shift this APInt by shiftAmt.
-/// Arithmetic right-shift function.
-void APInt::ashrInPlace(const APInt &shiftAmt) {
-  ashrInPlace((unsigned)shiftAmt.getLimitedValue(BitWidth));
+APInt APInt::sextOrTrunc(గుర్తులేని వెడల్పు_2) స్థిరరాశి {
+  ఒకవేళ (బిట్టు_వెడల్పు_2 < వెడల్పు_2)
+    తిరిగి sext(వెడల్పు_2);
+  ఒకవేళ (బిట్టు_వెడల్పు_2 > వెడల్పు_2)
+    తిరిగి trunc(వెడల్పు_2);
+  తిరిగి *ఇది;
 }
 
 /// Arithmetic right-shift this APInt by shiftAmt.
 /// Arithmetic right-shift function.
-void APInt::ashrSlowCase(unsigned ShiftAmt) {
+శూన్య APInt::ashr_లోపల_ఉంచు(స్థిరరాశి APInt &జరుపు_Amt) {
+  ashr_లోపల_ఉంచు((గుర్తులేని)జరుపు_Amt.get_Limited_విలువ(బిట్టు_వెడల్పు_2));
+}
+
+/// Arithmetic right-shift this APInt by shiftAmt.
+/// Arithmetic right-shift function.
+శూన్య APInt::ashrSlowCase(గుర్తులేని జరుపు_Amt_2) {
   // Don't bother performing a no-op shift.
-  if (!ShiftAmt)
-    return;
+  ఒకవేళ (!జరుపు_Amt_2)
+    తిరిగి;
 
   // Save the original sign bit for later.
-  bool Negative = isNegative();
+  తార్కిక Negative = isNegative();
 
   // WordShift is the inter-part shift; BitShift is intra-part shift.
-  unsigned WordShift = ShiftAmt / APINT_BITS_PER_WORD;
-  unsigned BitShift = ShiftAmt % APINT_BITS_PER_WORD;
+  గుర్తులేని మాట_జరుపు = జరుపు_Amt_2 / APINT_బిట్లు_చొప్పున_మాట;
+  గుర్తులేని బిట్టు_జరుపు = జరుపు_Amt_2 % APINT_బిట్లు_చొప్పున_మాట;
 
-  unsigned WordsToMove = getNumWords() - WordShift;
-  if (WordsToMove != 0) {
+  గుర్తులేని పదాలు_గమ్యం_Move = get_అంకె_పదాలు() - మాట_జరుపు;
+  ఒకవేళ (పదాలు_గమ్యం_Move != 0) {
     // Sign extend the last word to fill in the unused bits.
-    U.pVal[getNumWords() - 1] = SignExtend64(
-        U.pVal[getNumWords() - 1], ((BitWidth - 1) % APINT_BITS_PER_WORD) + 1);
+    U.pVal[get_అంకె_పదాలు() - 1] = SignExtend64(
+        U.pVal[get_అంకె_పదాలు() - 1], ((బిట్టు_వెడల్పు_2 - 1) % APINT_బిట్లు_చొప్పున_మాట) + 1);
 
     // Fastpath for moving by whole words.
-    if (BitShift == 0) {
-      std::memmove(U.pVal, U.pVal + WordShift, WordsToMove * APINT_WORD_SIZE);
-    } else {
+    ఒకవేళ (బిట్టు_జరుపు == 0) {
+      std::memmove(U.pVal, U.pVal + మాట_జరుపు, పదాలు_గమ్యం_Move * APINT_మాట_కొలత);
+    } లేకపోతే {
       // Move the words containing significant bits.
-      for (unsigned i = 0; i != WordsToMove - 1; ++i)
-        U.pVal[i] = (U.pVal[i + WordShift] >> BitShift) |
-                    (U.pVal[i + WordShift + 1] << (APINT_BITS_PER_WORD - BitShift));
+      కొరకు (గుర్తులేని i = 0; i != పదాలు_గమ్యం_Move - 1; ++i)
+        U.pVal[i] = (U.pVal[i + మాట_జరుపు] >> బిట్టు_జరుపు) |
+                    (U.pVal[i + మాట_జరుపు + 1] << (APINT_బిట్లు_చొప్పున_మాట - బిట్టు_జరుపు));
 
       // Handle the last word which has no high bits to copy. Use an arithmetic
       // shift to preserve the sign bit.
-      U.pVal[WordsToMove - 1] =
-          (int64_t)U.pVal[WordShift + WordsToMove - 1] >> BitShift;
+      U.pVal[పదాలు_గమ్యం_Move - 1] =
+          (int64_t)U.pVal[మాట_జరుపు + పదాలు_గమ్యం_Move - 1] >> బిట్టు_జరుపు;
     }
   }
 
   // Fill in the remainder based on the original sign.
-  std::memset(U.pVal + WordsToMove, Negative ? -1 : 0,
-              WordShift * APINT_WORD_SIZE);
-  clearUnusedBits();
+  std::memset(U.pVal + పదాలు_గమ్యం_Move, Negative ? -1 : 0,
+              మాట_జరుపు * APINT_మాట_కొలత);
+  clear_వాడని_బిట్లు();
 }
 
 /// Logical right-shift this APInt by shiftAmt.
 /// Logical right-shift function.
-void APInt::lshrInPlace(const APInt &shiftAmt) {
-  lshrInPlace((unsigned)shiftAmt.getLimitedValue(BitWidth));
+శూన్య APInt::lshr_లోపల_ఉంచు(స్థిరరాశి APInt &జరుపు_Amt) {
+  lshr_లోపల_ఉంచు((గుర్తులేని)జరుపు_Amt.get_Limited_విలువ(బిట్టు_వెడల్పు_2));
 }
 
 /// Logical right-shift this APInt by shiftAmt.
 /// Logical right-shift function.
-void APInt::lshrSlowCase(unsigned ShiftAmt) {
-  tcShiftRight(U.pVal, getNumWords(), ShiftAmt);
+శూన్య APInt::lshrSlowCase(గుర్తులేని జరుపు_Amt_2) {
+  tc_జరుపు_కుడి(U.pVal, get_అంకె_పదాలు(), జరుపు_Amt_2);
 }
 
 /// Left-shift this APInt by shiftAmt.
 /// Left-shift function.
-APInt &APInt::operator<<=(const APInt &shiftAmt) {
+APInt &APInt::క్రియాకారకం<<=(స్థిరరాశి APInt &జరుపు_Amt) {
   // It's undefined behavior in C to shift by BitWidth or greater.
-  *this <<= (unsigned)shiftAmt.getLimitedValue(BitWidth);
-  return *this;
+  *ఇది <<= (గుర్తులేని)జరుపు_Amt.get_Limited_విలువ(బిట్టు_వెడల్పు_2);
+  తిరిగి *ఇది;
 }
 
-void APInt::shlSlowCase(unsigned ShiftAmt) {
-  tcShiftLeft(U.pVal, getNumWords(), ShiftAmt);
-  clearUnusedBits();
+శూన్య APInt::shlSlowCase(గుర్తులేని జరుపు_Amt_2) {
+  tc_జరుపు_ఎడమ(U.pVal, get_అంకె_పదాలు(), జరుపు_Amt_2);
+  clear_వాడని_బిట్లు();
 }
 
 // Calculate the rotate amount modulo the bit width.
-static unsigned rotateModulo(unsigned BitWidth, const APInt &rotateAmt) {
-  if (LLVM_UNLIKELY(BitWidth == 0))
-    return 0;
-  unsigned rotBitWidth = rotateAmt.getBitWidth();
+స్థిర గుర్తులేని rotateModulo(గుర్తులేని బిట్టు_వెడల్పు_2, స్థిరరాశి APInt &rotateAmt) {
+  ఒకవేళ (LLVM_UNLIKELY(బిట్టు_వెడల్పు_2 == 0))
+    తిరిగి 0;
+  గుర్తులేని rot_బిట్టు_వెడల్పు = rotateAmt.get_బిట్టు_వెడల్పు();
   APInt rot = rotateAmt;
-  if (rotBitWidth < BitWidth) {
+  ఒకవేళ (rot_బిట్టు_వెడల్పు < బిట్టు_వెడల్పు_2) {
     // Extend the rotate APInt, so that the urem doesn't divide by 0.
     // e.g. APInt(1, 32) would give APInt(1, 0).
-    rot = rotateAmt.zext(BitWidth);
+    rot = rotateAmt.zext(బిట్టు_వెడల్పు_2);
   }
-  rot = rot.urem(APInt(rot.getBitWidth(), BitWidth));
-  return rot.getLimitedValue(BitWidth);
+  rot = rot.urem(APInt(rot.get_బిట్టు_వెడల్పు(), బిట్టు_వెడల్పు_2));
+  తిరిగి rot.get_Limited_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::rotl(const APInt &rotateAmt) const {
-  return rotl(rotateModulo(BitWidth, rotateAmt));
+APInt APInt::rotl(స్థిరరాశి APInt &rotateAmt) స్థిరరాశి {
+  తిరిగి rotl(rotateModulo(బిట్టు_వెడల్పు_2, rotateAmt));
 }
 
-APInt APInt::rotl(unsigned rotateAmt) const {
-  if (LLVM_UNLIKELY(BitWidth == 0))
-    return *this;
-  rotateAmt %= BitWidth;
-  if (rotateAmt == 0)
-    return *this;
-  return shl(rotateAmt) | lshr(BitWidth - rotateAmt);
+APInt APInt::rotl(గుర్తులేని rotateAmt) స్థిరరాశి {
+  ఒకవేళ (LLVM_UNLIKELY(బిట్టు_వెడల్పు_2 == 0))
+    తిరిగి *ఇది;
+  rotateAmt %= బిట్టు_వెడల్పు_2;
+  ఒకవేళ (rotateAmt == 0)
+    తిరిగి *ఇది;
+  తిరిగి shl(rotateAmt) | lshr(బిట్టు_వెడల్పు_2 - rotateAmt);
 }
 
-APInt APInt::rotr(const APInt &rotateAmt) const {
-  return rotr(rotateModulo(BitWidth, rotateAmt));
+APInt APInt::rotr(స్థిరరాశి APInt &rotateAmt) స్థిరరాశి {
+  తిరిగి rotr(rotateModulo(బిట్టు_వెడల్పు_2, rotateAmt));
 }
 
-APInt APInt::rotr(unsigned rotateAmt) const {
-  if (BitWidth == 0)
-    return *this;
-  rotateAmt %= BitWidth;
-  if (rotateAmt == 0)
-    return *this;
-  return lshr(rotateAmt) | shl(BitWidth - rotateAmt);
+APInt APInt::rotr(గుర్తులేని rotateAmt) స్థిరరాశి {
+  ఒకవేళ (బిట్టు_వెడల్పు_2 == 0)
+    తిరిగి *ఇది;
+  rotateAmt %= బిట్టు_వెడల్పు_2;
+  ఒకవేళ (rotateAmt == 0)
+    తిరిగి *ఇది;
+  తిరిగి lshr(rotateAmt) | shl(బిట్టు_వెడల్పు_2 - rotateAmt);
 }
 
 /// \returns the nearest log base 2 of this APInt. Ties round up.
@@ -1214,24 +1214,24 @@ APInt APInt::rotr(unsigned rotateAmt) const {
 ///
 /// to get around any mathematical concerns resulting from
 /// referencing 2 in a space where 2 does no exist.
-unsigned APInt::nearestLogBase2() const {
+గుర్తులేని APInt::సమీప_Log_Base2() స్థిరరాశి {
   // Special case when we have a bitwidth of 1. If VAL is 1, then we
   // get 0. If VAL is 0, we get WORDTYPE_MAX which gets truncated to
   // UINT32_MAX.
-  if (BitWidth == 1)
-    return U.VAL - 1;
+  ఒకవేళ (బిట్టు_వెడల్పు_2 == 1)
+    తిరిగి U.VAL - 1;
 
   // Handle the zero case.
-  if (isZero())
-    return UINT32_MAX;
+  ఒకవేళ (isZero())
+    తిరిగి UINT32_MAX;
 
   // The non-zero case is handled by computing:
   //
   //   nearestLogBase2(x) = logBase2(x) + x[logBase2(x)-1].
   //
   // where x[i] is referring to the value of the ith bit of x.
-  unsigned lg = logBase2();
-  return lg + unsigned((*this)[lg - 1]);
+  గుర్తులేని lg = logBase2();
+  తిరిగి lg + గుర్తులేని((*ఇది)[lg - 1]);
 }
 
 // Square Root - this method computes and returns the square root of "this".
@@ -1241,15 +1241,15 @@ unsigned APInt::nearestLogBase2() const {
 // the libc sqrt function is called. The result is rounded and then converted
 // back to a uint64_t which is then used to construct the result. Finally,
 // the Babylonian method for computing square roots is used.
-APInt APInt::sqrtFloor() const {
+APInt APInt::sqrtFloor() స్థిరరాశి {
 
   // Determine the magnitude of the value.
-  unsigned magnitude = getActiveBits();
+  గుర్తులేని magnitude = get_చురుకైన_బిట్లు();
 
   // Use a fast table for some small values. This also gets rid of some
   // rounding errors in libc sqrt for small values.
-  if (magnitude <= 5) {
-    static const uint8_t results[32] = {
+  ఒకవేళ (magnitude <= 5) {
+    స్థిర స్థిరరాశి uint8_t results[32] = {
         /*     0 */ 0,
         /*  1- 3 */ 1, 1, 1,
         /*  4- 8 */ 2, 2, 2, 2, 2,
@@ -1257,18 +1257,18 @@ APInt APInt::sqrtFloor() const {
         /* 16-24 */ 4, 4, 4, 4, 4, 4, 4, 4, 4,
         /* 25-31 */ 5, 5, 5, 5, 5, 5, 5,
     };
-    return APInt(BitWidth,
-                 results[(LLVM_LIKELY(isSingleWord()) ? U.VAL : U.pVal[0])]);
+    తిరిగి APInt(బిట్టు_వెడల్పు_2,
+                 results[(LLVM_LIKELY(is_Single_మాట()) ? U.VAL : U.pVal[0])]);
   }
 
   // If the magnitude of the value fits in less than 52 bits (the precision of
   // an IEEE double precision floating point value), then we can use the
   // libc sqrt function which will probably use a hardware sqrt computation.
   // This should be faster than the algorithm below.
-  if (magnitude < 52) {
-    return APInt(BitWidth,
-                 uint64_t(::floor(::sqrt(double(
-                     LLVM_LIKELY(isSingleWord()) ? U.VAL : U.pVal[0])))));
+  ఒకవేళ (magnitude < 52) {
+    తిరిగి APInt(బిట్టు_వెడల్పు_2,
+                 uint64_t(::floor(::వర్గమూలం(ద్విగుణ(
+                     LLVM_LIKELY(is_Single_మాట()) ? U.VAL : U.pVal[0])))));
   }
 
   // Okay, all the short cuts are exhausted. We must compute it. The following
@@ -1276,70 +1276,70 @@ APInt APInt::sqrtFloor() const {
   // was adapted to APInt from a wikipedia article on such computations.
   // See http://www.wikipedia.org/ and go to the page named
   // Calculate_an_integer_square_root.
-  unsigned nbits = BitWidth, i = 4;
-  APInt testy(BitWidth, 16);
-  APInt x_old(BitWidth, 1);
-  APInt x_new(BitWidth, 0);
-  APInt two(BitWidth, 2);
+  గుర్తులేని nbits = బిట్టు_వెడల్పు_2, i = 4;
+  APInt testy(బిట్టు_వెడల్పు_2, 16);
+  APInt x_old(బిట్టు_వెడల్పు_2, 1);
+  APInt x_new(బిట్టు_వెడల్పు_2, 0);
+  APInt two(బిట్టు_వెడల్పు_2, 2);
 
   // Select a good starting value using binary logarithms.
-  for (;; i += 2, testy = testy.shl(2))
-    if (i >= nbits || this->ule(testy)) {
+  కొరకు (;; i += 2, testy = testy.shl(2))
+    ఒకవేళ (i >= nbits || ఇది->ule(testy)) {
       x_old = x_old.shl(i / 2);
-      break;
+      ఆపు;
     }
 
   // Use the Babylonian method to arrive at the integer square root:
-  for (;;) {
-    x_new = (this->udiv(x_old) + x_old).udiv(two);
-    if (x_old.ule(x_new))
-      break;
+  కొరకు (;;) {
+    x_new = (ఇది->udiv(x_old) + x_old).udiv(two);
+    ఒకవేళ (x_old.ule(x_new))
+      ఆపు;
     x_old = x_new;
   }
-  return x_old;
+  తిరిగి x_old;
 }
 
 /// \returns the multiplicative inverse of an odd APInt modulo 2^BitWidth.
-APInt APInt::multiplicativeInverse() const {
-  assert((*this)[0] &&
+APInt APInt::multiplicativeInverse() స్థిరరాశి {
+  ప్రతిజ్ఞా((*ఇది)[0] &&
          "multiplicative inverse is only defined for odd numbers!");
 
   // Use Newton's method.
-  APInt Factor = *this;
+  APInt గుణకం = *ఇది;
   APInt T;
-  while (!(T = *this * Factor).isOne())
-    Factor *= 2 - std::move(T);
-  return Factor;
+  అయితే (!(T = *ఇది * గుణకం).isOne())
+    గుణకం *= 2 - std::move(T);
+  తిరిగి గుణకం;
 }
 
 /// Implementation of Knuth's Algorithm D (Division of nonnegative integers)
 /// from "Art of Computer Programming, Volume 2", section 4.3.1, p. 272. The
 /// variables here have the same names as in the algorithm. Comments explain
 /// the algorithm and any deviation from it.
-static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
-                     unsigned m, unsigned n) {
-  assert(u && "Must provide dividend");
-  assert(v && "Must provide divisor");
-  assert(q && "Must provide quotient");
-  assert(u != v && u != q && v != q && "Must use different memory");
-  assert(n>1 && "n must be > 1");
+స్థిర శూన్య KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
+                     గుర్తులేని m, గుర్తులేని n) {
+  ప్రతిజ్ఞా(u && "Must provide dividend");
+  ప్రతిజ్ఞా(v && "Must provide divisor");
+  ప్రతిజ్ఞా(q && "Must provide quotient");
+  ప్రతిజ్ఞా(u != v && u != q && v != q && "Must use different memory");
+  ప్రతిజ్ఞా(n>1 && "n must be > 1");
 
   // b denotes the base of the number system. In our case b is 2^32.
-  const uint64_t b = uint64_t(1) << 32;
+  స్థిరరాశి uint64_t b = uint64_t(1) << 32;
 
 // The DEBUG macros here tend to be spam in the debug output if you're not
 // debugging this code. Disable them unless KNUTH_DEBUG is defined.
-#ifdef KNUTH_DEBUG
-#define DEBUG_KNUTH(X) LLVM_DEBUG(X)
-#else
-#define DEBUG_KNUTH(X) do {} while(false)
-#endif
+#నిర్వచితమైతే KNUTH_DEBUG
+#నిర్వచించు DEBUG_KNUTH(X) LLVM_DEBUG(X)
+#లేకపోతే
+#నిర్వచించు DEBUG_KNUTH(X) చేయి {} అయితే(అబద్ధం)
+#అయితే_ముగింపు
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv: m=" << m << " n=" << n << '\n');
   DEBUG_KNUTH(dbgs() << "KnuthDiv: original:");
-  DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+  DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
   DEBUG_KNUTH(dbgs() << " by");
-  DEBUG_KNUTH(for (int i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
+  DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
   DEBUG_KNUTH(dbgs() << '\n');
   // D1. [Normalize.] Set d = b / (v[n-1] + 1) and multiply all the digits of
   // u and v by d. Note that we have taken Knuth's advice here to use a power
@@ -1349,32 +1349,32 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   // and v so that its high bits are shifted to the top of v's range without
   // overflow. Note that this can require an extra word in u so that u must
   // be of length m+n+1.
-  unsigned shift = llvm::countl_zero(v[n - 1]);
-  uint32_t v_carry = 0;
-  uint32_t u_carry = 0;
-  if (shift) {
-    for (unsigned i = 0; i < m+n; ++i) {
-      uint32_t u_tmp = u[i] >> (32 - shift);
-      u[i] = (u[i] << shift) | u_carry;
-      u_carry = u_tmp;
+  గుర్తులేని జరుపు = llvm::countl_zero(v[n - 1]);
+  uint32_t v_వాహకం = 0;
+  uint32_t u_వాహకం = 0;
+  ఒకవేళ (జరుపు) {
+    కొరకు (గుర్తులేని i = 0; i < m+n; ++i) {
+      uint32_t u_tmp = u[i] >> (32 - జరుపు);
+      u[i] = (u[i] << జరుపు) | u_వాహకం;
+      u_వాహకం = u_tmp;
     }
-    for (unsigned i = 0; i < n; ++i) {
-      uint32_t v_tmp = v[i] >> (32 - shift);
-      v[i] = (v[i] << shift) | v_carry;
-      v_carry = v_tmp;
+    కొరకు (గుర్తులేని i = 0; i < n; ++i) {
+      uint32_t v_tmp = v[i] >> (32 - జరుపు);
+      v[i] = (v[i] << జరుపు) | v_వాహకం;
+      v_వాహకం = v_tmp;
     }
   }
-  u[m+n] = u_carry;
+  u[m+n] = u_వాహకం;
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv:   normal:");
-  DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+  DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
   DEBUG_KNUTH(dbgs() << " by");
-  DEBUG_KNUTH(for (int i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
+  DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
   DEBUG_KNUTH(dbgs() << '\n');
 
   // D2. [Initialize j.]  Set j to m. This is the loop counter over the places.
-  int j = m;
-  do {
+  పూర్ణాంకం j = m;
+  చేయి {
     DEBUG_KNUTH(dbgs() << "KnuthDiv: quotient digit #" << j << '\n');
     // D3. [Calculate q'.].
     //     Set qp = (u[j+n]*b + u[j+n-1]) / v[n-1]. (qp=qprime=q')
@@ -1388,10 +1388,10 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     DEBUG_KNUTH(dbgs() << "KnuthDiv: dividend == " << dividend << '\n');
     uint64_t qp = dividend / v[n-1];
     uint64_t rp = dividend % v[n-1];
-    if (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
+    ఒకవేళ (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
       qp--;
       rp += v[n-1];
-      if (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
+      ఒకవేళ (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
         qp--;
     }
     DEBUG_KNUTH(dbgs() << "KnuthDiv: qp == " << qp << ", rp == " << rp << '\n');
@@ -1405,7 +1405,7 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     // true value plus b**(n+1), namely as the b's complement of
     // the true value, and a "borrow" to the left should be remembered.
     int64_t borrow = 0;
-    for (unsigned i = 0; i < n; ++i) {
+    కొరకు (గుర్తులేని i = 0; i < n; ++i) {
       uint64_t p = qp * uint64_t(v[i]);
       int64_t subres = int64_t(u[j+i]) - borrow - Lo_32(p);
       u[j+i] = Lo_32(subres);
@@ -1413,17 +1413,17 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       DEBUG_KNUTH(dbgs() << "KnuthDiv: u[j+i] = " << u[j + i]
                         << ", borrow = " << borrow << '\n');
     }
-    bool isNeg = u[j+n] < borrow;
+    తార్కిక isNeg = u[j+n] < borrow;
     u[j+n] -= Lo_32(borrow);
 
     DEBUG_KNUTH(dbgs() << "KnuthDiv: after subtraction:");
-    DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+    DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
     DEBUG_KNUTH(dbgs() << '\n');
 
     // D5. [Test remainder.] Set q[j] = qp. If the result of step D4 was
     // negative, go to step D6; otherwise go on to step D7.
     q[j] = Lo_32(qp);
-    if (isNeg) {
+    ఒకవేళ (isNeg) {
       // D6. [Add back]. The probability that this step is necessary is very
       // small, on the order of only 2/b. Make sure that test data accounts for
       // this possibility. Decrease q[j] by 1
@@ -1431,42 +1431,42 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // and add (0v[n-1]...v[1]v[0]) to (u[j+n]u[j+n-1]...u[j+1]u[j]).
       // A carry will occur to the left of u[j+n], and it should be ignored
       // since it cancels with the borrow that occurred in D4.
-      bool carry = false;
-      for (unsigned i = 0; i < n; i++) {
-        uint32_t limit = std::min(u[j+i],v[i]);
-        u[j+i] += v[i] + carry;
-        carry = u[j+i] < limit || (carry && u[j+i] == limit);
+      తార్కిక వాహకం = అబద్ధం;
+      కొరకు (గుర్తులేని i = 0; i < n; i++) {
+        uint32_t హద్దు = std::min(u[j+i],v[i]);
+        u[j+i] += v[i] + వాహకం;
+        వాహకం = u[j+i] < హద్దు || (వాహకం && u[j+i] == హద్దు);
       }
-      u[j+n] += carry;
+      u[j+n] += వాహకం;
     }
     DEBUG_KNUTH(dbgs() << "KnuthDiv: after correction:");
-    DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+    DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
     DEBUG_KNUTH(dbgs() << "\nKnuthDiv: digit result = " << q[j] << '\n');
 
     // D7. [Loop on j.]  Decrease j by one. Now if j >= 0, go back to D3.
-  } while (--j >= 0);
+  } అయితే (--j >= 0);
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv: quotient:");
-  DEBUG_KNUTH(for (int i = m; i >= 0; i--) dbgs() << " " << q[i]);
+  DEBUG_KNUTH(కొరకు (పూర్ణాంకం i = m; i >= 0; i--) dbgs() << " " << q[i]);
   DEBUG_KNUTH(dbgs() << '\n');
 
   // D8. [Unnormalize]. Now q[...] is the desired quotient, and the desired
   // remainder may be obtained by dividing u[...] by d. If r is non-null we
   // compute the remainder (urem uses this).
-  if (r) {
+  ఒకవేళ (r) {
     // The value d is expressed by the "shift" value above since we avoided
     // multiplication by d by using a shift left. So, all we have to do is
     // shift right here.
-    if (shift) {
-      uint32_t carry = 0;
+    ఒకవేళ (జరుపు) {
+      uint32_t వాహకం = 0;
       DEBUG_KNUTH(dbgs() << "KnuthDiv: remainder:");
-      for (int i = n-1; i >= 0; i--) {
-        r[i] = (u[i] >> shift) | carry;
-        carry = u[i] << (32 - shift);
+      కొరకు (పూర్ణాంకం i = n-1; i >= 0; i--) {
+        r[i] = (u[i] >> జరుపు) | వాహకం;
+        వాహకం = u[i] << (32 - జరుపు);
         DEBUG_KNUTH(dbgs() << " " << r[i]);
       }
-    } else {
-      for (int i = n-1; i >= 0; i--) {
+    } లేకపోతే {
+      కొరకు (పూర్ణాంకం i = n-1; i >= 0; i--) {
         r[i] = u[i];
         DEBUG_KNUTH(dbgs() << " " << r[i]);
       }
@@ -1476,9 +1476,9 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   DEBUG_KNUTH(dbgs() << '\n');
 }
 
-void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
-                   unsigned rhsWords, WordType *Quotient, WordType *Remainder) {
-  assert(lhsWords >= rhsWords && "Fractional result");
+శూన్య APInt::divide(స్థిరరాశి మాట_Type *LHS, గుర్తులేని lhs_పదాలు, స్థిరరాశి మాట_Type *RHS,
+                   గుర్తులేని rhs_పదాలు, మాట_Type *Quotient, మాట_Type *Remainder) {
+  ప్రతిజ్ఞా(lhs_పదాలు >= rhs_పదాలు && "Fractional result");
 
   // First, compose the values into an array of 32-bit words instead of
   // 64-bit words. This is a necessity of both the "short division" algorithm
@@ -1487,33 +1487,33 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   // can't use 64-bit operands here because we don't have native results of
   // 128-bits. Furthermore, casting the 64-bit values to 32-bit values won't
   // work on large-endian machines.
-  unsigned n = rhsWords * 2;
-  unsigned m = (lhsWords * 2) - n;
+  గుర్తులేని n = rhs_పదాలు * 2;
+  గుర్తులేని m = (lhs_పదాలు * 2) - n;
 
   // Allocate space for the temporary values we need either on the stack, if
   // it will fit, or on the heap if it won't.
   uint32_t SPACE[128];
-  uint32_t *U = nullptr;
-  uint32_t *V = nullptr;
-  uint32_t *Q = nullptr;
-  uint32_t *R = nullptr;
-  if ((Remainder?4:3)*n+2*m+1 <= 128) {
+  uint32_t *U = శూన్యసూచిక;
+  uint32_t *V = శూన్యసూచిక;
+  uint32_t *Q = శూన్యసూచిక;
+  uint32_t *R = శూన్యసూచిక;
+  ఒకవేళ ((Remainder?4:3)*n+2*m+1 <= 128) {
     U = &SPACE[0];
     V = &SPACE[m+n+1];
     Q = &SPACE[(m+n+1) + n];
-    if (Remainder)
+    ఒకవేళ (Remainder)
       R = &SPACE[(m+n+1) + n + (m+n)];
-  } else {
-    U = new uint32_t[m + n + 1];
-    V = new uint32_t[n];
-    Q = new uint32_t[m+n];
-    if (Remainder)
-      R = new uint32_t[n];
+  } లేకపోతే {
+    U = కొత్త uint32_t[m + n + 1];
+    V = కొత్త uint32_t[n];
+    Q = కొత్త uint32_t[m+n];
+    ఒకవేళ (Remainder)
+      R = కొత్త uint32_t[n];
   }
 
   // Initialize the dividend
-  memset(U, 0, (m+n+1)*sizeof(uint32_t));
-  for (unsigned i = 0; i < lhsWords; ++i) {
+  memset(U, 0, (m+n+1)*పరిమాణం(uint32_t));
+  కొరకు (గుర్తులేని i = 0; i < lhs_పదాలు; ++i) {
     uint64_t tmp = LHS[i];
     U[i * 2] = Lo_32(tmp);
     U[i * 2 + 1] = Hi_32(tmp);
@@ -1521,27 +1521,27 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   U[m+n] = 0; // this extra word is for "spill" in the Knuth algorithm.
 
   // Initialize the divisor
-  memset(V, 0, (n)*sizeof(uint32_t));
-  for (unsigned i = 0; i < rhsWords; ++i) {
+  memset(V, 0, (n)*పరిమాణం(uint32_t));
+  కొరకు (గుర్తులేని i = 0; i < rhs_పదాలు; ++i) {
     uint64_t tmp = RHS[i];
     V[i * 2] = Lo_32(tmp);
     V[i * 2 + 1] = Hi_32(tmp);
   }
 
   // initialize the quotient and remainder
-  memset(Q, 0, (m+n) * sizeof(uint32_t));
-  if (Remainder)
-    memset(R, 0, n * sizeof(uint32_t));
+  memset(Q, 0, (m+n) * పరిమాణం(uint32_t));
+  ఒకవేళ (Remainder)
+    memset(R, 0, n * పరిమాణం(uint32_t));
 
   // Now, adjust m and n for the Knuth division. n is the number of words in
   // the divisor. m is the number of words by which the dividend exceeds the
   // divisor (i.e. m+n is the length of the dividend). These sizes must not
   // contain any zero words or the Knuth algorithm fails.
-  for (unsigned i = n; i > 0 && V[i-1] == 0; i--) {
+  కొరకు (గుర్తులేని i = n; i > 0 && V[i-1] == 0; i--) {
     n--;
     m++;
   }
-  for (unsigned i = m+n; i > 0 && U[i-1] == 0; i--)
+  కొరకు (గుర్తులేని i = m+n; i > 0 && U[i-1] == 0; i--)
     m--;
 
   // If we're left with only a single word for the divisor, Knuth doesn't work
@@ -1550,801 +1550,801 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   // by a 32-bit quantity at hardware speed and short division is simply a
   // series of such operations. This is just like doing short division but we
   // are using base 2^32 instead of base 10.
-  assert(n != 0 && "Divide by zero?");
-  if (n == 1) {
-    uint32_t divisor = V[0];
+  ప్రతిజ్ఞా(n != 0 && "Divide by zero?");
+  ఒకవేళ (n == 1) {
+    uint32_t భాజకం = V[0];
     uint32_t remainder = 0;
-    for (int i = m; i >= 0; i--) {
+    కొరకు (పూర్ణాంకం i = m; i >= 0; i--) {
       uint64_t partial_dividend = Make_64(remainder, U[i]);
-      if (partial_dividend == 0) {
+      ఒకవేళ (partial_dividend == 0) {
         Q[i] = 0;
         remainder = 0;
-      } else if (partial_dividend < divisor) {
+      } లేకపోతే ఒకవేళ (partial_dividend < భాజకం) {
         Q[i] = 0;
         remainder = Lo_32(partial_dividend);
-      } else if (partial_dividend == divisor) {
+      } లేకపోతే ఒకవేళ (partial_dividend == భాజకం) {
         Q[i] = 1;
         remainder = 0;
-      } else {
-        Q[i] = Lo_32(partial_dividend / divisor);
-        remainder = Lo_32(partial_dividend - (Q[i] * divisor));
+      } లేకపోతే {
+        Q[i] = Lo_32(partial_dividend / భాజకం);
+        remainder = Lo_32(partial_dividend - (Q[i] * భాజకం));
       }
     }
-    if (R)
+    ఒకవేళ (R)
       R[0] = remainder;
-  } else {
+  } లేకపోతే {
     // Now we're ready to invoke the Knuth classical divide algorithm. In this
     // case n > 1.
     KnuthDiv(U, V, Q, R, m, n);
   }
 
   // If the caller wants the quotient
-  if (Quotient) {
-    for (unsigned i = 0; i < lhsWords; ++i)
+  ఒకవేళ (Quotient) {
+    కొరకు (గుర్తులేని i = 0; i < lhs_పదాలు; ++i)
       Quotient[i] = Make_64(Q[i*2+1], Q[i*2]);
   }
 
   // If the caller wants the remainder
-  if (Remainder) {
-    for (unsigned i = 0; i < rhsWords; ++i)
+  ఒకవేళ (Remainder) {
+    కొరకు (గుర్తులేని i = 0; i < rhs_పదాలు; ++i)
       Remainder[i] = Make_64(R[i*2+1], R[i*2]);
   }
 
   // Clean up the memory we allocated.
-  if (U != &SPACE[0]) {
-    delete [] U;
-    delete [] V;
-    delete [] Q;
-    delete [] R;
+  ఒకవేళ (U != &SPACE[0]) {
+    తొలగించు [] U;
+    తొలగించు [] V;
+    తొలగించు [] Q;
+    తొలగించు [] R;
   }
 }
 
-APInt APInt::udiv(const APInt &RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
+APInt APInt::udiv(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be the same");
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(isSingleWord())) {
-    assert(RHS.U.VAL != 0 && "Divide by zero?");
-    return APInt(BitWidth, U.VAL / RHS.U.VAL);
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    ప్రతిజ్ఞా(RHS.U.VAL != 0 && "Divide by zero?");
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, U.VAL / RHS.U.VAL);
   }
 
   // Get some facts about the LHS and RHS number of bits and words
-  unsigned lhsWords = getNumWords(getActiveBits());
-  unsigned rhsBits  = RHS.getActiveBits();
-  unsigned rhsWords = getNumWords(rhsBits);
-  assert(rhsWords && "Divided by zero???");
+  గుర్తులేని lhs_పదాలు = get_అంకె_పదాలు(get_చురుకైన_బిట్లు());
+  గుర్తులేని rhs_బిట్లు  = RHS.get_చురుకైన_బిట్లు();
+  గుర్తులేని rhs_పదాలు = get_అంకె_పదాలు(rhs_బిట్లు);
+  ప్రతిజ్ఞా(rhs_పదాలు && "Divided by zero???");
 
   // Deal with some degenerate cases
-  if (!lhsWords)
+  ఒకవేళ (!lhs_పదాలు)
     // 0 / X ===> 0
-    return APInt(BitWidth, 0);
-  if (rhsBits == 1)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (rhs_బిట్లు == 1)
     // X / 1 ===> X
-    return *this;
-  if (lhsWords < rhsWords || this->ult(RHS))
+    తిరిగి *ఇది;
+  ఒకవేళ (lhs_పదాలు < rhs_పదాలు || ఇది->ult(RHS))
     // X / Y ===> 0, iff X < Y
-    return APInt(BitWidth, 0);
-  if (*this == RHS)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (*ఇది == RHS)
     // X / X ===> 1
-    return APInt(BitWidth, 1);
-  if (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 1);
+  ఒకవేళ (lhs_పదాలు == 1) // rhsWords is 1 if lhsWords is 1.
     // All high words are zero, just use native divide
-    return APInt(BitWidth, this->U.pVal[0] / RHS.U.pVal[0]);
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, ఇది->U.pVal[0] / RHS.U.pVal[0]);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
-  APInt Quotient(BitWidth, 0); // to hold result.
-  divide(U.pVal, lhsWords, RHS.U.pVal, rhsWords, Quotient.U.pVal, nullptr);
-  return Quotient;
+  APInt Quotient(బిట్టు_వెడల్పు_2, 0); // to hold result.
+  divide(U.pVal, lhs_పదాలు, RHS.U.pVal, rhs_పదాలు, Quotient.U.pVal, శూన్యసూచిక);
+  తిరిగి Quotient;
 }
 
-APInt APInt::udiv(uint64_t RHS) const {
-  assert(RHS != 0 && "Divide by zero?");
+APInt APInt::udiv(uint64_t RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(RHS != 0 && "Divide by zero?");
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(BitWidth, U.VAL / RHS);
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, U.VAL / RHS);
 
   // Get some facts about the LHS words.
-  unsigned lhsWords = getNumWords(getActiveBits());
+  గుర్తులేని lhs_పదాలు = get_అంకె_పదాలు(get_చురుకైన_బిట్లు());
 
   // Deal with some degenerate cases
-  if (!lhsWords)
+  ఒకవేళ (!lhs_పదాలు)
     // 0 / X ===> 0
-    return APInt(BitWidth, 0);
-  if (RHS == 1)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (RHS == 1)
     // X / 1 ===> X
-    return *this;
-  if (this->ult(RHS))
+    తిరిగి *ఇది;
+  ఒకవేళ (ఇది->ult(RHS))
     // X / Y ===> 0, iff X < Y
-    return APInt(BitWidth, 0);
-  if (*this == RHS)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (*ఇది == RHS)
     // X / X ===> 1
-    return APInt(BitWidth, 1);
-  if (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 1);
+  ఒకవేళ (lhs_పదాలు == 1) // rhsWords is 1 if lhsWords is 1.
     // All high words are zero, just use native divide
-    return APInt(BitWidth, this->U.pVal[0] / RHS);
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, ఇది->U.pVal[0] / RHS);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
-  APInt Quotient(BitWidth, 0); // to hold result.
-  divide(U.pVal, lhsWords, &RHS, 1, Quotient.U.pVal, nullptr);
-  return Quotient;
+  APInt Quotient(బిట్టు_వెడల్పు_2, 0); // to hold result.
+  divide(U.pVal, lhs_పదాలు, &RHS, 1, Quotient.U.pVal, శూన్యసూచిక);
+  తిరిగి Quotient;
 }
 
-APInt APInt::sdiv(const APInt &RHS) const {
-  if (isNegative()) {
-    if (RHS.isNegative())
-      return (-(*this)).udiv(-RHS);
-    return -((-(*this)).udiv(RHS));
+APInt APInt::sdiv(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  ఒకవేళ (isNegative()) {
+    ఒకవేళ (RHS.isNegative())
+      తిరిగి (-(*ఇది)).udiv(-RHS);
+    తిరిగి -((-(*ఇది)).udiv(RHS));
   }
-  if (RHS.isNegative())
-    return -(this->udiv(-RHS));
-  return this->udiv(RHS);
+  ఒకవేళ (RHS.isNegative())
+    తిరిగి -(ఇది->udiv(-RHS));
+  తిరిగి ఇది->udiv(RHS);
 }
 
-APInt APInt::sdiv(int64_t RHS) const {
-  if (isNegative()) {
-    if (RHS < 0)
-      return (-(*this)).udiv(-RHS);
-    return -((-(*this)).udiv(RHS));
+APInt APInt::sdiv(int64_t RHS) స్థిరరాశి {
+  ఒకవేళ (isNegative()) {
+    ఒకవేళ (RHS < 0)
+      తిరిగి (-(*ఇది)).udiv(-RHS);
+    తిరిగి -((-(*ఇది)).udiv(RHS));
   }
-  if (RHS < 0)
-    return -(this->udiv(-RHS));
-  return this->udiv(RHS);
+  ఒకవేళ (RHS < 0)
+    తిరిగి -(ఇది->udiv(-RHS));
+  తిరిగి ఇది->udiv(RHS);
 }
 
-APInt APInt::urem(const APInt &RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord())) {
-    assert(RHS.U.VAL != 0 && "Remainder by zero?");
-    return APInt(BitWidth, U.VAL % RHS.U.VAL);
+APInt APInt::urem(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be the same");
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    ప్రతిజ్ఞా(RHS.U.VAL != 0 && "Remainder by zero?");
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, U.VAL % RHS.U.VAL);
   }
 
   // Get some facts about the LHS
-  unsigned lhsWords = getNumWords(getActiveBits());
+  గుర్తులేని lhs_పదాలు = get_అంకె_పదాలు(get_చురుకైన_బిట్లు());
 
   // Get some facts about the RHS
-  unsigned rhsBits = RHS.getActiveBits();
-  unsigned rhsWords = getNumWords(rhsBits);
-  assert(rhsWords && "Performing remainder operation by zero ???");
+  గుర్తులేని rhs_బిట్లు = RHS.get_చురుకైన_బిట్లు();
+  గుర్తులేని rhs_పదాలు = get_అంకె_పదాలు(rhs_బిట్లు);
+  ప్రతిజ్ఞా(rhs_పదాలు && "Performing remainder operation by zero ???");
 
   // Check the degenerate cases
-  if (lhsWords == 0)
+  ఒకవేళ (lhs_పదాలు == 0)
     // 0 % Y ===> 0
-    return APInt(BitWidth, 0);
-  if (rhsBits == 1)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (rhs_బిట్లు == 1)
     // X % 1 ===> 0
-    return APInt(BitWidth, 0);
-  if (lhsWords < rhsWords || this->ult(RHS))
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (lhs_పదాలు < rhs_పదాలు || ఇది->ult(RHS))
     // X % Y ===> X, iff X < Y
-    return *this;
-  if (*this == RHS)
+    తిరిగి *ఇది;
+  ఒకవేళ (*ఇది == RHS)
     // X % X == 0;
-    return APInt(BitWidth, 0);
-  if (lhsWords == 1)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
+  ఒకవేళ (lhs_పదాలు == 1)
     // All high words are zero, just use native remainder
-    return APInt(BitWidth, U.pVal[0] % RHS.U.pVal[0]);
-  if (RHS.isPowerOf2()) {
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, U.pVal[0] % RHS.U.pVal[0]);
+  ఒకవేళ (RHS.isPowerOf2()) {
     // X % 2^w ===> X & (2^w - 1)
-    APInt Result(*this);
-    Result.clearBits(RHS.logBase2(), BitWidth);
-    return Result;
+    APInt ఫలితం(*ఇది);
+    ఫలితం.clear_బిట్లు(RHS.logBase2(), బిట్టు_వెడల్పు_2);
+    తిరిగి ఫలితం;
   }
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
-  APInt Remainder(BitWidth, 0);
-  divide(U.pVal, lhsWords, RHS.U.pVal, rhsWords, nullptr, Remainder.U.pVal);
-  return Remainder;
+  APInt Remainder(బిట్టు_వెడల్పు_2, 0);
+  divide(U.pVal, lhs_పదాలు, RHS.U.pVal, rhs_పదాలు, శూన్యసూచిక, Remainder.U.pVal);
+  తిరిగి Remainder;
 }
 
-uint64_t APInt::urem(uint64_t RHS) const {
-  assert(RHS != 0 && "Remainder by zero?");
+uint64_t APInt::urem(uint64_t RHS) స్థిరరాశి {
+  ప్రతిజ్ఞా(RHS != 0 && "Remainder by zero?");
 
-  if (LLVM_LIKELY(isSingleWord()))
-    return U.VAL % RHS;
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
+    తిరిగి U.VAL % RHS;
 
   // Get some facts about the LHS
-  unsigned lhsWords = getNumWords(getActiveBits());
+  గుర్తులేని lhs_పదాలు = get_అంకె_పదాలు(get_చురుకైన_బిట్లు());
 
   // Check the degenerate cases
-  if (lhsWords == 0)
+  ఒకవేళ (lhs_పదాలు == 0)
     // 0 % Y ===> 0
-    return 0;
-  if (RHS == 1)
+    తిరిగి 0;
+  ఒకవేళ (RHS == 1)
     // X % 1 ===> 0
-    return 0;
-  if (this->ult(RHS))
+    తిరిగి 0;
+  ఒకవేళ (ఇది->ult(RHS))
     // X % Y ===> X, iff X < Y
-    return getZExtValue();
-  if (*this == RHS)
+    తిరిగి get_ZExt_విలువ();
+  ఒకవేళ (*ఇది == RHS)
     // X % X == 0;
-    return 0;
-  if (lhsWords == 1)
+    తిరిగి 0;
+  ఒకవేళ (lhs_పదాలు == 1)
     // All high words are zero, just use native remainder
-    return U.pVal[0] % RHS;
-  if (llvm::isPowerOf2_64(RHS))
+    తిరిగి U.pVal[0] % RHS;
+  ఒకవేళ (llvm::isPowerOf2_64(RHS))
     // X % 2^w ===> X & (2^w - 1)
-    return U.pVal[0] & (RHS - 1);
+    తిరిగి U.pVal[0] & (RHS - 1);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   uint64_t Remainder;
-  divide(U.pVal, lhsWords, &RHS, 1, nullptr, &Remainder);
-  return Remainder;
+  divide(U.pVal, lhs_పదాలు, &RHS, 1, శూన్యసూచిక, &Remainder);
+  తిరిగి Remainder;
 }
 
-APInt APInt::srem(const APInt &RHS) const {
-  if (isNegative()) {
-    if (RHS.isNegative())
-      return -((-(*this)).urem(-RHS));
-    return -((-(*this)).urem(RHS));
+APInt APInt::srem(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  ఒకవేళ (isNegative()) {
+    ఒకవేళ (RHS.isNegative())
+      తిరిగి -((-(*ఇది)).urem(-RHS));
+    తిరిగి -((-(*ఇది)).urem(RHS));
   }
-  if (RHS.isNegative())
-    return this->urem(-RHS);
-  return this->urem(RHS);
+  ఒకవేళ (RHS.isNegative())
+    తిరిగి ఇది->urem(-RHS);
+  తిరిగి ఇది->urem(RHS);
 }
 
-int64_t APInt::srem(int64_t RHS) const {
-  if (isNegative()) {
-    if (RHS < 0)
-      return -((-(*this)).urem(-RHS));
-    return -((-(*this)).urem(RHS));
+int64_t APInt::srem(int64_t RHS) స్థిరరాశి {
+  ఒకవేళ (isNegative()) {
+    ఒకవేళ (RHS < 0)
+      తిరిగి -((-(*ఇది)).urem(-RHS));
+    తిరిగి -((-(*ఇది)).urem(RHS));
   }
-  if (RHS < 0)
-    return this->urem(-RHS);
-  return this->urem(RHS);
+  ఒకవేళ (RHS < 0)
+    తిరిగి ఇది->urem(-RHS);
+  తిరిగి ఇది->urem(RHS);
 }
 
-void APInt::udivrem(const APInt &LHS, const APInt &RHS,
+శూన్య APInt::udivrem(స్థిరరాశి APInt &LHS, స్థిరరాశి APInt &RHS,
                     APInt &Quotient, APInt &Remainder) {
-  assert(LHS.BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  unsigned BitWidth = LHS.BitWidth;
+  ప్రతిజ్ఞా(LHS.బిట్టు_వెడల్పు_2 == RHS.బిట్టు_వెడల్పు_2 && "Bit widths must be the same");
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.బిట్టు_వెడల్పు_2;
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(LHS.isSingleWord())) {
-    assert(RHS.U.VAL != 0 && "Divide by zero?");
+  ఒకవేళ (LLVM_LIKELY(LHS.is_Single_మాట())) {
+    ప్రతిజ్ఞా(RHS.U.VAL != 0 && "Divide by zero?");
     uint64_t QuotVal = LHS.U.VAL / RHS.U.VAL;
     uint64_t RemVal = LHS.U.VAL % RHS.U.VAL;
-    Quotient = APInt(BitWidth, QuotVal);
-    Remainder = APInt(BitWidth, RemVal);
-    return;
+    Quotient = APInt(బిట్టు_వెడల్పు_2, QuotVal);
+    Remainder = APInt(బిట్టు_వెడల్పు_2, RemVal);
+    తిరిగి;
   }
 
   // Get some size facts about the dividend and divisor
-  unsigned lhsWords = getNumWords(LHS.getActiveBits());
-  unsigned rhsBits  = RHS.getActiveBits();
-  unsigned rhsWords = getNumWords(rhsBits);
-  assert(rhsWords && "Performing divrem operation by zero ???");
+  గుర్తులేని lhs_పదాలు = get_అంకె_పదాలు(LHS.get_చురుకైన_బిట్లు());
+  గుర్తులేని rhs_బిట్లు  = RHS.get_చురుకైన_బిట్లు();
+  గుర్తులేని rhs_పదాలు = get_అంకె_పదాలు(rhs_బిట్లు);
+  ప్రతిజ్ఞా(rhs_పదాలు && "Performing divrem operation by zero ???");
 
   // Check the degenerate cases
-  if (lhsWords == 0) {
-    Quotient = APInt(BitWidth, 0);    // 0 / Y ===> 0
-    Remainder = APInt(BitWidth, 0);   // 0 % Y ===> 0
-    return;
+  ఒకవేళ (lhs_పదాలు == 0) {
+    Quotient = APInt(బిట్టు_వెడల్పు_2, 0);    // 0 / Y ===> 0
+    Remainder = APInt(బిట్టు_వెడల్పు_2, 0);   // 0 % Y ===> 0
+    తిరిగి;
   }
 
-  if (rhsBits == 1) {
+  ఒకవేళ (rhs_బిట్లు == 1) {
     Quotient = LHS;                   // X / 1 ===> X
-    Remainder = APInt(BitWidth, 0);   // X % 1 ===> 0
+    Remainder = APInt(బిట్టు_వెడల్పు_2, 0);   // X % 1 ===> 0
   }
 
-  if (lhsWords < rhsWords || LHS.ult(RHS)) {
+  ఒకవేళ (lhs_పదాలు < rhs_పదాలు || LHS.ult(RHS)) {
     Remainder = LHS;                  // X % Y ===> X, iff X < Y
-    Quotient = APInt(BitWidth, 0);    // X / Y ===> 0, iff X < Y
-    return;
+    Quotient = APInt(బిట్టు_వెడల్పు_2, 0);    // X / Y ===> 0, iff X < Y
+    తిరిగి;
   }
 
-  if (LHS == RHS) {
-    Quotient  = APInt(BitWidth, 1);   // X / X ===> 1
-    Remainder = APInt(BitWidth, 0);   // X % X ===> 0;
-    return;
+  ఒకవేళ (LHS == RHS) {
+    Quotient  = APInt(బిట్టు_వెడల్పు_2, 1);   // X / X ===> 1
+    Remainder = APInt(బిట్టు_వెడల్పు_2, 0);   // X % X ===> 0;
+    తిరిగి;
   }
 
   // Make sure there is enough space to hold the results.
   // NOTE: This assumes that reallocate won't affect any bits if it doesn't
   // change the size. This is necessary if Quotient or Remainder is aliased
   // with LHS or RHS.
-  Quotient.reallocate(BitWidth);
-  Remainder.reallocate(BitWidth);
+  Quotient.reallocate(బిట్టు_వెడల్పు_2);
+  Remainder.reallocate(బిట్టు_వెడల్పు_2);
 
-  if (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
+  ఒకవేళ (lhs_పదాలు == 1) { // rhsWords is 1 if lhsWords is 1.
     // There is only one word to consider so use the native versions.
-    uint64_t lhsValue = LHS.U.pVal[0];
-    uint64_t rhsValue = RHS.U.pVal[0];
-    Quotient = lhsValue / rhsValue;
-    Remainder = lhsValue % rhsValue;
-    return;
+    uint64_t lhs_విలువ = LHS.U.pVal[0];
+    uint64_t rhs_విలువ = RHS.U.pVal[0];
+    Quotient = lhs_విలువ / rhs_విలువ;
+    Remainder = lhs_విలువ % rhs_విలువ;
+    తిరిగి;
   }
 
   // Okay, lets do it the long way
-  divide(LHS.U.pVal, lhsWords, RHS.U.pVal, rhsWords, Quotient.U.pVal,
+  divide(LHS.U.pVal, lhs_పదాలు, RHS.U.pVal, rhs_పదాలు, Quotient.U.pVal,
          Remainder.U.pVal);
   // Clear the rest of the Quotient and Remainder.
-  std::memset(Quotient.U.pVal + lhsWords, 0,
-              (getNumWords(BitWidth) - lhsWords) * APINT_WORD_SIZE);
-  std::memset(Remainder.U.pVal + rhsWords, 0,
-              (getNumWords(BitWidth) - rhsWords) * APINT_WORD_SIZE);
+  std::memset(Quotient.U.pVal + lhs_పదాలు, 0,
+              (get_అంకె_పదాలు(బిట్టు_వెడల్పు_2) - lhs_పదాలు) * APINT_మాట_కొలత);
+  std::memset(Remainder.U.pVal + rhs_పదాలు, 0,
+              (get_అంకె_పదాలు(బిట్టు_వెడల్పు_2) - rhs_పదాలు) * APINT_మాట_కొలత);
 }
 
-void APInt::udivrem(const APInt &LHS, uint64_t RHS, APInt &Quotient,
+శూన్య APInt::udivrem(స్థిరరాశి APInt &LHS, uint64_t RHS, APInt &Quotient,
                     uint64_t &Remainder) {
-  assert(RHS != 0 && "Divide by zero?");
-  unsigned BitWidth = LHS.BitWidth;
+  ప్రతిజ్ఞా(RHS != 0 && "Divide by zero?");
+  గుర్తులేని బిట్టు_వెడల్పు_2 = LHS.బిట్టు_వెడల్పు_2;
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(LHS.isSingleWord())) {
+  ఒకవేళ (LLVM_LIKELY(LHS.is_Single_మాట())) {
     uint64_t QuotVal = LHS.U.VAL / RHS;
     Remainder = LHS.U.VAL % RHS;
-    Quotient = APInt(BitWidth, QuotVal);
-    return;
+    Quotient = APInt(బిట్టు_వెడల్పు_2, QuotVal);
+    తిరిగి;
   }
 
   // Get some size facts about the dividend and divisor
-  unsigned lhsWords = getNumWords(LHS.getActiveBits());
+  గుర్తులేని lhs_పదాలు = get_అంకె_పదాలు(LHS.get_చురుకైన_బిట్లు());
 
   // Check the degenerate cases
-  if (lhsWords == 0) {
-    Quotient = APInt(BitWidth, 0);    // 0 / Y ===> 0
+  ఒకవేళ (lhs_పదాలు == 0) {
+    Quotient = APInt(బిట్టు_వెడల్పు_2, 0);    // 0 / Y ===> 0
     Remainder = 0;                    // 0 % Y ===> 0
-    return;
+    తిరిగి;
   }
 
-  if (RHS == 1) {
+  ఒకవేళ (RHS == 1) {
     Quotient = LHS;                   // X / 1 ===> X
     Remainder = 0;                    // X % 1 ===> 0
-    return;
+    తిరిగి;
   }
 
-  if (LHS.ult(RHS)) {
-    Remainder = LHS.getZExtValue();   // X % Y ===> X, iff X < Y
-    Quotient = APInt(BitWidth, 0);    // X / Y ===> 0, iff X < Y
-    return;
+  ఒకవేళ (LHS.ult(RHS)) {
+    Remainder = LHS.get_ZExt_విలువ();   // X % Y ===> X, iff X < Y
+    Quotient = APInt(బిట్టు_వెడల్పు_2, 0);    // X / Y ===> 0, iff X < Y
+    తిరిగి;
   }
 
-  if (LHS == RHS) {
-    Quotient  = APInt(BitWidth, 1);   // X / X ===> 1
+  ఒకవేళ (LHS == RHS) {
+    Quotient  = APInt(బిట్టు_వెడల్పు_2, 1);   // X / X ===> 1
     Remainder = 0;                    // X % X ===> 0;
-    return;
+    తిరిగి;
   }
 
   // Make sure there is enough space to hold the results.
   // NOTE: This assumes that reallocate won't affect any bits if it doesn't
   // change the size. This is necessary if Quotient is aliased with LHS.
-  Quotient.reallocate(BitWidth);
+  Quotient.reallocate(బిట్టు_వెడల్పు_2);
 
-  if (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
+  ఒకవేళ (lhs_పదాలు == 1) { // rhsWords is 1 if lhsWords is 1.
     // There is only one word to consider so use the native versions.
-    uint64_t lhsValue = LHS.U.pVal[0];
-    Quotient = lhsValue / RHS;
-    Remainder = lhsValue % RHS;
-    return;
+    uint64_t lhs_విలువ = LHS.U.pVal[0];
+    Quotient = lhs_విలువ / RHS;
+    Remainder = lhs_విలువ % RHS;
+    తిరిగి;
   }
 
   // Okay, lets do it the long way
-  divide(LHS.U.pVal, lhsWords, &RHS, 1, Quotient.U.pVal, &Remainder);
+  divide(LHS.U.pVal, lhs_పదాలు, &RHS, 1, Quotient.U.pVal, &Remainder);
   // Clear the rest of the Quotient.
-  std::memset(Quotient.U.pVal + lhsWords, 0,
-              (getNumWords(BitWidth) - lhsWords) * APINT_WORD_SIZE);
+  std::memset(Quotient.U.pVal + lhs_పదాలు, 0,
+              (get_అంకె_పదాలు(బిట్టు_వెడల్పు_2) - lhs_పదాలు) * APINT_మాట_కొలత);
 }
 
-void APInt::sdivrem(const APInt &LHS, const APInt &RHS,
+శూన్య APInt::sdivrem(స్థిరరాశి APInt &LHS, స్థిరరాశి APInt &RHS,
                     APInt &Quotient, APInt &Remainder) {
-  if (LHS.isNegative()) {
-    if (RHS.isNegative())
+  ఒకవేళ (LHS.isNegative()) {
+    ఒకవేళ (RHS.isNegative())
       APInt::udivrem(-LHS, -RHS, Quotient, Remainder);
-    else {
+    లేకపోతే {
       APInt::udivrem(-LHS, RHS, Quotient, Remainder);
       Quotient.negate();
     }
     Remainder.negate();
-  } else if (RHS.isNegative()) {
+  } లేకపోతే ఒకవేళ (RHS.isNegative()) {
     APInt::udivrem(LHS, -RHS, Quotient, Remainder);
     Quotient.negate();
-  } else {
+  } లేకపోతే {
     APInt::udivrem(LHS, RHS, Quotient, Remainder);
   }
 }
 
-void APInt::sdivrem(const APInt &LHS, int64_t RHS,
+శూన్య APInt::sdivrem(స్థిరరాశి APInt &LHS, int64_t RHS,
                     APInt &Quotient, int64_t &Remainder) {
   uint64_t R = Remainder;
-  if (LHS.isNegative()) {
-    if (RHS < 0)
+  ఒకవేళ (LHS.isNegative()) {
+    ఒకవేళ (RHS < 0)
       APInt::udivrem(-LHS, -RHS, Quotient, R);
-    else {
+    లేకపోతే {
       APInt::udivrem(-LHS, RHS, Quotient, R);
       Quotient.negate();
     }
     R = -R;
-  } else if (RHS < 0) {
+  } లేకపోతే ఒకవేళ (RHS < 0) {
     APInt::udivrem(LHS, -RHS, Quotient, R);
     Quotient.negate();
-  } else {
+  } లేకపోతే {
     APInt::udivrem(LHS, RHS, Quotient, R);
   }
   Remainder = R;
 }
 
-APInt APInt::sadd_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this+RHS;
-  Overflow = isNonNegative() == RHS.isNonNegative() &&
+APInt APInt::sadd_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  APInt Res = *ఇది+RHS;
+  అధికప్రవాహం = isNonNegative() == RHS.isNonNegative() &&
              Res.isNonNegative() != isNonNegative();
-  return Res;
+  తిరిగి Res;
 }
 
-APInt APInt::uadd_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this+RHS;
-  Overflow = Res.ult(RHS);
-  return Res;
+APInt APInt::uadd_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  APInt Res = *ఇది+RHS;
+  అధికప్రవాహం = Res.ult(RHS);
+  తిరిగి Res;
 }
 
-APInt APInt::ssub_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this - RHS;
-  Overflow = isNonNegative() != RHS.isNonNegative() &&
+APInt APInt::ssub_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  APInt Res = *ఇది - RHS;
+  అధికప్రవాహం = isNonNegative() != RHS.isNonNegative() &&
              Res.isNonNegative() != isNonNegative();
-  return Res;
+  తిరిగి Res;
 }
 
-APInt APInt::usub_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this-RHS;
-  Overflow = Res.ugt(*this);
-  return Res;
+APInt APInt::usub_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  APInt Res = *ఇది-RHS;
+  అధికప్రవాహం = Res.ugt(*ఇది);
+  తిరిగి Res;
 }
 
-APInt APInt::sdiv_ov(const APInt &RHS, bool &Overflow) const {
+APInt APInt::sdiv_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
   // MININT/-1  -->  overflow.
-  Overflow = isMinSignedValue() && RHS.isAllOnes();
-  return sdiv(RHS);
+  అధికప్రవాహం = is_Min_Signed_విలువ() && RHS.isAllOnes();
+  తిరిగి sdiv(RHS);
 }
 
-APInt APInt::smul_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this * RHS;
+APInt APInt::smul_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  APInt Res = *ఇది * RHS;
 
-  if (RHS != 0)
-    Overflow = Res.sdiv(RHS) != *this ||
-               (isMinSignedValue() && RHS.isAllOnes());
-  else
-    Overflow = false;
-  return Res;
+  ఒకవేళ (RHS != 0)
+    అధికప్రవాహం = Res.sdiv(RHS) != *ఇది ||
+               (is_Min_Signed_విలువ() && RHS.isAllOnes());
+  లేకపోతే
+    అధికప్రవాహం = అబద్ధం;
+  తిరిగి Res;
 }
 
-APInt APInt::umul_ov(const APInt &RHS, bool &Overflow) const {
-  if (countl_zero() + RHS.countl_zero() + 2 <= BitWidth) {
-    Overflow = true;
-    return *this * RHS;
+APInt APInt::umul_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  ఒకవేళ (countl_zero() + RHS.countl_zero() + 2 <= బిట్టు_వెడల్పు_2) {
+    అధికప్రవాహం = నిజం;
+    తిరిగి *ఇది * RHS;
   }
 
   APInt Res = lshr(1) * RHS;
-  Overflow = Res.isNegative();
+  అధికప్రవాహం = Res.isNegative();
   Res <<= 1;
-  if ((*this)[0]) {
+  ఒకవేళ ((*ఇది)[0]) {
     Res += RHS;
-    if (Res.ult(RHS))
-      Overflow = true;
+    ఒకవేళ (Res.ult(RHS))
+      అధికప్రవాహం = నిజం;
   }
-  return Res;
+  తిరిగి Res;
 }
 
-APInt APInt::sshl_ov(const APInt &ShAmt, bool &Overflow) const {
-  return sshl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
+APInt APInt::sshl_ov(స్థిరరాశి APInt &ShAmt, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  తిరిగి sshl_ov(ShAmt.get_Limited_విలువ(get_బిట్టు_వెడల్పు()), అధికప్రవాహం);
 }
 
-APInt APInt::sshl_ov(unsigned ShAmt, bool &Overflow) const {
-  Overflow = ShAmt >= getBitWidth();
-  if (Overflow)
-    return APInt(BitWidth, 0);
+APInt APInt::sshl_ov(గుర్తులేని ShAmt, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  అధికప్రవాహం = ShAmt >= get_బిట్టు_వెడల్పు();
+  ఒకవేళ (అధికప్రవాహం)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
 
-  if (isNonNegative()) // Don't allow sign change.
-    Overflow = ShAmt >= countl_zero();
-  else
-    Overflow = ShAmt >= countl_one();
+  ఒకవేళ (isNonNegative()) // Don't allow sign change.
+    అధికప్రవాహం = ShAmt >= countl_zero();
+  లేకపోతే
+    అధికప్రవాహం = ShAmt >= countl_one();
 
-  return *this << ShAmt;
+  తిరిగి *ఇది << ShAmt;
 }
 
-APInt APInt::ushl_ov(const APInt &ShAmt, bool &Overflow) const {
-  return ushl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
+APInt APInt::ushl_ov(స్థిరరాశి APInt &ShAmt, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  తిరిగి ushl_ov(ShAmt.get_Limited_విలువ(get_బిట్టు_వెడల్పు()), అధికప్రవాహం);
 }
 
-APInt APInt::ushl_ov(unsigned ShAmt, bool &Overflow) const {
-  Overflow = ShAmt >= getBitWidth();
-  if (Overflow)
-    return APInt(BitWidth, 0);
+APInt APInt::ushl_ov(గుర్తులేని ShAmt, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  అధికప్రవాహం = ShAmt >= get_బిట్టు_వెడల్పు();
+  ఒకవేళ (అధికప్రవాహం)
+    తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
 
-  Overflow = ShAmt > countl_zero();
+  అధికప్రవాహం = ShAmt > countl_zero();
 
-  return *this << ShAmt;
+  తిరిగి *ఇది << ShAmt;
 }
 
-APInt APInt::sfloordiv_ov(const APInt &RHS, bool &Overflow) const {
-  APInt quotient = sdiv_ov(RHS, Overflow);
-  if ((quotient * RHS != *this) && (isNegative() != RHS.isNegative()))
-    return quotient - 1;
-  return quotient;
+APInt APInt::sfloordiv_ov(స్థిరరాశి APInt &RHS, తార్కిక &అధికప్రవాహం) స్థిరరాశి {
+  APInt quotient = sdiv_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ ((quotient * RHS != *ఇది) && (isNegative() != RHS.isNegative()))
+    తిరిగి quotient - 1;
+  తిరిగి quotient;
 }
 
-APInt APInt::sadd_sat(const APInt &RHS) const {
-  bool Overflow;
-  APInt Res = sadd_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::sadd_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = sadd_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
-                      : APInt::getSignedMaxValue(BitWidth);
+  తిరిగి isNegative() ? APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2)
+                      : APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::uadd_sat(const APInt &RHS) const {
-  bool Overflow;
-  APInt Res = uadd_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::uadd_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = uadd_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return APInt::getMaxValue(BitWidth);
+  తిరిగి APInt::get_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::ssub_sat(const APInt &RHS) const {
-  bool Overflow;
-  APInt Res = ssub_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::ssub_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = ssub_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
-                      : APInt::getSignedMaxValue(BitWidth);
+  తిరిగి isNegative() ? APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2)
+                      : APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::usub_sat(const APInt &RHS) const {
-  bool Overflow;
-  APInt Res = usub_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::usub_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = usub_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return APInt(BitWidth, 0);
+  తిరిగి APInt(బిట్టు_వెడల్పు_2, 0);
 }
 
-APInt APInt::smul_sat(const APInt &RHS) const {
-  bool Overflow;
-  APInt Res = smul_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::smul_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = smul_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
   // The result is negative if one and only one of inputs is negative.
-  bool ResIsNegative = isNegative() ^ RHS.isNegative();
+  తార్కిక ResIsNegative = isNegative() ^ RHS.isNegative();
 
-  return ResIsNegative ? APInt::getSignedMinValue(BitWidth)
-                       : APInt::getSignedMaxValue(BitWidth);
+  తిరిగి ResIsNegative ? APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2)
+                       : APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::umul_sat(const APInt &RHS) const {
-  bool Overflow;
-  APInt Res = umul_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::umul_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = umul_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return APInt::getMaxValue(BitWidth);
+  తిరిగి APInt::get_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::sshl_sat(const APInt &RHS) const {
-  return sshl_sat(RHS.getLimitedValue(getBitWidth()));
+APInt APInt::sshl_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తిరిగి sshl_sat(RHS.get_Limited_విలువ(get_బిట్టు_వెడల్పు()));
 }
 
-APInt APInt::sshl_sat(unsigned RHS) const {
-  bool Overflow;
-  APInt Res = sshl_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::sshl_sat(గుర్తులేని RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = sshl_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
-                      : APInt::getSignedMaxValue(BitWidth);
+  తిరిగి isNegative() ? APInt::get_Signed_Min_విలువ(బిట్టు_వెడల్పు_2)
+                      : APInt::get_Signed_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-APInt APInt::ushl_sat(const APInt &RHS) const {
-  return ushl_sat(RHS.getLimitedValue(getBitWidth()));
+APInt APInt::ushl_sat(స్థిరరాశి APInt &RHS) స్థిరరాశి {
+  తిరిగి ushl_sat(RHS.get_Limited_విలువ(get_బిట్టు_వెడల్పు()));
 }
 
-APInt APInt::ushl_sat(unsigned RHS) const {
-  bool Overflow;
-  APInt Res = ushl_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+APInt APInt::ushl_sat(గుర్తులేని RHS) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  APInt Res = ushl_ov(RHS, అధికప్రవాహం);
+  ఒకవేళ (!అధికప్రవాహం)
+    తిరిగి Res;
 
-  return APInt::getMaxValue(BitWidth);
+  తిరిగి APInt::get_Max_విలువ(బిట్టు_వెడల్పు_2);
 }
 
-void APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
+శూన్య APInt::fromString(గుర్తులేని numbits, StringRef str, uint8_t radix) {
   // Check our assumptions here
-  assert(!str.empty() && "Invalid string length");
-  assert((radix == 10 || radix == 8 || radix == 16 || radix == 2 ||
+  ప్రతిజ్ఞా(!str.ఖాళీలు() && "Invalid string length");
+  ప్రతిజ్ఞా((radix == 10 || radix == 8 || radix == 16 || radix == 2 ||
           radix == 36) &&
          "Radix should be 2, 8, 10, 16, or 36!");
 
   StringRef::iterator p = str.begin();
-  size_t slen = str.size();
-  bool isNeg = *p == '-';
-  if (*p == '-' || *p == '+') {
+  size_t slen = str.కొలత_2();
+  తార్కిక isNeg = *p == '-';
+  ఒకవేళ (*p == '-' || *p == '+') {
     p++;
     slen--;
-    assert(slen && "String is only a sign, needs a value.");
+    ప్రతిజ్ఞా(slen && "String is only a sign, needs a value.");
   }
-  assert((slen <= numbits || radix != 2) && "Insufficient bit width");
-  assert(((slen-1)*3 <= numbits || radix != 8) && "Insufficient bit width");
-  assert(((slen-1)*4 <= numbits || radix != 16) && "Insufficient bit width");
-  assert((((slen-1)*64)/22 <= numbits || radix != 10) &&
+  ప్రతిజ్ఞా((slen <= numbits || radix != 2) && "Insufficient bit width");
+  ప్రతిజ్ఞా(((slen-1)*3 <= numbits || radix != 8) && "Insufficient bit width");
+  ప్రతిజ్ఞా(((slen-1)*4 <= numbits || radix != 16) && "Insufficient bit width");
+  ప్రతిజ్ఞా((((slen-1)*64)/22 <= numbits || radix != 10) &&
          "Insufficient bit width");
 
   // Allocate memory if needed
-  if (LLVM_LIKELY(isSingleWord()))
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట()))
     U.VAL = 0;
-  else
-    U.pVal = getClearedMemory(getNumWords());
+  లేకపోతే
+    U.pVal = get_Cleared_జ్ఞాపకం(get_అంకె_పదాలు());
 
   // Figure out if we can shift instead of multiply
-  unsigned shift = (radix == 16 ? 4 : radix == 8 ? 3 : radix == 2 ? 1 : 0);
+  గుర్తులేని జరుపు = (radix == 16 ? 4 : radix == 8 ? 3 : radix == 2 ? 1 : 0);
 
   // Enter digit traversal loop
-  for (StringRef::iterator e = str.end(); p != e; ++p) {
-    unsigned digit = getDigit(*p, radix);
-    assert(digit < radix && "Invalid character in digit string");
+  కొరకు (StringRef::iterator e = str.చివర(); p != e; ++p) {
+    గుర్తులేని digit = getDigit(*p, radix);
+    ప్రతిజ్ఞా(digit < radix && "Invalid character in digit string");
 
     // Shift or multiply the value by the radix
-    if (slen > 1) {
-      if (shift)
-        *this <<= shift;
-      else
-        *this *= radix;
+    ఒకవేళ (slen > 1) {
+      ఒకవేళ (జరుపు)
+        *ఇది <<= జరుపు;
+      లేకపోతే
+        *ఇది *= radix;
     }
 
     // Add in the digit we just interpreted
-    *this += digit;
+    *ఇది += digit;
   }
   // If its negative, put it in two's complement form
-  if (isNeg)
-    this->negate();
+  ఒకవేళ (isNeg)
+    ఇది->negate();
 }
 
-void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
-                     bool formatAsCLiteral, bool UpperCase,
-                     bool InsertSeparators) const {
-  assert((Radix == 10 || Radix == 8 || Radix == 16 || Radix == 2 ||
+శూన్య APInt::గమ్యం_String(Small_సదిశ_Impl<అక్షరం> &Str, గుర్తులేని Radix, తార్కిక Signed,
+                     తార్కిక formatAsCLiteral, తార్కిక పై_Case_2,
+                     తార్కిక చొప్పించు_Separators) స్థిరరాశి {
+  ప్రతిజ్ఞా((Radix == 10 || Radix == 8 || Radix == 16 || Radix == 2 ||
           Radix == 36) &&
          "Radix should be 2, 8, 10, 16, or 36!");
 
-  const char *Prefix = "";
-  if (formatAsCLiteral) {
-    switch (Radix) {
-      case 2:
+  స్థిరరాశి అక్షరం *ఉపసర్గ = "";
+  ఒకవేళ (formatAsCLiteral) {
+    ఎంపిక (Radix) {
+      స్థితి 2:
         // Binary literals are a non-standard extension added in gcc 4.3:
         // http://gcc.gnu.org/onlinedocs/gcc-4.3.0/gcc/Binary-constants.html
-        Prefix = "0b";
-        break;
-      case 8:
-        Prefix = "0";
-        break;
-      case 10:
-        break; // No prefix
-      case 16:
-        Prefix = "0x";
-        break;
-      default:
+        ఉపసర్గ = "0b";
+        ఆపు;
+      స్థితి 8:
+        ఉపసర్గ = "0";
+        ఆపు;
+      స్థితి 10:
+        ఆపు; // No prefix
+      స్థితి 16:
+        ఉపసర్గ = "0x";
+        ఆపు;
+      అప్రమేయ:
         llvm_unreachable("Invalid radix!");
     }
   }
 
   // Number of digits in a group between separators.
-  unsigned Grouping = (Radix == 8 || Radix == 10) ? 3 : 4;
+  గుర్తులేని Grouping = (Radix == 8 || Radix == 10) ? 3 : 4;
 
   // First, check for a zero value and just short circuit the logic below.
-  if (isZero()) {
-    while (*Prefix) {
-      Str.push_back(*Prefix);
-      ++Prefix;
+  ఒకవేళ (isZero()) {
+    అయితే (*ఉపసర్గ) {
+      Str.నెట్టు_వెనుక(*ఉపసర్గ);
+      ++ఉపసర్గ;
     };
-    Str.push_back('0');
-    return;
+    Str.నెట్టు_వెనుక('0');
+    తిరిగి;
   }
 
-  static const char BothDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz"
+  స్థిర స్థిరరాశి అక్షరం BothDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz"
                                    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const char *Digits = BothDigits + (UpperCase ? 36 : 0);
+  స్థిరరాశి అక్షరం *Digits = BothDigits + (పై_Case_2 ? 36 : 0);
 
-  if (LLVM_LIKELY(isSingleWord())) {
-    char Buffer[65];
-    char *BufPtr = std::end(Buffer);
+  ఒకవేళ (LLVM_LIKELY(is_Single_మాట())) {
+    అక్షరం బఫరు[65];
+    అక్షరం *BufPtr = std::చివర(బఫరు);
 
     uint64_t N;
-    if (!Signed) {
-      N = getZExtValue();
-    } else {
-      int64_t I = getSExtValue();
-      if (I >= 0) {
+    ఒకవేళ (!Signed) {
+      N = get_ZExt_విలువ();
+    } లేకపోతే {
+      int64_t I = get_SExt_విలువ();
+      ఒకవేళ (I >= 0) {
         N = I;
-      } else {
-        Str.push_back('-');
+      } లేకపోతే {
+        Str.నెట్టు_వెనుక('-');
         N = -(uint64_t)I;
       }
     }
 
-    while (*Prefix) {
-      Str.push_back(*Prefix);
-      ++Prefix;
+    అయితే (*ఉపసర్గ) {
+      Str.నెట్టు_వెనుక(*ఉపసర్గ);
+      ++ఉపసర్గ;
     };
 
-    int Pos = 0;
-    while (N) {
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
+    పూర్ణాంకం Pos = 0;
+    అయితే (N) {
+      ఒకవేళ (చొప్పించు_Separators && Pos % Grouping == 0 && Pos > 0)
         *--BufPtr = '\'';
       *--BufPtr = Digits[N % Radix];
       N /= Radix;
       Pos++;
     }
-    Str.append(BufPtr, std::end(Buffer));
-    return;
+    Str.append(BufPtr, std::చివర(బఫరు));
+    తిరిగి;
   }
 
-  APInt Tmp(*this);
+  APInt Tmp(*ఇది);
 
-  if (Signed && isNegative()) {
+  ఒకవేళ (Signed && isNegative()) {
     // They want to print the signed version and it is a negative value
     // Flip the bits and add one to turn it into the equivalent positive
     // value and put a '-' in the result.
     Tmp.negate();
-    Str.push_back('-');
+    Str.నెట్టు_వెనుక('-');
   }
 
-  while (*Prefix) {
-    Str.push_back(*Prefix);
-    ++Prefix;
+  అయితే (*ఉపసర్గ) {
+    Str.నెట్టు_వెనుక(*ఉపసర్గ);
+    ++ఉపసర్గ;
   }
 
   // We insert the digits backward, then reverse them to get the right order.
-  unsigned StartDig = Str.size();
+  గుర్తులేని ప్రారంభం_Dig = Str.కొలత_2();
 
   // For the 2, 8 and 16 bit cases, we can just shift instead of divide
   // because the number of bits per digit (1, 3 and 4 respectively) divides
   // equally.  We just shift until the value is zero.
-  if (Radix == 2 || Radix == 8 || Radix == 16) {
+  ఒకవేళ (Radix == 2 || Radix == 8 || Radix == 16) {
     // Just shift tmp right for each digit width until it becomes zero
-    unsigned ShiftAmt = (Radix == 16 ? 4 : (Radix == 8 ? 3 : 1));
-    unsigned MaskAmt = Radix - 1;
+    గుర్తులేని జరుపు_Amt_2 = (Radix == 16 ? 4 : (Radix == 8 ? 3 : 1));
+    గుర్తులేని ముసుగు_Amt = Radix - 1;
 
-    int Pos = 0;
-    while (Tmp.getBoolValue()) {
-      unsigned Digit = unsigned(Tmp.getRawData()[0]) & MaskAmt;
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
-        Str.push_back('\'');
+    పూర్ణాంకం Pos = 0;
+    అయితే (Tmp.get_Bool_విలువ()) {
+      గుర్తులేని Digit = గుర్తులేని(Tmp.get_Raw_దత్తాంశం()[0]) & ముసుగు_Amt;
+      ఒకవేళ (చొప్పించు_Separators && Pos % Grouping == 0 && Pos > 0)
+        Str.నెట్టు_వెనుక('\'');
 
-      Str.push_back(Digits[Digit]);
-      Tmp.lshrInPlace(ShiftAmt);
+      Str.నెట్టు_వెనుక(Digits[Digit]);
+      Tmp.lshr_లోపల_ఉంచు(జరుపు_Amt_2);
       Pos++;
     }
-  } else {
-    int Pos = 0;
-    while (Tmp.getBoolValue()) {
+  } లేకపోతే {
+    పూర్ణాంకం Pos = 0;
+    అయితే (Tmp.get_Bool_విలువ()) {
       uint64_t Digit;
       udivrem(Tmp, Radix, Tmp, Digit);
-      assert(Digit < Radix && "divide failed");
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
-        Str.push_back('\'');
+      ప్రతిజ్ఞా(Digit < Radix && "divide failed");
+      ఒకవేళ (చొప్పించు_Separators && Pos % Grouping == 0 && Pos > 0)
+        Str.నెట్టు_వెనుక('\'');
 
-      Str.push_back(Digits[Digit]);
+      Str.నెట్టు_వెనుక(Digits[Digit]);
       Pos++;
     }
   }
 
   // Reverse the digits before returning.
-  std::reverse(Str.begin()+StartDig, Str.end());
+  std::తిరగేయి(Str.begin()+ప్రారంభం_Dig, Str.చివర());
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void APInt::dump() const {
+#ఒకవేళ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_పద్ధతి శూన్య APInt::dump() స్థిరరాశి {
   SmallString<40> S, U;
-  this->toStringUnsigned(U);
-  this->toStringSigned(S);
-  dbgs() << "APInt(" << BitWidth << "b, "
+  ఇది->గమ్యం_String_Unsigned(U);
+  ఇది->గమ్యం_String_Signed(S);
+  dbgs() << "APInt(" << బిట్టు_వెడల్పు_2 << "b, "
          << U << "u " << S << "s)\n";
 }
-#endif
+#అయితే_ముగింపు
 
-void APInt::print(raw_ostream &OS, bool isSigned) const {
+శూన్య APInt::print(raw_ostream &OS, తార్కిక isSigned) స్థిరరాశి {
   SmallString<40> S;
-  this->toString(S, 10, isSigned, /* formatAsCLiteral = */false);
+  ఇది->గమ్యం_String(S, 10, isSigned, /* formatAsCLiteral = */అబద్ధం);
   OS << S;
 }
 
@@ -2353,181 +2353,181 @@ void APInt::print(raw_ostream &OS, bool isSigned) const {
 
 // Assumed by lowHalf, highHalf, partMSB and partLSB.  A fairly safe
 // and unrestricting assumption.
-static_assert(APInt::APINT_BITS_PER_WORD % 2 == 0,
+static_assert(APInt::APINT_బిట్లు_చొప్పున_మాట % 2 == 0,
               "Part width must be divisible by 2!");
 
 // Returns the integer part with the least significant BITS set.
 // BITS cannot be zero.
-static inline APInt::WordType lowBitMask(unsigned bits) {
-  assert(bits != 0 && bits <= APInt::APINT_BITS_PER_WORD);
-  return ~(APInt::WordType) 0 >> (APInt::APINT_BITS_PER_WORD - bits);
+స్థిర అంతఃవరుస APInt::మాట_Type దిగువ_బిట్టు_ముసుగు(గుర్తులేని బిట్లు) {
+  ప్రతిజ్ఞా(బిట్లు != 0 && బిట్లు <= APInt::APINT_బిట్లు_చొప్పున_మాట);
+  తిరిగి ~(APInt::మాట_Type) 0 >> (APInt::APINT_బిట్లు_చొప్పున_మాట - బిట్లు);
 }
 
 /// Returns the value of the lower half of PART.
-static inline APInt::WordType lowHalf(APInt::WordType part) {
-  return part & lowBitMask(APInt::APINT_BITS_PER_WORD / 2);
+స్థిర అంతఃవరుస APInt::మాట_Type దిగువ_Half(APInt::మాట_Type part) {
+  తిరిగి part & దిగువ_బిట్టు_ముసుగు(APInt::APINT_బిట్లు_చొప్పున_మాట / 2);
 }
 
 /// Returns the value of the upper half of PART.
-static inline APInt::WordType highHalf(APInt::WordType part) {
-  return part >> (APInt::APINT_BITS_PER_WORD / 2);
+స్థిర అంతఃవరుస APInt::మాట_Type ఎగువ_Half(APInt::మాట_Type part) {
+  తిరిగి part >> (APInt::APINT_బిట్లు_చొప్పున_మాట / 2);
 }
 
 /// Sets the least significant part of a bignum to the input value, and zeroes
 /// out higher parts.
-void APInt::tcSet(WordType *dst, WordType part, unsigned parts) {
-  assert(parts > 0);
+శూన్య APInt::tc_సమితి(మాట_Type *dst, మాట_Type part, గుర్తులేని parts) {
+  ప్రతిజ్ఞా(parts > 0);
   dst[0] = part;
-  for (unsigned i = 1; i < parts; i++)
+  కొరకు (గుర్తులేని i = 1; i < parts; i++)
     dst[i] = 0;
 }
 
 /// Assign one bignum to another.
-void APInt::tcAssign(WordType *dst, const WordType *src, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
+శూన్య APInt::tc_కేటాయించు(మాట_Type *dst, స్థిరరాశి మాట_Type *src, గుర్తులేని parts) {
+  కొరకు (గుర్తులేని i = 0; i < parts; i++)
     dst[i] = src[i];
 }
 
 /// Returns true if a bignum is zero, false otherwise.
-bool APInt::tcIsZero(const WordType *src, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
-    if (src[i])
-      return false;
+తార్కిక APInt::tcIsZero(స్థిరరాశి మాట_Type *src, గుర్తులేని parts) {
+  కొరకు (గుర్తులేని i = 0; i < parts; i++)
+    ఒకవేళ (src[i])
+      తిరిగి అబద్ధం;
 
-  return true;
+  తిరిగి నిజం;
 }
 
 /// Extract the given bit of a bignum; returns 0 or 1.
-int APInt::tcExtractBit(const WordType *parts, unsigned bit) {
-  return (parts[whichWord(bit)] & maskBit(bit)) != 0;
+పూర్ణాంకం APInt::tc_వెలికితీయి_బిట్టు(స్థిరరాశి మాట_Type *parts, గుర్తులేని బిట్టు) {
+  తిరిగి (parts[which_మాట(బిట్టు)] & ముసుగు_బిట్టు(బిట్టు)) != 0;
 }
 
 /// Set the given bit of a bignum.
-void APInt::tcSetBit(WordType *parts, unsigned bit) {
-  parts[whichWord(bit)] |= maskBit(bit);
+శూన్య APInt::tc_సమితి_బిట్టు(మాట_Type *parts, గుర్తులేని బిట్టు) {
+  parts[which_మాట(బిట్టు)] |= ముసుగు_బిట్టు(బిట్టు);
 }
 
 /// Clears the given bit of a bignum.
-void APInt::tcClearBit(WordType *parts, unsigned bit) {
-  parts[whichWord(bit)] &= ~maskBit(bit);
+శూన్య APInt::tc_Clear_బిట్టు(మాట_Type *parts, గుర్తులేని బిట్టు) {
+  parts[which_మాట(బిట్టు)] &= ~ముసుగు_బిట్టు(బిట్టు);
 }
 
 /// Returns the bit number of the least significant set bit of a number.  If the
 /// input number has no bits set UINT_MAX is returned.
-unsigned APInt::tcLSB(const WordType *parts, unsigned n) {
-  for (unsigned i = 0; i < n; i++) {
-    if (parts[i] != 0) {
-      unsigned lsb = llvm::countr_zero(parts[i]);
-      return lsb + i * APINT_BITS_PER_WORD;
+గుర్తులేని APInt::tcLSB(స్థిరరాశి మాట_Type *parts, గుర్తులేని n) {
+  కొరకు (గుర్తులేని i = 0; i < n; i++) {
+    ఒకవేళ (parts[i] != 0) {
+      గుర్తులేని lsb = llvm::countr_zero(parts[i]);
+      తిరిగి lsb + i * APINT_బిట్లు_చొప్పున_మాట;
     }
   }
 
-  return UINT_MAX;
+  తిరిగి UINT_MAX;
 }
 
 /// Returns the bit number of the most significant set bit of a number.
 /// If the input number has no bits set UINT_MAX is returned.
-unsigned APInt::tcMSB(const WordType *parts, unsigned n) {
-  do {
+గుర్తులేని APInt::tcMSB(స్థిరరాశి మాట_Type *parts, గుర్తులేని n) {
+  చేయి {
     --n;
 
-    if (parts[n] != 0) {
-      static_assert(sizeof(parts[n]) <= sizeof(uint64_t));
-      unsigned msb = llvm::Log2_64(parts[n]);
+    ఒకవేళ (parts[n] != 0) {
+      static_assert(పరిమాణం(parts[n]) <= పరిమాణం(uint64_t));
+      గుర్తులేని msb = llvm::Log2_64(parts[n]);
 
-      return msb + n * APINT_BITS_PER_WORD;
+      తిరిగి msb + n * APINT_బిట్లు_చొప్పున_మాట;
     }
-  } while (n);
+  } అయితే (n);
 
-  return UINT_MAX;
+  తిరిగి UINT_MAX;
 }
 
 /// Copy the bit vector of width srcBITS from SRC, starting at bit srcLSB, to
 /// DST, of dstCOUNT parts, such that the bit srcLSB becomes the least
 /// significant bit of DST.  All high bits above srcBITS in DST are zero-filled.
 /// */
-void
-APInt::tcExtract(WordType *dst, unsigned dstCount, const WordType *src,
-                 unsigned srcBits, unsigned srcLSB) {
-  unsigned dstParts = (srcBits + APINT_BITS_PER_WORD - 1) / APINT_BITS_PER_WORD;
-  assert(dstParts <= dstCount);
+శూన్య
+APInt::tc_వెలికితీయి(మాట_Type *dst, గుర్తులేని dst_లెక్క, స్థిరరాశి మాట_Type *src,
+                 గుర్తులేని src_బిట్లు, గుర్తులేని srcLSB) {
+  గుర్తులేని dstParts = (src_బిట్లు + APINT_బిట్లు_చొప్పున_మాట - 1) / APINT_బిట్లు_చొప్పున_మాట;
+  ప్రతిజ్ఞా(dstParts <= dst_లెక్క);
 
-  unsigned firstSrcPart = srcLSB / APINT_BITS_PER_WORD;
-  tcAssign(dst, src + firstSrcPart, dstParts);
+  గుర్తులేని మొదటి_Src_Part = srcLSB / APINT_బిట్లు_చొప్పున_మాట;
+  tc_కేటాయించు(dst, src + మొదటి_Src_Part, dstParts);
 
-  unsigned shift = srcLSB % APINT_BITS_PER_WORD;
-  tcShiftRight(dst, dstParts, shift);
+  గుర్తులేని జరుపు = srcLSB % APINT_బిట్లు_చొప్పున_మాట;
+  tc_జరుపు_కుడి(dst, dstParts, జరుపు);
 
   // We now have (dstParts * APINT_BITS_PER_WORD - shift) bits from SRC
   // in DST.  If this is less that srcBits, append the rest, else
   // clear the high bits.
-  unsigned n = dstParts * APINT_BITS_PER_WORD - shift;
-  if (n < srcBits) {
-    WordType mask = lowBitMask (srcBits - n);
-    dst[dstParts - 1] |= ((src[firstSrcPart + dstParts] & mask)
-                          << n % APINT_BITS_PER_WORD);
-  } else if (n > srcBits) {
-    if (srcBits % APINT_BITS_PER_WORD)
-      dst[dstParts - 1] &= lowBitMask (srcBits % APINT_BITS_PER_WORD);
+  గుర్తులేని n = dstParts * APINT_బిట్లు_చొప్పున_మాట - జరుపు;
+  ఒకవేళ (n < src_బిట్లు) {
+    మాట_Type ముసుగు_2 = దిగువ_బిట్టు_ముసుగు (src_బిట్లు - n);
+    dst[dstParts - 1] |= ((src[మొదటి_Src_Part + dstParts] & ముసుగు_2)
+                          << n % APINT_బిట్లు_చొప్పున_మాట);
+  } లేకపోతే ఒకవేళ (n > src_బిట్లు) {
+    ఒకవేళ (src_బిట్లు % APINT_బిట్లు_చొప్పున_మాట)
+      dst[dstParts - 1] &= దిగువ_బిట్టు_ముసుగు (src_బిట్లు % APINT_బిట్లు_చొప్పున_మాట);
   }
 
   // Clear high parts.
-  while (dstParts < dstCount)
+  అయితే (dstParts < dst_లెక్క)
     dst[dstParts++] = 0;
 }
 
 //// DST += RHS + C where C is zero or one.  Returns the carry flag.
-APInt::WordType APInt::tcAdd(WordType *dst, const WordType *rhs,
-                             WordType c, unsigned parts) {
-  assert(c <= 1);
+APInt::మాట_Type APInt::tc_కూడు(మాట_Type *dst, స్థిరరాశి మాట_Type *rhs,
+                             మాట_Type c, గుర్తులేని parts) {
+  ప్రతిజ్ఞా(c <= 1);
 
-  for (unsigned i = 0; i < parts; i++) {
-    WordType l = dst[i];
-    if (c) {
+  కొరకు (గుర్తులేని i = 0; i < parts; i++) {
+    మాట_Type l = dst[i];
+    ఒకవేళ (c) {
       dst[i] += rhs[i] + 1;
       c = (dst[i] <= l);
-    } else {
+    } లేకపోతే {
       dst[i] += rhs[i];
       c = (dst[i] < l);
     }
   }
 
-  return c;
+  తిరిగి c;
 }
 
 /// This function adds a single "word" integer, src, to the multiple
 /// "word" integer array, dst[]. dst[] is modified to reflect the addition and
 /// 1 is returned if there is a carry out, otherwise 0 is returned.
 /// @returns the carry of the addition.
-APInt::WordType APInt::tcAddPart(WordType *dst, WordType src,
-                                 unsigned parts) {
-  for (unsigned i = 0; i < parts; ++i) {
+APInt::మాట_Type APInt::tc_కూడు_Part(మాట_Type *dst, మాట_Type src,
+                                 గుర్తులేని parts) {
+  కొరకు (గుర్తులేని i = 0; i < parts; ++i) {
     dst[i] += src;
-    if (dst[i] >= src)
-      return 0; // No need to carry so exit early.
+    ఒకవేళ (dst[i] >= src)
+      తిరిగి 0; // No need to carry so exit early.
     src = 1; // Carry one to next digit.
   }
 
-  return 1;
+  తిరిగి 1;
 }
 
 /// DST -= RHS + C where C is zero or one.  Returns the carry flag.
-APInt::WordType APInt::tcSubtract(WordType *dst, const WordType *rhs,
-                                  WordType c, unsigned parts) {
-  assert(c <= 1);
+APInt::మాట_Type APInt::tc_వ్యవకలనం(మాట_Type *dst, స్థిరరాశి మాట_Type *rhs,
+                                  మాట_Type c, గుర్తులేని parts) {
+  ప్రతిజ్ఞా(c <= 1);
 
-  for (unsigned i = 0; i < parts; i++) {
-    WordType l = dst[i];
-    if (c) {
+  కొరకు (గుర్తులేని i = 0; i < parts; i++) {
+    మాట_Type l = dst[i];
+    ఒకవేళ (c) {
       dst[i] -= rhs[i] + 1;
       c = (dst[i] >= l);
-    } else {
+    } లేకపోతే {
       dst[i] -= rhs[i];
       c = (dst[i] > l);
     }
   }
 
-  return c;
+  తిరిగి c;
 }
 
 /// This function subtracts a single "word" (64-bit word), src, from
@@ -2537,21 +2537,21 @@ APInt::WordType APInt::tcSubtract(WordType *dst, const WordType *rhs,
 /// exhausted. In other words, if src > dst then this function returns 1,
 /// otherwise 0.
 /// @returns the borrow out of the subtraction
-APInt::WordType APInt::tcSubtractPart(WordType *dst, WordType src,
-                                      unsigned parts) {
-  for (unsigned i = 0; i < parts; ++i) {
-    WordType Dst = dst[i];
+APInt::మాట_Type APInt::tc_వ్యవకలనం_Part(మాట_Type *dst, మాట_Type src,
+                                      గుర్తులేని parts) {
+  కొరకు (గుర్తులేని i = 0; i < parts; ++i) {
+    మాట_Type Dst = dst[i];
     dst[i] -= src;
-    if (src <= Dst)
-      return 0; // No need to borrow so exit early.
+    ఒకవేళ (src <= Dst)
+      తిరిగి 0; // No need to borrow so exit early.
     src = 1; // We have to "borrow 1" from next "word"
   }
 
-  return 1;
+  తిరిగి 1;
 }
 
 /// Negate a bignum in-place.
-void APInt::tcNegate(WordType *dst, unsigned parts) {
+శూన్య APInt::tcNegate(మాట_Type *dst, గుర్తులేని parts) {
   tcComplement(dst, parts);
   tcIncrement(dst, parts);
 }
@@ -2565,118 +2565,118 @@ void APInt::tcNegate(WordType *dst, unsigned parts) {
 /// DSTPARTS parts of the result, and if all of the omitted higher
 /// parts were zero return zero, otherwise overflow occurred and
 /// return one.
-int APInt::tcMultiplyPart(WordType *dst, const WordType *src,
-                          WordType multiplier, WordType carry,
-                          unsigned srcParts, unsigned dstParts,
-                          bool add) {
+పూర్ణాంకం APInt::tcMultiplyPart(మాట_Type *dst, స్థిరరాశి మాట_Type *src,
+                          మాట_Type multiplier, మాట_Type వాహకం,
+                          గుర్తులేని srcParts, గుర్తులేని dstParts,
+                          తార్కిక కూడు) {
   // Otherwise our writes of DST kill our later reads of SRC.
-  assert(dst <= src || dst >= src + srcParts);
-  assert(dstParts <= srcParts + 1);
+  ప్రతిజ్ఞా(dst <= src || dst >= src + srcParts);
+  ప్రతిజ్ఞా(dstParts <= srcParts + 1);
 
   // N loops; minimum of dstParts and srcParts.
-  unsigned n = std::min(dstParts, srcParts);
+  గుర్తులేని n = std::min(dstParts, srcParts);
 
-  for (unsigned i = 0; i < n; i++) {
+  కొరకు (గుర్తులేని i = 0; i < n; i++) {
     // [LOW, HIGH] = MULTIPLIER * SRC[i] + DST[i] + CARRY.
     // This cannot overflow, because:
     //   (n - 1) * (n - 1) + 2 (n - 1) = (n - 1) * (n + 1)
     // which is less than n^2.
-    WordType srcPart = src[i];
-    WordType low, mid, high;
-    if (multiplier == 0 || srcPart == 0) {
-      low = carry;
-      high = 0;
-    } else {
-      low = lowHalf(srcPart) * lowHalf(multiplier);
-      high = highHalf(srcPart) * highHalf(multiplier);
+    మాట_Type srcPart = src[i];
+    మాట_Type దిగువ, mid, ఎగువ;
+    ఒకవేళ (multiplier == 0 || srcPart == 0) {
+      దిగువ = వాహకం;
+      ఎగువ = 0;
+    } లేకపోతే {
+      దిగువ = దిగువ_Half(srcPart) * దిగువ_Half(multiplier);
+      ఎగువ = ఎగువ_Half(srcPart) * ఎగువ_Half(multiplier);
 
-      mid = lowHalf(srcPart) * highHalf(multiplier);
-      high += highHalf(mid);
-      mid <<= APINT_BITS_PER_WORD / 2;
-      if (low + mid < low)
-        high++;
-      low += mid;
+      mid = దిగువ_Half(srcPart) * ఎగువ_Half(multiplier);
+      ఎగువ += ఎగువ_Half(mid);
+      mid <<= APINT_బిట్లు_చొప్పున_మాట / 2;
+      ఒకవేళ (దిగువ + mid < దిగువ)
+        ఎగువ++;
+      దిగువ += mid;
 
-      mid = highHalf(srcPart) * lowHalf(multiplier);
-      high += highHalf(mid);
-      mid <<= APINT_BITS_PER_WORD / 2;
-      if (low + mid < low)
-        high++;
-      low += mid;
+      mid = ఎగువ_Half(srcPart) * దిగువ_Half(multiplier);
+      ఎగువ += ఎగువ_Half(mid);
+      mid <<= APINT_బిట్లు_చొప్పున_మాట / 2;
+      ఒకవేళ (దిగువ + mid < దిగువ)
+        ఎగువ++;
+      దిగువ += mid;
 
       // Now add carry.
-      if (low + carry < low)
-        high++;
-      low += carry;
+      ఒకవేళ (దిగువ + వాహకం < దిగువ)
+        ఎగువ++;
+      దిగువ += వాహకం;
     }
 
-    if (add) {
+    ఒకవేళ (కూడు) {
       // And now DST[i], and store the new low part there.
-      if (low + dst[i] < low)
-        high++;
-      dst[i] += low;
-    } else {
-      dst[i] = low;
+      ఒకవేళ (దిగువ + dst[i] < దిగువ)
+        ఎగువ++;
+      dst[i] += దిగువ;
+    } లేకపోతే {
+      dst[i] = దిగువ;
     }
 
-    carry = high;
+    వాహకం = ఎగువ;
   }
 
-  if (srcParts < dstParts) {
+  ఒకవేళ (srcParts < dstParts) {
     // Full multiplication, there is no overflow.
-    assert(srcParts + 1 == dstParts);
-    dst[srcParts] = carry;
-    return 0;
+    ప్రతిజ్ఞా(srcParts + 1 == dstParts);
+    dst[srcParts] = వాహకం;
+    తిరిగి 0;
   }
 
   // We overflowed if there is carry.
-  if (carry)
-    return 1;
+  ఒకవేళ (వాహకం)
+    తిరిగి 1;
 
   // We would overflow if any significant unwritten parts would be
   // non-zero.  This is true if any remaining src parts are non-zero
   // and the multiplier is non-zero.
-  if (multiplier)
-    for (unsigned i = dstParts; i < srcParts; i++)
-      if (src[i])
-        return 1;
+  ఒకవేళ (multiplier)
+    కొరకు (గుర్తులేని i = dstParts; i < srcParts; i++)
+      ఒకవేళ (src[i])
+        తిరిగి 1;
 
   // We fitted in the narrow destination.
-  return 0;
+  తిరిగి 0;
 }
 
 /// DST = LHS * RHS, where DST has the same width as the operands and
 /// is filled with the least significant parts of the result.  Returns
 /// one if overflow occurred, otherwise zero.  DST must be disjoint
 /// from both operands.
-int APInt::tcMultiply(WordType *dst, const WordType *lhs,
-                      const WordType *rhs, unsigned parts) {
-  assert(dst != lhs && dst != rhs);
+పూర్ణాంకం APInt::tcMultiply(మాట_Type *dst, స్థిరరాశి మాట_Type *lhs,
+                      స్థిరరాశి మాట_Type *rhs, గుర్తులేని parts) {
+  ప్రతిజ్ఞా(dst != lhs && dst != rhs);
 
-  int overflow = 0;
+  పూర్ణాంకం అధికప్రవాహం_2 = 0;
 
-  for (unsigned i = 0; i < parts; i++) {
+  కొరకు (గుర్తులేని i = 0; i < parts; i++) {
     // Don't accumulate on the first iteration so we don't need to initalize
     // dst to 0.
-    overflow |=
+    అధికప్రవాహం_2 |=
         tcMultiplyPart(&dst[i], lhs, rhs[i], 0, parts, parts - i, i != 0);
   }
 
-  return overflow;
+  తిరిగి అధికప్రవాహం_2;
 }
 
 /// DST = LHS * RHS, where DST has width the sum of the widths of the
 /// operands. No overflow occurs. DST must be disjoint from both operands.
-void APInt::tcFullMultiply(WordType *dst, const WordType *lhs,
-                           const WordType *rhs, unsigned lhsParts,
-                           unsigned rhsParts) {
+శూన్య APInt::tc_నిండిన_Multiply(మాట_Type *dst, స్థిరరాశి మాట_Type *lhs,
+                           స్థిరరాశి మాట_Type *rhs, గుర్తులేని lhsParts,
+                           గుర్తులేని rhsParts) {
   // Put the narrower number on the LHS for less loops below.
-  if (lhsParts > rhsParts)
-    return tcFullMultiply (dst, rhs, lhs, rhsParts, lhsParts);
+  ఒకవేళ (lhsParts > rhsParts)
+    తిరిగి tc_నిండిన_Multiply (dst, rhs, lhs, rhsParts, lhsParts);
 
-  assert(dst != lhs && dst != rhs);
+  ప్రతిజ్ఞా(dst != lhs && dst != rhs);
 
-  for (unsigned i = 0; i < lhsParts; i++) {
+  కొరకు (గుర్తులేని i = 0; i < lhsParts; i++) {
     // Don't accumulate on the first iteration so we don't need to initalize
     // dst to 0.
     tcMultiplyPart(&dst[i], rhs, lhs[i], 0, rhsParts, rhsParts + 1, i != 0);
@@ -2692,176 +2692,176 @@ void APInt::tcFullMultiply(WordType *dst, const WordType *lhs,
 // SCRATCH is a bignum of the same size as the operands and result for
 // use by the routine; its contents need not be initialized and are
 // destroyed.  LHS, REMAINDER and SCRATCH must be distinct.
-int APInt::tcDivide(WordType *lhs, const WordType *rhs,
-                    WordType *remainder, WordType *srhs,
-                    unsigned parts) {
-  assert(lhs != remainder && lhs != srhs && remainder != srhs);
+పూర్ణాంకం APInt::tcDivide(మాట_Type *lhs, స్థిరరాశి మాట_Type *rhs,
+                    మాట_Type *remainder, మాట_Type *srhs,
+                    గుర్తులేని parts) {
+  ప్రతిజ్ఞా(lhs != remainder && lhs != srhs && remainder != srhs);
 
-  unsigned shiftCount = tcMSB(rhs, parts) + 1;
-  if (shiftCount == 0)
-    return true;
+  గుర్తులేని జరుపు_లెక్క = tcMSB(rhs, parts) + 1;
+  ఒకవేళ (జరుపు_లెక్క == 0)
+    తిరిగి నిజం;
 
-  shiftCount = parts * APINT_BITS_PER_WORD - shiftCount;
-  unsigned n = shiftCount / APINT_BITS_PER_WORD;
-  WordType mask = (WordType) 1 << (shiftCount % APINT_BITS_PER_WORD);
+  జరుపు_లెక్క = parts * APINT_బిట్లు_చొప్పున_మాట - జరుపు_లెక్క;
+  గుర్తులేని n = జరుపు_లెక్క / APINT_బిట్లు_చొప్పున_మాట;
+  మాట_Type ముసుగు_2 = (మాట_Type) 1 << (జరుపు_లెక్క % APINT_బిట్లు_చొప్పున_మాట);
 
-  tcAssign(srhs, rhs, parts);
-  tcShiftLeft(srhs, parts, shiftCount);
-  tcAssign(remainder, lhs, parts);
-  tcSet(lhs, 0, parts);
+  tc_కేటాయించు(srhs, rhs, parts);
+  tc_జరుపు_ఎడమ(srhs, parts, జరుపు_లెక్క);
+  tc_కేటాయించు(remainder, lhs, parts);
+  tc_సమితి(lhs, 0, parts);
 
   // Loop, subtracting SRHS if REMAINDER is greater and adding that to the
   // total.
-  for (;;) {
-    int compare = tcCompare(remainder, srhs, parts);
-    if (compare >= 0) {
-      tcSubtract(remainder, srhs, 0, parts);
-      lhs[n] |= mask;
+  కొరకు (;;) {
+    పూర్ణాంకం compare = tcCompare(remainder, srhs, parts);
+    ఒకవేళ (compare >= 0) {
+      tc_వ్యవకలనం(remainder, srhs, 0, parts);
+      lhs[n] |= ముసుగు_2;
     }
 
-    if (shiftCount == 0)
-      break;
-    shiftCount--;
-    tcShiftRight(srhs, parts, 1);
-    if ((mask >>= 1) == 0) {
-      mask = (WordType) 1 << (APINT_BITS_PER_WORD - 1);
+    ఒకవేళ (జరుపు_లెక్క == 0)
+      ఆపు;
+    జరుపు_లెక్క--;
+    tc_జరుపు_కుడి(srhs, parts, 1);
+    ఒకవేళ ((ముసుగు_2 >>= 1) == 0) {
+      ముసుగు_2 = (మాట_Type) 1 << (APINT_బిట్లు_చొప్పున_మాట - 1);
       n--;
     }
   }
 
-  return false;
+  తిరిగి అబద్ధం;
 }
 
 /// Shift a bignum left Count bits in-place. Shifted in bits are zero. There are
 /// no restrictions on Count.
-void APInt::tcShiftLeft(WordType *Dst, unsigned Words, unsigned Count) {
+శూన్య APInt::tc_జరుపు_ఎడమ(మాట_Type *Dst, గుర్తులేని పదాలు_2, గుర్తులేని లెక్క_2) {
   // Don't bother performing a no-op shift.
-  if (!Count)
-    return;
+  ఒకవేళ (!లెక్క_2)
+    తిరిగి;
 
   // WordShift is the inter-part shift; BitShift is the intra-part shift.
-  unsigned WordShift = std::min(Count / APINT_BITS_PER_WORD, Words);
-  unsigned BitShift = Count % APINT_BITS_PER_WORD;
+  గుర్తులేని మాట_జరుపు = std::min(లెక్క_2 / APINT_బిట్లు_చొప్పున_మాట, పదాలు_2);
+  గుర్తులేని బిట్టు_జరుపు = లెక్క_2 % APINT_బిట్లు_చొప్పున_మాట;
 
   // Fastpath for moving by whole words.
-  if (BitShift == 0) {
-    std::memmove(Dst + WordShift, Dst, (Words - WordShift) * APINT_WORD_SIZE);
-  } else {
-    while (Words-- > WordShift) {
-      Dst[Words] = Dst[Words - WordShift] << BitShift;
-      if (Words > WordShift)
-        Dst[Words] |=
-          Dst[Words - WordShift - 1] >> (APINT_BITS_PER_WORD - BitShift);
+  ఒకవేళ (బిట్టు_జరుపు == 0) {
+    std::memmove(Dst + మాట_జరుపు, Dst, (పదాలు_2 - మాట_జరుపు) * APINT_మాట_కొలత);
+  } లేకపోతే {
+    అయితే (పదాలు_2-- > మాట_జరుపు) {
+      Dst[పదాలు_2] = Dst[పదాలు_2 - మాట_జరుపు] << బిట్టు_జరుపు;
+      ఒకవేళ (పదాలు_2 > మాట_జరుపు)
+        Dst[పదాలు_2] |=
+          Dst[పదాలు_2 - మాట_జరుపు - 1] >> (APINT_బిట్లు_చొప్పున_మాట - బిట్టు_జరుపు);
     }
   }
 
   // Fill in the remainder with 0s.
-  std::memset(Dst, 0, WordShift * APINT_WORD_SIZE);
+  std::memset(Dst, 0, మాట_జరుపు * APINT_మాట_కొలత);
 }
 
 /// Shift a bignum right Count bits in-place. Shifted in bits are zero. There
 /// are no restrictions on Count.
-void APInt::tcShiftRight(WordType *Dst, unsigned Words, unsigned Count) {
+శూన్య APInt::tc_జరుపు_కుడి(మాట_Type *Dst, గుర్తులేని పదాలు_2, గుర్తులేని లెక్క_2) {
   // Don't bother performing a no-op shift.
-  if (!Count)
-    return;
+  ఒకవేళ (!లెక్క_2)
+    తిరిగి;
 
   // WordShift is the inter-part shift; BitShift is the intra-part shift.
-  unsigned WordShift = std::min(Count / APINT_BITS_PER_WORD, Words);
-  unsigned BitShift = Count % APINT_BITS_PER_WORD;
+  గుర్తులేని మాట_జరుపు = std::min(లెక్క_2 / APINT_బిట్లు_చొప్పున_మాట, పదాలు_2);
+  గుర్తులేని బిట్టు_జరుపు = లెక్క_2 % APINT_బిట్లు_చొప్పున_మాట;
 
-  unsigned WordsToMove = Words - WordShift;
+  గుర్తులేని పదాలు_గమ్యం_Move = పదాలు_2 - మాట_జరుపు;
   // Fastpath for moving by whole words.
-  if (BitShift == 0) {
-    std::memmove(Dst, Dst + WordShift, WordsToMove * APINT_WORD_SIZE);
-  } else {
-    for (unsigned i = 0; i != WordsToMove; ++i) {
-      Dst[i] = Dst[i + WordShift] >> BitShift;
-      if (i + 1 != WordsToMove)
-        Dst[i] |= Dst[i + WordShift + 1] << (APINT_BITS_PER_WORD - BitShift);
+  ఒకవేళ (బిట్టు_జరుపు == 0) {
+    std::memmove(Dst, Dst + మాట_జరుపు, పదాలు_గమ్యం_Move * APINT_మాట_కొలత);
+  } లేకపోతే {
+    కొరకు (గుర్తులేని i = 0; i != పదాలు_గమ్యం_Move; ++i) {
+      Dst[i] = Dst[i + మాట_జరుపు] >> బిట్టు_జరుపు;
+      ఒకవేళ (i + 1 != పదాలు_గమ్యం_Move)
+        Dst[i] |= Dst[i + మాట_జరుపు + 1] << (APINT_బిట్లు_చొప్పున_మాట - బిట్టు_జరుపు);
     }
   }
 
   // Fill in the remainder with 0s.
-  std::memset(Dst + WordsToMove, 0, WordShift * APINT_WORD_SIZE);
+  std::memset(Dst + పదాలు_గమ్యం_Move, 0, మాట_జరుపు * APINT_మాట_కొలత);
 }
 
 // Comparison (unsigned) of two bignums.
-int APInt::tcCompare(const WordType *lhs, const WordType *rhs,
-                     unsigned parts) {
-  while (parts) {
+పూర్ణాంకం APInt::tcCompare(స్థిరరాశి మాట_Type *lhs, స్థిరరాశి మాట_Type *rhs,
+                     గుర్తులేని parts) {
+  అయితే (parts) {
     parts--;
-    if (lhs[parts] != rhs[parts])
-      return (lhs[parts] > rhs[parts]) ? 1 : -1;
+    ఒకవేళ (lhs[parts] != rhs[parts])
+      తిరిగి (lhs[parts] > rhs[parts]) ? 1 : -1;
   }
 
-  return 0;
+  తిరిగి 0;
 }
 
-APInt llvm::APIntOps::RoundingUDiv(const APInt &A, const APInt &B,
+APInt llvm::APIntOps::RoundingUDiv(స్థిరరాశి APInt &A, స్థిరరాశి APInt &B,
                                    APInt::Rounding RM) {
   // Currently udivrem always rounds down.
-  switch (RM) {
-  case APInt::Rounding::DOWN:
-  case APInt::Rounding::TOWARD_ZERO:
-    return A.udiv(B);
-  case APInt::Rounding::UP: {
+  ఎంపిక (RM) {
+  స్థితి APInt::Rounding::కిందికి:
+  స్థితి APInt::Rounding::TOWARD_ZERO:
+    తిరిగి A.udiv(B);
+  స్థితి APInt::Rounding::పైకి: {
     APInt Quo, Rem;
     APInt::udivrem(A, B, Quo, Rem);
-    if (Rem.isZero())
-      return Quo;
-    return Quo + 1;
+    ఒకవేళ (Rem.isZero())
+      తిరిగి Quo;
+    తిరిగి Quo + 1;
   }
   }
   llvm_unreachable("Unknown APInt::Rounding enum");
 }
 
-APInt llvm::APIntOps::RoundingSDiv(const APInt &A, const APInt &B,
+APInt llvm::APIntOps::RoundingSDiv(స్థిరరాశి APInt &A, స్థిరరాశి APInt &B,
                                    APInt::Rounding RM) {
-  switch (RM) {
-  case APInt::Rounding::DOWN:
-  case APInt::Rounding::UP: {
+  ఎంపిక (RM) {
+  స్థితి APInt::Rounding::కిందికి:
+  స్థితి APInt::Rounding::పైకి: {
     APInt Quo, Rem;
     APInt::sdivrem(A, B, Quo, Rem);
-    if (Rem.isZero())
-      return Quo;
+    ఒకవేళ (Rem.isZero())
+      తిరిగి Quo;
     // This algorithm deals with arbitrary rounding mode used by sdivrem.
     // We want to check whether the non-integer part of the mathematical value
     // is negative or not. If the non-integer part is negative, we need to round
     // down from Quo; otherwise, if it's positive or 0, we return Quo, as it's
     // already rounded down.
-    if (RM == APInt::Rounding::DOWN) {
-      if (Rem.isNegative() != B.isNegative())
-        return Quo - 1;
-      return Quo;
+    ఒకవేళ (RM == APInt::Rounding::కిందికి) {
+      ఒకవేళ (Rem.isNegative() != B.isNegative())
+        తిరిగి Quo - 1;
+      తిరిగి Quo;
     }
-    if (Rem.isNegative() != B.isNegative())
-      return Quo;
-    return Quo + 1;
+    ఒకవేళ (Rem.isNegative() != B.isNegative())
+      తిరిగి Quo;
+    తిరిగి Quo + 1;
   }
   // Currently sdiv rounds towards zero.
-  case APInt::Rounding::TOWARD_ZERO:
-    return A.sdiv(B);
+  స్థితి APInt::Rounding::TOWARD_ZERO:
+    తిరిగి A.sdiv(B);
   }
   llvm_unreachable("Unknown APInt::Rounding enum");
 }
 
 std::optional<APInt>
 llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
-                                           unsigned RangeWidth) {
-  unsigned CoeffWidth = A.getBitWidth();
-  assert(CoeffWidth == B.getBitWidth() && CoeffWidth == C.getBitWidth());
-  assert(RangeWidth <= CoeffWidth &&
+                                           గుర్తులేని Range_వెడల్పు) {
+  గుర్తులేని Coeff_వెడల్పు = A.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(Coeff_వెడల్పు == B.get_బిట్టు_వెడల్పు() && Coeff_వెడల్పు == C.get_బిట్టు_వెడల్పు());
+  ప్రతిజ్ఞా(Range_వెడల్పు <= Coeff_వెడల్పు &&
          "Value range width should be less than coefficient width");
-  assert(RangeWidth > 1 && "Value range bit width should be > 1");
+  ప్రతిజ్ఞా(Range_వెడల్పు > 1 && "Value range bit width should be > 1");
 
   LLVM_DEBUG(dbgs() << __func__ << ": solving " << A << "x^2 + " << B
-                    << "x + " << C << ", rw:" << RangeWidth << '\n');
+                    << "x + " << C << ", rw:" << Range_వెడల్పు << '\n');
 
   // Identify 0 as a (non)solution immediately.
-  if (C.sextOrTrunc(RangeWidth).isZero()) {
+  ఒకవేళ (C.sextOrTrunc(Range_వెడల్పు).isZero()) {
     LLVM_DEBUG(dbgs() << __func__ << ": zero solution\n");
-    return APInt(CoeffWidth, 0);
+    తిరిగి APInt(Coeff_వెడల్పు, 0);
   }
 
   // The result of APInt arithmetic has the same bit width as the operands,
@@ -2878,14 +2878,14 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // used to solve the equation is based on the standard formula for real
   // numbers, and uses the concepts of "positive" and "negative" with their
   // usual meanings.
-  CoeffWidth *= 3;
-  A = A.sext(CoeffWidth);
-  B = B.sext(CoeffWidth);
-  C = C.sext(CoeffWidth);
+  Coeff_వెడల్పు *= 3;
+  A = A.sext(Coeff_వెడల్పు);
+  B = B.sext(Coeff_వెడల్పు);
+  C = C.sext(Coeff_వెడల్పు);
 
   // Make A > 0 for simplicity. Negate cannot overflow at this point because
   // the bit width has increased.
-  if (A.isNegative()) {
+  ఒకవేళ (A.isNegative()) {
     A.negate();
     B.negate();
     C.negate();
@@ -2913,52 +2913,52 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // of solving q(x) = kR to solving shifted_q(x) = 0.
   // (The interesting solutions are the ceilings of the real number
   // solutions.)
-  APInt R = APInt::getOneBitSet(CoeffWidth, RangeWidth);
+  APInt R = APInt::get_One_బిట్టు_సమితి(Coeff_వెడల్పు, Range_వెడల్పు);
   APInt TwoA = 2 * A;
   APInt SqrB = B * B;
-  bool PickLow;
+  తార్కిక Pick_దిగువ;
 
-  auto RoundUp = [] (const APInt &V, const APInt &A) -> APInt {
-    assert(A.isStrictlyPositive());
-    APInt T = V.abs().urem(A);
-    if (T.isZero())
-      return V;
-    return V.isNegative() ? V+T : V+(A-T);
+  స్వయంచాలక విడత_పైకి_2 = [] (స్థిరరాశి APInt &V, స్థిరరాశి APInt &A) -> APInt {
+    ప్రతిజ్ఞా(A.is_Strictly_ధనాత్మక());
+    APInt T = V.నిరపేక్ష().urem(A);
+    ఒకవేళ (T.isZero())
+      తిరిగి V;
+    తిరిగి V.isNegative() ? V+T : V+(A-T);
   };
 
   // The vertex of the parabola is at -B/2A, but since A > 0, it's negative
   // iff B is positive.
-  if (B.isNonNegative()) {
+  ఒకవేళ (B.isNonNegative()) {
     // If B >= 0, the vertex it at a negative location (or at 0), so in
     // order to have a non-negative solution we need to pick k that makes
     // C-kR negative. To satisfy all the requirements for the solution
     // that we are looking for, it needs to be closest to 0 of all k.
     C = C.srem(R);
-    if (C.isStrictlyPositive())
+    ఒకవేళ (C.is_Strictly_ధనాత్మక())
       C -= R;
     // Pick the greater solution.
-    PickLow = false;
-  } else {
+    Pick_దిగువ = అబద్ధం;
+  } లేకపోతే {
     // If B < 0, the vertex is at a positive location. For any solution
     // to exist, the discriminant must be non-negative. This means that
     // C-kR <= B^2/4A is a necessary condition for k, i.e. there is a
     // lower bound on values of k: kR >= C - B^2/4A.
     APInt LowkR = C - SqrB.udiv(2*TwoA); // udiv because all values > 0.
     // Round LowkR up (towards +inf) to the nearest kR.
-    LowkR = RoundUp(LowkR, R);
+    LowkR = విడత_పైకి_2(LowkR, R);
 
     // If there exists k meeting the condition above, and such that
     // C-kR > 0, there will be two positive real number solutions of
     // q(x) = kR. Out of all such values of k, pick the one that makes
     // C-kR closest to 0, (i.e. pick maximum k such that C-kR > 0).
     // In other words, find maximum k such that LowkR <= kR < C.
-    if (C.sgt(LowkR)) {
+    ఒకవేళ (C.sgt(LowkR)) {
       // If LowkR < C, then such a k is guaranteed to exist because
       // LowkR itself is a multiple of R.
-      C -= -RoundUp(-C, R);      // C = C - RoundDown(C, R)
+      C -= -విడత_పైకి_2(-C, R);      // C = C - RoundDown(C, R)
       // Pick the smaller solution.
-      PickLow = true;
-    } else {
+      Pick_దిగువ = నిజం;
+    } లేకపోతే {
       // If C-kR < 0 for all potential k's, it means that one solution
       // will be negative, while the other will be positive. The positive
       // solution will shift towards 0 if the parabola is moved up.
@@ -2968,19 +2968,19 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
       // Since LowkR is itself a multiple of R, simply take C-LowkR.
       C -= LowkR;
       // Pick the greater solution.
-      PickLow = false;
+      Pick_దిగువ = అబద్ధం;
     }
   }
 
   LLVM_DEBUG(dbgs() << __func__ << ": updated coefficients " << A << "x^2 + "
-                    << B << "x + " << C << ", rw:" << RangeWidth << '\n');
+                    << B << "x + " << C << ", rw:" << Range_వెడల్పు << '\n');
 
   APInt D = SqrB - 4*A*C;
-  assert(D.isNonNegative() && "Negative discriminant");
+  ప్రతిజ్ఞా(D.isNonNegative() && "Negative discriminant");
   APInt SQ = D.sqrtFloor();
 
   APInt Q = SQ * SQ;
-  bool InexactSQ = Q != D;
+  తార్కిక InexactSQ = Q != D;
 
   APInt X;
   APInt Rem;
@@ -2991,22 +2991,22 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // To make sure that the calculated root is not greater than the exact
   // one, subtract SQ+1 when calculating the low root (for inexact value
   // of SQ).
-  if (PickLow)
+  ఒకవేళ (Pick_దిగువ)
     APInt::sdivrem(-B - (SQ+InexactSQ), TwoA, X, Rem);
-  else
+  లేకపోతే
     APInt::sdivrem(-B + SQ, TwoA, X, Rem);
 
   // The updated coefficients should be such that the (exact) solution is
   // positive. Since APInt division rounds towards 0, the calculated one
   // can be 0, but cannot be negative.
-  assert(X.isNonNegative() && "Solution should be non-negative");
+  ప్రతిజ్ఞా(X.isNonNegative() && "Solution should be non-negative");
 
-  if (!InexactSQ && Rem.isZero()) {
+  ఒకవేళ (!InexactSQ && Rem.isZero()) {
     LLVM_DEBUG(dbgs() << __func__ << ": solution (root): " << X << '\n');
-    return X;
+    తిరిగి X;
   }
 
-  assert((SQ*SQ).sle(D) && "SQ = |_sqrt(D)_|, so SQ*SQ <= D");
+  ప్రతిజ్ఞా((SQ*SQ).sle(D) && "SQ = |_sqrt(D)_|, so SQ*SQ <= D");
   // The exact value of the square root of D should be between SQ and SQ+1.
   // This implies that the solution should be between that corresponding to
   // SQ (i.e. X) and that corresponding to SQ+1.
@@ -3017,257 +3017,257 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
 
   APInt VX = (A*X + B)*X + C;
   APInt VY = VX + TwoA*X + A + B;
-  bool SignChange =
+  తార్కిక SignChange =
       VX.isNegative() != VY.isNegative() || VX.isZero() != VY.isZero();
   // If the sign did not change between X and X+1, X is not a valid solution.
   // This could happen when the actual (exact) roots don't have an integer
   // between them, so they would both be contained between X and X+1.
-  if (!SignChange) {
+  ఒకవేళ (!SignChange) {
     LLVM_DEBUG(dbgs() << __func__ << ": no valid solution\n");
-    return std::nullopt;
+    తిరిగి std::nullopt;
   }
 
   X += 1;
   LLVM_DEBUG(dbgs() << __func__ << ": solution (wrap): " << X << '\n');
-  return X;
+  తిరిగి X;
 }
 
-std::optional<unsigned>
-llvm::APIntOps::GetMostSignificantDifferentBit(const APInt &A, const APInt &B) {
-  assert(A.getBitWidth() == B.getBitWidth() && "Must have the same bitwidth");
-  if (A == B)
-    return std::nullopt;
-  return A.getBitWidth() - ((A ^ B).countl_zero() + 1);
+std::optional<గుర్తులేని>
+llvm::APIntOps::Get_Most_Significant_Different_బిట్టు(స్థిరరాశి APInt &A, స్థిరరాశి APInt &B) {
+  ప్రతిజ్ఞా(A.get_బిట్టు_వెడల్పు() == B.get_బిట్టు_వెడల్పు() && "Must have the same bitwidth");
+  ఒకవేళ (A == B)
+    తిరిగి std::nullopt;
+  తిరిగి A.get_బిట్టు_వెడల్పు() - ((A ^ B).countl_zero() + 1);
 }
 
-APInt llvm::APIntOps::ScaleBitMask(const APInt &A, unsigned NewBitWidth,
-                                   bool MatchAllBits) {
-  unsigned OldBitWidth = A.getBitWidth();
-  assert((((OldBitWidth % NewBitWidth) == 0) ||
-          ((NewBitWidth % OldBitWidth) == 0)) &&
+APInt llvm::APIntOps::Scale_బిట్టు_ముసుగు(స్థిరరాశి APInt &A, గుర్తులేని New_బిట్టు_వెడల్పు,
+                                   తార్కిక సరిపోలిక_All_బిట్లు) {
+  గుర్తులేని Old_బిట్టు_వెడల్పు = A.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా((((Old_బిట్టు_వెడల్పు % New_బిట్టు_వెడల్పు) == 0) ||
+          ((New_బిట్టు_వెడల్పు % Old_బిట్టు_వెడల్పు) == 0)) &&
          "One size should be a multiple of the other one. "
          "Can't do fractional scaling.");
 
   // Check for matching bitwidths.
-  if (OldBitWidth == NewBitWidth)
-    return A;
+  ఒకవేళ (Old_బిట్టు_వెడల్పు == New_బిట్టు_వెడల్పు)
+    తిరిగి A;
 
-  APInt NewA = APInt::getZero(NewBitWidth);
+  APInt NewA = APInt::getZero(New_బిట్టు_వెడల్పు);
 
   // Check for null input.
-  if (A.isZero())
-    return NewA;
+  ఒకవేళ (A.isZero())
+    తిరిగి NewA;
 
-  if (NewBitWidth > OldBitWidth) {
+  ఒకవేళ (New_బిట్టు_వెడల్పు > Old_బిట్టు_వెడల్పు) {
     // Repeat bits.
-    unsigned Scale = NewBitWidth / OldBitWidth;
-    for (unsigned i = 0; i != OldBitWidth; ++i)
-      if (A[i])
-        NewA.setBits(i * Scale, (i + 1) * Scale);
-  } else {
-    unsigned Scale = OldBitWidth / NewBitWidth;
-    for (unsigned i = 0; i != NewBitWidth; ++i) {
-      if (MatchAllBits) {
-        if (A.extractBits(Scale, i * Scale).isAllOnes())
-          NewA.setBit(i);
-      } else {
-        if (!A.extractBits(Scale, i * Scale).isZero())
-          NewA.setBit(i);
+    గుర్తులేని Scale = New_బిట్టు_వెడల్పు / Old_బిట్టు_వెడల్పు;
+    కొరకు (గుర్తులేని i = 0; i != Old_బిట్టు_వెడల్పు; ++i)
+      ఒకవేళ (A[i])
+        NewA.సమితి_బిట్లు(i * Scale, (i + 1) * Scale);
+  } లేకపోతే {
+    గుర్తులేని Scale = Old_బిట్టు_వెడల్పు / New_బిట్టు_వెడల్పు;
+    కొరకు (గుర్తులేని i = 0; i != New_బిట్టు_వెడల్పు; ++i) {
+      ఒకవేళ (సరిపోలిక_All_బిట్లు) {
+        ఒకవేళ (A.వెలికితీయి_బిట్లు(Scale, i * Scale).isAllOnes())
+          NewA.సమితి_బిట్టు(i);
+      } లేకపోతే {
+        ఒకవేళ (!A.వెలికితీయి_బిట్లు(Scale, i * Scale).isZero())
+          NewA.సమితి_బిట్టు(i);
       }
     }
   }
 
-  return NewA;
+  తిరిగి NewA;
 }
 
 /// StoreIntToMemory - Fills the StoreBytes bytes of memory starting from Dst
 /// with the integer held in IntVal.
-void llvm::StoreIntToMemory(const APInt &IntVal, uint8_t *Dst,
-                            unsigned StoreBytes) {
-  assert((IntVal.getBitWidth()+7)/8 >= StoreBytes && "Integer too small!");
-  const uint8_t *Src = (const uint8_t *)IntVal.getRawData();
+శూన్య llvm::Store_Int_గమ్యం_జ్ఞాపకం(స్థిరరాశి APInt &IntVal, uint8_t *Dst,
+                            గుర్తులేని Store_బైట్లు) {
+  ప్రతిజ్ఞా((IntVal.get_బిట్టు_వెడల్పు()+7)/8 >= Store_బైట్లు && "Integer too small!");
+  స్థిరరాశి uint8_t *Src = (స్థిరరాశి uint8_t *)IntVal.get_Raw_దత్తాంశం();
 
-  if (sys::IsLittleEndianHost) {
+  ఒకవేళ (sys::IsLittleEndianHost) {
     // Little-endian host - the source is ordered from LSB to MSB.  Order the
     // destination from LSB to MSB: Do a straight copy.
-    memcpy(Dst, Src, StoreBytes);
-  } else {
+    జ్ఞాపకం_నకలు(Dst, Src, Store_బైట్లు);
+  } లేకపోతే {
     // Big-endian host - the source is an array of 64 bit words ordered from
     // LSW to MSW.  Each word is ordered from MSB to LSB.  Order the destination
     // from MSB to LSB: Reverse the word order, but not the bytes in a word.
-    while (StoreBytes > sizeof(uint64_t)) {
-      StoreBytes -= sizeof(uint64_t);
+    అయితే (Store_బైట్లు > పరిమాణం(uint64_t)) {
+      Store_బైట్లు -= పరిమాణం(uint64_t);
       // May not be aligned so use memcpy.
-      memcpy(Dst + StoreBytes, Src, sizeof(uint64_t));
-      Src += sizeof(uint64_t);
+      జ్ఞాపకం_నకలు(Dst + Store_బైట్లు, Src, పరిమాణం(uint64_t));
+      Src += పరిమాణం(uint64_t);
     }
 
-    memcpy(Dst, Src + sizeof(uint64_t) - StoreBytes, StoreBytes);
+    జ్ఞాపకం_నకలు(Dst, Src + పరిమాణం(uint64_t) - Store_బైట్లు, Store_బైట్లు);
   }
 }
 
 /// LoadIntFromMemory - Loads the integer stored in the LoadBytes bytes starting
 /// from Src into IntVal, which is assumed to be wide enough and to hold zero.
-void llvm::LoadIntFromMemory(APInt &IntVal, const uint8_t *Src,
-                             unsigned LoadBytes) {
-  assert((IntVal.getBitWidth()+7)/8 >= LoadBytes && "Integer too small!");
+శూన్య llvm::ఎక్కించు_Int_From_జ్ఞాపకం(APInt &IntVal, స్థిరరాశి uint8_t *Src,
+                             గుర్తులేని ఎక్కించు_బైట్లు) {
+  ప్రతిజ్ఞా((IntVal.get_బిట్టు_వెడల్పు()+7)/8 >= ఎక్కించు_బైట్లు && "Integer too small!");
   uint8_t *Dst = reinterpret_cast<uint8_t *>(
-                   const_cast<uint64_t *>(IntVal.getRawData()));
+                   const_cast<uint64_t *>(IntVal.get_Raw_దత్తాంశం()));
 
-  if (sys::IsLittleEndianHost)
+  ఒకవేళ (sys::IsLittleEndianHost)
     // Little-endian host - the destination must be ordered from LSB to MSB.
     // The source is ordered from LSB to MSB: Do a straight copy.
-    memcpy(Dst, Src, LoadBytes);
-  else {
+    జ్ఞాపకం_నకలు(Dst, Src, ఎక్కించు_బైట్లు);
+  లేకపోతే {
     // Big-endian - the destination is an array of 64 bit words ordered from
     // LSW to MSW.  Each word must be ordered from MSB to LSB.  The source is
     // ordered from MSB to LSB: Reverse the word order, but not the bytes in
     // a word.
-    while (LoadBytes > sizeof(uint64_t)) {
-      LoadBytes -= sizeof(uint64_t);
+    అయితే (ఎక్కించు_బైట్లు > పరిమాణం(uint64_t)) {
+      ఎక్కించు_బైట్లు -= పరిమాణం(uint64_t);
       // May not be aligned so use memcpy.
-      memcpy(Dst, Src + LoadBytes, sizeof(uint64_t));
-      Dst += sizeof(uint64_t);
+      జ్ఞాపకం_నకలు(Dst, Src + ఎక్కించు_బైట్లు, పరిమాణం(uint64_t));
+      Dst += పరిమాణం(uint64_t);
     }
 
-    memcpy(Dst + sizeof(uint64_t) - LoadBytes, Src, LoadBytes);
+    జ్ఞాపకం_నకలు(Dst + పరిమాణం(uint64_t) - ఎక్కించు_బైట్లు, Src, ఎక్కించు_బైట్లు);
   }
 }
 
-APInt APIntOps::avgFloorS(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgFloorS(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
   // Return floor((C1 + C2) / 2)
-  return (C1 & C2) + (C1 ^ C2).ashr(1);
+  తిరిగి (C1 & C2) + (C1 ^ C2).ashr(1);
 }
 
-APInt APIntOps::avgFloorU(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgFloorU(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
   // Return floor((C1 + C2) / 2)
-  return (C1 & C2) + (C1 ^ C2).lshr(1);
+  తిరిగి (C1 & C2) + (C1 ^ C2).lshr(1);
 }
 
-APInt APIntOps::avgCeilS(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgCeilS(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
   // Return ceil((C1 + C2) / 2)
-  return (C1 | C2) - (C1 ^ C2).ashr(1);
+  తిరిగి (C1 | C2) - (C1 ^ C2).ashr(1);
 }
 
-APInt APIntOps::avgCeilU(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgCeilU(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
   // Return ceil((C1 + C2) / 2)
-  return (C1 | C2) - (C1 ^ C2).lshr(1);
+  తిరిగి (C1 | C2) - (C1 ^ C2).lshr(1);
 }
 
-APInt APIntOps::avgSubFloorS(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgSubFloorS(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
   // Return floor((C1 - C2) / 2), using C1 - C2 == (C1 ^ C2) - 2 * (~C1 & C2).
-  return (C1 ^ C2).ashr(1) - (~C1 & C2);
+  తిరిగి (C1 ^ C2).ashr(1) - (~C1 & C2);
 }
 
-APInt APIntOps::avgSubFloorU(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgSubFloorU(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
   // Return floor((C1 - C2) / 2), using C1 - C2 == (C1 ^ C2) - 2 * (~C1 & C2).
-  return (C1 ^ C2).lshr(1) - (~C1 & C2);
+  తిరిగి (C1 ^ C2).lshr(1) - (~C1 & C2);
 }
 
-APInt APIntOps::mulhs(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
-  unsigned FullWidth = C1.getBitWidth() * 2;
-  APInt C1Ext = C1.sext(FullWidth);
-  APInt C2Ext = C2.sext(FullWidth);
-  return (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
+APInt APIntOps::mulhs(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
+  ప్రతిజ్ఞా(C1.get_బిట్టు_వెడల్పు() == C2.get_బిట్టు_వెడల్పు() && "Unequal bitwidths");
+  గుర్తులేని నిండిన_వెడల్పు = C1.get_బిట్టు_వెడల్పు() * 2;
+  APInt C1Ext = C1.sext(నిండిన_వెడల్పు);
+  APInt C2Ext = C2.sext(నిండిన_వెడల్పు);
+  తిరిగి (C1Ext * C2Ext).వెలికితీయి_బిట్లు(C1.get_బిట్టు_వెడల్పు(), C1.get_బిట్టు_వెడల్పు());
 }
 
-APInt APIntOps::mulhu(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
-  unsigned FullWidth = C1.getBitWidth() * 2;
-  APInt C1Ext = C1.zext(FullWidth);
-  APInt C2Ext = C2.zext(FullWidth);
-  return (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
+APInt APIntOps::mulhu(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
+  ప్రతిజ్ఞా(C1.get_బిట్టు_వెడల్పు() == C2.get_బిట్టు_వెడల్పు() && "Unequal bitwidths");
+  గుర్తులేని నిండిన_వెడల్పు = C1.get_బిట్టు_వెడల్పు() * 2;
+  APInt C1Ext = C1.zext(నిండిన_వెడల్పు);
+  APInt C2Ext = C2.zext(నిండిన_వెడల్పు);
+  తిరిగి (C1Ext * C2Ext).వెలికితీయి_బిట్లు(C1.get_బిట్టు_వెడల్పు(), C1.get_బిట్టు_వెడల్పు());
 }
 
-APInt APIntOps::mulsExtended(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
-  unsigned FullWidth = C1.getBitWidth() * 2;
-  APInt C1Ext = C1.sext(FullWidth);
-  APInt C2Ext = C2.sext(FullWidth);
-  return C1Ext * C2Ext;
+APInt APIntOps::mulsExtended(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
+  ప్రతిజ్ఞా(C1.get_బిట్టు_వెడల్పు() == C2.get_బిట్టు_వెడల్పు() && "Unequal bitwidths");
+  గుర్తులేని నిండిన_వెడల్పు = C1.get_బిట్టు_వెడల్పు() * 2;
+  APInt C1Ext = C1.sext(నిండిన_వెడల్పు);
+  APInt C2Ext = C2.sext(నిండిన_వెడల్పు);
+  తిరిగి C1Ext * C2Ext;
 }
 
-APInt APIntOps::muluExtended(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
-  unsigned FullWidth = C1.getBitWidth() * 2;
-  APInt C1Ext = C1.zext(FullWidth);
-  APInt C2Ext = C2.zext(FullWidth);
-  return C1Ext * C2Ext;
+APInt APIntOps::muluExtended(స్థిరరాశి APInt &C1, స్థిరరాశి APInt &C2) {
+  ప్రతిజ్ఞా(C1.get_బిట్టు_వెడల్పు() == C2.get_బిట్టు_వెడల్పు() && "Unequal bitwidths");
+  గుర్తులేని నిండిన_వెడల్పు = C1.get_బిట్టు_వెడల్పు() * 2;
+  APInt C1Ext = C1.zext(నిండిన_వెడల్పు);
+  APInt C2Ext = C2.zext(నిండిన_వెడల్పు);
+  తిరిగి C1Ext * C2Ext;
 }
 
-APInt APIntOps::pow(const APInt &X, int64_t N) {
-  assert(N >= 0 && "negative exponents not supported.");
-  APInt Acc = APInt(X.getBitWidth(), 1);
-  if (N == 0)
-    return Acc;
-  APInt Base = X;
-  int64_t RemainingExponent = N;
-  while (RemainingExponent > 0) {
-    while (RemainingExponent % 2 == 0) {
-      Base *= Base;
-      RemainingExponent /= 2;
+APInt APIntOps::ఘాతం(స్థిరరాశి APInt &X, int64_t N) {
+  ప్రతిజ్ఞా(N >= 0 && "negative exponents not supported.");
+  APInt Acc = APInt(X.get_బిట్టు_వెడల్పు(), 1);
+  ఒకవేళ (N == 0)
+    తిరిగి Acc;
+  APInt పునాది = X;
+  int64_t మిగిలిన_Exponent = N;
+  అయితే (మిగిలిన_Exponent > 0) {
+    అయితే (మిగిలిన_Exponent % 2 == 0) {
+      పునాది *= పునాది;
+      మిగిలిన_Exponent /= 2;
     }
-    --RemainingExponent;
-    Acc *= Base;
+    --మిగిలిన_Exponent;
+    Acc *= పునాది;
   }
-  return Acc;
+  తిరిగి Acc;
 }
 
-APInt llvm::APIntOps::fshl(const APInt &Hi, const APInt &Lo,
-                           const APInt &Shift) {
-  assert(Hi.getBitWidth() == Lo.getBitWidth());
-  unsigned ShiftAmt = rotateModulo(Hi.getBitWidth(), Shift);
-  if (ShiftAmt == 0)
-    return Hi;
-  return Hi.shl(ShiftAmt) | Lo.lshr(Hi.getBitWidth() - ShiftAmt);
+APInt llvm::APIntOps::fshl(స్థిరరాశి APInt &Hi, స్థిరరాశి APInt &Lo,
+                           స్థిరరాశి APInt &జరుపు_2) {
+  ప్రతిజ్ఞా(Hi.get_బిట్టు_వెడల్పు() == Lo.get_బిట్టు_వెడల్పు());
+  గుర్తులేని జరుపు_Amt_2 = rotateModulo(Hi.get_బిట్టు_వెడల్పు(), జరుపు_2);
+  ఒకవేళ (జరుపు_Amt_2 == 0)
+    తిరిగి Hi;
+  తిరిగి Hi.shl(జరుపు_Amt_2) | Lo.lshr(Hi.get_బిట్టు_వెడల్పు() - జరుపు_Amt_2);
 }
 
-APInt llvm::APIntOps::fshr(const APInt &Hi, const APInt &Lo,
-                           const APInt &Shift) {
-  assert(Hi.getBitWidth() == Lo.getBitWidth());
-  unsigned ShiftAmt = rotateModulo(Hi.getBitWidth(), Shift);
-  if (ShiftAmt == 0)
-    return Lo;
-  return Hi.shl(Hi.getBitWidth() - ShiftAmt) | Lo.lshr(ShiftAmt);
+APInt llvm::APIntOps::fshr(స్థిరరాశి APInt &Hi, స్థిరరాశి APInt &Lo,
+                           స్థిరరాశి APInt &జరుపు_2) {
+  ప్రతిజ్ఞా(Hi.get_బిట్టు_వెడల్పు() == Lo.get_బిట్టు_వెడల్పు());
+  గుర్తులేని జరుపు_Amt_2 = rotateModulo(Hi.get_బిట్టు_వెడల్పు(), జరుపు_2);
+  ఒకవేళ (జరుపు_Amt_2 == 0)
+    తిరిగి Lo;
+  తిరిగి Hi.shl(Hi.get_బిట్టు_వెడల్పు() - జరుపు_Amt_2) | Lo.lshr(జరుపు_Amt_2);
 }
 
-APInt llvm::APIntOps::clmul(const APInt &LHS, const APInt &RHS) {
-  unsigned BW = LHS.getBitWidth();
-  assert(BW == RHS.getBitWidth() && "Operand mismatch");
-  APInt Result(BW, 0);
-  for (unsigned I : seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
-    if (RHS[I])
-      Result ^= LHS << I;
-  return Result;
+APInt llvm::APIntOps::clmul(స్థిరరాశి APInt &LHS, స్థిరరాశి APInt &RHS) {
+  గుర్తులేని BW = LHS.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(BW == RHS.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+  APInt ఫలితం(BW, 0);
+  కొరకు (గుర్తులేని I : seq(std::min(RHS.get_చురుకైన_బిట్లు(), BW - LHS.countr_zero())))
+    ఒకవేళ (RHS[I])
+      ఫలితం ^= LHS << I;
+  తిరిగి ఫలితం;
 }
 
-APInt llvm::APIntOps::clmulr(const APInt &LHS, const APInt &RHS) {
-  assert(LHS.getBitWidth() == RHS.getBitWidth());
-  return clmul(LHS.reverseBits(), RHS.reverseBits()).reverseBits();
+APInt llvm::APIntOps::clmulr(స్థిరరాశి APInt &LHS, స్థిరరాశి APInt &RHS) {
+  ప్రతిజ్ఞా(LHS.get_బిట్టు_వెడల్పు() == RHS.get_బిట్టు_వెడల్పు());
+  తిరిగి clmul(LHS.తిరగేయి_బిట్లు(), RHS.తిరగేయి_బిట్లు()).తిరగేయి_బిట్లు();
 }
 
-APInt llvm::APIntOps::clmulh(const APInt &LHS, const APInt &RHS) {
-  assert(LHS.getBitWidth() == RHS.getBitWidth());
-  return clmulr(LHS, RHS).lshr(1);
+APInt llvm::APIntOps::clmulh(స్థిరరాశి APInt &LHS, స్థిరరాశి APInt &RHS) {
+  ప్రతిజ్ఞా(LHS.get_బిట్టు_వెడల్పు() == RHS.get_బిట్టు_వెడల్పు());
+  తిరిగి clmulr(LHS, RHS).lshr(1);
 }
 
-APInt llvm::APIntOps::pext(const APInt &Val, const APInt &Mask) {
-  unsigned BW = Val.getBitWidth();
-  assert(BW == Mask.getBitWidth() && "Operand mismatch");
-  APInt Result = APInt::getZero(BW);
-  for (unsigned I = 0, P = 0; I != BW; ++I)
-    if (Mask[I])
-      Result.setBitVal(P++, Val[I]);
-  return Result;
+APInt llvm::APIntOps::pext(స్థిరరాశి APInt &Val, స్థిరరాశి APInt &ముసుగు) {
+  గుర్తులేని BW = Val.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(BW == ముసుగు.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+  APInt ఫలితం = APInt::getZero(BW);
+  కొరకు (గుర్తులేని I = 0, P = 0; I != BW; ++I)
+    ఒకవేళ (ముసుగు[I])
+      ఫలితం.సమితి_బిట్టు_Val(P++, Val[I]);
+  తిరిగి ఫలితం;
 }
 
-APInt llvm::APIntOps::pdep(const APInt &Val, const APInt &Mask) {
-  unsigned BW = Val.getBitWidth();
-  assert(BW == Mask.getBitWidth() && "Operand mismatch");
-  APInt Result = APInt::getZero(BW);
-  for (unsigned I = 0, P = 0; I != BW; ++I)
-    if (Mask[I])
-      Result.setBitVal(I, Val[P++]);
-  return Result;
+APInt llvm::APIntOps::pdep(స్థిరరాశి APInt &Val, స్థిరరాశి APInt &ముసుగు) {
+  గుర్తులేని BW = Val.get_బిట్టు_వెడల్పు();
+  ప్రతిజ్ఞా(BW == ముసుగు.get_బిట్టు_వెడల్పు() && "Operand mismatch");
+  APInt ఫలితం = APInt::getZero(BW);
+  కొరకు (గుర్తులేని I = 0, P = 0; I != BW; ++I)
+    ఒకవేళ (ముసుగు[I])
+      ఫలితం.సమితి_బిట్టు_Val(I, Val[P++]);
+  తిరిగి ఫలితం;
 }

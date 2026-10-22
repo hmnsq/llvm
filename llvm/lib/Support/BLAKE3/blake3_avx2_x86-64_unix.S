@@ -25,8 +25,8 @@
 .intel_syntax noprefix
 HIDDEN _blake3_hash_many_avx2
 HIDDEN blake3_hash_many_avx2
-.global _blake3_hash_many_avx2
-.global blake3_hash_many_avx2
+.వైశ్విక _blake3_hash_many_avx2
+.వైశ్విక blake3_hash_many_avx2
 #ifdef __APPLE__
 .text
 #else

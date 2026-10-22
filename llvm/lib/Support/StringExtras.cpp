@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/ADT/SmallVector.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <cctype>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 /// getToken - This function extracts one token from source, ignoring any
 /// leading characters that appear in the Delimiters string, and ending the
@@ -23,111 +23,111 @@ using namespace llvm;
 /// there are no tokens in the source string, an empty string is returned.
 /// The function returns a pair containing the extracted token and the
 /// remaining tail string.
-std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
+std::pair<StringRef, StringRef> llvm::getToken(StringRef ఆధారం,
                                                StringRef Delimiters) {
   // Figure out where the token starts.
-  StringRef::size_type Start = Source.find_first_not_of(Delimiters);
+  StringRef::కొలత_type ప్రారంభం = ఆధారం.కనుగొను_మొదటి_not_యొక్క(Delimiters);
 
   // Find the next occurrence of the delimiter.
-  StringRef::size_type End = Source.find_first_of(Delimiters, Start);
+  StringRef::కొలత_type చివర_2 = ఆధారం.కనుగొను_మొదటి_యొక్క(Delimiters, ప్రారంభం);
 
-  return {Source.slice(Start, End), Source.substr(End)};
+  తిరిగి {ఆధారం.ముక్క(ప్రారంభం, చివర_2), ఆధారం.substr(చివర_2)};
 }
 
 /// SplitString - Split up the specified string according to the specified
 /// delimiters, appending the result fragments to the output list.
-void llvm::SplitString(StringRef Source,
-                       SmallVectorImpl<StringRef> &OutFragments,
+శూన్య llvm::విభజించు_String(StringRef ఆధారం,
+                       Small_సదిశ_Impl<StringRef> &బహిర్గతం_Fragments,
                        StringRef Delimiters) {
-  std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
-    OutFragments.push_back(S.first);
-    S = getToken(S.second, Delimiters);
+  std::pair<StringRef, StringRef> S = getToken(ఆధారం, Delimiters);
+  అయితే (!S.మొదటి_2.ఖాళీలు()) {
+    బహిర్గతం_Fragments.నెట్టు_వెనుక(S.మొదటి_2);
+    S = getToken(S.రెండవ_2, Delimiters);
   }
 }
 
-void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned char C : Name) {
-    if (C == '\\')
-      Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
-      Out << C;
-    else
-      Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
+శూన్య llvm::printEscapedString(StringRef Name, raw_ostream &బహిర్గతం) {
+  కొరకు (గుర్తులేని అక్షరం C : Name) {
+    ఒకవేళ (C == '\\')
+      బహిర్గతం << '\\' << C;
+    లేకపోతే ఒకవేళ (isPrint(C) && C != '"')
+      బహిర్గతం << C;
+    లేకపోతే
+      బహిర్గతం << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
-      Out << "&amp;";
-    else if (C == '<')
-      Out << "&lt;";
-    else if (C == '>')
-      Out << "&gt;";
-    else if (C == '\"')
-      Out << "&quot;";
-    else if (C == '\'')
-      Out << "&apos;";
-    else
-      Out << C;
+శూన్య llvm::printHTMLEscaped(StringRef String, raw_ostream &బహిర్గతం) {
+  కొరకు (అక్షరం C : String) {
+    ఒకవేళ (C == '&')
+      బహిర్గతం << "&amp;";
+    లేకపోతే ఒకవేళ (C == '<')
+      బహిర్గతం << "&lt;";
+    లేకపోతే ఒకవేళ (C == '>')
+      బహిర్గతం << "&gt;";
+    లేకపోతే ఒకవేళ (C == '\"')
+      బహిర్గతం << "&quot;";
+    లేకపోతే ఒకవేళ (C == '\'')
+      బహిర్గతం << "&apos;";
+    లేకపోతే
+      బహిర్గతం << C;
   }
 }
 
-void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
-    Out << toLower(C);
+శూన్య llvm::print_క్రింది_Case(StringRef String, raw_ostream &బహిర్గతం) {
+  కొరకు (స్థిరరాశి అక్షరం C : String)
+    బహిర్గతం << గమ్యం_క్రింది(C);
 }
 
-void llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
-  for (unsigned char C : String) {
-    if (isAlnum(C) || StringRef("-_.~").contains(C))
-      Out << C;
-    else
-      Out << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
+శూన్య llvm::printPercentEncoded(StringRef String, raw_ostream &బహిర్గతం) {
+  కొరకు (గుర్తులేని అక్షరం C : String) {
+    ఒకవేళ (isAlnum(C) || StringRef("-_.~").కలిగియుంది(C))
+      బహిర్గతం << C;
+    లేకపోతే
+      బహిర్గతం << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+std::string llvm::convert_గమ్యం_Snake_From_Camel_Case(StringRef ఆదానం_2) {
+  ఒకవేళ (ఆదానం_2.ఖాళీలు())
+    తిరిగి "";
 
   std::string snakeCase;
-  snakeCase.reserve(input.size());
-  auto check = [&input](size_t j, function_ref<bool(int)> predicate) {
-    return j < input.size() && predicate(input[j]);
+  snakeCase.reserve(ఆదానం_2.కొలత_2());
+  స్వయంచాలక check = [&ఆదానం_2](size_t j, function_ref<తార్కిక(పూర్ణాంకం)> predicate) {
+    తిరిగి j < ఆదానం_2.కొలత_2() && predicate(ఆదానం_2[j]);
   };
-  for (size_t i = 0; i < input.size(); ++i) {
-    snakeCase.push_back(tolower(input[i]));
+  కొరకు (size_t i = 0; i < ఆదానం_2.కొలత_2(); ++i) {
+    snakeCase.నెట్టు_వెనుక(tolower(ఆదానం_2[i]));
     // Handles "runs" of capitals, such as in OPName -> op_name.
-    if (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
-      snakeCase.push_back('_');
-    if ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
-      snakeCase.push_back('_');
+    ఒకవేళ (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
+      snakeCase.నెట్టు_వెనుక('_');
+    ఒకవేళ ((check(i, islower) || check(i, అంకెనా)) && check(i + 1, isupper))
+      snakeCase.నెట్టు_వెనుక('_');
   }
-  return snakeCase;
+  తిరిగి snakeCase;
 }
 
-std::string llvm::convertToCamelFromSnakeCase(StringRef input,
-                                              bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+std::string llvm::convert_గమ్యం_Camel_From_Snake_Case(StringRef ఆదానం_2,
+                                              తార్కిక capitalize_మొదటి) {
+  ఒకవేళ (ఆదానం_2.ఖాళీలు())
+    తిరిగి "";
 
   std::string output;
-  output.reserve(input.size());
+  output.reserve(ఆదానం_2.కొలత_2());
 
   // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
-    output.push_back(llvm::toUpper(input.front()));
-  else
-    output.push_back(input.front());
+  ఒకవేళ (capitalize_మొదటి && std::islower(ఆదానం_2.front()))
+    output.నెట్టు_వెనుక(llvm::గమ్యం_పై(ఆదానం_2.front()));
+  లేకపోతే
+    output.నెట్టు_వెనుక(ఆదానం_2.front());
 
   // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
-      output.push_back(llvm::toUpper(input[++pos]));
-    else
-      output.push_back(input[pos]);
+  కొరకు (size_t pos = 1, e = ఆదానం_2.కొలత_2(); pos < e; ++pos) {
+    ఒకవేళ (ఆదానం_2[pos] == '_' && pos != (e - 1) && std::islower(ఆదానం_2[pos + 1]))
+      output.నెట్టు_వెనుక(llvm::గమ్యం_పై(ఆదానం_2[++pos]));
+    లేకపోతే
+      output.నెట్టు_వెనుక(ఆదానం_2[pos]);
   }
-  return output;
+  తిరిగి output;
 }

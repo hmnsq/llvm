@@ -6,47 +6,47 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/Format.h"
+#అన్తర్భావ "llvm/Support/ScopedPrinter.h"
+#అన్తర్భావ "llvm/Support/Format.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, const HexNumber &Value) {
-  OS << "0x" << utohexstr(Value.Value);
-  return OS;
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, స్థిరరాశి Hex_సంఖ్య &విలువ) {
+  OS << "0x" << utohexstr(విలువ.విలువ);
+  తిరిగి OS;
 }
 
-void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
-                                    ArrayRef<uint8_t> Data, bool Block,
-                                    uint32_t StartOffset) {
-  if (Data.size() > 16)
-    Block = true;
+శూన్య ScopedPrinter::print_ద్విమాన_Impl(StringRef Label, StringRef Str,
+                                    ArrayRef<uint8_t> దత్తాంశం_2, తార్కిక ఖండం_2,
+                                    uint32_t ప్రారంభం_స్థానభ్రంశం) {
+  ఒకవేళ (దత్తాంశం_2.కొలత_2() > 16)
+    ఖండం_2 = నిజం;
 
-  if (Block) {
-    startLine() << Label;
-    if (!Str.empty())
+  ఒకవేళ (ఖండం_2) {
+    ప్రారంభం_పంక్తి() << Label;
+    ఒకవేళ (!Str.ఖాళీలు())
       OS << ": " << Str;
     OS << " (\n";
-    if (!Data.empty())
-      OS << format_bytes_with_ascii(Data, StartOffset, 16, 4,
-                                    (IndentLevel + 1) * 2, true)
+    ఒకవేళ (!దత్తాంశం_2.ఖాళీలు())
+      OS << format_బైట్లు_with_ascii(దత్తాంశం_2, ప్రారంభం_స్థానభ్రంశం, 16, 4,
+                                    (IndentLevel + 1) * 2, నిజం)
          << "\n";
-    startLine() << ")\n";
-  } else {
-    startLine() << Label << ":";
-    if (!Str.empty())
+    ప్రారంభం_పంక్తి() << ")\n";
+  } లేకపోతే {
+    ప్రారంభం_పంక్తి() << Label << ":";
+    ఒకవేళ (!Str.ఖాళీలు())
       OS << " " << Str;
-    OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, true)
+    OS << " (" << format_బైట్లు(దత్తాంశం_2, std::nullopt, దత్తాంశం_2.కొలత_2(), 1, 0, నిజం)
        << ")\n";
   }
 }
 
 JSONScopedPrinter::JSONScopedPrinter(
-    raw_ostream &OS, bool PrettyPrint,
+    raw_ostream &OS, తార్కిక PrettyPrint,
     std::unique_ptr<DelimitedScope> &&OuterScope)
-    : ScopedPrinter(OS, ScopedPrinter::ScopedPrinterKind::JSON),
+    : ScopedPrinter(OS, ScopedPrinter::Scoped_Printer_రకం::JSON),
       JOS(OS, /*Indent=*/PrettyPrint ? 2 : 0),
       OuterScope(std::move(OuterScope)) {
-  if (this->OuterScope)
-    this->OuterScope->setPrinter(*this);
+  ఒకవేళ (ఇది->OuterScope)
+    ఇది->OuterScope->సమితి_Printer(*ఇది);
 }

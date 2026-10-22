@@ -10,193 +10,193 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Protocol.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/JSON.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/LSP/Protocol.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/ADT/StringSet.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ "llvm/Support/JSON.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::lsp;
 
 // Helper that doesn't treat `null` and absent fields as failures.
-template <typename T>
-static bool mapOptOrNull(const llvm::json::Value &Params,
-                         llvm::StringLiteral Prop, T &Out,
-                         llvm::json::Path Path) {
-  const llvm::json::Object *O = Params.getAsObject();
-  assert(O);
+మూస <రకం_పేరు T>
+స్థిర తార్కిక mapOptOrNull(స్థిరరాశి llvm::json::విలువ &Params,
+                         llvm::StringLiteral Prop, T &బహిర్గతం,
+                         llvm::json::మార్గం మార్గం) {
+  స్థిరరాశి llvm::json::Object *O = Params.getAsObject();
+  ప్రతిజ్ఞా(O);
 
   // Field is missing or null.
-  auto *V = O->get(Prop);
-  if (!V || V->getAsNull())
-    return true;
-  return fromJSON(*V, Out, Path.field(Prop));
+  స్వయంచాలక *V = O->get(Prop);
+  ఒకవేళ (!V || V->getAsNull())
+    తిరిగి నిజం;
+  తిరిగి fromJSON(*V, బహిర్గతం, మార్గం.క్షేత్రం(Prop));
 }
 
 //===----------------------------------------------------------------------===//
 // LSPError
 //===----------------------------------------------------------------------===//
 
-char LSPError::ID;
+అక్షరం LSPError::ID;
 
 //===----------------------------------------------------------------------===//
 // URIForFile
 //===----------------------------------------------------------------------===//
 
-static bool isWindowsPath(StringRef Path) {
-  return Path.size() > 1 && llvm::isAlpha(Path[0]) && Path[1] == ':';
+స్థిర తార్కిక is_Windows_మార్గం(StringRef మార్గం) {
+  తిరిగి మార్గం.కొలత_2() > 1 && llvm::isAlpha(మార్గం[0]) && మార్గం[1] == ':';
 }
 
-static bool isNetworkPath(StringRef Path) {
-  return Path.size() > 2 && Path[0] == Path[1] &&
-         llvm::sys::path::is_separator(Path[0]);
+స్థిర తార్కిక is_జాలం_మార్గం(StringRef మార్గం) {
+  తిరిగి మార్గం.కొలత_2() > 2 && మార్గం[0] == మార్గం[1] &&
+         llvm::sys::మార్గం_2::is_separator(మార్గం[0]);
 }
 
-static bool shouldEscapeInURI(unsigned char C) {
+స్థిర తార్కిక should_Escape_లోపల_URI(గుర్తులేని అక్షరం C) {
   // Unreserved characters.
-  if ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
+  ఒకవేళ ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
       (C >= '0' && C <= '9'))
-    return false;
+    తిరిగి అబద్ధం;
 
-  switch (C) {
-  case '-':
-  case '_':
-  case '.':
-  case '~':
+  ఎంపిక (C) {
+  స్థితి '-':
+  స్థితి '_':
+  స్థితి '.':
+  స్థితి '~':
   // '/' is only reserved when parsing.
-  case '/':
+  స్థితి '/':
   // ':' is only reserved for relative URI paths, which we doesn't produce.
-  case ':':
-    return false;
+  స్థితి ':':
+    తిరిగి అబద్ధం;
   }
-  return true;
+  తిరిగి నిజం;
 }
 
 /// Encodes a string according to percent-encoding.
 /// - Unreserved characters are not escaped.
 /// - Reserved characters always escaped with exceptions like '/'.
 /// - All other characters are escaped.
-static void percentEncode(StringRef Content, std::string &Out) {
-  for (unsigned char C : Content) {
-    if (shouldEscapeInURI(C)) {
-      Out.push_back('%');
-      Out.push_back(llvm::hexdigit(C / 16));
-      Out.push_back(llvm::hexdigit(C % 16));
-    } else {
-      Out.push_back(C);
+స్థిర శూన్య percentEncode(StringRef Content, std::string &బహిర్గతం) {
+  కొరకు (గుర్తులేని అక్షరం C : Content) {
+    ఒకవేళ (should_Escape_లోపల_URI(C)) {
+      బహిర్గతం.నెట్టు_వెనుక('%');
+      బహిర్గతం.నెట్టు_వెనుక(llvm::hexdigit(C / 16));
+      బహిర్గతం.నెట్టు_వెనుక(llvm::hexdigit(C % 16));
+    } లేకపోతే {
+      బహిర్గతం.నెట్టు_వెనుక(C);
     }
   }
 }
 
 /// Decodes a string according to percent-encoding.
-static std::string percentDecode(StringRef Content) {
-  std::string Result;
-  for (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
-    if (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
+స్థిర std::string percentDecode(StringRef Content) {
+  std::string ఫలితం;
+  కొరకు (స్వయంచాలక I = Content.begin(), E = Content.చివర(); I != E; ++I) {
+    ఒకవేళ (*I == '%' && I + 2 < Content.చివర() && llvm::isHexDigit(*(I + 1)) &&
         llvm::isHexDigit(*(I + 2))) {
-      Result.push_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
+      ఫలితం.నెట్టు_వెనుక(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
       I += 2;
-    } else {
-      Result.push_back(*I);
+    } లేకపోతే {
+      ఫలితం.నెట్టు_వెనుక(*I);
     }
   }
-  return Result;
+  తిరిగి ఫలితం;
 }
 
 /// Return the set containing the supported URI schemes.
-static StringSet<> &getSupportedSchemes() {
-  static StringSet<> Schemes({"file", "test"});
-  return Schemes;
+స్థిర String_సమితి<> &getSupportedSchemes() {
+  స్థిర String_సమితి<> Schemes({"file", "test"});
+  తిరిగి Schemes;
 }
 
 /// Returns true if the given scheme is structurally valid, i.e. it does not
 /// contain any invalid scheme characters. This does not check that the scheme
 /// is actually supported.
-static bool isStructurallyValidScheme(StringRef Scheme) {
-  if (Scheme.empty())
-    return false;
-  if (!llvm::isAlpha(Scheme[0]))
-    return false;
-  return llvm::all_of(llvm::drop_begin(Scheme), [](char C) {
-    return llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
+స్థిర తార్కిక isStructurallyValidScheme(StringRef Scheme) {
+  ఒకవేళ (Scheme.ఖాళీలు())
+    తిరిగి అబద్ధం;
+  ఒకవేళ (!llvm::isAlpha(Scheme[0]))
+    తిరిగి అబద్ధం;
+  తిరిగి llvm::all_యొక్క(llvm::drop_begin(Scheme), [](అక్షరం C) {
+    తిరిగి llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
   });
 }
 
-static llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
+స్థిర llvm::Expected<std::string> uri_From_Absolute_మార్గం(StringRef Absolute_మార్గం,
                                                        StringRef Scheme) {
   std::string Body;
   StringRef Authority;
-  StringRef Root = llvm::sys::path::root_name(AbsolutePath);
-  if (isNetworkPath(Root)) {
+  StringRef మూలం_2 = llvm::sys::మార్గం_2::మూలం_name(Absolute_మార్గం);
+  ఒకవేళ (is_జాలం_మార్గం(మూలం_2)) {
     // Windows UNC paths e.g. \\server\share => file://server/share
-    Authority = Root.drop_front(2);
-    AbsolutePath.consume_front(Root);
-  } else if (isWindowsPath(Root)) {
+    Authority = మూలం_2.drop_front(2);
+    Absolute_మార్గం.consume_front(మూలం_2);
+  } లేకపోతే ఒకవేళ (is_Windows_మార్గం(మూలం_2)) {
     // Windows paths e.g. X:\path => file:///X:/path
     Body = "/";
   }
-  Body += llvm::sys::path::convert_to_slash(AbsolutePath);
+  Body += llvm::sys::మార్గం_2::convert_గమ్యం_slash(Absolute_మార్గం);
 
   std::string Uri = Scheme.str() + ":";
-  if (Authority.empty() && Body.empty())
-    return Uri;
+  ఒకవేళ (Authority.ఖాళీలు() && Body.ఖాళీలు())
+    తిరిగి Uri;
 
   // If authority if empty, we only print body if it starts with "/"; otherwise,
   // the URI is invalid.
-  if (!Authority.empty() || StringRef(Body).starts_with("/")) {
+  ఒకవేళ (!Authority.ఖాళీలు() || StringRef(Body).starts_with("/")) {
     Uri.append("//");
     percentEncode(Authority, Uri);
   }
   percentEncode(Body, Uri);
-  return Uri;
+  తిరిగి Uri;
 }
 
-static llvm::Expected<std::string> getAbsolutePath(StringRef Authority,
+స్థిర llvm::Expected<std::string> get_Absolute_మార్గం(StringRef Authority,
                                                    StringRef Body) {
-  if (!Body.starts_with("/"))
-    return llvm::createStringError(
-        llvm::inconvertibleErrorCode(),
+  ఒకవేళ (!Body.starts_with("/"))
+    తిరిగి llvm::createStringError(
+        llvm::inconvertible_Error_సంకేతం(),
         "File scheme: expect body to be an absolute path starting "
         "with '/': " +
             Body);
-  SmallString<128> Path;
-  if (!Authority.empty()) {
+  SmallString<128> మార్గం;
+  ఒకవేళ (!Authority.ఖాళీలు()) {
     // Windows UNC paths e.g. file://server/share => \\server\share
-    ("//" + Authority).toVector(Path);
-  } else if (isWindowsPath(Body.substr(1))) {
+    ("//" + Authority).గమ్యం_సదిశ(మార్గం);
+  } లేకపోతే ఒకవేళ (is_Windows_మార్గం(Body.substr(1))) {
     // Windows paths e.g. file:///X:/path => X:\path
     Body.consume_front("/");
   }
-  Path.append(Body);
-  llvm::sys::path::native(Path);
-  return std::string(Path);
+  మార్గం.append(Body);
+  llvm::sys::మార్గం_2::native(మార్గం);
+  తిరిగి std::string(మార్గం);
 }
 
-static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
+స్థిర llvm::Expected<std::string> parse_File_మార్గం_From_URI(StringRef OrigUri) {
   StringRef Uri = OrigUri;
 
   // Decode the scheme of the URI.
-  size_t Pos = Uri.find(':');
-  if (Pos == StringRef::npos)
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  size_t Pos = Uri.కనుగొను(':');
+  ఒకవేళ (Pos == StringRef::npos)
+    తిరిగి llvm::createStringError(llvm::inconvertible_Error_సంకేతం(),
                                    "Scheme must be provided in URI: " +
                                        OrigUri);
   StringRef SchemeStr = Uri.substr(0, Pos);
   std::string UriScheme = percentDecode(SchemeStr);
-  if (!isStructurallyValidScheme(UriScheme))
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  ఒకవేళ (!isStructurallyValidScheme(UriScheme))
+    తిరిగి llvm::createStringError(llvm::inconvertible_Error_సంకేతం(),
                                    "Invalid scheme: " + SchemeStr +
                                        " (decoded: " + UriScheme + ")");
   Uri = Uri.substr(Pos + 1);
 
   // Decode the authority of the URI.
   std::string UriAuthority;
-  if (Uri.consume_front("//")) {
-    Pos = Uri.find('/');
+  ఒకవేళ (Uri.consume_front("//")) {
+    Pos = Uri.కనుగొను('/');
     UriAuthority = percentDecode(Uri.substr(0, Pos));
     Uri = Uri.substr(Pos);
   }
@@ -205,390 +205,390 @@ static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
   std::string UriBody = percentDecode(Uri);
 
   // Compute the absolute path for this uri.
-  if (!getSupportedSchemes().contains(UriScheme)) {
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  ఒకవేళ (!getSupportedSchemes().కలిగియుంది(UriScheme)) {
+    తిరిగి llvm::createStringError(llvm::inconvertible_Error_సంకేతం(),
                                    "unsupported URI scheme `" + UriScheme +
                                        "' for workspace files");
   }
-  return getAbsolutePath(UriAuthority, UriBody);
+  తిరిగి get_Absolute_మార్గం(UriAuthority, UriBody);
 }
 
 llvm::Expected<URIForFile> URIForFile::fromURI(StringRef Uri) {
-  llvm::Expected<std::string> FilePath = parseFilePathFromURI(Uri);
-  if (!FilePath)
-    return FilePath.takeError();
-  return URIForFile(std::move(*FilePath), Uri.str());
+  llvm::Expected<std::string> File_మార్గం = parse_File_మార్గం_From_URI(Uri);
+  ఒకవేళ (!File_మార్గం)
+    తిరిగి File_మార్గం.takeError();
+  తిరిగి URIForFile(std::move(*File_మార్గం), Uri.str());
 }
 
 llvm::Expected<URIForFile> URIForFile::fromFile(StringRef AbsoluteFilepath,
                                                 StringRef Scheme) {
   llvm::Expected<std::string> Uri =
-      uriFromAbsolutePath(AbsoluteFilepath, Scheme);
-  if (!Uri)
-    return Uri.takeError();
-  return fromURI(*Uri);
+      uri_From_Absolute_మార్గం(AbsoluteFilepath, Scheme);
+  ఒకవేళ (!Uri)
+    తిరిగి Uri.takeError();
+  తిరిగి fromURI(*Uri);
 }
 
-StringRef URIForFile::scheme() const { return uri().split(':').first; }
+StringRef URIForFile::scheme() స్థిరరాశి { తిరిగి uri().విభజించు(':').మొదటి_2; }
 
-void URIForFile::registerSupportedScheme(StringRef Scheme) {
-  getSupportedSchemes().insert(Scheme);
+శూన్య URIForFile::రిజిస్టరు_Supported_Scheme(StringRef Scheme) {
+  getSupportedSchemes().చొప్పించు(Scheme);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, URIForFile &Result,
-                         llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, URIForFile &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  ఒకవేళ (std::optional<StringRef> Str = విలువ.getAsString()) {
     llvm::Expected<URIForFile> ExpectedUri = URIForFile::fromURI(*Str);
-    if (!ExpectedUri) {
-      Path.report("unresolvable URI");
+    ఒకవేళ (!ExpectedUri) {
+      మార్గం.report("unresolvable URI");
       consumeError(ExpectedUri.takeError());
-      return false;
+      తిరిగి అబద్ధం;
     }
-    Result = std::move(*ExpectedUri);
-    return true;
+    ఫలితం = std::move(*ExpectedUri);
+    తిరిగి నిజం;
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const URIForFile &Value) {
-  return Value.uri();
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి URIForFile &విలువ) {
+  తిరిగి విలువ.uri();
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const URIForFile &Value) {
-  return Os << Value.uri();
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os, స్థిరరాశి URIForFile &విలువ) {
+  తిరిగి Os << విలువ.uri();
 }
 
 //===----------------------------------------------------------------------===//
 // ClientCapabilities
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         ClientCapabilities &Result, llvm::json::Path Path) {
-  const llvm::json::Object *O = Value.getAsObject();
-  if (!O) {
-    Path.report("expected object");
-    return false;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         ClientCapabilities &ఫలితం, llvm::json::మార్గం మార్గం) {
+  స్థిరరాశి llvm::json::Object *O = విలువ.getAsObject();
+  ఒకవేళ (!O) {
+    మార్గం.report("expected object");
+    తిరిగి అబద్ధం;
   }
-  if (const llvm::json::Object *TextDocument = O->getObject("textDocument")) {
-    if (const llvm::json::Object *DocumentSymbol =
-            TextDocument->getObject("documentSymbol")) {
-      if (std::optional<bool> HierarchicalSupport =
-              DocumentSymbol->getBoolean("hierarchicalDocumentSymbolSupport"))
-        Result.hierarchicalDocumentSymbol = *HierarchicalSupport;
+  ఒకవేళ (స్థిరరాశి llvm::json::Object *పాఠ్యం_Document = O->getObject("textDocument")) {
+    ఒకవేళ (స్థిరరాశి llvm::json::Object *Document_చిహ్నం =
+            పాఠ్యం_Document->getObject("documentSymbol")) {
+      ఒకవేళ (std::optional<తార్కిక> క్రమానుగత_Support =
+              Document_చిహ్నం->getBoolean("hierarchicalDocumentSymbolSupport"))
+        ఫలితం.క్రమానుగత_Document_చిహ్నం = *క్రమానుగత_Support;
     }
-    if (auto *CodeAction = TextDocument->getObject("codeAction")) {
-      if (CodeAction->getObject("codeActionLiteralSupport"))
-        Result.codeActionStructure = true;
+    ఒకవేళ (స్వయంచాలక *సంకేతం_Action = పాఠ్యం_Document->getObject("codeAction")) {
+      ఒకవేళ (సంకేతం_Action->getObject("codeActionLiteralSupport"))
+        ఫలితం.సంకేతం_Action_Structure = నిజం;
     }
   }
-  if (auto *Window = O->getObject("window")) {
-    if (std::optional<bool> WorkDoneProgressSupport =
-            Window->getBoolean("workDoneProgress"))
-      Result.workDoneProgress = *WorkDoneProgressSupport;
+  ఒకవేళ (స్వయంచాలక *కిటికీ = O->getObject("window")) {
+    ఒకవేళ (std::optional<తార్కిక> Work_పూర్తి_పురోగతి_Support =
+            కిటికీ->getBoolean("workDoneProgress"))
+      ఫలితం.work_పూర్తి_పురోగతి = *Work_పూర్తి_పురోగతి_Support;
   }
-  return true;
+  తిరిగి నిజం;
 }
 
 //===----------------------------------------------------------------------===//
 // ClientInfo
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, ClientInfo &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("name", Result.name))
-    return false;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, ClientInfo &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  ఒకవేళ (!O || !O.map("name", ఫలితం.name))
+    తిరిగి అబద్ధం;
 
   // Don't fail if we can't parse version.
-  O.map("version", Result.version);
-  return true;
+  O.map("version", ఫలితం.సంస్కరణ_2);
+  తిరిగి నిజం;
 }
 
 //===----------------------------------------------------------------------===//
 // InitializeParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TraceLevel &Result,
-                         llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
-    if (*Str == "off") {
-      Result = TraceLevel::Off;
-      return true;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, TraceLevel &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  ఒకవేళ (std::optional<StringRef> Str = విలువ.getAsString()) {
+    ఒకవేళ (*Str == "off") {
+      ఫలితం = TraceLevel::Off;
+      తిరిగి నిజం;
     }
-    if (*Str == "messages") {
-      Result = TraceLevel::Messages;
-      return true;
+    ఒకవేళ (*Str == "messages") {
+      ఫలితం = TraceLevel::Messages;
+      తిరిగి నిజం;
     }
-    if (*Str == "verbose") {
-      Result = TraceLevel::Verbose;
-      return true;
+    ఒకవేళ (*Str == "verbose") {
+      ఫలితం = TraceLevel::Verbose;
+      తిరిగి నిజం;
     }
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         InitializeParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         InitializeParams &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  ఒకవేళ (!O)
+    తిరిగి అబద్ధం;
   // We deliberately don't fail if we can't parse individual fields.
-  O.map("capabilities", Result.capabilities);
-  O.map("trace", Result.trace);
-  O.map("rootUri", Result.rootUri);
-  O.map("rootPath", Result.rootPath);
-  mapOptOrNull(Value, "clientInfo", Result.clientInfo, Path);
+  O.map("capabilities", ఫలితం.capabilities);
+  O.map("trace", ఫలితం.trace);
+  O.map("rootUri", ఫలితం.మూలం_Uri);
+  O.map("rootPath", ఫలితం.మూలం_మార్గం);
+  mapOptOrNull(విలువ, "clientInfo", ఫలితం.clientInfo, మార్గం);
 
-  return true;
+  తిరిగి నిజం;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentItem
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentItem &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) &&
-         O.map("languageId", Result.languageId) && O.map("text", Result.text) &&
-         O.map("version", Result.version);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         పాఠ్యం_Document_అంశం &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("uri", ఫలితం.uri) &&
+         O.map("languageId", ఫలితం.languageId) && O.map("text", ఫలితం.పాఠ్యం) &&
+         O.map("version", ఫలితం.సంస్కరణ_2);
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const TextDocumentIdentifier &Value) {
-  return llvm::json::Object{{"uri", Value.uri}};
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి పాఠ్యం_Document_Identifier &విలువ) {
+  తిరిగి llvm::json::Object{{"uri", విలువ.uri}};
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentIdentifier &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         పాఠ్యం_Document_Identifier &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("uri", ఫలితం.uri);
 }
 
 //===----------------------------------------------------------------------===//
 // VersionedTextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value
-llvm::lsp::toJSON(const VersionedTextDocumentIdentifier &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"version", Value.version},
+llvm::json::విలువ
+llvm::lsp::గమ్యం_JSON(స్థిరరాశి Versioned_పాఠ్యం_Document_Identifier &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"uri", విలువ.uri},
+      {"version", విలువ.సంస్కరణ_2},
   };
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         VersionedTextDocumentIdentifier &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("version", Result.version);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Versioned_పాఠ్యం_Document_Identifier &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("uri", ఫలితం.uri) && O.map("version", ఫలితం.సంస్కరణ_2);
 }
 
 //===----------------------------------------------------------------------===//
 // Position
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Position &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("line", Result.line) &&
-         O.map("character", Result.character);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, Position &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("line", ఫలితం.పంక్తి_2) &&
+         O.map("character", ఫలితం.character);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Position &Value) {
-  return llvm::json::Object{
-      {"line", Value.line},
-      {"character", Value.character},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Position &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"line", విలువ.పంక్తి_2},
+      {"character", విలువ.character},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Position &Value) {
-  return Os << Value.line << ':' << Value.character;
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os, స్థిరరాశి Position &విలువ) {
+  తిరిగి Os << విలువ.పంక్తి_2 << ':' << విలువ.character;
 }
 
 //===----------------------------------------------------------------------===//
 // Range
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Range &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("start", Result.start) && O.map("end", Result.end);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, Range &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("start", ఫలితం.ప్రారంభం_2) && O.map("end", ఫలితం.చివర);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Range &Value) {
-  return llvm::json::Object{
-      {"start", Value.start},
-      {"end", Value.end},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Range &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"start", విలువ.ప్రారంభం_2},
+      {"end", విలువ.చివర},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Range &Value) {
-  return Os << Value.start << '-' << Value.end;
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os, స్థిరరాశి Range &విలువ) {
+  తిరిగి Os << విలువ.ప్రారంభం_2 << '-' << విలువ.చివర;
 }
 
 //===----------------------------------------------------------------------===//
 // Location
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Location &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("range", Result.range);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, Location &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("uri", ఫలితం.uri) && O.map("range", ఫలితం.range);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Location &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"range", Value.range},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Location &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"uri", విలువ.uri},
+      {"range", విలువ.range},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Location &Value) {
-  return Os << Value.range << '@' << Value.uri;
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os, స్థిరరాశి Location &విలువ) {
+  తిరిగి Os << విలువ.range << '@' << విలువ.uri;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentPositionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentPositionParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("position", Result.position);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         పాఠ్యం_Document_Position_Params &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2) &&
+         O.map("position", ఫలితం.position);
 }
 
 //===----------------------------------------------------------------------===//
 // ReferenceParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         ReferenceContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         ReferenceContext &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.mapOptional("includeDeclaration", ఫలితం.includeDeclaration);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         ReferenceParams &Result, llvm::json::Path Path) {
-  TextDocumentPositionParams &Base = Result;
-  llvm::json::ObjectMapper O(Value, Path);
-  return fromJSON(Value, Base, Path) && O &&
-         O.mapOptional("context", Result.context);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         ReferenceParams &ఫలితం, llvm::json::మార్గం మార్గం) {
+  పాఠ్యం_Document_Position_Params &పునాది = ఫలితం;
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి fromJSON(విలువ, పునాది, మార్గం) && O &&
+         O.mapOptional("context", ఫలితం.context);
 }
 
 //===----------------------------------------------------------------------===//
 // DidOpenTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DidOpenTextDocumentParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Did_Open_పాఠ్యం_Document_Params &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DidCloseTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DidCloseTextDocumentParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Did_Close_పాఠ్యం_Document_Params &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DidSaveTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
-                         DidSaveTextDocumentParams &R, llvm::json::Path P) {
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &Params,
+                         Did_Save_పాఠ్యం_Document_Params &R, llvm::json::మార్గం P) {
   llvm::json::ObjectMapper O(Params, P);
-  return O && O.map("textDocument", R.textDocument);
+  తిరిగి O && O.map("textDocument", R.పాఠ్యం_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DidChangeTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-LogicalResult
-TextDocumentContentChangeEvent::applyTo(std::string &Contents) const {
+Logical_ఫలితం
+పాఠ్యం_Document_Content_Change_Event::apply_గమ్యం(std::string &Contents) స్థిరరాశి {
   // If there is no range, the full document changed.
-  if (!range) {
-    Contents = text;
-    return success();
+  ఒకవేళ (!range) {
+    Contents = పాఠ్యం;
+    తిరిగి success();
   }
 
   // Try to map the replacement range to the content.
-  llvm::SourceMgr TmpScrMgr;
-  TmpScrMgr.AddNewSourceBuffer(llvm::MemoryBuffer::getMemBuffer(Contents),
+  llvm::ఆధారం_Mgr TmpScrMgr;
+  TmpScrMgr.కూడు_New_ఆధారం_బఫరు(llvm::జ్ఞాపకం_బఫరు::get_Mem_బఫరు(Contents),
                                SMLoc());
   SMRange RangeLoc = range->getAsSMRange(TmpScrMgr);
-  if (!RangeLoc.isValid())
-    return failure();
+  ఒకవేళ (!RangeLoc.isValid())
+    తిరిగి failure();
 
-  Contents.replace(RangeLoc.Start.getPointer() - Contents.data(),
-                   RangeLoc.End.getPointer() - RangeLoc.Start.getPointer(),
-                   text);
-  return success();
+  Contents.replace(RangeLoc.ప్రారంభం.get_సూచిక() - Contents.దత్తాంశం(),
+                   RangeLoc.చివర_2.get_సూచిక() - RangeLoc.ప్రారంభం.get_సూచిక(),
+                   పాఠ్యం);
+  తిరిగి success();
 }
 
-LogicalResult TextDocumentContentChangeEvent::applyTo(
-    ArrayRef<TextDocumentContentChangeEvent> Changes, std::string &Contents) {
-  for (const auto &Change : Changes)
-    if (failed(Change.applyTo(Contents)))
-      return failure();
-  return success();
+Logical_ఫలితం పాఠ్యం_Document_Content_Change_Event::apply_గమ్యం(
+    ArrayRef<పాఠ్యం_Document_Content_Change_Event> Changes, std::string &Contents) {
+  కొరకు (స్థిరరాశి స్వయంచాలక &Change : Changes)
+    ఒకవేళ (failed(Change.apply_గమ్యం(Contents)))
+      తిరిగి failure();
+  తిరిగి success();
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         TextDocumentContentChangeEvent &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) &&
-         O.map("rangeLength", Result.rangeLength) && O.map("text", Result.text);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         పాఠ్యం_Document_Content_Change_Event &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("range", ఫలితం.range) &&
+         O.map("rangeLength", ఫలితం.range_నిడివి) && O.map("text", ఫలితం.పాఠ్యం);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DidChangeTextDocumentParams &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("contentChanges", Result.contentChanges);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Did_Change_పాఠ్యం_Document_Params &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2) &&
+         O.map("contentChanges", ఫలితం.contentChanges);
 }
 
 //===----------------------------------------------------------------------===//
 // MarkupContent
 //===----------------------------------------------------------------------===//
 
-static llvm::StringRef toTextKind(MarkupKind Kind) {
-  switch (Kind) {
-  case MarkupKind::PlainText:
-    return "plaintext";
-  case MarkupKind::Markdown:
-    return "markdown";
+స్థిర llvm::StringRef గమ్యం_పాఠ్యం_రకం(Markup_రకం రకం_3) {
+  ఎంపిక (రకం_3) {
+  స్థితి Markup_రకం::Plain_పాఠ్యం:
+    తిరిగి "plaintext";
+  స్థితి Markup_రకం::Markdown:
+    తిరిగి "markdown";
   }
   llvm_unreachable("Invalid MarkupKind");
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, MarkupKind Kind) {
-  return Os << toTextKind(Kind);
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os, Markup_రకం రకం_3) {
+  తిరిగి Os << గమ్యం_పాఠ్యం_రకం(రకం_3);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
-  if (Mc.value.empty())
-    return nullptr;
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి MarkupContent &Mc) {
+  ఒకవేళ (Mc.విలువ_2.ఖాళీలు())
+    తిరిగి శూన్యసూచిక;
 
-  return llvm::json::Object{
-      {"kind", toTextKind(Mc.kind)},
-      {"value", Mc.value},
+  తిరిగి llvm::json::Object{
+      {"kind", గమ్యం_పాఠ్యం_రకం(Mc.రకం_2)},
+      {"value", Mc.విలువ_2},
   };
 }
 
@@ -596,56 +596,56 @@ llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
 // Hover
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const Hover &Hover) {
-  llvm::json::Object Result{{"contents", toJSON(Hover.contents)}};
-  if (Hover.range)
-    Result["range"] = toJSON(*Hover.range);
-  return std::move(Result);
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Hover &Hover) {
+  llvm::json::Object ఫలితం{{"contents", గమ్యం_JSON(Hover.contents)}};
+  ఒకవేళ (Hover.range)
+    ఫలితం["range"] = గమ్యం_JSON(*Hover.range);
+  తిరిగి std::move(ఫలితం);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbol
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentSymbol &Symbol) {
-  llvm::json::Object Result{{"name", Symbol.name},
-                            {"kind", static_cast<int>(Symbol.kind)},
-                            {"range", Symbol.range},
-                            {"selectionRange", Symbol.selectionRange}};
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Document_చిహ్నం &చిహ్నం) {
+  llvm::json::Object ఫలితం{{"name", చిహ్నం.name},
+                            {"kind", static_cast<పూర్ణాంకం>(చిహ్నం.రకం_2)},
+                            {"range", చిహ్నం.range},
+                            {"selectionRange", చిహ్నం.selectionRange}};
 
-  if (!Symbol.detail.empty())
-    Result["detail"] = Symbol.detail;
-  if (!Symbol.children.empty())
-    Result["children"] = Symbol.children;
-  return std::move(Result);
+  ఒకవేళ (!చిహ్నం.detail.ఖాళీలు())
+    ఫలితం["detail"] = చిహ్నం.detail;
+  ఒకవేళ (!చిహ్నం.children.ఖాళీలు())
+    ఫలితం["children"] = చిహ్నం.children;
+  తిరిగి std::move(ఫలితం);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbolParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentSymbolParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Document_చిహ్నం_Params &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DiagnosticRelatedInformation
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DiagnosticRelatedInformation &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("location", Result.location) &&
-         O.map("message", Result.message);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         DiagnosticRelatedInformation &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("location", ఫలితం.location) &&
+         O.map("message", ఫలితం.సందేశం_2);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
-  return llvm::json::Object{
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి DiagnosticRelatedInformation &Info) {
+  తిరిగి llvm::json::Object{
       {"location", Info.location},
-      {"message", Info.message},
+      {"message", Info.సందేశం_2},
   };
 }
 
@@ -653,64 +653,64 @@ llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
 // Diagnostic
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(DiagnosticTag Tag) {
-  return static_cast<int>(Tag);
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(Diagnostic_ట్యాగ్ ట్యాగ్) {
+  తిరిగి static_cast<పూర్ణాంకం>(ట్యాగ్);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, DiagnosticTag &Result,
-                         llvm::json::Path Path) {
-  if (std::optional<int64_t> I = Value.getAsInteger()) {
-    Result = (DiagnosticTag)*I;
-    return true;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, Diagnostic_ట్యాగ్ &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  ఒకవేళ (std::optional<int64_t> I = విలువ.getAsInteger()) {
+    ఫలితం = (Diagnostic_ట్యాగ్)*I;
+    తిరిగి నిజం;
   }
 
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Diagnostic &Diag) {
-  llvm::json::Object Result{
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Diagnostic &Diag) {
+  llvm::json::Object ఫలితం{
       {"range", Diag.range},
-      {"severity", (int)Diag.severity},
-      {"message", Diag.message},
+      {"severity", (పూర్ణాంకం)Diag.severity},
+      {"message", Diag.సందేశం_2},
   };
-  if (Diag.category)
-    Result["category"] = *Diag.category;
-  if (!Diag.source.empty())
-    Result["source"] = Diag.source;
-  if (Diag.relatedInformation)
-    Result["relatedInformation"] = *Diag.relatedInformation;
-  if (!Diag.tags.empty())
-    Result["tags"] = Diag.tags;
-  return std::move(Result);
+  ఒకవేళ (Diag.category)
+    ఫలితం["category"] = *Diag.category;
+  ఒకవేళ (!Diag.ఆధారం_2.ఖాళీలు())
+    ఫలితం["source"] = Diag.ఆధారం_2;
+  ఒకవేళ (Diag.relatedInformation)
+    ఫలితం["relatedInformation"] = *Diag.relatedInformation;
+  ఒకవేళ (!Diag.ట్యాగులు.ఖాళీలు())
+    ఫలితం["tags"] = Diag.ట్యాగులు;
+  తిరిగి std::move(ఫలితం);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Diagnostic &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
-  int Severity = 0;
-  if (!mapOptOrNull(Value, "severity", Severity, Path))
-    return false;
-  Result.severity = (DiagnosticSeverity)Severity;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, Diagnostic &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  ఒకవేళ (!O)
+    తిరిగి అబద్ధం;
+  పూర్ణాంకం Severity = 0;
+  ఒకవేళ (!mapOptOrNull(విలువ, "severity", Severity, మార్గం))
+    తిరిగి అబద్ధం;
+  ఫలితం.severity = (DiagnosticSeverity)Severity;
 
-  return O.map("range", Result.range) && O.map("message", Result.message) &&
-         mapOptOrNull(Value, "category", Result.category, Path) &&
-         mapOptOrNull(Value, "source", Result.source, Path) &&
-         mapOptOrNull(Value, "relatedInformation", Result.relatedInformation,
-                      Path) &&
-         mapOptOrNull(Value, "tags", Result.tags, Path);
+  తిరిగి O.map("range", ఫలితం.range) && O.map("message", ఫలితం.సందేశం_2) &&
+         mapOptOrNull(విలువ, "category", ఫలితం.category, మార్గం) &&
+         mapOptOrNull(విలువ, "source", ఫలితం.ఆధారం_2, మార్గం) &&
+         mapOptOrNull(విలువ, "relatedInformation", ఫలితం.relatedInformation,
+                      మార్గం) &&
+         mapOptOrNull(విలువ, "tags", ఫలితం.ట్యాగులు, మార్గం);
 }
 
 //===----------------------------------------------------------------------===//
 // PublishDiagnosticsParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
-  return llvm::json::Object{
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి PublishDiagnosticsParams &Params) {
+  తిరిగి llvm::json::Object{
       {"uri", Params.uri},
       {"diagnostics", Params.diagnostics},
-      {"version", Params.version},
+      {"version", Params.సంస్కరణ_2},
   };
 }
 
@@ -718,128 +718,128 @@ llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
 // TextEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TextEdit &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) && O.map("newText", Result.newText);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, పాఠ్యం_Edit &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("range", ఫలితం.range) && O.map("newText", ఫలితం.new_పాఠ్యం);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const TextEdit &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"newText", Value.newText},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి పాఠ్యం_Edit &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"range", విలువ.range},
+      {"newText", విలువ.new_పాఠ్యం},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &Value) {
-  Os << Value.range << " => \"";
-  llvm::printEscapedString(Value.newText, Os);
-  return Os << '"';
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os, స్థిరరాశి పాఠ్యం_Edit &విలువ) {
+  Os << విలువ.range << " => \"";
+  llvm::printEscapedString(విలువ.new_పాఠ్యం, Os);
+  తిరిగి Os << '"';
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItemKind
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionItemKind &Result, llvm::json::Path Path) {
-  if (std::optional<int64_t> IntValue = Value.getAsInteger()) {
-    if (*IntValue < static_cast<int>(CompletionItemKind::Text) ||
-        *IntValue > static_cast<int>(CompletionItemKind::TypeParameter))
-      return false;
-    Result = static_cast<CompletionItemKind>(*IntValue);
-    return true;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Completion_అంశం_రకం &ఫలితం, llvm::json::మార్గం మార్గం) {
+  ఒకవేళ (std::optional<int64_t> Int_విలువ = విలువ.getAsInteger()) {
+    ఒకవేళ (*Int_విలువ < static_cast<పూర్ణాంకం>(Completion_అంశం_రకం::పాఠ్యం_2) ||
+        *Int_విలువ > static_cast<పూర్ణాంకం>(Completion_అంశం_రకం::TypeParameter))
+      తిరిగి అబద్ధం;
+    ఫలితం = static_cast<Completion_అంశం_రకం>(*Int_విలువ);
+    తిరిగి నిజం;
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-CompletionItemKind llvm::lsp::adjustKindToCapability(
-    CompletionItemKind Kind,
-    CompletionItemKindBitset &SupportedCompletionItemKinds) {
-  size_t KindVal = static_cast<size_t>(Kind);
-  if (KindVal >= kCompletionItemKindMin &&
-      KindVal <= SupportedCompletionItemKinds.size() &&
-      SupportedCompletionItemKinds[KindVal])
-    return Kind;
+Completion_అంశం_రకం llvm::lsp::adjust_రకం_గమ్యం_Capability(
+    Completion_అంశం_రకం రకం_3,
+    Completion_అంశం_రకం_Bitset &Supported_Completion_అంశం_Kinds) {
+  size_t రకం_Val = static_cast<size_t>(రకం_3);
+  ఒకవేళ (రకం_Val >= k_Completion_అంశం_రకం_Min &&
+      రకం_Val <= Supported_Completion_అంశం_Kinds.కొలత_2() &&
+      Supported_Completion_అంశం_Kinds[రకం_Val])
+    తిరిగి రకం_3;
 
   // Provide some fall backs for common kinds that are close enough.
-  switch (Kind) {
-  case CompletionItemKind::Folder:
-    return CompletionItemKind::File;
-  case CompletionItemKind::EnumMember:
-    return CompletionItemKind::Enum;
-  case CompletionItemKind::Struct:
-    return CompletionItemKind::Class;
-  default:
-    return CompletionItemKind::Text;
+  ఎంపిక (రకం_3) {
+  స్థితి Completion_అంశం_రకం::Folder:
+    తిరిగి Completion_అంశం_రకం::File;
+  స్థితి Completion_అంశం_రకం::EnumMember:
+    తిరిగి Completion_అంశం_రకం::Enum;
+  స్థితి Completion_అంశం_రకం::Struct:
+    తిరిగి Completion_అంశం_రకం::Class;
+  అప్రమేయ:
+    తిరిగి Completion_అంశం_రకం::పాఠ్యం_2;
   }
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionItemKindBitset &Result,
-                         llvm::json::Path Path) {
-  if (const llvm::json::Array *ArrayValue = Value.getAsArray()) {
-    for (size_t I = 0, E = ArrayValue->size(); I < E; ++I) {
-      CompletionItemKind KindOut;
-      if (fromJSON((*ArrayValue)[I], KindOut, Path.index(I)))
-        Result.set(size_t(KindOut));
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         Completion_అంశం_రకం_Bitset &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  ఒకవేళ (స్థిరరాశి llvm::json::Array *Array_విలువ = విలువ.getAsArray()) {
+    కొరకు (size_t I = 0, E = Array_విలువ->కొలత_2(); I < E; ++I) {
+      Completion_అంశం_రకం రకం_బహిర్గతం;
+      ఒకవేళ (fromJSON((*Array_విలువ)[I], రకం_బహిర్గతం, మార్గం.సూచీ(I)))
+        ఫలితం.సమితి(size_t(రకం_బహిర్గతం));
     }
-    return true;
+    తిరిగి నిజం;
   }
-  return false;
+  తిరిగి అబద్ధం;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItem
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionItem &Value) {
-  assert(!Value.label.empty() && "completion item label is required");
-  llvm::json::Object Result{{"label", Value.label}};
-  if (Value.kind != CompletionItemKind::Missing)
-    Result["kind"] = static_cast<int>(Value.kind);
-  if (!Value.detail.empty())
-    Result["detail"] = Value.detail;
-  if (Value.documentation)
-    Result["documentation"] = Value.documentation;
-  if (!Value.sortText.empty())
-    Result["sortText"] = Value.sortText;
-  if (!Value.filterText.empty())
-    Result["filterText"] = Value.filterText;
-  if (!Value.insertText.empty())
-    Result["insertText"] = Value.insertText;
-  if (Value.insertTextFormat != InsertTextFormat::Missing)
-    Result["insertTextFormat"] = static_cast<int>(Value.insertTextFormat);
-  if (Value.textEdit)
-    Result["textEdit"] = *Value.textEdit;
-  if (!Value.additionalTextEdits.empty()) {
-    Result["additionalTextEdits"] =
-        llvm::json::Array(Value.additionalTextEdits);
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Completion_అంశం &విలువ) {
+  ప్రతిజ్ఞా(!విలువ.label.ఖాళీలు() && "completion item label is required");
+  llvm::json::Object ఫలితం{{"label", విలువ.label}};
+  ఒకవేళ (విలువ.రకం_2 != Completion_అంశం_రకం::Missing)
+    ఫలితం["kind"] = static_cast<పూర్ణాంకం>(విలువ.రకం_2);
+  ఒకవేళ (!విలువ.detail.ఖాళీలు())
+    ఫలితం["detail"] = విలువ.detail;
+  ఒకవేళ (విలువ.documentation)
+    ఫలితం["documentation"] = విలువ.documentation;
+  ఒకవేళ (!విలువ.క్రమీకరించు_పాఠ్యం.ఖాళీలు())
+    ఫలితం["sortText"] = విలువ.క్రమీకరించు_పాఠ్యం;
+  ఒకవేళ (!విలువ.filter_పాఠ్యం.ఖాళీలు())
+    ఫలితం["filterText"] = విలువ.filter_పాఠ్యం;
+  ఒకవేళ (!విలువ.చొప్పించు_పాఠ్యం.ఖాళీలు())
+    ఫలితం["insertText"] = విలువ.చొప్పించు_పాఠ్యం;
+  ఒకవేళ (విలువ.చొప్పించు_పాఠ్యం_Format != చొప్పించు_పాఠ్యం_Format_2::Missing)
+    ఫలితం["insertTextFormat"] = static_cast<పూర్ణాంకం>(విలువ.చొప్పించు_పాఠ్యం_Format);
+  ఒకవేళ (విలువ.పాఠ్యం_Edit_2)
+    ఫలితం["textEdit"] = *విలువ.పాఠ్యం_Edit_2;
+  ఒకవేళ (!విలువ.additional_పాఠ్యం_Edits.ఖాళీలు()) {
+    ఫలితం["additionalTextEdits"] =
+        llvm::json::Array(విలువ.additional_పాఠ్యం_Edits);
   }
-  if (Value.deprecated)
-    Result["deprecated"] = Value.deprecated;
-  return std::move(Result);
+  ఒకవేళ (విలువ.deprecated)
+    ఫలితం["deprecated"] = విలువ.deprecated;
+  తిరిగి std::move(ఫలితం);
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const CompletionItem &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os,
+                                   స్థిరరాశి Completion_అంశం &విలువ) {
+  తిరిగి Os << విలువ.label << " - " << గమ్యం_JSON(విలువ);
 }
 
-bool llvm::lsp::operator<(const CompletionItem &Lhs,
-                          const CompletionItem &Rhs) {
-  return (Lhs.sortText.empty() ? Lhs.label : Lhs.sortText) <
-         (Rhs.sortText.empty() ? Rhs.label : Rhs.sortText);
+తార్కిక llvm::lsp::క్రియాకారకం<(స్థిరరాశి Completion_అంశం &Lhs,
+                          స్థిరరాశి Completion_అంశం &Rhs) {
+  తిరిగి (Lhs.క్రమీకరించు_పాఠ్యం.ఖాళీలు() ? Lhs.label : Lhs.క్రమీకరించు_పాఠ్యం) <
+         (Rhs.క్రమీకరించు_పాఠ్యం.ఖాళీలు() ? Rhs.label : Rhs.క్రమీకరించు_పాఠ్యం);
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionList
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
-  return llvm::json::Object{
-      {"isIncomplete", Value.isIncomplete},
-      {"items", llvm::json::Array(Value.items)},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి CompletionList &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"isIncomplete", విలువ.isIncomplete},
+      {"items", llvm::json::Array(విలువ.వస్తువులు)},
   };
 }
 
@@ -847,81 +847,81 @@ llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
 // CompletionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  int TriggerKind;
-  if (!O || !O.map("triggerKind", TriggerKind) ||
-      !mapOptOrNull(Value, "triggerCharacter", Result.triggerCharacter, Path))
-    return false;
-  Result.triggerKind = static_cast<CompletionTriggerKind>(TriggerKind);
-  return true;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         CompletionContext &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  పూర్ణాంకం Trigger_రకం;
+  ఒకవేళ (!O || !O.map("triggerKind", Trigger_రకం) ||
+      !mapOptOrNull(విలువ, "triggerCharacter", ఫలితం.triggerCharacter, మార్గం))
+    తిరిగి అబద్ధం;
+  ఫలితం.trigger_రకం = static_cast<Completion_Trigger_రకం>(Trigger_రకం);
+  తిరిగి నిజం;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CompletionParams &Result, llvm::json::Path Path) {
-  if (!fromJSON(Value, static_cast<TextDocumentPositionParams &>(Result), Path))
-    return false;
-  if (const llvm::json::Value *Context = Value.getAsObject()->get("context"))
-    return fromJSON(*Context, Result.context, Path.field("context"));
-  return true;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         CompletionParams &ఫలితం, llvm::json::మార్గం మార్గం) {
+  ఒకవేళ (!fromJSON(విలువ, static_cast<పాఠ్యం_Document_Position_Params &>(ఫలితం), మార్గం))
+    తిరిగి అబద్ధం;
+  ఒకవేళ (స్థిరరాశి llvm::json::విలువ *Context = విలువ.getAsObject()->get("context"))
+    తిరిగి fromJSON(*Context, ఫలితం.context, మార్గం.క్షేత్రం("context"));
+  తిరిగి నిజం;
 }
 
 //===----------------------------------------------------------------------===//
 // ParameterInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ParameterInformation &Value) {
-  assert((Value.labelOffsets || !Value.labelString.empty()) &&
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి ParameterInformation &విలువ) {
+  ప్రతిజ్ఞా((విలువ.labelOffsets || !విలువ.labelString.ఖాళీలు()) &&
          "parameter information label is required");
-  llvm::json::Object Result;
-  if (Value.labelOffsets)
-    Result["label"] = llvm::json::Array(
-        {Value.labelOffsets->first, Value.labelOffsets->second});
-  else
-    Result["label"] = Value.labelString;
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+  llvm::json::Object ఫలితం;
+  ఒకవేళ (విలువ.labelOffsets)
+    ఫలితం["label"] = llvm::json::Array(
+        {విలువ.labelOffsets->మొదటి_2, విలువ.labelOffsets->రెండవ_2});
+  లేకపోతే
+    ఫలితం["label"] = విలువ.labelString;
+  ఒకవేళ (!విలువ.documentation.ఖాళీలు())
+    ఫలితం["documentation"] = విలువ.documentation;
+  తిరిగి std::move(ఫలితం);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureInformation &Value) {
-  assert(!Value.label.empty() && "signature information label is required");
-  llvm::json::Object Result{
-      {"label", Value.label},
-      {"parameters", llvm::json::Array(Value.parameters)},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి SignatureInformation &విలువ) {
+  ప్రతిజ్ఞా(!విలువ.label.ఖాళీలు() && "signature information label is required");
+  llvm::json::Object ఫలితం{
+      {"label", విలువ.label},
+      {"parameters", llvm::json::Array(విలువ.parameters)},
   };
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+  ఒకవేళ (!విలువ.documentation.ఖాళీలు())
+    ఫలితం["documentation"] = విలువ.documentation;
+  తిరిగి std::move(ఫలితం);
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const SignatureInformation &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+raw_ostream &llvm::lsp::క్రియాకారకం<<(raw_ostream &Os,
+                                   స్థిరరాశి SignatureInformation &విలువ) {
+  తిరిగి Os << విలువ.label << " - " << గమ్యం_JSON(విలువ);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureHelp
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
-  assert(Value.activeSignature >= 0 &&
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి SignatureHelp &విలువ) {
+  ప్రతిజ్ఞా(విలువ.చురుకైన_Signature >= 0 &&
          "Unexpected negative value for number of active signatures.");
-  assert(Value.activeParameter >= 0 &&
+  ప్రతిజ్ఞా(విలువ.చురుకైన_Parameter >= 0 &&
          "Unexpected negative value for active parameter index");
-  return llvm::json::Object{
-      {"activeSignature", Value.activeSignature},
-      {"activeParameter", Value.activeParameter},
-      {"signatures", llvm::json::Array(Value.signatures)},
+  తిరిగి llvm::json::Object{
+      {"activeSignature", విలువ.చురుకైన_Signature},
+      {"activeParameter", విలువ.చురుకైన_Parameter},
+      {"signatures", llvm::json::Array(విలువ.signatures)},
   };
 }
 
@@ -929,20 +929,20 @@ llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
 // DocumentLinkParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentLinkParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         DocumentLinkParams &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentLink
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"target", Value.target},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి DocumentLink &విలువ) {
+  తిరిగి llvm::json::Object{
+      {"range", విలువ.range},
+      {"target", విలువ.లక్ష్యం},
   };
 }
 
@@ -950,40 +950,40 @@ llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
 // InlayHintsParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         InlayHintsParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("range", Result.range);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         InlayHintsParams &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2) &&
+         O.map("range", ఫలితం.range);
 }
 
 //===----------------------------------------------------------------------===//
 // InlayHint
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const InlayHint &Value) {
-  return llvm::json::Object{{"position", Value.position},
-                            {"kind", (int)Value.kind},
-                            {"label", Value.label},
-                            {"paddingLeft", Value.paddingLeft},
-                            {"paddingRight", Value.paddingRight}};
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి InlayHint &విలువ) {
+  తిరిగి llvm::json::Object{{"position", విలువ.position},
+                            {"kind", (పూర్ణాంకం)విలువ.రకం_2},
+                            {"label", విలువ.label},
+                            {"paddingLeft", విలువ.padding_ఎడమ},
+                            {"paddingRight", విలువ.padding_కుడి}};
 }
-bool llvm::lsp::operator==(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
-         std::tie(Rhs.position, Rhs.kind, Rhs.label);
+తార్కిక llvm::lsp::క్రియాకారకం==(స్థిరరాశి InlayHint &Lhs, స్థిరరాశి InlayHint &Rhs) {
+  తిరిగి std::tie(Lhs.position, Lhs.రకం_2, Lhs.label) ==
+         std::tie(Rhs.position, Rhs.రకం_2, Rhs.label);
 }
-bool llvm::lsp::operator<(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) <
-         std::tie(Rhs.position, Rhs.kind, Rhs.label);
+తార్కిక llvm::lsp::క్రియాకారకం<(స్థిరరాశి InlayHint &Lhs, స్థిరరాశి InlayHint &Rhs) {
+  తిరిగి std::tie(Lhs.position, Lhs.రకం_2, Lhs.label) <
+         std::tie(Rhs.position, Rhs.రకం_2, Rhs.label);
 }
 
-llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
-                                         InlayHintKind Value) {
-  switch (Value) {
-  case InlayHintKind::Parameter:
-    return Os << "parameter";
-  case InlayHintKind::Type:
-    return Os << "type";
+llvm::raw_ostream &llvm::lsp::క్రియాకారకం<<(llvm::raw_ostream &Os,
+                                         Inlay_Hint_రకం విలువ) {
+  ఎంపిక (విలువ) {
+  స్థితి Inlay_Hint_రకం::Parameter:
+    తిరిగి Os << "parameter";
+  స్థితి Inlay_Hint_రకం::Type:
+    తిరిగి Os << "type";
   }
   llvm_unreachable("Unknown InlayHintKind");
 }
@@ -992,78 +992,78 @@ llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
 // CodeActionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CodeActionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("diagnostics", Result.diagnostics))
-    return false;
-  O.map("only", Result.only);
-  return true;
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         సంకేతం_Action_Context &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  ఒకవేళ (!O || !O.map("diagnostics", ఫలితం.diagnostics))
+    తిరిగి అబద్ధం;
+  O.map("only", ఫలితం.only);
+  తిరిగి నిజం;
 }
 
 //===----------------------------------------------------------------------===//
 // CodeActionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         CodeActionParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
-         O.map("range", Result.range) && O.map("context", Result.context);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ,
+                         సంకేతం_Action_Params &ఫలితం, llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("textDocument", ఫలితం.పాఠ్యం_Document_2) &&
+         O.map("range", ఫలితం.range) && O.map("context", ఫలితం.context);
 }
 
 //===----------------------------------------------------------------------===//
 // WorkspaceEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, WorkspaceEdit &Result,
-                         llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("changes", Result.changes);
+తార్కిక llvm::lsp::fromJSON(స్థిరరాశి llvm::json::విలువ &విలువ, WorkspaceEdit &ఫలితం,
+                         llvm::json::మార్గం మార్గం) {
+  llvm::json::ObjectMapper O(విలువ, మార్గం);
+  తిరిగి O && O.map("changes", ఫలితం.changes);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const WorkspaceEdit &Value) {
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి WorkspaceEdit &విలువ) {
   llvm::json::Object FileChanges;
-  for (auto &Change : Value.changes)
-    FileChanges[Change.first] = llvm::json::Array(Change.second);
-  return llvm::json::Object{{"changes", std::move(FileChanges)}};
+  కొరకు (స్వయంచాలక &Change : విలువ.changes)
+    FileChanges[Change.మొదటి_2] = llvm::json::Array(Change.రెండవ_2);
+  తిరిగి llvm::json::Object{{"changes", std::move(FileChanges)}};
 }
 
 //===----------------------------------------------------------------------===//
 // CodeAction
 //===----------------------------------------------------------------------===//
 
-const llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
-const llvm::StringLiteral CodeAction::kRefactor = "refactor";
-const llvm::StringLiteral CodeAction::kInfo = "info";
+స్థిరరాశి llvm::StringLiteral సంకేతం_Action::k_శీఘ్ర_Fix = "quickfix";
+స్థిరరాశి llvm::StringLiteral సంకేతం_Action::kRefactor = "refactor";
+స్థిరరాశి llvm::StringLiteral సంకేతం_Action::kInfo = "info";
 
-llvm::json::Value llvm::lsp::toJSON(const CodeAction &Value) {
-  llvm::json::Object CodeAction{{"title", Value.title}};
-  if (Value.kind)
-    CodeAction["kind"] = *Value.kind;
-  if (Value.diagnostics)
-    CodeAction["diagnostics"] = llvm::json::Array(*Value.diagnostics);
-  if (Value.isPreferred)
-    CodeAction["isPreferred"] = true;
-  if (Value.edit)
-    CodeAction["edit"] = *Value.edit;
-  return std::move(CodeAction);
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి సంకేతం_Action &విలువ) {
+  llvm::json::Object సంకేతం_Action{{"title", విలువ.title}};
+  ఒకవేళ (విలువ.రకం_2)
+    సంకేతం_Action["kind"] = *విలువ.రకం_2;
+  ఒకవేళ (విలువ.diagnostics)
+    సంకేతం_Action["diagnostics"] = llvm::json::Array(*విలువ.diagnostics);
+  ఒకవేళ (విలువ.isPreferred)
+    సంకేతం_Action["isPreferred"] = నిజం;
+  ఒకవేళ (విలువ.edit)
+    సంకేతం_Action["edit"] = *విలువ.edit;
+  తిరిగి std::move(సంకేతం_Action);
 }
 
 //===----------------------------------------------------------------------===//
 // ShowMessageParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ShowMessageParams &Params) {
-  auto Out = llvm::json::Object{
-      {"type", static_cast<int>(Params.type)},
-      {"message", Params.message},
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి Show_సందేశం_Params &Params) {
+  స్వయంచాలక బహిర్గతం = llvm::json::Object{
+      {"type", static_cast<పూర్ణాంకం>(Params.type)},
+      {"message", Params.సందేశం_2},
   };
-  if (Params.actions)
-    Out["actions"] = *Params.actions;
-  return Out;
+  ఒకవేళ (Params.actions)
+    బహిర్గతం["actions"] = *Params.actions;
+  తిరిగి బహిర్గతం;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MessageActionItem &Params) {
-  return llvm::json::Object{{"title", Params.title}};
+llvm::json::విలువ llvm::lsp::గమ్యం_JSON(స్థిరరాశి సందేశం_Action_అంశం &Params) {
+  తిరిగి llvm::json::Object{{"title", Params.title}};
 }

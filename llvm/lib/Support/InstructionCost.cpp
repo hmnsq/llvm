@@ -11,27 +11,27 @@
 /// instructions.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InstructionCost.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/InstructionCost.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
-  using UnsignedCostType = std::make_unsigned_t<CostType>;
-  if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+శూన్య Instruction_ఖర్చు::print(raw_ostream &OS) స్థిరరాశి {
+  ఉపయోగించి Unsigned_ఖర్చు_Type = std::make_unsigned_t<ఖర్చు_Type>;
+  ఒకవేళ (isValid()) {
+    Unsigned_ఖర్చు_Type Abs_విలువ =
+        (విలువ < 0) ? -((Unsigned_ఖర్చు_Type)విలువ) : ((Unsigned_ఖర్చు_Type)విలువ);
+    Unsigned_ఖర్చు_Type సంపూర్ణ_సంఖ్య = Abs_విలువ / ఖర్చు_Granularity;
+    Unsigned_ఖర్చు_Type Remainder = Abs_విలువ % ఖర్చు_Granularity;
+    ఒకవేళ (విలువ < 0)
       OS << "-";
-    UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
-    while (RemainderHundreds % 10 == 0 && RemainderHundreds)
+    Unsigned_ఖర్చు_Type RemainderHundreds = (Remainder * 100) / ఖర్చు_Granularity;
+    అయితే (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
-    if (RemainderHundreds)
+    OS << సంపూర్ణ_సంఖ్య;
+    ఒకవేళ (RemainderHundreds)
       OS << "." << RemainderHundreds;
-  } else {
+  } లేకపోతే {
     OS << "Invalid";
   }
 }

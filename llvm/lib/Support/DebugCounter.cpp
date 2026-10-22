@@ -1,36 +1,36 @@
-#include "llvm/Support/DebugCounter.h"
+#అన్తర్భావ "llvm/Support/DebugCounter.h"
 
-#include "DebugOptions.h"
+#అన్తర్భావ "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
+#అన్తర్భావ "llvm/Support/CommandLine.h"
+#అన్తర్భావ "llvm/Support/Format.h"
+#అన్తర్భావ "llvm/Support/ManagedStatic.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-namespace llvm {
+నామాకాశ llvm {
 
-void DebugCounter::printChunks(raw_ostream &OS,
+శూన్య DebugCounter::printChunks(raw_ostream &OS,
                                ArrayRef<IntegerInclusiveInterval> Chunks) {
   IntegerInclusiveIntervalUtils::printIntervals(OS, Chunks, ':');
 }
 
 } // namespace llvm
 
-namespace {
+నామాకాశ {
 // This class overrides the default list implementation of printing so we
 // can pretty print the list of debug counter options.  This type of
 // dynamic option is pretty rare (basically this and pass lists).
-class DebugCounterList : public cl::list<std::string, DebugCounter> {
-private:
-  using Base = cl::list<std::string, DebugCounter>;
+తరగతి DebugCounterList : బహిరంగ cl::list<std::string, DebugCounter> {
+అంతరంగ:
+  ఉపయోగించి పునాది = cl::list<std::string, DebugCounter>;
 
-public:
-  template <class... Mods>
-  explicit DebugCounterList(Mods &&... Ms) : Base(std::forward<Mods>(Ms)...) {}
+బహిరంగ:
+  మూస <తరగతి... Mods>
+  స్పష్టమైన DebugCounterList(Mods &&... Ms) : పునాది(std::forward<Mods>(Ms)...) {}
 
-private:
-  void printOptionInfo(size_t GlobalWidth) const override {
+అంతరంగ:
+  శూన్య printOptionInfo(size_t Global_వెడల్పు) స్థిరరాశి override {
     // This is a variant of from generic_parser_base::printOptionInfo.  Sadly,
     // it's not easy to make it more usable.  We could get it to print these as
     // options if we were a cl::opt and registered them, but lists don't have
@@ -41,13 +41,13 @@ private:
     outs() << "  -" << ArgStr;
     // All of the other options in CommandLine.cpp use ArgStr.size() + 6 for
     // width, so we do the same.
-    Option::printHelpStr(HelpStr, GlobalWidth, ArgStr.size() + 6);
-    const auto &CounterInstance = DebugCounter::instance();
-    for (const auto &Entry : CounterInstance) {
-      const auto &[Name, Desc] = CounterInstance.getCounterDesc(Entry.second);
-      size_t NumSpaces = GlobalWidth - Name.size() - 8;
+    Option::printHelpStr(HelpStr, Global_వెడల్పు, ArgStr.కొలత_2() + 6);
+    స్థిరరాశి స్వయంచాలక &CounterInstance = DebugCounter::instance();
+    కొరకు (స్థిరరాశి స్వయంచాలక &నమోదు_2 : CounterInstance) {
+      స్థిరరాశి స్వయంచాలక &[Name, Desc] = CounterInstance.getCounterDesc(నమోదు_2.రెండవ_2);
+      size_t అంకె_Spaces = Global_వెడల్పు - Name.కొలత_2() - 8;
       outs() << "    =" << Name;
-      outs().indent(NumSpaces) << " -   " << Desc << '\n';
+      outs().indent(అంకె_Spaces) << " -   " << Desc << '\n';
     }
   }
 };
@@ -56,44 +56,44 @@ private:
 // itself, are owned by a single global instance of the DebugCounterOwner
 // struct. This makes it easier to control the order in which constructors and
 // destructors are run.
-struct DebugCounterOwner : DebugCounter {
+నిర్మాణం DebugCounterOwner : DebugCounter {
   DebugCounterList DebugCounterOption{
       "debug-counter", cl::Hidden,
       cl::desc("Comma separated list of debug counter skip and count"),
-      cl::CommaSeparated, cl::location<DebugCounter>(*this)};
-  cl::opt<bool, true> PrintDebugCounter{
+      cl::CommaSeparated, cl::location<DebugCounter>(*ఇది)};
+  cl::opt<తార్కిక, నిజం> PrintDebugCounter{
       "print-debug-counter",
       cl::Hidden,
-      cl::location(this->ShouldPrintCounter),
-      cl::init(false),
+      cl::location(ఇది->ShouldPrintCounter),
+      cl::init(అబద్ధం),
       cl::desc("Print out debug counter info after all counters accumulated"),
-      cl::callback([&](const bool &Value) {
-        if (Value)
+      cl::callback([&](స్థిరరాశి తార్కిక &విలువ) {
+        ఒకవేళ (విలువ)
           activateAllCounters();
       })};
-  cl::opt<bool, true> PrintDebugCounterQueries{
+  cl::opt<తార్కిక, నిజం> PrintDebugCounterQueries{
       "print-debug-counter-queries",
       cl::Hidden,
-      cl::location(this->ShouldPrintCounterQueries),
-      cl::init(false),
+      cl::location(ఇది->ShouldPrintCounterQueries),
+      cl::init(అబద్ధం),
       cl::desc("Print out each query of an enabled debug counter")};
-  cl::opt<bool, true> BreakOnLastCount{
+  cl::opt<తార్కిక, నిజం> Break_On_చివరి_లెక్క{
       "debug-counter-break-on-last",
       cl::Hidden,
-      cl::location(this->BreakOnLast),
-      cl::init(false),
+      cl::location(ఇది->Break_On_చివరి),
+      cl::init(అబద్ధం),
       cl::desc("Insert a break point on the last enabled count of a "
                "chunks list")};
 
   DebugCounterOwner() {
     // Our destructor uses the debug stream. By referencing it here, we
     // ensure that its destructor runs after our destructor.
-    (void)dbgs();
+    (శూన్య)dbgs();
   }
 
   // Print information when destroyed, iff command line option is specified.
   ~DebugCounterOwner() {
-    if (ShouldPrintCounter)
+    ఒకవేళ (ShouldPrintCounter)
       print(dbgs());
   }
 };
@@ -103,95 +103,95 @@ struct DebugCounterOwner : DebugCounter {
 // Use ManagedStatic instead of function-local static variable to ensure
 // the destructor (which accesses counters and streams) runs during
 // llvm_shutdown() rather than at some unspecified point.
-static ManagedStatic<DebugCounterOwner> Owner;
+స్థిర ManagedStatic<DebugCounterOwner> Owner;
 
-void llvm::initDebugCounterOptions() { (void)DebugCounter::instance(); }
+శూన్య llvm::initDebugCounterOptions() { (శూన్య)DebugCounter::instance(); }
 
-DebugCounter &DebugCounter::instance() { return *Owner; }
+DebugCounter &DebugCounter::instance() { తిరిగి *Owner; }
 
 // This is called by the command line parser when it sees a value for the
 // debug-counter option defined above.
-void DebugCounter::push_back(const std::string &Val) {
-  if (Val.empty())
-    return;
+శూన్య DebugCounter::నెట్టు_వెనుక(స్థిరరాశి std::string &Val) {
+  ఒకవేళ (Val.ఖాళీలు())
+    తిరిగి;
 
   // The strings should come in as counter=chunk_list
-  auto CounterPair = StringRef(Val).split('=');
-  if (CounterPair.second.empty()) {
+  స్వయంచాలక CounterPair = StringRef(Val).విభజించు('=');
+  ఒకవేళ (CounterPair.రెండవ_2.ఖాళీలు()) {
     errs() << "DebugCounter Error: " << Val << " does not have an = in it\n";
-    exit(1);
+    నిష్క్రమించు(1);
   }
-  StringRef CounterName = CounterPair.first;
+  StringRef CounterName = CounterPair.మొదటి_2;
 
   CounterInfo *Counter = getCounterInfo(CounterName);
-  if (!Counter) {
+  ఒకవేళ (!Counter) {
     errs() << "DebugCounter Error: " << CounterName
            << " is not a registered counter\n";
-    return;
+    తిరిగి;
   }
 
-  auto ExpectedChunks =
-      IntegerInclusiveIntervalUtils::parseIntervals(CounterPair.second, ':');
-  if (!ExpectedChunks) {
-    handleAllErrors(ExpectedChunks.takeError(), [&](const StringError &E) {
-      errs() << "DebugCounter Error: " << E.getMessage() << "\n";
+  స్వయంచాలక ExpectedChunks =
+      IntegerInclusiveIntervalUtils::parseIntervals(CounterPair.రెండవ_2, ':');
+  ఒకవేళ (!ExpectedChunks) {
+    handleAllErrors(ExpectedChunks.takeError(), [&](స్థిరరాశి StringError &E) {
+      errs() << "DebugCounter Error: " << E.get_సందేశం() << "\n";
     });
-    exit(1);
+    నిష్క్రమించు(1);
   }
   Counter->Chunks = std::move(*ExpectedChunks);
-  Counter->Active = Counter->IsSet = true;
+  Counter->చురుకైన = Counter->Is_సమితి = నిజం;
 }
 
-void DebugCounter::print(raw_ostream &OS) const {
-  SmallVector<StringRef, 16> CounterNames(Counters.keys());
-  sort(CounterNames);
+శూన్య DebugCounter::print(raw_ostream &OS) స్థిరరాశి {
+  Small_సదిశ<StringRef, 16> Counter_పేర్లు(Counters.కీలకాలు());
+  క్రమీకరించు(Counter_పేర్లు);
 
   OS << "Counters and values:\n";
-  for (StringRef CounterName : CounterNames) {
-    const CounterInfo *C = getCounterInfo(CounterName);
-    OS << left_justify(C->Name, 32) << ": {" << C->Count << ",";
+  కొరకు (StringRef CounterName : Counter_పేర్లు) {
+    స్థిరరాశి CounterInfo *C = getCounterInfo(CounterName);
+    OS << ఎడమ_justify(C->Name, 32) << ": {" << C->లెక్క_2 << ",";
     printChunks(OS, C->Chunks);
     OS << "}\n";
   }
 }
 
-bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
-  int64_t CurrCount = Info.Count++;
+తార్కిక DebugCounter::handleCounterIncrement(CounterInfo &Info) {
+  int64_t Curr_లెక్క = Info.లెక్క_2++;
   uint64_t CurrIdx = Info.CurrChunkIdx;
 
-  if (Info.Chunks.empty())
-    return true;
-  if (CurrIdx >= Info.Chunks.size())
-    return false;
+  ఒకవేళ (Info.Chunks.ఖాళీలు())
+    తిరిగి నిజం;
+  ఒకవేళ (CurrIdx >= Info.Chunks.కొలత_2())
+    తిరిగి అబద్ధం;
 
-  bool Res = Info.Chunks[CurrIdx].contains(CurrCount);
-  if (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
-      CurrCount == Info.Chunks[CurrIdx].getEnd()) {
+  తార్కిక Res = Info.Chunks[CurrIdx].కలిగియుంది(Curr_లెక్క);
+  ఒకవేళ (Break_On_చివరి && CurrIdx == (Info.Chunks.కొలత_2() - 1) &&
+      Curr_లెక్క == Info.Chunks[CurrIdx].get_చివర()) {
     LLVM_BUILTIN_DEBUGTRAP;
   }
-  if (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
+  ఒకవేళ (Curr_లెక్క > Info.Chunks[CurrIdx].get_చివర()) {
     Info.CurrChunkIdx++;
 
     /// Handle consecutive blocks.
-    if (Info.CurrChunkIdx < Info.Chunks.size() &&
-        CurrCount == Info.Chunks[Info.CurrChunkIdx].getBegin())
-      return true;
+    ఒకవేళ (Info.CurrChunkIdx < Info.Chunks.కొలత_2() &&
+        Curr_లెక్క == Info.Chunks[Info.CurrChunkIdx].getBegin())
+      తిరిగి నిజం;
   }
-  return Res;
+  తిరిగి Res;
 }
 
-bool DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
-  auto &Us = instance();
-  bool Res = Us.handleCounterIncrement(Counter);
-  if (Us.ShouldPrintCounterQueries && Counter.IsSet) {
-    dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.Count - 1)
+తార్కిక DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
+  స్వయంచాలక &Us = instance();
+  తార్కిక Res = Us.handleCounterIncrement(Counter);
+  ఒకవేళ (Us.ShouldPrintCounterQueries && Counter.Is_సమితి) {
+    dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.లెక్క_2 - 1)
            << (Res ? " execute" : " skip") << "\n";
   }
-  return Res;
+  తిరిగి Res;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void DebugCounter::dump() const {
+#ఒకవేళ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_పద్ధతి శూన్య DebugCounter::dump() స్థిరరాశి {
   print(dbgs());
 }
-#endif
+#అయితే_ముగింపు

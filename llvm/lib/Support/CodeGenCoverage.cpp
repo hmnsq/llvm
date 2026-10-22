@@ -9,103 +9,103 @@
 /// This file implements the CodeGenCoverage class.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CodeGenCoverage.h"
+#అన్తర్భావ "llvm/Support/CodeGenCoverage.h"
 
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/ToolOutputFile.h"
+#అన్తర్భావ "llvm/Support/Endian.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/Mutex.h"
+#అన్తర్భావ "llvm/Support/Process.h"
+#అన్తర్భావ "llvm/Support/ScopedPrinter.h"
+#అన్తర్భావ "llvm/Support/ToolOutputFile.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-CodeGenCoverage::CodeGenCoverage() = default;
+సంకేతం_Gen_Coverage::సంకేతం_Gen_Coverage() = అప్రమేయ;
 
-void CodeGenCoverage::setCovered(uint64_t RuleID) {
-  if (RuleCoverage.size() <= RuleID)
-    RuleCoverage.resize(RuleID + 1, false);
-  RuleCoverage[RuleID] = true;
+శూన్య సంకేతం_Gen_Coverage::సమితి_Covered(uint64_t నియమం_ID) {
+  ఒకవేళ (నియమం_Coverage.కొలత_2() <= నియమం_ID)
+    నియమం_Coverage.resize(నియమం_ID + 1, అబద్ధం);
+  నియమం_Coverage[నియమం_ID] = నిజం;
 }
 
-bool CodeGenCoverage::isCovered(uint64_t RuleID) const {
-  if (RuleCoverage.size() <= RuleID)
-    return false;
-  return RuleCoverage[RuleID];
+తార్కిక సంకేతం_Gen_Coverage::isCovered(uint64_t నియమం_ID) స్థిరరాశి {
+  ఒకవేళ (నియమం_Coverage.కొలత_2() <= నియమం_ID)
+    తిరిగి అబద్ధం;
+  తిరిగి నియమం_Coverage[నియమం_ID];
 }
 
-iterator_range<CodeGenCoverage::const_covered_iterator>
-CodeGenCoverage::covered() const {
-  return RuleCoverage.set_bits();
+iterator_range<సంకేతం_Gen_Coverage::const_covered_iterator>
+సంకేతం_Gen_Coverage::covered() స్థిరరాశి {
+  తిరిగి నియమం_Coverage.సమితి_బిట్లు_2();
 }
 
-bool CodeGenCoverage::parse(MemoryBuffer &Buffer, StringRef BackendName) {
-  const char *CurPtr = Buffer.getBufferStart();
+తార్కిక సంకేతం_Gen_Coverage::parse(జ్ఞాపకం_బఫరు &బఫరు, StringRef BackendName) {
+  స్థిరరాశి అక్షరం *CurPtr = బఫరు.get_బఫరు_ప్రారంభం();
 
-  while (CurPtr != Buffer.getBufferEnd()) {
+  అయితే (CurPtr != బఫరు.get_బఫరు_చివర()) {
     // Read the backend name from the input.
-    const char *LexedBackendName = CurPtr;
-    while (*CurPtr++ != 0)
+    స్థిరరాశి అక్షరం *LexedBackendName = CurPtr;
+    అయితే (*CurPtr++ != 0)
       ;
-    if (CurPtr == Buffer.getBufferEnd())
-      return false; // Data is invalid, expected rule id's to follow.
+    ఒకవేళ (CurPtr == బఫరు.get_బఫరు_చివర())
+      తిరిగి అబద్ధం; // Data is invalid, expected rule id's to follow.
 
-    bool IsForThisBackend = BackendName == LexedBackendName;
-    while (CurPtr != Buffer.getBufferEnd()) {
-      if (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
-        return false; // Data is invalid. Not enough bytes for another rule id.
+    తార్కిక IsForThisBackend = BackendName == LexedBackendName;
+    అయితే (CurPtr != బఫరు.get_బఫరు_చివర()) {
+      ఒకవేళ (std::దూరం(CurPtr, బఫరు.get_బఫరు_చివర()) < 8)
+        తిరిగి అబద్ధం; // Data is invalid. Not enough bytes for another rule id.
 
-      uint64_t RuleID =
+      uint64_t నియమం_ID =
           support::endian::read64(CurPtr, llvm::endianness::native);
       CurPtr += 8;
 
       // ~0ull terminates the rule id list.
-      if (RuleID == ~0ull)
-        break;
+      ఒకవేళ (నియమం_ID == ~0ull)
+        ఆపు;
 
       // Anything else, is recorded or ignored depending on whether it's
       // intended for the backend we're interested in.
-      if (IsForThisBackend)
-        setCovered(RuleID);
+      ఒకవేళ (IsForThisBackend)
+        సమితి_Covered(నియమం_ID);
     }
   }
 
-  return true;
+  తిరిగి నిజం;
 }
 
-bool CodeGenCoverage::emit(StringRef CoveragePrefix,
-                           StringRef BackendName) const {
-  if (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
-    static sys::SmartMutex<true> OutputMutex;
-    sys::SmartScopedLock<true> Lock(OutputMutex);
+తార్కిక సంకేతం_Gen_Coverage::emit(StringRef Coverage_ఉపసర్గ,
+                           StringRef BackendName) స్థిరరాశి {
+  ఒకవేళ (!Coverage_ఉపసర్గ.ఖాళీలు() && !నియమం_Coverage.ఖాళీలు()) {
+    స్థిర sys::SmartMutex<నిజం> OutputMutex;
+    sys::Smart_Scoped_తాళం<నిజం> తాళం_3(OutputMutex);
 
     // We can handle locking within a process easily enough but we don't want to
     // manage it between multiple processes. Use the process ID to ensure no
     // more than one process is ever writing to the same file at the same time.
-    std::string Pid = llvm::to_string(sys::Process::getProcessId());
+    std::string Pid = llvm::గమ్యం_string(sys::Process::getProcessId());
 
-    std::string CoverageFilename = (CoveragePrefix + Pid).str();
+    std::string CoverageFilename = (Coverage_ఉపసర్గ + Pid).str();
 
-    std::error_code EC;
-    sys::fs::OpenFlags OpenFlags = sys::fs::OF_Append;
+    std::error_సంకేతం EC;
+    sys::fs::OpenFlags OpenFlags = sys::fs::యొక్క_Append;
     std::unique_ptr<ToolOutputFile> CoverageFile =
         std::make_unique<ToolOutputFile>(CoverageFilename, EC, OpenFlags);
-    if (EC)
-      return false;
+    ఒకవేళ (EC)
+      తిరిగి అబద్ధం;
 
     uint64_t Zero = 0;
     uint64_t InvZero = ~0ull;
     CoverageFile->os() << BackendName;
-    CoverageFile->os().write((const char *)&Zero, sizeof(unsigned char));
-    for (uint64_t I : RuleCoverage.set_bits())
-      CoverageFile->os().write((const char *)&I, sizeof(uint64_t));
-    CoverageFile->os().write((const char *)&InvZero, sizeof(uint64_t));
+    CoverageFile->os().లిఖ((స్థిరరాశి అక్షరం *)&Zero, పరిమాణం(గుర్తులేని అక్షరం));
+    కొరకు (uint64_t I : నియమం_Coverage.సమితి_బిట్లు_2())
+      CoverageFile->os().లిఖ((స్థిరరాశి అక్షరం *)&I, పరిమాణం(uint64_t));
+    CoverageFile->os().లిఖ((స్థిరరాశి అక్షరం *)&InvZero, పరిమాణం(uint64_t));
 
     CoverageFile->keep();
   }
 
-  return true;
+  తిరిగి నిజం;
 }
 
-void CodeGenCoverage::reset() { RuleCoverage.resize(0); }
+శూన్య సంకేతం_Gen_Coverage::reset() { నియమం_Coverage.resize(0); }

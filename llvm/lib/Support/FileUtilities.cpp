@@ -11,160 +11,160 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-#include <system_error>
+#అన్తర్భావ "llvm/Support/FileUtilities.h"
+#అన్తర్భావ "llvm/ADT/SmallString.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/Error.h"
+#అన్తర్భావ "llvm/Support/ErrorOr.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/Process.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <cmath>
+#అన్తర్భావ <cstdint>
+#అన్తర్భావ <cstdlib>
+#అన్తర్భావ <cstring>
+#అన్తర్భావ <memory>
+#అన్తర్భావ <system_error>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-static bool isSignedChar(char C) {
-  return (C == '+' || C == '-');
+స్థిర తార్కిక isSignedChar(అక్షరం C) {
+  తిరిగి (C == '+' || C == '-');
 }
 
-static bool isExponentChar(char C) {
-  switch (C) {
-  case 'D':  // Strange exponential notation.
-  case 'd':  // Strange exponential notation.
-  case 'e':
-  case 'E': return true;
-  default: return false;
+స్థిర తార్కిక isExponentChar(అక్షరం C) {
+  ఎంపిక (C) {
+  స్థితి 'D':  // Strange exponential notation.
+  స్థితి 'd':  // Strange exponential notation.
+  స్థితి 'e':
+  స్థితి 'E': తిరిగి నిజం;
+  అప్రమేయ: తిరిగి అబద్ధం;
   }
 }
 
-static bool isNumberChar(char C) {
-  switch (C) {
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case '.': return true;
-  default: return isSignedChar(C) || isExponentChar(C);
+స్థిర తార్కిక is_సంఖ్య_Char(అక్షరం C) {
+  ఎంపిక (C) {
+  స్థితి '0': స్థితి '1': స్థితి '2': స్థితి '3': స్థితి '4':
+  స్థితి '5': స్థితి '6': స్థితి '7': స్థితి '8': స్థితి '9':
+  స్థితి '.': తిరిగి నిజం;
+  అప్రమేయ: తిరిగి isSignedChar(C) || isExponentChar(C);
   }
 }
 
-static const char *BackupNumber(const char *Pos, const char *FirstChar) {
+స్థిర స్థిరరాశి అక్షరం *Backup_సంఖ్య(స్థిరరాశి అక్షరం *Pos, స్థిరరాశి అక్షరం *మొదటి_Char) {
   // If we didn't stop in the middle of a number, don't backup.
-  if (!isNumberChar(*Pos)) return Pos;
+  ఒకవేళ (!is_సంఖ్య_Char(*Pos)) తిరిగి Pos;
 
   // Otherwise, return to the start of the number.
-  bool HasPeriod = false;
-  while (Pos > FirstChar && isNumberChar(Pos[-1])) {
+  తార్కిక HasPeriod = అబద్ధం;
+  అయితే (Pos > మొదటి_Char && is_సంఖ్య_Char(Pos[-1])) {
     // Backup over at most one period.
-    if (Pos[-1] == '.') {
-      if (HasPeriod)
-        break;
-      HasPeriod = true;
+    ఒకవేళ (Pos[-1] == '.') {
+      ఒకవేళ (HasPeriod)
+        ఆపు;
+      HasPeriod = నిజం;
     }
 
     --Pos;
-    if (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
-      break;
+    ఒకవేళ (Pos > మొదటి_Char && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
+      ఆపు;
   }
-  return Pos;
+  తిరిగి Pos;
 }
 
 /// EndOfNumber - Return the first character that is not part of the specified
 /// number.  This assumes that the buffer is null terminated, so it won't fall
 /// off the end.
-static const char *EndOfNumber(const char *Pos) {
-  while (isNumberChar(*Pos))
+స్థిర స్థిరరాశి అక్షరం *చివర_యొక్క_సంఖ్య(స్థిరరాశి అక్షరం *Pos) {
+  అయితే (is_సంఖ్య_Char(*Pos))
     ++Pos;
-  return Pos;
+  తిరిగి Pos;
 }
 
 /// CompareNumbers - compare two numbers, returning true if they are different.
-static bool CompareNumbers(const char *&F1P, const char *&F2P,
-                           const char *F1End, const char *F2End,
-                           double AbsTolerance, double RelTolerance,
-                           std::string *ErrorMsg) {
-  const char *F1NumEnd, *F2NumEnd;
-  double V1 = 0.0, V2 = 0.0;
+స్థిర తార్కిక CompareNumbers(స్థిరరాశి అక్షరం *&F1P, స్థిరరాశి అక్షరం *&F2P,
+                           స్థిరరాశి అక్షరం *F1_చివర, స్థిరరాశి అక్షరం *F2_చివర,
+                           ద్విగుణ AbsTolerance, ద్విగుణ RelTolerance,
+                           std::string *Error_సందేశం) {
+  స్థిరరాశి అక్షరం *F1_అంకె_చివర, *F2_అంకె_చివర;
+  ద్విగుణ V1 = 0.0, V2 = 0.0;
 
   // If one of the positions is at a space and the other isn't, chomp up 'til
   // the end of the space.
-  while (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
+  అయితే (isSpace(static_cast<గుర్తులేని అక్షరం>(*F1P)) && F1P != F1_చివర)
     ++F1P;
-  while (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
+  అయితే (isSpace(static_cast<గుర్తులేని అక్షరం>(*F2P)) && F2P != F2_చివర)
     ++F2P;
 
   // If we stop on numbers, compare their difference.
-  if (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
+  ఒకవేళ (!is_సంఖ్య_Char(*F1P) || !is_సంఖ్య_Char(*F2P)) {
     // The diff failed.
-    F1NumEnd = F1P;
-    F2NumEnd = F2P;
-  } else {
+    F1_అంకె_చివర = F1P;
+    F2_అంకె_చివర = F2P;
+  } లేకపోతే {
     // Note that some ugliness is built into this to permit support for numbers
     // that use "D" or "d" as their exponential marker, e.g. "1.234D45".  This
     // occurs in 200.sixtrack in spec2k.
-    V1 = strtod(F1P, const_cast<char**>(&F1NumEnd));
-    V2 = strtod(F2P, const_cast<char**>(&F2NumEnd));
+    V1 = strtod(F1P, const_cast<అక్షరం**>(&F1_అంకె_చివర));
+    V2 = strtod(F2P, const_cast<అక్షరం**>(&F2_అంకె_చివర));
 
-    if (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
+    ఒకవేళ (*F1_అంకె_చివర == 'D' || *F1_అంకె_చివర == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F1P, EndOfNumber(F1NumEnd)+1);
+      SmallString<200> StrTmp(F1P, చివర_యొక్క_సంఖ్య(F1_అంకె_చివర)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F1NumEnd-F1P)] = 'e';
+      StrTmp[static_cast<గుర్తులేని>(F1_అంకె_చివర-F1P)] = 'e';
 
-      V1 = strtod(&StrTmp[0], const_cast<char**>(&F1NumEnd));
-      F1NumEnd = F1P + (F1NumEnd-&StrTmp[0]);
+      V1 = strtod(&StrTmp[0], const_cast<అక్షరం**>(&F1_అంకె_చివర));
+      F1_అంకె_చివర = F1P + (F1_అంకె_చివర-&StrTmp[0]);
     }
 
-    if (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
+    ఒకవేళ (*F2_అంకె_చివర == 'D' || *F2_అంకె_చివర == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F2P, EndOfNumber(F2NumEnd)+1);
+      SmallString<200> StrTmp(F2P, చివర_యొక్క_సంఖ్య(F2_అంకె_చివర)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F2NumEnd-F2P)] = 'e';
+      StrTmp[static_cast<గుర్తులేని>(F2_అంకె_చివర-F2P)] = 'e';
 
-      V2 = strtod(&StrTmp[0], const_cast<char**>(&F2NumEnd));
-      F2NumEnd = F2P + (F2NumEnd-&StrTmp[0]);
+      V2 = strtod(&StrTmp[0], const_cast<అక్షరం**>(&F2_అంకె_చివర));
+      F2_అంకె_చివర = F2P + (F2_అంకె_చివర-&StrTmp[0]);
     }
   }
 
-  if (F1NumEnd == F1P || F2NumEnd == F2P) {
-    if (ErrorMsg) {
-      *ErrorMsg = "FP Comparison failed, not a numeric difference between '";
-      *ErrorMsg += F1P[0];
-      *ErrorMsg += "' and '";
-      *ErrorMsg += F2P[0];
-      *ErrorMsg += "'";
+  ఒకవేళ (F1_అంకె_చివర == F1P || F2_అంకె_చివర == F2P) {
+    ఒకవేళ (Error_సందేశం) {
+      *Error_సందేశం = "FP Comparison failed, not a numeric difference between '";
+      *Error_సందేశం += F1P[0];
+      *Error_సందేశం += "' and '";
+      *Error_సందేశం += F2P[0];
+      *Error_సందేశం += "'";
     }
-    return true;
+    తిరిగి నిజం;
   }
 
   // Check to see if these are inside the absolute tolerance
-  if (AbsTolerance < std::abs(V1-V2)) {
+  ఒకవేళ (AbsTolerance < std::నిరపేక్ష(V1-V2)) {
     // Nope, check the relative tolerance...
-    double Diff;
-    if (V2)
-      Diff = std::abs(V1/V2 - 1.0);
-    else if (V1)
-      Diff = std::abs(V2/V1 - 1.0);
-    else
+    ద్విగుణ Diff;
+    ఒకవేళ (V2)
+      Diff = std::నిరపేక్ష(V1/V2 - 1.0);
+    లేకపోతే ఒకవేళ (V1)
+      Diff = std::నిరపేక్ష(V2/V1 - 1.0);
+    లేకపోతే
       Diff = 0;  // Both zero.
-    if (Diff > RelTolerance) {
-      if (ErrorMsg) {
-        raw_string_ostream(*ErrorMsg)
+    ఒకవేళ (Diff > RelTolerance) {
+      ఒకవేళ (Error_సందేశం) {
+        raw_string_ostream(*Error_సందేశం)
           << "Compared: " << V1 << " and " << V2 << '\n'
-          << "abs. diff = " << std::abs(V1-V2) << " rel.diff = " << Diff << '\n'
+          << "abs. diff = " << std::నిరపేక్ష(V1-V2) << " rel.diff = " << Diff << '\n'
           << "Out of tolerance: rel/abs: " << RelTolerance << '/'
           << AbsTolerance;
       }
-      return true;
+      తిరిగి నిజం;
     }
   }
 
   // Otherwise, advance our read pointers to the end of the numbers.
-  F1P = F1NumEnd;  F2P = F2NumEnd;
-  return false;
+  F1P = F1_అంకె_చివర;  F2P = F2_అంకె_చివర;
+  తిరిగి అబద్ధం;
 }
 
 /// DiffFilesWithTolerance - Compare the two files specified, returning 0 if the
@@ -175,160 +175,160 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 /// error occurs, allowing the caller to distinguish between a failed diff and a
 /// file system error.
 ///
-int llvm::DiffFilesWithTolerance(StringRef NameA,
+పూర్ణాంకం llvm::DiffFilesWithTolerance(StringRef NameA,
                                  StringRef NameB,
-                                 double AbsTol, double RelTol,
+                                 ద్విగుణ AbsTol, ద్విగుణ RelTol,
                                  std::string *Error) {
   // Now its safe to mmap the files into memory because both files
   // have a non-zero size.
-  ErrorOr<std::unique_ptr<MemoryBuffer>> F1OrErr = MemoryBuffer::getFile(NameA);
-  if (std::error_code EC = F1OrErr.getError()) {
-    if (Error)
-      *Error = EC.message();
-    return 2;
+  ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>> F1OrErr = జ్ఞాపకం_బఫరు::getFile(NameA);
+  ఒకవేళ (std::error_సంకేతం EC = F1OrErr.getError()) {
+    ఒకవేళ (Error)
+      *Error = EC.సందేశం_2();
+    తిరిగి 2;
   }
-  MemoryBuffer &F1 = *F1OrErr.get();
+  జ్ఞాపకం_బఫరు &F1 = *F1OrErr.get();
 
-  ErrorOr<std::unique_ptr<MemoryBuffer>> F2OrErr = MemoryBuffer::getFile(NameB);
-  if (std::error_code EC = F2OrErr.getError()) {
-    if (Error)
-      *Error = EC.message();
-    return 2;
+  ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>> F2OrErr = జ్ఞాపకం_బఫరు::getFile(NameB);
+  ఒకవేళ (std::error_సంకేతం EC = F2OrErr.getError()) {
+    ఒకవేళ (Error)
+      *Error = EC.సందేశం_2();
+    తిరిగి 2;
   }
-  MemoryBuffer &F2 = *F2OrErr.get();
+  జ్ఞాపకం_బఫరు &F2 = *F2OrErr.get();
 
   // Okay, now that we opened the files, scan them for the first difference.
-  const char *File1Start = F1.getBufferStart();
-  const char *File2Start = F2.getBufferStart();
-  const char *File1End = F1.getBufferEnd();
-  const char *File2End = F2.getBufferEnd();
-  const char *F1P = File1Start;
-  const char *F2P = File2Start;
-  uint64_t A_size = F1.getBufferSize();
-  uint64_t B_size = F2.getBufferSize();
+  స్థిరరాశి అక్షరం *File1_ప్రారంభం = F1.get_బఫరు_ప్రారంభం();
+  స్థిరరాశి అక్షరం *File2_ప్రారంభం = F2.get_బఫరు_ప్రారంభం();
+  స్థిరరాశి అక్షరం *File1_చివర = F1.get_బఫరు_చివర();
+  స్థిరరాశి అక్షరం *File2_చివర = F2.get_బఫరు_చివర();
+  స్థిరరాశి అక్షరం *F1P = File1_ప్రారంభం;
+  స్థిరరాశి అక్షరం *F2P = File2_ప్రారంభం;
+  uint64_t A_కొలత = F1.get_బఫరు_కొలత();
+  uint64_t B_కొలత = F2.get_బఫరు_కొలత();
 
   // Are the buffers identical?  Common case: Handle this efficiently.
-  if (A_size == B_size &&
-      std::memcmp(File1Start, File2Start, A_size) == 0)
-    return 0;
+  ఒకవేళ (A_కొలత == B_కొలత &&
+      std::memcmp(File1_ప్రారంభం, File2_ప్రారంభం, A_కొలత) == 0)
+    తిరిగి 0;
 
   // Otherwise, we are done a tolerances are set.
-  if (AbsTol == 0 && RelTol == 0) {
-    if (Error)
+  ఒకవేళ (AbsTol == 0 && RelTol == 0) {
+    ఒకవేళ (Error)
       *Error = "Files differ without tolerance allowance";
-    return 1;   // Files different!
+    తిరిగి 1;   // Files different!
   }
 
-  bool CompareFailed = false;
-  while (true) {
+  తార్కిక CompareFailed = అబద్ధం;
+  అయితే (నిజం) {
     // Scan for the end of file or next difference.
-    while (F1P < File1End && F2P < File2End && *F1P == *F2P) {
+    అయితే (F1P < File1_చివర && F2P < File2_చివర && *F1P == *F2P) {
       ++F1P;
       ++F2P;
     }
 
-    if (F1P >= File1End || F2P >= File2End) break;
+    ఒకవేళ (F1P >= File1_చివర || F2P >= File2_చివర) ఆపు;
 
     // Okay, we must have found a difference.  Backup to the start of the
     // current number each stream is at so that we can compare from the
     // beginning.
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    F1P = Backup_సంఖ్య(F1P, File1_ప్రారంభం);
+    F2P = Backup_సంఖ్య(F2P, File2_ప్రారంభం);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
-      CompareFailed = true;
-      break;
+    ఒకవేళ (CompareNumbers(F1P, F2P, File1_చివర, File2_చివర, AbsTol, RelTol, Error)) {
+      CompareFailed = నిజం;
+      ఆపు;
     }
   }
 
   // Okay, we reached the end of file.  If both files are at the end, we
   // succeeded.
-  bool F1AtEnd = F1P >= File1End;
-  bool F2AtEnd = F2P >= File2End;
-  if (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
+  తార్కిక F1_At_చివర = F1P >= File1_చివర;
+  తార్కిక F2_At_చివర = F2P >= File2_చివర;
+  ఒకవేళ (!CompareFailed && (!F1_At_చివర || !F2_At_చివర)) {
     // Else, we might have run off the end due to a number: backup and retry.
-    if (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
-    if (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    ఒకవేళ (F1_At_చివర && is_సంఖ్య_Char(F1P[-1])) --F1P;
+    ఒకవేళ (F2_At_చివర && is_సంఖ్య_Char(F2P[-1])) --F2P;
+    F1P = Backup_సంఖ్య(F1P, File1_ప్రారంభం);
+    F2P = Backup_సంఖ్య(F2P, File2_ప్రారంభం);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
-      CompareFailed = true;
+    ఒకవేళ (CompareNumbers(F1P, F2P, File1_చివర, File2_చివర, AbsTol, RelTol, Error))
+      CompareFailed = నిజం;
 
     // If we found the end, we succeeded.
-    if (F1P < File1End || F2P < File2End)
-      CompareFailed = true;
+    ఒకవేళ (F1P < File1_చివర || F2P < File2_చివర)
+      CompareFailed = నిజం;
   }
 
-  return CompareFailed;
+  తిరిగి CompareFailed;
 }
 
 Expected<FilePermissionsApplier>
-FilePermissionsApplier::create(StringRef InputFilename) {
-  sys::fs::file_status Status;
+FilePermissionsApplier::create(StringRef ఆదానం_Filename) {
+  sys::fs::file_స్థితి స్థితి_2;
 
-  if (InputFilename != "-") {
-    if (auto EC = sys::fs::status(InputFilename, Status))
-      return createFileError(InputFilename, EC);
-  } else {
-    Status.permissions(static_cast<sys::fs::perms>(0777));
+  ఒకవేళ (ఆదానం_Filename != "-") {
+    ఒకవేళ (స్వయంచాలక EC = sys::fs::స్థితి_3(ఆదానం_Filename, స్థితి_2))
+      తిరిగి createFileError(ఆదానం_Filename, EC);
+  } లేకపోతే {
+    స్థితి_2.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  return FilePermissionsApplier(InputFilename, Status);
+  తిరిగి FilePermissionsApplier(ఆదానం_Filename, స్థితి_2);
 }
 
 Error FilePermissionsApplier::apply(
-    StringRef OutputFilename, bool CopyDates,
+    StringRef OutputFilename, తార్కిక CopyDates,
     std::optional<sys::fs::perms> OverwritePermissions) {
-  sys::fs::file_status Status = InputStatus;
+  sys::fs::file_స్థితి స్థితి_2 = ఆదానం_స్థితి;
 
-  if (OverwritePermissions)
-    Status.permissions(*OverwritePermissions);
+  ఒకవేళ (OverwritePermissions)
+    స్థితి_2.permissions(*OverwritePermissions);
 
-  int FD = 0;
+  పూర్ణాంకం FD = 0;
 
   // Writing to stdout should not be treated as an error here, just
   // do not set access/modification times or permissions.
-  if (OutputFilename == "-")
-    return Error::success();
+  ఒకవేళ (OutputFilename == "-")
+    తిరిగి Error::success();
 
-  if (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
+  ఒకవేళ (std::error_సంకేతం EC = sys::fs::openFileForWrite(OutputFilename, FD,
                                                      sys::fs::CD_OpenExisting))
-    return createFileError(OutputFilename, EC);
+    తిరిగి createFileError(OutputFilename, EC);
 
-  if (CopyDates)
-    if (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
-            FD, Status.getLastAccessedTime(), Status.getLastModificationTime()))
-      return createFileError(OutputFilename, EC);
+  ఒకవేళ (CopyDates)
+    ఒకవేళ (std::error_సంకేతం EC = sys::fs::సమితి_చివరి_Access_And_Modification_సమయం(
+            FD, స్థితి_2.get_చివరి_Accessed_సమయం(), స్థితి_2.get_చివరి_Modification_సమయం()))
+      తిరిగి createFileError(OutputFilename, EC);
 
-  sys::fs::file_status OStat;
-  if (std::error_code EC =
-          sys::fs::status(sys::fs::convertFDToNativeFile(FD), OStat))
-    return createFileError(OutputFilename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file) {
-#ifndef _WIN32
+  sys::fs::file_స్థితి OStat;
+  ఒకవేళ (std::error_సంకేతం EC =
+          sys::fs::స్థితి_3(sys::fs::convertFDToNativeFile(FD), OStat))
+    తిరిగి createFileError(OutputFilename, EC);
+  ఒకవేళ (OStat.type() == sys::fs::file_type::regular_file) {
+#నిర్వచితం_కాకపోతే _WIN32
     // Keep ownership if llvm-objcopy is called under root.
-    if (OutputFilename == InputFilename && OStat.getUser() == 0)
-      sys::fs::changeFileOwnership(FD, Status.getUser(), Status.getGroup());
-#endif
+    ఒకవేళ (OutputFilename == ఆదానం_Filename && OStat.getUser() == 0)
+      sys::fs::changeFileOwnership(FD, స్థితి_2.getUser(), స్థితి_2.get_సమూహం());
+#అయితే_ముగింపు
 
-    sys::fs::perms Perm = Status.permissions();
-    if (OutputFilename != InputFilename)
+    sys::fs::perms Perm = స్థితి_2.permissions();
+    ఒకవేళ (OutputFilename != ఆదానం_Filename)
       Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
-#ifdef _WIN32
-    if (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
-#else
-    if (std::error_code EC = sys::fs::setPermissions(FD, Perm))
-#endif
-      return createFileError(OutputFilename, EC);
+#నిర్వచితమైతే _WIN32
+    ఒకవేళ (std::error_సంకేతం EC = sys::fs::సమితి_Permissions(OutputFilename, Perm))
+#లేకపోతే
+    ఒకవేళ (std::error_సంకేతం EC = sys::fs::సమితి_Permissions(FD, Perm))
+#అయితే_ముగింపు
+      తిరిగి createFileError(OutputFilename, EC);
   }
 
-  if (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return createFileError(OutputFilename, EC);
+  ఒకవేళ (std::error_సంకేతం EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    తిరిగి createFileError(OutputFilename, EC);
 
-  return Error::success();
+  తిరిగి Error::success();
 }

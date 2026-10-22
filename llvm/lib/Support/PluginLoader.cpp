@@ -10,49 +10,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#నిర్వచించు DONT_GET_PLUGIN_LOADER_OPTION
+#అన్తర్భావ "llvm/Support/PluginLoader.h"
+#అన్తర్భావ "llvm/Support/DynamicLibrary.h"
+#అన్తర్భావ "llvm/Support/Mutex.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <vector>
+ఉపయోగించి నామాకాశ llvm;
 
-namespace {
+నామాకాశ {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
-  std::vector<std::string> List;
+నిర్మాణం Plugins {
+  sys::SmartMutex<నిజం> తాళం_3;
+  std::సదిశ<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  స్థిర Plugins P;
+  తిరిగి P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+శూన్య PluginLoader::క్రియాకారకం=(స్థిరరాశి std::string &Filename) {
+  స్వయంచాలక &P = getPlugins();
+  sys::Smart_Scoped_తాళం<నిజం> తాళం_3(P.తాళం_3);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  ఒకవేళ (sys::DynamicLibrary::ఎక్కించు_Library_Permanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } లేకపోతే {
+    P.List.నెట్టు_వెనుక(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+గుర్తులేని PluginLoader::get_అంకె_Plugins() {
+  స్వయంచాలక &P = getPlugins();
+  sys::Smart_Scoped_తాళం<నిజం> తాళం_3(P.తాళం_3);
+  తిరిగి P.List.కొలత_2();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+std::string &PluginLoader::getPlugin(గుర్తులేని అంకె_2) {
+  స్వయంచాలక &P = getPlugins();
+  sys::Smart_Scoped_తాళం<నిజం> తాళం_3(P.తాళం_3);
+  ప్రతిజ్ఞా(అంకె_2 < P.List.కొలత_2() && "Asking for an out of bounds plugin");
+  తిరిగి P.List[అంకె_2];
 }

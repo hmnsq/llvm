@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/StringRef.h"
-#include <cassert>
+#అన్తర్భావ "llvm/ADT/APSInt.h"
+#అన్తర్భావ "llvm/ADT/FoldingSet.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ <cassert>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 APSInt::APSInt(StringRef Str) {
-  assert(!Str.empty() && "Invalid string length");
+  ప్రతిజ్ఞా(!Str.ఖాళీలు() && "Invalid string length");
 
   // (Over-)estimate the required number of bits.
-  unsigned NumBits = ((Str.size() * 64) / 19) + 2;
-  APInt Tmp(NumBits, Str, /*radix=*/10);
-  if (Str[0] == '-') {
-    unsigned MinBits = Tmp.getSignificantBits();
-    if (MinBits < NumBits)
-      Tmp = Tmp.trunc(std::max<unsigned>(1, MinBits));
-    *this = APSInt(Tmp, /*isUnsigned=*/false);
-    return;
+  గుర్తులేని అంకె_బిట్లు_2 = ((Str.కొలత_2() * 64) / 19) + 2;
+  APInt Tmp(అంకె_బిట్లు_2, Str, /*radix=*/10);
+  ఒకవేళ (Str[0] == '-') {
+    గుర్తులేని Min_బిట్లు = Tmp.get_Significant_బిట్లు();
+    ఒకవేళ (Min_బిట్లు < అంకె_బిట్లు_2)
+      Tmp = Tmp.trunc(std::max<గుర్తులేని>(1, Min_బిట్లు));
+    *ఇది = APSInt(Tmp, /*isUnsigned=*/అబద్ధం);
+    తిరిగి;
   }
-  unsigned ActiveBits = Tmp.getActiveBits();
-  if (ActiveBits < NumBits)
-    Tmp = Tmp.trunc(std::max<unsigned>(1, ActiveBits));
-  *this = APSInt(Tmp, /*isUnsigned=*/true);
+  గుర్తులేని చురుకైన_బిట్లు = Tmp.get_చురుకైన_బిట్లు();
+  ఒకవేళ (చురుకైన_బిట్లు < అంకె_బిట్లు_2)
+    Tmp = Tmp.trunc(std::max<గుర్తులేని>(1, చురుకైన_బిట్లు));
+  *ఇది = APSInt(Tmp, /*isUnsigned=*/నిజం);
 }
 
-void APSInt::Profile(FoldingSetNodeID& ID) const {
-  ID.AddInteger((unsigned) (IsUnsigned ? 1 : 0));
+శూన్య APSInt::Profile(Folding_సమితి_కణుపు_ID& ID) స్థిరరాశి {
+  ID.కూడు_Integer((గుర్తులేని) (IsUnsigned ? 1 : 0));
   APInt::Profile(ID);
 }

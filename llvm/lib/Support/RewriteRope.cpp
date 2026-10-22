@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/RewriteRope.h"
-#include "llvm/Support/Casting.h"
-#include <algorithm>
-#include <cassert>
-#include <cstring>
+#అన్తర్భావ "llvm/ADT/RewriteRope.h"
+#అన్తర్భావ "llvm/Support/Casting.h"
+#అన్తర్భావ <algorithm>
+#అన్తర్భావ <cassert>
+#అన్తర్భావ <cstring>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 /// RewriteRope is a "strong" string class, designed to make insertions and
 /// deletions in the middle of the string nearly constant time (really, they are
@@ -61,7 +61,7 @@ using namespace llvm;
 ///     RopePieceBTreeInterior - An interior node in the B+ Tree, which manages
 ///          up to '2*WidthFactor' other nodes in the tree.
 
-namespace {
+నామాకాశ {
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeNode Class
@@ -73,31 +73,31 @@ namespace {
 /// important, this node knows the full extend of the node, including any
 /// children that it has.  This allows efficient skipping over entire subtrees
 /// when looking for an offset in the BTree.
-class RopePieceBTreeNode {
-protected:
+తరగతి Rope_Piece_BTree_కణుపు {
+రక్షిత:
   /// WidthFactor - This controls the number of K/V slots held in the BTree:
   /// how wide it is.  Each level of the BTree is guaranteed to have at least
   /// 'WidthFactor' elements in it (either ropepieces or children), (except
   /// the root, which may have less) and may have at most 2*WidthFactor
   /// elements.
-  enum { WidthFactor = 8 };
+  గణన { వెడల్పు_గుణకం = 8 };
 
   /// Size - This is the number of bytes of file this node (including any
   /// potential children) covers.
-  unsigned Size = 0;
+  గుర్తులేని కొలత = 0;
 
   /// IsLeaf - True if this is an instance of RopePieceBTreeLeaf, false if it
   /// is an instance of RopePieceBTreeInterior.
-  bool IsLeaf;
+  తార్కిక Is_ఆకు;
 
-  RopePieceBTreeNode(bool isLeaf) : IsLeaf(isLeaf) {}
-  ~RopePieceBTreeNode() = default;
+  Rope_Piece_BTree_కణుపు(తార్కిక is_ఆకు) : Is_ఆకు(is_ఆకు) {}
+  ~Rope_Piece_BTree_కణుపు() = అప్రమేయ;
 
-public:
-  bool isLeaf() const { return IsLeaf; }
-  unsigned size() const { return Size; }
+బహిరంగ:
+  తార్కిక is_ఆకు() స్థిరరాశి { తిరిగి Is_ఆకు; }
+  గుర్తులేని కొలత_2() స్థిరరాశి { తిరిగి కొలత; }
 
-  void Destroy();
+  శూన్య Destroy();
 
   /// split - Split the range containing the specified offset so that we are
   /// guaranteed that there is a place to do an insertion at the specified
@@ -105,7 +105,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_కణుపు *విభజించు(గుర్తులేని స్థానభ్రంశం);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -113,11 +113,11 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_కణుపు *చొప్పించు(గుర్తులేని స్థానభ్రంశం, స్థిరరాశి RopePiece &R);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  శూన్య erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు);
 };
 
 //===----------------------------------------------------------------------===//
@@ -131,72 +131,72 @@ public:
 /// over the leaves efficient, they maintain a singly linked list through the
 /// NextLeaf field.  This allows the B+Tree forward iterator to be constant
 /// time for all increments.
-class RopePieceBTreeLeaf : public RopePieceBTreeNode {
+తరగతి Rope_Piece_BTree_ఆకు : బహిరంగ Rope_Piece_BTree_కణుపు {
   /// NumPieces - This holds the number of rope pieces currently active in the
   /// Pieces array.
-  unsigned char NumPieces = 0;
+  గుర్తులేని అక్షరం అంకె_Pieces = 0;
 
   /// Pieces - This tracks the file chunks currently in this leaf.
-  RopePiece Pieces[2 * WidthFactor];
+  RopePiece Pieces[2 * వెడల్పు_గుణకం];
 
   /// NextLeaf - This is a pointer to the next leaf in the tree, allowing
   /// efficient in-order forward iteration of the tree without traversal.
-  RopePieceBTreeLeaf **PrevLeaf = nullptr;
-  RopePieceBTreeLeaf *NextLeaf = nullptr;
+  Rope_Piece_BTree_ఆకు **Prev_ఆకు = శూన్యసూచిక;
+  Rope_Piece_BTree_ఆకు *తదుపరి_ఆకు = శూన్యసూచిక;
 
-public:
-  RopePieceBTreeLeaf() : RopePieceBTreeNode(true) {}
+బహిరంగ:
+  Rope_Piece_BTree_ఆకు() : Rope_Piece_BTree_కణుపు(నిజం) {}
 
-  ~RopePieceBTreeLeaf() {
-    if (PrevLeaf || NextLeaf)
-      removeFromLeafInOrder();
+  ~Rope_Piece_BTree_ఆకు() {
+    ఒకవేళ (Prev_ఆకు || తదుపరి_ఆకు)
+      remove_From_ఆకు_లోపల_క్రమం();
     clear();
   }
 
-  bool isFull() const { return NumPieces == 2 * WidthFactor; }
+  తార్కిక is_నిండిన() స్థిరరాశి { తిరిగి అంకె_Pieces == 2 * వెడల్పు_గుణకం; }
 
   /// clear - Remove all rope pieces from this leaf.
-  void clear() {
-    while (NumPieces)
-      Pieces[--NumPieces] = RopePiece();
-    Size = 0;
+  శూన్య clear() {
+    అయితే (అంకె_Pieces)
+      Pieces[--అంకె_Pieces] = RopePiece();
+    కొలత = 0;
   }
 
-  unsigned getNumPieces() const { return NumPieces; }
+  గుర్తులేని get_అంకె_Pieces() స్థిరరాశి { తిరిగి అంకె_Pieces; }
 
-  const RopePiece &getPiece(unsigned i) const {
-    assert(i < getNumPieces() && "Invalid piece ID");
-    return Pieces[i];
+  స్థిరరాశి RopePiece &getPiece(గుర్తులేని i) స్థిరరాశి {
+    ప్రతిజ్ఞా(i < get_అంకె_Pieces() && "Invalid piece ID");
+    తిరిగి Pieces[i];
   }
 
-  const RopePieceBTreeLeaf *getNextLeafInOrder() const { return NextLeaf; }
+  స్థిరరాశి Rope_Piece_BTree_ఆకు *get_తదుపరి_ఆకు_లోపల_క్రమం() స్థిరరాశి { తిరిగి తదుపరి_ఆకు; }
 
-  void insertAfterLeafInOrder(RopePieceBTreeLeaf *Node) {
-    assert(!PrevLeaf && !NextLeaf && "Already in ordering");
+  శూన్య చొప్పించు_After_ఆకు_లోపల_క్రమం(Rope_Piece_BTree_ఆకు *కణుపు) {
+    ప్రతిజ్ఞా(!Prev_ఆకు && !తదుపరి_ఆకు && "Already in ordering");
 
-    NextLeaf = Node->NextLeaf;
-    if (NextLeaf)
-      NextLeaf->PrevLeaf = &NextLeaf;
-    PrevLeaf = &Node->NextLeaf;
-    Node->NextLeaf = this;
+    తదుపరి_ఆకు = కణుపు->తదుపరి_ఆకు;
+    ఒకవేళ (తదుపరి_ఆకు)
+      తదుపరి_ఆకు->Prev_ఆకు = &తదుపరి_ఆకు;
+    Prev_ఆకు = &కణుపు->తదుపరి_ఆకు;
+    కణుపు->తదుపరి_ఆకు = ఇది;
   }
 
-  void removeFromLeafInOrder() {
-    if (PrevLeaf) {
-      *PrevLeaf = NextLeaf;
-      if (NextLeaf)
-        NextLeaf->PrevLeaf = PrevLeaf;
-    } else if (NextLeaf) {
-      NextLeaf->PrevLeaf = nullptr;
+  శూన్య remove_From_ఆకు_లోపల_క్రమం() {
+    ఒకవేళ (Prev_ఆకు) {
+      *Prev_ఆకు = తదుపరి_ఆకు;
+      ఒకవేళ (తదుపరి_ఆకు)
+        తదుపరి_ఆకు->Prev_ఆకు = Prev_ఆకు;
+    } లేకపోతే ఒకవేళ (తదుపరి_ఆకు) {
+      తదుపరి_ఆకు->Prev_ఆకు = శూన్యసూచిక;
     }
   }
 
   /// FullRecomputeSizeLocally - This method recomputes the 'Size' field by
   /// summing the size of all RopePieces.
-  void FullRecomputeSizeLocally() {
-    Size = 0;
-    for (unsigned i = 0, e = getNumPieces(); i != e; ++i)
-      Size += getPiece(i).size();
+  శూన్య నిండిన_Recompute_కొలత_Locally() {
+    కొలత = 0;
+    కొరకు (గుర్తులేని i = 0, e = get_అంకె_Pieces(); i != e; ++i)
+      కొలత += getPiece(i).కొలత_2();
   }
 
   /// split - Split the range containing the specified offset so that we are
@@ -205,7 +205,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_కణుపు *విభజించు(గుర్తులేని స్థానభ్రంశం);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -213,13 +213,13 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_కణుపు *చొప్పించు(గుర్తులేని స్థానభ్రంశం, స్థిరరాశి RopePiece &R);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  శూన్య erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు);
 
-  static bool classof(const RopePieceBTreeNode *N) { return N->isLeaf(); }
+  స్థిర తార్కిక classof(స్థిరరాశి Rope_Piece_BTree_కణుపు *N) { తిరిగి N->is_ఆకు(); }
 };
 
 } // namespace
@@ -230,39 +230,39 @@ public:
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeLeaf::split(unsigned Offset) {
+Rope_Piece_BTree_కణుపు *Rope_Piece_BTree_ఆకు::విభజించు(గుర్తులేని స్థానభ్రంశం) {
   // Find the insertion point.  We are guaranteed that there is a split at the
   // specified offset so find it.
-  if (Offset == 0 || Offset == size()) {
+  ఒకవేళ (స్థానభ్రంశం == 0 || స్థానభ్రంశం == కొలత_2()) {
     // Fastpath for a common case.  There is already a splitpoint at the end.
-    return nullptr;
+    తిరిగి శూన్యసూచిక;
   }
 
   // Find the piece that this offset lands in.
-  unsigned PieceOffs = 0;
-  unsigned i = 0;
-  while (Offset >= PieceOffs + Pieces[i].size()) {
-    PieceOffs += Pieces[i].size();
+  గుర్తులేని PieceOffs = 0;
+  గుర్తులేని i = 0;
+  అయితే (స్థానభ్రంశం >= PieceOffs + Pieces[i].కొలత_2()) {
+    PieceOffs += Pieces[i].కొలత_2();
     ++i;
   }
 
   // If there is already a split point at the specified offset, just return
   // success.
-  if (PieceOffs == Offset)
-    return nullptr;
+  ఒకవేళ (PieceOffs == స్థానభ్రంశం)
+    తిరిగి శూన్యసూచిక;
 
   // Otherwise, we need to split piece 'i' at Offset-PieceOffs.  Convert Offset
   // to being Piece relative.
-  unsigned IntraPieceOffset = Offset - PieceOffs;
+  గుర్తులేని Intra_Piece_స్థానభ్రంశం = స్థానభ్రంశం - PieceOffs;
 
   // We do this by shrinking the RopePiece and then doing an insert of the tail.
-  RopePiece Tail(Pieces[i].StrData, Pieces[i].StartOffs + IntraPieceOffset,
-                 Pieces[i].EndOffs);
-  Size -= Pieces[i].size();
-  Pieces[i].EndOffs = Pieces[i].StartOffs + IntraPieceOffset;
-  Size += Pieces[i].size();
+  RopePiece తోక(Pieces[i].Str_దత్తాంశం, Pieces[i].ప్రారంభం_Offs + Intra_Piece_స్థానభ్రంశం,
+                 Pieces[i].చివర_Offs);
+  కొలత -= Pieces[i].కొలత_2();
+  Pieces[i].చివర_Offs = Pieces[i].ప్రారంభం_Offs + Intra_Piece_స్థానభ్రంశం;
+  కొలత += Pieces[i].కొలత_2();
 
-  return insert(Offset, Tail);
+  తిరిగి చొప్పించు(స్థానభ్రంశం, తోక);
 }
 
 /// insert - Insert the specified RopePiece into this tree node at the
@@ -270,31 +270,31 @@ RopePieceBTreeNode *RopePieceBTreeLeaf::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeLeaf::insert(unsigned Offset,
-                                               const RopePiece &R) {
+Rope_Piece_BTree_కణుపు *Rope_Piece_BTree_ఆకు::చొప్పించు(గుర్తులేని స్థానభ్రంశం,
+                                               స్థిరరాశి RopePiece &R) {
   // If this node is not full, insert the piece.
-  if (!isFull()) {
+  ఒకవేళ (!is_నిండిన()) {
     // Find the insertion point.  We are guaranteed that there is a split at the
     // specified offset so find it.
-    unsigned i = 0, e = getNumPieces();
-    if (Offset == size()) {
+    గుర్తులేని i = 0, e = get_అంకె_Pieces();
+    ఒకవేళ (స్థానభ్రంశం == కొలత_2()) {
       // Fastpath for a common case.
       i = e;
-    } else {
-      unsigned SlotOffs = 0;
-      for (; Offset > SlotOffs; ++i)
-        SlotOffs += getPiece(i).size();
-      assert(SlotOffs == Offset && "Split didn't occur before insertion!");
+    } లేకపోతే {
+      గుర్తులేని స్థానం_Offs = 0;
+      కొరకు (; స్థానభ్రంశం > స్థానం_Offs; ++i)
+        స్థానం_Offs += getPiece(i).కొలత_2();
+      ప్రతిజ్ఞా(స్థానం_Offs == స్థానభ్రంశం && "Split didn't occur before insertion!");
     }
 
     // For an insertion into a non-full leaf node, just insert the value in
     // its sorted position.  This requires moving later values over.
-    for (; i != e; --e)
+    కొరకు (; i != e; --e)
       Pieces[e] = Pieces[e - 1];
     Pieces[i] = R;
-    ++NumPieces;
-    Size += R.size();
-    return nullptr;
+    ++అంకె_Pieces;
+    కొలత += R.కొలత_2();
+    తిరిగి శూన్యసూచిక;
   }
 
   // Otherwise, if this is leaf is full, split it in two halves.  Since this
@@ -303,136 +303,136 @@ RopePieceBTreeNode *RopePieceBTreeLeaf::insert(unsigned Offset,
   // move the last 'WidthFactor' values into the RHS child.
 
   // Create the new node.
-  RopePieceBTreeLeaf *NewNode = new RopePieceBTreeLeaf();
+  Rope_Piece_BTree_ఆకు *New_కణుపు = కొత్త Rope_Piece_BTree_ఆకు();
 
   // Move over the last 'WidthFactor' values from here to NewNode.
-  std::copy(&Pieces[WidthFactor], &Pieces[2 * WidthFactor],
-            &NewNode->Pieces[0]);
+  std::copy(&Pieces[వెడల్పు_గుణకం], &Pieces[2 * వెడల్పు_గుణకం],
+            &New_కణుపు->Pieces[0]);
   // Replace old pieces with null RopePieces to drop refcounts.
-  std::fill(&Pieces[WidthFactor], &Pieces[2 * WidthFactor], RopePiece());
+  std::fill(&Pieces[వెడల్పు_గుణకం], &Pieces[2 * వెడల్పు_గుణకం], RopePiece());
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumPieces = NumPieces = WidthFactor;
+  New_కణుపు->అంకె_Pieces = అంకె_Pieces = వెడల్పు_గుణకం;
 
   // Recompute the two nodes' size.
-  NewNode->FullRecomputeSizeLocally();
-  FullRecomputeSizeLocally();
+  New_కణుపు->నిండిన_Recompute_కొలత_Locally();
+  నిండిన_Recompute_కొలత_Locally();
 
   // Update the list of leaves.
-  NewNode->insertAfterLeafInOrder(this);
+  New_కణుపు->చొప్పించు_After_ఆకు_లోపల_క్రమం(ఇది);
 
   // These insertions can't fail.
-  if (this->size() >= Offset)
-    this->insert(Offset, R);
-  else
-    NewNode->insert(Offset - this->size(), R);
-  return NewNode;
+  ఒకవేళ (ఇది->కొలత_2() >= స్థానభ్రంశం)
+    ఇది->చొప్పించు(స్థానభ్రంశం, R);
+  లేకపోతే
+    New_కణుపు->చొప్పించు(స్థానభ్రంశం - ఇది->కొలత_2(), R);
+  తిరిగి New_కణుపు;
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeLeaf::erase(unsigned Offset, unsigned NumBytes) {
+శూన్య Rope_Piece_BTree_ఆకు::erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు) {
   // Since we are guaranteed that there is a split at Offset, we start by
   // finding the Piece that starts there.
-  unsigned PieceOffs = 0;
-  unsigned i = 0;
-  for (; Offset > PieceOffs; ++i)
-    PieceOffs += getPiece(i).size();
-  assert(PieceOffs == Offset && "Split didn't occur before erase!");
+  గుర్తులేని PieceOffs = 0;
+  గుర్తులేని i = 0;
+  కొరకు (; స్థానభ్రంశం > PieceOffs; ++i)
+    PieceOffs += getPiece(i).కొలత_2();
+  ప్రతిజ్ఞా(PieceOffs == స్థానభ్రంశం && "Split didn't occur before erase!");
 
-  unsigned StartPiece = i;
+  గుర్తులేని ప్రారంభం_Piece = i;
 
   // Figure out how many pieces completely cover 'NumBytes'.  We want to remove
   // all of them.
-  for (; Offset + NumBytes > PieceOffs + getPiece(i).size(); ++i)
-    PieceOffs += getPiece(i).size();
+  కొరకు (; స్థానభ్రంశం + అంకె_బైట్లు > PieceOffs + getPiece(i).కొలత_2(); ++i)
+    PieceOffs += getPiece(i).కొలత_2();
 
   // If we exactly include the last one, include it in the region to delete.
-  if (Offset + NumBytes == PieceOffs + getPiece(i).size()) {
-    PieceOffs += getPiece(i).size();
+  ఒకవేళ (స్థానభ్రంశం + అంకె_బైట్లు == PieceOffs + getPiece(i).కొలత_2()) {
+    PieceOffs += getPiece(i).కొలత_2();
     ++i;
   }
 
   // If we completely cover some RopePieces, erase them now.
-  if (i != StartPiece) {
-    unsigned NumDeleted = i - StartPiece;
-    for (; i != getNumPieces(); ++i)
-      Pieces[i - NumDeleted] = Pieces[i];
+  ఒకవేళ (i != ప్రారంభం_Piece) {
+    గుర్తులేని అంకె_Deleted = i - ప్రారంభం_Piece;
+    కొరకు (; i != get_అంకె_Pieces(); ++i)
+      Pieces[i - అంకె_Deleted] = Pieces[i];
 
     // Drop references to dead rope pieces.
-    std::fill(&Pieces[getNumPieces() - NumDeleted], &Pieces[getNumPieces()],
+    std::fill(&Pieces[get_అంకె_Pieces() - అంకె_Deleted], &Pieces[get_అంకె_Pieces()],
               RopePiece());
-    NumPieces -= NumDeleted;
+    అంకె_Pieces -= అంకె_Deleted;
 
-    unsigned CoverBytes = PieceOffs - Offset;
-    NumBytes -= CoverBytes;
-    Size -= CoverBytes;
+    గుర్తులేని Cover_బైట్లు = PieceOffs - స్థానభ్రంశం;
+    అంకె_బైట్లు -= Cover_బైట్లు;
+    కొలత -= Cover_బైట్లు;
   }
 
   // If we completely removed some stuff, we could be done.
-  if (NumBytes == 0)
-    return;
+  ఒకవేళ (అంకె_బైట్లు == 0)
+    తిరిగి;
 
   // Okay, now might be erasing part of some Piece.  If this is the case, then
   // move the start point of the piece.
-  assert(getPiece(StartPiece).size() > NumBytes);
-  Pieces[StartPiece].StartOffs += NumBytes;
+  ప్రతిజ్ఞా(getPiece(ప్రారంభం_Piece).కొలత_2() > అంకె_బైట్లు);
+  Pieces[ప్రారంభం_Piece].ప్రారంభం_Offs += అంకె_బైట్లు;
 
   // The size of this node just shrunk by NumBytes.
-  Size -= NumBytes;
+  కొలత -= అంకె_బైట్లు;
 }
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeInterior Class
 //===----------------------------------------------------------------------===//
 
-namespace {
+నామాకాశ {
 
 /// RopePieceBTreeInterior - This represents an interior node in the B+Tree,
 /// which holds up to 2*WidthFactor pointers to child nodes.
-class RopePieceBTreeInterior : public RopePieceBTreeNode {
+తరగతి RopePieceBTreeInterior : బహిరంగ Rope_Piece_BTree_కణుపు {
   /// NumChildren - This holds the number of children currently active in the
   /// Children array.
-  unsigned char NumChildren = 0;
+  గుర్తులేని అక్షరం అంకె_Children = 0;
 
-  RopePieceBTreeNode *Children[2 * WidthFactor];
+  Rope_Piece_BTree_కణుపు *Children[2 * వెడల్పు_గుణకం];
 
-public:
-  RopePieceBTreeInterior() : RopePieceBTreeNode(false) {}
+బహిరంగ:
+  RopePieceBTreeInterior() : Rope_Piece_BTree_కణుపు(అబద్ధం) {}
 
-  RopePieceBTreeInterior(RopePieceBTreeNode *LHS, RopePieceBTreeNode *RHS)
-      : RopePieceBTreeNode(false) {
+  RopePieceBTreeInterior(Rope_Piece_BTree_కణుపు *LHS, Rope_Piece_BTree_కణుపు *RHS)
+      : Rope_Piece_BTree_కణుపు(అబద్ధం) {
     Children[0] = LHS;
     Children[1] = RHS;
-    NumChildren = 2;
-    Size = LHS->size() + RHS->size();
+    అంకె_Children = 2;
+    కొలత = LHS->కొలత_2() + RHS->కొలత_2();
   }
 
   ~RopePieceBTreeInterior() {
-    for (unsigned i = 0, e = getNumChildren(); i != e; ++i)
+    కొరకు (గుర్తులేని i = 0, e = get_అంకె_Children(); i != e; ++i)
       Children[i]->Destroy();
   }
 
-  bool isFull() const { return NumChildren == 2 * WidthFactor; }
+  తార్కిక is_నిండిన() స్థిరరాశి { తిరిగి అంకె_Children == 2 * వెడల్పు_గుణకం; }
 
-  unsigned getNumChildren() const { return NumChildren; }
+  గుర్తులేని get_అంకె_Children() స్థిరరాశి { తిరిగి అంకె_Children; }
 
-  const RopePieceBTreeNode *getChild(unsigned i) const {
-    assert(i < NumChildren && "invalid child #");
-    return Children[i];
+  స్థిరరాశి Rope_Piece_BTree_కణుపు *get_బిడ్డ(గుర్తులేని i) స్థిరరాశి {
+    ప్రతిజ్ఞా(i < అంకె_Children && "invalid child #");
+    తిరిగి Children[i];
   }
 
-  RopePieceBTreeNode *getChild(unsigned i) {
-    assert(i < NumChildren && "invalid child #");
-    return Children[i];
+  Rope_Piece_BTree_కణుపు *get_బిడ్డ(గుర్తులేని i) {
+    ప్రతిజ్ఞా(i < అంకె_Children && "invalid child #");
+    తిరిగి Children[i];
   }
 
   /// FullRecomputeSizeLocally - Recompute the Size field of this node by
   /// summing up the sizes of the child nodes.
-  void FullRecomputeSizeLocally() {
-    Size = 0;
-    for (unsigned i = 0, e = getNumChildren(); i != e; ++i)
-      Size += getChild(i)->size();
+  శూన్య నిండిన_Recompute_కొలత_Locally() {
+    కొలత = 0;
+    కొరకు (గుర్తులేని i = 0, e = get_అంకె_Children(); i != e; ++i)
+      కొలత += get_బిడ్డ(i)->కొలత_2();
   }
 
   /// split - Split the range containing the specified offset so that we are
@@ -441,7 +441,7 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *split(unsigned Offset);
+  Rope_Piece_BTree_కణుపు *విభజించు(గుర్తులేని స్థానభ్రంశం);
 
   /// insert - Insert the specified ropepiece into this tree node at the
   /// specified offset.  The offset is relative, so "0" is the start of the
@@ -449,17 +449,17 @@ public:
   ///
   /// If there is no space in this subtree for the extra piece, the extra tree
   /// node is returned and must be inserted into a parent.
-  RopePieceBTreeNode *insert(unsigned Offset, const RopePiece &R);
+  Rope_Piece_BTree_కణుపు *చొప్పించు(గుర్తులేని స్థానభ్రంశం, స్థిరరాశి RopePiece &R);
 
   /// HandleChildPiece - A child propagated an insertion result up to us.
   /// Insert the new child, and/or propagate the result further up the tree.
-  RopePieceBTreeNode *HandleChildPiece(unsigned i, RopePieceBTreeNode *RHS);
+  Rope_Piece_BTree_కణుపు *Handle_బిడ్డ_Piece(గుర్తులేని i, Rope_Piece_BTree_కణుపు *RHS);
 
   /// erase - Remove NumBytes from this node at the specified offset.  We are
   /// guaranteed that there is a split at Offset.
-  void erase(unsigned Offset, unsigned NumBytes);
+  శూన్య erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు);
 
-  static bool classof(const RopePieceBTreeNode *N) { return !N->isLeaf(); }
+  స్థిర తార్కిక classof(స్థిరరాశి Rope_Piece_BTree_కణుపు *N) { తిరిగి !N->is_ఆకు(); }
 };
 
 } // namespace
@@ -470,24 +470,24 @@ public:
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeInterior::split(unsigned Offset) {
+Rope_Piece_BTree_కణుపు *RopePieceBTreeInterior::విభజించు(గుర్తులేని స్థానభ్రంశం) {
   // Figure out which child to split.
-  if (Offset == 0 || Offset == size())
-    return nullptr; // If we have an exact offset, we're already split.
+  ఒకవేళ (స్థానభ్రంశం == 0 || స్థానభ్రంశం == కొలత_2())
+    తిరిగి శూన్యసూచిక; // If we have an exact offset, we're already split.
 
-  unsigned ChildOffset = 0;
-  unsigned i = 0;
-  for (; Offset >= ChildOffset + getChild(i)->size(); ++i)
-    ChildOffset += getChild(i)->size();
+  గుర్తులేని బిడ్డ_స్థానభ్రంశం = 0;
+  గుర్తులేని i = 0;
+  కొరకు (; స్థానభ్రంశం >= బిడ్డ_స్థానభ్రంశం + get_బిడ్డ(i)->కొలత_2(); ++i)
+    బిడ్డ_స్థానభ్రంశం += get_బిడ్డ(i)->కొలత_2();
 
   // If already split there, we're done.
-  if (ChildOffset == Offset)
-    return nullptr;
+  ఒకవేళ (బిడ్డ_స్థానభ్రంశం == స్థానభ్రంశం)
+    తిరిగి శూన్యసూచిక;
 
   // Otherwise, recursively split the child.
-  if (RopePieceBTreeNode *RHS = getChild(i)->split(Offset - ChildOffset))
-    return HandleChildPiece(i, RHS);
-  return nullptr; // Done!
+  ఒకవేళ (Rope_Piece_BTree_కణుపు *RHS = get_బిడ్డ(i)->విభజించు(స్థానభ్రంశం - బిడ్డ_స్థానభ్రంశం))
+    తిరిగి Handle_బిడ్డ_Piece(i, RHS);
+  తిరిగి శూన్యసూచిక; // Done!
 }
 
 /// insert - Insert the specified ropepiece into this tree node at the
@@ -496,116 +496,116 @@ RopePieceBTreeNode *RopePieceBTreeInterior::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeInterior::insert(unsigned Offset,
-                                                   const RopePiece &R) {
+Rope_Piece_BTree_కణుపు *RopePieceBTreeInterior::చొప్పించు(గుర్తులేని స్థానభ్రంశం,
+                                                   స్థిరరాశి RopePiece &R) {
   // Find the insertion point.  We are guaranteed that there is a split at the
   // specified offset so find it.
-  unsigned i = 0, e = getNumChildren();
+  గుర్తులేని i = 0, e = get_అంకె_Children();
 
-  unsigned ChildOffs = 0;
-  if (Offset == size()) {
+  గుర్తులేని బిడ్డ_Offs = 0;
+  ఒకవేళ (స్థానభ్రంశం == కొలత_2()) {
     // Fastpath for a common case.  Insert at end of last child.
     i = e - 1;
-    ChildOffs = size() - getChild(i)->size();
-  } else {
-    for (; Offset > ChildOffs + getChild(i)->size(); ++i)
-      ChildOffs += getChild(i)->size();
+    బిడ్డ_Offs = కొలత_2() - get_బిడ్డ(i)->కొలత_2();
+  } లేకపోతే {
+    కొరకు (; స్థానభ్రంశం > బిడ్డ_Offs + get_బిడ్డ(i)->కొలత_2(); ++i)
+      బిడ్డ_Offs += get_బిడ్డ(i)->కొలత_2();
   }
 
-  Size += R.size();
+  కొలత += R.కొలత_2();
 
   // Insert at the end of this child.
-  if (RopePieceBTreeNode *RHS = getChild(i)->insert(Offset - ChildOffs, R))
-    return HandleChildPiece(i, RHS);
+  ఒకవేళ (Rope_Piece_BTree_కణుపు *RHS = get_బిడ్డ(i)->చొప్పించు(స్థానభ్రంశం - బిడ్డ_Offs, R))
+    తిరిగి Handle_బిడ్డ_Piece(i, RHS);
 
-  return nullptr;
+  తిరిగి శూన్యసూచిక;
 }
 
 /// HandleChildPiece - A child propagated an insertion result up to us.
 /// Insert the new child, and/or propagate the result further up the tree.
-RopePieceBTreeNode *
-RopePieceBTreeInterior::HandleChildPiece(unsigned i, RopePieceBTreeNode *RHS) {
+Rope_Piece_BTree_కణుపు *
+RopePieceBTreeInterior::Handle_బిడ్డ_Piece(గుర్తులేని i, Rope_Piece_BTree_కణుపు *RHS) {
   // Otherwise the child propagated a subtree up to us as a new child.  See if
   // we have space for it here.
-  if (!isFull()) {
+  ఒకవేళ (!is_నిండిన()) {
     // Insert RHS after child 'i'.
-    if (i + 1 != getNumChildren())
+    ఒకవేళ (i + 1 != get_అంకె_Children())
       memmove(&Children[i + 2], &Children[i + 1],
-              (getNumChildren() - i - 1) * sizeof(Children[0]));
+              (get_అంకె_Children() - i - 1) * పరిమాణం(Children[0]));
     Children[i + 1] = RHS;
-    ++NumChildren;
-    return nullptr;
+    ++అంకె_Children;
+    తిరిగి శూన్యసూచిక;
   }
 
   // Okay, this node is full.  Split it in half, moving WidthFactor children to
   // a newly allocated interior node.
 
   // Create the new node.
-  RopePieceBTreeInterior *NewNode = new RopePieceBTreeInterior();
+  RopePieceBTreeInterior *New_కణుపు = కొత్త RopePieceBTreeInterior();
 
   // Move over the last 'WidthFactor' values from here to NewNode.
-  memcpy(&NewNode->Children[0], &Children[WidthFactor],
-         WidthFactor * sizeof(Children[0]));
+  జ్ఞాపకం_నకలు(&New_కణుపు->Children[0], &Children[వెడల్పు_గుణకం],
+         వెడల్పు_గుణకం * పరిమాణం(Children[0]));
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumChildren = NumChildren = WidthFactor;
+  New_కణుపు->అంకె_Children = అంకె_Children = వెడల్పు_గుణకం;
 
   // Finally, insert the two new children in the side the can (now) hold them.
   // These insertions can't fail.
-  if (i < WidthFactor)
-    this->HandleChildPiece(i, RHS);
-  else
-    NewNode->HandleChildPiece(i - WidthFactor, RHS);
+  ఒకవేళ (i < వెడల్పు_గుణకం)
+    ఇది->Handle_బిడ్డ_Piece(i, RHS);
+  లేకపోతే
+    New_కణుపు->Handle_బిడ్డ_Piece(i - వెడల్పు_గుణకం, RHS);
 
   // Recompute the two nodes' size.
-  NewNode->FullRecomputeSizeLocally();
-  FullRecomputeSizeLocally();
-  return NewNode;
+  New_కణుపు->నిండిన_Recompute_కొలత_Locally();
+  నిండిన_Recompute_కొలత_Locally();
+  తిరిగి New_కణుపు;
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeInterior::erase(unsigned Offset, unsigned NumBytes) {
+శూన్య RopePieceBTreeInterior::erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు) {
   // This will shrink this node by NumBytes.
-  Size -= NumBytes;
+  కొలత -= అంకె_బైట్లు;
 
   // Find the first child that overlaps with Offset.
-  unsigned i = 0;
-  for (; Offset >= getChild(i)->size(); ++i)
-    Offset -= getChild(i)->size();
+  గుర్తులేని i = 0;
+  కొరకు (; స్థానభ్రంశం >= get_బిడ్డ(i)->కొలత_2(); ++i)
+    స్థానభ్రంశం -= get_బిడ్డ(i)->కొలత_2();
 
   // Propagate the delete request into overlapping children, or completely
   // delete the children as appropriate.
-  while (NumBytes) {
-    RopePieceBTreeNode *CurChild = getChild(i);
+  అయితే (అంకె_బైట్లు) {
+    Rope_Piece_BTree_కణుపు *Cur_బిడ్డ = get_బిడ్డ(i);
 
     // If we are deleting something contained entirely in the child, pass on the
     // request.
-    if (Offset + NumBytes < CurChild->size()) {
-      CurChild->erase(Offset, NumBytes);
-      return;
+    ఒకవేళ (స్థానభ్రంశం + అంకె_బైట్లు < Cur_బిడ్డ->కొలత_2()) {
+      Cur_బిడ్డ->erase(స్థానభ్రంశం, అంకె_బైట్లు);
+      తిరిగి;
     }
 
     // If this deletion request starts somewhere in the middle of the child, it
     // must be deleting to the end of the child.
-    if (Offset) {
-      unsigned BytesFromChild = CurChild->size() - Offset;
-      CurChild->erase(Offset, BytesFromChild);
-      NumBytes -= BytesFromChild;
+    ఒకవేళ (స్థానభ్రంశం) {
+      గుర్తులేని బైట్లు_From_బిడ్డ = Cur_బిడ్డ->కొలత_2() - స్థానభ్రంశం;
+      Cur_బిడ్డ->erase(స్థానభ్రంశం, బైట్లు_From_బిడ్డ);
+      అంకె_బైట్లు -= బైట్లు_From_బిడ్డ;
       // Start at the beginning of the next child.
-      Offset = 0;
+      స్థానభ్రంశం = 0;
       ++i;
-      continue;
+      కొనసాగు;
     }
 
     // If the deletion request completely covers the child, delete it and move
     // the rest down.
-    NumBytes -= CurChild->size();
-    CurChild->Destroy();
-    --NumChildren;
-    if (i != getNumChildren())
+    అంకె_బైట్లు -= Cur_బిడ్డ->కొలత_2();
+    Cur_బిడ్డ->Destroy();
+    --అంకె_Children;
+    ఒకవేళ (i != get_అంకె_Children())
       memmove(&Children[i], &Children[i + 1],
-              (getNumChildren() - i) * sizeof(Children[0]));
+              (get_అంకె_Children() - i) * పరిమాణం(Children[0]));
   }
 }
 
@@ -613,11 +613,11 @@ void RopePieceBTreeInterior::erase(unsigned Offset, unsigned NumBytes) {
 // RopePieceBTreeNode Implementation
 //===----------------------------------------------------------------------===//
 
-void RopePieceBTreeNode::Destroy() {
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    delete Leaf;
-  else
-    delete cast<RopePieceBTreeInterior>(this);
+శూన్య Rope_Piece_BTree_కణుపు::Destroy() {
+  ఒకవేళ (స్వయంచాలక *ఆకు = dyn_cast<Rope_Piece_BTree_ఆకు>(ఇది))
+    తొలగించు ఆకు;
+  లేకపోతే
+    తొలగించు cast<RopePieceBTreeInterior>(ఇది);
 }
 
 /// split - Split the range containing the specified offset so that we are
@@ -626,11 +626,11 @@ void RopePieceBTreeNode::Destroy() {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeNode::split(unsigned Offset) {
-  assert(Offset <= size() && "Invalid offset to split!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->split(Offset);
-  return cast<RopePieceBTreeInterior>(this)->split(Offset);
+Rope_Piece_BTree_కణుపు *Rope_Piece_BTree_కణుపు::విభజించు(గుర్తులేని స్థానభ్రంశం) {
+  ప్రతిజ్ఞా(స్థానభ్రంశం <= కొలత_2() && "Invalid offset to split!");
+  ఒకవేళ (స్వయంచాలక *ఆకు = dyn_cast<Rope_Piece_BTree_ఆకు>(ఇది))
+    తిరిగి ఆకు->విభజించు(స్థానభ్రంశం);
+  తిరిగి cast<RopePieceBTreeInterior>(ఇది)->విభజించు(స్థానభ్రంశం);
 }
 
 /// insert - Insert the specified ropepiece into this tree node at the
@@ -639,71 +639,71 @@ RopePieceBTreeNode *RopePieceBTreeNode::split(unsigned Offset) {
 ///
 /// If there is no space in this subtree for the extra piece, the extra tree
 /// node is returned and must be inserted into a parent.
-RopePieceBTreeNode *RopePieceBTreeNode::insert(unsigned Offset,
-                                               const RopePiece &R) {
-  assert(Offset <= size() && "Invalid offset to insert!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->insert(Offset, R);
-  return cast<RopePieceBTreeInterior>(this)->insert(Offset, R);
+Rope_Piece_BTree_కణుపు *Rope_Piece_BTree_కణుపు::చొప్పించు(గుర్తులేని స్థానభ్రంశం,
+                                               స్థిరరాశి RopePiece &R) {
+  ప్రతిజ్ఞా(స్థానభ్రంశం <= కొలత_2() && "Invalid offset to insert!");
+  ఒకవేళ (స్వయంచాలక *ఆకు = dyn_cast<Rope_Piece_BTree_ఆకు>(ఇది))
+    తిరిగి ఆకు->చొప్పించు(స్థానభ్రంశం, R);
+  తిరిగి cast<RopePieceBTreeInterior>(ఇది)->చొప్పించు(స్థానభ్రంశం, R);
 }
 
 /// erase - Remove NumBytes from this node at the specified offset.  We are
 /// guaranteed that there is a split at Offset.
-void RopePieceBTreeNode::erase(unsigned Offset, unsigned NumBytes) {
-  assert(Offset + NumBytes <= size() && "Invalid offset to erase!");
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(this))
-    return Leaf->erase(Offset, NumBytes);
-  return cast<RopePieceBTreeInterior>(this)->erase(Offset, NumBytes);
+శూన్య Rope_Piece_BTree_కణుపు::erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు) {
+  ప్రతిజ్ఞా(స్థానభ్రంశం + అంకె_బైట్లు <= కొలత_2() && "Invalid offset to erase!");
+  ఒకవేళ (స్వయంచాలక *ఆకు = dyn_cast<Rope_Piece_BTree_ఆకు>(ఇది))
+    తిరిగి ఆకు->erase(స్థానభ్రంశం, అంకె_బైట్లు);
+  తిరిగి cast<RopePieceBTreeInterior>(ఇది)->erase(స్థానభ్రంశం, అంకె_బైట్లు);
 }
 
 //===----------------------------------------------------------------------===//
 // RopePieceBTreeIterator Implementation
 //===----------------------------------------------------------------------===//
 
-static const RopePieceBTreeLeaf *getCN(const void *P) {
-  return static_cast<const RopePieceBTreeLeaf *>(P);
+స్థిర స్థిరరాశి Rope_Piece_BTree_ఆకు *getCN(స్థిరరాశి శూన్య *P) {
+  తిరిగి static_cast<స్థిరరాశి Rope_Piece_BTree_ఆకు *>(P);
 }
 
 // begin iterator.
-RopePieceBTreeIterator::RopePieceBTreeIterator(const void *n) {
-  const auto *N = static_cast<const RopePieceBTreeNode *>(n);
+RopePieceBTreeIterator::RopePieceBTreeIterator(స్థిరరాశి శూన్య *n) {
+  స్థిరరాశి స్వయంచాలక *N = static_cast<స్థిరరాశి Rope_Piece_BTree_కణుపు *>(n);
 
   // Walk down the left side of the tree until we get to a leaf.
-  while (const auto *IN = dyn_cast<RopePieceBTreeInterior>(N))
-    N = IN->getChild(0);
+  అయితే (స్థిరరాశి స్వయంచాలక *లోపల = dyn_cast<RopePieceBTreeInterior>(N))
+    N = లోపల->get_బిడ్డ(0);
 
   // We must have at least one leaf.
-  CurNode = cast<RopePieceBTreeLeaf>(N);
+  Cur_కణుపు = cast<Rope_Piece_BTree_ఆకు>(N);
 
   // If we found a leaf that happens to be empty, skip over it until we get
   // to something full.
-  while (CurNode && getCN(CurNode)->getNumPieces() == 0)
-    CurNode = getCN(CurNode)->getNextLeafInOrder();
+  అయితే (Cur_కణుపు && getCN(Cur_కణుపు)->get_అంకె_Pieces() == 0)
+    Cur_కణుపు = getCN(Cur_కణుపు)->get_తదుపరి_ఆకు_లోపల_క్రమం();
 
-  if (CurNode)
-    CurPiece = &getCN(CurNode)->getPiece(0);
-  else // Empty tree, this is an end() iterator.
-    CurPiece = nullptr;
+  ఒకవేళ (Cur_కణుపు)
+    CurPiece = &getCN(Cur_కణుపు)->getPiece(0);
+  లేకపోతే // Empty tree, this is an end() iterator.
+    CurPiece = శూన్యసూచిక;
   CurChar = 0;
 }
 
-void RopePieceBTreeIterator::MoveToNextPiece() {
-  if (CurPiece !=
-      &getCN(CurNode)->getPiece(getCN(CurNode)->getNumPieces() - 1)) {
+శూన్య RopePieceBTreeIterator::Move_గమ్యం_తదుపరి_Piece() {
+  ఒకవేళ (CurPiece !=
+      &getCN(Cur_కణుపు)->getPiece(getCN(Cur_కణుపు)->get_అంకె_Pieces() - 1)) {
     CurChar = 0;
     ++CurPiece;
-    return;
+    తిరిగి;
   }
 
   // Find the next non-empty leaf node.
-  do
-    CurNode = getCN(CurNode)->getNextLeafInOrder();
-  while (CurNode && getCN(CurNode)->getNumPieces() == 0);
+  చేయి
+    Cur_కణుపు = getCN(Cur_కణుపు)->get_తదుపరి_ఆకు_లోపల_క్రమం();
+  అయితే (Cur_కణుపు && getCN(Cur_కణుపు)->get_అంకె_Pieces() == 0);
 
-  if (CurNode)
-    CurPiece = &getCN(CurNode)->getPiece(0);
-  else // Hit end().
-    CurPiece = nullptr;
+  ఒకవేళ (Cur_కణుపు)
+    CurPiece = &getCN(Cur_కణుపు)->getPiece(0);
+  లేకపోతే // Hit end().
+    CurPiece = శూన్యసూచిక;
   CurChar = 0;
 }
 
@@ -711,47 +711,47 @@ void RopePieceBTreeIterator::MoveToNextPiece() {
 // RopePieceBTree Implementation
 //===----------------------------------------------------------------------===//
 
-static RopePieceBTreeNode *getRoot(void *P) {
-  return static_cast<RopePieceBTreeNode *>(P);
+స్థిర Rope_Piece_BTree_కణుపు *get_మూలం(శూన్య *P) {
+  తిరిగి static_cast<Rope_Piece_BTree_కణుపు *>(P);
 }
 
-RopePieceBTree::RopePieceBTree() { Root = new RopePieceBTreeLeaf(); }
+RopePieceBTree::RopePieceBTree() { మూలం_2 = కొత్త Rope_Piece_BTree_ఆకు(); }
 
-RopePieceBTree::RopePieceBTree(const RopePieceBTree &RHS) {
-  assert(RHS.empty() && "Can't copy non-empty tree yet");
-  Root = new RopePieceBTreeLeaf();
+RopePieceBTree::RopePieceBTree(స్థిరరాశి RopePieceBTree &RHS) {
+  ప్రతిజ్ఞా(RHS.ఖాళీలు() && "Can't copy non-empty tree yet");
+  మూలం_2 = కొత్త Rope_Piece_BTree_ఆకు();
 }
 
-RopePieceBTree::~RopePieceBTree() { getRoot(Root)->Destroy(); }
+RopePieceBTree::~RopePieceBTree() { get_మూలం(మూలం_2)->Destroy(); }
 
-unsigned RopePieceBTree::size() const { return getRoot(Root)->size(); }
+గుర్తులేని RopePieceBTree::కొలత_2() స్థిరరాశి { తిరిగి get_మూలం(మూలం_2)->కొలత_2(); }
 
-void RopePieceBTree::clear() {
-  if (auto *Leaf = dyn_cast<RopePieceBTreeLeaf>(getRoot(Root)))
-    Leaf->clear();
-  else {
-    getRoot(Root)->Destroy();
-    Root = new RopePieceBTreeLeaf();
+శూన్య RopePieceBTree::clear() {
+  ఒకవేళ (స్వయంచాలక *ఆకు = dyn_cast<Rope_Piece_BTree_ఆకు>(get_మూలం(మూలం_2)))
+    ఆకు->clear();
+  లేకపోతే {
+    get_మూలం(మూలం_2)->Destroy();
+    మూలం_2 = కొత్త Rope_Piece_BTree_ఆకు();
   }
 }
 
-void RopePieceBTree::insert(unsigned Offset, const RopePiece &R) {
+శూన్య RopePieceBTree::చొప్పించు(గుర్తులేని స్థానభ్రంశం, స్థిరరాశి RopePiece &R) {
   // #1. Split at Offset.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->split(Offset))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  ఒకవేళ (Rope_Piece_BTree_కణుపు *RHS = get_మూలం(మూలం_2)->విభజించు(స్థానభ్రంశం))
+    మూలం_2 = కొత్త RopePieceBTreeInterior(get_మూలం(మూలం_2), RHS);
 
   // #2. Do the insertion.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->insert(Offset, R))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  ఒకవేళ (Rope_Piece_BTree_కణుపు *RHS = get_మూలం(మూలం_2)->చొప్పించు(స్థానభ్రంశం, R))
+    మూలం_2 = కొత్త RopePieceBTreeInterior(get_మూలం(మూలం_2), RHS);
 }
 
-void RopePieceBTree::erase(unsigned Offset, unsigned NumBytes) {
+శూన్య RopePieceBTree::erase(గుర్తులేని స్థానభ్రంశం, గుర్తులేని అంకె_బైట్లు) {
   // #1. Split at Offset.
-  if (RopePieceBTreeNode *RHS = getRoot(Root)->split(Offset))
-    Root = new RopePieceBTreeInterior(getRoot(Root), RHS);
+  ఒకవేళ (Rope_Piece_BTree_కణుపు *RHS = get_మూలం(మూలం_2)->విభజించు(స్థానభ్రంశం))
+    మూలం_2 = కొత్త RopePieceBTreeInterior(get_మూలం(మూలం_2), RHS);
 
   // #2. Do the erasing.
-  getRoot(Root)->erase(Offset, NumBytes);
+  get_మూలం(మూలం_2)->erase(స్థానభ్రంశం, అంకె_బైట్లు);
 }
 
 //===----------------------------------------------------------------------===//
@@ -762,36 +762,36 @@ void RopePieceBTree::erase(unsigned Offset, unsigned NumBytes) {
 /// RopeRefCountString, and return a RopePiece that represents it.  This uses
 /// the AllocBuffer object to aggregate requests for small strings into one
 /// allocation instead of doing tons of tiny allocations.
-RopePiece RewriteRope::MakeRopeString(const char *Start, const char *End) {
-  unsigned Len = End - Start;
-  assert(Len && "Zero length RopePiece is invalid!");
+RopePiece RewriteRope::MakeRopeString(స్థిరరాశి అక్షరం *ప్రారంభం, స్థిరరాశి అక్షరం *చివర_2) {
+  గుర్తులేని Len = చివర_2 - ప్రారంభం;
+  ప్రతిజ్ఞా(Len && "Zero length RopePiece is invalid!");
 
   // If we have space for this string in the current alloc buffer, use it.
-  if (AllocOffs + Len <= AllocChunkSize) {
-    memcpy(AllocBuffer->Data + AllocOffs, Start, Len);
+  ఒకవేళ (AllocOffs + Len <= Alloc_Chunk_కొలత) {
+    జ్ఞాపకం_నకలు(Alloc_బఫరు->దత్తాంశం_2 + AllocOffs, ప్రారంభం, Len);
     AllocOffs += Len;
-    return RopePiece(AllocBuffer, AllocOffs - Len, AllocOffs);
+    తిరిగి RopePiece(Alloc_బఫరు, AllocOffs - Len, AllocOffs);
   }
 
   // If we don't have enough room because this specific allocation is huge,
   // just allocate a new rope piece for it alone.
-  if (Len > AllocChunkSize) {
-    unsigned Size = End - Start + sizeof(RopeRefCountString) - 1;
-    auto *Res = reinterpret_cast<RopeRefCountString *>(new char[Size]);
-    Res->RefCount = 0;
-    memcpy(Res->Data, Start, End - Start);
-    return RopePiece(Res, 0, End - Start);
+  ఒకవేళ (Len > Alloc_Chunk_కొలత) {
+    గుర్తులేని కొలత = చివర_2 - ప్రారంభం + పరిమాణం(Rope_Ref_లెక్క_String) - 1;
+    స్వయంచాలక *Res = reinterpret_cast<Rope_Ref_లెక్క_String *>(కొత్త అక్షరం[కొలత]);
+    Res->Ref_లెక్క = 0;
+    జ్ఞాపకం_నకలు(Res->దత్తాంశం_2, ప్రారంభం, చివర_2 - ప్రారంభం);
+    తిరిగి RopePiece(Res, 0, చివర_2 - ప్రారంభం);
   }
 
   // Otherwise, this was a small request but we just don't have space for it
   // Make a new chunk and share it with later allocations.
 
-  unsigned AllocSize = offsetof(RopeRefCountString, Data) + AllocChunkSize;
-  auto *Res = reinterpret_cast<RopeRefCountString *>(new char[AllocSize]);
-  Res->RefCount = 0;
-  memcpy(Res->Data, Start, Len);
-  AllocBuffer = Res;
+  గుర్తులేని Alloc_కొలత = offsetof(Rope_Ref_లెక్క_String, దత్తాంశం_2) + Alloc_Chunk_కొలత;
+  స్వయంచాలక *Res = reinterpret_cast<Rope_Ref_లెక్క_String *>(కొత్త అక్షరం[Alloc_కొలత]);
+  Res->Ref_లెక్క = 0;
+  జ్ఞాపకం_నకలు(Res->దత్తాంశం_2, ప్రారంభం, Len);
+  Alloc_బఫరు = Res;
   AllocOffs = Len;
 
-  return RopePiece(AllocBuffer, 0, Len);
+  తిరిగి RopePiece(Alloc_బఫరు, 0, Len);
 }

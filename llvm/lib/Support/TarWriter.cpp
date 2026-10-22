@@ -21,43 +21,43 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TarWriter.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/Support/TarWriter.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/MathExtras.h"
+#అన్తర్భావ "llvm/Support/Path.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 // Each file in an archive must be aligned to this block size.
-static const int BlockSize = 512;
+స్థిర స్థిరరాశి పూర్ణాంకం ఖండం_కొలత = 512;
 
-struct UstarHeader {
-  char Name[100];
-  char Mode[8];
-  char Uid[8];
-  char Gid[8];
-  char Size[12];
-  char Mtime[12];
-  char Checksum[8];
-  char TypeFlag;
-  char Linkname[100];
-  char Magic[6];
-  char Version[2];
-  char Uname[32];
-  char Gname[32];
-  char DevMajor[8];
-  char DevMinor[8];
-  char Prefix[155];
-  char Pad[12];
+నిర్మాణం Ustar_శీర్షిక {
+  అక్షరం Name[100];
+  అక్షరం బహుళకం[8];
+  అక్షరం Uid[8];
+  అక్షరం Gid[8];
+  అక్షరం కొలత[12];
+  అక్షరం Mtime[12];
+  అక్షరం Checksum[8];
+  అక్షరం TypeFlag;
+  అక్షరం Linkname[100];
+  అక్షరం Magic[6];
+  అక్షరం సంస్కరణ[2];
+  అక్షరం Uname[32];
+  అక్షరం Gname[32];
+  అక్షరం DevMajor[8];
+  అక్షరం DevMinor[8];
+  అక్షరం ఉపసర్గ[155];
+  అక్షరం Pad[12];
 };
-static_assert(sizeof(UstarHeader) == BlockSize, "invalid Ustar header");
+static_assert(పరిమాణం(Ustar_శీర్షిక) == ఖండం_కొలత, "invalid Ustar header");
 
-static UstarHeader makeUstarHeader() {
-  UstarHeader Hdr = {};
-  memcpy(Hdr.Magic, "ustar", 5); // Ustar magic
-  memcpy(Hdr.Version, "00", 2);  // Ustar version
-  return Hdr;
+స్థిర Ustar_శీర్షిక make_Ustar_శీర్షిక() {
+  Ustar_శీర్షిక Hdr = {};
+  జ్ఞాపకం_నకలు(Hdr.Magic, "ustar", 5); // Ustar magic
+  జ్ఞాపకం_నకలు(Hdr.సంస్కరణ, "00", 2);  // Ustar version
+  తిరిగి Hdr;
 }
 
 // A PAX attribute is in the form of "<length> <key>=<value>\n"
@@ -67,50 +67,50 @@ static UstarHeader makeUstarHeader() {
 //   25 ctime=1084839148.1212\n
 //
 // This function create such string.
-static std::string formatPax(StringRef Key, StringRef Val) {
-  int Len = Key.size() + Val.size() + 3; // +3 for " ", "=" and "\n"
+స్థిర std::string formatPax(StringRef కీలకం, StringRef Val) {
+  పూర్ణాంకం Len = కీలకం.కొలత_2() + Val.కొలత_2() + 3; // +3 for " ", "=" and "\n"
 
   // We need to compute total size twice because appending
   // a length field could change total size by one.
-  int Total = Len + Twine(Len).str().size();
-  Total = Len + Twine(Total).str().size();
-  return (Twine(Total) + " " + Key + "=" + Val + "\n").str();
+  పూర్ణాంకం మొత్తం = Len + Twine(Len).str().కొలత_2();
+  మొత్తం = Len + Twine(మొత్తం).str().కొలత_2();
+  తిరిగి (Twine(మొత్తం) + " " + కీలకం + "=" + Val + "\n").str();
 }
 
 // Headers in tar files must be aligned to 512 byte boundaries.
 // This function forwards the current file position to the next boundary.
-static void pad(raw_fd_ostream &OS) {
+స్థిర శూన్య pad(raw_fd_ostream &OS) {
   uint64_t Pos = OS.tell();
-  OS.seek(alignTo(Pos, BlockSize));
+  OS.seek(align_గమ్యం(Pos, ఖండం_కొలత));
 }
 
 // Computes a checksum for a tar header.
-static void computeChecksum(UstarHeader &Hdr) {
+స్థిర శూన్య computeChecksum(Ustar_శీర్షిక &Hdr) {
   // Before computing a checksum, checksum field must be
   // filled with space characters.
-  memset(Hdr.Checksum, ' ', sizeof(Hdr.Checksum));
+  memset(Hdr.Checksum, ' ', పరిమాణం(Hdr.Checksum));
 
   // Compute a checksum and set it to the checksum field.
-  unsigned Chksum = 0;
-  for (size_t I = 0; I < sizeof(Hdr); ++I)
+  గుర్తులేని Chksum = 0;
+  కొరకు (size_t I = 0; I < పరిమాణం(Hdr); ++I)
     Chksum += reinterpret_cast<uint8_t *>(&Hdr)[I];
-  snprintf(Hdr.Checksum, sizeof(Hdr.Checksum), "%06o", Chksum);
+  snprintf(Hdr.Checksum, పరిమాణం(Hdr.Checksum), "%06o", Chksum);
 }
 
 // Create a tar header and write it to a given output stream.
-static void writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
+స్థిర శూన్య write_Pax_శీర్షిక(raw_fd_ostream &OS, StringRef మార్గం) {
   // A PAX header consists of a 512-byte header followed
   // by key-value strings. First, create key-value strings.
-  std::string PaxAttr = formatPax("path", Path);
+  std::string PaxAttr = formatPax("path", మార్గం);
 
   // Create a 512-byte header.
-  UstarHeader Hdr = makeUstarHeader();
-  snprintf(Hdr.Size, sizeof(Hdr.Size), "%011zo", PaxAttr.size());
+  Ustar_శీర్షిక Hdr = make_Ustar_శీర్షిక();
+  snprintf(Hdr.కొలత, పరిమాణం(Hdr.కొలత), "%011zo", PaxAttr.కొలత_2());
   Hdr.TypeFlag = 'x'; // PAX magic
   computeChecksum(Hdr);
 
   // Write them down.
-  OS << StringRef(reinterpret_cast<char *>(&Hdr), sizeof(Hdr));
+  OS << StringRef(reinterpret_cast<అక్షరం *>(&Hdr), పరిమాణం(Hdr));
   OS << PaxAttr;
   pad(OS);
 }
@@ -124,11 +124,11 @@ static void writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
 //
 // If Path fits in a Ustar header, updates Prefix and Name and returns true.
 // Otherwise, returns false.
-static bool splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
-  if (Path.size() < sizeof(UstarHeader::Name)) {
-    Prefix = "";
-    Name = Path;
-    return true;
+స్థిర తార్కిక విభజించు_Ustar(StringRef మార్గం, StringRef &ఉపసర్గ, StringRef &Name) {
+  ఒకవేళ (మార్గం.కొలత_2() < పరిమాణం(Ustar_శీర్షిక::Name)) {
+    ఉపసర్గ = "";
+    Name = మార్గం;
+    తిరిగి నిజం;
   }
 
   // tar 1.13 and earlier unconditionally look at the tar header interpreted
@@ -140,72 +140,72 @@ static bool splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
   // 137 bytes of directory + 100 bytes of basename previously.
   // (tar-1.13 also doesn't support pax headers, but in practice all paths in
   // llvm's test suite are short enough for that to not matter.)
-  const int MaxPrefix = 137;
-  size_t Sep = Path.rfind('/', MaxPrefix + 1);
-  if (Sep == StringRef::npos)
-    return false;
-  if (Path.size() - Sep - 1 >= sizeof(UstarHeader::Name))
-    return false;
+  స్థిరరాశి పూర్ణాంకం Max_ఉపసర్గ = 137;
+  size_t Sep = మార్గం.rfind('/', Max_ఉపసర్గ + 1);
+  ఒకవేళ (Sep == StringRef::npos)
+    తిరిగి అబద్ధం;
+  ఒకవేళ (మార్గం.కొలత_2() - Sep - 1 >= పరిమాణం(Ustar_శీర్షిక::Name))
+    తిరిగి అబద్ధం;
 
-  Prefix = Path.substr(0, Sep);
-  Name = Path.substr(Sep + 1);
-  return true;
+  ఉపసర్గ = మార్గం.substr(0, Sep);
+  Name = మార్గం.substr(Sep + 1);
+  తిరిగి నిజం;
 }
 
 // The PAX header is an extended format, so a PAX header needs
 // to be followed by a "real" header.
-static void writeUstarHeader(raw_fd_ostream &OS, StringRef Prefix,
-                             StringRef Name, size_t Size) {
-  UstarHeader Hdr = makeUstarHeader();
-  memcpy(Hdr.Name, Name.data(), Name.size());
-  memcpy(Hdr.Mode, "0000664", 8);
-  snprintf(Hdr.Size, sizeof(Hdr.Size), "%011zo", Size);
-  memcpy(Hdr.Prefix, Prefix.data(), Prefix.size());
+స్థిర శూన్య write_Ustar_శీర్షిక(raw_fd_ostream &OS, StringRef ఉపసర్గ,
+                             StringRef Name, size_t కొలత) {
+  Ustar_శీర్షిక Hdr = make_Ustar_శీర్షిక();
+  జ్ఞాపకం_నకలు(Hdr.Name, Name.దత్తాంశం(), Name.కొలత_2());
+  జ్ఞాపకం_నకలు(Hdr.బహుళకం, "0000664", 8);
+  snprintf(Hdr.కొలత, పరిమాణం(Hdr.కొలత), "%011zo", కొలత);
+  జ్ఞాపకం_నకలు(Hdr.ఉపసర్గ, ఉపసర్గ.దత్తాంశం(), ఉపసర్గ.కొలత_2());
   computeChecksum(Hdr);
-  OS << StringRef(reinterpret_cast<char *>(&Hdr), sizeof(Hdr));
+  OS << StringRef(reinterpret_cast<అక్షరం *>(&Hdr), పరిమాణం(Hdr));
 }
 
 // Creates a TarWriter instance and returns it.
-Expected<std::unique_ptr<TarWriter>> TarWriter::create(StringRef OutputPath,
-                                                       StringRef BaseDir) {
-  using namespace sys::fs;
-  int FD;
-  if (std::error_code EC =
-          openFileForWrite(OutputPath, FD, CD_CreateAlways, OF_None))
-    return make_error<StringError>("cannot open " + OutputPath, EC);
-  return std::unique_ptr<TarWriter>(new TarWriter(FD, BaseDir));
+Expected<std::unique_ptr<TarWriter>> TarWriter::create(StringRef Output_మార్గం,
+                                                       StringRef పునాది_Dir) {
+  ఉపయోగించి నామాకాశ sys::fs;
+  పూర్ణాంకం FD;
+  ఒకవేళ (std::error_సంకేతం EC =
+          openFileForWrite(Output_మార్గం, FD, CD_CreateAlways, యొక్క_None))
+    తిరిగి make_error<StringError>("cannot open " + Output_మార్గం, EC);
+  తిరిగి std::unique_ptr<TarWriter>(కొత్త TarWriter(FD, పునాది_Dir));
 }
 
-TarWriter::TarWriter(int FD, StringRef BaseDir)
-    : OS(FD, /*shouldClose=*/true, /*unbuffered=*/false),
-      BaseDir(std::string(BaseDir)) {}
+TarWriter::TarWriter(పూర్ణాంకం FD, StringRef పునాది_Dir)
+    : OS(FD, /*shouldClose=*/నిజం, /*unbuffered=*/అబద్ధం),
+      పునాది_Dir(std::string(పునాది_Dir)) {}
 
 // Append a given file to an archive.
-void TarWriter::append(StringRef Path, StringRef Data) {
+శూన్య TarWriter::append(StringRef మార్గం, StringRef దత్తాంశం_2) {
   // Write Path and Data.
-  std::string Fullpath = BaseDir + "/" + sys::path::convert_to_slash(Path);
+  std::string Fullpath = పునాది_Dir + "/" + sys::మార్గం_2::convert_గమ్యం_slash(మార్గం);
 
   // We do not want to include the same file more than once.
-  if (!Files.insert(Fullpath).second)
-    return;
+  ఒకవేళ (!Files.చొప్పించు(Fullpath).రెండవ_2)
+    తిరిగి;
 
-  StringRef Prefix;
+  StringRef ఉపసర్గ;
   StringRef Name;
-  if (splitUstar(Fullpath, Prefix, Name)) {
-    writeUstarHeader(OS, Prefix, Name, Data.size());
-  } else {
-    writePaxHeader(OS, Fullpath);
-    writeUstarHeader(OS, "", "", Data.size());
+  ఒకవేళ (విభజించు_Ustar(Fullpath, ఉపసర్గ, Name)) {
+    write_Ustar_శీర్షిక(OS, ఉపసర్గ, Name, దత్తాంశం_2.కొలత_2());
+  } లేకపోతే {
+    write_Pax_శీర్షిక(OS, Fullpath);
+    write_Ustar_శీర్షిక(OS, "", "", దత్తాంశం_2.కొలత_2());
   }
 
-  OS << Data;
+  OS << దత్తాంశం_2;
   pad(OS);
 
   // POSIX requires tar archives end with two null blocks.
   // Here, we write the terminator and then seek back, so that
   // the file being output is terminated correctly at any moment.
   uint64_t Pos = OS.tell();
-  OS << std::string(BlockSize * 2, '\0');
+  OS << std::string(ఖండం_కొలత * 2, '\0');
   OS.seek(Pos);
   OS.flush();
 }

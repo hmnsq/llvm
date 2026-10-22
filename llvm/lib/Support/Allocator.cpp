@@ -10,36 +10,36 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/PerThreadBumpPtrAllocator.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/Allocator.h"
+#అన్తర్భావ "llvm/Support/PerThreadBumpPtrAllocator.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-#include <atomic>
+#అన్తర్భావ <atomic>
 
-namespace llvm {
+నామాకాశ llvm {
 
-namespace detail {
+నామాకాశ detail {
 
-void printBumpPtrAllocatorStats(unsigned NumSlabs, size_t TotalMemory) {
-  errs() << "\nNumber of memory regions: " << NumSlabs << '\n'
-         << "Bytes allocated: " << TotalMemory << '\n'
+శూన్య printBumpPtrAllocatorStats(గుర్తులేని అంకె_Slabs, size_t మొత్తం_జ్ఞాపకం) {
+  errs() << "\nNumber of memory regions: " << అంకె_Slabs << '\n'
+         << "Bytes allocated: " << మొత్తం_జ్ఞాపకం << '\n'
          << " (includes alignment, etc)\n";
 }
 
 } // namespace detail
 
-void PrintRecyclerStats(size_t Size,
+శూన్య PrintRecyclerStats(size_t కొలత,
                         size_t Align,
-                        size_t FreeListSize) {
-  errs() << "Recycler element size: " << Size << '\n'
+                        size_t Free_List_కొలత) {
+  errs() << "Recycler element size: " << కొలత << '\n'
          << "Recycler element alignment: " << Align << '\n'
-         << "Number of elements free for recycling: " << FreeListSize << '\n';
+         << "Number of elements free for recycling: " << Free_List_కొలత << '\n';
 }
 
-namespace parallel::detail {
-unsigned claimPerThreadAllocatorId() {
-  static std::atomic<unsigned> Counter;
-  return Counter.fetch_add(1, std::memory_order_relaxed);
+నామాకాశ parallel::detail {
+గుర్తులేని claim_చొప్పున_Thread_Allocator_Id() {
+  స్థిర std::atomic<గుర్తులేని> Counter;
+  తిరిగి Counter.fetch_కూడు(1, std::memory_order_relaxed);
 }
 } // namespace parallel::detail
 

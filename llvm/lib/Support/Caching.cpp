@@ -12,56 +12,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Caching.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/Support/Caching.h"
+#అన్తర్భావ "llvm/Support/Errc.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/Path.h"
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include "llvm/Support/Windows/WindowsSupport.h"
-#include <io.h>
-#endif
+#ఒకవేళ !defined(_MSC_VER) && !defined(__MINGW32__)
+#అన్తర్భావ <unistd.h>
+#లేకపోతే
+#అన్తర్భావ "llvm/Support/Windows/WindowsSupport.h"
+#అన్తర్భావ <io.h>
+#అయితే_ముగింపు
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
-                                     const Twine &TempFilePrefixRef,
-                                     const Twine &CacheDirectoryPathRef,
-                                     AddBufferFn AddBuffer, bool CacheRename) {
+Expected<FileCache> llvm::localCache(స్థిరరాశి Twine &CacheNameRef,
+                                     స్థిరరాశి Twine &తాత్కాలిక_File_ఉపసర్గ_Ref,
+                                     స్థిరరాశి Twine &Cache_Directory_మార్గం_Ref,
+                                     కూడు_బఫరు_Fn కూడు_బఫరు, తార్కిక CacheRename) {
 
   // Create local copies which are safely captured-by-copy in lambdas
-  SmallString<64> CacheName, TempFilePrefix, CacheDirectoryPath;
-  CacheNameRef.toVector(CacheName);
-  TempFilePrefixRef.toVector(TempFilePrefix);
-  CacheDirectoryPathRef.toVector(CacheDirectoryPath);
+  SmallString<64> CacheName, తాత్కాలిక_File_ఉపసర్గ, Cache_Directory_మార్గం;
+  CacheNameRef.గమ్యం_సదిశ(CacheName);
+  తాత్కాలిక_File_ఉపసర్గ_Ref.గమ్యం_సదిశ(తాత్కాలిక_File_ఉపసర్గ);
+  Cache_Directory_మార్గం_Ref.గమ్యం_సదిశ(Cache_Directory_మార్గం);
 
-  auto Func = [=](unsigned Task, StringRef Key,
-                  const Twine &ModuleName) -> Expected<AddStreamFn> {
+  స్వయంచాలక Func = [=](గుర్తులేని Task, StringRef కీలకం,
+                  స్థిరరాశి Twine &ModuleName) -> Expected<కూడు_ప్రవాహం_Fn> {
     // This choice of file name allows the cache to be pruned (see pruneCache()
     // in include/llvm/Support/CachePruning.h).
-    SmallString<64> EntryPath;
-    sys::path::append(EntryPath, CacheDirectoryPath, "llvmcache-" + Key);
+    SmallString<64> నమోదు_మార్గం;
+    sys::మార్గం_2::append(నమోదు_మార్గం, Cache_Directory_మార్గం, "llvmcache-" + కీలకం);
     // First, see if we have a cache hit.
-    SmallString<64> ResultPath;
+    SmallString<64> ఫలితం_మార్గం;
     Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
-        Twine(EntryPath), sys::fs::OF_UpdateAtime, &ResultPath);
-    std::error_code EC;
-    if (FDOrErr) {
-      ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-          MemoryBuffer::getOpenFile(*FDOrErr, EntryPath,
+        Twine(నమోదు_మార్గం), sys::fs::యొక్క_Update_Atime, &ఫలితం_మార్గం);
+    std::error_సంకేతం EC;
+    ఒకవేళ (FDOrErr) {
+      ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>> MBOrErr =
+          జ్ఞాపకం_బఫరు::getOpenFile(*FDOrErr, నమోదు_మార్గం,
                                     /*FileSize=*/-1,
-                                    /*RequiresNullTerminator=*/false);
+                                    /*RequiresNullTerminator=*/అబద్ధం);
       sys::fs::closeFile(*FDOrErr);
-      if (MBOrErr) {
-        AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return AddStreamFn();
+      ఒకవేళ (MBOrErr) {
+        కూడు_బఫరు(Task, ModuleName, std::move(*MBOrErr));
+        తిరిగి కూడు_ప్రవాహం_Fn();
       }
       EC = MBOrErr.getError();
-    } else {
-      EC = errorToErrorCode(FDOrErr.takeError());
+    } లేకపోతే {
+      EC = error_గమ్యం_Error_సంకేతం(FDOrErr.takeError());
     }
 
     // On Windows we can fail to open a cache file with a permission denied
@@ -70,43 +70,43 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
     // process has opened the file without the sharing permissions we need.
     // Since the file is probably being deleted we handle it in the same way as
     // if the file did not exist at all.
-    if (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
-      return createStringError(EC, Twine("Failed to open cache file ") +
-                                       EntryPath + ": " + EC.message() + "\n");
+    ఒకవేళ (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
+      తిరిగి createStringError(EC, Twine("Failed to open cache file ") +
+                                       నమోదు_మార్గం + ": " + EC.సందేశం_2() + "\n");
 
     // This file stream is responsible for commiting the resulting file to the
     // cache and calling AddBuffer to add it to the link.
-    struct CacheStream : CachedFileStream {
-      AddBufferFn AddBuffer;
-      sys::fs::TempFile TempFile;
+    నిర్మాణం Cache_ప్రవాహం : Cached_File_ప్రవాహం {
+      కూడు_బఫరు_Fn కూడు_బఫరు;
+      sys::fs::తాత్కాలిక_File తాత్కాలిక_File;
       std::string ModuleName;
-      unsigned Task;
+      గుర్తులేని Task;
 
-      CacheStream(std::unique_ptr<raw_pwrite_stream> OS, AddBufferFn AddBuffer,
-                  sys::fs::TempFile TempFile, std::string EntryPath,
-                  std::string ModuleName, unsigned Task)
-          : CachedFileStream(std::move(OS), std::move(EntryPath)),
-            AddBuffer(std::move(AddBuffer)), TempFile(std::move(TempFile)),
+      Cache_ప్రవాహం(std::unique_ptr<raw_pwrite_ప్రవాహం> OS, కూడు_బఫరు_Fn కూడు_బఫరు,
+                  sys::fs::తాత్కాలిక_File తాత్కాలిక_File, std::string నమోదు_మార్గం,
+                  std::string ModuleName, గుర్తులేని Task)
+          : Cached_File_ప్రవాహం(std::move(OS), std::move(నమోదు_మార్గం)),
+            కూడు_బఫరు(std::move(కూడు_బఫరు)), తాత్కాలిక_File(std::move(తాత్కాలిక_File)),
             ModuleName(ModuleName), Task(Task) {}
 
       Error commit() override {
-        Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+        Error E = Cached_File_ప్రవాహం::commit();
+        ఒకవేళ (E)
+          తిరిగి E;
 
         // Make sure the stream is closed before committing it.
         OS.reset();
 
         // Open the file first to avoid racing with a cache pruner.
-        ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-            MemoryBuffer::getOpenFile(
-                sys::fs::convertFDToNativeFile(TempFile.FD), ObjectPathName,
-                /*FileSize=*/-1, /*RequiresNullTerminator=*/false);
-        if (!MBOrErr) {
-          std::error_code EC = MBOrErr.getError();
-          return createStringError(EC, Twine("Failed to open new cache file ") +
-                                           TempFile.TmpName + ": " +
-                                           EC.message() + "\n");
+        ErrorOr<std::unique_ptr<జ్ఞాపకం_బఫరు>> MBOrErr =
+            జ్ఞాపకం_బఫరు::getOpenFile(
+                sys::fs::convertFDToNativeFile(తాత్కాలిక_File.FD), Object_మార్గం_Name,
+                /*FileSize=*/-1, /*RequiresNullTerminator=*/అబద్ధం);
+        ఒకవేళ (!MBOrErr) {
+          std::error_సంకేతం EC = MBOrErr.getError();
+          తిరిగి createStringError(EC, Twine("Failed to open new cache file ") +
+                                           తాత్కాలిక_File.TmpName + ": " +
+                                           EC.సందేశం_2() + "\n");
         }
 
         // On POSIX systems, this will atomically replace the destination if
@@ -118,116 +118,116 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
         // AddBuffer a copy of the bytes we wrote in that case. We do this
         // instead of just using the existing file, because the pruner might
         // delete the file before we get a chance to use it.
-        E = TempFile.keep(ObjectPathName);
-        E = handleErrors(std::move(E), [&](const ECError &E) -> Error {
-          std::error_code EC = E.convertToErrorCode();
-          if (EC != errc::permission_denied)
-            return createStringError(
+        E = తాత్కాలిక_File.keep(Object_మార్గం_Name);
+        E = handleErrors(std::move(E), [&](స్థిరరాశి ECError &E) -> Error {
+          std::error_సంకేతం EC = E.convert_గమ్యం_Error_సంకేతం();
+          ఒకవేళ (EC != errc::permission_denied)
+            తిరిగి createStringError(
                 EC, Twine("Failed to rename temporary file ") +
-                        TempFile.TmpName + " to " + ObjectPathName + ": " +
-                        EC.message() + "\n");
+                        తాత్కాలిక_File.TmpName + " to " + Object_మార్గం_Name + ": " +
+                        EC.సందేశం_2() + "\n");
 
-          auto MBCopy = MemoryBuffer::getMemBufferCopy((*MBOrErr)->getBuffer(),
-                                                       ObjectPathName);
+          స్వయంచాలక MBCopy = జ్ఞాపకం_బఫరు::get_Mem_బఫరు_Copy((*MBOrErr)->get_బఫరు(),
+                                                       Object_మార్గం_Name);
           MBOrErr = std::move(MBCopy);
 
           // FIXME: should we consume the discard error?
-          consumeError(TempFile.discard());
+          consumeError(తాత్కాలిక_File.discard());
 
-          return Error::success();
+          తిరిగి Error::success();
         });
 
-        if (E)
-          return E;
+        ఒకవేళ (E)
+          తిరిగి E;
 
-        AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return Error::success();
+        కూడు_బఫరు(Task, ModuleName, std::move(*MBOrErr));
+        తిరిగి Error::success();
       }
 
       Error abort() override {
-        Error E1 = CachedFileStream::abort();
-        Error E2 = TempFile.discard();
-        return joinErrors(std::move(E1), std::move(E2));
+        Error E1 = Cached_File_ప్రవాహం::abort();
+        Error E2 = తాత్కాలిక_File.discard();
+        తిరిగి joinErrors(std::move(E1), std::move(E2));
       }
     };
 
     // This class is responsible for renaming/moving existing file into a
     // cache directory. The path for an input file is passed through a string
     // stream.
-    struct MoveFileToCache : CachedFileStream {
-      AddBufferFn AddBuffer;
+    నిర్మాణం Move_File_గమ్యం_Cache : Cached_File_ప్రవాహం {
+      కూడు_బఫరు_Fn కూడు_బఫరు;
       std::string ModuleName;
       size_t Task;
-      StringRef FilePath;
+      StringRef File_మార్గం;
 
-      MoveFileToCache(AddBufferFn AddBuffer, std::string EntryPath,
+      Move_File_గమ్యం_Cache(కూడు_బఫరు_Fn కూడు_బఫరు, std::string నమోదు_మార్గం,
                       std::string ModuleID, size_t Task)
-          : CachedFileStream({}, std::move(EntryPath)),
-            AddBuffer(std::move(AddBuffer)), ModuleName(ModuleID), Task(Task) {}
-      virtual ~MoveFileToCache() = default;
+          : Cached_File_ప్రవాహం({}, std::move(నమోదు_మార్గం)),
+            కూడు_బఫరు(std::move(కూడు_బఫరు)), ModuleName(ModuleID), Task(Task) {}
+      మాయా ~Move_File_గమ్యం_Cache() = అప్రమేయ;
 
-      virtual Error commit(std::unique_ptr<MemoryBuffer> MemBuf) override {
-        Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+      మాయా Error commit(std::unique_ptr<జ్ఞాపకం_బఫరు> MemBuf) override {
+        Error E = Cached_File_ప్రవాహం::commit();
+        ఒకవేళ (E)
+          తిరిగి E;
 
-        FilePath = MemBuf->getBufferIdentifier();
-        assert(!FilePath.empty() && "File path is empty.");
+        File_మార్గం = MemBuf->get_బఫరు_Identifier();
+        ప్రతిజ్ఞా(!File_మార్గం.ఖాళీలు() && "File path is empty.");
 
         // Rename/move native object file into cache directory, if they are
         // located the same device/logical drive, otherwise we use a copy.
-        std::error_code EC = sys::fs::rename(FilePath, ObjectPathName);
-#ifdef _WIN32
-        if (EC ==
-            std::error_code(ERROR_NOT_SAME_DEVICE, std::system_category()))
-#else
-        if (EC == std::make_error_code(std::errc::cross_device_link))
-#endif
-          EC = sys::fs::copy_file(FilePath, ObjectPathName);
-        if (EC)
-          return createStringError(EC, Twine("Failed to rename or copy file ") +
-                                           FilePath + " to " + ObjectPathName +
-                                           ": " + EC.message() + "\n");
+        std::error_సంకేతం EC = sys::fs::rename(File_మార్గం, Object_మార్గం_Name);
+#నిర్వచితమైతే _WIN32
+        ఒకవేళ (EC ==
+            std::error_సంకేతం(ERROR_NOT_SAME_DEVICE, std::system_category()))
+#లేకపోతే
+        ఒకవేళ (EC == std::make_error_సంకేతం(std::errc::cross_device_link))
+#అయితే_ముగింపు
+          EC = sys::fs::copy_file(File_మార్గం, Object_మార్గం_Name);
+        ఒకవేళ (EC)
+          తిరిగి createStringError(EC, Twine("Failed to rename or copy file ") +
+                                           File_మార్గం + " to " + Object_మార్గం_Name +
+                                           ": " + EC.సందేశం_2() + "\n");
 
-        AddBuffer(Task, ModuleName, std::move(MemBuf));
+        కూడు_బఫరు(Task, ModuleName, std::move(MemBuf));
 
-        return Error::success();
+        తిరిగి Error::success();
       }
     };
 
-    return [=](size_t Task, const Twine &ModuleName)
-               -> Expected<std::unique_ptr<CachedFileStream>> {
+    తిరిగి [=](size_t Task, స్థిరరాశి Twine &ModuleName)
+               -> Expected<std::unique_ptr<Cached_File_ప్రవాహం>> {
       // Create the cache directory if not already done. Doing this lazily
       // ensures the filesystem isn't mutated until the cache is.
-      if (std::error_code EC = sys::fs::create_directories(
-              CacheDirectoryPath, /*IgnoreExisting=*/true))
-        return createStringError(EC, Twine("can't create cache directory ") +
-                                         CacheDirectoryPath + ": " +
-                                         EC.message());
+      ఒకవేళ (std::error_సంకేతం EC = sys::fs::create_directories(
+              Cache_Directory_మార్గం, /*IgnoreExisting=*/నిజం))
+        తిరిగి createStringError(EC, Twine("can't create cache directory ") +
+                                         Cache_Directory_మార్గం + ": " +
+                                         EC.సందేశం_2());
       // MoveFileToChache class will rename/move the file into the cache on
       // destruction.
-      if (CacheRename) {
-        return std::make_unique<MoveFileToCache>(
-            AddBuffer, std::string(EntryPath.str()), ModuleName.str(), Task);
+      ఒకవేళ (CacheRename) {
+        తిరిగి std::make_unique<Move_File_గమ్యం_Cache>(
+            కూడు_బఫరు, std::string(నమోదు_మార్గం.str()), ModuleName.str(), Task);
       }
 
       // Write to a temporary to avoid race condition
-      SmallString<64> TempFilenameModel;
-      sys::path::append(TempFilenameModel, CacheDirectoryPath,
-                        TempFilePrefix + "-%%%%%%.tmp.o");
-      Expected<sys::fs::TempFile> Temp = sys::fs::TempFile::create(
-          TempFilenameModel, sys::fs::owner_read | sys::fs::owner_write);
-      if (!Temp)
-        return createStringError(errc::io_error,
-                                 toString(Temp.takeError()) + ": " + CacheName +
+      SmallString<64> తాత్కాలిక_Filename_Model;
+      sys::మార్గం_2::append(తాత్కాలిక_Filename_Model, Cache_Directory_మార్గం,
+                        తాత్కాలిక_File_ఉపసర్గ + "-%%%%%%.tmp.o");
+      Expected<sys::fs::తాత్కాలిక_File> తాత్కాలిక = sys::fs::తాత్కాలిక_File::create(
+          తాత్కాలిక_Filename_Model, sys::fs::owner_read | sys::fs::owner_write);
+      ఒకవేళ (!తాత్కాలిక)
+        తిరిగి createStringError(errc::io_error,
+                                 గమ్యం_String(తాత్కాలిక.takeError()) + ": " + CacheName +
                                      ": Can't get a temporary file");
 
       // This CacheStream will move the temporary file into the cache when done.
-      return std::make_unique<CacheStream>(
-          std::make_unique<raw_fd_ostream>(Temp->FD, /* ShouldClose */ false),
-          AddBuffer, std::move(*Temp), std::string(EntryPath), ModuleName.str(),
+      తిరిగి std::make_unique<Cache_ప్రవాహం>(
+          std::make_unique<raw_fd_ostream>(తాత్కాలిక->FD, /* ShouldClose */ అబద్ధం),
+          కూడు_బఫరు, std::move(*తాత్కాలిక), std::string(నమోదు_మార్గం), ModuleName.str(),
           Task);
     };
   };
-  return FileCache(Func, CacheDirectoryPathRef.str());
+  తిరిగి FileCache(Func, Cache_Directory_మార్గం_Ref.str());
 }

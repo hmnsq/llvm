@@ -10,26 +10,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ToolOutputFile.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Signals.h"
-using namespace llvm;
+#అన్తర్భావ "llvm/Support/ToolOutputFile.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/Signals.h"
+ఉపయోగించి నామాకాశ llvm;
 
-static bool isStdout(StringRef Filename) { return Filename == "-"; }
+స్థిర తార్కిక isStdout(StringRef Filename) { తిరిగి Filename == "-"; }
 
 CleanupInstaller::CleanupInstaller(StringRef Filename)
-    : Filename(std::string(Filename)), Keep(false) {
+    : Filename(std::string(Filename)), Keep(అబద్ధం) {
   // Arrange for the file to be deleted if the process is killed.
-  if (!isStdout(Filename))
+  ఒకవేళ (!isStdout(Filename))
     sys::RemoveFileOnSignal(Filename);
 }
 
 CleanupInstaller::~CleanupInstaller() {
-  if (isStdout(Filename))
-    return;
+  ఒకవేళ (isStdout(Filename))
+    తిరిగి;
 
   // Delete the file if the client hasn't told us not to.
-  if (!Keep)
+  ఒకవేళ (!Keep)
     sys::fs::remove(Filename);
 
   // Ok, the file is successfully written and closed, or deleted. There's no
@@ -37,23 +37,23 @@ CleanupInstaller::~CleanupInstaller() {
   sys::DontRemoveFileOnSignal(Filename);
 }
 
-ToolOutputFile::ToolOutputFile(StringRef Filename, std::error_code &EC,
+ToolOutputFile::ToolOutputFile(StringRef Filename, std::error_సంకేతం &EC,
                                sys::fs::OpenFlags Flags)
     : Installer(Filename) {
-  if (isStdout(Filename)) {
+  ఒకవేళ (isStdout(Filename)) {
     OS = &outs();
-    EC = std::error_code();
-    return;
+    EC = std::error_సంకేతం();
+    తిరిగి;
   }
   OSHolder.emplace(Filename, EC, Flags);
   OS = &*OSHolder;
   // If open fails, no cleanup is needed.
-  if (EC)
-    Installer.Keep = true;
+  ఒకవేళ (EC)
+    Installer.Keep = నిజం;
 }
 
-ToolOutputFile::ToolOutputFile(StringRef Filename, int FD)
+ToolOutputFile::ToolOutputFile(StringRef Filename, పూర్ణాంకం FD)
     : Installer(Filename) {
-  OSHolder.emplace(FD, true);
+  OSHolder.emplace(FD, నిజం);
   OS = &*OSHolder;
 }

@@ -10,60 +10,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BlockFrequency.h"
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/BlockFrequency.h"
+#అన్తర్భావ "llvm/Support/BranchProbability.h"
+#అన్తర్భావ "llvm/Support/MathExtras.h"
+#అన్తర్భావ "llvm/Support/ScaledNumber.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
+ఖండం_Frequency &ఖండం_Frequency::క్రియాకారకం*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  తిరిగి *ఇది;
 }
 
-BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+ఖండం_Frequency ఖండం_Frequency::క్రియాకారకం*(BranchProbability Prob) స్థిరరాశి {
+  ఖండం_Frequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  తిరిగి Freq;
 }
 
-BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
+ఖండం_Frequency &ఖండం_Frequency::క్రియాకారకం/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  తిరిగి *ఇది;
 }
 
-BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+ఖండం_Frequency ఖండం_Frequency::క్రియాకారకం/(BranchProbability Prob) స్థిరరాశి {
+  ఖండం_Frequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  తిరిగి Freq;
 }
 
-std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
-  bool Overflow;
-  uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+std::optional<ఖండం_Frequency> ఖండం_Frequency::mul(uint64_t గుణకం) స్థిరరాశి {
+  తార్కిక అధికప్రవాహం;
+  uint64_t ఫలితం_Frequency = SaturatingMultiply(Frequency, గుణకం, &అధికప్రవాహం);
+  ఒకవేళ (అధికప్రవాహం)
+    తిరిగి {};
+  తిరిగి ఖండం_Frequency(ఫలితం_Frequency);
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, ఖండం_Frequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  తిరిగి OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
-                                  BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+శూన్య llvm::print_Relative_ఖండం_Freq(raw_ostream &OS, ఖండం_Frequency నమోదు_Freq,
+                                  ఖండం_Frequency Freq) {
+  ఒకవేళ (Freq == ఖండం_Frequency(0)) {
     OS << "0";
-    return;
+    తిరిగి;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  ఒకవేళ (నమోదు_Freq == ఖండం_Frequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    తిరిగి;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
-  OS << Block / Entry;
+  Scaled_సంఖ్య<uint64_t> ఖండం_2(Freq.getFrequency(), 0);
+  Scaled_సంఖ్య<uint64_t> నమోదు_2(నమోదు_Freq.getFrequency(), 0);
+  OS << ఖండం_2 / నమోదు_2;
 }

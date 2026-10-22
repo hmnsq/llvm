@@ -17,61 +17,61 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntEqClasses.h"
-#include <cassert>
+#అన్తర్భావ "llvm/ADT/IntEqClasses.h"
+#అన్తర్భావ <cassert>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-void IntEqClasses::grow(unsigned N) {
-  assert(NumClasses == 0 && "grow() called after compress().");
+శూన్య IntEqClasses::grow(గుర్తులేని N) {
+  ప్రతిజ్ఞా(అంకె_Classes == 0 && "grow() called after compress().");
   EC.reserve(N);
-  while (EC.size() < N)
-    EC.push_back(EC.size());
+  అయితే (EC.కొలత_2() < N)
+    EC.నెట్టు_వెనుక(EC.కొలత_2());
 }
 
-unsigned IntEqClasses::join(unsigned a, unsigned b) {
-  assert(NumClasses == 0 && "join() called after compress().");
-  unsigned eca = EC[a];
-  unsigned ecb = EC[b];
+గుర్తులేని IntEqClasses::join(గుర్తులేని a, గుర్తులేని b) {
+  ప్రతిజ్ఞా(అంకె_Classes == 0 && "join() called after compress().");
+  గుర్తులేని eca = EC[a];
+  గుర్తులేని ecb = EC[b];
   // Update pointers while searching for the leaders, compressing the paths
   // incrementally. The larger leader will eventually be updated, joining the
   // classes.
-  while (eca != ecb)
-    if (eca < ecb) {
+  అయితే (eca != ecb)
+    ఒకవేళ (eca < ecb) {
       EC[b] = eca;
       b = ecb;
       ecb = EC[b];
-    } else {
+    } లేకపోతే {
       EC[a] = ecb;
       a = eca;
       eca = EC[a];
     }
 
-  return eca;
+  తిరిగి eca;
 }
 
-unsigned IntEqClasses::findLeader(unsigned a) const {
-  assert(NumClasses == 0 && "findLeader() called after compress().");
-  while (a != EC[a])
+గుర్తులేని IntEqClasses::కనుగొను_Leader(గుర్తులేని a) స్థిరరాశి {
+  ప్రతిజ్ఞా(అంకె_Classes == 0 && "findLeader() called after compress().");
+  అయితే (a != EC[a])
     a = EC[a];
-  return a;
+  తిరిగి a;
 }
 
-void IntEqClasses::compress() {
-  if (NumClasses)
-    return;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    EC[i] = (EC[i] == i) ? NumClasses++ : EC[EC[i]];
+శూన్య IntEqClasses::compress() {
+  ఒకవేళ (అంకె_Classes)
+    తిరిగి;
+  కొరకు (గుర్తులేని i = 0, e = EC.కొలత_2(); i != e; ++i)
+    EC[i] = (EC[i] == i) ? అంకె_Classes++ : EC[EC[i]];
 }
 
-void IntEqClasses::uncompress() {
-  if (!NumClasses)
-    return;
-  SmallVector<unsigned, 8> Leader;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    if (EC[i] < Leader.size())
+శూన్య IntEqClasses::uncompress() {
+  ఒకవేళ (!అంకె_Classes)
+    తిరిగి;
+  Small_సదిశ<గుర్తులేని, 8> Leader;
+  కొరకు (గుర్తులేని i = 0, e = EC.కొలత_2(); i != e; ++i)
+    ఒకవేళ (EC[i] < Leader.కొలత_2())
       EC[i] = Leader[EC[i]];
-    else
-      Leader.push_back(EC[i] = i);
-  NumClasses = 0;
+    లేకపోతే
+      Leader.నెట్టు_వెనుక(EC[i] = i);
+  అంకె_Classes = 0;
 }

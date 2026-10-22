@@ -1,90 +1,90 @@
-#ifndef BLAKE3_IMPL_H
-#define BLAKE3_IMPL_H
+#నిర్వచితం_కాకపోతే BLAKE3_IMPL_H
+#నిర్వచించు BLAKE3_IMPL_H
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#అన్తర్భావ <assert.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdint.h>
+#అన్తర్భావ <string.h>
 
-#include "llvm-c/blake3.h"
+#అన్తర్భావ "llvm-c/blake3.h"
 // For \p LLVM_LIBRARY_VISIBILITY
-#include "llvm/Support/Compiler.h"
+#అన్తర్భావ "llvm/Support/Compiler.h"
 
-#include "llvm_blake3_prefix.h"
+#అన్తర్భావ "llvm_blake3_prefix.h"
 
-#define BLAKE3_PRIVATE
+#నిర్వచించు BLAKE3_వ్యక్తిగత
 
 // internal flags
-enum blake3_flags {
-  CHUNK_START         = 1 << 0,
-  CHUNK_END           = 1 << 1,
-  PARENT              = 1 << 2,
-  ROOT                = 1 << 3,
+గణన blake3_flags {
+  CHUNK_ప్రారంభం         = 1 << 0,
+  CHUNK_చివర           = 1 << 1,
+  మాతృ              = 1 << 2,
+  మూలం                = 1 << 3,
   KEYED_HASH          = 1 << 4,
-  DERIVE_KEY_CONTEXT  = 1 << 5,
-  DERIVE_KEY_MATERIAL = 1 << 6,
+  DERIVE_కీలకం_CONTEXT  = 1 << 5,
+  DERIVE_కీలకం_MATERIAL = 1 << 6,
 };
 
 // This C implementation tries to support recent versions of GCC, Clang, and
 // MSVC.
-#if defined(_MSC_VER)
-#define INLINE static __forceinline
-#else
-#define INLINE static inline __attribute__((always_inline))
-#endif
+#ఒకవేళ defined(_MSC_VER)
+#నిర్వచించు INLINE స్థిర __forceinline
+#లేకపోతే
+#నిర్వచించు INLINE స్థిర అంతఃవరుస __attribute__((always_inline))
+#అయితే_ముగింపు
 
-#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
-#define IS_X86
-#define IS_X86_64
-#endif
+#ఒకవేళ (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
+#నిర్వచించు IS_X86
+#నిర్వచించు IS_X86_64
+#అయితే_ముగింపు
 
-#if defined(__i386__) || defined(_M_IX86)
-#define IS_X86
-#define IS_X86_32
-#endif
+#ఒకవేళ defined(__i386__) || defined(_M_IX86)
+#నిర్వచించు IS_X86
+#నిర్వచించు IS_X86_32
+#అయితే_ముగింపు
 
-#if defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
-#define IS_AARCH64
-#endif
+#ఒకవేళ defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
+#నిర్వచించు IS_AARCH64
+#అయితే_ముగింపు
 
-#if defined(IS_X86)
-#if defined(_MSC_VER)
-#include <intrin.h>
-#endif
-#include <immintrin.h>
-#endif
+#ఒకవేళ defined(IS_X86)
+#ఒకవేళ defined(_MSC_VER)
+#అన్తర్భావ <intrin.h>
+#అయితే_ముగింపు
+#అన్తర్భావ <immintrin.h>
+#అయితే_ముగింపు
 
-#if !defined(BLAKE3_USE_NEON) 
+#ఒకవేళ !defined(BLAKE3_USE_NEON) 
   // If BLAKE3_USE_NEON not manually set, autodetect based on AArch64ness
-  #if defined(IS_AARCH64)
-    #if defined(__ARM_BIG_ENDIAN)
-      #define BLAKE3_USE_NEON 0
-    #else
-      #define BLAKE3_USE_NEON 1
-    #endif
-  #else
-    #define BLAKE3_USE_NEON 0
-  #endif
-#endif
+  #ఒకవేళ defined(IS_AARCH64)
+    #ఒకవేళ defined(__ARM_BIG_ENDIAN)
+      #నిర్వచించు BLAKE3_USE_NEON 0
+    #లేకపోతే
+      #నిర్వచించు BLAKE3_USE_NEON 1
+    #అయితే_ముగింపు
+  #లేకపోతే
+    #నిర్వచించు BLAKE3_USE_NEON 0
+  #అయితే_ముగింపు
+#అయితే_ముగింపు
 
-#if defined(IS_X86)
-#define MAX_SIMD_DEGREE 16
-#elif BLAKE3_USE_NEON == 1
-#define MAX_SIMD_DEGREE 4
-#else
-#define MAX_SIMD_DEGREE 1
-#endif
+#ఒకవేళ defined(IS_X86)
+#నిర్వచించు MAX_SIMD_DEGREE 16
+#లేదావేళ BLAKE3_USE_NEON == 1
+#నిర్వచించు MAX_SIMD_DEGREE 4
+#లేకపోతే
+#నిర్వచించు MAX_SIMD_DEGREE 1
+#అయితే_ముగింపు
 
 // There are some places where we want a static size that's equal to the
 // MAX_SIMD_DEGREE, but also at least 2.
-#define MAX_SIMD_DEGREE_OR_2 (MAX_SIMD_DEGREE > 2 ? MAX_SIMD_DEGREE : 2)
+#నిర్వచించు MAX_SIMD_DEGREE_OR_2 (MAX_SIMD_DEGREE > 2 ? MAX_SIMD_DEGREE : 2)
 
-static const uint32_t IV[8] = {0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL,
+స్థిర స్థిరరాశి uint32_t IV[8] = {0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL,
                                0xA54FF53AUL, 0x510E527FUL, 0x9B05688CUL,
                                0x1F83D9ABUL, 0x5BE0CD19UL};
 
-static const uint8_t MSG_SCHEDULE[7][16] = {
+స్థిర స్థిరరాశి uint8_t సందేశం_కాలపట్టిక[7][16] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
     {2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8},
     {3, 4, 10, 12, 13, 2, 7, 14, 6, 5, 9, 0, 11, 15, 8, 1},
@@ -96,87 +96,87 @@ static const uint8_t MSG_SCHEDULE[7][16] = {
 
 /* Find index of the highest set bit */
 /* x is assumed to be nonzero.       */
-static unsigned int highest_one(uint64_t x) {
-#if defined(__GNUC__) || defined(__clang__)
-  return 63 ^ (unsigned int)__builtin_clzll(x);
-#elif defined(_MSC_VER) && defined(IS_X86_64)
-  unsigned long index;
-  _BitScanReverse64(&index, x);
-  return index;
-#elif defined(_MSC_VER) && defined(IS_X86_32)
-  if(x >> 32) {
-    unsigned long index;
-    _BitScanReverse(&index, (unsigned long)(x >> 32));
-    return 32 + index;
-  } else {
-    unsigned long index;
-    _BitScanReverse(&index, (unsigned long)x);
-    return index;
+స్థిర గుర్తులేని పూర్ణాంకం highest_one(uint64_t x) {
+#ఒకవేళ defined(__GNUC__) || defined(__clang__)
+  తిరిగి 63 ^ (గుర్తులేని పూర్ణాంకం)__builtin_clzll(x);
+#లేదావేళ defined(_MSC_VER) && defined(IS_X86_64)
+  గుర్తులేని దీర్ఘ సూచీ;
+  బిట్టు_పరిశీలన_Reverse64(&సూచీ, x);
+  తిరిగి సూచీ;
+#లేదావేళ defined(_MSC_VER) && defined(IS_X86_32)
+  ఒకవేళ(x >> 32) {
+    గుర్తులేని దీర్ఘ సూచీ;
+    బిట్టు_పరిశీలన_తిరగేయి(&సూచీ, (గుర్తులేని దీర్ఘ)(x >> 32));
+    తిరిగి 32 + సూచీ;
+  } లేకపోతే {
+    గుర్తులేని దీర్ఘ సూచీ;
+    బిట్టు_పరిశీలన_తిరగేయి(&సూచీ, (గుర్తులేని దీర్ఘ)x);
+    తిరిగి సూచీ;
   }
-#else
-  unsigned int c = 0;
-  if(x & 0xffffffff00000000ULL) { x >>= 32; c += 32; }
-  if(x & 0x00000000ffff0000ULL) { x >>= 16; c += 16; }
-  if(x & 0x000000000000ff00ULL) { x >>=  8; c +=  8; }
-  if(x & 0x00000000000000f0ULL) { x >>=  4; c +=  4; }
-  if(x & 0x000000000000000cULL) { x >>=  2; c +=  2; }
-  if(x & 0x0000000000000002ULL) {           c +=  1; }
-  return c;
-#endif
+#లేకపోతే
+  గుర్తులేని పూర్ణాంకం c = 0;
+  ఒకవేళ(x & 0xffffffff00000000ULL) { x >>= 32; c += 32; }
+  ఒకవేళ(x & 0x00000000ffff0000ULL) { x >>= 16; c += 16; }
+  ఒకవేళ(x & 0x000000000000ff00ULL) { x >>=  8; c +=  8; }
+  ఒకవేళ(x & 0x00000000000000f0ULL) { x >>=  4; c +=  4; }
+  ఒకవేళ(x & 0x000000000000000cULL) { x >>=  2; c +=  2; }
+  ఒకవేళ(x & 0x0000000000000002ULL) {           c +=  1; }
+  తిరిగి c;
+#అయితే_ముగింపు
 }
 
 // Count the number of 1 bits.
-INLINE unsigned int popcnt(uint64_t x) {
-#if defined(__GNUC__) || defined(__clang__)
-  return (unsigned int)__builtin_popcountll(x);
-#else
-  unsigned int count = 0;
-  while (x != 0) {
-    count += 1;
+INLINE గుర్తులేని పూర్ణాంకం popcnt(uint64_t x) {
+#ఒకవేళ defined(__GNUC__) || defined(__clang__)
+  తిరిగి (గుర్తులేని పూర్ణాంకం)__builtin_popcountll(x);
+#లేకపోతే
+  గుర్తులేని పూర్ణాంకం లెక్క = 0;
+  అయితే (x != 0) {
+    లెక్క += 1;
     x &= x - 1;
   }
-  return count;
-#endif
+  తిరిగి లెక్క;
+#అయితే_ముగింపు
 }
 
 // Largest power of two less than or equal to x. As a special case, returns 1
 // when x is 0. 
-INLINE uint64_t round_down_to_power_of_2(uint64_t x) {
-  return 1ULL << highest_one(x | 1);
+INLINE uint64_t విడత_కిందికి_గమ్యం_power_యొక్క_2(uint64_t x) {
+  తిరిగి 1ULL << highest_one(x | 1);
 }
 
-INLINE uint32_t counter_low(uint64_t counter) { return (uint32_t)counter; }
+INLINE uint32_t counter_దిగువ(uint64_t counter) { తిరిగి (uint32_t)counter; }
 
-INLINE uint32_t counter_high(uint64_t counter) {
-  return (uint32_t)(counter >> 32);
+INLINE uint32_t counter_ఎగువ(uint64_t counter) {
+  తిరిగి (uint32_t)(counter >> 32);
 }
 
-INLINE uint32_t load32(const void *src) {
-  const uint8_t *p = (const uint8_t *)src;
-  return ((uint32_t)(p[0]) << 0) | ((uint32_t)(p[1]) << 8) |
+INLINE uint32_t load32(స్థిరరాశి శూన్య *src) {
+  స్థిరరాశి uint8_t *p = (స్థిరరాశి uint8_t *)src;
+  తిరిగి ((uint32_t)(p[0]) << 0) | ((uint32_t)(p[1]) << 8) |
          ((uint32_t)(p[2]) << 16) | ((uint32_t)(p[3]) << 24);
 }
 
-INLINE void load_key_words(const uint8_t key[BLAKE3_KEY_LEN],
-                           uint32_t key_words[8]) {
-  key_words[0] = load32(&key[0 * 4]);
-  key_words[1] = load32(&key[1 * 4]);
-  key_words[2] = load32(&key[2 * 4]);
-  key_words[3] = load32(&key[3 * 4]);
-  key_words[4] = load32(&key[4 * 4]);
-  key_words[5] = load32(&key[5 * 4]);
-  key_words[6] = load32(&key[6 * 4]);
-  key_words[7] = load32(&key[7 * 4]);
+INLINE శూన్య ఎక్కించు_కీలకం_పదాలు(స్థిరరాశి uint8_t కీలకం_2[BLAKE3_కీలకం_LEN],
+                           uint32_t కీలకం_పదాలు[8]) {
+  కీలకం_పదాలు[0] = load32(&కీలకం_2[0 * 4]);
+  కీలకం_పదాలు[1] = load32(&కీలకం_2[1 * 4]);
+  కీలకం_పదాలు[2] = load32(&కీలకం_2[2 * 4]);
+  కీలకం_పదాలు[3] = load32(&కీలకం_2[3 * 4]);
+  కీలకం_పదాలు[4] = load32(&కీలకం_2[4 * 4]);
+  కీలకం_పదాలు[5] = load32(&కీలకం_2[5 * 4]);
+  కీలకం_పదాలు[6] = load32(&కీలకం_2[6 * 4]);
+  కీలకం_పదాలు[7] = load32(&కీలకం_2[7 * 4]);
 }
 
-INLINE void load_block_words(const uint8_t block[BLAKE3_BLOCK_LEN],
-                             uint32_t block_words[16]) {
-  for (size_t i = 0; i < 16; i++) {
-      block_words[i] = load32(&block[i * 4]);
+INLINE శూన్య ఎక్కించు_ఖండం_పదాలు(స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                             uint32_t ఖండం_పదాలు[16]) {
+  కొరకు (size_t i = 0; i < 16; i++) {
+      ఖండం_పదాలు[i] = load32(&ఖండం[i * 4]);
   }
 }
 
-INLINE void store32(void *dst, uint32_t w) {
+INLINE శూన్య store32(శూన్య *dst, uint32_t w) {
   uint8_t *p = (uint8_t *)dst;
   p[0] = (uint8_t)(w >> 0);
   p[1] = (uint8_t)(w >> 8);
@@ -184,164 +184,164 @@ INLINE void store32(void *dst, uint32_t w) {
   p[3] = (uint8_t)(w >> 24);
 }
 
-INLINE void store_cv_words(uint8_t bytes_out[32], uint32_t cv_words[8]) {
-  store32(&bytes_out[0 * 4], cv_words[0]);
-  store32(&bytes_out[1 * 4], cv_words[1]);
-  store32(&bytes_out[2 * 4], cv_words[2]);
-  store32(&bytes_out[3 * 4], cv_words[3]);
-  store32(&bytes_out[4 * 4], cv_words[4]);
-  store32(&bytes_out[5 * 4], cv_words[5]);
-  store32(&bytes_out[6 * 4], cv_words[6]);
-  store32(&bytes_out[7 * 4], cv_words[7]);
+INLINE శూన్య store_cv_పదాలు(uint8_t బైట్లు_బహిర్గతం[32], uint32_t cv_పదాలు[8]) {
+  store32(&బైట్లు_బహిర్గతం[0 * 4], cv_పదాలు[0]);
+  store32(&బైట్లు_బహిర్గతం[1 * 4], cv_పదాలు[1]);
+  store32(&బైట్లు_బహిర్గతం[2 * 4], cv_పదాలు[2]);
+  store32(&బైట్లు_బహిర్గతం[3 * 4], cv_పదాలు[3]);
+  store32(&బైట్లు_బహిర్గతం[4 * 4], cv_పదాలు[4]);
+  store32(&బైట్లు_బహిర్గతం[5 * 4], cv_పదాలు[5]);
+  store32(&బైట్లు_బహిర్గతం[6 * 4], cv_పదాలు[6]);
+  store32(&బైట్లు_బహిర్గతం[7 * 4], cv_పదాలు[7]);
 }
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place(uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
+శూన్య blake3_compress_లోపల_ఉంచు(uint32_t cv[8],
+                              స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                              uint8_t ఖండం_len, uint64_t counter,
                               uint8_t flags);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof(const uint32_t cv[8],
-                         const uint8_t block[BLAKE3_BLOCK_LEN],
-                         uint8_t block_len, uint64_t counter, uint8_t flags,
-                         uint8_t out[64]);
+శూన్య blake3_compress_xof(స్థిరరాశి uint32_t cv[8],
+                         స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                         uint8_t ఖండం_len, uint64_t counter, uint8_t flags,
+                         uint8_t బహిర్గతం_2[64]);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_xof_many(const uint32_t cv[8],
-                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                     uint8_t block_len, uint64_t counter, uint8_t flags,
-                     uint8_t out[64], size_t outblocks);
+శూన్య blake3_xof_many(స్థిరరాశి uint32_t cv[8],
+                     స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                     uint8_t ఖండం_len, uint64_t counter, uint8_t flags,
+                     uint8_t బహిర్గతం_2[64], size_t outblocks);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
-                      size_t blocks, const uint32_t key[8], uint64_t counter,
+శూన్య blake3_hash_many(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                      size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8], uint64_t counter,
                       bool increment_counter, uint8_t flags,
-                      uint8_t flags_start, uint8_t flags_end, uint8_t *out);
+                      uint8_t flags_ప్రారంభం, uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
 
 LLVM_LIBRARY_VISIBILITY
-size_t blake3_simd_degree(void);
+size_t blake3_simd_degree(శూన్య);
 
-BLAKE3_PRIVATE size_t blake3_compress_subtree_wide(const uint8_t *input, size_t input_len,
-                                                   const uint32_t key[8],
+BLAKE3_వ్యక్తిగత size_t blake3_compress_subtree_wide(స్థిరరాశి uint8_t *ఆదానం_2, size_t ఆదానం_len,
+                                                   స్థిరరాశి uint32_t కీలకం_2[8],
                                                    uint64_t chunk_counter, uint8_t flags,
-                                                   uint8_t *out, bool use_tbb);
+                                                   uint8_t *బహిర్గతం_2, bool use_tbb);
 
-#if defined(BLAKE3_USE_TBB)
-BLAKE3_PRIVATE void blake3_compress_subtree_wide_join_tbb(
+#ఒకవేళ defined(BLAKE3_USE_TBB)
+BLAKE3_వ్యక్తిగత శూన్య blake3_compress_subtree_wide_join_tbb(
     // shared params
-    const uint32_t key[8], uint8_t flags, bool use_tbb,
+    స్థిరరాశి uint32_t కీలకం_2[8], uint8_t flags, bool use_tbb,
     // left-hand side params
-    const uint8_t *l_input, size_t l_input_len, uint64_t l_chunk_counter,
+    స్థిరరాశి uint8_t *l_ఆదానం, size_t l_ఆదానం_len, uint64_t l_chunk_counter,
     uint8_t *l_cvs, size_t *l_n,
     // right-hand side params
-    const uint8_t *r_input, size_t r_input_len, uint64_t r_chunk_counter,
+    స్థిరరాశి uint8_t *r_ఆదానం, size_t r_ఆదానం_len, uint64_t r_chunk_counter,
     uint8_t *r_cvs, size_t *r_n) NOEXCEPT;
-#endif
+#అయితే_ముగింపు
 
 // Declarations for implementation-specific functions.
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_portable(uint32_t cv[8],
-                                       const uint8_t block[BLAKE3_BLOCK_LEN],
-                                       uint8_t block_len, uint64_t counter,
+శూన్య blake3_compress_లోపల_ఉంచు_portable(uint32_t cv[8],
+                                       స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                                       uint8_t ఖండం_len, uint64_t counter,
                                        uint8_t flags);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_portable(const uint32_t cv[8],
-                                  const uint8_t block[BLAKE3_BLOCK_LEN],
-                                  uint8_t block_len, uint64_t counter,
-                                  uint8_t flags, uint8_t out[64]);
+శూన్య blake3_compress_xof_portable(స్థిరరాశి uint32_t cv[8],
+                                  స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                                  uint8_t ఖండం_len, uint64_t counter,
+                                  uint8_t flags, uint8_t బహిర్గతం_2[64]);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
-                               size_t blocks, const uint32_t key[8],
+శూన్య blake3_hash_many_portable(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                               size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8],
                                uint64_t counter, bool increment_counter,
-                               uint8_t flags, uint8_t flags_start,
-                               uint8_t flags_end, uint8_t *out);
+                               uint8_t flags, uint8_t flags_ప్రారంభం,
+                               uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
 
-#if defined(IS_X86)
-#if !defined(BLAKE3_NO_SSE2)
+#ఒకవేళ defined(IS_X86)
+#ఒకవేళ !defined(BLAKE3_NO_SSE2)
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_sse2(uint32_t cv[8],
-                                   const uint8_t block[BLAKE3_BLOCK_LEN],
-                                   uint8_t block_len, uint64_t counter,
+శూన్య blake3_compress_లోపల_ఉంచు_sse2(uint32_t cv[8],
+                                   స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                                   uint8_t ఖండం_len, uint64_t counter,
                                    uint8_t flags);
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_sse2(const uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
-                              uint8_t flags, uint8_t out[64]);
+శూన్య blake3_compress_xof_sse2(స్థిరరాశి uint32_t cv[8],
+                              స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                              uint8_t ఖండం_len, uint64_t counter,
+                              uint8_t flags, uint8_t బహిర్గతం_2[64]);
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_sse2(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+శూన్య blake3_hash_many_sse2(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                           size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out);
-#endif
-#if !defined(BLAKE3_NO_SSE41)
+                           uint8_t flags, uint8_t flags_ప్రారంభం,
+                           uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_SSE41)
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_sse41(uint32_t cv[8],
-                                    const uint8_t block[BLAKE3_BLOCK_LEN],
-                                    uint8_t block_len, uint64_t counter,
+శూన్య blake3_compress_లోపల_ఉంచు_sse41(uint32_t cv[8],
+                                    స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                                    uint8_t ఖండం_len, uint64_t counter,
                                     uint8_t flags);
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_sse41(const uint32_t cv[8],
-                               const uint8_t block[BLAKE3_BLOCK_LEN],
-                               uint8_t block_len, uint64_t counter,
-                               uint8_t flags, uint8_t out[64]);
+శూన్య blake3_compress_xof_sse41(స్థిరరాశి uint32_t cv[8],
+                               స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                               uint8_t ఖండం_len, uint64_t counter,
+                               uint8_t flags, uint8_t బహిర్గతం_2[64]);
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t num_inputs,
-                            size_t blocks, const uint32_t key[8],
+శూన్య blake3_hash_many_sse41(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                            size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8],
                             uint64_t counter, bool increment_counter,
-                            uint8_t flags, uint8_t flags_start,
-                            uint8_t flags_end, uint8_t *out);
-#endif
-#if !defined(BLAKE3_NO_AVX2)
+                            uint8_t flags, uint8_t flags_ప్రారంభం,
+                            uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_AVX2)
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_avx2(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+శూన్య blake3_hash_many_avx2(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                           size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out);
-#endif
-#if !defined(BLAKE3_NO_AVX512)
+                           uint8_t flags, uint8_t flags_ప్రారంభం,
+                           uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
+#అయితే_ముగింపు
+#ఒకవేళ !defined(BLAKE3_NO_AVX512)
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_in_place_avx512(uint32_t cv[8],
-                                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                                     uint8_t block_len, uint64_t counter,
+శూన్య blake3_compress_లోపల_ఉంచు_avx512(uint32_t cv[8],
+                                     స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                                     uint8_t ఖండం_len, uint64_t counter,
                                      uint8_t flags);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_compress_xof_avx512(const uint32_t cv[8],
-                                const uint8_t block[BLAKE3_BLOCK_LEN],
-                                uint8_t block_len, uint64_t counter,
-                                uint8_t flags, uint8_t out[64]);
+శూన్య blake3_compress_xof_avx512(స్థిరరాశి uint32_t cv[8],
+                                స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                                uint8_t ఖండం_len, uint64_t counter,
+                                uint8_t flags, uint8_t బహిర్గతం_2[64]);
 
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_avx512(const uint8_t *const *inputs, size_t num_inputs,
-                             size_t blocks, const uint32_t key[8],
+శూన్య blake3_hash_many_avx512(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                             size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8],
                              uint64_t counter, bool increment_counter,
-                             uint8_t flags, uint8_t flags_start,
-                             uint8_t flags_end, uint8_t *out);
+                             uint8_t flags, uint8_t flags_ప్రారంభం,
+                             uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
 
-#if !defined(_WIN32) && !defined(__CYGWIN__)
+#ఒకవేళ !defined(_WIN32) && !defined(__CYGWIN__)
 LLVM_LIBRARY_VISIBILITY
-void blake3_xof_many_avx512(const uint32_t cv[8],
-                            const uint8_t block[BLAKE3_BLOCK_LEN],
-                            uint8_t block_len, uint64_t counter, uint8_t flags,
-                            uint8_t* out, size_t outblocks);
-#endif
-#endif
-#endif
+శూన్య blake3_xof_many_avx512(స్థిరరాశి uint32_t cv[8],
+                            స్థిరరాశి uint8_t ఖండం[BLAKE3_ఖండం_LEN],
+                            uint8_t ఖండం_len, uint64_t counter, uint8_t flags,
+                            uint8_t* బహిర్గతం_2, size_t outblocks);
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+#అయితే_ముగింపు
 
-#if BLAKE3_USE_NEON == 1
+#ఒకవేళ BLAKE3_USE_NEON == 1
 LLVM_LIBRARY_VISIBILITY
-void blake3_hash_many_neon(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+శూన్య blake3_hash_many_neon(స్థిరరాశి uint8_t *స్థిరరాశి *inputs, size_t అంకె_inputs,
+                           size_t ఖండాలు, స్థిరరాశి uint32_t కీలకం_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out);
-#endif
+                           uint8_t flags, uint8_t flags_ప్రారంభం,
+                           uint8_t flags_చివర, uint8_t *బహిర్గతం_2);
+#అయితే_ముగింపు
 
 
-#endif /* BLAKE3_IMPL_H */
+#అయితే_ముగింపు /* BLAKE3_IMPL_H */

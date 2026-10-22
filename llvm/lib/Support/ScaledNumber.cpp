@@ -10,269 +10,269 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/ScaledNumber.h"
+#అన్తర్భావ "llvm/ADT/APFloat.h"
+#అన్తర్భావ "llvm/ADT/ArrayRef.h"
+#అన్తర్భావ "llvm/Support/Debug.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::ScaledNumbers;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::ScaledNumbers;
 
 std::pair<uint64_t, int16_t> ScaledNumbers::multiply64(uint64_t LHS,
                                                        uint64_t RHS) {
-  uint64_t Upper, Lower;
-#if defined(__SIZEOF_INT128__) ||                                              \
-    (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-  auto Product = __uint128_t(LHS) * RHS;
-  Upper = uint64_t(Product >> 64);
-  Lower = uint64_t(Product);
-#else
+  uint64_t పై_2, క్రింది_2;
+#ఒకవేళ defined(__SIZEOF_INT128__) ||                                              \
+    (defined(INTEGRAL_MAX_బిట్లు) && INTEGRAL_MAX_బిట్లు >= 128)
+  స్వయంచాలక లబ్ధం = __uint128_t(LHS) * RHS;
+  పై_2 = uint64_t(లబ్ధం >> 64);
+  క్రింది_2 = uint64_t(లబ్ధం);
+#లేకపోతే
   // Separate into two 32-bit digits (U.L).
-  auto getU = [](uint64_t N) { return N >> 32; };
-  auto getL = [](uint64_t N) { return N & UINT32_MAX; };
+  స్వయంచాలక getU = [](uint64_t N) { తిరిగి N >> 32; };
+  స్వయంచాలక getL = [](uint64_t N) { తిరిగి N & UINT32_MAX; };
   uint64_t UL = getU(LHS), LL = getL(LHS), UR = getU(RHS), LR = getL(RHS);
 
   // Compute cross products.
   uint64_t P1 = UL * UR, P2 = UL * LR, P3 = LL * UR, P4 = LL * LR;
 
   // Sum into two 64-bit digits.
-  Upper = P1;
-  Lower = P4;
-  auto addWithCarry = [&](uint64_t N) {
-    uint64_t NewLower = Lower + (getL(N) << 32);
-    Upper += getU(N) + (NewLower < Lower);
-    Lower = NewLower;
+  పై_2 = P1;
+  క్రింది_2 = P4;
+  స్వయంచాలక కూడు_With_వాహకం = [&](uint64_t N) {
+    uint64_t New_క్రింది = క్రింది_2 + (getL(N) << 32);
+    పై_2 += getU(N) + (New_క్రింది < క్రింది_2);
+    క్రింది_2 = New_క్రింది;
   };
-  addWithCarry(P2);
-  addWithCarry(P3);
-#endif
+  కూడు_With_వాహకం(P2);
+  కూడు_With_వాహకం(P3);
+#అయితే_ముగింపు
 
   // Check whether the upper digit is empty.
-  if (!Upper)
-    return {Lower, 0};
+  ఒకవేళ (!పై_2)
+    తిరిగి {క్రింది_2, 0};
 
   // Shift as little as possible to maximize precision.
-  unsigned LeadingZeros = llvm::countl_zero(Upper);
-  int Shift = 64 - LeadingZeros;
-  if (LeadingZeros)
-    Upper = Upper << LeadingZeros | Lower >> Shift;
-  return getRounded(Upper, Shift,
-                    Shift && (Lower & UINT64_C(1) << (Shift - 1)));
+  గుర్తులేని LeadingZeros = llvm::countl_zero(పై_2);
+  పూర్ణాంకం జరుపు_2 = 64 - LeadingZeros;
+  ఒకవేళ (LeadingZeros)
+    పై_2 = పై_2 << LeadingZeros | క్రింది_2 >> జరుపు_2;
+  తిరిగి getRounded(పై_2, జరుపు_2,
+                    జరుపు_2 && (క్రింది_2 & UINT64_C(1) << (జరుపు_2 - 1)));
 }
 
-static uint64_t getHalf(uint64_t N) { return (N >> 1) + (N & 1); }
+స్థిర uint64_t getHalf(uint64_t N) { తిరిగి (N >> 1) + (N & 1); }
 
 std::pair<uint32_t, int16_t> ScaledNumbers::divide32(uint32_t Dividend,
-                                                     uint32_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint32_t భాజకం_2) {
+  ప్రతిజ్ఞా(Dividend && "expected non-zero dividend");
+  ప్రతిజ్ఞా(భాజకం_2 && "expected non-zero divisor");
 
   // Use 64-bit math and canonicalize the dividend to gain precision.
   uint64_t Dividend64 = Dividend;
-  int Shift = 0;
-  if (int Zeros = llvm::countl_zero(Dividend64)) {
-    Shift -= Zeros;
+  పూర్ణాంకం జరుపు_2 = 0;
+  ఒకవేళ (పూర్ణాంకం Zeros = llvm::countl_zero(Dividend64)) {
+    జరుపు_2 -= Zeros;
     Dividend64 <<= Zeros;
   }
-  uint64_t Quotient = Dividend64 / Divisor;
-  uint64_t Remainder = Dividend64 % Divisor;
+  uint64_t Quotient = Dividend64 / భాజకం_2;
+  uint64_t Remainder = Dividend64 % భాజకం_2;
 
   // If Quotient needs to be shifted, leave the rounding to getAdjusted().
-  if (Quotient > UINT32_MAX)
-    return getAdjusted<uint32_t>(Quotient, Shift);
+  ఒకవేళ (Quotient > UINT32_MAX)
+    తిరిగి getAdjusted<uint32_t>(Quotient, జరుపు_2);
 
   // Round based on the value of the next bit.
-  return getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(Divisor));
+  తిరిగి getRounded<uint32_t>(Quotient, జరుపు_2, Remainder >= getHalf(భాజకం_2));
 }
 
 std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
-                                                     uint64_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint64_t భాజకం_2) {
+  ప్రతిజ్ఞా(Dividend && "expected non-zero dividend");
+  ప్రతిజ్ఞా(భాజకం_2 && "expected non-zero divisor");
 
   // Minimize size of divisor.
-  int Shift = 0;
-  if (int Zeros = llvm::countr_zero(Divisor)) {
-    Shift -= Zeros;
-    Divisor >>= Zeros;
+  పూర్ణాంకం జరుపు_2 = 0;
+  ఒకవేళ (పూర్ణాంకం Zeros = llvm::countr_zero(భాజకం_2)) {
+    జరుపు_2 -= Zeros;
+    భాజకం_2 >>= Zeros;
   }
 
   // Check for powers of two.
-  if (Divisor == 1)
-    return {Dividend, Shift};
+  ఒకవేళ (భాజకం_2 == 1)
+    తిరిగి {Dividend, జరుపు_2};
 
   // Maximize size of dividend.
-  if (int Zeros = llvm::countl_zero(Dividend)) {
-    Shift -= Zeros;
+  ఒకవేళ (పూర్ణాంకం Zeros = llvm::countl_zero(Dividend)) {
+    జరుపు_2 -= Zeros;
     Dividend <<= Zeros;
   }
 
   // Start with the result of a divide.
-  uint64_t Quotient = Dividend / Divisor;
-  Dividend %= Divisor;
+  uint64_t Quotient = Dividend / భాజకం_2;
+  Dividend %= భాజకం_2;
 
   // Continue building the quotient with long division.
-  while (!(Quotient >> 63) && Dividend) {
+  అయితే (!(Quotient >> 63) && Dividend) {
     // Shift Dividend and check for overflow.
-    bool IsOverflow = Dividend >> 63;
+    తార్కిక Is_అధికప్రవాహం = Dividend >> 63;
     Dividend <<= 1;
-    --Shift;
+    --జరుపు_2;
 
     // Get the next bit of Quotient.
     Quotient <<= 1;
-    if (IsOverflow || Divisor <= Dividend) {
+    ఒకవేళ (Is_అధికప్రవాహం || భాజకం_2 <= Dividend) {
       Quotient |= 1;
-      Dividend -= Divisor;
+      Dividend -= భాజకం_2;
     }
   }
 
-  return getRounded(Quotient, Shift, Dividend >= getHalf(Divisor));
+  తిరిగి getRounded(Quotient, జరుపు_2, Dividend >= getHalf(భాజకం_2));
 }
 
-int ScaledNumbers::compareImpl(uint64_t L, uint64_t R, int ScaleDiff) {
-  assert(ScaleDiff >= 0 && "wrong argument order");
-  assert(ScaleDiff < 64 && "numbers too far apart");
+పూర్ణాంకం ScaledNumbers::compareImpl(uint64_t L, uint64_t R, పూర్ణాంకం ScaleDiff) {
+  ప్రతిజ్ఞా(ScaleDiff >= 0 && "wrong argument order");
+  ప్రతిజ్ఞా(ScaleDiff < 64 && "numbers too far apart");
 
   uint64_t L_adjusted = L >> ScaleDiff;
-  if (L_adjusted < R)
-    return -1;
-  if (L_adjusted > R)
-    return 1;
+  ఒకవేళ (L_adjusted < R)
+    తిరిగి -1;
+  ఒకవేళ (L_adjusted > R)
+    తిరిగి 1;
 
-  return L > L_adjusted << ScaleDiff ? 1 : 0;
+  తిరిగి L > L_adjusted << ScaleDiff ? 1 : 0;
 }
 
-static void appendDigit(std::string &Str, unsigned D) {
-  assert(D < 10);
+స్థిర శూన్య appendDigit(std::string &Str, గుర్తులేని D) {
+  ప్రతిజ్ఞా(D < 10);
   Str += '0' + D % 10;
 }
 
-static void appendNumber(std::string &Str, uint64_t N) {
-  while (N) {
+స్థిర శూన్య append_సంఖ్య(std::string &Str, uint64_t N) {
+  అయితే (N) {
     appendDigit(Str, N % 10);
     N /= 10;
   }
 }
 
-static bool doesRoundUp(char Digit) {
-  switch (Digit) {
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-    return true;
-  default:
-    return false;
+స్థిర తార్కిక does_విడత_పైకి(అక్షరం Digit) {
+  ఎంపిక (Digit) {
+  స్థితి '5':
+  స్థితి '6':
+  స్థితి '7':
+  స్థితి '8':
+  స్థితి '9':
+    తిరిగి నిజం;
+  అప్రమేయ:
+    తిరిగి అబద్ధం;
   }
 }
 
-static std::string toStringAPFloat(uint64_t D, int E, unsigned Precision) {
-  assert(E >= ScaledNumbers::MinScale);
-  assert(E <= ScaledNumbers::MaxScale);
+స్థిర std::string గమ్యం_String_APFloat(uint64_t D, పూర్ణాంకం E, గుర్తులేని Precision) {
+  ప్రతిజ్ఞా(E >= ScaledNumbers::MinScale);
+  ప్రతిజ్ఞా(E <= ScaledNumbers::MaxScale);
 
   // Find a new E, but don't let it increase past MaxScale.
-  int LeadingZeros = ScaledNumberBase::countLeadingZeros64(D);
-  int NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
-  int Shift = 63 - (NewE - E);
-  assert(Shift <= LeadingZeros);
-  assert(Shift == LeadingZeros || NewE == ScaledNumbers::MaxScale);
-  assert(Shift >= 0 && Shift < 64 && "undefined behavior");
-  D <<= Shift;
+  పూర్ణాంకం LeadingZeros = Scaled_సంఖ్య_పునాది::లెక్క_Leading_Zeros64(D);
+  పూర్ణాంకం NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
+  పూర్ణాంకం జరుపు_2 = 63 - (NewE - E);
+  ప్రతిజ్ఞా(జరుపు_2 <= LeadingZeros);
+  ప్రతిజ్ఞా(జరుపు_2 == LeadingZeros || NewE == ScaledNumbers::MaxScale);
+  ప్రతిజ్ఞా(జరుపు_2 >= 0 && జరుపు_2 < 64 && "undefined behavior");
+  D <<= జరుపు_2;
   E = NewE;
 
   // Check for a denormal.
-  unsigned AdjustedE = E + 16383;
-  if (!(D >> 63)) {
-    assert(E == ScaledNumbers::MaxScale);
+  గుర్తులేని AdjustedE = E + 16383;
+  ఒకవేళ (!(D >> 63)) {
+    ప్రతిజ్ఞా(E == ScaledNumbers::MaxScale);
     AdjustedE = 0;
   }
 
   // Build the float and print it.
-  uint64_t RawBits[2] = {D, AdjustedE};
-  APFloat Float(APFloat::x87DoubleExtended(), APInt(80, RawBits));
-  SmallVector<char, 24> Chars;
-  Float.toString(Chars, Precision, 0);
-  return std::string(Chars.begin(), Chars.end());
+  uint64_t Raw_బిట్లు[2] = {D, AdjustedE};
+  APFloat Float(APFloat::x87DoubleExtended(), APInt(80, Raw_బిట్లు));
+  Small_సదిశ<అక్షరం, 24> Chars;
+  Float.గమ్యం_String(Chars, Precision, 0);
+  తిరిగి std::string(Chars.begin(), Chars.చివర());
 }
 
-static std::string stripTrailingZeros(const std::string &Float) {
-  size_t NonZero = Float.find_last_not_of('0');
-  assert(NonZero != std::string::npos && "no . in floating point string");
+స్థిర std::string stripTrailingZeros(స్థిరరాశి std::string &Float) {
+  size_t NonZero = Float.కనుగొను_చివరి_not_యొక్క('0');
+  ప్రతిజ్ఞా(NonZero != std::string::npos && "no . in floating point string");
 
-  if (Float[NonZero] == '.')
+  ఒకవేళ (Float[NonZero] == '.')
     ++NonZero;
 
-  return Float.substr(0, NonZero + 1);
+  తిరిగి Float.substr(0, NonZero + 1);
 }
 
-std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
-                                       unsigned Precision) {
-  if (!D)
-    return "0.0";
+std::string Scaled_సంఖ్య_పునాది::గమ్యం_String(uint64_t D, int16_t E, పూర్ణాంకం వెడల్పు,
+                                       గుర్తులేని Precision) {
+  ఒకవేళ (!D)
+    తిరిగి "0.0";
 
   // Canonicalize exponent and digits.
   uint64_t Above0 = 0;
   uint64_t Below0 = 0;
   uint64_t Extra = 0;
-  int ExtraShift = 0;
-  if (E == 0) {
+  పూర్ణాంకం Extra_జరుపు = 0;
+  ఒకవేళ (E == 0) {
     Above0 = D;
-  } else if (E > 0) {
-    if (int Shift = std::min(int16_t(countLeadingZeros64(D)), E)) {
-      D <<= Shift;
-      E -= Shift;
+  } లేకపోతే ఒకవేళ (E > 0) {
+    ఒకవేళ (పూర్ణాంకం జరుపు_2 = std::min(int16_t(లెక్క_Leading_Zeros64(D)), E)) {
+      D <<= జరుపు_2;
+      E -= జరుపు_2;
 
-      if (!E)
+      ఒకవేళ (!E)
         Above0 = D;
     }
-  } else if (E > -64) {
+  } లేకపోతే ఒకవేళ (E > -64) {
     Above0 = D >> -E;
     Below0 = D << (64 + E);
-  } else if (E == -64) {
+  } లేకపోతే ఒకవేళ (E == -64) {
     // Special case: shift by 64 bits is undefined behavior.
     Below0 = D;
-  } else if (E > -120) {
+  } లేకపోతే ఒకవేళ (E > -120) {
     Below0 = D >> (-E - 64);
     Extra = D << (128 + E);
-    ExtraShift = -64 - E;
+    Extra_జరుపు = -64 - E;
   }
 
   // Fall back on APFloat for very small and very large numbers.
-  if (!Above0 && !Below0)
-    return toStringAPFloat(D, E, Precision);
+  ఒకవేళ (!Above0 && !Below0)
+    తిరిగి గమ్యం_String_APFloat(D, E, Precision);
 
   // Append the digits before the decimal.
   std::string Str;
-  size_t DigitsOut = 0;
-  if (Above0) {
-    appendNumber(Str, Above0);
-    DigitsOut = Str.size();
-  } else {
+  size_t Digits_బహిర్గతం = 0;
+  ఒకవేళ (Above0) {
+    append_సంఖ్య(Str, Above0);
+    Digits_బహిర్గతం = Str.కొలత_2();
+  } లేకపోతే {
     appendDigit(Str, 0);
   }
-  std::reverse(Str.begin(), Str.end());
+  std::తిరగేయి(Str.begin(), Str.చివర());
 
   // Return early if there's nothing after the decimal.
-  if (!Below0)
-    return Str + ".0";
+  ఒకవేళ (!Below0)
+    తిరిగి Str + ".0";
 
   // Append the decimal and beyond.
   Str += '.';
-  uint64_t Error = UINT64_C(1) << (64 - Width);
+  uint64_t Error = UINT64_C(1) << (64 - వెడల్పు);
 
   // We need to shift Below0 to the right to make space for calculating
   // digits.  Save the precision we're losing in Extra.
   Extra = (Below0 & 0xf) << 56 | (Extra >> 8);
   Below0 >>= 4;
   size_t SinceDot = 0;
-  size_t AfterDot = Str.size();
-  do {
-    if (ExtraShift) {
-      --ExtraShift;
+  size_t AfterDot = Str.కొలత_2();
+  చేయి {
+    ఒకవేళ (Extra_జరుపు) {
+      --Extra_జరుపు;
       Error *= 5;
-    } else {
+    } లేకపోతే {
       Error *= 10;
     }
 
@@ -282,53 +282,53 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
     Extra = Extra & (UINT64_MAX >> 4);
     appendDigit(Str, Below0 >> 60);
     Below0 = Below0 & (UINT64_MAX >> 4);
-    if (DigitsOut || Str.back() != '0')
-      ++DigitsOut;
+    ఒకవేళ (Digits_బహిర్గతం || Str.వెనుక() != '0')
+      ++Digits_బహిర్గతం;
     ++SinceDot;
-  } while (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
-           (!Precision || DigitsOut <= Precision || SinceDot < 2));
+  } అయితే (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
+           (!Precision || Digits_బహిర్గతం <= Precision || SinceDot < 2));
 
   // Return early for maximum precision.
-  if (!Precision || DigitsOut <= Precision)
-    return stripTrailingZeros(Str);
+  ఒకవేళ (!Precision || Digits_బహిర్గతం <= Precision)
+    తిరిగి stripTrailingZeros(Str);
 
   // Find where to truncate.
   size_t Truncate =
-      std::max(Str.size() - (DigitsOut - Precision), AfterDot + 1);
+      std::max(Str.కొలత_2() - (Digits_బహిర్గతం - Precision), AfterDot + 1);
 
   // Check if there's anything to truncate.
-  if (Truncate >= Str.size())
-    return stripTrailingZeros(Str);
+  ఒకవేళ (Truncate >= Str.కొలత_2())
+    తిరిగి stripTrailingZeros(Str);
 
-  bool Carry = doesRoundUp(Str[Truncate]);
-  if (!Carry)
-    return stripTrailingZeros(Str.substr(0, Truncate));
+  తార్కిక వాహకం_2 = does_విడత_పైకి(Str[Truncate]);
+  ఒకవేళ (!వాహకం_2)
+    తిరిగి stripTrailingZeros(Str.substr(0, Truncate));
 
   // Round with the first truncated digit.
-  for (std::string::reverse_iterator I(Str.begin() + Truncate), E = Str.rend();
+  కొరకు (std::string::తిరగేయి_iterator I(Str.begin() + Truncate), E = Str.rend();
        I != E; ++I) {
-    if (*I == '.')
-      continue;
-    if (*I == '9') {
+    ఒకవేళ (*I == '.')
+      కొనసాగు;
+    ఒకవేళ (*I == '9') {
       *I = '0';
-      continue;
+      కొనసాగు;
     }
 
     ++*I;
-    Carry = false;
-    break;
+    వాహకం_2 = అబద్ధం;
+    ఆపు;
   }
 
   // Add "1" in front if we still need to carry.
-  return stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
+  తిరిగి stripTrailingZeros(std::string(వాహకం_2, '1') + Str.substr(0, Truncate));
 }
 
-raw_ostream &ScaledNumberBase::print(raw_ostream &OS, uint64_t D, int16_t E,
-                                     int Width, unsigned Precision) {
-  return OS << toString(D, E, Width, Precision);
+raw_ostream &Scaled_సంఖ్య_పునాది::print(raw_ostream &OS, uint64_t D, int16_t E,
+                                     పూర్ణాంకం వెడల్పు, గుర్తులేని Precision) {
+  తిరిగి OS << గమ్యం_String(D, E, వెడల్పు, Precision);
 }
 
-void ScaledNumberBase::dump(uint64_t D, int16_t E, int Width) {
-  print(dbgs(), D, E, Width, 0) << "[" << Width << ":" << D << "*2^" << E
+శూన్య Scaled_సంఖ్య_పునాది::dump(uint64_t D, int16_t E, పూర్ణాంకం వెడల్పు) {
+  print(dbgs(), D, E, వెడల్పు, 0) << "[" << వెడల్పు << ":" << D << "*2^" << E
                                 << "]";
 }

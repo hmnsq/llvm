@@ -6,58 +6,58 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CHERICapabilityFormat.h"
-#include "llvm/ADT/bit.h"
+#అన్తర్భావ "llvm/Support/CHERICapabilityFormat.h"
+#అన్తర్భావ "llvm/ADT/bit.h"
 
-namespace llvm {
+నామాకాశ llvm {
 
-template <typename AddressType, unsigned MW, unsigned MAX_E>
-AddressType RVYCapabilityFormat<AddressType, MW, MAX_E>::getAlignmentMaskImpl(
-    uint64_t Length) {
-  static constexpr unsigned int IE_TAKE_BITS = 3;
+మూస <రకం_పేరు చిరునామా_Type, గుర్తులేని MW, గుర్తులేని MAX_E>
+చిరునామా_Type RVYCapabilityFormat<చిరునామా_Type, MW, MAX_E>::get_Alignment_ముసుగు_Impl(
+    uint64_t నిడివి) {
+  స్థిర constexpr గుర్తులేని పూర్ణాంకం IE_TAKE_బిట్లు = 3;
 
-  if (Length == 0)
-    return RVYCapabilityFormat::AddressMask;
+  ఒకవేళ (నిడివి == 0)
+    తిరిగి RVYCapabilityFormat::చిరునామా_ముసుగు;
 
   // Extract bits that overflow the uncompressed mantissa window.
-  uint64_t Slice = static_cast<uint64_t>(Length) >> (MW - 1);
-  unsigned int E = 64 - llvm::countl_zero(Slice);
+  uint64_t ముక్క_2 = static_cast<uint64_t>(నిడివి) >> (MW - 1);
+  గుర్తులేని పూర్ణాంకం E = 64 - llvm::countl_zero(ముక్క_2);
   // We use internal exponent if length overflows OR the denormal boundary
   // bit is set.
-  bool IE = (E != 0) || ((static_cast<uint64_t>(Length) >> (MW - 2)) & 1);
+  తార్కిక IE = (E != 0) || ((static_cast<uint64_t>(నిడివి) >> (MW - 2)) & 1);
   // Include bits used by the internal exponent for the shift value.
-  unsigned int Eprime = IE ? (E + IE_TAKE_BITS) : 0;
+  గుర్తులేని పూర్ణాంకం Eprime = IE ? (E + IE_TAKE_బిట్లు) : 0;
 
-  assert(E <= MAX_E && "Raw exponent exceeds architecture maximum");
-  assert(Eprime <= sizeof(AddressType) * 8 &&
+  ప్రతిజ్ఞా(E <= MAX_E && "Raw exponent exceeds architecture maximum");
+  ప్రతిజ్ఞా(Eprime <= పరిమాణం(చిరునామా_Type) * 8 &&
          "Shift amount exceeds integer width");
 
   // Left-shift ~0 to mask out the lost precision bits
-  return RVYCapabilityFormat::AddressMask << Eprime;
+  తిరిగి RVYCapabilityFormat::చిరునామా_ముసుగు << Eprime;
 }
 
-template struct CHERICapabilityFormatBase<RVYCapabilityFormat<uint32_t, 10, 24>,
+మూస నిర్మాణం CHERICapability_Format_పునాది<RVYCapabilityFormat<uint32_t, 10, 24>,
                                           uint32_t>;
-template struct CHERICapabilityFormatBase<RVYCapabilityFormat<uint64_t, 14, 52>,
+మూస నిర్మాణం CHERICapability_Format_పునాది<RVYCapabilityFormat<uint64_t, 14, 52>,
                                           uint64_t>;
-template struct RVYCapabilityFormat<uint32_t, 10, 24>;
-template struct RVYCapabilityFormat<uint64_t, 14, 52>;
+మూస నిర్మాణం RVYCapabilityFormat<uint32_t, 10, 24>;
+మూస నిర్మాణం RVYCapabilityFormat<uint64_t, 14, 52>;
 
-uint32_t CHERIoTCapabilityFormat::getAlignmentMaskImpl(uint32_t Length) {
+uint32_t CHERIoTCapabilityFormat::get_Alignment_ముసుగు_Impl(uint32_t నిడివి) {
   // Per section 7.13.4 and table 7.4 in the v1.0 CHERIoT specification.
-  constexpr uint32_t NINE_SET_BITS = 511;
+  constexpr uint32_t NINE_సమితి_బిట్లు = 511;
   uint32_t E;
-  if (Length > NINE_SET_BITS << 14)
+  ఒకవేళ (నిడివి > NINE_సమితి_బిట్లు << 14)
     E = 24;
-  else {
-    E = Length > NINE_SET_BITS ? 32 - llvm::countl_zero(Length) - 9 : 0;
-    if (Length > NINE_SET_BITS << E)
+  లేకపోతే {
+    E = నిడివి > NINE_సమితి_బిట్లు ? 32 - llvm::countl_zero(నిడివి) - 9 : 0;
+    ఒకవేళ (నిడివి > NINE_సమితి_బిట్లు << E)
       ++E;
-    assert(E <= 14 && "CHERIoT capabilities cannot encode E between 14 and 24");
+    ప్రతిజ్ఞా(E <= 14 && "CHERIoT capabilities cannot encode E between 14 and 24");
   }
-  return CHERIoTCapabilityFormat::AddressMask << E;
+  తిరిగి CHERIoTCapabilityFormat::చిరునామా_ముసుగు << E;
 }
 
-template struct CHERICapabilityFormatBase<CHERIoTCapabilityFormat, uint32_t>;
+మూస నిర్మాణం CHERICapability_Format_పునాది<CHERIoTCapabilityFormat, uint32_t>;
 
 } // namespace llvm

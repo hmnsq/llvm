@@ -6,112 +6,112 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/APInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/edit_distance.h"
-#include "llvm/Support/Error.h"
-#include <bitset>
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/ADT/APFloat.h"
+#అన్తర్భావ "llvm/ADT/APInt.h"
+#అన్తర్భావ "llvm/ADT/Hashing.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/ADT/edit_distance.h"
+#అన్తర్భావ "llvm/Support/Error.h"
+#అన్తర్భావ <bitset>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 // strncasecmp() is not available on non-POSIX systems, so define an
 // alternative function here.
-static int ascii_strncasecmp(StringRef LHS, StringRef RHS) {
-  for (auto [LC, RC] : zip_equal(LHS, RHS)) {
-    unsigned char LHC = toLower(LC);
-    unsigned char RHC = toLower(RC);
-    if (LHC != RHC)
-      return LHC < RHC ? -1 : 1;
+స్థిర పూర్ణాంకం ascii_strncasecmp(StringRef LHS, StringRef RHS) {
+  కొరకు (స్వయంచాలక [LC, RC] : zip_equal(LHS, RHS)) {
+    గుర్తులేని అక్షరం LHC = గమ్యం_క్రింది(LC);
+    గుర్తులేని అక్షరం RHC = గమ్యం_క్రింది(RC);
+    ఒకవేళ (LHC != RHC)
+      తిరిగి LHC < RHC ? -1 : 1;
   }
-  return 0;
+  తిరిగి 0;
 }
 
-int StringRef::compare_insensitive(StringRef RHS) const {
-  size_t Min = std::min(size(), RHS.size());
-  if (int Res = ascii_strncasecmp(take_front(Min), RHS.take_front(Min)))
-    return Res;
-  if (size() == RHS.size())
-    return 0;
-  return size() < RHS.size() ? -1 : 1;
+పూర్ణాంకం StringRef::compare_insensitive(StringRef RHS) స్థిరరాశి {
+  size_t Min = std::min(కొలత_2(), RHS.కొలత_2());
+  ఒకవేళ (పూర్ణాంకం Res = ascii_strncasecmp(take_front(Min), RHS.take_front(Min)))
+    తిరిగి Res;
+  ఒకవేళ (కొలత_2() == RHS.కొలత_2())
+    తిరిగి 0;
+  తిరిగి కొలత_2() < RHS.కొలత_2() ? -1 : 1;
 }
 
-bool StringRef::starts_with_insensitive(StringRef Prefix) const {
-  return size() >= Prefix.size() &&
-         ascii_strncasecmp(take_front(Prefix.size()), Prefix) == 0;
+తార్కిక StringRef::starts_with_insensitive(StringRef ఉపసర్గ) స్థిరరాశి {
+  తిరిగి కొలత_2() >= ఉపసర్గ.కొలత_2() &&
+         ascii_strncasecmp(take_front(ఉపసర్గ.కొలత_2()), ఉపసర్గ) == 0;
 }
 
-bool StringRef::ends_with_insensitive(StringRef Suffix) const {
-  return size() >= Suffix.size() &&
-         ascii_strncasecmp(take_back(Suffix.size()), Suffix) == 0;
+తార్కిక StringRef::చివర్లు_with_insensitive(StringRef Suffix) స్థిరరాశి {
+  తిరిగి కొలత_2() >= Suffix.కొలత_2() &&
+         ascii_strncasecmp(take_వెనుక(Suffix.కొలత_2()), Suffix) == 0;
 }
 
-size_t StringRef::find_insensitive(char C, size_t From) const {
-  char L = toLower(C);
-  return find_if([L](char D) { return toLower(D) == L; }, From);
+size_t StringRef::కనుగొను_insensitive(అక్షరం C, size_t From) స్థిరరాశి {
+  అక్షరం L = గమ్యం_క్రింది(C);
+  తిరిగి కనుగొను_if([L](అక్షరం D) { తిరిగి గమ్యం_క్రింది(D) == L; }, From);
 }
 
 /// compare_numeric - Compare strings, handle embedded numbers.
-int StringRef::compare_numeric(StringRef RHS) const {
-  for (size_t I = 0, E = std::min(size(), RHS.size()); I != E; ++I) {
+పూర్ణాంకం StringRef::compare_numeric(StringRef RHS) స్థిరరాశి {
+  కొరకు (size_t I = 0, E = std::min(కొలత_2(), RHS.కొలత_2()); I != E; ++I) {
     // Check for sequences of digits.
-    if (isDigit(data()[I]) && isDigit(RHS.data()[I])) {
+    ఒకవేళ (isDigit(దత్తాంశం()[I]) && isDigit(RHS.దత్తాంశం()[I])) {
       // The longer sequence of numbers is considered larger.
       // This doesn't really handle prefixed zeros well.
       size_t J;
-      for (J = I + 1; J != E + 1; ++J) {
-        bool ld = J < size() && isDigit(data()[J]);
-        bool rd = J < RHS.size() && isDigit(RHS.data()[J]);
-        if (ld != rd)
-          return rd ? -1 : 1;
-        if (!rd)
-          break;
+      కొరకు (J = I + 1; J != E + 1; ++J) {
+        తార్కిక ld = J < కొలత_2() && isDigit(దత్తాంశం()[J]);
+        తార్కిక rd = J < RHS.కొలత_2() && isDigit(RHS.దత్తాంశం()[J]);
+        ఒకవేళ (ld != rd)
+          తిరిగి rd ? -1 : 1;
+        ఒకవేళ (!rd)
+          ఆపు;
       }
       // The two number sequences have the same length (J-I), just memcmp them.
-      if (int Res = compareMemory(data() + I, RHS.data() + I, J - I))
-        return Res < 0 ? -1 : 1;
+      ఒకవేళ (పూర్ణాంకం Res = compare_జ్ఞాపకం(దత్తాంశం() + I, RHS.దత్తాంశం() + I, J - I))
+        తిరిగి Res < 0 ? -1 : 1;
       // Identical number sequences, continue search after the numbers.
       I = J - 1;
-      continue;
+      కొనసాగు;
     }
-    if (data()[I] != RHS.data()[I])
-      return (unsigned char)data()[I] < (unsigned char)RHS.data()[I] ? -1 : 1;
+    ఒకవేళ (దత్తాంశం()[I] != RHS.దత్తాంశం()[I])
+      తిరిగి (గుర్తులేని అక్షరం)దత్తాంశం()[I] < (గుర్తులేని అక్షరం)RHS.దత్తాంశం()[I] ? -1 : 1;
   }
-  if (size() == RHS.size())
-    return 0;
-  return size() < RHS.size() ? -1 : 1;
+  ఒకవేళ (కొలత_2() == RHS.కొలత_2())
+    తిరిగి 0;
+  తిరిగి కొలత_2() < RHS.కొలత_2() ? -1 : 1;
 }
 
 // Compute the edit distance between the two given strings.
-unsigned StringRef::edit_distance(llvm::StringRef Other,
-                                  bool AllowReplacements,
-                                  unsigned MaxEditDistance) const {
-  return llvm::ComputeEditDistance(ArrayRef(data(), size()),
-                                   ArrayRef(Other.data(), Other.size()),
-                                   AllowReplacements, MaxEditDistance);
+గుర్తులేని StringRef::edit_దూరం(llvm::StringRef Other,
+                                  తార్కిక AllowReplacements,
+                                  గుర్తులేని Max_Edit_దూరం) స్థిరరాశి {
+  తిరిగి llvm::Compute_Edit_దూరం(ArrayRef(దత్తాంశం(), కొలత_2()),
+                                   ArrayRef(Other.దత్తాంశం(), Other.కొలత_2()),
+                                   AllowReplacements, Max_Edit_దూరం);
 }
 
-unsigned llvm::StringRef::edit_distance_insensitive(
-    StringRef Other, bool AllowReplacements, unsigned MaxEditDistance) const {
-  return llvm::ComputeMappedEditDistance(
-      ArrayRef(data(), size()), ArrayRef(Other.data(), Other.size()),
-      llvm::toLower, AllowReplacements, MaxEditDistance);
+గుర్తులేని llvm::StringRef::edit_దూరం_insensitive(
+    StringRef Other, తార్కిక AllowReplacements, గుర్తులేని Max_Edit_దూరం) స్థిరరాశి {
+  తిరిగి llvm::Compute_Mapped_Edit_దూరం(
+      ArrayRef(దత్తాంశం(), కొలత_2()), ArrayRef(Other.దత్తాంశం(), Other.కొలత_2()),
+      llvm::గమ్యం_క్రింది, AllowReplacements, Max_Edit_దూరం);
 }
 
 //===----------------------------------------------------------------------===//
 // String Operations
 //===----------------------------------------------------------------------===//
 
-std::string StringRef::lower() const {
-  return std::string(map_iterator(begin(), toLower),
-                     map_iterator(end(), toLower));
+std::string StringRef::క్రింది() స్థిరరాశి {
+  తిరిగి std::string(map_iterator(begin(), గమ్యం_క్రింది),
+                     map_iterator(చివర(), గమ్యం_క్రింది));
 }
 
-std::string StringRef::upper() const {
-  return std::string(map_iterator(begin(), toUpper),
-                     map_iterator(end(), toUpper));
+std::string StringRef::పై() స్థిరరాశి {
+  తిరిగి std::string(map_iterator(begin(), గమ్యం_పై),
+                     map_iterator(చివర(), గమ్యం_పై));
 }
 
 //===----------------------------------------------------------------------===//
@@ -123,239 +123,239 @@ std::string StringRef::upper() const {
 ///
 /// \return - The index of the first occurrence of \arg Str, or npos if not
 /// found.
-size_t StringRef::find(StringRef Str, size_t From) const {
-  if (From > size())
-    return npos;
+size_t StringRef::కనుగొను(StringRef Str, size_t From) స్థిరరాశి {
+  ఒకవేళ (From > కొలత_2())
+    తిరిగి npos;
 
-  const char *Start = data() + From;
-  size_t Size = size() - From;
+  స్థిరరాశి అక్షరం *ప్రారంభం = దత్తాంశం() + From;
+  size_t కొలత = కొలత_2() - From;
 
-  const char *Needle = Str.data();
-  size_t N = Str.size();
-  if (N == 0)
-    return From;
-  if (Size < N)
-    return npos;
-  if (N == 1) {
-    const char *Ptr = (const char *)::memchr(Start, Needle[0], Size);
-    return Ptr == nullptr ? npos : Ptr - data();
+  స్థిరరాశి అక్షరం *Needle = Str.దత్తాంశం();
+  size_t N = Str.కొలత_2();
+  ఒకవేళ (N == 0)
+    తిరిగి From;
+  ఒకవేళ (కొలత < N)
+    తిరిగి npos;
+  ఒకవేళ (N == 1) {
+    స్థిరరాశి అక్షరం *Ptr = (స్థిరరాశి అక్షరం *)::memchr(ప్రారంభం, Needle[0], కొలత);
+    తిరిగి Ptr == శూన్యసూచిక ? npos : Ptr - దత్తాంశం();
   }
 
-  const char *Stop = Start + (Size - N + 1);
+  స్థిరరాశి అక్షరం *Stop = ప్రారంభం + (కొలత - N + 1);
 
-  if (N == 2) {
+  ఒకవేళ (N == 2) {
     // Provide a fast path for newline finding (CRLF case) in InclusionRewriter.
     // Not the most optimized strategy, but getting memcmp inlined should be
     // good enough.
-    do {
-      if (std::memcmp(Start, Needle, 2) == 0)
-        return Start - data();
-      ++Start;
-    } while (Start < Stop);
-    return npos;
+    చేయి {
+      ఒకవేళ (std::memcmp(ప్రారంభం, Needle, 2) == 0)
+        తిరిగి ప్రారంభం - దత్తాంశం();
+      ++ప్రారంభం;
+    } అయితే (ప్రారంభం < Stop);
+    తిరిగి npos;
   }
 
   // For short haystacks or unsupported needles fall back to the naive algorithm
-  if (Size < 16 || N > 255) {
-    do {
-      if (std::memcmp(Start, Needle, N) == 0)
-        return Start - data();
-      ++Start;
-    } while (Start < Stop);
-    return npos;
+  ఒకవేళ (కొలత < 16 || N > 255) {
+    చేయి {
+      ఒకవేళ (std::memcmp(ప్రారంభం, Needle, N) == 0)
+        తిరిగి ప్రారంభం - దత్తాంశం();
+      ++ప్రారంభం;
+    } అయితే (ప్రారంభం < Stop);
+    తిరిగి npos;
   }
 
   // Build the bad char heuristic table, with uint8_t to reduce cache thrashing.
   uint8_t BadCharSkip[256];
   std::memset(BadCharSkip, N, 256);
-  for (unsigned i = 0; i != N-1; ++i)
+  కొరకు (గుర్తులేని i = 0; i != N-1; ++i)
     BadCharSkip[(uint8_t)Str[i]] = N-1-i;
 
-  do {
-    uint8_t Last = Start[N - 1];
-    if (LLVM_UNLIKELY(Last == (uint8_t)Needle[N - 1]))
-      if (std::memcmp(Start, Needle, N - 1) == 0)
-        return Start - data();
+  చేయి {
+    uint8_t చివరి = ప్రారంభం[N - 1];
+    ఒకవేళ (LLVM_UNLIKELY(చివరి == (uint8_t)Needle[N - 1]))
+      ఒకవేళ (std::memcmp(ప్రారంభం, Needle, N - 1) == 0)
+        తిరిగి ప్రారంభం - దత్తాంశం();
 
     // Otherwise skip the appropriate number of bytes.
-    Start += BadCharSkip[Last];
-  } while (Start < Stop);
+    ప్రారంభం += BadCharSkip[చివరి];
+  } అయితే (ప్రారంభం < Stop);
 
-  return npos;
+  తిరిగి npos;
 }
 
-size_t StringRef::find_insensitive(StringRef Str, size_t From) const {
+size_t StringRef::కనుగొను_insensitive(StringRef Str, size_t From) స్థిరరాశి {
   StringRef This = substr(From);
-  while (This.size() >= Str.size()) {
-    if (This.starts_with_insensitive(Str))
-      return From;
+  అయితే (This.కొలత_2() >= Str.కొలత_2()) {
+    ఒకవేళ (This.starts_with_insensitive(Str))
+      తిరిగి From;
     This = This.drop_front();
     ++From;
   }
-  return npos;
+  తిరిగి npos;
 }
 
-size_t StringRef::rfind_insensitive(char C, size_t From) const {
-  From = std::min(From, size());
+size_t StringRef::rfind_insensitive(అక్షరం C, size_t From) స్థిరరాశి {
+  From = std::min(From, కొలత_2());
   size_t i = From;
-  while (i != 0) {
+  అయితే (i != 0) {
     --i;
-    if (toLower(data()[i]) == toLower(C))
-      return i;
+    ఒకవేళ (గమ్యం_క్రింది(దత్తాంశం()[i]) == గమ్యం_క్రింది(C))
+      తిరిగి i;
   }
-  return npos;
+  తిరిగి npos;
 }
 
 /// rfind - Search for the last string \arg Str in the string.
 ///
 /// \return - The index of the last occurrence of \arg Str, or npos if not
 /// found.
-size_t StringRef::rfind(StringRef Str) const {
-  return std::string_view(*this).rfind(Str);
+size_t StringRef::rfind(StringRef Str) స్థిరరాశి {
+  తిరిగి std::string_view(*ఇది).rfind(Str);
 }
 
-size_t StringRef::rfind_insensitive(StringRef Str) const {
-  size_t N = Str.size();
-  if (N > size())
-    return npos;
-  for (size_t i = size() - N + 1, e = 0; i != e;) {
+size_t StringRef::rfind_insensitive(StringRef Str) స్థిరరాశి {
+  size_t N = Str.కొలత_2();
+  ఒకవేళ (N > కొలత_2())
+    తిరిగి npos;
+  కొరకు (size_t i = కొలత_2() - N + 1, e = 0; i != e;) {
     --i;
-    if (substr(i, N).equals_insensitive(Str))
-      return i;
+    ఒకవేళ (substr(i, N).equals_insensitive(Str))
+      తిరిగి i;
   }
-  return npos;
+  తిరిగి npos;
 }
 
 /// find_first_of - Find the first character in the string that is in \arg
 /// Chars, or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_first_of(StringRef Chars,
-                                              size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::కొలత_type StringRef::కనుగొను_మొదటి_యొక్క(StringRef Chars,
+                                              size_t From) స్థిరరాశి {
+  std::bitset<1 << CHAR_BIT> Char_బిట్లు;
+  కొరకు (అక్షరం C : Chars)
+    Char_బిట్లు.సమితి((గుర్తులేని అక్షరం)C);
 
-  for (size_type i = std::min(From, size()), e = size(); i != e; ++i)
-    if (CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  కొరకు (కొలత_type i = std::min(From, కొలత_2()), e = కొలత_2(); i != e; ++i)
+    ఒకవేళ (Char_బిట్లు.test((గుర్తులేని అక్షరం)దత్తాంశం()[i]))
+      తిరిగి i;
+  తిరిగి npos;
 }
 
 /// find_first_not_of - Find the first character in the string that is not
 /// \arg C or npos if not found.
-StringRef::size_type StringRef::find_first_not_of(char C, size_t From) const {
-  return std::string_view(*this).find_first_not_of(C, From);
+StringRef::కొలత_type StringRef::కనుగొను_మొదటి_not_యొక్క(అక్షరం C, size_t From) స్థిరరాశి {
+  తిరిగి std::string_view(*ఇది).కనుగొను_మొదటి_not_యొక్క(C, From);
 }
 
 /// find_first_not_of - Find the first character in the string that is not
 /// in the string \arg Chars, or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_first_not_of(StringRef Chars,
-                                                  size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::కొలత_type StringRef::కనుగొను_మొదటి_not_యొక్క(StringRef Chars,
+                                                  size_t From) స్థిరరాశి {
+  std::bitset<1 << CHAR_BIT> Char_బిట్లు;
+  కొరకు (అక్షరం C : Chars)
+    Char_బిట్లు.సమితి((గుర్తులేని అక్షరం)C);
 
-  for (size_type i = std::min(From, size()), e = size(); i != e; ++i)
-    if (!CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  కొరకు (కొలత_type i = std::min(From, కొలత_2()), e = కొలత_2(); i != e; ++i)
+    ఒకవేళ (!Char_బిట్లు.test((గుర్తులేని అక్షరం)దత్తాంశం()[i]))
+      తిరిగి i;
+  తిరిగి npos;
 }
 
 /// find_last_of - Find the last character in the string that is in \arg C,
 /// or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_last_of(StringRef Chars,
-                                             size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::కొలత_type StringRef::కనుగొను_చివరి_యొక్క(StringRef Chars,
+                                             size_t From) స్థిరరాశి {
+  std::bitset<1 << CHAR_BIT> Char_బిట్లు;
+  కొరకు (అక్షరం C : Chars)
+    Char_బిట్లు.సమితి((గుర్తులేని అక్షరం)C);
 
-  for (size_type i = std::min(From, size()) - 1, e = -1; i != e; --i)
-    if (CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  కొరకు (కొలత_type i = std::min(From, కొలత_2()) - 1, e = -1; i != e; --i)
+    ఒకవేళ (Char_బిట్లు.test((గుర్తులేని అక్షరం)దత్తాంశం()[i]))
+      తిరిగి i;
+  తిరిగి npos;
 }
 
 /// find_last_not_of - Find the last character in the string that is not
 /// \arg C, or npos if not found.
-StringRef::size_type StringRef::find_last_not_of(char C, size_t From) const {
-  for (size_type i = std::min(From, size()) - 1, e = -1; i != e; --i)
-    if (data()[i] != C)
-      return i;
-  return npos;
+StringRef::కొలత_type StringRef::కనుగొను_చివరి_not_యొక్క(అక్షరం C, size_t From) స్థిరరాశి {
+  కొరకు (కొలత_type i = std::min(From, కొలత_2()) - 1, e = -1; i != e; --i)
+    ఒకవేళ (దత్తాంశం()[i] != C)
+      తిరిగి i;
+  తిరిగి npos;
 }
 
 /// find_last_not_of - Find the last character in the string that is not in
 /// \arg Chars, or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_last_not_of(StringRef Chars,
-                                                 size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::కొలత_type StringRef::కనుగొను_చివరి_not_యొక్క(StringRef Chars,
+                                                 size_t From) స్థిరరాశి {
+  std::bitset<1 << CHAR_BIT> Char_బిట్లు;
+  కొరకు (అక్షరం C : Chars)
+    Char_బిట్లు.సమితి((గుర్తులేని అక్షరం)C);
 
-  for (size_type i = std::min(From, size()) - 1, e = -1; i != e; --i)
-    if (!CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  కొరకు (కొలత_type i = std::min(From, కొలత_2()) - 1, e = -1; i != e; --i)
+    ఒకవేళ (!Char_బిట్లు.test((గుర్తులేని అక్షరం)దత్తాంశం()[i]))
+      తిరిగి i;
+  తిరిగి npos;
 }
 
-void StringRef::split(SmallVectorImpl<StringRef> &A,
-                      StringRef Separator, int MaxSplit,
-                      bool KeepEmpty) const {
-  StringRef S = *this;
+శూన్య StringRef::విభజించు(Small_సదిశ_Impl<StringRef> &A,
+                      StringRef Separator, పూర్ణాంకం Max_విభజించు,
+                      తార్కిక Keep_ఖాళీలు) స్థిరరాశి {
+  StringRef S = *ఇది;
 
   // Count down from MaxSplit. When MaxSplit is -1, this will just split
   // "forever". This doesn't support splitting more than 2^31 times
   // intentionally; if we ever want that we can make MaxSplit a 64-bit integer
   // but that seems unlikely to be useful.
-  while (MaxSplit-- != 0) {
-    size_t Idx = S.find(Separator);
-    if (Idx == npos)
-      break;
+  అయితే (Max_విభజించు-- != 0) {
+    size_t Idx = S.కనుగొను(Separator);
+    ఒకవేళ (Idx == npos)
+      ఆపు;
 
     // Push this split.
-    if (KeepEmpty || Idx > 0)
-      A.push_back(S.slice(0, Idx));
+    ఒకవేళ (Keep_ఖాళీలు || Idx > 0)
+      A.నెట్టు_వెనుక(S.ముక్క(0, Idx));
 
     // Jump forward.
-    S = S.substr(Idx + Separator.size());
+    S = S.substr(Idx + Separator.కొలత_2());
   }
 
   // Push the tail.
-  if (KeepEmpty || !S.empty())
-    A.push_back(S);
+  ఒకవేళ (Keep_ఖాళీలు || !S.ఖాళీలు())
+    A.నెట్టు_వెనుక(S);
 }
 
-void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
-                      int MaxSplit, bool KeepEmpty) const {
-  StringRef S = *this;
+శూన్య StringRef::విభజించు(Small_సదిశ_Impl<StringRef> &A, అక్షరం Separator,
+                      పూర్ణాంకం Max_విభజించు, తార్కిక Keep_ఖాళీలు) స్థిరరాశి {
+  StringRef S = *ఇది;
 
   // Count down from MaxSplit. When MaxSplit is -1, this will just split
   // "forever". This doesn't support splitting more than 2^31 times
   // intentionally; if we ever want that we can make MaxSplit a 64-bit integer
   // but that seems unlikely to be useful.
-  while (MaxSplit-- != 0) {
-    size_t Idx = S.find(Separator);
-    if (Idx == npos)
-      break;
+  అయితే (Max_విభజించు-- != 0) {
+    size_t Idx = S.కనుగొను(Separator);
+    ఒకవేళ (Idx == npos)
+      ఆపు;
 
     // Push this split.
-    if (KeepEmpty || Idx > 0)
-      A.push_back(S.slice(0, Idx));
+    ఒకవేళ (Keep_ఖాళీలు || Idx > 0)
+      A.నెట్టు_వెనుక(S.ముక్క(0, Idx));
 
     // Jump forward.
     S = S.substr(Idx + 1);
   }
 
   // Push the tail.
-  if (KeepEmpty || !S.empty())
-    A.push_back(S);
+  ఒకవేళ (Keep_ఖాళీలు || !S.ఖాళీలు())
+    A.నెట్టు_వెనుక(S);
 }
 
 //===----------------------------------------------------------------------===//
@@ -364,224 +364,224 @@ void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
 
 /// count - Return the number of non-overlapped occurrences of \arg Str in
 /// the string.
-size_t StringRef::count(StringRef Str) const {
-  size_t Count = 0;
+size_t StringRef::లెక్క(StringRef Str) స్థిరరాశి {
+  size_t లెక్క_2 = 0;
   size_t Pos = 0;
-  size_t N = Str.size();
+  size_t N = Str.కొలత_2();
   // TODO: For an empty `Str` we return 0 for legacy reasons. Consider changing
   //       this to `Length + 1` which is more in-line with the function
   //       description.
-  if (!N)
-    return 0;
-  while ((Pos = find(Str, Pos)) != npos) {
-    ++Count;
+  ఒకవేళ (!N)
+    తిరిగి 0;
+  అయితే ((Pos = కనుగొను(Str, Pos)) != npos) {
+    ++లెక్క_2;
     Pos += N;
   }
-  return Count;
+  తిరిగి లెక్క_2;
 }
 
-unsigned llvm::getAutoSenseRadix(StringRef &Str) {
-  if (Str.empty())
-    return 10;
+గుర్తులేని llvm::getAutoSenseRadix(StringRef &Str) {
+  ఒకవేళ (Str.ఖాళీలు())
+    తిరిగి 10;
 
-  if (Str.consume_front_insensitive("0x"))
-    return 16;
+  ఒకవేళ (Str.consume_front_insensitive("0x"))
+    తిరిగి 16;
 
-  if (Str.consume_front_insensitive("0b"))
-    return 2;
+  ఒకవేళ (Str.consume_front_insensitive("0b"))
+    తిరిగి 2;
 
-  if (Str.consume_front("0o"))
-    return 8;
+  ఒకవేళ (Str.consume_front("0o"))
+    తిరిగి 8;
 
-  if (Str[0] == '0' && Str.size() > 1 && isDigit(Str[1])) {
+  ఒకవేళ (Str[0] == '0' && Str.కొలత_2() > 1 && isDigit(Str[1])) {
     Str = Str.substr(1);
-    return 8;
+    తిరిగి 8;
   }
 
-  return 10;
+  తిరిగి 10;
 }
 
-bool llvm::consumeUnsignedInteger(StringRef &Str, unsigned Radix,
-                                  unsigned long long &Result) {
+తార్కిక llvm::consumeUnsignedInteger(StringRef &Str, గుర్తులేని Radix,
+                                  గుర్తులేని దీర్ఘ దీర్ఘ &ఫలితం) {
   // Autosense radix if not specified.
-  if (Radix == 0)
+  ఒకవేళ (Radix == 0)
     Radix = getAutoSenseRadix(Str);
 
   // Empty strings (after the radix autosense) are invalid.
-  if (Str.empty()) return true;
+  ఒకవేళ (Str.ఖాళీలు()) తిరిగి నిజం;
 
   // Parse all the bytes of the string given this radix.  Watch for overflow.
   StringRef Str2 = Str;
-  Result = 0;
-  while (!Str2.empty()) {
-    unsigned CharVal;
-    if (Str2[0] >= '0' && Str2[0] <= '9')
+  ఫలితం = 0;
+  అయితే (!Str2.ఖాళీలు()) {
+    గుర్తులేని CharVal;
+    ఒకవేళ (Str2[0] >= '0' && Str2[0] <= '9')
       CharVal = Str2[0] - '0';
-    else if (Str2[0] >= 'a' && Str2[0] <= 'z')
+    లేకపోతే ఒకవేళ (Str2[0] >= 'a' && Str2[0] <= 'z')
       CharVal = Str2[0] - 'a' + 10;
-    else if (Str2[0] >= 'A' && Str2[0] <= 'Z')
+    లేకపోతే ఒకవేళ (Str2[0] >= 'A' && Str2[0] <= 'Z')
       CharVal = Str2[0] - 'A' + 10;
-    else
-      break;
+    లేకపోతే
+      ఆపు;
 
     // If the parsed value is larger than the integer radix, we cannot
     // consume any more characters.
-    if (CharVal >= Radix)
-      break;
+    ఒకవేళ (CharVal >= Radix)
+      ఆపు;
 
     // Add in this character.
-    unsigned long long PrevResult = Result;
-    Result = Result * Radix + CharVal;
+    గుర్తులేని దీర్ఘ దీర్ఘ Prev_ఫలితం = ఫలితం;
+    ఫలితం = ఫలితం * Radix + CharVal;
 
     // Check for overflow by shifting back and seeing if bits were lost.
-    if (Result / Radix < PrevResult)
-      return true;
+    ఒకవేళ (ఫలితం / Radix < Prev_ఫలితం)
+      తిరిగి నిజం;
 
     Str2 = Str2.substr(1);
   }
 
   // We consider the operation a failure if no characters were consumed
   // successfully.
-  if (Str.size() == Str2.size())
-    return true;
+  ఒకవేళ (Str.కొలత_2() == Str2.కొలత_2())
+    తిరిగి నిజం;
 
   Str = Str2;
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-bool llvm::consumeSignedInteger(StringRef &Str, unsigned Radix,
-                                long long &Result) {
-  unsigned long long ULLVal;
+తార్కిక llvm::consumeSignedInteger(StringRef &Str, గుర్తులేని Radix,
+                                దీర్ఘ దీర్ఘ &ఫలితం) {
+  గుర్తులేని దీర్ఘ దీర్ఘ ULLVal;
 
   // Handle positive strings first.
-  if (!Str.starts_with("-")) {
-    if (consumeUnsignedInteger(Str, Radix, ULLVal) ||
+  ఒకవేళ (!Str.starts_with("-")) {
+    ఒకవేళ (consumeUnsignedInteger(Str, Radix, ULLVal) ||
         // Check for value so large it overflows a signed value.
-        (long long)ULLVal < 0)
-      return true;
-    Result = ULLVal;
-    return false;
+        (దీర్ఘ దీర్ఘ)ULLVal < 0)
+      తిరిగి నిజం;
+    ఫలితం = ULLVal;
+    తిరిగి అబద్ధం;
   }
 
   // Get the positive part of the value.
   StringRef Str2 = Str.drop_front(1);
-  if (consumeUnsignedInteger(Str2, Radix, ULLVal) ||
+  ఒకవేళ (consumeUnsignedInteger(Str2, Radix, ULLVal) ||
       // Reject values so large they'd overflow as negative signed, but allow
       // "-0".  This negates the unsigned so that the negative isn't undefined
       // on signed overflow.
-      (long long)-ULLVal > 0)
-    return true;
+      (దీర్ఘ దీర్ఘ)-ULLVal > 0)
+    తిరిగి నిజం;
 
   Str = Str2;
-  Result = -ULLVal;
-  return false;
+  ఫలితం = -ULLVal;
+  తిరిగి అబద్ధం;
 }
 
 /// GetAsUnsignedInteger - Workhorse method that converts a integer character
 /// sequence of radix up to 36 to an unsigned long long value.
-bool llvm::getAsUnsignedInteger(StringRef Str, unsigned Radix,
-                                unsigned long long &Result) {
-  if (consumeUnsignedInteger(Str, Radix, Result))
-    return true;
+తార్కిక llvm::getAsUnsignedInteger(StringRef Str, గుర్తులేని Radix,
+                                గుర్తులేని దీర్ఘ దీర్ఘ &ఫలితం) {
+  ఒకవేళ (consumeUnsignedInteger(Str, Radix, ఫలితం))
+    తిరిగి నిజం;
 
   // For getAsUnsignedInteger, we require the whole string to be consumed or
   // else we consider it a failure.
-  return !Str.empty();
+  తిరిగి !Str.ఖాళీలు();
 }
 
-bool llvm::getAsSignedInteger(StringRef Str, unsigned Radix,
-                              long long &Result) {
-  if (consumeSignedInteger(Str, Radix, Result))
-    return true;
+తార్కిక llvm::getAsSignedInteger(StringRef Str, గుర్తులేని Radix,
+                              దీర్ఘ దీర్ఘ &ఫలితం) {
+  ఒకవేళ (consumeSignedInteger(Str, Radix, ఫలితం))
+    తిరిగి నిజం;
 
   // For getAsSignedInteger, we require the whole string to be consumed or else
   // we consider it a failure.
-  return !Str.empty();
+  తిరిగి !Str.ఖాళీలు();
 }
 
-bool StringRef::consumeInteger(unsigned Radix, APInt &Result) {
-  StringRef Str = *this;
+తార్కిక StringRef::consumeInteger(గుర్తులేని Radix, APInt &ఫలితం) {
+  StringRef Str = *ఇది;
 
   // Autosense radix if not specified.
-  if (Radix == 0)
+  ఒకవేళ (Radix == 0)
     Radix = getAutoSenseRadix(Str);
 
-  assert(Radix > 1 && Radix <= 36);
+  ప్రతిజ్ఞా(Radix > 1 && Radix <= 36);
 
   // Empty strings (after the radix autosense) are invalid.
-  if (Str.empty()) return true;
+  ఒకవేళ (Str.ఖాళీలు()) తిరిగి నిజం;
 
   // Skip leading zeroes.  This can be a significant improvement if
   // it means we don't need > 64 bits.
   Str = Str.ltrim('0');
 
   // If it was nothing but zeroes....
-  if (Str.empty()) {
-    Result = APInt(64, 0);
-    *this = Str;
-    return false;
+  ఒకవేళ (Str.ఖాళీలు()) {
+    ఫలితం = APInt(64, 0);
+    *ఇది = Str;
+    తిరిగి అబద్ధం;
   }
 
-  unsigned Log2Radix = 0;
-  while ((1U << Log2Radix) < Radix) Log2Radix++;
-  bool IsPowerOf2Radix = ((1U << Log2Radix) == Radix);
+  గుర్తులేని Log2Radix = 0;
+  అయితే ((1U << Log2Radix) < Radix) Log2Radix++;
+  తార్కిక IsPowerOf2Radix = ((1U << Log2Radix) == Radix);
 
   // Initialize Result to a reasonable starting width (at least 64 bits),
   // but do not shrink it if it was already larger.
-  unsigned BitWidth = std::max(64U, Result.getBitWidth());
+  గుర్తులేని బిట్టు_వెడల్పు_2 = std::max(64U, ఫలితం.get_బిట్టు_వెడల్పు());
 
-  if (Result.getBitWidth() < BitWidth) {
-    Result = Result.zext(BitWidth);
+  ఒకవేళ (ఫలితం.get_బిట్టు_వెడల్పు() < బిట్టు_వెడల్పు_2) {
+    ఫలితం = ఫలితం.zext(బిట్టు_వెడల్పు_2);
   }
 
   APInt RadixAP, CharAP; // unused unless !IsPowerOf2Radix
-  if (!IsPowerOf2Radix) {
+  ఒకవేళ (!IsPowerOf2Radix) {
     // These must have the same bit-width as Result.
-    RadixAP = APInt(BitWidth, Radix);
-    CharAP = APInt(BitWidth, 0);
+    RadixAP = APInt(బిట్టు_వెడల్పు_2, Radix);
+    CharAP = APInt(బిట్టు_వెడల్పు_2, 0);
   }
 
   // Parse all the bytes of the string given this radix.
-  Result = 0;
-  while (!Str.empty()) {
-    unsigned CharVal;
-    if (Str[0] >= '0' && Str[0] <= '9')
+  ఫలితం = 0;
+  అయితే (!Str.ఖాళీలు()) {
+    గుర్తులేని CharVal;
+    ఒకవేళ (Str[0] >= '0' && Str[0] <= '9')
       CharVal = Str[0]-'0';
-    else if (Str[0] >= 'a' && Str[0] <= 'z')
+    లేకపోతే ఒకవేళ (Str[0] >= 'a' && Str[0] <= 'z')
       CharVal = Str[0]-'a'+10;
-    else if (Str[0] >= 'A' && Str[0] <= 'Z')
+    లేకపోతే ఒకవేళ (Str[0] >= 'A' && Str[0] <= 'Z')
       CharVal = Str[0]-'A'+10;
-    else
-      break;
+    లేకపోతే
+      ఆపు;
 
     // If the parsed value is larger than the integer radix, the string is
     // invalid.
-    if (CharVal >= Radix)
-      break;
+    ఒకవేళ (CharVal >= Radix)
+      ఆపు;
 
     // Check if one more digit will overflow, and grow if so.
-    if (Result.getActiveBits() + Log2Radix > Result.getBitWidth()) {
-      unsigned NewWidth = Result.getBitWidth() * 2;
+    ఒకవేళ (ఫలితం.get_చురుకైన_బిట్లు() + Log2Radix > ఫలితం.get_బిట్టు_వెడల్పు()) {
+      గుర్తులేని New_వెడల్పు = ఫలితం.get_బిట్టు_వెడల్పు() * 2;
 
       // Guard against overflow of the NewWidth itself
-      if (NewWidth < Result.getBitWidth())
-        return true;
+      ఒకవేళ (New_వెడల్పు < ఫలితం.get_బిట్టు_వెడల్పు())
+        తిరిగి నిజం;
 
-      Result = Result.zext(NewWidth);
-      if (!IsPowerOf2Radix) {
-        RadixAP = RadixAP.zext(NewWidth);
-        CharAP = CharAP.zext(NewWidth);
+      ఫలితం = ఫలితం.zext(New_వెడల్పు);
+      ఒకవేళ (!IsPowerOf2Radix) {
+        RadixAP = RadixAP.zext(New_వెడల్పు);
+        CharAP = CharAP.zext(New_వెడల్పు);
       }
     }
 
     // Add in this character.
-    if (IsPowerOf2Radix) {
-      Result <<= Log2Radix;
-      Result |= CharVal;
-    } else {
-      Result *= RadixAP;
+    ఒకవేళ (IsPowerOf2Radix) {
+      ఫలితం <<= Log2Radix;
+      ఫలితం |= CharVal;
+    } లేకపోతే {
+      ఫలితం *= RadixAP;
       CharAP = CharVal;
-      Result += CharAP;
+      ఫలితం += CharAP;
     }
 
     Str = Str.substr(1);
@@ -589,42 +589,42 @@ bool StringRef::consumeInteger(unsigned Radix, APInt &Result) {
 
   // We consider the operation a failure if no characters were consumed
   // successfully.
-  if (size() == Str.size())
-    return true;
+  ఒకవేళ (కొలత_2() == Str.కొలత_2())
+    తిరిగి నిజం;
 
-  *this = Str;
-  return false;
+  *ఇది = Str;
+  తిరిగి అబద్ధం;
 }
 
-bool StringRef::getAsInteger(unsigned Radix, APInt &Result) const {
-  StringRef Str = *this;
-  if (Str.consumeInteger(Radix, Result))
-    return true;
+తార్కిక StringRef::getAsInteger(గుర్తులేని Radix, APInt &ఫలితం) స్థిరరాశి {
+  StringRef Str = *ఇది;
+  ఒకవేళ (Str.consumeInteger(Radix, ఫలితం))
+    తిరిగి నిజం;
 
   // For getAsInteger, we require the whole string to be consumed or else we
   // consider it a failure.
-  return !Str.empty();
+  తిరిగి !Str.ఖాళీలు();
 }
 
-bool StringRef::getAsDouble(double &Result, bool AllowInexact) const {
+తార్కిక StringRef::getAsDouble(ద్విగుణ &ఫలితం, తార్కిక AllowInexact) స్థిరరాశి {
   APFloat F(0.0);
-  auto StatusOrErr = F.convertFromString(*this, APFloat::rmNearestTiesToEven);
-  if (errorToBool(StatusOrErr.takeError()))
-    return true;
+  స్వయంచాలక స్థితి_Or_Err = F.convertFromString(*ఇది, APFloat::rm_సమీప_Ties_గమ్యం_Even);
+  ఒకవేళ (error_గమ్యం_Bool(స్థితి_Or_Err.takeError()))
+    తిరిగి నిజం;
 
-  APFloat::opStatus Status = *StatusOrErr;
-  if (Status != APFloat::opOK) {
-    if (!AllowInexact || !(Status & APFloat::opInexact))
-      return true;
+  APFloat::op_స్థితి స్థితి_2 = *స్థితి_Or_Err;
+  ఒకవేళ (స్థితి_2 != APFloat::opOK) {
+    ఒకవేళ (!AllowInexact || !(స్థితి_2 & APFloat::opInexact))
+      తిరిగి నిజం;
   }
 
-  Result = F.convertToDouble();
-  return false;
+  ఫలితం = F.convert_గమ్యం_Double();
+  తిరిగి అబద్ధం;
 }
 
 // Implementation of StringRef hashing.
-hash_code llvm::hash_value(StringRef S) { return hash_combine_range(S); }
+hash_సంకేతం llvm::hash_విలువ(StringRef S) { తిరిగి hash_combine_range(S); }
 
-unsigned DenseMapInfo<StringRef, void>::getHashValue(StringRef Val) {
-  return (unsigned)(hash_value(Val));
+గుర్తులేని DenseMapInfo<StringRef, శూన్య>::get_Hash_విలువ(StringRef Val) {
+  తిరిగి (గుర్తులేని)(hash_విలువ(Val));
 }

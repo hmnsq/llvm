@@ -13,13 +13,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ConvertEBCDIC.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
+#అన్తర్భావ "llvm/Support/ConvertEBCDIC.h"
+#అన్తర్భావ "llvm/Support/ConvertUTF.h"
+#అన్తర్భావ "llvm/Support/ErrorHandling.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-static const unsigned char ISO88591ToIBM1047[256] = {
+స్థిర స్థిరరాశి గుర్తులేని అక్షరం ISO88591_గమ్యం_IBM1047[256] = {
     0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f, 0x16, 0x05, 0x15, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
     0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, 0x40, 0x5a, 0x7f, 0x7b,
@@ -43,7 +43,7 @@ static const unsigned char ISO88591ToIBM1047[256] = {
     0x8c, 0x49, 0xcd, 0xce, 0xcb, 0xcf, 0xcc, 0xe1, 0x70, 0xdd, 0xde, 0xdb,
     0xdc, 0x8d, 0x8e, 0xdf};
 
-static const unsigned char IBM1047ToISO88591[256] = {
+స్థిర స్థిరరాశి గుర్తులేని అక్షరం IBM1047_గమ్యం_ISO88591[256] = {
     0x00, 0x01, 0x02, 0x03, 0x9c, 0x09, 0x86, 0x7f, 0x97, 0x8d, 0x8e, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x9d, 0x0a, 0x08, 0x87,
     0x18, 0x19, 0x92, 0x8f, 0x1c, 0x1d, 0x1e, 0x1f, 0x80, 0x81, 0x82, 0x83,
@@ -68,85 +68,85 @@ static const unsigned char IBM1047ToISO88591[256] = {
     0xdc, 0xd9, 0xda, 0x9f};
 
 // Returns true if [Ptr, End) can be completed to form a valid UTF-8 sequence.
-static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
-  assert(Ptr != End);
+స్థిర తార్కిక is_Potentially_Valid_UTF8_ఉపసర్గ(స్థిరరాశి UTF8 *Ptr, స్థిరరాశి UTF8 *చివర_2) {
+  ప్రతిజ్ఞా(Ptr != చివర_2);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  ఒకవేళ (Lead < 0xc2 || Lead > 0xf4)
+    తిరిగి అబద్ధం;
+  ఒకవేళ (Ptr == చివర_2)
+    తిరిగి నిజం;
 
-  UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
-      (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+  UTF8 రెండవ = *Ptr++;
+  ఒకవేళ ((రెండవ & 0xc0) != 0x80)
+    తిరిగి అబద్ధం;
+  ఒకవేళ ((Lead == 0xe0 && రెండవ < 0xa0) || (Lead == 0xed && రెండవ > 0x9f) ||
+      (Lead == 0xf0 && రెండవ < 0x90) || (Lead == 0xf4 && రెండవ > 0x8f))
+    తిరిగి అబద్ధం;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  అయితే (Ptr != చివర_2)
+    ఒకవేళ ((*Ptr++ & 0xc0) != 0x80)
+      తిరిగి అబద్ధం;
+  తిరిగి నిజం;
 }
 
-std::error_code
-ConverterEBCDIC::convertToEBCDIC(StringRef Source,
-                                 SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
-  Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+std::error_సంకేతం
+ConverterEBCDIC::convert_గమ్యం_EBCDIC(StringRef ఆధారం,
+                                 Small_సదిశ_Impl<అక్షరం> &ఫలితం) {
+  ప్రతిజ్ఞా(ఫలితం.ఖాళీలు() && "Result must be empty!");
+  ఫలితం.reserve(ఆధారం.కొలత_2());
+  ఒకవేళ (ఆధారం.ఖాళీలు())
+    తిరిగి std::error_సంకేతం();
 
-  const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
-  const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
-      continue;
+  స్థిరరాశి UTF8 *Ptr = reinterpret_cast<స్థిరరాశి UTF8 *>(ఆధారం.దత్తాంశం());
+  స్థిరరాశి UTF8 *చివర_2 = Ptr + ఆధారం.కొలత_2();
+  అయితే (Ptr != చివర_2) {
+    ఒకవేళ (*Ptr < 0x80) {
+      ఫలితం.నెట్టు_వెనుక(static_cast<అక్షరం>(ISO88591_గమ్యం_IBM1047[*Ptr++]));
+      కొనసాగు;
     }
 
     UTF32 Ch;
-    switch (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
-    case conversionOK:
-      break;
-    case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
-    case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
-    case targetExhausted:
+    ఎంపిక (convertUTF8Sequence(&Ptr, చివర_2, &Ch, strictConversion)) {
+    స్థితి conversionOK:
+      ఆపు;
+    స్థితి ఆధారం_Exhausted:
+      ఒకవేళ (!is_Potentially_Valid_UTF8_ఉపసర్గ(Ptr, చివర_2))
+        తిరిగి std::make_error_సంకేతం(std::errc::illegal_byte_sequence);
+      తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
+    స్థితి ఆధారం_Illegal:
+      తిరిగి std::make_error_సంకేతం(std::errc::illegal_byte_sequence);
+    స్థితి లక్ష్యం_Exhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    ఒకవేళ (Ch > 0xff)
+      తిరిగి std::make_error_సంకేతం(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    ఫలితం.నెట్టు_వెనుక(static_cast<అక్షరం>(ISO88591_గమ్యం_IBM1047[Ch]));
   }
-  return std::error_code();
+  తిరిగి std::error_సంకేతం();
 }
 
-void ConverterEBCDIC::convertToUTF8(StringRef Source,
-                                    SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+శూన్య ConverterEBCDIC::convert_గమ్యం_UTF8(StringRef ఆధారం,
+                                    Small_సదిశ_Impl<అక్షరం> &ఫలితం) {
+  ప్రతిజ్ఞా(ఫలితం.ఖాళీలు() && "Result must be empty!");
 
-  const unsigned char *Table = IBM1047ToISO88591;
-  const unsigned char *Ptr =
-      reinterpret_cast<const unsigned char *>(Source.data());
-  size_t Length = Source.size();
-  Result.reserve(Length);
-  while (Length--) {
-    unsigned char Ch = *Ptr++;
+  స్థిరరాశి గుర్తులేని అక్షరం *పట్టిక = IBM1047_గమ్యం_ISO88591;
+  స్థిరరాశి గుర్తులేని అక్షరం *Ptr =
+      reinterpret_cast<స్థిరరాశి గుర్తులేని అక్షరం *>(ఆధారం.దత్తాంశం());
+  size_t నిడివి = ఆధారం.కొలత_2();
+  ఫలితం.reserve(నిడివి);
+  అయితే (నిడివి--) {
+    గుర్తులేని అక్షరం Ch = *Ptr++;
     // Translate the character.
-    Ch = Table[Ch];
+    Ch = పట్టిక[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    ఒకవేళ (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      ఫలితం.నెట్టు_వెనుక(static_cast<అక్షరం>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    ఫలితం.నెట్టు_వెనుక(static_cast<అక్షరం>(Ch));
   }
 }

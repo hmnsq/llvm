@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/RISCVAttributeParser.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-const RISCVAttributeParser::DisplayHandler
+స్థిరరాశి RISCVAttributeParser::DisplayHandler
     RISCVAttributeParser::displayRoutines[] = {
         {
             RISCVAttrs::ARCH,
@@ -30,8 +30,8 @@ const RISCVAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         },
         {
-            RISCVAttrs::STACK_ALIGN,
-            &RISCVAttributeParser::stackAlign,
+            RISCVAttrs::దొంతర_ALIGN,
+            &RISCVAttributeParser::దొంతర_Align,
         },
         {
             RISCVAttrs::UNALIGNED_ACCESS,
@@ -43,36 +43,36 @@ const RISCVAttributeParser::DisplayHandler
         },
 };
 
-Error RISCVAttributeParser::atomicAbi(unsigned Tag) {
-  uint64_t Value = de.getULEB128(cursor);
-  printAttribute(Tag, Value, "Atomic ABI is " + utostr(Value));
-  return Error::success();
+Error RISCVAttributeParser::atomicAbi(గుర్తులేని ట్యాగ్) {
+  uint64_t విలువ = de.getULEB128(cursor);
+  printAttribute(ట్యాగ్, విలువ, "Atomic ABI is " + utostr(విలువ));
+  తిరిగి Error::success();
 }
 
-Error RISCVAttributeParser::unalignedAccess(unsigned tag) {
-  static const char *const strings[] = {"No unaligned access",
+Error RISCVAttributeParser::unalignedAccess(గుర్తులేని ట్యాగ్_2) {
+  స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి అక్షరశ్రేణులు[] = {"No unaligned access",
                                         "Unaligned access"};
-  return parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
+  తిరిగి parseStringAttribute("Unaligned_access", ట్యాగ్_2, ArrayRef(అక్షరశ్రేణులు));
 }
 
-Error RISCVAttributeParser::stackAlign(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error RISCVAttributeParser::దొంతర_Align(గుర్తులేని ట్యాగ్_2) {
+  uint64_t విలువ_2 = de.getULEB128(cursor);
   std::string description =
-      "Stack alignment is " + utostr(value) + std::string("-bytes");
-  printAttribute(tag, value, description);
-  return Error::success();
+      "Stack alignment is " + utostr(విలువ_2) + std::string("-bytes");
+  printAttribute(ట్యాగ్_2, విలువ_2, description);
+  తిరిగి Error::success();
 }
 
-Error RISCVAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
-      handled = true;
-      break;
+Error RISCVAttributeParser::handler(uint64_t ట్యాగ్_2, తార్కిక &handled) {
+  handled = అబద్ధం;
+  కొరకు (స్థిరరాశి స్వయంచాలక &AH : displayRoutines) {
+    ఒకవేళ (uint64_t(AH.attribute) == ట్యాగ్_2) {
+      ఒకవేళ (Error e = (ఇది->*AH.routine)(ట్యాగ్_2))
+        తిరిగి e;
+      handled = నిజం;
+      ఆపు;
     }
   }
 
-  return Error::success();
+  తిరిగి Error::success();
 }

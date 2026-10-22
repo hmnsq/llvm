@@ -11,260 +11,260 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/DenseMapInfo.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/MemAlloc.h"
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
+#అన్తర్భావ "llvm/ADT/SmallPtrSet.h"
+#అన్తర్భావ "llvm/ADT/DenseMapInfo.h"
+#అన్తర్భావ "llvm/ADT/STLExtras.h"
+#అన్తర్భావ "llvm/Support/MathExtras.h"
+#అన్తర్భావ "llvm/Support/MemAlloc.h"
+#అన్తర్భావ <algorithm>
+#అన్తర్భావ <cassert>
+#అన్తర్భావ <cstdlib>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-void SmallPtrSetImplBase::shrink_and_clear() {
-  assert(!isSmall() && "Can't shrink a small set!");
-  free(CurArray);
+శూన్య Small_Ptr_సమితి_Impl_పునాది::shrink_and_clear() {
+  ప్రతిజ్ఞా(!isSmall() && "Can't shrink a small set!");
+  విడుదల(CurArray);
 
   // Reduce the number of buckets.
-  unsigned Size = size();
-  CurArraySize = Size > 16 ? 1 << (Log2_32_Ceil(Size) + 1) : 32;
-  NumEntries = 0;
+  గుర్తులేని కొలత = కొలత_2();
+  Cur_Array_కొలత = కొలత > 16 ? 1 << (Log2_32_Ceil(కొలత) + 1) : 32;
+  అంకె_Entries = 0;
 
   // Install the new array.  Clear all the buckets to empty.
-  CurArray = (const void**)safe_malloc(sizeof(void*) * CurArraySize);
+  CurArray = (స్థిరరాశి శూన్య**)సురక్షిత_malloc(పరిమాణం(శూన్య*) * Cur_Array_కొలత);
 
-  memset(CurArray, -1, CurArraySize*sizeof(void*));
+  memset(CurArray, -1, Cur_Array_కొలత*పరిమాణం(శూన్య*));
 }
 
-std::pair<const void *const *, bool>
-SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
-  if (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
+std::pair<స్థిరరాశి శూన్య *స్థిరరాశి *, తార్కిక>
+Small_Ptr_సమితి_Impl_పునాది::చొప్పించు_imp_big(స్థిరరాశి శూన్య *Ptr) {
+  ఒకవేళ (LLVM_UNLIKELY(కొలత_2() * 3 >= Cur_Array_కొలత * 2)) {
     // If more than 2/3 of the array is full, grow.
-    Grow(CurArraySize < 64 ? 128 : CurArraySize * 2);
+    Grow(Cur_Array_కొలత < 64 ? 128 : Cur_Array_కొలత * 2);
   }
 
   // Find the first empty bucket or Ptr itself on the probe chain.
-  unsigned Mask = CurArraySize - 1;
-  unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  const void **Array = CurArray;
-  while (Array[I] != getEmptyMarker()) {
-    if (Array[I] == Ptr)
-      return {Array + I, false};
-    I = (I + 1) & Mask;
+  గుర్తులేని ముసుగు = Cur_Array_కొలత - 1;
+  గుర్తులేని I = DenseMapInfo<శూన్య *>::get_Hash_విలువ(Ptr) & ముసుగు;
+  స్థిరరాశి శూన్య **Array = CurArray;
+  అయితే (Array[I] != get_ఖాళీలు_Marker()) {
+    ఒకవేళ (Array[I] == Ptr)
+      తిరిగి {Array + I, అబద్ధం};
+    I = (I + 1) & ముసుగు;
   }
 
   // Insert into the empty bucket.
-  ++NumEntries;
+  ++అంకె_Entries;
   Array[I] = Ptr;
   incrementEpoch();
-  return {Array + I, true};
+  తిరిగి {Array + I, నిజం};
 }
 
-const void *const *SmallPtrSetImplBase::doFind(const void *Ptr) const {
-  unsigned Mask = CurArraySize - 1;
-  unsigned BucketNo = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  while (true) {
-    const void *const *Bucket = CurArray + BucketNo;
-    if (LLVM_LIKELY(*Bucket == Ptr))
-      return Bucket;
-    if (LLVM_LIKELY(*Bucket == getEmptyMarker()))
-      return nullptr;
-    BucketNo = (BucketNo + 1) & Mask;
+స్థిరరాశి శూన్య *స్థిరరాశి *Small_Ptr_సమితి_Impl_పునాది::do_కనుగొను(స్థిరరాశి శూన్య *Ptr) స్థిరరాశి {
+  గుర్తులేని ముసుగు = Cur_Array_కొలత - 1;
+  గుర్తులేని పాత్ర_No = DenseMapInfo<శూన్య *>::get_Hash_విలువ(Ptr) & ముసుగు;
+  అయితే (నిజం) {
+    స్థిరరాశి శూన్య *స్థిరరాశి *పాత్ర = CurArray + పాత్ర_No;
+    ఒకవేళ (LLVM_LIKELY(*పాత్ర == Ptr))
+      తిరిగి పాత్ర;
+    ఒకవేళ (LLVM_LIKELY(*పాత్ర == get_ఖాళీలు_Marker()))
+      తిరిగి శూన్యసూచిక;
+    పాత్ర_No = (పాత్ర_No + 1) & ముసుగు;
   }
 }
 
-void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
+శూన్య Small_Ptr_సమితి_Impl_పునాది::erase_From_పాత్ర(స్థిరరాశి శూన్య **పాత్ర) {
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  unsigned Mask = CurArraySize - 1;
-  unsigned I = Bucket - CurArray;
-  unsigned J = I;
-  const void *Empty = getEmptyMarker();
-  while ((J = (J + 1) & Mask), CurArray[J] != Empty) {
-    auto Ideal = DenseMapInfo<void *>::getHashValue(CurArray[J]);
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+  గుర్తులేని ముసుగు = Cur_Array_కొలత - 1;
+  గుర్తులేని I = పాత్ర - CurArray;
+  గుర్తులేని J = I;
+  స్థిరరాశి శూన్య *ఖాళీలు_2 = get_ఖాళీలు_Marker();
+  అయితే ((J = (J + 1) & ముసుగు), CurArray[J] != ఖాళీలు_2) {
+    స్వయంచాలక Ideal = DenseMapInfo<శూన్య *>::get_Hash_విలువ(CurArray[J]);
+    ఒకవేళ (((I - Ideal) & ముసుగు) < ((J - Ideal) & ముసుగు)) {
       CurArray[I] = CurArray[J];
       I = J;
     }
   }
-  CurArray[I] = Empty;
+  CurArray[I] = ఖాళీలు_2;
 }
 
 /// Grow - Allocate a larger backing store for the buckets and move it over.
 ///
-void SmallPtrSetImplBase::Grow(unsigned NewSize) {
-  auto OldBuckets = buckets();
-  bool WasSmall = isSmall();
+శూన్య Small_Ptr_సమితి_Impl_పునాది::Grow(గుర్తులేని New_కొలత) {
+  స్వయంచాలక OldBuckets = buckets();
+  తార్కిక WasSmall = isSmall();
 
   // Install the new array.  Clear all the buckets to empty.
-  const void **NewBuckets = (const void**) safe_malloc(sizeof(void*) * NewSize);
+  స్థిరరాశి శూన్య **NewBuckets = (స్థిరరాశి శూన్య**) సురక్షిత_malloc(పరిమాణం(శూన్య*) * New_కొలత);
 
   // Reset member only if memory was allocated successfully
   CurArray = NewBuckets;
-  CurArraySize = NewSize;
-  memset(CurArray, -1, NewSize*sizeof(void*));
+  Cur_Array_కొలత = New_కొలత;
+  memset(CurArray, -1, New_కొలత*పరిమాణం(శూన్య*));
 
   // Copy over all valid entries.
-  unsigned Mask = CurArraySize - 1;
-  for (const void *Ptr : OldBuckets) {
-    if (Ptr == getEmptyMarker())
-      continue;
+  గుర్తులేని ముసుగు = Cur_Array_కొలత - 1;
+  కొరకు (స్థిరరాశి శూన్య *Ptr : OldBuckets) {
+    ఒకవేళ (Ptr == get_ఖాళీలు_Marker())
+      కొనసాగు;
     // Find the first empty bucket on this key's probe chain; there is no equal
     // key, so nothing to compare against.
-    unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-    while (NewBuckets[I] != getEmptyMarker())
-      I = (I + 1) & Mask;
+    గుర్తులేని I = DenseMapInfo<శూన్య *>::get_Hash_విలువ(Ptr) & ముసుగు;
+    అయితే (NewBuckets[I] != get_ఖాళీలు_Marker())
+      I = (I + 1) & ముసుగు;
     NewBuckets[I] = Ptr;
   }
 
-  if (!WasSmall)
-    free(OldBuckets.begin());
-  IsSmall = false;
+  ఒకవేళ (!WasSmall)
+    విడుదల(OldBuckets.begin());
+  IsSmall = అబద్ధం;
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
-                                         const SmallPtrSetImplBase &that) {
+Small_Ptr_సమితి_Impl_పునాది::Small_Ptr_సమితి_Impl_పునాది(స్థిరరాశి శూన్య **SmallStorage,
+                                         స్థిరరాశి Small_Ptr_సమితి_Impl_పునాది &that) {
   IsSmall = that.isSmall();
-  if (IsSmall) {
+  ఒకవేళ (IsSmall) {
     // If we're becoming small, prepare to insert into our stack space
     CurArray = SmallStorage;
-  } else {
+  } లేకపోతే {
     // Otherwise, allocate new heap space (unless we were the same size)
-    CurArray = (const void**)safe_malloc(sizeof(void*) * that.CurArraySize);
+    CurArray = (స్థిరరాశి శూన్య**)సురక్షిత_malloc(పరిమాణం(శూన్య*) * that.Cur_Array_కొలత);
   }
 
   // Copy over the that array.
   copyHelper(that);
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
-                                         unsigned SmallSize,
-                                         const void **RHSSmallStorage,
-                                         SmallPtrSetImplBase &&that) {
-  moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(that));
+Small_Ptr_సమితి_Impl_పునాది::Small_Ptr_సమితి_Impl_పునాది(స్థిరరాశి శూన్య **SmallStorage,
+                                         గుర్తులేని Small_కొలత,
+                                         స్థిరరాశి శూన్య **RHSSmallStorage,
+                                         Small_Ptr_సమితి_Impl_పునాది &&that) {
+  moveHelper(SmallStorage, Small_కొలత, RHSSmallStorage, std::move(that));
 }
 
-void SmallPtrSetImplBase::copyFrom(const void **SmallStorage,
-                                   const SmallPtrSetImplBase &RHS) {
-  assert(&RHS != this && "Self-copy should be handled by the caller.");
+శూన్య Small_Ptr_సమితి_Impl_పునాది::copyFrom(స్థిరరాశి శూన్య **SmallStorage,
+                                   స్థిరరాశి Small_Ptr_సమితి_Impl_పునాది &RHS) {
+  ప్రతిజ్ఞా(&RHS != ఇది && "Self-copy should be handled by the caller.");
 
-  if (isSmall() && RHS.isSmall())
-    assert(CurArraySize == RHS.CurArraySize &&
+  ఒకవేళ (isSmall() && RHS.isSmall())
+    ప్రతిజ్ఞా(Cur_Array_కొలత == RHS.Cur_Array_కొలత &&
            "Cannot assign sets with different small sizes");
 
   // If we're becoming small, prepare to insert into our stack space
-  if (RHS.isSmall()) {
-    if (!isSmall())
-      free(CurArray);
+  ఒకవేళ (RHS.isSmall()) {
+    ఒకవేళ (!isSmall())
+      విడుదల(CurArray);
     CurArray = SmallStorage;
-    IsSmall = true;
+    IsSmall = నిజం;
     // Otherwise, allocate new heap space (unless we were the same size)
-  } else if (CurArraySize != RHS.CurArraySize) {
-    if (isSmall())
-      CurArray = (const void**)safe_malloc(sizeof(void*) * RHS.CurArraySize);
-    else {
-      const void **T = (const void**)safe_realloc(CurArray,
-                                             sizeof(void*) * RHS.CurArraySize);
+  } లేకపోతే ఒకవేళ (Cur_Array_కొలత != RHS.Cur_Array_కొలత) {
+    ఒకవేళ (isSmall())
+      CurArray = (స్థిరరాశి శూన్య**)సురక్షిత_malloc(పరిమాణం(శూన్య*) * RHS.Cur_Array_కొలత);
+    లేకపోతే {
+      స్థిరరాశి శూన్య **T = (స్థిరరాశి శూన్య**)సురక్షిత_realloc(CurArray,
+                                             పరిమాణం(శూన్య*) * RHS.Cur_Array_కొలత);
       CurArray = T;
     }
-    IsSmall = false;
+    IsSmall = అబద్ధం;
   }
 
   copyHelper(RHS);
 }
 
-void SmallPtrSetImplBase::copyHelper(const SmallPtrSetImplBase &RHS) {
+శూన్య Small_Ptr_సమితి_Impl_పునాది::copyHelper(స్థిరరాశి Small_Ptr_సమితి_Impl_పునాది &RHS) {
   // Copy over the new array size
-  CurArraySize = RHS.CurArraySize;
+  Cur_Array_కొలత = RHS.Cur_Array_కొలత;
 
   // Copy over the contents from the other set
   llvm::copy(RHS.buckets(), CurArray);
 
-  NumEntries = RHS.NumEntries;
+  అంకె_Entries = RHS.అంకె_Entries;
 }
 
-void SmallPtrSetImplBase::moveFrom(const void **SmallStorage,
-                                   unsigned SmallSize,
-                                   const void **RHSSmallStorage,
-                                   SmallPtrSetImplBase &&RHS) {
-  if (!isSmall())
-    free(CurArray);
-  moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(RHS));
+శూన్య Small_Ptr_సమితి_Impl_పునాది::moveFrom(స్థిరరాశి శూన్య **SmallStorage,
+                                   గుర్తులేని Small_కొలత,
+                                   స్థిరరాశి శూన్య **RHSSmallStorage,
+                                   Small_Ptr_సమితి_Impl_పునాది &&RHS) {
+  ఒకవేళ (!isSmall())
+    విడుదల(CurArray);
+  moveHelper(SmallStorage, Small_కొలత, RHSSmallStorage, std::move(RHS));
 }
 
-void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
-                                     unsigned SmallSize,
-                                     const void **RHSSmallStorage,
-                                     SmallPtrSetImplBase &&RHS) {
-  assert(&RHS != this && "Self-move should be handled by the caller.");
+శూన్య Small_Ptr_సమితి_Impl_పునాది::moveHelper(స్థిరరాశి శూన్య **SmallStorage,
+                                     గుర్తులేని Small_కొలత,
+                                     స్థిరరాశి శూన్య **RHSSmallStorage,
+                                     Small_Ptr_సమితి_Impl_పునాది &&RHS) {
+  ప్రతిజ్ఞా(&RHS != ఇది && "Self-move should be handled by the caller.");
   incrementEpoch();
   RHS.incrementEpoch();
 
-  if (RHS.isSmall()) {
+  ఒకవేళ (RHS.isSmall()) {
     // Copy a small RHS rather than moving.
     CurArray = SmallStorage;
     llvm::copy(RHS.small_buckets(), CurArray);
-  } else {
+  } లేకపోతే {
     CurArray = RHS.CurArray;
     RHS.CurArray = RHSSmallStorage;
   }
 
   // Copy the rest of the trivial members.
-  CurArraySize = RHS.CurArraySize;
-  NumEntries = RHS.NumEntries;
+  Cur_Array_కొలత = RHS.Cur_Array_కొలత;
+  అంకె_Entries = RHS.అంకె_Entries;
   IsSmall = RHS.IsSmall;
 
   // Make the RHS small and empty.
-  RHS.CurArraySize = SmallSize;
-  RHS.NumEntries = 0;
-  RHS.IsSmall = true;
+  RHS.Cur_Array_కొలత = Small_కొలత;
+  RHS.అంకె_Entries = 0;
+  RHS.IsSmall = నిజం;
 }
 
-void SmallPtrSetImplBase::swap(const void **SmallStorage,
-                               const void **RHSSmallStorage,
-                               SmallPtrSetImplBase &RHS) {
-  if (this == &RHS) return;
+శూన్య Small_Ptr_సమితి_Impl_పునాది::మార్పిడి(స్థిరరాశి శూన్య **SmallStorage,
+                               స్థిరరాశి శూన్య **RHSSmallStorage,
+                               Small_Ptr_సమితి_Impl_పునాది &RHS) {
+  ఒకవేళ (ఇది == &RHS) తిరిగి;
   incrementEpoch();
   RHS.incrementEpoch();
 
   // We can only avoid copying elements if neither set is small.
-  if (!this->isSmall() && !RHS.isSmall()) {
-    std::swap(this->CurArray, RHS.CurArray);
-    std::swap(this->CurArraySize, RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+  ఒకవేళ (!ఇది->isSmall() && !RHS.isSmall()) {
+    std::మార్పిడి(ఇది->CurArray, RHS.CurArray);
+    std::మార్పిడి(ఇది->Cur_Array_కొలత, RHS.Cur_Array_కొలత);
+    std::మార్పిడి(ఇది->అంకె_Entries, RHS.అంకె_Entries);
+    తిరిగి;
   }
 
   // FIXME: From here on we assume that both sets have the same small size.
 
   // Both a small, just swap the small elements.
-  if (this->isSmall() && RHS.isSmall()) {
-    unsigned MinEntries = std::min(this->NumEntries, RHS.NumEntries);
-    std::swap_ranges(this->CurArray, this->CurArray + MinEntries, RHS.CurArray);
-    if (this->NumEntries > MinEntries) {
-      std::copy(this->CurArray + MinEntries, this->CurArray + this->NumEntries,
+  ఒకవేళ (ఇది->isSmall() && RHS.isSmall()) {
+    గుర్తులేని MinEntries = std::min(ఇది->అంకె_Entries, RHS.అంకె_Entries);
+    std::మార్పిడి_ranges(ఇది->CurArray, ఇది->CurArray + MinEntries, RHS.CurArray);
+    ఒకవేళ (ఇది->అంకె_Entries > MinEntries) {
+      std::copy(ఇది->CurArray + MinEntries, ఇది->CurArray + ఇది->అంకె_Entries,
                 RHS.CurArray + MinEntries);
-    } else {
-      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.NumEntries,
-                this->CurArray + MinEntries);
+    } లేకపోతే {
+      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.అంకె_Entries,
+                ఇది->CurArray + MinEntries);
     }
-    assert(this->CurArraySize == RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+    ప్రతిజ్ఞా(ఇది->Cur_Array_కొలత == RHS.Cur_Array_కొలత);
+    std::మార్పిడి(ఇది->అంకె_Entries, RHS.అంకె_Entries);
+    తిరిగి;
   }
 
   // If only one side is small, copy the small elements into the large side and
   // move the pointer from the large side to the small side.
-  SmallPtrSetImplBase &SmallSide = this->isSmall() ? *this : RHS;
-  SmallPtrSetImplBase &LargeSide = this->isSmall() ? RHS : *this;
-  const void **LargeSideInlineStorage =
-      this->isSmall() ? RHSSmallStorage : SmallStorage;
+  Small_Ptr_సమితి_Impl_పునాది &SmallSide = ఇది->isSmall() ? *ఇది : RHS;
+  Small_Ptr_సమితి_Impl_పునాది &LargeSide = ఇది->isSmall() ? RHS : *ఇది;
+  స్థిరరాశి శూన్య **LargeSideInlineStorage =
+      ఇది->isSmall() ? RHSSmallStorage : SmallStorage;
   llvm::copy(SmallSide.small_buckets(), LargeSideInlineStorage);
-  std::swap(LargeSide.CurArraySize, SmallSide.CurArraySize);
-  std::swap(LargeSide.NumEntries, SmallSide.NumEntries);
+  std::మార్పిడి(LargeSide.Cur_Array_కొలత, SmallSide.Cur_Array_కొలత);
+  std::మార్పిడి(LargeSide.అంకె_Entries, SmallSide.అంకె_Entries);
   SmallSide.CurArray = LargeSide.CurArray;
-  SmallSide.IsSmall = false;
+  SmallSide.IsSmall = అబద్ధం;
   LargeSide.CurArray = LargeSideInlineStorage;
-  LargeSide.IsSmall = true;
+  LargeSide.IsSmall = నిజం;
 }

@@ -10,244 +10,244 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm-c/Support.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Mutex.h"
-#include <vector>
+#అన్తర్భావ "llvm/Support/DynamicLibrary.h"
+#అన్తర్భావ "llvm-c/Support.h"
+#అన్తర్భావ "llvm/ADT/STLExtras.h"
+#అన్తర్భావ "llvm/ADT/StringMap.h"
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Support/Mutex.h"
+#అన్తర్భావ <vector>
 
-using namespace llvm;
-using namespace llvm::sys;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::sys;
 
 // All methods for HandleSet should be used holding SymbolsMutex.
-class DynamicLibrary::HandleSet {
-  using HandleList = std::vector<void *>;
+తరగతి DynamicLibrary::Handle_సమితి {
+  ఉపయోగించి HandleList = std::సదిశ<శూన్య *>;
   HandleList Handles;
-  void *Process = &Invalid;
+  శూన్య *Process = &Invalid;
 
-public:
-  static void *DLOpen(const char *Filename, std::string *Err);
-  static void DLClose(void *Handle);
-  static void *DLSym(void *Handle, const char *Symbol);
+బహిరంగ:
+  స్థిర శూన్య *DLOpen(స్థిరరాశి అక్షరం *Filename, std::string *Err);
+  స్థిర శూన్య DLClose(శూన్య *Handle);
+  స్థిర శూన్య *DLSym(శూన్య *Handle, స్థిరరాశి అక్షరం *చిహ్నం);
 
-  HandleSet() = default;
-  ~HandleSet();
+  Handle_సమితి() = అప్రమేయ;
+  ~Handle_సమితి();
 
-  HandleList::iterator Find(void *Handle) { return find(Handles, Handle); }
+  HandleList::iterator కనుగొను_2(శూన్య *Handle) { తిరిగి కనుగొను(Handles, Handle); }
 
-  bool Contains(void *Handle) {
-    return Handle == Process || Find(Handle) != Handles.end();
+  తార్కిక కలిగియుంది_2(శూన్య *Handle) {
+    తిరిగి Handle == Process || కనుగొను_2(Handle) != Handles.చివర();
   }
 
-  bool AddLibrary(void *Handle, bool IsProcess = false, bool CanClose = true,
-                  bool AllowDuplicates = false) {
-#ifdef _WIN32
-    assert((Handle == this ? IsProcess : !IsProcess) && "Bad Handle.");
-#endif
-    assert((!AllowDuplicates || !CanClose) &&
+  తార్కిక కూడు_Library(శూన్య *Handle, తార్కిక IsProcess = అబద్ధం, తార్కిక CanClose = నిజం,
+                  తార్కిక AllowDuplicates = అబద్ధం) {
+#నిర్వచితమైతే _WIN32
+    ప్రతిజ్ఞా((Handle == ఇది ? IsProcess : !IsProcess) && "Bad Handle.");
+#అయితే_ముగింపు
+    ప్రతిజ్ఞా((!AllowDuplicates || !CanClose) &&
            "CanClose must be false if AllowDuplicates is true.");
 
-    if (LLVM_LIKELY(!IsProcess)) {
-      if (!AllowDuplicates && Find(Handle) != Handles.end()) {
-        if (CanClose)
+    ఒకవేళ (LLVM_LIKELY(!IsProcess)) {
+      ఒకవేళ (!AllowDuplicates && కనుగొను_2(Handle) != Handles.చివర()) {
+        ఒకవేళ (CanClose)
           DLClose(Handle);
-        return false;
+        తిరిగి అబద్ధం;
       }
-      Handles.push_back(Handle);
-    } else {
-#ifndef _WIN32
-      if (Process != &Invalid) {
-        if (CanClose)
+      Handles.నెట్టు_వెనుక(Handle);
+    } లేకపోతే {
+#నిర్వచితం_కాకపోతే _WIN32
+      ఒకవేళ (Process != &Invalid) {
+        ఒకవేళ (CanClose)
           DLClose(Process);
-        if (Process == Handle)
-          return false;
+        ఒకవేళ (Process == Handle)
+          తిరిగి అబద్ధం;
       }
-#endif
+#అయితే_ముగింపు
       Process = Handle;
     }
-    return true;
+    తిరిగి నిజం;
   }
 
-  void CloseLibrary(void *Handle) {
+  శూన్య CloseLibrary(శూన్య *Handle) {
     DLClose(Handle);
-    HandleList::iterator it = Find(Handle);
-    if (it != Handles.end()) {
+    HandleList::iterator it = కనుగొను_2(Handle);
+    ఒకవేళ (it != Handles.చివర()) {
       Handles.erase(it);
     }
   }
 
-  void *LibLookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    if (Order & SO_LoadOrder) {
-      for (void *Handle : Handles) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+  శూన్య *LibLookup(స్థిరరాశి అక్షరం *చిహ్నం, DynamicLibrary::శోధన_Ordering క్రమం) {
+    ఒకవేళ (క్రమం & SO_ఎక్కించు_క్రమం) {
+      కొరకు (శూన్య *Handle : Handles) {
+        ఒకవేళ (శూన్య *Ptr = DLSym(Handle, చిహ్నం))
+          తిరిగి Ptr;
       }
-    } else {
-      for (void *Handle : llvm::reverse(Handles)) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+    } లేకపోతే {
+      కొరకు (శూన్య *Handle : llvm::తిరగేయి(Handles)) {
+        ఒకవేళ (శూన్య *Ptr = DLSym(Handle, చిహ్నం))
+          తిరిగి Ptr;
       }
     }
-    return nullptr;
+    తిరిగి శూన్యసూచిక;
   }
 
-  void *Lookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    assert(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
+  శూన్య *Lookup(స్థిరరాశి అక్షరం *చిహ్నం, DynamicLibrary::శోధన_Ordering క్రమం) {
+    ప్రతిజ్ఞా(!((క్రమం & SO_Loaded_మొదటి) && (క్రమం & SO_Loaded_చివరి)) &&
            "Invalid Ordering");
 
-    if (Process == &Invalid || (Order & SO_LoadedFirst)) {
-      if (void *Ptr = LibLookup(Symbol, Order))
-        return Ptr;
+    ఒకవేళ (Process == &Invalid || (క్రమం & SO_Loaded_మొదటి)) {
+      ఒకవేళ (శూన్య *Ptr = LibLookup(చిహ్నం, క్రమం))
+        తిరిగి Ptr;
     }
-    if (Process != &Invalid) {
+    ఒకవేళ (Process != &Invalid) {
       // Use OS facilities to search the current binary and all loaded libs.
-      if (void *Ptr = DLSym(Process, Symbol))
-        return Ptr;
+      ఒకవేళ (శూన్య *Ptr = DLSym(Process, చిహ్నం))
+        తిరిగి Ptr;
 
       // Search any libs that might have been skipped because of RTLD_LOCAL.
-      if (Order & SO_LoadedLast) {
-        if (void *Ptr = LibLookup(Symbol, Order))
-          return Ptr;
+      ఒకవేళ (క్రమం & SO_Loaded_చివరి) {
+        ఒకవేళ (శూన్య *Ptr = LibLookup(చిహ్నం, క్రమం))
+          తిరిగి Ptr;
       }
     }
-    return nullptr;
+    తిరిగి శూన్యసూచిక;
   }
 };
 
-namespace {
+నామాకాశ {
 
-struct Globals {
+నిర్మాణం Globals {
   // Collection of symbol name/value pairs to be searched prior to any
   // libraries.
-  llvm::StringMap<void *> ExplicitSymbols;
+  llvm::StringMap<శూన్య *> ExplicitSymbols;
   // Collections of known library handles.
-  DynamicLibrary::HandleSet OpenedHandles;
-  DynamicLibrary::HandleSet OpenedTemporaryHandles;
+  DynamicLibrary::Handle_సమితి OpenedHandles;
+  DynamicLibrary::Handle_సమితి OpenedTemporaryHandles;
   // Lock for ExplicitSymbols, OpenedHandles, and OpenedTemporaryHandles.
-  llvm::sys::SmartMutex<true> SymbolsMutex;
+  llvm::sys::SmartMutex<నిజం> SymbolsMutex;
 };
 
 Globals &getGlobals() {
-  static Globals G;
-  return G;
+  స్థిర Globals G;
+  తిరిగి G;
 }
 
 } // namespace
 
-#ifdef _WIN32
+#నిర్వచితమైతే _WIN32
 
-#include "Windows/DynamicLibrary.inc"
+#అన్తర్భావ "Windows/DynamicLibrary.inc"
 
-#else
+#లేకపోతే
 
-#include "Unix/DynamicLibrary.inc"
+#అన్తర్భావ "Unix/DynamicLibrary.inc"
 
-#endif
+#అయితే_ముగింపు
 
-char DynamicLibrary::Invalid;
-DynamicLibrary::SearchOrdering DynamicLibrary::SearchOrder =
+అక్షరం DynamicLibrary::Invalid;
+DynamicLibrary::శోధన_Ordering DynamicLibrary::శోధన_క్రమం =
     DynamicLibrary::SO_Linker;
 
-namespace llvm {
-void *SearchForAddressOfSpecialSymbol(const char *SymbolName) {
-  return DoSearch(SymbolName); // DynamicLibrary.inc
+నామాకాశ llvm {
+శూన్య *శోధన_For_చిరునామా_యొక్క_Special_చిహ్నం(స్థిరరాశి అక్షరం *చిహ్నం_Name) {
+  తిరిగి Do_శోధన(చిహ్నం_Name); // DynamicLibrary.inc
 }
 } // namespace llvm
 
-void DynamicLibrary::AddSymbol(StringRef SymbolName, void *SymbolValue) {
-  auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  G.ExplicitSymbols[SymbolName] = SymbolValue;
+శూన్య DynamicLibrary::కూడు_చిహ్నం(StringRef చిహ్నం_Name, శూన్య *చిహ్నం_విలువ) {
+  స్వయంచాలక &G = getGlobals();
+  Smart_Scoped_తాళం<నిజం> తాళం_3(G.SymbolsMutex);
+  G.ExplicitSymbols[చిహ్నం_Name] = చిహ్నం_విలువ;
 }
 
-DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getPermanentLibrary(స్థిరరాశి అక్షరం *FileName,
                                                    std::string *Err) {
-  auto &G = getGlobals();
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
-    G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ FileName == nullptr);
+  స్వయంచాలక &G = getGlobals();
+  శూన్య *Handle = Handle_సమితి::DLOpen(FileName, Err);
+  ఒకవేళ (Handle != &Invalid) {
+    Smart_Scoped_తాళం<నిజం> తాళం_3(G.SymbolsMutex);
+    G.OpenedHandles.కూడు_Library(Handle, /*IsProcess*/ FileName == శూన్యసూచిక);
   }
 
-  return DynamicLibrary(Handle);
+  తిరిగి DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::addPermanentLibrary(void *Handle,
+DynamicLibrary DynamicLibrary::కూడు_Permanent_Library(శూన్య *Handle,
                                                    std::string *Err) {
-  auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
+  స్వయంచాలక &G = getGlobals();
+  Smart_Scoped_తాళం<నిజం> తాళం_3(G.SymbolsMutex);
   // If we've already loaded this library, tell the caller.
-  if (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                  /*CanClose*/ false))
+  ఒకవేళ (!G.OpenedHandles.కూడు_Library(Handle, /*IsProcess*/ అబద్ధం,
+                                  /*CanClose*/ అబద్ధం))
     *Err = "Library already loaded";
 
-  return DynamicLibrary(Handle);
+  తిరిగి DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::getLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getLibrary(స్థిరరాశి అక్షరం *FileName,
                                           std::string *Err) {
-  assert(FileName && "Use getPermanentLibrary() for opening process handle");
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
-    auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
-    G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                        /*CanClose*/ false,
-                                        /*AllowDuplicates*/ true);
+  ప్రతిజ్ఞా(FileName && "Use getPermanentLibrary() for opening process handle");
+  శూన్య *Handle = Handle_సమితి::DLOpen(FileName, Err);
+  ఒకవేళ (Handle != &Invalid) {
+    స్వయంచాలక &G = getGlobals();
+    Smart_Scoped_తాళం<నిజం> తాళం_3(G.SymbolsMutex);
+    G.OpenedTemporaryHandles.కూడు_Library(Handle, /*IsProcess*/ అబద్ధం,
+                                        /*CanClose*/ అబద్ధం,
+                                        /*AllowDuplicates*/ నిజం);
   }
-  return DynamicLibrary(Handle);
+  తిరిగి DynamicLibrary(Handle);
 }
 
-void DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
-  auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  if (Lib.isValid()) {
-    G.OpenedTemporaryHandles.CloseLibrary(Lib.Data);
-    Lib.Data = &Invalid;
+శూన్య DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
+  స్వయంచాలక &G = getGlobals();
+  Smart_Scoped_తాళం<నిజం> తాళం_3(G.SymbolsMutex);
+  ఒకవేళ (Lib.isValid()) {
+    G.OpenedTemporaryHandles.CloseLibrary(Lib.దత్తాంశం_2);
+    Lib.దత్తాంశం_2 = &Invalid;
   }
 }
 
-void *DynamicLibrary::getAddressOfSymbol(const char *SymbolName) {
-  if (!isValid())
-    return nullptr;
-  return HandleSet::DLSym(Data, SymbolName);
+శూన్య *DynamicLibrary::get_చిరునామా_యొక్క_చిహ్నం(స్థిరరాశి అక్షరం *చిహ్నం_Name) {
+  ఒకవేళ (!isValid())
+    తిరిగి శూన్యసూచిక;
+  తిరిగి Handle_సమితి::DLSym(దత్తాంశం_2, చిహ్నం_Name);
 }
 
-void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
+శూన్య *DynamicLibrary::శోధన_For_చిరునామా_యొక్క_చిహ్నం(స్థిరరాశి అక్షరం *చిహ్నం_Name) {
   {
-    auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
+    స్వయంచాలక &G = getGlobals();
+    Smart_Scoped_తాళం<నిజం> తాళం_3(G.SymbolsMutex);
 
     // First check symbols added via AddSymbol().
-    StringMap<void *>::iterator i = G.ExplicitSymbols.find(SymbolName);
+    StringMap<శూన్య *>::iterator i = G.ExplicitSymbols.కనుగొను(చిహ్నం_Name);
 
-    if (i != G.ExplicitSymbols.end())
-      return i->second;
+    ఒకవేళ (i != G.ExplicitSymbols.చివర())
+      తిరిగి i->రెండవ_2;
 
     // Now search the libraries.
-    if (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
-    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
+    ఒకవేళ (శూన్య *Ptr = G.OpenedHandles.Lookup(చిహ్నం_Name, శోధన_క్రమం))
+      తిరిగి Ptr;
+    ఒకవేళ (శూన్య *Ptr = G.OpenedTemporaryHandles.Lookup(చిహ్నం_Name, శోధన_క్రమం))
+      తిరిగి Ptr;
   }
 
-  return llvm::SearchForAddressOfSpecialSymbol(SymbolName);
+  తిరిగి llvm::శోధన_For_చిరునామా_యొక్క_Special_చిహ్నం(చిహ్నం_Name);
 }
 
 //===----------------------------------------------------------------------===//
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
-  return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
+LLVMBool LLVMLoadLibraryPermanently(స్థిరరాశి అక్షరం *Filename) {
+  తిరిగి llvm::sys::DynamicLibrary::ఎక్కించు_Library_Permanently(Filename);
 }
 
-void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
-  return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
+శూన్య *LLVMSearch_For_చిరునామా_యొక్క_చిహ్నం(స్థిరరాశి అక్షరం *చిహ్నం_Name_2) {
+  తిరిగి llvm::sys::DynamicLibrary::శోధన_For_చిరునామా_యొక్క_చిహ్నం(చిహ్నం_Name_2);
 }
 
-void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
-  return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
+శూన్య LLVMAdd_చిహ్నం(స్థిరరాశి అక్షరం *చిహ్నం_Name_2, శూన్య *చిహ్నం_విలువ_2) {
+  తిరిగి llvm::sys::DynamicLibrary::కూడు_చిహ్నం(చిహ్నం_Name_2, చిహ్నం_విలువ_2);
 }

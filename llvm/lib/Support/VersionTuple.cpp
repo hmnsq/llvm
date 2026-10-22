@@ -11,129 +11,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#అన్తర్భావ "llvm/Support/VersionTuple.h"
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <cassert>
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-std::string VersionTuple::getAsString() const {
-  std::string Result;
+std::string సంస్కరణ_Tuple::getAsString() స్థిరరాశి {
+  std::string ఫలితం;
   {
-    llvm::raw_string_ostream Out(Result);
-    Out << *this;
+    llvm::raw_string_ostream బహిర్గతం(ఫలితం);
+    బహిర్గతం << *ఇది;
   }
-  return Result;
+  తిరిగి ఫలితం;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
-  Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
-    Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
-    Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
-    Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
-    Out << '.' << *Subbuild;
-  return Out;
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &బహిర్గతం, స్థిరరాశి సంస్కరణ_Tuple &V) {
+  బహిర్గతం << V.getMajor();
+  ఒకవేళ (std::optional<గుర్తులేని> Minor = V.getMinor())
+    బహిర్గతం << '.' << *Minor;
+  ఒకవేళ (std::optional<గుర్తులేని> Subminor = V.getSubminor())
+    బహిర్గతం << '.' << *Subminor;
+  ఒకవేళ (std::optional<గుర్తులేని> Build = V.getBuild())
+    బహిర్గతం << '.' << *Build;
+  ఒకవేళ (std::optional<గుర్తులేని> Subbuild = V.getSubbuild())
+    బహిర్గతం << '.' << *Subbuild;
+  తిరిగి బహిర్గతం;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
-    return true;
+స్థిర తార్కిక parseInt(StringRef &ఆదానం_2, గుర్తులేని &విలువ_2) {
+  ప్రతిజ్ఞా(విలువ_2 == 0);
+  ఒకవేళ (ఆదానం_2.ఖాళీలు())
+    తిరిగి నిజం;
 
-  char next = input[0];
-  input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
-  value = (unsigned)(next - '0');
+  అక్షరం తదుపరి = ఆదానం_2[0];
+  ఆదానం_2 = ఆదానం_2.substr(1);
+  ఒకవేళ (తదుపరి < '0' || తదుపరి > '9')
+    తిరిగి నిజం;
+  విలువ_2 = (గుర్తులేని)(తదుపరి - '0');
 
-  while (!input.empty()) {
-    next = input[0];
-    if (next < '0' || next > '9')
-      return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+  అయితే (!ఆదానం_2.ఖాళీలు()) {
+    తదుపరి = ఆదానం_2[0];
+    ఒకవేళ (తదుపరి < '0' || తదుపరి > '9')
+      తిరిగి అబద్ధం;
+    ఆదానం_2 = ఆదానం_2.substr(1);
+    విలువ_2 = విలువ_2 * 10 + (గుర్తులేని)(తదుపరి - '0');
   }
 
-  return false;
+  తిరిగి అబద్ధం;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
-  unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
+తార్కిక సంస్కరణ_Tuple::tryParse(StringRef ఆదానం_2) {
+  గుర్తులేని major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  ఒకవేళ (parseInt(ఆదానం_2, major))
+    తిరిగి నిజం;
 
-  if (input.empty()) {
-    *this = VersionTuple(major);
-    return false;
+  ఒకవేళ (ఆదానం_2.ఖాళీలు()) {
+    *ఇది = సంస్కరణ_Tuple(major);
+    తిరిగి అబద్ధం;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  ఒకవేళ (ఆదానం_2[0] != '.')
+    తిరిగి నిజం;
+  ఆదానం_2 = ఆదానం_2.substr(1);
+  ఒకవేళ (parseInt(ఆదానం_2, minor))
+    తిరిగి నిజం;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor);
-    return false;
+  ఒకవేళ (ఆదానం_2.ఖాళీలు()) {
+    *ఇది = సంస్కరణ_Tuple(major, minor);
+    తిరిగి అబద్ధం;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  ఒకవేళ (!ఆదానం_2.consume_front("."))
+    తిరిగి నిజం;
+  ఒకవేళ (parseInt(ఆదానం_2, subminor))
+    తిరిగి నిజం;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor);
-    return false;
+  ఒకవేళ (ఆదానం_2.ఖాళీలు()) {
+    *ఇది = సంస్కరణ_Tuple(major, minor, subminor);
+    తిరిగి అబద్ధం;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  ఒకవేళ (!ఆదానం_2.consume_front("."))
+    తిరిగి నిజం;
+  ఒకవేళ (parseInt(ఆదానం_2, build))
+    తిరిగి నిజం;
+  ఒకవేళ (build >= 1024 * 1024)
+    తిరిగి నిజం;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor, build);
-    return false;
+  ఒకవేళ (ఆదానం_2.ఖాళీలు()) {
+    *ఇది = సంస్కరణ_Tuple(major, minor, subminor, build);
+    తిరిగి అబద్ధం;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  ఒకవేళ (!ఆదానం_2.consume_front("."))
+    తిరిగి నిజం;
+  ఒకవేళ (parseInt(ఆదానం_2, subbuild))
+    తిరిగి నిజం;
+  ఒకవేళ (subbuild >= 1024)
+    తిరిగి నిజం;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  ఒకవేళ (!ఆదానం_2.ఖాళీలు())
+    తిరిగి నిజం;
 
-  *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  *ఇది = సంస్కరణ_Tuple(major, minor, subminor, build, subbuild);
+  తిరిగి అబద్ధం;
 }
 
-VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+సంస్కరణ_Tuple సంస్కరణ_Tuple::withMajorReplaced(గుర్తులేని NewMajor) స్థిరరాశి {
+  ఒకవేళ (HasSubbuild)
+    తిరిగి సంస్కరణ_Tuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  ఒకవేళ (HasBuild)
+    తిరిగి సంస్కరణ_Tuple(NewMajor, Minor, Subminor, Build);
+  ఒకవేళ (HasSubminor)
+    తిరిగి సంస్కరణ_Tuple(NewMajor, Minor, Subminor);
+  ఒకవేళ (HasMinor)
+    తిరిగి సంస్కరణ_Tuple(NewMajor, Minor);
+  తిరిగి సంస్కరణ_Tuple(NewMajor);
 }

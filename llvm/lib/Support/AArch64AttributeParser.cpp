@@ -7,42 +7,42 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64AttributeParser.h"
-#include "llvm/Support/AArch64BuildAttributes.h"
+#అన్తర్భావ "llvm/Support/AArch64AttributeParser.h"
+#అన్తర్భావ "llvm/Support/AArch64BuildAttributes.h"
 
-std::vector<llvm::SubsectionAndTagToTagName> &
-llvm::AArch64AttributeParser::returnTagsNamesMap() {
-  static std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
+std::సదిశ<llvm::Subsection_And_ట్యాగ్_గమ్యం_ట్యాగ్_Name> &
+llvm::AArch64AttributeParser::return_ట్యాగులు_పేర్లు_Map() {
+  స్థిర std::సదిశ<Subsection_And_ట్యాగ్_గమ్యం_ట్యాగ్_Name> ట్యాగులు_పేర్లు_Map = {
       {"aeabi_pauthabi", 1, "Tag_PAuth_Platform"},
       {"aeabi_pauthabi", 2, "Tag_PAuth_Schema"},
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  తిరిగి ట్యాగులు_పేర్లు_Map;
 }
 
-llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
-    const llvm::AArch64AttributeParser &Attributes) {
+llvm::AArch64BuildAttrSubsections llvm::వెలికితీయి_Build_లక్షణాలు_Subsections(
+    స్థిరరాశి llvm::AArch64AttributeParser &లక్షణాలు) {
 
   llvm::AArch64BuildAttrSubsections SubSections;
-  auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+  స్వయంచాలక Get_Pauth_విలువ = [&లక్షణాలు](గుర్తులేని ట్యాగ్) {
+    తిరిగి లక్షణాలు.get_Attribute_విలువ("aeabi_pauthabi", ట్యాగ్).విలువ_or(0);
   };
-  SubSections.Pauth.TagPlatform =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
-  SubSections.Pauth.TagSchema =
-      GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
+  SubSections.Pauth.ట్యాగ్_Platform =
+      Get_Pauth_విలువ(llvm::AArch64_Build_లక్షణాలు::ట్యాగ్_PAUTH_PLATFORM);
+  SubSections.Pauth.ట్యాగ్_Schema =
+      Get_Pauth_విలువ(llvm::AArch64_Build_లక్షణాలు::ట్యాగ్_PAUTH_SCHEMA);
 
-  auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
-        .value_or(0);
+  స్వయంచాలక Get_Feature_విలువ = [&లక్షణాలు](గుర్తులేని ట్యాగ్) {
+    తిరిగి లక్షణాలు.get_Attribute_విలువ("aeabi_feature_and_bits", ట్యాగ్)
+        .విలువ_or(0);
   };
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_BTI);
+      Get_Feature_విలువ(llvm::AArch64_Build_లక్షణాలు::ట్యాగ్_FEATURE_BTI);
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_PAC) << 1;
+      Get_Feature_విలువ(llvm::AArch64_Build_లక్షణాలు::ట్యాగ్_FEATURE_PAC) << 1;
   SubSections.AndFeatures |=
-      GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
+      Get_Feature_విలువ(llvm::AArch64_Build_లక్షణాలు::ట్యాగ్_FEATURE_GCS) << 2;
 
-  return SubSections;
+  తిరిగి SubSections;
 }

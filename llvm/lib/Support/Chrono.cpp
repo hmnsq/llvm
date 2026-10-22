@@ -6,122 +6,122 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Chrono.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#అన్తర్భావ "llvm/Support/Chrono.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Support/Compiler.h"
+#అన్తర్భావ "llvm/Support/Format.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
 
-namespace llvm {
+నామాకాశ llvm {
 
-using namespace sys;
+ఉపయోగించి నామాకాశ sys;
 
-LLVM_ABI const char llvm::detail::unit<std::ratio<3600>>::value[] = "h";
-LLVM_ABI const char llvm::detail::unit<std::ratio<60>>::value[] = "m";
-LLVM_ABI const char llvm::detail::unit<std::ratio<1>>::value[] = "s";
-LLVM_ABI const char llvm::detail::unit<std::milli>::value[] = "ms";
-LLVM_ABI const char llvm::detail::unit<std::micro>::value[] = "us";
-LLVM_ABI const char llvm::detail::unit<std::nano>::value[] = "ns";
+LLVM_ABI స్థిరరాశి అక్షరం llvm::detail::unit<std::నిష్పత్తి<3600>>::విలువ_2[] = "h";
+LLVM_ABI స్థిరరాశి అక్షరం llvm::detail::unit<std::నిష్పత్తి<60>>::విలువ_2[] = "m";
+LLVM_ABI స్థిరరాశి అక్షరం llvm::detail::unit<std::నిష్పత్తి<1>>::విలువ_2[] = "s";
+LLVM_ABI స్థిరరాశి అక్షరం llvm::detail::unit<std::milli>::విలువ_2[] = "ms";
+LLVM_ABI స్థిరరాశి అక్షరం llvm::detail::unit<std::micro>::విలువ_2[] = "us";
+LLVM_ABI స్థిరరాశి అక్షరం llvm::detail::unit<std::nano>::విలువ_2[] = "ns";
 
-static inline struct tm getStructTM(TimePoint<> TP) {
-  struct tm Storage;
-  std::time_t OurTime = toTimeT(TP);
+స్థిర అంతఃవరుస నిర్మాణం tm getStructTM(సమయం_బిందువు<> TP) {
+  నిర్మాణం tm Storage;
+  std::time_t Our_సమయం = గమ్యం_సమయం_T(TP);
 
-#if defined(LLVM_ON_UNIX)
-  struct tm *LT = ::localtime_r(&OurTime, &Storage);
-  assert(LT);
-  (void)LT;
-#endif
-#if defined(_WIN32)
-  int Error = ::localtime_s(&Storage, &OurTime);
-  assert(!Error);
-  (void)Error;
-#endif
+#ఒకవేళ defined(LLVM_ON_UNIX)
+  నిర్మాణం tm *LT = ::localtime_r(&Our_సమయం, &Storage);
+  ప్రతిజ్ఞా(LT);
+  (శూన్య)LT;
+#అయితే_ముగింపు
+#ఒకవేళ defined(_WIN32)
+  పూర్ణాంకం Error = ::localtime_s(&Storage, &Our_సమయం);
+  ప్రతిజ్ఞా(!Error);
+  (శూన్య)Error;
+#అయితే_ముగింపు
 
-  return Storage;
+  తిరిగి Storage;
 }
 
-static inline struct tm getStructTMUtc(UtcTime<> TP) {
-  struct tm Storage;
-  std::time_t OurTime = toTimeT(TP);
+స్థిర అంతఃవరుస నిర్మాణం tm getStructTMUtc(Utc_సమయం<> TP) {
+  నిర్మాణం tm Storage;
+  std::time_t Our_సమయం = గమ్యం_సమయం_T(TP);
 
-#if defined(LLVM_ON_UNIX)
-  struct tm *LT = ::gmtime_r(&OurTime, &Storage);
-  assert(LT);
-  (void)LT;
-#endif
-#if defined(_WIN32)
-  int Error = ::gmtime_s(&Storage, &OurTime);
-  assert(!Error);
-  (void)Error;
-#endif
+#ఒకవేళ defined(LLVM_ON_UNIX)
+  నిర్మాణం tm *LT = ::gmtime_r(&Our_సమయం, &Storage);
+  ప్రతిజ్ఞా(LT);
+  (శూన్య)LT;
+#అయితే_ముగింపు
+#ఒకవేళ defined(_WIN32)
+  పూర్ణాంకం Error = ::gmtime_s(&Storage, &Our_సమయం);
+  ప్రతిజ్ఞా(!Error);
+  (శూన్య)Error;
+#అయితే_ముగింపు
 
-  return Storage;
+  తిరిగి Storage;
 }
 
-raw_ostream &operator<<(raw_ostream &OS, TimePoint<> TP) {
-  struct tm LT = getStructTM(TP);
-  char Buffer[sizeof("YYYY-MM-DD HH:MM:SS")];
-  strftime(Buffer, sizeof(Buffer), "%Y-%m-%d %H:%M:%S", &LT);
-  return OS << Buffer << '.'
+raw_ostream &క్రియాకారకం<<(raw_ostream &OS, సమయం_బిందువు<> TP) {
+  నిర్మాణం tm LT = getStructTM(TP);
+  అక్షరం బఫరు[పరిమాణం("YYYY-MM-DD HH:MM:SS")];
+  strftime(బఫరు, పరిమాణం(బఫరు), "%Y-%m-%d %H:%M:%S", &LT);
+  తిరిగి OS << బఫరు << '.'
             << format("%.9lu",
-                      long((TP.time_since_epoch() % std::chrono::seconds(1))
-                               .count()));
+                      దీర్ఘ((TP.సమయం_since_epoch() % std::chrono::seconds(1))
+                               .లెక్క()));
 }
 
-template <class T>
-static void format(const T &Fractional, struct tm &LT, raw_ostream &OS,
+మూస <తరగతి T>
+స్థిర శూన్య format(స్థిరరాశి T &Fractional, నిర్మాణం tm &LT, raw_ostream &OS,
                    StringRef Style) {
-  using namespace std::chrono;
+  ఉపయోగించి నామాకాశ std::chrono;
   // Handle extensions first. strftime mangles unknown %x on some platforms.
-  if (Style.empty()) Style = "%Y-%m-%d %H:%M:%S.%N";
+  ఒకవేళ (Style.ఖాళీలు()) Style = "%Y-%m-%d %H:%M:%S.%N";
   std::string Format;
   raw_string_ostream FStream(Format);
-  for (unsigned I = 0; I < Style.size(); ++I) {
-    if (Style[I] == '%' && Style.size() > I + 1) switch (Style[I + 1]) {
-        case 'L':  // Milliseconds, from Ruby.
+  కొరకు (గుర్తులేని I = 0; I < Style.కొలత_2(); ++I) {
+    ఒకవేళ (Style[I] == '%' && Style.కొలత_2() > I + 1) ఎంపిక (Style[I + 1]) {
+        స్థితి 'L':  // Milliseconds, from Ruby.
           FStream << llvm::format(
-              "%.3lu", (long)duration_cast<milliseconds>(Fractional).count());
+              "%.3lu", (దీర్ఘ)duration_cast<milliseconds>(Fractional).లెక్క());
           ++I;
-          continue;
-        case 'f':  // Microseconds, from Python.
+          కొనసాగు;
+        స్థితి 'f':  // Microseconds, from Python.
           FStream << llvm::format(
-              "%.6lu", (long)duration_cast<microseconds>(Fractional).count());
+              "%.6lu", (దీర్ఘ)duration_cast<microseconds>(Fractional).లెక్క());
           ++I;
-          continue;
-        case 'N':  // Nanoseconds, from date(1).
+          కొనసాగు;
+        స్థితి 'N':  // Nanoseconds, from date(1).
           FStream << llvm::format(
-              "%.9lu", (long)duration_cast<nanoseconds>(Fractional).count());
+              "%.9lu", (దీర్ఘ)duration_cast<nanoseconds>(Fractional).లెక్క());
           ++I;
-          continue;
-        case '%':  // Consume %%, so %%f parses as (%%)f not %(%f)
+          కొనసాగు;
+        స్థితి '%':  // Consume %%, so %%f parses as (%%)f not %(%f)
           FStream << "%%";
           ++I;
-          continue;
+          కొనసాగు;
       }
     FStream << Style[I];
   }
-  char Buffer[256];  // Should be enough for anywhen.
-  size_t Len = strftime(Buffer, sizeof(Buffer), Format.c_str(), &LT);
-  OS << (Len ? Buffer : "BAD-DATE-FORMAT");
+  అక్షరం బఫరు[256];  // Should be enough for anywhen.
+  size_t Len = strftime(బఫరు, పరిమాణం(బఫరు), Format.c_str(), &LT);
+  OS << (Len ? బఫరు : "BAD-DATE-FORMAT");
 }
 
-void format_provider<UtcTime<std::chrono::seconds>>::format(
-    const UtcTime<std::chrono::seconds> &T, raw_ostream &OS, StringRef Style) {
-  using namespace std::chrono;
-  UtcTime<seconds> Truncated =
-      UtcTime<seconds>(duration_cast<seconds>(T.time_since_epoch()));
-  auto Fractional = T - Truncated;
-  struct tm LT = getStructTMUtc(Truncated);
+శూన్య format_provider<Utc_సమయం<std::chrono::seconds>>::format(
+    స్థిరరాశి Utc_సమయం<std::chrono::seconds> &T, raw_ostream &OS, StringRef Style) {
+  ఉపయోగించి నామాకాశ std::chrono;
+  Utc_సమయం<seconds> Truncated =
+      Utc_సమయం<seconds>(duration_cast<seconds>(T.సమయం_since_epoch()));
+  స్వయంచాలక Fractional = T - Truncated;
+  నిర్మాణం tm LT = getStructTMUtc(Truncated);
   llvm::format(Fractional, LT, OS, Style);
 }
 
-void format_provider<TimePoint<>>::format(const TimePoint<> &T, raw_ostream &OS,
+శూన్య format_provider<సమయం_బిందువు<>>::format(స్థిరరాశి సమయం_బిందువు<> &T, raw_ostream &OS,
                                           StringRef Style) {
-  using namespace std::chrono;
-  TimePoint<seconds> Truncated = time_point_cast<seconds>(T);
-  auto Fractional = T - Truncated;
-  struct tm LT = getStructTM(Truncated);
+  ఉపయోగించి నామాకాశ std::chrono;
+  సమయం_బిందువు<seconds> Truncated = సమయం_బిందువు_cast<seconds>(T);
+  స్వయంచాలక Fractional = T - Truncated;
+  నిర్మాణం tm LT = getStructTM(Truncated);
   llvm::format(Fractional, LT, OS, Style);
 }
 

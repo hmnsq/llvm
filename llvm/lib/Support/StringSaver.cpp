@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/StringSaver.h"
+#అన్తర్భావ "llvm/Support/StringSaver.h"
 
-#include "llvm/ADT/SmallString.h"
+#అన్తర్భావ "llvm/ADT/SmallString.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 StringRef StringSaver::save(StringRef S) {
-  char *P = Alloc.Allocate<char>(S.size() + 1);
-  if (!S.empty())
-    memcpy(P, S.data(), S.size());
-  P[S.size()] = '\0';
-  return StringRef(P, S.size());
+  అక్షరం *P = Alloc.Allocate<అక్షరం>(S.కొలత_2() + 1);
+  ఒకవేళ (!S.ఖాళీలు())
+    జ్ఞాపకం_నకలు(P, S.దత్తాంశం(), S.కొలత_2());
+  P[S.కొలత_2()] = '\0';
+  తిరిగి StringRef(P, S.కొలత_2());
 }
 
-StringRef StringSaver::save(const Twine &S) {
+StringRef StringSaver::save(స్థిరరాశి Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  తిరిగి save(S.గమ్యం_String_Ref(Storage));
 }
 
 StringRef UniqueStringSaver::save(StringRef S) {
-  auto R = Unique.insert(S);
-  if (R.second)                 // cache miss, need to actually save the string
-    *R.first = Strings.save(S); // safe replacement with equal value
-  return *R.first;
+  స్వయంచాలక R = Unique.చొప్పించు(S);
+  ఒకవేళ (R.రెండవ_2)                 // cache miss, need to actually save the string
+    *R.మొదటి_2 = అక్షరశ్రేణులు_2.save(S); // safe replacement with equal value
+  తిరిగి *R.మొదటి_2;
 }
 
-StringRef UniqueStringSaver::save(const Twine &S) {
+StringRef UniqueStringSaver::save(స్థిరరాశి Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  తిరిగి save(S.గమ్యం_String_Ref(Storage));
 }

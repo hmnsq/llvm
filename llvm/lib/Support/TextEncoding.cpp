@@ -12,71 +12,71 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TextEncoding.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/ConvertEBCDIC.h"
-#include <system_error>
+#అన్తర్భావ "llvm/Support/TextEncoding.h"
+#అన్తర్భావ "llvm/ADT/SmallString.h"
+#అన్తర్భావ "llvm/ADT/SmallVector.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Support/ConvertEBCDIC.h"
+#అన్తర్భావ <system_error>
 
-#if HAVE_ICU
-#if HAVE_WINDOWS_ICU
-#include <icu.h>
-#else
-#include <unicode/ucnv.h>
-#endif
-#elif HAVE_ICONV
-#include <iconv.h>
-#endif
+#ఒకవేళ HAVE_ICU
+#ఒకవేళ HAVE_WINDOWS_ICU
+#అన్తర్భావ <icu.h>
+#లేకపోతే
+#అన్తర్భావ <unicode/ucnv.h>
+#అయితే_ముగింపు
+#లేదావేళ HAVE_ICONV
+#అన్తర్భావ <iconv.h>
+#అయితే_ముగింపు
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 // Normalize the charset name with the charset alias matching algorithm proposed
 // in https://www.unicode.org/reports/tr22/tr22-8.html#Charset_Alias_Matching.
-static void normalizeCharSetName(StringRef CSName,
-                                 SmallVectorImpl<char> &Normalized) {
-  bool PrevDigit = false;
-  for (auto Ch : CSName) {
-    if (isAlnum(Ch)) {
-      Ch = toLower(Ch);
-      if (Ch != '0' || PrevDigit) {
+స్థిర శూన్య normalize_Char_సమితి_Name(StringRef CSName,
+                                 Small_సదిశ_Impl<అక్షరం> &Normalized) {
+  తార్కిక PrevDigit = అబద్ధం;
+  కొరకు (స్వయంచాలక Ch : CSName) {
+    ఒకవేళ (isAlnum(Ch)) {
+      Ch = గమ్యం_క్రింది(Ch);
+      ఒకవేళ (Ch != '0' || PrevDigit) {
         PrevDigit = isDigit(Ch);
-        Normalized.push_back(Ch);
+        Normalized.నెట్టు_వెనుక(Ch);
       }
     }
   }
 }
 
 // Maps the encoding name to enum constant if possible.
-static std::optional<TextEncoding> getKnownEncoding(StringRef Name) {
+స్థిర std::optional<పాఠ్యం_Encoding> get_తెలిసిన_Encoding(StringRef Name) {
   SmallString<16> Normalized;
-  normalizeCharSetName(Name, Normalized);
-  if (Normalized.equals("utf8"))
-    return TextEncoding::UTF8;
-  if (Normalized.equals("ibm1047"))
-    return TextEncoding::IBM1047;
-  return std::nullopt;
+  normalize_Char_సమితి_Name(Name, Normalized);
+  ఒకవేళ (Normalized.equals("utf8"))
+    తిరిగి పాఠ్యం_Encoding::UTF8;
+  ఒకవేళ (Normalized.equals("ibm1047"))
+    తిరిగి పాఠ్యం_Encoding::IBM1047;
+  తిరిగి std::nullopt;
 }
 
-[[maybe_unused]] static void HandleOverflow(size_t &Capacity, char *&Output,
-                                            size_t &OutputLength,
-                                            SmallVectorImpl<char> &Result) {
+[[maybe_వాడని]] స్థిర శూన్య Handle_అధికప్రవాహం(size_t &సామర్థ్యం, అక్షరం *&Output,
+                                            size_t &Output_నిడివి,
+                                            Small_సదిశ_Impl<అక్షరం> &ఫలితం) {
   // No space left in output buffer. Double the size of the underlying
   // memory in the SmallVectorImpl, adjust pointer and length and continue
   // the conversion.
-  Capacity =
-      (Capacity < Result.max_size() / 2) ? 2 * Capacity : Result.max_size();
-  Result.resize(0);
-  Result.resize_for_overwrite(Capacity);
-  Output = static_cast<char *>(Result.data());
-  OutputLength = Capacity;
+  సామర్థ్యం =
+      (సామర్థ్యం < ఫలితం.max_కొలత() / 2) ? 2 * సామర్థ్యం : ఫలితం.max_కొలత();
+  ఫలితం.resize(0);
+  ఫలితం.resize_for_overwrite(సామర్థ్యం);
+  Output = static_cast<అక్షరం *>(ఫలితం.దత్తాంశం());
+  Output_నిడివి = సామర్థ్యం;
 }
 
-namespace {
-enum ConversionType {
-  UTF8ToIBM1047,
-  IBM1047ToUTF8,
+నామాకాశ {
+గణన ConversionType {
+  UTF8_గమ్యం_IBM1047,
+  IBM1047_గమ్యం_UTF8,
 };
 
 // Support conversion between EBCDIC 1047 and UTF-8. This class uses
@@ -84,57 +84,57 @@ enum ConversionType {
 // aforementioned encodings. The use of tables for conversion is only
 // possible because EBCDIC 1047 is a single-byte, stateless encoding; other
 // encodings are not supported.
-class TextEncodingConverterTable final
-    : public details::TextEncodingConverterImplBase {
-  const ConversionType ConvType;
+తరగతి పాఠ్యం_Encoding_Converter_పట్టిక final
+    : బహిరంగ details::పాఠ్యం_Encoding_Converter_Impl_పునాది {
+  స్థిరరాశి ConversionType ConvType;
 
-public:
-  TextEncodingConverterTable(ConversionType ConvType) : ConvType(ConvType) {}
+బహిరంగ:
+  పాఠ్యం_Encoding_Converter_పట్టిక(ConversionType ConvType) : ConvType(ConvType) {}
 
-  std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+  std::error_సంకేతం convertString(StringRef ఆధారం,
+                                Small_సదిశ_Impl<అక్షరం> &ఫలితం) override;
 
-  void reset() override {}
+  శూన్య reset() override {}
 };
 
-std::error_code
-TextEncodingConverterTable::convertString(StringRef Source,
-                                          SmallVectorImpl<char> &Result) {
-  switch (ConvType) {
-  case IBM1047ToUTF8:
-    ConverterEBCDIC::convertToUTF8(Source, Result);
-    return std::error_code();
-  case UTF8ToIBM1047:
-    return ConverterEBCDIC::convertToEBCDIC(Source, Result);
+std::error_సంకేతం
+పాఠ్యం_Encoding_Converter_పట్టిక::convertString(StringRef ఆధారం,
+                                          Small_సదిశ_Impl<అక్షరం> &ఫలితం) {
+  ఎంపిక (ConvType) {
+  స్థితి IBM1047_గమ్యం_UTF8:
+    ConverterEBCDIC::convert_గమ్యం_UTF8(ఆధారం, ఫలితం);
+    తిరిగి std::error_సంకేతం();
+  స్థితి UTF8_గమ్యం_IBM1047:
+    తిరిగి ConverterEBCDIC::convert_గమ్యం_EBCDIC(ఆధారం, ఫలితం);
   }
   llvm_unreachable("Invalid ConvType!");
-  return std::error_code();
+  తిరిగి std::error_సంకేతం();
 }
 
-#if HAVE_ICU
-struct UConverterDeleter {
-  void operator()(UConverter *Converter) const {
-    if (Converter)
+#ఒకవేళ HAVE_ICU
+నిర్మాణం UConverterDeleter {
+  శూన్య క్రియాకారకం()(UConverter *Converter) స్థిరరాశి {
+    ఒకవేళ (Converter)
       ucnv_close(Converter);
   }
 };
-using UConverterUniquePtr = std::unique_ptr<UConverter, UConverterDeleter>;
+ఉపయోగించి UConverterUniquePtr = std::unique_ptr<UConverter, UConverterDeleter>;
 
-class TextEncodingConverterICU final
-    : public details::TextEncodingConverterImplBase {
+తరగతి పాఠ్యం_Encoding_Converter_ICU final
+    : బహిరంగ details::పాఠ్యం_Encoding_Converter_Impl_పునాది {
   UConverterUniquePtr FromConvDesc;
-  UConverterUniquePtr ToConvDesc;
+  UConverterUniquePtr గమ్యం_Conv_Desc;
 
-public:
-  TextEncodingConverterICU(UConverterUniquePtr FromConverter,
-                           UConverterUniquePtr ToConverter)
+బహిరంగ:
+  పాఠ్యం_Encoding_Converter_ICU(UConverterUniquePtr FromConverter,
+                           UConverterUniquePtr గమ్యం_Converter)
       : FromConvDesc(std::move(FromConverter)),
-        ToConvDesc(std::move(ToConverter)) {}
+        గమ్యం_Conv_Desc(std::move(గమ్యం_Converter)) {}
 
-  std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+  std::error_సంకేతం convertString(StringRef ఆధారం,
+                                Small_సదిశ_Impl<అక్షరం> &ఫలితం) override;
 
-  void reset() override;
+  శూన్య reset() override;
 };
 
 // TODO: The current implementation discards the partial result and restarts the
@@ -142,73 +142,73 @@ public:
 // insufficient buffer size. In the future, it would better to save the partial
 // result and resume the conversion for the remaining string.
 // TODO: Improve translation of ICU errors to error_code
-std::error_code
-TextEncodingConverterICU::convertString(StringRef Source,
-                                        SmallVectorImpl<char> &Result) {
+std::error_సంకేతం
+పాఠ్యం_Encoding_Converter_ICU::convertString(StringRef ఆధారం,
+                                        Small_సదిశ_Impl<అక్షరం> &ఫలితం) {
   // Setup the input in case it has no backing data.
-  size_t InputLength = Source.size();
-  const char *In = InputLength ? const_cast<char *>(Source.data()) : "";
+  size_t ఆదానం_నిడివి = ఆధారం.కొలత_2();
+  స్థిరరాశి అక్షరం *లోపల_2 = ఆదానం_నిడివి ? const_cast<అక్షరం *>(ఆధారం.దత్తాంశం()) : "";
 
   // Setup the output. We directly write into the SmallVector.
-  size_t Capacity = Result.capacity();
-  size_t OutputLength = Capacity;
-  Result.resize_for_overwrite(Capacity);
-  char *Output;
-  UErrorCode EC = U_ZERO_ERROR;
+  size_t సామర్థ్యం = ఫలితం.సామర్థ్యం_2();
+  size_t Output_నిడివి = సామర్థ్యం;
+  ఫలితం.resize_for_overwrite(సామర్థ్యం);
+  అక్షరం *Output;
+  UError_సంకేతం EC = U_ZERO_ERROR;
 
-  ucnv_setToUCallBack(&*FromConvDesc, UCNV_TO_U_CALLBACK_STOP, NULL, NULL, NULL,
+  ucnv_సమితి_గమ్యం_UCall_వెనుక(&*FromConvDesc, UCNV_గమ్యం_U_CALLBACK_STOP, ఖాళీ, ఖాళీ, ఖాళీ,
                       &EC);
-  ucnv_setFromUCallBack(&*ToConvDesc, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL,
-                        NULL, &EC);
-  assert(U_SUCCESS(EC));
+  ucnv_సమితి_From_UCall_వెనుక(&*గమ్యం_Conv_Desc, UCNV_FROM_U_CALLBACK_STOP, ఖాళీ, ఖాళీ,
+                        ఖాళీ, &EC);
+  ప్రతిజ్ఞా(U_SUCCESS(EC));
 
-  do {
+  చేయి {
     EC = U_ZERO_ERROR;
-    const char *Input = In;
+    స్థిరరాశి అక్షరం *ఆదానం = లోపల_2;
 
-    Output = static_cast<char *>(Result.data());
-    ucnv_convertEx(&*ToConvDesc, &*FromConvDesc, &Output, Result.end(), &Input,
-                   In + InputLength, /*pivotStart=*/NULL,
-                   /*pivotSource=*/NULL, /*pivotTarget=*/NULL,
-                   /*pivotLimit=*/NULL, /*reset=*/true,
-                   /*flush=*/true, &EC);
-    if (U_FAILURE(EC)) {
-      if (EC == U_BUFFER_OVERFLOW_ERROR) {
-        if (Capacity < Result.max_size()) {
-          HandleOverflow(Capacity, Output, OutputLength, Result);
-          continue;
-        } else {
-          Result.resize(Output - Result.data());
-          return std::error_code(E2BIG, std::generic_category());
+    Output = static_cast<అక్షరం *>(ఫలితం.దత్తాంశం());
+    ucnv_convertEx(&*గమ్యం_Conv_Desc, &*FromConvDesc, &Output, ఫలితం.చివర(), &ఆదానం,
+                   లోపల_2 + ఆదానం_నిడివి, /*pivotStart=*/ఖాళీ,
+                   /*pivotSource=*/ఖాళీ, /*pivotTarget=*/ఖాళీ,
+                   /*pivotLimit=*/ఖాళీ, /*reset=*/నిజం,
+                   /*flush=*/నిజం, &EC);
+    ఒకవేళ (U_FAILURE(EC)) {
+      ఒకవేళ (EC == U_బఫరు_అధికప్రవాహం_ERROR) {
+        ఒకవేళ (సామర్థ్యం < ఫలితం.max_కొలత()) {
+          Handle_అధికప్రవాహం(సామర్థ్యం, Output, Output_నిడివి, ఫలితం);
+          కొనసాగు;
+        } లేకపోతే {
+          ఫలితం.resize(Output - ఫలితం.దత్తాంశం());
+          తిరిగి std::error_సంకేతం(E2BIG, std::generic_category());
         }
       }
       // Some other error occurred.
-      Result.resize(Output - Result.data());
-      return std::error_code(EILSEQ, std::generic_category());
+      ఫలితం.resize(Output - ఫలితం.దత్తాంశం());
+      తిరిగి std::error_సంకేతం(EILSEQ, std::generic_category());
     }
-    break;
-  } while (true);
+    ఆపు;
+  } అయితే (నిజం);
 
-  Result.resize(Output - Result.data());
-  return std::error_code();
+  ఫలితం.resize(Output - ఫలితం.దత్తాంశం());
+  తిరిగి std::error_సంకేతం();
 }
 
-void TextEncodingConverterICU::reset() {
+శూన్య పాఠ్యం_Encoding_Converter_ICU::reset() {
   ucnv_reset(&*FromConvDesc);
-  ucnv_reset(&*ToConvDesc);
+  ucnv_reset(&*గమ్యం_Conv_Desc);
 }
 
-#elif HAVE_ICONV
-class TextEncodingConverterIconv final
-    : public details::TextEncodingConverterImplBase {
-  class UniqueIconvT {
+#లేదావేళ HAVE_ICONV
+తరగతి పాఠ్యం_Encoding_Converter_Iconv final
+    : బహిరంగ details::పాఠ్యం_Encoding_Converter_Impl_పునాది {
+  తరగతి UniqueIconvT {
     iconv_t ConvDesc;
 
-  public:
-    operator iconv_t() const { return ConvDesc; }
+  బహిరంగ:
+    క్రియాకారకం iconv_t() స్థిరరాశి { తిరిగి ConvDesc; }
     UniqueIconvT(iconv_t CD) : ConvDesc(CD) {}
     ~UniqueIconvT() {
-      if (ConvDesc != (iconv_t)-1) {
+      ఒకవేళ (ConvDesc != (iconv_t)-1) {
         iconv_close(ConvDesc);
         ConvDesc = (iconv_t)-1;
       }
@@ -216,144 +216,144 @@ class TextEncodingConverterIconv final
     UniqueIconvT(UniqueIconvT &&Other) : ConvDesc(Other.ConvDesc) {
       Other.ConvDesc = (iconv_t)-1;
     }
-    UniqueIconvT &operator=(UniqueIconvT &&Other) {
-      if (&Other != this) {
+    UniqueIconvT &క్రియాకారకం=(UniqueIconvT &&Other) {
+      ఒకవేళ (&Other != ఇది) {
         ConvDesc = Other.ConvDesc;
         Other.ConvDesc = (iconv_t)-1;
       }
-      return *this;
+      తిరిగి *ఇది;
     }
   };
   UniqueIconvT ConvDesc;
 
-public:
-  TextEncodingConverterIconv(UniqueIconvT ConvDesc)
+బహిరంగ:
+  పాఠ్యం_Encoding_Converter_Iconv(UniqueIconvT ConvDesc)
       : ConvDesc(std::move(ConvDesc)) {}
 
-  std::error_code convertString(StringRef Source,
-                                SmallVectorImpl<char> &Result) override;
+  std::error_సంకేతం convertString(StringRef ఆధారం,
+                                Small_సదిశ_Impl<అక్షరం> &ఫలితం) override;
 
-  void reset() override;
+  శూన్య reset() override;
 };
 
 // TODO: The current implementation discards the partial result and restarts the
 // conversion from the beginning if there is a conversion error due to
 // insufficient buffer size. In the future, it would better to save the partial
 // result and resume the conversion for the remaining string.
-std::error_code
-TextEncodingConverterIconv::convertString(StringRef Source,
-                                          SmallVectorImpl<char> &Result) {
+std::error_సంకేతం
+పాఠ్యం_Encoding_Converter_Iconv::convertString(StringRef ఆధారం,
+                                          Small_సదిశ_Impl<అక్షరం> &ఫలితం) {
   // Setup the output. We directly write into the SmallVector.
-  size_t Capacity = Result.capacity();
-  char *Output = static_cast<char *>(Result.data());
-  size_t OutputLength = Capacity;
-  Result.resize_for_overwrite(Capacity);
+  size_t సామర్థ్యం = ఫలితం.సామర్థ్యం_2();
+  అక్షరం *Output = static_cast<అక్షరం *>(ఫలితం.దత్తాంశం());
+  size_t Output_నిడివి = సామర్థ్యం;
+  ఫలితం.resize_for_overwrite(సామర్థ్యం);
 
   size_t Ret;
   // Handle errors returned from iconv().
-  auto HandleError = [&Capacity, &Output, &OutputLength, &Result,
-                      this](size_t Ret) {
-    if (Ret == static_cast<size_t>(-1)) {
+  స్వయంచాలక HandleError = [&సామర్థ్యం, &Output, &Output_నిడివి, &ఫలితం,
+                      ఇది](size_t Ret) {
+    ఒకవేళ (Ret == static_cast<size_t>(-1)) {
       // An error occurred. Check if we can gracefully handle it.
-      if (errno == E2BIG && Capacity < Result.max_size()) {
-        HandleOverflow(Capacity, Output, OutputLength, Result);
+      ఒకవేళ (errno == E2BIG && సామర్థ్యం < ఫలితం.max_కొలత()) {
+        Handle_అధికప్రవాహం(సామర్థ్యం, Output, Output_నిడివి, ఫలితం);
         // Reset converter
         reset();
-        return std::error_code();
-      } else {
+        తిరిగి std::error_సంకేతం();
+      } లేకపోతే {
         // Some other error occurred.
-        Result.resize(Output - Result.data());
-        return std::error_code(errno, std::generic_category());
+        ఫలితం.resize(Output - ఫలితం.దత్తాంశం());
+        తిరిగి std::error_సంకేతం(errno, std::generic_category());
       }
-    } else {
+    } లేకపోతే {
       // A positive return value indicates that some characters were converted
       // in a nonreversible way, that is, replaced with a SUB symbol. Returning
       // an error in this case makes sure that both conversion routines behave
       // in the same way.
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+      తిరిగి std::make_error_సంకేతం(std::errc::illegal_byte_sequence);
     }
   };
 
-  do {
-    size_t InputLength = Source.size();
-    char *Input = const_cast<char *>(Source.data());
-    Ret = iconv(ConvDesc, &Input, &InputLength, &Output, &OutputLength);
-    if (Ret != 0) {
-      if (auto EC = HandleError(Ret))
-        return EC;
-      continue;
+  చేయి {
+    size_t ఆదానం_నిడివి = ఆధారం.కొలత_2();
+    అక్షరం *ఆదానం = const_cast<అక్షరం *>(ఆధారం.దత్తాంశం());
+    Ret = iconv(ConvDesc, &ఆదానం, &ఆదానం_నిడివి, &Output, &Output_నిడివి);
+    ఒకవేళ (Ret != 0) {
+      ఒకవేళ (స్వయంచాలక EC = HandleError(Ret))
+        తిరిగి EC;
+      కొనసాగు;
     }
     // Flush the converter
-    Ret = iconv(ConvDesc, nullptr, nullptr, &Output, &OutputLength);
-    if (Ret != 0) {
-      if (auto EC = HandleError(Ret))
-        return EC;
-      continue;
+    Ret = iconv(ConvDesc, శూన్యసూచిక, శూన్యసూచిక, &Output, &Output_నిడివి);
+    ఒకవేళ (Ret != 0) {
+      ఒకవేళ (స్వయంచాలక EC = HandleError(Ret))
+        తిరిగి EC;
+      కొనసాగు;
     }
-    break;
-  } while (true);
+    ఆపు;
+  } అయితే (నిజం);
 
   // Re-adjust size to actual size.
-  Result.resize(Output - Result.data());
-  return std::error_code();
+  ఫలితం.resize(Output - ఫలితం.దత్తాంశం());
+  తిరిగి std::error_సంకేతం();
 }
 
-inline void TextEncodingConverterIconv::reset() {
-  iconv(ConvDesc, nullptr, nullptr, nullptr, nullptr);
+అంతఃవరుస శూన్య పాఠ్యం_Encoding_Converter_Iconv::reset() {
+  iconv(ConvDesc, శూన్యసూచిక, శూన్యసూచిక, శూన్యసూచిక, శూన్యసూచిక);
 }
 
-#endif // HAVE_ICONV
+#అయితే_ముగింపు // HAVE_ICONV
 } // namespace
 
-ErrorOr<TextEncodingConverter>
-TextEncodingConverter::create(TextEncoding CPFrom, TextEncoding CPTo) {
+ErrorOr<పాఠ్యం_Encoding_Converter>
+పాఠ్యం_Encoding_Converter::create(పాఠ్యం_Encoding CPFrom, పాఠ్యం_Encoding CPTo) {
 
   // Text encodings should be distinct.
-  if (CPFrom == CPTo)
-    return std::make_error_code(std::errc::invalid_argument);
+  ఒకవేళ (CPFrom == CPTo)
+    తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
 
   ConversionType Conversion;
-  if (CPFrom == TextEncoding::UTF8 && CPTo == TextEncoding::IBM1047)
-    Conversion = UTF8ToIBM1047;
-  else if (CPFrom == TextEncoding::IBM1047 && CPTo == TextEncoding::UTF8)
-    Conversion = IBM1047ToUTF8;
-  else
-    return std::make_error_code(std::errc::invalid_argument);
+  ఒకవేళ (CPFrom == పాఠ్యం_Encoding::UTF8 && CPTo == పాఠ్యం_Encoding::IBM1047)
+    Conversion = UTF8_గమ్యం_IBM1047;
+  లేకపోతే ఒకవేళ (CPFrom == పాఠ్యం_Encoding::IBM1047 && CPTo == పాఠ్యం_Encoding::UTF8)
+    Conversion = IBM1047_గమ్యం_UTF8;
+  లేకపోతే
+    తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
 
-  return TextEncodingConverter(
-      std::make_unique<TextEncodingConverterTable>(Conversion));
+  తిరిగి పాఠ్యం_Encoding_Converter(
+      std::make_unique<పాఠ్యం_Encoding_Converter_పట్టిక>(Conversion));
 }
 
-ErrorOr<TextEncodingConverter> TextEncodingConverter::create(StringRef From,
-                                                             StringRef To) {
-  std::optional<TextEncoding> FromEncoding = getKnownEncoding(From);
-  std::optional<TextEncoding> ToEncoding = getKnownEncoding(To);
-  if (FromEncoding && ToEncoding) {
-    ErrorOr<TextEncodingConverter> Converter =
-        create(*FromEncoding, *ToEncoding);
-    if (Converter)
-      return Converter;
+ErrorOr<పాఠ్యం_Encoding_Converter> పాఠ్యం_Encoding_Converter::create(StringRef From,
+                                                             StringRef గమ్యం) {
+  std::optional<పాఠ్యం_Encoding> FromEncoding = get_తెలిసిన_Encoding(From);
+  std::optional<పాఠ్యం_Encoding> గమ్యం_Encoding = get_తెలిసిన_Encoding(గమ్యం);
+  ఒకవేళ (FromEncoding && గమ్యం_Encoding) {
+    ErrorOr<పాఠ్యం_Encoding_Converter> Converter =
+        create(*FromEncoding, *గమ్యం_Encoding);
+    ఒకవేళ (Converter)
+      తిరిగి Converter;
   }
-#if HAVE_ICU
-  UErrorCode EC = U_ZERO_ERROR;
+#ఒకవేళ HAVE_ICU
+  UError_సంకేతం EC = U_ZERO_ERROR;
   UConverterUniquePtr FromConvDesc(ucnv_open(From.str().c_str(), &EC));
-  if (U_FAILURE(EC))
-    return std::make_error_code(std::errc::invalid_argument);
+  ఒకవేళ (U_FAILURE(EC))
+    తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
 
-  UConverterUniquePtr ToConvDesc(ucnv_open(To.str().c_str(), &EC));
-  if (U_FAILURE(EC))
-    return std::make_error_code(std::errc::invalid_argument);
+  UConverterUniquePtr గమ్యం_Conv_Desc(ucnv_open(గమ్యం.str().c_str(), &EC));
+  ఒకవేళ (U_FAILURE(EC))
+    తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
 
-  auto Converter = std::make_unique<TextEncodingConverterICU>(
-      std::move(FromConvDesc), std::move(ToConvDesc));
-  return TextEncodingConverter(std::move(Converter));
-#elif HAVE_ICONV
-  iconv_t ConvDesc = iconv_open(To.str().c_str(), From.str().c_str());
-  if (ConvDesc == (iconv_t)-1)
-    return std::make_error_code(std::errc::invalid_argument);
-  return TextEncodingConverter(
-      std::make_unique<TextEncodingConverterIconv>(ConvDesc));
-#else
-  return std::make_error_code(std::errc::invalid_argument);
-#endif
+  స్వయంచాలక Converter = std::make_unique<పాఠ్యం_Encoding_Converter_ICU>(
+      std::move(FromConvDesc), std::move(గమ్యం_Conv_Desc));
+  తిరిగి పాఠ్యం_Encoding_Converter(std::move(Converter));
+#లేదావేళ HAVE_ICONV
+  iconv_t ConvDesc = iconv_open(గమ్యం.str().c_str(), From.str().c_str());
+  ఒకవేళ (ConvDesc == (iconv_t)-1)
+    తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
+  తిరిగి పాఠ్యం_Encoding_Converter(
+      std::make_unique<పాఠ్యం_Encoding_Converter_Iconv>(ConvDesc));
+#లేకపోతే
+  తిరిగి std::make_error_సంకేతం(std::errc::invalid_వాదం);
+#అయితే_ముగింపు
 }

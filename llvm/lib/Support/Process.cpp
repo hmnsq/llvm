@@ -10,20 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Process.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/Support/Process.h"
+#అన్తర్భావ "llvm/ADT/STLExtras.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Config/config.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Support/CrashRecoveryContext.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/Path.h"
 
-#include <optional>
-#include <stdlib.h> // for _Exit
+#అన్తర్భావ <optional>
+#అన్తర్భావ <stdlib.h> // for _Exit
 
-using namespace llvm;
-using namespace sys;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
@@ -31,45 +31,45 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+Process::కనుగొను_లోపల_Env_మార్గం(StringRef EnvName, StringRef FileName, అక్షరం Separator) {
+  తిరిగి కనుగొను_లోపల_Env_మార్గం(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
-                       ArrayRef<std::string> IgnoreList, char Separator) {
-  assert(!path::is_absolute(FileName));
-  std::optional<std::string> FoundPath;
-  std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+Process::కనుగొను_లోపల_Env_మార్గం(StringRef EnvName, StringRef FileName,
+                       ArrayRef<std::string> IgnoreList, అక్షరం Separator) {
+  ప్రతిజ్ఞా(!మార్గం_2::is_absolute(FileName));
+  std::optional<std::string> దొరికింది_మార్గం;
+  std::optional<std::string> Opt_మార్గం = Process::GetEnv(EnvName);
+  ఒకవేళ (!Opt_మార్గం)
+    తిరిగి దొరికింది_మార్గం;
 
-  const char EnvPathSeparatorStr[] = {Separator, '\0'};
-  SmallVector<StringRef, 8> Dirs;
-  SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
+  స్థిరరాశి అక్షరం Env_మార్గం_Separator_Str[] = {Separator, '\0'};
+  Small_సదిశ<StringRef, 8> Dirs;
+  విభజించు_String(*Opt_మార్గం, Dirs, Env_మార్గం_Separator_Str);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
-      continue;
+  కొరకు (StringRef Dir : Dirs) {
+    ఒకవేళ (Dir.ఖాళీలు())
+      కొనసాగు;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
-      continue;
+    ఒకవేళ (any_యొక్క(IgnoreList, [&](StringRef S) { తిరిగి fs::equivalent(S, Dir); }))
+      కొనసాగు;
 
-    SmallString<128> FilePath(Dir);
-    path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
-      FoundPath = std::string(FilePath);
-      break;
+    SmallString<128> File_మార్గం(Dir);
+    మార్గం_2::append(File_మార్గం, FileName);
+    ఒకవేళ (fs::exists(Twine(File_మార్గం))) {
+      దొరికింది_మార్గం = std::string(File_మార్గం);
+      ఆపు;
     }
   }
 
-  return FoundPath;
+  తిరిగి దొరికింది_మార్గం;
 }
 
 // clang-format off
-#define COLOR(FGBG, CODE, BOLD) "\033[0;" BOLD FGBG CODE "m"
+#నిర్వచించు COLOR(FGBG, సంకేతం_4, BOLD) "\033[0;" BOLD FGBG సంకేతం_4 "m"
 
-#define ALLCOLORS(FGBG, BRIGHT, BOLD) \
+#నిర్వచించు ALLCOLORS(FGBG, BRIGHT, BOLD) \
   {                           \
     COLOR(FGBG, "0", BOLD),   \
     COLOR(FGBG, "1", BOLD),   \
@@ -95,7 +95,7 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
 //                           |  |   codes
 //                           |  |   |
 //                           |  |   |
-static const char colorcodes[2][2][16][11] = {
+స్థిర స్థిరరాశి అక్షరం colorcodes[2][2][16][11] = {
     { ALLCOLORS("3", "9", ""), ALLCOLORS("3", "9", "1;"),},
     { ALLCOLORS("4", "10", ""), ALLCOLORS("4", "10", "1;")}
 };
@@ -103,24 +103,24 @@ static const char colorcodes[2][2][16][11] = {
 
 // A CMake option controls wheter we emit core dumps by default. An application
 // may disable core dumps by calling Process::PreventCoreFiles().
-static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
+స్థిర తార్కిక coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+తార్కిక Process::AreCoreFilesPrevented() { తిరిగి coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
-    CRC->HandleExit(RetCode);
+[[noreturn]] శూన్య Process::Exit(పూర్ణాంకం Ret_సంకేతం, తార్కిక NoCleanup) {
+  ఒకవేళ (CrashRecoveryContext *చక్రీయ_తనిఖీ = CrashRecoveryContext::GetCurrent())
+    చక్రీయ_తనిఖీ->HandleExit(Ret_సంకేతం);
 
-  if (NoCleanup)
-    ExitNoCleanup(RetCode);
-  else
-    ::exit(RetCode);
+  ఒకవేళ (NoCleanup)
+    ExitNoCleanup(Ret_సంకేతం);
+  లేకపోతే
+    ::నిష్క్రమించు(Ret_సంకేతం);
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Process.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Process.inc"
-#endif
+#నిర్వచితమైతే LLVM_ON_UNIX
+#అన్తర్భావ "Unix/Process.inc"
+#అయితే_ముగింపు
+#నిర్వచితమైతే _WIN32
+#అన్తర్భావ "Windows/Process.inc"
+#అయితే_ముగింపు

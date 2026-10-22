@@ -35,24 +35,24 @@
  *	@(#)utils.h	8.3 (Berkeley) 3/20/94
  */
 
-#ifndef LLVM_SUPPORT_REGUTILS_H
-#define LLVM_SUPPORT_REGUTILS_H
+#నిర్వచితం_కాకపోతే LLVM_SUPPORT_REGUTILS_H
+#నిర్వచించు LLVM_SUPPORT_REGUTILS_H
 
 /* utility definitions */
-#define	NC		(CHAR_MAX - CHAR_MIN + 1)
-typedef unsigned char uch;
+#నిర్వచించు	NC		(CHAR_MAX - CHAR_MIN + 1)
+రకనిర్వచనం గుర్తులేని అక్షరం uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */
-#ifndef REDEBUG
-#ifndef NDEBUG
-#define	NDEBUG	/* no assertions please */
-#endif
-#endif
-#include <assert.h>
+#నిర్వచితం_కాకపోతే REDEBUG
+#నిర్వచితం_కాకపోతే NDEBUG
+#నిర్వచించు	NDEBUG	/* no assertions please */
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+#అన్తర్భావ <assert.h>
 
 /* for old systems with bcopy() but no memmove() */
-#ifdef USEBCOPY
-#define	memmove(d, s, c)	bcopy(s, d, c)
-#endif
+#నిర్వచితమైతే USEBCOPY
+#నిర్వచించు	memmove(d, s, c)	bcopy(s, d, c)
+#అయితే_ముగింపు
 
-#endif
+#అయితే_ముగింపు

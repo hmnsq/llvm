@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#అన్తర్భావ "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+గుర్తులేని Suffix_వృక్షం_కణుపు::get_ప్రారంభం_Idx() స్థిరరాశి { తిరిగి ప్రారంభం_Idx; }
+శూన్య Suffix_వృక్షం_కణుపు::increment_ప్రారంభం_Idx(గుర్తులేని Inc) { ప్రారంభం_Idx += Inc; }
+శూన్య Suffix_వృక్షం_కణుపు::సమితి_Concat_Len(గుర్తులేని Len) { ConcatLen = Len; }
+గుర్తులేని Suffix_వృక్షం_కణుపు::getConcatLen() స్థిరరాశి { తిరిగి ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+తార్కిక Suffix_వృక్షం_అంతర్గత_కణుపు::is_మూలం() స్థిరరాశి {
+  తిరిగి get_ప్రారంభం_Idx() == ఖాళీలు_Idx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+గుర్తులేని Suffix_వృక్షం_అంతర్గత_కణుపు::get_చివర_Idx() స్థిరరాశి { తిరిగి చివర_Idx; }
+శూన్య Suffix_వృక్షం_అంతర్గత_కణుపు::సమితి_Link(Suffix_వృక్షం_అంతర్గత_కణుపు *L) {
+  ప్రతిజ్ఞా(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_వృక్షం_అంతర్గత_కణుపు *Suffix_వృక్షం_అంతర్గత_కణుపు::getLink() స్థిరరాశి { తిరిగి Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+గుర్తులేని Suffix_వృక్షం_ఆకు_కణుపు::get_చివర_Idx() స్థిరరాశి {
+  ప్రతిజ్ఞా(చివర_Idx && "EndIdx is empty?");
+  తిరిగి *చివర_Idx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+గుర్తులేని Suffix_వృక్షం_ఆకు_కణుపు::getSuffixIdx() స్థిరరాశి { తిరిగి SuffixIdx; }
+శూన్య Suffix_వృక్షం_ఆకు_కణుపు::సమితి_Suffix_Idx(గుర్తులేని Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+గుర్తులేని Suffix_వృక్షం_కణుపు::get_ఎడమ_ఆకు_Idx() స్థిరరాశి { తిరిగి ఎడమ_ఆకు_Idx; }
+గుర్తులేని Suffix_వృక్షం_కణుపు::get_కుడి_ఆకు_Idx() స్థిరరాశి { తిరిగి కుడి_ఆకు_Idx; }
+శూన్య Suffix_వృక్షం_కణుపు::సమితి_ఎడమ_ఆకు_Idx(గుర్తులేని Idx) { ఎడమ_ఆకు_Idx = Idx; }
+శూన్య Suffix_వృక్షం_కణుపు::సమితి_కుడి_ఆకు_Idx(గుర్తులేని Idx) { కుడి_ఆకు_Idx = Idx; }

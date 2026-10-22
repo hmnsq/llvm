@@ -10,167 +10,167 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileOutputBuffer.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Memory.h"
-#include "llvm/Support/TimeProfiler.h"
-#include <system_error>
+#అన్తర్భావ "llvm/Support/FileOutputBuffer.h"
+#అన్తర్భావ "llvm/Support/Errc.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/Memory.h"
+#అన్తర్భావ "llvm/Support/TimeProfiler.h"
+#అన్తర్భావ <system_error>
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
+#ఒకవేళ !defined(_MSC_VER) && !defined(__MINGW32__)
+#అన్తర్భావ <unistd.h>
+#లేకపోతే
+#అన్తర్భావ <io.h>
+#అయితే_ముగింపు
 
-using namespace llvm;
-using namespace llvm::sys;
+ఉపయోగించి నామాకాశ llvm;
+ఉపయోగించి నామాకాశ llvm::sys;
 
-namespace {
+నామాకాశ {
 // A FileOutputBuffer which creates a temporary file in the same directory
 // as the final output file. The final output file is atomically replaced
 // with the temporary file on commit().
-class OnDiskBuffer : public FileOutputBuffer {
-public:
-  OnDiskBuffer(StringRef Path, fs::TempFile Temp, fs::mapped_file_region Buf)
-      : FileOutputBuffer(Path), Buffer(std::move(Buf)), Temp(std::move(Temp)) {}
+తరగతి On_Disk_బఫరు : బహిరంగ File_Output_బఫరు {
+బహిరంగ:
+  On_Disk_బఫరు(StringRef మార్గం, fs::తాత్కాలిక_File తాత్కాలిక, fs::mapped_file_region Buf)
+      : File_Output_బఫరు(మార్గం), బఫరు(std::move(Buf)), తాత్కాలిక(std::move(తాత్కాలిక)) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.data(); }
+  uint8_t *get_బఫరు_ప్రారంభం() స్థిరరాశి override { తిరిగి (uint8_t *)బఫరు.దత్తాంశం(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.data() + Buffer.size();
+  uint8_t *get_బఫరు_చివర() స్థిరరాశి override {
+    తిరిగి (uint8_t *)బఫరు.దత్తాంశం() + బఫరు.కొలత_2();
   }
 
-  size_t getBufferSize() const override { return Buffer.size(); }
+  size_t get_బఫరు_కొలత() స్థిరరాశి override { తిరిగి బఫరు.కొలత_2(); }
 
   Error commit() override {
-    llvm::TimeTraceScope timeScope("Commit buffer to disk");
+    llvm::సమయం_Trace_Scope సమయం_Scope("Commit buffer to disk");
 
     // Unmap buffer, letting OS flush dirty pages to file on disk.
-    Buffer.unmap();
+    బఫరు.unmap();
 
     // Atomically replace the existing file with the new one.
-    return Temp.keep(FinalPath);
+    తిరిగి తాత్కాలిక.keep(Final_మార్గం);
   }
 
-  ~OnDiskBuffer() override {
+  ~On_Disk_బఫరు() override {
     // Close the mapping before deleting the temp file, so that the removal
     // succeeds.
-    Buffer.unmap();
-    consumeError(Temp.discard());
+    బఫరు.unmap();
+    consumeError(తాత్కాలిక.discard());
   }
 
-  void discard() override {
+  శూన్య discard() override {
     // Delete the temp file if it still was open, but keeping the mapping
     // active.
-    consumeError(Temp.discard());
+    consumeError(తాత్కాలిక.discard());
   }
 
-private:
-  fs::mapped_file_region Buffer;
-  fs::TempFile Temp;
+అంతరంగ:
+  fs::mapped_file_region బఫరు;
+  fs::తాత్కాలిక_File తాత్కాలిక;
 };
 
 // A FileOutputBuffer which keeps data in memory and writes to the final
 // output file on commit(). This is used only when we cannot use OnDiskBuffer.
-class InMemoryBuffer : public FileOutputBuffer {
-public:
-  InMemoryBuffer(StringRef Path, MemoryBlock Buf, std::size_t BufSize,
-                 unsigned Mode)
-      : FileOutputBuffer(Path), Buffer(Buf), BufferSize(BufSize),
-        Mode(Mode) {}
+తరగతి లోపల_జ్ఞాపకం_బఫరు : బహిరంగ File_Output_బఫరు {
+బహిరంగ:
+  లోపల_జ్ఞాపకం_బఫరు(StringRef మార్గం, జ్ఞాపకం_ఖండం Buf, std::size_t Buf_కొలత,
+                 గుర్తులేని బహుళకం)
+      : File_Output_బఫరు(మార్గం), బఫరు(Buf), బఫరు_కొలత(Buf_కొలత),
+        బహుళకం(బహుళకం) {}
 
-  uint8_t *getBufferStart() const override { return (uint8_t *)Buffer.base(); }
+  uint8_t *get_బఫరు_ప్రారంభం() స్థిరరాశి override { తిరిగి (uint8_t *)బఫరు.పునాది_2(); }
 
-  uint8_t *getBufferEnd() const override {
-    return (uint8_t *)Buffer.base() + BufferSize;
+  uint8_t *get_బఫరు_చివర() స్థిరరాశి override {
+    తిరిగి (uint8_t *)బఫరు.పునాది_2() + బఫరు_కొలత;
   }
 
-  size_t getBufferSize() const override { return BufferSize; }
+  size_t get_బఫరు_కొలత() స్థిరరాశి override { తిరిగి బఫరు_కొలత; }
 
   Error commit() override {
-    if (FinalPath == "-") {
-      llvm::outs() << StringRef((const char *)Buffer.base(), BufferSize);
+    ఒకవేళ (Final_మార్గం == "-") {
+      llvm::outs() << StringRef((స్థిరరాశి అక్షరం *)బఫరు.పునాది_2(), బఫరు_కొలత);
       llvm::outs().flush();
-      return Error::success();
+      తిరిగి Error::success();
     }
 
-    using namespace sys::fs;
-    int FD;
-    std::error_code EC;
-    if (auto EC =
-            openFileForWrite(FinalPath, FD, CD_CreateAlways, OF_Delete, Mode))
-      return errorCodeToError(EC);
-    raw_fd_ostream OS(FD, /*shouldClose=*/true, /*unbuffered=*/true);
-    OS << StringRef((const char *)Buffer.base(), BufferSize);
-    return Error::success();
+    ఉపయోగించి నామాకాశ sys::fs;
+    పూర్ణాంకం FD;
+    std::error_సంకేతం EC;
+    ఒకవేళ (స్వయంచాలక EC =
+            openFileForWrite(Final_మార్గం, FD, CD_CreateAlways, యొక్క_Delete, బహుళకం))
+      తిరిగి error_సంకేతం_గమ్యం_Error(EC);
+    raw_fd_ostream OS(FD, /*shouldClose=*/నిజం, /*unbuffered=*/నిజం);
+    OS << StringRef((స్థిరరాశి అక్షరం *)బఫరు.పునాది_2(), బఫరు_కొలత);
+    తిరిగి Error::success();
   }
 
-private:
+అంతరంగ:
   // Buffer may actually contain a larger memory block than BufferSize
-  OwningMemoryBlock Buffer;
-  size_t BufferSize;
-  unsigned Mode;
+  Owning_జ్ఞాపకం_ఖండం బఫరు;
+  size_t బఫరు_కొలత;
+  గుర్తులేని బహుళకం;
 };
 } // namespace
 
-static Expected<std::unique_ptr<InMemoryBuffer>>
-createInMemoryBuffer(StringRef Path, size_t Size, unsigned Mode) {
-  std::error_code EC;
-  MemoryBlock MB = Memory::allocateMappedMemory(
-      Size, nullptr, sys::Memory::MF_READ | sys::Memory::MF_WRITE, EC);
-  if (EC)
-    return errorCodeToError(EC);
-  return std::make_unique<InMemoryBuffer>(Path, MB, Size, Mode);
+స్థిర Expected<std::unique_ptr<లోపల_జ్ఞాపకం_బఫరు>>
+create_లోపల_జ్ఞాపకం_బఫరు(StringRef మార్గం, size_t కొలత, గుర్తులేని బహుళకం) {
+  std::error_సంకేతం EC;
+  జ్ఞాపకం_ఖండం MB = జ్ఞాపకం_2::allocate_Mapped_జ్ఞాపకం(
+      కొలత, శూన్యసూచిక, sys::జ్ఞాపకం_2::MF_READ | sys::జ్ఞాపకం_2::MF_WRITE, EC);
+  ఒకవేళ (EC)
+    తిరిగి error_సంకేతం_గమ్యం_Error(EC);
+  తిరిగి std::make_unique<లోపల_జ్ఞాపకం_బఫరు>(మార్గం, MB, కొలత, బహుళకం);
 }
 
-static Expected<std::unique_ptr<FileOutputBuffer>>
-createOnDiskBuffer(StringRef Path, size_t Size, unsigned Mode) {
-  Expected<fs::TempFile> FileOrErr =
-      fs::TempFile::create(Path + ".tmp%%%%%%%", Mode);
-  if (!FileOrErr)
-    return FileOrErr.takeError();
-  fs::TempFile File = std::move(*FileOrErr);
+స్థిర Expected<std::unique_ptr<File_Output_బఫరు>>
+create_On_Disk_బఫరు(StringRef మార్గం, size_t కొలత, గుర్తులేని బహుళకం) {
+  Expected<fs::తాత్కాలిక_File> FileOrErr =
+      fs::తాత్కాలిక_File::create(మార్గం + ".tmp%%%%%%%", బహుళకం);
+  ఒకవేళ (!FileOrErr)
+    తిరిగి FileOrErr.takeError();
+  fs::తాత్కాలిక_File File = std::move(*FileOrErr);
 
-  if (auto EC = fs::resize_file_before_mapping_readwrite(File.FD, Size)) {
+  ఒకవేళ (స్వయంచాలక EC = fs::resize_file_before_mapping_readwrite(File.FD, కొలత)) {
     consumeError(File.discard());
-    return errorCodeToError(EC);
+    తిరిగి error_సంకేతం_గమ్యం_Error(EC);
   }
 
   // Mmap it.
-  std::error_code EC;
+  std::error_సంకేతం EC;
   fs::mapped_file_region MappedFile =
       fs::mapped_file_region(fs::convertFDToNativeFile(File.FD),
-                             fs::mapped_file_region::readwrite, Size, 0, EC);
+                             fs::mapped_file_region::readwrite, కొలత, 0, EC);
 
   // mmap(2) can fail if the underlying filesystem does not support it.
   // If that happens, we fall back to in-memory buffer as the last resort.
-  if (EC) {
+  ఒకవేళ (EC) {
     consumeError(File.discard());
-    return createInMemoryBuffer(Path, Size, Mode);
+    తిరిగి create_లోపల_జ్ఞాపకం_బఫరు(మార్గం, కొలత, బహుళకం);
   }
 
-  return std::make_unique<OnDiskBuffer>(Path, std::move(File),
+  తిరిగి std::make_unique<On_Disk_బఫరు>(మార్గం, std::move(File),
                                          std::move(MappedFile));
 }
 
 // Create an instance of FileOutputBuffer.
-Expected<std::unique_ptr<FileOutputBuffer>>
-FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
+Expected<std::unique_ptr<File_Output_బఫరు>>
+File_Output_బఫరు::create(StringRef మార్గం, size_t కొలత, గుర్తులేని Flags) {
   // Handle "-" as stdout just like llvm::raw_ostream does.
-  if (Path == "-")
-    return createInMemoryBuffer("-", Size, /*Mode=*/0);
+  ఒకవేళ (మార్గం == "-")
+    తిరిగి create_లోపల_జ్ఞాపకం_బఫరు("-", కొలత, /*Mode=*/0);
 
-  unsigned Mode = fs::all_read | fs::all_write;
-  if (Flags & F_executable)
-    Mode |= fs::all_exe;
+  గుర్తులేని బహుళకం = fs::all_read | fs::all_write;
+  ఒకవేళ (Flags & F_executable)
+    బహుళకం |= fs::all_exe;
 
   // If Size is zero, don't use mmap which will fail with EINVAL.
-  if (Size == 0)
-    return createInMemoryBuffer(Path, Size, Mode);
+  ఒకవేళ (కొలత == 0)
+    తిరిగి create_లోపల_జ్ఞాపకం_బఫరు(మార్గం, కొలత, బహుళకం);
 
-  fs::file_status Stat;
-  fs::status(Path, Stat);
+  fs::file_స్థితి Stat;
+  fs::స్థితి_3(మార్గం, Stat);
 
   // Usually, we want to create OnDiskBuffer to create a temporary file in
   // the same directory as the destination file and atomically replaces it
@@ -180,17 +180,17 @@ FileOutputBuffer::create(StringRef Path, size_t Size, unsigned Flags) {
   // use rename (e.g. we don't want to replace /dev/null with a regular
   // file.) If that's the case, we create an in-memory buffer, open the
   // destination file and write to it on commit().
-  switch (Stat.type()) {
-  case fs::file_type::directory_file:
-    return errorCodeToError(errc::is_a_directory);
-  case fs::file_type::regular_file:
-  case fs::file_type::file_not_found:
-  case fs::file_type::status_error:
-    if (Flags & F_mmap)
-      return createInMemoryBuffer(Path, Size, Mode);
-    else
-      return createOnDiskBuffer(Path, Size, Mode);
-  default:
-    return createInMemoryBuffer(Path, Size, Mode);
+  ఎంపిక (Stat.type()) {
+  స్థితి fs::file_type::directory_file:
+    తిరిగి error_సంకేతం_గమ్యం_Error(errc::is_a_directory);
+  స్థితి fs::file_type::regular_file:
+  స్థితి fs::file_type::file_not_దొరికింది:
+  స్థితి fs::file_type::స్థితి_error:
+    ఒకవేళ (Flags & F_mmap)
+      తిరిగి create_లోపల_జ్ఞాపకం_బఫరు(మార్గం, కొలత, బహుళకం);
+    లేకపోతే
+      తిరిగి create_On_Disk_బఫరు(మార్గం, కొలత, బహుళకం);
+  అప్రమేయ:
+    తిరిగి create_లోపల_జ్ఞాపకం_బఫరు(మార్గం, కొలత, బహుళకం);
   }
 }

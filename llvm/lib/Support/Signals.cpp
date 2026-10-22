@@ -11,133 +11,133 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Signals.h"
+#అన్తర్భావ "llvm/Support/Signals.h"
 
-#include "DebugOptions.h"
+#అన్తర్భావ "DebugOptions.h"
 
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Program.h"
-#include "llvm/Support/StringSaver.h"
-#include "llvm/Support/raw_ostream.h"
-#include <array>
-#include <cmath>
+#అన్తర్భావ "llvm/ADT/StringRef.h"
+#అన్తర్భావ "llvm/Config/llvm-config.h"
+#అన్తర్భావ "llvm/Support/CommandLine.h"
+#అన్తర్భావ "llvm/Support/ErrorOr.h"
+#అన్తర్భావ "llvm/Support/FileSystem.h"
+#అన్తర్భావ "llvm/Support/FileUtilities.h"
+#అన్తర్భావ "llvm/Support/Format.h"
+#అన్తర్భావ "llvm/Support/FormatVariadic.h"
+#అన్తర్భావ "llvm/Support/IOSandbox.h"
+#అన్తర్భావ "llvm/Support/ManagedStatic.h"
+#అన్తర్భావ "llvm/Support/MemoryBuffer.h"
+#అన్తర్భావ "llvm/Support/Path.h"
+#అన్తర్భావ "llvm/Support/Program.h"
+#అన్తర్భావ "llvm/Support/StringSaver.h"
+#అన్తర్భావ "llvm/Support/raw_ostream.h"
+#అన్తర్భావ <array>
+#అన్తర్భావ <cmath>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
 // Use explicit storage to avoid accessing cl::opt in a signal handler.
-static bool DisableSymbolicationFlag = false;
-static ManagedStatic<std::string> CrashDiagnosticsDirectory;
-namespace {
-struct CreateDisableSymbolication {
-  static void *call() {
-    return new cl::opt<bool, true>(
+స్థిర తార్కిక DisableSymbolicationFlag = అబద్ధం;
+స్థిర ManagedStatic<std::string> CrashDiagnosticsDirectory;
+నామాకాశ {
+నిర్మాణం CreateDisableSymbolication {
+  స్థిర శూన్య *call() {
+    తిరిగి కొత్త cl::opt<తార్కిక, నిజం>(
         "disable-symbolication",
         cl::desc("Disable symbolizing crash backtraces."),
         cl::location(DisableSymbolicationFlag), cl::Hidden);
   }
 };
-struct CreateCrashDiagnosticsDir {
-  static void *call() {
-    return new cl::opt<std::string, true>(
-        "crash-diagnostics-dir", cl::value_desc("directory"),
+నిర్మాణం CreateCrashDiagnosticsDir {
+  స్థిర శూన్య *call() {
+    తిరిగి కొత్త cl::opt<std::string, నిజం>(
+        "crash-diagnostics-dir", cl::విలువ_desc("directory"),
         cl::desc("Directory for crash diagnostic files."),
         cl::location(*CrashDiagnosticsDirectory), cl::Hidden);
   }
 };
 } // namespace
-void llvm::initSignalsOptions() {
-  static ManagedStatic<cl::opt<bool, true>, CreateDisableSymbolication>
+శూన్య llvm::init_సంకేతాలు_Options() {
+  స్థిర ManagedStatic<cl::opt<తార్కిక, నిజం>, CreateDisableSymbolication>
       DisableSymbolication;
-  static ManagedStatic<cl::opt<std::string, true>, CreateCrashDiagnosticsDir>
+  స్థిర ManagedStatic<cl::opt<std::string, నిజం>, CreateCrashDiagnosticsDir>
       CrashDiagnosticsDir;
   *DisableSymbolication;
   *CrashDiagnosticsDir;
 }
 
-constexpr char DisableSymbolizationEnv[] = "LLVM_DISABLE_SYMBOLIZATION";
-constexpr char LLVMSymbolizerPathEnv[] = "LLVM_SYMBOLIZER_PATH";
-constexpr char EnableSymbolizerMarkupEnv[] = "LLVM_ENABLE_SYMBOLIZER_MARKUP";
+constexpr అక్షరం DisableSymbolizationEnv[] = "LLVM_DISABLE_SYMBOLIZATION";
+constexpr అక్షరం LLVMSymbolizer_మార్గం_Env[] = "LLVM_SYMBOLIZER_PATH";
+constexpr అక్షరం EnableSymbolizerMarkupEnv[] = "LLVM_ENABLE_SYMBOLIZER_MARKUP";
 
 // Callbacks to run in signal handler must be lock-free because a signal handler
 // could be running as we add new callbacks. We don't add unbounded numbers of
 // callbacks, an array is therefore sufficient.
-struct CallbackAndCookie {
+నిర్మాణం CallbackAndCookie {
   sys::SignalHandlerCallback Callback;
-  void *Cookie;
-  enum class Status { Empty, Initializing, Initialized, Executing };
-  std::atomic<Status> Flag;
+  శూన్య *Cookie;
+  గణన తరగతి స్థితి_2 { ఖాళీలు_2, Initializing, Initialized, Executing };
+  std::atomic<స్థితి_2> Flag;
 };
 
-static constexpr size_t MaxSignalHandlerCallbacks = 8;
+స్థిర constexpr size_t MaxSignalHandlerCallbacks = 8;
 
 // A global array of CallbackAndCookie may not compile with
 // -Werror=global-constructors in c++20 and above
-static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> &
-CallBacksToRun() {
-  static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> callbacks;
-  return callbacks;
+స్థిర std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> &
+Call_Backs_గమ్యం_నిరంతరం() {
+  స్థిర std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> callbacks;
+  తిరిగి callbacks;
 }
 
 // Signal-safe.
-void sys::RunSignalHandlers() {
+శూన్య sys::నిరంతరం_Signal_Handlers() {
   // Let's not interfere with stack trace symbolication and friends.
-  auto BypassSandbox = sandbox::scopedDisable();
+  స్వయంచాలక BypassSandbox = sandbox::scopedDisable();
 
-  for (CallbackAndCookie &RunMe : CallBacksToRun()) {
-    auto Expected = CallbackAndCookie::Status::Initialized;
-    auto Desired = CallbackAndCookie::Status::Executing;
-    if (!RunMe.Flag.compare_exchange_strong(Expected, Desired))
-      continue;
-    (*RunMe.Callback)(RunMe.Cookie);
-    RunMe.Callback = nullptr;
-    RunMe.Cookie = nullptr;
-    RunMe.Flag.store(CallbackAndCookie::Status::Empty);
+  కొరకు (CallbackAndCookie &నిరంతరం_Me : Call_Backs_గమ్యం_నిరంతరం()) {
+    స్వయంచాలక Expected = CallbackAndCookie::స్థితి_2::Initialized;
+    స్వయంచాలక Desired = CallbackAndCookie::స్థితి_2::Executing;
+    ఒకవేళ (!నిరంతరం_Me.Flag.compare_exchange_strong(Expected, Desired))
+      కొనసాగు;
+    (*నిరంతరం_Me.Callback)(నిరంతరం_Me.Cookie);
+    నిరంతరం_Me.Callback = శూన్యసూచిక;
+    నిరంతరం_Me.Cookie = శూన్యసూచిక;
+    నిరంతరం_Me.Flag.store(CallbackAndCookie::స్థితి_2::ఖాళీలు_2);
   }
 }
 
 // Signal-safe.
-static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
-                                void *Cookie) {
-  for (CallbackAndCookie &SetMe : CallBacksToRun()) {
-    auto Expected = CallbackAndCookie::Status::Empty;
-    auto Desired = CallbackAndCookie::Status::Initializing;
-    if (!SetMe.Flag.compare_exchange_strong(Expected, Desired))
-      continue;
-    SetMe.Callback = FnPtr;
-    SetMe.Cookie = Cookie;
-    SetMe.Flag.store(CallbackAndCookie::Status::Initialized);
-    return;
+స్థిర శూన్య చొప్పించు_Signal_Handler(sys::SignalHandlerCallback FnPtr,
+                                శూన్య *Cookie) {
+  కొరకు (CallbackAndCookie &సమితి_Me : Call_Backs_గమ్యం_నిరంతరం()) {
+    స్వయంచాలక Expected = CallbackAndCookie::స్థితి_2::ఖాళీలు_2;
+    స్వయంచాలక Desired = CallbackAndCookie::స్థితి_2::Initializing;
+    ఒకవేళ (!సమితి_Me.Flag.compare_exchange_strong(Expected, Desired))
+      కొనసాగు;
+    సమితి_Me.Callback = FnPtr;
+    సమితి_Me.Cookie = Cookie;
+    సమితి_Me.Flag.store(CallbackAndCookie::స్థితి_2::Initialized);
+    తిరిగి;
   }
   report_fatal_error("too many signal callbacks already registered");
 }
 
-static bool findModulesAndOffsets(void **StackTrace, int Depth,
-                                  const char **Modules, intptr_t *Offsets,
-                                  const char *MainExecutableName,
+స్థిర తార్కిక కనుగొను_Modules_And_Offsets(శూన్య **దొంతర_Trace, పూర్ణాంకం లోతు,
+                                  స్థిరరాశి అక్షరం **Modules, intptr_t *Offsets,
+                                  స్థిరరాశి అక్షరం *MainExecutableName,
                                   StringSaver &StrPool);
 
 /// Format a pointer value as hexadecimal. Zero pad it out so its always the
 /// same width.
-static FormattedNumber format_ptr(void *PC) {
+స్థిర Formatted_సంఖ్య format_ptr(శూన్య *PC) {
   // Each byte is two hex digits plus 2 for the 0x prefix.
-  unsigned PtrWidth = 2 + 2 * sizeof(void *);
-  return format_hex((uint64_t)PC, PtrWidth);
+  గుర్తులేని Ptr_వెడల్పు = 2 + 2 * పరిమాణం(శూన్య *);
+  తిరిగి format_hex((uint64_t)PC, Ptr_వెడల్పు);
 }
 
 /// Reads a file \p Filename written by llvm-symbolizer containing function
@@ -151,55 +151,55 @@ static FormattedNumber format_ptr(void *PC) {
 /// There may be multiple returned entries for a single \p AddressList entry if
 /// that frame address corresponds to one or more inlined frames; in this case,
 /// all frames for an address will appear contiguously and in-order.
-std::optional<SmallVector<std::pair<unsigned, std::string>, 0>>
-collectAddressSymbols(void **AddressList, unsigned AddressCount,
-                      const char *MainExecutableName,
-                      const std::string &LLVMSymbolizerPath) {
+std::optional<Small_సదిశ<std::pair<గుర్తులేని, std::string>, 0>>
+collect_చిరునామా_Symbols(శూన్య **చిరునామా_List, గుర్తులేని చిరునామా_లెక్క,
+                      స్థిరరాశి అక్షరం *MainExecutableName,
+                      స్థిరరాశి std::string &LLVMSymbolizer_మార్గం) {
   BumpPtrAllocator Allocator;
   StringSaver StrPool(Allocator);
-  SmallVector<const char *, 0> Modules(AddressCount, nullptr);
-  SmallVector<intptr_t, 0> Offsets(AddressCount, 0);
-  if (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
-                             Offsets.data(), MainExecutableName, StrPool))
-    return {};
-  int InputFD;
-  SmallString<32> InputFile, OutputFile;
-  sys::fs::createTemporaryFile("symbolizer-input", "", InputFD, InputFile);
+  Small_సదిశ<స్థిరరాశి అక్షరం *, 0> Modules(చిరునామా_లెక్క, శూన్యసూచిక);
+  Small_సదిశ<intptr_t, 0> Offsets(చిరునామా_లెక్క, 0);
+  ఒకవేళ (!కనుగొను_Modules_And_Offsets(చిరునామా_List, చిరునామా_లెక్క, Modules.దత్తాంశం(),
+                             Offsets.దత్తాంశం(), MainExecutableName, StrPool))
+    తిరిగి {};
+  పూర్ణాంకం ఆదానం_FD;
+  SmallString<32> ఆదానం_File, OutputFile;
+  sys::fs::createTemporaryFile("symbolizer-input", "", ఆదానం_FD, ఆదానం_File);
   sys::fs::createTemporaryFile("symbolizer-output", "", OutputFile);
-  FileRemover InputRemover(InputFile.c_str());
+  FileRemover ఆదానం_Remover(ఆదానం_File.c_str());
   FileRemover OutputRemover(OutputFile.c_str());
 
   {
-    raw_fd_ostream Input(InputFD, true);
-    for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-      if (Modules[AddrIdx])
-        Input << Modules[AddrIdx] << " " << (void *)Offsets[AddrIdx] << "\n";
+    raw_fd_ostream ఆదానం(ఆదానం_FD, నిజం);
+    కొరకు (గుర్తులేని AddrIdx = 0; AddrIdx < చిరునామా_లెక్క; AddrIdx++) {
+      ఒకవేళ (Modules[AddrIdx])
+        ఆదానం << Modules[AddrIdx] << " " << (శూన్య *)Offsets[AddrIdx] << "\n";
     }
   }
 
-  std::optional<StringRef> Redirects[] = {InputFile.str(), OutputFile.str(),
+  std::optional<StringRef> Redirects[] = {ఆదానం_File.str(), OutputFile.str(),
                                           StringRef("")};
-  StringRef Args[] = {"llvm-symbolizer", "--functions=linkage", "--inlining",
-#ifdef _WIN32
+  StringRef వాదనలు[] = {"llvm-symbolizer", "--functions=linkage", "--inlining",
+#నిర్వచితమైతే _WIN32
                       // Pass --relative-address on Windows so that we don't
                       // have to add ImageBase from PE file.
                       // FIXME: Make this the default for llvm-symbolizer.
                       "--relative-address",
-#endif
+#అయితే_ముగింపు
                       "--demangle"};
-  int RunResult =
-      sys::ExecuteAndWait(LLVMSymbolizerPath, Args, std::nullopt, Redirects);
-  if (RunResult != 0)
-    return {};
+  పూర్ణాంకం నిరంతరం_ఫలితం =
+      sys::ExecuteAndWait(LLVMSymbolizer_మార్గం, వాదనలు, std::nullopt, Redirects);
+  ఒకవేళ (నిరంతరం_ఫలితం != 0)
+    తిరిగి {};
 
-  SmallVector<std::pair<unsigned, std::string>, 0> Result;
-  auto OutputBuf = MemoryBuffer::getFile(OutputFile.c_str());
-  if (!OutputBuf)
-    return {};
-  StringRef Output = OutputBuf.get()->getBuffer();
-  SmallVector<StringRef, 32> Lines;
-  Output.split(Lines, "\n");
-  auto *CurLine = Lines.begin();
+  Small_సదిశ<std::pair<గుర్తులేని, std::string>, 0> ఫలితం;
+  స్వయంచాలక OutputBuf = జ్ఞాపకం_బఫరు::getFile(OutputFile.c_str());
+  ఒకవేళ (!OutputBuf)
+    తిరిగి {};
+  StringRef Output = OutputBuf.get()->get_బఫరు();
+  Small_సదిశ<StringRef, 32> పంక్తులు;
+  Output.విభజించు(పంక్తులు, "\n");
+  స్వయంచాలక *Cur_పంక్తి = పంక్తులు.begin();
   // Lines contains the output from llvm-symbolizer, which should contain for
   // each address with a module in order of appearance, one or more lines
   // containing the function name and line associated with that address,
@@ -209,157 +209,157 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   // containing just the formatted address; for all other output entries, we
   // output the function entry if it is known, and either the line number if it
   // is known or the module+address offset otherwise.
-  for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-    if (!Modules[AddrIdx]) {
-      auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
-      raw_string_ostream OS(SymbolizedFrame.second);
-      OS << format_ptr(AddressList[AddrIdx]);
-      continue;
+  కొరకు (గుర్తులేని AddrIdx = 0; AddrIdx < చిరునామా_లెక్క; AddrIdx++) {
+    ఒకవేళ (!Modules[AddrIdx]) {
+      స్వయంచాలక &Symbolized_చట్రం = ఫలితం.emplace_వెనుక(std::make_pair(AddrIdx, ""));
+      raw_string_ostream OS(Symbolized_చట్రం.రెండవ_2);
+      OS << format_ptr(చిరునామా_List[AddrIdx]);
+      కొనసాగు;
     }
     // Read pairs of lines (function name and file/line info) until we
     // encounter empty line.
-    for (;;) {
-      if (CurLine == Lines.end())
-        return {};
-      StringRef FunctionName = *CurLine++;
-      if (FunctionName.empty())
-        break;
-      auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
-      raw_string_ostream OS(SymbolizedFrame.second);
-      OS << format_ptr(AddressList[AddrIdx]) << ' ';
-      if (!FunctionName.starts_with("??"))
+    కొరకు (;;) {
+      ఒకవేళ (Cur_పంక్తి == పంక్తులు.చివర())
+        తిరిగి {};
+      StringRef FunctionName = *Cur_పంక్తి++;
+      ఒకవేళ (FunctionName.ఖాళీలు())
+        ఆపు;
+      స్వయంచాలక &Symbolized_చట్రం = ఫలితం.emplace_వెనుక(std::make_pair(AddrIdx, ""));
+      raw_string_ostream OS(Symbolized_చట్రం.రెండవ_2);
+      OS << format_ptr(చిరునామా_List[AddrIdx]) << ' ';
+      ఒకవేళ (!FunctionName.starts_with("??"))
         OS << FunctionName << ' ';
-      if (CurLine == Lines.end())
-        return {};
-      StringRef FileLineInfo = *CurLine++;
-      if (!FileLineInfo.starts_with("??")) {
-        OS << FileLineInfo;
-      } else {
+      ఒకవేళ (Cur_పంక్తి == పంక్తులు.చివర())
+        తిరిగి {};
+      StringRef File_పంక్తి_Info = *Cur_పంక్తి++;
+      ఒకవేళ (!File_పంక్తి_Info.starts_with("??")) {
+        OS << File_పంక్తి_Info;
+      } లేకపోతే {
         OS << "(" << Modules[AddrIdx] << '+' << format_hex(Offsets[AddrIdx], 0)
            << ")";
       }
     }
   }
-  return Result;
+  తిరిగి ఫలితం;
 }
 
-ErrorOr<std::string> getLLVMSymbolizerPath(StringRef Argv0 = {}) {
-  ErrorOr<std::string> LLVMSymbolizerPathOrErr = std::error_code();
-  if (const char *Path = getenv(LLVMSymbolizerPathEnv)) {
-    LLVMSymbolizerPathOrErr = sys::findProgramByName(Path);
-  } else if (!Argv0.empty()) {
-    StringRef Parent = llvm::sys::path::parent_path(Argv0);
-    if (!Parent.empty())
-      LLVMSymbolizerPathOrErr =
-          sys::findProgramByName("llvm-symbolizer", Parent);
+ErrorOr<std::string> get_LLVMSymbolizer_మార్గం(StringRef Argv0 = {}) {
+  ErrorOr<std::string> LLVMSymbolizer_మార్గం_Or_Err = std::error_సంకేతం();
+  ఒకవేళ (స్థిరరాశి అక్షరం *మార్గం = getenv(LLVMSymbolizer_మార్గం_Env)) {
+    LLVMSymbolizer_మార్గం_Or_Err = sys::కనుగొను_కార్యక్రమం_By_Name(మార్గం);
+  } లేకపోతే ఒకవేళ (!Argv0.ఖాళీలు()) {
+    StringRef మాతృ_2 = llvm::sys::మార్గం_2::మాతృ_మార్గం(Argv0);
+    ఒకవేళ (!మాతృ_2.ఖాళీలు())
+      LLVMSymbolizer_మార్గం_Or_Err =
+          sys::కనుగొను_కార్యక్రమం_By_Name("llvm-symbolizer", మాతృ_2);
   }
-  if (!LLVMSymbolizerPathOrErr)
-    LLVMSymbolizerPathOrErr = sys::findProgramByName("llvm-symbolizer");
-  return LLVMSymbolizerPathOrErr;
+  ఒకవేళ (!LLVMSymbolizer_మార్గం_Or_Err)
+    LLVMSymbolizer_మార్గం_Or_Err = sys::కనుగొను_కార్యక్రమం_By_Name("llvm-symbolizer");
+  తిరిగి LLVMSymbolizer_మార్గం_Or_Err;
 }
 
 /// Helper that launches llvm-symbolizer and symbolizes a backtrace.
-LLVM_ATTRIBUTE_USED
-static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
-                                      int Depth, llvm::raw_ostream &OS) {
-  if (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
-    return false;
+LLVM_ATTRIBUTE_వాడిన
+స్థిర తార్కిక print_Symbolized_దొంతర_Trace(StringRef Argv0, శూన్య **దొంతర_Trace,
+                                      పూర్ణాంకం లోతు, llvm::raw_ostream &OS) {
+  ఒకవేళ (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
+    తిరిగి అబద్ధం;
 
   // Don't recursively invoke the llvm-symbolizer binary.
-  if (Argv0.contains("llvm-symbolizer"))
-    return false;
+  ఒకవేళ (Argv0.కలిగియుంది("llvm-symbolizer"))
+    తిరిగి అబద్ధం;
 
   // FIXME: Subtract necessary number from StackTrace entries to turn return
   // addresses into actual instruction addresses.
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
-  ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath(Argv0);
-  if (!LLVMSymbolizerPathOrErr)
-    return false;
-  const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
+  ErrorOr<std::string> LLVMSymbolizer_మార్గం_Or_Err = get_LLVMSymbolizer_మార్గం(Argv0);
+  ఒకవేళ (!LLVMSymbolizer_మార్గం_Or_Err)
+    తిరిగి అబద్ధం;
+  స్థిరరాశి std::string &LLVMSymbolizer_మార్గం = *LLVMSymbolizer_మార్గం_Or_Err;
 
   // If we don't know argv0 or the address of main() at this point, try
   // to guess it anyway (it's possible on some platforms).
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
-                             : sys::fs::getMainExecutable(nullptr, nullptr);
+                             : sys::fs::getMainExecutable(శూన్యసూచిక, శూన్యసూచిక);
 
-  auto SymbolizedAddressesOpt = collectAddressSymbols(
-      StackTrace, Depth, MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return false;
-  for (unsigned FrameNo = 0; FrameNo < SymbolizedAddressesOpt->size();
-       ++FrameNo) {
-    OS << right_justify(formatv("#{0}", FrameNo).str(), std::log10(Depth) + 2)
-       << ' ' << (*SymbolizedAddressesOpt)[FrameNo].second << '\n';
+  స్వయంచాలక Symbolized_చిరునామాలు_Opt = collect_చిరునామా_Symbols(
+      దొంతర_Trace, లోతు, MainExecutableName.c_str(), LLVMSymbolizer_మార్గం);
+  ఒకవేళ (!Symbolized_చిరునామాలు_Opt)
+    తిరిగి అబద్ధం;
+  కొరకు (గుర్తులేని చట్రం_No = 0; చట్రం_No < Symbolized_చిరునామాలు_Opt->కొలత_2();
+       ++చట్రం_No) {
+    OS << కుడి_justify(formatv("#{0}", చట్రం_No).str(), std::log10(లోతు) + 2)
+       << ' ' << (*Symbolized_చిరునామాలు_Opt)[చట్రం_No].రెండవ_2 << '\n';
   }
-  return true;
+  తిరిగి నిజం;
 }
 
-#if LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
-void sys::symbolizeAddresses(AddressSet &Addresses,
-                             SymbolizedAddressMap &SymbolizedAddresses) {
-  assert(!DisableSymbolicationFlag && !getenv(DisableSymbolizationEnv) &&
+#ఒకవేళ LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
+శూన్య sys::symbolize_చిరునామాలు(చిరునామా_సమితి &చిరునామాలు,
+                             Symbolized_చిరునామా_Map &Symbolized_చిరునామాలు) {
+  ప్రతిజ్ఞా(!DisableSymbolicationFlag && !getenv(DisableSymbolizationEnv) &&
          "Debugify origin stacktraces require symbolization to be enabled.");
 
   // This function deals with temporary files for the purposes of symbolization
   // only, not formal compiler output.
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  స్వయంచాలక BypassSandbox = sys::sandbox::scopedDisable();
 
   // Convert Set of Addresses to ordered list.
-  SmallVector<void *, 0> AddressList(Addresses.begin(), Addresses.end());
-  if (AddressList.empty())
-    return;
-  llvm::sort(AddressList);
+  Small_సదిశ<శూన్య *, 0> చిరునామా_List(చిరునామాలు.begin(), చిరునామాలు.చివర());
+  ఒకవేళ (చిరునామా_List.ఖాళీలు())
+    తిరిగి;
+  llvm::క్రమీకరించు(చిరునామా_List);
 
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
-  ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath();
-  if (!LLVMSymbolizerPathOrErr)
+  ErrorOr<std::string> LLVMSymbolizer_మార్గం_Or_Err = get_LLVMSymbolizer_మార్గం();
+  ఒకవేళ (!LLVMSymbolizer_మార్గం_Or_Err)
     report_fatal_error("Debugify origin stacktraces require llvm-symbolizer");
-  const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
+  స్థిరరాశి std::string &LLVMSymbolizer_మార్గం = *LLVMSymbolizer_మార్గం_Or_Err;
 
   // Try to guess the main executable name, since we don't have argv0 available
   // here.
-  std::string MainExecutableName = sys::fs::getMainExecutable(nullptr, nullptr);
+  std::string MainExecutableName = sys::fs::getMainExecutable(శూన్యసూచిక, శూన్యసూచిక);
 
-  auto SymbolizedAddressesOpt =
-      collectAddressSymbols(AddressList.begin(), AddressList.size(),
-                            MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return;
-  for (auto SymbolizedFrame : *SymbolizedAddressesOpt) {
-    SmallVector<std::string, 0> &SymbolizedAddrs =
-        SymbolizedAddresses[AddressList[SymbolizedFrame.first]];
-    SymbolizedAddrs.push_back(SymbolizedFrame.second);
+  స్వయంచాలక Symbolized_చిరునామాలు_Opt =
+      collect_చిరునామా_Symbols(చిరునామా_List.begin(), చిరునామా_List.కొలత_2(),
+                            MainExecutableName.c_str(), LLVMSymbolizer_మార్గం);
+  ఒకవేళ (!Symbolized_చిరునామాలు_Opt)
+    తిరిగి;
+  కొరకు (స్వయంచాలక Symbolized_చట్రం : *Symbolized_చిరునామాలు_Opt) {
+    Small_సదిశ<std::string, 0> &SymbolizedAddrs =
+        Symbolized_చిరునామాలు[చిరునామా_List[Symbolized_చట్రం.మొదటి_2]];
+    SymbolizedAddrs.నెట్టు_వెనుక(Symbolized_చట్రం.రెండవ_2);
   }
-  return;
+  తిరిగి;
 }
-#endif
+#అయితే_ముగింపు
 
-static bool printMarkupContext(raw_ostream &OS, const char *MainExecutableName);
+స్థిర తార్కిక printMarkupContext(raw_ostream &OS, స్థిరరాశి అక్షరం *MainExecutableName);
 
-LLVM_ATTRIBUTE_USED
-static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, int Depth,
+LLVM_ATTRIBUTE_వాడిన
+స్థిర తార్కిక print_Markup_దొంతర_Trace(StringRef Argv0, శూన్య **దొంతర_Trace, పూర్ణాంకం లోతు,
                                   raw_ostream &OS) {
-  const char *Env = getenv(EnableSymbolizerMarkupEnv);
-  if (!Env || !*Env)
-    return false;
+  స్థిరరాశి అక్షరం *Env = getenv(EnableSymbolizerMarkupEnv);
+  ఒకవేళ (!Env || !*Env)
+    తిరిగి అబద్ధం;
 
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
-                             : sys::fs::getMainExecutable(nullptr, nullptr);
-  if (!printMarkupContext(OS, MainExecutableName.c_str()))
-    return false;
-  for (int I = 0; I < Depth; I++)
-    OS << format("{{{bt:%d:%#016x}}}\n", I, StackTrace[I]);
-  return true;
+                             : sys::fs::getMainExecutable(శూన్యసూచిక, శూన్యసూచిక);
+  ఒకవేళ (!printMarkupContext(OS, MainExecutableName.c_str()))
+    తిరిగి అబద్ధం;
+  కొరకు (పూర్ణాంకం I = 0; I < లోతు; I++)
+    OS << format("{{{bt:%d:%#016x}}}\n", I, దొంతర_Trace[I]);
+  తిరిగి నిజం;
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Signals.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Signals.inc"
-#endif
+#నిర్వచితమైతే LLVM_ON_UNIX
+#అన్తర్భావ "Unix/Signals.inc"
+#అయితే_ముగింపు
+#నిర్వచితమైతే _WIN32
+#అన్తర్భావ "Windows/Signals.inc"
+#అయితే_ముగింపు

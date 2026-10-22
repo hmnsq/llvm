@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ModRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
+#అన్తర్భావ "llvm/Support/ModRef.h"
+#అన్తర్భావ "llvm/ADT/STLExtras.h"
+#అన్తర్భావ "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+ఉపయోగించి నామాకాశ llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
-  switch (MR) {
-  case ModRefInfo::NoModRef:
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, ModRefInfo MR) {
+  ఎంపిక (MR) {
+  స్థితి ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    ఆపు;
+  స్థితి ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    ఆపు;
+  స్థితి ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    ఆపు;
+  స్థితి ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    ఆపు;
   }
-  return OS;
+  తిరిగి OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
-  interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
-    switch (Loc) {
-    case IRMemLocation::ArgMem:
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, జ్ఞాపకం_Effects ME) {
+  interleaveComma(జ్ఞాపకం_Effects::locations(), OS, [&](IRMemLocation Loc) {
+    ఎంపిక (Loc) {
+    స్థితి IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      ఆపు;
+    స్థితి IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      ఆపు;
+    స్థితి IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      ఆపు;
+    స్థితి IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      ఆపు;
+    స్థితి IRMemLocation::లక్ష్యం_Mem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      ఆపు;
+    స్థితి IRMemLocation::లక్ష్యం_Mem1:
       OS << "TargetMem1: ";
-      break;
+      ఆపు;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  తిరిగి OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, CaptureComponents CC) {
+  ఒకవేళ (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    తిరిగి OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  ఒకవేళ (captures_చిరునామా_Is_Null_Only(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  లేకపోతే ఒకవేళ (captures_చిరునామా(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  ఒకవేళ (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  ఒకవేళ (captures_నిండిన_Provenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  తిరిగి OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
+raw_ostream &llvm::క్రియాకారకం<<(raw_ostream &OS, CaptureInfo CI) {
   ListSeparator LS;
   CaptureComponents Other = CI.getOtherComponents();
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  ఒకవేళ (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  ఒకవేళ (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  తిరిగి OS;
 }
