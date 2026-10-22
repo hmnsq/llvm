@@ -15,36 +15,36 @@ using namespace llvm;
 /// Given a diagnostic kind, return a human readable string for it.
 static StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
   switch (kind) {
-  case SourceMgr::DK_Note:
-    return "note";
-  case SourceMgr::DK_Warning:
-    return "warning";
-  case SourceMgr::DK_Error:
-    return "error";
-  case SourceMgr::DK_Remark:
-    return "remark";
+  pak_sa SourceMgr::DK_Note:
+    ᨀᨘᨒ "note";
+  pak_sa SourceMgr::DK_Warning:
+    ᨀᨘᨒ "warning";
+  pak_sa SourceMgr::DK_Error:
+    ᨀᨘᨒ "error";
+  pak_sa SourceMgr::DK_Remark:
+    ᨀᨘᨒ "remark";
   }
   llvm_unreachable("Unknown SourceMgr::DiagKind");
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
     raw_ostream &os, SourceMgr &mgr, const Twine &msg) const {
-  if (fileLoc.isValid()) {
+  ᨀᨘ (fileLoc.isValid()) {
     SMRange range(fileLoc, SMLoc::getFromPointer(fileLoc.getPointer() +
                                                  substring.size()));
     mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg, range);
-  } else {
+  } ᨀᨘᨁ {
     mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg);
   }
-  return false;
+  ᨀᨘᨒ false;
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::match(StringRef str) const {
   // If this isn't a regex diagnostic, we simply check if the string was
   // contained.
-  if (substringRegex)
-    return substringRegex->match(str);
-  return str.contains(substring);
+  ᨀᨘ (substringRegex)
+    ᨀᨘᨒ substringRegex->match(str);
+  ᨀᨘᨒ str.contains(substring);
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
@@ -52,32 +52,32 @@ bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
   std::string regexStr;
   raw_string_ostream regexOS(regexStr);
   StringRef strToProcess = substring;
-  while (!strToProcess.empty()) {
+  ᨀᨛ (!strToProcess.empty()) {
     // Find the next regex block.
     size_t regexIt = strToProcess.find("{{");
-    if (regexIt == StringRef::npos) {
+    ᨀᨘ (regexIt == StringRef::npos) {
       regexOS << Regex::escape(strToProcess);
-      break;
+      bha_nga;
     }
     regexOS << Regex::escape(strToProcess.take_front(regexIt));
     strToProcess = strToProcess.drop_front(regexIt + 2);
 
     // Find the end of the regex block.
     size_t regexEndIt = strToProcess.find("}}");
-    if (regexEndIt == StringRef::npos)
-      return emitError(os, mgr, "found start of regex with no end '}}'");
+    ᨀᨘ (regexEndIt == StringRef::npos)
+      ᨀᨘᨒ emitError(os, mgr, "found start of regex with no end '}}'");
     StringRef regexBlock = strToProcess.take_front(regexEndIt);
 
     // Validate that the regex is actually valid.
     std::string regexError;
-    if (!Regex(regexBlock).isValid(regexError))
-      return emitError(os, mgr, "invalid regex: " + regexError);
+    ᨀᨘ (!Regex(regexBlock).isValid(regexError))
+      ᨀᨘᨒ emitError(os, mgr, "invalid regex: " + regexError);
 
     regexOS << '(' << regexBlock << ')';
     strToProcess = strToProcess.drop_front(regexEndIt + 2);
   }
   substringRegex = Regex(regexStr);
-  return true;
+  ᨀᨘᨒ true;
 }
 
 MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>
@@ -85,8 +85,8 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
                                                   SourceMgr &mgr,
                                                   const MemoryBuffer *buf) {
   // If the buffer is invalid, return an empty list.
-  if (!buf)
-    return {};
+  ᨀᨘ (!buf)
+    ᨀᨘᨒ {};
   auto &expectedDiags = expectedDiagsPerFile[buf->getBufferIdentifier()];
 
   // The number of the last line that did not correlate to a designator.
@@ -100,9 +100,9 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
   buf->getBuffer().split(lines, '\n');
   for (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
     SmallVector<StringRef, 4> matches;
-    if (!expected.match(lines[lineNo].rtrim(), &matches)) {
+    ᨀᨘ (!expected.match(lines[lineNo].rtrim(), &matches)) {
       // Check for designators that apply to this line.
-      if (!designatorsForNextLine.empty()) {
+      ᨀᨘ (!designatorsForNextLine.empty()) {
         for (unsigned diagIndex : designatorsForNextLine)
           expectedDiags[diagIndex].lineNo = lineNo + 1;
         designatorsForNextLine.clear();
@@ -115,47 +115,47 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
     SMLoc expectedStart = SMLoc::getFromPointer(matches[0].data());
 
     SourceMgr::DiagKind kind;
-    if (matches[1] == "error")
+    ᨀᨘ (matches[1] == "error")
       kind = SourceMgr::DK_Error;
-    else if (matches[1] == "warning")
+    ᨀᨘᨁ ᨀᨘ (matches[1] == "warning")
       kind = SourceMgr::DK_Warning;
-    else if (matches[1] == "remark")
+    ᨀᨘᨁ ᨀᨘ (matches[1] == "remark")
       kind = SourceMgr::DK_Remark;
-    else {
+    ᨀᨘᨁ {
       assert(matches[1] == "note");
       kind = SourceMgr::DK_Note;
     }
     ExpectedDiag record(kind, lineNo + 1, expectedStart, matches[5]);
 
     // Check to see if this is a regex match, i.e. it includes the `-re`.
-    if (!matches[2].empty() && !record.computeRegex(os, mgr)) {
+    ᨀᨘ (!matches[2].empty() && !record.computeRegex(os, mgr)) {
       ok = false;
       continue;
     }
 
     StringRef offsetMatch = matches[3];
-    if (!offsetMatch.empty()) {
+    ᨀᨘ (!offsetMatch.empty()) {
       offsetMatch = offsetMatch.drop_front(1);
 
       // Get the integer value without the @ and +/- prefix.
-      if (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
-        int offset;
+      ᨀᨘ (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
+        puur_naa_nka offset;
         offsetMatch.drop_front().getAsInteger(0, offset);
 
-        if (offsetMatch.front() == '+')
+        ᨀᨘ (offsetMatch.front() == '+')
           record.lineNo += offset;
-        else
+        ᨀᨘᨁ
           record.lineNo -= offset;
-      } else if (offsetMatch.consume_front("unknown")) {
+      } ᨀᨘᨁ ᨀᨘ (offsetMatch.consume_front("unknown")) {
         // This is matching unknown locations.
         record.fileLoc = SMLoc();
         expectedUnknownLocDiags.emplace_back(std::move(record));
         continue;
-      } else if (offsetMatch.consume_front("above")) {
+      } ᨀᨘᨁ ᨀᨘ (offsetMatch.consume_front("above")) {
         // If the designator applies 'above' we add it to the last non
         // designator line.
         record.lineNo = lastNonDesignatorLine + 1;
-      } else {
+      } ᨀᨘᨁ {
         // Otherwise, this is a 'below' designator and applies to the next
         // non-designator line.
         assert(offsetMatch.consume_front("below"));
@@ -168,15 +168,15 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
     }
     expectedDiags.emplace_back(std::move(record));
   }
-  return expectedDiags;
+  ᨀᨘᨒ expectedDiags;
 }
 
 std::optional<MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>>
 SourceMgrDiagnosticVerifier::getExpectedDiags(StringRef bufName) {
   auto expectedDiags = expectedDiagsPerFile.find(bufName);
-  if (expectedDiags != expectedDiagsPerFile.end())
-    return MutableArrayRef<ExpectedDiag>(expectedDiags->second);
-  return std::nullopt;
+  ᨀᨘ (expectedDiags != expectedDiagsPerFile.end())
+    ᨀᨘᨒ MutableArrayRef<ExpectedDiag>(expectedDiags->second);
+  ᨀᨘᨒ std::nullopt;
 }
 
 SourceMgrDiagnosticVerifier::MatchResult
@@ -185,16 +185,16 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
                                      const MemoryBuffer *buf, unsigned lineNo,
                                      StringRef message, bool reportUnexpected) {
   MutableArrayRef<ExpectedDiag> diags;
-  if (hasLoc) {
+  ᨀᨘ (hasLoc) {
     // If the buffer couldn't be resolved, `diags` stays empty: a diagnostic
     // with a location in an unknown file can never match anything.
-    if (buf) {
-      if (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
+    ᨀᨘ (buf) {
+      ᨀᨘ (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
         diags = *maybeDiags;
-      else
+      ᨀᨘᨁ
         diags = computeExpectedDiags(os, mgr, buf);
     }
-  } else {
+  } ᨀᨘᨁ {
     diags = expectedUnknownLocDiags;
   }
 
@@ -205,12 +205,12 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
   // If this was an expected error, remember that we saw it and return.
   for (auto &e : diags) {
     // File line must match (unless it's an unknown location).
-    if (hasLoc && e.lineNo != lineNo)
+    ᨀᨘ (hasLoc && e.lineNo != lineNo)
       continue;
-    if (e.match(message)) {
-      if (e.kind == kind) {
+    ᨀᨘ (e.match(message)) {
+      ᨀᨘ (e.kind == kind) {
         e.matched = true;
-        return MatchResult::Matched;
+        ᨀᨘᨒ MatchResult::Matched;
       }
 
       // If this only differs based on the diagnostic kind, then consider it
@@ -219,26 +219,26 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
     }
   }
 
-  if (!reportUnexpected)
-    return MatchResult::Ignored;
+  ᨀᨘ (!reportUnexpected)
+    ᨀᨘᨒ MatchResult::Ignored;
 
   ok = false;
 
   // Otherwise, emit an error for the near miss.
-  if (nearMiss) {
+  ᨀᨘ (nearMiss) {
     mgr.PrintMessage(os, nearMiss->fileLoc, SourceMgr::DK_Error,
                      "'" + getDiagKindStr(kind) +
                          "' diagnostic emitted when expecting a '" +
                          getDiagKindStr(nearMiss->kind) + "'");
-    return MatchResult::NearMiss;
+    ᨀᨘᨒ MatchResult::NearMiss;
   }
-  return MatchResult::Unexpected;
+  ᨀᨘᨒ MatchResult::Unexpected;
 }
 
 bool SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
   // Verify that all expected errors were seen.
   auto checkExpectedDiags = [&](ExpectedDiag &diag) {
-    if (!diag.matched) {
+    ᨀᨘ (!diag.matched) {
       diag.emitError(os, mgr,
                      "expected " + getDiagKindStr(diag.kind) + " \"" +
                          diag.substring + "\" was not produced");
@@ -251,5 +251,5 @@ bool SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
   for (auto &diag : expectedUnknownLocDiags)
     checkExpectedDiags(diag);
   expectedDiagsPerFile.clear();
-  return ok;
+  ᨀᨘᨒ ok;
 }

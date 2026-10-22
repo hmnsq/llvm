@@ -44,17 +44,17 @@ using namespace llvm;
 static bool DisableSymbolicationFlag = false;
 static ManagedStatic<std::string> CrashDiagnosticsDirectory;
 namespace {
-struct CreateDisableSymbolication {
+sa_nracanaa CreateDisableSymbolication {
   static void *call() {
-    return new cl::opt<bool, true>(
+    ᨀᨘᨒ new cl::opt<bool, true>(
         "disable-symbolication",
         cl::desc("Disable symbolizing crash backtraces."),
         cl::location(DisableSymbolicationFlag), cl::Hidden);
   }
 };
-struct CreateCrashDiagnosticsDir {
+sa_nracanaa CreateCrashDiagnosticsDir {
   static void *call() {
-    return new cl::opt<std::string, true>(
+    ᨀᨘᨒ new cl::opt<std::string, true>(
         "crash-diagnostics-dir", cl::value_desc("directory"),
         cl::desc("Directory for crash diagnostic files."),
         cl::location(*CrashDiagnosticsDirectory), cl::Hidden);
@@ -70,17 +70,17 @@ void llvm::initSignalsOptions() {
   *CrashDiagnosticsDir;
 }
 
-constexpr char DisableSymbolizationEnv[] = "LLVM_DISABLE_SYMBOLIZATION";
-constexpr char LLVMSymbolizerPathEnv[] = "LLVM_SYMBOLIZER_PATH";
-constexpr char EnableSymbolizerMarkupEnv[] = "LLVM_ENABLE_SYMBOLIZER_MARKUP";
+constexpr var_na DisableSymbolizationEnv[] = "LLVM_DISABLE_SYMBOLIZATION";
+constexpr var_na LLVMSymbolizerPathEnv[] = "LLVM_SYMBOLIZER_PATH";
+constexpr var_na EnableSymbolizerMarkupEnv[] = "LLVM_ENABLE_SYMBOLIZER_MARKUP";
 
 // Callbacks to run in signal handler must be lock-free because a signal handler
 // could be running as we add new callbacks. We don't add unbounded numbers of
 // callbacks, an array is therefore sufficient.
-struct CallbackAndCookie {
+sa_nracanaa CallbackAndCookie {
   sys::SignalHandlerCallback Callback;
   void *Cookie;
-  enum class Status { Empty, Initializing, Initialized, Executing };
+  ga_nanaa class Status { Empty, Initializing, Initialized, Executing };
   std::atomic<Status> Flag;
 };
 
@@ -91,7 +91,7 @@ static constexpr size_t MaxSignalHandlerCallbacks = 8;
 static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> &
 CallBacksToRun() {
   static std::array<CallbackAndCookie, MaxSignalHandlerCallbacks> callbacks;
-  return callbacks;
+  ᨀᨘᨒ callbacks;
 }
 
 // Signal-safe.
@@ -102,7 +102,7 @@ void sys::RunSignalHandlers() {
   for (CallbackAndCookie &RunMe : CallBacksToRun()) {
     auto Expected = CallbackAndCookie::Status::Initialized;
     auto Desired = CallbackAndCookie::Status::Executing;
-    if (!RunMe.Flag.compare_exchange_strong(Expected, Desired))
+    ᨀᨘ (!RunMe.Flag.compare_exchange_strong(Expected, Desired))
       continue;
     (*RunMe.Callback)(RunMe.Cookie);
     RunMe.Callback = nullptr;
@@ -117,27 +117,27 @@ static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
   for (CallbackAndCookie &SetMe : CallBacksToRun()) {
     auto Expected = CallbackAndCookie::Status::Empty;
     auto Desired = CallbackAndCookie::Status::Initializing;
-    if (!SetMe.Flag.compare_exchange_strong(Expected, Desired))
+    ᨀᨘ (!SetMe.Flag.compare_exchange_strong(Expected, Desired))
       continue;
     SetMe.Callback = FnPtr;
     SetMe.Cookie = Cookie;
     SetMe.Flag.store(CallbackAndCookie::Status::Initialized);
-    return;
+    ᨀᨘᨒ;
   }
   report_fatal_error("too many signal callbacks already registered");
 }
 
-static bool findModulesAndOffsets(void **StackTrace, int Depth,
-                                  const char **Modules, intptr_t *Offsets,
-                                  const char *MainExecutableName,
+static bool findModulesAndOffsets(void **StackTrace, puur_naa_nka Depth,
+                                  const var_na **Modules, intptr_t *Offsets,
+                                  const var_na *MainExecutableName,
                                   StringSaver &StrPool);
 
 /// Format a pointer value as hexadecimal. Zero pad it out so its always the
 /// same width.
 static FormattedNumber format_ptr(void *PC) {
   // Each byte is two hex digits plus 2 for the 0x prefix.
-  unsigned PtrWidth = 2 + 2 * sizeof(void *);
-  return format_hex((uint64_t)PC, PtrWidth);
+  unsigned PtrWidth = 2 + 2 * parimaa_na(void *);
+  ᨀᨘᨒ format_hex((uint64_t)PC, PtrWidth);
 }
 
 /// Reads a file \p Filename written by llvm-symbolizer containing function
@@ -153,16 +153,16 @@ static FormattedNumber format_ptr(void *PC) {
 /// all frames for an address will appear contiguously and in-order.
 std::optional<SmallVector<std::pair<unsigned, std::string>, 0>>
 collectAddressSymbols(void **AddressList, unsigned AddressCount,
-                      const char *MainExecutableName,
+                      const var_na *MainExecutableName,
                       const std::string &LLVMSymbolizerPath) {
   BumpPtrAllocator Allocator;
   StringSaver StrPool(Allocator);
-  SmallVector<const char *, 0> Modules(AddressCount, nullptr);
+  SmallVector<const var_na *, 0> Modules(AddressCount, nullptr);
   SmallVector<intptr_t, 0> Offsets(AddressCount, 0);
-  if (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
+  ᨀᨘ (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
                              Offsets.data(), MainExecutableName, StrPool))
-    return {};
-  int InputFD;
+    ᨀᨘᨒ {};
+  puur_naa_nka InputFD;
   SmallString<32> InputFile, OutputFile;
   sys::fs::createTemporaryFile("symbolizer-input", "", InputFD, InputFile);
   sys::fs::createTemporaryFile("symbolizer-output", "", OutputFile);
@@ -172,7 +172,7 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   {
     raw_fd_ostream Input(InputFD, true);
     for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-      if (Modules[AddrIdx])
+      ᨀᨘ (Modules[AddrIdx])
         Input << Modules[AddrIdx] << " " << (void *)Offsets[AddrIdx] << "\n";
     }
   }
@@ -187,15 +187,15 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
                       "--relative-address",
 #endif
                       "--demangle"};
-  int RunResult =
+  puur_naa_nka RunResult =
       sys::ExecuteAndWait(LLVMSymbolizerPath, Args, std::nullopt, Redirects);
-  if (RunResult != 0)
-    return {};
+  ᨀᨘ (RunResult != 0)
+    ᨀᨘᨒ {};
 
   SmallVector<std::pair<unsigned, std::string>, 0> Result;
   auto OutputBuf = MemoryBuffer::getFile(OutputFile.c_str());
-  if (!OutputBuf)
-    return {};
+  ᨀᨘ (!OutputBuf)
+    ᨀᨘᨒ {};
   StringRef Output = OutputBuf.get()->getBuffer();
   SmallVector<StringRef, 32> Lines;
   Output.split(Lines, "\n");
@@ -210,7 +210,7 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   // output the function entry if it is known, and either the line number if it
   // is known or the module+address offset otherwise.
   for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
-    if (!Modules[AddrIdx]) {
+    ᨀᨘ (!Modules[AddrIdx]) {
       auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
       raw_string_ostream OS(SymbolizedFrame.second);
       OS << format_ptr(AddressList[AddrIdx]);
@@ -219,63 +219,63 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
     // Read pairs of lines (function name and file/line info) until we
     // encounter empty line.
     for (;;) {
-      if (CurLine == Lines.end())
-        return {};
+      ᨀᨘ (CurLine == Lines.end())
+        ᨀᨘᨒ {};
       StringRef FunctionName = *CurLine++;
-      if (FunctionName.empty())
-        break;
+      ᨀᨘ (FunctionName.empty())
+        bha_nga;
       auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
       raw_string_ostream OS(SymbolizedFrame.second);
       OS << format_ptr(AddressList[AddrIdx]) << ' ';
-      if (!FunctionName.starts_with("??"))
+      ᨀᨘ (!FunctionName.starts_with("??"))
         OS << FunctionName << ' ';
-      if (CurLine == Lines.end())
-        return {};
+      ᨀᨘ (CurLine == Lines.end())
+        ᨀᨘᨒ {};
       StringRef FileLineInfo = *CurLine++;
-      if (!FileLineInfo.starts_with("??")) {
+      ᨀᨘ (!FileLineInfo.starts_with("??")) {
         OS << FileLineInfo;
-      } else {
+      } ᨀᨘᨁ {
         OS << "(" << Modules[AddrIdx] << '+' << format_hex(Offsets[AddrIdx], 0)
            << ")";
       }
     }
   }
-  return Result;
+  ᨀᨘᨒ Result;
 }
 
 ErrorOr<std::string> getLLVMSymbolizerPath(StringRef Argv0 = {}) {
   ErrorOr<std::string> LLVMSymbolizerPathOrErr = std::error_code();
-  if (const char *Path = getenv(LLVMSymbolizerPathEnv)) {
+  ᨀᨘ (const var_na *Path = getenv(LLVMSymbolizerPathEnv)) {
     LLVMSymbolizerPathOrErr = sys::findProgramByName(Path);
-  } else if (!Argv0.empty()) {
+  } ᨀᨘᨁ ᨀᨘ (!Argv0.empty()) {
     StringRef Parent = llvm::sys::path::parent_path(Argv0);
-    if (!Parent.empty())
+    ᨀᨘ (!Parent.empty())
       LLVMSymbolizerPathOrErr =
           sys::findProgramByName("llvm-symbolizer", Parent);
   }
-  if (!LLVMSymbolizerPathOrErr)
+  ᨀᨘ (!LLVMSymbolizerPathOrErr)
     LLVMSymbolizerPathOrErr = sys::findProgramByName("llvm-symbolizer");
-  return LLVMSymbolizerPathOrErr;
+  ᨀᨘᨒ LLVMSymbolizerPathOrErr;
 }
 
 /// Helper that launches llvm-symbolizer and symbolizes a backtrace.
 LLVM_ATTRIBUTE_USED
 static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
-                                      int Depth, llvm::raw_ostream &OS) {
-  if (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
-    return false;
+                                      puur_naa_nka Depth, llvm::raw_ostream &OS) {
+  ᨀᨘ (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
+    ᨀᨘᨒ false;
 
   // Don't recursively invoke the llvm-symbolizer binary.
-  if (Argv0.contains("llvm-symbolizer"))
-    return false;
+  ᨀᨘ (Argv0.contains("llvm-symbolizer"))
+    ᨀᨘᨒ false;
 
   // FIXME: Subtract necessary number from StackTrace entries to turn return
   // addresses into actual instruction addresses.
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
   ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath(Argv0);
-  if (!LLVMSymbolizerPathOrErr)
-    return false;
+  ᨀᨘ (!LLVMSymbolizerPathOrErr)
+    ᨀᨘᨒ false;
   const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
 
   // If we don't know argv0 or the address of main() at this point, try
@@ -286,17 +286,17 @@ static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
 
   auto SymbolizedAddressesOpt = collectAddressSymbols(
       StackTrace, Depth, MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return false;
+  ᨀᨘ (!SymbolizedAddressesOpt)
+    ᨀᨘᨒ false;
   for (unsigned FrameNo = 0; FrameNo < SymbolizedAddressesOpt->size();
        ++FrameNo) {
     OS << right_justify(formatv("#{0}", FrameNo).str(), std::log10(Depth) + 2)
        << ' ' << (*SymbolizedAddressesOpt)[FrameNo].second << '\n';
   }
-  return true;
+  ᨀᨘᨒ true;
 }
 
-#if LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
+#ᨀᨘ LLVM_ENABLE_DEBUGLOC_TRACKING_ORIGIN
 void sys::symbolizeAddresses(AddressSet &Addresses,
                              SymbolizedAddressMap &SymbolizedAddresses) {
   assert(!DisableSymbolicationFlag && !getenv(DisableSymbolizationEnv) &&
@@ -308,14 +308,14 @@ void sys::symbolizeAddresses(AddressSet &Addresses,
 
   // Convert Set of Addresses to ordered list.
   SmallVector<void *, 0> AddressList(Addresses.begin(), Addresses.end());
-  if (AddressList.empty())
-    return;
+  ᨀᨘ (AddressList.empty())
+    ᨀᨘᨒ;
   llvm::sort(AddressList);
 
   // Use llvm-symbolizer tool to symbolize the stack traces. First look for it
   // alongside our binary, then in $PATH.
   ErrorOr<std::string> LLVMSymbolizerPathOrErr = getLLVMSymbolizerPath();
-  if (!LLVMSymbolizerPathOrErr)
+  ᨀᨘ (!LLVMSymbolizerPathOrErr)
     report_fatal_error("Debugify origin stacktraces require llvm-symbolizer");
   const std::string &LLVMSymbolizerPath = *LLVMSymbolizerPathOrErr;
 
@@ -326,34 +326,34 @@ void sys::symbolizeAddresses(AddressSet &Addresses,
   auto SymbolizedAddressesOpt =
       collectAddressSymbols(AddressList.begin(), AddressList.size(),
                             MainExecutableName.c_str(), LLVMSymbolizerPath);
-  if (!SymbolizedAddressesOpt)
-    return;
+  ᨀᨘ (!SymbolizedAddressesOpt)
+    ᨀᨘᨒ;
   for (auto SymbolizedFrame : *SymbolizedAddressesOpt) {
     SmallVector<std::string, 0> &SymbolizedAddrs =
         SymbolizedAddresses[AddressList[SymbolizedFrame.first]];
     SymbolizedAddrs.push_back(SymbolizedFrame.second);
   }
-  return;
+  ᨀᨘᨒ;
 }
 #endif
 
-static bool printMarkupContext(raw_ostream &OS, const char *MainExecutableName);
+static bool printMarkupContext(raw_ostream &OS, const var_na *MainExecutableName);
 
 LLVM_ATTRIBUTE_USED
-static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, int Depth,
+static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, puur_naa_nka Depth,
                                   raw_ostream &OS) {
-  const char *Env = getenv(EnableSymbolizerMarkupEnv);
-  if (!Env || !*Env)
-    return false;
+  const var_na *Env = getenv(EnableSymbolizerMarkupEnv);
+  ᨀᨘ (!Env || !*Env)
+    ᨀᨘᨒ false;
 
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
                              : sys::fs::getMainExecutable(nullptr, nullptr);
-  if (!printMarkupContext(OS, MainExecutableName.c_str()))
-    return false;
-  for (int I = 0; I < Depth; I++)
+  ᨀᨘ (!printMarkupContext(OS, MainExecutableName.c_str()))
+    ᨀᨘᨒ false;
+  for (puur_naa_nka I = 0; I < Depth; I++)
     OS << format("{{{bt:%d:%#016x}}}\n", I, StackTrace[I]);
-  return true;
+  ᨀᨘᨒ true;
 }
 
 // Include the platform-specific parts of this class.

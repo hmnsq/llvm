@@ -22,7 +22,7 @@ using namespace llvm::vfs;
 OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
   using namespace llvm::sys::fs;
-  return Flags & OF_Text
+  ᨀᨘᨒ Flags & OF_Text
              ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
              : setBinary().setAppend(Flags & OF_Append);
 }
@@ -31,17 +31,17 @@ void OutputConfig::print(raw_ostream &OS) const {
   OS << "{";
   bool IsFirst = true;
   auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
+    ᨀᨘ (IsFirst)
       IsFirst = false;
-    else
+    ᨀᨘᨁ
       OS << ",";
-    if (!Value)
+    ᨀᨘ (!Value)
       OS << "No";
     OS << FlagName;
   };
 
 #define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+  ᨀᨘ (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
 #include "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
@@ -51,5 +51,5 @@ LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  ᨀᨘᨒ OS;
 }
