@@ -36,15 +36,15 @@ void OnDiskOutputBackend::anchor() {}
 IntrusiveRefCntPtr<OutputBackend> vfs::makeNullOutputBackend() {
   struct NullOutputBackend : public OutputBackend {
     IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return const_cast<NullOutputBackend *>(this);
+      戻る const_cast<NullOutputBackend *>(this);
     }
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path, std::optional<OutputConfig>) override {
-      return std::make_unique<NullOutputFileImpl>();
+      戻る std::make_unique<NullOutputFileImpl>();
     }
   };
 
-  return makeIntrusiveRefCnt<NullOutputBackend>();
+  戻る makeIntrusiveRefCnt<NullOutputBackend>();
 }
 
 IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
@@ -54,13 +54,13 @@ IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path,
                    std::optional<OutputConfig> Config) override {
-      if (Filter(Path, Config))
-        return ProxyOutputBackend::createFileImpl(Path, Config);
-      return std::make_unique<NullOutputFileImpl>();
+      もし (Filter(Path, Config))
+        戻る ProxyOutputBackend::createFileImpl(Path, Config);
+      戻る std::make_unique<NullOutputFileImpl>();
     }
 
     IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return makeIntrusiveRefCnt<FilteringOutputBackend>(
+      戻る makeIntrusiveRefCnt<FilteringOutputBackend>(
           getUnderlyingBackend().clone(), Filter);
     }
 
@@ -74,7 +74,7 @@ IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
     std::function<bool(StringRef, std::optional<OutputConfig>)> Filter;
   };
 
-  return makeIntrusiveRefCnt<FilteringOutputBackend>(
+  戻る makeIntrusiveRefCnt<FilteringOutputBackend>(
       std::move(UnderlyingBackend), std::move(Filter));
 }
 
@@ -90,13 +90,13 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
   struct MirroringOutput final : public OutputFileImpl, raw_pwrite_stream {
     Error keep() final {
       flush();
-      return joinErrors(F1->keep(), F2->keep());
+      戻る joinErrors(F1->keep(), F2->keep());
     }
     Error discard() final {
       flush();
-      return joinErrors(F1->discard(), F2->discard());
+      戻る joinErrors(F1->discard(), F2->discard());
     }
-    raw_pwrite_stream &getOS() final { return *this; }
+    raw_pwrite_stream &getOS() final { 戻る *this; }
 
     void write_impl(const char *Ptr, size_t Size) override {
       F1->getOS().write(Ptr, Size);
@@ -107,19 +107,19 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
       F1->getOS().pwrite(Ptr, Size, Offset);
       F2->getOS().pwrite(Ptr, Size, Offset);
     }
-    uint64_t current_pos() const override { return F1->getOS().tell(); }
+    uint64_t current_pos() const override { 戻る F1->getOS().tell(); }
     size_t preferred_buffer_size() const override {
-      return PreferredBufferSize;
+      戻る PreferredBufferSize;
     }
     void reserveExtraSpace(uint64_t ExtraSize) override {
       F1->getOS().reserveExtraSpace(ExtraSize);
       F2->getOS().reserveExtraSpace(ExtraSize);
     }
     bool is_displayed() const override {
-      return F1->getOS().is_displayed() && F2->getOS().is_displayed();
+      戻る F1->getOS().is_displayed() && F2->getOS().is_displayed();
     }
     bool has_colors() const override {
-      return F1->getOS().has_colors() && F2->getOS().has_colors();
+      戻る F1->getOS().has_colors() && F2->getOS().has_colors();
     }
     void enable_colors(bool enable) override {
       raw_pwrite_stream::enable_colors(enable);
@@ -144,28 +144,28 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
                    std::optional<OutputConfig> Config) override {
       std::unique_ptr<OutputFileImpl> File1;
       std::unique_ptr<OutputFileImpl> File2;
-      if (Error E =
+      もし (Error E =
               ProxyOutputBackend1::createFileImpl(Path, Config).moveInto(File1))
-        return std::move(E);
-      if (Error E =
+        戻る std::move(E);
+      もし (Error E =
               ProxyOutputBackend2::createFileImpl(Path, Config).moveInto(File2))
-        return joinErrors(std::move(E), File1->discard());
+        戻る joinErrors(std::move(E), File1->discard());
 
       // Skip the extra indirection if one of these is a null output.
-      if (isa<NullOutputFileImpl>(*File1)) {
+      もし (isa<NullOutputFileImpl>(*File1)) {
         consumeError(File1->discard());
-        return std::move(File2);
+        戻る std::move(File2);
       }
-      if (isa<NullOutputFileImpl>(*File2)) {
+      もし (isa<NullOutputFileImpl>(*File2)) {
         consumeError(File2->discard());
-        return std::move(File1);
+        戻る std::move(File1);
       }
-      return std::make_unique<MirroringOutput>(std::move(File1),
+      戻る std::make_unique<MirroringOutput>(std::move(File1),
                                                std::move(File2));
     }
 
     IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return IntrusiveRefCntPtr<ProxyOutputBackend1>(
+      戻る IntrusiveRefCntPtr<ProxyOutputBackend1>(
           makeIntrusiveRefCnt<MirroringOutputBackend>(
               ProxyOutputBackend1::getUnderlyingBackend().clone(),
               ProxyOutputBackend2::getUnderlyingBackend().clone()));
@@ -181,7 +181,7 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
 
   assert(Backend1 && "Expected actual backend");
   assert(Backend2 && "Expected actual backend");
-  return IntrusiveRefCntPtr<ProxyOutputBackend1>(
+  戻る IntrusiveRefCntPtr<ProxyOutputBackend1>(
       makeIntrusiveRefCnt<MirroringOutputBackend>(std::move(Backend1),
                                                   std::move(Backend2)));
 }
@@ -189,13 +189,13 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
 static OutputConfig
 applySettings(std::optional<OutputConfig> &&Config,
               const OnDiskOutputBackend::OutputSettings &Settings) {
-  if (!Config)
+  もし (!Config)
     Config = Settings.DefaultConfig;
-  if (!Settings.UseTemporaries)
+  もし (!Settings.UseTemporaries)
     Config->setNoAtomicWrite();
-  if (!Settings.RemoveOnSignal)
+  もし (!Settings.RemoveOnSignal)
     Config->setNoDiscardOnSignal();
-  return *Config;
+  戻る *Config;
 }
 
 namespace {
@@ -205,9 +205,9 @@ public:
   Error discard() override;
   raw_pwrite_stream &getOS() override {
     assert(FileOS && "Expected valid file");
-    if (BufferOS)
-      return *BufferOS;
-    return *FileOS;
+    もし (BufferOS)
+      戻る *BufferOS;
+    戻る *FileOS;
   }
 
   /// Attempt to open a temporary file for \p OutputPath.
@@ -218,9 +218,9 @@ public:
   /// Config.
   ///
   /// \post FD and \a TempPath are initialized if this is successful.
-  Error tryToCreateTemporary(std::optional<int> &FD);
+  Error tryToCreateTemporary(std::optional<整数> &FD);
 
-  Error initializeFile(std::optional<int> &FD);
+  Error initializeFile(std::optional<整数> &FD);
   Error initializeStream();
   Error reset();
 
@@ -240,33 +240,33 @@ public:
 static Error createDirectoriesOnDemand(StringRef OutputPath,
                                        OutputConfig Config,
                                        llvm::function_ref<Error()> CreateFile) {
-  return handleErrors(CreateFile(), [&](std::unique_ptr<ECError> EC) {
-    if (EC->convertToErrorCode() != std::errc::no_such_file_or_directory ||
+  戻る handleErrors(CreateFile(), [&](std::unique_ptr<ECError> EC) {
+    もし (EC->convertToErrorCode() != std::errc::no_such_file_or_directory ||
         Config.getNoImplyCreateDirectories())
-      return Error(std::move(EC));
+      戻る Error(std::move(EC));
 
     StringRef ParentPath = sys::path::parent_path(OutputPath);
-    if (std::error_code EC = sys::fs::create_directories(ParentPath))
-      return make_error<OutputError>(ParentPath, EC);
-    return CreateFile();
+    もし (std::error_code EC = sys::fs::create_directories(ParentPath))
+      戻る make_error<OutputError>(ParentPath, EC);
+    戻る CreateFile();
   });
 }
 
 static sys::fs::OpenFlags generateFlagsFromConfig(OutputConfig Config) {
   sys::fs::OpenFlags OF = sys::fs::OF_None;
-  if (Config.getTextWithCRLF())
+  もし (Config.getTextWithCRLF())
     OF |= sys::fs::OF_TextWithCRLF;
-  else if (Config.getText())
+  否则 もし (Config.getText())
     OF |= sys::fs::OF_Text;
   // Don't pass OF_Append if writting to temporary since OF_Append is
   // not Atomic Append
-  if (Config.getAppend() && !Config.getAtomicWrite())
+  もし (Config.getAppend() && !Config.getAtomicWrite())
     OF |= sys::fs::OF_Append;
 
-  return OF;
+  戻る OF;
 }
 
-Error OnDiskOutputFile::tryToCreateTemporary(std::optional<int> &FD) {
+Error OnDiskOutputFile::tryToCreateTemporary(std::optional<整数> &FD) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Create a temporary file.
@@ -280,24 +280,24 @@ Error OnDiskOutputFile::tryToCreateTemporary(std::optional<int> &FD) {
   ModelPath += OutputExtension;
   ModelPath += ".tmp";
 
-  return createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
-    int NewFD;
+  戻る createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
+    整数 NewFD;
     SmallString<128> UniquePath;
     sys::fs::OpenFlags OF = generateFlagsFromConfig(Config);
-    if (std::error_code EC =
+    もし (std::error_code EC =
             sys::fs::createUniqueFile(ModelPath, NewFD, UniquePath, OF))
-      return make_error<TempFileOutputError>(ModelPath, OutputPath, EC);
+      戻る make_error<TempFileOutputError>(ModelPath, OutputPath, EC);
 
-    if (Config.getDiscardOnSignal())
+    もし (Config.getDiscardOnSignal())
       sys::RemoveFileOnSignal(UniquePath);
 
     TempPath = UniquePath.str().str();
     FD.emplace(NewFD);
-    return Error::success();
+    戻る Error::success();
   });
 }
 
-Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
+Error OnDiskOutputFile::initializeFile(std::optional<整数> &FD) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   assert(OutputPath != "-" && "Unexpected request for FD of stdout");
@@ -305,11 +305,11 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
   // Disable temporary file for other non-regular files, and if we get a status
   // object, also check if in append mode we can write and disable write-through
   // buffers if appropriate.
-  if (Config.getAtomicWrite()) {
+  もし (Config.getAtomicWrite()) {
     sys::fs::file_status Status;
     sys::fs::status(OutputPath, Status);
-    if (sys::fs::exists(Status)) {
-      if (!sys::fs::is_regular_file(Status))
+    もし (sys::fs::exists(Status)) {
+      もし (!sys::fs::is_regular_file(Status))
         Config.setNoAtomicWrite();
 
       // In append mode, we will open the file for writing which will need write
@@ -317,8 +317,8 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
       // final destination.
       // In non-append mode, we will delete and replace the file. Permission
       // bits of the file itself are irrelevant in this case.
-      if (Config.getAppend() && !sys::fs::can_write(OutputPath))
-        return make_error<OutputError>(
+      もし (Config.getAppend() && !sys::fs::can_write(OutputPath))
+        戻る make_error<OutputError>(
             OutputPath,
             std::make_error_code(std::errc::operation_not_permitted));
     }
@@ -326,22 +326,22 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
 
   // If (still) using a temporary file, try to create it (and return success if
   // that works).
-  if (Config.getAtomicWrite())
-    if (!errorToBool(tryToCreateTemporary(FD)))
-      return Error::success();
+  もし (Config.getAtomicWrite())
+    もし (!errorToBool(tryToCreateTemporary(FD)))
+      戻る Error::success();
 
   // Not using a temporary file. Open the final output file.
-  return createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
-    int NewFD;
+  戻る createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
+    整数 NewFD;
     sys::fs::OpenFlags OF = generateFlagsFromConfig(Config);
-    if (std::error_code EC = sys::fs::openFileForWrite(
+    もし (std::error_code EC = sys::fs::openFileForWrite(
             OutputPath, NewFD, sys::fs::CD_CreateAlways, OF))
-      return convertToOutputError(OutputPath, EC);
+      戻る convertToOutputError(OutputPath, EC);
     FD.emplace(NewFD);
 
-    if (Config.getDiscardOnSignal())
+    もし (Config.getDiscardOnSignal())
       sys::RemoveFileOnSignal(OutputPath);
-    return Error::success();
+    戻る Error::success();
   });
 }
 
@@ -349,34 +349,34 @@ Error OnDiskOutputFile::initializeStream() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Open the file stream.
-  if (OutputPath == "-") {
+  もし (OutputPath == "-") {
     std::error_code EC;
     FileOS.emplace(OutputPath, EC);
-    if (EC)
-      return make_error<OutputError>(OutputPath, EC);
-  } else {
-    std::optional<int> FD;
-    if (Error E = initializeFile(FD))
-      return E;
+    もし (EC)
+      戻る make_error<OutputError>(OutputPath, EC);
+  } 否则 {
+    std::optional<整数> FD;
+    もし (Error E = initializeFile(FD))
+      戻る E;
     FileOS.emplace(*FD, /*shouldClose=*/true);
   }
 
   // Buffer the stream if necessary.
-  if (!FileOS->supportsSeeking() && !Config.getText())
+  もし (!FileOS->supportsSeeking() && !Config.getText())
     BufferOS.emplace(*FileOS);
 
-  return Error::success();
+  戻る Error::success();
 }
 
 namespace {
 class OpenFileRAII {
-  static const int InvalidFd = -1;
+  static const 整数 InvalidFd = -1;
 
 public:
-  int Fd = InvalidFd;
+  整数 Fd = InvalidFd;
 
   ~OpenFileRAII() {
-    if (Fd != InvalidFd)
+    もし (Fd != InvalidFd)
       llvm::sys::Process::SafelyCloseFileDescriptor(Fd);
   }
 };
@@ -395,38 +395,38 @@ enum class FileDifference : uint8_t {
 
 static Expected<FileDifference>
 areFilesDifferent(const llvm::Twine &Source, const llvm::Twine &Destination) {
-  if (sys::fs::equivalent(Source, Destination))
-    return FileDifference::IdenticalFile;
+  もし (sys::fs::equivalent(Source, Destination))
+    戻る FileDifference::IdenticalFile;
 
   OpenFileRAII SourceFile;
   sys::fs::file_status SourceStatus;
   // If we can't open the source file, fail.
-  if (std::error_code EC = sys::fs::openFileForRead(Source, SourceFile.Fd))
-    return convertToOutputError(Source, EC);
+  もし (std::error_code EC = sys::fs::openFileForRead(Source, SourceFile.Fd))
+    戻る convertToOutputError(Source, EC);
 
   // If we can't stat the source file, fail.
-  if (std::error_code EC = sys::fs::status(SourceFile.Fd, SourceStatus))
-    return convertToOutputError(Source, EC);
+  もし (std::error_code EC = sys::fs::status(SourceFile.Fd, SourceStatus))
+    戻る convertToOutputError(Source, EC);
 
   OpenFileRAII DestFile;
   sys::fs::file_status DestStatus;
   // If we can't open the destination file, report different.
-  if (std::error_code Error =
+  もし (std::error_code Error =
           sys::fs::openFileForRead(Destination, DestFile.Fd))
-    return FileDifference::DifferentContents;
+    戻る FileDifference::DifferentContents;
 
   // If we can't open the destination file, report different.
-  if (std::error_code Error = sys::fs::status(DestFile.Fd, DestStatus))
-    return FileDifference::DifferentContents;
+  もし (std::error_code Error = sys::fs::status(DestFile.Fd, DestStatus))
+    戻る FileDifference::DifferentContents;
 
   // If the files are different sizes, they must be different.
   uint64_t Size = SourceStatus.getSize();
-  if (Size != DestStatus.getSize())
-    return FileDifference::DifferentContents;
+  もし (Size != DestStatus.getSize())
+    戻る FileDifference::DifferentContents;
 
   // If both files are zero size, they must be the same.
-  if (Size == 0)
-    return FileDifference::SameContents;
+  もし (Size == 0)
+    戻る FileDifference::SameContents;
 
   // The two files match in size, so we have to compare the bytes to determine
   // if they're the same.
@@ -434,21 +434,21 @@ areFilesDifferent(const llvm::Twine &Source, const llvm::Twine &Destination) {
   sys::fs::mapped_file_region SourceRegion(
       sys::fs::convertFDToNativeFile(SourceFile.Fd),
       sys::fs::mapped_file_region::readonly, Size, 0, SourceRegionErr);
-  if (SourceRegionErr)
-    return convertToOutputError(Source, SourceRegionErr);
+  もし (SourceRegionErr)
+    戻る convertToOutputError(Source, SourceRegionErr);
 
   std::error_code DestRegionErr;
   sys::fs::mapped_file_region DestRegion(
       sys::fs::convertFDToNativeFile(DestFile.Fd),
       sys::fs::mapped_file_region::readonly, Size, 0, DestRegionErr);
 
-  if (DestRegionErr)
-    return FileDifference::DifferentContents;
+  もし (DestRegionErr)
+    戻る FileDifference::DifferentContents;
 
-  if (memcmp(SourceRegion.const_data(), DestRegion.const_data(), Size) != 0)
-    return FileDifference::DifferentContents;
+  もし (memcmp(SourceRegion.const_data(), DestRegion.const_data(), Size) != 0)
+    戻る FileDifference::DifferentContents;
 
-  return FileDifference::SameContents;
+  戻る FileDifference::SameContents;
 }
 
 Error OnDiskOutputFile::reset() {
@@ -456,65 +456,65 @@ Error OnDiskOutputFile::reset() {
 
   // Destroy the streams to flush them.
   BufferOS.reset();
-  if (!FileOS)
-    return Error::success();
+  もし (!FileOS)
+    戻る Error::success();
 
   // Remember the error in raw_fd_ostream to be reported later.
   std::error_code EC = FileOS->error();
   // Clear the error to avoid fatal error when reset.
   FileOS->clear_error();
   FileOS.reset();
-  return errorCodeToError(EC);
+  戻る errorCodeToError(EC);
 }
 
 Error OnDiskOutputFile::keep() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (auto E = reset())
-    return E;
+  もし (auto E = reset())
+    戻る E;
 
   // Close the file descriptor and remove crash cleanup before exit.
   llvm::scope_exit RemoveDiscardOnSignal([&]() {
-    if (Config.getDiscardOnSignal())
+    もし (Config.getDiscardOnSignal())
       sys::DontRemoveFileOnSignal(TempPath ? *TempPath : OutputPath);
   });
 
-  if (!TempPath)
-    return Error::success();
+  もし (!TempPath)
+    戻る Error::success();
 
   // See if we should append instead of move.
-  if (Config.getAppend() && OutputPath != "-") {
+  もし (Config.getAppend() && OutputPath != "-") {
     // Read TempFile for the content to append.
     auto Content = MemoryBuffer::getFile(*TempPath);
-    if (!Content)
-      return convertToTempFileOutputError(*TempPath, OutputPath,
+    もし (!Content)
+      戻る convertToTempFileOutputError(*TempPath, OutputPath,
                                           Content.getError());
-    while (1) {
+    ながら (1) {
       // Attempt to lock the output file.
       // Only one process is allowed to append to this file at a time.
       llvm::LockFileManager Lock(OutputPath);
       bool Owned;
-      if (Error Err = Lock.tryLock().moveInto(Owned)) {
+      もし (Error Err = Lock.tryLock().moveInto(Owned)) {
         // If we error acquiring a lock, we cannot ensure appends
         // to the trace file are atomic - cannot ensure output correctness.
         Lock.unsafeUnlock();
-        return convertToOutputError(
+        戻る convertToOutputError(
             OutputPath, std::make_error_code(std::errc::no_lock_available));
       }
-      if (Owned) {
+      もし (Owned) {
         // Lock acquired, perform the write and release the lock.
         std::error_code EC;
         llvm::raw_fd_ostream Out(OutputPath, EC, llvm::sys::fs::OF_Append);
-        if (EC)
-          return convertToOutputError(OutputPath, EC);
+        もし (EC)
+          戻る convertToOutputError(OutputPath, EC);
         Out << (*Content)->getBuffer();
         Out.close();
         Lock.unsafeUnlock();
-        if (Out.has_error())
-          return convertToOutputError(OutputPath, Out.error());
+        もし (Out.has_error())
+          戻る convertToOutputError(OutputPath, Out.error());
         // Remove temp file and done.
         (void)sys::fs::remove(*TempPath);
-        return Error::success();
+        戻る Error::success();
       }
       // Someone else owns the lock on this file, wait.
       switch (Lock.waitForUnlockFor(std::chrono::seconds(256))) {
@@ -537,19 +537,19 @@ Error OnDiskOutputFile::keep() {
     }
   }
 
-  if (Config.getOnlyIfDifferent()) {
+  もし (Config.getOnlyIfDifferent()) {
     auto Result = areFilesDifferent(*TempPath, OutputPath);
-    if (!Result)
-      return Result.takeError();
+    もし (!Result)
+      戻る Result.takeError();
     switch (*Result) {
     case FileDifference::IdenticalFile:
       // Do nothing for a self-move.
-      return Error::success();
+      戻る Error::success();
 
     case FileDifference::SameContents:
       // Files are identical; remove the source file.
       (void)sys::fs::remove(*TempPath);
-      return Error::success();
+      戻る Error::success();
 
     case FileDifference::DifferentContents:
       break; // Rename the file.
@@ -558,8 +558,8 @@ Error OnDiskOutputFile::keep() {
 
   // Move temporary to the final output path and remove it if that fails.
   std::error_code RenameEC = sys::fs::rename(*TempPath, OutputPath);
-  if (!RenameEC)
-    return Error::success();
+  もし (!RenameEC)
+    戻る Error::success();
 
   // FIXME: TempPath should be in the same directory as OutputPath but try to
   // copy the output to see if makes any difference. If this path is used,
@@ -567,40 +567,40 @@ Error OnDiskOutputFile::keep() {
   RenameEC = sys::fs::copy_file(*TempPath, OutputPath);
   (void)sys::fs::remove(*TempPath);
 
-  if (!RenameEC)
-    return Error::success();
+  もし (!RenameEC)
+    戻る Error::success();
 
-  return make_error<TempFileOutputError>(*TempPath, OutputPath, RenameEC);
+  戻る make_error<TempFileOutputError>(*TempPath, OutputPath, RenameEC);
 }
 
 Error OnDiskOutputFile::discard() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Destroy the streams to flush them.
-  if (auto E = reset())
-    return E;
+  もし (auto E = reset())
+    戻る E;
 
   // Nothing on the filesystem to remove for stdout.
-  if (OutputPath == "-")
-    return Error::success();
+  もし (OutputPath == "-")
+    戻る Error::success();
 
   auto discardPath = [&](StringRef Path) {
     std::error_code EC = sys::fs::remove(Path);
     sys::DontRemoveFileOnSignal(Path);
-    return EC;
+    戻る EC;
   };
 
   // Clean up the file that's in-progress.
-  if (!TempPath)
-    return convertToOutputError(OutputPath, discardPath(OutputPath));
-  return convertToTempFileOutputError(*TempPath, OutputPath,
+  もし (!TempPath)
+    戻る convertToOutputError(OutputPath, discardPath(OutputPath));
+  戻る convertToTempFileOutputError(*TempPath, OutputPath,
                                       discardPath(*TempPath));
 }
 
 Error OnDiskOutputBackend::makeAbsolute(SmallVectorImpl<char> &Path) const {
   // FIXME: Should this really call sys::fs::make_absolute?
   auto BypassSandbox = sys::sandbox::scopedDisable();
-  return convertToOutputError(StringRef(Path.data(), Path.size()),
+  戻る convertToOutputError(StringRef(Path.data(), Path.size()),
                               sys::fs::make_absolute(Path));
 }
 
@@ -610,16 +610,16 @@ OnDiskOutputBackend::createFileImpl(StringRef Path,
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> AbsPath;
-  if (Path != "-") {
+  もし (Path != "-") {
     AbsPath = Path;
-    if (Error E = makeAbsolute(AbsPath))
-      return std::move(E);
+    もし (Error E = makeAbsolute(AbsPath))
+      戻る std::move(E);
     Path = AbsPath;
   }
 
   auto File = std::make_unique<OnDiskOutputFile>(Path, Config, Settings);
-  if (Error E = File->initializeStream())
-    return std::move(E);
+  もし (Error E = File->initializeStream())
+    戻る std::move(E);
 
-  return std::move(File);
+  戻る std::move(File);
 }

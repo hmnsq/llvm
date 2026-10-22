@@ -9,38 +9,38 @@
       _mm_shuffle_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b), (c))))
 
 INLINE __m128i loadu(const uint8_t src[16]) {
-  return _mm_loadu_si128((const __m128i *)src);
+  戻る _mm_loadu_si128((const __m128i *)src);
 }
 
 INLINE void storeu(__m128i src, uint8_t dest[16]) {
   _mm_storeu_si128((__m128i *)dest, src);
 }
 
-INLINE __m128i addv(__m128i a, __m128i b) { return _mm_add_epi32(a, b); }
+INLINE __m128i addv(__m128i a, __m128i b) { 戻る _mm_add_epi32(a, b); }
 
 // Note that clang-format doesn't like the name "xor" for some reason.
-INLINE __m128i xorv(__m128i a, __m128i b) { return _mm_xor_si128(a, b); }
+INLINE __m128i xorv(__m128i a, __m128i b) { 戻る _mm_xor_si128(a, b); }
 
-INLINE __m128i set1(uint32_t x) { return _mm_set1_epi32((int32_t)x); }
+INLINE __m128i set1(uint32_t x) { 戻る _mm_set1_epi32((int32_t)x); }
 
 INLINE __m128i set4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
-  return _mm_setr_epi32((int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d);
+  戻る _mm_setr_epi32((int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d);
 }
 
 INLINE __m128i rot16(__m128i x) {
-  return _mm_shufflehi_epi16(_mm_shufflelo_epi16(x, 0xB1), 0xB1);
+  戻る _mm_shufflehi_epi16(_mm_shufflelo_epi16(x, 0xB1), 0xB1);
 }
 
 INLINE __m128i rot12(__m128i x) {
-  return xorv(_mm_srli_epi32(x, 12), _mm_slli_epi32(x, 32 - 12));
+  戻る xorv(_mm_srli_epi32(x, 12), _mm_slli_epi32(x, 32 - 12));
 }
 
 INLINE __m128i rot8(__m128i x) {
-  return xorv(_mm_srli_epi32(x, 8), _mm_slli_epi32(x, 32 - 8));
+  戻る xorv(_mm_srli_epi32(x, 8), _mm_slli_epi32(x, 32 - 8));
 }
 
 INLINE __m128i rot7(__m128i x) {
-  return xorv(_mm_srli_epi32(x, 7), _mm_slli_epi32(x, 32 - 7));
+  戻る xorv(_mm_srli_epi32(x, 7), _mm_slli_epi32(x, 32 - 7));
 }
 
 INLINE void g1(__m128i *row0, __m128i *row1, __m128i *row2, __m128i *row3,
@@ -83,7 +83,7 @@ INLINE __m128i blend_epi16(__m128i a, __m128i b, const int16_t imm8) {
   __m128i mask = _mm_set1_epi16(imm8);
   mask = _mm_and_si128(mask, bits);
   mask = _mm_cmpeq_epi16(mask, bits);
-  return _mm_or_si128(_mm_and_si128(mask, b), _mm_andnot_si128(mask, a));
+  戻る _mm_or_si128(_mm_and_si128(mask, b), _mm_andnot_si128(mask, a));
 }
 
 INLINE void compress_pre(__m128i rows[4], const uint32_t cv[8],
@@ -434,7 +434,7 @@ INLINE void transpose_msg_vecs(const uint8_t *const *inputs,
   out[13] = loadu(&inputs[1][block_offset + 3 * sizeof(__m128i)]);
   out[14] = loadu(&inputs[2][block_offset + 3 * sizeof(__m128i)]);
   out[15] = loadu(&inputs[3][block_offset + 3 * sizeof(__m128i)]);
-  for (size_t i = 0; i < 4; ++i) {
+  ために (size_t i = 0; i < 4; ++i) {
     _mm_prefetch((const void *)&inputs[i][block_offset + 256], _MM_HINT_T0);
   }
   transpose_vecs(&out[0]);
@@ -470,8 +470,8 @@ void blake3_hash4_sse2(const uint8_t *const *inputs, size_t blocks,
                 &counter_high_vec);
   uint8_t block_flags = flags | flags_start;
 
-  for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+  ために (size_t block = 0; block < blocks; block++) {
+    もし (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     __m128i block_len_vec = set1(BLAKE3_BLOCK_LEN);
@@ -525,8 +525,8 @@ INLINE void hash_one_sse2(const uint8_t *input, size_t blocks,
   uint32_t cv[8];
   memcpy(cv, key, BLAKE3_KEY_LEN);
   uint8_t block_flags = flags | flags_start;
-  while (blocks > 0) {
-    if (blocks == 1) {
+  ながら (blocks > 0) {
+    もし (blocks == 1) {
       block_flags |= flags_end;
     }
     blake3_compress_in_place_sse2(cv, input, BLAKE3_BLOCK_LEN, counter,
@@ -543,20 +543,20 @@ void blake3_hash_many_sse2(const uint8_t *const *inputs, size_t num_inputs,
                            uint64_t counter, bool increment_counter,
                            uint8_t flags, uint8_t flags_start,
                            uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= DEGREE) {
+  ながら (num_inputs >= DEGREE) {
     blake3_hash4_sse2(inputs, blocks, key, counter, increment_counter, flags,
                       flags_start, flags_end, out);
-    if (increment_counter) {
+    もし (increment_counter) {
       counter += DEGREE;
     }
     inputs += DEGREE;
     num_inputs -= DEGREE;
     out = &out[DEGREE * BLAKE3_OUT_LEN];
   }
-  while (num_inputs > 0) {
+  ながら (num_inputs > 0) {
     hash_one_sse2(inputs[0], blocks, key, counter, flags, flags_start,
                   flags_end, out);
-    if (increment_counter) {
+    もし (increment_counter) {
       counter += 1;
     }
     inputs += 1;

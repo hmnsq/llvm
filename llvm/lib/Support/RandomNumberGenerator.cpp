@@ -23,7 +23,7 @@
 #include "llvm/Support/raw_ostream.h"
 #ifdef _WIN32
 #include "llvm/Support/Windows/WindowsSupport.h"
-#else
+#否则
 #include "Unix/Unix.h"
 #endif
 
@@ -33,7 +33,7 @@ using namespace llvm;
 namespace {
 struct CreateSeed {
   static void *call() {
-    return new cl::opt<uint64_t>(
+    戻る new cl::opt<uint64_t>(
         "rng-seed", cl::value_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
@@ -43,7 +43,7 @@ static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
 void llvm::initRandomSeedOptions() { *Seed; }
 
 RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
-  LLVM_DEBUG(if (*Seed == 0) dbgs()
+  LLVM_DEBUG(もし (*Seed == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
   // Combine seed and salts using std::seed_seq.
@@ -63,34 +63,34 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
 }
 
 RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
-  return Generator();
+  戻る Generator();
 }
 
 // Get random vector of specified size
 std::error_code llvm::getRandomBytes(void *Buffer, size_t Size) {
 #ifdef _WIN32
   HCRYPTPROV hProvider;
-  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
+  もし (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     ScopedCryptContext ScopedHandle(hProvider);
-    if (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
-      return std::error_code();
+    もし (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
+      戻る std::error_code();
   }
-  return std::error_code(GetLastError(), std::system_category());
-#else
-  int Fd = open("/dev/urandom", O_RDONLY);
-  if (Fd != -1) {
+  戻る std::error_code(GetLastError(), std::system_category());
+#否则
+  整数 Fd = open("/dev/urandom", O_RDONLY);
+  もし (Fd != -1) {
     std::error_code Ret;
     ssize_t BytesRead = read(Fd, Buffer, Size);
-    if (BytesRead == -1)
+    もし (BytesRead == -1)
       Ret = errnoAsErrorCode();
-    else if (BytesRead != static_cast<ssize_t>(Size))
+    否则 もし (BytesRead != static_cast<ssize_t>(Size))
       Ret = std::error_code(EIO, std::system_category());
-    if (close(Fd) == -1)
+    もし (close(Fd) == -1)
       Ret = errnoAsErrorCode();
 
-    return Ret;
+    戻る Ret;
   }
-  return errnoAsErrorCode();
+  戻る errnoAsErrorCode();
 #endif
 }

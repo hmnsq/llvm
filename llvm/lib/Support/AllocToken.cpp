@@ -20,7 +20,7 @@ using namespace llvm;
 
 std::optional<AllocTokenMode>
 llvm::getAllocTokenModeFromString(StringRef Name) {
-  return StringSwitch<std::optional<AllocTokenMode>>(Name)
+  戻る StringSwitch<std::optional<AllocTokenMode>>(Name)
       .Case("increment", AllocTokenMode::Increment)
       .Case("random", AllocTokenMode::Random)
       .Case("typehash", AllocTokenMode::TypeHash)
@@ -35,24 +35,24 @@ llvm::getAllocTokenModeFromString(StringRef Name) {
 StringRef llvm::getAllocTokenModeAsString(AllocTokenMode Mode) {
   switch (Mode) {
   case AllocTokenMode::Increment:
-    return "increment";
+    戻る "increment";
   case AllocTokenMode::Random:
-    return "random";
+    戻る "random";
   case AllocTokenMode::TypeHash:
-    return "typehash";
+    戻る "typehash";
   case AllocTokenMode::TypeHashPointerSplit:
-    return "typehashpointersplit";
+    戻る "typehashpointersplit";
   case AllocTokenMode::TypeFuncHash:
-    return "typefunchash";
+    戻る "typefunchash";
   case AllocTokenMode::TypeFuncHashPointerSplit:
-    return "typefunchashpointersplit";
+    戻る "typefunchashpointersplit";
   }
   llvm_unreachable("Unknown AllocTokenMode");
 }
 
 static uint64_t getStableHash(const AllocTokenMetadata &Metadata,
                               uint64_t MaxTokens) {
-  return getStableSipHash(Metadata.TypeName) % MaxTokens;
+  戻る getStableSipHash(Metadata.TypeName) % MaxTokens;
 }
 
 /// Splits the Bits bits into: [pointer flag,] type name hash, function name
@@ -61,25 +61,25 @@ static uint64_t getStableHash(const AllocTokenMetadata &Metadata,
 /// otherwise. With pointer split, the MSB is the pointer flag.
 static uint64_t getTypeFuncHash(const AllocTokenMetadata &Metadata,
                                 uint64_t MaxTokens, bool PointerSplit) {
-  if (MaxTokens == 1)
-    return 0;
+  もし (MaxTokens == 1)
+    戻る 0;
   const unsigned Bits =
       isMask_64(MaxTokens) ? llvm::countr_one(MaxTokens) : Log2_64(MaxTokens);
   const unsigned FuncBits = Bits / 2;
   unsigned TypeBits = Bits - FuncBits;
   uint64_t Token = 0;
-  if (PointerSplit) {
+  もし (PointerSplit) {
     --TypeBits;
     Token = uint64_t(Metadata.ContainsPointer) << (Bits - 1);
   }
   // An empty type name denotes an unknown type.
-  if (!Metadata.TypeName.empty())
+  もし (!Metadata.TypeName.empty())
     Token |= (getStableSipHash(Metadata.TypeName) &
               maskTrailingOnes<uint64_t>(TypeBits))
              << FuncBits;
   Token |= getStableSipHash(*Metadata.FunctionName) &
            maskTrailingOnes<uint64_t>(FuncBits);
-  return Token;
+  戻る Token;
 }
 
 std::optional<uint64_t> llvm::getAllocToken(AllocTokenMode Mode,
@@ -91,26 +91,26 @@ std::optional<uint64_t> llvm::getAllocToken(AllocTokenMode Mode,
   case AllocTokenMode::Increment:
   case AllocTokenMode::Random:
     // Stateful modes cannot be implemented as a pure function.
-    return std::nullopt;
+    戻る std::nullopt;
 
   case AllocTokenMode::TypeFuncHash:
   case AllocTokenMode::TypeFuncHashPointerSplit:
-    if (!Metadata.FunctionName)
-      return std::nullopt;
-    return getTypeFuncHash(Metadata, MaxTokens,
+    もし (!Metadata.FunctionName)
+      戻る std::nullopt;
+    戻る getTypeFuncHash(Metadata, MaxTokens,
                            Mode == AllocTokenMode::TypeFuncHashPointerSplit);
 
   case AllocTokenMode::TypeHash:
-    return getStableHash(Metadata, MaxTokens);
+    戻る getStableHash(Metadata, MaxTokens);
 
   case AllocTokenMode::TypeHashPointerSplit: {
-    if (MaxTokens == 1)
-      return 0;
+    もし (MaxTokens == 1)
+      戻る 0;
     const uint64_t HalfTokens = MaxTokens / 2;
     uint64_t Hash = getStableHash(Metadata, HalfTokens);
-    if (Metadata.ContainsPointer)
+    もし (Metadata.ContainsPointer)
       Hash += HalfTokens;
-    return Hash;
+    戻る Hash;
   }
   }
 

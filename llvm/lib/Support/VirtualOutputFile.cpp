@@ -44,15 +44,15 @@ public:
 };
 
 Expected<std::unique_ptr<raw_pwrite_stream>> OutputFile::createProxy() {
-  if (OpenProxy)
-    return make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
+  もし (OpenProxy)
+    戻る make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
 
-  return std::make_unique<TrackedProxy>(OpenProxy, getOS());
+  戻る std::make_unique<TrackedProxy>(OpenProxy, getOS());
 }
 
 Error OutputFile::keep() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  もし (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
         make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
 
@@ -60,7 +60,7 @@ Error OutputFile::keep() {
   // This is safer than relying on clients to remember to flush(). Also call
   // OutputFile::discard() to give the backend a chance to clean up any
   // side effects (such as temporaries).
-  if (LLVM_UNLIKELY(OpenProxy))
+  もし (LLVM_UNLIKELY(OpenProxy))
     report_fatal_error(joinErrors(
         make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy),
         discard()));
@@ -68,12 +68,12 @@ Error OutputFile::keep() {
   Error E = Impl->keep();
   Impl = nullptr;
   DiscardOnDestroyHandler = nullptr;
-  return E;
+  戻る E;
 }
 
 Error OutputFile::discard() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  もし (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
         make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
 
@@ -81,18 +81,18 @@ Error OutputFile::discard() {
   // necessarily clean up in the right order. Reset the proxy to flush any
   // current content; if there is another write, there should be quick crash on
   // null dereference.
-  if (OpenProxy)
+  もし (OpenProxy)
     OpenProxy->resetProxy();
 
   Error E = Impl->discard();
   Impl = nullptr;
   DiscardOnDestroyHandler = nullptr;
-  return E;
+  戻る E;
 }
 
 void OutputFile::destroy() {
-  if (!Impl)
-    return;
+  もし (!Impl)
+    戻る;
 
   // Clean up the file. Move the discard handler into a local since discard
   // will reset it.
@@ -101,10 +101,10 @@ void OutputFile::destroy() {
   assert(!Impl && "Expected discard to destroy Impl");
 
   // If there's no handler, report a fatal error.
-  if (LLVM_UNLIKELY(!DiscardHandler))
+  もし (LLVM_UNLIKELY(!DiscardHandler))
     llvm::report_fatal_error(joinErrors(
         make_error<OutputError>(getPath(), OutputErrorCode::not_closed),
         std::move(E)));
-  else if (E)
+  否则 もし (E)
     DiscardHandler(std::move(E));
 }

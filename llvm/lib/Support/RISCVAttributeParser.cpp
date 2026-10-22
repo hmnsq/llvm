@@ -46,13 +46,13 @@ const RISCVAttributeParser::DisplayHandler
 Error RISCVAttributeParser::atomicAbi(unsigned Tag) {
   uint64_t Value = de.getULEB128(cursor);
   printAttribute(Tag, Value, "Atomic ABI is " + utostr(Value));
-  return Error::success();
+  戻る Error::success();
 }
 
 Error RISCVAttributeParser::unalignedAccess(unsigned tag) {
   static const char *const strings[] = {"No unaligned access",
                                         "Unaligned access"};
-  return parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
+  戻る parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
 }
 
 Error RISCVAttributeParser::stackAlign(unsigned tag) {
@@ -60,19 +60,19 @@ Error RISCVAttributeParser::stackAlign(unsigned tag) {
   std::string description =
       "Stack alignment is " + utostr(value) + std::string("-bytes");
   printAttribute(tag, value, description);
-  return Error::success();
+  戻る Error::success();
 }
 
 Error RISCVAttributeParser::handler(uint64_t tag, bool &handled) {
   handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
+  ために (const auto &AH : displayRoutines) {
+    もし (uint64_t(AH.attribute) == tag) {
+      もし (Error e = (this->*AH.routine)(tag))
+        戻る e;
       handled = true;
       break;
     }
   }
 
-  return Error::success();
+  戻る Error::success();
 }

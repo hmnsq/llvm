@@ -22,7 +22,7 @@ static void checkValidLayout(ArrayRef<Field> Fields, uint64_t Size,
                              Align MaxAlign) {
   uint64_t LastEnd = 0;
   Align ComputedMaxAlign;
-  for (auto &Field : Fields) {
+  ために (auto &Field : Fields) {
     assert(Field.hasFixedOffset() &&
            "didn't assign a fixed offset to field");
     assert(isAligned(Field.Alignment, Field.Offset) &&
@@ -46,9 +46,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   {
     bool InFixedPrefix = true;
     size_t LastEnd = 0;
-    for (auto &Field : Fields) {
+    ために (auto &Field : Fields) {
       assert(Field.Size > 0 && "field of zero size");
-      if (Field.hasFixedOffset()) {
+      もし (Field.hasFixedOffset()) {
         assert(InFixedPrefix &&
                "fixed-offset fields are not a strict prefix of array");
         assert(LastEnd <= Field.Offset &&
@@ -56,7 +56,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
         LastEnd = Field.getEndOffset();
         assert(LastEnd > Field.Offset &&
                "overflow in fixed-offset end offset");
-      } else {
+      } 否则 {
         InFixedPrefix = false;
       }
     }
@@ -68,21 +68,21 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
   // Find the first flexible-offset field, tracking MaxAlign.
   auto FirstFlexible = Fields.begin(), E = Fields.end();
-  while (FirstFlexible != E && FirstFlexible->hasFixedOffset()) {
+  ながら (FirstFlexible != E && FirstFlexible->hasFixedOffset()) {
     MaxAlign = std::max(MaxAlign, FirstFlexible->Alignment);
     ++FirstFlexible;
   }
 
   // If there are no flexible fields, we're done.
-  if (FirstFlexible == E) {
+  もし (FirstFlexible == E) {
     uint64_t Size = 0;
-    if (!Fields.empty())
+    もし (!Fields.empty())
       Size = Fields.back().getEndOffset();
 
 #ifndef NDEBUG
     checkValidLayout(Fields, Size, MaxAlign);
 #endif
-    return {Size, MaxAlign};
+    戻る {Size, MaxAlign};
   }
 
   // Walk over the flexible-offset fields, tracking MaxAlign and
@@ -92,7 +92,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // past that point.
   {
     uintptr_t UniqueNumber = 0;
-    for (auto I = FirstFlexible; I != E; ++I) {
+    ために (auto I = FirstFlexible; I != E; ++I) {
       I->Scratch = reinterpret_cast<void*>(UniqueNumber++);
       MaxAlign = std::max(MaxAlign, I->Alignment);
     }
@@ -104,22 +104,22 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // important if we get into the gap-filling stage below, but it
   // doesn't hurt here.
   array_pod_sort(FirstFlexible, E,
-                 [](const Field *lhs, const Field *rhs) -> int {
+                 [](const Field *lhs, const Field *rhs) -> 整数 {
     // Decreasing alignment.
-    if (lhs->Alignment != rhs->Alignment)
-      return (lhs->Alignment < rhs->Alignment ? 1 : -1);
+    もし (lhs->Alignment != rhs->Alignment)
+      戻る (lhs->Alignment < rhs->Alignment ? 1 : -1);
 
     // Decreasing size.
-    if (lhs->Size != rhs->Size)
-      return (lhs->Size < rhs->Size ? 1 : -1);
+    もし (lhs->Size != rhs->Size)
+      戻る (lhs->Size < rhs->Size ? 1 : -1);
 
     // Original order.
     auto lhsNumber = reinterpret_cast<uintptr_t>(lhs->Scratch);
     auto rhsNumber = reinterpret_cast<uintptr_t>(rhs->Scratch);
-    if (lhsNumber != rhsNumber)
-      return (lhsNumber < rhsNumber ? -1 : 1);
+    もし (lhsNumber != rhsNumber)
+      戻る (lhsNumber < rhsNumber ? -1 : 1);
 
-    return 0;
+    戻る 0;
   });
 
   // Do a quick check for whether that sort alone has given us a perfect
@@ -133,9 +133,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     uint64_t LastEnd = 0;
 
     // Walk the fixed-offset fields.
-    for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
+    ために (auto I = Fields.begin(); I != FirstFlexible; ++I) {
       assert(I->hasFixedOffset());
-      if (LastEnd != I->Offset) {
+      もし (LastEnd != I->Offset) {
         HasPadding = true;
         break;
       }
@@ -147,10 +147,10 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     // fixed-offset and flexible-offset fields, so if we end up
     // discovering padding later in this loop, we can just abandon this
     // work and we'll ignore the offsets we already assigned.
-    if (!HasPadding) {
-      for (auto I = FirstFlexible; I != E; ++I) {
+    もし (!HasPadding) {
+      ために (auto I = FirstFlexible; I != E; ++I) {
         auto Offset = alignTo(LastEnd, I->Alignment);
-        if (LastEnd != Offset) {
+        もし (LastEnd != Offset) {
           HasPadding = true;
           break;
         }
@@ -160,11 +160,11 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     }
 
     // If we already have a perfect layout, we're done.
-    if (!HasPadding) {
+    もし (!HasPadding) {
 #ifndef NDEBUG
       checkValidLayout(Fields, LastEnd, MaxAlign);
 #endif
-      return {LastEnd, MaxAlign};
+      戻る {LastEnd, MaxAlign};
     }
   }
 
@@ -248,17 +248,17 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     Align Alignment;
 
     static Field *getNext(Field *Cur) {
-      return static_cast<Field *>(Cur->Scratch);
+      戻る static_cast<Field *>(Cur->Scratch);
     }
   };
   SmallVector<AlignmentQueue, 8> FlexibleFieldsByAlignment;
-  for (auto I = FirstFlexible; I != E; ) {
+  ために (auto I = FirstFlexible; I != E; ) {
     auto Head = I;
     auto Alignment = I->Alignment;
 
     uint64_t MinSize = I->Size;
     auto LastInQueue = I;
-    for (++I; I != E && I->Alignment == Alignment; ++I) {
+    ために (++I; I != E && I->Alignment == Alignment; ++I) {
       LastInQueue->Scratch = I;
       LastInQueue = I;
       MinSize = std::min(MinSize, I->Size);
@@ -273,7 +273,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   auto checkQueues = [&]{
     bool FirstQueue = true;
     Align LastQueueAlignment;
-    for (auto &Queue : FlexibleFieldsByAlignment) {
+    ために (auto &Queue : FlexibleFieldsByAlignment) {
       assert((FirstQueue || Queue.Alignment < LastQueueAlignment) &&
              "bins not in order of descending alignment");
       LastQueueAlignment = Queue.Alignment;
@@ -281,7 +281,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
       assert(Queue.Head && "queue was empty");
       uint64_t LastSize = ~(uint64_t)0;
-      for (auto I = Queue.Head; I; I = Queue.getNext(I)) {
+      ために (auto I = Queue.Head; I; I = Queue.getNext(I)) {
         assert(I->Alignment == Queue.Alignment && "bad field in queue");
         assert(I->Size <= LastSize && "queue not in descending size order");
         LastSize = I->Size;
@@ -297,22 +297,22 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
     // If we're removing Cur from a non-initial position, splice it out
     // of the linked list.
-    if (Last) {
+    もし (Last) {
       Last->Scratch = Cur->Scratch;
 
       // If Cur was the last field in the list, we need to update MinSize.
       // We can just use the last field's size because the list is in
       // descending order of size.
-      if (!Cur->Scratch)
+      もし (!Cur->Scratch)
         Queue->MinSize = Last->Size;
 
     // Otherwise, replace the head.
-    } else {
-      if (auto NewHead = Queue->getNext(Cur))
+    } 否则 {
+      もし (auto NewHead = Queue->getNext(Cur))
         Queue->Head = NewHead;
 
       // If we just emptied the queue, destroy its bin.
-      else
+      否则
         FlexibleFieldsByAlignment.erase(Queue);
     }
   };
@@ -340,7 +340,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     LastEnd = Layout.back().getEndOffset();
 
     // Always return true so that we can be tail-called.
-    return true;
+    戻る true;
   };
 
   // Helper function to try to find a field in the given queue that'll
@@ -356,16 +356,16 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     // queue if there's nothing in it that small.
     auto MaxViableSize =
       (EndOffset ? *EndOffset - StartOffset : ~(uint64_t)0);
-    if (Queue->MinSize > MaxViableSize)
-      return false;
+    もし (Queue->MinSize > MaxViableSize)
+      戻る false;
 
     // Find the matching field.  Note that this should always find
     // something because of the MinSize check above.
-    for (Field *Cur = Queue->Head, *Last = nullptr; true;
+    ために (Field *Cur = Queue->Head, *Last = nullptr; true;
            Last = Cur, Cur = Queue->getNext(Cur)) {
       assert(Cur && "didn't find a match in queue despite its MinSize");
-      if (Cur->Size <= MaxViableSize)
-        return addToLayout(Queue, Last, Cur, StartOffset);
+      もし (Cur->Size <= MaxViableSize)
+        戻る addToLayout(Queue, Last, Cur, StartOffset);
     }
 
     llvm_unreachable("didn't find a match in queue despite its MinSize");
@@ -381,38 +381,38 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     // Start by looking for the most-aligned queue that doesn't need any
     // leading padding after LastEnd.
     auto FirstQueueToSearch = QueueB;
-    for (; FirstQueueToSearch != QueueE; ++FirstQueueToSearch) {
-      if (isAligned(FirstQueueToSearch->Alignment, LastEnd))
+    ために (; FirstQueueToSearch != QueueE; ++FirstQueueToSearch) {
+      もし (isAligned(FirstQueueToSearch->Alignment, LastEnd))
         break;
     }
 
     uint64_t Offset = LastEnd;
-    while (true) {
+    ながら (true) {
       // Invariant: all of the queues in [FirstQueueToSearch, QueueE)
       // require the same initial padding offset.
 
       // Search those queues in descending order of alignment for a
       // satisfactory field.
-      for (auto Queue = FirstQueueToSearch; Queue != QueueE; ++Queue) {
-        if (tryAddFillerFromQueue(Queue, Offset, BeforeOffset))
-          return true;
+      ために (auto Queue = FirstQueueToSearch; Queue != QueueE; ++Queue) {
+        もし (tryAddFillerFromQueue(Queue, Offset, BeforeOffset))
+          戻る true;
       }
 
       // Okay, we don't need to scan those again.
       QueueE = FirstQueueToSearch;
 
       // If we started from the first queue, we're done.
-      if (FirstQueueToSearch == QueueB)
-        return false;
+      もし (FirstQueueToSearch == QueueB)
+        戻る false;
 
       // Otherwise, scan backwards to find the most-aligned queue that
       // still has minimal leading padding after LastEnd.  If that
       // minimal padding is already at or past the end point, we're done.
       --FirstQueueToSearch;
       Offset = alignTo(LastEnd, FirstQueueToSearch->Alignment);
-      if (BeforeOffset && Offset >= *BeforeOffset)
-        return false;
-      while (FirstQueueToSearch != QueueB &&
+      もし (BeforeOffset && Offset >= *BeforeOffset)
+        戻る false;
+      ながら (FirstQueueToSearch != QueueB &&
              Offset == alignTo(LastEnd, FirstQueueToSearch[-1].Alignment))
         --FirstQueueToSearch;
     }
@@ -420,10 +420,10 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
   // Phase 1: fill the gaps between fixed-offset fields with the best
   // flexible-offset field that fits.
-  for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
+  ために (auto I = Fields.begin(); I != FirstFlexible; ++I) {
     assert(LastEnd <= I->Offset);
-    while (LastEnd != I->Offset) {
-      if (!tryAddBestField(I->Offset))
+    ながら (LastEnd != I->Offset) {
+      もし (!tryAddBestField(I->Offset))
         break;
     }
     Layout.push_back(*I);
@@ -436,7 +436,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
   // Phase 2: repeatedly add the best flexible-offset field until
   // they're all gone.
-  while (!FlexibleFieldsByAlignment.empty()) {
+  ながら (!FlexibleFieldsByAlignment.empty()) {
     bool Success = tryAddBestField(std::nullopt);
     assert(Success && "didn't find a field with no fixed limit?");
     (void) Success;
@@ -452,5 +452,5 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   checkValidLayout(Fields, LastEnd, MaxAlign);
 #endif
 
-  return {LastEnd, MaxAlign};
+  戻る {LastEnd, MaxAlign};
 }

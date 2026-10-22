@@ -18,12 +18,12 @@ using namespace llvm;
 
 cl::OptionCategory &llvm::getColorCategory() {
   static cl::OptionCategory ColorCategory("Color Options");
-  return ColorCategory;
+  戻る ColorCategory;
 }
 namespace {
 struct CreateUseColor {
   static void *call() {
-    return new cl::opt<cl::boolOrDefault>(
+    戻る new cl::opt<cl::boolOrDefault>(
         "color", cl::cat(getColorCategory()),
         cl::desc("Use colors in output (default=autodetect)"),
         cl::init(cl::boolOrDefault::BOU_UNSET));
@@ -34,7 +34,7 @@ static ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
 void llvm::initWithColorOptions() { *UseColor; }
 
 static bool DefaultAutoDetectFunction(const raw_ostream &OS) {
-  return *UseColor == cl::boolOrDefault::BOU_UNSET
+  戻る *UseColor == cl::boolOrDefault::BOU_UNSET
              ? OS.has_colors()
              : *UseColor == cl::boolOrDefault::BOU_TRUE;
 }
@@ -45,7 +45,7 @@ WithColor::AutoDetectFunctionType WithColor::AutoDetectFunction =
 WithColor::WithColor(raw_ostream &OS, HighlightColor Color, ColorMode Mode)
     : OS(OS), Mode(Mode) {
   // Detect color from terminal type unless the user passed the --color option.
-  if (colorsEnabled()) {
+  もし (colorsEnabled()) {
     switch (Color) {
     case HighlightColor::Address:
       OS.changeColor(raw_ostream::YELLOW);
@@ -81,19 +81,19 @@ WithColor::WithColor(raw_ostream &OS, HighlightColor Color, ColorMode Mode)
   }
 }
 
-raw_ostream &WithColor::error() { return error(errs()); }
+raw_ostream &WithColor::error() { 戻る error(errs()); }
 
-raw_ostream &WithColor::warning() { return warning(errs()); }
+raw_ostream &WithColor::warning() { 戻る warning(errs()); }
 
-raw_ostream &WithColor::note() { return note(errs()); }
+raw_ostream &WithColor::note() { 戻る note(errs()); }
 
-raw_ostream &WithColor::remark() { return remark(errs()); }
+raw_ostream &WithColor::remark() { 戻る remark(errs()); }
 
 raw_ostream &WithColor::error(raw_ostream &OS, StringRef Prefix,
                               bool DisableColors) {
-  if (!Prefix.empty())
+  もし (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Error,
+  戻る WithColor(OS, HighlightColor::Error,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "error: ";
@@ -101,9 +101,9 @@ raw_ostream &WithColor::error(raw_ostream &OS, StringRef Prefix,
 
 raw_ostream &WithColor::warning(raw_ostream &OS, StringRef Prefix,
                                 bool DisableColors) {
-  if (!Prefix.empty())
+  もし (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Warning,
+  戻る WithColor(OS, HighlightColor::Warning,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "warning: ";
@@ -111,9 +111,9 @@ raw_ostream &WithColor::warning(raw_ostream &OS, StringRef Prefix,
 
 raw_ostream &WithColor::note(raw_ostream &OS, StringRef Prefix,
                              bool DisableColors) {
-  if (!Prefix.empty())
+  もし (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Note,
+  戻る WithColor(OS, HighlightColor::Note,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "note: ";
@@ -121,9 +121,9 @@ raw_ostream &WithColor::note(raw_ostream &OS, StringRef Prefix,
 
 raw_ostream &WithColor::remark(raw_ostream &OS, StringRef Prefix,
                                bool DisableColors) {
-  if (!Prefix.empty())
+  もし (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Remark,
+  戻る WithColor(OS, HighlightColor::Remark,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "remark: ";
@@ -132,26 +132,26 @@ raw_ostream &WithColor::remark(raw_ostream &OS, StringRef Prefix,
 bool WithColor::colorsEnabled() {
   switch (Mode) {
   case ColorMode::Enable:
-    return true;
+    戻る true;
   case ColorMode::Disable:
-    return false;
+    戻る false;
   case ColorMode::Auto:
-    return AutoDetectFunction(OS);
+    戻る AutoDetectFunction(OS);
   }
   llvm_unreachable("All cases handled above.");
 }
 
 WithColor &WithColor::changeColor(raw_ostream::Colors Color, bool Bold,
                                   bool BG) {
-  if (colorsEnabled())
+  もし (colorsEnabled())
     OS.changeColor(Color, Bold, BG);
-  return *this;
+  戻る *this;
 }
 
 WithColor &WithColor::resetColor() {
-  if (colorsEnabled())
+  もし (colorsEnabled())
     OS.resetColor();
-  return *this;
+  戻る *this;
 }
 
 WithColor::~WithColor() { resetColor(); }
@@ -169,7 +169,7 @@ void WithColor::defaultWarningHandler(Error Warning) {
 }
 
 WithColor::AutoDetectFunctionType WithColor::defaultAutoDetectFunction() {
-  return DefaultAutoDetectFunction;
+  戻る DefaultAutoDetectFunction;
 }
 
 void WithColor::setAutoDetectFunction(

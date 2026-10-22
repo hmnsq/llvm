@@ -17,16 +17,16 @@ class ArrayRefImpl : public BinaryStream {
 public:
   ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
 
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
+  llvm::endianness getEndian() const override { 戻る BBS.getEndian(); }
   Error readBytes(uint64_t Offset, uint64_t Size,
                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+    戻る BBS.readBytes(Offset, Size, Buffer);
   }
   Error readLongestContiguousChunk(uint64_t Offset,
                                    ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+    戻る BBS.readLongestContiguousChunk(Offset, Buffer);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t getLength() override { 戻る BBS.getLength(); }
 
 private:
   BinaryByteStream BBS;
@@ -38,21 +38,21 @@ public:
       : BBS(Data, Endian) {}
 
   // Inherited via WritableBinaryStream
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
+  llvm::endianness getEndian() const override { 戻る BBS.getEndian(); }
   Error readBytes(uint64_t Offset, uint64_t Size,
                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+    戻る BBS.readBytes(Offset, Size, Buffer);
   }
   Error readLongestContiguousChunk(uint64_t Offset,
                                    ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+    戻る BBS.readLongestContiguousChunk(Offset, Buffer);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t getLength() override { 戻る BBS.getLength(); }
 
   Error writeBytes(uint64_t Offset, ArrayRef<uint8_t> Data) override {
-    return BBS.writeBytes(Offset, Data);
+    戻る BBS.writeBytes(Offset, Data);
   }
-  Error commit() override { return BBS.commit(); }
+  Error commit() override { 戻る BBS.commit(); }
 
 private:
   MutableBinaryByteStream BBS;
@@ -72,26 +72,26 @@ BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
 
 Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
                                  ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, Size))
-    return EC;
-  return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
+  もし (auto EC = checkOffsetForRead(Offset, Size))
+    戻る EC;
+  戻る BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
 }
 
 Error BinaryStreamRef::readLongestContiguousChunk(
     uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, 1))
-    return EC;
+  もし (auto EC = checkOffsetForRead(Offset, 1))
+    戻る EC;
 
-  if (auto EC =
+  もし (auto EC =
           BorrowedImpl->readLongestContiguousChunk(ViewOffset + Offset, Buffer))
-    return EC;
+    戻る EC;
   // This StreamRef might refer to a smaller window over a larger stream.  In
   // that case we will have read out more bytes than we should return, because
   // we should not read past the end of the current view.
   uint64_t MaxLength = getLength() - Offset;
-  if (Buffer.size() > MaxLength)
+  もし (Buffer.size() > MaxLength)
     Buffer = Buffer.slice(0, MaxLength);
-  return Error::success();
+  戻る Error::success();
 }
 
 WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
@@ -109,15 +109,15 @@ WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
 
 Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
                                           ArrayRef<uint8_t> Data) const {
-  if (auto EC = checkOffsetForWrite(Offset, Data.size()))
-    return EC;
+  もし (auto EC = checkOffsetForWrite(Offset, Data.size()))
+    戻る EC;
 
-  return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
+  戻る BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
 }
 
 WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+  戻る BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error WritableBinaryStreamRef::commit() { 戻る BorrowedImpl->commit(); }
