@@ -10,192 +10,192 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Protocol.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/JSON.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/LSP/Protocol.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/StringSet.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव "llvm/Support/JSON.h"
+#अन्तर्भाव "llvm/Support/MemoryBuffer.h"
+#अन्तर्भाव "llvm/Support/Path.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+using नामाकाश llvm;
+using नामाकाश llvm::lsp;
 
 // Helper that doesn't treat `null` and absent fields as failures.
 template <typename T>
-static bool mapOptOrNull(const llvm::json::Value &Params,
+स्थिर तार्किक mapOptOrNull(ध्रुव llvm::json::मूल्य &Params,
                          llvm::StringLiteral Prop, T &Out,
                          llvm::json::Path Path) {
-  const llvm::json::Object *O = Params.getAsObject();
-  assert(O);
+  ध्रुव llvm::json::Object *O = Params.getAsObject();
+  प्रतिज्ञा(O);
 
   // Field is missing or null.
   auto *V = O->get(Prop);
-  if (!V || V->getAsNull())
-    return true;
-  return fromJSON(*V, Out, Path.field(Prop));
+  यदि (!V || V->getAsNull())
+    प्रत्यागम सत्य;
+  प्रत्यागम fromJSON(*V, Out, Path.field(Prop));
 }
 
 //===----------------------------------------------------------------------===//
 // LSPError
 //===----------------------------------------------------------------------===//
 
-char LSPError::ID;
+वर्ण LSPError::ID;
 
 //===----------------------------------------------------------------------===//
 // URIForFile
 //===----------------------------------------------------------------------===//
 
-static bool isWindowsPath(StringRef Path) {
-  return Path.size() > 1 && llvm::isAlpha(Path[0]) && Path[1] == ':';
+स्थिर तार्किक isWindowsPath(StringRef Path) {
+  प्रत्यागम Path.size() > 1 && llvm::isAlpha(Path[0]) && Path[1] == ':';
 }
 
-static bool isNetworkPath(StringRef Path) {
-  return Path.size() > 2 && Path[0] == Path[1] &&
+स्थिर तार्किक isNetworkPath(StringRef Path) {
+  प्रत्यागम Path.size() > 2 && Path[0] == Path[1] &&
          llvm::sys::path::is_separator(Path[0]);
 }
 
-static bool shouldEscapeInURI(unsigned char C) {
+स्थिर तार्किक shouldEscapeInURI(unsigned वर्ण C) {
   // Unreserved characters.
-  if ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
+  यदि ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
       (C >= '0' && C <= '9'))
-    return false;
+    प्रत्यागम असत्य;
 
-  switch (C) {
-  case '-':
-  case '_':
-  case '.':
-  case '~':
+  विकल्प (C) {
+  पक्ष '-':
+  पक्ष '_':
+  पक्ष '.':
+  पक्ष '~':
   // '/' is only reserved when parsing.
-  case '/':
+  पक्ष '/':
   // ':' is only reserved for relative URI paths, which we doesn't produce.
-  case ':':
-    return false;
+  पक्ष ':':
+    प्रत्यागम असत्य;
   }
-  return true;
+  प्रत्यागम सत्य;
 }
 
 /// Encodes a string according to percent-encoding.
 /// - Unreserved characters are not escaped.
 /// - Reserved characters always escaped with exceptions like '/'.
 /// - All other characters are escaped.
-static void percentEncode(StringRef Content, std::string &Out) {
-  for (unsigned char C : Content) {
-    if (shouldEscapeInURI(C)) {
-      Out.push_back('%');
-      Out.push_back(llvm::hexdigit(C / 16));
-      Out.push_back(llvm::hexdigit(C % 16));
-    } else {
-      Out.push_back(C);
+स्थिर शून्य percentEncode(StringRef Content, std::string &Out) {
+  प्रति (unsigned वर्ण C : Content) {
+    यदि (shouldEscapeInURI(C)) {
+      Out.ढकला_back('%');
+      Out.ढकला_back(llvm::hexdigit(C / 16));
+      Out.ढकला_back(llvm::hexdigit(C % 16));
+    } अन्यथा {
+      Out.ढकला_back(C);
     }
   }
 }
 
 /// Decodes a string according to percent-encoding.
-static std::string percentDecode(StringRef Content) {
+स्थिर std::string percentDecode(StringRef Content) {
   std::string Result;
-  for (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
-    if (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
+  प्रति (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
+    यदि (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
         llvm::isHexDigit(*(I + 2))) {
-      Result.push_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
+      Result.ढकला_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
       I += 2;
-    } else {
-      Result.push_back(*I);
+    } अन्यथा {
+      Result.ढकला_back(*I);
     }
   }
-  return Result;
+  प्रत्यागम Result;
 }
 
 /// Return the set containing the supported URI schemes.
-static StringSet<> &getSupportedSchemes() {
-  static StringSet<> Schemes({"file", "test"});
-  return Schemes;
+स्थिर StringSet<> &getSupportedSchemes() {
+  स्थिर StringSet<> Schemes({"file", "test"});
+  प्रत्यागम Schemes;
 }
 
 /// Returns true if the given scheme is structurally valid, i.e. it does not
 /// contain any invalid scheme characters. This does not check that the scheme
 /// is actually supported.
-static bool isStructurallyValidScheme(StringRef Scheme) {
-  if (Scheme.empty())
-    return false;
-  if (!llvm::isAlpha(Scheme[0]))
-    return false;
-  return llvm::all_of(llvm::drop_begin(Scheme), [](char C) {
-    return llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
+स्थिर तार्किक isStructurallyValidScheme(StringRef Scheme) {
+  यदि (Scheme.empty())
+    प्रत्यागम असत्य;
+  यदि (!llvm::isAlpha(Scheme[0]))
+    प्रत्यागम असत्य;
+  प्रत्यागम llvm::all_of(llvm::drop_begin(Scheme), [](वर्ण C) {
+    प्रत्यागम llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
   });
 }
 
-static llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
+स्थिर llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
                                                        StringRef Scheme) {
   std::string Body;
   StringRef Authority;
-  StringRef Root = llvm::sys::path::root_name(AbsolutePath);
-  if (isNetworkPath(Root)) {
+  StringRef मूळ_2 = llvm::sys::path::मूळ_name(AbsolutePath);
+  यदि (isNetworkPath(मूळ_2)) {
     // Windows UNC paths e.g. \\server\share => file://server/share
-    Authority = Root.drop_front(2);
-    AbsolutePath.consume_front(Root);
-  } else if (isWindowsPath(Root)) {
+    Authority = मूळ_2.drop_front(2);
+    AbsolutePath.consume_front(मूळ_2);
+  } अन्यथा यदि (isWindowsPath(मूळ_2)) {
     // Windows paths e.g. X:\path => file:///X:/path
     Body = "/";
   }
   Body += llvm::sys::path::convert_to_slash(AbsolutePath);
 
   std::string Uri = Scheme.str() + ":";
-  if (Authority.empty() && Body.empty())
-    return Uri;
+  यदि (Authority.empty() && Body.empty())
+    प्रत्यागम Uri;
 
   // If authority if empty, we only print body if it starts with "/"; otherwise,
   // the URI is invalid.
-  if (!Authority.empty() || StringRef(Body).starts_with("/")) {
+  यदि (!Authority.empty() || StringRef(Body).starts_with("/")) {
     Uri.append("//");
     percentEncode(Authority, Uri);
   }
   percentEncode(Body, Uri);
-  return Uri;
+  प्रत्यागम Uri;
 }
 
-static llvm::Expected<std::string> getAbsolutePath(StringRef Authority,
+स्थिर llvm::Expected<std::string> getAbsolutePath(StringRef Authority,
                                                    StringRef Body) {
-  if (!Body.starts_with("/"))
-    return llvm::createStringError(
+  यदि (!Body.starts_with("/"))
+    प्रत्यागम llvm::createStringError(
         llvm::inconvertibleErrorCode(),
         "File scheme: expect body to be an absolute path starting "
         "with '/': " +
             Body);
   SmallString<128> Path;
-  if (!Authority.empty()) {
+  यदि (!Authority.empty()) {
     // Windows UNC paths e.g. file://server/share => \\server\share
     ("//" + Authority).toVector(Path);
-  } else if (isWindowsPath(Body.substr(1))) {
+  } अन्यथा यदि (isWindowsPath(Body.substr(1))) {
     // Windows paths e.g. file:///X:/path => X:\path
     Body.consume_front("/");
   }
   Path.append(Body);
   llvm::sys::path::native(Path);
-  return std::string(Path);
+  प्रत्यागम std::string(Path);
 }
 
-static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
+स्थिर llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
   StringRef Uri = OrigUri;
 
   // Decode the scheme of the URI.
   size_t Pos = Uri.find(':');
-  if (Pos == StringRef::npos)
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  यदि (Pos == StringRef::npos)
+    प्रत्यागम llvm::createStringError(llvm::inconvertibleErrorCode(),
                                    "Scheme must be provided in URI: " +
                                        OrigUri);
   StringRef SchemeStr = Uri.substr(0, Pos);
   std::string UriScheme = percentDecode(SchemeStr);
-  if (!isStructurallyValidScheme(UriScheme))
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  यदि (!isStructurallyValidScheme(UriScheme))
+    प्रत्यागम llvm::createStringError(llvm::inconvertibleErrorCode(),
                                    "Invalid scheme: " + SchemeStr +
                                        " (decoded: " + UriScheme + ")");
   Uri = Uri.substr(Pos + 1);
 
   // Decode the authority of the URI.
   std::string UriAuthority;
-  if (Uri.consume_front("//")) {
+  यदि (Uri.consume_front("//")) {
     Pos = Uri.find('/');
     UriAuthority = percentDecode(Uri.substr(0, Pos));
     Uri = Uri.substr(Pos);
@@ -205,151 +205,151 @@ static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
   std::string UriBody = percentDecode(Uri);
 
   // Compute the absolute path for this uri.
-  if (!getSupportedSchemes().contains(UriScheme)) {
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  यदि (!getSupportedSchemes().contains(UriScheme)) {
+    प्रत्यागम llvm::createStringError(llvm::inconvertibleErrorCode(),
                                    "unsupported URI scheme `" + UriScheme +
                                        "' for workspace files");
   }
-  return getAbsolutePath(UriAuthority, UriBody);
+  प्रत्यागम getAbsolutePath(UriAuthority, UriBody);
 }
 
 llvm::Expected<URIForFile> URIForFile::fromURI(StringRef Uri) {
   llvm::Expected<std::string> FilePath = parseFilePathFromURI(Uri);
-  if (!FilePath)
-    return FilePath.takeError();
-  return URIForFile(std::move(*FilePath), Uri.str());
+  यदि (!FilePath)
+    प्रत्यागम FilePath.takeError();
+  प्रत्यागम URIForFile(std::move(*FilePath), Uri.str());
 }
 
 llvm::Expected<URIForFile> URIForFile::fromFile(StringRef AbsoluteFilepath,
                                                 StringRef Scheme) {
   llvm::Expected<std::string> Uri =
       uriFromAbsolutePath(AbsoluteFilepath, Scheme);
-  if (!Uri)
-    return Uri.takeError();
-  return fromURI(*Uri);
+  यदि (!Uri)
+    प्रत्यागम Uri.takeError();
+  प्रत्यागम fromURI(*Uri);
 }
 
-StringRef URIForFile::scheme() const { return uri().split(':').first; }
+StringRef URIForFile::scheme() ध्रुव { प्रत्यागम uri().split(':').first; }
 
-void URIForFile::registerSupportedScheme(StringRef Scheme) {
-  getSupportedSchemes().insert(Scheme);
+शून्य URIForFile::registerSupportedScheme(StringRef Scheme) {
+  getSupportedSchemes().घाला(Scheme);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, URIForFile &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, URIForFile &Result,
                          llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
+  यदि (std::optional<StringRef> Str = मूल्य.getAsString()) {
     llvm::Expected<URIForFile> ExpectedUri = URIForFile::fromURI(*Str);
-    if (!ExpectedUri) {
+    यदि (!ExpectedUri) {
       Path.report("unresolvable URI");
       consumeError(ExpectedUri.takeError());
-      return false;
+      प्रत्यागम असत्य;
     }
     Result = std::move(*ExpectedUri);
-    return true;
+    प्रत्यागम सत्य;
   }
-  return false;
+  प्रत्यागम असत्य;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const URIForFile &Value) {
-  return Value.uri();
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव URIForFile &मूल्य) {
+  प्रत्यागम मूल्य.uri();
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const URIForFile &Value) {
-  return Os << Value.uri();
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, ध्रुव URIForFile &मूल्य) {
+  प्रत्यागम Os << मूल्य.uri();
 }
 
 //===----------------------------------------------------------------------===//
 // ClientCapabilities
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          ClientCapabilities &Result, llvm::json::Path Path) {
-  const llvm::json::Object *O = Value.getAsObject();
-  if (!O) {
+  ध्रुव llvm::json::Object *O = मूल्य.getAsObject();
+  यदि (!O) {
     Path.report("expected object");
-    return false;
+    प्रत्यागम असत्य;
   }
-  if (const llvm::json::Object *TextDocument = O->getObject("textDocument")) {
-    if (const llvm::json::Object *DocumentSymbol =
+  यदि (ध्रुव llvm::json::Object *TextDocument = O->getObject("textDocument")) {
+    यदि (ध्रुव llvm::json::Object *Document_चिन्ह =
             TextDocument->getObject("documentSymbol")) {
-      if (std::optional<bool> HierarchicalSupport =
-              DocumentSymbol->getBoolean("hierarchicalDocumentSymbolSupport"))
-        Result.hierarchicalDocumentSymbol = *HierarchicalSupport;
+      यदि (std::optional<तार्किक> HierarchicalSupport =
+              Document_चिन्ह->getBoolean("hierarchicalDocumentSymbolSupport"))
+        Result.hierarchical_Document_चिन्ह = *HierarchicalSupport;
     }
-    if (auto *CodeAction = TextDocument->getObject("codeAction")) {
-      if (CodeAction->getObject("codeActionLiteralSupport"))
-        Result.codeActionStructure = true;
+    यदि (auto *CodeAction = TextDocument->getObject("codeAction")) {
+      यदि (CodeAction->getObject("codeActionLiteralSupport"))
+        Result.codeActionStructure = सत्य;
     }
   }
-  if (auto *Window = O->getObject("window")) {
-    if (std::optional<bool> WorkDoneProgressSupport =
+  यदि (auto *Window = O->getObject("window")) {
+    यदि (std::optional<तार्किक> WorkDoneProgressSupport =
             Window->getBoolean("workDoneProgress"))
       Result.workDoneProgress = *WorkDoneProgressSupport;
   }
-  return true;
+  प्रत्यागम सत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // ClientInfo
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, ClientInfo &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, ClientInfo &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("name", Result.name))
-    return false;
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  यदि (!O || !O.map("name", Result.name))
+    प्रत्यागम असत्य;
 
   // Don't fail if we can't parse version.
   O.map("version", Result.version);
-  return true;
+  प्रत्यागम सत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // InitializeParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TraceLevel &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, TraceLevel &Result,
                          llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
-    if (*Str == "off") {
+  यदि (std::optional<StringRef> Str = मूल्य.getAsString()) {
+    यदि (*Str == "off") {
       Result = TraceLevel::Off;
-      return true;
+      प्रत्यागम सत्य;
     }
-    if (*Str == "messages") {
+    यदि (*Str == "messages") {
       Result = TraceLevel::Messages;
-      return true;
+      प्रत्यागम सत्य;
     }
-    if (*Str == "verbose") {
+    यदि (*Str == "verbose") {
       Result = TraceLevel::Verbose;
-      return true;
+      प्रत्यागम सत्य;
     }
   }
-  return false;
+  प्रत्यागम असत्य;
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          InitializeParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  यदि (!O)
+    प्रत्यागम असत्य;
   // We deliberately don't fail if we can't parse individual fields.
   O.map("capabilities", Result.capabilities);
   O.map("trace", Result.trace);
-  O.map("rootUri", Result.rootUri);
-  O.map("rootPath", Result.rootPath);
-  mapOptOrNull(Value, "clientInfo", Result.clientInfo, Path);
+  O.map("rootUri", Result.मूळ_Uri);
+  O.map("rootPath", Result.मूळ_Path);
+  mapOptOrNull(मूल्य, "clientInfo", Result.clientInfo, Path);
 
-  return true;
+  प्रत्यागम सत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentItem
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          TextDocumentItem &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("uri", Result.uri) &&
          O.map("languageId", Result.languageId) && O.map("text", Result.text) &&
          O.map("version", Result.version);
 }
@@ -358,109 +358,109 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // TextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const TextDocumentIdentifier &Value) {
-  return llvm::json::Object{{"uri", Value.uri}};
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव TextDocumentIdentifier &मूल्य) {
+  प्रत्यागम llvm::json::Object{{"uri", मूल्य.uri}};
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          TextDocumentIdentifier &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("uri", Result.uri);
 }
 
 //===----------------------------------------------------------------------===//
 // VersionedTextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value
-llvm::lsp::toJSON(const VersionedTextDocumentIdentifier &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"version", Value.version},
+llvm::json::मूल्य
+llvm::lsp::toJSON(ध्रुव VersionedTextDocumentIdentifier &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"uri", मूल्य.uri},
+      {"version", मूल्य.version},
   };
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          VersionedTextDocumentIdentifier &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("version", Result.version);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("uri", Result.uri) && O.map("version", Result.version);
 }
 
 //===----------------------------------------------------------------------===//
 // Position
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Position &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, Position &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("line", Result.line) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("line", Result.ओळ_2) &&
          O.map("character", Result.character);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Position &Value) {
-  return llvm::json::Object{
-      {"line", Value.line},
-      {"character", Value.character},
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव Position &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"line", मूल्य.ओळ_2},
+      {"character", मूल्य.character},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Position &Value) {
-  return Os << Value.line << ':' << Value.character;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, ध्रुव Position &मूल्य) {
+  प्रत्यागम Os << मूल्य.ओळ_2 << ':' << मूल्य.character;
 }
 
 //===----------------------------------------------------------------------===//
 // Range
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Range &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, Range &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("start", Result.start) && O.map("end", Result.end);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("start", Result.start) && O.map("end", Result.end);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Range &Value) {
-  return llvm::json::Object{
-      {"start", Value.start},
-      {"end", Value.end},
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव Range &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"start", मूल्य.start},
+      {"end", मूल्य.end},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Range &Value) {
-  return Os << Value.start << '-' << Value.end;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, ध्रुव Range &मूल्य) {
+  प्रत्यागम Os << मूल्य.start << '-' << मूल्य.end;
 }
 
 //===----------------------------------------------------------------------===//
 // Location
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Location &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, Location &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("range", Result.range);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("uri", Result.uri) && O.map("range", Result.range);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Location &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"range", Value.range},
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव Location &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"uri", मूल्य.uri},
+      {"range", मूल्य.range},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Location &Value) {
-  return Os << Value.range << '@' << Value.uri;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, ध्रुव Location &मूल्य) {
+  प्रत्यागम Os << मूल्य.range << '@' << मूल्य.uri;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentPositionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          TextDocumentPositionParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument) &&
          O.map("position", Result.position);
 }
 
@@ -468,17 +468,17 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // ReferenceParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          ReferenceContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          ReferenceParams &Result, llvm::json::Path Path) {
   TextDocumentPositionParams &Base = Result;
-  llvm::json::ObjectMapper O(Value, Path);
-  return fromJSON(Value, Base, Path) && O &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम fromJSON(मूल्य, Base, Path) && O &&
          O.mapOptional("context", Result.context);
 }
 
@@ -486,32 +486,32 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DidOpenTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          DidOpenTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DidCloseTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          DidCloseTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DidSaveTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &Params,
                          DidSaveTextDocumentParams &R, llvm::json::Path P) {
   llvm::json::ObjectMapper O(Params, P);
-  return O && O.map("textDocument", R.textDocument);
+  प्रत्यागम O && O.map("textDocument", R.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
@@ -519,11 +519,11 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
 //===----------------------------------------------------------------------===//
 
 LogicalResult
-TextDocumentContentChangeEvent::applyTo(std::string &Contents) const {
+TextDocumentContentChangeEvent::applyTo(std::string &Contents) ध्रुव {
   // If there is no range, the full document changed.
-  if (!range) {
+  यदि (!range) {
     Contents = text;
-    return success();
+    प्रत्यागम success();
   }
 
   // Try to map the replacement range to the content.
@@ -531,36 +531,36 @@ TextDocumentContentChangeEvent::applyTo(std::string &Contents) const {
   TmpScrMgr.AddNewSourceBuffer(llvm::MemoryBuffer::getMemBuffer(Contents),
                                SMLoc());
   SMRange RangeLoc = range->getAsSMRange(TmpScrMgr);
-  if (!RangeLoc.isValid())
-    return failure();
+  यदि (!RangeLoc.isValid())
+    प्रत्यागम failure();
 
   Contents.replace(RangeLoc.Start.getPointer() - Contents.data(),
                    RangeLoc.End.getPointer() - RangeLoc.Start.getPointer(),
                    text);
-  return success();
+  प्रत्यागम success();
 }
 
 LogicalResult TextDocumentContentChangeEvent::applyTo(
     ArrayRef<TextDocumentContentChangeEvent> Changes, std::string &Contents) {
-  for (const auto &Change : Changes)
-    if (failed(Change.applyTo(Contents)))
-      return failure();
-  return success();
+  प्रति (ध्रुव auto &Change : Changes)
+    यदि (failed(Change.applyTo(Contents)))
+      प्रत्यागम failure();
+  प्रत्यागम success();
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          TextDocumentContentChangeEvent &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("range", Result.range) &&
          O.map("rangeLength", Result.rangeLength) && O.map("text", Result.text);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          DidChangeTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument) &&
          O.map("contentChanges", Result.contentChanges);
 }
 
@@ -568,27 +568,27 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // MarkupContent
 //===----------------------------------------------------------------------===//
 
-static llvm::StringRef toTextKind(MarkupKind Kind) {
-  switch (Kind) {
-  case MarkupKind::PlainText:
-    return "plaintext";
-  case MarkupKind::Markdown:
-    return "markdown";
+स्थिर llvm::StringRef toTextKind(MarkupKind Kind) {
+  विकल्प (Kind) {
+  पक्ष MarkupKind::PlainText:
+    प्रत्यागम "plaintext";
+  पक्ष MarkupKind::Markdown:
+    प्रत्यागम "markdown";
   }
   llvm_unreachable("Invalid MarkupKind");
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, MarkupKind Kind) {
-  return Os << toTextKind(Kind);
+  प्रत्यागम Os << toTextKind(Kind);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
-  if (Mc.value.empty())
-    return nullptr;
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव MarkupContent &Mc) {
+  यदि (Mc.मूल्य_2.empty())
+    प्रत्यागम nullptr;
 
-  return llvm::json::Object{
+  प्रत्यागम llvm::json::Object{
       {"kind", toTextKind(Mc.kind)},
-      {"value", Mc.value},
+      {"value", Mc.मूल्य_2},
   };
 }
 
@@ -596,54 +596,54 @@ llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
 // Hover
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const Hover &Hover) {
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव Hover &Hover) {
   llvm::json::Object Result{{"contents", toJSON(Hover.contents)}};
-  if (Hover.range)
+  यदि (Hover.range)
     Result["range"] = toJSON(*Hover.range);
-  return std::move(Result);
+  प्रत्यागम std::move(Result);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbol
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentSymbol &Symbol) {
-  llvm::json::Object Result{{"name", Symbol.name},
-                            {"kind", static_cast<int>(Symbol.kind)},
-                            {"range", Symbol.range},
-                            {"selectionRange", Symbol.selectionRange}};
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव Document_चिन्ह &चिन्ह) {
+  llvm::json::Object Result{{"name", चिन्ह.name},
+                            {"kind", static_cast<पूर्णाङ्क>(चिन्ह.kind)},
+                            {"range", चिन्ह.range},
+                            {"selectionRange", चिन्ह.selectionRange}};
 
-  if (!Symbol.detail.empty())
-    Result["detail"] = Symbol.detail;
-  if (!Symbol.children.empty())
-    Result["children"] = Symbol.children;
-  return std::move(Result);
+  यदि (!चिन्ह.detail.empty())
+    Result["detail"] = चिन्ह.detail;
+  यदि (!चिन्ह.children.empty())
+    Result["children"] = चिन्ह.children;
+  प्रत्यागम std::move(Result);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbolParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentSymbolParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
+                         Document_चिन्ह_Params &Result, llvm::json::Path Path) {
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DiagnosticRelatedInformation
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          DiagnosticRelatedInformation &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("location", Result.location) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("location", Result.location) &&
          O.map("message", Result.message);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
-  return llvm::json::Object{
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव DiagnosticRelatedInformation &Info) {
+  प्रत्यागम llvm::json::Object{
       {"location", Info.location},
       {"message", Info.message},
   };
@@ -653,61 +653,61 @@ llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
 // Diagnostic
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(DiagnosticTag Tag) {
-  return static_cast<int>(Tag);
+llvm::json::मूल्य llvm::lsp::toJSON(DiagnosticTag Tag) {
+  प्रत्यागम static_cast<पूर्णाङ्क>(Tag);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, DiagnosticTag &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, DiagnosticTag &Result,
                          llvm::json::Path Path) {
-  if (std::optional<int64_t> I = Value.getAsInteger()) {
+  यदि (std::optional<int64_t> I = मूल्य.getAsInteger()) {
     Result = (DiagnosticTag)*I;
-    return true;
+    प्रत्यागम सत्य;
   }
 
-  return false;
+  प्रत्यागम असत्य;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Diagnostic &Diag) {
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव Diagnostic &Diag) {
   llvm::json::Object Result{
       {"range", Diag.range},
-      {"severity", (int)Diag.severity},
+      {"severity", (पूर्णाङ्क)Diag.severity},
       {"message", Diag.message},
   };
-  if (Diag.category)
+  यदि (Diag.category)
     Result["category"] = *Diag.category;
-  if (!Diag.source.empty())
+  यदि (!Diag.source.empty())
     Result["source"] = Diag.source;
-  if (Diag.relatedInformation)
+  यदि (Diag.relatedInformation)
     Result["relatedInformation"] = *Diag.relatedInformation;
-  if (!Diag.tags.empty())
+  यदि (!Diag.tags.empty())
     Result["tags"] = Diag.tags;
-  return std::move(Result);
+  प्रत्यागम std::move(Result);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Diagnostic &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, Diagnostic &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
-  int Severity = 0;
-  if (!mapOptOrNull(Value, "severity", Severity, Path))
-    return false;
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  यदि (!O)
+    प्रत्यागम असत्य;
+  पूर्णाङ्क Severity = 0;
+  यदि (!mapOptOrNull(मूल्य, "severity", Severity, Path))
+    प्रत्यागम असत्य;
   Result.severity = (DiagnosticSeverity)Severity;
 
-  return O.map("range", Result.range) && O.map("message", Result.message) &&
-         mapOptOrNull(Value, "category", Result.category, Path) &&
-         mapOptOrNull(Value, "source", Result.source, Path) &&
-         mapOptOrNull(Value, "relatedInformation", Result.relatedInformation,
+  प्रत्यागम O.map("range", Result.range) && O.map("message", Result.message) &&
+         mapOptOrNull(मूल्य, "category", Result.category, Path) &&
+         mapOptOrNull(मूल्य, "source", Result.source, Path) &&
+         mapOptOrNull(मूल्य, "relatedInformation", Result.relatedInformation,
                       Path) &&
-         mapOptOrNull(Value, "tags", Result.tags, Path);
+         mapOptOrNull(मूल्य, "tags", Result.tags, Path);
 }
 
 //===----------------------------------------------------------------------===//
 // PublishDiagnosticsParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
-  return llvm::json::Object{
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव PublishDiagnosticsParams &Params) {
+  प्रत्यागम llvm::json::Object{
       {"uri", Params.uri},
       {"diagnostics", Params.diagnostics},
       {"version", Params.version},
@@ -718,117 +718,117 @@ llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
 // TextEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TextEdit &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, TextEdit &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) && O.map("newText", Result.newText);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("range", Result.range) && O.map("newText", Result.newText);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const TextEdit &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"newText", Value.newText},
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव TextEdit &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"range", मूल्य.range},
+      {"newText", मूल्य.newText},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &Value) {
-  Os << Value.range << " => \"";
-  llvm::printEscapedString(Value.newText, Os);
-  return Os << '"';
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, ध्रुव TextEdit &मूल्य) {
+  Os << मूल्य.range << " => \"";
+  llvm::printEscapedString(मूल्य.newText, Os);
+  प्रत्यागम Os << '"';
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItemKind
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          CompletionItemKind &Result, llvm::json::Path Path) {
-  if (std::optional<int64_t> IntValue = Value.getAsInteger()) {
-    if (*IntValue < static_cast<int>(CompletionItemKind::Text) ||
-        *IntValue > static_cast<int>(CompletionItemKind::TypeParameter))
-      return false;
-    Result = static_cast<CompletionItemKind>(*IntValue);
-    return true;
+  यदि (std::optional<int64_t> Int_मूल्य = मूल्य.getAsInteger()) {
+    यदि (*Int_मूल्य < static_cast<पूर्णाङ्क>(CompletionItemKind::Text) ||
+        *Int_मूल्य > static_cast<पूर्णाङ्क>(CompletionItemKind::TypeParameter))
+      प्रत्यागम असत्य;
+    Result = static_cast<CompletionItemKind>(*Int_मूल्य);
+    प्रत्यागम सत्य;
   }
-  return false;
+  प्रत्यागम असत्य;
 }
 
 CompletionItemKind llvm::lsp::adjustKindToCapability(
     CompletionItemKind Kind,
     CompletionItemKindBitset &SupportedCompletionItemKinds) {
   size_t KindVal = static_cast<size_t>(Kind);
-  if (KindVal >= kCompletionItemKindMin &&
+  यदि (KindVal >= kCompletionItemKindMin &&
       KindVal <= SupportedCompletionItemKinds.size() &&
       SupportedCompletionItemKinds[KindVal])
-    return Kind;
+    प्रत्यागम Kind;
 
   // Provide some fall backs for common kinds that are close enough.
-  switch (Kind) {
-  case CompletionItemKind::Folder:
-    return CompletionItemKind::File;
-  case CompletionItemKind::EnumMember:
-    return CompletionItemKind::Enum;
-  case CompletionItemKind::Struct:
-    return CompletionItemKind::Class;
-  default:
-    return CompletionItemKind::Text;
+  विकल्प (Kind) {
+  पक्ष CompletionItemKind::Folder:
+    प्रत्यागम CompletionItemKind::File;
+  पक्ष CompletionItemKind::EnumMember:
+    प्रत्यागम CompletionItemKind::Enum;
+  पक्ष CompletionItemKind::Struct:
+    प्रत्यागम CompletionItemKind::Class;
+  स्वभाव:
+    प्रत्यागम CompletionItemKind::Text;
   }
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          CompletionItemKindBitset &Result,
                          llvm::json::Path Path) {
-  if (const llvm::json::Array *ArrayValue = Value.getAsArray()) {
-    for (size_t I = 0, E = ArrayValue->size(); I < E; ++I) {
+  यदि (ध्रुव llvm::json::Array *Array_मूल्य = मूल्य.getAsArray()) {
+    प्रति (size_t I = 0, E = Array_मूल्य->size(); I < E; ++I) {
       CompletionItemKind KindOut;
-      if (fromJSON((*ArrayValue)[I], KindOut, Path.index(I)))
+      यदि (fromJSON((*Array_मूल्य)[I], KindOut, Path.index(I)))
         Result.set(size_t(KindOut));
     }
-    return true;
+    प्रत्यागम सत्य;
   }
-  return false;
+  प्रत्यागम असत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItem
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionItem &Value) {
-  assert(!Value.label.empty() && "completion item label is required");
-  llvm::json::Object Result{{"label", Value.label}};
-  if (Value.kind != CompletionItemKind::Missing)
-    Result["kind"] = static_cast<int>(Value.kind);
-  if (!Value.detail.empty())
-    Result["detail"] = Value.detail;
-  if (Value.documentation)
-    Result["documentation"] = Value.documentation;
-  if (!Value.sortText.empty())
-    Result["sortText"] = Value.sortText;
-  if (!Value.filterText.empty())
-    Result["filterText"] = Value.filterText;
-  if (!Value.insertText.empty())
-    Result["insertText"] = Value.insertText;
-  if (Value.insertTextFormat != InsertTextFormat::Missing)
-    Result["insertTextFormat"] = static_cast<int>(Value.insertTextFormat);
-  if (Value.textEdit)
-    Result["textEdit"] = *Value.textEdit;
-  if (!Value.additionalTextEdits.empty()) {
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव CompletionItem &मूल्य) {
+  प्रतिज्ञा(!मूल्य.label.empty() && "completion item label is required");
+  llvm::json::Object Result{{"label", मूल्य.label}};
+  यदि (मूल्य.kind != CompletionItemKind::Missing)
+    Result["kind"] = static_cast<पूर्णाङ्क>(मूल्य.kind);
+  यदि (!मूल्य.detail.empty())
+    Result["detail"] = मूल्य.detail;
+  यदि (मूल्य.documentation)
+    Result["documentation"] = मूल्य.documentation;
+  यदि (!मूल्य.sortText.empty())
+    Result["sortText"] = मूल्य.sortText;
+  यदि (!मूल्य.filterText.empty())
+    Result["filterText"] = मूल्य.filterText;
+  यदि (!मूल्य.घाला_Text.empty())
+    Result["insertText"] = मूल्य.घाला_Text;
+  यदि (मूल्य.घाला_Text_Format != घाला_Text_Format_2::Missing)
+    Result["insertTextFormat"] = static_cast<पूर्णाङ्क>(मूल्य.घाला_Text_Format);
+  यदि (मूल्य.textEdit)
+    Result["textEdit"] = *मूल्य.textEdit;
+  यदि (!मूल्य.additionalTextEdits.empty()) {
     Result["additionalTextEdits"] =
-        llvm::json::Array(Value.additionalTextEdits);
+        llvm::json::Array(मूल्य.additionalTextEdits);
   }
-  if (Value.deprecated)
-    Result["deprecated"] = Value.deprecated;
-  return std::move(Result);
+  यदि (मूल्य.deprecated)
+    Result["deprecated"] = मूल्य.deprecated;
+  प्रत्यागम std::move(Result);
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const CompletionItem &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+                                   ध्रुव CompletionItem &मूल्य) {
+  प्रत्यागम Os << मूल्य.label << " - " << toJSON(मूल्य);
 }
 
-bool llvm::lsp::operator<(const CompletionItem &Lhs,
-                          const CompletionItem &Rhs) {
-  return (Lhs.sortText.empty() ? Lhs.label : Lhs.sortText) <
+तार्किक llvm::lsp::operator<(ध्रुव CompletionItem &Lhs,
+                          ध्रुव CompletionItem &Rhs) {
+  प्रत्यागम (Lhs.sortText.empty() ? Lhs.label : Lhs.sortText) <
          (Rhs.sortText.empty() ? Rhs.label : Rhs.sortText);
 }
 
@@ -836,10 +836,10 @@ bool llvm::lsp::operator<(const CompletionItem &Lhs,
 // CompletionList
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
-  return llvm::json::Object{
-      {"isIncomplete", Value.isIncomplete},
-      {"items", llvm::json::Array(Value.items)},
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव CompletionList &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"isIncomplete", मूल्य.isIncomplete},
+      {"items", llvm::json::Array(मूल्य.वस्तुसंच)},
   };
 }
 
@@ -847,81 +847,81 @@ llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
 // CompletionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          CompletionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  int TriggerKind;
-  if (!O || !O.map("triggerKind", TriggerKind) ||
-      !mapOptOrNull(Value, "triggerCharacter", Result.triggerCharacter, Path))
-    return false;
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  पूर्णाङ्क TriggerKind;
+  यदि (!O || !O.map("triggerKind", TriggerKind) ||
+      !mapOptOrNull(मूल्य, "triggerCharacter", Result.triggerCharacter, Path))
+    प्रत्यागम असत्य;
   Result.triggerKind = static_cast<CompletionTriggerKind>(TriggerKind);
-  return true;
+  प्रत्यागम सत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          CompletionParams &Result, llvm::json::Path Path) {
-  if (!fromJSON(Value, static_cast<TextDocumentPositionParams &>(Result), Path))
-    return false;
-  if (const llvm::json::Value *Context = Value.getAsObject()->get("context"))
-    return fromJSON(*Context, Result.context, Path.field("context"));
-  return true;
+  यदि (!fromJSON(मूल्य, static_cast<TextDocumentPositionParams &>(Result), Path))
+    प्रत्यागम असत्य;
+  यदि (ध्रुव llvm::json::मूल्य *Context = मूल्य.getAsObject()->get("context"))
+    प्रत्यागम fromJSON(*Context, Result.context, Path.field("context"));
+  प्रत्यागम सत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // ParameterInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ParameterInformation &Value) {
-  assert((Value.labelOffsets || !Value.labelString.empty()) &&
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव ParameterInformation &मूल्य) {
+  प्रतिज्ञा((मूल्य.labelOffsets || !मूल्य.labelString.empty()) &&
          "parameter information label is required");
   llvm::json::Object Result;
-  if (Value.labelOffsets)
+  यदि (मूल्य.labelOffsets)
     Result["label"] = llvm::json::Array(
-        {Value.labelOffsets->first, Value.labelOffsets->second});
-  else
-    Result["label"] = Value.labelString;
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+        {मूल्य.labelOffsets->first, मूल्य.labelOffsets->second});
+  अन्यथा
+    Result["label"] = मूल्य.labelString;
+  यदि (!मूल्य.documentation.empty())
+    Result["documentation"] = मूल्य.documentation;
+  प्रत्यागम std::move(Result);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureInformation &Value) {
-  assert(!Value.label.empty() && "signature information label is required");
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव SignatureInformation &मूल्य) {
+  प्रतिज्ञा(!मूल्य.label.empty() && "signature information label is required");
   llvm::json::Object Result{
-      {"label", Value.label},
-      {"parameters", llvm::json::Array(Value.parameters)},
+      {"label", मूल्य.label},
+      {"parameters", llvm::json::Array(मूल्य.parameters)},
   };
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+  यदि (!मूल्य.documentation.empty())
+    Result["documentation"] = मूल्य.documentation;
+  प्रत्यागम std::move(Result);
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const SignatureInformation &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+                                   ध्रुव SignatureInformation &मूल्य) {
+  प्रत्यागम Os << मूल्य.label << " - " << toJSON(मूल्य);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureHelp
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
-  assert(Value.activeSignature >= 0 &&
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव SignatureHelp &मूल्य) {
+  प्रतिज्ञा(मूल्य.activeSignature >= 0 &&
          "Unexpected negative value for number of active signatures.");
-  assert(Value.activeParameter >= 0 &&
+  प्रतिज्ञा(मूल्य.activeParameter >= 0 &&
          "Unexpected negative value for active parameter index");
-  return llvm::json::Object{
-      {"activeSignature", Value.activeSignature},
-      {"activeParameter", Value.activeParameter},
-      {"signatures", llvm::json::Array(Value.signatures)},
+  प्रत्यागम llvm::json::Object{
+      {"activeSignature", मूल्य.activeSignature},
+      {"activeParameter", मूल्य.activeParameter},
+      {"signatures", llvm::json::Array(मूल्य.signatures)},
   };
 }
 
@@ -929,20 +929,20 @@ llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
 // DocumentLinkParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          DocumentLinkParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentLink
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"target", Value.target},
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव DocumentLink &मूल्य) {
+  प्रत्यागम llvm::json::Object{
+      {"range", मूल्य.range},
+      {"target", मूल्य.target},
   };
 }
 
@@ -950,10 +950,10 @@ llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
 // InlayHintsParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          InlayHintsParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument) &&
          O.map("range", Result.range);
 }
 
@@ -961,29 +961,29 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // InlayHint
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const InlayHint &Value) {
-  return llvm::json::Object{{"position", Value.position},
-                            {"kind", (int)Value.kind},
-                            {"label", Value.label},
-                            {"paddingLeft", Value.paddingLeft},
-                            {"paddingRight", Value.paddingRight}};
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव InlayHint &मूल्य) {
+  प्रत्यागम llvm::json::Object{{"position", मूल्य.position},
+                            {"kind", (पूर्णाङ्क)मूल्य.kind},
+                            {"label", मूल्य.label},
+                            {"paddingLeft", मूल्य.padding_डावा},
+                            {"paddingRight", मूल्य.padding_उजवा}};
 }
-bool llvm::lsp::operator==(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
+तार्किक llvm::lsp::operator==(ध्रुव InlayHint &Lhs, ध्रुव InlayHint &Rhs) {
+  प्रत्यागम std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
          std::tie(Rhs.position, Rhs.kind, Rhs.label);
 }
-bool llvm::lsp::operator<(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) <
+तार्किक llvm::lsp::operator<(ध्रुव InlayHint &Lhs, ध्रुव InlayHint &Rhs) {
+  प्रत्यागम std::tie(Lhs.position, Lhs.kind, Lhs.label) <
          std::tie(Rhs.position, Rhs.kind, Rhs.label);
 }
 
 llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
-                                         InlayHintKind Value) {
-  switch (Value) {
-  case InlayHintKind::Parameter:
-    return Os << "parameter";
-  case InlayHintKind::Type:
-    return Os << "type";
+                                         InlayHintKind मूल्य) {
+  विकल्प (मूल्य) {
+  पक्ष InlayHintKind::Parameter:
+    प्रत्यागम Os << "parameter";
+  पक्ष InlayHintKind::Type:
+    प्रत्यागम Os << "type";
   }
   llvm_unreachable("Unknown InlayHintKind");
 }
@@ -992,23 +992,23 @@ llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
 // CodeActionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          CodeActionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("diagnostics", Result.diagnostics))
-    return false;
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  यदि (!O || !O.map("diagnostics", Result.diagnostics))
+    प्रत्यागम असत्य;
   O.map("only", Result.only);
-  return true;
+  प्रत्यागम सत्य;
 }
 
 //===----------------------------------------------------------------------===//
 // CodeActionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य,
                          CodeActionParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("textDocument", Result.textDocument) &&
          O.map("range", Result.range) && O.map("context", Result.context);
 }
 
@@ -1016,54 +1016,54 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // WorkspaceEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, WorkspaceEdit &Result,
+तार्किक llvm::lsp::fromJSON(ध्रुव llvm::json::मूल्य &मूल्य, WorkspaceEdit &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("changes", Result.changes);
+  llvm::json::ObjectMapper O(मूल्य, Path);
+  प्रत्यागम O && O.map("changes", Result.changes);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const WorkspaceEdit &Value) {
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव WorkspaceEdit &मूल्य) {
   llvm::json::Object FileChanges;
-  for (auto &Change : Value.changes)
+  प्रति (auto &Change : मूल्य.changes)
     FileChanges[Change.first] = llvm::json::Array(Change.second);
-  return llvm::json::Object{{"changes", std::move(FileChanges)}};
+  प्रत्यागम llvm::json::Object{{"changes", std::move(FileChanges)}};
 }
 
 //===----------------------------------------------------------------------===//
 // CodeAction
 //===----------------------------------------------------------------------===//
 
-const llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
-const llvm::StringLiteral CodeAction::kRefactor = "refactor";
-const llvm::StringLiteral CodeAction::kInfo = "info";
+ध्रुव llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
+ध्रुव llvm::StringLiteral CodeAction::kRefactor = "refactor";
+ध्रुव llvm::StringLiteral CodeAction::kInfo = "info";
 
-llvm::json::Value llvm::lsp::toJSON(const CodeAction &Value) {
-  llvm::json::Object CodeAction{{"title", Value.title}};
-  if (Value.kind)
-    CodeAction["kind"] = *Value.kind;
-  if (Value.diagnostics)
-    CodeAction["diagnostics"] = llvm::json::Array(*Value.diagnostics);
-  if (Value.isPreferred)
-    CodeAction["isPreferred"] = true;
-  if (Value.edit)
-    CodeAction["edit"] = *Value.edit;
-  return std::move(CodeAction);
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव CodeAction &मूल्य) {
+  llvm::json::Object CodeAction{{"title", मूल्य.title}};
+  यदि (मूल्य.kind)
+    CodeAction["kind"] = *मूल्य.kind;
+  यदि (मूल्य.diagnostics)
+    CodeAction["diagnostics"] = llvm::json::Array(*मूल्य.diagnostics);
+  यदि (मूल्य.isPreferred)
+    CodeAction["isPreferred"] = सत्य;
+  यदि (मूल्य.edit)
+    CodeAction["edit"] = *मूल्य.edit;
+  प्रत्यागम std::move(CodeAction);
 }
 
 //===----------------------------------------------------------------------===//
 // ShowMessageParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ShowMessageParams &Params) {
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव ShowMessageParams &Params) {
   auto Out = llvm::json::Object{
-      {"type", static_cast<int>(Params.type)},
+      {"type", static_cast<पूर्णाङ्क>(Params.type)},
       {"message", Params.message},
   };
-  if (Params.actions)
+  यदि (Params.actions)
     Out["actions"] = *Params.actions;
-  return Out;
+  प्रत्यागम Out;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MessageActionItem &Params) {
-  return llvm::json::Object{{"title", Params.title}};
+llvm::json::मूल्य llvm::lsp::toJSON(ध्रुव MessageActionItem &Params) {
+  प्रत्यागम llvm::json::Object{{"title", Params.title}};
 }
