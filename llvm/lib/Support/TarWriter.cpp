@@ -21,43 +21,43 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TarWriter.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/Path.h"
+#અન્તર્ભાવ "llvm/Support/TarWriter.h"
+#અન્તર્ભાવ "llvm/ADT/StringRef.h"
+#અન્તર્ભાવ "llvm/Support/FileSystem.h"
+#અન્તર્ભાવ "llvm/Support/MathExtras.h"
+#અન્તર્ભાવ "llvm/Support/Path.h"
 
-using namespace llvm;
+using નામાકાશ llvm;
 
 // Each file in an archive must be aligned to this block size.
-static const int BlockSize = 512;
+સ્થિર અચલ પૂર્ણાંક BlockSize = 512;
 
-struct UstarHeader {
-  char Name[100];
-  char Mode[8];
-  char Uid[8];
-  char Gid[8];
-  char Size[12];
-  char Mtime[12];
-  char Checksum[8];
-  char TypeFlag;
-  char Linkname[100];
-  char Magic[6];
-  char Version[2];
-  char Uname[32];
-  char Gname[32];
-  char DevMajor[8];
-  char DevMinor[8];
-  char Prefix[155];
-  char Pad[12];
+સંરચના UstarHeader {
+  અક્ષર Name[100];
+  અક્ષર Mode[8];
+  અક્ષર Uid[8];
+  અક્ષર Gid[8];
+  અક્ષર Size[12];
+  અક્ષર Mtime[12];
+  અક્ષર Checksum[8];
+  અક્ષર TypeFlag;
+  અક્ષર Linkname[100];
+  અક્ષર Magic[6];
+  અક્ષર Version[2];
+  અક્ષર Uname[32];
+  અક્ષર Gname[32];
+  અક્ષર DevMajor[8];
+  અક્ષર DevMinor[8];
+  અક્ષર Prefix[155];
+  અક્ષર Pad[12];
 };
-static_assert(sizeof(UstarHeader) == BlockSize, "invalid Ustar header");
+static_assert(કદ(UstarHeader) == BlockSize, "invalid Ustar header");
 
-static UstarHeader makeUstarHeader() {
+સ્થિર UstarHeader makeUstarHeader() {
   UstarHeader Hdr = {};
   memcpy(Hdr.Magic, "ustar", 5); // Ustar magic
   memcpy(Hdr.Version, "00", 2);  // Ustar version
-  return Hdr;
+  પાછા Hdr;
 }
 
 // A PAX attribute is in the form of "<length> <key>=<value>\n"
@@ -67,50 +67,50 @@ static UstarHeader makeUstarHeader() {
 //   25 ctime=1084839148.1212\n
 //
 // This function create such string.
-static std::string formatPax(StringRef Key, StringRef Val) {
-  int Len = Key.size() + Val.size() + 3; // +3 for " ", "=" and "\n"
+સ્થિર std::string formatPax(StringRef ચાવી, StringRef Val) {
+  પૂર્ણાંક Len = ચાવી.size() + Val.size() + 3; // +3 for " ", "=" and "\n"
 
   // We need to compute total size twice because appending
   // a length field could change total size by one.
-  int Total = Len + Twine(Len).str().size();
+  પૂર્ણાંક Total = Len + Twine(Len).str().size();
   Total = Len + Twine(Total).str().size();
-  return (Twine(Total) + " " + Key + "=" + Val + "\n").str();
+  પાછા (Twine(Total) + " " + ચાવી + "=" + Val + "\n").str();
 }
 
 // Headers in tar files must be aligned to 512 byte boundaries.
 // This function forwards the current file position to the next boundary.
-static void pad(raw_fd_ostream &OS) {
+સ્થિર શૂન્ય pad(raw_fd_ostream &OS) {
   uint64_t Pos = OS.tell();
   OS.seek(alignTo(Pos, BlockSize));
 }
 
 // Computes a checksum for a tar header.
-static void computeChecksum(UstarHeader &Hdr) {
+સ્થિર શૂન્ય computeChecksum(UstarHeader &Hdr) {
   // Before computing a checksum, checksum field must be
   // filled with space characters.
-  memset(Hdr.Checksum, ' ', sizeof(Hdr.Checksum));
+  memset(Hdr.Checksum, ' ', કદ(Hdr.Checksum));
 
   // Compute a checksum and set it to the checksum field.
   unsigned Chksum = 0;
-  for (size_t I = 0; I < sizeof(Hdr); ++I)
+  માટે (size_t I = 0; I < કદ(Hdr); ++I)
     Chksum += reinterpret_cast<uint8_t *>(&Hdr)[I];
-  snprintf(Hdr.Checksum, sizeof(Hdr.Checksum), "%06o", Chksum);
+  snprintf(Hdr.Checksum, કદ(Hdr.Checksum), "%06o", Chksum);
 }
 
 // Create a tar header and write it to a given output stream.
-static void writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
+સ્થિર શૂન્ય writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
   // A PAX header consists of a 512-byte header followed
   // by key-value strings. First, create key-value strings.
   std::string PaxAttr = formatPax("path", Path);
 
   // Create a 512-byte header.
   UstarHeader Hdr = makeUstarHeader();
-  snprintf(Hdr.Size, sizeof(Hdr.Size), "%011zo", PaxAttr.size());
+  snprintf(Hdr.Size, કદ(Hdr.Size), "%011zo", PaxAttr.size());
   Hdr.TypeFlag = 'x'; // PAX magic
   computeChecksum(Hdr);
 
   // Write them down.
-  OS << StringRef(reinterpret_cast<char *>(&Hdr), sizeof(Hdr));
+  OS << StringRef(reinterpret_cast<અક્ષર *>(&Hdr), કદ(Hdr));
   OS << PaxAttr;
   pad(OS);
 }
@@ -124,11 +124,11 @@ static void writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
 //
 // If Path fits in a Ustar header, updates Prefix and Name and returns true.
 // Otherwise, returns false.
-static bool splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
-  if (Path.size() < sizeof(UstarHeader::Name)) {
+સ્થિર તાર્કિક splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
+  જો (Path.size() < કદ(UstarHeader::Name)) {
     Prefix = "";
     Name = Path;
-    return true;
+    પાછા સાચું;
   }
 
   // tar 1.13 and earlier unconditionally look at the tar header interpreted
@@ -140,60 +140,60 @@ static bool splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
   // 137 bytes of directory + 100 bytes of basename previously.
   // (tar-1.13 also doesn't support pax headers, but in practice all paths in
   // llvm's test suite are short enough for that to not matter.)
-  const int MaxPrefix = 137;
+  અચલ પૂર્ણાંક MaxPrefix = 137;
   size_t Sep = Path.rfind('/', MaxPrefix + 1);
-  if (Sep == StringRef::npos)
-    return false;
-  if (Path.size() - Sep - 1 >= sizeof(UstarHeader::Name))
-    return false;
+  જો (Sep == StringRef::npos)
+    પાછા ખોટું;
+  જો (Path.size() - Sep - 1 >= કદ(UstarHeader::Name))
+    પાછા ખોટું;
 
   Prefix = Path.substr(0, Sep);
   Name = Path.substr(Sep + 1);
-  return true;
+  પાછા સાચું;
 }
 
 // The PAX header is an extended format, so a PAX header needs
 // to be followed by a "real" header.
-static void writeUstarHeader(raw_fd_ostream &OS, StringRef Prefix,
+સ્થિર શૂન્ય writeUstarHeader(raw_fd_ostream &OS, StringRef Prefix,
                              StringRef Name, size_t Size) {
   UstarHeader Hdr = makeUstarHeader();
   memcpy(Hdr.Name, Name.data(), Name.size());
   memcpy(Hdr.Mode, "0000664", 8);
-  snprintf(Hdr.Size, sizeof(Hdr.Size), "%011zo", Size);
+  snprintf(Hdr.Size, કદ(Hdr.Size), "%011zo", Size);
   memcpy(Hdr.Prefix, Prefix.data(), Prefix.size());
   computeChecksum(Hdr);
-  OS << StringRef(reinterpret_cast<char *>(&Hdr), sizeof(Hdr));
+  OS << StringRef(reinterpret_cast<અક્ષર *>(&Hdr), કદ(Hdr));
 }
 
 // Creates a TarWriter instance and returns it.
 Expected<std::unique_ptr<TarWriter>> TarWriter::create(StringRef OutputPath,
                                                        StringRef BaseDir) {
-  using namespace sys::fs;
-  int FD;
-  if (std::error_code EC =
+  using નામાકાશ sys::fs;
+  પૂર્ણાંક FD;
+  જો (std::error_code EC =
           openFileForWrite(OutputPath, FD, CD_CreateAlways, OF_None))
-    return make_error<StringError>("cannot open " + OutputPath, EC);
-  return std::unique_ptr<TarWriter>(new TarWriter(FD, BaseDir));
+    પાછા make_error<StringError>("cannot open " + OutputPath, EC);
+  પાછા std::unique_ptr<TarWriter>(નવું TarWriter(FD, BaseDir));
 }
 
-TarWriter::TarWriter(int FD, StringRef BaseDir)
-    : OS(FD, /*shouldClose=*/true, /*unbuffered=*/false),
+TarWriter::TarWriter(પૂર્ણાંક FD, StringRef BaseDir)
+    : OS(FD, /*shouldClose=*/સાચું, /*unbuffered=*/ખોટું),
       BaseDir(std::string(BaseDir)) {}
 
 // Append a given file to an archive.
-void TarWriter::append(StringRef Path, StringRef Data) {
+શૂન્ય TarWriter::append(StringRef Path, StringRef Data) {
   // Write Path and Data.
   std::string Fullpath = BaseDir + "/" + sys::path::convert_to_slash(Path);
 
   // We do not want to include the same file more than once.
-  if (!Files.insert(Fullpath).second)
-    return;
+  જો (!Files.ઉમેરો(Fullpath).second)
+    પાછા;
 
   StringRef Prefix;
   StringRef Name;
-  if (splitUstar(Fullpath, Prefix, Name)) {
+  જો (splitUstar(Fullpath, Prefix, Name)) {
     writeUstarHeader(OS, Prefix, Name, Data.size());
-  } else {
+  } નહીંતર {
     writePaxHeader(OS, Fullpath);
     writeUstarHeader(OS, "", "", Data.size());
   }

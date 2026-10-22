@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVISAUtils.h"
-#include "llvm/ADT/StringExtras.h"
-#include <cassert>
+#અન્તર્ભાવ "llvm/Support/RISCVISAUtils.h"
+#અન્તર્ભાવ "llvm/ADT/StringExtras.h"
+#અન્તર્ભાવ <cassert>
 
-using namespace llvm;
+using નામાકાશ llvm;
 
 // We rank extensions in the following order:
 // -Single letter extensions in canonical order.
@@ -28,7 +28,7 @@ using namespace llvm;
 // These flags are used to indicate the category. The first 6 bits store the
 // single letter extension rank for single letter and multi-letter extensions
 // starting with 'z'.
-enum RankFlags {
+ગણના RankFlags {
   RF_Z_EXTENSION = 1 << 6,
   RF_S_EXTENSION = 2 << 6,
   RF_X_EXTENSION = 3 << 6,
@@ -37,58 +37,58 @@ enum RankFlags {
 
 // Get the rank for single-letter extension, lower value meaning higher
 // priority.
-static unsigned singleLetterExtensionRank(char Ext) {
-  assert(isLower(Ext));
-  switch (Ext) {
-  case 'i':
-    return 0;
-  case 'e':
-    return 1;
-  case 'y':
-    return 2;
+સ્થિર unsigned singleLetterExtensionRank(અક્ષર Ext) {
+  પ્રતિજ્ઞા(isLower(Ext));
+  પસંદગી (Ext) {
+  સ્થિતિ 'i':
+    પાછા 0;
+  સ્થિતિ 'e':
+    પાછા 1;
+  સ્થિતિ 'y':
+    પાછા 2;
   }
 
   size_t Pos = RISCVISAUtils::AllStdExts.find(Ext);
-  if (Pos != StringRef::npos)
-    return Pos + 3; // Skip 'e', 'i', and 'y' from above.
+  જો (Pos != StringRef::npos)
+    પાછા Pos + 3; // Skip 'e', 'i', and 'y' from above.
 
   // If we got an unknown extension letter, then give it an alphabetical
   // order, but after all known standard extensions.
-  return 3 + RISCVISAUtils::AllStdExts.size() + (Ext - 'a');
+  પાછા 3 + RISCVISAUtils::AllStdExts.size() + (Ext - 'a');
 }
 
 // Get the rank for multi-letter extension, lower value meaning higher
 // priority/order in canonical order.
-static unsigned getExtensionRank(const std::string &ExtName) {
-  assert(ExtName.size() >= 1);
-  switch (ExtName[0]) {
-  case 's':
-    return RF_S_EXTENSION;
-  case 'z':
-    assert(ExtName.size() >= 2);
+સ્થિર unsigned getExtensionRank(અચલ std::string &ExtName) {
+  પ્રતિજ્ઞા(ExtName.size() >= 1);
+  પસંદગી (ExtName[0]) {
+  સ્થિતિ 's':
+    પાછા RF_S_EXTENSION;
+  સ્થિતિ 'z':
+    પ્રતિજ્ઞા(ExtName.size() >= 2);
     // `z` extension must be sorted by canonical order of second letter.
     // e.g. zmx has higher rank than zax.
-    return RF_Z_EXTENSION | singleLetterExtensionRank(ExtName[1]);
-  case 'x':
-    return RF_X_EXTENSION;
-  default:
-    if (ExtName.size() == 1)
-      return singleLetterExtensionRank(ExtName[0]);
-    return RF_UNKNOWN_MULTILETTER_EXTENSION;
+    પાછા RF_Z_EXTENSION | singleLetterExtensionRank(ExtName[1]);
+  સ્થિતિ 'x':
+    પાછા RF_X_EXTENSION;
+  મૂળભૂત:
+    જો (ExtName.size() == 1)
+      પાછા singleLetterExtensionRank(ExtName[0]);
+    પાછા RF_UNKNOWN_MULTILETTER_EXTENSION;
   }
 }
 
 // Compare function for extension.
 // Only compare the extension name, ignore version comparison.
-bool llvm::RISCVISAUtils::compareExtension(const std::string &LHS,
-                                           const std::string &RHS) {
+તાર્કિક llvm::RISCVISAUtils::compareExtension(અચલ std::string &LHS,
+                                           અચલ std::string &RHS) {
   unsigned LHSRank = getExtensionRank(LHS);
   unsigned RHSRank = getExtensionRank(RHS);
 
   // If the ranks differ, pick the lower rank.
-  if (LHSRank != RHSRank)
-    return LHSRank < RHSRank;
+  જો (LHSRank != RHSRank)
+    પાછા LHSRank < RHSRank;
 
   // If the rank is same, it must be sorted by lexicographic order.
-  return LHS < RHS;
+  પાછા LHS < RHS;
 }

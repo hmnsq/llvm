@@ -61,25 +61,25 @@
 
 ------------------------------------------------------------------------ */
 
-#include "llvm/Support/ConvertUTF.h"
+#અન્તર્ભાવ "llvm/Support/ConvertUTF.h"
 #ifdef CVTUTF_DEBUG
-#include <stdio.h>
+#અન્તર્ભાવ <stdio.h>
 #endif
-#include <assert.h>
+#અન્તર્ભાવ <assert.h>
 
 /*
  * This code extensively uses fall-through switches.
  * Keep the compiler from warning about that.
  */
-#if defined(__clang__) && defined(__has_warning)
-# if __has_warning("-Wimplicit-fallthrough")
+#જો defined(__clang__) && defined(__has_warning)
+# જો __has_warning("-Wimplicit-fallthrough")
 #  define ConvertUTF_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push")  \
     _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"")
 #  define ConvertUTF_RESTORE_WARNINGS \
     _Pragma("clang diagnostic pop")
 # endif
-#elif defined(__GNUC__)
+#અથવાજો defined(__GNUC__)
 # define ConvertUTF_DISABLE_WARNINGS \
    _Pragma("GCC diagnostic push")    \
    _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"")
@@ -95,17 +95,17 @@
 
 ConvertUTF_DISABLE_WARNINGS
 
-namespace llvm {
+નામાકાશ llvm {
 
-static const int halfShift  = 10; /* used for shifting by 10 bits */
+સ્થિર અચલ પૂર્ણાંક halfShift  = 10; /* used for shifting by 10 bits */
 
-static const UTF32 halfBase = 0x0010000UL;
-static const UTF32 halfMask = 0x3FFUL;
+સ્થિર અચલ UTF32 halfBase = 0x0010000UL;
+સ્થિર અચલ UTF32 halfMask = 0x3FFUL;
 
-#define UNI_SUR_HIGH_START  (UTF32)0xD800
-#define UNI_SUR_HIGH_END    (UTF32)0xDBFF
-#define UNI_SUR_LOW_START   (UTF32)0xDC00
-#define UNI_SUR_LOW_END     (UTF32)0xDFFF
+#define UNI_SUR_ઉપલું_START  (UTF32)0xD800
+#define UNI_SUR_ઉપલું_END    (UTF32)0xDBFF
+#define UNI_SUR_નીચલું_START   (UTF32)0xDC00
+#define UNI_SUR_નીચલું_END     (UTF32)0xDFFF
 
 /* --------------------------------------------------------------------- */
 
@@ -116,7 +116,7 @@ static const UTF32 halfMask = 0x3FFUL;
  * left as-is for anyone who may want to do such conversion, which was
  * allowed in earlier algorithms.
  */
-static const char trailingBytesForUTF8[256] = {
+સ્થિર અચલ અક્ષર trailingBytesForUTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -132,7 +132,7 @@ static const char trailingBytesForUTF8[256] = {
  * This table contains as many values as there might be trailing bytes
  * in a UTF-8 sequence.
  */
-static const UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
+સ્થિર અચલ UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
                      0x03C82080UL, 0xFA082080UL, 0x82082080UL };
 
 /*
@@ -142,7 +142,7 @@ static const UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080
  * (I.e., one byte sequence, two byte... etc.). Remember that sequencs
  * for *legal* UTF-8 will be 4 or fewer bytes total.
  */
-static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+સ્થિર અચલ UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
 /* --------------------------------------------------------------------- */
 
@@ -158,227 +158,227 @@ static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF32toUTF16 (
-        const UTF32** sourceStart, const UTF32* sourceEnd,
+        અચલ UTF32** sourceStart, અચલ UTF32* sourceEnd,
         UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF32* source = *sourceStart;
+    અચલ UTF32* source = *sourceStart;
     UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+    જ્યારે (source < sourceEnd) {
         UTF32 ch;
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        જો (target >= targetEnd) {
+            result = targetExhausted; તોડો;
         }
         ch = *source++;
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        જો (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            જો (ch >= UNI_SUR_ઉપલું_START && ch <= UNI_SUR_નીચલું_END) {
+                જો (flags == strictConversion) {
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    તોડો;
+                } નહીંતર {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } નહીંતર {
                 *target++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_LEGAL_UTF32) {
-            if (flags == strictConversion) {
+        } નહીંતર જો (ch > UNI_MAX_LEGAL_UTF32) {
+            જો (flags == strictConversion) {
                 result = sourceIllegal;
-            } else {
+            } નહીંતર {
                 *target++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } નહીંતર {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
+            જો (target + 1 >= targetEnd) {
                 --source; /* Back up source pointer! */
-                result = targetExhausted; break;
+                result = targetExhausted; તોડો;
             }
             ch -= halfBase;
-            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_ઉપલું_START);
+            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_નીચલું_START);
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    પાછા result;
 }
 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF16toUTF32 (
-        const UTF16** sourceStart, const UTF16* sourceEnd,
+        અચલ UTF16** sourceStart, અચલ UTF16* sourceEnd,
         UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF16* source = *sourceStart;
+    અચલ UTF16* source = *sourceStart;
     UTF32* target = *targetStart;
     UTF32 ch, ch2;
-    while (source < sourceEnd) {
-        const UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
+    જ્યારે (source < sourceEnd) {
+        અચલ UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
         ch = *source++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        જો (ch >= UNI_SUR_ઉપલું_START && ch <= UNI_SUR_ઉપલું_END) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
+            જો (source < sourceEnd) {
                 ch2 = *source;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-                    ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
-                        + (ch2 - UNI_SUR_LOW_START) + halfBase;
+                જો (ch2 >= UNI_SUR_નીચલું_START && ch2 <= UNI_SUR_નીચલું_END) {
+                    ch = ((ch - UNI_SUR_ઉપલું_START) << halfShift)
+                        + (ch2 - UNI_SUR_નીચલું_START) + halfBase;
                     ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
+                } નહીંતર જો (flags == strictConversion) { /* it's an unpaired high surrogate */
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
+                    તોડો;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
+            } નહીંતર { /* We don't have the 16 bits following the high surrogate. */
                 --source; /* return to the high surrogate */
                 result = sourceExhausted;
-                break;
+                તોડો;
             }
-        } else if (flags == strictConversion) {
+        } નહીંતર જો (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
+            જો (ch >= UNI_SUR_નીચલું_START && ch <= UNI_SUR_નીચલું_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                તોડો;
             }
         }
-        if (target >= targetEnd) {
+        જો (target >= targetEnd) {
             source = oldSource; /* Back up source pointer! */
-            result = targetExhausted; break;
+            result = targetExhausted; તોડો;
         }
         *target++ = ch;
     }
     *sourceStart = source;
     *targetStart = target;
 #ifdef CVTUTF_DEBUG
-if (result == sourceIllegal) {
+જો (result == sourceIllegal) {
     fprintf(stderr, "ConvertUTF16toUTF32 illegal seq 0x%04x,%04x\n", ch, ch2);
     fflush(stderr);
 }
 #endif
-    return result;
+    પાછા result;
 }
 ConversionResult ConvertUTF16toUTF8 (
-        const UTF16** sourceStart, const UTF16* sourceEnd,
+        અચલ UTF16** sourceStart, અચલ UTF16* sourceEnd,
         UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF16* source = *sourceStart;
+    અચલ UTF16* source = *sourceStart;
     UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+    જ્યારે (source < sourceEnd) {
         UTF32 ch;
         unsigned short bytesToWrite = 0;
-        const UTF32 byteMask = 0xBF;
-        const UTF32 byteMark = 0x80;
-        const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
+        અચલ UTF32 byteMask = 0xBF;
+        અચલ UTF32 byteMark = 0x80;
+        અચલ UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
         ch = *source++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        જો (ch >= UNI_SUR_ઉપલું_START && ch <= UNI_SUR_ઉપલું_END) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
+            જો (source < sourceEnd) {
                 UTF32 ch2 = *source;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-                    ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
-                        + (ch2 - UNI_SUR_LOW_START) + halfBase;
+                જો (ch2 >= UNI_SUR_નીચલું_START && ch2 <= UNI_SUR_નીચલું_END) {
+                    ch = ((ch - UNI_SUR_ઉપલું_START) << halfShift)
+                        + (ch2 - UNI_SUR_નીચલું_START) + halfBase;
                     ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
+                } નહીંતર જો (flags == strictConversion) { /* it's an unpaired high surrogate */
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
+                    તોડો;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
+            } નહીંતર { /* We don't have the 16 bits following the high surrogate. */
                 --source; /* return to the high surrogate */
                 result = sourceExhausted;
-                break;
+                તોડો;
             }
-        } else if (flags == strictConversion) {
+        } નહીંતર જો (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
+            જો (ch >= UNI_SUR_નીચલું_START && ch <= UNI_SUR_નીચલું_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                તોડો;
             }
         }
         /* Figure out how many bytes the result will require */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch < (UTF32)0x110000) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        જો (ch < (UTF32)0x80) {      bytesToWrite = 1;
+        } નહીંતર જો (ch < (UTF32)0x800) {     bytesToWrite = 2;
+        } નહીંતર જો (ch < (UTF32)0x10000) {   bytesToWrite = 3;
+        } નહીંતર જો (ch < (UTF32)0x110000) {  bytesToWrite = 4;
+        } નહીંતર {                            bytesToWrite = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
         }
 
         target += bytesToWrite;
-        if (target > targetEnd) {
+        જો (target > targetEnd) {
             source = oldSource; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+            target -= bytesToWrite; result = targetExhausted; તોડો;
         }
-        switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
+        પસંદગી (bytesToWrite) { /* note: everything falls through. */
+            સ્થિતિ 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            સ્થિતિ 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            સ્થિતિ 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            સ્થિતિ 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
         }
         target += bytesToWrite;
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    પાછા result;
 }
 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF32toUTF8 (
-        const UTF32** sourceStart, const UTF32* sourceEnd,
+        અચલ UTF32** sourceStart, અચલ UTF32* sourceEnd,
         UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF32* source = *sourceStart;
+    અચલ UTF32* source = *sourceStart;
     UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+    જ્યારે (source < sourceEnd) {
         UTF32 ch;
         unsigned short bytesToWrite = 0;
-        const UTF32 byteMask = 0xBF;
-        const UTF32 byteMark = 0x80;
+        અચલ UTF32 byteMask = 0xBF;
+        અચલ UTF32 byteMark = 0x80;
         ch = *source++;
-        if (flags == strictConversion ) {
+        જો (flags == strictConversion ) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+            જો (ch >= UNI_SUR_ઉપલું_START && ch <= UNI_SUR_નીચલું_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                તોડો;
             }
         }
         /*
          * Figure out how many bytes the result will require. Turn any
          * illegally large UTF32 things (> Plane 17) into replacement chars.
          */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        જો (ch < (UTF32)0x80) {      bytesToWrite = 1;
+        } નહીંતર જો (ch < (UTF32)0x800) {     bytesToWrite = 2;
+        } નહીંતર જો (ch < (UTF32)0x10000) {   bytesToWrite = 3;
+        } નહીંતર જો (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
+        } નહીંતર {                            bytesToWrite = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
                                             result = sourceIllegal;
         }
 
         target += bytesToWrite;
-        if (target > targetEnd) {
+        જો (target > targetEnd) {
             --source; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+            target -= bytesToWrite; result = targetExhausted; તોડો;
         }
-        switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
+        પસંદગી (bytesToWrite) { /* note: everything falls through. */
+            સ્થિતિ 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            સ્થિતિ 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            સ્થિતિ 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            સ્થિતિ 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
         }
         target += bytesToWrite;
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    પાછા result;
 }
 
 /* --------------------------------------------------------------------- */
@@ -394,29 +394,29 @@ ConversionResult ConvertUTF32toUTF8 (
  * definition of UTF-8 goes up to 4-byte sequences.
  */
 
-static Boolean isLegalUTF8(const UTF8 *source, int length) {
+સ્થિર Boolean isLegalUTF8(અચલ UTF8 *source, પૂર્ણાંક length) {
     UTF8 a;
-    const UTF8 *srcptr = source+length;
-    switch (length) {
-    default: return false;
+    અચલ UTF8 *srcptr = source+length;
+    પસંદગી (length) {
+    મૂળભૂત: પાછા ખોટું;
         /* Everything else falls through when "true"... */
-    case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 2: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+    સ્થિતિ 4: જો ((a = (*--srcptr)) < 0x80 || a > 0xBF) પાછા ખોટું;
+    સ્થિતિ 3: જો ((a = (*--srcptr)) < 0x80 || a > 0xBF) પાછા ખોટું;
+    સ્થિતિ 2: જો ((a = (*--srcptr)) < 0x80 || a > 0xBF) પાછા ખોટું;
 
-        switch (*source) {
+        પસંદગી (*source) {
             /* no fall-through in this inner switch */
-            case 0xE0: if (a < 0xA0) return false; break;
-            case 0xED: if (a > 0x9F) return false; break;
-            case 0xF0: if (a < 0x90) return false; break;
-            case 0xF4: if (a > 0x8F) return false; break;
-            default:   if (a < 0x80) return false;
+            સ્થિતિ 0xE0: જો (a < 0xA0) પાછા ખોટું; તોડો;
+            સ્થિતિ 0xED: જો (a > 0x9F) પાછા ખોટું; તોડો;
+            સ્થિતિ 0xF0: જો (a < 0x90) પાછા ખોટું; તોડો;
+            સ્થિતિ 0xF4: જો (a > 0x8F) પાછા ખોટું; તોડો;
+            મૂળભૂત:   જો (a < 0x80) પાછા ખોટું;
         }
 
-    case 1: if (*source >= 0x80 && *source < 0xC2) return false;
+    સ્થિતિ 1: જો (*source >= 0x80 && *source < 0xC2) પાછા ખોટું;
     }
-    if (*source > 0xF4) return false;
-    return true;
+    જો (*source > 0xF4) પાછા ખોટું;
+    પાછા સાચું;
 }
 
 /* --------------------------------------------------------------------- */
@@ -425,31 +425,31 @@ static Boolean isLegalUTF8(const UTF8 *source, int length) {
  * Exported function to return whether a UTF-8 sequence is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd) {
-    int length = trailingBytesForUTF8[*source]+1;
-    if (length > sourceEnd - source) {
-        return false;
+Boolean isLegalUTF8Sequence(અચલ UTF8 *source, અચલ UTF8 *sourceEnd) {
+    પૂર્ણાંક length = trailingBytesForUTF8[*source]+1;
+    જો (length > sourceEnd - source) {
+        પાછા ખોટું;
     }
-    return isLegalUTF8(source, length);
+    પાછા isLegalUTF8(source, length);
 }
 
 /*
  * Exported function to return the size of the first utf-8 code unit sequence,
  * Or 0 if the sequence is not valid;
  */
-unsigned getUTF8SequenceSize(const UTF8 *source, const UTF8 *sourceEnd) {
-  int length = trailingBytesForUTF8[*source] + 1;
-  return (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
+unsigned getUTF8SequenceSize(અચલ UTF8 *source, અચલ UTF8 *sourceEnd) {
+  પૂર્ણાંક length = trailingBytesForUTF8[*source] + 1;
+  પાછા (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
                                                                        : 0;
 }
 
 /* --------------------------------------------------------------------- */
 
-unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
-                                                   const UTF8 *sourceEnd) {
+unsigned findMaximalSubpartOfIllFormedUTF8Sequence(અચલ UTF8 *source,
+                                                   અચલ UTF8 *sourceEnd) {
   UTF8 b1, b2, b3;
 
-  assert(!isLegalUTF8Sequence(source, sourceEnd));
+  પ્રતિજ્ઞા(!isLegalUTF8Sequence(source, sourceEnd));
 
   /*
    * Unicode 6.3.0, D93b:
@@ -460,8 +460,8 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
    *   b. a subsequence of length one.
    */
 
-  if (source == sourceEnd)
-    return 0;
+  જો (source == sourceEnd)
+    પાછા 0;
 
   /*
    * Perform case analysis.  See Unicode 6.3.0, Table 3-7. Well-Formed UTF-8
@@ -470,69 +470,69 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
 
   b1 = *source;
   ++source;
-  if (b1 >= 0xC2 && b1 <= 0xDF) {
+  જો (b1 >= 0xC2 && b1 <= 0xDF) {
     /*
      * First byte is valid, but we know that this code unit sequence is
      * invalid, so the maximal subpart has to end after the first byte.
      */
-    return 1;
+    પાછા 1;
   }
 
-  if (source == sourceEnd)
-    return 1;
+  જો (source == sourceEnd)
+    પાછા 1;
 
   b2 = *source;
   ++source;
 
-  if (b1 == 0xE0) {
-    return (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
+  જો (b1 == 0xE0) {
+    પાછા (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 >= 0xE1 && b1 <= 0xEC) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  જો (b1 >= 0xE1 && b1 <= 0xEC) {
+    પાછા (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xED) {
-    return (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
+  જો (b1 == 0xED) {
+    પાછા (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
   }
-  if (b1 >= 0xEE && b1 <= 0xEF) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  જો (b1 >= 0xEE && b1 <= 0xEF) {
+    પાછા (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xF0) {
-    if (b2 >= 0x90 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  જો (b1 == 0xF0) {
+    જો (b2 >= 0x90 && b2 <= 0xBF) {
+      જો (source == sourceEnd)
+        પાછા 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      પાછા (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    પાછા 1;
   }
-  if (b1 >= 0xF1 && b1 <= 0xF3) {
-    if (b2 >= 0x80 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  જો (b1 >= 0xF1 && b1 <= 0xF3) {
+    જો (b2 >= 0x80 && b2 <= 0xBF) {
+      જો (source == sourceEnd)
+        પાછા 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      પાછા (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    પાછા 1;
   }
-  if (b1 == 0xF4) {
-    if (b2 >= 0x80 && b2 <= 0x8F) {
-      if (source == sourceEnd)
-        return 2;
+  જો (b1 == 0xF4) {
+    જો (b2 >= 0x80 && b2 <= 0x8F) {
+      જો (source == sourceEnd)
+        પાછા 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      પાછા (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    પાછા 1;
   }
 
-  assert((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
+  પ્રતિજ્ઞા((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
   /*
    * There are no valid sequences that start with these bytes.  Maximal subpart
    * is defined to have length 1 in these cases.
    */
-  return 1;
+  પાછા 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -541,8 +541,8 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
  * Exported function to return the total number of bytes in a codepoint
  * represented in UTF-8, given the value of the first byte.
  */
-unsigned getNumBytesForUTF8(UTF8 first) {
-  return trailingBytesForUTF8[first] + 1;
+unsigned get_અંક_Bytes_For_UTF8(UTF8 first) {
+  પાછા trailingBytesForUTF8[first] + 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -551,106 +551,106 @@ unsigned getNumBytesForUTF8(UTF8 first) {
  * Exported function to return whether a UTF-8 string is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean isLegalUTF8String(const UTF8 **source, const UTF8 *sourceEnd) {
-    while (*source != sourceEnd) {
-        int length = trailingBytesForUTF8[**source] + 1;
-        if (length > sourceEnd - *source || !isLegalUTF8(*source, length))
-            return false;
+Boolean isLegalUTF8String(અચલ UTF8 **source, અચલ UTF8 *sourceEnd) {
+    જ્યારે (*source != sourceEnd) {
+        પૂર્ણાંક length = trailingBytesForUTF8[**source] + 1;
+        જો (length > sourceEnd - *source || !isLegalUTF8(*source, length))
+            પાછા ખોટું;
         *source += length;
     }
-    return true;
+    પાછા સાચું;
 }
 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF8toUTF16 (
-        const UTF8** sourceStart, const UTF8* sourceEnd,
+        અચલ UTF8** sourceStart, અચલ UTF8* sourceEnd,
         UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF8* source = *sourceStart;
+    અચલ UTF8* source = *sourceStart;
     UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+    જ્યારે (source < sourceEnd) {
         UTF32 ch = 0;
         unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            result = sourceExhausted; break;
+        જો (extraBytesToRead >= sourceEnd - source) {
+            result = sourceExhausted; તોડો;
         }
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
+        જો (!isLegalUTF8(source, extraBytesToRead+1)) {
             result = sourceIllegal;
-            break;
+            તોડો;
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
-        switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+        પસંદગી (extraBytesToRead) {
+            સ્થિતિ 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
+            સ્થિતિ 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
+            સ્થિતિ 3: ch += *source++; ch <<= 6;
+            સ્થિતિ 2: ch += *source++; ch <<= 6;
+            સ્થિતિ 1: ch += *source++; ch <<= 6;
+            સ્થિતિ 0: ch += *source++;
         }
         ch -= offsetsFromUTF8[extraBytesToRead];
 
-        if (target >= targetEnd) {
+        જો (target >= targetEnd) {
             source -= (extraBytesToRead+1); /* Back up source pointer! */
-            result = targetExhausted; break;
+            result = targetExhausted; તોડો;
         }
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        જો (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            જો (ch >= UNI_SUR_ઉપલું_START && ch <= UNI_SUR_નીચલું_END) {
+                જો (flags == strictConversion) {
                     source -= (extraBytesToRead+1); /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    તોડો;
+                } નહીંતર {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } નહીંતર {
                 *target++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_UTF16) {
-            if (flags == strictConversion) {
+        } નહીંતર જો (ch > UNI_MAX_UTF16) {
+            જો (flags == strictConversion) {
                 result = sourceIllegal;
                 source -= (extraBytesToRead+1); /* return to the start */
-                break; /* Bail out; shouldn't continue */
-            } else {
+                તોડો; /* Bail out; shouldn't continue */
+            } નહીંતર {
                 *target++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } નહીંતર {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
+            જો (target + 1 >= targetEnd) {
                 source -= (extraBytesToRead+1); /* Back up source pointer! */
-                result = targetExhausted; break;
+                result = targetExhausted; તોડો;
             }
             ch -= halfBase;
-            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_ઉપલું_START);
+            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_નીચલું_START);
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    પાછા result;
 }
 
 /* --------------------------------------------------------------------- */
 
-static ConversionResult ConvertUTF8toUTF32Impl(
-        const UTF8** sourceStart, const UTF8* sourceEnd,
+સ્થિર ConversionResult ConvertUTF8toUTF32Impl(
+        અચલ UTF8** sourceStart, અચલ UTF8* sourceEnd,
         UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags,
-        Boolean InputIsPartial) {
+        Boolean આગત_Is_Partial) {
     ConversionResult result = conversionOK;
-    const UTF8* source = *sourceStart;
+    અચલ UTF8* source = *sourceStart;
     UTF32* target = *targetStart;
-    while (source < sourceEnd) {
+    જ્યારે (source < sourceEnd) {
         UTF32 ch = 0;
         unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            if (flags == strictConversion || InputIsPartial) {
+        જો (extraBytesToRead >= sourceEnd - source) {
+            જો (flags == strictConversion || આગત_Is_Partial) {
                 result = sourceExhausted;
-                break;
-            } else {
+                તોડો;
+            } નહીંતર {
                 result = sourceIllegal;
 
                 /*
@@ -660,20 +660,20 @@ static ConversionResult ConvertUTF8toUTF32Impl(
                 source += findMaximalSubpartOfIllFormedUTF8Sequence(source,
                                                                     sourceEnd);
                 *target++ = UNI_REPLACEMENT_CHAR;
-                continue;
+                ચાલુ;
             }
         }
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        જો (target >= targetEnd) {
+            result = targetExhausted; તોડો;
         }
 
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
+        જો (!isLegalUTF8(source, extraBytesToRead+1)) {
             result = sourceIllegal;
-            if (flags == strictConversion) {
+            જો (flags == strictConversion) {
                 /* Abort conversion. */
-                break;
-            } else {
+                તોડો;
+            } નહીંતર {
                 /*
                  * Replace the maximal subpart of ill-formed sequence with
                  * replacement character.
@@ -681,62 +681,62 @@ static ConversionResult ConvertUTF8toUTF32Impl(
                 source += findMaximalSubpartOfIllFormedUTF8Sequence(source,
                                                                     sourceEnd);
                 *target++ = UNI_REPLACEMENT_CHAR;
-                continue;
+                ચાલુ;
             }
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
-        switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6;
-            case 4: ch += *source++; ch <<= 6;
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+        પસંદગી (extraBytesToRead) {
+            સ્થિતિ 5: ch += *source++; ch <<= 6;
+            સ્થિતિ 4: ch += *source++; ch <<= 6;
+            સ્થિતિ 3: ch += *source++; ch <<= 6;
+            સ્થિતિ 2: ch += *source++; ch <<= 6;
+            સ્થિતિ 1: ch += *source++; ch <<= 6;
+            સ્થિતિ 0: ch += *source++;
         }
         ch -= offsetsFromUTF8[extraBytesToRead];
 
-        if (ch <= UNI_MAX_LEGAL_UTF32) {
+        જો (ch <= UNI_MAX_LEGAL_UTF32) {
             /*
              * UTF-16 surrogate values are illegal in UTF-32, and anything
              * over Plane 17 (> 0x10FFFF) is illegal.
              */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            જો (ch >= UNI_SUR_ઉપલું_START && ch <= UNI_SUR_નીચલું_END) {
+                જો (flags == strictConversion) {
                     source -= (extraBytesToRead+1); /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    તોડો;
+                } નહીંતર {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } નહીંતર {
                 *target++ = ch;
             }
-        } else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
+        } નહીંતર { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
             result = sourceIllegal;
             *target++ = UNI_REPLACEMENT_CHAR;
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    પાછા result;
 }
 
-ConversionResult ConvertUTF8toUTF32Partial(const UTF8 **sourceStart,
-                                           const UTF8 *sourceEnd,
+ConversionResult ConvertUTF8toUTF32Partial(અચલ UTF8 **sourceStart,
+                                           અચલ UTF8 *sourceEnd,
                                            UTF32 **targetStart,
                                            UTF32 *targetEnd,
                                            ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
-                                flags, /*InputIsPartial=*/true);
+  પાછા ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
+                                flags, /*InputIsPartial=*/સાચું);
 }
 
-ConversionResult ConvertUTF8toUTF32(const UTF8 **sourceStart,
-                                    const UTF8 *sourceEnd, UTF32 **targetStart,
+ConversionResult ConvertUTF8toUTF32(અચલ UTF8 **sourceStart,
+                                    અચલ UTF8 *sourceEnd, UTF32 **targetStart,
                                     UTF32 *targetEnd, ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
-                                flags, /*InputIsPartial=*/false);
+  પાછા ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
+                                flags, /*InputIsPartial=*/ખોટું);
 }
 
 /* ---------------------------------------------------------------------

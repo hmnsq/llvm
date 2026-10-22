@@ -6,47 +6,47 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/Format.h"
+#અન્તર્ભાવ "llvm/Support/ScopedPrinter.h"
+#અન્તર્ભાવ "llvm/Support/Format.h"
 
-using namespace llvm;
+using નામાકાશ llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, const HexNumber &Value) {
-  OS << "0x" << utohexstr(Value.Value);
-  return OS;
+raw_ostream &llvm::operator<<(raw_ostream &OS, અચલ Hex_સંખ્યા &કિંમત) {
+  OS << "0x" << utohexstr(કિંમત.કિંમત);
+  પાછા OS;
 }
 
-void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
-                                    ArrayRef<uint8_t> Data, bool Block,
+શૂન્ય ScopedPrinter::print_દ્વિઅંકી_Impl(StringRef Label, StringRef Str,
+                                    ArrayRef<uint8_t> Data, તાર્કિક Block,
                                     uint32_t StartOffset) {
-  if (Data.size() > 16)
-    Block = true;
+  જો (Data.size() > 16)
+    Block = સાચું;
 
-  if (Block) {
-    startLine() << Label;
-    if (!Str.empty())
+  જો (Block) {
+    start_લીટી() << Label;
+    જો (!Str.empty())
       OS << ": " << Str;
     OS << " (\n";
-    if (!Data.empty())
+    જો (!Data.empty())
       OS << format_bytes_with_ascii(Data, StartOffset, 16, 4,
-                                    (IndentLevel + 1) * 2, true)
+                                    (IndentLevel + 1) * 2, સાચું)
          << "\n";
-    startLine() << ")\n";
-  } else {
-    startLine() << Label << ":";
-    if (!Str.empty())
+    start_લીટી() << ")\n";
+  } નહીંતર {
+    start_લીટી() << Label << ":";
+    જો (!Str.empty())
       OS << " " << Str;
-    OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, true)
+    OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, સાચું)
        << ")\n";
   }
 }
 
 JSONScopedPrinter::JSONScopedPrinter(
-    raw_ostream &OS, bool PrettyPrint,
+    raw_ostream &OS, તાર્કિક PrettyPrint,
     std::unique_ptr<DelimitedScope> &&OuterScope)
     : ScopedPrinter(OS, ScopedPrinter::ScopedPrinterKind::JSON),
       JOS(OS, /*Indent=*/PrettyPrint ? 2 : 0),
       OuterScope(std::move(OuterScope)) {
-  if (this->OuterScope)
-    this->OuterScope->setPrinter(*this);
+  જો (આ->OuterScope)
+    આ->OuterScope->setPrinter(*આ);
 }

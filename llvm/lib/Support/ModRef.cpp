@@ -10,74 +10,74 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ModRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
+#અન્તર્ભાવ "llvm/Support/ModRef.h"
+#અન્તર્ભાવ "llvm/ADT/STLExtras.h"
+#અન્તર્ભાવ "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+using નામાકાશ llvm;
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
-  switch (MR) {
-  case ModRefInfo::NoModRef:
+  પસંદગી (MR) {
+  સ્થિતિ ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    તોડો;
+  સ્થિતિ ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    તોડો;
+  સ્થિતિ ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    તોડો;
+  સ્થિતિ ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    તોડો;
   }
-  return OS;
+  પાછા OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
   interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
-    switch (Loc) {
-    case IRMemLocation::ArgMem:
+    પસંદગી (Loc) {
+    સ્થિતિ IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      તોડો;
+    સ્થિતિ IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      તોડો;
+    સ્થિતિ IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      તોડો;
+    સ્થિતિ IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      તોડો;
+    સ્થિતિ IRMemLocation::TargetMem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      તોડો;
+    સ્થિતિ IRMemLocation::TargetMem1:
       OS << "TargetMem1: ";
-      break;
+      તોડો;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  પાછા OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+  જો (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    પાછા OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  જો (capturesAddressIsNullOnly(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  નહીંતર જો (capturesAddress(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  જો (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  જો (capturesFullProvenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  પાછા OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
@@ -86,10 +86,10 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  જો (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  જો (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  પાછા OS;
 }

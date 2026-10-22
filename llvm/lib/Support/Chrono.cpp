@@ -6,122 +6,122 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Chrono.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#અન્તર્ભાવ "llvm/Support/Chrono.h"
+#અન્તર્ભાવ "llvm/Config/llvm-config.h"
+#અન્તર્ભાવ "llvm/Support/Compiler.h"
+#અન્તર્ભાવ "llvm/Support/Format.h"
+#અન્તર્ભાવ "llvm/Support/raw_ostream.h"
 
-namespace llvm {
+નામાકાશ llvm {
 
-using namespace sys;
+using નામાકાશ sys;
 
-LLVM_ABI const char llvm::detail::unit<std::ratio<3600>>::value[] = "h";
-LLVM_ABI const char llvm::detail::unit<std::ratio<60>>::value[] = "m";
-LLVM_ABI const char llvm::detail::unit<std::ratio<1>>::value[] = "s";
-LLVM_ABI const char llvm::detail::unit<std::milli>::value[] = "ms";
-LLVM_ABI const char llvm::detail::unit<std::micro>::value[] = "us";
-LLVM_ABI const char llvm::detail::unit<std::nano>::value[] = "ns";
+LLVM_ABI અચલ અક્ષર llvm::detail::unit<std::ratio<3600>>::કિંમત_2[] = "h";
+LLVM_ABI અચલ અક્ષર llvm::detail::unit<std::ratio<60>>::કિંમત_2[] = "m";
+LLVM_ABI અચલ અક્ષર llvm::detail::unit<std::ratio<1>>::કિંમત_2[] = "s";
+LLVM_ABI અચલ અક્ષર llvm::detail::unit<std::milli>::કિંમત_2[] = "ms";
+LLVM_ABI અચલ અક્ષર llvm::detail::unit<std::micro>::કિંમત_2[] = "us";
+LLVM_ABI અચલ અક્ષર llvm::detail::unit<std::nano>::કિંમત_2[] = "ns";
 
-static inline struct tm getStructTM(TimePoint<> TP) {
-  struct tm Storage;
+સ્થિર અંતઃરેખ સંરચના tm getStructTM(TimePoint<> TP) {
+  સંરચના tm Storage;
   std::time_t OurTime = toTimeT(TP);
 
-#if defined(LLVM_ON_UNIX)
-  struct tm *LT = ::localtime_r(&OurTime, &Storage);
-  assert(LT);
-  (void)LT;
+#જો defined(LLVM_ON_UNIX)
+  સંરચના tm *LT = ::localtime_r(&OurTime, &Storage);
+  પ્રતિજ્ઞા(LT);
+  (શૂન્ય)LT;
 #endif
-#if defined(_WIN32)
-  int Error = ::localtime_s(&Storage, &OurTime);
-  assert(!Error);
-  (void)Error;
+#જો defined(_WIN32)
+  પૂર્ણાંક Error = ::localtime_s(&Storage, &OurTime);
+  પ્રતિજ્ઞા(!Error);
+  (શૂન્ય)Error;
 #endif
 
-  return Storage;
+  પાછા Storage;
 }
 
-static inline struct tm getStructTMUtc(UtcTime<> TP) {
-  struct tm Storage;
+સ્થિર અંતઃરેખ સંરચના tm getStructTMUtc(UtcTime<> TP) {
+  સંરચના tm Storage;
   std::time_t OurTime = toTimeT(TP);
 
-#if defined(LLVM_ON_UNIX)
-  struct tm *LT = ::gmtime_r(&OurTime, &Storage);
-  assert(LT);
-  (void)LT;
+#જો defined(LLVM_ON_UNIX)
+  સંરચના tm *LT = ::gmtime_r(&OurTime, &Storage);
+  પ્રતિજ્ઞા(LT);
+  (શૂન્ય)LT;
 #endif
-#if defined(_WIN32)
-  int Error = ::gmtime_s(&Storage, &OurTime);
-  assert(!Error);
-  (void)Error;
+#જો defined(_WIN32)
+  પૂર્ણાંક Error = ::gmtime_s(&Storage, &OurTime);
+  પ્રતિજ્ઞા(!Error);
+  (શૂન્ય)Error;
 #endif
 
-  return Storage;
+  પાછા Storage;
 }
 
 raw_ostream &operator<<(raw_ostream &OS, TimePoint<> TP) {
-  struct tm LT = getStructTM(TP);
-  char Buffer[sizeof("YYYY-MM-DD HH:MM:SS")];
-  strftime(Buffer, sizeof(Buffer), "%Y-%m-%d %H:%M:%S", &LT);
-  return OS << Buffer << '.'
+  સંરચના tm LT = getStructTM(TP);
+  અક્ષર Buffer[કદ("YYYY-MM-DD HH:MM:SS")];
+  strftime(Buffer, કદ(Buffer), "%Y-%m-%d %H:%M:%S", &LT);
+  પાછા OS << Buffer << '.'
             << format("%.9lu",
                       long((TP.time_since_epoch() % std::chrono::seconds(1))
-                               .count()));
+                               .ગણતરી()));
 }
 
-template <class T>
-static void format(const T &Fractional, struct tm &LT, raw_ostream &OS,
+template <વર્ગ T>
+સ્થિર શૂન્ય format(અચલ T &Fractional, સંરચના tm &LT, raw_ostream &OS,
                    StringRef Style) {
-  using namespace std::chrono;
+  using નામાકાશ std::chrono;
   // Handle extensions first. strftime mangles unknown %x on some platforms.
-  if (Style.empty()) Style = "%Y-%m-%d %H:%M:%S.%N";
+  જો (Style.empty()) Style = "%Y-%m-%d %H:%M:%S.%N";
   std::string Format;
   raw_string_ostream FStream(Format);
-  for (unsigned I = 0; I < Style.size(); ++I) {
-    if (Style[I] == '%' && Style.size() > I + 1) switch (Style[I + 1]) {
-        case 'L':  // Milliseconds, from Ruby.
+  માટે (unsigned I = 0; I < Style.size(); ++I) {
+    જો (Style[I] == '%' && Style.size() > I + 1) પસંદગી (Style[I + 1]) {
+        સ્થિતિ 'L':  // Milliseconds, from Ruby.
           FStream << llvm::format(
-              "%.3lu", (long)duration_cast<milliseconds>(Fractional).count());
+              "%.3lu", (long)duration_cast<milliseconds>(Fractional).ગણતરી());
           ++I;
-          continue;
-        case 'f':  // Microseconds, from Python.
+          ચાલુ;
+        સ્થિતિ 'f':  // Microseconds, from Python.
           FStream << llvm::format(
-              "%.6lu", (long)duration_cast<microseconds>(Fractional).count());
+              "%.6lu", (long)duration_cast<microseconds>(Fractional).ગણતરી());
           ++I;
-          continue;
-        case 'N':  // Nanoseconds, from date(1).
+          ચાલુ;
+        સ્થિતિ 'N':  // Nanoseconds, from date(1).
           FStream << llvm::format(
-              "%.9lu", (long)duration_cast<nanoseconds>(Fractional).count());
+              "%.9lu", (long)duration_cast<nanoseconds>(Fractional).ગણતરી());
           ++I;
-          continue;
-        case '%':  // Consume %%, so %%f parses as (%%)f not %(%f)
+          ચાલુ;
+        સ્થિતિ '%':  // Consume %%, so %%f parses as (%%)f not %(%f)
           FStream << "%%";
           ++I;
-          continue;
+          ચાલુ;
       }
     FStream << Style[I];
   }
-  char Buffer[256];  // Should be enough for anywhen.
-  size_t Len = strftime(Buffer, sizeof(Buffer), Format.c_str(), &LT);
+  અક્ષર Buffer[256];  // Should be enough for anywhen.
+  size_t Len = strftime(Buffer, કદ(Buffer), Format.c_str(), &LT);
   OS << (Len ? Buffer : "BAD-DATE-FORMAT");
 }
 
-void format_provider<UtcTime<std::chrono::seconds>>::format(
-    const UtcTime<std::chrono::seconds> &T, raw_ostream &OS, StringRef Style) {
-  using namespace std::chrono;
+શૂન્ય format_provider<UtcTime<std::chrono::seconds>>::format(
+    અચલ UtcTime<std::chrono::seconds> &T, raw_ostream &OS, StringRef Style) {
+  using નામાકાશ std::chrono;
   UtcTime<seconds> Truncated =
       UtcTime<seconds>(duration_cast<seconds>(T.time_since_epoch()));
   auto Fractional = T - Truncated;
-  struct tm LT = getStructTMUtc(Truncated);
+  સંરચના tm LT = getStructTMUtc(Truncated);
   llvm::format(Fractional, LT, OS, Style);
 }
 
-void format_provider<TimePoint<>>::format(const TimePoint<> &T, raw_ostream &OS,
+શૂન્ય format_provider<TimePoint<>>::format(અચલ TimePoint<> &T, raw_ostream &OS,
                                           StringRef Style) {
-  using namespace std::chrono;
+  using નામાકાશ std::chrono;
   TimePoint<seconds> Truncated = time_point_cast<seconds>(T);
   auto Fractional = T - Truncated;
-  struct tm LT = getStructTM(Truncated);
+  સંરચના tm LT = getStructTM(Truncated);
   llvm::format(Fractional, LT, OS, Style);
 }
 

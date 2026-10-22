@@ -38,18 +38,18 @@
 #ifndef LLVM_SUPPORT_REGEX_IMPL_H
 #define LLVM_SUPPORT_REGEX_IMPL_H
 
-#include <sys/types.h>
-typedef off_t llvm_regoff_t;
-typedef struct {
+#અન્તર્ભાવ <sys/types.h>
+પ્રકારવ્યાખ્યા off_t llvm_regoff_t;
+પ્રકારવ્યાખ્યા સંરચના {
   llvm_regoff_t rm_so;		/* start of match */
   llvm_regoff_t rm_eo;		/* end of match */
 } llvm_regmatch_t;
 
-typedef struct llvm_regex {
-  int re_magic;
+પ્રકારવ્યાખ્યા સંરચના llvm_regex {
+  પૂર્ણાંક re_magic;
   size_t re_nsub;		/* number of parenthesized subexpressions */
-  const char *re_endp;	/* end pointer for REG_PEND */
-  struct re_guts *re_g;	/* none of your business :-) */
+  અચલ અક્ષર *re_endp;	/* end pointer for REG_PEND */
+  સંરચના re_guts *re_g;	/* none of your business :-) */
 } llvm_regex_t;
 
 /* llvm_regcomp() flags */
@@ -91,15 +91,15 @@ typedef struct llvm_regex {
 #define	REG_BACKR	02000	/* force use of backref code */
 
 #ifdef __cplusplus
-extern "C" {
+બાહ્ય "C" {
 #endif
 
-int	llvm_regcomp(llvm_regex_t *, const char *, int);
-size_t	llvm_regerror(int, const llvm_regex_t *, char *, size_t);
-int	llvm_regexec(const llvm_regex_t *, const char *, size_t,
-                     llvm_regmatch_t [], int);
-void	llvm_regfree(llvm_regex_t *);
-size_t  llvm_strlcpy(char *dst, const char *src, size_t siz);
+પૂર્ણાંક	llvm_regcomp(llvm_regex_t *, અચલ અક્ષર *, પૂર્ણાંક);
+size_t	llvm_regerror(પૂર્ણાંક, અચલ llvm_regex_t *, અક્ષર *, size_t);
+પૂર્ણાંક	llvm_regexec(અચલ llvm_regex_t *, અચલ અક્ષર *, size_t,
+                     llvm_regmatch_t [], પૂર્ણાંક);
+શૂન્ય	llvm_regfree(llvm_regex_t *);
+size_t  llvm_strlcpy(અક્ષર *dst, અચલ અક્ષર *src, size_t siz);
 
 #ifdef __cplusplus
 }

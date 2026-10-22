@@ -10,60 +10,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BlockFrequency.h"
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/Support/raw_ostream.h"
+#અન્તર્ભાવ "llvm/Support/BlockFrequency.h"
+#અન્તર્ભાવ "llvm/Support/BranchProbability.h"
+#અન્તર્ભાવ "llvm/Support/MathExtras.h"
+#અન્તર્ભાવ "llvm/Support/ScaledNumber.h"
+#અન્તર્ભાવ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using નામાકાશ llvm;
 
 BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  પાછા *આ;
 }
 
-BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
+BlockFrequency BlockFrequency::operator*(BranchProbability Prob) અચલ {
   BlockFrequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  પાછા Freq;
 }
 
 BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  પાછા *આ;
 }
 
-BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
+BlockFrequency BlockFrequency::operator/(BranchProbability Prob) અચલ {
   BlockFrequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  પાછા Freq;
 }
 
-std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
-  bool Overflow;
+std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) અચલ {
+  તાર્કિક Overflow;
   uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+  જો (Overflow)
+    પાછા {};
+  પાછા BlockFrequency(ResultFrequency);
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  પાછા OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
+શૂન્ય llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
                                   BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+  જો (Freq == BlockFrequency(0)) {
     OS << "0";
-    return;
+    પાછા;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  જો (EntryFreq == BlockFrequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    પાછા;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
+  Scaled_સંખ્યા<uint64_t> Block(Freq.getFrequency(), 0);
+  Scaled_સંખ્યા<uint64_t> Entry(EntryFreq.getFrequency(), 0);
   OS << Block / Entry;
 }

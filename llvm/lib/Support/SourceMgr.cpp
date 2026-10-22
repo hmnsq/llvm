@@ -12,68 +12,68 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/Locale.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/Support/WithColor.h"
-#include "llvm/Support/raw_ostream.h"
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <limits>
-#include <memory>
-#include <string>
-#include <utility>
+#અન્તર્ભાવ "llvm/Support/SourceMgr.h"
+#અન્તર્ભાવ "llvm/ADT/ArrayRef.h"
+#અન્તર્ભાવ "llvm/ADT/STLExtras.h"
+#અન્તર્ભાવ "llvm/ADT/SmallString.h"
+#અન્તર્ભાવ "llvm/ADT/SmallVector.h"
+#અન્તર્ભાવ "llvm/ADT/StringRef.h"
+#અન્તર્ભાવ "llvm/ADT/Twine.h"
+#અન્તર્ભાવ "llvm/Support/ErrorOr.h"
+#અન્તર્ભાવ "llvm/Support/Locale.h"
+#અન્તર્ભાવ "llvm/Support/MemoryBuffer.h"
+#અન્તર્ભાવ "llvm/Support/Path.h"
+#અન્તર્ભાવ "llvm/Support/SMLoc.h"
+#અન્તર્ભાવ "llvm/Support/VirtualFileSystem.h"
+#અન્તર્ભાવ "llvm/Support/WithColor.h"
+#અન્તર્ભાવ "llvm/Support/raw_ostream.h"
+#અન્તર્ભાવ <algorithm>
+#અન્તર્ભાવ <cassert>
+#અન્તર્ભાવ <cstddef>
+#અન્તર્ભાવ <limits>
+#અન્તર્ભાવ <memory>
+#અન્તર્ભાવ <string>
+#અન્તર્ભાવ <utility>
 
-using namespace llvm;
+using નામાકાશ llvm;
 
-static const size_t TabStop = 8;
+સ્થિર અચલ size_t TabStop = 8;
 
 // Out of line to avoid needing definition of vfs::FileSystem in header.
-SourceMgr::SourceMgr() = default;
+SourceMgr::SourceMgr() = મૂળભૂત;
 SourceMgr::SourceMgr(IntrusiveRefCntPtr<vfs::FileSystem> FS)
     : FS(std::move(FS)) {}
-SourceMgr::SourceMgr(SourceMgr &&) = default;
-SourceMgr &SourceMgr::operator=(SourceMgr &&) = default;
-SourceMgr::~SourceMgr() = default;
+SourceMgr::SourceMgr(SourceMgr &&) = મૂળભૂત;
+SourceMgr &SourceMgr::operator=(SourceMgr &&) = મૂળભૂત;
+SourceMgr::~SourceMgr() = મૂળભૂત;
 
-IntrusiveRefCntPtr<vfs::FileSystem> SourceMgr::getVirtualFileSystem() const {
-  return FS;
+IntrusiveRefCntPtr<vfs::FileSystem> SourceMgr::getVirtualFileSystem() અચલ {
+  પાછા FS;
 }
 
-void SourceMgr::setVirtualFileSystem(IntrusiveRefCntPtr<vfs::FileSystem> FS) {
-  this->FS = std::move(FS);
+શૂન્ય SourceMgr::setVirtualFileSystem(IntrusiveRefCntPtr<vfs::FileSystem> FS) {
+  આ->FS = std::move(FS);
 }
 
-unsigned SourceMgr::AddIncludeFile(const std::string &Filename,
+unsigned SourceMgr::AddIncludeFile(અચલ std::string &Filename,
                                    SMLoc IncludeLoc,
                                    std::string &IncludedFile) {
   ErrorOr<std::unique_ptr<MemoryBuffer>> NewBufOrErr =
       OpenIncludeFile(Filename, IncludedFile);
-  if (!NewBufOrErr)
-    return 0;
+  જો (!NewBufOrErr)
+    પાછા 0;
 
-  return AddNewSourceBuffer(std::move(*NewBufOrErr), IncludeLoc);
+  પાછા AddNewSourceBuffer(std::move(*NewBufOrErr), IncludeLoc);
 }
 
 ErrorOr<std::unique_ptr<MemoryBuffer>>
-SourceMgr::OpenIncludeFile(const std::string &Filename,
+SourceMgr::OpenIncludeFile(અચલ std::string &Filename,
                            std::string &IncludedFile,
-                           bool RequiresNullTerminator) {
-  auto GetFile = [this, RequiresNullTerminator](StringRef Path) {
-    return FS ? FS->getBufferForFile(Path, /*FileSize=*/-1,
+                           તાર્કિક RequiresNullTerminator) {
+  auto GetFile = [આ, RequiresNullTerminator](StringRef Path) {
+    પાછા FS ? FS->getBufferForFile(Path, /*FileSize=*/-1,
                                      RequiresNullTerminator)
-              : MemoryBuffer::getFile(Path, /*IsText=*/false,
+              : MemoryBuffer::getFile(Path, /*IsText=*/ખોટું,
                                       RequiresNullTerminator);
   };
 
@@ -81,122 +81,122 @@ SourceMgr::OpenIncludeFile(const std::string &Filename,
 
   SmallString<64> Buffer(Filename);
   // If the file didn't exist directly, see if it's in an include path.
-  for (unsigned i = 0, e = IncludeDirectories.size(); i != e && !NewBufOrErr;
+  માટે (unsigned i = 0, e = IncludeDirectories.size(); i != e && !NewBufOrErr;
        ++i) {
     Buffer = IncludeDirectories[i];
     sys::path::append(Buffer, Filename);
     NewBufOrErr = GetFile(Buffer);
   }
 
-  if (NewBufOrErr)
+  જો (NewBufOrErr)
     IncludedFile = static_cast<std::string>(Buffer);
 
-  return NewBufOrErr;
+  પાછા NewBufOrErr;
 }
 
-unsigned SourceMgr::FindBufferContainingLoc(SMLoc Loc) const {
-  for (unsigned i = 0, e = Buffers.size(); i != e; ++i)
-    if (Loc.getPointer() >= Buffers[i].Buffer->getBufferStart() &&
+unsigned SourceMgr::FindBufferContainingLoc(SMLoc Loc) અચલ {
+  માટે (unsigned i = 0, e = Buffers.size(); i != e; ++i)
+    જો (Loc.getPointer() >= Buffers[i].Buffer->getBufferStart() &&
         // Use <= here so that a pointer to the null at the end of the buffer
         // is included as part of the buffer.
         Loc.getPointer() <= Buffers[i].Buffer->getBufferEnd())
-      return i + 1;
-  return 0;
+      પાછા i + 1;
+  પાછા 0;
 }
 
 template <typename T>
-static std::vector<T> &GetOrCreateOffsetCache(void *&OffsetCache,
+સ્થિર std::vector<T> &GetOrCreateOffsetCache(શૂન્ય *&OffsetCache,
                                               MemoryBuffer *Buffer) {
-  if (OffsetCache)
-    return *static_cast<std::vector<T> *>(OffsetCache);
+  જો (OffsetCache)
+    પાછા *static_cast<std::vector<T> *>(OffsetCache);
 
   // Lazily fill in the offset cache.
-  auto *Offsets = new std::vector<T>();
+  auto *Offsets = નવું std::vector<T>();
   size_t Sz = Buffer->getBufferSize();
-  assert(Sz <= std::numeric_limits<T>::max());
+  પ્રતિજ્ઞા(Sz <= std::numeric_limits<T>::max());
   StringRef S = Buffer->getBuffer();
-  for (size_t N = 0; N < Sz; ++N) {
-    if (S[N] == '\n')
-      Offsets->push_back(static_cast<T>(N));
+  માટે (size_t N = 0; N < Sz; ++N) {
+    જો (S[N] == '\n')
+      Offsets->ધકેલો_back(static_cast<T>(N));
   }
 
   OffsetCache = Offsets;
-  return *Offsets;
+  પાછા *Offsets;
 }
 
 template <typename T>
 std::pair<unsigned, unsigned>
-SourceMgr::SrcBuffer::getLineAndColumnSpecialized(const char *Ptr) const {
+SourceMgr::SrcBuffer::get_લીટી_And_Column_Specialized(અચલ અક્ષર *Ptr) અચલ {
   std::vector<T> &Offsets =
       GetOrCreateOffsetCache<T>(OffsetCache, Buffer.get());
 
-  const char *BufStart = Buffer->getBufferStart();
-  assert(Ptr >= BufStart && Ptr <= Buffer->getBufferEnd());
+  અચલ અક્ષર *BufStart = Buffer->getBufferStart();
+  પ્રતિજ્ઞા(Ptr >= BufStart && Ptr <= Buffer->getBufferEnd());
   ptrdiff_t PtrDiff = Ptr - BufStart;
-  assert(PtrDiff >= 0 &&
+  પ્રતિજ્ઞા(PtrDiff >= 0 &&
          static_cast<size_t>(PtrDiff) <= std::numeric_limits<T>::max());
   T PtrOffset = static_cast<T>(PtrDiff);
 
   // llvm::lower_bound gives the number of EOL before PtrOffset. Add 1 to get
   // the line number.
   auto I = llvm::lower_bound(Offsets, PtrOffset);
-  unsigned LineNo = I - Offsets.begin() + 1;
+  unsigned લીટી_No = I - Offsets.begin() + 1;
 
   // The column number is the distance from the previous EOL (or the start of
   // the buffer) to the pointer.
-  T LineStartOffs = (I == Offsets.begin()) ? 0 : (I[-1] + 1);
-  unsigned ColNo = PtrOffset - LineStartOffs + 1;
-  return {LineNo, ColNo};
+  T લીટી_Start_Offs = (I == Offsets.begin()) ? 0 : (I[-1] + 1);
+  unsigned ColNo = PtrOffset - લીટી_Start_Offs + 1;
+  પાછા {લીટી_No, ColNo};
 }
 
 /// Look up a given \p Ptr in the buffer, determining which line and column
 /// it came from.
 LLVM_ABI std::pair<unsigned, unsigned>
-SourceMgr::SrcBuffer::getLineAndColumn(const char *Ptr) const {
+SourceMgr::SrcBuffer::get_લીટી_And_Column(અચલ અક્ષર *Ptr) અચલ {
   size_t Sz = Buffer->getBufferSize();
-  if (Sz <= std::numeric_limits<uint8_t>::max())
-    return getLineAndColumnSpecialized<uint8_t>(Ptr);
-  if (Sz <= std::numeric_limits<uint16_t>::max())
-    return getLineAndColumnSpecialized<uint16_t>(Ptr);
-  if (Sz <= std::numeric_limits<uint32_t>::max())
-    return getLineAndColumnSpecialized<uint32_t>(Ptr);
-  return getLineAndColumnSpecialized<uint64_t>(Ptr);
+  જો (Sz <= std::numeric_limits<uint8_t>::max())
+    પાછા get_લીટી_And_Column_Specialized<uint8_t>(Ptr);
+  જો (Sz <= std::numeric_limits<uint16_t>::max())
+    પાછા get_લીટી_And_Column_Specialized<uint16_t>(Ptr);
+  જો (Sz <= std::numeric_limits<uint32_t>::max())
+    પાછા get_લીટી_And_Column_Specialized<uint32_t>(Ptr);
+  પાછા get_લીટી_And_Column_Specialized<uint64_t>(Ptr);
 }
 
 template <typename T>
-const char *SourceMgr::SrcBuffer::getPointerForLineNumberSpecialized(
-    unsigned LineNo) const {
+અચલ અક્ષર *SourceMgr::SrcBuffer::get_Pointer_For_લીટી_સંખ્યા_Specialized(
+    unsigned લીટી_No) અચલ {
   std::vector<T> &Offsets =
       GetOrCreateOffsetCache<T>(OffsetCache, Buffer.get());
 
   // We start counting line and column numbers from 1.
-  if (LineNo != 0)
-    --LineNo;
+  જો (લીટી_No != 0)
+    --લીટી_No;
 
-  const char *BufStart = Buffer->getBufferStart();
+  અચલ અક્ષર *BufStart = Buffer->getBufferStart();
 
   // The offset cache contains the location of the \n for the specified line,
   // we want the start of the line.  As such, we look for the previous entry.
-  if (LineNo == 0)
-    return BufStart;
-  if (LineNo > Offsets.size())
-    return nullptr;
-  return BufStart + Offsets[LineNo - 1] + 1;
+  જો (લીટી_No == 0)
+    પાછા BufStart;
+  જો (લીટી_No > Offsets.size())
+    પાછા nullptr;
+  પાછા BufStart + Offsets[લીટી_No - 1] + 1;
 }
 
 /// Return a pointer to the first character of the specified line number or
 /// null if the line number is invalid.
-const char *
-SourceMgr::SrcBuffer::getPointerForLineNumber(unsigned LineNo) const {
+અચલ અક્ષર *
+SourceMgr::SrcBuffer::get_Pointer_For_લીટી_સંખ્યા(unsigned લીટી_No) અચલ {
   size_t Sz = Buffer->getBufferSize();
-  if (Sz <= std::numeric_limits<uint8_t>::max())
-    return getPointerForLineNumberSpecialized<uint8_t>(LineNo);
-  else if (Sz <= std::numeric_limits<uint16_t>::max())
-    return getPointerForLineNumberSpecialized<uint16_t>(LineNo);
-  else if (Sz <= std::numeric_limits<uint32_t>::max())
-    return getPointerForLineNumberSpecialized<uint32_t>(LineNo);
-  else
-    return getPointerForLineNumberSpecialized<uint64_t>(LineNo);
+  જો (Sz <= std::numeric_limits<uint8_t>::max())
+    પાછા get_Pointer_For_લીટી_સંખ્યા_Specialized<uint8_t>(લીટી_No);
+  નહીંતર જો (Sz <= std::numeric_limits<uint16_t>::max())
+    પાછા get_Pointer_For_લીટી_સંખ્યા_Specialized<uint16_t>(લીટી_No);
+  નહીંતર જો (Sz <= std::numeric_limits<uint32_t>::max())
+    પાછા get_Pointer_For_લીટી_સંખ્યા_Specialized<uint32_t>(લીટી_No);
+  નહીંતર
+    પાછા get_Pointer_For_લીટી_સંખ્યા_Specialized<uint64_t>(લીટી_No);
 }
 
 SourceMgr::SrcBuffer::SrcBuffer(SourceMgr::SrcBuffer &&Other)
@@ -206,30 +206,30 @@ SourceMgr::SrcBuffer::SrcBuffer(SourceMgr::SrcBuffer &&Other)
 }
 
 SourceMgr::SrcBuffer::~SrcBuffer() {
-  if (OffsetCache) {
+  જો (OffsetCache) {
     size_t Sz = Buffer->getBufferSize();
-    if (Sz <= std::numeric_limits<uint8_t>::max())
+    જો (Sz <= std::numeric_limits<uint8_t>::max())
       delete static_cast<std::vector<uint8_t> *>(OffsetCache);
-    else if (Sz <= std::numeric_limits<uint16_t>::max())
+    નહીંતર જો (Sz <= std::numeric_limits<uint16_t>::max())
       delete static_cast<std::vector<uint16_t> *>(OffsetCache);
-    else if (Sz <= std::numeric_limits<uint32_t>::max())
+    નહીંતર જો (Sz <= std::numeric_limits<uint32_t>::max())
       delete static_cast<std::vector<uint32_t> *>(OffsetCache);
-    else
+    નહીંતર
       delete static_cast<std::vector<uint64_t> *>(OffsetCache);
     OffsetCache = nullptr;
   }
 }
 
 std::pair<unsigned, unsigned>
-SourceMgr::getLineAndColumn(SMLoc Loc, unsigned BufferID) const {
-  if (!BufferID)
+SourceMgr::get_લીટી_And_Column(SMLoc Loc, unsigned BufferID) અચલ {
+  જો (!BufferID)
     BufferID = FindBufferContainingLoc(Loc);
-  assert(BufferID && "Invalid location!");
+  પ્રતિજ્ઞા(BufferID && "Invalid location!");
 
   auto &SB = getBufferInfo(BufferID);
-  const char *Ptr = Loc.getPointer();
+  અચલ અક્ષર *Ptr = Loc.getPointer();
 
-  return SB.getLineAndColumn(Ptr);
+  પાછા SB.get_લીટી_And_Column(Ptr);
 }
 
 // FIXME: Note that the formatting of source locations is spread between
@@ -241,220 +241,220 @@ SourceMgr::getLineAndColumn(SMLoc Loc, unsigned BufferID) const {
 /// style, but without the line offset. If \p IncludePath is true, the path
 /// is included. If false, only the file name and extension are included.
 std::string SourceMgr::getFormattedLocationNoOffset(SMLoc Loc,
-                                                    bool IncludePath) const {
+                                                    તાર્કિક IncludePath) અચલ {
   auto BufferID = FindBufferContainingLoc(Loc);
-  assert(BufferID && "Invalid location!");
+  પ્રતિજ્ઞા(BufferID && "Invalid location!");
   auto FileSpec = getBufferInfo(BufferID).Buffer->getBufferIdentifier();
 
-  if (IncludePath) {
-    return FileSpec.str() + ":" + std::to_string(FindLineNumber(Loc, BufferID));
-  } else {
+  જો (IncludePath) {
+    પાછા FileSpec.str() + ":" + std::to_string(Find_લીટી_સંખ્યા(Loc, BufferID));
+  } નહીંતર {
     auto I = FileSpec.find_last_of("/\\");
     I = (I == FileSpec.size()) ? 0 : (I + 1);
-    return FileSpec.substr(I).str() + ":" +
-           std::to_string(FindLineNumber(Loc, BufferID));
+    પાછા FileSpec.substr(I).str() + ":" +
+           std::to_string(Find_લીટી_સંખ્યા(Loc, BufferID));
   }
 }
 
 /// Given a line and column number in a mapped buffer, turn it into an SMLoc.
 /// This will return a null SMLoc if the line/column location is invalid.
-SMLoc SourceMgr::FindLocForLineAndColumn(unsigned BufferID, unsigned LineNo,
+SMLoc SourceMgr::Find_Loc_For_લીટી_And_Column(unsigned BufferID, unsigned લીટી_No,
                                          unsigned ColNo) {
   auto &SB = getBufferInfo(BufferID);
-  const char *Ptr = SB.getPointerForLineNumber(LineNo);
-  if (!Ptr)
-    return SMLoc();
+  અચલ અક્ષર *Ptr = SB.get_Pointer_For_લીટી_સંખ્યા(લીટી_No);
+  જો (!Ptr)
+    પાછા SMLoc();
 
   // We start counting line and column numbers from 1.
-  if (ColNo != 0)
+  જો (ColNo != 0)
     --ColNo;
 
   // If we have a column number, validate it.
-  if (ColNo) {
+  જો (ColNo) {
     // Make sure the location is within the current line.
-    if (Ptr + ColNo > SB.Buffer->getBufferEnd())
-      return SMLoc();
+    જો (Ptr + ColNo > SB.Buffer->getBufferEnd())
+      પાછા SMLoc();
 
     // Make sure there is no newline in the way.
-    if (StringRef(Ptr, ColNo).find_first_of("\n\r") != StringRef::npos)
-      return SMLoc();
+    જો (StringRef(Ptr, ColNo).find_first_of("\n\r") != StringRef::npos)
+      પાછા SMLoc();
 
     Ptr += ColNo;
   }
 
-  return SMLoc::getFromPointer(Ptr);
+  પાછા SMLoc::getFromPointer(Ptr);
 }
 
-void SourceMgr::PrintIncludeStack(SMLoc IncludeLoc, raw_ostream &OS) const {
-  if (IncludeLoc == SMLoc())
-    return; // Top of stack.
+શૂન્ય SourceMgr::Print_Include_ઢગલો(SMLoc IncludeLoc, raw_ostream &OS) અચલ {
+  જો (IncludeLoc == SMLoc())
+    પાછા; // Top of stack.
 
   unsigned CurBuf = FindBufferContainingLoc(IncludeLoc);
-  assert(CurBuf && "Invalid or unspecified location!");
+  પ્રતિજ્ઞા(CurBuf && "Invalid or unspecified location!");
 
-  PrintIncludeStack(getBufferInfo(CurBuf).IncludeLoc, OS);
+  Print_Include_ઢગલો(getBufferInfo(CurBuf).IncludeLoc, OS);
 
   OS << "Included from " << getBufferInfo(CurBuf).Buffer->getBufferIdentifier()
-     << ":" << FindLineNumber(IncludeLoc, CurBuf) << ":\n";
+     << ":" << Find_લીટી_સંખ્યા(IncludeLoc, CurBuf) << ":\n";
 }
 
-void SourceMgr::printIncludeStackForDiagnostic(SMLoc Loc,
-                                               raw_ostream &OS) const {
-  if (!Loc.isValid())
-    return;
+શૂન્ય SourceMgr::print_Include_ઢગલો_For_Diagnostic(SMLoc Loc,
+                                               raw_ostream &OS) અચલ {
+  જો (!Loc.isValid())
+    પાછા;
   unsigned DiagCurBuffer = FindBufferContainingLoc(Loc);
-  if (DiagCurBuffer && DiagCurBuffer != getMainFileID()) {
+  જો (DiagCurBuffer && DiagCurBuffer != getMainFileID()) {
     SMLoc ParentIncludeLoc = getParentIncludeLoc(DiagCurBuffer);
     // Ignore macro instantiation buffers to avoid redundant include stacks.
-    PrintIncludeStack(ParentIncludeLoc, OS);
+    Print_Include_ઢગલો(ParentIncludeLoc, OS);
   }
 }
 
 SMDiagnostic SourceMgr::GetMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
-                                   const Twine &Msg, ArrayRef<SMRange> Ranges,
-                                   ArrayRef<SMFixIt> FixIts) const {
+                                   અચલ Twine &સંદેશ_2, ArrayRef<SMRange> Ranges,
+                                   ArrayRef<SMFixIt> FixIts) અચલ {
   // First thing to do: find the current buffer containing the specified
   // location to pull out the source line.
   SmallVector<std::pair<unsigned, unsigned>, 4> ColRanges;
-  std::pair<unsigned, unsigned> LineAndCol;
+  std::pair<unsigned, unsigned> લીટી_And_Col;
   StringRef BufferID = "<unknown>";
-  StringRef LineStr;
+  StringRef લીટી_Str;
 
-  if (Loc.isValid()) {
+  જો (Loc.isValid()) {
     unsigned CurBuf = FindBufferContainingLoc(Loc);
-    assert(CurBuf && "Invalid or unspecified location!");
+    પ્રતિજ્ઞા(CurBuf && "Invalid or unspecified location!");
 
-    const MemoryBuffer *CurMB = getMemoryBuffer(CurBuf);
+    અચલ MemoryBuffer *CurMB = getMemoryBuffer(CurBuf);
     BufferID = CurMB->getBufferIdentifier();
 
     // Scan backward to find the start of the line.
-    const char *LineStart = Loc.getPointer();
-    const char *BufStart = CurMB->getBufferStart();
-    while (LineStart != BufStart && LineStart[-1] != '\n' &&
-           LineStart[-1] != '\r')
-      --LineStart;
+    અચલ અક્ષર *લીટી_Start = Loc.getPointer();
+    અચલ અક્ષર *BufStart = CurMB->getBufferStart();
+    જ્યારે (લીટી_Start != BufStart && લીટી_Start[-1] != '\n' &&
+           લીટી_Start[-1] != '\r')
+      --લીટી_Start;
 
     // Get the end of the line.
-    const char *LineEnd = Loc.getPointer();
-    const char *BufEnd = CurMB->getBufferEnd();
-    while (LineEnd != BufEnd && LineEnd[0] != '\n' && LineEnd[0] != '\r')
-      ++LineEnd;
-    LineStr = StringRef(LineStart, LineEnd - LineStart);
+    અચલ અક્ષર *લીટી_End = Loc.getPointer();
+    અચલ અક્ષર *BufEnd = CurMB->getBufferEnd();
+    જ્યારે (લીટી_End != BufEnd && લીટી_End[0] != '\n' && લીટી_End[0] != '\r')
+      ++લીટી_End;
+    લીટી_Str = StringRef(લીટી_Start, લીટી_End - લીટી_Start);
 
     // Convert any ranges to column ranges that only intersect the line of the
     // location.
-    for (SMRange R : Ranges) {
-      if (!R.isValid())
-        continue;
+    માટે (SMRange R : Ranges) {
+      જો (!R.isValid())
+        ચાલુ;
 
       // If the line doesn't contain any part of the range, then ignore it.
-      if (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
-        continue;
+      જો (R.Start.getPointer() > લીટી_End || R.End.getPointer() < લીટી_Start)
+        ચાલુ;
 
       // Ignore pieces of the range that go onto other lines.
-      if (R.Start.getPointer() < LineStart)
-        R.Start = SMLoc::getFromPointer(LineStart);
-      if (R.End.getPointer() > LineEnd)
-        R.End = SMLoc::getFromPointer(LineEnd);
+      જો (R.Start.getPointer() < લીટી_Start)
+        R.Start = SMLoc::getFromPointer(લીટી_Start);
+      જો (R.End.getPointer() > લીટી_End)
+        R.End = SMLoc::getFromPointer(લીટી_End);
 
       // Translate from SMLoc ranges to column ranges.
       // FIXME: Handle multibyte characters.
-      ColRanges.push_back(std::make_pair(R.Start.getPointer() - LineStart,
-                                         R.End.getPointer() - LineStart));
+      ColRanges.ધકેલો_back(std::make_pair(R.Start.getPointer() - લીટી_Start,
+                                         R.End.getPointer() - લીટી_Start));
     }
 
-    LineAndCol = getLineAndColumn(Loc, CurBuf);
+    લીટી_And_Col = get_લીટી_And_Column(Loc, CurBuf);
   }
 
-  return SMDiagnostic(*this, Loc, BufferID, LineAndCol.first,
-                      LineAndCol.second - 1, Kind, Msg.str(), LineStr,
+  પાછા SMDiagnostic(*આ, Loc, BufferID, લીટી_And_Col.first,
+                      લીટી_And_Col.second - 1, Kind, સંદેશ_2.str(), લીટી_Str,
                       ColRanges, FixIts);
 }
 
-void SourceMgr::PrintMessage(raw_ostream &OS, const SMDiagnostic &Diagnostic,
-                             bool ShowColors) const {
+શૂન્ય SourceMgr::PrintMessage(raw_ostream &OS, અચલ SMDiagnostic &Diagnostic,
+                             તાર્કિક ShowColors) અચલ {
   // Report the message with the diagnostic handler if present.
-  if (DiagHandler) {
+  જો (DiagHandler) {
     DiagHandler(Diagnostic, DiagContext);
-    return;
+    પાછા;
   }
 
-  if (Diagnostic.getLoc().isValid()) {
+  જો (Diagnostic.getLoc().isValid()) {
     unsigned CurBuf = FindBufferContainingLoc(Diagnostic.getLoc());
-    assert(CurBuf && "Invalid or unspecified location!");
-    PrintIncludeStack(getBufferInfo(CurBuf).IncludeLoc, OS);
+    પ્રતિજ્ઞા(CurBuf && "Invalid or unspecified location!");
+    Print_Include_ઢગલો(getBufferInfo(CurBuf).IncludeLoc, OS);
   }
 
   Diagnostic.print(nullptr, OS, ShowColors);
 }
 
-void SourceMgr::PrintMessage(raw_ostream &OS, SMLoc Loc,
-                             SourceMgr::DiagKind Kind, const Twine &Msg,
+શૂન્ય SourceMgr::PrintMessage(raw_ostream &OS, SMLoc Loc,
+                             SourceMgr::DiagKind Kind, અચલ Twine &સંદેશ_2,
                              ArrayRef<SMRange> Ranges, ArrayRef<SMFixIt> FixIts,
-                             bool ShowColors) const {
-  PrintMessage(OS, GetMessage(Loc, Kind, Msg, Ranges, FixIts), ShowColors);
+                             તાર્કિક ShowColors) અચલ {
+  PrintMessage(OS, GetMessage(Loc, Kind, સંદેશ_2, Ranges, FixIts), ShowColors);
 }
 
-void SourceMgr::PrintMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
-                             const Twine &Msg, ArrayRef<SMRange> Ranges,
-                             ArrayRef<SMFixIt> FixIts, bool ShowColors) const {
-  PrintMessage(errs(), Loc, Kind, Msg, Ranges, FixIts, ShowColors);
+શૂન્ય SourceMgr::PrintMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
+                             અચલ Twine &સંદેશ_2, ArrayRef<SMRange> Ranges,
+                             ArrayRef<SMFixIt> FixIts, તાર્કિક ShowColors) અચલ {
+  PrintMessage(errs(), Loc, Kind, સંદેશ_2, Ranges, FixIts, ShowColors);
 }
 
 //===----------------------------------------------------------------------===//
 // SMFixIt Implementation
 //===----------------------------------------------------------------------===//
 
-SMFixIt::SMFixIt(SMRange R, const Twine &Replacement)
+SMFixIt::SMFixIt(SMRange R, અચલ Twine &Replacement)
     : Range(R), Text(Replacement.str()) {
-  assert(R.isValid());
+  પ્રતિજ્ઞા(R.isValid());
 }
 
 //===----------------------------------------------------------------------===//
 // SMDiagnostic Implementation
 //===----------------------------------------------------------------------===//
 
-SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLoc L, StringRef FN, int Line,
-                           int Col, SourceMgr::DiagKind Kind, StringRef Msg,
-                           StringRef LineStr,
+SMDiagnostic::SMDiagnostic(અચલ SourceMgr &sm, SMLoc L, StringRef FN, પૂર્ણાંક લીટી,
+                           પૂર્ણાંક Col, SourceMgr::DiagKind Kind, StringRef સંદેશ_2,
+                           StringRef લીટી_Str,
                            ArrayRef<std::pair<unsigned, unsigned>> Ranges,
                            ArrayRef<SMFixIt> Hints)
-    : SM(&sm), Loc(L), Filename(std::string(FN)), LineNo(Line), ColumnNo(Col),
-      Kind(Kind), Message(Msg), LineContents(LineStr), Ranges(Ranges.vec()),
+    : SM(&sm), Loc(L), Filename(std::string(FN)), લીટી_No(લીટી), ColumnNo(Col),
+      Kind(Kind), Message(સંદેશ_2), લીટી_Contents(લીટી_Str), Ranges(Ranges.vec()),
       FixIts(Hints) {
   llvm::sort(FixIts);
 }
 
-static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
+સ્થિર શૂન્ય build_Fix_It_લીટી(std::string &Caret_લીટી, std::string &Fix_It_લીટી,
                            ArrayRef<SMFixIt> FixIts,
-                           ArrayRef<char> SourceLine) {
-  if (FixIts.empty())
-    return;
+                           ArrayRef<અક્ષર> Source_લીટી) {
+  જો (FixIts.empty())
+    પાછા;
 
-  const char *LineStart = SourceLine.begin();
-  const char *LineEnd = SourceLine.end();
+  અચલ અક્ષર *લીટી_Start = Source_લીટી.begin();
+  અચલ અક્ષર *લીટી_End = Source_લીટી.end();
 
   size_t PrevHintEndCol = 0;
 
-  for (const llvm::SMFixIt &Fixit : FixIts) {
+  માટે (અચલ llvm::SMFixIt &Fixit : FixIts) {
     // If the fixit contains a newline or tab, ignore it.
-    if (Fixit.getText().find_first_of("\n\r\t") != StringRef::npos)
-      continue;
+    જો (Fixit.getText().find_first_of("\n\r\t") != StringRef::npos)
+      ચાલુ;
 
     SMRange R = Fixit.getRange();
 
     // If the line doesn't contain any part of the range, then ignore it.
-    if (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
-      continue;
+    જો (R.Start.getPointer() > લીટી_End || R.End.getPointer() < લીટી_Start)
+      ચાલુ;
 
     // Translate from SMLoc to column.
     // Ignore pieces of the range that go onto other lines.
     // FIXME: Handle multibyte characters in the source line.
     unsigned FirstCol;
-    if (R.Start.getPointer() < LineStart)
+    જો (R.Start.getPointer() < લીટી_Start)
       FirstCol = 0;
-    else
-      FirstCol = R.Start.getPointer() - LineStart;
+    નહીંતર
+      FirstCol = R.Start.getPointer() - લીટી_Start;
 
     // If we inserted a long previous hint, push this one forwards, and add
     // an extra space to show that this is not part of the previous
@@ -464,191 +464,191 @@ static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
     // Note that if this hint is located immediately after the previous
     // hint, no space will be added, since the location is more important.
     unsigned HintCol = FirstCol;
-    if (HintCol < PrevHintEndCol)
+    જો (HintCol < PrevHintEndCol)
       HintCol = PrevHintEndCol + 1;
 
     // FIXME: This assertion is intended to catch unintended use of multibyte
     // characters in fixits. If we decide to do this, we'll have to track
     // separate byte widths for the source and fixit lines.
-    assert((size_t)sys::locale::columnWidth(Fixit.getText()) ==
+    પ્રતિજ્ઞા((size_t)sys::locale::columnWidth(Fixit.getText()) ==
            Fixit.getText().size());
 
     // This relies on one byte per column in our fixit hints.
     unsigned LastColumnModified = HintCol + Fixit.getText().size();
-    if (LastColumnModified > FixItLine.size())
-      FixItLine.resize(LastColumnModified, ' ');
+    જો (LastColumnModified > Fix_It_લીટી.size())
+      Fix_It_લીટી.resize(LastColumnModified, ' ');
 
-    llvm::copy(Fixit.getText(), FixItLine.begin() + HintCol);
+    llvm::copy(Fixit.getText(), Fix_It_લીટી.begin() + HintCol);
 
     PrevHintEndCol = LastColumnModified;
 
     // For replacements, mark the removal range with '~'.
     // FIXME: Handle multibyte characters in the source line.
     unsigned LastCol;
-    if (R.End.getPointer() >= LineEnd)
-      LastCol = LineEnd - LineStart;
-    else
-      LastCol = R.End.getPointer() - LineStart;
+    જો (R.End.getPointer() >= લીટી_End)
+      LastCol = લીટી_End - લીટી_Start;
+    નહીંતર
+      LastCol = R.End.getPointer() - લીટી_Start;
 
-    std::fill(&CaretLine[FirstCol], &CaretLine[LastCol], '~');
+    std::fill(&Caret_લીટી[FirstCol], &Caret_લીટી[LastCol], '~');
   }
 }
 
-static void printSourceLine(raw_ostream &S, StringRef LineContents) {
+સ્થિર શૂન્ય print_Source_લીટી(raw_ostream &S, StringRef લીટી_Contents) {
   // Print out the source line one character at a time, so we can expand tabs.
-  for (unsigned i = 0, e = LineContents.size(), OutCol = 0; i != e; ++i) {
-    size_t NextTab = LineContents.find('\t', i);
+  માટે (unsigned i = 0, e = લીટી_Contents.size(), OutCol = 0; i != e; ++i) {
+    size_t NextTab = લીટી_Contents.find('\t', i);
     // If there were no tabs left, print the rest, we are done.
-    if (NextTab == StringRef::npos) {
-      S << LineContents.drop_front(i);
-      break;
+    જો (NextTab == StringRef::npos) {
+      S << લીટી_Contents.drop_front(i);
+      તોડો;
     }
 
     // Otherwise, print from i to NextTab.
-    S << LineContents.slice(i, NextTab);
+    S << લીટી_Contents.slice(i, NextTab);
     OutCol += NextTab - i;
     i = NextTab;
 
     // If we have a tab, emit at least one space, then round up to 8 columns.
-    do {
+    કરો {
       S << ' ';
       ++OutCol;
-    } while ((OutCol % TabStop) != 0);
+    } જ્યારે ((OutCol % TabStop) != 0);
   }
   S << '\n';
 }
 
-static bool isNonASCII(char c) { return c & 0x80; }
+સ્થિર તાર્કિક isNonASCII(અક્ષર c) { પાછા c & 0x80; }
 
-void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
-                         bool ShowKindLabel, bool ShowLocation) const {
+શૂન્ય SMDiagnostic::print(અચલ અક્ષર *ProgName, raw_ostream &OS, તાર્કિક ShowColors,
+                         તાર્કિક ShowKindLabel, તાર્કિક ShowLocation) અચલ {
   ColorMode Mode = ShowColors ? ColorMode::Auto : ColorMode::Disable;
 
   {
-    WithColor S(OS, raw_ostream::SAVEDCOLOR, true, false, Mode);
+    WithColor S(OS, raw_ostream::SAVEDCOLOR, સાચું, ખોટું, Mode);
 
-    if (ProgName && ProgName[0])
+    જો (ProgName && ProgName[0])
       S << ProgName << ": ";
 
-    if (ShowLocation && !Filename.empty()) {
-      if (Filename == "-")
+    જો (ShowLocation && !Filename.empty()) {
+      જો (Filename == "-")
         S << "<stdin>";
-      else
+      નહીંતર
         S << Filename;
 
-      if (LineNo != -1) {
-        S << ':' << LineNo;
-        if (ColumnNo != -1)
+      જો (લીટી_No != -1) {
+        S << ':' << લીટી_No;
+        જો (ColumnNo != -1)
           S << ':' << (ColumnNo + 1);
       }
       S << ": ";
     }
   }
 
-  if (ShowKindLabel) {
-    switch (Kind) {
-    case SourceMgr::DK_Error:
+  જો (ShowKindLabel) {
+    પસંદગી (Kind) {
+    સ્થિતિ SourceMgr::DK_Error:
       WithColor::error(OS, "", !ShowColors);
-      break;
-    case SourceMgr::DK_Warning:
+      તોડો;
+    સ્થિતિ SourceMgr::DK_Warning:
       WithColor::warning(OS, "", !ShowColors);
-      break;
-    case SourceMgr::DK_Note:
+      તોડો;
+    સ્થિતિ SourceMgr::DK_Note:
       WithColor::note(OS, "", !ShowColors);
-      break;
-    case SourceMgr::DK_Remark:
+      તોડો;
+    સ્થિતિ SourceMgr::DK_Remark:
       WithColor::remark(OS, "", !ShowColors);
-      break;
+      તોડો;
     }
   }
 
-  WithColor(OS, raw_ostream::SAVEDCOLOR, true, false, Mode) << Message << '\n';
+  WithColor(OS, raw_ostream::SAVEDCOLOR, સાચું, ખોટું, Mode) << Message << '\n';
 
-  if (LineNo == -1 || ColumnNo == -1)
-    return;
+  જો (લીટી_No == -1 || ColumnNo == -1)
+    પાછા;
 
   // FIXME: If there are multibyte or multi-column characters in the source, all
   // our ranges will be wrong. To do this properly, we'll need a byte-to-column
   // map like Clang's TextDiagnostic. For now, we'll just handle tabs by
   // expanding them later, and bail out rather than show incorrect ranges and
   // misaligned fixits for any other odd characters.
-  if (any_of(LineContents, isNonASCII)) {
-    printSourceLine(OS, LineContents);
-    return;
+  જો (any_of(લીટી_Contents, isNonASCII)) {
+    print_Source_લીટી(OS, લીટી_Contents);
+    પાછા;
   }
-  size_t NumColumns = LineContents.size();
+  size_t અંક_Columns = લીટી_Contents.size();
 
   // Build the line with the caret and ranges.
-  std::string CaretLine(NumColumns + 1, ' ');
+  std::string Caret_લીટી(અંક_Columns + 1, ' ');
 
   // Expand any ranges.
-  for (const std::pair<unsigned, unsigned> &R : Ranges)
-    std::fill(&CaretLine[R.first],
-              &CaretLine[std::min((size_t)R.second, CaretLine.size())], '~');
+  માટે (અચલ std::pair<unsigned, unsigned> &R : Ranges)
+    std::fill(&Caret_લીટી[R.first],
+              &Caret_લીટી[std::min((size_t)R.second, Caret_લીટી.size())], '~');
 
   // Add any fix-its.
   // FIXME: Find the beginning of the line properly for multibyte characters.
-  std::string FixItInsertionLine;
-  buildFixItLine(CaretLine, FixItInsertionLine, FixIts,
-                 ArrayRef(Loc.getPointer() - ColumnNo, LineContents.size()));
+  std::string Fix_It_Insertion_લીટી;
+  build_Fix_It_લીટી(Caret_લીટી, Fix_It_Insertion_લીટી, FixIts,
+                 ArrayRef(Loc.getPointer() - ColumnNo, લીટી_Contents.size()));
 
   // Finally, plop on the caret.
-  if (unsigned(ColumnNo) <= NumColumns)
-    CaretLine[ColumnNo] = '^';
-  else
-    CaretLine[NumColumns] = '^';
+  જો (unsigned(ColumnNo) <= અંક_Columns)
+    Caret_લીટી[ColumnNo] = '^';
+  નહીંતર
+    Caret_લીટી[અંક_Columns] = '^';
 
   // ... and remove trailing whitespace so the output doesn't wrap for it.  We
   // know that the line isn't completely empty because it has the caret in it at
   // least.
-  CaretLine.erase(CaretLine.find_last_not_of(' ') + 1);
+  Caret_લીટી.erase(Caret_લીટી.find_last_not_of(' ') + 1);
 
-  printSourceLine(OS, LineContents);
+  print_Source_લીટી(OS, લીટી_Contents);
 
   {
     ColorMode Mode = ShowColors ? ColorMode::Auto : ColorMode::Disable;
-    WithColor S(OS, raw_ostream::GREEN, true, false, Mode);
+    WithColor S(OS, raw_ostream::GREEN, સાચું, ખોટું, Mode);
 
     // Print out the caret line, matching tabs in the source line.
-    for (unsigned i = 0, e = CaretLine.size(), OutCol = 0; i != e; ++i) {
-      if (i >= LineContents.size() || LineContents[i] != '\t') {
-        S << CaretLine[i];
+    માટે (unsigned i = 0, e = Caret_લીટી.size(), OutCol = 0; i != e; ++i) {
+      જો (i >= લીટી_Contents.size() || લીટી_Contents[i] != '\t') {
+        S << Caret_લીટી[i];
         ++OutCol;
-        continue;
+        ચાલુ;
       }
 
       // Okay, we have a tab.  Insert the appropriate number of characters.
-      do {
-        S << CaretLine[i];
+      કરો {
+        S << Caret_લીટી[i];
         ++OutCol;
-      } while ((OutCol % TabStop) != 0);
+      } જ્યારે ((OutCol % TabStop) != 0);
     }
     S << '\n';
   }
 
   // Print out the replacement line, matching tabs in the source line.
-  if (FixItInsertionLine.empty())
-    return;
+  જો (Fix_It_Insertion_લીટી.empty())
+    પાછા;
 
-  for (size_t i = 0, e = FixItInsertionLine.size(), OutCol = 0; i < e; ++i) {
-    if (i >= LineContents.size() || LineContents[i] != '\t') {
-      OS << FixItInsertionLine[i];
+  માટે (size_t i = 0, e = Fix_It_Insertion_લીટી.size(), OutCol = 0; i < e; ++i) {
+    જો (i >= લીટી_Contents.size() || લીટી_Contents[i] != '\t') {
+      OS << Fix_It_Insertion_લીટી[i];
       ++OutCol;
-      continue;
+      ચાલુ;
     }
 
     // Okay, we have a tab.  Insert the appropriate number of characters.
-    do {
-      OS << FixItInsertionLine[i];
+    કરો {
+      OS << Fix_It_Insertion_લીટી[i];
       // FIXME: This is trying not to break up replacements, but then to re-sync
       // with the tabs between replacements. This will fail, though, if two
       // fix-it replacements are exactly adjacent, or if a fix-it contains a
       // space. Really we should be precomputing column widths, which we'll
       // need anyway for multibyte chars.
-      if (FixItInsertionLine[i] != ' ')
+      જો (Fix_It_Insertion_લીટી[i] != ' ')
         ++i;
       ++OutCol;
-    } while (((OutCol % TabStop) != 0) && i != e);
+    } જ્યારે (((OutCol % TabStop) != 0) && i != e);
   }
   OS << '\n';
 }

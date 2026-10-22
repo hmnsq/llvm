@@ -35,38 +35,38 @@
  *	@(#)regfree.c	8.3 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#અન્તર્ભાવ "regutils.h"
+#અન્તર્ભાવ "regex2.h"
 
 /*
  - llvm_regfree - free everything
  */
-void
+શૂન્ય
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	સંરચના re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	જો (preg->re_magic != MAGIC1)	/* oops */
+		પાછા;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	જો (g == ખાલી || g->magic != MAGIC2)	/* oops again */
+		પાછા;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
-		free(g->must);
-	free((char *)g);
+	જો (g->strip != ખાલી)
+		મુક્ત((અક્ષર *)g->strip);
+	જો (g->sets != ખાલી)
+		મુક્ત((અક્ષર *)g->sets);
+	જો (g->setbits != ખાલી)
+		મુક્ત((અક્ષર *)g->setbits);
+	જો (g->must != ખાલી)
+		મુક્ત(g->must);
+	મુક્ત((અક્ષર *)g);
 }

@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ExtensibleRTTI.h"
+#અન્તર્ભાવ "llvm/Support/ExtensibleRTTI.h"
 
-void llvm::RTTIRoot::anchor() {}
-char llvm::RTTIRoot::ID = 0;
+શૂન્ય llvm::RTTIRoot::anchor() {}
+અક્ષર llvm::RTTIRoot::ID = 0;

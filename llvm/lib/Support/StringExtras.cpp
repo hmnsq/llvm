@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
+#અન્તર્ભાવ "llvm/ADT/StringExtras.h"
+#અન્તર્ભાવ "llvm/ADT/SmallVector.h"
+#અન્તર્ભાવ "llvm/Support/raw_ostream.h"
+#અન્તર્ભાવ <cctype>
 
-using namespace llvm;
+using નામાકાશ llvm;
 
 /// getToken - This function extracts one token from source, ignoring any
 /// leading characters that appear in the Delimiters string, and ending the
@@ -31,103 +31,103 @@ std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
   // Find the next occurrence of the delimiter.
   StringRef::size_type End = Source.find_first_of(Delimiters, Start);
 
-  return {Source.slice(Start, End), Source.substr(End)};
+  પાછા {Source.slice(Start, End), Source.substr(End)};
 }
 
 /// SplitString - Split up the specified string according to the specified
 /// delimiters, appending the result fragments to the output list.
-void llvm::SplitString(StringRef Source,
+શૂન્ય llvm::SplitString(StringRef Source,
                        SmallVectorImpl<StringRef> &OutFragments,
                        StringRef Delimiters) {
   std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
-    OutFragments.push_back(S.first);
+  જ્યારે (!S.first.empty()) {
+    OutFragments.ધકેલો_back(S.first);
     S = getToken(S.second, Delimiters);
   }
 }
 
-void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned char C : Name) {
-    if (C == '\\')
+શૂન્ય llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
+  માટે (unsigned અક્ષર C : Name) {
+    જો (C == '\\')
       Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
+    નહીંતર જો (isPrint(C) && C != '"')
       Out << C;
-    else
+    નહીંતર
       Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
+શૂન્ય llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
+  માટે (અક્ષર C : String) {
+    જો (C == '&')
       Out << "&amp;";
-    else if (C == '<')
+    નહીંતર જો (C == '<')
       Out << "&lt;";
-    else if (C == '>')
+    નહીંતર જો (C == '>')
       Out << "&gt;";
-    else if (C == '\"')
+    નહીંતર જો (C == '\"')
       Out << "&quot;";
-    else if (C == '\'')
+    નહીંતર જો (C == '\'')
       Out << "&apos;";
-    else
+    નહીંતર
       Out << C;
   }
 }
 
-void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
+શૂન્ય llvm::printLowerCase(StringRef String, raw_ostream &Out) {
+  માટે (અચલ અક્ષર C : String)
     Out << toLower(C);
 }
 
-void llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
-  for (unsigned char C : String) {
-    if (isAlnum(C) || StringRef("-_.~").contains(C))
+શૂન્ય llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
+  માટે (unsigned અક્ષર C : String) {
+    જો (isAlnum(C) || StringRef("-_.~").contains(C))
       Out << C;
-    else
+    નહીંતર
       Out << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+std::string llvm::convertToSnakeFromCamelCase(StringRef આગત_2) {
+  જો (આગત_2.empty())
+    પાછા "";
 
   std::string snakeCase;
-  snakeCase.reserve(input.size());
-  auto check = [&input](size_t j, function_ref<bool(int)> predicate) {
-    return j < input.size() && predicate(input[j]);
+  snakeCase.reserve(આગત_2.size());
+  auto check = [&આગત_2](size_t j, function_ref<તાર્કિક(પૂર્ણાંક)> predicate) {
+    પાછા j < આગત_2.size() && predicate(આગત_2[j]);
   };
-  for (size_t i = 0; i < input.size(); ++i) {
-    snakeCase.push_back(tolower(input[i]));
+  માટે (size_t i = 0; i < આગત_2.size(); ++i) {
+    snakeCase.ધકેલો_back(tolower(આગત_2[i]));
     // Handles "runs" of capitals, such as in OPName -> op_name.
-    if (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
-      snakeCase.push_back('_');
-    if ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
-      snakeCase.push_back('_');
+    જો (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
+      snakeCase.ધકેલો_back('_');
+    જો ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
+      snakeCase.ધકેલો_back('_');
   }
-  return snakeCase;
+  પાછા snakeCase;
 }
 
-std::string llvm::convertToCamelFromSnakeCase(StringRef input,
-                                              bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+std::string llvm::convertToCamelFromSnakeCase(StringRef આગત_2,
+                                              તાર્કિક capitalizeFirst) {
+  જો (આગત_2.empty())
+    પાછા "";
 
   std::string output;
-  output.reserve(input.size());
+  output.reserve(આગત_2.size());
 
   // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
-    output.push_back(llvm::toUpper(input.front()));
-  else
-    output.push_back(input.front());
+  જો (capitalizeFirst && std::islower(આગત_2.front()))
+    output.ધકેલો_back(llvm::toUpper(આગત_2.front()));
+  નહીંતર
+    output.ધકેલો_back(આગત_2.front());
 
   // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
-      output.push_back(llvm::toUpper(input[++pos]));
-    else
-      output.push_back(input[pos]);
+  માટે (size_t pos = 1, e = આગત_2.size(); pos < e; ++pos) {
+    જો (આગત_2[pos] == '_' && pos != (e - 1) && std::islower(આગત_2[pos + 1]))
+      output.ધકેલો_back(llvm::toUpper(આગત_2[++pos]));
+    નહીંતર
+      output.ધકેલો_back(આગત_2[pos]);
   }
-  return output;
+  પાછા output;
 }

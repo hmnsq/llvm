@@ -40,7 +40,7 @@
 
 /* utility definitions */
 #define	NC		(CHAR_MAX - CHAR_MIN + 1)
-typedef unsigned char uch;
+પ્રકારવ્યાખ્યા unsigned અક્ષર uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */
 #ifndef REDEBUG
@@ -48,7 +48,7 @@ typedef unsigned char uch;
 #define	NDEBUG	/* no assertions please */
 #endif
 #endif
-#include <assert.h>
+#અન્તર્ભાવ <assert.h>
 
 /* for old systems with bcopy() but no memmove() */
 #ifdef USEBCOPY

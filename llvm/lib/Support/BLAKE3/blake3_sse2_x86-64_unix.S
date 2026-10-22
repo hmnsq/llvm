@@ -29,12 +29,12 @@ HIDDEN blake3_compress_in_place_sse2
 HIDDEN _blake3_compress_in_place_sse2
 HIDDEN blake3_compress_xof_sse2
 HIDDEN _blake3_compress_xof_sse2
-.global blake3_hash_many_sse2
-.global _blake3_hash_many_sse2
-.global blake3_compress_in_place_sse2
-.global _blake3_compress_in_place_sse2
-.global blake3_compress_xof_sse2
-.global _blake3_compress_xof_sse2
+.વૈશ્વિક blake3_hash_many_sse2
+.વૈશ્વિક _blake3_hash_many_sse2
+.વૈશ્વિક blake3_compress_in_place_sse2
+.વૈશ્વિક _blake3_compress_in_place_sse2
+.વૈશ્વિક blake3_compress_xof_sse2
+.વૈશ્વિક _blake3_compress_xof_sse2
 #ifdef __APPLE__
 .text
 #else

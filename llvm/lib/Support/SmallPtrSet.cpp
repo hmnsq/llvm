@@ -11,79 +11,79 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/DenseMapInfo.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/MemAlloc.h"
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
+#અન્તર્ભાવ "llvm/ADT/SmallPtrSet.h"
+#અન્તર્ભાવ "llvm/ADT/DenseMapInfo.h"
+#અન્તર્ભાવ "llvm/ADT/STLExtras.h"
+#અન્તર્ભાવ "llvm/Support/MathExtras.h"
+#અન્તર્ભાવ "llvm/Support/MemAlloc.h"
+#અન્તર્ભાવ <algorithm>
+#અન્તર્ભાવ <cassert>
+#અન્તર્ભાવ <cstdlib>
 
-using namespace llvm;
+using નામાકાશ llvm;
 
-void SmallPtrSetImplBase::shrink_and_clear() {
-  assert(!isSmall() && "Can't shrink a small set!");
-  free(CurArray);
+શૂન્ય SmallPtrSetImplBase::shrink_and_clear() {
+  પ્રતિજ્ઞા(!isSmall() && "Can't shrink a small set!");
+  મુક્ત(CurArray);
 
   // Reduce the number of buckets.
   unsigned Size = size();
   CurArraySize = Size > 16 ? 1 << (Log2_32_Ceil(Size) + 1) : 32;
-  NumEntries = 0;
+  અંક_Entries = 0;
 
   // Install the new array.  Clear all the buckets to empty.
-  CurArray = (const void**)safe_malloc(sizeof(void*) * CurArraySize);
+  CurArray = (અચલ શૂન્ય**)safe_malloc(કદ(શૂન્ય*) * CurArraySize);
 
-  memset(CurArray, -1, CurArraySize*sizeof(void*));
+  memset(CurArray, -1, CurArraySize*કદ(શૂન્ય*));
 }
 
-std::pair<const void *const *, bool>
-SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
-  if (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
+std::pair<અચલ શૂન્ય *અચલ *, તાર્કિક>
+SmallPtrSetImplBase::ઉમેરો_imp_big(અચલ શૂન્ય *Ptr) {
+  જો (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
     // If more than 2/3 of the array is full, grow.
     Grow(CurArraySize < 64 ? 128 : CurArraySize * 2);
   }
 
   // Find the first empty bucket or Ptr itself on the probe chain.
   unsigned Mask = CurArraySize - 1;
-  unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  const void **Array = CurArray;
-  while (Array[I] != getEmptyMarker()) {
-    if (Array[I] == Ptr)
-      return {Array + I, false};
+  unsigned I = DenseMapInfo<શૂન્ય *>::get_Hash_કિંમત(Ptr) & Mask;
+  અચલ શૂન્ય **Array = CurArray;
+  જ્યારે (Array[I] != getEmptyMarker()) {
+    જો (Array[I] == Ptr)
+      પાછા {Array + I, ખોટું};
     I = (I + 1) & Mask;
   }
 
   // Insert into the empty bucket.
-  ++NumEntries;
+  ++અંક_Entries;
   Array[I] = Ptr;
   incrementEpoch();
-  return {Array + I, true};
+  પાછા {Array + I, સાચું};
 }
 
-const void *const *SmallPtrSetImplBase::doFind(const void *Ptr) const {
+અચલ શૂન્ય *અચલ *SmallPtrSetImplBase::doFind(અચલ શૂન્ય *Ptr) અચલ {
   unsigned Mask = CurArraySize - 1;
-  unsigned BucketNo = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  while (true) {
-    const void *const *Bucket = CurArray + BucketNo;
-    if (LLVM_LIKELY(*Bucket == Ptr))
-      return Bucket;
-    if (LLVM_LIKELY(*Bucket == getEmptyMarker()))
-      return nullptr;
+  unsigned BucketNo = DenseMapInfo<શૂન્ય *>::get_Hash_કિંમત(Ptr) & Mask;
+  જ્યારે (સાચું) {
+    અચલ શૂન્ય *અચલ *Bucket = CurArray + BucketNo;
+    જો (LLVM_LIKELY(*Bucket == Ptr))
+      પાછા Bucket;
+    જો (LLVM_LIKELY(*Bucket == getEmptyMarker()))
+      પાછા nullptr;
     BucketNo = (BucketNo + 1) & Mask;
   }
 }
 
-void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
+શૂન્ય SmallPtrSetImplBase::eraseFromBucket(અચલ શૂન્ય **Bucket) {
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
   unsigned Mask = CurArraySize - 1;
   unsigned I = Bucket - CurArray;
   unsigned J = I;
-  const void *Empty = getEmptyMarker();
-  while ((J = (J + 1) & Mask), CurArray[J] != Empty) {
-    auto Ideal = DenseMapInfo<void *>::getHashValue(CurArray[J]);
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+  અચલ શૂન્ય *Empty = getEmptyMarker();
+  જ્યારે ((J = (J + 1) & Mask), CurArray[J] != Empty) {
+    auto Ideal = DenseMapInfo<શૂન્ય *>::get_Hash_કિંમત(CurArray[J]);
+    જો (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       CurArray[I] = CurArray[J];
       I = J;
     }
@@ -93,178 +93,178 @@ void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
 
 /// Grow - Allocate a larger backing store for the buckets and move it over.
 ///
-void SmallPtrSetImplBase::Grow(unsigned NewSize) {
+શૂન્ય SmallPtrSetImplBase::Grow(unsigned NewSize) {
   auto OldBuckets = buckets();
-  bool WasSmall = isSmall();
+  તાર્કિક WasSmall = isSmall();
 
   // Install the new array.  Clear all the buckets to empty.
-  const void **NewBuckets = (const void**) safe_malloc(sizeof(void*) * NewSize);
+  અચલ શૂન્ય **NewBuckets = (અચલ શૂન્ય**) safe_malloc(કદ(શૂન્ય*) * NewSize);
 
   // Reset member only if memory was allocated successfully
   CurArray = NewBuckets;
   CurArraySize = NewSize;
-  memset(CurArray, -1, NewSize*sizeof(void*));
+  memset(CurArray, -1, NewSize*કદ(શૂન્ય*));
 
   // Copy over all valid entries.
   unsigned Mask = CurArraySize - 1;
-  for (const void *Ptr : OldBuckets) {
-    if (Ptr == getEmptyMarker())
-      continue;
+  માટે (અચલ શૂન્ય *Ptr : OldBuckets) {
+    જો (Ptr == getEmptyMarker())
+      ચાલુ;
     // Find the first empty bucket on this key's probe chain; there is no equal
     // key, so nothing to compare against.
-    unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-    while (NewBuckets[I] != getEmptyMarker())
+    unsigned I = DenseMapInfo<શૂન્ય *>::get_Hash_કિંમત(Ptr) & Mask;
+    જ્યારે (NewBuckets[I] != getEmptyMarker())
       I = (I + 1) & Mask;
     NewBuckets[I] = Ptr;
   }
 
-  if (!WasSmall)
-    free(OldBuckets.begin());
-  IsSmall = false;
+  જો (!WasSmall)
+    મુક્ત(OldBuckets.begin());
+  IsSmall = ખોટું;
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
-                                         const SmallPtrSetImplBase &that) {
+SmallPtrSetImplBase::SmallPtrSetImplBase(અચલ શૂન્ય **SmallStorage,
+                                         અચલ SmallPtrSetImplBase &that) {
   IsSmall = that.isSmall();
-  if (IsSmall) {
+  જો (IsSmall) {
     // If we're becoming small, prepare to insert into our stack space
     CurArray = SmallStorage;
-  } else {
+  } નહીંતર {
     // Otherwise, allocate new heap space (unless we were the same size)
-    CurArray = (const void**)safe_malloc(sizeof(void*) * that.CurArraySize);
+    CurArray = (અચલ શૂન્ય**)safe_malloc(કદ(શૂન્ય*) * that.CurArraySize);
   }
 
   // Copy over the that array.
   copyHelper(that);
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
+SmallPtrSetImplBase::SmallPtrSetImplBase(અચલ શૂન્ય **SmallStorage,
                                          unsigned SmallSize,
-                                         const void **RHSSmallStorage,
+                                         અચલ શૂન્ય **RHSSmallStorage,
                                          SmallPtrSetImplBase &&that) {
   moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(that));
 }
 
-void SmallPtrSetImplBase::copyFrom(const void **SmallStorage,
-                                   const SmallPtrSetImplBase &RHS) {
-  assert(&RHS != this && "Self-copy should be handled by the caller.");
+શૂન્ય SmallPtrSetImplBase::copyFrom(અચલ શૂન્ય **SmallStorage,
+                                   અચલ SmallPtrSetImplBase &RHS) {
+  પ્રતિજ્ઞા(&RHS != આ && "Self-copy should be handled by the caller.");
 
-  if (isSmall() && RHS.isSmall())
-    assert(CurArraySize == RHS.CurArraySize &&
+  જો (isSmall() && RHS.isSmall())
+    પ્રતિજ્ઞા(CurArraySize == RHS.CurArraySize &&
            "Cannot assign sets with different small sizes");
 
   // If we're becoming small, prepare to insert into our stack space
-  if (RHS.isSmall()) {
-    if (!isSmall())
-      free(CurArray);
+  જો (RHS.isSmall()) {
+    જો (!isSmall())
+      મુક્ત(CurArray);
     CurArray = SmallStorage;
-    IsSmall = true;
+    IsSmall = સાચું;
     // Otherwise, allocate new heap space (unless we were the same size)
-  } else if (CurArraySize != RHS.CurArraySize) {
-    if (isSmall())
-      CurArray = (const void**)safe_malloc(sizeof(void*) * RHS.CurArraySize);
-    else {
-      const void **T = (const void**)safe_realloc(CurArray,
-                                             sizeof(void*) * RHS.CurArraySize);
+  } નહીંતર જો (CurArraySize != RHS.CurArraySize) {
+    જો (isSmall())
+      CurArray = (અચલ શૂન્ય**)safe_malloc(કદ(શૂન્ય*) * RHS.CurArraySize);
+    નહીંતર {
+      અચલ શૂન્ય **T = (અચલ શૂન્ય**)safe_realloc(CurArray,
+                                             કદ(શૂન્ય*) * RHS.CurArraySize);
       CurArray = T;
     }
-    IsSmall = false;
+    IsSmall = ખોટું;
   }
 
   copyHelper(RHS);
 }
 
-void SmallPtrSetImplBase::copyHelper(const SmallPtrSetImplBase &RHS) {
+શૂન્ય SmallPtrSetImplBase::copyHelper(અચલ SmallPtrSetImplBase &RHS) {
   // Copy over the new array size
   CurArraySize = RHS.CurArraySize;
 
   // Copy over the contents from the other set
   llvm::copy(RHS.buckets(), CurArray);
 
-  NumEntries = RHS.NumEntries;
+  અંક_Entries = RHS.અંક_Entries;
 }
 
-void SmallPtrSetImplBase::moveFrom(const void **SmallStorage,
+શૂન્ય SmallPtrSetImplBase::moveFrom(અચલ શૂન્ય **SmallStorage,
                                    unsigned SmallSize,
-                                   const void **RHSSmallStorage,
+                                   અચલ શૂન્ય **RHSSmallStorage,
                                    SmallPtrSetImplBase &&RHS) {
-  if (!isSmall())
-    free(CurArray);
+  જો (!isSmall())
+    મુક્ત(CurArray);
   moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(RHS));
 }
 
-void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
+શૂન્ય SmallPtrSetImplBase::moveHelper(અચલ શૂન્ય **SmallStorage,
                                      unsigned SmallSize,
-                                     const void **RHSSmallStorage,
+                                     અચલ શૂન્ય **RHSSmallStorage,
                                      SmallPtrSetImplBase &&RHS) {
-  assert(&RHS != this && "Self-move should be handled by the caller.");
+  પ્રતિજ્ઞા(&RHS != આ && "Self-move should be handled by the caller.");
   incrementEpoch();
   RHS.incrementEpoch();
 
-  if (RHS.isSmall()) {
+  જો (RHS.isSmall()) {
     // Copy a small RHS rather than moving.
     CurArray = SmallStorage;
     llvm::copy(RHS.small_buckets(), CurArray);
-  } else {
+  } નહીંતર {
     CurArray = RHS.CurArray;
     RHS.CurArray = RHSSmallStorage;
   }
 
   // Copy the rest of the trivial members.
   CurArraySize = RHS.CurArraySize;
-  NumEntries = RHS.NumEntries;
+  અંક_Entries = RHS.અંક_Entries;
   IsSmall = RHS.IsSmall;
 
   // Make the RHS small and empty.
   RHS.CurArraySize = SmallSize;
-  RHS.NumEntries = 0;
-  RHS.IsSmall = true;
+  RHS.અંક_Entries = 0;
+  RHS.IsSmall = સાચું;
 }
 
-void SmallPtrSetImplBase::swap(const void **SmallStorage,
-                               const void **RHSSmallStorage,
+શૂન્ય SmallPtrSetImplBase::swap(અચલ શૂન્ય **SmallStorage,
+                               અચલ શૂન્ય **RHSSmallStorage,
                                SmallPtrSetImplBase &RHS) {
-  if (this == &RHS) return;
+  જો (આ == &RHS) પાછા;
   incrementEpoch();
   RHS.incrementEpoch();
 
   // We can only avoid copying elements if neither set is small.
-  if (!this->isSmall() && !RHS.isSmall()) {
-    std::swap(this->CurArray, RHS.CurArray);
-    std::swap(this->CurArraySize, RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+  જો (!આ->isSmall() && !RHS.isSmall()) {
+    std::swap(આ->CurArray, RHS.CurArray);
+    std::swap(આ->CurArraySize, RHS.CurArraySize);
+    std::swap(આ->અંક_Entries, RHS.અંક_Entries);
+    પાછા;
   }
 
   // FIXME: From here on we assume that both sets have the same small size.
 
   // Both a small, just swap the small elements.
-  if (this->isSmall() && RHS.isSmall()) {
-    unsigned MinEntries = std::min(this->NumEntries, RHS.NumEntries);
-    std::swap_ranges(this->CurArray, this->CurArray + MinEntries, RHS.CurArray);
-    if (this->NumEntries > MinEntries) {
-      std::copy(this->CurArray + MinEntries, this->CurArray + this->NumEntries,
+  જો (આ->isSmall() && RHS.isSmall()) {
+    unsigned MinEntries = std::min(આ->અંક_Entries, RHS.અંક_Entries);
+    std::swap_ranges(આ->CurArray, આ->CurArray + MinEntries, RHS.CurArray);
+    જો (આ->અંક_Entries > MinEntries) {
+      std::copy(આ->CurArray + MinEntries, આ->CurArray + આ->અંક_Entries,
                 RHS.CurArray + MinEntries);
-    } else {
-      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.NumEntries,
-                this->CurArray + MinEntries);
+    } નહીંતર {
+      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.અંક_Entries,
+                આ->CurArray + MinEntries);
     }
-    assert(this->CurArraySize == RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+    પ્રતિજ્ઞા(આ->CurArraySize == RHS.CurArraySize);
+    std::swap(આ->અંક_Entries, RHS.અંક_Entries);
+    પાછા;
   }
 
   // If only one side is small, copy the small elements into the large side and
   // move the pointer from the large side to the small side.
-  SmallPtrSetImplBase &SmallSide = this->isSmall() ? *this : RHS;
-  SmallPtrSetImplBase &LargeSide = this->isSmall() ? RHS : *this;
-  const void **LargeSideInlineStorage =
-      this->isSmall() ? RHSSmallStorage : SmallStorage;
+  SmallPtrSetImplBase &SmallSide = આ->isSmall() ? *આ : RHS;
+  SmallPtrSetImplBase &LargeSide = આ->isSmall() ? RHS : *આ;
+  અચલ શૂન્ય **LargeSideInlineStorage =
+      આ->isSmall() ? RHSSmallStorage : SmallStorage;
   llvm::copy(SmallSide.small_buckets(), LargeSideInlineStorage);
   std::swap(LargeSide.CurArraySize, SmallSide.CurArraySize);
-  std::swap(LargeSide.NumEntries, SmallSide.NumEntries);
+  std::swap(LargeSide.અંક_Entries, SmallSide.અંક_Entries);
   SmallSide.CurArray = LargeSide.CurArray;
-  SmallSide.IsSmall = false;
+  SmallSide.IsSmall = ખોટું;
   LargeSide.CurArray = LargeSideInlineStorage;
-  LargeSide.IsSmall = true;
+  LargeSide.IsSmall = સાચું;
 }

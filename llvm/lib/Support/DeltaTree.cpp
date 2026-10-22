@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DeltaTree.h"
-#include "llvm/Support/Casting.h"
-#include <cassert>
-#include <cstring>
+#અન્તર્ભાવ "llvm/ADT/DeltaTree.h"
+#અન્તર્ભાવ "llvm/Support/Casting.h"
+#અન્તર્ભાવ <cassert>
+#અન્તર્ભાવ <cstring>
 
-using namespace llvm;
+using નામાકાશ llvm;
 
 /// The DeltaTree class is a multiway search tree (BTree) structure with some
 /// fancy features.  B-Trees are generally more memory and cache efficient
@@ -32,146 +32,146 @@ using namespace llvm;
 /// entries (recursively) contained inside of it, which allows us to get the
 /// full delta implied by a whole subtree in constant time.
 
-namespace {
+નામાકાશ {
 
 /// SourceDelta - As code in the original input buffer is added and deleted,
 /// SourceDelta records are used to keep track of how the input SourceLocation
 /// object is mapped into the output buffer.
-struct SourceDelta {
+સંરચના SourceDelta {
   unsigned FileLoc;
-  int Delta;
+  પૂર્ણાંક Delta;
 
-  static SourceDelta get(unsigned Loc, int D) {
+  સ્થિર SourceDelta get(unsigned Loc, પૂર્ણાંક D) {
     SourceDelta Delta;
     Delta.FileLoc = Loc;
     Delta.Delta = D;
-    return Delta;
+    પાછા Delta;
   }
 };
 
 /// DeltaTreeNode - The common part of all nodes.
 ///
-class DeltaTreeNode {
-public:
-  struct InsertResult {
-    DeltaTreeNode *LHS, *RHS;
+વર્ગ Delta_વૃક્ષ_ગાંઠ {
+જાહેર:
+  સંરચના ઉમેરો_Result {
+    Delta_વૃક્ષ_ગાંઠ *LHS, *RHS;
     SourceDelta Split;
   };
 
-private:
-  friend class DeltaTreeInteriorNode;
+ખાનગી:
+  friend વર્ગ Delta_વૃક્ષ_Interior_ગાંઠ;
 
   /// WidthFactor - This controls the number of K/V slots held in the BTree:
   /// how wide it is.  Each level of the BTree is guaranteed to have at least
   /// WidthFactor-1 K/V pairs (except the root) and may have at most
   /// 2*WidthFactor-1 K/V pairs.
-  enum { WidthFactor = 8 };
+  ગણના { WidthFactor = 8 };
 
   /// Values - This tracks the SourceDelta's currently in this node.
-  SourceDelta Values[2 * WidthFactor - 1];
+  SourceDelta કિંમતો[2 * WidthFactor - 1];
 
   /// NumValuesUsed - This tracks the number of values this node currently
   /// holds.
-  unsigned char NumValuesUsed = 0;
+  unsigned અક્ષર અંક_કિંમતો_Used = 0;
 
   /// IsLeaf - This is true if this is a leaf of the btree.  If false, this is
   /// an interior node, and is actually an instance of DeltaTreeInteriorNode.
-  bool IsLeaf;
+  તાર્કિક IsLeaf;
 
   /// FullDelta - This is the full delta of all the values in this node and
   /// all children nodes.
-  int FullDelta = 0;
+  પૂર્ણાંક FullDelta = 0;
 
-public:
-  DeltaTreeNode(bool isLeaf = true) : IsLeaf(isLeaf) {}
+જાહેર:
+  Delta_વૃક્ષ_ગાંઠ(તાર્કિક isLeaf = સાચું) : IsLeaf(isLeaf) {}
 
-  bool isLeaf() const { return IsLeaf; }
-  int getFullDelta() const { return FullDelta; }
-  bool isFull() const { return NumValuesUsed == 2 * WidthFactor - 1; }
+  તાર્કિક isLeaf() અચલ { પાછા IsLeaf; }
+  પૂર્ણાંક getFullDelta() અચલ { પાછા FullDelta; }
+  તાર્કિક isFull() અચલ { પાછા અંક_કિંમતો_Used == 2 * WidthFactor - 1; }
 
-  unsigned getNumValuesUsed() const { return NumValuesUsed; }
+  unsigned get_અંક_કિંમતો_Used() અચલ { પાછા અંક_કિંમતો_Used; }
 
-  const SourceDelta &getValue(unsigned i) const {
-    assert(i < NumValuesUsed && "Invalid value #");
-    return Values[i];
+  અચલ SourceDelta &get_કિંમત(unsigned i) અચલ {
+    પ્રતિજ્ઞા(i < અંક_કિંમતો_Used && "Invalid value #");
+    પાછા કિંમતો[i];
   }
 
-  SourceDelta &getValue(unsigned i) {
-    assert(i < NumValuesUsed && "Invalid value #");
-    return Values[i];
+  SourceDelta &get_કિંમત(unsigned i) {
+    પ્રતિજ્ઞા(i < અંક_કિંમતો_Used && "Invalid value #");
+    પાછા કિંમતો[i];
   }
 
   /// DoInsertion - Do an insertion of the specified FileIndex/Delta pair into
   /// this node.  If insertion is easy, do it and return false.  Otherwise,
   /// split the node, populate InsertRes with info about the split, and return
   /// true.
-  bool DoInsertion(unsigned FileIndex, int Delta, InsertResult *InsertRes);
+  તાર્કિક DoInsertion(unsigned FileIndex, પૂર્ણાંક Delta, ઉમેરો_Result *ઉમેરો_Res);
 
-  void DoSplit(InsertResult &InsertRes);
+  શૂન્ય DoSplit(ઉમેરો_Result &ઉમેરો_Res);
 
   /// RecomputeFullDeltaLocally - Recompute the FullDelta field by doing a
   /// local walk over our contained deltas.
-  void RecomputeFullDeltaLocally();
+  શૂન્ય RecomputeFullDeltaLocally();
 
-  void Destroy();
+  શૂન્ય Destroy();
 };
 
 /// DeltaTreeInteriorNode - When isLeaf = false, a node has child pointers.
 /// This class tracks them.
-class DeltaTreeInteriorNode : public DeltaTreeNode {
-  friend class DeltaTreeNode;
+વર્ગ Delta_વૃક્ષ_Interior_ગાંઠ : જાહેર Delta_વૃક્ષ_ગાંઠ {
+  friend વર્ગ Delta_વૃક્ષ_ગાંઠ;
 
-  DeltaTreeNode *Children[2 * WidthFactor];
+  Delta_વૃક્ષ_ગાંઠ *Children[2 * WidthFactor];
 
-  ~DeltaTreeInteriorNode() {
-    for (unsigned i = 0, e = NumValuesUsed + 1; i != e; ++i)
+  ~Delta_વૃક્ષ_Interior_ગાંઠ() {
+    માટે (unsigned i = 0, e = અંક_કિંમતો_Used + 1; i != e; ++i)
       Children[i]->Destroy();
   }
 
-public:
-  DeltaTreeInteriorNode() : DeltaTreeNode(false /*nonleaf*/) {}
+જાહેર:
+  Delta_વૃક્ષ_Interior_ગાંઠ() : Delta_વૃક્ષ_ગાંઠ(ખોટું /*nonleaf*/) {}
 
-  DeltaTreeInteriorNode(const InsertResult &IR)
-      : DeltaTreeNode(false /*nonleaf*/) {
+  Delta_વૃક્ષ_Interior_ગાંઠ(અચલ ઉમેરો_Result &IR)
+      : Delta_વૃક્ષ_ગાંઠ(ખોટું /*nonleaf*/) {
     Children[0] = IR.LHS;
     Children[1] = IR.RHS;
-    Values[0] = IR.Split;
+    કિંમતો[0] = IR.Split;
     FullDelta =
         IR.LHS->getFullDelta() + IR.RHS->getFullDelta() + IR.Split.Delta;
-    NumValuesUsed = 1;
+    અંક_કિંમતો_Used = 1;
   }
 
-  const DeltaTreeNode *getChild(unsigned i) const {
-    assert(i < getNumValuesUsed() + 1 && "Invalid child");
-    return Children[i];
+  અચલ Delta_વૃક્ષ_ગાંઠ *getChild(unsigned i) અચલ {
+    પ્રતિજ્ઞા(i < get_અંક_કિંમતો_Used() + 1 && "Invalid child");
+    પાછા Children[i];
   }
 
-  DeltaTreeNode *getChild(unsigned i) {
-    assert(i < getNumValuesUsed() + 1 && "Invalid child");
-    return Children[i];
+  Delta_વૃક્ષ_ગાંઠ *getChild(unsigned i) {
+    પ્રતિજ્ઞા(i < get_અંક_કિંમતો_Used() + 1 && "Invalid child");
+    પાછા Children[i];
   }
 
-  static bool classof(const DeltaTreeNode *N) { return !N->isLeaf(); }
+  સ્થિર તાર્કિક classof(અચલ Delta_વૃક્ષ_ગાંઠ *N) { પાછા !N->isLeaf(); }
 };
 
 } // namespace
 
 /// Destroy - A 'virtual' destructor.
-void DeltaTreeNode::Destroy() {
-  if (isLeaf())
-    delete this;
-  else
-    delete cast<DeltaTreeInteriorNode>(this);
+શૂન્ય Delta_વૃક્ષ_ગાંઠ::Destroy() {
+  જો (isLeaf())
+    delete આ;
+  નહીંતર
+    delete cast<Delta_વૃક્ષ_Interior_ગાંઠ>(આ);
 }
 
 /// RecomputeFullDeltaLocally - Recompute the FullDelta field by doing a
 /// local walk over our contained deltas.
-void DeltaTreeNode::RecomputeFullDeltaLocally() {
-  int NewFullDelta = 0;
-  for (unsigned i = 0, e = getNumValuesUsed(); i != e; ++i)
-    NewFullDelta += Values[i].Delta;
-  if (auto *IN = dyn_cast<DeltaTreeInteriorNode>(this))
-    for (unsigned i = 0, e = getNumValuesUsed() + 1; i != e; ++i)
+શૂન્ય Delta_વૃક્ષ_ગાંઠ::RecomputeFullDeltaLocally() {
+  પૂર્ણાંક NewFullDelta = 0;
+  માટે (unsigned i = 0, e = get_અંક_કિંમતો_Used(); i != e; ++i)
+    NewFullDelta += કિંમતો[i].Delta;
+  જો (auto *IN = dyn_cast<Delta_વૃક્ષ_Interior_ગાંઠ>(આ))
+    માટે (unsigned i = 0, e = get_અંક_કિંમતો_Used() + 1; i != e; ++i)
       NewFullDelta += IN->getChild(i)->getFullDelta();
   FullDelta = NewFullDelta;
 }
@@ -180,123 +180,123 @@ void DeltaTreeNode::RecomputeFullDeltaLocally() {
 /// this node.  If insertion is easy, do it and return false.  Otherwise,
 /// split the node, populate InsertRes with info about the split, and return
 /// true.
-bool DeltaTreeNode::DoInsertion(unsigned FileIndex, int Delta,
-                                InsertResult *InsertRes) {
+તાર્કિક Delta_વૃક્ષ_ગાંઠ::DoInsertion(unsigned FileIndex, પૂર્ણાંક Delta,
+                                ઉમેરો_Result *ઉમેરો_Res) {
   // Maintain full delta for this node.
   FullDelta += Delta;
 
   // Find the insertion point, the first delta whose index is >= FileIndex.
-  unsigned i = 0, e = getNumValuesUsed();
-  while (i != e && FileIndex > getValue(i).FileLoc)
+  unsigned i = 0, e = get_અંક_કિંમતો_Used();
+  જ્યારે (i != e && FileIndex > get_કિંમત(i).FileLoc)
     ++i;
 
   // If we found an a record for exactly this file index, just merge this
   // value into the pre-existing record and finish early.
-  if (i != e && getValue(i).FileLoc == FileIndex) {
+  જો (i != e && get_કિંમત(i).FileLoc == FileIndex) {
     // NOTE: Delta could drop to zero here.  This means that the delta entry is
     // useless and could be removed.  Supporting erases is more complex than
     // leaving an entry with Delta=0, so we just leave an entry with Delta=0 in
     // the tree.
-    Values[i].Delta += Delta;
-    return false;
+    કિંમતો[i].Delta += Delta;
+    પાછા ખોટું;
   }
 
   // Otherwise, we found an insertion point, and we know that the value at the
   // specified index is > FileIndex.  Handle the leaf case first.
-  if (isLeaf()) {
-    if (!isFull()) {
+  જો (isLeaf()) {
+    જો (!isFull()) {
       // For an insertion into a non-full leaf node, just insert the value in
       // its sorted position.  This requires moving later values over.
-      if (i != e)
-        memmove(&Values[i + 1], &Values[i], sizeof(Values[0]) * (e - i));
-      Values[i] = SourceDelta::get(FileIndex, Delta);
-      ++NumValuesUsed;
-      return false;
+      જો (i != e)
+        memmove(&કિંમતો[i + 1], &કિંમતો[i], કદ(કિંમતો[0]) * (e - i));
+      કિંમતો[i] = SourceDelta::get(FileIndex, Delta);
+      ++અંક_કિંમતો_Used;
+      પાછા ખોટું;
     }
 
     // Otherwise, if this is leaf is full, split the node at its median, insert
     // the value into one of the children, and return the result.
-    assert(InsertRes && "No result location specified");
-    DoSplit(*InsertRes);
+    પ્રતિજ્ઞા(ઉમેરો_Res && "No result location specified");
+    DoSplit(*ઉમેરો_Res);
 
-    if (InsertRes->Split.FileLoc > FileIndex)
-      InsertRes->LHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
-    else
-      InsertRes->RHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
-    return true;
+    જો (ઉમેરો_Res->Split.FileLoc > FileIndex)
+      ઉમેરો_Res->LHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
+    નહીંતર
+      ઉમેરો_Res->RHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
+    પાછા સાચું;
   }
 
   // Otherwise, this is an interior node.  Send the request down the tree.
-  auto *IN = cast<DeltaTreeInteriorNode>(this);
-  if (!IN->Children[i]->DoInsertion(FileIndex, Delta, InsertRes))
-    return false; // If there was space in the child, just return.
+  auto *IN = cast<Delta_વૃક્ષ_Interior_ગાંઠ>(આ);
+  જો (!IN->Children[i]->DoInsertion(FileIndex, Delta, ઉમેરો_Res))
+    પાછા ખોટું; // If there was space in the child, just return.
 
   // Okay, this split the subtree, producing a new value and two children to
   // insert here.  If this node is non-full, we can just insert it directly.
-  if (!isFull()) {
+  જો (!isFull()) {
     // Now that we have two nodes and a new element, insert the perclated value
     // into ourself by moving all the later values/children down, then inserting
     // the new one.
-    if (i != e)
+    જો (i != e)
       memmove(&IN->Children[i + 2], &IN->Children[i + 1],
-              (e - i) * sizeof(IN->Children[0]));
-    IN->Children[i] = InsertRes->LHS;
-    IN->Children[i + 1] = InsertRes->RHS;
+              (e - i) * કદ(IN->Children[0]));
+    IN->Children[i] = ઉમેરો_Res->LHS;
+    IN->Children[i + 1] = ઉમેરો_Res->RHS;
 
-    if (e != i)
-      memmove(&Values[i + 1], &Values[i], (e - i) * sizeof(Values[0]));
-    Values[i] = InsertRes->Split;
-    ++NumValuesUsed;
-    return false;
+    જો (e != i)
+      memmove(&કિંમતો[i + 1], &કિંમતો[i], (e - i) * કદ(કિંમતો[0]));
+    કિંમતો[i] = ઉમેરો_Res->Split;
+    ++અંક_કિંમતો_Used;
+    પાછા ખોટું;
   }
 
   // Finally, if this interior node was full and a node is percolated up, split
   // ourself and return that up the chain.  Start by saving all our info to
   // avoid having the split clobber it.
-  IN->Children[i] = InsertRes->LHS;
-  DeltaTreeNode *SubRHS = InsertRes->RHS;
-  SourceDelta SubSplit = InsertRes->Split;
+  IN->Children[i] = ઉમેરો_Res->LHS;
+  Delta_વૃક્ષ_ગાંઠ *SubRHS = ઉમેરો_Res->RHS;
+  SourceDelta SubSplit = ઉમેરો_Res->Split;
 
   // Do the split.
-  DoSplit(*InsertRes);
+  DoSplit(*ઉમેરો_Res);
 
   // Figure out where to insert SubRHS/NewSplit.
-  DeltaTreeInteriorNode *InsertSide;
-  if (SubSplit.FileLoc < InsertRes->Split.FileLoc)
-    InsertSide = cast<DeltaTreeInteriorNode>(InsertRes->LHS);
-  else
-    InsertSide = cast<DeltaTreeInteriorNode>(InsertRes->RHS);
+  Delta_વૃક્ષ_Interior_ગાંઠ *ઉમેરો_Side;
+  જો (SubSplit.FileLoc < ઉમેરો_Res->Split.FileLoc)
+    ઉમેરો_Side = cast<Delta_વૃક્ષ_Interior_ગાંઠ>(ઉમેરો_Res->LHS);
+  નહીંતર
+    ઉમેરો_Side = cast<Delta_વૃક્ષ_Interior_ગાંઠ>(ઉમેરો_Res->RHS);
 
   // We now have a non-empty interior node 'InsertSide' to insert
   // SubRHS/SubSplit into.  Find out where to insert SubSplit.
 
   // Find the insertion point, the first delta whose index is >SubSplit.FileLoc.
   i = 0;
-  e = InsertSide->getNumValuesUsed();
-  while (i != e && SubSplit.FileLoc > InsertSide->getValue(i).FileLoc)
+  e = ઉમેરો_Side->get_અંક_કિંમતો_Used();
+  જ્યારે (i != e && SubSplit.FileLoc > ઉમેરો_Side->get_કિંમત(i).FileLoc)
     ++i;
 
   // Now we know that i is the place to insert the split value into.  Insert it
   // and the child right after it.
-  if (i != e)
-    memmove(&InsertSide->Children[i + 2], &InsertSide->Children[i + 1],
-            (e - i) * sizeof(IN->Children[0]));
-  InsertSide->Children[i + 1] = SubRHS;
+  જો (i != e)
+    memmove(&ઉમેરો_Side->Children[i + 2], &ઉમેરો_Side->Children[i + 1],
+            (e - i) * કદ(IN->Children[0]));
+  ઉમેરો_Side->Children[i + 1] = SubRHS;
 
-  if (e != i)
-    memmove(&InsertSide->Values[i + 1], &InsertSide->Values[i],
-            (e - i) * sizeof(Values[0]));
-  InsertSide->Values[i] = SubSplit;
-  ++InsertSide->NumValuesUsed;
-  InsertSide->FullDelta += SubSplit.Delta + SubRHS->getFullDelta();
-  return true;
+  જો (e != i)
+    memmove(&ઉમેરો_Side->કિંમતો[i + 1], &ઉમેરો_Side->કિંમતો[i],
+            (e - i) * કદ(કિંમતો[0]));
+  ઉમેરો_Side->કિંમતો[i] = SubSplit;
+  ++ઉમેરો_Side->અંક_કિંમતો_Used;
+  ઉમેરો_Side->FullDelta += SubSplit.Delta + SubRHS->getFullDelta();
+  પાછા સાચું;
 }
 
 /// DoSplit - Split the currently full node (which has 2*WidthFactor-1 values)
 /// into two subtrees each with "WidthFactor-1" values and a pivot value.
 /// Return the pieces in InsertRes.
-void DeltaTreeNode::DoSplit(InsertResult &InsertRes) {
-  assert(isFull() && "Why split a non-full node?");
+શૂન્ય Delta_વૃક્ષ_ગાંઠ::DoSplit(ઉમેરો_Result &ઉમેરો_Res) {
+  પ્રતિજ્ઞા(isFull() && "Why split a non-full node?");
 
   // Since this node is full, it contains 2*WidthFactor-1 values.  We move
   // the first 'WidthFactor-1' values to the LHS child (which we leave in this
@@ -304,33 +304,33 @@ void DeltaTreeNode::DoSplit(InsertResult &InsertRes) {
   // into the RHS child.
 
   // Create the new child node.
-  DeltaTreeNode *NewNode;
-  if (auto *IN = dyn_cast<DeltaTreeInteriorNode>(this)) {
+  Delta_વૃક્ષ_ગાંઠ *New_ગાંઠ;
+  જો (auto *IN = dyn_cast<Delta_વૃક્ષ_Interior_ગાંઠ>(આ)) {
     // If this is an interior node, also move over 'WidthFactor' children
     // into the new node.
-    DeltaTreeInteriorNode *New = new DeltaTreeInteriorNode();
+    Delta_વૃક્ષ_Interior_ગાંઠ *New = નવું Delta_વૃક્ષ_Interior_ગાંઠ();
     memcpy(&New->Children[0], &IN->Children[WidthFactor],
-           WidthFactor * sizeof(IN->Children[0]));
-    NewNode = New;
-  } else {
+           WidthFactor * કદ(IN->Children[0]));
+    New_ગાંઠ = New;
+  } નહીંતર {
     // Just create the new leaf node.
-    NewNode = new DeltaTreeNode();
+    New_ગાંઠ = નવું Delta_વૃક્ષ_ગાંઠ();
   }
 
   // Move over the last 'WidthFactor-1' values from here to NewNode.
-  memcpy(&NewNode->Values[0], &Values[WidthFactor],
-         (WidthFactor - 1) * sizeof(Values[0]));
+  memcpy(&New_ગાંઠ->કિંમતો[0], &કિંમતો[WidthFactor],
+         (WidthFactor - 1) * કદ(કિંમતો[0]));
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumValuesUsed = NumValuesUsed = WidthFactor - 1;
+  New_ગાંઠ->અંક_કિંમતો_Used = અંક_કિંમતો_Used = WidthFactor - 1;
 
   // Recompute the two nodes' full delta.
-  NewNode->RecomputeFullDeltaLocally();
+  New_ગાંઠ->RecomputeFullDeltaLocally();
   RecomputeFullDeltaLocally();
 
-  InsertRes.LHS = this;
-  InsertRes.RHS = NewNode;
-  InsertRes.Split = Values[WidthFactor - 1];
+  ઉમેરો_Res.LHS = આ;
+  ઉમેરો_Res.RHS = New_ગાંઠ;
+  ઉમેરો_Res.Split = કિંમતો[WidthFactor - 1];
 }
 
 //===----------------------------------------------------------------------===//
@@ -339,107 +339,107 @@ void DeltaTreeNode::DoSplit(InsertResult &InsertRes) {
 
 // #define VERIFY_TREE
 
-#ifdef VERIFY_TREE
+#ifdef VERIFY_વૃક્ષ
 /// VerifyTree - Walk the btree performing assertions on various properties to
 /// verify consistency.  This is useful for debugging new changes to the tree.
-static void VerifyTree(const DeltaTreeNode *N) {
-  const auto *IN = dyn_cast<DeltaTreeInteriorNode>(N);
-  if (IN == 0) {
+સ્થિર શૂન્ય Verify_વૃક્ષ(અચલ Delta_વૃક્ષ_ગાંઠ *N) {
+  અચલ auto *IN = dyn_cast<Delta_વૃક્ષ_Interior_ગાંઠ>(N);
+  જો (IN == 0) {
     // Verify leaves, just ensure that FullDelta matches up and the elements
     // are in proper order.
-    int FullDelta = 0;
-    for (unsigned i = 0, e = N->getNumValuesUsed(); i != e; ++i) {
-      if (i)
-        assert(N->getValue(i - 1).FileLoc < N->getValue(i).FileLoc);
-      FullDelta += N->getValue(i).Delta;
+    પૂર્ણાંક FullDelta = 0;
+    માટે (unsigned i = 0, e = N->get_અંક_કિંમતો_Used(); i != e; ++i) {
+      જો (i)
+        પ્રતિજ્ઞા(N->get_કિંમત(i - 1).FileLoc < N->get_કિંમત(i).FileLoc);
+      FullDelta += N->get_કિંમત(i).Delta;
     }
-    assert(FullDelta == N->getFullDelta());
-    return;
+    પ્રતિજ્ઞા(FullDelta == N->getFullDelta());
+    પાછા;
   }
 
   // Verify interior nodes: Ensure that FullDelta matches up and the
   // elements are in proper order and the children are in proper order.
-  int FullDelta = 0;
-  for (unsigned i = 0, e = IN->getNumValuesUsed(); i != e; ++i) {
-    const SourceDelta &IVal = N->getValue(i);
-    const DeltaTreeNode *IChild = IN->getChild(i);
-    if (i)
-      assert(IN->getValue(i - 1).FileLoc < IVal.FileLoc);
+  પૂર્ણાંક FullDelta = 0;
+  માટે (unsigned i = 0, e = IN->get_અંક_કિંમતો_Used(); i != e; ++i) {
+    અચલ SourceDelta &IVal = N->get_કિંમત(i);
+    અચલ Delta_વૃક્ષ_ગાંઠ *IChild = IN->getChild(i);
+    જો (i)
+      પ્રતિજ્ઞા(IN->get_કિંમત(i - 1).FileLoc < IVal.FileLoc);
     FullDelta += IVal.Delta;
     FullDelta += IChild->getFullDelta();
 
     // The largest value in child #i should be smaller than FileLoc.
-    assert(IChild->getValue(IChild->getNumValuesUsed() - 1).FileLoc <
+    પ્રતિજ્ઞા(IChild->get_કિંમત(IChild->get_અંક_કિંમતો_Used() - 1).FileLoc <
            IVal.FileLoc);
 
     // The smallest value in child #i+1 should be larger than FileLoc.
-    assert(IN->getChild(i + 1)->getValue(0).FileLoc > IVal.FileLoc);
-    VerifyTree(IChild);
+    પ્રતિજ્ઞા(IN->getChild(i + 1)->get_કિંમત(0).FileLoc > IVal.FileLoc);
+    Verify_વૃક્ષ(IChild);
   }
 
-  FullDelta += IN->getChild(IN->getNumValuesUsed())->getFullDelta();
+  FullDelta += IN->getChild(IN->get_અંક_કિંમતો_Used())->getFullDelta();
 
-  assert(FullDelta == N->getFullDelta());
+  પ્રતિજ્ઞા(FullDelta == N->getFullDelta());
 }
 #endif // VERIFY_TREE
 
-static DeltaTreeNode *getRoot(void *Root) { return (DeltaTreeNode *)Root; }
+સ્થિર Delta_વૃક્ષ_ગાંઠ *get_મૂળ(શૂન્ય *મૂળ_2) { પાછા (Delta_વૃક્ષ_ગાંઠ *)મૂળ_2; }
 
-DeltaTree::DeltaTree() { Root = new DeltaTreeNode(); }
+Delta_વૃક્ષ::Delta_વૃક્ષ() { મૂળ_2 = નવું Delta_વૃક્ષ_ગાંઠ(); }
 
-DeltaTree::DeltaTree(const DeltaTree &RHS) {
+Delta_વૃક્ષ::Delta_વૃક્ષ(અચલ Delta_વૃક્ષ &RHS) {
   // Currently we only support copying when the RHS is empty.
-  assert(getRoot(RHS.Root)->getNumValuesUsed() == 0 &&
+  પ્રતિજ્ઞા(get_મૂળ(RHS.મૂળ_2)->get_અંક_કિંમતો_Used() == 0 &&
          "Can only copy empty tree");
-  Root = new DeltaTreeNode();
+  મૂળ_2 = નવું Delta_વૃક્ષ_ગાંઠ();
 }
 
-DeltaTree::~DeltaTree() { getRoot(Root)->Destroy(); }
+Delta_વૃક્ષ::~Delta_વૃક્ષ() { get_મૂળ(મૂળ_2)->Destroy(); }
 
 /// getDeltaAt - Return the accumulated delta at the specified file offset.
 /// This includes all insertions or delections that occurred *before* the
 /// specified file index.
-int DeltaTree::getDeltaAt(unsigned FileIndex) const {
-  const DeltaTreeNode *Node = getRoot(Root);
+પૂર્ણાંક Delta_વૃક્ષ::getDeltaAt(unsigned FileIndex) અચલ {
+  અચલ Delta_વૃક્ષ_ગાંઠ *ગાંઠ = get_મૂળ(મૂળ_2);
 
-  int Result = 0;
+  પૂર્ણાંક Result = 0;
 
   // Walk down the tree.
-  while (true) {
+  જ્યારે (સાચું) {
     // For all nodes, include any local deltas before the specified file
     // index by summing them up directly.  Keep track of how many were
     // included.
-    unsigned NumValsGreater = 0;
-    for (unsigned e = Node->getNumValuesUsed(); NumValsGreater != e;
-         ++NumValsGreater) {
-      const SourceDelta &Val = Node->getValue(NumValsGreater);
+    unsigned અંક_Vals_Greater = 0;
+    માટે (unsigned e = ગાંઠ->get_અંક_કિંમતો_Used(); અંક_Vals_Greater != e;
+         ++અંક_Vals_Greater) {
+      અચલ SourceDelta &Val = ગાંઠ->get_કિંમત(અંક_Vals_Greater);
 
-      if (Val.FileLoc >= FileIndex)
-        break;
+      જો (Val.FileLoc >= FileIndex)
+        તોડો;
       Result += Val.Delta;
     }
 
     // If we have an interior node, include information about children and
     // recurse.  Otherwise, if we have a leaf, we're done.
-    const auto *IN = dyn_cast<DeltaTreeInteriorNode>(Node);
-    if (!IN)
-      return Result;
+    અચલ auto *IN = dyn_cast<Delta_વૃક્ષ_Interior_ગાંઠ>(ગાંઠ);
+    જો (!IN)
+      પાછા Result;
 
     // Include any children to the left of the values we skipped, all of
     // their deltas should be included as well.
-    for (unsigned i = 0; i != NumValsGreater; ++i)
+    માટે (unsigned i = 0; i != અંક_Vals_Greater; ++i)
       Result += IN->getChild(i)->getFullDelta();
 
     // If we found exactly the value we were looking for, break off the
     // search early.  There is no need to search the RHS of the value for
     // partial results.
-    if (NumValsGreater != Node->getNumValuesUsed() &&
-        Node->getValue(NumValsGreater).FileLoc == FileIndex)
-      return Result + IN->getChild(NumValsGreater)->getFullDelta();
+    જો (અંક_Vals_Greater != ગાંઠ->get_અંક_કિંમતો_Used() &&
+        ગાંઠ->get_કિંમત(અંક_Vals_Greater).FileLoc == FileIndex)
+      પાછા Result + IN->getChild(અંક_Vals_Greater)->getFullDelta();
 
     // Otherwise, traverse down the tree.  The selected subtree may be
     // partially included in the range.
-    Node = IN->getChild(NumValsGreater);
+    ગાંઠ = IN->getChild(અંક_Vals_Greater);
   }
   // NOT REACHED.
 }
@@ -447,19 +447,19 @@ int DeltaTree::getDeltaAt(unsigned FileIndex) const {
 /// AddDelta - When a change is made that shifts around the text buffer,
 /// this method is used to record that info.  It inserts a delta of 'Delta'
 /// into the current DeltaTree at offset FileIndex.
-void DeltaTree::AddDelta(unsigned FileIndex, int Delta) {
-  assert(Delta && "Adding a noop?");
-  DeltaTreeNode *MyRoot = getRoot(Root);
+શૂન્ય Delta_વૃક્ષ::AddDelta(unsigned FileIndex, પૂર્ણાંક Delta) {
+  પ્રતિજ્ઞા(Delta && "Adding a noop?");
+  Delta_વૃક્ષ_ગાંઠ *My_મૂળ = get_મૂળ(મૂળ_2);
 
-  DeltaTreeNode::InsertResult InsertRes;
-  if (MyRoot->DoInsertion(FileIndex, Delta, &InsertRes)) {
-    Root = new DeltaTreeInteriorNode(InsertRes);
-#ifdef VERIFY_TREE
-    MyRoot = Root;
+  Delta_વૃક્ષ_ગાંઠ::ઉમેરો_Result ઉમેરો_Res;
+  જો (My_મૂળ->DoInsertion(FileIndex, Delta, &ઉમેરો_Res)) {
+    મૂળ_2 = નવું Delta_વૃક્ષ_Interior_ગાંઠ(ઉમેરો_Res);
+#ifdef VERIFY_વૃક્ષ
+    My_મૂળ = મૂળ_2;
 #endif
   }
 
-#ifdef VERIFY_TREE
-  VerifyTree(MyRoot);
+#ifdef VERIFY_વૃક્ષ
+  Verify_વૃક્ષ(My_મૂળ);
 #endif
 }
