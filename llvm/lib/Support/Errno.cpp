@@ -10,10 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Errno.h"
-#include "llvm/Config/config.h"
-#include <cstring>
-#include <errno.h>
+#समावेश "llvm/Support/Errno.h"
+#समावेश "llvm/Config/config.h"
+#समावेश <cstring>
+#समावेश <errno.h>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
@@ -24,39 +24,39 @@ namespace llvm {
 namespace sys {
 
 std::string StrError() {
-  return StrError(errno);
+  वापस StrError(त्रुटि_सं);
 }
 
-std::string StrError(int errnum) {
+std::string StrError(पूर्णांक errnum) {
   std::string str;
-  if (errnum == 0)
-    return str;
-#if defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
-  const int MaxErrStrLen = 2000;
-  char buffer[MaxErrStrLen];
-  buffer[0] = '\0';
-#endif
+  अगर (errnum == 0)
+    वापस str;
+#अगर defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
+  स्थिर पूर्णांक MaxErrStrLen = 2000;
+  अक्षर बफर_2[MaxErrStrLen];
+  बफर_2[0] = '\0';
+#पूर्ण_अगर
 
-#ifdef HAVE_STRERROR_R
+#अगर_घोषित HAVE_STRERROR_R
   // strerror_r is thread-safe.
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#अगर defined(__GLIBC__) && defined(_GNU_SOURCE)
   // glibc defines its own incompatible version of strerror_r
   // which may not use the buffer supplied.
-  str = strerror_r(errnum, buffer, MaxErrStrLen - 1);
-#else
-  strerror_r(errnum, buffer, MaxErrStrLen - 1);
-  str = buffer;
-#endif
-#elif HAVE_DECL_STRERROR_S // "Windows Secure API"
-  strerror_s(buffer, MaxErrStrLen - 1, errnum);
-  str = buffer;
-#else
+  str = strerror_r(errnum, बफर_2, MaxErrStrLen - 1);
+#अन्यथा
+  strerror_r(errnum, बफर_2, MaxErrStrLen - 1);
+  str = बफर_2;
+#पूर्ण_अगर
+#या_अगर HAVE_DECL_STRERROR_S // "Windows Secure API"
+  strerror_s(बफर_2, MaxErrStrLen - 1, errnum);
+  str = बफर_2;
+#अन्यथा
   // Copy the thread un-safe result of strerror into
   // the buffer as fast as possible to minimize impact
   // of collision of strerror in multiple threads.
-  str = strerror(errnum);
-#endif
-  return str;
+  str = म_त्रुटि(errnum);
+#पूर्ण_अगर
+  वापस str;
 }
 
 }  // namespace sys

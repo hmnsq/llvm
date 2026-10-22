@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
+#समावेश "llvm/Support/RISCVAttributeParser.h"
+#समावेश "llvm/ADT/StringExtras.h"
 
 using namespace llvm;
 
-const RISCVAttributeParser::DisplayHandler
+स्थिर RISCVAttributeParser::DisplayHandler
     RISCVAttributeParser::displayRoutines[] = {
         {
             RISCVAttrs::ARCH,
@@ -30,8 +30,8 @@ const RISCVAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         },
         {
-            RISCVAttrs::STACK_ALIGN,
-            &RISCVAttributeParser::stackAlign,
+            RISCVAttrs::ढेर_ALIGN,
+            &RISCVAttributeParser::ढेर_Align,
         },
         {
             RISCVAttrs::UNALIGNED_ACCESS,
@@ -43,36 +43,36 @@ const RISCVAttributeParser::DisplayHandler
         },
 };
 
-Error RISCVAttributeParser::atomicAbi(unsigned Tag) {
-  uint64_t Value = de.getULEB128(cursor);
-  printAttribute(Tag, Value, "Atomic ABI is " + utostr(Value));
-  return Error::success();
+Error RISCVAttributeParser::atomicAbi(अचिन्हित Tag) {
+  uint64_t मूल्य = de.getULEB128(cursor);
+  printAttribute(Tag, मूल्य, "Atomic ABI is " + utostr(मूल्य));
+  वापस Error::success();
 }
 
-Error RISCVAttributeParser::unalignedAccess(unsigned tag) {
-  static const char *const strings[] = {"No unaligned access",
+Error RISCVAttributeParser::unalignedAccess(अचिन्हित tag) {
+  अटल स्थिर अक्षर *स्थिर strings[] = {"No unaligned access",
                                         "Unaligned access"};
-  return parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
+  वापस parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
 }
 
-Error RISCVAttributeParser::stackAlign(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error RISCVAttributeParser::ढेर_Align(अचिन्हित tag) {
+  uint64_t मूल्य_2 = de.getULEB128(cursor);
   std::string description =
-      "Stack alignment is " + utostr(value) + std::string("-bytes");
-  printAttribute(tag, value, description);
-  return Error::success();
+      "Stack alignment is " + utostr(मूल्य_2) + std::string("-bytes");
+  printAttribute(tag, मूल्य_2, description);
+  वापस Error::success();
 }
 
 Error RISCVAttributeParser::handler(uint64_t tag, bool &handled) {
   handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
+  क्रम (स्थिर स्वतः &AH : displayRoutines) {
+    अगर (uint64_t(AH.attribute) == tag) {
+      अगर (Error e = (यह->*AH.routine)(tag))
+        वापस e;
       handled = true;
-      break;
+      अवरोध;
     }
   }
 
-  return Error::success();
+  वापस Error::success();
 }

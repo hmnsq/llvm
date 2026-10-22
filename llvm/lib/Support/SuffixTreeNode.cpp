@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#समावेश "llvm/Support/SuffixTreeNode.h"
 
 using namespace llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+अचिन्हित Suffix_वृक्ष_गाँठ::getStartIdx() स्थिर { वापस StartIdx; }
+व्योम Suffix_वृक्ष_गाँठ::incrementStartIdx(अचिन्हित Inc) { StartIdx += Inc; }
+व्योम Suffix_वृक्ष_गाँठ::setConcatLen(अचिन्हित Len) { ConcatLen = Len; }
+अचिन्हित Suffix_वृक्ष_गाँठ::getConcatLen() स्थिर { वापस ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+bool Suffix_वृक्ष_Internal_गाँठ::is_मूल() स्थिर {
+  वापस getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+अचिन्हित Suffix_वृक्ष_Internal_गाँठ::getEndIdx() स्थिर { वापस EndIdx; }
+व्योम Suffix_वृक्ष_Internal_गाँठ::setLink(Suffix_वृक्ष_Internal_गाँठ *L) {
+  निश्चित(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_वृक्ष_Internal_गाँठ *Suffix_वृक्ष_Internal_गाँठ::getLink() स्थिर { वापस Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+अचिन्हित Suffix_वृक्ष_Leaf_गाँठ::getEndIdx() स्थिर {
+  निश्चित(EndIdx && "EndIdx is empty?");
+  वापस *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+अचिन्हित Suffix_वृक्ष_Leaf_गाँठ::getSuffixIdx() स्थिर { वापस SuffixIdx; }
+व्योम Suffix_वृक्ष_Leaf_गाँठ::setSuffixIdx(अचिन्हित Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+अचिन्हित Suffix_वृक्ष_गाँठ::get_बायाँ_Leaf_Idx() स्थिर { वापस बायाँ_Leaf_Idx; }
+अचिन्हित Suffix_वृक्ष_गाँठ::get_दायाँ_Leaf_Idx() स्थिर { वापस दायाँ_Leaf_Idx; }
+व्योम Suffix_वृक्ष_गाँठ::set_बायाँ_Leaf_Idx(अचिन्हित Idx) { बायाँ_Leaf_Idx = Idx; }
+व्योम Suffix_वृक्ष_गाँठ::set_दायाँ_Leaf_Idx(अचिन्हित Idx) { दायाँ_Leaf_Idx = Idx; }

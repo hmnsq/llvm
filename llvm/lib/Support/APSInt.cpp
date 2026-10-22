@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/StringRef.h"
-#include <cassert>
+#समावेश "llvm/ADT/APSInt.h"
+#समावेश "llvm/ADT/FoldingSet.h"
+#समावेश "llvm/ADT/StringRef.h"
+#समावेश <cassert>
 
 using namespace llvm;
 
 APSInt::APSInt(StringRef Str) {
-  assert(!Str.empty() && "Invalid string length");
+  निश्चित(!Str.empty() && "Invalid string length");
 
   // (Over-)estimate the required number of bits.
-  unsigned NumBits = ((Str.size() * 64) / 19) + 2;
-  APInt Tmp(NumBits, Str, /*radix=*/10);
-  if (Str[0] == '-') {
-    unsigned MinBits = Tmp.getSignificantBits();
-    if (MinBits < NumBits)
-      Tmp = Tmp.trunc(std::max<unsigned>(1, MinBits));
-    *this = APSInt(Tmp, /*isUnsigned=*/false);
-    return;
+  अचिन्हित अंक_Bits_2 = ((Str.आकार_2() * 64) / 19) + 2;
+  APInt Tmp(अंक_Bits_2, Str, /*radix=*/10);
+  अगर (Str[0] == '-') {
+    अचिन्हित MinBits = Tmp.getSignificantBits();
+    अगर (MinBits < अंक_Bits_2)
+      Tmp = Tmp.छाँटो(std::max<अचिन्हित>(1, MinBits));
+    *यह = APSInt(Tmp, /*isUnsigned=*/false);
+    वापस;
   }
-  unsigned ActiveBits = Tmp.getActiveBits();
-  if (ActiveBits < NumBits)
-    Tmp = Tmp.trunc(std::max<unsigned>(1, ActiveBits));
-  *this = APSInt(Tmp, /*isUnsigned=*/true);
+  अचिन्हित ActiveBits = Tmp.getActiveBits();
+  अगर (ActiveBits < अंक_Bits_2)
+    Tmp = Tmp.छाँटो(std::max<अचिन्हित>(1, ActiveBits));
+  *यह = APSInt(Tmp, /*isUnsigned=*/true);
 }
 
-void APSInt::Profile(FoldingSetNodeID& ID) const {
-  ID.AddInteger((unsigned) (IsUnsigned ? 1 : 0));
+व्योम APSInt::Profile(Folding_Set_गाँठ_ID& ID) स्थिर {
+  ID.AddInteger((अचिन्हित) (IsUnsigned ? 1 : 0));
   APInt::Profile(ID);
 }

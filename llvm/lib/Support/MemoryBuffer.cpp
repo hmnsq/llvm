@@ -10,31 +10,31 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Alignment.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Program.h"
-#include "llvm/Support/SmallVectorMemoryBuffer.h"
-#include <algorithm>
-#include <cassert>
-#include <cstring>
-#include <new>
-#include <sys/types.h>
-#include <system_error>
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
+#समावेश "llvm/Support/MemoryBuffer.h"
+#समावेश "llvm/ADT/STLExtras.h"
+#समावेश "llvm/ADT/SmallString.h"
+#समावेश "llvm/Config/config.h"
+#समावेश "llvm/Support/Alignment.h"
+#समावेश "llvm/Support/AutoConvert.h"
+#समावेश "llvm/Support/Errc.h"
+#समावेश "llvm/Support/Error.h"
+#समावेश "llvm/Support/ErrorHandling.h"
+#समावेश "llvm/Support/FileSystem.h"
+#समावेश "llvm/Support/IOSandbox.h"
+#समावेश "llvm/Support/Process.h"
+#समावेश "llvm/Support/Program.h"
+#समावेश "llvm/Support/SmallVectorMemoryBuffer.h"
+#समावेश <algorithm>
+#समावेश <cassert>
+#समावेश <cstring>
+#समावेश <new>
+#समावेश <sys/types.h>
+#समावेश <system_error>
+#अगर !defined(_MSC_VER) && !defined(__MINGW32__)
+#समावेश <unistd.h>
+#अन्यथा
+#समावेश <io.h>
+#पूर्ण_अगर
 
 using namespace llvm;
 
@@ -42,16 +42,16 @@ using namespace llvm;
 // MemoryBuffer implementation itself.
 //===----------------------------------------------------------------------===//
 
-MemoryBuffer::~MemoryBuffer() = default;
+Memory_बफर::~Memory_बफर() = शेष;
 
 /// init - Initialize this MemoryBuffer as a reference to externally allocated
 /// memory, memory that we know is already null terminated.
-void MemoryBuffer::init(const char *BufStart, const char *BufEnd,
+व्योम Memory_बफर::init(स्थिर अक्षर *BufStart, स्थिर अक्षर *BufEnd,
                         bool RequiresNullTerminator) {
-  assert((!RequiresNullTerminator || BufEnd[0] == 0) &&
+  निश्चित((!RequiresNullTerminator || BufEnd[0] == 0) &&
          "Buffer is not null terminated!");
-  BufferStart = BufStart;
-  BufferEnd = BufEnd;
+  बफर_Start = BufStart;
+  बफर_End = BufEnd;
 }
 
 //===----------------------------------------------------------------------===//
@@ -60,20 +60,20 @@ void MemoryBuffer::init(const char *BufStart, const char *BufEnd,
 
 /// CopyStringRef - Copies contents of a StringRef into a block of memory and
 /// null-terminates it.
-static void CopyStringRef(char *Memory, StringRef Data) {
-  if (!Data.empty())
-    memcpy(Memory, Data.data(), Data.size());
-  Memory[Data.size()] = 0; // Null terminate string.
+अटल व्योम CopyStringRef(अक्षर *Memory, StringRef तथ्य_2) {
+  अगर (!तथ्य_2.empty())
+    स_नकल(Memory, तथ्य_2.तथ्य(), तथ्य_2.आकार_2());
+  Memory[तथ्य_2.आकार_2()] = 0; // Null terminate string.
 }
 
 namespace {
-struct NamedBufferAlloc {
-  const Twine &Name;
-  NamedBufferAlloc(const Twine &Name) : Name(Name) {}
+काष्ठा Named_बफर_Alloc {
+  स्थिर Twine &Name;
+  Named_बफर_Alloc(स्थिर Twine &Name) : Name(Name) {}
 };
 } // namespace
 
-void *operator new(size_t N, const NamedBufferAlloc &Alloc) {
+व्योम *चालक नया(माप_प्रकार N, स्थिर Named_बफर_Alloc &Alloc) {
   SmallString<256> NameBuf;
   StringRef NameRef = Alloc.Name.toStringRef(NameBuf);
 
@@ -83,83 +83,83 @@ void *operator new(size_t N, const NamedBufferAlloc &Alloc) {
   // WritableMemoryBuffer::getNewUninitMemBuffer() to work around the out-of-
   // memory handler installed by default in LLVM. See operator delete() member
   // functions within this file for the paired call to free().
-  char *Mem =
-      static_cast<char *>(std::malloc(N + sizeof(size_t) + NameRef.size() + 1));
-  if (!Mem)
+  अक्षर *Mem =
+      static_cast<अक्षर *>(std::दो_स्मृति(N + माप(माप_प्रकार) + NameRef.आकार_2() + 1));
+  अगर (!Mem)
     llvm::report_bad_alloc_error("Allocation failed");
-  *reinterpret_cast<size_t *>(Mem + N) = NameRef.size();
-  CopyStringRef(Mem + N + sizeof(size_t), NameRef);
-  return Mem;
+  *reinterpret_cast<माप_प्रकार *>(Mem + N) = NameRef.आकार_2();
+  CopyStringRef(Mem + N + माप(माप_प्रकार), NameRef);
+  वापस Mem;
 }
 
 namespace {
 /// MemoryBufferMem - Named MemoryBuffer pointing to a block of memory.
-template<typename MB>
-class MemoryBufferMem : public MB {
-public:
-  MemoryBufferMem(StringRef InputData, bool RequiresNullTerminator) {
-    MemoryBuffer::init(InputData.begin(), InputData.end(),
+ढाँचा<typename MB>
+श्रेणी Memory_बफर_Mem : खुला MB {
+खुला:
+  Memory_बफर_Mem(StringRef निवेश_तथ्य, bool RequiresNullTerminator) {
+    Memory_बफर::init(निवेश_तथ्य.begin(), निवेश_तथ्य.end(),
                        RequiresNullTerminator);
   }
 
   /// Disable sized deallocation for MemoryBufferMem, because it has
   /// tail-allocated data.
-  void operator delete(void *p) { std::free(p); }
+  व्योम चालक मिटाओ(व्योम *p) { std::मुक्त(p); }
 
-  StringRef getBufferIdentifier() const override {
+  StringRef get_बफर_Identifier() स्थिर override {
     // The name is stored after the class itself.
-    return StringRef(reinterpret_cast<const char *>(this + 1) + sizeof(size_t),
-                     *reinterpret_cast<const size_t *>(this + 1));
+    वापस StringRef(reinterpret_cast<स्थिर अक्षर *>(यह + 1) + माप(माप_प्रकार),
+                     *reinterpret_cast<स्थिर माप_प्रकार *>(यह + 1));
   }
 
-  MemoryBuffer::BufferKind getBufferKind() const override {
-    return MemoryBuffer::MemoryBuffer_Malloc;
+  Memory_बफर::बफर_Kind get_बफर_Kind() स्थिर override {
+    वापस Memory_बफर::Memory_बफर_Malloc;
   }
 };
 } // namespace
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getFileAux(const Twine &Filename, uint64_t MapSize, uint64_t Offset,
+ढाँचा <typename MB>
+अटल ErrorOr<std::unique_ptr<MB>>
+getFileAux(स्थिर Twine &Filename, uint64_t Map_आकार, uint64_t Offset,
            bool IsText, bool RequiresNullTerminator, bool IsVolatile,
            std::optional<Align> Alignment);
 
-std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBuffer(StringRef InputData, StringRef BufferName,
+std::unique_ptr<Memory_बफर>
+Memory_बफर::get_Mem_बफर(StringRef निवेश_तथ्य, StringRef बफर_Name,
                            bool RequiresNullTerminator) {
-  auto *Ret = new (NamedBufferAlloc(BufferName))
-      MemoryBufferMem<MemoryBuffer>(InputData, RequiresNullTerminator);
-  return std::unique_ptr<MemoryBuffer>(Ret);
+  स्वतः *Ret = नया (Named_बफर_Alloc(बफर_Name))
+      Memory_बफर_Mem<Memory_बफर>(निवेश_तथ्य, RequiresNullTerminator);
+  वापस std::unique_ptr<Memory_बफर>(Ret);
 }
 
-std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBuffer(MemoryBufferRef Ref, bool RequiresNullTerminator) {
-  return std::unique_ptr<MemoryBuffer>(getMemBuffer(
-      Ref.getBuffer(), Ref.getBufferIdentifier(), RequiresNullTerminator));
+std::unique_ptr<Memory_बफर>
+Memory_बफर::get_Mem_बफर(Memory_बफर_Ref Ref, bool RequiresNullTerminator) {
+  वापस std::unique_ptr<Memory_बफर>(get_Mem_बफर(
+      Ref.get_बफर(), Ref.get_बफर_Identifier(), RequiresNullTerminator));
 }
 
-static ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-getMemBufferCopyImpl(StringRef InputData, const Twine &BufferName) {
-  auto Buf =
-      WritableMemoryBuffer::getNewUninitMemBuffer(InputData.size(), BufferName);
-  if (!Buf)
-    return make_error_code(errc::not_enough_memory);
+अटल ErrorOr<std::unique_ptr<Writable_Memory_बफर>>
+get_Mem_बफर_Copy_Impl(StringRef निवेश_तथ्य, स्थिर Twine &बफर_Name) {
+  स्वतः Buf =
+      Writable_Memory_बफर::get_New_Uninit_Mem_बफर(निवेश_तथ्य.आकार_2(), बफर_Name);
+  अगर (!Buf)
+    वापस make_error_code(errc::not_enough_memory);
   // Calling memcpy with null src/dst is UB, and an empty StringRef is
   // represented with {nullptr, 0}.
-  llvm::copy(InputData, Buf->getBufferStart());
-  return std::move(Buf);
+  llvm::copy(निवेश_तथ्य, Buf->get_बफर_Start());
+  वापस std::move(Buf);
 }
 
-std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBufferCopy(StringRef InputData, const Twine &BufferName) {
-  auto Buf = getMemBufferCopyImpl(InputData, BufferName);
-  if (Buf)
-    return std::move(*Buf);
-  return nullptr;
+std::unique_ptr<Memory_बफर>
+Memory_बफर::get_Mem_बफर_Copy(StringRef निवेश_तथ्य, स्थिर Twine &बफर_Name) {
+  स्वतः Buf = get_Mem_बफर_Copy_Impl(निवेश_तथ्य, बफर_Name);
+  अगर (Buf)
+    वापस std::move(*Buf);
+  वापस nullptr;
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFileOrSTDIN(const Twine &Filename, bool IsText,
+ErrorOr<std::unique_ptr<Memory_बफर>>
+Memory_बफर::getFileOrSTDIN(स्थिर Twine &Filename, bool IsText,
                              bool RequiresNullTerminator,
                              std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
@@ -167,19 +167,19 @@ MemoryBuffer::getFileOrSTDIN(const Twine &Filename, bool IsText,
   SmallString<256> NameBuf;
   StringRef NameRef = Filename.toStringRef(NameBuf);
 
-  if (NameRef == "-")
-    return getSTDIN();
-  return getFile(Filename, IsText, RequiresNullTerminator,
+  अगर (NameRef == "-")
+    वापस getSTDIN();
+  वापस getFile(Filename, IsText, RequiresNullTerminator,
                  /*IsVolatile=*/false, Alignment);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFileSlice(const Twine &FilePath, uint64_t MapSize,
+ErrorOr<std::unique_ptr<Memory_बफर>>
+Memory_बफर::getFileSlice(स्थिर Twine &FilePath, uint64_t Map_आकार,
                            uint64_t Offset, bool IsVolatile,
                            std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<MemoryBuffer>(FilePath, MapSize, Offset, /*IsText=*/false,
+  वापस getFileAux<Memory_बफर>(FilePath, Map_आकार, Offset, /*IsText=*/false,
                                   /*RequiresNullTerminator=*/false, IsVolatile,
                                   Alignment);
 }
@@ -190,149 +190,149 @@ MemoryBuffer::getFileSlice(const Twine &FilePath, uint64_t MapSize,
 
 namespace {
 
-template <typename MB>
+ढाँचा <typename MB>
 constexpr sys::fs::mapped_file_region::mapmode Mapmode =
     sys::fs::mapped_file_region::readonly;
-template <>
-constexpr sys::fs::mapped_file_region::mapmode Mapmode<MemoryBuffer> =
+ढाँचा <>
+constexpr sys::fs::mapped_file_region::mapmode Mapmode<Memory_बफर> =
     sys::fs::mapped_file_region::readonly;
-template <>
-constexpr sys::fs::mapped_file_region::mapmode Mapmode<WritableMemoryBuffer> =
+ढाँचा <>
+constexpr sys::fs::mapped_file_region::mapmode Mapmode<Writable_Memory_बफर> =
     sys::fs::mapped_file_region::priv;
-template <>
+ढाँचा <>
 constexpr sys::fs::mapped_file_region::mapmode
-    Mapmode<WriteThroughMemoryBuffer> = sys::fs::mapped_file_region::readwrite;
+    Mapmode<Write_Through_Memory_बफर> = sys::fs::mapped_file_region::readwrite;
 
 /// Memory maps a file descriptor using sys::fs::mapped_file_region.
 ///
 /// This handles converting the offset into a legal offset on the platform.
-template<typename MB>
-class MemoryBufferMMapFile : public MB {
+ढाँचा<typename MB>
+श्रेणी Memory_बफर_MMap_File : खुला MB {
   sys::fs::mapped_file_region MFR;
 
-  static uint64_t getLegalMapOffset(uint64_t Offset) {
-    return Offset & ~(sys::fs::mapped_file_region::alignment() - 1);
+  अटल uint64_t getLegalMapOffset(uint64_t Offset) {
+    वापस Offset & ~(sys::fs::mapped_file_region::alignment() - 1);
   }
 
-  static uint64_t getLegalMapSize(uint64_t Len, uint64_t Offset) {
-    return Len + (Offset - getLegalMapOffset(Offset));
+  अटल uint64_t get_Legal_Map_आकार(uint64_t Len, uint64_t Offset) {
+    वापस Len + (Offset - getLegalMapOffset(Offset));
   }
 
-  const char *getStart(uint64_t Len, uint64_t Offset) {
-    return MFR.const_data() + (Offset - getLegalMapOffset(Offset));
+  स्थिर अक्षर *getStart(uint64_t Len, uint64_t Offset) {
+    वापस MFR.const_तथ्य() + (Offset - getLegalMapOffset(Offset));
   }
 
-public:
-  MemoryBufferMMapFile(bool RequiresNullTerminator, sys::fs::file_t FD, uint64_t Len,
+खुला:
+  Memory_बफर_MMap_File(bool RequiresNullTerminator, sys::fs::file_t FD, uint64_t Len,
                        uint64_t Offset, std::error_code &EC)
-      : MFR(FD, Mapmode<MB>, getLegalMapSize(Len, Offset),
+      : MFR(FD, Mapmode<MB>, get_Legal_Map_आकार(Len, Offset),
             getLegalMapOffset(Offset), EC) {
-    if (!EC) {
-      const char *Start = getStart(Len, Offset);
-      MemoryBuffer::init(Start, Start + Len, RequiresNullTerminator);
+    अगर (!EC) {
+      स्थिर अक्षर *Start = getStart(Len, Offset);
+      Memory_बफर::init(Start, Start + Len, RequiresNullTerminator);
     }
   }
 
   /// Disable sized deallocation for MemoryBufferMMapFile, because it has
   /// tail-allocated data.
-  void operator delete(void *p) { std::free(p); }
+  व्योम चालक मिटाओ(व्योम *p) { std::मुक्त(p); }
 
-  StringRef getBufferIdentifier() const override {
+  StringRef get_बफर_Identifier() स्थिर override {
     // The name is stored after the class itself.
-    return StringRef(reinterpret_cast<const char *>(this + 1) + sizeof(size_t),
-                     *reinterpret_cast<const size_t *>(this + 1));
+    वापस StringRef(reinterpret_cast<स्थिर अक्षर *>(यह + 1) + माप(माप_प्रकार),
+                     *reinterpret_cast<स्थिर माप_प्रकार *>(यह + 1));
   }
 
-  MemoryBuffer::BufferKind getBufferKind() const override {
-    return MemoryBuffer::MemoryBuffer_MMap;
+  Memory_बफर::बफर_Kind get_बफर_Kind() स्थिर override {
+    वापस Memory_बफर::Memory_बफर_MMap;
   }
 
-  void dontNeedIfMmap() override { MFR.dontNeed(); }
-  void willNeedIfMmap() override { MFR.willNeed(); }
-  void randomAccessIfMmap() override { MFR.randomAccess(); }
+  व्योम dontNeedIfMmap() override { MFR.dontNeed(); }
+  व्योम willNeedIfMmap() override { MFR.willNeed(); }
+  व्योम randomAccessIfMmap() override { MFR.randomAccess(); }
 };
 } // namespace
 
-static ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-getMemoryBufferForStream(sys::fs::file_t FD, const Twine &BufferName) {
-  SmallString<sys::fs::DefaultReadChunkSize> Buffer;
-  if (Error E = sys::fs::readNativeFileToEOF(FD, Buffer))
-    return errorToErrorCode(std::move(E));
-  return getMemBufferCopyImpl(Buffer, BufferName);
+अटल ErrorOr<std::unique_ptr<Writable_Memory_बफर>>
+get_Memory_बफर_For_Stream(sys::fs::file_t FD, स्थिर Twine &बफर_Name) {
+  SmallString<sys::fs::Default_Read_Chunk_आकार> बफर;
+  अगर (Error E = sys::fs::readNativeFileToEOF(FD, बफर))
+    वापस errorToErrorCode(std::move(E));
+  वापस get_Mem_बफर_Copy_Impl(बफर, बफर_Name);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFile(const Twine &Filename, bool IsText,
+ErrorOr<std::unique_ptr<Memory_बफर>>
+Memory_बफर::getFile(स्थिर Twine &Filename, bool IsText,
                       bool RequiresNullTerminator, bool IsVolatile,
                       std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<MemoryBuffer>(Filename, /*MapSize=*/-1, /*Offset=*/0,
+  वापस getFileAux<Memory_बफर>(Filename, /*MapSize=*/-1, /*Offset=*/0,
                                   IsText, RequiresNullTerminator, IsVolatile,
                                   Alignment);
 }
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getOpenFileImpl(sys::fs::file_t FD, const Twine &Filename, uint64_t FileSize,
-                uint64_t MapSize, int64_t Offset, bool RequiresNullTerminator,
+ढाँचा <typename MB>
+अटल ErrorOr<std::unique_ptr<MB>>
+getOpenFileImpl(sys::fs::file_t FD, स्थिर Twine &Filename, uint64_t File_आकार,
+                uint64_t Map_आकार, int64_t Offset, bool RequiresNullTerminator,
                 bool IsVolatile, std::optional<Align> Alignment);
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getFileAux(const Twine &Filename, uint64_t MapSize, uint64_t Offset,
+ढाँचा <typename MB>
+अटल ErrorOr<std::unique_ptr<MB>>
+getFileAux(स्थिर Twine &Filename, uint64_t Map_आकार, uint64_t Offset,
            bool IsText, bool RequiresNullTerminator, bool IsVolatile,
            std::optional<Align> Alignment) {
   Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
       Filename, IsText ? sys::fs::OF_TextWithCRLF : sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+  अगर (!FDOrErr)
+    वापस errorToErrorCode(FDOrErr.takeError());
   sys::fs::file_t FD = *FDOrErr;
-  auto Ret = getOpenFileImpl<MB>(FD, Filename, /*FileSize=*/-1, MapSize, Offset,
+  स्वतः Ret = getOpenFileImpl<MB>(FD, Filename, /*FileSize=*/-1, Map_आकार, Offset,
                                  RequiresNullTerminator, IsVolatile, Alignment);
   sys::fs::closeFile(FD);
-  return Ret;
+  वापस Ret;
 }
 
-ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-WritableMemoryBuffer::getFile(const Twine &Filename, bool IsVolatile,
+ErrorOr<std::unique_ptr<Writable_Memory_बफर>>
+Writable_Memory_बफर::getFile(स्थिर Twine &Filename, bool IsVolatile,
                               std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<WritableMemoryBuffer>(
+  वापस getFileAux<Writable_Memory_बफर>(
       Filename, /*MapSize=*/-1, /*Offset=*/0, /*IsText=*/false,
       /*RequiresNullTerminator=*/false, IsVolatile, Alignment);
 }
 
-ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-WritableMemoryBuffer::getFileSlice(const Twine &Filename, uint64_t MapSize,
+ErrorOr<std::unique_ptr<Writable_Memory_बफर>>
+Writable_Memory_बफर::getFileSlice(स्थिर Twine &Filename, uint64_t Map_आकार,
                                    uint64_t Offset, bool IsVolatile,
                                    std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getFileAux<WritableMemoryBuffer>(
-      Filename, MapSize, Offset, /*IsText=*/false,
+  वापस getFileAux<Writable_Memory_बफर>(
+      Filename, Map_आकार, Offset, /*IsText=*/false,
       /*RequiresNullTerminator=*/false, IsVolatile, Alignment);
 }
 
-std::unique_ptr<WritableMemoryBuffer>
-WritableMemoryBuffer::getNewUninitMemBuffer(size_t Size,
-                                            const Twine &BufferName,
+std::unique_ptr<Writable_Memory_बफर>
+Writable_Memory_बफर::get_New_Uninit_Mem_बफर(माप_प्रकार आकार,
+                                            स्थिर Twine &बफर_Name,
                                             std::optional<Align> Alignment) {
-  using MemBuffer = MemoryBufferMem<WritableMemoryBuffer>;
+  using Mem_बफर = Memory_बफर_Mem<Writable_Memory_बफर>;
 
   // Use 16-byte alignment if no alignment is specified.
-  Align BufAlign = Alignment.value_or(Align(16));
+  Align BufAlign = Alignment.मूल्य_or(Align(16));
 
   // Allocate space for the MemoryBuffer, the data and the name. It is important
   // that MemoryBuffer and data are aligned so PointerIntPair works with them.
   SmallString<256> NameBuf;
-  StringRef NameRef = BufferName.toStringRef(NameBuf);
+  StringRef NameRef = बफर_Name.toStringRef(NameBuf);
 
-  size_t StringLen = sizeof(MemBuffer) + sizeof(size_t) + NameRef.size() + 1;
-  size_t RealLen = StringLen + Size + 1 + BufAlign.value();
-  if (RealLen <= Size) // Check for rollover.
-    return nullptr;
+  माप_प्रकार StringLen = माप(Mem_बफर) + माप(माप_प्रकार) + NameRef.आकार_2() + 1;
+  माप_प्रकार RealLen = StringLen + आकार + 1 + BufAlign.मूल्य_2();
+  अगर (RealLen <= आकार) // Check for rollover.
+    वापस nullptr;
   // We use a call to malloc() rather than a call to a non-throwing operator
   // new() because LLVM unconditionally installs an out of memory new handler
   // when exceptions are disabled. This new handler intentionally crashes to
@@ -340,256 +340,256 @@ WritableMemoryBuffer::getNewUninitMemBuffer(size_t Size,
   // See MemoryBufferMem::operator delete() for the paired call to free(), and
   // llvm::install_out_of_memory_new_handler() for the installation of the
   // custom new handler.
-  char *Mem = static_cast<char *>(std::malloc(RealLen));
-  if (!Mem)
-    return nullptr;
+  अक्षर *Mem = static_cast<अक्षर *>(std::दो_स्मृति(RealLen));
+  अगर (!Mem)
+    वापस nullptr;
 
   // The name is stored after the class itself.
-  *reinterpret_cast<size_t *>(Mem + sizeof(MemBuffer)) = NameRef.size();
-  CopyStringRef(Mem + sizeof(MemBuffer) + sizeof(size_t), NameRef);
+  *reinterpret_cast<माप_प्रकार *>(Mem + माप(Mem_बफर)) = NameRef.आकार_2();
+  CopyStringRef(Mem + माप(Mem_बफर) + माप(माप_प्रकार), NameRef);
 
   // The buffer begins after the name and must be aligned.
-  char *Buf = (char *)alignAddr(Mem + StringLen, BufAlign);
-  Buf[Size] = 0; // Null terminate buffer.
+  अक्षर *Buf = (अक्षर *)alignAddr(Mem + StringLen, BufAlign);
+  Buf[आकार] = 0; // Null terminate buffer.
 
-  auto *Ret = new (Mem) MemBuffer(StringRef(Buf, Size), true);
-  return std::unique_ptr<WritableMemoryBuffer>(Ret);
+  स्वतः *Ret = नया (Mem) Mem_बफर(StringRef(Buf, आकार), true);
+  वापस std::unique_ptr<Writable_Memory_बफर>(Ret);
 }
 
-std::unique_ptr<WritableMemoryBuffer>
-WritableMemoryBuffer::getNewMemBuffer(size_t Size, const Twine &BufferName) {
-  auto SB = WritableMemoryBuffer::getNewUninitMemBuffer(Size, BufferName);
-  if (!SB)
-    return nullptr;
-  memset(SB->getBufferStart(), 0, Size);
-  return SB;
+std::unique_ptr<Writable_Memory_बफर>
+Writable_Memory_बफर::get_New_Mem_बफर(माप_प्रकार आकार, स्थिर Twine &बफर_Name) {
+  स्वतः SB = Writable_Memory_बफर::get_New_Uninit_Mem_बफर(आकार, बफर_Name);
+  अगर (!SB)
+    वापस nullptr;
+  स_रखो(SB->get_बफर_Start(), 0, आकार);
+  वापस SB;
 }
 
-static bool shouldUseMmap(sys::fs::file_t FD,
-                          size_t FileSize,
-                          size_t MapSize,
+अटल bool shouldUseMmap(sys::fs::file_t FD,
+                          माप_प्रकार File_आकार,
+                          माप_प्रकार Map_आकार,
                           off_t Offset,
                           bool RequiresNullTerminator,
-                          int PageSize,
+                          पूर्णांक Page_आकार,
                           bool IsVolatile) {
-#if defined(__MVS__)
+#अगर defined(__MVS__)
   // zOS Enhanced ASCII auto convert does not support mmap.
-  return false;
-#endif
+  वापस false;
+#पूर्ण_अगर
 
   // mmap may leave the buffer without null terminator if the file size changed
   // by the time the last page is mapped in, so avoid it if the file size is
   // likely to change.
-  if (IsVolatile && RequiresNullTerminator)
-    return false;
+  अगर (IsVolatile && RequiresNullTerminator)
+    वापस false;
 
   // We don't use mmap for small files because this can severely fragment our
   // address space.
-  if (MapSize < 4 * 4096 || MapSize < (unsigned)PageSize)
-    return false;
+  अगर (Map_आकार < 4 * 4096 || Map_आकार < (अचिन्हित)Page_आकार)
+    वापस false;
 
-  if (!RequiresNullTerminator)
-    return true;
+  अगर (!RequiresNullTerminator)
+    वापस true;
 
   // If we don't know the file size, use fstat to find out.  fstat on an open
   // file descriptor is cheaper than stat on a random path.
   // FIXME: this chunk of code is duplicated, but it avoids a fstat when
   // RequiresNullTerminator = false and MapSize != -1.
-  if (FileSize == size_t(-1)) {
+  अगर (File_आकार == माप_प्रकार(-1)) {
     sys::fs::file_status Status;
-    if (sys::fs::status(FD, Status))
-      return false;
-    FileSize = Status.getSize();
+    अगर (sys::fs::status(FD, Status))
+      वापस false;
+    File_आकार = Status.get_आकार();
   }
 
   // If we need a null terminator and the end of the map is inside the file,
   // we cannot use mmap.
-  size_t End = Offset + MapSize;
-  assert(End <= FileSize);
-  if (End != FileSize)
-    return false;
+  माप_प्रकार End = Offset + Map_आकार;
+  निश्चित(End <= File_आकार);
+  अगर (End != File_आकार)
+    वापस false;
 
   // Don't try to map files that are exactly a multiple of the system page size
   // if we need a null terminator.
-  if ((FileSize & (PageSize -1)) == 0)
-    return false;
+  अगर ((File_आकार & (Page_आकार -1)) == 0)
+    वापस false;
 
-#if defined(__CYGWIN__)
+#अगर defined(__CYGWIN__)
   // Don't try to map files that are exactly a multiple of the physical page size
   // if we need a null terminator.
   // FIXME: We should reorganize again getPageSize() on Win32.
-  if ((FileSize & (4096 - 1)) == 0)
-    return false;
-#endif
+  अगर ((File_आकार & (4096 - 1)) == 0)
+    वापस false;
+#पूर्ण_अगर
 
-  return true;
+  वापस true;
 }
 
-static ErrorOr<std::unique_ptr<WriteThroughMemoryBuffer>>
-getReadWriteFile(const Twine &Filename, uint64_t FileSize, uint64_t MapSize,
+अटल ErrorOr<std::unique_ptr<Write_Through_Memory_बफर>>
+getReadWriteFile(स्थिर Twine &Filename, uint64_t File_आकार, uint64_t Map_आकार,
                  uint64_t Offset) {
   Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForReadWrite(
       Filename, sys::fs::CD_OpenExisting, sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+  अगर (!FDOrErr)
+    वापस errorToErrorCode(FDOrErr.takeError());
   sys::fs::file_t FD = *FDOrErr;
 
   // Default is to map the full file.
-  if (MapSize == uint64_t(-1)) {
+  अगर (Map_आकार == uint64_t(-1)) {
     // If we don't know the file size, use fstat to find out.  fstat on an open
     // file descriptor is cheaper than stat on a random path.
-    if (FileSize == uint64_t(-1)) {
+    अगर (File_आकार == uint64_t(-1)) {
       sys::fs::file_status Status;
       std::error_code EC = sys::fs::status(FD, Status);
-      if (EC)
-        return EC;
+      अगर (EC)
+        वापस EC;
 
       // If this not a file or a block device (e.g. it's a named pipe
       // or character device), we can't mmap it, so error out.
       sys::fs::file_type Type = Status.type();
-      if (Type != sys::fs::file_type::regular_file &&
+      अगर (Type != sys::fs::file_type::regular_file &&
           Type != sys::fs::file_type::block_file)
-        return make_error_code(errc::invalid_argument);
+        वापस make_error_code(errc::invalid_argument);
 
-      FileSize = Status.getSize();
+      File_आकार = Status.get_आकार();
     }
-    MapSize = FileSize;
+    Map_आकार = File_आकार;
   }
 
   std::error_code EC;
-  std::unique_ptr<WriteThroughMemoryBuffer> Result(
-      new (NamedBufferAlloc(Filename))
-          MemoryBufferMMapFile<WriteThroughMemoryBuffer>(false, FD, MapSize,
+  std::unique_ptr<Write_Through_Memory_बफर> परिणाम(
+      नया (Named_बफर_Alloc(Filename))
+          Memory_बफर_MMap_File<Write_Through_Memory_बफर>(false, FD, Map_आकार,
                                                          Offset, EC));
-  if (EC)
-    return EC;
-  return std::move(Result);
+  अगर (EC)
+    वापस EC;
+  वापस std::move(परिणाम);
 }
 
-ErrorOr<std::unique_ptr<WriteThroughMemoryBuffer>>
-WriteThroughMemoryBuffer::getFile(const Twine &Filename, int64_t FileSize) {
+ErrorOr<std::unique_ptr<Write_Through_Memory_बफर>>
+Write_Through_Memory_बफर::getFile(स्थिर Twine &Filename, int64_t File_आकार) {
   sys::sandbox::violationIfEnabled();
 
-  return getReadWriteFile(Filename, FileSize, FileSize, 0);
+  वापस getReadWriteFile(Filename, File_आकार, File_आकार, 0);
 }
 
 /// Map a subrange of the specified file as a WritableMemoryBuffer.
-ErrorOr<std::unique_ptr<WriteThroughMemoryBuffer>>
-WriteThroughMemoryBuffer::getFileSlice(const Twine &Filename, uint64_t MapSize,
+ErrorOr<std::unique_ptr<Write_Through_Memory_बफर>>
+Write_Through_Memory_बफर::getFileSlice(स्थिर Twine &Filename, uint64_t Map_आकार,
                                        uint64_t Offset) {
   sys::sandbox::violationIfEnabled();
 
-  return getReadWriteFile(Filename, -1, MapSize, Offset);
+  वापस getReadWriteFile(Filename, -1, Map_आकार, Offset);
 }
 
-template <typename MB>
-static ErrorOr<std::unique_ptr<MB>>
-getOpenFileImpl(sys::fs::file_t FD, const Twine &Filename, uint64_t FileSize,
-                uint64_t MapSize, int64_t Offset, bool RequiresNullTerminator,
+ढाँचा <typename MB>
+अटल ErrorOr<std::unique_ptr<MB>>
+getOpenFileImpl(sys::fs::file_t FD, स्थिर Twine &Filename, uint64_t File_आकार,
+                uint64_t Map_आकार, int64_t Offset, bool RequiresNullTerminator,
                 bool IsVolatile, std::optional<Align> Alignment) {
-  static int PageSize = sys::Process::getPageSizeEstimate();
+  अटल पूर्णांक Page_आकार = sys::Process::get_Page_आकार_Estimate();
 
   // Default is to map the full file.
-  if (MapSize == uint64_t(-1)) {
+  अगर (Map_आकार == uint64_t(-1)) {
     // If we don't know the file size, use fstat to find out.  fstat on an open
     // file descriptor is cheaper than stat on a random path.
-    if (FileSize == uint64_t(-1)) {
+    अगर (File_आकार == uint64_t(-1)) {
       sys::fs::file_status Status;
       std::error_code EC = sys::fs::status(FD, Status);
-      if (EC)
-        return EC;
+      अगर (EC)
+        वापस EC;
 
       // If this not a file or a block device (e.g. it's a named pipe
       // or character device), we can't trust the size. Create the memory
       // buffer by copying off the stream.
       sys::fs::file_type Type = Status.type();
-      if (Type != sys::fs::file_type::regular_file &&
+      अगर (Type != sys::fs::file_type::regular_file &&
           Type != sys::fs::file_type::block_file)
-        return getMemoryBufferForStream(FD, Filename);
+        वापस get_Memory_बफर_For_Stream(FD, Filename);
 
-      FileSize = Status.getSize();
+      File_आकार = Status.get_आकार();
     }
-    MapSize = FileSize;
+    Map_आकार = File_आकार;
   }
 
-  if (shouldUseMmap(FD, FileSize, MapSize, Offset, RequiresNullTerminator,
-                    PageSize, IsVolatile)) {
+  अगर (shouldUseMmap(FD, File_आकार, Map_आकार, Offset, RequiresNullTerminator,
+                    Page_आकार, IsVolatile)) {
     std::error_code EC;
-    std::unique_ptr<MB> Result(
-        new (NamedBufferAlloc(Filename)) MemoryBufferMMapFile<MB>(
-            RequiresNullTerminator, FD, MapSize, Offset, EC));
-    if (!EC) {
+    std::unique_ptr<MB> परिणाम(
+        नया (Named_बफर_Alloc(Filename)) Memory_बफर_MMap_File<MB>(
+            RequiresNullTerminator, FD, Map_आकार, Offset, EC));
+    अगर (!EC) {
       // On at least Linux, and possibly on other systems, mmap may return pages
       // from the page cache that are not properly filled with trailing zeroes,
       // if some prior user of the page wrote non-zero bytes. Detect this and
       // don't use mmap in that case.
-      if (!RequiresNullTerminator || *Result->getBufferEnd() == '\0')
-        return std::move(Result);
+      अगर (!RequiresNullTerminator || *परिणाम->get_बफर_End() == '\0')
+        वापस std::move(परिणाम);
     }
   }
 
-#ifdef __MVS__
+#अगर_घोषित __MVS__
   ErrorOr<bool> NeedsConversion = needConversion(Filename, FD);
-  if (std::error_code EC = NeedsConversion.getError())
-    return EC;
+  अगर (std::error_code EC = NeedsConversion.getError())
+    वापस EC;
   // File size may increase due to EBCDIC -> UTF-8 conversion, therefore we
   // cannot trust the file size and we create the memory buffer by copying
   // off the stream.
   // Note: This only works with the assumption of reading a full file (i.e,
   // Offset == 0 and MapSize == FileSize). Reading a file slice does not work.
-  if (*NeedsConversion && Offset == 0 && MapSize == FileSize)
-    return getMemoryBufferForStream(FD, Filename);
-#endif
+  अगर (*NeedsConversion && Offset == 0 && Map_आकार == File_आकार)
+    वापस get_Memory_बफर_For_Stream(FD, Filename);
+#पूर्ण_अगर
 
-  auto Buf =
-      WritableMemoryBuffer::getNewUninitMemBuffer(MapSize, Filename, Alignment);
-  if (!Buf) {
+  स्वतः Buf =
+      Writable_Memory_बफर::get_New_Uninit_Mem_बफर(Map_आकार, Filename, Alignment);
+  अगर (!Buf) {
     // Failed to create a buffer. The only way it can fail is if
     // new(std::nothrow) returns 0.
-    return make_error_code(errc::not_enough_memory);
+    वापस make_error_code(errc::not_enough_memory);
   }
 
   // Read until EOF, zero-initialize the rest.
-  MutableArrayRef<char> ToRead = Buf->getBuffer();
-  while (!ToRead.empty()) {
-    Expected<size_t> ReadBytes =
+  MutableArrayRef<अक्षर> ToRead = Buf->get_बफर();
+  जबतक (!ToRead.empty()) {
+    Expected<माप_प्रकार> ReadBytes =
         sys::fs::readNativeFileSlice(FD, ToRead, Offset);
-    if (!ReadBytes)
-      return errorToErrorCode(ReadBytes.takeError());
-    if (*ReadBytes == 0) {
-      std::memset(ToRead.data(), 0, ToRead.size());
-      break;
+    अगर (!ReadBytes)
+      वापस errorToErrorCode(ReadBytes.takeError());
+    अगर (*ReadBytes == 0) {
+      std::स_रखो(ToRead.तथ्य(), 0, ToRead.आकार_2());
+      अवरोध;
     }
     ToRead = ToRead.drop_front(*ReadBytes);
     Offset += *ReadBytes;
   }
 
-  return std::move(Buf);
+  वापस std::move(Buf);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getOpenFile(sys::fs::file_t FD, const Twine &Filename,
-                          uint64_t FileSize, bool RequiresNullTerminator,
+ErrorOr<std::unique_ptr<Memory_बफर>>
+Memory_बफर::getOpenFile(sys::fs::file_t FD, स्थिर Twine &Filename,
+                          uint64_t File_आकार, bool RequiresNullTerminator,
                           bool IsVolatile, std::optional<Align> Alignment) {
   sys::sandbox::violationIfEnabled();
 
-  return getOpenFileImpl<MemoryBuffer>(FD, Filename, FileSize, FileSize, 0,
+  वापस getOpenFileImpl<Memory_बफर>(FD, Filename, File_आकार, File_आकार, 0,
                                        RequiresNullTerminator, IsVolatile,
                                        Alignment);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>> MemoryBuffer::getOpenFileSlice(
-    sys::fs::file_t FD, const Twine &Filename, uint64_t MapSize, int64_t Offset,
+ErrorOr<std::unique_ptr<Memory_बफर>> Memory_बफर::getOpenFileSlice(
+    sys::fs::file_t FD, स्थिर Twine &Filename, uint64_t Map_आकार, int64_t Offset,
     bool IsVolatile, std::optional<Align> Alignment) {
-  assert(MapSize != uint64_t(-1));
+  निश्चित(Map_आकार != uint64_t(-1));
 
   sys::sandbox::violationIfEnabled();
 
-  return getOpenFileImpl<MemoryBuffer>(FD, Filename, -1, MapSize, Offset, false,
+  वापस getOpenFileImpl<Memory_बफर>(FD, Filename, -1, Map_आकार, Offset, false,
                                        IsVolatile, Alignment);
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>> MemoryBuffer::getSTDIN() {
+ErrorOr<std::unique_ptr<Memory_बफर>> Memory_बफर::getSTDIN() {
   sys::sandbox::violationIfEnabled();
 
   // Read in all of the data from stdin, we cannot mmap stdin.
@@ -598,28 +598,28 @@ ErrorOr<std::unique_ptr<MemoryBuffer>> MemoryBuffer::getSTDIN() {
   // fallback if it fails.
   sys::ChangeStdinMode(sys::fs::OF_Text);
 
-  return getMemoryBufferForStream(sys::fs::getStdinHandle(), "<stdin>");
+  वापस get_Memory_बफर_For_Stream(sys::fs::getStdinHandle(), "<stdin>");
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-MemoryBuffer::getFileAsStream(const Twine &Filename) {
+ErrorOr<std::unique_ptr<Memory_बफर>>
+Memory_बफर::getFileAsStream(स्थिर Twine &Filename) {
   sys::sandbox::violationIfEnabled();
 
   Expected<sys::fs::file_t> FDOrErr =
       sys::fs::openNativeFileForRead(Filename, sys::fs::OF_None);
-  if (!FDOrErr)
-    return errorToErrorCode(FDOrErr.takeError());
+  अगर (!FDOrErr)
+    वापस errorToErrorCode(FDOrErr.takeError());
   sys::fs::file_t FD = *FDOrErr;
-  ErrorOr<std::unique_ptr<MemoryBuffer>> Ret =
-      getMemoryBufferForStream(FD, Filename);
+  ErrorOr<std::unique_ptr<Memory_बफर>> Ret =
+      get_Memory_बफर_For_Stream(FD, Filename);
   sys::fs::closeFile(FD);
-  return Ret;
+  वापस Ret;
 }
 
-MemoryBufferRef MemoryBuffer::getMemBufferRef() const {
-  StringRef Data = getBuffer();
-  StringRef Identifier = getBufferIdentifier();
-  return MemoryBufferRef(Data, Identifier);
+Memory_बफर_Ref Memory_बफर::get_Mem_बफर_Ref() स्थिर {
+  StringRef तथ्य_2 = get_बफर();
+  StringRef Identifier = get_बफर_Identifier();
+  वापस Memory_बफर_Ref(तथ्य_2, Identifier);
 }
 
-SmallVectorMemoryBuffer::~SmallVectorMemoryBuffer() = default;
+Small_Vector_Memory_बफर::~Small_Vector_Memory_बफर() = शेष;

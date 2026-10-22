@@ -6,36 +6,36 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Logging.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/raw_ostream.h"
+#समावेश "llvm/Support/LSP/Logging.h"
+#समावेश "llvm/Support/Chrono.h"
+#समावेश "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 using namespace llvm::lsp;
 
-void Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
+व्योम Logger::setLogLevel(Level LogLevel) { लो().LogLevel = LogLevel; }
 
-Logger &Logger::get() {
-  static Logger Logger;
-  return Logger;
+Logger &Logger::लो() {
+  अटल Logger Logger;
+  वापस Logger;
 }
 
-void Logger::log(Level LogLevel, const char *Fmt,
-                 const llvm::formatv_object_base &Message) {
-  Logger &Logger = get();
+व्योम Logger::log(Level LogLevel, स्थिर अक्षर *Fmt,
+                 स्थिर llvm::formatv_object_base &Message) {
+  Logger &Logger = लो();
 
   // Ignore messages with log levels below the current setting in the logger.
-  if (LogLevel < Logger.LogLevel)
-    return;
+  अगर (LogLevel < Logger.LogLevel)
+    वापस;
 
   // An indicator character for each log level.
-  const char *LogLevelIndicators = "DIE";
+  स्थिर अक्षर *LogLevelIndicators = "DIE";
 
   // Format the message and print to errs.
   llvm::sys::TimePoint<> Timestamp = std::chrono::system_clock::now();
   std::lock_guard<std::mutex> LogGuard(Logger.Mutex);
   llvm::errs() << llvm::formatv(
       "{0}[{1:%H:%M:%S.%L}] {2}\n",
-      LogLevelIndicators[static_cast<unsigned>(LogLevel)], Timestamp, Message);
-  llvm::errs().flush();
+      LogLevelIndicators[static_cast<अचिन्हित>(LogLevel)], Timestamp, Message);
+  llvm::errs().सफाई();
 }

@@ -1,11 +1,11 @@
 public _llvm_blake3_hash_many_avx2
 public llvm_blake3_hash_many_avx2
 
-_TEXT   SEGMENT ALIGN(16) 'CODE'
+_TEXT   अखंड मिलाओ(16) 'CODE'
 
-ALIGN   16
-llvm_blake3_hash_many_avx2 PROC
-_llvm_blake3_hash_many_avx2 PROC
+मिलाओ   16
+llvm_blake3_hash_many_avx2 क्रिया
+_llvm_blake3_hash_many_avx2 क्रिया
         push    r15
         push    r14
         push    r13
@@ -60,11 +60,11 @@ outerloop8:
         vpbroadcastd ymm0, dword ptr [rcx]
         vpbroadcastd ymm1, dword ptr [rcx+4H]
         vpbroadcastd ymm2, dword ptr [rcx+8H]
-        vpbroadcastd ymm3, dword ptr [rcx+0CH]
+        vpbroadcastd ymm3, dword ptr [rcx+0गउ]
         vpbroadcastd ymm4, dword ptr [rcx+10H]
         vpbroadcastd ymm5, dword ptr [rcx+14H]
         vpbroadcastd ymm6, dword ptr [rcx+18H]
-        vpbroadcastd ymm7, dword ptr [rcx+1CH]
+        vpbroadcastd ymm7, dword ptr [rcx+1गउ]
         mov     r8, qword ptr [rdi]
         mov     r9, qword ptr [rdi+8H]
         mov     r10, qword ptr [rdi+10H]
@@ -77,7 +77,7 @@ outerloop8:
         movzx   ebx, byte ptr [rbp+80H]
         or      eax, ebx
         xor     edx, edx
-ALIGN   16
+मिलाओ   16
 innerloop8:
         movzx   ebx, byte ptr [rbp+88H]
         or      ebx, eax
@@ -1323,7 +1323,7 @@ unwind:
         pop     r14
         pop     r15
         ret
-ALIGN   16
+मिलाओ   16
 final7blocks:
         mov     rbx, qword ptr [rbp+90H]
         mov     r15, qword ptr [rsp+2C0H]
@@ -1353,7 +1353,7 @@ final7blocks:
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
-ALIGN   16
+मिलाओ   16
 innerloop4:
         mov     r14d, eax
         or      eax, r12d
@@ -1574,7 +1574,7 @@ final3blocks:
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
-ALIGN   16
+मिलाओ   16
 innerloop2:
         mov     r14d, eax
         or      eax, r12d
@@ -1695,7 +1695,7 @@ final1blocks:
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
-ALIGN   16
+मिलाओ   16
 innerloop1:
         mov     r14d, eax
         or      eax, r12d
@@ -1785,12 +1785,12 @@ endroundloop1:
         vmovdqu xmmword ptr [rbx+10H], xmm1
         jmp     unwind
 
-_llvm_blake3_hash_many_avx2 ENDP
-llvm_blake3_hash_many_avx2 ENDP
-_TEXT ENDS
+_llvm_blake3_hash_many_avx2 पूर्ण_क्रिया
+llvm_blake3_hash_many_avx2 पूर्ण_क्रिया
+_TEXT पूर्ण_खंड
 
-_RDATA SEGMENT READONLY PAGE ALIAS(".rdata") 'CONST'
-ALIGN   64
+_RDATA अखंड READONLY पृष्ठ ALIAS(".rdata") 'CONST'
+मिलाओ   64
 ADD0:
         dd 0, 1, 2, 3, 4, 5, 6, 7
 
@@ -1824,5 +1824,5 @@ CMP_MSB_MASK:
 BLAKE3_IV:
         dd 6A09E667H, 0BB67AE85H, 3C6EF372H, 0A54FF53AH
 
-_RDATA ENDS
-END
+_RDATA पूर्ण_खंड
+पूर्ण

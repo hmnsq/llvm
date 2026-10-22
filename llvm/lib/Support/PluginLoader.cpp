@@ -10,49 +10,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
+#घोषणा DONT_GET_PLUGIN_LOADER_OPTION
+#समावेश "llvm/Support/PluginLoader.h"
+#समावेश "llvm/Support/DynamicLibrary.h"
+#समावेश "llvm/Support/Mutex.h"
+#समावेश "llvm/Support/raw_ostream.h"
+#समावेश <vector>
 using namespace llvm;
 
 namespace {
 
-struct Plugins {
+काष्ठा Plugins {
   sys::SmartMutex<true> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  अटल Plugins P;
+  वापस P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
-  auto &P = getPlugins();
+व्योम PluginLoader::चालक=(स्थिर std::string &Filename) {
+  स्वतः &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  अगर (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } अन्यथा {
+    P.List.धकेलो_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
-  auto &P = getPlugins();
+अचिन्हित PluginLoader::get_अंक_Plugins() {
+  स्वतः &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  वापस P.List.आकार_2();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
-  auto &P = getPlugins();
+std::string &PluginLoader::getPlugin(अचिन्हित अंक_2) {
+  स्वतः &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  निश्चित(अंक_2 < P.List.आकार_2() && "Asking for an out of bounds plugin");
+  वापस P.List[अंक_2];
 }

@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#समावेश "llvm/Support/Memory.h"
+#समावेश "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#अगर_अघोषित न_संशोधन
+#समावेश "llvm/Support/raw_ostream.h"
+#पूर्ण_अगर // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#अगर_घोषित LLVM_ON_UNIX
+#समावेश "Unix/Memory.inc"
+#पूर्ण_अगर
+#अगर_घोषित _WIN32
+#समावेश "Windows/Memory.inc"
+#पूर्ण_अगर
 
-#ifndef NDEBUG
+#अगर_अघोषित न_संशोधन
 
 namespace llvm {
 namespace sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &चालक<<(raw_ostream &OS, स्थिर Memory::ProtectionFlags &PF) {
+  निश्चित((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
+  वापस OS << (PF & Memory::MF_READ ? 'R' : '-')
             << (PF & Memory::MF_WRITE ? 'W' : '-')
             << (PF & Memory::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &चालक<<(raw_ostream &OS, स्थिर MemoryBlock &MB) {
+  वापस OS << "[ " << MB.base() << " .. "
+            << (व्योम *)((अक्षर *)MB.base() + MB.allocated_आकार()) << " ] ("
+            << MB.allocated_आकार() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#पूर्ण_अगर // ifndef NDEBUG

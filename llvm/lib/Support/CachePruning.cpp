@@ -10,65 +10,65 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CachePruning.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/WithColor.h"
-#include "llvm/Support/raw_ostream.h"
+#समावेश "llvm/Support/CachePruning.h"
+#समावेश "llvm/ADT/StringRef.h"
+#समावेश "llvm/Support/Debug.h"
+#समावेश "llvm/Support/Errc.h"
+#समावेश "llvm/Support/Error.h"
+#समावेश "llvm/Support/FileSystem.h"
+#समावेश "llvm/Support/Path.h"
+#समावेश "llvm/Support/WithColor.h"
+#समावेश "llvm/Support/raw_ostream.h"
 
-#define DEBUG_TYPE "cache-pruning"
+#घोषणा DEBUG_TYPE "cache-pruning"
 
-#include <set>
-#include <system_error>
+#समावेश <set>
+#समावेश <system_error>
 
 using namespace llvm;
 
 namespace {
-struct FileInfo {
+काष्ठा FileInfo {
   sys::TimePoint<> Time;
-  uint64_t Size;
+  uint64_t आकार;
   std::string Path;
 
   /// Used to determine which files to prune first. Also used to determine
   /// set membership, so must take into account all fields.
-  bool operator<(const FileInfo &Other) const {
-    return std::tie(Time, Other.Size, Path) <
-           std::tie(Other.Time, Size, Other.Path);
+  bool चालक<(स्थिर FileInfo &Other) स्थिर {
+    वापस std::tie(Time, Other.आकार, Path) <
+           std::tie(Other.Time, आकार, Other.Path);
   }
 };
 } // anonymous namespace
 
 /// Write a new timestamp file with the given path. This is used for the pruning
 /// interval option.
-static void writeTimestampFile(StringRef TimestampFile) {
+अटल व्योम writeTimestampFile(StringRef TimestampFile) {
   std::error_code EC;
   raw_fd_ostream Out(TimestampFile.str(), EC, sys::fs::OF_None);
 }
 
-static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
-  if (Duration.empty())
-    return make_error<StringError>("Duration must not be empty",
+अटल Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
+  अगर (Duration.empty())
+    वापस make_error<StringError>("Duration must not be empty",
                                    inconvertibleErrorCode());
 
-  StringRef NumStr = Duration.slice(0, Duration.size()-1);
-  uint64_t Num;
-  if (NumStr.getAsInteger(0, Num))
-    return make_error<StringError>("'" + NumStr + "' not an integer",
+  StringRef अंक_Str = Duration.slice(0, Duration.आकार_2()-1);
+  uint64_t अंक;
+  अगर (अंक_Str.getAsInteger(0, अंक))
+    वापस make_error<StringError>("'" + अंक_Str + "' not an integer",
                                    inconvertibleErrorCode());
 
-  switch (Duration.back()) {
-  case 's':
-    return std::chrono::seconds(Num);
-  case 'm':
-    return std::chrono::minutes(Num);
-  case 'h':
-    return std::chrono::hours(Num);
-  default:
-    return make_error<StringError>("'" + Duration +
+  चयन (Duration.back()) {
+  हाल 's':
+    वापस std::chrono::seconds(अंक);
+  हाल 'm':
+    वापस std::chrono::minutes(अंक);
+  हाल 'h':
+    वापस std::chrono::hours(अंक);
+  शेष:
+    वापस make_error<StringError>("'" + Duration +
                                        "' must end with one of 's', 'm' or 'h'",
                                    inconvertibleErrorCode());
   }
@@ -78,122 +78,122 @@ Expected<CachePruningPolicy>
 llvm::parseCachePruningPolicy(StringRef PolicyStr) {
   CachePruningPolicy Policy;
   std::pair<StringRef, StringRef> P = {"", PolicyStr};
-  while (!P.second.empty()) {
+  जबतक (!P.second.empty()) {
     P = P.second.split(':');
 
-    StringRef Key, Value;
-    std::tie(Key, Value) = P.first.split('=');
-    if (Key == "prune_interval") {
-      auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+    StringRef कुंजी, मूल्य;
+    std::tie(कुंजी, मूल्य) = P.first.split('=');
+    अगर (कुंजी == "prune_interval") {
+      स्वतः DurationOrErr = parseDuration(मूल्य);
+      अगर (!DurationOrErr)
+        वापस DurationOrErr.takeError();
       Policy.Interval = *DurationOrErr;
-    } else if (Key == "prune_after") {
-      auto DurationOrErr = parseDuration(Value);
-      if (!DurationOrErr)
-        return DurationOrErr.takeError();
+    } अन्यथा अगर (कुंजी == "prune_after") {
+      स्वतः DurationOrErr = parseDuration(मूल्य);
+      अगर (!DurationOrErr)
+        वापस DurationOrErr.takeError();
       Policy.Expiration = *DurationOrErr;
-    } else if (Key == "cache_size") {
-      if (Value.back() != '%')
-        return make_error<StringError>("'" + Value + "' must be a percentage",
+    } अन्यथा अगर (कुंजी == "cache_size") {
+      अगर (मूल्य.back() != '%')
+        वापस make_error<StringError>("'" + मूल्य + "' must be a percentage",
                                        inconvertibleErrorCode());
-      StringRef SizeStr = Value.drop_back();
-      uint64_t Size;
-      if (SizeStr.getAsInteger(0, Size))
-        return make_error<StringError>("'" + SizeStr + "' not an integer",
+      StringRef आकार_Str = मूल्य.drop_back();
+      uint64_t आकार;
+      अगर (आकार_Str.getAsInteger(0, आकार))
+        वापस make_error<StringError>("'" + आकार_Str + "' not an integer",
                                        inconvertibleErrorCode());
-      if (Size > 100)
-        return make_error<StringError>("'" + SizeStr +
+      अगर (आकार > 100)
+        वापस make_error<StringError>("'" + आकार_Str +
                                            "' must be between 0 and 100",
                                        inconvertibleErrorCode());
-      Policy.MaxSizePercentageOfAvailableSpace = Size;
-    } else if (Key == "cache_size_bytes") {
+      Policy.Max_आकार_Percentage_Of_Available_Space = आकार;
+    } अन्यथा अगर (कुंजी == "cache_size_bytes") {
       uint64_t Mult = 1;
-      switch (tolower(Value.back())) {
-      case 'k':
+      चयन (छोटे(मूल्य.back())) {
+      हाल 'k':
         Mult = 1024;
-        Value = Value.drop_back();
-        break;
-      case 'm':
+        मूल्य = मूल्य.drop_back();
+        अवरोध;
+      हाल 'm':
         Mult = 1024 * 1024;
-        Value = Value.drop_back();
-        break;
-      case 'g':
+        मूल्य = मूल्य.drop_back();
+        अवरोध;
+      हाल 'g':
         Mult = 1024 * 1024 * 1024;
-        Value = Value.drop_back();
-        break;
+        मूल्य = मूल्य.drop_back();
+        अवरोध;
       }
-      uint64_t Size;
-      if (Value.getAsInteger(0, Size))
-        return make_error<StringError>("'" + Value + "' not an integer",
+      uint64_t आकार;
+      अगर (मूल्य.getAsInteger(0, आकार))
+        वापस make_error<StringError>("'" + मूल्य + "' not an integer",
                                        inconvertibleErrorCode());
-      Policy.MaxSizeBytes = Size * Mult;
-    } else if (Key == "cache_size_files") {
-      if (Value.getAsInteger(0, Policy.MaxSizeFiles))
-        return make_error<StringError>("'" + Value + "' not an integer",
+      Policy.Max_आकार_Bytes = आकार * Mult;
+    } अन्यथा अगर (कुंजी == "cache_size_files") {
+      अगर (मूल्य.getAsInteger(0, Policy.Max_आकार_Files))
+        वापस make_error<StringError>("'" + मूल्य + "' not an integer",
                                        inconvertibleErrorCode());
-    } else {
-      return make_error<StringError>("Unknown key: '" + Key + "'",
+    } अन्यथा {
+      वापस make_error<StringError>("Unknown key: '" + कुंजी + "'",
                                      inconvertibleErrorCode());
     }
   }
 
-  return Policy;
+  वापस Policy;
 }
 
 /// Prune the cache of files that haven't been accessed in a long time.
 Expected<bool>
 llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
-                 const std::vector<std::unique_ptr<MemoryBuffer>> &Files) {
+                 स्थिर std::vector<std::unique_ptr<Memory_बफर>> &Files) {
   using namespace std::chrono;
 
-  if (Path.empty())
-    return false;
+  अगर (Path.empty())
+    वापस false;
 
   bool isPathDir;
-  if (sys::fs::is_directory(Path, isPathDir))
-    return false;
+  अगर (sys::fs::is_directory(Path, isPathDir))
+    वापस false;
 
-  if (!isPathDir)
-    return false;
+  अगर (!isPathDir)
+    वापस false;
 
-  Policy.MaxSizePercentageOfAvailableSpace =
-      std::min(Policy.MaxSizePercentageOfAvailableSpace, 100u);
+  Policy.Max_आकार_Percentage_Of_Available_Space =
+      std::min(Policy.Max_आकार_Percentage_Of_Available_Space, 100u);
 
-  if (Policy.Expiration == seconds(0) &&
-      Policy.MaxSizePercentageOfAvailableSpace == 0 &&
-      Policy.MaxSizeBytes == 0 && Policy.MaxSizeFiles == 0) {
+  अगर (Policy.Expiration == seconds(0) &&
+      Policy.Max_आकार_Percentage_Of_Available_Space == 0 &&
+      Policy.Max_आकार_Bytes == 0 && Policy.Max_आकार_Files == 0) {
     LLVM_DEBUG(dbgs() << "No pruning settings set, exit early\n");
     // Nothing will be pruned, early exit
-    return false;
+    वापस false;
   }
 
   // Try to stat() the timestamp file.
   SmallString<128> TimestampFile(Path);
   sys::path::append(TimestampFile, "llvmcache.timestamp");
   sys::fs::file_status FileStatus;
-  const auto CurrentTime = system_clock::now();
-  if (auto EC = sys::fs::status(TimestampFile, FileStatus)) {
-    if (EC == errc::no_such_file_or_directory) {
+  स्थिर स्वतः CurrentTime = system_clock::now();
+  अगर (स्वतः EC = sys::fs::status(TimestampFile, FileStatus)) {
+    अगर (EC == errc::no_such_file_or_directory) {
       // If the timestamp file wasn't there, create one now.
       writeTimestampFile(TimestampFile);
-    } else {
+    } अन्यथा {
       // Unknown error?
-      return false;
+      वापस false;
     }
-  } else {
-    if (!Policy.Interval)
-      return false;
-    if (Policy.Interval != seconds(0)) {
+  } अन्यथा {
+    अगर (!Policy.Interval)
+      वापस false;
+    अगर (Policy.Interval != seconds(0)) {
       // Check whether the time stamp is older than our pruning interval.
       // If not, do nothing.
-      const auto TimeStampModTime = FileStatus.getLastModificationTime();
-      auto TimeStampAge = CurrentTime - TimeStampModTime;
-      if (TimeStampAge <= *Policy.Interval) {
+      स्थिर स्वतः TimeStampModTime = FileStatus.getLastModificationTime();
+      स्वतः TimeStampAge = CurrentTime - TimeStampModTime;
+      अगर (TimeStampAge <= *Policy.Interval) {
         LLVM_DEBUG(dbgs() << "Timestamp file too recent ("
-                          << duration_cast<seconds>(TimeStampAge).count()
+                          << duration_cast<seconds>(TimeStampAge).गिनती()
                           << "s old), do not prune.\n");
-        return false;
+        वापस false;
       }
     }
     // Write a new timestamp file so that nobody else attempts to prune.
@@ -205,58 +205,58 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   // Keep track of files to delete to get below the size limit.
   // Order by time of last use so that recently used files are preserved.
   std::set<FileInfo> FileInfos;
-  uint64_t TotalSize = 0;
+  uint64_t योग_आकार = 0;
 
   // Walk the entire directory cache, looking for unused files.
   std::error_code EC;
   SmallString<128> CachePathNative;
   sys::path::native(Path, CachePathNative);
   // Walk all of the files within this directory.
-  for (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
+  क्रम (sys::fs::directory_iterator File(CachePathNative, EC), FileEnd;
        File != FileEnd && !EC; File.increment(EC)) {
     // Ignore filenames not beginning with "llvmcache-" or "Thin-". This
     // includes the timestamp file as well as any files created by the user.
     // This acts as a safeguard against data loss if the user specifies the
     // wrong directory as their cache directory.
     StringRef filename = sys::path::filename(File->path());
-    if (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
-      continue;
+    अगर (!filename.starts_with("llvmcache-") && !filename.starts_with("Thin-"))
+      जारी;
 
     // Look at this file. If we can't stat it, there's nothing interesting
     // there.
     ErrorOr<sys::fs::basic_file_status> StatusOrErr = File->status();
-    if (!StatusOrErr) {
+    अगर (!StatusOrErr) {
       LLVM_DEBUG(dbgs() << "Ignore " << File->path() << " (can't stat)\n");
-      continue;
+      जारी;
     }
 
     // If the file hasn't been used recently enough, delete it
-    const auto FileAccessTime = StatusOrErr->getLastAccessedTime();
-    auto FileAge = CurrentTime - FileAccessTime;
-    if (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
+    स्थिर स्वतः FileAccessTime = StatusOrErr->getLastAccessedTime();
+    स्वतः FileAge = CurrentTime - FileAccessTime;
+    अगर (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
       LLVM_DEBUG(dbgs() << "Remove " << File->path() << " ("
-                        << duration_cast<seconds>(FileAge).count()
+                        << duration_cast<seconds>(FileAge).गिनती()
                         << "s old)\n");
-      sys::fs::remove(File->path());
-      continue;
+      sys::fs::हटाओ(File->path());
+      जारी;
     }
 
     // Leave it here for now, but add it to the list of size-based pruning.
-    TotalSize += StatusOrErr->getSize();
-    FileInfos.insert({FileAccessTime, StatusOrErr->getSize(), File->path()});
+    योग_आकार += StatusOrErr->get_आकार();
+    FileInfos.जोड़ो({FileAccessTime, StatusOrErr->get_आकार(), File->path()});
   }
 
-  auto FileInfo = FileInfos.begin();
-  size_t NumFiles = FileInfos.size();
+  स्वतः FileInfo = FileInfos.begin();
+  माप_प्रकार अंक_Files = FileInfos.आकार_2();
 
-  auto RemoveCacheFile = [&]() {
+  स्वतः RemoveCacheFile = [&]() {
     // Remove the file.
-    sys::fs::remove(FileInfo->Path);
+    sys::fs::हटाओ(FileInfo->Path);
     // Update size
-    TotalSize -= FileInfo->Size;
-    NumFiles--;
+    योग_आकार -= FileInfo->आकार;
+    अंक_Files--;
     LLVM_DEBUG(dbgs() << " - Remove " << FileInfo->Path << " (size "
-                      << FileInfo->Size << "), new occupancy is " << TotalSize
+                      << FileInfo->आकार << "), new occupancy is " << योग_आकार
                       << "%\n");
     ++FileInfo;
   };
@@ -264,60 +264,60 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
   // files.size() is greater the number of inputs  by one. However, a timestamp
   // file is created and stored in the cache directory if --thinlto-cache-policy
   // option is used. Therefore, files.size() is used as ActualNums.
-  const size_t ActualNums = Files.size();
-  if (Policy.MaxSizeFiles && ActualNums > Policy.MaxSizeFiles)
+  स्थिर माप_प्रकार ActualNums = Files.आकार_2();
+  अगर (Policy.Max_आकार_Files && ActualNums > Policy.Max_आकार_Files)
     WithColor::warning()
         << "ThinLTO cache pruning happens since the number of created files ("
         << ActualNums << ") exceeds the maximum number of files ("
-        << Policy.MaxSizeFiles
+        << Policy.Max_आकार_Files
         << "); consider adjusting --thinlto-cache-policy\n";
 
   // Prune for number of files.
-  if (Policy.MaxSizeFiles)
-    while (NumFiles > Policy.MaxSizeFiles)
+  अगर (Policy.Max_आकार_Files)
+    जबतक (अंक_Files > Policy.Max_आकार_Files)
       RemoveCacheFile();
 
   // Prune for size now if needed
-  if (Policy.MaxSizePercentageOfAvailableSpace > 0 || Policy.MaxSizeBytes > 0) {
-    auto SpaceInfoOrErr = sys::fs::disk_space(Path);
-    if (!SpaceInfoOrErr) {
-      auto EC = SpaceInfoOrErr.getError();
-      return createStringError(EC,
+  अगर (Policy.Max_आकार_Percentage_Of_Available_Space > 0 || Policy.Max_आकार_Bytes > 0) {
+    स्वतः SpaceInfoOrErr = sys::fs::disk_space(Path);
+    अगर (!SpaceInfoOrErr) {
+      स्वतः EC = SpaceInfoOrErr.getError();
+      वापस createStringError(EC,
                                "cannot get available disk space for '%s': '%s'",
                                Path.str().c_str(), EC.message().c_str());
     }
-    sys::fs::space_info SpaceInfo = SpaceInfoOrErr.get();
-    auto AvailableSpace = TotalSize + SpaceInfo.free;
+    sys::fs::space_info SpaceInfo = SpaceInfoOrErr.लो();
+    स्वतः AvailableSpace = योग_आकार + SpaceInfo.मुक्त;
 
-    if (Policy.MaxSizePercentageOfAvailableSpace == 0)
-      Policy.MaxSizePercentageOfAvailableSpace = 100;
-    if (Policy.MaxSizeBytes == 0)
-      Policy.MaxSizeBytes = AvailableSpace;
-    auto TotalSizeTarget = std::min<uint64_t>(
-        AvailableSpace * Policy.MaxSizePercentageOfAvailableSpace / 100ull,
-        Policy.MaxSizeBytes);
+    अगर (Policy.Max_आकार_Percentage_Of_Available_Space == 0)
+      Policy.Max_आकार_Percentage_Of_Available_Space = 100;
+    अगर (Policy.Max_आकार_Bytes == 0)
+      Policy.Max_आकार_Bytes = AvailableSpace;
+    स्वतः योग_आकार_Target = std::min<uint64_t>(
+        AvailableSpace * Policy.Max_आकार_Percentage_Of_Available_Space / 100ull,
+        Policy.Max_आकार_Bytes);
 
-    LLVM_DEBUG(dbgs() << "Occupancy: " << ((100 * TotalSize) / AvailableSpace)
+    LLVM_DEBUG(dbgs() << "Occupancy: " << ((100 * योग_आकार) / AvailableSpace)
                       << "% target is: "
-                      << Policy.MaxSizePercentageOfAvailableSpace << "%, "
-                      << Policy.MaxSizeBytes << " bytes\n");
+                      << Policy.Max_आकार_Percentage_Of_Available_Space << "%, "
+                      << Policy.Max_आकार_Bytes << " bytes\n");
 
-    size_t ActualSizes = 0;
-    for (const auto &File : Files)
-      if (File)
-        ActualSizes += File->getBufferSize();
+    माप_प्रकार ActualSizes = 0;
+    क्रम (स्थिर स्वतः &File : Files)
+      अगर (File)
+        ActualSizes += File->get_बफर_आकार();
 
-    if (ActualSizes > TotalSizeTarget)
+    अगर (ActualSizes > योग_आकार_Target)
       WithColor::warning()
           << "ThinLTO cache pruning happens since the total size of the cache "
              "files consumed by the current link job ("
           << ActualSizes << "  bytes) exceeds maximum cache size ("
-          << TotalSizeTarget
+          << योग_आकार_Target
           << " bytes); consider adjusting --thinlto-cache-policy\n";
 
     // Remove the oldest accessed files first, till we get below the threshold.
-    while (TotalSize > TotalSizeTarget && FileInfo != FileInfos.end())
+    जबतक (योग_आकार > योग_आकार_Target && FileInfo != FileInfos.end())
       RemoveCacheFile();
   }
-  return true;
+  वापस true;
 }

@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemAlloc.h"
-#include <new>
+#समावेश "llvm/Support/MemAlloc.h"
+#समावेश <new>
 
 // These are out of line to have __cpp_aligned_new not affect ABI.
 
-LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS void *
-llvm::allocate_buffer(size_t Size, size_t Alignment) {
-  void *Result = ::operator new(Size,
-#ifdef __cpp_aligned_new
+LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS व्योम *
+llvm::allocate_बफर(माप_प्रकार आकार, माप_प्रकार Alignment) {
+  व्योम *परिणाम = ::चालक नया(आकार,
+#अगर_घोषित __cpp_aligned_new
                                 std::align_val_t(Alignment),
-#endif
+#पूर्ण_अगर
                                 std::nothrow);
-  if (Result == nullptr) {
+  अगर (परिणाम == nullptr) {
     report_bad_alloc_error("Buffer allocation failed");
   }
-  return Result;
+  वापस परिणाम;
 }
 
-void llvm::deallocate_buffer(void *Ptr, size_t Size, size_t Alignment) {
-  ::operator delete(Ptr
-#ifdef __cpp_sized_deallocation
+व्योम llvm::deallocate_बफर(व्योम *Ptr, माप_प्रकार आकार, माप_प्रकार Alignment) {
+  ::चालक मिटाओ(Ptr
+#अगर_घोषित __cpp_sized_deallocation
                     ,
-                    Size
-#endif
-#ifdef __cpp_aligned_new
+                    आकार
+#पूर्ण_अगर
+#अगर_घोषित __cpp_aligned_new
                     ,
                     std::align_val_t(Alignment)
-#endif
+#पूर्ण_अगर
   );
 }

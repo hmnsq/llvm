@@ -10,46 +10,46 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/IntrusiveRefCntPtr.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/iterator_range.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FileSystem/UniqueID.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <atomic>
-#include <cassert>
-#include <cstdint>
-#include <iterator>
-#include <limits>
-#include <map>
-#include <memory>
-#include <optional>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#समावेश "llvm/Support/VirtualFileSystem.h"
+#समावेश "llvm/ADT/ArrayRef.h"
+#समावेश "llvm/ADT/DenseMap.h"
+#समावेश "llvm/ADT/IntrusiveRefCntPtr.h"
+#समावेश "llvm/ADT/STLExtras.h"
+#समावेश "llvm/ADT/SmallString.h"
+#समावेश "llvm/ADT/SmallVector.h"
+#समावेश "llvm/ADT/StringRef.h"
+#समावेश "llvm/ADT/StringSet.h"
+#समावेश "llvm/ADT/Twine.h"
+#समावेश "llvm/ADT/iterator_range.h"
+#समावेश "llvm/Config/llvm-config.h"
+#समावेश "llvm/Support/Casting.h"
+#समावेश "llvm/Support/Chrono.h"
+#समावेश "llvm/Support/Compiler.h"
+#समावेश "llvm/Support/Debug.h"
+#समावेश "llvm/Support/Errc.h"
+#समावेश "llvm/Support/ErrorHandling.h"
+#समावेश "llvm/Support/ErrorOr.h"
+#समावेश "llvm/Support/FileSystem.h"
+#समावेश "llvm/Support/FileSystem/UniqueID.h"
+#समावेश "llvm/Support/IOSandbox.h"
+#समावेश "llvm/Support/MemoryBuffer.h"
+#समावेश "llvm/Support/Path.h"
+#समावेश "llvm/Support/SMLoc.h"
+#समावेश "llvm/Support/SourceMgr.h"
+#समावेश "llvm/Support/YAMLParser.h"
+#समावेश "llvm/Support/raw_ostream.h"
+#समावेश <atomic>
+#समावेश <cassert>
+#समावेश <cstdint>
+#समावेश <iterator>
+#समावेश <limits>
+#समावेश <map>
+#समावेश <memory>
+#समावेश <optional>
+#समावेश <string>
+#समावेश <system_error>
+#समावेश <utility>
+#समावेश <vector>
 
 using namespace llvm;
 using namespace llvm::vfs;
@@ -60,125 +60,125 @@ using llvm::sys::fs::file_type;
 using llvm::sys::fs::perms;
 using llvm::sys::fs::UniqueID;
 
-Status::Status(const file_status &Status)
+Status::Status(स्थिर file_status &Status)
     : UID(Status.getUniqueID()), MTime(Status.getLastModificationTime()),
-      User(Status.getUser()), Group(Status.getGroup()), Size(Status.getSize()),
+      User(Status.getUser()), Group(Status.getGroup()), आकार(Status.get_आकार()),
       Type(Status.type()), Perms(Status.permissions()) {}
 
-Status::Status(const Twine &Name, UniqueID UID, sys::TimePoint<> MTime,
-               uint32_t User, uint32_t Group, uint64_t Size, file_type Type,
+Status::Status(स्थिर Twine &Name, UniqueID UID, sys::TimePoint<> MTime,
+               uint32_t User, uint32_t Group, uint64_t आकार, file_type Type,
                perms Perms)
     : Name(Name.str()), UID(UID), MTime(MTime), User(User), Group(Group),
-      Size(Size), Type(Type), Perms(Perms) {}
+      आकार(आकार), Type(Type), Perms(Perms) {}
 
-Status Status::copyWithNewSize(const Status &In, uint64_t NewSize) {
-  return Status(In.getName(), In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), NewSize, In.getType(),
+Status Status::copy_With_New_आकार(स्थिर Status &In, uint64_t New_आकार) {
+  वापस Status(In.getName(), In.getUniqueID(), In.getLastModificationTime(),
+                In.getUser(), In.getGroup(), New_आकार, In.getType(),
                 In.getPermissions());
 }
 
-Status Status::copyWithNewName(const Status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), In.getSize(), In.getType(),
+Status Status::copyWithNewName(स्थिर Status &In, स्थिर Twine &NewName) {
+  वापस Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
+                In.getUser(), In.getGroup(), In.get_आकार(), In.getType(),
                 In.getPermissions());
 }
 
-Status Status::copyWithNewName(const file_status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
-                In.getUser(), In.getGroup(), In.getSize(), In.type(),
+Status Status::copyWithNewName(स्थिर file_status &In, स्थिर Twine &NewName) {
+  वापस Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
+                In.getUser(), In.getGroup(), In.get_आकार(), In.type(),
                 In.permissions());
 }
 
-bool Status::equivalent(const Status &Other) const {
-  assert(isStatusKnown() && Other.isStatusKnown());
-  return getUniqueID() == Other.getUniqueID();
+bool Status::equivalent(स्थिर Status &Other) स्थिर {
+  निश्चित(isStatusKnown() && Other.isStatusKnown());
+  वापस getUniqueID() == Other.getUniqueID();
 }
 
-bool Status::isDirectory() const { return Type == file_type::directory_file; }
+bool Status::isDirectory() स्थिर { वापस Type == file_type::directory_file; }
 
-bool Status::isRegularFile() const { return Type == file_type::regular_file; }
+bool Status::isRegularFile() स्थिर { वापस Type == file_type::regular_file; }
 
-bool Status::isOther() const {
-  return exists() && !isRegularFile() && !isDirectory() && !isSymlink();
+bool Status::isOther() स्थिर {
+  वापस exists() && !isRegularFile() && !isDirectory() && !isSymlink();
 }
 
-bool Status::isSymlink() const { return Type == file_type::symlink_file; }
+bool Status::isSymlink() स्थिर { वापस Type == file_type::symlink_file; }
 
-bool Status::isStatusKnown() const { return Type != file_type::status_error; }
+bool Status::isStatusKnown() स्थिर { वापस Type != file_type::status_error; }
 
-bool Status::exists() const {
-  return isStatusKnown() && Type != file_type::file_not_found;
+bool Status::exists() स्थिर {
+  वापस isStatusKnown() && Type != file_type::file_not_found;
 }
 
-File::~File() = default;
+File::~File() = शेष;
 
-FileSystem::~FileSystem() = default;
+FileSystem::~FileSystem() = शेष;
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-FileSystem::getBufferForFile(const llvm::Twine &Name, int64_t FileSize,
+ErrorOr<std::unique_ptr<Memory_बफर>>
+FileSystem::get_बफर_For_File(स्थिर llvm::Twine &Name, int64_t File_आकार,
                              bool RequiresNullTerminator, bool IsVolatile,
                              bool IsText) {
-  auto F = IsText ? openFileForRead(Name) : openFileForReadBinary(Name);
-  if (!F)
-    return F.getError();
+  स्वतः F = IsText ? openFileForRead(Name) : open_File_For_Read_द्विआधारी(Name);
+  अगर (!F)
+    वापस F.getError();
 
-  return (*F)->getBuffer(Name, FileSize, RequiresNullTerminator, IsVolatile);
+  वापस (*F)->get_बफर(Name, File_आकार, RequiresNullTerminator, IsVolatile);
 }
 
-std::error_code FileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
-  if (llvm::sys::path::is_absolute(Path))
-    return {};
+std::error_code FileSystem::makeAbsolute(SmallVectorImpl<अक्षर> &Path) स्थिर {
+  अगर (llvm::sys::path::is_absolute(Path))
+    वापस {};
 
-  auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  स्वतः WorkingDir = getCurrentWorkingDirectory();
+  अगर (!WorkingDir)
+    वापस WorkingDir.getError();
 
-  sys::path::make_absolute(WorkingDir.get(), Path);
-  return {};
+  sys::path::make_absolute(WorkingDir.लो(), Path);
+  वापस {};
 }
 
-std::error_code FileSystem::getRealPath(const Twine &Path,
-                                        SmallVectorImpl<char> &Output) {
-  return errc::operation_not_permitted;
+std::error_code FileSystem::getRealPath(स्थिर Twine &Path,
+                                        SmallVectorImpl<अक्षर> &Output) {
+  वापस errc::operation_not_permitted;
 }
 
-std::error_code FileSystem::isLocal(const Twine &Path, bool &Result) {
-  return errc::operation_not_permitted;
+std::error_code FileSystem::isLocal(स्थिर Twine &Path, bool &परिणाम) {
+  वापस errc::operation_not_permitted;
 }
 
-bool FileSystem::exists(const Twine &Path) {
-  auto Status = status(Path);
-  return Status && Status->exists();
+bool FileSystem::exists(स्थिर Twine &Path) {
+  स्वतः Status = status(Path);
+  वापस Status && Status->exists();
 }
 
-llvm::ErrorOr<bool> FileSystem::equivalent(const Twine &A, const Twine &B) {
-  auto StatusA = status(A);
-  if (!StatusA)
-    return StatusA.getError();
-  auto StatusB = status(B);
-  if (!StatusB)
-    return StatusB.getError();
-  return StatusA->equivalent(*StatusB);
+llvm::ErrorOr<bool> FileSystem::equivalent(स्थिर Twine &A, स्थिर Twine &B) {
+  स्वतः StatusA = status(A);
+  अगर (!StatusA)
+    वापस StatusA.getError();
+  स्वतः StatusB = status(B);
+  अगर (!StatusB)
+    वापस StatusB.getError();
+  वापस StatusA->equivalent(*StatusB);
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-void FileSystem::dump() const { print(dbgs(), PrintType::RecursiveContents); }
-#endif
+#अगर !defined(न_संशोधन) || defined(LLVM_ENABLE_DUMP)
+व्योम FileSystem::dump() स्थिर { print(dbgs(), PrintType::RecursiveContents); }
+#पूर्ण_अगर
 
-#ifndef NDEBUG
-static bool isTraversalComponent(StringRef Component) {
-  return Component == ".." || Component == ".";
+#अगर_अघोषित न_संशोधन
+अटल bool isTraversalComponent(StringRef Component) {
+  वापस Component == ".." || Component == ".";
 }
 
-static bool pathHasTraversal(StringRef Path) {
+अटल bool pathHasTraversal(StringRef Path) {
   using namespace llvm::sys;
 
-  for (StringRef Comp : llvm::make_range(path::begin(Path), path::end(Path)))
-    if (isTraversalComponent(Comp))
-      return true;
-  return false;
+  क्रम (StringRef Comp : llvm::make_range(path::begin(Path), path::end(Path)))
+    अगर (isTraversalComponent(Comp))
+      वापस true;
+  वापस false;
 }
-#endif
+#पूर्ण_अगर
 
 //===-----------------------------------------------------------------------===/
 // RealFileSystem implementation
@@ -187,8 +187,8 @@ static bool pathHasTraversal(StringRef Path) {
 namespace {
 
 /// Wrapper around a raw file descriptor.
-class RealFile : public File {
-  friend class RealFileSystem;
+श्रेणी RealFile : खुला File {
+  मित्र श्रेणी RealFileSystem;
 
   file_t FD;
   Status S;
@@ -198,67 +198,67 @@ class RealFile : public File {
       : FD(RawFD), S(NewName, {}, {}, {}, {}, {},
                      llvm::sys::fs::file_type::status_error, {}),
         RealName(NewRealPathName.str()) {
-    assert(FD.isValid() && "Invalid or inactive file descriptor");
+    निश्चित(FD.isValid() && "Invalid or inactive file descriptor");
   }
 
-public:
+खुला:
   ~RealFile() override;
 
   ErrorOr<Status> status() override;
   ErrorOr<std::string> getName() override;
-  ErrorOr<std::unique_ptr<MemoryBuffer>> getBuffer(const Twine &Name,
-                                                   int64_t FileSize,
+  ErrorOr<std::unique_ptr<Memory_बफर>> get_बफर(स्थिर Twine &Name,
+                                                   int64_t File_आकार,
                                                    bool RequiresNullTerminator,
                                                    bool IsVolatile) override;
-  std::error_code close() override;
-  void setPath(const Twine &Path) override;
+  std::error_code बंद() override;
+  व्योम setPath(स्थिर Twine &Path) override;
 };
 
 } // namespace
 
-RealFile::~RealFile() { close(); }
+RealFile::~RealFile() { बंद(); }
 
 ErrorOr<Status> RealFile::status() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot stat closed file");
-  if (!S.isStatusKnown()) {
+  निश्चित(FD.isValid() && "cannot stat closed file");
+  अगर (!S.isStatusKnown()) {
     file_status RealStatus;
-    if (std::error_code EC = sys::fs::status(FD, RealStatus))
-      return EC;
+    अगर (std::error_code EC = sys::fs::status(FD, RealStatus))
+      वापस EC;
     S = Status::copyWithNewName(RealStatus, S.getName());
   }
-  return S;
+  वापस S;
 }
 
 ErrorOr<std::string> RealFile::getName() {
-  return RealName.empty() ? S.getName().str() : RealName;
+  वापस RealName.empty() ? S.getName().str() : RealName;
 }
 
-ErrorOr<std::unique_ptr<MemoryBuffer>>
-RealFile::getBuffer(const Twine &Name, int64_t FileSize,
+ErrorOr<std::unique_ptr<Memory_बफर>>
+RealFile::get_बफर(स्थिर Twine &Name, int64_t File_आकार,
                     bool RequiresNullTerminator, bool IsVolatile) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot get buffer for closed file");
-  return MemoryBuffer::getOpenFile(FD, Name, FileSize, RequiresNullTerminator,
+  निश्चित(FD.isValid() && "cannot get buffer for closed file");
+  वापस Memory_बफर::getOpenFile(FD, Name, File_आकार, RequiresNullTerminator,
                                    IsVolatile);
 }
 
-std::error_code RealFile::close() {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_code RealFile::बंद() {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
   std::error_code EC = sys::fs::closeFile(FD);
   FD = file_t::Invalid;
-  return EC;
+  वापस EC;
 }
 
-void RealFile::setPath(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+व्योम RealFile::setPath(स्थिर Twine &Path) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
   RealName = Path.str();
-  if (auto Status = status())
-    S = Status.get().copyWithNewName(Status.get(), Path);
+  अगर (स्वतः Status = status())
+    S = Status.लो().copyWithNewName(Status.लो(), Path);
 }
 
 namespace {
@@ -271,64 +271,64 @@ namespace {
 /// A more principled approach would be to push this down a level, modelling
 /// the working dir as an llvm::sys::fs::WorkingDir or similar.
 /// This would enable the use of openat()-style functions on some platforms.
-class RealFileSystem : public FileSystem {
-public:
+श्रेणी RealFileSystem : खुला FileSystem {
+खुला:
   explicit RealFileSystem(bool LinkCWDToProcess) {
-    if (!LinkCWDToProcess) {
+    अगर (!LinkCWDToProcess) {
       SmallString<128> PWD, RealPWD;
-      if (std::error_code EC = llvm::sys::fs::current_path(PWD))
+      अगर (std::error_code EC = llvm::sys::fs::current_path(PWD))
         WD = std::move(EC);
-      else if (llvm::sys::fs::real_path(PWD, RealPWD))
+      अन्यथा अगर (llvm::sys::fs::real_path(PWD, RealPWD))
         WD = WorkingDirectory{PWD, PWD};
-      else
+      अन्यथा
         WD = WorkingDirectory{PWD, RealPWD};
     }
   }
 
-  ErrorOr<Status> status(const Twine &Path) override;
-  ErrorOr<std::unique_ptr<File>> openFileForRead(const Twine &Path) override;
+  ErrorOr<Status> status(स्थिर Twine &Path) override;
+  ErrorOr<std::unique_ptr<File>> openFileForRead(स्थिर Twine &Path) override;
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadBinary(const Twine &Path) override;
-  directory_iterator dir_begin(const Twine &Dir, std::error_code &EC) override;
+  open_File_For_Read_द्विआधारी(स्थिर Twine &Path) override;
+  directory_iterator dir_begin(स्थिर Twine &Dir, std::error_code &EC) override;
 
-  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override;
-  std::error_code setCurrentWorkingDirectory(const Twine &Path) override;
-  std::error_code isLocal(const Twine &Path, bool &Result) override;
-  void
-  getDirectoryContentRealSources(const Twine &Dir,
+  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() स्थिर override;
+  std::error_code setCurrentWorkingDirectory(स्थिर Twine &Path) override;
+  std::error_code isLocal(स्थिर Twine &Path, bool &परिणाम) override;
+  व्योम
+  getDirectoryContentRealSources(स्थिर Twine &Dir,
                                  SmallVectorImpl<std::string> &Out) override {
-    Out.push_back(Dir.str());
+    Out.धकेलो_back(Dir.str());
   }
-  std::error_code getRealPath(const Twine &Path,
-                              SmallVectorImpl<char> &Output) override;
+  std::error_code getRealPath(स्थिर Twine &Path,
+                              SmallVectorImpl<अक्षर> &Output) override;
 
-protected:
-  void printImpl(raw_ostream &OS, PrintType Type,
-                 unsigned IndentLevel) const override;
+रक्षित:
+  व्योम printImpl(raw_ostream &OS, PrintType Type,
+                 अचिन्हित IndentLevel) स्थिर override;
 
-private:
+निजी:
   // If this FS has its own working dir, use it to make Path absolute.
   // The returned twine is safe to use as long as both Storage and Path live.
-  Twine adjustPath(const Twine &Path, SmallVectorImpl<char> &Storage) const {
-    if (!WD || !*WD)
-      return Path;
+  Twine adjustPath(स्थिर Twine &Path, SmallVectorImpl<अक्षर> &Storage) स्थिर {
+    अगर (!WD || !*WD)
+      वापस Path;
     Path.toVector(Storage);
-    sys::path::make_absolute(WD->get().Resolved, Storage);
-    return Storage;
+    sys::path::make_absolute(WD->लो().Resolved, Storage);
+    वापस Storage;
   }
 
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadWithFlags(const Twine &Name, sys::fs::OpenFlags Flags) {
+  openFileForReadWithFlags(स्थिर Twine &Name, sys::fs::OpenFlags Flags) {
     SmallString<256> RealName, Storage;
     Expected<file_t> FDOrErr = sys::fs::openNativeFileForRead(
         adjustPath(Name, Storage), Flags, &RealName);
-    if (!FDOrErr)
-      return errorToErrorCode(FDOrErr.takeError());
-    return std::unique_ptr<File>(
-        new RealFile(*FDOrErr, Name.str(), RealName.str()));
+    अगर (!FDOrErr)
+      वापस errorToErrorCode(FDOrErr.takeError());
+    वापस std::unique_ptr<File>(
+        नया RealFile(*FDOrErr, Name.str(), RealName.str()));
   }
 
-  struct WorkingDirectory {
+  काष्ठा WorkingDirectory {
     // The current working directory, without symlinks resolved. (echo $PWD).
     SmallString<128> Specified;
     // The current working directory, with links resolved. (readlink .).
@@ -339,138 +339,138 @@ private:
 
 } // namespace
 
-ErrorOr<Status> RealFileSystem::status(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+ErrorOr<Status> RealFileSystem::status(स्थिर Twine &Path) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
   sys::fs::file_status RealStatus;
-  if (std::error_code EC =
+  अगर (std::error_code EC =
           sys::fs::status(adjustPath(Path, Storage), RealStatus))
-    return EC;
-  return Status::copyWithNewName(RealStatus, Path);
+    वापस EC;
+  वापस Status::copyWithNewName(RealStatus, Path);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForRead(const Twine &Name) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+RealFileSystem::openFileForRead(स्थिर Twine &Name) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_Text);
+  वापस openFileForReadWithFlags(Name, sys::fs::OF_Text);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForReadBinary(const Twine &Name) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+RealFileSystem::open_File_For_Read_द्विआधारी(स्थिर Twine &Name) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_None);
+  वापस openFileForReadWithFlags(Name, sys::fs::OF_None);
 }
 
-llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() const {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() स्थिर {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (WD && *WD)
-    return std::string(WD->get().Specified);
-  if (WD)
-    return WD->getError();
+  अगर (WD && *WD)
+    वापस std::string(WD->लो().Specified);
+  अगर (WD)
+    वापस WD->getError();
 
   SmallString<128> Dir;
-  if (std::error_code EC = llvm::sys::fs::current_path(Dir))
-    return EC;
-  return std::string(Dir);
+  अगर (std::error_code EC = llvm::sys::fs::current_path(Dir))
+    वापस EC;
+  वापस std::string(Dir);
 }
 
-std::error_code RealFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_code RealFileSystem::setCurrentWorkingDirectory(स्थिर Twine &Path) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (!WD)
-    return llvm::sys::fs::set_current_path(Path);
+  अगर (!WD)
+    वापस llvm::sys::fs::set_current_path(Path);
 
   SmallString<128> Absolute, Resolved, Storage;
   adjustPath(Path, Storage).toVector(Absolute);
   bool IsDir;
-  if (auto Err = llvm::sys::fs::is_directory(Absolute, IsDir))
-    return Err;
-  if (!IsDir)
-    return std::make_error_code(std::errc::not_a_directory);
-  if (auto Err = llvm::sys::fs::real_path(Absolute, Resolved))
-    return Err;
+  अगर (स्वतः Err = llvm::sys::fs::is_directory(Absolute, IsDir))
+    वापस Err;
+  अगर (!IsDir)
+    वापस std::make_error_code(std::errc::not_a_directory);
+  अगर (स्वतः Err = llvm::sys::fs::real_path(Absolute, Resolved))
+    वापस Err;
   WD = WorkingDirectory{Absolute, Resolved};
-  return std::error_code();
+  वापस std::error_code();
 }
 
-std::error_code RealFileSystem::isLocal(const Twine &Path, bool &Result) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_code RealFileSystem::isLocal(स्थिर Twine &Path, bool &परिणाम) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::is_local(adjustPath(Path, Storage), Result);
+  वापस llvm::sys::fs::is_local(adjustPath(Path, Storage), परिणाम);
 }
 
-std::error_code RealFileSystem::getRealPath(const Twine &Path,
-                                            SmallVectorImpl<char> &Output) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+std::error_code RealFileSystem::getRealPath(स्थिर Twine &Path,
+                                            SmallVectorImpl<अक्षर> &Output) {
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::real_path(adjustPath(Path, Storage), Output);
+  वापस llvm::sys::fs::real_path(adjustPath(Path, Storage), Output);
 }
 
-void RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                               unsigned IndentLevel) const {
+व्योम RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                               अचिन्हित IndentLevel) स्थिर {
   printIndent(OS, IndentLevel);
   OS << "RealFileSystem using ";
-  if (WD)
+  अगर (WD)
     OS << "own";
-  else
+  अन्यथा
     OS << "process";
   OS << " CWD\n";
 }
 
 IntrusiveRefCntPtr<FileSystem> vfs::getRealFileSystem() {
-  static IntrusiveRefCntPtr<FileSystem> FS =
+  अटल IntrusiveRefCntPtr<FileSystem> FS =
       makeIntrusiveRefCnt<RealFileSystem>(true);
   sys::sandbox::violationIfEnabled();
 
-  return FS;
+  वापस FS;
 }
 
 std::unique_ptr<FileSystem> vfs::createPhysicalFileSystem() {
   sys::sandbox::violationIfEnabled();
 
-  return std::make_unique<RealFileSystem>(false);
+  वापस std::make_unique<RealFileSystem>(false);
 }
 
 namespace {
 
-class RealFSDirIter : public llvm::vfs::detail::DirIterImpl {
+श्रेणी RealFSDirIter : खुला llvm::vfs::detail::DirIterImpl {
   llvm::sys::fs::directory_iterator Iter;
 
-public:
-  RealFSDirIter(const Twine &Path, std::error_code &EC) {
-    auto BypassSandbox = sys::sandbox::scopedDisable();
+खुला:
+  RealFSDirIter(स्थिर Twine &Path, std::error_code &EC) {
+    स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
     Iter = sys::fs::directory_iterator(Path, EC);
-    if (Iter != sys::fs::directory_iterator())
+    अगर (Iter != sys::fs::directory_iterator())
       CurrentEntry = directory_entry(Iter->path(), Iter->type());
   }
 
   std::error_code increment() override {
-    auto BypassSandbox = sys::sandbox::scopedDisable();
+    स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
     std::error_code EC;
     Iter.increment(EC);
     CurrentEntry = (Iter == llvm::sys::fs::directory_iterator())
                        ? directory_entry()
                        : directory_entry(Iter->path(), Iter->type());
-    return EC;
+    वापस EC;
   }
 };
 
 } // namespace
 
-directory_iterator RealFileSystem::dir_begin(const Twine &Dir,
+directory_iterator RealFileSystem::dir_begin(स्थिर Twine &Dir,
                                              std::error_code &EC) {
-  auto BypassSandbox = sys::sandbox::scopedDisable();
+  स्वतः BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<128> Storage;
-  return directory_iterator(
+  वापस directory_iterator(
       std::make_shared<RealFSDirIter>(adjustPath(Dir, Storage), EC));
 }
 
@@ -479,108 +479,108 @@ directory_iterator RealFileSystem::dir_begin(const Twine &Dir,
 //===-----------------------------------------------------------------------===/
 
 OverlayFileSystem::OverlayFileSystem(IntrusiveRefCntPtr<FileSystem> BaseFS) {
-  FSList.push_back(std::move(BaseFS));
+  FSList.धकेलो_back(std::move(BaseFS));
 }
 
-void OverlayFileSystem::pushOverlay(IntrusiveRefCntPtr<FileSystem> FS) {
-  FSList.push_back(FS);
+व्योम OverlayFileSystem::धकेलो_Overlay(IntrusiveRefCntPtr<FileSystem> FS) {
+  FSList.धकेलो_back(FS);
   // Synchronize added file systems by duplicating the working directory from
   // the first one in the list.
-  FS->setCurrentWorkingDirectory(getCurrentWorkingDirectory().get());
+  FS->setCurrentWorkingDirectory(getCurrentWorkingDirectory().लो());
 }
 
-ErrorOr<Status> OverlayFileSystem::status(const Twine &Path) {
+ErrorOr<Status> OverlayFileSystem::status(स्थिर Twine &Path) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
+  क्रम (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
     ErrorOr<Status> Status = (*I)->status(Path);
-    if (Status || Status.getError() != llvm::errc::no_such_file_or_directory)
-      return Status;
+    अगर (Status || Status.getError() != llvm::errc::no_such_file_or_directory)
+      वापस Status;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  वापस make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
-bool OverlayFileSystem::exists(const Twine &Path) {
+bool OverlayFileSystem::exists(स्थिर Twine &Path) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    if ((*I)->exists(Path))
-      return true;
+  क्रम (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
+    अगर ((*I)->exists(Path))
+      वापस true;
   }
-  return false;
+  वापस false;
 }
 
 ErrorOr<std::unique_ptr<File>>
-OverlayFileSystem::openFileForRead(const llvm::Twine &Path) {
+OverlayFileSystem::openFileForRead(स्थिर llvm::Twine &Path) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    auto Result = (*I)->openFileForRead(Path);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+  क्रम (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
+    स्वतः परिणाम = (*I)->openFileForRead(Path);
+    अगर (परिणाम || परिणाम.getError() != llvm::errc::no_such_file_or_directory)
+      वापस परिणाम;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  वापस make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
 llvm::ErrorOr<std::string>
-OverlayFileSystem::getCurrentWorkingDirectory() const {
+OverlayFileSystem::getCurrentWorkingDirectory() स्थिर {
   // All file systems are synchronized, just take the first working directory.
-  return FSList.front()->getCurrentWorkingDirectory();
+  वापस FSList.front()->getCurrentWorkingDirectory();
 }
 
 std::error_code
-OverlayFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  for (auto &FS : FSList)
-    if (std::error_code EC = FS->setCurrentWorkingDirectory(Path))
-      return EC;
-  return {};
+OverlayFileSystem::setCurrentWorkingDirectory(स्थिर Twine &Path) {
+  क्रम (स्वतः &FS : FSList)
+    अगर (std::error_code EC = FS->setCurrentWorkingDirectory(Path))
+      वापस EC;
+  वापस {};
 }
 
-std::error_code OverlayFileSystem::isLocal(const Twine &Path, bool &Result) {
-  for (auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->isLocal(Path, Result);
-  return errc::no_such_file_or_directory;
+std::error_code OverlayFileSystem::isLocal(स्थिर Twine &Path, bool &परिणाम) {
+  क्रम (स्वतः &FS : FSList)
+    अगर (FS->exists(Path))
+      वापस FS->isLocal(Path, परिणाम);
+  वापस errc::no_such_file_or_directory;
 }
 
-std::error_code OverlayFileSystem::getRealPath(const Twine &Path,
-                                               SmallVectorImpl<char> &Output) {
-  for (const auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->getRealPath(Path, Output);
-  return errc::no_such_file_or_directory;
+std::error_code OverlayFileSystem::getRealPath(स्थिर Twine &Path,
+                                               SmallVectorImpl<अक्षर> &Output) {
+  क्रम (स्थिर स्वतः &FS : FSList)
+    अगर (FS->exists(Path))
+      वापस FS->getRealPath(Path, Output);
+  वापस errc::no_such_file_or_directory;
 }
 
-void OverlayFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
+व्योम OverlayFileSystem::getDirectoryContentRealSources(
+    स्थिर Twine &Dir, SmallVectorImpl<std::string> &Out) {
   // All layers contribute.
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I)
+  क्रम (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I)
     (*I)->getDirectoryContentRealSources(Dir, Out);
 }
 
-void OverlayFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  for (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
+व्योम OverlayFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
+  क्रम (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
     Callback(*FS);
     FS->visitChildFileSystems(Callback);
   }
 }
 
-void OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                  unsigned IndentLevel) const {
+व्योम OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                  अचिन्हित IndentLevel) स्थिर {
   printIndent(OS, IndentLevel);
   OS << "OverlayFileSystem\n";
-  if (Type == PrintType::Summary)
-    return;
+  अगर (Type == PrintType::Summary)
+    वापस;
 
-  if (Type == PrintType::Contents)
+  अगर (Type == PrintType::Contents)
     Type = PrintType::Summary;
-  for (const auto &FS : overlays_range())
+  क्रम (स्थिर स्वतः &FS : overlays_range())
     FS->print(OS, Type, IndentLevel + 1);
 }
 
-llvm::vfs::detail::DirIterImpl::~DirIterImpl() = default;
+llvm::vfs::detail::DirIterImpl::~DirIterImpl() = शेष;
 
 namespace {
 
 /// Combines and deduplicates directory entries across multiple file systems.
-class CombiningDirIterImpl : public llvm::vfs::detail::DirIterImpl {
+श्रेणी CombiningDirIterImpl : खुला llvm::vfs::detail::DirIterImpl {
   using FileSystemPtr = llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>;
 
   /// Iterators to combine, processed in reverse order.
@@ -593,56 +593,56 @@ class CombiningDirIterImpl : public llvm::vfs::detail::DirIterImpl {
   /// Sets \c CurrentDirIter to the next iterator in the list, or leaves it as
   /// is (at its end position) if we've already gone through them all.
   std::error_code incrementIter(bool IsFirstTime) {
-    while (!IterList.empty()) {
+    जबतक (!IterList.empty()) {
       CurrentDirIter = IterList.back();
-      IterList.pop_back();
-      if (CurrentDirIter != directory_iterator())
-        break; // found
+      IterList.निकालो_back();
+      अगर (CurrentDirIter != directory_iterator())
+        अवरोध; // found
     }
 
-    if (IsFirstTime && CurrentDirIter == directory_iterator())
-      return errc::no_such_file_or_directory;
-    return {};
+    अगर (IsFirstTime && CurrentDirIter == directory_iterator())
+      वापस errc::no_such_file_or_directory;
+    वापस {};
   }
 
   std::error_code incrementDirIter(bool IsFirstTime) {
-    assert((IsFirstTime || CurrentDirIter != directory_iterator()) &&
+    निश्चित((IsFirstTime || CurrentDirIter != directory_iterator()) &&
            "incrementing past end");
     std::error_code EC;
-    if (!IsFirstTime)
+    अगर (!IsFirstTime)
       CurrentDirIter.increment(EC);
-    if (!EC && CurrentDirIter == directory_iterator())
+    अगर (!EC && CurrentDirIter == directory_iterator())
       EC = incrementIter(IsFirstTime);
-    return EC;
+    वापस EC;
   }
 
   std::error_code incrementImpl(bool IsFirstTime) {
-    while (true) {
+    जबतक (true) {
       std::error_code EC = incrementDirIter(IsFirstTime);
-      if (EC || CurrentDirIter == directory_iterator()) {
+      अगर (EC || CurrentDirIter == directory_iterator()) {
         CurrentEntry = directory_entry();
-        return EC;
+        वापस EC;
       }
       CurrentEntry = *CurrentDirIter;
       StringRef Name = llvm::sys::path::filename(CurrentEntry.path());
-      if (SeenNames.insert(Name).second)
-        return EC; // name not seen before
+      अगर (SeenNames.जोड़ो(Name).second)
+        वापस EC; // name not seen before
     }
     llvm_unreachable("returned above");
   }
 
-public:
+खुला:
   CombiningDirIterImpl(ArrayRef<FileSystemPtr> FileSystems, std::string Dir,
                        std::error_code &EC) {
-    for (const auto &FS : FileSystems) {
+    क्रम (स्थिर स्वतः &FS : FileSystems) {
       std::error_code FEC;
       directory_iterator Iter = FS->dir_begin(Dir, FEC);
-      if (FEC && FEC != errc::no_such_file_or_directory) {
+      अगर (FEC && FEC != errc::no_such_file_or_directory) {
         EC = FEC;
-        return;
+        वापस;
       }
-      if (!FEC)
-        IterList.push_back(Iter);
+      अगर (!FEC)
+        IterList.धकेलो_back(Iter);
     }
     EC = incrementImpl(true);
   }
@@ -653,28 +653,28 @@ public:
     EC = incrementImpl(true);
   }
 
-  std::error_code increment() override { return incrementImpl(false); }
+  std::error_code increment() override { वापस incrementImpl(false); }
 };
 
 } // namespace
 
-directory_iterator OverlayFileSystem::dir_begin(const Twine &Dir,
+directory_iterator OverlayFileSystem::dir_begin(स्थिर Twine &Dir,
                                                 std::error_code &EC) {
   directory_iterator Combined = directory_iterator(
       std::make_shared<CombiningDirIterImpl>(FSList, Dir.str(), EC));
-  if (EC)
-    return {};
-  return Combined;
+  अगर (EC)
+    वापस {};
+  वापस Combined;
 }
 
-void ProxyFileSystem::anchor() {}
+व्योम ProxyFileSystem::anchor() {}
 
 namespace llvm {
 namespace vfs {
 
 namespace detail {
 
-enum InMemoryNodeKind {
+क्रमागत In_Memory_गाँठ_Kind {
   IME_File,
   IME_Directory,
   IME_HardLink,
@@ -683,172 +683,172 @@ enum InMemoryNodeKind {
 
 /// The in memory file system is a tree of Nodes. Every node can either be a
 /// file, symlink, hardlink or a directory.
-class InMemoryNode {
-  InMemoryNodeKind Kind;
+श्रेणी In_Memory_गाँठ {
+  In_Memory_गाँठ_Kind Kind;
   std::string FileName;
 
-public:
-  InMemoryNode(llvm::StringRef FileName, InMemoryNodeKind Kind)
+खुला:
+  In_Memory_गाँठ(llvm::StringRef FileName, In_Memory_गाँठ_Kind Kind)
       : Kind(Kind), FileName(std::string(llvm::sys::path::filename(FileName))) {
   }
-  virtual ~InMemoryNode() = default;
+  भव ~In_Memory_गाँठ() = शेष;
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  virtual Status getStatus(const Twine &RequestedName) const = 0;
+  भव Status getStatus(स्थिर Twine &RequestedName) स्थिर = 0;
 
   /// Get the filename of this node (the name without the directory part).
-  StringRef getFileName() const { return FileName; }
-  InMemoryNodeKind getKind() const { return Kind; }
-  virtual std::string toString(unsigned Indent) const = 0;
+  StringRef getFileName() स्थिर { वापस FileName; }
+  In_Memory_गाँठ_Kind getKind() स्थिर { वापस Kind; }
+  भव std::string toString(अचिन्हित Indent) स्थिर = 0;
 };
 
-class InMemoryFile : public InMemoryNode {
+श्रेणी InMemoryFile : खुला In_Memory_गाँठ {
   Status Stat;
-  std::unique_ptr<llvm::MemoryBuffer> Buffer;
+  std::unique_ptr<llvm::Memory_बफर> बफर;
 
-public:
-  InMemoryFile(Status Stat, std::unique_ptr<llvm::MemoryBuffer> Buffer)
-      : InMemoryNode(Stat.getName(), IME_File), Stat(std::move(Stat)),
-        Buffer(std::move(Buffer)) {}
+खुला:
+  InMemoryFile(Status Stat, std::unique_ptr<llvm::Memory_बफर> बफर)
+      : In_Memory_गाँठ(Stat.getName(), IME_File), Stat(std::move(Stat)),
+        बफर(std::move(बफर)) {}
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  Status getStatus(स्थिर Twine &RequestedName) स्थिर override {
+    वापस Status::copyWithNewName(Stat, RequestedName);
   }
-  llvm::MemoryBuffer *getBuffer() const { return Buffer.get(); }
+  llvm::Memory_बफर *get_बफर() स्थिर { वापस बफर.लो(); }
 
-  std::string toString(unsigned Indent) const override {
-    return (std::string(Indent, ' ') + Stat.getName() + "\n").str();
+  std::string toString(अचिन्हित Indent) स्थिर override {
+    वापस (std::string(Indent, ' ') + Stat.getName() + "\n").str();
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_File;
+  अटल bool classof(स्थिर In_Memory_गाँठ *N) {
+    वापस N->getKind() == IME_File;
   }
 };
 
 namespace {
 
-class InMemoryHardLink : public InMemoryNode {
-  const InMemoryFile &ResolvedFile;
+श्रेणी InMemoryHardLink : खुला In_Memory_गाँठ {
+  स्थिर InMemoryFile &ResolvedFile;
 
-public:
-  InMemoryHardLink(StringRef Path, const InMemoryFile &ResolvedFile)
-      : InMemoryNode(Path, IME_HardLink), ResolvedFile(ResolvedFile) {}
-  const InMemoryFile &getResolvedFile() const { return ResolvedFile; }
+खुला:
+  InMemoryHardLink(StringRef Path, स्थिर InMemoryFile &ResolvedFile)
+      : In_Memory_गाँठ(Path, IME_HardLink), ResolvedFile(ResolvedFile) {}
+  स्थिर InMemoryFile &getResolvedFile() स्थिर { वापस ResolvedFile; }
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return ResolvedFile.getStatus(RequestedName);
+  Status getStatus(स्थिर Twine &RequestedName) स्थिर override {
+    वापस ResolvedFile.getStatus(RequestedName);
   }
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "HardLink to -> " +
+  std::string toString(अचिन्हित Indent) स्थिर override {
+    वापस std::string(Indent, ' ') + "HardLink to -> " +
            ResolvedFile.toString(0);
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_HardLink;
+  अटल bool classof(स्थिर In_Memory_गाँठ *N) {
+    वापस N->getKind() == IME_HardLink;
   }
 };
 
-class InMemorySymbolicLink : public InMemoryNode {
+श्रेणी InMemorySymbolicLink : खुला In_Memory_गाँठ {
   std::string TargetPath;
   Status Stat;
 
-public:
+खुला:
   InMemorySymbolicLink(StringRef Path, StringRef TargetPath, Status Stat)
-      : InMemoryNode(Path, IME_SymbolicLink), TargetPath(std::move(TargetPath)),
+      : In_Memory_गाँठ(Path, IME_SymbolicLink), TargetPath(std::move(TargetPath)),
         Stat(Stat) {}
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "SymbolicLink to -> " + TargetPath;
+  std::string toString(अचिन्हित Indent) स्थिर override {
+    वापस std::string(Indent, ' ') + "SymbolicLink to -> " + TargetPath;
   }
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  Status getStatus(स्थिर Twine &RequestedName) स्थिर override {
+    वापस Status::copyWithNewName(Stat, RequestedName);
   }
 
-  StringRef getTargetPath() const { return TargetPath; }
+  StringRef getTargetPath() स्थिर { वापस TargetPath; }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_SymbolicLink;
+  अटल bool classof(स्थिर In_Memory_गाँठ *N) {
+    वापस N->getKind() == IME_SymbolicLink;
   }
 };
 
 /// Adapt a InMemoryFile for VFS' File interface.  The goal is to make
 /// \p InMemoryFileAdaptor mimic as much as possible the behavior of
 /// \p RealFile.
-class InMemoryFileAdaptor : public File {
-  const InMemoryFile &Node;
+श्रेणी InMemoryFileAdaptor : खुला File {
+  स्थिर InMemoryFile &गाँठ;
   /// The name to use when returning a Status for this file.
   std::string RequestedName;
 
-public:
-  explicit InMemoryFileAdaptor(const InMemoryFile &Node,
+खुला:
+  explicit InMemoryFileAdaptor(स्थिर InMemoryFile &गाँठ,
                                std::string RequestedName)
-      : Node(Node), RequestedName(std::move(RequestedName)) {}
+      : गाँठ(गाँठ), RequestedName(std::move(RequestedName)) {}
 
   llvm::ErrorOr<Status> status() override {
-    return Node.getStatus(RequestedName);
+    वापस गाँठ.getStatus(RequestedName);
   }
 
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
+  llvm::ErrorOr<std::unique_ptr<llvm::Memory_बफर>>
+  get_बफर(स्थिर Twine &Name, int64_t File_आकार, bool RequiresNullTerminator,
             bool IsVolatile) override {
-    llvm::MemoryBuffer *Buf = Node.getBuffer();
-    return llvm::MemoryBuffer::getMemBuffer(
-        Buf->getBuffer(), Buf->getBufferIdentifier(), RequiresNullTerminator);
+    llvm::Memory_बफर *Buf = गाँठ.get_बफर();
+    वापस llvm::Memory_बफर::get_Mem_बफर(
+        Buf->get_बफर(), Buf->get_बफर_Identifier(), RequiresNullTerminator);
   }
 
-  std::error_code close() override { return {}; }
+  std::error_code बंद() override { वापस {}; }
 
-  void setPath(const Twine &Path) override { RequestedName = Path.str(); }
+  व्योम setPath(स्थिर Twine &Path) override { RequestedName = Path.str(); }
 };
 } // namespace
 
-class InMemoryDirectory : public InMemoryNode {
+श्रेणी InMemoryDirectory : खुला In_Memory_गाँठ {
   Status Stat;
-  std::map<std::string, std::unique_ptr<InMemoryNode>, std::less<>> Entries;
+  std::map<std::string, std::unique_ptr<In_Memory_गाँठ>, std::less<>> Entries;
 
-public:
+खुला:
   InMemoryDirectory(Status Stat)
-      : InMemoryNode(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
+      : In_Memory_गाँठ(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  Status getStatus(स्थिर Twine &RequestedName) स्थिर override {
+    वापस Status::copyWithNewName(Stat, RequestedName);
   }
 
-  UniqueID getUniqueID() const { return Stat.getUniqueID(); }
+  UniqueID getUniqueID() स्थिर { वापस Stat.getUniqueID(); }
 
-  InMemoryNode *getChild(StringRef Name) const {
-    auto I = Entries.find(Name);
-    if (I != Entries.end())
-      return I->second.get();
-    return nullptr;
+  In_Memory_गाँठ *getChild(StringRef Name) स्थिर {
+    स्वतः I = Entries.find(Name);
+    अगर (I != Entries.end())
+      वापस I->second.लो();
+    वापस nullptr;
   }
 
-  InMemoryNode *addChild(StringRef Name, std::unique_ptr<InMemoryNode> Child) {
-    return Entries.emplace(Name, std::move(Child)).first->second.get();
+  In_Memory_गाँठ *addChild(StringRef Name, std::unique_ptr<In_Memory_गाँठ> Child) {
+    वापस Entries.emplace(Name, std::move(Child)).first->second.लो();
   }
 
   using const_iterator = decltype(Entries)::const_iterator;
 
-  const_iterator begin() const { return Entries.begin(); }
-  const_iterator end() const { return Entries.end(); }
+  const_iterator begin() स्थिर { वापस Entries.begin(); }
+  const_iterator end() स्थिर { वापस Entries.end(); }
 
-  std::string toString(unsigned Indent) const override {
-    std::string Result =
+  std::string toString(अचिन्हित Indent) स्थिर override {
+    std::string परिणाम =
         (std::string(Indent, ' ') + Stat.getName() + "\n").str();
-    for (const auto &Entry : Entries)
-      Result += Entry.second->toString(Indent + 2);
-    return Result;
+    क्रम (स्थिर स्वतः &Entry : Entries)
+      परिणाम += Entry.second->toString(Indent + 2);
+    वापस परिणाम;
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_Directory;
+  अटल bool classof(स्थिर In_Memory_गाँठ *N) {
+    वापस N->getKind() == IME_Directory;
   }
 };
 
@@ -857,83 +857,83 @@ public:
 // The UniqueID of in-memory files is derived from path and content.
 // This avoids difficulties in creating exactly equivalent in-memory FSes,
 // as often needed in multithreaded programs.
-static sys::fs::UniqueID getUniqueID(hash_code Hash) {
-  return sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
-                           uint64_t(size_t(Hash)));
+अटल sys::fs::UniqueID getUniqueID(hash_code Hash) {
+  वापस sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
+                           uint64_t(माप_प्रकार(Hash)));
 }
-static sys::fs::UniqueID getFileID(sys::fs::UniqueID Parent,
+अटल sys::fs::UniqueID getFileID(sys::fs::UniqueID Parent,
                                    llvm::StringRef Name,
                                    llvm::StringRef Contents) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name, Contents));
+  वापस getUniqueID(llvm::hash_combine(Parent.getFile(), Name, Contents));
 }
-static sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID Parent,
+अटल sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID Parent,
                                         llvm::StringRef Name) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name));
+  वापस getUniqueID(llvm::hash_combine(Parent.getFile(), Name));
 }
 
-Status detail::NewInMemoryNodeInfo::makeStatus() const {
+Status detail::New_In_Memory_गाँठ_Info::makeStatus() स्थिर {
   UniqueID UID =
       (Type == sys::fs::file_type::directory_file)
           ? getDirectoryID(DirUID, Name)
-          : getFileID(DirUID, Name, Buffer ? Buffer->getBuffer() : "");
+          : getFileID(DirUID, Name, बफर ? बफर->get_बफर() : "");
 
-  return Status(Path, UID, llvm::sys::toTimePoint(ModificationTime), User,
-                Group, Buffer ? Buffer->getBufferSize() : 0, Type, Perms);
+  वापस Status(Path, UID, llvm::sys::toTimePoint(ModificationTime), User,
+                Group, बफर ? बफर->get_बफर_आकार() : 0, Type, Perms);
 }
 
 InMemoryFileSystem::InMemoryFileSystem(bool UseNormalizedPaths)
-    : Root(new detail::InMemoryDirectory(
+    : मूल_2(नया detail::InMemoryDirectory(
           Status("", getDirectoryID(llvm::sys::fs::UniqueID(), ""),
                  llvm::sys::TimePoint<>(), 0, 0, 0,
                  llvm::sys::fs::file_type::directory_file,
                  llvm::sys::fs::perms::all_all))),
       UseNormalizedPaths(UseNormalizedPaths) {}
 
-InMemoryFileSystem::~InMemoryFileSystem() = default;
+InMemoryFileSystem::~InMemoryFileSystem() = शेष;
 
-std::string InMemoryFileSystem::toString() const {
-  return Root->toString(/*Indent=*/0);
+std::string InMemoryFileSystem::toString() स्थिर {
+  वापस मूल_2->toString(/*Indent=*/0);
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
-                                 std::unique_ptr<llvm::MemoryBuffer> Buffer,
+bool InMemoryFileSystem::addFile(स्थिर Twine &P, समय_प्रकार ModificationTime,
+                                 std::unique_ptr<llvm::Memory_बफर> बफर,
                                  std::optional<uint32_t> User,
                                  std::optional<uint32_t> Group,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms,
-                                 MakeNodeFn MakeNode) {
+                                 Make_गाँठ_Fn Make_गाँठ) {
   SmallString<128> Path;
   P.toVector(Path);
 
   // Fix up relative paths. This just prepends the current working directory.
   std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  निश्चित(!EC);
+  (व्योम)EC;
 
-  if (useNormalizedPaths())
+  अगर (useNormalizedPaths())
     llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
 
-  if (Path.empty())
-    return false;
+  अगर (Path.empty())
+    वापस false;
 
-  detail::InMemoryDirectory *Dir = Root.get();
-  auto I = llvm::sys::path::begin(Path), E = sys::path::end(Path);
-  const auto ResolvedUser = User.value_or(0);
-  const auto ResolvedGroup = Group.value_or(0);
-  const auto ResolvedType = Type.value_or(sys::fs::file_type::regular_file);
-  const auto ResolvedPerms = Perms.value_or(sys::fs::all_all);
+  detail::InMemoryDirectory *Dir = मूल_2.लो();
+  स्वतः I = llvm::sys::path::begin(Path), E = sys::path::end(Path);
+  स्थिर स्वतः ResolvedUser = User.मूल्य_or(0);
+  स्थिर स्वतः ResolvedGroup = Group.मूल्य_or(0);
+  स्थिर स्वतः ResolvedType = Type.मूल्य_or(sys::fs::file_type::regular_file);
+  स्थिर स्वतः ResolvedPerms = Perms.मूल्य_or(sys::fs::all_all);
   // Any intermediate directories we create should be accessible by
   // the owner, even if Perms says otherwise for the final path.
-  const auto NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
+  स्थिर स्वतः NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
 
   StringRef Name = *I;
-  while (true) {
+  जबतक (true) {
     Name = *I;
     ++I;
-    if (I == E)
-      break;
-    detail::InMemoryNode *Node = Dir->getChild(Name);
-    if (!Node) {
+    अगर (I == E)
+      अवरोध;
+    detail::In_Memory_गाँठ *गाँठ = Dir->getChild(Name);
+    अगर (!गाँठ) {
       // This isn't the last element, so we create a new directory.
       Status Stat(
           StringRef(Path.str().begin(), Name.end() - Path.str().begin()),
@@ -942,251 +942,251 @@ bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
           0, sys::fs::file_type::directory_file, NewDirectoryPerms);
       Dir = cast<detail::InMemoryDirectory>(Dir->addChild(
           Name, std::make_unique<detail::InMemoryDirectory>(std::move(Stat))));
-      continue;
+      जारी;
     }
     // Creating file under another file.
-    if (!isa<detail::InMemoryDirectory>(Node))
-      return false;
-    Dir = cast<detail::InMemoryDirectory>(Node);
+    अगर (!isa<detail::InMemoryDirectory>(गाँठ))
+      वापस false;
+    Dir = cast<detail::InMemoryDirectory>(गाँठ);
   }
-  detail::InMemoryNode *Node = Dir->getChild(Name);
-  if (!Node) {
+  detail::In_Memory_गाँठ *गाँठ = Dir->getChild(Name);
+  अगर (!गाँठ) {
     Dir->addChild(Name,
-                  MakeNode({Dir->getUniqueID(), Path, Name, ModificationTime,
-                            std::move(Buffer), ResolvedUser, ResolvedGroup,
+                  Make_गाँठ({Dir->getUniqueID(), Path, Name, ModificationTime,
+                            std::move(बफर), ResolvedUser, ResolvedGroup,
                             ResolvedType, ResolvedPerms}));
-    return true;
+    वापस true;
   }
-  if (isa<detail::InMemoryDirectory>(Node))
-    return ResolvedType == sys::fs::file_type::directory_file;
+  अगर (isa<detail::InMemoryDirectory>(गाँठ))
+    वापस ResolvedType == sys::fs::file_type::directory_file;
 
-  assert((isa<detail::InMemoryFile>(Node) ||
-          isa<detail::InMemoryHardLink>(Node)) &&
+  निश्चित((isa<detail::InMemoryFile>(गाँठ) ||
+          isa<detail::InMemoryHardLink>(गाँठ)) &&
          "Must be either file, hardlink or directory!");
 
   // Return false only if the new file is different from the existing one.
-  if (auto *Link = dyn_cast<detail::InMemoryHardLink>(Node)) {
-    return Link->getResolvedFile().getBuffer()->getBuffer() ==
-           Buffer->getBuffer();
+  अगर (स्वतः *Link = dyn_cast<detail::InMemoryHardLink>(गाँठ)) {
+    वापस Link->getResolvedFile().get_बफर()->get_बफर() ==
+           बफर->get_बफर();
   }
-  return cast<detail::InMemoryFile>(Node)->getBuffer()->getBuffer() ==
-         Buffer->getBuffer();
+  वापस cast<detail::InMemoryFile>(गाँठ)->get_बफर()->get_बफर() ==
+         बफर->get_बफर();
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
-                                 std::unique_ptr<llvm::MemoryBuffer> Buffer,
+bool InMemoryFileSystem::addFile(स्थिर Twine &P, समय_प्रकार ModificationTime,
+                                 std::unique_ptr<llvm::Memory_बफर> बफर,
                                  std::optional<uint32_t> User,
                                  std::optional<uint32_t> Group,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, std::move(Buffer), User, Group, Type,
+  वापस addFile(P, ModificationTime, std::move(बफर), User, Group, Type,
                  Perms,
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
+                 [](detail::New_In_Memory_गाँठ_Info NNI)
+                     -> std::unique_ptr<detail::In_Memory_गाँठ> {
                    Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
-                       Stat, std::move(NNI.Buffer));
+                   अगर (Stat.getType() == sys::fs::file_type::directory_file)
+                     वापस std::make_unique<detail::InMemoryDirectory>(Stat);
+                   वापस std::make_unique<detail::InMemoryFile>(
+                       Stat, std::move(NNI.बफर));
                  });
 }
 
 bool InMemoryFileSystem::addFileNoOwn(
-    const Twine &P, time_t ModificationTime,
-    const llvm::MemoryBufferRef &Buffer, std::optional<uint32_t> User,
+    स्थिर Twine &P, समय_प्रकार ModificationTime,
+    स्थिर llvm::Memory_बफर_Ref &बफर, std::optional<uint32_t> User,
     std::optional<uint32_t> Group, std::optional<llvm::sys::fs::file_type> Type,
     std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, llvm::MemoryBuffer::getMemBuffer(Buffer),
+  वापस addFile(P, ModificationTime, llvm::Memory_बफर::get_Mem_बफर(बफर),
                  std::move(User), std::move(Group), std::move(Type),
                  std::move(Perms),
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
+                 [](detail::New_In_Memory_गाँठ_Info NNI)
+                     -> std::unique_ptr<detail::In_Memory_गाँठ> {
                    Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
-                       Stat, std::move(NNI.Buffer));
+                   अगर (Stat.getType() == sys::fs::file_type::directory_file)
+                     वापस std::make_unique<detail::InMemoryDirectory>(Stat);
+                   वापस std::make_unique<detail::InMemoryFile>(
+                       Stat, std::move(NNI.बफर));
                  });
 }
 
-detail::NamedNodeOrError
-InMemoryFileSystem::lookupNode(const Twine &P, bool FollowFinalSymlink,
-                               size_t SymlinkDepth) const {
+detail::Named_गाँठ_Or_Error
+InMemoryFileSystem::lookup_गाँठ(स्थिर Twine &P, bool FollowFinalSymlink,
+                               माप_प्रकार SymlinkDepth) स्थिर {
   SmallString<128> Path;
   P.toVector(Path);
 
   // Fix up relative paths. This just prepends the current working directory.
   std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  निश्चित(!EC);
+  (व्योम)EC;
 
-  if (useNormalizedPaths())
+  अगर (useNormalizedPaths())
     llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
 
-  const detail::InMemoryDirectory *Dir = Root.get();
-  if (Path.empty())
-    return detail::NamedNodeOrError(Path, Dir);
+  स्थिर detail::InMemoryDirectory *Dir = मूल_2.लो();
+  अगर (Path.empty())
+    वापस detail::Named_गाँठ_Or_Error(Path, Dir);
 
-  auto I = llvm::sys::path::begin(Path), E = llvm::sys::path::end(Path);
-  while (true) {
-    detail::InMemoryNode *Node = Dir->getChild(*I);
+  स्वतः I = llvm::sys::path::begin(Path), E = llvm::sys::path::end(Path);
+  जबतक (true) {
+    detail::In_Memory_गाँठ *गाँठ = Dir->getChild(*I);
     ++I;
-    if (!Node)
-      return errc::no_such_file_or_directory;
+    अगर (!गाँठ)
+      वापस errc::no_such_file_or_directory;
 
-    if (auto Symlink = dyn_cast<detail::InMemorySymbolicLink>(Node)) {
+    अगर (स्वतः Symlink = dyn_cast<detail::InMemorySymbolicLink>(गाँठ)) {
       // If we're at the end of the path, and we're not following through
       // terminal symlinks, then we're done.
-      if (I == E && !FollowFinalSymlink)
-        return detail::NamedNodeOrError(Path, Symlink);
+      अगर (I == E && !FollowFinalSymlink)
+        वापस detail::Named_गाँठ_Or_Error(Path, Symlink);
 
-      if (SymlinkDepth > InMemoryFileSystem::MaxSymlinkDepth)
-        return errc::no_such_file_or_directory;
+      अगर (SymlinkDepth > InMemoryFileSystem::MaxSymlinkDepth)
+        वापस errc::no_such_file_or_directory;
 
       SmallString<128> TargetPath = Symlink->getTargetPath();
-      if (std::error_code EC = makeAbsolute(TargetPath))
-        return EC;
+      अगर (std::error_code EC = makeAbsolute(TargetPath))
+        वापस EC;
 
       // Keep going with the target. We always want to follow symlinks here
       // because we're either at the end of a path that we want to follow, or
       // not at the end of a path, in which case we need to follow the symlink
       // regardless.
-      auto Target =
-          lookupNode(TargetPath, /*FollowFinalSymlink=*/true, SymlinkDepth + 1);
-      if (!Target || I == E)
-        return Target;
+      स्वतः Target =
+          lookup_गाँठ(TargetPath, /*FollowFinalSymlink=*/true, SymlinkDepth + 1);
+      अगर (!Target || I == E)
+        वापस Target;
 
-      if (!isa<detail::InMemoryDirectory>(*Target))
-        return errc::no_such_file_or_directory;
+      अगर (!isa<detail::InMemoryDirectory>(*Target))
+        वापस errc::no_such_file_or_directory;
 
       // Otherwise, continue on the search in the symlinked directory.
       Dir = cast<detail::InMemoryDirectory>(*Target);
-      continue;
+      जारी;
     }
 
     // Return the file if it's at the end of the path.
-    if (auto File = dyn_cast<detail::InMemoryFile>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, File);
-      return errc::no_such_file_or_directory;
+    अगर (स्वतः File = dyn_cast<detail::InMemoryFile>(गाँठ)) {
+      अगर (I == E)
+        वापस detail::Named_गाँठ_Or_Error(Path, File);
+      वापस errc::no_such_file_or_directory;
     }
 
     // If Node is HardLink then return the resolved file.
-    if (auto File = dyn_cast<detail::InMemoryHardLink>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, &File->getResolvedFile());
-      return errc::no_such_file_or_directory;
+    अगर (स्वतः File = dyn_cast<detail::InMemoryHardLink>(गाँठ)) {
+      अगर (I == E)
+        वापस detail::Named_गाँठ_Or_Error(Path, &File->getResolvedFile());
+      वापस errc::no_such_file_or_directory;
     }
     // Traverse directories.
-    Dir = cast<detail::InMemoryDirectory>(Node);
-    if (I == E)
-      return detail::NamedNodeOrError(Path, Dir);
+    Dir = cast<detail::InMemoryDirectory>(गाँठ);
+    अगर (I == E)
+      वापस detail::Named_गाँठ_Or_Error(Path, Dir);
   }
 }
 
-bool InMemoryFileSystem::addHardLink(const Twine &NewLink,
-                                     const Twine &Target) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
+bool InMemoryFileSystem::addHardLink(स्थिर Twine &NewLink,
+                                     स्थिर Twine &Target) {
+  स्वतः New_Link_गाँठ = lookup_गाँठ(NewLink, /*FollowFinalSymlink=*/false);
   // Whether symlinks in the hardlink target are followed is
   // implementation-defined in POSIX.
   // We're following symlinks here to be consistent with macOS.
-  auto TargetNode = lookupNode(Target, /*FollowFinalSymlink=*/true);
+  स्वतः Target_गाँठ = lookup_गाँठ(Target, /*FollowFinalSymlink=*/true);
   // FromPath must not have been added before. ToPath must have been added
   // before. Resolved ToPath must be a File.
-  if (!TargetNode || NewLinkNode || !isa<detail::InMemoryFile>(*TargetNode))
-    return false;
-  return addFile(NewLink, 0, nullptr, std::nullopt, std::nullopt, std::nullopt,
-                 std::nullopt, [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemoryHardLink>(
+  अगर (!Target_गाँठ || New_Link_गाँठ || !isa<detail::InMemoryFile>(*Target_गाँठ))
+    वापस false;
+  वापस addFile(NewLink, 0, nullptr, std::nullopt, std::nullopt, std::nullopt,
+                 std::nullopt, [&](detail::New_In_Memory_गाँठ_Info NNI) {
+                   वापस std::make_unique<detail::InMemoryHardLink>(
                        NNI.Path.str(),
-                       *cast<detail::InMemoryFile>(*TargetNode));
+                       *cast<detail::InMemoryFile>(*Target_गाँठ));
                  });
 }
 
 bool InMemoryFileSystem::addSymbolicLink(
-    const Twine &NewLink, const Twine &Target, time_t ModificationTime,
+    स्थिर Twine &NewLink, स्थिर Twine &Target, समय_प्रकार ModificationTime,
     std::optional<uint32_t> User, std::optional<uint32_t> Group,
     std::optional<llvm::sys::fs::perms> Perms) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
-  if (NewLinkNode)
-    return false;
+  स्वतः New_Link_गाँठ = lookup_गाँठ(NewLink, /*FollowFinalSymlink=*/false);
+  अगर (New_Link_गाँठ)
+    वापस false;
 
   SmallString<128> NewLinkStr, TargetStr;
   NewLink.toVector(NewLinkStr);
   Target.toVector(TargetStr);
 
-  return addFile(NewLinkStr, ModificationTime, nullptr, User, Group,
+  वापस addFile(NewLinkStr, ModificationTime, nullptr, User, Group,
                  sys::fs::file_type::symlink_file, Perms,
-                 [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemorySymbolicLink>(
+                 [&](detail::New_In_Memory_गाँठ_Info NNI) {
+                   वापस std::make_unique<detail::InMemorySymbolicLink>(
                        NewLinkStr, TargetStr, NNI.makeStatus());
                  });
 }
 
-llvm::ErrorOr<Status> InMemoryFileSystem::status(const Twine &Path) {
-  auto Node = lookupNode(Path, /*FollowFinalSymlink=*/true);
-  if (Node)
-    return (*Node)->getStatus(Path);
-  return Node.getError();
+llvm::ErrorOr<Status> InMemoryFileSystem::status(स्थिर Twine &Path) {
+  स्वतः गाँठ = lookup_गाँठ(Path, /*FollowFinalSymlink=*/true);
+  अगर (गाँठ)
+    वापस (*गाँठ)->getStatus(Path);
+  वापस गाँठ.getError();
 }
 
 llvm::ErrorOr<std::unique_ptr<File>>
-InMemoryFileSystem::openFileForRead(const Twine &Path) {
-  auto Node = lookupNode(Path,/*FollowFinalSymlink=*/true);
-  if (!Node)
-    return Node.getError();
+InMemoryFileSystem::openFileForRead(स्थिर Twine &Path) {
+  स्वतः गाँठ = lookup_गाँठ(Path,/*FollowFinalSymlink=*/true);
+  अगर (!गाँठ)
+    वापस गाँठ.getError();
 
   // When we have a file provide a heap-allocated wrapper for the memory buffer
   // to match the ownership semantics for File.
-  if (auto *F = dyn_cast<detail::InMemoryFile>(*Node))
-    return std::unique_ptr<File>(
-        new detail::InMemoryFileAdaptor(*F, Path.str()));
+  अगर (स्वतः *F = dyn_cast<detail::InMemoryFile>(*गाँठ))
+    वापस std::unique_ptr<File>(
+        नया detail::InMemoryFileAdaptor(*F, Path.str()));
 
   // FIXME: errc::not_a_file?
-  return make_error_code(llvm::errc::invalid_argument);
+  वापस make_error_code(llvm::errc::invalid_argument);
 }
 
 /// Adaptor from InMemoryDir::iterator to directory_iterator.
-class InMemoryFileSystem::DirIterator : public llvm::vfs::detail::DirIterImpl {
-  const InMemoryFileSystem *FS;
+श्रेणी InMemoryFileSystem::DirIterator : खुला llvm::vfs::detail::DirIterImpl {
+  स्थिर InMemoryFileSystem *FS;
   detail::InMemoryDirectory::const_iterator I;
   detail::InMemoryDirectory::const_iterator E;
   std::string RequestedDirName;
 
-  void setCurrentEntry() {
-    if (I != E) {
+  व्योम setCurrentEntry() {
+    अगर (I != E) {
       SmallString<256> Path(RequestedDirName);
       llvm::sys::path::append(Path, I->second->getFileName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch (I->second->getKind()) {
-      case detail::IME_File:
-      case detail::IME_HardLink:
+      चयन (I->second->getKind()) {
+      हाल detail::IME_File:
+      हाल detail::IME_HardLink:
         Type = sys::fs::file_type::regular_file;
-        break;
-      case detail::IME_Directory:
+        अवरोध;
+      हाल detail::IME_Directory:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case detail::IME_SymbolicLink:
-        if (auto SymlinkTarget =
-                FS->lookupNode(Path, /*FollowFinalSymlink=*/true)) {
+        अवरोध;
+      हाल detail::IME_SymbolicLink:
+        अगर (स्वतः SymlinkTarget =
+                FS->lookup_गाँठ(Path, /*FollowFinalSymlink=*/true)) {
           Path = SymlinkTarget.getName();
           Type = (*SymlinkTarget)->getStatus(Path).getType();
         }
-        break;
+        अवरोध;
       }
       CurrentEntry = directory_entry(std::string(Path), Type);
-    } else {
+    } अन्यथा {
       // When we're at the end, make CurrentEntry invalid and DirIterImpl will
       // do the rest.
       CurrentEntry = directory_entry();
     }
   }
 
-public:
-  DirIterator() = default;
+खुला:
+  DirIterator() = शेष;
 
-  DirIterator(const InMemoryFileSystem *FS,
-              const detail::InMemoryDirectory &Dir,
+  DirIterator(स्थिर InMemoryFileSystem *FS,
+              स्थिर detail::InMemoryDirectory &Dir,
               std::string RequestedDirName)
       : FS(FS), I(Dir.begin()), E(Dir.end()),
         RequestedDirName(std::move(RequestedDirName)) {
@@ -1196,62 +1196,62 @@ public:
   std::error_code increment() override {
     ++I;
     setCurrentEntry();
-    return {};
+    वापस {};
   }
 };
 
-directory_iterator InMemoryFileSystem::dir_begin(const Twine &Dir,
+directory_iterator InMemoryFileSystem::dir_begin(स्थिर Twine &Dir,
                                                  std::error_code &EC) {
-  auto Node = lookupNode(Dir, /*FollowFinalSymlink=*/true);
-  if (!Node) {
-    EC = Node.getError();
-    return directory_iterator(std::make_shared<DirIterator>());
+  स्वतः गाँठ = lookup_गाँठ(Dir, /*FollowFinalSymlink=*/true);
+  अगर (!गाँठ) {
+    EC = गाँठ.getError();
+    वापस directory_iterator(std::make_shared<DirIterator>());
   }
 
-  if (auto *DirNode = dyn_cast<detail::InMemoryDirectory>(*Node))
-    return directory_iterator(
-        std::make_shared<DirIterator>(this, *DirNode, Dir.str()));
+  अगर (स्वतः *Dir_गाँठ = dyn_cast<detail::InMemoryDirectory>(*गाँठ))
+    वापस directory_iterator(
+        std::make_shared<DirIterator>(यह, *Dir_गाँठ, Dir.str()));
 
   EC = make_error_code(llvm::errc::not_a_directory);
-  return directory_iterator(std::make_shared<DirIterator>());
+  वापस directory_iterator(std::make_shared<DirIterator>());
 }
 
-std::error_code InMemoryFileSystem::setCurrentWorkingDirectory(const Twine &P) {
+std::error_code InMemoryFileSystem::setCurrentWorkingDirectory(स्थिर Twine &P) {
   SmallString<128> Path;
   P.toVector(Path);
 
   // Fix up relative paths. This just prepends the current working directory.
   std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  निश्चित(!EC);
+  (व्योम)EC;
 
-  if (useNormalizedPaths())
+  अगर (useNormalizedPaths())
     llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
 
-  if (!Path.empty())
+  अगर (!Path.empty())
     WorkingDirectory = std::string(Path);
-  return {};
+  वापस {};
 }
 
-std::error_code InMemoryFileSystem::getRealPath(const Twine &Path,
-                                                SmallVectorImpl<char> &Output) {
-  auto CWD = getCurrentWorkingDirectory();
-  if (!CWD || CWD->empty())
-    return errc::operation_not_permitted;
+std::error_code InMemoryFileSystem::getRealPath(स्थिर Twine &Path,
+                                                SmallVectorImpl<अक्षर> &Output) {
+  स्वतः CWD = getCurrentWorkingDirectory();
+  अगर (!CWD || CWD->empty())
+    वापस errc::operation_not_permitted;
   Path.toVector(Output);
-  if (auto EC = makeAbsolute(Output))
-    return EC;
+  अगर (स्वतः EC = makeAbsolute(Output))
+    वापस EC;
   llvm::sys::path::remove_dots(Output, /*remove_dot_dot=*/true);
-  return {};
+  वापस {};
 }
 
-std::error_code InMemoryFileSystem::isLocal(const Twine &Path, bool &Result) {
-  Result = false;
-  return {};
+std::error_code InMemoryFileSystem::isLocal(स्थिर Twine &Path, bool &परिणाम) {
+  परिणाम = false;
+  वापस {};
 }
 
-void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
-                                   unsigned IndentLevel) const {
+व्योम InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
+                                   अचिन्हित IndentLevel) स्थिर {
   printIndent(OS, IndentLevel);
   OS << "InMemoryFileSystem\n";
 }
@@ -1265,36 +1265,36 @@ void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
 
 namespace {
 
-static llvm::sys::path::Style getExistingStyle(llvm::StringRef Path) {
+अटल llvm::sys::path::Style getExistingStyle(llvm::StringRef Path) {
   // Detect the path style in use by checking the first separator.
   llvm::sys::path::Style style = llvm::sys::path::Style::native;
-  const size_t n = Path.find_first_of("/\\");
+  स्थिर माप_प्रकार n = Path.find_first_of("/\\");
   // Can't distinguish between posix and windows_slash here.
-  if (n != static_cast<size_t>(-1))
+  अगर (n != static_cast<माप_प्रकार>(-1))
     style = (Path[n] == '/') ? llvm::sys::path::Style::posix
                              : llvm::sys::path::Style::windows_backslash;
-  return style;
+  वापस style;
 }
 
 /// Removes leading "./" as well as path components like ".." and ".".
-static llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
+अटल llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
   // First detect the path style in use by checking the first separator.
   llvm::sys::path::Style style = getExistingStyle(Path);
 
   // Now remove the dots.  Explicitly specifying the path style prevents the
   // direction of the slashes from changing.
-  llvm::SmallString<256> result =
+  llvm::SmallString<256> परिणाम_2 =
       llvm::sys::path::remove_leading_dotslash(Path, style);
-  llvm::sys::path::remove_dots(result, /*remove_dot_dot=*/true, style);
-  return result;
+  llvm::sys::path::remove_dots(परिणाम_2, /*remove_dot_dot=*/true, style);
+  वापस परिणाम_2;
 }
 
 /// Whether the error and entry specify a file/directory that was not found.
-static bool isFileNotFound(std::error_code EC,
+अटल bool isFileNotFound(std::error_code EC,
                            RedirectingFileSystem::Entry *E = nullptr) {
-  if (E && !isa<RedirectingFileSystem::DirectoryRemapEntry>(E))
-    return false;
-  return EC == llvm::errc::no_such_file_or_directory;
+  अगर (E && !isa<RedirectingFileSystem::DirectoryRemapEntry>(E))
+    वापस false;
+  वापस EC == llvm::errc::no_such_file_or_directory;
 }
 
 } // anonymous namespace
@@ -1302,53 +1302,53 @@ static bool isFileNotFound(std::error_code EC,
 
 RedirectingFileSystem::RedirectingFileSystem(IntrusiveRefCntPtr<FileSystem> FS)
     : ExternalFS(std::move(FS)) {
-  assert(ExternalFS && "RedirectingFileSystem requires an external FS");
-  if (auto ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
+  निश्चित(ExternalFS && "RedirectingFileSystem requires an external FS");
+  अगर (स्वतः ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
     WorkingDirectory = *ExternalWorkingDirectory;
 }
 
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory entries.
-class llvm::vfs::RedirectingFSDirIterImpl
-    : public llvm::vfs::detail::DirIterImpl {
+श्रेणी llvm::vfs::RedirectingFSDirIterImpl
+    : खुला llvm::vfs::detail::DirIterImpl {
   std::string Dir;
   RedirectingFileSystem::DirectoryEntry::iterator Current, End;
 
   std::error_code incrementImpl(bool IsFirstTime) {
-    assert((IsFirstTime || Current != End) && "cannot iterate past end");
-    if (!IsFirstTime)
+    निश्चित((IsFirstTime || Current != End) && "cannot iterate past end");
+    अगर (!IsFirstTime)
       ++Current;
-    if (Current != End) {
+    अगर (Current != End) {
       SmallString<128> PathStr(Dir);
       llvm::sys::path::append(PathStr, (*Current)->getName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch ((*Current)->getKind()) {
-      case RedirectingFileSystem::EK_Directory:
+      चयन ((*Current)->getKind()) {
+      हाल RedirectingFileSystem::EK_Directory:
         [[fallthrough]];
-      case RedirectingFileSystem::EK_DirectoryRemap:
+      हाल RedirectingFileSystem::EK_DirectoryRemap:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case RedirectingFileSystem::EK_File:
+        अवरोध;
+      हाल RedirectingFileSystem::EK_File:
         Type = sys::fs::file_type::regular_file;
-        break;
+        अवरोध;
       }
       CurrentEntry = directory_entry(std::string(PathStr), Type);
-    } else {
+    } अन्यथा {
       CurrentEntry = directory_entry();
     }
-    return {};
+    वापस {};
   };
 
-public:
+खुला:
   RedirectingFSDirIterImpl(
-      const Twine &Path, RedirectingFileSystem::DirectoryEntry::iterator Begin,
+      स्थिर Twine &Path, RedirectingFileSystem::DirectoryEntry::iterator Begin,
       RedirectingFileSystem::DirectoryEntry::iterator End, std::error_code &EC)
       : Dir(Path.str()), Current(Begin), End(End) {
     EC = incrementImpl(/*IsFirstTime=*/true);
   }
 
   std::error_code increment() override {
-    return incrementImpl(/*IsFirstTime=*/false);
+    वापस incrementImpl(/*IsFirstTime=*/false);
   }
 };
 
@@ -1356,21 +1356,21 @@ namespace {
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory remap entries that maps the paths reported by the external
 /// file system's directory iterator back to the virtual directory's path.
-class RedirectingFSDirRemapIterImpl : public llvm::vfs::detail::DirIterImpl {
+श्रेणी RedirectingFSDirRemapIterImpl : खुला llvm::vfs::detail::DirIterImpl {
   std::string Dir;
   llvm::sys::path::Style DirStyle;
   llvm::vfs::directory_iterator ExternalIter;
 
-public:
+खुला:
   RedirectingFSDirRemapIterImpl(std::string DirPath,
                                 llvm::vfs::directory_iterator ExtIter)
       : Dir(std::move(DirPath)), DirStyle(getExistingStyle(Dir)),
         ExternalIter(ExtIter) {
-    if (ExternalIter != llvm::vfs::directory_iterator())
+    अगर (ExternalIter != llvm::vfs::directory_iterator())
       setCurrentEntry();
   }
 
-  void setCurrentEntry() {
+  व्योम setCurrentEntry() {
     StringRef ExternalPath = ExternalIter->path();
     llvm::sys::path::Style ExternalStyle = getExistingStyle(ExternalPath);
     StringRef File = llvm::sys::path::filename(ExternalPath, ExternalStyle);
@@ -1384,240 +1384,240 @@ public:
   std::error_code increment() override {
     std::error_code EC;
     ExternalIter.increment(EC);
-    if (!EC && ExternalIter != llvm::vfs::directory_iterator())
+    अगर (!EC && ExternalIter != llvm::vfs::directory_iterator())
       setCurrentEntry();
-    else
+    अन्यथा
       CurrentEntry = directory_entry();
-    return EC;
+    वापस EC;
   }
 };
 } // namespace
 
 llvm::ErrorOr<std::string>
-RedirectingFileSystem::getCurrentWorkingDirectory() const {
-  return WorkingDirectory;
+RedirectingFileSystem::getCurrentWorkingDirectory() स्थिर {
+  वापस WorkingDirectory;
 }
 
 std::error_code
-RedirectingFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
+RedirectingFileSystem::setCurrentWorkingDirectory(स्थिर Twine &Path) {
   // Don't change the working directory if the path doesn't exist.
-  if (!exists(Path))
-    return errc::no_such_file_or_directory;
+  अगर (!exists(Path))
+    वापस errc::no_such_file_or_directory;
 
   SmallString<128> AbsolutePath;
   Path.toVector(AbsolutePath);
-  if (std::error_code EC = makeAbsolute(AbsolutePath))
-    return EC;
+  अगर (std::error_code EC = makeAbsolute(AbsolutePath))
+    वापस EC;
   WorkingDirectory = std::string(AbsolutePath);
-  return {};
+  वापस {};
 }
 
-std::error_code RedirectingFileSystem::isLocal(const Twine &Path_,
-                                               bool &Result) {
+std::error_code RedirectingFileSystem::isLocal(स्थिर Twine &Path_,
+                                               bool &परिणाम) {
   SmallString<256> Path;
   Path_.toVector(Path);
 
-  if (makeAbsolute(Path))
-    return {};
+  अगर (makeAbsolute(Path))
+    वापस {};
 
-  return ExternalFS->isLocal(Path, Result);
+  वापस ExternalFS->isLocal(Path, परिणाम);
 }
 
-std::error_code RedirectingFileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
+std::error_code RedirectingFileSystem::makeAbsolute(SmallVectorImpl<अक्षर> &Path) स्थिर {
   // is_absolute(..., Style::windows_*) accepts paths with both slash types.
-  if (llvm::sys::path::is_absolute(Path, llvm::sys::path::Style::posix) ||
+  अगर (llvm::sys::path::is_absolute(Path, llvm::sys::path::Style::posix) ||
       llvm::sys::path::is_absolute(Path,
                                    llvm::sys::path::Style::windows_backslash))
     // This covers windows absolute path with forward slash as well, as the
     // forward slashes are treated as path separation in llvm::path
     // regardless of what path::Style is used.
-    return {};
+    वापस {};
 
-  auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  स्वतः WorkingDir = getCurrentWorkingDirectory();
+  अगर (!WorkingDir)
+    वापस WorkingDir.getError();
 
-  return makeAbsolute(WorkingDir.get(), Path);
+  वापस makeAbsolute(WorkingDir.लो(), Path);
 }
 
 std::error_code
 RedirectingFileSystem::makeAbsolute(StringRef WorkingDir,
-                                    SmallVectorImpl<char> &Path) const {
+                                    SmallVectorImpl<अक्षर> &Path) स्थिर {
   // We can't use sys::fs::make_absolute because that assumes the path style
   // is native and there is no way to override that.  Since we know WorkingDir
   // is absolute, we can use it to determine which style we actually have and
   // append Path ourselves.
-  if (!WorkingDir.empty() &&
+  अगर (!WorkingDir.empty() &&
       !sys::path::is_absolute(WorkingDir, sys::path::Style::posix) &&
       !sys::path::is_absolute(WorkingDir,
                               sys::path::Style::windows_backslash)) {
-    return std::error_code();
+    वापस std::error_code();
   }
   sys::path::Style style = sys::path::Style::windows_backslash;
-  if (sys::path::is_absolute(WorkingDir, sys::path::Style::posix)) {
+  अगर (sys::path::is_absolute(WorkingDir, sys::path::Style::posix)) {
     style = sys::path::Style::posix;
-  } else {
+  } अन्यथा {
     // Distinguish between windows_backslash and windows_slash; getExistingStyle
     // returns posix for a path with windows_slash.
-    if (getExistingStyle(WorkingDir) != sys::path::Style::windows_backslash)
+    अगर (getExistingStyle(WorkingDir) != sys::path::Style::windows_backslash)
       style = sys::path::Style::windows_slash;
   }
 
-  std::string Result = std::string(WorkingDir);
-  StringRef Dir(Result);
-  if (!Dir.ends_with(sys::path::get_separator(style))) {
-    Result += sys::path::get_separator(style);
+  std::string परिणाम = std::string(WorkingDir);
+  StringRef Dir(परिणाम);
+  अगर (!Dir.ends_with(sys::path::get_separator(style))) {
+    परिणाम += sys::path::get_separator(style);
   }
   // backslashes '\' are legit path charactors under POSIX. Windows APIs
   // like CreateFile accepts forward slashes '/' as path
   // separator (even when mixed with backslashes). Therefore,
   // `Path` should be directly appended to `WorkingDir` without converting
   // path separator.
-  Result.append(Path.data(), Path.size());
-  Path.assign(Result.begin(), Result.end());
+  परिणाम.append(Path.तथ्य(), Path.आकार_2());
+  Path.assign(परिणाम.begin(), परिणाम.end());
 
-  return {};
+  वापस {};
 }
 
-directory_iterator RedirectingFileSystem::dir_begin(const Twine &Dir,
+directory_iterator RedirectingFileSystem::dir_begin(स्थिर Twine &Dir,
                                                     std::error_code &EC) {
   SmallString<256> Path;
   Dir.toVector(Path);
 
   EC = makeAbsolute(Path);
-  if (EC)
-    return {};
+  अगर (EC)
+    वापस {};
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
-    if (Redirection != RedirectKind::RedirectOnly &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->dir_begin(Path, EC);
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम = lookupPath(Path);
+  अगर (!परिणाम) {
+    अगर (Redirection != RedirectKind::RedirectOnly &&
+        isFileNotFound(परिणाम.getError()))
+      वापस ExternalFS->dir_begin(Path, EC);
 
-    EC = Result.getError();
-    return {};
+    EC = परिणाम.getError();
+    वापस {};
   }
 
   // Use status to make sure the path exists and refers to a directory.
-  ErrorOr<Status> S = status(Path, Dir, *Result);
-  if (!S) {
-    if (Redirection != RedirectKind::RedirectOnly &&
-        isFileNotFound(S.getError(), Result->E))
-      return ExternalFS->dir_begin(Dir, EC);
+  ErrorOr<Status> S = status(Path, Dir, *परिणाम);
+  अगर (!S) {
+    अगर (Redirection != RedirectKind::RedirectOnly &&
+        isFileNotFound(S.getError(), परिणाम->E))
+      वापस ExternalFS->dir_begin(Dir, EC);
 
     EC = S.getError();
-    return {};
+    वापस {};
   }
 
-  if (!S->isDirectory()) {
+  अगर (!S->isDirectory()) {
     EC = errc::not_a_directory;
-    return {};
+    वापस {};
   }
 
   // Create the appropriate directory iterator based on whether we found a
   // DirectoryRemapEntry or DirectoryEntry.
   directory_iterator RedirectIter;
   std::error_code RedirectEC;
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
-    auto RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
+  अगर (स्वतः ExtRedirect = परिणाम->getExternalRedirect()) {
+    स्वतः RE = cast<RedirectingFileSystem::RemapEntry>(परिणाम->E);
     RedirectIter = ExternalFS->dir_begin(*ExtRedirect, RedirectEC);
 
-    if (!RE->useExternalName(UseExternalNames)) {
+    अगर (!RE->useExternalName(UseExternalNames)) {
       // Update the paths in the results to use the virtual directory's path.
       RedirectIter =
           directory_iterator(std::make_shared<RedirectingFSDirRemapIterImpl>(
               std::string(Path), RedirectIter));
     }
-  } else {
-    auto DE = cast<DirectoryEntry>(Result->E);
+  } अन्यथा {
+    स्वतः DE = cast<DirectoryEntry>(परिणाम->E);
     RedirectIter =
         directory_iterator(std::make_shared<RedirectingFSDirIterImpl>(
             Path, DE->contents_begin(), DE->contents_end(), RedirectEC));
   }
 
-  if (RedirectEC) {
-    if (RedirectEC != errc::no_such_file_or_directory) {
+  अगर (RedirectEC) {
+    अगर (RedirectEC != errc::no_such_file_or_directory) {
       EC = RedirectEC;
-      return {};
+      वापस {};
     }
     RedirectIter = {};
   }
 
-  if (Redirection == RedirectKind::RedirectOnly) {
+  अगर (Redirection == RedirectKind::RedirectOnly) {
     EC = RedirectEC;
-    return RedirectIter;
+    वापस RedirectIter;
   }
 
   std::error_code ExternalEC;
   directory_iterator ExternalIter = ExternalFS->dir_begin(Path, ExternalEC);
-  if (ExternalEC) {
-    if (ExternalEC != errc::no_such_file_or_directory) {
+  अगर (ExternalEC) {
+    अगर (ExternalEC != errc::no_such_file_or_directory) {
       EC = ExternalEC;
-      return {};
+      वापस {};
     }
     ExternalIter = {};
   }
 
   SmallVector<directory_iterator, 2> Iters;
-  switch (Redirection) {
-  case RedirectKind::Fallthrough:
-    Iters.push_back(ExternalIter);
-    Iters.push_back(RedirectIter);
-    break;
-  case RedirectKind::Fallback:
-    Iters.push_back(RedirectIter);
-    Iters.push_back(ExternalIter);
-    break;
-  default:
+  चयन (Redirection) {
+  हाल RedirectKind::Fallthrough:
+    Iters.धकेलो_back(ExternalIter);
+    Iters.धकेलो_back(RedirectIter);
+    अवरोध;
+  हाल RedirectKind::Fallback:
+    Iters.धकेलो_back(RedirectIter);
+    Iters.धकेलो_back(ExternalIter);
+    अवरोध;
+  शेष:
     llvm_unreachable("unhandled RedirectKind");
   }
 
   directory_iterator Combined{
       std::make_shared<CombiningDirIterImpl>(Iters, EC)};
-  if (EC)
-    return {};
-  return Combined;
+  अगर (EC)
+    वापस {};
+  वापस Combined;
 }
 
-void RedirectingFileSystem::setOverlayFileDir(StringRef Dir) {
+व्योम RedirectingFileSystem::setOverlayFileDir(StringRef Dir) {
   OverlayFileDir = Dir.str();
 }
 
-StringRef RedirectingFileSystem::getOverlayFileDir() const {
-  return OverlayFileDir;
+StringRef RedirectingFileSystem::getOverlayFileDir() स्थिर {
+  वापस OverlayFileDir;
 }
 
-void RedirectingFileSystem::setFallthrough(bool Fallthrough) {
-  if (Fallthrough) {
+व्योम RedirectingFileSystem::setFallthrough(bool Fallthrough) {
+  अगर (Fallthrough) {
     Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-  } else {
+  } अन्यथा {
     Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
   }
 }
 
-void RedirectingFileSystem::setRedirection(
+व्योम RedirectingFileSystem::setRedirection(
     RedirectingFileSystem::RedirectKind Kind) {
   Redirection = Kind;
 }
 
-std::vector<StringRef> RedirectingFileSystem::getRoots() const {
+std::vector<StringRef> RedirectingFileSystem::getRoots() स्थिर {
   std::vector<StringRef> R;
-  R.reserve(Roots.size());
-  for (const auto &Root : Roots)
-    R.push_back(Root->getName());
-  return R;
+  R.reserve(Roots.आकार_2());
+  क्रम (स्थिर स्वतः &मूल_2 : Roots)
+    R.धकेलो_back(मूल_2->getName());
+  वापस R;
 }
 
-void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                      unsigned IndentLevel) const {
+व्योम RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                      अचिन्हित IndentLevel) स्थिर {
   printIndent(OS, IndentLevel);
   OS << "RedirectingFileSystem (UseExternalNames: "
      << (UseExternalNames ? "true" : "false") << ")\n";
-  if (Type == PrintType::Summary)
-    return;
+  अगर (Type == PrintType::Summary)
+    वापस;
 
-  for (const auto &Root : Roots)
-    printEntry(OS, Root.get(), IndentLevel);
+  क्रम (स्थिर स्वतः &मूल_2 : Roots)
+    printEntry(OS, मूल_2.लो(), IndentLevel);
 
   printIndent(OS, IndentLevel);
   OS << "ExternalFS:\n";
@@ -1625,410 +1625,410 @@ void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
                     IndentLevel + 1);
 }
 
-void RedirectingFileSystem::printEntry(raw_ostream &OS,
+व्योम RedirectingFileSystem::printEntry(raw_ostream &OS,
                                        RedirectingFileSystem::Entry *E,
-                                       unsigned IndentLevel) const {
+                                       अचिन्हित IndentLevel) स्थिर {
   printIndent(OS, IndentLevel);
   OS << "'" << E->getName() << "'";
 
-  switch (E->getKind()) {
-  case EK_Directory: {
-    auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(E);
+  चयन (E->getKind()) {
+  हाल EK_Directory: {
+    स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(E);
 
     OS << "\n";
-    for (std::unique_ptr<Entry> &SubEntry :
+    क्रम (std::unique_ptr<Entry> &SubEntry :
          llvm::make_range(DE->contents_begin(), DE->contents_end()))
-      printEntry(OS, SubEntry.get(), IndentLevel + 1);
-    break;
+      printEntry(OS, SubEntry.लो(), IndentLevel + 1);
+    अवरोध;
   }
-  case EK_DirectoryRemap:
-  case EK_File: {
-    auto *RE = cast<RedirectingFileSystem::RemapEntry>(E);
+  हाल EK_DirectoryRemap:
+  हाल EK_File: {
+    स्वतः *RE = cast<RedirectingFileSystem::RemapEntry>(E);
     OS << " -> '" << RE->getExternalContentsPath() << "'";
-    switch (RE->getUseName()) {
-    case NK_NotSet:
-      break;
-    case NK_External:
+    चयन (RE->getUseName()) {
+    हाल NK_NotSet:
+      अवरोध;
+    हाल NK_External:
       OS << " (UseExternalName: true)";
-      break;
-    case NK_Virtual:
+      अवरोध;
+    हाल NK_Virtual:
       OS << " (UseExternalName: false)";
-      break;
+      अवरोध;
     }
     OS << "\n";
-    break;
+    अवरोध;
   }
   }
 }
 
-void RedirectingFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  if (ExternalFS) {
+व्योम RedirectingFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
+  अगर (ExternalFS) {
     Callback(*ExternalFS);
     ExternalFS->visitChildFileSystems(Callback);
   }
 }
 
 /// A helper class to hold the common YAML parsing state.
-class llvm::vfs::RedirectingFileSystemParser {
+श्रेणी llvm::vfs::RedirectingFileSystemParser {
   yaml::Stream &Stream;
 
-  void error(yaml::Node *N, const Twine &Msg) { Stream.printError(N, Msg); }
+  व्योम error(yaml::गाँठ *N, स्थिर Twine &संदेश_2) { Stream.printError(N, संदेश_2); }
 
   // false on error
-  bool parseScalarString(yaml::Node *N, StringRef &Result,
-                         SmallVectorImpl<char> &Storage) {
-    const auto *S = dyn_cast_if_present<yaml::ScalarNode>(N);
+  bool parseScalarString(yaml::गाँठ *N, StringRef &परिणाम,
+                         SmallVectorImpl<अक्षर> &Storage) {
+    स्थिर स्वतः *S = dyn_cast_if_present<yaml::Scalar_गाँठ>(N);
 
-    if (!S) {
+    अगर (!S) {
       error(N, "expected string");
-      return false;
+      वापस false;
     }
-    Result = S->getValue(Storage);
-    return true;
+    परिणाम = S->get_मूल्य(Storage);
+    वापस true;
   }
 
   // false on error
-  bool parseScalarBool(yaml::Node *N, bool &Result) {
+  bool parseScalarBool(yaml::गाँठ *N, bool &परिणाम) {
     SmallString<5> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return false;
+    StringRef मूल्य;
+    अगर (!parseScalarString(N, मूल्य, Storage))
+      वापस false;
 
-    if (Value.equals_insensitive("true") || Value.equals_insensitive("on") ||
-        Value.equals_insensitive("yes") || Value == "1") {
-      Result = true;
-      return true;
-    } else if (Value.equals_insensitive("false") ||
-               Value.equals_insensitive("off") ||
-               Value.equals_insensitive("no") || Value == "0") {
-      Result = false;
-      return true;
+    अगर (मूल्य.equals_insensitive("true") || मूल्य.equals_insensitive("on") ||
+        मूल्य.equals_insensitive("yes") || मूल्य == "1") {
+      परिणाम = true;
+      वापस true;
+    } अन्यथा अगर (मूल्य.equals_insensitive("false") ||
+               मूल्य.equals_insensitive("off") ||
+               मूल्य.equals_insensitive("no") || मूल्य == "0") {
+      परिणाम = false;
+      वापस true;
     }
 
     error(N, "expected boolean value");
-    return false;
+    वापस false;
   }
 
   std::optional<RedirectingFileSystem::RedirectKind>
-  parseRedirectKind(yaml::Node *N) {
+  parseRedirectKind(yaml::गाँठ *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
+    StringRef मूल्य;
+    अगर (!parseScalarString(N, मूल्य, Storage))
+      वापस std::nullopt;
 
-    if (Value.equals_insensitive("fallthrough")) {
-      return RedirectingFileSystem::RedirectKind::Fallthrough;
-    } else if (Value.equals_insensitive("fallback")) {
-      return RedirectingFileSystem::RedirectKind::Fallback;
-    } else if (Value.equals_insensitive("redirect-only")) {
-      return RedirectingFileSystem::RedirectKind::RedirectOnly;
+    अगर (मूल्य.equals_insensitive("fallthrough")) {
+      वापस RedirectingFileSystem::RedirectKind::Fallthrough;
+    } अन्यथा अगर (मूल्य.equals_insensitive("fallback")) {
+      वापस RedirectingFileSystem::RedirectKind::Fallback;
+    } अन्यथा अगर (मूल्य.equals_insensitive("redirect-only")) {
+      वापस RedirectingFileSystem::RedirectKind::RedirectOnly;
     }
-    return std::nullopt;
+    वापस std::nullopt;
   }
 
-  std::optional<RedirectingFileSystem::RootRelativeKind>
-  parseRootRelativeKind(yaml::Node *N) {
+  std::optional<RedirectingFileSystem::मूल_Relative_Kind>
+  parse_मूल_Relative_Kind(yaml::गाँठ *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
-    if (Value.equals_insensitive("cwd")) {
-      return RedirectingFileSystem::RootRelativeKind::CWD;
-    } else if (Value.equals_insensitive("overlay-dir")) {
-      return RedirectingFileSystem::RootRelativeKind::OverlayDir;
+    StringRef मूल्य;
+    अगर (!parseScalarString(N, मूल्य, Storage))
+      वापस std::nullopt;
+    अगर (मूल्य.equals_insensitive("cwd")) {
+      वापस RedirectingFileSystem::मूल_Relative_Kind::CWD;
+    } अन्यथा अगर (मूल्य.equals_insensitive("overlay-dir")) {
+      वापस RedirectingFileSystem::मूल_Relative_Kind::OverlayDir;
     }
-    return std::nullopt;
+    वापस std::nullopt;
   }
 
-  struct KeyStatus {
+  काष्ठा कुंजी_Status {
     bool Required;
     bool Seen = false;
 
-    KeyStatus(bool Required = false) : Required(Required) {}
+    कुंजी_Status(bool Required = false) : Required(Required) {}
   };
 
-  using KeyStatusPair = std::pair<StringRef, KeyStatus>;
+  using कुंजी_Status_Pair = std::pair<StringRef, कुंजी_Status>;
 
   // false on error
-  bool checkDuplicateOrUnknownKey(yaml::Node *KeyNode, StringRef Key,
-                                  DenseMap<StringRef, KeyStatus> &Keys) {
-    auto It = Keys.find(Key);
-    if (It == Keys.end()) {
-      error(KeyNode, "unknown key");
-      return false;
+  bool check_Duplicate_Or_Unknown_कुंजी(yaml::गाँठ *कुंजी_गाँठ, StringRef कुंजी,
+                                  DenseMap<StringRef, कुंजी_Status> &कुंजियाँ_2) {
+    स्वतः It = कुंजियाँ_2.find(कुंजी);
+    अगर (It == कुंजियाँ_2.end()) {
+      error(कुंजी_गाँठ, "unknown key");
+      वापस false;
     }
-    KeyStatus &S = It->second;
-    if (S.Seen) {
-      error(KeyNode, Twine("duplicate key '") + Key + "'");
-      return false;
+    कुंजी_Status &S = It->second;
+    अगर (S.Seen) {
+      error(कुंजी_गाँठ, Twine("duplicate key '") + कुंजी + "'");
+      वापस false;
     }
     S.Seen = true;
-    return true;
+    वापस true;
   }
 
   // false on error
-  bool checkMissingKeys(yaml::Node *Obj, DenseMap<StringRef, KeyStatus> &Keys) {
-    for (const auto &I : Keys) {
-      if (I.second.Required && !I.second.Seen) {
+  bool check_Missing_कुंजियाँ(yaml::गाँठ *Obj, DenseMap<StringRef, कुंजी_Status> &कुंजियाँ_2) {
+    क्रम (स्थिर स्वतः &I : कुंजियाँ_2) {
+      अगर (I.second.Required && !I.second.Seen) {
         error(Obj, Twine("missing key '") + I.first + "'");
-        return false;
+        वापस false;
       }
     }
-    return true;
+    वापस true;
   }
 
-public:
-  static RedirectingFileSystem::Entry *
+खुला:
+  अटल RedirectingFileSystem::Entry *
   lookupOrCreateEntry(RedirectingFileSystem *FS, StringRef Name,
                       RedirectingFileSystem::Entry *ParentEntry = nullptr) {
-    if (!ParentEntry) { // Look for a existent root
-      for (const auto &Root : FS->Roots) {
-        if (Name == Root->getName()) {
-          ParentEntry = Root.get();
-          return ParentEntry;
+    अगर (!ParentEntry) { // Look for a existent root
+      क्रम (स्थिर स्वतः &मूल_2 : FS->Roots) {
+        अगर (Name == मूल_2->getName()) {
+          ParentEntry = मूल_2.लो();
+          वापस ParentEntry;
         }
       }
-    } else { // Advance to the next component
-      auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &Content :
+    } अन्यथा { // Advance to the next component
+      स्वतः *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
+      क्रम (std::unique_ptr<RedirectingFileSystem::Entry> &Content :
            llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-        auto *DirContent =
-            dyn_cast<RedirectingFileSystem::DirectoryEntry>(Content.get());
-        if (DirContent && Name == Content->getName())
-          return DirContent;
+        स्वतः *DirContent =
+            dyn_cast<RedirectingFileSystem::DirectoryEntry>(Content.लो());
+        अगर (DirContent && Name == Content->getName())
+          वापस DirContent;
       }
     }
 
     // ... or create a new one
     std::unique_ptr<RedirectingFileSystem::Entry> E =
         std::make_unique<RedirectingFileSystem::DirectoryEntry>(
-            Name, Status("", getNextVirtualUniqueID(),
+            Name, Status("", get_अग्र_Virtual_Unique_ID(),
                          std::chrono::system_clock::now(), 0, 0, 0,
                          file_type::directory_file, sys::fs::all_all));
 
-    if (!ParentEntry) { // Add a new root to the overlay
-      FS->Roots.push_back(std::move(E));
-      ParentEntry = FS->Roots.back().get();
-      return ParentEntry;
+    अगर (!ParentEntry) { // Add a new root to the overlay
+      FS->Roots.धकेलो_back(std::move(E));
+      ParentEntry = FS->Roots.back().लो();
+      वापस ParentEntry;
     }
 
-    auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
+    स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
     DE->addContent(std::move(E));
-    return DE->getLastContent();
+    वापस DE->getLastContent();
   }
 
-private:
-  void uniqueOverlayTree(RedirectingFileSystem *FS,
+निजी:
+  व्योम unique_Overlay_वृक्ष(RedirectingFileSystem *FS,
                          RedirectingFileSystem::Entry *SrcE,
                          RedirectingFileSystem::Entry *NewParentE = nullptr) {
     StringRef Name = SrcE->getName();
-    switch (SrcE->getKind()) {
-    case RedirectingFileSystem::EK_Directory: {
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
+    चयन (SrcE->getKind()) {
+    हाल RedirectingFileSystem::EK_Directory: {
+      स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
       // Empty directories could be present in the YAML as a way to
       // describe a file for a current directory after some of its subdir
       // is parsed. This only leads to redundant walks, ignore it.
-      if (!Name.empty())
+      अगर (!Name.empty())
         NewParentE = lookupOrCreateEntry(FS, Name, NewParentE);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
+      क्रम (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
            llvm::make_range(DE->contents_begin(), DE->contents_end()))
-        uniqueOverlayTree(FS, SubEntry.get(), NewParentE);
-      break;
+        unique_Overlay_वृक्ष(FS, SubEntry.लो(), NewParentE);
+      अवरोध;
     }
-    case RedirectingFileSystem::EK_DirectoryRemap: {
-      assert(NewParentE && "Parent entry must exist");
-      auto *DR = cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
+    हाल RedirectingFileSystem::EK_DirectoryRemap: {
+      निश्चित(NewParentE && "Parent entry must exist");
+      स्वतः *DR = cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
+      स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
       DE->addContent(
           std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
               Name, DR->getExternalContentsPath(), DR->getUseName()));
-      break;
+      अवरोध;
     }
-    case RedirectingFileSystem::EK_File: {
-      assert(NewParentE && "Parent entry must exist");
-      auto *FE = cast<RedirectingFileSystem::FileEntry>(SrcE);
-      auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
+    हाल RedirectingFileSystem::EK_File: {
+      निश्चित(NewParentE && "Parent entry must exist");
+      स्वतः *FE = cast<RedirectingFileSystem::FileEntry>(SrcE);
+      स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
       DE->addContent(std::make_unique<RedirectingFileSystem::FileEntry>(
           Name, FE->getExternalContentsPath(), FE->getUseName()));
-      break;
+      अवरोध;
     }
     }
   }
 
   std::unique_ptr<RedirectingFileSystem::Entry>
-  parseEntry(yaml::Node *N, RedirectingFileSystem *FS, bool IsRootEntry) {
-    auto *M = dyn_cast<yaml::MappingNode>(N);
-    if (!M) {
+  parseEntry(yaml::गाँठ *N, RedirectingFileSystem *FS, bool Is_मूल_Entry) {
+    स्वतः *M = dyn_cast<yaml::Mapping_गाँठ>(N);
+    अगर (!M) {
       error(N, "expected mapping node for file or directory entry");
-      return nullptr;
+      वापस nullptr;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("name", true),
-        KeyStatusPair("type", true),
-        KeyStatusPair("contents", false),
-        KeyStatusPair("external-contents", false),
-        KeyStatusPair("use-external-name", false),
+    कुंजी_Status_Pair Fields[] = {
+        कुंजी_Status_Pair("name", true),
+        कुंजी_Status_Pair("type", true),
+        कुंजी_Status_Pair("contents", false),
+        कुंजी_Status_Pair("external-contents", false),
+        कुंजी_Status_Pair("use-external-name", false),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
+    DenseMap<StringRef, कुंजी_Status> कुंजियाँ_2(std::begin(Fields), std::end(Fields));
 
-    enum { CF_NotSet, CF_List, CF_External } ContentsField = CF_NotSet;
+    क्रमागत { CF_NotSet, CF_List, CF_External } ContentsField = CF_NotSet;
     std::vector<std::unique_ptr<RedirectingFileSystem::Entry>>
         EntryArrayContents;
     SmallString<256> ExternalContentsPath;
     SmallString<256> Name;
-    yaml::Node *NameValueNode = nullptr;
-    auto UseExternalName = RedirectingFileSystem::NK_NotSet;
+    yaml::गाँठ *Name_मूल्य_गाँठ = nullptr;
+    स्वतः UseExternalName = RedirectingFileSystem::NK_NotSet;
     RedirectingFileSystem::EntryKind Kind;
 
-    for (auto &I : *M) {
-      StringRef Key;
+    क्रम (स्वतः &I : *M) {
+      StringRef कुंजी;
       // Reuse the buffer for key and value, since we don't look at key after
       // parsing value.
-      SmallString<256> Buffer;
-      if (!parseScalarString(I.getKey(), Key, Buffer))
-        return nullptr;
+      SmallString<256> बफर;
+      अगर (!parseScalarString(I.get_कुंजी(), कुंजी, बफर))
+        वापस nullptr;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return nullptr;
+      अगर (!check_Duplicate_Or_Unknown_कुंजी(I.get_कुंजी(), कुंजी, कुंजियाँ_2))
+        वापस nullptr;
 
-      StringRef Value;
-      if (Key == "name") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+      StringRef मूल्य;
+      अगर (कुंजी == "name") {
+        अगर (!parseScalarString(I.get_मूल्य(), मूल्य, बफर))
+          वापस nullptr;
 
-        NameValueNode = I.getValue();
+        Name_मूल्य_गाँठ = I.get_मूल्य();
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
-        Name = canonicalize(Value).str();
-      } else if (Key == "type") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
-        if (Value == "file")
+        Name = canonicalize(मूल्य).str();
+      } अन्यथा अगर (कुंजी == "type") {
+        अगर (!parseScalarString(I.get_मूल्य(), मूल्य, बफर))
+          वापस nullptr;
+        अगर (मूल्य == "file")
           Kind = RedirectingFileSystem::EK_File;
-        else if (Value == "directory")
+        अन्यथा अगर (मूल्य == "directory")
           Kind = RedirectingFileSystem::EK_Directory;
-        else if (Value == "directory-remap")
+        अन्यथा अगर (मूल्य == "directory-remap")
           Kind = RedirectingFileSystem::EK_DirectoryRemap;
-        else {
-          error(I.getValue(), "unknown value for 'type'");
-          return nullptr;
+        अन्यथा {
+          error(I.get_मूल्य(), "unknown value for 'type'");
+          वापस nullptr;
         }
-      } else if (Key == "contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } अन्यथा अगर (कुंजी == "contents") {
+        अगर (ContentsField != CF_NotSet) {
+          error(I.get_कुंजी(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          वापस nullptr;
         }
         ContentsField = CF_List;
-        auto *Contents = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Contents) {
+        स्वतः *Contents = dyn_cast_if_present<yaml::Sequence_गाँठ>(I.get_मूल्य());
+        अगर (!Contents) {
           // FIXME: this is only for directories, what about files?
-          error(I.getValue(), "expected array");
-          return nullptr;
+          error(I.get_मूल्य(), "expected array");
+          वापस nullptr;
         }
 
-        for (auto &I : *Contents) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
+        क्रम (स्वतः &I : *Contents) {
+          अगर (std::unique_ptr<RedirectingFileSystem::Entry> E =
                   parseEntry(&I, FS, /*IsRootEntry*/ false))
-            EntryArrayContents.push_back(std::move(E));
-          else
-            return nullptr;
+            EntryArrayContents.धकेलो_back(std::move(E));
+          अन्यथा
+            वापस nullptr;
         }
-      } else if (Key == "external-contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } अन्यथा अगर (कुंजी == "external-contents") {
+        अगर (ContentsField != CF_NotSet) {
+          error(I.get_कुंजी(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          वापस nullptr;
         }
         ContentsField = CF_External;
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+        अगर (!parseScalarString(I.get_मूल्य(), मूल्य, बफर))
+          वापस nullptr;
 
         SmallString<256> FullPath;
-        if (FS->IsRelativeOverlay) {
+        अगर (FS->IsRelativeOverlay) {
           FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() &&
+          निश्चित(!FullPath.empty() &&
                  "External contents prefix directory must exist");
-          SmallString<256> AbsFullPath = Value;
-          if (FS->makeAbsolute(FullPath, AbsFullPath)) {
+          SmallString<256> AbsFullPath = मूल्य;
+          अगर (FS->makeAbsolute(FullPath, AbsFullPath)) {
             error(N, "failed to make 'external-contents' absolute");
-            return nullptr;
+            वापस nullptr;
           }
           FullPath = AbsFullPath;
-        } else {
-          FullPath = Value;
+        } अन्यथा {
+          FullPath = मूल्य;
         }
 
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
         FullPath = canonicalize(FullPath);
         ExternalContentsPath = FullPath.str();
-      } else if (Key == "use-external-name") {
+      } अन्यथा अगर (कुंजी == "use-external-name") {
         bool Val;
-        if (!parseScalarBool(I.getValue(), Val))
-          return nullptr;
+        अगर (!parseScalarBool(I.get_मूल्य(), Val))
+          वापस nullptr;
         UseExternalName = Val ? RedirectingFileSystem::NK_External
                               : RedirectingFileSystem::NK_Virtual;
-      } else {
+      } अन्यथा {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return nullptr;
+    अगर (Stream.failed())
+      वापस nullptr;
 
     // check for missing keys
-    if (ContentsField == CF_NotSet) {
+    अगर (ContentsField == CF_NotSet) {
       error(N, "missing key 'contents' or 'external-contents'");
-      return nullptr;
+      वापस nullptr;
     }
-    if (!checkMissingKeys(N, Keys))
-      return nullptr;
+    अगर (!check_Missing_कुंजियाँ(N, कुंजियाँ_2))
+      वापस nullptr;
 
     // check invalid configuration
-    if (Kind == RedirectingFileSystem::EK_Directory &&
+    अगर (Kind == RedirectingFileSystem::EK_Directory &&
         UseExternalName != RedirectingFileSystem::NK_NotSet) {
       error(N, "'use-external-name' is not supported for 'directory' entries");
-      return nullptr;
+      वापस nullptr;
     }
 
-    if (Kind == RedirectingFileSystem::EK_DirectoryRemap &&
+    अगर (Kind == RedirectingFileSystem::EK_DirectoryRemap &&
         ContentsField == CF_List) {
       error(N, "'contents' is not supported for 'directory-remap' entries");
-      return nullptr;
+      वापस nullptr;
     }
 
     sys::path::Style path_style = sys::path::Style::native;
-    if (IsRootEntry) {
+    अगर (Is_मूल_Entry) {
       // VFS root entries may be in either Posix or Windows style.  Figure out
       // which style we have, and use it consistently.
-      if (sys::path::is_absolute(Name, sys::path::Style::posix)) {
+      अगर (sys::path::is_absolute(Name, sys::path::Style::posix)) {
         path_style = sys::path::Style::posix;
-      } else if (sys::path::is_absolute(Name,
+      } अन्यथा अगर (sys::path::is_absolute(Name,
                                         sys::path::Style::windows_backslash)) {
         path_style = sys::path::Style::windows_backslash;
-      } else {
+      } अन्यथा {
         // Relative VFS root entries are made absolute to either the overlay
         // directory, or the current working directory, then we can determine
         // the path style from that.
         std::error_code EC;
-        if (FS->RootRelative ==
-            RedirectingFileSystem::RootRelativeKind::OverlayDir) {
+        अगर (FS->मूल_Relative ==
+            RedirectingFileSystem::मूल_Relative_Kind::OverlayDir) {
           StringRef FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() && "Overlay file directory must exist");
+          निश्चित(!FullPath.empty() && "Overlay file directory must exist");
           EC = FS->makeAbsolute(FullPath, Name);
           Name = canonicalize(Name);
-        } else {
+        } अन्यथा {
           EC = FS->makeAbsolute(Name);
         }
-        if (EC) {
-          assert(NameValueNode && "Name presence should be checked earlier");
+        अगर (EC) {
+          निश्चित(Name_मूल्य_गाँठ && "Name presence should be checked earlier");
           error(
-              NameValueNode,
+              Name_मूल्य_गाँठ,
               "entry with relative path at the root level is not discoverable");
-          return nullptr;
+          वापस nullptr;
         }
         path_style = sys::path::is_absolute(Name, sys::path::Style::posix)
                          ? sys::path::Style::posix
@@ -2037,212 +2037,212 @@ private:
       // is::path::is_absolute(Name, sys::path::Style::windows_backslash) will
       // return true even if `Name` is using forward slashes. Distinguish
       // between windows_backslash and windows_slash.
-      if (path_style == sys::path::Style::windows_backslash &&
+      अगर (path_style == sys::path::Style::windows_backslash &&
           getExistingStyle(Name) != sys::path::Style::windows_backslash)
         path_style = sys::path::Style::windows_slash;
     }
 
     // Remove trailing slash(es), being careful not to remove the root path
     StringRef Trimmed = Name;
-    size_t RootPathLen = sys::path::root_path(Trimmed, path_style).size();
-    while (Trimmed.size() > RootPathLen &&
+    माप_प्रकार मूल_Path_Len = sys::path::मूल_path(Trimmed, path_style).आकार_2();
+    जबतक (Trimmed.आकार_2() > मूल_Path_Len &&
            sys::path::is_separator(Trimmed.back(), path_style))
-      Trimmed = Trimmed.slice(0, Trimmed.size() - 1);
+      Trimmed = Trimmed.slice(0, Trimmed.आकार_2() - 1);
 
     // Get the last component
     StringRef LastComponent = sys::path::filename(Trimmed, path_style);
 
-    std::unique_ptr<RedirectingFileSystem::Entry> Result;
-    switch (Kind) {
-    case RedirectingFileSystem::EK_File:
-      Result = std::make_unique<RedirectingFileSystem::FileEntry>(
+    std::unique_ptr<RedirectingFileSystem::Entry> परिणाम;
+    चयन (Kind) {
+    हाल RedirectingFileSystem::EK_File:
+      परिणाम = std::make_unique<RedirectingFileSystem::FileEntry>(
           LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_DirectoryRemap:
-      Result = std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
+      अवरोध;
+    हाल RedirectingFileSystem::EK_DirectoryRemap:
+      परिणाम = std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
           LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_Directory:
-      Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
+      अवरोध;
+    हाल RedirectingFileSystem::EK_Directory:
+      परिणाम = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
           LastComponent, std::move(EntryArrayContents),
-          Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
+          Status("", get_अग्र_Virtual_Unique_ID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
-      break;
+      अवरोध;
     }
 
     StringRef Parent = sys::path::parent_path(Trimmed, path_style);
-    if (Parent.empty())
-      return Result;
+    अगर (Parent.empty())
+      वापस परिणाम;
 
     // if 'name' contains multiple components, create implicit directory entries
-    for (sys::path::reverse_iterator I = sys::path::rbegin(Parent, path_style),
+    क्रम (sys::path::reverse_iterator I = sys::path::rbegin(Parent, path_style),
                                      E = sys::path::rend(Parent);
          I != E; ++I) {
       std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> Entries;
-      Entries.push_back(std::move(Result));
-      Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
+      Entries.धकेलो_back(std::move(परिणाम));
+      परिणाम = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
           *I, std::move(Entries),
-          Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
+          Status("", get_अग्र_Virtual_Unique_ID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
     }
-    return Result;
+    वापस परिणाम;
   }
 
-public:
+खुला:
   RedirectingFileSystemParser(yaml::Stream &S) : Stream(S) {}
 
   // false on error
-  bool parse(yaml::Node *Root, RedirectingFileSystem *FS) {
-    auto *Top = dyn_cast<yaml::MappingNode>(Root);
-    if (!Top) {
-      error(Root, "expected mapping node");
-      return false;
+  bool parse(yaml::गाँठ *मूल_2, RedirectingFileSystem *FS) {
+    स्वतः *शीर्ष_3 = dyn_cast<yaml::Mapping_गाँठ>(मूल_2);
+    अगर (!शीर्ष_3) {
+      error(मूल_2, "expected mapping node");
+      वापस false;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("version", true),
-        KeyStatusPair("case-sensitive", false),
-        KeyStatusPair("use-external-names", false),
-        KeyStatusPair("root-relative", false),
-        KeyStatusPair("overlay-relative", false),
-        KeyStatusPair("fallthrough", false),
-        KeyStatusPair("redirecting-with", false),
-        KeyStatusPair("roots", true),
+    कुंजी_Status_Pair Fields[] = {
+        कुंजी_Status_Pair("version", true),
+        कुंजी_Status_Pair("case-sensitive", false),
+        कुंजी_Status_Pair("use-external-names", false),
+        कुंजी_Status_Pair("root-relative", false),
+        कुंजी_Status_Pair("overlay-relative", false),
+        कुंजी_Status_Pair("fallthrough", false),
+        कुंजी_Status_Pair("redirecting-with", false),
+        कुंजी_Status_Pair("roots", true),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
-    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> RootEntries;
+    DenseMap<StringRef, कुंजी_Status> कुंजियाँ_2(std::begin(Fields), std::end(Fields));
+    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> मूल_Entries;
 
     // Parse configuration and 'roots'
-    for (auto &I : *Top) {
-      SmallString<10> KeyBuffer;
-      StringRef Key;
-      if (!parseScalarString(I.getKey(), Key, KeyBuffer))
-        return false;
+    क्रम (स्वतः &I : *शीर्ष_3) {
+      SmallString<10> कुंजी_बफर;
+      StringRef कुंजी;
+      अगर (!parseScalarString(I.get_कुंजी(), कुंजी, कुंजी_बफर))
+        वापस false;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return false;
+      अगर (!check_Duplicate_Or_Unknown_कुंजी(I.get_कुंजी(), कुंजी, कुंजियाँ_2))
+        वापस false;
 
-      if (Key == "roots") {
-        auto *Roots = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Roots) {
-          error(I.getValue(), "expected array");
-          return false;
+      अगर (कुंजी == "roots") {
+        स्वतः *Roots = dyn_cast_if_present<yaml::Sequence_गाँठ>(I.get_मूल्य());
+        अगर (!Roots) {
+          error(I.get_मूल्य(), "expected array");
+          वापस false;
         }
 
-        for (auto &I : *Roots) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
+        क्रम (स्वतः &I : *Roots) {
+          अगर (std::unique_ptr<RedirectingFileSystem::Entry> E =
                   parseEntry(&I, FS, /*IsRootEntry*/ true))
-            RootEntries.push_back(std::move(E));
-          else
-            return false;
+            मूल_Entries.धकेलो_back(std::move(E));
+          अन्यथा
+            वापस false;
         }
-      } else if (Key == "version") {
+      } अन्यथा अगर (कुंजी == "version") {
         StringRef VersionString;
         SmallString<4> Storage;
-        if (!parseScalarString(I.getValue(), VersionString, Storage))
-          return false;
-        int Version;
-        if (VersionString.getAsInteger<int>(10, Version)) {
-          error(I.getValue(), "expected integer");
-          return false;
+        अगर (!parseScalarString(I.get_मूल्य(), VersionString, Storage))
+          वापस false;
+        पूर्णांक Version;
+        अगर (VersionString.getAsInteger<पूर्णांक>(10, Version)) {
+          error(I.get_मूल्य(), "expected integer");
+          वापस false;
         }
-        if (Version < 0) {
-          error(I.getValue(), "invalid version number");
-          return false;
+        अगर (Version < 0) {
+          error(I.get_मूल्य(), "invalid version number");
+          वापस false;
         }
-        if (Version != 0) {
-          error(I.getValue(), "version mismatch, expected 0");
-          return false;
+        अगर (Version != 0) {
+          error(I.get_मूल्य(), "version mismatch, expected 0");
+          वापस false;
         }
-      } else if (Key == "case-sensitive") {
-        if (!parseScalarBool(I.getValue(), FS->CaseSensitive))
-          return false;
-      } else if (Key == "overlay-relative") {
-        if (!parseScalarBool(I.getValue(), FS->IsRelativeOverlay))
-          return false;
-      } else if (Key == "use-external-names") {
-        if (!parseScalarBool(I.getValue(), FS->UseExternalNames))
-          return false;
-      } else if (Key == "fallthrough") {
-        if (Keys["redirecting-with"].Seen) {
-          error(I.getValue(),
+      } अन्यथा अगर (कुंजी == "case-sensitive") {
+        अगर (!parseScalarBool(I.get_मूल्य(), FS->CaseSensitive))
+          वापस false;
+      } अन्यथा अगर (कुंजी == "overlay-relative") {
+        अगर (!parseScalarBool(I.get_मूल्य(), FS->IsRelativeOverlay))
+          वापस false;
+      } अन्यथा अगर (कुंजी == "use-external-names") {
+        अगर (!parseScalarBool(I.get_मूल्य(), FS->UseExternalNames))
+          वापस false;
+      } अन्यथा अगर (कुंजी == "fallthrough") {
+        अगर (कुंजियाँ_2["redirecting-with"].Seen) {
+          error(I.get_मूल्य(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          वापस false;
         }
 
         bool ShouldFallthrough = false;
-        if (!parseScalarBool(I.getValue(), ShouldFallthrough))
-          return false;
+        अगर (!parseScalarBool(I.get_मूल्य(), ShouldFallthrough))
+          वापस false;
 
-        if (ShouldFallthrough) {
+        अगर (ShouldFallthrough) {
           FS->Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-        } else {
+        } अन्यथा {
           FS->Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
         }
-      } else if (Key == "redirecting-with") {
-        if (Keys["fallthrough"].Seen) {
-          error(I.getValue(),
+      } अन्यथा अगर (कुंजी == "redirecting-with") {
+        अगर (कुंजियाँ_2["fallthrough"].Seen) {
+          error(I.get_मूल्य(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          वापस false;
         }
 
-        if (auto Kind = parseRedirectKind(I.getValue())) {
+        अगर (स्वतः Kind = parseRedirectKind(I.get_मूल्य())) {
           FS->Redirection = *Kind;
-        } else {
-          error(I.getValue(), "expected valid redirect kind");
-          return false;
+        } अन्यथा {
+          error(I.get_मूल्य(), "expected valid redirect kind");
+          वापस false;
         }
-      } else if (Key == "root-relative") {
-        if (auto Kind = parseRootRelativeKind(I.getValue())) {
-          FS->RootRelative = *Kind;
-        } else {
-          error(I.getValue(), "expected valid root-relative kind");
-          return false;
+      } अन्यथा अगर (कुंजी == "root-relative") {
+        अगर (स्वतः Kind = parse_मूल_Relative_Kind(I.get_मूल्य())) {
+          FS->मूल_Relative = *Kind;
+        } अन्यथा {
+          error(I.get_मूल्य(), "expected valid root-relative kind");
+          वापस false;
         }
-      } else {
+      } अन्यथा {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return false;
+    अगर (Stream.failed())
+      वापस false;
 
-    if (!checkMissingKeys(Top, Keys))
-      return false;
+    अगर (!check_Missing_कुंजियाँ(शीर्ष_3, कुंजियाँ_2))
+      वापस false;
 
     // Now that we sucessefully parsed the YAML file, canonicalize the internal
     // representation to a proper directory tree so that we can search faster
     // inside the VFS.
-    for (auto &E : RootEntries)
-      uniqueOverlayTree(FS, E.get());
+    क्रम (स्वतः &E : मूल_Entries)
+      unique_Overlay_वृक्ष(FS, E.लो());
 
-    return true;
+    वापस true;
   }
 };
 
 std::unique_ptr<RedirectingFileSystem>
-RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
+RedirectingFileSystem::create(std::unique_ptr<Memory_बफर> बफर,
                               SourceMgr::DiagHandlerTy DiagHandler,
-                              StringRef YAMLFilePath, void *DiagContext,
+                              StringRef YAMLFilePath, व्योम *DiagContext,
                               IntrusiveRefCntPtr<FileSystem> ExternalFS) {
   SourceMgr SM;
-  yaml::Stream Stream(Buffer->getMemBufferRef(), SM);
+  yaml::Stream Stream(बफर->get_Mem_बफर_Ref(), SM);
 
   SM.setDiagHandler(DiagHandler, DiagContext);
   yaml::document_iterator DI = Stream.begin();
-  yaml::Node *Root = DI->getRoot();
-  if (DI == Stream.end() || !Root) {
+  yaml::गाँठ *मूल_2 = DI->get_मूल();
+  अगर (DI == Stream.end() || !मूल_2) {
     SM.PrintMessage(SMLoc(), SourceMgr::DK_Error, "expected root node");
-    return nullptr;
+    वापस nullptr;
   }
 
   RedirectingFileSystemParser P(Stream);
 
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
+      नया RedirectingFileSystem(ExternalFS));
 
-  if (!YAMLFilePath.empty()) {
+  अगर (!YAMLFilePath.empty()) {
     // Use the YAML path from -ivfsoverlay to compute the dir to be prefixed
     // to each 'external-contents' path.
     //
@@ -2253,78 +2253,78 @@ RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
     //
     SmallString<256> OverlayAbsDir = sys::path::parent_path(YAMLFilePath);
     std::error_code EC = FS->makeAbsolute(OverlayAbsDir);
-    assert(!EC && "Overlay dir final path must be absolute");
-    (void)EC;
+    निश्चित(!EC && "Overlay dir final path must be absolute");
+    (व्योम)EC;
     FS->setOverlayFileDir(OverlayAbsDir);
   }
 
-  if (!P.parse(Root, FS.get()))
-    return nullptr;
+  अगर (!P.parse(मूल_2, FS.लो()))
+    वापस nullptr;
 
-  return FS;
+  वापस FS;
 }
 
 std::unique_ptr<RedirectingFileSystem> RedirectingFileSystem::create(
     ArrayRef<std::pair<std::string, std::string>> RemappedFiles,
     bool UseExternalNames, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
+      नया RedirectingFileSystem(ExternalFS));
   FS->UseExternalNames = UseExternalNames;
 
   StringMap<RedirectingFileSystem::Entry *> Entries;
 
-  for (auto &Mapping : llvm::reverse(RemappedFiles)) {
+  क्रम (स्वतः &Mapping : llvm::reverse(RemappedFiles)) {
     SmallString<128> From = StringRef(Mapping.first);
     SmallString<128> To = StringRef(Mapping.second);
     {
-      auto EC = ExternalFS->makeAbsolute(From);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      स्वतः EC = ExternalFS->makeAbsolute(From);
+      (व्योम)EC;
+      निश्चित(!EC && "Could not make absolute path");
     }
 
     // Check if we've already mapped this file. The first one we see (in the
     // reverse iteration) wins.
     RedirectingFileSystem::Entry *&ToEntry = Entries[From];
-    if (ToEntry)
-      continue;
+    अगर (ToEntry)
+      जारी;
 
     // Add parent directories.
     RedirectingFileSystem::Entry *Parent = nullptr;
     StringRef FromDirectory = llvm::sys::path::parent_path(From);
-    for (auto I = llvm::sys::path::begin(FromDirectory),
+    क्रम (स्वतः I = llvm::sys::path::begin(FromDirectory),
               E = llvm::sys::path::end(FromDirectory);
          I != E; ++I) {
-      Parent = RedirectingFileSystemParser::lookupOrCreateEntry(FS.get(), *I,
+      Parent = RedirectingFileSystemParser::lookupOrCreateEntry(FS.लो(), *I,
                                                                 Parent);
     }
-    assert(Parent && "File without a directory?");
+    निश्चित(Parent && "File without a directory?");
     {
-      auto EC = ExternalFS->makeAbsolute(To);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      स्वतः EC = ExternalFS->makeAbsolute(To);
+      (व्योम)EC;
+      निश्चित(!EC && "Could not make absolute path");
     }
 
     // Add the file.
-    auto NewFile = std::make_unique<RedirectingFileSystem::FileEntry>(
+    स्वतः NewFile = std::make_unique<RedirectingFileSystem::FileEntry>(
         llvm::sys::path::filename(From), To,
         UseExternalNames ? RedirectingFileSystem::NK_External
                          : RedirectingFileSystem::NK_Virtual);
-    ToEntry = NewFile.get();
+    ToEntry = NewFile.लो();
     cast<RedirectingFileSystem::DirectoryEntry>(Parent)->addContent(
         std::move(NewFile));
   }
 
-  return FS;
+  वापस FS;
 }
 
-RedirectingFileSystem::LookupResult::LookupResult(
+RedirectingFileSystem::Lookup_परिणाम::Lookup_परिणाम(
     Entry *E, sys::path::const_iterator Start, sys::path::const_iterator End)
     : E(E) {
-  assert(E != nullptr);
+  निश्चित(E != nullptr);
   // If the matched entry is a DirectoryRemapEntry, set ExternalRedirect to the
   // path of the directory it maps to in the external file system plus any
   // remaining path components in the provided iterator.
-  if (auto *DRE = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(E)) {
+  अगर (स्वतः *DRE = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(E)) {
     SmallString<256> Redirect(DRE->getExternalContentsPath());
     sys::path::append(Redirect, Start, End,
                       getExistingStyle(DRE->getExternalContentsPath()));
@@ -2332,525 +2332,525 @@ RedirectingFileSystem::LookupResult::LookupResult(
   }
 }
 
-void RedirectingFileSystem::LookupResult::getPath(
-    llvm::SmallVectorImpl<char> &Result) const {
-  Result.clear();
-  for (Entry *Parent : Parents)
-    llvm::sys::path::append(Result, Parent->getName());
-  llvm::sys::path::append(Result, E->getName());
+व्योम RedirectingFileSystem::Lookup_परिणाम::getPath(
+    llvm::SmallVectorImpl<अक्षर> &परिणाम) स्थिर {
+  परिणाम.सफा();
+  क्रम (Entry *Parent : Parents)
+    llvm::sys::path::append(परिणाम, Parent->getName());
+  llvm::sys::path::append(परिणाम, E->getName());
 }
 
 std::error_code RedirectingFileSystem::makeCanonicalForLookup(
-    SmallVectorImpl<char> &Path) const {
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+    SmallVectorImpl<अक्षर> &Path) स्थिर {
+  अगर (std::error_code EC = makeAbsolute(Path))
+    वापस EC;
 
   llvm::SmallString<256> CanonicalPath =
-      canonicalize(StringRef(Path.data(), Path.size()));
-  if (CanonicalPath.empty())
-    return make_error_code(llvm::errc::invalid_argument);
+      canonicalize(StringRef(Path.तथ्य(), Path.आकार_2()));
+  अगर (CanonicalPath.empty())
+    वापस make_error_code(llvm::errc::invalid_argument);
 
   Path.assign(CanonicalPath.begin(), CanonicalPath.end());
-  return {};
+  वापस {};
 }
 
-ErrorOr<RedirectingFileSystem::LookupResult>
-RedirectingFileSystem::lookupPath(StringRef Path) const {
+ErrorOr<RedirectingFileSystem::Lookup_परिणाम>
+RedirectingFileSystem::lookupPath(StringRef Path) स्थिर {
   llvm::SmallString<128> CanonicalPath(Path);
-  if (std::error_code EC = makeCanonicalForLookup(CanonicalPath))
-    return EC;
+  अगर (std::error_code EC = makeCanonicalForLookup(CanonicalPath))
+    वापस EC;
 
   // RedirectOnly means the VFS is always used.
-  if (UsageTrackingActive && Redirection == RedirectKind::RedirectOnly)
+  अगर (UsageTrackingActive && Redirection == RedirectKind::RedirectOnly)
     HasBeenUsed = true;
 
   sys::path::const_iterator Start = sys::path::begin(CanonicalPath);
   sys::path::const_iterator End = sys::path::end(CanonicalPath);
   llvm::SmallVector<Entry *, 32> Entries;
-  for (const auto &Root : Roots) {
-    ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, Root.get(), Entries);
-    if (UsageTrackingActive && Result && isa<RemapEntry>(Result->E))
+  क्रम (स्थिर स्वतः &मूल_2 : Roots) {
+    ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम =
+        lookupPathImpl(Start, End, मूल_2.लो(), Entries);
+    अगर (UsageTrackingActive && परिणाम && isa<RemapEntry>(परिणाम->E))
       HasBeenUsed = true;
-    if (Result) {
-      Result->Parents = std::move(Entries);
-      return Result;
+    अगर (परिणाम) {
+      परिणाम->Parents = std::move(Entries);
+      वापस परिणाम;
     }
 
-    if (Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+    अगर (परिणाम.getError() != llvm::errc::no_such_file_or_directory)
+      वापस परिणाम;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  वापस make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
-ErrorOr<RedirectingFileSystem::LookupResult>
+ErrorOr<RedirectingFileSystem::Lookup_परिणाम>
 RedirectingFileSystem::lookupPathImpl(
     sys::path::const_iterator Start, sys::path::const_iterator End,
     RedirectingFileSystem::Entry *From,
-    llvm::SmallVectorImpl<Entry *> &Entries) const {
-  assert(!isTraversalComponent(*Start) &&
+    llvm::SmallVectorImpl<Entry *> &Entries) स्थिर {
+  निश्चित(!isTraversalComponent(*Start) &&
          !isTraversalComponent(From->getName()) &&
          "Paths should not contain traversal components");
 
   StringRef FromName = From->getName();
 
   // Forward the search to the next component in case this is an empty one.
-  if (!FromName.empty()) {
-    if (!pathComponentMatches(*Start, FromName))
-      return make_error_code(llvm::errc::no_such_file_or_directory);
+  अगर (!FromName.empty()) {
+    अगर (!pathComponentMatches(*Start, FromName))
+      वापस make_error_code(llvm::errc::no_such_file_or_directory);
 
     ++Start;
 
-    if (Start == End) {
+    अगर (Start == End) {
       // Match!
-      return LookupResult(From, Start, End);
+      वापस Lookup_परिणाम(From, Start, End);
     }
   }
 
-  if (isa<RedirectingFileSystem::FileEntry>(From))
-    return make_error_code(llvm::errc::not_a_directory);
+  अगर (isa<RedirectingFileSystem::FileEntry>(From))
+    वापस make_error_code(llvm::errc::not_a_directory);
 
-  if (isa<RedirectingFileSystem::DirectoryRemapEntry>(From))
-    return LookupResult(From, Start, End);
+  अगर (isa<RedirectingFileSystem::DirectoryRemapEntry>(From))
+    वापस Lookup_परिणाम(From, Start, End);
 
-  auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(From);
-  for (const std::unique_ptr<RedirectingFileSystem::Entry> &DirEntry :
+  स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(From);
+  क्रम (स्थिर std::unique_ptr<RedirectingFileSystem::Entry> &DirEntry :
        llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-    Entries.push_back(From);
-    ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, DirEntry.get(), Entries);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
-    Entries.pop_back();
+    Entries.धकेलो_back(From);
+    ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम =
+        lookupPathImpl(Start, End, DirEntry.लो(), Entries);
+    अगर (परिणाम || परिणाम.getError() != llvm::errc::no_such_file_or_directory)
+      वापस परिणाम;
+    Entries.निकालो_back();
   }
 
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  वापस make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
-static Status getRedirectedFileStatus(const Twine &OriginalPath,
+अटल Status getRedirectedFileStatus(स्थिर Twine &OriginalPath,
                                       bool UseExternalNames,
                                       Status ExternalStatus) {
   // The path has been mapped by some nested VFS and exposes an external path,
   // don't override it with the original path.
-  if (ExternalStatus.ExposesExternalVFSPath)
-    return ExternalStatus;
+  अगर (ExternalStatus.ExposesExternalVFSPath)
+    वापस ExternalStatus;
 
   Status S = ExternalStatus;
-  if (!UseExternalNames)
+  अगर (!UseExternalNames)
     S = Status::copyWithNewName(S, OriginalPath);
-  else
+  अन्यथा
     S.ExposesExternalVFSPath = true;
-  return S;
+  वापस S;
 }
 
 ErrorOr<Status> RedirectingFileSystem::status(
-    const Twine &LookupPath, const Twine &OriginalPath,
-    const RedirectingFileSystem::LookupResult &Result) {
-  if (std::optional<StringRef> ExtRedirect = Result.getExternalRedirect()) {
+    स्थिर Twine &LookupPath, स्थिर Twine &OriginalPath,
+    स्थिर RedirectingFileSystem::Lookup_परिणाम &परिणाम) {
+  अगर (std::optional<StringRef> ExtRedirect = परिणाम.getExternalRedirect()) {
     SmallString<256> RemappedPath((*ExtRedirect).str());
-    if (std::error_code EC = makeAbsolute(RemappedPath))
-      return EC;
+    अगर (std::error_code EC = makeAbsolute(RemappedPath))
+      वापस EC;
 
     ErrorOr<Status> S = ExternalFS->status(RemappedPath);
-    if (!S)
-      return S;
+    अगर (!S)
+      वापस S;
     S = Status::copyWithNewName(*S, *ExtRedirect);
-    auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result.E);
-    return getRedirectedFileStatus(OriginalPath,
+    स्वतः *RE = cast<RedirectingFileSystem::RemapEntry>(परिणाम.E);
+    वापस getRedirectedFileStatus(OriginalPath,
                                    RE->useExternalName(UseExternalNames), *S);
   }
 
-  auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(Result.E);
-  return Status::copyWithNewName(DE->getStatus(), LookupPath);
+  स्वतः *DE = cast<RedirectingFileSystem::DirectoryEntry>(परिणाम.E);
+  वापस Status::copyWithNewName(DE->getStatus(), LookupPath);
 }
 
 ErrorOr<Status>
-RedirectingFileSystem::getExternalStatus(const Twine &LookupPath,
-                                         const Twine &OriginalPath) const {
-  auto Result = ExternalFS->status(LookupPath);
+RedirectingFileSystem::getExternalStatus(स्थिर Twine &LookupPath,
+                                         स्थिर Twine &OriginalPath) स्थिर {
+  स्वतः परिणाम = ExternalFS->status(LookupPath);
 
   // The path has been mapped by some nested VFS, don't override it with the
   // original path.
-  if (!Result || Result->ExposesExternalVFSPath)
-    return Result;
-  return Status::copyWithNewName(Result.get(), OriginalPath);
+  अगर (!परिणाम || परिणाम->ExposesExternalVFSPath)
+    वापस परिणाम;
+  वापस Status::copyWithNewName(परिणाम.लो(), OriginalPath);
 }
 
-ErrorOr<Status> RedirectingFileSystem::status(const Twine &OriginalPath) {
+ErrorOr<Status> RedirectingFileSystem::status(स्थिर Twine &OriginalPath) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  अगर (std::error_code EC = makeAbsolute(Path))
+    वापस EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  अगर (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
     ErrorOr<Status> S = getExternalStatus(Path, OriginalPath);
-    if (S)
-      return S;
+    अगर (S)
+      वापस S;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम = lookupPath(Path);
+  अगर (!परिणाम) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return getExternalStatus(Path, OriginalPath);
-    return Result.getError();
+    अगर (Redirection == RedirectKind::Fallthrough &&
+        isFileNotFound(परिणाम.getError()))
+      वापस getExternalStatus(Path, OriginalPath);
+    वापस परिणाम.getError();
   }
 
-  ErrorOr<Status> S = status(Path, OriginalPath, *Result);
-  if (!S && Redirection == RedirectKind::Fallthrough &&
-      isFileNotFound(S.getError(), Result->E)) {
+  ErrorOr<Status> S = status(Path, OriginalPath, *परिणाम);
+  अगर (!S && Redirection == RedirectKind::Fallthrough &&
+      isFileNotFound(S.getError(), परिणाम->E)) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return getExternalStatus(Path, OriginalPath);
+    वापस getExternalStatus(Path, OriginalPath);
   }
 
-  return S;
+  वापस S;
 }
 
-bool RedirectingFileSystem::exists(const Twine &OriginalPath) {
+bool RedirectingFileSystem::exists(स्थिर Twine &OriginalPath) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (makeAbsolute(Path))
-    return false;
+  अगर (makeAbsolute(Path))
+    वापस false;
 
-  if (Redirection == RedirectKind::Fallback) {
+  अगर (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    if (ExternalFS->exists(Path))
-      return true;
+    अगर (ExternalFS->exists(Path))
+      वापस true;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम = lookupPath(Path);
+  अगर (!परिणाम) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->exists(Path);
-    return false;
+    अगर (Redirection == RedirectKind::Fallthrough &&
+        isFileNotFound(परिणाम.getError()))
+      वापस ExternalFS->exists(Path);
+    वापस false;
   }
 
-  std::optional<StringRef> ExtRedirect = Result->getExternalRedirect();
-  if (!ExtRedirect) {
-    assert(isa<RedirectingFileSystem::DirectoryEntry>(Result->E));
-    return true;
+  std::optional<StringRef> ExtRedirect = परिणाम->getExternalRedirect();
+  अगर (!ExtRedirect) {
+    निश्चित(isa<RedirectingFileSystem::DirectoryEntry>(परिणाम->E));
+    वापस true;
   }
 
   SmallString<256> RemappedPath((*ExtRedirect).str());
-  if (makeAbsolute(RemappedPath))
-    return false;
+  अगर (makeAbsolute(RemappedPath))
+    वापस false;
 
-  if (ExternalFS->exists(RemappedPath))
-    return true;
+  अगर (ExternalFS->exists(RemappedPath))
+    वापस true;
 
-  if (Redirection == RedirectKind::Fallthrough) {
+  अगर (Redirection == RedirectKind::Fallthrough) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return ExternalFS->exists(Path);
+    वापस ExternalFS->exists(Path);
   }
 
-  return false;
+  वापस false;
 }
 
 namespace {
 
 /// Provide a file wrapper with an overriden status.
-class FileWithFixedStatus : public File {
+श्रेणी FileWithFixedStatus : खुला File {
   std::unique_ptr<File> InnerFile;
   Status S;
 
-public:
+खुला:
   FileWithFixedStatus(std::unique_ptr<File> InnerFile, Status S)
       : InnerFile(std::move(InnerFile)), S(std::move(S)) {}
 
-  ErrorOr<Status> status() override { return S; }
-  ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
+  ErrorOr<Status> status() override { वापस S; }
+  ErrorOr<std::unique_ptr<llvm::Memory_बफर>>
 
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
+  get_बफर(स्थिर Twine &Name, int64_t File_आकार, bool RequiresNullTerminator,
             bool IsVolatile) override {
-    return InnerFile->getBuffer(Name, FileSize, RequiresNullTerminator,
+    वापस InnerFile->get_बफर(Name, File_आकार, RequiresNullTerminator,
                                 IsVolatile);
   }
 
-  std::error_code close() override { return InnerFile->close(); }
+  std::error_code बंद() override { वापस InnerFile->बंद(); }
 
-  void setPath(const Twine &Path) override { S = S.copyWithNewName(S, Path); }
+  व्योम setPath(स्थिर Twine &Path) override { S = S.copyWithNewName(S, Path); }
 };
 
 } // namespace
 
 ErrorOr<std::unique_ptr<File>>
-File::getWithPath(ErrorOr<std::unique_ptr<File>> Result, const Twine &P) {
+File::getWithPath(ErrorOr<std::unique_ptr<File>> परिणाम, स्थिर Twine &P) {
   // See \c getRedirectedFileStatus - don't update path if it's exposing an
   // external path.
-  if (!Result || (*Result)->status()->ExposesExternalVFSPath)
-    return Result;
+  अगर (!परिणाम || (*परिणाम)->status()->ExposesExternalVFSPath)
+    वापस परिणाम;
 
-  ErrorOr<std::unique_ptr<File>> F = std::move(*Result);
-  auto Name = F->get()->getName();
-  if (Name && Name.get() != P.str())
-    F->get()->setPath(P);
-  return F;
+  ErrorOr<std::unique_ptr<File>> F = std::move(*परिणाम);
+  स्वतः Name = F->लो()->getName();
+  अगर (Name && Name.लो() != P.str())
+    F->लो()->setPath(P);
+  वापस F;
 }
 
 ErrorOr<std::unique_ptr<File>>
-RedirectingFileSystem::openFileForRead(const Twine &OriginalPath) {
+RedirectingFileSystem::openFileForRead(स्थिर Twine &OriginalPath) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  अगर (std::error_code EC = makeAbsolute(Path))
+    वापस EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  अगर (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    auto F = File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    if (F)
-      return F;
+    स्वतः F = File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+    अगर (F)
+      वापस F;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम = lookupPath(Path);
+  अगर (!परिणाम) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    return Result.getError();
+    अगर (Redirection == RedirectKind::Fallthrough &&
+        isFileNotFound(परिणाम.getError()))
+      वापस File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+    वापस परिणाम.getError();
   }
 
-  if (!Result->getExternalRedirect()) // FIXME: errc::not_a_file?
-    return make_error_code(llvm::errc::invalid_argument);
+  अगर (!परिणाम->getExternalRedirect()) // FIXME: errc::not_a_file?
+    वापस make_error_code(llvm::errc::invalid_argument);
 
-  StringRef ExtRedirect = *Result->getExternalRedirect();
+  StringRef ExtRedirect = *परिणाम->getExternalRedirect();
   SmallString<256> RemappedPath(ExtRedirect.str());
-  if (std::error_code EC = makeAbsolute(RemappedPath))
-    return EC;
+  अगर (std::error_code EC = makeAbsolute(RemappedPath))
+    वापस EC;
 
-  auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
+  स्वतः *RE = cast<RedirectingFileSystem::RemapEntry>(परिणाम->E);
 
-  auto ExternalFile =
+  स्वतः ExternalFile =
       File::getWithPath(ExternalFS->openFileForRead(RemappedPath), ExtRedirect);
-  if (!ExternalFile) {
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(ExternalFile.getError(), Result->E)) {
+  अगर (!ExternalFile) {
+    अगर (Redirection == RedirectKind::Fallthrough &&
+        isFileNotFound(ExternalFile.getError(), परिणाम->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+      वापस File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
     }
-    return ExternalFile;
+    वापस ExternalFile;
   }
 
-  auto ExternalStatus = (*ExternalFile)->status();
-  if (!ExternalStatus)
-    return ExternalStatus.getError();
+  स्वतः ExternalStatus = (*ExternalFile)->status();
+  अगर (!ExternalStatus)
+    वापस ExternalStatus.getError();
 
   // Otherwise, the file was successfully remapped. Mark it as such. Also
   // replace the underlying path if the external name is being used.
   Status S = getRedirectedFileStatus(
       OriginalPath, RE->useExternalName(UseExternalNames), *ExternalStatus);
-  return std::unique_ptr<File>(
+  वापस std::unique_ptr<File>(
       std::make_unique<FileWithFixedStatus>(std::move(*ExternalFile), S));
 }
 
 std::error_code
-RedirectingFileSystem::getRealPath(const Twine &OriginalPath,
-                                   SmallVectorImpl<char> &Output) {
+RedirectingFileSystem::getRealPath(स्थिर Twine &OriginalPath,
+                                   SmallVectorImpl<अक्षर> &Output) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  अगर (std::error_code EC = makeAbsolute(Path))
+    वापस EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  अगर (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
     std::error_code EC = ExternalFS->getRealPath(Path, Output);
-    if (!EC)
-      return EC;
+    अगर (!EC)
+      वापस EC;
   }
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम = lookupPath(Path);
+  अगर (!परिणाम) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(Result.getError()))
-      return ExternalFS->getRealPath(Path, Output);
-    return Result.getError();
+    अगर (Redirection == RedirectKind::Fallthrough &&
+        isFileNotFound(परिणाम.getError()))
+      वापस ExternalFS->getRealPath(Path, Output);
+    वापस परिणाम.getError();
   }
 
   // If we found FileEntry or DirectoryRemapEntry, look up the mapped
   // path in the external file system.
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
-    auto P = ExternalFS->getRealPath(*ExtRedirect, Output);
-    if (P && Redirection == RedirectKind::Fallthrough &&
-        isFileNotFound(P, Result->E)) {
+  अगर (स्वतः ExtRedirect = परिणाम->getExternalRedirect()) {
+    स्वतः P = ExternalFS->getRealPath(*ExtRedirect, Output);
+    अगर (P && Redirection == RedirectKind::Fallthrough &&
+        isFileNotFound(P, परिणाम->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return ExternalFS->getRealPath(Path, Output);
+      वापस ExternalFS->getRealPath(Path, Output);
     }
-    return P;
+    वापस P;
   }
 
   // We found a DirectoryEntry, which does not have a single external contents
   // path. Use the canonical virtual path.
-  if (Redirection == RedirectKind::Fallthrough) {
-    Result->getPath(Output);
-    return {};
+  अगर (Redirection == RedirectKind::Fallthrough) {
+    परिणाम->getPath(Output);
+    वापस {};
   }
-  return llvm::errc::invalid_argument;
+  वापस llvm::errc::invalid_argument;
 }
 
-void RedirectingFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
+व्योम RedirectingFileSystem::getDirectoryContentRealSources(
+    स्थिर Twine &Dir, SmallVectorImpl<std::string> &Out) {
   SmallString<256> Path;
   Dir.toVector(Path);
 
-  if (makeAbsolute(Path))
-    return;
+  अगर (makeAbsolute(Path))
+    वापस;
 
   // Fallthrough and Fallback both consult ExternalFS, differing only in order.
-  const bool ConsultsExternalFS = Redirection != RedirectKind::RedirectOnly;
+  स्थिर bool ConsultsExternalFS = Redirection != RedirectKind::RedirectOnly;
 
-  ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> परिणाम = lookupPath(Path);
+  अगर (!परिणाम) {
     // dir_begin() delegates entirely to ExternalFS.
-    if (ConsultsExternalFS)
+    अगर (ConsultsExternalFS)
       ExternalFS->getDirectoryContentRealSources(Path, Out);
-    return;
+    वापस;
   }
 
-  switch (Result->E->getKind()) {
-  case EK_File:
-    return;
-  case EK_Directory:
+  चयन (परिणाम->E->getKind()) {
+  हाल EK_File:
+    वापस;
+  हाल EK_Directory:
     // The names come from the overlay, which has no location in ExternalFS.
-    break;
-  case EK_DirectoryRemap: {
+    अवरोध;
+  हाल EK_DirectoryRemap: {
     // Make the target absolute as status() does, so a relative
     // 'external-contents' is not passed down raw.
-    SmallString<256> RemappedPath(*Result->getExternalRedirect());
-    if (!makeAbsolute(RemappedPath))
+    SmallString<256> RemappedPath(*परिणाम->getExternalRedirect());
+    अगर (!makeAbsolute(RemappedPath))
       ExternalFS->getDirectoryContentRealSources(RemappedPath, Out);
-    break;
+    अवरोध;
   }
   }
 
   // dir_begin() also iterates the original path in ExternalFS.
-  if (ConsultsExternalFS)
+  अगर (ConsultsExternalFS)
     ExternalFS->getDirectoryContentRealSources(Path, Out);
 }
 
 std::unique_ptr<FileSystem>
-vfs::getVFSFromYAML(std::unique_ptr<MemoryBuffer> Buffer,
+vfs::getVFSFromYAML(std::unique_ptr<Memory_बफर> बफर,
                     SourceMgr::DiagHandlerTy DiagHandler,
-                    StringRef YAMLFilePath, void *DiagContext,
+                    StringRef YAMLFilePath, व्योम *DiagContext,
                     IntrusiveRefCntPtr<FileSystem> ExternalFS) {
-  return RedirectingFileSystem::create(std::move(Buffer), DiagHandler,
+  वापस RedirectingFileSystem::create(std::move(बफर), DiagHandler,
                                        YAMLFilePath, DiagContext,
                                        std::move(ExternalFS));
 }
 
-static void getVFSEntries(RedirectingFileSystem::Entry *SrcE,
+अटल व्योम getVFSEntries(RedirectingFileSystem::Entry *SrcE,
                           SmallVectorImpl<StringRef> &Path,
                           SmallVectorImpl<YAMLVFSEntry> &Entries) {
-  auto Kind = SrcE->getKind();
-  if (Kind == RedirectingFileSystem::EK_Directory) {
-    auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
-    assert(DE && "Must be a directory");
-    for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
+  स्वतः Kind = SrcE->getKind();
+  अगर (Kind == RedirectingFileSystem::EK_Directory) {
+    स्वतः *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
+    निश्चित(DE && "Must be a directory");
+    क्रम (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
          llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-      Path.push_back(SubEntry->getName());
-      getVFSEntries(SubEntry.get(), Path, Entries);
-      Path.pop_back();
+      Path.धकेलो_back(SubEntry->getName());
+      getVFSEntries(SubEntry.लो(), Path, Entries);
+      Path.निकालो_back();
     }
-    return;
+    वापस;
   }
 
-  if (Kind == RedirectingFileSystem::EK_DirectoryRemap) {
-    auto *DR = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-    assert(DR && "Must be a directory remap");
+  अगर (Kind == RedirectingFileSystem::EK_DirectoryRemap) {
+    स्वतः *DR = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
+    निश्चित(DR && "Must be a directory remap");
     SmallString<128> VPath;
-    for (auto &Comp : Path)
+    क्रम (स्वतः &Comp : Path)
       llvm::sys::path::append(VPath, Comp);
-    Entries.push_back(
+    Entries.धकेलो_back(
         YAMLVFSEntry(VPath.c_str(), DR->getExternalContentsPath()));
-    return;
+    वापस;
   }
 
-  assert(Kind == RedirectingFileSystem::EK_File && "Must be a EK_File");
-  auto *FE = dyn_cast<RedirectingFileSystem::FileEntry>(SrcE);
-  assert(FE && "Must be a file");
+  निश्चित(Kind == RedirectingFileSystem::EK_File && "Must be a EK_File");
+  स्वतः *FE = dyn_cast<RedirectingFileSystem::FileEntry>(SrcE);
+  निश्चित(FE && "Must be a file");
   SmallString<128> VPath;
-  for (auto &Comp : Path)
+  क्रम (स्वतः &Comp : Path)
     llvm::sys::path::append(VPath, Comp);
-  Entries.push_back(YAMLVFSEntry(VPath.c_str(), FE->getExternalContentsPath()));
+  Entries.धकेलो_back(YAMLVFSEntry(VPath.c_str(), FE->getExternalContentsPath()));
 }
 
-void vfs::collectVFSEntries(RedirectingFileSystem &VFS,
+व्योम vfs::collectVFSEntries(RedirectingFileSystem &VFS,
                             SmallVectorImpl<YAMLVFSEntry> &CollectedEntries) {
-  ErrorOr<RedirectingFileSystem::LookupResult> RootResult = VFS.lookupPath("/");
-  if (!RootResult)
-    return;
+  ErrorOr<RedirectingFileSystem::Lookup_परिणाम> मूल_परिणाम = VFS.lookupPath("/");
+  अगर (!मूल_परिणाम)
+    वापस;
   SmallVector<StringRef, 8> Components;
-  Components.push_back("/");
-  getVFSEntries(RootResult->E, Components, CollectedEntries);
+  Components.धकेलो_back("/");
+  getVFSEntries(मूल_परिणाम->E, Components, CollectedEntries);
 }
 
-UniqueID vfs::getNextVirtualUniqueID() {
-  static std::atomic<unsigned> UID;
-  unsigned ID = ++UID;
+UniqueID vfs::get_अग्र_Virtual_Unique_ID() {
+  अटल std::atomic<अचिन्हित> UID;
+  अचिन्हित ID = ++UID;
   // The following assumes that uint64_t max will never collide with a real
   // dev_t value from the OS.
-  return UniqueID(std::numeric_limits<uint64_t>::max(), ID);
+  वापस UniqueID(std::numeric_limits<uint64_t>::max(), ID);
 }
 
-void YAMLVFSWriter::addEntry(StringRef VirtualPath, StringRef RealPath,
+व्योम YAMLVFSWriter::addEntry(StringRef VirtualPath, StringRef RealPath,
                              bool IsDirectory) {
-  assert(sys::path::is_absolute(VirtualPath) && "virtual path not absolute");
-  assert(sys::path::is_absolute(RealPath) && "real path not absolute");
-  assert(!pathHasTraversal(VirtualPath) && "path traversal is not supported");
+  निश्चित(sys::path::is_absolute(VirtualPath) && "virtual path not absolute");
+  निश्चित(sys::path::is_absolute(RealPath) && "real path not absolute");
+  निश्चित(!pathHasTraversal(VirtualPath) && "path traversal is not supported");
   Mappings.emplace_back(VirtualPath, RealPath, IsDirectory);
 }
 
-void YAMLVFSWriter::addFileMapping(StringRef VirtualPath, StringRef RealPath) {
+व्योम YAMLVFSWriter::addFileMapping(StringRef VirtualPath, StringRef RealPath) {
   addEntry(VirtualPath, RealPath, /*IsDirectory=*/false);
 }
 
-void YAMLVFSWriter::addDirectoryMapping(StringRef VirtualPath,
+व्योम YAMLVFSWriter::addDirectoryMapping(StringRef VirtualPath,
                                         StringRef RealPath) {
   addEntry(VirtualPath, RealPath, /*IsDirectory=*/true);
 }
 
 namespace {
 
-class JSONWriter {
+श्रेणी JSONWriter {
   llvm::raw_ostream &OS;
-  SmallVector<StringRef, 16> DirStack;
+  SmallVector<StringRef, 16> Dir_ढेर;
 
-  unsigned getDirIndent() { return 4 * DirStack.size(); }
-  unsigned getFileIndent() { return 4 * (DirStack.size() + 1); }
+  अचिन्हित getDirIndent() { वापस 4 * Dir_ढेर.आकार_2(); }
+  अचिन्हित getFileIndent() { वापस 4 * (Dir_ढेर.आकार_2() + 1); }
   bool containedIn(StringRef Parent, StringRef Path);
   StringRef containedPart(StringRef Parent, StringRef Path);
-  void startDirectory(StringRef Path);
-  void endDirectory();
-  void writeEntry(StringRef VPath, StringRef RPath);
+  व्योम startDirectory(StringRef Path);
+  व्योम endDirectory();
+  व्योम writeEntry(StringRef VPath, StringRef RPath);
 
-public:
+खुला:
   JSONWriter(llvm::raw_ostream &OS) : OS(OS) {}
 
-  void write(ArrayRef<YAMLVFSEntry> Entries,
+  व्योम ग_लिखो(ArrayRef<YAMLVFSEntry> Entries,
              std::optional<bool> UseExternalNames,
              std::optional<bool> IsCaseSensitive,
              std::optional<bool> IsOverlayRelative, StringRef OverlayDir);
@@ -2862,43 +2862,43 @@ bool JSONWriter::containedIn(StringRef Parent, StringRef Path) {
   using namespace llvm::sys;
 
   // Compare each path component.
-  auto IParent = path::begin(Parent), EParent = path::end(Parent);
-  for (auto IChild = path::begin(Path), EChild = path::end(Path);
+  स्वतः IParent = path::begin(Parent), EParent = path::end(Parent);
+  क्रम (स्वतः IChild = path::begin(Path), EChild = path::end(Path);
        IParent != EParent && IChild != EChild; ++IParent, ++IChild) {
-    if (*IParent != *IChild)
-      return false;
+    अगर (*IParent != *IChild)
+      वापस false;
   }
   // Have we exhausted the parent path?
-  return IParent == EParent;
+  वापस IParent == EParent;
 }
 
 StringRef JSONWriter::containedPart(StringRef Parent, StringRef Path) {
-  assert(!Parent.empty());
-  assert(containedIn(Parent, Path));
-  return Path.substr(Parent.size() + 1);
+  निश्चित(!Parent.empty());
+  निश्चित(containedIn(Parent, Path));
+  वापस Path.substr(Parent.आकार_2() + 1);
 }
 
-void JSONWriter::startDirectory(StringRef Path) {
+व्योम JSONWriter::startDirectory(StringRef Path) {
   StringRef Name =
-      DirStack.empty() ? Path : containedPart(DirStack.back(), Path);
-  DirStack.push_back(Path);
-  unsigned Indent = getDirIndent();
+      Dir_ढेर.empty() ? Path : containedPart(Dir_ढेर.back(), Path);
+  Dir_ढेर.धकेलो_back(Path);
+  अचिन्हित Indent = getDirIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'directory',\n";
   OS.indent(Indent + 2) << "'name': \"" << llvm::yaml::escape(Name) << "\",\n";
   OS.indent(Indent + 2) << "'contents': [\n";
 }
 
-void JSONWriter::endDirectory() {
-  unsigned Indent = getDirIndent();
+व्योम JSONWriter::endDirectory() {
+  अचिन्हित Indent = getDirIndent();
   OS.indent(Indent + 2) << "]\n";
   OS.indent(Indent) << "}";
 
-  DirStack.pop_back();
+  Dir_ढेर.निकालो_back();
 }
 
-void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
-  unsigned Indent = getFileIndent();
+व्योम JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
+  अचिन्हित Indent = getFileIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'file',\n";
   OS.indent(Indent + 2) << "'name': \"" << llvm::yaml::escape(VPath) << "\",\n";
@@ -2907,7 +2907,7 @@ void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
   OS.indent(Indent) << "}";
 }
 
-void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
+व्योम JSONWriter::ग_लिखो(ArrayRef<YAMLVFSEntry> Entries,
                        std::optional<bool> UseExternalNames,
                        std::optional<bool> IsCaseSensitive,
                        std::optional<bool> IsOverlayRelative,
@@ -2916,73 +2916,73 @@ void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
 
   OS << "{\n"
         "  'version': 0,\n";
-  if (IsCaseSensitive)
+  अगर (IsCaseSensitive)
     OS << "  'case-sensitive': '" << (*IsCaseSensitive ? "true" : "false")
        << "',\n";
-  if (UseExternalNames)
+  अगर (UseExternalNames)
     OS << "  'use-external-names': '" << (*UseExternalNames ? "true" : "false")
        << "',\n";
   bool UseOverlayRelative = false;
-  if (IsOverlayRelative) {
+  अगर (IsOverlayRelative) {
     UseOverlayRelative = *IsOverlayRelative;
     OS << "  'overlay-relative': '" << (UseOverlayRelative ? "true" : "false")
        << "',\n";
   }
   OS << "  'roots': [\n";
 
-  if (!Entries.empty()) {
-    const YAMLVFSEntry &Entry = Entries.front();
+  अगर (!Entries.empty()) {
+    स्थिर YAMLVFSEntry &Entry = Entries.front();
 
     startDirectory(
       Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath)
     );
 
     StringRef RPath = Entry.RPath;
-    if (UseOverlayRelative) {
-      assert(RPath.starts_with(OverlayDir) &&
+    अगर (UseOverlayRelative) {
+      निश्चित(RPath.starts_with(OverlayDir) &&
              "Overlay dir must be contained in RPath");
-      RPath = RPath.substr(OverlayDir.size());
+      RPath = RPath.substr(OverlayDir.आकार_2());
     }
 
     bool IsCurrentDirEmpty = true;
-    if (!Entry.IsDirectory) {
+    अगर (!Entry.IsDirectory) {
       writeEntry(path::filename(Entry.VPath), RPath);
       IsCurrentDirEmpty = false;
     }
 
-    for (const auto &Entry : Entries.slice(1)) {
+    क्रम (स्थिर स्वतः &Entry : Entries.slice(1)) {
       StringRef Dir =
           Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath);
-      if (Dir == DirStack.back()) {
-        if (!IsCurrentDirEmpty) {
+      अगर (Dir == Dir_ढेर.back()) {
+        अगर (!IsCurrentDirEmpty) {
           OS << ",\n";
         }
-      } else {
-        bool IsDirPoppedFromStack = false;
-        while (!DirStack.empty() && !containedIn(DirStack.back(), Dir)) {
+      } अन्यथा {
+        bool Is_Dir_Popped_From_ढेर = false;
+        जबतक (!Dir_ढेर.empty() && !containedIn(Dir_ढेर.back(), Dir)) {
           OS << "\n";
           endDirectory();
-          IsDirPoppedFromStack = true;
+          Is_Dir_Popped_From_ढेर = true;
         }
-        if (IsDirPoppedFromStack || !IsCurrentDirEmpty) {
+        अगर (Is_Dir_Popped_From_ढेर || !IsCurrentDirEmpty) {
           OS << ",\n";
         }
         startDirectory(Dir);
         IsCurrentDirEmpty = true;
       }
       StringRef RPath = Entry.RPath;
-      if (UseOverlayRelative) {
-        assert(RPath.starts_with(OverlayDir) &&
+      अगर (UseOverlayRelative) {
+        निश्चित(RPath.starts_with(OverlayDir) &&
                "Overlay dir must be contained in RPath");
-        RPath = RPath.substr(OverlayDir.size());
+        RPath = RPath.substr(OverlayDir.आकार_2());
       }
-      if (!Entry.IsDirectory) {
+      अगर (!Entry.IsDirectory) {
         writeEntry(path::filename(Entry.VPath), RPath);
         IsCurrentDirEmpty = false;
       }
     }
 
-    while (!DirStack.empty()) {
+    जबतक (!Dir_ढेर.empty()) {
       OS << "\n";
       endDirectory();
     }
@@ -2993,68 +2993,68 @@ void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
      << "}\n";
 }
 
-void YAMLVFSWriter::write(llvm::raw_ostream &OS) {
-  llvm::sort(Mappings, [](const YAMLVFSEntry &LHS, const YAMLVFSEntry &RHS) {
-    return LHS.VPath < RHS.VPath;
+व्योम YAMLVFSWriter::ग_लिखो(llvm::raw_ostream &OS) {
+  llvm::sort(Mappings, [](स्थिर YAMLVFSEntry &LHS, स्थिर YAMLVFSEntry &RHS) {
+    वापस LHS.VPath < RHS.VPath;
   });
 
-  JSONWriter(OS).write(Mappings, UseExternalNames, IsCaseSensitive,
+  JSONWriter(OS).ग_लिखो(Mappings, UseExternalNames, IsCaseSensitive,
                        IsOverlayRelative, OverlayDir);
 }
 
 vfs::recursive_directory_iterator::recursive_directory_iterator(
-    FileSystem &FS_, const Twine &Path, std::error_code &EC)
+    FileSystem &FS_, स्थिर Twine &Path, std::error_code &EC)
     : FS(&FS_) {
   directory_iterator I = FS->dir_begin(Path, EC);
-  if (I != directory_iterator()) {
+  अगर (I != directory_iterator()) {
     State = std::make_shared<detail::RecDirIterState>();
-    State->Stack.push_back(I);
+    State->ढेर_2.धकेलो_back(I);
   }
 }
 
 vfs::recursive_directory_iterator &
 recursive_directory_iterator::increment(std::error_code &EC) {
-  assert(FS && State && !State->Stack.empty() && "incrementing past end");
-  assert(!State->Stack.back()->path().empty() && "non-canonical end iterator");
+  निश्चित(FS && State && !State->ढेर_2.empty() && "incrementing past end");
+  निश्चित(!State->ढेर_2.back()->path().empty() && "non-canonical end iterator");
   vfs::directory_iterator End;
 
-  if (State->HasNoPushRequest)
-    State->HasNoPushRequest = false;
-  else {
-    if (State->Stack.back()->type() == sys::fs::file_type::directory_file) {
+  अगर (State->Has_No_धकेलो_Request)
+    State->Has_No_धकेलो_Request = false;
+  अन्यथा {
+    अगर (State->ढेर_2.back()->type() == sys::fs::file_type::directory_file) {
       vfs::directory_iterator I =
-          FS->dir_begin(State->Stack.back()->path(), EC);
-      if (I != End) {
-        State->Stack.push_back(I);
-        return *this;
+          FS->dir_begin(State->ढेर_2.back()->path(), EC);
+      अगर (I != End) {
+        State->ढेर_2.धकेलो_back(I);
+        वापस *यह;
       }
     }
   }
 
-  while (!State->Stack.empty() && State->Stack.back().increment(EC) == End)
-    State->Stack.pop_back();
+  जबतक (!State->ढेर_2.empty() && State->ढेर_2.back().increment(EC) == End)
+    State->ढेर_2.निकालो_back();
 
-  if (State->Stack.empty())
+  अगर (State->ढेर_2.empty())
     State.reset(); // end iterator
 
-  return *this;
+  वापस *यह;
 }
 
-const char FileSystem::ID = 0;
-const char OverlayFileSystem::ID = 0;
-const char ProxyFileSystem::ID = 0;
-const char InMemoryFileSystem::ID = 0;
-const char RedirectingFileSystem::ID = 0;
+स्थिर अक्षर FileSystem::ID = 0;
+स्थिर अक्षर OverlayFileSystem::ID = 0;
+स्थिर अक्षर ProxyFileSystem::ID = 0;
+स्थिर अक्षर InMemoryFileSystem::ID = 0;
+स्थिर अक्षर RedirectingFileSystem::ID = 0;
 
-unsigned ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::useCount(
-    const FileSystem *FS) {
-  return FS->UseCount();
+अचिन्हित ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::use_गिनती(
+    स्थिर FileSystem *FS) {
+  वापस FS->Use_गिनती();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
+व्योम ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
   FS->Retain();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
+व्योम ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
   FS->Release();
 }

@@ -5,13 +5,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "llvm/Support/Mustache.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
-#include <sstream>
+#समावेश "llvm/Support/Mustache.h"
+#समावेश "llvm/ADT/SmallVector.h"
+#समावेश "llvm/Support/Debug.h"
+#समावेश "llvm/Support/raw_ostream.h"
+#समावेश <sstream>
 
-#define DEBUG_TYPE "mustache"
+#घोषणा DEBUG_TYPE "mustache"
 
 using namespace llvm;
 using namespace llvm::mustache;
@@ -20,36 +20,36 @@ namespace {
 
 using Accessor = ArrayRef<StringRef>;
 
-static bool isFalsey(const json::Value &V) {
-  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
+अटल bool isFalsey(स्थिर json::मूल्य &V) {
+  वापस V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().मूल्य_2()) ||
          (V.getAsArray() && V.getAsArray()->empty());
 }
 
-static bool isContextFalsey(const json::Value *V) {
+अटल bool isContextFalsey(स्थिर json::मूल्य *V) {
   // A missing context (represented by a nullptr) is defined as falsey.
-  if (!V)
-    return true;
-  return isFalsey(*V);
+  अगर (!V)
+    वापस true;
+  वापस isFalsey(*V);
 }
 
-static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
-  size_t CurrentPos = 0;
-  while (CurrentPos < Str.size()) {
+अटल व्योम splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
+  माप_प्रकार CurrentPos = 0;
+  जबतक (CurrentPos < Str.आकार_2()) {
     // Find the next delimiter.
-    size_t DelimiterPos = Str.find('.', CurrentPos);
+    माप_प्रकार DelimiterPos = Str.find('.', CurrentPos);
 
     // If no delimiter is found, process the rest of the string.
-    if (DelimiterPos == StringRef::npos)
-      DelimiterPos = Str.size();
+    अगर (DelimiterPos == StringRef::npos)
+      DelimiterPos = Str.आकार_2();
 
     // Get the current part, which may have whitespace.
     StringRef Part = Str.slice(CurrentPos, DelimiterPos);
 
     // Manually trim the part without creating a new string object.
-    size_t Start = Part.find_first_not_of(" \t\r\n");
-    if (Start != StringRef::npos) {
-      size_t End = Part.find_last_not_of(" \t\r\n");
-      Tokens.push_back(Part.slice(Start, End + 1));
+    माप_प्रकार Start = Part.find_first_not_of(" \t\r\n");
+    अगर (Start != StringRef::npos) {
+      माप_प्रकार End = Part.find_last_not_of(" \t\r\n");
+      Tokens.धकेलो_back(Part.slice(Start, End + 1));
     }
 
     // Move past the delimiter for the next iteration.
@@ -57,61 +57,61 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
   }
 }
 
-static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
+अटल Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // We split the mustache string into an accessor.
   // For example:
   //    "a.b.c" would be split into {"a", "b", "c"}
   // We make an exception for a single dot which
   // refers to the current context.
   SmallVector<StringRef> Tokens;
-  if (Str == ".") {
+  अगर (Str == ".") {
     // "." is a special accessor that refers to the current context.
     // It's a literal, so it doesn't need to be saved.
-    Tokens.push_back(".");
-  } else {
+    Tokens.धकेलो_back(".");
+  } अन्यथा {
     splitAndTrim(Str, Tokens);
   }
   // Now, allocate memory for the array of StringRefs in the arena.
-  StringRef *ArenaTokens = Ctx.Allocator.Allocate<StringRef>(Tokens.size());
+  StringRef *ArenaTokens = Ctx.Allocator.Allocate<StringRef>(Tokens.आकार_2());
   // Copy the StringRefs from the stack vector to the arena.
   llvm::copy(Tokens, ArenaTokens);
   // Return an ArrayRef pointing to the stable arena memory.
-  return ArrayRef<StringRef>(ArenaTokens, Tokens.size());
+  वापस ArrayRef<StringRef>(ArenaTokens, Tokens.आकार_2());
 }
 } // namespace
 
 namespace llvm::mustache {
 
-class MustacheOutputStream : public raw_ostream {
-public:
-  MustacheOutputStream() = default;
-  ~MustacheOutputStream() override = default;
+श्रेणी MustacheOutputStream : खुला raw_ostream {
+खुला:
+  MustacheOutputStream() = शेष;
+  ~MustacheOutputStream() override = शेष;
 
-  virtual void suspendIndentation() {}
-  virtual void resumeIndentation() {}
+  भव व्योम suspendIndentation() {}
+  भव व्योम resumeIndentation() {}
 
-private:
-  void anchor() override;
+निजी:
+  व्योम anchor() override;
 };
 
-void MustacheOutputStream::anchor() {}
+व्योम MustacheOutputStream::anchor() {}
 
-class RawMustacheOutputStream : public MustacheOutputStream {
-public:
+श्रेणी RawMustacheOutputStream : खुला MustacheOutputStream {
+खुला:
   RawMustacheOutputStream(raw_ostream &OS) : OS(OS) { SetUnbuffered(); }
 
-private:
+निजी:
   raw_ostream &OS;
 
-  void write_impl(const char *Ptr, size_t Size) override {
-    OS.write(Ptr, Size);
+  व्योम write_impl(स्थिर अक्षर *Ptr, माप_प्रकार आकार) override {
+    OS.ग_लिखो(Ptr, आकार);
   }
-  uint64_t current_pos() const override { return OS.tell(); }
+  uint64_t current_pos() स्थिर override { वापस OS.tell(); }
 };
 
-class Token {
-public:
-  enum class Type {
+श्रेणी Token {
+खुला:
+  क्रमागत श्रेणी Type {
     Text,
     Variable,
     Partial,
@@ -125,46 +125,46 @@ public:
 
   Token(StringRef Str)
       : TokenType(Type::Text), RawBody(Str), TokenBody(RawBody),
-        AccessorValue({}), Indentation(0) {};
+        Accessor_मूल्य({}), Indentation(0) {};
 
-  Token(StringRef RawBody, StringRef TokenBody, char Identifier,
+  Token(StringRef RawBody, StringRef TokenBody, अक्षर Identifier,
         MustacheContext &Ctx)
       : RawBody(RawBody), TokenBody(TokenBody), Indentation(0) {
     TokenType = getTokenType(Identifier);
-    if (TokenType == Type::Comment)
-      return;
-    StringRef AccessorStr(this->TokenBody);
-    if (TokenType != Type::Variable)
+    अगर (TokenType == Type::Comment)
+      वापस;
+    StringRef AccessorStr(यह->TokenBody);
+    अगर (TokenType != Type::Variable)
       AccessorStr = AccessorStr.substr(1);
-    AccessorValue = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
+    Accessor_मूल्य = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
   }
 
-  ArrayRef<StringRef> getAccessor() const { return AccessorValue; }
+  ArrayRef<StringRef> getAccessor() स्थिर { वापस Accessor_मूल्य; }
 
-  Type getType() const { return TokenType; }
+  Type getType() स्थिर { वापस TokenType; }
 
-  void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; }
+  व्योम setIndentation(माप_प्रकार NewIndentation) { Indentation = NewIndentation; }
 
-  size_t getIndentation() const { return Indentation; }
+  माप_प्रकार getIndentation() स्थिर { वापस Indentation; }
 
-  static Type getTokenType(char Identifier) {
-    switch (Identifier) {
-    case '#':
-      return Type::SectionOpen;
-    case '/':
-      return Type::SectionClose;
-    case '^':
-      return Type::InvertSectionOpen;
-    case '!':
-      return Type::Comment;
-    case '>':
-      return Type::Partial;
-    case '&':
-      return Type::UnescapeVariable;
-    case '=':
-      return Type::SetDelimiter;
-    default:
-      return Type::Variable;
+  अटल Type getTokenType(अक्षर Identifier) {
+    चयन (Identifier) {
+    हाल '#':
+      वापस Type::SectionOpen;
+    हाल '/':
+      वापस Type::SectionClose;
+    हाल '^':
+      वापस Type::InvertSectionOpen;
+    हाल '!':
+      वापस Type::Comment;
+    हाल '>':
+      वापस Type::Partial;
+    हाल '&':
+      वापस Type::UnescapeVariable;
+    हाल '=':
+      वापस Type::SetDelimiter;
+    शेष:
+      वापस Type::Variable;
     }
   }
 
@@ -173,16 +173,16 @@ public:
   StringRef RawBody;
   // TokenBody is the original string with the identifier removed.
   StringRef TokenBody;
-  ArrayRef<StringRef> AccessorValue;
-  size_t Indentation;
+  ArrayRef<StringRef> Accessor_मूल्य;
+  माप_प्रकार Indentation;
 };
 
-using EscapeMap = DenseMap<char, std::string>;
+using EscapeMap = DenseMap<अक्षर, std::string>;
 
-class ASTNode : public ilist_node<ASTNode> {
-public:
-  enum Type {
-    Root,
+श्रेणी ASTNode : खुला ilist_गाँठ<ASTNode> {
+खुला:
+  क्रमागत Type {
+    मूल_2,
     Text,
     Partial,
     Variable,
@@ -192,7 +192,7 @@ public:
   };
 
   ASTNode(MustacheContext &Ctx)
-      : Ctx(Ctx), Ty(Type::Root), Parent(nullptr), ParentContext(nullptr) {}
+      : Ctx(Ctx), Ty(Type::मूल_2), Parent(nullptr), ParentContext(nullptr) {}
 
   ASTNode(MustacheContext &Ctx, StringRef Body, ASTNode *Parent)
       : Ctx(Ctx), Ty(Type::Text), Body(Body), Parent(Parent),
@@ -201,65 +201,65 @@ public:
   // Constructor for Section/InvertSection/Variable/UnescapeVariable Nodes
   ASTNode(MustacheContext &Ctx, Type Ty, ArrayRef<StringRef> Accessor,
           ASTNode *Parent)
-      : Ctx(Ctx), Ty(Ty), Parent(Parent), AccessorValue(Accessor),
+      : Ctx(Ctx), Ty(Ty), Parent(Parent), Accessor_मूल्य(Accessor),
         ParentContext(nullptr) {}
 
-  void addChild(AstPtr Child) { Children.push_back(Child); };
+  व्योम addChild(AstPtr Child) { Children.धकेलो_back(Child); };
 
-  void setRawBody(StringRef NewBody) { RawBody = NewBody; };
+  व्योम setRawBody(StringRef NewBody) { RawBody = NewBody; };
 
-  void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; };
+  व्योम setIndentation(माप_प्रकार NewIndentation) { Indentation = NewIndentation; };
 
-  void render(const llvm::json::Value &Data, MustacheOutputStream &OS);
+  व्योम render(स्थिर llvm::json::मूल्य &तथ्य_2, MustacheOutputStream &OS);
 
-private:
-  void renderLambdas(const llvm::json::Value &Contexts,
+निजी:
+  व्योम renderLambdas(स्थिर llvm::json::मूल्य &Contexts,
                      MustacheOutputStream &OS, Lambda &L);
 
-  void renderSectionLambdas(const llvm::json::Value &Contexts,
+  व्योम renderSectionLambdas(स्थिर llvm::json::मूल्य &Contexts,
                             MustacheOutputStream &OS, SectionLambda &L);
 
-  void renderPartial(const llvm::json::Value &Contexts,
+  व्योम renderPartial(स्थिर llvm::json::मूल्य &Contexts,
                      MustacheOutputStream &OS, ASTNode *Partial);
 
-  void renderChild(const llvm::json::Value &Context, MustacheOutputStream &OS);
+  व्योम renderChild(स्थिर llvm::json::मूल्य &Context, MustacheOutputStream &OS);
 
-  const llvm::json::Value *findContext();
+  स्थिर llvm::json::मूल्य *findContext();
 
-  void renderRoot(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderText(MustacheOutputStream &OS);
-  void renderPartial(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderVariable(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderUnescapeVariable(const json::Value &CurrentCtx,
+  व्योम render_मूल(स्थिर json::मूल्य &CurrentCtx, MustacheOutputStream &OS);
+  व्योम renderText(MustacheOutputStream &OS);
+  व्योम renderPartial(स्थिर json::मूल्य &CurrentCtx, MustacheOutputStream &OS);
+  व्योम renderVariable(स्थिर json::मूल्य &CurrentCtx, MustacheOutputStream &OS);
+  व्योम renderUnescapeVariable(स्थिर json::मूल्य &CurrentCtx,
                               MustacheOutputStream &OS);
-  void renderSection(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderInvertSection(const json::Value &CurrentCtx,
+  व्योम renderSection(स्थिर json::मूल्य &CurrentCtx, MustacheOutputStream &OS);
+  व्योम renderInvertSection(स्थिर json::मूल्य &CurrentCtx,
                            MustacheOutputStream &OS);
 
   MustacheContext &Ctx;
   Type Ty;
-  size_t Indentation = 0;
+  माप_प्रकार Indentation = 0;
   StringRef RawBody;
   StringRef Body;
   ASTNode *Parent;
   ASTNodeList Children;
-  const ArrayRef<StringRef> AccessorValue;
-  const llvm::json::Value *ParentContext;
+  स्थिर ArrayRef<StringRef> Accessor_मूल्य;
+  स्थिर llvm::json::मूल्य *ParentContext;
 };
 
 // A wrapper for arena allocator for ASTNodes
-static AstPtr createRootNode(MustacheContext &Ctx) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
+अटल AstPtr create_मूल_गाँठ(MustacheContext &Ctx) {
+  वापस नया (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
 }
 
-static AstPtr createNode(MustacheContext &Ctx, ASTNode::Type T,
+अटल AstPtr create_गाँठ(MustacheContext &Ctx, ASTNode::Type T,
                          ArrayRef<StringRef> A, ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
+  वापस नया (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
 }
 
-static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
+अटल AstPtr create_Text_गाँठ(MustacheContext &Ctx, StringRef Body,
                              ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
+  वापस नया (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
 }
 
 // Function to check if there is meaningful text behind.
@@ -274,38 +274,38 @@ static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
 // and the current token is the second token.
 // For example:
 //  "{{#Section}}"
-static bool hasTextBehind(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx == 0)
-    return true;
+अटल bool hasTextBehind(माप_प्रकार Idx, स्थिर ArrayRef<Token> &Tokens) {
+  अगर (Idx == 0)
+    वापस true;
 
-  size_t PrevIdx = Idx - 1;
-  if (Tokens[PrevIdx].getType() != Token::Type::Text)
-    return true;
+  माप_प्रकार पूर्व_Idx = Idx - 1;
+  अगर (Tokens[पूर्व_Idx].getType() != Token::Type::Text)
+    वापस true;
 
-  const Token &PrevToken = Tokens[PrevIdx];
-  StringRef TokenBody = StringRef(PrevToken.RawBody).rtrim(" \r\t\v");
-  return !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
+  स्थिर Token &पूर्व_Token = Tokens[पूर्व_Idx];
+  StringRef TokenBody = StringRef(पूर्व_Token.RawBody).rtrim(" \r\t\v");
+  वापस !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
 }
 
 // Function to check if there's no meaningful text ahead.
 // We determine if a token has text ahead if the left of previous
 // token does not start with a newline.
-static bool hasTextAhead(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx >= Tokens.size() - 1)
-    return true;
+अटल bool hasTextAhead(माप_प्रकार Idx, स्थिर ArrayRef<Token> &Tokens) {
+  अगर (Idx >= Tokens.आकार_2() - 1)
+    वापस true;
 
-  size_t NextIdx = Idx + 1;
-  if (Tokens[NextIdx].getType() != Token::Type::Text)
-    return true;
+  माप_प्रकार अग्र_Idx = Idx + 1;
+  अगर (Tokens[अग्र_Idx].getType() != Token::Type::Text)
+    वापस true;
 
-  const Token &NextToken = Tokens[NextIdx];
-  StringRef TokenBody = StringRef(NextToken.RawBody).ltrim(" ");
-  return !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
+  स्थिर Token &अग्र_Token = Tokens[अग्र_Idx];
+  StringRef TokenBody = StringRef(अग्र_Token.RawBody).ltrim(" ");
+  वापस !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
 }
 
-static bool requiresCleanUp(Token::Type T) {
+अटल bool requiresCleanUp(Token::Type T) {
   // We must clean up all the tokens that could contain child nodes.
-  return T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
+  वापस T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
          T == Token::Type::SectionClose || T == Token::Type::Comment ||
          T == Token::Type::Partial || T == Token::Type::SetDelimiter;
 }
@@ -316,14 +316,14 @@ static bool requiresCleanUp(Token::Type T) {
 //  "{{! Comment }} \nLine 2"
 // would be considered as no text ahead and should be rendered as
 //  " Line 2"
-static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
-  Token &NextToken = Tokens[Idx + 1];
-  StringRef NextTokenBody = NextToken.TokenBody;
+अटल व्योम stripTokenAhead(SmallVectorImpl<Token> &Tokens, माप_प्रकार Idx) {
+  Token &अग्र_Token = Tokens[Idx + 1];
+  StringRef अग्र_Token_Body = अग्र_Token.TokenBody;
   // Cut off the leading newline which could be \n or \r\n.
-  if (NextTokenBody.starts_with("\r\n"))
-    NextToken.TokenBody = NextTokenBody.substr(2);
-  else if (NextTokenBody.starts_with("\n"))
-    NextToken.TokenBody = NextTokenBody.substr(1);
+  अगर (अग्र_Token_Body.starts_with("\r\n"))
+    अग्र_Token.TokenBody = अग्र_Token_Body.substr(2);
+  अन्यथा अगर (अग्र_Token_Body.starts_with("\n"))
+    अग्र_Token.TokenBody = अग्र_Token_Body.substr(1);
 }
 
 // Adjust previous token body if there no text behind.
@@ -332,18 +332,18 @@ static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
 //  " \t{{#section}}A{{/section}}"
 // would be considered as having no text ahead and would be render as:
 //  "A"
-void stripTokenBefore(SmallVectorImpl<Token> &Tokens, size_t Idx,
+व्योम stripTokenBefore(SmallVectorImpl<Token> &Tokens, माप_प्रकार Idx,
                       Token &CurrentToken, Token::Type CurrentType) {
-  Token &PrevToken = Tokens[Idx - 1];
-  StringRef PrevTokenBody = PrevToken.TokenBody;
-  StringRef Unindented = PrevTokenBody.rtrim(" \r\t\v");
-  size_t Indentation = PrevTokenBody.size() - Unindented.size();
-  PrevToken.TokenBody = Unindented;
+  Token &पूर्व_Token = Tokens[Idx - 1];
+  StringRef पूर्व_Token_Body = पूर्व_Token.TokenBody;
+  StringRef Unindented = पूर्व_Token_Body.rtrim(" \r\t\v");
+  माप_प्रकार Indentation = पूर्व_Token_Body.आकार_2() - Unindented.आकार_2();
+  पूर्व_Token.TokenBody = Unindented;
   CurrentToken.setIndentation(Indentation);
 }
 
-struct Tag {
-  enum class Kind {
+काष्ठा Tag {
+  क्रमागत श्रेणी Kind {
     None,
     Normal, // {{...}}
     Triple, // {{{...}}}
@@ -352,108 +352,108 @@ struct Tag {
   Kind TagKind = Kind::None;
   StringRef Content;   // The content between the delimiters.
   StringRef FullMatch; // The entire tag, including delimiters.
-  size_t StartPosition = StringRef::npos;
+  माप_प्रकार StartPosition = StringRef::npos;
 };
 
-[[maybe_unused]] static const char *tagKindToString(Tag::Kind K) {
-  switch (K) {
-  case Tag::Kind::None:
-    return "None";
-  case Tag::Kind::Normal:
-    return "Normal";
-  case Tag::Kind::Triple:
-    return "Triple";
+[[maybe_unused]] अटल स्थिर अक्षर *tagKindToString(Tag::Kind K) {
+  चयन (K) {
+  हाल Tag::Kind::None:
+    वापस "None";
+  हाल Tag::Kind::Normal:
+    वापस "Normal";
+  हाल Tag::Kind::Triple:
+    वापस "Triple";
   }
   llvm_unreachable("Unknown Tag::Kind");
 }
 
-[[maybe_unused]] static const char *jsonKindToString(json::Value::Kind K) {
-  switch (K) {
-  case json::Value::Kind::Null:
-    return "JSON_KIND_NULL";
-  case json::Value::Kind::Boolean:
-    return "JSON_KIND_BOOLEAN";
-  case json::Value::Kind::Number:
-    return "JSON_KIND_NUMBER";
-  case json::Value::Kind::String:
-    return "JSON_KIND_STRING";
-  case json::Value::Kind::Array:
-    return "JSON_KIND_ARRAY";
-  case json::Value::Kind::Object:
-    return "JSON_KIND_OBJECT";
+[[maybe_unused]] अटल स्थिर अक्षर *jsonKindToString(json::मूल्य::Kind K) {
+  चयन (K) {
+  हाल json::मूल्य::Kind::Null:
+    वापस "JSON_KIND_NULL";
+  हाल json::मूल्य::Kind::Boolean:
+    वापस "JSON_KIND_BOOLEAN";
+  हाल json::मूल्य::Kind::संख्या:
+    वापस "JSON_KIND_NUMBER";
+  हाल json::मूल्य::Kind::String:
+    वापस "JSON_KIND_STRING";
+  हाल json::मूल्य::Kind::Array:
+    वापस "JSON_KIND_ARRAY";
+  हाल json::मूल्य::Kind::Object:
+    वापस "JSON_KIND_OBJECT";
   }
   llvm_unreachable("Unknown json::Value::Kind");
 }
 
 // Simple tokenizer that splits the template into tokens.
-static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
+अटल SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   LLVM_DEBUG(dbgs() << "[Tokenize Template] \"" << Template << "\"\n");
   SmallVector<Token> Tokens;
   SmallString<8> Open("{{");
   SmallString<8> Close("}}");
-  size_t Cursor = 0;
-  size_t TextStart = 0;
+  माप_प्रकार Cursor = 0;
+  माप_प्रकार TextStart = 0;
 
-  const StringLiteral TripleOpen("{{{");
-  const StringLiteral TripleClose("}}}");
+  स्थिर StringLiteral TripleOpen("{{{");
+  स्थिर StringLiteral TripleClose("}}}");
 
-  while (Cursor < Template.size()) {
+  जबतक (Cursor < Template.आकार_2()) {
     StringRef TemplateSuffix = Template.substr(Cursor);
     StringRef TagOpen, TagClose;
     Tag::Kind Kind;
 
     // Determine which tag we've encountered.
-    if (TemplateSuffix.starts_with(TripleOpen)) {
+    अगर (TemplateSuffix.starts_with(TripleOpen)) {
       Kind = Tag::Kind::Triple;
       TagOpen = TripleOpen;
       TagClose = TripleClose;
-    } else if (TemplateSuffix.starts_with(Open)) {
+    } अन्यथा अगर (TemplateSuffix.starts_with(Open)) {
       Kind = Tag::Kind::Normal;
       TagOpen = Open;
       TagClose = Close;
-    } else {
+    } अन्यथा {
       // Not at a tag, continue scanning.
       ++Cursor;
-      continue;
+      जारी;
     }
 
     // Found a tag, first add the preceding text.
-    if (Cursor > TextStart)
+    अगर (Cursor > TextStart)
       Tokens.emplace_back(Template.slice(TextStart, Cursor));
 
     // Find the closing tag.
-    size_t EndPos = Template.find(TagClose, Cursor + TagOpen.size());
-    if (EndPos == StringRef::npos) {
+    माप_प्रकार EndPos = Template.find(TagClose, Cursor + TagOpen.आकार_2());
+    अगर (EndPos == StringRef::npos) {
       // No closing tag, the rest is text.
       Tokens.emplace_back(Template.substr(Cursor));
-      TextStart = Cursor = Template.size();
-      break;
+      TextStart = Cursor = Template.आकार_2();
+      अवरोध;
     }
 
     // Extract tag content and full match.
-    size_t ContentStart = Cursor + TagOpen.size();
+    माप_प्रकार ContentStart = Cursor + TagOpen.आकार_2();
     StringRef Content = Template.substr(ContentStart, EndPos - ContentStart);
     StringRef FullMatch =
-        Template.substr(Cursor, (EndPos + TagClose.size()) - Cursor);
+        Template.substr(Cursor, (EndPos + TagClose.आकार_2()) - Cursor);
 
     // Process the tag (inlined logic from processTag).
     LLVM_DEBUG(dbgs() << "[Tag] " << FullMatch << ", Content: " << Content
                       << ", Kind: " << tagKindToString(Kind) << "\n");
-    if (Kind == Tag::Kind::Triple) {
+    अगर (Kind == Tag::Kind::Triple) {
       Tokens.emplace_back(FullMatch, Ctx.Saver.save("&" + Content), '&', Ctx);
-    } else { // Normal Tag
+    } अन्यथा { // Normal Tag
       StringRef Interpolated = Content;
-      if (!Interpolated.trim().starts_with("=")) {
-        char Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
+      अगर (!Interpolated.trim().starts_with("=")) {
+        अक्षर Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
         Tokens.emplace_back(FullMatch, Interpolated, Front, Ctx);
-      } else { // Set Delimiter
+      } अन्यथा { // Set Delimiter
         Tokens.emplace_back(FullMatch, Interpolated, '=', Ctx);
         StringRef DelimSpec = Interpolated.trim();
         DelimSpec = DelimSpec.drop_front(1);
-        DelimSpec = DelimSpec.take_until([](char C) { return C == '='; });
+        DelimSpec = DelimSpec.take_until([](अक्षर C) { वापस C == '='; });
         DelimSpec = DelimSpec.trim();
 
-        auto [NewOpen, NewClose] = DelimSpec.split(' ');
+        स्वतः [NewOpen, NewClose] = DelimSpec.split(' ');
         LLVM_DEBUG(dbgs() << "[Set Delimiter] NewOpen: " << NewOpen
                           << ", NewClose: " << NewClose << "\n");
         Open = NewOpen;
@@ -462,457 +462,457 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
     }
 
     // Move past the tag for the next iteration.
-    Cursor += FullMatch.size();
+    Cursor += FullMatch.आकार_2();
     TextStart = Cursor;
   }
 
   // Add any remaining text after the last tag.
-  if (TextStart < Template.size())
+  अगर (TextStart < Template.आकार_2())
     Tokens.emplace_back(Template.substr(TextStart));
 
   // Fix up white spaces for standalone tags.
-  size_t LastIdx = Tokens.size() - 1;
-  for (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
+  माप_प्रकार LastIdx = Tokens.आकार_2() - 1;
+  क्रम (माप_प्रकार Idx = 0, End = Tokens.आकार_2(); Idx < End; ++Idx) {
     Token &CurrentToken = Tokens[Idx];
     Token::Type CurrentType = CurrentToken.getType();
-    if (!requiresCleanUp(CurrentType))
-      continue;
+    अगर (!requiresCleanUp(CurrentType))
+      जारी;
 
     bool HasTextBehind = hasTextBehind(Idx, Tokens);
     bool HasTextAhead = hasTextAhead(Idx, Tokens);
 
-    if ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
+    अगर ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
       stripTokenAhead(Tokens, Idx);
 
-    if ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
+    अगर ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
       stripTokenBefore(Tokens, Idx, CurrentToken, CurrentType);
   }
-  return Tokens;
+  वापस Tokens;
 }
 
 // Custom stream to escape strings.
-class EscapeStringStream : public MustacheOutputStream {
-public:
+श्रेणी EscapeStringStream : खुला MustacheOutputStream {
+खुला:
   explicit EscapeStringStream(llvm::raw_ostream &WrappedStream,
                               EscapeMap &Escape)
-      : Escape(Escape), EscapeChars(Escape.keys().begin(), Escape.keys().end()),
+      : Escape(Escape), EscapeChars(Escape.कुंजियाँ().begin(), Escape.कुंजियाँ().end()),
         WrappedStream(WrappedStream) {
     SetUnbuffered();
   }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
-    StringRef Data(Ptr, Size);
-    size_t Start = 0;
-    while (Start < Size) {
+रक्षित:
+  व्योम write_impl(स्थिर अक्षर *Ptr, माप_प्रकार आकार) override {
+    StringRef तथ्य_2(Ptr, आकार);
+    माप_प्रकार Start = 0;
+    जबतक (Start < आकार) {
       // Find the next character that needs to be escaped.
-      size_t Next = Data.find_first_of(EscapeChars.str(), Start);
+      माप_प्रकार अग्र_2 = तथ्य_2.find_first_of(EscapeChars.str(), Start);
 
       // If no escapable characters are found, write the rest of the string.
-      if (Next == StringRef::npos) {
-        WrappedStream << Data.substr(Start);
-        return;
+      अगर (अग्र_2 == StringRef::npos) {
+        WrappedStream << तथ्य_2.substr(Start);
+        वापस;
       }
 
       // Write the chunk of text before the escapable character.
-      if (Next > Start)
-        WrappedStream << Data.substr(Start, Next - Start);
+      अगर (अग्र_2 > Start)
+        WrappedStream << तथ्य_2.substr(Start, अग्र_2 - Start);
 
       // Look up and write the escaped version of the character.
-      WrappedStream << Escape[Data[Next]];
-      Start = Next + 1;
+      WrappedStream << Escape[तथ्य_2[अग्र_2]];
+      Start = अग्र_2 + 1;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() स्थिर override { वापस WrappedStream.tell(); }
 
-private:
+निजी:
   EscapeMap &Escape;
   SmallString<8> EscapeChars;
   llvm::raw_ostream &WrappedStream;
 };
 
 // Custom stream to add indentation used to for rendering partials.
-class AddIndentationStringStream : public MustacheOutputStream {
-public:
+श्रेणी AddIndentationStringStream : खुला MustacheOutputStream {
+खुला:
   explicit AddIndentationStringStream(raw_ostream &WrappedStream,
-                                      size_t Indentation)
+                                      माप_प्रकार Indentation)
       : Indentation(Indentation), WrappedStream(WrappedStream),
         NeedsIndent(true), IsSuspended(false) {
     SetUnbuffered();
   }
 
-  void suspendIndentation() override { IsSuspended = true; }
-  void resumeIndentation() override { IsSuspended = false; }
+  व्योम suspendIndentation() override { IsSuspended = true; }
+  व्योम resumeIndentation() override { IsSuspended = false; }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
-    llvm::StringRef Data(Ptr, Size);
+रक्षित:
+  व्योम write_impl(स्थिर अक्षर *Ptr, माप_प्रकार आकार) override {
+    llvm::StringRef तथ्य_2(Ptr, आकार);
     SmallString<0> Indent;
     Indent.resize(Indentation, ' ');
 
-    for (char C : Data) {
+    क्रम (अक्षर C : तथ्य_2) {
       LLVM_DEBUG(dbgs() << "[Indentation Stream] NeedsIndent:" << NeedsIndent
                         << ", C:'" << C << "', Indentation:" << Indentation
                         << "\n");
-      if (NeedsIndent && C != '\n') {
+      अगर (NeedsIndent && C != '\n') {
         WrappedStream << Indent;
         NeedsIndent = false;
       }
       WrappedStream << C;
-      if (C == '\n' && !IsSuspended)
+      अगर (C == '\n' && !IsSuspended)
         NeedsIndent = true;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() स्थिर override { वापस WrappedStream.tell(); }
 
-private:
-  size_t Indentation;
+निजी:
+  माप_प्रकार Indentation;
   raw_ostream &WrappedStream;
   bool NeedsIndent;
   bool IsSuspended;
 };
 
-class Parser {
-public:
+श्रेणी Parser {
+खुला:
   Parser(StringRef TemplateStr, MustacheContext &Ctx)
       : Ctx(Ctx), TemplateStr(TemplateStr) {}
 
   AstPtr parse();
 
-private:
-  void parseMustache(ASTNode *Parent);
-  void parseSection(ASTNode *Parent, ASTNode::Type Ty, const Accessor &A);
+निजी:
+  व्योम parseMustache(ASTNode *Parent);
+  व्योम parseSection(ASTNode *Parent, ASTNode::Type Ty, स्थिर Accessor &A);
 
   MustacheContext &Ctx;
   SmallVector<Token> Tokens;
-  size_t CurrentPtr;
+  माप_प्रकार CurrentPtr;
   StringRef TemplateStr;
 };
 
-void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
-                          const Accessor &A) {
-  AstPtr CurrentNode = createNode(Ctx, Ty, A, Parent);
-  size_t Start = CurrentPtr;
-  parseMustache(CurrentNode);
-  const size_t End = CurrentPtr - 1;
+व्योम Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
+                          स्थिर Accessor &A) {
+  AstPtr Current_गाँठ = create_गाँठ(Ctx, Ty, A, Parent);
+  माप_प्रकार Start = CurrentPtr;
+  parseMustache(Current_गाँठ);
+  स्थिर माप_प्रकार End = CurrentPtr - 1;
 
-  size_t RawBodySize = 0;
-  for (size_t I = Start; I < End; ++I)
-    RawBodySize += Tokens[I].RawBody.size();
+  माप_प्रकार Raw_Body_आकार = 0;
+  क्रम (माप_प्रकार I = Start; I < End; ++I)
+    Raw_Body_आकार += Tokens[I].RawBody.आकार_2();
 
   SmallString<128> RawBody;
-  RawBody.reserve(RawBodySize);
-  for (std::size_t I = Start; I < End; ++I)
+  RawBody.reserve(Raw_Body_आकार);
+  क्रम (std::माप_प्रकार I = Start; I < End; ++I)
     RawBody += Tokens[I].RawBody;
 
-  CurrentNode->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
-  Parent->addChild(CurrentNode);
+  Current_गाँठ->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
+  Parent->addChild(Current_गाँठ);
 }
 
 AstPtr Parser::parse() {
   Tokens = tokenize(TemplateStr, Ctx);
   CurrentPtr = 0;
-  AstPtr RootNode = createRootNode(Ctx);
-  parseMustache(RootNode);
-  return RootNode;
+  AstPtr मूल_गाँठ = create_मूल_गाँठ(Ctx);
+  parseMustache(मूल_गाँठ);
+  वापस मूल_गाँठ;
 }
 
-void Parser::parseMustache(ASTNode *Parent) {
+व्योम Parser::parseMustache(ASTNode *Parent) {
 
-  while (CurrentPtr < Tokens.size()) {
+  जबतक (CurrentPtr < Tokens.आकार_2()) {
     Token CurrentToken = Tokens[CurrentPtr];
     CurrentPtr++;
     ArrayRef<StringRef> A = CurrentToken.getAccessor();
-    AstPtr CurrentNode;
+    AstPtr Current_गाँठ;
 
-    switch (CurrentToken.getType()) {
-    case Token::Type::Text: {
-      CurrentNode = createTextNode(Ctx, CurrentToken.TokenBody, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    चयन (CurrentToken.getType()) {
+    हाल Token::Type::Text: {
+      Current_गाँठ = create_Text_गाँठ(Ctx, CurrentToken.TokenBody, Parent);
+      Parent->addChild(Current_गाँठ);
+      अवरोध;
     }
-    case Token::Type::Variable: {
-      CurrentNode = createNode(Ctx, ASTNode::Variable, A, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    हाल Token::Type::Variable: {
+      Current_गाँठ = create_गाँठ(Ctx, ASTNode::Variable, A, Parent);
+      Parent->addChild(Current_गाँठ);
+      अवरोध;
     }
-    case Token::Type::UnescapeVariable: {
-      CurrentNode = createNode(Ctx, ASTNode::UnescapeVariable, A, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    हाल Token::Type::UnescapeVariable: {
+      Current_गाँठ = create_गाँठ(Ctx, ASTNode::UnescapeVariable, A, Parent);
+      Parent->addChild(Current_गाँठ);
+      अवरोध;
     }
-    case Token::Type::Partial: {
-      CurrentNode = createNode(Ctx, ASTNode::Partial, A, Parent);
-      CurrentNode->setIndentation(CurrentToken.getIndentation());
-      Parent->addChild(CurrentNode);
-      break;
+    हाल Token::Type::Partial: {
+      Current_गाँठ = create_गाँठ(Ctx, ASTNode::Partial, A, Parent);
+      Current_गाँठ->setIndentation(CurrentToken.getIndentation());
+      Parent->addChild(Current_गाँठ);
+      अवरोध;
     }
-    case Token::Type::SectionOpen: {
+    हाल Token::Type::SectionOpen: {
       parseSection(Parent, ASTNode::Section, A);
-      break;
+      अवरोध;
     }
-    case Token::Type::InvertSectionOpen: {
+    हाल Token::Type::InvertSectionOpen: {
       parseSection(Parent, ASTNode::InvertSection, A);
-      break;
+      अवरोध;
     }
-    case Token::Type::Comment:
-    case Token::Type::SetDelimiter:
-      break;
-    case Token::Type::SectionClose:
-      return;
+    हाल Token::Type::Comment:
+    हाल Token::Type::SetDelimiter:
+      अवरोध;
+    हाल Token::Type::SectionClose:
+      वापस;
     }
   }
 }
-static void toMustacheString(const json::Value &Data, raw_ostream &OS) {
+अटल व्योम toMustacheString(स्थिर json::मूल्य &तथ्य_2, raw_ostream &OS) {
   LLVM_DEBUG(dbgs() << "[To Mustache String] Kind: "
-                    << jsonKindToString(Data.kind()) << ", Data: " << Data
+                    << jsonKindToString(तथ्य_2.kind()) << ", Data: " << तथ्य_2
                     << "\n");
-  switch (Data.kind()) {
-  case json::Value::Null:
-    return;
-  case json::Value::Number: {
-    auto Num = *Data.getAsNumber();
+  चयन (तथ्य_2.kind()) {
+  हाल json::मूल्य::Null:
+    वापस;
+  हाल json::मूल्य::संख्या: {
+    स्वतः अंक = *तथ्य_2.get_As_संख्या();
     std::ostringstream SS;
-    SS << Num;
+    SS << अंक;
     OS << SS.str();
-    return;
+    वापस;
   }
-  case json::Value::String: {
-    OS << *Data.getAsString();
-    return;
+  हाल json::मूल्य::String: {
+    OS << *तथ्य_2.getAsString();
+    वापस;
   }
 
-  case json::Value::Array: {
-    auto Arr = *Data.getAsArray();
-    if (Arr.empty())
-      return;
+  हाल json::मूल्य::Array: {
+    स्वतः Arr = *तथ्य_2.getAsArray();
+    अगर (Arr.empty())
+      वापस;
     [[fallthrough]];
   }
-  case json::Value::Object:
-  case json::Value::Boolean: {
+  हाल json::मूल्य::Object:
+  हाल json::मूल्य::Boolean: {
     llvm::json::OStream JOS(OS, 2);
-    JOS.value(Data);
-    break;
+    JOS.मूल्य_2(तथ्य_2);
+    अवरोध;
   }
   }
 }
 
-void ASTNode::renderRoot(const json::Value &CurrentCtx,
+व्योम ASTNode::render_मूल(स्थिर json::मूल्य &CurrentCtx,
                          MustacheOutputStream &OS) {
   renderChild(CurrentCtx, OS);
 }
 
-void ASTNode::renderText(MustacheOutputStream &OS) { OS << Body; }
+व्योम ASTNode::renderText(MustacheOutputStream &OS) { OS << Body; }
 
-void ASTNode::renderPartial(const json::Value &CurrentCtx,
+व्योम ASTNode::renderPartial(स्थिर json::मूल्य &CurrentCtx,
                             MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << AccessorValue[0]
+  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << Accessor_मूल्य[0]
                     << ", Indentation:" << Indentation << "\n");
-  auto Partial = Ctx.Partials.find(AccessorValue[0]);
-  if (Partial != Ctx.Partials.end())
-    renderPartial(CurrentCtx, OS, Partial->getValue());
+  स्वतः Partial = Ctx.Partials.find(Accessor_मूल्य[0]);
+  अगर (Partial != Ctx.Partials.end())
+    renderPartial(CurrentCtx, OS, Partial->get_मूल्य());
 }
 
-void ASTNode::renderVariable(const json::Value &CurrentCtx,
+व्योम ASTNode::renderVariable(स्थिर json::मूल्य &CurrentCtx,
                              MustacheOutputStream &OS) {
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  स्वतः Lambda = Ctx.Lambdas.find(Accessor_मूल्य[0]);
+  अगर (Lambda != Ctx.Lambdas.end()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_मूल्य());
+  } अन्यथा अगर (स्थिर json::मूल्य *ContextPtr = findContext()) {
     EscapeStringStream ES(OS, Ctx.Escapes);
     toMustacheString(*ContextPtr, ES);
   }
 }
 
-void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
+व्योम ASTNode::renderUnescapeVariable(स्थिर json::मूल्य &CurrentCtx,
                                      MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << AccessorValue[0]
+  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << Accessor_मूल्य[0]
                     << "\n");
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  स्वतः Lambda = Ctx.Lambdas.find(Accessor_मूल्य[0]);
+  अगर (Lambda != Ctx.Lambdas.end()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_मूल्य());
+  } अन्यथा अगर (स्थिर json::मूल्य *ContextPtr = findContext()) {
     OS.suspendIndentation();
     toMustacheString(*ContextPtr, OS);
     OS.resumeIndentation();
   }
 }
 
-void ASTNode::renderSection(const json::Value &CurrentCtx,
+व्योम ASTNode::renderSection(स्थिर json::मूल्य &CurrentCtx,
                             MustacheOutputStream &OS) {
-  auto SectionLambda = Ctx.SectionLambdas.find(AccessorValue[0]);
-  if (SectionLambda != Ctx.SectionLambdas.end()) {
-    renderSectionLambdas(CurrentCtx, OS, SectionLambda->getValue());
-    return;
+  स्वतः SectionLambda = Ctx.SectionLambdas.find(Accessor_मूल्य[0]);
+  अगर (SectionLambda != Ctx.SectionLambdas.end()) {
+    renderSectionLambdas(CurrentCtx, OS, SectionLambda->get_मूल्य());
+    वापस;
   }
 
-  const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr))
-    return;
+  स्थिर json::मूल्य *ContextPtr = findContext();
+  अगर (isContextFalsey(ContextPtr))
+    वापस;
 
-  if (const json::Array *Arr = ContextPtr->getAsArray()) {
-    for (const json::Value &V : *Arr)
+  अगर (स्थिर json::Array *Arr = ContextPtr->getAsArray()) {
+    क्रम (स्थिर json::मूल्य &V : *Arr)
       renderChild(V, OS);
-    return;
+    वापस;
   }
   renderChild(*ContextPtr, OS);
 }
 
-void ASTNode::renderInvertSection(const json::Value &CurrentCtx,
+व्योम ASTNode::renderInvertSection(स्थिर json::मूल्य &CurrentCtx,
                                   MustacheOutputStream &OS) {
-  bool IsLambda = Ctx.SectionLambdas.contains(AccessorValue[0]);
-  const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr) && !IsLambda) {
+  bool IsLambda = Ctx.SectionLambdas.contains(Accessor_मूल्य[0]);
+  स्थिर json::मूल्य *ContextPtr = findContext();
+  अगर (isContextFalsey(ContextPtr) && !IsLambda) {
     renderChild(CurrentCtx, OS);
   }
 }
 
-void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
-  if (Ty != Root && Ty != Text && AccessorValue.empty())
-    return;
+व्योम ASTNode::render(स्थिर llvm::json::मूल्य &तथ्य_2, MustacheOutputStream &OS) {
+  अगर (Ty != मूल_2 && Ty != Text && Accessor_मूल्य.empty())
+    वापस;
   // Set the parent context to the incoming context so that we
   // can walk up the context tree correctly in findContext().
-  ParentContext = &Data;
+  ParentContext = &तथ्य_2;
 
-  switch (Ty) {
-  case Root:
-    renderRoot(Data, OS);
-    return;
-  case Text:
+  चयन (Ty) {
+  हाल मूल_2:
+    render_मूल(तथ्य_2, OS);
+    वापस;
+  हाल Text:
     renderText(OS);
-    return;
-  case Partial:
-    renderPartial(Data, OS);
-    return;
-  case Variable:
-    renderVariable(Data, OS);
-    return;
-  case UnescapeVariable:
-    renderUnescapeVariable(Data, OS);
-    return;
-  case Section:
-    renderSection(Data, OS);
-    return;
-  case InvertSection:
-    renderInvertSection(Data, OS);
-    return;
+    वापस;
+  हाल Partial:
+    renderPartial(तथ्य_2, OS);
+    वापस;
+  हाल Variable:
+    renderVariable(तथ्य_2, OS);
+    वापस;
+  हाल UnescapeVariable:
+    renderUnescapeVariable(तथ्य_2, OS);
+    वापस;
+  हाल Section:
+    renderSection(तथ्य_2, OS);
+    वापस;
+  हाल InvertSection:
+    renderInvertSection(तथ्य_2, OS);
+    वापस;
   }
   llvm_unreachable("Invalid ASTNode type");
 }
 
-const json::Value *ASTNode::findContext() {
+स्थिर json::मूल्य *ASTNode::findContext() {
   // The mustache spec allows for dot notation to access nested values
   // a single dot refers to the current context.
   // We attempt to find the JSON context in the current node, if it is not
   // found, then we traverse the parent nodes to find the context until we
   // reach the root node or the context is found.
-  if (AccessorValue.empty())
-    return nullptr;
-  if (AccessorValue[0] == ".")
-    return ParentContext;
+  अगर (Accessor_मूल्य.empty())
+    वापस nullptr;
+  अगर (Accessor_मूल्य[0] == ".")
+    वापस ParentContext;
 
-  const json::Object *CurrentContext = ParentContext->getAsObject();
-  StringRef CurrentAccessor = AccessorValue[0];
+  स्थिर json::Object *CurrentContext = ParentContext->getAsObject();
+  StringRef CurrentAccessor = Accessor_मूल्य[0];
   ASTNode *CurrentParent = Parent;
 
-  while (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
-    if (CurrentParent->Ty != Root) {
+  जबतक (!CurrentContext || !CurrentContext->लो(CurrentAccessor)) {
+    अगर (CurrentParent->Ty != मूल_2) {
       CurrentContext = CurrentParent->ParentContext->getAsObject();
       CurrentParent = CurrentParent->Parent;
-      continue;
+      जारी;
     }
-    return nullptr;
+    वापस nullptr;
   }
-  const json::Value *Context = nullptr;
-  for (auto [Idx, Acc] : enumerate(AccessorValue)) {
-    const json::Value *CurrentValue = CurrentContext->get(Acc);
-    if (!CurrentValue)
-      return nullptr;
-    if (Idx < AccessorValue.size() - 1) {
-      CurrentContext = CurrentValue->getAsObject();
-      if (!CurrentContext)
-        return nullptr;
-    } else {
-      Context = CurrentValue;
+  स्थिर json::मूल्य *Context = nullptr;
+  क्रम (स्वतः [Idx, Acc] : enumerate(Accessor_मूल्य)) {
+    स्थिर json::मूल्य *Current_मूल्य = CurrentContext->लो(Acc);
+    अगर (!Current_मूल्य)
+      वापस nullptr;
+    अगर (Idx < Accessor_मूल्य.आकार_2() - 1) {
+      CurrentContext = Current_मूल्य->getAsObject();
+      अगर (!CurrentContext)
+        वापस nullptr;
+    } अन्यथा {
+      Context = Current_मूल्य;
     }
   }
-  return Context;
+  वापस Context;
 }
 
-void ASTNode::renderChild(const json::Value &Contexts,
+व्योम ASTNode::renderChild(स्थिर json::मूल्य &Contexts,
                           MustacheOutputStream &OS) {
-  for (ASTNode &Child : Children)
+  क्रम (ASTNode &Child : Children)
     Child.render(Contexts, OS);
 }
 
-void ASTNode::renderPartial(const json::Value &Contexts,
+व्योम ASTNode::renderPartial(स्थिर json::मूल्य &Contexts,
                             MustacheOutputStream &OS, ASTNode *Partial) {
   LLVM_DEBUG(dbgs() << "[Render Partial Indentation] Indentation: " << Indentation << "\n");
   AddIndentationStringStream IS(OS, Indentation);
   Partial->render(Contexts, IS);
 }
 
-void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
+व्योम ASTNode::renderLambdas(स्थिर llvm::json::मूल्य &Contexts,
                             MustacheOutputStream &OS, Lambda &L) {
-  json::Value LambdaResult = L();
+  json::मूल्य Lambda_परिणाम = L();
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
-  toMustacheString(LambdaResult, Output);
+  toMustacheString(Lambda_परिणाम, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
+  AstPtr Lambda_गाँठ = P.parse();
 
   EscapeStringStream ES(OS, Ctx.Escapes);
-  if (Ty == Variable) {
-    LambdaNode->render(Contexts, ES);
-    return;
+  अगर (Ty == Variable) {
+    Lambda_गाँठ->render(Contexts, ES);
+    वापस;
   }
-  LambdaNode->render(Contexts, OS);
+  Lambda_गाँठ->render(Contexts, OS);
 }
 
-void ASTNode::renderSectionLambdas(const llvm::json::Value &Contexts,
+व्योम ASTNode::renderSectionLambdas(स्थिर llvm::json::मूल्य &Contexts,
                                    MustacheOutputStream &OS, SectionLambda &L) {
-  json::Value Return = L(RawBody.str());
-  if (isFalsey(Return))
-    return;
+  json::मूल्य Return = L(RawBody.str());
+  अगर (isFalsey(Return))
+    वापस;
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(Return, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
-  LambdaNode->render(Contexts, OS);
+  AstPtr Lambda_गाँठ = P.parse();
+  Lambda_गाँठ->render(Contexts, OS);
 }
 
-void Template::render(const llvm::json::Value &Data, llvm::raw_ostream &OS) {
+व्योम Template::render(स्थिर llvm::json::मूल्य &तथ्य_2, llvm::raw_ostream &OS) {
   RawMustacheOutputStream MOS(OS);
-  Tree->render(Data, MOS);
+  वृक्ष->render(तथ्य_2, MOS);
 }
 
-void Template::registerPartial(std::string Name, std::string Partial) {
+व्योम Template::registerPartial(std::string Name, std::string Partial) {
   StringRef SavedPartial = Ctx.Saver.save(Partial);
   Parser P(SavedPartial, Ctx);
-  AstPtr PartialTree = P.parse();
-  Ctx.Partials.insert(std::make_pair(Name, PartialTree));
+  AstPtr Partial_वृक्ष = P.parse();
+  Ctx.Partials.जोड़ो(std::make_pair(Name, Partial_वृक्ष));
 }
 
-void Template::registerLambda(std::string Name, Lambda L) {
+व्योम Template::registerLambda(std::string Name, Lambda L) {
   Ctx.Lambdas[Name] = std::move(L);
 }
 
-void Template::registerLambda(std::string Name, SectionLambda L) {
+व्योम Template::registerLambda(std::string Name, SectionLambda L) {
   Ctx.SectionLambdas[Name] = std::move(L);
 }
 
-void Template::overrideEscapeCharacters(EscapeMap E) {
+व्योम Template::overrideEscapeCharacters(EscapeMap E) {
   Ctx.Escapes = std::move(E);
 }
 
 Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
   Parser P(TemplateStr, Ctx);
-  Tree = P.parse();
+  वृक्ष = P.parse();
   // The default behavior is to escape html entities.
-  const EscapeMap HtmlEntities = {{'&', "&amp;"},
+  स्थिर EscapeMap HtmlEntities = {{'&', "&amp;"},
                                   {'<', "&lt;"},
                                   {'>', "&gt;"},
                                   {'"', "&quot;"},
@@ -921,12 +921,12 @@ Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
 }
 
 Template::Template(Template &&Other) noexcept
-    : Ctx(Other.Ctx), Tree(Other.Tree) {
-  Other.Tree = nullptr;
+    : Ctx(Other.Ctx), वृक्ष(Other.वृक्ष) {
+  Other.वृक्ष = nullptr;
 }
 
-Template::~Template() = default;
+Template::~Template() = शेष;
 
 } // namespace llvm::mustache
 
-#undef DEBUG_TYPE
+#अघोषित DEBUG_TYPE

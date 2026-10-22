@@ -10,50 +10,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Atomic.h"
-#include "llvm/Config/llvm-config.h"
+#समावेश "llvm/Support/Atomic.h"
+#समावेश "llvm/Config/llvm-config.h"
 
 using namespace llvm;
 
-#if defined(_MSC_VER)
-#include <intrin.h>
+#अगर defined(_MSC_VER)
+#समावेश <intrin.h>
 
 // We must include windows.h after intrin.h.
-#include <windows.h>
-#undef MemoryFence
-#endif
+#समावेश <windows.h>
+#अघोषित MemoryFence
+#पूर्ण_अगर
 
-#if defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
-#define GNU_ATOMICS
-#endif
+#अगर defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
+#घोषणा GNU_ATOMICS
+#पूर्ण_अगर
 
-void sys::MemoryFence() {
-#if LLVM_HAS_ATOMICS == 0
-  return;
-#else
-#  if defined(GNU_ATOMICS)
+व्योम sys::MemoryFence() {
+#अगर LLVM_HAS_ATOMICS == 0
+  वापस;
+#अन्यथा
+#  अगर defined(GNU_ATOMICS)
   __sync_synchronize();
 #  elif defined(_MSC_VER)
   MemoryBarrier();
-#  else
-# error No memory fence implementation for your platform!
+#  अन्यथा
+# error No memory fence implementation क्रम your platform!
 #  endif
-#endif
+#पूर्ण_अगर
 }
 
-sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
-                                  sys::cas_flag new_value,
-                                  sys::cas_flag old_value) {
-#if LLVM_HAS_ATOMICS == 0
-  sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
-  return result;
-#elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
-#elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
-#else
-#  error No compare-and-swap implementation for your platform!
-#endif
+sys::cas_flag sys::CompareAndSwap(अस्थिर sys::cas_flag* ptr,
+                                  sys::cas_flag new_मूल्य,
+                                  sys::cas_flag old_मूल्य) {
+#अगर LLVM_HAS_ATOMICS == 0
+  sys::cas_flag परिणाम_2 = *ptr;
+  अगर (परिणाम_2 == old_मूल्य)
+    *ptr = new_मूल्य;
+  वापस परिणाम_2;
+#या_अगर defined(GNU_ATOMICS)
+  वापस __sync_val_compare_and_swap(ptr, old_मूल्य, new_मूल्य);
+#या_अगर defined(_MSC_VER)
+  वापस InterlockedCompareExchange(ptr, new_मूल्य, old_मूल्य);
+#अन्यथा
+#  error No compare-and-swap implementation क्रम your platform!
+#पूर्ण_अगर
 }

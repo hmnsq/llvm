@@ -10,10 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Program.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/raw_ostream.h"
+#समावेश "llvm/Support/Program.h"
+#समावेश "llvm/ADT/StringRef.h"
+#समावेश "llvm/Config/llvm-config.h"
+#समावेश "llvm/Support/raw_ostream.h"
 using namespace llvm;
 using namespace sys;
 
@@ -22,74 +22,74 @@ using namespace sys;
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-static bool Execute(ProcessInfo &PI, StringRef Program,
+अटल bool Execute(ProcessInfo &PI, StringRef Program,
                     ArrayRef<StringRef> Args,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
+                    अचिन्हित MemoryLimit, std::string *Err_संदेश,
                     BitVector *AffinityMask, bool DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+पूर्णांक sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
-                        unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        अचिन्हित SecondsToWait, अचिन्हित MemoryLimit,
+                        std::string *Err_संदेश, bool *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
                         BitVector *AffinityMask) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+  निश्चित(Redirects.empty() || Redirects.आकार_2() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  अगर (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, Err_संदेश,
               AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
+    अगर (ExecutionFailed)
       *ExecutionFailed = false;
-    ProcessInfo Result = Wait(
+    ProcessInfo परिणाम = Wait(
         PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
-    return Result.ReturnCode;
+        Err_संदेश, ProcStat);
+    वापस परिणाम.ReturnCode;
   }
 
-  if (ExecutionFailed)
+  अगर (ExecutionFailed)
     *ExecutionFailed = true;
 
-  return -1;
+  वापस -1;
 }
 
 ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
+                               अचिन्हित MemoryLimit, std::string *Err_संदेश,
                                bool *ExecutionFailed, BitVector *AffinityMask,
                                bool DetachProcess) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+  निश्चित(Redirects.empty() || Redirects.आकार_2() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
+  अगर (ExecutionFailed)
     *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  अगर (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, Err_संदेश,
                AffinityMask, DetachProcess))
-    if (ExecutionFailed)
+    अगर (ExecutionFailed)
       *ExecutionFailed = true;
 
-  return PI;
+  वापस PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
+bool sys::command_पंक्ति_Fits_Within_System_Limits(StringRef Program,
+                                            ArrayRef<स्थिर अक्षर *> Args) {
   SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+  वापस command_पंक्ति_Fits_Within_System_Limits(Program, StringRefArgs);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+व्योम sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
+  स्थिर bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  अगर (!Quote && !Escape) {
     OS << Arg;
-    return;
+    वापस;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  क्रम (स्थिर स्वतः c : Arg) {
+    अगर (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }
@@ -97,9 +97,9 @@ void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Program.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Program.inc"
-#endif
+#अगर_घोषित LLVM_ON_UNIX
+#समावेश "Unix/Program.inc"
+#पूर्ण_अगर
+#अगर_घोषित _WIN32
+#समावेश "Windows/Program.inc"
+#पूर्ण_अगर

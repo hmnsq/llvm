@@ -11,103 +11,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __cplusplus
+#अगर_घोषित __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#समावेश <new>
+#समावेश <rpmalloc.h>
 
-#ifndef __CRTDECL
-#define __CRTDECL
-#endif
+#अगर_अघोषित __CRTDECL
+#घोषणा __CRTDECL
+#पूर्ण_अगर
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+बाह्य व्योम __CRTDECL चालक delete(व्योम *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+बाह्य व्योम __CRTDECL चालक delete[](व्योम *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+बाह्य व्योम *__CRTDECL चालक new(std::माप_प्रकार आकार_2) noexcept(false) {
+  वापस rpmalloc(आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+बाह्य व्योम *__CRTDECL चालक new[](std::माप_प्रकार आकार_2) noexcept(false) {
+  वापस rpmalloc(आकार_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+बाह्य व्योम *__CRTDECL चालक new(std::माप_प्रकार आकार_2,
+                                    स्थिर std::nothrow_t &tag) noexcept {
+  (व्योम)माप(tag);
+  वापस rpmalloc(आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+बाह्य व्योम *__CRTDECL चालक new[](std::माप_प्रकार आकार_2,
+                                      स्थिर std::nothrow_t &tag) noexcept {
+  (व्योम)माप(tag);
+  वापस rpmalloc(आकार_2);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#अगर (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+बाह्य व्योम __CRTDECL चालक delete(व्योम *p, std::माप_प्रकार आकार_2) noexcept {
+  (व्योम)माप(आकार_2);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+बाह्य व्योम __CRTDECL चालक delete[](व्योम *p, std::माप_प्रकार आकार_2) noexcept {
+  (व्योम)माप(आकार_2);
   rpfree(p);
 }
 
-#endif
+#पूर्ण_अगर
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#अगर (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+बाह्य व्योम __CRTDECL चालक delete(व्योम *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (व्योम)माप(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+बाह्य व्योम __CRTDECL चालक delete[](व्योम *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (व्योम)माप(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+बाह्य व्योम __CRTDECL चालक delete(व्योम *p, std::माप_प्रकार आकार_2,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (व्योम)माप(आकार_2);
+  (व्योम)माप(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+बाह्य व्योम __CRTDECL चालक delete[](व्योम *p, std::माप_प्रकार आकार_2,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (व्योम)माप(आकार_2);
+  (व्योम)माप(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+बाह्य व्योम *__CRTDECL चालक new(std::माप_प्रकार आकार_2,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  वापस rpaligned_alloc(static_cast<माप_प्रकार>(align), आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+बाह्य व्योम *__CRTDECL चालक new[](std::माप_प्रकार आकार_2,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  वापस rpaligned_alloc(static_cast<माप_प्रकार>(align), आकार_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+बाह्य व्योम *__CRTDECL चालक new(std::माप_प्रकार आकार_2, std::align_val_t align,
+                                    स्थिर std::nothrow_t &tag) noexcept {
+  (व्योम)माप(tag);
+  वापस rpaligned_alloc(static_cast<माप_प्रकार>(align), आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+बाह्य व्योम *__CRTDECL चालक new[](std::माप_प्रकार आकार_2, std::align_val_t align,
+                                      स्थिर std::nothrow_t &tag) noexcept {
+  (व्योम)माप(tag);
+  वापस rpaligned_alloc(static_cast<माप_प्रकार>(align), आकार_2);
 }
 
-#endif
+#पूर्ण_अगर
 
-#endif
+#पूर्ण_अगर

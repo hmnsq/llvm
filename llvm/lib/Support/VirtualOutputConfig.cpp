@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#समावेश "llvm/Support/VirtualOutputConfig.h"
+#समावेश "llvm/Support/Debug.h"
+#समावेश "llvm/Support/FileSystem.h"
+#समावेश "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 using namespace llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::setOpenFlags(स्थिर sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
   using namespace llvm::sys::fs;
-  return Flags & OF_Text
+  वापस Flags & OF_Text
              ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+             : set_द्विआधारी().setAppend(Flags & OF_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+व्योम OutputConfig::print(raw_ostream &OS) स्थिर {
   OS << "{";
   bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
+  स्वतः printFlag = [&](StringRef FlagName, bool मूल्य) {
+    अगर (IsFirst)
       IsFirst = false;
-    else
+    अन्यथा
       OS << ",";
-    if (!Value)
+    अगर (!मूल्य)
       OS << "No";
     OS << FlagName;
   };
 
-#define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
-    printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#घोषणा HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
+  अगर (लो##NAME() != DEFAULT)                                                  \
+    printFlag(#NAME, लो##NAME());
+#समावेश "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD व्योम OutputConfig::dump() स्थिर { print(dbgs()); }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
+raw_ostream &llvm::चालक<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  वापस OS;
 }

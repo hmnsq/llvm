@@ -10,8 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_os_ostream.h"
-#include <ostream>
+#समावेश "llvm/Support/raw_os_ostream.h"
+#समावेश <ostream>
 using namespace llvm;
 
 //===----------------------------------------------------------------------===//
@@ -19,11 +19,11 @@ using namespace llvm;
 //===----------------------------------------------------------------------===//
 
 raw_os_ostream::~raw_os_ostream() {
-  flush();
+  सफाई();
 }
 
-void raw_os_ostream::write_impl(const char *Ptr, size_t Size) {
-  OS.write(Ptr, Size);
+व्योम raw_os_ostream::write_impl(स्थिर अक्षर *Ptr, माप_प्रकार आकार) {
+  OS.ग_लिखो(Ptr, आकार);
 }
 
-uint64_t raw_os_ostream::current_pos() const { return OS.tellp(); }
+uint64_t raw_os_ostream::current_pos() स्थिर { वापस OS.tellp(); }

@@ -11,27 +11,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Valgrind.h"
-#include <stddef.h>
+#समावेश "llvm/Support/Valgrind.h"
+#समावेश <stddef.h>
 
-#if __has_include(<valgrind/valgrind.h>)
-#include <valgrind/valgrind.h>
+#अगर __has_include(<valgrind/valgrind.h>)
+#समावेश <valgrind/valgrind.h>
 
 bool llvm::sys::RunningOnValgrind() {
-  return RUNNING_ON_VALGRIND;
+  वापस RUNNING_ON_VALGRIND;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+व्योम llvm::sys::ValgrindDiscardTranslations(स्थिर व्योम *Addr, माप_प्रकार Len) {
   VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
 }
 
-#else
+#अन्यथा
 
 bool llvm::sys::RunningOnValgrind() {
-  return false;
+  वापस false;
 }
 
-void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
+व्योम llvm::sys::ValgrindDiscardTranslations(स्थिर व्योम *Addr, माप_प्रकार Len) {
 }
 
-#endif
+#पूर्ण_अगर

@@ -35,16 +35,16 @@
  *	@(#)regex2.h	8.4 (Berkeley) 3/20/94
  */
 
-#ifndef LLVM_SUPPORT_REGEX2_H
-#define LLVM_SUPPORT_REGEX2_H
+#अगर_अघोषित LLVM_SUPPORT_REGEX2_H
+#घोषणा LLVM_SUPPORT_REGEX2_H
 
-#include "regutils.h"
-#include <stddef.h>
+#समावेश "regutils.h"
+#समावेश <stddef.h>
 
 /*
  * internals of regex_t
  */
-#define	MAGIC1	((('r'^0200)<<8) | 'e')
+#घोषणा	MAGIC1	((('r'^0200)<<8) | 'e')
 
 /*
  * The internal representation is a *strip*, a sequence of
@@ -65,36 +65,36 @@
  * In state representations, an operator's bit is on to signify a state
  * immediately *preceding* "execution" of that operator.
  */
-typedef unsigned long sop;	/* strip operator */
-typedef long sopno;
-#define	OPRMASK	0xf8000000LU
-#define	OPDMASK	0x07ffffffLU
-#define	OPSHIFT	((unsigned)27)
-#define	OP(n)	((n)&OPRMASK)
-#define	OPND(n)	((n)&OPDMASK)
-#define	SOP(op, opnd)	((op)|(opnd))
+प्रकार अचिन्हित दीर्घ sop;	/* strip operator */
+प्रकार दीर्घ sopno;
+#घोषणा	OPRMASK	0xf8000000LU
+#घोषणा	OPDMASK	0x07ffffffLU
+#घोषणा	OPSHIFT	((अचिन्हित)27)
+#घोषणा	OP(n)	((n)&OPRMASK)
+#घोषणा	OPND(n)	((n)&OPDMASK)
+#घोषणा	SOP(op, opnd)	((op)|(opnd))
 /* operators			   meaning	operand			*/
 /*						(back, fwd are offsets)	*/
-#define	OEND	(1LU<<OPSHIFT)	/* endmarker	-			*/
-#define	OCHAR	(2LU<<OPSHIFT)	/* character	unsigned char		*/
-#define	OBOL	(3LU<<OPSHIFT)	/* left anchor	-			*/
-#define	OEOL	(4LU<<OPSHIFT)	/* right anchor	-			*/
-#define	OANY	(5LU<<OPSHIFT)	/* .		-			*/
-#define	OANYOF	(6LU<<OPSHIFT)	/* [...]	set number		*/
-#define	OBACK_	(7LU<<OPSHIFT)	/* begin \d	paren number		*/
-#define	O_BACK	(8LU<<OPSHIFT)	/* end \d	paren number		*/
-#define	OPLUS_	(9LU<<OPSHIFT)	/* + prefix	fwd to suffix		*/
-#define	O_PLUS	(10LU<<OPSHIFT)	/* + suffix	back to prefix		*/
-#define	OQUEST_	(11LU<<OPSHIFT)	/* ? prefix	fwd to suffix		*/
-#define	O_QUEST	(12LU<<OPSHIFT)	/* ? suffix	back to prefix		*/
-#define	OLPAREN	(13LU<<OPSHIFT)	/* (		fwd to )		*/
-#define	ORPAREN	(14LU<<OPSHIFT)	/* )		back to (		*/
-#define	OCH_	(15LU<<OPSHIFT)	/* begin choice	fwd to OOR2		*/
-#define	OOR1	(16LU<<OPSHIFT)	/* | pt. 1	back to OOR1 or OCH_	*/
-#define	OOR2	(17LU<<OPSHIFT)	/* | pt. 2	fwd to OOR2 or O_CH	*/
-#define	O_CH	(18LU<<OPSHIFT)	/* end choice	back to OOR1		*/
-#define	OBOW	(19LU<<OPSHIFT)	/* begin word	-			*/
-#define	OEOW	(20LU<<OPSHIFT)	/* end word	-			*/
+#घोषणा	OEND	(1LU<<OPSHIFT)	/* endmarker	-			*/
+#घोषणा	OCHAR	(2LU<<OPSHIFT)	/* character	unsigned char		*/
+#घोषणा	OBOL	(3LU<<OPSHIFT)	/* left anchor	-			*/
+#घोषणा	OEOL	(4LU<<OPSHIFT)	/* right anchor	-			*/
+#घोषणा	OANY	(5LU<<OPSHIFT)	/* .		-			*/
+#घोषणा	OANYOF	(6LU<<OPSHIFT)	/* [...]	set number		*/
+#घोषणा	OBACK_	(7LU<<OPSHIFT)	/* begin \d	paren number		*/
+#घोषणा	O_BACK	(8LU<<OPSHIFT)	/* end \d	paren number		*/
+#घोषणा	OPLUS_	(9LU<<OPSHIFT)	/* + prefix	fwd to suffix		*/
+#घोषणा	O_PLUS	(10LU<<OPSHIFT)	/* + suffix	back to prefix		*/
+#घोषणा	OQUEST_	(11LU<<OPSHIFT)	/* ? prefix	fwd to suffix		*/
+#घोषणा	O_QUEST	(12LU<<OPSHIFT)	/* ? suffix	back to prefix		*/
+#घोषणा	OLPAREN	(13LU<<OPSHIFT)	/* (		fwd to )		*/
+#घोषणा	ORPAREN	(14LU<<OPSHIFT)	/* )		back to (		*/
+#घोषणा	OCH_	(15LU<<OPSHIFT)	/* begin choice	fwd to OOR2		*/
+#घोषणा	OOR1	(16LU<<OPSHIFT)	/* | pt. 1	back to OOR1 or OCH_	*/
+#घोषणा	OOR2	(17LU<<OPSHIFT)	/* | pt. 2	fwd to OOR2 or O_CH	*/
+#घोषणा	O_CH	(18LU<<OPSHIFT)	/* end choice	back to OOR1		*/
+#घोषणा	OBOW	(19LU<<OPSHIFT)	/* begin word	-			*/
+#घोषणा	OEOW	(20LU<<OPSHIFT)	/* end word	-			*/
 
 /*
  * Structure for [] character-set representation.  Character sets are
@@ -108,58 +108,58 @@ typedef long sopno;
  * a string of multi-character elements, and decide the size of the
  * vectors at run time.
  */
-typedef struct {
+प्रकार काष्ठा {
 	uch *ptr;		/* -> uch [csetsize] */
 	uch mask;		/* bit within array */
 	uch hash;		/* hash code */
-	size_t smultis;
-	char *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
+	माप_प्रकार smultis;
+	अक्षर *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
 } cset;
 /* note that CHadd and CHsub are unsafe, and CHIN doesn't yield 0/1 */
-#define	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->mask, (cs)->hash += (c))
-#define	CHsub(cs, c)	((cs)->ptr[(uch)(c)] &= ~(cs)->mask, (cs)->hash -= (c))
-#define	CHIN(cs, c)	((cs)->ptr[(uch)(c)] & (cs)->mask)
-#define	MCadd(p, cs, cp)	mcadd(p, cs, cp)	/* llvm_regcomp() internal fns */
-#define	MCsub(p, cs, cp)	mcsub(p, cs, cp)
-#define	MCin(p, cs, cp)	mcin(p, cs, cp)
+#घोषणा	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->mask, (cs)->hash += (c))
+#घोषणा	CHsub(cs, c)	((cs)->ptr[(uch)(c)] &= ~(cs)->mask, (cs)->hash -= (c))
+#घोषणा	CHIN(cs, c)	((cs)->ptr[(uch)(c)] & (cs)->mask)
+#घोषणा	MCadd(p, cs, cp)	mcadd(p, cs, cp)	/* llvm_regcomp() internal fns */
+#घोषणा	MCsub(p, cs, cp)	mcsub(p, cs, cp)
+#घोषणा	MCin(p, cs, cp)	mcin(p, cs, cp)
 
 /* stuff for character categories */
-typedef unsigned char cat_t;
+प्रकार अचिन्हित अक्षर cat_t;
 
 /*
  * main compiled-expression structure
  */
-struct re_guts {
-	int magic;
+काष्ठा re_guts {
+	पूर्णांक magic;
 #		define	MAGIC2	((('R'^0200)<<8)|'E')
 	sop *strip;		/* malloced area for strip */
-	int csetsize;		/* number of bits in a cset vector */
-	int ncsets;		/* number of csets in use */
+	पूर्णांक csetsize;		/* number of bits in a cset vector */
+	पूर्णांक ncsets;		/* number of csets in use */
 	cset *sets;		/* -> cset [ncsets] */
 	uch *setbits;		/* -> uch[csetsize][ncsets/CHAR_BIT] */
-	int cflags;		/* copy of llvm_regcomp() cflags argument */
+	पूर्णांक cflags;		/* copy of llvm_regcomp() cflags argument */
 	sopno nstates;		/* = number of sops */
 	sopno firststate;	/* the initial OEND (normally 0) */
 	sopno laststate;	/* the final OEND */
-	int iflags;		/* internal flags */
+	पूर्णांक iflags;		/* internal flags */
 #		define	USEBOL	01	/* used ^ */
 #		define	USEEOL	02	/* used $ */
 #		define	REGEX_BAD	04	/* something wrong */
-	int nbol;		/* number of ^ used */
-	int neol;		/* number of $ used */
-	int ncategories;	/* how many character categories */
+	पूर्णांक nbol;		/* number of ^ used */
+	पूर्णांक neol;		/* number of $ used */
+	पूर्णांक ncategories;	/* how many character categories */
 	cat_t *categories;	/* ->catspace[-CHAR_MIN] */
-	char *must;		/* match must contain this string */
-	int mlen;		/* length of must */
-	size_t nsub;		/* copy of re_nsub */
-	int backrefs;		/* does it use back references? */
+	अक्षर *must;		/* match must contain this string */
+	पूर्णांक mlen;		/* length of must */
+	माप_प्रकार nsub;		/* copy of re_nsub */
+	पूर्णांक backrefs;		/* does it use back references? */
 	sopno nplus;		/* how deep does it nest +s? */
 	/* catspace must be last */
 	cat_t catspace[1];	/* actually [NC] */
 };
 
 /* misc utilities */
-#define	OUT	(CHAR_MAX+1)	/* a non-character value */
-#define	ISWORD(c)	(isalnum(c&0xff) || (c) == '_')
+#घोषणा	OUT	(अक्षर_उच्च+1)	/* a non-character value */
+#घोषणा	ISWORD(c)	(है_अक्षर_अंक(c&0xff) || (c) == '_')
 
-#endif
+#पूर्ण_अगर

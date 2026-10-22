@@ -6,37 +6,37 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/Format.h"
+#समावेश "llvm/Support/ScopedPrinter.h"
+#समावेश "llvm/Support/Format.h"
 
 using namespace llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, const HexNumber &Value) {
-  OS << "0x" << utohexstr(Value.Value);
-  return OS;
+raw_ostream &llvm::चालक<<(raw_ostream &OS, स्थिर Hex_संख्या &मूल्य) {
+  OS << "0x" << utohexstr(मूल्य.मूल्य);
+  वापस OS;
 }
 
-void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
-                                    ArrayRef<uint8_t> Data, bool Block,
+व्योम ScopedPrinter::print_द्विआधारी_Impl(StringRef Label, StringRef Str,
+                                    ArrayRef<uint8_t> तथ्य_2, bool Block,
                                     uint32_t StartOffset) {
-  if (Data.size() > 16)
+  अगर (तथ्य_2.आकार_2() > 16)
     Block = true;
 
-  if (Block) {
-    startLine() << Label;
-    if (!Str.empty())
+  अगर (Block) {
+    start_पंक्ति() << Label;
+    अगर (!Str.empty())
       OS << ": " << Str;
     OS << " (\n";
-    if (!Data.empty())
-      OS << format_bytes_with_ascii(Data, StartOffset, 16, 4,
+    अगर (!तथ्य_2.empty())
+      OS << format_bytes_with_ascii(तथ्य_2, StartOffset, 16, 4,
                                     (IndentLevel + 1) * 2, true)
          << "\n";
-    startLine() << ")\n";
-  } else {
-    startLine() << Label << ":";
-    if (!Str.empty())
+    start_पंक्ति() << ")\n";
+  } अन्यथा {
+    start_पंक्ति() << Label << ":";
+    अगर (!Str.empty())
       OS << " " << Str;
-    OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, true)
+    OS << " (" << format_bytes(तथ्य_2, std::nullopt, तथ्य_2.आकार_2(), 1, 0, true)
        << ")\n";
   }
 }
@@ -47,6 +47,6 @@ JSONScopedPrinter::JSONScopedPrinter(
     : ScopedPrinter(OS, ScopedPrinter::ScopedPrinterKind::JSON),
       JOS(OS, /*Indent=*/PrettyPrint ? 2 : 0),
       OuterScope(std::move(OuterScope)) {
-  if (this->OuterScope)
-    this->OuterScope->setPrinter(*this);
+  अगर (यह->OuterScope)
+    यह->OuterScope->setPrinter(*यह);
 }

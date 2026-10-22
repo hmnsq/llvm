@@ -6,167 +6,167 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/raw_ostream.h"
+#समावेश "llvm/ADT/Twine.h"
+#समावेश "llvm/ADT/SmallString.h"
+#समावेश "llvm/Config/llvm-config.h"
+#समावेश "llvm/Support/Debug.h"
+#समावेश "llvm/Support/FormatVariadic.h"
+#समावेश "llvm/Support/raw_ostream.h"
 using namespace llvm;
 
-std::string Twine::str() const {
+std::string Twine::str() स्थिर {
   // If we're storing only a std::string, just return it.
-  if (LHSKind == StdStringKind && RHSKind == EmptyKind)
-    return *LHS.stdString;
+  अगर (LHSKind == StdStringKind && RHSKind == EmptyKind)
+    वापस *LHS.stdString;
 
   // If we're storing a formatv_object, we can avoid an extra copy by formatting
   // it immediately and returning the result.
-  if (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
-    return LHS.formatvObject->str();
+  अगर (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
+    वापस LHS.formatvObject->str();
 
   // Otherwise, flatten and copy the contents first.
   SmallString<256> Vec;
-  return toStringRef(Vec).str();
+  वापस toStringRef(Vec).str();
 }
 
-void Twine::toVector(SmallVectorImpl<char> &Out) const {
+व्योम Twine::toVector(SmallVectorImpl<अक्षर> &Out) स्थिर {
   raw_svector_ostream OS(Out);
   print(OS);
 }
 
-StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
-  if (isUnary()) {
-    switch (getLHSKind()) {
-    case CStringKind:
+StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<अक्षर> &Out) स्थिर {
+  अगर (isUnary()) {
+    चयन (getLHSKind()) {
+    हाल CStringKind:
       // Already null terminated, yay!
-      return StringRef(LHS.cString);
-    case StdStringKind: {
-      const std::string *str = LHS.stdString;
-      return StringRef(str->c_str(), str->size());
+      वापस StringRef(LHS.cString);
+    हाल StdStringKind: {
+      स्थिर std::string *str = LHS.stdString;
+      वापस StringRef(str->c_str(), str->आकार_2());
     }
-    case StringLiteralKind:
-      return StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
-    default:
-      break;
+    हाल StringLiteralKind:
+      वापस StringRef(LHS.ptr_And_लंबाई.ptr, LHS.ptr_And_लंबाई.लंबाई_2);
+    शेष:
+      अवरोध;
     }
   }
   toVector(Out);
-  Out.push_back(0);
-  Out.pop_back();
-  return StringRef(Out.data(), Out.size());
+  Out.धकेलो_back(0);
+  Out.निकालो_back();
+  वापस StringRef(Out.तथ्य(), Out.आकार_2());
 }
 
-void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
-    break;
-  case Twine::EmptyKind:
-    break;
-  case Twine::TwineKind:
+व्योम Twine::printOneChild(raw_ostream &OS, Child Ptr, गाँठ_Kind Kind) स्थिर {
+  चयन (Kind) {
+  हाल Twine::NullKind:
+    अवरोध;
+  हाल Twine::EmptyKind:
+    अवरोध;
+  हाल Twine::TwineKind:
     Ptr.twine->print(OS);
-    break;
-  case Twine::CStringKind:
+    अवरोध;
+  हाल Twine::CStringKind:
     OS << Ptr.cString;
-    break;
-  case Twine::StdStringKind:
+    अवरोध;
+  हाल Twine::StdStringKind:
     OS << *Ptr.stdString;
-    break;
-  case Twine::PtrAndLengthKind:
-  case Twine::StringLiteralKind:
-    OS << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length);
-    break;
-  case Twine::FormatvObjectKind:
+    अवरोध;
+  हाल Twine::Ptr_And_लंबाई_Kind:
+  हाल Twine::StringLiteralKind:
+    OS << StringRef(Ptr.ptr_And_लंबाई.ptr, Ptr.ptr_And_लंबाई.लंबाई_2);
+    अवरोध;
+  हाल Twine::FormatvObjectKind:
     OS << *Ptr.formatvObject;
-    break;
-  case Twine::CharKind:
+    अवरोध;
+  हाल Twine::CharKind:
     OS << Ptr.character;
-    break;
-  case Twine::DecUIKind:
+    अवरोध;
+  हाल Twine::DecUIKind:
     OS << Ptr.decUI;
-    break;
-  case Twine::DecIKind:
+    अवरोध;
+  हाल Twine::DecIKind:
     OS << Ptr.decI;
-    break;
-  case Twine::DecULKind:
+    अवरोध;
+  हाल Twine::DecULKind:
     OS << Ptr.decUL;
-    break;
-  case Twine::DecLKind:
+    अवरोध;
+  हाल Twine::DecLKind:
     OS << Ptr.decL;
-    break;
-  case Twine::DecULLKind:
+    अवरोध;
+  हाल Twine::DecULLKind:
     OS << Ptr.decULL;
-    break;
-  case Twine::DecLLKind:
+    अवरोध;
+  हाल Twine::DecLLKind:
     OS << Ptr.decLL;
-    break;
-  case Twine::UHexKind:
+    अवरोध;
+  हाल Twine::UHexKind:
     OS.write_hex(Ptr.uHex);
-    break;
+    अवरोध;
   }
 }
 
-void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
+व्योम Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, गाँठ_Kind Kind) स्थिर {
+  चयन (Kind) {
+  हाल Twine::NullKind:
     OS << "null";
-    break;
-  case Twine::EmptyKind:
+    अवरोध;
+  हाल Twine::EmptyKind:
     OS << "empty";
-    break;
-  case Twine::TwineKind:
+    अवरोध;
+  हाल Twine::TwineKind:
     OS << "rope:";
     Ptr.twine->printRepr(OS);
-    break;
-  case Twine::CStringKind:
+    अवरोध;
+  हाल Twine::CStringKind:
     OS << "cstring:\"" << Ptr.cString << "\"";
-    break;
-  case Twine::StdStringKind:
+    अवरोध;
+  हाल Twine::StdStringKind:
     OS << "std::string:\"" << Ptr.stdString << "\"";
-    break;
-  case Twine::PtrAndLengthKind:
+    अवरोध;
+  हाल Twine::Ptr_And_लंबाई_Kind:
     OS << "ptrAndLength:\""
-       << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::StringLiteralKind:
+       << StringRef(Ptr.ptr_And_लंबाई.ptr, Ptr.ptr_And_लंबाई.लंबाई_2) << "\"";
+    अवरोध;
+  हाल Twine::StringLiteralKind:
     OS << "constexprPtrAndLength:\""
-       << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::FormatvObjectKind:
+       << StringRef(Ptr.ptr_And_लंबाई.ptr, Ptr.ptr_And_लंबाई.लंबाई_2) << "\"";
+    अवरोध;
+  हाल Twine::FormatvObjectKind:
     OS << "formatv:\"" << *Ptr.formatvObject << "\"";
-    break;
-  case Twine::CharKind:
+    अवरोध;
+  हाल Twine::CharKind:
     OS << "char:\"" << Ptr.character << "\"";
-    break;
-  case Twine::DecUIKind:
+    अवरोध;
+  हाल Twine::DecUIKind:
     OS << "decUI:\"" << Ptr.decUI << "\"";
-    break;
-  case Twine::DecIKind:
+    अवरोध;
+  हाल Twine::DecIKind:
     OS << "decI:\"" << Ptr.decI << "\"";
-    break;
-  case Twine::DecULKind:
+    अवरोध;
+  हाल Twine::DecULKind:
     OS << "decUL:\"" << Ptr.decUL << "\"";
-    break;
-  case Twine::DecLKind:
+    अवरोध;
+  हाल Twine::DecLKind:
     OS << "decL:\"" << Ptr.decL << "\"";
-    break;
-  case Twine::DecULLKind:
+    अवरोध;
+  हाल Twine::DecULLKind:
     OS << "decULL:\"" << Ptr.decULL << "\"";
-    break;
-  case Twine::DecLLKind:
+    अवरोध;
+  हाल Twine::DecLLKind:
     OS << "decLL:\"" << Ptr.decLL << "\"";
-    break;
-  case Twine::UHexKind:
+    अवरोध;
+  हाल Twine::UHexKind:
     OS << "uhex:\"" << Ptr.uHex << "\"";
-    break;
+    अवरोध;
   }
 }
 
-void Twine::print(raw_ostream &OS) const {
+व्योम Twine::print(raw_ostream &OS) स्थिर {
   printOneChild(OS, LHS, getLHSKind());
   printOneChild(OS, RHS, getRHSKind());
 }
 
-void Twine::printRepr(raw_ostream &OS) const {
+व्योम Twine::printRepr(raw_ostream &OS) स्थिर {
   OS << "(Twine ";
   printOneChildRepr(OS, LHS, getLHSKind());
   OS << " ";
@@ -174,8 +174,8 @@ void Twine::printRepr(raw_ostream &OS) const {
   OS << ")";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
+#अगर !defined(न_संशोधन) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD व्योम Twine::dump() स्थिर { print(dbgs()); }
 
-LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }
-#endif
+LLVM_DUMP_METHOD व्योम Twine::dumpRepr() स्थिर { printRepr(dbgs()); }
+#पूर्ण_अगर

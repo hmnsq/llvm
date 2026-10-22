@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMBuildAttributes.h"
+#समावेश "llvm/Support/ARMBuildAttributes.h"
 
 using namespace llvm;
 
-static const TagNameItem tagData[] = {
+अटल स्थिर TagNameItem tag_तथ्य[] = {
     {ARMBuildAttrs::File, "Tag_File"},
     {ARMBuildAttrs::Section, "Tag_Section"},
-    {ARMBuildAttrs::Symbol, "Tag_Symbol"},
+    {ARMBuildAttrs::प्रतीक, "Tag_Symbol"},
     {ARMBuildAttrs::CPU_raw_name, "Tag_CPU_raw_name"},
     {ARMBuildAttrs::CPU_name, "Tag_CPU_name"},
     {ARMBuildAttrs::CPU_arch, "Tag_CPU_arch"},
@@ -26,18 +26,18 @@ static const TagNameItem tagData[] = {
     {ARMBuildAttrs::MVE_arch, "Tag_MVE_arch"},
     {ARMBuildAttrs::PCS_config, "Tag_PCS_config"},
     {ARMBuildAttrs::ABI_PCS_R9_use, "Tag_ABI_PCS_R9_use"},
-    {ARMBuildAttrs::ABI_PCS_RW_data, "Tag_ABI_PCS_RW_data"},
-    {ARMBuildAttrs::ABI_PCS_RO_data, "Tag_ABI_PCS_RO_data"},
+    {ARMBuildAttrs::ABI_PCS_RW_तथ्य, "Tag_ABI_PCS_RW_data"},
+    {ARMBuildAttrs::ABI_PCS_RO_तथ्य, "Tag_ABI_PCS_RO_data"},
     {ARMBuildAttrs::ABI_PCS_GOT_use, "Tag_ABI_PCS_GOT_use"},
     {ARMBuildAttrs::ABI_PCS_wchar_t, "Tag_ABI_PCS_wchar_t"},
     {ARMBuildAttrs::ABI_FP_rounding, "Tag_ABI_FP_rounding"},
     {ARMBuildAttrs::ABI_FP_denormal, "Tag_ABI_FP_denormal"},
     {ARMBuildAttrs::ABI_FP_exceptions, "Tag_ABI_FP_exceptions"},
     {ARMBuildAttrs::ABI_FP_user_exceptions, "Tag_ABI_FP_user_exceptions"},
-    {ARMBuildAttrs::ABI_FP_number_model, "Tag_ABI_FP_number_model"},
+    {ARMBuildAttrs::ABI_FP_संख्या_model, "Tag_ABI_FP_number_model"},
     {ARMBuildAttrs::ABI_align_needed, "Tag_ABI_align_needed"},
     {ARMBuildAttrs::ABI_align_preserved, "Tag_ABI_align_preserved"},
-    {ARMBuildAttrs::ABI_enum_size, "Tag_ABI_enum_size"},
+    {ARMBuildAttrs::ABI_enum_आकार, "Tag_ABI_enum_size"},
     {ARMBuildAttrs::ABI_HardFP_use, "Tag_ABI_HardFP_use"},
     {ARMBuildAttrs::ABI_VFP_args, "Tag_ABI_VFP_args"},
     {ARMBuildAttrs::ABI_WMMX_args, "Tag_ABI_WMMX_args"},
@@ -67,7 +67,7 @@ static const TagNameItem tagData[] = {
     {ARMBuildAttrs::ABI_align_preserved, "Tag_ABI_align8_preserved"},
 };
 
-constexpr TagNameMap ARMAttributeTags{tagData};
-const TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
-  return ARMAttributeTags;
+constexpr TagNameMap ARMAttributeTags{tag_तथ्य};
+स्थिर TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
+  वापस ARMAttributeTags;
 }

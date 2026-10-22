@@ -5,11 +5,11 @@ public _llvm_blake3_compress_in_place_sse2
 public llvm_blake3_compress_xof_sse2
 public _llvm_blake3_compress_xof_sse2
 
-_TEXT   SEGMENT ALIGN(16) 'CODE'
+_TEXT   अखंड मिलाओ(16) 'CODE'
 
-ALIGN   16
-llvm_blake3_hash_many_sse2 PROC
-_llvm_blake3_hash_many_sse2 PROC
+मिलाओ   16
+llvm_blake3_hash_many_sse2 क्रिया
+_llvm_blake3_hash_many_sse2 क्रिया
         push    r15
         push    r14
         push    r13
@@ -1659,7 +1659,7 @@ unwind:
         pop     r14
         pop     r15
         ret
-ALIGN   16
+मिलाओ   16
 final3blocks:
         test    esi, 2H
         je      final1block
@@ -2034,11 +2034,11 @@ endroundloop1:
         movups  xmmword ptr [rbx], xmm0
         movups  xmmword ptr [rbx+10H], xmm1
         jmp     unwind
-_llvm_blake3_hash_many_sse2 ENDP
-llvm_blake3_hash_many_sse2 ENDP
+_llvm_blake3_hash_many_sse2 पूर्ण_क्रिया
+llvm_blake3_hash_many_sse2 पूर्ण_क्रिया
 
-llvm_blake3_compress_in_place_sse2 PROC
-_llvm_blake3_compress_in_place_sse2 PROC
+llvm_blake3_compress_in_place_sse2 क्रिया
+_llvm_blake3_compress_in_place_sse2 क्रिया
         sub     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
@@ -2164,12 +2164,12 @@ _llvm_blake3_compress_in_place_sse2 PROC
         movdqa  xmm15, xmmword ptr [rsp+60H]
         add     rsp, 120
         ret
-_llvm_blake3_compress_in_place_sse2 ENDP
-llvm_blake3_compress_in_place_sse2 ENDP
+_llvm_blake3_compress_in_place_sse2 पूर्ण_क्रिया
+llvm_blake3_compress_in_place_sse2 पूर्ण_क्रिया
 
-ALIGN 16
-llvm_blake3_compress_xof_sse2 PROC
-_llvm_blake3_compress_xof_sse2 PROC
+मिलाओ 16
+llvm_blake3_compress_xof_sse2 क्रिया
+_llvm_blake3_compress_xof_sse2 क्रिया
         sub     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
@@ -2302,14 +2302,14 @@ _llvm_blake3_compress_xof_sse2 PROC
         movdqa  xmm15, xmmword ptr [rsp+60H]
         add     rsp, 120
         ret
-_llvm_blake3_compress_xof_sse2 ENDP
-llvm_blake3_compress_xof_sse2 ENDP
+_llvm_blake3_compress_xof_sse2 पूर्ण_क्रिया
+llvm_blake3_compress_xof_sse2 पूर्ण_क्रिया
 
-_TEXT ENDS
+_TEXT पूर्ण_खंड
 
 
-_RDATA SEGMENT READONLY PAGE ALIAS(".rdata") 'CONST'
-ALIGN   64
+_RDATA अखंड READONLY पृष्ठ ALIAS(".rdata") 'CONST'
+मिलाओ   64
 BLAKE3_IV:
         dd 6A09E667H, 0BB67AE85H, 3C6EF372H, 0A54FF53AH
 
@@ -2346,5 +2346,5 @@ PBLENDW_0x3F_MASK:
 PBLENDW_0xC0_MASK:
        dd 000000000H, 000000000H, 000000000H, 0FFFFFFFFH
 
-_RDATA ENDS
-END
+_RDATA पूर्ण_खंड
+पूर्ण

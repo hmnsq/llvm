@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributeParser.h"
+#समावेश "llvm/Support/HexagonAttributeParser.h"
 
 using namespace llvm;
 
-const HexagonAttributeParser::DisplayHandler
+स्थिर HexagonAttributeParser::DisplayHandler
     HexagonAttributeParser::DisplayRoutines[] = {
         {
             HexagonAttrs::ARCH,
@@ -43,13 +43,13 @@ const HexagonAttributeParser::DisplayHandler
 
 Error HexagonAttributeParser::handler(uint64_t Tag, bool &Handled) {
   Handled = false;
-  for (const auto &R : DisplayRoutines) {
-    if (uint64_t(R.Attribute) == Tag) {
-      if (Error E = (this->*R.Routine)(Tag))
-        return E;
+  क्रम (स्थिर स्वतः &R : DisplayRoutines) {
+    अगर (uint64_t(R.Attribute) == Tag) {
+      अगर (Error E = (यह->*R.Routine)(Tag))
+        वापस E;
       Handled = true;
-      break;
+      अवरोध;
     }
   }
-  return Error::success();
+  वापस Error::success();
 }

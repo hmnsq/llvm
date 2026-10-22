@@ -6,28 +6,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Jobserver.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
+#समावेश "llvm/Support/Jobserver.h"
+#समावेश "llvm/ADT/StringExtras.h"
+#समावेश "llvm/Support/Error.h"
 
-#include <atomic>
-#include <memory>
-#include <mutex>
-#include <new>
+#समावेश <atomic>
+#समावेश <memory>
+#समावेश <mutex>
+#समावेश <new>
 
-#define DEBUG_TYPE "jobserver"
+#घोषणा DEBUG_TYPE "jobserver"
 
 using namespace llvm;
 
 namespace {
-struct FdPair {
-  int Read = -1;
-  int Write = -1;
-  bool isValid() const { return Read >= 0 && Write >= 0; }
+काष्ठा FdPair {
+  पूर्णांक Read = -1;
+  पूर्णांक Write = -1;
+  bool isValid() स्थिर { वापस Read >= 0 && Write >= 0; }
 };
 
-struct JobserverConfig {
-  enum Mode {
+काष्ठा JobserverConfig {
+  क्रमागत Mode {
     None,
     PosixFifo,
     PosixPipe,
@@ -41,28 +41,28 @@ struct JobserverConfig {
 /// A helper function that checks if `Input` starts with `Prefix`.
 /// If it does, it removes the prefix from `Input`, assigns the remainder to
 /// `Value`, and returns true. Otherwise, it returns false.
-bool getPrefixedValue(StringRef Input, StringRef Prefix, StringRef &Value) {
-  if (Input.consume_front(Prefix)) {
-    Value = Input;
-    return true;
+bool get_Prefixed_मूल्य(StringRef निवेश, StringRef Prefix, StringRef &मूल्य) {
+  अगर (निवेश.consume_front(Prefix)) {
+    मूल्य = निवेश;
+    वापस true;
   }
-  return false;
+  वापस false;
 }
 
 /// A helper function to parse a string in the format "R,W" where R and W are
 /// non-negative integers representing file descriptors. It populates the
 /// `ReadFD` and `WriteFD` output parameters. Returns true on success.
-static std::optional<FdPair> getFileDescriptorPair(StringRef Input) {
+अटल std::optional<FdPair> getFileDescriptorPair(StringRef निवेश) {
   FdPair FDs;
-  if (Input.consumeInteger(10, FDs.Read))
-    return std::nullopt;
-  if (!Input.consume_front(","))
-    return std::nullopt;
-  if (Input.consumeInteger(10, FDs.Write))
-    return std::nullopt;
-  if (!Input.empty() || !FDs.isValid())
-    return std::nullopt;
-  return FDs;
+  अगर (निवेश.consumeInteger(10, FDs.Read))
+    वापस std::nullopt;
+  अगर (!निवेश.consume_front(","))
+    वापस std::nullopt;
+  अगर (निवेश.consumeInteger(10, FDs.Write))
+    वापस std::nullopt;
+  अगर (!निवेश.empty() || !FDs.isValid())
+    वापस std::nullopt;
+  वापस FDs;
 }
 
 /// Parses the `MAKEFLAGS` environment variable string to find jobserver
@@ -72,8 +72,8 @@ static std::optional<FdPair> getFileDescriptorPair(StringRef Input) {
 /// connection details (file descriptors or path).
 Expected<JobserverConfig> parseNativeMakeFlags(StringRef MakeFlags) {
   JobserverConfig Config;
-  if (MakeFlags.empty())
-    return Config;
+  अगर (MakeFlags.empty())
+    वापस Config;
 
   // Split the MAKEFLAGS string into arguments.
   SmallVector<StringRef, 8> Args;
@@ -81,56 +81,56 @@ Expected<JobserverConfig> parseNativeMakeFlags(StringRef MakeFlags) {
 
   // If '-n' (dry-run) is present as a legacy flag (not starting with '-'),
   // disable the jobserver.
-  if (!Args.empty() && !Args[0].starts_with("-") && Args[0].contains('n'))
-    return Config;
+  अगर (!Args.empty() && !Args[0].starts_with("-") && Args[0].contains('n'))
+    वापस Config;
 
   // Iterate through arguments to find jobserver flags.
   // Note that make may pass multiple --jobserver-auth flags; the last one wins.
-  for (StringRef Arg : Args) {
-    StringRef Value;
-    if (getPrefixedValue(Arg, "--jobserver-auth=", Value)) {
+  क्रम (StringRef Arg : Args) {
+    StringRef मूल्य;
+    अगर (get_Prefixed_मूल्य(Arg, "--jobserver-auth=", मूल्य)) {
       // Try to parse as a file descriptor pair first.
-      if (auto FDPair = getFileDescriptorPair(Value)) {
+      अगर (स्वतः FDPair = getFileDescriptorPair(मूल्य)) {
         Config.TheMode = JobserverConfig::PosixPipe;
         Config.PipeFDs = *FDPair;
-      } else {
+      } अन्यथा {
         StringRef FifoPath;
         // If not FDs, try to parse as a named pipe (fifo).
-        if (getPrefixedValue(Value, "fifo:", FifoPath)) {
+        अगर (get_Prefixed_मूल्य(मूल्य, "fifo:", FifoPath)) {
           Config.TheMode = JobserverConfig::PosixFifo;
           Config.Path = FifoPath.str();
-        } else {
+        } अन्यथा {
           // Otherwise, assume it's a Windows semaphore.
           Config.TheMode = JobserverConfig::Win32Semaphore;
-          Config.Path = Value.str();
+          Config.Path = मूल्य.str();
         }
       }
-    } else if (getPrefixedValue(Arg, "--jobserver-fds=", Value)) {
+    } अन्यथा अगर (get_Prefixed_मूल्य(Arg, "--jobserver-fds=", मूल्य)) {
       // This is an alternative, older syntax for the pipe-based server.
-      if (auto FDPair = getFileDescriptorPair(Value)) {
+      अगर (स्वतः FDPair = getFileDescriptorPair(मूल्य)) {
         Config.TheMode = JobserverConfig::PosixPipe;
         Config.PipeFDs = *FDPair;
-      } else {
-        return createStringError(inconvertibleErrorCode(),
+      } अन्यथा {
+        वापस createStringError(inconvertibleErrorCode(),
                                  "Invalid file descriptor pair in MAKEFLAGS");
       }
     }
   }
 
 // Perform platform-specific validation.
-#ifdef _WIN32
-  if (Config.TheMode == JobserverConfig::PosixFifo ||
+#अगर_घोषित _WIN32
+  अगर (Config.TheMode == JobserverConfig::PosixFifo ||
       Config.TheMode == JobserverConfig::PosixPipe)
-    return createStringError(
+    वापस createStringError(
         inconvertibleErrorCode(),
         "FIFO/Pipe-based jobserver is not supported on Windows");
-#else
-  if (Config.TheMode == JobserverConfig::Win32Semaphore)
-    return createStringError(
+#अन्यथा
+  अगर (Config.TheMode == JobserverConfig::Win32Semaphore)
+    वापस createStringError(
         inconvertibleErrorCode(),
         "Semaphore-based jobserver is not supported on this platform");
-#endif
-  return Config;
+#पूर्ण_अगर
+  वापस Config;
 }
 
 std::once_flag GJobserverOnceFlag;
@@ -139,51 +139,51 @@ JobserverClient *GJobserver = nullptr;
 } // namespace
 
 namespace llvm {
-class JobserverClientImpl : public JobserverClient {
+श्रेणी JobserverClientImpl : खुला JobserverClient {
   bool IsInitialized = false;
   std::atomic<bool> HasImplicitSlot{true};
-  unsigned NumJobs = 0;
+  अचिन्हित अंक_Jobs = 0;
 
-public:
-  JobserverClientImpl(const JobserverConfig &Config);
+खुला:
+  JobserverClientImpl(स्थिर JobserverConfig &Config);
   ~JobserverClientImpl() override;
 
   JobSlot tryAcquire() override;
-  void release(JobSlot Slot) override;
-  unsigned getNumJobs() const override { return NumJobs; }
+  व्योम release(JobSlot Slot) override;
+  अचिन्हित get_अंक_Jobs() स्थिर override { वापस अंक_Jobs; }
 
-  bool isValid() const { return IsInitialized; }
+  bool isValid() स्थिर { वापस IsInitialized; }
 
-private:
-#if defined(LLVM_ON_UNIX)
-  int ReadFD = -1;
-  int WriteFD = -1;
+निजी:
+#अगर defined(LLVM_ON_UNIX)
+  पूर्णांक ReadFD = -1;
+  पूर्णांक WriteFD = -1;
   std::string FifoPath;
-#elif defined(_WIN32)
-  void *Semaphore = nullptr;
-#endif
+#या_अगर defined(_WIN32)
+  व्योम *Semaphore = nullptr;
+#पूर्ण_अगर
 };
 } // namespace llvm
 
 // Include the platform-specific parts of the class.
-#if defined(LLVM_ON_UNIX)
-#include "Unix/Jobserver.inc"
-#elif defined(_WIN32)
-#include "Windows/Jobserver.inc"
-#else
+#अगर defined(LLVM_ON_UNIX)
+#समावेश "Unix/Jobserver.inc"
+#या_अगर defined(_WIN32)
+#समावेश "Windows/Jobserver.inc"
+#अन्यथा
 // Dummy implementation for unsupported platforms.
-JobserverClientImpl::JobserverClientImpl(const JobserverConfig &Config) {}
-JobserverClientImpl::~JobserverClientImpl() = default;
-JobSlot JobserverClientImpl::tryAcquire() { return JobSlot(); }
-void JobserverClientImpl::release(JobSlot Slot) {}
-#endif
+JobserverClientImpl::JobserverClientImpl(स्थिर JobserverConfig &Config) {}
+JobserverClientImpl::~JobserverClientImpl() = शेष;
+JobSlot JobserverClientImpl::tryAcquire() { वापस JobSlot(); }
+व्योम JobserverClientImpl::release(JobSlot Slot) {}
+#पूर्ण_अगर
 
 namespace llvm {
-JobserverClient::~JobserverClient() = default;
+JobserverClient::~JobserverClient() = शेष;
 
-uint8_t JobSlot::getExplicitValue() const {
-  assert(isExplicit() && "Cannot get value of implicit or invalid slot");
-  return static_cast<uint8_t>(Value);
+uint8_t JobSlot::get_Explicit_मूल्य() स्थिर {
+  निश्चित(isExplicit() && "Cannot get value of implicit or invalid slot");
+  वापस static_cast<uint8_t>(मूल्य);
 }
 
 /// This is the main entry point for acquiring a jobserver client. It uses a
@@ -197,58 +197,58 @@ JobserverClient *JobserverClient::getInstance() {
     LLVM_DEBUG(
         dbgs()
         << "JobserverClient::getInstance() called for the first time.\n");
-    const char *MakeFlagsEnv = getenv("MAKEFLAGS");
-    if (!MakeFlagsEnv) {
+    स्थिर अक्षर *MakeFlagsEnv = दो_पर्या("MAKEFLAGS");
+    अगर (!MakeFlagsEnv) {
       errs() << "Warning: failed to create jobserver client due to MAKEFLAGS "
                 "environment variable not found\n";
-      return;
+      वापस;
     }
 
     LLVM_DEBUG(dbgs() << "Found MAKEFLAGS = \"" << MakeFlagsEnv << "\"\n");
 
-    auto ConfigOrErr = parseNativeMakeFlags(MakeFlagsEnv);
-    if (Error Err = ConfigOrErr.takeError()) {
+    स्वतः ConfigOrErr = parseNativeMakeFlags(MakeFlagsEnv);
+    अगर (Error Err = ConfigOrErr.takeError()) {
       errs() << "Warning: failed to create jobserver client due to invalid "
                 "MAKEFLAGS environment variable: "
              << toString(std::move(Err)) << "\n";
-      return;
+      वापस;
     }
 
     JobserverConfig Config = *ConfigOrErr;
-    if (Config.TheMode == JobserverConfig::None) {
+    अगर (Config.TheMode == JobserverConfig::None) {
       errs() << "Warning: failed to create jobserver client due to jobserver "
                 "mode missing in MAKEFLAGS environment variable\n";
-      return;
+      वापस;
     }
 
-    if (Config.TheMode == JobserverConfig::PosixPipe) {
-#if defined(LLVM_ON_UNIX)
-      if (!areFdsValid(Config.PipeFDs.Read, Config.PipeFDs.Write)) {
+    अगर (Config.TheMode == JobserverConfig::PosixPipe) {
+#अगर defined(LLVM_ON_UNIX)
+      अगर (!areFdsValid(Config.PipeFDs.Read, Config.PipeFDs.Write)) {
         errs() << "Warning: failed to create jobserver client due to invalid "
                   "Pipe FDs in MAKEFLAGS environment variable\n";
-        return;
+        वापस;
       }
-#endif
+#पूर्ण_अगर
     }
 
-    auto Client = std::make_unique<JobserverClientImpl>(Config);
-    if (Client->isValid()) {
+    स्वतः Client = std::make_unique<JobserverClientImpl>(Config);
+    अगर (Client->isValid()) {
       LLVM_DEBUG(dbgs() << "Jobserver client created successfully!\n");
       GJobserver = Client.release();
-    } else
+    } अन्यथा
       errs() << "Warning: jobserver client initialization failed.\n";
   });
-  return GJobserver;
+  वापस GJobserver;
 }
 
 /// For testing purposes only. This function resets the singleton instance by
 /// destroying the existing client and re-initializing the `std::once_flag`.
 /// This allows tests to simulate the first-time initialization of the
 /// jobserver client multiple times.
-void JobserverClient::resetForTesting() {
-  delete GJobserver;
+व्योम JobserverClient::resetForTesting() {
+  मिटाओ GJobserver;
   GJobserver = nullptr;
   // Re-construct the std::once_flag in place to reset the singleton state.
-  new (&GJobserverOnceFlag) std::once_flag();
+  नया (&GJobserverOnceFlag) std::once_flag();
 }
 } // namespace llvm

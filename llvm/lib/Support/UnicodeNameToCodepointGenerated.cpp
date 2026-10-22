@@ -62,17 +62,17 @@ use or other dealings in these Data Files or Software without prior
 written authorization of the copyright holder.
 */
 
-#include "llvm/Support/Compiler.h"
-#include <cstddef>
-#include <cstdint>
+#समावेश "llvm/Support/Compiler.h"
+#समावेश <cstddef>
+#समावेश <cstdint>
 namespace llvm {
 namespace sys {
 namespace unicode {
-extern const char *const UnicodeNameToCodepointDict;
-extern const uint8_t *const UnicodeNameToCodepointIndex;
-extern const std::size_t UnicodeNameToCodepointIndexSize;
-extern const std::size_t UnicodeNameToCodepointLargestNameSize;
-const char *const UnicodeNameToCodepointDict =
+बाह्य स्थिर अक्षर *स्थिर UnicodeNameToCodepointDict;
+बाह्य स्थिर uint8_t *स्थिर Unicode_Name_To_Codepoint_सूचकांक;
+बाह्य स्थिर std::माप_प्रकार Unicode_Name_To_Codepoint_सूचकांक_आकार;
+बाह्य स्थिर std::माप_प्रकार Unicode_Name_To_Codepoint_Largest_Name_आकार;
+स्थिर अक्षर *स्थिर UnicodeNameToCodepointDict =
     " _-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789SEMICIRCULAR ANTICLOCKWISE "
     "ARROWBLE VERTICAL AND HORIZONTAL LINE LEFTWARDS TRIANGLE-HEADED ARROW "
     "LETTER BYELORUSSIAN-UKRAINIAN IOUBLE-LINE EQUAL ABOVE LESS-THANUTHWEST "
@@ -1043,7 +1043,7 @@ const char *const UnicodeNameToCodepointDict =
     "T-6T-7T-8T-AT-5LJELFAM-2T-0M-CM-BM-4M-3T-1T-2T-3T-4L-8L-7L-6L-5L-4L-3L-2L-"
     "1L-0L-9KUGKUEN-3MSPN-"
     "2640360R7R0839299907138221AS04817164BVDG3G0G9HZP0C0F3";
-const uint8_t UnicodeNameToCodepointIndex_[278248] = {
+स्थिर uint8_t Unicode_Name_To_Codepoint_सूचकांक_2[278248] = {
     0x00, 0x05, 0xc0, 0x00, 0x89, 0x15, 0xc0, 0x00, 0xc8, 0x12, 0xc0, 0x01,
     0x26, 0x06, 0xc0, 0x01, 0x58, 0x14, 0xc0, 0x01, 0x86, 0x18, 0xc0, 0x01,
     0xa9, 0x16, 0xc0, 0x01, 0xca, 0x03, 0xc0, 0x01, 0xea, 0x04, 0xc0, 0x02,
@@ -24232,9 +24232,9 @@ const uint8_t UnicodeNameToCodepointIndex_[278248] = {
     0x55, 0x73, 0x0e, 0xc1, 0x90, 0x00, 0x44, 0x3e, 0xd5, 0xc4, 0x1a, 0x0e,
     0x0e, 0xc1, 0x79, 0xc9, 0x16, 0x49, 0x0e, 0xc1, 0x70, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0};
-const uint8_t *const UnicodeNameToCodepointIndex = UnicodeNameToCodepointIndex_;
-const std::size_t UnicodeNameToCodepointIndexSize = 278248;
-const std::size_t UnicodeNameToCodepointLargestNameSize = 74;
+स्थिर uint8_t *स्थिर Unicode_Name_To_Codepoint_सूचकांक = Unicode_Name_To_Codepoint_सूचकांक_2;
+स्थिर std::माप_प्रकार Unicode_Name_To_Codepoint_सूचकांक_आकार = 278248;
+स्थिर std::माप_प्रकार Unicode_Name_To_Codepoint_Largest_Name_आकार = 74;
 
 } // namespace unicode
 } // namespace sys

@@ -37,58 +37,58 @@
  * compile-time configuration.
  */
 
-#include "llvm/Support/MD5.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include <cstdint>
-#include <cstring>
+#समावेश "llvm/Support/MD5.h"
+#समावेश "llvm/ADT/ArrayRef.h"
+#समावेश "llvm/ADT/SmallString.h"
+#समावेश "llvm/ADT/StringExtras.h"
+#समावेश "llvm/ADT/StringRef.h"
+#समावेश "llvm/Support/Endian.h"
+#समावेश <cstdint>
+#समावेश <cstring>
 
 // The basic MD5 functions.
 
 // F and G are optimized compared to their RFC 1321 definitions for
 // architectures that lack an AND-NOT instruction, just like in Colin Plumb's
 // implementation.
-#define F(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
-#define G(x, y, z) ((y) ^ ((z) & ((x) ^ (y))))
-#define H(x, y, z) ((x) ^ (y) ^ (z))
-#define I(x, y, z) ((y) ^ ((x) | ~(z)))
+#घोषणा F(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
+#घोषणा G(x, y, z) ((y) ^ ((z) & ((x) ^ (y))))
+#घोषणा H(x, y, z) ((x) ^ (y) ^ (z))
+#घोषणा I(x, y, z) ((y) ^ ((x) | ~(z)))
 
 // The MD5 transformation for all four rounds.
-#define STEP(f, a, b, c, d, x, t, s)                                           \
+#घोषणा STEP(f, a, b, c, d, x, t, s)                                           \
   (a) += f((b), (c), (d)) + (x) + (t);                                         \
   (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));                   \
   (a) += (b);
 
 // SET reads 4 input bytes in little-endian byte order and stores them
 // in a properly aligned word in host byte order.
-#define SET(n)                                                                 \
+#घोषणा SET(n)                                                                 \
   (InternalState.block[(n)] = (MD5_u32plus)ptr[(n)*4] |                        \
                               ((MD5_u32plus)ptr[(n)*4 + 1] << 8) |             \
                               ((MD5_u32plus)ptr[(n)*4 + 2] << 16) |            \
                               ((MD5_u32plus)ptr[(n)*4 + 3] << 24))
-#define GET(n) (InternalState.block[(n)])
+#घोषणा GET(n) (InternalState.block[(n)])
 
 using namespace llvm;
 
 /// This processes one or more 64-byte data blocks, but does NOT update
 ///the bit counters.  There are no alignment requirements.
-const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
-  const uint8_t *ptr;
+स्थिर uint8_t *MD5::body(ArrayRef<uint8_t> तथ्य_2) {
+  स्थिर uint8_t *ptr;
   MD5_u32plus a, b, c, d;
   MD5_u32plus saved_a, saved_b, saved_c, saved_d;
-  unsigned long Size = Data.size();
+  अचिन्हित दीर्घ आकार = तथ्य_2.आकार_2();
 
-  ptr = Data.data();
+  ptr = तथ्य_2.तथ्य();
 
   a = InternalState.a;
   b = InternalState.b;
   c = InternalState.c;
   d = InternalState.d;
 
-  do {
+  करो {
     saved_a = a;
     saved_b = b;
     saved_c = c;
@@ -172,134 +172,134 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
     d += saved_d;
 
     ptr += 64;
-  } while (Size -= 64);
+  } जबतक (आकार -= 64);
 
   InternalState.a = a;
   InternalState.b = b;
   InternalState.c = c;
   InternalState.d = d;
 
-  return ptr;
+  वापस ptr;
 }
 
-MD5::MD5() = default;
+MD5::MD5() = शेष;
 
 /// Incrementally add the bytes in \p Data to the hash.
-void MD5::update(ArrayRef<uint8_t> Data) {
+व्योम MD5::update(ArrayRef<uint8_t> तथ्य_2) {
   MD5_u32plus saved_lo;
-  unsigned long used, free;
-  const uint8_t *Ptr = Data.data();
-  unsigned long Size = Data.size();
+  अचिन्हित दीर्घ used, मुक्त;
+  स्थिर uint8_t *Ptr = तथ्य_2.तथ्य();
+  अचिन्हित दीर्घ आकार = तथ्य_2.आकार_2();
 
   saved_lo = InternalState.lo;
-  if ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
+  अगर ((InternalState.lo = (saved_lo + आकार) & 0x1fffffff) < saved_lo)
     InternalState.hi++;
-  InternalState.hi += Size >> 29;
+  InternalState.hi += आकार >> 29;
 
   used = saved_lo & 0x3f;
 
-  if (used) {
-    free = 64 - used;
+  अगर (used) {
+    मुक्त = 64 - used;
 
-    if (Size < free) {
-      memcpy(&InternalState.buffer[used], Ptr, Size);
-      return;
+    अगर (आकार < मुक्त) {
+      स_नकल(&InternalState.बफर_2[used], Ptr, आकार);
+      वापस;
     }
 
-    memcpy(&InternalState.buffer[used], Ptr, free);
-    Ptr = Ptr + free;
-    Size -= free;
-    body(ArrayRef(InternalState.buffer, 64));
+    स_नकल(&InternalState.बफर_2[used], Ptr, मुक्त);
+    Ptr = Ptr + मुक्त;
+    आकार -= मुक्त;
+    body(ArrayRef(InternalState.बफर_2, 64));
   }
 
-  if (Size >= 64) {
-    Ptr = body(ArrayRef(Ptr, Size & ~(unsigned long)0x3f));
-    Size &= 0x3f;
+  अगर (आकार >= 64) {
+    Ptr = body(ArrayRef(Ptr, आकार & ~(अचिन्हित दीर्घ)0x3f));
+    आकार &= 0x3f;
   }
 
-  memcpy(InternalState.buffer, Ptr, Size);
+  स_नकल(InternalState.बफर_2, Ptr, आकार);
 }
 
 /// Add the bytes in the StringRef \p Str to the hash.
 // Note that this isn't a string and so this won't include any trailing NULL
 // bytes.
-void MD5::update(StringRef Str) {
-  ArrayRef<uint8_t> SVal((const uint8_t *)Str.data(), Str.size());
+व्योम MD5::update(StringRef Str) {
+  ArrayRef<uint8_t> SVal((स्थिर uint8_t *)Str.तथ्य(), Str.आकार_2());
   update(SVal);
 }
 
 /// Finish the hash and place the resulting hash into \p result.
 /// \param Result is assumed to be a minimum of 16-bytes in size.
-void MD5::final(MD5Result &Result) {
-  unsigned long used, free;
+व्योम MD5::final(MD5_परिणाम &परिणाम) {
+  अचिन्हित दीर्घ used, मुक्त;
 
   used = InternalState.lo & 0x3f;
 
-  InternalState.buffer[used++] = 0x80;
+  InternalState.बफर_2[used++] = 0x80;
 
-  free = 64 - used;
+  मुक्त = 64 - used;
 
-  if (free < 8) {
-    memset(&InternalState.buffer[used], 0, free);
-    body(ArrayRef(InternalState.buffer, 64));
+  अगर (मुक्त < 8) {
+    स_रखो(&InternalState.बफर_2[used], 0, मुक्त);
+    body(ArrayRef(InternalState.बफर_2, 64));
     used = 0;
-    free = 64;
+    मुक्त = 64;
   }
 
-  memset(&InternalState.buffer[used], 0, free - 8);
+  स_रखो(&InternalState.बफर_2[used], 0, मुक्त - 8);
 
   InternalState.lo <<= 3;
-  support::endian::write32le(&InternalState.buffer[56], InternalState.lo);
-  support::endian::write32le(&InternalState.buffer[60], InternalState.hi);
+  support::endian::write32le(&InternalState.बफर_2[56], InternalState.lo);
+  support::endian::write32le(&InternalState.बफर_2[60], InternalState.hi);
 
-  body(ArrayRef(InternalState.buffer, 64));
+  body(ArrayRef(InternalState.बफर_2, 64));
 
-  support::endian::write32le(&Result[0], InternalState.a);
-  support::endian::write32le(&Result[4], InternalState.b);
-  support::endian::write32le(&Result[8], InternalState.c);
-  support::endian::write32le(&Result[12], InternalState.d);
+  support::endian::write32le(&परिणाम[0], InternalState.a);
+  support::endian::write32le(&परिणाम[4], InternalState.b);
+  support::endian::write32le(&परिणाम[8], InternalState.c);
+  support::endian::write32le(&परिणाम[12], InternalState.d);
 }
 
-MD5::MD5Result MD5::final() {
-  MD5Result Result;
-  final(Result);
-  return Result;
+MD5::MD5_परिणाम MD5::final() {
+  MD5_परिणाम परिणाम;
+  final(परिणाम);
+  वापस परिणाम;
 }
 
-MD5::MD5Result MD5::result() {
-  auto StateToRestore = InternalState;
+MD5::MD5_परिणाम MD5::परिणाम_2() {
+  स्वतः StateToRestore = InternalState;
 
-  auto Hash = final();
+  स्वतः Hash = final();
 
   // Restore the state
   InternalState = StateToRestore;
 
-  return Hash;
+  वापस Hash;
 }
 
-SmallString<32> MD5::MD5Result::digest() const {
+SmallString<32> MD5::MD5_परिणाम::digest() स्थिर {
   SmallString<32> Str;
-  toHex(*this, /*LowerCase*/ true, Str);
-  return Str;
+  toHex(*यह, /*LowerCase*/ true, Str);
+  वापस Str;
 }
 
-void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<char> &Str) {
-  toHex(Result, /*LowerCase*/ true, Str);
+व्योम MD5::stringify_परिणाम(MD5_परिणाम &परिणाम, SmallVectorImpl<अक्षर> &Str) {
+  toHex(परिणाम, /*LowerCase*/ true, Str);
 }
 
-MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
+MD5::MD5_परिणाम MD5::hash(ArrayRef<uint8_t> तथ्य_2) {
   MD5 Hash;
-  Hash.update(Data);
-  MD5::MD5Result Res;
+  Hash.update(तथ्य_2);
+  MD5::MD5_परिणाम Res;
   Hash.final(Res);
 
-  return Res;
+  वापस Res;
 }
 
-#undef F
-#undef G
-#undef H
-#undef I
-#undef STEP
-#undef SET
-#undef GET
+#अघोषित F
+#अघोषित G
+#अघोषित H
+#अघोषित I
+#अघोषित STEP
+#अघोषित SET
+#अघोषित GET
