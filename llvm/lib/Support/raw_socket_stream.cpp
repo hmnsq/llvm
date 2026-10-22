@@ -24,7 +24,7 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#else
+#không_thì
 #include "llvm/Support/Windows/WindowsSupport.h"
 // winsock2.h must be included before afunix.h. Briefly turn off clang-format to
 // avoid error.
@@ -35,7 +35,7 @@
 #include <io.h>
 #endif // _WIN32
 
-#if defined(HAVE_UNISTD_H)
+#nếu defined(HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
 
@@ -45,7 +45,7 @@ using namespace llvm;
 WSABalancer::WSABalancer() {
   WSADATA WsaData;
   ::memset(&WsaData, 0, sizeof(WsaData));
-  if (WSAStartup(MAKEWORD(2, 2), &WsaData) != 0) {
+  nếu (WSAStartup(MAKEWORD(2, 2), &WsaData) != 0) {
     llvm::report_fatal_error("WSAStartup failed");
   }
 }
@@ -55,24 +55,24 @@ WSABalancer::~WSABalancer() { WSACleanup(); }
 
 static std::error_code getLastSocketErrorCode() {
 #ifdef _WIN32
-  return std::error_code(::WSAGetLastError(), std::system_category());
-#else
-  return errnoAsErrorCode();
+  trả_về std::error_code(::WSAGetLastError(), std::system_category());
+#không_thì
+  trả_về errnoAsErrorCode();
 #endif
 }
 
 #ifdef _WIN32
 using NativeSocket = SOCKET;
-#else
-using NativeSocket = int;
+#không_thì
+using NativeSocket = số_nguyên;
 #define INVALID_SOCKET -1
 #endif
 
-static int closeSocket(NativeSocket Socket) {
+static số_nguyên closeSocket(NativeSocket Socket) {
 #ifdef _WIN32
-  return ::closesocket(Socket);
-#else
-  return ::close(Socket);
+  trả_về ::closesocket(Socket);
+#không_thì
+  trả_về ::close(Socket);
 #endif
 }
 
@@ -81,19 +81,19 @@ static Expected<sockaddr_un> setSocketAddr(StringRef SocketPath) {
   memset(&Addr, 0, sizeof(Addr));
   Addr.sun_family = AF_UNIX;
 
-  if (sizeof(sockaddr_un::sun_path) <= SocketPath.size())
-    return make_error<StringError>(
+  nếu (sizeof(sockaddr_un::sun_path) <= SocketPath.size())
+    trả_về make_error<StringError>(
         std::make_error_code(std::errc::filename_too_long),
         "Socket path exceeds sockaddr_un::sun_path size limit");
 
   strncpy(Addr.sun_path, SocketPath.str().c_str(), sizeof(Addr.sun_path) - 1);
-  return Addr;
+  trả_về Addr;
 }
 
-static Expected<int> getSocketFD(StringRef SocketPath) {
+static Expected<số_nguyên> getSocketFD(StringRef SocketPath) {
   NativeSocket Socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (Socket == INVALID_SOCKET) {
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  nếu (Socket == INVALID_SOCKET) {
+    trả_về llvm::make_error<StringError>(getLastSocketErrorCode(),
                                          "Create socket failed");
   }
 
@@ -107,27 +107,27 @@ static Expected<int> getSocketFD(StringRef SocketPath) {
   setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, NULL, 0);
 #endif
   Expected<struct sockaddr_un> Addr = setSocketAddr(SocketPath);
-  if (!Addr) {
+  nếu (!Addr) {
     closeSocket(Socket);
-    return Addr.takeError();
+    trả_về Addr.takeError();
   }
 
-  if (::connect(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
+  nếu (::connect(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
     // Grab the error code before closing, which may overwrite it.
     std::error_code EC = getLastSocketErrorCode();
     closeSocket(Socket);
-    return llvm::make_error<StringError>(EC, "Connect socket failed");
+    trả_về llvm::make_error<StringError>(EC, "Connect socket failed");
   }
 
 #ifdef _WIN32
-  return _open_osfhandle(Socket, 0);
-#else
-  return Socket;
+  trả_về _open_osfhandle(Socket, 0);
+#không_thì
+  trả_về Socket;
 #endif // _WIN32
 }
 
-ListeningSocket::ListeningSocket(int SocketFD, StringRef SocketPath,
-                                 int PipeFD[2])
+ListeningSocket::ListeningSocket(số_nguyên SocketFD, StringRef SocketPath,
+                                 số_nguyên PipeFD[2])
     : FD(SocketFD), SocketPath(SocketPath), PipeFD{PipeFD[0], PipeFD[1]} {}
 
 ListeningSocket::ListeningSocket(ListeningSocket &&LS)
@@ -141,7 +141,7 @@ ListeningSocket::ListeningSocket(ListeningSocket &&LS)
 }
 
 Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
-                                                      int MaxBacklog) {
+                                                      số_nguyên MaxBacklog) {
 
   // Handle instances where the target socket address already exists and
   // differentiate between a preexisting file with and without a bound socket
@@ -149,22 +149,22 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
   // ::bind will return std::errc:address_in_use if a file at the socket address
   // already exists (e.g., the file was not properly unlinked due to a crash)
   // even if another socket has not yet binded to that address
-  if (llvm::sys::fs::exists(SocketPath)) {
-    Expected<int> MaybeFD = getSocketFD(SocketPath);
-    if (!MaybeFD) {
+  nếu (llvm::sys::fs::exists(SocketPath)) {
+    Expected<số_nguyên> MaybeFD = getSocketFD(SocketPath);
+    nếu (!MaybeFD) {
 
       // Regardless of the error, notify the caller that a file already exists
       // at the desired socket address and that there is no bound socket at that
       // address. The file must be removed before ::bind can use the address
       consumeError(MaybeFD.takeError());
-      return llvm::make_error<StringError>(
+      trả_về llvm::make_error<StringError>(
           std::make_error_code(std::errc::file_exists),
           "Socket address unavailable");
     }
     ::close(std::move(*MaybeFD));
 
     // Notify caller that the provided socket address already has a bound socket
-    return llvm::make_error<StringError>(
+    trả_về llvm::make_error<StringError>(
         std::make_error_code(std::errc::address_in_use),
         "Socket address unavailable");
   }
@@ -173,8 +173,8 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
   WSABalancer _;
 #endif
   NativeSocket Socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (Socket == INVALID_SOCKET)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  nếu (Socket == INVALID_SOCKET)
+    trả_về llvm::make_error<StringError>(getLastSocketErrorCode(),
                                          "socket create failed");
 
 #ifdef __CYGWIN__
@@ -187,37 +187,37 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
   setsockopt(Socket, SOL_SOCKET, SO_PEERCRED, NULL, 0);
 #endif
   Expected<struct sockaddr_un> Addr = setSocketAddr(SocketPath);
-  if (!Addr) {
+  nếu (!Addr) {
     closeSocket(Socket);
-    return Addr.takeError();
+    trả_về Addr.takeError();
   }
 
-  if (::bind(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
+  nếu (::bind(Socket, (struct sockaddr *)&*Addr, sizeof(*Addr)) == -1) {
     // Grab error code from call to ::bind before closing the socket
     std::error_code EC = getLastSocketErrorCode();
     closeSocket(Socket);
-    return llvm::make_error<StringError>(EC, "Bind error");
+    trả_về llvm::make_error<StringError>(EC, "Bind error");
   }
 
   // Mark socket as passive so incoming connections can be accepted
-  if (::listen(Socket, MaxBacklog) == -1)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  nếu (::listen(Socket, MaxBacklog) == -1)
+    trả_về llvm::make_error<StringError>(getLastSocketErrorCode(),
                                          "Listen error");
 
-  int PipeFD[2];
+  số_nguyên PipeFD[2];
 #ifdef _WIN32
   // Reserve 1 byte for the pipe and use default textmode
-  if (::_pipe(PipeFD, 1, 0) == -1)
-#else
-  if (::pipe(PipeFD) == -1)
+  nếu (::_pipe(PipeFD, 1, 0) == -1)
+#không_thì
+  nếu (::pipe(PipeFD) == -1)
 #endif // _WIN32
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+    trả_về llvm::make_error<StringError>(getLastSocketErrorCode(),
                                          "pipe failed");
 
 #ifdef _WIN32
-  return ListeningSocket{_open_osfhandle(Socket, 0), SocketPath, PipeFD};
-#else
-  return ListeningSocket{Socket, SocketPath, PipeFD};
+  trả_về ListeningSocket{_open_osfhandle(Socket, 0), SocketPath, PipeFD};
+#không_thì
+  trả_về ListeningSocket{Socket, SocketPath, PipeFD};
 #endif // _WIN32
 }
 
@@ -232,18 +232,18 @@ Expected<ListeningSocket> ListeningSocket::createUnix(StringRef SocketPath,
 // getActiveFD is a callback to handle ActiveFD's of std::atomic<int> and int
 static std::error_code
 manageTimeout(const std::chrono::milliseconds &Timeout,
-              const std::function<int()> &getActiveFD,
-              const std::optional<int> &CancelFD = std::nullopt) {
+              const std::function<số_nguyên()> &getActiveFD,
+              const std::optional<số_nguyên> &CancelFD = std::nullopt) {
   struct pollfd FD[2];
   FD[0].events = POLLIN;
 #ifdef _WIN32
   SOCKET WinServerSock = _get_osfhandle(getActiveFD());
   FD[0].fd = WinServerSock;
-#else
+#không_thì
   FD[0].fd = getActiveFD();
 #endif
   uint8_t FDCount = 1;
-  if (CancelFD.has_value()) {
+  nếu (CancelFD.has_value()) {
     FD[1].events = POLLIN;
     FD[1].fd = CancelFD.value();
     FDCount++;
@@ -253,78 +253,78 @@ manageTimeout(const std::chrono::milliseconds &Timeout,
   // interupted by a signal and need to be recalled
   auto Start = std::chrono::steady_clock::now();
   auto RemainingTimeout = Timeout;
-  int PollStatus = 0;
+  số_nguyên PollStatus = 0;
   do {
     // If Timeout is -1 then poll should block and RemainingTimeout does not
     // need to be recalculated
-    if (PollStatus != 0 && Timeout != std::chrono::milliseconds(-1)) {
+    nếu (PollStatus != 0 && Timeout != std::chrono::milliseconds(-1)) {
       auto TotalElapsedTime =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::steady_clock::now() - Start);
 
-      if (TotalElapsedTime >= Timeout)
-        return std::make_error_code(std::errc::operation_would_block);
+      nếu (TotalElapsedTime >= Timeout)
+        trả_về std::make_error_code(std::errc::operation_would_block);
 
       RemainingTimeout = Timeout - TotalElapsedTime;
     }
 #ifdef _WIN32
     PollStatus = WSAPoll(FD, FDCount, RemainingTimeout.count());
-  } while (PollStatus == SOCKET_ERROR &&
+  } trong_khi (PollStatus == SOCKET_ERROR &&
            getLastSocketErrorCode() == std::errc::interrupted);
-#else
+#không_thì
     PollStatus = ::poll(FD, FDCount, RemainingTimeout.count());
-  } while (PollStatus == -1 &&
+  } trong_khi (PollStatus == -1 &&
            getLastSocketErrorCode() == std::errc::interrupted);
 #endif
 
   // If ActiveFD equals -1 or CancelFD has data to be read then the operation
   // has been canceled by another thread
-  if (getActiveFD() == -1 || (CancelFD.has_value() && FD[1].revents & POLLIN))
-    return std::make_error_code(std::errc::operation_canceled);
+  nếu (getActiveFD() == -1 || (CancelFD.has_value() && FD[1].revents & POLLIN))
+    trả_về std::make_error_code(std::errc::operation_canceled);
 #ifdef _WIN32
-  if (PollStatus == SOCKET_ERROR)
-#else
-  if (PollStatus == -1)
+  nếu (PollStatus == SOCKET_ERROR)
+#không_thì
+  nếu (PollStatus == -1)
 #endif
-    return getLastSocketErrorCode();
-  if (PollStatus == 0)
-    return std::make_error_code(std::errc::timed_out);
-  if (FD[0].revents & POLLNVAL)
-    return std::make_error_code(std::errc::bad_file_descriptor);
-  return std::error_code();
+    trả_về getLastSocketErrorCode();
+  nếu (PollStatus == 0)
+    trả_về std::make_error_code(std::errc::timed_out);
+  nếu (FD[0].revents & POLLNVAL)
+    trả_về std::make_error_code(std::errc::bad_file_descriptor);
+  trả_về std::error_code();
 }
 
 Expected<std::unique_ptr<raw_socket_stream>>
 ListeningSocket::accept(const std::chrono::milliseconds &Timeout) {
-  auto getActiveFD = [this]() -> int { return FD; };
+  auto getActiveFD = [this]() -> số_nguyên { trả_về FD; };
   std::error_code TimeoutErr = manageTimeout(Timeout, getActiveFD, PipeFD[0]);
-  if (TimeoutErr)
-    return llvm::make_error<StringError>(TimeoutErr, "Timeout error");
+  nếu (TimeoutErr)
+    trả_về llvm::make_error<StringError>(TimeoutErr, "Timeout error");
 
-  int AcceptFD;
+  số_nguyên AcceptFD;
 #ifdef _WIN32
   SOCKET WinAcceptSock = ::accept(_get_osfhandle(FD), NULL, NULL);
   AcceptFD = _open_osfhandle(WinAcceptSock, 0);
-#else
+#không_thì
   AcceptFD = ::accept(FD, NULL, NULL);
 #endif
 
-  if (AcceptFD == -1)
-    return llvm::make_error<StringError>(getLastSocketErrorCode(),
+  nếu (AcceptFD == -1)
+    trả_về llvm::make_error<StringError>(getLastSocketErrorCode(),
                                          "Socket accept failed");
-  return std::make_unique<raw_socket_stream>(AcceptFD);
+  trả_về std::make_unique<raw_socket_stream>(AcceptFD);
 }
 
 void ListeningSocket::shutdown() {
-  int ObservedFD = FD.load();
+  số_nguyên ObservedFD = FD.load();
 
-  if (ObservedFD == -1)
-    return;
+  nếu (ObservedFD == -1)
+    trả_về;
 
   // If FD equals ObservedFD set FD to -1; If FD doesn't equal ObservedFD then
   // another thread is responsible for shutdown so return
-  if (!FD.compare_exchange_strong(ObservedFD, -1))
-    return;
+  nếu (!FD.compare_exchange_strong(ObservedFD, -1))
+    trả_về;
 
   ::close(ObservedFD);
   ::unlink(SocketPath.c_str());
@@ -345,9 +345,9 @@ ListeningSocket::~ListeningSocket() {
   // would occur as PipeFD's values would have to be changed to -1
   //
   // The move constructor sets PipeFD to -1
-  if (PipeFD[0] != -1)
+  nếu (PipeFD[0] != -1)
     ::close(PipeFD[0]);
-  if (PipeFD[1] != -1)
+  nếu (PipeFD[1] != -1)
     ::close(PipeFD[1]);
 }
 
@@ -355,7 +355,7 @@ ListeningSocket::~ListeningSocket() {
 //  raw_socket_stream
 //===----------------------------------------------------------------------===//
 
-raw_socket_stream::raw_socket_stream(int SocketFD)
+raw_socket_stream::raw_socket_stream(số_nguyên SocketFD)
     : raw_fd_stream(SocketFD, true) {}
 
 raw_socket_stream::~raw_socket_stream() = default;
@@ -365,20 +365,20 @@ raw_socket_stream::createConnectedUnix(StringRef SocketPath) {
 #ifdef _WIN32
   WSABalancer _;
 #endif // _WIN32
-  Expected<int> FD = getSocketFD(SocketPath);
-  if (!FD)
-    return FD.takeError();
-  return std::make_unique<raw_socket_stream>(*FD);
+  Expected<số_nguyên> FD = getSocketFD(SocketPath);
+  nếu (!FD)
+    trả_về FD.takeError();
+  trả_về std::make_unique<raw_socket_stream>(*FD);
 }
 
 ssize_t raw_socket_stream::read(char *Ptr, size_t Size,
                                 const std::chrono::milliseconds &Timeout) {
-  auto getActiveFD = [this]() -> int { return this->get_fd(); };
+  auto getActiveFD = [this]() -> số_nguyên { trả_về this->get_fd(); };
   std::error_code Err = manageTimeout(Timeout, getActiveFD);
   // Mimic raw_fd_stream::read error handling behavior
-  if (Err) {
+  nếu (Err) {
     raw_fd_stream::error_detected(Err);
-    return -1;
+    trả_về -1;
   }
-  return raw_fd_stream::read(Ptr, Size);
+  trả_về raw_fd_stream::read(Ptr, Size);
 }

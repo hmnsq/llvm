@@ -43,22 +43,22 @@ using namespace llvm;
 /// Parse a debug type string into a pair of the debug type and the debug level.
 /// The expected format is "type[:level]", where the level is an optional
 /// integer.
-static std::pair<std::string, std::optional<int>>
+static std::pair<std::string, std::optional<số_nguyên>>
 parseDebugType(StringRef DbgType) {
-  std::optional<int> Level;
+  std::optional<số_nguyên> Level;
   size_t ColonPos = DbgType.find(':');
-  if (ColonPos != StringRef::npos) {
+  nếu (ColonPos != StringRef::npos) {
     StringRef LevelStr = DbgType.substr(ColonPos + 1);
     DbgType = DbgType.take_front(ColonPos);
-    if (LevelStr.empty())
+    nếu (LevelStr.empty())
       Level = 0;
-    else {
-      int parsedLevel;
-      if (to_integer(LevelStr, parsedLevel, 10))
+    không_thì {
+      số_nguyên parsedLevel;
+      nếu (to_integer(LevelStr, parsedLevel, 10))
         Level = parsedLevel;
     }
   }
-  return std::make_pair(DbgType.str(), Level);
+  trả_về std::make_pair(DbgType.str(), Level);
 }
 
 // Even though LLVM might be built with NDEBUG, define symbols that the code
@@ -72,30 +72,30 @@ bool DebugFlag = false;
 /// 0 is a special level that acts as an opt-out for this specific debug type.
 /// If provided, the debug output is enabled only if the user specified a level
 /// at least as high as the provided level.
-static ManagedStatic<std::vector<std::pair<std::string, std::optional<int>>>>
+static ManagedStatic<std::vector<std::pair<std::string, std::optional<số_nguyên>>>>
     CurrentDebugType;
 
 /// Return true if the specified string is the debug type
 /// specified on the command line, or if none was specified on the command line
 /// with the -debug-only=X option.
-bool isCurrentDebugType(const char *DebugType, int Level) {
-  if (CurrentDebugType->empty())
-    return true;
+bool isCurrentDebugType(const char *DebugType, số_nguyên Level) {
+  nếu (CurrentDebugType->empty())
+    trả_về true;
   // Track if there is at least one debug type with a level, this is used
   // to allow to opt-out of some DebugType and leaving all the others enabled.
   bool HasEnabledDebugType = false;
   // See if DebugType is in list. Note: do not use find() as that forces us to
   // unnecessarily create an std::string instance.
-  for (auto &D : *CurrentDebugType) {
+  cho (auto &D : *CurrentDebugType) {
     HasEnabledDebugType =
         HasEnabledDebugType || (!D.second.has_value() || D.second.value() > 0);
-    if (D.first != DebugType)
+    nếu (D.first != DebugType)
       continue;
-    if (!D.second.has_value())
-      return true;
-    return D.second >= Level;
+    nếu (!D.second.has_value())
+      trả_về true;
+    trả_về D.second >= Level;
   }
-  return !HasEnabledDebugType;
+  trả_về !HasEnabledDebugType;
 }
 
 /// Set the current debug type, as if the -debug-only=X
@@ -111,7 +111,7 @@ void setCurrentDebugType(const char *Type) {
 void setCurrentDebugTypes(const char **Types, unsigned Count) {
   CurrentDebugType->clear();
   CurrentDebugType->reserve(Count);
-  for (const char *Type : ArrayRef(Types, Count))
+  cho (const char *Type : ArrayRef(Types, Count))
     CurrentDebugType->push_back(parseDebugType(Type));
 }
 
@@ -123,7 +123,7 @@ void setCurrentDebugTypes(const char **Types, unsigned Count) {
 namespace {
 struct CreateDebug {
   static void *call() {
-    return new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
+    trả_về new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
                                    cl::Hidden, cl::location(DebugFlag));
   }
 };
@@ -132,7 +132,7 @@ struct CreateDebug {
 //until program termination.
 struct CreateDebugBufferSize {
   static void *call() {
-    return new cl::opt<unsigned>(
+    trả_về new cl::opt<unsigned>(
         "debug-buffer-size",
         cl::desc("Buffer the last N characters of debug output "
                  "until program termination. "
@@ -151,12 +151,12 @@ namespace {
 
 struct DebugOnlyOpt {
   void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
+    nếu (Val.empty())
+      trả_về;
     DebugFlag = true;
     SmallVector<StringRef, 8> DbgTypes;
     StringRef(Val).split(DbgTypes, ',', -1, false);
-    for (auto DbgType : DbgTypes)
+    cho (auto DbgType : DbgTypes)
       CurrentDebugType->push_back(parseDebugType(DbgType));
   }
 };
@@ -167,7 +167,7 @@ static DebugOnlyOpt DebugOnlyOptLoc;
 namespace {
 struct CreateDebugOnly {
   static void *call() {
-    return new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
+    trả_về new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
         "debug-only",
         cl::desc(
             "Enable a specific type of debug output (comma separated list "
@@ -214,7 +214,7 @@ raw_ostream &llvm::dbgs() {
     dbgstream()
         : strm(errs(), "*** Debug Log Output ***\n",
                (!EnableDebugBuffering || !DebugFlag) ? 0 : *DebugBufferSize) {
-      if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+      nếu (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
         // TODO: Add a handler for SIGUSER1-type signals so the user can
         // force a debug dump.
         sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
@@ -223,20 +223,20 @@ raw_ostream &llvm::dbgs() {
     }
   } thestrm;
 
-  return thestrm.strm;
+  trả_về thestrm.strm;
 }
 
 void llvm::printDebugLog() {
-  if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+  nếu (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
     printDebugLogImpl();
 }
 
-#else
+#không_thì
 // Avoid "has no symbols" warning.
 namespace llvm {
   /// dbgs - Return errs().
   raw_ostream &dbgs() {
-    return errs();
+    trả_về errs();
   }
 }
 void llvm::initDebugOptions() {}

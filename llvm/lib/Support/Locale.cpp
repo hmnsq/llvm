@@ -6,12 +6,12 @@ namespace llvm {
 namespace sys {
 namespace locale {
 
-int columnWidth(StringRef Text) {
-  return llvm::sys::unicode::columnWidthUTF8(Text);
+số_nguyên columnWidth(StringRef Text) {
+  trả_về llvm::sys::unicode::columnWidthUTF8(Text);
 }
 
-bool isPrint(int UCS) {
-  return llvm::sys::unicode::isPrintable(UCS);
+bool isPrint(số_nguyên UCS) {
+  trả_về llvm::sys::unicode::isPrintable(UCS);
 }
 
 } // namespace locale

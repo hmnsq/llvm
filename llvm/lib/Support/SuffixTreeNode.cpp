@@ -15,30 +15,30 @@
 
 using namespace llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
+unsigned SuffixTreeNode::getStartIdx() const { trả_về StartIdx; }
 void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
 void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned SuffixTreeNode::getConcatLen() const { trả_về ConcatLen; }
 
 bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+  trả_về getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
+unsigned SuffixTreeInternalNode::getEndIdx() const { trả_về EndIdx; }
 void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
   assert(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { trả_về Link; }
 
 unsigned SuffixTreeLeafNode::getEndIdx() const {
   assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+  trả_về *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
+unsigned SuffixTreeLeafNode::getSuffixIdx() const { trả_về SuffixIdx; }
 void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
+unsigned SuffixTreeNode::getLeftLeafIdx() const { trả_về LeftLeafIdx; }
+unsigned SuffixTreeNode::getRightLeafIdx() const { trả_về RightLeafIdx; }
 void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
 void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }

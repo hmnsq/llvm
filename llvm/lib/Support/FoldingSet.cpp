@@ -25,9 +25,9 @@ using namespace llvm;
 // FoldingSetNodeIDRef Implementation
 
 bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
-  if (LHS.size() != RHS.size())
-    return LHS.size() < RHS.size();
-  return memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
+  nếu (LHS.size() != RHS.size())
+    trả_về LHS.size() < RHS.size();
+  trả_về memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
 }
 
 //===----------------------------------------------------------------------===//
@@ -40,33 +40,33 @@ void FoldingSetNodeID::AddString(StringRef String) {
   Bits.reserve(Bits.size() + NumInserts);
 
   Bits.push_back(Size);
-  if (!Size)
-    return;
+  nếu (!Size)
+    trả_về;
 
   unsigned Units = Size / 4;
   unsigned Pos = 0;
   const unsigned *Base = (const unsigned *)String.data();
 
   // If the string is aligned do a bulk transfer.
-  if (!((intptr_t)Base & 3)) {
+  nếu (!((intptr_t)Base & 3)) {
     Bits.append(Base, Base + Units);
     Pos = (Units + 1) * 4;
-  } else {
+  } không_thì {
     // Otherwise do it the hard way.
     // To be compatible with above bulk transfer, we need to take endianness
     // into account.
     static_assert(sys::IsBigEndianHost || sys::IsLittleEndianHost,
                   "Unexpected host endianness");
-    if (sys::IsBigEndianHost) {
-      for (Pos += 4; Pos <= Size; Pos += 4) {
+    nếu (sys::IsBigEndianHost) {
+      cho (Pos += 4; Pos <= Size; Pos += 4) {
         unsigned V = ((unsigned char)String[Pos - 4] << 24) |
                      ((unsigned char)String[Pos - 3] << 16) |
                      ((unsigned char)String[Pos - 2] << 8) |
                      (unsigned char)String[Pos - 1];
         Bits.push_back(V);
       }
-    } else { // Little-endian host
-      for (Pos += 4; Pos <= Size; Pos += 4) {
+    } không_thì { // Little-endian host
+      cho (Pos += 4; Pos <= Size; Pos += 4) {
         unsigned V = ((unsigned char)String[Pos - 1] << 24) |
                      ((unsigned char)String[Pos - 2] << 16) |
                      ((unsigned char)String[Pos - 3] << 8) |
@@ -91,7 +91,7 @@ void FoldingSetNodeID::AddString(StringRef String) {
     V = (V << 8) | (unsigned char)String[Size - 1];
     break;
   default:
-    return; // Nothing left.
+    trả_về; // Nothing left.
   }
 
   Bits.push_back(V);
@@ -105,7 +105,7 @@ FoldingSetNodeIDRef
 FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
   unsigned *New = Allocator.Allocate<unsigned>(Bits.size());
   llvm::uninitialized_copy(Bits, New);
-  return FoldingSetNodeIDRef(New, Bits.size());
+  trả_về FoldingSetNodeIDRef(New, Bits.size());
 }
 
 //===----------------------------------------------------------------------===//
@@ -127,8 +127,8 @@ FoldingSetBase::FoldingSetBase(FoldingSetBase &&Arg)
 }
 
 FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
-  if (this == &RHS)
-    return *this;
+  nếu (this == &RHS)
+    trả_về *this;
 
   incrementEpoch();
   RHS.incrementEpoch();
@@ -136,7 +136,7 @@ FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
   Buckets = std::exchange(RHS.Buckets, nullptr);
   NumBuckets = std::exchange(RHS.NumBuckets, 0);
   NumNodes = std::exchange(RHS.NumNodes, 0);
-  return *this;
+  trả_về *this;
 }
 
 FoldingSetBase::~FoldingSetBase() { free(Buckets); }
@@ -144,7 +144,7 @@ FoldingSetBase::~FoldingSetBase() { free(Buckets); }
 void FoldingSetBase::clear() {
   incrementEpoch();
   // Stale hashes are unreachable, so only the occupancy needs resetting.
-  if (NumBuckets)
+  nếu (NumBuckets)
     memset(Buckets, 0, NumBuckets * sizeof(FoldingSetNode *));
   NumNodes = 0;
 }
@@ -152,7 +152,7 @@ void FoldingSetBase::clear() {
 void FoldingSetBase::placeNode(FoldingSetNode *N, uint32_t Hash) {
   unsigned Mask = NumBuckets - 1;
   unsigned I = Hash & Mask;
-  while (Buckets[I]) {
+  trong_khi (Buckets[I]) {
     assert(Buckets[I] != N && "Node already in the folding set");
     I = (I + 1) & Mask;
   }
@@ -166,16 +166,16 @@ void FoldingSetBase::grow(unsigned MinNumBuckets) {
   assert(NewBucketCount > NumBuckets && "Can't shrink a folding set");
 
   FoldingSetBase Tmp(llvm::Log2_32(NewBucketCount));
-  for (unsigned I = 0; I != NumBuckets; ++I)
-    if (FoldingSetNode *N = Buckets[I])
+  cho (unsigned I = 0; I != NumBuckets; ++I)
+    nếu (FoldingSetNode *N = Buckets[I])
       Tmp.placeNode(N, N->getFoldingSetHash());
 
   *this = std::move(Tmp);
 }
 
 void FoldingSetBase::reserve(unsigned N) {
-  if (N * 4 <= NumBuckets * 3)
-    return;
+  nếu (N * 4 <= NumBuckets * 3)
+    trả_về;
   // N + (N + 2) / 3 is ceil(4N/3).
   grow(N + (N + 2) / 3);
 }
@@ -184,7 +184,7 @@ void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
   assert(N && "Cannot insert a null node");
   assert(Token && "Invalid token!");
   incrementEpoch();
-  if (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
+  nếu (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
     grow(NumBuckets * 2);
   uint32_t Hash = Token.Hash;
   placeNode(N, Hash);
@@ -193,14 +193,14 @@ void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
 
 bool FoldingSetBase::erase(FoldingSetNode *N) {
   uint32_t Hash = N->getFoldingSetHash();
-  if (Hash == FoldingSetNodeIDRef::NotAHash)
-    return false; // Never inserted.
+  nếu (Hash == FoldingSetNodeIDRef::NotAHash)
+    trả_về false; // Never inserted.
 
   unsigned Mask = NumBuckets - 1;
   unsigned I = Hash & Mask;
-  while (Buckets[I] != N) {
-    if (LLVM_UNLIKELY(!Buckets[I]))
-      return false; // Not in folding set.
+  trong_khi (Buckets[I] != N) {
+    nếu (LLVM_UNLIKELY(!Buckets[I]))
+      trả_về false; // Not in folding set.
     I = (I + 1) & Mask;
   }
 
@@ -208,9 +208,9 @@ bool FoldingSetBase::erase(FoldingSetNode *N) {
 
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  for (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
+  cho (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
     unsigned Ideal = Buckets[J]->getFoldingSetHash();
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+    nếu (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       Buckets[I] = Buckets[J];
       I = J;
     }
@@ -218,5 +218,5 @@ bool FoldingSetBase::erase(FoldingSetNode *N) {
   Buckets[I] = nullptr;
   N->setFoldingSetHash(FoldingSetNodeIDRef::NotAHash);
   --NumNodes;
-  return true;
+  trả_về true;
 }

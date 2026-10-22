@@ -24,116 +24,116 @@ std::string VersionTuple::getAsString() const {
     llvm::raw_string_ostream Out(Result);
     Out << *this;
   }
-  return Result;
+  trả_về Result;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  nếu (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  nếu (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  nếu (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  nếu (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  trả_về Out;
 }
 
 static bool parseInt(StringRef &input, unsigned &value) {
   assert(value == 0);
-  if (input.empty())
-    return true;
+  nếu (input.empty())
+    trả_về true;
 
   char next = input[0];
   input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
+  nếu (next < '0' || next > '9')
+    trả_về true;
   value = (unsigned)(next - '0');
 
-  while (!input.empty()) {
+  trong_khi (!input.empty()) {
     next = input[0];
-    if (next < '0' || next > '9')
-      return false;
+    nếu (next < '0' || next > '9')
+      trả_về false;
     input = input.substr(1);
     value = value * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  trả_về false;
 }
 
 bool VersionTuple::tryParse(StringRef input) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  nếu (parseInt(input, major))
+    trả_về true;
 
-  if (input.empty()) {
+  nếu (input.empty()) {
     *this = VersionTuple(major);
-    return false;
+    trả_về false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
+  nếu (input[0] != '.')
+    trả_về true;
   input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  nếu (parseInt(input, minor))
+    trả_về true;
 
-  if (input.empty()) {
+  nếu (input.empty()) {
     *this = VersionTuple(major, minor);
-    return false;
+    trả_về false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  nếu (!input.consume_front("."))
+    trả_về true;
+  nếu (parseInt(input, subminor))
+    trả_về true;
 
-  if (input.empty()) {
+  nếu (input.empty()) {
     *this = VersionTuple(major, minor, subminor);
-    return false;
+    trả_về false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  nếu (!input.consume_front("."))
+    trả_về true;
+  nếu (parseInt(input, build))
+    trả_về true;
+  nếu (build >= 1024 * 1024)
+    trả_về true;
 
-  if (input.empty()) {
+  nếu (input.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
-    return false;
+    trả_về false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  nếu (!input.consume_front("."))
+    trả_về true;
+  nếu (parseInt(input, subbuild))
+    trả_về true;
+  nếu (subbuild >= 1024)
+    trả_về true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  nếu (!input.empty())
+    trả_về true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  trả_về false;
 }
 
 VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+  nếu (HasSubbuild)
+    trả_về VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  nếu (HasBuild)
+    trả_về VersionTuple(NewMajor, Minor, Subminor, Build);
+  nếu (HasSubminor)
+    trả_về VersionTuple(NewMajor, Minor, Subminor);
+  nếu (HasMinor)
+    trả_về VersionTuple(NewMajor, Minor);
+  trả_về VersionTuple(NewMajor);
 }

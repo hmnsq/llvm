@@ -21,13 +21,13 @@ using namespace llvm;
 StringRef dxil::getResourceClassName(dxil::ResourceClass RC) {
   switch (RC) {
   case dxil::ResourceClass::SRV:
-    return "SRV";
+    trả_về "SRV";
   case dxil::ResourceClass::UAV:
-    return "UAV";
+    trả_về "UAV";
   case dxil::ResourceClass::CBuffer:
-    return "CBV";
+    trả_về "CBV";
   case dxil::ResourceClass::Sampler:
-    return "Sampler";
+    trả_về "Sampler";
   }
   llvm_unreachable("Invalid ResourceClass enum value");
 }

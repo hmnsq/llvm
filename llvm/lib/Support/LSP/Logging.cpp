@@ -17,7 +17,7 @@ void Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
 
 Logger &Logger::get() {
   static Logger Logger;
-  return Logger;
+  trả_về Logger;
 }
 
 void Logger::log(Level LogLevel, const char *Fmt,
@@ -25,8 +25,8 @@ void Logger::log(Level LogLevel, const char *Fmt,
   Logger &Logger = get();
 
   // Ignore messages with log levels below the current setting in the logger.
-  if (LogLevel < Logger.LogLevel)
-    return;
+  nếu (LogLevel < Logger.LogLevel)
+    trả_về;
 
   // An indicator character for each log level.
   const char *LogLevelIndicators = "DIE";

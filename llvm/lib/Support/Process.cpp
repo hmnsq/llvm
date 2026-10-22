@@ -32,7 +32,7 @@ using namespace sys;
 
 std::optional<std::string>
 Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+  trả_về FindInEnvPath(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
@@ -41,29 +41,29 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
   assert(!path::is_absolute(FileName));
   std::optional<std::string> FoundPath;
   std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+  nếu (!OptPath)
+    trả_về FoundPath;
 
   const char EnvPathSeparatorStr[] = {Separator, '\0'};
   SmallVector<StringRef, 8> Dirs;
   SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
+  cho (StringRef Dir : Dirs) {
+    nếu (Dir.empty())
       continue;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
+    nếu (any_of(IgnoreList, [&](StringRef S) { trả_về fs::equivalent(S, Dir); }))
       continue;
 
     SmallString<128> FilePath(Dir);
     path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
+    nếu (fs::exists(Twine(FilePath))) {
       FoundPath = std::string(FilePath);
       break;
     }
   }
 
-  return FoundPath;
+  trả_về FoundPath;
 }
 
 // clang-format off
@@ -105,15 +105,15 @@ static const char colorcodes[2][2][16][11] = {
 // may disable core dumps by calling Process::PreventCoreFiles().
 static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+bool Process::AreCoreFilesPrevented() { trả_về coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
+[[noreturn]] void Process::Exit(số_nguyên RetCode, bool NoCleanup) {
+  nếu (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
     CRC->HandleExit(RetCode);
 
-  if (NoCleanup)
+  nếu (NoCleanup)
     ExitNoCleanup(RetCode);
-  else
+  không_thì
     ::exit(RetCode);
 }
 

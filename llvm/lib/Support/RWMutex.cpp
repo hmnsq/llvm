@@ -15,26 +15,26 @@
 #include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
 #include "llvm/Support/Allocator.h"
 
-#if defined(LLVM_USE_RW_MUTEX_IMPL)
+#nếu defined(LLVM_USE_RW_MUTEX_IMPL)
 using namespace llvm;
 using namespace sys;
 
-#if !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
+#nếu !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
 // Define all methods as no-ops if threading is explicitly disabled
 
 RWMutexImpl::RWMutexImpl() = default;
 RWMutexImpl::~RWMutexImpl() = default;
 
-bool RWMutexImpl::lock_shared() { return true; }
-bool RWMutexImpl::unlock_shared() { return true; }
-bool RWMutexImpl::try_lock_shared() { return true; }
-bool RWMutexImpl::lock() { return true; }
-bool RWMutexImpl::unlock() { return true; }
-bool RWMutexImpl::try_lock() { return true; }
+bool RWMutexImpl::lock_shared() { trả_về true; }
+bool RWMutexImpl::unlock_shared() { trả_về true; }
+bool RWMutexImpl::try_lock_shared() { trả_về true; }
+bool RWMutexImpl::lock() { trả_về true; }
+bool RWMutexImpl::unlock() { trả_về true; }
+bool RWMutexImpl::try_lock() { trả_về true; }
 
-#else
+#không_thì
 
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
+#nếu defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
 
 #include <cassert>
 #include <cstdlib>
@@ -53,7 +53,7 @@ RWMutexImpl::RWMutexImpl()
 #endif
 
   // Initialize the rwlock
-  int errorcode = pthread_rwlock_init(rwlock, nullptr);
+  số_nguyên errorcode = pthread_rwlock_init(rwlock, nullptr);
   (void)errorcode;
   assert(errorcode == 0);
 
@@ -76,8 +76,8 @@ RWMutexImpl::lock_shared()
   pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
   assert(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_rdlock(rwlock);
-  return errorcode == 0;
+  số_nguyên errorcode = pthread_rwlock_rdlock(rwlock);
+  trả_về errorcode == 0;
 }
 
 bool
@@ -86,16 +86,16 @@ RWMutexImpl::unlock_shared()
   pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
   assert(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  số_nguyên errorcode = pthread_rwlock_unlock(rwlock);
+  trả_về errorcode == 0;
 }
 
 bool RWMutexImpl::try_lock_shared() {
   pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
   assert(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_tryrdlock(rwlock);
-  return errorcode == 0;
+  số_nguyên errorcode = pthread_rwlock_tryrdlock(rwlock);
+  trả_về errorcode == 0;
 }
 
 bool
@@ -104,8 +104,8 @@ RWMutexImpl::lock()
   pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
   assert(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_wrlock(rwlock);
-  return errorcode == 0;
+  số_nguyên errorcode = pthread_rwlock_wrlock(rwlock);
+  trả_về errorcode == 0;
 }
 
 bool
@@ -114,19 +114,19 @@ RWMutexImpl::unlock()
   pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
   assert(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  số_nguyên errorcode = pthread_rwlock_unlock(rwlock);
+  trả_về errorcode == 0;
 }
 
 bool RWMutexImpl::try_lock() {
   pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
   assert(rwlock != nullptr);
 
-  int errorcode = pthread_rwlock_trywrlock(rwlock);
-  return errorcode == 0;
+  số_nguyên errorcode = pthread_rwlock_trywrlock(rwlock);
+  trả_về errorcode == 0;
 }
 
-#else
+#không_thì
 
 RWMutexImpl::RWMutexImpl() : data_(new MutexImpl(false)) { }
 
@@ -135,27 +135,27 @@ RWMutexImpl::~RWMutexImpl() {
 }
 
 bool RWMutexImpl::lock_shared() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+  trả_về static_cast<MutexImpl *>(data_)->acquire();
 }
 
 bool RWMutexImpl::unlock_shared() {
-  return static_cast<MutexImpl *>(data_)->release();
+  trả_về static_cast<MutexImpl *>(data_)->release();
 }
 
 bool RWMutexImpl::try_lock_shared() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+  trả_về static_cast<MutexImpl *>(data_)->tryacquire();
 }
 
 bool RWMutexImpl::lock() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+  trả_về static_cast<MutexImpl *>(data_)->acquire();
 }
 
 bool RWMutexImpl::unlock() {
-  return static_cast<MutexImpl *>(data_)->release();
+  trả_về static_cast<MutexImpl *>(data_)->release();
 }
 
 bool RWMutexImpl::try_lock() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+  trả_về static_cast<MutexImpl *>(data_)->tryacquire();
 }
 
 #endif

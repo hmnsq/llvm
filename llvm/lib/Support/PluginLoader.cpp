@@ -27,7 +27,7 @@ struct Plugins {
 
 Plugins &getPlugins() {
   static Plugins P;
-  return P;
+  trả_về P;
 }
 
 } // anonymous namespace
@@ -36,10 +36,10 @@ void PluginLoader::operator=(const std::string &Filename) {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  nếu (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
+  } không_thì {
     P.List.push_back(Filename);
   }
 }
@@ -47,12 +47,12 @@ void PluginLoader::operator=(const std::string &Filename) {
 unsigned PluginLoader::getNumPlugins() {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  trả_về P.List.size();
 }
 
 std::string &PluginLoader::getPlugin(unsigned num) {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
   assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  trả_về P.List[num];
 }

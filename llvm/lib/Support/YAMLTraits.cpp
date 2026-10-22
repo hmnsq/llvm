@@ -39,7 +39,7 @@ IO::IO(void *Context) : Ctxt(Context) {}
 IO::~IO() = default;
 
 void *IO::getContext() const {
-  return Ctxt;
+  trả_về Ctxt;
 }
 
 void IO::setContext(void *Context) {
@@ -57,7 +57,7 @@ void IO::setAllowUnknownKeys(bool Allow) {
 Input::Input(StringRef InputContent, void *Ctxt,
              SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
     : IO(Ctxt), Strm(new Stream(InputContent, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+  nếu (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
@@ -65,69 +65,69 @@ Input::Input(StringRef InputContent, void *Ctxt,
 Input::Input(MemoryBufferRef Input, void *Ctxt,
              SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
     : IO(Ctxt), Strm(new Stream(Input, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+  nếu (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
 Input::~Input() = default;
 
-std::error_code Input::error() { return EC; }
+std::error_code Input::error() { trả_về EC; }
 
 bool Input::outputting() const {
-  return false;
+  trả_về false;
 }
 
 bool Input::setCurrentDocument() {
-  if (DocIterator != Strm->end()) {
+  nếu (DocIterator != Strm->end()) {
     Node *N = DocIterator->getRoot();
-    if (!N) {
+    nếu (!N) {
       EC = make_error_code(errc::invalid_argument);
-      return false;
+      trả_về false;
     }
 
-    if (isa<NullNode>(N)) {
+    nếu (isa<NullNode>(N)) {
       // Empty files are allowed and ignored
       ++DocIterator;
-      return setCurrentDocument();
+      trả_về setCurrentDocument();
     }
     releaseHNodeBuffers();
     TopNode = createHNodes(N);
     CurrentNode = TopNode;
-    return true;
+    trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 bool Input::nextDocument() {
-  return ++DocIterator != Strm->end();
+  trả_về ++DocIterator != Strm->end();
 }
 
 const Node *Input::getCurrentNode() const {
-  return CurrentNode ? CurrentNode->_node : nullptr;
+  trả_về CurrentNode ? CurrentNode->_node : nullptr;
 }
 
 bool Input::mapTag(StringRef Tag, bool Default) {
   // CurrentNode can be null if setCurrentDocument() was unable to
   // parse the document because it was invalid or empty.
-  if (!CurrentNode)
-    return false;
+  nếu (!CurrentNode)
+    trả_về false;
 
   std::string foundTag = CurrentNode->_node->getVerbatimTag();
-  if (foundTag.empty()) {
+  nếu (foundTag.empty()) {
     // If no tag found and 'Tag' is the default, say it was found.
-    return Default;
+    trả_về Default;
   }
   // Return true iff found tag matches supplied tag.
-  return Tag == foundTag;
+  trả_về Tag == foundTag;
 }
 
 void Input::beginMapping() {
-  if (EC)
-    return;
+  nếu (EC)
+    trả_về;
   // CurrentNode can be null if the document is empty.
   MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (MN) {
+  nếu (MN) {
     MN->ValidKeys.clear();
   }
 }
@@ -135,51 +135,51 @@ void Input::beginMapping() {
 std::vector<StringRef> Input::keys() {
   MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
   std::vector<StringRef> Ret;
-  if (!MN) {
+  nếu (!MN) {
     setError(CurrentNode, "not a mapping");
-    return Ret;
+    trả_về Ret;
   }
-  for (auto &P : MN->Mapping)
+  cho (auto &P : MN->Mapping)
     Ret.push_back(P.first());
-  return Ret;
+  trả_về Ret;
 }
 
 bool Input::preflightKey(StringRef Key, bool Required, bool, bool &UseDefault,
                          void *&SaveInfo) {
   UseDefault = false;
-  if (EC)
-    return false;
+  nếu (EC)
+    trả_về false;
 
   // CurrentNode is null for empty documents, which is an error in case required
   // nodes are present.
-  if (!CurrentNode) {
-    if (Required)
+  nếu (!CurrentNode) {
+    nếu (Required)
       EC = make_error_code(errc::invalid_argument);
-    else
+    không_thì
       UseDefault = true;
-    return false;
+    trả_về false;
   }
 
   MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  if (!MN) {
-    if (Required || !isa<EmptyHNode>(CurrentNode))
+  nếu (!MN) {
+    nếu (Required || !isa<EmptyHNode>(CurrentNode))
       setError(CurrentNode, "not a mapping");
-    else
+    không_thì
       UseDefault = true;
-    return false;
+    trả_về false;
   }
   MN->ValidKeys.push_back(Key.str());
   HNode *Value = MN->Mapping[Key].first;
-  if (!Value) {
-    if (Required)
+  nếu (!Value) {
+    nếu (Required)
       setError(CurrentNode, Twine("missing required key '") + Key + "'");
-    else
+    không_thì
       UseDefault = true;
-    return false;
+    trả_về false;
   }
   SaveInfo = CurrentNode;
   CurrentNode = Value;
-  return true;
+  trả_về true;
 }
 
 void Input::postflightKey(void *saveInfo) {
@@ -187,19 +187,19 @@ void Input::postflightKey(void *saveInfo) {
 }
 
 void Input::endMapping() {
-  if (EC)
-    return;
+  nếu (EC)
+    trả_về;
   // CurrentNode can be null if the document is empty.
   MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (!MN)
-    return;
-  for (const auto &NN : MN->Mapping) {
-    if (!is_contained(MN->ValidKeys, NN.first())) {
+  nếu (!MN)
+    trả_về;
+  cho (const auto &NN : MN->Mapping) {
+    nếu (!is_contained(MN->ValidKeys, NN.first())) {
       const SMRange &ReportLoc = NN.second.second;
-      if (!AllowUnknownKeys) {
+      nếu (!AllowUnknownKeys) {
         setError(ReportLoc, Twine("unknown key '") + NN.first() + "'");
         break;
-      } else
+      } không_thì
         reportWarning(ReportLoc, Twine("unknown key '") + NN.first() + "'");
     }
   }
@@ -210,49 +210,49 @@ void Input::beginFlowMapping() { beginMapping(); }
 void Input::endFlowMapping() { endMapping(); }
 
 unsigned Input::beginSequence() {
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
-    return SQ->Entries.size();
-  if (isa<EmptyHNode>(CurrentNode))
-    return 0;
+  nếu (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
+    trả_về SQ->Entries.size();
+  nếu (isa<EmptyHNode>(CurrentNode))
+    trả_về 0;
   // Treat case where there's a scalar "null" value as an empty sequence.
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (isNull(SN->value()))
-      return 0;
+  nếu (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
+    nếu (isNull(SN->value()))
+      trả_về 0;
   }
   // Any other type of HNode is an error.
   setError(CurrentNode, "not a sequence");
-  return 0;
+  trả_về 0;
 }
 
 void Input::endSequence() {
 }
 
 bool Input::preflightElement(unsigned Index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  nếu (EC)
+    trả_về false;
+  nếu (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     SaveInfo = CurrentNode;
     CurrentNode = SQ->Entries[Index];
-    return true;
+    trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 void Input::postflightElement(void *SaveInfo) {
   CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-unsigned Input::beginFlowSequence() { return beginSequence(); }
+unsigned Input::beginFlowSequence() { trả_về beginSequence(); }
 
 bool Input::preflightFlowElement(unsigned index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  nếu (EC)
+    trả_về false;
+  nếu (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     SaveInfo = CurrentNode;
     CurrentNode = SQ->Entries[index];
-    return true;
+    trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 void Input::postflightFlowElement(void *SaveInfo) {
@@ -267,81 +267,81 @@ void Input::beginEnumScalar() {
 }
 
 bool Input::matchEnumScalar(StringRef Str, bool) {
-  if (ScalarMatchFound)
-    return false;
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (SN->value() == Str) {
+  nếu (ScalarMatchFound)
+    trả_về false;
+  nếu (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
+    nếu (SN->value() == Str) {
       ScalarMatchFound = true;
-      return true;
+      trả_về true;
     }
   }
-  return false;
+  trả_về false;
 }
 
 bool Input::matchEnumFallback() {
-  if (ScalarMatchFound)
-    return false;
+  nếu (ScalarMatchFound)
+    trả_về false;
   ScalarMatchFound = true;
-  return true;
+  trả_về true;
 }
 
 void Input::endEnumScalar() {
-  if (!ScalarMatchFound) {
+  nếu (!ScalarMatchFound) {
     setError(CurrentNode, "unknown enumerated scalar");
   }
 }
 
 bool Input::beginBitSetScalar(bool &DoClear) {
   BitValuesUsed.clear();
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  nếu (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     BitValuesUsed.resize(SQ->Entries.size());
-  } else {
+  } không_thì {
     setError(CurrentNode, "expected sequence of bit values");
   }
   DoClear = true;
-  return true;
+  trả_về true;
 }
 
 bool Input::bitSetMatch(StringRef Str, bool) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  nếu (EC)
+    trả_về false;
+  nếu (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     unsigned Index = 0;
-    for (auto &N : SQ->Entries) {
-      if (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
-        if (SN->value() == Str) {
+    cho (auto &N : SQ->Entries) {
+      nếu (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
+        nếu (SN->value() == Str) {
           BitValuesUsed[Index] = true;
-          return true;
+          trả_về true;
         }
-      } else {
+      } không_thì {
         setError(CurrentNode, "unexpected scalar in sequence of bit values");
       }
       ++Index;
     }
-  } else {
+  } không_thì {
     setError(CurrentNode, "expected sequence of bit values");
   }
-  return false;
+  trả_về false;
 }
 
 void Input::endBitSetScalar() {
-  if (EC)
-    return;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  nếu (EC)
+    trả_về;
+  nếu (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     assert(BitValuesUsed.size() == SQ->Entries.size());
-    for (unsigned i = 0; i < SQ->Entries.size(); ++i) {
-      if (!BitValuesUsed[i]) {
+    cho (unsigned i = 0; i < SQ->Entries.size(); ++i) {
+      nếu (!BitValuesUsed[i]) {
         setError(SQ->Entries[i], "unknown bit value");
-        return;
+        trả_về;
       }
     }
   }
 }
 
 void Input::scalarString(StringRef &S, QuotingType) {
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
+  nếu (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
     S = SN->value();
-  } else {
+  } không_thì {
     setError(CurrentNode, "unexpected scalar");
   }
 }
@@ -358,12 +358,12 @@ void Input::setError(HNode *hnode, const Twine &message) {
 }
 
 NodeKind Input::getNodeKind() {
-  if (isa<ScalarHNode>(CurrentNode))
-    return NodeKind::Scalar;
-  else if (isa<MapHNode>(CurrentNode))
-    return NodeKind::Map;
-  else if (isa<SequenceHNode>(CurrentNode))
-    return NodeKind::Sequence;
+  nếu (isa<ScalarHNode>(CurrentNode))
+    trả_về NodeKind::Scalar;
+  không_thì nếu (isa<MapHNode>(CurrentNode))
+    trả_về NodeKind::Map;
+  không_thì nếu (isa<SequenceHNode>(CurrentNode))
+    trả_về NodeKind::Sequence;
   llvm_unreachable("Unsupported node kind");
 }
 
@@ -399,7 +399,7 @@ void Input::releaseHNodeBuffers() {
 
 void Input::saveAliasHNode(Node *N, HNode *HN) {
   StringRef Anchor = N->getAnchor();
-  if (!Anchor.empty())
+  nếu (!Anchor.empty())
     // YAML 1.2.2 - 3.2.2.2. Anchors and Aliases:
     //
     // An alias event refers to the most recent event in the serialization
@@ -415,13 +415,13 @@ Input::HNode *Input::createHNodes(Node *N) {
   case Node::NK_Scalar: {
     ScalarNode *SN = dyn_cast<ScalarNode>(N);
     StringRef KeyStr = SN->getValue(StringStorage);
-    if (!StringStorage.empty()) {
+    nếu (!StringStorage.empty()) {
       // Copy string to permanent storage
       KeyStr = StringStorage.str().copy(StringAllocator);
     }
     auto *SHNode = new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, KeyStr);
     saveAliasHNode(SN, SHNode);
-    return SHNode;
+    trả_về SHNode;
   }
   case Node::NK_BlockScalar: {
     BlockScalarNode *BSN = dyn_cast<BlockScalarNode>(N);
@@ -429,71 +429,71 @@ Input::HNode *Input::createHNodes(Node *N) {
     auto *BSHNode =
         new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ValueCopy);
     saveAliasHNode(BSN, BSHNode);
-    return BSHNode;
+    trả_về BSHNode;
   }
   case Node::NK_Sequence: {
     SequenceNode *SQ = dyn_cast<SequenceNode>(N);
     auto SQHNode = new (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
-    for (Node &SN : *SQ) {
+    cho (Node &SN : *SQ) {
       auto Entry = createHNodes(&SN);
-      if (EC)
+      nếu (EC)
         break;
       SQHNode->Entries.push_back(Entry);
     }
     saveAliasHNode(SQ, SQHNode);
-    return SQHNode;
+    trả_về SQHNode;
   }
   case Node::NK_Mapping: {
     MappingNode *Map = dyn_cast<MappingNode>(N);
     auto mapHNode = new (MapHNodeAllocator.Allocate()) MapHNode(N);
-    for (KeyValueNode &KVN : *Map) {
+    cho (KeyValueNode &KVN : *Map) {
       Node *KeyNode = KVN.getKey();
       ScalarNode *Key = dyn_cast_if_present<ScalarNode>(KeyNode);
       Node *Value = KVN.getValue();
-      if (!Key || !Value) {
-        if (!Key)
+      nếu (!Key || !Value) {
+        nếu (!Key)
           setError(KeyNode, "Map key must be a scalar");
-        if (!Value)
+        nếu (!Value)
           setError(KeyNode, "Map value must not be empty");
         break;
       }
       StringStorage.clear();
       StringRef KeyStr = Key->getValue(StringStorage);
-      if (!StringStorage.empty()) {
+      nếu (!StringStorage.empty()) {
         // Copy string to permanent storage
         KeyStr = StringStorage.str().copy(StringAllocator);
       }
-      if (mapHNode->Mapping.count(KeyStr))
+      nếu (mapHNode->Mapping.count(KeyStr))
         // From YAML spec: "The content of a mapping node is an unordered set of
         // key/value node pairs, with the restriction that each of the keys is
         // unique."
         setError(KeyNode, Twine("duplicated mapping key '") + KeyStr + "'");
       auto ValueHNode = createHNodes(Value);
-      if (EC)
+      nếu (EC)
         break;
       mapHNode->Mapping[KeyStr] =
           std::make_pair(std::move(ValueHNode), KeyNode->getSourceRange());
     }
     saveAliasHNode(Map, mapHNode);
-    return std::move(mapHNode);
+    trả_về std::move(mapHNode);
   }
   case Node::NK_Null:
     // TODO: Anchor is not set for NullNode in the parser. Update the parser to
     // faithfully preserve anchors.
-    return new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
+    trả_về new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
   case Node::NK_Alias: {
     AliasNode *AN = dyn_cast<AliasNode>(N);
     auto AliasName = AN->getName();
     auto AHN = AliasMap.find(AliasName);
-    if (AHN == AliasMap.end()) {
+    nếu (AHN == AliasMap.end()) {
       setError(AN, Twine("undefined alias '" + AliasName + "'"));
-      return nullptr;
+      trả_về nullptr;
     }
-    return AHN->second;
+    trả_về AHN->second;
   }
   default:
     setError(N, "unknown node kind");
-    return nullptr;
+    trả_về nullptr;
   }
 }
 
@@ -504,20 +504,20 @@ void Input::setError(const Twine &Message) {
 void Input::setAllowUnknownKeys(bool Allow) { AllowUnknownKeys = Allow; }
 
 bool Input::canElideEmptySequence() {
-  return false;
+  trả_về false;
 }
 
 //===----------------------------------------------------------------------===//
 //  Output
 //===----------------------------------------------------------------------===//
 
-Output::Output(raw_ostream &yout, void *context, int WrapColumn)
+Output::Output(raw_ostream &yout, void *context, số_nguyên WrapColumn)
     : IO(context), Out(yout), WrapColumn(WrapColumn) {}
 
 Output::~Output() = default;
 
 bool Output::outputting() const {
-  return true;
+  trả_về true;
 }
 
 void Output::beginMapping() {
@@ -527,25 +527,25 @@ void Output::beginMapping() {
 }
 
 bool Output::mapTag(StringRef Tag, bool Use) {
-  if (Use) {
+  nếu (Use) {
     // If this tag is being written inside a sequence we should write the start
     // of the sequence before writing the tag, otherwise the tag won't be
     // attached to the element in the sequence, but rather the sequence itself.
     bool SequenceElement = false;
-    if (StateStack.size() > 1) {
+    nếu (StateStack.size() > 1) {
       auto &E = StateStack[StateStack.size() - 2];
       SequenceElement = inSeqAnyElement(E) || inFlowSeqAnyElement(E);
     }
-    if (SequenceElement && StateStack.back() == inMapFirstKey) {
+    nếu (SequenceElement && StateStack.back() == inMapFirstKey) {
       newLineCheck();
-    } else {
+    } không_thì {
       output(" ");
     }
     output(Tag);
-    if (SequenceElement) {
+    nếu (SequenceElement) {
       // If we're writing the tag during the first element of a map, the tag
       // takes the place of the first element in the sequence.
-      if (StateStack.back() == inMapFirstKey) {
+      nếu (StateStack.back() == inMapFirstKey) {
         StateStack.pop_back();
         StateStack.push_back(inMapOtherKey);
       }
@@ -554,12 +554,12 @@ bool Output::mapTag(StringRef Tag, bool Use) {
       Padding = "\n";
     }
   }
-  return Use;
+  trả_về Use;
 }
 
 void Output::endMapping() {
   // If we did not map anything, we should explicitly emit an empty map
-  if (StateStack.back() == inMapFirstKey) {
+  nếu (StateStack.back() == inMapFirstKey) {
     Padding = PaddingBeforeContainer;
     newLineCheck();
     output("{}");
@@ -576,24 +576,24 @@ bool Output::preflightKey(StringRef Key, bool Required, bool SameAsDefault,
                           bool &UseDefault, void *&SaveInfo) {
   UseDefault = false;
   SaveInfo = nullptr;
-  if (Required || !SameAsDefault || WriteDefaultValues) {
+  nếu (Required || !SameAsDefault || WriteDefaultValues) {
     auto State = StateStack.back();
-    if (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
+    nếu (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
       flowKey(Key);
-    } else {
+    } không_thì {
       newLineCheck();
       paddedKey(Key);
     }
-    return true;
+    trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 void Output::postflightKey(void *) {
-  if (StateStack.back() == inMapFirstKey) {
+  nếu (StateStack.back() == inMapFirstKey) {
     StateStack.pop_back();
     StateStack.push_back(inMapOtherKey);
-  } else if (StateStack.back() == inFlowMapFirstKey) {
+  } không_thì nếu (StateStack.back() == inFlowMapFirstKey) {
     StateStack.pop_back();
     StateStack.push_back(inFlowMapOtherKey);
   }
@@ -616,9 +616,9 @@ void Output::beginDocuments() {
 }
 
 bool Output::preflightDocument(unsigned index) {
-  if (index > 0)
+  nếu (index > 0)
     outputUpToEndOfLine("\n---");
-  return true;
+  trả_về true;
 }
 
 void Output::postflightDocument() {
@@ -632,12 +632,12 @@ unsigned Output::beginSequence() {
   StateStack.push_back(inSeqFirstElement);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
-  return 0;
+  trả_về 0;
 }
 
 void Output::endSequence() {
   // If we did not emit anything, we should explicitly emit an empty sequence
-  if (StateStack.back() == inSeqFirstElement) {
+  nếu (StateStack.back() == inSeqFirstElement) {
     Padding = PaddingBeforeContainer;
     newLineCheck(/*EmptySequence=*/true);
     output("[]");
@@ -648,14 +648,14 @@ void Output::endSequence() {
 
 bool Output::preflightElement(unsigned, void *&SaveInfo) {
   SaveInfo = nullptr;
-  return true;
+  trả_về true;
 }
 
 void Output::postflightElement(void *) {
-  if (StateStack.back() == inSeqFirstElement) {
+  nếu (StateStack.back() == inSeqFirstElement) {
     StateStack.pop_back();
     StateStack.push_back(inSeqOtherElement);
-  } else if (StateStack.back() == inFlowSeqFirstElement) {
+  } không_thì nếu (StateStack.back() == inFlowSeqFirstElement) {
     StateStack.pop_back();
     StateStack.push_back(inFlowSeqOtherElement);
   }
@@ -667,7 +667,7 @@ unsigned Output::beginFlowSequence() {
   ColumnAtFlowStart = Column;
   output("[ ");
   NeedFlowSequenceComma = false;
-  return 0;
+  trả_về 0;
 }
 
 void Output::endFlowSequence() {
@@ -676,17 +676,17 @@ void Output::endFlowSequence() {
 }
 
 bool Output::preflightFlowElement(unsigned, void *&SaveInfo) {
-  if (NeedFlowSequenceComma)
+  nếu (NeedFlowSequenceComma)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  nếu (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int i = 0; i < ColumnAtFlowStart; ++i)
+    cho (số_nguyên i = 0; i < ColumnAtFlowStart; ++i)
       output(" ");
     Column = ColumnAtFlowStart;
     output("  ");
   }
   SaveInfo = nullptr;
-  return true;
+  trả_về true;
 }
 
 void Output::postflightFlowElement(void *) {
@@ -698,23 +698,23 @@ void Output::beginEnumScalar() {
 }
 
 bool Output::matchEnumScalar(StringRef Str, bool Match) {
-  if (Match && !EnumerationMatchFound) {
+  nếu (Match && !EnumerationMatchFound) {
     newLineCheck();
     outputUpToEndOfLine(Str);
     EnumerationMatchFound = true;
   }
-  return false;
+  trả_về false;
 }
 
 bool Output::matchEnumFallback() {
-  if (EnumerationMatchFound)
-    return false;
+  nếu (EnumerationMatchFound)
+    trả_về false;
   EnumerationMatchFound = true;
-  return true;
+  trả_về true;
 }
 
 void Output::endEnumScalar() {
-  if (!EnumerationMatchFound)
+  nếu (!EnumerationMatchFound)
     llvm_unreachable("bad runtime enum value");
 }
 
@@ -723,17 +723,17 @@ bool Output::beginBitSetScalar(bool &DoClear) {
   output("[ ");
   NeedBitValueComma = false;
   DoClear = false;
-  return true;
+  trả_về true;
 }
 
 bool Output::bitSetMatch(StringRef Str, bool Matches) {
-  if (Matches) {
-    if (NeedBitValueComma)
+  nếu (Matches) {
+    nếu (NeedBitValueComma)
       output(", ");
     output(Str);
     NeedBitValueComma = true;
   }
-  return false;
+  trả_về false;
 }
 
 void Output::endBitSetScalar() {
@@ -742,27 +742,27 @@ void Output::endBitSetScalar() {
 
 void Output::scalarString(StringRef &S, QuotingType MustQuote) {
   newLineCheck();
-  if (S.empty()) {
+  nếu (S.empty()) {
     // Print '' for the empty string because leaving the field empty is not
     // allowed.
     outputUpToEndOfLine("''");
-    return;
+    trả_về;
   }
   output(S, MustQuote);
   outputUpToEndOfLine("");
 }
 
 void Output::blockScalarString(StringRef &S) {
-  if (!StateStack.empty())
+  nếu (!StateStack.empty())
     newLineCheck();
   output(" |");
 
   unsigned Indent = StateStack.empty() ? 1 : StateStack.size();
 
   auto Buffer = MemoryBuffer::getMemBuffer(S, "", false);
-  for (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
+  cho (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
     outputNewLine();
-    for (unsigned I = 0; I < Indent; ++I) {
+    cho (unsigned I = 0; I < Indent; ++I) {
       output("  ");
     }
     output(*Lines);
@@ -771,8 +771,8 @@ void Output::blockScalarString(StringRef &S) {
 }
 
 void Output::scalarTag(std::string &Tag) {
-  if (Tag.empty())
-    return;
+  nếu (Tag.empty())
+    trả_về;
   newLineCheck();
   output(Tag);
   output(" ");
@@ -781,7 +781,7 @@ void Output::scalarTag(std::string &Tag) {
 void Output::setError(const Twine &message) {
 }
 
-std::error_code Output::error() { return {}; }
+std::error_code Output::error() { trả_về {}; }
 
 bool Output::canElideEmptySequence() {
   // Normally, with an optional key/value where the value is an empty sequence,
@@ -789,11 +789,11 @@ bool Output::canElideEmptySequence() {
   // if the key/value is the only thing in the map and the map is used in
   // a sequence.  This detects if the this sequence is the first key/value
   // in map that itself is embedded in a sequence.
-  if (StateStack.size() < 2)
-    return true;
-  if (StateStack.back() != inMapFirstKey)
-    return true;
-  return !inSeqAnyElement(StateStack[StateStack.size() - 2]);
+  nếu (StateStack.size() < 2)
+    trả_về true;
+  nếu (StateStack.back() != inMapFirstKey)
+    trả_về true;
+  trả_về !inSeqAnyElement(StateStack[StateStack.size() - 2]);
 }
 
 void Output::output(StringRef s) {
@@ -802,10 +802,10 @@ void Output::output(StringRef s) {
 }
 
 void Output::output(StringRef S, QuotingType MustQuote) {
-  if (MustQuote == QuotingType::None) {
+  nếu (MustQuote == QuotingType::None) {
     // Only quote if we must.
     output(S);
-    return;
+    trả_về;
   }
 
   StringLiteral Quote = MustQuote == QuotingType::Single ? StringLiteral("'")
@@ -816,10 +816,10 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   // characters may be present, and will be escaped using a variety of
   // unicode-scalar and special short-form escapes. This is handled in
   // yaml::escape.
-  if (MustQuote == QuotingType::Double) {
+  nếu (MustQuote == QuotingType::Double) {
     output(yaml::escape(S, /* EscapePrintable= */ false));
     output(Quote);
-    return;
+    trả_về;
   }
 
   unsigned i = 0;
@@ -829,8 +829,8 @@ void Output::output(StringRef S, QuotingType MustQuote) {
 
   // When using single-quoted strings, any single quote ' must be doubled to be
   // escaped.
-  while (j < End) {
-    if (S[j] == '\'') {                   // Escape quotes.
+  trong_khi (j < End) {
+    nếu (S[j] == '\'') {                   // Escape quotes.
       output(StringRef(&Base[i], j - i)); // "flush".
       output(StringLiteral("''"));        // Print it as ''
       i = j + 1;
@@ -843,7 +843,7 @@ void Output::output(StringRef S, QuotingType MustQuote) {
 
 void Output::outputUpToEndOfLine(StringRef s) {
   output(s);
-  if (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
+  nếu (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
                              !inFlowMapAnyKey(StateStack.back())))
     Padding = "\n";
 }
@@ -858,51 +858,51 @@ void Output::outputNewLine() {
 //
 
 void Output::newLineCheck(bool EmptySequence) {
-  if (Padding != "\n") {
+  nếu (Padding != "\n") {
     output(Padding);
     Padding = {};
-    return;
+    trả_về;
   }
   outputNewLine();
   Padding = {};
 
-  if (StateStack.size() == 0 || EmptySequence)
-    return;
+  nếu (StateStack.size() == 0 || EmptySequence)
+    trả_về;
 
   unsigned Indent = StateStack.size() - 1;
   bool PossiblyNestedSeq = false;
   auto I = StateStack.rbegin(), E = StateStack.rend();
 
-  if (inSeqAnyElement(*I)) {
+  nếu (inSeqAnyElement(*I)) {
     PossiblyNestedSeq = true; // Not possibly but always.
     ++Indent;
-  } else if (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
+  } không_thì nếu (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
              inFlowSeqAnyElement(*I)) {
     PossiblyNestedSeq = true;
     ++I; // Skip back().
   }
 
   unsigned OutputDashCount = 0;
-  if (PossiblyNestedSeq) {
+  nếu (PossiblyNestedSeq) {
     // Count up consecutive inSeqFirstElement from the end, unless
     // inSeqFirstElement is the top of nested sequence.
-    while (I != E) {
+    trong_khi (I != E) {
       // Don't count the top of nested sequence.
-      if (!inSeqAnyElement(*I))
+      nếu (!inSeqAnyElement(*I))
         break;
 
       ++OutputDashCount;
 
       // Stop counting if consecutive inSeqFirstElement ends.
-      if (*I++ != inSeqFirstElement)
+      nếu (*I++ != inSeqFirstElement)
         break;
     }
   }
 
-  for (unsigned I = OutputDashCount; I < Indent; ++I)
+  cho (unsigned I = OutputDashCount; I < Indent; ++I)
     output("  ");
 
-  for (unsigned I = 0; I < OutputDashCount; ++I)
+  cho (unsigned I = 0; I < OutputDashCount; ++I)
     output("- ");
 }
 
@@ -910,18 +910,18 @@ void Output::paddedKey(StringRef key) {
   output(key, needsQuotes(key, false));
   output(":");
   const char *spaces = "                ";
-  if (key.size() < strlen(spaces))
+  nếu (key.size() < strlen(spaces))
     Padding = &spaces[key.size()];
-  else
+  không_thì
     Padding = " ";
 }
 
 void Output::flowKey(StringRef Key) {
-  if (StateStack.back() == inFlowMapOtherKey)
+  nếu (StateStack.back() == inFlowMapOtherKey)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  nếu (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int I = 0; I < ColumnAtMapFlowStart; ++I)
+    cho (số_nguyên I = 0; I < ColumnAtMapFlowStart; ++I)
       output(" ");
     Column = ColumnAtMapFlowStart;
     output("  ");
@@ -933,19 +933,19 @@ void Output::flowKey(StringRef Key) {
 NodeKind Output::getNodeKind() { report_fatal_error("invalid call"); }
 
 bool Output::inSeqAnyElement(InState State) {
-  return State == inSeqFirstElement || State == inSeqOtherElement;
+  trả_về State == inSeqFirstElement || State == inSeqOtherElement;
 }
 
 bool Output::inFlowSeqAnyElement(InState State) {
-  return State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
+  trả_về State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
 }
 
 bool Output::inMapAnyKey(InState State) {
-  return State == inMapFirstKey || State == inMapOtherKey;
+  trả_về State == inMapFirstKey || State == inMapOtherKey;
 }
 
 bool Output::inFlowMapAnyKey(InState State) {
-  return State == inFlowMapFirstKey || State == inFlowMapOtherKey;
+  trả_về State == inFlowMapFirstKey || State == inFlowMapOtherKey;
 }
 
 //===----------------------------------------------------------------------===//
@@ -957,11 +957,11 @@ void ScalarTraits<bool>::output(const bool &Val, void *, raw_ostream &Out) {
 }
 
 StringRef ScalarTraits<bool>::input(StringRef Scalar, void *, bool &Val) {
-  if (std::optional<bool> Parsed = parseBool(Scalar)) {
+  nếu (std::optional<bool> Parsed = parseBool(Scalar)) {
     Val = *Parsed;
-    return StringRef();
+    trả_về StringRef();
   }
-  return "invalid boolean";
+  trả_về "invalid boolean";
 }
 
 void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
@@ -972,7 +972,7 @@ void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
 StringRef ScalarTraits<StringRef>::input(StringRef Scalar, void *,
                                          StringRef &Val) {
   Val = Scalar;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<std::string>::output(const std::string &Val, void *,
@@ -983,7 +983,7 @@ void ScalarTraits<std::string>::output(const std::string &Val, void *,
 StringRef ScalarTraits<std::string>::input(StringRef Scalar, void *,
                                            std::string &Val) {
   Val = Scalar.str();
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
@@ -995,12 +995,12 @@ void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
 
 StringRef ScalarTraits<uint8_t>::input(StringRef Scalar, void *, uint8_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFF)
-    return "out of range number";
+  nếu (getAsUnsignedInteger(Scalar, 0, n))
+    trả_về "invalid number";
+  nếu (n > 0xFF)
+    trả_về "out of range number";
   Val = n;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
@@ -1011,12 +1011,12 @@ void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
 StringRef ScalarTraits<uint16_t>::input(StringRef Scalar, void *,
                                         uint16_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFF)
-    return "out of range number";
+  nếu (getAsUnsignedInteger(Scalar, 0, n))
+    trả_về "invalid number";
+  nếu (n > 0xFFFF)
+    trả_về "out of range number";
   Val = n;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
@@ -1027,12 +1027,12 @@ void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
 StringRef ScalarTraits<uint32_t>::input(StringRef Scalar, void *,
                                         uint32_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range number";
+  nếu (getAsUnsignedInteger(Scalar, 0, n))
+    trả_về "invalid number";
+  nếu (n > 0xFFFFFFFFUL)
+    trả_về "out of range number";
   Val = n;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
@@ -1043,10 +1043,10 @@ void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
 StringRef ScalarTraits<uint64_t>::input(StringRef Scalar, void *,
                                         uint64_t &Val) {
   unsigned long long N;
-  if (getAsUnsignedInteger(Scalar, 0, N))
-    return "invalid number";
+  nếu (getAsUnsignedInteger(Scalar, 0, N))
+    trả_về "invalid number";
   Val = N;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
@@ -1057,12 +1057,12 @@ void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<int8_t>::input(StringRef Scalar, void *, int8_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > 127) || (N < -128))
-    return "out of range number";
+  nếu (getAsSignedInteger(Scalar, 0, N))
+    trả_về "invalid number";
+  nếu ((N > 127) || (N < -128))
+    trả_về "out of range number";
   Val = N;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
@@ -1072,12 +1072,12 @@ void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
 
 StringRef ScalarTraits<int16_t>::input(StringRef Scalar, void *, int16_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT16_MAX) || (N < INT16_MIN))
-    return "out of range number";
+  nếu (getAsSignedInteger(Scalar, 0, N))
+    trả_về "invalid number";
+  nếu ((N > INT16_MAX) || (N < INT16_MIN))
+    trả_về "out of range number";
   Val = N;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
@@ -1087,12 +1087,12 @@ void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
 
 StringRef ScalarTraits<int32_t>::input(StringRef Scalar, void *, int32_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT32_MAX) || (N < INT32_MIN))
-    return "out of range number";
+  nếu (getAsSignedInteger(Scalar, 0, N))
+    trả_về "invalid number";
+  nếu ((N > INT32_MAX) || (N < INT32_MIN))
+    trả_về "out of range number";
   Val = N;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
@@ -1102,10 +1102,10 @@ void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
 
 StringRef ScalarTraits<int64_t>::input(StringRef Scalar, void *, int64_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
+  nếu (getAsSignedInteger(Scalar, 0, N))
+    trả_về "invalid number";
   Val = N;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
@@ -1113,9 +1113,9 @@ void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
 }
 
 StringRef ScalarTraits<double>::input(StringRef Scalar, void *, double &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+  nếu (to_float(Scalar, Val))
+    trả_về StringRef();
+  trả_về "invalid floating point number";
 }
 
 void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
@@ -1123,9 +1123,9 @@ void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
 }
 
 StringRef ScalarTraits<float>::input(StringRef Scalar, void *, float &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+  nếu (to_float(Scalar, Val))
+    trả_về StringRef();
+  trả_về "invalid floating point number";
 }
 
 void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
@@ -1134,12 +1134,12 @@ void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex8>::input(StringRef Scalar, void *, Hex8 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex8 number";
-  if (n > 0xFF)
-    return "out of range hex8 number";
+  nếu (getAsUnsignedInteger(Scalar, 0, n))
+    trả_về "invalid hex8 number";
+  nếu (n > 0xFF)
+    trả_về "out of range hex8 number";
   Val = n;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
@@ -1148,12 +1148,12 @@ void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex16>::input(StringRef Scalar, void *, Hex16 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex16 number";
-  if (n > 0xFFFF)
-    return "out of range hex16 number";
+  nếu (getAsUnsignedInteger(Scalar, 0, n))
+    trả_về "invalid hex16 number";
+  nếu (n > 0xFFFF)
+    trả_về "out of range hex16 number";
   Val = n;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
@@ -1162,12 +1162,12 @@ void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex32>::input(StringRef Scalar, void *, Hex32 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex32 number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range hex32 number";
+  nếu (getAsUnsignedInteger(Scalar, 0, n))
+    trả_về "invalid hex32 number";
+  nếu (n > 0xFFFFFFFFUL)
+    trả_về "out of range hex32 number";
   Val = n;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
@@ -1176,10 +1176,10 @@ void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex64>::input(StringRef Scalar, void *, Hex64 &Val) {
   unsigned long long Num;
-  if (getAsUnsignedInteger(Scalar, 0, Num))
-    return "invalid hex64 number";
+  nếu (getAsUnsignedInteger(Scalar, 0, Num))
+    trả_về "invalid hex64 number";
   Val = Num;
-  return StringRef();
+  trả_về StringRef();
 }
 
 void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
@@ -1189,7 +1189,7 @@ void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
 
 StringRef ScalarTraits<VersionTuple>::input(StringRef Scalar, void *,
                                             VersionTuple &Val) {
-  if (Val.tryParse(Scalar))
-    return "invalid version format";
-  return StringRef();
+  nếu (Val.tryParse(Scalar))
+    trả_về "invalid version format";
+  trả_về StringRef();
 }

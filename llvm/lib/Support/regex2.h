@@ -130,29 +130,29 @@ typedef unsigned char cat_t;
  * main compiled-expression structure
  */
 struct re_guts {
-	int magic;
+	số_nguyên magic;
 #		define	MAGIC2	((('R'^0200)<<8)|'E')
 	sop *strip;		/* malloced area for strip */
-	int csetsize;		/* number of bits in a cset vector */
-	int ncsets;		/* number of csets in use */
+	số_nguyên csetsize;		/* number of bits in a cset vector */
+	số_nguyên ncsets;		/* number of csets in use */
 	cset *sets;		/* -> cset [ncsets] */
 	uch *setbits;		/* -> uch[csetsize][ncsets/CHAR_BIT] */
-	int cflags;		/* copy of llvm_regcomp() cflags argument */
+	số_nguyên cflags;		/* copy of llvm_regcomp() cflags argument */
 	sopno nstates;		/* = number of sops */
 	sopno firststate;	/* the initial OEND (normally 0) */
 	sopno laststate;	/* the final OEND */
-	int iflags;		/* internal flags */
+	số_nguyên iflags;		/* internal flags */
 #		define	USEBOL	01	/* used ^ */
 #		define	USEEOL	02	/* used $ */
 #		define	REGEX_BAD	04	/* something wrong */
-	int nbol;		/* number of ^ used */
-	int neol;		/* number of $ used */
-	int ncategories;	/* how many character categories */
+	số_nguyên nbol;		/* number of ^ used */
+	số_nguyên neol;		/* number of $ used */
+	số_nguyên ncategories;	/* how many character categories */
 	cat_t *categories;	/* ->catspace[-CHAR_MIN] */
 	char *must;		/* match must contain this string */
-	int mlen;		/* length of must */
+	số_nguyên mlen;		/* length of must */
 	size_t nsub;		/* copy of re_nsub */
-	int backrefs;		/* does it use back references? */
+	số_nguyên backrefs;		/* does it use back references? */
 	sopno nplus;		/* how deep does it nest +s? */
 	/* catspace must be last */
 	cat_t catspace[1];	/* actually [NC] */

@@ -49,10 +49,10 @@
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+static const char *regatoi(const llvm_regex_t *, char *, số_nguyên);
 
 static struct rerr {
-	int code;
+	số_nguyên code;
 	const char *name;
 	const char *explain;
 } rerrs[] = {
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(số_nguyên errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 	struct rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
+	số_nguyên target = errcode &~ REG_ITOA;
 	const char *s;
 	char convbuf[50];
 
-	if (errcode == REG_ATOI)
+	nếu (errcode == REG_ATOI)
 		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
+	không_thì {
+		cho (r = rerrs; r->code != 0; r++)
+			nếu (r->code == target)
 				break;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
+		nếu (errcode&REG_ITOA) {
+			nếu (r->code != 0) {
 				assert(strlen(r->name) < sizeof(convbuf));
 				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
+			} không_thì
 				(void)snprintf(convbuf, sizeof convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} không_thì
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	nếu (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	trả_về(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
 static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+regatoi(const llvm_regex_t *preg, char *localbuf, số_nguyên localbufsize)
 {
 	struct rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
+	cho (r = rerrs; r->code != 0; r++)
+		nếu (strcmp(r->name, preg->re_endp) == 0)
 			break;
-	if (r->code == 0)
-		return("0");
+	nếu (r->code == 0)
+		trả_về("0");
 
 	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	trả_về(localbuf);
 }

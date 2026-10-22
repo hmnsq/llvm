@@ -14,23 +14,23 @@ using namespace llvm;
 raw_ostream &RewriteBuffer::write(raw_ostream &Stream) const {
   // Walk RewriteRope chunks efficiently using MoveToNextPiece() instead of the
   // character iterator.
-  for (RopePieceBTreeIterator I = begin(), E = end(); I != E;
+  cho (RopePieceBTreeIterator I = begin(), E = end(); I != E;
        I.MoveToNextPiece())
     Stream << I.piece();
-  return Stream;
+  trả_về Stream;
 }
 
 /// Return true if this character is non-new-line whitespace:
 /// ' ', '\\t', '\\f', '\\v', '\\r'.
 static inline bool isWhitespaceExceptNL(unsigned char c) {
-  return c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
+  trả_về c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
 }
 
 void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
                                bool removeLineIfEmpty) {
   // Nothing to remove, exit early.
-  if (Size == 0)
-    return;
+  nếu (Size == 0)
+    trả_về;
 
   unsigned RealOffset = getMappedOffset(OrigOffset, true);
   assert(RealOffset + Size <= Buffer.size() && "Invalid location");
@@ -41,15 +41,15 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
   // Add a delta so that future changes are offset correctly.
   AddReplaceDelta(OrigOffset, -Size);
 
-  if (removeLineIfEmpty) {
+  nếu (removeLineIfEmpty) {
     // Find the line that the remove occurred and if it is completely empty
     // remove the line as well.
 
     iterator curLineStart = begin();
     unsigned curLineStartOffs = 0;
     iterator posI = begin();
-    for (unsigned i = 0; i != RealOffset; ++i) {
-      if (*posI == '\n') {
+    cho (unsigned i = 0; i != RealOffset; ++i) {
+      nếu (*posI == '\n') {
         curLineStart = posI;
         ++curLineStart;
         curLineStartOffs = i + 1;
@@ -59,11 +59,11 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
 
     unsigned lineSize = 0;
     posI = curLineStart;
-    while (posI != end() && isWhitespaceExceptNL(*posI)) {
+    trong_khi (posI != end() && isWhitespaceExceptNL(*posI)) {
       ++posI;
       ++lineSize;
     }
-    if (posI != end() && *posI == '\n') {
+    nếu (posI != end() && *posI == '\n') {
       Buffer.erase(curLineStartOffs, lineSize + 1 /* + '\n'*/);
       // FIXME: Here, the offset of the start of the line is supposed to be
       // expressed in terms of the original input not the "real" rewrite
@@ -84,8 +84,8 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
 void RewriteBuffer::InsertText(unsigned OrigOffset, StringRef Str,
                                bool InsertAfter) {
   // Nothing to insert, exit early.
-  if (Str.empty())
-    return;
+  nếu (Str.empty())
+    trả_về;
 
   unsigned RealOffset = getMappedOffset(OrigOffset, InsertAfter);
   Buffer.insert(RealOffset, Str.begin(), Str.end());
@@ -102,6 +102,6 @@ void RewriteBuffer::ReplaceText(unsigned OrigOffset, unsigned OrigLength,
   unsigned RealOffset = getMappedOffset(OrigOffset, true);
   Buffer.erase(RealOffset, OrigLength);
   Buffer.insert(RealOffset, NewStr.begin(), NewStr.end());
-  if (OrigLength != NewStr.size())
+  nếu (OrigLength != NewStr.size())
     AddReplaceDelta(OrigOffset, NewStr.size() - OrigLength);
 }

@@ -26,45 +26,45 @@ namespace llvm::IntegerInclusiveIntervalUtils {
 Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
   IntervalList Intervals;
 
-  if (Str.empty())
-    return std::move(Intervals);
+  nếu (Str.empty())
+    trả_về std::move(Intervals);
 
   // Regex to match either single number or interval "num1-num2".
   const Regex IntervalRegex("^([0-9]+)(-([0-9]+))?$");
 
-  for (StringRef Part : llvm::split(Str, Separator)) {
+  cho (StringRef Part : llvm::split(Str, Separator)) {
     Part = Part.trim();
-    if (Part.empty())
+    nếu (Part.empty())
       continue;
 
     SmallVector<StringRef, 4> Matches;
-    if (!IntervalRegex.match(Part, &Matches))
-      return createStringError(std::errc::invalid_argument,
+    nếu (!IntervalRegex.match(Part, &Matches))
+      trả_về createStringError(std::errc::invalid_argument,
                                "Invalid interval format: '%s'",
                                Part.str().c_str());
 
     int64_t Begin, End;
-    if (Matches[1].getAsInteger(10, Begin))
-      return createStringError(std::errc::invalid_argument,
+    nếu (Matches[1].getAsInteger(10, Begin))
+      trả_về createStringError(std::errc::invalid_argument,
                                "Failed to parse number: '%s'",
                                Matches[1].str().c_str());
 
-    if (!Matches[3].empty()) {
+    nếu (!Matches[3].empty()) {
       // Interval format "begin-end".
-      if (Matches[3].getAsInteger(10, End))
-        return createStringError(std::errc::invalid_argument,
+      nếu (Matches[3].getAsInteger(10, End))
+        trả_về createStringError(std::errc::invalid_argument,
                                  "Failed to parse number: '%s'",
                                  Matches[3].str().c_str());
-      if (Begin >= End)
-        return createStringError(std::errc::invalid_argument,
+      nếu (Begin >= End)
+        trả_về createStringError(std::errc::invalid_argument,
                                  "Invalid interval: %lld >= %lld", Begin, End);
-    } else
+    } không_thì
       // Single number.
       End = Begin;
 
     // Check ordering constraint (intervals must be in increasing order).
-    if (!Intervals.empty() && Begin <= Intervals.back().getEnd())
-      return createStringError(
+    nếu (!Intervals.empty() && Begin <= Intervals.back().getEnd())
+      trả_về createStringError(
           std::errc::invalid_argument,
           "Expected intervals to be in increasing order: %lld <= %lld", Begin,
           Intervals.back().getEnd());
@@ -72,28 +72,28 @@ Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
     Intervals.push_back(IntegerInclusiveInterval(Begin, End));
   }
 
-  return Intervals;
+  trả_về Intervals;
 }
 
 bool contains(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t Value) {
-  for (const IntegerInclusiveInterval &It : Intervals) {
-    if (It.contains(Value))
-      return true;
+  cho (const IntegerInclusiveInterval &It : Intervals) {
+    nếu (It.contains(Value))
+      trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 void printIntervals(raw_ostream &OS,
                     ArrayRef<IntegerInclusiveInterval> Intervals,
                     char Separator) {
-  if (Intervals.empty()) {
+  nếu (Intervals.empty()) {
     OS << "empty";
-    return;
+    trả_về;
   }
 
   std::string Sep(1, Separator);
   ListSeparator LS(Sep);
-  for (const IntegerInclusiveInterval &It : Intervals) {
+  cho (const IntegerInclusiveInterval &It : Intervals) {
     OS << LS;
     It.print(OS);
   }
@@ -101,25 +101,25 @@ void printIntervals(raw_ostream &OS,
 
 IntervalList
 mergeAdjacentIntervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
-  if (Intervals.empty())
-    return {};
+  nếu (Intervals.empty())
+    trả_về {};
 
   IntervalList Result;
   Result.push_back(Intervals[0]);
 
-  for (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
+  cho (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
     IntegerInclusiveInterval &Last = Result.back();
     // Check if current interval is adjacent to the last merged interval.
-    if (Current.getBegin() == Last.getEnd() + 1) {
+    nếu (Current.getBegin() == Last.getEnd() + 1) {
       // Merge by extending the end of the last interval.
       Last.setEnd(Current.getEnd());
-    } else {
+    } không_thì {
       // Not adjacent, add as separate interval.
       Result.push_back(Current);
     }
   }
 
-  return Result;
+  trả_về Result;
 }
 
 } // end namespace llvm::IntegerInclusiveIntervalUtils

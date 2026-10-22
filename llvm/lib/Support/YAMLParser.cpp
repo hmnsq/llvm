@@ -58,53 +58,53 @@ using EncodingInfo = std::pair<UnicodeEncodingForm, unsigned>;
 /// @returns An EncodingInfo indicating the Unicode encoding form of the input
 ///          and how long the byte order mark is if one exists.
 static EncodingInfo getUnicodeEncoding(StringRef Input) {
-  if (Input.empty())
-    return {UEF_Unknown, 0};
+  nếu (Input.empty())
+    trả_về {UEF_Unknown, 0};
 
   switch (uint8_t(Input[0])) {
   case 0x00:
-    if (Input.size() >= 4) {
-      if (  Input[1] == 0
+    nếu (Input.size() >= 4) {
+      nếu (  Input[1] == 0
          && uint8_t(Input[2]) == 0xFE
          && uint8_t(Input[3]) == 0xFF)
-        return {UEF_UTF32_BE, 4};
-      if (Input[1] == 0 && Input[2] == 0 && Input[3] != 0)
-        return {UEF_UTF32_BE, 0};
+        trả_về {UEF_UTF32_BE, 4};
+      nếu (Input[1] == 0 && Input[2] == 0 && Input[3] != 0)
+        trả_về {UEF_UTF32_BE, 0};
     }
 
-    if (Input.size() >= 2 && Input[1] != 0)
-      return {UEF_UTF16_BE, 0};
-    return {UEF_Unknown, 0};
+    nếu (Input.size() >= 2 && Input[1] != 0)
+      trả_về {UEF_UTF16_BE, 0};
+    trả_về {UEF_Unknown, 0};
   case 0xFF:
-    if (  Input.size() >= 4
+    nếu (  Input.size() >= 4
        && uint8_t(Input[1]) == 0xFE
        && Input[2] == 0
        && Input[3] == 0)
-      return {UEF_UTF32_LE, 4};
+      trả_về {UEF_UTF32_LE, 4};
 
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFE)
-      return {UEF_UTF16_LE, 2};
-    return {UEF_Unknown, 0};
+    nếu (Input.size() >= 2 && uint8_t(Input[1]) == 0xFE)
+      trả_về {UEF_UTF16_LE, 2};
+    trả_về {UEF_Unknown, 0};
   case 0xFE:
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFF)
-      return {UEF_UTF16_BE, 2};
-    return {UEF_Unknown, 0};
+    nếu (Input.size() >= 2 && uint8_t(Input[1]) == 0xFF)
+      trả_về {UEF_UTF16_BE, 2};
+    trả_về {UEF_Unknown, 0};
   case 0xEF:
-    if (  Input.size() >= 3
+    nếu (  Input.size() >= 3
        && uint8_t(Input[1]) == 0xBB
        && uint8_t(Input[2]) == 0xBF)
-      return {UEF_UTF8, 3};
-    return {UEF_Unknown, 0};
+      trả_về {UEF_UTF8, 3};
+    trả_về {UEF_Unknown, 0};
   }
 
   // It could still be utf-32 or utf-16.
-  if (Input.size() >= 4 && Input[1] == 0 && Input[2] == 0 && Input[3] == 0)
-    return {UEF_UTF32_LE, 0};
+  nếu (Input.size() >= 4 && Input[1] == 0 && Input[2] == 0 && Input[3] == 0)
+    trả_về {UEF_UTF32_LE, 0};
 
-  if (Input.size() >= 2 && Input[1] == 0)
-    return {UEF_UTF16_LE, 0};
+  nếu (Input.size() >= 2 && Input[1] == 0)
+    trả_về {UEF_UTF16_LE, 0};
 
-  return {UEF_UTF8, 0};
+  trả_về {UEF_UTF8, 0};
 }
 
 /// Pin the vtables to this file.
@@ -182,7 +182,7 @@ struct SimpleKey {
   bool IsRequired = false;
 
   bool operator ==(const SimpleKey &Other) {
-    return Tok == Other.Tok;
+    trả_về Tok == Other.Tok;
   }
 };
 
@@ -198,21 +198,21 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
   StringRef::iterator End = Range.end();
   // 1 byte: [0x00, 0x7f]
   // Bit pattern: 0xxxxxxx
-  if (Position < End && (*Position & 0x80) == 0) {
-    return {*Position, 1};
+  nếu (Position < End && (*Position & 0x80) == 0) {
+    trả_về {*Position, 1};
   }
   // 2 bytes: [0x80, 0x7ff]
   // Bit pattern: 110xxxxx 10xxxxxx
-  if (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
+  nếu (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
       ((*(Position + 1) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x1F) << 6) |
                           (*(Position + 1) & 0x3F);
-    if (codepoint >= 0x80)
-      return {codepoint, 2};
+    nếu (codepoint >= 0x80)
+      trả_về {codepoint, 2};
   }
   // 3 bytes: [0x8000, 0xffff]
   // Bit pattern: 1110xxxx 10xxxxxx 10xxxxxx
-  if (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
+  nếu (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x0F) << 12) |
@@ -220,13 +220,13 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                           (*(Position + 2) & 0x3F);
     // Codepoints between 0xD800 and 0xDFFF are invalid, as
     // they are high / low surrogate halves used by UTF-16.
-    if (codepoint >= 0x800 &&
+    nếu (codepoint >= 0x800 &&
         (codepoint < 0xD800 || codepoint > 0xDFFF))
-      return {codepoint, 3};
+      trả_về {codepoint, 3};
   }
   // 4 bytes: [0x10000, 0x10FFFF]
   // Bit pattern: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-  if (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
+  nếu (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80) &&
       ((*(Position + 3) & 0xC0) == 0x80)) {
@@ -234,10 +234,10 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                          ((*(Position + 1) & 0x3F) << 12) |
                          ((*(Position + 2) & 0x3F) << 6) |
                           (*(Position + 3) & 0x3F);
-    if (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
-      return {codepoint, 4};
+    nếu (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
+      trả_về {codepoint, 4};
   }
-  return {0, 0};
+  trả_về {0, 0};
 }
 
 namespace llvm {
@@ -263,30 +263,30 @@ public:
   }
 
   void setError(const Twine &Message, StringRef::iterator Position) {
-    if (Position >= End)
+    nếu (Position >= End)
       Position = End - 1;
 
     // propagate the error if possible
-    if (EC)
+    nếu (EC)
       *EC = make_error_code(std::errc::invalid_argument);
 
     // Don't print out more errors after the first one we encounter. The rest
     // are just the result of the first, and have no meaning.
-    if (!Failed)
+    nếu (!Failed)
       printError(SMLoc::getFromPointer(Position), SourceMgr::DK_Error, Message);
     Failed = true;
   }
 
   /// Returns true if an error occurred while parsing.
   bool failed() {
-    return Failed;
+    trả_về Failed;
   }
 
 private:
   void init(MemoryBufferRef Buffer);
 
   StringRef currentInput() {
-    return StringRef(Current, End - Current);
+    trả_về StringRef(Current, End - Current);
   }
 
   /// Decode a UTF-8 minimal well-formed code unit subsequence starting
@@ -296,7 +296,7 @@ private:
   /// code unit subsequence, then the Unicode scalar value is 0, and the length
   /// is 0.
   UTF8Decoded decodeUTF8(StringRef::iterator Position) {
-    return ::decodeUTF8(StringRef(Position, End - Position));
+    trả_về ::decodeUTF8(StringRef(Position, End - Position));
   }
 
   // The following functions are based on the gramar rules in the YAML spec. The
@@ -419,11 +419,11 @@ private:
 
   /// Unroll indentation in \a Indents back to \a Col. Creates BlockEnd
   ///        tokens if needed.
-  bool unrollIndent(int ToColumn);
+  bool unrollIndent(số_nguyên ToColumn);
 
   /// Increase indent to \a Col. Creates \a Kind token at \a InsertPoint
   ///        if needed.
-  bool rollIndent( int ToColumn
+  bool rollIndent( số_nguyên ToColumn
                  , Token::TokenKind Kind
                  , TokenQueueT::iterator InsertPoint);
 
@@ -531,7 +531,7 @@ private:
   StringRef::iterator End;
 
   /// Current YAML indentation level in spaces.
-  int Indent;
+  số_nguyên Indent;
 
   /// Current column number in Unicode code points.
   unsigned Column;
@@ -564,7 +564,7 @@ private:
   TokenQueueT TokenQueue;
 
   /// Indentation levels.
-  SmallVector<int, 4> Indents;
+  SmallVector<số_nguyên, 4> Indents;
 
   /// Potential simple keys.
   SmallVector<SimpleKey, 4> SimpleKeys;
@@ -578,21 +578,21 @@ private:
 /// encodeUTF8 - Encode \a UnicodeScalarValue in UTF-8 and append it to result.
 static void encodeUTF8( uint32_t UnicodeScalarValue
                       , SmallVectorImpl<char> &Result) {
-  if (UnicodeScalarValue <= 0x7F) {
+  nếu (UnicodeScalarValue <= 0x7F) {
     Result.push_back(UnicodeScalarValue & 0x7F);
-  } else if (UnicodeScalarValue <= 0x7FF) {
+  } không_thì nếu (UnicodeScalarValue <= 0x7FF) {
     uint8_t FirstByte = 0xC0 | ((UnicodeScalarValue & 0x7C0) >> 6);
     uint8_t SecondByte = 0x80 | (UnicodeScalarValue & 0x3F);
     Result.push_back(FirstByte);
     Result.push_back(SecondByte);
-  } else if (UnicodeScalarValue <= 0xFFFF) {
+  } không_thì nếu (UnicodeScalarValue <= 0xFFFF) {
     uint8_t FirstByte = 0xE0 | ((UnicodeScalarValue & 0xF000) >> 12);
     uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
     uint8_t ThirdByte = 0x80 | (UnicodeScalarValue & 0x3F);
     Result.push_back(FirstByte);
     Result.push_back(SecondByte);
     Result.push_back(ThirdByte);
-  } else if (UnicodeScalarValue <= 0x10FFFF) {
+  } không_thì nếu (UnicodeScalarValue <= 0x10FFFF) {
     uint8_t FirstByte = 0xF0 | ((UnicodeScalarValue & 0x1F0000) >> 18);
     uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0x3F000) >> 12);
     uint8_t ThirdByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
@@ -607,7 +607,7 @@ static void encodeUTF8( uint32_t UnicodeScalarValue
 bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
   SourceMgr SM;
   Scanner scanner(Input, SM);
-  while (true) {
+  trong_khi (true) {
     Token T = scanner.getNext();
     switch (T.Kind) {
     case Token::TK_StreamStart:
@@ -680,92 +680,92 @@ bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
       break;
     }
     OS << T.Range << "\n";
-    if (T.Kind == Token::TK_StreamEnd)
+    nếu (T.Kind == Token::TK_StreamEnd)
       break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    không_thì nếu (T.Kind == Token::TK_Error)
+      trả_về false;
   }
-  return true;
+  trả_về true;
 }
 
 bool yaml::scanTokens(StringRef Input) {
   SourceMgr SM;
   Scanner scanner(Input, SM);
-  while (true) {
+  trong_khi (true) {
     Token T = scanner.getNext();
-    if (T.Kind == Token::TK_StreamEnd)
+    nếu (T.Kind == Token::TK_StreamEnd)
       break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    không_thì nếu (T.Kind == Token::TK_Error)
+      trả_về false;
   }
-  return true;
+  trả_về true;
 }
 
 std::string yaml::escape(StringRef Input, bool EscapePrintable) {
   std::string EscapedInput;
-  for (StringRef::iterator i = Input.begin(), e = Input.end(); i != e; ++i) {
-    if (*i == '\\')
+  cho (StringRef::iterator i = Input.begin(), e = Input.end(); i != e; ++i) {
+    nếu (*i == '\\')
       EscapedInput += "\\\\";
-    else if (*i == '"')
+    không_thì nếu (*i == '"')
       EscapedInput += "\\\"";
-    else if (*i == 0)
+    không_thì nếu (*i == 0)
       EscapedInput += "\\0";
-    else if (*i == 0x07)
+    không_thì nếu (*i == 0x07)
       EscapedInput += "\\a";
-    else if (*i == 0x08)
+    không_thì nếu (*i == 0x08)
       EscapedInput += "\\b";
-    else if (*i == 0x09)
+    không_thì nếu (*i == 0x09)
       EscapedInput += "\\t";
-    else if (*i == 0x0A)
+    không_thì nếu (*i == 0x0A)
       EscapedInput += "\\n";
-    else if (*i == 0x0B)
+    không_thì nếu (*i == 0x0B)
       EscapedInput += "\\v";
-    else if (*i == 0x0C)
+    không_thì nếu (*i == 0x0C)
       EscapedInput += "\\f";
-    else if (*i == 0x0D)
+    không_thì nếu (*i == 0x0D)
       EscapedInput += "\\r";
-    else if (*i == 0x1B)
+    không_thì nếu (*i == 0x1B)
       EscapedInput += "\\e";
-    else if ((unsigned char)*i < 0x20) { // Control characters not handled above.
+    không_thì nếu ((unsigned char)*i < 0x20) { // Control characters not handled above.
       std::string HexStr = utohexstr(*i);
       EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-    } else if (*i & 0x80) { // UTF-8 multiple code unit subsequence.
+    } không_thì nếu (*i & 0x80) { // UTF-8 multiple code unit subsequence.
       UTF8Decoded UnicodeScalarValue
         = decodeUTF8(StringRef(i, Input.end() - i));
-      if (UnicodeScalarValue.second == 0) {
+      nếu (UnicodeScalarValue.second == 0) {
         // Found invalid char.
         SmallString<4> Val;
         encodeUTF8(0xFFFD, Val);
         llvm::append_range(EscapedInput, Val);
         // FIXME: Error reporting.
-        return EscapedInput;
+        trả_về EscapedInput;
       }
-      if (UnicodeScalarValue.first == 0x85)
+      nếu (UnicodeScalarValue.first == 0x85)
         EscapedInput += "\\N";
-      else if (UnicodeScalarValue.first == 0xA0)
+      không_thì nếu (UnicodeScalarValue.first == 0xA0)
         EscapedInput += "\\_";
-      else if (UnicodeScalarValue.first == 0x2028)
+      không_thì nếu (UnicodeScalarValue.first == 0x2028)
         EscapedInput += "\\L";
-      else if (UnicodeScalarValue.first == 0x2029)
+      không_thì nếu (UnicodeScalarValue.first == 0x2029)
         EscapedInput += "\\P";
-      else if (!EscapePrintable &&
+      không_thì nếu (!EscapePrintable &&
                sys::unicode::isPrintable(UnicodeScalarValue.first))
         EscapedInput += StringRef(i, UnicodeScalarValue.second);
-      else {
+      không_thì {
         std::string HexStr = utohexstr(UnicodeScalarValue.first);
-        if (HexStr.size() <= 2)
+        nếu (HexStr.size() <= 2)
           EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 4)
+        không_thì nếu (HexStr.size() <= 4)
           EscapedInput += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 8)
+        không_thì nếu (HexStr.size() <= 8)
           EscapedInput += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
       }
       i += UnicodeScalarValue.second - 1;
-    } else {
+    } không_thì {
       EscapedInput.push_back(*i);
     }
   }
-  return EscapedInput;
+  trả_về EscapedInput;
 }
 
 std::optional<bool> yaml::parseBool(StringRef S) {
@@ -774,83 +774,83 @@ std::optional<bool> yaml::parseBool(StringRef S) {
     switch (S.front()) {
     case 'y':
     case 'Y':
-      return true;
+      trả_về true;
     case 'n':
     case 'N':
-      return false;
+      trả_về false;
     default:
-      return std::nullopt;
+      trả_về std::nullopt;
     }
   case 2:
     switch (S.front()) {
     case 'O':
-      if (S[1] == 'N') // ON
-        return true;
+      nếu (S[1] == 'N') // ON
+        trả_về true;
       [[fallthrough]];
     case 'o':
-      if (S[1] == 'n') //[Oo]n
-        return true;
-      return std::nullopt;
+      nếu (S[1] == 'n') //[Oo]n
+        trả_về true;
+      trả_về std::nullopt;
     case 'N':
-      if (S[1] == 'O') // NO
-        return false;
+      nếu (S[1] == 'O') // NO
+        trả_về false;
       [[fallthrough]];
     case 'n':
-      if (S[1] == 'o') //[Nn]o
-        return false;
-      return std::nullopt;
+      nếu (S[1] == 'o') //[Nn]o
+        trả_về false;
+      trả_về std::nullopt;
     default:
-      return std::nullopt;
+      trả_về std::nullopt;
     }
   case 3:
     switch (S.front()) {
     case 'O':
-      if (S.drop_front() == "FF") // OFF
-        return false;
+      nếu (S.drop_front() == "FF") // OFF
+        trả_về false;
       [[fallthrough]];
     case 'o':
-      if (S.drop_front() == "ff") //[Oo]ff
-        return false;
-      return std::nullopt;
+      nếu (S.drop_front() == "ff") //[Oo]ff
+        trả_về false;
+      trả_về std::nullopt;
     case 'Y':
-      if (S.drop_front() == "ES") // YES
-        return true;
+      nếu (S.drop_front() == "ES") // YES
+        trả_về true;
       [[fallthrough]];
     case 'y':
-      if (S.drop_front() == "es") //[Yy]es
-        return true;
-      return std::nullopt;
+      nếu (S.drop_front() == "es") //[Yy]es
+        trả_về true;
+      trả_về std::nullopt;
     default:
-      return std::nullopt;
+      trả_về std::nullopt;
     }
   case 4:
     switch (S.front()) {
     case 'T':
-      if (S.drop_front() == "RUE") // TRUE
-        return true;
+      nếu (S.drop_front() == "RUE") // TRUE
+        trả_về true;
       [[fallthrough]];
     case 't':
-      if (S.drop_front() == "rue") //[Tt]rue
-        return true;
-      return std::nullopt;
+      nếu (S.drop_front() == "rue") //[Tt]rue
+        trả_về true;
+      trả_về std::nullopt;
     default:
-      return std::nullopt;
+      trả_về std::nullopt;
     }
   case 5:
     switch (S.front()) {
     case 'F':
-      if (S.drop_front() == "ALSE") // FALSE
-        return false;
+      nếu (S.drop_front() == "ALSE") // FALSE
+        trả_về false;
       [[fallthrough]];
     case 'f':
-      if (S.drop_front() == "alse") //[Ff]alse
-        return false;
-      return std::nullopt;
+      nếu (S.drop_front() == "alse") //[Ff]alse
+        trả_về false;
+      trả_về std::nullopt;
     default:
-      return std::nullopt;
+      trả_về std::nullopt;
     }
   default:
-    return std::nullopt;
+    trả_về std::nullopt;
   }
 }
 
@@ -887,13 +887,13 @@ Token &Scanner::peekNext() {
   // If the current token is a possible simple key, keep parsing until we
   // can confirm.
   bool NeedMore = false;
-  while (true) {
-    if (TokenQueue.empty() || NeedMore) {
-      if (!fetchMoreTokens()) {
+  trong_khi (true) {
+    nếu (TokenQueue.empty() || NeedMore) {
+      nếu (!fetchMoreTokens()) {
         TokenQueue.clear();
         SimpleKeys.clear();
         TokenQueue.push_back(Token());
-        return TokenQueue.front();
+        trả_về TokenQueue.front();
       }
     }
     assert(!TokenQueue.empty() &&
@@ -902,40 +902,40 @@ Token &Scanner::peekNext() {
     removeStaleSimpleKeyCandidates();
     SimpleKey SK;
     SK.Tok = TokenQueue.begin();
-    if (!is_contained(SimpleKeys, SK))
+    nếu (!is_contained(SimpleKeys, SK))
       break;
-    else
+    không_thì
       NeedMore = true;
   }
-  return TokenQueue.front();
+  trả_về TokenQueue.front();
 }
 
 Token Scanner::getNext() {
   Token Ret = peekNext();
   // TokenQueue can be empty if there was an error getting the next token.
-  if (!TokenQueue.empty())
+  nếu (!TokenQueue.empty())
     TokenQueue.pop_front();
 
   // There cannot be any referenced Token's if the TokenQueue is empty. So do a
   // quick deallocation of them all.
-  if (TokenQueue.empty())
+  nếu (TokenQueue.empty())
     TokenQueue.resetAlloc();
 
-  return Ret;
+  trả_về Ret;
 }
 
 StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
+  nếu (Position == End)
+    trả_về Position;
   // Check 7 bit c-printable - b-char.
-  if (   *Position == 0x09
+  nếu (   *Position == 0x09
       || (*Position >= 0x20 && *Position <= 0x7E))
-    return Position + 1;
+    trả_về Position + 1;
 
   // Check for valid UTF-8.
-  if (uint8_t(*Position) & 0x80) {
+  nếu (uint8_t(*Position) & 0x80) {
     UTF8Decoded u8d = decodeUTF8(Position);
-    if (   u8d.second != 0
+    nếu (   u8d.second != 0
         && u8d.first != 0xFEFF
         && ( u8d.first == 0x85
           || ( u8d.first >= 0xA0
@@ -944,58 +944,58 @@ StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
             && u8d.first <= 0xFFFD)
           || ( u8d.first >= 0x10000
             && u8d.first <= 0x10FFFF)))
-      return Position + u8d.second;
+      trả_về Position + u8d.second;
   }
-  return Position;
+  trả_về Position;
 }
 
 StringRef::iterator Scanner::skip_b_break(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == 0x0D) {
-    if (Position + 1 != End && *(Position + 1) == 0x0A)
-      return Position + 2;
-    return Position + 1;
+  nếu (Position == End)
+    trả_về Position;
+  nếu (*Position == 0x0D) {
+    nếu (Position + 1 != End && *(Position + 1) == 0x0A)
+      trả_về Position + 2;
+    trả_về Position + 1;
   }
 
-  if (*Position == 0x0A)
-    return Position + 1;
-  return Position;
+  nếu (*Position == 0x0A)
+    trả_về Position + 1;
+  trả_về Position;
 }
 
 StringRef::iterator Scanner::skip_s_space(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ')
-    return Position + 1;
-  return Position;
+  nếu (Position == End)
+    trả_về Position;
+  nếu (*Position == ' ')
+    trả_về Position + 1;
+  trả_về Position;
 }
 
 StringRef::iterator Scanner::skip_s_white(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position + 1;
-  return Position;
+  nếu (Position == End)
+    trả_về Position;
+  nếu (*Position == ' ' || *Position == '\t')
+    trả_về Position + 1;
+  trả_về Position;
 }
 
 StringRef::iterator Scanner::skip_ns_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position;
-  return skip_nb_char(Position);
+  nếu (Position == End)
+    trả_về Position;
+  nếu (*Position == ' ' || *Position == '\t')
+    trả_về Position;
+  trả_về skip_nb_char(Position);
 }
 
 StringRef::iterator Scanner::skip_while( SkipWhileFunc Func
                                        , StringRef::iterator Position) {
-  while (true) {
+  trong_khi (true) {
     StringRef::iterator i = (this->*Func)(Position);
-    if (i == Position)
+    nếu (i == Position)
       break;
     Position = i;
   }
-  return Position;
+  trả_về Position;
 }
 
 void Scanner::advanceWhile(SkipWhileFunc Func) {
@@ -1004,44 +1004,44 @@ void Scanner::advanceWhile(SkipWhileFunc Func) {
   Current = Final;
 }
 
-static bool is_ns_hex_digit(const char C) { return isAlnum(C); }
+static bool is_ns_hex_digit(const char C) { trả_về isAlnum(C); }
 
-static bool is_ns_word_char(const char C) { return C == '-' || isAlpha(C); }
+static bool is_ns_word_char(const char C) { trả_về C == '-' || isAlpha(C); }
 
 void Scanner::scan_ns_uri_char() {
-  while (true) {
-    if (Current == End)
+  trong_khi (true) {
+    nếu (Current == End)
       break;
-    if ((*Current == '%' && Current + 2 < End &&
+    nếu ((*Current == '%' && Current + 2 < End &&
          is_ns_hex_digit(*(Current + 1)) && is_ns_hex_digit(*(Current + 2))) ||
         is_ns_word_char(*Current) ||
         StringRef(Current, 1).find_first_of("#;/?:@&=+$,_.!~*'()[]") !=
             StringRef::npos) {
       ++Current;
       ++Column;
-    } else {
+    } không_thì {
       break;
     }
   }
 }
 
 bool Scanner::consume(uint32_t Expected) {
-  if (Expected >= 0x80) {
+  nếu (Expected >= 0x80) {
     setError("Cannot consume non-ascii characters", Current);
-    return false;
+    trả_về false;
   }
-  if (Current == End)
-    return false;
-  if (uint8_t(*Current) >= 0x80) {
+  nếu (Current == End)
+    trả_về false;
+  nếu (uint8_t(*Current) >= 0x80) {
     setError("Cannot consume non-ascii characters", Current);
-    return false;
+    trả_về false;
   }
-  if (uint8_t(*Current) == Expected) {
+  nếu (uint8_t(*Current) == Expected) {
     ++Current;
     ++Column;
-    return true;
+    trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 void Scanner::skip(uint32_t Distance) {
@@ -1051,42 +1051,42 @@ void Scanner::skip(uint32_t Distance) {
 }
 
 bool Scanner::isBlankOrBreak(StringRef::iterator Position) {
-  if (Position == End)
-    return false;
-  return *Position == ' ' || *Position == '\t' || *Position == '\r' ||
+  nếu (Position == End)
+    trả_về false;
+  trả_về *Position == ' ' || *Position == '\t' || *Position == '\r' ||
          *Position == '\n';
 }
 
 bool Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
-  if (Position == End || isBlankOrBreak(Position))
-    return false;
-  if (FlowLevel &&
+  nếu (Position == End || isBlankOrBreak(Position))
+    trả_về false;
+  nếu (FlowLevel &&
       StringRef(Position, 1).find_first_of(",[]{}") != StringRef::npos)
-    return false;
-  return true;
+    trả_về false;
+  trả_về true;
 }
 
 bool Scanner::isLineEmpty(StringRef Line) {
-  for (const auto *Position = Line.begin(); Position != Line.end(); ++Position)
-    if (!isBlankOrBreak(Position))
-      return false;
-  return true;
+  cho (const auto *Position = Line.begin(); Position != Line.end(); ++Position)
+    nếu (!isBlankOrBreak(Position))
+      trả_về false;
+  trả_về true;
 }
 
 bool Scanner::consumeLineBreakIfPresent() {
   auto Next = skip_b_break(Current);
-  if (Next == Current)
-    return false;
+  nếu (Next == Current)
+    trả_về false;
   Column = 0;
   ++Line;
   Current = Next;
-  return true;
+  trả_về true;
 }
 
 void Scanner::saveSimpleKeyCandidate( TokenQueueT::iterator Tok
                                     , unsigned AtColumn
                                     , bool IsRequired) {
-  if (IsSimpleKeyAllowed) {
+  nếu (IsSimpleKeyAllowed) {
     SimpleKey SK;
     SK.Tok = Tok;
     SK.Line = Line;
@@ -1098,46 +1098,46 @@ void Scanner::saveSimpleKeyCandidate( TokenQueueT::iterator Tok
 }
 
 void Scanner::removeStaleSimpleKeyCandidates() {
-  for (SmallVectorImpl<SimpleKey>::iterator i = SimpleKeys.begin();
+  cho (SmallVectorImpl<SimpleKey>::iterator i = SimpleKeys.begin();
                                             i != SimpleKeys.end();) {
-    if (i->Line != Line || i->Column + 1024 < Column) {
-      if (i->IsRequired)
+    nếu (i->Line != Line || i->Column + 1024 < Column) {
+      nếu (i->IsRequired)
         setError( "Could not find expected : for simple key"
                 , i->Tok->Range.begin());
       i = SimpleKeys.erase(i);
-    } else {
+    } không_thì {
       ++i;
     }
   }
 }
 
 void Scanner::removeSimpleKeyCandidatesOnFlowLevel(unsigned Level) {
-  if (!SimpleKeys.empty() && (SimpleKeys.end() - 1)->FlowLevel == Level)
+  nếu (!SimpleKeys.empty() && (SimpleKeys.end() - 1)->FlowLevel == Level)
     SimpleKeys.pop_back();
 }
 
-bool Scanner::unrollIndent(int ToColumn) {
+bool Scanner::unrollIndent(số_nguyên ToColumn) {
   Token T;
   // Indentation is ignored in flow.
-  if (FlowLevel != 0)
-    return true;
+  nếu (FlowLevel != 0)
+    trả_về true;
 
-  while (Indent > ToColumn) {
+  trong_khi (Indent > ToColumn) {
     T.Kind = Token::TK_BlockEnd;
     T.Range = StringRef(Current, 1);
     TokenQueue.push_back(T);
     Indent = Indents.pop_back_val();
   }
 
-  return true;
+  trả_về true;
 }
 
-bool Scanner::rollIndent( int ToColumn
+bool Scanner::rollIndent( số_nguyên ToColumn
                         , Token::TokenKind Kind
                         , TokenQueueT::iterator InsertPoint) {
-  if (FlowLevel)
-    return true;
-  if (Indent < ToColumn) {
+  nếu (FlowLevel)
+    trả_về true;
+  nếu (Indent < ToColumn) {
     Indents.push_back(Indent);
     Indent = ToColumn;
 
@@ -1146,17 +1146,17 @@ bool Scanner::rollIndent( int ToColumn
     T.Range = StringRef(Current, 0);
     TokenQueue.insert(InsertPoint, T);
   }
-  return true;
+  trả_về true;
 }
 
 void Scanner::skipComment() {
-  if (Current == End || *Current != '#')
-    return;
-  while (true) {
+  nếu (Current == End || *Current != '#')
+    trả_về;
+  trong_khi (true) {
     // This may skip more than one byte, thus Column is only incremented
     // for code points.
     StringRef::iterator I = skip_nb_char(Current);
-    if (I == Current)
+    nếu (I == Current)
       break;
     Current = I;
     ++Column;
@@ -1164,8 +1164,8 @@ void Scanner::skipComment() {
 }
 
 void Scanner::scanToNextToken() {
-  while (true) {
-    while (Current != End && (*Current == ' ' || *Current == '\t')) {
+  trong_khi (true) {
+    trong_khi (Current != End && (*Current == ' ' || *Current == '\t')) {
       skip(1);
     }
 
@@ -1173,13 +1173,13 @@ void Scanner::scanToNextToken() {
 
     // Skip EOL.
     StringRef::iterator i = skip_b_break(Current);
-    if (i == Current)
+    nếu (i == Current)
       break;
     Current = i;
     ++Line;
     Column = 0;
     // New lines may start a simple key.
-    if (!FlowLevel)
+    nếu (!FlowLevel)
       IsSimpleKeyAllowed = true;
   }
 }
@@ -1194,12 +1194,12 @@ bool Scanner::scanStreamStart() {
   T.Range = StringRef(Current, EI.second);
   TokenQueue.push_back(T);
   Current += EI.second;
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanStreamEnd() {
   // Force an ending new line if one isn't present.
-  if (Column != 0) {
+  nếu (Column != 0) {
     Column = 0;
     ++Line;
   }
@@ -1213,7 +1213,7 @@ bool Scanner::scanStreamEnd() {
   T.Kind = Token::TK_StreamEnd;
   T.Range = StringRef(Current, 0);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanDirective() {
@@ -1231,22 +1231,22 @@ bool Scanner::scanDirective() {
   Current = skip_while(&Scanner::skip_s_white, Current);
 
   Token T;
-  if (Name == "YAML") {
+  nếu (Name == "YAML") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_VersionDirective;
     T.Range = StringRef(Start, Current - Start);
     TokenQueue.push_back(T);
-    return true;
-  } else if(Name == "TAG") {
+    trả_về true;
+  } không_thì nếu(Name == "TAG") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     Current = skip_while(&Scanner::skip_s_white, Current);
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_TagDirective;
     T.Range = StringRef(Start, Current - Start);
     TokenQueue.push_back(T);
-    return true;
+    trả_về true;
   }
-  return false;
+  trả_về false;
 }
 
 bool Scanner::scanDocumentIndicator(bool IsStart) {
@@ -1260,7 +1260,7 @@ bool Scanner::scanDocumentIndicator(bool IsStart) {
   T.Range = StringRef(Current, 3);
   skip(3);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanFlowCollectionStart(bool IsSequence) {
@@ -1279,7 +1279,7 @@ bool Scanner::scanFlowCollectionStart(bool IsSequence) {
   // Adjacent values are allowed in flows only after JSON-style keys.
   IsAdjacentValueAllowedInFlow = false;
   ++FlowLevel;
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanFlowCollectionEnd(bool IsSequence) {
@@ -1292,9 +1292,9 @@ bool Scanner::scanFlowCollectionEnd(bool IsSequence) {
   T.Range = StringRef(Current, 1);
   skip(1);
   TokenQueue.push_back(T);
-  if (FlowLevel)
+  nếu (FlowLevel)
     --FlowLevel;
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanFlowEntry() {
@@ -1306,7 +1306,7 @@ bool Scanner::scanFlowEntry() {
   T.Range = StringRef(Current, 1);
   skip(1);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanBlockEntry() {
@@ -1319,11 +1319,11 @@ bool Scanner::scanBlockEntry() {
   T.Range = StringRef(Current, 1);
   skip(1);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanKey() {
-  if (!FlowLevel)
+  nếu (!FlowLevel)
     rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
 
   removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
@@ -1335,25 +1335,25 @@ bool Scanner::scanKey() {
   T.Range = StringRef(Current, 1);
   skip(1);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanValue() {
   // If the previous token could have been a simple key, insert the key token
   // into the token queue.
-  if (!SimpleKeys.empty()) {
+  nếu (!SimpleKeys.empty()) {
     SimpleKey SK = SimpleKeys.pop_back_val();
     Token T;
     T.Kind = Token::TK_Key;
     T.Range = SK.Tok->Range;
     TokenQueueT::iterator i, e;
-    for (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
-      if (i == SK.Tok)
+    cho (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
+      nếu (i == SK.Tok)
         break;
     }
-    if (i == e) {
+    nếu (i == e) {
       Failed = true;
-      return false;
+      trả_về false;
     }
     i = TokenQueue.insert(i, T);
 
@@ -1361,8 +1361,8 @@ bool Scanner::scanValue() {
     rollIndent(SK.Column, Token::TK_BlockMappingStart, i);
 
     IsSimpleKeyAllowed = false;
-  } else {
-    if (!FlowLevel)
+  } không_thì {
+    nếu (!FlowLevel)
       rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
     IsSimpleKeyAllowed = !FlowLevel;
   }
@@ -1373,7 +1373,7 @@ bool Scanner::scanValue() {
   T.Range = StringRef(Current, 1);
   skip(1);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 // Forbidding inlining improves performance by roughly 20%.
@@ -1389,44 +1389,44 @@ static bool wasEscaped(StringRef::iterator First,
   StringRef::iterator I = Position - 1;
   // We calculate the number of consecutive '\'s before the current position
   // by iterating backwards through our string.
-  while (I >= First && *I == '\\') --I;
+  trong_khi (I >= First && *I == '\\') --I;
   // (Position - 1 - I) now contains the number of '\'s before the current
   // position. If it is odd, the character at 'Position' was escaped.
-  return (Position - 1 - I) % 2 == 1;
+  trả_về (Position - 1 - I) % 2 == 1;
 }
 
 bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
-  if (IsDoubleQuoted) {
+  nếu (IsDoubleQuoted) {
     do {
       ++Current;
-      while (Current != End && *Current != '"')
+      trong_khi (Current != End && *Current != '"')
         ++Current;
       // Repeat until the previous character was not a '\' or was an escaped
       // backslash.
-    } while (   Current != End
+    } trong_khi (   Current != End
              && *(Current - 1) == '\\'
              && wasEscaped(Start + 1, Current));
-  } else {
+  } không_thì {
     skip(1);
-    while (Current != End) {
+    trong_khi (Current != End) {
       // Skip a ' followed by another '.
-      if (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
+      nếu (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
         skip(2);
         continue;
-      } else if (*Current == '\'')
+      } không_thì nếu (*Current == '\'')
         break;
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current) {
+      nếu (i == Current) {
         i = skip_b_break(Current);
-        if (i == Current)
+        nếu (i == Current)
           break;
         Current = i;
         Column = 0;
         ++Line;
-      } else {
-        if (i == End)
+      } không_thì {
+        nếu (i == End)
           break;
         Current = i;
         ++Column;
@@ -1434,9 +1434,9 @@ bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
     }
   }
 
-  if (Current == End) {
+  nếu (Current == End) {
     setError("Expected quote at end of scalar", Current);
-    return false;
+    trả_về false;
   }
 
   skip(1); // Skip ending quote.
@@ -1450,7 +1450,7 @@ bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
   IsSimpleKeyAllowed = false;
   IsAdjacentValueAllowedInFlow = true;
 
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanPlainScalar() {
@@ -1459,38 +1459,38 @@ bool Scanner::scanPlainScalar() {
   unsigned LeadingBlanks = 0;
   assert(Indent >= -1 && "Indent must be >= -1 !");
   unsigned indent = static_cast<unsigned>(Indent + 1);
-  while (Current != End) {
-    if (*Current == '#')
+  trong_khi (Current != End) {
+    nếu (*Current == '#')
       break;
 
-    while (Current != End &&
+    trong_khi (Current != End &&
            ((*Current != ':' && isPlainSafeNonBlank(Current)) ||
             (*Current == ':' && isPlainSafeNonBlank(Current + 1)))) {
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current)
+      nếu (i == Current)
         break;
       Current = i;
       ++Column;
     }
 
     // Are we at the end?
-    if (!isBlankOrBreak(Current))
+    nếu (!isBlankOrBreak(Current))
       break;
 
     // Eat blanks.
     StringRef::iterator Tmp = Current;
-    while (isBlankOrBreak(Tmp)) {
+    trong_khi (isBlankOrBreak(Tmp)) {
       StringRef::iterator i = skip_s_white(Tmp);
-      if (i != Tmp) {
-        if (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
+      nếu (i != Tmp) {
+        nếu (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
           setError("Found invalid tab character in indentation", Tmp);
-          return false;
+          trả_về false;
         }
         Tmp = i;
         ++Column;
-      } else {
+      } không_thì {
         i = skip_b_break(Tmp);
-        if (!LeadingBlanks)
+        nếu (!LeadingBlanks)
           LeadingBlanks = 1;
         Tmp = i;
         Column = 0;
@@ -1498,14 +1498,14 @@ bool Scanner::scanPlainScalar() {
       }
     }
 
-    if (!FlowLevel && Column < indent)
+    nếu (!FlowLevel && Column < indent)
       break;
 
     Current = Tmp;
   }
-  if (Start == Current) {
+  nếu (Start == Current) {
     setError("Got empty plain scalar", Start);
-    return false;
+    trả_về false;
   }
   Token T;
   T.Kind = Token::TK_Scalar;
@@ -1518,29 +1518,29 @@ bool Scanner::scanPlainScalar() {
   IsSimpleKeyAllowed = false;
   IsAdjacentValueAllowedInFlow = false;
 
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanAliasOrAnchor(bool IsAlias) {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   skip(1);
-  while (Current != End) {
-    if (   *Current == '[' || *Current == ']'
+  trong_khi (Current != End) {
+    nếu (   *Current == '[' || *Current == ']'
         || *Current == '{' || *Current == '}'
         || *Current == ','
         || *Current == ':')
       break;
     StringRef::iterator i = skip_ns_char(Current);
-    if (i == Current)
+    nếu (i == Current)
       break;
     Current = i;
     ++Column;
   }
 
-  if (Start + 1 == Current) {
+  nếu (Start + 1 == Current) {
     setError("Got empty alias or anchor", Start);
-    return false;
+    trả_về false;
   }
 
   Token T;
@@ -1554,7 +1554,7 @@ bool Scanner::scanAliasOrAnchor(bool IsAlias) {
   IsSimpleKeyAllowed = false;
   IsAdjacentValueAllowedInFlow = false;
 
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanBlockScalarIndicators(char &StyleIndicator,
@@ -1562,27 +1562,27 @@ bool Scanner::scanBlockScalarIndicators(char &StyleIndicator,
                                         unsigned &IndentIndicator,
                                         bool &IsDone) {
   StyleIndicator = scanBlockStyleIndicator();
-  if (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
-    return false;
-  return true;
+  nếu (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
+    trả_về false;
+  trả_về true;
 }
 
 char Scanner::scanBlockStyleIndicator() {
   char Indicator = ' ';
-  if (Current != End && (*Current == '>' || *Current == '|')) {
+  nếu (Current != End && (*Current == '>' || *Current == '|')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  trả_về Indicator;
 }
 
 char Scanner::scanBlockChompingIndicator() {
   char Indicator = ' ';
-  if (Current != End && (*Current == '+' || *Current == '-')) {
+  nếu (Current != End && (*Current == '+' || *Current == '-')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  trả_về Indicator;
 }
 
 /// Get the number of line breaks after chomping.
@@ -1591,21 +1591,21 @@ char Scanner::scanBlockChompingIndicator() {
 /// \p ChompingIndicator.
 static unsigned getChompedLineBreaks(char ChompingIndicator,
                                      unsigned LineBreaks, StringRef Str) {
-  if (ChompingIndicator == '-') // Strip all line breaks.
-    return 0;
-  if (ChompingIndicator == '+') // Keep all line breaks.
-    return LineBreaks;
+  nếu (ChompingIndicator == '-') // Strip all line breaks.
+    trả_về 0;
+  nếu (ChompingIndicator == '+') // Keep all line breaks.
+    trả_về LineBreaks;
   // Clip trailing lines.
-  return Str.empty() ? 0 : 1;
+  trả_về Str.empty() ? 0 : 1;
 }
 
 unsigned Scanner::scanBlockIndentationIndicator() {
   unsigned Indent = 0;
-  if (Current != End && (*Current >= '1' && *Current <= '9')) {
+  nếu (Current != End && (*Current >= '1' && *Current <= '9')) {
     Indent = unsigned(*Current - '0');
     skip(1);
   }
-  return Indent;
+  trả_về Indent;
 }
 
 bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
@@ -1615,25 +1615,25 @@ bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
   ChompingIndicator = scanBlockChompingIndicator();
   IndentIndicator = scanBlockIndentationIndicator();
   // Check for the chomping indicator once again.
-  if (ChompingIndicator == ' ')
+  nếu (ChompingIndicator == ' ')
     ChompingIndicator = scanBlockChompingIndicator();
   Current = skip_while(&Scanner::skip_s_white, Current);
   skipComment();
 
-  if (Current == End) { // EOF, we have an empty scalar.
+  nếu (Current == End) { // EOF, we have an empty scalar.
     Token T;
     T.Kind = Token::TK_BlockScalar;
     T.Range = StringRef(Start, Current - Start);
     TokenQueue.push_back(T);
     IsDone = true;
-    return true;
+    trả_về true;
   }
 
-  if (!consumeLineBreakIfPresent()) {
+  nếu (!consumeLineBreakIfPresent()) {
     setError("Expected a line break after block scalar header", Current);
-    return false;
+    trả_về false;
   }
-  return true;
+  trả_về true;
 }
 
 bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
@@ -1642,25 +1642,25 @@ bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
   unsigned MaxAllSpaceLineCharacters = 0;
   StringRef::iterator LongestAllSpaceLine;
 
-  while (true) {
+  trong_khi (true) {
     advanceWhile(&Scanner::skip_s_space);
-    if (skip_nb_char(Current) != Current) {
+    nếu (skip_nb_char(Current) != Current) {
       // This line isn't empty, so try and find the indentation.
-      if (Column <= BlockExitIndent) { // End of the block literal.
+      nếu (Column <= BlockExitIndent) { // End of the block literal.
         IsDone = true;
-        return true;
+        trả_về true;
       }
       // We found the block's indentation.
       BlockIndent = Column;
-      if (MaxAllSpaceLineCharacters > BlockIndent) {
+      nếu (MaxAllSpaceLineCharacters > BlockIndent) {
         setError(
             "Leading all-spaces line must be smaller than the block indent",
             LongestAllSpaceLine);
-        return false;
+        trả_về false;
       }
-      return true;
+      trả_về true;
     }
-    if (skip_b_break(Current) != Current &&
+    nếu (skip_b_break(Current) != Current &&
         Column > MaxAllSpaceLineCharacters) {
       // Record the longest all-space line in case it's longer than the
       // discovered block indent.
@@ -1669,48 +1669,48 @@ bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
     }
 
     // Check for EOF.
-    if (Current == End) {
+    nếu (Current == End) {
       IsDone = true;
-      return true;
+      trả_về true;
     }
 
-    if (!consumeLineBreakIfPresent()) {
+    nếu (!consumeLineBreakIfPresent()) {
       IsDone = true;
-      return true;
+      trả_về true;
     }
     ++LineBreaks;
   }
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanBlockScalarIndent(unsigned BlockIndent,
                                     unsigned BlockExitIndent, bool &IsDone) {
   // Skip the indentation.
-  while (Column < BlockIndent) {
+  trong_khi (Column < BlockIndent) {
     auto I = skip_s_space(Current);
-    if (I == Current)
+    nếu (I == Current)
       break;
     Current = I;
     ++Column;
   }
 
-  if (skip_nb_char(Current) == Current)
-    return true;
+  nếu (skip_nb_char(Current) == Current)
+    trả_về true;
 
-  if (Column <= BlockExitIndent) { // End of the block literal.
+  nếu (Column <= BlockExitIndent) { // End of the block literal.
     IsDone = true;
-    return true;
+    trả_về true;
   }
 
-  if (Column < BlockIndent) {
-    if (Current != End && *Current == '#') { // Trailing comment.
+  nếu (Column < BlockIndent) {
+    nếu (Current != End && *Current == '#') { // Trailing comment.
       IsDone = true;
-      return true;
+      trả_về true;
     }
     setError("A text line is less indented than the block scalar", Current);
-    return false;
+    trả_về false;
   }
-  return true; // A normal text line.
+  trả_về true; // A normal text line.
 }
 
 bool Scanner::scanBlockScalar(bool IsLiteral) {
@@ -1719,39 +1719,39 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
   char ChompingIndicator;
   unsigned BlockIndent;
   bool IsDone = false;
-  if (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
+  nếu (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
                                  IsDone))
-    return false;
-  if (IsDone)
-    return true;
+    trả_về false;
+  nếu (IsDone)
+    trả_về true;
   bool IsFolded = StyleIndicator == '>';
 
   const auto *Start = Current;
   unsigned BlockExitIndent = Indent < 0 ? 0 : (unsigned)Indent;
   unsigned LineBreaks = 0;
-  if (BlockIndent == 0) {
-    if (!findBlockScalarIndent(BlockIndent, BlockExitIndent, LineBreaks,
+  nếu (BlockIndent == 0) {
+    nếu (!findBlockScalarIndent(BlockIndent, BlockExitIndent, LineBreaks,
                                IsDone))
-      return false;
+      trả_về false;
   }
 
   // Scan the block's scalars body.
   SmallString<256> Str;
-  while (!IsDone) {
-    if (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
-      return false;
-    if (IsDone)
+  trong_khi (!IsDone) {
+    nếu (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
+      trả_về false;
+    nếu (IsDone)
       break;
 
     // Parse the current line.
     auto LineStart = Current;
     advanceWhile(&Scanner::skip_nb_char);
-    if (LineStart != Current) {
-      if (LineBreaks && IsFolded && !Scanner::isLineEmpty(Str)) {
+    nếu (LineStart != Current) {
+      nếu (LineBreaks && IsFolded && !Scanner::isLineEmpty(Str)) {
         // The folded style "folds" any single line break between content into a
         // single space, except when that content is "empty" (only contains
         // whitespace) in which case the line break is left as-is.
-        if (LineBreaks == 1) {
+        nếu (LineBreaks == 1) {
           Str.append(LineBreaks,
                      isLineEmpty(StringRef(LineStart, Current - LineStart))
                          ? '\n'
@@ -1769,21 +1769,21 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
     }
 
     // Check for EOF.
-    if (Current == End)
+    nếu (Current == End)
       break;
 
-    if (!consumeLineBreakIfPresent())
+    nếu (!consumeLineBreakIfPresent())
       break;
     ++LineBreaks;
   }
 
-  if (Current == End && !LineBreaks)
+  nếu (Current == End && !LineBreaks)
     // Ensure that there is at least one line break before the end of file.
     LineBreaks = 1;
   Str.append(getChompedLineBreaks(ChompingIndicator, LineBreaks, Str), '\n');
 
   // New lines may start a simple key.
-  if (!FlowLevel)
+  nếu (!FlowLevel)
     IsSimpleKeyAllowed = true;
   IsAdjacentValueAllowedInFlow = false;
 
@@ -1792,20 +1792,20 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
   T.Range = StringRef(Start, Current - Start);
   T.Value = std::string(Str);
   TokenQueue.push_back(T);
-  return true;
+  trả_về true;
 }
 
 bool Scanner::scanTag() {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   skip(1); // Eat !.
-  if (Current == End || isBlankOrBreak(Current)); // An empty tag.
-  else if (*Current == '<') {
+  nếu (Current == End || isBlankOrBreak(Current)); // An empty tag.
+  không_thì nếu (*Current == '<') {
     skip(1);
     scan_ns_uri_char();
-    if (!consume('>'))
-      return false;
-  } else {
+    nếu (!consume('>'))
+      trả_về false;
+  } không_thì {
     // FIXME: Actually parse the c-ns-shorthand-tag rule.
     Current = skip_while(&Scanner::skip_ns_char, Current);
   }
@@ -1821,95 +1821,95 @@ bool Scanner::scanTag() {
   IsSimpleKeyAllowed = false;
   IsAdjacentValueAllowedInFlow = false;
 
-  return true;
+  trả_về true;
 }
 
 bool Scanner::fetchMoreTokens() {
-  if (IsStartOfStream)
-    return scanStreamStart();
+  nếu (IsStartOfStream)
+    trả_về scanStreamStart();
 
   scanToNextToken();
 
-  if (Current == End)
-    return scanStreamEnd();
+  nếu (Current == End)
+    trả_về scanStreamEnd();
 
   removeStaleSimpleKeyCandidates();
 
   unrollIndent(Column);
 
-  if (Column == 0 && *Current == '%')
-    return scanDirective();
+  nếu (Column == 0 && *Current == '%')
+    trả_về scanDirective();
 
-  if (Column == 0 && Current + 3 <= End
+  nếu (Column == 0 && Current + 3 <= End
       && *Current == '-'
       && *(Current + 1) == '-'
       && *(Current + 2) == '-'
       && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(true);
+    trả_về scanDocumentIndicator(true);
 
-  if (Column == 0 && Current + 3 <= End
+  nếu (Column == 0 && Current + 3 <= End
       && *Current == '.'
       && *(Current + 1) == '.'
       && *(Current + 2) == '.'
       && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(false);
+    trả_về scanDocumentIndicator(false);
 
-  if (*Current == '[')
-    return scanFlowCollectionStart(true);
+  nếu (*Current == '[')
+    trả_về scanFlowCollectionStart(true);
 
-  if (*Current == '{')
-    return scanFlowCollectionStart(false);
+  nếu (*Current == '{')
+    trả_về scanFlowCollectionStart(false);
 
-  if (*Current == ']')
-    return scanFlowCollectionEnd(true);
+  nếu (*Current == ']')
+    trả_về scanFlowCollectionEnd(true);
 
-  if (*Current == '}')
-    return scanFlowCollectionEnd(false);
+  nếu (*Current == '}')
+    trả_về scanFlowCollectionEnd(false);
 
-  if (*Current == ',')
-    return scanFlowEntry();
+  nếu (*Current == ',')
+    trả_về scanFlowEntry();
 
-  if (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
-    return scanBlockEntry();
+  nếu (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
+    trả_về scanBlockEntry();
 
-  if (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
-    return scanKey();
+  nếu (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
+    trả_về scanKey();
 
-  if (*Current == ':' &&
+  nếu (*Current == ':' &&
       (!isPlainSafeNonBlank(Current + 1) || IsAdjacentValueAllowedInFlow))
-    return scanValue();
+    trả_về scanValue();
 
-  if (*Current == '*')
-    return scanAliasOrAnchor(true);
+  nếu (*Current == '*')
+    trả_về scanAliasOrAnchor(true);
 
-  if (*Current == '&')
-    return scanAliasOrAnchor(false);
+  nếu (*Current == '&')
+    trả_về scanAliasOrAnchor(false);
 
-  if (*Current == '!')
-    return scanTag();
+  nếu (*Current == '!')
+    trả_về scanTag();
 
-  if (*Current == '|' && !FlowLevel)
-    return scanBlockScalar(true);
+  nếu (*Current == '|' && !FlowLevel)
+    trả_về scanBlockScalar(true);
 
-  if (*Current == '>' && !FlowLevel)
-    return scanBlockScalar(false);
+  nếu (*Current == '>' && !FlowLevel)
+    trả_về scanBlockScalar(false);
 
-  if (*Current == '\'')
-    return scanFlowScalar(false);
+  nếu (*Current == '\'')
+    trả_về scanFlowScalar(false);
 
-  if (*Current == '"')
-    return scanFlowScalar(true);
+  nếu (*Current == '"')
+    trả_về scanFlowScalar(true);
 
   // Get a plain scalar.
   StringRef FirstChar(Current, 1);
-  if ((!isBlankOrBreak(Current) &&
+  nếu ((!isBlankOrBreak(Current) &&
        FirstChar.find_first_of("-?:,[]{}#&*!|>'\"%@`") == StringRef::npos) ||
       (FirstChar.find_first_of("?:-") != StringRef::npos &&
        isPlainSafeNonBlank(Current + 1)))
-    return scanPlainScalar();
+    trả_về scanPlainScalar();
 
   setError("Unrecognized character while tokenizing.", Current);
-  return false;
+  trả_về false;
 }
 
 Stream::Stream(StringRef Input, SourceMgr &SM, bool ShowColors,
@@ -1922,7 +1922,7 @@ Stream::Stream(MemoryBufferRef InputBuffer, SourceMgr &SM, bool ShowColors,
 
 Stream::~Stream() = default;
 
-bool Stream::failed() { return scanner->failed(); }
+bool Stream::failed() { trả_về scanner->failed(); }
 
 void Stream::printError(Node *N, const Twine &Msg, SourceMgr::DiagKind Kind) {
   printError(N ? N->getSourceRange() : SMRange(), Msg, Kind);
@@ -1934,26 +1934,26 @@ void Stream::printError(const SMRange &Range, const Twine &Msg,
 }
 
 document_iterator Stream::begin() {
-  if (CurrentDoc)
+  nếu (CurrentDoc)
     report_fatal_error("Can only iterate over the stream once");
 
   // Skip Stream-Start.
   scanner->getNext();
 
   CurrentDoc.reset(new Document(*this));
-  return document_iterator(CurrentDoc);
+  trả_về document_iterator(CurrentDoc);
 }
 
 document_iterator Stream::end() {
-  return document_iterator();
+  trả_về document_iterator();
 }
 
 void Stream::skip() {
-  for (Document &Doc : *this)
+  cho (Document &Doc : *this)
     Doc.skip();
 }
 
-Node::Node(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
+Node::Node(unsigned số_nguyên Type, std::unique_ptr<Document> &D, StringRef A,
            StringRef T)
     : Doc(D), TypeID(Type), Anchor(A), Tag(T) {
   SMLoc Start = SMLoc::getFromPointer(peekNext().Range.begin());
@@ -1962,63 +1962,63 @@ Node::Node(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
 
 std::string Node::getVerbatimTag() const {
   StringRef Raw = getRawTag();
-  if (!Raw.empty() && Raw != "!") {
+  nếu (!Raw.empty() && Raw != "!") {
     std::string Ret;
-    if (Raw.find_last_of('!') == 0) {
+    nếu (Raw.find_last_of('!') == 0) {
       Ret = std::string(Doc->getTagMap().find("!")->second);
       Ret += Raw.substr(1);
-      return Ret;
-    } else if (Raw.starts_with("!!")) {
+      trả_về Ret;
+    } không_thì nếu (Raw.starts_with("!!")) {
       Ret = std::string(Doc->getTagMap().find("!!")->second);
       Ret += Raw.substr(2);
-      return Ret;
-    } else {
+      trả_về Ret;
+    } không_thì {
       StringRef TagHandle = Raw.substr(0, Raw.find_last_of('!') + 1);
       std::map<StringRef, StringRef>::const_iterator It =
           Doc->getTagMap().find(TagHandle);
-      if (It != Doc->getTagMap().end())
+      nếu (It != Doc->getTagMap().end())
         Ret = std::string(It->second);
-      else {
+      không_thì {
         Token T;
         T.Kind = Token::TK_Tag;
         T.Range = TagHandle;
         setError(Twine("Unknown tag handle ") + TagHandle, T);
       }
       Ret += Raw.substr(Raw.find_last_of('!') + 1);
-      return Ret;
+      trả_về Ret;
     }
   }
 
   switch (getType()) {
   case NK_Null:
-    return "tag:yaml.org,2002:null";
+    trả_về "tag:yaml.org,2002:null";
   case NK_Scalar:
   case NK_BlockScalar:
     // TODO: Tag resolution.
-    return "tag:yaml.org,2002:str";
+    trả_về "tag:yaml.org,2002:str";
   case NK_Mapping:
-    return "tag:yaml.org,2002:map";
+    trả_về "tag:yaml.org,2002:map";
   case NK_Sequence:
-    return "tag:yaml.org,2002:seq";
+    trả_về "tag:yaml.org,2002:seq";
   }
 
-  return "";
+  trả_về "";
 }
 
 Token &Node::peekNext() {
-  return Doc->peekNext();
+  trả_về Doc->peekNext();
 }
 
 Token Node::getNext() {
-  return Doc->getNext();
+  trả_về Doc->getNext();
 }
 
 Node *Node::parseBlockNode() {
-  return Doc->parseBlockNode();
+  trả_về Doc->parseBlockNode();
 }
 
 BumpPtrAllocator &Node::getAllocator() {
-  return Doc->NodeAllocator;
+  trả_về Doc->NodeAllocator;
 }
 
 void Node::setError(const Twine &Msg, Token &Tok) const {
@@ -2026,15 +2026,15 @@ void Node::setError(const Twine &Msg, Token &Tok) const {
 }
 
 bool Node::failed() const {
-  return Doc->failed();
+  trả_về Doc->failed();
 }
 
 StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
-  if (Value[0] == '"')
-    return getDoubleQuotedValue(Value, Storage);
-  if (Value[0] == '\'')
-    return getSingleQuotedValue(Value, Storage);
-  return getPlainValue(Value, Storage);
+  nếu (Value[0] == '"')
+    trả_về getDoubleQuotedValue(Value, Storage);
+  nếu (Value[0] == '\'')
+    trả_về getSingleQuotedValue(Value, Storage);
+  trả_về getPlainValue(Value, Storage);
 }
 
 /// parseScalarValue - A common parsing routine for all flow scalar styles.
@@ -2057,25 +2057,25 @@ parseScalarValue(StringRef UnquotedValue, SmallVectorImpl<char> &Storage,
                  std::function<StringRef(StringRef, SmallVectorImpl<char> &)>
                      UnescapeCallback) {
   size_t I = UnquotedValue.find_first_of(LookupChars);
-  if (I == StringRef::npos)
-    return UnquotedValue;
+  nếu (I == StringRef::npos)
+    trả_về UnquotedValue;
 
   Storage.clear();
   Storage.reserve(UnquotedValue.size());
   char LastNewLineAddedAs = '\0';
-  for (; I != StringRef::npos; I = UnquotedValue.find_first_of(LookupChars)) {
-    if (UnquotedValue[I] != '\r' && UnquotedValue[I] != '\n') {
+  cho (; I != StringRef::npos; I = UnquotedValue.find_first_of(LookupChars)) {
+    nếu (UnquotedValue[I] != '\r' && UnquotedValue[I] != '\n') {
       llvm::append_range(Storage, UnquotedValue.take_front(I));
       UnquotedValue = UnescapeCallback(UnquotedValue.drop_front(I), Storage);
       LastNewLineAddedAs = '\0';
       continue;
     }
-    if (size_t LastNonSWhite = UnquotedValue.find_last_not_of(" \t", I);
+    nếu (size_t LastNonSWhite = UnquotedValue.find_last_not_of(" \t", I);
         LastNonSWhite != StringRef::npos) {
       llvm::append_range(Storage, UnquotedValue.take_front(LastNonSWhite + 1));
       Storage.push_back(' ');
       LastNewLineAddedAs = ' ';
-    } else {
+    } không_thì {
       // Note: we can't just check if the last character in Storage is ' ',
       // '\n', or something else; that would give a wrong result for double
       // quoted values containing an escaped space character before a new-line
@@ -2097,12 +2097,12 @@ parseScalarValue(StringRef UnquotedValue, SmallVectorImpl<char> &Storage,
       }
     }
     // Handle Windows-style EOL
-    if (UnquotedValue.substr(I, 2) == "\r\n")
+    nếu (UnquotedValue.substr(I, 2) == "\r\n")
       I++;
     UnquotedValue = UnquotedValue.drop_front(I + 1).ltrim(" \t");
   }
   llvm::append_range(Storage, UnquotedValue);
-  return StringRef(Storage.begin(), Storage.size());
+  trả_về StringRef(Storage.begin(), Storage.size());
 }
 
 StringRef
@@ -2115,12 +2115,12 @@ ScalarNode::getDoubleQuotedValue(StringRef RawValue,
   auto UnescapeFunc = [this](StringRef UnquotedValue,
                              SmallVectorImpl<char> &Storage) {
     assert(UnquotedValue.take_front(1) == "\\");
-    if (UnquotedValue.size() == 1) {
+    nếu (UnquotedValue.size() == 1) {
       Token T;
       T.Range = UnquotedValue;
       setError("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      trả_về StringRef();
     }
     UnquotedValue = UnquotedValue.drop_front(1);
     switch (UnquotedValue[0]) {
@@ -2129,15 +2129,15 @@ ScalarNode::getDoubleQuotedValue(StringRef RawValue,
       T.Range = UnquotedValue.take_front(1);
       setError("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      trả_về StringRef();
     }
     case '\r':
       // Shrink the Windows-style EOL.
-      if (UnquotedValue.size() >= 2 && UnquotedValue[1] == '\n')
+      nếu (UnquotedValue.size() >= 2 && UnquotedValue[1] == '\n')
         UnquotedValue = UnquotedValue.drop_front(1);
       [[fallthrough]];
     case '\n':
-      return UnquotedValue.drop_front(1).ltrim(" \t");
+      trả_về UnquotedValue.drop_front(1).ltrim(" \t");
     case '0':
       Storage.push_back(0x00);
       break;
@@ -2191,43 +2191,43 @@ ScalarNode::getDoubleQuotedValue(StringRef RawValue,
       encodeUTF8(0x2029, Storage);
       break;
     case 'x': {
-      if (UnquotedValue.size() < 3)
+      nếu (UnquotedValue.size() < 3)
         // TODO: Report error.
         break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 2).getAsInteger(16, UnicodeScalarValue))
+      unsigned số_nguyên UnicodeScalarValue;
+      nếu (UnquotedValue.substr(1, 2).getAsInteger(16, UnicodeScalarValue))
         // TODO: Report error.
         UnicodeScalarValue = 0xFFFD;
       encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(3);
+      trả_về UnquotedValue.drop_front(3);
     }
     case 'u': {
-      if (UnquotedValue.size() < 5)
+      nếu (UnquotedValue.size() < 5)
         // TODO: Report error.
         break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 4).getAsInteger(16, UnicodeScalarValue))
+      unsigned số_nguyên UnicodeScalarValue;
+      nếu (UnquotedValue.substr(1, 4).getAsInteger(16, UnicodeScalarValue))
         // TODO: Report error.
         UnicodeScalarValue = 0xFFFD;
       encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(5);
+      trả_về UnquotedValue.drop_front(5);
     }
     case 'U': {
-      if (UnquotedValue.size() < 9)
+      nếu (UnquotedValue.size() < 9)
         // TODO: Report error.
         break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 8).getAsInteger(16, UnicodeScalarValue))
+      unsigned số_nguyên UnicodeScalarValue;
+      nếu (UnquotedValue.substr(1, 8).getAsInteger(16, UnicodeScalarValue))
         // TODO: Report error.
         UnicodeScalarValue = 0xFFFD;
       encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(9);
+      trả_về UnquotedValue.drop_front(9);
     }
     }
-    return UnquotedValue.drop_front(1);
+    trả_về UnquotedValue.drop_front(1);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "\\\r\n", UnescapeFunc);
+  trả_về parseScalarValue(UnquotedValue, Storage, "\\\r\n", UnescapeFunc);
 }
 
 StringRef ScalarNode::getSingleQuotedValue(StringRef RawValue,
@@ -2240,10 +2240,10 @@ StringRef ScalarNode::getSingleQuotedValue(StringRef RawValue,
                          SmallVectorImpl<char> &Storage) {
     assert(UnquotedValue.take_front(2) == "''");
     Storage.push_back('\'');
-    return UnquotedValue.drop_front(2);
+    trả_về UnquotedValue.drop_front(2);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "'\r\n", UnescapeFunc);
+  trả_về parseScalarValue(UnquotedValue, Storage, "'\r\n", UnescapeFunc);
 }
 
 StringRef ScalarNode::getPlainValue(StringRef RawValue,
@@ -2252,95 +2252,95 @@ StringRef ScalarNode::getPlainValue(StringRef RawValue,
   // NOTE: Alternatively we could change the scanner to not include whitespace
   //       here in the first place.
   RawValue = RawValue.rtrim("\r\n \t");
-  return parseScalarValue(RawValue, Storage, "\r\n", nullptr);
+  trả_về parseScalarValue(RawValue, Storage, "\r\n", nullptr);
 }
 
 Node *KeyValueNode::getKey() {
-  if (Key)
-    return Key;
+  nếu (Key)
+    trả_về Key;
   // Handle implicit null keys.
   {
     Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
+    nếu (   t.Kind == Token::TK_BlockEnd
         || t.Kind == Token::TK_Value
         || t.Kind == Token::TK_Error) {
-      return Key = new (getAllocator()) NullNode(Doc);
+      trả_về Key = new (getAllocator()) NullNode(Doc);
     }
-    if (t.Kind == Token::TK_Key)
+    nếu (t.Kind == Token::TK_Key)
       getNext(); // skip TK_Key.
   }
 
   // Handle explicit null keys.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Value) {
-    return Key = new (getAllocator()) NullNode(Doc);
+  nếu (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Value) {
+    trả_về Key = new (getAllocator()) NullNode(Doc);
   }
 
   // We've got a normal key.
-  return Key = parseBlockNode();
+  trả_về Key = parseBlockNode();
 }
 
 Node *KeyValueNode::getValue() {
-  if (Value)
-    return Value;
+  nếu (Value)
+    trả_về Value;
 
-  if (Node* Key = getKey())
+  nếu (Node* Key = getKey())
     Key->skip();
-  else {
+  không_thì {
     setError("Null key in Key Value.", peekNext());
-    return Value = new (getAllocator()) NullNode(Doc);
+    trả_về Value = new (getAllocator()) NullNode(Doc);
   }
 
-  if (failed())
-    return Value = new (getAllocator()) NullNode(Doc);
+  nếu (failed())
+    trả_về Value = new (getAllocator()) NullNode(Doc);
 
   // Handle implicit null values.
   {
     Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
+    nếu (   t.Kind == Token::TK_BlockEnd
         || t.Kind == Token::TK_FlowMappingEnd
         || t.Kind == Token::TK_Key
         || t.Kind == Token::TK_FlowEntry
         || t.Kind == Token::TK_Error) {
-      return Value = new (getAllocator()) NullNode(Doc);
+      trả_về Value = new (getAllocator()) NullNode(Doc);
     }
 
-    if (t.Kind != Token::TK_Value) {
+    nếu (t.Kind != Token::TK_Value) {
       setError("Unexpected token in Key Value.", t);
-      return Value = new (getAllocator()) NullNode(Doc);
+      trả_về Value = new (getAllocator()) NullNode(Doc);
     }
     getNext(); // skip TK_Value.
   }
 
   // Handle explicit null values.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Key) {
-    return Value = new (getAllocator()) NullNode(Doc);
+  nếu (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Key) {
+    trả_về Value = new (getAllocator()) NullNode(Doc);
   }
 
   // We got a normal value.
-  return Value = parseBlockNode();
+  trả_về Value = parseBlockNode();
 }
 
 void MappingNode::increment() {
-  if (failed()) {
+  nếu (failed()) {
     IsAtEnd = true;
     CurrentEntry = nullptr;
-    return;
+    trả_về;
   }
-  if (CurrentEntry) {
+  nếu (CurrentEntry) {
     CurrentEntry->skip();
-    if (Type == MT_Inline) {
+    nếu (Type == MT_Inline) {
       IsAtEnd = true;
       CurrentEntry = nullptr;
-      return;
+      trả_về;
     }
   }
   Token T = peekNext();
-  if (T.Kind == Token::TK_Key || T.Kind == Token::TK_Scalar) {
+  nếu (T.Kind == Token::TK_Key || T.Kind == Token::TK_Scalar) {
     // KeyValueNode eats the TK_Key. That way it can detect null keys.
     CurrentEntry = new (getAllocator()) KeyValueNode(Doc);
-  } else if (Type == MT_Block) {
+  } không_thì nếu (Type == MT_Block) {
     switch (T.Kind) {
     case Token::TK_BlockEnd:
       getNext();
@@ -2354,12 +2354,12 @@ void MappingNode::increment() {
       IsAtEnd = true;
       CurrentEntry = nullptr;
     }
-  } else {
+  } không_thì {
     switch (T.Kind) {
     case Token::TK_FlowEntry:
       // Eat the flow entry and recurse.
       getNext();
-      return increment();
+      trả_về increment();
     case Token::TK_FlowMappingEnd:
       getNext();
       [[fallthrough]];
@@ -2379,20 +2379,20 @@ void MappingNode::increment() {
 }
 
 void SequenceNode::increment() {
-  if (failed()) {
+  nếu (failed()) {
     IsAtEnd = true;
     CurrentEntry = nullptr;
-    return;
+    trả_về;
   }
-  if (CurrentEntry)
+  nếu (CurrentEntry)
     CurrentEntry->skip();
   Token T = peekNext();
-  if (SeqType == ST_Block) {
+  nếu (SeqType == ST_Block) {
     switch (T.Kind) {
     case Token::TK_BlockEntry:
       getNext();
       CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
+      nếu (!CurrentEntry) { // An error occurred.
         IsAtEnd = true;
         CurrentEntry = nullptr;
       }
@@ -2410,12 +2410,12 @@ void SequenceNode::increment() {
       IsAtEnd = true;
       CurrentEntry = nullptr;
     }
-  } else if (SeqType == ST_Indentless) {
+  } không_thì nếu (SeqType == ST_Indentless) {
     switch (T.Kind) {
     case Token::TK_BlockEntry:
       getNext();
       CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
+      nếu (!CurrentEntry) { // An error occurred.
         IsAtEnd = true;
         CurrentEntry = nullptr;
       }
@@ -2425,13 +2425,13 @@ void SequenceNode::increment() {
       IsAtEnd = true;
       CurrentEntry = nullptr;
     }
-  } else if (SeqType == ST_Flow) {
+  } không_thì nếu (SeqType == ST_Flow) {
     switch (T.Kind) {
     case Token::TK_FlowEntry:
       // Eat the flow entry and recurse.
       getNext();
       WasPreviousTokenFlowEntry = true;
-      return increment();
+      trả_về increment();
     case Token::TK_FlowSequenceEnd:
       getNext();
       [[fallthrough]];
@@ -2449,7 +2449,7 @@ void SequenceNode::increment() {
       CurrentEntry = nullptr;
       break;
     default:
-      if (!WasPreviousTokenFlowEntry) {
+      nếu (!WasPreviousTokenFlowEntry) {
         setError("Expected , between entries!", T);
         IsAtEnd = true;
         CurrentEntry = nullptr;
@@ -2457,7 +2457,7 @@ void SequenceNode::increment() {
       }
       // Otherwise it must be a flow entry.
       CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) {
+      nếu (!CurrentEntry) {
         IsAtEnd = true;
       }
       WasPreviousTokenFlowEntry = false;
@@ -2471,35 +2471,35 @@ Document::Document(Stream &S) : stream(S), Root(nullptr) {
   TagMap["!"] = "!";
   TagMap["!!"] = "tag:yaml.org,2002:";
 
-  if (parseDirectives())
+  nếu (parseDirectives())
     expectToken(Token::TK_DocumentStart);
   Token &T = peekNext();
-  if (T.Kind == Token::TK_DocumentStart)
+  nếu (T.Kind == Token::TK_DocumentStart)
     getNext();
 }
 
 bool Document::skip()  {
-  if (stream.scanner->failed())
-    return false;
-  if (!Root && !getRoot())
-    return false;
+  nếu (stream.scanner->failed())
+    trả_về false;
+  nếu (!Root && !getRoot())
+    trả_về false;
   Root->skip();
   Token &T = peekNext();
-  if (T.Kind == Token::TK_StreamEnd)
-    return false;
-  if (T.Kind == Token::TK_DocumentEnd) {
+  nếu (T.Kind == Token::TK_StreamEnd)
+    trả_về false;
+  nếu (T.Kind == Token::TK_DocumentEnd) {
     getNext();
-    return skip();
+    trả_về skip();
   }
-  return true;
+  trả_về true;
 }
 
 Token &Document::peekNext() {
-  return stream.scanner->peekNext();
+  trả_về stream.scanner->peekNext();
 }
 
 Token Document::getNext() {
-  return stream.scanner->getNext();
+  trả_về stream.scanner->getNext();
 }
 
 void Document::setError(const Twine &Message, Token &Location) const {
@@ -2507,7 +2507,7 @@ void Document::setError(const Twine &Message, Token &Location) const {
 }
 
 bool Document::failed() const {
-  return stream.scanner->failed();
+  trả_về stream.scanner->failed();
 }
 
 Node *Document::parseBlockNode() {
@@ -2519,19 +2519,19 @@ parse_property:
   switch (T.Kind) {
   case Token::TK_Alias:
     getNext();
-    return new (NodeAllocator) AliasNode(stream.CurrentDoc, T.Range.substr(1));
+    trả_về new (NodeAllocator) AliasNode(stream.CurrentDoc, T.Range.substr(1));
   case Token::TK_Anchor:
-    if (AnchorInfo.Kind == Token::TK_Anchor) {
+    nếu (AnchorInfo.Kind == Token::TK_Anchor) {
       setError("Already encountered an anchor for this node!", T);
-      return nullptr;
+      trả_về nullptr;
     }
     AnchorInfo = getNext(); // Consume TK_Anchor.
     T = peekNext();
     goto parse_property;
   case Token::TK_Tag:
-    if (TagInfo.Kind == Token::TK_Tag) {
+    nếu (TagInfo.Kind == Token::TK_Tag) {
       setError("Already encountered a tag for this node!", T);
-      return nullptr;
+      trả_về nullptr;
     }
     TagInfo = getNext(); // Consume TK_Tag.
     T = peekNext();
@@ -2545,41 +2545,41 @@ parse_property:
     // We got an unindented BlockEntry sequence. This is not terminated with
     // a BlockEnd.
     // Don't eat the TK_BlockEntry, SequenceNode needs it.
-    return new (NodeAllocator) SequenceNode( stream.CurrentDoc
+    trả_về new (NodeAllocator) SequenceNode( stream.CurrentDoc
                                            , AnchorInfo.Range.substr(1)
                                            , TagInfo.Range
                                            , SequenceNode::ST_Indentless);
   case Token::TK_BlockSequenceStart:
     getNext();
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
       SequenceNode( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
                   , SequenceNode::ST_Block);
   case Token::TK_BlockMappingStart:
     getNext();
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
       MappingNode( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
                  , MappingNode::MT_Block);
   case Token::TK_FlowSequenceStart:
     getNext();
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
       SequenceNode( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
                   , SequenceNode::ST_Flow);
   case Token::TK_FlowMappingStart:
     getNext();
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
       MappingNode( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
                  , MappingNode::MT_Flow);
   case Token::TK_Scalar:
     getNext();
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
       ScalarNode( stream.CurrentDoc
                 , AnchorInfo.Range.substr(1)
                 , TagInfo.Range
@@ -2588,13 +2588,13 @@ parse_property:
     getNext();
     StringRef NullTerminatedStr(T.Value.c_str(), T.Value.length() + 1);
     StringRef StrCopy = NullTerminatedStr.copy(NodeAllocator).drop_back();
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
         BlockScalarNode(stream.CurrentDoc, AnchorInfo.Range.substr(1),
                         TagInfo.Range, StrCopy, T.Range);
   }
   case Token::TK_Key:
     // Don't eat the TK_Key, KeyValueNode expects it.
-    return new (NodeAllocator)
+    trả_về new (NodeAllocator)
       MappingNode( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
@@ -2605,38 +2605,38 @@ parse_property:
   default:
     // TODO: Properly handle tags. "[!!str ]" should resolve to !!str "", not
     //       !!null null.
-    return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    trả_về new (NodeAllocator) NullNode(stream.CurrentDoc);
   case Token::TK_FlowMappingEnd:
   case Token::TK_FlowSequenceEnd:
   case Token::TK_FlowEntry: {
-    if (Root && (isa<MappingNode>(Root) || isa<SequenceNode>(Root)))
-      return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    nếu (Root && (isa<MappingNode>(Root) || isa<SequenceNode>(Root)))
+      trả_về new (NodeAllocator) NullNode(stream.CurrentDoc);
 
     setError("Unexpected token", T);
-    return nullptr;
+    trả_về nullptr;
   }
   case Token::TK_Error:
-    return nullptr;
+    trả_về nullptr;
   }
   llvm_unreachable("Control flow shouldn't reach here.");
-  return nullptr;
+  trả_về nullptr;
 }
 
 bool Document::parseDirectives() {
   bool isDirective = false;
-  while (true) {
+  trong_khi (true) {
     Token T = peekNext();
-    if (T.Kind == Token::TK_TagDirective) {
+    nếu (T.Kind == Token::TK_TagDirective) {
       parseTAGDirective();
       isDirective = true;
-    } else if (T.Kind == Token::TK_VersionDirective) {
+    } không_thì nếu (T.Kind == Token::TK_VersionDirective) {
       parseYAMLDirective();
       isDirective = true;
-    } else {
+    } không_thì {
       break;
     }
   }
-  return isDirective;
+  trả_về isDirective;
 }
 
 void Document::parseYAMLDirective() {
@@ -2654,11 +2654,11 @@ void Document::parseTAGDirective() {
   TagMap[TagHandle] = TagPrefix;
 }
 
-bool Document::expectToken(int TK) {
+bool Document::expectToken(số_nguyên TK) {
   Token T = getNext();
-  if (T.Kind != TK) {
+  nếu (T.Kind != TK) {
     setError("Unexpected token", T);
-    return false;
+    trả_về false;
   }
-  return true;
+  trả_về true;
 }

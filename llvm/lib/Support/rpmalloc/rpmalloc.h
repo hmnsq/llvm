@@ -19,15 +19,15 @@
 extern "C" {
 #endif
 
-#if defined(__clang__) || defined(__GNUC__)
+#nếu defined(__clang__) || defined(__GNUC__)
 #define RPMALLOC_EXPORT __attribute__((visibility("default")))
 #define RPMALLOC_ALLOCATOR
-#if (defined(__clang_major__) && (__clang_major__ < 4)) ||                     \
+#nếu (defined(__clang_major__) && (__clang_major__ < 4)) ||                     \
     (defined(__GNUC__) && defined(ENABLE_PRELOAD) && ENABLE_PRELOAD)
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
 #define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
-#else
+#không_thì
 #define RPMALLOC_ATTRIB_MALLOC __attribute__((__malloc__))
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size) __attribute__((alloc_size(size)))
 #define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)                               \
@@ -41,7 +41,7 @@ extern "C" {
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
 #define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
 #define RPMALLOC_CDECL __cdecl
-#else
+#không_thì
 #define RPMALLOC_EXPORT
 #define RPMALLOC_ALLOCATOR
 #define RPMALLOC_ATTRIB_MALLOC
@@ -190,7 +190,7 @@ typedef struct rpmalloc_config_t {
   //  retried. The argument passed is the number of bytes that was requested in
   //  the map call. Only used if the default system memory map function is used
   //  (memory_map callback is not set).
-  int (*map_fail_callback)(size_t size);
+  số_nguyên (*map_fail_callback)(size_t size);
   //! Size of memory pages. The page size MUST be a power of two. All memory
   //! mapping
   //  requests to memory_map will be made with size set to a multiple of the
@@ -218,7 +218,7 @@ typedef struct rpmalloc_config_t {
   //  prior to initializing the allocator. For Windows, see
   //  https://docs.microsoft.com/en-us/windows/desktop/memory/large-page-support
   //  For Linux, see https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-  int enable_huge_pages;
+  số_nguyên enable_huge_pages;
   //! Respectively allocated pages and huge allocated pages names for systems
   //  supporting it to be able to distinguish among anonymous regions.
   const char *page_name;
@@ -226,10 +226,10 @@ typedef struct rpmalloc_config_t {
 } rpmalloc_config_t;
 
 //! Initialize allocator with default configuration
-RPMALLOC_EXPORT int rpmalloc_initialize(void);
+RPMALLOC_EXPORT số_nguyên rpmalloc_initialize(void);
 
 //! Initialize allocator with given configuration
-RPMALLOC_EXPORT int rpmalloc_initialize_config(const rpmalloc_config_t *config);
+RPMALLOC_EXPORT số_nguyên rpmalloc_initialize_config(const rpmalloc_config_t *config);
 
 //! Get allocator configuration
 RPMALLOC_EXPORT const rpmalloc_config_t *rpmalloc_config(void);
@@ -241,13 +241,13 @@ RPMALLOC_EXPORT void rpmalloc_finalize(void);
 RPMALLOC_EXPORT void rpmalloc_thread_initialize(void);
 
 //! Finalize allocator for calling thread
-RPMALLOC_EXPORT void rpmalloc_thread_finalize(int release_caches);
+RPMALLOC_EXPORT void rpmalloc_thread_finalize(số_nguyên release_caches);
 
 //! Perform deferred deallocations pending for the calling thread heap
 RPMALLOC_EXPORT void rpmalloc_thread_collect(void);
 
 //! Query if allocator is initialized for calling thread
-RPMALLOC_EXPORT int rpmalloc_is_thread_initialized(void);
+RPMALLOC_EXPORT số_nguyên rpmalloc_is_thread_initialized(void);
 
 //! Get per-thread statistics
 RPMALLOC_EXPORT void
@@ -285,7 +285,7 @@ rprealloc(void *ptr, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  (default 64KiB)
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
 rpaligned_realloc(void *ptr, size_t alignment, size_t size, size_t oldsize,
-                  unsigned int flags) RPMALLOC_ATTRIB_MALLOC
+                  unsigned số_nguyên flags) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Allocate a memory block of at least the given size and alignment.
@@ -322,7 +322,7 @@ rpmemalign(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT int rpposix_memalign(void **memptr, size_t alignment,
+RPMALLOC_EXPORT số_nguyên rpposix_memalign(void **memptr, size_t alignment,
                                      size_t size);
 
 //! Query the usable size of the given memory block (from given pointer to the
@@ -332,7 +332,7 @@ RPMALLOC_EXPORT size_t rpmalloc_usable_size(void *ptr);
 //! Dummy empty function for forcing linker symbol inclusion
 RPMALLOC_EXPORT void rpmalloc_linker_reference(void);
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#nếu RPMALLOC_FIRST_CLASS_HEAPS
 
 //! Heap type
 typedef struct heap_t rpmalloc_heap_t;
@@ -389,7 +389,7 @@ rpmalloc_heap_aligned_calloc(rpmalloc_heap_t *heap, size_t alignment,
 //  by the same heap given to this function.
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
 rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
-                      unsigned int flags) RPMALLOC_ATTRIB_MALLOC
+                      unsigned số_nguyên flags) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Reallocate the given block to at least the given size. The memory block MUST
@@ -401,7 +401,7 @@ rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
 //  the span size (default 64KiB).
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *rpmalloc_heap_aligned_realloc(
     rpmalloc_heap_t *heap, void *ptr, size_t alignment, size_t size,
-    unsigned int flags) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(4);
+    unsigned số_nguyên flags) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(4);
 
 //! Free the given memory block from the given heap. The memory block MUST be
 //! allocated

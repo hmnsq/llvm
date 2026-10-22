@@ -33,20 +33,20 @@ llvm_strlcpy(char *dst, const char *src, size_t siz)
 	size_t n = siz;
 
 	/* Copy as many bytes as will fit */
-	if (n != 0) {
-		while (--n != 0) {
-			if ((*d++ = *s++) == '\0')
+	nếu (n != 0) {
+		trong_khi (--n != 0) {
+			nếu ((*d++ = *s++) == '\0')
 				break;
 		}
 	}
 
 	/* Not enough room in dst, add NUL and traverse rest of src */
-	if (n == 0) {
-		if (siz != 0)
+	nếu (n == 0) {
+		nếu (siz != 0)
 			*d = '\0';		/* NUL-terminate dst */
-		while (*s++)
+		trong_khi (*s++)
 			;
 	}
 
-	return(s - src - 1);	/* count does not include NUL */
+	trả_về(s - src - 1);	/* count does not include NUL */
 }
