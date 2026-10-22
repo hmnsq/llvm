@@ -5,63 +5,63 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FormatVariadic.h"
-#include <cassert>
-#include <optional>
+#ضمن "llvm/Support/FormatVariadic.h"
+#ضمن <cassert>
+#ضمن <optional>
 
-using namespace llvm;
+using نطاق llvm;
 
-static std::optional<AlignStyle> translateLocChar(char C) {
-  switch (C) {
-  case '-':
-    return AlignStyle::Left;
-  case '=':
-    return AlignStyle::Center;
-  case '+':
-    return AlignStyle::Right;
-  default:
-    return std::nullopt;
+ساكن std::optional<AlignStyle> translateLocChar(حرف C) {
+  بدل (C) {
+  حالة '-':
+    أرجع AlignStyle::يسار;
+  حالة '=':
+    أرجع AlignStyle::Center;
+  حالة '+':
+    أرجع AlignStyle::يمين;
+  افتراضي:
+    أرجع std::nullopt;
   }
   LLVM_BUILTIN_UNREACHABLE;
 }
 
-static bool consumeFieldLayout(StringRef &Spec, AlignStyle &Where,
-                               unsigned &Align, char &Pad) {
-  Where = AlignStyle::Right;
+ساكن منطقي consumeFieldLayout(StringRef &Spec, AlignStyle &Where,
+                               unsigned &Align, حرف &Pad) {
+  Where = AlignStyle::يمين;
   Align = 0;
   Pad = ' ';
-  if (Spec.empty())
-    return true;
+  إذا (Spec.empty())
+    أرجع true;
 
-  if (Spec.size() > 1) {
+  إذا (Spec.size() > 1) {
     // A maximum of 2 characters at the beginning can be used for something
     // other than the width.
     // If Spec[1] is a loc char, then Spec[0] is a pad char and Spec[2:...]
     // contains the width.
     // Otherwise, if Spec[0] is a loc char, then Spec[1:...] contains the width.
     // Otherwise, Spec[0:...] contains the width.
-    if (auto Loc = translateLocChar(Spec[1])) {
+    إذا (auto Loc = translateLocChar(Spec[1])) {
       Pad = Spec[0];
       Where = *Loc;
       Spec = Spec.drop_front(2);
-    } else if (auto Loc = translateLocChar(Spec[0])) {
+    } وإلا إذا (auto Loc = translateLocChar(Spec[0])) {
       Where = *Loc;
       Spec = Spec.drop_front(1);
     }
   }
 
-  bool Failed = Spec.consumeInteger(0, Align);
-  return !Failed;
+  منطقي Failed = Spec.consumeInteger(0, Align);
+  أرجع !Failed;
 }
 
-static std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
+ساكن std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
   StringRef RepString = Spec.trim("{}");
 
   // If the replacement sequence does not start with a non-negative integer,
   // this is an error.
-  char Pad = ' ';
+  حرف Pad = ' ';
   unsigned Align = 0;
-  AlignStyle Where = AlignStyle::Right;
+  AlignStyle Where = AlignStyle::يمين;
   StringRef Options;
   unsigned Index = ~0U;
   RepString = RepString.ltrim();
@@ -69,52 +69,52 @@ static std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
   // If index is not specified, keep it ~0U to indicate unresolved index.
   RepString.consumeInteger(0, Index);
 
-  if (RepString.consume_front(",")) {
-    if (!consumeFieldLayout(RepString, Where, Align, Pad)) {
-      assert(false && "Invalid replacement field layout specification!");
-      return std::nullopt;
+  إذا (RepString.consume_front(",")) {
+    إذا (!consumeFieldLayout(RepString, Where, Align, Pad)) {
+      أكد(خطأ && "Invalid replacement field layout specification!");
+      أرجع std::nullopt;
     }
   }
   RepString = RepString.ltrim();
-  if (RepString.consume_front(":")) {
+  إذا (RepString.consume_front(":")) {
     Options = RepString;
     RepString = StringRef();
   }
   RepString = RepString.trim();
-  if (!RepString.empty()) {
-    assert(0 && "Unexpected characters found in replacement string!");
-    return std::nullopt;
+  إذا (!RepString.empty()) {
+    أكد(0 && "Unexpected characters found in replacement string!");
+    أرجع std::nullopt;
   }
 
-  return ReplacementItem(Spec, Index, Align, Where, Pad, Options);
+  أرجع ReplacementItem(Spec, Index, Align, Where, Pad, Options);
 }
 
-static std::pair<std::optional<ReplacementItem>, StringRef>
+ساكن std::pair<std::optional<ReplacementItem>, StringRef>
 splitLiteralAndReplacement(StringRef Fmt) {
-  assert(!Fmt.empty());
+  أكد(!Fmt.empty());
   // Everything up until the first brace is a literal.
-  if (Fmt.front() != '{') {
+  إذا (Fmt.front() != '{') {
     size_t BO = Fmt.find_first_of('{');
-    return {ReplacementItem{Fmt.substr(0, BO)}, Fmt.substr(BO)};
+    أرجع {ReplacementItem{Fmt.substr(0, BO)}, Fmt.substr(BO)};
   }
 
-  StringRef Braces = Fmt.take_while([](char C) { return C == '{'; });
+  StringRef Braces = Fmt.take_while([](حرف C) { أرجع C == '{'; });
   // If there is more than one brace, then some of them are escaped.  Treat
   // these as replacements.
-  if (Braces.size() > 1) {
-    size_t NumEscapedBraces = Braces.size() / 2;
-    StringRef Middle = Fmt.take_front(NumEscapedBraces);
-    StringRef Right = Fmt.drop_front(NumEscapedBraces * 2);
-    return {ReplacementItem(Middle), Right};
+  إذا (Braces.size() > 1) {
+    size_t رقم_Escaped_Braces = Braces.size() / 2;
+    StringRef وسط = Fmt.take_front(رقم_Escaped_Braces);
+    StringRef يمين = Fmt.drop_front(رقم_Escaped_Braces * 2);
+    أرجع {ReplacementItem(وسط), يمين};
   }
   // An unterminated open brace is undefined. Assert to indicate that this is
   // undefined and that we consider it an error. When asserts are disabled,
   // build a replacement item with an error message.
   size_t BC = Fmt.find_first_of('}');
-  if (BC == StringRef::npos) {
-    assert(false &&
+  إذا (BC == StringRef::npos) {
+    أكد(خطأ &&
            "Unterminated brace sequence. Escape with {{ for a literal brace.");
-    return {ReplacementItem("Unterminated brace sequence. Escape with {{ for a "
+    أرجع {ReplacementItem("Unterminated brace sequence. Escape with {{ for a "
                             "literal brace."),
             StringRef()};
   }
@@ -123,54 +123,54 @@ splitLiteralAndReplacement(StringRef Fmt) {
   // this closing brace, treat this portion as literal, and try again with the
   // next one.
   size_t BO2 = Fmt.find_first_of('{', 1);
-  if (BO2 < BC)
-    return {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
+  إذا (BO2 < BC)
+    أرجع {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
 
   StringRef Spec = Fmt.slice(1, BC);
-  StringRef Right = Fmt.substr(BC + 1);
+  StringRef يمين = Fmt.substr(BC + 1);
 
-  return {parseReplacementItem(Spec), Right};
+  أرجع {parseReplacementItem(Spec), يمين};
 }
 
 #ifndef NDEBUG
 #define ENABLE_VALIDATION 1
-#else
+#وإلا
 #define ENABLE_VALIDATION 0 // Conveniently enable validation in release mode.
 #endif
 
 SmallVector<ReplacementItem, 2>
-formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
-                                       bool Validate) {
+formatv_object_base::parseFormatString(StringRef Fmt, size_t رقم_وسائط,
+                                       منطقي Validate) {
   SmallVector<ReplacementItem, 2> Replacements;
   unsigned NextAutomaticIndex = 0;
 
-#if ENABLE_VALIDATION
-  const StringRef SavedFmtStr = Fmt;
-  unsigned NumExpectedArgs = 0;
-  bool HasExplicitIndex = false;
+#إذا ENABLE_VALIDATION
+  ثابت StringRef SavedFmtStr = Fmt;
+  unsigned رقم_Expected_وسائط = 0;
+  منطقي HasExplicitIndex = خطأ;
 #endif
 
-  while (!Fmt.empty()) {
+  طالما (!Fmt.empty()) {
     std::optional<ReplacementItem> I;
     std::tie(I, Fmt) = splitLiteralAndReplacement(Fmt);
-    if (!I)
-      continue;
-    if (I->Type == ReplacementType::Format) {
-      if (I->Index == ~0U)
+    إذا (!I)
+      استمر;
+    إذا (I->Type == ReplacementType::Format) {
+      إذا (I->Index == ~0U)
         I->Index = NextAutomaticIndex++;
-#if ENABLE_VALIDATION
-      else
+#إذا ENABLE_VALIDATION
+      وإلا
         HasExplicitIndex = true;
-      NumExpectedArgs = std::max(NumExpectedArgs, I->Index + 1);
+      رقم_Expected_وسائط = std::max(رقم_Expected_وسائط, I->Index + 1);
 #endif
     }
 
     Replacements.emplace_back(*I);
   }
 
-#if ENABLE_VALIDATION
-  if (!Validate)
-    return Replacements;
+#إذا ENABLE_VALIDATION
+  إذا (!Validate)
+    أرجع Replacements;
 
   // Perform additional validation. Verify that the number of arguments matches
   // the number of replacement indices and that there are no holes in the
@@ -179,46 +179,46 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
   // When validation fails, return an array of replacement items that
   // will print an error message as the outout of this formatv() (used when
   // validation is enabled in release mode).
-  auto getErrorReplacements = [SavedFmtStr](StringLiteral ErrorMsg) {
-    return SmallVector<ReplacementItem, 2>{
-        ReplacementItem("Invalid formatv() call: "), ReplacementItem(ErrorMsg),
+  auto getErrorReplacements = [SavedFmtStr](StringLiteral Error_رسالة) {
+    أرجع SmallVector<ReplacementItem, 2>{
+        ReplacementItem("Invalid formatv() call: "), ReplacementItem(Error_رسالة),
         ReplacementItem(" for format string: "), ReplacementItem(SavedFmtStr)};
   };
 
-  if (NumExpectedArgs != NumArgs) {
+  إذا (رقم_Expected_وسائط != رقم_وسائط) {
     errs() << formatv("Expected {} Args, but got {} for format string '{}'\n",
-                      NumExpectedArgs, NumArgs, SavedFmtStr);
-    assert(0 && "Invalid formatv() call");
-    return getErrorReplacements("Unexpected number of arguments");
+                      رقم_Expected_وسائط, رقم_وسائط, SavedFmtStr);
+    أكد(0 && "Invalid formatv() call");
+    أرجع getErrorReplacements("Unexpected number of arguments");
   }
 
   // Find the number of unique indices seen. All replacement indices
   // are < NumExpectedArgs.
-  SmallVector<bool> Indices(NumExpectedArgs);
-  unsigned Count = 0;
-  for (const ReplacementItem &I : Replacements) {
-    if (I.Type != ReplacementType::Format || Indices[I.Index])
-      continue;
+  SmallVector<منطقي> Indices(رقم_Expected_وسائط);
+  unsigned عدد_2 = 0;
+  لكل (ثابت ReplacementItem &I : Replacements) {
+    إذا (I.Type != ReplacementType::Format || Indices[I.Index])
+      استمر;
     Indices[I.Index] = true;
-    ++Count;
+    ++عدد_2;
   }
 
-  if (Count != NumExpectedArgs) {
+  إذا (عدد_2 != رقم_Expected_وسائط) {
     errs() << formatv(
         "Replacement field indices cannot have holes for format string '{}'\n",
         SavedFmtStr);
-    assert(0 && "Invalid format string");
-    return getErrorReplacements("Replacement indices have holes");
+    أكد(0 && "Invalid format string");
+    أرجع getErrorReplacements("Replacement indices have holes");
   }
 
   // Fail validation if we see both automatic index and explicit index.
-  if (NextAutomaticIndex != 0 && HasExplicitIndex) {
+  إذا (NextAutomaticIndex != 0 && HasExplicitIndex) {
     errs() << formatv(
         "Cannot mix automatic and explicit indices for format string '{}'\n",
         SavedFmtStr);
-    assert(0 && "Invalid format string");
-    return getErrorReplacements("Cannot mix automatic and explicit indices");
+    أكد(0 && "Invalid format string");
+    أرجع getErrorReplacements("Cannot mix automatic and explicit indices");
   }
 #endif // ENABLE_VALIDATION
-  return Replacements;
+  أرجع Replacements;
 }
