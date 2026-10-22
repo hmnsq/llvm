@@ -37,14 +37,14 @@
  * compile-time configuration.
  */
 
-#include "llvm/Support/MD5.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include <cstdint>
-#include <cstring>
+#ضمن "llvm/Support/MD5.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/Endian.h"
+#ضمن <cstdint>
+#ضمن <cstring>
 
 // The basic MD5 functions.
 
@@ -71,12 +71,12 @@
                               ((MD5_u32plus)ptr[(n)*4 + 3] << 24))
 #define GET(n) (InternalState.block[(n)])
 
-using namespace llvm;
+using نطاق llvm;
 
 /// This processes one or more 64-byte data blocks, but does NOT update
 ///the bit counters.  There are no alignment requirements.
-const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
-  const uint8_t *ptr;
+ثابت uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
+  ثابت uint8_t *ptr;
   MD5_u32plus a, b, c, d;
   MD5_u32plus saved_a, saved_b, saved_c, saved_d;
   unsigned long Size = Data.size();
@@ -88,7 +88,7 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
   c = InternalState.c;
   d = InternalState.d;
 
-  do {
+  ܥܒܕ {
     saved_a = a;
     saved_b = b;
     saved_c = c;
@@ -172,47 +172,47 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
     d += saved_d;
 
     ptr += 64;
-  } while (Size -= 64);
+  } ܟܡܐ (Size -= 64);
 
   InternalState.a = a;
   InternalState.b = b;
   InternalState.c = c;
   InternalState.d = d;
 
-  return ptr;
+  ܦܢܐ ptr;
 }
 
-MD5::MD5() = default;
+MD5::MD5() = افتراضي;
 
 /// Incrementally add the bytes in \p Data to the hash.
-void MD5::update(ArrayRef<uint8_t> Data) {
+فراغ MD5::update(ArrayRef<uint8_t> Data) {
   MD5_u32plus saved_lo;
-  unsigned long used, free;
-  const uint8_t *Ptr = Data.data();
+  unsigned long used, حرر;
+  ثابت uint8_t *Ptr = Data.data();
   unsigned long Size = Data.size();
 
   saved_lo = InternalState.lo;
-  if ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
+  ܐܢ ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
     InternalState.hi++;
   InternalState.hi += Size >> 29;
 
   used = saved_lo & 0x3f;
 
-  if (used) {
-    free = 64 - used;
+  ܐܢ (used) {
+    حرر = 64 - used;
 
-    if (Size < free) {
+    ܐܢ (Size < حرر) {
       memcpy(&InternalState.buffer[used], Ptr, Size);
-      return;
+      ܦܢܐ;
     }
 
-    memcpy(&InternalState.buffer[used], Ptr, free);
-    Ptr = Ptr + free;
-    Size -= free;
+    memcpy(&InternalState.buffer[used], Ptr, حرر);
+    Ptr = Ptr + حرر;
+    Size -= حرر;
     body(ArrayRef(InternalState.buffer, 64));
   }
 
-  if (Size >= 64) {
+  ܐܢ (Size >= 64) {
     Ptr = body(ArrayRef(Ptr, Size & ~(unsigned long)0x3f));
     Size &= 0x3f;
   }
@@ -223,30 +223,30 @@ void MD5::update(ArrayRef<uint8_t> Data) {
 /// Add the bytes in the StringRef \p Str to the hash.
 // Note that this isn't a string and so this won't include any trailing NULL
 // bytes.
-void MD5::update(StringRef Str) {
-  ArrayRef<uint8_t> SVal((const uint8_t *)Str.data(), Str.size());
+فراغ MD5::update(StringRef Str) {
+  ArrayRef<uint8_t> SVal((ثابت uint8_t *)Str.data(), Str.size());
   update(SVal);
 }
 
 /// Finish the hash and place the resulting hash into \p result.
 /// \param Result is assumed to be a minimum of 16-bytes in size.
-void MD5::final(MD5Result &Result) {
-  unsigned long used, free;
+فراغ MD5::final(MD5Result &Result) {
+  unsigned long used, حرر;
 
   used = InternalState.lo & 0x3f;
 
   InternalState.buffer[used++] = 0x80;
 
-  free = 64 - used;
+  حرر = 64 - used;
 
-  if (free < 8) {
-    memset(&InternalState.buffer[used], 0, free);
+  ܐܢ (حرر < 8) {
+    memset(&InternalState.buffer[used], 0, حرر);
     body(ArrayRef(InternalState.buffer, 64));
     used = 0;
-    free = 64;
+    حرر = 64;
   }
 
-  memset(&InternalState.buffer[used], 0, free - 8);
+  memset(&InternalState.buffer[used], 0, حرر - 8);
 
   InternalState.lo <<= 3;
   support::endian::write32le(&InternalState.buffer[56], InternalState.lo);
@@ -263,7 +263,7 @@ void MD5::final(MD5Result &Result) {
 MD5::MD5Result MD5::final() {
   MD5Result Result;
   final(Result);
-  return Result;
+  ܦܢܐ Result;
 }
 
 MD5::MD5Result MD5::result() {
@@ -274,17 +274,17 @@ MD5::MD5Result MD5::result() {
   // Restore the state
   InternalState = StateToRestore;
 
-  return Hash;
+  ܦܢܐ Hash;
 }
 
-SmallString<32> MD5::MD5Result::digest() const {
+SmallString<32> MD5::MD5Result::digest() ثابت {
   SmallString<32> Str;
-  toHex(*this, /*LowerCase*/ true, Str);
-  return Str;
+  toHex(*هذا, /*LowerCase*/ ܫܪܪܐ, Str);
+  ܦܢܐ Str;
 }
 
-void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<char> &Str) {
-  toHex(Result, /*LowerCase*/ true, Str);
+فراغ MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<حرف> &Str) {
+  toHex(Result, /*LowerCase*/ ܫܪܪܐ, Str);
 }
 
 MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
@@ -293,7 +293,7 @@ MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
   MD5::MD5Result Res;
   Hash.final(Res);
 
-  return Res;
+  ܦܢܐ Res;
 }
 
 #undef F

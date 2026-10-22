@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/RISCVAttributeParser.h"
+#ضمن "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-const RISCVAttributeParser::DisplayHandler
+ثابت RISCVAttributeParser::DisplayHandler
     RISCVAttributeParser::displayRoutines[] = {
         {
             RISCVAttrs::ARCH,
@@ -46,13 +46,13 @@ const RISCVAttributeParser::DisplayHandler
 Error RISCVAttributeParser::atomicAbi(unsigned Tag) {
   uint64_t Value = de.getULEB128(cursor);
   printAttribute(Tag, Value, "Atomic ABI is " + utostr(Value));
-  return Error::success();
+  ܦܢܐ Error::success();
 }
 
 Error RISCVAttributeParser::unalignedAccess(unsigned tag) {
-  static const char *const strings[] = {"No unaligned access",
+  ساكن ثابت حرف *ثابت strings[] = {"No unaligned access",
                                         "Unaligned access"};
-  return parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
+  ܦܢܐ parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
 }
 
 Error RISCVAttributeParser::stackAlign(unsigned tag) {
@@ -60,19 +60,19 @@ Error RISCVAttributeParser::stackAlign(unsigned tag) {
   std::string description =
       "Stack alignment is " + utostr(value) + std::string("-bytes");
   printAttribute(tag, value, description);
-  return Error::success();
+  ܦܢܐ Error::success();
 }
 
-Error RISCVAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
-      handled = true;
-      break;
+Error RISCVAttributeParser::handler(uint64_t tag, منطقي &handled) {
+  handled = ܕܓܠܐ;
+  لكل (ثابت auto &AH : displayRoutines) {
+    ܐܢ (uint64_t(AH.attribute) == tag) {
+      ܐܢ (Error e = (هذا->*AH.routine)(tag))
+        ܦܢܐ e;
+      handled = ܫܪܪܐ;
+      اكسر;
     }
   }
 
-  return Error::success();
+  ܦܢܐ Error::success();
 }

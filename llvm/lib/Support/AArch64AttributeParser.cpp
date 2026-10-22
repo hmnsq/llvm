@@ -7,26 +7,26 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64AttributeParser.h"
-#include "llvm/Support/AArch64BuildAttributes.h"
+#ضمن "llvm/Support/AArch64AttributeParser.h"
+#ضمن "llvm/Support/AArch64BuildAttributes.h"
 
 std::vector<llvm::SubsectionAndTagToTagName> &
 llvm::AArch64AttributeParser::returnTagsNamesMap() {
-  static std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
+  ساكن std::vector<SubsectionAndTagToTagName> TagsNamesMap = {
       {"aeabi_pauthabi", 1, "Tag_PAuth_Platform"},
       {"aeabi_pauthabi", 2, "Tag_PAuth_Schema"},
       {"aeabi_feature_and_bits", 0, "Tag_Feature_BTI"},
       {"aeabi_feature_and_bits", 1, "Tag_Feature_PAC"},
       {"aeabi_feature_and_bits", 2, "Tag_Feature_GCS"}};
-  return TagsNamesMap;
+  ܦܢܐ TagsNamesMap;
 }
 
 llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
-    const llvm::AArch64AttributeParser &Attributes) {
+    ثابت llvm::AArch64AttributeParser &Attributes) {
 
   llvm::AArch64BuildAttrSubsections SubSections;
   auto GetPauthValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
+    ܦܢܐ Attributes.getAttributeValue("aeabi_pauthabi", Tag).value_or(0);
   };
   SubSections.Pauth.TagPlatform =
       GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_PLATFORM);
@@ -34,7 +34,7 @@ llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
       GetPauthValue(llvm::AArch64BuildAttributes::TAG_PAUTH_SCHEMA);
 
   auto GetFeatureValue = [&Attributes](unsigned Tag) {
-    return Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
+    ܦܢܐ Attributes.getAttributeValue("aeabi_feature_and_bits", Tag)
         .value_or(0);
   };
   SubSections.AndFeatures |=
@@ -44,5 +44,5 @@ llvm::AArch64BuildAttrSubsections llvm::extractBuildAttributesSubsections(
   SubSections.AndFeatures |=
       GetFeatureValue(llvm::AArch64BuildAttributes::TAG_FEATURE_GCS) << 2;
 
-  return SubSections;
+  ܦܢܐ SubSections;
 }

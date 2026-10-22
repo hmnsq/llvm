@@ -10,30 +10,30 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Win64EH.h"
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/Win64EH.h"
+#ضمن "llvm/Support/Endian.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/MathExtras.h"
 
-using namespace llvm;
-using namespace llvm::Win64EH;
+using نطاق llvm;
+using نطاق llvm::Win64EH;
 
 StringRef Win64EH::getRegisterNameV3(unsigned Reg) {
-  static const char *const Names[] = {
+  ساكن ثابت حرف *ثابت Names[] = {
       "RAX", "RCX", "RDX", "RBX", "RSP", "RBP", "RSI", "RDI",
       "R8",  "R9",  "R10", "R11", "R12", "R13", "R14", "R15",
       "R16", "R17", "R18", "R19", "R20", "R21", "R22", "R23",
       "R24", "R25", "R26", "R27", "R28", "R29", "R30", "R31",
   };
-  if (Reg >= std::size(Names))
-    return "<invalid>";
-  return Names[Reg];
+  ܐܢ (Reg >= std::size(Names))
+    ܦܢܐ "<invalid>";
+  ܦܢܐ Names[Reg];
 }
 
 Expected<DecodedWOD> Win64EH::decodeWOD(ArrayRef<uint8_t> Pool,
                                         unsigned Offset) {
-  if (Offset >= Pool.size())
-    return createStringError("WOD pool overflow at offset %u", Offset);
+  ܐܢ (Offset >= Pool.size())
+    ܦܢܐ createStringError("WOD pool overflow at offset %u", Offset);
 
   uint8_t FirstByte = Pool[Offset];
   DecodedWOD W = {};
@@ -48,152 +48,152 @@ Expected<DecodedWOD> Win64EH::decodeWOD(ArrayRef<uint8_t> Pool,
   uint8_t Low3 = FirstByte & 0x07;
 
   // 3-bit opcode: bits [2:0] in {4, 5, 6, 7}
-  if (Low3 >= 4) {
-    switch (Low3) {
-    case WOD_PUSH: {
+  ܐܢ (Low3 >= 4) {
+    بدل (Low3) {
+    حالة WOD_PUSH: {
       W.Opcode = WOD_PUSH;
       W.ByteSize = 1;
       W.Register = (FirstByte >> 3) & 0x1F; // 5-bit register
-      return W;
+      ܦܢܐ W;
     }
-    case WOD_SAVE_NONVOL_FAR: {
+    حالة WOD_SAVE_NONVOL_FAR: {
       W.Opcode = WOD_SAVE_NONVOL_FAR;
       W.ByteSize = 5;
-      if (Offset + 5 > Pool.size())
-        return createStringError("WOD_SAVE_NONVOL_FAR truncated at offset %u",
+      ܐܢ (Offset + 5 > Pool.size())
+        ܦܢܐ createStringError("WOD_SAVE_NONVOL_FAR truncated at offset %u",
                                  Offset);
       W.Register = (FirstByte >> 3) & 0x1F;
       W.Displacement = support::endian::read32le(&Pool[Offset + 1]);
-      return W;
+      ܦܢܐ W;
     }
-    case WOD_SAVE_NONVOL: {
+    حالة WOD_SAVE_NONVOL: {
       W.Opcode = WOD_SAVE_NONVOL;
       W.ByteSize = 3;
-      if (Offset + 3 > Pool.size())
-        return createStringError("WOD_SAVE_NONVOL truncated at offset %u",
+      ܐܢ (Offset + 3 > Pool.size())
+        ܦܢܐ createStringError("WOD_SAVE_NONVOL truncated at offset %u",
                                  Offset);
       W.Register = (FirstByte >> 3) & 0x1F;
       W.Displacement =
           (uint32_t)support::endian::read16le(&Pool[Offset + 1]) * 8;
-      return W;
+      ܦܢܐ W;
     }
-    case WOD_PUSH_CONSECUTIVE_2: {
+    حالة WOD_PUSH_CONSECUTIVE_2: {
       W.Opcode = WOD_PUSH_CONSECUTIVE_2;
       W.ByteSize = 1;
       W.Register = (FirstByte >> 3) & 0x1F;
-      if (W.Register > 30)
-        return createStringError(
+      ܐܢ (W.Register > 30)
+        ܦܢܐ createStringError(
             "WOD_PUSH_CONSECUTIVE_2 Register=%u out of range [0,30] at pool "
             "offset %u",
             W.Register, Offset);
-      return W;
+      ܦܢܐ W;
     }
-    default:
-      return createStringError("unknown WOD opcode 0x%02X at pool offset %u",
+    افتراضي:
+      ܦܢܐ createStringError("unknown WOD opcode 0x%02X at pool offset %u",
                                FirstByte, Offset);
     }
   }
 
   // 4-bit opcode: bits [3:0] in {8, 9, 10, ...}
   uint8_t Low4 = FirstByte & 0x0F;
-  if (Low4 >= 8) {
-    switch (Low4) {
-    case WOD_ALLOC_SMALL: {
+  ܐܢ (Low4 >= 8) {
+    بدل (Low4) {
+    حالة WOD_ALLOC_SMALL: {
       W.Opcode = WOD_ALLOC_SMALL;
       W.ByteSize = 1;
       W.Size = (unsigned)(((FirstByte >> 4) & 0x0F) + 1) * 8;
-      return W;
+      ܦܢܐ W;
     }
-    case WOD_SAVE_XMM128_FAR: {
+    حالة WOD_SAVE_XMM128_FAR: {
       W.Opcode = WOD_SAVE_XMM128_FAR;
       W.ByteSize = 5;
-      if (Offset + 5 > Pool.size())
-        return createStringError("WOD_SAVE_XMM128_FAR truncated at offset %u",
+      ܐܢ (Offset + 5 > Pool.size())
+        ܦܢܐ createStringError("WOD_SAVE_XMM128_FAR truncated at offset %u",
                                  Offset);
       W.Register = (FirstByte >> 4) & 0x0F;
       W.Displacement = support::endian::read32le(&Pool[Offset + 1]);
-      return W;
+      ܦܢܐ W;
     }
-    case WOD_SAVE_XMM128: {
+    حالة WOD_SAVE_XMM128: {
       W.Opcode = WOD_SAVE_XMM128;
       W.ByteSize = 3;
-      if (Offset + 3 > Pool.size())
-        return createStringError("WOD_SAVE_XMM128 truncated at offset %u",
+      ܐܢ (Offset + 3 > Pool.size())
+        ܦܢܐ createStringError("WOD_SAVE_XMM128 truncated at offset %u",
                                  Offset);
       W.Register = (FirstByte >> 4) & 0x0F;
       W.Displacement =
           (uint32_t)support::endian::read16le(&Pool[Offset + 1]) * 16;
-      return W;
+      ܦܢܐ W;
     }
-    default:
-      return createStringError("unknown WOD opcode 0x%02X at pool offset %u",
+    افتراضي:
+      ܦܢܐ createStringError("unknown WOD opcode 0x%02X at pool offset %u",
                                FirstByte, Offset);
     }
   }
 
   // 6-bit opcode: bits [5:0] == 0x20 (WOD_PUSH2)
   uint8_t Low6 = FirstByte & 0x3F;
-  if (Low6 == WOD_PUSH2) {
+  ܐܢ (Low6 == WOD_PUSH2) {
     W.Opcode = WOD_PUSH2;
     W.ByteSize = 2;
-    if (Offset + 2 > Pool.size())
-      return createStringError("WOD_PUSH2 truncated at offset %u", Offset);
+    ܐܢ (Offset + 2 > Pool.size())
+      ܦܢܐ createStringError("WOD_PUSH2 truncated at offset %u", Offset);
     uint8_t SecondByte = Pool[Offset + 1];
     // First reg from bits [7:6] of first byte (2 bits) and bits [2:0] of second
     // (3 bits)
     W.Register = ((FirstByte >> 6) & 0x03) | ((SecondByte & 0x07) << 2);
     W.Register2 = (SecondByte >> 3) & 0x1F;
-    return W;
+    ܦܢܐ W;
   }
 
   // 8-bit opcode: full byte is opcode (values 0-3)
-  switch (FirstByte) {
-  case WOD_SET_FPREG: {
+  بدل (FirstByte) {
+  حالة WOD_SET_FPREG: {
     W.Opcode = WOD_SET_FPREG;
     W.ByteSize = 2;
-    if (Offset + 2 > Pool.size())
-      return createStringError("WOD_SET_FPREG truncated at offset %u", Offset);
+    ܐܢ (Offset + 2 > Pool.size())
+      ܦܢܐ createStringError("WOD_SET_FPREG truncated at offset %u", Offset);
     uint8_t SecondByte = Pool[Offset + 1];
     W.Register = SecondByte & 0x0F; // 4-bit register
     W.Displacement = (unsigned)((SecondByte >> 4) & 0x0F) * 16;
-    return W;
+    ܦܢܐ W;
   }
-  case WOD_ALLOC_HUGE: {
+  حالة WOD_ALLOC_HUGE: {
     W.Opcode = WOD_ALLOC_HUGE;
     W.ByteSize = 5;
-    if (Offset + 5 > Pool.size())
-      return createStringError("WOD_ALLOC_HUGE truncated at offset %u", Offset);
+    ܐܢ (Offset + 5 > Pool.size())
+      ܦܢܐ createStringError("WOD_ALLOC_HUGE truncated at offset %u", Offset);
     W.Size = support::endian::read32le(&Pool[Offset + 1]);
-    return W;
+    ܦܢܐ W;
   }
-  case WOD_ALLOC_LARGE: {
+  حالة WOD_ALLOC_LARGE: {
     W.Opcode = WOD_ALLOC_LARGE;
     W.ByteSize = 3;
-    if (Offset + 3 > Pool.size())
-      return createStringError("WOD_ALLOC_LARGE truncated at offset %u",
+    ܐܢ (Offset + 3 > Pool.size())
+      ܦܢܐ createStringError("WOD_ALLOC_LARGE truncated at offset %u",
                                Offset);
     W.Size = (uint32_t)support::endian::read16le(&Pool[Offset + 1]) * 8;
-    return W;
+    ܦܢܐ W;
   }
-  case WOD_PUSH_CANONICAL_FRAME: {
+  حالة WOD_PUSH_CANONICAL_FRAME: {
     W.Opcode = WOD_PUSH_CANONICAL_FRAME;
     W.ByteSize = 2;
-    if (Offset + 2 > Pool.size())
-      return createStringError(
+    ܐܢ (Offset + 2 > Pool.size())
+      ܦܢܐ createStringError(
           "WOD_PUSH_CANONICAL_FRAME truncated at offset %u", Offset);
     W.Type = Pool[Offset + 1];
-    return W;
+    ܦܢܐ W;
   }
-  default:
-    return createStringError("unknown WOD opcode 0x%02X at pool offset %u",
+  افتراضي:
+    ܦܢܐ createStringError("unknown WOD opcode 0x%02X at pool offset %u",
                              FirstByte, Offset);
   }
 }
 
 Expected<DecodedUnwindInfoV3>
 Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
-  if (Data.size() < 4)
-    return createStringError("V3 unwind info too short: %zu bytes",
+  ܐܢ (Data.size() < 4)
+    ܦܢܐ createStringError("V3 unwind info too short: %zu bytes",
                              Data.size());
 
   DecodedUnwindInfoV3 Info;
@@ -216,15 +216,15 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   // reading past it would either overflow the buffer or cross into the
   // trailing handler/chain data, both of which indicate a malformed record.
   unsigned PayloadEnd = 4 + Info.PayloadWords * 2;
-  if (PayloadEnd > Data.size())
-    return createStringError(
+  ܐܢ (PayloadEnd > Data.size())
+    ܦܢܐ createStringError(
         "V3 unwind info PayloadWords (%u) extends past end of buffer",
         Info.PayloadWords);
 
-  bool IsLarge = Info.isLarge();
-  if (IsLarge) {
-    if (Offset >= PayloadEnd)
-      return createStringError(
+  منطقي IsLarge = Info.isLarge();
+  ܐܢ (IsLarge) {
+    ܐܢ (Offset >= PayloadEnd)
+      ܦܢܐ createStringError(
           "V3 unwind info with UNW_FlagLarge too short: PayloadWords (%u) "
           "leaves no room for UNWIND_INFO_LARGE_V3",
           Info.PayloadWords);
@@ -233,16 +233,16 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   }
 
   // Read prolog IP offsets (8-bit each, or 16-bit when LARGE)
-  for (unsigned I = 0; I < Info.NumberOfOps; ++I) {
-    if (IsLarge) {
-      if (Offset + 2 > PayloadEnd)
-        return createStringError(
+  لكل (unsigned I = 0; I < Info.NumberOfOps; ++I) {
+    ܐܢ (IsLarge) {
+      ܐܢ (Offset + 2 > PayloadEnd)
+        ܦܢܐ createStringError(
             "V3 payload truncated reading prolog IP offset %u", I);
       Info.PrologIpOffsets.push_back(support::endian::read16le(&Data[Offset]));
       Offset += 2;
-    } else {
-      if (Offset >= PayloadEnd)
-        return createStringError(
+    } ܐܚܪܢܐ {
+      ܐܢ (Offset >= PayloadEnd)
+        ܦܢܐ createStringError(
             "V3 payload truncated reading prolog IP offset %u", I);
       Info.PrologIpOffsets.push_back(Data[Offset++]);
     }
@@ -254,18 +254,18 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   // spec, a descriptor with NumberOfOps == 0 inherits its effective fields
   // from the first *preceding* descriptor with NumberOfOps != 0, which is not
   // necessarily the immediately preceding descriptor.
-  int BaseEpilogIdx = -1;
-  for (unsigned I = 0; I < Info.NumberOfEpilogs; ++I) {
+  صحيح BaseEpilogIdx = -1;
+  لكل (unsigned I = 0; I < Info.NumberOfEpilogs; ++I) {
     DecodedEpilogV3 Epi;
-    if (Offset >= PayloadEnd)
-      return createStringError(
+    ܐܢ (Offset >= PayloadEnd)
+      ܦܢܐ createStringError(
           "V3 payload truncated reading epilog %u FlagsAndNumOps", I);
     uint8_t FlagsAndNumOps = Data[Offset++];
     Epi.Flags = FlagsAndNumOps & 0x07;
     Epi.NumberOfOps = (FlagsAndNumOps >> 3) & 0x1F;
 
-    if (Offset + 2 > PayloadEnd)
-      return createStringError(
+    ܐܢ (Offset + 2 > PayloadEnd)
+      ܦܢܐ createStringError(
           "V3 payload truncated reading epilog %u EpilogOffset", I);
     int16_t RawOffset =
         static_cast<int16_t>(support::endian::read16le(&Data[Offset]));
@@ -274,9 +274,9 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
     // The first epilog's EpilogOffset is absolute (from fragment start or
     // tail). Subsequent epilogs store a delta from the previous epilog's
     // resolved position. Accumulate to resolve all to absolute.
-    if (I == 0)
+    ܐܢ (I == 0)
       Epi.EpilogOffset = RawOffset;
-    else
+    ܐܚܪܢܐ
       Epi.EpilogOffset = PrevResolvedOffset + RawOffset;
     PrevResolvedOffset = Epi.EpilogOffset;
 
@@ -294,9 +294,9 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
     // still see the (broken) header and EpilogOffset; downstream consumers
     // (e.g. the dumpers) surface a warning when they encounter NumberOfOps == 0
     // at index 0.
-    if (Epi.NumberOfOps == 0) {
-      if (BaseEpilogIdx >= 0) {
-        const DecodedEpilogV3 &Base = Info.Epilogs[BaseEpilogIdx];
+    ܐܢ (Epi.NumberOfOps == 0) {
+      ܐܢ (BaseEpilogIdx >= 0) {
+        ثابت DecodedEpilogV3 &Base = Info.Epilogs[BaseEpilogIdx];
         // Flags bits 0 and 1 are producer-replicated, not inherited: a
         // compliant producer must have written the base's values into this
         // descriptor's own flags byte, so they should already match the base.
@@ -308,49 +308,49 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
         Epi.FirstOp = Base.FirstOp;
         Epi.IpOffsetOfLastInstruction = Base.IpOffsetOfLastInstruction;
         Epi.IpOffsets = Base.IpOffsets;
-      } else {
+      } ܐܚܪܢܐ {
         Epi.FirstOp = 0;
         Epi.IpOffsetOfLastInstruction = 0;
       }
       Info.Epilogs.push_back(std::move(Epi));
-      continue;
+      استمر;
     }
 
-    bool EpiLarge = Epi.isLarge();
+    منطقي EpiLarge = Epi.isLarge();
 
-    if (Offset + 2 > PayloadEnd)
-      return createStringError("V3 payload truncated reading epilog %u FirstOp",
+    ܐܢ (Offset + 2 > PayloadEnd)
+      ܦܢܐ createStringError("V3 payload truncated reading epilog %u FirstOp",
                                I);
     Epi.FirstOp = support::endian::read16le(&Data[Offset]);
     Offset += 2;
 
     // IpOffsetOfLastInstruction: 8-bit normally, 16-bit when EPILOG_INFO_LARGE
-    if (EpiLarge) {
-      if (Offset + 2 > PayloadEnd)
-        return createStringError(
+    ܐܢ (EpiLarge) {
+      ܐܢ (Offset + 2 > PayloadEnd)
+        ܦܢܐ createStringError(
             "V3 payload truncated reading epilog %u IpOffsetOfLastInstruction",
             I);
       Epi.IpOffsetOfLastInstruction = support::endian::read16le(&Data[Offset]);
       Offset += 2;
-    } else {
-      if (Offset >= PayloadEnd)
-        return createStringError(
+    } ܐܚܪܢܐ {
+      ܐܢ (Offset >= PayloadEnd)
+        ܦܢܐ createStringError(
             "V3 payload truncated reading epilog %u IpOffsetOfLastInstruction",
             I);
       Epi.IpOffsetOfLastInstruction = Data[Offset++];
     }
 
     // Read epilog IP offsets (8-bit each, or 16-bit when EPILOG_INFO_LARGE)
-    for (unsigned J = 0; J < Epi.NumberOfOps; ++J) {
-      if (EpiLarge) {
-        if (Offset + 2 > PayloadEnd)
-          return createStringError(
+    لكل (unsigned J = 0; J < Epi.NumberOfOps; ++J) {
+      ܐܢ (EpiLarge) {
+        ܐܢ (Offset + 2 > PayloadEnd)
+          ܦܢܐ createStringError(
               "V3 payload truncated reading epilog %u IP offset %u", I, J);
         Epi.IpOffsets.push_back(support::endian::read16le(&Data[Offset]));
         Offset += 2;
-      } else {
-        if (Offset >= PayloadEnd)
-          return createStringError(
+      } ܐܚܪܢܐ {
+        ܐܢ (Offset >= PayloadEnd)
+          ܦܢܐ createStringError(
               "V3 payload truncated reading epilog %u IP offset %u", I, J);
         Epi.IpOffsets.push_back(Data[Offset++]);
       }
@@ -364,9 +364,9 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
 
   // Identify WOD pool: everything from current offset until the end of
   // the payload area declared by PayloadWords.
-  if (Offset < PayloadEnd)
+  ܐܢ (Offset < PayloadEnd)
     Info.WODPool = Data.slice(Offset, PayloadEnd - Offset);
-  else
+  ܐܚܪܢܐ
     Info.WODPool = ArrayRef<uint8_t>();
 
   // When PayloadWords is odd, the encoder emits 2 trailing zero bytes inside
@@ -374,5 +374,5 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   // aligned offset so consumers locate the next field correctly.
   Info.PayloadSize = alignTo(PayloadEnd, 4);
 
-  return Info;
+  ܦܢܐ Info;
 }

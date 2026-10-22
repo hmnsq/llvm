@@ -13,99 +13,99 @@
 
 #ifdef __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#ضمن <new>
+#ضمن <rpmalloc.h>
 
 #ifndef __CRTDECL
 #define __CRTDECL
 #endif
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+خارجي فراغ __CRTDECL operator delete(فراغ *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+خارجي فراغ __CRTDECL operator delete[](فراغ *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+خارجي فراغ *__CRTDECL operator new(std::size_t size) noexcept(false) {
+  ܦܢܐ rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+خارجي فراغ *__CRTDECL operator new[](std::size_t size) noexcept(false) {
+  ܦܢܐ rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+خارجي فراغ *__CRTDECL operator new(std::size_t size,
+                                    ثابت std::nothrow_t &tag) noexcept {
+  (فراغ)حجم(tag);
+  ܦܢܐ rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+خارجي فراغ *__CRTDECL operator new[](std::size_t size,
+                                      ثابت std::nothrow_t &tag) noexcept {
+  (فراغ)حجم(tag);
+  ܦܢܐ rpmalloc(size);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#ܐܢ (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+خارجي فراغ __CRTDECL operator delete(فراغ *p, std::size_t size) noexcept {
+  (فراغ)حجم(size);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+خارجي فراغ __CRTDECL operator delete[](فراغ *p, std::size_t size) noexcept {
+  (فراغ)حجم(size);
   rpfree(p);
 }
 
 #endif
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#ܐܢ (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+خارجي فراغ __CRTDECL operator delete(فراغ *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (فراغ)حجم(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+خارجي فراغ __CRTDECL operator delete[](فراغ *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (فراغ)حجم(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+خارجي فراغ __CRTDECL operator delete(فراغ *p, std::size_t size,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (فراغ)حجم(size);
+  (فراغ)حجم(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+خارجي فراغ __CRTDECL operator delete[](فراغ *p, std::size_t size,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (فراغ)حجم(size);
+  (فراغ)حجم(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+خارجي فراغ *__CRTDECL operator new(std::size_t size,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  ܦܢܐ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+خارجي فراغ *__CRTDECL operator new[](std::size_t size,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  ܦܢܐ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+خارجي فراغ *__CRTDECL operator new(std::size_t size, std::align_val_t align,
+                                    ثابت std::nothrow_t &tag) noexcept {
+  (فراغ)حجم(tag);
+  ܦܢܐ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+خارجي فراغ *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
+                                      ثابت std::nothrow_t &tag) noexcept {
+  (فراغ)حجم(tag);
+  ܦܢܐ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
 #endif

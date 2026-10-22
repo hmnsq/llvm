@@ -7,70 +7,70 @@
 //
 //===------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttrParserExtended.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cstdint>
+#ضمن "llvm/Support/ELFAttrParserExtended.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/ELFAttributes.h"
+#ضمن "llvm/Support/Errc.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ScopedPrinter.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cstdint>
 
-using namespace llvm;
-using namespace ELFAttrs;
+using نطاق llvm;
+using نطاق ELFAttrs;
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(unsigned Tag) const {
-  assert(
+ELFExtendedAttrParser::getAttributeValue(unsigned Tag) ثابت {
+  أكد(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
-  return std::nullopt;
+  ܦܢܐ std::nullopt;
 }
 
 std::optional<unsigned>
 ELFExtendedAttrParser::getAttributeValue(StringRef BuildAttrSubsectionName,
-                                         unsigned Tag) const {
-  for (const auto &SubSection : SubSectionVec) {
-    if (BuildAttrSubsectionName == SubSection.Name)
-      for (const auto &BAItem : SubSection.Content) {
-        if (Tag == BAItem.Tag)
-          return std::optional<unsigned>(BAItem.IntValue);
+                                         unsigned Tag) ثابت {
+  لكل (ثابت auto &SubSection : SubSectionVec) {
+    ܐܢ (BuildAttrSubsectionName == SubSection.Name)
+      لكل (ثابت auto &BAItem : SubSection.Content) {
+        ܐܢ (Tag == BAItem.Tag)
+          ܦܢܐ std::optional<unsigned>(BAItem.IntValue);
       }
   }
-  return std::nullopt;
+  ܦܢܐ std::nullopt;
 }
 
 std::optional<StringRef>
-ELFExtendedAttrParser::getAttributeString(unsigned Tag) const {
-  assert(
+ELFExtendedAttrParser::getAttributeString(unsigned Tag) ثابت {
+  أكد(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
-  return std::nullopt;
+  ܦܢܐ std::nullopt;
 }
 
 std::optional<StringRef>
 ELFExtendedAttrParser::getAttributeString(StringRef BuildAttrSubsectionName,
-                                          unsigned Tag) const {
-  for (const auto &SubSection : SubSectionVec) {
-    if (BuildAttrSubsectionName == SubSection.Name)
-      for (const auto &BAItem : SubSection.Content) {
-        if (Tag == BAItem.Tag)
-          return std::optional<StringRef>(BAItem.StringValue);
+                                          unsigned Tag) ثابت {
+  لكل (ثابت auto &SubSection : SubSectionVec) {
+    ܐܢ (BuildAttrSubsectionName == SubSection.Name)
+      لكل (ثابت auto &BAItem : SubSection.Content) {
+        ܐܢ (Tag == BAItem.Tag)
+          ܦܢܐ std::optional<StringRef>(BAItem.StringValue);
       }
   }
-  return std::nullopt;
+  ܦܢܐ std::nullopt;
 }
 
 StringRef
-ELFExtendedAttrParser::getTagName(const StringRef &BuildAttrSubsectionName,
-                                  const unsigned Tag) {
-  for (const auto &Entry : TagsNamesMap) {
-    if (BuildAttrSubsectionName == Entry.SubsectionName)
-      if (Tag == Entry.Tag)
-        return Entry.TagName;
+ELFExtendedAttrParser::getTagName(ثابت StringRef &BuildAttrSubsectionName,
+                                  ثابت unsigned Tag) {
+  لكل (ثابت auto &Entry : TagsNamesMap) {
+    ܐܢ (BuildAttrSubsectionName == Entry.SubsectionName)
+      ܐܢ (Tag == Entry.Tag)
+        ܦܢܐ Entry.TagName;
   }
-  return "";
+  ܦܢܐ "";
 }
 
 Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
@@ -80,7 +80,7 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
   De = DataExtractor(Section, Endian == llvm::endianness::little);
 
   // Early returns have specific errors. Consume the Error in Cursor.
-  struct ClearCursorError {
+  بنية ClearCursorError {
     DataExtractor::Cursor &Cursor;
     ~ClearCursorError() { consumeError(Cursor.takeError()); }
   } Clear{Cursor};
@@ -102,45 +102,45 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
 
   // Get format-version
   uint8_t FormatVersion = De.getU8(Cursor);
-  if (!Cursor)
-    return Cursor.takeError();
-  if (ELFAttrs::Format_Version != FormatVersion)
-    return createStringError(errc::invalid_argument,
+  ܐܢ (!Cursor)
+    ܦܢܐ Cursor.takeError();
+  ܐܢ (ELFAttrs::Format_Version != FormatVersion)
+    ܦܢܐ createStringError(errc::invalid_argument,
                              "unrecognized format-version: 0x" +
                                  utohexstr(FormatVersion));
 
-  while (!De.eof(Cursor)) {
+  ܟܡܐ (!De.eof(Cursor)) {
     uint32_t ExtBASubsectionLength = De.getU32(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
+    ܐܢ (!Cursor)
+      ܦܢܐ Cursor.takeError();
     // Minimal valid Extended Build Attributes subsection size is at
     // least 8: length(4) name(at least a single char + null) optionality(1) and
     // type(1)
     // Extended Build Attributes subsection has to fit inside the section.
-    if (ExtBASubsectionLength < 8 ||
+    ܐܢ (ExtBASubsectionLength < 8 ||
         ExtBASubsectionLength > (Section.size() - Cursor.tell() + 4))
-      return createStringError(
+      ܦܢܐ createStringError(
           errc::invalid_argument,
           "invalid Extended Build Attributes subsection size at offset: " +
               utohexstr(Cursor.tell() - 4));
 
     StringRef VendorName = De.getCStrRef(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
+    ܐܢ (!Cursor)
+      ܦܢܐ Cursor.takeError();
     uint8_t IsOptional = De.getU8(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
-    if (!(0 == IsOptional || 1 == IsOptional))
-      return createStringError(
+    ܐܢ (!Cursor)
+      ܦܢܐ Cursor.takeError();
+    ܐܢ (!(0 == IsOptional || 1 == IsOptional))
+      ܦܢܐ createStringError(
           errc::invalid_argument,
           "\ninvalid Optionality at offset " + utohexstr(Cursor.tell() - 4) +
               ": " + utohexstr(IsOptional) + " (Options are 1|0)");
     StringRef IsOptionalStr = IsOptional ? "optional" : "required";
     uint8_t Type = De.getU8(Cursor);
-    if (!Cursor)
-      return Cursor.takeError();
-    if (!(0 == Type || 1 == Type))
-      return createStringError(errc::invalid_argument,
+    ܐܢ (!Cursor)
+      ܦܢܐ Cursor.takeError();
+    ܐܢ (!(0 == Type || 1 == Type))
+      ܦܢܐ createStringError(errc::invalid_argument,
                                "\ninvalid Type at offset " +
                                    utohexstr(Cursor.tell() - 4) + ": " +
                                    utohexstr(Type) + " (Options are 1|0)");
@@ -151,7 +151,7 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     BASubSection.IsOptional = IsOptional;
     BASubSection.ParameterType = Type;
 
-    if (Sw) {
+    ܐܢ (Sw) {
       Sw->startLine() << "Section " << ++SectionNumber << " {\n";
       Sw->indent();
       Sw->printNumber("SectionLength", ExtBASubsectionLength);
@@ -167,28 +167,28 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     // Size: 4 bytes, Vendor Name: VendorName.size() + 1 (null termination),
     // optionality: 1, type: 1
     uint32_t BytesAllButAttributes = 4 + (VendorName.size() + 1) + 1 + 1;
-    while (Cursor.tell() <
+    ܟܡܐ (Cursor.tell() <
            (OffsetInSection + ExtBASubsectionLength - BytesAllButAttributes)) {
 
       uint64_t Tag = De.getULEB128(Cursor);
-      if (!Cursor)
-        return Cursor.takeError();
+      ܐܢ (!Cursor)
+        ܦܢܐ Cursor.takeError();
 
       StringRef TagName = getTagName(VendorName, Tag);
 
       uint64_t ValueInt = 0;
       std::string ValueStr = "";
-      if (Type) { // type==1 --> ntbs
+      ܐܢ (Type) { // type==1 --> ntbs
         ValueStr = De.getCStrRef(Cursor);
-        if (!Cursor)
-          return Cursor.takeError();
-        if (Sw)
+        ܐܢ (!Cursor)
+          ܦܢܐ Cursor.takeError();
+        ܐܢ (Sw)
           Sw->printString("" != TagName ? TagName : utostr(Tag), ValueStr);
-      } else { // type==0 --> uleb128
+      } ܐܚܪܢܐ { // type==0 --> uleb128
         ValueInt = De.getULEB128(Cursor);
-        if (!Cursor)
-          return Cursor.takeError();
-        if (Sw)
+        ܐܢ (!Cursor)
+          ܦܢܐ Cursor.takeError();
+        ܐܢ (Sw)
           Sw->printNumber("" != TagName ? TagName : utostr(Tag), ValueInt);
       }
 
@@ -197,7 +197,7 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
                                 Tag, ValueInt, ValueStr);
       BASubSection.Content.push_back(BAItem);
     }
-    if (Sw) {
+    ܐܢ (Sw) {
       // Close 'Attributes'
       Sw->unindent();
       Sw->startLine() << "}\n";
@@ -210,5 +210,5 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     SubSectionVec.push_back(BASubSection);
   }
 
-  return Cursor.takeError();
+  ܦܢܐ Cursor.takeError();
 }

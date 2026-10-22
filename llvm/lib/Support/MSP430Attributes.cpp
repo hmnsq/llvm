@@ -6,17 +6,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MSP430Attributes.h"
+#ضمن "llvm/Support/MSP430Attributes.h"
 
-using namespace llvm;
-using namespace llvm::MSP430Attrs;
+using نطاق llvm;
+using نطاق llvm::MSP430Attrs;
 
-static constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
+ساكن constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
                                           {TagCodeModel, "Tag_Code_Model"},
                                           {TagDataModel, "Tag_Data_Model"},
                                           {TagEnumSize, "Tag_Enum_Size"}};
 
 constexpr TagNameMap MSP430AttributeTags{TagData};
-const TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
-  return MSP430AttributeTags;
+ثابت TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
+  ܦܢܐ MSP430AttributeTags;
 }

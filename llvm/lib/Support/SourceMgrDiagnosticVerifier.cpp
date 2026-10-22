@@ -6,87 +6,87 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SourceMgrDiagnosticVerifier.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/SourceMgrDiagnosticVerifier.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using نطاق llvm;
 
 /// Given a diagnostic kind, return a human readable string for it.
-static StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
-  switch (kind) {
-  case SourceMgr::DK_Note:
-    return "note";
-  case SourceMgr::DK_Warning:
-    return "warning";
-  case SourceMgr::DK_Error:
-    return "error";
-  case SourceMgr::DK_Remark:
-    return "remark";
+ساكن StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
+  بدل (kind) {
+  حالة SourceMgr::DK_Note:
+    ܦܢܐ "note";
+  حالة SourceMgr::DK_Warning:
+    ܦܢܐ "warning";
+  حالة SourceMgr::DK_Error:
+    ܦܢܐ "error";
+  حالة SourceMgr::DK_Remark:
+    ܦܢܐ "remark";
   }
   llvm_unreachable("Unknown SourceMgr::DiagKind");
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
-    raw_ostream &os, SourceMgr &mgr, const Twine &msg) const {
-  if (fileLoc.isValid()) {
+منطقي SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
+    raw_ostream &os, SourceMgr &mgr, ثابت Twine &msg) ثابت {
+  ܐܢ (fileLoc.isValid()) {
     SMRange range(fileLoc, SMLoc::getFromPointer(fileLoc.getPointer() +
                                                  substring.size()));
     mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg, range);
-  } else {
+  } ܐܚܪܢܐ {
     mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg);
   }
-  return false;
+  ܦܢܐ ܕܓܠܐ;
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::match(StringRef str) const {
+منطقي SourceMgrDiagnosticVerifier::ExpectedDiag::match(StringRef str) ثابت {
   // If this isn't a regex diagnostic, we simply check if the string was
   // contained.
-  if (substringRegex)
-    return substringRegex->match(str);
-  return str.contains(substring);
+  ܐܢ (substringRegex)
+    ܦܢܐ substringRegex->match(str);
+  ܦܢܐ str.contains(substring);
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
+منطقي SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
                                                              SourceMgr &mgr) {
   std::string regexStr;
   raw_string_ostream regexOS(regexStr);
   StringRef strToProcess = substring;
-  while (!strToProcess.empty()) {
+  ܟܡܐ (!strToProcess.empty()) {
     // Find the next regex block.
     size_t regexIt = strToProcess.find("{{");
-    if (regexIt == StringRef::npos) {
+    ܐܢ (regexIt == StringRef::npos) {
       regexOS << Regex::escape(strToProcess);
-      break;
+      اكسر;
     }
     regexOS << Regex::escape(strToProcess.take_front(regexIt));
     strToProcess = strToProcess.drop_front(regexIt + 2);
 
     // Find the end of the regex block.
     size_t regexEndIt = strToProcess.find("}}");
-    if (regexEndIt == StringRef::npos)
-      return emitError(os, mgr, "found start of regex with no end '}}'");
+    ܐܢ (regexEndIt == StringRef::npos)
+      ܦܢܐ emitError(os, mgr, "found start of regex with no end '}}'");
     StringRef regexBlock = strToProcess.take_front(regexEndIt);
 
     // Validate that the regex is actually valid.
     std::string regexError;
-    if (!Regex(regexBlock).isValid(regexError))
-      return emitError(os, mgr, "invalid regex: " + regexError);
+    ܐܢ (!Regex(regexBlock).isValid(regexError))
+      ܦܢܐ emitError(os, mgr, "invalid regex: " + regexError);
 
     regexOS << '(' << regexBlock << ')';
     strToProcess = strToProcess.drop_front(regexEndIt + 2);
   }
   substringRegex = Regex(regexStr);
-  return true;
+  ܦܢܐ ܫܪܪܐ;
 }
 
 MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>
 SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
                                                   SourceMgr &mgr,
-                                                  const MemoryBuffer *buf) {
+                                                  ثابت MemoryBuffer *buf) {
   // If the buffer is invalid, return an empty list.
-  if (!buf)
-    return {};
+  ܐܢ (!buf)
+    ܦܢܐ {};
   auto &expectedDiags = expectedDiagsPerFile[buf->getBufferIdentifier()];
 
   // The number of the last line that did not correlate to a designator.
@@ -98,67 +98,67 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
   // Scan the file for expected-* designators.
   SmallVector<StringRef, 100> lines;
   buf->getBuffer().split(lines, '\n');
-  for (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
+  لكل (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
     SmallVector<StringRef, 4> matches;
-    if (!expected.match(lines[lineNo].rtrim(), &matches)) {
+    ܐܢ (!expected.match(lines[lineNo].rtrim(), &matches)) {
       // Check for designators that apply to this line.
-      if (!designatorsForNextLine.empty()) {
-        for (unsigned diagIndex : designatorsForNextLine)
+      ܐܢ (!designatorsForNextLine.empty()) {
+        لكل (unsigned diagIndex : designatorsForNextLine)
           expectedDiags[diagIndex].lineNo = lineNo + 1;
         designatorsForNextLine.clear();
       }
       lastNonDesignatorLine = lineNo;
-      continue;
+      استمر;
     }
 
     // Point to the start of expected-*.
     SMLoc expectedStart = SMLoc::getFromPointer(matches[0].data());
 
     SourceMgr::DiagKind kind;
-    if (matches[1] == "error")
+    ܐܢ (matches[1] == "error")
       kind = SourceMgr::DK_Error;
-    else if (matches[1] == "warning")
+    ܐܚܪܢܐ ܐܢ (matches[1] == "warning")
       kind = SourceMgr::DK_Warning;
-    else if (matches[1] == "remark")
+    ܐܚܪܢܐ ܐܢ (matches[1] == "remark")
       kind = SourceMgr::DK_Remark;
-    else {
-      assert(matches[1] == "note");
+    ܐܚܪܢܐ {
+      أكد(matches[1] == "note");
       kind = SourceMgr::DK_Note;
     }
     ExpectedDiag record(kind, lineNo + 1, expectedStart, matches[5]);
 
     // Check to see if this is a regex match, i.e. it includes the `-re`.
-    if (!matches[2].empty() && !record.computeRegex(os, mgr)) {
-      ok = false;
-      continue;
+    ܐܢ (!matches[2].empty() && !record.computeRegex(os, mgr)) {
+      ok = ܕܓܠܐ;
+      استمر;
     }
 
     StringRef offsetMatch = matches[3];
-    if (!offsetMatch.empty()) {
+    ܐܢ (!offsetMatch.empty()) {
       offsetMatch = offsetMatch.drop_front(1);
 
       // Get the integer value without the @ and +/- prefix.
-      if (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
-        int offset;
+      ܐܢ (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
+        صحيح offset;
         offsetMatch.drop_front().getAsInteger(0, offset);
 
-        if (offsetMatch.front() == '+')
+        ܐܢ (offsetMatch.front() == '+')
           record.lineNo += offset;
-        else
+        ܐܚܪܢܐ
           record.lineNo -= offset;
-      } else if (offsetMatch.consume_front("unknown")) {
+      } ܐܚܪܢܐ ܐܢ (offsetMatch.consume_front("unknown")) {
         // This is matching unknown locations.
         record.fileLoc = SMLoc();
         expectedUnknownLocDiags.emplace_back(std::move(record));
-        continue;
-      } else if (offsetMatch.consume_front("above")) {
+        استمر;
+      } ܐܚܪܢܐ ܐܢ (offsetMatch.consume_front("above")) {
         // If the designator applies 'above' we add it to the last non
         // designator line.
         record.lineNo = lastNonDesignatorLine + 1;
-      } else {
+      } ܐܚܪܢܐ {
         // Otherwise, this is a 'below' designator and applies to the next
         // non-designator line.
-        assert(offsetMatch.consume_front("below"));
+        أكد(offsetMatch.consume_front("below"));
         designatorsForNextLine.push_back(expectedDiags.size());
 
         // Set the line number to the last in the case that this designator
@@ -168,33 +168,33 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
     }
     expectedDiags.emplace_back(std::move(record));
   }
-  return expectedDiags;
+  ܦܢܐ expectedDiags;
 }
 
 std::optional<MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>>
 SourceMgrDiagnosticVerifier::getExpectedDiags(StringRef bufName) {
   auto expectedDiags = expectedDiagsPerFile.find(bufName);
-  if (expectedDiags != expectedDiagsPerFile.end())
-    return MutableArrayRef<ExpectedDiag>(expectedDiags->second);
-  return std::nullopt;
+  ܐܢ (expectedDiags != expectedDiagsPerFile.end())
+    ܦܢܐ MutableArrayRef<ExpectedDiag>(expectedDiags->second);
+  ܦܢܐ std::nullopt;
 }
 
 SourceMgrDiagnosticVerifier::MatchResult
 SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
-                                     SourceMgr::DiagKind kind, bool hasLoc,
-                                     const MemoryBuffer *buf, unsigned lineNo,
-                                     StringRef message, bool reportUnexpected) {
+                                     SourceMgr::DiagKind kind, منطقي hasLoc,
+                                     ثابت MemoryBuffer *buf, unsigned lineNo,
+                                     StringRef message, منطقي reportUnexpected) {
   MutableArrayRef<ExpectedDiag> diags;
-  if (hasLoc) {
+  ܐܢ (hasLoc) {
     // If the buffer couldn't be resolved, `diags` stays empty: a diagnostic
     // with a location in an unknown file can never match anything.
-    if (buf) {
-      if (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
+    ܐܢ (buf) {
+      ܐܢ (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
         diags = *maybeDiags;
-      else
+      ܐܚܪܢܐ
         diags = computeExpectedDiags(os, mgr, buf);
     }
-  } else {
+  } ܐܚܪܢܐ {
     diags = expectedUnknownLocDiags;
   }
 
@@ -203,14 +203,14 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
   ExpectedDiag *nearMiss = nullptr;
 
   // If this was an expected error, remember that we saw it and return.
-  for (auto &e : diags) {
+  لكل (auto &e : diags) {
     // File line must match (unless it's an unknown location).
-    if (hasLoc && e.lineNo != lineNo)
-      continue;
-    if (e.match(message)) {
-      if (e.kind == kind) {
-        e.matched = true;
-        return MatchResult::Matched;
+    ܐܢ (hasLoc && e.lineNo != lineNo)
+      استمر;
+    ܐܢ (e.match(message)) {
+      ܐܢ (e.kind == kind) {
+        e.matched = ܫܪܪܐ;
+        ܦܢܐ MatchResult::Matched;
       }
 
       // If this only differs based on the diagnostic kind, then consider it
@@ -219,37 +219,37 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
     }
   }
 
-  if (!reportUnexpected)
-    return MatchResult::Ignored;
+  ܐܢ (!reportUnexpected)
+    ܦܢܐ MatchResult::Ignored;
 
-  ok = false;
+  ok = ܕܓܠܐ;
 
   // Otherwise, emit an error for the near miss.
-  if (nearMiss) {
+  ܐܢ (nearMiss) {
     mgr.PrintMessage(os, nearMiss->fileLoc, SourceMgr::DK_Error,
                      "'" + getDiagKindStr(kind) +
                          "' diagnostic emitted when expecting a '" +
                          getDiagKindStr(nearMiss->kind) + "'");
-    return MatchResult::NearMiss;
+    ܦܢܐ MatchResult::NearMiss;
   }
-  return MatchResult::Unexpected;
+  ܦܢܐ MatchResult::Unexpected;
 }
 
-bool SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
+منطقي SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
   // Verify that all expected errors were seen.
   auto checkExpectedDiags = [&](ExpectedDiag &diag) {
-    if (!diag.matched) {
+    ܐܢ (!diag.matched) {
       diag.emitError(os, mgr,
                      "expected " + getDiagKindStr(diag.kind) + " \"" +
                          diag.substring + "\" was not produced");
-      ok = false;
+      ok = ܕܓܠܐ;
     }
   };
-  for (auto &expectedDiagsPair : expectedDiagsPerFile)
-    for (auto &diag : expectedDiagsPair.second)
+  لكل (auto &expectedDiagsPair : expectedDiagsPerFile)
+    لكل (auto &diag : expectedDiagsPair.second)
       checkExpectedDiags(diag);
-  for (auto &diag : expectedUnknownLocDiags)
+  لكل (auto &diag : expectedUnknownLocDiags)
     checkExpectedDiags(diag);
   expectedDiagsPerFile.clear();
-  return ok;
+  ܦܢܐ ok;
 }
