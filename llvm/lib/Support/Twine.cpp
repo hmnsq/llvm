@@ -6,167 +6,167 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/ADT/Twine.h"
+#അന്തര്ഭാവ "llvm/ADT/SmallString.h"
+#അന്തര്ഭാവ "llvm/Config/llvm-config.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/FormatVariadic.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+using നാമാകാശ llvm;
 
-std::string Twine::str() const {
+std::string Twine::str() സ്ഥിരം {
   // If we're storing only a std::string, just return it.
-  if (LHSKind == StdStringKind && RHSKind == EmptyKind)
-    return *LHS.stdString;
+  എങ്കിൽ (LHSKind == StdStringKind && RHSKind == EmptyKind)
+    തിരികെ *LHS.stdString;
 
   // If we're storing a formatv_object, we can avoid an extra copy by formatting
   // it immediately and returning the result.
-  if (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
-    return LHS.formatvObject->str();
+  എങ്കിൽ (LHSKind == FormatvObjectKind && RHSKind == EmptyKind)
+    തിരികെ LHS.formatvObject->str();
 
   // Otherwise, flatten and copy the contents first.
   SmallString<256> Vec;
-  return toStringRef(Vec).str();
+  തിരികെ toStringRef(Vec).str();
 }
 
-void Twine::toVector(SmallVectorImpl<char> &Out) const {
+ശൂന്യം Twine::toVector(SmallVectorImpl<അക്ഷരം> &Out) സ്ഥിരം {
   raw_svector_ostream OS(Out);
   print(OS);
 }
 
-StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
-  if (isUnary()) {
-    switch (getLHSKind()) {
-    case CStringKind:
+StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<അക്ഷരം> &Out) സ്ഥിരം {
+  എങ്കിൽ (isUnary()) {
+    തിരഞ്ഞെടുപ്പ് (getLHSKind()) {
+    അവസ്ഥ CStringKind:
       // Already null terminated, yay!
-      return StringRef(LHS.cString);
-    case StdStringKind: {
-      const std::string *str = LHS.stdString;
-      return StringRef(str->c_str(), str->size());
+      തിരികെ StringRef(LHS.cString);
+    അവസ്ഥ StdStringKind: {
+      സ്ഥിരം std::string *str = LHS.stdString;
+      തിരികെ StringRef(str->c_str(), str->size());
     }
-    case StringLiteralKind:
-      return StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
-    default:
-      break;
+    അവസ്ഥ StringLiteralKind:
+      തിരികെ StringRef(LHS.ptrAndLength.ptr, LHS.ptrAndLength.length);
+    സ്ഥിരസ്ഥിതി:
+      നിർത്തുക;
     }
   }
   toVector(Out);
-  Out.push_back(0);
-  Out.pop_back();
-  return StringRef(Out.data(), Out.size());
+  Out.തള്ളുക_back(0);
+  Out.എടുക്കുക_back();
+  തിരികെ StringRef(Out.data(), Out.size());
 }
 
-void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
-    break;
-  case Twine::EmptyKind:
-    break;
-  case Twine::TwineKind:
+ശൂന്യം Twine::printOneChild(raw_ostream &OS, Child Ptr, കണ്ണി_Kind Kind) സ്ഥിരം {
+  തിരഞ്ഞെടുപ്പ് (Kind) {
+  അവസ്ഥ Twine::NullKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::EmptyKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::TwineKind:
     Ptr.twine->print(OS);
-    break;
-  case Twine::CStringKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::CStringKind:
     OS << Ptr.cString;
-    break;
-  case Twine::StdStringKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::StdStringKind:
     OS << *Ptr.stdString;
-    break;
-  case Twine::PtrAndLengthKind:
-  case Twine::StringLiteralKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::PtrAndLengthKind:
+  അവസ്ഥ Twine::StringLiteralKind:
     OS << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length);
-    break;
-  case Twine::FormatvObjectKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::FormatvObjectKind:
     OS << *Ptr.formatvObject;
-    break;
-  case Twine::CharKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::CharKind:
     OS << Ptr.character;
-    break;
-  case Twine::DecUIKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecUIKind:
     OS << Ptr.decUI;
-    break;
-  case Twine::DecIKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecIKind:
     OS << Ptr.decI;
-    break;
-  case Twine::DecULKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecULKind:
     OS << Ptr.decUL;
-    break;
-  case Twine::DecLKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecLKind:
     OS << Ptr.decL;
-    break;
-  case Twine::DecULLKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecULLKind:
     OS << Ptr.decULL;
-    break;
-  case Twine::DecLLKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecLLKind:
     OS << Ptr.decLL;
-    break;
-  case Twine::UHexKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::UHexKind:
     OS.write_hex(Ptr.uHex);
-    break;
+    നിർത്തുക;
   }
 }
 
-void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
-  switch (Kind) {
-  case Twine::NullKind:
+ശൂന്യം Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, കണ്ണി_Kind Kind) സ്ഥിരം {
+  തിരഞ്ഞെടുപ്പ് (Kind) {
+  അവസ്ഥ Twine::NullKind:
     OS << "null";
-    break;
-  case Twine::EmptyKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::EmptyKind:
     OS << "empty";
-    break;
-  case Twine::TwineKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::TwineKind:
     OS << "rope:";
     Ptr.twine->printRepr(OS);
-    break;
-  case Twine::CStringKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::CStringKind:
     OS << "cstring:\"" << Ptr.cString << "\"";
-    break;
-  case Twine::StdStringKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::StdStringKind:
     OS << "std::string:\"" << Ptr.stdString << "\"";
-    break;
-  case Twine::PtrAndLengthKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::PtrAndLengthKind:
     OS << "ptrAndLength:\""
        << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::StringLiteralKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::StringLiteralKind:
     OS << "constexprPtrAndLength:\""
        << StringRef(Ptr.ptrAndLength.ptr, Ptr.ptrAndLength.length) << "\"";
-    break;
-  case Twine::FormatvObjectKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::FormatvObjectKind:
     OS << "formatv:\"" << *Ptr.formatvObject << "\"";
-    break;
-  case Twine::CharKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::CharKind:
     OS << "char:\"" << Ptr.character << "\"";
-    break;
-  case Twine::DecUIKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecUIKind:
     OS << "decUI:\"" << Ptr.decUI << "\"";
-    break;
-  case Twine::DecIKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecIKind:
     OS << "decI:\"" << Ptr.decI << "\"";
-    break;
-  case Twine::DecULKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecULKind:
     OS << "decUL:\"" << Ptr.decUL << "\"";
-    break;
-  case Twine::DecLKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecLKind:
     OS << "decL:\"" << Ptr.decL << "\"";
-    break;
-  case Twine::DecULLKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecULLKind:
     OS << "decULL:\"" << Ptr.decULL << "\"";
-    break;
-  case Twine::DecLLKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::DecLLKind:
     OS << "decLL:\"" << Ptr.decLL << "\"";
-    break;
-  case Twine::UHexKind:
+    നിർത്തുക;
+  അവസ്ഥ Twine::UHexKind:
     OS << "uhex:\"" << Ptr.uHex << "\"";
-    break;
+    നിർത്തുക;
   }
 }
 
-void Twine::print(raw_ostream &OS) const {
+ശൂന്യം Twine::print(raw_ostream &OS) സ്ഥിരം {
   printOneChild(OS, LHS, getLHSKind());
   printOneChild(OS, RHS, getRHSKind());
 }
 
-void Twine::printRepr(raw_ostream &OS) const {
+ശൂന്യം Twine::printRepr(raw_ostream &OS) സ്ഥിരം {
   OS << "(Twine ";
   printOneChildRepr(OS, LHS, getLHSKind());
   OS << " ";
@@ -174,8 +174,8 @@ void Twine::printRepr(raw_ostream &OS) const {
   OS << ")";
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
+#എങ്കിൽ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD ശൂന്യം Twine::dump() സ്ഥിരം { print(dbgs()); }
 
-LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }
+LLVM_DUMP_METHOD ശൂന്യം Twine::dumpRepr() സ്ഥിരം { printRepr(dbgs()); }
 #endif

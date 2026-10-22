@@ -35,26 +35,26 @@
  *	@(#)regcomp.c	8.5 (Berkeley) 3/20/94
  */
 
-#include "regex_impl.h"
-#include <ctype.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+#അന്തര്ഭാവ "regex_impl.h"
+#അന്തര്ഭാവ <ctype.h>
+#അന്തര്ഭാവ <limits.h>
+#അന്തര്ഭാവ <stdint.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <sys/types.h>
 
-#include "regex2.h"
-#include "regutils.h"
+#അന്തര്ഭാവ "regex2.h"
+#അന്തര്ഭാവ "regutils.h"
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
+#അന്തര്ഭാവ "llvm/Config/config.h"
+#അന്തര്ഭാവ "llvm/Support/Compiler.h"
 
 /* character-class table */
-static struct cclass {
-  const char *name;
-  const char *chars;
-  const char *multis;
+സ്ഥിതം ഘടന cclass {
+  സ്ഥിരം അക്ഷരം *name;
+  സ്ഥിരം അക്ഷരം *chars;
+  സ്ഥിരം അക്ഷരം *multis;
 } cclasses[] = {
     {"alnum", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\
 0123456789",
@@ -76,12 +76,12 @@ static struct cclass {
     {"space", "\t\n\v\f\r ", ""},
     {"upper", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", ""},
     {"xdigit", "0123456789ABCDEFabcdef", ""},
-    {NULL, 0, ""}};
+    {ശൂന്യ, 0, ""}};
 
 /* character-name table */
-static struct cname {
-  const char *name;
-  char code;
+സ്ഥിതം ഘടന cname {
+  സ്ഥിരം അക്ഷരം *name;
+  അക്ഷരം code;
 } cnames[] = {{"NUL", '\0'},
               {"SOH", '\001'},
               {"STX", '\002'},
@@ -177,66 +177,66 @@ static struct cname {
               {"right-curly-bracket", '}'},
               {"tilde", '~'},
               {"DEL", '\177'},
-              {NULL, 0}};
+              {ശൂന്യ, 0}};
 
 /*
  * parse structure, passed up and down to avoid global variables and
  * other clumsinesses
  */
-struct parse {
-  const char *next; /* next character in RE */
-  const char *end;  /* end of string (-> NUL normally) */
-  int error;        /* has an error been seen? */
+ഘടന parse {
+  സ്ഥിരം അക്ഷരം *next; /* next character in RE */
+  സ്ഥിരം അക്ഷരം *end;  /* end of string (-> NUL normally) */
+  പൂർണ്ണസംഖ്യ error;        /* has an error been seen? */
   sop *strip;       /* malloced strip */
   sopno ssize;      /* malloced strip size (allocated) */
   sopno slen;       /* malloced strip length (used) */
-  int ncsalloc;     /* number of csets allocated */
-  struct re_guts *g;
+  പൂർണ്ണസംഖ്യ ncsalloc;     /* number of csets allocated */
+  ഘടന re_guts *g;
 #define NPAREN 21       /* we need to remember () 1-20 for back refs */
   sopno pbegin[NPAREN]; /* -> ( ([0] unused) */
   sopno pend[NPAREN];   /* -> ) ([0] unused) */
 };
 
-static void p_ere(struct parse *, int);
-static void p_ere_exp(struct parse *);
-static void p_str(struct parse *);
-static void p_bre(struct parse *, int, int);
-static int p_simp_re(struct parse *, int);
-static int p_count(struct parse *);
-static void p_bracket(struct parse *);
-static void p_b_term(struct parse *, cset *);
-static void p_b_cclass(struct parse *, cset *);
-static void p_b_eclass(struct parse *, cset *);
-static char p_b_symbol(struct parse *);
-static char p_b_coll_elem(struct parse *, int);
-static char othercase(int);
-static void bothcases(struct parse *, int);
-static void uncased(struct parse *, int);
-static void ordinary(struct parse *, int);
-static void nonnewline(struct parse *);
-static void repeat(struct parse *, sopno, int, int);
-static int seterr(struct parse *, int);
-static cset *allocset(struct parse *);
-static void freeset(struct parse *, cset *);
-static int freezeset(struct parse *, cset *);
-static int firstch(struct parse *, cset *);
-static int nch(struct parse *, cset *);
-static void mcadd(struct parse *, cset *, const char *);
-static void mcinvert(struct parse *, cset *);
-static void mccase(struct parse *, cset *);
-static int isinsets(struct re_guts *, int);
-static int samesets(struct re_guts *, int, int);
-static void categorize(struct parse *, struct re_guts *);
-static sopno dupl(struct parse *, sopno, sopno);
-static void doemit(struct parse *, sop, size_t);
-static void doinsert(struct parse *, sop, size_t, sopno);
-static void dofwd(struct parse *, sopno, sop);
-static void enlarge(struct parse *, sopno);
-static void stripsnug(struct parse *, struct re_guts *);
-static void findmust(struct parse *, struct re_guts *);
-static sopno pluscount(struct parse *, struct re_guts *);
+സ്ഥിതം ശൂന്യം p_ere(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം ശൂന്യം p_ere_exp(ഘടന parse *);
+സ്ഥിതം ശൂന്യം p_str(ഘടന parse *);
+സ്ഥിതം ശൂന്യം p_bre(ഘടന parse *, പൂർണ്ണസംഖ്യ, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം പൂർണ്ണസംഖ്യ p_simp_re(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം പൂർണ്ണസംഖ്യ p_എണ്ണം(ഘടന parse *);
+സ്ഥിതം ശൂന്യം p_bracket(ഘടന parse *);
+സ്ഥിതം ശൂന്യം p_b_term(ഘടന parse *, cset *);
+സ്ഥിതം ശൂന്യം p_b_cclass(ഘടന parse *, cset *);
+സ്ഥിതം ശൂന്യം p_b_eclass(ഘടന parse *, cset *);
+സ്ഥിതം അക്ഷരം p_b_ചിഹ്നം(ഘടന parse *);
+സ്ഥിതം അക്ഷരം p_b_coll_elem(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം അക്ഷരം othercase(പൂർണ്ണസംഖ്യ);
+സ്ഥിതം ശൂന്യം bothcases(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം ശൂന്യം uncased(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം ശൂന്യം ordinary(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം ശൂന്യം nonnewline(ഘടന parse *);
+സ്ഥിതം ശൂന്യം repeat(ഘടന parse *, sopno, പൂർണ്ണസംഖ്യ, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം പൂർണ്ണസംഖ്യ seterr(ഘടന parse *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം cset *allocset(ഘടന parse *);
+സ്ഥിതം ശൂന്യം freeset(ഘടന parse *, cset *);
+സ്ഥിതം പൂർണ്ണസംഖ്യ freezeset(ഘടന parse *, cset *);
+സ്ഥിതം പൂർണ്ണസംഖ്യ firstch(ഘടന parse *, cset *);
+സ്ഥിതം പൂർണ്ണസംഖ്യ nch(ഘടന parse *, cset *);
+സ്ഥിതം ശൂന്യം mcadd(ഘടന parse *, cset *, സ്ഥിരം അക്ഷരം *);
+സ്ഥിതം ശൂന്യം mcinvert(ഘടന parse *, cset *);
+സ്ഥിതം ശൂന്യം mccase(ഘടന parse *, cset *);
+സ്ഥിതം പൂർണ്ണസംഖ്യ isinsets(ഘടന re_guts *, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം പൂർണ്ണസംഖ്യ samesets(ഘടന re_guts *, പൂർണ്ണസംഖ്യ, പൂർണ്ണസംഖ്യ);
+സ്ഥിതം ശൂന്യം categorize(ഘടന parse *, ഘടന re_guts *);
+സ്ഥിതം sopno dupl(ഘടന parse *, sopno, sopno);
+സ്ഥിതം ശൂന്യം doemit(ഘടന parse *, sop, size_t);
+സ്ഥിതം ശൂന്യം doinsert(ഘടന parse *, sop, size_t, sopno);
+സ്ഥിതം ശൂന്യം dofwd(ഘടന parse *, sopno, sop);
+സ്ഥിതം ശൂന്യം enlarge(ഘടന parse *, sopno);
+സ്ഥിതം ശൂന്യം stripsnug(ഘടന parse *, ഘടന re_guts *);
+സ്ഥിതം ശൂന്യം findmust(ഘടന parse *, ഘടന re_guts *);
+സ്ഥിതം sopno pluscount(ഘടന parse *, ഘടന re_guts *);
 
-static char nuls[10]; /* place to point scanner in event of error */
+സ്ഥിതം അക്ഷരം nuls[10]; /* place to point scanner in event of error */
 
 /*
  * macros for use with parse structure
@@ -255,12 +255,12 @@ static char nuls[10]; /* place to point scanner in event of error */
 #define NEXTn(n) (p->next += (n))
 #define GETNEXT() (*p->next++)
 #define SETERROR(e) seterr(p, (e))
-#define REQUIRE(co, e) (void)((co) || SETERROR(e))
+#define REQUIRE(co, e) (ശൂന്യം)((co) || SETERROR(e))
 #define MUSTSEE(c, e) (REQUIRE(MORE() && PEEK() == (c), e))
 #define MUSTEAT(c, e) (REQUIRE(MORE() && GETNEXT() == (c), e))
 #define MUSTNOTSEE(c, e) (REQUIRE(!MORE() || PEEK() != (c), e))
 #define EMIT(op, sopnd) doemit(p, (sop)(op), (size_t)(sopnd))
-#define INSERT(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
+#define തിരുകുക_3(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
 #define AHEAD(pos) dofwd(p, pos, HERE() - (pos))
 #define ASTERN(sop, pos) EMIT(sop, HERE() - pos)
 #define HERE() (p->slen)
@@ -270,56 +270,56 @@ static char nuls[10]; /* place to point scanner in event of error */
 
 #ifdef _POSIX2_RE_DUP_MAX
 #define DUPMAX _POSIX2_RE_DUP_MAX
-#else
+#അല്ലെങ്കിൽ
 #define DUPMAX 255
 #endif
 #define REGINFINITY (DUPMAX + 1)
 
 #ifndef NDEBUG
-static int never = 0; /* for use in asserts; shuts lint up */
-#else
+സ്ഥിതം പൂർണ്ണസംഖ്യ never = 0; /* for use in asserts; shuts lint up */
+#അല്ലെങ്കിൽ
 #define never 0 /* some <assert.h>s have bugs too */
 #endif
 
 /*
  - llvm_regcomp - interface for parser and compilation
  */
-int /* 0 success, otherwise REG_something */
-llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
-  struct parse pa;
-  struct re_guts *g;
-  struct parse *p = &pa;
-  int i;
+പൂർണ്ണസംഖ്യ /* 0 success, otherwise REG_something */
+llvm_regcomp(llvm_regex_t *preg, സ്ഥിരം അക്ഷരം *pattern, പൂർണ്ണസംഖ്യ cflags) {
+  ഘടന parse pa;
+  ഘടന re_guts *g;
+  ഘടന parse *p = &pa;
+  പൂർണ്ണസംഖ്യ i;
   size_t len;
 #ifdef REDEBUG
 #define GOODFLAGS(f) (f)
-#else
+#അല്ലെങ്കിൽ
 #define GOODFLAGS(f) ((f) & ~REG_DUMP)
 #endif
 
   cflags = GOODFLAGS(cflags);
-  if ((cflags & REG_EXTENDED) && (cflags & REG_NOSPEC))
-    return (REG_INVARG);
+  എങ്കിൽ ((cflags & REG_EXTENDED) && (cflags & REG_NOSPEC))
+    തിരികെ (REG_INVARG);
 
-  if (cflags & REG_PEND) {
-    if (preg->re_endp < pattern)
-      return (REG_INVARG);
+  എങ്കിൽ (cflags & REG_PEND) {
+    എങ്കിൽ (preg->re_endp < pattern)
+      തിരികെ (REG_INVARG);
     len = preg->re_endp - pattern;
-  } else {
+  } അല്ലെങ്കിൽ {
     len = strlen(pattern);
   }
 
   /* do the mallocs early so failure handling is easy */
-  g = (struct re_guts *)malloc(sizeof(struct re_guts) +
-                               (NC - 1) * sizeof(cat_t));
-  if (g == NULL)
-    return (REG_ESPACE);
+  g = (ഘടന re_guts *)malloc(വലുപ്പം(ഘടന re_guts) +
+                               (NC - 1) * വലുപ്പം(cat_t));
+  എങ്കിൽ (g == ശൂന്യ)
+    തിരികെ (REG_ESPACE);
   p->ssize = len / (size_t)2 * (size_t)3 + (size_t)1; /* ugh */
-  p->strip = (sop *)calloc(p->ssize, sizeof(sop));
+  p->strip = (sop *)calloc(p->ssize, വലുപ്പം(sop));
   p->slen = 0;
-  if (p->strip == NULL) {
-    free((char *)g);
-    return (REG_ESPACE);
+  എങ്കിൽ (p->strip == ശൂന്യ) {
+    സ്വതന്ത്രം((അക്ഷരം *)g);
+    തിരികെ (REG_ESPACE);
   }
 
   /* set things up */
@@ -328,34 +328,34 @@ llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
   p->end = p->next + len;
   p->error = 0;
   p->ncsalloc = 0;
-  for (i = 0; i < NPAREN; i++) {
+  വേണ്ടി (i = 0; i < NPAREN; i++) {
     p->pbegin[i] = 0;
     p->pend[i] = 0;
   }
   g->csetsize = NC;
-  g->sets = NULL;
-  g->setbits = NULL;
+  g->sets = ശൂന്യ;
+  g->setbits = ശൂന്യ;
   g->ncsets = 0;
   g->cflags = cflags;
   g->iflags = 0;
   g->nbol = 0;
   g->neol = 0;
-  g->must = NULL;
+  g->must = ശൂന്യ;
   g->mlen = 0;
   g->nsub = 0;
   g->ncategories = 1; /* category 0 is "everything else" */
   g->categories = &g->catspace[-(CHAR_MIN)];
-  (void)memset((char *)g->catspace, 0, NC * sizeof(cat_t));
+  (ശൂന്യം)memset((അക്ഷരം *)g->catspace, 0, NC * വലുപ്പം(cat_t));
   g->backrefs = 0;
 
   /* do it */
   EMIT(OEND, 0);
   g->firststate = THERE();
-  if (cflags & REG_EXTENDED)
+  എങ്കിൽ (cflags & REG_EXTENDED)
     p_ere(p, OUT);
-  else if (cflags & REG_NOSPEC)
+  അല്ലെങ്കിൽ എങ്കിൽ (cflags & REG_NOSPEC)
     p_str(p);
-  else
+  അല്ലെങ്കിൽ
     p_bre(p, OUT, OUT);
   EMIT(OEND, 0);
   g->laststate = THERE();
@@ -371,40 +371,40 @@ llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
   preg->re_magic = MAGIC1;
 #ifndef REDEBUG
   /* not debugging, so can't rely on the assert() in llvm_regexec() */
-  if (g->iflags & REGEX_BAD)
+  എങ്കിൽ (g->iflags & REGEX_BAD)
     SETERROR(REG_ASSERT);
 #endif
 
   /* win or lose, we're done */
-  if (p->error != 0) /* lose */
+  എങ്കിൽ (p->error != 0) /* lose */
     llvm_regfree(preg);
-  return (p->error);
+  തിരികെ (p->error);
 }
 
 /*
  - p_ere - ERE parser top level, concatenation and alternation
  */
-static void p_ere(struct parse *p,
-                  int stop) /* character this ERE should end at */
+സ്ഥിതം ശൂന്യം p_ere(ഘടന parse *p,
+                  പൂർണ്ണസംഖ്യ stop) /* character this ERE should end at */
 {
-  char c;
+  അക്ഷരം c;
   sopno prevback = 0;
   sopno prevfwd = 0;
   sopno conc;
-  int first = 1; /* is this the first alternative? */
+  പൂർണ്ണസംഖ്യ first = 1; /* is this the first alternative? */
 
-  for (;;) {
+  വേണ്ടി (;;) {
     /* do a bunch of concatenated expressions */
     conc = HERE();
-    while (MORE() && (c = PEEK()) != '|' && c != stop)
+    ആകുമ്പോൾ (MORE() && (c = PEEK()) != '|' && c != stop)
       p_ere_exp(p);
     REQUIRE(HERE() != conc, REG_EMPTY); /* require nonempty */
 
-    if (!EAT('|'))
-      break; /* NOTE BREAK OUT */
+    എങ്കിൽ (!EAT('|'))
+      നിർത്തുക; /* NOTE BREAK OUT */
 
-    if (first) {
-      INSERT(OCH_, conc); /* offset is wrong */
+    എങ്കിൽ (first) {
+      തിരുകുക_3(OCH_, conc); /* offset is wrong */
       prevfwd = conc;
       prevback = conc;
       first = 0;
@@ -416,49 +416,49 @@ static void p_ere(struct parse *p,
     EMIT(OOR2, 0); /* offset is very wrong */
   }
 
-  if (!first) { /* tail-end fixups */
+  എങ്കിൽ (!first) { /* tail-end fixups */
     AHEAD(prevfwd);
     ASTERN(O_CH, prevback);
   }
 
-  assert(!MORE() || SEE(stop));
+  പ്രതിജ്ഞാ(!MORE() || SEE(stop));
 }
 
 /*
  - p_ere_exp - parse one subERE, an atom possibly followed by a repetition op
  */
-static void p_ere_exp(struct parse *p) {
-  char c;
+സ്ഥിതം ശൂന്യം p_ere_exp(ഘടന parse *p) {
+  അക്ഷരം c;
   sopno pos;
-  int count;
-  int count2;
-  int backrefnum;
+  പൂർണ്ണസംഖ്യ എണ്ണം;
+  പൂർണ്ണസംഖ്യ count2;
+  പൂർണ്ണസംഖ്യ backrefnum;
   sopno subno;
-  int wascaret = 0;
+  പൂർണ്ണസംഖ്യ wascaret = 0;
 
-  assert(MORE()); /* caller should have ensured this */
+  പ്രതിജ്ഞാ(MORE()); /* caller should have ensured this */
   c = GETNEXT();
 
   pos = HERE();
-  switch (c) {
-  case '(':
+  തിരഞ്ഞെടുപ്പ് (c) {
+  അവസ്ഥ '(':
     REQUIRE(MORE(), REG_EPAREN);
     p->g->nsub++;
     subno = p->g->nsub;
-    if (subno < NPAREN)
+    എങ്കിൽ (subno < NPAREN)
       p->pbegin[subno] = HERE();
     EMIT(OLPAREN, subno);
-    if (!SEE(')'))
+    എങ്കിൽ (!SEE(')'))
       p_ere(p, ')');
-    if (subno < NPAREN) {
+    എങ്കിൽ (subno < NPAREN) {
       p->pend[subno] = HERE();
-      assert(p->pend[subno] != 0);
+      പ്രതിജ്ഞാ(p->pend[subno] != 0);
     }
     EMIT(ORPAREN, subno);
     MUSTEAT(')', REG_EPAREN);
-    break;
+    നിർത്തുക;
 #ifndef POSIX_MISTAKE
-  case ')': /* happens only if no current unmatched ( */
+  അവസ്ഥ ')': /* happens only if no current unmatched ( */
     /*
      * You may ask, why the ifndef?  Because I didn't notice
      * this until slightly too late for 1003.2, and none of the
@@ -467,47 +467,47 @@ static void p_ere_exp(struct parse *p) {
      * we can get it fixed.
      */
     SETERROR(REG_EPAREN);
-    break;
+    നിർത്തുക;
 #endif
-  case '^':
+  അവസ്ഥ '^':
     EMIT(OBOL, 0);
     p->g->iflags |= USEBOL;
     p->g->nbol++;
     wascaret = 1;
-    break;
-  case '$':
+    നിർത്തുക;
+  അവസ്ഥ '$':
     EMIT(OEOL, 0);
     p->g->iflags |= USEEOL;
     p->g->neol++;
-    break;
-  case '|':
+    നിർത്തുക;
+  അവസ്ഥ '|':
     SETERROR(REG_EMPTY);
-    break;
-  case '*':
-  case '+':
-  case '?':
+    നിർത്തുക;
+  അവസ്ഥ '*':
+  അവസ്ഥ '+':
+  അവസ്ഥ '?':
     SETERROR(REG_BADRPT);
-    break;
-  case '.':
-    if (p->g->cflags & REG_NEWLINE)
+    നിർത്തുക;
+  അവസ്ഥ '.':
+    എങ്കിൽ (p->g->cflags & REG_NEWLINE)
       nonnewline(p);
-    else
+    അല്ലെങ്കിൽ
       EMIT(OANY, 0);
-    break;
-  case '[':
+    നിർത്തുക;
+  അവസ്ഥ '[':
     p_bracket(p);
-    break;
-  case '\\':
+    നിർത്തുക;
+  അവസ്ഥ '\\':
     REQUIRE(MORE(), REG_EESCAPE);
     c = GETNEXT();
-    if (c >= '1' && c <= '9') {
+    എങ്കിൽ (c >= '1' && c <= '9') {
       /* \[0-9] is taken to be a back-reference to a previously specified
        * matching group. backrefnum will hold the number. The matching
        * group must exist (i.e. if \4 is found there must have been at
        * least 4 matching groups specified in the pattern previously).
        */
       backrefnum = c - '0';
-    } else if (c == 'g') {
+    } അല്ലെങ്കിൽ എങ്കിൽ (c == 'g') {
       /* Support back-references with index greater 9.
        * These look like that: \g{n}
        * Extract the number inside the brackets.
@@ -515,139 +515,139 @@ static void p_ere_exp(struct parse *p) {
       MUSTEAT('{', REG_BADRPT);
 
       backrefnum = 0;
-      while (MORE() && isdigit(PEEK())) {
+      ആകുമ്പോൾ (MORE() && isdigit(PEEK())) {
         c = GETNEXT();
         backrefnum = backrefnum * 10 + c - '0';
       }
       MUSTEAT('}', REG_BADRPT);
-    } else if (c == 'n') {
+    } അല്ലെങ്കിൽ എങ്കിൽ (c == 'n') {
       ordinary(p, '\n');
-      break;
-    } else if (c == 't') {
+      നിർത്തുക;
+    } അല്ലെങ്കിൽ എങ്കിൽ (c == 't') {
       ordinary(p, '\t');
-      break;
-    } else if (c == 'x') {
+      നിർത്തുക;
+    } അല്ലെങ്കിൽ എങ്കിൽ (c == 'x') {
       /* Support \xAA hexadecimal escape sequences. \x must be followed by
        * exactly two hex digits, otherwise it is interpreted literally.
        */
-      char hexstr[3] = {0};
-      char *hexp;
-      int val;
-      if (MORE2()) {
+      അക്ഷരം hexstr[3] = {0};
+      അക്ഷരം *hexp;
+      പൂർണ്ണസംഖ്യ val;
+      എങ്കിൽ (MORE2()) {
         hexstr[0] = PEEK();
         hexstr[1] = PEEK2();
         val = strtol(hexstr, &hexp, 16);
-        if (*hexp == '\0') {
+        എങ്കിൽ (*hexp == '\0') {
           NEXT2();
-          uncased(p, (char)val);
-          break;
+          uncased(p, (അക്ഷരം)val);
+          നിർത്തുക;
         }
       }
       ordinary(p, 'x');
-      break;
-    } else {
+      നിർത്തുക;
+    } അല്ലെങ്കിൽ {
       /* Other chars are simply themselves when escaped with a backslash.
        */
       ordinary(p, c);
-      break;
+      നിർത്തുക;
     }
 
-    if (backrefnum >= NPAREN) {
+    എങ്കിൽ (backrefnum >= NPAREN) {
       SETERROR(REG_ESUBREG);
-      break;
+      നിർത്തുക;
     }
 
-    if (p->pend[backrefnum] == 0) {
+    എങ്കിൽ (p->pend[backrefnum] == 0) {
       SETERROR(REG_ESUBREG);
-      break;
+      നിർത്തുക;
     }
 
     /* Make sure everything checks out and emit the sequence
      * that marks a back-reference to the parse structure.
      */
-    assert(backrefnum <= p->g->nsub);
+    പ്രതിജ്ഞാ(backrefnum <= p->g->nsub);
     EMIT(OBACK_, backrefnum);
-    assert(p->pbegin[backrefnum] != 0);
-    assert(OP(p->strip[p->pbegin[backrefnum]]) == OLPAREN);
-    assert(OP(p->strip[p->pend[backrefnum]]) == ORPAREN);
-    (void)dupl(p, p->pbegin[backrefnum] + 1, p->pend[backrefnum]);
+    പ്രതിജ്ഞാ(p->pbegin[backrefnum] != 0);
+    പ്രതിജ്ഞാ(OP(p->strip[p->pbegin[backrefnum]]) == OLPAREN);
+    പ്രതിജ്ഞാ(OP(p->strip[p->pend[backrefnum]]) == ORPAREN);
+    (ശൂന്യം)dupl(p, p->pbegin[backrefnum] + 1, p->pend[backrefnum]);
     EMIT(O_BACK, backrefnum);
     p->g->backrefs = 1;
-    break;
-  case '{': /* okay as ordinary except if digit follows */
+    നിർത്തുക;
+  അവസ്ഥ '{': /* okay as ordinary except if digit follows */
     REQUIRE(!MORE() || !isdigit((uch)PEEK()), REG_BADRPT);
     LLVM_FALLTHROUGH;
-  default:
+  സ്ഥിരസ്ഥിതി:
     ordinary(p, c);
-    break;
+    നിർത്തുക;
   }
 
-  if (!MORE())
-    return;
+  എങ്കിൽ (!MORE())
+    തിരികെ;
   c = PEEK();
   /* we call { a repetition if followed by a digit */
-  if (!(c == '*' || c == '+' || c == '?' ||
+  എങ്കിൽ (!(c == '*' || c == '+' || c == '?' ||
         (c == '{' && MORE2() && isdigit((uch)PEEK2()))))
-    return; /* no repetition, we're done */
+    തിരികെ; /* no repetition, we're done */
   NEXT();
 
   REQUIRE(!wascaret, REG_BADRPT);
-  switch (c) {
-  case '*': /* implemented as +? */
+  തിരഞ്ഞെടുപ്പ് (c) {
+  അവസ്ഥ '*': /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    തിരുകുക_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    തിരുകുക_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
-    break;
-  case '+':
-    INSERT(OPLUS_, pos);
+    നിർത്തുക;
+  അവസ്ഥ '+':
+    തിരുകുക_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    break;
-  case '?':
+    നിർത്തുക;
+  അവസ്ഥ '?':
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, pos); /* offset slightly wrong */
+    തിരുകുക_3(OCH_, pos); /* offset slightly wrong */
     ASTERN(OOR1, pos); /* this one's right */
     AHEAD(pos);        /* fix the OCH_ */
     EMIT(OOR2, 0);     /* offset very wrong... */
     AHEAD(THERE());    /* ...so fix it */
     ASTERN(O_CH, THERETHERE());
-    break;
-  case '{':
-    count = p_count(p);
-    if (EAT(',')) {
-      if (isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
-      } else /* single number with comma */
+    നിർത്തുക;
+  അവസ്ഥ '{':
+    എണ്ണം = p_എണ്ണം(p);
+    എങ്കിൽ (EAT(',')) {
+      എങ്കിൽ (isdigit((uch)PEEK())) {
+        count2 = p_എണ്ണം(p);
+        REQUIRE(എണ്ണം <= count2, REG_BADBR);
+      } അല്ലെങ്കിൽ /* single number with comma */
         count2 = REGINFINITY;
-    } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
-    if (!EAT('}')) { /* error heuristics */
-      while (MORE() && PEEK() != '}')
+    } അല്ലെങ്കിൽ /* just a single number */
+      count2 = എണ്ണം;
+    repeat(p, pos, എണ്ണം, count2);
+    എങ്കിൽ (!EAT('}')) { /* error heuristics */
+      ആകുമ്പോൾ (MORE() && PEEK() != '}')
         NEXT();
       REQUIRE(MORE(), REG_EBRACE);
       SETERROR(REG_BADBR);
     }
-    break;
+    നിർത്തുക;
   }
 
-  if (!MORE())
-    return;
+  എങ്കിൽ (!MORE())
+    തിരികെ;
   c = PEEK();
-  if (!(c == '*' || c == '+' || c == '?' ||
+  എങ്കിൽ (!(c == '*' || c == '+' || c == '?' ||
         (c == '{' && MORE2() && isdigit((uch)PEEK2()))))
-    return;
+    തിരികെ;
   SETERROR(REG_BADRPT);
 }
 
 /*
  - p_str - string (no metacharacters) "parser"
  */
-static void p_str(struct parse *p) {
+സ്ഥിതം ശൂന്യം p_str(ഘടന parse *p) {
   REQUIRE(MORE(), REG_EMPTY);
-  while (MORE())
+  ആകുമ്പോൾ (MORE())
     ordinary(p, GETNEXT());
 }
 
@@ -661,23 +661,23 @@ static void p_str(struct parse *p) {
  * category in such cases.  This is fairly harmless; not worth fixing.
  * The amount of lookahead needed to avoid this kludge is excessive.
  */
-static void p_bre(struct parse *p, int end1, /* first terminating character */
-                  int end2)                  /* second terminating character */
+സ്ഥിതം ശൂന്യം p_bre(ഘടന parse *p, പൂർണ്ണസംഖ്യ end1, /* first terminating character */
+                  പൂർണ്ണസംഖ്യ end2)                  /* second terminating character */
 {
   sopno start = HERE();
-  int first = 1; /* first subexpression? */
-  int wasdollar = 0;
+  പൂർണ്ണസംഖ്യ first = 1; /* first subexpression? */
+  പൂർണ്ണസംഖ്യ wasdollar = 0;
 
-  if (EAT('^')) {
+  എങ്കിൽ (EAT('^')) {
     EMIT(OBOL, 0);
     p->g->iflags |= USEBOL;
     p->g->nbol++;
   }
-  while (MORE() && !SEETWO(end1, end2)) {
+  ആകുമ്പോൾ (MORE() && !SEETWO(end1, end2)) {
     wasdollar = p_simp_re(p, first);
     first = 0;
   }
-  if (wasdollar) { /* oops, that was a trailing anchor */
+  എങ്കിൽ (wasdollar) { /* oops, that was a trailing anchor */
     DROP(1);
     EMIT(OEOL, 0);
     p->g->iflags |= USEEOL;
@@ -690,135 +690,135 @@ static void p_bre(struct parse *p, int end1, /* first terminating character */
 /*
  - p_simp_re - parse a simple RE, an atom possibly followed by a repetition
  */
-static int /* was the simple RE an unbackslashed $? */
-p_simp_re(struct parse *p,
-          int starordinary) /* is a leading * an ordinary character? */
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* was the simple RE an unbackslashed $? */
+p_simp_re(ഘടന parse *p,
+          പൂർണ്ണസംഖ്യ starordinary) /* is a leading * an ordinary character? */
 {
-  int c;
-  int count;
-  int count2;
+  പൂർണ്ണസംഖ്യ c;
+  പൂർണ്ണസംഖ്യ എണ്ണം;
+  പൂർണ്ണസംഖ്യ count2;
   sopno pos;
-  int i;
+  പൂർണ്ണസംഖ്യ i;
   sopno subno;
 #define BACKSL (1 << CHAR_BIT)
 
   pos = HERE(); /* repetition op, if any, covers from here */
 
-  assert(MORE()); /* caller should have ensured this */
+  പ്രതിജ്ഞാ(MORE()); /* caller should have ensured this */
   c = GETNEXT();
-  if (c == '\\') {
+  എങ്കിൽ (c == '\\') {
     REQUIRE(MORE(), REG_EESCAPE);
     c = BACKSL | GETNEXT();
   }
-  switch (c) {
-  case '.':
-    if (p->g->cflags & REG_NEWLINE)
+  തിരഞ്ഞെടുപ്പ് (c) {
+  അവസ്ഥ '.':
+    എങ്കിൽ (p->g->cflags & REG_NEWLINE)
       nonnewline(p);
-    else
+    അല്ലെങ്കിൽ
       EMIT(OANY, 0);
-    break;
-  case '[':
+    നിർത്തുക;
+  അവസ്ഥ '[':
     p_bracket(p);
-    break;
-  case BACKSL | '{':
+    നിർത്തുക;
+  അവസ്ഥ BACKSL | '{':
     SETERROR(REG_BADRPT);
-    break;
-  case BACKSL | '(':
+    നിർത്തുക;
+  അവസ്ഥ BACKSL | '(':
     p->g->nsub++;
     subno = p->g->nsub;
-    if (subno < NPAREN)
+    എങ്കിൽ (subno < NPAREN)
       p->pbegin[subno] = HERE();
     EMIT(OLPAREN, subno);
     /* the MORE here is an error heuristic */
-    if (MORE() && !SEETWO('\\', ')'))
+    എങ്കിൽ (MORE() && !SEETWO('\\', ')'))
       p_bre(p, '\\', ')');
-    if (subno < NPAREN) {
+    എങ്കിൽ (subno < NPAREN) {
       p->pend[subno] = HERE();
-      assert(p->pend[subno] != 0);
+      പ്രതിജ്ഞാ(p->pend[subno] != 0);
     }
     EMIT(ORPAREN, subno);
     REQUIRE(EATTWO('\\', ')'), REG_EPAREN);
-    break;
-  case BACKSL | ')': /* should not get here -- must be user */
-  case BACKSL | '}':
+    നിർത്തുക;
+  അവസ്ഥ BACKSL | ')': /* should not get here -- must be user */
+  അവസ്ഥ BACKSL | '}':
     SETERROR(REG_EPAREN);
-    break;
-  case BACKSL | '1':
-  case BACKSL | '2':
-  case BACKSL | '3':
-  case BACKSL | '4':
-  case BACKSL | '5':
-  case BACKSL | '6':
-  case BACKSL | '7':
-  case BACKSL | '8':
-  case BACKSL | '9':
+    നിർത്തുക;
+  അവസ്ഥ BACKSL | '1':
+  അവസ്ഥ BACKSL | '2':
+  അവസ്ഥ BACKSL | '3':
+  അവസ്ഥ BACKSL | '4':
+  അവസ്ഥ BACKSL | '5':
+  അവസ്ഥ BACKSL | '6':
+  അവസ്ഥ BACKSL | '7':
+  അവസ്ഥ BACKSL | '8':
+  അവസ്ഥ BACKSL | '9':
     i = (c & ~BACKSL) - '0';
-    assert(i < NPAREN);
-    if (p->pend[i] != 0) {
-      assert(i <= p->g->nsub);
+    പ്രതിജ്ഞാ(i < NPAREN);
+    എങ്കിൽ (p->pend[i] != 0) {
+      പ്രതിജ്ഞാ(i <= p->g->nsub);
       EMIT(OBACK_, i);
-      assert(p->pbegin[i] != 0);
-      assert(OP(p->strip[p->pbegin[i]]) == OLPAREN);
-      assert(OP(p->strip[p->pend[i]]) == ORPAREN);
-      (void)dupl(p, p->pbegin[i] + 1, p->pend[i]);
+      പ്രതിജ്ഞാ(p->pbegin[i] != 0);
+      പ്രതിജ്ഞാ(OP(p->strip[p->pbegin[i]]) == OLPAREN);
+      പ്രതിജ്ഞാ(OP(p->strip[p->pend[i]]) == ORPAREN);
+      (ശൂന്യം)dupl(p, p->pbegin[i] + 1, p->pend[i]);
       EMIT(O_BACK, i);
-    } else {
+    } അല്ലെങ്കിൽ {
       SETERROR(REG_ESUBREG);
     }
     p->g->backrefs = 1;
-    break;
-  case '*':
+    നിർത്തുക;
+  അവസ്ഥ '*':
     REQUIRE(starordinary, REG_BADRPT);
     LLVM_FALLTHROUGH;
-  default:
-    ordinary(p, (char)c);
-    break;
+  സ്ഥിരസ്ഥിതി:
+    ordinary(p, (അക്ഷരം)c);
+    നിർത്തുക;
   }
 
-  if (EAT('*')) { /* implemented as +? */
+  എങ്കിൽ (EAT('*')) { /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    തിരുകുക_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    തിരുകുക_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
-  } else if (EATTWO('\\', '{')) {
-    count = p_count(p);
-    if (EAT(',')) {
-      if (MORE() && isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
-      } else /* single number with comma */
+  } അല്ലെങ്കിൽ എങ്കിൽ (EATTWO('\\', '{')) {
+    എണ്ണം = p_എണ്ണം(p);
+    എങ്കിൽ (EAT(',')) {
+      എങ്കിൽ (MORE() && isdigit((uch)PEEK())) {
+        count2 = p_എണ്ണം(p);
+        REQUIRE(എണ്ണം <= count2, REG_BADBR);
+      } അല്ലെങ്കിൽ /* single number with comma */
         count2 = REGINFINITY;
-    } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
-    if (!EATTWO('\\', '}')) { /* error heuristics */
-      while (MORE() && !SEETWO('\\', '}'))
+    } അല്ലെങ്കിൽ /* just a single number */
+      count2 = എണ്ണം;
+    repeat(p, pos, എണ്ണം, count2);
+    എങ്കിൽ (!EATTWO('\\', '}')) { /* error heuristics */
+      ആകുമ്പോൾ (MORE() && !SEETWO('\\', '}'))
         NEXT();
       REQUIRE(MORE(), REG_EBRACE);
       SETERROR(REG_BADBR);
     }
-  } else if (c == '$') /* $ (but not \$) ends it */
-    return (1);
+  } അല്ലെങ്കിൽ എങ്കിൽ (c == '$') /* $ (but not \$) ends it */
+    തിരികെ (1);
 
-  return (0);
+  തിരികെ (0);
 }
 
 /*
  - p_count - parse a repetition count
  */
-static int /* the value */
-p_count(struct parse *p) {
-  int count = 0;
-  int ndigits = 0;
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* the value */
+p_എണ്ണം(ഘടന parse *p) {
+  പൂർണ്ണസംഖ്യ എണ്ണം = 0;
+  പൂർണ്ണസംഖ്യ ndigits = 0;
 
-  while (MORE() && isdigit((uch)PEEK()) && count <= DUPMAX) {
-    count = count * 10 + (GETNEXT() - '0');
+  ആകുമ്പോൾ (MORE() && isdigit((uch)PEEK()) && എണ്ണം <= DUPMAX) {
+    എണ്ണം = എണ്ണം * 10 + (GETNEXT() - '0');
     ndigits++;
   }
 
-  REQUIRE(ndigits > 0 && count <= DUPMAX, REG_BADBR);
-  return (count);
+  REQUIRE(ndigits > 0 && എണ്ണം <= DUPMAX, REG_BADBR);
+  തിരികെ (എണ്ണം);
 }
 
 /*
@@ -827,79 +827,79 @@ p_count(struct parse *p) {
  * Note a significant property of this code:  if the allocset() did SETERROR,
  * no set operations are done.
  */
-static void p_bracket(struct parse *p) {
+സ്ഥിതം ശൂന്യം p_bracket(ഘടന parse *p) {
   cset *cs;
-  int invert = 0;
+  പൂർണ്ണസംഖ്യ invert = 0;
 
   /* Dept of Truly Sickening Special-Case Kludges */
-  if (p->end - p->next > 5) {
-    if (strncmp(p->next, "[:<:]]", 6) == 0) {
+  എങ്കിൽ (p->end - p->next > 5) {
+    എങ്കിൽ (strncmp(p->next, "[:<:]]", 6) == 0) {
       EMIT(OBOW, 0);
       NEXTn(6);
-      return;
+      തിരികെ;
     }
-    if (strncmp(p->next, "[:>:]]", 6) == 0) {
+    എങ്കിൽ (strncmp(p->next, "[:>:]]", 6) == 0) {
       EMIT(OEOW, 0);
       NEXTn(6);
-      return;
+      തിരികെ;
     }
   }
 
-  if ((cs = allocset(p)) == NULL) {
+  എങ്കിൽ ((cs = allocset(p)) == ശൂന്യ) {
     /* allocset did set error status in p */
-    return;
+    തിരികെ;
   }
 
-  if (EAT('^'))
+  എങ്കിൽ (EAT('^'))
     invert++; /* make note to invert set at end */
-  if (EAT(']'))
+  എങ്കിൽ (EAT(']'))
     CHadd(cs, ']');
-  else if (EAT('-'))
+  അല്ലെങ്കിൽ എങ്കിൽ (EAT('-'))
     CHadd(cs, '-');
-  while (MORE() && PEEK() != ']' && !SEETWO('-', ']'))
+  ആകുമ്പോൾ (MORE() && PEEK() != ']' && !SEETWO('-', ']'))
     p_b_term(p, cs);
-  if (EAT('-'))
+  എങ്കിൽ (EAT('-'))
     CHadd(cs, '-');
   MUSTEAT(']', REG_EBRACK);
 
-  if (p->error != 0) { /* don't mess things up further */
+  എങ്കിൽ (p->error != 0) { /* don't mess things up further */
     freeset(p, cs);
-    return;
+    തിരികെ;
   }
 
-  if (p->g->cflags & REG_ICASE) {
-    int i;
-    int ci;
+  എങ്കിൽ (p->g->cflags & REG_ICASE) {
+    പൂർണ്ണസംഖ്യ i;
+    പൂർണ്ണസംഖ്യ ci;
 
-    for (i = p->g->csetsize - 1; i >= 0; i--)
-      if (CHIN(cs, i) && isalpha(i)) {
+    വേണ്ടി (i = p->g->csetsize - 1; i >= 0; i--)
+      എങ്കിൽ (CHIN(cs, i) && isalpha(i)) {
         ci = othercase(i);
-        if (ci != i)
+        എങ്കിൽ (ci != i)
           CHadd(cs, ci);
       }
-    if (cs->multis != NULL)
+    എങ്കിൽ (cs->multis != ശൂന്യ)
       mccase(p, cs);
   }
-  if (invert) {
-    int i;
+  എങ്കിൽ (invert) {
+    പൂർണ്ണസംഖ്യ i;
 
-    for (i = p->g->csetsize - 1; i >= 0; i--)
-      if (CHIN(cs, i))
+    വേണ്ടി (i = p->g->csetsize - 1; i >= 0; i--)
+      എങ്കിൽ (CHIN(cs, i))
         CHsub(cs, i);
-      else
+      അല്ലെങ്കിൽ
         CHadd(cs, i);
-    if (p->g->cflags & REG_NEWLINE)
+    എങ്കിൽ (p->g->cflags & REG_NEWLINE)
       CHsub(cs, '\n');
-    if (cs->multis != NULL)
+    എങ്കിൽ (cs->multis != ശൂന്യ)
       mcinvert(p, cs);
   }
 
-  assert(cs->multis == NULL); /* xxx */
+  പ്രതിജ്ഞാ(cs->multis == ശൂന്യ); /* xxx */
 
-  if (nch(p, cs) == 1) { /* optimize singleton sets */
+  എങ്കിൽ (nch(p, cs) == 1) { /* optimize singleton sets */
     ordinary(p, firstch(p, cs));
     freeset(p, cs);
-  } else {
+  } അല്ലെങ്കിൽ {
     EMIT(OANYOF, freezeset(p, cs));
   }
 }
@@ -907,27 +907,27 @@ static void p_bracket(struct parse *p) {
 /*
  - p_b_term - parse one term of a bracketed character list
  */
-static void p_b_term(struct parse *p, cset *cs) {
-  char c;
-  char start, finish;
-  int i;
+സ്ഥിതം ശൂന്യം p_b_term(ഘടന parse *p, cset *cs) {
+  അക്ഷരം c;
+  അക്ഷരം start, finish;
+  പൂർണ്ണസംഖ്യ i;
 
   /* classify what we've got */
-  switch ((MORE()) ? PEEK() : '\0') {
-  case '[':
+  തിരഞ്ഞെടുപ്പ് ((MORE()) ? PEEK() : '\0') {
+  അവസ്ഥ '[':
     c = (MORE2()) ? PEEK2() : '\0';
-    break;
-  case '-':
+    നിർത്തുക;
+  അവസ്ഥ '-':
     SETERROR(REG_ERANGE);
-    return; /* NOTE RETURN */
-    break;
-  default:
+    തിരികെ; /* NOTE RETURN */
+    നിർത്തുക;
+  സ്ഥിരസ്ഥിതി:
     c = '\0';
-    break;
+    നിർത്തുക;
   }
 
-  switch (c) {
-  case ':': /* character class */
+  തിരഞ്ഞെടുപ്പ് (c) {
+  അവസ്ഥ ':': /* character class */
     NEXT2();
     REQUIRE(MORE(), REG_EBRACK);
     c = PEEK();
@@ -935,8 +935,8 @@ static void p_b_term(struct parse *p, cset *cs) {
     p_b_cclass(p, cs);
     REQUIRE(MORE(), REG_EBRACK);
     REQUIRE(EATTWO(':', ']'), REG_ECTYPE);
-    break;
-  case '=': /* equivalence class */
+    നിർത്തുക;
+  അവസ്ഥ '=': /* equivalence class */
     NEXT2();
     REQUIRE(MORE(), REG_EBRACK);
     c = PEEK();
@@ -944,54 +944,54 @@ static void p_b_term(struct parse *p, cset *cs) {
     p_b_eclass(p, cs);
     REQUIRE(MORE(), REG_EBRACK);
     REQUIRE(EATTWO('=', ']'), REG_ECOLLATE);
-    break;
-  default: /* symbol, ordinary character, or range */
+    നിർത്തുക;
+  സ്ഥിരസ്ഥിതി: /* symbol, ordinary character, or range */
            /* xxx revision needed for multichar stuff */
-    start = p_b_symbol(p);
-    if (SEE('-') && MORE2() && PEEK2() != ']') {
+    start = p_b_ചിഹ്നം(p);
+    എങ്കിൽ (SEE('-') && MORE2() && PEEK2() != ']') {
       /* range */
       NEXT();
-      if (EAT('-'))
+      എങ്കിൽ (EAT('-'))
         finish = '-';
-      else
-        finish = p_b_symbol(p);
-    } else {
+      അല്ലെങ്കിൽ
+        finish = p_b_ചിഹ്നം(p);
+    } അല്ലെങ്കിൽ {
       finish = start;
     }
     /* xxx what about signed chars here... */
     REQUIRE(start <= finish, REG_ERANGE);
-    for (i = start; i <= finish; i++)
+    വേണ്ടി (i = start; i <= finish; i++)
       CHadd(cs, i);
-    break;
+    നിർത്തുക;
   }
 }
 
 /*
  - p_b_cclass - parse a character-class name and deal with it
  */
-static void p_b_cclass(struct parse *p, cset *cs) {
-  const char *sp = p->next;
-  struct cclass *cp;
+സ്ഥിതം ശൂന്യം p_b_cclass(ഘടന parse *p, cset *cs) {
+  സ്ഥിരം അക്ഷരം *sp = p->next;
+  ഘടന cclass *cp;
   size_t len;
-  const char *u;
-  char c;
+  സ്ഥിരം അക്ഷരം *u;
+  അക്ഷരം c;
 
-  while (MORE() && isalpha((uch)PEEK()))
+  ആകുമ്പോൾ (MORE() && isalpha((uch)PEEK()))
     NEXT();
   len = p->next - sp;
-  for (cp = cclasses; cp->name != NULL; cp++)
-    if (strncmp(cp->name, sp, len) == 0 && cp->name[len] == '\0')
-      break;
-  if (cp->name == NULL) {
+  വേണ്ടി (cp = cclasses; cp->name != ശൂന്യ; cp++)
+    എങ്കിൽ (strncmp(cp->name, sp, len) == 0 && cp->name[len] == '\0')
+      നിർത്തുക;
+  എങ്കിൽ (cp->name == ശൂന്യ) {
     /* oops, didn't find it */
     SETERROR(REG_ECTYPE);
-    return;
+    തിരികെ;
   }
 
   u = cp->chars;
-  while ((c = *u++) != '\0')
+  ആകുമ്പോൾ ((c = *u++) != '\0')
     CHadd(cs, c);
-  for (u = cp->multis; *u != '\0'; u += strlen(u) + 1)
+  വേണ്ടി (u = cp->multis; *u != '\0'; u += strlen(u) + 1)
     MCadd(p, cs, u);
 }
 
@@ -1000,8 +1000,8 @@ static void p_b_cclass(struct parse *p, cset *cs) {
  *
  * This implementation is incomplete. xxx
  */
-static void p_b_eclass(struct parse *p, cset *cs) {
-  char c;
+സ്ഥിതം ശൂന്യം p_b_eclass(ഘടന parse *p, cset *cs) {
+  അക്ഷരം c;
 
   c = p_b_coll_elem(p, '=');
   CHadd(cs, c);
@@ -1010,59 +1010,59 @@ static void p_b_eclass(struct parse *p, cset *cs) {
 /*
  - p_b_symbol - parse a character or [..]ed multicharacter collating symbol
  */
-static char /* value of symbol */
-p_b_symbol(struct parse *p) {
-  char value;
+സ്ഥിതം അക്ഷരം /* value of symbol */
+p_b_ചിഹ്നം(ഘടന parse *p) {
+  അക്ഷരം മൂല്യം_2;
 
   REQUIRE(MORE(), REG_EBRACK);
-  if (!EATTWO('[', '.'))
-    return (GETNEXT());
+  എങ്കിൽ (!EATTWO('[', '.'))
+    തിരികെ (GETNEXT());
 
   /* collating symbol */
-  value = p_b_coll_elem(p, '.');
+  മൂല്യം_2 = p_b_coll_elem(p, '.');
   REQUIRE(EATTWO('.', ']'), REG_ECOLLATE);
-  return (value);
+  തിരികെ (മൂല്യം_2);
 }
 
 /*
  - p_b_coll_elem - parse a collating-element name and look it up
  */
-static char                              /* value of collating element */
-p_b_coll_elem(struct parse *p, int endc) /* name ended by endc,']' */
+സ്ഥിതം അക്ഷരം                              /* value of collating element */
+p_b_coll_elem(ഘടന parse *p, പൂർണ്ണസംഖ്യ endc) /* name ended by endc,']' */
 {
-  const char *sp = p->next;
-  struct cname *cp;
+  സ്ഥിരം അക്ഷരം *sp = p->next;
+  ഘടന cname *cp;
   size_t len;
 
-  while (MORE() && !SEETWO(endc, ']'))
+  ആകുമ്പോൾ (MORE() && !SEETWO(endc, ']'))
     NEXT();
-  if (!MORE()) {
+  എങ്കിൽ (!MORE()) {
     SETERROR(REG_EBRACK);
-    return (0);
+    തിരികെ (0);
   }
   len = p->next - sp;
-  for (cp = cnames; cp->name != NULL; cp++)
-    if (strncmp(cp->name, sp, len) == 0 && strlen(cp->name) == len)
-      return (cp->code); /* known name */
-  if (len == 1)
-    return (*sp);         /* single character */
+  വേണ്ടി (cp = cnames; cp->name != ശൂന്യ; cp++)
+    എങ്കിൽ (strncmp(cp->name, sp, len) == 0 && strlen(cp->name) == len)
+      തിരികെ (cp->code); /* known name */
+  എങ്കിൽ (len == 1)
+    തിരികെ (*sp);         /* single character */
   SETERROR(REG_ECOLLATE); /* neither */
-  return (0);
+  തിരികെ (0);
 }
 
 /*
  - othercase - return the case counterpart of an alphabetic
  */
-static char /* if no counterpart, return ch */
-othercase(int ch) {
+സ്ഥിതം അക്ഷരം /* if no counterpart, return ch */
+othercase(പൂർണ്ണസംഖ്യ ch) {
   ch = (uch)ch;
-  assert(isalpha(ch));
-  if (isupper(ch))
-    return ((uch)tolower(ch));
-  else if (islower(ch))
-    return ((uch)toupper(ch));
-  else /* peculiar, but could happen */
-    return (ch);
+  പ്രതിജ്ഞാ(isalpha(ch));
+  എങ്കിൽ (isupper(ch))
+    തിരികെ ((uch)tolower(ch));
+  അല്ലെങ്കിൽ എങ്കിൽ (islower(ch))
+    തിരികെ ((uch)toupper(ch));
+  അല്ലെങ്കിൽ /* peculiar, but could happen */
+    തിരികെ (ch);
 }
 
 /*
@@ -1070,20 +1070,20 @@ othercase(int ch) {
  *
  * Boy, is this implementation ever a kludge...
  */
-static void bothcases(struct parse *p, int ch) {
-  const char *oldnext = p->next;
-  const char *oldend = p->end;
-  char bracket[3];
+സ്ഥിതം ശൂന്യം bothcases(ഘടന parse *p, പൂർണ്ണസംഖ്യ ch) {
+  സ്ഥിരം അക്ഷരം *oldnext = p->next;
+  സ്ഥിരം അക്ഷരം *oldend = p->end;
+  അക്ഷരം bracket[3];
 
   ch = (uch)ch;
-  assert(othercase(ch) != ch); /* p_bracket() would recurse */
+  പ്രതിജ്ഞാ(othercase(ch) != ch); /* p_bracket() would recurse */
   p->next = bracket;
   p->end = bracket + 2;
   bracket[0] = ch;
   bracket[1] = ']';
   bracket[2] = '\0';
   p_bracket(p);
-  assert(p->next == bracket + 2);
+  പ്രതിജ്ഞാ(p->next == bracket + 2);
   p->next = oldnext;
   p->end = oldend;
 }
@@ -1091,21 +1091,21 @@ static void bothcases(struct parse *p, int ch) {
 /*
  - uncased - emit an ordinary character that is never treated as cased
  */
-static void uncased(struct parse *p, int ch) {
+സ്ഥിതം ശൂന്യം uncased(ഘടന parse *p, പൂർണ്ണസംഖ്യ ch) {
   cat_t *cap = p->g->categories;
 
   EMIT(OCHAR, (uch)ch);
-  if (cap[ch] == 0)
+  എങ്കിൽ (cap[ch] == 0)
     cap[ch] = p->g->ncategories++;
 }
 
 /*
  - ordinary - emit an ordinary character
  */
-static void ordinary(struct parse *p, int ch) {
-  if ((p->g->cflags & REG_ICASE) && isalpha((uch)ch) && othercase(ch) != ch)
+സ്ഥിതം ശൂന്യം ordinary(ഘടന parse *p, പൂർണ്ണസംഖ്യ ch) {
+  എങ്കിൽ ((p->g->cflags & REG_ICASE) && isalpha((uch)ch) && othercase(ch) != ch)
     bothcases(p, ch);
-  else
+  അല്ലെങ്കിൽ
     uncased(p, ch);
 }
 
@@ -1114,15 +1114,15 @@ static void ordinary(struct parse *p, int ch) {
  *
  * Boy, is this implementation ever a kludge...
  */
-static void nonnewline(struct parse *p) {
-  const char *oldnext = p->next;
-  const char *oldend = p->end;
-  static const char bracket[4] = {'^', '\n', ']', '\0'};
+സ്ഥിതം ശൂന്യം nonnewline(ഘടന parse *p) {
+  സ്ഥിരം അക്ഷരം *oldnext = p->next;
+  സ്ഥിരം അക്ഷരം *oldend = p->end;
+  സ്ഥിതം സ്ഥിരം അക്ഷരം bracket[4] = {'^', '\n', ']', '\0'};
 
   p->next = bracket;
   p->end = bracket + 3;
   p_bracket(p);
-  assert(p->next == bracket + 3);
+  പ്രതിജ്ഞാ(p->next == bracket + 3);
   p->next = oldnext;
   p->end = oldend;
 }
@@ -1130,10 +1130,10 @@ static void nonnewline(struct parse *p) {
 /*
  - repeat - generate code for a bounded repetition, recursively if needed
  */
-static void repeat(struct parse *p,
+സ്ഥിതം ശൂന്യം repeat(ഘടന parse *p,
                    sopno start, /* operand from here to end of strip */
-                   int from,    /* repeated from this number */
-                   int to)      /* to this number of times (maybe INFINITY) */
+                   പൂർണ്ണസംഖ്യ from,    /* repeated from this number */
+                   പൂർണ്ണസംഖ്യ to)      /* to this number of times (maybe INFINITY) */
 {
   sopno finish = HERE();
 #define N 2
@@ -1142,142 +1142,142 @@ static void repeat(struct parse *p,
 #define MAP(n) (((n) <= 1) ? (n) : ((n) == REGINFINITY) ? INF : N)
   sopno copy;
 
-  if (p->error != 0) /* head off possible runaway recursion */
-    return;
+  എങ്കിൽ (p->error != 0) /* head off possible runaway recursion */
+    തിരികെ;
 
-  assert(from <= to);
+  പ്രതിജ്ഞാ(from <= to);
 
-  switch (REP(MAP(from), MAP(to))) {
-  case REP(0, 0):         /* must be user doing this */
+  തിരഞ്ഞെടുപ്പ് (REP(MAP(from), MAP(to))) {
+  അവസ്ഥ REP(0, 0):         /* must be user doing this */
     DROP(finish - start); /* drop the operand */
-    break;
-  case REP(0, 1):   /* as x{1,1}? */
-  case REP(0, N):   /* as x{1,n}? */
-  case REP(0, INF): /* as x{1,}? */
+    നിർത്തുക;
+  അവസ്ഥ REP(0, 1):   /* as x{1,1}? */
+  അവസ്ഥ REP(0, N):   /* as x{1,n}? */
+  അവസ്ഥ REP(0, INF): /* as x{1,}? */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start); /* offset is wrong... */
+    തിരുകുക_3(OCH_, start); /* offset is wrong... */
     repeat(p, start + 1, 1, to);
     ASTERN(OOR1, start);
     AHEAD(start); /* ... fix it */
     EMIT(OOR2, 0);
     AHEAD(THERE());
     ASTERN(O_CH, THERETHERE());
-    break;
-  case REP(1, 1): /* trivial case */
+    നിർത്തുക;
+  അവസ്ഥ REP(1, 1): /* trivial case */
     /* done */
-    break;
-  case REP(1, N): /* as x?x{1,n-1} */
+    നിർത്തുക;
+  അവസ്ഥ REP(1, N): /* as x?x{1,n-1} */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start);
+    തിരുകുക_3(OCH_, start);
     ASTERN(OOR1, start);
     AHEAD(start);
     EMIT(OOR2, 0);  /* offset very wrong... */
     AHEAD(THERE()); /* ...so fix it */
     ASTERN(O_CH, THERETHERE());
     copy = dupl(p, start + 1, finish + 1);
-    assert(copy == finish + 4);
+    പ്രതിജ്ഞാ(copy == finish + 4);
     repeat(p, copy, 1, to - 1);
-    break;
-  case REP(1, INF): /* as x+ */
-    INSERT(OPLUS_, start);
+    നിർത്തുക;
+  അവസ്ഥ REP(1, INF): /* as x+ */
+    തിരുകുക_3(OPLUS_, start);
     ASTERN(O_PLUS, start);
-    break;
-  case REP(N, N): /* as xx{m-1,n-1} */
+    നിർത്തുക;
+  അവസ്ഥ REP(N, N): /* as xx{m-1,n-1} */
     copy = dupl(p, start, finish);
     repeat(p, copy, from - 1, to - 1);
-    break;
-  case REP(N, INF): /* as xx{n-1,INF} */
+    നിർത്തുക;
+  അവസ്ഥ REP(N, INF): /* as xx{n-1,INF} */
     copy = dupl(p, start, finish);
     repeat(p, copy, from - 1, to);
-    break;
-  default:                /* "can't happen" */
+    നിർത്തുക;
+  സ്ഥിരസ്ഥിതി:                /* "can't happen" */
     SETERROR(REG_ASSERT); /* just in case */
-    break;
+    നിർത്തുക;
   }
 }
 
 /*
  - seterr - set an error condition
  */
-static int /* useless but makes type checking happy */
-seterr(struct parse *p, int e) {
-  if (p->error == 0) /* keep earliest error condition */
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* useless but makes type checking happy */
+seterr(ഘടന parse *p, പൂർണ്ണസംഖ്യ e) {
+  എങ്കിൽ (p->error == 0) /* keep earliest error condition */
     p->error = e;
   p->next = nuls; /* try to bring things to a halt */
   p->end = nuls;
-  return (0); /* make the return value well-defined */
+  തിരികെ (0); /* make the return value well-defined */
 }
 
 /*
  - allocset - allocate a set of characters for []
  */
-static cset *allocset(struct parse *p) {
-  int no = p->g->ncsets++;
+സ്ഥിതം cset *allocset(ഘടന parse *p) {
+  പൂർണ്ണസംഖ്യ no = p->g->ncsets++;
   size_t nc;
   size_t nbytes;
   cset *cs;
   size_t css = (size_t)p->g->csetsize;
-  int i;
+  പൂർണ്ണസംഖ്യ i;
 
-  if (no >= p->ncsalloc) { /* need another column of space */
-    void *ptr;
+  എങ്കിൽ (no >= p->ncsalloc) { /* need another column of space */
+    ശൂന്യം *ptr;
 
     p->ncsalloc += CHAR_BIT;
     nc = p->ncsalloc;
-    if (nc > SIZE_MAX / sizeof(cset))
-      goto nomem;
-    assert(nc % CHAR_BIT == 0);
+    എങ്കിൽ (nc > SIZE_MAX / വലുപ്പം(cset))
+      പോകുക nomem;
+    പ്രതിജ്ഞാ(nc % CHAR_BIT == 0);
     nbytes = nc / CHAR_BIT * css;
 
-    ptr = (cset *)realloc((char *)p->g->sets, nc * sizeof(cset));
-    if (ptr == NULL)
-      goto nomem;
+    ptr = (cset *)realloc((അക്ഷരം *)p->g->sets, nc * വലുപ്പം(cset));
+    എങ്കിൽ (ptr == ശൂന്യ)
+      പോകുക nomem;
     p->g->sets = ptr;
 
-    ptr = (uch *)realloc((char *)p->g->setbits, nbytes);
-    if (ptr == NULL)
-      goto nomem;
+    ptr = (uch *)realloc((അക്ഷരം *)p->g->setbits, nbytes);
+    എങ്കിൽ (ptr == ശൂന്യ)
+      പോകുക nomem;
     p->g->setbits = ptr;
 
-    for (i = 0; i < no; i++)
+    വേണ്ടി (i = 0; i < no; i++)
       p->g->sets[i].ptr = p->g->setbits + css * (i / CHAR_BIT);
 
-    (void)memset((char *)p->g->setbits + (nbytes - css), 0, css);
+    (ശൂന്യം)memset((അക്ഷരം *)p->g->setbits + (nbytes - css), 0, css);
   }
   /* XXX should not happen */
-  if (p->g->sets == NULL || p->g->setbits == NULL)
-    goto nomem;
+  എങ്കിൽ (p->g->sets == ശൂന്യ || p->g->setbits == ശൂന്യ)
+    പോകുക nomem;
 
   cs = &p->g->sets[no];
   cs->ptr = p->g->setbits + css * ((no) / CHAR_BIT);
   cs->mask = 1 << ((no) % CHAR_BIT);
   cs->hash = 0;
   cs->smultis = 0;
-  cs->multis = NULL;
+  cs->multis = ശൂന്യ;
 
-  return (cs);
+  തിരികെ (cs);
 nomem:
-  free(p->g->sets);
-  p->g->sets = NULL;
-  free(p->g->setbits);
-  p->g->setbits = NULL;
+  സ്വതന്ത്രം(p->g->sets);
+  p->g->sets = ശൂന്യ;
+  സ്വതന്ത്രം(p->g->setbits);
+  p->g->setbits = ശൂന്യ;
 
   SETERROR(REG_ESPACE);
   /* caller's responsibility not to do set ops */
-  return (NULL);
+  തിരികെ (ശൂന്യ);
 }
 
 /*
  - freeset - free a now-unused set
  */
-static void freeset(struct parse *p, cset *cs) {
+സ്ഥിതം ശൂന്യം freeset(ഘടന parse *p, cset *cs) {
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *മുകൾ_2 = &p->g->sets[p->g->ncsets];
   size_t css = (size_t)p->g->csetsize;
 
-  for (i = 0; i < css; i++)
+  വേണ്ടി (i = 0; i < css; i++)
     CHsub(cs, i);
-  if (cs == top - 1) /* recover only the easy case */
+  എങ്കിൽ (cs == മുകൾ_2 - 1) /* recover only the easy case */
     p->g->ncsets--;
 }
 
@@ -1290,77 +1290,77 @@ static void freeset(struct parse *p, cset *cs) {
  * is done using addition rather than xor -- all ASCII [aA] sets xor to
  * the same value!
  */
-static int /* set number */
-freezeset(struct parse *p, cset *cs) {
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* set number */
+freezeset(ഘടന parse *p, cset *cs) {
   uch h = cs->hash;
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *മുകൾ_2 = &p->g->sets[p->g->ncsets];
   cset *cs2;
   size_t css = (size_t)p->g->csetsize;
 
   /* look for an earlier one which is the same */
-  for (cs2 = &p->g->sets[0]; cs2 < top; cs2++)
-    if (cs2->hash == h && cs2 != cs) {
+  വേണ്ടി (cs2 = &p->g->sets[0]; cs2 < മുകൾ_2; cs2++)
+    എങ്കിൽ (cs2->hash == h && cs2 != cs) {
       /* maybe */
-      for (i = 0; i < css; i++)
-        if (!!CHIN(cs2, i) != !!CHIN(cs, i))
-          break; /* no */
-      if (i == css)
-        break; /* yes */
+      വേണ്ടി (i = 0; i < css; i++)
+        എങ്കിൽ (!!CHIN(cs2, i) != !!CHIN(cs, i))
+          നിർത്തുക; /* no */
+      എങ്കിൽ (i == css)
+        നിർത്തുക; /* yes */
     }
 
-  if (cs2 < top) { /* found one */
+  എങ്കിൽ (cs2 < മുകൾ_2) { /* found one */
     freeset(p, cs);
     cs = cs2;
   }
 
-  return ((int)(cs - p->g->sets));
+  തിരികെ ((പൂർണ്ണസംഖ്യ)(cs - p->g->sets));
 }
 
 /*
  - firstch - return first character in a set (which must have at least one)
  */
-static int /* character; there is no "none" value */
-firstch(struct parse *p, cset *cs) {
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* character; there is no "none" value */
+firstch(ഘടന parse *p, cset *cs) {
   size_t i;
   size_t css = (size_t)p->g->csetsize;
 
-  for (i = 0; i < css; i++)
-    if (CHIN(cs, i))
-      return ((char)i);
-  assert(never);
-  return (0); /* arbitrary */
+  വേണ്ടി (i = 0; i < css; i++)
+    എങ്കിൽ (CHIN(cs, i))
+      തിരികെ ((അക്ഷരം)i);
+  പ്രതിജ്ഞാ(never);
+  തിരികെ (0); /* arbitrary */
 }
 
 /*
  - nch - number of characters in a set
  */
-static int nch(struct parse *p, cset *cs) {
+സ്ഥിതം പൂർണ്ണസംഖ്യ nch(ഘടന parse *p, cset *cs) {
   size_t i;
   size_t css = (size_t)p->g->csetsize;
-  int n = 0;
+  പൂർണ്ണസംഖ്യ n = 0;
 
-  for (i = 0; i < css; i++)
-    if (CHIN(cs, i))
+  വേണ്ടി (i = 0; i < css; i++)
+    എങ്കിൽ (CHIN(cs, i))
       n++;
-  return (n);
+  തിരികെ (n);
 }
 
 /*
  - mcadd - add a collating element to a cset
  */
-static void mcadd(struct parse *p, cset *cs, const char *cp) {
+സ്ഥിതം ശൂന്യം mcadd(ഘടന parse *p, cset *cs, സ്ഥിരം അക്ഷരം *cp) {
   size_t oldend = cs->smultis;
-  void *np;
+  ശൂന്യം *np;
 
   cs->smultis += strlen(cp) + 1;
   np = realloc(cs->multis, cs->smultis);
-  if (np == NULL) {
-    if (cs->multis)
-      free(cs->multis);
-    cs->multis = NULL;
+  എങ്കിൽ (np == ശൂന്യ) {
+    എങ്കിൽ (cs->multis)
+      സ്വതന്ത്രം(cs->multis);
+    cs->multis = ശൂന്യ;
     SETERROR(REG_ESPACE);
-    return;
+    തിരികെ;
   }
   cs->multis = np;
 
@@ -1374,8 +1374,8 @@ static void mcadd(struct parse *p, cset *cs, const char *cp) {
  * is deferred.
  */
 /* ARGSUSED */
-static void mcinvert(struct parse *p, cset *cs) {
-  assert(cs->multis == NULL); /* xxx */
+സ്ഥിതം ശൂന്യം mcinvert(ഘടന parse *p, cset *cs) {
+  പ്രതിജ്ഞാ(cs->multis == ശൂന്യ); /* xxx */
 }
 
 /*
@@ -1385,62 +1385,62 @@ static void mcinvert(struct parse *p, cset *cs) {
  * is deferred.
  */
 /* ARGSUSED */
-static void mccase(struct parse *p, cset *cs) {
-  assert(cs->multis == NULL); /* xxx */
+സ്ഥിതം ശൂന്യം mccase(ഘടന parse *p, cset *cs) {
+  പ്രതിജ്ഞാ(cs->multis == ശൂന്യ); /* xxx */
 }
 
 /*
  - isinsets - is this character in any sets?
  */
-static int /* predicate */
-isinsets(struct re_guts *g, int c) {
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* predicate */
+isinsets(ഘടന re_guts *g, പൂർണ്ണസംഖ്യ c) {
   uch *col;
-  int i;
-  int ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
+  പൂർണ്ണസംഖ്യ i;
+  പൂർണ്ണസംഖ്യ ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
   unsigned uc = (uch)c;
 
-  for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
-    if (col[uc] != 0)
-      return (1);
-  return (0);
+  വേണ്ടി (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
+    എങ്കിൽ (col[uc] != 0)
+      തിരികെ (1);
+  തിരികെ (0);
 }
 
 /*
  - samesets - are these two characters in exactly the same sets?
  */
-static int /* predicate */
-samesets(struct re_guts *g, int c1, int c2) {
+സ്ഥിതം പൂർണ്ണസംഖ്യ /* predicate */
+samesets(ഘടന re_guts *g, പൂർണ്ണസംഖ്യ c1, പൂർണ്ണസംഖ്യ c2) {
   uch *col;
-  int i;
-  int ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
+  പൂർണ്ണസംഖ്യ i;
+  പൂർണ്ണസംഖ്യ ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
   unsigned uc1 = (uch)c1;
   unsigned uc2 = (uch)c2;
 
-  for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
-    if (col[uc1] != col[uc2])
-      return (0);
-  return (1);
+  വേണ്ടി (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
+    എങ്കിൽ (col[uc1] != col[uc2])
+      തിരികെ (0);
+  തിരികെ (1);
 }
 
 /*
  - categorize - sort out character categories
  */
-static void categorize(struct parse *p, struct re_guts *g) {
+സ്ഥിതം ശൂന്യം categorize(ഘടന parse *p, ഘടന re_guts *g) {
   cat_t *cats = g->categories;
-  int c;
-  int c2;
+  പൂർണ്ണസംഖ്യ c;
+  പൂർണ്ണസംഖ്യ c2;
   cat_t cat;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  എങ്കിൽ (p->error != 0)
+    തിരികെ;
 
-  for (c = CHAR_MIN; c <= CHAR_MAX; c++)
-    if (cats[c] == 0 && isinsets(g, c)) {
+  വേണ്ടി (c = CHAR_MIN; c <= CHAR_MAX; c++)
+    എങ്കിൽ (cats[c] == 0 && isinsets(g, c)) {
       cat = g->ncategories++;
       cats[c] = cat;
-      for (c2 = c + 1; c2 <= CHAR_MAX; c2++)
-        if (cats[c2] == 0 && samesets(g, c, c2))
+      വേണ്ടി (c2 = c + 1; c2 <= CHAR_MAX; c2++)
+        എങ്കിൽ (cats[c2] == 0 && samesets(g, c, c2))
           cats[c2] = cat;
     }
 }
@@ -1448,22 +1448,22 @@ static void categorize(struct parse *p, struct re_guts *g) {
 /*
  - dupl - emit a duplicate of a bunch of sops
  */
-static sopno                       /* start of duplicate */
-dupl(struct parse *p, sopno start, /* from here */
+സ്ഥിതം sopno                       /* start of duplicate */
+dupl(ഘടന parse *p, sopno start, /* from here */
      sopno finish)                 /* to this less one */
 {
   sopno ret = HERE();
   sopno len = finish - start;
 
-  assert(finish >= start);
-  if (len == 0)
-    return (ret);
+  പ്രതിജ്ഞാ(finish >= start);
+  എങ്കിൽ (len == 0)
+    തിരികെ (ret);
   enlarge(p, p->ssize + len); /* this many unexpected additions */
-  assert(p->ssize >= p->slen + len);
-  (void)memmove((char *)(p->strip + p->slen), (char *)(p->strip + start),
-                (size_t)len * sizeof(sop));
+  പ്രതിജ്ഞാ(p->ssize >= p->slen + len);
+  (ശൂന്യം)memmove((അക്ഷരം *)(p->strip + p->slen), (അക്ഷരം *)(p->strip + start),
+                (size_t)len * വലുപ്പം(sop));
   p->slen += len;
-  return (ret);
+  തിരികെ (ret);
 }
 
 /*
@@ -1473,18 +1473,18 @@ dupl(struct parse *p, sopno start, /* from here */
  * hard-case backup, but it's just too big and messy unless there are
  * some changes to the data structures.  Maybe later.
  */
-static void doemit(struct parse *p, sop op, size_t opnd) {
+സ്ഥിതം ശൂന്യം doemit(ഘടന parse *p, sop op, size_t opnd) {
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  എങ്കിൽ (p->error != 0)
+    തിരികെ;
 
   /* deal with oversize operands ("can't happen", more or less) */
-  assert(opnd < 1 << OPSHIFT);
+  പ്രതിജ്ഞാ(opnd < 1 << OPSHIFT);
 
   /* deal with undersized strip */
-  if (p->slen >= p->ssize)
+  എങ്കിൽ (p->slen >= p->ssize)
     enlarge(p, (p->ssize + 1) / 2 * 3); /* +50% */
-  assert(p->slen < p->ssize);
+  പ്രതിജ്ഞാ(p->slen < p->ssize);
 
   /* finally, it's all reduced to the easy case */
   p->strip[p->slen++] = SOP(op, opnd);
@@ -1493,66 +1493,66 @@ static void doemit(struct parse *p, sop op, size_t opnd) {
 /*
  - doinsert - insert a sop into the strip
  */
-static void doinsert(struct parse *p, sop op, size_t opnd, sopno pos) {
+സ്ഥിതം ശൂന്യം doinsert(ഘടന parse *p, sop op, size_t opnd, sopno pos) {
   sopno sn;
   sop s;
-  int i;
+  പൂർണ്ണസംഖ്യ i;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  എങ്കിൽ (p->error != 0)
+    തിരികെ;
 
   sn = HERE();
   EMIT(op, opnd); /* do checks, ensure space */
-  assert(HERE() == sn + 1);
+  പ്രതിജ്ഞാ(HERE() == sn + 1);
   s = p->strip[sn];
 
   /* adjust paren pointers */
-  assert(pos > 0);
-  for (i = 1; i < NPAREN; i++) {
-    if (p->pbegin[i] >= pos) {
+  പ്രതിജ്ഞാ(pos > 0);
+  വേണ്ടി (i = 1; i < NPAREN; i++) {
+    എങ്കിൽ (p->pbegin[i] >= pos) {
       p->pbegin[i]++;
     }
-    if (p->pend[i] >= pos) {
+    എങ്കിൽ (p->pend[i] >= pos) {
       p->pend[i]++;
     }
   }
 
-  memmove((char *)&p->strip[pos + 1], (char *)&p->strip[pos],
-          (HERE() - pos - 1) * sizeof(sop));
+  memmove((അക്ഷരം *)&p->strip[pos + 1], (അക്ഷരം *)&p->strip[pos],
+          (HERE() - pos - 1) * വലുപ്പം(sop));
   p->strip[pos] = s;
 }
 
 /*
  - dofwd - complete a forward reference
  */
-static void dofwd(struct parse *p, sopno pos, sop value) {
+സ്ഥിതം ശൂന്യം dofwd(ഘടന parse *p, sopno pos, sop മൂല്യം_2) {
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  എങ്കിൽ (p->error != 0)
+    തിരികെ;
 
-  assert(value < 1 << OPSHIFT);
-  p->strip[pos] = OP(p->strip[pos]) | value;
+  പ്രതിജ്ഞാ(മൂല്യം_2 < 1 << OPSHIFT);
+  p->strip[pos] = OP(p->strip[pos]) | മൂല്യം_2;
 }
 
 /*
  - enlarge - enlarge the strip
  */
-static void enlarge(struct parse *p, sopno size) {
+സ്ഥിതം ശൂന്യം enlarge(ഘടന parse *p, sopno size) {
   sop *sp;
 
-  if (p->ssize >= size)
-    return;
+  എങ്കിൽ (p->ssize >= size)
+    തിരികെ;
 
-  if ((uintptr_t)size > SIZE_MAX / sizeof(sop)) {
+  എങ്കിൽ ((uintptr_t)size > SIZE_MAX / വലുപ്പം(sop)) {
     SETERROR(REG_ESPACE);
-    return;
+    തിരികെ;
   }
 
-  sp = (sop *)realloc(p->strip, size * sizeof(sop));
-  if (sp == NULL) {
+  sp = (sop *)realloc(p->strip, size * വലുപ്പം(sop));
+  എങ്കിൽ (sp == ശൂന്യ) {
     SETERROR(REG_ESPACE);
-    return;
+    തിരികെ;
   }
   p->strip = sp;
   p->ssize = size;
@@ -1561,16 +1561,16 @@ static void enlarge(struct parse *p, sopno size) {
 /*
  - stripsnug - compact the strip
  */
-static void stripsnug(struct parse *p, struct re_guts *g) {
+സ്ഥിതം ശൂന്യം stripsnug(ഘടന parse *p, ഘടന re_guts *g) {
   g->nstates = p->slen;
-  if ((uintptr_t)p->slen > SIZE_MAX / sizeof(sop)) {
+  എങ്കിൽ ((uintptr_t)p->slen > SIZE_MAX / വലുപ്പം(sop)) {
     g->strip = p->strip;
     SETERROR(REG_ESPACE);
-    return;
+    തിരികെ;
   }
 
-  g->strip = (sop *)realloc((char *)p->strip, p->slen * sizeof(sop));
-  if (g->strip == NULL) {
+  g->strip = (sop *)realloc((അക്ഷരം *)p->strip, p->slen * വലുപ്പം(sop));
+  എങ്കിൽ (g->strip == ശൂന്യ) {
     SETERROR(REG_ESPACE);
     g->strip = p->strip;
   }
@@ -1585,106 +1585,106 @@ static void stripsnug(struct parse *p, struct re_guts *g) {
  *
  * Note that must and mlen got initialized during setup.
  */
-static void findmust(struct parse *p, struct re_guts *g) {
+സ്ഥിതം ശൂന്യം findmust(ഘടന parse *p, ഘടന re_guts *g) {
   sop *scan;
   sop *start = 0;    /* start initialized in the default case, after that */
   sop *newstart = 0; /* newstart was initialized in the OCHAR case */
   sopno newlen;
   sop s;
-  char *cp;
+  അക്ഷരം *cp;
   sopno i;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  എങ്കിൽ (p->error != 0)
+    തിരികെ;
 
   /* find the longest OCHAR sequence in strip */
   newlen = 0;
   scan = g->strip + 1;
-  do {
+  ചെയ്യുക {
     s = *scan++;
-    switch (OP(s)) {
-    case OCHAR:        /* sequence member */
-      if (newlen == 0) /* new sequence */
+    തിരഞ്ഞെടുപ്പ് (OP(s)) {
+    അവസ്ഥ OCHAR:        /* sequence member */
+      എങ്കിൽ (newlen == 0) /* new sequence */
         newstart = scan - 1;
       newlen++;
-      break;
-    case OPLUS_: /* things that don't break one */
-    case OLPAREN:
-    case ORPAREN:
-      break;
-    case OQUEST_: /* things that must be skipped */
-    case OCH_:
+      നിർത്തുക;
+    അവസ്ഥ OPLUS_: /* things that don't break one */
+    അവസ്ഥ OLPAREN:
+    അവസ്ഥ ORPAREN:
+      നിർത്തുക;
+    അവസ്ഥ OQUEST_: /* things that must be skipped */
+    അവസ്ഥ OCH_:
       scan--;
-      do {
+      ചെയ്യുക {
         scan += OPND(s);
         s = *scan;
         /* assert() interferes w debug printouts */
-        if (OP(s) != O_QUEST && OP(s) != O_CH && OP(s) != OOR2) {
+        എങ്കിൽ (OP(s) != O_QUEST && OP(s) != O_CH && OP(s) != OOR2) {
           g->iflags |= REGEX_BAD;
-          return;
+          തിരികെ;
         }
-      } while (OP(s) != O_QUEST && OP(s) != O_CH);
+      } ആകുമ്പോൾ (OP(s) != O_QUEST && OP(s) != O_CH);
       LLVM_FALLTHROUGH;
-    default:                  /* things that break a sequence */
-      if (newlen > g->mlen) { /* ends one */
+    സ്ഥിരസ്ഥിതി:                  /* things that break a sequence */
+      എങ്കിൽ (newlen > g->mlen) { /* ends one */
         start = newstart;
         g->mlen = newlen;
       }
       newlen = 0;
-      break;
+      നിർത്തുക;
     }
-  } while (OP(s) != OEND);
+  } ആകുമ്പോൾ (OP(s) != OEND);
 
-  if (g->mlen == 0) /* there isn't one */
-    return;
+  എങ്കിൽ (g->mlen == 0) /* there isn't one */
+    തിരികെ;
 
   /* turn it into a character string */
   g->must = malloc((size_t)g->mlen + 1);
-  if (g->must == NULL) { /* argh; just forget it */
+  എങ്കിൽ (g->must == ശൂന്യ) { /* argh; just forget it */
     g->mlen = 0;
-    return;
+    തിരികെ;
   }
   cp = g->must;
   scan = start;
-  for (i = g->mlen; i > 0; i--) {
-    while (OP(s = *scan++) != OCHAR)
-      continue;
-    assert(cp < g->must + g->mlen);
-    *cp++ = (char)OPND(s);
+  വേണ്ടി (i = g->mlen; i > 0; i--) {
+    ആകുമ്പോൾ (OP(s = *scan++) != OCHAR)
+      തുടരുക;
+    പ്രതിജ്ഞാ(cp < g->must + g->mlen);
+    *cp++ = (അക്ഷരം)OPND(s);
   }
-  assert(cp == g->must + g->mlen);
+  പ്രതിജ്ഞാ(cp == g->must + g->mlen);
   *cp++ = '\0'; /* just on general principles */
 }
 
 /*
  - pluscount - count + nesting
  */
-static sopno /* nesting depth */
-pluscount(struct parse *p, struct re_guts *g) {
+സ്ഥിതം sopno /* nesting depth */
+pluscount(ഘടന parse *p, ഘടന re_guts *g) {
   sop *scan;
   sop s;
   sopno plusnest = 0;
   sopno maxnest = 0;
 
-  if (p->error != 0)
-    return (0); /* there may not be an OEND */
+  എങ്കിൽ (p->error != 0)
+    തിരികെ (0); /* there may not be an OEND */
 
   scan = g->strip + 1;
-  do {
+  ചെയ്യുക {
     s = *scan++;
-    switch (OP(s)) {
-    case OPLUS_:
+    തിരഞ്ഞെടുപ്പ് (OP(s)) {
+    അവസ്ഥ OPLUS_:
       plusnest++;
-      break;
-    case O_PLUS:
-      if (plusnest > maxnest)
+      നിർത്തുക;
+    അവസ്ഥ O_PLUS:
+      എങ്കിൽ (plusnest > maxnest)
         maxnest = plusnest;
       plusnest--;
-      break;
+      നിർത്തുക;
     }
-  } while (OP(s) != OEND);
-  if (plusnest != 0)
+  } ആകുമ്പോൾ (OP(s) != OEND);
+  എങ്കിൽ (plusnest != 0)
     g->iflags |= REGEX_BAD;
-  return (maxnest);
+  തിരികെ (maxnest);
 }

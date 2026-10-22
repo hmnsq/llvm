@@ -6,281 +6,281 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DataExtractor.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/LEB128.h"
-#include "llvm/Support/SwapByteOrder.h"
+#അന്തര്ഭാവ "llvm/Support/DataExtractor.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/Errc.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorHandling.h"
+#അന്തര്ഭാവ "llvm/Support/LEB128.h"
+#അന്തര്ഭാവ "llvm/Support/SwapByteOrder.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-bool DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
-                                Error *E) const {
-  if (isValidOffsetForDataOfSize(Offset, Size))
-    return true;
-  if (E) {
-    if (Offset <= Data.size())
+തർക്കം DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
+                                Error *E) സ്ഥിരം {
+  എങ്കിൽ (isValidOffsetForDataOfSize(Offset, Size))
+    തിരികെ സത്യം;
+  എങ്കിൽ (E) {
+    എങ്കിൽ (Offset <= Data.size())
       *E = createStringError(
           errc::illegal_byte_sequence,
           "unexpected end of data at offset 0x%zx while reading [0x%" PRIx64
           ", 0x%" PRIx64 ")",
           Data.size(), Offset, Offset + Size);
-    else
+    അല്ലെങ്കിൽ
       *E = createStringError(errc::invalid_argument,
                              "offset 0x%" PRIx64
                              " is beyond the end of data at 0x%zx",
                              Offset, Data.size());
   }
-  return false;
+  തിരികെ അസത്യം;
 }
 
-static bool isError(Error *E) { return E && *E; }
+സ്ഥിതം തർക്കം isError(Error *E) { തിരികെ E && *E; }
 
 template <typename T>
-T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) const {
+T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) സ്ഥിരം {
   ErrorAsOutParameter ErrAsOut(Err);
   T val = 0;
-  if (isError(Err))
-    return val;
+  എങ്കിൽ (isError(Err))
+    തിരികെ val;
 
   uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, sizeof(T), Err))
-    return val;
-  std::memcpy(&val, &Data.data()[offset], sizeof(val));
-  if (sys::IsLittleEndianHost != IsLittleEndian)
+  എങ്കിൽ (!prepareRead(offset, വലുപ്പം(T), Err))
+    തിരികെ val;
+  std::memcpy(&val, &Data.data()[offset], വലുപ്പം(val));
+  എങ്കിൽ (sys::IsLittleEndianHost != IsLittleEndian)
     sys::swapByteOrder(val);
 
   // Advance the offset
-  *offset_ptr += sizeof(val);
-  return val;
+  *offset_ptr += വലുപ്പം(val);
+  തിരികെ val;
 }
 
 template <typename T>
-T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
-                        Error *Err) const {
+T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t എണ്ണം,
+                        Error *Err) സ്ഥിരം {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return nullptr;
+  എങ്കിൽ (isError(Err))
+    തിരികെ nullptr;
 
   uint64_t offset = *offset_ptr;
 
-  if (!prepareRead(offset, sizeof(*dst) * count, Err))
-    return nullptr;
-  for (T *value_ptr = dst, *end = dst + count; value_ptr != end;
-       ++value_ptr, offset += sizeof(*dst))
-    *value_ptr = getU<T>(offset_ptr, Err);
+  എങ്കിൽ (!prepareRead(offset, വലുപ്പം(*dst) * എണ്ണം, Err))
+    തിരികെ nullptr;
+  വേണ്ടി (T *മൂല്യം_ptr = dst, *end = dst + എണ്ണം; മൂല്യം_ptr != end;
+       ++മൂല്യം_ptr, offset += വലുപ്പം(*dst))
+    *മൂല്യം_ptr = getU<T>(offset_ptr, Err);
   // Advance the offset
   *offset_ptr = offset;
   // Return a non-NULL pointer to the converted data as an indicator of
   // success
-  return dst;
+  തിരികെ dst;
 }
 
-uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint8_t>(offset_ptr, Err);
+uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) സ്ഥിരം {
+  തിരികെ getU<uint8_t>(offset_ptr, Err);
 }
 
 uint8_t *DataExtractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
-                              uint32_t count) const {
-  return getUs<uint8_t>(offset_ptr, dst, count, nullptr);
+                              uint32_t എണ്ണം) സ്ഥിരം {
+  തിരികെ getUs<uint8_t>(offset_ptr, dst, എണ്ണം, nullptr);
 }
 
-uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t Count) const {
-  return getUs<uint8_t>(&C.Offset, Dst, Count, &C.Err);
+uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t എണ്ണം_2) സ്ഥിരം {
+  തിരികെ getUs<uint8_t>(&C.Offset, Dst, എണ്ണം_2, &C.Err);
 }
 
-uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint16_t>(offset_ptr, Err);
+uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) സ്ഥിരം {
+  തിരികെ getU<uint16_t>(offset_ptr, Err);
 }
 
 uint16_t *DataExtractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
-                                uint32_t count) const {
-  return getUs<uint16_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t എണ്ണം) സ്ഥിരം {
+  തിരികെ getUs<uint16_t>(offset_ptr, dst, എണ്ണം, nullptr);
 }
 
-uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) const {
+uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) സ്ഥിരം {
   uint24_t ExtractedVal = getU<uint24_t>(OffsetPtr, Err);
   // The 3 bytes are in the correct byte order for the host.
-  return ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
+  തിരികെ ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
 }
 
-uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint32_t>(offset_ptr, Err);
+uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) സ്ഥിരം {
+  തിരികെ getU<uint32_t>(offset_ptr, Err);
 }
 
 uint32_t *DataExtractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
-                                uint32_t count) const {
-  return getUs<uint32_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t എണ്ണം) സ്ഥിരം {
+  തിരികെ getUs<uint32_t>(offset_ptr, dst, എണ്ണം, nullptr);
 }
 
-uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint64_t>(offset_ptr, Err);
+uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) സ്ഥിരം {
+  തിരികെ getU<uint64_t>(offset_ptr, Err);
 }
 
 uint64_t *DataExtractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
-                                uint32_t count) const {
-  return getUs<uint64_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t എണ്ണം) സ്ഥിരം {
+  തിരികെ getUs<uint64_t>(offset_ptr, dst, എണ്ണം, nullptr);
 }
 
 uint64_t DataExtractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_size,
-                                    llvm::Error *Err) const {
-  switch (byte_size) {
-  case 1:
-    return getU8(offset_ptr, Err);
-  case 2:
-    return getU16(offset_ptr, Err);
-  case 4:
-    return getU32(offset_ptr, Err);
-  case 8:
-    return getU64(offset_ptr, Err);
+                                    llvm::Error *Err) സ്ഥിരം {
+  തിരഞ്ഞെടുപ്പ് (byte_size) {
+  അവസ്ഥ 1:
+    തിരികെ getU8(offset_ptr, Err);
+  അവസ്ഥ 2:
+    തിരികെ getU16(offset_ptr, Err);
+  അവസ്ഥ 4:
+    തിരികെ getU32(offset_ptr, Err);
+  അവസ്ഥ 8:
+    തിരികെ getU64(offset_ptr, Err);
   }
 
   // For any other byte size, read the bytes and swap/shift if necessary.
   ErrorAsOutParameter ErrAsOut(Err);
   uint64_t val = 0;
-  if (isError(Err))
-    return val;
+  എങ്കിൽ (isError(Err))
+    തിരികെ val;
   uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, byte_size, Err))
-    return val;
+  എങ്കിൽ (!prepareRead(offset, byte_size, Err))
+    തിരികെ val;
   // Copy into the least significant bytes of val regardless of host
   // endianness.
-  std::memcpy(reinterpret_cast<char *>(&val) +
+  std::memcpy(reinterpret_cast<അക്ഷരം *>(&val) +
                   (sys::IsLittleEndianHost ? 0 : 8 - byte_size),
               &Data.data()[offset], byte_size);
   // Swap the least significant bytes of val if endianness doesn't match.
-  if (sys::IsLittleEndianHost != IsLittleEndian)
+  എങ്കിൽ (sys::IsLittleEndianHost != IsLittleEndian)
     val = sys::getSwappedBytes(val) >> (8 * (8 - byte_size));
 
   *offset_ptr += byte_size;
-  return val;
+  തിരികെ val;
 }
 
 int64_t
-DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) const {
-  switch (byte_size) {
-  case 1:
-    return getS8(offset_ptr);
-  case 2:
-    return getS16(offset_ptr);
-  case 4:
-    return getS32(offset_ptr);
-  case 8:
-    return getS64(offset_ptr);
+DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) സ്ഥിരം {
+  തിരഞ്ഞെടുപ്പ് (byte_size) {
+  അവസ്ഥ 1:
+    തിരികെ getS8(offset_ptr);
+  അവസ്ഥ 2:
+    തിരികെ getS16(offset_ptr);
+  അവസ്ഥ 4:
+    തിരികെ getS32(offset_ptr);
+  അവസ്ഥ 8:
+    തിരികെ getS64(offset_ptr);
   }
   llvm_unreachable("getSigned unhandled case!");
 }
 
-StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) const {
+StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) സ്ഥിരം {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+  എങ്കിൽ (isError(Err))
+    തിരികെ StringRef();
 
   uint64_t Start = *OffsetPtr;
   StringRef::size_type Pos = Data.find('\0', Start);
-  if (Pos != StringRef::npos) {
+  എങ്കിൽ (Pos != StringRef::npos) {
     *OffsetPtr = Pos + 1;
-    return StringRef(Data.data() + Start, Pos - Start);
+    തിരികെ StringRef(Data.data() + Start, Pos - Start);
   }
-  if (Err)
+  എങ്കിൽ (Err)
     *Err = createStringError(errc::illegal_byte_sequence,
                              "no null terminated string at offset 0x%" PRIx64,
                              Start);
-  return StringRef();
+  തിരികെ StringRef();
 }
 
 StringRef DataExtractor::getFixedLengthString(uint64_t *OffsetPtr,
                                               uint64_t Length,
-                                              StringRef TrimChars) const {
+                                              StringRef TrimChars) സ്ഥിരം {
   StringRef Bytes(getBytes(OffsetPtr, Length));
-  return Bytes.trim(TrimChars);
+  തിരികെ Bytes.trim(TrimChars);
 }
 
 StringRef DataExtractor::getBytes(uint64_t *OffsetPtr, uint64_t Length,
-                                  Error *Err) const {
+                                  Error *Err) സ്ഥിരം {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+  എങ്കിൽ (isError(Err))
+    തിരികെ StringRef();
 
-  if (!prepareRead(*OffsetPtr, Length, Err))
-    return StringRef();
+  എങ്കിൽ (!prepareRead(*OffsetPtr, Length, Err))
+    തിരികെ StringRef();
 
   StringRef Result = Data.substr(*OffsetPtr, Length);
   *OffsetPtr += Length;
-  return Result;
+  തിരികെ Result;
 }
 
 template <typename T>
-static T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
-                   T (&Decoder)(const uint8_t *p, unsigned *n,
-                                const uint8_t *end, const char **error)) {
+സ്ഥിതം T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
+                   T (&Decoder)(സ്ഥിരം uint8_t *p, unsigned *n,
+                                സ്ഥിരം uint8_t *end, സ്ഥിരം അക്ഷരം **error)) {
   ArrayRef<uint8_t> Bytes = arrayRefFromStringRef(Data);
-  assert(*OffsetPtr <= Bytes.size());
+  പ്രതിജ്ഞാ(*OffsetPtr <= Bytes.size());
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return T();
+  എങ്കിൽ (isError(Err))
+    തിരികെ T();
 
-  const char *error = nullptr;
+  സ്ഥിരം അക്ഷരം *error = nullptr;
   unsigned bytes_read;
   T result =
       Decoder(Bytes.data() + *OffsetPtr, &bytes_read, Bytes.end(), &error);
-  if (error) {
-    if (Err)
+  എങ്കിൽ (error) {
+    എങ്കിൽ (Err)
       *Err = createStringError(errc::illegal_byte_sequence,
                                "unable to decode LEB128 at offset 0x%8.8" PRIx64
                                ": %s",
                                *OffsetPtr, error);
-    return T();
+    തിരികെ T();
   }
   *OffsetPtr += bytes_read;
-  return result;
+  തിരികെ result;
 }
 
-uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeULEB128);
+uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) സ്ഥിരം {
+  തിരികെ getLEB128(Data, offset_ptr, Err, decodeULEB128);
 }
 
-int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeSLEB128);
+int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) സ്ഥിരം {
+  തിരികെ getLEB128(Data, offset_ptr, Err, decodeSLEB128);
 }
 
-APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
+APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) സ്ഥിരം {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return APSInt();
+  എങ്കിൽ (isError(Err))
+    തിരികെ APSInt();
 
   uint64_t Offset = *OffsetPtr;
-  APInt Value;
+  APInt മൂല്യം;
   unsigned Shift = 0;
   uint8_t Byte;
-  do {
-    if (!prepareRead(Offset, 1, Err))
-      return APSInt();
+  ചെയ്യുക {
+    എങ്കിൽ (!prepareRead(Offset, 1, Err))
+      തിരികെ APSInt();
     Byte = Data[Offset++];
     APInt Slice(7, Byte & 0x7f);
-    if (Shift == 0)
-      Value = Slice;
-    else {
-      Value = Value.zext(Shift + 7);
-      Value.insertBits(Slice, Shift);
+    എങ്കിൽ (Shift == 0)
+      മൂല്യം = Slice;
+    അല്ലെങ്കിൽ {
+      മൂല്യം = മൂല്യം.zext(Shift + 7);
+      മൂല്യം.തിരുകുക_Bits(Slice, Shift);
     }
     Shift += 7;
-  } while (Byte & 0x80);
+  } ആകുമ്പോൾ (Byte & 0x80);
 
   // Sign extend Value to at least 64 bits to match getSLEB128.
-  if (Shift < 64)
-    Value = Value.sext(64);
+  എങ്കിൽ (Shift < 64)
+    മൂല്യം = മൂല്യം.sext(64);
 
   *OffsetPtr = Offset;
-  return APSInt(std::move(Value), /*isUnsigned=*/false);
+  തിരികെ APSInt(std::move(മൂല്യം), /*isUnsigned=*/അസത്യം);
 }
 
-void DataExtractor::skip(Cursor &C, uint64_t Length) const {
+ശൂന്യം DataExtractor::skip(Cursor &C, uint64_t Length) സ്ഥിരം {
   ErrorAsOutParameter ErrAsOut(C.Err);
-  if (isError(&C.Err))
-    return;
+  എങ്കിൽ (isError(&C.Err))
+    തിരികെ;
 
-  if (prepareRead(C.Offset, Length, &C.Err))
+  എങ്കിൽ (prepareRead(C.Offset, Length, &C.Err))
     C.Offset += Length;
 }

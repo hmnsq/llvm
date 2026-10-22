@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMBuildAttributes.h"
+#അന്തര്ഭാവ "llvm/Support/ARMBuildAttributes.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-static const TagNameItem tagData[] = {
+സ്ഥിതം സ്ഥിരം TagNameItem tagData[] = {
     {ARMBuildAttrs::File, "Tag_File"},
     {ARMBuildAttrs::Section, "Tag_Section"},
-    {ARMBuildAttrs::Symbol, "Tag_Symbol"},
+    {ARMBuildAttrs::ചിഹ്നം, "Tag_Symbol"},
     {ARMBuildAttrs::CPU_raw_name, "Tag_CPU_raw_name"},
     {ARMBuildAttrs::CPU_name, "Tag_CPU_name"},
     {ARMBuildAttrs::CPU_arch, "Tag_CPU_arch"},
@@ -34,7 +34,7 @@ static const TagNameItem tagData[] = {
     {ARMBuildAttrs::ABI_FP_denormal, "Tag_ABI_FP_denormal"},
     {ARMBuildAttrs::ABI_FP_exceptions, "Tag_ABI_FP_exceptions"},
     {ARMBuildAttrs::ABI_FP_user_exceptions, "Tag_ABI_FP_user_exceptions"},
-    {ARMBuildAttrs::ABI_FP_number_model, "Tag_ABI_FP_number_model"},
+    {ARMBuildAttrs::ABI_FP_സംഖ്യ_model, "Tag_ABI_FP_number_model"},
     {ARMBuildAttrs::ABI_align_needed, "Tag_ABI_align_needed"},
     {ARMBuildAttrs::ABI_align_preserved, "Tag_ABI_align_preserved"},
     {ARMBuildAttrs::ABI_enum_size, "Tag_ABI_enum_size"},
@@ -68,6 +68,6 @@ static const TagNameItem tagData[] = {
 };
 
 constexpr TagNameMap ARMAttributeTags{tagData};
-const TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
-  return ARMAttributeTags;
+സ്ഥിരം TagNameMap &llvm::ARMBuildAttrs::getARMAttributeTags() {
+  തിരികെ ARMAttributeTags;
 }

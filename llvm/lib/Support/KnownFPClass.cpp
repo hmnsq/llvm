@@ -11,101 +11,101 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/KnownFPClass.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/KnownBits.h"
+#അന്തര്ഭാവ "llvm/Support/KnownFPClass.h"
+#അന്തര്ഭാവ "llvm/ADT/APFloat.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorHandling.h"
+#അന്തര്ഭാവ "llvm/Support/KnownBits.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-KnownFPClass::KnownFPClass(const APFloat &C)
-    : KnownFPClassesValue(C.classify()) {
+KnownFPClass::KnownFPClass(സ്ഥിരം APFloat &C)
+    : Known_FPClasses_മൂല്യം(C.classify()) {
   setSignBit(C.isNegative());
 }
 
-KnownFPClass KnownFPClass::applyInputDenormalMode(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::apply_നിവേശം_Denormal_Mode(സ്ഥിരം KnownFPClass &KnownSrc,
                                                   DenormalMode Mode) {
   KnownFPClass Known = KnownSrc;
-  switch (Mode.Input) {
-  case DenormalMode::IEEE:
-    return Known;
-  case DenormalMode::PreserveSign:
-    if (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
+  തിരഞ്ഞെടുപ്പ് (Mode.നിവേശം) {
+  അവസ്ഥ DenormalMode::IEEE:
+    തിരികെ Known;
+  അവസ്ഥ DenormalMode::PreserveSign:
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
-  case DenormalMode::PositiveZero:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    തിരികെ Known;
+  അവസ്ഥ DenormalMode::PositiveZero:
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    return Known;
-  default:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    തിരികെ Known;
+  സ്ഥിരസ്ഥിതി:
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
+    തിരികെ Known;
   }
 
   llvm_unreachable("covered switch over denormal mode");
 }
 
-KnownFPClass KnownFPClass::applyOutputDenormalMode(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::applyOutputDenormalMode(സ്ഥിരം KnownFPClass &KnownSrc,
                                                    DenormalMode Mode) {
   KnownFPClass Known = KnownSrc;
-  switch (Mode.Output) {
-  case DenormalMode::IEEE:
-    return Known;
-  case DenormalMode::PreserveSign:
-    if (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
+  തിരഞ്ഞെടുപ്പ് (Mode.Output) {
+  അവസ്ഥ DenormalMode::IEEE:
+    തിരികെ Known;
+  അവസ്ഥ DenormalMode::PreserveSign:
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcPosSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
-  case DenormalMode::PositiveZero:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    തിരികെ Known;
+  അവസ്ഥ DenormalMode::PositiveZero:
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    return Known;
-  default:
-    if (KnownSrc.getKnownFPClasses() & fcSubnormal) {
+    തിരികെ Known;
+  സ്ഥിരസ്ഥിതി:
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcSubnormal) {
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosZero);
-      if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+      എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
         Known.setSignBit(std::nullopt);
     }
-    if (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
+    എങ്കിൽ (KnownSrc.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegZero);
-    return Known;
+    തിരികെ Known;
   }
 
   llvm_unreachable("covered switch over denormal mode");
 }
 
-bool KnownFPClass::isKnownNeverLogicalZero(DenormalMode Mode) const {
-  return applyInputDenormalMode(*this, Mode).isKnownNeverZero();
+തർക്കം KnownFPClass::isKnownNeverLogicalZero(DenormalMode Mode) സ്ഥിരം {
+  തിരികെ apply_നിവേശം_Denormal_Mode(*ഇത്, Mode).isKnownNeverZero();
 }
 
-bool KnownFPClass::isKnownNeverLogicalNegZero(DenormalMode Mode) const {
-  return applyInputDenormalMode(*this, Mode).isKnownNeverNegZero();
+തർക്കം KnownFPClass::isKnownNeverLogicalNegZero(DenormalMode Mode) സ്ഥിരം {
+  തിരികെ apply_നിവേശം_Denormal_Mode(*ഇത്, Mode).isKnownNeverNegZero();
 }
 
-bool KnownFPClass::isKnownNeverLogicalPosZero(DenormalMode Mode) const {
-  return applyInputDenormalMode(*this, Mode).isKnownNeverPosZero();
+തർക്കം KnownFPClass::isKnownNeverLogicalPosZero(DenormalMode Mode) സ്ഥിരം {
+  തിരികെ apply_നിവേശം_Denormal_Mode(*ഇത്, Mode).isKnownNeverPosZero();
 }
 
-KnownFPClass KnownFPClass::minMaxLike(const KnownFPClass &KnownLHS_,
-                                      const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::minMaxLike(സ്ഥിരം KnownFPClass &KnownLHS_,
+                                      സ്ഥിരം KnownFPClass &KnownRHS_,
                                       MinMaxKind Kind, DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_നിവേശം_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_നിവേശം_Denormal_Mode(KnownRHS_, Mode);
 
   KnownFPClass Known;
 
@@ -113,61 +113,61 @@ KnownFPClass KnownFPClass::minMaxLike(const KnownFPClass &KnownLHS_,
 
   // The *num functions return the non-NaN operand if only one operand is NaN.
   // FIXME: minnum/maxnum may return a NaN if either operand is a signaling NaN.
-  if ((KnownLHS.isKnownNeverNaN() || KnownRHS.isKnownNeverNaN()) &&
+  എങ്കിൽ ((KnownLHS.isKnownNeverNaN() || KnownRHS.isKnownNeverNaN()) &&
       (Kind == MinMaxKind::minnum || Kind == MinMaxKind::maxnum ||
        Kind == MinMaxKind::minimumnum || Kind == MinMaxKind::maximumnum))
     Known.knownNot(fcNan);
 
-  switch (Kind) {
-  case MinMaxKind::maxnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  തിരഞ്ഞെടുപ്പ് (Kind) {
+  അവസ്ഥ MinMaxKind::maxnum: {
+    എങ്കിൽ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownLHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/false));
-    if (KnownRHS.isKnownNeverNaN())
+                                         /*OrderedZeroSign=*/അസത്യം));
+    എങ്കിൽ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownRHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/false));
-    break;
+                                         /*OrderedZeroSign=*/അസത്യം));
+    നിർത്തുക;
   }
-  case MinMaxKind::minnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  അവസ്ഥ MinMaxKind::minnum: {
+    എങ്കിൽ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownLHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/false));
-    if (KnownRHS.isKnownNeverNaN())
+                                            /*OrderedZeroSign=*/അസത്യം));
+    എങ്കിൽ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownRHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/false));
-    break;
+                                            /*OrderedZeroSign=*/അസത്യം));
+    നിർത്തുക;
   }
-  case MinMaxKind::maximumnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  അവസ്ഥ MinMaxKind::maximumnum: {
+    എങ്കിൽ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownLHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/true));
-    if (KnownRHS.isKnownNeverNaN())
+                                         /*OrderedZeroSign=*/സത്യം));
+    എങ്കിൽ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyLess(KnownRHS.getKnownFPClasses(),
-                                         /*OrderedZeroSign=*/true));
-    break;
+                                         /*OrderedZeroSign=*/സത്യം));
+    നിർത്തുക;
   }
-  case MinMaxKind::minimumnum: {
-    if (KnownLHS.isKnownNeverNaN())
+  അവസ്ഥ MinMaxKind::minimumnum: {
+    എങ്കിൽ (KnownLHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownLHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/true));
-    if (KnownRHS.isKnownNeverNaN())
+                                            /*OrderedZeroSign=*/സത്യം));
+    എങ്കിൽ (KnownRHS.isKnownNeverNaN())
       Known.knownNot(orderedStrictlyGreater(KnownRHS.getKnownFPClasses(),
-                                            /*OrderedZeroSign=*/true));
-    break;
+                                            /*OrderedZeroSign=*/സത്യം));
+    നിർത്തുക;
   }
-  case MinMaxKind::maximum: {
+  അവസ്ഥ MinMaxKind::maximum: {
     Known.knownNot(orderedStrictlyLess(KnownLHS.getKnownFPClasses(),
-                                       /*OrderedZeroSign=*/true) |
+                                       /*OrderedZeroSign=*/സത്യം) |
                    orderedStrictlyLess(KnownRHS.getKnownFPClasses(),
-                                       /*OrderedZeroSign=*/true));
-    break;
+                                       /*OrderedZeroSign=*/സത്യം));
+    നിർത്തുക;
   }
-  case MinMaxKind::minimum: {
+  അവസ്ഥ MinMaxKind::minimum: {
     Known.knownNot(orderedStrictlyGreater(KnownLHS.getKnownFPClasses(),
-                                          /*OrderedZeroSign=*/true) |
+                                          /*OrderedZeroSign=*/സത്യം) |
                    orderedStrictlyGreater(KnownRHS.getKnownFPClasses(),
-                                          /*OrderedZeroSign=*/true));
-    break;
+                                          /*OrderedZeroSign=*/സത്യം));
+    നിർത്തുക;
   }
   }
 
@@ -176,10 +176,10 @@ KnownFPClass KnownFPClass::minMaxLike(const KnownFPClass &KnownLHS_,
       KnownLHS.getKnownFPClasses() | KnownRHS.getKnownFPClasses() | fcNan;
   Known.knownNot(~PossibleClasses);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::canonicalize(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::canonicalize(സ്ഥിരം KnownFPClass &KnownSrc,
                                         DenormalMode DenormMode) {
   KnownFPClass Known;
 
@@ -189,134 +189,134 @@ KnownFPClass KnownFPClass::canonicalize(const KnownFPClass &KnownSrc,
 
   // Stronger version of propagateNaN
   // Canonicalize is guaranteed to quiet signaling nans.
-  if (KnownSrc.isKnownNeverNaN())
+  എങ്കിൽ (KnownSrc.isKnownNeverNaN())
     Known.knownNot(fcNan);
-  else
+  അല്ലെങ്കിൽ
     Known.knownNot(fcSNan);
 
   // FIXME: Missing check of IEEE like types.
 
   // If the parent function flushes denormals, the canonical output cannot be a
   // denormal.
-  if (DenormMode == DenormalMode::getIEEE()) {
-    if (KnownSrc.isKnownNever(fcPosZero))
+  എങ്കിൽ (DenormMode == DenormalMode::getIEEE()) {
+    എങ്കിൽ (KnownSrc.isKnownNever(fcPosZero))
       Known.knownNot(fcPosZero);
-    if (KnownSrc.isKnownNever(fcNegZero))
+    എങ്കിൽ (KnownSrc.isKnownNever(fcNegZero))
       Known.knownNot(fcNegZero);
-    return Known;
+    തിരികെ Known;
   }
 
-  if (DenormMode.inputsAreZero() || DenormMode.outputsAreZero())
+  എങ്കിൽ (DenormMode.inputsAreZero() || DenormMode.outputsAreZero())
     Known.knownNot(fcSubnormal);
 
-  if (DenormMode == DenormalMode::getPreserveSign()) {
-    if (KnownSrc.isKnownNever(fcPosZero | fcPosSubnormal))
+  എങ്കിൽ (DenormMode == DenormalMode::getPreserveSign()) {
+    എങ്കിൽ (KnownSrc.isKnownNever(fcPosZero | fcPosSubnormal))
       Known.knownNot(fcPosZero);
-    if (KnownSrc.isKnownNever(fcNegZero | fcNegSubnormal))
+    എങ്കിൽ (KnownSrc.isKnownNever(fcNegZero | fcNegSubnormal))
       Known.knownNot(fcNegZero);
-    return Known;
+    തിരികെ Known;
   }
 
-  if (DenormMode.Input == DenormalMode::PositiveZero ||
+  എങ്കിൽ (DenormMode.നിവേശം == DenormalMode::PositiveZero ||
       (DenormMode.Output == DenormalMode::PositiveZero &&
-       DenormMode.Input == DenormalMode::IEEE)) {
+       DenormMode.നിവേശം == DenormalMode::IEEE)) {
     // -0.0 is not a subnormal and should not be flushed.
-    if (KnownSrc.isKnownNever(fcNegZero))
+    എങ്കിൽ (KnownSrc.isKnownNever(fcNegZero))
       Known.knownNot(fcNegZero);
 
-    if (KnownSrc.isKnownNever(fcPosZero | fcSubnormal))
+    എങ്കിൽ (KnownSrc.isKnownNever(fcPosZero | fcSubnormal))
       Known.knownNot(fcPosZero);
   }
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::bitcast(const fltSemantics &FltSemantics,
-                                   const KnownBits &Bits) {
-  assert(FltSemantics.sizeInBits == Bits.getBitWidth() &&
+KnownFPClass KnownFPClass::bitcast(സ്ഥിരം fltSemantics &FltSemantics,
+                                   സ്ഥിരം KnownBits &Bits) {
+  പ്രതിജ്ഞാ(FltSemantics.sizeInBits == Bits.getBitWidth() &&
          "Bitcast operand has incorrect bit width");
   KnownFPClass Known;
 
   // Conflicting known bits do not describe a concrete value. Return unknown.
-  if (Bits.hasConflict())
-    return Known;
+  എങ്കിൽ (Bits.hasConflict())
+    തിരികെ Known;
 
   // Return unknown for types we have not validated.
-  auto IsSupported = [](const fltSemantics &Semantics) {
-    switch (APFloat::SemanticsToEnum(Semantics)) {
-    case APFloatBase::S_IEEEhalf:
-    case APFloatBase::S_BFloat:
-    case APFloatBase::S_IEEEsingle:
-    case APFloatBase::S_IEEEdouble:
-    case APFloatBase::S_IEEEquad:
-    case APFloatBase::S_x87DoubleExtended:
-      return true;
-    default:
-      return false;
+  auto IsSupported = [](സ്ഥിരം fltSemantics &Semantics) {
+    തിരഞ്ഞെടുപ്പ് (APFloat::SemanticsToEnum(Semantics)) {
+    അവസ്ഥ APFloatBase::S_IEEEhalf:
+    അവസ്ഥ APFloatBase::S_BFloat:
+    അവസ്ഥ APFloatBase::S_IEEEsingle:
+    അവസ്ഥ APFloatBase::S_IEEEdouble:
+    അവസ്ഥ APFloatBase::S_IEEEquad:
+    അവസ്ഥ APFloatBase::S_x87DoubleExtended:
+      തിരികെ സത്യം;
+    സ്ഥിരസ്ഥിതി:
+      തിരികെ അസത്യം;
     }
   };
-  if (!IsSupported(FltSemantics))
-    return Known;
+  എങ്കിൽ (!IsSupported(FltSemantics))
+    തിരികെ Known;
 
   // Transfer information from the sign bit.
-  if (Bits.isNonNegative())
+  എങ്കിൽ (Bits.isNonNegative())
     Known.signBitMustBeZero();
-  else if (Bits.isNegative())
+  അല്ലെങ്കിൽ എങ്കിൽ (Bits.isNegative())
     Known.signBitMustBeOne();
 
-  switch (APFloatBase::SemanticsToEnum(FltSemantics)) {
-  case APFloatBase::S_IEEEhalf:
-  case APFloatBase::S_BFloat:
-  case APFloatBase::S_IEEEsingle:
-  case APFloatBase::S_IEEEdouble:
-  case APFloatBase::S_IEEEquad: {
-    const unsigned MantissaBits = FltSemantics.precision - 1;
-    const APInt ExponentMask = APInt::getBitsSet(
+  തിരഞ്ഞെടുപ്പ് (APFloatBase::SemanticsToEnum(FltSemantics)) {
+  അവസ്ഥ APFloatBase::S_IEEEhalf:
+  അവസ്ഥ APFloatBase::S_BFloat:
+  അവസ്ഥ APFloatBase::S_IEEEsingle:
+  അവസ്ഥ APFloatBase::S_IEEEdouble:
+  അവസ്ഥ APFloatBase::S_IEEEquad: {
+    സ്ഥിരം unsigned MantissaBits = FltSemantics.precision - 1;
+    സ്ഥിരം APInt ExponentMask = APInt::getBitsSet(
         FltSemantics.sizeInBits, MantissaBits, FltSemantics.sizeInBits - 1);
-    const APInt MantissaMask =
-        APInt::getLowBitsSet(FltSemantics.sizeInBits, MantissaBits);
+    സ്ഥിരം APInt MantissaMask =
+        APInt::get_താഴെയുള്ള_Bits_Set(FltSemantics.sizeInBits, MantissaBits);
 
-    const bool ExponentKnownAllZeros =
+    സ്ഥിരം തർക്കം ExponentKnownAllZeros =
         (Bits.Zero & ExponentMask) == ExponentMask;
-    const bool ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
-    const bool ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
-    const bool ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
+    സ്ഥിരം തർക്കം ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
+    സ്ഥിരം തർക്കം ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
+    സ്ഥിരം തർക്കം ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
 
-    const bool MantissaKnownAllZeros =
+    സ്ഥിരം തർക്കം MantissaKnownAllZeros =
         (Bits.Zero & MantissaMask) == MantissaMask;
-    const bool MantissaKnownNotAllZeros = !(Bits.One & MantissaMask).isZero();
+    സ്ഥിരം തർക്കം MantissaKnownNotAllZeros = !(Bits.One & MantissaMask).isZero();
 
     // Zero and subnormal require an exponent with all zero bits.
-    if (ExponentKnownNotAllZeros)
+    എങ്കിൽ (ExponentKnownNotAllZeros)
       Known.knownNot(fcZero | fcSubnormal);
 
     // Infinity and NaN require an exponent with all one bits.
-    if (ExponentKnownNotAllOnes)
+    എങ്കിൽ (ExponentKnownNotAllOnes)
       Known.knownNot(fcInf | fcNan);
 
     // Normal values have an exponent that is not all zeros or all ones.
-    if (ExponentKnownAllZeros || ExponentKnownAllOnes)
+    എങ്കിൽ (ExponentKnownAllZeros || ExponentKnownAllOnes)
       Known.knownNot(fcNormal);
 
     // Zero and infinity require a mantissa with all zero bits.
-    if (MantissaKnownNotAllZeros)
+    എങ്കിൽ (MantissaKnownNotAllZeros)
       Known.knownNot(fcZero | fcInf);
 
     // Subnormal and NaN require a non-zero mantissa.
-    if (MantissaKnownAllZeros)
+    എങ്കിൽ (MantissaKnownAllZeros)
       Known.knownNot(fcSubnormal | fcNan);
 
-    const bool QuietBitKnownSet = Bits.One[MantissaBits - 1];
-    const bool QuietBitKnownClear = Bits.Zero[MantissaBits - 1];
+    സ്ഥിരം തർക്കം QuietBitKnownSet = Bits.One[MantissaBits - 1];
+    സ്ഥിരം തർക്കം QuietBitKnownClear = Bits.Zero[MantissaBits - 1];
 
-    if (QuietBitKnownSet)
+    എങ്കിൽ (QuietBitKnownSet)
       Known.knownNot(fcSNan);
-    else if (QuietBitKnownClear)
+    അല്ലെങ്കിൽ എങ്കിൽ (QuietBitKnownClear)
       Known.knownNot(fcQNan);
 
-    break;
+    നിർത്തുക;
   }
-  case APFloatBase::S_x87DoubleExtended: {
+  അവസ്ഥ APFloatBase::S_x87DoubleExtended: {
     // Layout of the x87 floating point type:
     // [0:62] fraction
     // [63] explicit integer bit
@@ -327,278 +327,278 @@ KnownFPClass KnownFPClass::bitcast(const fltSemantics &FltSemantics,
     constexpr unsigned BitWidth = 80;
     constexpr unsigned FractionBits = 63;
     constexpr unsigned IntegerBitIndex = FractionBits;
-    const APInt FractionMask = APInt::getLowBitsSet(BitWidth, FractionBits);
-    const APInt ExponentMask =
+    സ്ഥിരം APInt FractionMask = APInt::get_താഴെയുള്ള_Bits_Set(BitWidth, FractionBits);
+    സ്ഥിരം APInt ExponentMask =
         APInt::getBitsSet(BitWidth, FractionBits + 1, BitWidth - 1);
 
-    const bool ExponentKnownAllZeros =
+    സ്ഥിരം തർക്കം ExponentKnownAllZeros =
         (Bits.Zero & ExponentMask) == ExponentMask;
-    const bool ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
-    const bool ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
-    const bool ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
-    const bool FractionKnownAllZeros =
+    സ്ഥിരം തർക്കം ExponentKnownAllOnes = (Bits.One & ExponentMask) == ExponentMask;
+    സ്ഥിരം തർക്കം ExponentKnownNotAllZeros = !(Bits.One & ExponentMask).isZero();
+    സ്ഥിരം തർക്കം ExponentKnownNotAllOnes = !(Bits.Zero & ExponentMask).isZero();
+    സ്ഥിരം തർക്കം FractionKnownAllZeros =
         (Bits.Zero & FractionMask) == FractionMask;
-    const bool FractionKnownNotAllZeros = !(Bits.One & FractionMask).isZero();
-    const bool IntegerBitKnownSet = Bits.One[IntegerBitIndex];
-    const bool IntegerBitKnownClear = Bits.Zero[IntegerBitIndex];
+    സ്ഥിരം തർക്കം FractionKnownNotAllZeros = !(Bits.One & FractionMask).isZero();
+    സ്ഥിരം തർക്കം IntegerBitKnownSet = Bits.One[IntegerBitIndex];
+    സ്ഥിരം തർക്കം IntegerBitKnownClear = Bits.Zero[IntegerBitIndex];
 
     // zero and subnormal require an exponent with all zero bits and a cleared
     // integer bit.
-    if (ExponentKnownNotAllZeros || IntegerBitKnownSet)
+    എങ്കിൽ (ExponentKnownNotAllZeros || IntegerBitKnownSet)
       Known.knownNot(fcZero | fcSubnormal);
 
     // Zero requires a zero fraction.
-    if (FractionKnownNotAllZeros)
+    എങ്കിൽ (FractionKnownNotAllZeros)
       Known.knownNot(fcZero);
 
     // Infinity requires an exponent with all one bits, a set integer bit, and
     // a zero fraction.
-    if (ExponentKnownNotAllOnes || IntegerBitKnownClear ||
+    എങ്കിൽ (ExponentKnownNotAllOnes || IntegerBitKnownClear ||
         FractionKnownNotAllZeros)
       Known.knownNot(fcInf);
 
     // A normal x87 value has its integer bit set. A zero exponent with that
     // bit set is the x87 pseudodenormal encoding, which APFloat treats as
     // normal.
-    if (IntegerBitKnownClear || ExponentKnownAllOnes)
+    എങ്കിൽ (IntegerBitKnownClear || ExponentKnownAllOnes)
       Known.knownNot(fcNormal);
 
     // A subnormal has a nonzero fraction; NaNs are possible with a zero
     // fraction through pseudoinfinity and unnormal encodings.
-    if (FractionKnownAllZeros)
+    എങ്കിൽ (FractionKnownAllZeros)
       Known.knownNot(fcSubnormal);
 
     // We can rule out NaN if the value has all exponent bits set to zero, or
     // if the value is a canonical normal or infinity.
-    if (ExponentKnownAllZeros ||
+    എങ്കിൽ (ExponentKnownAllZeros ||
         (IntegerBitKnownSet &&
          (ExponentKnownNotAllOnes || FractionKnownAllZeros)))
       Known.knownNot(fcNan);
 
-    const bool QuietBitKnownSet = Bits.One[FractionBits - 1];
-    const bool QuietBitKnownClear = Bits.Zero[FractionBits - 1];
+    സ്ഥിരം തർക്കം QuietBitKnownSet = Bits.One[FractionBits - 1];
+    സ്ഥിരം തർക്കം QuietBitKnownClear = Bits.Zero[FractionBits - 1];
 
-    if (QuietBitKnownSet)
+    എങ്കിൽ (QuietBitKnownSet)
       Known.knownNot(fcSNan);
-    else if (QuietBitKnownClear)
+    അല്ലെങ്കിൽ എങ്കിൽ (QuietBitKnownClear)
       Known.knownNot(fcQNan);
 
-    break;
+    നിർത്തുക;
   }
-  default:
+  സ്ഥിരസ്ഥിതി:
     llvm_unreachable("unhandled supported type");
   }
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownBits KnownFPClass::toKnownBits(const fltSemantics &FltSemantics) const {
+KnownBits KnownFPClass::toKnownBits(സ്ഥിരം fltSemantics &FltSemantics) സ്ഥിരം {
   KnownBits Known(FltSemantics.sizeInBits);
-  const FPClassTest FPClasses = getKnownFPClasses();
+  സ്ഥിരം FPClassTest FPClasses = getKnownFPClasses();
 
   // Return unknown if poison.
-  if (FPClasses == fcNone)
-    return Known;
+  എങ്കിൽ (FPClasses == fcNone)
+    തിരികെ Known;
 
   // Return unknown for types we have not validated.
-  auto IsSupported = [](const fltSemantics &Semantics) {
-    switch (APFloat::SemanticsToEnum(Semantics)) {
-    case APFloatBase::S_IEEEhalf:
-    case APFloatBase::S_BFloat:
-    case APFloatBase::S_IEEEsingle:
-    case APFloatBase::S_IEEEdouble:
-    case APFloatBase::S_IEEEquad:
-    case APFloatBase::S_x87DoubleExtended:
-      return true;
-    default:
-      return false;
+  auto IsSupported = [](സ്ഥിരം fltSemantics &Semantics) {
+    തിരഞ്ഞെടുപ്പ് (APFloat::SemanticsToEnum(Semantics)) {
+    അവസ്ഥ APFloatBase::S_IEEEhalf:
+    അവസ്ഥ APFloatBase::S_BFloat:
+    അവസ്ഥ APFloatBase::S_IEEEsingle:
+    അവസ്ഥ APFloatBase::S_IEEEdouble:
+    അവസ്ഥ APFloatBase::S_IEEEquad:
+    അവസ്ഥ APFloatBase::S_x87DoubleExtended:
+      തിരികെ സത്യം;
+    സ്ഥിരസ്ഥിതി:
+      തിരികെ അസത്യം;
     }
   };
-  if (!IsSupported(FltSemantics))
-    return Known;
+  എങ്കിൽ (!IsSupported(FltSemantics))
+    തിരികെ Known;
 
-  switch (APFloat::SemanticsToEnum(FltSemantics)) {
-  case APFloatBase::S_IEEEhalf:
-  case APFloatBase::S_BFloat:
-  case APFloatBase::S_IEEEsingle:
-  case APFloatBase::S_IEEEdouble:
-  case APFloatBase::S_IEEEquad: {
+  തിരഞ്ഞെടുപ്പ് (APFloat::SemanticsToEnum(FltSemantics)) {
+  അവസ്ഥ APFloatBase::S_IEEEhalf:
+  അവസ്ഥ APFloatBase::S_BFloat:
+  അവസ്ഥ APFloatBase::S_IEEEsingle:
+  അവസ്ഥ APFloatBase::S_IEEEdouble:
+  അവസ്ഥ APFloatBase::S_IEEEquad: {
     // For ieee types, we cannot deduce anything if the source could be normal.
-    if (FPClasses & fcNormal)
-      break;
+    എങ്കിൽ (FPClasses & fcNormal)
+      നിർത്തുക;
 
     Known.setAllConflict();
 
-    const unsigned BitWidth = FltSemantics.sizeInBits;
-    const unsigned MantissaBits = FltSemantics.precision - 1;
-    const unsigned ExponentBits = BitWidth - MantissaBits - 1;
+    സ്ഥിരം unsigned BitWidth = FltSemantics.sizeInBits;
+    സ്ഥിരം unsigned MantissaBits = FltSemantics.precision - 1;
+    സ്ഥിരം unsigned ExponentBits = BitWidth - MantissaBits - 1;
 
-    APInt MantissaMask = APInt::getLowBitsSet(BitWidth, MantissaBits);
+    APInt MantissaMask = APInt::get_താഴെയുള്ള_Bits_Set(BitWidth, MantissaBits);
     APInt ExponentMask =
         APInt::getBitsSet(BitWidth, MantissaBits, MantissaBits + ExponentBits);
 
-    const unsigned QuietBitIndex = MantissaBits - 1;
+    സ്ഥിരം unsigned QuietBitIndex = MantissaBits - 1;
     APInt PayloadMask = MantissaMask;
     PayloadMask.clearBit(QuietBitIndex);
 
-    if (FPClasses & fcNan) {
+    എങ്കിൽ (FPClasses & fcNan) {
       // Exponent bits cannot be zeros.
       Known.Zero &= ~ExponentMask;
       // No individual payload bit is known.
       Known.Zero &= ~PayloadMask;
       Known.One &= ~PayloadMask;
 
-      if (FPClasses & fcQNan)
+      എങ്കിൽ (FPClasses & fcQNan)
         Known.Zero.clearBit(QuietBitIndex);
-      if (FPClasses & fcSNan)
+      എങ്കിൽ (FPClasses & fcSNan)
         Known.One.clearBit(QuietBitIndex);
     }
-    if (FPClasses & fcInf) {
+    എങ്കിൽ (FPClasses & fcInf) {
       // Exponent bits cannot be zeros.
       Known.Zero &= ~ExponentMask;
       // Mantissa bits cannot be ones.
       Known.One &= ~MantissaMask;
     }
-    if (FPClasses & fcSubnormal) {
+    എങ്കിൽ (FPClasses & fcSubnormal) {
       // Exponent bits cannot be ones.
       Known.One &= ~ExponentMask;
       // Unknown mantissa.
       Known.One &= ~MantissaMask;
       Known.Zero &= ~MantissaMask;
     }
-    if (FPClasses & fcZero) {
+    എങ്കിൽ (FPClasses & fcZero) {
       // Exponent bits cannot be ones.
       Known.One &= ~ExponentMask;
       // Mantissa cannot be ones.
       Known.One &= ~MantissaMask;
     }
 
-    break;
+    നിർത്തുക;
   }
-  case APFloatBase::S_x87DoubleExtended: {
-    if (!isKnownNever(fcNormal | fcSubnormal | fcNan))
-      break;
+  അവസ്ഥ APFloatBase::S_x87DoubleExtended: {
+    എങ്കിൽ (!isKnownNever(fcNormal | fcSubnormal | fcNan))
+      നിർത്തുക;
 
     Known.setAllConflict();
 
-    if (FPClasses & fcInf)
+    എങ്കിൽ (FPClasses & fcInf)
       Known = Known.intersectWith(KnownBits::makeConstant(
           APFloat::getInf(FltSemantics).bitcastToAPInt()));
 
-    if (FPClasses & fcZero)
+    എങ്കിൽ (FPClasses & fcZero)
       Known = Known.intersectWith(
           KnownBits::makeConstant(APInt::getZero(FltSemantics.sizeInBits)));
 
-    break;
+    നിർത്തുക;
   }
-  default:
+  സ്ഥിരസ്ഥിതി:
     llvm_unreachable("unhandled supported semantics");
   }
 
   Known.Zero.clearSignBit();
   Known.One.clearSignBit();
-  if (std::optional<bool> Sign = getSignBit()) {
-    if (*Sign)
+  എങ്കിൽ (std::optional<തർക്കം> Sign = getSignBit()) {
+    എങ്കിൽ (*Sign)
       Known.makeNegative();
-    else
+    അല്ലെങ്കിൽ
       Known.makeNonNegative();
   }
 
-  return Known;
+  തിരികെ Known;
 }
 
 // Handle known sign bit and nan cases for fadd, fsub, and fma.
-static KnownFPClass fadd_impl(const KnownFPClass &KnownLHS,
-                              const KnownFPClass &KnownRHS, bool IsFMA) {
+സ്ഥിതം KnownFPClass fadd_impl(സ്ഥിരം KnownFPClass &KnownLHS,
+                              സ്ഥിരം KnownFPClass &KnownRHS, തർക്കം IsFMA) {
   KnownFPClass Known;
 
   // Adding positive and negative infinity produces NaN, but only if both
   // opposite-sign infinity combinations are possible.
-  if (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
+  എങ്കിൽ (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
       (KnownLHS.isKnownNever(fcPosInf) || KnownRHS.isKnownNever(fcNegInf)) &&
       (KnownLHS.isKnownNever(fcNegInf) || KnownRHS.isKnownNever(fcPosInf)))
     Known.knownNot(fcNan);
 
-  if (KnownLHS.cannotBeOrderedLessThanZero() &&
+  എങ്കിൽ (KnownLHS.cannotBeOrderedLessThanZero() &&
       KnownRHS.cannotBeOrderedLessThanZero()) {
     Known.knownNot(KnownFPClass::OrderedLessThanZeroMask);
 
     // This can't underflow if one of the operands is known normal.
-    if (KnownLHS.isKnownNever(fcZero | fcPosSubnormal) ||
+    എങ്കിൽ (KnownLHS.isKnownNever(fcZero | fcPosSubnormal) ||
         KnownRHS.isKnownNever(fcZero | fcPosSubnormal))
       Known.knownNot(fcZero | fcPosSubnormal);
   }
 
-  if (KnownLHS.cannotBeOrderedGreaterThanZero() &&
+  എങ്കിൽ (KnownLHS.cannotBeOrderedGreaterThanZero() &&
       KnownRHS.cannotBeOrderedGreaterThanZero()) {
     Known.knownNot(KnownFPClass::OrderedGreaterThanZeroMask);
 
     // This can't underflow if one of the operands is known normal.
-    if (KnownLHS.isKnownNever(fcZero | fcNegSubnormal) ||
+    എങ്കിൽ (KnownLHS.isKnownNever(fcZero | fcNegSubnormal) ||
         KnownRHS.isKnownNever(fcZero | fcNegSubnormal))
       Known.knownNot(fcZero | fcNegSubnormal);
   }
 
-  if (!IsFMA) {
+  എങ്കിൽ (!IsFMA) {
     // (fadd x, +0.0) is guaranteed to return +0.0, not -0.0.
-    if (KnownLHS.isKnownNever(fcNegZero) || KnownRHS.isKnownNever(fcNegZero))
+    എങ്കിൽ (KnownLHS.isKnownNever(fcNegZero) || KnownRHS.isKnownNever(fcNegZero))
       Known.knownNot(fcNegZero);
 
     Known.propagateNonSNaN(KnownLHS, KnownRHS);
   }
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::fadd(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fadd(സ്ഥിരം KnownFPClass &KnownLHS_,
+                                സ്ഥിരം KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_നിവേശം_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_നിവേശം_Denormal_Mode(KnownRHS_, Mode);
 
-  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/false);
+  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/അസത്യം);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fadd_self(const KnownFPClass &KnownSrc_,
+KnownFPClass KnownFPClass::fadd_self(സ്ഥിരം KnownFPClass &KnownSrc_,
                                      DenormalMode Mode) {
-  KnownFPClass KnownSrc = applyInputDenormalMode(KnownSrc_, Mode);
+  KnownFPClass KnownSrc = apply_നിവേശം_Denormal_Mode(KnownSrc_, Mode);
 
-  KnownFPClass Known = fadd_impl(KnownSrc, KnownSrc, /*IsFMA=*/false);
+  KnownFPClass Known = fadd_impl(KnownSrc, KnownSrc, /*IsFMA=*/അസത്യം);
 
-  if (KnownSrc.isKnownNever(fcPosSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosSubnormal))
     Known.knownNot(fcPosSubnormal);
-  if (KnownSrc.isKnownNever(fcNegSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegSubnormal))
     Known.knownNot(fcNegSubnormal);
 
   // Doubling 0 will give the same 0.
-  if (KnownSrc.isKnownNever(fcPosZero))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosZero))
     Known.knownNot(fcPosZero);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fsub(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fsub(സ്ഥിരം KnownFPClass &KnownLHS_,
+                                സ്ഥിരം KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_നിവേശം_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_നിവേശം_Denormal_Mode(KnownRHS_, Mode);
 
   // fsub(x, y) == fadd(x, -y) as long as we negate after subnormals are
   // flushed.
   KnownRHS.fneg();
 
-  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/false);
+  KnownFPClass Known = fadd_impl(KnownLHS, KnownRHS, /*IsFMA=*/അസത്യം);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fmul(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fmul(സ്ഥിരം KnownFPClass &KnownLHS_,
+                                സ്ഥിരം KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_നിവേശം_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_നിവേശം_Denormal_Mode(KnownRHS_, Mode);
 
   KnownFPClass Known;
 
@@ -606,75 +606,75 @@ KnownFPClass KnownFPClass::fmul(const KnownFPClass &KnownLHS_,
 
   // +X * +Y or -X * -Y => +Q
   // +X * -Y or -X * +Y => -Q
-  if ((KnownLHS.isKnownNever(fcNegative) &&
+  എങ്കിൽ ((KnownLHS.isKnownNever(fcNegative) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcPositive) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcNegative);
-  if ((KnownLHS.isKnownNever(fcPositive) &&
+  എങ്കിൽ ((KnownLHS.isKnownNever(fcPositive) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcNegative) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcPositive);
 
   // Inf * Y => Inf or NaN
-  if (KnownLHS.isKnownAlways(fcInf | fcNan) ||
+  എങ്കിൽ (KnownLHS.isKnownAlways(fcInf | fcNan) ||
       KnownRHS.isKnownAlways(fcInf | fcNan))
     Known.knownNot(fcNormal | fcSubnormal | fcZero);
 
   // 0 * Y => 0 or NaN
-  if (KnownRHS.isKnownAlways(fcZero | fcNan) ||
+  എങ്കിൽ (KnownRHS.isKnownAlways(fcZero | fcNan) ||
       KnownLHS.isKnownAlways(fcZero | fcNan))
     Known.knownNot(fcNormal | fcSubnormal | fcInf);
 
   // 0 * +/-inf => NaN
-  if (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
+  എങ്കിൽ (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
       (KnownRHS.isKnownNeverInfinity() || KnownLHS.isKnownNeverZero()) &&
       (KnownLHS.isKnownNeverInfinity() || KnownRHS.isKnownNeverZero()))
     Known.knownNot(fcNan);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
 // TODO: This generalizes to known ranges
-KnownFPClass KnownFPClass::fmul(const KnownFPClass &KnownLHS,
-                                const APFloat &CRHS, DenormalMode Mode) {
+KnownFPClass KnownFPClass::fmul(സ്ഥിരം KnownFPClass &KnownLHS,
+                                സ്ഥിരം APFloat &CRHS, DenormalMode Mode) {
   // Match denormal scaling pattern, similar to the case in ldexp. If the
   // constant's exponent is sufficiently large, the result cannot be subnormal.
 
-  const fltSemantics &Flt = CRHS.getSemantics();
+  സ്ഥിരം fltSemantics &Flt = CRHS.getSemantics();
   unsigned Precision = APFloat::semanticsPrecision(Flt);
-  const int MantissaBits = Precision - 1;
+  സ്ഥിരം പൂർണ്ണസംഖ്യ MantissaBits = Precision - 1;
 
-  int MinKnownExponent = ilogb(CRHS);
-  bool CannotBeSubnormal = (MinKnownExponent >= MantissaBits);
+  പൂർണ്ണസംഖ്യ MinKnownExponent = ilogb(CRHS);
+  തർക്കം CannotBeSubnormal = (MinKnownExponent >= MantissaBits);
 
   KnownFPClass Known = KnownFPClass::fmul(KnownLHS, KnownFPClass(CRHS), Mode);
-  if (CannotBeSubnormal)
+  എങ്കിൽ (CannotBeSubnormal)
     Known.knownNot(fcSubnormal);
 
   // Multiply of values <= 1 cannot introduce overflow.
-  if (KnownLHS.isKnownNever(fcInf)) {
-    if (MinKnownExponent < 0)
+  എങ്കിൽ (KnownLHS.isKnownNever(fcInf)) {
+    എങ്കിൽ (MinKnownExponent < 0)
       Known.knownNot(fcInf);
-    else if (MinKnownExponent == 0 && CRHS.compareAbsoluteValue(APFloat::getOne(
+    അല്ലെങ്കിൽ എങ്കിൽ (MinKnownExponent == 0 && CRHS.compare_Absolute_മൂല്യം(APFloat::getOne(
                                           Flt)) == APFloat::cmpEqual)
       Known.knownNot(fcInf);
   }
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::fdiv(const KnownFPClass &KnownLHS_,
-                                const KnownFPClass &KnownRHS_,
+KnownFPClass KnownFPClass::fdiv(സ്ഥിരം KnownFPClass &KnownLHS_,
+                                സ്ഥിരം KnownFPClass &KnownRHS_,
                                 DenormalMode Mode) {
-  KnownFPClass KnownLHS = applyInputDenormalMode(KnownLHS_, Mode);
-  KnownFPClass KnownRHS = applyInputDenormalMode(KnownRHS_, Mode);
+  KnownFPClass KnownLHS = apply_നിവേശം_Denormal_Mode(KnownLHS_, Mode);
+  KnownFPClass KnownRHS = apply_നിവേശം_Denormal_Mode(KnownRHS_, Mode);
 
   KnownFPClass Known;
 
   Known.propagateNonSNaN(KnownLHS, KnownRHS);
 
   // Only 0/0, Inf/Inf produce NaN.
-  if (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
+  എങ്കിൽ (KnownLHS.isKnownNeverNaN() && KnownRHS.isKnownNeverNaN() &&
       (KnownLHS.isKnownNeverInfinity() || KnownRHS.isKnownNeverInfinity()) &&
       (KnownLHS.isKnownNeverZero() || KnownRHS.isKnownNeverZero())) {
     Known.knownNot(fcNan);
@@ -683,53 +683,53 @@ KnownFPClass KnownFPClass::fdiv(const KnownFPClass &KnownLHS_,
   //  X / -0.0 => -Inf (or NaN)
   // +X / +Y or -X / -Y => +Q
   // +X / -Y or -X / +Y => -Q
-  if ((KnownLHS.isKnownNever(fcNegative) &&
+  എങ്കിൽ ((KnownLHS.isKnownNever(fcNegative) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcPositive) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcNegative);
-  if ((KnownLHS.isKnownNever(fcPositive) &&
+  എങ്കിൽ ((KnownLHS.isKnownNever(fcPositive) &&
        KnownRHS.isKnownNever(fcNegative)) ||
       (KnownLHS.isKnownNever(fcNegative) && KnownRHS.isKnownNever(fcPositive)))
     Known.knownNot(fcPositive);
 
   // Normal and subnormal results require two non-zero finite operands.
-  if ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
+  എങ്കിൽ ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
        KnownRHS.isKnownNever(fcNegNormal | fcNegSubnormal)) ||
       (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal) &&
        KnownRHS.isKnownNever(fcPosNormal | fcPosSubnormal)))
     Known.knownNot(fcNegNormal | fcNegSubnormal);
-  if ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
+  എങ്കിൽ ((KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal) &&
        KnownRHS.isKnownNever(fcPosNormal | fcPosSubnormal)) ||
       (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal) &&
        KnownRHS.isKnownNever(fcNegNormal | fcNegSubnormal)))
     Known.knownNot(fcPosNormal | fcPosSubnormal);
 
   // 0 / X => 0 or NaN
-  if (KnownLHS.isKnownAlways(fcZero))
+  എങ്കിൽ (KnownLHS.isKnownAlways(fcZero))
     Known.knownNot(fcSubnormal | fcNormal | fcInf);
 
   // X / 0 => NaN or Inf
-  if (KnownRHS.isKnownAlways(fcZero))
+  എങ്കിൽ (KnownRHS.isKnownAlways(fcZero))
     Known.knownNot(fcFinite);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fdiv_self(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::fdiv_self(സ്ഥിരം KnownFPClass &KnownSrc,
                                      DenormalMode Mode) {
   // X / X is always exactly 1.0 or a NaN.
   KnownFPClass Known(fcNan | fcPosNormal);
 
   Known.propagateNonSNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
+  എങ്കിൽ (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
     Known.knownNot(fcNan);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::frem(const KnownFPClass &KnownLHS,
-                                const KnownFPClass &KnownRHS,
+KnownFPClass KnownFPClass::frem(സ്ഥിരം KnownFPClass &KnownLHS,
+                                സ്ഥിരം KnownFPClass &KnownRHS,
                                 DenormalMode Mode) {
   KnownFPClass Known;
 
@@ -740,56 +740,56 @@ KnownFPClass KnownFPClass::frem(const KnownFPClass &KnownLHS,
   Known.propagateNonSNaN(KnownLHS, KnownRHS);
 
   // frem(Inf, x) and frem(x, 0) produce NaN.
-  if (KnownLHS.isKnownNeverInfOrNaN() && KnownRHS.isKnownNeverNaN() &&
+  എങ്കിൽ (KnownLHS.isKnownNeverInfOrNaN() && KnownRHS.isKnownNeverNaN() &&
       KnownRHS.isKnownNeverLogicalZero(Mode)) {
     Known.knownNot(fcNan);
   }
 
   // The sign for frem is the same as the first operand.
-  if (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal))
+  എങ്കിൽ (KnownLHS.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosNormal | fcPosSubnormal);
-  if (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal))
+  എങ്കിൽ (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegNormal | fcNegSubnormal);
 
   // A negative zero result requires a negative finite first operand.
-  if (KnownLHS.isKnownNever(fcNegFinite))
+  എങ്കിൽ (KnownLHS.isKnownNever(fcNegFinite))
     Known.knownNot(fcNegZero);
 
   // A positive zero result can additionally come from a negative finite
   // result being flushed to positive zero.
-  if (KnownLHS.isKnownNever(fcPosFinite) &&
+  എങ്കിൽ (KnownLHS.isKnownNever(fcPosFinite) &&
       KnownLHS.isKnownNeverLogicalPosZero(Mode) &&
       (!Mode.outputsMayBePositiveZero() ||
        KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal)))
     Known.knownNot(fcPosZero);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::frem_self(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::frem_self(സ്ഥിരം KnownFPClass &KnownSrc,
                                      DenormalMode Mode) {
   // X % X is always exactly [+-]0.0 or a NaN.
   KnownFPClass Known(fcNan | fcZero);
 
   Known.propagateNonSNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
+  എങ്കിൽ (KnownSrc.isKnownNeverInfOrNaN() && KnownSrc.isKnownNeverLogicalZero(Mode))
     Known.knownNot(fcNan);
 
   // The sign of a zero result is the sign of the finite non-zero input.
   // We do not have to worry about subnormal values flushing to zero, since
   // frem(+-0.0, +-0.0) = NaN.
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosZero);
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegZero);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::fma(const KnownFPClass &KnownLHS,
-                               const KnownFPClass &KnownRHS,
-                               const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fma(സ്ഥിരം KnownFPClass &KnownLHS,
+                               സ്ഥിരം KnownFPClass &KnownRHS,
+                               സ്ഥിരം KnownFPClass &KnownAddend,
                                DenormalMode Mode) {
   KnownFPClass Mul = fmul(KnownLHS, KnownRHS, Mode);
 
@@ -798,32 +798,32 @@ KnownFPClass KnownFPClass::fma(const KnownFPClass &KnownLHS,
   //
   // If the multiply is a -0 due to rounding, the final -0 + 0 will be -0,
   // unlike for a separate fadd.
-  KnownFPClass Known = fadd_impl(Mul, KnownAddend, /*IsFMA=*/true);
+  KnownFPClass Known = fadd_impl(Mul, KnownAddend, /*IsFMA=*/സത്യം);
 
   // propagateNonSNaN for 3 arguments.
-  if (KnownLHS.isKnownNever(fcSNan) && KnownRHS.isKnownNever(fcSNan) &&
+  എങ്കിൽ (KnownLHS.isKnownNever(fcSNan) && KnownRHS.isKnownNever(fcSNan) &&
       KnownAddend.isKnownNever(fcSNan))
     Known.knownNot(fcSNan);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::fmuladd(const KnownFPClass &KnownLHS,
-                                   const KnownFPClass &KnownRHS,
-                                   const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fmuladd(സ്ഥിരം KnownFPClass &KnownLHS,
+                                   സ്ഥിരം KnownFPClass &KnownRHS,
+                                   സ്ഥിരം KnownFPClass &KnownAddend,
                                    DenormalMode Mode) {
   // fmuladd can lower to either fma(x, y, z) or fadd(fmul(x, y), z). Compute
   // the intersection of both possibilities.
   KnownFPClass FMA = fma(KnownLHS, KnownRHS, KnownAddend, Mode);
   KnownFPClass MulAdd = fadd(fmul(KnownLHS, KnownRHS, Mode), KnownAddend, Mode);
-  return FMA.intersectWith(MulAdd);
+  തിരികെ FMA.intersectWith(MulAdd);
 }
 
-KnownFPClass KnownFPClass::fma_square(const KnownFPClass &KnownSquared,
-                                      const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fma_square(സ്ഥിരം KnownFPClass &KnownSquared,
+                                      സ്ഥിരം KnownFPClass &KnownAddend,
                                       DenormalMode Mode) {
   KnownFPClass Squared = square(KnownSquared, Mode);
-  KnownFPClass Known = fadd_impl(Squared, KnownAddend, /*IsFMA=*/true);
+  KnownFPClass Known = fadd_impl(Squared, KnownAddend, /*IsFMA=*/സത്യം);
 
   // Since we know the squared input must be positive, the add of opposite sign
   // infinities nan hazard only applies for negative inf.
@@ -831,23 +831,23 @@ KnownFPClass KnownFPClass::fma_square(const KnownFPClass &KnownSquared,
   // TODO: Alternatively to proving addend is not -inf, we could know Squared is
   // not pinf. Other than the degenerate always-subnormal input case, we can't
   // prove that without a known range.
-  if (KnownAddend.isKnownNever(fcNegInf | fcNan) && Squared.isKnownNever(fcNan))
+  എങ്കിൽ (KnownAddend.isKnownNever(fcNegInf | fcNan) && Squared.isKnownNever(fcNan))
     Known.knownNot(fcNan);
 
   Known.propagateNonSNaN(KnownSquared, KnownAddend);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::fmuladd_square(const KnownFPClass &KnownSquared,
-                                          const KnownFPClass &KnownAddend,
+KnownFPClass KnownFPClass::fmuladd_square(സ്ഥിരം KnownFPClass &KnownSquared,
+                                          സ്ഥിരം KnownFPClass &KnownAddend,
                                           DenormalMode Mode) {
   KnownFPClass FMA = fma_square(KnownSquared, KnownAddend, Mode);
   KnownFPClass MulAdd = fadd(square(KnownSquared, Mode), KnownAddend, Mode);
-  return FMA.intersectWith(MulAdd);
+  തിരികെ FMA.intersectWith(MulAdd);
 }
 
-KnownFPClass KnownFPClass::exp(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::exp(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
   Known.knownNot(fcNegative);
 
@@ -857,55 +857,55 @@ KnownFPClass KnownFPClass::exp(const KnownFPClass &KnownSrc) {
   // exp10(+1.0) = +10.0 are both finite normal values.
 
   // Zero can only be produced if x < -1.0.
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegInf))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal | fcNegInf))
     Known.knownNot(fcPosZero);
 
   // Subnormals can only be produced if x < -1.0 and x is finite.
-  if (KnownSrc.isKnownNever(fcNegNormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal))
     Known.knownNot(fcPosSubnormal);
 
   // Infinity can only be produced if x > +1.0.
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosInf))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosNormal | fcPosInf))
     Known.knownNot(fcPosInf);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::log(const KnownFPClass &KnownSrc, DenormalMode Mode,
-                               bool IsMultiUnitFPType) {
+KnownFPClass KnownFPClass::log(സ്ഥിരം KnownFPClass &KnownSrc, DenormalMode Mode,
+                               തർക്കം IsMultiUnitFPType) {
   KnownFPClass Known;
 
   // PPCDoubleDouble can represent the exact value of 1.0 + subnormal, and
   // log(1.0 + subnormal) = subnormal.
-  if (!IsMultiUnitFPType)
+  എങ്കിൽ (!IsMultiUnitFPType)
     Known.knownNot(fcNegZero | fcSubnormal);
 
   Known.propagateNonSNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
+  എങ്കിൽ (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(fcNan);
 
-  if (KnownSrc.isKnownNeverLogicalZero(Mode))
+  എങ്കിൽ (KnownSrc.isKnownNeverLogicalZero(Mode))
     Known.knownNot(fcNegInf);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::sqrt(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::sqrt(സ്ഥിരം KnownFPClass &KnownSrc,
                                 DenormalMode Mode) {
   KnownFPClass Known;
   Known.knownNot(fcPosSubnormal);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
   Known.propagateNonSNaN(KnownSrc);
 
   // Any negative value besides -0 returns a nan.
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
+  എങ്കിൽ (KnownSrc.isKnownNeverNaN() && KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(fcNan);
 
   // The only negative value that can be returned is -0 for -0 inputs.
@@ -913,30 +913,30 @@ KnownFPClass KnownFPClass::sqrt(const KnownFPClass &KnownSrc,
 
   // If the input denormal mode could be PreserveSign, a negative
   // subnormal input could produce a negative zero output.
-  if (KnownSrc.isKnownNeverLogicalNegZero(Mode))
+  എങ്കിൽ (KnownSrc.isKnownNeverLogicalNegZero(Mode))
     Known.knownNot(fcNegZero);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::sin(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::sin(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   Known.propagateNonSNaN(KnownSrc);
 
   // Return NaN on infinite inputs.
   Known.knownNot(fcInf);
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
     Known.knownNot(fcNan);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::cos(const KnownFPClass &KnownSrc) {
-  return sin(KnownSrc);
+KnownFPClass KnownFPClass::cos(സ്ഥിരം KnownFPClass &KnownSrc) {
+  തിരികെ sin(KnownSrc);
 }
 
-KnownFPClass KnownFPClass::tan(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::tan(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // tan never returns Inf (tan(+-Inf) = NaN; tan(finite) = finite).
@@ -945,31 +945,31 @@ KnownFPClass KnownFPClass::tan(const KnownFPClass &KnownSrc) {
   Known.propagateNonSNaN(KnownSrc);
 
   // NaN propagates. tan(+-Inf) is NaN.
-  if (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverNaN() && KnownSrc.isKnownNeverInfinity())
     Known.knownNot(fcNan);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::sinh(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::sinh(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // sinh is sign-preserving: sinh(x) < 0 iff x < 0.
-  if (KnownSrc.isKnownNever(fcNegative))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegative))
     Known.knownNot(fcNegative);
 
   // A nonzero positive result requires a nonzero positive input.
   // Zero remains possible: sinh(+/-0.0) = +/-0.0, and flushing a subnormal
   // may produce +0.0.
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
     Known.knownNot(fcPosSubnormal | fcPosNormal | fcPosInf);
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::cosh(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::cosh(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // cosh(x) >= 1 for all real x; cosh(+-Inf) = +Inf. Never negative,
@@ -978,35 +978,35 @@ KnownFPClass KnownFPClass::cosh(const KnownFPClass &KnownSrc) {
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::tanh(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::tanh(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // tanh is bounded to (-1, 1), never Inf.
   Known.knownNot(fcInf);
 
   // tanh is sign-preserving: tanh(x) < 0 iff x < 0.
-  if (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf)) {
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf)) {
     Known.knownNot(fcNegSubnormal | fcNegNormal);
 
     // -0.0 is preserved: tanh(-0.0) = -0.0.
-    if (KnownSrc.isKnownNeverNegZero())
+    എങ്കിൽ (KnownSrc.isKnownNeverNegZero())
       Known.knownNot(fcNegZero);
   }
 
   // Likewise, tanh(x) > 0 iff x > 0. Zero is not ruled out: tanh(+-0.0) =
   // +-0.0, and a flushed subnormal may become +0.0.
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
     Known.knownNot(fcPosSubnormal | fcPosNormal);
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::asin(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::asin(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // asin is bounded to [-pi/2, pi/2], never Inf.
@@ -1015,18 +1015,18 @@ KnownFPClass KnownFPClass::asin(const KnownFPClass &KnownSrc) {
   Known.propagateNonSNaN(KnownSrc);
 
   // asin is sign-preserving for finite arguments.
-  if (KnownSrc.isKnownNever(fcNegFinite))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegFinite))
     Known.knownNot(fcNegFinite);
 
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal))
     Known.knownNot(fcPosSubnormal | fcPosNormal);
 
   // NaN propagates. asin(x) is also NaN for |x| > 1, so we cannot rule
   // out NaN without knowing the source is in [-1, 1].
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::acos(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::acos(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // acos(x) is bounded to [0, pi] for -1 <= x <= 1, and is never negative,
@@ -1037,17 +1037,17 @@ KnownFPClass KnownFPClass::acos(const KnownFPClass &KnownSrc) {
   Known.knownNot(fcNegative | fcInf | fcSubnormal);
 
   // acos(x) == +0.0 iff x == +1.0
-  if (KnownSrc.isKnownNever(fcPosNormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosNormal))
     Known.knownNot(fcZero);
 
   Known.propagateNonSNaN(KnownSrc);
 
   // NaN propagates. acos(x) is also NaN for |x| > 1, so we cannot rule
   // out NaN without knowing the source is in [-1, 1].
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::atan(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::atan(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // atan is bounded to (-pi/2, pi/2), never Inf. atan(+-Inf) = +-pi/2 (finite).
@@ -1056,27 +1056,27 @@ KnownFPClass KnownFPClass::atan(const KnownFPClass &KnownSrc) {
   // Ruling out Subnormal/Normal from the result requires the
   // input to never be finite-nonzero and never inf, since
   // atan(+-inf) = +-pi/2
-  if (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegSubnormal | fcNegNormal | fcNegInf))
     Known.knownNot(fcNegSubnormal | fcNegNormal);
 
-  if (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosSubnormal | fcPosNormal | fcPosInf))
     Known.knownNot(fcPosSubnormal | fcPosNormal);
 
   // atan(-0.0) = -0.0. Negative finite inputs may also produce -0.0
   // if the result rounds to a negative subnormal that is flushed to zero.
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal | fcNegZero))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal | fcNegZero))
     Known.knownNot(fcNegZero);
 
   Known.propagateNonNaN(KnownSrc);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::atan2(const KnownFPClass &KnownY_,
-                                 const KnownFPClass &KnownX_,
+KnownFPClass KnownFPClass::atan2(സ്ഥിരം KnownFPClass &KnownY_,
+                                 സ്ഥിരം KnownFPClass &KnownX_,
                                  DenormalMode Mode) {
-  KnownFPClass KnownY = applyInputDenormalMode(KnownY_, Mode);
-  KnownFPClass KnownX = applyInputDenormalMode(KnownX_, Mode);
+  KnownFPClass KnownY = apply_നിവേശം_Denormal_Mode(KnownY_, Mode);
+  KnownFPClass KnownX = apply_നിവേശം_Denormal_Mode(KnownX_, Mode);
   KnownFPClass Known;
 
   // Even though these deductions are correct, we are ignoring the following
@@ -1090,58 +1090,58 @@ KnownFPClass KnownFPClass::atan2(const KnownFPClass &KnownY_,
   Known.propagateNonNaN(KnownY, KnownX);
 
   // If x <= -0.0, then |atan2(y, x)| >= pi/2
-  if (KnownX.isKnownNever(fcPositive))
+  എങ്കിൽ (KnownX.isKnownNever(fcPositive))
     Known.knownNot(fcZero | fcSubnormal);
 
   // If y >= +0.0, then atan2(y, x) >= +0.0
-  if (KnownY.isKnownNever(fcNegative))
+  എങ്കിൽ (KnownY.isKnownNever(fcNegative))
     Known.knownNot(fcNegative);
 
   // If y <= -0.0, then atan2(y, x) <= -0.0
-  if (KnownY.isKnownNever(fcPositive))
+  എങ്കിൽ (KnownY.isKnownNever(fcPositive))
     Known.knownNot(fcPositive);
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::fpext(const KnownFPClass &KnownSrc,
-                                 const fltSemantics &DstTy,
-                                 const fltSemantics &SrcTy) {
+KnownFPClass KnownFPClass::fpext(സ്ഥിരം KnownFPClass &KnownSrc,
+                                 സ്ഥിരം fltSemantics &DstTy,
+                                 സ്ഥിരം fltSemantics &SrcTy) {
   // Infinity, nan and zero propagate from source.
   KnownFPClass Known = KnownSrc;
 
   // All subnormal inputs should be in the normal range in the result type.
-  if (APFloat::isRepresentableAsNormalIn(SrcTy, DstTy)) {
-    if (Known.getKnownFPClasses() & fcPosSubnormal)
+  എങ്കിൽ (APFloat::isRepresentableAsNormalIn(SrcTy, DstTy)) {
+    എങ്കിൽ (Known.getKnownFPClasses() & fcPosSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcPosNormal);
-    if (Known.getKnownFPClasses() & fcNegSubnormal)
+    എങ്കിൽ (Known.getKnownFPClasses() & fcNegSubnormal)
       Known.setKnownFPClasses(Known.getKnownFPClasses() | fcNegNormal);
     Known.knownNot(fcSubnormal);
   }
 
   // Sign bit of a nan isn't guaranteed.
-  if (!Known.isKnownNeverNaN())
+  എങ്കിൽ (!Known.isKnownNeverNaN())
     Known.setSignBit(std::nullopt);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::fptrunc(const KnownFPClass &KnownSrc) {
+KnownFPClass KnownFPClass::fptrunc(സ്ഥിരം KnownFPClass &KnownSrc) {
   KnownFPClass Known;
 
   // Sign should be preserved
   // TODO: Handle cannot be ordered greater than zero
-  if (KnownSrc.cannotBeOrderedLessThanZero())
+  എങ്കിൽ (KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(KnownFPClass::OrderedLessThanZeroMask);
 
   Known.propagateNonNaN(KnownSrc);
 
   // Infinity needs a range check.
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::roundToIntegral(const KnownFPClass &KnownSrc,
-                                           bool MayBeMultiUnitFPType,
+KnownFPClass KnownFPClass::roundToIntegral(സ്ഥിരം KnownFPClass &KnownSrc,
+                                           തർക്കം MayBeMultiUnitFPType,
                                            DenormalMode Mode) {
   KnownFPClass Known;
 
@@ -1151,68 +1151,68 @@ KnownFPClass KnownFPClass::roundToIntegral(const KnownFPClass &KnownSrc,
   Known.propagateNonNaN(KnownSrc);
 
   // Pass through infinities, except PPC_FP128 is a special case for intrinsics.
-  if (!MayBeMultiUnitFPType) {
-    if (KnownSrc.isKnownNeverPosInfinity())
+  എങ്കിൽ (!MayBeMultiUnitFPType) {
+    എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
       Known.knownNot(fcPosInf);
-    if (KnownSrc.isKnownNeverNegInfinity())
+    എങ്കിൽ (KnownSrc.isKnownNeverNegInfinity())
       Known.knownNot(fcNegInf);
   }
 
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosNormal);
 
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegNormal);
 
   // Negative round ups towards zero produce negative zero.
-  if (KnownSrc.isKnownNever(fcNegFinite))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegFinite))
     Known.knownNot(fcNegZero);
 
   // Negative subnormals may flush to positive zero.
-  if (KnownSrc.isKnownNever(fcPosFinite) &&
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosFinite) &&
       (KnownSrc.isKnownNever(fcNegSubnormal) ||
        !Mode.inputsMayBePositiveZero()))
     Known.knownNot(fcPosZero);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::trunc(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::trunc(സ്ഥിരം KnownFPClass &KnownSrc,
                                  DenormalMode Mode) {
   KnownFPClass Known = roundToIntegral(KnownSrc,
-                                       /*MayBeMultiUnitFPType=*/true, Mode);
+                                       /*MayBeMultiUnitFPType=*/സത്യം, Mode);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
-  if (KnownSrc.isKnownNeverNegInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverNegInfinity())
     Known.knownNot(fcNegInf);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::floor(const KnownFPClass &KnownSrc,
-                                 bool IsMultiUnitFPType, DenormalMode Mode) {
+KnownFPClass KnownFPClass::floor(സ്ഥിരം KnownFPClass &KnownSrc,
+                                 തർക്കം IsMultiUnitFPType, DenormalMode Mode) {
   KnownFPClass Known = roundToIntegral(KnownSrc, IsMultiUnitFPType, Mode);
 
   // Applicable for multi-unit floating point types.
-  if (KnownSrc.isKnownNeverPosInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::ceil(const KnownFPClass &KnownSrc,
-                                bool IsMultiUnitFPType, DenormalMode Mode) {
+KnownFPClass KnownFPClass::ceil(സ്ഥിരം KnownFPClass &KnownSrc,
+                                തർക്കം IsMultiUnitFPType, DenormalMode Mode) {
   KnownFPClass Known = roundToIntegral(KnownSrc, IsMultiUnitFPType, Mode);
 
   // Applicable for multi-unit floating point types.
-  if (KnownSrc.isKnownNeverNegInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverNegInfinity())
     Known.knownNot(fcNegInf);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::frexp_mant(const KnownFPClass &KnownSrc,
+KnownFPClass KnownFPClass::frexp_mant(സ്ഥിരം KnownFPClass &KnownSrc,
                                       DenormalMode Mode) {
   KnownFPClass Known;
 
@@ -1220,103 +1220,103 @@ KnownFPClass KnownFPClass::frexp_mant(const KnownFPClass &KnownSrc,
 
   Known.propagateNonNaN(KnownSrc);
 
-  if (KnownSrc.isKnownNeverPosInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
     Known.knownNot(fcPosInf);
 
-  if (KnownSrc.isKnownNeverNegInfinity())
+  എങ്കിൽ (KnownSrc.isKnownNeverNegInfinity())
     Known.knownNot(fcNegInf);
 
-  if (KnownSrc.isKnownNeverLogicalPosZero(Mode))
+  എങ്കിൽ (KnownSrc.isKnownNeverLogicalPosZero(Mode))
     Known.knownNot(fcPosZero);
 
-  if (KnownSrc.isKnownNeverLogicalNegZero(Mode))
+  എങ്കിൽ (KnownSrc.isKnownNeverLogicalNegZero(Mode))
     Known.knownNot(fcNegZero);
 
   // TODO: These deductions can be improved if subnormal inputs are guaranteed
   // to be flushed to zero.
-  if (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPosNormal | fcPosSubnormal))
     Known.knownNot(fcPosNormal);
 
-  if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal))
     Known.knownNot(fcNegNormal);
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::ldexp(const KnownFPClass &KnownSrc_,
-                                 const APInt &ConstantRangeExpMin,
-                                 const APInt &ConstantRangeExpMax,
-                                 const fltSemantics &Flt, DenormalMode Mode) {
+KnownFPClass KnownFPClass::ldexp(സ്ഥിരം KnownFPClass &KnownSrc_,
+                                 സ്ഥിരം APInt &ConstantRangeExpMin,
+                                 സ്ഥിരം APInt &ConstantRangeExpMax,
+                                 സ്ഥിരം fltSemantics &Flt, DenormalMode Mode) {
   KnownFPClass Known;
 
-  KnownFPClass KnownSrc = applyInputDenormalMode(KnownSrc_, Mode);
+  KnownFPClass KnownSrc = apply_നിവേശം_Denormal_Mode(KnownSrc_, Mode);
 
-  if (ConstantRangeExpMin.isZero() && ConstantRangeExpMax.isZero()) {
+  എങ്കിൽ (ConstantRangeExpMin.isZero() && ConstantRangeExpMax.isZero()) {
     // ldexp(x, 0) -> x
     // Here we make sure to properly propagate sNaN and denormals.
     Known.setKnownFPClasses(KnownSrc.getKnownFPClasses() | fcNan);
     Known.propagateNonNaN(KnownSrc);
-    return applyOutputDenormalMode(Known, Mode);
+    തിരികെ applyOutputDenormalMode(Known, Mode);
   }
 
   Known.propagateNonNaN(KnownSrc);
 
   // Sign is preserved, but underflows may produce zeroes.
-  if (KnownSrc.isKnownNever(fcNegative))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegative))
     Known.knownNot(fcNegative);
-  else if (KnownSrc.cannotBeOrderedLessThanZero())
+  അല്ലെങ്കിൽ എങ്കിൽ (KnownSrc.cannotBeOrderedLessThanZero())
     Known.knownNot(OrderedLessThanZeroMask);
 
-  if (KnownSrc.isKnownNever(fcPositive))
+  എങ്കിൽ (KnownSrc.isKnownNever(fcPositive))
     Known.knownNot(fcPositive);
-  else if (KnownSrc.cannotBeOrderedGreaterThanZero())
+  അല്ലെങ്കിൽ എങ്കിൽ (KnownSrc.cannotBeOrderedGreaterThanZero())
     Known.knownNot(OrderedGreaterThanZeroMask);
 
   // TODO: determine when it is safe to rule out subnormal for ppcf128.
-  if (&Flt != &APFloat::PPCDoubleDouble()) {
+  എങ്കിൽ (&Flt != &APFloat::PPCDoubleDouble()) {
     unsigned Precision = APFloat::semanticsPrecision(Flt);
-    const int MantissaBits = Precision - 1;
-    if (ConstantRangeExpMin.sge(MantissaBits))
+    സ്ഥിരം പൂർണ്ണസംഖ്യ MantissaBits = Precision - 1;
+    എങ്കിൽ (ConstantRangeExpMin.sge(MantissaBits))
       Known.knownNot(fcSubnormal);
   }
 
-  if (ConstantRangeExpMax.isNonPositive()) {
+  എങ്കിൽ (ConstantRangeExpMax.isNonPositive()) {
     // If we know the power is <= 0, can't introduce inf
-    if (KnownSrc.isKnownNeverPosInfinity())
+    എങ്കിൽ (KnownSrc.isKnownNeverPosInfinity())
       Known.knownNot(fcPosInf);
-    if (KnownSrc.isKnownNeverNegInfinity())
+    എങ്കിൽ (KnownSrc.isKnownNeverNegInfinity())
       Known.knownNot(fcNegInf);
-  } else if (ConstantRangeExpMin.isNonNegative()) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (ConstantRangeExpMin.isNonNegative()) {
     // If we know the power is >= 0, can't introduce subnormal or zero
-    if (KnownSrc.isKnownNeverPosSubnormal())
+    എങ്കിൽ (KnownSrc.isKnownNeverPosSubnormal())
       Known.knownNot(fcPosSubnormal);
-    if (KnownSrc.isKnownNeverNegSubnormal())
+    എങ്കിൽ (KnownSrc.isKnownNeverNegSubnormal())
       Known.knownNot(fcNegSubnormal);
-    if (KnownSrc.isKnownNeverPosZero())
+    എങ്കിൽ (KnownSrc.isKnownNeverPosZero())
       Known.knownNot(fcPosZero);
-    if (KnownSrc.isKnownNeverNegZero())
+    എങ്കിൽ (KnownSrc.isKnownNeverNegZero())
       Known.knownNot(fcNegZero);
   }
 
-  return applyOutputDenormalMode(Known, Mode);
+  തിരികെ applyOutputDenormalMode(Known, Mode);
 }
 
-KnownFPClass KnownFPClass::ldexp(const KnownFPClass &KnownSrc,
-                                 const KnownBits &ExpBits,
-                                 const fltSemantics &Flt, DenormalMode Mode) {
-  return ldexp(KnownSrc, ExpBits.getSignedMinValue(),
-               ExpBits.getSignedMaxValue(), Flt, Mode);
+KnownFPClass KnownFPClass::ldexp(സ്ഥിരം KnownFPClass &KnownSrc,
+                                 സ്ഥിരം KnownBits &ExpBits,
+                                 സ്ഥിരം fltSemantics &Flt, DenormalMode Mode) {
+  തിരികെ ldexp(KnownSrc, ExpBits.get_Signed_Min_മൂല്യം(),
+               ExpBits.get_Signed_Max_മൂല്യം(), Flt, Mode);
 }
 
-KnownFPClass KnownFPClass::pow(const KnownFPClass &KnownLHS,
-                               const KnownFPClass &KnownRHS) {
+KnownFPClass KnownFPClass::pow(സ്ഥിരം KnownFPClass &KnownLHS,
+                               സ്ഥിരം KnownFPClass &KnownRHS) {
   KnownFPClass Known;
 
   Known.propagateNonSNaN(KnownLHS, KnownRHS);
 
   // pow may return NaN if one of the arguments is NaN. NaN may be produced from
   // a non-zero-finite-negative base and a non-integer exponent.
-  if (KnownLHS.isKnownNever(fcNan | fcNegNormal | fcNegSubnormal) &&
+  എങ്കിൽ (KnownLHS.isKnownNever(fcNan | fcNegNormal | fcNegSubnormal) &&
       KnownRHS.isKnownNeverNaN())
     Known.knownNot(fcNan);
 
@@ -1325,46 +1325,46 @@ KnownFPClass KnownFPClass::pow(const KnownFPClass &KnownLHS,
   // normal is unlikely and not worth considering.
 
   // Only a negative base raised to an odd power returns a negative value.
-  if (KnownLHS.isKnownNever(fcNegative)) {
+  എങ്കിൽ (KnownLHS.isKnownNever(fcNegative)) {
     Known.knownNot(fcNegative);
-  } else if (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal)) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (KnownLHS.isKnownNever(fcNegNormal | fcNegSubnormal)) {
     Known.knownNot(fcNegNormal | fcNegSubnormal);
     // See if we can also rule out -0.0 or -inf.
     // Here at least one of -0.0 or -inf is a possible base.
 
     // pow(-0.0, odd-positive) = -0.0
     // pow(-inf, odd-negative) = -0.0
-    if ((KnownLHS.isKnownNever(fcNegZero) ||
+    എങ്കിൽ ((KnownLHS.isKnownNever(fcNegZero) ||
          KnownRHS.isKnownNever(fcPosNormal)) &&
         (KnownLHS.isKnownNever(fcNegInf) || KnownRHS.isKnownNever(fcNegNormal)))
       Known.knownNot(fcNegZero);
 
     // pow(-0.0, odd-negative) = -inf
     // pow(-inf, odd-positive) = -inf
-    if ((KnownLHS.isKnownNever(fcNegZero) ||
+    എങ്കിൽ ((KnownLHS.isKnownNever(fcNegZero) ||
          KnownRHS.isKnownNever(fcNegNormal)) &&
         (KnownLHS.isKnownNever(fcNegInf) || KnownRHS.isKnownNever(fcPosNormal)))
       Known.knownNot(fcNegInf);
   }
 
-  return Known;
+  തിരികെ Known;
 }
 
-KnownFPClass KnownFPClass::powi(const KnownFPClass &KnownSrc,
-                                const KnownBits &ExponentKnownBits) {
+KnownFPClass KnownFPClass::powi(സ്ഥിരം KnownFPClass &KnownSrc,
+                                സ്ഥിരം KnownBits &ExponentKnownBits) {
   KnownFPClass Known;
   Known.propagateNonNaN(KnownSrc);
 
-  if (ExponentKnownBits.isZero()) {
+  എങ്കിൽ (ExponentKnownBits.isZero()) {
     // powi(QNaN, 0) returns 1.0, and powi(SNaN, 0) may non-deterministically
     // return 1.0 or a NaN.
-    if (KnownSrc.isKnownNever(fcSNan)) {
+    എങ്കിൽ (KnownSrc.isKnownNever(fcSNan)) {
       Known.knownNot(~fcPosNormal);
-      return Known;
+      തിരികെ Known;
     }
 
     Known.knownNot(~(fcPosNormal | fcNan));
-    return Known;
+    തിരികെ Known;
   }
 
   // Given that exp is an integer, here are the
@@ -1375,26 +1375,26 @@ KnownFPClass KnownFPClass::powi(const KnownFPClass &KnownSrc,
   //   powi(-0, exp)   --> -0 if exp is positive odd.
   //   powi(-inf, exp) --> -0 if exp is negative odd.
   //   powi(-inf, exp) --> -inf if exp is positive odd.
-  if (KnownSrc.isKnownNever(fcNegative) || ExponentKnownBits.isEven()) {
+  എങ്കിൽ (KnownSrc.isKnownNever(fcNegative) || ExponentKnownBits.isEven()) {
     Known.knownNot(fcNegative);
-  } else if (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal)) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (KnownSrc.isKnownNever(fcNegNormal | fcNegSubnormal)) {
     Known.knownNot(fcNegNormal | fcNegSubnormal);
     // See if we can also rule out -0.0 or -inf.
     // Here at least one of -0.0 or -inf is a possible base.
 
     // We already know that ExponentKnownBits.isEven() is false here.
-    const bool IsKnownNeverOddPositive = ExponentKnownBits.isNegative();
-    const bool IsKnownNeverOddNegative = ExponentKnownBits.isNonNegative();
+    സ്ഥിരം തർക്കം IsKnownNeverOddPositive = ExponentKnownBits.isNegative();
+    സ്ഥിരം തർക്കം IsKnownNeverOddNegative = ExponentKnownBits.isNonNegative();
 
     // powi(-0.0, odd-positive) = -0.0
     // powi(-inf, odd-negative) = -0.0
-    if ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddPositive) &&
+    എങ്കിൽ ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddPositive) &&
         (KnownSrc.isKnownNever(fcNegInf) || IsKnownNeverOddNegative))
       Known.knownNot(fcNegZero);
 
     // powi(-0.0, odd-negative) = -inf
     // powi(-inf, odd-positive) = -inf
-    if ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddNegative) &&
+    എങ്കിൽ ((KnownSrc.isKnownNever(fcNegZero) || IsKnownNeverOddNegative) &&
         (KnownSrc.isKnownNever(fcNegInf) || IsKnownNeverOddPositive))
       Known.knownNot(fcNegInf);
   }
@@ -1411,28 +1411,28 @@ KnownFPClass KnownFPClass::powi(const KnownFPClass &KnownSrc,
   //   2. powi(0/nan, exp), exp > 0 can be refinable
   //      to fcNan | fcZero | fcPosNormal.
   {
-    APInt MinExp = ExponentKnownBits.getSignedMinValue();
-    APInt MaxExp = ExponentKnownBits.getSignedMaxValue();
+    APInt MinExp = ExponentKnownBits.get_Signed_Min_മൂല്യം();
+    APInt MaxExp = ExponentKnownBits.get_Signed_Max_മൂല്യം();
 
     // powi(inf, exp), exp > 0
-    bool MayInfSrc =
+    തർക്കം MayInfSrc =
         !KnownSrc.isKnownNever(fcInf) && MaxExp.isStrictlyPositive();
 
     // powi(+/-0, exp), exp < 0
-    bool MayDivByZero = !KnownSrc.isKnownNever(fcZero) && MinExp.isNegative();
+    തർക്കം MayDivByZero = !KnownSrc.isKnownNever(fcZero) && MinExp.isNegative();
 
     // powi(finite, exp), |exp| > 1
-    bool MayFinite = !KnownSrc.isKnownNever(fcNormal | fcSubnormal);
-    bool MayAbsExpGT1 = MinExp.slt(-1) || MaxExp.sgt(1);
-    bool MayFiniteOverflow = MayFinite && MayAbsExpGT1;
+    തർക്കം MayFinite = !KnownSrc.isKnownNever(fcNormal | fcSubnormal);
+    തർക്കം MayAbsExpGT1 = MinExp.slt(-1) || MaxExp.sgt(1);
+    തർക്കം MayFiniteOverflow = MayFinite && MayAbsExpGT1;
 
     // powi(subnormal, -1)
-    bool MayBeNegOne = ExponentKnownBits.Zero.isZero();
-    bool MaySubnormInv = !KnownSrc.isKnownNever(fcSubnormal) && MayBeNegOne;
+    തർക്കം MayBeNegOne = ExponentKnownBits.Zero.isZero();
+    തർക്കം MaySubnormInv = !KnownSrc.isKnownNever(fcSubnormal) && MayBeNegOne;
 
-    if (!MayInfSrc && !MayDivByZero && !MayFiniteOverflow && !MaySubnormInv)
+    എങ്കിൽ (!MayInfSrc && !MayDivByZero && !MayFiniteOverflow && !MaySubnormInv)
       Known.knownNot(fcInf);
   }
 
-  return Known;
+  തിരികെ Known;
 }

@@ -13,13 +13,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ConvertEBCDIC.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
+#അന്തര്ഭാവ "llvm/Support/ConvertEBCDIC.h"
+#അന്തര്ഭാവ "llvm/Support/ConvertUTF.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorHandling.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-static const unsigned char ISO88591ToIBM1047[256] = {
+സ്ഥിതം സ്ഥിരം unsigned അക്ഷരം ISO88591ToIBM1047[256] = {
     0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f, 0x16, 0x05, 0x15, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
     0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, 0x40, 0x5a, 0x7f, 0x7b,
@@ -43,7 +43,7 @@ static const unsigned char ISO88591ToIBM1047[256] = {
     0x8c, 0x49, 0xcd, 0xce, 0xcb, 0xcf, 0xcc, 0xe1, 0x70, 0xdd, 0xde, 0xdb,
     0xdc, 0x8d, 0x8e, 0xdf};
 
-static const unsigned char IBM1047ToISO88591[256] = {
+സ്ഥിതം സ്ഥിരം unsigned അക്ഷരം IBM1047ToISO88591[256] = {
     0x00, 0x01, 0x02, 0x03, 0x9c, 0x09, 0x86, 0x7f, 0x97, 0x8d, 0x8e, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x9d, 0x0a, 0x08, 0x87,
     0x18, 0x19, 0x92, 0x8f, 0x1c, 0x1d, 0x1e, 0x1f, 0x80, 0x81, 0x82, 0x83,
@@ -68,85 +68,85 @@ static const unsigned char IBM1047ToISO88591[256] = {
     0xdc, 0xd9, 0xda, 0x9f};
 
 // Returns true if [Ptr, End) can be completed to form a valid UTF-8 sequence.
-static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
-  assert(Ptr != End);
+സ്ഥിതം തർക്കം isPotentiallyValidUTF8Prefix(സ്ഥിരം UTF8 *Ptr, സ്ഥിരം UTF8 *End) {
+  പ്രതിജ്ഞാ(Ptr != End);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  എങ്കിൽ (Lead < 0xc2 || Lead > 0xf4)
+    തിരികെ അസത്യം;
+  എങ്കിൽ (Ptr == End)
+    തിരികെ സത്യം;
 
   UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
+  എങ്കിൽ ((Second & 0xc0) != 0x80)
+    തിരികെ അസത്യം;
+  എങ്കിൽ ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
       (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+    തിരികെ അസത്യം;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  ആകുമ്പോൾ (Ptr != End)
+    എങ്കിൽ ((*Ptr++ & 0xc0) != 0x80)
+      തിരികെ അസത്യം;
+  തിരികെ സത്യം;
 }
 
 std::error_code
 ConverterEBCDIC::convertToEBCDIC(StringRef Source,
-                                 SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+                                 SmallVectorImpl<അക്ഷരം> &Result) {
+  പ്രതിജ്ഞാ(Result.empty() && "Result must be empty!");
   Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+  എങ്കിൽ (Source.empty())
+    തിരികെ std::error_code();
 
-  const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
-  const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
-      continue;
+  സ്ഥിരം UTF8 *Ptr = reinterpret_cast<സ്ഥിരം UTF8 *>(Source.data());
+  സ്ഥിരം UTF8 *End = Ptr + Source.size();
+  ആകുമ്പോൾ (Ptr != End) {
+    എങ്കിൽ (*Ptr < 0x80) {
+      Result.തള്ളുക_back(static_cast<അക്ഷരം>(ISO88591ToIBM1047[*Ptr++]));
+      തുടരുക;
     }
 
     UTF32 Ch;
-    switch (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
-    case conversionOK:
-      break;
-    case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
-    case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
-    case targetExhausted:
+    തിരഞ്ഞെടുപ്പ് (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
+    അവസ്ഥ conversionOK:
+      നിർത്തുക;
+    അവസ്ഥ sourceExhausted:
+      എങ്കിൽ (!isPotentiallyValidUTF8Prefix(Ptr, End))
+        തിരികെ std::make_error_code(std::errc::illegal_byte_sequence);
+      തിരികെ std::make_error_code(std::errc::invalid_argument);
+    അവസ്ഥ sourceIllegal:
+      തിരികെ std::make_error_code(std::errc::illegal_byte_sequence);
+    അവസ്ഥ targetExhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    എങ്കിൽ (Ch > 0xff)
+      തിരികെ std::make_error_code(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    Result.തള്ളുക_back(static_cast<അക്ഷരം>(ISO88591ToIBM1047[Ch]));
   }
-  return std::error_code();
+  തിരികെ std::error_code();
 }
 
-void ConverterEBCDIC::convertToUTF8(StringRef Source,
-                                    SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+ശൂന്യം ConverterEBCDIC::convertToUTF8(StringRef Source,
+                                    SmallVectorImpl<അക്ഷരം> &Result) {
+  പ്രതിജ്ഞാ(Result.empty() && "Result must be empty!");
 
-  const unsigned char *Table = IBM1047ToISO88591;
-  const unsigned char *Ptr =
-      reinterpret_cast<const unsigned char *>(Source.data());
+  സ്ഥിരം unsigned അക്ഷരം *Table = IBM1047ToISO88591;
+  സ്ഥിരം unsigned അക്ഷരം *Ptr =
+      reinterpret_cast<സ്ഥിരം unsigned അക്ഷരം *>(Source.data());
   size_t Length = Source.size();
   Result.reserve(Length);
-  while (Length--) {
-    unsigned char Ch = *Ptr++;
+  ആകുമ്പോൾ (Length--) {
+    unsigned അക്ഷരം Ch = *Ptr++;
     // Translate the character.
     Ch = Table[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    എങ്കിൽ (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      Result.തള്ളുക_back(static_cast<അക്ഷരം>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    Result.തള്ളുക_back(static_cast<അക്ഷരം>(Ch));
   }
 }

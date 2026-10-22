@@ -10,39 +10,39 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Duration.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Program.h"
-#include <algorithm>
-#include <cerrno>
-#include <cstdio>
-#include <sys/stat.h>
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Config/config.h"
+#അന്തര്ഭാവ "llvm/Support/AutoConvert.h"
+#അന്തര്ഭാവ "llvm/Support/Compiler.h"
+#അന്തര്ഭാവ "llvm/Support/Duration.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorHandling.h"
+#അന്തര്ഭാവ "llvm/Support/FileSystem.h"
+#അന്തര്ഭാവ "llvm/Support/Format.h"
+#അന്തര്ഭാവ "llvm/Support/FormatVariadic.h"
+#അന്തര്ഭാവ "llvm/Support/IOSandbox.h"
+#അന്തര്ഭാവ "llvm/Support/MathExtras.h"
+#അന്തര്ഭാവ "llvm/Support/NativeFormatting.h"
+#അന്തര്ഭാവ "llvm/Support/Process.h"
+#അന്തര്ഭാവ "llvm/Support/Program.h"
+#അന്തര്ഭാവ <algorithm>
+#അന്തര്ഭാവ <cerrno>
+#അന്തര്ഭാവ <cstdio>
+#അന്തര്ഭാവ <sys/stat.h>
 
 // <fcntl.h> may provide O_BINARY.
 # include <fcntl.h>
 
-#if defined(HAVE_UNISTD_H)
+#എങ്കിൽ defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
 
-#if defined(__CYGWIN__)
-#include <io.h>
+#എങ്കിൽ defined(__CYGWIN__)
+#അന്തര്ഭാവ <io.h>
 #endif
 
-#if defined(_MSC_VER)
-#include <io.h>
+#എങ്കിൽ defined(_MSC_VER)
+#അന്തര്ഭാവ <io.h>
 #ifndef STDIN_FILENO
 # define STDIN_FILENO 0
 #endif
@@ -55,240 +55,240 @@
 #endif
 
 #ifdef _WIN32
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/Windows/WindowsSupport.h"
+#അന്തര്ഭാവ "llvm/Support/ConvertUTF.h"
+#അന്തര്ഭാവ "llvm/Support/Signals.h"
+#അന്തര്ഭാവ "llvm/Support/Windows/WindowsSupport.h"
 #endif
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
 raw_ostream::~raw_ostream() {
   // raw_ostream's subclasses should take care to flush the buffer
   // in their destructors.
-  assert(OutBufCur == OutBufStart &&
+  പ്രതിജ്ഞാ(OutBufCur == OutBufStart &&
          "raw_ostream destructor called with non-empty buffer!");
 
-  if (BufferMode == BufferKind::InternalBuffer)
+  എങ്കിൽ (BufferMode == BufferKind::InternalBuffer)
     delete [] OutBufStart;
 }
 
-size_t raw_ostream::preferred_buffer_size() const {
+size_t raw_ostream::preferred_buffer_size() സ്ഥിരം {
 #ifdef _WIN32
   // On Windows BUFSIZ is only 512 which results in more calls to write. This
   // overhead can cause significant performance degradation. Therefore use a
   // better default.
-  return (16 * 1024);
-#else
+  തിരികെ (16 * 1024);
+#അല്ലെങ്കിൽ
   // BUFSIZ is intended to be a reasonable default.
-  return BUFSIZ;
+  തിരികെ BUFSIZ;
 #endif
 }
 
-void raw_ostream::SetBuffered() {
+ശൂന്യം raw_ostream::SetBuffered() {
   // Ask the subclass to determine an appropriate buffer size.
-  if (size_t Size = preferred_buffer_size())
+  എങ്കിൽ (size_t Size = preferred_buffer_size())
     SetBufferSize(Size);
-  else
+  അല്ലെങ്കിൽ
     // It may return 0, meaning this stream should be unbuffered.
     SetUnbuffered();
 }
 
-void raw_ostream::SetBufferAndMode(char *BufferStart, size_t Size,
+ശൂന്യം raw_ostream::SetBufferAndMode(അക്ഷരം *BufferStart, size_t Size,
                                    BufferKind Mode) {
-  assert(((Mode == BufferKind::Unbuffered && !BufferStart && Size == 0) ||
+  പ്രതിജ്ഞാ(((Mode == BufferKind::Unbuffered && !BufferStart && Size == 0) ||
           (Mode != BufferKind::Unbuffered && BufferStart && Size != 0)) &&
          "stream must be unbuffered or have at least one byte");
   // Make sure the current buffer is free of content (we can't flush here; the
   // child buffer management logic will be in write_impl).
-  assert(GetNumBytesInBuffer() == 0 && "Current buffer is non-empty!");
+  പ്രതിജ്ഞാ(Get_അക്കം_Bytes_In_Buffer() == 0 && "Current buffer is non-empty!");
 
-  if (BufferMode == BufferKind::InternalBuffer)
+  എങ്കിൽ (BufferMode == BufferKind::InternalBuffer)
     delete [] OutBufStart;
   OutBufStart = BufferStart;
   OutBufEnd = OutBufStart+Size;
   OutBufCur = OutBufStart;
   BufferMode = Mode;
 
-  assert(OutBufStart <= OutBufEnd && "Invalid size!");
+  പ്രതിജ്ഞാ(OutBufStart <= OutBufEnd && "Invalid size!");
 }
 
 raw_ostream &raw_ostream::operator<<(unsigned long N) {
-  write_integer(*this, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+  write_integer(*ഇത്, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::operator<<(long N) {
-  write_integer(*this, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+  write_integer(*ഇത്, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::operator<<(unsigned long long N) {
-  write_integer(*this, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+  write_integer(*ഇത്, static_cast<uint64_t>(N), 0, IntegerStyle::Integer);
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::operator<<(long long N) {
-  write_integer(*this, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
-  return *this;
+  write_integer(*ഇത്, static_cast<int64_t>(N), 0, IntegerStyle::Integer);
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::write_hex(unsigned long long N) {
-  llvm::write_hex(*this, N, HexPrintStyle::Lower);
-  return *this;
+  llvm::write_hex(*ഇത്, N, HexPrintStyle::Lower);
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::operator<<(Colors C) {
-  if (C == Colors::RESET)
+  എങ്കിൽ (C == Colors::RESET)
     resetColor();
-  else
+  അല്ലെങ്കിൽ
     changeColor(C);
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::write_uuid(const uuid_t UUID) {
-  for (int Idx = 0; Idx < 16; ++Idx) {
-    *this << format("%02" PRIX32, UUID[Idx]);
-    if (Idx == 3 || Idx == 5 || Idx == 7 || Idx == 9)
-      *this << "-";
+raw_ostream &raw_ostream::write_uuid(സ്ഥിരം uuid_t UUID) {
+  വേണ്ടി (പൂർണ്ണസംഖ്യ Idx = 0; Idx < 16; ++Idx) {
+    *ഇത് << format("%02" PRIX32, UUID[Idx]);
+    എങ്കിൽ (Idx == 3 || Idx == 5 || Idx == 7 || Idx == 9)
+      *ഇത് << "-";
   }
-  return *this;
+  തിരികെ *ഇത്;
 }
 
 
 raw_ostream &raw_ostream::write_escaped(StringRef Str,
-                                        bool UseHexEscapes) {
-  for (unsigned char c : Str) {
-    switch (c) {
-    case '\\':
-      *this << '\\' << '\\';
-      break;
-    case '\t':
-      *this << '\\' << 't';
-      break;
-    case '\n':
-      *this << '\\' << 'n';
-      break;
-    case '"':
-      *this << '\\' << '"';
-      break;
-    default:
-      if (isPrint(c)) {
-        *this << c;
-        break;
+                                        തർക്കം UseHexEscapes) {
+  വേണ്ടി (unsigned അക്ഷരം c : Str) {
+    തിരഞ്ഞെടുപ്പ് (c) {
+    അവസ്ഥ '\\':
+      *ഇത് << '\\' << '\\';
+      നിർത്തുക;
+    അവസ്ഥ '\t':
+      *ഇത് << '\\' << 't';
+      നിർത്തുക;
+    അവസ്ഥ '\n':
+      *ഇത് << '\\' << 'n';
+      നിർത്തുക;
+    അവസ്ഥ '"':
+      *ഇത് << '\\' << '"';
+      നിർത്തുക;
+    സ്ഥിരസ്ഥിതി:
+      എങ്കിൽ (isPrint(c)) {
+        *ഇത് << c;
+        നിർത്തുക;
       }
 
       // Write out the escaped representation.
-      if (UseHexEscapes) {
-        *this << '\\' << 'x';
-        *this << hexdigit((c >> 4) & 0xF);
-        *this << hexdigit((c >> 0) & 0xF);
-      } else {
+      എങ്കിൽ (UseHexEscapes) {
+        *ഇത് << '\\' << 'x';
+        *ഇത് << hexdigit((c >> 4) & 0xF);
+        *ഇത് << hexdigit((c >> 0) & 0xF);
+      } അല്ലെങ്കിൽ {
         // Always use a full 3-character octal escape.
-        *this << '\\';
-        *this << char('0' + ((c >> 6) & 7));
-        *this << char('0' + ((c >> 3) & 7));
-        *this << char('0' + ((c >> 0) & 7));
+        *ഇത് << '\\';
+        *ഇത് << അക്ഷരം('0' + ((c >> 6) & 7));
+        *ഇത് << അക്ഷരം('0' + ((c >> 3) & 7));
+        *ഇത് << അക്ഷരം('0' + ((c >> 0) & 7));
       }
     }
   }
 
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::operator<<(const void *P) {
-  llvm::write_hex(*this, (uintptr_t)P, HexPrintStyle::PrefixLower);
-  return *this;
+raw_ostream &raw_ostream::operator<<(സ്ഥിരം ശൂന്യം *P) {
+  llvm::write_hex(*ഇത്, (uintptr_t)P, HexPrintStyle::PrefixLower);
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::operator<<(double N) {
-  llvm::write_double(*this, N, FloatStyle::Exponent);
-  return *this;
+raw_ostream &raw_ostream::operator<<(ഇരട്ട N) {
+  llvm::write_double(*ഇത്, N, FloatStyle::Exponent);
+  തിരികെ *ഇത്;
 }
 
-void raw_ostream::flush_nonempty() {
-  assert(OutBufCur > OutBufStart && "Invalid call to flush_nonempty.");
+ശൂന്യം raw_ostream::flush_nonempty() {
+  പ്രതിജ്ഞാ(OutBufCur > OutBufStart && "Invalid call to flush_nonempty.");
   size_t Length = OutBufCur - OutBufStart;
   OutBufCur = OutBufStart;
   write_impl(OutBufStart, Length);
 }
 
-raw_ostream &raw_ostream::write(unsigned char C) {
+raw_ostream &raw_ostream::ലിഖ(unsigned അക്ഷരം C) {
   // Group exceptional cases into a single branch.
-  if (LLVM_UNLIKELY(OutBufCur >= OutBufEnd)) {
-    if (LLVM_UNLIKELY(!OutBufStart)) {
-      if (BufferMode == BufferKind::Unbuffered) {
-        write_impl(reinterpret_cast<char *>(&C), 1);
-        return *this;
+  എങ്കിൽ (LLVM_UNLIKELY(OutBufCur >= OutBufEnd)) {
+    എങ്കിൽ (LLVM_UNLIKELY(!OutBufStart)) {
+      എങ്കിൽ (BufferMode == BufferKind::Unbuffered) {
+        write_impl(reinterpret_cast<അക്ഷരം *>(&C), 1);
+        തിരികെ *ഇത്;
       }
       // Set up a buffer and start over.
       SetBuffered();
-      return write(C);
+      തിരികെ ലിഖ(C);
     }
 
     flush_nonempty();
   }
 
   *OutBufCur++ = C;
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::write(const char *Ptr, size_t Size) {
+raw_ostream &raw_ostream::ലിഖ(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
   // Group exceptional cases into a single branch.
-  if (LLVM_UNLIKELY(size_t(OutBufEnd - OutBufCur) < Size)) {
-    if (LLVM_UNLIKELY(!OutBufStart)) {
-      if (BufferMode == BufferKind::Unbuffered) {
+  എങ്കിൽ (LLVM_UNLIKELY(size_t(OutBufEnd - OutBufCur) < Size)) {
+    എങ്കിൽ (LLVM_UNLIKELY(!OutBufStart)) {
+      എങ്കിൽ (BufferMode == BufferKind::Unbuffered) {
         write_impl(Ptr, Size);
-        return *this;
+        തിരികെ *ഇത്;
       }
       // Set up a buffer and start over.
       SetBuffered();
-      return write(Ptr, Size);
+      തിരികെ ലിഖ(Ptr, Size);
     }
 
-    size_t NumBytes = OutBufEnd - OutBufCur;
+    size_t അക്കം_Bytes = OutBufEnd - OutBufCur;
 
     // If the buffer is empty at this point we have a string that is larger
     // than the buffer. Directly write the chunk that is a multiple of the
     // preferred buffer size and put the remainder in the buffer.
-    if (LLVM_UNLIKELY(OutBufCur == OutBufStart)) {
-      assert(NumBytes != 0 && "undefined behavior");
-      size_t BytesToWrite = Size - (Size % NumBytes);
+    എങ്കിൽ (LLVM_UNLIKELY(OutBufCur == OutBufStart)) {
+      പ്രതിജ്ഞാ(അക്കം_Bytes != 0 && "undefined behavior");
+      size_t BytesToWrite = Size - (Size % അക്കം_Bytes);
       write_impl(Ptr, BytesToWrite);
       size_t BytesRemaining = Size - BytesToWrite;
-      if (BytesRemaining > size_t(OutBufEnd - OutBufCur)) {
+      എങ്കിൽ (BytesRemaining > size_t(OutBufEnd - OutBufCur)) {
         // Too much left over to copy into our buffer.
-        return write(Ptr + BytesToWrite, BytesRemaining);
+        തിരികെ ലിഖ(Ptr + BytesToWrite, BytesRemaining);
       }
       copy_to_buffer(Ptr + BytesToWrite, BytesRemaining);
-      return *this;
+      തിരികെ *ഇത്;
     }
 
     // We don't have enough space in the buffer to fit the string in. Insert as
     // much as possible, flush and start over with the remainder.
-    copy_to_buffer(Ptr, NumBytes);
+    copy_to_buffer(Ptr, അക്കം_Bytes);
     flush_nonempty();
-    return write(Ptr + NumBytes, Size - NumBytes);
+    തിരികെ ലിഖ(Ptr + അക്കം_Bytes, Size - അക്കം_Bytes);
   }
 
   copy_to_buffer(Ptr, Size);
 
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-void raw_ostream::copy_to_buffer(const char *Ptr, size_t Size) {
-  assert(Size <= size_t(OutBufEnd - OutBufCur) && "Buffer overrun!");
+ശൂന്യം raw_ostream::copy_to_buffer(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
+  പ്രതിജ്ഞാ(Size <= size_t(OutBufEnd - OutBufCur) && "Buffer overrun!");
 
   // Handle short strings specially, memcpy isn't very good at very short
   // strings.
-  switch (Size) {
-  case 4: OutBufCur[3] = Ptr[3]; [[fallthrough]];
-  case 3: OutBufCur[2] = Ptr[2]; [[fallthrough]];
-  case 2: OutBufCur[1] = Ptr[1]; [[fallthrough]];
-  case 1: OutBufCur[0] = Ptr[0]; [[fallthrough]];
-  case 0: break;
-  default:
+  തിരഞ്ഞെടുപ്പ് (Size) {
+  അവസ്ഥ 4: OutBufCur[3] = Ptr[3]; [[fallthrough]];
+  അവസ്ഥ 3: OutBufCur[2] = Ptr[2]; [[fallthrough]];
+  അവസ്ഥ 2: OutBufCur[1] = Ptr[1]; [[fallthrough]];
+  അവസ്ഥ 1: OutBufCur[0] = Ptr[0]; [[fallthrough]];
+  അവസ്ഥ 0: നിർത്തുക;
+  സ്ഥിരസ്ഥിതി:
     memcpy(OutBufCur, Ptr, Size);
-    break;
+    നിർത്തുക;
   }
 
   OutBufCur += Size;
@@ -298,273 +298,273 @@ void raw_ostream::copy_to_buffer(const char *Ptr, size_t Size) {
 // needs, excluding the '\0'. A negative value is a genuine error, which a
 // larger buffer can't fix, so give up and print nothing.
 raw_ostream &
-raw_ostream::operator<<(function_ref<int(char *, size_t)> Snprint) {
+raw_ostream::operator<<(function_ref<പൂർണ്ണസംഖ്യ(അക്ഷരം *, size_t)> Snprint) {
   // If we have more than a few bytes left in our output buffer, try
   // formatting directly onto its end.
   size_t Size = 128;
-  size_t BufferBytesLeft = OutBufEnd - OutBufCur;
-  if (BufferBytesLeft > 3) {
-    int N = Snprint(OutBufCur, BufferBytesLeft);
-    if (N < 0)
-      return *this;
+  size_t Buffer_Bytes_ഇടത് = OutBufEnd - OutBufCur;
+  എങ്കിൽ (Buffer_Bytes_ഇടത് > 3) {
+    പൂർണ്ണസംഖ്യ N = Snprint(OutBufCur, Buffer_Bytes_ഇടത്);
+    എങ്കിൽ (N < 0)
+      തിരികെ *ഇത്;
     // Common case is that we have plenty of space.
-    if (size_t(N) < BufferBytesLeft) {
+    എങ്കിൽ (size_t(N) < Buffer_Bytes_ഇടത്) {
       OutBufCur += N;
-      return *this;
+      തിരികെ *ഇത്;
     }
     // N excludes the '\0', so N + 1 bytes are exactly enough.
     Size = size_t(N) + 1;
   }
 
   // Otherwise format into a SmallVector resized to fit.
-  SmallVector<char, 128> V;
-  for (;;) {
+  SmallVector<അക്ഷരം, 128> V;
+  വേണ്ടി (;;) {
     V.resize(Size);
-    int N = Snprint(V.data(), Size);
-    if (N < 0)
-      return *this;
-    if (size_t(N) < Size)
-      return write(V.data(), N);
+    പൂർണ്ണസംഖ്യ N = Snprint(V.data(), Size);
+    എങ്കിൽ (N < 0)
+      തിരികെ *ഇത്;
+    എങ്കിൽ (size_t(N) < Size)
+      തിരികെ ലിഖ(V.data(), N);
     Size = size_t(N) + 1;
   }
 }
 
-raw_ostream &raw_ostream::operator<<(const formatv_object_base &Obj) {
-  Obj.format(*this);
-  return *this;
+raw_ostream &raw_ostream::operator<<(സ്ഥിരം formatv_object_base &Obj) {
+  Obj.format(*ഇത്);
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedString &FS) {
-  unsigned LeftIndent = 0;
-  unsigned RightIndent = 0;
-  const ssize_t Difference = FS.Width - FS.Str.size();
-  if (Difference > 0) {
-    switch (FS.Justify) {
-    case FormattedString::JustifyNone:
-      break;
-    case FormattedString::JustifyLeft:
-      RightIndent = Difference;
-      break;
-    case FormattedString::JustifyRight:
-      LeftIndent = Difference;
-      break;
-    case FormattedString::JustifyCenter:
-      LeftIndent = Difference / 2;
-      RightIndent = Difference - LeftIndent;
-      break;
+raw_ostream &raw_ostream::operator<<(സ്ഥിരം FormattedString &FS) {
+  unsigned ഇടത്_Indent = 0;
+  unsigned വലത്_Indent = 0;
+  സ്ഥിരം ssize_t Difference = FS.Width - FS.Str.size();
+  എങ്കിൽ (Difference > 0) {
+    തിരഞ്ഞെടുപ്പ് (FS.Justify) {
+    അവസ്ഥ FormattedString::JustifyNone:
+      നിർത്തുക;
+    അവസ്ഥ FormattedString::Justify_ഇടത്:
+      വലത്_Indent = Difference;
+      നിർത്തുക;
+    അവസ്ഥ FormattedString::Justify_വലത്:
+      ഇടത്_Indent = Difference;
+      നിർത്തുക;
+    അവസ്ഥ FormattedString::JustifyCenter:
+      ഇടത്_Indent = Difference / 2;
+      വലത്_Indent = Difference - ഇടത്_Indent;
+      നിർത്തുക;
     }
   }
-  indent(LeftIndent);
-  (*this) << FS.Str;
-  indent(RightIndent);
-  return *this;
+  indent(ഇടത്_Indent);
+  (*ഇത്) << FS.Str;
+  indent(വലത്_Indent);
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedNumber &FN) {
-  if (FN.Hex) {
+raw_ostream &raw_ostream::operator<<(സ്ഥിരം Formatted_സംഖ്യ &FN) {
+  എങ്കിൽ (FN.Hex) {
     HexPrintStyle Style;
-    if (FN.Upper && FN.HexPrefix)
+    എങ്കിൽ (FN.Upper && FN.HexPrefix)
       Style = HexPrintStyle::PrefixUpper;
-    else if (FN.Upper && !FN.HexPrefix)
+    അല്ലെങ്കിൽ എങ്കിൽ (FN.Upper && !FN.HexPrefix)
       Style = HexPrintStyle::Upper;
-    else if (!FN.Upper && FN.HexPrefix)
+    അല്ലെങ്കിൽ എങ്കിൽ (!FN.Upper && FN.HexPrefix)
       Style = HexPrintStyle::PrefixLower;
-    else
+    അല്ലെങ്കിൽ
       Style = HexPrintStyle::Lower;
-    llvm::write_hex(*this, FN.HexValue, Style, FN.Width);
-  } else {
+    llvm::write_hex(*ഇത്, FN.Hex_മൂല്യം, Style, FN.Width);
+  } അല്ലെങ്കിൽ {
     llvm::SmallString<16> Buffer;
     llvm::raw_svector_ostream Stream(Buffer);
-    llvm::write_integer(Stream, FN.DecValue, 0, IntegerStyle::Integer);
-    if (Buffer.size() < FN.Width)
+    llvm::write_integer(Stream, FN.Dec_മൂല്യം, 0, IntegerStyle::Integer);
+    എങ്കിൽ (Buffer.size() < FN.Width)
       indent(FN.Width - Buffer.size());
-    (*this) << Buffer;
+    (*ഇത്) << Buffer;
   }
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedBytes &FB) {
-  if (FB.Bytes.empty())
-    return *this;
+raw_ostream &raw_ostream::operator<<(സ്ഥിരം FormattedBytes &FB) {
+  എങ്കിൽ (FB.Bytes.empty())
+    തിരികെ *ഇത്;
 
-  size_t LineIndex = 0;
+  size_t വരി_Index = 0;
   auto Bytes = FB.Bytes;
-  const size_t Size = Bytes.size();
+  സ്ഥിരം size_t Size = Bytes.size();
   HexPrintStyle HPS = FB.Upper ? HexPrintStyle::Upper : HexPrintStyle::Lower;
   uint64_t OffsetWidth = 0;
-  if (FB.FirstByteOffset) {
+  എങ്കിൽ (FB.FirstByteOffset) {
     // Figure out how many nibbles are needed to print the largest offset
     // represented by this data set, so that we can align the offset field
     // to the right width.
-    size_t Lines = Size / FB.NumPerLine;
-    uint64_t MaxOffset = *FB.FirstByteOffset + Lines * FB.NumPerLine;
+    size_t വരികൾ = Size / FB.അക്കം_Per_വരി;
+    uint64_t MaxOffset = *FB.FirstByteOffset + വരികൾ * FB.അക്കം_Per_വരി;
     unsigned Power = 0;
-    if (MaxOffset > 0)
+    എങ്കിൽ (MaxOffset > 0)
       Power = llvm::Log2_64_Ceil(MaxOffset);
     OffsetWidth = std::max<uint64_t>(4, llvm::alignTo(Power, 4) / 4);
   }
 
   // The width of a block of data including all spaces for group separators.
-  unsigned NumByteGroups =
-      alignTo(FB.NumPerLine, FB.ByteGroupSize) / FB.ByteGroupSize;
-  unsigned BlockCharWidth = FB.NumPerLine * 2 + NumByteGroups - 1;
+  unsigned അക്കം_Byte_Groups =
+      alignTo(FB.അക്കം_Per_വരി, FB.ByteGroupSize) / FB.ByteGroupSize;
+  unsigned BlockCharWidth = FB.അക്കം_Per_വരി * 2 + അക്കം_Byte_Groups - 1;
 
-  while (!Bytes.empty()) {
+  ആകുമ്പോൾ (!Bytes.empty()) {
     indent(FB.IndentLevel);
 
-    if (FB.FirstByteOffset) {
+    എങ്കിൽ (FB.FirstByteOffset) {
       uint64_t Offset = *FB.FirstByteOffset;
-      llvm::write_hex(*this, Offset + LineIndex, HPS, OffsetWidth);
-      *this << ": ";
+      llvm::write_hex(*ഇത്, Offset + വരി_Index, HPS, OffsetWidth);
+      *ഇത് << ": ";
     }
 
-    auto Line = Bytes.take_front(FB.NumPerLine);
+    auto വരി = Bytes.take_front(FB.അക്കം_Per_വരി);
 
     size_t CharsPrinted = 0;
     // Print the hex bytes for this line in groups
-    for (size_t I = 0; I < Line.size(); ++I, CharsPrinted += 2) {
-      if (I && (I % FB.ByteGroupSize) == 0) {
+    വേണ്ടി (size_t I = 0; I < വരി.size(); ++I, CharsPrinted += 2) {
+      എങ്കിൽ (I && (I % FB.ByteGroupSize) == 0) {
         ++CharsPrinted;
-        *this << " ";
+        *ഇത് << " ";
       }
-      llvm::write_hex(*this, Line[I], HPS, 2);
+      llvm::write_hex(*ഇത്, വരി[I], HPS, 2);
     }
 
-    if (FB.ASCII) {
+    എങ്കിൽ (FB.ASCII) {
       // Print any spaces needed for any bytes that we didn't print on this
       // line so that the ASCII bytes are correctly aligned.
-      assert(BlockCharWidth >= CharsPrinted);
+      പ്രതിജ്ഞാ(BlockCharWidth >= CharsPrinted);
       indent(BlockCharWidth - CharsPrinted + 2);
-      *this << "|";
+      *ഇത് << "|";
 
       // Print the ASCII char values for each byte on this line
-      for (uint8_t Byte : Line) {
-        if (isPrint(Byte))
-          *this << static_cast<char>(Byte);
-        else
-          *this << '.';
+      വേണ്ടി (uint8_t Byte : വരി) {
+        എങ്കിൽ (isPrint(Byte))
+          *ഇത് << static_cast<അക്ഷരം>(Byte);
+        അല്ലെങ്കിൽ
+          *ഇത് << '.';
       }
-      *this << '|';
+      *ഇത് << '|';
     }
 
-    Bytes = Bytes.drop_front(Line.size());
-    LineIndex += Line.size();
-    if (LineIndex < Size)
-      *this << '\n';
+    Bytes = Bytes.drop_front(വരി.size());
+    വരി_Index += വരി.size();
+    എങ്കിൽ (വരി_Index < Size)
+      *ഇത് << '\n';
   }
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-template <char C>
-static raw_ostream &write_padding(raw_ostream &OS, unsigned NumChars) {
-  static const char Chars[] = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
+template <അക്ഷരം C>
+സ്ഥിതം raw_ostream &write_padding(raw_ostream &OS, unsigned അക്കം_Chars) {
+  സ്ഥിതം സ്ഥിരം അക്ഷരം Chars[] = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C};
 
   // Usually the indentation is small, handle it with a fastpath.
-  if (NumChars < std::size(Chars))
-    return OS.write(Chars, NumChars);
+  എങ്കിൽ (അക്കം_Chars < std::size(Chars))
+    തിരികെ OS.ലിഖ(Chars, അക്കം_Chars);
 
-  while (NumChars) {
-    unsigned NumToWrite = std::min(NumChars, (unsigned)std::size(Chars) - 1);
-    OS.write(Chars, NumToWrite);
-    NumChars -= NumToWrite;
+  ആകുമ്പോൾ (അക്കം_Chars) {
+    unsigned അക്കം_To_Write = std::min(അക്കം_Chars, (unsigned)std::size(Chars) - 1);
+    OS.ലിഖ(Chars, അക്കം_To_Write);
+    അക്കം_Chars -= അക്കം_To_Write;
   }
-  return OS;
+  തിരികെ OS;
 }
 
 /// indent - Insert 'NumSpaces' spaces.
-raw_ostream &raw_ostream::indent(unsigned NumSpaces) {
-  return write_padding<' '>(*this, NumSpaces);
+raw_ostream &raw_ostream::indent(unsigned അക്കം_Spaces) {
+  തിരികെ write_padding<' '>(*ഇത്, അക്കം_Spaces);
 }
 
 /// write_zeros - Insert 'NumZeros' nulls.
-raw_ostream &raw_ostream::write_zeros(unsigned NumZeros) {
-  return write_padding<'\0'>(*this, NumZeros);
+raw_ostream &raw_ostream::write_zeros(unsigned അക്കം_Zeros) {
+  തിരികെ write_padding<'\0'>(*ഇത്, അക്കം_Zeros);
 }
 
-bool raw_ostream::prepare_colors() {
+തർക്കം raw_ostream::prepare_colors() {
   // Colors were explicitly disabled.
-  if (!ColorEnabled)
-    return false;
+  എങ്കിൽ (!ColorEnabled)
+    തിരികെ അസത്യം;
 
   // Colors require changing the terminal but this stream is not going to a
   // terminal.
-  if (sys::Process::ColorNeedsFlush() && !is_displayed())
-    return false;
+  എങ്കിൽ (sys::Process::ColorNeedsFlush() && !is_displayed())
+    തിരികെ അസത്യം;
 
-  if (sys::Process::ColorNeedsFlush())
+  എങ്കിൽ (sys::Process::ColorNeedsFlush())
     flush();
 
-  return true;
+  തിരികെ സത്യം;
 }
 
-raw_ostream &raw_ostream::changeColor(enum Colors colors, bool bold, bool bg) {
-  if (!prepare_colors())
-    return *this;
+raw_ostream &raw_ostream::changeColor(എണ്ണൽ Colors colors, തർക്കം bold, തർക്കം bg) {
+  എങ്കിൽ (!prepare_colors())
+    തിരികെ *ഇത്;
 
-  const char *colorcode =
+  സ്ഥിരം അക്ഷരം *colorcode =
       (colors == SAVEDCOLOR)
           ? sys::Process::OutputBold(bg)
-          : sys::Process::OutputColor(static_cast<char>(colors), bold, bg);
-  if (colorcode)
-    write(colorcode, strlen(colorcode));
-  return *this;
+          : sys::Process::OutputColor(static_cast<അക്ഷരം>(colors), bold, bg);
+  എങ്കിൽ (colorcode)
+    ലിഖ(colorcode, strlen(colorcode));
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::resetColor() {
-  if (!prepare_colors())
-    return *this;
+  എങ്കിൽ (!prepare_colors())
+    തിരികെ *ഇത്;
 
-  if (const char *colorcode = sys::Process::ResetColor())
-    write(colorcode, strlen(colorcode));
-  return *this;
+  എങ്കിൽ (സ്ഥിരം അക്ഷരം *colorcode = sys::Process::ResetColor())
+    ലിഖ(colorcode, strlen(colorcode));
+  തിരികെ *ഇത്;
 }
 
 raw_ostream &raw_ostream::reverseColor() {
-  if (!prepare_colors())
-    return *this;
+  എങ്കിൽ (!prepare_colors())
+    തിരികെ *ഇത്;
 
-  if (const char *colorcode = sys::Process::OutputReverse())
-    write(colorcode, strlen(colorcode));
-  return *this;
+  എങ്കിൽ (സ്ഥിരം അക്ഷരം *colorcode = sys::Process::OutputReverse())
+    ലിഖ(colorcode, strlen(colorcode));
+  തിരികെ *ഇത്;
 }
 
-void raw_ostream::anchor() {}
+ശൂന്യം raw_ostream::anchor() {}
 
 //===----------------------------------------------------------------------===//
 //  raw_fd_ostream
 //===----------------------------------------------------------------------===//
 
-static int getFD(StringRef Filename, std::error_code &EC,
+സ്ഥിതം പൂർണ്ണസംഖ്യ getFD(StringRef Filename, std::error_code &EC,
                  sys::fs::CreationDisposition Disp, sys::fs::FileAccess Access,
                  sys::fs::OpenFlags Flags) {
   // FIXME(sandboxing): Remove this by adopting `llvm::vfs::OutputBackend`.
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert((Access & sys::fs::FA_Write) &&
+  പ്രതിജ്ഞാ((Access & sys::fs::FA_Write) &&
          "Cannot make a raw_ostream from a read-only descriptor!");
 
   // Handle "-" as stdout. Note that when we do this, we consider ourself
   // the owner of stdout and may set the "binary" flag globally based on Flags.
-  if (Filename == "-") {
+  എങ്കിൽ (Filename == "-") {
     EC = std::error_code();
     // Change stdout's text/binary mode based on the Flags.
     sys::ChangeStdoutMode(Flags);
-    return STDOUT_FILENO;
+    തിരികെ STDOUT_FILENO;
   }
 
-  int FD;
-  if (Access & sys::fs::FA_Read)
+  പൂർണ്ണസംഖ്യ FD;
+  എങ്കിൽ (Access & sys::fs::FA_Read)
     EC = sys::fs::openFileForReadWrite(Filename, FD, Disp, Flags);
-  else
+  അല്ലെങ്കിൽ
     EC = sys::fs::openFileForWrite(Filename, FD, Disp, Flags);
-  if (EC)
-    return -1;
+  എങ്കിൽ (EC)
+    തിരികെ -1;
 
-  return FD;
+  തിരികെ FD;
 }
 
 raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC)
@@ -589,22 +589,22 @@ raw_fd_ostream::raw_fd_ostream(StringRef Filename, std::error_code &EC,
                                sys::fs::CreationDisposition Disp,
                                sys::fs::FileAccess Access,
                                sys::fs::OpenFlags Flags)
-    : raw_fd_ostream(getFD(Filename, EC, Disp, Access, Flags), true) {}
+    : raw_fd_ostream(getFD(Filename, EC, Disp, Access, Flags), സത്യം) {}
 
 /// FD is the file descriptor that this writes to.  If ShouldClose is true, this
 /// closes the file when the stream is destroyed.
-raw_fd_ostream::raw_fd_ostream(int fd, bool shouldClose, bool unbuffered,
+raw_fd_ostream::raw_fd_ostream(പൂർണ്ണസംഖ്യ fd, തർക്കം shouldClose, തർക്കം unbuffered,
                                OStreamKind K)
     : raw_pwrite_stream(unbuffered, K), FD(fd), ShouldClose(shouldClose) {
   // FIXME(sandboxing): Remove this by adopting `llvm::vfs::OutputBackend`.
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (FD < 0 ) {
-    ShouldClose = false;
-    return;
+  എങ്കിൽ (FD < 0 ) {
+    ShouldClose = അസത്യം;
+    തിരികെ;
   }
 
-  enable_colors(true);
+  enable_colors(സത്യം);
 
   // Do not attempt to close stdout or stderr. We used to try to maintain the
   // property that tools that support writing file to stdout should not also
@@ -612,8 +612,8 @@ raw_fd_ostream::raw_fd_ostream(int fd, bool shouldClose, bool unbuffered,
   // maintain this invariant. Many features have been added to LLVM and clang
   // (-fdump-record-layouts, optimization remarks, etc) that print to stdout, so
   // users must simply be aware that mixed output and remarks is a possibility.
-  if (FD <= STDERR_FILENO)
-    ShouldClose = false;
+  എങ്കിൽ (FD <= STDERR_FILENO)
+    ShouldClose = അസത്യം;
 
 #ifdef _WIN32
   // Check if this is a console device. This is not equivalent to isatty.
@@ -629,20 +629,20 @@ raw_fd_ostream::raw_fd_ostream(int fd, bool shouldClose, bool unbuffered,
 #ifdef _WIN32
   // MSVCRT's _lseek(SEEK_CUR) doesn't return -1 for pipes.
   SupportsSeeking = !EC && IsRegularFile;
-#else
+#അല്ലെങ്കിൽ
   SupportsSeeking = !EC && loc != (off_t)-1;
 #endif
-  if (!SupportsSeeking)
+  എങ്കിൽ (!SupportsSeeking)
     pos = 0;
-  else
+  അല്ലെങ്കിൽ
     pos = static_cast<uint64_t>(loc);
 }
 
 raw_fd_ostream::~raw_fd_ostream() {
-  if (FD >= 0) {
+  എങ്കിൽ (FD >= 0) {
     flush();
-    if (ShouldClose) {
-      if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    എങ്കിൽ (ShouldClose) {
+      എങ്കിൽ (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
         error_detected(EC);
     }
   }
@@ -652,19 +652,19 @@ raw_fd_ostream::~raw_fd_ostream() {
   // report_fatal_error() invokes exit(). We know report_fatal_error()
   // might not write messages to stderr when any errors were detected
   // on FD == 2.
-  if (FD == 2) return;
+  എങ്കിൽ (FD == 2) തിരികെ;
 #endif
 
   // If there are any pending errors, report them now. Clients wishing
   // to avoid report_fatal_error calls should check for errors with
   // has_error() and clear the error flag with clear_error() before
   // destructing raw_ostream objects which may have errors.
-  if (has_error())
+  എങ്കിൽ (has_error())
     reportFatalUsageError(Twine("IO failure on output stream: ") +
                           error().message());
 }
 
-#if defined(_WIN32)
+#എങ്കിൽ defined(_WIN32)
 // The most reliable way to print unicode in a Windows console is with
 // WriteConsoleW. To use that, first transcode from UTF-8 to UTF-16. This
 // assumes that LLVM programs always print valid UTF-8 to the console. The data
@@ -679,25 +679,25 @@ raw_fd_ostream::~raw_fd_ostream() {
 // the input is UTF-8 or transcode from the local codepage to UTF-8 before
 // quoting it. If they don't, this may mess up the encoding, but this is still
 // probably the best compromise we can make.
-static bool write_console_impl(int FD, StringRef Data) {
+സ്ഥിതം തർക്കം write_console_impl(പൂർണ്ണസംഖ്യ FD, StringRef Data) {
   SmallVector<wchar_t, 256> WideText;
 
   // Fall back to ::write if it wasn't valid UTF-8.
-  if (auto EC = sys::windows::UTF8ToUTF16(Data, WideText))
-    return false;
+  എങ്കിൽ (auto EC = sys::windows::UTF8ToUTF16(Data, WideText))
+    തിരികെ അസത്യം;
 
   // On Windows 7 and earlier, WriteConsoleW has a low maximum amount of data
   // that can be written to the console at a time.
   size_t MaxWriteSize = WideText.size();
-  if (!RunningWindows8OrGreater())
+  എങ്കിൽ (!RunningWindows8OrGreater())
     MaxWriteSize = 32767;
 
   size_t WCharsWritten = 0;
-  do {
+  ചെയ്യുക {
     size_t WCharsToWrite =
         std::min(MaxWriteSize, WideText.size() - WCharsWritten);
     DWORD ActuallyWritten;
-    bool Success =
+    തർക്കം Success =
         ::WriteConsoleW((HANDLE)::_get_osfhandle(FD), &WideText[WCharsWritten],
                         WCharsToWrite, &ActuallyWritten,
                         /*Reserved=*/nullptr);
@@ -705,28 +705,28 @@ static bool write_console_impl(int FD, StringRef Data) {
     // The most likely reason for WriteConsoleW to fail is that FD no longer
     // points to a console. Fall back to ::write. If this isn't the first loop
     // iteration, something is truly wrong.
-    if (!Success)
-      return false;
+    എങ്കിൽ (!Success)
+      തിരികെ അസത്യം;
 
     WCharsWritten += ActuallyWritten;
-  } while (WCharsWritten != WideText.size());
-  return true;
+  } ആകുമ്പോൾ (WCharsWritten != WideText.size());
+  തിരികെ സത്യം;
 }
 #endif
 
-void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (TiedStream)
+ശൂന്യം raw_fd_ostream::write_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
+  എങ്കിൽ (TiedStream)
     TiedStream->flush();
 
-  assert(FD >= 0 && "File already closed.");
+  പ്രതിജ്ഞാ(FD >= 0 && "File already closed.");
   pos += Size;
 
-#if defined(_WIN32)
+#എങ്കിൽ defined(_WIN32)
   // If this is a Windows console device, try re-encoding from UTF-8 to UTF-16
   // and using WriteConsoleW. If that fails, fall back to plain write().
-  if (IsWindowsConsole)
-    if (write_console_impl(FD, StringRef(Ptr, Size)))
-      return;
+  എങ്കിൽ (IsWindowsConsole)
+    എങ്കിൽ (write_console_impl(FD, StringRef(Ptr, Size)))
+      തിരികെ;
 #endif
 
   // The maximum write size is limited to INT32_MAX. A write
@@ -734,17 +734,17 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
   // and Windows _write requires 32 bit input.
   size_t MaxWriteSize = INT32_MAX;
 
-#if defined(__linux__)
+#എങ്കിൽ defined(__linux__)
   // It is observed that Linux returns EINVAL for a very large write (>2G).
   // Make it a reasonably small value.
   MaxWriteSize = 1024 * 1024 * 1024;
 #endif
 
-  do {
+  ചെയ്യുക {
     size_t ChunkSize = std::min(Size, MaxWriteSize);
-    ssize_t ret = ::write(FD, Ptr, ChunkSize);
+    ssize_t ret = ::ലിഖ(FD, Ptr, ChunkSize);
 
-    if (ret < 0) {
+    എങ്കിൽ (ret < 0) {
       // If it's a recoverable error, swallow it and retry the write.
       //
       // Ideally we wouldn't ever see EAGAIN or EWOULDBLOCK here, since
@@ -753,17 +753,17 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
       // O_NONBLOCK. For compatibility, emulate blocking semantics by
       // spinning until the write succeeds. If you don't want spinning,
       // don't use O_NONBLOCK file descriptors with raw_ostream.
-      if (errno == EINTR || errno == EAGAIN
+      എങ്കിൽ (errno == EINTR || errno == EAGAIN
 #ifdef EWOULDBLOCK
           || errno == EWOULDBLOCK
 #endif
           )
-        continue;
+        തുടരുക;
 
 #ifdef _WIN32
       // Windows equivalents of SIGPIPE/EPIPE.
       DWORD WinLastError = GetLastError();
-      if (WinLastError == ERROR_BROKEN_PIPE ||
+      എങ്കിൽ (WinLastError == ERROR_BROKEN_PIPE ||
           (WinLastError == ERROR_NO_DATA && errno == EINVAL)) {
         llvm::sys::CallOneShotPipeSignalHandler();
         errno = EPIPE;
@@ -771,7 +771,7 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
 #endif
       // Otherwise it's a non-recoverable error. Note it and quit.
       error_detected(errnoAsErrorCode());
-      break;
+      നിർത്തുക;
     }
 
     // The write may have written some or all of the data. Update the
@@ -779,95 +779,95 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
     // to be written. If there are no bytes left, we're done.
     Ptr += ret;
     Size -= ret;
-  } while (Size > 0);
+  } ആകുമ്പോൾ (Size > 0);
 }
 
-void raw_fd_ostream::close() {
-  assert(ShouldClose);
-  ShouldClose = false;
+ശൂന്യം raw_fd_ostream::close() {
+  പ്രതിജ്ഞാ(ShouldClose);
+  ShouldClose = അസത്യം;
   flush();
-  if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+  എങ്കിൽ (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
     error_detected(EC);
   FD = -1;
 }
 
 uint64_t raw_fd_ostream::seek(uint64_t off) {
-  assert(SupportsSeeking && "Stream does not support seeking!");
+  പ്രതിജ്ഞാ(SupportsSeeking && "Stream does not support seeking!");
   flush();
 #ifdef _WIN32
   pos = ::_lseeki64(FD, off, SEEK_SET);
-#else
+#അല്ലെങ്കിൽ
   pos = ::lseek(FD, off, SEEK_SET);
 #endif
-  if (pos == (uint64_t)-1)
+  എങ്കിൽ (pos == (uint64_t)-1)
     error_detected(errnoAsErrorCode());
-  return pos;
+  തിരികെ pos;
 }
 
-void raw_fd_ostream::pwrite_impl(const char *Ptr, size_t Size,
+ശൂന്യം raw_fd_ostream::pwrite_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size,
                                  uint64_t Offset) {
   uint64_t Pos = tell();
   seek(Offset);
-  write(Ptr, Size);
+  ലിഖ(Ptr, Size);
   seek(Pos);
 }
 
-size_t raw_fd_ostream::preferred_buffer_size() const {
-#if defined(_WIN32)
+size_t raw_fd_ostream::preferred_buffer_size() സ്ഥിരം {
+#എങ്കിൽ defined(_WIN32)
   // Disable buffering for console devices. Console output is re-encoded from
   // UTF-8 to UTF-16 on Windows, and buffering it would require us to split the
   // buffer on a valid UTF-8 codepoint boundary. Terminal buffering is disabled
   // below on most other OSs, so do the same thing on Windows and avoid that
   // complexity.
-  if (IsWindowsConsole)
-    return 0;
-  return raw_ostream::preferred_buffer_size();
-#elif defined(__MVS__)
+  എങ്കിൽ (IsWindowsConsole)
+    തിരികെ 0;
+  തിരികെ raw_ostream::preferred_buffer_size();
+#അല്ലെങ്കിലെങ്കിൽ defined(__MVS__)
   // The buffer size on z/OS is defined with macro BUFSIZ, which can be
   // retrieved by invoking function raw_ostream::preferred_buffer_size().
-  return raw_ostream::preferred_buffer_size();
-#else
-  assert(FD >= 0 && "File not yet open!");
-  struct stat statbuf;
-  if (fstat(FD, &statbuf) != 0)
-    return 0;
+  തിരികെ raw_ostream::preferred_buffer_size();
+#അല്ലെങ്കിൽ
+  പ്രതിജ്ഞാ(FD >= 0 && "File not yet open!");
+  ഘടന stat statbuf;
+  എങ്കിൽ (fstat(FD, &statbuf) != 0)
+    തിരികെ 0;
 
   // If this is a terminal, don't use buffering. Line buffering
   // would be a more traditional thing to do, but it's not worth
   // the complexity.
-  if (S_ISCHR(statbuf.st_mode) && is_displayed())
-    return 0;
+  എങ്കിൽ (S_ISCHR(statbuf.st_mode) && is_displayed())
+    തിരികെ 0;
   // Return the preferred block size.
-  return statbuf.st_blksize;
+  തിരികെ statbuf.st_blksize;
 #endif
 }
 
-bool raw_fd_ostream::is_displayed() const {
-  return sys::Process::FileDescriptorIsDisplayed(FD);
+തർക്കം raw_fd_ostream::is_displayed() സ്ഥിരം {
+  തിരികെ sys::Process::FileDescriptorIsDisplayed(FD);
 }
 
-bool raw_fd_ostream::has_colors() const {
-  if (!HasColors)
+തർക്കം raw_fd_ostream::has_colors() സ്ഥിരം {
+  എങ്കിൽ (!HasColors)
     HasColors = sys::Process::FileDescriptorHasColors(FD);
-  return *HasColors;
+  തിരികെ *HasColors;
 }
 
 Expected<sys::fs::FileLocker> raw_fd_ostream::lock() {
   std::error_code EC = sys::fs::lockFile(FD);
-  if (!EC)
-    return sys::fs::FileLocker(FD);
-  return errorCodeToError(EC);
+  എങ്കിൽ (!EC)
+    തിരികെ sys::fs::FileLocker(FD);
+  തിരികെ errorCodeToError(EC);
 }
 
 Expected<sys::fs::FileLocker>
-raw_fd_ostream::tryLockFor(Duration const& Timeout) {
+raw_fd_ostream::tryLockFor(Duration സ്ഥിരം& Timeout) {
   std::error_code EC = sys::fs::tryLockFile(FD, Timeout.getDuration());
-  if (!EC)
-    return sys::fs::FileLocker(FD);
-  return errorCodeToError(EC);
+  എങ്കിൽ (!EC)
+    തിരികെ sys::fs::FileLocker(FD);
+  തിരികെ errorCodeToError(EC);
 }
 
-void raw_fd_ostream::anchor() {}
+ശൂന്യം raw_fd_ostream::anchor() {}
 
 //===----------------------------------------------------------------------===//
 //  outs(), errs(), nulls()
@@ -878,30 +878,30 @@ raw_fd_ostream &llvm::outs() {
   std::error_code EC;
 
   // On z/OS we need to enable auto conversion
-  static std::error_code EC1 = enableAutoConversion(STDOUT_FILENO);
-  assert(!EC1);
-  (void)EC1;
+  സ്ഥിതം std::error_code EC1 = enableAutoConversion(STDOUT_FILENO);
+  പ്രതിജ്ഞാ(!EC1);
+  (ശൂന്യം)EC1;
 
-  static raw_fd_ostream S("-", EC, sys::fs::OF_None);
-  assert(!EC);
-  return S;
+  സ്ഥിതം raw_fd_ostream S("-", EC, sys::fs::OF_None);
+  പ്രതിജ്ഞാ(!EC);
+  തിരികെ S;
 }
 
 raw_fd_ostream &llvm::errs() {
   // On z/OS we need to enable auto conversion
-  static std::error_code EC = enableAutoConversion(STDERR_FILENO);
-  assert(!EC);
-  (void)EC;
+  സ്ഥിതം std::error_code EC = enableAutoConversion(STDERR_FILENO);
+  പ്രതിജ്ഞാ(!EC);
+  (ശൂന്യം)EC;
 
   // Set standard error to be unbuffered.
-  static raw_fd_ostream S(STDERR_FILENO, false, true);
-  return S;
+  സ്ഥിതം raw_fd_ostream S(STDERR_FILENO, അസത്യം, സത്യം);
+  തിരികെ S;
 }
 
 /// nulls() - This returns a reference to a raw_ostream which discards output.
 raw_ostream &llvm::nulls() {
-  static raw_null_ostream S;
-  return S;
+  സ്ഥിതം raw_null_ostream S;
+  തിരികെ S;
 }
 
 //===----------------------------------------------------------------------===//
@@ -912,36 +912,36 @@ raw_fd_stream::raw_fd_stream(StringRef Filename, std::error_code &EC)
     : raw_fd_ostream(getFD(Filename, EC, sys::fs::CD_CreateAlways,
                            sys::fs::FA_Write | sys::fs::FA_Read,
                            sys::fs::OF_None),
-                     true, false, OStreamKind::OK_FDStream) {
-  if (EC)
-    return;
+                     സത്യം, അസത്യം, OStreamKind::OK_FDStream) {
+  എങ്കിൽ (EC)
+    തിരികെ;
 
-  if (!isRegularFile())
+  എങ്കിൽ (!isRegularFile())
     EC = std::make_error_code(std::errc::invalid_argument);
 }
 
-raw_fd_stream::raw_fd_stream(int fd, bool shouldClose)
-    : raw_fd_ostream(fd, shouldClose, false, OStreamKind::OK_FDStream) {}
+raw_fd_stream::raw_fd_stream(പൂർണ്ണസംഖ്യ fd, തർക്കം shouldClose)
+    : raw_fd_ostream(fd, shouldClose, അസത്യം, OStreamKind::OK_FDStream) {}
 
-ssize_t raw_fd_stream::read(char *Ptr, size_t Size) {
-  assert(get_fd() >= 0 && "File already closed.");
-  ssize_t Ret = ::read(get_fd(), (void *)Ptr, Size);
-  if (Ret >= 0)
+ssize_t raw_fd_stream::പഠ(അക്ഷരം *Ptr, size_t Size) {
+  പ്രതിജ്ഞാ(get_fd() >= 0 && "File already closed.");
+  ssize_t Ret = ::പഠ(get_fd(), (ശൂന്യം *)Ptr, Size);
+  എങ്കിൽ (Ret >= 0)
     inc_pos(Ret);
-  else
+  അല്ലെങ്കിൽ
     error_detected(errnoAsErrorCode());
-  return Ret;
+  തിരികെ Ret;
 }
 
-bool raw_fd_stream::classof(const raw_ostream *OS) {
-  return OS->get_kind() == OStreamKind::OK_FDStream;
+തർക്കം raw_fd_stream::classof(സ്ഥിരം raw_ostream *OS) {
+  തിരികെ OS->get_kind() == OStreamKind::OK_FDStream;
 }
 
 //===----------------------------------------------------------------------===//
 //  raw_string_ostream
 //===----------------------------------------------------------------------===//
 
-void raw_string_ostream::write_impl(const char *Ptr, size_t Size) {
+ശൂന്യം raw_string_ostream::write_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
   OS.append(Ptr, Size);
 }
 
@@ -949,19 +949,19 @@ void raw_string_ostream::write_impl(const char *Ptr, size_t Size) {
 //  raw_svector_ostream
 //===----------------------------------------------------------------------===//
 
-uint64_t raw_svector_ostream::current_pos() const { return OS.size(); }
+uint64_t raw_svector_ostream::current_pos() സ്ഥിരം { തിരികെ OS.size(); }
 
-void raw_svector_ostream::write_impl(const char *Ptr, size_t Size) {
+ശൂന്യം raw_svector_ostream::write_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
   OS.append(Ptr, Ptr + Size);
 }
 
-void raw_svector_ostream::pwrite_impl(const char *Ptr, size_t Size,
+ശൂന്യം raw_svector_ostream::pwrite_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size,
                                       uint64_t Offset) {
   memcpy(OS.data() + Offset, Ptr, Size);
 }
 
-bool raw_svector_ostream::classof(const raw_ostream *OS) {
-  return OS->get_kind() == OStreamKind::OK_SVecStream;
+തർക്കം raw_svector_ostream::classof(സ്ഥിരം raw_ostream *OS) {
+  തിരികെ OS->get_kind() == OStreamKind::OK_SVecStream;
 }
 
 //===----------------------------------------------------------------------===//
@@ -977,64 +977,64 @@ raw_null_ostream::~raw_null_ostream() {
 #endif
 }
 
-void raw_null_ostream::write_impl(const char *Ptr, size_t Size) {
+ശൂന്യം raw_null_ostream::write_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
 }
 
-uint64_t raw_null_ostream::current_pos() const {
-  return 0;
+uint64_t raw_null_ostream::current_pos() സ്ഥിരം {
+  തിരികെ 0;
 }
 
-void raw_null_ostream::pwrite_impl(const char *Ptr, size_t Size,
+ശൂന്യം raw_null_ostream::pwrite_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size,
                                    uint64_t Offset) {}
 
-void raw_pwrite_stream::anchor() {}
+ശൂന്യം raw_pwrite_stream::anchor() {}
 
-void buffer_ostream::anchor() {}
+ശൂന്യം buffer_ostream::anchor() {}
 
-void buffer_unique_ostream::anchor() {}
+ശൂന്യം buffer_unique_ostream::anchor() {}
 
-static bool isNullDeviceName(StringRef OutputFileName) {
+സ്ഥിതം തർക്കം isNullDeviceName(StringRef OutputFileName) {
 #ifdef _WIN32
-  if (OutputFileName.equals_insensitive("NUL"))
-    return true;
+  എങ്കിൽ (OutputFileName.equals_insensitive("NUL"))
+    തിരികെ സത്യം;
 #endif
-  return OutputFileName == "/dev/null";
+  തിരികെ OutputFileName == "/dev/null";
 }
 
 Error llvm::writeToOutput(StringRef OutputFileName,
                           std::function<Error(raw_ostream &)> Write) {
-  if (OutputFileName == "-")
-    return Write(outs());
+  എങ്കിൽ (OutputFileName == "-")
+    തിരികെ Write(outs());
 
-  if (isNullDeviceName(OutputFileName)) {
+  എങ്കിൽ (isNullDeviceName(OutputFileName)) {
     raw_null_ostream Out;
-    return Write(Out);
+    തിരികെ Write(Out);
   }
 
   unsigned Mode = sys::fs::all_read | sys::fs::all_write;
   Expected<sys::fs::TempFile> Temp =
       sys::fs::TempFile::create(OutputFileName + ".temp-stream-%%%%%%", Mode);
-  if (!Temp)
-    return createFileError(OutputFileName, Temp.takeError());
+  എങ്കിൽ (!Temp)
+    തിരികെ createFileError(OutputFileName, Temp.takeError());
 
-#if defined(__MVS__)
+#എങ്കിൽ defined(__MVS__)
   // The file tag needs to be set before any output can be written to the file.
   // Do this before creating the raw_fd_ostream to ensure the correct
   // sequence.
-  if (auto EC = llvm::copyFileTagAttributes(OutputFileName.str(), Temp->FD)) {
-    if (EC != std::errc::no_such_file_or_directory)
-      return createFileError(OutputFileName, EC);
+  എങ്കിൽ (auto EC = llvm::copyFileTagAttributes(OutputFileName.str(), Temp->FD)) {
+    എങ്കിൽ (EC != std::errc::no_such_file_or_directory)
+      തിരികെ createFileError(OutputFileName, EC);
   }
 #endif
 
-  raw_fd_ostream Out(Temp->FD, false);
+  raw_fd_ostream Out(Temp->FD, അസത്യം);
 
-  if (Error E = Write(Out)) {
-    if (Error DiscardError = Temp->discard())
-      return joinErrors(std::move(E), std::move(DiscardError));
-    return E;
+  എങ്കിൽ (Error E = Write(Out)) {
+    എങ്കിൽ (Error DiscardError = Temp->discard())
+      തിരികെ joinErrors(std::move(E), std::move(DiscardError));
+    തിരികെ E;
   }
   Out.flush();
 
-  return Temp->keep(OutputFileName);
+  തിരികെ Temp->keep(OutputFileName);
 }

@@ -5,107 +5,107 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include <algorithm>
-#include <iterator>
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/ADT/DeltaAlgorithm.h"
+#അന്തര്ഭാവ <algorithm>
+#അന്തര്ഭാവ <iterator>
+using നാമാകാശ llvm;
 
-DeltaAlgorithm::~DeltaAlgorithm() = default;
+DeltaAlgorithm::~DeltaAlgorithm() = സ്ഥിരസ്ഥിതി;
 
-bool DeltaAlgorithm::GetTestResult(const changeset_ty &Changes) {
-  if (FailedTestsCache.count(Changes))
-    return false;
+തർക്കം DeltaAlgorithm::GetTestResult(സ്ഥിരം changeset_ty &Changes) {
+  എങ്കിൽ (FailedTestsCache.എണ്ണം(Changes))
+    തിരികെ അസത്യം;
 
-  bool Result = ExecuteOneTest(Changes);
-  if (!Result)
-    FailedTestsCache.insert(Changes);
+  തർക്കം Result = ExecuteOneTest(Changes);
+  എങ്കിൽ (!Result)
+    FailedTestsCache.തിരുകുക(Changes);
 
-  return Result;
+  തിരികെ Result;
 }
 
-void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
+ശൂന്യം DeltaAlgorithm::Split(സ്ഥിരം changeset_ty &S, changesetlist_ty &Res) {
   // FIXME: Allow clients to provide heuristics for improved splitting.
 
   // FIXME: This is really slow.
   changeset_ty LHS, RHS;
   unsigned idx = 0, N = S.size() / 2;
-  for (changeset_ty::const_iterator it = S.begin(),
+  വേണ്ടി (changeset_ty::const_iterator it = S.begin(),
          ie = S.end(); it != ie; ++it, ++idx)
-    ((idx < N) ? LHS : RHS).insert(*it);
-  if (!LHS.empty())
-    Res.push_back(LHS);
-  if (!RHS.empty())
-    Res.push_back(RHS);
+    ((idx < N) ? LHS : RHS).തിരുകുക(*it);
+  എങ്കിൽ (!LHS.empty())
+    Res.തള്ളുക_back(LHS);
+  എങ്കിൽ (!RHS.empty())
+    Res.തള്ളുക_back(RHS);
 }
 
 DeltaAlgorithm::changeset_ty
-DeltaAlgorithm::Delta(const changeset_ty &Changes,
-                      const changesetlist_ty &Sets) {
+DeltaAlgorithm::Delta(സ്ഥിരം changeset_ty &Changes,
+                      സ്ഥിരം changesetlist_ty &Sets) {
   // Invariant: union(Res) == Changes
-  UpdatedSearchState(Changes, Sets);
+  Updated_തിരയൽ_State(Changes, Sets);
 
   // If there is nothing left we can remove, we are done.
-  if (Sets.size() <= 1)
-    return Changes;
+  എങ്കിൽ (Sets.size() <= 1)
+    തിരികെ Changes;
 
   // Look for a passing subset.
   changeset_ty Res;
-  if (Search(Changes, Sets, Res))
-    return Res;
+  എങ്കിൽ (തിരയൽ(Changes, Sets, Res))
+    തിരികെ Res;
 
   // Otherwise, partition the sets if possible; if not we are done.
   changesetlist_ty SplitSets;
-  for (const changeset_ty &Set : Sets)
+  വേണ്ടി (സ്ഥിരം changeset_ty &Set : Sets)
     Split(Set, SplitSets);
-  if (SplitSets.size() == Sets.size())
-    return Changes;
+  എങ്കിൽ (SplitSets.size() == Sets.size())
+    തിരികെ Changes;
 
-  return Delta(Changes, SplitSets);
+  തിരികെ Delta(Changes, SplitSets);
 }
 
-bool DeltaAlgorithm::Search(const changeset_ty &Changes,
-                            const changesetlist_ty &Sets,
+തർക്കം DeltaAlgorithm::തിരയൽ(സ്ഥിരം changeset_ty &Changes,
+                            സ്ഥിരം changesetlist_ty &Sets,
                             changeset_ty &Res) {
   // FIXME: Parallelize.
-  for (changesetlist_ty::const_iterator it = Sets.begin(),
+  വേണ്ടി (changesetlist_ty::const_iterator it = Sets.begin(),
          ie = Sets.end(); it != ie; ++it) {
     // If the test passes on this subset alone, recurse.
-    if (GetTestResult(*it)) {
+    എങ്കിൽ (GetTestResult(*it)) {
       changesetlist_ty Sets;
       Split(*it, Sets);
       Res = Delta(*it, Sets);
-      return true;
+      തിരികെ സത്യം;
     }
 
     // Otherwise, if we have more than two sets, see if test passes on the
     // complement.
-    if (Sets.size() > 2) {
+    എങ്കിൽ (Sets.size() > 2) {
       // FIXME: This is really slow.
       changeset_ty Complement;
       std::set_difference(Changes.begin(), Changes.end(), it->begin(),
                           it->end(),
                           std::inserter(Complement, Complement.begin()));
-      if (GetTestResult(Complement)) {
+      എങ്കിൽ (GetTestResult(Complement)) {
         changesetlist_ty ComplementSets;
-        ComplementSets.insert(ComplementSets.end(), Sets.begin(), it);
-        ComplementSets.insert(ComplementSets.end(), it + 1, Sets.end());
+        ComplementSets.തിരുകുക(ComplementSets.end(), Sets.begin(), it);
+        ComplementSets.തിരുകുക(ComplementSets.end(), it + 1, Sets.end());
         Res = Delta(Complement, ComplementSets);
-        return true;
+        തിരികെ സത്യം;
       }
     }
   }
 
-  return false;
+  തിരികെ അസത്യം;
 }
 
-DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(const changeset_ty &Changes) {
+DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(സ്ഥിരം changeset_ty &Changes) {
   // Check empty set first to quickly find poor test functions.
-  if (GetTestResult(changeset_ty()))
-    return changeset_ty();
+  എങ്കിൽ (GetTestResult(changeset_ty()))
+    തിരികെ changeset_ty();
 
   // Otherwise run the real delta algorithm.
   changesetlist_ty Sets;
   Split(Changes, Sets);
 
-  return Delta(Changes, Sets);
+  തിരികെ Delta(Changes, Sets);
 }

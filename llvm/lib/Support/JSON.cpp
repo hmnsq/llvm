@@ -6,310 +6,310 @@
 //
 //===---------------------------------------------------------------------===//
 
-#include "llvm/Support/JSON.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
-#include <cerrno>
-#include <optional>
+#അന്തര്ഭാവ "llvm/Support/JSON.h"
+#അന്തര്ഭാവ "llvm/ADT/STLExtras.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/ConvertUTF.h"
+#അന്തര്ഭാവ "llvm/Support/Error.h"
+#അന്തര്ഭാവ "llvm/Support/Format.h"
+#അന്തര്ഭാവ "llvm/Support/NativeFormatting.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <cctype>
+#അന്തര്ഭാവ <cerrno>
+#അന്തര്ഭാവ <optional>
 
-namespace llvm {
-namespace json {
+നാമാകാശ llvm {
+നാമാകാശ json {
 
-Value &Object::operator[](const ObjectKey &K) {
-  return try_emplace(K, nullptr).first->getSecond();
+മൂല്യം &Object::operator[](സ്ഥിരം Object_താക്കോൽ &K) {
+  തിരികെ try_emplace(K, nullptr).first->getSecond();
 }
-Value &Object::operator[](ObjectKey &&K) {
-  return try_emplace(std::move(K), nullptr).first->getSecond();
+മൂല്യം &Object::operator[](Object_താക്കോൽ &&K) {
+  തിരികെ try_emplace(std::move(K), nullptr).first->getSecond();
 }
-Value *Object::get(StringRef K) {
+മൂല്യം *Object::get(StringRef K) {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  എങ്കിൽ (I == end())
+    തിരികെ nullptr;
+  തിരികെ &I->second;
 }
-const Value *Object::get(StringRef K) const {
+സ്ഥിരം മൂല്യം *Object::get(StringRef K) സ്ഥിരം {
   auto I = find(K);
-  if (I == end())
-    return nullptr;
-  return &I->second;
+  എങ്കിൽ (I == end())
+    തിരികെ nullptr;
+  തിരികെ &I->second;
 }
-std::optional<std::nullptr_t> Object::getNull(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNull();
-  return std::nullopt;
+std::optional<std::nullptr_t> Object::getNull(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsNull();
+  തിരികെ std::nullopt;
 }
-std::optional<bool> Object::getBoolean(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsBoolean();
-  return std::nullopt;
+std::optional<തർക്കം> Object::getBoolean(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsBoolean();
+  തിരികെ std::nullopt;
 }
-std::optional<double> Object::getNumber(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsNumber();
-  return std::nullopt;
+std::optional<ഇരട്ട> Object::get_സംഖ്യ(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->get_As_സംഖ്യ();
+  തിരികെ std::nullopt;
 }
-std::optional<int64_t> Object::getInteger(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsInteger();
-  return std::nullopt;
+std::optional<int64_t> Object::getInteger(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsInteger();
+  തിരികെ std::nullopt;
 }
-std::optional<llvm::StringRef> Object::getString(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsString();
-  return std::nullopt;
+std::optional<llvm::StringRef> Object::getString(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsString();
+  തിരികെ std::nullopt;
 }
-const json::Object *Object::getObject(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+സ്ഥിരം json::Object *Object::getObject(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsObject();
+  തിരികെ nullptr;
 }
 json::Object *Object::getObject(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsObject();
-  return nullptr;
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsObject();
+  തിരികെ nullptr;
 }
-const json::Array *Object::getArray(StringRef K) const {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+സ്ഥിരം json::Array *Object::getArray(StringRef K) സ്ഥിരം {
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsArray();
+  തിരികെ nullptr;
 }
 json::Array *Object::getArray(StringRef K) {
-  if (auto *V = get(K))
-    return V->getAsArray();
-  return nullptr;
+  എങ്കിൽ (auto *V = get(K))
+    തിരികെ V->getAsArray();
+  തിരികെ nullptr;
 }
-bool operator==(const Object &LHS, const Object &RHS) { return LHS.M == RHS.M; }
+തർക്കം operator==(സ്ഥിരം Object &LHS, സ്ഥിരം Object &RHS) { തിരികെ LHS.M == RHS.M; }
 
-Array::Array(std::initializer_list<Value> Elements) {
+Array::Array(std::initializer_list<മൂല്യം> Elements) {
   V.reserve(Elements.size());
-  for (const Value &V : Elements) {
+  വേണ്ടി (സ്ഥിരം മൂല്യം &V : Elements) {
     emplace_back(nullptr);
     back().moveFrom(std::move(V));
   }
 }
 
-Value::Value(std::initializer_list<Value> Elements)
-    : Value(json::Array(Elements)) {}
+മൂല്യം::മൂല്യം(std::initializer_list<മൂല്യം> Elements)
+    : മൂല്യം(json::Array(Elements)) {}
 
-void Value::copyFrom(const Value &M) {
+ശൂന്യം മൂല്യം::copyFrom(സ്ഥിരം മൂല്യം &M) {
   Type = M.Type;
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    memcpy(&Union, &M.Union, sizeof(Union));
-    break;
-  case T_StringRef:
+  തിരഞ്ഞെടുപ്പ് (Type) {
+  അവസ്ഥ T_Null:
+  അവസ്ഥ T_Boolean:
+  അവസ്ഥ T_Double:
+  അവസ്ഥ T_Integer:
+  അവസ്ഥ T_UINT64:
+    memcpy(&Union, &M.Union, വലുപ്പം(Union));
+    നിർത്തുക;
+  അവസ്ഥ T_StringRef:
     create<StringRef>(M.as<StringRef>());
-    break;
-  case T_String:
+    നിർത്തുക;
+  അവസ്ഥ T_String:
     create<std::string>(M.as<std::string>());
-    break;
-  case T_Object:
+    നിർത്തുക;
+  അവസ്ഥ T_Object:
     create<json::Object>(M.as<json::Object>());
-    break;
-  case T_Array:
+    നിർത്തുക;
+  അവസ്ഥ T_Array:
     create<json::Array>(M.as<json::Array>());
-    break;
+    നിർത്തുക;
   }
 }
 
-void Value::moveFrom(const Value &&M) {
+ശൂന്യം മൂല്യം::moveFrom(സ്ഥിരം മൂല്യം &&M) {
   Type = M.Type;
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    memcpy(&Union, &M.Union, sizeof(Union));
-    break;
-  case T_StringRef:
+  തിരഞ്ഞെടുപ്പ് (Type) {
+  അവസ്ഥ T_Null:
+  അവസ്ഥ T_Boolean:
+  അവസ്ഥ T_Double:
+  അവസ്ഥ T_Integer:
+  അവസ്ഥ T_UINT64:
+    memcpy(&Union, &M.Union, വലുപ്പം(Union));
+    നിർത്തുക;
+  അവസ്ഥ T_StringRef:
     create<StringRef>(M.as<StringRef>());
-    break;
-  case T_String:
+    നിർത്തുക;
+  അവസ്ഥ T_String:
     create<std::string>(std::move(M.as<std::string>()));
-    break;
-  case T_Object:
+    നിർത്തുക;
+  അവസ്ഥ T_Object:
     create<json::Object>(std::move(M.as<json::Object>()));
-    break;
-  case T_Array:
+    നിർത്തുക;
+  അവസ്ഥ T_Array:
     create<json::Array>(std::move(M.as<json::Array>()));
-    break;
+    നിർത്തുക;
   }
-  const_cast<Value &>(M).destroy();
+  const_cast<മൂല്യം &>(M).destroy();
   M.Type = T_Null;
 }
 
-void Value::destroy() {
-  switch (Type) {
-  case T_Null:
-  case T_Boolean:
-  case T_Double:
-  case T_Integer:
-  case T_UINT64:
-    break;
-  case T_StringRef:
+ശൂന്യം മൂല്യം::destroy() {
+  തിരഞ്ഞെടുപ്പ് (Type) {
+  അവസ്ഥ T_Null:
+  അവസ്ഥ T_Boolean:
+  അവസ്ഥ T_Double:
+  അവസ്ഥ T_Integer:
+  അവസ്ഥ T_UINT64:
+    നിർത്തുക;
+  അവസ്ഥ T_StringRef:
     as<StringRef>().~StringRef();
-    break;
-  case T_String:
+    നിർത്തുക;
+  അവസ്ഥ T_String:
     as<std::string>().~basic_string();
-    break;
-  case T_Object:
+    നിർത്തുക;
+  അവസ്ഥ T_Object:
     as<json::Object>().~Object();
-    break;
-  case T_Array:
+    നിർത്തുക;
+  അവസ്ഥ T_Array:
     as<json::Array>().~Array();
-    break;
+    നിർത്തുക;
   }
 }
 
-void Value::print(llvm::raw_ostream &OS) const { OS << *this; }
+ശൂന്യം മൂല്യം::print(llvm::raw_ostream &OS) സ്ഥിരം { OS << *ഇത്; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Value::dump() const {
+#എങ്കിൽ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD ശൂന്യം മൂല്യം::dump() സ്ഥിരം {
   print(llvm::dbgs());
   llvm::dbgs() << '\n';
 }
 #endif
 
-bool operator==(const Value &L, const Value &R) {
-  if (L.kind() != R.kind())
-    return false;
-  switch (L.kind()) {
-  case Value::Null:
-    return *L.getAsNull() == *R.getAsNull();
-  case Value::Boolean:
-    return *L.getAsBoolean() == *R.getAsBoolean();
-  case Value::Number:
+തർക്കം operator==(സ്ഥിരം മൂല്യം &L, സ്ഥിരം മൂല്യം &R) {
+  എങ്കിൽ (L.kind() != R.kind())
+    തിരികെ അസത്യം;
+  തിരഞ്ഞെടുപ്പ് (L.kind()) {
+  അവസ്ഥ മൂല്യം::Null:
+    തിരികെ *L.getAsNull() == *R.getAsNull();
+  അവസ്ഥ മൂല്യം::Boolean:
+    തിരികെ *L.getAsBoolean() == *R.getAsBoolean();
+  അവസ്ഥ മൂല്യം::സംഖ്യ:
     // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=323
     // The same integer must convert to the same double, per the standard.
     // However we see 64-vs-80-bit precision comparisons with gcc-7 -O3 -m32.
     // So we avoid floating point promotion for exact comparisons.
-    if (L.Type == Value::T_Integer || R.Type == Value::T_Integer)
-      return L.getAsInteger() == R.getAsInteger();
-    return *L.getAsNumber() == *R.getAsNumber();
-  case Value::String:
-    return *L.getAsString() == *R.getAsString();
-  case Value::Array:
-    return *L.getAsArray() == *R.getAsArray();
-  case Value::Object:
-    return *L.getAsObject() == *R.getAsObject();
+    എങ്കിൽ (L.Type == മൂല്യം::T_Integer || R.Type == മൂല്യം::T_Integer)
+      തിരികെ L.getAsInteger() == R.getAsInteger();
+    തിരികെ *L.get_As_സംഖ്യ() == *R.get_As_സംഖ്യ();
+  അവസ്ഥ മൂല്യം::String:
+    തിരികെ *L.getAsString() == *R.getAsString();
+  അവസ്ഥ മൂല്യം::Array:
+    തിരികെ *L.getAsArray() == *R.getAsArray();
+  അവസ്ഥ മൂല്യം::Object:
+    തിരികെ *L.getAsObject() == *R.getAsObject();
   }
   llvm_unreachable("Unknown value kind");
 }
 
-void Path::report(llvm::StringLiteral Msg) {
+ശൂന്യം Path::report(llvm::StringLiteral സന്ദേശം_2) {
   // Walk up to the root context, and count the number of segments.
-  unsigned Count = 0;
-  const Path *P;
-  for (P = this; P->Parent != nullptr; P = P->Parent)
-    ++Count;
-  Path::Root *R = P->Seg.root();
+  unsigned എണ്ണം_2 = 0;
+  സ്ഥിരം Path *P;
+  വേണ്ടി (P = ഇത്; P->Parent != nullptr; P = P->Parent)
+    ++എണ്ണം_2;
+  Path::വേര്_2 *R = P->Seg.വേര്_3();
   // Fill in the error message and copy the path (in reverse order).
-  R->ErrorMessage = Msg;
-  R->ErrorPath.resize(Count);
+  R->ErrorMessage = സന്ദേശം_2;
+  R->ErrorPath.resize(എണ്ണം_2);
   auto It = R->ErrorPath.begin();
-  for (P = this; P->Parent != nullptr; P = P->Parent)
+  വേണ്ടി (P = ഇത്; P->Parent != nullptr; P = P->Parent)
     *It++ = P->Seg;
 }
 
-Error Path::Root::getError() const {
+Error Path::വേര്_2::getError() സ്ഥിരം {
   std::string S;
   raw_string_ostream OS(S);
   OS << (ErrorMessage.empty() ? "invalid JSON contents" : ErrorMessage);
-  if (ErrorPath.empty()) {
-    if (!Name.empty())
+  എങ്കിൽ (ErrorPath.empty()) {
+    എങ്കിൽ (!Name.empty())
       OS << " when parsing " << Name;
-  } else {
+  } അല്ലെങ്കിൽ {
     OS << " at " << (Name.empty() ? "(root)" : Name);
-    for (const Path::Segment &S : llvm::reverse(ErrorPath)) {
-      if (S.isField())
+    വേണ്ടി (സ്ഥിരം Path::Segment &S : llvm::reverse(ErrorPath)) {
+      എങ്കിൽ (S.isField())
         OS << '.' << S.field();
-      else
+      അല്ലെങ്കിൽ
         OS << '[' << S.index() << ']';
     }
   }
-  return createStringError(llvm::inconvertibleErrorCode(), S);
+  തിരികെ createStringError(llvm::inconvertibleErrorCode(), S);
 }
 
-std::vector<const Object::value_type *> sortedElements(const Object &O) {
-  std::vector<const Object::value_type *> Elements;
-  for (const auto &E : O)
-    Elements.push_back(&E);
+std::vector<സ്ഥിരം Object::മൂല്യം_type *> sortedElements(സ്ഥിരം Object &O) {
+  std::vector<സ്ഥിരം Object::മൂല്യം_type *> Elements;
+  വേണ്ടി (സ്ഥിരം auto &E : O)
+    Elements.തള്ളുക_back(&E);
   llvm::sort(Elements,
-             [](const Object::value_type *L, const Object::value_type *R) {
-               return L->first < R->first;
+             [](സ്ഥിരം Object::മൂല്യം_type *L, സ്ഥിരം Object::മൂല്യം_type *R) {
+               തിരികെ L->first < R->first;
              });
-  return Elements;
+  തിരികെ Elements;
 }
 
 // Prints a one-line version of a value that isn't our main focus.
 // We interleave writes to OS and JOS, exploiting the lack of extra buffering.
 // This is OK as we own the implementation.
-static void abbreviate(const Value &V, OStream &JOS) {
-  switch (V.kind()) {
-  case Value::Array:
-    JOS.rawValue(V.getAsArray()->empty() ? "[]" : "[ ... ]");
-    break;
-  case Value::Object:
-    JOS.rawValue(V.getAsObject()->empty() ? "{}" : "{ ... }");
-    break;
-  case Value::String: {
+സ്ഥിതം ശൂന്യം abbreviate(സ്ഥിരം മൂല്യം &V, OStream &JOS) {
+  തിരഞ്ഞെടുപ്പ് (V.kind()) {
+  അവസ്ഥ മൂല്യം::Array:
+    JOS.raw_മൂല്യം(V.getAsArray()->empty() ? "[]" : "[ ... ]");
+    നിർത്തുക;
+  അവസ്ഥ മൂല്യം::Object:
+    JOS.raw_മൂല്യം(V.getAsObject()->empty() ? "{}" : "{ ... }");
+    നിർത്തുക;
+  അവസ്ഥ മൂല്യം::String: {
     llvm::StringRef S = *V.getAsString();
-    if (S.size() < 40) {
-      JOS.value(V);
-    } else {
+    എങ്കിൽ (S.size() < 40) {
+      JOS.മൂല്യം_2(V);
+    } അല്ലെങ്കിൽ {
       std::string Truncated = fixUTF8(S.take_front(37));
       Truncated.append("...");
-      JOS.value(Truncated);
+      JOS.മൂല്യം_2(Truncated);
     }
-    break;
+    നിർത്തുക;
   }
-  default:
-    JOS.value(V);
+  സ്ഥിരസ്ഥിതി:
+    JOS.മൂല്യം_2(V);
   }
 }
 
 // Prints a semi-expanded version of a value that is our main focus.
 // Array/Object entries are printed, but not recursively as they may be huge.
-static void abbreviateChildren(const Value &V, OStream &JOS) {
-  switch (V.kind()) {
-  case Value::Array:
+സ്ഥിതം ശൂന്യം abbreviateChildren(സ്ഥിരം മൂല്യം &V, OStream &JOS) {
+  തിരഞ്ഞെടുപ്പ് (V.kind()) {
+  അവസ്ഥ മൂല്യം::Array:
     JOS.array([&] {
-      for (const auto &I : *V.getAsArray())
+      വേണ്ടി (സ്ഥിരം auto &I : *V.getAsArray())
         abbreviate(I, JOS);
     });
-    break;
-  case Value::Object:
+    നിർത്തുക;
+  അവസ്ഥ മൂല്യം::Object:
     JOS.object([&] {
-      for (const auto *KV : sortedElements(*V.getAsObject())) {
+      വേണ്ടി (സ്ഥിരം auto *KV : sortedElements(*V.getAsObject())) {
         JOS.attributeBegin(KV->first);
         abbreviate(KV->second, JOS);
         JOS.attributeEnd();
       }
     });
-    break;
-  default:
-    JOS.value(V);
+    നിർത്തുക;
+  സ്ഥിരസ്ഥിതി:
+    JOS.മൂല്യം_2(V);
   }
 }
 
-void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
+ശൂന്യം Path::വേര്_2::printErrorContext(സ്ഥിരം മൂല്യം &R, raw_ostream &OS) സ്ഥിരം {
   OStream JOS(OS, /*IndentSize=*/2);
   // PrintValue recurses down the path, printing the ancestors of our target.
   // Siblings of nodes along the path are printed with abbreviate(), and the
   // target itself is printed with the somewhat richer abbreviateChildren().
   // 'Recurse' is the lambda itself, to allow recursive calls.
-  auto PrintValue = [&](const Value &V, ArrayRef<Segment> Path, auto &Recurse) {
+  auto Print_മൂല്യം = [&](സ്ഥിരം മൂല്യം &V, ArrayRef<Segment> Path, auto &Recurse) {
     // Print the target node itself, with the error as a comment.
     // Also used if we can't follow our path, e.g. it names a field that
     // *should* exist but doesn't.
@@ -319,288 +319,288 @@ void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
       JOS.comment(Comment);
       abbreviateChildren(V, JOS);
     };
-    if (Path.empty()) // We reached our target.
-      return HighlightCurrent();
-    const Segment &S = Path.back(); // Path is in reverse order.
-    if (S.isField()) {
+    എങ്കിൽ (Path.empty()) // We reached our target.
+      തിരികെ HighlightCurrent();
+    സ്ഥിരം Segment &S = Path.back(); // Path is in reverse order.
+    എങ്കിൽ (S.isField()) {
       // Current node is an object, path names a field.
       llvm::StringRef FieldName = S.field();
-      const Object *O = V.getAsObject();
-      if (!O || !O->get(FieldName))
-        return HighlightCurrent();
+      സ്ഥിരം Object *O = V.getAsObject();
+      എങ്കിൽ (!O || !O->get(FieldName))
+        തിരികെ HighlightCurrent();
       JOS.object([&] {
-        for (const auto *KV : sortedElements(*O)) {
+        വേണ്ടി (സ്ഥിരം auto *KV : sortedElements(*O)) {
           JOS.attributeBegin(KV->first);
-          if (FieldName == StringRef(KV->first))
+          എങ്കിൽ (FieldName == StringRef(KV->first))
             Recurse(KV->second, Path.drop_back(), Recurse);
-          else
+          അല്ലെങ്കിൽ
             abbreviate(KV->second, JOS);
           JOS.attributeEnd();
         }
       });
-    } else {
+    } അല്ലെങ്കിൽ {
       // Current node is an array, path names an element.
-      const Array *A = V.getAsArray();
-      if (!A || S.index() >= A->size())
-        return HighlightCurrent();
+      സ്ഥിരം Array *A = V.getAsArray();
+      എങ്കിൽ (!A || S.index() >= A->size())
+        തിരികെ HighlightCurrent();
       JOS.array([&] {
         unsigned Current = 0;
-        for (const auto &V : *A) {
-          if (Current++ == S.index())
+        വേണ്ടി (സ്ഥിരം auto &V : *A) {
+          എങ്കിൽ (Current++ == S.index())
             Recurse(V, Path.drop_back(), Recurse);
-          else
+          അല്ലെങ്കിൽ
             abbreviate(V, JOS);
         }
       });
     }
   };
-  PrintValue(R, ErrorPath, PrintValue);
+  Print_മൂല്യം(R, ErrorPath, Print_മൂല്യം);
 }
 
-namespace {
+നാമാകാശ {
 // Simple recursive-descent JSON parser.
-class Parser {
-public:
+വർഗ്ഗം Parser {
+പൊതു:
   Parser(StringRef JSON)
       : Start(JSON.begin()), P(JSON.begin()), End(JSON.end()) {}
 
-  bool checkUTF8() {
+  തർക്കം checkUTF8() {
     size_t ErrOffset;
-    if (isUTF8(StringRef(Start, End - Start), &ErrOffset))
-      return true;
+    എങ്കിൽ (isUTF8(StringRef(Start, End - Start), &ErrOffset))
+      തിരികെ സത്യം;
     P = Start + ErrOffset; // For line/column calculation.
-    return parseError("Invalid UTF-8 sequence");
+    തിരികെ parseError("Invalid UTF-8 sequence");
   }
 
-  bool parseValue(Value &Out);
+  തർക്കം parse_മൂല്യം(മൂല്യം &Out);
 
-  bool assertEnd() {
+  തർക്കം assertEnd() {
     eatWhitespace();
-    if (P == End)
-      return true;
-    return parseError("Text after end of document");
+    എങ്കിൽ (P == End)
+      തിരികെ സത്യം;
+    തിരികെ parseError("Text after end of document");
   }
 
   Error takeError() {
-    assert(Err);
-    return std::move(*Err);
+    പ്രതിജ്ഞാ(Err);
+    തിരികെ std::move(*Err);
   }
 
-private:
-  void eatWhitespace() {
-    while (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
+സ്വകാര്യ:
+  ശൂന്യം eatWhitespace() {
+    ആകുമ്പോൾ (P != End && (*P == ' ' || *P == '\r' || *P == '\n' || *P == '\t'))
       ++P;
   }
 
   // On invalid syntax, parseX() functions return false and set Err.
-  bool parseNumber(char First, Value &Out);
-  bool parseString(std::string &Out);
-  bool parseUnicode(std::string &Out);
-  bool parseError(const char *Msg); // always returns false
+  തർക്കം parse_സംഖ്യ(അക്ഷരം First, മൂല്യം &Out);
+  തർക്കം parseString(std::string &Out);
+  തർക്കം parseUnicode(std::string &Out);
+  തർക്കം parseError(സ്ഥിരം അക്ഷരം *സന്ദേശം_2); // always returns false
 
-  char next() { return P == End ? 0 : *P++; }
-  char peek() { return P == End ? 0 : *P; }
-  static bool isNumber(char C) {
-    return C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
+  അക്ഷരം next() { തിരികെ P == End ? 0 : *P++; }
+  അക്ഷരം peek() { തിരികെ P == End ? 0 : *P; }
+  സ്ഥിതം തർക്കം is_സംഖ്യ(അക്ഷരം C) {
+    തിരികെ C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
            C == '5' || C == '6' || C == '7' || C == '8' || C == '9' ||
            C == 'e' || C == 'E' || C == '+' || C == '-' || C == '.';
   }
 
   std::optional<Error> Err;
-  const char *Start, *P, *End;
+  സ്ഥിരം അക്ഷരം *Start, *P, *End;
 };
 } // namespace
 
-bool Parser::parseValue(Value &Out) {
+തർക്കം Parser::parse_മൂല്യം(മൂല്യം &Out) {
   eatWhitespace();
-  if (P == End)
-    return parseError("Unexpected EOF");
-  switch (char C = next()) {
+  എങ്കിൽ (P == End)
+    തിരികെ parseError("Unexpected EOF");
+  തിരഞ്ഞെടുപ്പ് (അക്ഷരം C = next()) {
   // Bare null/true/false are easy - first char identifies them.
-  case 'n':
+  അവസ്ഥ 'n':
     Out = nullptr;
-    return (next() == 'u' && next() == 'l' && next() == 'l') ||
+    തിരികെ (next() == 'u' && next() == 'l' && next() == 'l') ||
            parseError("Invalid JSON value (null?)");
-  case 't':
-    Out = true;
-    return (next() == 'r' && next() == 'u' && next() == 'e') ||
+  അവസ്ഥ 't':
+    Out = സത്യം;
+    തിരികെ (next() == 'r' && next() == 'u' && next() == 'e') ||
            parseError("Invalid JSON value (true?)");
-  case 'f':
-    Out = false;
-    return (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
+  അവസ്ഥ 'f':
+    Out = അസത്യം;
+    തിരികെ (next() == 'a' && next() == 'l' && next() == 's' && next() == 'e') ||
            parseError("Invalid JSON value (false?)");
-  case '"': {
+  അവസ്ഥ '"': {
     std::string S;
-    if (parseString(S)) {
+    എങ്കിൽ (parseString(S)) {
       Out = std::move(S);
-      return true;
+      തിരികെ സത്യം;
     }
-    return false;
+    തിരികെ അസത്യം;
   }
-  case '[': {
+  അവസ്ഥ '[': {
     Out = Array{};
     Array &A = *Out.getAsArray();
     eatWhitespace();
-    if (peek() == ']') {
+    എങ്കിൽ (peek() == ']') {
       ++P;
-      return true;
+      തിരികെ സത്യം;
     }
-    for (;;) {
+    വേണ്ടി (;;) {
       A.emplace_back(nullptr);
-      if (!parseValue(A.back()))
-        return false;
+      എങ്കിൽ (!parse_മൂല്യം(A.back()))
+        തിരികെ അസത്യം;
       eatWhitespace();
-      switch (next()) {
-      case ',':
+      തിരഞ്ഞെടുപ്പ് (next()) {
+      അവസ്ഥ ',':
         eatWhitespace();
-        continue;
-      case ']':
-        return true;
-      default:
-        return parseError("Expected , or ] after array element");
+        തുടരുക;
+      അവസ്ഥ ']':
+        തിരികെ സത്യം;
+      സ്ഥിരസ്ഥിതി:
+        തിരികെ parseError("Expected , or ] after array element");
       }
     }
   }
-  case '{': {
+  അവസ്ഥ '{': {
     Out = Object{};
     Object &O = *Out.getAsObject();
     eatWhitespace();
-    if (peek() == '}') {
+    എങ്കിൽ (peek() == '}') {
       ++P;
-      return true;
+      തിരികെ സത്യം;
     }
-    for (;;) {
-      if (next() != '"')
-        return parseError("Expected object key");
+    വേണ്ടി (;;) {
+      എങ്കിൽ (next() != '"')
+        തിരികെ parseError("Expected object key");
       std::string K;
-      if (!parseString(K))
-        return false;
+      എങ്കിൽ (!parseString(K))
+        തിരികെ അസത്യം;
       eatWhitespace();
-      if (next() != ':')
-        return parseError("Expected : after object key");
+      എങ്കിൽ (next() != ':')
+        തിരികെ parseError("Expected : after object key");
       eatWhitespace();
-      if (!parseValue(O[std::move(K)]))
-        return false;
+      എങ്കിൽ (!parse_മൂല്യം(O[std::move(K)]))
+        തിരികെ അസത്യം;
       eatWhitespace();
-      switch (next()) {
-      case ',':
+      തിരഞ്ഞെടുപ്പ് (next()) {
+      അവസ്ഥ ',':
         eatWhitespace();
-        continue;
-      case '}':
-        return true;
-      default:
-        return parseError("Expected , or } after object property");
+        തുടരുക;
+      അവസ്ഥ '}':
+        തിരികെ സത്യം;
+      സ്ഥിരസ്ഥിതി:
+        തിരികെ parseError("Expected , or } after object property");
       }
     }
   }
-  default:
-    if (isNumber(C))
-      return parseNumber(C, Out);
-    return parseError("Invalid JSON value");
+  സ്ഥിരസ്ഥിതി:
+    എങ്കിൽ (is_സംഖ്യ(C))
+      തിരികെ parse_സംഖ്യ(C, Out);
+    തിരികെ parseError("Invalid JSON value");
   }
 }
 
-bool Parser::parseNumber(char First, Value &Out) {
+തർക്കം Parser::parse_സംഖ്യ(അക്ഷരം First, മൂല്യം &Out) {
   // Read the number into a string. (Must be null-terminated for strto*).
   SmallString<24> S;
-  S.push_back(First);
-  while (isNumber(peek()))
-    S.push_back(next());
-  char *End;
+  S.തള്ളുക_back(First);
+  ആകുമ്പോൾ (is_സംഖ്യ(peek()))
+    S.തള്ളുക_back(next());
+  അക്ഷരം *End;
   // Try first to parse as integer, and if so preserve full 64 bits.
   // We check for errno for out of bounds errors and for End == S.end()
   // to make sure that the numeric string is not malformed.
   errno = 0;
   int64_t I = std::strtoll(S.c_str(), &End, 10);
-  if (End == S.end() && errno != ERANGE) {
+  എങ്കിൽ (End == S.end() && errno != ERANGE) {
     Out = I;
-    return true;
+    തിരികെ സത്യം;
   }
   // strtroull has a special handling for negative numbers, but in this
   // case we don't want to do that because negative numbers were already
   // handled in the previous block.
-  if (First != '-') {
+  എങ്കിൽ (First != '-') {
     errno = 0;
     uint64_t UI = std::strtoull(S.c_str(), &End, 10);
-    if (End == S.end() && errno != ERANGE) {
+    എങ്കിൽ (End == S.end() && errno != ERANGE) {
       Out = UI;
-      return true;
+      തിരികെ സത്യം;
     }
   }
   // If it's not an integer
   Out = std::strtod(S.c_str(), &End);
-  return End == S.end() || parseError("Invalid JSON value (number?)");
+  തിരികെ End == S.end() || parseError("Invalid JSON value (number?)");
 }
 
-bool Parser::parseString(std::string &Out) {
+തർക്കം Parser::parseString(std::string &Out) {
   // leading quote was already consumed.
-  for (char C = next(); C != '"'; C = next()) {
-    if (LLVM_UNLIKELY(P == End))
-      return parseError("Unterminated string");
-    if (LLVM_UNLIKELY((C & 0x1f) == C))
-      return parseError("Control character in string");
-    if (LLVM_LIKELY(C != '\\')) {
-      Out.push_back(C);
-      continue;
+  വേണ്ടി (അക്ഷരം C = next(); C != '"'; C = next()) {
+    എങ്കിൽ (LLVM_UNLIKELY(P == End))
+      തിരികെ parseError("Unterminated string");
+    എങ്കിൽ (LLVM_UNLIKELY((C & 0x1f) == C))
+      തിരികെ parseError("Control character in string");
+    എങ്കിൽ (LLVM_LIKELY(C != '\\')) {
+      Out.തള്ളുക_back(C);
+      തുടരുക;
     }
     // Handle escape sequence.
-    switch (C = next()) {
-    case '"':
-    case '\\':
-    case '/':
-      Out.push_back(C);
-      break;
-    case 'b':
-      Out.push_back('\b');
-      break;
-    case 'f':
-      Out.push_back('\f');
-      break;
-    case 'n':
-      Out.push_back('\n');
-      break;
-    case 'r':
-      Out.push_back('\r');
-      break;
-    case 't':
-      Out.push_back('\t');
-      break;
-    case 'u':
-      if (!parseUnicode(Out))
-        return false;
-      break;
-    default:
-      return parseError("Invalid escape sequence");
+    തിരഞ്ഞെടുപ്പ് (C = next()) {
+    അവസ്ഥ '"':
+    അവസ്ഥ '\\':
+    അവസ്ഥ '/':
+      Out.തള്ളുക_back(C);
+      നിർത്തുക;
+    അവസ്ഥ 'b':
+      Out.തള്ളുക_back('\b');
+      നിർത്തുക;
+    അവസ്ഥ 'f':
+      Out.തള്ളുക_back('\f');
+      നിർത്തുക;
+    അവസ്ഥ 'n':
+      Out.തള്ളുക_back('\n');
+      നിർത്തുക;
+    അവസ്ഥ 'r':
+      Out.തള്ളുക_back('\r');
+      നിർത്തുക;
+    അവസ്ഥ 't':
+      Out.തള്ളുക_back('\t');
+      നിർത്തുക;
+    അവസ്ഥ 'u':
+      എങ്കിൽ (!parseUnicode(Out))
+        തിരികെ അസത്യം;
+      നിർത്തുക;
+    സ്ഥിരസ്ഥിതി:
+      തിരികെ parseError("Invalid escape sequence");
     }
   }
-  return true;
+  തിരികെ സത്യം;
 }
 
-static void encodeUtf8(uint32_t Rune, std::string &Out) {
-  if (Rune < 0x80) {
-    Out.push_back(Rune & 0x7F);
-  } else if (Rune < 0x800) {
+സ്ഥിതം ശൂന്യം encodeUtf8(uint32_t Rune, std::string &Out) {
+  എങ്കിൽ (Rune < 0x80) {
+    Out.തള്ളുക_back(Rune & 0x7F);
+  } അല്ലെങ്കിൽ എങ്കിൽ (Rune < 0x800) {
     uint8_t FirstByte = 0xC0 | ((Rune & 0x7C0) >> 6);
     uint8_t SecondByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-  } else if (Rune < 0x10000) {
+    Out.തള്ളുക_back(FirstByte);
+    Out.തള്ളുക_back(SecondByte);
+  } അല്ലെങ്കിൽ എങ്കിൽ (Rune < 0x10000) {
     uint8_t FirstByte = 0xE0 | ((Rune & 0xF000) >> 12);
     uint8_t SecondByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t ThirdByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-  } else if (Rune < 0x110000) {
+    Out.തള്ളുക_back(FirstByte);
+    Out.തള്ളുക_back(SecondByte);
+    Out.തള്ളുക_back(ThirdByte);
+  } അല്ലെങ്കിൽ എങ്കിൽ (Rune < 0x110000) {
     uint8_t FirstByte = 0xF0 | ((Rune & 0x1F0000) >> 18);
     uint8_t SecondByte = 0x80 | ((Rune & 0x3F000) >> 12);
     uint8_t ThirdByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t FourthByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-    Out.push_back(FourthByte);
-  } else {
+    Out.തള്ളുക_back(FirstByte);
+    Out.തള്ളുക_back(SecondByte);
+    Out.തള്ളുക_back(ThirdByte);
+    Out.തള്ളുക_back(FourthByte);
+  } അല്ലെങ്കിൽ {
     llvm_unreachable("Invalid codepoint");
   }
 }
@@ -609,325 +609,325 @@ static void encodeUtf8(uint32_t Rune, std::string &Out) {
 // May parse several sequential escapes to ensure proper surrogate handling.
 // We do not use ConvertUTF.h, it can't accept and replace unpaired surrogates.
 // These are invalid Unicode but valid JSON (RFC 8259, section 8.2).
-bool Parser::parseUnicode(std::string &Out) {
+തർക്കം Parser::parseUnicode(std::string &Out) {
   // Invalid UTF is not a JSON error (RFC 8529§8.2). It gets replaced by U+FFFD.
   auto Invalid = [&] { Out.append(/* UTF-8 */ {'\xef', '\xbf', '\xbd'}); };
   // Decodes 4 hex digits from the stream into Out, returns false on error.
-  auto Parse4Hex = [this](uint16_t &Out) -> bool {
+  auto Parse4Hex = [ഇത്](uint16_t &Out) -> തർക്കം {
     Out = 0;
-    char Bytes[] = {next(), next(), next(), next()};
-    for (unsigned char C : Bytes) {
-      if (!std::isxdigit(C))
-        return parseError("Invalid \\u escape sequence");
+    അക്ഷരം Bytes[] = {next(), next(), next(), next()};
+    വേണ്ടി (unsigned അക്ഷരം C : Bytes) {
+      എങ്കിൽ (!std::isxdigit(C))
+        തിരികെ parseError("Invalid \\u escape sequence");
       Out <<= 4;
       Out |= (C > '9') ? (C & ~0x20) - 'A' + 10 : (C - '0');
     }
-    return true;
+    തിരികെ സത്യം;
   };
   uint16_t First; // UTF-16 code unit from the first \u escape.
-  if (!Parse4Hex(First))
-    return false;
+  എങ്കിൽ (!Parse4Hex(First))
+    തിരികെ അസത്യം;
 
   // We loop to allow proper surrogate-pair error handling.
-  while (true) {
+  ആകുമ്പോൾ (സത്യം) {
     // Case 1: the UTF-16 code unit is already a codepoint in the BMP.
-    if (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
+    എങ്കിൽ (LLVM_LIKELY(First < 0xD800 || First >= 0xE000)) {
       encodeUtf8(First, Out);
-      return true;
+      തിരികെ സത്യം;
     }
 
     // Case 2: it's an (unpaired) trailing surrogate.
-    if (LLVM_UNLIKELY(First >= 0xDC00)) {
+    എങ്കിൽ (LLVM_UNLIKELY(First >= 0xDC00)) {
       Invalid();
-      return true;
+      തിരികെ സത്യം;
     }
 
     // Case 3: it's a leading surrogate. We expect a trailing one next.
     // Case 3a: there's no trailing \u escape. Don't advance in the stream.
-    if (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
+    എങ്കിൽ (LLVM_UNLIKELY(P + 2 > End || *P != '\\' || *(P + 1) != 'u')) {
       Invalid(); // Leading surrogate was unpaired.
-      return true;
+      തിരികെ സത്യം;
     }
     P += 2;
     uint16_t Second;
-    if (!Parse4Hex(Second))
-      return false;
+    എങ്കിൽ (!Parse4Hex(Second))
+      തിരികെ അസത്യം;
     // Case 3b: there was another \u escape, but it wasn't a trailing surrogate.
-    if (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
+    എങ്കിൽ (LLVM_UNLIKELY(Second < 0xDC00 || Second >= 0xE000)) {
       Invalid();      // Leading surrogate was unpaired.
       First = Second; // Second escape still needs to be processed.
-      continue;
+      തുടരുക;
     }
     // Case 3c: a valid surrogate pair encoding an astral codepoint.
     encodeUtf8(0x10000 | ((First - 0xD800) << 10) | (Second - 0xDC00), Out);
-    return true;
+    തിരികെ സത്യം;
   }
 }
 
-bool Parser::parseError(const char *Msg) {
-  int Line = 1;
-  const char *StartOfLine = Start;
-  for (const char *X = Start; X < P; ++X) {
-    if (*X == 0x0A) {
-      ++Line;
-      StartOfLine = X + 1;
+തർക്കം Parser::parseError(സ്ഥിരം അക്ഷരം *സന്ദേശം_2) {
+  പൂർണ്ണസംഖ്യ വരി = 1;
+  സ്ഥിരം അക്ഷരം *Start_Of_വരി = Start;
+  വേണ്ടി (സ്ഥിരം അക്ഷരം *X = Start; X < P; ++X) {
+    എങ്കിൽ (*X == 0x0A) {
+      ++വരി;
+      Start_Of_വരി = X + 1;
     }
   }
   Err.emplace(
-      std::make_unique<ParseError>(Msg, Line, P - StartOfLine, P - Start));
-  return false;
+      std::make_unique<ParseError>(സന്ദേശം_2, വരി, P - Start_Of_വരി, P - Start));
+  തിരികെ അസത്യം;
 }
 
-Expected<Value> parse(StringRef JSON) {
+Expected<മൂല്യം> parse(StringRef JSON) {
   Parser P(JSON);
-  Value E = nullptr;
-  if (P.checkUTF8())
-    if (P.parseValue(E))
-      if (P.assertEnd())
-        return std::move(E);
-  return P.takeError();
+  മൂല്യം E = nullptr;
+  എങ്കിൽ (P.checkUTF8())
+    എങ്കിൽ (P.parse_മൂല്യം(E))
+      എങ്കിൽ (P.assertEnd())
+        തിരികെ std::move(E);
+  തിരികെ P.takeError();
 }
 
-char ParseError::ID = 0;
+അക്ഷരം ParseError::ID = 0;
 
 // Defined out-of-line to place vtable in this compilation unit.
-void ParseError::log(llvm::raw_ostream &OS) const {
-  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", Line, Column, Offset, Msg);
+ശൂന്യം ParseError::log(llvm::raw_ostream &OS) സ്ഥിരം {
+  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", വരി, Column, Offset, സന്ദേശം_2);
 }
 
-bool isUTF8(llvm::StringRef S, size_t *ErrOffset) {
+തർക്കം isUTF8(llvm::StringRef S, size_t *ErrOffset) {
   // Fast-path for ASCII, which is valid UTF-8.
-  if (LLVM_LIKELY(isASCII(S)))
-    return true;
+  എങ്കിൽ (LLVM_LIKELY(isASCII(S)))
+    തിരികെ സത്യം;
 
-  const UTF8 *Data = reinterpret_cast<const UTF8 *>(S.data()), *Rest = Data;
-  if (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
-    return true;
+  സ്ഥിരം UTF8 *Data = reinterpret_cast<സ്ഥിരം UTF8 *>(S.data()), *Rest = Data;
+  എങ്കിൽ (LLVM_LIKELY(isLegalUTF8String(&Rest, Data + S.size())))
+    തിരികെ സത്യം;
 
-  if (ErrOffset)
+  എങ്കിൽ (ErrOffset)
     *ErrOffset = Rest - Data;
-  return false;
+  തിരികെ അസത്യം;
 }
 
 std::string fixUTF8(llvm::StringRef S) {
   // This isn't particularly efficient, but is only for error-recovery.
   std::vector<UTF32> Codepoints(S.size()); // 1 codepoint per byte suffices.
-  const UTF8 *In8 = reinterpret_cast<const UTF8 *>(S.data());
+  സ്ഥിരം UTF8 *In8 = reinterpret_cast<സ്ഥിരം UTF8 *>(S.data());
   UTF32 *Out32 = Codepoints.data();
   ConvertUTF8toUTF32(&In8, In8 + S.size(), &Out32, Out32 + Codepoints.size(),
                      lenientConversion);
   Codepoints.resize(Out32 - Codepoints.data());
   std::string Res(4 * Codepoints.size(), 0); // 4 bytes per codepoint suffice
-  const UTF32 *In32 = Codepoints.data();
+  സ്ഥിരം UTF32 *In32 = Codepoints.data();
   UTF8 *Out8 = reinterpret_cast<UTF8 *>(&Res[0]);
   ConvertUTF32toUTF8(&In32, In32 + Codepoints.size(), &Out8, Out8 + Res.size(),
                      strictConversion);
-  Res.resize(reinterpret_cast<char *>(Out8) - Res.data());
-  return Res;
+  Res.resize(reinterpret_cast<അക്ഷരം *>(Out8) - Res.data());
+  തിരികെ Res;
 }
 
-static void quote(llvm::raw_ostream &OS, llvm::StringRef S) {
+സ്ഥിതം ശൂന്യം quote(llvm::raw_ostream &OS, llvm::StringRef S) {
   OS << '\"';
-  for (unsigned char C : S) {
-    if (C == 0x22 || C == 0x5C)
+  വേണ്ടി (unsigned അക്ഷരം C : S) {
+    എങ്കിൽ (C == 0x22 || C == 0x5C)
       OS << '\\';
-    if (C >= 0x20) {
+    എങ്കിൽ (C >= 0x20) {
       OS << C;
-      continue;
+      തുടരുക;
     }
     OS << '\\';
-    switch (C) {
+    തിരഞ്ഞെടുപ്പ് (C) {
     // A few characters are common enough to make short escapes worthwhile.
-    case '\t':
+    അവസ്ഥ '\t':
       OS << 't';
-      break;
-    case '\n':
+      നിർത്തുക;
+    അവസ്ഥ '\n':
       OS << 'n';
-      break;
-    case '\r':
+      നിർത്തുക;
+    അവസ്ഥ '\r':
       OS << 'r';
-      break;
-    default:
+      നിർത്തുക;
+    സ്ഥിരസ്ഥിതി:
       OS << 'u';
       llvm::write_hex(OS, C, llvm::HexPrintStyle::Lower, 4);
-      break;
+      നിർത്തുക;
     }
   }
   OS << '\"';
 }
 
-void llvm::json::OStream::value(const Value &V) {
-  switch (V.kind()) {
-  case Value::Null:
-    valueBegin();
+ശൂന്യം llvm::json::OStream::മൂല്യം_2(സ്ഥിരം മൂല്യം &V) {
+  തിരഞ്ഞെടുപ്പ് (V.kind()) {
+  അവസ്ഥ മൂല്യം::Null:
+    മൂല്യം_Begin();
     OS << "null";
-    return;
-  case Value::Boolean:
-    valueBegin();
+    തിരികെ;
+  അവസ്ഥ മൂല്യം::Boolean:
+    മൂല്യം_Begin();
     OS << (*V.getAsBoolean() ? "true" : "false");
-    return;
-  case Value::Number:
-    valueBegin();
-    if (V.Type == Value::T_Integer)
+    തിരികെ;
+  അവസ്ഥ മൂല്യം::സംഖ്യ:
+    മൂല്യം_Begin();
+    എങ്കിൽ (V.Type == മൂല്യം::T_Integer)
       OS << *V.getAsInteger();
-    else if (V.Type == Value::T_UINT64)
+    അല്ലെങ്കിൽ എങ്കിൽ (V.Type == മൂല്യം::T_UINT64)
       OS << *V.getAsUINT64();
-    else
-      OS << format("%.*g", std::numeric_limits<double>::max_digits10,
-                   *V.getAsNumber());
-    return;
-  case Value::String:
-    valueBegin();
+    അല്ലെങ്കിൽ
+      OS << format("%.*g", std::numeric_limits<ഇരട്ട>::max_digits10,
+                   *V.get_As_സംഖ്യ());
+    തിരികെ;
+  അവസ്ഥ മൂല്യം::String:
+    മൂല്യം_Begin();
     quote(OS, *V.getAsString());
-    return;
-  case Value::Array:
-    return array([&] {
-      for (const Value &E : *V.getAsArray())
-        value(E);
+    തിരികെ;
+  അവസ്ഥ മൂല്യം::Array:
+    തിരികെ array([&] {
+      വേണ്ടി (സ്ഥിരം മൂല്യം &E : *V.getAsArray())
+        മൂല്യം_2(E);
     });
-  case Value::Object:
-    return object([&] {
-      for (const Object::value_type *E : sortedElements(*V.getAsObject()))
+  അവസ്ഥ മൂല്യം::Object:
+    തിരികെ object([&] {
+      വേണ്ടി (സ്ഥിരം Object::മൂല്യം_type *E : sortedElements(*V.getAsObject()))
         attribute(E->first, E->second);
     });
   }
 }
 
-void llvm::json::OStream::valueBegin() {
-  assert(Stack.back().Ctx != Object && "Only attributes allowed here");
-  if (Stack.back().HasValue) {
-    assert(Stack.back().Ctx != Singleton && "Only one value allowed here");
+ശൂന്യം llvm::json::OStream::മൂല്യം_Begin() {
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx != Object && "Only attributes allowed here");
+  എങ്കിൽ (അട്ടി.back().Has_മൂല്യം) {
+    പ്രതിജ്ഞാ(അട്ടി.back().Ctx != Singleton && "Only one value allowed here");
     OS << ',';
   }
-  if (Stack.back().Ctx == Array)
+  എങ്കിൽ (അട്ടി.back().Ctx == Array)
     newline();
   flushComment();
-  Stack.back().HasValue = true;
+  അട്ടി.back().Has_മൂല്യം = സത്യം;
 }
 
-void OStream::comment(llvm::StringRef Comment) {
-  assert(PendingComment.empty() && "Only one comment per value!");
+ശൂന്യം OStream::comment(llvm::StringRef Comment) {
+  പ്രതിജ്ഞാ(PendingComment.empty() && "Only one comment per value!");
   PendingComment = Comment;
 }
 
-void OStream::flushComment() {
-  if (PendingComment.empty())
-    return;
+ശൂന്യം OStream::flushComment() {
+  എങ്കിൽ (PendingComment.empty())
+    തിരികെ;
   OS << (IndentSize ? "/* " : "/*");
   // Be sure not to accidentally emit "*/". Transform to "* /".
-  while (!PendingComment.empty()) {
+  ആകുമ്പോൾ (!PendingComment.empty()) {
     auto Pos = PendingComment.find("*/");
-    if (Pos == StringRef::npos) {
+    എങ്കിൽ (Pos == StringRef::npos) {
       OS << PendingComment;
       PendingComment = "";
-    } else {
+    } അല്ലെങ്കിൽ {
       OS << PendingComment.take_front(Pos) << "* /";
       PendingComment = PendingComment.drop_front(Pos + 2);
     }
   }
   OS << (IndentSize ? " */" : "*/");
   // Comments are on their own line unless attached to an attribute value.
-  if (Stack.size() > 1 && Stack.back().Ctx == Singleton) {
-    if (IndentSize)
+  എങ്കിൽ (അട്ടി.size() > 1 && അട്ടി.back().Ctx == Singleton) {
+    എങ്കിൽ (IndentSize)
       OS << ' ';
-  } else {
+  } അല്ലെങ്കിൽ {
     newline();
   }
 }
 
-void llvm::json::OStream::newline() {
-  if (IndentSize) {
-    OS.write('\n');
+ശൂന്യം llvm::json::OStream::newline() {
+  എങ്കിൽ (IndentSize) {
+    OS.ലിഖ('\n');
     OS.indent(Indent);
   }
 }
 
-void llvm::json::OStream::arrayBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Array;
+ശൂന്യം llvm::json::OStream::arrayBegin() {
+  മൂല്യം_Begin();
+  അട്ടി.emplace_back();
+  അട്ടി.back().Ctx = Array;
   Indent += IndentSize;
   OS << '[';
 }
 
-void llvm::json::OStream::arrayEnd() {
-  assert(Stack.back().Ctx == Array);
+ശൂന്യം llvm::json::OStream::arrayEnd() {
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx == Array);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  എങ്കിൽ (അട്ടി.back().Has_മൂല്യം)
     newline();
   OS << ']';
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  പ്രതിജ്ഞാ(PendingComment.empty());
+  അട്ടി.എടുക്കുക_back();
+  പ്രതിജ്ഞാ(!അട്ടി.empty());
 }
 
-void llvm::json::OStream::objectBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Object;
+ശൂന്യം llvm::json::OStream::objectBegin() {
+  മൂല്യം_Begin();
+  അട്ടി.emplace_back();
+  അട്ടി.back().Ctx = Object;
   Indent += IndentSize;
   OS << '{';
 }
 
-void llvm::json::OStream::objectEnd() {
-  assert(Stack.back().Ctx == Object);
+ശൂന്യം llvm::json::OStream::objectEnd() {
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx == Object);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  എങ്കിൽ (അട്ടി.back().Has_മൂല്യം)
     newline();
   OS << '}';
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  പ്രതിജ്ഞാ(PendingComment.empty());
+  അട്ടി.എടുക്കുക_back();
+  പ്രതിജ്ഞാ(!അട്ടി.empty());
 }
 
-void llvm::json::OStream::attributeBegin(llvm::StringRef Key) {
-  assert(Stack.back().Ctx == Object);
-  if (Stack.back().HasValue)
+ശൂന്യം llvm::json::OStream::attributeBegin(llvm::StringRef താക്കോൽ) {
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx == Object);
+  എങ്കിൽ (അട്ടി.back().Has_മൂല്യം)
     OS << ',';
   newline();
   flushComment();
-  Stack.back().HasValue = true;
-  Stack.emplace_back();
-  Stack.back().Ctx = Singleton;
-  if (LLVM_LIKELY(isUTF8(Key))) {
-    quote(OS, Key);
-  } else {
-    assert(false && "Invalid UTF-8 in attribute key");
-    quote(OS, fixUTF8(Key));
+  അട്ടി.back().Has_മൂല്യം = സത്യം;
+  അട്ടി.emplace_back();
+  അട്ടി.back().Ctx = Singleton;
+  എങ്കിൽ (LLVM_LIKELY(isUTF8(താക്കോൽ))) {
+    quote(OS, താക്കോൽ);
+  } അല്ലെങ്കിൽ {
+    പ്രതിജ്ഞാ(അസത്യം && "Invalid UTF-8 in attribute key");
+    quote(OS, fixUTF8(താക്കോൽ));
   }
-  OS.write(':');
-  if (IndentSize)
-    OS.write(' ');
+  OS.ലിഖ(':');
+  എങ്കിൽ (IndentSize)
+    OS.ലിഖ(' ');
 }
 
-void llvm::json::OStream::attributeEnd() {
-  assert(Stack.back().Ctx == Singleton);
-  assert(Stack.back().HasValue && "Attribute must have a value");
-  assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(Stack.back().Ctx == Object);
+ശൂന്യം llvm::json::OStream::attributeEnd() {
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx == Singleton);
+  പ്രതിജ്ഞാ(അട്ടി.back().Has_മൂല്യം && "Attribute must have a value");
+  പ്രതിജ്ഞാ(PendingComment.empty());
+  അട്ടി.എടുക്കുക_back();
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx == Object);
 }
 
-raw_ostream &llvm::json::OStream::rawValueBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = RawValue;
-  return OS;
+raw_ostream &llvm::json::OStream::raw_മൂല്യം_Begin() {
+  മൂല്യം_Begin();
+  അട്ടി.emplace_back();
+  അട്ടി.back().Ctx = Raw_മൂല്യം;
+  തിരികെ OS;
 }
 
-void llvm::json::OStream::rawValueEnd() {
-  assert(Stack.back().Ctx == RawValue);
-  Stack.pop_back();
+ശൂന്യം llvm::json::OStream::raw_മൂല്യം_End() {
+  പ്രതിജ്ഞാ(അട്ടി.back().Ctx == Raw_മൂല്യം);
+  അട്ടി.എടുക്കുക_back();
 }
 
 } // namespace json
 } // namespace llvm
 
-void llvm::format_provider<llvm::json::Value>::format(
-    const llvm::json::Value &E, raw_ostream &OS, StringRef Options) {
+ശൂന്യം llvm::format_provider<llvm::json::മൂല്യം>::format(
+    സ്ഥിരം llvm::json::മൂല്യം &E, raw_ostream &OS, StringRef Options) {
   unsigned IndentAmount = 0;
-  if (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
+  എങ്കിൽ (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
     llvm_unreachable("json::Value format options should be an integer");
-  json::OStream(OS, IndentAmount).value(E);
+  json::OStream(OS, IndentAmount).മൂല്യം_2(E);
 }
 

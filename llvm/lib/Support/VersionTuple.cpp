@@ -11,129 +11,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#അന്തര്ഭാവ "llvm/Support/VersionTuple.h"
+#അന്തര്ഭാവ "llvm/ADT/StringRef.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <cassert>
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-std::string VersionTuple::getAsString() const {
+std::string VersionTuple::getAsString() സ്ഥിരം {
   std::string Result;
   {
     llvm::raw_string_ostream Out(Result);
-    Out << *this;
+    Out << *ഇത്;
   }
-  return Result;
+  തിരികെ Result;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
+raw_ostream &llvm::operator<<(raw_ostream &Out, സ്ഥിരം VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  എങ്കിൽ (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  എങ്കിൽ (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  എങ്കിൽ (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  എങ്കിൽ (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  തിരികെ Out;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
-    return true;
+സ്ഥിതം തർക്കം parseInt(StringRef &നിവേശം_2, unsigned &മൂല്യം_2) {
+  പ്രതിജ്ഞാ(മൂല്യം_2 == 0);
+  എങ്കിൽ (നിവേശം_2.empty())
+    തിരികെ സത്യം;
 
-  char next = input[0];
-  input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
-  value = (unsigned)(next - '0');
+  അക്ഷരം next = നിവേശം_2[0];
+  നിവേശം_2 = നിവേശം_2.substr(1);
+  എങ്കിൽ (next < '0' || next > '9')
+    തിരികെ സത്യം;
+  മൂല്യം_2 = (unsigned)(next - '0');
 
-  while (!input.empty()) {
-    next = input[0];
-    if (next < '0' || next > '9')
-      return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+  ആകുമ്പോൾ (!നിവേശം_2.empty()) {
+    next = നിവേശം_2[0];
+    എങ്കിൽ (next < '0' || next > '9')
+      തിരികെ അസത്യം;
+    നിവേശം_2 = നിവേശം_2.substr(1);
+    മൂല്യം_2 = മൂല്യം_2 * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  തിരികെ അസത്യം;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
+തർക്കം VersionTuple::tryParse(StringRef നിവേശം_2) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  എങ്കിൽ (parseInt(നിവേശം_2, major))
+    തിരികെ സത്യം;
 
-  if (input.empty()) {
-    *this = VersionTuple(major);
-    return false;
+  എങ്കിൽ (നിവേശം_2.empty()) {
+    *ഇത് = VersionTuple(major);
+    തിരികെ അസത്യം;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  എങ്കിൽ (നിവേശം_2[0] != '.')
+    തിരികെ സത്യം;
+  നിവേശം_2 = നിവേശം_2.substr(1);
+  എങ്കിൽ (parseInt(നിവേശം_2, minor))
+    തിരികെ സത്യം;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor);
-    return false;
+  എങ്കിൽ (നിവേശം_2.empty()) {
+    *ഇത് = VersionTuple(major, minor);
+    തിരികെ അസത്യം;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  എങ്കിൽ (!നിവേശം_2.consume_front("."))
+    തിരികെ സത്യം;
+  എങ്കിൽ (parseInt(നിവേശം_2, subminor))
+    തിരികെ സത്യം;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor);
-    return false;
+  എങ്കിൽ (നിവേശം_2.empty()) {
+    *ഇത് = VersionTuple(major, minor, subminor);
+    തിരികെ അസത്യം;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  എങ്കിൽ (!നിവേശം_2.consume_front("."))
+    തിരികെ സത്യം;
+  എങ്കിൽ (parseInt(നിവേശം_2, build))
+    തിരികെ സത്യം;
+  എങ്കിൽ (build >= 1024 * 1024)
+    തിരികെ സത്യം;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor, build);
-    return false;
+  എങ്കിൽ (നിവേശം_2.empty()) {
+    *ഇത് = VersionTuple(major, minor, subminor, build);
+    തിരികെ അസത്യം;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  എങ്കിൽ (!നിവേശം_2.consume_front("."))
+    തിരികെ സത്യം;
+  എങ്കിൽ (parseInt(നിവേശം_2, subbuild))
+    തിരികെ സത്യം;
+  എങ്കിൽ (subbuild >= 1024)
+    തിരികെ സത്യം;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  എങ്കിൽ (!നിവേശം_2.empty())
+    തിരികെ സത്യം;
 
-  *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  *ഇത് = VersionTuple(major, minor, subminor, build, subbuild);
+  തിരികെ അസത്യം;
 }
 
-VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) സ്ഥിരം {
+  എങ്കിൽ (HasSubbuild)
+    തിരികെ VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  എങ്കിൽ (HasBuild)
+    തിരികെ VersionTuple(NewMajor, Minor, Subminor, Build);
+  എങ്കിൽ (HasSubminor)
+    തിരികെ VersionTuple(NewMajor, Minor, Subminor);
+  എങ്കിൽ (HasMinor)
+    തിരികെ VersionTuple(NewMajor, Minor);
+  തിരികെ VersionTuple(NewMajor);
 }

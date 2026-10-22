@@ -6,173 +6,173 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamReader.h"
+#അന്തര്ഭാവ "llvm/Support/BinaryStreamReader.h"
 
-#include "llvm/Support/BinaryStreamError.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#അന്തര്ഭാവ "llvm/Support/BinaryStreamError.h"
+#അന്തര്ഭാവ "llvm/Support/BinaryStreamRef.h"
+#അന്തര്ഭാവ "llvm/Support/LEB128.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-BinaryStreamReader::BinaryStreamReader(BinaryStreamRef Ref) : Stream(Ref) {}
+ദ്വിമാന_Stream_Reader::ദ്വിമാന_Stream_Reader(ദ്വിമാന_Stream_Ref Ref) : Stream(Ref) {}
 
-BinaryStreamReader::BinaryStreamReader(BinaryStream &Stream) : Stream(Stream) {}
+ദ്വിമാന_Stream_Reader::ദ്വിമാന_Stream_Reader(ദ്വിമാന_Stream &Stream) : Stream(Stream) {}
 
-BinaryStreamReader::BinaryStreamReader(ArrayRef<uint8_t> Data,
+ദ്വിമാന_Stream_Reader::ദ്വിമാന_Stream_Reader(ArrayRef<uint8_t> Data,
                                        endianness Endian)
     : Stream(Data, Endian) {}
 
-BinaryStreamReader::BinaryStreamReader(StringRef Data, endianness Endian)
+ദ്വിമാന_Stream_Reader::ദ്വിമാന_Stream_Reader(StringRef Data, endianness Endian)
     : Stream(Data, Endian) {}
 
-Error BinaryStreamReader::readLongestContiguousChunk(
+Error ദ്വിമാന_Stream_Reader::readLongestContiguousChunk(
     ArrayRef<uint8_t> &Buffer) {
-  if (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
-    return EC;
+  എങ്കിൽ (auto EC = Stream.readLongestContiguousChunk(Offset, Buffer))
+    തിരികെ EC;
   Offset += Buffer.size();
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
-  if (auto EC = Stream.readBytes(Offset, Size, Buffer))
-    return EC;
+Error ദ്വിമാന_Stream_Reader::readBytes(ArrayRef<uint8_t> &Buffer, uint32_t Size) {
+  എങ്കിൽ (auto EC = Stream.readBytes(Offset, Size, Buffer))
+    തിരികെ EC;
   Offset += Size;
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readULEB128(uint64_t &Dest) {
+Error ദ്വിമാന_Stream_Reader::readULEB128(uint64_t &Dest) {
   SmallVector<uint8_t, 10> EncodedBytes;
   ArrayRef<uint8_t> NextByte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  ചെയ്യുക {
+    എങ്കിൽ (auto Err = readBytes(NextByte, 1))
+      തിരികെ Err;
+    EncodedBytes.തള്ളുക_back(NextByte[0]);
+  } ആകുമ്പോൾ (NextByte[0] & 0x80);
 
   Dest = decodeULEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readSLEB128(int64_t &Dest) {
+Error ദ്വിമാന_Stream_Reader::readSLEB128(int64_t &Dest) {
   SmallVector<uint8_t, 10> EncodedBytes;
   ArrayRef<uint8_t> NextByte;
 
   // Copy the encoded ULEB into the buffer.
-  do {
-    if (auto Err = readBytes(NextByte, 1))
-      return Err;
-    EncodedBytes.push_back(NextByte[0]);
-  } while (NextByte[0] & 0x80);
+  ചെയ്യുക {
+    എങ്കിൽ (auto Err = readBytes(NextByte, 1))
+      തിരികെ Err;
+    EncodedBytes.തള്ളുക_back(NextByte[0]);
+  } ആകുമ്പോൾ (NextByte[0] & 0x80);
 
   Dest = decodeSLEB128(EncodedBytes.begin(), nullptr, EncodedBytes.end());
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readCString(StringRef &Dest) {
+Error ദ്വിമാന_Stream_Reader::readCString(StringRef &Dest) {
   uint64_t OriginalOffset = getOffset();
   uint64_t FoundOffset = 0;
-  while (true) {
+  ആകുമ്പോൾ (സത്യം) {
     uint64_t ThisOffset = getOffset();
     ArrayRef<uint8_t> Buffer;
-    if (auto EC = readLongestContiguousChunk(Buffer))
-      return EC;
-    StringRef S(reinterpret_cast<const char *>(Buffer.begin()), Buffer.size());
+    എങ്കിൽ (auto EC = readLongestContiguousChunk(Buffer))
+      തിരികെ EC;
+    StringRef S(reinterpret_cast<സ്ഥിരം അക്ഷരം *>(Buffer.begin()), Buffer.size());
     size_t Pos = S.find_first_of('\0');
-    if (LLVM_LIKELY(Pos != StringRef::npos)) {
+    എങ്കിൽ (LLVM_LIKELY(Pos != StringRef::npos)) {
       FoundOffset = Pos + ThisOffset;
-      break;
+      നിർത്തുക;
     }
   }
-  assert(FoundOffset >= OriginalOffset);
+  പ്രതിജ്ഞാ(FoundOffset >= OriginalOffset);
 
   setOffset(OriginalOffset);
   size_t Length = FoundOffset - OriginalOffset;
 
-  if (auto EC = readFixedString(Dest, Length))
-    return EC;
+  എങ്കിൽ (auto EC = readFixedString(Dest, Length))
+    തിരികെ EC;
 
   // Now set the offset back to after the null terminator.
   setOffset(FoundOffset + 1);
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readWideString(ArrayRef<UTF16> &Dest) {
+Error ദ്വിമാന_Stream_Reader::readWideString(ArrayRef<UTF16> &Dest) {
   uint64_t Length = 0;
   uint64_t OriginalOffset = getOffset();
-  const UTF16 *C;
-  while (true) {
-    if (auto EC = readObject(C))
-      return EC;
-    if (*C == 0x0000)
-      break;
+  സ്ഥിരം UTF16 *C;
+  ആകുമ്പോൾ (സത്യം) {
+    എങ്കിൽ (auto EC = readObject(C))
+      തിരികെ EC;
+    എങ്കിൽ (*C == 0x0000)
+      നിർത്തുക;
     ++Length;
   }
   uint64_t NewOffset = getOffset();
   setOffset(OriginalOffset);
 
-  if (auto EC = readArray(Dest, Length))
-    return EC;
+  എങ്കിൽ (auto EC = readArray(Dest, Length))
+    തിരികെ EC;
   setOffset(NewOffset);
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readFixedString(StringRef &Dest, uint32_t Length) {
+Error ദ്വിമാന_Stream_Reader::readFixedString(StringRef &Dest, uint32_t Length) {
   ArrayRef<uint8_t> Bytes;
-  if (auto EC = readBytes(Bytes, Length))
-    return EC;
-  Dest = StringRef(reinterpret_cast<const char *>(Bytes.begin()), Bytes.size());
-  return Error::success();
+  എങ്കിൽ (auto EC = readBytes(Bytes, Length))
+    തിരികെ EC;
+  Dest = StringRef(reinterpret_cast<സ്ഥിരം അക്ഷരം *>(Bytes.begin()), Bytes.size());
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref) {
-  return readStreamRef(Ref, bytesRemaining());
+Error ദ്വിമാന_Stream_Reader::readStreamRef(ദ്വിമാന_Stream_Ref &Ref) {
+  തിരികെ readStreamRef(Ref, bytesRemaining());
 }
 
-Error BinaryStreamReader::readStreamRef(BinaryStreamRef &Ref, uint32_t Length) {
-  if (bytesRemaining() < Length)
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+Error ദ്വിമാന_Stream_Reader::readStreamRef(ദ്വിമാന_Stream_Ref &Ref, uint32_t Length) {
+  എങ്കിൽ (bytesRemaining() < Length)
+    തിരികെ make_error<ദ്വിമാന_Stream_Error>(stream_error_code::stream_too_short);
   Ref = Stream.slice(Offset, Length);
   Offset += Length;
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::readSubstream(BinarySubstreamRef &Ref,
+Error ദ്വിമാന_Stream_Reader::readSubstream(ദ്വിമാന_Substream_Ref &Ref,
                                         uint32_t Length) {
   Ref.Offset = getOffset();
-  return readStreamRef(Ref.StreamData, Length);
+  തിരികെ readStreamRef(Ref.StreamData, Length);
 }
 
-Error BinaryStreamReader::skip(uint64_t Amount) {
-  if (Amount > bytesRemaining())
-    return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+Error ദ്വിമാന_Stream_Reader::skip(uint64_t Amount) {
+  എങ്കിൽ (Amount > bytesRemaining())
+    തിരികെ make_error<ദ്വിമാന_Stream_Error>(stream_error_code::stream_too_short);
   Offset += Amount;
-  return Error::success();
+  തിരികെ Error::success();
 }
 
-Error BinaryStreamReader::padToAlignment(uint32_t Align) {
+Error ദ്വിമാന_Stream_Reader::padToAlignment(uint32_t Align) {
   uint32_t NewOffset = alignTo(Offset, Align);
-  return skip(NewOffset - Offset);
+  തിരികെ skip(NewOffset - Offset);
 }
 
-uint8_t BinaryStreamReader::peek() const {
+uint8_t ദ്വിമാന_Stream_Reader::peek() സ്ഥിരം {
   ArrayRef<uint8_t> Buffer;
   auto EC = Stream.readBytes(Offset, 1, Buffer);
-  assert(!EC && "Cannot peek an empty buffer!");
+  പ്രതിജ്ഞാ(!EC && "Cannot peek an empty buffer!");
   llvm::consumeError(std::move(EC));
-  return Buffer[0];
+  തിരികെ Buffer[0];
 }
 
-std::pair<BinaryStreamReader, BinaryStreamReader>
-BinaryStreamReader::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+std::pair<ദ്വിമാന_Stream_Reader, ദ്വിമാന_Stream_Reader>
+ദ്വിമാന_Stream_Reader::split(uint64_t Off) സ്ഥിരം {
+  പ്രതിജ്ഞാ(getLength() >= Off);
 
-  BinaryStreamRef First = Stream.drop_front(Offset);
+  ദ്വിമാന_Stream_Ref First = Stream.drop_front(Offset);
 
-  BinaryStreamRef Second = First.drop_front(Off);
+  ദ്വിമാന_Stream_Ref Second = First.drop_front(Off);
   First = First.keep_front(Off);
-  BinaryStreamReader W1{First};
-  BinaryStreamReader W2{Second};
-  return {W1, W2};
+  ദ്വിമാന_Stream_Reader W1{First};
+  ദ്വിമാന_Stream_Reader W2{Second};
+  തിരികെ {W1, W2};
 }

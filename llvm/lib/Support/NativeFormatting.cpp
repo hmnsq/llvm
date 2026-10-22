@@ -6,229 +6,229 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/Support/NativeFormatting.h"
+#അന്തര്ഭാവ "llvm/ADT/ArrayRef.h"
+#അന്തര്ഭാവ "llvm/ADT/SmallString.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/Format.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
 
-#include <cmath>
+#അന്തര്ഭാവ <cmath>
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <float.h> // For _fpclass in llvm::write_double.
+#എങ്കിൽ defined(_WIN32) && !defined(__MINGW32__)
+#അന്തര്ഭാവ <float.h> // For _fpclass in llvm::write_double.
 #endif
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
 template<typename T, std::size_t N>
-static int format_to_buffer(T Value, char (&Buffer)[N]) {
-  char *EndPtr = std::end(Buffer);
-  char *CurPtr = EndPtr;
+സ്ഥിതം പൂർണ്ണസംഖ്യ format_to_buffer(T മൂല്യം, അക്ഷരം (&Buffer)[N]) {
+  അക്ഷരം *EndPtr = std::end(Buffer);
+  അക്ഷരം *CurPtr = EndPtr;
 
-  do {
-    *--CurPtr = '0' + char(Value % 10);
-    Value /= 10;
-  } while (Value);
-  return EndPtr - CurPtr;
+  ചെയ്യുക {
+    *--CurPtr = '0' + അക്ഷരം(മൂല്യം % 10);
+    മൂല്യം /= 10;
+  } ആകുമ്പോൾ (മൂല്യം);
+  തിരികെ EndPtr - CurPtr;
 }
 
-static void writeWithCommas(raw_ostream &S, ArrayRef<char> Buffer) {
-  assert(!Buffer.empty());
+സ്ഥിതം ശൂന്യം writeWithCommas(raw_ostream &S, ArrayRef<അക്ഷരം> Buffer) {
+  പ്രതിജ്ഞാ(!Buffer.empty());
 
-  ArrayRef<char> ThisGroup;
-  int InitialDigits = ((Buffer.size() - 1) % 3) + 1;
+  ArrayRef<അക്ഷരം> ThisGroup;
+  പൂർണ്ണസംഖ്യ InitialDigits = ((Buffer.size() - 1) % 3) + 1;
   ThisGroup = Buffer.take_front(InitialDigits);
-  S.write(ThisGroup.data(), ThisGroup.size());
+  S.ലിഖ(ThisGroup.data(), ThisGroup.size());
 
   Buffer = Buffer.drop_front(InitialDigits);
-  assert(Buffer.size() % 3 == 0);
-  while (!Buffer.empty()) {
+  പ്രതിജ്ഞാ(Buffer.size() % 3 == 0);
+  ആകുമ്പോൾ (!Buffer.empty()) {
     S << ',';
     ThisGroup = Buffer.take_front(3);
-    S.write(ThisGroup.data(), 3);
+    S.ലിഖ(ThisGroup.data(), 3);
     Buffer = Buffer.drop_front(3);
   }
 }
 
 template <typename T>
-static void write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
-                                IntegerStyle Style, bool IsNegative,
-                                bool NonNegativePlus) {
+സ്ഥിതം ശൂന്യം write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
+                                IntegerStyle Style, തർക്കം IsNegative,
+                                തർക്കം NonNegativePlus) {
   static_assert(std::is_unsigned_v<T>, "Value is not unsigned!");
 
-  char NumberBuffer[128];
-  size_t Len = format_to_buffer(N, NumberBuffer);
+  അക്ഷരം സംഖ്യ_Buffer[128];
+  size_t Len = format_to_buffer(N, സംഖ്യ_Buffer);
 
-  if (IsNegative)
+  എങ്കിൽ (IsNegative)
     S << '-';
-  else if (NonNegativePlus)
+  അല്ലെങ്കിൽ എങ്കിൽ (NonNegativePlus)
     S << '+';
 
-  if (Len < MinDigits && Style != IntegerStyle::Number) {
-    for (size_t I = Len; I < MinDigits; ++I)
+  എങ്കിൽ (Len < MinDigits && Style != IntegerStyle::സംഖ്യ) {
+    വേണ്ടി (size_t I = Len; I < MinDigits; ++I)
       S << '0';
   }
 
-  if (Style == IntegerStyle::Number) {
-    writeWithCommas(S, ArrayRef<char>(std::end(NumberBuffer) - Len, Len));
-  } else {
-    S.write(std::end(NumberBuffer) - Len, Len);
+  എങ്കിൽ (Style == IntegerStyle::സംഖ്യ) {
+    writeWithCommas(S, ArrayRef<അക്ഷരം>(std::end(സംഖ്യ_Buffer) - Len, Len));
+  } അല്ലെങ്കിൽ {
+    S.ലിഖ(std::end(സംഖ്യ_Buffer) - Len, Len);
   }
 }
 
 template <typename T>
-static void write_unsigned(raw_ostream &S, T N, size_t MinDigits,
-                           IntegerStyle Style, bool IsNegative = false,
-                           bool NonNegativePlus = false) {
+സ്ഥിതം ശൂന്യം write_unsigned(raw_ostream &S, T N, size_t MinDigits,
+                           IntegerStyle Style, തർക്കം IsNegative = അസത്യം,
+                           തർക്കം NonNegativePlus = അസത്യം) {
   // Output using 32-bit div/mod if possible.
-  if (N == static_cast<uint32_t>(N))
+  എങ്കിൽ (N == static_cast<uint32_t>(N))
     write_unsigned_impl(S, static_cast<uint32_t>(N), MinDigits, Style,
                         IsNegative, NonNegativePlus);
-  else
+  അല്ലെങ്കിൽ
     write_unsigned_impl(S, N, MinDigits, Style, IsNegative, NonNegativePlus);
 }
 
 template <typename T>
-static void write_signed(raw_ostream &S, T N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus = false) {
+സ്ഥിതം ശൂന്യം write_signed(raw_ostream &S, T N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus = അസത്യം) {
   static_assert(std::is_signed_v<T>, "Value is not signed!");
 
   using UnsignedT = std::make_unsigned_t<T>;
 
-  if (N >= 0) {
-    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, false,
+  എങ്കിൽ (N >= 0) {
+    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, അസത്യം,
                    NonNegativePlus);
-    return;
+    തിരികെ;
   }
 
   UnsignedT UN = -(UnsignedT)N;
-  write_unsigned(S, UN, MinDigits, Style, true, NonNegativePlus);
+  write_unsigned(S, UN, MinDigits, Style, സത്യം, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+ശൂന്യം llvm::write_integer(raw_ostream &S, unsigned പൂർണ്ണസംഖ്യ N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, അസത്യം, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+ശൂന്യം llvm::write_integer(raw_ostream &S, പൂർണ്ണസംഖ്യ N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+ശൂന്യം llvm::write_integer(raw_ostream &S, unsigned long N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, അസത്യം, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+ശൂന്യം llvm::write_integer(raw_ostream &S, long N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+ശൂന്യം llvm::write_integer(raw_ostream &S, unsigned long long N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, അസത്യം, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+ശൂന്യം llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
+                         IntegerStyle Style, തർക്കം NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
+ശൂന്യം llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
                      std::optional<size_t> Width) {
-  const size_t kMaxWidth = 128u;
+  സ്ഥിരം size_t kMaxWidth = 128u;
 
-  size_t W = std::min(kMaxWidth, Width.value_or(0u));
+  size_t W = std::min(kMaxWidth, Width.മൂല്യം_or(0u));
 
   unsigned Nibbles = (llvm::bit_width(N) + 3) / 4;
-  bool Prefix = (Style == HexPrintStyle::PrefixLower ||
+  തർക്കം Prefix = (Style == HexPrintStyle::PrefixLower ||
                  Style == HexPrintStyle::PrefixUpper);
-  bool Upper =
+  തർക്കം Upper =
       (Style == HexPrintStyle::Upper || Style == HexPrintStyle::PrefixUpper);
   unsigned PrefixChars = Prefix ? 2 : 0;
-  unsigned NumChars =
+  unsigned അക്കം_Chars =
       std::max(static_cast<unsigned>(W), std::max(1u, Nibbles) + PrefixChars);
 
-  char NumberBuffer[kMaxWidth];
-  ::memset(NumberBuffer, '0', std::size(NumberBuffer));
-  if (Prefix)
-    NumberBuffer[1] = 'x';
-  char *EndPtr = NumberBuffer + NumChars;
-  char *CurPtr = EndPtr;
-  while (N) {
-    unsigned char x = static_cast<unsigned char>(N) % 16;
+  അക്ഷരം സംഖ്യ_Buffer[kMaxWidth];
+  ::memset(സംഖ്യ_Buffer, '0', std::size(സംഖ്യ_Buffer));
+  എങ്കിൽ (Prefix)
+    സംഖ്യ_Buffer[1] = 'x';
+  അക്ഷരം *EndPtr = സംഖ്യ_Buffer + അക്കം_Chars;
+  അക്ഷരം *CurPtr = EndPtr;
+  ആകുമ്പോൾ (N) {
+    unsigned അക്ഷരം x = static_cast<unsigned അക്ഷരം>(N) % 16;
     *--CurPtr = hexdigit(x, !Upper);
     N /= 16;
   }
 
-  S.write(NumberBuffer, NumChars);
+  S.ലിഖ(സംഖ്യ_Buffer, അക്കം_Chars);
 }
 
-void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
+ശൂന്യം llvm::write_double(raw_ostream &S, ഇരട്ട N, FloatStyle Style,
                         std::optional<size_t> Precision) {
-  size_t Prec = Precision.value_or(getDefaultPrecision(Style));
+  size_t Prec = Precision.മൂല്യം_or(getDefaultPrecision(Style));
 
-  if (std::isnan(N)) {
+  എങ്കിൽ (std::isnan(N)) {
     S << "nan";
-    return;
-  } else if (std::isinf(N)) {
+    തിരികെ;
+  } അല്ലെങ്കിൽ എങ്കിൽ (std::isinf(N)) {
     S << (std::signbit(N) ? "-INF" : "INF");
-    return;
+    തിരികെ;
   }
 
-  char Letter;
-  if (Style == FloatStyle::Exponent)
+  അക്ഷരം Letter;
+  എങ്കിൽ (Style == FloatStyle::Exponent)
     Letter = 'e';
-  else if (Style == FloatStyle::ExponentUpper)
+  അല്ലെങ്കിൽ എങ്കിൽ (Style == FloatStyle::ExponentUpper)
     Letter = 'E';
-  else
+  അല്ലെങ്കിൽ
     Letter = 'f';
 
   SmallString<8> Spec;
   llvm::raw_svector_ostream Out(Spec);
   Out << "%." << Prec << Letter;
 
-  if (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
+  എങ്കിൽ (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
 #ifdef _WIN32
 // On MSVCRT and compatible, output of %e is incompatible to Posix
 // by default. Number of exponent digits should be at least 2. "%+03d"
 // FIXME: Implement our formatter to here or Support/Format.h!
-#if defined(__MINGW32__)
+#എങ്കിൽ defined(__MINGW32__)
     // FIXME: It should be generic to C++11.
-    if (N == 0.0 && std::signbit(N)) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
+    എങ്കിൽ (N == 0.0 && std::signbit(N)) {
+      അക്ഷരം NegativeZero[] = "-0.000000e+00";
+      എങ്കിൽ (Style == FloatStyle::ExponentUpper)
         NegativeZero[strlen(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      തിരികെ;
     }
-#else
-    int fpcl = _fpclass(N);
+#അല്ലെങ്കിൽ
+    പൂർണ്ണസംഖ്യ fpcl = _fpclass(N);
 
     // negative zero
-    if (fpcl == _FPCLASS_NZ) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
+    എങ്കിൽ (fpcl == _FPCLASS_NZ) {
+      അക്ഷരം NegativeZero[] = "-0.000000e+00";
+      എങ്കിൽ (Style == FloatStyle::ExponentUpper)
         NegativeZero[strlen(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      തിരികെ;
     }
 #endif
 
-    char buf[32];
+    അക്ഷരം buf[32];
     unsigned len;
-    len = format(Spec.c_str(), N).snprint(buf, sizeof(buf));
-    if (len <= sizeof(buf) - 2) {
-      if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
+    len = format(Spec.c_str(), N).snprint(buf, വലുപ്പം(buf));
+    എങ്കിൽ (len <= വലുപ്പം(buf) - 2) {
+      എങ്കിൽ (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
           buf[len - 3] == '0') {
-        int cs = buf[len - 4];
-        if (cs == '+' || cs == '-') {
-          int c1 = buf[len - 2];
-          int c0 = buf[len - 1];
-          if (isdigit(static_cast<unsigned char>(c1)) &&
-              isdigit(static_cast<unsigned char>(c0))) {
+        പൂർണ്ണസംഖ്യ cs = buf[len - 4];
+        എങ്കിൽ (cs == '+' || cs == '-') {
+          പൂർണ്ണസംഖ്യ c1 = buf[len - 2];
+          പൂർണ്ണസംഖ്യ c0 = buf[len - 1];
+          എങ്കിൽ (isdigit(static_cast<unsigned അക്ഷരം>(c1)) &&
+              isdigit(static_cast<unsigned അക്ഷരം>(c0))) {
             // Trim leading '0': "...e+012" -> "...e+12\0"
             buf[len - 3] = c1;
             buf[len - 2] = c0;
@@ -237,33 +237,33 @@ void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
         }
       }
       S << buf;
-      return;
+      തിരികെ;
     }
 #endif
   }
 
-  if (Style == FloatStyle::Percent)
+  എങ്കിൽ (Style == FloatStyle::Percent)
     N *= 100.0;
 
-  char Buf[32];
-  format(Spec.c_str(), N).snprint(Buf, sizeof(Buf));
+  അക്ഷരം Buf[32];
+  format(Spec.c_str(), N).snprint(Buf, വലുപ്പം(Buf));
   S << Buf;
-  if (Style == FloatStyle::Percent)
+  എങ്കിൽ (Style == FloatStyle::Percent)
     S << '%';
 }
 
-bool llvm::isPrefixedHexStyle(HexPrintStyle S) {
-  return (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
+തർക്കം llvm::isPrefixedHexStyle(HexPrintStyle S) {
+  തിരികെ (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
 }
 
 size_t llvm::getDefaultPrecision(FloatStyle Style) {
-  switch (Style) {
-  case FloatStyle::Exponent:
-  case FloatStyle::ExponentUpper:
-    return 6; // Number of decimal places.
-  case FloatStyle::Fixed:
-  case FloatStyle::Percent:
-    return 2; // Number of decimal places.
+  തിരഞ്ഞെടുപ്പ് (Style) {
+  അവസ്ഥ FloatStyle::Exponent:
+  അവസ്ഥ FloatStyle::ExponentUpper:
+    തിരികെ 6; // Number of decimal places.
+  അവസ്ഥ FloatStyle::Fixed:
+  അവസ്ഥ FloatStyle::Percent:
+    തിരികെ 2; // Number of decimal places.
   }
   llvm_unreachable("Unknown FloatStyle enum");
 }

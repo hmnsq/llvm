@@ -10,49 +10,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/IntrusiveRefCntPtr.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/ADT/iterator_range.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FileSystem/UniqueID.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <atomic>
-#include <cassert>
-#include <cstdint>
-#include <iterator>
-#include <limits>
-#include <map>
-#include <memory>
-#include <optional>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#അന്തര്ഭാവ "llvm/Support/VirtualFileSystem.h"
+#അന്തര്ഭാവ "llvm/ADT/ArrayRef.h"
+#അന്തര്ഭാവ "llvm/ADT/DenseMap.h"
+#അന്തര്ഭാവ "llvm/ADT/IntrusiveRefCntPtr.h"
+#അന്തര്ഭാവ "llvm/ADT/STLExtras.h"
+#അന്തര്ഭാവ "llvm/ADT/SmallString.h"
+#അന്തര്ഭാവ "llvm/ADT/SmallVector.h"
+#അന്തര്ഭാവ "llvm/ADT/StringRef.h"
+#അന്തര്ഭാവ "llvm/ADT/StringSet.h"
+#അന്തര്ഭാവ "llvm/ADT/Twine.h"
+#അന്തര്ഭാവ "llvm/ADT/iterator_range.h"
+#അന്തര്ഭാവ "llvm/Config/llvm-config.h"
+#അന്തര്ഭാവ "llvm/Support/Casting.h"
+#അന്തര്ഭാവ "llvm/Support/Chrono.h"
+#അന്തര്ഭാവ "llvm/Support/Compiler.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/Errc.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorHandling.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorOr.h"
+#അന്തര്ഭാവ "llvm/Support/FileSystem.h"
+#അന്തര്ഭാവ "llvm/Support/FileSystem/UniqueID.h"
+#അന്തര്ഭാവ "llvm/Support/IOSandbox.h"
+#അന്തര്ഭാവ "llvm/Support/MemoryBuffer.h"
+#അന്തര്ഭാവ "llvm/Support/Path.h"
+#അന്തര്ഭാവ "llvm/Support/SMLoc.h"
+#അന്തര്ഭാവ "llvm/Support/SourceMgr.h"
+#അന്തര്ഭാവ "llvm/Support/YAMLParser.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <atomic>
+#അന്തര്ഭാവ <cassert>
+#അന്തര്ഭാവ <cstdint>
+#അന്തര്ഭാവ <iterator>
+#അന്തര്ഭാവ <limits>
+#അന്തര്ഭാവ <map>
+#അന്തര്ഭാവ <memory>
+#അന്തര്ഭാവ <optional>
+#അന്തര്ഭാവ <string>
+#അന്തര്ഭാവ <system_error>
+#അന്തര്ഭാവ <utility>
+#അന്തര്ഭാവ <vector>
 
-using namespace llvm;
-using namespace llvm::vfs;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::vfs;
 
 using llvm::sys::fs::file_status;
 using llvm::sys::fs::file_t;
@@ -60,123 +60,123 @@ using llvm::sys::fs::file_type;
 using llvm::sys::fs::perms;
 using llvm::sys::fs::UniqueID;
 
-Status::Status(const file_status &Status)
+Status::Status(സ്ഥിരം file_status &Status)
     : UID(Status.getUniqueID()), MTime(Status.getLastModificationTime()),
       User(Status.getUser()), Group(Status.getGroup()), Size(Status.getSize()),
       Type(Status.type()), Perms(Status.permissions()) {}
 
-Status::Status(const Twine &Name, UniqueID UID, sys::TimePoint<> MTime,
+Status::Status(സ്ഥിരം Twine &Name, UniqueID UID, sys::TimePoint<> MTime,
                uint32_t User, uint32_t Group, uint64_t Size, file_type Type,
                perms Perms)
     : Name(Name.str()), UID(UID), MTime(MTime), User(User), Group(Group),
       Size(Size), Type(Type), Perms(Perms) {}
 
-Status Status::copyWithNewSize(const Status &In, uint64_t NewSize) {
-  return Status(In.getName(), In.getUniqueID(), In.getLastModificationTime(),
+Status Status::copyWithNewSize(സ്ഥിരം Status &In, uint64_t NewSize) {
+  തിരികെ Status(In.getName(), In.getUniqueID(), In.getLastModificationTime(),
                 In.getUser(), In.getGroup(), NewSize, In.getType(),
                 In.getPermissions());
 }
 
-Status Status::copyWithNewName(const Status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
+Status Status::copyWithNewName(സ്ഥിരം Status &In, സ്ഥിരം Twine &NewName) {
+  തിരികെ Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
                 In.getUser(), In.getGroup(), In.getSize(), In.getType(),
                 In.getPermissions());
 }
 
-Status Status::copyWithNewName(const file_status &In, const Twine &NewName) {
-  return Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
+Status Status::copyWithNewName(സ്ഥിരം file_status &In, സ്ഥിരം Twine &NewName) {
+  തിരികെ Status(NewName, In.getUniqueID(), In.getLastModificationTime(),
                 In.getUser(), In.getGroup(), In.getSize(), In.type(),
                 In.permissions());
 }
 
-bool Status::equivalent(const Status &Other) const {
-  assert(isStatusKnown() && Other.isStatusKnown());
-  return getUniqueID() == Other.getUniqueID();
+തർക്കം Status::equivalent(സ്ഥിരം Status &Other) സ്ഥിരം {
+  പ്രതിജ്ഞാ(isStatusKnown() && Other.isStatusKnown());
+  തിരികെ getUniqueID() == Other.getUniqueID();
 }
 
-bool Status::isDirectory() const { return Type == file_type::directory_file; }
+തർക്കം Status::isDirectory() സ്ഥിരം { തിരികെ Type == file_type::directory_file; }
 
-bool Status::isRegularFile() const { return Type == file_type::regular_file; }
+തർക്കം Status::isRegularFile() സ്ഥിരം { തിരികെ Type == file_type::regular_file; }
 
-bool Status::isOther() const {
-  return exists() && !isRegularFile() && !isDirectory() && !isSymlink();
+തർക്കം Status::isOther() സ്ഥിരം {
+  തിരികെ exists() && !isRegularFile() && !isDirectory() && !isSymlink();
 }
 
-bool Status::isSymlink() const { return Type == file_type::symlink_file; }
+തർക്കം Status::isSymlink() സ്ഥിരം { തിരികെ Type == file_type::symlink_file; }
 
-bool Status::isStatusKnown() const { return Type != file_type::status_error; }
+തർക്കം Status::isStatusKnown() സ്ഥിരം { തിരികെ Type != file_type::status_error; }
 
-bool Status::exists() const {
-  return isStatusKnown() && Type != file_type::file_not_found;
+തർക്കം Status::exists() സ്ഥിരം {
+  തിരികെ isStatusKnown() && Type != file_type::file_not_found;
 }
 
-File::~File() = default;
+File::~File() = സ്ഥിരസ്ഥിതി;
 
-FileSystem::~FileSystem() = default;
+FileSystem::~FileSystem() = സ്ഥിരസ്ഥിതി;
 
 ErrorOr<std::unique_ptr<MemoryBuffer>>
-FileSystem::getBufferForFile(const llvm::Twine &Name, int64_t FileSize,
-                             bool RequiresNullTerminator, bool IsVolatile,
-                             bool IsText) {
-  auto F = IsText ? openFileForRead(Name) : openFileForReadBinary(Name);
-  if (!F)
-    return F.getError();
+FileSystem::getBufferForFile(സ്ഥിരം llvm::Twine &Name, int64_t FileSize,
+                             തർക്കം RequiresNullTerminator, തർക്കം IsVolatile,
+                             തർക്കം IsText) {
+  auto F = IsText ? openFileForRead(Name) : open_File_For_Read_ദ്വിമാന(Name);
+  എങ്കിൽ (!F)
+    തിരികെ F.getError();
 
-  return (*F)->getBuffer(Name, FileSize, RequiresNullTerminator, IsVolatile);
+  തിരികെ (*F)->getBuffer(Name, FileSize, RequiresNullTerminator, IsVolatile);
 }
 
-std::error_code FileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
-  if (llvm::sys::path::is_absolute(Path))
-    return {};
+std::error_code FileSystem::makeAbsolute(SmallVectorImpl<അക്ഷരം> &Path) സ്ഥിരം {
+  എങ്കിൽ (llvm::sys::path::is_absolute(Path))
+    തിരികെ {};
 
   auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  എങ്കിൽ (!WorkingDir)
+    തിരികെ WorkingDir.getError();
 
   sys::path::make_absolute(WorkingDir.get(), Path);
-  return {};
+  തിരികെ {};
 }
 
-std::error_code FileSystem::getRealPath(const Twine &Path,
-                                        SmallVectorImpl<char> &Output) {
-  return errc::operation_not_permitted;
+std::error_code FileSystem::getRealPath(സ്ഥിരം Twine &Path,
+                                        SmallVectorImpl<അക്ഷരം> &Output) {
+  തിരികെ errc::operation_not_permitted;
 }
 
-std::error_code FileSystem::isLocal(const Twine &Path, bool &Result) {
-  return errc::operation_not_permitted;
+std::error_code FileSystem::isLocal(സ്ഥിരം Twine &Path, തർക്കം &Result) {
+  തിരികെ errc::operation_not_permitted;
 }
 
-bool FileSystem::exists(const Twine &Path) {
+തർക്കം FileSystem::exists(സ്ഥിരം Twine &Path) {
   auto Status = status(Path);
-  return Status && Status->exists();
+  തിരികെ Status && Status->exists();
 }
 
-llvm::ErrorOr<bool> FileSystem::equivalent(const Twine &A, const Twine &B) {
+llvm::ErrorOr<തർക്കം> FileSystem::equivalent(സ്ഥിരം Twine &A, സ്ഥിരം Twine &B) {
   auto StatusA = status(A);
-  if (!StatusA)
-    return StatusA.getError();
+  എങ്കിൽ (!StatusA)
+    തിരികെ StatusA.getError();
   auto StatusB = status(B);
-  if (!StatusB)
-    return StatusB.getError();
-  return StatusA->equivalent(*StatusB);
+  എങ്കിൽ (!StatusB)
+    തിരികെ StatusB.getError();
+  തിരികെ StatusA->equivalent(*StatusB);
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-void FileSystem::dump() const { print(dbgs(), PrintType::RecursiveContents); }
+#എങ്കിൽ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+ശൂന്യം FileSystem::dump() സ്ഥിരം { print(dbgs(), PrintType::RecursiveContents); }
 #endif
 
 #ifndef NDEBUG
-static bool isTraversalComponent(StringRef Component) {
-  return Component == ".." || Component == ".";
+സ്ഥിതം തർക്കം isTraversalComponent(StringRef Component) {
+  തിരികെ Component == ".." || Component == ".";
 }
 
-static bool pathHasTraversal(StringRef Path) {
-  using namespace llvm::sys;
+സ്ഥിതം തർക്കം pathHasTraversal(StringRef Path) {
+  using നാമാകാശ llvm::sys;
 
-  for (StringRef Comp : llvm::make_range(path::begin(Path), path::end(Path)))
-    if (isTraversalComponent(Comp))
-      return true;
-  return false;
+  വേണ്ടി (StringRef Comp : llvm::make_range(path::begin(Path), path::end(Path)))
+    എങ്കിൽ (isTraversalComponent(Comp))
+      തിരികെ സത്യം;
+  തിരികെ അസത്യം;
 }
 #endif
 
@@ -184,11 +184,11 @@ static bool pathHasTraversal(StringRef Path) {
 // RealFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-namespace {
+നാമാകാശ {
 
 /// Wrapper around a raw file descriptor.
-class RealFile : public File {
-  friend class RealFileSystem;
+വർഗ്ഗം RealFile : പൊതു File {
+  friend വർഗ്ഗം RealFileSystem;
 
   file_t FD;
   Status S;
@@ -198,20 +198,20 @@ class RealFile : public File {
       : FD(RawFD), S(NewName, {}, {}, {}, {}, {},
                      llvm::sys::fs::file_type::status_error, {}),
         RealName(NewRealPathName.str()) {
-    assert(FD.isValid() && "Invalid or inactive file descriptor");
+    പ്രതിജ്ഞാ(FD.isValid() && "Invalid or inactive file descriptor");
   }
 
-public:
+പൊതു:
   ~RealFile() override;
 
   ErrorOr<Status> status() override;
   ErrorOr<std::string> getName() override;
-  ErrorOr<std::unique_ptr<MemoryBuffer>> getBuffer(const Twine &Name,
+  ErrorOr<std::unique_ptr<MemoryBuffer>> getBuffer(സ്ഥിരം Twine &Name,
                                                    int64_t FileSize,
-                                                   bool RequiresNullTerminator,
-                                                   bool IsVolatile) override;
+                                                   തർക്കം RequiresNullTerminator,
+                                                   തർക്കം IsVolatile) override;
   std::error_code close() override;
-  void setPath(const Twine &Path) override;
+  ശൂന്യം setPath(സ്ഥിരം Twine &Path) override;
 };
 
 } // namespace
@@ -221,27 +221,27 @@ RealFile::~RealFile() { close(); }
 ErrorOr<Status> RealFile::status() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot stat closed file");
-  if (!S.isStatusKnown()) {
+  പ്രതിജ്ഞാ(FD.isValid() && "cannot stat closed file");
+  എങ്കിൽ (!S.isStatusKnown()) {
     file_status RealStatus;
-    if (std::error_code EC = sys::fs::status(FD, RealStatus))
-      return EC;
+    എങ്കിൽ (std::error_code EC = sys::fs::status(FD, RealStatus))
+      തിരികെ EC;
     S = Status::copyWithNewName(RealStatus, S.getName());
   }
-  return S;
+  തിരികെ S;
 }
 
 ErrorOr<std::string> RealFile::getName() {
-  return RealName.empty() ? S.getName().str() : RealName;
+  തിരികെ RealName.empty() ? S.getName().str() : RealName;
 }
 
 ErrorOr<std::unique_ptr<MemoryBuffer>>
-RealFile::getBuffer(const Twine &Name, int64_t FileSize,
-                    bool RequiresNullTerminator, bool IsVolatile) {
+RealFile::getBuffer(സ്ഥിരം Twine &Name, int64_t FileSize,
+                    തർക്കം RequiresNullTerminator, തർക്കം IsVolatile) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(FD.isValid() && "cannot get buffer for closed file");
-  return MemoryBuffer::getOpenFile(FD, Name, FileSize, RequiresNullTerminator,
+  പ്രതിജ്ഞാ(FD.isValid() && "cannot get buffer for closed file");
+  തിരികെ MemoryBuffer::getOpenFile(FD, Name, FileSize, RequiresNullTerminator,
                                    IsVolatile);
 }
 
@@ -250,18 +250,18 @@ std::error_code RealFile::close() {
 
   std::error_code EC = sys::fs::closeFile(FD);
   FD = file_t::Invalid;
-  return EC;
+  തിരികെ EC;
 }
 
-void RealFile::setPath(const Twine &Path) {
+ശൂന്യം RealFile::setPath(സ്ഥിരം Twine &Path) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   RealName = Path.str();
-  if (auto Status = status())
+  എങ്കിൽ (auto Status = status())
     S = Status.get().copyWithNewName(Status.get(), Path);
 }
 
-namespace {
+നാമാകാശ {
 
 /// A file system according to your operating system.
 /// This may be linked to the process's working directory, or maintain its own.
@@ -271,64 +271,64 @@ namespace {
 /// A more principled approach would be to push this down a level, modelling
 /// the working dir as an llvm::sys::fs::WorkingDir or similar.
 /// This would enable the use of openat()-style functions on some platforms.
-class RealFileSystem : public FileSystem {
-public:
-  explicit RealFileSystem(bool LinkCWDToProcess) {
-    if (!LinkCWDToProcess) {
+വർഗ്ഗം RealFileSystem : പൊതു FileSystem {
+പൊതു:
+  explicit RealFileSystem(തർക്കം LinkCWDToProcess) {
+    എങ്കിൽ (!LinkCWDToProcess) {
       SmallString<128> PWD, RealPWD;
-      if (std::error_code EC = llvm::sys::fs::current_path(PWD))
+      എങ്കിൽ (std::error_code EC = llvm::sys::fs::current_path(PWD))
         WD = std::move(EC);
-      else if (llvm::sys::fs::real_path(PWD, RealPWD))
+      അല്ലെങ്കിൽ എങ്കിൽ (llvm::sys::fs::real_path(PWD, RealPWD))
         WD = WorkingDirectory{PWD, PWD};
-      else
+      അല്ലെങ്കിൽ
         WD = WorkingDirectory{PWD, RealPWD};
     }
   }
 
-  ErrorOr<Status> status(const Twine &Path) override;
-  ErrorOr<std::unique_ptr<File>> openFileForRead(const Twine &Path) override;
+  ErrorOr<Status> status(സ്ഥിരം Twine &Path) override;
+  ErrorOr<std::unique_ptr<File>> openFileForRead(സ്ഥിരം Twine &Path) override;
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadBinary(const Twine &Path) override;
-  directory_iterator dir_begin(const Twine &Dir, std::error_code &EC) override;
+  open_File_For_Read_ദ്വിമാന(സ്ഥിരം Twine &Path) override;
+  directory_iterator dir_begin(സ്ഥിരം Twine &Dir, std::error_code &EC) override;
 
-  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override;
-  std::error_code setCurrentWorkingDirectory(const Twine &Path) override;
-  std::error_code isLocal(const Twine &Path, bool &Result) override;
-  void
-  getDirectoryContentRealSources(const Twine &Dir,
+  llvm::ErrorOr<std::string> getCurrentWorkingDirectory() സ്ഥിരം override;
+  std::error_code setCurrentWorkingDirectory(സ്ഥിരം Twine &Path) override;
+  std::error_code isLocal(സ്ഥിരം Twine &Path, തർക്കം &Result) override;
+  ശൂന്യം
+  getDirectoryContentRealSources(സ്ഥിരം Twine &Dir,
                                  SmallVectorImpl<std::string> &Out) override {
-    Out.push_back(Dir.str());
+    Out.തള്ളുക_back(Dir.str());
   }
-  std::error_code getRealPath(const Twine &Path,
-                              SmallVectorImpl<char> &Output) override;
+  std::error_code getRealPath(സ്ഥിരം Twine &Path,
+                              SmallVectorImpl<അക്ഷരം> &Output) override;
 
-protected:
-  void printImpl(raw_ostream &OS, PrintType Type,
-                 unsigned IndentLevel) const override;
+സംരക്ഷിത:
+  ശൂന്യം printImpl(raw_ostream &OS, PrintType Type,
+                 unsigned IndentLevel) സ്ഥിരം override;
 
-private:
+സ്വകാര്യ:
   // If this FS has its own working dir, use it to make Path absolute.
   // The returned twine is safe to use as long as both Storage and Path live.
-  Twine adjustPath(const Twine &Path, SmallVectorImpl<char> &Storage) const {
-    if (!WD || !*WD)
-      return Path;
+  Twine adjustPath(സ്ഥിരം Twine &Path, SmallVectorImpl<അക്ഷരം> &Storage) സ്ഥിരം {
+    എങ്കിൽ (!WD || !*WD)
+      തിരികെ Path;
     Path.toVector(Storage);
     sys::path::make_absolute(WD->get().Resolved, Storage);
-    return Storage;
+    തിരികെ Storage;
   }
 
   ErrorOr<std::unique_ptr<File>>
-  openFileForReadWithFlags(const Twine &Name, sys::fs::OpenFlags Flags) {
+  openFileForReadWithFlags(സ്ഥിരം Twine &Name, sys::fs::OpenFlags Flags) {
     SmallString<256> RealName, Storage;
     Expected<file_t> FDOrErr = sys::fs::openNativeFileForRead(
         adjustPath(Name, Storage), Flags, &RealName);
-    if (!FDOrErr)
-      return errorToErrorCode(FDOrErr.takeError());
-    return std::unique_ptr<File>(
-        new RealFile(*FDOrErr, Name.str(), RealName.str()));
+    എങ്കിൽ (!FDOrErr)
+      തിരികെ errorToErrorCode(FDOrErr.takeError());
+    തിരികെ std::unique_ptr<File>(
+        പുതിയ RealFile(*FDOrErr, Name.str(), RealName.str()));
   }
 
-  struct WorkingDirectory {
+  ഘടന WorkingDirectory {
     // The current working directory, without symlinks resolved. (echo $PWD).
     SmallString<128> Specified;
     // The current working directory, with links resolved. (readlink .).
@@ -339,115 +339,115 @@ private:
 
 } // namespace
 
-ErrorOr<Status> RealFileSystem::status(const Twine &Path) {
+ErrorOr<Status> RealFileSystem::status(സ്ഥിരം Twine &Path) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
   sys::fs::file_status RealStatus;
-  if (std::error_code EC =
+  എങ്കിൽ (std::error_code EC =
           sys::fs::status(adjustPath(Path, Storage), RealStatus))
-    return EC;
-  return Status::copyWithNewName(RealStatus, Path);
+    തിരികെ EC;
+  തിരികെ Status::copyWithNewName(RealStatus, Path);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForRead(const Twine &Name) {
+RealFileSystem::openFileForRead(സ്ഥിരം Twine &Name) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_Text);
+  തിരികെ openFileForReadWithFlags(Name, sys::fs::OF_Text);
 }
 
 ErrorOr<std::unique_ptr<File>>
-RealFileSystem::openFileForReadBinary(const Twine &Name) {
+RealFileSystem::open_File_For_Read_ദ്വിമാന(സ്ഥിരം Twine &Name) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  return openFileForReadWithFlags(Name, sys::fs::OF_None);
+  തിരികെ openFileForReadWithFlags(Name, sys::fs::OF_None);
 }
 
-llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() const {
+llvm::ErrorOr<std::string> RealFileSystem::getCurrentWorkingDirectory() സ്ഥിരം {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (WD && *WD)
-    return std::string(WD->get().Specified);
-  if (WD)
-    return WD->getError();
+  എങ്കിൽ (WD && *WD)
+    തിരികെ std::string(WD->get().Specified);
+  എങ്കിൽ (WD)
+    തിരികെ WD->getError();
 
   SmallString<128> Dir;
-  if (std::error_code EC = llvm::sys::fs::current_path(Dir))
-    return EC;
-  return std::string(Dir);
+  എങ്കിൽ (std::error_code EC = llvm::sys::fs::current_path(Dir))
+    തിരികെ EC;
+  തിരികെ std::string(Dir);
 }
 
-std::error_code RealFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
+std::error_code RealFileSystem::setCurrentWorkingDirectory(സ്ഥിരം Twine &Path) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (!WD)
-    return llvm::sys::fs::set_current_path(Path);
+  എങ്കിൽ (!WD)
+    തിരികെ llvm::sys::fs::set_current_path(Path);
 
   SmallString<128> Absolute, Resolved, Storage;
   adjustPath(Path, Storage).toVector(Absolute);
-  bool IsDir;
-  if (auto Err = llvm::sys::fs::is_directory(Absolute, IsDir))
-    return Err;
-  if (!IsDir)
-    return std::make_error_code(std::errc::not_a_directory);
-  if (auto Err = llvm::sys::fs::real_path(Absolute, Resolved))
-    return Err;
+  തർക്കം IsDir;
+  എങ്കിൽ (auto Err = llvm::sys::fs::is_directory(Absolute, IsDir))
+    തിരികെ Err;
+  എങ്കിൽ (!IsDir)
+    തിരികെ std::make_error_code(std::errc::not_a_directory);
+  എങ്കിൽ (auto Err = llvm::sys::fs::real_path(Absolute, Resolved))
+    തിരികെ Err;
   WD = WorkingDirectory{Absolute, Resolved};
-  return std::error_code();
+  തിരികെ std::error_code();
 }
 
-std::error_code RealFileSystem::isLocal(const Twine &Path, bool &Result) {
+std::error_code RealFileSystem::isLocal(സ്ഥിരം Twine &Path, തർക്കം &Result) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::is_local(adjustPath(Path, Storage), Result);
+  തിരികെ llvm::sys::fs::is_local(adjustPath(Path, Storage), Result);
 }
 
-std::error_code RealFileSystem::getRealPath(const Twine &Path,
-                                            SmallVectorImpl<char> &Output) {
+std::error_code RealFileSystem::getRealPath(സ്ഥിരം Twine &Path,
+                                            SmallVectorImpl<അക്ഷരം> &Output) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> Storage;
-  return llvm::sys::fs::real_path(adjustPath(Path, Storage), Output);
+  തിരികെ llvm::sys::fs::real_path(adjustPath(Path, Storage), Output);
 }
 
-void RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                               unsigned IndentLevel) const {
+ശൂന്യം RealFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                               unsigned IndentLevel) സ്ഥിരം {
   printIndent(OS, IndentLevel);
   OS << "RealFileSystem using ";
-  if (WD)
+  എങ്കിൽ (WD)
     OS << "own";
-  else
+  അല്ലെങ്കിൽ
     OS << "process";
   OS << " CWD\n";
 }
 
 IntrusiveRefCntPtr<FileSystem> vfs::getRealFileSystem() {
-  static IntrusiveRefCntPtr<FileSystem> FS =
-      makeIntrusiveRefCnt<RealFileSystem>(true);
+  സ്ഥിതം IntrusiveRefCntPtr<FileSystem> FS =
+      makeIntrusiveRefCnt<RealFileSystem>(സത്യം);
   sys::sandbox::violationIfEnabled();
 
-  return FS;
+  തിരികെ FS;
 }
 
 std::unique_ptr<FileSystem> vfs::createPhysicalFileSystem() {
   sys::sandbox::violationIfEnabled();
 
-  return std::make_unique<RealFileSystem>(false);
+  തിരികെ std::make_unique<RealFileSystem>(അസത്യം);
 }
 
-namespace {
+നാമാകാശ {
 
-class RealFSDirIter : public llvm::vfs::detail::DirIterImpl {
+വർഗ്ഗം RealFSDirIter : പൊതു llvm::vfs::detail::DirIterImpl {
   llvm::sys::fs::directory_iterator Iter;
 
-public:
-  RealFSDirIter(const Twine &Path, std::error_code &EC) {
+പൊതു:
+  RealFSDirIter(സ്ഥിരം Twine &Path, std::error_code &EC) {
     auto BypassSandbox = sys::sandbox::scopedDisable();
 
     Iter = sys::fs::directory_iterator(Path, EC);
-    if (Iter != sys::fs::directory_iterator())
+    എങ്കിൽ (Iter != sys::fs::directory_iterator())
       CurrentEntry = directory_entry(Iter->path(), Iter->type());
   }
 
@@ -459,18 +459,18 @@ public:
     CurrentEntry = (Iter == llvm::sys::fs::directory_iterator())
                        ? directory_entry()
                        : directory_entry(Iter->path(), Iter->type());
-    return EC;
+    തിരികെ EC;
   }
 };
 
 } // namespace
 
-directory_iterator RealFileSystem::dir_begin(const Twine &Dir,
+directory_iterator RealFileSystem::dir_begin(സ്ഥിരം Twine &Dir,
                                              std::error_code &EC) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<128> Storage;
-  return directory_iterator(
+  തിരികെ directory_iterator(
       std::make_shared<RealFSDirIter>(adjustPath(Dir, Storage), EC));
 }
 
@@ -479,108 +479,108 @@ directory_iterator RealFileSystem::dir_begin(const Twine &Dir,
 //===-----------------------------------------------------------------------===/
 
 OverlayFileSystem::OverlayFileSystem(IntrusiveRefCntPtr<FileSystem> BaseFS) {
-  FSList.push_back(std::move(BaseFS));
+  FSList.തള്ളുക_back(std::move(BaseFS));
 }
 
-void OverlayFileSystem::pushOverlay(IntrusiveRefCntPtr<FileSystem> FS) {
-  FSList.push_back(FS);
+ശൂന്യം OverlayFileSystem::തള്ളുക_Overlay(IntrusiveRefCntPtr<FileSystem> FS) {
+  FSList.തള്ളുക_back(FS);
   // Synchronize added file systems by duplicating the working directory from
   // the first one in the list.
   FS->setCurrentWorkingDirectory(getCurrentWorkingDirectory().get());
 }
 
-ErrorOr<Status> OverlayFileSystem::status(const Twine &Path) {
+ErrorOr<Status> OverlayFileSystem::status(സ്ഥിരം Twine &Path) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
+  വേണ്ടി (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
     ErrorOr<Status> Status = (*I)->status(Path);
-    if (Status || Status.getError() != llvm::errc::no_such_file_or_directory)
-      return Status;
+    എങ്കിൽ (Status || Status.getError() != llvm::errc::no_such_file_or_directory)
+      തിരികെ Status;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  തിരികെ make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
-bool OverlayFileSystem::exists(const Twine &Path) {
+തർക്കം OverlayFileSystem::exists(സ്ഥിരം Twine &Path) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
-    if ((*I)->exists(Path))
-      return true;
+  വേണ്ടി (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
+    എങ്കിൽ ((*I)->exists(Path))
+      തിരികെ സത്യം;
   }
-  return false;
+  തിരികെ അസത്യം;
 }
 
 ErrorOr<std::unique_ptr<File>>
-OverlayFileSystem::openFileForRead(const llvm::Twine &Path) {
+OverlayFileSystem::openFileForRead(സ്ഥിരം llvm::Twine &Path) {
   // FIXME: handle symlinks that cross file systems
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
+  വേണ്ടി (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I) {
     auto Result = (*I)->openFileForRead(Path);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+    എങ്കിൽ (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
+      തിരികെ Result;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  തിരികെ make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
 llvm::ErrorOr<std::string>
-OverlayFileSystem::getCurrentWorkingDirectory() const {
+OverlayFileSystem::getCurrentWorkingDirectory() സ്ഥിരം {
   // All file systems are synchronized, just take the first working directory.
-  return FSList.front()->getCurrentWorkingDirectory();
+  തിരികെ FSList.front()->getCurrentWorkingDirectory();
 }
 
 std::error_code
-OverlayFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
-  for (auto &FS : FSList)
-    if (std::error_code EC = FS->setCurrentWorkingDirectory(Path))
-      return EC;
-  return {};
+OverlayFileSystem::setCurrentWorkingDirectory(സ്ഥിരം Twine &Path) {
+  വേണ്ടി (auto &FS : FSList)
+    എങ്കിൽ (std::error_code EC = FS->setCurrentWorkingDirectory(Path))
+      തിരികെ EC;
+  തിരികെ {};
 }
 
-std::error_code OverlayFileSystem::isLocal(const Twine &Path, bool &Result) {
-  for (auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->isLocal(Path, Result);
-  return errc::no_such_file_or_directory;
+std::error_code OverlayFileSystem::isLocal(സ്ഥിരം Twine &Path, തർക്കം &Result) {
+  വേണ്ടി (auto &FS : FSList)
+    എങ്കിൽ (FS->exists(Path))
+      തിരികെ FS->isLocal(Path, Result);
+  തിരികെ errc::no_such_file_or_directory;
 }
 
-std::error_code OverlayFileSystem::getRealPath(const Twine &Path,
-                                               SmallVectorImpl<char> &Output) {
-  for (const auto &FS : FSList)
-    if (FS->exists(Path))
-      return FS->getRealPath(Path, Output);
-  return errc::no_such_file_or_directory;
+std::error_code OverlayFileSystem::getRealPath(സ്ഥിരം Twine &Path,
+                                               SmallVectorImpl<അക്ഷരം> &Output) {
+  വേണ്ടി (സ്ഥിരം auto &FS : FSList)
+    എങ്കിൽ (FS->exists(Path))
+      തിരികെ FS->getRealPath(Path, Output);
+  തിരികെ errc::no_such_file_or_directory;
 }
 
-void OverlayFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
+ശൂന്യം OverlayFileSystem::getDirectoryContentRealSources(
+    സ്ഥിരം Twine &Dir, SmallVectorImpl<std::string> &Out) {
   // All layers contribute.
-  for (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I)
+  വേണ്ടി (iterator I = overlays_begin(), E = overlays_end(); I != E; ++I)
     (*I)->getDirectoryContentRealSources(Dir, Out);
 }
 
-void OverlayFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  for (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
+ശൂന്യം OverlayFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
+  വേണ്ടി (IntrusiveRefCntPtr<FileSystem> FS : overlays_range()) {
     Callback(*FS);
     FS->visitChildFileSystems(Callback);
   }
 }
 
-void OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                  unsigned IndentLevel) const {
+ശൂന്യം OverlayFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                  unsigned IndentLevel) സ്ഥിരം {
   printIndent(OS, IndentLevel);
   OS << "OverlayFileSystem\n";
-  if (Type == PrintType::Summary)
-    return;
+  എങ്കിൽ (Type == PrintType::Summary)
+    തിരികെ;
 
-  if (Type == PrintType::Contents)
+  എങ്കിൽ (Type == PrintType::Contents)
     Type = PrintType::Summary;
-  for (const auto &FS : overlays_range())
+  വേണ്ടി (സ്ഥിരം auto &FS : overlays_range())
     FS->print(OS, Type, IndentLevel + 1);
 }
 
-llvm::vfs::detail::DirIterImpl::~DirIterImpl() = default;
+llvm::vfs::detail::DirIterImpl::~DirIterImpl() = സ്ഥിരസ്ഥിതി;
 
-namespace {
+നാമാകാശ {
 
 /// Combines and deduplicates directory entries across multiple file systems.
-class CombiningDirIterImpl : public llvm::vfs::detail::DirIterImpl {
+വർഗ്ഗം CombiningDirIterImpl : പൊതു llvm::vfs::detail::DirIterImpl {
   using FileSystemPtr = llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>;
 
   /// Iterators to combine, processed in reverse order.
@@ -592,89 +592,89 @@ class CombiningDirIterImpl : public llvm::vfs::detail::DirIterImpl {
 
   /// Sets \c CurrentDirIter to the next iterator in the list, or leaves it as
   /// is (at its end position) if we've already gone through them all.
-  std::error_code incrementIter(bool IsFirstTime) {
-    while (!IterList.empty()) {
+  std::error_code incrementIter(തർക്കം IsFirstTime) {
+    ആകുമ്പോൾ (!IterList.empty()) {
       CurrentDirIter = IterList.back();
-      IterList.pop_back();
-      if (CurrentDirIter != directory_iterator())
-        break; // found
+      IterList.എടുക്കുക_back();
+      എങ്കിൽ (CurrentDirIter != directory_iterator())
+        നിർത്തുക; // found
     }
 
-    if (IsFirstTime && CurrentDirIter == directory_iterator())
-      return errc::no_such_file_or_directory;
-    return {};
+    എങ്കിൽ (IsFirstTime && CurrentDirIter == directory_iterator())
+      തിരികെ errc::no_such_file_or_directory;
+    തിരികെ {};
   }
 
-  std::error_code incrementDirIter(bool IsFirstTime) {
-    assert((IsFirstTime || CurrentDirIter != directory_iterator()) &&
+  std::error_code incrementDirIter(തർക്കം IsFirstTime) {
+    പ്രതിജ്ഞാ((IsFirstTime || CurrentDirIter != directory_iterator()) &&
            "incrementing past end");
     std::error_code EC;
-    if (!IsFirstTime)
+    എങ്കിൽ (!IsFirstTime)
       CurrentDirIter.increment(EC);
-    if (!EC && CurrentDirIter == directory_iterator())
+    എങ്കിൽ (!EC && CurrentDirIter == directory_iterator())
       EC = incrementIter(IsFirstTime);
-    return EC;
+    തിരികെ EC;
   }
 
-  std::error_code incrementImpl(bool IsFirstTime) {
-    while (true) {
+  std::error_code incrementImpl(തർക്കം IsFirstTime) {
+    ആകുമ്പോൾ (സത്യം) {
       std::error_code EC = incrementDirIter(IsFirstTime);
-      if (EC || CurrentDirIter == directory_iterator()) {
+      എങ്കിൽ (EC || CurrentDirIter == directory_iterator()) {
         CurrentEntry = directory_entry();
-        return EC;
+        തിരികെ EC;
       }
       CurrentEntry = *CurrentDirIter;
       StringRef Name = llvm::sys::path::filename(CurrentEntry.path());
-      if (SeenNames.insert(Name).second)
-        return EC; // name not seen before
+      എങ്കിൽ (SeenNames.തിരുകുക(Name).second)
+        തിരികെ EC; // name not seen before
     }
     llvm_unreachable("returned above");
   }
 
-public:
+പൊതു:
   CombiningDirIterImpl(ArrayRef<FileSystemPtr> FileSystems, std::string Dir,
                        std::error_code &EC) {
-    for (const auto &FS : FileSystems) {
+    വേണ്ടി (സ്ഥിരം auto &FS : FileSystems) {
       std::error_code FEC;
       directory_iterator Iter = FS->dir_begin(Dir, FEC);
-      if (FEC && FEC != errc::no_such_file_or_directory) {
+      എങ്കിൽ (FEC && FEC != errc::no_such_file_or_directory) {
         EC = FEC;
-        return;
+        തിരികെ;
       }
-      if (!FEC)
-        IterList.push_back(Iter);
+      എങ്കിൽ (!FEC)
+        IterList.തള്ളുക_back(Iter);
     }
-    EC = incrementImpl(true);
+    EC = incrementImpl(സത്യം);
   }
 
   CombiningDirIterImpl(ArrayRef<directory_iterator> DirIters,
                        std::error_code &EC)
       : IterList(DirIters) {
-    EC = incrementImpl(true);
+    EC = incrementImpl(സത്യം);
   }
 
-  std::error_code increment() override { return incrementImpl(false); }
+  std::error_code increment() override { തിരികെ incrementImpl(അസത്യം); }
 };
 
 } // namespace
 
-directory_iterator OverlayFileSystem::dir_begin(const Twine &Dir,
+directory_iterator OverlayFileSystem::dir_begin(സ്ഥിരം Twine &Dir,
                                                 std::error_code &EC) {
   directory_iterator Combined = directory_iterator(
       std::make_shared<CombiningDirIterImpl>(FSList, Dir.str(), EC));
-  if (EC)
-    return {};
-  return Combined;
+  എങ്കിൽ (EC)
+    തിരികെ {};
+  തിരികെ Combined;
 }
 
-void ProxyFileSystem::anchor() {}
+ശൂന്യം ProxyFileSystem::anchor() {}
 
-namespace llvm {
-namespace vfs {
+നാമാകാശ llvm {
+നാമാകാശ vfs {
 
-namespace detail {
+നാമാകാശ detail {
 
-enum InMemoryNodeKind {
+എണ്ണൽ In_Memory_കണ്ണി_Kind {
   IME_File,
   IME_Directory,
   IME_HardLink,
@@ -683,172 +683,172 @@ enum InMemoryNodeKind {
 
 /// The in memory file system is a tree of Nodes. Every node can either be a
 /// file, symlink, hardlink or a directory.
-class InMemoryNode {
-  InMemoryNodeKind Kind;
+വർഗ്ഗം In_Memory_കണ്ണി {
+  In_Memory_കണ്ണി_Kind Kind;
   std::string FileName;
 
-public:
-  InMemoryNode(llvm::StringRef FileName, InMemoryNodeKind Kind)
+പൊതു:
+  In_Memory_കണ്ണി(llvm::StringRef FileName, In_Memory_കണ്ണി_Kind Kind)
       : Kind(Kind), FileName(std::string(llvm::sys::path::filename(FileName))) {
   }
-  virtual ~InMemoryNode() = default;
+  മായാ ~In_Memory_കണ്ണി() = സ്ഥിരസ്ഥിതി;
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  virtual Status getStatus(const Twine &RequestedName) const = 0;
+  മായാ Status getStatus(സ്ഥിരം Twine &RequestedName) സ്ഥിരം = 0;
 
   /// Get the filename of this node (the name without the directory part).
-  StringRef getFileName() const { return FileName; }
-  InMemoryNodeKind getKind() const { return Kind; }
-  virtual std::string toString(unsigned Indent) const = 0;
+  StringRef getFileName() സ്ഥിരം { തിരികെ FileName; }
+  In_Memory_കണ്ണി_Kind getKind() സ്ഥിരം { തിരികെ Kind; }
+  മായാ std::string toString(unsigned Indent) സ്ഥിരം = 0;
 };
 
-class InMemoryFile : public InMemoryNode {
+വർഗ്ഗം InMemoryFile : പൊതു In_Memory_കണ്ണി {
   Status Stat;
   std::unique_ptr<llvm::MemoryBuffer> Buffer;
 
-public:
+പൊതു:
   InMemoryFile(Status Stat, std::unique_ptr<llvm::MemoryBuffer> Buffer)
-      : InMemoryNode(Stat.getName(), IME_File), Stat(std::move(Stat)),
+      : In_Memory_കണ്ണി(Stat.getName(), IME_File), Stat(std::move(Stat)),
         Buffer(std::move(Buffer)) {}
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  Status getStatus(സ്ഥിരം Twine &RequestedName) സ്ഥിരം override {
+    തിരികെ Status::copyWithNewName(Stat, RequestedName);
   }
-  llvm::MemoryBuffer *getBuffer() const { return Buffer.get(); }
+  llvm::MemoryBuffer *getBuffer() സ്ഥിരം { തിരികെ Buffer.get(); }
 
-  std::string toString(unsigned Indent) const override {
-    return (std::string(Indent, ' ') + Stat.getName() + "\n").str();
+  std::string toString(unsigned Indent) സ്ഥിരം override {
+    തിരികെ (std::string(Indent, ' ') + Stat.getName() + "\n").str();
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_File;
+  സ്ഥിതം തർക്കം classof(സ്ഥിരം In_Memory_കണ്ണി *N) {
+    തിരികെ N->getKind() == IME_File;
   }
 };
 
-namespace {
+നാമാകാശ {
 
-class InMemoryHardLink : public InMemoryNode {
-  const InMemoryFile &ResolvedFile;
+വർഗ്ഗം InMemoryHardLink : പൊതു In_Memory_കണ്ണി {
+  സ്ഥിരം InMemoryFile &ResolvedFile;
 
-public:
-  InMemoryHardLink(StringRef Path, const InMemoryFile &ResolvedFile)
-      : InMemoryNode(Path, IME_HardLink), ResolvedFile(ResolvedFile) {}
-  const InMemoryFile &getResolvedFile() const { return ResolvedFile; }
+പൊതു:
+  InMemoryHardLink(StringRef Path, സ്ഥിരം InMemoryFile &ResolvedFile)
+      : In_Memory_കണ്ണി(Path, IME_HardLink), ResolvedFile(ResolvedFile) {}
+  സ്ഥിരം InMemoryFile &getResolvedFile() സ്ഥിരം { തിരികെ ResolvedFile; }
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return ResolvedFile.getStatus(RequestedName);
+  Status getStatus(സ്ഥിരം Twine &RequestedName) സ്ഥിരം override {
+    തിരികെ ResolvedFile.getStatus(RequestedName);
   }
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "HardLink to -> " +
+  std::string toString(unsigned Indent) സ്ഥിരം override {
+    തിരികെ std::string(Indent, ' ') + "HardLink to -> " +
            ResolvedFile.toString(0);
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_HardLink;
+  സ്ഥിതം തർക്കം classof(സ്ഥിരം In_Memory_കണ്ണി *N) {
+    തിരികെ N->getKind() == IME_HardLink;
   }
 };
 
-class InMemorySymbolicLink : public InMemoryNode {
+വർഗ്ഗം InMemorySymbolicLink : പൊതു In_Memory_കണ്ണി {
   std::string TargetPath;
   Status Stat;
 
-public:
+പൊതു:
   InMemorySymbolicLink(StringRef Path, StringRef TargetPath, Status Stat)
-      : InMemoryNode(Path, IME_SymbolicLink), TargetPath(std::move(TargetPath)),
+      : In_Memory_കണ്ണി(Path, IME_SymbolicLink), TargetPath(std::move(TargetPath)),
         Stat(Stat) {}
 
-  std::string toString(unsigned Indent) const override {
-    return std::string(Indent, ' ') + "SymbolicLink to -> " + TargetPath;
+  std::string toString(unsigned Indent) സ്ഥിരം override {
+    തിരികെ std::string(Indent, ' ') + "SymbolicLink to -> " + TargetPath;
   }
 
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  Status getStatus(സ്ഥിരം Twine &RequestedName) സ്ഥിരം override {
+    തിരികെ Status::copyWithNewName(Stat, RequestedName);
   }
 
-  StringRef getTargetPath() const { return TargetPath; }
+  StringRef getTargetPath() സ്ഥിരം { തിരികെ TargetPath; }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_SymbolicLink;
+  സ്ഥിതം തർക്കം classof(സ്ഥിരം In_Memory_കണ്ണി *N) {
+    തിരികെ N->getKind() == IME_SymbolicLink;
   }
 };
 
 /// Adapt a InMemoryFile for VFS' File interface.  The goal is to make
 /// \p InMemoryFileAdaptor mimic as much as possible the behavior of
 /// \p RealFile.
-class InMemoryFileAdaptor : public File {
-  const InMemoryFile &Node;
+വർഗ്ഗം InMemoryFileAdaptor : പൊതു File {
+  സ്ഥിരം InMemoryFile &കണ്ണി;
   /// The name to use when returning a Status for this file.
   std::string RequestedName;
 
-public:
-  explicit InMemoryFileAdaptor(const InMemoryFile &Node,
+പൊതു:
+  explicit InMemoryFileAdaptor(സ്ഥിരം InMemoryFile &കണ്ണി,
                                std::string RequestedName)
-      : Node(Node), RequestedName(std::move(RequestedName)) {}
+      : കണ്ണി(കണ്ണി), RequestedName(std::move(RequestedName)) {}
 
   llvm::ErrorOr<Status> status() override {
-    return Node.getStatus(RequestedName);
+    തിരികെ കണ്ണി.getStatus(RequestedName);
   }
 
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
-            bool IsVolatile) override {
-    llvm::MemoryBuffer *Buf = Node.getBuffer();
-    return llvm::MemoryBuffer::getMemBuffer(
+  getBuffer(സ്ഥിരം Twine &Name, int64_t FileSize, തർക്കം RequiresNullTerminator,
+            തർക്കം IsVolatile) override {
+    llvm::MemoryBuffer *Buf = കണ്ണി.getBuffer();
+    തിരികെ llvm::MemoryBuffer::getMemBuffer(
         Buf->getBuffer(), Buf->getBufferIdentifier(), RequiresNullTerminator);
   }
 
-  std::error_code close() override { return {}; }
+  std::error_code close() override { തിരികെ {}; }
 
-  void setPath(const Twine &Path) override { RequestedName = Path.str(); }
+  ശൂന്യം setPath(സ്ഥിരം Twine &Path) override { RequestedName = Path.str(); }
 };
 } // namespace
 
-class InMemoryDirectory : public InMemoryNode {
+വർഗ്ഗം InMemoryDirectory : പൊതു In_Memory_കണ്ണി {
   Status Stat;
-  std::map<std::string, std::unique_ptr<InMemoryNode>, std::less<>> Entries;
+  std::map<std::string, std::unique_ptr<In_Memory_കണ്ണി>, std::less<>> Entries;
 
-public:
+പൊതു:
   InMemoryDirectory(Status Stat)
-      : InMemoryNode(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
+      : In_Memory_കണ്ണി(Stat.getName(), IME_Directory), Stat(std::move(Stat)) {}
 
   /// Return the \p Status for this node. \p RequestedName should be the name
   /// through which the caller referred to this node. It will override
   /// \p Status::Name in the return value, to mimic the behavior of \p RealFile.
-  Status getStatus(const Twine &RequestedName) const override {
-    return Status::copyWithNewName(Stat, RequestedName);
+  Status getStatus(സ്ഥിരം Twine &RequestedName) സ്ഥിരം override {
+    തിരികെ Status::copyWithNewName(Stat, RequestedName);
   }
 
-  UniqueID getUniqueID() const { return Stat.getUniqueID(); }
+  UniqueID getUniqueID() സ്ഥിരം { തിരികെ Stat.getUniqueID(); }
 
-  InMemoryNode *getChild(StringRef Name) const {
+  In_Memory_കണ്ണി *getChild(StringRef Name) സ്ഥിരം {
     auto I = Entries.find(Name);
-    if (I != Entries.end())
-      return I->second.get();
-    return nullptr;
+    എങ്കിൽ (I != Entries.end())
+      തിരികെ I->second.get();
+    തിരികെ nullptr;
   }
 
-  InMemoryNode *addChild(StringRef Name, std::unique_ptr<InMemoryNode> Child) {
-    return Entries.emplace(Name, std::move(Child)).first->second.get();
+  In_Memory_കണ്ണി *addChild(StringRef Name, std::unique_ptr<In_Memory_കണ്ണി> Child) {
+    തിരികെ Entries.emplace(Name, std::move(Child)).first->second.get();
   }
 
   using const_iterator = decltype(Entries)::const_iterator;
 
-  const_iterator begin() const { return Entries.begin(); }
-  const_iterator end() const { return Entries.end(); }
+  const_iterator begin() സ്ഥിരം { തിരികെ Entries.begin(); }
+  const_iterator end() സ്ഥിരം { തിരികെ Entries.end(); }
 
-  std::string toString(unsigned Indent) const override {
+  std::string toString(unsigned Indent) സ്ഥിരം override {
     std::string Result =
         (std::string(Indent, ' ') + Stat.getName() + "\n").str();
-    for (const auto &Entry : Entries)
+    വേണ്ടി (സ്ഥിരം auto &Entry : Entries)
       Result += Entry.second->toString(Indent + 2);
-    return Result;
+    തിരികെ Result;
   }
 
-  static bool classof(const InMemoryNode *N) {
-    return N->getKind() == IME_Directory;
+  സ്ഥിതം തർക്കം classof(സ്ഥിരം In_Memory_കണ്ണി *N) {
+    തിരികെ N->getKind() == IME_Directory;
   }
 };
 
@@ -857,83 +857,83 @@ public:
 // The UniqueID of in-memory files is derived from path and content.
 // This avoids difficulties in creating exactly equivalent in-memory FSes,
 // as often needed in multithreaded programs.
-static sys::fs::UniqueID getUniqueID(hash_code Hash) {
-  return sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
+സ്ഥിതം sys::fs::UniqueID getUniqueID(hash_code Hash) {
+  തിരികെ sys::fs::UniqueID(std::numeric_limits<uint64_t>::max(),
                            uint64_t(size_t(Hash)));
 }
-static sys::fs::UniqueID getFileID(sys::fs::UniqueID Parent,
+സ്ഥിതം sys::fs::UniqueID getFileID(sys::fs::UniqueID Parent,
                                    llvm::StringRef Name,
                                    llvm::StringRef Contents) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name, Contents));
+  തിരികെ getUniqueID(llvm::hash_combine(Parent.getFile(), Name, Contents));
 }
-static sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID Parent,
+സ്ഥിതം sys::fs::UniqueID getDirectoryID(sys::fs::UniqueID Parent,
                                         llvm::StringRef Name) {
-  return getUniqueID(llvm::hash_combine(Parent.getFile(), Name));
+  തിരികെ getUniqueID(llvm::hash_combine(Parent.getFile(), Name));
 }
 
-Status detail::NewInMemoryNodeInfo::makeStatus() const {
+Status detail::New_In_Memory_കണ്ണി_Info::makeStatus() സ്ഥിരം {
   UniqueID UID =
       (Type == sys::fs::file_type::directory_file)
           ? getDirectoryID(DirUID, Name)
           : getFileID(DirUID, Name, Buffer ? Buffer->getBuffer() : "");
 
-  return Status(Path, UID, llvm::sys::toTimePoint(ModificationTime), User,
+  തിരികെ Status(Path, UID, llvm::sys::toTimePoint(ModificationTime), User,
                 Group, Buffer ? Buffer->getBufferSize() : 0, Type, Perms);
 }
 
-InMemoryFileSystem::InMemoryFileSystem(bool UseNormalizedPaths)
-    : Root(new detail::InMemoryDirectory(
+InMemoryFileSystem::InMemoryFileSystem(തർക്കം UseNormalizedPaths)
+    : വേര്_2(പുതിയ detail::InMemoryDirectory(
           Status("", getDirectoryID(llvm::sys::fs::UniqueID(), ""),
                  llvm::sys::TimePoint<>(), 0, 0, 0,
                  llvm::sys::fs::file_type::directory_file,
                  llvm::sys::fs::perms::all_all))),
       UseNormalizedPaths(UseNormalizedPaths) {}
 
-InMemoryFileSystem::~InMemoryFileSystem() = default;
+InMemoryFileSystem::~InMemoryFileSystem() = സ്ഥിരസ്ഥിതി;
 
-std::string InMemoryFileSystem::toString() const {
-  return Root->toString(/*Indent=*/0);
+std::string InMemoryFileSystem::toString() സ്ഥിരം {
+  തിരികെ വേര്_2->toString(/*Indent=*/0);
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
+തർക്കം InMemoryFileSystem::addFile(സ്ഥിരം Twine &P, time_t ModificationTime,
                                  std::unique_ptr<llvm::MemoryBuffer> Buffer,
                                  std::optional<uint32_t> User,
                                  std::optional<uint32_t> Group,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms,
-                                 MakeNodeFn MakeNode) {
+                                 Make_കണ്ണി_Fn Make_കണ്ണി) {
   SmallString<128> Path;
   P.toVector(Path);
 
   // Fix up relative paths. This just prepends the current working directory.
   std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  പ്രതിജ്ഞാ(!EC);
+  (ശൂന്യം)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  എങ്കിൽ (useNormalizedPaths())
+    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/സത്യം);
 
-  if (Path.empty())
-    return false;
+  എങ്കിൽ (Path.empty())
+    തിരികെ അസത്യം;
 
-  detail::InMemoryDirectory *Dir = Root.get();
+  detail::InMemoryDirectory *Dir = വേര്_2.get();
   auto I = llvm::sys::path::begin(Path), E = sys::path::end(Path);
-  const auto ResolvedUser = User.value_or(0);
-  const auto ResolvedGroup = Group.value_or(0);
-  const auto ResolvedType = Type.value_or(sys::fs::file_type::regular_file);
-  const auto ResolvedPerms = Perms.value_or(sys::fs::all_all);
+  സ്ഥിരം auto ResolvedUser = User.മൂല്യം_or(0);
+  സ്ഥിരം auto ResolvedGroup = Group.മൂല്യം_or(0);
+  സ്ഥിരം auto ResolvedType = Type.മൂല്യം_or(sys::fs::file_type::regular_file);
+  സ്ഥിരം auto ResolvedPerms = Perms.മൂല്യം_or(sys::fs::all_all);
   // Any intermediate directories we create should be accessible by
   // the owner, even if Perms says otherwise for the final path.
-  const auto NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
+  സ്ഥിരം auto NewDirectoryPerms = ResolvedPerms | sys::fs::owner_all;
 
   StringRef Name = *I;
-  while (true) {
+  ആകുമ്പോൾ (സത്യം) {
     Name = *I;
     ++I;
-    if (I == E)
-      break;
-    detail::InMemoryNode *Node = Dir->getChild(Name);
-    if (!Node) {
+    എങ്കിൽ (I == E)
+      നിർത്തുക;
+    detail::In_Memory_കണ്ണി *കണ്ണി = Dir->getChild(Name);
+    എങ്കിൽ (!കണ്ണി) {
       // This isn't the last element, so we create a new directory.
       Status Stat(
           StringRef(Path.str().begin(), Name.end() - Path.str().begin()),
@@ -942,251 +942,251 @@ bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
           0, sys::fs::file_type::directory_file, NewDirectoryPerms);
       Dir = cast<detail::InMemoryDirectory>(Dir->addChild(
           Name, std::make_unique<detail::InMemoryDirectory>(std::move(Stat))));
-      continue;
+      തുടരുക;
     }
     // Creating file under another file.
-    if (!isa<detail::InMemoryDirectory>(Node))
-      return false;
-    Dir = cast<detail::InMemoryDirectory>(Node);
+    എങ്കിൽ (!isa<detail::InMemoryDirectory>(കണ്ണി))
+      തിരികെ അസത്യം;
+    Dir = cast<detail::InMemoryDirectory>(കണ്ണി);
   }
-  detail::InMemoryNode *Node = Dir->getChild(Name);
-  if (!Node) {
+  detail::In_Memory_കണ്ണി *കണ്ണി = Dir->getChild(Name);
+  എങ്കിൽ (!കണ്ണി) {
     Dir->addChild(Name,
-                  MakeNode({Dir->getUniqueID(), Path, Name, ModificationTime,
+                  Make_കണ്ണി({Dir->getUniqueID(), Path, Name, ModificationTime,
                             std::move(Buffer), ResolvedUser, ResolvedGroup,
                             ResolvedType, ResolvedPerms}));
-    return true;
+    തിരികെ സത്യം;
   }
-  if (isa<detail::InMemoryDirectory>(Node))
-    return ResolvedType == sys::fs::file_type::directory_file;
+  എങ്കിൽ (isa<detail::InMemoryDirectory>(കണ്ണി))
+    തിരികെ ResolvedType == sys::fs::file_type::directory_file;
 
-  assert((isa<detail::InMemoryFile>(Node) ||
-          isa<detail::InMemoryHardLink>(Node)) &&
+  പ്രതിജ്ഞാ((isa<detail::InMemoryFile>(കണ്ണി) ||
+          isa<detail::InMemoryHardLink>(കണ്ണി)) &&
          "Must be either file, hardlink or directory!");
 
   // Return false only if the new file is different from the existing one.
-  if (auto *Link = dyn_cast<detail::InMemoryHardLink>(Node)) {
-    return Link->getResolvedFile().getBuffer()->getBuffer() ==
+  എങ്കിൽ (auto *Link = dyn_cast<detail::InMemoryHardLink>(കണ്ണി)) {
+    തിരികെ Link->getResolvedFile().getBuffer()->getBuffer() ==
            Buffer->getBuffer();
   }
-  return cast<detail::InMemoryFile>(Node)->getBuffer()->getBuffer() ==
+  തിരികെ cast<detail::InMemoryFile>(കണ്ണി)->getBuffer()->getBuffer() ==
          Buffer->getBuffer();
 }
 
-bool InMemoryFileSystem::addFile(const Twine &P, time_t ModificationTime,
+തർക്കം InMemoryFileSystem::addFile(സ്ഥിരം Twine &P, time_t ModificationTime,
                                  std::unique_ptr<llvm::MemoryBuffer> Buffer,
                                  std::optional<uint32_t> User,
                                  std::optional<uint32_t> Group,
                                  std::optional<llvm::sys::fs::file_type> Type,
                                  std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, std::move(Buffer), User, Group, Type,
+  തിരികെ addFile(P, ModificationTime, std::move(Buffer), User, Group, Type,
                  Perms,
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
+                 [](detail::New_In_Memory_കണ്ണി_Info NNI)
+                     -> std::unique_ptr<detail::In_Memory_കണ്ണി> {
                    Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
+                   എങ്കിൽ (Stat.getType() == sys::fs::file_type::directory_file)
+                     തിരികെ std::make_unique<detail::InMemoryDirectory>(Stat);
+                   തിരികെ std::make_unique<detail::InMemoryFile>(
                        Stat, std::move(NNI.Buffer));
                  });
 }
 
-bool InMemoryFileSystem::addFileNoOwn(
-    const Twine &P, time_t ModificationTime,
-    const llvm::MemoryBufferRef &Buffer, std::optional<uint32_t> User,
+തർക്കം InMemoryFileSystem::addFileNoOwn(
+    സ്ഥിരം Twine &P, time_t ModificationTime,
+    സ്ഥിരം llvm::MemoryBufferRef &Buffer, std::optional<uint32_t> User,
     std::optional<uint32_t> Group, std::optional<llvm::sys::fs::file_type> Type,
     std::optional<llvm::sys::fs::perms> Perms) {
-  return addFile(P, ModificationTime, llvm::MemoryBuffer::getMemBuffer(Buffer),
+  തിരികെ addFile(P, ModificationTime, llvm::MemoryBuffer::getMemBuffer(Buffer),
                  std::move(User), std::move(Group), std::move(Type),
                  std::move(Perms),
-                 [](detail::NewInMemoryNodeInfo NNI)
-                     -> std::unique_ptr<detail::InMemoryNode> {
+                 [](detail::New_In_Memory_കണ്ണി_Info NNI)
+                     -> std::unique_ptr<detail::In_Memory_കണ്ണി> {
                    Status Stat = NNI.makeStatus();
-                   if (Stat.getType() == sys::fs::file_type::directory_file)
-                     return std::make_unique<detail::InMemoryDirectory>(Stat);
-                   return std::make_unique<detail::InMemoryFile>(
+                   എങ്കിൽ (Stat.getType() == sys::fs::file_type::directory_file)
+                     തിരികെ std::make_unique<detail::InMemoryDirectory>(Stat);
+                   തിരികെ std::make_unique<detail::InMemoryFile>(
                        Stat, std::move(NNI.Buffer));
                  });
 }
 
-detail::NamedNodeOrError
-InMemoryFileSystem::lookupNode(const Twine &P, bool FollowFinalSymlink,
-                               size_t SymlinkDepth) const {
+detail::Named_കണ്ണി_Or_Error
+InMemoryFileSystem::lookup_കണ്ണി(സ്ഥിരം Twine &P, തർക്കം FollowFinalSymlink,
+                               size_t SymlinkDepth) സ്ഥിരം {
   SmallString<128> Path;
   P.toVector(Path);
 
   // Fix up relative paths. This just prepends the current working directory.
   std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  പ്രതിജ്ഞാ(!EC);
+  (ശൂന്യം)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  എങ്കിൽ (useNormalizedPaths())
+    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/സത്യം);
 
-  const detail::InMemoryDirectory *Dir = Root.get();
-  if (Path.empty())
-    return detail::NamedNodeOrError(Path, Dir);
+  സ്ഥിരം detail::InMemoryDirectory *Dir = വേര്_2.get();
+  എങ്കിൽ (Path.empty())
+    തിരികെ detail::Named_കണ്ണി_Or_Error(Path, Dir);
 
   auto I = llvm::sys::path::begin(Path), E = llvm::sys::path::end(Path);
-  while (true) {
-    detail::InMemoryNode *Node = Dir->getChild(*I);
+  ആകുമ്പോൾ (സത്യം) {
+    detail::In_Memory_കണ്ണി *കണ്ണി = Dir->getChild(*I);
     ++I;
-    if (!Node)
-      return errc::no_such_file_or_directory;
+    എങ്കിൽ (!കണ്ണി)
+      തിരികെ errc::no_such_file_or_directory;
 
-    if (auto Symlink = dyn_cast<detail::InMemorySymbolicLink>(Node)) {
+    എങ്കിൽ (auto Symlink = dyn_cast<detail::InMemorySymbolicLink>(കണ്ണി)) {
       // If we're at the end of the path, and we're not following through
       // terminal symlinks, then we're done.
-      if (I == E && !FollowFinalSymlink)
-        return detail::NamedNodeOrError(Path, Symlink);
+      എങ്കിൽ (I == E && !FollowFinalSymlink)
+        തിരികെ detail::Named_കണ്ണി_Or_Error(Path, Symlink);
 
-      if (SymlinkDepth > InMemoryFileSystem::MaxSymlinkDepth)
-        return errc::no_such_file_or_directory;
+      എങ്കിൽ (SymlinkDepth > InMemoryFileSystem::MaxSymlinkDepth)
+        തിരികെ errc::no_such_file_or_directory;
 
       SmallString<128> TargetPath = Symlink->getTargetPath();
-      if (std::error_code EC = makeAbsolute(TargetPath))
-        return EC;
+      എങ്കിൽ (std::error_code EC = makeAbsolute(TargetPath))
+        തിരികെ EC;
 
       // Keep going with the target. We always want to follow symlinks here
       // because we're either at the end of a path that we want to follow, or
       // not at the end of a path, in which case we need to follow the symlink
       // regardless.
       auto Target =
-          lookupNode(TargetPath, /*FollowFinalSymlink=*/true, SymlinkDepth + 1);
-      if (!Target || I == E)
-        return Target;
+          lookup_കണ്ണി(TargetPath, /*FollowFinalSymlink=*/സത്യം, SymlinkDepth + 1);
+      എങ്കിൽ (!Target || I == E)
+        തിരികെ Target;
 
-      if (!isa<detail::InMemoryDirectory>(*Target))
-        return errc::no_such_file_or_directory;
+      എങ്കിൽ (!isa<detail::InMemoryDirectory>(*Target))
+        തിരികെ errc::no_such_file_or_directory;
 
       // Otherwise, continue on the search in the symlinked directory.
       Dir = cast<detail::InMemoryDirectory>(*Target);
-      continue;
+      തുടരുക;
     }
 
     // Return the file if it's at the end of the path.
-    if (auto File = dyn_cast<detail::InMemoryFile>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, File);
-      return errc::no_such_file_or_directory;
+    എങ്കിൽ (auto File = dyn_cast<detail::InMemoryFile>(കണ്ണി)) {
+      എങ്കിൽ (I == E)
+        തിരികെ detail::Named_കണ്ണി_Or_Error(Path, File);
+      തിരികെ errc::no_such_file_or_directory;
     }
 
     // If Node is HardLink then return the resolved file.
-    if (auto File = dyn_cast<detail::InMemoryHardLink>(Node)) {
-      if (I == E)
-        return detail::NamedNodeOrError(Path, &File->getResolvedFile());
-      return errc::no_such_file_or_directory;
+    എങ്കിൽ (auto File = dyn_cast<detail::InMemoryHardLink>(കണ്ണി)) {
+      എങ്കിൽ (I == E)
+        തിരികെ detail::Named_കണ്ണി_Or_Error(Path, &File->getResolvedFile());
+      തിരികെ errc::no_such_file_or_directory;
     }
     // Traverse directories.
-    Dir = cast<detail::InMemoryDirectory>(Node);
-    if (I == E)
-      return detail::NamedNodeOrError(Path, Dir);
+    Dir = cast<detail::InMemoryDirectory>(കണ്ണി);
+    എങ്കിൽ (I == E)
+      തിരികെ detail::Named_കണ്ണി_Or_Error(Path, Dir);
   }
 }
 
-bool InMemoryFileSystem::addHardLink(const Twine &NewLink,
-                                     const Twine &Target) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
+തർക്കം InMemoryFileSystem::addHardLink(സ്ഥിരം Twine &NewLink,
+                                     സ്ഥിരം Twine &Target) {
+  auto New_Link_കണ്ണി = lookup_കണ്ണി(NewLink, /*FollowFinalSymlink=*/അസത്യം);
   // Whether symlinks in the hardlink target are followed is
   // implementation-defined in POSIX.
   // We're following symlinks here to be consistent with macOS.
-  auto TargetNode = lookupNode(Target, /*FollowFinalSymlink=*/true);
+  auto Target_കണ്ണി = lookup_കണ്ണി(Target, /*FollowFinalSymlink=*/സത്യം);
   // FromPath must not have been added before. ToPath must have been added
   // before. Resolved ToPath must be a File.
-  if (!TargetNode || NewLinkNode || !isa<detail::InMemoryFile>(*TargetNode))
-    return false;
-  return addFile(NewLink, 0, nullptr, std::nullopt, std::nullopt, std::nullopt,
-                 std::nullopt, [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemoryHardLink>(
+  എങ്കിൽ (!Target_കണ്ണി || New_Link_കണ്ണി || !isa<detail::InMemoryFile>(*Target_കണ്ണി))
+    തിരികെ അസത്യം;
+  തിരികെ addFile(NewLink, 0, nullptr, std::nullopt, std::nullopt, std::nullopt,
+                 std::nullopt, [&](detail::New_In_Memory_കണ്ണി_Info NNI) {
+                   തിരികെ std::make_unique<detail::InMemoryHardLink>(
                        NNI.Path.str(),
-                       *cast<detail::InMemoryFile>(*TargetNode));
+                       *cast<detail::InMemoryFile>(*Target_കണ്ണി));
                  });
 }
 
-bool InMemoryFileSystem::addSymbolicLink(
-    const Twine &NewLink, const Twine &Target, time_t ModificationTime,
+തർക്കം InMemoryFileSystem::addSymbolicLink(
+    സ്ഥിരം Twine &NewLink, സ്ഥിരം Twine &Target, time_t ModificationTime,
     std::optional<uint32_t> User, std::optional<uint32_t> Group,
     std::optional<llvm::sys::fs::perms> Perms) {
-  auto NewLinkNode = lookupNode(NewLink, /*FollowFinalSymlink=*/false);
-  if (NewLinkNode)
-    return false;
+  auto New_Link_കണ്ണി = lookup_കണ്ണി(NewLink, /*FollowFinalSymlink=*/അസത്യം);
+  എങ്കിൽ (New_Link_കണ്ണി)
+    തിരികെ അസത്യം;
 
   SmallString<128> NewLinkStr, TargetStr;
   NewLink.toVector(NewLinkStr);
   Target.toVector(TargetStr);
 
-  return addFile(NewLinkStr, ModificationTime, nullptr, User, Group,
+  തിരികെ addFile(NewLinkStr, ModificationTime, nullptr, User, Group,
                  sys::fs::file_type::symlink_file, Perms,
-                 [&](detail::NewInMemoryNodeInfo NNI) {
-                   return std::make_unique<detail::InMemorySymbolicLink>(
+                 [&](detail::New_In_Memory_കണ്ണി_Info NNI) {
+                   തിരികെ std::make_unique<detail::InMemorySymbolicLink>(
                        NewLinkStr, TargetStr, NNI.makeStatus());
                  });
 }
 
-llvm::ErrorOr<Status> InMemoryFileSystem::status(const Twine &Path) {
-  auto Node = lookupNode(Path, /*FollowFinalSymlink=*/true);
-  if (Node)
-    return (*Node)->getStatus(Path);
-  return Node.getError();
+llvm::ErrorOr<Status> InMemoryFileSystem::status(സ്ഥിരം Twine &Path) {
+  auto കണ്ണി = lookup_കണ്ണി(Path, /*FollowFinalSymlink=*/സത്യം);
+  എങ്കിൽ (കണ്ണി)
+    തിരികെ (*കണ്ണി)->getStatus(Path);
+  തിരികെ കണ്ണി.getError();
 }
 
 llvm::ErrorOr<std::unique_ptr<File>>
-InMemoryFileSystem::openFileForRead(const Twine &Path) {
-  auto Node = lookupNode(Path,/*FollowFinalSymlink=*/true);
-  if (!Node)
-    return Node.getError();
+InMemoryFileSystem::openFileForRead(സ്ഥിരം Twine &Path) {
+  auto കണ്ണി = lookup_കണ്ണി(Path,/*FollowFinalSymlink=*/സത്യം);
+  എങ്കിൽ (!കണ്ണി)
+    തിരികെ കണ്ണി.getError();
 
   // When we have a file provide a heap-allocated wrapper for the memory buffer
   // to match the ownership semantics for File.
-  if (auto *F = dyn_cast<detail::InMemoryFile>(*Node))
-    return std::unique_ptr<File>(
-        new detail::InMemoryFileAdaptor(*F, Path.str()));
+  എങ്കിൽ (auto *F = dyn_cast<detail::InMemoryFile>(*കണ്ണി))
+    തിരികെ std::unique_ptr<File>(
+        പുതിയ detail::InMemoryFileAdaptor(*F, Path.str()));
 
   // FIXME: errc::not_a_file?
-  return make_error_code(llvm::errc::invalid_argument);
+  തിരികെ make_error_code(llvm::errc::invalid_argument);
 }
 
 /// Adaptor from InMemoryDir::iterator to directory_iterator.
-class InMemoryFileSystem::DirIterator : public llvm::vfs::detail::DirIterImpl {
-  const InMemoryFileSystem *FS;
+വർഗ്ഗം InMemoryFileSystem::DirIterator : പൊതു llvm::vfs::detail::DirIterImpl {
+  സ്ഥിരം InMemoryFileSystem *FS;
   detail::InMemoryDirectory::const_iterator I;
   detail::InMemoryDirectory::const_iterator E;
   std::string RequestedDirName;
 
-  void setCurrentEntry() {
-    if (I != E) {
+  ശൂന്യം setCurrentEntry() {
+    എങ്കിൽ (I != E) {
       SmallString<256> Path(RequestedDirName);
       llvm::sys::path::append(Path, I->second->getFileName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch (I->second->getKind()) {
-      case detail::IME_File:
-      case detail::IME_HardLink:
+      തിരഞ്ഞെടുപ്പ് (I->second->getKind()) {
+      അവസ്ഥ detail::IME_File:
+      അവസ്ഥ detail::IME_HardLink:
         Type = sys::fs::file_type::regular_file;
-        break;
-      case detail::IME_Directory:
+        നിർത്തുക;
+      അവസ്ഥ detail::IME_Directory:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case detail::IME_SymbolicLink:
-        if (auto SymlinkTarget =
-                FS->lookupNode(Path, /*FollowFinalSymlink=*/true)) {
+        നിർത്തുക;
+      അവസ്ഥ detail::IME_SymbolicLink:
+        എങ്കിൽ (auto SymlinkTarget =
+                FS->lookup_കണ്ണി(Path, /*FollowFinalSymlink=*/സത്യം)) {
           Path = SymlinkTarget.getName();
           Type = (*SymlinkTarget)->getStatus(Path).getType();
         }
-        break;
+        നിർത്തുക;
       }
       CurrentEntry = directory_entry(std::string(Path), Type);
-    } else {
+    } അല്ലെങ്കിൽ {
       // When we're at the end, make CurrentEntry invalid and DirIterImpl will
       // do the rest.
       CurrentEntry = directory_entry();
     }
   }
 
-public:
-  DirIterator() = default;
+പൊതു:
+  DirIterator() = സ്ഥിരസ്ഥിതി;
 
-  DirIterator(const InMemoryFileSystem *FS,
-              const detail::InMemoryDirectory &Dir,
+  DirIterator(സ്ഥിരം InMemoryFileSystem *FS,
+              സ്ഥിരം detail::InMemoryDirectory &Dir,
               std::string RequestedDirName)
       : FS(FS), I(Dir.begin()), E(Dir.end()),
         RequestedDirName(std::move(RequestedDirName)) {
@@ -1196,62 +1196,62 @@ public:
   std::error_code increment() override {
     ++I;
     setCurrentEntry();
-    return {};
+    തിരികെ {};
   }
 };
 
-directory_iterator InMemoryFileSystem::dir_begin(const Twine &Dir,
+directory_iterator InMemoryFileSystem::dir_begin(സ്ഥിരം Twine &Dir,
                                                  std::error_code &EC) {
-  auto Node = lookupNode(Dir, /*FollowFinalSymlink=*/true);
-  if (!Node) {
-    EC = Node.getError();
-    return directory_iterator(std::make_shared<DirIterator>());
+  auto കണ്ണി = lookup_കണ്ണി(Dir, /*FollowFinalSymlink=*/സത്യം);
+  എങ്കിൽ (!കണ്ണി) {
+    EC = കണ്ണി.getError();
+    തിരികെ directory_iterator(std::make_shared<DirIterator>());
   }
 
-  if (auto *DirNode = dyn_cast<detail::InMemoryDirectory>(*Node))
-    return directory_iterator(
-        std::make_shared<DirIterator>(this, *DirNode, Dir.str()));
+  എങ്കിൽ (auto *Dir_കണ്ണി = dyn_cast<detail::InMemoryDirectory>(*കണ്ണി))
+    തിരികെ directory_iterator(
+        std::make_shared<DirIterator>(ഇത്, *Dir_കണ്ണി, Dir.str()));
 
   EC = make_error_code(llvm::errc::not_a_directory);
-  return directory_iterator(std::make_shared<DirIterator>());
+  തിരികെ directory_iterator(std::make_shared<DirIterator>());
 }
 
-std::error_code InMemoryFileSystem::setCurrentWorkingDirectory(const Twine &P) {
+std::error_code InMemoryFileSystem::setCurrentWorkingDirectory(സ്ഥിരം Twine &P) {
   SmallString<128> Path;
   P.toVector(Path);
 
   // Fix up relative paths. This just prepends the current working directory.
   std::error_code EC = makeAbsolute(Path);
-  assert(!EC);
-  (void)EC;
+  പ്രതിജ്ഞാ(!EC);
+  (ശൂന്യം)EC;
 
-  if (useNormalizedPaths())
-    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/true);
+  എങ്കിൽ (useNormalizedPaths())
+    llvm::sys::path::remove_dots(Path, /*remove_dot_dot=*/സത്യം);
 
-  if (!Path.empty())
+  എങ്കിൽ (!Path.empty())
     WorkingDirectory = std::string(Path);
-  return {};
+  തിരികെ {};
 }
 
-std::error_code InMemoryFileSystem::getRealPath(const Twine &Path,
-                                                SmallVectorImpl<char> &Output) {
+std::error_code InMemoryFileSystem::getRealPath(സ്ഥിരം Twine &Path,
+                                                SmallVectorImpl<അക്ഷരം> &Output) {
   auto CWD = getCurrentWorkingDirectory();
-  if (!CWD || CWD->empty())
-    return errc::operation_not_permitted;
+  എങ്കിൽ (!CWD || CWD->empty())
+    തിരികെ errc::operation_not_permitted;
   Path.toVector(Output);
-  if (auto EC = makeAbsolute(Output))
-    return EC;
-  llvm::sys::path::remove_dots(Output, /*remove_dot_dot=*/true);
-  return {};
+  എങ്കിൽ (auto EC = makeAbsolute(Output))
+    തിരികെ EC;
+  llvm::sys::path::remove_dots(Output, /*remove_dot_dot=*/സത്യം);
+  തിരികെ {};
 }
 
-std::error_code InMemoryFileSystem::isLocal(const Twine &Path, bool &Result) {
-  Result = false;
-  return {};
+std::error_code InMemoryFileSystem::isLocal(സ്ഥിരം Twine &Path, തർക്കം &Result) {
+  Result = അസത്യം;
+  തിരികെ {};
 }
 
-void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
-                                   unsigned IndentLevel) const {
+ശൂന്യം InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
+                                   unsigned IndentLevel) സ്ഥിരം {
   printIndent(OS, IndentLevel);
   OS << "InMemoryFileSystem\n";
 }
@@ -1263,21 +1263,21 @@ void InMemoryFileSystem::printImpl(raw_ostream &OS, PrintType PrintContents,
 // RedirectingFileSystem implementation
 //===-----------------------------------------------------------------------===/
 
-namespace {
+നാമാകാശ {
 
-static llvm::sys::path::Style getExistingStyle(llvm::StringRef Path) {
+സ്ഥിതം llvm::sys::path::Style getExistingStyle(llvm::StringRef Path) {
   // Detect the path style in use by checking the first separator.
   llvm::sys::path::Style style = llvm::sys::path::Style::native;
-  const size_t n = Path.find_first_of("/\\");
+  സ്ഥിരം size_t n = Path.find_first_of("/\\");
   // Can't distinguish between posix and windows_slash here.
-  if (n != static_cast<size_t>(-1))
+  എങ്കിൽ (n != static_cast<size_t>(-1))
     style = (Path[n] == '/') ? llvm::sys::path::Style::posix
                              : llvm::sys::path::Style::windows_backslash;
-  return style;
+  തിരികെ style;
 }
 
 /// Removes leading "./" as well as path components like ".." and ".".
-static llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
+സ്ഥിതം llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
   // First detect the path style in use by checking the first separator.
   llvm::sys::path::Style style = getExistingStyle(Path);
 
@@ -1285,16 +1285,16 @@ static llvm::SmallString<256> canonicalize(llvm::StringRef Path) {
   // direction of the slashes from changing.
   llvm::SmallString<256> result =
       llvm::sys::path::remove_leading_dotslash(Path, style);
-  llvm::sys::path::remove_dots(result, /*remove_dot_dot=*/true, style);
-  return result;
+  llvm::sys::path::remove_dots(result, /*remove_dot_dot=*/സത്യം, style);
+  തിരികെ result;
 }
 
 /// Whether the error and entry specify a file/directory that was not found.
-static bool isFileNotFound(std::error_code EC,
+സ്ഥിതം തർക്കം isFileNotFound(std::error_code EC,
                            RedirectingFileSystem::Entry *E = nullptr) {
-  if (E && !isa<RedirectingFileSystem::DirectoryRemapEntry>(E))
-    return false;
-  return EC == llvm::errc::no_such_file_or_directory;
+  എങ്കിൽ (E && !isa<RedirectingFileSystem::DirectoryRemapEntry>(E))
+    തിരികെ അസത്യം;
+  തിരികെ EC == llvm::errc::no_such_file_or_directory;
 }
 
 } // anonymous namespace
@@ -1302,75 +1302,75 @@ static bool isFileNotFound(std::error_code EC,
 
 RedirectingFileSystem::RedirectingFileSystem(IntrusiveRefCntPtr<FileSystem> FS)
     : ExternalFS(std::move(FS)) {
-  assert(ExternalFS && "RedirectingFileSystem requires an external FS");
-  if (auto ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
+  പ്രതിജ്ഞാ(ExternalFS && "RedirectingFileSystem requires an external FS");
+  എങ്കിൽ (auto ExternalWorkingDirectory = ExternalFS->getCurrentWorkingDirectory())
     WorkingDirectory = *ExternalWorkingDirectory;
 }
 
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory entries.
-class llvm::vfs::RedirectingFSDirIterImpl
-    : public llvm::vfs::detail::DirIterImpl {
+വർഗ്ഗം llvm::vfs::RedirectingFSDirIterImpl
+    : പൊതു llvm::vfs::detail::DirIterImpl {
   std::string Dir;
   RedirectingFileSystem::DirectoryEntry::iterator Current, End;
 
-  std::error_code incrementImpl(bool IsFirstTime) {
-    assert((IsFirstTime || Current != End) && "cannot iterate past end");
-    if (!IsFirstTime)
+  std::error_code incrementImpl(തർക്കം IsFirstTime) {
+    പ്രതിജ്ഞാ((IsFirstTime || Current != End) && "cannot iterate past end");
+    എങ്കിൽ (!IsFirstTime)
       ++Current;
-    if (Current != End) {
+    എങ്കിൽ (Current != End) {
       SmallString<128> PathStr(Dir);
       llvm::sys::path::append(PathStr, (*Current)->getName());
       sys::fs::file_type Type = sys::fs::file_type::type_unknown;
-      switch ((*Current)->getKind()) {
-      case RedirectingFileSystem::EK_Directory:
+      തിരഞ്ഞെടുപ്പ് ((*Current)->getKind()) {
+      അവസ്ഥ RedirectingFileSystem::EK_Directory:
         [[fallthrough]];
-      case RedirectingFileSystem::EK_DirectoryRemap:
+      അവസ്ഥ RedirectingFileSystem::EK_DirectoryRemap:
         Type = sys::fs::file_type::directory_file;
-        break;
-      case RedirectingFileSystem::EK_File:
+        നിർത്തുക;
+      അവസ്ഥ RedirectingFileSystem::EK_File:
         Type = sys::fs::file_type::regular_file;
-        break;
+        നിർത്തുക;
       }
       CurrentEntry = directory_entry(std::string(PathStr), Type);
-    } else {
+    } അല്ലെങ്കിൽ {
       CurrentEntry = directory_entry();
     }
-    return {};
+    തിരികെ {};
   };
 
-public:
+പൊതു:
   RedirectingFSDirIterImpl(
-      const Twine &Path, RedirectingFileSystem::DirectoryEntry::iterator Begin,
+      സ്ഥിരം Twine &Path, RedirectingFileSystem::DirectoryEntry::iterator Begin,
       RedirectingFileSystem::DirectoryEntry::iterator End, std::error_code &EC)
       : Dir(Path.str()), Current(Begin), End(End) {
-    EC = incrementImpl(/*IsFirstTime=*/true);
+    EC = incrementImpl(/*IsFirstTime=*/സത്യം);
   }
 
   std::error_code increment() override {
-    return incrementImpl(/*IsFirstTime=*/false);
+    തിരികെ incrementImpl(/*IsFirstTime=*/അസത്യം);
   }
 };
 
-namespace {
+നാമാകാശ {
 /// Directory iterator implementation for \c RedirectingFileSystem's
 /// directory remap entries that maps the paths reported by the external
 /// file system's directory iterator back to the virtual directory's path.
-class RedirectingFSDirRemapIterImpl : public llvm::vfs::detail::DirIterImpl {
+വർഗ്ഗം RedirectingFSDirRemapIterImpl : പൊതു llvm::vfs::detail::DirIterImpl {
   std::string Dir;
   llvm::sys::path::Style DirStyle;
   llvm::vfs::directory_iterator ExternalIter;
 
-public:
+പൊതു:
   RedirectingFSDirRemapIterImpl(std::string DirPath,
                                 llvm::vfs::directory_iterator ExtIter)
       : Dir(std::move(DirPath)), DirStyle(getExistingStyle(Dir)),
         ExternalIter(ExtIter) {
-    if (ExternalIter != llvm::vfs::directory_iterator())
+    എങ്കിൽ (ExternalIter != llvm::vfs::directory_iterator())
       setCurrentEntry();
   }
 
-  void setCurrentEntry() {
+  ശൂന്യം setCurrentEntry() {
     StringRef ExternalPath = ExternalIter->path();
     llvm::sys::path::Style ExternalStyle = getExistingStyle(ExternalPath);
     StringRef File = llvm::sys::path::filename(ExternalPath, ExternalStyle);
@@ -1384,88 +1384,88 @@ public:
   std::error_code increment() override {
     std::error_code EC;
     ExternalIter.increment(EC);
-    if (!EC && ExternalIter != llvm::vfs::directory_iterator())
+    എങ്കിൽ (!EC && ExternalIter != llvm::vfs::directory_iterator())
       setCurrentEntry();
-    else
+    അല്ലെങ്കിൽ
       CurrentEntry = directory_entry();
-    return EC;
+    തിരികെ EC;
   }
 };
 } // namespace
 
 llvm::ErrorOr<std::string>
-RedirectingFileSystem::getCurrentWorkingDirectory() const {
-  return WorkingDirectory;
+RedirectingFileSystem::getCurrentWorkingDirectory() സ്ഥിരം {
+  തിരികെ WorkingDirectory;
 }
 
 std::error_code
-RedirectingFileSystem::setCurrentWorkingDirectory(const Twine &Path) {
+RedirectingFileSystem::setCurrentWorkingDirectory(സ്ഥിരം Twine &Path) {
   // Don't change the working directory if the path doesn't exist.
-  if (!exists(Path))
-    return errc::no_such_file_or_directory;
+  എങ്കിൽ (!exists(Path))
+    തിരികെ errc::no_such_file_or_directory;
 
   SmallString<128> AbsolutePath;
   Path.toVector(AbsolutePath);
-  if (std::error_code EC = makeAbsolute(AbsolutePath))
-    return EC;
+  എങ്കിൽ (std::error_code EC = makeAbsolute(AbsolutePath))
+    തിരികെ EC;
   WorkingDirectory = std::string(AbsolutePath);
-  return {};
+  തിരികെ {};
 }
 
-std::error_code RedirectingFileSystem::isLocal(const Twine &Path_,
-                                               bool &Result) {
+std::error_code RedirectingFileSystem::isLocal(സ്ഥിരം Twine &Path_,
+                                               തർക്കം &Result) {
   SmallString<256> Path;
   Path_.toVector(Path);
 
-  if (makeAbsolute(Path))
-    return {};
+  എങ്കിൽ (makeAbsolute(Path))
+    തിരികെ {};
 
-  return ExternalFS->isLocal(Path, Result);
+  തിരികെ ExternalFS->isLocal(Path, Result);
 }
 
-std::error_code RedirectingFileSystem::makeAbsolute(SmallVectorImpl<char> &Path) const {
+std::error_code RedirectingFileSystem::makeAbsolute(SmallVectorImpl<അക്ഷരം> &Path) സ്ഥിരം {
   // is_absolute(..., Style::windows_*) accepts paths with both slash types.
-  if (llvm::sys::path::is_absolute(Path, llvm::sys::path::Style::posix) ||
+  എങ്കിൽ (llvm::sys::path::is_absolute(Path, llvm::sys::path::Style::posix) ||
       llvm::sys::path::is_absolute(Path,
                                    llvm::sys::path::Style::windows_backslash))
     // This covers windows absolute path with forward slash as well, as the
     // forward slashes are treated as path separation in llvm::path
     // regardless of what path::Style is used.
-    return {};
+    തിരികെ {};
 
   auto WorkingDir = getCurrentWorkingDirectory();
-  if (!WorkingDir)
-    return WorkingDir.getError();
+  എങ്കിൽ (!WorkingDir)
+    തിരികെ WorkingDir.getError();
 
-  return makeAbsolute(WorkingDir.get(), Path);
+  തിരികെ makeAbsolute(WorkingDir.get(), Path);
 }
 
 std::error_code
 RedirectingFileSystem::makeAbsolute(StringRef WorkingDir,
-                                    SmallVectorImpl<char> &Path) const {
+                                    SmallVectorImpl<അക്ഷരം> &Path) സ്ഥിരം {
   // We can't use sys::fs::make_absolute because that assumes the path style
   // is native and there is no way to override that.  Since we know WorkingDir
   // is absolute, we can use it to determine which style we actually have and
   // append Path ourselves.
-  if (!WorkingDir.empty() &&
+  എങ്കിൽ (!WorkingDir.empty() &&
       !sys::path::is_absolute(WorkingDir, sys::path::Style::posix) &&
       !sys::path::is_absolute(WorkingDir,
                               sys::path::Style::windows_backslash)) {
-    return std::error_code();
+    തിരികെ std::error_code();
   }
   sys::path::Style style = sys::path::Style::windows_backslash;
-  if (sys::path::is_absolute(WorkingDir, sys::path::Style::posix)) {
+  എങ്കിൽ (sys::path::is_absolute(WorkingDir, sys::path::Style::posix)) {
     style = sys::path::Style::posix;
-  } else {
+  } അല്ലെങ്കിൽ {
     // Distinguish between windows_backslash and windows_slash; getExistingStyle
     // returns posix for a path with windows_slash.
-    if (getExistingStyle(WorkingDir) != sys::path::Style::windows_backslash)
+    എങ്കിൽ (getExistingStyle(WorkingDir) != sys::path::Style::windows_backslash)
       style = sys::path::Style::windows_slash;
   }
 
   std::string Result = std::string(WorkingDir);
   StringRef Dir(Result);
-  if (!Dir.ends_with(sys::path::get_separator(style))) {
+  എങ്കിൽ (!Dir.ends_with(sys::path::get_separator(style))) {
     Result += sys::path::get_separator(style);
   }
   // backslashes '\' are legit path charactors under POSIX. Windows APIs
@@ -1476,148 +1476,148 @@ RedirectingFileSystem::makeAbsolute(StringRef WorkingDir,
   Result.append(Path.data(), Path.size());
   Path.assign(Result.begin(), Result.end());
 
-  return {};
+  തിരികെ {};
 }
 
-directory_iterator RedirectingFileSystem::dir_begin(const Twine &Dir,
+directory_iterator RedirectingFileSystem::dir_begin(സ്ഥിരം Twine &Dir,
                                                     std::error_code &EC) {
   SmallString<256> Path;
   Dir.toVector(Path);
 
   EC = makeAbsolute(Path);
-  if (EC)
-    return {};
+  എങ്കിൽ (EC)
+    തിരികെ {};
 
   ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
-    if (Redirection != RedirectKind::RedirectOnly &&
+  എങ്കിൽ (!Result) {
+    എങ്കിൽ (Redirection != RedirectKind::RedirectOnly &&
         isFileNotFound(Result.getError()))
-      return ExternalFS->dir_begin(Path, EC);
+      തിരികെ ExternalFS->dir_begin(Path, EC);
 
     EC = Result.getError();
-    return {};
+    തിരികെ {};
   }
 
   // Use status to make sure the path exists and refers to a directory.
   ErrorOr<Status> S = status(Path, Dir, *Result);
-  if (!S) {
-    if (Redirection != RedirectKind::RedirectOnly &&
+  എങ്കിൽ (!S) {
+    എങ്കിൽ (Redirection != RedirectKind::RedirectOnly &&
         isFileNotFound(S.getError(), Result->E))
-      return ExternalFS->dir_begin(Dir, EC);
+      തിരികെ ExternalFS->dir_begin(Dir, EC);
 
     EC = S.getError();
-    return {};
+    തിരികെ {};
   }
 
-  if (!S->isDirectory()) {
+  എങ്കിൽ (!S->isDirectory()) {
     EC = errc::not_a_directory;
-    return {};
+    തിരികെ {};
   }
 
   // Create the appropriate directory iterator based on whether we found a
   // DirectoryRemapEntry or DirectoryEntry.
   directory_iterator RedirectIter;
   std::error_code RedirectEC;
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
+  എങ്കിൽ (auto ExtRedirect = Result->getExternalRedirect()) {
     auto RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
     RedirectIter = ExternalFS->dir_begin(*ExtRedirect, RedirectEC);
 
-    if (!RE->useExternalName(UseExternalNames)) {
+    എങ്കിൽ (!RE->useExternalName(UseExternalNames)) {
       // Update the paths in the results to use the virtual directory's path.
       RedirectIter =
           directory_iterator(std::make_shared<RedirectingFSDirRemapIterImpl>(
               std::string(Path), RedirectIter));
     }
-  } else {
+  } അല്ലെങ്കിൽ {
     auto DE = cast<DirectoryEntry>(Result->E);
     RedirectIter =
         directory_iterator(std::make_shared<RedirectingFSDirIterImpl>(
             Path, DE->contents_begin(), DE->contents_end(), RedirectEC));
   }
 
-  if (RedirectEC) {
-    if (RedirectEC != errc::no_such_file_or_directory) {
+  എങ്കിൽ (RedirectEC) {
+    എങ്കിൽ (RedirectEC != errc::no_such_file_or_directory) {
       EC = RedirectEC;
-      return {};
+      തിരികെ {};
     }
     RedirectIter = {};
   }
 
-  if (Redirection == RedirectKind::RedirectOnly) {
+  എങ്കിൽ (Redirection == RedirectKind::RedirectOnly) {
     EC = RedirectEC;
-    return RedirectIter;
+    തിരികെ RedirectIter;
   }
 
   std::error_code ExternalEC;
   directory_iterator ExternalIter = ExternalFS->dir_begin(Path, ExternalEC);
-  if (ExternalEC) {
-    if (ExternalEC != errc::no_such_file_or_directory) {
+  എങ്കിൽ (ExternalEC) {
+    എങ്കിൽ (ExternalEC != errc::no_such_file_or_directory) {
       EC = ExternalEC;
-      return {};
+      തിരികെ {};
     }
     ExternalIter = {};
   }
 
   SmallVector<directory_iterator, 2> Iters;
-  switch (Redirection) {
-  case RedirectKind::Fallthrough:
-    Iters.push_back(ExternalIter);
-    Iters.push_back(RedirectIter);
-    break;
-  case RedirectKind::Fallback:
-    Iters.push_back(RedirectIter);
-    Iters.push_back(ExternalIter);
-    break;
-  default:
+  തിരഞ്ഞെടുപ്പ് (Redirection) {
+  അവസ്ഥ RedirectKind::Fallthrough:
+    Iters.തള്ളുക_back(ExternalIter);
+    Iters.തള്ളുക_back(RedirectIter);
+    നിർത്തുക;
+  അവസ്ഥ RedirectKind::Fallback:
+    Iters.തള്ളുക_back(RedirectIter);
+    Iters.തള്ളുക_back(ExternalIter);
+    നിർത്തുക;
+  സ്ഥിരസ്ഥിതി:
     llvm_unreachable("unhandled RedirectKind");
   }
 
   directory_iterator Combined{
       std::make_shared<CombiningDirIterImpl>(Iters, EC)};
-  if (EC)
-    return {};
-  return Combined;
+  എങ്കിൽ (EC)
+    തിരികെ {};
+  തിരികെ Combined;
 }
 
-void RedirectingFileSystem::setOverlayFileDir(StringRef Dir) {
+ശൂന്യം RedirectingFileSystem::setOverlayFileDir(StringRef Dir) {
   OverlayFileDir = Dir.str();
 }
 
-StringRef RedirectingFileSystem::getOverlayFileDir() const {
-  return OverlayFileDir;
+StringRef RedirectingFileSystem::getOverlayFileDir() സ്ഥിരം {
+  തിരികെ OverlayFileDir;
 }
 
-void RedirectingFileSystem::setFallthrough(bool Fallthrough) {
-  if (Fallthrough) {
+ശൂന്യം RedirectingFileSystem::setFallthrough(തർക്കം Fallthrough) {
+  എങ്കിൽ (Fallthrough) {
     Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-  } else {
+  } അല്ലെങ്കിൽ {
     Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
   }
 }
 
-void RedirectingFileSystem::setRedirection(
+ശൂന്യം RedirectingFileSystem::setRedirection(
     RedirectingFileSystem::RedirectKind Kind) {
   Redirection = Kind;
 }
 
-std::vector<StringRef> RedirectingFileSystem::getRoots() const {
+std::vector<StringRef> RedirectingFileSystem::getRoots() സ്ഥിരം {
   std::vector<StringRef> R;
   R.reserve(Roots.size());
-  for (const auto &Root : Roots)
-    R.push_back(Root->getName());
-  return R;
+  വേണ്ടി (സ്ഥിരം auto &വേര്_2 : Roots)
+    R.തള്ളുക_back(വേര്_2->getName());
+  തിരികെ R;
 }
 
-void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
-                                      unsigned IndentLevel) const {
+ശൂന്യം RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
+                                      unsigned IndentLevel) സ്ഥിരം {
   printIndent(OS, IndentLevel);
   OS << "RedirectingFileSystem (UseExternalNames: "
      << (UseExternalNames ? "true" : "false") << ")\n";
-  if (Type == PrintType::Summary)
-    return;
+  എങ്കിൽ (Type == PrintType::Summary)
+    തിരികെ;
 
-  for (const auto &Root : Roots)
-    printEntry(OS, Root.get(), IndentLevel);
+  വേണ്ടി (സ്ഥിരം auto &വേര്_2 : Roots)
+    printEntry(OS, വേര്_2.get(), IndentLevel);
 
   printIndent(OS, IndentLevel);
   OS << "ExternalFS:\n";
@@ -1625,177 +1625,177 @@ void RedirectingFileSystem::printImpl(raw_ostream &OS, PrintType Type,
                     IndentLevel + 1);
 }
 
-void RedirectingFileSystem::printEntry(raw_ostream &OS,
+ശൂന്യം RedirectingFileSystem::printEntry(raw_ostream &OS,
                                        RedirectingFileSystem::Entry *E,
-                                       unsigned IndentLevel) const {
+                                       unsigned IndentLevel) സ്ഥിരം {
   printIndent(OS, IndentLevel);
   OS << "'" << E->getName() << "'";
 
-  switch (E->getKind()) {
-  case EK_Directory: {
+  തിരഞ്ഞെടുപ്പ് (E->getKind()) {
+  അവസ്ഥ EK_Directory: {
     auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(E);
 
     OS << "\n";
-    for (std::unique_ptr<Entry> &SubEntry :
+    വേണ്ടി (std::unique_ptr<Entry> &SubEntry :
          llvm::make_range(DE->contents_begin(), DE->contents_end()))
       printEntry(OS, SubEntry.get(), IndentLevel + 1);
-    break;
+    നിർത്തുക;
   }
-  case EK_DirectoryRemap:
-  case EK_File: {
+  അവസ്ഥ EK_DirectoryRemap:
+  അവസ്ഥ EK_File: {
     auto *RE = cast<RedirectingFileSystem::RemapEntry>(E);
     OS << " -> '" << RE->getExternalContentsPath() << "'";
-    switch (RE->getUseName()) {
-    case NK_NotSet:
-      break;
-    case NK_External:
+    തിരഞ്ഞെടുപ്പ് (RE->getUseName()) {
+    അവസ്ഥ NK_NotSet:
+      നിർത്തുക;
+    അവസ്ഥ NK_External:
       OS << " (UseExternalName: true)";
-      break;
-    case NK_Virtual:
+      നിർത്തുക;
+    അവസ്ഥ NK_Virtual:
       OS << " (UseExternalName: false)";
-      break;
+      നിർത്തുക;
     }
     OS << "\n";
-    break;
+    നിർത്തുക;
   }
   }
 }
 
-void RedirectingFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
-  if (ExternalFS) {
+ശൂന്യം RedirectingFileSystem::visitChildFileSystems(VisitCallbackTy Callback) {
+  എങ്കിൽ (ExternalFS) {
     Callback(*ExternalFS);
     ExternalFS->visitChildFileSystems(Callback);
   }
 }
 
 /// A helper class to hold the common YAML parsing state.
-class llvm::vfs::RedirectingFileSystemParser {
+വർഗ്ഗം llvm::vfs::RedirectingFileSystemParser {
   yaml::Stream &Stream;
 
-  void error(yaml::Node *N, const Twine &Msg) { Stream.printError(N, Msg); }
+  ശൂന്യം error(yaml::കണ്ണി *N, സ്ഥിരം Twine &സന്ദേശം_2) { Stream.printError(N, സന്ദേശം_2); }
 
   // false on error
-  bool parseScalarString(yaml::Node *N, StringRef &Result,
-                         SmallVectorImpl<char> &Storage) {
-    const auto *S = dyn_cast_if_present<yaml::ScalarNode>(N);
+  തർക്കം parseScalarString(yaml::കണ്ണി *N, StringRef &Result,
+                         SmallVectorImpl<അക്ഷരം> &Storage) {
+    സ്ഥിരം auto *S = dyn_cast_if_present<yaml::Scalar_കണ്ണി>(N);
 
-    if (!S) {
+    എങ്കിൽ (!S) {
       error(N, "expected string");
-      return false;
+      തിരികെ അസത്യം;
     }
-    Result = S->getValue(Storage);
-    return true;
+    Result = S->get_മൂല്യം(Storage);
+    തിരികെ സത്യം;
   }
 
   // false on error
-  bool parseScalarBool(yaml::Node *N, bool &Result) {
+  തർക്കം parseScalarBool(yaml::കണ്ണി *N, തർക്കം &Result) {
     SmallString<5> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return false;
+    StringRef മൂല്യം;
+    എങ്കിൽ (!parseScalarString(N, മൂല്യം, Storage))
+      തിരികെ അസത്യം;
 
-    if (Value.equals_insensitive("true") || Value.equals_insensitive("on") ||
-        Value.equals_insensitive("yes") || Value == "1") {
-      Result = true;
-      return true;
-    } else if (Value.equals_insensitive("false") ||
-               Value.equals_insensitive("off") ||
-               Value.equals_insensitive("no") || Value == "0") {
-      Result = false;
-      return true;
+    എങ്കിൽ (മൂല്യം.equals_insensitive("true") || മൂല്യം.equals_insensitive("on") ||
+        മൂല്യം.equals_insensitive("yes") || മൂല്യം == "1") {
+      Result = സത്യം;
+      തിരികെ സത്യം;
+    } അല്ലെങ്കിൽ എങ്കിൽ (മൂല്യം.equals_insensitive("false") ||
+               മൂല്യം.equals_insensitive("off") ||
+               മൂല്യം.equals_insensitive("no") || മൂല്യം == "0") {
+      Result = അസത്യം;
+      തിരികെ സത്യം;
     }
 
     error(N, "expected boolean value");
-    return false;
+    തിരികെ അസത്യം;
   }
 
   std::optional<RedirectingFileSystem::RedirectKind>
-  parseRedirectKind(yaml::Node *N) {
+  parseRedirectKind(yaml::കണ്ണി *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
+    StringRef മൂല്യം;
+    എങ്കിൽ (!parseScalarString(N, മൂല്യം, Storage))
+      തിരികെ std::nullopt;
 
-    if (Value.equals_insensitive("fallthrough")) {
-      return RedirectingFileSystem::RedirectKind::Fallthrough;
-    } else if (Value.equals_insensitive("fallback")) {
-      return RedirectingFileSystem::RedirectKind::Fallback;
-    } else if (Value.equals_insensitive("redirect-only")) {
-      return RedirectingFileSystem::RedirectKind::RedirectOnly;
+    എങ്കിൽ (മൂല്യം.equals_insensitive("fallthrough")) {
+      തിരികെ RedirectingFileSystem::RedirectKind::Fallthrough;
+    } അല്ലെങ്കിൽ എങ്കിൽ (മൂല്യം.equals_insensitive("fallback")) {
+      തിരികെ RedirectingFileSystem::RedirectKind::Fallback;
+    } അല്ലെങ്കിൽ എങ്കിൽ (മൂല്യം.equals_insensitive("redirect-only")) {
+      തിരികെ RedirectingFileSystem::RedirectKind::RedirectOnly;
     }
-    return std::nullopt;
+    തിരികെ std::nullopt;
   }
 
-  std::optional<RedirectingFileSystem::RootRelativeKind>
-  parseRootRelativeKind(yaml::Node *N) {
+  std::optional<RedirectingFileSystem::വേര്_Relative_Kind>
+  parse_വേര്_Relative_Kind(yaml::കണ്ണി *N) {
     SmallString<12> Storage;
-    StringRef Value;
-    if (!parseScalarString(N, Value, Storage))
-      return std::nullopt;
-    if (Value.equals_insensitive("cwd")) {
-      return RedirectingFileSystem::RootRelativeKind::CWD;
-    } else if (Value.equals_insensitive("overlay-dir")) {
-      return RedirectingFileSystem::RootRelativeKind::OverlayDir;
+    StringRef മൂല്യം;
+    എങ്കിൽ (!parseScalarString(N, മൂല്യം, Storage))
+      തിരികെ std::nullopt;
+    എങ്കിൽ (മൂല്യം.equals_insensitive("cwd")) {
+      തിരികെ RedirectingFileSystem::വേര്_Relative_Kind::CWD;
+    } അല്ലെങ്കിൽ എങ്കിൽ (മൂല്യം.equals_insensitive("overlay-dir")) {
+      തിരികെ RedirectingFileSystem::വേര്_Relative_Kind::OverlayDir;
     }
-    return std::nullopt;
+    തിരികെ std::nullopt;
   }
 
-  struct KeyStatus {
-    bool Required;
-    bool Seen = false;
+  ഘടന താക്കോൽ_Status {
+    തർക്കം Required;
+    തർക്കം Seen = അസത്യം;
 
-    KeyStatus(bool Required = false) : Required(Required) {}
+    താക്കോൽ_Status(തർക്കം Required = അസത്യം) : Required(Required) {}
   };
 
-  using KeyStatusPair = std::pair<StringRef, KeyStatus>;
+  using താക്കോൽ_Status_Pair = std::pair<StringRef, താക്കോൽ_Status>;
 
   // false on error
-  bool checkDuplicateOrUnknownKey(yaml::Node *KeyNode, StringRef Key,
-                                  DenseMap<StringRef, KeyStatus> &Keys) {
-    auto It = Keys.find(Key);
-    if (It == Keys.end()) {
-      error(KeyNode, "unknown key");
-      return false;
+  തർക്കം check_Duplicate_Or_Unknown_താക്കോൽ(yaml::കണ്ണി *താക്കോൽ_കണ്ണി, StringRef താക്കോൽ,
+                                  DenseMap<StringRef, താക്കോൽ_Status> &താക്കോലുകൾ_2) {
+    auto It = താക്കോലുകൾ_2.find(താക്കോൽ);
+    എങ്കിൽ (It == താക്കോലുകൾ_2.end()) {
+      error(താക്കോൽ_കണ്ണി, "unknown key");
+      തിരികെ അസത്യം;
     }
-    KeyStatus &S = It->second;
-    if (S.Seen) {
-      error(KeyNode, Twine("duplicate key '") + Key + "'");
-      return false;
+    താക്കോൽ_Status &S = It->second;
+    എങ്കിൽ (S.Seen) {
+      error(താക്കോൽ_കണ്ണി, Twine("duplicate key '") + താക്കോൽ + "'");
+      തിരികെ അസത്യം;
     }
-    S.Seen = true;
-    return true;
+    S.Seen = സത്യം;
+    തിരികെ സത്യം;
   }
 
   // false on error
-  bool checkMissingKeys(yaml::Node *Obj, DenseMap<StringRef, KeyStatus> &Keys) {
-    for (const auto &I : Keys) {
-      if (I.second.Required && !I.second.Seen) {
+  തർക്കം check_Missing_താക്കോലുകൾ(yaml::കണ്ണി *Obj, DenseMap<StringRef, താക്കോൽ_Status> &താക്കോലുകൾ_2) {
+    വേണ്ടി (സ്ഥിരം auto &I : താക്കോലുകൾ_2) {
+      എങ്കിൽ (I.second.Required && !I.second.Seen) {
         error(Obj, Twine("missing key '") + I.first + "'");
-        return false;
+        തിരികെ അസത്യം;
       }
     }
-    return true;
+    തിരികെ സത്യം;
   }
 
-public:
-  static RedirectingFileSystem::Entry *
+പൊതു:
+  സ്ഥിതം RedirectingFileSystem::Entry *
   lookupOrCreateEntry(RedirectingFileSystem *FS, StringRef Name,
                       RedirectingFileSystem::Entry *ParentEntry = nullptr) {
-    if (!ParentEntry) { // Look for a existent root
-      for (const auto &Root : FS->Roots) {
-        if (Name == Root->getName()) {
-          ParentEntry = Root.get();
-          return ParentEntry;
+    എങ്കിൽ (!ParentEntry) { // Look for a existent root
+      വേണ്ടി (സ്ഥിരം auto &വേര്_2 : FS->Roots) {
+        എങ്കിൽ (Name == വേര്_2->getName()) {
+          ParentEntry = വേര്_2.get();
+          തിരികെ ParentEntry;
         }
       }
-    } else { // Advance to the next component
+    } അല്ലെങ്കിൽ { // Advance to the next component
       auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &Content :
+      വേണ്ടി (std::unique_ptr<RedirectingFileSystem::Entry> &Content :
            llvm::make_range(DE->contents_begin(), DE->contents_end())) {
         auto *DirContent =
             dyn_cast<RedirectingFileSystem::DirectoryEntry>(Content.get());
-        if (DirContent && Name == Content->getName())
-          return DirContent;
+        എങ്കിൽ (DirContent && Name == Content->getName())
+          തിരികെ DirContent;
       }
     }
 
@@ -1806,229 +1806,229 @@ public:
                          std::chrono::system_clock::now(), 0, 0, 0,
                          file_type::directory_file, sys::fs::all_all));
 
-    if (!ParentEntry) { // Add a new root to the overlay
-      FS->Roots.push_back(std::move(E));
+    എങ്കിൽ (!ParentEntry) { // Add a new root to the overlay
+      FS->Roots.തള്ളുക_back(std::move(E));
       ParentEntry = FS->Roots.back().get();
-      return ParentEntry;
+      തിരികെ ParentEntry;
     }
 
     auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(ParentEntry);
     DE->addContent(std::move(E));
-    return DE->getLastContent();
+    തിരികെ DE->getLastContent();
   }
 
-private:
-  void uniqueOverlayTree(RedirectingFileSystem *FS,
+സ്വകാര്യ:
+  ശൂന്യം unique_Overlay_വൃക്ഷം(RedirectingFileSystem *FS,
                          RedirectingFileSystem::Entry *SrcE,
                          RedirectingFileSystem::Entry *NewParentE = nullptr) {
     StringRef Name = SrcE->getName();
-    switch (SrcE->getKind()) {
-    case RedirectingFileSystem::EK_Directory: {
+    തിരഞ്ഞെടുപ്പ് (SrcE->getKind()) {
+    അവസ്ഥ RedirectingFileSystem::EK_Directory: {
       auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
       // Empty directories could be present in the YAML as a way to
       // describe a file for a current directory after some of its subdir
       // is parsed. This only leads to redundant walks, ignore it.
-      if (!Name.empty())
+      എങ്കിൽ (!Name.empty())
         NewParentE = lookupOrCreateEntry(FS, Name, NewParentE);
-      for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
+      വേണ്ടി (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
            llvm::make_range(DE->contents_begin(), DE->contents_end()))
-        uniqueOverlayTree(FS, SubEntry.get(), NewParentE);
-      break;
+        unique_Overlay_വൃക്ഷം(FS, SubEntry.get(), NewParentE);
+      നിർത്തുക;
     }
-    case RedirectingFileSystem::EK_DirectoryRemap: {
-      assert(NewParentE && "Parent entry must exist");
+    അവസ്ഥ RedirectingFileSystem::EK_DirectoryRemap: {
+      പ്രതിജ്ഞാ(NewParentE && "Parent entry must exist");
       auto *DR = cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
       auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
       DE->addContent(
           std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
               Name, DR->getExternalContentsPath(), DR->getUseName()));
-      break;
+      നിർത്തുക;
     }
-    case RedirectingFileSystem::EK_File: {
-      assert(NewParentE && "Parent entry must exist");
+    അവസ്ഥ RedirectingFileSystem::EK_File: {
+      പ്രതിജ്ഞാ(NewParentE && "Parent entry must exist");
       auto *FE = cast<RedirectingFileSystem::FileEntry>(SrcE);
       auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(NewParentE);
       DE->addContent(std::make_unique<RedirectingFileSystem::FileEntry>(
           Name, FE->getExternalContentsPath(), FE->getUseName()));
-      break;
+      നിർത്തുക;
     }
     }
   }
 
   std::unique_ptr<RedirectingFileSystem::Entry>
-  parseEntry(yaml::Node *N, RedirectingFileSystem *FS, bool IsRootEntry) {
-    auto *M = dyn_cast<yaml::MappingNode>(N);
-    if (!M) {
+  parseEntry(yaml::കണ്ണി *N, RedirectingFileSystem *FS, തർക്കം Is_വേര്_Entry) {
+    auto *M = dyn_cast<yaml::Mapping_കണ്ണി>(N);
+    എങ്കിൽ (!M) {
       error(N, "expected mapping node for file or directory entry");
-      return nullptr;
+      തിരികെ nullptr;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("name", true),
-        KeyStatusPair("type", true),
-        KeyStatusPair("contents", false),
-        KeyStatusPair("external-contents", false),
-        KeyStatusPair("use-external-name", false),
+    താക്കോൽ_Status_Pair Fields[] = {
+        താക്കോൽ_Status_Pair("name", സത്യം),
+        താക്കോൽ_Status_Pair("type", സത്യം),
+        താക്കോൽ_Status_Pair("contents", അസത്യം),
+        താക്കോൽ_Status_Pair("external-contents", അസത്യം),
+        താക്കോൽ_Status_Pair("use-external-name", അസത്യം),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
+    DenseMap<StringRef, താക്കോൽ_Status> താക്കോലുകൾ_2(std::begin(Fields), std::end(Fields));
 
-    enum { CF_NotSet, CF_List, CF_External } ContentsField = CF_NotSet;
+    എണ്ണൽ { CF_NotSet, CF_List, CF_External } ContentsField = CF_NotSet;
     std::vector<std::unique_ptr<RedirectingFileSystem::Entry>>
         EntryArrayContents;
     SmallString<256> ExternalContentsPath;
     SmallString<256> Name;
-    yaml::Node *NameValueNode = nullptr;
+    yaml::കണ്ണി *Name_മൂല്യം_കണ്ണി = nullptr;
     auto UseExternalName = RedirectingFileSystem::NK_NotSet;
     RedirectingFileSystem::EntryKind Kind;
 
-    for (auto &I : *M) {
-      StringRef Key;
+    വേണ്ടി (auto &I : *M) {
+      StringRef താക്കോൽ;
       // Reuse the buffer for key and value, since we don't look at key after
       // parsing value.
       SmallString<256> Buffer;
-      if (!parseScalarString(I.getKey(), Key, Buffer))
-        return nullptr;
+      എങ്കിൽ (!parseScalarString(I.get_താക്കോൽ(), താക്കോൽ, Buffer))
+        തിരികെ nullptr;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return nullptr;
+      എങ്കിൽ (!check_Duplicate_Or_Unknown_താക്കോൽ(I.get_താക്കോൽ(), താക്കോൽ, താക്കോലുകൾ_2))
+        തിരികെ nullptr;
 
-      StringRef Value;
-      if (Key == "name") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+      StringRef മൂല്യം;
+      എങ്കിൽ (താക്കോൽ == "name") {
+        എങ്കിൽ (!parseScalarString(I.get_മൂല്യം(), മൂല്യം, Buffer))
+          തിരികെ nullptr;
 
-        NameValueNode = I.getValue();
+        Name_മൂല്യം_കണ്ണി = I.get_മൂല്യം();
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
-        Name = canonicalize(Value).str();
-      } else if (Key == "type") {
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
-        if (Value == "file")
+        Name = canonicalize(മൂല്യം).str();
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "type") {
+        എങ്കിൽ (!parseScalarString(I.get_മൂല്യം(), മൂല്യം, Buffer))
+          തിരികെ nullptr;
+        എങ്കിൽ (മൂല്യം == "file")
           Kind = RedirectingFileSystem::EK_File;
-        else if (Value == "directory")
+        അല്ലെങ്കിൽ എങ്കിൽ (മൂല്യം == "directory")
           Kind = RedirectingFileSystem::EK_Directory;
-        else if (Value == "directory-remap")
+        അല്ലെങ്കിൽ എങ്കിൽ (മൂല്യം == "directory-remap")
           Kind = RedirectingFileSystem::EK_DirectoryRemap;
-        else {
-          error(I.getValue(), "unknown value for 'type'");
-          return nullptr;
+        അല്ലെങ്കിൽ {
+          error(I.get_മൂല്യം(), "unknown value for 'type'");
+          തിരികെ nullptr;
         }
-      } else if (Key == "contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "contents") {
+        എങ്കിൽ (ContentsField != CF_NotSet) {
+          error(I.get_താക്കോൽ(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          തിരികെ nullptr;
         }
         ContentsField = CF_List;
-        auto *Contents = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Contents) {
+        auto *Contents = dyn_cast_if_present<yaml::Sequence_കണ്ണി>(I.get_മൂല്യം());
+        എങ്കിൽ (!Contents) {
           // FIXME: this is only for directories, what about files?
-          error(I.getValue(), "expected array");
-          return nullptr;
+          error(I.get_മൂല്യം(), "expected array");
+          തിരികെ nullptr;
         }
 
-        for (auto &I : *Contents) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
-                  parseEntry(&I, FS, /*IsRootEntry*/ false))
-            EntryArrayContents.push_back(std::move(E));
-          else
-            return nullptr;
+        വേണ്ടി (auto &I : *Contents) {
+          എങ്കിൽ (std::unique_ptr<RedirectingFileSystem::Entry> E =
+                  parseEntry(&I, FS, /*IsRootEntry*/ അസത്യം))
+            EntryArrayContents.തള്ളുക_back(std::move(E));
+          അല്ലെങ്കിൽ
+            തിരികെ nullptr;
         }
-      } else if (Key == "external-contents") {
-        if (ContentsField != CF_NotSet) {
-          error(I.getKey(),
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "external-contents") {
+        എങ്കിൽ (ContentsField != CF_NotSet) {
+          error(I.get_താക്കോൽ(),
                 "entry already has 'contents' or 'external-contents'");
-          return nullptr;
+          തിരികെ nullptr;
         }
         ContentsField = CF_External;
-        if (!parseScalarString(I.getValue(), Value, Buffer))
-          return nullptr;
+        എങ്കിൽ (!parseScalarString(I.get_മൂല്യം(), മൂല്യം, Buffer))
+          തിരികെ nullptr;
 
         SmallString<256> FullPath;
-        if (FS->IsRelativeOverlay) {
+        എങ്കിൽ (FS->IsRelativeOverlay) {
           FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() &&
+          പ്രതിജ്ഞാ(!FullPath.empty() &&
                  "External contents prefix directory must exist");
-          SmallString<256> AbsFullPath = Value;
-          if (FS->makeAbsolute(FullPath, AbsFullPath)) {
+          SmallString<256> AbsFullPath = മൂല്യം;
+          എങ്കിൽ (FS->makeAbsolute(FullPath, AbsFullPath)) {
             error(N, "failed to make 'external-contents' absolute");
-            return nullptr;
+            തിരികെ nullptr;
           }
           FullPath = AbsFullPath;
-        } else {
-          FullPath = Value;
+        } അല്ലെങ്കിൽ {
+          FullPath = മൂല്യം;
         }
 
         // Guarantee that old YAML files containing paths with ".." and "."
         // are properly canonicalized before read into the VFS.
         FullPath = canonicalize(FullPath);
         ExternalContentsPath = FullPath.str();
-      } else if (Key == "use-external-name") {
-        bool Val;
-        if (!parseScalarBool(I.getValue(), Val))
-          return nullptr;
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "use-external-name") {
+        തർക്കം Val;
+        എങ്കിൽ (!parseScalarBool(I.get_മൂല്യം(), Val))
+          തിരികെ nullptr;
         UseExternalName = Val ? RedirectingFileSystem::NK_External
                               : RedirectingFileSystem::NK_Virtual;
-      } else {
+      } അല്ലെങ്കിൽ {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return nullptr;
+    എങ്കിൽ (Stream.failed())
+      തിരികെ nullptr;
 
     // check for missing keys
-    if (ContentsField == CF_NotSet) {
+    എങ്കിൽ (ContentsField == CF_NotSet) {
       error(N, "missing key 'contents' or 'external-contents'");
-      return nullptr;
+      തിരികെ nullptr;
     }
-    if (!checkMissingKeys(N, Keys))
-      return nullptr;
+    എങ്കിൽ (!check_Missing_താക്കോലുകൾ(N, താക്കോലുകൾ_2))
+      തിരികെ nullptr;
 
     // check invalid configuration
-    if (Kind == RedirectingFileSystem::EK_Directory &&
+    എങ്കിൽ (Kind == RedirectingFileSystem::EK_Directory &&
         UseExternalName != RedirectingFileSystem::NK_NotSet) {
       error(N, "'use-external-name' is not supported for 'directory' entries");
-      return nullptr;
+      തിരികെ nullptr;
     }
 
-    if (Kind == RedirectingFileSystem::EK_DirectoryRemap &&
+    എങ്കിൽ (Kind == RedirectingFileSystem::EK_DirectoryRemap &&
         ContentsField == CF_List) {
       error(N, "'contents' is not supported for 'directory-remap' entries");
-      return nullptr;
+      തിരികെ nullptr;
     }
 
     sys::path::Style path_style = sys::path::Style::native;
-    if (IsRootEntry) {
+    എങ്കിൽ (Is_വേര്_Entry) {
       // VFS root entries may be in either Posix or Windows style.  Figure out
       // which style we have, and use it consistently.
-      if (sys::path::is_absolute(Name, sys::path::Style::posix)) {
+      എങ്കിൽ (sys::path::is_absolute(Name, sys::path::Style::posix)) {
         path_style = sys::path::Style::posix;
-      } else if (sys::path::is_absolute(Name,
+      } അല്ലെങ്കിൽ എങ്കിൽ (sys::path::is_absolute(Name,
                                         sys::path::Style::windows_backslash)) {
         path_style = sys::path::Style::windows_backslash;
-      } else {
+      } അല്ലെങ്കിൽ {
         // Relative VFS root entries are made absolute to either the overlay
         // directory, or the current working directory, then we can determine
         // the path style from that.
         std::error_code EC;
-        if (FS->RootRelative ==
-            RedirectingFileSystem::RootRelativeKind::OverlayDir) {
+        എങ്കിൽ (FS->വേര്_Relative ==
+            RedirectingFileSystem::വേര്_Relative_Kind::OverlayDir) {
           StringRef FullPath = FS->getOverlayFileDir();
-          assert(!FullPath.empty() && "Overlay file directory must exist");
+          പ്രതിജ്ഞാ(!FullPath.empty() && "Overlay file directory must exist");
           EC = FS->makeAbsolute(FullPath, Name);
           Name = canonicalize(Name);
-        } else {
+        } അല്ലെങ്കിൽ {
           EC = FS->makeAbsolute(Name);
         }
-        if (EC) {
-          assert(NameValueNode && "Name presence should be checked earlier");
+        എങ്കിൽ (EC) {
+          പ്രതിജ്ഞാ(Name_മൂല്യം_കണ്ണി && "Name presence should be checked earlier");
           error(
-              NameValueNode,
+              Name_മൂല്യം_കണ്ണി,
               "entry with relative path at the root level is not discoverable");
-          return nullptr;
+          തിരികെ nullptr;
         }
         path_style = sys::path::is_absolute(Name, sys::path::Style::posix)
                          ? sys::path::Style::posix
@@ -2037,15 +2037,15 @@ private:
       // is::path::is_absolute(Name, sys::path::Style::windows_backslash) will
       // return true even if `Name` is using forward slashes. Distinguish
       // between windows_backslash and windows_slash.
-      if (path_style == sys::path::Style::windows_backslash &&
+      എങ്കിൽ (path_style == sys::path::Style::windows_backslash &&
           getExistingStyle(Name) != sys::path::Style::windows_backslash)
         path_style = sys::path::Style::windows_slash;
     }
 
     // Remove trailing slash(es), being careful not to remove the root path
     StringRef Trimmed = Name;
-    size_t RootPathLen = sys::path::root_path(Trimmed, path_style).size();
-    while (Trimmed.size() > RootPathLen &&
+    size_t വേര്_Path_Len = sys::path::വേര്_path(Trimmed, path_style).size();
+    ആകുമ്പോൾ (Trimmed.size() > വേര്_Path_Len &&
            sys::path::is_separator(Trimmed.back(), path_style))
       Trimmed = Trimmed.slice(0, Trimmed.size() - 1);
 
@@ -2053,196 +2053,196 @@ private:
     StringRef LastComponent = sys::path::filename(Trimmed, path_style);
 
     std::unique_ptr<RedirectingFileSystem::Entry> Result;
-    switch (Kind) {
-    case RedirectingFileSystem::EK_File:
+    തിരഞ്ഞെടുപ്പ് (Kind) {
+    അവസ്ഥ RedirectingFileSystem::EK_File:
       Result = std::make_unique<RedirectingFileSystem::FileEntry>(
           LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_DirectoryRemap:
+      നിർത്തുക;
+    അവസ്ഥ RedirectingFileSystem::EK_DirectoryRemap:
       Result = std::make_unique<RedirectingFileSystem::DirectoryRemapEntry>(
           LastComponent, std::move(ExternalContentsPath), UseExternalName);
-      break;
-    case RedirectingFileSystem::EK_Directory:
+      നിർത്തുക;
+    അവസ്ഥ RedirectingFileSystem::EK_Directory:
       Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
           LastComponent, std::move(EntryArrayContents),
           Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
-      break;
+      നിർത്തുക;
     }
 
     StringRef Parent = sys::path::parent_path(Trimmed, path_style);
-    if (Parent.empty())
-      return Result;
+    എങ്കിൽ (Parent.empty())
+      തിരികെ Result;
 
     // if 'name' contains multiple components, create implicit directory entries
-    for (sys::path::reverse_iterator I = sys::path::rbegin(Parent, path_style),
+    വേണ്ടി (sys::path::reverse_iterator I = sys::path::rbegin(Parent, path_style),
                                      E = sys::path::rend(Parent);
          I != E; ++I) {
       std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> Entries;
-      Entries.push_back(std::move(Result));
+      Entries.തള്ളുക_back(std::move(Result));
       Result = std::make_unique<RedirectingFileSystem::DirectoryEntry>(
           *I, std::move(Entries),
           Status("", getNextVirtualUniqueID(), std::chrono::system_clock::now(),
                  0, 0, 0, file_type::directory_file, sys::fs::all_all));
     }
-    return Result;
+    തിരികെ Result;
   }
 
-public:
+പൊതു:
   RedirectingFileSystemParser(yaml::Stream &S) : Stream(S) {}
 
   // false on error
-  bool parse(yaml::Node *Root, RedirectingFileSystem *FS) {
-    auto *Top = dyn_cast<yaml::MappingNode>(Root);
-    if (!Top) {
-      error(Root, "expected mapping node");
-      return false;
+  തർക്കം parse(yaml::കണ്ണി *വേര്_2, RedirectingFileSystem *FS) {
+    auto *മുകൾ = dyn_cast<yaml::Mapping_കണ്ണി>(വേര്_2);
+    എങ്കിൽ (!മുകൾ) {
+      error(വേര്_2, "expected mapping node");
+      തിരികെ അസത്യം;
     }
 
-    KeyStatusPair Fields[] = {
-        KeyStatusPair("version", true),
-        KeyStatusPair("case-sensitive", false),
-        KeyStatusPair("use-external-names", false),
-        KeyStatusPair("root-relative", false),
-        KeyStatusPair("overlay-relative", false),
-        KeyStatusPair("fallthrough", false),
-        KeyStatusPair("redirecting-with", false),
-        KeyStatusPair("roots", true),
+    താക്കോൽ_Status_Pair Fields[] = {
+        താക്കോൽ_Status_Pair("version", സത്യം),
+        താക്കോൽ_Status_Pair("case-sensitive", അസത്യം),
+        താക്കോൽ_Status_Pair("use-external-names", അസത്യം),
+        താക്കോൽ_Status_Pair("root-relative", അസത്യം),
+        താക്കോൽ_Status_Pair("overlay-relative", അസത്യം),
+        താക്കോൽ_Status_Pair("fallthrough", അസത്യം),
+        താക്കോൽ_Status_Pair("redirecting-with", അസത്യം),
+        താക്കോൽ_Status_Pair("roots", സത്യം),
     };
 
-    DenseMap<StringRef, KeyStatus> Keys(std::begin(Fields), std::end(Fields));
-    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> RootEntries;
+    DenseMap<StringRef, താക്കോൽ_Status> താക്കോലുകൾ_2(std::begin(Fields), std::end(Fields));
+    std::vector<std::unique_ptr<RedirectingFileSystem::Entry>> വേര്_Entries;
 
     // Parse configuration and 'roots'
-    for (auto &I : *Top) {
-      SmallString<10> KeyBuffer;
-      StringRef Key;
-      if (!parseScalarString(I.getKey(), Key, KeyBuffer))
-        return false;
+    വേണ്ടി (auto &I : *മുകൾ) {
+      SmallString<10> താക്കോൽ_Buffer;
+      StringRef താക്കോൽ;
+      എങ്കിൽ (!parseScalarString(I.get_താക്കോൽ(), താക്കോൽ, താക്കോൽ_Buffer))
+        തിരികെ അസത്യം;
 
-      if (!checkDuplicateOrUnknownKey(I.getKey(), Key, Keys))
-        return false;
+      എങ്കിൽ (!check_Duplicate_Or_Unknown_താക്കോൽ(I.get_താക്കോൽ(), താക്കോൽ, താക്കോലുകൾ_2))
+        തിരികെ അസത്യം;
 
-      if (Key == "roots") {
-        auto *Roots = dyn_cast_if_present<yaml::SequenceNode>(I.getValue());
-        if (!Roots) {
-          error(I.getValue(), "expected array");
-          return false;
+      എങ്കിൽ (താക്കോൽ == "roots") {
+        auto *Roots = dyn_cast_if_present<yaml::Sequence_കണ്ണി>(I.get_മൂല്യം());
+        എങ്കിൽ (!Roots) {
+          error(I.get_മൂല്യം(), "expected array");
+          തിരികെ അസത്യം;
         }
 
-        for (auto &I : *Roots) {
-          if (std::unique_ptr<RedirectingFileSystem::Entry> E =
-                  parseEntry(&I, FS, /*IsRootEntry*/ true))
-            RootEntries.push_back(std::move(E));
-          else
-            return false;
+        വേണ്ടി (auto &I : *Roots) {
+          എങ്കിൽ (std::unique_ptr<RedirectingFileSystem::Entry> E =
+                  parseEntry(&I, FS, /*IsRootEntry*/ സത്യം))
+            വേര്_Entries.തള്ളുക_back(std::move(E));
+          അല്ലെങ്കിൽ
+            തിരികെ അസത്യം;
         }
-      } else if (Key == "version") {
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "version") {
         StringRef VersionString;
         SmallString<4> Storage;
-        if (!parseScalarString(I.getValue(), VersionString, Storage))
-          return false;
-        int Version;
-        if (VersionString.getAsInteger<int>(10, Version)) {
-          error(I.getValue(), "expected integer");
-          return false;
+        എങ്കിൽ (!parseScalarString(I.get_മൂല്യം(), VersionString, Storage))
+          തിരികെ അസത്യം;
+        പൂർണ്ണസംഖ്യ Version;
+        എങ്കിൽ (VersionString.getAsInteger<പൂർണ്ണസംഖ്യ>(10, Version)) {
+          error(I.get_മൂല്യം(), "expected integer");
+          തിരികെ അസത്യം;
         }
-        if (Version < 0) {
-          error(I.getValue(), "invalid version number");
-          return false;
+        എങ്കിൽ (Version < 0) {
+          error(I.get_മൂല്യം(), "invalid version number");
+          തിരികെ അസത്യം;
         }
-        if (Version != 0) {
-          error(I.getValue(), "version mismatch, expected 0");
-          return false;
+        എങ്കിൽ (Version != 0) {
+          error(I.get_മൂല്യം(), "version mismatch, expected 0");
+          തിരികെ അസത്യം;
         }
-      } else if (Key == "case-sensitive") {
-        if (!parseScalarBool(I.getValue(), FS->CaseSensitive))
-          return false;
-      } else if (Key == "overlay-relative") {
-        if (!parseScalarBool(I.getValue(), FS->IsRelativeOverlay))
-          return false;
-      } else if (Key == "use-external-names") {
-        if (!parseScalarBool(I.getValue(), FS->UseExternalNames))
-          return false;
-      } else if (Key == "fallthrough") {
-        if (Keys["redirecting-with"].Seen) {
-          error(I.getValue(),
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "case-sensitive") {
+        എങ്കിൽ (!parseScalarBool(I.get_മൂല്യം(), FS->CaseSensitive))
+          തിരികെ അസത്യം;
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "overlay-relative") {
+        എങ്കിൽ (!parseScalarBool(I.get_മൂല്യം(), FS->IsRelativeOverlay))
+          തിരികെ അസത്യം;
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "use-external-names") {
+        എങ്കിൽ (!parseScalarBool(I.get_മൂല്യം(), FS->UseExternalNames))
+          തിരികെ അസത്യം;
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "fallthrough") {
+        എങ്കിൽ (താക്കോലുകൾ_2["redirecting-with"].Seen) {
+          error(I.get_മൂല്യം(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          തിരികെ അസത്യം;
         }
 
-        bool ShouldFallthrough = false;
-        if (!parseScalarBool(I.getValue(), ShouldFallthrough))
-          return false;
+        തർക്കം ShouldFallthrough = അസത്യം;
+        എങ്കിൽ (!parseScalarBool(I.get_മൂല്യം(), ShouldFallthrough))
+          തിരികെ അസത്യം;
 
-        if (ShouldFallthrough) {
+        എങ്കിൽ (ShouldFallthrough) {
           FS->Redirection = RedirectingFileSystem::RedirectKind::Fallthrough;
-        } else {
+        } അല്ലെങ്കിൽ {
           FS->Redirection = RedirectingFileSystem::RedirectKind::RedirectOnly;
         }
-      } else if (Key == "redirecting-with") {
-        if (Keys["fallthrough"].Seen) {
-          error(I.getValue(),
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "redirecting-with") {
+        എങ്കിൽ (താക്കോലുകൾ_2["fallthrough"].Seen) {
+          error(I.get_മൂല്യം(),
                 "'fallthrough' and 'redirecting-with' are mutually exclusive");
-          return false;
+          തിരികെ അസത്യം;
         }
 
-        if (auto Kind = parseRedirectKind(I.getValue())) {
+        എങ്കിൽ (auto Kind = parseRedirectKind(I.get_മൂല്യം())) {
           FS->Redirection = *Kind;
-        } else {
-          error(I.getValue(), "expected valid redirect kind");
-          return false;
+        } അല്ലെങ്കിൽ {
+          error(I.get_മൂല്യം(), "expected valid redirect kind");
+          തിരികെ അസത്യം;
         }
-      } else if (Key == "root-relative") {
-        if (auto Kind = parseRootRelativeKind(I.getValue())) {
-          FS->RootRelative = *Kind;
-        } else {
-          error(I.getValue(), "expected valid root-relative kind");
-          return false;
+      } അല്ലെങ്കിൽ എങ്കിൽ (താക്കോൽ == "root-relative") {
+        എങ്കിൽ (auto Kind = parse_വേര്_Relative_Kind(I.get_മൂല്യം())) {
+          FS->വേര്_Relative = *Kind;
+        } അല്ലെങ്കിൽ {
+          error(I.get_മൂല്യം(), "expected valid root-relative kind");
+          തിരികെ അസത്യം;
         }
-      } else {
+      } അല്ലെങ്കിൽ {
         llvm_unreachable("key missing from Keys");
       }
     }
 
-    if (Stream.failed())
-      return false;
+    എങ്കിൽ (Stream.failed())
+      തിരികെ അസത്യം;
 
-    if (!checkMissingKeys(Top, Keys))
-      return false;
+    എങ്കിൽ (!check_Missing_താക്കോലുകൾ(മുകൾ, താക്കോലുകൾ_2))
+      തിരികെ അസത്യം;
 
     // Now that we sucessefully parsed the YAML file, canonicalize the internal
     // representation to a proper directory tree so that we can search faster
     // inside the VFS.
-    for (auto &E : RootEntries)
-      uniqueOverlayTree(FS, E.get());
+    വേണ്ടി (auto &E : വേര്_Entries)
+      unique_Overlay_വൃക്ഷം(FS, E.get());
 
-    return true;
+    തിരികെ സത്യം;
   }
 };
 
 std::unique_ptr<RedirectingFileSystem>
 RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
                               SourceMgr::DiagHandlerTy DiagHandler,
-                              StringRef YAMLFilePath, void *DiagContext,
+                              StringRef YAMLFilePath, ശൂന്യം *DiagContext,
                               IntrusiveRefCntPtr<FileSystem> ExternalFS) {
   SourceMgr SM;
   yaml::Stream Stream(Buffer->getMemBufferRef(), SM);
 
   SM.setDiagHandler(DiagHandler, DiagContext);
   yaml::document_iterator DI = Stream.begin();
-  yaml::Node *Root = DI->getRoot();
-  if (DI == Stream.end() || !Root) {
+  yaml::കണ്ണി *വേര്_2 = DI->get_വേര്();
+  എങ്കിൽ (DI == Stream.end() || !വേര്_2) {
     SM.PrintMessage(SMLoc(), SourceMgr::DK_Error, "expected root node");
-    return nullptr;
+    തിരികെ nullptr;
   }
 
   RedirectingFileSystemParser P(Stream);
 
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
+      പുതിയ RedirectingFileSystem(ExternalFS));
 
-  if (!YAMLFilePath.empty()) {
+  എങ്കിൽ (!YAMLFilePath.empty()) {
     // Use the YAML path from -ivfsoverlay to compute the dir to be prefixed
     // to each 'external-contents' path.
     //
@@ -2253,55 +2253,55 @@ RedirectingFileSystem::create(std::unique_ptr<MemoryBuffer> Buffer,
     //
     SmallString<256> OverlayAbsDir = sys::path::parent_path(YAMLFilePath);
     std::error_code EC = FS->makeAbsolute(OverlayAbsDir);
-    assert(!EC && "Overlay dir final path must be absolute");
-    (void)EC;
+    പ്രതിജ്ഞാ(!EC && "Overlay dir final path must be absolute");
+    (ശൂന്യം)EC;
     FS->setOverlayFileDir(OverlayAbsDir);
   }
 
-  if (!P.parse(Root, FS.get()))
-    return nullptr;
+  എങ്കിൽ (!P.parse(വേര്_2, FS.get()))
+    തിരികെ nullptr;
 
-  return FS;
+  തിരികെ FS;
 }
 
 std::unique_ptr<RedirectingFileSystem> RedirectingFileSystem::create(
     ArrayRef<std::pair<std::string, std::string>> RemappedFiles,
-    bool UseExternalNames, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
+    തർക്കം UseExternalNames, llvm::IntrusiveRefCntPtr<FileSystem> ExternalFS) {
   std::unique_ptr<RedirectingFileSystem> FS(
-      new RedirectingFileSystem(ExternalFS));
+      പുതിയ RedirectingFileSystem(ExternalFS));
   FS->UseExternalNames = UseExternalNames;
 
   StringMap<RedirectingFileSystem::Entry *> Entries;
 
-  for (auto &Mapping : llvm::reverse(RemappedFiles)) {
+  വേണ്ടി (auto &Mapping : llvm::reverse(RemappedFiles)) {
     SmallString<128> From = StringRef(Mapping.first);
     SmallString<128> To = StringRef(Mapping.second);
     {
       auto EC = ExternalFS->makeAbsolute(From);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      (ശൂന്യം)EC;
+      പ്രതിജ്ഞാ(!EC && "Could not make absolute path");
     }
 
     // Check if we've already mapped this file. The first one we see (in the
     // reverse iteration) wins.
     RedirectingFileSystem::Entry *&ToEntry = Entries[From];
-    if (ToEntry)
-      continue;
+    എങ്കിൽ (ToEntry)
+      തുടരുക;
 
     // Add parent directories.
     RedirectingFileSystem::Entry *Parent = nullptr;
     StringRef FromDirectory = llvm::sys::path::parent_path(From);
-    for (auto I = llvm::sys::path::begin(FromDirectory),
+    വേണ്ടി (auto I = llvm::sys::path::begin(FromDirectory),
               E = llvm::sys::path::end(FromDirectory);
          I != E; ++I) {
       Parent = RedirectingFileSystemParser::lookupOrCreateEntry(FS.get(), *I,
                                                                 Parent);
     }
-    assert(Parent && "File without a directory?");
+    പ്രതിജ്ഞാ(Parent && "File without a directory?");
     {
       auto EC = ExternalFS->makeAbsolute(To);
-      (void)EC;
-      assert(!EC && "Could not make absolute path");
+      (ശൂന്യം)EC;
+      പ്രതിജ്ഞാ(!EC && "Could not make absolute path");
     }
 
     // Add the file.
@@ -2314,17 +2314,17 @@ std::unique_ptr<RedirectingFileSystem> RedirectingFileSystem::create(
         std::move(NewFile));
   }
 
-  return FS;
+  തിരികെ FS;
 }
 
 RedirectingFileSystem::LookupResult::LookupResult(
     Entry *E, sys::path::const_iterator Start, sys::path::const_iterator End)
     : E(E) {
-  assert(E != nullptr);
+  പ്രതിജ്ഞാ(E != nullptr);
   // If the matched entry is a DirectoryRemapEntry, set ExternalRedirect to the
   // path of the directory it maps to in the external file system plus any
   // remaining path components in the provided iterator.
-  if (auto *DRE = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(E)) {
+  എങ്കിൽ (auto *DRE = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(E)) {
     SmallString<256> Redirect(DRE->getExternalContentsPath());
     sys::path::append(Redirect, Start, End,
                       getExistingStyle(DRE->getExternalContentsPath()));
@@ -2332,556 +2332,556 @@ RedirectingFileSystem::LookupResult::LookupResult(
   }
 }
 
-void RedirectingFileSystem::LookupResult::getPath(
-    llvm::SmallVectorImpl<char> &Result) const {
+ശൂന്യം RedirectingFileSystem::LookupResult::getPath(
+    llvm::SmallVectorImpl<അക്ഷരം> &Result) സ്ഥിരം {
   Result.clear();
-  for (Entry *Parent : Parents)
+  വേണ്ടി (Entry *Parent : Parents)
     llvm::sys::path::append(Result, Parent->getName());
   llvm::sys::path::append(Result, E->getName());
 }
 
 std::error_code RedirectingFileSystem::makeCanonicalForLookup(
-    SmallVectorImpl<char> &Path) const {
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+    SmallVectorImpl<അക്ഷരം> &Path) സ്ഥിരം {
+  എങ്കിൽ (std::error_code EC = makeAbsolute(Path))
+    തിരികെ EC;
 
   llvm::SmallString<256> CanonicalPath =
       canonicalize(StringRef(Path.data(), Path.size()));
-  if (CanonicalPath.empty())
-    return make_error_code(llvm::errc::invalid_argument);
+  എങ്കിൽ (CanonicalPath.empty())
+    തിരികെ make_error_code(llvm::errc::invalid_argument);
 
   Path.assign(CanonicalPath.begin(), CanonicalPath.end());
-  return {};
+  തിരികെ {};
 }
 
 ErrorOr<RedirectingFileSystem::LookupResult>
-RedirectingFileSystem::lookupPath(StringRef Path) const {
+RedirectingFileSystem::lookupPath(StringRef Path) സ്ഥിരം {
   llvm::SmallString<128> CanonicalPath(Path);
-  if (std::error_code EC = makeCanonicalForLookup(CanonicalPath))
-    return EC;
+  എങ്കിൽ (std::error_code EC = makeCanonicalForLookup(CanonicalPath))
+    തിരികെ EC;
 
   // RedirectOnly means the VFS is always used.
-  if (UsageTrackingActive && Redirection == RedirectKind::RedirectOnly)
-    HasBeenUsed = true;
+  എങ്കിൽ (UsageTrackingActive && Redirection == RedirectKind::RedirectOnly)
+    HasBeenUsed = സത്യം;
 
   sys::path::const_iterator Start = sys::path::begin(CanonicalPath);
   sys::path::const_iterator End = sys::path::end(CanonicalPath);
   llvm::SmallVector<Entry *, 32> Entries;
-  for (const auto &Root : Roots) {
+  വേണ്ടി (സ്ഥിരം auto &വേര്_2 : Roots) {
     ErrorOr<RedirectingFileSystem::LookupResult> Result =
-        lookupPathImpl(Start, End, Root.get(), Entries);
-    if (UsageTrackingActive && Result && isa<RemapEntry>(Result->E))
-      HasBeenUsed = true;
-    if (Result) {
+        lookupPathImpl(Start, End, വേര്_2.get(), Entries);
+    എങ്കിൽ (UsageTrackingActive && Result && isa<RemapEntry>(Result->E))
+      HasBeenUsed = സത്യം;
+    എങ്കിൽ (Result) {
       Result->Parents = std::move(Entries);
-      return Result;
+      തിരികെ Result;
     }
 
-    if (Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
+    എങ്കിൽ (Result.getError() != llvm::errc::no_such_file_or_directory)
+      തിരികെ Result;
   }
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  തിരികെ make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
 ErrorOr<RedirectingFileSystem::LookupResult>
 RedirectingFileSystem::lookupPathImpl(
     sys::path::const_iterator Start, sys::path::const_iterator End,
     RedirectingFileSystem::Entry *From,
-    llvm::SmallVectorImpl<Entry *> &Entries) const {
-  assert(!isTraversalComponent(*Start) &&
+    llvm::SmallVectorImpl<Entry *> &Entries) സ്ഥിരം {
+  പ്രതിജ്ഞാ(!isTraversalComponent(*Start) &&
          !isTraversalComponent(From->getName()) &&
          "Paths should not contain traversal components");
 
   StringRef FromName = From->getName();
 
   // Forward the search to the next component in case this is an empty one.
-  if (!FromName.empty()) {
-    if (!pathComponentMatches(*Start, FromName))
-      return make_error_code(llvm::errc::no_such_file_or_directory);
+  എങ്കിൽ (!FromName.empty()) {
+    എങ്കിൽ (!pathComponentMatches(*Start, FromName))
+      തിരികെ make_error_code(llvm::errc::no_such_file_or_directory);
 
     ++Start;
 
-    if (Start == End) {
+    എങ്കിൽ (Start == End) {
       // Match!
-      return LookupResult(From, Start, End);
+      തിരികെ LookupResult(From, Start, End);
     }
   }
 
-  if (isa<RedirectingFileSystem::FileEntry>(From))
-    return make_error_code(llvm::errc::not_a_directory);
+  എങ്കിൽ (isa<RedirectingFileSystem::FileEntry>(From))
+    തിരികെ make_error_code(llvm::errc::not_a_directory);
 
-  if (isa<RedirectingFileSystem::DirectoryRemapEntry>(From))
-    return LookupResult(From, Start, End);
+  എങ്കിൽ (isa<RedirectingFileSystem::DirectoryRemapEntry>(From))
+    തിരികെ LookupResult(From, Start, End);
 
   auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(From);
-  for (const std::unique_ptr<RedirectingFileSystem::Entry> &DirEntry :
+  വേണ്ടി (സ്ഥിരം std::unique_ptr<RedirectingFileSystem::Entry> &DirEntry :
        llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-    Entries.push_back(From);
+    Entries.തള്ളുക_back(From);
     ErrorOr<RedirectingFileSystem::LookupResult> Result =
         lookupPathImpl(Start, End, DirEntry.get(), Entries);
-    if (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
-      return Result;
-    Entries.pop_back();
+    എങ്കിൽ (Result || Result.getError() != llvm::errc::no_such_file_or_directory)
+      തിരികെ Result;
+    Entries.എടുക്കുക_back();
   }
 
-  return make_error_code(llvm::errc::no_such_file_or_directory);
+  തിരികെ make_error_code(llvm::errc::no_such_file_or_directory);
 }
 
-static Status getRedirectedFileStatus(const Twine &OriginalPath,
-                                      bool UseExternalNames,
+സ്ഥിതം Status getRedirectedFileStatus(സ്ഥിരം Twine &OriginalPath,
+                                      തർക്കം UseExternalNames,
                                       Status ExternalStatus) {
   // The path has been mapped by some nested VFS and exposes an external path,
   // don't override it with the original path.
-  if (ExternalStatus.ExposesExternalVFSPath)
-    return ExternalStatus;
+  എങ്കിൽ (ExternalStatus.ExposesExternalVFSPath)
+    തിരികെ ExternalStatus;
 
   Status S = ExternalStatus;
-  if (!UseExternalNames)
+  എങ്കിൽ (!UseExternalNames)
     S = Status::copyWithNewName(S, OriginalPath);
-  else
-    S.ExposesExternalVFSPath = true;
-  return S;
+  അല്ലെങ്കിൽ
+    S.ExposesExternalVFSPath = സത്യം;
+  തിരികെ S;
 }
 
 ErrorOr<Status> RedirectingFileSystem::status(
-    const Twine &LookupPath, const Twine &OriginalPath,
-    const RedirectingFileSystem::LookupResult &Result) {
-  if (std::optional<StringRef> ExtRedirect = Result.getExternalRedirect()) {
+    സ്ഥിരം Twine &LookupPath, സ്ഥിരം Twine &OriginalPath,
+    സ്ഥിരം RedirectingFileSystem::LookupResult &Result) {
+  എങ്കിൽ (std::optional<StringRef> ExtRedirect = Result.getExternalRedirect()) {
     SmallString<256> RemappedPath((*ExtRedirect).str());
-    if (std::error_code EC = makeAbsolute(RemappedPath))
-      return EC;
+    എങ്കിൽ (std::error_code EC = makeAbsolute(RemappedPath))
+      തിരികെ EC;
 
     ErrorOr<Status> S = ExternalFS->status(RemappedPath);
-    if (!S)
-      return S;
+    എങ്കിൽ (!S)
+      തിരികെ S;
     S = Status::copyWithNewName(*S, *ExtRedirect);
     auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result.E);
-    return getRedirectedFileStatus(OriginalPath,
+    തിരികെ getRedirectedFileStatus(OriginalPath,
                                    RE->useExternalName(UseExternalNames), *S);
   }
 
   auto *DE = cast<RedirectingFileSystem::DirectoryEntry>(Result.E);
-  return Status::copyWithNewName(DE->getStatus(), LookupPath);
+  തിരികെ Status::copyWithNewName(DE->getStatus(), LookupPath);
 }
 
 ErrorOr<Status>
-RedirectingFileSystem::getExternalStatus(const Twine &LookupPath,
-                                         const Twine &OriginalPath) const {
+RedirectingFileSystem::getExternalStatus(സ്ഥിരം Twine &LookupPath,
+                                         സ്ഥിരം Twine &OriginalPath) സ്ഥിരം {
   auto Result = ExternalFS->status(LookupPath);
 
   // The path has been mapped by some nested VFS, don't override it with the
   // original path.
-  if (!Result || Result->ExposesExternalVFSPath)
-    return Result;
-  return Status::copyWithNewName(Result.get(), OriginalPath);
+  എങ്കിൽ (!Result || Result->ExposesExternalVFSPath)
+    തിരികെ Result;
+  തിരികെ Status::copyWithNewName(Result.get(), OriginalPath);
 }
 
-ErrorOr<Status> RedirectingFileSystem::status(const Twine &OriginalPath) {
+ErrorOr<Status> RedirectingFileSystem::status(സ്ഥിരം Twine &OriginalPath) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  എങ്കിൽ (std::error_code EC = makeAbsolute(Path))
+    തിരികെ EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  എങ്കിൽ (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
     ErrorOr<Status> S = getExternalStatus(Path, OriginalPath);
-    if (S)
-      return S;
+    എങ്കിൽ (S)
+      തിരികെ S;
   }
 
   ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  എങ്കിൽ (!Result) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
+    എങ്കിൽ (Redirection == RedirectKind::Fallthrough &&
         isFileNotFound(Result.getError()))
-      return getExternalStatus(Path, OriginalPath);
-    return Result.getError();
+      തിരികെ getExternalStatus(Path, OriginalPath);
+    തിരികെ Result.getError();
   }
 
   ErrorOr<Status> S = status(Path, OriginalPath, *Result);
-  if (!S && Redirection == RedirectKind::Fallthrough &&
+  എങ്കിൽ (!S && Redirection == RedirectKind::Fallthrough &&
       isFileNotFound(S.getError(), Result->E)) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return getExternalStatus(Path, OriginalPath);
+    തിരികെ getExternalStatus(Path, OriginalPath);
   }
 
-  return S;
+  തിരികെ S;
 }
 
-bool RedirectingFileSystem::exists(const Twine &OriginalPath) {
+തർക്കം RedirectingFileSystem::exists(സ്ഥിരം Twine &OriginalPath) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (makeAbsolute(Path))
-    return false;
+  എങ്കിൽ (makeAbsolute(Path))
+    തിരികെ അസത്യം;
 
-  if (Redirection == RedirectKind::Fallback) {
+  എങ്കിൽ (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
-    if (ExternalFS->exists(Path))
-      return true;
+    എങ്കിൽ (ExternalFS->exists(Path))
+      തിരികെ സത്യം;
   }
 
   ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  എങ്കിൽ (!Result) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
+    എങ്കിൽ (Redirection == RedirectKind::Fallthrough &&
         isFileNotFound(Result.getError()))
-      return ExternalFS->exists(Path);
-    return false;
+      തിരികെ ExternalFS->exists(Path);
+    തിരികെ അസത്യം;
   }
 
   std::optional<StringRef> ExtRedirect = Result->getExternalRedirect();
-  if (!ExtRedirect) {
-    assert(isa<RedirectingFileSystem::DirectoryEntry>(Result->E));
-    return true;
+  എങ്കിൽ (!ExtRedirect) {
+    പ്രതിജ്ഞാ(isa<RedirectingFileSystem::DirectoryEntry>(Result->E));
+    തിരികെ സത്യം;
   }
 
   SmallString<256> RemappedPath((*ExtRedirect).str());
-  if (makeAbsolute(RemappedPath))
-    return false;
+  എങ്കിൽ (makeAbsolute(RemappedPath))
+    തിരികെ അസത്യം;
 
-  if (ExternalFS->exists(RemappedPath))
-    return true;
+  എങ്കിൽ (ExternalFS->exists(RemappedPath))
+    തിരികെ സത്യം;
 
-  if (Redirection == RedirectKind::Fallthrough) {
+  എങ്കിൽ (Redirection == RedirectKind::Fallthrough) {
     // Mapped the file but it wasn't found in the underlying filesystem,
     // fallthrough to using the original path if that was the specified
     // redirection type.
-    return ExternalFS->exists(Path);
+    തിരികെ ExternalFS->exists(Path);
   }
 
-  return false;
+  തിരികെ അസത്യം;
 }
 
-namespace {
+നാമാകാശ {
 
 /// Provide a file wrapper with an overriden status.
-class FileWithFixedStatus : public File {
+വർഗ്ഗം FileWithFixedStatus : പൊതു File {
   std::unique_ptr<File> InnerFile;
   Status S;
 
-public:
+പൊതു:
   FileWithFixedStatus(std::unique_ptr<File> InnerFile, Status S)
       : InnerFile(std::move(InnerFile)), S(std::move(S)) {}
 
-  ErrorOr<Status> status() override { return S; }
+  ErrorOr<Status> status() override { തിരികെ S; }
   ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
 
-  getBuffer(const Twine &Name, int64_t FileSize, bool RequiresNullTerminator,
-            bool IsVolatile) override {
-    return InnerFile->getBuffer(Name, FileSize, RequiresNullTerminator,
+  getBuffer(സ്ഥിരം Twine &Name, int64_t FileSize, തർക്കം RequiresNullTerminator,
+            തർക്കം IsVolatile) override {
+    തിരികെ InnerFile->getBuffer(Name, FileSize, RequiresNullTerminator,
                                 IsVolatile);
   }
 
-  std::error_code close() override { return InnerFile->close(); }
+  std::error_code close() override { തിരികെ InnerFile->close(); }
 
-  void setPath(const Twine &Path) override { S = S.copyWithNewName(S, Path); }
+  ശൂന്യം setPath(സ്ഥിരം Twine &Path) override { S = S.copyWithNewName(S, Path); }
 };
 
 } // namespace
 
 ErrorOr<std::unique_ptr<File>>
-File::getWithPath(ErrorOr<std::unique_ptr<File>> Result, const Twine &P) {
+File::getWithPath(ErrorOr<std::unique_ptr<File>> Result, സ്ഥിരം Twine &P) {
   // See \c getRedirectedFileStatus - don't update path if it's exposing an
   // external path.
-  if (!Result || (*Result)->status()->ExposesExternalVFSPath)
-    return Result;
+  എങ്കിൽ (!Result || (*Result)->status()->ExposesExternalVFSPath)
+    തിരികെ Result;
 
   ErrorOr<std::unique_ptr<File>> F = std::move(*Result);
   auto Name = F->get()->getName();
-  if (Name && Name.get() != P.str())
+  എങ്കിൽ (Name && Name.get() != P.str())
     F->get()->setPath(P);
-  return F;
+  തിരികെ F;
 }
 
 ErrorOr<std::unique_ptr<File>>
-RedirectingFileSystem::openFileForRead(const Twine &OriginalPath) {
+RedirectingFileSystem::openFileForRead(സ്ഥിരം Twine &OriginalPath) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  എങ്കിൽ (std::error_code EC = makeAbsolute(Path))
+    തിരികെ EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  എങ്കിൽ (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
     auto F = File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    if (F)
-      return F;
+    എങ്കിൽ (F)
+      തിരികെ F;
   }
 
   ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  എങ്കിൽ (!Result) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
+    എങ്കിൽ (Redirection == RedirectKind::Fallthrough &&
         isFileNotFound(Result.getError()))
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
-    return Result.getError();
+      തിരികെ File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+    തിരികെ Result.getError();
   }
 
-  if (!Result->getExternalRedirect()) // FIXME: errc::not_a_file?
-    return make_error_code(llvm::errc::invalid_argument);
+  എങ്കിൽ (!Result->getExternalRedirect()) // FIXME: errc::not_a_file?
+    തിരികെ make_error_code(llvm::errc::invalid_argument);
 
   StringRef ExtRedirect = *Result->getExternalRedirect();
   SmallString<256> RemappedPath(ExtRedirect.str());
-  if (std::error_code EC = makeAbsolute(RemappedPath))
-    return EC;
+  എങ്കിൽ (std::error_code EC = makeAbsolute(RemappedPath))
+    തിരികെ EC;
 
   auto *RE = cast<RedirectingFileSystem::RemapEntry>(Result->E);
 
   auto ExternalFile =
       File::getWithPath(ExternalFS->openFileForRead(RemappedPath), ExtRedirect);
-  if (!ExternalFile) {
-    if (Redirection == RedirectKind::Fallthrough &&
+  എങ്കിൽ (!ExternalFile) {
+    എങ്കിൽ (Redirection == RedirectKind::Fallthrough &&
         isFileNotFound(ExternalFile.getError(), Result->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
+      തിരികെ File::getWithPath(ExternalFS->openFileForRead(Path), OriginalPath);
     }
-    return ExternalFile;
+    തിരികെ ExternalFile;
   }
 
   auto ExternalStatus = (*ExternalFile)->status();
-  if (!ExternalStatus)
-    return ExternalStatus.getError();
+  എങ്കിൽ (!ExternalStatus)
+    തിരികെ ExternalStatus.getError();
 
   // Otherwise, the file was successfully remapped. Mark it as such. Also
   // replace the underlying path if the external name is being used.
   Status S = getRedirectedFileStatus(
       OriginalPath, RE->useExternalName(UseExternalNames), *ExternalStatus);
-  return std::unique_ptr<File>(
+  തിരികെ std::unique_ptr<File>(
       std::make_unique<FileWithFixedStatus>(std::move(*ExternalFile), S));
 }
 
 std::error_code
-RedirectingFileSystem::getRealPath(const Twine &OriginalPath,
-                                   SmallVectorImpl<char> &Output) {
+RedirectingFileSystem::getRealPath(സ്ഥിരം Twine &OriginalPath,
+                                   SmallVectorImpl<അക്ഷരം> &Output) {
   SmallString<256> Path;
   OriginalPath.toVector(Path);
 
-  if (std::error_code EC = makeAbsolute(Path))
-    return EC;
+  എങ്കിൽ (std::error_code EC = makeAbsolute(Path))
+    തിരികെ EC;
 
-  if (Redirection == RedirectKind::Fallback) {
+  എങ്കിൽ (Redirection == RedirectKind::Fallback) {
     // Attempt to find the original file first, only falling back to the
     // mapped file if that fails.
     std::error_code EC = ExternalFS->getRealPath(Path, Output);
-    if (!EC)
-      return EC;
+    എങ്കിൽ (!EC)
+      തിരികെ EC;
   }
 
   ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  എങ്കിൽ (!Result) {
     // Was not able to map file, fallthrough to using the original path if
     // that was the specified redirection type.
-    if (Redirection == RedirectKind::Fallthrough &&
+    എങ്കിൽ (Redirection == RedirectKind::Fallthrough &&
         isFileNotFound(Result.getError()))
-      return ExternalFS->getRealPath(Path, Output);
-    return Result.getError();
+      തിരികെ ExternalFS->getRealPath(Path, Output);
+    തിരികെ Result.getError();
   }
 
   // If we found FileEntry or DirectoryRemapEntry, look up the mapped
   // path in the external file system.
-  if (auto ExtRedirect = Result->getExternalRedirect()) {
+  എങ്കിൽ (auto ExtRedirect = Result->getExternalRedirect()) {
     auto P = ExternalFS->getRealPath(*ExtRedirect, Output);
-    if (P && Redirection == RedirectKind::Fallthrough &&
+    എങ്കിൽ (P && Redirection == RedirectKind::Fallthrough &&
         isFileNotFound(P, Result->E)) {
       // Mapped the file but it wasn't found in the underlying filesystem,
       // fallthrough to using the original path if that was the specified
       // redirection type.
-      return ExternalFS->getRealPath(Path, Output);
+      തിരികെ ExternalFS->getRealPath(Path, Output);
     }
-    return P;
+    തിരികെ P;
   }
 
   // We found a DirectoryEntry, which does not have a single external contents
   // path. Use the canonical virtual path.
-  if (Redirection == RedirectKind::Fallthrough) {
+  എങ്കിൽ (Redirection == RedirectKind::Fallthrough) {
     Result->getPath(Output);
-    return {};
+    തിരികെ {};
   }
-  return llvm::errc::invalid_argument;
+  തിരികെ llvm::errc::invalid_argument;
 }
 
-void RedirectingFileSystem::getDirectoryContentRealSources(
-    const Twine &Dir, SmallVectorImpl<std::string> &Out) {
+ശൂന്യം RedirectingFileSystem::getDirectoryContentRealSources(
+    സ്ഥിരം Twine &Dir, SmallVectorImpl<std::string> &Out) {
   SmallString<256> Path;
   Dir.toVector(Path);
 
-  if (makeAbsolute(Path))
-    return;
+  എങ്കിൽ (makeAbsolute(Path))
+    തിരികെ;
 
   // Fallthrough and Fallback both consult ExternalFS, differing only in order.
-  const bool ConsultsExternalFS = Redirection != RedirectKind::RedirectOnly;
+  സ്ഥിരം തർക്കം ConsultsExternalFS = Redirection != RedirectKind::RedirectOnly;
 
   ErrorOr<RedirectingFileSystem::LookupResult> Result = lookupPath(Path);
-  if (!Result) {
+  എങ്കിൽ (!Result) {
     // dir_begin() delegates entirely to ExternalFS.
-    if (ConsultsExternalFS)
+    എങ്കിൽ (ConsultsExternalFS)
       ExternalFS->getDirectoryContentRealSources(Path, Out);
-    return;
+    തിരികെ;
   }
 
-  switch (Result->E->getKind()) {
-  case EK_File:
-    return;
-  case EK_Directory:
+  തിരഞ്ഞെടുപ്പ് (Result->E->getKind()) {
+  അവസ്ഥ EK_File:
+    തിരികെ;
+  അവസ്ഥ EK_Directory:
     // The names come from the overlay, which has no location in ExternalFS.
-    break;
-  case EK_DirectoryRemap: {
+    നിർത്തുക;
+  അവസ്ഥ EK_DirectoryRemap: {
     // Make the target absolute as status() does, so a relative
     // 'external-contents' is not passed down raw.
     SmallString<256> RemappedPath(*Result->getExternalRedirect());
-    if (!makeAbsolute(RemappedPath))
+    എങ്കിൽ (!makeAbsolute(RemappedPath))
       ExternalFS->getDirectoryContentRealSources(RemappedPath, Out);
-    break;
+    നിർത്തുക;
   }
   }
 
   // dir_begin() also iterates the original path in ExternalFS.
-  if (ConsultsExternalFS)
+  എങ്കിൽ (ConsultsExternalFS)
     ExternalFS->getDirectoryContentRealSources(Path, Out);
 }
 
 std::unique_ptr<FileSystem>
 vfs::getVFSFromYAML(std::unique_ptr<MemoryBuffer> Buffer,
                     SourceMgr::DiagHandlerTy DiagHandler,
-                    StringRef YAMLFilePath, void *DiagContext,
+                    StringRef YAMLFilePath, ശൂന്യം *DiagContext,
                     IntrusiveRefCntPtr<FileSystem> ExternalFS) {
-  return RedirectingFileSystem::create(std::move(Buffer), DiagHandler,
+  തിരികെ RedirectingFileSystem::create(std::move(Buffer), DiagHandler,
                                        YAMLFilePath, DiagContext,
                                        std::move(ExternalFS));
 }
 
-static void getVFSEntries(RedirectingFileSystem::Entry *SrcE,
+സ്ഥിതം ശൂന്യം getVFSEntries(RedirectingFileSystem::Entry *SrcE,
                           SmallVectorImpl<StringRef> &Path,
                           SmallVectorImpl<YAMLVFSEntry> &Entries) {
   auto Kind = SrcE->getKind();
-  if (Kind == RedirectingFileSystem::EK_Directory) {
+  എങ്കിൽ (Kind == RedirectingFileSystem::EK_Directory) {
     auto *DE = dyn_cast<RedirectingFileSystem::DirectoryEntry>(SrcE);
-    assert(DE && "Must be a directory");
-    for (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
+    പ്രതിജ്ഞാ(DE && "Must be a directory");
+    വേണ്ടി (std::unique_ptr<RedirectingFileSystem::Entry> &SubEntry :
          llvm::make_range(DE->contents_begin(), DE->contents_end())) {
-      Path.push_back(SubEntry->getName());
+      Path.തള്ളുക_back(SubEntry->getName());
       getVFSEntries(SubEntry.get(), Path, Entries);
-      Path.pop_back();
+      Path.എടുക്കുക_back();
     }
-    return;
+    തിരികെ;
   }
 
-  if (Kind == RedirectingFileSystem::EK_DirectoryRemap) {
+  എങ്കിൽ (Kind == RedirectingFileSystem::EK_DirectoryRemap) {
     auto *DR = dyn_cast<RedirectingFileSystem::DirectoryRemapEntry>(SrcE);
-    assert(DR && "Must be a directory remap");
+    പ്രതിജ്ഞാ(DR && "Must be a directory remap");
     SmallString<128> VPath;
-    for (auto &Comp : Path)
+    വേണ്ടി (auto &Comp : Path)
       llvm::sys::path::append(VPath, Comp);
-    Entries.push_back(
+    Entries.തള്ളുക_back(
         YAMLVFSEntry(VPath.c_str(), DR->getExternalContentsPath()));
-    return;
+    തിരികെ;
   }
 
-  assert(Kind == RedirectingFileSystem::EK_File && "Must be a EK_File");
+  പ്രതിജ്ഞാ(Kind == RedirectingFileSystem::EK_File && "Must be a EK_File");
   auto *FE = dyn_cast<RedirectingFileSystem::FileEntry>(SrcE);
-  assert(FE && "Must be a file");
+  പ്രതിജ്ഞാ(FE && "Must be a file");
   SmallString<128> VPath;
-  for (auto &Comp : Path)
+  വേണ്ടി (auto &Comp : Path)
     llvm::sys::path::append(VPath, Comp);
-  Entries.push_back(YAMLVFSEntry(VPath.c_str(), FE->getExternalContentsPath()));
+  Entries.തള്ളുക_back(YAMLVFSEntry(VPath.c_str(), FE->getExternalContentsPath()));
 }
 
-void vfs::collectVFSEntries(RedirectingFileSystem &VFS,
+ശൂന്യം vfs::collectVFSEntries(RedirectingFileSystem &VFS,
                             SmallVectorImpl<YAMLVFSEntry> &CollectedEntries) {
-  ErrorOr<RedirectingFileSystem::LookupResult> RootResult = VFS.lookupPath("/");
-  if (!RootResult)
-    return;
+  ErrorOr<RedirectingFileSystem::LookupResult> വേര്_Result = VFS.lookupPath("/");
+  എങ്കിൽ (!വേര്_Result)
+    തിരികെ;
   SmallVector<StringRef, 8> Components;
-  Components.push_back("/");
-  getVFSEntries(RootResult->E, Components, CollectedEntries);
+  Components.തള്ളുക_back("/");
+  getVFSEntries(വേര്_Result->E, Components, CollectedEntries);
 }
 
 UniqueID vfs::getNextVirtualUniqueID() {
-  static std::atomic<unsigned> UID;
+  സ്ഥിതം std::atomic<unsigned> UID;
   unsigned ID = ++UID;
   // The following assumes that uint64_t max will never collide with a real
   // dev_t value from the OS.
-  return UniqueID(std::numeric_limits<uint64_t>::max(), ID);
+  തിരികെ UniqueID(std::numeric_limits<uint64_t>::max(), ID);
 }
 
-void YAMLVFSWriter::addEntry(StringRef VirtualPath, StringRef RealPath,
-                             bool IsDirectory) {
-  assert(sys::path::is_absolute(VirtualPath) && "virtual path not absolute");
-  assert(sys::path::is_absolute(RealPath) && "real path not absolute");
-  assert(!pathHasTraversal(VirtualPath) && "path traversal is not supported");
+ശൂന്യം YAMLVFSWriter::addEntry(StringRef VirtualPath, StringRef RealPath,
+                             തർക്കം IsDirectory) {
+  പ്രതിജ്ഞാ(sys::path::is_absolute(VirtualPath) && "virtual path not absolute");
+  പ്രതിജ്ഞാ(sys::path::is_absolute(RealPath) && "real path not absolute");
+  പ്രതിജ്ഞാ(!pathHasTraversal(VirtualPath) && "path traversal is not supported");
   Mappings.emplace_back(VirtualPath, RealPath, IsDirectory);
 }
 
-void YAMLVFSWriter::addFileMapping(StringRef VirtualPath, StringRef RealPath) {
-  addEntry(VirtualPath, RealPath, /*IsDirectory=*/false);
+ശൂന്യം YAMLVFSWriter::addFileMapping(StringRef VirtualPath, StringRef RealPath) {
+  addEntry(VirtualPath, RealPath, /*IsDirectory=*/അസത്യം);
 }
 
-void YAMLVFSWriter::addDirectoryMapping(StringRef VirtualPath,
+ശൂന്യം YAMLVFSWriter::addDirectoryMapping(StringRef VirtualPath,
                                         StringRef RealPath) {
-  addEntry(VirtualPath, RealPath, /*IsDirectory=*/true);
+  addEntry(VirtualPath, RealPath, /*IsDirectory=*/സത്യം);
 }
 
-namespace {
+നാമാകാശ {
 
-class JSONWriter {
+വർഗ്ഗം JSONWriter {
   llvm::raw_ostream &OS;
-  SmallVector<StringRef, 16> DirStack;
+  SmallVector<StringRef, 16> Dir_അട്ടി;
 
-  unsigned getDirIndent() { return 4 * DirStack.size(); }
-  unsigned getFileIndent() { return 4 * (DirStack.size() + 1); }
-  bool containedIn(StringRef Parent, StringRef Path);
+  unsigned getDirIndent() { തിരികെ 4 * Dir_അട്ടി.size(); }
+  unsigned getFileIndent() { തിരികെ 4 * (Dir_അട്ടി.size() + 1); }
+  തർക്കം containedIn(StringRef Parent, StringRef Path);
   StringRef containedPart(StringRef Parent, StringRef Path);
-  void startDirectory(StringRef Path);
-  void endDirectory();
-  void writeEntry(StringRef VPath, StringRef RPath);
+  ശൂന്യം startDirectory(StringRef Path);
+  ശൂന്യം endDirectory();
+  ശൂന്യം writeEntry(StringRef VPath, StringRef RPath);
 
-public:
+പൊതു:
   JSONWriter(llvm::raw_ostream &OS) : OS(OS) {}
 
-  void write(ArrayRef<YAMLVFSEntry> Entries,
-             std::optional<bool> UseExternalNames,
-             std::optional<bool> IsCaseSensitive,
-             std::optional<bool> IsOverlayRelative, StringRef OverlayDir);
+  ശൂന്യം ലിഖ(ArrayRef<YAMLVFSEntry> Entries,
+             std::optional<തർക്കം> UseExternalNames,
+             std::optional<തർക്കം> IsCaseSensitive,
+             std::optional<തർക്കം> IsOverlayRelative, StringRef OverlayDir);
 };
 
 } // namespace
 
-bool JSONWriter::containedIn(StringRef Parent, StringRef Path) {
-  using namespace llvm::sys;
+തർക്കം JSONWriter::containedIn(StringRef Parent, StringRef Path) {
+  using നാമാകാശ llvm::sys;
 
   // Compare each path component.
   auto IParent = path::begin(Parent), EParent = path::end(Parent);
-  for (auto IChild = path::begin(Path), EChild = path::end(Path);
+  വേണ്ടി (auto IChild = path::begin(Path), EChild = path::end(Path);
        IParent != EParent && IChild != EChild; ++IParent, ++IChild) {
-    if (*IParent != *IChild)
-      return false;
+    എങ്കിൽ (*IParent != *IChild)
+      തിരികെ അസത്യം;
   }
   // Have we exhausted the parent path?
-  return IParent == EParent;
+  തിരികെ IParent == EParent;
 }
 
 StringRef JSONWriter::containedPart(StringRef Parent, StringRef Path) {
-  assert(!Parent.empty());
-  assert(containedIn(Parent, Path));
-  return Path.substr(Parent.size() + 1);
+  പ്രതിജ്ഞാ(!Parent.empty());
+  പ്രതിജ്ഞാ(containedIn(Parent, Path));
+  തിരികെ Path.substr(Parent.size() + 1);
 }
 
-void JSONWriter::startDirectory(StringRef Path) {
+ശൂന്യം JSONWriter::startDirectory(StringRef Path) {
   StringRef Name =
-      DirStack.empty() ? Path : containedPart(DirStack.back(), Path);
-  DirStack.push_back(Path);
+      Dir_അട്ടി.empty() ? Path : containedPart(Dir_അട്ടി.back(), Path);
+  Dir_അട്ടി.തള്ളുക_back(Path);
   unsigned Indent = getDirIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'directory',\n";
@@ -2889,15 +2889,15 @@ void JSONWriter::startDirectory(StringRef Path) {
   OS.indent(Indent + 2) << "'contents': [\n";
 }
 
-void JSONWriter::endDirectory() {
+ശൂന്യം JSONWriter::endDirectory() {
   unsigned Indent = getDirIndent();
   OS.indent(Indent + 2) << "]\n";
   OS.indent(Indent) << "}";
 
-  DirStack.pop_back();
+  Dir_അട്ടി.എടുക്കുക_back();
 }
 
-void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
+ശൂന്യം JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
   unsigned Indent = getFileIndent();
   OS.indent(Indent) << "{\n";
   OS.indent(Indent + 2) << "'type': 'file',\n";
@@ -2907,82 +2907,82 @@ void JSONWriter::writeEntry(StringRef VPath, StringRef RPath) {
   OS.indent(Indent) << "}";
 }
 
-void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
-                       std::optional<bool> UseExternalNames,
-                       std::optional<bool> IsCaseSensitive,
-                       std::optional<bool> IsOverlayRelative,
+ശൂന്യം JSONWriter::ലിഖ(ArrayRef<YAMLVFSEntry> Entries,
+                       std::optional<തർക്കം> UseExternalNames,
+                       std::optional<തർക്കം> IsCaseSensitive,
+                       std::optional<തർക്കം> IsOverlayRelative,
                        StringRef OverlayDir) {
-  using namespace llvm::sys;
+  using നാമാകാശ llvm::sys;
 
   OS << "{\n"
         "  'version': 0,\n";
-  if (IsCaseSensitive)
+  എങ്കിൽ (IsCaseSensitive)
     OS << "  'case-sensitive': '" << (*IsCaseSensitive ? "true" : "false")
        << "',\n";
-  if (UseExternalNames)
+  എങ്കിൽ (UseExternalNames)
     OS << "  'use-external-names': '" << (*UseExternalNames ? "true" : "false")
        << "',\n";
-  bool UseOverlayRelative = false;
-  if (IsOverlayRelative) {
+  തർക്കം UseOverlayRelative = അസത്യം;
+  എങ്കിൽ (IsOverlayRelative) {
     UseOverlayRelative = *IsOverlayRelative;
     OS << "  'overlay-relative': '" << (UseOverlayRelative ? "true" : "false")
        << "',\n";
   }
   OS << "  'roots': [\n";
 
-  if (!Entries.empty()) {
-    const YAMLVFSEntry &Entry = Entries.front();
+  എങ്കിൽ (!Entries.empty()) {
+    സ്ഥിരം YAMLVFSEntry &Entry = Entries.front();
 
     startDirectory(
       Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath)
     );
 
     StringRef RPath = Entry.RPath;
-    if (UseOverlayRelative) {
-      assert(RPath.starts_with(OverlayDir) &&
+    എങ്കിൽ (UseOverlayRelative) {
+      പ്രതിജ്ഞാ(RPath.starts_with(OverlayDir) &&
              "Overlay dir must be contained in RPath");
       RPath = RPath.substr(OverlayDir.size());
     }
 
-    bool IsCurrentDirEmpty = true;
-    if (!Entry.IsDirectory) {
+    തർക്കം IsCurrentDirEmpty = സത്യം;
+    എങ്കിൽ (!Entry.IsDirectory) {
       writeEntry(path::filename(Entry.VPath), RPath);
-      IsCurrentDirEmpty = false;
+      IsCurrentDirEmpty = അസത്യം;
     }
 
-    for (const auto &Entry : Entries.slice(1)) {
+    വേണ്ടി (സ്ഥിരം auto &Entry : Entries.slice(1)) {
       StringRef Dir =
           Entry.IsDirectory ? Entry.VPath : path::parent_path(Entry.VPath);
-      if (Dir == DirStack.back()) {
-        if (!IsCurrentDirEmpty) {
+      എങ്കിൽ (Dir == Dir_അട്ടി.back()) {
+        എങ്കിൽ (!IsCurrentDirEmpty) {
           OS << ",\n";
         }
-      } else {
-        bool IsDirPoppedFromStack = false;
-        while (!DirStack.empty() && !containedIn(DirStack.back(), Dir)) {
+      } അല്ലെങ്കിൽ {
+        തർക്കം Is_Dir_Popped_From_അട്ടി = അസത്യം;
+        ആകുമ്പോൾ (!Dir_അട്ടി.empty() && !containedIn(Dir_അട്ടി.back(), Dir)) {
           OS << "\n";
           endDirectory();
-          IsDirPoppedFromStack = true;
+          Is_Dir_Popped_From_അട്ടി = സത്യം;
         }
-        if (IsDirPoppedFromStack || !IsCurrentDirEmpty) {
+        എങ്കിൽ (Is_Dir_Popped_From_അട്ടി || !IsCurrentDirEmpty) {
           OS << ",\n";
         }
         startDirectory(Dir);
-        IsCurrentDirEmpty = true;
+        IsCurrentDirEmpty = സത്യം;
       }
       StringRef RPath = Entry.RPath;
-      if (UseOverlayRelative) {
-        assert(RPath.starts_with(OverlayDir) &&
+      എങ്കിൽ (UseOverlayRelative) {
+        പ്രതിജ്ഞാ(RPath.starts_with(OverlayDir) &&
                "Overlay dir must be contained in RPath");
         RPath = RPath.substr(OverlayDir.size());
       }
-      if (!Entry.IsDirectory) {
+      എങ്കിൽ (!Entry.IsDirectory) {
         writeEntry(path::filename(Entry.VPath), RPath);
-        IsCurrentDirEmpty = false;
+        IsCurrentDirEmpty = അസത്യം;
       }
     }
 
-    while (!DirStack.empty()) {
+    ആകുമ്പോൾ (!Dir_അട്ടി.empty()) {
       OS << "\n";
       endDirectory();
     }
@@ -2993,68 +2993,68 @@ void JSONWriter::write(ArrayRef<YAMLVFSEntry> Entries,
      << "}\n";
 }
 
-void YAMLVFSWriter::write(llvm::raw_ostream &OS) {
-  llvm::sort(Mappings, [](const YAMLVFSEntry &LHS, const YAMLVFSEntry &RHS) {
-    return LHS.VPath < RHS.VPath;
+ശൂന്യം YAMLVFSWriter::ലിഖ(llvm::raw_ostream &OS) {
+  llvm::sort(Mappings, [](സ്ഥിരം YAMLVFSEntry &LHS, സ്ഥിരം YAMLVFSEntry &RHS) {
+    തിരികെ LHS.VPath < RHS.VPath;
   });
 
-  JSONWriter(OS).write(Mappings, UseExternalNames, IsCaseSensitive,
+  JSONWriter(OS).ലിഖ(Mappings, UseExternalNames, IsCaseSensitive,
                        IsOverlayRelative, OverlayDir);
 }
 
 vfs::recursive_directory_iterator::recursive_directory_iterator(
-    FileSystem &FS_, const Twine &Path, std::error_code &EC)
+    FileSystem &FS_, സ്ഥിരം Twine &Path, std::error_code &EC)
     : FS(&FS_) {
   directory_iterator I = FS->dir_begin(Path, EC);
-  if (I != directory_iterator()) {
+  എങ്കിൽ (I != directory_iterator()) {
     State = std::make_shared<detail::RecDirIterState>();
-    State->Stack.push_back(I);
+    State->അട്ടി.തള്ളുക_back(I);
   }
 }
 
 vfs::recursive_directory_iterator &
 recursive_directory_iterator::increment(std::error_code &EC) {
-  assert(FS && State && !State->Stack.empty() && "incrementing past end");
-  assert(!State->Stack.back()->path().empty() && "non-canonical end iterator");
+  പ്രതിജ്ഞാ(FS && State && !State->അട്ടി.empty() && "incrementing past end");
+  പ്രതിജ്ഞാ(!State->അട്ടി.back()->path().empty() && "non-canonical end iterator");
   vfs::directory_iterator End;
 
-  if (State->HasNoPushRequest)
-    State->HasNoPushRequest = false;
-  else {
-    if (State->Stack.back()->type() == sys::fs::file_type::directory_file) {
+  എങ്കിൽ (State->Has_No_തള്ളുക_Request)
+    State->Has_No_തള്ളുക_Request = അസത്യം;
+  അല്ലെങ്കിൽ {
+    എങ്കിൽ (State->അട്ടി.back()->type() == sys::fs::file_type::directory_file) {
       vfs::directory_iterator I =
-          FS->dir_begin(State->Stack.back()->path(), EC);
-      if (I != End) {
-        State->Stack.push_back(I);
-        return *this;
+          FS->dir_begin(State->അട്ടി.back()->path(), EC);
+      എങ്കിൽ (I != End) {
+        State->അട്ടി.തള്ളുക_back(I);
+        തിരികെ *ഇത്;
       }
     }
   }
 
-  while (!State->Stack.empty() && State->Stack.back().increment(EC) == End)
-    State->Stack.pop_back();
+  ആകുമ്പോൾ (!State->അട്ടി.empty() && State->അട്ടി.back().increment(EC) == End)
+    State->അട്ടി.എടുക്കുക_back();
 
-  if (State->Stack.empty())
+  എങ്കിൽ (State->അട്ടി.empty())
     State.reset(); // end iterator
 
-  return *this;
+  തിരികെ *ഇത്;
 }
 
-const char FileSystem::ID = 0;
-const char OverlayFileSystem::ID = 0;
-const char ProxyFileSystem::ID = 0;
-const char InMemoryFileSystem::ID = 0;
-const char RedirectingFileSystem::ID = 0;
+സ്ഥിരം അക്ഷരം FileSystem::ID = 0;
+സ്ഥിരം അക്ഷരം OverlayFileSystem::ID = 0;
+സ്ഥിരം അക്ഷരം ProxyFileSystem::ID = 0;
+സ്ഥിരം അക്ഷരം InMemoryFileSystem::ID = 0;
+സ്ഥിരം അക്ഷരം RedirectingFileSystem::ID = 0;
 
-unsigned ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::useCount(
-    const FileSystem *FS) {
-  return FS->UseCount();
+unsigned ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::use_എണ്ണം(
+    സ്ഥിരം FileSystem *FS) {
+  തിരികെ FS->Use_എണ്ണം();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
+ശൂന്യം ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::retain(FileSystem *FS) {
   FS->Retain();
 }
 
-void ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
+ശൂന്യം ::llvm::IntrusiveRefCntPtrInfo<FileSystem>::release(FileSystem *FS) {
   FS->Release();
 }

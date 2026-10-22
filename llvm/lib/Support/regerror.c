@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <ctype.h>
+#അന്തര്ഭാവ <limits.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ "regex_impl.h"
 
-#include "regutils.h"
+#അന്തര്ഭാവ "regutils.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+സ്ഥിതം സ്ഥിരം അക്ഷരം *regatoi(സ്ഥിരം llvm_regex_t *, അക്ഷരം *, പൂർണ്ണസംഖ്യ);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+സ്ഥിതം ഘടന rerr {
+	പൂർണ്ണസംഖ്യ code;
+	സ്ഥിരം അക്ഷരം *name;
+	സ്ഥിരം അക്ഷരം *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(പൂർണ്ണസംഖ്യ errcode, സ്ഥിരം llvm_regex_t *preg, അക്ഷരം *errbuf, size_t errbuf_size)
 {
-	struct rerr *r;
+	ഘടന rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	പൂർണ്ണസംഖ്യ target = errcode &~ REG_ITOA;
+	സ്ഥിരം അക്ഷരം *s;
+	അക്ഷരം convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	എങ്കിൽ (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, വലുപ്പം convbuf);
+	അല്ലെങ്കിൽ {
+		വേണ്ടി (r = rerrs; r->code != 0; r++)
+			എങ്കിൽ (r->code == target)
+				നിർത്തുക;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
+		എങ്കിൽ (errcode&REG_ITOA) {
+			എങ്കിൽ (r->code != 0) {
+				പ്രതിജ്ഞാ(strlen(r->name) < വലുപ്പം(convbuf));
+				(ശൂന്യം) llvm_strlcpy(convbuf, r->name, വലുപ്പം convbuf);
+			} അല്ലെങ്കിൽ
+				(ശൂന്യം)snprintf(convbuf, വലുപ്പം convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} അല്ലെങ്കിൽ
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	എങ്കിൽ (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	തിരികെ(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *
+regatoi(സ്ഥിരം llvm_regex_t *preg, അക്ഷരം *localbuf, പൂർണ്ണസംഖ്യ localbufsize)
 {
-	struct rerr *r;
+	ഘടന rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	വേണ്ടി (r = rerrs; r->code != 0; r++)
+		എങ്കിൽ (strcmp(r->name, preg->re_endp) == 0)
+			നിർത്തുക;
+	എങ്കിൽ (r->code == 0)
+		തിരികെ("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(ശൂന്യം)snprintf(localbuf, localbufsize, "%d", r->code);
+	തിരികെ(localbuf);
 }

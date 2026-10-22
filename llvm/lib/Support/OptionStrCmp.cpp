@@ -6,10 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/OptionStrCmp.h"
-#include "llvm/ADT/STLExtras.h"
+#അന്തര്ഭാവ "llvm/Support/OptionStrCmp.h"
+#അന്തര്ഭാവ "llvm/ADT/STLExtras.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
 // Comparison function for Option strings (option names & prefixes).
 // The ordering is *almost* case-insensitive lexicographic, with an exception.
@@ -17,27 +17,27 @@ using namespace llvm;
 // precede any other options which prefix them). Additionally, if two options
 // are identical ignoring case, they are ordered according to case sensitive
 // ordering if `FallbackCaseSensitive` is true.
-int llvm::StrCmpOptionName(StringRef A, StringRef B,
-                           bool FallbackCaseSensitive) {
+പൂർണ്ണസംഖ്യ llvm::StrCmpOptionName(StringRef A, StringRef B,
+                           തർക്കം FallbackCaseSensitive) {
   size_t MinSize = std::min(A.size(), B.size());
-  if (int Res = A.substr(0, MinSize).compare_insensitive(B.substr(0, MinSize)))
-    return Res;
+  എങ്കിൽ (പൂർണ്ണസംഖ്യ Res = A.substr(0, MinSize).compare_insensitive(B.substr(0, MinSize)))
+    തിരികെ Res;
 
   // If they are identical ignoring case, use case sensitive ordering.
-  if (A.size() == B.size())
-    return FallbackCaseSensitive ? A.compare(B) : 0;
+  എങ്കിൽ (A.size() == B.size())
+    തിരികെ FallbackCaseSensitive ? A.compare(B) : 0;
 
-  return (A.size() == MinSize) ? 1 /* A is a prefix of B. */
+  തിരികെ (A.size() == MinSize) ? 1 /* A is a prefix of B. */
                                : -1 /* B is a prefix of A */;
 }
 
 // Comparison function for Option prefixes.
-int llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
+പൂർണ്ണസംഖ്യ llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
                                ArrayRef<StringRef> BPrefixes) {
-  for (const auto &[APre, BPre] : zip(APrefixes, BPrefixes)) {
-    if (int Cmp = StrCmpOptionName(APre, BPre))
-      return Cmp;
+  വേണ്ടി (സ്ഥിരം auto &[APre, BPre] : zip(APrefixes, BPrefixes)) {
+    എങ്കിൽ (പൂർണ്ണസംഖ്യ Cmp = StrCmpOptionName(APre, BPre))
+      തിരികെ Cmp;
   }
   // Both prefixes are identical.
-  return 0;
+  തിരികെ 0;
 }

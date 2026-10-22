@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CSKYAttributes.h"
+#അന്തര്ഭാവ "llvm/Support/CSKYAttributes.h"
 
-using namespace llvm;
-using namespace llvm::CSKYAttrs;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::CSKYAttrs;
 
-static const TagNameItem tagData[] = {
+സ്ഥിതം സ്ഥിരം TagNameItem tagData[] = {
     {CSKY_ARCH_NAME, "Tag_CSKY_ARCH_NAME"},
     {CSKY_CPU_NAME, "Tag_CSKY_CPU_NAME"},
     {CSKY_CPU_NAME, "Tag_CSKY_CPU_NAME"},
@@ -24,10 +24,10 @@ static const TagNameItem tagData[] = {
     {CSKY_FPU_ROUNDING, "Tag_CSKY_FPU_ROUNDING"},
     {CSKY_FPU_DENORMAL, "Tag_CSKY_FPU_DENORMAL"},
     {CSKY_FPU_EXCEPTION, "Tag_CSKY_FPU_EXCEPTION"},
-    {CSKY_FPU_NUMBER_MODULE, "Tag_CSKY_FPU_NUMBER_MODULE"},
+    {CSKY_FPU_സംഖ്യ_MODULE, "Tag_CSKY_FPU_NUMBER_MODULE"},
     {CSKY_FPU_HARDFP, "Tag_CSKY_FPU_HARDFP"}};
 
 constexpr TagNameMap CSKYAttributeTags{tagData};
-const TagNameMap &llvm::CSKYAttrs::getCSKYAttributeTags() {
-  return CSKYAttributeTags;
+സ്ഥിരം TagNameMap &llvm::CSKYAttrs::getCSKYAttributeTags() {
+  തിരികെ CSKYAttributeTags;
 }

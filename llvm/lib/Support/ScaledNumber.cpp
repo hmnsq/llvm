@@ -10,27 +10,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/Support/ScaledNumber.h"
+#അന്തര്ഭാവ "llvm/ADT/APFloat.h"
+#അന്തര്ഭാവ "llvm/ADT/ArrayRef.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::ScaledNumbers;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::ScaledNumbers;
 
 std::pair<uint64_t, int16_t> ScaledNumbers::multiply64(uint64_t LHS,
                                                        uint64_t RHS) {
   uint64_t Upper, Lower;
-#if defined(__SIZEOF_INT128__) ||                                              \
+#എങ്കിൽ defined(__SIZEOF_INT128__) ||                                              \
     (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
   auto Product = __uint128_t(LHS) * RHS;
   Upper = uint64_t(Product >> 64);
   Lower = uint64_t(Product);
-#else
+#അല്ലെങ്കിൽ
   // Separate into two 32-bit digits (U.L).
-  auto getU = [](uint64_t N) { return N >> 32; };
-  auto getL = [](uint64_t N) { return N & UINT32_MAX; };
+  auto getU = [](uint64_t N) { തിരികെ N >> 32; };
+  auto getL = [](uint64_t N) { തിരികെ N & UINT32_MAX; };
   uint64_t UL = getU(LHS), LL = getL(LHS), UR = getU(RHS), LR = getL(RHS);
 
   // Compute cross products.
@@ -49,214 +49,214 @@ std::pair<uint64_t, int16_t> ScaledNumbers::multiply64(uint64_t LHS,
 #endif
 
   // Check whether the upper digit is empty.
-  if (!Upper)
-    return {Lower, 0};
+  എങ്കിൽ (!Upper)
+    തിരികെ {Lower, 0};
 
   // Shift as little as possible to maximize precision.
   unsigned LeadingZeros = llvm::countl_zero(Upper);
-  int Shift = 64 - LeadingZeros;
-  if (LeadingZeros)
+  പൂർണ്ണസംഖ്യ Shift = 64 - LeadingZeros;
+  എങ്കിൽ (LeadingZeros)
     Upper = Upper << LeadingZeros | Lower >> Shift;
-  return getRounded(Upper, Shift,
+  തിരികെ getRounded(Upper, Shift,
                     Shift && (Lower & UINT64_C(1) << (Shift - 1)));
 }
 
-static uint64_t getHalf(uint64_t N) { return (N >> 1) + (N & 1); }
+സ്ഥിതം uint64_t getHalf(uint64_t N) { തിരികെ (N >> 1) + (N & 1); }
 
 std::pair<uint32_t, int16_t> ScaledNumbers::divide32(uint32_t Dividend,
-                                                     uint32_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint32_t ഹാരകം_2) {
+  പ്രതിജ്ഞാ(Dividend && "expected non-zero dividend");
+  പ്രതിജ്ഞാ(ഹാരകം_2 && "expected non-zero divisor");
 
   // Use 64-bit math and canonicalize the dividend to gain precision.
   uint64_t Dividend64 = Dividend;
-  int Shift = 0;
-  if (int Zeros = llvm::countl_zero(Dividend64)) {
+  പൂർണ്ണസംഖ്യ Shift = 0;
+  എങ്കിൽ (പൂർണ്ണസംഖ്യ Zeros = llvm::countl_zero(Dividend64)) {
     Shift -= Zeros;
     Dividend64 <<= Zeros;
   }
-  uint64_t Quotient = Dividend64 / Divisor;
-  uint64_t Remainder = Dividend64 % Divisor;
+  uint64_t Quotient = Dividend64 / ഹാരകം_2;
+  uint64_t Remainder = Dividend64 % ഹാരകം_2;
 
   // If Quotient needs to be shifted, leave the rounding to getAdjusted().
-  if (Quotient > UINT32_MAX)
-    return getAdjusted<uint32_t>(Quotient, Shift);
+  എങ്കിൽ (Quotient > UINT32_MAX)
+    തിരികെ getAdjusted<uint32_t>(Quotient, Shift);
 
   // Round based on the value of the next bit.
-  return getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(Divisor));
+  തിരികെ getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(ഹാരകം_2));
 }
 
 std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
-                                                     uint64_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint64_t ഹാരകം_2) {
+  പ്രതിജ്ഞാ(Dividend && "expected non-zero dividend");
+  പ്രതിജ്ഞാ(ഹാരകം_2 && "expected non-zero divisor");
 
   // Minimize size of divisor.
-  int Shift = 0;
-  if (int Zeros = llvm::countr_zero(Divisor)) {
+  പൂർണ്ണസംഖ്യ Shift = 0;
+  എങ്കിൽ (പൂർണ്ണസംഖ്യ Zeros = llvm::countr_zero(ഹാരകം_2)) {
     Shift -= Zeros;
-    Divisor >>= Zeros;
+    ഹാരകം_2 >>= Zeros;
   }
 
   // Check for powers of two.
-  if (Divisor == 1)
-    return {Dividend, Shift};
+  എങ്കിൽ (ഹാരകം_2 == 1)
+    തിരികെ {Dividend, Shift};
 
   // Maximize size of dividend.
-  if (int Zeros = llvm::countl_zero(Dividend)) {
+  എങ്കിൽ (പൂർണ്ണസംഖ്യ Zeros = llvm::countl_zero(Dividend)) {
     Shift -= Zeros;
     Dividend <<= Zeros;
   }
 
   // Start with the result of a divide.
-  uint64_t Quotient = Dividend / Divisor;
-  Dividend %= Divisor;
+  uint64_t Quotient = Dividend / ഹാരകം_2;
+  Dividend %= ഹാരകം_2;
 
   // Continue building the quotient with long division.
-  while (!(Quotient >> 63) && Dividend) {
+  ആകുമ്പോൾ (!(Quotient >> 63) && Dividend) {
     // Shift Dividend and check for overflow.
-    bool IsOverflow = Dividend >> 63;
+    തർക്കം IsOverflow = Dividend >> 63;
     Dividend <<= 1;
     --Shift;
 
     // Get the next bit of Quotient.
     Quotient <<= 1;
-    if (IsOverflow || Divisor <= Dividend) {
+    എങ്കിൽ (IsOverflow || ഹാരകം_2 <= Dividend) {
       Quotient |= 1;
-      Dividend -= Divisor;
+      Dividend -= ഹാരകം_2;
     }
   }
 
-  return getRounded(Quotient, Shift, Dividend >= getHalf(Divisor));
+  തിരികെ getRounded(Quotient, Shift, Dividend >= getHalf(ഹാരകം_2));
 }
 
-int ScaledNumbers::compareImpl(uint64_t L, uint64_t R, int ScaleDiff) {
-  assert(ScaleDiff >= 0 && "wrong argument order");
-  assert(ScaleDiff < 64 && "numbers too far apart");
+പൂർണ്ണസംഖ്യ ScaledNumbers::compareImpl(uint64_t L, uint64_t R, പൂർണ്ണസംഖ്യ ScaleDiff) {
+  പ്രതിജ്ഞാ(ScaleDiff >= 0 && "wrong argument order");
+  പ്രതിജ്ഞാ(ScaleDiff < 64 && "numbers too far apart");
 
   uint64_t L_adjusted = L >> ScaleDiff;
-  if (L_adjusted < R)
-    return -1;
-  if (L_adjusted > R)
-    return 1;
+  എങ്കിൽ (L_adjusted < R)
+    തിരികെ -1;
+  എങ്കിൽ (L_adjusted > R)
+    തിരികെ 1;
 
-  return L > L_adjusted << ScaleDiff ? 1 : 0;
+  തിരികെ L > L_adjusted << ScaleDiff ? 1 : 0;
 }
 
-static void appendDigit(std::string &Str, unsigned D) {
-  assert(D < 10);
+സ്ഥിതം ശൂന്യം appendDigit(std::string &Str, unsigned D) {
+  പ്രതിജ്ഞാ(D < 10);
   Str += '0' + D % 10;
 }
 
-static void appendNumber(std::string &Str, uint64_t N) {
-  while (N) {
+സ്ഥിതം ശൂന്യം append_സംഖ്യ(std::string &Str, uint64_t N) {
+  ആകുമ്പോൾ (N) {
     appendDigit(Str, N % 10);
     N /= 10;
   }
 }
 
-static bool doesRoundUp(char Digit) {
-  switch (Digit) {
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-    return true;
-  default:
-    return false;
+സ്ഥിതം തർക്കം doesRoundUp(അക്ഷരം Digit) {
+  തിരഞ്ഞെടുപ്പ് (Digit) {
+  അവസ്ഥ '5':
+  അവസ്ഥ '6':
+  അവസ്ഥ '7':
+  അവസ്ഥ '8':
+  അവസ്ഥ '9':
+    തിരികെ സത്യം;
+  സ്ഥിരസ്ഥിതി:
+    തിരികെ അസത്യം;
   }
 }
 
-static std::string toStringAPFloat(uint64_t D, int E, unsigned Precision) {
-  assert(E >= ScaledNumbers::MinScale);
-  assert(E <= ScaledNumbers::MaxScale);
+സ്ഥിതം std::string toStringAPFloat(uint64_t D, പൂർണ്ണസംഖ്യ E, unsigned Precision) {
+  പ്രതിജ്ഞാ(E >= ScaledNumbers::MinScale);
+  പ്രതിജ്ഞാ(E <= ScaledNumbers::MaxScale);
 
   // Find a new E, but don't let it increase past MaxScale.
-  int LeadingZeros = ScaledNumberBase::countLeadingZeros64(D);
-  int NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
-  int Shift = 63 - (NewE - E);
-  assert(Shift <= LeadingZeros);
-  assert(Shift == LeadingZeros || NewE == ScaledNumbers::MaxScale);
-  assert(Shift >= 0 && Shift < 64 && "undefined behavior");
+  പൂർണ്ണസംഖ്യ LeadingZeros = Scaled_സംഖ്യ_Base::എണ്ണം_Leading_Zeros64(D);
+  പൂർണ്ണസംഖ്യ NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
+  പൂർണ്ണസംഖ്യ Shift = 63 - (NewE - E);
+  പ്രതിജ്ഞാ(Shift <= LeadingZeros);
+  പ്രതിജ്ഞാ(Shift == LeadingZeros || NewE == ScaledNumbers::MaxScale);
+  പ്രതിജ്ഞാ(Shift >= 0 && Shift < 64 && "undefined behavior");
   D <<= Shift;
   E = NewE;
 
   // Check for a denormal.
   unsigned AdjustedE = E + 16383;
-  if (!(D >> 63)) {
-    assert(E == ScaledNumbers::MaxScale);
+  എങ്കിൽ (!(D >> 63)) {
+    പ്രതിജ്ഞാ(E == ScaledNumbers::MaxScale);
     AdjustedE = 0;
   }
 
   // Build the float and print it.
   uint64_t RawBits[2] = {D, AdjustedE};
   APFloat Float(APFloat::x87DoubleExtended(), APInt(80, RawBits));
-  SmallVector<char, 24> Chars;
+  SmallVector<അക്ഷരം, 24> Chars;
   Float.toString(Chars, Precision, 0);
-  return std::string(Chars.begin(), Chars.end());
+  തിരികെ std::string(Chars.begin(), Chars.end());
 }
 
-static std::string stripTrailingZeros(const std::string &Float) {
+സ്ഥിതം std::string stripTrailingZeros(സ്ഥിരം std::string &Float) {
   size_t NonZero = Float.find_last_not_of('0');
-  assert(NonZero != std::string::npos && "no . in floating point string");
+  പ്രതിജ്ഞാ(NonZero != std::string::npos && "no . in floating point string");
 
-  if (Float[NonZero] == '.')
+  എങ്കിൽ (Float[NonZero] == '.')
     ++NonZero;
 
-  return Float.substr(0, NonZero + 1);
+  തിരികെ Float.substr(0, NonZero + 1);
 }
 
-std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
+std::string Scaled_സംഖ്യ_Base::toString(uint64_t D, int16_t E, പൂർണ്ണസംഖ്യ Width,
                                        unsigned Precision) {
-  if (!D)
-    return "0.0";
+  എങ്കിൽ (!D)
+    തിരികെ "0.0";
 
   // Canonicalize exponent and digits.
   uint64_t Above0 = 0;
   uint64_t Below0 = 0;
   uint64_t Extra = 0;
-  int ExtraShift = 0;
-  if (E == 0) {
+  പൂർണ്ണസംഖ്യ ExtraShift = 0;
+  എങ്കിൽ (E == 0) {
     Above0 = D;
-  } else if (E > 0) {
-    if (int Shift = std::min(int16_t(countLeadingZeros64(D)), E)) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (E > 0) {
+    എങ്കിൽ (പൂർണ്ണസംഖ്യ Shift = std::min(int16_t(എണ്ണം_Leading_Zeros64(D)), E)) {
       D <<= Shift;
       E -= Shift;
 
-      if (!E)
+      എങ്കിൽ (!E)
         Above0 = D;
     }
-  } else if (E > -64) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (E > -64) {
     Above0 = D >> -E;
     Below0 = D << (64 + E);
-  } else if (E == -64) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (E == -64) {
     // Special case: shift by 64 bits is undefined behavior.
     Below0 = D;
-  } else if (E > -120) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (E > -120) {
     Below0 = D >> (-E - 64);
     Extra = D << (128 + E);
     ExtraShift = -64 - E;
   }
 
   // Fall back on APFloat for very small and very large numbers.
-  if (!Above0 && !Below0)
-    return toStringAPFloat(D, E, Precision);
+  എങ്കിൽ (!Above0 && !Below0)
+    തിരികെ toStringAPFloat(D, E, Precision);
 
   // Append the digits before the decimal.
   std::string Str;
   size_t DigitsOut = 0;
-  if (Above0) {
-    appendNumber(Str, Above0);
+  എങ്കിൽ (Above0) {
+    append_സംഖ്യ(Str, Above0);
     DigitsOut = Str.size();
-  } else {
+  } അല്ലെങ്കിൽ {
     appendDigit(Str, 0);
   }
   std::reverse(Str.begin(), Str.end());
 
   // Return early if there's nothing after the decimal.
-  if (!Below0)
-    return Str + ".0";
+  എങ്കിൽ (!Below0)
+    തിരികെ Str + ".0";
 
   // Append the decimal and beyond.
   Str += '.';
@@ -268,11 +268,11 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
   Below0 >>= 4;
   size_t SinceDot = 0;
   size_t AfterDot = Str.size();
-  do {
-    if (ExtraShift) {
+  ചെയ്യുക {
+    എങ്കിൽ (ExtraShift) {
       --ExtraShift;
       Error *= 5;
-    } else {
+    } അല്ലെങ്കിൽ {
       Error *= 10;
     }
 
@@ -282,53 +282,53 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
     Extra = Extra & (UINT64_MAX >> 4);
     appendDigit(Str, Below0 >> 60);
     Below0 = Below0 & (UINT64_MAX >> 4);
-    if (DigitsOut || Str.back() != '0')
+    എങ്കിൽ (DigitsOut || Str.back() != '0')
       ++DigitsOut;
     ++SinceDot;
-  } while (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
+  } ആകുമ്പോൾ (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
            (!Precision || DigitsOut <= Precision || SinceDot < 2));
 
   // Return early for maximum precision.
-  if (!Precision || DigitsOut <= Precision)
-    return stripTrailingZeros(Str);
+  എങ്കിൽ (!Precision || DigitsOut <= Precision)
+    തിരികെ stripTrailingZeros(Str);
 
   // Find where to truncate.
   size_t Truncate =
       std::max(Str.size() - (DigitsOut - Precision), AfterDot + 1);
 
   // Check if there's anything to truncate.
-  if (Truncate >= Str.size())
-    return stripTrailingZeros(Str);
+  എങ്കിൽ (Truncate >= Str.size())
+    തിരികെ stripTrailingZeros(Str);
 
-  bool Carry = doesRoundUp(Str[Truncate]);
-  if (!Carry)
-    return stripTrailingZeros(Str.substr(0, Truncate));
+  തർക്കം Carry = doesRoundUp(Str[Truncate]);
+  എങ്കിൽ (!Carry)
+    തിരികെ stripTrailingZeros(Str.substr(0, Truncate));
 
   // Round with the first truncated digit.
-  for (std::string::reverse_iterator I(Str.begin() + Truncate), E = Str.rend();
+  വേണ്ടി (std::string::reverse_iterator I(Str.begin() + Truncate), E = Str.rend();
        I != E; ++I) {
-    if (*I == '.')
-      continue;
-    if (*I == '9') {
+    എങ്കിൽ (*I == '.')
+      തുടരുക;
+    എങ്കിൽ (*I == '9') {
       *I = '0';
-      continue;
+      തുടരുക;
     }
 
     ++*I;
-    Carry = false;
-    break;
+    Carry = അസത്യം;
+    നിർത്തുക;
   }
 
   // Add "1" in front if we still need to carry.
-  return stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
+  തിരികെ stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
 }
 
-raw_ostream &ScaledNumberBase::print(raw_ostream &OS, uint64_t D, int16_t E,
-                                     int Width, unsigned Precision) {
-  return OS << toString(D, E, Width, Precision);
+raw_ostream &Scaled_സംഖ്യ_Base::print(raw_ostream &OS, uint64_t D, int16_t E,
+                                     പൂർണ്ണസംഖ്യ Width, unsigned Precision) {
+  തിരികെ OS << toString(D, E, Width, Precision);
 }
 
-void ScaledNumberBase::dump(uint64_t D, int16_t E, int Width) {
+ശൂന്യം Scaled_സംഖ്യ_Base::dump(uint64_t D, int16_t E, പൂർണ്ണസംഖ്യ Width) {
   print(dbgs(), D, E, Width, 0) << "[" << Width << ":" << D << "*2^" << E
                                 << "]";
 }

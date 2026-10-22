@@ -11,62 +11,62 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputError.h"
+#അന്തര്ഭാവ "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::vfs;
 
-void OutputError::anchor() {}
-void OutputConfigError::anchor() {}
-void TempFileOutputError::anchor() {}
+ശൂന്യം OutputError::anchor() {}
+ശൂന്യം OutputConfigError::anchor() {}
+ശൂന്യം TempFileOutputError::anchor() {}
 
-char OutputError::ID = 0;
-char OutputConfigError::ID = 0;
-char TempFileOutputError::ID = 0;
+അക്ഷരം OutputError::ID = 0;
+അക്ഷരം OutputConfigError::ID = 0;
+അക്ഷരം TempFileOutputError::ID = 0;
 
-void OutputError::log(raw_ostream &OS) const {
+ശൂന്യം OutputError::log(raw_ostream &OS) സ്ഥിരം {
   OS << getOutputPath() << ": ";
   ECError::log(OS);
 }
 
-void OutputConfigError::log(raw_ostream &OS) const {
+ശൂന്യം OutputConfigError::log(raw_ostream &OS) സ്ഥിരം {
   OutputError::log(OS);
   OS << ": " << Config;
 }
 
-void TempFileOutputError::log(raw_ostream &OS) const {
+ശൂന്യം TempFileOutputError::log(raw_ostream &OS) സ്ഥിരം {
   OS << getTempPath() << " => ";
   OutputError::log(OS);
 }
 
-namespace {
-class OutputErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override;
-  std::string message(int EV) const override;
+നാമാകാശ {
+വർഗ്ഗം OutputErrorCategory : പൊതു std::error_category {
+പൊതു:
+  സ്ഥിരം അക്ഷരം *name() സ്ഥിരം noexcept override;
+  std::string message(പൂർണ്ണസംഖ്യ EV) സ്ഥിരം override;
 };
 } // end namespace
 
-const std::error_category &vfs::output_category() {
-  static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+സ്ഥിരം std::error_category &vfs::output_category() {
+  സ്ഥിതം OutputErrorCategory ErrorCategory;
+  തിരികെ ErrorCategory;
 }
 
-const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+സ്ഥിരം അക്ഷരം *OutputErrorCategory::name() സ്ഥിരം noexcept {
+  തിരികെ "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
+std::string OutputErrorCategory::message(പൂർണ്ണസംഖ്യ EV) സ്ഥിരം {
   OutputErrorCode E = static_cast<OutputErrorCode>(EV);
-  switch (E) {
-  case OutputErrorCode::invalid_config:
-    return "invalid config";
-  case OutputErrorCode::not_closed:
-    return "output not closed";
-  case OutputErrorCode::already_closed:
-    return "output already closed";
-  case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+  തിരഞ്ഞെടുപ്പ് (E) {
+  അവസ്ഥ OutputErrorCode::invalid_config:
+    തിരികെ "invalid config";
+  അവസ്ഥ OutputErrorCode::not_closed:
+    തിരികെ "output not closed";
+  അവസ്ഥ OutputErrorCode::already_closed:
+    തിരികെ "output already closed";
+  അവസ്ഥ OutputErrorCode::has_open_proxy:
+    തിരികെ "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");

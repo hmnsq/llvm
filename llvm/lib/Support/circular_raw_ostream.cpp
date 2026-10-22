@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/circular_raw_ostream.h"
-#include <algorithm>
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/Support/circular_raw_ostream.h"
+#അന്തര്ഭാവ <algorithm>
+using നാമാകാശ llvm;
 
-void circular_raw_ostream::write_impl(const char *Ptr, size_t Size) {
-  if (BufferSize == 0) {
-    TheStream->write(Ptr, Size);
-    return;
+ശൂന്യം circular_raw_ostream::write_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
+  എങ്കിൽ (BufferSize == 0) {
+    TheStream->ലിഖ(Ptr, Size);
+    തിരികെ;
   }
 
   // Write into the buffer, wrapping if necessary.
-  while (Size != 0) {
+  ആകുമ്പോൾ (Size != 0) {
     unsigned Bytes =
       std::min(unsigned(Size), unsigned(BufferSize - (Cur - BufferArray)));
     memcpy(Cur, Ptr, Bytes);
     Size -= Bytes;
     Cur += Bytes;
-    if (Cur == BufferArray + BufferSize) {
+    എങ്കിൽ (Cur == BufferArray + BufferSize) {
       // Reset the output pointer to the start of the buffer.
       Cur = BufferArray;
-      Filled = true;
+      Filled = സത്യം;
     }
   }
 }
 
-void circular_raw_ostream::flushBufferWithBanner() {
-  if (BufferSize != 0) {
+ശൂന്യം circular_raw_ostream::flushBufferWithBanner() {
+  എങ്കിൽ (BufferSize != 0) {
     // Write out the buffer
-    TheStream->write(Banner, std::strlen(Banner));
+    TheStream->ലിഖ(Banner, std::strlen(Banner));
     flushBuffer();
   }
 }

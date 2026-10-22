@@ -11,160 +11,160 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-#include <system_error>
+#അന്തര്ഭാവ "llvm/Support/FileUtilities.h"
+#അന്തര്ഭാവ "llvm/ADT/SmallString.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/Error.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorOr.h"
+#അന്തര്ഭാവ "llvm/Support/MemoryBuffer.h"
+#അന്തര്ഭാവ "llvm/Support/Process.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <cmath>
+#അന്തര്ഭാവ <cstdint>
+#അന്തര്ഭാവ <cstdlib>
+#അന്തര്ഭാവ <cstring>
+#അന്തര്ഭാവ <memory>
+#അന്തര്ഭാവ <system_error>
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-static bool isSignedChar(char C) {
-  return (C == '+' || C == '-');
+സ്ഥിതം തർക്കം isSignedChar(അക്ഷരം C) {
+  തിരികെ (C == '+' || C == '-');
 }
 
-static bool isExponentChar(char C) {
-  switch (C) {
-  case 'D':  // Strange exponential notation.
-  case 'd':  // Strange exponential notation.
-  case 'e':
-  case 'E': return true;
-  default: return false;
+സ്ഥിതം തർക്കം isExponentChar(അക്ഷരം C) {
+  തിരഞ്ഞെടുപ്പ് (C) {
+  അവസ്ഥ 'D':  // Strange exponential notation.
+  അവസ്ഥ 'd':  // Strange exponential notation.
+  അവസ്ഥ 'e':
+  അവസ്ഥ 'E': തിരികെ സത്യം;
+  സ്ഥിരസ്ഥിതി: തിരികെ അസത്യം;
   }
 }
 
-static bool isNumberChar(char C) {
-  switch (C) {
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case '.': return true;
-  default: return isSignedChar(C) || isExponentChar(C);
+സ്ഥിതം തർക്കം is_സംഖ്യ_Char(അക്ഷരം C) {
+  തിരഞ്ഞെടുപ്പ് (C) {
+  അവസ്ഥ '0': അവസ്ഥ '1': അവസ്ഥ '2': അവസ്ഥ '3': അവസ്ഥ '4':
+  അവസ്ഥ '5': അവസ്ഥ '6': അവസ്ഥ '7': അവസ്ഥ '8': അവസ്ഥ '9':
+  അവസ്ഥ '.': തിരികെ സത്യം;
+  സ്ഥിരസ്ഥിതി: തിരികെ isSignedChar(C) || isExponentChar(C);
   }
 }
 
-static const char *BackupNumber(const char *Pos, const char *FirstChar) {
+സ്ഥിതം സ്ഥിരം അക്ഷരം *Backup_സംഖ്യ(സ്ഥിരം അക്ഷരം *Pos, സ്ഥിരം അക്ഷരം *FirstChar) {
   // If we didn't stop in the middle of a number, don't backup.
-  if (!isNumberChar(*Pos)) return Pos;
+  എങ്കിൽ (!is_സംഖ്യ_Char(*Pos)) തിരികെ Pos;
 
   // Otherwise, return to the start of the number.
-  bool HasPeriod = false;
-  while (Pos > FirstChar && isNumberChar(Pos[-1])) {
+  തർക്കം HasPeriod = അസത്യം;
+  ആകുമ്പോൾ (Pos > FirstChar && is_സംഖ്യ_Char(Pos[-1])) {
     // Backup over at most one period.
-    if (Pos[-1] == '.') {
-      if (HasPeriod)
-        break;
-      HasPeriod = true;
+    എങ്കിൽ (Pos[-1] == '.') {
+      എങ്കിൽ (HasPeriod)
+        നിർത്തുക;
+      HasPeriod = സത്യം;
     }
 
     --Pos;
-    if (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
-      break;
+    എങ്കിൽ (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
+      നിർത്തുക;
   }
-  return Pos;
+  തിരികെ Pos;
 }
 
 /// EndOfNumber - Return the first character that is not part of the specified
 /// number.  This assumes that the buffer is null terminated, so it won't fall
 /// off the end.
-static const char *EndOfNumber(const char *Pos) {
-  while (isNumberChar(*Pos))
+സ്ഥിതം സ്ഥിരം അക്ഷരം *End_Of_സംഖ്യ(സ്ഥിരം അക്ഷരം *Pos) {
+  ആകുമ്പോൾ (is_സംഖ്യ_Char(*Pos))
     ++Pos;
-  return Pos;
+  തിരികെ Pos;
 }
 
 /// CompareNumbers - compare two numbers, returning true if they are different.
-static bool CompareNumbers(const char *&F1P, const char *&F2P,
-                           const char *F1End, const char *F2End,
-                           double AbsTolerance, double RelTolerance,
-                           std::string *ErrorMsg) {
-  const char *F1NumEnd, *F2NumEnd;
-  double V1 = 0.0, V2 = 0.0;
+സ്ഥിതം തർക്കം CompareNumbers(സ്ഥിരം അക്ഷരം *&F1P, സ്ഥിരം അക്ഷരം *&F2P,
+                           സ്ഥിരം അക്ഷരം *F1End, സ്ഥിരം അക്ഷരം *F2End,
+                           ഇരട്ട AbsTolerance, ഇരട്ട RelTolerance,
+                           std::string *Error_സന്ദേശം) {
+  സ്ഥിരം അക്ഷരം *F1_അക്കം_End, *F2_അക്കം_End;
+  ഇരട്ട V1 = 0.0, V2 = 0.0;
 
   // If one of the positions is at a space and the other isn't, chomp up 'til
   // the end of the space.
-  while (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
+  ആകുമ്പോൾ (isSpace(static_cast<unsigned അക്ഷരം>(*F1P)) && F1P != F1End)
     ++F1P;
-  while (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
+  ആകുമ്പോൾ (isSpace(static_cast<unsigned അക്ഷരം>(*F2P)) && F2P != F2End)
     ++F2P;
 
   // If we stop on numbers, compare their difference.
-  if (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
+  എങ്കിൽ (!is_സംഖ്യ_Char(*F1P) || !is_സംഖ്യ_Char(*F2P)) {
     // The diff failed.
-    F1NumEnd = F1P;
-    F2NumEnd = F2P;
-  } else {
+    F1_അക്കം_End = F1P;
+    F2_അക്കം_End = F2P;
+  } അല്ലെങ്കിൽ {
     // Note that some ugliness is built into this to permit support for numbers
     // that use "D" or "d" as their exponential marker, e.g. "1.234D45".  This
     // occurs in 200.sixtrack in spec2k.
-    V1 = strtod(F1P, const_cast<char**>(&F1NumEnd));
-    V2 = strtod(F2P, const_cast<char**>(&F2NumEnd));
+    V1 = strtod(F1P, const_cast<അക്ഷരം**>(&F1_അക്കം_End));
+    V2 = strtod(F2P, const_cast<അക്ഷരം**>(&F2_അക്കം_End));
 
-    if (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
+    എങ്കിൽ (*F1_അക്കം_End == 'D' || *F1_അക്കം_End == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F1P, EndOfNumber(F1NumEnd)+1);
+      SmallString<200> StrTmp(F1P, End_Of_സംഖ്യ(F1_അക്കം_End)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F1NumEnd-F1P)] = 'e';
+      StrTmp[static_cast<unsigned>(F1_അക്കം_End-F1P)] = 'e';
 
-      V1 = strtod(&StrTmp[0], const_cast<char**>(&F1NumEnd));
-      F1NumEnd = F1P + (F1NumEnd-&StrTmp[0]);
+      V1 = strtod(&StrTmp[0], const_cast<അക്ഷരം**>(&F1_അക്കം_End));
+      F1_അക്കം_End = F1P + (F1_അക്കം_End-&StrTmp[0]);
     }
 
-    if (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
+    എങ്കിൽ (*F2_അക്കം_End == 'D' || *F2_അക്കം_End == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F2P, EndOfNumber(F2NumEnd)+1);
+      SmallString<200> StrTmp(F2P, End_Of_സംഖ്യ(F2_അക്കം_End)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F2NumEnd-F2P)] = 'e';
+      StrTmp[static_cast<unsigned>(F2_അക്കം_End-F2P)] = 'e';
 
-      V2 = strtod(&StrTmp[0], const_cast<char**>(&F2NumEnd));
-      F2NumEnd = F2P + (F2NumEnd-&StrTmp[0]);
+      V2 = strtod(&StrTmp[0], const_cast<അക്ഷരം**>(&F2_അക്കം_End));
+      F2_അക്കം_End = F2P + (F2_അക്കം_End-&StrTmp[0]);
     }
   }
 
-  if (F1NumEnd == F1P || F2NumEnd == F2P) {
-    if (ErrorMsg) {
-      *ErrorMsg = "FP Comparison failed, not a numeric difference between '";
-      *ErrorMsg += F1P[0];
-      *ErrorMsg += "' and '";
-      *ErrorMsg += F2P[0];
-      *ErrorMsg += "'";
+  എങ്കിൽ (F1_അക്കം_End == F1P || F2_അക്കം_End == F2P) {
+    എങ്കിൽ (Error_സന്ദേശം) {
+      *Error_സന്ദേശം = "FP Comparison failed, not a numeric difference between '";
+      *Error_സന്ദേശം += F1P[0];
+      *Error_സന്ദേശം += "' and '";
+      *Error_സന്ദേശം += F2P[0];
+      *Error_സന്ദേശം += "'";
     }
-    return true;
+    തിരികെ സത്യം;
   }
 
   // Check to see if these are inside the absolute tolerance
-  if (AbsTolerance < std::abs(V1-V2)) {
+  എങ്കിൽ (AbsTolerance < std::abs(V1-V2)) {
     // Nope, check the relative tolerance...
-    double Diff;
-    if (V2)
+    ഇരട്ട Diff;
+    എങ്കിൽ (V2)
       Diff = std::abs(V1/V2 - 1.0);
-    else if (V1)
+    അല്ലെങ്കിൽ എങ്കിൽ (V1)
       Diff = std::abs(V2/V1 - 1.0);
-    else
+    അല്ലെങ്കിൽ
       Diff = 0;  // Both zero.
-    if (Diff > RelTolerance) {
-      if (ErrorMsg) {
-        raw_string_ostream(*ErrorMsg)
+    എങ്കിൽ (Diff > RelTolerance) {
+      എങ്കിൽ (Error_സന്ദേശം) {
+        raw_string_ostream(*Error_സന്ദേശം)
           << "Compared: " << V1 << " and " << V2 << '\n'
           << "abs. diff = " << std::abs(V1-V2) << " rel.diff = " << Diff << '\n'
           << "Out of tolerance: rel/abs: " << RelTolerance << '/'
           << AbsTolerance;
       }
-      return true;
+      തിരികെ സത്യം;
     }
   }
 
   // Otherwise, advance our read pointers to the end of the numbers.
-  F1P = F1NumEnd;  F2P = F2NumEnd;
-  return false;
+  F1P = F1_അക്കം_End;  F2P = F2_അക്കം_End;
+  തിരികെ അസത്യം;
 }
 
 /// DiffFilesWithTolerance - Compare the two files specified, returning 0 if the
@@ -175,160 +175,160 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 /// error occurs, allowing the caller to distinguish between a failed diff and a
 /// file system error.
 ///
-int llvm::DiffFilesWithTolerance(StringRef NameA,
+പൂർണ്ണസംഖ്യ llvm::DiffFilesWithTolerance(StringRef NameA,
                                  StringRef NameB,
-                                 double AbsTol, double RelTol,
+                                 ഇരട്ട AbsTol, ഇരട്ട RelTol,
                                  std::string *Error) {
   // Now its safe to mmap the files into memory because both files
   // have a non-zero size.
   ErrorOr<std::unique_ptr<MemoryBuffer>> F1OrErr = MemoryBuffer::getFile(NameA);
-  if (std::error_code EC = F1OrErr.getError()) {
-    if (Error)
+  എങ്കിൽ (std::error_code EC = F1OrErr.getError()) {
+    എങ്കിൽ (Error)
       *Error = EC.message();
-    return 2;
+    തിരികെ 2;
   }
   MemoryBuffer &F1 = *F1OrErr.get();
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> F2OrErr = MemoryBuffer::getFile(NameB);
-  if (std::error_code EC = F2OrErr.getError()) {
-    if (Error)
+  എങ്കിൽ (std::error_code EC = F2OrErr.getError()) {
+    എങ്കിൽ (Error)
       *Error = EC.message();
-    return 2;
+    തിരികെ 2;
   }
   MemoryBuffer &F2 = *F2OrErr.get();
 
   // Okay, now that we opened the files, scan them for the first difference.
-  const char *File1Start = F1.getBufferStart();
-  const char *File2Start = F2.getBufferStart();
-  const char *File1End = F1.getBufferEnd();
-  const char *File2End = F2.getBufferEnd();
-  const char *F1P = File1Start;
-  const char *F2P = File2Start;
+  സ്ഥിരം അക്ഷരം *File1Start = F1.getBufferStart();
+  സ്ഥിരം അക്ഷരം *File2Start = F2.getBufferStart();
+  സ്ഥിരം അക്ഷരം *File1End = F1.getBufferEnd();
+  സ്ഥിരം അക്ഷരം *File2End = F2.getBufferEnd();
+  സ്ഥിരം അക്ഷരം *F1P = File1Start;
+  സ്ഥിരം അക്ഷരം *F2P = File2Start;
   uint64_t A_size = F1.getBufferSize();
   uint64_t B_size = F2.getBufferSize();
 
   // Are the buffers identical?  Common case: Handle this efficiently.
-  if (A_size == B_size &&
+  എങ്കിൽ (A_size == B_size &&
       std::memcmp(File1Start, File2Start, A_size) == 0)
-    return 0;
+    തിരികെ 0;
 
   // Otherwise, we are done a tolerances are set.
-  if (AbsTol == 0 && RelTol == 0) {
-    if (Error)
+  എങ്കിൽ (AbsTol == 0 && RelTol == 0) {
+    എങ്കിൽ (Error)
       *Error = "Files differ without tolerance allowance";
-    return 1;   // Files different!
+    തിരികെ 1;   // Files different!
   }
 
-  bool CompareFailed = false;
-  while (true) {
+  തർക്കം CompareFailed = അസത്യം;
+  ആകുമ്പോൾ (സത്യം) {
     // Scan for the end of file or next difference.
-    while (F1P < File1End && F2P < File2End && *F1P == *F2P) {
+    ആകുമ്പോൾ (F1P < File1End && F2P < File2End && *F1P == *F2P) {
       ++F1P;
       ++F2P;
     }
 
-    if (F1P >= File1End || F2P >= File2End) break;
+    എങ്കിൽ (F1P >= File1End || F2P >= File2End) നിർത്തുക;
 
     // Okay, we must have found a difference.  Backup to the start of the
     // current number each stream is at so that we can compare from the
     // beginning.
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    F1P = Backup_സംഖ്യ(F1P, File1Start);
+    F2P = Backup_സംഖ്യ(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
-      CompareFailed = true;
-      break;
+    എങ്കിൽ (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
+      CompareFailed = സത്യം;
+      നിർത്തുക;
     }
   }
 
   // Okay, we reached the end of file.  If both files are at the end, we
   // succeeded.
-  bool F1AtEnd = F1P >= File1End;
-  bool F2AtEnd = F2P >= File2End;
-  if (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
+  തർക്കം F1AtEnd = F1P >= File1End;
+  തർക്കം F2AtEnd = F2P >= File2End;
+  എങ്കിൽ (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
     // Else, we might have run off the end due to a number: backup and retry.
-    if (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
-    if (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    എങ്കിൽ (F1AtEnd && is_സംഖ്യ_Char(F1P[-1])) --F1P;
+    എങ്കിൽ (F2AtEnd && is_സംഖ്യ_Char(F2P[-1])) --F2P;
+    F1P = Backup_സംഖ്യ(F1P, File1Start);
+    F2P = Backup_സംഖ്യ(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
-      CompareFailed = true;
+    എങ്കിൽ (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
+      CompareFailed = സത്യം;
 
     // If we found the end, we succeeded.
-    if (F1P < File1End || F2P < File2End)
-      CompareFailed = true;
+    എങ്കിൽ (F1P < File1End || F2P < File2End)
+      CompareFailed = സത്യം;
   }
 
-  return CompareFailed;
+  തിരികെ CompareFailed;
 }
 
 Expected<FilePermissionsApplier>
-FilePermissionsApplier::create(StringRef InputFilename) {
+FilePermissionsApplier::create(StringRef നിവേശം_Filename) {
   sys::fs::file_status Status;
 
-  if (InputFilename != "-") {
-    if (auto EC = sys::fs::status(InputFilename, Status))
-      return createFileError(InputFilename, EC);
-  } else {
+  എങ്കിൽ (നിവേശം_Filename != "-") {
+    എങ്കിൽ (auto EC = sys::fs::status(നിവേശം_Filename, Status))
+      തിരികെ createFileError(നിവേശം_Filename, EC);
+  } അല്ലെങ്കിൽ {
     Status.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  return FilePermissionsApplier(InputFilename, Status);
+  തിരികെ FilePermissionsApplier(നിവേശം_Filename, Status);
 }
 
 Error FilePermissionsApplier::apply(
-    StringRef OutputFilename, bool CopyDates,
+    StringRef OutputFilename, തർക്കം CopyDates,
     std::optional<sys::fs::perms> OverwritePermissions) {
-  sys::fs::file_status Status = InputStatus;
+  sys::fs::file_status Status = നിവേശം_Status;
 
-  if (OverwritePermissions)
+  എങ്കിൽ (OverwritePermissions)
     Status.permissions(*OverwritePermissions);
 
-  int FD = 0;
+  പൂർണ്ണസംഖ്യ FD = 0;
 
   // Writing to stdout should not be treated as an error here, just
   // do not set access/modification times or permissions.
-  if (OutputFilename == "-")
-    return Error::success();
+  എങ്കിൽ (OutputFilename == "-")
+    തിരികെ Error::success();
 
-  if (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
+  എങ്കിൽ (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
                                                      sys::fs::CD_OpenExisting))
-    return createFileError(OutputFilename, EC);
+    തിരികെ createFileError(OutputFilename, EC);
 
-  if (CopyDates)
-    if (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
+  എങ്കിൽ (CopyDates)
+    എങ്കിൽ (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
             FD, Status.getLastAccessedTime(), Status.getLastModificationTime()))
-      return createFileError(OutputFilename, EC);
+      തിരികെ createFileError(OutputFilename, EC);
 
   sys::fs::file_status OStat;
-  if (std::error_code EC =
+  എങ്കിൽ (std::error_code EC =
           sys::fs::status(sys::fs::convertFDToNativeFile(FD), OStat))
-    return createFileError(OutputFilename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file) {
+    തിരികെ createFileError(OutputFilename, EC);
+  എങ്കിൽ (OStat.type() == sys::fs::file_type::regular_file) {
 #ifndef _WIN32
     // Keep ownership if llvm-objcopy is called under root.
-    if (OutputFilename == InputFilename && OStat.getUser() == 0)
+    എങ്കിൽ (OutputFilename == നിവേശം_Filename && OStat.getUser() == 0)
       sys::fs::changeFileOwnership(FD, Status.getUser(), Status.getGroup());
 #endif
 
     sys::fs::perms Perm = Status.permissions();
-    if (OutputFilename != InputFilename)
+    എങ്കിൽ (OutputFilename != നിവേശം_Filename)
       Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
 #ifdef _WIN32
-    if (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
-#else
-    if (std::error_code EC = sys::fs::setPermissions(FD, Perm))
+    എങ്കിൽ (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
+#അല്ലെങ്കിൽ
+    എങ്കിൽ (std::error_code EC = sys::fs::setPermissions(FD, Perm))
 #endif
-      return createFileError(OutputFilename, EC);
+      തിരികെ createFileError(OutputFilename, EC);
   }
 
-  if (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return createFileError(OutputFilename, EC);
+  എങ്കിൽ (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    തിരികെ createFileError(OutputFilename, EC);
 
-  return Error::success();
+  തിരികെ Error::success();
 }

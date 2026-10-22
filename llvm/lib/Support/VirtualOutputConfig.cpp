@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/Support/VirtualOutputConfig.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/FileSystem.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::setOpenFlags(സ്ഥിരം sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
-  using namespace llvm::sys::fs;
-  return Flags & OF_Text
+  using നാമാകാശ llvm::sys::fs;
+  തിരികെ Flags & OF_Text
              ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+             : set_ദ്വിമാന().setAppend(Flags & OF_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+ശൂന്യം OutputConfig::print(raw_ostream &OS) സ്ഥിരം {
   OS << "{";
-  bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
-      IsFirst = false;
-    else
+  തർക്കം IsFirst = സത്യം;
+  auto printFlag = [&](StringRef FlagName, തർക്കം മൂല്യം) {
+    എങ്കിൽ (IsFirst)
+      IsFirst = അസത്യം;
+    അല്ലെങ്കിൽ
       OS << ",";
-    if (!Value)
+    എങ്കിൽ (!മൂല്യം)
       OS << "No";
     OS << FlagName;
   };
 
 #define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+  എങ്കിൽ (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#അന്തര്ഭാവ "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD ശൂന്യം OutputConfig::dump() സ്ഥിരം { print(dbgs()); }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  തിരികെ OS;
 }

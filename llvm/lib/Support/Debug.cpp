@@ -23,96 +23,96 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Debug.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/circular_raw_ostream.h"
-#include "llvm/Support/raw_ostream.h"
-#include <utility>
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/CommandLine.h"
+#അന്തര്ഭാവ "llvm/Support/ManagedStatic.h"
+#അന്തര്ഭാവ "llvm/Support/Signals.h"
+#അന്തര്ഭാവ "llvm/Support/circular_raw_ostream.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <utility>
 
-#include "DebugOptions.h"
+#അന്തര്ഭാവ "DebugOptions.h"
 
 #undef isCurrentDebugType
 #undef setCurrentDebugType
 #undef setCurrentDebugTypes
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
 /// Parse a debug type string into a pair of the debug type and the debug level.
 /// The expected format is "type[:level]", where the level is an optional
 /// integer.
-static std::pair<std::string, std::optional<int>>
+സ്ഥിതം std::pair<std::string, std::optional<പൂർണ്ണസംഖ്യ>>
 parseDebugType(StringRef DbgType) {
-  std::optional<int> Level;
+  std::optional<പൂർണ്ണസംഖ്യ> Level;
   size_t ColonPos = DbgType.find(':');
-  if (ColonPos != StringRef::npos) {
+  എങ്കിൽ (ColonPos != StringRef::npos) {
     StringRef LevelStr = DbgType.substr(ColonPos + 1);
     DbgType = DbgType.take_front(ColonPos);
-    if (LevelStr.empty())
+    എങ്കിൽ (LevelStr.empty())
       Level = 0;
-    else {
-      int parsedLevel;
-      if (to_integer(LevelStr, parsedLevel, 10))
+    അല്ലെങ്കിൽ {
+      പൂർണ്ണസംഖ്യ parsedLevel;
+      എങ്കിൽ (to_integer(LevelStr, parsedLevel, 10))
         Level = parsedLevel;
     }
   }
-  return std::make_pair(DbgType.str(), Level);
+  തിരികെ std::make_pair(DbgType.str(), Level);
 }
 
 // Even though LLVM might be built with NDEBUG, define symbols that the code
 // built without NDEBUG can depend on via the llvm/Support/Debug.h header.
-namespace llvm {
+നാമാകാശ llvm {
 /// Exported boolean set by the -debug option.
-bool DebugFlag = false;
+തർക്കം DebugFlag = അസത്യം;
 
 /// The current debug type and an optional debug level.
 /// The debug level is the verbosity of the debug output.
 /// 0 is a special level that acts as an opt-out for this specific debug type.
 /// If provided, the debug output is enabled only if the user specified a level
 /// at least as high as the provided level.
-static ManagedStatic<std::vector<std::pair<std::string, std::optional<int>>>>
+സ്ഥിതം ManagedStatic<std::vector<std::pair<std::string, std::optional<പൂർണ്ണസംഖ്യ>>>>
     CurrentDebugType;
 
 /// Return true if the specified string is the debug type
 /// specified on the command line, or if none was specified on the command line
 /// with the -debug-only=X option.
-bool isCurrentDebugType(const char *DebugType, int Level) {
-  if (CurrentDebugType->empty())
-    return true;
+തർക്കം isCurrentDebugType(സ്ഥിരം അക്ഷരം *DebugType, പൂർണ്ണസംഖ്യ Level) {
+  എങ്കിൽ (CurrentDebugType->empty())
+    തിരികെ സത്യം;
   // Track if there is at least one debug type with a level, this is used
   // to allow to opt-out of some DebugType and leaving all the others enabled.
-  bool HasEnabledDebugType = false;
+  തർക്കം HasEnabledDebugType = അസത്യം;
   // See if DebugType is in list. Note: do not use find() as that forces us to
   // unnecessarily create an std::string instance.
-  for (auto &D : *CurrentDebugType) {
+  വേണ്ടി (auto &D : *CurrentDebugType) {
     HasEnabledDebugType =
-        HasEnabledDebugType || (!D.second.has_value() || D.second.value() > 0);
-    if (D.first != DebugType)
-      continue;
-    if (!D.second.has_value())
-      return true;
-    return D.second >= Level;
+        HasEnabledDebugType || (!D.second.has_മൂല്യം_2() || D.second.മൂല്യം_2() > 0);
+    എങ്കിൽ (D.first != DebugType)
+      തുടരുക;
+    എങ്കിൽ (!D.second.has_മൂല്യം_2())
+      തിരികെ സത്യം;
+    തിരികെ D.second >= Level;
   }
-  return !HasEnabledDebugType;
+  തിരികെ !HasEnabledDebugType;
 }
 
 /// Set the current debug type, as if the -debug-only=X
 /// option were specified.  Note that DebugFlag also needs to be set to true for
 /// debug output to be produced.
 ///
-void setCurrentDebugTypes(const char **Types, unsigned Count);
+ശൂന്യം setCurrentDebugTypes(സ്ഥിരം അക്ഷരം **Types, unsigned എണ്ണം_2);
 
-void setCurrentDebugType(const char *Type) {
+ശൂന്യം setCurrentDebugType(സ്ഥിരം അക്ഷരം *Type) {
   setCurrentDebugTypes(&Type, 1);
 }
 
-void setCurrentDebugTypes(const char **Types, unsigned Count) {
+ശൂന്യം setCurrentDebugTypes(സ്ഥിരം അക്ഷരം **Types, unsigned എണ്ണം_2) {
   CurrentDebugType->clear();
-  CurrentDebugType->reserve(Count);
-  for (const char *Type : ArrayRef(Types, Count))
-    CurrentDebugType->push_back(parseDebugType(Type));
+  CurrentDebugType->reserve(എണ്ണം_2);
+  വേണ്ടി (സ്ഥിരം അക്ഷരം *Type : ArrayRef(Types, എണ്ണം_2))
+    CurrentDebugType->തള്ളുക_back(parseDebugType(Type));
 }
 
 } // namespace llvm
@@ -120,19 +120,19 @@ void setCurrentDebugTypes(const char **Types, unsigned Count) {
 // All Debug.h functionality is a no-op in NDEBUG mode.
 #ifndef NDEBUG
 
-namespace {
-struct CreateDebug {
-  static void *call() {
-    return new cl::opt<bool, true>("debug", cl::desc("Enable debug output"),
+നാമാകാശ {
+ഘടന CreateDebug {
+  സ്ഥിതം ശൂന്യം *call() {
+    തിരികെ പുതിയ cl::opt<തർക്കം, സത്യം>("debug", cl::desc("Enable debug output"),
                                    cl::Hidden, cl::location(DebugFlag));
   }
 };
 
 // -debug-buffer-size - Buffer the last N characters of debug output
 //until program termination.
-struct CreateDebugBufferSize {
-  static void *call() {
-    return new cl::opt<unsigned>(
+ഘടന CreateDebugBufferSize {
+  സ്ഥിതം ശൂന്യം *call() {
+    തിരികെ പുതിയ cl::opt<unsigned>(
         "debug-buffer-size",
         cl::desc("Buffer the last N characters of debug output "
                  "until program termination. "
@@ -144,30 +144,30 @@ struct CreateDebugBufferSize {
 
 // -debug - Command line option to enable the DEBUG statements in the passes.
 // This flag may only be enabled in debug builds.
-static ManagedStatic<cl::opt<bool, true>, CreateDebug> Debug;
-static ManagedStatic<cl::opt<unsigned>, CreateDebugBufferSize> DebugBufferSize;
+സ്ഥിതം ManagedStatic<cl::opt<തർക്കം, സത്യം>, CreateDebug> Debug;
+സ്ഥിതം ManagedStatic<cl::opt<unsigned>, CreateDebugBufferSize> DebugBufferSize;
 
-namespace {
+നാമാകാശ {
 
-struct DebugOnlyOpt {
-  void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
-    DebugFlag = true;
+ഘടന DebugOnlyOpt {
+  ശൂന്യം operator=(സ്ഥിരം std::string &Val) സ്ഥിരം {
+    എങ്കിൽ (Val.empty())
+      തിരികെ;
+    DebugFlag = സത്യം;
     SmallVector<StringRef, 8> DbgTypes;
-    StringRef(Val).split(DbgTypes, ',', -1, false);
-    for (auto DbgType : DbgTypes)
-      CurrentDebugType->push_back(parseDebugType(DbgType));
+    StringRef(Val).split(DbgTypes, ',', -1, അസത്യം);
+    വേണ്ടി (auto DbgType : DbgTypes)
+      CurrentDebugType->തള്ളുക_back(parseDebugType(DbgType));
   }
 };
 } // namespace
 
-static DebugOnlyOpt DebugOnlyOptLoc;
+സ്ഥിതം DebugOnlyOpt DebugOnlyOptLoc;
 
-namespace {
-struct CreateDebugOnly {
-  static void *call() {
-    return new cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>(
+നാമാകാശ {
+ഘടന CreateDebugOnly {
+  സ്ഥിതം ശൂന്യം *call() {
+    തിരികെ പുതിയ cl::opt<DebugOnlyOpt, സത്യം, cl::parser<std::string>>(
         "debug-only",
         cl::desc(
             "Enable a specific type of debug output (comma separated list "
@@ -176,23 +176,23 @@ struct CreateDebugOnly {
             "control the verbosity of the output. Setting a debug-type level "
             "to zero acts as an opt-out for this specific debug-type without "
             "affecting the others."),
-        cl::Hidden, cl::value_desc("debug string"),
-        cl::location(DebugOnlyOptLoc), cl::ValueRequired);
+        cl::Hidden, cl::മൂല്യം_desc("debug string"),
+        cl::location(DebugOnlyOptLoc), cl::മൂല്യം_Required);
   }
 };
 } // namespace
 
-static ManagedStatic<cl::opt<DebugOnlyOpt, true, cl::parser<std::string>>,
+സ്ഥിതം ManagedStatic<cl::opt<DebugOnlyOpt, സത്യം, cl::parser<std::string>>,
                      CreateDebugOnly>
     DebugOnly;
 
-void llvm::initDebugOptions() {
+ശൂന്യം llvm::initDebugOptions() {
   *Debug;
   *DebugBufferSize;
   *DebugOnly;
 }
 
-static void printDebugLogImpl() {
+സ്ഥിതം ശൂന്യം printDebugLogImpl() {
   // This is a bit sneaky.  Since this is under #ifndef NDEBUG, we
   // know that debug mode is enabled and dbgs() really is a
   // circular_raw_ostream.  If NDEBUG is defined, then dbgs() ==
@@ -203,18 +203,18 @@ static void printDebugLogImpl() {
 }
 
 // Signal handlers - dump debug output on termination.
-static void debug_user_sig_handler(void *Cookie) { printDebugLogImpl(); }
+സ്ഥിതം ശൂന്യം debug_user_sig_handler(ശൂന്യം *Cookie) { printDebugLogImpl(); }
 
 /// dbgs - Return a circular-buffered debug stream.
 raw_ostream &llvm::dbgs() {
   // Do one-time initialization in a thread-safe way.
-  static struct dbgstream {
+  സ്ഥിതം ഘടന dbgstream {
     circular_raw_ostream strm;
 
     dbgstream()
         : strm(errs(), "*** Debug Log Output ***\n",
                (!EnableDebugBuffering || !DebugFlag) ? 0 : *DebugBufferSize) {
-      if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+      എങ്കിൽ (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
         // TODO: Add a handler for SIGUSER1-type signals so the user can
         // force a debug dump.
         sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
@@ -223,27 +223,27 @@ raw_ostream &llvm::dbgs() {
     }
   } thestrm;
 
-  return thestrm.strm;
+  തിരികെ thestrm.strm;
 }
 
-void llvm::printDebugLog() {
-  if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
+ശൂന്യം llvm::printDebugLog() {
+  എങ്കിൽ (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
     printDebugLogImpl();
 }
 
-#else
+#അല്ലെങ്കിൽ
 // Avoid "has no symbols" warning.
-namespace llvm {
+നാമാകാശ llvm {
   /// dbgs - Return errs().
   raw_ostream &dbgs() {
-    return errs();
+    തിരികെ errs();
   }
 }
-void llvm::initDebugOptions() {}
+ശൂന്യം llvm::initDebugOptions() {}
 
-void llvm::printDebugLog() {}
+ശൂന്യം llvm::printDebugLog() {}
 #endif
 
 /// EnableDebugBuffering - Turn on signal handler installation.
 ///
-bool llvm::EnableDebugBuffering = false;
+തർക്കം llvm::EnableDebugBuffering = അസത്യം;

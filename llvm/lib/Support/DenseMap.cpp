@@ -6,35 +6,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/MemAlloc.h"
-#include <cstring>
+#അന്തര്ഭാവ "llvm/ADT/DenseMap.h"
+#അന്തര്ഭാവ "llvm/Support/MemAlloc.h"
+#അന്തര്ഭാവ <cstring>
 
-using namespace llvm;
-using namespace llvm::densemap;
-using namespace llvm::densemap::detail;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::densemap;
+using നാമാകാശ llvm::densemap::detail;
 
 // A nonzero FixedSize turns the bucket copy into a couple of stores.
-template <size_t FixedSize, bool InlinePtrHash>
-static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
-                       const void *SrcBuckets, const UsedT *SrcUsed,
-                       unsigned SrcNumBuckets, size_t RuntimeSize,
+template <size_t FixedSize, തർക്കം InlinePtrHash>
+സ്ഥിതം ശൂന്യം rehashLoop(ശൂന്യം *DstBuckets, UsedT *DstUsed, unsigned Mask,
+                       സ്ഥിരം ശൂന്യം *SrcBuckets, സ്ഥിരം UsedT *SrcUsed,
+                       unsigned Src_അക്കം_Buckets, size_t RuntimeSize,
                        BucketHasher Hasher) {
-  const size_t BucketSize = FixedSize ? FixedSize : RuntimeSize;
-  char *Dst = static_cast<char *>(DstBuckets);
-  const char *Src = static_cast<const char *>(SrcBuckets);
-  forEachUsed(SrcUsed, SrcNumBuckets, [&](unsigned I) {
-    const char *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
+  സ്ഥിരം size_t BucketSize = FixedSize ? FixedSize : RuntimeSize;
+  അക്ഷരം *Dst = static_cast<അക്ഷരം *>(DstBuckets);
+  സ്ഥിരം അക്ഷരം *Src = static_cast<സ്ഥിരം അക്ഷരം *>(SrcBuckets);
+  forEachUsed(SrcUsed, Src_അക്കം_Buckets, [&](unsigned I) {
+    സ്ഥിരം അക്ഷരം *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
     unsigned Hash;
-    if constexpr (InlinePtrHash) {
-      void *Key;
-      std::memcpy(&Key, SrcBucket, sizeof(Key));
-      Hash = DenseMapInfo<void *>::getHashValue(Key);
-    } else {
+    എങ്കിൽ constexpr (InlinePtrHash) {
+      ശൂന്യം *താക്കോൽ;
+      std::memcpy(&താക്കോൽ, SrcBucket, വലുപ്പം(താക്കോൽ));
+      Hash = DenseMapInfo<ശൂന്യം *>::get_Hash_മൂല്യം(താക്കോൽ);
+    } അല്ലെങ്കിൽ {
       Hash = Hasher(SrcBucket);
     }
     unsigned BucketNo = Hash & Mask;
-    while (used(DstUsed, BucketNo))
+    ആകുമ്പോൾ (used(DstUsed, BucketNo))
       BucketNo = (BucketNo + 1) & Mask;
     std::memcpy(Dst + static_cast<size_t>(BucketNo) * BucketSize, SrcBucket,
                 BucketSize);
@@ -42,17 +42,17 @@ static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
   });
 }
 
-template <bool InlinePtrHash>
-static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
-                         const void *Src, const UsedT *SrcUsed,
-                         unsigned SrcNumBuckets, size_t BucketSize,
+template <തർക്കം InlinePtrHash>
+സ്ഥിതം ശൂന്യം rehashBySize(ശൂന്യം *Dst, UsedT *DstUsed, unsigned Mask,
+                         സ്ഥിരം ശൂന്യം *Src, സ്ഥിരം UsedT *SrcUsed,
+                         unsigned Src_അക്കം_Buckets, size_t BucketSize,
                          BucketHasher Hasher) {
   // The bucket sizes of 95% of the grow instantiations in an LLVM build.
-  switch (BucketSize) {
+  തിരഞ്ഞെടുപ്പ് (BucketSize) {
 #define REHASH_CASE(N)                                                         \
-  case N:                                                                      \
-    return rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
-                                        SrcNumBuckets, BucketSize, Hasher);
+  അവസ്ഥ N:                                                                      \
+    തിരികെ rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
+                                        Src_അക്കം_Buckets, BucketSize, Hasher);
     REHASH_CASE(4)
     REHASH_CASE(8)
     REHASH_CASE(12)
@@ -62,40 +62,40 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
     REHASH_CASE(40)
     REHASH_CASE(48)
 #undef REHASH_CASE
-  default:
-    return rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
-                                        SrcNumBuckets, BucketSize, Hasher);
+  സ്ഥിരസ്ഥിതി:
+    തിരികെ rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
+                                        Src_അക്കം_Buckets, BucketSize, Hasher);
   }
 }
 
-void densemap::detail::rehashRelocatable(void *Dst, UsedT *DstUsed,
-                                         unsigned DstNumBuckets,
-                                         const void *Src, const UsedT *SrcUsed,
-                                         unsigned SrcNumBuckets,
+ശൂന്യം densemap::detail::rehashRelocatable(ശൂന്യം *Dst, UsedT *DstUsed,
+                                         unsigned Dst_അക്കം_Buckets,
+                                         സ്ഥിരം ശൂന്യം *Src, സ്ഥിരം UsedT *SrcUsed,
+                                         unsigned Src_അക്കം_Buckets,
                                          size_t BucketSize,
                                          BucketHasher Hasher) {
-  const unsigned Mask = DstNumBuckets - 1;
-  if (!Hasher)
-    return rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  സ്ഥിരം unsigned Mask = Dst_അക്കം_Buckets - 1;
+  എങ്കിൽ (!Hasher)
+    തിരികെ rehashBySize<സത്യം>(Dst, DstUsed, Mask, Src, SrcUsed, Src_അക്കം_Buckets,
                               BucketSize, Hasher);
-  return rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  തിരികെ rehashBySize<അസത്യം>(Dst, DstUsed, Mask, Src, SrcUsed, Src_അക്കം_Buckets,
                              BucketSize, Hasher);
 }
 
-void *densemap::detail::growRelocatable(void *OldBuckets, const UsedT *OldUsed,
-                                        unsigned OldNumBuckets,
-                                        unsigned NewNumBuckets,
+ശൂന്യം *densemap::detail::growRelocatable(ശൂന്യം *OldBuckets, സ്ഥിരം UsedT *OldUsed,
+                                        unsigned Old_അക്കം_Buckets,
+                                        unsigned New_അക്കം_Buckets,
                                         size_t BucketSize, size_t Align,
-                                        BucketHasher Hasher, bool FreeOld) {
-  void *Storage = allocate_buffer(allocBytes(BucketSize, NewNumBuckets), Align);
-  UsedT *NewUsed = usedFor(Storage, BucketSize, NewNumBuckets);
-  clearUsed(NewUsed, NewNumBuckets);
-  if (OldNumBuckets) {
-    rehashRelocatable(Storage, NewUsed, NewNumBuckets, OldBuckets, OldUsed,
-                      OldNumBuckets, BucketSize, Hasher);
-    if (FreeOld)
-      deallocate_buffer(OldBuckets, allocBytes(BucketSize, OldNumBuckets),
+                                        BucketHasher Hasher, തർക്കം FreeOld) {
+  ശൂന്യം *Storage = allocate_buffer(allocBytes(BucketSize, New_അക്കം_Buckets), Align);
+  UsedT *NewUsed = usedFor(Storage, BucketSize, New_അക്കം_Buckets);
+  clearUsed(NewUsed, New_അക്കം_Buckets);
+  എങ്കിൽ (Old_അക്കം_Buckets) {
+    rehashRelocatable(Storage, NewUsed, New_അക്കം_Buckets, OldBuckets, OldUsed,
+                      Old_അക്കം_Buckets, BucketSize, Hasher);
+    എങ്കിൽ (FreeOld)
+      deallocate_buffer(OldBuckets, allocBytes(BucketSize, Old_അക്കം_Buckets),
                         Align);
   }
-  return Storage;
+  തിരികെ Storage;
 }

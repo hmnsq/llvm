@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LEB128.h"
+#അന്തര്ഭാവ "llvm/Support/LEB128.h"
 
-namespace llvm {
+നാമാകാശ llvm {
 
 /// Utility function to get the size of the ULEB128-encoded value.
-unsigned getULEB128Size(uint64_t Value) {
+unsigned getULEB128Size(uint64_t മൂല്യം) {
   unsigned Size = 0;
-  do {
-    Value >>= 7;
-    Size += sizeof(int8_t);
-  } while (Value);
-  return Size;
+  ചെയ്യുക {
+    മൂല്യം >>= 7;
+    Size += വലുപ്പം(int8_t);
+  } ആകുമ്പോൾ (മൂല്യം);
+  തിരികെ Size;
 }
 
 /// Utility function to get the size of the SLEB128-encoded value.
-unsigned getSLEB128Size(int64_t Value) {
+unsigned getSLEB128Size(int64_t മൂല്യം) {
   unsigned Size = 0;
-  int Sign = Value >> (8 * sizeof(Value) - 1);
-  bool IsMore;
+  പൂർണ്ണസംഖ്യ Sign = മൂല്യം >> (8 * വലുപ്പം(മൂല്യം) - 1);
+  തർക്കം IsMore;
 
-  do {
-    unsigned Byte = Value & 0x7f;
-    Value >>= 7;
-    IsMore = Value != Sign || ((Byte ^ Sign) & 0x40) != 0;
-    Size += sizeof(int8_t);
-  } while (IsMore);
-  return Size;
+  ചെയ്യുക {
+    unsigned Byte = മൂല്യം & 0x7f;
+    മൂല്യം >>= 7;
+    IsMore = മൂല്യം != Sign || ((Byte ^ Sign) & 0x40) != 0;
+    Size += വലുപ്പം(int8_t);
+  } ആകുമ്പോൾ (IsMore);
+  തിരികെ Size;
 }
 
 }  // namespace llvm

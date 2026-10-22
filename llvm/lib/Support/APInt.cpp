@@ -11,101 +11,101 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/APInt.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/Sequence.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/bit.h"
-#include "llvm/Support/Alignment.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <optional>
+#അന്തര്ഭാവ "llvm/ADT/APInt.h"
+#അന്തര്ഭാവ "llvm/ADT/ArrayRef.h"
+#അന്തര്ഭാവ "llvm/ADT/FoldingSet.h"
+#അന്തര്ഭാവ "llvm/ADT/Hashing.h"
+#അന്തര്ഭാവ "llvm/ADT/Sequence.h"
+#അന്തര്ഭാവ "llvm/ADT/SmallString.h"
+#അന്തര്ഭാവ "llvm/ADT/StringRef.h"
+#അന്തര്ഭാവ "llvm/ADT/bit.h"
+#അന്തര്ഭാവ "llvm/Support/Alignment.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/ErrorHandling.h"
+#അന്തര്ഭാവ "llvm/Support/MathExtras.h"
+#അന്തര്ഭാവ "llvm/Support/SwapByteOrder.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <cmath>
+#അന്തര്ഭാവ <optional>
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
 #define DEBUG_TYPE "apint"
 
 /// A utility function for allocating memory, checking for allocation failures,
 /// and ensuring the contents are zeroed.
-inline static uint64_t* getClearedMemory(unsigned numWords) {
-  return new uint64_t[numWords]();
+വരിയിൽ സ്ഥിതം uint64_t* getClearedMemory(unsigned അക്കം_വാക്കുകൾ) {
+  തിരികെ പുതിയ uint64_t[അക്കം_വാക്കുകൾ]();
 }
 
 /// A utility function for allocating memory and checking for allocation
 /// failure.  The content is not zeroed.
-inline static uint64_t* getMemory(unsigned numWords) {
-  return new uint64_t[numWords];
+വരിയിൽ സ്ഥിതം uint64_t* getMemory(unsigned അക്കം_വാക്കുകൾ) {
+  തിരികെ പുതിയ uint64_t[അക്കം_വാക്കുകൾ];
 }
 
 /// A utility function that converts a character to a digit.
-inline static unsigned getDigit(char cdigit, uint8_t radix) {
+വരിയിൽ സ്ഥിതം unsigned getDigit(അക്ഷരം cdigit, uint8_t radix) {
   unsigned r;
 
-  if (radix == 16 || radix == 36) {
+  എങ്കിൽ (radix == 16 || radix == 36) {
     r = cdigit - '0';
-    if (r <= 9)
-      return r;
+    എങ്കിൽ (r <= 9)
+      തിരികെ r;
 
     r = cdigit - 'A';
-    if (r <= radix - 11U)
-      return r + 10;
+    എങ്കിൽ (r <= radix - 11U)
+      തിരികെ r + 10;
 
     r = cdigit - 'a';
-    if (r <= radix - 11U)
-      return r + 10;
+    എങ്കിൽ (r <= radix - 11U)
+      തിരികെ r + 10;
 
     radix = 10;
   }
 
   r = cdigit - '0';
-  if (r < radix)
-    return r;
+  എങ്കിൽ (r < radix)
+    തിരികെ r;
 
-  return UINT_MAX;
+  തിരികെ UINT_MAX;
 }
 
 
-void APInt::initSlowCase(uint64_t val, bool isSigned) {
-  if (isSigned && int64_t(val) < 0) {
-    U.pVal = getMemory(getNumWords());
+ശൂന്യം APInt::initSlowCase(uint64_t val, തർക്കം isSigned) {
+  എങ്കിൽ (isSigned && int64_t(val) < 0) {
+    U.pVal = getMemory(get_അക്കം_വാക്കുകൾ());
     U.pVal[0] = val;
-    memset(&U.pVal[1], 0xFF, APINT_WORD_SIZE * (getNumWords() - 1));
+    memset(&U.pVal[1], 0xFF, APINT_WORD_SIZE * (get_അക്കം_വാക്കുകൾ() - 1));
     clearUnusedBits();
-  } else {
-    U.pVal = getClearedMemory(getNumWords());
+  } അല്ലെങ്കിൽ {
+    U.pVal = getClearedMemory(get_അക്കം_വാക്കുകൾ());
     U.pVal[0] = val;
   }
 }
 
-void APInt::initSlowCase(const APInt& that) {
-  U.pVal = getMemory(getNumWords());
-  memcpy(U.pVal, that.U.pVal, getNumWords() * APINT_WORD_SIZE);
+ശൂന്യം APInt::initSlowCase(സ്ഥിരം APInt& that) {
+  U.pVal = getMemory(get_അക്കം_വാക്കുകൾ());
+  memcpy(U.pVal, that.U.pVal, get_അക്കം_വാക്കുകൾ() * APINT_WORD_SIZE);
 }
 
-void APInt::initFromArray(ArrayRef<uint64_t> bigVal) {
-  assert(bigVal.data() && "Null pointer detected!");
-  if (LLVM_LIKELY(isSingleWord()))
+ശൂന്യം APInt::initFromArray(ArrayRef<uint64_t> bigVal) {
+  പ്രതിജ്ഞാ(bigVal.data() && "Null pointer detected!");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL = bigVal[0];
-  else {
+  അല്ലെങ്കിൽ {
     // Get memory, cleared to 0
-    U.pVal = getClearedMemory(getNumWords());
+    U.pVal = getClearedMemory(get_അക്കം_വാക്കുകൾ());
     // Calculate the number of words to copy
-    unsigned words = std::min<unsigned>(bigVal.size(), getNumWords());
+    unsigned വാക്കുകൾ = std::min<unsigned>(bigVal.size(), get_അക്കം_വാക്കുകൾ());
     // Copy the words from bigVal to pVal
-    memcpy(U.pVal, bigVal.data(), words * APINT_WORD_SIZE);
+    memcpy(U.pVal, bigVal.data(), വാക്കുകൾ * APINT_WORD_SIZE);
   }
   // Make sure unused high bits are cleared
   clearUnusedBits();
 }
 
-APInt::APInt(unsigned numBits, ArrayRef<uint64_t> bigVal) : BitWidth(numBits) {
+APInt::APInt(unsigned അക്കം_Bits, ArrayRef<uint64_t> bigVal) : BitWidth(അക്കം_Bits) {
   initFromArray(bigVal);
 }
 
@@ -114,198 +114,198 @@ APInt::APInt(unsigned numbits, StringRef Str, uint8_t radix)
   fromString(numbits, Str, radix);
 }
 
-void APInt::reallocate(unsigned NewBitWidth) {
+ശൂന്യം APInt::reallocate(unsigned NewBitWidth) {
   // If the number of words is the same we can just change the width and stop.
-  if (getNumWords() == getNumWords(NewBitWidth)) {
+  എങ്കിൽ (get_അക്കം_വാക്കുകൾ() == get_അക്കം_വാക്കുകൾ(NewBitWidth)) {
     BitWidth = NewBitWidth;
-    return;
+    തിരികെ;
   }
 
   // If we have an allocation, delete it.
-  if (LLVM_UNLIKELY(!isSingleWord()))
+  എങ്കിൽ (LLVM_UNLIKELY(!isSingleWord()))
     delete [] U.pVal;
 
   // Update BitWidth.
   BitWidth = NewBitWidth;
 
   // If we are supposed to have an allocation, create it.
-  if (LLVM_UNLIKELY(!isSingleWord()))
-    U.pVal = getMemory(getNumWords());
+  എങ്കിൽ (LLVM_UNLIKELY(!isSingleWord()))
+    U.pVal = getMemory(get_അക്കം_വാക്കുകൾ());
 }
 
-void APInt::assignSlowCase(const APInt &RHS) {
+ശൂന്യം APInt::assignSlowCase(സ്ഥിരം APInt &RHS) {
   // Don't do anything for X = X
-  if (this == &RHS)
-    return;
+  എങ്കിൽ (ഇത് == &RHS)
+    തിരികെ;
 
   // Adjust the bit width and handle allocations as necessary.
   reallocate(RHS.getBitWidth());
 
   // Copy the data.
-  if (LLVM_LIKELY(isSingleWord()))
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL = RHS.U.VAL;
-  else
-    memcpy(U.pVal, RHS.U.pVal, getNumWords() * APINT_WORD_SIZE);
+  അല്ലെങ്കിൽ
+    memcpy(U.pVal, RHS.U.pVal, get_അക്കം_വാക്കുകൾ() * APINT_WORD_SIZE);
 }
 
 /// This method 'profiles' an APInt for use with FoldingSet.
-void APInt::Profile(FoldingSetNodeID& ID) const {
+ശൂന്യം APInt::Profile(Folding_Set_കണ്ണി_ID& ID) സ്ഥിരം {
   ID.AddInteger(BitWidth);
 
-  if (LLVM_LIKELY(isSingleWord())) {
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
     ID.AddInteger(U.VAL);
-    return;
+    തിരികെ;
   }
 
-  unsigned NumWords = getNumWords();
-  for (unsigned i = 0; i < NumWords; ++i)
+  unsigned അക്കം_വാക്കുകൾ_2 = get_അക്കം_വാക്കുകൾ();
+  വേണ്ടി (unsigned i = 0; i < അക്കം_വാക്കുകൾ_2; ++i)
     ID.AddInteger(U.pVal[i]);
 }
 
-bool APInt::isAligned(Align A) const {
-  if (isZero())
-    return true;
-  const unsigned TrailingZeroes = countr_zero();
-  const unsigned MinimumTrailingZeroes = Log2(A);
-  return TrailingZeroes >= MinimumTrailingZeroes;
+തർക്കം APInt::isAligned(Align A) സ്ഥിരം {
+  എങ്കിൽ (isZero())
+    തിരികെ സത്യം;
+  സ്ഥിരം unsigned TrailingZeroes = countr_zero();
+  സ്ഥിരം unsigned MinimumTrailingZeroes = Log2(A);
+  തിരികെ TrailingZeroes >= MinimumTrailingZeroes;
 }
 
 /// Prefix increment operator. Increments the APInt by one.
 APInt& APInt::operator++() {
-  if (LLVM_LIKELY(isSingleWord()))
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     ++U.VAL;
-  else
-    tcIncrement(U.pVal, getNumWords());
-  return clearUnusedBits();
+  അല്ലെങ്കിൽ
+    tcIncrement(U.pVal, get_അക്കം_വാക്കുകൾ());
+  തിരികെ clearUnusedBits();
 }
 
 /// Prefix decrement operator. Decrements the APInt by one.
 APInt& APInt::operator--() {
-  if (LLVM_LIKELY(isSingleWord()))
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     --U.VAL;
-  else
-    tcDecrement(U.pVal, getNumWords());
-  return clearUnusedBits();
+  അല്ലെങ്കിൽ
+    tcDecrement(U.pVal, get_അക്കം_വാക്കുകൾ());
+  തിരികെ clearUnusedBits();
 }
 
 /// Adds the RHS APInt to this APInt.
 /// @returns this, after addition of RHS.
 /// Addition assignment operator.
-APInt& APInt::operator+=(const APInt& RHS) {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::operator+=(സ്ഥിരം APInt& RHS) {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be the same");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL += RHS.U.VAL;
-  else
-    tcAdd(U.pVal, RHS.U.pVal, 0, getNumWords());
-  return clearUnusedBits();
+  അല്ലെങ്കിൽ
+    tcAdd(U.pVal, RHS.U.pVal, 0, get_അക്കം_വാക്കുകൾ());
+  തിരികെ clearUnusedBits();
 }
 
 APInt& APInt::operator+=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord()))
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL += RHS;
-  else
-    tcAddPart(U.pVal, RHS, getNumWords());
-  return clearUnusedBits();
+  അല്ലെങ്കിൽ
+    tcAddPart(U.pVal, RHS, get_അക്കം_വാക്കുകൾ());
+  തിരികെ clearUnusedBits();
 }
 
 /// Subtracts the RHS APInt from this APInt
 /// @returns this, after subtraction
 /// Subtraction assignment operator.
-APInt& APInt::operator-=(const APInt& RHS) {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
+APInt& APInt::operator-=(സ്ഥിരം APInt& RHS) {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be the same");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL -= RHS.U.VAL;
-  else
-    tcSubtract(U.pVal, RHS.U.pVal, 0, getNumWords());
-  return clearUnusedBits();
+  അല്ലെങ്കിൽ
+    tcSubtract(U.pVal, RHS.U.pVal, 0, get_അക്കം_വാക്കുകൾ());
+  തിരികെ clearUnusedBits();
 }
 
 APInt& APInt::operator-=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord()))
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL -= RHS;
-  else
-    tcSubtractPart(U.pVal, RHS, getNumWords());
-  return clearUnusedBits();
+  അല്ലെങ്കിൽ
+    tcSubtractPart(U.pVal, RHS, get_അക്കം_വാക്കുകൾ());
+  തിരികെ clearUnusedBits();
 }
 
-APInt APInt::operator*(const APInt& RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(BitWidth, U.VAL * RHS.U.VAL, /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+APInt APInt::operator*(സ്ഥിരം APInt& RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be the same");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
+    തിരികെ APInt(BitWidth, U.VAL * RHS.U.VAL, /*isSigned=*/അസത്യം,
+                 /*implicitTrunc=*/സത്യം);
 
-  APInt Result(getMemory(getNumWords()), getBitWidth());
-  tcMultiply(Result.U.pVal, U.pVal, RHS.U.pVal, getNumWords());
+  APInt Result(getMemory(get_അക്കം_വാക്കുകൾ()), getBitWidth());
+  tcMultiply(Result.U.pVal, U.pVal, RHS.U.pVal, get_അക്കം_വാക്കുകൾ());
   Result.clearUnusedBits();
-  return Result;
+  തിരികെ Result;
 }
 
-void APInt::andAssignSlowCase(const APInt &RHS) {
+ശൂന്യം APInt::andAssignSlowCase(സ്ഥിരം APInt &RHS) {
   WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+  വേണ്ടി (size_t i = 0, e = get_അക്കം_വാക്കുകൾ(); i != e; ++i)
     dst[i] &= rhs[i];
 }
 
-void APInt::orAssignSlowCase(const APInt &RHS) {
+ശൂന്യം APInt::orAssignSlowCase(സ്ഥിരം APInt &RHS) {
   WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+  വേണ്ടി (size_t i = 0, e = get_അക്കം_വാക്കുകൾ(); i != e; ++i)
     dst[i] |= rhs[i];
 }
 
-void APInt::xorAssignSlowCase(const APInt &RHS) {
+ശൂന്യം APInt::xorAssignSlowCase(സ്ഥിരം APInt &RHS) {
   WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+  വേണ്ടി (size_t i = 0, e = get_അക്കം_വാക്കുകൾ(); i != e; ++i)
     dst[i] ^= rhs[i];
 }
 
-APInt &APInt::operator*=(const APInt &RHS) {
-  *this = *this * RHS;
-  return *this;
+APInt &APInt::operator*=(സ്ഥിരം APInt &RHS) {
+  *ഇത് = *ഇത് * RHS;
+  തിരികെ *ഇത്;
 }
 
 APInt& APInt::operator*=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord())) {
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
     U.VAL *= RHS;
-  } else {
-    unsigned NumWords = getNumWords();
-    tcMultiplyPart(U.pVal, U.pVal, RHS, 0, NumWords, NumWords, false);
+  } അല്ലെങ്കിൽ {
+    unsigned അക്കം_വാക്കുകൾ_2 = get_അക്കം_വാക്കുകൾ();
+    tcMultiplyPart(U.pVal, U.pVal, RHS, 0, അക്കം_വാക്കുകൾ_2, അക്കം_വാക്കുകൾ_2, അസത്യം);
   }
-  return clearUnusedBits();
+  തിരികെ clearUnusedBits();
 }
 
-bool APInt::equalSlowCase(const APInt &RHS) const {
-  return std::equal(U.pVal, U.pVal + getNumWords(), RHS.U.pVal);
+തർക്കം APInt::equalSlowCase(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തിരികെ std::equal(U.pVal, U.pVal + get_അക്കം_വാക്കുകൾ(), RHS.U.pVal);
 }
 
-int APInt::compare(const APInt& RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
-  if (LLVM_LIKELY(isSingleWord()))
-    return U.VAL < RHS.U.VAL ? -1 : U.VAL > RHS.U.VAL;
+പൂർണ്ണസംഖ്യ APInt::compare(സ്ഥിരം APInt& RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
+    തിരികെ U.VAL < RHS.U.VAL ? -1 : U.VAL > RHS.U.VAL;
 
-  return tcCompare(U.pVal, RHS.U.pVal, getNumWords());
+  തിരികെ tcCompare(U.pVal, RHS.U.pVal, get_അക്കം_വാക്കുകൾ());
 }
 
-int APInt::compareSigned(const APInt& RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
-  if (LLVM_LIKELY(isSingleWord())) {
+പൂർണ്ണസംഖ്യ APInt::compareSigned(സ്ഥിരം APInt& RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
     int64_t lhsSext = SignExtend64(U.VAL, BitWidth);
     int64_t rhsSext = SignExtend64(RHS.U.VAL, BitWidth);
-    return lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
+    തിരികെ lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
   }
 
-  bool lhsNeg = isNegative();
-  bool rhsNeg = RHS.isNegative();
+  തർക്കം lhsNeg = isNegative();
+  തർക്കം rhsNeg = RHS.isNegative();
 
   // If the sign bits don't match, then (LHS < RHS) if LHS is negative
-  if (lhsNeg != rhsNeg)
-    return lhsNeg ? -1 : 1;
+  എങ്കിൽ (lhsNeg != rhsNeg)
+    തിരികെ lhsNeg ? -1 : 1;
 
   // Otherwise we can just use an unsigned comparison, because even negative
   // numbers compare correctly this way if both have the same signed-ness.
-  return tcCompare(U.pVal, RHS.U.pVal, getNumWords());
+  തിരികെ tcCompare(U.pVal, RHS.U.pVal, get_അക്കം_വാക്കുകൾ());
 }
 
-void APInt::setBitsSlowCase(unsigned loBit, unsigned hiBit) {
+ശൂന്യം APInt::setBitsSlowCase(unsigned loBit, unsigned hiBit) {
   unsigned loWord = whichWord(loBit);
   unsigned hiWord = whichWord(hiBit);
 
@@ -314,25 +314,25 @@ void APInt::setBitsSlowCase(unsigned loBit, unsigned hiBit) {
 
   // If hiBit is not aligned, we need a high mask.
   unsigned hiShiftAmt = whichBit(hiBit);
-  if (hiShiftAmt != 0) {
+  എങ്കിൽ (hiShiftAmt != 0) {
     // Create a high mask with zeros above hiBit.
     uint64_t hiMask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - hiShiftAmt);
     // If loWord and hiWord are equal, then we combine the masks. Otherwise,
     // set the bits in hiWord.
-    if (hiWord == loWord)
+    എങ്കിൽ (hiWord == loWord)
       loMask &= hiMask;
-    else
+    അല്ലെങ്കിൽ
       U.pVal[hiWord] |= hiMask;
   }
   // Apply the mask to the low word.
   U.pVal[loWord] |= loMask;
 
   // Fill any words between loWord and hiWord with all ones.
-  for (unsigned word = loWord + 1; word < hiWord; ++word)
+  വേണ്ടി (unsigned word = loWord + 1; word < hiWord; ++word)
     U.pVal[word] = WORDTYPE_MAX;
 }
 
-void APInt::clearBitsSlowCase(unsigned LoBit, unsigned HiBit) {
+ശൂന്യം APInt::clearBitsSlowCase(unsigned LoBit, unsigned HiBit) {
   unsigned LoWord = whichWord(LoBit);
   unsigned HiWord = whichWord(HiBit);
 
@@ -341,33 +341,33 @@ void APInt::clearBitsSlowCase(unsigned LoBit, unsigned HiBit) {
 
   // If HiBit is not aligned, we need a high mask.
   unsigned HiShiftAmt = whichBit(HiBit);
-  if (HiShiftAmt != 0) {
+  എങ്കിൽ (HiShiftAmt != 0) {
     // Create a high mask with ones above HiBit.
     uint64_t HiMask = ~(WORDTYPE_MAX >> (APINT_BITS_PER_WORD - HiShiftAmt));
     // If LoWord and HiWord are equal, then we combine the masks. Otherwise,
     // clear the bits in HiWord.
-    if (HiWord == LoWord)
+    എങ്കിൽ (HiWord == LoWord)
       LoMask |= HiMask;
-    else
+    അല്ലെങ്കിൽ
       U.pVal[HiWord] &= HiMask;
   }
   // Apply the mask to the low word.
   U.pVal[LoWord] &= LoMask;
 
   // Fill any words between LoWord and HiWord with all zeros.
-  for (unsigned Word = LoWord + 1; Word < HiWord; ++Word)
+  വേണ്ടി (unsigned Word = LoWord + 1; Word < HiWord; ++Word)
     U.pVal[Word] = 0;
 }
 
 // Complement a bignum in-place.
-static void tcComplement(APInt::WordType *dst, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
+സ്ഥിതം ശൂന്യം tcComplement(APInt::WordType *dst, unsigned parts) {
+  വേണ്ടി (unsigned i = 0; i < parts; i++)
     dst[i] = ~dst[i];
 }
 
 /// Toggle every bit to its opposite value.
-void APInt::flipAllBitsSlowCase() {
-  tcComplement(U.pVal, getNumWords());
+ശൂന്യം APInt::flipAllBitsSlowCase() {
+  tcComplement(U.pVal, get_അക്കം_വാക്കുകൾ());
   clearUnusedBits();
 }
 
@@ -375,41 +375,41 @@ void APInt::flipAllBitsSlowCase() {
 /// equivalent to:
 ///   (this->zext(NewWidth) << NewLSB.getBitWidth()) | NewLSB.zext(NewWidth)
 /// In the slow case, we know the result is large.
-APInt APInt::concatSlowCase(const APInt &NewLSB) const {
+APInt APInt::concatSlowCase(സ്ഥിരം APInt &NewLSB) സ്ഥിരം {
   unsigned NewWidth = getBitWidth() + NewLSB.getBitWidth();
   APInt Result = NewLSB.zext(NewWidth);
-  Result.insertBits(*this, NewLSB.getBitWidth());
-  return Result;
+  Result.തിരുകുക_Bits(*ഇത്, NewLSB.getBitWidth());
+  തിരികെ Result;
 }
 
 /// Toggle a given bit to its opposite value whose position is given
 /// as "bitPosition".
 /// Toggles a given bit to its opposite value.
-void APInt::flipBit(unsigned bitPosition) {
-  assert(bitPosition < BitWidth && "Out of the bit-width range!");
-  setBitVal(bitPosition, !(*this)[bitPosition]);
+ശൂന്യം APInt::flipBit(unsigned bitPosition) {
+  പ്രതിജ്ഞാ(bitPosition < BitWidth && "Out of the bit-width range!");
+  setBitVal(bitPosition, !(*ഇത്)[bitPosition]);
 }
 
-void APInt::insertBits(const APInt &subBits, unsigned bitPosition) {
+ശൂന്യം APInt::തിരുകുക_Bits(സ്ഥിരം APInt &subBits, unsigned bitPosition) {
   unsigned subBitWidth = subBits.getBitWidth();
-  assert((subBitWidth + bitPosition) <= BitWidth && "Illegal bit insertion");
+  പ്രതിജ്ഞാ((subBitWidth + bitPosition) <= BitWidth && "Illegal bit insertion");
 
   // inserting no bits is a noop.
-  if (subBitWidth == 0)
-    return;
+  എങ്കിൽ (subBitWidth == 0)
+    തിരികെ;
 
   // Insertion is a direct copy.
-  if (subBitWidth == BitWidth) {
-    *this = subBits;
-    return;
+  എങ്കിൽ (subBitWidth == BitWidth) {
+    *ഇത് = subBits;
+    തിരികെ;
   }
 
   // Single word result can be done as a direct bitmask.
-  if (LLVM_LIKELY(isSingleWord())) {
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
     uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
     U.VAL &= ~(mask << bitPosition);
     U.VAL |= (subBits.U.VAL << bitPosition);
-    return;
+    തിരികെ;
   }
 
   unsigned loBit = whichBit(bitPosition);
@@ -417,57 +417,57 @@ void APInt::insertBits(const APInt &subBits, unsigned bitPosition) {
   unsigned hi1Word = whichWord(bitPosition + subBitWidth - 1);
 
   // Insertion within a single word can be done as a direct bitmask.
-  if (loWord == hi1Word) {
+  എങ്കിൽ (loWord == hi1Word) {
     uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
     U.pVal[loWord] &= ~(mask << loBit);
     U.pVal[loWord] |= (subBits.U.VAL << loBit);
-    return;
+    തിരികെ;
   }
 
   // Insert on word boundaries.
-  if (loBit == 0) {
+  എങ്കിൽ (loBit == 0) {
     // Direct copy whole words.
-    unsigned numWholeSubWords = subBitWidth / APINT_BITS_PER_WORD;
+    unsigned അക്കം_Whole_Sub_വാക്കുകൾ = subBitWidth / APINT_BITS_PER_WORD;
     memcpy(U.pVal + loWord, subBits.getRawData(),
-           numWholeSubWords * APINT_WORD_SIZE);
+           അക്കം_Whole_Sub_വാക്കുകൾ * APINT_WORD_SIZE);
 
     // Mask+insert remaining bits.
     unsigned remainingBits = subBitWidth % APINT_BITS_PER_WORD;
-    if (remainingBits != 0) {
+    എങ്കിൽ (remainingBits != 0) {
       uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - remainingBits);
       U.pVal[hi1Word] &= ~mask;
       U.pVal[hi1Word] |= subBits.getWord(subBitWidth - 1);
     }
-    return;
+    തിരികെ;
   }
 
   // General case - set/clear individual bits in dst based on src.
   // TODO - there is scope for optimization here, but at the moment this code
   // path is barely used so prefer readability over performance.
-  for (unsigned i = 0; i != subBitWidth; ++i)
+  വേണ്ടി (unsigned i = 0; i != subBitWidth; ++i)
     setBitVal(bitPosition + i, subBits[i]);
 }
 
-void APInt::insertBits(uint64_t subBits, unsigned bitPosition, unsigned numBits) {
-  uint64_t maskBits = maskTrailingOnes<uint64_t>(numBits);
+ശൂന്യം APInt::തിരുകുക_Bits(uint64_t subBits, unsigned bitPosition, unsigned അക്കം_Bits) {
+  uint64_t maskBits = maskTrailingOnes<uint64_t>(അക്കം_Bits);
   subBits &= maskBits;
-  if (LLVM_LIKELY(isSingleWord())) {
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
     U.VAL &= ~(maskBits << bitPosition);
     U.VAL |= subBits << bitPosition;
-    return;
+    തിരികെ;
   }
 
   unsigned loBit = whichBit(bitPosition);
   unsigned loWord = whichWord(bitPosition);
-  unsigned hiWord = whichWord(bitPosition + numBits - 1);
-  if (loWord == hiWord) {
+  unsigned hiWord = whichWord(bitPosition + അക്കം_Bits - 1);
+  എങ്കിൽ (loWord == hiWord) {
     U.pVal[loWord] &= ~(maskBits << loBit);
     U.pVal[loWord] |= subBits << loBit;
-    return;
+    തിരികെ;
   }
 
-  static_assert(8 * sizeof(WordType) <= 64, "This code assumes only two words affected");
-  unsigned wordBits = 8 * sizeof(WordType);
+  static_assert(8 * വലുപ്പം(WordType) <= 64, "This code assumes only two words affected");
+  unsigned wordBits = 8 * വലുപ്പം(WordType);
   U.pVal[loWord] &= ~(maskBits << loBit);
   U.pVal[loWord] |= subBits << loBit;
 
@@ -475,99 +475,99 @@ void APInt::insertBits(uint64_t subBits, unsigned bitPosition, unsigned numBits)
   U.pVal[hiWord] |= subBits >> (wordBits - loBit);
 }
 
-APInt APInt::extractBits(unsigned numBits, unsigned bitPosition) const {
-  assert(bitPosition < BitWidth && (numBits + bitPosition) <= BitWidth &&
+APInt APInt::extractBits(unsigned അക്കം_Bits, unsigned bitPosition) സ്ഥിരം {
+  പ്രതിജ്ഞാ(bitPosition < BitWidth && (അക്കം_Bits + bitPosition) <= BitWidth &&
          "Illegal bit extraction");
 
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(numBits, U.VAL >> bitPosition, /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
+    തിരികെ APInt(അക്കം_Bits, U.VAL >> bitPosition, /*isSigned=*/അസത്യം,
+                 /*implicitTrunc=*/സത്യം);
 
   unsigned loBit = whichBit(bitPosition);
   unsigned loWord = whichWord(bitPosition);
-  unsigned hiWord = whichWord(bitPosition + numBits - 1);
+  unsigned hiWord = whichWord(bitPosition + അക്കം_Bits - 1);
 
   // Single word result extracting bits from a single word source.
-  if (loWord == hiWord)
-    return APInt(numBits, U.pVal[loWord] >> loBit, /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+  എങ്കിൽ (loWord == hiWord)
+    തിരികെ APInt(അക്കം_Bits, U.pVal[loWord] >> loBit, /*isSigned=*/അസത്യം,
+                 /*implicitTrunc=*/സത്യം);
 
   // Extracting bits that start on a source word boundary can be done
   // as a fast memory copy.
-  if (loBit == 0)
-    return APInt(numBits, ArrayRef(U.pVal + loWord, 1 + hiWord - loWord));
+  എങ്കിൽ (loBit == 0)
+    തിരികെ APInt(അക്കം_Bits, ArrayRef(U.pVal + loWord, 1 + hiWord - loWord));
 
   // General case - shift + copy source words directly into place.
-  APInt Result(numBits, 0);
-  unsigned NumSrcWords = getNumWords();
-  unsigned NumDstWords = Result.getNumWords();
+  APInt Result(അക്കം_Bits, 0);
+  unsigned അക്കം_Src_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ();
+  unsigned അക്കം_Dst_വാക്കുകൾ = Result.get_അക്കം_വാക്കുകൾ();
 
   uint64_t *DestPtr =
       LLVM_LIKELY(Result.isSingleWord()) ? &Result.U.VAL : Result.U.pVal;
-  for (unsigned word = 0; word < NumDstWords; ++word) {
+  വേണ്ടി (unsigned word = 0; word < അക്കം_Dst_വാക്കുകൾ; ++word) {
     uint64_t w0 = U.pVal[loWord + word];
     uint64_t w1 =
-        (loWord + word + 1) < NumSrcWords ? U.pVal[loWord + word + 1] : 0;
+        (loWord + word + 1) < അക്കം_Src_വാക്കുകൾ ? U.pVal[loWord + word + 1] : 0;
     DestPtr[word] = (w0 >> loBit) | (w1 << (APINT_BITS_PER_WORD - loBit));
   }
 
-  return Result.clearUnusedBits();
+  തിരികെ Result.clearUnusedBits();
 }
 
-uint64_t APInt::extractBitsAsZExtValue(unsigned numBits,
-                                       unsigned bitPosition) const {
-  assert(bitPosition < BitWidth && (numBits + bitPosition) <= BitWidth &&
+uint64_t APInt::extract_Bits_As_ZExt_മൂല്യം(unsigned അക്കം_Bits,
+                                       unsigned bitPosition) സ്ഥിരം {
+  പ്രതിജ്ഞാ(bitPosition < BitWidth && (അക്കം_Bits + bitPosition) <= BitWidth &&
          "Illegal bit extraction");
-  assert(numBits <= 64 && "Illegal bit extraction");
+  പ്രതിജ്ഞാ(അക്കം_Bits <= 64 && "Illegal bit extraction");
 
-  uint64_t maskBits = maskTrailingOnes<uint64_t>(numBits);
-  if (LLVM_LIKELY(isSingleWord()))
-    return (U.VAL >> bitPosition) & maskBits;
+  uint64_t maskBits = maskTrailingOnes<uint64_t>(അക്കം_Bits);
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
+    തിരികെ (U.VAL >> bitPosition) & maskBits;
 
   static_assert(APINT_BITS_PER_WORD >= 64,
                 "This code assumes only two words affected");
   unsigned loBit = whichBit(bitPosition);
   unsigned loWord = whichWord(bitPosition);
-  unsigned hiWord = whichWord(bitPosition + numBits - 1);
-  if (loWord == hiWord)
-    return (U.pVal[loWord] >> loBit) & maskBits;
+  unsigned hiWord = whichWord(bitPosition + അക്കം_Bits - 1);
+  എങ്കിൽ (loWord == hiWord)
+    തിരികെ (U.pVal[loWord] >> loBit) & maskBits;
 
   uint64_t retBits = U.pVal[loWord] >> loBit;
   retBits |= U.pVal[hiWord] << (APINT_BITS_PER_WORD - loBit);
   retBits &= maskBits;
-  return retBits;
+  തിരികെ retBits;
 }
 
 unsigned APInt::getSufficientBitsNeeded(StringRef Str, uint8_t Radix) {
-  assert(!Str.empty() && "Invalid string length");
+  പ്രതിജ്ഞാ(!Str.empty() && "Invalid string length");
   size_t StrLen = Str.size();
 
   // Each computation below needs to know if it's negative.
-  unsigned IsNegative = false;
-  if (Str[0] == '-' || Str[0] == '+') {
+  unsigned IsNegative = അസത്യം;
+  എങ്കിൽ (Str[0] == '-' || Str[0] == '+') {
     IsNegative = Str[0] == '-';
     StrLen--;
-    assert(StrLen && "String is only a sign, needs a value.");
+    പ്രതിജ്ഞാ(StrLen && "String is only a sign, needs a value.");
   }
 
   // For radixes of power-of-two values, the bits required is accurately and
   // easily computed.
-  if (Radix == 2)
-    return StrLen + IsNegative;
-  if (Radix == 8)
-    return StrLen * 3 + IsNegative;
-  if (Radix == 16)
-    return StrLen * 4 + IsNegative;
+  എങ്കിൽ (Radix == 2)
+    തിരികെ StrLen + IsNegative;
+  എങ്കിൽ (Radix == 8)
+    തിരികെ StrLen * 3 + IsNegative;
+  എങ്കിൽ (Radix == 16)
+    തിരികെ StrLen * 4 + IsNegative;
 
   // Compute a sufficient number of bits that is always large enough but might
   // be too large. This avoids the assertion in the constructor. This
   // calculation doesn't work appropriately for the numbers 0-9, so just use 4
   // bits in that case.
-  if (Radix == 10)
-    return (StrLen == 1 ? 4 : StrLen * 64 / 18) + IsNegative;
+  എങ്കിൽ (Radix == 10)
+    തിരികെ (StrLen == 1 ? 4 : StrLen * 64 / 18) + IsNegative;
 
-  assert(Radix == 36);
-  return (StrLen == 1 ? 7 : StrLen * 16 / 3) + IsNegative;
+  പ്രതിജ്ഞാ(Radix == 36);
+  തിരികെ (StrLen == 1 ? 7 : StrLen * 16 / 3) + IsNegative;
 }
 
 unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
@@ -577,8 +577,8 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
 
   // For bases 2, 8, and 16, the sufficient number of bits is exact and we can
   // return the value directly. For bases 10 and 36, we need to do extra work.
-  if (radix == 2 || radix == 8 || radix == 16)
-    return sufficient;
+  എങ്കിൽ (radix == 2 || radix == 8 || radix == 16)
+    തിരികെ sufficient;
 
   // This is grossly inefficient but accurate. We could probably do something
   // with a computation of roughly slen*64/20 and then adjust by the value of
@@ -588,10 +588,10 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
   // Each computation below needs to know if it's negative.
   StringRef::iterator p = str.begin();
   unsigned isNegative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  എങ്കിൽ (*p == '-' || *p == '+') {
     p++;
     slen--;
-    assert(slen && "String is only a sign, needs a value.");
+    പ്രതിജ്ഞാ(slen && "String is only a sign, needs a value.");
   }
 
 
@@ -602,253 +602,253 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
   // just bit. If the log is exact and value is negative, then the value is
   // MinSignedValue with (log + 1) bits.
   unsigned log = tmp.logBase2();
-  if (log == (unsigned)-1) {
-    return isNegative + 1;
-  } else if (isNegative && tmp.isPowerOf2()) {
-    return isNegative + log;
-  } else {
-    return isNegative + log + 1;
+  എങ്കിൽ (log == (unsigned)-1) {
+    തിരികെ isNegative + 1;
+  } അല്ലെങ്കിൽ എങ്കിൽ (isNegative && tmp.isPowerOf2()) {
+    തിരികെ isNegative + log;
+  } അല്ലെങ്കിൽ {
+    തിരികെ isNegative + log + 1;
   }
 }
 
-hash_code llvm::hash_value(const APInt &Arg) {
-  if (LLVM_LIKELY(Arg.isSingleWord()))
-    return hash_combine(Arg.BitWidth, Arg.U.VAL);
+hash_code llvm::hash_മൂല്യം(സ്ഥിരം APInt &Arg) {
+  എങ്കിൽ (LLVM_LIKELY(Arg.isSingleWord()))
+    തിരികെ hash_combine(Arg.BitWidth, Arg.U.VAL);
 
-  return hash_combine(
+  തിരികെ hash_combine(
       Arg.BitWidth,
-      hash_combine_range(Arg.U.pVal, Arg.U.pVal + Arg.getNumWords()));
+      hash_combine_range(Arg.U.pVal, Arg.U.pVal + Arg.get_അക്കം_വാക്കുകൾ()));
 }
 
-unsigned DenseMapInfo<APInt, void>::getHashValue(const APInt &Key) {
-  return static_cast<unsigned>(hash_value(Key));
+unsigned DenseMapInfo<APInt, ശൂന്യം>::get_Hash_മൂല്യം(സ്ഥിരം APInt &താക്കോൽ) {
+  തിരികെ static_cast<unsigned>(hash_മൂല്യം(താക്കോൽ));
 }
 
-bool APInt::isSplat(unsigned SplatSizeInBits) const {
-  assert(getBitWidth() % SplatSizeInBits == 0 &&
+തർക്കം APInt::isSplat(unsigned SplatSizeInBits) സ്ഥിരം {
+  പ്രതിജ്ഞാ(getBitWidth() % SplatSizeInBits == 0 &&
          "SplatSizeInBits must divide width!");
   // We can check that all parts of an integer are equal by making use of a
   // little trick: rotate and check if it's still the same value.
-  return *this == rotl(SplatSizeInBits);
+  തിരികെ *ഇത് == rotl(SplatSizeInBits);
 }
 
 /// This function returns the high "numBits" bits of this APInt.
-APInt APInt::getHiBits(unsigned numBits) const {
-  return this->lshr(BitWidth - numBits);
+APInt APInt::getHiBits(unsigned അക്കം_Bits) സ്ഥിരം {
+  തിരികെ ഇത്->lshr(BitWidth - അക്കം_Bits);
 }
 
 /// This function returns the low "numBits" bits of this APInt.
-APInt APInt::getLoBits(unsigned numBits) const {
-  APInt Result(getLowBitsSet(BitWidth, numBits));
-  Result &= *this;
-  return Result;
+APInt APInt::getLoBits(unsigned അക്കം_Bits) സ്ഥിരം {
+  APInt Result(get_താഴെയുള്ള_Bits_Set(BitWidth, അക്കം_Bits));
+  Result &= *ഇത്;
+  തിരികെ Result;
 }
 
 /// Return a value containing V broadcasted over NewLen bits.
-APInt APInt::getSplat(unsigned NewLen, const APInt &V) {
-  assert(NewLen >= V.getBitWidth() && "Can't splat to smaller bit width!");
+APInt APInt::getSplat(unsigned NewLen, സ്ഥിരം APInt &V) {
+  പ്രതിജ്ഞാ(NewLen >= V.getBitWidth() && "Can't splat to smaller bit width!");
 
   APInt Val = V.zext(NewLen);
-  for (unsigned I = V.getBitWidth(); I < NewLen; I <<= 1)
+  വേണ്ടി (unsigned I = V.getBitWidth(); I < NewLen; I <<= 1)
     Val |= Val << I;
 
-  return Val;
+  തിരികെ Val;
 }
 
-unsigned APInt::countLeadingZerosSlowCase() const {
-  unsigned Count = 0;
-  for (int i = getNumWords() - 1; i >= 0; --i) {
+unsigned APInt::എണ്ണം_Leading_Zeros_Slow_Case() സ്ഥിരം {
+  unsigned എണ്ണം_2 = 0;
+  വേണ്ടി (പൂർണ്ണസംഖ്യ i = get_അക്കം_വാക്കുകൾ() - 1; i >= 0; --i) {
     uint64_t V = U.pVal[i];
-    if (V == 0)
-      Count += APINT_BITS_PER_WORD;
-    else {
-      Count += llvm::countl_zero(V);
-      break;
+    എങ്കിൽ (V == 0)
+      എണ്ണം_2 += APINT_BITS_PER_WORD;
+    അല്ലെങ്കിൽ {
+      എണ്ണം_2 += llvm::countl_zero(V);
+      നിർത്തുക;
     }
   }
   // Adjust for unused bits in the most significant word (they are zero).
   unsigned Mod = BitWidth % APINT_BITS_PER_WORD;
-  Count -= Mod > 0 ? APINT_BITS_PER_WORD - Mod : 0;
-  return Count;
+  എണ്ണം_2 -= Mod > 0 ? APINT_BITS_PER_WORD - Mod : 0;
+  തിരികെ എണ്ണം_2;
 }
 
-unsigned APInt::countLeadingOnesSlowCase() const {
-  unsigned highWordBits = BitWidth % APINT_BITS_PER_WORD;
+unsigned APInt::എണ്ണം_Leading_Ones_Slow_Case() സ്ഥിരം {
+  unsigned മുകളിലെ_Word_Bits = BitWidth % APINT_BITS_PER_WORD;
   unsigned shift;
-  if (!highWordBits) {
-    highWordBits = APINT_BITS_PER_WORD;
+  എങ്കിൽ (!മുകളിലെ_Word_Bits) {
+    മുകളിലെ_Word_Bits = APINT_BITS_PER_WORD;
     shift = 0;
-  } else {
-    shift = APINT_BITS_PER_WORD - highWordBits;
+  } അല്ലെങ്കിൽ {
+    shift = APINT_BITS_PER_WORD - മുകളിലെ_Word_Bits;
   }
-  int i = getNumWords() - 1;
-  unsigned Count = llvm::countl_one(U.pVal[i] << shift);
-  if (Count == highWordBits) {
-    for (i--; i >= 0; --i) {
-      if (U.pVal[i] == WORDTYPE_MAX)
-        Count += APINT_BITS_PER_WORD;
-      else {
-        Count += llvm::countl_one(U.pVal[i]);
-        break;
+  പൂർണ്ണസംഖ്യ i = get_അക്കം_വാക്കുകൾ() - 1;
+  unsigned എണ്ണം_2 = llvm::countl_one(U.pVal[i] << shift);
+  എങ്കിൽ (എണ്ണം_2 == മുകളിലെ_Word_Bits) {
+    വേണ്ടി (i--; i >= 0; --i) {
+      എങ്കിൽ (U.pVal[i] == WORDTYPE_MAX)
+        എണ്ണം_2 += APINT_BITS_PER_WORD;
+      അല്ലെങ്കിൽ {
+        എണ്ണം_2 += llvm::countl_one(U.pVal[i]);
+        നിർത്തുക;
       }
     }
   }
-  return Count;
+  തിരികെ എണ്ണം_2;
 }
 
-unsigned APInt::countTrailingZerosSlowCase() const {
-  unsigned Count = 0;
+unsigned APInt::എണ്ണം_Trailing_Zeros_Slow_Case() സ്ഥിരം {
+  unsigned എണ്ണം_2 = 0;
   unsigned i = 0;
-  for (; i < getNumWords() && U.pVal[i] == 0; ++i)
-    Count += APINT_BITS_PER_WORD;
-  if (i < getNumWords())
-    Count += llvm::countr_zero(U.pVal[i]);
-  return std::min(Count, BitWidth);
+  വേണ്ടി (; i < get_അക്കം_വാക്കുകൾ() && U.pVal[i] == 0; ++i)
+    എണ്ണം_2 += APINT_BITS_PER_WORD;
+  എങ്കിൽ (i < get_അക്കം_വാക്കുകൾ())
+    എണ്ണം_2 += llvm::countr_zero(U.pVal[i]);
+  തിരികെ std::min(എണ്ണം_2, BitWidth);
 }
 
-unsigned APInt::countTrailingOnesSlowCase() const {
-  unsigned Count = 0;
+unsigned APInt::എണ്ണം_Trailing_Ones_Slow_Case() സ്ഥിരം {
+  unsigned എണ്ണം_2 = 0;
   unsigned i = 0;
-  for (; i < getNumWords() && U.pVal[i] == WORDTYPE_MAX; ++i)
-    Count += APINT_BITS_PER_WORD;
-  if (i < getNumWords())
-    Count += llvm::countr_one(U.pVal[i]);
-  assert(Count <= BitWidth);
-  return Count;
+  വേണ്ടി (; i < get_അക്കം_വാക്കുകൾ() && U.pVal[i] == WORDTYPE_MAX; ++i)
+    എണ്ണം_2 += APINT_BITS_PER_WORD;
+  എങ്കിൽ (i < get_അക്കം_വാക്കുകൾ())
+    എണ്ണം_2 += llvm::countr_one(U.pVal[i]);
+  പ്രതിജ്ഞാ(എണ്ണം_2 <= BitWidth);
+  തിരികെ എണ്ണം_2;
 }
 
-unsigned APInt::countPopulationSlowCase() const {
-  unsigned Count = 0;
-  for (unsigned i = 0; i < getNumWords(); ++i)
-    Count += llvm::popcount(U.pVal[i]);
-  return Count;
+unsigned APInt::എണ്ണം_Population_Slow_Case() സ്ഥിരം {
+  unsigned എണ്ണം_2 = 0;
+  വേണ്ടി (unsigned i = 0; i < get_അക്കം_വാക്കുകൾ(); ++i)
+    എണ്ണം_2 += llvm::popcount(U.pVal[i]);
+  തിരികെ എണ്ണം_2;
 }
 
-bool APInt::isPowerOf2SlowCase() const {
-  unsigned Count = 0;
-  for (unsigned i = 0; i < getNumWords(); ++i) {
-    Count += llvm::popcount(U.pVal[i]);
-    if (Count > 1)
-      return false;
+തർക്കം APInt::isPowerOf2SlowCase() സ്ഥിരം {
+  unsigned എണ്ണം_2 = 0;
+  വേണ്ടി (unsigned i = 0; i < get_അക്കം_വാക്കുകൾ(); ++i) {
+    എണ്ണം_2 += llvm::popcount(U.pVal[i]);
+    എങ്കിൽ (എണ്ണം_2 > 1)
+      തിരികെ അസത്യം;
   }
-  return Count == 1;
+  തിരികെ എണ്ണം_2 == 1;
 }
 
-bool APInt::intersectsSlowCase(const APInt &RHS) const {
-  for (unsigned i = 0, e = getNumWords(); i != e; ++i)
-    if ((U.pVal[i] & RHS.U.pVal[i]) != 0)
-      return true;
+തർക്കം APInt::intersectsSlowCase(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  വേണ്ടി (unsigned i = 0, e = get_അക്കം_വാക്കുകൾ(); i != e; ++i)
+    എങ്കിൽ ((U.pVal[i] & RHS.U.pVal[i]) != 0)
+      തിരികെ സത്യം;
 
-  return false;
+  തിരികെ അസത്യം;
 }
 
-bool APInt::isSubsetOfSlowCase(const APInt &RHS) const {
-  for (unsigned i = 0, e = getNumWords(); i != e; ++i)
-    if ((U.pVal[i] & ~RHS.U.pVal[i]) != 0)
-      return false;
+തർക്കം APInt::isSubsetOfSlowCase(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  വേണ്ടി (unsigned i = 0, e = get_അക്കം_വാക്കുകൾ(); i != e; ++i)
+    എങ്കിൽ ((U.pVal[i] & ~RHS.U.pVal[i]) != 0)
+      തിരികെ അസത്യം;
 
-  return true;
+  തിരികെ സത്യം;
 }
 
-bool APInt::isInverseOfSlowCase(const APInt &RHS) const {
-  const unsigned Last = getNumWords() - 1;
-  for (unsigned I = 0; I != Last; ++I)
-    if ((U.pVal[I] ^ RHS.U.pVal[I]) != WORDTYPE_MAX)
-      return false;
+തർക്കം APInt::isInverseOfSlowCase(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  സ്ഥിരം unsigned Last = get_അക്കം_വാക്കുകൾ() - 1;
+  വേണ്ടി (unsigned I = 0; I != Last; ++I)
+    എങ്കിൽ ((U.pVal[I] ^ RHS.U.pVal[I]) != WORDTYPE_MAX)
+      തിരികെ അസത്യം;
 
   unsigned TailBits = BitWidth - Last * APINT_BITS_PER_WORD;
   WordType TailMask = llvm::maskTrailingOnes<WordType>(TailBits);
-  return (U.pVal[Last] ^ RHS.U.pVal[Last]) == TailMask;
+  തിരികെ (U.pVal[Last] ^ RHS.U.pVal[Last]) == TailMask;
 }
 
-APInt APInt::byteSwap() const {
-  assert(BitWidth >= 16 && BitWidth % 8 == 0 && "Cannot byteswap!");
-  if (BitWidth == 16)
-    return APInt(BitWidth, llvm::byteswap<uint16_t>(U.VAL));
-  if (BitWidth == 32)
-    return APInt(BitWidth, llvm::byteswap<uint32_t>(U.VAL));
-  if (BitWidth <= 64) {
+APInt APInt::byteSwap() സ്ഥിരം {
+  പ്രതിജ്ഞാ(BitWidth >= 16 && BitWidth % 8 == 0 && "Cannot byteswap!");
+  എങ്കിൽ (BitWidth == 16)
+    തിരികെ APInt(BitWidth, llvm::byteswap<uint16_t>(U.VAL));
+  എങ്കിൽ (BitWidth == 32)
+    തിരികെ APInt(BitWidth, llvm::byteswap<uint32_t>(U.VAL));
+  എങ്കിൽ (BitWidth <= 64) {
     uint64_t Tmp1 = llvm::byteswap<uint64_t>(U.VAL);
     Tmp1 >>= (64 - BitWidth);
-    return APInt(BitWidth, Tmp1);
+    തിരികെ APInt(BitWidth, Tmp1);
   }
 
-  APInt Result(getNumWords() * APINT_BITS_PER_WORD, 0);
-  for (unsigned I = 0, N = getNumWords(); I != N; ++I)
+  APInt Result(get_അക്കം_വാക്കുകൾ() * APINT_BITS_PER_WORD, 0);
+  വേണ്ടി (unsigned I = 0, N = get_അക്കം_വാക്കുകൾ(); I != N; ++I)
     Result.U.pVal[I] = llvm::byteswap<uint64_t>(U.pVal[N - I - 1]);
-  if (Result.BitWidth != BitWidth) {
+  എങ്കിൽ (Result.BitWidth != BitWidth) {
     Result.lshrInPlace(Result.BitWidth - BitWidth);
     Result.BitWidth = BitWidth;
   }
-  return Result;
+  തിരികെ Result;
 }
 
-APInt APInt::reverseBits() const {
-  if (LLVM_LIKELY(isSingleWord())) {
-    switch (BitWidth) {
-    case 64:
-      return APInt(BitWidth, llvm::reverseBits<uint64_t>(U.VAL));
-    case 32:
-      return APInt(BitWidth, llvm::reverseBits<uint32_t>(U.VAL));
-    case 16:
-      return APInt(BitWidth, llvm::reverseBits<uint16_t>(U.VAL));
-    case 8:
-      return APInt(BitWidth, llvm::reverseBits<uint8_t>(U.VAL));
-    case 1: // fallthrough
-    case 0:
-      return *this;
-    default:
-      return APInt(BitWidth,
+APInt APInt::reverseBits() സ്ഥിരം {
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
+    തിരഞ്ഞെടുപ്പ് (BitWidth) {
+    അവസ്ഥ 64:
+      തിരികെ APInt(BitWidth, llvm::reverseBits<uint64_t>(U.VAL));
+    അവസ്ഥ 32:
+      തിരികെ APInt(BitWidth, llvm::reverseBits<uint32_t>(U.VAL));
+    അവസ്ഥ 16:
+      തിരികെ APInt(BitWidth, llvm::reverseBits<uint16_t>(U.VAL));
+    അവസ്ഥ 8:
+      തിരികെ APInt(BitWidth, llvm::reverseBits<uint8_t>(U.VAL));
+    അവസ്ഥ 1: // fallthrough
+    അവസ്ഥ 0:
+      തിരികെ *ഇത്;
+    സ്ഥിരസ്ഥിതി:
+      തിരികെ APInt(BitWidth,
                    llvm::reverseBits<uint64_t>(U.VAL) >> (64 - BitWidth));
     }
   }
 
   APInt Result(BitWidth, 0);
-  unsigned NumWords = getNumWords();
-  unsigned ExcessBits = NumWords * APINT_BITS_PER_WORD - BitWidth;
-  if (ExcessBits == 0) {
+  unsigned അക്കം_വാക്കുകൾ_2 = get_അക്കം_വാക്കുകൾ();
+  unsigned ExcessBits = അക്കം_വാക്കുകൾ_2 * APINT_BITS_PER_WORD - BitWidth;
+  എങ്കിൽ (ExcessBits == 0) {
     // Fast path. No cross-word shift needed.
-    for (unsigned I = 0; I < NumWords; ++I)
-      Result.U.pVal[I] = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 1 - I]);
-    return Result;
+    വേണ്ടി (unsigned I = 0; I < അക്കം_വാക്കുകൾ_2; ++I)
+      Result.U.pVal[I] = llvm::reverseBits<uint64_t>(U.pVal[അക്കം_വാക്കുകൾ_2 - 1 - I]);
+    തിരികെ Result;
   }
   // Holds reversed bits of the previous (more significant) word.
-  uint64_t PrevRev = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 1]);
-  for (unsigned I = 0; I < NumWords - 1; ++I) {
-    uint64_t CurrRev = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 2 - I]);
+  uint64_t PrevRev = llvm::reverseBits<uint64_t>(U.pVal[അക്കം_വാക്കുകൾ_2 - 1]);
+  വേണ്ടി (unsigned I = 0; I < അക്കം_വാക്കുകൾ_2 - 1; ++I) {
+    uint64_t CurrRev = llvm::reverseBits<uint64_t>(U.pVal[അക്കം_വാക്കുകൾ_2 - 2 - I]);
     Result.U.pVal[I] = (PrevRev >> ExcessBits) | (CurrRev << (64 - ExcessBits));
     PrevRev = CurrRev;
   }
-  Result.U.pVal[NumWords - 1] = PrevRev >> ExcessBits;
-  return Result;
+  Result.U.pVal[അക്കം_വാക്കുകൾ_2 - 1] = PrevRev >> ExcessBits;
+  തിരികെ Result;
 }
 
-APInt llvm::APIntOps::GreatestCommonDivisor(APInt A, APInt B, bool IsSigned) {
+APInt llvm::APIntOps::Greatest_Common_ഹാരകം(APInt A, APInt B, തർക്കം IsSigned) {
   // Take absolute value if IsSigned.
-  if (IsSigned) {
+  എങ്കിൽ (IsSigned) {
     A = A.abs();
     B = B.abs();
   }
 
   // Fast-path a common case.
-  if (A == B) return A;
+  എങ്കിൽ (A == B) തിരികെ A;
 
   // Corner cases: if either operand is zero, the other is the gcd.
-  if (!A) return B;
-  if (!B) return A;
+  എങ്കിൽ (!A) തിരികെ B;
+  എങ്കിൽ (!B) തിരികെ A;
 
   // Count common powers of 2 and remove all other powers of 2.
   unsigned Pow2;
   {
     unsigned Pow2_A = A.countr_zero();
     unsigned Pow2_B = B.countr_zero();
-    if (Pow2_A > Pow2_B) {
+    എങ്കിൽ (Pow2_A > Pow2_B) {
       A.lshrInPlace(Pow2_A - Pow2_B);
       Pow2 = Pow2_B;
-    } else if (Pow2_B > Pow2_A) {
+    } അല്ലെങ്കിൽ എങ്കിൽ (Pow2_B > Pow2_A) {
       B.lshrInPlace(Pow2_B - Pow2_A);
       Pow2 = Pow2_A;
-    } else {
+    } അല്ലെങ്കിൽ {
       Pow2 = Pow2_A;
     }
   }
@@ -859,49 +859,49 @@ APInt llvm::APIntOps::GreatestCommonDivisor(APInt A, APInt B, bool IsSigned) {
   //
   // This is a modified version of Stein's algorithm, taking advantage of
   // efficient countTrailingZeros().
-  while (A != B) {
-    if (A.ugt(B)) {
+  ആകുമ്പോൾ (A != B) {
+    എങ്കിൽ (A.ugt(B)) {
       A -= B;
       A.lshrInPlace(A.countr_zero() - Pow2);
-    } else {
+    } അല്ലെങ്കിൽ {
       B -= A;
       B.lshrInPlace(B.countr_zero() - Pow2);
     }
   }
 
-  return A;
+  തിരികെ A;
 }
 
-APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
+APInt llvm::APIntOps::RoundDoubleToAPInt(ഇരട്ട Double, unsigned width) {
   uint64_t I = bit_cast<uint64_t>(Double);
 
   // Get the sign bit from the highest order bit
-  bool isNeg = I >> 63;
+  തർക്കം isNeg = I >> 63;
 
   // Get the 11-bit exponent and adjust for the 1023 bit bias
   int64_t exp = ((I >> 52) & 0x7ff) - 1023;
 
   // If the exponent is negative, the value is < 0 so just return 0.
-  if (exp < 0)
-    return APInt(width, 0u);
+  എങ്കിൽ (exp < 0)
+    തിരികെ APInt(width, 0u);
 
   // Extract the mantissa by clearing the top 12 bits (sign + exponent).
   uint64_t mantissa = (I & (~0ULL >> 12)) | 1ULL << 52;
 
   // If the exponent doesn't shift all bits out of the mantissa
-  if (exp < 52)
-    return isNeg ? -APInt(width, mantissa >> (52 - exp)) :
+  എങ്കിൽ (exp < 52)
+    തിരികെ isNeg ? -APInt(width, mantissa >> (52 - exp)) :
                     APInt(width, mantissa >> (52 - exp));
 
   // If the client didn't provide enough bits for us to shift the mantissa into
   // then the result is undefined, just return 0
-  if (width <= exp - 52)
-    return APInt(width, 0);
+  എങ്കിൽ (width <= exp - 52)
+    തിരികെ APInt(width, 0);
 
   // Otherwise, we have to shift the mantissa bits up to the right location
   APInt Tmp(width, mantissa);
   Tmp <<= (unsigned)exp - 52;
-  return isNeg ? -Tmp : Tmp;
+  തിരികെ isNeg ? -Tmp : Tmp;
 }
 
 /// This function converts this APInt to a double.
@@ -911,22 +911,22 @@ APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
 /// |-------------------------------------- |
 /// |  1[63]   11[62-52]   52[51-00]   1023 |
 ///  --------------------------------------
-double APInt::roundToDouble(bool isSigned) const {
+ഇരട്ട APInt::roundToDouble(തർക്കം isSigned) സ്ഥിരം {
   // Handle the simple case where the value is contained in one uint64_t.
   // It is wrong to optimize getWord(0) to VAL; there might be more than one word.
-  if (LLVM_LIKELY(isSingleWord() || getActiveBits() <= APINT_BITS_PER_WORD)) {
-    if (isSigned) {
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord() || getActiveBits() <= APINT_BITS_PER_WORD)) {
+    എങ്കിൽ (isSigned) {
       int64_t sext = SignExtend64(getWord(0), BitWidth);
-      return double(sext);
+      തിരികെ ഇരട്ട(sext);
     }
-    return double(getWord(0));
+    തിരികെ ഇരട്ട(getWord(0));
   }
 
   // Determine if the value is negative.
-  bool isNeg = isSigned ? (*this)[BitWidth-1] : false;
+  തർക്കം isNeg = isSigned ? (*ഇത്)[BitWidth-1] : അസത്യം;
 
   // Construct the absolute value if we're negative.
-  APInt Tmp(isNeg ? -(*this) : (*this));
+  APInt Tmp(isNeg ? -(*ഇത്) : (*ഇത്));
 
   // Figure out how many bits we're using.
   unsigned n = Tmp.getActiveBits();
@@ -937,11 +937,11 @@ double APInt::roundToDouble(bool isSigned) const {
   uint64_t exp = n;
 
   // Return infinity for exponent overflow
-  if (exp > 1023) {
-    if (!isSigned || !isNeg)
-      return std::numeric_limits<double>::infinity();
-    else
-      return -std::numeric_limits<double>::infinity();
+  എങ്കിൽ (exp > 1023) {
+    എങ്കിൽ (!isSigned || !isNeg)
+      തിരികെ std::numeric_limits<ഇരട്ട>::infinity();
+    അല്ലെങ്കിൽ
+      തിരികെ -std::numeric_limits<ഇരട്ട>::infinity();
   }
   exp += 1023; // Increment for 1023 bias
 
@@ -949,12 +949,12 @@ double APInt::roundToDouble(bool isSigned) const {
   // extract the high 52 bits from the correct words in pVal.
   uint64_t mantissa;
   unsigned hiWord = whichWord(n-1);
-  if (hiWord == 0) {
+  എങ്കിൽ (hiWord == 0) {
     mantissa = Tmp.U.pVal[0];
-    if (n > 52)
+    എങ്കിൽ (n > 52)
       mantissa >>= n - 52; // shift down, we want the top 52 bits.
-  } else {
-    assert(hiWord > 0 && "huh?");
+  } അല്ലെങ്കിൽ {
+    പ്രതിജ്ഞാ(hiWord > 0 && "huh?");
     uint64_t hibits = Tmp.U.pVal[hiWord] << (52 - n % APINT_BITS_PER_WORD);
     uint64_t lobits = Tmp.U.pVal[hiWord-1] >> (11 + n % APINT_BITS_PER_WORD);
     mantissa = hibits | lobits;
@@ -963,246 +963,246 @@ double APInt::roundToDouble(bool isSigned) const {
   // The leading bit of mantissa is implicit, so get rid of it.
   uint64_t sign = isNeg ? (1ULL << (APINT_BITS_PER_WORD - 1)) : 0;
   uint64_t I = sign | (exp << 52) | mantissa;
-  return bit_cast<double>(I);
+  തിരികെ bit_cast<ഇരട്ട>(I);
 }
 
 // Truncate to new width.
-APInt APInt::trunc(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::trunc(unsigned width) സ്ഥിരം {
+  പ്രതിജ്ഞാ(width <= BitWidth && "Invalid APInt Truncate request");
 
-  if (width <= APINT_BITS_PER_WORD)
-    return APInt(width, getRawData()[0], /*isSigned=*/false,
-                 /*implicitTrunc=*/true);
+  എങ്കിൽ (width <= APINT_BITS_PER_WORD)
+    തിരികെ APInt(width, getRawData()[0], /*isSigned=*/അസത്യം,
+                 /*implicitTrunc=*/സത്യം);
 
-  if (width == BitWidth)
-    return *this;
+  എങ്കിൽ (width == BitWidth)
+    തിരികെ *ഇത്;
 
-  APInt Result(getMemory(getNumWords(width)), width);
+  APInt Result(getMemory(get_അക്കം_വാക്കുകൾ(width)), width);
 
   // Copy full words.
   unsigned i;
-  for (i = 0; i != width / APINT_BITS_PER_WORD; i++)
+  വേണ്ടി (i = 0; i != width / APINT_BITS_PER_WORD; i++)
     Result.U.pVal[i] = U.pVal[i];
 
   // Truncate and copy any partial word.
   unsigned bits = (0 - width) % APINT_BITS_PER_WORD;
-  if (bits != 0)
+  എങ്കിൽ (bits != 0)
     Result.U.pVal[i] = U.pVal[i] << bits >> bits;
 
-  return Result;
+  തിരികെ Result;
 }
 
 // Truncate to new width with unsigned saturation.
-APInt APInt::truncUSat(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::truncUSat(unsigned width) സ്ഥിരം {
+  പ്രതിജ്ഞാ(width <= BitWidth && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isIntN(width))
-    return trunc(width);
+  എങ്കിൽ (isIntN(width))
+    തിരികെ trunc(width);
   // If not, then just return the new limit.
-  return APInt::getMaxValue(width);
+  തിരികെ APInt::get_Max_മൂല്യം(width);
 }
 
 // Truncate to new width with signed saturation to signed result.
-APInt APInt::truncSSat(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::truncSSat(unsigned width) സ്ഥിരം {
+  പ്രതിജ്ഞാ(width <= BitWidth && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isSignedIntN(width))
-    return trunc(width);
+  എങ്കിൽ (isSignedIntN(width))
+    തിരികെ trunc(width);
   // If not, then just return the new limits.
-  return isNegative() ? APInt::getSignedMinValue(width)
-                      : APInt::getSignedMaxValue(width);
+  തിരികെ isNegative() ? APInt::get_Signed_Min_മൂല്യം(width)
+                      : APInt::get_Signed_Max_മൂല്യം(width);
 }
 
 // Truncate to new width with signed saturation to unsigned result.
-APInt APInt::truncSSatU(unsigned width) const {
-  assert(width <= BitWidth && "Invalid APInt Truncate request");
+APInt APInt::truncSSatU(unsigned width) സ്ഥിരം {
+  പ്രതിജ്ഞാ(width <= BitWidth && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isIntN(width))
-    return trunc(width);
+  എങ്കിൽ (isIntN(width))
+    തിരികെ trunc(width);
   // If not, then just return the new limits.
-  return isNegative() ? APInt::getZero(width) : APInt::getMaxValue(width);
+  തിരികെ isNegative() ? APInt::getZero(width) : APInt::get_Max_മൂല്യം(width);
 }
 
 // Sign extend to a new width.
-APInt APInt::sext(unsigned Width) const {
-  assert(Width >= BitWidth && "Invalid APInt SignExtend request");
+APInt APInt::sext(unsigned Width) സ്ഥിരം {
+  പ്രതിജ്ഞാ(Width >= BitWidth && "Invalid APInt SignExtend request");
 
-  if (Width <= APINT_BITS_PER_WORD)
-    return APInt(Width, SignExtend64(U.VAL, BitWidth), /*isSigned=*/true);
+  എങ്കിൽ (Width <= APINT_BITS_PER_WORD)
+    തിരികെ APInt(Width, SignExtend64(U.VAL, BitWidth), /*isSigned=*/സത്യം);
 
-  if (Width == BitWidth)
-    return *this;
+  എങ്കിൽ (Width == BitWidth)
+    തിരികെ *ഇത്;
 
-  APInt Result(getMemory(getNumWords(Width)), Width);
+  APInt Result(getMemory(get_അക്കം_വാക്കുകൾ(Width)), Width);
 
   // Copy words.
-  std::memcpy(Result.U.pVal, getRawData(), getNumWords() * APINT_WORD_SIZE);
+  std::memcpy(Result.U.pVal, getRawData(), get_അക്കം_വാക്കുകൾ() * APINT_WORD_SIZE);
 
   // Sign extend the last word since there may be unused bits in the input.
-  Result.U.pVal[getNumWords() - 1] =
-      SignExtend64(Result.U.pVal[getNumWords() - 1],
+  Result.U.pVal[get_അക്കം_വാക്കുകൾ() - 1] =
+      SignExtend64(Result.U.pVal[get_അക്കം_വാക്കുകൾ() - 1],
                    ((BitWidth - 1) % APINT_BITS_PER_WORD) + 1);
 
   // Fill with sign bits.
-  std::memset(Result.U.pVal + getNumWords(), isNegative() ? -1 : 0,
-              (Result.getNumWords() - getNumWords()) * APINT_WORD_SIZE);
+  std::memset(Result.U.pVal + get_അക്കം_വാക്കുകൾ(), isNegative() ? -1 : 0,
+              (Result.get_അക്കം_വാക്കുകൾ() - get_അക്കം_വാക്കുകൾ()) * APINT_WORD_SIZE);
   Result.clearUnusedBits();
-  return Result;
+  തിരികെ Result;
 }
 
 //  Zero extend to a new width.
-APInt APInt::zext(unsigned width) const {
-  assert(width >= BitWidth && "Invalid APInt ZeroExtend request");
+APInt APInt::zext(unsigned width) സ്ഥിരം {
+  പ്രതിജ്ഞാ(width >= BitWidth && "Invalid APInt ZeroExtend request");
 
-  if (width <= APINT_BITS_PER_WORD)
-    return APInt(width, U.VAL);
+  എങ്കിൽ (width <= APINT_BITS_PER_WORD)
+    തിരികെ APInt(width, U.VAL);
 
-  if (width == BitWidth)
-    return *this;
+  എങ്കിൽ (width == BitWidth)
+    തിരികെ *ഇത്;
 
-  APInt Result(getMemory(getNumWords(width)), width);
+  APInt Result(getMemory(get_അക്കം_വാക്കുകൾ(width)), width);
 
   // Copy words.
-  std::memcpy(Result.U.pVal, getRawData(), getNumWords() * APINT_WORD_SIZE);
+  std::memcpy(Result.U.pVal, getRawData(), get_അക്കം_വാക്കുകൾ() * APINT_WORD_SIZE);
 
   // Zero remaining words.
-  std::memset(Result.U.pVal + getNumWords(), 0,
-              (Result.getNumWords() - getNumWords()) * APINT_WORD_SIZE);
+  std::memset(Result.U.pVal + get_അക്കം_വാക്കുകൾ(), 0,
+              (Result.get_അക്കം_വാക്കുകൾ() - get_അക്കം_വാക്കുകൾ()) * APINT_WORD_SIZE);
 
-  return Result;
+  തിരികെ Result;
 }
 
-APInt APInt::zextOrTrunc(unsigned width) const {
-  if (BitWidth < width)
-    return zext(width);
-  if (BitWidth > width)
-    return trunc(width);
-  return *this;
+APInt APInt::zextOrTrunc(unsigned width) സ്ഥിരം {
+  എങ്കിൽ (BitWidth < width)
+    തിരികെ zext(width);
+  എങ്കിൽ (BitWidth > width)
+    തിരികെ trunc(width);
+  തിരികെ *ഇത്;
 }
 
-APInt APInt::sextOrTrunc(unsigned width) const {
-  if (BitWidth < width)
-    return sext(width);
-  if (BitWidth > width)
-    return trunc(width);
-  return *this;
-}
-
-/// Arithmetic right-shift this APInt by shiftAmt.
-/// Arithmetic right-shift function.
-void APInt::ashrInPlace(const APInt &shiftAmt) {
-  ashrInPlace((unsigned)shiftAmt.getLimitedValue(BitWidth));
+APInt APInt::sextOrTrunc(unsigned width) സ്ഥിരം {
+  എങ്കിൽ (BitWidth < width)
+    തിരികെ sext(width);
+  എങ്കിൽ (BitWidth > width)
+    തിരികെ trunc(width);
+  തിരികെ *ഇത്;
 }
 
 /// Arithmetic right-shift this APInt by shiftAmt.
 /// Arithmetic right-shift function.
-void APInt::ashrSlowCase(unsigned ShiftAmt) {
+ശൂന്യം APInt::ashrInPlace(സ്ഥിരം APInt &shiftAmt) {
+  ashrInPlace((unsigned)shiftAmt.get_Limited_മൂല്യം(BitWidth));
+}
+
+/// Arithmetic right-shift this APInt by shiftAmt.
+/// Arithmetic right-shift function.
+ശൂന്യം APInt::ashrSlowCase(unsigned ShiftAmt) {
   // Don't bother performing a no-op shift.
-  if (!ShiftAmt)
-    return;
+  എങ്കിൽ (!ShiftAmt)
+    തിരികെ;
 
   // Save the original sign bit for later.
-  bool Negative = isNegative();
+  തർക്കം Negative = isNegative();
 
   // WordShift is the inter-part shift; BitShift is intra-part shift.
   unsigned WordShift = ShiftAmt / APINT_BITS_PER_WORD;
   unsigned BitShift = ShiftAmt % APINT_BITS_PER_WORD;
 
-  unsigned WordsToMove = getNumWords() - WordShift;
-  if (WordsToMove != 0) {
+  unsigned വാക്കുകൾ_To_Move = get_അക്കം_വാക്കുകൾ() - WordShift;
+  എങ്കിൽ (വാക്കുകൾ_To_Move != 0) {
     // Sign extend the last word to fill in the unused bits.
-    U.pVal[getNumWords() - 1] = SignExtend64(
-        U.pVal[getNumWords() - 1], ((BitWidth - 1) % APINT_BITS_PER_WORD) + 1);
+    U.pVal[get_അക്കം_വാക്കുകൾ() - 1] = SignExtend64(
+        U.pVal[get_അക്കം_വാക്കുകൾ() - 1], ((BitWidth - 1) % APINT_BITS_PER_WORD) + 1);
 
     // Fastpath for moving by whole words.
-    if (BitShift == 0) {
-      std::memmove(U.pVal, U.pVal + WordShift, WordsToMove * APINT_WORD_SIZE);
-    } else {
+    എങ്കിൽ (BitShift == 0) {
+      std::memmove(U.pVal, U.pVal + WordShift, വാക്കുകൾ_To_Move * APINT_WORD_SIZE);
+    } അല്ലെങ്കിൽ {
       // Move the words containing significant bits.
-      for (unsigned i = 0; i != WordsToMove - 1; ++i)
+      വേണ്ടി (unsigned i = 0; i != വാക്കുകൾ_To_Move - 1; ++i)
         U.pVal[i] = (U.pVal[i + WordShift] >> BitShift) |
                     (U.pVal[i + WordShift + 1] << (APINT_BITS_PER_WORD - BitShift));
 
       // Handle the last word which has no high bits to copy. Use an arithmetic
       // shift to preserve the sign bit.
-      U.pVal[WordsToMove - 1] =
-          (int64_t)U.pVal[WordShift + WordsToMove - 1] >> BitShift;
+      U.pVal[വാക്കുകൾ_To_Move - 1] =
+          (int64_t)U.pVal[WordShift + വാക്കുകൾ_To_Move - 1] >> BitShift;
     }
   }
 
   // Fill in the remainder based on the original sign.
-  std::memset(U.pVal + WordsToMove, Negative ? -1 : 0,
+  std::memset(U.pVal + വാക്കുകൾ_To_Move, Negative ? -1 : 0,
               WordShift * APINT_WORD_SIZE);
   clearUnusedBits();
 }
 
 /// Logical right-shift this APInt by shiftAmt.
 /// Logical right-shift function.
-void APInt::lshrInPlace(const APInt &shiftAmt) {
-  lshrInPlace((unsigned)shiftAmt.getLimitedValue(BitWidth));
+ശൂന്യം APInt::lshrInPlace(സ്ഥിരം APInt &shiftAmt) {
+  lshrInPlace((unsigned)shiftAmt.get_Limited_മൂല്യം(BitWidth));
 }
 
 /// Logical right-shift this APInt by shiftAmt.
 /// Logical right-shift function.
-void APInt::lshrSlowCase(unsigned ShiftAmt) {
-  tcShiftRight(U.pVal, getNumWords(), ShiftAmt);
+ശൂന്യം APInt::lshrSlowCase(unsigned ShiftAmt) {
+  tc_Shift_വലത്(U.pVal, get_അക്കം_വാക്കുകൾ(), ShiftAmt);
 }
 
 /// Left-shift this APInt by shiftAmt.
 /// Left-shift function.
-APInt &APInt::operator<<=(const APInt &shiftAmt) {
+APInt &APInt::operator<<=(സ്ഥിരം APInt &shiftAmt) {
   // It's undefined behavior in C to shift by BitWidth or greater.
-  *this <<= (unsigned)shiftAmt.getLimitedValue(BitWidth);
-  return *this;
+  *ഇത് <<= (unsigned)shiftAmt.get_Limited_മൂല്യം(BitWidth);
+  തിരികെ *ഇത്;
 }
 
-void APInt::shlSlowCase(unsigned ShiftAmt) {
-  tcShiftLeft(U.pVal, getNumWords(), ShiftAmt);
+ശൂന്യം APInt::shlSlowCase(unsigned ShiftAmt) {
+  tc_Shift_ഇടത്(U.pVal, get_അക്കം_വാക്കുകൾ(), ShiftAmt);
   clearUnusedBits();
 }
 
 // Calculate the rotate amount modulo the bit width.
-static unsigned rotateModulo(unsigned BitWidth, const APInt &rotateAmt) {
-  if (LLVM_UNLIKELY(BitWidth == 0))
-    return 0;
+സ്ഥിതം unsigned rotateModulo(unsigned BitWidth, സ്ഥിരം APInt &rotateAmt) {
+  എങ്കിൽ (LLVM_UNLIKELY(BitWidth == 0))
+    തിരികെ 0;
   unsigned rotBitWidth = rotateAmt.getBitWidth();
   APInt rot = rotateAmt;
-  if (rotBitWidth < BitWidth) {
+  എങ്കിൽ (rotBitWidth < BitWidth) {
     // Extend the rotate APInt, so that the urem doesn't divide by 0.
     // e.g. APInt(1, 32) would give APInt(1, 0).
     rot = rotateAmt.zext(BitWidth);
   }
   rot = rot.urem(APInt(rot.getBitWidth(), BitWidth));
-  return rot.getLimitedValue(BitWidth);
+  തിരികെ rot.get_Limited_മൂല്യം(BitWidth);
 }
 
-APInt APInt::rotl(const APInt &rotateAmt) const {
-  return rotl(rotateModulo(BitWidth, rotateAmt));
+APInt APInt::rotl(സ്ഥിരം APInt &rotateAmt) സ്ഥിരം {
+  തിരികെ rotl(rotateModulo(BitWidth, rotateAmt));
 }
 
-APInt APInt::rotl(unsigned rotateAmt) const {
-  if (LLVM_UNLIKELY(BitWidth == 0))
-    return *this;
+APInt APInt::rotl(unsigned rotateAmt) സ്ഥിരം {
+  എങ്കിൽ (LLVM_UNLIKELY(BitWidth == 0))
+    തിരികെ *ഇത്;
   rotateAmt %= BitWidth;
-  if (rotateAmt == 0)
-    return *this;
-  return shl(rotateAmt) | lshr(BitWidth - rotateAmt);
+  എങ്കിൽ (rotateAmt == 0)
+    തിരികെ *ഇത്;
+  തിരികെ shl(rotateAmt) | lshr(BitWidth - rotateAmt);
 }
 
-APInt APInt::rotr(const APInt &rotateAmt) const {
-  return rotr(rotateModulo(BitWidth, rotateAmt));
+APInt APInt::rotr(സ്ഥിരം APInt &rotateAmt) സ്ഥിരം {
+  തിരികെ rotr(rotateModulo(BitWidth, rotateAmt));
 }
 
-APInt APInt::rotr(unsigned rotateAmt) const {
-  if (BitWidth == 0)
-    return *this;
+APInt APInt::rotr(unsigned rotateAmt) സ്ഥിരം {
+  എങ്കിൽ (BitWidth == 0)
+    തിരികെ *ഇത്;
   rotateAmt %= BitWidth;
-  if (rotateAmt == 0)
-    return *this;
-  return lshr(rotateAmt) | shl(BitWidth - rotateAmt);
+  എങ്കിൽ (rotateAmt == 0)
+    തിരികെ *ഇത്;
+  തിരികെ lshr(rotateAmt) | shl(BitWidth - rotateAmt);
 }
 
 /// \returns the nearest log base 2 of this APInt. Ties round up.
@@ -1214,16 +1214,16 @@ APInt APInt::rotr(unsigned rotateAmt) const {
 ///
 /// to get around any mathematical concerns resulting from
 /// referencing 2 in a space where 2 does no exist.
-unsigned APInt::nearestLogBase2() const {
+unsigned APInt::nearestLogBase2() സ്ഥിരം {
   // Special case when we have a bitwidth of 1. If VAL is 1, then we
   // get 0. If VAL is 0, we get WORDTYPE_MAX which gets truncated to
   // UINT32_MAX.
-  if (BitWidth == 1)
-    return U.VAL - 1;
+  എങ്കിൽ (BitWidth == 1)
+    തിരികെ U.VAL - 1;
 
   // Handle the zero case.
-  if (isZero())
-    return UINT32_MAX;
+  എങ്കിൽ (isZero())
+    തിരികെ UINT32_MAX;
 
   // The non-zero case is handled by computing:
   //
@@ -1231,7 +1231,7 @@ unsigned APInt::nearestLogBase2() const {
   //
   // where x[i] is referring to the value of the ith bit of x.
   unsigned lg = logBase2();
-  return lg + unsigned((*this)[lg - 1]);
+  തിരികെ lg + unsigned((*ഇത്)[lg - 1]);
 }
 
 // Square Root - this method computes and returns the square root of "this".
@@ -1241,15 +1241,15 @@ unsigned APInt::nearestLogBase2() const {
 // the libc sqrt function is called. The result is rounded and then converted
 // back to a uint64_t which is then used to construct the result. Finally,
 // the Babylonian method for computing square roots is used.
-APInt APInt::sqrtFloor() const {
+APInt APInt::sqrtFloor() സ്ഥിരം {
 
   // Determine the magnitude of the value.
   unsigned magnitude = getActiveBits();
 
   // Use a fast table for some small values. This also gets rid of some
   // rounding errors in libc sqrt for small values.
-  if (magnitude <= 5) {
-    static const uint8_t results[32] = {
+  എങ്കിൽ (magnitude <= 5) {
+    സ്ഥിതം സ്ഥിരം uint8_t results[32] = {
         /*     0 */ 0,
         /*  1- 3 */ 1, 1, 1,
         /*  4- 8 */ 2, 2, 2, 2, 2,
@@ -1257,7 +1257,7 @@ APInt APInt::sqrtFloor() const {
         /* 16-24 */ 4, 4, 4, 4, 4, 4, 4, 4, 4,
         /* 25-31 */ 5, 5, 5, 5, 5, 5, 5,
     };
-    return APInt(BitWidth,
+    തിരികെ APInt(BitWidth,
                  results[(LLVM_LIKELY(isSingleWord()) ? U.VAL : U.pVal[0])]);
   }
 
@@ -1265,9 +1265,9 @@ APInt APInt::sqrtFloor() const {
   // an IEEE double precision floating point value), then we can use the
   // libc sqrt function which will probably use a hardware sqrt computation.
   // This should be faster than the algorithm below.
-  if (magnitude < 52) {
-    return APInt(BitWidth,
-                 uint64_t(::floor(::sqrt(double(
+  എങ്കിൽ (magnitude < 52) {
+    തിരികെ APInt(BitWidth,
+                 uint64_t(::floor(::sqrt(ഇരട്ട(
                      LLVM_LIKELY(isSingleWord()) ? U.VAL : U.pVal[0])))));
   }
 
@@ -1283,63 +1283,63 @@ APInt APInt::sqrtFloor() const {
   APInt two(BitWidth, 2);
 
   // Select a good starting value using binary logarithms.
-  for (;; i += 2, testy = testy.shl(2))
-    if (i >= nbits || this->ule(testy)) {
+  വേണ്ടി (;; i += 2, testy = testy.shl(2))
+    എങ്കിൽ (i >= nbits || ഇത്->ule(testy)) {
       x_old = x_old.shl(i / 2);
-      break;
+      നിർത്തുക;
     }
 
   // Use the Babylonian method to arrive at the integer square root:
-  for (;;) {
-    x_new = (this->udiv(x_old) + x_old).udiv(two);
-    if (x_old.ule(x_new))
-      break;
+  വേണ്ടി (;;) {
+    x_new = (ഇത്->udiv(x_old) + x_old).udiv(two);
+    എങ്കിൽ (x_old.ule(x_new))
+      നിർത്തുക;
     x_old = x_new;
   }
-  return x_old;
+  തിരികെ x_old;
 }
 
 /// \returns the multiplicative inverse of an odd APInt modulo 2^BitWidth.
-APInt APInt::multiplicativeInverse() const {
-  assert((*this)[0] &&
+APInt APInt::multiplicativeInverse() സ്ഥിരം {
+  പ്രതിജ്ഞാ((*ഇത്)[0] &&
          "multiplicative inverse is only defined for odd numbers!");
 
   // Use Newton's method.
-  APInt Factor = *this;
+  APInt Factor = *ഇത്;
   APInt T;
-  while (!(T = *this * Factor).isOne())
+  ആകുമ്പോൾ (!(T = *ഇത് * Factor).isOne())
     Factor *= 2 - std::move(T);
-  return Factor;
+  തിരികെ Factor;
 }
 
 /// Implementation of Knuth's Algorithm D (Division of nonnegative integers)
 /// from "Art of Computer Programming, Volume 2", section 4.3.1, p. 272. The
 /// variables here have the same names as in the algorithm. Comments explain
 /// the algorithm and any deviation from it.
-static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
+സ്ഥിതം ശൂന്യം KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
                      unsigned m, unsigned n) {
-  assert(u && "Must provide dividend");
-  assert(v && "Must provide divisor");
-  assert(q && "Must provide quotient");
-  assert(u != v && u != q && v != q && "Must use different memory");
-  assert(n>1 && "n must be > 1");
+  പ്രതിജ്ഞാ(u && "Must provide dividend");
+  പ്രതിജ്ഞാ(v && "Must provide divisor");
+  പ്രതിജ്ഞാ(q && "Must provide quotient");
+  പ്രതിജ്ഞാ(u != v && u != q && v != q && "Must use different memory");
+  പ്രതിജ്ഞാ(n>1 && "n must be > 1");
 
   // b denotes the base of the number system. In our case b is 2^32.
-  const uint64_t b = uint64_t(1) << 32;
+  സ്ഥിരം uint64_t b = uint64_t(1) << 32;
 
 // The DEBUG macros here tend to be spam in the debug output if you're not
 // debugging this code. Disable them unless KNUTH_DEBUG is defined.
 #ifdef KNUTH_DEBUG
 #define DEBUG_KNUTH(X) LLVM_DEBUG(X)
-#else
-#define DEBUG_KNUTH(X) do {} while(false)
+#അല്ലെങ്കിൽ
+#define DEBUG_KNUTH(X) ചെയ്യുക {} ആകുമ്പോൾ(അസത്യം)
 #endif
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv: m=" << m << " n=" << n << '\n');
   DEBUG_KNUTH(dbgs() << "KnuthDiv: original:");
-  DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+  DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
   DEBUG_KNUTH(dbgs() << " by");
-  DEBUG_KNUTH(for (int i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
+  DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
   DEBUG_KNUTH(dbgs() << '\n');
   // D1. [Normalize.] Set d = b / (v[n-1] + 1) and multiply all the digits of
   // u and v by d. Note that we have taken Knuth's advice here to use a power
@@ -1352,13 +1352,13 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   unsigned shift = llvm::countl_zero(v[n - 1]);
   uint32_t v_carry = 0;
   uint32_t u_carry = 0;
-  if (shift) {
-    for (unsigned i = 0; i < m+n; ++i) {
+  എങ്കിൽ (shift) {
+    വേണ്ടി (unsigned i = 0; i < m+n; ++i) {
       uint32_t u_tmp = u[i] >> (32 - shift);
       u[i] = (u[i] << shift) | u_carry;
       u_carry = u_tmp;
     }
-    for (unsigned i = 0; i < n; ++i) {
+    വേണ്ടി (unsigned i = 0; i < n; ++i) {
       uint32_t v_tmp = v[i] >> (32 - shift);
       v[i] = (v[i] << shift) | v_carry;
       v_carry = v_tmp;
@@ -1367,14 +1367,14 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   u[m+n] = u_carry;
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv:   normal:");
-  DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+  DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
   DEBUG_KNUTH(dbgs() << " by");
-  DEBUG_KNUTH(for (int i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
+  DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
   DEBUG_KNUTH(dbgs() << '\n');
 
   // D2. [Initialize j.]  Set j to m. This is the loop counter over the places.
-  int j = m;
-  do {
+  പൂർണ്ണസംഖ്യ j = m;
+  ചെയ്യുക {
     DEBUG_KNUTH(dbgs() << "KnuthDiv: quotient digit #" << j << '\n');
     // D3. [Calculate q'.].
     //     Set qp = (u[j+n]*b + u[j+n-1]) / v[n-1]. (qp=qprime=q')
@@ -1388,10 +1388,10 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     DEBUG_KNUTH(dbgs() << "KnuthDiv: dividend == " << dividend << '\n');
     uint64_t qp = dividend / v[n-1];
     uint64_t rp = dividend % v[n-1];
-    if (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
+    എങ്കിൽ (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
       qp--;
       rp += v[n-1];
-      if (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
+      എങ്കിൽ (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
         qp--;
     }
     DEBUG_KNUTH(dbgs() << "KnuthDiv: qp == " << qp << ", rp == " << rp << '\n');
@@ -1405,7 +1405,7 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     // true value plus b**(n+1), namely as the b's complement of
     // the true value, and a "borrow" to the left should be remembered.
     int64_t borrow = 0;
-    for (unsigned i = 0; i < n; ++i) {
+    വേണ്ടി (unsigned i = 0; i < n; ++i) {
       uint64_t p = qp * uint64_t(v[i]);
       int64_t subres = int64_t(u[j+i]) - borrow - Lo_32(p);
       u[j+i] = Lo_32(subres);
@@ -1413,17 +1413,17 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       DEBUG_KNUTH(dbgs() << "KnuthDiv: u[j+i] = " << u[j + i]
                         << ", borrow = " << borrow << '\n');
     }
-    bool isNeg = u[j+n] < borrow;
+    തർക്കം isNeg = u[j+n] < borrow;
     u[j+n] -= Lo_32(borrow);
 
     DEBUG_KNUTH(dbgs() << "KnuthDiv: after subtraction:");
-    DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+    DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
     DEBUG_KNUTH(dbgs() << '\n');
 
     // D5. [Test remainder.] Set q[j] = qp. If the result of step D4 was
     // negative, go to step D6; otherwise go on to step D7.
     q[j] = Lo_32(qp);
-    if (isNeg) {
+    എങ്കിൽ (isNeg) {
       // D6. [Add back]. The probability that this step is necessary is very
       // small, on the order of only 2/b. Make sure that test data accounts for
       // this possibility. Decrease q[j] by 1
@@ -1431,8 +1431,8 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // and add (0v[n-1]...v[1]v[0]) to (u[j+n]u[j+n-1]...u[j+1]u[j]).
       // A carry will occur to the left of u[j+n], and it should be ignored
       // since it cancels with the borrow that occurred in D4.
-      bool carry = false;
-      for (unsigned i = 0; i < n; i++) {
+      തർക്കം carry = അസത്യം;
+      വേണ്ടി (unsigned i = 0; i < n; i++) {
         uint32_t limit = std::min(u[j+i],v[i]);
         u[j+i] += v[i] + carry;
         carry = u[j+i] < limit || (carry && u[j+i] == limit);
@@ -1440,33 +1440,33 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       u[j+n] += carry;
     }
     DEBUG_KNUTH(dbgs() << "KnuthDiv: after correction:");
-    DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+    DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
     DEBUG_KNUTH(dbgs() << "\nKnuthDiv: digit result = " << q[j] << '\n');
 
     // D7. [Loop on j.]  Decrease j by one. Now if j >= 0, go back to D3.
-  } while (--j >= 0);
+  } ആകുമ്പോൾ (--j >= 0);
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv: quotient:");
-  DEBUG_KNUTH(for (int i = m; i >= 0; i--) dbgs() << " " << q[i]);
+  DEBUG_KNUTH(വേണ്ടി (പൂർണ്ണസംഖ്യ i = m; i >= 0; i--) dbgs() << " " << q[i]);
   DEBUG_KNUTH(dbgs() << '\n');
 
   // D8. [Unnormalize]. Now q[...] is the desired quotient, and the desired
   // remainder may be obtained by dividing u[...] by d. If r is non-null we
   // compute the remainder (urem uses this).
-  if (r) {
+  എങ്കിൽ (r) {
     // The value d is expressed by the "shift" value above since we avoided
     // multiplication by d by using a shift left. So, all we have to do is
     // shift right here.
-    if (shift) {
+    എങ്കിൽ (shift) {
       uint32_t carry = 0;
       DEBUG_KNUTH(dbgs() << "KnuthDiv: remainder:");
-      for (int i = n-1; i >= 0; i--) {
+      വേണ്ടി (പൂർണ്ണസംഖ്യ i = n-1; i >= 0; i--) {
         r[i] = (u[i] >> shift) | carry;
         carry = u[i] << (32 - shift);
         DEBUG_KNUTH(dbgs() << " " << r[i]);
       }
-    } else {
-      for (int i = n-1; i >= 0; i--) {
+    } അല്ലെങ്കിൽ {
+      വേണ്ടി (പൂർണ്ണസംഖ്യ i = n-1; i >= 0; i--) {
         r[i] = u[i];
         DEBUG_KNUTH(dbgs() << " " << r[i]);
       }
@@ -1476,9 +1476,9 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   DEBUG_KNUTH(dbgs() << '\n');
 }
 
-void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
-                   unsigned rhsWords, WordType *Quotient, WordType *Remainder) {
-  assert(lhsWords >= rhsWords && "Fractional result");
+ശൂന്യം APInt::divide(സ്ഥിരം WordType *LHS, unsigned lhs_വാക്കുകൾ, സ്ഥിരം WordType *RHS,
+                   unsigned rhs_വാക്കുകൾ, WordType *Quotient, WordType *Remainder) {
+  പ്രതിജ്ഞാ(lhs_വാക്കുകൾ >= rhs_വാക്കുകൾ && "Fractional result");
 
   // First, compose the values into an array of 32-bit words instead of
   // 64-bit words. This is a necessity of both the "short division" algorithm
@@ -1487,8 +1487,8 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   // can't use 64-bit operands here because we don't have native results of
   // 128-bits. Furthermore, casting the 64-bit values to 32-bit values won't
   // work on large-endian machines.
-  unsigned n = rhsWords * 2;
-  unsigned m = (lhsWords * 2) - n;
+  unsigned n = rhs_വാക്കുകൾ * 2;
+  unsigned m = (lhs_വാക്കുകൾ * 2) - n;
 
   // Allocate space for the temporary values we need either on the stack, if
   // it will fit, or on the heap if it won't.
@@ -1497,23 +1497,23 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   uint32_t *V = nullptr;
   uint32_t *Q = nullptr;
   uint32_t *R = nullptr;
-  if ((Remainder?4:3)*n+2*m+1 <= 128) {
+  എങ്കിൽ ((Remainder?4:3)*n+2*m+1 <= 128) {
     U = &SPACE[0];
     V = &SPACE[m+n+1];
     Q = &SPACE[(m+n+1) + n];
-    if (Remainder)
+    എങ്കിൽ (Remainder)
       R = &SPACE[(m+n+1) + n + (m+n)];
-  } else {
-    U = new uint32_t[m + n + 1];
-    V = new uint32_t[n];
-    Q = new uint32_t[m+n];
-    if (Remainder)
-      R = new uint32_t[n];
+  } അല്ലെങ്കിൽ {
+    U = പുതിയ uint32_t[m + n + 1];
+    V = പുതിയ uint32_t[n];
+    Q = പുതിയ uint32_t[m+n];
+    എങ്കിൽ (Remainder)
+      R = പുതിയ uint32_t[n];
   }
 
   // Initialize the dividend
-  memset(U, 0, (m+n+1)*sizeof(uint32_t));
-  for (unsigned i = 0; i < lhsWords; ++i) {
+  memset(U, 0, (m+n+1)*വലുപ്പം(uint32_t));
+  വേണ്ടി (unsigned i = 0; i < lhs_വാക്കുകൾ; ++i) {
     uint64_t tmp = LHS[i];
     U[i * 2] = Lo_32(tmp);
     U[i * 2 + 1] = Hi_32(tmp);
@@ -1521,27 +1521,27 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   U[m+n] = 0; // this extra word is for "spill" in the Knuth algorithm.
 
   // Initialize the divisor
-  memset(V, 0, (n)*sizeof(uint32_t));
-  for (unsigned i = 0; i < rhsWords; ++i) {
+  memset(V, 0, (n)*വലുപ്പം(uint32_t));
+  വേണ്ടി (unsigned i = 0; i < rhs_വാക്കുകൾ; ++i) {
     uint64_t tmp = RHS[i];
     V[i * 2] = Lo_32(tmp);
     V[i * 2 + 1] = Hi_32(tmp);
   }
 
   // initialize the quotient and remainder
-  memset(Q, 0, (m+n) * sizeof(uint32_t));
-  if (Remainder)
-    memset(R, 0, n * sizeof(uint32_t));
+  memset(Q, 0, (m+n) * വലുപ്പം(uint32_t));
+  എങ്കിൽ (Remainder)
+    memset(R, 0, n * വലുപ്പം(uint32_t));
 
   // Now, adjust m and n for the Knuth division. n is the number of words in
   // the divisor. m is the number of words by which the dividend exceeds the
   // divisor (i.e. m+n is the length of the dividend). These sizes must not
   // contain any zero words or the Knuth algorithm fails.
-  for (unsigned i = n; i > 0 && V[i-1] == 0; i--) {
+  വേണ്ടി (unsigned i = n; i > 0 && V[i-1] == 0; i--) {
     n--;
     m++;
   }
-  for (unsigned i = m+n; i > 0 && U[i-1] == 0; i--)
+  വേണ്ടി (unsigned i = m+n; i > 0 && U[i-1] == 0; i--)
     m--;
 
   // If we're left with only a single word for the divisor, Knuth doesn't work
@@ -1550,48 +1550,48 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   // by a 32-bit quantity at hardware speed and short division is simply a
   // series of such operations. This is just like doing short division but we
   // are using base 2^32 instead of base 10.
-  assert(n != 0 && "Divide by zero?");
-  if (n == 1) {
-    uint32_t divisor = V[0];
+  പ്രതിജ്ഞാ(n != 0 && "Divide by zero?");
+  എങ്കിൽ (n == 1) {
+    uint32_t ഹാരകം = V[0];
     uint32_t remainder = 0;
-    for (int i = m; i >= 0; i--) {
+    വേണ്ടി (പൂർണ്ണസംഖ്യ i = m; i >= 0; i--) {
       uint64_t partial_dividend = Make_64(remainder, U[i]);
-      if (partial_dividend == 0) {
+      എങ്കിൽ (partial_dividend == 0) {
         Q[i] = 0;
         remainder = 0;
-      } else if (partial_dividend < divisor) {
+      } അല്ലെങ്കിൽ എങ്കിൽ (partial_dividend < ഹാരകം) {
         Q[i] = 0;
         remainder = Lo_32(partial_dividend);
-      } else if (partial_dividend == divisor) {
+      } അല്ലെങ്കിൽ എങ്കിൽ (partial_dividend == ഹാരകം) {
         Q[i] = 1;
         remainder = 0;
-      } else {
-        Q[i] = Lo_32(partial_dividend / divisor);
-        remainder = Lo_32(partial_dividend - (Q[i] * divisor));
+      } അല്ലെങ്കിൽ {
+        Q[i] = Lo_32(partial_dividend / ഹാരകം);
+        remainder = Lo_32(partial_dividend - (Q[i] * ഹാരകം));
       }
     }
-    if (R)
+    എങ്കിൽ (R)
       R[0] = remainder;
-  } else {
+  } അല്ലെങ്കിൽ {
     // Now we're ready to invoke the Knuth classical divide algorithm. In this
     // case n > 1.
     KnuthDiv(U, V, Q, R, m, n);
   }
 
   // If the caller wants the quotient
-  if (Quotient) {
-    for (unsigned i = 0; i < lhsWords; ++i)
+  എങ്കിൽ (Quotient) {
+    വേണ്ടി (unsigned i = 0; i < lhs_വാക്കുകൾ; ++i)
       Quotient[i] = Make_64(Q[i*2+1], Q[i*2]);
   }
 
   // If the caller wants the remainder
-  if (Remainder) {
-    for (unsigned i = 0; i < rhsWords; ++i)
+  എങ്കിൽ (Remainder) {
+    വേണ്ടി (unsigned i = 0; i < rhs_വാക്കുകൾ; ++i)
       Remainder[i] = Make_64(R[i*2+1], R[i*2]);
   }
 
   // Clean up the memory we allocated.
-  if (U != &SPACE[0]) {
+  എങ്കിൽ (U != &SPACE[0]) {
     delete [] U;
     delete [] V;
     delete [] Q;
@@ -1599,243 +1599,243 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   }
 }
 
-APInt APInt::udiv(const APInt &RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
+APInt APInt::udiv(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be the same");
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(isSingleWord())) {
-    assert(RHS.U.VAL != 0 && "Divide by zero?");
-    return APInt(BitWidth, U.VAL / RHS.U.VAL);
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
+    പ്രതിജ്ഞാ(RHS.U.VAL != 0 && "Divide by zero?");
+    തിരികെ APInt(BitWidth, U.VAL / RHS.U.VAL);
   }
 
   // Get some facts about the LHS and RHS number of bits and words
-  unsigned lhsWords = getNumWords(getActiveBits());
+  unsigned lhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(getActiveBits());
   unsigned rhsBits  = RHS.getActiveBits();
-  unsigned rhsWords = getNumWords(rhsBits);
-  assert(rhsWords && "Divided by zero???");
+  unsigned rhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(rhsBits);
+  പ്രതിജ്ഞാ(rhs_വാക്കുകൾ && "Divided by zero???");
 
   // Deal with some degenerate cases
-  if (!lhsWords)
+  എങ്കിൽ (!lhs_വാക്കുകൾ)
     // 0 / X ===> 0
-    return APInt(BitWidth, 0);
-  if (rhsBits == 1)
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (rhsBits == 1)
     // X / 1 ===> X
-    return *this;
-  if (lhsWords < rhsWords || this->ult(RHS))
+    തിരികെ *ഇത്;
+  എങ്കിൽ (lhs_വാക്കുകൾ < rhs_വാക്കുകൾ || ഇത്->ult(RHS))
     // X / Y ===> 0, iff X < Y
-    return APInt(BitWidth, 0);
-  if (*this == RHS)
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (*ഇത് == RHS)
     // X / X ===> 1
-    return APInt(BitWidth, 1);
-  if (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
+    തിരികെ APInt(BitWidth, 1);
+  എങ്കിൽ (lhs_വാക്കുകൾ == 1) // rhsWords is 1 if lhsWords is 1.
     // All high words are zero, just use native divide
-    return APInt(BitWidth, this->U.pVal[0] / RHS.U.pVal[0]);
+    തിരികെ APInt(BitWidth, ഇത്->U.pVal[0] / RHS.U.pVal[0]);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   APInt Quotient(BitWidth, 0); // to hold result.
-  divide(U.pVal, lhsWords, RHS.U.pVal, rhsWords, Quotient.U.pVal, nullptr);
-  return Quotient;
+  divide(U.pVal, lhs_വാക്കുകൾ, RHS.U.pVal, rhs_വാക്കുകൾ, Quotient.U.pVal, nullptr);
+  തിരികെ Quotient;
 }
 
-APInt APInt::udiv(uint64_t RHS) const {
-  assert(RHS != 0 && "Divide by zero?");
+APInt APInt::udiv(uint64_t RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(RHS != 0 && "Divide by zero?");
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(BitWidth, U.VAL / RHS);
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
+    തിരികെ APInt(BitWidth, U.VAL / RHS);
 
   // Get some facts about the LHS words.
-  unsigned lhsWords = getNumWords(getActiveBits());
+  unsigned lhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(getActiveBits());
 
   // Deal with some degenerate cases
-  if (!lhsWords)
+  എങ്കിൽ (!lhs_വാക്കുകൾ)
     // 0 / X ===> 0
-    return APInt(BitWidth, 0);
-  if (RHS == 1)
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (RHS == 1)
     // X / 1 ===> X
-    return *this;
-  if (this->ult(RHS))
+    തിരികെ *ഇത്;
+  എങ്കിൽ (ഇത്->ult(RHS))
     // X / Y ===> 0, iff X < Y
-    return APInt(BitWidth, 0);
-  if (*this == RHS)
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (*ഇത് == RHS)
     // X / X ===> 1
-    return APInt(BitWidth, 1);
-  if (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
+    തിരികെ APInt(BitWidth, 1);
+  എങ്കിൽ (lhs_വാക്കുകൾ == 1) // rhsWords is 1 if lhsWords is 1.
     // All high words are zero, just use native divide
-    return APInt(BitWidth, this->U.pVal[0] / RHS);
+    തിരികെ APInt(BitWidth, ഇത്->U.pVal[0] / RHS);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   APInt Quotient(BitWidth, 0); // to hold result.
-  divide(U.pVal, lhsWords, &RHS, 1, Quotient.U.pVal, nullptr);
-  return Quotient;
+  divide(U.pVal, lhs_വാക്കുകൾ, &RHS, 1, Quotient.U.pVal, nullptr);
+  തിരികെ Quotient;
 }
 
-APInt APInt::sdiv(const APInt &RHS) const {
-  if (isNegative()) {
-    if (RHS.isNegative())
-      return (-(*this)).udiv(-RHS);
-    return -((-(*this)).udiv(RHS));
+APInt APInt::sdiv(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  എങ്കിൽ (isNegative()) {
+    എങ്കിൽ (RHS.isNegative())
+      തിരികെ (-(*ഇത്)).udiv(-RHS);
+    തിരികെ -((-(*ഇത്)).udiv(RHS));
   }
-  if (RHS.isNegative())
-    return -(this->udiv(-RHS));
-  return this->udiv(RHS);
+  എങ്കിൽ (RHS.isNegative())
+    തിരികെ -(ഇത്->udiv(-RHS));
+  തിരികെ ഇത്->udiv(RHS);
 }
 
-APInt APInt::sdiv(int64_t RHS) const {
-  if (isNegative()) {
-    if (RHS < 0)
-      return (-(*this)).udiv(-RHS);
-    return -((-(*this)).udiv(RHS));
+APInt APInt::sdiv(int64_t RHS) സ്ഥിരം {
+  എങ്കിൽ (isNegative()) {
+    എങ്കിൽ (RHS < 0)
+      തിരികെ (-(*ഇത്)).udiv(-RHS);
+    തിരികെ -((-(*ഇത്)).udiv(RHS));
   }
-  if (RHS < 0)
-    return -(this->udiv(-RHS));
-  return this->udiv(RHS);
+  എങ്കിൽ (RHS < 0)
+    തിരികെ -(ഇത്->udiv(-RHS));
+  തിരികെ ഇത്->udiv(RHS);
 }
 
-APInt APInt::urem(const APInt &RHS) const {
-  assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord())) {
-    assert(RHS.U.VAL != 0 && "Remainder by zero?");
-    return APInt(BitWidth, U.VAL % RHS.U.VAL);
+APInt APInt::urem(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(BitWidth == RHS.BitWidth && "Bit widths must be the same");
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
+    പ്രതിജ്ഞാ(RHS.U.VAL != 0 && "Remainder by zero?");
+    തിരികെ APInt(BitWidth, U.VAL % RHS.U.VAL);
   }
 
   // Get some facts about the LHS
-  unsigned lhsWords = getNumWords(getActiveBits());
+  unsigned lhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(getActiveBits());
 
   // Get some facts about the RHS
   unsigned rhsBits = RHS.getActiveBits();
-  unsigned rhsWords = getNumWords(rhsBits);
-  assert(rhsWords && "Performing remainder operation by zero ???");
+  unsigned rhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(rhsBits);
+  പ്രതിജ്ഞാ(rhs_വാക്കുകൾ && "Performing remainder operation by zero ???");
 
   // Check the degenerate cases
-  if (lhsWords == 0)
+  എങ്കിൽ (lhs_വാക്കുകൾ == 0)
     // 0 % Y ===> 0
-    return APInt(BitWidth, 0);
-  if (rhsBits == 1)
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (rhsBits == 1)
     // X % 1 ===> 0
-    return APInt(BitWidth, 0);
-  if (lhsWords < rhsWords || this->ult(RHS))
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (lhs_വാക്കുകൾ < rhs_വാക്കുകൾ || ഇത്->ult(RHS))
     // X % Y ===> X, iff X < Y
-    return *this;
-  if (*this == RHS)
+    തിരികെ *ഇത്;
+  എങ്കിൽ (*ഇത് == RHS)
     // X % X == 0;
-    return APInt(BitWidth, 0);
-  if (lhsWords == 1)
+    തിരികെ APInt(BitWidth, 0);
+  എങ്കിൽ (lhs_വാക്കുകൾ == 1)
     // All high words are zero, just use native remainder
-    return APInt(BitWidth, U.pVal[0] % RHS.U.pVal[0]);
-  if (RHS.isPowerOf2()) {
+    തിരികെ APInt(BitWidth, U.pVal[0] % RHS.U.pVal[0]);
+  എങ്കിൽ (RHS.isPowerOf2()) {
     // X % 2^w ===> X & (2^w - 1)
-    APInt Result(*this);
+    APInt Result(*ഇത്);
     Result.clearBits(RHS.logBase2(), BitWidth);
-    return Result;
+    തിരികെ Result;
   }
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   APInt Remainder(BitWidth, 0);
-  divide(U.pVal, lhsWords, RHS.U.pVal, rhsWords, nullptr, Remainder.U.pVal);
-  return Remainder;
+  divide(U.pVal, lhs_വാക്കുകൾ, RHS.U.pVal, rhs_വാക്കുകൾ, nullptr, Remainder.U.pVal);
+  തിരികെ Remainder;
 }
 
-uint64_t APInt::urem(uint64_t RHS) const {
-  assert(RHS != 0 && "Remainder by zero?");
+uint64_t APInt::urem(uint64_t RHS) സ്ഥിരം {
+  പ്രതിജ്ഞാ(RHS != 0 && "Remainder by zero?");
 
-  if (LLVM_LIKELY(isSingleWord()))
-    return U.VAL % RHS;
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
+    തിരികെ U.VAL % RHS;
 
   // Get some facts about the LHS
-  unsigned lhsWords = getNumWords(getActiveBits());
+  unsigned lhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(getActiveBits());
 
   // Check the degenerate cases
-  if (lhsWords == 0)
+  എങ്കിൽ (lhs_വാക്കുകൾ == 0)
     // 0 % Y ===> 0
-    return 0;
-  if (RHS == 1)
+    തിരികെ 0;
+  എങ്കിൽ (RHS == 1)
     // X % 1 ===> 0
-    return 0;
-  if (this->ult(RHS))
+    തിരികെ 0;
+  എങ്കിൽ (ഇത്->ult(RHS))
     // X % Y ===> X, iff X < Y
-    return getZExtValue();
-  if (*this == RHS)
+    തിരികെ get_ZExt_മൂല്യം();
+  എങ്കിൽ (*ഇത് == RHS)
     // X % X == 0;
-    return 0;
-  if (lhsWords == 1)
+    തിരികെ 0;
+  എങ്കിൽ (lhs_വാക്കുകൾ == 1)
     // All high words are zero, just use native remainder
-    return U.pVal[0] % RHS;
-  if (llvm::isPowerOf2_64(RHS))
+    തിരികെ U.pVal[0] % RHS;
+  എങ്കിൽ (llvm::isPowerOf2_64(RHS))
     // X % 2^w ===> X & (2^w - 1)
-    return U.pVal[0] & (RHS - 1);
+    തിരികെ U.pVal[0] & (RHS - 1);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   uint64_t Remainder;
-  divide(U.pVal, lhsWords, &RHS, 1, nullptr, &Remainder);
-  return Remainder;
+  divide(U.pVal, lhs_വാക്കുകൾ, &RHS, 1, nullptr, &Remainder);
+  തിരികെ Remainder;
 }
 
-APInt APInt::srem(const APInt &RHS) const {
-  if (isNegative()) {
-    if (RHS.isNegative())
-      return -((-(*this)).urem(-RHS));
-    return -((-(*this)).urem(RHS));
+APInt APInt::srem(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  എങ്കിൽ (isNegative()) {
+    എങ്കിൽ (RHS.isNegative())
+      തിരികെ -((-(*ഇത്)).urem(-RHS));
+    തിരികെ -((-(*ഇത്)).urem(RHS));
   }
-  if (RHS.isNegative())
-    return this->urem(-RHS);
-  return this->urem(RHS);
+  എങ്കിൽ (RHS.isNegative())
+    തിരികെ ഇത്->urem(-RHS);
+  തിരികെ ഇത്->urem(RHS);
 }
 
-int64_t APInt::srem(int64_t RHS) const {
-  if (isNegative()) {
-    if (RHS < 0)
-      return -((-(*this)).urem(-RHS));
-    return -((-(*this)).urem(RHS));
+int64_t APInt::srem(int64_t RHS) സ്ഥിരം {
+  എങ്കിൽ (isNegative()) {
+    എങ്കിൽ (RHS < 0)
+      തിരികെ -((-(*ഇത്)).urem(-RHS));
+    തിരികെ -((-(*ഇത്)).urem(RHS));
   }
-  if (RHS < 0)
-    return this->urem(-RHS);
-  return this->urem(RHS);
+  എങ്കിൽ (RHS < 0)
+    തിരികെ ഇത്->urem(-RHS);
+  തിരികെ ഇത്->urem(RHS);
 }
 
-void APInt::udivrem(const APInt &LHS, const APInt &RHS,
+ശൂന്യം APInt::udivrem(സ്ഥിരം APInt &LHS, സ്ഥിരം APInt &RHS,
                     APInt &Quotient, APInt &Remainder) {
-  assert(LHS.BitWidth == RHS.BitWidth && "Bit widths must be the same");
+  പ്രതിജ്ഞാ(LHS.BitWidth == RHS.BitWidth && "Bit widths must be the same");
   unsigned BitWidth = LHS.BitWidth;
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(LHS.isSingleWord())) {
-    assert(RHS.U.VAL != 0 && "Divide by zero?");
+  എങ്കിൽ (LLVM_LIKELY(LHS.isSingleWord())) {
+    പ്രതിജ്ഞാ(RHS.U.VAL != 0 && "Divide by zero?");
     uint64_t QuotVal = LHS.U.VAL / RHS.U.VAL;
     uint64_t RemVal = LHS.U.VAL % RHS.U.VAL;
     Quotient = APInt(BitWidth, QuotVal);
     Remainder = APInt(BitWidth, RemVal);
-    return;
+    തിരികെ;
   }
 
   // Get some size facts about the dividend and divisor
-  unsigned lhsWords = getNumWords(LHS.getActiveBits());
+  unsigned lhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(LHS.getActiveBits());
   unsigned rhsBits  = RHS.getActiveBits();
-  unsigned rhsWords = getNumWords(rhsBits);
-  assert(rhsWords && "Performing divrem operation by zero ???");
+  unsigned rhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(rhsBits);
+  പ്രതിജ്ഞാ(rhs_വാക്കുകൾ && "Performing divrem operation by zero ???");
 
   // Check the degenerate cases
-  if (lhsWords == 0) {
+  എങ്കിൽ (lhs_വാക്കുകൾ == 0) {
     Quotient = APInt(BitWidth, 0);    // 0 / Y ===> 0
     Remainder = APInt(BitWidth, 0);   // 0 % Y ===> 0
-    return;
+    തിരികെ;
   }
 
-  if (rhsBits == 1) {
+  എങ്കിൽ (rhsBits == 1) {
     Quotient = LHS;                   // X / 1 ===> X
     Remainder = APInt(BitWidth, 0);   // X % 1 ===> 0
   }
 
-  if (lhsWords < rhsWords || LHS.ult(RHS)) {
+  എങ്കിൽ (lhs_വാക്കുകൾ < rhs_വാക്കുകൾ || LHS.ult(RHS)) {
     Remainder = LHS;                  // X % Y ===> X, iff X < Y
     Quotient = APInt(BitWidth, 0);    // X / Y ===> 0, iff X < Y
-    return;
+    തിരികെ;
   }
 
-  if (LHS == RHS) {
+  എങ്കിൽ (LHS == RHS) {
     Quotient  = APInt(BitWidth, 1);   // X / X ===> 1
     Remainder = APInt(BitWidth, 0);   // X % X ===> 0;
-    return;
+    തിരികെ;
   }
 
   // Make sure there is enough space to hold the results.
@@ -1845,64 +1845,64 @@ void APInt::udivrem(const APInt &LHS, const APInt &RHS,
   Quotient.reallocate(BitWidth);
   Remainder.reallocate(BitWidth);
 
-  if (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
+  എങ്കിൽ (lhs_വാക്കുകൾ == 1) { // rhsWords is 1 if lhsWords is 1.
     // There is only one word to consider so use the native versions.
-    uint64_t lhsValue = LHS.U.pVal[0];
-    uint64_t rhsValue = RHS.U.pVal[0];
-    Quotient = lhsValue / rhsValue;
-    Remainder = lhsValue % rhsValue;
-    return;
+    uint64_t lhs_മൂല്യം = LHS.U.pVal[0];
+    uint64_t rhs_മൂല്യം = RHS.U.pVal[0];
+    Quotient = lhs_മൂല്യം / rhs_മൂല്യം;
+    Remainder = lhs_മൂല്യം % rhs_മൂല്യം;
+    തിരികെ;
   }
 
   // Okay, lets do it the long way
-  divide(LHS.U.pVal, lhsWords, RHS.U.pVal, rhsWords, Quotient.U.pVal,
+  divide(LHS.U.pVal, lhs_വാക്കുകൾ, RHS.U.pVal, rhs_വാക്കുകൾ, Quotient.U.pVal,
          Remainder.U.pVal);
   // Clear the rest of the Quotient and Remainder.
-  std::memset(Quotient.U.pVal + lhsWords, 0,
-              (getNumWords(BitWidth) - lhsWords) * APINT_WORD_SIZE);
-  std::memset(Remainder.U.pVal + rhsWords, 0,
-              (getNumWords(BitWidth) - rhsWords) * APINT_WORD_SIZE);
+  std::memset(Quotient.U.pVal + lhs_വാക്കുകൾ, 0,
+              (get_അക്കം_വാക്കുകൾ(BitWidth) - lhs_വാക്കുകൾ) * APINT_WORD_SIZE);
+  std::memset(Remainder.U.pVal + rhs_വാക്കുകൾ, 0,
+              (get_അക്കം_വാക്കുകൾ(BitWidth) - rhs_വാക്കുകൾ) * APINT_WORD_SIZE);
 }
 
-void APInt::udivrem(const APInt &LHS, uint64_t RHS, APInt &Quotient,
+ശൂന്യം APInt::udivrem(സ്ഥിരം APInt &LHS, uint64_t RHS, APInt &Quotient,
                     uint64_t &Remainder) {
-  assert(RHS != 0 && "Divide by zero?");
+  പ്രതിജ്ഞാ(RHS != 0 && "Divide by zero?");
   unsigned BitWidth = LHS.BitWidth;
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(LHS.isSingleWord())) {
+  എങ്കിൽ (LLVM_LIKELY(LHS.isSingleWord())) {
     uint64_t QuotVal = LHS.U.VAL / RHS;
     Remainder = LHS.U.VAL % RHS;
     Quotient = APInt(BitWidth, QuotVal);
-    return;
+    തിരികെ;
   }
 
   // Get some size facts about the dividend and divisor
-  unsigned lhsWords = getNumWords(LHS.getActiveBits());
+  unsigned lhs_വാക്കുകൾ = get_അക്കം_വാക്കുകൾ(LHS.getActiveBits());
 
   // Check the degenerate cases
-  if (lhsWords == 0) {
+  എങ്കിൽ (lhs_വാക്കുകൾ == 0) {
     Quotient = APInt(BitWidth, 0);    // 0 / Y ===> 0
     Remainder = 0;                    // 0 % Y ===> 0
-    return;
+    തിരികെ;
   }
 
-  if (RHS == 1) {
+  എങ്കിൽ (RHS == 1) {
     Quotient = LHS;                   // X / 1 ===> X
     Remainder = 0;                    // X % 1 ===> 0
-    return;
+    തിരികെ;
   }
 
-  if (LHS.ult(RHS)) {
-    Remainder = LHS.getZExtValue();   // X % Y ===> X, iff X < Y
+  എങ്കിൽ (LHS.ult(RHS)) {
+    Remainder = LHS.get_ZExt_മൂല്യം();   // X % Y ===> X, iff X < Y
     Quotient = APInt(BitWidth, 0);    // X / Y ===> 0, iff X < Y
-    return;
+    തിരികെ;
   }
 
-  if (LHS == RHS) {
+  എങ്കിൽ (LHS == RHS) {
     Quotient  = APInt(BitWidth, 1);   // X / X ===> 1
     Remainder = 0;                    // X % X ===> 0;
-    return;
+    തിരികെ;
   }
 
   // Make sure there is enough space to hold the results.
@@ -1910,319 +1910,319 @@ void APInt::udivrem(const APInt &LHS, uint64_t RHS, APInt &Quotient,
   // change the size. This is necessary if Quotient is aliased with LHS.
   Quotient.reallocate(BitWidth);
 
-  if (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
+  എങ്കിൽ (lhs_വാക്കുകൾ == 1) { // rhsWords is 1 if lhsWords is 1.
     // There is only one word to consider so use the native versions.
-    uint64_t lhsValue = LHS.U.pVal[0];
-    Quotient = lhsValue / RHS;
-    Remainder = lhsValue % RHS;
-    return;
+    uint64_t lhs_മൂല്യം = LHS.U.pVal[0];
+    Quotient = lhs_മൂല്യം / RHS;
+    Remainder = lhs_മൂല്യം % RHS;
+    തിരികെ;
   }
 
   // Okay, lets do it the long way
-  divide(LHS.U.pVal, lhsWords, &RHS, 1, Quotient.U.pVal, &Remainder);
+  divide(LHS.U.pVal, lhs_വാക്കുകൾ, &RHS, 1, Quotient.U.pVal, &Remainder);
   // Clear the rest of the Quotient.
-  std::memset(Quotient.U.pVal + lhsWords, 0,
-              (getNumWords(BitWidth) - lhsWords) * APINT_WORD_SIZE);
+  std::memset(Quotient.U.pVal + lhs_വാക്കുകൾ, 0,
+              (get_അക്കം_വാക്കുകൾ(BitWidth) - lhs_വാക്കുകൾ) * APINT_WORD_SIZE);
 }
 
-void APInt::sdivrem(const APInt &LHS, const APInt &RHS,
+ശൂന്യം APInt::sdivrem(സ്ഥിരം APInt &LHS, സ്ഥിരം APInt &RHS,
                     APInt &Quotient, APInt &Remainder) {
-  if (LHS.isNegative()) {
-    if (RHS.isNegative())
+  എങ്കിൽ (LHS.isNegative()) {
+    എങ്കിൽ (RHS.isNegative())
       APInt::udivrem(-LHS, -RHS, Quotient, Remainder);
-    else {
+    അല്ലെങ്കിൽ {
       APInt::udivrem(-LHS, RHS, Quotient, Remainder);
       Quotient.negate();
     }
     Remainder.negate();
-  } else if (RHS.isNegative()) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (RHS.isNegative()) {
     APInt::udivrem(LHS, -RHS, Quotient, Remainder);
     Quotient.negate();
-  } else {
+  } അല്ലെങ്കിൽ {
     APInt::udivrem(LHS, RHS, Quotient, Remainder);
   }
 }
 
-void APInt::sdivrem(const APInt &LHS, int64_t RHS,
+ശൂന്യം APInt::sdivrem(സ്ഥിരം APInt &LHS, int64_t RHS,
                     APInt &Quotient, int64_t &Remainder) {
   uint64_t R = Remainder;
-  if (LHS.isNegative()) {
-    if (RHS < 0)
+  എങ്കിൽ (LHS.isNegative()) {
+    എങ്കിൽ (RHS < 0)
       APInt::udivrem(-LHS, -RHS, Quotient, R);
-    else {
+    അല്ലെങ്കിൽ {
       APInt::udivrem(-LHS, RHS, Quotient, R);
       Quotient.negate();
     }
     R = -R;
-  } else if (RHS < 0) {
+  } അല്ലെങ്കിൽ എങ്കിൽ (RHS < 0) {
     APInt::udivrem(LHS, -RHS, Quotient, R);
     Quotient.negate();
-  } else {
+  } അല്ലെങ്കിൽ {
     APInt::udivrem(LHS, RHS, Quotient, R);
   }
   Remainder = R;
 }
 
-APInt APInt::sadd_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this+RHS;
+APInt APInt::sadd_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
+  APInt Res = *ഇത്+RHS;
   Overflow = isNonNegative() == RHS.isNonNegative() &&
              Res.isNonNegative() != isNonNegative();
-  return Res;
+  തിരികെ Res;
 }
 
-APInt APInt::uadd_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this+RHS;
+APInt APInt::uadd_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
+  APInt Res = *ഇത്+RHS;
   Overflow = Res.ult(RHS);
-  return Res;
+  തിരികെ Res;
 }
 
-APInt APInt::ssub_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this - RHS;
+APInt APInt::ssub_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
+  APInt Res = *ഇത് - RHS;
   Overflow = isNonNegative() != RHS.isNonNegative() &&
              Res.isNonNegative() != isNonNegative();
-  return Res;
+  തിരികെ Res;
 }
 
-APInt APInt::usub_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this-RHS;
-  Overflow = Res.ugt(*this);
-  return Res;
+APInt APInt::usub_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
+  APInt Res = *ഇത്-RHS;
+  Overflow = Res.ugt(*ഇത്);
+  തിരികെ Res;
 }
 
-APInt APInt::sdiv_ov(const APInt &RHS, bool &Overflow) const {
+APInt APInt::sdiv_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
   // MININT/-1  -->  overflow.
-  Overflow = isMinSignedValue() && RHS.isAllOnes();
-  return sdiv(RHS);
+  Overflow = is_Min_Signed_മൂല്യം() && RHS.isAllOnes();
+  തിരികെ sdiv(RHS);
 }
 
-APInt APInt::smul_ov(const APInt &RHS, bool &Overflow) const {
-  APInt Res = *this * RHS;
+APInt APInt::smul_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
+  APInt Res = *ഇത് * RHS;
 
-  if (RHS != 0)
-    Overflow = Res.sdiv(RHS) != *this ||
-               (isMinSignedValue() && RHS.isAllOnes());
-  else
-    Overflow = false;
-  return Res;
+  എങ്കിൽ (RHS != 0)
+    Overflow = Res.sdiv(RHS) != *ഇത് ||
+               (is_Min_Signed_മൂല്യം() && RHS.isAllOnes());
+  അല്ലെങ്കിൽ
+    Overflow = അസത്യം;
+  തിരികെ Res;
 }
 
-APInt APInt::umul_ov(const APInt &RHS, bool &Overflow) const {
-  if (countl_zero() + RHS.countl_zero() + 2 <= BitWidth) {
-    Overflow = true;
-    return *this * RHS;
+APInt APInt::umul_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
+  എങ്കിൽ (countl_zero() + RHS.countl_zero() + 2 <= BitWidth) {
+    Overflow = സത്യം;
+    തിരികെ *ഇത് * RHS;
   }
 
   APInt Res = lshr(1) * RHS;
   Overflow = Res.isNegative();
   Res <<= 1;
-  if ((*this)[0]) {
+  എങ്കിൽ ((*ഇത്)[0]) {
     Res += RHS;
-    if (Res.ult(RHS))
-      Overflow = true;
+    എങ്കിൽ (Res.ult(RHS))
+      Overflow = സത്യം;
   }
-  return Res;
+  തിരികെ Res;
 }
 
-APInt APInt::sshl_ov(const APInt &ShAmt, bool &Overflow) const {
-  return sshl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
+APInt APInt::sshl_ov(സ്ഥിരം APInt &ShAmt, തർക്കം &Overflow) സ്ഥിരം {
+  തിരികെ sshl_ov(ShAmt.get_Limited_മൂല്യം(getBitWidth()), Overflow);
 }
 
-APInt APInt::sshl_ov(unsigned ShAmt, bool &Overflow) const {
+APInt APInt::sshl_ov(unsigned ShAmt, തർക്കം &Overflow) സ്ഥിരം {
   Overflow = ShAmt >= getBitWidth();
-  if (Overflow)
-    return APInt(BitWidth, 0);
+  എങ്കിൽ (Overflow)
+    തിരികെ APInt(BitWidth, 0);
 
-  if (isNonNegative()) // Don't allow sign change.
+  എങ്കിൽ (isNonNegative()) // Don't allow sign change.
     Overflow = ShAmt >= countl_zero();
-  else
+  അല്ലെങ്കിൽ
     Overflow = ShAmt >= countl_one();
 
-  return *this << ShAmt;
+  തിരികെ *ഇത് << ShAmt;
 }
 
-APInt APInt::ushl_ov(const APInt &ShAmt, bool &Overflow) const {
-  return ushl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
+APInt APInt::ushl_ov(സ്ഥിരം APInt &ShAmt, തർക്കം &Overflow) സ്ഥിരം {
+  തിരികെ ushl_ov(ShAmt.get_Limited_മൂല്യം(getBitWidth()), Overflow);
 }
 
-APInt APInt::ushl_ov(unsigned ShAmt, bool &Overflow) const {
+APInt APInt::ushl_ov(unsigned ShAmt, തർക്കം &Overflow) സ്ഥിരം {
   Overflow = ShAmt >= getBitWidth();
-  if (Overflow)
-    return APInt(BitWidth, 0);
+  എങ്കിൽ (Overflow)
+    തിരികെ APInt(BitWidth, 0);
 
   Overflow = ShAmt > countl_zero();
 
-  return *this << ShAmt;
+  തിരികെ *ഇത് << ShAmt;
 }
 
-APInt APInt::sfloordiv_ov(const APInt &RHS, bool &Overflow) const {
+APInt APInt::sfloordiv_ov(സ്ഥിരം APInt &RHS, തർക്കം &Overflow) സ്ഥിരം {
   APInt quotient = sdiv_ov(RHS, Overflow);
-  if ((quotient * RHS != *this) && (isNegative() != RHS.isNegative()))
-    return quotient - 1;
-  return quotient;
+  എങ്കിൽ ((quotient * RHS != *ഇത്) && (isNegative() != RHS.isNegative()))
+    തിരികെ quotient - 1;
+  തിരികെ quotient;
 }
 
-APInt APInt::sadd_sat(const APInt &RHS) const {
-  bool Overflow;
+APInt APInt::sadd_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = sadd_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
-                      : APInt::getSignedMaxValue(BitWidth);
+  തിരികെ isNegative() ? APInt::get_Signed_Min_മൂല്യം(BitWidth)
+                      : APInt::get_Signed_Max_മൂല്യം(BitWidth);
 }
 
-APInt APInt::uadd_sat(const APInt &RHS) const {
-  bool Overflow;
+APInt APInt::uadd_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = uadd_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return APInt::getMaxValue(BitWidth);
+  തിരികെ APInt::get_Max_മൂല്യം(BitWidth);
 }
 
-APInt APInt::ssub_sat(const APInt &RHS) const {
-  bool Overflow;
+APInt APInt::ssub_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = ssub_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
-                      : APInt::getSignedMaxValue(BitWidth);
+  തിരികെ isNegative() ? APInt::get_Signed_Min_മൂല്യം(BitWidth)
+                      : APInt::get_Signed_Max_മൂല്യം(BitWidth);
 }
 
-APInt APInt::usub_sat(const APInt &RHS) const {
-  bool Overflow;
+APInt APInt::usub_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = usub_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return APInt(BitWidth, 0);
+  തിരികെ APInt(BitWidth, 0);
 }
 
-APInt APInt::smul_sat(const APInt &RHS) const {
-  bool Overflow;
+APInt APInt::smul_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = smul_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
   // The result is negative if one and only one of inputs is negative.
-  bool ResIsNegative = isNegative() ^ RHS.isNegative();
+  തർക്കം ResIsNegative = isNegative() ^ RHS.isNegative();
 
-  return ResIsNegative ? APInt::getSignedMinValue(BitWidth)
-                       : APInt::getSignedMaxValue(BitWidth);
+  തിരികെ ResIsNegative ? APInt::get_Signed_Min_മൂല്യം(BitWidth)
+                       : APInt::get_Signed_Max_മൂല്യം(BitWidth);
 }
 
-APInt APInt::umul_sat(const APInt &RHS) const {
-  bool Overflow;
+APInt APInt::umul_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = umul_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return APInt::getMaxValue(BitWidth);
+  തിരികെ APInt::get_Max_മൂല്യം(BitWidth);
 }
 
-APInt APInt::sshl_sat(const APInt &RHS) const {
-  return sshl_sat(RHS.getLimitedValue(getBitWidth()));
+APInt APInt::sshl_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തിരികെ sshl_sat(RHS.get_Limited_മൂല്യം(getBitWidth()));
 }
 
-APInt APInt::sshl_sat(unsigned RHS) const {
-  bool Overflow;
+APInt APInt::sshl_sat(unsigned RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = sshl_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
-                      : APInt::getSignedMaxValue(BitWidth);
+  തിരികെ isNegative() ? APInt::get_Signed_Min_മൂല്യം(BitWidth)
+                      : APInt::get_Signed_Max_മൂല്യം(BitWidth);
 }
 
-APInt APInt::ushl_sat(const APInt &RHS) const {
-  return ushl_sat(RHS.getLimitedValue(getBitWidth()));
+APInt APInt::ushl_sat(സ്ഥിരം APInt &RHS) സ്ഥിരം {
+  തിരികെ ushl_sat(RHS.get_Limited_മൂല്യം(getBitWidth()));
 }
 
-APInt APInt::ushl_sat(unsigned RHS) const {
-  bool Overflow;
+APInt APInt::ushl_sat(unsigned RHS) സ്ഥിരം {
+  തർക്കം Overflow;
   APInt Res = ushl_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  എങ്കിൽ (!Overflow)
+    തിരികെ Res;
 
-  return APInt::getMaxValue(BitWidth);
+  തിരികെ APInt::get_Max_മൂല്യം(BitWidth);
 }
 
-void APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
+ശൂന്യം APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
   // Check our assumptions here
-  assert(!str.empty() && "Invalid string length");
-  assert((radix == 10 || radix == 8 || radix == 16 || radix == 2 ||
+  പ്രതിജ്ഞാ(!str.empty() && "Invalid string length");
+  പ്രതിജ്ഞാ((radix == 10 || radix == 8 || radix == 16 || radix == 2 ||
           radix == 36) &&
          "Radix should be 2, 8, 10, 16, or 36!");
 
   StringRef::iterator p = str.begin();
   size_t slen = str.size();
-  bool isNeg = *p == '-';
-  if (*p == '-' || *p == '+') {
+  തർക്കം isNeg = *p == '-';
+  എങ്കിൽ (*p == '-' || *p == '+') {
     p++;
     slen--;
-    assert(slen && "String is only a sign, needs a value.");
+    പ്രതിജ്ഞാ(slen && "String is only a sign, needs a value.");
   }
-  assert((slen <= numbits || radix != 2) && "Insufficient bit width");
-  assert(((slen-1)*3 <= numbits || radix != 8) && "Insufficient bit width");
-  assert(((slen-1)*4 <= numbits || radix != 16) && "Insufficient bit width");
-  assert((((slen-1)*64)/22 <= numbits || radix != 10) &&
+  പ്രതിജ്ഞാ((slen <= numbits || radix != 2) && "Insufficient bit width");
+  പ്രതിജ്ഞാ(((slen-1)*3 <= numbits || radix != 8) && "Insufficient bit width");
+  പ്രതിജ്ഞാ(((slen-1)*4 <= numbits || radix != 16) && "Insufficient bit width");
+  പ്രതിജ്ഞാ((((slen-1)*64)/22 <= numbits || radix != 10) &&
          "Insufficient bit width");
 
   // Allocate memory if needed
-  if (LLVM_LIKELY(isSingleWord()))
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord()))
     U.VAL = 0;
-  else
-    U.pVal = getClearedMemory(getNumWords());
+  അല്ലെങ്കിൽ
+    U.pVal = getClearedMemory(get_അക്കം_വാക്കുകൾ());
 
   // Figure out if we can shift instead of multiply
   unsigned shift = (radix == 16 ? 4 : radix == 8 ? 3 : radix == 2 ? 1 : 0);
 
   // Enter digit traversal loop
-  for (StringRef::iterator e = str.end(); p != e; ++p) {
+  വേണ്ടി (StringRef::iterator e = str.end(); p != e; ++p) {
     unsigned digit = getDigit(*p, radix);
-    assert(digit < radix && "Invalid character in digit string");
+    പ്രതിജ്ഞാ(digit < radix && "Invalid character in digit string");
 
     // Shift or multiply the value by the radix
-    if (slen > 1) {
-      if (shift)
-        *this <<= shift;
-      else
-        *this *= radix;
+    എങ്കിൽ (slen > 1) {
+      എങ്കിൽ (shift)
+        *ഇത് <<= shift;
+      അല്ലെങ്കിൽ
+        *ഇത് *= radix;
     }
 
     // Add in the digit we just interpreted
-    *this += digit;
+    *ഇത് += digit;
   }
   // If its negative, put it in two's complement form
-  if (isNeg)
-    this->negate();
+  എങ്കിൽ (isNeg)
+    ഇത്->negate();
 }
 
-void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
-                     bool formatAsCLiteral, bool UpperCase,
-                     bool InsertSeparators) const {
-  assert((Radix == 10 || Radix == 8 || Radix == 16 || Radix == 2 ||
+ശൂന്യം APInt::toString(SmallVectorImpl<അക്ഷരം> &Str, unsigned Radix, തർക്കം Signed,
+                     തർക്കം formatAsCLiteral, തർക്കം UpperCase,
+                     തർക്കം തിരുകുക_Separators) സ്ഥിരം {
+  പ്രതിജ്ഞാ((Radix == 10 || Radix == 8 || Radix == 16 || Radix == 2 ||
           Radix == 36) &&
          "Radix should be 2, 8, 10, 16, or 36!");
 
-  const char *Prefix = "";
-  if (formatAsCLiteral) {
-    switch (Radix) {
-      case 2:
+  സ്ഥിരം അക്ഷരം *Prefix = "";
+  എങ്കിൽ (formatAsCLiteral) {
+    തിരഞ്ഞെടുപ്പ് (Radix) {
+      അവസ്ഥ 2:
         // Binary literals are a non-standard extension added in gcc 4.3:
         // http://gcc.gnu.org/onlinedocs/gcc-4.3.0/gcc/Binary-constants.html
         Prefix = "0b";
-        break;
-      case 8:
+        നിർത്തുക;
+      അവസ്ഥ 8:
         Prefix = "0";
-        break;
-      case 10:
-        break; // No prefix
-      case 16:
+        നിർത്തുക;
+      അവസ്ഥ 10:
+        നിർത്തുക; // No prefix
+      അവസ്ഥ 16:
         Prefix = "0x";
-        break;
-      default:
+        നിർത്തുക;
+      സ്ഥിരസ്ഥിതി:
         llvm_unreachable("Invalid radix!");
     }
   }
@@ -2231,65 +2231,65 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
   unsigned Grouping = (Radix == 8 || Radix == 10) ? 3 : 4;
 
   // First, check for a zero value and just short circuit the logic below.
-  if (isZero()) {
-    while (*Prefix) {
-      Str.push_back(*Prefix);
+  എങ്കിൽ (isZero()) {
+    ആകുമ്പോൾ (*Prefix) {
+      Str.തള്ളുക_back(*Prefix);
       ++Prefix;
     };
-    Str.push_back('0');
-    return;
+    Str.തള്ളുക_back('0');
+    തിരികെ;
   }
 
-  static const char BothDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz"
+  സ്ഥിതം സ്ഥിരം അക്ഷരം BothDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz"
                                    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const char *Digits = BothDigits + (UpperCase ? 36 : 0);
+  സ്ഥിരം അക്ഷരം *Digits = BothDigits + (UpperCase ? 36 : 0);
 
-  if (LLVM_LIKELY(isSingleWord())) {
-    char Buffer[65];
-    char *BufPtr = std::end(Buffer);
+  എങ്കിൽ (LLVM_LIKELY(isSingleWord())) {
+    അക്ഷരം Buffer[65];
+    അക്ഷരം *BufPtr = std::end(Buffer);
 
     uint64_t N;
-    if (!Signed) {
-      N = getZExtValue();
-    } else {
-      int64_t I = getSExtValue();
-      if (I >= 0) {
+    എങ്കിൽ (!Signed) {
+      N = get_ZExt_മൂല്യം();
+    } അല്ലെങ്കിൽ {
+      int64_t I = get_SExt_മൂല്യം();
+      എങ്കിൽ (I >= 0) {
         N = I;
-      } else {
-        Str.push_back('-');
+      } അല്ലെങ്കിൽ {
+        Str.തള്ളുക_back('-');
         N = -(uint64_t)I;
       }
     }
 
-    while (*Prefix) {
-      Str.push_back(*Prefix);
+    ആകുമ്പോൾ (*Prefix) {
+      Str.തള്ളുക_back(*Prefix);
       ++Prefix;
     };
 
-    int Pos = 0;
-    while (N) {
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
+    പൂർണ്ണസംഖ്യ Pos = 0;
+    ആകുമ്പോൾ (N) {
+      എങ്കിൽ (തിരുകുക_Separators && Pos % Grouping == 0 && Pos > 0)
         *--BufPtr = '\'';
       *--BufPtr = Digits[N % Radix];
       N /= Radix;
       Pos++;
     }
     Str.append(BufPtr, std::end(Buffer));
-    return;
+    തിരികെ;
   }
 
-  APInt Tmp(*this);
+  APInt Tmp(*ഇത്);
 
-  if (Signed && isNegative()) {
+  എങ്കിൽ (Signed && isNegative()) {
     // They want to print the signed version and it is a negative value
     // Flip the bits and add one to turn it into the equivalent positive
     // value and put a '-' in the result.
     Tmp.negate();
-    Str.push_back('-');
+    Str.തള്ളുക_back('-');
   }
 
-  while (*Prefix) {
-    Str.push_back(*Prefix);
+  ആകുമ്പോൾ (*Prefix) {
+    Str.തള്ളുക_back(*Prefix);
     ++Prefix;
   }
 
@@ -2299,31 +2299,31 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
   // For the 2, 8 and 16 bit cases, we can just shift instead of divide
   // because the number of bits per digit (1, 3 and 4 respectively) divides
   // equally.  We just shift until the value is zero.
-  if (Radix == 2 || Radix == 8 || Radix == 16) {
+  എങ്കിൽ (Radix == 2 || Radix == 8 || Radix == 16) {
     // Just shift tmp right for each digit width until it becomes zero
     unsigned ShiftAmt = (Radix == 16 ? 4 : (Radix == 8 ? 3 : 1));
     unsigned MaskAmt = Radix - 1;
 
-    int Pos = 0;
-    while (Tmp.getBoolValue()) {
+    പൂർണ്ണസംഖ്യ Pos = 0;
+    ആകുമ്പോൾ (Tmp.get_Bool_മൂല്യം()) {
       unsigned Digit = unsigned(Tmp.getRawData()[0]) & MaskAmt;
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
-        Str.push_back('\'');
+      എങ്കിൽ (തിരുകുക_Separators && Pos % Grouping == 0 && Pos > 0)
+        Str.തള്ളുക_back('\'');
 
-      Str.push_back(Digits[Digit]);
+      Str.തള്ളുക_back(Digits[Digit]);
       Tmp.lshrInPlace(ShiftAmt);
       Pos++;
     }
-  } else {
-    int Pos = 0;
-    while (Tmp.getBoolValue()) {
+  } അല്ലെങ്കിൽ {
+    പൂർണ്ണസംഖ്യ Pos = 0;
+    ആകുമ്പോൾ (Tmp.get_Bool_മൂല്യം()) {
       uint64_t Digit;
       udivrem(Tmp, Radix, Tmp, Digit);
-      assert(Digit < Radix && "divide failed");
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
-        Str.push_back('\'');
+      പ്രതിജ്ഞാ(Digit < Radix && "divide failed");
+      എങ്കിൽ (തിരുകുക_Separators && Pos % Grouping == 0 && Pos > 0)
+        Str.തള്ളുക_back('\'');
 
-      Str.push_back(Digits[Digit]);
+      Str.തള്ളുക_back(Digits[Digit]);
       Pos++;
     }
   }
@@ -2332,19 +2332,19 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
   std::reverse(Str.begin()+StartDig, Str.end());
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void APInt::dump() const {
+#എങ്കിൽ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD ശൂന്യം APInt::dump() സ്ഥിരം {
   SmallString<40> S, U;
-  this->toStringUnsigned(U);
-  this->toStringSigned(S);
+  ഇത്->toStringUnsigned(U);
+  ഇത്->toStringSigned(S);
   dbgs() << "APInt(" << BitWidth << "b, "
          << U << "u " << S << "s)\n";
 }
 #endif
 
-void APInt::print(raw_ostream &OS, bool isSigned) const {
+ശൂന്യം APInt::print(raw_ostream &OS, തർക്കം isSigned) സ്ഥിരം {
   SmallString<40> S;
-  this->toString(S, 10, isSigned, /* formatAsCLiteral = */false);
+  ഇത്->toString(S, 10, isSigned, /* formatAsCLiteral = */അസത്യം);
   OS << S;
 }
 
@@ -2358,141 +2358,141 @@ static_assert(APInt::APINT_BITS_PER_WORD % 2 == 0,
 
 // Returns the integer part with the least significant BITS set.
 // BITS cannot be zero.
-static inline APInt::WordType lowBitMask(unsigned bits) {
-  assert(bits != 0 && bits <= APInt::APINT_BITS_PER_WORD);
-  return ~(APInt::WordType) 0 >> (APInt::APINT_BITS_PER_WORD - bits);
+സ്ഥിതം വരിയിൽ APInt::WordType താഴെയുള്ള_Bit_Mask(unsigned bits) {
+  പ്രതിജ്ഞാ(bits != 0 && bits <= APInt::APINT_BITS_PER_WORD);
+  തിരികെ ~(APInt::WordType) 0 >> (APInt::APINT_BITS_PER_WORD - bits);
 }
 
 /// Returns the value of the lower half of PART.
-static inline APInt::WordType lowHalf(APInt::WordType part) {
-  return part & lowBitMask(APInt::APINT_BITS_PER_WORD / 2);
+സ്ഥിതം വരിയിൽ APInt::WordType താഴെയുള്ള_Half(APInt::WordType part) {
+  തിരികെ part & താഴെയുള്ള_Bit_Mask(APInt::APINT_BITS_PER_WORD / 2);
 }
 
 /// Returns the value of the upper half of PART.
-static inline APInt::WordType highHalf(APInt::WordType part) {
-  return part >> (APInt::APINT_BITS_PER_WORD / 2);
+സ്ഥിതം വരിയിൽ APInt::WordType മുകളിലെ_Half(APInt::WordType part) {
+  തിരികെ part >> (APInt::APINT_BITS_PER_WORD / 2);
 }
 
 /// Sets the least significant part of a bignum to the input value, and zeroes
 /// out higher parts.
-void APInt::tcSet(WordType *dst, WordType part, unsigned parts) {
-  assert(parts > 0);
+ശൂന്യം APInt::tcSet(WordType *dst, WordType part, unsigned parts) {
+  പ്രതിജ്ഞാ(parts > 0);
   dst[0] = part;
-  for (unsigned i = 1; i < parts; i++)
+  വേണ്ടി (unsigned i = 1; i < parts; i++)
     dst[i] = 0;
 }
 
 /// Assign one bignum to another.
-void APInt::tcAssign(WordType *dst, const WordType *src, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
+ശൂന്യം APInt::tcAssign(WordType *dst, സ്ഥിരം WordType *src, unsigned parts) {
+  വേണ്ടി (unsigned i = 0; i < parts; i++)
     dst[i] = src[i];
 }
 
 /// Returns true if a bignum is zero, false otherwise.
-bool APInt::tcIsZero(const WordType *src, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
-    if (src[i])
-      return false;
+തർക്കം APInt::tcIsZero(സ്ഥിരം WordType *src, unsigned parts) {
+  വേണ്ടി (unsigned i = 0; i < parts; i++)
+    എങ്കിൽ (src[i])
+      തിരികെ അസത്യം;
 
-  return true;
+  തിരികെ സത്യം;
 }
 
 /// Extract the given bit of a bignum; returns 0 or 1.
-int APInt::tcExtractBit(const WordType *parts, unsigned bit) {
-  return (parts[whichWord(bit)] & maskBit(bit)) != 0;
+പൂർണ്ണസംഖ്യ APInt::tcExtractBit(സ്ഥിരം WordType *parts, unsigned bit) {
+  തിരികെ (parts[whichWord(bit)] & maskBit(bit)) != 0;
 }
 
 /// Set the given bit of a bignum.
-void APInt::tcSetBit(WordType *parts, unsigned bit) {
+ശൂന്യം APInt::tcSetBit(WordType *parts, unsigned bit) {
   parts[whichWord(bit)] |= maskBit(bit);
 }
 
 /// Clears the given bit of a bignum.
-void APInt::tcClearBit(WordType *parts, unsigned bit) {
+ശൂന്യം APInt::tcClearBit(WordType *parts, unsigned bit) {
   parts[whichWord(bit)] &= ~maskBit(bit);
 }
 
 /// Returns the bit number of the least significant set bit of a number.  If the
 /// input number has no bits set UINT_MAX is returned.
-unsigned APInt::tcLSB(const WordType *parts, unsigned n) {
-  for (unsigned i = 0; i < n; i++) {
-    if (parts[i] != 0) {
+unsigned APInt::tcLSB(സ്ഥിരം WordType *parts, unsigned n) {
+  വേണ്ടി (unsigned i = 0; i < n; i++) {
+    എങ്കിൽ (parts[i] != 0) {
       unsigned lsb = llvm::countr_zero(parts[i]);
-      return lsb + i * APINT_BITS_PER_WORD;
+      തിരികെ lsb + i * APINT_BITS_PER_WORD;
     }
   }
 
-  return UINT_MAX;
+  തിരികെ UINT_MAX;
 }
 
 /// Returns the bit number of the most significant set bit of a number.
 /// If the input number has no bits set UINT_MAX is returned.
-unsigned APInt::tcMSB(const WordType *parts, unsigned n) {
-  do {
+unsigned APInt::tcMSB(സ്ഥിരം WordType *parts, unsigned n) {
+  ചെയ്യുക {
     --n;
 
-    if (parts[n] != 0) {
-      static_assert(sizeof(parts[n]) <= sizeof(uint64_t));
+    എങ്കിൽ (parts[n] != 0) {
+      static_assert(വലുപ്പം(parts[n]) <= വലുപ്പം(uint64_t));
       unsigned msb = llvm::Log2_64(parts[n]);
 
-      return msb + n * APINT_BITS_PER_WORD;
+      തിരികെ msb + n * APINT_BITS_PER_WORD;
     }
-  } while (n);
+  } ആകുമ്പോൾ (n);
 
-  return UINT_MAX;
+  തിരികെ UINT_MAX;
 }
 
 /// Copy the bit vector of width srcBITS from SRC, starting at bit srcLSB, to
 /// DST, of dstCOUNT parts, such that the bit srcLSB becomes the least
 /// significant bit of DST.  All high bits above srcBITS in DST are zero-filled.
 /// */
-void
-APInt::tcExtract(WordType *dst, unsigned dstCount, const WordType *src,
+ശൂന്യം
+APInt::tcExtract(WordType *dst, unsigned dst_എണ്ണം, സ്ഥിരം WordType *src,
                  unsigned srcBits, unsigned srcLSB) {
   unsigned dstParts = (srcBits + APINT_BITS_PER_WORD - 1) / APINT_BITS_PER_WORD;
-  assert(dstParts <= dstCount);
+  പ്രതിജ്ഞാ(dstParts <= dst_എണ്ണം);
 
   unsigned firstSrcPart = srcLSB / APINT_BITS_PER_WORD;
   tcAssign(dst, src + firstSrcPart, dstParts);
 
   unsigned shift = srcLSB % APINT_BITS_PER_WORD;
-  tcShiftRight(dst, dstParts, shift);
+  tc_Shift_വലത്(dst, dstParts, shift);
 
   // We now have (dstParts * APINT_BITS_PER_WORD - shift) bits from SRC
   // in DST.  If this is less that srcBits, append the rest, else
   // clear the high bits.
   unsigned n = dstParts * APINT_BITS_PER_WORD - shift;
-  if (n < srcBits) {
-    WordType mask = lowBitMask (srcBits - n);
+  എങ്കിൽ (n < srcBits) {
+    WordType mask = താഴെയുള്ള_Bit_Mask (srcBits - n);
     dst[dstParts - 1] |= ((src[firstSrcPart + dstParts] & mask)
                           << n % APINT_BITS_PER_WORD);
-  } else if (n > srcBits) {
-    if (srcBits % APINT_BITS_PER_WORD)
-      dst[dstParts - 1] &= lowBitMask (srcBits % APINT_BITS_PER_WORD);
+  } അല്ലെങ്കിൽ എങ്കിൽ (n > srcBits) {
+    എങ്കിൽ (srcBits % APINT_BITS_PER_WORD)
+      dst[dstParts - 1] &= താഴെയുള്ള_Bit_Mask (srcBits % APINT_BITS_PER_WORD);
   }
 
   // Clear high parts.
-  while (dstParts < dstCount)
+  ആകുമ്പോൾ (dstParts < dst_എണ്ണം)
     dst[dstParts++] = 0;
 }
 
 //// DST += RHS + C where C is zero or one.  Returns the carry flag.
-APInt::WordType APInt::tcAdd(WordType *dst, const WordType *rhs,
+APInt::WordType APInt::tcAdd(WordType *dst, സ്ഥിരം WordType *rhs,
                              WordType c, unsigned parts) {
-  assert(c <= 1);
+  പ്രതിജ്ഞാ(c <= 1);
 
-  for (unsigned i = 0; i < parts; i++) {
+  വേണ്ടി (unsigned i = 0; i < parts; i++) {
     WordType l = dst[i];
-    if (c) {
+    എങ്കിൽ (c) {
       dst[i] += rhs[i] + 1;
       c = (dst[i] <= l);
-    } else {
+    } അല്ലെങ്കിൽ {
       dst[i] += rhs[i];
       c = (dst[i] < l);
     }
   }
 
-  return c;
+  തിരികെ c;
 }
 
 /// This function adds a single "word" integer, src, to the multiple
@@ -2501,33 +2501,33 @@ APInt::WordType APInt::tcAdd(WordType *dst, const WordType *rhs,
 /// @returns the carry of the addition.
 APInt::WordType APInt::tcAddPart(WordType *dst, WordType src,
                                  unsigned parts) {
-  for (unsigned i = 0; i < parts; ++i) {
+  വേണ്ടി (unsigned i = 0; i < parts; ++i) {
     dst[i] += src;
-    if (dst[i] >= src)
-      return 0; // No need to carry so exit early.
+    എങ്കിൽ (dst[i] >= src)
+      തിരികെ 0; // No need to carry so exit early.
     src = 1; // Carry one to next digit.
   }
 
-  return 1;
+  തിരികെ 1;
 }
 
 /// DST -= RHS + C where C is zero or one.  Returns the carry flag.
-APInt::WordType APInt::tcSubtract(WordType *dst, const WordType *rhs,
+APInt::WordType APInt::tcSubtract(WordType *dst, സ്ഥിരം WordType *rhs,
                                   WordType c, unsigned parts) {
-  assert(c <= 1);
+  പ്രതിജ്ഞാ(c <= 1);
 
-  for (unsigned i = 0; i < parts; i++) {
+  വേണ്ടി (unsigned i = 0; i < parts; i++) {
     WordType l = dst[i];
-    if (c) {
+    എങ്കിൽ (c) {
       dst[i] -= rhs[i] + 1;
       c = (dst[i] >= l);
-    } else {
+    } അല്ലെങ്കിൽ {
       dst[i] -= rhs[i];
       c = (dst[i] > l);
     }
   }
 
-  return c;
+  തിരികെ c;
 }
 
 /// This function subtracts a single "word" (64-bit word), src, from
@@ -2539,19 +2539,19 @@ APInt::WordType APInt::tcSubtract(WordType *dst, const WordType *rhs,
 /// @returns the borrow out of the subtraction
 APInt::WordType APInt::tcSubtractPart(WordType *dst, WordType src,
                                       unsigned parts) {
-  for (unsigned i = 0; i < parts; ++i) {
+  വേണ്ടി (unsigned i = 0; i < parts; ++i) {
     WordType Dst = dst[i];
     dst[i] -= src;
-    if (src <= Dst)
-      return 0; // No need to borrow so exit early.
+    എങ്കിൽ (src <= Dst)
+      തിരികെ 0; // No need to borrow so exit early.
     src = 1; // We have to "borrow 1" from next "word"
   }
 
-  return 1;
+  തിരികെ 1;
 }
 
 /// Negate a bignum in-place.
-void APInt::tcNegate(WordType *dst, unsigned parts) {
+ശൂന്യം APInt::tcNegate(WordType *dst, unsigned parts) {
   tcComplement(dst, parts);
   tcIncrement(dst, parts);
 }
@@ -2565,118 +2565,118 @@ void APInt::tcNegate(WordType *dst, unsigned parts) {
 /// DSTPARTS parts of the result, and if all of the omitted higher
 /// parts were zero return zero, otherwise overflow occurred and
 /// return one.
-int APInt::tcMultiplyPart(WordType *dst, const WordType *src,
+പൂർണ്ണസംഖ്യ APInt::tcMultiplyPart(WordType *dst, സ്ഥിരം WordType *src,
                           WordType multiplier, WordType carry,
                           unsigned srcParts, unsigned dstParts,
-                          bool add) {
+                          തർക്കം add) {
   // Otherwise our writes of DST kill our later reads of SRC.
-  assert(dst <= src || dst >= src + srcParts);
-  assert(dstParts <= srcParts + 1);
+  പ്രതിജ്ഞാ(dst <= src || dst >= src + srcParts);
+  പ്രതിജ്ഞാ(dstParts <= srcParts + 1);
 
   // N loops; minimum of dstParts and srcParts.
   unsigned n = std::min(dstParts, srcParts);
 
-  for (unsigned i = 0; i < n; i++) {
+  വേണ്ടി (unsigned i = 0; i < n; i++) {
     // [LOW, HIGH] = MULTIPLIER * SRC[i] + DST[i] + CARRY.
     // This cannot overflow, because:
     //   (n - 1) * (n - 1) + 2 (n - 1) = (n - 1) * (n + 1)
     // which is less than n^2.
     WordType srcPart = src[i];
-    WordType low, mid, high;
-    if (multiplier == 0 || srcPart == 0) {
-      low = carry;
-      high = 0;
-    } else {
-      low = lowHalf(srcPart) * lowHalf(multiplier);
-      high = highHalf(srcPart) * highHalf(multiplier);
+    WordType താഴെയുള്ള, mid, മുകളിലെ;
+    എങ്കിൽ (multiplier == 0 || srcPart == 0) {
+      താഴെയുള്ള = carry;
+      മുകളിലെ = 0;
+    } അല്ലെങ്കിൽ {
+      താഴെയുള്ള = താഴെയുള്ള_Half(srcPart) * താഴെയുള്ള_Half(multiplier);
+      മുകളിലെ = മുകളിലെ_Half(srcPart) * മുകളിലെ_Half(multiplier);
 
-      mid = lowHalf(srcPart) * highHalf(multiplier);
-      high += highHalf(mid);
+      mid = താഴെയുള്ള_Half(srcPart) * മുകളിലെ_Half(multiplier);
+      മുകളിലെ += മുകളിലെ_Half(mid);
       mid <<= APINT_BITS_PER_WORD / 2;
-      if (low + mid < low)
-        high++;
-      low += mid;
+      എങ്കിൽ (താഴെയുള്ള + mid < താഴെയുള്ള)
+        മുകളിലെ++;
+      താഴെയുള്ള += mid;
 
-      mid = highHalf(srcPart) * lowHalf(multiplier);
-      high += highHalf(mid);
+      mid = മുകളിലെ_Half(srcPart) * താഴെയുള്ള_Half(multiplier);
+      മുകളിലെ += മുകളിലെ_Half(mid);
       mid <<= APINT_BITS_PER_WORD / 2;
-      if (low + mid < low)
-        high++;
-      low += mid;
+      എങ്കിൽ (താഴെയുള്ള + mid < താഴെയുള്ള)
+        മുകളിലെ++;
+      താഴെയുള്ള += mid;
 
       // Now add carry.
-      if (low + carry < low)
-        high++;
-      low += carry;
+      എങ്കിൽ (താഴെയുള്ള + carry < താഴെയുള്ള)
+        മുകളിലെ++;
+      താഴെയുള്ള += carry;
     }
 
-    if (add) {
+    എങ്കിൽ (add) {
       // And now DST[i], and store the new low part there.
-      if (low + dst[i] < low)
-        high++;
-      dst[i] += low;
-    } else {
-      dst[i] = low;
+      എങ്കിൽ (താഴെയുള്ള + dst[i] < താഴെയുള്ള)
+        മുകളിലെ++;
+      dst[i] += താഴെയുള്ള;
+    } അല്ലെങ്കിൽ {
+      dst[i] = താഴെയുള്ള;
     }
 
-    carry = high;
+    carry = മുകളിലെ;
   }
 
-  if (srcParts < dstParts) {
+  എങ്കിൽ (srcParts < dstParts) {
     // Full multiplication, there is no overflow.
-    assert(srcParts + 1 == dstParts);
+    പ്രതിജ്ഞാ(srcParts + 1 == dstParts);
     dst[srcParts] = carry;
-    return 0;
+    തിരികെ 0;
   }
 
   // We overflowed if there is carry.
-  if (carry)
-    return 1;
+  എങ്കിൽ (carry)
+    തിരികെ 1;
 
   // We would overflow if any significant unwritten parts would be
   // non-zero.  This is true if any remaining src parts are non-zero
   // and the multiplier is non-zero.
-  if (multiplier)
-    for (unsigned i = dstParts; i < srcParts; i++)
-      if (src[i])
-        return 1;
+  എങ്കിൽ (multiplier)
+    വേണ്ടി (unsigned i = dstParts; i < srcParts; i++)
+      എങ്കിൽ (src[i])
+        തിരികെ 1;
 
   // We fitted in the narrow destination.
-  return 0;
+  തിരികെ 0;
 }
 
 /// DST = LHS * RHS, where DST has the same width as the operands and
 /// is filled with the least significant parts of the result.  Returns
 /// one if overflow occurred, otherwise zero.  DST must be disjoint
 /// from both operands.
-int APInt::tcMultiply(WordType *dst, const WordType *lhs,
-                      const WordType *rhs, unsigned parts) {
-  assert(dst != lhs && dst != rhs);
+പൂർണ്ണസംഖ്യ APInt::tcMultiply(WordType *dst, സ്ഥിരം WordType *lhs,
+                      സ്ഥിരം WordType *rhs, unsigned parts) {
+  പ്രതിജ്ഞാ(dst != lhs && dst != rhs);
 
-  int overflow = 0;
+  പൂർണ്ണസംഖ്യ overflow = 0;
 
-  for (unsigned i = 0; i < parts; i++) {
+  വേണ്ടി (unsigned i = 0; i < parts; i++) {
     // Don't accumulate on the first iteration so we don't need to initalize
     // dst to 0.
     overflow |=
         tcMultiplyPart(&dst[i], lhs, rhs[i], 0, parts, parts - i, i != 0);
   }
 
-  return overflow;
+  തിരികെ overflow;
 }
 
 /// DST = LHS * RHS, where DST has width the sum of the widths of the
 /// operands. No overflow occurs. DST must be disjoint from both operands.
-void APInt::tcFullMultiply(WordType *dst, const WordType *lhs,
-                           const WordType *rhs, unsigned lhsParts,
+ശൂന്യം APInt::tcFullMultiply(WordType *dst, സ്ഥിരം WordType *lhs,
+                           സ്ഥിരം WordType *rhs, unsigned lhsParts,
                            unsigned rhsParts) {
   // Put the narrower number on the LHS for less loops below.
-  if (lhsParts > rhsParts)
-    return tcFullMultiply (dst, rhs, lhs, rhsParts, lhsParts);
+  എങ്കിൽ (lhsParts > rhsParts)
+    തിരികെ tcFullMultiply (dst, rhs, lhs, rhsParts, lhsParts);
 
-  assert(dst != lhs && dst != rhs);
+  പ്രതിജ്ഞാ(dst != lhs && dst != rhs);
 
-  for (unsigned i = 0; i < lhsParts; i++) {
+  വേണ്ടി (unsigned i = 0; i < lhsParts; i++) {
     // Don't accumulate on the first iteration so we don't need to initalize
     // dst to 0.
     tcMultiplyPart(&dst[i], rhs, lhs[i], 0, rhsParts, rhsParts + 1, i != 0);
@@ -2692,66 +2692,66 @@ void APInt::tcFullMultiply(WordType *dst, const WordType *lhs,
 // SCRATCH is a bignum of the same size as the operands and result for
 // use by the routine; its contents need not be initialized and are
 // destroyed.  LHS, REMAINDER and SCRATCH must be distinct.
-int APInt::tcDivide(WordType *lhs, const WordType *rhs,
+പൂർണ്ണസംഖ്യ APInt::tcDivide(WordType *lhs, സ്ഥിരം WordType *rhs,
                     WordType *remainder, WordType *srhs,
                     unsigned parts) {
-  assert(lhs != remainder && lhs != srhs && remainder != srhs);
+  പ്രതിജ്ഞാ(lhs != remainder && lhs != srhs && remainder != srhs);
 
-  unsigned shiftCount = tcMSB(rhs, parts) + 1;
-  if (shiftCount == 0)
-    return true;
+  unsigned shift_എണ്ണം = tcMSB(rhs, parts) + 1;
+  എങ്കിൽ (shift_എണ്ണം == 0)
+    തിരികെ സത്യം;
 
-  shiftCount = parts * APINT_BITS_PER_WORD - shiftCount;
-  unsigned n = shiftCount / APINT_BITS_PER_WORD;
-  WordType mask = (WordType) 1 << (shiftCount % APINT_BITS_PER_WORD);
+  shift_എണ്ണം = parts * APINT_BITS_PER_WORD - shift_എണ്ണം;
+  unsigned n = shift_എണ്ണം / APINT_BITS_PER_WORD;
+  WordType mask = (WordType) 1 << (shift_എണ്ണം % APINT_BITS_PER_WORD);
 
   tcAssign(srhs, rhs, parts);
-  tcShiftLeft(srhs, parts, shiftCount);
+  tc_Shift_ഇടത്(srhs, parts, shift_എണ്ണം);
   tcAssign(remainder, lhs, parts);
   tcSet(lhs, 0, parts);
 
   // Loop, subtracting SRHS if REMAINDER is greater and adding that to the
   // total.
-  for (;;) {
-    int compare = tcCompare(remainder, srhs, parts);
-    if (compare >= 0) {
+  വേണ്ടി (;;) {
+    പൂർണ്ണസംഖ്യ compare = tcCompare(remainder, srhs, parts);
+    എങ്കിൽ (compare >= 0) {
       tcSubtract(remainder, srhs, 0, parts);
       lhs[n] |= mask;
     }
 
-    if (shiftCount == 0)
-      break;
-    shiftCount--;
-    tcShiftRight(srhs, parts, 1);
-    if ((mask >>= 1) == 0) {
+    എങ്കിൽ (shift_എണ്ണം == 0)
+      നിർത്തുക;
+    shift_എണ്ണം--;
+    tc_Shift_വലത്(srhs, parts, 1);
+    എങ്കിൽ ((mask >>= 1) == 0) {
       mask = (WordType) 1 << (APINT_BITS_PER_WORD - 1);
       n--;
     }
   }
 
-  return false;
+  തിരികെ അസത്യം;
 }
 
 /// Shift a bignum left Count bits in-place. Shifted in bits are zero. There are
 /// no restrictions on Count.
-void APInt::tcShiftLeft(WordType *Dst, unsigned Words, unsigned Count) {
+ശൂന്യം APInt::tc_Shift_ഇടത്(WordType *Dst, unsigned വാക്കുകൾ_2, unsigned എണ്ണം_2) {
   // Don't bother performing a no-op shift.
-  if (!Count)
-    return;
+  എങ്കിൽ (!എണ്ണം_2)
+    തിരികെ;
 
   // WordShift is the inter-part shift; BitShift is the intra-part shift.
-  unsigned WordShift = std::min(Count / APINT_BITS_PER_WORD, Words);
-  unsigned BitShift = Count % APINT_BITS_PER_WORD;
+  unsigned WordShift = std::min(എണ്ണം_2 / APINT_BITS_PER_WORD, വാക്കുകൾ_2);
+  unsigned BitShift = എണ്ണം_2 % APINT_BITS_PER_WORD;
 
   // Fastpath for moving by whole words.
-  if (BitShift == 0) {
-    std::memmove(Dst + WordShift, Dst, (Words - WordShift) * APINT_WORD_SIZE);
-  } else {
-    while (Words-- > WordShift) {
-      Dst[Words] = Dst[Words - WordShift] << BitShift;
-      if (Words > WordShift)
-        Dst[Words] |=
-          Dst[Words - WordShift - 1] >> (APINT_BITS_PER_WORD - BitShift);
+  എങ്കിൽ (BitShift == 0) {
+    std::memmove(Dst + WordShift, Dst, (വാക്കുകൾ_2 - WordShift) * APINT_WORD_SIZE);
+  } അല്ലെങ്കിൽ {
+    ആകുമ്പോൾ (വാക്കുകൾ_2-- > WordShift) {
+      Dst[വാക്കുകൾ_2] = Dst[വാക്കുകൾ_2 - WordShift] << BitShift;
+      എങ്കിൽ (വാക്കുകൾ_2 > WordShift)
+        Dst[വാക്കുകൾ_2] |=
+          Dst[വാക്കുകൾ_2 - WordShift - 1] >> (APINT_BITS_PER_WORD - BitShift);
     }
   }
 
@@ -2761,87 +2761,87 @@ void APInt::tcShiftLeft(WordType *Dst, unsigned Words, unsigned Count) {
 
 /// Shift a bignum right Count bits in-place. Shifted in bits are zero. There
 /// are no restrictions on Count.
-void APInt::tcShiftRight(WordType *Dst, unsigned Words, unsigned Count) {
+ശൂന്യം APInt::tc_Shift_വലത്(WordType *Dst, unsigned വാക്കുകൾ_2, unsigned എണ്ണം_2) {
   // Don't bother performing a no-op shift.
-  if (!Count)
-    return;
+  എങ്കിൽ (!എണ്ണം_2)
+    തിരികെ;
 
   // WordShift is the inter-part shift; BitShift is the intra-part shift.
-  unsigned WordShift = std::min(Count / APINT_BITS_PER_WORD, Words);
-  unsigned BitShift = Count % APINT_BITS_PER_WORD;
+  unsigned WordShift = std::min(എണ്ണം_2 / APINT_BITS_PER_WORD, വാക്കുകൾ_2);
+  unsigned BitShift = എണ്ണം_2 % APINT_BITS_PER_WORD;
 
-  unsigned WordsToMove = Words - WordShift;
+  unsigned വാക്കുകൾ_To_Move = വാക്കുകൾ_2 - WordShift;
   // Fastpath for moving by whole words.
-  if (BitShift == 0) {
-    std::memmove(Dst, Dst + WordShift, WordsToMove * APINT_WORD_SIZE);
-  } else {
-    for (unsigned i = 0; i != WordsToMove; ++i) {
+  എങ്കിൽ (BitShift == 0) {
+    std::memmove(Dst, Dst + WordShift, വാക്കുകൾ_To_Move * APINT_WORD_SIZE);
+  } അല്ലെങ്കിൽ {
+    വേണ്ടി (unsigned i = 0; i != വാക്കുകൾ_To_Move; ++i) {
       Dst[i] = Dst[i + WordShift] >> BitShift;
-      if (i + 1 != WordsToMove)
+      എങ്കിൽ (i + 1 != വാക്കുകൾ_To_Move)
         Dst[i] |= Dst[i + WordShift + 1] << (APINT_BITS_PER_WORD - BitShift);
     }
   }
 
   // Fill in the remainder with 0s.
-  std::memset(Dst + WordsToMove, 0, WordShift * APINT_WORD_SIZE);
+  std::memset(Dst + വാക്കുകൾ_To_Move, 0, WordShift * APINT_WORD_SIZE);
 }
 
 // Comparison (unsigned) of two bignums.
-int APInt::tcCompare(const WordType *lhs, const WordType *rhs,
+പൂർണ്ണസംഖ്യ APInt::tcCompare(സ്ഥിരം WordType *lhs, സ്ഥിരം WordType *rhs,
                      unsigned parts) {
-  while (parts) {
+  ആകുമ്പോൾ (parts) {
     parts--;
-    if (lhs[parts] != rhs[parts])
-      return (lhs[parts] > rhs[parts]) ? 1 : -1;
+    എങ്കിൽ (lhs[parts] != rhs[parts])
+      തിരികെ (lhs[parts] > rhs[parts]) ? 1 : -1;
   }
 
-  return 0;
+  തിരികെ 0;
 }
 
-APInt llvm::APIntOps::RoundingUDiv(const APInt &A, const APInt &B,
+APInt llvm::APIntOps::RoundingUDiv(സ്ഥിരം APInt &A, സ്ഥിരം APInt &B,
                                    APInt::Rounding RM) {
   // Currently udivrem always rounds down.
-  switch (RM) {
-  case APInt::Rounding::DOWN:
-  case APInt::Rounding::TOWARD_ZERO:
-    return A.udiv(B);
-  case APInt::Rounding::UP: {
+  തിരഞ്ഞെടുപ്പ് (RM) {
+  അവസ്ഥ APInt::Rounding::DOWN:
+  അവസ്ഥ APInt::Rounding::TOWARD_ZERO:
+    തിരികെ A.udiv(B);
+  അവസ്ഥ APInt::Rounding::UP: {
     APInt Quo, Rem;
     APInt::udivrem(A, B, Quo, Rem);
-    if (Rem.isZero())
-      return Quo;
-    return Quo + 1;
+    എങ്കിൽ (Rem.isZero())
+      തിരികെ Quo;
+    തിരികെ Quo + 1;
   }
   }
   llvm_unreachable("Unknown APInt::Rounding enum");
 }
 
-APInt llvm::APIntOps::RoundingSDiv(const APInt &A, const APInt &B,
+APInt llvm::APIntOps::RoundingSDiv(സ്ഥിരം APInt &A, സ്ഥിരം APInt &B,
                                    APInt::Rounding RM) {
-  switch (RM) {
-  case APInt::Rounding::DOWN:
-  case APInt::Rounding::UP: {
+  തിരഞ്ഞെടുപ്പ് (RM) {
+  അവസ്ഥ APInt::Rounding::DOWN:
+  അവസ്ഥ APInt::Rounding::UP: {
     APInt Quo, Rem;
     APInt::sdivrem(A, B, Quo, Rem);
-    if (Rem.isZero())
-      return Quo;
+    എങ്കിൽ (Rem.isZero())
+      തിരികെ Quo;
     // This algorithm deals with arbitrary rounding mode used by sdivrem.
     // We want to check whether the non-integer part of the mathematical value
     // is negative or not. If the non-integer part is negative, we need to round
     // down from Quo; otherwise, if it's positive or 0, we return Quo, as it's
     // already rounded down.
-    if (RM == APInt::Rounding::DOWN) {
-      if (Rem.isNegative() != B.isNegative())
-        return Quo - 1;
-      return Quo;
+    എങ്കിൽ (RM == APInt::Rounding::DOWN) {
+      എങ്കിൽ (Rem.isNegative() != B.isNegative())
+        തിരികെ Quo - 1;
+      തിരികെ Quo;
     }
-    if (Rem.isNegative() != B.isNegative())
-      return Quo;
-    return Quo + 1;
+    എങ്കിൽ (Rem.isNegative() != B.isNegative())
+      തിരികെ Quo;
+    തിരികെ Quo + 1;
   }
   // Currently sdiv rounds towards zero.
-  case APInt::Rounding::TOWARD_ZERO:
-    return A.sdiv(B);
+  അവസ്ഥ APInt::Rounding::TOWARD_ZERO:
+    തിരികെ A.sdiv(B);
   }
   llvm_unreachable("Unknown APInt::Rounding enum");
 }
@@ -2850,18 +2850,18 @@ std::optional<APInt>
 llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
                                            unsigned RangeWidth) {
   unsigned CoeffWidth = A.getBitWidth();
-  assert(CoeffWidth == B.getBitWidth() && CoeffWidth == C.getBitWidth());
-  assert(RangeWidth <= CoeffWidth &&
+  പ്രതിജ്ഞാ(CoeffWidth == B.getBitWidth() && CoeffWidth == C.getBitWidth());
+  പ്രതിജ്ഞാ(RangeWidth <= CoeffWidth &&
          "Value range width should be less than coefficient width");
-  assert(RangeWidth > 1 && "Value range bit width should be > 1");
+  പ്രതിജ്ഞാ(RangeWidth > 1 && "Value range bit width should be > 1");
 
   LLVM_DEBUG(dbgs() << __func__ << ": solving " << A << "x^2 + " << B
                     << "x + " << C << ", rw:" << RangeWidth << '\n');
 
   // Identify 0 as a (non)solution immediately.
-  if (C.sextOrTrunc(RangeWidth).isZero()) {
+  എങ്കിൽ (C.sextOrTrunc(RangeWidth).isZero()) {
     LLVM_DEBUG(dbgs() << __func__ << ": zero solution\n");
-    return APInt(CoeffWidth, 0);
+    തിരികെ APInt(CoeffWidth, 0);
   }
 
   // The result of APInt arithmetic has the same bit width as the operands,
@@ -2885,7 +2885,7 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
 
   // Make A > 0 for simplicity. Negate cannot overflow at this point because
   // the bit width has increased.
-  if (A.isNegative()) {
+  എങ്കിൽ (A.isNegative()) {
     A.negate();
     B.negate();
     C.negate();
@@ -2916,29 +2916,29 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   APInt R = APInt::getOneBitSet(CoeffWidth, RangeWidth);
   APInt TwoA = 2 * A;
   APInt SqrB = B * B;
-  bool PickLow;
+  തർക്കം Pick_താഴെയുള്ള;
 
-  auto RoundUp = [] (const APInt &V, const APInt &A) -> APInt {
-    assert(A.isStrictlyPositive());
+  auto RoundUp = [] (സ്ഥിരം APInt &V, സ്ഥിരം APInt &A) -> APInt {
+    പ്രതിജ്ഞാ(A.isStrictlyPositive());
     APInt T = V.abs().urem(A);
-    if (T.isZero())
-      return V;
-    return V.isNegative() ? V+T : V+(A-T);
+    എങ്കിൽ (T.isZero())
+      തിരികെ V;
+    തിരികെ V.isNegative() ? V+T : V+(A-T);
   };
 
   // The vertex of the parabola is at -B/2A, but since A > 0, it's negative
   // iff B is positive.
-  if (B.isNonNegative()) {
+  എങ്കിൽ (B.isNonNegative()) {
     // If B >= 0, the vertex it at a negative location (or at 0), so in
     // order to have a non-negative solution we need to pick k that makes
     // C-kR negative. To satisfy all the requirements for the solution
     // that we are looking for, it needs to be closest to 0 of all k.
     C = C.srem(R);
-    if (C.isStrictlyPositive())
+    എങ്കിൽ (C.isStrictlyPositive())
       C -= R;
     // Pick the greater solution.
-    PickLow = false;
-  } else {
+    Pick_താഴെയുള്ള = അസത്യം;
+  } അല്ലെങ്കിൽ {
     // If B < 0, the vertex is at a positive location. For any solution
     // to exist, the discriminant must be non-negative. This means that
     // C-kR <= B^2/4A is a necessary condition for k, i.e. there is a
@@ -2952,13 +2952,13 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
     // q(x) = kR. Out of all such values of k, pick the one that makes
     // C-kR closest to 0, (i.e. pick maximum k such that C-kR > 0).
     // In other words, find maximum k such that LowkR <= kR < C.
-    if (C.sgt(LowkR)) {
+    എങ്കിൽ (C.sgt(LowkR)) {
       // If LowkR < C, then such a k is guaranteed to exist because
       // LowkR itself is a multiple of R.
       C -= -RoundUp(-C, R);      // C = C - RoundDown(C, R)
       // Pick the smaller solution.
-      PickLow = true;
-    } else {
+      Pick_താഴെയുള്ള = സത്യം;
+    } അല്ലെങ്കിൽ {
       // If C-kR < 0 for all potential k's, it means that one solution
       // will be negative, while the other will be positive. The positive
       // solution will shift towards 0 if the parabola is moved up.
@@ -2968,7 +2968,7 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
       // Since LowkR is itself a multiple of R, simply take C-LowkR.
       C -= LowkR;
       // Pick the greater solution.
-      PickLow = false;
+      Pick_താഴെയുള്ള = അസത്യം;
     }
   }
 
@@ -2976,11 +2976,11 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
                     << B << "x + " << C << ", rw:" << RangeWidth << '\n');
 
   APInt D = SqrB - 4*A*C;
-  assert(D.isNonNegative() && "Negative discriminant");
+  പ്രതിജ്ഞാ(D.isNonNegative() && "Negative discriminant");
   APInt SQ = D.sqrtFloor();
 
   APInt Q = SQ * SQ;
-  bool InexactSQ = Q != D;
+  തർക്കം InexactSQ = Q != D;
 
   APInt X;
   APInt Rem;
@@ -2991,22 +2991,22 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // To make sure that the calculated root is not greater than the exact
   // one, subtract SQ+1 when calculating the low root (for inexact value
   // of SQ).
-  if (PickLow)
+  എങ്കിൽ (Pick_താഴെയുള്ള)
     APInt::sdivrem(-B - (SQ+InexactSQ), TwoA, X, Rem);
-  else
+  അല്ലെങ്കിൽ
     APInt::sdivrem(-B + SQ, TwoA, X, Rem);
 
   // The updated coefficients should be such that the (exact) solution is
   // positive. Since APInt division rounds towards 0, the calculated one
   // can be 0, but cannot be negative.
-  assert(X.isNonNegative() && "Solution should be non-negative");
+  പ്രതിജ്ഞാ(X.isNonNegative() && "Solution should be non-negative");
 
-  if (!InexactSQ && Rem.isZero()) {
+  എങ്കിൽ (!InexactSQ && Rem.isZero()) {
     LLVM_DEBUG(dbgs() << __func__ << ": solution (root): " << X << '\n');
-    return X;
+    തിരികെ X;
   }
 
-  assert((SQ*SQ).sle(D) && "SQ = |_sqrt(D)_|, so SQ*SQ <= D");
+  പ്രതിജ്ഞാ((SQ*SQ).sle(D) && "SQ = |_sqrt(D)_|, so SQ*SQ <= D");
   // The exact value of the square root of D should be between SQ and SQ+1.
   // This implies that the solution should be between that corresponding to
   // SQ (i.e. X) and that corresponding to SQ+1.
@@ -3017,257 +3017,257 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
 
   APInt VX = (A*X + B)*X + C;
   APInt VY = VX + TwoA*X + A + B;
-  bool SignChange =
+  തർക്കം SignChange =
       VX.isNegative() != VY.isNegative() || VX.isZero() != VY.isZero();
   // If the sign did not change between X and X+1, X is not a valid solution.
   // This could happen when the actual (exact) roots don't have an integer
   // between them, so they would both be contained between X and X+1.
-  if (!SignChange) {
+  എങ്കിൽ (!SignChange) {
     LLVM_DEBUG(dbgs() << __func__ << ": no valid solution\n");
-    return std::nullopt;
+    തിരികെ std::nullopt;
   }
 
   X += 1;
   LLVM_DEBUG(dbgs() << __func__ << ": solution (wrap): " << X << '\n');
-  return X;
+  തിരികെ X;
 }
 
 std::optional<unsigned>
-llvm::APIntOps::GetMostSignificantDifferentBit(const APInt &A, const APInt &B) {
-  assert(A.getBitWidth() == B.getBitWidth() && "Must have the same bitwidth");
-  if (A == B)
-    return std::nullopt;
-  return A.getBitWidth() - ((A ^ B).countl_zero() + 1);
+llvm::APIntOps::GetMostSignificantDifferentBit(സ്ഥിരം APInt &A, സ്ഥിരം APInt &B) {
+  പ്രതിജ്ഞാ(A.getBitWidth() == B.getBitWidth() && "Must have the same bitwidth");
+  എങ്കിൽ (A == B)
+    തിരികെ std::nullopt;
+  തിരികെ A.getBitWidth() - ((A ^ B).countl_zero() + 1);
 }
 
-APInt llvm::APIntOps::ScaleBitMask(const APInt &A, unsigned NewBitWidth,
-                                   bool MatchAllBits) {
+APInt llvm::APIntOps::ScaleBitMask(സ്ഥിരം APInt &A, unsigned NewBitWidth,
+                                   തർക്കം MatchAllBits) {
   unsigned OldBitWidth = A.getBitWidth();
-  assert((((OldBitWidth % NewBitWidth) == 0) ||
+  പ്രതിജ്ഞാ((((OldBitWidth % NewBitWidth) == 0) ||
           ((NewBitWidth % OldBitWidth) == 0)) &&
          "One size should be a multiple of the other one. "
          "Can't do fractional scaling.");
 
   // Check for matching bitwidths.
-  if (OldBitWidth == NewBitWidth)
-    return A;
+  എങ്കിൽ (OldBitWidth == NewBitWidth)
+    തിരികെ A;
 
   APInt NewA = APInt::getZero(NewBitWidth);
 
   // Check for null input.
-  if (A.isZero())
-    return NewA;
+  എങ്കിൽ (A.isZero())
+    തിരികെ NewA;
 
-  if (NewBitWidth > OldBitWidth) {
+  എങ്കിൽ (NewBitWidth > OldBitWidth) {
     // Repeat bits.
     unsigned Scale = NewBitWidth / OldBitWidth;
-    for (unsigned i = 0; i != OldBitWidth; ++i)
-      if (A[i])
+    വേണ്ടി (unsigned i = 0; i != OldBitWidth; ++i)
+      എങ്കിൽ (A[i])
         NewA.setBits(i * Scale, (i + 1) * Scale);
-  } else {
+  } അല്ലെങ്കിൽ {
     unsigned Scale = OldBitWidth / NewBitWidth;
-    for (unsigned i = 0; i != NewBitWidth; ++i) {
-      if (MatchAllBits) {
-        if (A.extractBits(Scale, i * Scale).isAllOnes())
+    വേണ്ടി (unsigned i = 0; i != NewBitWidth; ++i) {
+      എങ്കിൽ (MatchAllBits) {
+        എങ്കിൽ (A.extractBits(Scale, i * Scale).isAllOnes())
           NewA.setBit(i);
-      } else {
-        if (!A.extractBits(Scale, i * Scale).isZero())
+      } അല്ലെങ്കിൽ {
+        എങ്കിൽ (!A.extractBits(Scale, i * Scale).isZero())
           NewA.setBit(i);
       }
     }
   }
 
-  return NewA;
+  തിരികെ NewA;
 }
 
 /// StoreIntToMemory - Fills the StoreBytes bytes of memory starting from Dst
 /// with the integer held in IntVal.
-void llvm::StoreIntToMemory(const APInt &IntVal, uint8_t *Dst,
+ശൂന്യം llvm::StoreIntToMemory(സ്ഥിരം APInt &IntVal, uint8_t *Dst,
                             unsigned StoreBytes) {
-  assert((IntVal.getBitWidth()+7)/8 >= StoreBytes && "Integer too small!");
-  const uint8_t *Src = (const uint8_t *)IntVal.getRawData();
+  പ്രതിജ്ഞാ((IntVal.getBitWidth()+7)/8 >= StoreBytes && "Integer too small!");
+  സ്ഥിരം uint8_t *Src = (സ്ഥിരം uint8_t *)IntVal.getRawData();
 
-  if (sys::IsLittleEndianHost) {
+  എങ്കിൽ (sys::IsLittleEndianHost) {
     // Little-endian host - the source is ordered from LSB to MSB.  Order the
     // destination from LSB to MSB: Do a straight copy.
     memcpy(Dst, Src, StoreBytes);
-  } else {
+  } അല്ലെങ്കിൽ {
     // Big-endian host - the source is an array of 64 bit words ordered from
     // LSW to MSW.  Each word is ordered from MSB to LSB.  Order the destination
     // from MSB to LSB: Reverse the word order, but not the bytes in a word.
-    while (StoreBytes > sizeof(uint64_t)) {
-      StoreBytes -= sizeof(uint64_t);
+    ആകുമ്പോൾ (StoreBytes > വലുപ്പം(uint64_t)) {
+      StoreBytes -= വലുപ്പം(uint64_t);
       // May not be aligned so use memcpy.
-      memcpy(Dst + StoreBytes, Src, sizeof(uint64_t));
-      Src += sizeof(uint64_t);
+      memcpy(Dst + StoreBytes, Src, വലുപ്പം(uint64_t));
+      Src += വലുപ്പം(uint64_t);
     }
 
-    memcpy(Dst, Src + sizeof(uint64_t) - StoreBytes, StoreBytes);
+    memcpy(Dst, Src + വലുപ്പം(uint64_t) - StoreBytes, StoreBytes);
   }
 }
 
 /// LoadIntFromMemory - Loads the integer stored in the LoadBytes bytes starting
 /// from Src into IntVal, which is assumed to be wide enough and to hold zero.
-void llvm::LoadIntFromMemory(APInt &IntVal, const uint8_t *Src,
+ശൂന്യം llvm::LoadIntFromMemory(APInt &IntVal, സ്ഥിരം uint8_t *Src,
                              unsigned LoadBytes) {
-  assert((IntVal.getBitWidth()+7)/8 >= LoadBytes && "Integer too small!");
+  പ്രതിജ്ഞാ((IntVal.getBitWidth()+7)/8 >= LoadBytes && "Integer too small!");
   uint8_t *Dst = reinterpret_cast<uint8_t *>(
                    const_cast<uint64_t *>(IntVal.getRawData()));
 
-  if (sys::IsLittleEndianHost)
+  എങ്കിൽ (sys::IsLittleEndianHost)
     // Little-endian host - the destination must be ordered from LSB to MSB.
     // The source is ordered from LSB to MSB: Do a straight copy.
     memcpy(Dst, Src, LoadBytes);
-  else {
+  അല്ലെങ്കിൽ {
     // Big-endian - the destination is an array of 64 bit words ordered from
     // LSW to MSW.  Each word must be ordered from MSB to LSB.  The source is
     // ordered from MSB to LSB: Reverse the word order, but not the bytes in
     // a word.
-    while (LoadBytes > sizeof(uint64_t)) {
-      LoadBytes -= sizeof(uint64_t);
+    ആകുമ്പോൾ (LoadBytes > വലുപ്പം(uint64_t)) {
+      LoadBytes -= വലുപ്പം(uint64_t);
       // May not be aligned so use memcpy.
-      memcpy(Dst, Src + LoadBytes, sizeof(uint64_t));
-      Dst += sizeof(uint64_t);
+      memcpy(Dst, Src + LoadBytes, വലുപ്പം(uint64_t));
+      Dst += വലുപ്പം(uint64_t);
     }
 
-    memcpy(Dst + sizeof(uint64_t) - LoadBytes, Src, LoadBytes);
+    memcpy(Dst + വലുപ്പം(uint64_t) - LoadBytes, Src, LoadBytes);
   }
 }
 
-APInt APIntOps::avgFloorS(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgFloorS(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
   // Return floor((C1 + C2) / 2)
-  return (C1 & C2) + (C1 ^ C2).ashr(1);
+  തിരികെ (C1 & C2) + (C1 ^ C2).ashr(1);
 }
 
-APInt APIntOps::avgFloorU(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgFloorU(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
   // Return floor((C1 + C2) / 2)
-  return (C1 & C2) + (C1 ^ C2).lshr(1);
+  തിരികെ (C1 & C2) + (C1 ^ C2).lshr(1);
 }
 
-APInt APIntOps::avgCeilS(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgCeilS(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
   // Return ceil((C1 + C2) / 2)
-  return (C1 | C2) - (C1 ^ C2).ashr(1);
+  തിരികെ (C1 | C2) - (C1 ^ C2).ashr(1);
 }
 
-APInt APIntOps::avgCeilU(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgCeilU(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
   // Return ceil((C1 + C2) / 2)
-  return (C1 | C2) - (C1 ^ C2).lshr(1);
+  തിരികെ (C1 | C2) - (C1 ^ C2).lshr(1);
 }
 
-APInt APIntOps::avgSubFloorS(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgSubFloorS(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
   // Return floor((C1 - C2) / 2), using C1 - C2 == (C1 ^ C2) - 2 * (~C1 & C2).
-  return (C1 ^ C2).ashr(1) - (~C1 & C2);
+  തിരികെ (C1 ^ C2).ashr(1) - (~C1 & C2);
 }
 
-APInt APIntOps::avgSubFloorU(const APInt &C1, const APInt &C2) {
+APInt APIntOps::avgSubFloorU(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
   // Return floor((C1 - C2) / 2), using C1 - C2 == (C1 ^ C2) - 2 * (~C1 & C2).
-  return (C1 ^ C2).lshr(1) - (~C1 & C2);
+  തിരികെ (C1 ^ C2).lshr(1) - (~C1 & C2);
 }
 
-APInt APIntOps::mulhs(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
+APInt APIntOps::mulhs(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
+  പ്രതിജ്ഞാ(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.sext(FullWidth);
   APInt C2Ext = C2.sext(FullWidth);
-  return (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
+  തിരികെ (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
 }
 
-APInt APIntOps::mulhu(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
+APInt APIntOps::mulhu(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
+  പ്രതിജ്ഞാ(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.zext(FullWidth);
   APInt C2Ext = C2.zext(FullWidth);
-  return (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
+  തിരികെ (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
 }
 
-APInt APIntOps::mulsExtended(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
+APInt APIntOps::mulsExtended(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
+  പ്രതിജ്ഞാ(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.sext(FullWidth);
   APInt C2Ext = C2.sext(FullWidth);
-  return C1Ext * C2Ext;
+  തിരികെ C1Ext * C2Ext;
 }
 
-APInt APIntOps::muluExtended(const APInt &C1, const APInt &C2) {
-  assert(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
+APInt APIntOps::muluExtended(സ്ഥിരം APInt &C1, സ്ഥിരം APInt &C2) {
+  പ്രതിജ്ഞാ(C1.getBitWidth() == C2.getBitWidth() && "Unequal bitwidths");
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.zext(FullWidth);
   APInt C2Ext = C2.zext(FullWidth);
-  return C1Ext * C2Ext;
+  തിരികെ C1Ext * C2Ext;
 }
 
-APInt APIntOps::pow(const APInt &X, int64_t N) {
-  assert(N >= 0 && "negative exponents not supported.");
+APInt APIntOps::pow(സ്ഥിരം APInt &X, int64_t N) {
+  പ്രതിജ്ഞാ(N >= 0 && "negative exponents not supported.");
   APInt Acc = APInt(X.getBitWidth(), 1);
-  if (N == 0)
-    return Acc;
+  എങ്കിൽ (N == 0)
+    തിരികെ Acc;
   APInt Base = X;
   int64_t RemainingExponent = N;
-  while (RemainingExponent > 0) {
-    while (RemainingExponent % 2 == 0) {
+  ആകുമ്പോൾ (RemainingExponent > 0) {
+    ആകുമ്പോൾ (RemainingExponent % 2 == 0) {
       Base *= Base;
       RemainingExponent /= 2;
     }
     --RemainingExponent;
     Acc *= Base;
   }
-  return Acc;
+  തിരികെ Acc;
 }
 
-APInt llvm::APIntOps::fshl(const APInt &Hi, const APInt &Lo,
-                           const APInt &Shift) {
-  assert(Hi.getBitWidth() == Lo.getBitWidth());
+APInt llvm::APIntOps::fshl(സ്ഥിരം APInt &Hi, സ്ഥിരം APInt &Lo,
+                           സ്ഥിരം APInt &Shift) {
+  പ്രതിജ്ഞാ(Hi.getBitWidth() == Lo.getBitWidth());
   unsigned ShiftAmt = rotateModulo(Hi.getBitWidth(), Shift);
-  if (ShiftAmt == 0)
-    return Hi;
-  return Hi.shl(ShiftAmt) | Lo.lshr(Hi.getBitWidth() - ShiftAmt);
+  എങ്കിൽ (ShiftAmt == 0)
+    തിരികെ Hi;
+  തിരികെ Hi.shl(ShiftAmt) | Lo.lshr(Hi.getBitWidth() - ShiftAmt);
 }
 
-APInt llvm::APIntOps::fshr(const APInt &Hi, const APInt &Lo,
-                           const APInt &Shift) {
-  assert(Hi.getBitWidth() == Lo.getBitWidth());
+APInt llvm::APIntOps::fshr(സ്ഥിരം APInt &Hi, സ്ഥിരം APInt &Lo,
+                           സ്ഥിരം APInt &Shift) {
+  പ്രതിജ്ഞാ(Hi.getBitWidth() == Lo.getBitWidth());
   unsigned ShiftAmt = rotateModulo(Hi.getBitWidth(), Shift);
-  if (ShiftAmt == 0)
-    return Lo;
-  return Hi.shl(Hi.getBitWidth() - ShiftAmt) | Lo.lshr(ShiftAmt);
+  എങ്കിൽ (ShiftAmt == 0)
+    തിരികെ Lo;
+  തിരികെ Hi.shl(Hi.getBitWidth() - ShiftAmt) | Lo.lshr(ShiftAmt);
 }
 
-APInt llvm::APIntOps::clmul(const APInt &LHS, const APInt &RHS) {
+APInt llvm::APIntOps::clmul(സ്ഥിരം APInt &LHS, സ്ഥിരം APInt &RHS) {
   unsigned BW = LHS.getBitWidth();
-  assert(BW == RHS.getBitWidth() && "Operand mismatch");
+  പ്രതിജ്ഞാ(BW == RHS.getBitWidth() && "Operand mismatch");
   APInt Result(BW, 0);
-  for (unsigned I : seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
-    if (RHS[I])
+  വേണ്ടി (unsigned I : seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
+    എങ്കിൽ (RHS[I])
       Result ^= LHS << I;
-  return Result;
+  തിരികെ Result;
 }
 
-APInt llvm::APIntOps::clmulr(const APInt &LHS, const APInt &RHS) {
-  assert(LHS.getBitWidth() == RHS.getBitWidth());
-  return clmul(LHS.reverseBits(), RHS.reverseBits()).reverseBits();
+APInt llvm::APIntOps::clmulr(സ്ഥിരം APInt &LHS, സ്ഥിരം APInt &RHS) {
+  പ്രതിജ്ഞാ(LHS.getBitWidth() == RHS.getBitWidth());
+  തിരികെ clmul(LHS.reverseBits(), RHS.reverseBits()).reverseBits();
 }
 
-APInt llvm::APIntOps::clmulh(const APInt &LHS, const APInt &RHS) {
-  assert(LHS.getBitWidth() == RHS.getBitWidth());
-  return clmulr(LHS, RHS).lshr(1);
+APInt llvm::APIntOps::clmulh(സ്ഥിരം APInt &LHS, സ്ഥിരം APInt &RHS) {
+  പ്രതിജ്ഞാ(LHS.getBitWidth() == RHS.getBitWidth());
+  തിരികെ clmulr(LHS, RHS).lshr(1);
 }
 
-APInt llvm::APIntOps::pext(const APInt &Val, const APInt &Mask) {
+APInt llvm::APIntOps::pext(സ്ഥിരം APInt &Val, സ്ഥിരം APInt &Mask) {
   unsigned BW = Val.getBitWidth();
-  assert(BW == Mask.getBitWidth() && "Operand mismatch");
+  പ്രതിജ്ഞാ(BW == Mask.getBitWidth() && "Operand mismatch");
   APInt Result = APInt::getZero(BW);
-  for (unsigned I = 0, P = 0; I != BW; ++I)
-    if (Mask[I])
+  വേണ്ടി (unsigned I = 0, P = 0; I != BW; ++I)
+    എങ്കിൽ (Mask[I])
       Result.setBitVal(P++, Val[I]);
-  return Result;
+  തിരികെ Result;
 }
 
-APInt llvm::APIntOps::pdep(const APInt &Val, const APInt &Mask) {
+APInt llvm::APIntOps::pdep(സ്ഥിരം APInt &Val, സ്ഥിരം APInt &Mask) {
   unsigned BW = Val.getBitWidth();
-  assert(BW == Mask.getBitWidth() && "Operand mismatch");
+  പ്രതിജ്ഞാ(BW == Mask.getBitWidth() && "Operand mismatch");
   APInt Result = APInt::getZero(BW);
-  for (unsigned I = 0, P = 0; I != BW; ++I)
-    if (Mask[I])
+  വേണ്ടി (unsigned I = 0, P = 0; I != BW; ++I)
+    എങ്കിൽ (Mask[I])
       Result.setBitVal(I, Val[P++]);
-  return Result;
+  തിരികെ Result;
 }

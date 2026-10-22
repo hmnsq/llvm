@@ -6,93 +6,93 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
+#അന്തര്ഭാവ "llvm/Support/LineIterator.h"
+#അന്തര്ഭാവ "llvm/Support/MemoryBuffer.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+സ്ഥിതം തർക്കം is_At_വരി_End(സ്ഥിരം അക്ഷരം *P) {
+  എങ്കിൽ (*P == '\n')
+    തിരികെ സത്യം;
+  എങ്കിൽ (*P == '\r' && *(P + 1) == '\n')
+    തിരികെ സത്യം;
+  തിരികെ അസത്യം;
 }
 
-static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+സ്ഥിതം തർക്കം skip_If_At_വരി_End(സ്ഥിരം അക്ഷരം *&P) {
+  എങ്കിൽ (*P == '\n') {
     ++P;
-    return true;
+    തിരികെ സത്യം;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  എങ്കിൽ (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    തിരികെ സത്യം;
   }
-  return false;
+  തിരികെ അസത്യം;
 }
 
-line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
-                             char CommentMarker)
-    : line_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
+വരി_iterator::വരി_iterator(സ്ഥിരം MemoryBuffer &Buffer, തർക്കം SkipBlanks,
+                             അക്ഷരം CommentMarker)
+    : വരി_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
 
-line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+വരി_iterator::വരി_iterator(സ്ഥിരം MemoryBufferRef &Buffer, തർക്കം SkipBlanks,
+                             അക്ഷരം CommentMarker)
     : Buffer(Buffer.getBufferSize() ? std::optional<MemoryBufferRef>(Buffer)
                                     : std::nullopt),
       CommentMarker(CommentMarker), SkipBlanks(SkipBlanks),
-      CurrentLine(Buffer.getBufferSize() ? Buffer.getBufferStart() : nullptr,
+      Current_വരി(Buffer.getBufferSize() ? Buffer.getBufferStart() : nullptr,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
-    assert(Buffer.getBufferEnd()[0] == '\0');
+  എങ്കിൽ (Buffer.getBufferSize()) {
+    പ്രതിജ്ഞാ(Buffer.getBufferEnd()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    എങ്കിൽ (SkipBlanks || !is_At_വരി_End(Buffer.getBufferStart()))
       advance();
   }
 }
 
-void line_iterator::advance() {
-  assert(Buffer && "Cannot advance past the end!");
+ശൂന്യം വരി_iterator::advance() {
+  പ്രതിജ്ഞാ(Buffer && "Cannot advance past the end!");
 
-  const char *Pos = CurrentLine.end();
-  assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
+  സ്ഥിരം അക്ഷരം *Pos = Current_വരി.end();
+  പ്രതിജ്ഞാ(Pos == Buffer->getBufferStart() || is_At_വരി_End(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
-    ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  എങ്കിൽ (skip_If_At_വരി_End(Pos))
+    ++വരി_സംഖ്യ;
+  എങ്കിൽ (!SkipBlanks && is_At_വരി_End(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } അല്ലെങ്കിൽ എങ്കിൽ (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
-      ++LineNumber;
-  } else {
+    ആകുമ്പോൾ (skip_If_At_വരി_End(Pos))
+      ++വരി_സംഖ്യ;
+  } അല്ലെങ്കിൽ {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
-        break;
-      if (*Pos == CommentMarker)
-        do {
+    വേണ്ടി (;;) {
+      എങ്കിൽ (is_At_വരി_End(Pos) && !SkipBlanks)
+        നിർത്തുക;
+      എങ്കിൽ (*Pos == CommentMarker)
+        ചെയ്യുക {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
-        break;
-      ++LineNumber;
+        } ആകുമ്പോൾ (*Pos != '\0' && !is_At_വരി_End(Pos));
+      എങ്കിൽ (!skip_If_At_വരി_End(Pos))
+        നിർത്തുക;
+      ++വരി_സംഖ്യ;
     }
   }
 
-  if (*Pos == '\0') {
+  എങ്കിൽ (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
     Buffer = std::nullopt;
-    CurrentLine = StringRef();
-    return;
+    Current_വരി = StringRef();
+    തിരികെ;
   }
 
   // Measure the line.
   size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
+  ആകുമ്പോൾ (Pos[Length] != '\0' && !is_At_വരി_End(&Pos[Length])) {
     ++Length;
   }
 
-  CurrentLine = StringRef(Pos, Length);
+  Current_വരി = StringRef(Pos, Length);
 }

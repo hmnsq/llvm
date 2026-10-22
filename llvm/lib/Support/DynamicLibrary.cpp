@@ -10,244 +10,244 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm-c/Support.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Mutex.h"
-#include <vector>
+#അന്തര്ഭാവ "llvm/Support/DynamicLibrary.h"
+#അന്തര്ഭാവ "llvm-c/Support.h"
+#അന്തര്ഭാവ "llvm/ADT/STLExtras.h"
+#അന്തര്ഭാവ "llvm/ADT/StringMap.h"
+#അന്തര്ഭാവ "llvm/Config/config.h"
+#അന്തര്ഭാവ "llvm/Support/Mutex.h"
+#അന്തര്ഭാവ <vector>
 
-using namespace llvm;
-using namespace llvm::sys;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::sys;
 
 // All methods for HandleSet should be used holding SymbolsMutex.
-class DynamicLibrary::HandleSet {
-  using HandleList = std::vector<void *>;
+വർഗ്ഗം DynamicLibrary::HandleSet {
+  using HandleList = std::vector<ശൂന്യം *>;
   HandleList Handles;
-  void *Process = &Invalid;
+  ശൂന്യം *Process = &Invalid;
 
-public:
-  static void *DLOpen(const char *Filename, std::string *Err);
-  static void DLClose(void *Handle);
-  static void *DLSym(void *Handle, const char *Symbol);
+പൊതു:
+  സ്ഥിതം ശൂന്യം *DLOpen(സ്ഥിരം അക്ഷരം *Filename, std::string *Err);
+  സ്ഥിതം ശൂന്യം DLClose(ശൂന്യം *Handle);
+  സ്ഥിതം ശൂന്യം *DLSym(ശൂന്യം *Handle, സ്ഥിരം അക്ഷരം *ചിഹ്നം);
 
-  HandleSet() = default;
+  HandleSet() = സ്ഥിരസ്ഥിതി;
   ~HandleSet();
 
-  HandleList::iterator Find(void *Handle) { return find(Handles, Handle); }
+  HandleList::iterator Find(ശൂന്യം *Handle) { തിരികെ find(Handles, Handle); }
 
-  bool Contains(void *Handle) {
-    return Handle == Process || Find(Handle) != Handles.end();
+  തർക്കം Contains(ശൂന്യം *Handle) {
+    തിരികെ Handle == Process || Find(Handle) != Handles.end();
   }
 
-  bool AddLibrary(void *Handle, bool IsProcess = false, bool CanClose = true,
-                  bool AllowDuplicates = false) {
+  തർക്കം AddLibrary(ശൂന്യം *Handle, തർക്കം IsProcess = അസത്യം, തർക്കം CanClose = സത്യം,
+                  തർക്കം AllowDuplicates = അസത്യം) {
 #ifdef _WIN32
-    assert((Handle == this ? IsProcess : !IsProcess) && "Bad Handle.");
+    പ്രതിജ്ഞാ((Handle == ഇത് ? IsProcess : !IsProcess) && "Bad Handle.");
 #endif
-    assert((!AllowDuplicates || !CanClose) &&
+    പ്രതിജ്ഞാ((!AllowDuplicates || !CanClose) &&
            "CanClose must be false if AllowDuplicates is true.");
 
-    if (LLVM_LIKELY(!IsProcess)) {
-      if (!AllowDuplicates && Find(Handle) != Handles.end()) {
-        if (CanClose)
+    എങ്കിൽ (LLVM_LIKELY(!IsProcess)) {
+      എങ്കിൽ (!AllowDuplicates && Find(Handle) != Handles.end()) {
+        എങ്കിൽ (CanClose)
           DLClose(Handle);
-        return false;
+        തിരികെ അസത്യം;
       }
-      Handles.push_back(Handle);
-    } else {
+      Handles.തള്ളുക_back(Handle);
+    } അല്ലെങ്കിൽ {
 #ifndef _WIN32
-      if (Process != &Invalid) {
-        if (CanClose)
+      എങ്കിൽ (Process != &Invalid) {
+        എങ്കിൽ (CanClose)
           DLClose(Process);
-        if (Process == Handle)
-          return false;
+        എങ്കിൽ (Process == Handle)
+          തിരികെ അസത്യം;
       }
 #endif
       Process = Handle;
     }
-    return true;
+    തിരികെ സത്യം;
   }
 
-  void CloseLibrary(void *Handle) {
+  ശൂന്യം CloseLibrary(ശൂന്യം *Handle) {
     DLClose(Handle);
     HandleList::iterator it = Find(Handle);
-    if (it != Handles.end()) {
+    എങ്കിൽ (it != Handles.end()) {
       Handles.erase(it);
     }
   }
 
-  void *LibLookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    if (Order & SO_LoadOrder) {
-      for (void *Handle : Handles) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+  ശൂന്യം *LibLookup(സ്ഥിരം അക്ഷരം *ചിഹ്നം, DynamicLibrary::തിരയൽ_Ordering Order) {
+    എങ്കിൽ (Order & SO_LoadOrder) {
+      വേണ്ടി (ശൂന്യം *Handle : Handles) {
+        എങ്കിൽ (ശൂന്യം *Ptr = DLSym(Handle, ചിഹ്നം))
+          തിരികെ Ptr;
       }
-    } else {
-      for (void *Handle : llvm::reverse(Handles)) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+    } അല്ലെങ്കിൽ {
+      വേണ്ടി (ശൂന്യം *Handle : llvm::reverse(Handles)) {
+        എങ്കിൽ (ശൂന്യം *Ptr = DLSym(Handle, ചിഹ്നം))
+          തിരികെ Ptr;
       }
     }
-    return nullptr;
+    തിരികെ nullptr;
   }
 
-  void *Lookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    assert(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
+  ശൂന്യം *Lookup(സ്ഥിരം അക്ഷരം *ചിഹ്നം, DynamicLibrary::തിരയൽ_Ordering Order) {
+    പ്രതിജ്ഞാ(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
            "Invalid Ordering");
 
-    if (Process == &Invalid || (Order & SO_LoadedFirst)) {
-      if (void *Ptr = LibLookup(Symbol, Order))
-        return Ptr;
+    എങ്കിൽ (Process == &Invalid || (Order & SO_LoadedFirst)) {
+      എങ്കിൽ (ശൂന്യം *Ptr = LibLookup(ചിഹ്നം, Order))
+        തിരികെ Ptr;
     }
-    if (Process != &Invalid) {
+    എങ്കിൽ (Process != &Invalid) {
       // Use OS facilities to search the current binary and all loaded libs.
-      if (void *Ptr = DLSym(Process, Symbol))
-        return Ptr;
+      എങ്കിൽ (ശൂന്യം *Ptr = DLSym(Process, ചിഹ്നം))
+        തിരികെ Ptr;
 
       // Search any libs that might have been skipped because of RTLD_LOCAL.
-      if (Order & SO_LoadedLast) {
-        if (void *Ptr = LibLookup(Symbol, Order))
-          return Ptr;
+      എങ്കിൽ (Order & SO_LoadedLast) {
+        എങ്കിൽ (ശൂന്യം *Ptr = LibLookup(ചിഹ്നം, Order))
+          തിരികെ Ptr;
       }
     }
-    return nullptr;
+    തിരികെ nullptr;
   }
 };
 
-namespace {
+നാമാകാശ {
 
-struct Globals {
+ഘടന Globals {
   // Collection of symbol name/value pairs to be searched prior to any
   // libraries.
-  llvm::StringMap<void *> ExplicitSymbols;
+  llvm::StringMap<ശൂന്യം *> ExplicitSymbols;
   // Collections of known library handles.
   DynamicLibrary::HandleSet OpenedHandles;
   DynamicLibrary::HandleSet OpenedTemporaryHandles;
   // Lock for ExplicitSymbols, OpenedHandles, and OpenedTemporaryHandles.
-  llvm::sys::SmartMutex<true> SymbolsMutex;
+  llvm::sys::SmartMutex<സത്യം> SymbolsMutex;
 };
 
 Globals &getGlobals() {
-  static Globals G;
-  return G;
+  സ്ഥിതം Globals G;
+  തിരികെ G;
 }
 
 } // namespace
 
 #ifdef _WIN32
 
-#include "Windows/DynamicLibrary.inc"
+#അന്തര്ഭാവ "Windows/DynamicLibrary.inc"
 
-#else
+#അല്ലെങ്കിൽ
 
-#include "Unix/DynamicLibrary.inc"
+#അന്തര്ഭാവ "Unix/DynamicLibrary.inc"
 
 #endif
 
-char DynamicLibrary::Invalid;
-DynamicLibrary::SearchOrdering DynamicLibrary::SearchOrder =
+അക്ഷരം DynamicLibrary::Invalid;
+DynamicLibrary::തിരയൽ_Ordering DynamicLibrary::തിരയൽ_Order =
     DynamicLibrary::SO_Linker;
 
-namespace llvm {
-void *SearchForAddressOfSpecialSymbol(const char *SymbolName) {
-  return DoSearch(SymbolName); // DynamicLibrary.inc
+നാമാകാശ llvm {
+ശൂന്യം *തിരയൽ_For_Address_Of_Special_ചിഹ്നം(സ്ഥിരം അക്ഷരം *ചിഹ്നം_Name) {
+  തിരികെ Do_തിരയൽ(ചിഹ്നം_Name); // DynamicLibrary.inc
 }
 } // namespace llvm
 
-void DynamicLibrary::AddSymbol(StringRef SymbolName, void *SymbolValue) {
+ശൂന്യം DynamicLibrary::Add_ചിഹ്നം(StringRef ചിഹ്നം_Name, ശൂന്യം *ചിഹ്നം_മൂല്യം) {
   auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  G.ExplicitSymbols[SymbolName] = SymbolValue;
+  SmartScopedLock<സത്യം> Lock(G.SymbolsMutex);
+  G.ExplicitSymbols[ചിഹ്നം_Name] = ചിഹ്നം_മൂല്യം;
 }
 
-DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getPermanentLibrary(സ്ഥിരം അക്ഷരം *FileName,
                                                    std::string *Err) {
   auto &G = getGlobals();
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
+  ശൂന്യം *Handle = HandleSet::DLOpen(FileName, Err);
+  എങ്കിൽ (Handle != &Invalid) {
+    SmartScopedLock<സത്യം> Lock(G.SymbolsMutex);
     G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ FileName == nullptr);
   }
 
-  return DynamicLibrary(Handle);
+  തിരികെ DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::addPermanentLibrary(void *Handle,
+DynamicLibrary DynamicLibrary::addPermanentLibrary(ശൂന്യം *Handle,
                                                    std::string *Err) {
   auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
+  SmartScopedLock<സത്യം> Lock(G.SymbolsMutex);
   // If we've already loaded this library, tell the caller.
-  if (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                  /*CanClose*/ false))
+  എങ്കിൽ (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ അസത്യം,
+                                  /*CanClose*/ അസത്യം))
     *Err = "Library already loaded";
 
-  return DynamicLibrary(Handle);
+  തിരികെ DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::getLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getLibrary(സ്ഥിരം അക്ഷരം *FileName,
                                           std::string *Err) {
-  assert(FileName && "Use getPermanentLibrary() for opening process handle");
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
+  പ്രതിജ്ഞാ(FileName && "Use getPermanentLibrary() for opening process handle");
+  ശൂന്യം *Handle = HandleSet::DLOpen(FileName, Err);
+  എങ്കിൽ (Handle != &Invalid) {
     auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
-    G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                        /*CanClose*/ false,
-                                        /*AllowDuplicates*/ true);
+    SmartScopedLock<സത്യം> Lock(G.SymbolsMutex);
+    G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ അസത്യം,
+                                        /*CanClose*/ അസത്യം,
+                                        /*AllowDuplicates*/ സത്യം);
   }
-  return DynamicLibrary(Handle);
+  തിരികെ DynamicLibrary(Handle);
 }
 
-void DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
+ശൂന്യം DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
   auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  if (Lib.isValid()) {
+  SmartScopedLock<സത്യം> Lock(G.SymbolsMutex);
+  എങ്കിൽ (Lib.isValid()) {
     G.OpenedTemporaryHandles.CloseLibrary(Lib.Data);
     Lib.Data = &Invalid;
   }
 }
 
-void *DynamicLibrary::getAddressOfSymbol(const char *SymbolName) {
-  if (!isValid())
-    return nullptr;
-  return HandleSet::DLSym(Data, SymbolName);
+ശൂന്യം *DynamicLibrary::get_Address_Of_ചിഹ്നം(സ്ഥിരം അക്ഷരം *ചിഹ്നം_Name) {
+  എങ്കിൽ (!isValid())
+    തിരികെ nullptr;
+  തിരികെ HandleSet::DLSym(Data, ചിഹ്നം_Name);
 }
 
-void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
+ശൂന്യം *DynamicLibrary::തിരയൽ_For_Address_Of_ചിഹ്നം(സ്ഥിരം അക്ഷരം *ചിഹ്നം_Name) {
   {
     auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
+    SmartScopedLock<സത്യം> Lock(G.SymbolsMutex);
 
     // First check symbols added via AddSymbol().
-    StringMap<void *>::iterator i = G.ExplicitSymbols.find(SymbolName);
+    StringMap<ശൂന്യം *>::iterator i = G.ExplicitSymbols.find(ചിഹ്നം_Name);
 
-    if (i != G.ExplicitSymbols.end())
-      return i->second;
+    എങ്കിൽ (i != G.ExplicitSymbols.end())
+      തിരികെ i->second;
 
     // Now search the libraries.
-    if (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
-    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
+    എങ്കിൽ (ശൂന്യം *Ptr = G.OpenedHandles.Lookup(ചിഹ്നം_Name, തിരയൽ_Order))
+      തിരികെ Ptr;
+    എങ്കിൽ (ശൂന്യം *Ptr = G.OpenedTemporaryHandles.Lookup(ചിഹ്നം_Name, തിരയൽ_Order))
+      തിരികെ Ptr;
   }
 
-  return llvm::SearchForAddressOfSpecialSymbol(SymbolName);
+  തിരികെ llvm::തിരയൽ_For_Address_Of_Special_ചിഹ്നം(ചിഹ്നം_Name);
 }
 
 //===----------------------------------------------------------------------===//
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
-  return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
+LLVMBool LLVMLoadLibraryPermanently(സ്ഥിരം അക്ഷരം *Filename) {
+  തിരികെ llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
 }
 
-void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
-  return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
+ശൂന്യം *LLVMSearch_For_Address_Of_ചിഹ്നം(സ്ഥിരം അക്ഷരം *ചിഹ്നം_Name_2) {
+  തിരികെ llvm::sys::DynamicLibrary::തിരയൽ_For_Address_Of_ചിഹ്നം(ചിഹ്നം_Name_2);
 }
 
-void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
-  return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
+ശൂന്യം LLVMAdd_ചിഹ്നം(സ്ഥിരം അക്ഷരം *ചിഹ്നം_Name_2, ശൂന്യം *ചിഹ്നം_മൂല്യം_2) {
+  തിരികെ llvm::sys::DynamicLibrary::Add_ചിഹ്നം(ചിഹ്നം_Name_2, ചിഹ്നം_മൂല്യം_2);
 }

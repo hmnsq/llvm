@@ -20,82 +20,82 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Statistic.h"
+#അന്തര്ഭാവ "llvm/ADT/Statistic.h"
 
-#include "DebugOptions.h"
+#അന്തര്ഭാവ "DebugOptions.h"
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Timer.h"
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/Support/raw_ostream.h"
-#include <algorithm>
-#include <cstring>
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/CommandLine.h"
+#അന്തര്ഭാവ "llvm/Support/Compiler.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/Format.h"
+#അന്തര്ഭാവ "llvm/Support/ManagedStatic.h"
+#അന്തര്ഭാവ "llvm/Support/Mutex.h"
+#അന്തര്ഭാവ "llvm/Support/Timer.h"
+#അന്തര്ഭാവ "llvm/Support/YAMLTraits.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <algorithm>
+#അന്തര്ഭാവ <cstring>
+using നാമാകാശ llvm;
 
 /// -stats - Command line option to cause transformations to emit stats about
 /// what they did.
 ///
-static bool EnableStats;
-static bool StatsAsJSON;
-static bool Enabled;
-static bool PrintOnExit;
+സ്ഥിതം തർക്കം EnableStats;
+സ്ഥിതം തർക്കം StatsAsJSON;
+സ്ഥിതം തർക്കം Enabled;
+സ്ഥിതം തർക്കം PrintOnExit;
 
-void llvm::initStatisticOptions() {
-  static cl::opt<bool, true> registerEnableStats{
+ശൂന്യം llvm::initStatisticOptions() {
+  സ്ഥിതം cl::opt<തർക്കം, സത്യം> registerEnableStats{
       "stats",
       cl::desc(
           "Enable statistics output from program (available with Asserts)"),
       cl::location(EnableStats), cl::Hidden};
-  static cl::opt<bool, true> registerStatsAsJson{
+  സ്ഥിതം cl::opt<തർക്കം, സത്യം> registerStatsAsJson{
       "stats-json", cl::desc("Display statistics as json data"),
       cl::location(StatsAsJSON), cl::Hidden};
 }
 
-namespace {
+നാമാകാശ {
 /// This class is used in a ManagedStatic so that it is created on demand (when
 /// the first statistic is bumped) and destroyed only when llvm_shutdown is
 /// called. We print statistics from the destructor.
 /// This class is also used to look up statistic values from applications that
 /// use LLVM.
-class StatisticInfo {
+വർഗ്ഗം StatisticInfo {
   std::vector<TrackingStatistic *> Stats;
 
-  friend void llvm::PrintStatistics();
-  friend void llvm::PrintStatistics(raw_ostream &OS);
-  friend void llvm::PrintStatisticsJSON(raw_ostream &OS);
+  friend ശൂന്യം llvm::PrintStatistics();
+  friend ശൂന്യം llvm::PrintStatistics(raw_ostream &OS);
+  friend ശൂന്യം llvm::PrintStatisticsJSON(raw_ostream &OS);
 
   /// Sort statistics by debugtype,name,description.
-  void sort();
-public:
+  ശൂന്യം sort();
+പൊതു:
   using const_iterator = std::vector<TrackingStatistic *>::const_iterator;
 
   StatisticInfo();
   ~StatisticInfo();
 
-  void addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
+  ശൂന്യം addStatistic(TrackingStatistic *S) { Stats.തള്ളുക_back(S); }
 
-  const_iterator begin() const { return Stats.begin(); }
-  const_iterator end() const { return Stats.end(); }
-  iterator_range<const_iterator> statistics() const {
-    return {begin(), end()};
+  const_iterator begin() സ്ഥിരം { തിരികെ Stats.begin(); }
+  const_iterator end() സ്ഥിരം { തിരികെ Stats.end(); }
+  iterator_range<const_iterator> statistics() സ്ഥിരം {
+    തിരികെ {begin(), end()};
   }
 
-  void reset();
+  ശൂന്യം reset();
 };
 } // end anonymous namespace
 
-static ManagedStatic<StatisticInfo> StatInfo;
-static ManagedStatic<sys::SmartMutex<true> > StatLock;
+സ്ഥിതം ManagedStatic<StatisticInfo> StatInfo;
+സ്ഥിതം ManagedStatic<sys::SmartMutex<സത്യം> > StatLock;
 
 /// RegisterStatistic - The first time a statistic is bumped, this method is
 /// called.
-void TrackingStatistic::RegisterStatistic() {
+ശൂന്യം TrackingStatistic::RegisterStatistic() {
   // If stats are enabled, inform StatInfo that this statistic should be
   // printed.
   // llvm_shutdown calls destructors while holding the ManagedStatic mutex.
@@ -104,18 +104,18 @@ void TrackingStatistic::RegisterStatistic() {
   // ManagedStatic mutex, doing so with StatLock held would lead to a lock
   // order inversion. To avoid that, we dereference the ManagedStatics first,
   // and only take StatLock afterwards.
-  if (!Initialized.load(std::memory_order_relaxed)) {
-    sys::SmartMutex<true> &Lock = *StatLock;
+  എങ്കിൽ (!Initialized.load(std::memory_order_relaxed)) {
+    sys::SmartMutex<സത്യം> &Lock = *StatLock;
     StatisticInfo &SI = *StatInfo;
-    sys::SmartScopedLock<true> Writer(Lock);
+    sys::SmartScopedLock<സത്യം> Writer(Lock);
     // Check Initialized again after acquiring the lock.
-    if (Initialized.load(std::memory_order_relaxed))
-      return;
-    if (EnableStats || Enabled)
-      SI.addStatistic(this);
+    എങ്കിൽ (Initialized.load(std::memory_order_relaxed))
+      തിരികെ;
+    എങ്കിൽ (EnableStats || Enabled)
+      SI.addStatistic(ഇത്);
 
     // Remember we have been registered.
-    Initialized.store(true, std::memory_order_release);
+    Initialized.store(സത്യം, std::memory_order_release);
   }
 }
 
@@ -127,42 +127,42 @@ StatisticInfo::StatisticInfo() {
 
 // Print information when destroyed, iff command line option is specified.
 StatisticInfo::~StatisticInfo() {
-  if (EnableStats || PrintOnExit)
+  എങ്കിൽ (EnableStats || PrintOnExit)
     llvm::PrintStatistics();
 }
 
-void llvm::EnableStatistics(bool DoPrintOnExit) {
-  Enabled = true;
+ശൂന്യം llvm::EnableStatistics(തർക്കം DoPrintOnExit) {
+  Enabled = സത്യം;
   PrintOnExit = DoPrintOnExit;
 }
 
-bool llvm::AreStatisticsEnabled() { return Enabled || EnableStats; }
+തർക്കം llvm::AreStatisticsEnabled() { തിരികെ Enabled || EnableStats; }
 
-void StatisticInfo::sort() {
+ശൂന്യം StatisticInfo::sort() {
   llvm::stable_sort(
-      Stats, [](const TrackingStatistic *LHS, const TrackingStatistic *RHS) {
-        if (int Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
-          return Cmp < 0;
+      Stats, [](സ്ഥിരം TrackingStatistic *LHS, സ്ഥിരം TrackingStatistic *RHS) {
+        എങ്കിൽ (പൂർണ്ണസംഖ്യ Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
+          തിരികെ Cmp < 0;
 
-        if (int Cmp = std::strcmp(LHS->getName(), RHS->getName()))
-          return Cmp < 0;
+        എങ്കിൽ (പൂർണ്ണസംഖ്യ Cmp = std::strcmp(LHS->getName(), RHS->getName()))
+          തിരികെ Cmp < 0;
 
-        return std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
+        തിരികെ std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
       });
 }
 
-void StatisticInfo::reset() {
-  sys::SmartScopedLock<true> Writer(*StatLock);
+ശൂന്യം StatisticInfo::reset() {
+  sys::SmartScopedLock<സത്യം> Writer(*StatLock);
 
   // Tell each statistic that it isn't registered so it has to register
   // again. We're holding the lock so it won't be able to do so until we're
   // finished. Once we've forced it to re-register (after we return), then zero
   // the value.
-  for (auto *Stat : Stats) {
+  വേണ്ടി (auto *Stat : Stats) {
     // Value updates to a statistic that complete before this statement in the
     // iteration for that statistic will be lost as intended.
-    Stat->Initialized = false;
-    Stat->Value = 0;
+    Stat->Initialized = അസത്യം;
+    Stat->മൂല്യം = 0;
   }
 
   // Clear the registration list and release the lock once we're done. Any
@@ -173,13 +173,13 @@ void StatisticInfo::reset() {
   Stats.clear();
 }
 
-void llvm::PrintStatistics(raw_ostream &OS) {
+ശൂന്യം llvm::PrintStatistics(raw_ostream &OS) {
   StatisticInfo &Stats = *StatInfo;
 
   // Figure out how long the biggest Value and Name fields are.
   unsigned MaxDebugTypeLen = 0, MaxValLen = 0;
-  for (TrackingStatistic *Stat : Stats.Stats) {
-    MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->getValue()).size());
+  വേണ്ടി (TrackingStatistic *Stat : Stats.Stats) {
+    MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->get_മൂല്യം()).size());
     MaxDebugTypeLen =
         std::max(MaxDebugTypeLen, (unsigned)std::strlen(Stat->getDebugType()));
   }
@@ -192,31 +192,31 @@ void llvm::PrintStatistics(raw_ostream &OS) {
      << "===" << std::string(73, '-') << "===\n\n";
 
   // Print all of the statistics.
-  for (TrackingStatistic *Stat : Stats.Stats)
-    OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->getValue(),
+  വേണ്ടി (TrackingStatistic *Stat : Stats.Stats)
+    OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->get_മൂല്യം(),
                  MaxDebugTypeLen, Stat->getDebugType(), Stat->getDesc());
 
   OS << '\n';  // Flush the output stream.
   OS.flush();
 }
 
-void llvm::PrintStatisticsJSON(raw_ostream &OS) {
-  sys::SmartScopedLock<true> Reader(*StatLock);
+ശൂന്യം llvm::PrintStatisticsJSON(raw_ostream &OS) {
+  sys::SmartScopedLock<സത്യം> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
   Stats.sort();
 
   // Print all of the statistics.
   OS << "{\n";
-  const char *delim = "";
-  for (const TrackingStatistic *Stat : Stats.Stats) {
+  സ്ഥിരം അക്ഷരം *delim = "";
+  വേണ്ടി (സ്ഥിരം TrackingStatistic *Stat : Stats.Stats) {
     OS << delim;
-    assert(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
+    പ്രതിജ്ഞാ(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
            "Statistic group/type name is simple.");
-    assert(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
+    പ്രതിജ്ഞാ(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
            "Statistic name is simple");
     OS << "\t\"" << Stat->getDebugType() << '.' << Stat->getName() << "\": "
-       << Stat->getValue();
+       << Stat->get_മൂല്യം();
     delim = ",\n";
   }
   // Print timers.
@@ -226,26 +226,26 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
   OS.flush();
 }
 
-void llvm::PrintStatistics() {
-#if LLVM_ENABLE_STATS
-  sys::SmartScopedLock<true> Reader(*StatLock);
+ശൂന്യം llvm::PrintStatistics() {
+#എങ്കിൽ LLVM_ENABLE_STATS
+  sys::SmartScopedLock<സത്യം> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
   // Statistics not enabled?
-  if (Stats.Stats.empty()) return;
+  എങ്കിൽ (Stats.Stats.empty()) തിരികെ;
 
   // Get the stream to write to.
   std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-  if (StatsAsJSON)
+  എങ്കിൽ (StatsAsJSON)
     PrintStatisticsJSON(*OutStream);
-  else
+  അല്ലെങ്കിൽ
     PrintStatistics(*OutStream);
 
-#else
+#അല്ലെങ്കിൽ
   // Check if the -stats option is set instead of checking
   // !Stats.Stats.empty().  In release builds, Statistics operators
   // do nothing, so stats are never Registered.
-  if (EnableStats) {
+  എങ്കിൽ (EnableStats) {
     // Get the stream to write to.
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
     (*OutStream) << "Statistics are disabled.  "
@@ -255,14 +255,14 @@ void llvm::PrintStatistics() {
 }
 
 std::vector<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
-  sys::SmartScopedLock<true> Reader(*StatLock);
+  sys::SmartScopedLock<സത്യം> Reader(*StatLock);
   std::vector<std::pair<StringRef, uint64_t>> ReturnStats;
 
-  for (const auto &Stat : StatInfo->statistics())
-    ReturnStats.emplace_back(Stat->getName(), Stat->getValue());
-  return ReturnStats;
+  വേണ്ടി (സ്ഥിരം auto &Stat : StatInfo->statistics())
+    ReturnStats.emplace_back(Stat->getName(), Stat->get_മൂല്യം());
+  തിരികെ ReturnStats;
 }
 
-void llvm::ResetStatistics() {
+ശൂന്യം llvm::ResetStatistics() {
   StatInfo->reset();
 }

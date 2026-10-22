@@ -11,67 +11,67 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <cassert>
-#include <cstring>
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/ADT/FoldingSet.h"
+#അന്തര്ഭാവ "llvm/ADT/STLExtras.h"
+#അന്തര്ഭാവ "llvm/ADT/StringRef.h"
+#അന്തര്ഭാവ "llvm/Support/Allocator.h"
+#അന്തര്ഭാവ "llvm/Support/MathExtras.h"
+#അന്തര്ഭാവ "llvm/Support/SwapByteOrder.h"
+#അന്തര്ഭാവ <cassert>
+#അന്തര്ഭാവ <cstring>
+using നാമാകാശ llvm;
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeIDRef Implementation
 
-bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
-  if (LHS.size() != RHS.size())
-    return LHS.size() < RHS.size();
-  return memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
+തർക്കം llvm::operator<(Folding_Set_കണ്ണി_IDRef LHS, Folding_Set_കണ്ണി_IDRef RHS) {
+  എങ്കിൽ (LHS.size() != RHS.size())
+    തിരികെ LHS.size() < RHS.size();
+  തിരികെ memcmp(LHS.data(), RHS.data(), LHS.size() * വലുപ്പം(unsigned)) < 0;
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeID Implementation
 
-void FoldingSetNodeID::AddString(StringRef String) {
+ശൂന്യം Folding_Set_കണ്ണി_ID::AddString(StringRef String) {
   unsigned Size = String.size();
 
-  unsigned NumInserts = 1 + divideCeil(Size, 4);
-  Bits.reserve(Bits.size() + NumInserts);
+  unsigned അക്കം_Inserts = 1 + divideCeil(Size, 4);
+  Bits.reserve(Bits.size() + അക്കം_Inserts);
 
-  Bits.push_back(Size);
-  if (!Size)
-    return;
+  Bits.തള്ളുക_back(Size);
+  എങ്കിൽ (!Size)
+    തിരികെ;
 
   unsigned Units = Size / 4;
   unsigned Pos = 0;
-  const unsigned *Base = (const unsigned *)String.data();
+  സ്ഥിരം unsigned *Base = (സ്ഥിരം unsigned *)String.data();
 
   // If the string is aligned do a bulk transfer.
-  if (!((intptr_t)Base & 3)) {
+  എങ്കിൽ (!((intptr_t)Base & 3)) {
     Bits.append(Base, Base + Units);
     Pos = (Units + 1) * 4;
-  } else {
+  } അല്ലെങ്കിൽ {
     // Otherwise do it the hard way.
     // To be compatible with above bulk transfer, we need to take endianness
     // into account.
     static_assert(sys::IsBigEndianHost || sys::IsLittleEndianHost,
                   "Unexpected host endianness");
-    if (sys::IsBigEndianHost) {
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 4] << 24) |
-                     ((unsigned char)String[Pos - 3] << 16) |
-                     ((unsigned char)String[Pos - 2] << 8) |
-                     (unsigned char)String[Pos - 1];
-        Bits.push_back(V);
+    എങ്കിൽ (sys::IsBigEndianHost) {
+      വേണ്ടി (Pos += 4; Pos <= Size; Pos += 4) {
+        unsigned V = ((unsigned അക്ഷരം)String[Pos - 4] << 24) |
+                     ((unsigned അക്ഷരം)String[Pos - 3] << 16) |
+                     ((unsigned അക്ഷരം)String[Pos - 2] << 8) |
+                     (unsigned അക്ഷരം)String[Pos - 1];
+        Bits.തള്ളുക_back(V);
       }
-    } else { // Little-endian host
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 1] << 24) |
-                     ((unsigned char)String[Pos - 2] << 16) |
-                     ((unsigned char)String[Pos - 3] << 8) |
-                     (unsigned char)String[Pos - 4];
-        Bits.push_back(V);
+    } അല്ലെങ്കിൽ { // Little-endian host
+      വേണ്ടി (Pos += 4; Pos <= Size; Pos += 4) {
+        unsigned V = ((unsigned അക്ഷരം)String[Pos - 1] << 24) |
+                     ((unsigned അക്ഷരം)String[Pos - 2] << 16) |
+                     ((unsigned അക്ഷരം)String[Pos - 3] << 8) |
+                     (unsigned അക്ഷരം)String[Pos - 4];
+        Bits.തള്ളുക_back(V);
       }
     }
   }
@@ -80,127 +80,127 @@ void FoldingSetNodeID::AddString(StringRef String) {
   unsigned V = 0;
   // Pos will have overshot size by 4 - #bytes left over.
   // No need to take endianness into account here - this is always executed.
-  switch (Pos - Size) {
-  case 1:
-    V = (V << 8) | (unsigned char)String[Size - 3];
+  തിരഞ്ഞെടുപ്പ് (Pos - Size) {
+  അവസ്ഥ 1:
+    V = (V << 8) | (unsigned അക്ഷരം)String[Size - 3];
     [[fallthrough]];
-  case 2:
-    V = (V << 8) | (unsigned char)String[Size - 2];
+  അവസ്ഥ 2:
+    V = (V << 8) | (unsigned അക്ഷരം)String[Size - 2];
     [[fallthrough]];
-  case 3:
-    V = (V << 8) | (unsigned char)String[Size - 1];
-    break;
-  default:
-    return; // Nothing left.
+  അവസ്ഥ 3:
+    V = (V << 8) | (unsigned അക്ഷരം)String[Size - 1];
+    നിർത്തുക;
+  സ്ഥിരസ്ഥിതി:
+    തിരികെ; // Nothing left.
   }
 
-  Bits.push_back(V);
+  Bits.തള്ളുക_back(V);
 }
 
-void FoldingSetNodeID::AddNodeID(const FoldingSetNodeID &ID) {
+ശൂന്യം Folding_Set_കണ്ണി_ID::Add_കണ്ണി_ID(സ്ഥിരം Folding_Set_കണ്ണി_ID &ID) {
   Bits.append(ID.Bits.begin(), ID.Bits.end());
 }
 
-FoldingSetNodeIDRef
-FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
+Folding_Set_കണ്ണി_IDRef
+Folding_Set_കണ്ണി_ID::Intern(BumpPtrAllocator &Allocator) സ്ഥിരം {
   unsigned *New = Allocator.Allocate<unsigned>(Bits.size());
   llvm::uninitialized_copy(Bits, New);
-  return FoldingSetNodeIDRef(New, Bits.size());
+  തിരികെ Folding_Set_കണ്ണി_IDRef(New, Bits.size());
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetBase Implementation
 
 FoldingSetBase::FoldingSetBase(unsigned Log2InitSize) {
-  assert(5 < Log2InitSize && Log2InitSize < 32 &&
+  പ്രതിജ്ഞാ(5 < Log2InitSize && Log2InitSize < 32 &&
          "Initial hash table size out of range");
-  NumBuckets = 1 << Log2InitSize;
-  Buckets = static_cast<FoldingSetNode **>(
-      safe_calloc(NumBuckets, sizeof(FoldingSetNode *)));
+  അക്കം_Buckets = 1 << Log2InitSize;
+  Buckets = static_cast<Folding_Set_കണ്ണി **>(
+      safe_calloc(അക്കം_Buckets, വലുപ്പം(Folding_Set_കണ്ണി *)));
 }
 
 FoldingSetBase::FoldingSetBase(FoldingSetBase &&Arg)
     : Buckets(std::exchange(Arg.Buckets, nullptr)),
-      NumBuckets(std::exchange(Arg.NumBuckets, 0)),
-      NumNodes(std::exchange(Arg.NumNodes, 0)) {
+      അക്കം_Buckets(std::exchange(Arg.അക്കം_Buckets, 0)),
+      അക്കം_Nodes(std::exchange(Arg.അക്കം_Nodes, 0)) {
   Arg.incrementEpoch();
 }
 
 FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
-  if (this == &RHS)
-    return *this;
+  എങ്കിൽ (ഇത് == &RHS)
+    തിരികെ *ഇത്;
 
   incrementEpoch();
   RHS.incrementEpoch();
-  free(Buckets); // This may be null if the set is in a moved-from state.
+  സ്വതന്ത്രം(Buckets); // This may be null if the set is in a moved-from state.
   Buckets = std::exchange(RHS.Buckets, nullptr);
-  NumBuckets = std::exchange(RHS.NumBuckets, 0);
-  NumNodes = std::exchange(RHS.NumNodes, 0);
-  return *this;
+  അക്കം_Buckets = std::exchange(RHS.അക്കം_Buckets, 0);
+  അക്കം_Nodes = std::exchange(RHS.അക്കം_Nodes, 0);
+  തിരികെ *ഇത്;
 }
 
-FoldingSetBase::~FoldingSetBase() { free(Buckets); }
+FoldingSetBase::~FoldingSetBase() { സ്വതന്ത്രം(Buckets); }
 
-void FoldingSetBase::clear() {
+ശൂന്യം FoldingSetBase::clear() {
   incrementEpoch();
   // Stale hashes are unreachable, so only the occupancy needs resetting.
-  if (NumBuckets)
-    memset(Buckets, 0, NumBuckets * sizeof(FoldingSetNode *));
-  NumNodes = 0;
+  എങ്കിൽ (അക്കം_Buckets)
+    memset(Buckets, 0, അക്കം_Buckets * വലുപ്പം(Folding_Set_കണ്ണി *));
+  അക്കം_Nodes = 0;
 }
 
-void FoldingSetBase::placeNode(FoldingSetNode *N, uint32_t Hash) {
-  unsigned Mask = NumBuckets - 1;
+ശൂന്യം FoldingSetBase::place_കണ്ണി(Folding_Set_കണ്ണി *N, uint32_t Hash) {
+  unsigned Mask = അക്കം_Buckets - 1;
   unsigned I = Hash & Mask;
-  while (Buckets[I]) {
-    assert(Buckets[I] != N && "Node already in the folding set");
+  ആകുമ്പോൾ (Buckets[I]) {
+    പ്രതിജ്ഞാ(Buckets[I] != N && "Node already in the folding set");
     I = (I + 1) & Mask;
   }
   Buckets[I] = N;
-  ++NumNodes;
+  ++അക്കം_Nodes;
 }
 
-void FoldingSetBase::grow(unsigned MinNumBuckets) {
+ശൂന്യം FoldingSetBase::grow(unsigned Min_അക്കം_Buckets) {
   // The floor is the smallest size the constructor accepts.
-  unsigned NewBucketCount = std::max(64u, llvm::bit_ceil(MinNumBuckets));
-  assert(NewBucketCount > NumBuckets && "Can't shrink a folding set");
+  unsigned New_Bucket_എണ്ണം = std::max(64u, llvm::bit_ceil(Min_അക്കം_Buckets));
+  പ്രതിജ്ഞാ(New_Bucket_എണ്ണം > അക്കം_Buckets && "Can't shrink a folding set");
 
-  FoldingSetBase Tmp(llvm::Log2_32(NewBucketCount));
-  for (unsigned I = 0; I != NumBuckets; ++I)
-    if (FoldingSetNode *N = Buckets[I])
-      Tmp.placeNode(N, N->getFoldingSetHash());
+  FoldingSetBase Tmp(llvm::Log2_32(New_Bucket_എണ്ണം));
+  വേണ്ടി (unsigned I = 0; I != അക്കം_Buckets; ++I)
+    എങ്കിൽ (Folding_Set_കണ്ണി *N = Buckets[I])
+      Tmp.place_കണ്ണി(N, N->getFoldingSetHash());
 
-  *this = std::move(Tmp);
+  *ഇത് = std::move(Tmp);
 }
 
-void FoldingSetBase::reserve(unsigned N) {
-  if (N * 4 <= NumBuckets * 3)
-    return;
+ശൂന്യം FoldingSetBase::reserve(unsigned N) {
+  എങ്കിൽ (N * 4 <= അക്കം_Buckets * 3)
+    തിരികെ;
   // N + (N + 2) / 3 is ceil(4N/3).
   grow(N + (N + 2) / 3);
 }
 
-void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
-  assert(N && "Cannot insert a null node");
-  assert(Token && "Invalid token!");
+ശൂന്യം FoldingSetBase::തിരുകുക(Folding_Set_കണ്ണി *N, Folding_Set_തിരുകുക_Token Token) {
+  പ്രതിജ്ഞാ(N && "Cannot insert a null node");
+  പ്രതിജ്ഞാ(Token && "Invalid token!");
   incrementEpoch();
-  if (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
-    grow(NumBuckets * 2);
+  എങ്കിൽ (LLVM_UNLIKELY((അക്കം_Nodes + 1) * 4 > അക്കം_Buckets * 3))
+    grow(അക്കം_Buckets * 2);
   uint32_t Hash = Token.Hash;
-  placeNode(N, Hash);
+  place_കണ്ണി(N, Hash);
   N->setFoldingSetHash(Hash);
 }
 
-bool FoldingSetBase::erase(FoldingSetNode *N) {
+തർക്കം FoldingSetBase::erase(Folding_Set_കണ്ണി *N) {
   uint32_t Hash = N->getFoldingSetHash();
-  if (Hash == FoldingSetNodeIDRef::NotAHash)
-    return false; // Never inserted.
+  എങ്കിൽ (Hash == Folding_Set_കണ്ണി_IDRef::NotAHash)
+    തിരികെ അസത്യം; // Never inserted.
 
-  unsigned Mask = NumBuckets - 1;
+  unsigned Mask = അക്കം_Buckets - 1;
   unsigned I = Hash & Mask;
-  while (Buckets[I] != N) {
-    if (LLVM_UNLIKELY(!Buckets[I]))
-      return false; // Not in folding set.
+  ആകുമ്പോൾ (Buckets[I] != N) {
+    എങ്കിൽ (LLVM_UNLIKELY(!Buckets[I]))
+      തിരികെ അസത്യം; // Not in folding set.
     I = (I + 1) & Mask;
   }
 
@@ -208,15 +208,15 @@ bool FoldingSetBase::erase(FoldingSetNode *N) {
 
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  for (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
+  വേണ്ടി (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
     unsigned Ideal = Buckets[J]->getFoldingSetHash();
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+    എങ്കിൽ (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       Buckets[I] = Buckets[J];
       I = J;
     }
   }
   Buckets[I] = nullptr;
-  N->setFoldingSetHash(FoldingSetNodeIDRef::NotAHash);
-  --NumNodes;
-  return true;
+  N->setFoldingSetHash(Folding_Set_കണ്ണി_IDRef::NotAHash);
+  --അക്കം_Nodes;
+  തിരികെ സത്യം;
 }

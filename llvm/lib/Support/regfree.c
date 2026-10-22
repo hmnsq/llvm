@@ -35,38 +35,38 @@
  *	@(#)regfree.c	8.3 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#അന്തര്ഭാവ "regutils.h"
+#അന്തര്ഭാവ "regex2.h"
 
 /*
  - llvm_regfree - free everything
  */
-void
+ശൂന്യം
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	ഘടന re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	എങ്കിൽ (preg->re_magic != MAGIC1)	/* oops */
+		തിരികെ;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	എങ്കിൽ (g == ശൂന്യ || g->magic != MAGIC2)	/* oops again */
+		തിരികെ;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
-		free(g->must);
-	free((char *)g);
+	എങ്കിൽ (g->strip != ശൂന്യ)
+		സ്വതന്ത്രം((അക്ഷരം *)g->strip);
+	എങ്കിൽ (g->sets != ശൂന്യ)
+		സ്വതന്ത്രം((അക്ഷരം *)g->sets);
+	എങ്കിൽ (g->setbits != ശൂന്യ)
+		സ്വതന്ത്രം((അക്ഷരം *)g->setbits);
+	എങ്കിൽ (g->must != ശൂന്യ)
+		സ്വതന്ത്രം(g->must);
+	സ്വതന്ത്രം((അക്ഷരം *)g);
 }

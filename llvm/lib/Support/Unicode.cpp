@@ -11,28 +11,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Unicode.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/UnicodeCharRanges.h"
+#അന്തര്ഭാവ "llvm/Support/Unicode.h"
+#അന്തര്ഭാവ "llvm/Support/ConvertUTF.h"
+#അന്തര്ഭാവ "llvm/Support/UnicodeCharRanges.h"
 
-namespace llvm {
-namespace sys {
-namespace unicode {
+നാമാകാശ llvm {
+നാമാകാശ sys {
+നാമാകാശ unicode {
 
-extern const UnicodeCharSet::CharRanges GeneratedCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedPrintableRanges;
-extern const UnicodeCharSet::CharRanges GeneratedControlCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedFormatCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedCombiningCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedDoubleWidthCharacterRanges;
+ബാഹ്യ സ്ഥിരം UnicodeCharSet::CharRanges GeneratedCharacterRanges;
+ബാഹ്യ സ്ഥിരം UnicodeCharSet::CharRanges GeneratedPrintableRanges;
+ബാഹ്യ സ്ഥിരം UnicodeCharSet::CharRanges GeneratedControlCharacterRanges;
+ബാഹ്യ സ്ഥിരം UnicodeCharSet::CharRanges GeneratedFormatCharacterRanges;
+ബാഹ്യ സ്ഥിരം UnicodeCharSet::CharRanges GeneratedCombiningCharacterRanges;
+ബാഹ്യ സ്ഥിരം UnicodeCharSet::CharRanges GeneratedDoubleWidthCharacterRanges;
 
 /// Unicode code points that are considered characters. This function
 /// returns true for any code point defined by Unicode as a character, false for
 /// any code point defined as a non-character, as reserved, as a surrogate code
 /// point, or not defined at all.
-bool isCharacter(int UCS) {
-  static const UnicodeCharSet Character(GeneratedCharacterRanges);
-  return Character.contains(UCS);
+തർക്കം isCharacter(പൂർണ്ണസംഖ്യ UCS) {
+  സ്ഥിതം സ്ഥിരം UnicodeCharSet Character(GeneratedCharacterRanges);
+  തിരികെ Character.contains(UCS);
 }
 
 /// Unicode code points of the categories L, M, N, P, S and Zs are considered
@@ -40,25 +40,25 @@ bool isCharacter(int UCS) {
 /// In addition, U+00AD SOFT HYPHEN is also considered printable, as
 /// it's actually displayed on most terminals. \return true if the character is
 /// considered printable.
-bool isPrintable(int UCS) {
-  static const UnicodeCharSet Printables(GeneratedPrintableRanges);
+തർക്കം isPrintable(പൂർണ്ണസംഖ്യ UCS) {
+  സ്ഥിതം സ്ഥിരം UnicodeCharSet Printables(GeneratedPrintableRanges);
   // Clang special cases 0x00AD (SOFT HYPHEN) which is rendered as an actual
   // hyphen in most terminals.
-  return UCS == 0x00AD || Printables.contains(UCS);
+  തിരികെ UCS == 0x00AD || Printables.contains(UCS);
 }
 
 /// Unicode code points of the Cc category are considered
 /// control characters.
-bool isControl(int UCS) {
-  static const UnicodeCharSet Control(GeneratedControlCharacterRanges);
-  return Control.contains(UCS);
+തർക്കം isControl(പൂർണ്ണസംഖ്യ UCS) {
+  സ്ഥിതം സ്ഥിരം UnicodeCharSet Control(GeneratedControlCharacterRanges);
+  തിരികെ Control.contains(UCS);
 }
 
 /// Unicode code points of the Cf category are considered
 /// formatting characters.
-bool isFormatting(int UCS) {
-  static const UnicodeCharSet Format(GeneratedFormatCharacterRanges);
-  return Format.contains(UCS);
+തർക്കം isFormatting(പൂർണ്ണസംഖ്യ UCS) {
+  സ്ഥിതം സ്ഥിരം UnicodeCharSet Format(GeneratedFormatCharacterRanges);
+  തിരികെ Format.contains(UCS);
 }
 
 /// Gets the number of positions a character is likely to occupy when output
@@ -72,54 +72,54 @@ bool isFormatting(int UCS) {
 ///   * 0 for non-spacing and enclosing combining marks;
 ///   * 2 for CJK characters excluding halfwidth forms;
 ///   * 1 for all remaining characters.
-static inline int charWidth(int UCS) {
-  if (!isPrintable(UCS))
-    return ErrorNonPrintableCharacter;
+സ്ഥിതം വരിയിൽ പൂർണ്ണസംഖ്യ charWidth(പൂർണ്ണസംഖ്യ UCS) {
+  എങ്കിൽ (!isPrintable(UCS))
+    തിരികെ ErrorNonPrintableCharacter;
 
-  static const UnicodeCharSet CombiningCharacters(
+  സ്ഥിതം സ്ഥിരം UnicodeCharSet CombiningCharacters(
       GeneratedCombiningCharacterRanges);
 
-  if (CombiningCharacters.contains(UCS))
-    return 0;
+  എങ്കിൽ (CombiningCharacters.contains(UCS))
+    തിരികെ 0;
 
-  static const UnicodeCharSet DoubleWidthCharacters(
+  സ്ഥിതം സ്ഥിരം UnicodeCharSet DoubleWidthCharacters(
       GeneratedDoubleWidthCharacterRanges);
 
-  if (DoubleWidthCharacters.contains(UCS))
-    return 2;
-  return 1;
+  എങ്കിൽ (DoubleWidthCharacters.contains(UCS))
+    തിരികെ 2;
+  തിരികെ 1;
 }
 
-static bool isprintableascii(char c) { return c > 31 && c < 127; }
+സ്ഥിതം തർക്കം isprintableascii(അക്ഷരം c) { തിരികെ c > 31 && c < 127; }
 
-int columnWidthUTF8(StringRef Text) {
+പൂർണ്ണസംഖ്യ columnWidthUTF8(StringRef Text) {
   unsigned ColumnWidth = 0;
   unsigned Length;
-  for (size_t i = 0, e = Text.size(); i < e; i += Length) {
-    Length = getNumBytesForUTF8(Text[i]);
+  വേണ്ടി (size_t i = 0, e = Text.size(); i < e; i += Length) {
+    Length = get_അക്കം_Bytes_For_UTF8(Text[i]);
 
     // fast path for ASCII characters
-    if (Length == 1) {
-      if (!isprintableascii(Text[i]))
-        return ErrorNonPrintableCharacter;
+    എങ്കിൽ (Length == 1) {
+      എങ്കിൽ (!isprintableascii(Text[i]))
+        തിരികെ ErrorNonPrintableCharacter;
       ColumnWidth += 1;
-      continue;
+      തുടരുക;
     }
 
-    if (Length <= 0 || i + Length > Text.size())
-      return ErrorInvalidUTF8;
+    എങ്കിൽ (Length <= 0 || i + Length > Text.size())
+      തിരികെ ErrorInvalidUTF8;
     UTF32 buf[1];
-    const UTF8 *Start = reinterpret_cast<const UTF8 *>(Text.data() + i);
+    സ്ഥിരം UTF8 *Start = reinterpret_cast<സ്ഥിരം UTF8 *>(Text.data() + i);
     UTF32 *Target = &buf[0];
-    if (conversionOK != ConvertUTF8toUTF32(&Start, Start + Length, &Target,
+    എങ്കിൽ (conversionOK != ConvertUTF8toUTF32(&Start, Start + Length, &Target,
                                            Target + 1, strictConversion))
-      return ErrorInvalidUTF8;
-    int Width = charWidth(buf[0]);
-    if (Width < 0)
-      return ErrorNonPrintableCharacter;
+      തിരികെ ErrorInvalidUTF8;
+    പൂർണ്ണസംഖ്യ Width = charWidth(buf[0]);
+    എങ്കിൽ (Width < 0)
+      തിരികെ ErrorNonPrintableCharacter;
     ColumnWidth += Width;
   }
-  return ColumnWidth;
+  തിരികെ ColumnWidth;
 }
 
 } // namespace unicode

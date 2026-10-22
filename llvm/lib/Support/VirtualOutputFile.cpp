@@ -11,31 +11,31 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputFile.h"
-#include "llvm/Support/VirtualOutputError.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/raw_ostream_proxy.h"
+#അന്തര്ഭാവ "llvm/Support/VirtualOutputFile.h"
+#അന്തര്ഭാവ "llvm/Support/VirtualOutputError.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream_proxy.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using നാമാകാശ llvm;
+using നാമാകാശ llvm::vfs;
 
-char OutputFileImpl::ID = 0;
-char NullOutputFileImpl::ID = 0;
+അക്ഷരം OutputFileImpl::ID = 0;
+അക്ഷരം NullOutputFileImpl::ID = 0;
 
-void OutputFileImpl::anchor() {}
-void NullOutputFileImpl::anchor() {}
+ശൂന്യം OutputFileImpl::anchor() {}
+ശൂന്യം NullOutputFileImpl::anchor() {}
 
-class OutputFile::TrackedProxy : public raw_pwrite_stream_proxy {
-public:
-  void resetProxy() {
+വർഗ്ഗം OutputFile::TrackedProxy : പൊതു raw_pwrite_stream_proxy {
+പൊതു:
+  ശൂന്യം resetProxy() {
     TrackingPointer = nullptr;
     resetProxiedOS();
   }
 
   explicit TrackedProxy(TrackedProxy *&TrackingPointer, raw_pwrite_stream &OS)
       : raw_pwrite_stream_proxy(OS), TrackingPointer(TrackingPointer) {
-    assert(!TrackingPointer && "Expected to add a proxy");
-    TrackingPointer = this;
+    പ്രതിജ്ഞാ(!TrackingPointer && "Expected to add a proxy");
+    TrackingPointer = ഇത്;
   }
 
   ~TrackedProxy() override { resetProxy(); }
@@ -44,15 +44,15 @@ public:
 };
 
 Expected<std::unique_ptr<raw_pwrite_stream>> OutputFile::createProxy() {
-  if (OpenProxy)
-    return make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
+  എങ്കിൽ (OpenProxy)
+    തിരികെ make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
 
-  return std::make_unique<TrackedProxy>(OpenProxy, getOS());
+  തിരികെ std::make_unique<TrackedProxy>(OpenProxy, getOS());
 }
 
 Error OutputFile::keep() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  എങ്കിൽ (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
         make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
 
@@ -60,7 +60,7 @@ Error OutputFile::keep() {
   // This is safer than relying on clients to remember to flush(). Also call
   // OutputFile::discard() to give the backend a chance to clean up any
   // side effects (such as temporaries).
-  if (LLVM_UNLIKELY(OpenProxy))
+  എങ്കിൽ (LLVM_UNLIKELY(OpenProxy))
     report_fatal_error(joinErrors(
         make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy),
         discard()));
@@ -68,12 +68,12 @@ Error OutputFile::keep() {
   Error E = Impl->keep();
   Impl = nullptr;
   DiscardOnDestroyHandler = nullptr;
-  return E;
+  തിരികെ E;
 }
 
 Error OutputFile::discard() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  എങ്കിൽ (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
         make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
 
@@ -81,30 +81,30 @@ Error OutputFile::discard() {
   // necessarily clean up in the right order. Reset the proxy to flush any
   // current content; if there is another write, there should be quick crash on
   // null dereference.
-  if (OpenProxy)
+  എങ്കിൽ (OpenProxy)
     OpenProxy->resetProxy();
 
   Error E = Impl->discard();
   Impl = nullptr;
   DiscardOnDestroyHandler = nullptr;
-  return E;
+  തിരികെ E;
 }
 
-void OutputFile::destroy() {
-  if (!Impl)
-    return;
+ശൂന്യം OutputFile::destroy() {
+  എങ്കിൽ (!Impl)
+    തിരികെ;
 
   // Clean up the file. Move the discard handler into a local since discard
   // will reset it.
   auto DiscardHandler = std::move(DiscardOnDestroyHandler);
   Error E = discard();
-  assert(!Impl && "Expected discard to destroy Impl");
+  പ്രതിജ്ഞാ(!Impl && "Expected discard to destroy Impl");
 
   // If there's no handler, report a fatal error.
-  if (LLVM_UNLIKELY(!DiscardHandler))
+  എങ്കിൽ (LLVM_UNLIKELY(!DiscardHandler))
     llvm::report_fatal_error(joinErrors(
         make_error<OutputError>(getPath(), OutputErrorCode::not_closed),
         std::move(E)));
-  else if (E)
+  അല്ലെങ്കിൽ എങ്കിൽ (E)
     DiscardHandler(std::move(E));
 }

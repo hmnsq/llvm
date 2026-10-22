@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Program.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
-using namespace sys;
+#അന്തര്ഭാവ "llvm/Support/Program.h"
+#അന്തര്ഭാവ "llvm/ADT/StringRef.h"
+#അന്തര്ഭാവ "llvm/Config/llvm-config.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+using നാമാകാശ llvm;
+using നാമാകാശ sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-static bool Execute(ProcessInfo &PI, StringRef Program,
+സ്ഥിതം തർക്കം Execute(ProcessInfo &PI, StringRef Program,
                     ArrayRef<StringRef> Args,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
-                    BitVector *AffinityMask, bool DetachProcess);
+                    unsigned MemoryLimit, std::string *Err_സന്ദേശം,
+                    BitVector *AffinityMask, തർക്കം DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+പൂർണ്ണസംഖ്യ sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
                         unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        std::string *Err_സന്ദേശം, തർക്കം *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
                         BitVector *AffinityMask) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+  പ്രതിജ്ഞാ(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-              AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
-      *ExecutionFailed = false;
+  എങ്കിൽ (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, Err_സന്ദേശം,
+              AffinityMask, /*DetachProcess=*/അസത്യം)) {
+    എങ്കിൽ (ExecutionFailed)
+      *ExecutionFailed = അസത്യം;
     ProcessInfo Result = Wait(
         PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
-    return Result.ReturnCode;
+        Err_സന്ദേശം, ProcStat);
+    തിരികെ Result.ReturnCode;
   }
 
-  if (ExecutionFailed)
-    *ExecutionFailed = true;
+  എങ്കിൽ (ExecutionFailed)
+    *ExecutionFailed = സത്യം;
 
-  return -1;
+  തിരികെ -1;
 }
 
 ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
-                               bool *ExecutionFailed, BitVector *AffinityMask,
-                               bool DetachProcess) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                               unsigned MemoryLimit, std::string *Err_സന്ദേശം,
+                               തർക്കം *ExecutionFailed, BitVector *AffinityMask,
+                               തർക്കം DetachProcess) {
+  പ്രതിജ്ഞാ(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
-    *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  എങ്കിൽ (ExecutionFailed)
+    *ExecutionFailed = അസത്യം;
+  എങ്കിൽ (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, Err_സന്ദേശം,
                AffinityMask, DetachProcess))
-    if (ExecutionFailed)
-      *ExecutionFailed = true;
+    എങ്കിൽ (ExecutionFailed)
+      *ExecutionFailed = സത്യം;
 
-  return PI;
+  തിരികെ PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
+തർക്കം sys::command_വരി_Fits_Within_System_Limits(StringRef Program,
+                                            ArrayRef<സ്ഥിരം അക്ഷരം *> Args) {
   SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+  തിരികെ command_വരി_Fits_Within_System_Limits(Program, StringRefArgs);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+ശൂന്യം sys::printArg(raw_ostream &OS, StringRef Arg, തർക്കം Quote) {
+  സ്ഥിരം തർക്കം Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  എങ്കിൽ (!Quote && !Escape) {
     OS << Arg;
-    return;
+    തിരികെ;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  വേണ്ടി (സ്ഥിരം auto c : Arg) {
+    എങ്കിൽ (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }
@@ -98,8 +98,8 @@ void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
-#include "Unix/Program.inc"
+#അന്തര്ഭാവ "Unix/Program.inc"
 #endif
 #ifdef _WIN32
-#include "Windows/Program.inc"
+#അന്തര്ഭാവ "Windows/Program.inc"
 #endif

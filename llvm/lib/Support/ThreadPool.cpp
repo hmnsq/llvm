@@ -11,19 +11,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ThreadPool.h"
+#അന്തര്ഭാവ "llvm/Support/ThreadPool.h"
 
-#include "llvm/Config/llvm-config.h"
+#അന്തര്ഭാവ "llvm/Config/llvm-config.h"
 
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/FormatVariadic.h"
-#include "llvm/Support/Threading.h"
-#include "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/ADT/ScopeExit.h"
+#അന്തര്ഭാവ "llvm/Support/ExponentialBackoff.h"
+#അന്തര്ഭാവ "llvm/Support/FormatVariadic.h"
+#അന്തര്ഭാവ "llvm/Support/Threading.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-ThreadPoolInterface::~ThreadPoolInterface() = default;
+ThreadPoolInterface::~ThreadPoolInterface() = സ്ഥിരസ്ഥിതി;
 
 // A note on thread groups: Tasks are by default in no group (represented
 // by nullptr ThreadPoolTaskGroup pointer in the Tasks queue) and functionality
@@ -33,22 +33,22 @@ ThreadPoolInterface::~ThreadPoolInterface() = default;
 // queue, and functions called to work only on tasks from one group take that
 // pointer.
 
-#if LLVM_ENABLE_THREADS
+#എങ്കിൽ LLVM_ENABLE_THREADS
 
 StdThreadPool::StdThreadPool(ThreadPoolStrategy S)
-    : Strategy(S), MaxThreadCount(S.compute_thread_count()) {
-  if (Strategy.UseJobserver)
+    : Strategy(S), Max_Thread_എണ്ണം(S.compute_thread_എണ്ണം()) {
+  എങ്കിൽ (Strategy.UseJobserver)
     TheJobserver = JobserverClient::getInstance();
 }
 
-void StdThreadPool::grow(int requested) {
+ശൂന്യം StdThreadPool::grow(പൂർണ്ണസംഖ്യ requested) {
   llvm::sys::ScopedWriter LockGuard(ThreadsLock);
-  if (Threads.size() >= MaxThreadCount)
-    return; // Already hit the max thread pool size.
-  int newThreadCount = std::min<int>(requested, MaxThreadCount);
-  while (static_cast<int>(Threads.size()) < newThreadCount) {
-    int ThreadID = Threads.size();
-    Threads.emplace_back([this, ThreadID] {
+  എങ്കിൽ (Threads.size() >= Max_Thread_എണ്ണം)
+    തിരികെ; // Already hit the max thread pool size.
+  പൂർണ്ണസംഖ്യ new_Thread_എണ്ണം = std::min<പൂർണ്ണസംഖ്യ>(requested, Max_Thread_എണ്ണം);
+  ആകുമ്പോൾ (static_cast<പൂർണ്ണസംഖ്യ>(Threads.size()) < new_Thread_എണ്ണം) {
+    പൂർണ്ണസംഖ്യ ThreadID = Threads.size();
+    Threads.emplace_back([ഇത്, ThreadID] {
       set_thread_name(formatv("llvm-worker-{0}", ThreadID));
       Strategy.apply_thread_strategy(ThreadID);
       // Note on jobserver deadlock avoidance:
@@ -56,9 +56,9 @@ void StdThreadPool::grow(int requested) {
       // JobserverClient::tryAcquire() returns that implicit slot on the first
       // successful call in a process, ensuring forward progress without a
       // dedicated "always-on" thread.
-      if (TheJobserver)
+      എങ്കിൽ (TheJobserver)
         processTasksWithJobserver();
-      else
+      അല്ലെങ്കിൽ
         processTasks(nullptr);
     });
   }
@@ -66,30 +66,30 @@ void StdThreadPool::grow(int requested) {
 
 #ifndef NDEBUG
 // The group of the tasks run by the current thread.
-static LLVM_THREAD_LOCAL std::vector<ThreadPoolTaskGroup *>
+സ്ഥിതം LLVM_THREAD_LOCAL std::vector<ThreadPoolTaskGroup *>
     *CurrentThreadTaskGroups = nullptr;
 #endif
 
 // WaitingForGroup == nullptr means all tasks regardless of their group.
-void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
-  while (true) {
-    llvm::unique_function<void()> Task;
+ശൂന്യം StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
+  ആകുമ്പോൾ (സത്യം) {
+    llvm::unique_function<ശൂന്യം()> Task;
     ThreadPoolTaskGroup *GroupOfTask;
     {
       std::unique_lock<std::mutex> LockGuard(QueueLock);
-      bool workCompletedForGroup = false; // Result of workCompletedUnlocked()
+      തർക്കം workCompletedForGroup = അസത്യം; // Result of workCompletedUnlocked()
       // Wait for tasks to be pushed in the queue
       QueueCondition.wait(LockGuard, [&] {
-        return !EnableFlag || !Tasks.empty() ||
+        തിരികെ !EnableFlag || !Tasks.empty() ||
                (WaitingForGroup != nullptr &&
                 (workCompletedForGroup =
                      workCompletedUnlocked(WaitingForGroup)));
       });
       // Exit condition
-      if (!EnableFlag && Tasks.empty())
-        return;
-      if (WaitingForGroup != nullptr && workCompletedForGroup)
-        return;
+      എങ്കിൽ (!EnableFlag && Tasks.empty())
+        തിരികെ;
+      എങ്കിൽ (WaitingForGroup != nullptr && workCompletedForGroup)
+        തിരികെ;
       // Yeah, we have a task, grab it and release the lock on the queue
 
       // We first need to signal that we are active before popping the queue
@@ -100,14 +100,14 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
       GroupOfTask = Tasks.front().second;
       // Need to count active threads in each group separately, ActiveThreads
       // would never be 0 if waiting for another group inside a wait.
-      if (GroupOfTask != nullptr)
+      എങ്കിൽ (GroupOfTask != nullptr)
         ++ActiveGroups[GroupOfTask]; // Increment or set to 1 if new item
-      Tasks.pop_front();
+      Tasks.എടുക്കുക_front();
     }
 #ifndef NDEBUG
-    if (CurrentThreadTaskGroups == nullptr)
-      CurrentThreadTaskGroups = new std::vector<ThreadPoolTaskGroup *>;
-    CurrentThreadTaskGroups->push_back(GroupOfTask);
+    എങ്കിൽ (CurrentThreadTaskGroups == nullptr)
+      CurrentThreadTaskGroups = പുതിയ std::vector<ThreadPoolTaskGroup *>;
+    CurrentThreadTaskGroups->തള്ളുക_back(GroupOfTask);
 #endif
 
     // Run the task we just grabbed. This also destroys the task once run to
@@ -119,22 +119,22 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
     std::exchange(Task, {})();
 
 #ifndef NDEBUG
-    CurrentThreadTaskGroups->pop_back();
-    if (CurrentThreadTaskGroups->empty()) {
+    CurrentThreadTaskGroups->എടുക്കുക_back();
+    എങ്കിൽ (CurrentThreadTaskGroups->empty()) {
       delete CurrentThreadTaskGroups;
       CurrentThreadTaskGroups = nullptr;
     }
 #endif
 
-    bool Notify;
-    bool NotifyGroup;
+    തർക്കം Notify;
+    തർക്കം NotifyGroup;
     {
       // Adjust `ActiveThreads`, in case someone waits on StdThreadPool::wait()
       std::lock_guard<std::mutex> LockGuard(QueueLock);
       --ActiveThreads;
-      if (GroupOfTask != nullptr) {
+      എങ്കിൽ (GroupOfTask != nullptr) {
         auto A = ActiveGroups.find(GroupOfTask);
-        if (--(A->second) == 0)
+        എങ്കിൽ (--(A->second) == 0)
           ActiveGroups.erase(A);
       }
       Notify = workCompletedUnlocked(GroupOfTask);
@@ -142,12 +142,12 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
     }
     // Notify task completion if this is the last active thread, in case
     // someone waits on StdThreadPool::wait().
-    if (Notify)
+    എങ്കിൽ (Notify)
       CompletionCondition.notify_all();
     // If this was a task in a group, notify also threads waiting for tasks
     // in this function on QueueCondition, to make a recursive wait() return
     // after the group it's been waiting for has finished.
-    if (NotifyGroup)
+    എങ്കിൽ (NotifyGroup)
       QueueCondition.notify_all();
   }
 }
@@ -156,8 +156,8 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
 /// This function uses a two-level queue; it first acquires a job slot from the
 /// external jobserver, then retrieves a task from the internal queue.
 /// This allows the thread pool to cooperate with build systems like `make -j`.
-void StdThreadPool::processTasksWithJobserver() {
-  while (true) {
+ശൂന്യം StdThreadPool::processTasksWithJobserver() {
+  ആകുമ്പോൾ (സത്യം) {
     // Acquire a job slot from the external jobserver.
     // This polls for a slot and yields the thread to avoid a high-CPU wait.
     JobSlot Slot;
@@ -165,23 +165,23 @@ void StdThreadPool::processTasksWithJobserver() {
     // is checked on each iteration. The sleep duration is capped by MaxWait
     // in ExponentialBackoff, so shutdown latency is not a problem.
     ExponentialBackoff Backoff(std::chrono::hours(24));
-    bool AcquiredToken = false;
-    do {
+    തർക്കം AcquiredToken = അസത്യം;
+    ചെയ്യുക {
       // Return if the thread pool is shutting down.
       {
         std::unique_lock<std::mutex> LockGuard(QueueLock);
-        if (!EnableFlag)
-          return;
+        എങ്കിൽ (!EnableFlag)
+          തിരികെ;
       }
 
       Slot = TheJobserver->tryAcquire();
-      if (Slot.isValid()) {
-        AcquiredToken = true;
-        break;
+      എങ്കിൽ (Slot.isValid()) {
+        AcquiredToken = സത്യം;
+        നിർത്തുക;
       }
-    } while (Backoff.waitForNextAttempt());
+    } ആകുമ്പോൾ (Backoff.waitForNextAttempt());
 
-    if (!AcquiredToken) {
+    എങ്കിൽ (!AcquiredToken) {
       // This is practically unreachable with a 24h timeout and indicates a
       // deeper problem if hit.
       report_fatal_error("Timed out waiting for jobserver token.");
@@ -193,8 +193,8 @@ void StdThreadPool::processTasksWithJobserver() {
         [&] { TheJobserver->release(std::move(Slot)); });
 
     // While we hold a job slot, process tasks from the internal queue.
-    while (true) {
-      llvm::unique_function<void()> Task;
+    ആകുമ്പോൾ (സത്യം) {
+      llvm::unique_function<ശൂന്യം()> Task;
       ThreadPoolTaskGroup *GroupOfTask = nullptr;
 
       {
@@ -202,25 +202,25 @@ void StdThreadPool::processTasksWithJobserver() {
 
         // Wait until a task is available or the pool is shutting down.
         QueueCondition.wait(LockGuard,
-                            [&] { return !EnableFlag || !Tasks.empty(); });
+                            [&] { തിരികെ !EnableFlag || !Tasks.empty(); });
 
         // If shutting down and the queue is empty, the thread can terminate.
-        if (!EnableFlag && Tasks.empty())
-          return;
+        എങ്കിൽ (!EnableFlag && Tasks.empty())
+          തിരികെ;
 
         // If the queue is empty, we're done processing tasks for now.
         // Break the inner loop to release the job slot.
-        if (Tasks.empty())
-          break;
+        എങ്കിൽ (Tasks.empty())
+          നിർത്തുക;
 
         // A task is available. Mark it as active before releasing the lock
         // to prevent race conditions with `wait()`.
         ++ActiveThreads;
         Task = std::move(Tasks.front().first);
         GroupOfTask = Tasks.front().second;
-        if (GroupOfTask != nullptr)
+        എങ്കിൽ (GroupOfTask != nullptr)
           ++ActiveGroups[GroupOfTask];
-        Tasks.pop_front();
+        Tasks.എടുക്കുക_front();
       } // The queue lock is released.
 
       // Run the task. The job slot remains acquired during execution.
@@ -230,43 +230,43 @@ void StdThreadPool::processTasksWithJobserver() {
       {
         std::lock_guard<std::mutex> LockGuard(QueueLock);
         --ActiveThreads;
-        if (GroupOfTask != nullptr) {
+        എങ്കിൽ (GroupOfTask != nullptr) {
           auto A = ActiveGroups.find(GroupOfTask);
-          if (--(A->second) == 0)
+          എങ്കിൽ (--(A->second) == 0)
             ActiveGroups.erase(A);
         }
         // If all tasks are complete, notify any waiting threads.
-        if (workCompletedUnlocked(nullptr))
+        എങ്കിൽ (workCompletedUnlocked(nullptr))
           CompletionCondition.notify_all();
       }
     }
   }
 }
-bool StdThreadPool::workCompletedUnlocked(ThreadPoolTaskGroup *Group) const {
-  if (Group == nullptr)
-    return !ActiveThreads && Tasks.empty();
-  return ActiveGroups.count(Group) == 0 &&
+തർക്കം StdThreadPool::workCompletedUnlocked(ThreadPoolTaskGroup *Group) സ്ഥിരം {
+  എങ്കിൽ (Group == nullptr)
+    തിരികെ !ActiveThreads && Tasks.empty();
+  തിരികെ ActiveGroups.എണ്ണം(Group) == 0 &&
          !llvm::is_contained(llvm::make_second_range(Tasks), Group);
 }
 
-void StdThreadPool::wait() {
-  assert(!isWorkerThread()); // Would deadlock waiting for itself.
+ശൂന്യം StdThreadPool::wait() {
+  പ്രതിജ്ഞാ(!isWorkerThread()); // Would deadlock waiting for itself.
   // Wait for all threads to complete and the queue to be empty
   std::unique_lock<std::mutex> LockGuard(QueueLock);
   CompletionCondition.wait(LockGuard,
-                           [&] { return workCompletedUnlocked(nullptr); });
+                           [&] { തിരികെ workCompletedUnlocked(nullptr); });
 }
 
-void StdThreadPool::wait(ThreadPoolTaskGroup &Group) {
+ശൂന്യം StdThreadPool::wait(ThreadPoolTaskGroup &Group) {
   // Wait for all threads in the group to complete.
-  if (!isWorkerThread()) {
+  എങ്കിൽ (!isWorkerThread()) {
     std::unique_lock<std::mutex> LockGuard(QueueLock);
     CompletionCondition.wait(LockGuard,
-                             [&] { return workCompletedUnlocked(&Group); });
-    return;
+                             [&] { തിരികെ workCompletedUnlocked(&Group); });
+    തിരികെ;
   }
   // Make sure to not deadlock waiting for oneself.
-  assert(CurrentThreadTaskGroups == nullptr ||
+  പ്രതിജ്ഞാ(CurrentThreadTaskGroups == nullptr ||
          !llvm::is_contained(*CurrentThreadTaskGroups, &Group));
   // Handle the case of recursive call from another task in a different group,
   // in which case process tasks while waiting to keep the thread busy and avoid
@@ -274,24 +274,24 @@ void StdThreadPool::wait(ThreadPoolTaskGroup &Group) {
   processTasks(&Group);
 }
 
-bool StdThreadPool::isWorkerThread() const {
+തർക്കം StdThreadPool::isWorkerThread() സ്ഥിരം {
   llvm::sys::ScopedReader LockGuard(ThreadsLock);
   llvm::thread::id CurrentThreadId = llvm::this_thread::get_id();
-  for (const llvm::thread &Thread : Threads)
-    if (CurrentThreadId == Thread.get_id())
-      return true;
-  return false;
+  വേണ്ടി (സ്ഥിരം llvm::thread &Thread : Threads)
+    എങ്കിൽ (CurrentThreadId == Thread.get_id())
+      തിരികെ സത്യം;
+  തിരികെ അസത്യം;
 }
 
 // The destructor joins all threads, waiting for completion.
 StdThreadPool::~StdThreadPool() {
   {
     std::unique_lock<std::mutex> LockGuard(QueueLock);
-    EnableFlag = false;
+    EnableFlag = അസത്യം;
   }
   QueueCondition.notify_all();
   llvm::sys::ScopedReader LockGuard(ThreadsLock);
-  for (auto &Worker : Threads)
+  വേണ്ടി (auto &Worker : Threads)
     Worker.join();
 }
 
@@ -299,29 +299,29 @@ StdThreadPool::~StdThreadPool() {
 
 // No threads are launched, issue a warning if ThreadCount is not 0
 SingleThreadExecutor::SingleThreadExecutor(ThreadPoolStrategy S) {
-  int ThreadCount = S.compute_thread_count();
-  if (ThreadCount != 1) {
-    errs() << "Warning: request a ThreadPool with " << ThreadCount
+  പൂർണ്ണസംഖ്യ Thread_എണ്ണം = S.compute_thread_എണ്ണം();
+  എങ്കിൽ (Thread_എണ്ണം != 1) {
+    errs() << "Warning: request a ThreadPool with " << Thread_എണ്ണം
            << " threads, but LLVM_ENABLE_THREADS has been turned off\n";
   }
 }
 
-void SingleThreadExecutor::wait() {
+ശൂന്യം SingleThreadExecutor::wait() {
   // Sequential implementation running the tasks
-  while (!Tasks.empty()) {
+  ആകുമ്പോൾ (!Tasks.empty()) {
     auto Task = std::move(Tasks.front().first);
-    Tasks.pop_front();
+    Tasks.എടുക്കുക_front();
     Task();
   }
 }
 
-void SingleThreadExecutor::wait(ThreadPoolTaskGroup &) {
+ശൂന്യം SingleThreadExecutor::wait(ThreadPoolTaskGroup &) {
   // Simply wait for all, this works even if recursive (the running task
   // is already removed from the queue).
   wait();
 }
 
-bool SingleThreadExecutor::isWorkerThread() const {
+തർക്കം SingleThreadExecutor::isWorkerThread() സ്ഥിരം {
   report_fatal_error("LLVM compiled without multithreading");
 }
 

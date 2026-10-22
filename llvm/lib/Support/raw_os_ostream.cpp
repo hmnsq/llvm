@@ -10,9 +10,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_os_ostream.h"
-#include <ostream>
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/Support/raw_os_ostream.h"
+#അന്തര്ഭാവ <ostream>
+using നാമാകാശ llvm;
 
 //===----------------------------------------------------------------------===//
 //  raw_os_ostream
@@ -22,8 +22,8 @@ raw_os_ostream::~raw_os_ostream() {
   flush();
 }
 
-void raw_os_ostream::write_impl(const char *Ptr, size_t Size) {
-  OS.write(Ptr, Size);
+ശൂന്യം raw_os_ostream::write_impl(സ്ഥിരം അക്ഷരം *Ptr, size_t Size) {
+  OS.ലിഖ(Ptr, Size);
 }
 
-uint64_t raw_os_ostream::current_pos() const { return OS.tellp(); }
+uint64_t raw_os_ostream::current_pos() സ്ഥിരം { തിരികെ OS.tellp(); }

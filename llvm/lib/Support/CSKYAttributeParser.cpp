@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CSKYAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
+#അന്തര്ഭാവ "llvm/Support/CSKYAttributeParser.h"
+#അന്തര്ഭാവ "llvm/ADT/StringExtras.h"
+#അന്തര്ഭാവ "llvm/Support/Errc.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-const CSKYAttributeParser::DisplayHandler
+സ്ഥിരം CSKYAttributeParser::DisplayHandler
     CSKYAttributeParser::displayRoutines[] = {
         {
             CSKYAttrs::CSKY_ARCH_NAME,
@@ -59,7 +59,7 @@ const CSKYAttributeParser::DisplayHandler
             &CSKYAttributeParser::fpuException,
         },
         {
-            CSKYAttrs::CSKY_FPU_NUMBER_MODULE,
+            CSKYAttrs::CSKY_FPU_സംഖ്യ_MODULE,
             &ELFCompactAttrParser::stringAttribute,
         },
         {
@@ -67,83 +67,83 @@ const CSKYAttributeParser::DisplayHandler
             &CSKYAttributeParser::fpuHardFP,
         }};
 
-Error CSKYAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
-      handled = true;
-      break;
+Error CSKYAttributeParser::handler(uint64_t tag, തർക്കം &handled) {
+  handled = അസത്യം;
+  വേണ്ടി (സ്ഥിരം auto &AH : displayRoutines) {
+    എങ്കിൽ (uint64_t(AH.attribute) == tag) {
+      എങ്കിൽ (Error e = (ഇത്->*AH.routine)(tag))
+        തിരികെ e;
+      handled = സത്യം;
+      നിർത്തുക;
     }
   }
 
-  return Error::success();
+  തിരികെ Error::success();
 }
 
 Error CSKYAttributeParser::dspVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "DSP Extension", "DSP 2.0"};
-  return parseStringAttribute("Tag_CSKY_DSP_VERSION", tag, ArrayRef(strings));
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"Error", "DSP Extension", "DSP 2.0"};
+  തിരികെ parseStringAttribute("Tag_CSKY_DSP_VERSION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::vdspVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "VDSP Version 1",
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"Error", "VDSP Version 1",
                                         "VDSP Version 2"};
-  return parseStringAttribute("Tag_CSKY_VDSP_VERSION", tag, ArrayRef(strings));
+  തിരികെ parseStringAttribute("Tag_CSKY_VDSP_VERSION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "FPU Version 1",
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"Error", "FPU Version 1",
                                         "FPU Version 2", "FPU Version 3"};
-  return parseStringAttribute("Tag_CSKY_FPU_VERSION", tag, ArrayRef(strings));
+  തിരികെ parseStringAttribute("Tag_CSKY_FPU_VERSION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuABI(unsigned tag) {
-  static const char *const strings[] = {"Error", "Soft", "SoftFP", "Hard"};
-  return parseStringAttribute("Tag_CSKY_FPU_ABI", tag, ArrayRef(strings));
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"Error", "Soft", "SoftFP", "Hard"};
+  തിരികെ parseStringAttribute("Tag_CSKY_FPU_ABI", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuRounding(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_ROUNDING", tag, ArrayRef(strings));
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"None", "Needed"};
+  തിരികെ parseStringAttribute("Tag_CSKY_FPU_ROUNDING", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuDenormal(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_DENORMAL", tag, ArrayRef(strings));
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"None", "Needed"};
+  തിരികെ parseStringAttribute("Tag_CSKY_FPU_DENORMAL", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuException(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_EXCEPTION", tag, ArrayRef(strings));
+  സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം strings[] = {"None", "Needed"};
+  തിരികെ parseStringAttribute("Tag_CSKY_FPU_EXCEPTION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuHardFP(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t മൂല്യം_2 = de.getULEB128(cursor);
   ListSeparator LS(" ");
 
   std::string description;
 
-  if (value & 0x1) {
+  എങ്കിൽ (മൂല്യം_2 & 0x1) {
     description += LS;
     description += "Half";
   }
-  if ((value >> 1) & 0x1) {
+  എങ്കിൽ ((മൂല്യം_2 >> 1) & 0x1) {
     description += LS;
     description += "Single";
   }
-  if ((value >> 2) & 0x1) {
+  എങ്കിൽ ((മൂല്യം_2 >> 2) & 0x1) {
     description += LS;
     description += "Double";
   }
 
-  if (description.empty()) {
-    printAttribute(tag, value, "");
-    return createStringError(errc::invalid_argument,
+  എങ്കിൽ (description.empty()) {
+    printAttribute(tag, മൂല്യം_2, "");
+    തിരികെ createStringError(errc::invalid_argument,
                              "unknown Tag_CSKY_FPU_HARDFP value: " +
-                                 Twine(value));
+                                 Twine(മൂല്യം_2));
   }
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(tag, മൂല്യം_2, description);
+  തിരികെ Error::success();
 }

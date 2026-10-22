@@ -13,12 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 #ifdef __MVS__
-#include <stdio.h>
-#include <string.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <sys/resource.h>
+#അന്തര്ഭാവ <sys/wait.h>
 
-const char *signalName[] = {
+സ്ഥിരം അക്ഷരം *signalName[] = {
     /*  0 */ nullptr,
     /*  1 */ "Hangup",                   // SIGHUP
     /*  2 */ "Interrupt",                // SIGINT
@@ -63,23 +63,23 @@ const char *signalName[] = {
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+അക്ഷരം *strsignal(പൂർണ്ണസംഖ്യ sig) {
+  എങ്കിൽ (static_cast<size_t>(sig) < (വലുപ്പം(signalName) / വലുപ്പം(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+    തിരികെ const_cast<അക്ഷരം *>(signalName[sig]);
+  സ്ഥിതം അക്ഷരം സന്ദേശം[256];
+  snprintf(സന്ദേശം, വലുപ്പം(സന്ദേശം), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  സന്ദേശം[വലുപ്പം(സന്ദേശം) - 1] = '\0';
+  തിരികെ സന്ദേശം;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
 // function is implemented here.
-size_t strnlen(const char *S, size_t MaxLen) {
-  const char *PtrToNullChar =
-      static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+size_t strnlen(സ്ഥിരം അക്ഷരം *S, size_t MaxLen) {
+  സ്ഥിരം അക്ഷരം *PtrToNullChar =
+      static_cast<സ്ഥിരം അക്ഷരം *>(memchr(S, '\0', MaxLen));
+  തിരികെ PtrToNullChar ? PtrToNullChar - S : MaxLen;
 }
 #endif

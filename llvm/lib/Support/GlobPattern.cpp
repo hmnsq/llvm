@@ -10,63 +10,63 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/GlobPattern.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Errc.h"
+#അന്തര്ഭാവ "llvm/Support/GlobPattern.h"
+#അന്തര്ഭാവ "llvm/ADT/StringRef.h"
+#അന്തര്ഭാവ "llvm/Support/Errc.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-static constexpr char PrefixMetacharacters[] = "?*[{\\";
-static constexpr char SuffixMetacharacters[] = "?*[]{}\\";
-static constexpr char PrefixMetacharactersWithSlash[] = "?*[{\\/";
-static constexpr char SuffixMetacharactersWithSlash[] = "?*[]{}\\/";
+സ്ഥിതം constexpr അക്ഷരം PrefixMetacharacters[] = "?*[{\\";
+സ്ഥിതം constexpr അക്ഷരം SuffixMetacharacters[] = "?*[]{}\\";
+സ്ഥിതം constexpr അക്ഷരം PrefixMetacharactersWithSlash[] = "?*[{\\/";
+സ്ഥിതം constexpr അക്ഷരം SuffixMetacharactersWithSlash[] = "?*[]{}\\/";
 
 // Expands character ranges and returns a bitmap.
 // For example, "a-cf-hz" is expanded to "abcfghz".
-static Expected<BitVector> expand(StringRef S, StringRef Original) {
-  BitVector BV(256, false);
+സ്ഥിതം Expected<BitVector> expand(StringRef S, StringRef Original) {
+  BitVector BV(256, അസത്യം);
 
   // Expand X-Y.
-  for (;;) {
-    if (S.size() < 3)
-      break;
+  വേണ്ടി (;;) {
+    എങ്കിൽ (S.size() < 3)
+      നിർത്തുക;
 
     uint8_t Start = S[0];
     uint8_t End = S[2];
 
     // If it doesn't start with something like X-Y,
     // consume the first character and proceed.
-    if (S[1] != '-') {
-      BV[Start] = true;
+    എങ്കിൽ (S[1] != '-') {
+      BV[Start] = സത്യം;
       S = S.substr(1);
-      continue;
+      തുടരുക;
     }
 
     // It must be in the form of X-Y.
     // Validate it and then interpret the range.
-    if (Start > End)
-      return make_error<StringError>("invalid glob pattern: " + Original,
+    എങ്കിൽ (Start > End)
+      തിരികെ make_error<StringError>("invalid glob pattern: " + Original,
                                      errc::invalid_argument);
 
-    for (int C = Start; C <= End; ++C)
-      BV[(uint8_t)C] = true;
+    വേണ്ടി (പൂർണ്ണസംഖ്യ C = Start; C <= End; ++C)
+      BV[(uint8_t)C] = സത്യം;
     S = S.substr(3);
   }
 
-  for (char C : S)
-    BV[(uint8_t)C] = true;
-  return BV;
+  വേണ്ടി (അക്ഷരം C : S)
+    BV[(uint8_t)C] = സത്യം;
+  തിരികെ BV;
 }
 
 // Identify brace expansions in S and return the list of patterns they expand
 // into.
-static Expected<SmallVector<std::string, 1>>
+സ്ഥിതം Expected<SmallVector<std::string, 1>>
 parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
   SmallVector<std::string> SubPatterns = {S.str()};
-  if (!MaxSubPatterns || !S.contains('{'))
-    return std::move(SubPatterns);
+  എങ്കിൽ (!MaxSubPatterns || !S.contains('{'))
+    തിരികെ std::move(SubPatterns);
 
-  struct BraceExpansion {
+  ഘടന BraceExpansion {
     size_t Start;
     size_t Length;
     SmallVector<StringRef, 2> Terms;
@@ -75,78 +75,78 @@ parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
 
   BraceExpansion *CurrentBE = nullptr;
   size_t TermBegin;
-  for (size_t I = 0, E = S.size(); I != E; ++I) {
-    if (S[I] == '[') {
+  വേണ്ടി (size_t I = 0, E = S.size(); I != E; ++I) {
+    എങ്കിൽ (S[I] == '[') {
       I = S.find(']', I + 2);
-      if (I == std::string::npos)
-        return make_error<StringError>("invalid glob pattern, unmatched '['",
+      എങ്കിൽ (I == std::string::npos)
+        തിരികെ make_error<StringError>("invalid glob pattern, unmatched '['",
                                        errc::invalid_argument);
-    } else if (S[I] == '{') {
-      if (CurrentBE)
-        return make_error<StringError>(
+    } അല്ലെങ്കിൽ എങ്കിൽ (S[I] == '{') {
+      എങ്കിൽ (CurrentBE)
+        തിരികെ make_error<StringError>(
             "nested brace expansions are not supported",
             errc::invalid_argument);
       CurrentBE = &BraceExpansions.emplace_back();
       CurrentBE->Start = I;
       TermBegin = I + 1;
-    } else if (S[I] == ',') {
-      if (!CurrentBE)
-        continue;
-      CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
+    } അല്ലെങ്കിൽ എങ്കിൽ (S[I] == ',') {
+      എങ്കിൽ (!CurrentBE)
+        തുടരുക;
+      CurrentBE->Terms.തള്ളുക_back(S.substr(TermBegin, I - TermBegin));
       TermBegin = I + 1;
-    } else if (S[I] == '}') {
-      if (!CurrentBE)
-        continue;
-      if (CurrentBE->Terms.empty())
-        return make_error<StringError>(
+    } അല്ലെങ്കിൽ എങ്കിൽ (S[I] == '}') {
+      എങ്കിൽ (!CurrentBE)
+        തുടരുക;
+      എങ്കിൽ (CurrentBE->Terms.empty())
+        തിരികെ make_error<StringError>(
             "empty or singleton brace expansions are not supported",
             errc::invalid_argument);
-      CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
+      CurrentBE->Terms.തള്ളുക_back(S.substr(TermBegin, I - TermBegin));
       CurrentBE->Length = I - CurrentBE->Start + 1;
       CurrentBE = nullptr;
-    } else if (S[I] == '\\') {
-      if (++I == E)
-        return make_error<StringError>("invalid glob pattern, stray '\\'",
+    } അല്ലെങ്കിൽ എങ്കിൽ (S[I] == '\\') {
+      എങ്കിൽ (++I == E)
+        തിരികെ make_error<StringError>("invalid glob pattern, stray '\\'",
                                        errc::invalid_argument);
     }
   }
-  if (CurrentBE)
-    return make_error<StringError>("incomplete brace expansion",
+  എങ്കിൽ (CurrentBE)
+    തിരികെ make_error<StringError>("incomplete brace expansion",
                                    errc::invalid_argument);
 
-  size_t NumSubPatterns = 1;
-  for (auto &BE : BraceExpansions) {
-    if (NumSubPatterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
-      NumSubPatterns = std::numeric_limits<size_t>::max();
-      break;
+  size_t അക്കം_Sub_Patterns = 1;
+  വേണ്ടി (auto &BE : BraceExpansions) {
+    എങ്കിൽ (അക്കം_Sub_Patterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
+      അക്കം_Sub_Patterns = std::numeric_limits<size_t>::max();
+      നിർത്തുക;
     }
-    NumSubPatterns *= BE.Terms.size();
+    അക്കം_Sub_Patterns *= BE.Terms.size();
   }
-  if (NumSubPatterns > *MaxSubPatterns)
-    return make_error<StringError>("too many brace expansions",
+  എങ്കിൽ (അക്കം_Sub_Patterns > *MaxSubPatterns)
+    തിരികെ make_error<StringError>("too many brace expansions",
                                    errc::invalid_argument);
   // Replace brace expansions in reverse order so that we don't invalidate
   // earlier start indices
-  for (auto &BE : reverse(BraceExpansions)) {
+  വേണ്ടി (auto &BE : reverse(BraceExpansions)) {
     SmallVector<std::string> OrigSubPatterns;
     std::swap(SubPatterns, OrigSubPatterns);
-    for (StringRef Term : BE.Terms)
-      for (StringRef Orig : OrigSubPatterns)
+    വേണ്ടി (StringRef Term : BE.Terms)
+      വേണ്ടി (StringRef Orig : OrigSubPatterns)
         SubPatterns.emplace_back(Orig).replace(BE.Start, BE.Length, Term);
   }
-  return std::move(SubPatterns);
+  തിരികെ std::move(SubPatterns);
 }
 
-static StringRef maxPlainSubstring(StringRef S, bool SlashAgnostic) {
-  const char *Metas =
+സ്ഥിതം StringRef maxPlainSubstring(StringRef S, തർക്കം SlashAgnostic) {
+  സ്ഥിരം അക്ഷരം *Metas =
       SlashAgnostic ? PrefixMetacharactersWithSlash : PrefixMetacharacters;
   StringRef Best;
-  while (!S.empty()) {
+  ആകുമ്പോൾ (!S.empty()) {
     size_t PrefixSize = S.find_first_of(Metas);
-    if (PrefixSize == std::string::npos)
+    എങ്കിൽ (PrefixSize == std::string::npos)
       PrefixSize = S.size();
 
-    if (Best.size() < PrefixSize)
+    എങ്കിൽ (Best.size() < PrefixSize)
       Best = S.take_front(PrefixSize);
 
     S = S.drop_front(PrefixSize);
@@ -154,208 +154,208 @@ static StringRef maxPlainSubstring(StringRef S, bool SlashAgnostic) {
     // It's impossible, as the first and last characters of the input string
     // must be Glob special characters, otherwise they would be parts of
     // the prefix or the suffix.
-    assert(!S.empty());
+    പ്രതിജ്ഞാ(!S.empty());
 
-    switch (S.front()) {
-    case '\\':
+    തിരഞ്ഞെടുപ്പ് (S.front()) {
+    അവസ്ഥ '\\':
       S = S.drop_front(2);
-      break;
-    case '[': {
+      നിർത്തുക;
+    അവസ്ഥ '[': {
       // Drop '[' and the first character which can be ']'.
       S = S.drop_front(2);
       size_t EndBracket = S.find_first_of("]");
       // Should not be possible, SubGlobPattern::create should fail on invalid
       // pattern before we get here.
-      assert(EndBracket != std::string::npos);
+      പ്രതിജ്ഞാ(EndBracket != std::string::npos);
       S = S.drop_front(EndBracket + 1);
-      break;
+      നിർത്തുക;
     }
-    case '{':
+    അവസ്ഥ '{':
       // TODO: implement.
       // Fallback to whatever is best for now.
-      return Best;
-    default:
+      തിരികെ Best;
+    സ്ഥിരസ്ഥിതി:
       S = S.drop_front(1);
     }
   }
 
-  return Best;
+  തിരികെ Best;
 }
 
 Expected<GlobPattern> GlobPattern::create(StringRef S,
                                           std::optional<size_t> MaxSubPatterns,
-                                          bool SlashAgnostic) {
+                                          തർക്കം SlashAgnostic) {
   GlobPattern Pat;
   Pat.SlashAgnostic = SlashAgnostic;
   Pat.Pattern = S;
 
-  const char *PrefixMetas =
+  സ്ഥിരം അക്ഷരം *PrefixMetas =
       SlashAgnostic ? PrefixMetacharactersWithSlash : PrefixMetacharacters;
-  const char *SuffixMetas =
+  സ്ഥിരം അക്ഷരം *SuffixMetas =
       SlashAgnostic ? SuffixMetacharactersWithSlash : SuffixMetacharacters;
 
   // Store the prefix that does not contain any metacharacter.
   Pat.PrefixSize = S.find_first_of(PrefixMetas);
-  if (Pat.PrefixSize == std::string::npos) {
+  എങ്കിൽ (Pat.PrefixSize == std::string::npos) {
     Pat.PrefixSize = S.size();
-    return Pat;
+    തിരികെ Pat;
   }
   S = S.substr(Pat.PrefixSize);
 
   // Just in case we stop on unmatched opening brackets.
   size_t SuffixStart = S.find_last_of(SuffixMetas);
-  assert(SuffixStart != std::string::npos);
-  if (S[SuffixStart] == '\\')
+  പ്രതിജ്ഞാ(SuffixStart != std::string::npos);
+  എങ്കിൽ (S[SuffixStart] == '\\')
     ++SuffixStart;
-  if (SuffixStart < S.size())
+  എങ്കിൽ (SuffixStart < S.size())
     ++SuffixStart;
   Pat.SuffixSize = S.size() - SuffixStart;
   S = S.substr(0, SuffixStart);
 
   SmallVector<std::string, 1> SubPats;
-  if (auto Err = parseBraceExpansions(S, MaxSubPatterns).moveInto(SubPats))
-    return std::move(Err);
-  for (StringRef SubPat : SubPats) {
+  എങ്കിൽ (auto Err = parseBraceExpansions(S, MaxSubPatterns).moveInto(SubPats))
+    തിരികെ std::move(Err);
+  വേണ്ടി (StringRef SubPat : SubPats) {
     auto SubGlobOrErr = SubGlobPattern::create(SubPat, SlashAgnostic);
-    if (!SubGlobOrErr)
-      return SubGlobOrErr.takeError();
-    Pat.SubGlobs.push_back(*SubGlobOrErr);
+    എങ്കിൽ (!SubGlobOrErr)
+      തിരികെ SubGlobOrErr.takeError();
+    Pat.SubGlobs.തള്ളുക_back(*SubGlobOrErr);
   }
 
-  return Pat;
+  തിരികെ Pat;
 }
 
-std::optional<std::string> GlobPattern::asLiteral() const {
+std::optional<std::string> GlobPattern::asLiteral() സ്ഥിരം {
   // The prefix and suffix are metacharacter-free by construction, so whether
   // this pattern denotes a single string is decided by the sub-patterns, which
   // recorded it while parsing. No sub-pattern at all means there was no
   // metacharacter; more than one means brace expansion produced a choice.
-  if (SubGlobs.size() > 1 || (SubGlobs.size() == 1 && !SubGlobs[0].isLiteral()))
-    return std::nullopt;
+  എങ്കിൽ (SubGlobs.size() > 1 || (SubGlobs.size() == 1 && !SubGlobs[0].isLiteral()))
+    തിരികെ std::nullopt;
 
   std::string Literal;
   Literal.reserve(Pattern.size());
-  for (size_t I = 0, E = Pattern.size(); I != E; ++I) {
-    if (Pattern[I] == '\\' && I + 1 != E)
+  വേണ്ടി (size_t I = 0, E = Pattern.size(); I != E; ++I) {
+    എങ്കിൽ (Pattern[I] == '\\' && I + 1 != E)
       ++I;
-    Literal.push_back(Pattern[I]);
+    Literal.തള്ളുക_back(Pattern[I]);
   }
 
   // In slash-agnostic mode '/' and '\\' match each other, so a pattern holding
   // either matches more than one string. A pattern with no sub-pattern cannot
   // reach here holding one, as both are prefix metacharacters in that mode.
-  if (SlashAgnostic &&
+  എങ്കിൽ (SlashAgnostic &&
       StringRef(Literal).find_first_of("/\\") != StringRef::npos)
-    return std::nullopt;
+    തിരികെ std::nullopt;
 
-  return Literal;
+  തിരികെ Literal;
 }
 
 Expected<GlobPattern::SubGlobPattern>
-GlobPattern::SubGlobPattern::create(StringRef S, bool SlashAgnostic) {
+GlobPattern::SubGlobPattern::create(StringRef S, തർക്കം SlashAgnostic) {
   SubGlobPattern Pat;
 
   // Parse brackets.
   Pat.Pat.assign(S.begin(), S.end());
-  for (size_t I = 0, E = S.size(); I != E; ++I) {
-    if (S[I] == '[') {
+  വേണ്ടി (size_t I = 0, E = S.size(); I != E; ++I) {
+    എങ്കിൽ (S[I] == '[') {
       // ']' is allowed as the first character of a character class. '[]' is
       // invalid. So, just skip the first character.
       ++I;
       size_t J = S.find(']', I + 1);
-      if (J == StringRef::npos)
-        return make_error<StringError>("invalid glob pattern, unmatched '['",
+      എങ്കിൽ (J == StringRef::npos)
+        തിരികെ make_error<StringError>("invalid glob pattern, unmatched '['",
                                        errc::invalid_argument);
       StringRef Chars = S.substr(I, J - I);
-      bool Invert = S[I] == '^' || S[I] == '!';
-      if (Invert)
+      തർക്കം Invert = S[I] == '^' || S[I] == '!';
+      എങ്കിൽ (Invert)
         Chars = Chars.drop_front();
       Expected<BitVector> BVOrErr = expand(Chars, S);
-      if (!BVOrErr)
-        return BVOrErr.takeError();
+      എങ്കിൽ (!BVOrErr)
+        തിരികെ BVOrErr.takeError();
       BitVector &BV = *BVOrErr;
-      if (SlashAgnostic && (BV['\\'] || BV['/'])) {
+      എങ്കിൽ (SlashAgnostic && (BV['\\'] || BV['/'])) {
         BV.set('\\');
         BV.set('/');
       }
-      if (Invert)
+      എങ്കിൽ (Invert)
         BV.flip();
-      Pat.Brackets.push_back(Bracket{J + 1, std::move(BV)});
+      Pat.Brackets.തള്ളുക_back(Bracket{J + 1, std::move(BV)});
       I = J;
-    } else if (S[I] == '\\') {
-      if (++I == E)
-        return make_error<StringError>("invalid glob pattern, stray '\\'",
+    } അല്ലെങ്കിൽ എങ്കിൽ (S[I] == '\\') {
+      എങ്കിൽ (++I == E)
+        തിരികെ make_error<StringError>("invalid glob pattern, stray '\\'",
                                        errc::invalid_argument);
-    } else if (S[I] == '*' || S[I] == '?') {
-      Pat.HasWildcard = true;
+    } അല്ലെങ്കിൽ എങ്കിൽ (S[I] == '*' || S[I] == '?') {
+      Pat.HasWildcard = സത്യം;
     }
   }
-  return Pat;
+  തിരികെ Pat;
 }
 
-StringRef GlobPattern::longest_substr() const {
-  return maxPlainSubstring(Pattern.drop_front(PrefixSize).drop_back(SuffixSize),
+StringRef GlobPattern::longest_substr() സ്ഥിരം {
+  തിരികെ maxPlainSubstring(Pattern.drop_front(PrefixSize).drop_back(SuffixSize),
                            SlashAgnostic);
 }
 
-bool GlobPattern::match(StringRef S) const {
-  if (!S.consume_front(prefix()))
-    return false;
-  if (!S.consume_back(suffix()))
-    return false;
-  if (SubGlobs.empty() && S.empty())
-    return true;
-  for (auto &Glob : SubGlobs)
-    if (Glob.match(S, SlashAgnostic))
-      return true;
-  return false;
+തർക്കം GlobPattern::match(StringRef S) സ്ഥിരം {
+  എങ്കിൽ (!S.consume_front(prefix()))
+    തിരികെ അസത്യം;
+  എങ്കിൽ (!S.consume_back(suffix()))
+    തിരികെ അസത്യം;
+  എങ്കിൽ (SubGlobs.empty() && S.empty())
+    തിരികെ സത്യം;
+  വേണ്ടി (auto &Glob : SubGlobs)
+    എങ്കിൽ (Glob.match(S, SlashAgnostic))
+      തിരികെ സത്യം;
+  തിരികെ അസത്യം;
 }
 
-static bool matchChar(char PatC, char QueryC, bool SlashAgnostic) {
-  if (PatC == QueryC)
-    return true;
-  return SlashAgnostic && (PatC == '\\' || PatC == '/') &&
+സ്ഥിതം തർക്കം matchChar(അക്ഷരം PatC, അക്ഷരം QueryC, തർക്കം SlashAgnostic) {
+  എങ്കിൽ (PatC == QueryC)
+    തിരികെ സത്യം;
+  തിരികെ SlashAgnostic && (PatC == '\\' || PatC == '/') &&
          (QueryC == '\\' || QueryC == '/');
 }
 
 // Factor the pattern into segments split by '*'. The segment is matched
 // sequentianlly by finding the first occurrence past the end of the previous
 // match.
-bool GlobPattern::SubGlobPattern::match(StringRef Str,
-                                        bool SlashAgnostic) const {
-  const char *P = Pat.data(), *SegmentBegin = nullptr, *S = Str.data(),
+തർക്കം GlobPattern::SubGlobPattern::match(StringRef Str,
+                                        തർക്കം SlashAgnostic) സ്ഥിരം {
+  സ്ഥിരം അക്ഷരം *P = Pat.data(), *SegmentBegin = nullptr, *S = Str.data(),
              *SavedS = S;
-  const char *const PEnd = P + Pat.size(), *const End = S + Str.size();
+  സ്ഥിരം അക്ഷരം *സ്ഥിരം PEnd = P + Pat.size(), *സ്ഥിരം End = S + Str.size();
   size_t B = 0, SavedB = 0;
-  while (S != End) {
-    if (P == PEnd)
+  ആകുമ്പോൾ (S != End) {
+    എങ്കിൽ (P == PEnd)
       ;
-    else if (*P == '*') {
+    അല്ലെങ്കിൽ എങ്കിൽ (*P == '*') {
       // The non-* substring on the left of '*' matches the tail of S. Save the
       // positions to be used by backtracking if we see a mismatch later.
       SegmentBegin = ++P;
       SavedS = S;
       SavedB = B;
-      continue;
-    } else if (*P == '[') {
-      if (Brackets[B].Bytes[uint8_t(*S)]) {
+      തുടരുക;
+    } അല്ലെങ്കിൽ എങ്കിൽ (*P == '[') {
+      എങ്കിൽ (Brackets[B].Bytes[uint8_t(*S)]) {
         P = Pat.data() + Brackets[B++].NextOffset;
         ++S;
-        continue;
+        തുടരുക;
       }
-    } else if (*P == '\\') {
-      if (matchChar(*++P, *S, SlashAgnostic)) {
+    } അല്ലെങ്കിൽ എങ്കിൽ (*P == '\\') {
+      എങ്കിൽ (matchChar(*++P, *S, SlashAgnostic)) {
         ++P;
         ++S;
-        continue;
+        തുടരുക;
       }
-    } else if (matchChar(*P, *S, SlashAgnostic) || *P == '?') {
+    } അല്ലെങ്കിൽ എങ്കിൽ (matchChar(*P, *S, SlashAgnostic) || *P == '?') {
       ++P;
       ++S;
-      continue;
+      തുടരുക;
     }
-    if (!SegmentBegin)
-      return false;
+    എങ്കിൽ (!SegmentBegin)
+      തിരികെ അസത്യം;
     // We have seen a '*'. Backtrack to the saved positions. Shift the S
     // position to probe the next starting position in the segment.
     P = SegmentBegin;
@@ -364,5 +364,5 @@ bool GlobPattern::SubGlobPattern::match(StringRef Str,
   }
   // All bytes in Str have been matched. Return true if the rest part of Pat is
   // empty or contains only '*'.
-  return getPat().find_first_not_of('*', P - Pat.data()) == std::string::npos;
+  തിരികെ getPat().find_first_not_of('*', P - Pat.data()) == std::string::npos;
 }

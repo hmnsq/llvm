@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#അന്തര്ഭാവ "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using നാമാകാശ llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned Suffix_വൃക്ഷം_കണ്ണി::getStartIdx() സ്ഥിരം { തിരികെ StartIdx; }
+ശൂന്യം Suffix_വൃക്ഷം_കണ്ണി::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
+ശൂന്യം Suffix_വൃക്ഷം_കണ്ണി::setConcatLen(unsigned Len) { ConcatLen = Len; }
+unsigned Suffix_വൃക്ഷം_കണ്ണി::getConcatLen() സ്ഥിരം { തിരികെ ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+തർക്കം Suffix_വൃക്ഷം_Internal_കണ്ണി::is_വേര്() സ്ഥിരം {
+  തിരികെ getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+unsigned Suffix_വൃക്ഷം_Internal_കണ്ണി::getEndIdx() സ്ഥിരം { തിരികെ EndIdx; }
+ശൂന്യം Suffix_വൃക്ഷം_Internal_കണ്ണി::setLink(Suffix_വൃക്ഷം_Internal_കണ്ണി *L) {
+  പ്രതിജ്ഞാ(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_വൃക്ഷം_Internal_കണ്ണി *Suffix_വൃക്ഷം_Internal_കണ്ണി::getLink() സ്ഥിരം { തിരികെ Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+unsigned Suffix_വൃക്ഷം_Leaf_കണ്ണി::getEndIdx() സ്ഥിരം {
+  പ്രതിജ്ഞാ(EndIdx && "EndIdx is empty?");
+  തിരികെ *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+unsigned Suffix_വൃക്ഷം_Leaf_കണ്ണി::getSuffixIdx() സ്ഥിരം { തിരികെ SuffixIdx; }
+ശൂന്യം Suffix_വൃക്ഷം_Leaf_കണ്ണി::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+unsigned Suffix_വൃക്ഷം_കണ്ണി::get_ഇടത്_Leaf_Idx() സ്ഥിരം { തിരികെ ഇടത്_Leaf_Idx; }
+unsigned Suffix_വൃക്ഷം_കണ്ണി::get_വലത്_Leaf_Idx() സ്ഥിരം { തിരികെ വലത്_Leaf_Idx; }
+ശൂന്യം Suffix_വൃക്ഷം_കണ്ണി::set_ഇടത്_Leaf_Idx(unsigned Idx) { ഇടത്_Leaf_Idx = Idx; }
+ശൂന്യം Suffix_വൃക്ഷം_കണ്ണി::set_വലത്_Leaf_Idx(unsigned Idx) { വലത്_Leaf_Idx = Idx; }

@@ -13,99 +13,99 @@
 
 #ifdef __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#അന്തര്ഭാവ <new>
+#അന്തര്ഭാവ <rpmalloc.h>
 
 #ifndef __CRTDECL
 #define __CRTDECL
 #endif
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete(ശൂന്യം *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete[](ശൂന്യം *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new(std::size_t size) noexcept(false) {
+  തിരികെ rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new[](std::size_t size) noexcept(false) {
+  തിരികെ rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new(std::size_t size,
+                                    സ്ഥിരം std::nothrow_t &tag) noexcept {
+  (ശൂന്യം)വലുപ്പം(tag);
+  തിരികെ rpmalloc(size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new[](std::size_t size,
+                                      സ്ഥിരം std::nothrow_t &tag) noexcept {
+  (ശൂന്യം)വലുപ്പം(tag);
+  തിരികെ rpmalloc(size);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#എങ്കിൽ (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete(ശൂന്യം *p, std::size_t size) noexcept {
+  (ശൂന്യം)വലുപ്പം(size);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete[](ശൂന്യം *p, std::size_t size) noexcept {
+  (ശൂന്യം)വലുപ്പം(size);
   rpfree(p);
 }
 
 #endif
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#എങ്കിൽ (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete(ശൂന്യം *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (ശൂന്യം)വലുപ്പം(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete[](ശൂന്യം *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (ശൂന്യം)വലുപ്പം(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete(ശൂന്യം *p, std::size_t size,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (ശൂന്യം)വലുപ്പം(size);
+  (ശൂന്യം)വലുപ്പം(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+ബാഹ്യ ശൂന്യം __CRTDECL operator delete[](ശൂന്യം *p, std::size_t size,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (ശൂന്യം)വലുപ്പം(size);
+  (ശൂന്യം)വലുപ്പം(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new(std::size_t size,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  തിരികെ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new[](std::size_t size,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  തിരികെ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new(std::size_t size, std::align_val_t align,
+                                    സ്ഥിരം std::nothrow_t &tag) noexcept {
+  (ശൂന്യം)വലുപ്പം(tag);
+  തിരികെ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+ബാഹ്യ ശൂന്യം *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
+                                      സ്ഥിരം std::nothrow_t &tag) noexcept {
+  (ശൂന്യം)വലുപ്പം(tag);
+  തിരികെ rpaligned_alloc(static_cast<size_t>(align), size);
 }
 
 #endif

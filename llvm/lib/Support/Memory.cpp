@@ -11,38 +11,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#അന്തര്ഭാവ "llvm/Support/Memory.h"
+#അന്തര്ഭാവ "llvm/Config/llvm-config.h"
 
 #ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
 #endif // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
+#അന്തര്ഭാവ "Unix/Memory.inc"
 #endif
 #ifdef _WIN32
-#include "Windows/Memory.inc"
+#അന്തര്ഭാവ "Windows/Memory.inc"
 #endif
 
 #ifndef NDEBUG
 
-namespace llvm {
-namespace sys {
+നാമാകാശ llvm {
+നാമാകാശ sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &operator<<(raw_ostream &OS, സ്ഥിരം Memory::ProtectionFlags &PF) {
+  പ്രതിജ്ഞാ((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
+  തിരികെ OS << (PF & Memory::MF_READ ? 'R' : '-')
             << (PF & Memory::MF_WRITE ? 'W' : '-')
             << (PF & Memory::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
+raw_ostream &operator<<(raw_ostream &OS, സ്ഥിരം MemoryBlock &MB) {
+  തിരികെ OS << "[ " << MB.base() << " .. "
+            << (ശൂന്യം *)((അക്ഷരം *)MB.base() + MB.allocatedSize()) << " ] ("
             << MB.allocatedSize() << " bytes)";
 }
 

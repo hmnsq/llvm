@@ -30,29 +30,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DAGDeltaAlgorithm.h"
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <map>
-using namespace llvm;
+#അന്തര്ഭാവ "llvm/ADT/DAGDeltaAlgorithm.h"
+#അന്തര്ഭാവ "llvm/ADT/DeltaAlgorithm.h"
+#അന്തര്ഭാവ "llvm/Support/Debug.h"
+#അന്തര്ഭാവ "llvm/Support/Format.h"
+#അന്തര്ഭാവ "llvm/Support/raw_ostream.h"
+#അന്തര്ഭാവ <cassert>
+#അന്തര്ഭാവ <map>
+using നാമാകാശ llvm;
 
 #define DEBUG_TYPE "dag-delta"
 
-namespace {
+നാമാകാശ {
 
-class DAGDeltaAlgorithmImpl {
-  friend class DeltaActiveSetHelper;
+വർഗ്ഗം DAGDeltaAlgorithmImpl {
+  friend വർഗ്ഗം DeltaActiveSetHelper;
 
-public:
+പൊതു:
   using change_ty = DAGDeltaAlgorithm::change_ty;
   using changeset_ty = DAGDeltaAlgorithm::changeset_ty;
   using changesetlist_ty = DAGDeltaAlgorithm::changesetlist_ty;
   using edge_ty = DAGDeltaAlgorithm::edge_ty;
 
-private:
+സ്വകാര്യ:
   using pred_iterator_ty = std::vector<change_ty>::iterator;
   using succ_iterator_ty = std::vector<change_ty>::iterator;
   using pred_closure_iterator_ty = std::set<change_ty>::iterator;
@@ -75,66 +75,66 @@ private:
   std::map<change_ty, std::set<change_ty> > PredClosure;
   std::map<change_ty, std::set<change_ty> > SuccClosure;
 
-private:
-  pred_iterator_ty pred_begin(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].begin();
+സ്വകാര്യ:
+  pred_iterator_ty pred_begin(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(Predecessors.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ Predecessors[കണ്ണി].begin();
   }
-  pred_iterator_ty pred_end(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].end();
-  }
-
-  pred_closure_iterator_ty pred_closure_begin(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].begin();
-  }
-  pred_closure_iterator_ty pred_closure_end(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].end();
+  pred_iterator_ty pred_end(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(Predecessors.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ Predecessors[കണ്ണി].end();
   }
 
-  succ_iterator_ty succ_begin(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].begin();
+  pred_closure_iterator_ty pred_closure_begin(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(PredClosure.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ PredClosure[കണ്ണി].begin();
   }
-  succ_iterator_ty succ_end(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].end();
-  }
-
-  succ_closure_iterator_ty succ_closure_begin(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].begin();
-  }
-  succ_closure_iterator_ty succ_closure_end(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].end();
+  pred_closure_iterator_ty pred_closure_end(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(PredClosure.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ PredClosure[കണ്ണി].end();
   }
 
-  void UpdatedSearchState(const changeset_ty &Changes,
-                          const changesetlist_ty &Sets,
-                          const changeset_ty &Required) {
-    DDA.UpdatedSearchState(Changes, Sets, Required);
+  succ_iterator_ty succ_begin(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(Successors.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ Successors[കണ്ണി].begin();
+  }
+  succ_iterator_ty succ_end(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(Successors.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ Successors[കണ്ണി].end();
+  }
+
+  succ_closure_iterator_ty succ_closure_begin(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(SuccClosure.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ SuccClosure[കണ്ണി].begin();
+  }
+  succ_closure_iterator_ty succ_closure_end(change_ty കണ്ണി) {
+    പ്രതിജ്ഞാ(SuccClosure.എണ്ണം(കണ്ണി) && "Invalid node!");
+    തിരികെ SuccClosure[കണ്ണി].end();
+  }
+
+  ശൂന്യം Updated_തിരയൽ_State(സ്ഥിരം changeset_ty &Changes,
+                          സ്ഥിരം changesetlist_ty &Sets,
+                          സ്ഥിരം changeset_ty &Required) {
+    DDA.Updated_തിരയൽ_State(Changes, Sets, Required);
   }
 
   /// ExecuteOneTest - Execute a single test predicate on the change set \p S.
-  bool ExecuteOneTest(const changeset_ty &S) {
+  തർക്കം ExecuteOneTest(സ്ഥിരം changeset_ty &S) {
     // Check dependencies invariant.
     LLVM_DEBUG({
-      for (changeset_ty::const_iterator it = S.begin(), ie = S.end(); it != ie;
+      വേണ്ടി (changeset_ty::const_iterator it = S.begin(), ie = S.end(); it != ie;
            ++it)
-        for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
+        വേണ്ടി (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
              it2 != ie2; ++it2)
-          assert(S.count(*it2) && "Attempt to run invalid changeset!");
+          പ്രതിജ്ഞാ(S.എണ്ണം(*it2) && "Attempt to run invalid changeset!");
     });
 
-    return DDA.ExecuteOneTest(S);
+    തിരികെ DDA.ExecuteOneTest(S);
   }
 
-public:
-  DAGDeltaAlgorithmImpl(DAGDeltaAlgorithm &DDA, const changeset_ty &Changes,
-                        const std::vector<edge_ty> &Dependencies);
+പൊതു:
+  DAGDeltaAlgorithmImpl(DAGDeltaAlgorithm &DDA, സ്ഥിരം changeset_ty &Changes,
+                        സ്ഥിരം std::vector<edge_ty> &Dependencies);
 
   changeset_ty Run();
 
@@ -146,92 +146,92 @@ public:
   /// \param Required - The set of changes which have previously been
   /// established to be required.
   /// \return - The test result.
-  bool GetTestResult(const changeset_ty &Changes, const changeset_ty &Required);
+  തർക്കം GetTestResult(സ്ഥിരം changeset_ty &Changes, സ്ഥിരം changeset_ty &Required);
 };
 
 /// Helper object for minimizing an active set of changes.
-class DeltaActiveSetHelper : public DeltaAlgorithm {
+വർഗ്ഗം DeltaActiveSetHelper : പൊതു DeltaAlgorithm {
   DAGDeltaAlgorithmImpl &DDAI;
 
-  const changeset_ty &Required;
+  സ്ഥിരം changeset_ty &Required;
 
-protected:
+സംരക്ഷിത:
   /// UpdatedSearchState - Callback used when the search state changes.
-  void UpdatedSearchState(const changeset_ty &Changes,
-                                  const changesetlist_ty &Sets) override {
-    DDAI.UpdatedSearchState(Changes, Sets, Required);
+  ശൂന്യം Updated_തിരയൽ_State(സ്ഥിരം changeset_ty &Changes,
+                                  സ്ഥിരം changesetlist_ty &Sets) override {
+    DDAI.Updated_തിരയൽ_State(Changes, Sets, Required);
   }
 
-  bool ExecuteOneTest(const changeset_ty &S) override {
-    return DDAI.GetTestResult(S, Required);
+  തർക്കം ExecuteOneTest(സ്ഥിരം changeset_ty &S) override {
+    തിരികെ DDAI.GetTestResult(S, Required);
   }
 
-public:
+പൊതു:
   DeltaActiveSetHelper(DAGDeltaAlgorithmImpl &DDAI,
-                       const changeset_ty &Required)
+                       സ്ഥിരം changeset_ty &Required)
       : DDAI(DDAI), Required(Required) {}
 };
 
 } // namespace
 
 DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
-    DAGDeltaAlgorithm &DDA, const changeset_ty &Changes,
-    const std::vector<edge_ty> &Dependencies)
+    DAGDeltaAlgorithm &DDA, സ്ഥിരം changeset_ty &Changes,
+    സ്ഥിരം std::vector<edge_ty> &Dependencies)
     : DDA(DDA) {
-  for (change_ty Change : Changes) {
+  വേണ്ടി (change_ty Change : Changes) {
     Predecessors.try_emplace(Change);
     Successors.try_emplace(Change);
   }
-  for (const edge_ty &Dep : Dependencies) {
-    Predecessors[Dep.second].push_back(Dep.first);
-    Successors[Dep.first].push_back(Dep.second);
+  വേണ്ടി (സ്ഥിരം edge_ty &Dep : Dependencies) {
+    Predecessors[Dep.second].തള്ളുക_back(Dep.first);
+    Successors[Dep.first].തള്ളുക_back(Dep.second);
   }
 
   // Compute the roots.
-  for (change_ty Change : Changes)
-    if (succ_begin(Change) == succ_end(Change))
-      Roots.push_back(Change);
+  വേണ്ടി (change_ty Change : Changes)
+    എങ്കിൽ (succ_begin(Change) == succ_end(Change))
+      Roots.തള്ളുക_back(Change);
 
   // Pre-compute the closure of the successor relation.
   std::vector<change_ty> Worklist(Roots.begin(), Roots.end());
-  while (!Worklist.empty()) {
+  ആകുമ്പോൾ (!Worklist.empty()) {
     change_ty Change = Worklist.back();
-    Worklist.pop_back();
+    Worklist.എടുക്കുക_back();
 
     std::set<change_ty> &ChangeSuccs = SuccClosure[Change];
-    for (pred_iterator_ty it = pred_begin(Change),
+    വേണ്ടി (pred_iterator_ty it = pred_begin(Change),
            ie = pred_end(Change); it != ie; ++it) {
       auto &SC = SuccClosure[*it];
-      SC.insert(Change);
-      SC.insert(ChangeSuccs.begin(), ChangeSuccs.end());
-      Worklist.push_back(*it);
+      SC.തിരുകുക(Change);
+      SC.തിരുകുക(ChangeSuccs.begin(), ChangeSuccs.end());
+      Worklist.തള്ളുക_back(*it);
     }
   }
 
   // Invert to form the predecessor closure map.
-  for (change_ty Change : Changes)
+  വേണ്ടി (change_ty Change : Changes)
     PredClosure.try_emplace(Change);
-  for (change_ty Change : Changes)
-    for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
+  വേണ്ടി (change_ty Change : Changes)
+    വേണ്ടി (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
                                   ie2 = succ_closure_end(Change);
          it2 != ie2; ++it2)
-      PredClosure[*it2].insert(Change);
+      PredClosure[*it2].തിരുകുക(Change);
 
   // Dump useful debug info.
   LLVM_DEBUG({
     llvm::errs() << "-- DAGDeltaAlgorithmImpl --\n";
     llvm::errs() << "Changes: [";
-    for (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.end();
+    വേണ്ടി (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.end();
          it != ie; ++it) {
-      if (it != Changes.begin())
+      എങ്കിൽ (it != Changes.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
 
-      if (succ_begin(*it) != succ_end(*it)) {
+      എങ്കിൽ (succ_begin(*it) != succ_end(*it)) {
         llvm::errs() << "(";
-        for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
+        വേണ്ടി (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
              it2 != ie2; ++it2) {
-          if (it2 != succ_begin(*it))
+          എങ്കിൽ (it2 != succ_begin(*it))
             llvm::errs() << ", ";
           llvm::errs() << "->" << *it2;
         }
@@ -241,22 +241,22 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     llvm::errs() << "]\n";
 
     llvm::errs() << "Roots: [";
-    for (std::vector<change_ty>::const_iterator it = Roots.begin(),
+    വേണ്ടി (std::vector<change_ty>::const_iterator it = Roots.begin(),
                                                 ie = Roots.end();
          it != ie; ++it) {
-      if (it != Roots.begin())
+      എങ്കിൽ (it != Roots.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
     }
     llvm::errs() << "]\n";
 
     llvm::errs() << "Predecessor Closure:\n";
-    for (change_ty Change : Changes) {
+    വേണ്ടി (change_ty Change : Changes) {
       llvm::errs() << format("  %-4d: [", Change);
-      for (pred_closure_iterator_ty it2 = pred_closure_begin(Change),
+      വേണ്ടി (pred_closure_iterator_ty it2 = pred_closure_begin(Change),
                                     ie2 = pred_closure_end(Change);
            it2 != ie2; ++it2) {
-        if (it2 != pred_closure_begin(Change))
+        എങ്കിൽ (it2 != pred_closure_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -264,12 +264,12 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     }
 
     llvm::errs() << "Successor Closure:\n";
-    for (change_ty Change : Changes) {
+    വേണ്ടി (change_ty Change : Changes) {
       llvm::errs() << format("  %-4d: [", Change);
-      for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
+      വേണ്ടി (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
                                     ie2 = succ_closure_end(Change);
            it2 != ie2; ++it2) {
-        if (it2 != succ_closure_begin(Change))
+        എങ്കിൽ (it2 != succ_closure_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -280,21 +280,21 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
   });
 }
 
-bool DAGDeltaAlgorithmImpl::GetTestResult(const changeset_ty &Changes,
-                                          const changeset_ty &Required) {
+തർക്കം DAGDeltaAlgorithmImpl::GetTestResult(സ്ഥിരം changeset_ty &Changes,
+                                          സ്ഥിരം changeset_ty &Required) {
   changeset_ty Extended(Required);
-  Extended.insert(Changes.begin(), Changes.end());
-  for (change_ty Change : Changes)
-    Extended.insert(pred_closure_begin(Change), pred_closure_end(Change));
+  Extended.തിരുകുക(Changes.begin(), Changes.end());
+  വേണ്ടി (change_ty Change : Changes)
+    Extended.തിരുകുക(pred_closure_begin(Change), pred_closure_end(Change));
 
-  if (FailedTestsCache.count(Extended))
-    return false;
+  എങ്കിൽ (FailedTestsCache.എണ്ണം(Extended))
+    തിരികെ അസത്യം;
 
-  bool Result = ExecuteOneTest(Extended);
-  if (!Result)
-    FailedTestsCache.insert(Extended);
+  തർക്കം Result = ExecuteOneTest(Extended);
+  എങ്കിൽ (!Result)
+    FailedTestsCache.തിരുകുക(Extended);
 
-  return Result;
+  തിരികെ Result;
 }
 
 DAGDeltaAlgorithm::changeset_ty
@@ -310,14 +310,14 @@ DAGDeltaAlgorithmImpl::Run() {
   //
   // Invariant:  CurrentSet intersect Required == {}
   // Invariant:  Required == (Required union succ*(Required))
-  while (!CurrentSet.empty()) {
+  ആകുമ്പോൾ (!CurrentSet.empty()) {
     LLVM_DEBUG({
       llvm::errs() << "DAG_DD - " << CurrentSet.size() << " active changes, "
                    << Required.size() << " required changes\n";
     });
 
     // Minimize the current set of changes.
-    DeltaActiveSetHelper Helper(*this, Required);
+    DeltaActiveSetHelper Helper(*ഇത്, Required);
     changeset_ty CurrentMinSet = Helper.Run(CurrentSet);
 
     // Update the set of required changes. Since
@@ -327,26 +327,26 @@ DAGDeltaAlgorithmImpl::Run() {
     // then
     //   succ(CurrentMinSet) subset Required
     // and our invariant on Required is maintained.
-    Required.insert(CurrentMinSet.begin(), CurrentMinSet.end());
+    Required.തിരുകുക(CurrentMinSet.begin(), CurrentMinSet.end());
 
     // Replace the current set with the predecssors of the minimized set of
     // active changes.
     CurrentSet.clear();
-    for (change_ty CT : CurrentMinSet)
-      CurrentSet.insert(pred_begin(CT), pred_end(CT));
+    വേണ്ടി (change_ty CT : CurrentMinSet)
+      CurrentSet.തിരുകുക(pred_begin(CT), pred_end(CT));
 
     // FIXME: We could enforce CurrentSet intersect Required == {} here if we
     // wanted to protect against cyclic graphs.
   }
 
-  return Required;
+  തിരികെ Required;
 }
 
-void DAGDeltaAlgorithm::anchor() {
+ശൂന്യം DAGDeltaAlgorithm::anchor() {
 }
 
 DAGDeltaAlgorithm::changeset_ty
-DAGDeltaAlgorithm::Run(const changeset_ty &Changes,
-                       const std::vector<edge_ty> &Dependencies) {
-  return DAGDeltaAlgorithmImpl(*this, Changes, Dependencies).Run();
+DAGDeltaAlgorithm::Run(സ്ഥിരം changeset_ty &Changes,
+                       സ്ഥിരം std::vector<edge_ty> &Dependencies) {
+  തിരികെ DAGDeltaAlgorithmImpl(*ഇത്, Changes, Dependencies).Run();
 }
