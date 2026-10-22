@@ -11,45 +11,45 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব "llvm/Support/VirtualOutputConfig.h"
+#অন্তর্ভাব "llvm/Support/Debug.h"
+#অন্তর্ভাব "llvm/Support/FileSystem.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using নামাকাশ llvm;
+using নামাকাশ llvm::vfs;
 
-OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
+OutputConfig &OutputConfig::setOpenFlags(ধ্রুব sys::fs::OpenFlags &Flags) {
   // Ignore CRLF on its own as invalid.
-  using namespace llvm::sys::fs;
-  return Flags & OF_Text
+  using নামাকাশ llvm::sys::fs;
+  প্রত্যাগম Flags & OF_Text
              ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+             : set_দ্বিমিক().setAppend(Flags & OF_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+শূন্য OutputConfig::print(raw_ostream &OS) ধ্রুব {
   OS << "{";
-  bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
-    if (IsFirst)
-      IsFirst = false;
-    else
+  তার্কিক IsFirst = সত্য;
+  auto printFlag = [&](StringRef FlagName, তার্কিক মান) {
+    যদি (IsFirst)
+      IsFirst = অসত্য;
+    অন্যথা
       OS << ",";
-    if (!Value)
+    যদি (!মান)
       OS << "No";
     OS << FlagName;
   };
 
 #define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
-  if (get##NAME() != DEFAULT)                                                  \
+  যদি (get##NAME() != DEFAULT)                                                  \
     printFlag(#NAME, get##NAME());
-#include "llvm/Support/VirtualOutputConfig.def"
+#অন্তর্ভাব "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD শূন্য OutputConfig::dump() ধ্রুব { print(dbgs()); }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
   Config.print(OS);
-  return OS;
+  প্রত্যাগম OS;
 }

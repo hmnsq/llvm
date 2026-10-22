@@ -6,32 +6,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/bit.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <string>
-#include <vector>
+#অন্তর্ভাব "llvm/ADT/ArrayRef.h"
+#অন্তর্ভাব "llvm/ADT/StringRef.h"
+#অন্তর্ভাব "llvm/ADT/bit.h"
+#অন্তর্ভাব "llvm/Support/ConvertUTF.h"
+#অন্তর্ভাব "llvm/Support/ErrorHandling.h"
+#অন্তর্ভাব <string>
+#অন্তর্ভাব <vector>
 
-namespace llvm {
+নামাকাশ llvm {
 
-bool ConvertUTF8toWide(unsigned WideCharWidth, llvm::StringRef Source,
-                       char *&ResultPtr, const UTF8 *&ErrorPtr) {
-  assert(WideCharWidth == 1 || WideCharWidth == 2 || WideCharWidth == 4);
+তার্কিক ConvertUTF8toWide(unsigned WideCharWidth, llvm::StringRef Source,
+                       বর্ণ *&ResultPtr, ধ্রুব UTF8 *&ErrorPtr) {
+  প্রতিজ্ঞা(WideCharWidth == 1 || WideCharWidth == 2 || WideCharWidth == 4);
   ConversionResult result = conversionOK;
   // Copy the character span over.
-  if (WideCharWidth == 1) {
-    const UTF8 *Pos = reinterpret_cast<const UTF8*>(Source.begin());
-    if (!isLegalUTF8String(&Pos, reinterpret_cast<const UTF8*>(Source.end()))) {
+  যদি (WideCharWidth == 1) {
+    ধ্রুব UTF8 *Pos = reinterpret_cast<ধ্রুব UTF8*>(Source.begin());
+    যদি (!isLegalUTF8String(&Pos, reinterpret_cast<ধ্রুব UTF8*>(Source.end()))) {
       result = sourceIllegal;
       ErrorPtr = Pos;
-    } else {
+    } অন্যথা {
       memcpy(ResultPtr, Source.data(), Source.size());
       ResultPtr += Source.size();
     }
-  } else if (WideCharWidth == 2) {
-    const UTF8 *sourceStart = (const UTF8*)Source.data();
+  } অন্যথা যদি (WideCharWidth == 2) {
+    ধ্রুব UTF8 *sourceStart = (ধ্রুব UTF8*)Source.data();
     // FIXME: Make the type of the result buffer correct instead of
     // using reinterpret_cast.
     UTF16 *targetStart = reinterpret_cast<UTF16 *>(ResultPtr);
@@ -39,12 +39,12 @@ bool ConvertUTF8toWide(unsigned WideCharWidth, llvm::StringRef Source,
     result =
         ConvertUTF8toUTF16(&sourceStart, sourceStart + Source.size(),
                            &targetStart, targetStart + Source.size(), flags);
-    if (result == conversionOK)
-      ResultPtr = reinterpret_cast<char *>(targetStart);
-    else
+    যদি (result == conversionOK)
+      ResultPtr = reinterpret_cast<বর্ণ *>(targetStart);
+    অন্যথা
       ErrorPtr = sourceStart;
-  } else if (WideCharWidth == 4) {
-    const UTF8 *sourceStart = (const UTF8 *)Source.data();
+  } অন্যথা যদি (WideCharWidth == 4) {
+    ধ্রুব UTF8 *sourceStart = (ধ্রুব UTF8 *)Source.data();
     // FIXME: Make the type of the result buffer correct instead of
     // using reinterpret_cast.
     UTF32 *targetStart = reinterpret_cast<UTF32 *>(ResultPtr);
@@ -52,63 +52,63 @@ bool ConvertUTF8toWide(unsigned WideCharWidth, llvm::StringRef Source,
     result =
         ConvertUTF8toUTF32(&sourceStart, sourceStart + Source.size(),
                            &targetStart, targetStart + Source.size(), flags);
-    if (result == conversionOK)
-      ResultPtr = reinterpret_cast<char *>(targetStart);
-    else
+    যদি (result == conversionOK)
+      ResultPtr = reinterpret_cast<বর্ণ *>(targetStart);
+    অন্যথা
       ErrorPtr = sourceStart;
   }
-  assert((result != targetExhausted) &&
+  প্রতিজ্ঞা((result != targetExhausted) &&
          "ConvertUTF8toUTFXX exhausted target buffer");
-  return result == conversionOK;
+  প্রত্যাগম result == conversionOK;
 }
 
-bool ConvertCodePointToUTF8(unsigned Source, char *&ResultPtr) {
-  const UTF32 *SourceStart = &Source;
-  const UTF32 *SourceEnd = SourceStart + 1;
+তার্কিক ConvertCodePointToUTF8(unsigned Source, বর্ণ *&ResultPtr) {
+  ধ্রুব UTF32 *SourceStart = &Source;
+  ধ্রুব UTF32 *SourceEnd = SourceStart + 1;
   UTF8 *TargetStart = reinterpret_cast<UTF8 *>(ResultPtr);
   UTF8 *TargetEnd = TargetStart + 4;
   ConversionResult CR = ConvertUTF32toUTF8(
       &SourceStart, SourceEnd, &TargetStart, TargetEnd, strictConversion);
-  if (CR != conversionOK)
-    return false;
+  যদি (CR != conversionOK)
+    প্রত্যাগম অসত্য;
 
-  ResultPtr = reinterpret_cast<char *>(TargetStart);
-  return true;
+  ResultPtr = reinterpret_cast<বর্ণ *>(TargetStart);
+  প্রত্যাগম সত্য;
 }
 
-bool hasUTF16ByteOrderMark(ArrayRef<char> S) {
-  return (S.size() >= 2 && ((S[0] == '\xff' && S[1] == '\xfe') ||
+তার্কিক hasUTF16ByteOrderMark(ArrayRef<বর্ণ> S) {
+  প্রত্যাগম (S.size() >= 2 && ((S[0] == '\xff' && S[1] == '\xfe') ||
                             (S[0] == '\xfe' && S[1] == '\xff')));
 }
 
-bool convertUTF16ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
-  assert(Out.empty());
+তার্কিক convertUTF16ToUTF8String(ArrayRef<বর্ণ> SrcBytes, std::string &Out) {
+  প্রতিজ্ঞা(Out.empty());
 
   // Error out on an uneven byte count.
-  if (SrcBytes.size() % 2)
-    return false;
+  যদি (SrcBytes.size() % 2)
+    প্রত্যাগম অসত্য;
 
   // Avoid OOB by returning early on empty input.
-  if (SrcBytes.empty())
-    return true;
+  যদি (SrcBytes.empty())
+    প্রত্যাগম সত্য;
 
-  const UTF16 *Src = reinterpret_cast<const UTF16 *>(SrcBytes.begin());
-  const UTF16 *SrcEnd = reinterpret_cast<const UTF16 *>(SrcBytes.end());
+  ধ্রুব UTF16 *Src = reinterpret_cast<ধ্রুব UTF16 *>(SrcBytes.begin());
+  ধ্রুব UTF16 *SrcEnd = reinterpret_cast<ধ্রুব UTF16 *>(SrcBytes.end());
 
-  assert((uintptr_t)Src % sizeof(UTF16) == 0);
+  প্রতিজ্ঞা((uintptr_t)Src % পরিমাণ(UTF16) == 0);
 
   // Byteswap if necessary.
   std::vector<UTF16> ByteSwapped;
-  if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
-    for (UTF16 &I : ByteSwapped)
+  যদি (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_SWAPPED) {
+    ByteSwapped.ঢোকাও(ByteSwapped.end(), Src, SrcEnd);
+    প্রতি (UTF16 &I : ByteSwapped)
       I = llvm::byteswap<uint16_t>(I);
     Src = &ByteSwapped[0];
     SrcEnd = &ByteSwapped[ByteSwapped.size() - 1] + 1;
   }
 
   // Skip the BOM for conversion.
-  if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_NATIVE)
+  যদি (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_NATIVE)
     Src++;
 
   // Just allocate enough space up front.  We'll shrink it later.  Allocate
@@ -119,54 +119,54 @@ bool convertUTF16ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
 
   ConversionResult CR =
       ConvertUTF16toUTF8(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  প্রতিজ্ঞা(CR != targetExhausted);
 
-  if (CR != conversionOK) {
+  যদি (CR != conversionOK) {
     Out.clear();
-    return false;
+    প্রত্যাগম অসত্য;
   }
 
-  Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
-  return true;
+  Out.resize(reinterpret_cast<বর্ণ *>(Dst) - &Out[0]);
+  Out.ঠেলো_back(0);
+  Out.বের_করো_back();
+  প্রত্যাগম সত্য;
 }
 
-bool convertUTF16ToUTF8String(ArrayRef<UTF16> Src, std::string &Out) {
-  return convertUTF16ToUTF8String(
-      llvm::ArrayRef<char>(reinterpret_cast<const char *>(Src.data()),
-                           Src.size() * sizeof(UTF16)),
+তার্কিক convertUTF16ToUTF8String(ArrayRef<UTF16> Src, std::string &Out) {
+  প্রত্যাগম convertUTF16ToUTF8String(
+      llvm::ArrayRef<বর্ণ>(reinterpret_cast<ধ্রুব বর্ণ *>(Src.data()),
+                           Src.size() * পরিমাণ(UTF16)),
       Out);
 }
 
-bool convertUTF32ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
-  assert(Out.empty());
+তার্কিক convertUTF32ToUTF8String(ArrayRef<বর্ণ> SrcBytes, std::string &Out) {
+  প্রতিজ্ঞা(Out.empty());
 
   // Error out on an uneven byte count.
-  if (SrcBytes.size() % 4)
-    return false;
+  যদি (SrcBytes.size() % 4)
+    প্রত্যাগম অসত্য;
 
   // Avoid OOB by returning early on empty input.
-  if (SrcBytes.empty())
-    return true;
+  যদি (SrcBytes.empty())
+    প্রত্যাগম সত্য;
 
-  const UTF32 *Src = reinterpret_cast<const UTF32 *>(SrcBytes.begin());
-  const UTF32 *SrcEnd = reinterpret_cast<const UTF32 *>(SrcBytes.end());
+  ধ্রুব UTF32 *Src = reinterpret_cast<ধ্রুব UTF32 *>(SrcBytes.begin());
+  ধ্রুব UTF32 *SrcEnd = reinterpret_cast<ধ্রুব UTF32 *>(SrcBytes.end());
 
-  assert((uintptr_t)Src % sizeof(UTF32) == 0);
+  প্রতিজ্ঞা((uintptr_t)Src % পরিমাণ(UTF32) == 0);
 
   // Byteswap if necessary.
   std::vector<UTF32> ByteSwapped;
-  if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
-    for (UTF32 &I : ByteSwapped)
+  যদি (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_SWAPPED) {
+    ByteSwapped.ঢোকাও(ByteSwapped.end(), Src, SrcEnd);
+    প্রতি (UTF32 &I : ByteSwapped)
       I = llvm::byteswap<uint32_t>(I);
     Src = &ByteSwapped[0];
     SrcEnd = &ByteSwapped[ByteSwapped.size() - 1] + 1;
   }
 
   // Skip the BOM for conversion.
-  if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_NATIVE)
+  যদি (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_NATIVE)
     Src++;
 
   // Just allocate enough space up front.  We'll shrink it later.  Allocate
@@ -177,39 +177,39 @@ bool convertUTF32ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
 
   ConversionResult CR =
       ConvertUTF32toUTF8(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  প্রতিজ্ঞা(CR != targetExhausted);
 
-  if (CR != conversionOK) {
+  যদি (CR != conversionOK) {
     Out.clear();
-    return false;
+    প্রত্যাগম অসত্য;
   }
 
-  Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
-  return true;
+  Out.resize(reinterpret_cast<বর্ণ *>(Dst) - &Out[0]);
+  Out.ঠেলো_back(0);
+  Out.বের_করো_back();
+  প্রত্যাগম সত্য;
 }
 
-bool convertUTF32ToUTF8String(ArrayRef<UTF32> Src, std::string &Out) {
-  return convertUTF32ToUTF8String(
-      llvm::ArrayRef<char>(reinterpret_cast<const char *>(Src.data()),
-                           Src.size() * sizeof(UTF32)),
+তার্কিক convertUTF32ToUTF8String(ArrayRef<UTF32> Src, std::string &Out) {
+  প্রত্যাগম convertUTF32ToUTF8String(
+      llvm::ArrayRef<বর্ণ>(reinterpret_cast<ধ্রুব বর্ণ *>(Src.data()),
+                           Src.size() * পরিমাণ(UTF32)),
       Out);
 }
 
-bool convertUTF8ToUTF16String(StringRef SrcUTF8,
+তার্কিক convertUTF8ToUTF16String(StringRef SrcUTF8,
                               SmallVectorImpl<UTF16> &DstUTF16) {
-  assert(DstUTF16.empty());
+  প্রতিজ্ঞা(DstUTF16.empty());
 
   // Avoid OOB by returning early on empty input.
-  if (SrcUTF8.empty()) {
-    DstUTF16.push_back(0);
-    DstUTF16.pop_back();
-    return true;
+  যদি (SrcUTF8.empty()) {
+    DstUTF16.ঠেলো_back(0);
+    DstUTF16.বের_করো_back();
+    প্রত্যাগম সত্য;
   }
 
-  const UTF8 *Src = reinterpret_cast<const UTF8 *>(SrcUTF8.begin());
-  const UTF8 *SrcEnd = reinterpret_cast<const UTF8 *>(SrcUTF8.end());
+  ধ্রুব UTF8 *Src = reinterpret_cast<ধ্রুব UTF8 *>(SrcUTF8.begin());
+  ধ্রুব UTF8 *SrcEnd = reinterpret_cast<ধ্রুব UTF8 *>(SrcUTF8.end());
 
   // Allocate the same number of UTF-16 code units as UTF-8 code units. Encoding
   // as UTF-16 should always require the same amount or less code units than the
@@ -222,96 +222,96 @@ bool convertUTF8ToUTF16String(StringRef SrcUTF8,
 
   ConversionResult CR =
       ConvertUTF8toUTF16(&Src, SrcEnd, &Dst, DstEnd, strictConversion);
-  assert(CR != targetExhausted);
+  প্রতিজ্ঞা(CR != targetExhausted);
 
-  if (CR != conversionOK) {
+  যদি (CR != conversionOK) {
     DstUTF16.clear();
-    return false;
+    প্রত্যাগম অসত্য;
   }
 
   DstUTF16.resize(Dst - &DstUTF16[0]);
-  DstUTF16.push_back(0);
-  DstUTF16.pop_back();
-  return true;
+  DstUTF16.ঠেলো_back(0);
+  DstUTF16.বের_করো_back();
+  প্রত্যাগম সত্য;
 }
 
-static_assert(sizeof(wchar_t) == 1 || sizeof(wchar_t) == 2 ||
-                  sizeof(wchar_t) == 4,
+static_assert(পরিমাণ(wchar_t) == 1 || পরিমাণ(wchar_t) == 2 ||
+                  পরিমাণ(wchar_t) == 4,
               "Expected wchar_t to be 1, 2, or 4 bytes");
 
 template <typename TResult>
-static inline bool ConvertUTF8toWideInternal(llvm::StringRef Source,
+স্থির অন্তঃস্থ তার্কিক ConvertUTF8toWideInternal(llvm::StringRef Source,
                                              TResult &Result) {
   // Even in the case of UTF-16, the number of bytes in a UTF-8 string is
   // at least as large as the number of elements in the resulting wide
   // string, because surrogate pairs take at least 4 bytes in UTF-8.
   Result.resize(Source.size() + 1);
-  char *ResultPtr = reinterpret_cast<char *>(&Result[0]);
-  const UTF8 *ErrorPtr;
-  if (!ConvertUTF8toWide(sizeof(wchar_t), Source, ResultPtr, ErrorPtr)) {
+  বর্ণ *ResultPtr = reinterpret_cast<বর্ণ *>(&Result[0]);
+  ধ্রুব UTF8 *ErrorPtr;
+  যদি (!ConvertUTF8toWide(পরিমাণ(wchar_t), Source, ResultPtr, ErrorPtr)) {
     Result.clear();
-    return false;
+    প্রত্যাগম অসত্য;
   }
   Result.resize(reinterpret_cast<wchar_t *>(ResultPtr) - &Result[0]);
-  return true;
+  প্রত্যাগম সত্য;
 }
 
-bool ConvertUTF8toWide(llvm::StringRef Source, std::wstring &Result) {
-  return ConvertUTF8toWideInternal(Source, Result);
+তার্কিক ConvertUTF8toWide(llvm::StringRef Source, std::wstring &Result) {
+  প্রত্যাগম ConvertUTF8toWideInternal(Source, Result);
 }
 
-bool ConvertUTF8toWide(const char *Source, std::wstring &Result) {
-  if (!Source) {
+তার্কিক ConvertUTF8toWide(ধ্রুব বর্ণ *Source, std::wstring &Result) {
+  যদি (!Source) {
     Result.clear();
-    return true;
+    প্রত্যাগম সত্য;
   }
-  return ConvertUTF8toWide(llvm::StringRef(Source), Result);
+  প্রত্যাগম ConvertUTF8toWide(llvm::StringRef(Source), Result);
 }
 
-bool convertWideToUTF8(std::wstring_view Source, std::string &Result) {
-  if (sizeof(wchar_t) == 1) {
-    const UTF8 *Start = reinterpret_cast<const UTF8 *>(Source.data());
-    const UTF8 *End =
-        reinterpret_cast<const UTF8 *>(Source.data() + Source.size());
-    if (!isLegalUTF8String(&Start, End))
-      return false;
+তার্কিক convertWideToUTF8(std::wstring_view Source, std::string &Result) {
+  যদি (পরিমাণ(wchar_t) == 1) {
+    ধ্রুব UTF8 *Start = reinterpret_cast<ধ্রুব UTF8 *>(Source.data());
+    ধ্রুব UTF8 *End =
+        reinterpret_cast<ধ্রুব UTF8 *>(Source.data() + Source.size());
+    যদি (!isLegalUTF8String(&Start, End))
+      প্রত্যাগম অসত্য;
     Result.resize(Source.size());
     memcpy(&Result[0], Source.data(), Source.size());
-    return true;
-  } else if (sizeof(wchar_t) == 2) {
-    return convertUTF16ToUTF8String(
-        llvm::ArrayRef<UTF16>(reinterpret_cast<const UTF16 *>(Source.data()),
+    প্রত্যাগম সত্য;
+  } অন্যথা যদি (পরিমাণ(wchar_t) == 2) {
+    প্রত্যাগম convertUTF16ToUTF8String(
+        llvm::ArrayRef<UTF16>(reinterpret_cast<ধ্রুব UTF16 *>(Source.data()),
                               Source.size()),
         Result);
-  } else if (sizeof(wchar_t) == 4) {
-    const UTF32 *Start = reinterpret_cast<const UTF32 *>(Source.data());
-    const UTF32 *End =
-        reinterpret_cast<const UTF32 *>(Source.data() + Source.size());
+  } অন্যথা যদি (পরিমাণ(wchar_t) == 4) {
+    ধ্রুব UTF32 *Start = reinterpret_cast<ধ্রুব UTF32 *>(Source.data());
+    ধ্রুব UTF32 *End =
+        reinterpret_cast<ধ্রুব UTF32 *>(Source.data() + Source.size());
     Result.resize(UNI_MAX_UTF8_BYTES_PER_CODE_POINT * Source.size());
     UTF8 *ResultPtr = reinterpret_cast<UTF8 *>(&Result[0]);
     UTF8 *ResultEnd = reinterpret_cast<UTF8 *>(&Result[0] + Result.size());
-    if (ConvertUTF32toUTF8(&Start, End, &ResultPtr, ResultEnd,
+    যদি (ConvertUTF32toUTF8(&Start, End, &ResultPtr, ResultEnd,
                            strictConversion) == conversionOK) {
-      Result.resize(reinterpret_cast<char *>(ResultPtr) - &Result[0]);
-      return true;
-    } else {
+      Result.resize(reinterpret_cast<বর্ণ *>(ResultPtr) - &Result[0]);
+      প্রত্যাগম সত্য;
+    } অন্যথা {
       Result.clear();
-      return false;
+      প্রত্যাগম অসত্য;
     }
-  } else {
+  } অন্যথা {
     llvm_unreachable(
         "Control should never reach this point; see static_assert further up");
   }
 }
 
-bool IsSingleCodeUnitUTF8Codepoint(unsigned V) { return V <= 0x7F; }
+তার্কিক IsSingleCodeUnitUTF8Codepoint(unsigned V) { প্রত্যাগম V <= 0x7F; }
 
-bool IsSingleCodeUnitUTF16Codepoint(unsigned V) {
-  return V <= 0xD7FF || (V >= 0xE000 && V <= 0xFFFF);
+তার্কিক IsSingleCodeUnitUTF16Codepoint(unsigned V) {
+  প্রত্যাগম V <= 0xD7FF || (V >= 0xE000 && V <= 0xFFFF);
 }
 
-bool IsSingleCodeUnitUTF32Codepoint(unsigned V) {
-  return V <= 0xD7FF || (V >= 0xE000 && V <= 0x10FFFF);
+তার্কিক IsSingleCodeUnitUTF32Codepoint(unsigned V) {
+  প্রত্যাগম V <= 0xD7FF || (V >= 0xE000 && V <= 0x10FFFF);
 }
 
 } // end namespace llvm

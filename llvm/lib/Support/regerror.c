@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <ctype.h>
+#অন্তর্ভাব <limits.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব "regex_impl.h"
 
-#include "regutils.h"
+#অন্তর্ভাব "regutils.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+স্থির ধ্রুব বর্ণ *regatoi(ধ্রুব llvm_regex_t *, বর্ণ *, পূর্ণাঙ্ক);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+স্থির সংরচনা rerr {
+	পূর্ণাঙ্ক code;
+	ধ্রুব বর্ণ *name;
+	ধ্রুব বর্ণ *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(পূর্ণাঙ্ক errcode, ধ্রুব llvm_regex_t *preg, বর্ণ *errbuf, size_t errbuf_size)
 {
-	struct rerr *r;
+	সংরচনা rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	পূর্ণাঙ্ক target = errcode &~ REG_ITOA;
+	ধ্রুব বর্ণ *s;
+	বর্ণ convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	যদি (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, পরিমাণ convbuf);
+	অন্যথা {
+		প্রতি (r = rerrs; r->code != 0; r++)
+			যদি (r->code == target)
+				ভঙ্গ;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
+		যদি (errcode&REG_ITOA) {
+			যদি (r->code != 0) {
+				প্রতিজ্ঞা(strlen(r->name) < পরিমাণ(convbuf));
+				(শূন্য) llvm_strlcpy(convbuf, r->name, পরিমাণ convbuf);
+			} অন্যথা
+				(শূন্য)snprintf(convbuf, পরিমাণ convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} অন্যথা
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	যদি (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	প্রত্যাগম(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+স্থির ধ্রুব বর্ণ *
+regatoi(ধ্রুব llvm_regex_t *preg, বর্ণ *localbuf, পূর্ণাঙ্ক localbufsize)
 {
-	struct rerr *r;
+	সংরচনা rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	প্রতি (r = rerrs; r->code != 0; r++)
+		যদি (strcmp(r->name, preg->re_endp) == 0)
+			ভঙ্গ;
+	যদি (r->code == 0)
+		প্রত্যাগম("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(শূন্য)snprintf(localbuf, localbufsize, "%d", r->code);
+	প্রত্যাগম(localbuf);
 }

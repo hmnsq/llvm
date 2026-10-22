@@ -6,116 +6,116 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SlowDynamicAPInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব "llvm/ADT/SlowDynamicAPInt.h"
+#অন্তর্ভাব "llvm/ADT/Hashing.h"
+#অন্তর্ভাব "llvm/Support/Debug.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::detail;
+using নামাকাশ llvm;
+using নামাকাশ llvm::detail;
 
 SlowDynamicAPInt::SlowDynamicAPInt(int64_t Val)
-    : Val(64, Val, /*isSigned=*/true) {}
+    : Val(64, Val, /*isSigned=*/সত্য) {}
 SlowDynamicAPInt::SlowDynamicAPInt() : SlowDynamicAPInt(0) {}
-SlowDynamicAPInt::SlowDynamicAPInt(const APInt &Val) : Val(Val) {}
+SlowDynamicAPInt::SlowDynamicAPInt(ধ্রুব APInt &Val) : Val(Val) {}
 SlowDynamicAPInt &SlowDynamicAPInt::operator=(int64_t Val) {
-  return *this = SlowDynamicAPInt(Val);
+  প্রত্যাগম *এতত্ = SlowDynamicAPInt(Val);
 }
-SlowDynamicAPInt::operator int64_t() const { return Val.getSExtValue(); }
+SlowDynamicAPInt::operator int64_t() ধ্রুব { প্রত্যাগম Val.get_SExt_মান(); }
 
-hash_code llvm::detail::hash_value(const SlowDynamicAPInt &X) {
-  return hash_value(X.Val);
+hash_code llvm::detail::hash_মান(ধ্রুব SlowDynamicAPInt &X) {
+  প্রত্যাগম hash_মান(X.Val);
 }
 
 /// ---------------------------------------------------------------------------
 /// Convenience operator overloads for int64_t.
 /// ---------------------------------------------------------------------------
 SlowDynamicAPInt &llvm::detail::operator+=(SlowDynamicAPInt &A, int64_t B) {
-  return A += SlowDynamicAPInt(B);
+  প্রত্যাগম A += SlowDynamicAPInt(B);
 }
 SlowDynamicAPInt &llvm::detail::operator-=(SlowDynamicAPInt &A, int64_t B) {
-  return A -= SlowDynamicAPInt(B);
+  প্রত্যাগম A -= SlowDynamicAPInt(B);
 }
 SlowDynamicAPInt &llvm::detail::operator*=(SlowDynamicAPInt &A, int64_t B) {
-  return A *= SlowDynamicAPInt(B);
+  প্রত্যাগম A *= SlowDynamicAPInt(B);
 }
 SlowDynamicAPInt &llvm::detail::operator/=(SlowDynamicAPInt &A, int64_t B) {
-  return A /= SlowDynamicAPInt(B);
+  প্রত্যাগম A /= SlowDynamicAPInt(B);
 }
 SlowDynamicAPInt &llvm::detail::operator%=(SlowDynamicAPInt &A, int64_t B) {
-  return A %= SlowDynamicAPInt(B);
+  প্রত্যাগম A %= SlowDynamicAPInt(B);
 }
 
-bool llvm::detail::operator==(const SlowDynamicAPInt &A, int64_t B) {
-  return A == SlowDynamicAPInt(B);
+তার্কিক llvm::detail::operator==(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A == SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator!=(const SlowDynamicAPInt &A, int64_t B) {
-  return A != SlowDynamicAPInt(B);
+তার্কিক llvm::detail::operator!=(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A != SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator>(const SlowDynamicAPInt &A, int64_t B) {
-  return A > SlowDynamicAPInt(B);
+তার্কিক llvm::detail::operator>(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A > SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator<(const SlowDynamicAPInt &A, int64_t B) {
-  return A < SlowDynamicAPInt(B);
+তার্কিক llvm::detail::operator<(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A < SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator<=(const SlowDynamicAPInt &A, int64_t B) {
-  return A <= SlowDynamicAPInt(B);
+তার্কিক llvm::detail::operator<=(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A <= SlowDynamicAPInt(B);
 }
-bool llvm::detail::operator>=(const SlowDynamicAPInt &A, int64_t B) {
-  return A >= SlowDynamicAPInt(B);
+তার্কিক llvm::detail::operator>=(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A >= SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator+(const SlowDynamicAPInt &A, int64_t B) {
-  return A + SlowDynamicAPInt(B);
+SlowDynamicAPInt llvm::detail::operator+(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A + SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator-(const SlowDynamicAPInt &A, int64_t B) {
-  return A - SlowDynamicAPInt(B);
+SlowDynamicAPInt llvm::detail::operator-(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A - SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator*(const SlowDynamicAPInt &A, int64_t B) {
-  return A * SlowDynamicAPInt(B);
+SlowDynamicAPInt llvm::detail::operator*(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A * SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator/(const SlowDynamicAPInt &A, int64_t B) {
-  return A / SlowDynamicAPInt(B);
+SlowDynamicAPInt llvm::detail::operator/(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A / SlowDynamicAPInt(B);
 }
-SlowDynamicAPInt llvm::detail::operator%(const SlowDynamicAPInt &A, int64_t B) {
-  return A % SlowDynamicAPInt(B);
-}
-
-bool llvm::detail::operator==(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) == B;
-}
-bool llvm::detail::operator!=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) != B;
-}
-bool llvm::detail::operator>(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) > B;
-}
-bool llvm::detail::operator<(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) < B;
-}
-bool llvm::detail::operator<=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) <= B;
-}
-bool llvm::detail::operator>=(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) >= B;
-}
-SlowDynamicAPInt llvm::detail::operator+(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) + B;
-}
-SlowDynamicAPInt llvm::detail::operator-(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) - B;
-}
-SlowDynamicAPInt llvm::detail::operator*(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) * B;
-}
-SlowDynamicAPInt llvm::detail::operator/(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) / B;
-}
-SlowDynamicAPInt llvm::detail::operator%(int64_t A, const SlowDynamicAPInt &B) {
-  return SlowDynamicAPInt(A) % B;
+SlowDynamicAPInt llvm::detail::operator%(ধ্রুব SlowDynamicAPInt &A, int64_t B) {
+  প্রত্যাগম A % SlowDynamicAPInt(B);
 }
 
-static unsigned getMaxWidth(const APInt &A, const APInt &B) {
-  return std::max(A.getBitWidth(), B.getBitWidth());
+তার্কিক llvm::detail::operator==(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) == B;
+}
+তার্কিক llvm::detail::operator!=(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) != B;
+}
+তার্কিক llvm::detail::operator>(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) > B;
+}
+তার্কিক llvm::detail::operator<(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) < B;
+}
+তার্কিক llvm::detail::operator<=(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) <= B;
+}
+তার্কিক llvm::detail::operator>=(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) >= B;
+}
+SlowDynamicAPInt llvm::detail::operator+(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) + B;
+}
+SlowDynamicAPInt llvm::detail::operator-(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) - B;
+}
+SlowDynamicAPInt llvm::detail::operator*(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) * B;
+}
+SlowDynamicAPInt llvm::detail::operator/(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) / B;
+}
+SlowDynamicAPInt llvm::detail::operator%(int64_t A, ধ্রুব SlowDynamicAPInt &B) {
+  প্রত্যাগম SlowDynamicAPInt(A) % B;
+}
+
+স্থির unsigned getMaxWidth(ধ্রুব APInt &A, ধ্রুব APInt &B) {
+  প্রত্যাগম std::max(A.getBitWidth(), B.getBitWidth());
 }
 
 /// ---------------------------------------------------------------------------
@@ -123,29 +123,29 @@ static unsigned getMaxWidth(const APInt &A, const APInt &B) {
 /// ---------------------------------------------------------------------------
 
 // TODO: consider instead making APInt::compare available and using that.
-bool SlowDynamicAPInt::operator==(const SlowDynamicAPInt &O) const {
+তার্কিক SlowDynamicAPInt::operator==(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width) == O.Val.sext(Width);
+  প্রত্যাগম Val.sext(Width) == O.Val.sext(Width);
 }
-bool SlowDynamicAPInt::operator!=(const SlowDynamicAPInt &O) const {
+তার্কিক SlowDynamicAPInt::operator!=(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width) != O.Val.sext(Width);
+  প্রত্যাগম Val.sext(Width) != O.Val.sext(Width);
 }
-bool SlowDynamicAPInt::operator>(const SlowDynamicAPInt &O) const {
+তার্কিক SlowDynamicAPInt::operator>(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sgt(O.Val.sext(Width));
+  প্রত্যাগম Val.sext(Width).sgt(O.Val.sext(Width));
 }
-bool SlowDynamicAPInt::operator<(const SlowDynamicAPInt &O) const {
+তার্কিক SlowDynamicAPInt::operator<(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).slt(O.Val.sext(Width));
+  প্রত্যাগম Val.sext(Width).slt(O.Val.sext(Width));
 }
-bool SlowDynamicAPInt::operator<=(const SlowDynamicAPInt &O) const {
+তার্কিক SlowDynamicAPInt::operator<=(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sle(O.Val.sext(Width));
+  প্রত্যাগম Val.sext(Width).sle(O.Val.sext(Width));
 }
-bool SlowDynamicAPInt::operator>=(const SlowDynamicAPInt &O) const {
+তার্কিক SlowDynamicAPInt::operator>=(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = getMaxWidth(Val, O.Val);
-  return Val.sext(Width).sge(O.Val.sext(Width));
+  প্রত্যাগম Val.sext(Width).sge(O.Val.sext(Width));
 }
 
 /// ---------------------------------------------------------------------------
@@ -157,132 +157,132 @@ bool SlowDynamicAPInt::operator>=(const SlowDynamicAPInt &O) const {
 /// call op(a, b, overflow), returning its result. The operation with double
 /// widths should not also overflow.
 APInt runOpWithExpandOnOverflow(
-    const APInt &A, const APInt &B,
-    function_ref<APInt(const APInt &, const APInt &, bool &Overflow)> Op) {
-  bool Overflow;
+    ধ্রুব APInt &A, ধ্রুব APInt &B,
+    function_ref<APInt(ধ্রুব APInt &, ধ্রুব APInt &, তার্কিক &Overflow)> Op) {
+  তার্কিক Overflow;
   unsigned Width = getMaxWidth(A, B);
   APInt Ret = Op(A.sext(Width), B.sext(Width), Overflow);
-  if (!Overflow)
-    return Ret;
+  যদি (!Overflow)
+    প্রত্যাগম Ret;
 
   Width *= 2;
   Ret = Op(A.sext(Width), B.sext(Width), Overflow);
-  assert(!Overflow && "double width should be sufficient to avoid overflow!");
-  return Ret;
+  প্রতিজ্ঞা(!Overflow && "double width should be sufficient to avoid overflow!");
+  প্রত্যাগম Ret;
 }
 
-SlowDynamicAPInt SlowDynamicAPInt::operator+(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
+SlowDynamicAPInt SlowDynamicAPInt::operator+(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
+  প্রত্যাগম SlowDynamicAPInt(
       runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::sadd_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator-(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
+SlowDynamicAPInt SlowDynamicAPInt::operator-(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
+  প্রত্যাগম SlowDynamicAPInt(
       runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::ssub_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator*(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
+SlowDynamicAPInt SlowDynamicAPInt::operator*(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
+  প্রত্যাগম SlowDynamicAPInt(
       runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::smul_ov)));
 }
-SlowDynamicAPInt SlowDynamicAPInt::operator/(const SlowDynamicAPInt &O) const {
-  return SlowDynamicAPInt(
+SlowDynamicAPInt SlowDynamicAPInt::operator/(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
+  প্রত্যাগম SlowDynamicAPInt(
       runOpWithExpandOnOverflow(Val, O.Val, std::mem_fn(&APInt::sdiv_ov)));
 }
-SlowDynamicAPInt llvm::detail::abs(const SlowDynamicAPInt &X) {
-  return X >= 0 ? X : -X;
+SlowDynamicAPInt llvm::detail::abs(ধ্রুব SlowDynamicAPInt &X) {
+  প্রত্যাগম X >= 0 ? X : -X;
 }
-SlowDynamicAPInt llvm::detail::ceilDiv(const SlowDynamicAPInt &LHS,
-                                       const SlowDynamicAPInt &RHS) {
-  if (RHS == -1)
-    return -LHS;
+SlowDynamicAPInt llvm::detail::ceilDiv(ধ্রুব SlowDynamicAPInt &LHS,
+                                       ধ্রুব SlowDynamicAPInt &RHS) {
+  যদি (RHS == -1)
+    প্রত্যাগম -LHS;
   unsigned Width = getMaxWidth(LHS.Val, RHS.Val);
-  return SlowDynamicAPInt(APIntOps::RoundingSDiv(
+  প্রত্যাগম SlowDynamicAPInt(APIntOps::RoundingSDiv(
       LHS.Val.sext(Width), RHS.Val.sext(Width), APInt::Rounding::UP));
 }
-SlowDynamicAPInt llvm::detail::floorDiv(const SlowDynamicAPInt &LHS,
-                                        const SlowDynamicAPInt &RHS) {
-  if (RHS == -1)
-    return -LHS;
+SlowDynamicAPInt llvm::detail::floorDiv(ধ্রুব SlowDynamicAPInt &LHS,
+                                        ধ্রুব SlowDynamicAPInt &RHS) {
+  যদি (RHS == -1)
+    প্রত্যাগম -LHS;
   unsigned Width = getMaxWidth(LHS.Val, RHS.Val);
-  return SlowDynamicAPInt(APIntOps::RoundingSDiv(
+  প্রত্যাগম SlowDynamicAPInt(APIntOps::RoundingSDiv(
       LHS.Val.sext(Width), RHS.Val.sext(Width), APInt::Rounding::DOWN));
 }
 // The RHS is always expected to be positive, and the result
 /// is always non-negative.
-SlowDynamicAPInt llvm::detail::mod(const SlowDynamicAPInt &LHS,
-                                   const SlowDynamicAPInt &RHS) {
-  assert(RHS >= 1 && "mod is only supported for positive divisors!");
-  return LHS % RHS < 0 ? LHS % RHS + RHS : LHS % RHS;
+SlowDynamicAPInt llvm::detail::mod(ধ্রুব SlowDynamicAPInt &LHS,
+                                   ধ্রুব SlowDynamicAPInt &RHS) {
+  প্রতিজ্ঞা(RHS >= 1 && "mod is only supported for positive divisors!");
+  প্রত্যাগম LHS % RHS < 0 ? LHS % RHS + RHS : LHS % RHS;
 }
 
-SlowDynamicAPInt llvm::detail::gcd(const SlowDynamicAPInt &A,
-                                   const SlowDynamicAPInt &B) {
-  assert(A >= 0 && B >= 0 && "operands must be non-negative!");
+SlowDynamicAPInt llvm::detail::gcd(ধ্রুব SlowDynamicAPInt &A,
+                                   ধ্রুব SlowDynamicAPInt &B) {
+  প্রতিজ্ঞা(A >= 0 && B >= 0 && "operands must be non-negative!");
   unsigned Width = getMaxWidth(A.Val, B.Val);
-  return SlowDynamicAPInt(
-      APIntOps::GreatestCommonDivisor(A.Val.sext(Width), B.Val.sext(Width)));
+  প্রত্যাগম SlowDynamicAPInt(
+      APIntOps::Greatest_Common_ভাজক(A.Val.sext(Width), B.Val.sext(Width)));
 }
 
 /// Returns the least common multiple of A and B.
-SlowDynamicAPInt llvm::detail::lcm(const SlowDynamicAPInt &A,
-                                   const SlowDynamicAPInt &B) {
+SlowDynamicAPInt llvm::detail::lcm(ধ্রুব SlowDynamicAPInt &A,
+                                   ধ্রুব SlowDynamicAPInt &B) {
   SlowDynamicAPInt X = abs(A);
   SlowDynamicAPInt Y = abs(B);
-  return (X * Y) / gcd(X, Y);
+  প্রত্যাগম (X * Y) / gcd(X, Y);
 }
 
 /// This operation cannot overflow.
-SlowDynamicAPInt SlowDynamicAPInt::operator%(const SlowDynamicAPInt &O) const {
+SlowDynamicAPInt SlowDynamicAPInt::operator%(ধ্রুব SlowDynamicAPInt &O) ধ্রুব {
   unsigned Width = std::max(Val.getBitWidth(), O.Val.getBitWidth());
-  return SlowDynamicAPInt(Val.sext(Width).srem(O.Val.sext(Width)));
+  প্রত্যাগম SlowDynamicAPInt(Val.sext(Width).srem(O.Val.sext(Width)));
 }
 
-SlowDynamicAPInt SlowDynamicAPInt::operator-() const {
-  if (Val.isMinSignedValue()) {
+SlowDynamicAPInt SlowDynamicAPInt::operator-() ধ্রুব {
+  যদি (Val.is_Min_Signed_মান()) {
     /// Overflow only occurs when the value is the minimum possible value.
     APInt Ret = Val.sext(2 * Val.getBitWidth());
-    return SlowDynamicAPInt(-Ret);
+    প্রত্যাগম SlowDynamicAPInt(-Ret);
   }
-  return SlowDynamicAPInt(-Val);
+  প্রত্যাগম SlowDynamicAPInt(-Val);
 }
 
 /// ---------------------------------------------------------------------------
 /// Assignment operators, preincrement, predecrement.
 /// ---------------------------------------------------------------------------
-SlowDynamicAPInt &SlowDynamicAPInt::operator+=(const SlowDynamicAPInt &O) {
-  *this = *this + O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::operator+=(ধ্রুব SlowDynamicAPInt &O) {
+  *এতত্ = *এতত্ + O;
+  প্রত্যাগম *এতত্;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator-=(const SlowDynamicAPInt &O) {
-  *this = *this - O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::operator-=(ধ্রুব SlowDynamicAPInt &O) {
+  *এতত্ = *এতত্ - O;
+  প্রত্যাগম *এতত্;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator*=(const SlowDynamicAPInt &O) {
-  *this = *this * O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::operator*=(ধ্রুব SlowDynamicAPInt &O) {
+  *এতত্ = *এতত্ * O;
+  প্রত্যাগম *এতত্;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator/=(const SlowDynamicAPInt &O) {
-  *this = *this / O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::operator/=(ধ্রুব SlowDynamicAPInt &O) {
+  *এতত্ = *এতত্ / O;
+  প্রত্যাগম *এতত্;
 }
-SlowDynamicAPInt &SlowDynamicAPInt::operator%=(const SlowDynamicAPInt &O) {
-  *this = *this % O;
-  return *this;
+SlowDynamicAPInt &SlowDynamicAPInt::operator%=(ধ্রুব SlowDynamicAPInt &O) {
+  *এতত্ = *এতত্ % O;
+  প্রত্যাগম *এতত্;
 }
 SlowDynamicAPInt &SlowDynamicAPInt::operator++() {
-  *this += 1;
-  return *this;
+  *এতত্ += 1;
+  প্রত্যাগম *এতত্;
 }
 
 SlowDynamicAPInt &SlowDynamicAPInt::operator--() {
-  *this -= 1;
-  return *this;
+  *এতত্ -= 1;
+  প্রত্যাগম *এতত্;
 }
 
 /// ---------------------------------------------------------------------------
 /// Printing.
 /// ---------------------------------------------------------------------------
-void SlowDynamicAPInt::print(raw_ostream &OS) const { OS << Val; }
+শূন্য SlowDynamicAPInt::print(raw_ostream &OS) ধ্রুব { OS << Val; }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void SlowDynamicAPInt::dump() const { print(dbgs()); }
+#যদি !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD শূন্য SlowDynamicAPInt::dump() ধ্রুব { print(dbgs()); }
 #endif

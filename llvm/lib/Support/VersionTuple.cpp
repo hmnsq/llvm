@@ -11,129 +11,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#অন্তর্ভাব "llvm/Support/VersionTuple.h"
+#অন্তর্ভাব "llvm/ADT/StringRef.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব <cassert>
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-std::string VersionTuple::getAsString() const {
+std::string VersionTuple::getAsString() ধ্রুব {
   std::string Result;
   {
     llvm::raw_string_ostream Out(Result);
-    Out << *this;
+    Out << *এতত্;
   }
-  return Result;
+  প্রত্যাগম Result;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
+raw_ostream &llvm::operator<<(raw_ostream &Out, ধ্রুব VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  যদি (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  যদি (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  যদি (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  যদি (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  প্রত্যাগম Out;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
-    return true;
+স্থির তার্কিক parseInt(StringRef &প্রবেশ_2, unsigned &মান_2) {
+  প্রতিজ্ঞা(মান_2 == 0);
+  যদি (প্রবেশ_2.empty())
+    প্রত্যাগম সত্য;
 
-  char next = input[0];
-  input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
-  value = (unsigned)(next - '0');
+  বর্ণ next = প্রবেশ_2[0];
+  প্রবেশ_2 = প্রবেশ_2.substr(1);
+  যদি (next < '0' || next > '9')
+    প্রত্যাগম সত্য;
+  মান_2 = (unsigned)(next - '0');
 
-  while (!input.empty()) {
-    next = input[0];
-    if (next < '0' || next > '9')
-      return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+  যাবত্ (!প্রবেশ_2.empty()) {
+    next = প্রবেশ_2[0];
+    যদি (next < '0' || next > '9')
+      প্রত্যাগম অসত্য;
+    প্রবেশ_2 = প্রবেশ_2.substr(1);
+    মান_2 = মান_2 * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  প্রত্যাগম অসত্য;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
+তার্কিক VersionTuple::tryParse(StringRef প্রবেশ_2) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  যদি (parseInt(প্রবেশ_2, major))
+    প্রত্যাগম সত্য;
 
-  if (input.empty()) {
-    *this = VersionTuple(major);
-    return false;
+  যদি (প্রবেশ_2.empty()) {
+    *এতত্ = VersionTuple(major);
+    প্রত্যাগম অসত্য;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  যদি (প্রবেশ_2[0] != '.')
+    প্রত্যাগম সত্য;
+  প্রবেশ_2 = প্রবেশ_2.substr(1);
+  যদি (parseInt(প্রবেশ_2, minor))
+    প্রত্যাগম সত্য;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor);
-    return false;
+  যদি (প্রবেশ_2.empty()) {
+    *এতত্ = VersionTuple(major, minor);
+    প্রত্যাগম অসত্য;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  যদি (!প্রবেশ_2.consume_front("."))
+    প্রত্যাগম সত্য;
+  যদি (parseInt(প্রবেশ_2, subminor))
+    প্রত্যাগম সত্য;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor);
-    return false;
+  যদি (প্রবেশ_2.empty()) {
+    *এতত্ = VersionTuple(major, minor, subminor);
+    প্রত্যাগম অসত্য;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  যদি (!প্রবেশ_2.consume_front("."))
+    প্রত্যাগম সত্য;
+  যদি (parseInt(প্রবেশ_2, build))
+    প্রত্যাগম সত্য;
+  যদি (build >= 1024 * 1024)
+    প্রত্যাগম সত্য;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor, build);
-    return false;
+  যদি (প্রবেশ_2.empty()) {
+    *এতত্ = VersionTuple(major, minor, subminor, build);
+    প্রত্যাগম অসত্য;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  যদি (!প্রবেশ_2.consume_front("."))
+    প্রত্যাগম সত্য;
+  যদি (parseInt(প্রবেশ_2, subbuild))
+    প্রত্যাগম সত্য;
+  যদি (subbuild >= 1024)
+    প্রত্যাগম সত্য;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  যদি (!প্রবেশ_2.empty())
+    প্রত্যাগম সত্য;
 
-  *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  *এতত্ = VersionTuple(major, minor, subminor, build, subbuild);
+  প্রত্যাগম অসত্য;
 }
 
-VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) ধ্রুব {
+  যদি (HasSubbuild)
+    প্রত্যাগম VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  যদি (HasBuild)
+    প্রত্যাগম VersionTuple(NewMajor, Minor, Subminor, Build);
+  যদি (HasSubminor)
+    প্রত্যাগম VersionTuple(NewMajor, Minor, Subminor);
+  যদি (HasMinor)
+    প্রত্যাগম VersionTuple(NewMajor, Minor);
+  প্রত্যাগম VersionTuple(NewMajor);
 }

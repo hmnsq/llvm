@@ -6,55 +6,55 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Parallel.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/ExponentialBackoff.h"
-#include "llvm/Support/Jobserver.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Threading.h"
+#অন্তর্ভাব "llvm/Support/Parallel.h"
+#অন্তর্ভাব "llvm/ADT/ScopeExit.h"
+#অন্তর্ভাব "llvm/Config/llvm-config.h"
+#অন্তর্ভাব "llvm/Support/ExponentialBackoff.h"
+#অন্তর্ভাব "llvm/Support/Jobserver.h"
+#অন্তর্ভাব "llvm/Support/ManagedStatic.h"
+#অন্তর্ভাব "llvm/Support/Threading.h"
 
-#include <atomic>
-#include <future>
-#include <memory>
-#include <mutex>
-#include <thread>
-#include <vector>
+#অন্তর্ভাব <atomic>
+#অন্তর্ভাব <future>
+#অন্তর্ভাব <memory>
+#অন্তর্ভাব <mutex>
+#অন্তর্ভাব <thread>
+#অন্তর্ভাব <vector>
 
-using namespace llvm;
-using namespace llvm::parallel;
+using নামাকাশ llvm;
+using নামাকাশ llvm::parallel;
 
 llvm::ThreadPoolStrategy parallel::strategy;
 
-#if LLVM_ENABLE_THREADS
+#যদি LLVM_ENABLE_THREADS
 
-static thread_local unsigned threadIndex = UINT_MAX;
+স্থির thread_local unsigned threadIndex = UINT_MAX;
 
-namespace {
+নামাকাশ {
 
 /// Runs closures on a thread pool in filo order.
-class ThreadPoolExecutor {
-public:
+বর্গ ThreadPoolExecutor {
+সার্বজনিক:
   explicit ThreadPoolExecutor(ThreadPoolStrategy S) {
-    if (S.UseJobserver)
+    যদি (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
-    ThreadCount = S.compute_thread_count();
+    Thread_গুনতি = S.compute_thread_গুনতি();
     // Spawn all but one of the threads in another thread as spawning threads
     // can take a while.
-    Threads.reserve(ThreadCount);
+    Threads.reserve(Thread_গুনতি);
     Threads.resize(1);
     std::lock_guard<std::mutex> Lock(Mutex);
     // Use operator[] before creating the thread to avoid data race in .size()
     // in 'safe libc++' mode.
     auto &Thread0 = Threads[0];
-    Thread0 = std::thread([this, S] {
-      for (unsigned I = 1; I < ThreadCount; ++I) {
-        Threads.emplace_back([this, S, I] { work(S, I); });
-        if (Stop)
-          break;
+    Thread0 = std::thread([এতত্, S] {
+      প্রতি (unsigned I = 1; I < Thread_গুনতি; ++I) {
+        Threads.emplace_back([এতত্, S, I] { work(S, I); });
+        যদি (Stop)
+          ভঙ্গ;
       }
-      ThreadsCreated.set_value();
+      ThreadsCreated.set_মান();
       work(S, 0);
     });
   }
@@ -63,46 +63,46 @@ public:
   // strategy.
   ThreadPoolExecutor() = delete;
 
-  void stop() {
+  শূন্য stop() {
     {
       std::lock_guard<std::mutex> Lock(Mutex);
-      if (Stop)
-        return;
-      Stop = true;
+      যদি (Stop)
+        প্রত্যাগম;
+      Stop = সত্য;
     }
     Cond.notify_all();
     ThreadsCreated.get_future().wait();
 
     std::thread::id CurrentThreadId = std::this_thread::get_id();
-    for (std::thread &T : Threads)
-      if (T.get_id() == CurrentThreadId)
+    প্রতি (std::thread &T : Threads)
+      যদি (T.get_id() == CurrentThreadId)
         T.detach();
-      else
+      অন্যথা
         T.join();
   }
 
   ~ThreadPoolExecutor() { stop(); }
 
-  struct Creator {
-    static void *call() { return new ThreadPoolExecutor(strategy); }
+  সংরচনা Creator {
+    স্থির শূন্য *call() { প্রত্যাগম নূতন ThreadPoolExecutor(strategy); }
   };
-  struct Deleter {
-    static void call(void *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
+  সংরচনা Deleter {
+    স্থির শূন্য call(শূন্য *Ptr) { ((ThreadPoolExecutor *)Ptr)->stop(); }
   };
 
-  struct WorkItem {
-    std::function<void()> F;
+  সংরচনা WorkItem {
+    std::function<শূন্য()> F;
     std::reference_wrapper<parallel::detail::Latch> L;
-    void operator()() {
+    শূন্য operator()() {
       F();
       L.get().dec();
     }
   };
 
-  void add(std::function<void()> F, parallel::detail::Latch &L) {
+  শূন্য add(std::function<শূন্য()> F, parallel::detail::Latch &L) {
     {
       std::lock_guard<std::mutex> Lock(Mutex);
-      WorkStack.push_back({std::move(F), std::ref(L)});
+      Work_স্তূপ.ঠেলো_back({std::move(F), std::ref(L)});
     }
     Cond.notify_one();
   }
@@ -110,28 +110,28 @@ public:
   // Execute tasks from the work queue until the latch reaches zero.
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
-  void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
+  শূন্য helpSync(ধ্রুব parallel::detail::Latch &L) {
+    যাবত্ (L.get_গুনতি() != 0) {
       std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
-        return;
-      popAndRun(Lock);
+      যদি (Stop || Work_স্তূপ.empty())
+        প্রত্যাগম;
+      বের_করো_And_Run(Lock);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t get_Thread_গুনতি() ধ্রুব { প্রত্যাগম Thread_গুনতি; }
 
-private:
+গুপ্ত:
   // Pop one task from the queue and run it. Must be called with Lock held;
   // releases Lock before executing the task.
-  void popAndRun(std::unique_lock<std::mutex> &Lock) {
-    auto Item = std::move(WorkStack.back());
-    WorkStack.pop_back();
+  শূন্য বের_করো_And_Run(std::unique_lock<std::mutex> &Lock) {
+    auto Item = std::move(Work_স্তূপ.back());
+    Work_স্তূপ.বের_করো_back();
     Lock.unlock();
     Item();
   }
 
-  void work(ThreadPoolStrategy S, unsigned ThreadID) {
+  শূন্য work(ThreadPoolStrategy S, unsigned ThreadID) {
     threadIndex = ThreadID;
     S.apply_thread_strategy(ThreadID);
     // Note on jobserver deadlock avoidance:
@@ -140,8 +140,8 @@ private:
     // first successful tryAcquire() in a process. This guarantees forward
     // progress without requiring a dedicated "always-on" thread here.
 
-    while (true) {
-      if (TheJobserver) {
+    যাবত্ (সত্য) {
+      যদি (TheJobserver) {
         // Jobserver-mode scheduling:
         // - Acquire one job slot (with exponential backoff to avoid busy-wait).
         // - While holding the slot, drain and run tasks from the local queue.
@@ -153,127 +153,127 @@ private:
         // sequentially until the local queue is empty.
         ExponentialBackoff Backoff(std::chrono::hours(24));
         JobSlot Slot;
-        do {
-          if (Stop)
-            return;
+        কুরু {
+          যদি (Stop)
+            প্রত্যাগম;
           Slot = TheJobserver->tryAcquire();
-          if (Slot.isValid())
-            break;
-        } while (Backoff.waitForNextAttempt());
+          যদি (Slot.isValid())
+            ভঙ্গ;
+        } যাবত্ (Backoff.waitForNextAttempt());
 
         llvm::scope_exit SlotReleaser(
             [&] { TheJobserver->release(std::move(Slot)); });
 
-        while (true) {
+        যাবত্ (সত্য) {
           std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
-            return;
-          if (WorkStack.empty())
-            break;
-          popAndRun(Lock);
+          Cond.wait(Lock, [&] { প্রত্যাগম Stop || !Work_স্তূপ.empty(); });
+          যদি (Stop && Work_স্তূপ.empty())
+            প্রত্যাগম;
+          যদি (Work_স্তূপ.empty())
+            ভঙ্গ;
+          বের_করো_And_Run(Lock);
         }
-      } else {
+      } অন্যথা {
         std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-        if (Stop)
-          break;
-        popAndRun(Lock);
+        Cond.wait(Lock, [&] { প্রত্যাগম Stop || !Work_স্তূপ.empty(); });
+        যদি (Stop)
+          ভঙ্গ;
+        বের_করো_And_Run(Lock);
       }
     }
   }
 
-  std::atomic<bool> Stop{false};
-  std::vector<WorkItem> WorkStack;
+  std::atomic<তার্কিক> Stop{অসত্য};
+  std::vector<WorkItem> Work_স্তূপ;
   std::mutex Mutex;
   std::condition_variable Cond;
-  std::promise<void> ThreadsCreated;
+  std::promise<শূন্য> ThreadsCreated;
   std::vector<std::thread> Threads;
-  unsigned ThreadCount;
+  unsigned Thread_গুনতি;
 
   JobserverClient *TheJobserver = nullptr;
 };
 } // namespace
 
-static ThreadPoolExecutor *getDefaultExecutor() {
+স্থির ThreadPoolExecutor *getDefaultExecutor() {
 #ifdef _WIN32
   // The ManagedStatic enables the ThreadPoolExecutor to be stopped via
   // llvm_shutdown() on Windows. This is important to avoid various race
   // conditions at process exit that can cause crashes or deadlocks.
 
-  static ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
+  স্থির ManagedStatic<ThreadPoolExecutor, ThreadPoolExecutor::Creator,
                        ThreadPoolExecutor::Deleter>
       ManagedExec;
-  static std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
-  return Exec.get();
-#else
+  স্থির std::unique_ptr<ThreadPoolExecutor> Exec(&(*ManagedExec));
+  প্রত্যাগম Exec.get();
+#অন্যথা
   // ManagedStatic is not desired on other platforms. When `Exec` is destroyed
   // by llvm_shutdown(), worker threads will clean up and invoke TLS
   // destructors. This can lead to race conditions if other threads attempt to
   // access TLS objects that have already been destroyed.
-  static ThreadPoolExecutor Exec(strategy);
-  return &Exec;
+  স্থির ThreadPoolExecutor Exec(strategy);
+  প্রত্যাগম &Exec;
 #endif
 }
 
-size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+size_t parallel::get_Thread_গুনতি() {
+  প্রত্যাগম getDefaultExecutor()->get_Thread_গুনতি();
 }
 #endif
 
 TaskGroup::TaskGroup()
     : Parallel(
-#if LLVM_ENABLE_THREADS
+#যদি LLVM_ENABLE_THREADS
           strategy.ThreadsRequested != 1
-#else
-          false
+#অন্যথা
+          অসত্য
 #endif
       ) {
 }
 
 TaskGroup::~TaskGroup() {
-#if LLVM_ENABLE_THREADS
+#যদি LLVM_ENABLE_THREADS
   // In a nested TaskGroup (threadIndex != -1u), actively help drain the queue.
-  bool IsNested = threadIndex != UINT_MAX;
-  if (Parallel && IsNested)
+  তার্কিক IsNested = threadIndex != UINT_MAX;
+  যদি (Parallel && IsNested)
     getDefaultExecutor()->helpSync(L);
 #endif
-  L.sync();
+  L.সমকাল();
 }
 
-void TaskGroup::spawn(std::function<void()> F) {
-#if LLVM_ENABLE_THREADS
-  if (Parallel) {
+শূন্য TaskGroup::spawn(std::function<শূন্য()> F) {
+#যদি LLVM_ENABLE_THREADS
+  যদি (Parallel) {
     L.inc();
     getDefaultExecutor()->add(std::move(F), L);
-    return;
+    প্রত্যাগম;
   }
 #endif
   F();
 }
 
-void llvm::parallelFor(size_t Begin, size_t End,
-                       function_ref<void(size_t)> Fn) {
-#if LLVM_ENABLE_THREADS
-  if (strategy.ThreadsRequested != 1) {
-    size_t NumItems = End - Begin;
-    if (NumItems == 0)
-      return;
+শূন্য llvm::parallelFor(size_t Begin, size_t End,
+                       function_ref<শূন্য(size_t)> Fn) {
+#যদি LLVM_ENABLE_THREADS
+  যদি (strategy.ThreadsRequested != 1) {
+    size_t অঙ্ক_বস্তুসমূহ = End - Begin;
+    যদি (অঙ্ক_বস্তুসমূহ == 0)
+      প্রত্যাগম;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
     // While 2 vs 4 vs 8 makes no measurable difference, 4 is used as a
     // reasonable default.
-    size_t NumWorkers = std::min<size_t>(NumItems, getThreadCount());
-    size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
+    size_t অঙ্ক_Workers = std::min<size_t>(অঙ্ক_বস্তুসমূহ, get_Thread_গুনতি());
+    size_t ChunkSize = std::max(size_t(1), অঙ্ক_বস্তুসমূহ / (অঙ্ক_Workers * 4));
     std::atomic<size_t> Idx{Begin};
     auto Worker = [&] {
-      while (true) {
+      যাবত্ (সত্য) {
         size_t I = Idx.fetch_add(ChunkSize, std::memory_order_relaxed);
-        if (I >= End)
-          break;
+        যদি (I >= End)
+          ভঙ্গ;
         size_t IEnd = std::min(I + ChunkSize, End);
-        for (; I < IEnd; ++I)
+        প্রতি (; I < IEnd; ++I)
           Fn(I);
       }
     };
@@ -281,13 +281,13 @@ void llvm::parallelFor(size_t Begin, size_t End,
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
     TaskGroup TG;
-    while (--NumWorkers)
+    যাবত্ (--অঙ্ক_Workers)
       TG.spawn(Worker);
     Worker();
-    return;
+    প্রত্যাগম;
   }
 #endif
 
-  for (; Begin != End; ++Begin)
+  প্রতি (; Begin != End; ++Begin)
     Fn(Begin);
 }

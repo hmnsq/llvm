@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#অন্তর্ভাব "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned Suffix_বৃক্ষ_গ্রন্থি::getStartIdx() ধ্রুব { প্রত্যাগম StartIdx; }
+শূন্য Suffix_বৃক্ষ_গ্রন্থি::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
+শূন্য Suffix_বৃক্ষ_গ্রন্থি::setConcatLen(unsigned Len) { ConcatLen = Len; }
+unsigned Suffix_বৃক্ষ_গ্রন্থি::getConcatLen() ধ্রুব { প্রত্যাগম ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+তার্কিক Suffix_বৃক্ষ_Internal_গ্রন্থি::is_মূল() ধ্রুব {
+  প্রত্যাগম getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+unsigned Suffix_বৃক্ষ_Internal_গ্রন্থি::getEndIdx() ধ্রুব { প্রত্যাগম EndIdx; }
+শূন্য Suffix_বৃক্ষ_Internal_গ্রন্থি::setLink(Suffix_বৃক্ষ_Internal_গ্রন্থি *L) {
+  প্রতিজ্ঞা(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_বৃক্ষ_Internal_গ্রন্থি *Suffix_বৃক্ষ_Internal_গ্রন্থি::getLink() ধ্রুব { প্রত্যাগম Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+unsigned Suffix_বৃক্ষ_Leaf_গ্রন্থি::getEndIdx() ধ্রুব {
+  প্রতিজ্ঞা(EndIdx && "EndIdx is empty?");
+  প্রত্যাগম *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+unsigned Suffix_বৃক্ষ_Leaf_গ্রন্থি::getSuffixIdx() ধ্রুব { প্রত্যাগম SuffixIdx; }
+শূন্য Suffix_বৃক্ষ_Leaf_গ্রন্থি::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+unsigned Suffix_বৃক্ষ_গ্রন্থি::get_বাম_Leaf_Idx() ধ্রুব { প্রত্যাগম বাম_Leaf_Idx; }
+unsigned Suffix_বৃক্ষ_গ্রন্থি::get_ডান_Leaf_Idx() ধ্রুব { প্রত্যাগম ডান_Leaf_Idx; }
+শূন্য Suffix_বৃক্ষ_গ্রন্থি::set_বাম_Leaf_Idx(unsigned Idx) { বাম_Leaf_Idx = Idx; }
+শূন্য Suffix_বৃক্ষ_গ্রন্থি::set_ডান_Leaf_Idx(unsigned Idx) { ডান_Leaf_Idx = Idx; }

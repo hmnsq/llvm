@@ -6,10 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_ostream_proxy.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream_proxy.h"
 
-using namespace llvm;
+using নামাকাশ llvm;
 
-void raw_ostream_proxy::anchor() {}
+শূন্য raw_ostream_proxy::anchor() {}
 
-void raw_pwrite_stream_proxy::anchor() {}
+শূন্য raw_pwrite_stream_proxy::anchor() {}

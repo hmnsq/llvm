@@ -6,229 +6,229 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#অন্তর্ভাব "llvm/Support/NativeFormatting.h"
+#অন্তর্ভাব "llvm/ADT/ArrayRef.h"
+#অন্তর্ভাব "llvm/ADT/SmallString.h"
+#অন্তর্ভাব "llvm/ADT/StringExtras.h"
+#অন্তর্ভাব "llvm/Support/Format.h"
+#অন্তর্ভাব "llvm/Support/raw_ostream.h"
 
-#include <cmath>
+#অন্তর্ভাব <cmath>
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <float.h> // For _fpclass in llvm::write_double.
+#যদি defined(_WIN32) && !defined(__MINGW32__)
+#অন্তর্ভাব <float.h> // For _fpclass in llvm::write_double.
 #endif
 
-using namespace llvm;
+using নামাকাশ llvm;
 
 template<typename T, std::size_t N>
-static int format_to_buffer(T Value, char (&Buffer)[N]) {
-  char *EndPtr = std::end(Buffer);
-  char *CurPtr = EndPtr;
+স্থির পূর্ণাঙ্ক format_to_buffer(T মান, বর্ণ (&Buffer)[N]) {
+  বর্ণ *EndPtr = std::end(Buffer);
+  বর্ণ *CurPtr = EndPtr;
 
-  do {
-    *--CurPtr = '0' + char(Value % 10);
-    Value /= 10;
-  } while (Value);
-  return EndPtr - CurPtr;
+  কুরু {
+    *--CurPtr = '0' + বর্ণ(মান % 10);
+    মান /= 10;
+  } যাবত্ (মান);
+  প্রত্যাগম EndPtr - CurPtr;
 }
 
-static void writeWithCommas(raw_ostream &S, ArrayRef<char> Buffer) {
-  assert(!Buffer.empty());
+স্থির শূন্য writeWithCommas(raw_ostream &S, ArrayRef<বর্ণ> Buffer) {
+  প্রতিজ্ঞা(!Buffer.empty());
 
-  ArrayRef<char> ThisGroup;
-  int InitialDigits = ((Buffer.size() - 1) % 3) + 1;
+  ArrayRef<বর্ণ> ThisGroup;
+  পূর্ণাঙ্ক InitialDigits = ((Buffer.size() - 1) % 3) + 1;
   ThisGroup = Buffer.take_front(InitialDigits);
-  S.write(ThisGroup.data(), ThisGroup.size());
+  S.লিখ(ThisGroup.data(), ThisGroup.size());
 
   Buffer = Buffer.drop_front(InitialDigits);
-  assert(Buffer.size() % 3 == 0);
-  while (!Buffer.empty()) {
+  প্রতিজ্ঞা(Buffer.size() % 3 == 0);
+  যাবত্ (!Buffer.empty()) {
     S << ',';
     ThisGroup = Buffer.take_front(3);
-    S.write(ThisGroup.data(), 3);
+    S.লিখ(ThisGroup.data(), 3);
     Buffer = Buffer.drop_front(3);
   }
 }
 
 template <typename T>
-static void write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
-                                IntegerStyle Style, bool IsNegative,
-                                bool NonNegativePlus) {
+স্থির শূন্য write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
+                                IntegerStyle Style, তার্কিক IsNegative,
+                                তার্কিক NonNegativePlus) {
   static_assert(std::is_unsigned_v<T>, "Value is not unsigned!");
 
-  char NumberBuffer[128];
-  size_t Len = format_to_buffer(N, NumberBuffer);
+  বর্ণ সংখ্যা_Buffer[128];
+  size_t Len = format_to_buffer(N, সংখ্যা_Buffer);
 
-  if (IsNegative)
+  যদি (IsNegative)
     S << '-';
-  else if (NonNegativePlus)
+  অন্যথা যদি (NonNegativePlus)
     S << '+';
 
-  if (Len < MinDigits && Style != IntegerStyle::Number) {
-    for (size_t I = Len; I < MinDigits; ++I)
+  যদি (Len < MinDigits && Style != IntegerStyle::সংখ্যা) {
+    প্রতি (size_t I = Len; I < MinDigits; ++I)
       S << '0';
   }
 
-  if (Style == IntegerStyle::Number) {
-    writeWithCommas(S, ArrayRef<char>(std::end(NumberBuffer) - Len, Len));
-  } else {
-    S.write(std::end(NumberBuffer) - Len, Len);
+  যদি (Style == IntegerStyle::সংখ্যা) {
+    writeWithCommas(S, ArrayRef<বর্ণ>(std::end(সংখ্যা_Buffer) - Len, Len));
+  } অন্যথা {
+    S.লিখ(std::end(সংখ্যা_Buffer) - Len, Len);
   }
 }
 
 template <typename T>
-static void write_unsigned(raw_ostream &S, T N, size_t MinDigits,
-                           IntegerStyle Style, bool IsNegative = false,
-                           bool NonNegativePlus = false) {
+স্থির শূন্য write_unsigned(raw_ostream &S, T N, size_t MinDigits,
+                           IntegerStyle Style, তার্কিক IsNegative = অসত্য,
+                           তার্কিক NonNegativePlus = অসত্য) {
   // Output using 32-bit div/mod if possible.
-  if (N == static_cast<uint32_t>(N))
+  যদি (N == static_cast<uint32_t>(N))
     write_unsigned_impl(S, static_cast<uint32_t>(N), MinDigits, Style,
                         IsNegative, NonNegativePlus);
-  else
+  অন্যথা
     write_unsigned_impl(S, N, MinDigits, Style, IsNegative, NonNegativePlus);
 }
 
 template <typename T>
-static void write_signed(raw_ostream &S, T N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus = false) {
+স্থির শূন্য write_signed(raw_ostream &S, T N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus = অসত্য) {
   static_assert(std::is_signed_v<T>, "Value is not signed!");
 
   using UnsignedT = std::make_unsigned_t<T>;
 
-  if (N >= 0) {
-    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, false,
+  যদি (N >= 0) {
+    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, অসত্য,
                    NonNegativePlus);
-    return;
+    প্রত্যাগম;
   }
 
   UnsignedT UN = -(UnsignedT)N;
-  write_unsigned(S, UN, MinDigits, Style, true, NonNegativePlus);
+  write_unsigned(S, UN, MinDigits, Style, সত্য, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+শূন্য llvm::write_integer(raw_ostream &S, unsigned পূর্ণাঙ্ক N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, অসত্য, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+শূন্য llvm::write_integer(raw_ostream &S, পূর্ণাঙ্ক N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+শূন্য llvm::write_integer(raw_ostream &S, unsigned long N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, অসত্য, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+শূন্য llvm::write_integer(raw_ostream &S, long N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+শূন্য llvm::write_integer(raw_ostream &S, unsigned long long N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, অসত্য, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+শূন্য llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
+                         IntegerStyle Style, তার্কিক NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
+শূন্য llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
                      std::optional<size_t> Width) {
-  const size_t kMaxWidth = 128u;
+  ধ্রুব size_t kMaxWidth = 128u;
 
-  size_t W = std::min(kMaxWidth, Width.value_or(0u));
+  size_t W = std::min(kMaxWidth, Width.মান_or(0u));
 
   unsigned Nibbles = (llvm::bit_width(N) + 3) / 4;
-  bool Prefix = (Style == HexPrintStyle::PrefixLower ||
+  তার্কিক Prefix = (Style == HexPrintStyle::PrefixLower ||
                  Style == HexPrintStyle::PrefixUpper);
-  bool Upper =
+  তার্কিক Upper =
       (Style == HexPrintStyle::Upper || Style == HexPrintStyle::PrefixUpper);
   unsigned PrefixChars = Prefix ? 2 : 0;
-  unsigned NumChars =
+  unsigned অঙ্ক_Chars =
       std::max(static_cast<unsigned>(W), std::max(1u, Nibbles) + PrefixChars);
 
-  char NumberBuffer[kMaxWidth];
-  ::memset(NumberBuffer, '0', std::size(NumberBuffer));
-  if (Prefix)
-    NumberBuffer[1] = 'x';
-  char *EndPtr = NumberBuffer + NumChars;
-  char *CurPtr = EndPtr;
-  while (N) {
-    unsigned char x = static_cast<unsigned char>(N) % 16;
+  বর্ণ সংখ্যা_Buffer[kMaxWidth];
+  ::memset(সংখ্যা_Buffer, '0', std::size(সংখ্যা_Buffer));
+  যদি (Prefix)
+    সংখ্যা_Buffer[1] = 'x';
+  বর্ণ *EndPtr = সংখ্যা_Buffer + অঙ্ক_Chars;
+  বর্ণ *CurPtr = EndPtr;
+  যাবত্ (N) {
+    unsigned বর্ণ x = static_cast<unsigned বর্ণ>(N) % 16;
     *--CurPtr = hexdigit(x, !Upper);
     N /= 16;
   }
 
-  S.write(NumberBuffer, NumChars);
+  S.লিখ(সংখ্যা_Buffer, অঙ্ক_Chars);
 }
 
-void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
+শূন্য llvm::write_double(raw_ostream &S, দ্বিগুণ N, FloatStyle Style,
                         std::optional<size_t> Precision) {
-  size_t Prec = Precision.value_or(getDefaultPrecision(Style));
+  size_t Prec = Precision.মান_or(getDefaultPrecision(Style));
 
-  if (std::isnan(N)) {
+  যদি (std::isnan(N)) {
     S << "nan";
-    return;
-  } else if (std::isinf(N)) {
+    প্রত্যাগম;
+  } অন্যথা যদি (std::isinf(N)) {
     S << (std::signbit(N) ? "-INF" : "INF");
-    return;
+    প্রত্যাগম;
   }
 
-  char Letter;
-  if (Style == FloatStyle::Exponent)
+  বর্ণ Letter;
+  যদি (Style == FloatStyle::Exponent)
     Letter = 'e';
-  else if (Style == FloatStyle::ExponentUpper)
+  অন্যথা যদি (Style == FloatStyle::ExponentUpper)
     Letter = 'E';
-  else
+  অন্যথা
     Letter = 'f';
 
   SmallString<8> Spec;
   llvm::raw_svector_ostream Out(Spec);
   Out << "%." << Prec << Letter;
 
-  if (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
+  যদি (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
 #ifdef _WIN32
 // On MSVCRT and compatible, output of %e is incompatible to Posix
 // by default. Number of exponent digits should be at least 2. "%+03d"
 // FIXME: Implement our formatter to here or Support/Format.h!
-#if defined(__MINGW32__)
+#যদি defined(__MINGW32__)
     // FIXME: It should be generic to C++11.
-    if (N == 0.0 && std::signbit(N)) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
+    যদি (N == 0.0 && std::signbit(N)) {
+      বর্ণ NegativeZero[] = "-0.000000e+00";
+      যদি (Style == FloatStyle::ExponentUpper)
         NegativeZero[strlen(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      প্রত্যাগম;
     }
-#else
-    int fpcl = _fpclass(N);
+#অন্যথা
+    পূর্ণাঙ্ক fpcl = _fpclass(N);
 
     // negative zero
-    if (fpcl == _FPCLASS_NZ) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
+    যদি (fpcl == _FPCLASS_NZ) {
+      বর্ণ NegativeZero[] = "-0.000000e+00";
+      যদি (Style == FloatStyle::ExponentUpper)
         NegativeZero[strlen(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      প্রত্যাগম;
     }
 #endif
 
-    char buf[32];
+    বর্ণ buf[32];
     unsigned len;
-    len = format(Spec.c_str(), N).snprint(buf, sizeof(buf));
-    if (len <= sizeof(buf) - 2) {
-      if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
+    len = format(Spec.c_str(), N).snprint(buf, পরিমাণ(buf));
+    যদি (len <= পরিমাণ(buf) - 2) {
+      যদি (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
           buf[len - 3] == '0') {
-        int cs = buf[len - 4];
-        if (cs == '+' || cs == '-') {
-          int c1 = buf[len - 2];
-          int c0 = buf[len - 1];
-          if (isdigit(static_cast<unsigned char>(c1)) &&
-              isdigit(static_cast<unsigned char>(c0))) {
+        পূর্ণাঙ্ক cs = buf[len - 4];
+        যদি (cs == '+' || cs == '-') {
+          পূর্ণাঙ্ক c1 = buf[len - 2];
+          পূর্ণাঙ্ক c0 = buf[len - 1];
+          যদি (isdigit(static_cast<unsigned বর্ণ>(c1)) &&
+              isdigit(static_cast<unsigned বর্ণ>(c0))) {
             // Trim leading '0': "...e+012" -> "...e+12\0"
             buf[len - 3] = c1;
             buf[len - 2] = c0;
@@ -237,33 +237,33 @@ void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
         }
       }
       S << buf;
-      return;
+      প্রত্যাগম;
     }
 #endif
   }
 
-  if (Style == FloatStyle::Percent)
+  যদি (Style == FloatStyle::Percent)
     N *= 100.0;
 
-  char Buf[32];
-  format(Spec.c_str(), N).snprint(Buf, sizeof(Buf));
+  বর্ণ Buf[32];
+  format(Spec.c_str(), N).snprint(Buf, পরিমাণ(Buf));
   S << Buf;
-  if (Style == FloatStyle::Percent)
+  যদি (Style == FloatStyle::Percent)
     S << '%';
 }
 
-bool llvm::isPrefixedHexStyle(HexPrintStyle S) {
-  return (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
+তার্কিক llvm::isPrefixedHexStyle(HexPrintStyle S) {
+  প্রত্যাগম (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
 }
 
 size_t llvm::getDefaultPrecision(FloatStyle Style) {
-  switch (Style) {
-  case FloatStyle::Exponent:
-  case FloatStyle::ExponentUpper:
-    return 6; // Number of decimal places.
-  case FloatStyle::Fixed:
-  case FloatStyle::Percent:
-    return 2; // Number of decimal places.
+  বিকল্প (Style) {
+  পক্ষ FloatStyle::Exponent:
+  পক্ষ FloatStyle::ExponentUpper:
+    প্রত্যাগম 6; // Number of decimal places.
+  পক্ষ FloatStyle::Fixed:
+  পক্ষ FloatStyle::Percent:
+    প্রত্যাগম 2; // Number of decimal places.
   }
   llvm_unreachable("Unknown FloatStyle enum");
 }
