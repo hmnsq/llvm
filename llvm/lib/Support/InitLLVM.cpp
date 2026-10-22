@@ -6,21 +6,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Signals.h"
+#ضمن "llvm/Support/InitLLVM.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/AutoConvert.h"
+#ضمن "llvm/Support/Error.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/Signals.h"
 
 #ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
+#ضمن "llvm/Support/Windows/WindowsSupport.h"
 #endif
 
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#else
+#𐡄𐡍 defined(HAVE_UNISTD_H)
+#ضمن <unistd.h>
+#وإلا
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
 #endif
@@ -32,16 +32,16 @@
 #endif
 #endif
 
-static void RaiseLimits() {
+ساكن فراغ RaiseLimits() {
 #ifdef _AIX
   // AIX has restrictive memory soft-limits out-of-box, so raise them if needed.
-  auto RaiseLimit = [](int resource) {
-    struct rlimit r;
+  auto RaiseLimit = [](صحيح resource) {
+    بنية rlimit r;
     getrlimit(resource, &r);
 
     // Increase the soft limit to the hard limit, if necessary and
     // possible.
-    if (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
+    𐡄𐡍 (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
       r.rlim_cur = r.rlim_max;
       setrlimit(resource, &r);
     }
@@ -60,7 +60,7 @@ static void RaiseLimits() {
 #endif
 }
 
-void CleanupStdHandles(void *Cookie) {
+فراغ CleanupStdHandles(فراغ *Cookie) {
   llvm::raw_ostream *Outs = &llvm::outs(), *Errs = &llvm::errs();
   Outs->flush();
   Errs->flush();
@@ -69,27 +69,27 @@ void CleanupStdHandles(void *Cookie) {
   llvm::restoreStdHandleAutoConversion(STDERR_FILENO);
 }
 
-using namespace llvm;
-using namespace llvm::sys;
+using نطاق llvm;
+using نطاق llvm::sys;
 
-InitLLVM::InitLLVM(int &Argc, const char **&Argv,
-                   bool InstallPipeSignalExitHandler,
-                   bool NeedsPOSIXUtilitySignalHandling) {
+InitLLVM::InitLLVM(صحيح &Argc, ثابت حرف **&Argv,
+                   منطقي InstallPipeSignalExitHandler,
+                   منطقي NeedsPOSIXUtilitySignalHandling) {
 #ifndef NDEBUG
-  static std::atomic<bool> Initialized{false};
-  assert(!Initialized && "InitLLVM was already initialized!");
-  Initialized = true;
+  ساكن std::atomic<منطقي> Initialized{خطأ};
+  أكد(!Initialized && "InitLLVM was already initialized!");
+  Initialized = 𐡒𐡔𐡈;
 #endif
 
   // Bring stdin/stdout/stderr into a known state.
 #ifdef _WIN32
   sys::AddSignalHandler(CleanupStdHandles, nullptr);
-#else
+#وإلا
   sys::AddSignalHandler(CleanupStdHandles, nullptr,
                         NeedsPOSIXUtilitySignalHandling);
 #endif
 
-  if (InstallPipeSignalExitHandler)
+  𐡄𐡍 (InstallPipeSignalExitHandler)
     // The pipe signal handler must be installed before any other handlers are
     // registered. This is because the Unix \ref RegisterHandlers function does
     // not perform a sigaction() for SIGPIPE unless a one-shot handler is

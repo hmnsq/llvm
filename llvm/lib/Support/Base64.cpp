@@ -7,11 +7,11 @@
 //===----------------------------------------------------------------------===//
 
 #define INVALID_BASE64_BYTE 64
-#include "llvm/Support/Base64.h"
+#ضمن "llvm/Support/Base64.h"
 
-static char decodeBase64Byte(uint8_t Ch) {
-  constexpr char Inv = INVALID_BASE64_BYTE;
-  static const char DecodeTable[] = {
+ساكن حرف decodeBase64Byte(uint8_t Ch) {
+  constexpr حرف Inv = INVALID_BASE64_BYTE;
+  ساكن ثابت حرف DecodeTable[] = {
       Inv, Inv, Inv, Inv, Inv, Inv, Inv, Inv, // ........
       Inv, Inv, Inv, Inv, Inv, Inv, Inv, Inv, // ........
       Inv, Inv, Inv, Inv, Inv, Inv, Inv, Inv, // ........
@@ -29,47 +29,47 @@ static char decodeBase64Byte(uint8_t Ch) {
       41,  42,  43,  44,  45,  46,  47,  48,  // pqrstuvw
       49,  50,  51                            // xyz.....
   };
-  if (Ch >= sizeof(DecodeTable))
-    return Inv;
-  return DecodeTable[Ch];
+  𐡄𐡍 (Ch >= حجم(DecodeTable))
+    أرجع Inv;
+  أرجع DecodeTable[Ch];
 }
 
 llvm::Error llvm::decodeBase64(llvm::StringRef Input,
-                               std::vector<char> &Output) {
-  constexpr char Base64InvalidByte = INVALID_BASE64_BYTE;
+                               std::vector<حرف> &Output) {
+  constexpr حرف Base64InvalidByte = INVALID_BASE64_BYTE;
   // Invalid table value with short name to fit in the table init below. The
   // invalid value is 64 since valid base64 values are 0 - 63.
   Output.clear();
-  const uint64_t InputLength = Input.size();
-  if (InputLength == 0)
-    return Error::success();
+  ثابت uint64_t InputLength = Input.size();
+  𐡄𐡍 (InputLength == 0)
+    أرجع Error::success();
   // Make sure we have a valid input string length which must be a multiple
   // of 4.
-  if ((InputLength % 4) != 0)
-    return createStringError(std::errc::illegal_byte_sequence,
+  𐡄𐡍 ((InputLength % 4) != 0)
+    أرجع createStringError(std::errc::illegal_byte_sequence,
                              "Base64 encoded strings must be a multiple of 4 "
                              "bytes in length");
-  const uint64_t FirstValidEqualIdx = InputLength - 2;
-  char Hex64Bytes[4];
-  for (uint64_t Idx = 0; Idx < InputLength; Idx += 4) {
-    for (uint64_t ByteOffset = 0; ByteOffset < 4; ++ByteOffset) {
-      const uint64_t ByteIdx = Idx + ByteOffset;
-      const char Byte = Input[ByteIdx];
-      const char DecodedByte = decodeBase64Byte(Byte);
-      bool Illegal = DecodedByte == Base64InvalidByte;
-      if (!Illegal && Byte == '=') {
-        if (ByteIdx < FirstValidEqualIdx) {
+  ثابت uint64_t FirstValidEqualIdx = InputLength - 2;
+  حرف Hex64Bytes[4];
+  لكل (uint64_t Idx = 0; Idx < InputLength; Idx += 4) {
+    لكل (uint64_t ByteOffset = 0; ByteOffset < 4; ++ByteOffset) {
+      ثابت uint64_t ByteIdx = Idx + ByteOffset;
+      ثابت حرف Byte = Input[ByteIdx];
+      ثابت حرف DecodedByte = decodeBase64Byte(Byte);
+      منطقي Illegal = DecodedByte == Base64InvalidByte;
+      𐡄𐡍 (!Illegal && Byte == '=') {
+        𐡄𐡍 (ByteIdx < FirstValidEqualIdx) {
           // We have an '=' in the middle of the string which is invalid, only
           // the last two characters can be '=' characters.
-          Illegal = true;
-        } else if (ByteIdx == FirstValidEqualIdx && Input[ByteIdx + 1] != '=') {
+          Illegal = 𐡒𐡔𐡈;
+        } وإلا 𐡄𐡍 (ByteIdx == FirstValidEqualIdx && Input[ByteIdx + 1] != '=') {
           // We have an equal second to last from the end and the last character
           // is not also an equal, so the '=' character is invalid
-          Illegal = true;
+          Illegal = 𐡒𐡔𐡈;
         }
       }
-      if (Illegal)
-        return createStringError(
+      𐡄𐡍 (Illegal)
+        أرجع createStringError(
             std::errc::illegal_byte_sequence,
             "Invalid Base64 character %#2.2x at index %" PRIu64, Byte, ByteIdx);
       Hex64Bytes[ByteOffset] = DecodedByte;
@@ -83,10 +83,10 @@ llvm::Error llvm::decodeBase64(llvm::StringRef Input,
   // If we had valid trailing '=' characters strip the right number of bytes
   // from the end of the output buffer. We already know that the Input length
   // it a multiple of 4 and is not zero, so direct character access is safe.
-  if (Input.back() == '=') {
+  𐡄𐡍 (Input.back() == '=') {
     Output.pop_back();
-    if (Input[InputLength - 2] == '=')
+    𐡄𐡍 (Input[InputLength - 2] == '=')
       Output.pop_back();
   }
-  return Error::success();
+  أرجع Error::success();
 }

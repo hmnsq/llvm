@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamWriter.h"
+#ضمن "llvm/Support/BinaryStreamWriter.h"
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/BinaryStreamReader.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/BinaryStreamReader.h"
+#ضمن "llvm/Support/BinaryStreamRef.h"
+#ضمن "llvm/Support/LEB128.h"
 
-using namespace llvm;
+using نطاق llvm;
 
 BinaryStreamWriter::BinaryStreamWriter(WritableBinaryStreamRef Ref)
     : Stream(Ref) {}
@@ -26,40 +26,40 @@ BinaryStreamWriter::BinaryStreamWriter(MutableArrayRef<uint8_t> Data,
     : Stream(Data, Endian) {}
 
 Error BinaryStreamWriter::writeBytes(ArrayRef<uint8_t> Buffer) {
-  if (auto EC = Stream.writeBytes(Offset, Buffer))
-    return EC;
+  𐡄𐡍 (auto EC = Stream.writeBytes(Offset, Buffer))
+    أرجع EC;
   Offset += Buffer.size();
-  return Error::success();
+  أرجع Error::success();
 }
 
 Error BinaryStreamWriter::writeULEB128(uint64_t Value) {
   uint8_t EncodedBytes[10] = {0};
   unsigned Size = encodeULEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+  أرجع writeBytes({EncodedBytes, Size});
 }
 
 Error BinaryStreamWriter::writeSLEB128(int64_t Value) {
   uint8_t EncodedBytes[10] = {0};
   unsigned Size = encodeSLEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+  أرجع writeBytes({EncodedBytes, Size});
 }
 
 Error BinaryStreamWriter::writeCString(StringRef Str) {
-  if (auto EC = writeFixedString(Str))
-    return EC;
-  if (auto EC = writeObject('\0'))
-    return EC;
+  𐡄𐡍 (auto EC = writeFixedString(Str))
+    أرجع EC;
+  𐡄𐡍 (auto EC = writeObject('\0'))
+    أرجع EC;
 
-  return Error::success();
+  أرجع Error::success();
 }
 
 Error BinaryStreamWriter::writeFixedString(StringRef Str) {
 
-  return writeBytes(arrayRefFromStringRef(Str));
+  أرجع writeBytes(arrayRefFromStringRef(Str));
 }
 
 Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref) {
-  return writeStreamRef(Ref, Ref.getLength());
+  أرجع writeStreamRef(Ref, Ref.getLength());
 }
 
 Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref, uint64_t Length) {
@@ -69,19 +69,19 @@ Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref, uint64_t Length) {
   // this can be satisfied by returning a reference straight from the buffer, as
   // an implementation may not store all data in a single contiguous buffer.  So
   // we iterate over each contiguous chunk, writing each one in succession.
-  while (SrcReader.bytesRemaining() > 0) {
+  طالما (SrcReader.bytesRemaining() > 0) {
     ArrayRef<uint8_t> Chunk;
-    if (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
-      return EC;
-    if (auto EC = writeBytes(Chunk))
-      return EC;
+    𐡄𐡍 (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
+      أرجع EC;
+    𐡄𐡍 (auto EC = writeBytes(Chunk))
+      أرجع EC;
   }
-  return Error::success();
+  أرجع Error::success();
 }
 
 std::pair<BinaryStreamWriter, BinaryStreamWriter>
-BinaryStreamWriter::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+BinaryStreamWriter::split(uint64_t Off) ثابت {
+  أكد(getLength() >= Off);
 
   WritableBinaryStreamRef First = Stream.drop_front(Offset);
 
@@ -89,16 +89,16 @@ BinaryStreamWriter::split(uint64_t Off) const {
   First = First.keep_front(Off);
   BinaryStreamWriter W1{First};
   BinaryStreamWriter W2{Second};
-  return {W1, W2};
+  أرجع {W1, W2};
 }
 
 Error BinaryStreamWriter::padToAlignment(uint32_t Align) {
   uint64_t NewOffset = alignTo(Offset, Align);
-  const uint64_t ZerosSize = 64;
-  static constexpr char Zeros[ZerosSize] = {};
-  while (Offset < NewOffset)
-    if (auto E = writeArray(
-            ArrayRef<char>(Zeros, std::min(ZerosSize, NewOffset - Offset))))
-      return E;
-  return Error::success();
+  ثابت uint64_t ZerosSize = 64;
+  ساكن constexpr حرف Zeros[ZerosSize] = {};
+  طالما (Offset < NewOffset)
+    𐡄𐡍 (auto E = writeArray(
+            ArrayRef<حرف>(Zeros, std::min(ZerosSize, NewOffset - Offset))))
+      أرجع E;
+  أرجع Error::success();
 }

@@ -13,12 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 #ifdef __MVS__
-#include <stdio.h>
-#include <string.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
+#ضمن <stdio.h>
+#ضمن <string.h>
+#ضمن <sys/resource.h>
+#ضمن <sys/wait.h>
 
-const char *signalName[] = {
+ثابت حرف *signalName[] = {
     /*  0 */ nullptr,
     /*  1 */ "Hangup",                   // SIGHUP
     /*  2 */ "Interrupt",                // SIGINT
@@ -63,23 +63,23 @@ const char *signalName[] = {
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+حرف *strsignal(صحيح sig) {
+  𐡄𐡍 (static_cast<size_t>(sig) < (حجم(signalName) / حجم(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+    أرجع const_cast<حرف *>(signalName[sig]);
+  ساكن حرف msg[256];
+  snprintf(msg, حجم(msg), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  msg[حجم(msg) - 1] = '\0';
+  أرجع msg;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
 // function is implemented here.
-size_t strnlen(const char *S, size_t MaxLen) {
-  const char *PtrToNullChar =
-      static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+size_t strnlen(ثابت حرف *S, size_t MaxLen) {
+  ثابت حرف *PtrToNullChar =
+      static_cast<ثابت حرف *>(memchr(S, '\0', MaxLen));
+  أرجع PtrToNullChar ? PtrToNullChar - S : MaxLen;
 }
 #endif

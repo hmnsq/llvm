@@ -12,22 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AMDGPUMetadata.h"
-#include "llvm/Support/YAMLTraits.h"
-#include <optional>
+#ضمن "llvm/Support/AMDGPUMetadata.h"
+#ضمن "llvm/Support/YAMLTraits.h"
+#ضمن <optional>
 
-using namespace llvm::AMDGPU;
-using namespace llvm::AMDGPU::HSAMD;
+using نطاق llvm::AMDGPU;
+using نطاق llvm::AMDGPU::HSAMD;
 
 LLVM_YAML_IS_SEQUENCE_VECTOR(Kernel::Arg::Metadata)
 LLVM_YAML_IS_SEQUENCE_VECTOR(Kernel::Metadata)
 
-namespace llvm {
-namespace yaml {
+نطاق llvm {
+نطاق yaml {
 
 template <>
-struct ScalarEnumerationTraits<AccessQualifier> {
-  static void enumeration(IO &YIO, AccessQualifier &EN) {
+بنية ScalarEnumerationTraits<AccessQualifier> {
+  ساكن فراغ enumeration(IO &YIO, AccessQualifier &EN) {
     YIO.enumCase(EN, "Default", AccessQualifier::Default);
     YIO.enumCase(EN, "ReadOnly", AccessQualifier::ReadOnly);
     YIO.enumCase(EN, "WriteOnly", AccessQualifier::WriteOnly);
@@ -36,8 +36,8 @@ struct ScalarEnumerationTraits<AccessQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<AddressSpaceQualifier> {
-  static void enumeration(IO &YIO, AddressSpaceQualifier &EN) {
+بنية ScalarEnumerationTraits<AddressSpaceQualifier> {
+  ساكن فراغ enumeration(IO &YIO, AddressSpaceQualifier &EN) {
     YIO.enumCase(EN, "Private", AddressSpaceQualifier::Private);
     YIO.enumCase(EN, "Global", AddressSpaceQualifier::Global);
     YIO.enumCase(EN, "Constant", AddressSpaceQualifier::Constant);
@@ -48,8 +48,8 @@ struct ScalarEnumerationTraits<AddressSpaceQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueKind> {
-  static void enumeration(IO &YIO, ValueKind &EN) {
+بنية ScalarEnumerationTraits<ValueKind> {
+  ساكن فراغ enumeration(IO &YIO, ValueKind &EN) {
     YIO.enumCase(EN, "ByValue", ValueKind::ByValue);
     YIO.enumCase(EN, "GlobalBuffer", ValueKind::GlobalBuffer);
     YIO.enumCase(EN, "DynamicSharedPointer", ValueKind::DynamicSharedPointer);
@@ -72,8 +72,8 @@ struct ScalarEnumerationTraits<ValueKind> {
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueType> {
-  static void enumeration(IO &YIO, ValueType &EN) {
+بنية ScalarEnumerationTraits<ValueType> {
+  ساكن فراغ enumeration(IO &YIO, ValueType &EN) {
     YIO.enumCase(EN, "Struct", ValueType::Struct);
     YIO.enumCase(EN, "I8", ValueType::I8);
     YIO.enumCase(EN, "U8", ValueType::U8);
@@ -90,8 +90,8 @@ struct ScalarEnumerationTraits<ValueType> {
 };
 
 template <>
-struct MappingTraits<Kernel::Attrs::Metadata> {
-  static void mapping(IO &YIO, Kernel::Attrs::Metadata &MD) {
+بنية MappingTraits<Kernel::Attrs::Metadata> {
+  ساكن فراغ mapping(IO &YIO, Kernel::Attrs::Metadata &MD) {
     YIO.mapOptional(Kernel::Attrs::Key::ReqdWorkGroupSize,
                     MD.mReqdWorkGroupSize, std::vector<uint32_t>());
     YIO.mapOptional(Kernel::Attrs::Key::WorkGroupSizeHint,
@@ -104,8 +104,8 @@ struct MappingTraits<Kernel::Attrs::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::Arg::Metadata> {
-  static void mapping(IO &YIO, Kernel::Arg::Metadata &MD) {
+بنية MappingTraits<Kernel::Arg::Metadata> {
+  ساكن فراغ mapping(IO &YIO, Kernel::Arg::Metadata &MD) {
     YIO.mapOptional(Kernel::Arg::Key::Name, MD.mName, std::string());
     YIO.mapOptional(Kernel::Arg::Key::TypeName, MD.mTypeName, std::string());
     YIO.mapRequired(Kernel::Arg::Key::Size, MD.mSize);
@@ -124,16 +124,16 @@ struct MappingTraits<Kernel::Arg::Metadata> {
                     AccessQualifier::Unknown);
     YIO.mapOptional(Kernel::Arg::Key::ActualAccQual, MD.mActualAccQual,
                     AccessQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::IsConst, MD.mIsConst, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsRestrict, MD.mIsRestrict, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsVolatile, MD.mIsVolatile, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsPipe, MD.mIsPipe, false);
+    YIO.mapOptional(Kernel::Arg::Key::IsConst, MD.mIsConst, خطأ);
+    YIO.mapOptional(Kernel::Arg::Key::IsRestrict, MD.mIsRestrict, خطأ);
+    YIO.mapOptional(Kernel::Arg::Key::IsVolatile, MD.mIsVolatile, خطأ);
+    YIO.mapOptional(Kernel::Arg::Key::IsPipe, MD.mIsPipe, خطأ);
   }
 };
 
 template <>
-struct MappingTraits<Kernel::CodeProps::Metadata> {
-  static void mapping(IO &YIO, Kernel::CodeProps::Metadata &MD) {
+بنية MappingTraits<Kernel::CodeProps::Metadata> {
+  ساكن فراغ mapping(IO &YIO, Kernel::CodeProps::Metadata &MD) {
     YIO.mapRequired(Kernel::CodeProps::Key::KernargSegmentSize,
                     MD.mKernargSegmentSize);
     YIO.mapRequired(Kernel::CodeProps::Key::GroupSegmentFixedSize,
@@ -151,9 +151,9 @@ struct MappingTraits<Kernel::CodeProps::Metadata> {
     YIO.mapOptional(Kernel::CodeProps::Key::MaxFlatWorkGroupSize,
                     MD.mMaxFlatWorkGroupSize, uint32_t(0));
     YIO.mapOptional(Kernel::CodeProps::Key::IsDynamicCallStack,
-                    MD.mIsDynamicCallStack, false);
+                    MD.mIsDynamicCallStack, خطأ);
     YIO.mapOptional(Kernel::CodeProps::Key::IsXNACKEnabled,
-                    MD.mIsXNACKEnabled, false);
+                    MD.mIsXNACKEnabled, خطأ);
     YIO.mapOptional(Kernel::CodeProps::Key::NumSpilledSGPRs,
                     MD.mNumSpilledSGPRs, uint16_t(0));
     YIO.mapOptional(Kernel::CodeProps::Key::NumSpilledVGPRs,
@@ -162,8 +162,8 @@ struct MappingTraits<Kernel::CodeProps::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::DebugProps::Metadata> {
-  static void mapping(IO &YIO, Kernel::DebugProps::Metadata &MD) {
+بنية MappingTraits<Kernel::DebugProps::Metadata> {
+  ساكن فراغ mapping(IO &YIO, Kernel::DebugProps::Metadata &MD) {
     YIO.mapOptional(Kernel::DebugProps::Key::DebuggerABIVersion,
                     MD.mDebuggerABIVersion, std::vector<uint32_t>());
     YIO.mapOptional(Kernel::DebugProps::Key::ReservedNumVGPRs,
@@ -178,50 +178,50 @@ struct MappingTraits<Kernel::DebugProps::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::Metadata> {
-  static void mapping(IO &YIO, Kernel::Metadata &MD) {
+بنية MappingTraits<Kernel::Metadata> {
+  ساكن فراغ mapping(IO &YIO, Kernel::Metadata &MD) {
     YIO.mapRequired(Kernel::Key::Name, MD.mName);
     YIO.mapRequired(Kernel::Key::SymbolName, MD.mSymbolName);
     YIO.mapOptional(Kernel::Key::Language, MD.mLanguage, std::string());
     YIO.mapOptional(Kernel::Key::LanguageVersion, MD.mLanguageVersion,
                     std::vector<uint32_t>());
-    if (!MD.mAttrs.empty() || !YIO.outputting())
+    𐡄𐡍 (!MD.mAttrs.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::Attrs, MD.mAttrs);
-    if (!MD.mArgs.empty() || !YIO.outputting())
+    𐡄𐡍 (!MD.mArgs.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::Args, MD.mArgs);
-    if (!MD.mCodeProps.empty() || !YIO.outputting())
+    𐡄𐡍 (!MD.mCodeProps.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::CodeProps, MD.mCodeProps);
-    if (!MD.mDebugProps.empty() || !YIO.outputting())
+    𐡄𐡍 (!MD.mDebugProps.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::DebugProps, MD.mDebugProps);
   }
 };
 
 template <>
-struct MappingTraits<HSAMD::Metadata> {
-  static void mapping(IO &YIO, HSAMD::Metadata &MD) {
+بنية MappingTraits<HSAMD::Metadata> {
+  ساكن فراغ mapping(IO &YIO, HSAMD::Metadata &MD) {
     YIO.mapRequired(Key::Version, MD.mVersion);
     YIO.mapOptional(Key::Printf, MD.mPrintf, std::vector<std::string>());
-    if (!MD.mKernels.empty() || !YIO.outputting())
+    𐡄𐡍 (!MD.mKernels.empty() || !YIO.outputting())
       YIO.mapOptional(Key::Kernels, MD.mKernels);
   }
 };
 
 } // end namespace yaml
 
-namespace AMDGPU {
-namespace HSAMD {
+نطاق AMDGPU {
+نطاق HSAMD {
 
 std::error_code fromString(StringRef String, Metadata &HSAMetadata) {
   yaml::Input YamlInput(String);
   YamlInput >> HSAMetadata;
-  return YamlInput.error();
+  أرجع YamlInput.error();
 }
 
 std::error_code toString(Metadata HSAMetadata, std::string &String) {
   raw_string_ostream YamlStream(String);
-  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<int>::max());
+  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<صحيح>::max());
   YamlOutput << HSAMetadata;
-  return std::error_code();
+  أرجع std::error_code();
 }
 
 } // end namespace HSAMD

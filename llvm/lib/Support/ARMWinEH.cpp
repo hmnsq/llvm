@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMWinEH.h"
+#ضمن "llvm/Support/ARMWinEH.h"
 
-namespace llvm {
-namespace ARM {
-namespace WinEH {
-std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
-                                                bool Prologue) {
+نطاق llvm {
+نطاق ARM {
+نطاق WinEH {
+std::pair<uint16_t, uint32_t> SavedRegisterMask(ثابت RuntimeFunction &RF,
+                                                منطقي Prologue) {
   uint8_t NumRegisters = RF.Reg();
   uint8_t RegistersVFP = RF.R();
   uint8_t LinkRegister = RF.L();
@@ -21,27 +21,27 @@ std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
   uint16_t GPRMask = (ChainedFrame << 11);
   uint32_t VFPMask = 0;
 
-  if (Prologue) {
+  𐡄𐡍 (Prologue) {
     GPRMask |= (LinkRegister << 14);
-  } else {
+  } وإلا {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
+    𐡄𐡍 (RF.Ret() != ReturnType::RT_POP)
       GPRMask |= (LinkRegister << 14);
-    else if (!RF.H()) // If H == 0, we pop directly into Pc
+    وإلا 𐡄𐡍 (!RF.H()) // If H == 0, we pop directly into Pc
       GPRMask |= (LinkRegister << 15);
     // else, Ret == 0 && H == 1, we pop into Pc separately afterwards
   }
 
-  if (RegistersVFP)
+  𐡄𐡍 (RegistersVFP)
     VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
-  else
+  وإلا
     GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
 
-  if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
+  𐡄𐡍 ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
     GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
                 << (~RF.StackAdjust() & 0x3));
 
-  return {GPRMask, VFPMask};
+  أرجع {GPRMask, VFPMask};
 }
 } // namespace WinEH
 } // namespace ARM

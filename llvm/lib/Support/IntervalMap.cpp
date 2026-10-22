@@ -10,53 +10,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntervalMap.h"
-#include <cassert>
+#ضمن "llvm/ADT/IntervalMap.h"
+#ضمن <cassert>
 
-namespace llvm {
-namespace IntervalMapImpl {
+نطاق llvm {
+نطاق IntervalMapImpl {
 
-void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
-  assert(!path.empty() && "Can't replace missing root");
+فراغ Path::replaceRoot(فراغ *Root, unsigned Size, IdxPair Offsets) {
+  أكد(!path.empty() && "Can't replace missing root");
   path.front() = Entry(Root, Size, Offsets.first);
   path.insert(path.begin() + 1, Entry(subtree(0), Offsets.second));
 }
 
-NodeRef Path::getLeftSibling(unsigned Level) const {
+NodeRef Path::getLeftSibling(unsigned Level) ثابت {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  𐡄𐡍 (Level == 0)
+    أرجع NodeRef();
 
   // Go up the tree until we can go left.
   unsigned l = Level - 1;
-  while (l && path[l].offset == 0)
+  طالما (l && path[l].offset == 0)
     --l;
 
   // We can't go left.
-  if (path[l].offset == 0)
-    return NodeRef();
+  𐡄𐡍 (path[l].offset == 0)
+    أرجع NodeRef();
 
   // NR is the subtree containing our left sibling.
   NodeRef NR = path[l].subtree(path[l].offset - 1);
 
   // Keep right all the way down.
-  for (++l; l != Level; ++l)
+  لكل (++l; l != Level; ++l)
     NR = NR.subtree(NR.size() - 1);
-  return NR;
+  أرجع NR;
 }
 
-void Path::moveLeft(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+فراغ Path::moveLeft(unsigned Level) {
+  أكد(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go left.
   unsigned l = 0;
-  if (valid()) {
+  𐡄𐡍 (valid()) {
     l = Level - 1;
-    while (path[l].offset == 0) {
-      assert(l != 0 && "Cannot move beyond begin()");
+    طالما (path[l].offset == 0) {
+      أكد(l != 0 && "Cannot move beyond begin()");
       --l;
     }
-  } else if (height() < Level)
+  } وإلا 𐡄𐡍 (height() < Level)
     // end() may have created a height=0 path.
     path.resize(Level + 1, Entry(nullptr, 0, 0));
 
@@ -65,51 +65,51 @@ void Path::moveLeft(unsigned Level) {
   NodeRef NR = subtree(l);
 
   // Get the rightmost node in the subtree.
-  for (++l; l != Level; ++l) {
+  لكل (++l; l != Level; ++l) {
     path[l] = Entry(NR, NR.size() - 1);
     NR = NR.subtree(NR.size() - 1);
   }
   path[l] = Entry(NR, NR.size() - 1);
 }
 
-NodeRef Path::getRightSibling(unsigned Level) const {
+NodeRef Path::getRightSibling(unsigned Level) ثابت {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  𐡄𐡍 (Level == 0)
+    أرجع NodeRef();
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  طالما (l && atLastEntry(l))
     --l;
 
   // We can't go right.
-  if (atLastEntry(l))
-    return NodeRef();
+  𐡄𐡍 (atLastEntry(l))
+    أرجع NodeRef();
 
   // NR is the subtree containing our right sibling.
   NodeRef NR = path[l].subtree(path[l].offset + 1);
 
   // Keep left all the way down.
-  for (++l; l != Level; ++l)
+  لكل (++l; l != Level; ++l)
     NR = NR.subtree(0);
-  return NR;
+  أرجع NR;
 }
 
-void Path::moveRight(unsigned Level) {
-  assert(Level != 0 && "Cannot move the root node");
+فراغ Path::moveRight(unsigned Level) {
+  أكد(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  طالما (l && atLastEntry(l))
     --l;
 
   // NR is the subtree containing our right sibling. If we hit end(), we have
   // offset(0) == node(0).size().
-  if (++path[l].offset == path[l].size)
-    return;
+  𐡄𐡍 (++path[l].offset == path[l].size)
+    أرجع;
   NodeRef NR = subtree(l);
 
-  for (++l; l != Level; ++l) {
+  لكل (++l; l != Level; ++l) {
     path[l] = Entry(NR, 0);
     NR = NR.subtree(0);
   }
@@ -118,42 +118,42 @@ void Path::moveRight(unsigned Level) {
 
 
 IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
-                   const unsigned *CurSize, unsigned NewSize[],
-                   unsigned Position, bool Grow) {
-  assert(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
-  assert(Position <= Elements && "Invalid position");
-  if (!Nodes)
-    return IdxPair();
+                   ثابت unsigned *CurSize, unsigned NewSize[],
+                   unsigned Position, منطقي Grow) {
+  أكد(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
+  أكد(Position <= Elements && "Invalid position");
+  𐡄𐡍 (!Nodes)
+    أرجع IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
-  const unsigned PerNode = (Elements + Grow) / Nodes;
-  const unsigned Extra = (Elements + Grow) % Nodes;
+  ثابت unsigned PerNode = (Elements + Grow) / Nodes;
+  ثابت unsigned Extra = (Elements + Grow) % Nodes;
   IdxPair PosPair = IdxPair(Nodes, 0);
   unsigned Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
+  لكل (unsigned n = 0; n != Nodes; ++n) {
     Sum += NewSize[n] = PerNode + (n < Extra);
-    if (PosPair.first == Nodes && Sum > Position)
+    𐡄𐡍 (PosPair.first == Nodes && Sum > Position)
       PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
   }
-  assert(Sum == Elements + Grow && "Bad distribution sum");
+  أكد(Sum == Elements + Grow && "Bad distribution sum");
 
   // Subtract the Grow element that was added.
-  if (Grow) {
-    assert(PosPair.first < Nodes && "Bad algebra");
-    assert(NewSize[PosPair.first] && "Too few elements to need Grow");
+  𐡄𐡍 (Grow) {
+    أكد(PosPair.first < Nodes && "Bad algebra");
+    أكد(NewSize[PosPair.first] && "Too few elements to need Grow");
     --NewSize[PosPair.first];
   }
 
 #ifndef NDEBUG
   Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
-    assert(NewSize[n] <= Capacity && "Overallocated node");
+  لكل (unsigned n = 0; n != Nodes; ++n) {
+    أكد(NewSize[n] <= Capacity && "Overallocated node");
     Sum += NewSize[n];
   }
-  assert(Sum == Elements && "Bad distribution sum");
+  أكد(Sum == Elements && "Bad distribution sum");
 #endif
 
-  return PosPair;
+  أرجع PosPair;
 }
 
 } // namespace IntervalMapImpl

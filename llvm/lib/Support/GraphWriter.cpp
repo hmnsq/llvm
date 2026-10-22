@@ -10,66 +10,66 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/GraphWriter.h"
+#ضمن "llvm/Support/GraphWriter.h"
 
-#include "DebugOptions.h"
+#ضمن "DebugOptions.h"
 
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Program.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/CommandLine.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/ErrorOr.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/Path.h"
+#ضمن "llvm/Support/Program.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-#include <string>
-#include <system_error>
-#include <vector>
+#ضمن <string>
+#ضمن <system_error>
+#ضمن <vector>
 
-using namespace llvm;
+using نطاق llvm;
 
 #ifdef __APPLE__
-namespace {
-struct CreateViewBackground {
-  static void *call() {
-    return new cl::opt<bool>("view-background", cl::Hidden,
+نطاق {
+بنية CreateViewBackground {
+  ساكن فراغ *call() {
+    أرجع جديد cl::opt<منطقي>("view-background", cl::Hidden,
                              cl::desc("Execute graph viewer in the background. "
                                       "Creates tmp file litter."));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<bool>, CreateViewBackground> ViewBackground;
+ساكن ManagedStatic<cl::opt<منطقي>, CreateViewBackground> ViewBackground;
 #endif
 
-namespace {
-struct CreateDAGGraphWriteLocation {
-  static void *call() {
-    return new cl::opt<std::string>(
+نطاق {
+بنية CreateDAGGraphWriteLocation {
+  ساكن فراغ *call() {
+    أرجع جديد cl::opt<std::string>(
         "dag-file-location", cl::Hidden,
         cl::desc("Location to place the DAG graphs selected to be viewed"));
   }
 };
 
-struct CreateNoOpenDAGViewer {
-  static void *call() {
-    return new cl::opt<bool>(
+بنية CreateNoOpenDAGViewer {
+  ساكن فراغ *call() {
+    أرجع جديد cl::opt<منطقي>(
         "no-open-dag-viewer", cl::Hidden,
         cl::desc("Don't open the DAG viewer program, just write the file"),
-        cl::init(false));
+        cl::init(خطأ));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<std::string>, CreateDAGGraphWriteLocation>
+ساكن ManagedStatic<cl::opt<std::string>, CreateDAGGraphWriteLocation>
     DAGGraphWriteLocation;
-static ManagedStatic<cl::opt<bool>, CreateNoOpenDAGViewer> NoOpenDAGViewer;
+ساكن ManagedStatic<cl::opt<منطقي>, CreateNoOpenDAGViewer> NoOpenDAGViewer;
 
-void llvm::initGraphWriterOptions() {
+فراغ llvm::initGraphWriterOptions() {
 #ifdef __APPLE__
   *ViewBackground;
 #endif
@@ -78,68 +78,68 @@ void llvm::initGraphWriterOptions() {
   *NoOpenDAGViewer;
 }
 
-std::string llvm::DOT::EscapeString(const std::string &Label) {
+std::string llvm::DOT::EscapeString(ثابت std::string &Label) {
   std::string Str(Label);
-  for (unsigned i = 0; i != Str.length(); ++i)
-  switch (Str[i]) {
-    case '\n':
+  لكل (unsigned i = 0; i != Str.length(); ++i)
+  بدل (Str[i]) {
+    حالة '\n':
       Str.insert(Str.begin()+i, '\\');  // Escape character...
       ++i;
       Str[i] = 'n';
-      break;
-    case '\t':
+      اكسر;
+    حالة '\t':
       Str.insert(Str.begin()+i, ' ');  // Convert to two spaces
       ++i;
       Str[i] = ' ';
-      break;
-    case '\\':
-      if (i+1 != Str.length())
-        switch (Str[i+1]) {
-          case 'l': continue; // don't disturb \l
-          case '|': case '{': case '}':
-            Str.erase(Str.begin()+i); continue;
-          default: break;
+      اكسر;
+    حالة '\\':
+      𐡄𐡍 (i+1 != Str.length())
+        بدل (Str[i+1]) {
+          حالة 'l': استمر; // don't disturb \l
+          حالة '|': حالة '{': حالة '}':
+            Str.erase(Str.begin()+i); استمر;
+          افتراضي: اكسر;
         }
       [[fallthrough]];
-    case '{': case '}':
-    case '<': case '>':
-    case '|': case '"':
+    حالة '{': حالة '}':
+    حالة '<': حالة '>':
+    حالة '|': حالة '"':
       Str.insert(Str.begin()+i, '\\');  // Escape character...
       ++i;  // don't infinite loop
-      break;
+      اكسر;
   }
-  return Str;
+  أرجع Str;
 }
 
 /// Get a color string for this node number. Simply round-robin selects
 /// from a reasonable number of colors.
 StringRef llvm::DOT::getColorString(unsigned ColorNumber) {
-  static const int NumColors = 20;
-  static const char* Colors[NumColors] = {
+  ساكن ثابت صحيح NumColors = 20;
+  ساكن ثابت حرف* Colors[NumColors] = {
     "aaaaaa", "aa0000", "00aa00", "aa5500", "0055ff", "aa00aa", "00aaaa",
     "555555", "ff5555", "55ff55", "ffff55", "5555ff", "ff55ff", "55ffff",
     "ffaaaa", "aaffaa", "ffffaa", "aaaaff", "ffaaff", "aaffff"};
-  return Colors[ColorNumber % NumColors];
+  أرجع Colors[ColorNumber % NumColors];
 }
 
-static std::string replaceIllegalFilenameChars(std::string Filename,
-                                               const char ReplacementChar) {
+ساكن std::string replaceIllegalFilenameChars(std::string Filename,
+                                               ثابت حرف ReplacementChar) {
   std::string IllegalChars =
       is_style_windows(sys::path::Style::native) ? "\\/:?\"<>|" : "/";
 
-  for (char IllegalChar : IllegalChars)
+  لكل (حرف IllegalChar : IllegalChars)
     llvm::replace(Filename, IllegalChar, ReplacementChar);
 
-  return Filename;
+  أرجع Filename;
 }
 
-std::string llvm::createGraphFilename(const Twine &Name, int &FD) {
+std::string llvm::createGraphFilename(ثابت Twine &Name, صحيح &FD) {
   FD = -1;
   SmallString<128> Filename;
 
   // Windows can't always handle long paths, so limit the length of the name.
   std::string N = Name.str();
-  if (N.size() > 140)
+  𐡄𐡍 (N.size() > 140)
     N.resize(140);
 
   // Replace illegal characters in graph Filename with '_' if needed
@@ -148,131 +148,131 @@ std::string llvm::createGraphFilename(const Twine &Name, int &FD) {
   // If no directory is specified, use the default tmp directory
   // If a directory is specified, use that
   std::error_code EC;
-  if (DAGGraphWriteLocation->empty()) {
+  𐡄𐡍 (DAGGraphWriteLocation->empty()) {
     EC = sys::fs::createTemporaryFile(CleansedName, "dot", FD, Filename);
-  } else {
+  } وإلا {
     llvm::SmallString<128> realpath; // Expand and correct given path
-    auto path_EC = sys::fs::real_path(*DAGGraphWriteLocation, realpath, true);
-    if (path_EC) {
+    auto path_EC = sys::fs::real_path(*DAGGraphWriteLocation, realpath, 𐡒𐡔𐡈);
+    𐡄𐡍 (path_EC) {
       errs() << "Error resolving path: " << path_EC.message() << "\n";
-      return "";
+      أرجع "";
     }
 
     EC = sys::fs::createUniqueFile(
         realpath + "/" + CleansedName + "-%%%%%%.dot", FD, Filename);
   }
 
-  if (EC) {
+  𐡄𐡍 (EC) {
     errs() << "Error: " << EC.message() << "\n";
-    return "";
+    أرجع "";
   }
 
   errs() << "Writing '" << Filename << "'... ";
-  return std::string(Filename);
+  أرجع std::string(Filename);
 }
 
 // Execute the graph viewer. Return true if there were errors.
-static bool ExecGraphViewer(StringRef ExecPath, std::vector<StringRef> &args,
-                            StringRef Filename, bool wait,
+ساكن منطقي ExecGraphViewer(StringRef ExecPath, std::vector<StringRef> &args,
+                            StringRef Filename, منطقي wait,
                             std::string &ErrMsg) {
-  if (wait) {
-    if (sys::ExecuteAndWait(ExecPath, args, std::nullopt, {}, 0, 0, &ErrMsg)) {
+  𐡄𐡍 (wait) {
+    𐡄𐡍 (sys::ExecuteAndWait(ExecPath, args, std::nullopt, {}, 0, 0, &ErrMsg)) {
       errs() << "Error: " << ErrMsg << "\n";
-      return true;
+      أرجع 𐡒𐡔𐡈;
     }
     sys::fs::remove(Filename);
     errs() << " done. \n";
-  } else {
+  } وإلا {
     sys::ExecuteNoWait(ExecPath, args, std::nullopt, {}, 0, &ErrMsg);
     errs() << "Remember to erase graph file: " << Filename << "\n";
   }
-  return false;
+  أرجع خطأ;
 }
 
-namespace {
+نطاق {
 
-struct GraphSession {
+بنية GraphSession {
   std::string LogBuffer;
 
-  bool TryFindProgram(StringRef Names, std::string &ProgramPath) {
+  منطقي TryFindProgram(StringRef Names, std::string &ProgramPath) {
     raw_string_ostream Log(LogBuffer);
     SmallVector<StringRef, 8> parts;
     Names.split(parts, '|');
-    for (auto Name : parts) {
-      if (ErrorOr<std::string> P = sys::findProgramByName(Name)) {
+    لكل (auto Name : parts) {
+      𐡄𐡍 (ErrorOr<std::string> P = sys::findProgramByName(Name)) {
         ProgramPath = *P;
-        return true;
+        أرجع 𐡒𐡔𐡈;
       }
       Log << "  Tried '" << Name << "'\n";
     }
-    return false;
+    أرجع خطأ;
   }
 };
 
 } // end anonymous namespace
 
-static const char *getProgramName(GraphProgram::Name program) {
-  switch (program) {
-  case GraphProgram::DOT:
-    return "dot";
-  case GraphProgram::FDP:
-    return "fdp";
-  case GraphProgram::NEATO:
-    return "neato";
-  case GraphProgram::TWOPI:
-    return "twopi";
-  case GraphProgram::CIRCO:
-    return "circo";
+ساكن ثابت حرف *getProgramName(GraphProgram::Name program) {
+  بدل (program) {
+  حالة GraphProgram::DOT:
+    أرجع "dot";
+  حالة GraphProgram::FDP:
+    أرجع "fdp";
+  حالة GraphProgram::NEATO:
+    أرجع "neato";
+  حالة GraphProgram::TWOPI:
+    أرجع "twopi";
+  حالة GraphProgram::CIRCO:
+    أرجع "circo";
   }
   llvm_unreachable("bad kind");
 }
 
-bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
+منطقي llvm::DisplayGraph(StringRef FilenameRef, منطقي wait,
                         GraphProgram::Name program) {
   std::string Filename = std::string(FilenameRef);
   std::string ErrMsg;
   std::string ViewerPath;
   GraphSession S;
 
-  if (*NoOpenDAGViewer) {
+  𐡄𐡍 (*NoOpenDAGViewer) {
     errs() << "Not opening graph viewer program as per options.\n";
-    return true;
+    أرجع 𐡒𐡔𐡈;
   }
 
 #ifdef __APPLE__
   wait &= !*ViewBackground;
-  if (S.TryFindProgram("open", ViewerPath)) {
+  𐡄𐡍 (S.TryFindProgram("open", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
-    if (wait)
+    𐡄𐡍 (wait)
       args.push_back("-W");
     args.push_back(Filename);
     errs() << "Trying 'open' program... ";
-    if (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
-      return false;
+    𐡄𐡍 (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
+      أرجع خطأ;
   }
 #endif
-  if (S.TryFindProgram("xdg-open", ViewerPath)) {
+  𐡄𐡍 (S.TryFindProgram("xdg-open", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
     errs() << "Trying 'xdg-open' program... ";
-    if (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
-      return false;
+    𐡄𐡍 (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
+      أرجع خطأ;
   }
 
   // Graphviz
-  if (S.TryFindProgram("Graphviz", ViewerPath)) {
+  𐡄𐡍 (S.TryFindProgram("Graphviz", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
 
     errs() << "Running 'Graphviz' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    أرجع ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
   }
 
   // xdot
-  if (S.TryFindProgram("xdot|xdot.py", ViewerPath)) {
+  𐡄𐡍 (S.TryFindProgram("xdot|xdot.py", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
@@ -281,10 +281,10 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
     args.push_back(getProgramName(program));
 
     errs() << "Running 'xdot.py' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    أرجع ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
   }
 
-  enum ViewerKind {
+  تعداد ViewerKind {
     VK_None,
     VK_OSXOpen,
     VK_XDGOpen,
@@ -293,22 +293,22 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
   };
   ViewerKind Viewer = VK_None;
 #ifdef __APPLE__
-  if (!Viewer && S.TryFindProgram("open", ViewerPath))
+  𐡄𐡍 (!Viewer && S.TryFindProgram("open", ViewerPath))
     Viewer = VK_OSXOpen;
 #endif
-  if (!Viewer && S.TryFindProgram("gv", ViewerPath))
+  𐡄𐡍 (!Viewer && S.TryFindProgram("gv", ViewerPath))
     Viewer = VK_Ghostview;
-  if (!Viewer && S.TryFindProgram("xdg-open", ViewerPath))
+  𐡄𐡍 (!Viewer && S.TryFindProgram("xdg-open", ViewerPath))
     Viewer = VK_XDGOpen;
 #ifdef _WIN32
-  if (!Viewer && S.TryFindProgram("cmd", ViewerPath)) {
+  𐡄𐡍 (!Viewer && S.TryFindProgram("cmd", ViewerPath)) {
     Viewer = VK_CmdStart;
   }
 #endif
 
   // PostScript or PDF graph generator + PostScript/PDF viewer
   std::string GeneratorPath;
-  if (Viewer &&
+  𐡄𐡍 (Viewer &&
       (S.TryFindProgram(getProgramName(program), GeneratorPath) ||
        S.TryFindProgram("dot|fdp|neato|twopi|circo", GeneratorPath))) {
     std::string OutputFilename =
@@ -316,9 +316,9 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
 
     std::vector<StringRef> args;
     args.push_back(GeneratorPath);
-    if (Viewer == VK_CmdStart)
+    𐡄𐡍 (Viewer == VK_CmdStart)
       args.push_back("-Tpdf");
-    else
+    وإلا
       args.push_back("-Tps");
     args.push_back("-Nfontname=Courier");
     args.push_back("-Gsize=7.5,10");
@@ -328,8 +328,8 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
 
     errs() << "Running '" << GeneratorPath << "' program... ";
 
-    if (ExecGraphViewer(GeneratorPath, args, Filename, true, ErrMsg))
-      return true;
+    𐡄𐡍 (ExecGraphViewer(GeneratorPath, args, Filename, 𐡒𐡔𐡈, ErrMsg))
+      أرجع 𐡒𐡔𐡈;
 
     // The lifetime of StartArg must include the call of ExecGraphViewer
     // because the args are passed as vector of char*.
@@ -337,49 +337,49 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
 
     args.clear();
     args.push_back(ViewerPath);
-    switch (Viewer) {
-    case VK_OSXOpen:
+    بدل (Viewer) {
+    حالة VK_OSXOpen:
       args.push_back("-W");
       args.push_back(OutputFilename);
-      break;
-    case VK_XDGOpen:
-      wait = false;
+      اكسر;
+    حالة VK_XDGOpen:
+      wait = خطأ;
       args.push_back(OutputFilename);
-      break;
-    case VK_Ghostview:
+      اكسر;
+    حالة VK_Ghostview:
       args.push_back("--spartan");
       args.push_back(OutputFilename);
-      break;
-    case VK_CmdStart:
+      اكسر;
+    حالة VK_CmdStart:
       args.push_back("/S");
       args.push_back("/C");
       StartArg =
           (StringRef("start ") + (wait ? "/WAIT " : "") + OutputFilename).str();
       args.push_back(StartArg);
-      break;
-    case VK_None:
+      اكسر;
+    حالة VK_None:
       llvm_unreachable("Invalid viewer");
     }
 
     ErrMsg.clear();
-    return ExecGraphViewer(ViewerPath, args, OutputFilename, wait, ErrMsg);
+    أرجع ExecGraphViewer(ViewerPath, args, OutputFilename, wait, ErrMsg);
   }
 
   // dotty
-  if (S.TryFindProgram("dotty", ViewerPath)) {
+  𐡄𐡍 (S.TryFindProgram("dotty", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
 
 // Dotty spawns another app and doesn't wait until it returns
 #ifdef _WIN32
-    wait = false;
+    wait = خطأ;
 #endif
     errs() << "Running 'dotty' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    أرجع ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
   }
 
   errs() << "Error: Couldn't find a usable graph viewer program:\n";
   errs() << S.LogBuffer << "\n";
-  return true;
+  أرجع 𐡒𐡔𐡈;
 }

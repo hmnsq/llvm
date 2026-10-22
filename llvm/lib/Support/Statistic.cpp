@@ -20,82 +20,82 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Statistic.h"
+#ضمن "llvm/ADT/Statistic.h"
 
-#include "DebugOptions.h"
+#ضمن "DebugOptions.h"
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Timer.h"
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/Support/raw_ostream.h"
-#include <algorithm>
-#include <cstring>
-using namespace llvm;
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/CommandLine.h"
+#ضمن "llvm/Support/Compiler.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/Mutex.h"
+#ضمن "llvm/Support/Timer.h"
+#ضمن "llvm/Support/YAMLTraits.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <algorithm>
+#ضمن <cstring>
+using نطاق llvm;
 
 /// -stats - Command line option to cause transformations to emit stats about
 /// what they did.
 ///
-static bool EnableStats;
-static bool StatsAsJSON;
-static bool Enabled;
-static bool PrintOnExit;
+ساكن منطقي EnableStats;
+ساكن منطقي StatsAsJSON;
+ساكن منطقي Enabled;
+ساكن منطقي PrintOnExit;
 
-void llvm::initStatisticOptions() {
-  static cl::opt<bool, true> registerEnableStats{
+فراغ llvm::initStatisticOptions() {
+  ساكن cl::opt<منطقي, 𐡒𐡔𐡈> registerEnableStats{
       "stats",
       cl::desc(
           "Enable statistics output from program (available with Asserts)"),
       cl::location(EnableStats), cl::Hidden};
-  static cl::opt<bool, true> registerStatsAsJson{
+  ساكن cl::opt<منطقي, 𐡒𐡔𐡈> registerStatsAsJson{
       "stats-json", cl::desc("Display statistics as json data"),
       cl::location(StatsAsJSON), cl::Hidden};
 }
 
-namespace {
+نطاق {
 /// This class is used in a ManagedStatic so that it is created on demand (when
 /// the first statistic is bumped) and destroyed only when llvm_shutdown is
 /// called. We print statistics from the destructor.
 /// This class is also used to look up statistic values from applications that
 /// use LLVM.
-class StatisticInfo {
+صنف StatisticInfo {
   std::vector<TrackingStatistic *> Stats;
 
-  friend void llvm::PrintStatistics();
-  friend void llvm::PrintStatistics(raw_ostream &OS);
-  friend void llvm::PrintStatisticsJSON(raw_ostream &OS);
+  friend فراغ llvm::PrintStatistics();
+  friend فراغ llvm::PrintStatistics(raw_ostream &OS);
+  friend فراغ llvm::PrintStatisticsJSON(raw_ostream &OS);
 
   /// Sort statistics by debugtype,name,description.
-  void sort();
-public:
+  فراغ sort();
+عام:
   using const_iterator = std::vector<TrackingStatistic *>::const_iterator;
 
   StatisticInfo();
   ~StatisticInfo();
 
-  void addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
+  فراغ addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
 
-  const_iterator begin() const { return Stats.begin(); }
-  const_iterator end() const { return Stats.end(); }
-  iterator_range<const_iterator> statistics() const {
-    return {begin(), end()};
+  const_iterator begin() ثابت { أرجع Stats.begin(); }
+  const_iterator end() ثابت { أرجع Stats.end(); }
+  iterator_range<const_iterator> statistics() ثابت {
+    أرجع {begin(), end()};
   }
 
-  void reset();
+  فراغ reset();
 };
 } // end anonymous namespace
 
-static ManagedStatic<StatisticInfo> StatInfo;
-static ManagedStatic<sys::SmartMutex<true> > StatLock;
+ساكن ManagedStatic<StatisticInfo> StatInfo;
+ساكن ManagedStatic<sys::SmartMutex<𐡒𐡔𐡈> > StatLock;
 
 /// RegisterStatistic - The first time a statistic is bumped, this method is
 /// called.
-void TrackingStatistic::RegisterStatistic() {
+فراغ TrackingStatistic::RegisterStatistic() {
   // If stats are enabled, inform StatInfo that this statistic should be
   // printed.
   // llvm_shutdown calls destructors while holding the ManagedStatic mutex.
@@ -104,18 +104,18 @@ void TrackingStatistic::RegisterStatistic() {
   // ManagedStatic mutex, doing so with StatLock held would lead to a lock
   // order inversion. To avoid that, we dereference the ManagedStatics first,
   // and only take StatLock afterwards.
-  if (!Initialized.load(std::memory_order_relaxed)) {
-    sys::SmartMutex<true> &Lock = *StatLock;
+  𐡄𐡍 (!Initialized.load(std::memory_order_relaxed)) {
+    sys::SmartMutex<𐡒𐡔𐡈> &Lock = *StatLock;
     StatisticInfo &SI = *StatInfo;
-    sys::SmartScopedLock<true> Writer(Lock);
+    sys::SmartScopedLock<𐡒𐡔𐡈> Writer(Lock);
     // Check Initialized again after acquiring the lock.
-    if (Initialized.load(std::memory_order_relaxed))
-      return;
-    if (EnableStats || Enabled)
-      SI.addStatistic(this);
+    𐡄𐡍 (Initialized.load(std::memory_order_relaxed))
+      أرجع;
+    𐡄𐡍 (EnableStats || Enabled)
+      SI.addStatistic(هذا);
 
     // Remember we have been registered.
-    Initialized.store(true, std::memory_order_release);
+    Initialized.store(𐡒𐡔𐡈, std::memory_order_release);
   }
 }
 
@@ -127,41 +127,41 @@ StatisticInfo::StatisticInfo() {
 
 // Print information when destroyed, iff command line option is specified.
 StatisticInfo::~StatisticInfo() {
-  if (EnableStats || PrintOnExit)
+  𐡄𐡍 (EnableStats || PrintOnExit)
     llvm::PrintStatistics();
 }
 
-void llvm::EnableStatistics(bool DoPrintOnExit) {
-  Enabled = true;
+فراغ llvm::EnableStatistics(منطقي DoPrintOnExit) {
+  Enabled = 𐡒𐡔𐡈;
   PrintOnExit = DoPrintOnExit;
 }
 
-bool llvm::AreStatisticsEnabled() { return Enabled || EnableStats; }
+منطقي llvm::AreStatisticsEnabled() { أرجع Enabled || EnableStats; }
 
-void StatisticInfo::sort() {
+فراغ StatisticInfo::sort() {
   llvm::stable_sort(
-      Stats, [](const TrackingStatistic *LHS, const TrackingStatistic *RHS) {
-        if (int Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
-          return Cmp < 0;
+      Stats, [](ثابت TrackingStatistic *LHS, ثابت TrackingStatistic *RHS) {
+        𐡄𐡍 (صحيح Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
+          أرجع Cmp < 0;
 
-        if (int Cmp = std::strcmp(LHS->getName(), RHS->getName()))
-          return Cmp < 0;
+        𐡄𐡍 (صحيح Cmp = std::strcmp(LHS->getName(), RHS->getName()))
+          أرجع Cmp < 0;
 
-        return std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
+        أرجع std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
       });
 }
 
-void StatisticInfo::reset() {
-  sys::SmartScopedLock<true> Writer(*StatLock);
+فراغ StatisticInfo::reset() {
+  sys::SmartScopedLock<𐡒𐡔𐡈> Writer(*StatLock);
 
   // Tell each statistic that it isn't registered so it has to register
   // again. We're holding the lock so it won't be able to do so until we're
   // finished. Once we've forced it to re-register (after we return), then zero
   // the value.
-  for (auto *Stat : Stats) {
+  لكل (auto *Stat : Stats) {
     // Value updates to a statistic that complete before this statement in the
     // iteration for that statistic will be lost as intended.
-    Stat->Initialized = false;
+    Stat->Initialized = خطأ;
     Stat->Value = 0;
   }
 
@@ -173,12 +173,12 @@ void StatisticInfo::reset() {
   Stats.clear();
 }
 
-void llvm::PrintStatistics(raw_ostream &OS) {
+فراغ llvm::PrintStatistics(raw_ostream &OS) {
   StatisticInfo &Stats = *StatInfo;
 
   // Figure out how long the biggest Value and Name fields are.
   unsigned MaxDebugTypeLen = 0, MaxValLen = 0;
-  for (TrackingStatistic *Stat : Stats.Stats) {
+  لكل (TrackingStatistic *Stat : Stats.Stats) {
     MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->getValue()).size());
     MaxDebugTypeLen =
         std::max(MaxDebugTypeLen, (unsigned)std::strlen(Stat->getDebugType()));
@@ -192,7 +192,7 @@ void llvm::PrintStatistics(raw_ostream &OS) {
      << "===" << std::string(73, '-') << "===\n\n";
 
   // Print all of the statistics.
-  for (TrackingStatistic *Stat : Stats.Stats)
+  لكل (TrackingStatistic *Stat : Stats.Stats)
     OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->getValue(),
                  MaxDebugTypeLen, Stat->getDebugType(), Stat->getDesc());
 
@@ -200,20 +200,20 @@ void llvm::PrintStatistics(raw_ostream &OS) {
   OS.flush();
 }
 
-void llvm::PrintStatisticsJSON(raw_ostream &OS) {
-  sys::SmartScopedLock<true> Reader(*StatLock);
+فراغ llvm::PrintStatisticsJSON(raw_ostream &OS) {
+  sys::SmartScopedLock<𐡒𐡔𐡈> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
   Stats.sort();
 
   // Print all of the statistics.
   OS << "{\n";
-  const char *delim = "";
-  for (const TrackingStatistic *Stat : Stats.Stats) {
+  ثابت حرف *delim = "";
+  لكل (ثابت TrackingStatistic *Stat : Stats.Stats) {
     OS << delim;
-    assert(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
+    أكد(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
            "Statistic group/type name is simple.");
-    assert(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
+    أكد(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
            "Statistic name is simple");
     OS << "\t\"" << Stat->getDebugType() << '.' << Stat->getName() << "\": "
        << Stat->getValue();
@@ -226,26 +226,26 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
   OS.flush();
 }
 
-void llvm::PrintStatistics() {
-#if LLVM_ENABLE_STATS
-  sys::SmartScopedLock<true> Reader(*StatLock);
+فراغ llvm::PrintStatistics() {
+#𐡄𐡍 LLVM_ENABLE_STATS
+  sys::SmartScopedLock<𐡒𐡔𐡈> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
   // Statistics not enabled?
-  if (Stats.Stats.empty()) return;
+  𐡄𐡍 (Stats.Stats.empty()) أرجع;
 
   // Get the stream to write to.
   std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-  if (StatsAsJSON)
+  𐡄𐡍 (StatsAsJSON)
     PrintStatisticsJSON(*OutStream);
-  else
+  وإلا
     PrintStatistics(*OutStream);
 
-#else
+#وإلا
   // Check if the -stats option is set instead of checking
   // !Stats.Stats.empty().  In release builds, Statistics operators
   // do nothing, so stats are never Registered.
-  if (EnableStats) {
+  𐡄𐡍 (EnableStats) {
     // Get the stream to write to.
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
     (*OutStream) << "Statistics are disabled.  "
@@ -255,14 +255,14 @@ void llvm::PrintStatistics() {
 }
 
 std::vector<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
-  sys::SmartScopedLock<true> Reader(*StatLock);
+  sys::SmartScopedLock<𐡒𐡔𐡈> Reader(*StatLock);
   std::vector<std::pair<StringRef, uint64_t>> ReturnStats;
 
-  for (const auto &Stat : StatInfo->statistics())
+  لكل (ثابت auto &Stat : StatInfo->statistics())
     ReturnStats.emplace_back(Stat->getName(), Stat->getValue());
-  return ReturnStats;
+  أرجع ReturnStats;
 }
 
-void llvm::ResetStatistics() {
+فراغ llvm::ResetStatistics() {
   StatInfo->reset();
 }
