@@ -172,14 +172,14 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
     d += saved_d;
 
     ptr += 64;
-  } while (Size -= 64);
+  } ၶၢဝ်း (Size -= 64);
 
   InternalState.a = a;
   InternalState.b = b;
   InternalState.c = c;
   InternalState.d = d;
 
-  return ptr;
+  ပွၵ်ႈ ptr;
 }
 
 MD5::MD5() = default;
@@ -192,18 +192,18 @@ void MD5::update(ArrayRef<uint8_t> Data) {
   unsigned long Size = Data.size();
 
   saved_lo = InternalState.lo;
-  if ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
+  ပေႃး ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
     InternalState.hi++;
   InternalState.hi += Size >> 29;
 
   used = saved_lo & 0x3f;
 
-  if (used) {
+  ပေႃး (used) {
     free = 64 - used;
 
-    if (Size < free) {
+    ပေႃး (Size < free) {
       memcpy(&InternalState.buffer[used], Ptr, Size);
-      return;
+      ပွၵ်ႈ;
     }
 
     memcpy(&InternalState.buffer[used], Ptr, free);
@@ -212,7 +212,7 @@ void MD5::update(ArrayRef<uint8_t> Data) {
     body(ArrayRef(InternalState.buffer, 64));
   }
 
-  if (Size >= 64) {
+  ပေႃး (Size >= 64) {
     Ptr = body(ArrayRef(Ptr, Size & ~(unsigned long)0x3f));
     Size &= 0x3f;
   }
@@ -239,7 +239,7 @@ void MD5::final(MD5Result &Result) {
 
   free = 64 - used;
 
-  if (free < 8) {
+  ပေႃး (free < 8) {
     memset(&InternalState.buffer[used], 0, free);
     body(ArrayRef(InternalState.buffer, 64));
     used = 0;
@@ -263,7 +263,7 @@ void MD5::final(MD5Result &Result) {
 MD5::MD5Result MD5::final() {
   MD5Result Result;
   final(Result);
-  return Result;
+  ပွၵ်ႈ Result;
 }
 
 MD5::MD5Result MD5::result() {
@@ -274,16 +274,16 @@ MD5::MD5Result MD5::result() {
   // Restore the state
   InternalState = StateToRestore;
 
-  return Hash;
+  ပွၵ်ႈ Hash;
 }
 
 SmallString<32> MD5::MD5Result::digest() const {
   SmallString<32> Str;
   toHex(*this, /*LowerCase*/ true, Str);
-  return Str;
+  ပွၵ်ႈ Str;
 }
 
-void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<char> &Str) {
+void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<var_na> &Str) {
   toHex(Result, /*LowerCase*/ true, Str);
 }
 
@@ -293,7 +293,7 @@ MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
   MD5::MD5Result Res;
   Hash.final(Res);
 
-  return Res;
+  ပွၵ်ႈ Res;
 }
 
 #undef F

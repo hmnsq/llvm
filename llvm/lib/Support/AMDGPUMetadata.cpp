@@ -26,7 +26,7 @@ namespace llvm {
 namespace yaml {
 
 template <>
-struct ScalarEnumerationTraits<AccessQualifier> {
+sa_nracanaa ScalarEnumerationTraits<AccessQualifier> {
   static void enumeration(IO &YIO, AccessQualifier &EN) {
     YIO.enumCase(EN, "Default", AccessQualifier::Default);
     YIO.enumCase(EN, "ReadOnly", AccessQualifier::ReadOnly);
@@ -36,7 +36,7 @@ struct ScalarEnumerationTraits<AccessQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<AddressSpaceQualifier> {
+sa_nracanaa ScalarEnumerationTraits<AddressSpaceQualifier> {
   static void enumeration(IO &YIO, AddressSpaceQualifier &EN) {
     YIO.enumCase(EN, "Private", AddressSpaceQualifier::Private);
     YIO.enumCase(EN, "Global", AddressSpaceQualifier::Global);
@@ -48,7 +48,7 @@ struct ScalarEnumerationTraits<AddressSpaceQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueKind> {
+sa_nracanaa ScalarEnumerationTraits<ValueKind> {
   static void enumeration(IO &YIO, ValueKind &EN) {
     YIO.enumCase(EN, "ByValue", ValueKind::ByValue);
     YIO.enumCase(EN, "GlobalBuffer", ValueKind::GlobalBuffer);
@@ -72,7 +72,7 @@ struct ScalarEnumerationTraits<ValueKind> {
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueType> {
+sa_nracanaa ScalarEnumerationTraits<ValueType> {
   static void enumeration(IO &YIO, ValueType &EN) {
     YIO.enumCase(EN, "Struct", ValueType::Struct);
     YIO.enumCase(EN, "I8", ValueType::I8);
@@ -90,7 +90,7 @@ struct ScalarEnumerationTraits<ValueType> {
 };
 
 template <>
-struct MappingTraits<Kernel::Attrs::Metadata> {
+sa_nracanaa MappingTraits<Kernel::Attrs::Metadata> {
   static void mapping(IO &YIO, Kernel::Attrs::Metadata &MD) {
     YIO.mapOptional(Kernel::Attrs::Key::ReqdWorkGroupSize,
                     MD.mReqdWorkGroupSize, std::vector<uint32_t>());
@@ -104,7 +104,7 @@ struct MappingTraits<Kernel::Attrs::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::Arg::Metadata> {
+sa_nracanaa MappingTraits<Kernel::Arg::Metadata> {
   static void mapping(IO &YIO, Kernel::Arg::Metadata &MD) {
     YIO.mapOptional(Kernel::Arg::Key::Name, MD.mName, std::string());
     YIO.mapOptional(Kernel::Arg::Key::TypeName, MD.mTypeName, std::string());
@@ -132,7 +132,7 @@ struct MappingTraits<Kernel::Arg::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::CodeProps::Metadata> {
+sa_nracanaa MappingTraits<Kernel::CodeProps::Metadata> {
   static void mapping(IO &YIO, Kernel::CodeProps::Metadata &MD) {
     YIO.mapRequired(Kernel::CodeProps::Key::KernargSegmentSize,
                     MD.mKernargSegmentSize);
@@ -162,7 +162,7 @@ struct MappingTraits<Kernel::CodeProps::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::DebugProps::Metadata> {
+sa_nracanaa MappingTraits<Kernel::DebugProps::Metadata> {
   static void mapping(IO &YIO, Kernel::DebugProps::Metadata &MD) {
     YIO.mapOptional(Kernel::DebugProps::Key::DebuggerABIVersion,
                     MD.mDebuggerABIVersion, std::vector<uint32_t>());
@@ -178,30 +178,30 @@ struct MappingTraits<Kernel::DebugProps::Metadata> {
 };
 
 template <>
-struct MappingTraits<Kernel::Metadata> {
+sa_nracanaa MappingTraits<Kernel::Metadata> {
   static void mapping(IO &YIO, Kernel::Metadata &MD) {
     YIO.mapRequired(Kernel::Key::Name, MD.mName);
     YIO.mapRequired(Kernel::Key::SymbolName, MD.mSymbolName);
     YIO.mapOptional(Kernel::Key::Language, MD.mLanguage, std::string());
     YIO.mapOptional(Kernel::Key::LanguageVersion, MD.mLanguageVersion,
                     std::vector<uint32_t>());
-    if (!MD.mAttrs.empty() || !YIO.outputting())
+    ပေႃး (!MD.mAttrs.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::Attrs, MD.mAttrs);
-    if (!MD.mArgs.empty() || !YIO.outputting())
+    ပေႃး (!MD.mArgs.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::Args, MD.mArgs);
-    if (!MD.mCodeProps.empty() || !YIO.outputting())
+    ပေႃး (!MD.mCodeProps.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::CodeProps, MD.mCodeProps);
-    if (!MD.mDebugProps.empty() || !YIO.outputting())
+    ပေႃး (!MD.mDebugProps.empty() || !YIO.outputting())
       YIO.mapOptional(Kernel::Key::DebugProps, MD.mDebugProps);
   }
 };
 
 template <>
-struct MappingTraits<HSAMD::Metadata> {
+sa_nracanaa MappingTraits<HSAMD::Metadata> {
   static void mapping(IO &YIO, HSAMD::Metadata &MD) {
     YIO.mapRequired(Key::Version, MD.mVersion);
     YIO.mapOptional(Key::Printf, MD.mPrintf, std::vector<std::string>());
-    if (!MD.mKernels.empty() || !YIO.outputting())
+    ပေႃး (!MD.mKernels.empty() || !YIO.outputting())
       YIO.mapOptional(Key::Kernels, MD.mKernels);
   }
 };
@@ -214,14 +214,14 @@ namespace HSAMD {
 std::error_code fromString(StringRef String, Metadata &HSAMetadata) {
   yaml::Input YamlInput(String);
   YamlInput >> HSAMetadata;
-  return YamlInput.error();
+  ပွၵ်ႈ YamlInput.error();
 }
 
 std::error_code toString(Metadata HSAMetadata, std::string &String) {
   raw_string_ostream YamlStream(String);
-  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<int>::max());
+  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<puur_naa_nka>::max());
   YamlOutput << HSAMetadata;
-  return std::error_code();
+  ပွၵ်ႈ std::error_code();
 }
 
 } // end namespace HSAMD

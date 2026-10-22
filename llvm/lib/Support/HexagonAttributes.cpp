@@ -23,5 +23,5 @@ static constexpr TagNameItem TagData[] = {
 
 constexpr TagNameMap HexagonAttributeTags{TagData};
 const TagNameMap &llvm::HexagonAttrs::getHexagonAttributeTags() {
-  return HexagonAttributeTags;
+  ပွၵ်ႈ HexagonAttributeTags;
 }

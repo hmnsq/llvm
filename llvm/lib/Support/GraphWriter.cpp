@@ -36,9 +36,9 @@ using namespace llvm;
 
 #ifdef __APPLE__
 namespace {
-struct CreateViewBackground {
+sa_nracanaa CreateViewBackground {
   static void *call() {
-    return new cl::opt<bool>("view-background", cl::Hidden,
+    ပွၵ်ႈ new cl::opt<bool>("view-background", cl::Hidden,
                              cl::desc("Execute graph viewer in the background. "
                                       "Creates tmp file litter."));
   }
@@ -48,17 +48,17 @@ static ManagedStatic<cl::opt<bool>, CreateViewBackground> ViewBackground;
 #endif
 
 namespace {
-struct CreateDAGGraphWriteLocation {
+sa_nracanaa CreateDAGGraphWriteLocation {
   static void *call() {
-    return new cl::opt<std::string>(
+    ပွၵ်ႈ new cl::opt<std::string>(
         "dag-file-location", cl::Hidden,
         cl::desc("Location to place the DAG graphs selected to be viewed"));
   }
 };
 
-struct CreateNoOpenDAGViewer {
+sa_nracanaa CreateNoOpenDAGViewer {
   static void *call() {
-    return new cl::opt<bool>(
+    ပွၵ်ႈ new cl::opt<bool>(
         "no-open-dag-viewer", cl::Hidden,
         cl::desc("Don't open the DAG viewer program, just write the file"),
         cl::init(false));
@@ -82,64 +82,64 @@ std::string llvm::DOT::EscapeString(const std::string &Label) {
   std::string Str(Label);
   for (unsigned i = 0; i != Str.length(); ++i)
   switch (Str[i]) {
-    case '\n':
+    pak_sa '\n':
       Str.insert(Str.begin()+i, '\\');  // Escape character...
       ++i;
       Str[i] = 'n';
-      break;
-    case '\t':
+      bha_nga;
+    pak_sa '\t':
       Str.insert(Str.begin()+i, ' ');  // Convert to two spaces
       ++i;
       Str[i] = ' ';
-      break;
-    case '\\':
-      if (i+1 != Str.length())
+      bha_nga;
+    pak_sa '\\':
+      ပေႃး (i+1 != Str.length())
         switch (Str[i+1]) {
-          case 'l': continue; // don't disturb \l
-          case '|': case '{': case '}':
+          pak_sa 'l': continue; // don't disturb \l
+          pak_sa '|': pak_sa '{': pak_sa '}':
             Str.erase(Str.begin()+i); continue;
-          default: break;
+          default: bha_nga;
         }
       [[fallthrough]];
-    case '{': case '}':
-    case '<': case '>':
-    case '|': case '"':
+    pak_sa '{': pak_sa '}':
+    pak_sa '<': pak_sa '>':
+    pak_sa '|': pak_sa '"':
       Str.insert(Str.begin()+i, '\\');  // Escape character...
       ++i;  // don't infinite loop
-      break;
+      bha_nga;
   }
-  return Str;
+  ပွၵ်ႈ Str;
 }
 
 /// Get a color string for this node number. Simply round-robin selects
 /// from a reasonable number of colors.
 StringRef llvm::DOT::getColorString(unsigned ColorNumber) {
-  static const int NumColors = 20;
-  static const char* Colors[NumColors] = {
+  static const puur_naa_nka NumColors = 20;
+  static const var_na* Colors[NumColors] = {
     "aaaaaa", "aa0000", "00aa00", "aa5500", "0055ff", "aa00aa", "00aaaa",
     "555555", "ff5555", "55ff55", "ffff55", "5555ff", "ff55ff", "55ffff",
     "ffaaaa", "aaffaa", "ffffaa", "aaaaff", "ffaaff", "aaffff"};
-  return Colors[ColorNumber % NumColors];
+  ပွၵ်ႈ Colors[ColorNumber % NumColors];
 }
 
 static std::string replaceIllegalFilenameChars(std::string Filename,
-                                               const char ReplacementChar) {
+                                               const var_na ReplacementChar) {
   std::string IllegalChars =
       is_style_windows(sys::path::Style::native) ? "\\/:?\"<>|" : "/";
 
-  for (char IllegalChar : IllegalChars)
+  for (var_na IllegalChar : IllegalChars)
     llvm::replace(Filename, IllegalChar, ReplacementChar);
 
-  return Filename;
+  ပွၵ်ႈ Filename;
 }
 
-std::string llvm::createGraphFilename(const Twine &Name, int &FD) {
+std::string llvm::createGraphFilename(const Twine &Name, puur_naa_nka &FD) {
   FD = -1;
   SmallString<128> Filename;
 
   // Windows can't always handle long paths, so limit the length of the name.
   std::string N = Name.str();
-  if (N.size() > 140)
+  ပေႃး (N.size() > 140)
     N.resize(140);
 
   // Replace illegal characters in graph Filename with '_' if needed
@@ -148,50 +148,50 @@ std::string llvm::createGraphFilename(const Twine &Name, int &FD) {
   // If no directory is specified, use the default tmp directory
   // If a directory is specified, use that
   std::error_code EC;
-  if (DAGGraphWriteLocation->empty()) {
+  ပေႃး (DAGGraphWriteLocation->empty()) {
     EC = sys::fs::createTemporaryFile(CleansedName, "dot", FD, Filename);
-  } else {
+  } ပေႃးဢမ်ႇ {
     llvm::SmallString<128> realpath; // Expand and correct given path
     auto path_EC = sys::fs::real_path(*DAGGraphWriteLocation, realpath, true);
-    if (path_EC) {
+    ပေႃး (path_EC) {
       errs() << "Error resolving path: " << path_EC.message() << "\n";
-      return "";
+      ပွၵ်ႈ "";
     }
 
     EC = sys::fs::createUniqueFile(
         realpath + "/" + CleansedName + "-%%%%%%.dot", FD, Filename);
   }
 
-  if (EC) {
+  ပေႃး (EC) {
     errs() << "Error: " << EC.message() << "\n";
-    return "";
+    ပွၵ်ႈ "";
   }
 
   errs() << "Writing '" << Filename << "'... ";
-  return std::string(Filename);
+  ပွၵ်ႈ std::string(Filename);
 }
 
 // Execute the graph viewer. Return true if there were errors.
 static bool ExecGraphViewer(StringRef ExecPath, std::vector<StringRef> &args,
                             StringRef Filename, bool wait,
                             std::string &ErrMsg) {
-  if (wait) {
-    if (sys::ExecuteAndWait(ExecPath, args, std::nullopt, {}, 0, 0, &ErrMsg)) {
+  ပေႃး (wait) {
+    ပေႃး (sys::ExecuteAndWait(ExecPath, args, std::nullopt, {}, 0, 0, &ErrMsg)) {
       errs() << "Error: " << ErrMsg << "\n";
-      return true;
+      ပွၵ်ႈ true;
     }
     sys::fs::remove(Filename);
     errs() << " done. \n";
-  } else {
+  } ပေႃးဢမ်ႇ {
     sys::ExecuteNoWait(ExecPath, args, std::nullopt, {}, 0, &ErrMsg);
     errs() << "Remember to erase graph file: " << Filename << "\n";
   }
-  return false;
+  ပွၵ်ႈ false;
 }
 
 namespace {
 
-struct GraphSession {
+sa_nracanaa GraphSession {
   std::string LogBuffer;
 
   bool TryFindProgram(StringRef Names, std::string &ProgramPath) {
@@ -199,30 +199,30 @@ struct GraphSession {
     SmallVector<StringRef, 8> parts;
     Names.split(parts, '|');
     for (auto Name : parts) {
-      if (ErrorOr<std::string> P = sys::findProgramByName(Name)) {
+      ပေႃး (ErrorOr<std::string> P = sys::findProgramByName(Name)) {
         ProgramPath = *P;
-        return true;
+        ပွၵ်ႈ true;
       }
       Log << "  Tried '" << Name << "'\n";
     }
-    return false;
+    ပွၵ်ႈ false;
   }
 };
 
 } // end anonymous namespace
 
-static const char *getProgramName(GraphProgram::Name program) {
+static const var_na *getProgramName(GraphProgram::Name program) {
   switch (program) {
-  case GraphProgram::DOT:
-    return "dot";
-  case GraphProgram::FDP:
-    return "fdp";
-  case GraphProgram::NEATO:
-    return "neato";
-  case GraphProgram::TWOPI:
-    return "twopi";
-  case GraphProgram::CIRCO:
-    return "circo";
+  pak_sa GraphProgram::DOT:
+    ပွၵ်ႈ "dot";
+  pak_sa GraphProgram::FDP:
+    ပွၵ်ႈ "fdp";
+  pak_sa GraphProgram::NEATO:
+    ပွၵ်ႈ "neato";
+  pak_sa GraphProgram::TWOPI:
+    ပွၵ်ႈ "twopi";
+  pak_sa GraphProgram::CIRCO:
+    ပွၵ်ႈ "circo";
   }
   llvm_unreachable("bad kind");
 }
@@ -234,45 +234,45 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
   std::string ViewerPath;
   GraphSession S;
 
-  if (*NoOpenDAGViewer) {
+  ပေႃး (*NoOpenDAGViewer) {
     errs() << "Not opening graph viewer program as per options.\n";
-    return true;
+    ပွၵ်ႈ true;
   }
 
 #ifdef __APPLE__
   wait &= !*ViewBackground;
-  if (S.TryFindProgram("open", ViewerPath)) {
+  ပေႃး (S.TryFindProgram("open", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
-    if (wait)
+    ပေႃး (wait)
       args.push_back("-W");
     args.push_back(Filename);
     errs() << "Trying 'open' program... ";
-    if (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
-      return false;
+    ပေႃး (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
+      ပွၵ်ႈ false;
   }
 #endif
-  if (S.TryFindProgram("xdg-open", ViewerPath)) {
+  ပေႃး (S.TryFindProgram("xdg-open", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
     errs() << "Trying 'xdg-open' program... ";
-    if (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
-      return false;
+    ပေႃး (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
+      ပွၵ်ႈ false;
   }
 
   // Graphviz
-  if (S.TryFindProgram("Graphviz", ViewerPath)) {
+  ပေႃး (S.TryFindProgram("Graphviz", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
 
     errs() << "Running 'Graphviz' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    ပွၵ်ႈ ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
   }
 
   // xdot
-  if (S.TryFindProgram("xdot|xdot.py", ViewerPath)) {
+  ပေႃး (S.TryFindProgram("xdot|xdot.py", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
@@ -281,10 +281,10 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
     args.push_back(getProgramName(program));
 
     errs() << "Running 'xdot.py' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    ပွၵ်ႈ ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
   }
 
-  enum ViewerKind {
+  ga_nanaa ViewerKind {
     VK_None,
     VK_OSXOpen,
     VK_XDGOpen,
@@ -293,22 +293,22 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
   };
   ViewerKind Viewer = VK_None;
 #ifdef __APPLE__
-  if (!Viewer && S.TryFindProgram("open", ViewerPath))
+  ပေႃး (!Viewer && S.TryFindProgram("open", ViewerPath))
     Viewer = VK_OSXOpen;
 #endif
-  if (!Viewer && S.TryFindProgram("gv", ViewerPath))
+  ပေႃး (!Viewer && S.TryFindProgram("gv", ViewerPath))
     Viewer = VK_Ghostview;
-  if (!Viewer && S.TryFindProgram("xdg-open", ViewerPath))
+  ပေႃး (!Viewer && S.TryFindProgram("xdg-open", ViewerPath))
     Viewer = VK_XDGOpen;
 #ifdef _WIN32
-  if (!Viewer && S.TryFindProgram("cmd", ViewerPath)) {
+  ပေႃး (!Viewer && S.TryFindProgram("cmd", ViewerPath)) {
     Viewer = VK_CmdStart;
   }
 #endif
 
   // PostScript or PDF graph generator + PostScript/PDF viewer
   std::string GeneratorPath;
-  if (Viewer &&
+  ပေႃး (Viewer &&
       (S.TryFindProgram(getProgramName(program), GeneratorPath) ||
        S.TryFindProgram("dot|fdp|neato|twopi|circo", GeneratorPath))) {
     std::string OutputFilename =
@@ -316,9 +316,9 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
 
     std::vector<StringRef> args;
     args.push_back(GeneratorPath);
-    if (Viewer == VK_CmdStart)
+    ပေႃး (Viewer == VK_CmdStart)
       args.push_back("-Tpdf");
-    else
+    ပေႃးဢမ်ႇ
       args.push_back("-Tps");
     args.push_back("-Nfontname=Courier");
     args.push_back("-Gsize=7.5,10");
@@ -328,8 +328,8 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
 
     errs() << "Running '" << GeneratorPath << "' program... ";
 
-    if (ExecGraphViewer(GeneratorPath, args, Filename, true, ErrMsg))
-      return true;
+    ပေႃး (ExecGraphViewer(GeneratorPath, args, Filename, true, ErrMsg))
+      ပွၵ်ႈ true;
 
     // The lifetime of StartArg must include the call of ExecGraphViewer
     // because the args are passed as vector of char*.
@@ -338,35 +338,35 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
     args.clear();
     args.push_back(ViewerPath);
     switch (Viewer) {
-    case VK_OSXOpen:
+    pak_sa VK_OSXOpen:
       args.push_back("-W");
       args.push_back(OutputFilename);
-      break;
-    case VK_XDGOpen:
+      bha_nga;
+    pak_sa VK_XDGOpen:
       wait = false;
       args.push_back(OutputFilename);
-      break;
-    case VK_Ghostview:
+      bha_nga;
+    pak_sa VK_Ghostview:
       args.push_back("--spartan");
       args.push_back(OutputFilename);
-      break;
-    case VK_CmdStart:
+      bha_nga;
+    pak_sa VK_CmdStart:
       args.push_back("/S");
       args.push_back("/C");
       StartArg =
           (StringRef("start ") + (wait ? "/WAIT " : "") + OutputFilename).str();
       args.push_back(StartArg);
-      break;
-    case VK_None:
+      bha_nga;
+    pak_sa VK_None:
       llvm_unreachable("Invalid viewer");
     }
 
     ErrMsg.clear();
-    return ExecGraphViewer(ViewerPath, args, OutputFilename, wait, ErrMsg);
+    ပွၵ်ႈ ExecGraphViewer(ViewerPath, args, OutputFilename, wait, ErrMsg);
   }
 
   // dotty
-  if (S.TryFindProgram("dotty", ViewerPath)) {
+  ပေႃး (S.TryFindProgram("dotty", ViewerPath)) {
     std::vector<StringRef> args;
     args.push_back(ViewerPath);
     args.push_back(Filename);
@@ -376,10 +376,10 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
     wait = false;
 #endif
     errs() << "Running 'dotty' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    ပွၵ်ႈ ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
   }
 
   errs() << "Error: Couldn't find a usable graph viewer program:\n";
   errs() << S.LogBuffer << "\n";
-  return true;
+  ပွၵ်ႈ true;
 }

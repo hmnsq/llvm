@@ -13,853 +13,853 @@
 
 #include "llvm/Support/Unicode.h"
 
-int llvm::sys::unicode::foldCharSimple(int C) {
-  if (C < 0x0041)
-    return C;
+puur_naa_nka llvm::sys::unicode::foldCharSimple(puur_naa_nka C) {
+  ပေႃး (C < 0x0041)
+    ပွၵ်ႈ C;
   // 26 characters
-  if (C <= 0x005a)
-    return C + 32;
+  ပေႃး (C <= 0x005a)
+    ပွၵ်ႈ C + 32;
   // MICRO SIGN
-  if (C == 0x00b5)
-    return 0x03bc;
-  if (C < 0x00c0)
-    return C;
+  ပေႃး (C == 0x00b5)
+    ပွၵ်ႈ 0x03bc;
+  ပေႃး (C < 0x00c0)
+    ပွၵ်ႈ C;
   // 23 characters
-  if (C <= 0x00d6)
-    return C + 32;
-  if (C < 0x00d8)
-    return C;
+  ပေႃး (C <= 0x00d6)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x00d8)
+    ပွၵ်ႈ C;
   // 7 characters
-  if (C <= 0x00de)
-    return C + 32;
-  if (C < 0x0100)
-    return C;
+  ပေႃး (C <= 0x00de)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x0100)
+    ပွၵ်ႈ C;
   // 24 characters
-  if (C <= 0x012e)
-    return C | 1;
-  if (C < 0x0132)
-    return C;
+  ပေႃး (C <= 0x012e)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x0132)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x0136)
-    return C | 1;
-  if (C < 0x0139)
-    return C;
+  ပေႃး (C <= 0x0136)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x0139)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x0147 && C % 2 == 1)
-    return C + 1;
-  if (C < 0x014a)
-    return C;
+  ပေႃး (C <= 0x0147 && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x014a)
+    ပွၵ်ႈ C;
   // 23 characters
-  if (C <= 0x0176)
-    return C | 1;
+  ပေႃး (C <= 0x0176)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER Y WITH DIAERESIS
-  if (C == 0x0178)
-    return 0x00ff;
-  if (C < 0x0179)
-    return C;
+  ပေႃး (C == 0x0178)
+    ပွၵ်ႈ 0x00ff;
+  ပေႃး (C < 0x0179)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x017d && C % 2 == 1)
-    return C + 1;
+  ပေႃး (C <= 0x017d && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
   // LATIN SMALL LETTER LONG S
-  if (C == 0x017f)
-    return 0x0073;
+  ပေႃး (C == 0x017f)
+    ပွၵ်ႈ 0x0073;
   // LATIN CAPITAL LETTER B WITH HOOK
-  if (C == 0x0181)
-    return 0x0253;
-  if (C < 0x0182)
-    return C;
+  ပေႃး (C == 0x0181)
+    ပွၵ်ႈ 0x0253;
+  ပေႃး (C < 0x0182)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x0184)
-    return C | 1;
+  ပေႃး (C <= 0x0184)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER OPEN O
-  if (C == 0x0186)
-    return 0x0254;
+  ပေႃး (C == 0x0186)
+    ပွၵ်ႈ 0x0254;
   // LATIN CAPITAL LETTER C WITH HOOK
-  if (C == 0x0187)
-    return 0x0188;
-  if (C < 0x0189)
-    return C;
+  ပေႃး (C == 0x0187)
+    ပွၵ်ႈ 0x0188;
+  ပေႃး (C < 0x0189)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x018a)
-    return C + 205;
+  ပေႃး (C <= 0x018a)
+    ပွၵ်ႈ C + 205;
   // LATIN CAPITAL LETTER D WITH TOPBAR
-  if (C == 0x018b)
-    return 0x018c;
+  ပေႃး (C == 0x018b)
+    ပွၵ်ႈ 0x018c;
   // LATIN CAPITAL LETTER REVERSED E
-  if (C == 0x018e)
-    return 0x01dd;
+  ပေႃး (C == 0x018e)
+    ပွၵ်ႈ 0x01dd;
   // LATIN CAPITAL LETTER SCHWA
-  if (C == 0x018f)
-    return 0x0259;
+  ပေႃး (C == 0x018f)
+    ပွၵ်ႈ 0x0259;
   // LATIN CAPITAL LETTER OPEN E
-  if (C == 0x0190)
-    return 0x025b;
+  ပေႃး (C == 0x0190)
+    ပွၵ်ႈ 0x025b;
   // LATIN CAPITAL LETTER F WITH HOOK
-  if (C == 0x0191)
-    return 0x0192;
+  ပေႃး (C == 0x0191)
+    ပွၵ်ႈ 0x0192;
   // LATIN CAPITAL LETTER G WITH HOOK
-  if (C == 0x0193)
-    return 0x0260;
+  ပေႃး (C == 0x0193)
+    ပွၵ်ႈ 0x0260;
   // LATIN CAPITAL LETTER GAMMA
-  if (C == 0x0194)
-    return 0x0263;
+  ပေႃး (C == 0x0194)
+    ပွၵ်ႈ 0x0263;
   // LATIN CAPITAL LETTER IOTA
-  if (C == 0x0196)
-    return 0x0269;
+  ပေႃး (C == 0x0196)
+    ပွၵ်ႈ 0x0269;
   // LATIN CAPITAL LETTER I WITH STROKE
-  if (C == 0x0197)
-    return 0x0268;
+  ပေႃး (C == 0x0197)
+    ပွၵ်ႈ 0x0268;
   // LATIN CAPITAL LETTER K WITH HOOK
-  if (C == 0x0198)
-    return 0x0199;
+  ပေႃး (C == 0x0198)
+    ပွၵ်ႈ 0x0199;
   // LATIN CAPITAL LETTER TURNED M
-  if (C == 0x019c)
-    return 0x026f;
+  ပေႃး (C == 0x019c)
+    ပွၵ်ႈ 0x026f;
   // LATIN CAPITAL LETTER N WITH LEFT HOOK
-  if (C == 0x019d)
-    return 0x0272;
+  ပေႃး (C == 0x019d)
+    ပွၵ်ႈ 0x0272;
   // LATIN CAPITAL LETTER O WITH MIDDLE TILDE
-  if (C == 0x019f)
-    return 0x0275;
-  if (C < 0x01a0)
-    return C;
+  ပေႃး (C == 0x019f)
+    ပွၵ်ႈ 0x0275;
+  ပေႃး (C < 0x01a0)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x01a4)
-    return C | 1;
+  ပေႃး (C <= 0x01a4)
+    ပွၵ်ႈ C | 1;
   // LATIN LETTER YR
-  if (C == 0x01a6)
-    return 0x0280;
+  ပေႃး (C == 0x01a6)
+    ပွၵ်ႈ 0x0280;
   // LATIN CAPITAL LETTER TONE TWO
-  if (C == 0x01a7)
-    return 0x01a8;
+  ပေႃး (C == 0x01a7)
+    ပွၵ်ႈ 0x01a8;
   // LATIN CAPITAL LETTER ESH
-  if (C == 0x01a9)
-    return 0x0283;
+  ပေႃး (C == 0x01a9)
+    ပွၵ်ႈ 0x0283;
   // LATIN CAPITAL LETTER T WITH HOOK
-  if (C == 0x01ac)
-    return 0x01ad;
+  ပေႃး (C == 0x01ac)
+    ပွၵ်ႈ 0x01ad;
   // LATIN CAPITAL LETTER T WITH RETROFLEX HOOK
-  if (C == 0x01ae)
-    return 0x0288;
+  ပေႃး (C == 0x01ae)
+    ပွၵ်ႈ 0x0288;
   // LATIN CAPITAL LETTER U WITH HORN
-  if (C == 0x01af)
-    return 0x01b0;
-  if (C < 0x01b1)
-    return C;
+  ပေႃး (C == 0x01af)
+    ပွၵ်ႈ 0x01b0;
+  ပေႃး (C < 0x01b1)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x01b2)
-    return C + 217;
-  if (C < 0x01b3)
-    return C;
+  ပေႃး (C <= 0x01b2)
+    ပွၵ်ႈ C + 217;
+  ပေႃး (C < 0x01b3)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x01b5 && C % 2 == 1)
-    return C + 1;
+  ပေႃး (C <= 0x01b5 && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
   // LATIN CAPITAL LETTER EZH
-  if (C == 0x01b7)
-    return 0x0292;
-  if (C < 0x01b8)
-    return C;
+  ပေႃး (C == 0x01b7)
+    ပွၵ်ႈ 0x0292;
+  ပေႃး (C < 0x01b8)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x01bc && C % 4 == 0)
-    return C + 1;
+  ပေႃး (C <= 0x01bc && C % 4 == 0)
+    ပွၵ်ႈ C + 1;
   // LATIN CAPITAL LETTER DZ WITH CARON
-  if (C == 0x01c4)
-    return 0x01c6;
+  ပေႃး (C == 0x01c4)
+    ပွၵ်ႈ 0x01c6;
   // LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
-  if (C == 0x01c5)
-    return 0x01c6;
+  ပေႃး (C == 0x01c5)
+    ပွၵ်ႈ 0x01c6;
   // LATIN CAPITAL LETTER LJ
-  if (C == 0x01c7)
-    return 0x01c9;
+  ပေႃး (C == 0x01c7)
+    ပွၵ်ႈ 0x01c9;
   // LATIN CAPITAL LETTER L WITH SMALL LETTER J
-  if (C == 0x01c8)
-    return 0x01c9;
+  ပေႃး (C == 0x01c8)
+    ပွၵ်ႈ 0x01c9;
   // LATIN CAPITAL LETTER NJ
-  if (C == 0x01ca)
-    return 0x01cc;
-  if (C < 0x01cb)
-    return C;
+  ပေႃး (C == 0x01ca)
+    ပွၵ်ႈ 0x01cc;
+  ပေႃး (C < 0x01cb)
+    ပွၵ်ႈ C;
   // 9 characters
-  if (C <= 0x01db && C % 2 == 1)
-    return C + 1;
-  if (C < 0x01de)
-    return C;
+  ပေႃး (C <= 0x01db && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x01de)
+    ပွၵ်ႈ C;
   // 9 characters
-  if (C <= 0x01ee)
-    return C | 1;
+  ပေႃး (C <= 0x01ee)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER DZ
-  if (C == 0x01f1)
-    return 0x01f3;
-  if (C < 0x01f2)
-    return C;
+  ပေႃး (C == 0x01f1)
+    ပွၵ်ႈ 0x01f3;
+  ပေႃး (C < 0x01f2)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x01f4)
-    return C | 1;
+  ပေႃး (C <= 0x01f4)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER HWAIR
-  if (C == 0x01f6)
-    return 0x0195;
+  ပေႃး (C == 0x01f6)
+    ပွၵ်ႈ 0x0195;
   // LATIN CAPITAL LETTER WYNN
-  if (C == 0x01f7)
-    return 0x01bf;
-  if (C < 0x01f8)
-    return C;
+  ပေႃး (C == 0x01f7)
+    ပွၵ်ႈ 0x01bf;
+  ပေႃး (C < 0x01f8)
+    ပွၵ်ႈ C;
   // 20 characters
-  if (C <= 0x021e)
-    return C | 1;
+  ပေႃး (C <= 0x021e)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER N WITH LONG RIGHT LEG
-  if (C == 0x0220)
-    return 0x019e;
-  if (C < 0x0222)
-    return C;
+  ပေႃး (C == 0x0220)
+    ပွၵ်ႈ 0x019e;
+  ပေႃး (C < 0x0222)
+    ပွၵ်ႈ C;
   // 9 characters
-  if (C <= 0x0232)
-    return C | 1;
+  ပေႃး (C <= 0x0232)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER A WITH STROKE
-  if (C == 0x023a)
-    return 0x2c65;
+  ပေႃး (C == 0x023a)
+    ပွၵ်ႈ 0x2c65;
   // LATIN CAPITAL LETTER C WITH STROKE
-  if (C == 0x023b)
-    return 0x023c;
+  ပေႃး (C == 0x023b)
+    ပွၵ်ႈ 0x023c;
   // LATIN CAPITAL LETTER L WITH BAR
-  if (C == 0x023d)
-    return 0x019a;
+  ပေႃး (C == 0x023d)
+    ပွၵ်ႈ 0x019a;
   // LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
-  if (C == 0x023e)
-    return 0x2c66;
+  ပေႃး (C == 0x023e)
+    ပွၵ်ႈ 0x2c66;
   // LATIN CAPITAL LETTER GLOTTAL STOP
-  if (C == 0x0241)
-    return 0x0242;
+  ပေႃး (C == 0x0241)
+    ပွၵ်ႈ 0x0242;
   // LATIN CAPITAL LETTER B WITH STROKE
-  if (C == 0x0243)
-    return 0x0180;
+  ပေႃး (C == 0x0243)
+    ပွၵ်ႈ 0x0180;
   // LATIN CAPITAL LETTER U BAR
-  if (C == 0x0244)
-    return 0x0289;
+  ပေႃး (C == 0x0244)
+    ပွၵ်ႈ 0x0289;
   // LATIN CAPITAL LETTER TURNED V
-  if (C == 0x0245)
-    return 0x028c;
-  if (C < 0x0246)
-    return C;
+  ပေႃး (C == 0x0245)
+    ပွၵ်ႈ 0x028c;
+  ပေႃး (C < 0x0246)
+    ပွၵ်ႈ C;
   // 5 characters
-  if (C <= 0x024e)
-    return C | 1;
+  ပေႃး (C <= 0x024e)
+    ပွၵ်ႈ C | 1;
   // COMBINING GREEK YPOGEGRAMMENI
-  if (C == 0x0345)
-    return 0x03b9;
-  if (C < 0x0370)
-    return C;
+  ပေႃး (C == 0x0345)
+    ပွၵ်ႈ 0x03b9;
+  ပေႃး (C < 0x0370)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x0372)
-    return C | 1;
+  ပေႃး (C <= 0x0372)
+    ပွၵ်ႈ C | 1;
   // GREEK CAPITAL LETTER PAMPHYLIAN DIGAMMA
-  if (C == 0x0376)
-    return 0x0377;
+  ပေႃး (C == 0x0376)
+    ပွၵ်ႈ 0x0377;
   // GREEK CAPITAL LETTER YOT
-  if (C == 0x037f)
-    return 0x03f3;
+  ပေႃး (C == 0x037f)
+    ပွၵ်ႈ 0x03f3;
   // GREEK CAPITAL LETTER ALPHA WITH TONOS
-  if (C == 0x0386)
-    return 0x03ac;
-  if (C < 0x0388)
-    return C;
+  ပေႃး (C == 0x0386)
+    ပွၵ်ႈ 0x03ac;
+  ပေႃး (C < 0x0388)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x038a)
-    return C + 37;
+  ပေႃး (C <= 0x038a)
+    ပွၵ်ႈ C + 37;
   // GREEK CAPITAL LETTER OMICRON WITH TONOS
-  if (C == 0x038c)
-    return 0x03cc;
-  if (C < 0x038e)
-    return C;
+  ပေႃး (C == 0x038c)
+    ပွၵ်ႈ 0x03cc;
+  ပေႃး (C < 0x038e)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x038f)
-    return C + 63;
-  if (C < 0x0391)
-    return C;
+  ပေႃး (C <= 0x038f)
+    ပွၵ်ႈ C + 63;
+  ပေႃး (C < 0x0391)
+    ပွၵ်ႈ C;
   // 17 characters
-  if (C <= 0x03a1)
-    return C + 32;
-  if (C < 0x03a3)
-    return C;
+  ပေႃး (C <= 0x03a1)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x03a3)
+    ပွၵ်ႈ C;
   // 9 characters
-  if (C <= 0x03ab)
-    return C + 32;
+  ပေႃး (C <= 0x03ab)
+    ပွၵ်ႈ C + 32;
   // GREEK SMALL LETTER FINAL SIGMA
-  if (C == 0x03c2)
-    return 0x03c3;
+  ပေႃး (C == 0x03c2)
+    ပွၵ်ႈ 0x03c3;
   // GREEK CAPITAL KAI SYMBOL
-  if (C == 0x03cf)
-    return 0x03d7;
+  ပေႃး (C == 0x03cf)
+    ပွၵ်ႈ 0x03d7;
   // GREEK BETA SYMBOL
-  if (C == 0x03d0)
-    return 0x03b2;
+  ပေႃး (C == 0x03d0)
+    ပွၵ်ႈ 0x03b2;
   // GREEK THETA SYMBOL
-  if (C == 0x03d1)
-    return 0x03b8;
+  ပေႃး (C == 0x03d1)
+    ပွၵ်ႈ 0x03b8;
   // GREEK PHI SYMBOL
-  if (C == 0x03d5)
-    return 0x03c6;
+  ပေႃး (C == 0x03d5)
+    ပွၵ်ႈ 0x03c6;
   // GREEK PI SYMBOL
-  if (C == 0x03d6)
-    return 0x03c0;
-  if (C < 0x03d8)
-    return C;
+  ပေႃး (C == 0x03d6)
+    ပွၵ်ႈ 0x03c0;
+  ပေႃး (C < 0x03d8)
+    ပွၵ်ႈ C;
   // 12 characters
-  if (C <= 0x03ee)
-    return C | 1;
+  ပေႃး (C <= 0x03ee)
+    ပွၵ်ႈ C | 1;
   // GREEK KAPPA SYMBOL
-  if (C == 0x03f0)
-    return 0x03ba;
+  ပေႃး (C == 0x03f0)
+    ပွၵ်ႈ 0x03ba;
   // GREEK RHO SYMBOL
-  if (C == 0x03f1)
-    return 0x03c1;
+  ပေႃး (C == 0x03f1)
+    ပွၵ်ႈ 0x03c1;
   // GREEK CAPITAL THETA SYMBOL
-  if (C == 0x03f4)
-    return 0x03b8;
+  ပေႃး (C == 0x03f4)
+    ပွၵ်ႈ 0x03b8;
   // GREEK LUNATE EPSILON SYMBOL
-  if (C == 0x03f5)
-    return 0x03b5;
+  ပေႃး (C == 0x03f5)
+    ပွၵ်ႈ 0x03b5;
   // GREEK CAPITAL LETTER SHO
-  if (C == 0x03f7)
-    return 0x03f8;
+  ပေႃး (C == 0x03f7)
+    ပွၵ်ႈ 0x03f8;
   // GREEK CAPITAL LUNATE SIGMA SYMBOL
-  if (C == 0x03f9)
-    return 0x03f2;
+  ပေႃး (C == 0x03f9)
+    ပွၵ်ႈ 0x03f2;
   // GREEK CAPITAL LETTER SAN
-  if (C == 0x03fa)
-    return 0x03fb;
-  if (C < 0x03fd)
-    return C;
+  ပေႃး (C == 0x03fa)
+    ပွၵ်ႈ 0x03fb;
+  ပေႃး (C < 0x03fd)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x03ff)
-    return C + -130;
-  if (C < 0x0400)
-    return C;
+  ပေႃး (C <= 0x03ff)
+    ပွၵ်ႈ C + -130;
+  ပေႃး (C < 0x0400)
+    ပွၵ်ႈ C;
   // 16 characters
-  if (C <= 0x040f)
-    return C + 80;
-  if (C < 0x0410)
-    return C;
+  ပေႃး (C <= 0x040f)
+    ပွၵ်ႈ C + 80;
+  ပေႃး (C < 0x0410)
+    ပွၵ်ႈ C;
   // 32 characters
-  if (C <= 0x042f)
-    return C + 32;
-  if (C < 0x0460)
-    return C;
+  ပေႃး (C <= 0x042f)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x0460)
+    ပွၵ်ႈ C;
   // 17 characters
-  if (C <= 0x0480)
-    return C | 1;
-  if (C < 0x048a)
-    return C;
+  ပေႃး (C <= 0x0480)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x048a)
+    ပွၵ်ႈ C;
   // 27 characters
-  if (C <= 0x04be)
-    return C | 1;
+  ပေႃး (C <= 0x04be)
+    ပွၵ်ႈ C | 1;
   // CYRILLIC LETTER PALOCHKA
-  if (C == 0x04c0)
-    return 0x04cf;
-  if (C < 0x04c1)
-    return C;
+  ပေႃး (C == 0x04c0)
+    ပွၵ်ႈ 0x04cf;
+  ပေႃး (C < 0x04c1)
+    ပွၵ်ႈ C;
   // 7 characters
-  if (C <= 0x04cd && C % 2 == 1)
-    return C + 1;
-  if (C < 0x04d0)
-    return C;
+  ပေႃး (C <= 0x04cd && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x04d0)
+    ပွၵ်ႈ C;
   // 48 characters
-  if (C <= 0x052e)
-    return C | 1;
-  if (C < 0x0531)
-    return C;
+  ပေႃး (C <= 0x052e)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x0531)
+    ပွၵ်ႈ C;
   // 38 characters
-  if (C <= 0x0556)
-    return C + 48;
-  if (C < 0x10a0)
-    return C;
+  ပေႃး (C <= 0x0556)
+    ပွၵ်ႈ C + 48;
+  ပေႃး (C < 0x10a0)
+    ပွၵ်ႈ C;
   // 38 characters
-  if (C <= 0x10c5)
-    return C + 7264;
-  if (C < 0x10c7)
-    return C;
+  ပေႃး (C <= 0x10c5)
+    ပွၵ်ႈ C + 7264;
+  ပေႃး (C < 0x10c7)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x10cd && C % 6 == 5)
-    return C + 7264;
-  if (C < 0x13f8)
-    return C;
+  ပေႃး (C <= 0x10cd && C % 6 == 5)
+    ပွၵ်ႈ C + 7264;
+  ပေႃး (C < 0x13f8)
+    ပွၵ်ႈ C;
   // 6 characters
-  if (C <= 0x13fd)
-    return C + -8;
+  ပေႃး (C <= 0x13fd)
+    ပွၵ်ႈ C + -8;
   // CYRILLIC SMALL LETTER ROUNDED VE
-  if (C == 0x1c80)
-    return 0x0432;
+  ပေႃး (C == 0x1c80)
+    ပွၵ်ႈ 0x0432;
   // CYRILLIC SMALL LETTER LONG-LEGGED DE
-  if (C == 0x1c81)
-    return 0x0434;
+  ပေႃး (C == 0x1c81)
+    ပွၵ်ႈ 0x0434;
   // CYRILLIC SMALL LETTER NARROW O
-  if (C == 0x1c82)
-    return 0x043e;
-  if (C < 0x1c83)
-    return C;
+  ပေႃး (C == 0x1c82)
+    ပွၵ်ႈ 0x043e;
+  ပေႃး (C < 0x1c83)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1c84)
-    return C + -6210;
+  ပေႃး (C <= 0x1c84)
+    ပွၵ်ႈ C + -6210;
   // CYRILLIC SMALL LETTER THREE-LEGGED TE
-  if (C == 0x1c85)
-    return 0x0442;
+  ပေႃး (C == 0x1c85)
+    ပွၵ်ႈ 0x0442;
   // CYRILLIC SMALL LETTER TALL HARD SIGN
-  if (C == 0x1c86)
-    return 0x044a;
+  ပေႃး (C == 0x1c86)
+    ပွၵ်ႈ 0x044a;
   // CYRILLIC SMALL LETTER TALL YAT
-  if (C == 0x1c87)
-    return 0x0463;
+  ပေႃး (C == 0x1c87)
+    ပွၵ်ႈ 0x0463;
   // CYRILLIC SMALL LETTER UNBLENDED UK
-  if (C == 0x1c88)
-    return 0xa64b;
+  ပေႃး (C == 0x1c88)
+    ပွၵ်ႈ 0xa64b;
   // CYRILLIC CAPITAL LETTER TJE
-  if (C == 0x1c89)
-    return 0x1c8a;
-  if (C < 0x1c90)
-    return C;
+  ပေႃး (C == 0x1c89)
+    ပွၵ်ႈ 0x1c8a;
+  ပေႃး (C < 0x1c90)
+    ပွၵ်ႈ C;
   // 43 characters
-  if (C <= 0x1cba)
-    return C + -3008;
-  if (C < 0x1cbd)
-    return C;
+  ပေႃး (C <= 0x1cba)
+    ပွၵ်ႈ C + -3008;
+  ပေႃး (C < 0x1cbd)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x1cbf)
-    return C + -3008;
-  if (C < 0x1e00)
-    return C;
+  ပေႃး (C <= 0x1cbf)
+    ပွၵ်ႈ C + -3008;
+  ပေႃး (C < 0x1e00)
+    ပွၵ်ႈ C;
   // 75 characters
-  if (C <= 0x1e94)
-    return C | 1;
+  ပေႃး (C <= 0x1e94)
+    ပွၵ်ႈ C | 1;
   // LATIN SMALL LETTER LONG S WITH DOT ABOVE
-  if (C == 0x1e9b)
-    return 0x1e61;
+  ပေႃး (C == 0x1e9b)
+    ပွၵ်ႈ 0x1e61;
   // LATIN CAPITAL LETTER SHARP S
-  if (C == 0x1e9e)
-    return 0x00df;
-  if (C < 0x1ea0)
-    return C;
+  ပေႃး (C == 0x1e9e)
+    ပွၵ်ႈ 0x00df;
+  ပေႃး (C < 0x1ea0)
+    ပွၵ်ႈ C;
   // 48 characters
-  if (C <= 0x1efe)
-    return C | 1;
-  if (C < 0x1f08)
-    return C;
+  ပေႃး (C <= 0x1efe)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x1f08)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1f0f)
-    return C + -8;
-  if (C < 0x1f18)
-    return C;
+  ပေႃး (C <= 0x1f0f)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f18)
+    ပွၵ်ႈ C;
   // 6 characters
-  if (C <= 0x1f1d)
-    return C + -8;
-  if (C < 0x1f28)
-    return C;
+  ပေႃး (C <= 0x1f1d)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f28)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1f2f)
-    return C + -8;
-  if (C < 0x1f38)
-    return C;
+  ပေႃး (C <= 0x1f2f)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f38)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1f3f)
-    return C + -8;
-  if (C < 0x1f48)
-    return C;
+  ပေႃး (C <= 0x1f3f)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f48)
+    ပွၵ်ႈ C;
   // 6 characters
-  if (C <= 0x1f4d)
-    return C + -8;
-  if (C < 0x1f59)
-    return C;
+  ပေႃး (C <= 0x1f4d)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f59)
+    ပွၵ်ႈ C;
   // 4 characters
-  if (C <= 0x1f5f && C % 2 == 1)
-    return C + -8;
-  if (C < 0x1f68)
-    return C;
+  ပေႃး (C <= 0x1f5f && C % 2 == 1)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f68)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1f6f)
-    return C + -8;
-  if (C < 0x1f88)
-    return C;
+  ပေႃး (C <= 0x1f6f)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f88)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1f8f)
-    return C + -8;
-  if (C < 0x1f98)
-    return C;
+  ပေႃး (C <= 0x1f8f)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1f98)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1f9f)
-    return C + -8;
-  if (C < 0x1fa8)
-    return C;
+  ပေႃး (C <= 0x1f9f)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1fa8)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0x1faf)
-    return C + -8;
-  if (C < 0x1fb8)
-    return C;
+  ပေႃး (C <= 0x1faf)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1fb8)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1fb9)
-    return C + -8;
-  if (C < 0x1fba)
-    return C;
+  ပေႃး (C <= 0x1fb9)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1fba)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1fbb)
-    return C + -74;
+  ပေႃး (C <= 0x1fbb)
+    ပွၵ်ႈ C + -74;
   // GREEK CAPITAL LETTER ALPHA WITH PROSGEGRAMMENI
-  if (C == 0x1fbc)
-    return 0x1fb3;
+  ပေႃး (C == 0x1fbc)
+    ပွၵ်ႈ 0x1fb3;
   // GREEK PROSGEGRAMMENI
-  if (C == 0x1fbe)
-    return 0x03b9;
-  if (C < 0x1fc8)
-    return C;
+  ပေႃး (C == 0x1fbe)
+    ပွၵ်ႈ 0x03b9;
+  ပေႃး (C < 0x1fc8)
+    ပွၵ်ႈ C;
   // 4 characters
-  if (C <= 0x1fcb)
-    return C + -86;
+  ပေႃး (C <= 0x1fcb)
+    ပွၵ်ႈ C + -86;
   // GREEK CAPITAL LETTER ETA WITH PROSGEGRAMMENI
-  if (C == 0x1fcc)
-    return 0x1fc3;
+  ပေႃး (C == 0x1fcc)
+    ပွၵ်ႈ 0x1fc3;
   // GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
-  if (C == 0x1fd3)
-    return 0x0390;
-  if (C < 0x1fd8)
-    return C;
+  ပေႃး (C == 0x1fd3)
+    ပွၵ်ႈ 0x0390;
+  ပေႃး (C < 0x1fd8)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1fd9)
-    return C + -8;
-  if (C < 0x1fda)
-    return C;
+  ပေႃး (C <= 0x1fd9)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1fda)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1fdb)
-    return C + -100;
+  ပေႃး (C <= 0x1fdb)
+    ပွၵ်ႈ C + -100;
   // GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
-  if (C == 0x1fe3)
-    return 0x03b0;
-  if (C < 0x1fe8)
-    return C;
+  ပေႃး (C == 0x1fe3)
+    ပွၵ်ႈ 0x03b0;
+  ပေႃး (C < 0x1fe8)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1fe9)
-    return C + -8;
-  if (C < 0x1fea)
-    return C;
+  ပေႃး (C <= 0x1fe9)
+    ပွၵ်ႈ C + -8;
+  ပေႃး (C < 0x1fea)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1feb)
-    return C + -112;
+  ပေႃး (C <= 0x1feb)
+    ပွၵ်ႈ C + -112;
   // GREEK CAPITAL LETTER RHO WITH DASIA
-  if (C == 0x1fec)
-    return 0x1fe5;
-  if (C < 0x1ff8)
-    return C;
+  ပေႃး (C == 0x1fec)
+    ပွၵ်ႈ 0x1fe5;
+  ပေႃး (C < 0x1ff8)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1ff9)
-    return C + -128;
-  if (C < 0x1ffa)
-    return C;
+  ပေႃး (C <= 0x1ff9)
+    ပွၵ်ႈ C + -128;
+  ပေႃး (C < 0x1ffa)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1ffb)
-    return C + -126;
+  ပေႃး (C <= 0x1ffb)
+    ပွၵ်ႈ C + -126;
   // GREEK CAPITAL LETTER OMEGA WITH PROSGEGRAMMENI
-  if (C == 0x1ffc)
-    return 0x1ff3;
+  ပေႃး (C == 0x1ffc)
+    ပွၵ်ႈ 0x1ff3;
   // OHM SIGN
-  if (C == 0x2126)
-    return 0x03c9;
+  ပေႃး (C == 0x2126)
+    ပွၵ်ႈ 0x03c9;
   // KELVIN SIGN
-  if (C == 0x212a)
-    return 0x006b;
+  ပေႃး (C == 0x212a)
+    ပွၵ်ႈ 0x006b;
   // ANGSTROM SIGN
-  if (C == 0x212b)
-    return 0x00e5;
+  ပေႃး (C == 0x212b)
+    ပွၵ်ႈ 0x00e5;
   // TURNED CAPITAL F
-  if (C == 0x2132)
-    return 0x214e;
-  if (C < 0x2160)
-    return C;
+  ပေႃး (C == 0x2132)
+    ပွၵ်ႈ 0x214e;
+  ပေႃး (C < 0x2160)
+    ပွၵ်ႈ C;
   // 16 characters
-  if (C <= 0x216f)
-    return C + 16;
+  ပေႃး (C <= 0x216f)
+    ပွၵ်ႈ C + 16;
   // ROMAN NUMERAL REVERSED ONE HUNDRED
-  if (C == 0x2183)
-    return 0x2184;
-  if (C < 0x24b6)
-    return C;
+  ပေႃး (C == 0x2183)
+    ပွၵ်ႈ 0x2184;
+  ပေႃး (C < 0x24b6)
+    ပွၵ်ႈ C;
   // 26 characters
-  if (C <= 0x24cf)
-    return C + 26;
-  if (C < 0x2c00)
-    return C;
+  ပေႃး (C <= 0x24cf)
+    ပွၵ်ႈ C + 26;
+  ပေႃး (C < 0x2c00)
+    ပွၵ်ႈ C;
   // 48 characters
-  if (C <= 0x2c2f)
-    return C + 48;
+  ပေႃး (C <= 0x2c2f)
+    ပွၵ်ႈ C + 48;
   // LATIN CAPITAL LETTER L WITH DOUBLE BAR
-  if (C == 0x2c60)
-    return 0x2c61;
+  ပေႃး (C == 0x2c60)
+    ပွၵ်ႈ 0x2c61;
   // LATIN CAPITAL LETTER L WITH MIDDLE TILDE
-  if (C == 0x2c62)
-    return 0x026b;
+  ပေႃး (C == 0x2c62)
+    ပွၵ်ႈ 0x026b;
   // LATIN CAPITAL LETTER P WITH STROKE
-  if (C == 0x2c63)
-    return 0x1d7d;
+  ပေႃး (C == 0x2c63)
+    ပွၵ်ႈ 0x1d7d;
   // LATIN CAPITAL LETTER R WITH TAIL
-  if (C == 0x2c64)
-    return 0x027d;
-  if (C < 0x2c67)
-    return C;
+  ပေႃး (C == 0x2c64)
+    ပွၵ်ႈ 0x027d;
+  ပေႃး (C < 0x2c67)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x2c6b && C % 2 == 1)
-    return C + 1;
+  ပေႃး (C <= 0x2c6b && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
   // LATIN CAPITAL LETTER ALPHA
-  if (C == 0x2c6d)
-    return 0x0251;
+  ပေႃး (C == 0x2c6d)
+    ပွၵ်ႈ 0x0251;
   // LATIN CAPITAL LETTER M WITH HOOK
-  if (C == 0x2c6e)
-    return 0x0271;
+  ပေႃး (C == 0x2c6e)
+    ပွၵ်ႈ 0x0271;
   // LATIN CAPITAL LETTER TURNED A
-  if (C == 0x2c6f)
-    return 0x0250;
+  ပေႃး (C == 0x2c6f)
+    ပွၵ်ႈ 0x0250;
   // LATIN CAPITAL LETTER TURNED ALPHA
-  if (C == 0x2c70)
-    return 0x0252;
-  if (C < 0x2c72)
-    return C;
+  ပေႃး (C == 0x2c70)
+    ပွၵ်ႈ 0x0252;
+  ပေႃး (C < 0x2c72)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x2c75 && C % 3 == 2)
-    return C + 1;
-  if (C < 0x2c7e)
-    return C;
+  ပေႃး (C <= 0x2c75 && C % 3 == 2)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x2c7e)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x2c7f)
-    return C + -10815;
-  if (C < 0x2c80)
-    return C;
+  ပေႃး (C <= 0x2c7f)
+    ပွၵ်ႈ C + -10815;
+  ပေႃး (C < 0x2c80)
+    ပွၵ်ႈ C;
   // 50 characters
-  if (C <= 0x2ce2)
-    return C | 1;
-  if (C < 0x2ceb)
-    return C;
+  ပေႃး (C <= 0x2ce2)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x2ceb)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x2ced && C % 2 == 1)
-    return C + 1;
-  if (C < 0x2cf2)
-    return C;
+  ပေႃး (C <= 0x2ced && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x2cf2)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0xa640 && C % 31054 == 11506)
-    return C + 1;
-  if (C < 0xa642)
-    return C;
+  ပေႃး (C <= 0xa640 && C % 31054 == 11506)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0xa642)
+    ပွၵ်ႈ C;
   // 22 characters
-  if (C <= 0xa66c)
-    return C | 1;
-  if (C < 0xa680)
-    return C;
+  ပေႃး (C <= 0xa66c)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0xa680)
+    ပွၵ်ႈ C;
   // 14 characters
-  if (C <= 0xa69a)
-    return C | 1;
-  if (C < 0xa722)
-    return C;
+  ပေႃး (C <= 0xa69a)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0xa722)
+    ပွၵ်ႈ C;
   // 7 characters
-  if (C <= 0xa72e)
-    return C | 1;
-  if (C < 0xa732)
-    return C;
+  ပေႃး (C <= 0xa72e)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0xa732)
+    ပွၵ်ႈ C;
   // 31 characters
-  if (C <= 0xa76e)
-    return C | 1;
-  if (C < 0xa779)
-    return C;
+  ပေႃး (C <= 0xa76e)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0xa779)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0xa77b && C % 2 == 1)
-    return C + 1;
+  ပေႃး (C <= 0xa77b && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
   // LATIN CAPITAL LETTER INSULAR G
-  if (C == 0xa77d)
-    return 0x1d79;
-  if (C < 0xa77e)
-    return C;
+  ပေႃး (C == 0xa77d)
+    ပွၵ်ႈ 0x1d79;
+  ပေႃး (C < 0xa77e)
+    ပွၵ်ႈ C;
   // 5 characters
-  if (C <= 0xa786)
-    return C | 1;
+  ပေႃး (C <= 0xa786)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER SALTILLO
-  if (C == 0xa78b)
-    return 0xa78c;
+  ပေႃး (C == 0xa78b)
+    ပွၵ်ႈ 0xa78c;
   // LATIN CAPITAL LETTER TURNED H
-  if (C == 0xa78d)
-    return 0x0265;
-  if (C < 0xa790)
-    return C;
+  ပေႃး (C == 0xa78d)
+    ပွၵ်ႈ 0x0265;
+  ပေႃး (C < 0xa790)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0xa792)
-    return C | 1;
-  if (C < 0xa796)
-    return C;
+  ပေႃး (C <= 0xa792)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0xa796)
+    ပွၵ်ႈ C;
   // 10 characters
-  if (C <= 0xa7a8)
-    return C | 1;
+  ပေႃး (C <= 0xa7a8)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER H WITH HOOK
-  if (C == 0xa7aa)
-    return 0x0266;
+  ပေႃး (C == 0xa7aa)
+    ပွၵ်ႈ 0x0266;
   // LATIN CAPITAL LETTER REVERSED OPEN E
-  if (C == 0xa7ab)
-    return 0x025c;
+  ပေႃး (C == 0xa7ab)
+    ပွၵ်ႈ 0x025c;
   // LATIN CAPITAL LETTER SCRIPT G
-  if (C == 0xa7ac)
-    return 0x0261;
+  ပေႃး (C == 0xa7ac)
+    ပွၵ်ႈ 0x0261;
   // LATIN CAPITAL LETTER L WITH BELT
-  if (C == 0xa7ad)
-    return 0x026c;
+  ပေႃး (C == 0xa7ad)
+    ပွၵ်ႈ 0x026c;
   // LATIN CAPITAL LETTER SMALL CAPITAL I
-  if (C == 0xa7ae)
-    return 0x026a;
+  ပေႃး (C == 0xa7ae)
+    ပွၵ်ႈ 0x026a;
   // LATIN CAPITAL LETTER TURNED K
-  if (C == 0xa7b0)
-    return 0x029e;
+  ပေႃး (C == 0xa7b0)
+    ပွၵ်ႈ 0x029e;
   // LATIN CAPITAL LETTER TURNED T
-  if (C == 0xa7b1)
-    return 0x0287;
+  ပေႃး (C == 0xa7b1)
+    ပွၵ်ႈ 0x0287;
   // LATIN CAPITAL LETTER J WITH CROSSED-TAIL
-  if (C == 0xa7b2)
-    return 0x029d;
+  ပေႃး (C == 0xa7b2)
+    ပွၵ်ႈ 0x029d;
   // LATIN CAPITAL LETTER CHI
-  if (C == 0xa7b3)
-    return 0xab53;
-  if (C < 0xa7b4)
-    return C;
+  ပေႃး (C == 0xa7b3)
+    ပွၵ်ႈ 0xab53;
+  ပေႃး (C < 0xa7b4)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0xa7c2)
-    return C | 1;
+  ပေႃး (C <= 0xa7c2)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER C WITH PALATAL HOOK
-  if (C == 0xa7c4)
-    return 0xa794;
+  ပေႃး (C == 0xa7c4)
+    ပွၵ်ႈ 0xa794;
   // LATIN CAPITAL LETTER S WITH HOOK
-  if (C == 0xa7c5)
-    return 0x0282;
+  ပေႃး (C == 0xa7c5)
+    ပွၵ်ႈ 0x0282;
   // LATIN CAPITAL LETTER Z WITH PALATAL HOOK
-  if (C == 0xa7c6)
-    return 0x1d8e;
-  if (C < 0xa7c7)
-    return C;
+  ပေႃး (C == 0xa7c6)
+    ပွၵ်ႈ 0x1d8e;
+  ပေႃး (C < 0xa7c7)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0xa7c9 && C % 2 == 1)
-    return C + 1;
+  ပေႃး (C <= 0xa7c9 && C % 2 == 1)
+    ပွၵ်ႈ C + 1;
   // LATIN CAPITAL LETTER RAMS HORN
-  if (C == 0xa7cb)
-    return 0x0264;
-  if (C < 0xa7cc)
-    return C;
+  ပေႃး (C == 0xa7cb)
+    ပွၵ်ႈ 0x0264;
+  ပေႃး (C < 0xa7cc)
+    ပွၵ်ႈ C;
   // 8 characters
-  if (C <= 0xa7da)
-    return C | 1;
+  ပေႃး (C <= 0xa7da)
+    ပွၵ်ႈ C | 1;
   // LATIN CAPITAL LETTER LAMBDA WITH STROKE
-  if (C == 0xa7dc)
-    return 0x019b;
-  if (C < 0xa7dd)
-    return C;
+  ပေႃး (C == 0xa7dc)
+    ပွၵ်ႈ 0x019b;
+  ပေႃး (C < 0xa7dd)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0xa7e2 && C % 5 == 3)
-    return C + -42342;
+  ပေႃး (C <= 0xa7e2 && C % 5 == 3)
+    ပွၵ်ႈ C + -42342;
   // LATIN CAPITAL LETTER REVERSED HALF H
-  if (C == 0xa7f5)
-    return 0xa7f6;
-  if (C < 0xab6c)
-    return C;
+  ပေႃး (C == 0xa7f5)
+    ပွၵ်ႈ 0xa7f6;
+  ပေႃး (C < 0xab6c)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0xab6d)
-    return C + -33;
-  if (C < 0xab70)
-    return C;
+  ပေႃး (C <= 0xab6d)
+    ပွၵ်ႈ C + -33;
+  ပေႃး (C < 0xab70)
+    ပွၵ်ႈ C;
   // 80 characters
-  if (C <= 0xabbf)
-    return C + -38864;
+  ပေႃး (C <= 0xabbf)
+    ပွၵ်ႈ C + -38864;
   // LATIN SMALL LIGATURE LONG S T
-  if (C == 0xfb05)
-    return 0xfb06;
-  if (C < 0xff21)
-    return C;
+  ပေႃး (C == 0xfb05)
+    ပွၵ်ႈ 0xfb06;
+  ပေႃး (C < 0xff21)
+    ပွၵ်ႈ C;
   // 26 characters
-  if (C <= 0xff3a)
-    return C + 32;
-  if (C < 0x10400)
-    return C;
+  ပေႃး (C <= 0xff3a)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x10400)
+    ပွၵ်ႈ C;
   // 40 characters
-  if (C <= 0x10427)
-    return C + 40;
-  if (C < 0x104b0)
-    return C;
+  ပေႃး (C <= 0x10427)
+    ပွၵ်ႈ C + 40;
+  ပေႃး (C < 0x104b0)
+    ပွၵ်ႈ C;
   // 36 characters
-  if (C <= 0x104d3)
-    return C + 40;
-  if (C < 0x10570)
-    return C;
+  ပေႃး (C <= 0x104d3)
+    ပွၵ်ႈ C + 40;
+  ပေႃး (C < 0x10570)
+    ပွၵ်ႈ C;
   // 11 characters
-  if (C <= 0x1057a)
-    return C + 39;
-  if (C < 0x1057c)
-    return C;
+  ပေႃး (C <= 0x1057a)
+    ပွၵ်ႈ C + 39;
+  ပေႃး (C < 0x1057c)
+    ပွၵ်ႈ C;
   // 15 characters
-  if (C <= 0x1058a)
-    return C + 39;
-  if (C < 0x1058c)
-    return C;
+  ပေႃး (C <= 0x1058a)
+    ပွၵ်ႈ C + 39;
+  ပေႃး (C < 0x1058c)
+    ပွၵ်ႈ C;
   // 7 characters
-  if (C <= 0x10592)
-    return C + 39;
-  if (C < 0x10594)
-    return C;
+  ပေႃး (C <= 0x10592)
+    ပွၵ်ႈ C + 39;
+  ပေႃး (C < 0x10594)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x10595)
-    return C + 39;
-  if (C < 0x10c80)
-    return C;
+  ပေႃး (C <= 0x10595)
+    ပွၵ်ႈ C + 39;
+  ပေႃး (C < 0x10c80)
+    ပွၵ်ႈ C;
   // 51 characters
-  if (C <= 0x10cb2)
-    return C + 64;
-  if (C < 0x10d50)
-    return C;
+  ပေႃး (C <= 0x10cb2)
+    ပွၵ်ႈ C + 64;
+  ပေႃး (C < 0x10d50)
+    ပွၵ်ႈ C;
   // 22 characters
-  if (C <= 0x10d65)
-    return C + 32;
-  if (C < 0x118a0)
-    return C;
+  ပေႃး (C <= 0x10d65)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x118a0)
+    ပွၵ်ႈ C;
   // 32 characters
-  if (C <= 0x118bf)
-    return C + 32;
-  if (C < 0x16e40)
-    return C;
+  ပေႃး (C <= 0x118bf)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x16e40)
+    ပွၵ်ႈ C;
   // 32 characters
-  if (C <= 0x16e5f)
-    return C + 32;
-  if (C < 0x16ea0)
-    return C;
+  ပေႃး (C <= 0x16e5f)
+    ပွၵ်ႈ C + 32;
+  ပေႃး (C < 0x16ea0)
+    ပွၵ်ႈ C;
   // 25 characters
-  if (C <= 0x16eb8)
-    return C + 27;
-  if (C < 0x1df40)
-    return C;
+  ပေႃး (C <= 0x16eb8)
+    ပွၵ်ႈ C + 27;
+  ပေႃး (C < 0x1df40)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1df48 && C % 8 == 0)
-    return C + 1;
-  if (C < 0x1df4a)
-    return C;
+  ပေႃး (C <= 0x1df48 && C % 8 == 0)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x1df4a)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1df4d && C % 3 == 1)
-    return C + 1;
-  if (C < 0x1df51)
-    return C;
+  ပေႃး (C <= 0x1df4d && C % 3 == 1)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x1df51)
+    ပွၵ်ႈ C;
   // 2 characters
-  if (C <= 0x1df68 && C % 23 == 0)
-    return C + 1;
-  if (C < 0x1df6a)
-    return C;
+  ပေႃး (C <= 0x1df68 && C % 23 == 0)
+    ပွၵ်ႈ C + 1;
+  ပေႃး (C < 0x1df6a)
+    ပွၵ်ႈ C;
   // 3 characters
-  if (C <= 0x1df6e)
-    return C | 1;
-  if (C < 0x1df72)
-    return C;
+  ပေႃး (C <= 0x1df6e)
+    ပွၵ်ႈ C | 1;
+  ပေႃး (C < 0x1df72)
+    ပွၵ်ႈ C;
   // 7 characters
-  if (C <= 0x1df7e)
-    return C | 1;
+  ပေႃး (C <= 0x1df7e)
+    ပွၵ်ႈ C | 1;
   // LATIN SMALL LIGATURE LONG S WITH DESCENDER S
-  if (C == 0x1df95)
-    return 0x00df;
-  if (C < 0x1e900)
-    return C;
+  ပေႃး (C == 0x1df95)
+    ပွၵ်ႈ 0x00df;
+  ပေႃး (C < 0x1e900)
+    ပွၵ်ႈ C;
   // 34 characters
-  if (C <= 0x1e921)
-    return C + 34;
+  ပေႃး (C <= 0x1e921)
+    ပွၵ်ႈ C + 34;
 
-  return C;
+  ပွၵ်ႈ C;
 }

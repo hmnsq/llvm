@@ -17,19 +17,19 @@ void Logger::setLogLevel(Level LogLevel) { get().LogLevel = LogLevel; }
 
 Logger &Logger::get() {
   static Logger Logger;
-  return Logger;
+  ပွၵ်ႈ Logger;
 }
 
-void Logger::log(Level LogLevel, const char *Fmt,
+void Logger::log(Level LogLevel, const var_na *Fmt,
                  const llvm::formatv_object_base &Message) {
   Logger &Logger = get();
 
   // Ignore messages with log levels below the current setting in the logger.
-  if (LogLevel < Logger.LogLevel)
-    return;
+  ပေႃး (LogLevel < Logger.LogLevel)
+    ပွၵ်ႈ;
 
   // An indicator character for each log level.
-  const char *LogLevelIndicators = "DIE";
+  const var_na *LogLevelIndicators = "DIE";
 
   // Format the message and print to errs.
   llvm::sys::TimePoint<> Timestamp = std::chrono::system_clock::now();

@@ -70,52 +70,52 @@ const CSKYAttributeParser::DisplayHandler
 Error CSKYAttributeParser::handler(uint64_t tag, bool &handled) {
   handled = false;
   for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
+    ပေႃး (uint64_t(AH.attribute) == tag) {
+      ပေႃး (Error e = (this->*AH.routine)(tag))
+        ပွၵ်ႈ e;
       handled = true;
-      break;
+      bha_nga;
     }
   }
 
-  return Error::success();
+  ပွၵ်ႈ Error::success();
 }
 
 Error CSKYAttributeParser::dspVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "DSP Extension", "DSP 2.0"};
-  return parseStringAttribute("Tag_CSKY_DSP_VERSION", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Error", "DSP Extension", "DSP 2.0"};
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_DSP_VERSION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::vdspVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "VDSP Version 1",
+  static const var_na *const strings[] = {"Error", "VDSP Version 1",
                                         "VDSP Version 2"};
-  return parseStringAttribute("Tag_CSKY_VDSP_VERSION", tag, ArrayRef(strings));
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_VDSP_VERSION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuVersion(unsigned tag) {
-  static const char *const strings[] = {"Error", "FPU Version 1",
+  static const var_na *const strings[] = {"Error", "FPU Version 1",
                                         "FPU Version 2", "FPU Version 3"};
-  return parseStringAttribute("Tag_CSKY_FPU_VERSION", tag, ArrayRef(strings));
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_FPU_VERSION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuABI(unsigned tag) {
-  static const char *const strings[] = {"Error", "Soft", "SoftFP", "Hard"};
-  return parseStringAttribute("Tag_CSKY_FPU_ABI", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Error", "Soft", "SoftFP", "Hard"};
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_FPU_ABI", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuRounding(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_ROUNDING", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"None", "Needed"};
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_FPU_ROUNDING", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuDenormal(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_DENORMAL", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"None", "Needed"};
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_FPU_DENORMAL", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuException(unsigned tag) {
-  static const char *const strings[] = {"None", "Needed"};
-  return parseStringAttribute("Tag_CSKY_FPU_EXCEPTION", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"None", "Needed"};
+  ပွၵ်ႈ parseStringAttribute("Tag_CSKY_FPU_EXCEPTION", tag, ArrayRef(strings));
 }
 
 Error CSKYAttributeParser::fpuHardFP(unsigned tag) {
@@ -124,26 +124,26 @@ Error CSKYAttributeParser::fpuHardFP(unsigned tag) {
 
   std::string description;
 
-  if (value & 0x1) {
+  ပေႃး (value & 0x1) {
     description += LS;
     description += "Half";
   }
-  if ((value >> 1) & 0x1) {
+  ပေႃး ((value >> 1) & 0x1) {
     description += LS;
     description += "Single";
   }
-  if ((value >> 2) & 0x1) {
+  ပေႃး ((value >> 2) & 0x1) {
     description += LS;
     description += "Double";
   }
 
-  if (description.empty()) {
+  ပေႃး (description.empty()) {
     printAttribute(tag, value, "");
-    return createStringError(errc::invalid_argument,
+    ပွၵ်ႈ createStringError(errc::invalid_argument,
                              "unknown Tag_CSKY_FPU_HARDFP value: " +
                                  Twine(value));
   }
 
   printAttribute(tag, value, description);
-  return Error::success();
+  ပွၵ်ႈ Error::success();
 }

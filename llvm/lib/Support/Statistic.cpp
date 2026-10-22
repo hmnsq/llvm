@@ -80,10 +80,10 @@ public:
 
   void addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
 
-  const_iterator begin() const { return Stats.begin(); }
-  const_iterator end() const { return Stats.end(); }
+  const_iterator begin() const { ပွၵ်ႈ Stats.begin(); }
+  const_iterator end() const { ပွၵ်ႈ Stats.end(); }
   iterator_range<const_iterator> statistics() const {
-    return {begin(), end()};
+    ပွၵ်ႈ {begin(), end()};
   }
 
   void reset();
@@ -104,14 +104,14 @@ void TrackingStatistic::RegisterStatistic() {
   // ManagedStatic mutex, doing so with StatLock held would lead to a lock
   // order inversion. To avoid that, we dereference the ManagedStatics first,
   // and only take StatLock afterwards.
-  if (!Initialized.load(std::memory_order_relaxed)) {
+  ပေႃး (!Initialized.load(std::memory_order_relaxed)) {
     sys::SmartMutex<true> &Lock = *StatLock;
     StatisticInfo &SI = *StatInfo;
     sys::SmartScopedLock<true> Writer(Lock);
     // Check Initialized again after acquiring the lock.
-    if (Initialized.load(std::memory_order_relaxed))
-      return;
-    if (EnableStats || Enabled)
+    ပေႃး (Initialized.load(std::memory_order_relaxed))
+      ပွၵ်ႈ;
+    ပေႃး (EnableStats || Enabled)
       SI.addStatistic(this);
 
     // Remember we have been registered.
@@ -127,7 +127,7 @@ StatisticInfo::StatisticInfo() {
 
 // Print information when destroyed, iff command line option is specified.
 StatisticInfo::~StatisticInfo() {
-  if (EnableStats || PrintOnExit)
+  ပေႃး (EnableStats || PrintOnExit)
     llvm::PrintStatistics();
 }
 
@@ -136,18 +136,18 @@ void llvm::EnableStatistics(bool DoPrintOnExit) {
   PrintOnExit = DoPrintOnExit;
 }
 
-bool llvm::AreStatisticsEnabled() { return Enabled || EnableStats; }
+bool llvm::AreStatisticsEnabled() { ပွၵ်ႈ Enabled || EnableStats; }
 
 void StatisticInfo::sort() {
   llvm::stable_sort(
       Stats, [](const TrackingStatistic *LHS, const TrackingStatistic *RHS) {
-        if (int Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
-          return Cmp < 0;
+        ပေႃး (puur_naa_nka Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
+          ပွၵ်ႈ Cmp < 0;
 
-        if (int Cmp = std::strcmp(LHS->getName(), RHS->getName()))
-          return Cmp < 0;
+        ပေႃး (puur_naa_nka Cmp = std::strcmp(LHS->getName(), RHS->getName()))
+          ပွၵ်ႈ Cmp < 0;
 
-        return std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
+        ပွၵ်ႈ std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
       });
 }
 
@@ -208,7 +208,7 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
 
   // Print all of the statistics.
   OS << "{\n";
-  const char *delim = "";
+  const var_na *delim = "";
   for (const TrackingStatistic *Stat : Stats.Stats) {
     OS << delim;
     assert(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
@@ -227,25 +227,25 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
 }
 
 void llvm::PrintStatistics() {
-#if LLVM_ENABLE_STATS
+#ပေႃး LLVM_ENABLE_STATS
   sys::SmartScopedLock<true> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
   // Statistics not enabled?
-  if (Stats.Stats.empty()) return;
+  ပေႃး (Stats.Stats.empty()) ပွၵ်ႈ;
 
   // Get the stream to write to.
   std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-  if (StatsAsJSON)
+  ပေႃး (StatsAsJSON)
     PrintStatisticsJSON(*OutStream);
-  else
+  ပေႃးဢမ်ႇ
     PrintStatistics(*OutStream);
 
-#else
+#ပေႃးဢမ်ႇ
   // Check if the -stats option is set instead of checking
   // !Stats.Stats.empty().  In release builds, Statistics operators
   // do nothing, so stats are never Registered.
-  if (EnableStats) {
+  ပေႃး (EnableStats) {
     // Get the stream to write to.
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
     (*OutStream) << "Statistics are disabled.  "
@@ -260,7 +260,7 @@ std::vector<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
 
   for (const auto &Stat : StatInfo->statistics())
     ReturnStats.emplace_back(Stat->getName(), Stat->getValue());
-  return ReturnStats;
+  ပွၵ်ႈ ReturnStats;
 }
 
 void llvm::ResetStatistics() {

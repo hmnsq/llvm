@@ -28,11 +28,11 @@ Regex::Regex(StringRef regex, RegexFlags Flags) {
   unsigned flags = 0;
   preg = new llvm_regex();
   preg->re_endp = regex.end();
-  if (Flags & IgnoreCase)
+  ပေႃး (Flags & IgnoreCase)
     flags |= REG_ICASE;
-  if (Flags & Newline)
+  ပေႃး (Flags & Newline)
     flags |= REG_NEWLINE;
-  if (!(Flags & BasicRegex))
+  ပေႃး (!(Flags & BasicRegex))
     flags |= REG_EXTENDED;
   error = llvm_regcomp(preg, regex.data(), flags|REG_PEND);
 }
@@ -48,7 +48,7 @@ Regex::Regex(Regex &&regex) {
 }
 
 Regex::~Regex() {
-  if (preg) {
+  ပေႃး (preg) {
     llvm_regfree(preg);
     delete preg;
   }
@@ -57,7 +57,7 @@ Regex::~Regex() {
 namespace {
 
 /// Utility to convert a regex error code into a human-readable string.
-void RegexErrorToString(int error, struct llvm_regex *preg,
+void RegexErrorToString(puur_naa_nka error, sa_nracanaa llvm_regex *preg,
                         std::string &Error) {
   size_t len = llvm_regerror(error, preg, nullptr, 0);
 
@@ -68,33 +68,33 @@ void RegexErrorToString(int error, struct llvm_regex *preg,
 } // namespace
 
 bool Regex::isValid(std::string &Error) const {
-  if (!error)
-    return true;
+  ပေႃး (!error)
+    ပွၵ်ႈ true;
 
   RegexErrorToString(error, preg, Error);
-  return false;
+  ပွၵ်ႈ false;
 }
 
 /// getNumMatches - In a valid regex, return the number of parenthesized
 /// matches it contains.
 unsigned Regex::getNumMatches() const {
-  return preg->re_nsub;
+  ပွၵ်ႈ preg->re_nsub;
 }
 
 bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
                   std::string *Error) const {
   // Reset error, if given.
-  if (Error && !Error->empty())
+  ပေႃး (Error && !Error->empty())
     *Error = "";
 
   // Check if the regex itself didn't successfully compile.
-  if (Error ? !isValid(*Error) : !isValid())
-    return false;
+  ပေႃး (Error ? !isValid(*Error) : !isValid())
+    ပွၵ်ႈ false;
 
   unsigned nmatch = Matches ? preg->re_nsub+1 : 0;
 
   // Update null string to empty string.
-  if (String.data() == nullptr)
+  ပေႃး (String.data() == nullptr)
     String = "";
 
   // pmatch needs to have at least one element.
@@ -103,25 +103,25 @@ bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
   pm[0].rm_so = 0;
   pm[0].rm_eo = String.size();
 
-  int rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
+  puur_naa_nka rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
 
   // Failure to match is not an error, it's just a normal return value.
   // Any other error code is considered abnormal, and is logged in the Error.
-  if (rc == REG_NOMATCH)
-    return false;
-  if (rc != 0) {
-    if (Error)
+  ပေႃး (rc == REG_NOMATCH)
+    ပွၵ်ႈ false;
+  ပေႃး (rc != 0) {
+    ပေႃး (Error)
       RegexErrorToString(error, preg, *Error);
-    return false;
+    ပွၵ်ႈ false;
   }
 
   // There was a match.
 
-  if (Matches) { // match position requested
+  ပေႃး (Matches) { // match position requested
     Matches->clear();
 
     for (unsigned i = 0; i != nmatch; ++i) {
-      if (pm[i].rm_so == -1) {
+      ပေႃး (pm[i].rm_so == -1) {
         // this group didn't match
         Matches->push_back(StringRef());
         continue;
@@ -132,7 +132,7 @@ bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
     }
   }
 
-  return true;
+  ပွၵ်ႈ true;
 }
 
 std::string Regex::sub(StringRef Repl, StringRef String,
@@ -140,15 +140,15 @@ std::string Regex::sub(StringRef Repl, StringRef String,
   SmallVector<StringRef, 8> Matches;
 
   // Return the input if there was no match.
-  if (!match(String, &Matches, Error))
-    return std::string(String);
+  ပေႃး (!match(String, &Matches, Error))
+    ပွၵ်ႈ std::string(String);
 
   // Otherwise splice in the replacement string, starting with the prefix before
   // the match.
   std::string Res(String.begin(), Matches[0].begin());
 
   // Then the replacement string, honoring possible substitutions.
-  while (!Repl.empty()) {
+  ၶၢဝ်း (!Repl.empty()) {
     // Skip to the next escape.
     std::pair<StringRef, StringRef> Split = Repl.split('\\');
 
@@ -156,11 +156,11 @@ std::string Regex::sub(StringRef Repl, StringRef String,
     Res += Split.first;
 
     // Check for termination and trailing backslash.
-    if (Split.second.empty()) {
-      if (Repl.size() != Split.first.size() &&
+    ပေႃး (Split.second.empty()) {
+      ပေႃး (Repl.size() != Split.first.size() &&
           Error && Error->empty())
         *Error = "replacement string contained trailing backslash";
-      break;
+      bha_nga;
     }
 
     // Otherwise update the replacement string and interpret escapes.
@@ -170,19 +170,19 @@ std::string Regex::sub(StringRef Repl, StringRef String,
     switch (Repl[0]) {
 
       // Backreference with the "\g<ref>" syntax
-    case 'g':
-      if (Repl.size() >= 4 && Repl[1] == '<') {
+    pak_sa 'g':
+      ပေႃး (Repl.size() >= 4 && Repl[1] == '<') {
         size_t End = Repl.find('>');
         StringRef Ref = Repl.slice(2, End);
         unsigned RefValue;
-        if (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
+        ပေႃး (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
           Repl = Repl.substr(End + 1);
-          if (RefValue < Matches.size())
+          ပေႃး (RefValue < Matches.size())
             Res += Matches[RefValue];
-          else if (Error && Error->empty())
+          ပေႃးဢမ်ႇ ပေႃး (Error && Error->empty())
             *Error =
                 ("invalid backreference string 'g<" + Twine(Ref) + ">'").str();
-          break;
+          bha_nga;
         }
       }
       [[fallthrough]];
@@ -191,43 +191,43 @@ std::string Regex::sub(StringRef Repl, StringRef String,
     default:
       Res += Repl[0];
       Repl = Repl.substr(1);
-      break;
+      bha_nga;
 
       // Single character escapes.
-    case 't':
+    pak_sa 't':
       Res += '\t';
       Repl = Repl.substr(1);
-      break;
-    case 'n':
+      bha_nga;
+    pak_sa 'n':
       Res += '\n';
       Repl = Repl.substr(1);
-      break;
+      bha_nga;
 
       // Hex character escapes.
-    case 'x':
-      if (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
-        Res += char(hexDigitValue(Repl[1]) * 16 + hexDigitValue(Repl[2]));
+    pak_sa 'x':
+      ပေႃး (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
+        Res += var_na(hexDigitValue(Repl[1]) * 16 + hexDigitValue(Repl[2]));
         Repl = Repl.substr(3);
-      } else {
+      } ပေႃးဢမ်ႇ {
         Res += Repl[0];
         Repl = Repl.substr(1);
       }
-      break;
+      bha_nga;
 
       // Decimal escapes are backreferences.
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': {
+    pak_sa '0': pak_sa '1': pak_sa '2': pak_sa '3': pak_sa '4':
+    pak_sa '5': pak_sa '6': pak_sa '7': pak_sa '8': pak_sa '9': {
       // Extract the backreference number.
       StringRef Ref = Repl.slice(0, Repl.find_first_not_of("0123456789"));
       Repl = Repl.substr(Ref.size());
 
       unsigned RefValue;
-      if (!Ref.getAsInteger(10, RefValue) &&
+      ပေႃး (!Ref.getAsInteger(10, RefValue) &&
           RefValue < Matches.size())
         Res += Matches[RefValue];
-      else if (Error && Error->empty())
+      ပေႃးဢမ်ႇ ပေႃး (Error && Error->empty())
         *Error = ("invalid backreference string '" + Twine(Ref) + "'").str();
-      break;
+      bha_nga;
     }
     }
   }
@@ -235,26 +235,26 @@ std::string Regex::sub(StringRef Repl, StringRef String,
   // And finally the suffix.
   Res += StringRef(Matches[0].end(), String.end() - Matches[0].end());
 
-  return Res;
+  ပွၵ်ႈ Res;
 }
 
 // These are the special characters matched in functions like "p_ere_exp".
-static const char RegexMetachars[] = "()^$|*+?.[]\\{}";
+static const var_na RegexMetachars[] = "()^$|*+?.[]\\{}";
 
 bool Regex::isLiteralERE(StringRef Str) {
   // Check for regex metacharacters.  This list was derived from our regex
   // implementation in regcomp.c and double checked against the POSIX extended
   // regular expression specification.
-  return Str.find_first_of(RegexMetachars) == StringRef::npos;
+  ပွၵ်ႈ Str.find_first_of(RegexMetachars) == StringRef::npos;
 }
 
 std::string Regex::escape(StringRef String) {
   std::string RegexStr;
-  for (char C : String) {
-    if (strchr(RegexMetachars, C))
+  for (var_na C : String) {
+    ပေႃး (strchr(RegexMetachars, C))
       RegexStr += '\\';
     RegexStr += C;
   }
 
-  return RegexStr;
+  ပွၵ်ႈ RegexStr;
 }

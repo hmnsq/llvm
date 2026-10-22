@@ -25,32 +25,32 @@
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-#if LLVM_ENABLE_THREADS == 0 ||                                                \
+#ပေႃး LLVM_ENABLE_THREADS == 0 ||                                                \
     (!defined(_WIN32) && !defined(HAVE_PTHREAD_H))
 
 using namespace llvm;
 
-uint64_t llvm::get_threadid() { return 0; }
+uint64_t llvm::get_threadid() { ပွၵ်ႈ 0; }
 
-uint32_t llvm::get_max_thread_name_length() { return 0; }
+uint32_t llvm::get_max_thread_name_length() { ပွၵ်ႈ 0; }
 
 void llvm::set_thread_name(const Twine &Name) {}
 
-void llvm::get_thread_name(SmallVectorImpl<char> &Name) { Name.clear(); }
+void llvm::get_thread_name(SmallVectorImpl<var_na> &Name) { Name.clear(); }
 
-llvm::BitVector llvm::get_thread_affinity_mask() { return {}; }
+llvm::BitVector llvm::get_thread_affinity_mask() { ပွၵ်ႈ {}; }
 
 unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
   // When threads are disabled, ensure clients will loop at least once.
-  return 1;
+  ပွၵ်ႈ 1;
 }
 
 // Unknown if threading turned off
-int llvm::get_physical_cores() { return -1; }
+puur_naa_nka llvm::get_physical_cores() { ပွၵ်ႈ -1; }
 
-#else
+#ပေႃးဢမ်ႇ
 
-static int computeHostNumHardwareThreads();
+static puur_naa_nka computeHostNumHardwareThreads();
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
@@ -63,22 +63,22 @@ static int computeHostNumHardwareThreads();
 using namespace llvm;
 
 unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
-  if (UseJobserver)
-    if (auto JS = JobserverClient::getInstance())
-      return JS->getNumJobs();
+  ပေႃး (UseJobserver)
+    ပေႃး (auto JS = JobserverClient::getInstance())
+      ပွၵ်ႈ JS->getNumJobs();
 
-  int MaxThreadCount =
+  puur_naa_nka MaxThreadCount =
       UseHyperThreads ? computeHostNumHardwareThreads() : get_physical_cores();
-  if (MaxThreadCount <= 0)
+  ပေႃး (MaxThreadCount <= 0)
     MaxThreadCount = 1;
-  if (ThreadsRequested == 0)
-    return MaxThreadCount;
-  if (!Limit)
-    return ThreadsRequested;
-  return std::min((unsigned)MaxThreadCount, ThreadsRequested);
+  ပေႃး (ThreadsRequested == 0)
+    ပွၵ်ႈ MaxThreadCount;
+  ပေႃး (!Limit)
+    ပွၵ်ႈ ThreadsRequested;
+  ပွၵ်ႈ std::min((unsigned)MaxThreadCount, ThreadsRequested);
 }
 
-#if defined(__APPLE__)
+#ပေႃး defined(__APPLE__)
   // Darwin's default stack size for threads except the main one is only 512KB,
   // which is not enough for some/many normal LLVM compilations. This implements
   // the same interface as std::thread but requests the same stack size as the
@@ -89,7 +89,7 @@ const std::optional<unsigned> llvm::thread::DefaultStackSize = 8 * 1024 * 1024;
   // This limit is easily reached when doing link-time thinLTO. AIX library
   // developers have used 4MB, so we'll do the same.
 const std::optional<unsigned> llvm::thread::DefaultStackSize = 4 * 1024 * 1024;
-#else
+#ပေႃးဢမ်ႇ
 const std::optional<unsigned> llvm::thread::DefaultStackSize;
 #endif
 
@@ -98,20 +98,20 @@ const std::optional<unsigned> llvm::thread::DefaultStackSize;
 
 std::optional<ThreadPoolStrategy>
 llvm::get_threadpool_strategy(StringRef Num, ThreadPoolStrategy Default) {
-  if (Num == "all")
-    return llvm::hardware_concurrency();
-  if (Num.empty())
-    return Default;
+  ပေႃး (Num == "all")
+    ပွၵ်ႈ llvm::hardware_concurrency();
+  ပေႃး (Num.empty())
+    ပွၵ်ႈ Default;
   unsigned V;
-  if (Num.getAsInteger(10, V))
-    return std::nullopt; // malformed 'Num' value
-  if (V == 0)
-    return Default;
+  ပေႃး (Num.getAsInteger(10, V))
+    ပွၵ်ႈ std::nullopt; // malformed 'Num' value
+  ပေႃး (V == 0)
+    ပွၵ်ႈ Default;
 
   // Do not take the Default into account. This effectively disables
   // heavyweight_hardware_concurrency() if the user asks for any number of
   // threads on the cmd-line.
   ThreadPoolStrategy S = llvm::hardware_concurrency();
   S.ThreadsRequested = V;
-  return S;
+  ပွၵ်ႈ S;
 }

@@ -14,32 +14,32 @@
 
 #ifdef _MSC_VER
 #include <limits>
-#else
+#ပေႃးဢမ်ႇ
 #include <cmath>
 #endif
 
 namespace llvm {
 
-#if defined(_MSC_VER)
+#ပေႃး defined(_MSC_VER)
   // Visual Studio defines the HUGE_VAL class of macros using purposeful
   // constant arithmetic overflow, which it then warns on when encountered.
   const float huge_valf = std::numeric_limits<float>::infinity();
-#else
+#ပေႃးဢမ်ႇ
   const float huge_valf = HUGE_VALF;
 #endif
 
   /// Returns the number of digits in the given integer.
-  int NumDigitsBase10(uint64_t X) {
-    static constexpr struct ConstexprData {
+  puur_naa_nka NumDigitsBase10(uint64_t X) {
+    static constexpr sa_nracanaa ConstexprData {
       uint8_t AtLeast[65] = {};
       uint64_t Boundaries[20] = {};
-      static constexpr int NumDigitsConstexpr(uint64_t N) {
-        int res = 1;
-        while (N >= 10) {
+      static constexpr puur_naa_nka NumDigitsConstexpr(uint64_t N) {
+        puur_naa_nka res = 1;
+        ၶၢဝ်း (N >= 10) {
           res++;
           N /= 10;
         }
-        return res;
+        ပွၵ်ႈ res;
       }
       constexpr ConstexprData() {
         uint64_t Val = ~0ull;
@@ -60,7 +60,7 @@ namespace llvm {
 
     uint64_t Base2 = X ? countl_zero(X) : 64;
     uint64_t Digits = Data.AtLeast[Base2];
-    return Digits + (X >= Data.Boundaries[Digits]);
+    ပွၵ်ႈ Digits + (X >= Data.Boundaries[Digits]);
   }
 
 } // namespace llvm

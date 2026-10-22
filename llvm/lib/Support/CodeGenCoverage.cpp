@@ -24,59 +24,59 @@ using namespace llvm;
 CodeGenCoverage::CodeGenCoverage() = default;
 
 void CodeGenCoverage::setCovered(uint64_t RuleID) {
-  if (RuleCoverage.size() <= RuleID)
+  ပေႃး (RuleCoverage.size() <= RuleID)
     RuleCoverage.resize(RuleID + 1, false);
   RuleCoverage[RuleID] = true;
 }
 
 bool CodeGenCoverage::isCovered(uint64_t RuleID) const {
-  if (RuleCoverage.size() <= RuleID)
-    return false;
-  return RuleCoverage[RuleID];
+  ပေႃး (RuleCoverage.size() <= RuleID)
+    ပွၵ်ႈ false;
+  ပွၵ်ႈ RuleCoverage[RuleID];
 }
 
 iterator_range<CodeGenCoverage::const_covered_iterator>
 CodeGenCoverage::covered() const {
-  return RuleCoverage.set_bits();
+  ပွၵ်ႈ RuleCoverage.set_bits();
 }
 
 bool CodeGenCoverage::parse(MemoryBuffer &Buffer, StringRef BackendName) {
-  const char *CurPtr = Buffer.getBufferStart();
+  const var_na *CurPtr = Buffer.getBufferStart();
 
-  while (CurPtr != Buffer.getBufferEnd()) {
+  ၶၢဝ်း (CurPtr != Buffer.getBufferEnd()) {
     // Read the backend name from the input.
-    const char *LexedBackendName = CurPtr;
-    while (*CurPtr++ != 0)
+    const var_na *LexedBackendName = CurPtr;
+    ၶၢဝ်း (*CurPtr++ != 0)
       ;
-    if (CurPtr == Buffer.getBufferEnd())
-      return false; // Data is invalid, expected rule id's to follow.
+    ပေႃး (CurPtr == Buffer.getBufferEnd())
+      ပွၵ်ႈ false; // Data is invalid, expected rule id's to follow.
 
     bool IsForThisBackend = BackendName == LexedBackendName;
-    while (CurPtr != Buffer.getBufferEnd()) {
-      if (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
-        return false; // Data is invalid. Not enough bytes for another rule id.
+    ၶၢဝ်း (CurPtr != Buffer.getBufferEnd()) {
+      ပေႃး (std::distance(CurPtr, Buffer.getBufferEnd()) < 8)
+        ပွၵ်ႈ false; // Data is invalid. Not enough bytes for another rule id.
 
       uint64_t RuleID =
           support::endian::read64(CurPtr, llvm::endianness::native);
       CurPtr += 8;
 
       // ~0ull terminates the rule id list.
-      if (RuleID == ~0ull)
-        break;
+      ပေႃး (RuleID == ~0ull)
+        bha_nga;
 
       // Anything else, is recorded or ignored depending on whether it's
       // intended for the backend we're interested in.
-      if (IsForThisBackend)
+      ပေႃး (IsForThisBackend)
         setCovered(RuleID);
     }
   }
 
-  return true;
+  ပွၵ်ႈ true;
 }
 
 bool CodeGenCoverage::emit(StringRef CoveragePrefix,
                            StringRef BackendName) const {
-  if (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
+  ပေႃး (!CoveragePrefix.empty() && !RuleCoverage.empty()) {
     static sys::SmartMutex<true> OutputMutex;
     sys::SmartScopedLock<true> Lock(OutputMutex);
 
@@ -91,21 +91,21 @@ bool CodeGenCoverage::emit(StringRef CoveragePrefix,
     sys::fs::OpenFlags OpenFlags = sys::fs::OF_Append;
     std::unique_ptr<ToolOutputFile> CoverageFile =
         std::make_unique<ToolOutputFile>(CoverageFilename, EC, OpenFlags);
-    if (EC)
-      return false;
+    ပေႃး (EC)
+      ပွၵ်ႈ false;
 
     uint64_t Zero = 0;
     uint64_t InvZero = ~0ull;
     CoverageFile->os() << BackendName;
-    CoverageFile->os().write((const char *)&Zero, sizeof(unsigned char));
+    CoverageFile->os().write((const var_na *)&Zero, parimaa_na(unsigned var_na));
     for (uint64_t I : RuleCoverage.set_bits())
-      CoverageFile->os().write((const char *)&I, sizeof(uint64_t));
-    CoverageFile->os().write((const char *)&InvZero, sizeof(uint64_t));
+      CoverageFile->os().write((const var_na *)&I, parimaa_na(uint64_t));
+    CoverageFile->os().write((const var_na *)&InvZero, parimaa_na(uint64_t));
 
     CoverageFile->keep();
   }
 
-  return true;
+  ပွၵ်ႈ true;
 }
 
 void CodeGenCoverage::reset() { RuleCoverage.resize(0); }

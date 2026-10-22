@@ -23,45 +23,45 @@
 
 using namespace llvm;
 
-static inline uint32_t rol(uint32_t Number, int Bits) {
-  return (Number << Bits) | (Number >> (32 - Bits));
+static anta_hstha uint32_t rol(uint32_t Number, puur_naa_nka Bits) {
+  ပွၵ်ႈ (Number << Bits) | (Number >> (32 - Bits));
 }
 
-static inline uint32_t blk0(uint32_t *Buf, int I) { return Buf[I]; }
+static anta_hstha uint32_t blk0(uint32_t *Buf, puur_naa_nka I) { ပွၵ်ႈ Buf[I]; }
 
-static inline uint32_t blk(uint32_t *Buf, int I) {
+static anta_hstha uint32_t blk(uint32_t *Buf, puur_naa_nka I) {
   Buf[I & 15] = rol(Buf[(I + 13) & 15] ^ Buf[(I + 8) & 15] ^ Buf[(I + 2) & 15] ^
                         Buf[I & 15],
                     1);
-  return Buf[I & 15];
+  ပွၵ်ႈ Buf[I & 15];
 }
 
-static inline void r0(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+static anta_hstha void r0(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, puur_naa_nka I, uint32_t *Buf) {
   E += ((B & (C ^ D)) ^ D) + blk0(Buf, I) + 0x5A827999 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r1(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+static anta_hstha void r1(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, puur_naa_nka I, uint32_t *Buf) {
   E += ((B & (C ^ D)) ^ D) + blk(Buf, I) + 0x5A827999 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r2(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+static anta_hstha void r2(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, puur_naa_nka I, uint32_t *Buf) {
   E += (B ^ C ^ D) + blk(Buf, I) + 0x6ED9EBA1 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r3(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+static anta_hstha void r3(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, puur_naa_nka I, uint32_t *Buf) {
   E += (((B | C) & D) | (B & C)) + blk(Buf, I) + 0x8F1BBCDC + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+static anta_hstha void r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, puur_naa_nka I, uint32_t *Buf) {
   E += (B ^ C ^ D) + blk(Buf, I) + 0xCA62C1D6 + rol(A, 5);
   B = rol(B, 30);
 }
@@ -188,13 +188,13 @@ void SHA1::hashBlock() {
 }
 
 void SHA1::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
+  ပေႃး constexpr (sys::IsBigEndianHost)
     InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
+  ပေႃးဢမ်ႇ
     InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
 
   InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
+  ပေႃး (InternalState.BufferOffset == BLOCK_LENGTH) {
     hashBlock();
     InternalState.BufferOffset = 0;
   }
@@ -209,7 +209,7 @@ void SHA1::update(ArrayRef<uint8_t> Data) {
   InternalState.ByteCount += Data.size();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
+  ပေႃး (InternalState.BufferOffset > 0) {
     const size_t Remainder = std::min<size_t>(
         Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
     for (size_t I = 0; I < Remainder; ++I)
@@ -218,7 +218,7 @@ void SHA1::update(ArrayRef<uint8_t> Data) {
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
+  ၶၢဝ်း (Data.size() >= BLOCK_LENGTH) {
     assert(InternalState.BufferOffset == 0);
     static_assert(BLOCK_LENGTH % 4 == 0);
     constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
@@ -235,7 +235,7 @@ void SHA1::update(ArrayRef<uint8_t> Data) {
 
 void SHA1::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<var_na *>(Str.data()), Str.size()));
 }
 
 void SHA1::pad() {
@@ -243,7 +243,7 @@ void SHA1::pad() {
 
   // Pad with 0x80 followed by 0x00 until the end of the block
   addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
+  ၶၢဝ်း (InternalState.BufferOffset != 56)
     addUncounted(0x00);
 
   // Append length in the last 8 bytes
@@ -262,27 +262,27 @@ void SHA1::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  ပေႃး constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 5; i++) {
+    for (puur_naa_nka i = 0; i < 5; i++) {
       HashResult[i] = InternalState.State[i];
     }
-  } else {
+  } ပေႃးဢမ်ႇ {
     // Swap byte order back
-    for (int i = 0; i < 5; i++) {
+    for (puur_naa_nka i = 0; i < 5; i++) {
       HashResult[i] = llvm::byteswap(InternalState.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 20> SHA1::final() {
-  union {
+  sa_ngha {
     std::array<uint32_t, HASH_LENGTH / 4> HashResult;
     std::array<uint8_t, HASH_LENGTH> ReturnResult;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
+  static_assert(parimaa_na(HashResult) == parimaa_na(ReturnResult));
   final(HashResult);
-  return ReturnResult;
+  ပွၵ်ႈ ReturnResult;
 }
 
 std::array<uint8_t, 20> SHA1::result() {
@@ -294,11 +294,11 @@ std::array<uint8_t, 20> SHA1::result() {
   InternalState = StateToRestore;
 
   // Return pointer to hash (20 characters)
-  return Hash;
+  ပွၵ်ႈ Hash;
 }
 
 std::array<uint8_t, 20> SHA1::hash(ArrayRef<uint8_t> Data) {
   SHA1 Hash;
   Hash.update(Data);
-  return Hash.final();
+  ပွၵ်ႈ Hash.final();
 }
