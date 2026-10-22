@@ -21,43 +21,43 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TarWriter.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/Path.h"
+#ضمن "llvm/Support/TarWriter.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/Path.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
 // Each file in an archive must be aligned to this block size.
-static const int BlockSize = 512;
+ساكن ثابت صحيح بلوک_اندازه = 512;
 
-struct UstarHeader {
-  char Name[100];
-  char Mode[8];
-  char Uid[8];
-  char Gid[8];
-  char Size[12];
-  char Mtime[12];
-  char Checksum[8];
-  char TypeFlag;
-  char Linkname[100];
-  char Magic[6];
-  char Version[2];
-  char Uname[32];
-  char Gname[32];
-  char DevMajor[8];
-  char DevMinor[8];
-  char Prefix[155];
-  char Pad[12];
+بنية Ustar_سرآیند {
+  حرف Name[100];
+  حرف نما[8];
+  حرف Uid[8];
+  حرف Gid[8];
+  حرف اندازه[12];
+  حرف Mtime[12];
+  حرف Checksum[8];
+  حرف TypeFlag;
+  حرف Linkname[100];
+  حرف Magic[6];
+  حرف نسخه[2];
+  حرف Uname[32];
+  حرف Gname[32];
+  حرف DevMajor[8];
+  حرف DevMinor[8];
+  حرف پیشوند[155];
+  حرف Pad[12];
 };
-static_assert(sizeof(UstarHeader) == BlockSize, "invalid Ustar header");
+static_assert(حجم(Ustar_سرآیند) == بلوک_اندازه, "invalid Ustar header");
 
-static UstarHeader makeUstarHeader() {
-  UstarHeader Hdr = {};
-  memcpy(Hdr.Magic, "ustar", 5); // Ustar magic
-  memcpy(Hdr.Version, "00", 2);  // Ustar version
-  return Hdr;
+ساكن Ustar_سرآیند make_Ustar_سرآیند() {
+  Ustar_سرآیند Hdr = {};
+  کپی_حافظه(Hdr.Magic, "ustar", 5); // Ustar magic
+  کپی_حافظه(Hdr.نسخه, "00", 2);  // Ustar version
+  أرجع Hdr;
 }
 
 // A PAX attribute is in the form of "<length> <key>=<value>\n"
@@ -67,50 +67,50 @@ static UstarHeader makeUstarHeader() {
 //   25 ctime=1084839148.1212\n
 //
 // This function create such string.
-static std::string formatPax(StringRef Key, StringRef Val) {
-  int Len = Key.size() + Val.size() + 3; // +3 for " ", "=" and "\n"
+ساكن std::string formatPax(StringRef کلید, StringRef Val) {
+  صحيح Len = کلید.اندازه_2() + Val.اندازه_2() + 3; // +3 for " ", "=" and "\n"
 
   // We need to compute total size twice because appending
   // a length field could change total size by one.
-  int Total = Len + Twine(Len).str().size();
-  Total = Len + Twine(Total).str().size();
-  return (Twine(Total) + " " + Key + "=" + Val + "\n").str();
+  صحيح مجموع = Len + Twine(Len).str().اندازه_2();
+  مجموع = Len + Twine(مجموع).str().اندازه_2();
+  أرجع (Twine(مجموع) + " " + کلید + "=" + Val + "\n").str();
 }
 
 // Headers in tar files must be aligned to 512 byte boundaries.
 // This function forwards the current file position to the next boundary.
-static void pad(raw_fd_ostream &OS) {
+ساكن فراغ pad(raw_fd_ostream &OS) {
   uint64_t Pos = OS.tell();
-  OS.seek(alignTo(Pos, BlockSize));
+  OS.seek(align_مقصد(Pos, بلوک_اندازه));
 }
 
 // Computes a checksum for a tar header.
-static void computeChecksum(UstarHeader &Hdr) {
+ساكن فراغ computeChecksum(Ustar_سرآیند &Hdr) {
   // Before computing a checksum, checksum field must be
   // filled with space characters.
-  memset(Hdr.Checksum, ' ', sizeof(Hdr.Checksum));
+  memset(Hdr.Checksum, ' ', حجم(Hdr.Checksum));
 
   // Compute a checksum and set it to the checksum field.
-  unsigned Chksum = 0;
-  for (size_t I = 0; I < sizeof(Hdr); ++I)
+  بیعلامت Chksum = 0;
+  لكل (size_t I = 0; I < حجم(Hdr); ++I)
     Chksum += reinterpret_cast<uint8_t *>(&Hdr)[I];
-  snprintf(Hdr.Checksum, sizeof(Hdr.Checksum), "%06o", Chksum);
+  snprintf(Hdr.Checksum, حجم(Hdr.Checksum), "%06o", Chksum);
 }
 
 // Create a tar header and write it to a given output stream.
-static void writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
+ساكن فراغ write_Pax_سرآیند(raw_fd_ostream &OS, StringRef مسیر) {
   // A PAX header consists of a 512-byte header followed
   // by key-value strings. First, create key-value strings.
-  std::string PaxAttr = formatPax("path", Path);
+  std::string PaxAttr = formatPax("path", مسیر);
 
   // Create a 512-byte header.
-  UstarHeader Hdr = makeUstarHeader();
-  snprintf(Hdr.Size, sizeof(Hdr.Size), "%011zo", PaxAttr.size());
+  Ustar_سرآیند Hdr = make_Ustar_سرآیند();
+  snprintf(Hdr.اندازه, حجم(Hdr.اندازه), "%011zo", PaxAttr.اندازه_2());
   Hdr.TypeFlag = 'x'; // PAX magic
   computeChecksum(Hdr);
 
   // Write them down.
-  OS << StringRef(reinterpret_cast<char *>(&Hdr), sizeof(Hdr));
+  OS << StringRef(reinterpret_cast<حرف *>(&Hdr), حجم(Hdr));
   OS << PaxAttr;
   pad(OS);
 }
@@ -124,11 +124,11 @@ static void writePaxHeader(raw_fd_ostream &OS, StringRef Path) {
 //
 // If Path fits in a Ustar header, updates Prefix and Name and returns true.
 // Otherwise, returns false.
-static bool splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
-  if (Path.size() < sizeof(UstarHeader::Name)) {
-    Prefix = "";
-    Name = Path;
-    return true;
+ساكن منطقي تقسیم_Ustar(StringRef مسیر, StringRef &پیشوند, StringRef &Name) {
+  إذا (مسیر.اندازه_2() < حجم(Ustar_سرآیند::Name)) {
+    پیشوند = "";
+    Name = مسیر;
+    أرجع درست;
   }
 
   // tar 1.13 and earlier unconditionally look at the tar header interpreted
@@ -140,72 +140,72 @@ static bool splitUstar(StringRef Path, StringRef &Prefix, StringRef &Name) {
   // 137 bytes of directory + 100 bytes of basename previously.
   // (tar-1.13 also doesn't support pax headers, but in practice all paths in
   // llvm's test suite are short enough for that to not matter.)
-  const int MaxPrefix = 137;
-  size_t Sep = Path.rfind('/', MaxPrefix + 1);
-  if (Sep == StringRef::npos)
-    return false;
-  if (Path.size() - Sep - 1 >= sizeof(UstarHeader::Name))
-    return false;
+  ثابت صحيح Max_پیشوند = 137;
+  size_t Sep = مسیر.rfind('/', Max_پیشوند + 1);
+  إذا (Sep == StringRef::npos)
+    أرجع خطأ;
+  إذا (مسیر.اندازه_2() - Sep - 1 >= حجم(Ustar_سرآیند::Name))
+    أرجع خطأ;
 
-  Prefix = Path.substr(0, Sep);
-  Name = Path.substr(Sep + 1);
-  return true;
+  پیشوند = مسیر.substr(0, Sep);
+  Name = مسیر.substr(Sep + 1);
+  أرجع درست;
 }
 
 // The PAX header is an extended format, so a PAX header needs
 // to be followed by a "real" header.
-static void writeUstarHeader(raw_fd_ostream &OS, StringRef Prefix,
-                             StringRef Name, size_t Size) {
-  UstarHeader Hdr = makeUstarHeader();
-  memcpy(Hdr.Name, Name.data(), Name.size());
-  memcpy(Hdr.Mode, "0000664", 8);
-  snprintf(Hdr.Size, sizeof(Hdr.Size), "%011zo", Size);
-  memcpy(Hdr.Prefix, Prefix.data(), Prefix.size());
+ساكن فراغ write_Ustar_سرآیند(raw_fd_ostream &OS, StringRef پیشوند,
+                             StringRef Name, size_t اندازه) {
+  Ustar_سرآیند Hdr = make_Ustar_سرآیند();
+  کپی_حافظه(Hdr.Name, Name.داده(), Name.اندازه_2());
+  کپی_حافظه(Hdr.نما, "0000664", 8);
+  snprintf(Hdr.اندازه, حجم(Hdr.اندازه), "%011zo", اندازه);
+  کپی_حافظه(Hdr.پیشوند, پیشوند.داده(), پیشوند.اندازه_2());
   computeChecksum(Hdr);
-  OS << StringRef(reinterpret_cast<char *>(&Hdr), sizeof(Hdr));
+  OS << StringRef(reinterpret_cast<حرف *>(&Hdr), حجم(Hdr));
 }
 
 // Creates a TarWriter instance and returns it.
-Expected<std::unique_ptr<TarWriter>> TarWriter::create(StringRef OutputPath,
-                                                       StringRef BaseDir) {
-  using namespace sys::fs;
-  int FD;
-  if (std::error_code EC =
-          openFileForWrite(OutputPath, FD, CD_CreateAlways, OF_None))
-    return make_error<StringError>("cannot open " + OutputPath, EC);
-  return std::unique_ptr<TarWriter>(new TarWriter(FD, BaseDir));
+Expected<std::unique_ptr<TarWriter>> TarWriter::create(StringRef Output_مسیر,
+                                                       StringRef پایه_Dir) {
+  استفاده نطاق sys::fs;
+  صحيح FD;
+  إذا (std::error_کد EC =
+          openFileForWrite(Output_مسیر, FD, CD_CreateAlways, از_None))
+    أرجع make_error<StringError>("cannot open " + Output_مسیر, EC);
+  أرجع std::unique_ptr<TarWriter>(جديد TarWriter(FD, پایه_Dir));
 }
 
-TarWriter::TarWriter(int FD, StringRef BaseDir)
-    : OS(FD, /*shouldClose=*/true, /*unbuffered=*/false),
-      BaseDir(std::string(BaseDir)) {}
+TarWriter::TarWriter(صحيح FD, StringRef پایه_Dir)
+    : OS(FD, /*shouldClose=*/درست, /*unbuffered=*/خطأ),
+      پایه_Dir(std::string(پایه_Dir)) {}
 
 // Append a given file to an archive.
-void TarWriter::append(StringRef Path, StringRef Data) {
+فراغ TarWriter::append(StringRef مسیر, StringRef داده_2) {
   // Write Path and Data.
-  std::string Fullpath = BaseDir + "/" + sys::path::convert_to_slash(Path);
+  std::string Fullpath = پایه_Dir + "/" + sys::مسیر_2::convert_مقصد_slash(مسیر);
 
   // We do not want to include the same file more than once.
-  if (!Files.insert(Fullpath).second)
-    return;
+  إذا (!Files.درج(Fullpath).دومی_2)
+    أرجع;
 
-  StringRef Prefix;
+  StringRef پیشوند;
   StringRef Name;
-  if (splitUstar(Fullpath, Prefix, Name)) {
-    writeUstarHeader(OS, Prefix, Name, Data.size());
-  } else {
-    writePaxHeader(OS, Fullpath);
-    writeUstarHeader(OS, "", "", Data.size());
+  إذا (تقسیم_Ustar(Fullpath, پیشوند, Name)) {
+    write_Ustar_سرآیند(OS, پیشوند, Name, داده_2.اندازه_2());
+  } وإلا {
+    write_Pax_سرآیند(OS, Fullpath);
+    write_Ustar_سرآیند(OS, "", "", داده_2.اندازه_2());
   }
 
-  OS << Data;
+  OS << داده_2;
   pad(OS);
 
   // POSIX requires tar archives end with two null blocks.
   // Here, we write the terminator and then seek back, so that
   // the file being output is terminated correctly at any moment.
   uint64_t Pos = OS.tell();
-  OS << std::string(BlockSize * 2, '\0');
+  OS << std::string(بلوک_اندازه * 2, '\0');
   OS.seek(Pos);
   OS.flush();
 }

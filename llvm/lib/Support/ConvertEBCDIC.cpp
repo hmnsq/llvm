@@ -13,13 +13,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ConvertEBCDIC.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
+#ضمن "llvm/Support/ConvertEBCDIC.h"
+#ضمن "llvm/Support/ConvertUTF.h"
+#ضمن "llvm/Support/ErrorHandling.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-static const unsigned char ISO88591ToIBM1047[256] = {
+ساكن ثابت بیعلامت حرف ISO88591_مقصد_IBM1047[256] = {
     0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f, 0x16, 0x05, 0x15, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
     0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, 0x40, 0x5a, 0x7f, 0x7b,
@@ -43,7 +43,7 @@ static const unsigned char ISO88591ToIBM1047[256] = {
     0x8c, 0x49, 0xcd, 0xce, 0xcb, 0xcf, 0xcc, 0xe1, 0x70, 0xdd, 0xde, 0xdb,
     0xdc, 0x8d, 0x8e, 0xdf};
 
-static const unsigned char IBM1047ToISO88591[256] = {
+ساكن ثابت بیعلامت حرف IBM1047_مقصد_ISO88591[256] = {
     0x00, 0x01, 0x02, 0x03, 0x9c, 0x09, 0x86, 0x7f, 0x97, 0x8d, 0x8e, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x9d, 0x0a, 0x08, 0x87,
     0x18, 0x19, 0x92, 0x8f, 0x1c, 0x1d, 0x1e, 0x1f, 0x80, 0x81, 0x82, 0x83,
@@ -68,85 +68,85 @@ static const unsigned char IBM1047ToISO88591[256] = {
     0xdc, 0xd9, 0xda, 0x9f};
 
 // Returns true if [Ptr, End) can be completed to form a valid UTF-8 sequence.
-static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
-  assert(Ptr != End);
+ساكن منطقي is_Potentially_Valid_UTF8_پیشوند(ثابت UTF8 *Ptr, ثابت UTF8 *انتها_2) {
+  أكد(Ptr != انتها_2);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  إذا (Lead < 0xc2 || Lead > 0xf4)
+    أرجع خطأ;
+  إذا (Ptr == انتها_2)
+    أرجع درست;
 
-  UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
-      (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+  UTF8 دومی = *Ptr++;
+  إذا ((دومی & 0xc0) != 0x80)
+    أرجع خطأ;
+  إذا ((Lead == 0xe0 && دومی < 0xa0) || (Lead == 0xed && دومی > 0x9f) ||
+      (Lead == 0xf0 && دومی < 0x90) || (Lead == 0xf4 && دومی > 0x8f))
+    أرجع خطأ;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  طالما (Ptr != انتها_2)
+    إذا ((*Ptr++ & 0xc0) != 0x80)
+      أرجع خطأ;
+  أرجع درست;
 }
 
-std::error_code
-ConverterEBCDIC::convertToEBCDIC(StringRef Source,
-                                 SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
-  Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+std::error_کد
+ConverterEBCDIC::convert_مقصد_EBCDIC(StringRef منبع,
+                                 Small_وکتور_Impl<حرف> &نتیجه) {
+  أكد(نتیجه.خالی() && "Result must be empty!");
+  نتیجه.reserve(منبع.اندازه_2());
+  إذا (منبع.خالی())
+    أرجع std::error_کد();
 
-  const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
-  const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
-      continue;
+  ثابت UTF8 *Ptr = reinterpret_cast<ثابت UTF8 *>(منبع.داده());
+  ثابت UTF8 *انتها_2 = Ptr + منبع.اندازه_2();
+  طالما (Ptr != انتها_2) {
+    إذا (*Ptr < 0x80) {
+      نتیجه.افزودن_پشت(static_cast<حرف>(ISO88591_مقصد_IBM1047[*Ptr++]));
+      استمر;
     }
 
     UTF32 Ch;
-    switch (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
-    case conversionOK:
-      break;
-    case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
-    case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
-    case targetExhausted:
+    بدل (convertUTF8Sequence(&Ptr, انتها_2, &Ch, strictConversion)) {
+    حالة conversionOK:
+      اكسر;
+    حالة منبع_Exhausted:
+      إذا (!is_Potentially_Valid_UTF8_پیشوند(Ptr, انتها_2))
+        أرجع std::make_error_کد(std::errc::illegal_byte_sequence);
+      أرجع std::make_error_کد(std::errc::invalid_آرگومان);
+    حالة منبع_Illegal:
+      أرجع std::make_error_کد(std::errc::illegal_byte_sequence);
+    حالة هدف_Exhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    إذا (Ch > 0xff)
+      أرجع std::make_error_کد(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    نتیجه.افزودن_پشت(static_cast<حرف>(ISO88591_مقصد_IBM1047[Ch]));
   }
-  return std::error_code();
+  أرجع std::error_کد();
 }
 
-void ConverterEBCDIC::convertToUTF8(StringRef Source,
-                                    SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+فراغ ConverterEBCDIC::convert_مقصد_UTF8(StringRef منبع,
+                                    Small_وکتور_Impl<حرف> &نتیجه) {
+  أكد(نتیجه.خالی() && "Result must be empty!");
 
-  const unsigned char *Table = IBM1047ToISO88591;
-  const unsigned char *Ptr =
-      reinterpret_cast<const unsigned char *>(Source.data());
-  size_t Length = Source.size();
-  Result.reserve(Length);
-  while (Length--) {
-    unsigned char Ch = *Ptr++;
+  ثابت بیعلامت حرف *جدول = IBM1047_مقصد_ISO88591;
+  ثابت بیعلامت حرف *Ptr =
+      reinterpret_cast<ثابت بیعلامت حرف *>(منبع.داده());
+  size_t درازی = منبع.اندازه_2();
+  نتیجه.reserve(درازی);
+  طالما (درازی--) {
+    بیعلامت حرف Ch = *Ptr++;
     // Translate the character.
-    Ch = Table[Ch];
+    Ch = جدول[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    إذا (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      نتیجه.افزودن_پشت(static_cast<حرف>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    نتیجه.افزودن_پشت(static_cast<حرف>(Ch));
   }
 }

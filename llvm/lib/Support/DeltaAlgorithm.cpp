@@ -5,107 +5,107 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include <algorithm>
-#include <iterator>
-using namespace llvm;
+#ضمن "llvm/ADT/DeltaAlgorithm.h"
+#ضمن <algorithm>
+#ضمن <iterator>
+استفاده نطاق llvm;
 
-DeltaAlgorithm::~DeltaAlgorithm() = default;
+DeltaAlgorithm::~DeltaAlgorithm() = افتراضي;
 
-bool DeltaAlgorithm::GetTestResult(const changeset_ty &Changes) {
-  if (FailedTestsCache.count(Changes))
-    return false;
+منطقي DeltaAlgorithm::Get_Test_نتیجه(ثابت changeset_ty &Changes) {
+  إذا (FailedTestsCache.شمار(Changes))
+    أرجع خطأ;
 
-  bool Result = ExecuteOneTest(Changes);
-  if (!Result)
-    FailedTestsCache.insert(Changes);
+  منطقي نتیجه = ExecuteOneTest(Changes);
+  إذا (!نتیجه)
+    FailedTestsCache.درج(Changes);
 
-  return Result;
+  أرجع نتیجه;
 }
 
-void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
+فراغ DeltaAlgorithm::تقسیم_2(ثابت changeset_ty &S, changesetlist_ty &Res) {
   // FIXME: Allow clients to provide heuristics for improved splitting.
 
   // FIXME: This is really slow.
   changeset_ty LHS, RHS;
-  unsigned idx = 0, N = S.size() / 2;
-  for (changeset_ty::const_iterator it = S.begin(),
-         ie = S.end(); it != ie; ++it, ++idx)
-    ((idx < N) ? LHS : RHS).insert(*it);
-  if (!LHS.empty())
-    Res.push_back(LHS);
-  if (!RHS.empty())
-    Res.push_back(RHS);
+  بیعلامت idx = 0, N = S.اندازه_2() / 2;
+  لكل (changeset_ty::const_iterator it = S.begin(),
+         ie = S.انتها(); it != ie; ++it, ++idx)
+    ((idx < N) ? LHS : RHS).درج(*it);
+  إذا (!LHS.خالی())
+    Res.افزودن_پشت(LHS);
+  إذا (!RHS.خالی())
+    Res.افزودن_پشت(RHS);
 }
 
 DeltaAlgorithm::changeset_ty
-DeltaAlgorithm::Delta(const changeset_ty &Changes,
-                      const changesetlist_ty &Sets) {
+DeltaAlgorithm::Delta(ثابت changeset_ty &Changes,
+                      ثابت changesetlist_ty &Sets) {
   // Invariant: union(Res) == Changes
-  UpdatedSearchState(Changes, Sets);
+  Updated_جستجو_State(Changes, Sets);
 
   // If there is nothing left we can remove, we are done.
-  if (Sets.size() <= 1)
-    return Changes;
+  إذا (Sets.اندازه_2() <= 1)
+    أرجع Changes;
 
   // Look for a passing subset.
   changeset_ty Res;
-  if (Search(Changes, Sets, Res))
-    return Res;
+  إذا (جستجو(Changes, Sets, Res))
+    أرجع Res;
 
   // Otherwise, partition the sets if possible; if not we are done.
-  changesetlist_ty SplitSets;
-  for (const changeset_ty &Set : Sets)
-    Split(Set, SplitSets);
-  if (SplitSets.size() == Sets.size())
-    return Changes;
+  changesetlist_ty تقسیم_Sets;
+  لكل (ثابت changeset_ty &مجموعه_2 : Sets)
+    تقسیم_2(مجموعه_2, تقسیم_Sets);
+  إذا (تقسیم_Sets.اندازه_2() == Sets.اندازه_2())
+    أرجع Changes;
 
-  return Delta(Changes, SplitSets);
+  أرجع Delta(Changes, تقسیم_Sets);
 }
 
-bool DeltaAlgorithm::Search(const changeset_ty &Changes,
-                            const changesetlist_ty &Sets,
+منطقي DeltaAlgorithm::جستجو(ثابت changeset_ty &Changes,
+                            ثابت changesetlist_ty &Sets,
                             changeset_ty &Res) {
   // FIXME: Parallelize.
-  for (changesetlist_ty::const_iterator it = Sets.begin(),
-         ie = Sets.end(); it != ie; ++it) {
+  لكل (changesetlist_ty::const_iterator it = Sets.begin(),
+         ie = Sets.انتها(); it != ie; ++it) {
     // If the test passes on this subset alone, recurse.
-    if (GetTestResult(*it)) {
+    إذا (Get_Test_نتیجه(*it)) {
       changesetlist_ty Sets;
-      Split(*it, Sets);
+      تقسیم_2(*it, Sets);
       Res = Delta(*it, Sets);
-      return true;
+      أرجع درست;
     }
 
     // Otherwise, if we have more than two sets, see if test passes on the
     // complement.
-    if (Sets.size() > 2) {
+    إذا (Sets.اندازه_2() > 2) {
       // FIXME: This is really slow.
       changeset_ty Complement;
-      std::set_difference(Changes.begin(), Changes.end(), it->begin(),
-                          it->end(),
+      std::مجموعه_difference(Changes.begin(), Changes.انتها(), it->begin(),
+                          it->انتها(),
                           std::inserter(Complement, Complement.begin()));
-      if (GetTestResult(Complement)) {
+      إذا (Get_Test_نتیجه(Complement)) {
         changesetlist_ty ComplementSets;
-        ComplementSets.insert(ComplementSets.end(), Sets.begin(), it);
-        ComplementSets.insert(ComplementSets.end(), it + 1, Sets.end());
+        ComplementSets.درج(ComplementSets.انتها(), Sets.begin(), it);
+        ComplementSets.درج(ComplementSets.انتها(), it + 1, Sets.انتها());
         Res = Delta(Complement, ComplementSets);
-        return true;
+        أرجع درست;
       }
     }
   }
 
-  return false;
+  أرجع خطأ;
 }
 
-DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(const changeset_ty &Changes) {
+DeltaAlgorithm::changeset_ty DeltaAlgorithm::پیاپی_2(ثابت changeset_ty &Changes) {
   // Check empty set first to quickly find poor test functions.
-  if (GetTestResult(changeset_ty()))
-    return changeset_ty();
+  إذا (Get_Test_نتیجه(changeset_ty()))
+    أرجع changeset_ty();
 
   // Otherwise run the real delta algorithm.
   changesetlist_ty Sets;
-  Split(Changes, Sets);
+  تقسیم_2(Changes, Sets);
 
-  return Delta(Changes, Sets);
+  أرجع Delta(Changes, Sets);
 }

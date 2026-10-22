@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemAlloc.h"
-#include <new>
+#ضمن "llvm/Support/MemAlloc.h"
+#ضمن <new>
 
 // These are out of line to have __cpp_aligned_new not affect ABI.
 
-LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS void *
-llvm::allocate_buffer(size_t Size, size_t Alignment) {
-  void *Result = ::operator new(Size,
-#ifdef __cpp_aligned_new
+LLVM_ATTRIBUTE_RETURNS_NONNULL LLVM_ATTRIBUTE_RETURNS_NOALIAS فراغ *
+llvm::allocate_میانگیر(size_t اندازه, size_t Alignment) {
+  فراغ *نتیجه = ::عملگر جديد(اندازه,
+#اگر_تعریف_شده __cpp_aligned_new
                                 std::align_val_t(Alignment),
-#endif
+#پایان_اگر
                                 std::nothrow);
-  if (Result == nullptr) {
+  إذا (نتیجه == اشاره_تهی) {
     report_bad_alloc_error("Buffer allocation failed");
   }
-  return Result;
+  أرجع نتیجه;
 }
 
-void llvm::deallocate_buffer(void *Ptr, size_t Size, size_t Alignment) {
-  ::operator delete(Ptr
-#ifdef __cpp_sized_deallocation
+فراغ llvm::deallocate_میانگیر(فراغ *Ptr, size_t اندازه, size_t Alignment) {
+  ::عملگر حذف(Ptr
+#اگر_تعریف_شده __cpp_sized_deallocation
                     ,
-                    Size
-#endif
-#ifdef __cpp_aligned_new
+                    اندازه
+#پایان_اگر
+#اگر_تعریف_شده __cpp_aligned_new
                     ,
                     std::align_val_t(Alignment)
-#endif
+#پایان_اگر
   );
 }

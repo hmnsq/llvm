@@ -10,33 +10,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Timer.h"
+#ضمن "llvm/Support/Timer.h"
 
-#include "DebugOptions.h"
+#ضمن "DebugOptions.h"
 
-#include "llvm/ADT/Statistic.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signposts.h"
-#include "llvm/Support/raw_ostream.h"
-#include <limits>
-#include <optional>
+#ضمن "llvm/ADT/Statistic.h"
+#ضمن "llvm/ADT/StringMap.h"
+#ضمن "llvm/Config/config.h"
+#ضمن "llvm/Support/CommandLine.h"
+#ضمن "llvm/Support/FileSystem.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/ManagedStatic.h"
+#ضمن "llvm/Support/Mutex.h"
+#ضمن "llvm/Support/Process.h"
+#ضمن "llvm/Support/Signposts.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <limits>
+#ضمن <optional>
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#إذا HAVE_UNISTD_H
+#ضمن <unistd.h>
+#پایان_اگر
 
-#ifdef HAVE_PROC_PID_RUSAGE
-#include <libproc.h>
-#endif
+#اگر_تعریف_شده HAVE_PROC_PID_RUSAGE
+#ضمن <libproc.h>
+#پایان_اگر
 
-using namespace llvm;
+استفاده نطاق llvm;
 
 //===----------------------------------------------------------------------===//
 // Forward declarations for Managed Timer Globals getters.
@@ -45,158 +45,158 @@ using namespace llvm;
 // access. Use of getters also has the benefit of making it a bit more explicit
 // that a global is being used.
 //===----------------------------------------------------------------------===//
-namespace {
-class Name2PairMap;
+نطاق {
+صنف Name2PairMap;
 }
 
-static std::string &libSupportInfoOutputFilename();
-static bool trackSpace();
-static bool sortTimers();
-[[maybe_unused]]
-static SignpostEmitter &signposts();
-static sys::SmartMutex<true> &timerLock();
-static TimerGroup &defaultTimerGroup();
-static Name2PairMap &namedGroupedTimers();
-static bool isTimerGlobalsConstructed();
+ساكن std::string &libSupportInfoOutputFilename();
+ساكن منطقي trackSpace();
+ساكن منطقي مرتب_سازی_Timers();
+[[maybe_استفادهنشده]]
+ساكن SignpostEmitter &signposts();
+ساكن sys::SmartMutex<درست> &timer_قفل();
+ساكن Timer_گروه &default_Timer_گروه();
+ساكن Name2PairMap &namedGroupedTimers();
+ساكن منطقي isTimerGlobalsConstructed();
 
 //===----------------------------------------------------------------------===//
 //
 //===----------------------------------------------------------------------===//
 
 std::unique_ptr<raw_ostream> llvm::CreateInfoOutputFile() {
-  const std::string &OutputFilename = libSupportInfoOutputFilename();
-  if (OutputFilename.empty())
-    return std::make_unique<raw_fd_ostream>(2, false); // stderr.
-  if (OutputFilename == "-")
-    return std::make_unique<raw_fd_ostream>(1, false); // stdout.
+  ثابت std::string &OutputFilename = libSupportInfoOutputFilename();
+  إذا (OutputFilename.خالی())
+    أرجع std::make_unique<raw_fd_ostream>(2, خطأ); // stderr.
+  إذا (OutputFilename == "-")
+    أرجع std::make_unique<raw_fd_ostream>(1, خطأ); // stdout.
 
   // Append mode is used because the info output file is opened and closed
   // each time -stats or -time-passes wants to print output to it. To
   // compensate for this, the test-suite Makefiles have code to delete the
   // info output file before running commands which write to it.
-  std::error_code EC;
-  auto Result = std::make_unique<raw_fd_ostream>(
-      OutputFilename, EC, sys::fs::OF_Append | sys::fs::OF_TextWithCRLF);
-  if (!EC)
-    return Result;
+  std::error_کد EC;
+  خودکار نتیجه = std::make_unique<raw_fd_ostream>(
+      OutputFilename, EC, sys::fs::از_Append | sys::fs::از_متن_With_CRLF);
+  إذا (!EC)
+    أرجع نتیجه;
 
   errs() << "Error opening info-output-file '"
     << OutputFilename << " for appending!\n";
-  return std::make_unique<raw_fd_ostream>(2, false); // stderr.
+  أرجع std::make_unique<raw_fd_ostream>(2, خطأ); // stderr.
 }
 
 //===----------------------------------------------------------------------===//
 // Timer Implementation
 //===----------------------------------------------------------------------===//
 
-void Timer::init(StringRef TimerName, StringRef TimerDescription) {
-  init(TimerName, TimerDescription, defaultTimerGroup());
+فراغ Timer::init(StringRef TimerName, StringRef TimerDescription) {
+  init(TimerName, TimerDescription, default_Timer_گروه());
 }
 
-void Timer::init(StringRef TimerName, StringRef TimerDescription,
-                 TimerGroup &tg) {
-  assert(!TG && "Timer already initialized");
-  Name.assign(TimerName.begin(), TimerName.end());
-  Description.assign(TimerDescription.begin(), TimerDescription.end());
-  Running = Triggered = false;
+فراغ Timer::init(StringRef TimerName, StringRef TimerDescription,
+                 Timer_گروه &tg) {
+  أكد(!TG && "Timer already initialized");
+  Name.تخصیص_بده(TimerName.begin(), TimerName.انتها());
+  Description.تخصیص_بده(TimerDescription.begin(), TimerDescription.انتها());
+  Running = Triggered = خطأ;
   TG = &tg;
-  TG->addTimer(*this);
+  TG->جمع_کن_Timer(*هذا);
 }
 
 Timer::~Timer() {
-  if (!TG) return;  // Never initialized, or already cleared.
-  TG->removeTimer(*this);
+  إذا (!TG) أرجع;  // Never initialized, or already cleared.
+  TG->removeTimer(*هذا);
 }
 
-static inline size_t getMemUsage() {
-  if (!trackSpace())
-    return 0;
-  return sys::Process::GetMallocUsage();
+ساكن مضمن size_t getMemUsage() {
+  إذا (!trackSpace())
+    أرجع 0;
+  أرجع sys::Process::GetMallocUsage();
 }
 
-static uint64_t getCurInstructionsExecuted() {
-#if defined(HAVE_UNISTD_H) && defined(HAVE_PROC_PID_RUSAGE) &&                 \
+ساكن uint64_t getCurInstructionsExecuted() {
+#إذا defined(HAVE_UNISTD_H) && defined(HAVE_PROC_PID_RUSAGE) &&                 \
     defined(RUSAGE_INFO_V4)
-  struct rusage_info_v4 ru;
-  if (proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru) == 0) {
-    return ru.ri_instructions;
+  بنية rusage_info_v4 ru;
+  إذا (proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru) == 0) {
+    أرجع ru.ri_instructions;
   }
-#endif
-  return 0;
+#پایان_اگر
+  أرجع 0;
 }
 
-TimeRecord TimeRecord::getCurrentTime(bool Start) {
-  using Seconds = std::chrono::duration<double, std::ratio<1>>;
-  TimeRecord Result;
-  sys::TimePoint<> now;
+زمان_رکورد زمان_رکورد::get_Current_زمان(منطقي شروع) {
+  استفاده Seconds = std::chrono::duration<مزدوج, std::نسبت<1>>;
+  زمان_رکورد نتیجه;
+  sys::زمان_نقطه<> now;
   std::chrono::nanoseconds user, sys;
 
-  if (Start) {
-    Result.MemUsed = getMemUsage();
-    Result.InstructionsExecuted = getCurInstructionsExecuted();
-    sys::Process::GetTimeUsage(now, user, sys);
-  } else {
-    sys::Process::GetTimeUsage(now, user, sys);
-    Result.InstructionsExecuted = getCurInstructionsExecuted();
-    Result.MemUsed = getMemUsage();
+  إذا (شروع) {
+    نتیجه.Mem_استفاده_شده = getMemUsage();
+    نتیجه.InstructionsExecuted = getCurInstructionsExecuted();
+    sys::Process::Get_زمان_Usage(now, user, sys);
+  } وإلا {
+    sys::Process::Get_زمان_Usage(now, user, sys);
+    نتیجه.InstructionsExecuted = getCurInstructionsExecuted();
+    نتیجه.Mem_استفاده_شده = getMemUsage();
   }
 
-  Result.WallTime = Seconds(now.time_since_epoch()).count();
-  Result.UserTime = Seconds(user).count();
-  Result.SystemTime = Seconds(sys).count();
-  return Result;
+  نتیجه.Wall_زمان = Seconds(now.زمان_since_epoch()).شمار();
+  نتیجه.User_زمان = Seconds(user).شمار();
+  نتیجه.System_زمان = Seconds(sys).شمار();
+  أرجع نتیجه;
 }
 
-void Timer::startTimer() {
-  assert(!Running && "Cannot start a running timer");
-  Running = Triggered = true;
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-  signposts().startInterval(this, getName());
-#endif
-  StartTime = TimeRecord::getCurrentTime(true);
+فراغ Timer::شروع_Timer() {
+  أكد(!Running && "Cannot start a running timer");
+  Running = Triggered = درست;
+#إذا LLVM_SUPPORT_XCODE_SIGNPOSTS
+  signposts().شروع_Interval(هذا, getName());
+#پایان_اگر
+  شروع_زمان = زمان_رکورد::get_Current_زمان(درست);
 }
 
-void Timer::stopTimer() {
-  assert(Running && "Cannot stop a paused timer");
-  Running = false;
-  Time += TimeRecord::getCurrentTime(false);
-  Time -= StartTime;
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-  signposts().endInterval(this, getName());
-#endif
+فراغ Timer::stopTimer() {
+  أكد(Running && "Cannot stop a paused timer");
+  Running = خطأ;
+  زمان += زمان_رکورد::get_Current_زمان(خطأ);
+  زمان -= شروع_زمان;
+#إذا LLVM_SUPPORT_XCODE_SIGNPOSTS
+  signposts().انتها_Interval(هذا, getName());
+#پایان_اگر
 }
 
-void Timer::clear() {
-  Running = Triggered = false;
-  Time = StartTime = TimeRecord();
+فراغ Timer::clear() {
+  Running = Triggered = خطأ;
+  زمان = شروع_زمان = زمان_رکورد();
 }
 
-void Timer::yieldTo(Timer &O) {
+فراغ Timer::yield_مقصد(Timer &O) {
   stopTimer();
-  O.startTimer();
+  O.شروع_Timer();
 }
 
-static void printVal(double Val, double Total, raw_ostream &OS) {
-  if (Total < 1e-7)   // Avoid dividing by zero.
+ساكن فراغ printVal(مزدوج Val, مزدوج مجموع, raw_ostream &OS) {
+  إذا (مجموع < 1e-7)   // Avoid dividing by zero.
     OS << "        -----     ";
-  else
-    OS << format("  %7.4f (%5.1f%%)", Val, Val*100/Total);
+  وإلا
+    OS << format("  %7.4f (%5.1f%%)", Val, Val*100/مجموع);
 }
 
-void TimeRecord::print(const TimeRecord &Total, raw_ostream &OS) const {
-  if (Total.getUserTime())
-    printVal(getUserTime(), Total.getUserTime(), OS);
-  if (Total.getSystemTime())
-    printVal(getSystemTime(), Total.getSystemTime(), OS);
-  if (Total.getProcessTime())
-    printVal(getProcessTime(), Total.getProcessTime(), OS);
-  printVal(getWallTime(), Total.getWallTime(), OS);
+فراغ زمان_رکورد::print(ثابت زمان_رکورد &مجموع, raw_ostream &OS) ثابت {
+  إذا (مجموع.get_User_زمان())
+    printVal(get_User_زمان(), مجموع.get_User_زمان(), OS);
+  إذا (مجموع.get_System_زمان())
+    printVal(get_System_زمان(), مجموع.get_System_زمان(), OS);
+  إذا (مجموع.get_Process_زمان())
+    printVal(get_Process_زمان(), مجموع.get_Process_زمان(), OS);
+  printVal(get_Wall_زمان(), مجموع.get_Wall_زمان(), OS);
 
   OS << "  ";
 
-  if (Total.getMemUsed())
-    OS << format("%9" PRId64 "  ", (int64_t)getMemUsed());
-  if (Total.getInstructionsExecuted())
+  إذا (مجموع.get_Mem_استفاده_شده())
+    OS << format("%9" PRId64 "  ", (int64_t)get_Mem_استفاده_شده());
+  إذا (مجموع.getInstructionsExecuted())
     OS << format("%9" PRId64 "  ", (int64_t)getInstructionsExecuted());
 }
 
@@ -205,61 +205,61 @@ void TimeRecord::print(const TimeRecord &Total, raw_ostream &OS) const {
 //   NamedRegionTimer Implementation
 //===----------------------------------------------------------------------===//
 
-namespace {
+نطاق {
 
-using Name2TimerMap = StringMap<Timer>;
+استفاده Name2TimerMap = StringMap<Timer>;
 
-class Name2PairMap {
-  StringMap<std::pair<TimerGroup*, Name2TimerMap> > Map;
-public:
+صنف Name2PairMap {
+  StringMap<std::pair<Timer_گروه*, Name2TimerMap> > Map;
+عام:
   ~Name2PairMap() {
-    for (StringMap<std::pair<TimerGroup*, Name2TimerMap> >::iterator
-         I = Map.begin(), E = Map.end(); I != E; ++I)
-      delete I->second.first;
+    لكل (StringMap<std::pair<Timer_گروه*, Name2TimerMap> >::iterator
+         I = Map.begin(), E = Map.انتها(); I != E; ++I)
+      حذف I->دومی_2.اولی_2;
   }
 
-  Timer &get(StringRef Name, StringRef Description, StringRef GroupName,
-             StringRef GroupDescription) {
-    sys::SmartScopedLock<true> L(timerLock());
+  Timer &get(StringRef Name, StringRef Description, StringRef گروه_Name,
+             StringRef گروه_Description) {
+    sys::Smart_Scoped_قفل<درست> L(timer_قفل());
 
-    std::pair<TimerGroup *, Name2TimerMap> &GroupEntry =
-        getGroupEntry(GroupName, GroupDescription);
-    Timer &T = GroupEntry.second[Name];
-    if (!T.isInitialized())
-      T.init(Name, Description, *GroupEntry.first);
-    return T;
+    std::pair<Timer_گروه *, Name2TimerMap> &گروه_مدخل =
+        get_گروه_مدخل(گروه_Name, گروه_Description);
+    Timer &T = گروه_مدخل.دومی_2[Name];
+    إذا (!T.isInitialized())
+      T.init(Name, Description, *گروه_مدخل.اولی_2);
+    أرجع T;
   }
 
-  TimerGroup &getTimerGroup(StringRef GroupName, StringRef GroupDescription) {
-    sys::SmartScopedLock<true> L(timerLock());
-    return *getGroupEntry(GroupName, GroupDescription).first;
+  Timer_گروه &get_Timer_گروه(StringRef گروه_Name, StringRef گروه_Description) {
+    sys::Smart_Scoped_قفل<درست> L(timer_قفل());
+    أرجع *get_گروه_مدخل(گروه_Name, گروه_Description).اولی_2;
   }
 
-private:
-  std::pair<TimerGroup *, Name2TimerMap> &
-  getGroupEntry(StringRef GroupName, StringRef GroupDescription) {
-    std::pair<TimerGroup *, Name2TimerMap> &GroupEntry = Map[GroupName];
-    if (!GroupEntry.first)
-      GroupEntry.first =
-          new TimerGroup(GroupName, GroupDescription, /*PrintOnExit=*/true);
+خاص:
+  std::pair<Timer_گروه *, Name2TimerMap> &
+  get_گروه_مدخل(StringRef گروه_Name, StringRef گروه_Description) {
+    std::pair<Timer_گروه *, Name2TimerMap> &گروه_مدخل = Map[گروه_Name];
+    إذا (!گروه_مدخل.اولی_2)
+      گروه_مدخل.اولی_2 =
+          جديد Timer_گروه(گروه_Name, گروه_Description, /*PrintOnExit=*/درست);
 
-    return GroupEntry;
+    أرجع گروه_مدخل;
   }
 };
 
 }
 
 NamedRegionTimer::NamedRegionTimer(StringRef Name, StringRef Description,
-                                   StringRef GroupName,
-                                   StringRef GroupDescription, bool Enabled)
-    : TimeRegion(!Enabled
-                     ? nullptr
-                     : &namedGroupedTimers().get(Name, Description, GroupName,
-                                                 GroupDescription)) {}
+                                   StringRef گروه_Name,
+                                   StringRef گروه_Description, منطقي Enabled)
+    : زمان_Region(!Enabled
+                     ? اشاره_تهی
+                     : &namedGroupedTimers().get(Name, Description, گروه_Name,
+                                                 گروه_Description)) {}
 
-TimerGroup &NamedRegionTimer::getNamedTimerGroup(StringRef GroupName,
-                                                 StringRef GroupDescription) {
-  return namedGroupedTimers().getTimerGroup(GroupName, GroupDescription);
+Timer_گروه &NamedRegionTimer::get_Named_Timer_گروه(StringRef گروه_Name,
+                                                 StringRef گروه_Description) {
+  أرجع namedGroupedTimers().get_Timer_گروه(گروه_Name, گروه_Description);
 }
 
 //===----------------------------------------------------------------------===//
@@ -268,231 +268,231 @@ TimerGroup &NamedRegionTimer::getNamedTimerGroup(StringRef GroupName,
 
 /// This is the global list of TimerGroups, maintained by the TimerGroup
 /// ctor/dtor and is protected by the timerLock lock.
-static TimerGroup *TimerGroupList = nullptr;
+ساكن Timer_گروه *Timer_گروه_List = اشاره_تهی;
 
-TimerGroup::TimerGroup(StringRef Name, StringRef Description,
-                       sys::SmartMutex<true> &lock, bool PrintOnExit)
-    : Name(Name.begin(), Name.end()),
-      Description(Description.begin(), Description.end()),
+Timer_گروه::Timer_گروه(StringRef Name, StringRef Description,
+                       sys::SmartMutex<درست> &قفل_2, منطقي PrintOnExit)
+    : Name(Name.begin(), Name.انتها()),
+      Description(Description.begin(), Description.انتها()),
       PrintOnExit(PrintOnExit) {
   // Add the group to TimerGroupList.
-  sys::SmartScopedLock<true> L(lock);
-  if (TimerGroupList)
-    TimerGroupList->Prev = &Next;
-  Next = TimerGroupList;
-  Prev = &TimerGroupList;
-  TimerGroupList = this;
+  sys::Smart_Scoped_قفل<درست> L(قفل_2);
+  إذا (Timer_گروه_List)
+    Timer_گروه_List->Prev = &بعدی_2;
+  بعدی_2 = Timer_گروه_List;
+  Prev = &Timer_گروه_List;
+  Timer_گروه_List = هذا;
 }
 
-TimerGroup::TimerGroup(StringRef Name, StringRef Description, bool PrintOnExit)
-    : TimerGroup(Name, Description, timerLock(), PrintOnExit) {}
+Timer_گروه::Timer_گروه(StringRef Name, StringRef Description, منطقي PrintOnExit)
+    : Timer_گروه(Name, Description, timer_قفل(), PrintOnExit) {}
 
-TimerGroup::TimerGroup(StringRef Name, StringRef Description,
-                       const StringMap<TimeRecord> &Records, bool PrintOnExit)
-    : TimerGroup(Name, Description, PrintOnExit) {
-  TimersToPrint.reserve(Records.size());
-  for (const auto &P : Records)
-    TimersToPrint.emplace_back(P.getValue(), std::string(P.getKey()),
-                               std::string(P.getKey()));
-  assert(TimersToPrint.size() == Records.size() && "Size mismatch");
+Timer_گروه::Timer_گروه(StringRef Name, StringRef Description,
+                       ثابت StringMap<زمان_رکورد> &رکوردها, منطقي PrintOnExit)
+    : Timer_گروه(Name, Description, PrintOnExit) {
+  Timers_مقصد_Print.reserve(رکوردها.اندازه_2());
+  لكل (ثابت خودکار &P : رکوردها)
+    Timers_مقصد_Print.emplace_پشت(P.get_مقدار(), std::string(P.get_کلید()),
+                               std::string(P.get_کلید()));
+  أكد(Timers_مقصد_Print.اندازه_2() == رکوردها.اندازه_2() && "Size mismatch");
 }
 
-TimerGroup::~TimerGroup() {
+Timer_گروه::~Timer_گروه() {
   // If the timer group is destroyed before the timers it owns, accumulate and
   // print the timing data.
-  while (FirstTimer)
-    removeTimer(*FirstTimer);
+  طالما (اولی_Timer)
+    removeTimer(*اولی_Timer);
 
-  if (!TimersToPrint.empty() && PrintOnExit) {
-    std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-    PrintQueuedTimers(*OutStream);
+  إذا (!Timers_مقصد_Print.خالی() && PrintOnExit) {
+    std::unique_ptr<raw_ostream> بیرون_جریان = CreateInfoOutputFile();
+    PrintQueuedTimers(*بیرون_جریان);
   }
 
-  auto unlink = [&]() {
-    *Prev = Next;
-    if (Next)
-      Next->Prev = Prev;
+  خودکار unlink = [&]() {
+    *Prev = بعدی_2;
+    إذا (بعدی_2)
+      بعدی_2->Prev = Prev;
   };
 
   // TimerGlobals is always created implicity, through a call to timerLock(),
   // when a TimeGroup is created. On CRT shutdown, the TimerGlobals instance
   // might have been destroyed already. Avoid re-creating it if calling
   // timerLock().
-  if (!isTimerGlobalsConstructed()) {
+  إذا (!isTimerGlobalsConstructed()) {
     unlink();
-    return;
+    أرجع;
   }
 
   // Remove the group from the TimerGroupList.
-  sys::SmartScopedLock<true> L(timerLock());
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
   unlink();
 }
 
-void TimerGroup::removeTimer(Timer &T) {
-  sys::SmartScopedLock<true> L(timerLock());
+فراغ Timer_گروه::removeTimer(Timer &T) {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
 
   // If the timer was started, move its data to TimersToPrint.
-  if (T.hasTriggered())
-    TimersToPrint.emplace_back(T.Time, T.Name, T.Description);
+  إذا (T.hasTriggered())
+    Timers_مقصد_Print.emplace_پشت(T.زمان, T.Name, T.Description);
 
-  T.TG = nullptr;
+  T.TG = اشاره_تهی;
 
   // Unlink the timer from our list.
-  *T.Prev = T.Next;
-  if (T.Next)
-    T.Next->Prev = T.Prev;
+  *T.Prev = T.بعدی_2;
+  إذا (T.بعدی_2)
+    T.بعدی_2->Prev = T.Prev;
 }
 
-void TimerGroup::addTimer(Timer &T) {
-  sys::SmartScopedLock<true> L(timerLock());
+فراغ Timer_گروه::جمع_کن_Timer(Timer &T) {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
 
   // Add the timer to our list.
-  if (FirstTimer)
-    FirstTimer->Prev = &T.Next;
-  T.Next = FirstTimer;
-  T.Prev = &FirstTimer;
-  FirstTimer = &T;
+  إذا (اولی_Timer)
+    اولی_Timer->Prev = &T.بعدی_2;
+  T.بعدی_2 = اولی_Timer;
+  T.Prev = &اولی_Timer;
+  اولی_Timer = &T;
 }
 
-void TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
+فراغ Timer_گروه::PrintQueuedTimers(raw_ostream &OS) {
   // Perhaps sort the timers in descending order by amount of time taken.
-  if (sortTimers())
-    llvm::sort(TimersToPrint);
+  إذا (مرتب_سازی_Timers())
+    llvm::مرتب_سازی(Timers_مقصد_Print);
 
-  TimeRecord Total;
-  for (const PrintRecord &Record : TimersToPrint)
-    Total += Record.Time;
+  زمان_رکورد مجموع;
+  لكل (ثابت Print_رکورد &رکورد : Timers_مقصد_Print)
+    مجموع += رکورد.زمان;
 
   // Print out timing header.
   OS << "===" << std::string(73, '-') << "===\n";
   // Figure out how many spaces to indent TimerGroup name.
-  unsigned Padding = (80-Description.length())/2;
-  if (Padding > 80) Padding = 0;         // Don't allow "negative" numbers
+  بیعلامت Padding = (80-Description.درازی_2())/2;
+  إذا (Padding > 80) Padding = 0;         // Don't allow "negative" numbers
   OS.indent(Padding) << Description << '\n';
   OS << "===" << std::string(73, '-') << "===\n";
 
   // If this is not an collection of ungrouped times, print the total time.
   // Ungrouped timers don't really make sense to add up.  We still print the
   // TOTAL line to make the percentages make sense.
-  if (this != &defaultTimerGroup())
+  إذا (هذا != &default_Timer_گروه())
     OS << format("  Total Execution Time: %5.4f seconds (%5.4f wall clock)\n",
-                 Total.getProcessTime(), Total.getWallTime());
+                 مجموع.get_Process_زمان(), مجموع.get_Wall_زمان());
   OS << '\n';
 
-  if (Total.getUserTime())
+  إذا (مجموع.get_User_زمان())
     OS << "   ---User Time---";
-  if (Total.getSystemTime())
+  إذا (مجموع.get_System_زمان())
     OS << "   --System Time--";
-  if (Total.getProcessTime())
+  إذا (مجموع.get_Process_زمان())
     OS << "   --User+System--";
   OS << "   ---Wall Time---";
-  if (Total.getMemUsed())
+  إذا (مجموع.get_Mem_استفاده_شده())
     OS << "  ---Mem---";
-  if (Total.getInstructionsExecuted())
+  إذا (مجموع.getInstructionsExecuted())
     OS << "  ---Instr---";
   OS << "  --- Name ---\n";
 
   // Loop through all of the timing data, printing it out.
-  for (const PrintRecord &Record : llvm::reverse(TimersToPrint)) {
-    Record.Time.print(Total, OS);
-    OS << Record.Description << '\n';
+  لكل (ثابت Print_رکورد &رکورد : llvm::معکوس(Timers_مقصد_Print)) {
+    رکورد.زمان.print(مجموع, OS);
+    OS << رکورد.Description << '\n';
   }
 
-  Total.print(Total, OS);
+  مجموع.print(مجموع, OS);
   OS << "Total\n\n";
   OS.flush();
 
-  TimersToPrint.clear();
+  Timers_مقصد_Print.clear();
 }
 
-void TimerGroup::prepareToPrintList(bool ResetTime) {
+فراغ Timer_گروه::prepare_مقصد_Print_List(منطقي Reset_زمان) {
   // See if any of our timers were started, if so add them to TimersToPrint.
-  for (Timer *T = FirstTimer; T; T = T->Next) {
-    if (!T->hasTriggered()) continue;
-    bool WasRunning = T->isRunning();
-    if (WasRunning)
+  لكل (Timer *T = اولی_Timer; T; T = T->بعدی_2) {
+    إذا (!T->hasTriggered()) استمر;
+    منطقي WasRunning = T->isRunning();
+    إذا (WasRunning)
       T->stopTimer();
 
-    TimersToPrint.emplace_back(T->Time, T->Name, T->Description);
+    Timers_مقصد_Print.emplace_پشت(T->زمان, T->Name, T->Description);
 
-    if (ResetTime)
+    إذا (Reset_زمان)
       T->clear();
 
-    if (WasRunning)
-      T->startTimer();
+    إذا (WasRunning)
+      T->شروع_Timer();
   }
 }
 
-void TimerGroup::print(raw_ostream &OS, bool ResetAfterPrint) {
+فراغ Timer_گروه::print(raw_ostream &OS, منطقي ResetAfterPrint) {
   {
     // After preparing the timers we can free the lock
-    sys::SmartScopedLock<true> L(timerLock());
-    prepareToPrintList(ResetAfterPrint);
+    sys::Smart_Scoped_قفل<درست> L(timer_قفل());
+    prepare_مقصد_Print_List(ResetAfterPrint);
   }
 
   // If any timers were started, print the group.
-  if (!TimersToPrint.empty())
+  إذا (!Timers_مقصد_Print.خالی())
     PrintQueuedTimers(OS);
 }
 
-void TimerGroup::clear() {
-  sys::SmartScopedLock<true> L(timerLock());
-  for (Timer *T = FirstTimer; T; T = T->Next)
+فراغ Timer_گروه::clear() {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
+  لكل (Timer *T = اولی_Timer; T; T = T->بعدی_2)
     T->clear();
 }
 
-void TimerGroup::printAll(raw_ostream &OS) {
-  sys::SmartScopedLock<true> L(timerLock());
+فراغ Timer_گروه::printAll(raw_ostream &OS) {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
 
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+  لكل (Timer_گروه *TG = Timer_گروه_List; TG; TG = TG->بعدی_2)
     TG->print(OS);
 }
 
-void TimerGroup::clearAll() {
-  sys::SmartScopedLock<true> L(timerLock());
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+فراغ Timer_گروه::clearAll() {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
+  لكل (Timer_گروه *TG = Timer_گروه_List; TG; TG = TG->بعدی_2)
     TG->clear();
 }
 
-void TimerGroup::printJSONValue(raw_ostream &OS, const PrintRecord &R,
-                                const char *suffix, double Value) {
-  constexpr auto max_digits10 = std::numeric_limits<double>::max_digits10;
+فراغ Timer_گروه::printJSONValue(raw_ostream &OS, ثابت Print_رکورد &R,
+                                ثابت حرف *suffix, مزدوج مقدار) {
+  constexpr خودکار max_digits10 = std::numeric_limits<مزدوج>::max_digits10;
   OS << "\t\"time." << Name << '.' << R.Name << suffix
-     << "\": " << format("%.*e", max_digits10 - 1, Value);
+     << "\": " << format("%.*e", max_digits10 - 1, مقدار);
 }
 
-const char *TimerGroup::printJSONValues(raw_ostream &OS, const char *delim) {
-  sys::SmartScopedLock<true> L(timerLock());
+ثابت حرف *Timer_گروه::printJSONValues(raw_ostream &OS, ثابت حرف *delim) {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
 
-  prepareToPrintList(false);
-  for (const PrintRecord &R : TimersToPrint) {
+  prepare_مقصد_Print_List(خطأ);
+  لكل (ثابت Print_رکورد &R : Timers_مقصد_Print) {
     OS << delim;
     delim = ",\n";
 
-    const TimeRecord &T = R.Time;
-    printJSONValue(OS, R, ".wall", T.getWallTime());
+    ثابت زمان_رکورد &T = R.زمان;
+    printJSONValue(OS, R, ".wall", T.get_Wall_زمان());
     OS << delim;
-    printJSONValue(OS, R, ".user", T.getUserTime());
+    printJSONValue(OS, R, ".user", T.get_User_زمان());
     OS << delim;
-    printJSONValue(OS, R, ".sys", T.getSystemTime());
-    if (T.getMemUsed()) {
+    printJSONValue(OS, R, ".sys", T.get_System_زمان());
+    إذا (T.get_Mem_استفاده_شده()) {
       OS << delim;
-      printJSONValue(OS, R, ".mem", T.getMemUsed());
+      printJSONValue(OS, R, ".mem", T.get_Mem_استفاده_شده());
     }
-    if (T.getInstructionsExecuted()) {
+    إذا (T.getInstructionsExecuted()) {
       OS << delim;
       printJSONValue(OS, R, ".instr", T.getInstructionsExecuted());
     }
   }
-  TimersToPrint.clear();
-  return delim;
+  Timers_مقصد_Print.clear();
+  أرجع delim;
 }
 
-const char *TimerGroup::printAllJSONValues(raw_ostream &OS, const char *delim) {
-  sys::SmartScopedLock<true> L(timerLock());
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+ثابت حرف *Timer_گروه::printAllJSONValues(raw_ostream &OS, ثابت حرف *delim) {
+  sys::Smart_Scoped_قفل<درست> L(timer_قفل());
+  لكل (Timer_گروه *TG = Timer_گروه_List; TG; TG = TG->بعدی_2)
     delim = TG->printJSONValues(OS, delim);
-  return delim;
+  أرجع delim;
 }
 
 //===----------------------------------------------------------------------===//
@@ -513,26 +513,26 @@ const char *TimerGroup::printAllJSONValues(raw_ostream &OS, const char *delim) {
 // needed until later during compilation. These are lazily constructed in order
 // to reduce launch time.
 //===----------------------------------------------------------------------===//
-class llvm::TimerGlobals {
-public:
+صنف llvm::TimerGlobals {
+عام:
   std::string LibSupportInfoOutputFilename;
-  cl::opt<std::string, true> InfoOutputFilename{
-      "info-output-file", cl::value_desc("filename"),
+  cl::opt<std::string, درست> InfoOutputFilename{
+      "info-output-file", cl::مقدار_desc("filename"),
       cl::desc("File to append -stats and -timer output to"), cl::Hidden,
       cl::location(LibSupportInfoOutputFilename)};
-  cl::opt<bool> TrackSpace{
+  cl::opt<منطقي> TrackSpace{
       "track-memory",
       cl::desc("Enable -time-passes memory tracking (this may be slow)"),
       cl::Hidden};
-  cl::opt<bool> SortTimers{
+  cl::opt<منطقي> مرتب_سازی_Timers_2{
       "sort-timers",
       cl::desc("In the report, sort the timers in each group in wall clock"
                " time order"),
-      cl::init(true), cl::Hidden};
+      cl::init(درست), cl::Hidden};
 
-  sys::SmartMutex<true> TimerLock;
-  TimerGroup DefaultTimerGroup{"misc", "Miscellaneous Ungrouped Timers",
-                               TimerLock, /*PrintOnExit=*/true};
+  sys::SmartMutex<درست> Timer_قفل;
+  Timer_گروه Default_Timer_گروه{"misc", "Miscellaneous Ungrouped Timers",
+                               Timer_قفل, /*PrintOnExit=*/درست};
   SignpostEmitter Signposts;
 
   // Order of these members and initialization below is important. For example
@@ -543,36 +543,36 @@ public:
 
   TimerGlobals &initDeferred() {
     std::call_once(InitDeferredFlag,
-                   [this]() { NamedGroupedTimersPtr.emplace(); });
-    return *this;
+                   [هذا]() { NamedGroupedTimersPtr.emplace(); });
+    أرجع *هذا;
   }
 };
 
-static ManagedStatic<TimerGlobals> ManagedTimerGlobals;
+ساكن ManagedStatic<TimerGlobals> ManagedTimerGlobals;
 
-static std::string &libSupportInfoOutputFilename() {
-  return ManagedTimerGlobals->LibSupportInfoOutputFilename;
+ساكن std::string &libSupportInfoOutputFilename() {
+  أرجع ManagedTimerGlobals->LibSupportInfoOutputFilename;
 }
-static bool trackSpace() { return ManagedTimerGlobals->TrackSpace; }
-static bool sortTimers() { return ManagedTimerGlobals->SortTimers; }
-static SignpostEmitter &signposts() { return ManagedTimerGlobals->Signposts; }
-static sys::SmartMutex<true> &timerLock() {
-  return ManagedTimerGlobals->TimerLock;
+ساكن منطقي trackSpace() { أرجع ManagedTimerGlobals->TrackSpace; }
+ساكن منطقي مرتب_سازی_Timers() { أرجع ManagedTimerGlobals->مرتب_سازی_Timers_2; }
+ساكن SignpostEmitter &signposts() { أرجع ManagedTimerGlobals->Signposts; }
+ساكن sys::SmartMutex<درست> &timer_قفل() {
+  أرجع ManagedTimerGlobals->Timer_قفل;
 }
-static TimerGroup &defaultTimerGroup() {
-  return ManagedTimerGlobals->DefaultTimerGroup;
+ساكن Timer_گروه &default_Timer_گروه() {
+  أرجع ManagedTimerGlobals->Default_Timer_گروه;
 }
-static Name2PairMap &namedGroupedTimers() {
-  return *ManagedTimerGlobals->initDeferred().NamedGroupedTimersPtr;
+ساكن Name2PairMap &namedGroupedTimers() {
+  أرجع *ManagedTimerGlobals->initDeferred().NamedGroupedTimersPtr;
 }
 
-void llvm::initTimerOptions() { *ManagedTimerGlobals; }
-void TimerGroup::constructForStatistics() {
+فراغ llvm::initTimerOptions() { *ManagedTimerGlobals; }
+فراغ Timer_گروه::constructForStatistics() {
   ManagedTimerGlobals->initDeferred();
 }
 
-void *TimerGroup::acquireTimerGlobals() { return ManagedTimerGlobals.claim(); }
+فراغ *Timer_گروه::acquireTimerGlobals() { أرجع ManagedTimerGlobals.claim(); }
 
-static bool isTimerGlobalsConstructed() {
-  return ManagedTimerGlobals.isConstructed();
+ساكن منطقي isTimerGlobalsConstructed() {
+  أرجع ManagedTimerGlobals.isConstructed();
 }

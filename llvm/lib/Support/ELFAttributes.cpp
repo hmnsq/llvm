@@ -6,29 +6,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/ADT/StringRef.h"
+#ضمن "llvm/Support/ELFAttributes.h"
+#ضمن "llvm/ADT/StringRef.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
-                                     bool hasTagPrefix) {
-  auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
-  StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+StringRef ELFAttrs::attrTypeAsString(بیعلامت attr, برچسب_Name_Map برچسب_Name_Map_2,
+                                     منطقي has_برچسب_پیشوند) {
+  خودکار برچسب_Name_It = پیدا_کن_if(
+      برچسب_Name_Map_2, [attr](ثابت برچسب_Name_قلم قلم_2) { أرجع قلم_2.attr == attr; });
+  إذا (برچسب_Name_It == برچسب_Name_Map_2.انتها())
+    أرجع "";
+  StringRef برچسب_Name = برچسب_Name_It->برچسب_Name;
+  أرجع has_برچسب_پیشوند ? برچسب_Name : برچسب_Name.drop_front(4);
 }
 
-std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
-                                                     TagNameMap tagNameMap) {
-  bool hasTagPrefix = tag.starts_with("Tag_");
-  auto tagNameIt =
-      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+std::optional<بیعلامت> ELFAttrs::attrTypeFromString(StringRef برچسب_2,
+                                                     برچسب_Name_Map برچسب_Name_Map_2) {
+  منطقي has_برچسب_پیشوند = برچسب_2.starts_with("Tag_");
+  خودکار برچسب_Name_It =
+      پیدا_کن_if(برچسب_Name_Map_2, [برچسب_2, has_برچسب_پیشوند](ثابت برچسب_Name_قلم قلم_2) {
+        أرجع قلم_2.برچسب_Name.drop_front(has_برچسب_پیشوند ? 0 : 4) == برچسب_2;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  إذا (برچسب_Name_It == برچسب_Name_Map_2.انتها())
+    أرجع std::nullopt;
+  أرجع برچسب_Name_It->attr;
 }

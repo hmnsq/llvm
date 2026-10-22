@@ -6,128 +6,128 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Signposts.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/config.h"
+#ضمن "llvm/Support/Signposts.h"
+#ضمن "llvm/ADT/StringRef.h"
+#ضمن "llvm/Config/config.h"
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/Mutex.h"
-#include <Availability.h>
-#include <os/signpost.h>
-#endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#إذا LLVM_SUPPORT_XCODE_SIGNPOSTS
+#ضمن "llvm/ADT/DenseMap.h"
+#ضمن "llvm/Support/Mutex.h"
+#ضمن <Availability.h>
+#ضمن <os/signpost.h>
+#پایان_اگر // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#define SIGNPOSTS_AVAILABLE()                                                  \
+#إذا LLVM_SUPPORT_XCODE_SIGNPOSTS
+#تعریف_کن SIGNPOSTS_موجود()                                                  \
   __builtin_available(macos 10.14, iOS 12, tvOS 12, watchOS 5, *)
-namespace {
+نطاق {
 os_log_t *LogCreator() {
-  os_log_t *X = new os_log_t;
+  os_log_t *X = جديد os_log_t;
   *X = os_log_create("org.llvm.signposts", "toolchain");
-  return X;
+  أرجع X;
 }
-struct LogDeleter {
-  void operator()(os_log_t *X) const {
+بنية LogDeleter {
+  فراغ عملگر()(os_log_t *X) ثابت {
     os_release(*X);
-    delete X;
+    حذف X;
   }
 };
 } // end anonymous namespace
 
-namespace llvm {
-class SignpostEmitterImpl {
-  using LogPtrTy = std::unique_ptr<os_log_t, LogDeleter>;
-  using LogTy = LogPtrTy::element_type;
+نطاق llvm {
+صنف SignpostEmitterImpl {
+  استفاده LogPtrTy = std::unique_ptr<os_log_t, LogDeleter>;
+  استفاده LogTy = LogPtrTy::element_type;
 
   LogPtrTy SignpostLog;
-  DenseMap<const void *, os_signpost_id_t> Signposts;
-  sys::SmartMutex<true> Mutex;
+  DenseMap<ثابت فراغ *, os_signpost_id_t> Signposts;
+  sys::SmartMutex<درست> Mutex;
 
-  LogTy &getLogger() const { return *SignpostLog; }
-  os_signpost_id_t getSignpostForObject(const void *O) {
-    sys::SmartScopedLock<true> Lock(Mutex);
-    const auto &I = Signposts.find(O);
-    if (I != Signposts.end())
-      return I->second;
+  LogTy &getLogger() ثابت { أرجع *SignpostLog; }
+  os_signpost_id_t getSignpostForObject(ثابت فراغ *O) {
+    sys::Smart_Scoped_قفل<درست> قفل_3(Mutex);
+    ثابت خودکار &I = Signposts.پیدا_کن(O);
+    إذا (I != Signposts.انتها())
+      أرجع I->دومی_2;
     os_signpost_id_t ID = {};
-    if (SIGNPOSTS_AVAILABLE()) {
-      ID = os_signpost_id_make_with_pointer(getLogger(), O);
+    إذا (SIGNPOSTS_موجود()) {
+      ID = os_signpost_id_make_with_اشاره_گر(getLogger(), O);
     }
-    const auto &Inserted = Signposts.insert(std::make_pair(O, ID));
-    return Inserted.first->second;
+    ثابت خودکار &Inserted = Signposts.درج(std::make_pair(O, ID));
+    أرجع Inserted.اولی_2->دومی_2;
   }
 
-public:
+عام:
   SignpostEmitterImpl() : SignpostLog(LogCreator()) {}
 
-  bool isEnabled() const {
-    if (SIGNPOSTS_AVAILABLE())
-      return os_signpost_enabled(*SignpostLog);
-    return false;
+  منطقي isEnabled() ثابت {
+    إذا (SIGNPOSTS_موجود())
+      أرجع os_signpost_enabled(*SignpostLog);
+    أرجع خطأ;
   }
 
-  void startInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  فراغ شروع_Interval(ثابت فراغ *O, llvm::StringRef Name) {
+    إذا (isEnabled()) {
+      إذا (SIGNPOSTS_موجود()) {
         // Both strings used here are required to be constant literal strings.
         os_signpost_interval_begin(getLogger(), getSignpostForObject(O),
-                                   "LLVM Timers", "%s", Name.data());
+                                   "LLVM Timers", "%s", Name.داده());
       }
     }
   }
 
-  void endInterval(const void *O, llvm::StringRef Name) {
-    if (isEnabled()) {
-      if (SIGNPOSTS_AVAILABLE()) {
+  فراغ انتها_Interval(ثابت فراغ *O, llvm::StringRef Name) {
+    إذا (isEnabled()) {
+      إذا (SIGNPOSTS_موجود()) {
         // Both strings used here are required to be constant literal strings.
-        os_signpost_interval_end(getLogger(), getSignpostForObject(O),
+        os_signpost_interval_انتها(getLogger(), getSignpostForObject(O),
                                  "LLVM Timers", "");
       }
     }
   }
 };
 } // end namespace llvm
-#else
+#وإلا
 /// Definition necessary for use of std::unique_ptr in SignpostEmitter::Impl.
-class llvm::SignpostEmitterImpl {};
-#endif // if LLVM_SUPPORT_XCODE_SIGNPOSTS
+صنف llvm::SignpostEmitterImpl {};
+#پایان_اگر // if LLVM_SUPPORT_XCODE_SIGNPOSTS
 
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
-#define HAVE_ANY_SIGNPOST_IMPL 1
-#else
-#define HAVE_ANY_SIGNPOST_IMPL 0
-#endif
+#إذا LLVM_SUPPORT_XCODE_SIGNPOSTS
+#تعریف_کن HAVE_ANY_SIGNPOST_IMPL 1
+#وإلا
+#تعریف_کن HAVE_ANY_SIGNPOST_IMPL 0
+#پایان_اگر
 
 SignpostEmitter::SignpostEmitter() {
-#if HAVE_ANY_SIGNPOST_IMPL
+#إذا HAVE_ANY_SIGNPOST_IMPL
   Impl = std::make_unique<SignpostEmitterImpl>();
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+#پایان_اگر // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-SignpostEmitter::~SignpostEmitter() = default;
+SignpostEmitter::~SignpostEmitter() = افتراضي;
 
-bool SignpostEmitter::isEnabled() const {
-#if HAVE_ANY_SIGNPOST_IMPL
-  return Impl->isEnabled();
-#else
-  return false;
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+منطقي SignpostEmitter::isEnabled() ثابت {
+#إذا HAVE_ANY_SIGNPOST_IMPL
+  أرجع Impl->isEnabled();
+#وإلا
+  أرجع خطأ;
+#پایان_اگر // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::startInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  return Impl->startInterval(O, Name);
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+فراغ SignpostEmitter::شروع_Interval(ثابت فراغ *O, StringRef Name) {
+#إذا HAVE_ANY_SIGNPOST_IMPL
+  إذا (Impl == اشاره_تهی)
+    أرجع;
+  أرجع Impl->شروع_Interval(O, Name);
+#پایان_اگر // if !HAVE_ANY_SIGNPOST_IMPL
 }
 
-void SignpostEmitter::endInterval(const void *O, StringRef Name) {
-#if HAVE_ANY_SIGNPOST_IMPL
-  if (Impl == nullptr)
-    return;
-  Impl->endInterval(O, Name);
-#endif // if !HAVE_ANY_SIGNPOST_IMPL
+فراغ SignpostEmitter::انتها_Interval(ثابت فراغ *O, StringRef Name) {
+#إذا HAVE_ANY_SIGNPOST_IMPL
+  إذا (Impl == اشاره_تهی)
+    أرجع;
+  Impl->انتها_Interval(O, Name);
+#پایان_اگر // if !HAVE_ANY_SIGNPOST_IMPL
 }

@@ -6,65 +6,65 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/RewriteBuffer.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/ADT/RewriteBuffer.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-raw_ostream &RewriteBuffer::write(raw_ostream &Stream) const {
+raw_ostream &Rewrite_میانگیر::اكتب(raw_ostream &جریان) ثابت {
   // Walk RewriteRope chunks efficiently using MoveToNextPiece() instead of the
   // character iterator.
-  for (RopePieceBTreeIterator I = begin(), E = end(); I != E;
-       I.MoveToNextPiece())
-    Stream << I.piece();
-  return Stream;
+  لكل (RopePieceBTreeIterator I = begin(), E = انتها(); I != E;
+       I.Move_مقصد_بعدی_Piece())
+    جریان << I.piece();
+  أرجع جریان;
 }
 
 /// Return true if this character is non-new-line whitespace:
 /// ' ', '\\t', '\\f', '\\v', '\\r'.
-static inline bool isWhitespaceExceptNL(unsigned char c) {
-  return c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
+ساكن مضمن منطقي isWhitespaceExceptNL(بیعلامت حرف c) {
+  أرجع c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r';
 }
 
-void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
-                               bool removeLineIfEmpty) {
+فراغ Rewrite_میانگیر::Remove_متن(بیعلامت Orig_جابه_جایی, بیعلامت اندازه,
+                               منطقي remove_سطر_If_خالی) {
   // Nothing to remove, exit early.
-  if (Size == 0)
-    return;
+  إذا (اندازه == 0)
+    أرجع;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, true);
-  assert(RealOffset + Size <= Buffer.size() && "Invalid location");
+  بیعلامت Real_جابه_جایی = get_Mapped_جابه_جایی(Orig_جابه_جایی, درست);
+  أكد(Real_جابه_جایی + اندازه <= میانگیر.اندازه_2() && "Invalid location");
 
   // Remove the dead characters.
-  Buffer.erase(RealOffset, Size);
+  میانگیر.erase(Real_جابه_جایی, اندازه);
 
   // Add a delta so that future changes are offset correctly.
-  AddReplaceDelta(OrigOffset, -Size);
+  جمع_کن_Replace_Delta(Orig_جابه_جایی, -اندازه);
 
-  if (removeLineIfEmpty) {
+  إذا (remove_سطر_If_خالی) {
     // Find the line that the remove occurred and if it is completely empty
     // remove the line as well.
 
-    iterator curLineStart = begin();
-    unsigned curLineStartOffs = 0;
+    iterator cur_سطر_شروع = begin();
+    بیعلامت cur_سطر_شروع_Offs = 0;
     iterator posI = begin();
-    for (unsigned i = 0; i != RealOffset; ++i) {
-      if (*posI == '\n') {
-        curLineStart = posI;
-        ++curLineStart;
-        curLineStartOffs = i + 1;
+    لكل (بیعلامت i = 0; i != Real_جابه_جایی; ++i) {
+      إذا (*posI == '\n') {
+        cur_سطر_شروع = posI;
+        ++cur_سطر_شروع;
+        cur_سطر_شروع_Offs = i + 1;
       }
       ++posI;
     }
 
-    unsigned lineSize = 0;
-    posI = curLineStart;
-    while (posI != end() && isWhitespaceExceptNL(*posI)) {
+    بیعلامت سطر_اندازه = 0;
+    posI = cur_سطر_شروع;
+    طالما (posI != انتها() && isWhitespaceExceptNL(*posI)) {
       ++posI;
-      ++lineSize;
+      ++سطر_اندازه;
     }
-    if (posI != end() && *posI == '\n') {
-      Buffer.erase(curLineStartOffs, lineSize + 1 /* + '\n'*/);
+    إذا (posI != انتها() && *posI == '\n') {
+      میانگیر.erase(cur_سطر_شروع_Offs, سطر_اندازه + 1 /* + '\n'*/);
       // FIXME: Here, the offset of the start of the line is supposed to be
       // expressed in terms of the original input not the "real" rewrite
       // buffer.  How do we compute that reliably?  It might be tempting to use
@@ -76,32 +76,32 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
       // clang::Rewriter::RewriteOptions::RemoveLineIfEmpty.  A reproducer for
       // the implementation below is the test RemoveLineIfEmpty in
       // clang/unittests/Rewrite/RewriteBufferTest.cpp.
-      AddReplaceDelta(curLineStartOffs, -(lineSize + 1 /* + '\n'*/));
+      جمع_کن_Replace_Delta(cur_سطر_شروع_Offs, -(سطر_اندازه + 1 /* + '\n'*/));
     }
   }
 }
 
-void RewriteBuffer::InsertText(unsigned OrigOffset, StringRef Str,
-                               bool InsertAfter) {
+فراغ Rewrite_میانگیر::درج_متن_2(بیعلامت Orig_جابه_جایی, StringRef Str,
+                               منطقي درج_After) {
   // Nothing to insert, exit early.
-  if (Str.empty())
-    return;
+  إذا (Str.خالی())
+    أرجع;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, InsertAfter);
-  Buffer.insert(RealOffset, Str.begin(), Str.end());
+  بیعلامت Real_جابه_جایی = get_Mapped_جابه_جایی(Orig_جابه_جایی, درج_After);
+  میانگیر.درج(Real_جابه_جایی, Str.begin(), Str.انتها());
 
   // Add a delta so that future changes are offset correctly.
-  AddInsertDelta(OrigOffset, Str.size());
+  جمع_کن_درج_Delta(Orig_جابه_جایی, Str.اندازه_2());
 }
 
 /// ReplaceText - This method replaces a range of characters in the input
 /// buffer with a new string.  This is effectively a combined "remove+insert"
 /// operation.
-void RewriteBuffer::ReplaceText(unsigned OrigOffset, unsigned OrigLength,
+فراغ Rewrite_میانگیر::Replace_متن(بیعلامت Orig_جابه_جایی, بیعلامت Orig_درازی,
                                 StringRef NewStr) {
-  unsigned RealOffset = getMappedOffset(OrigOffset, true);
-  Buffer.erase(RealOffset, OrigLength);
-  Buffer.insert(RealOffset, NewStr.begin(), NewStr.end());
-  if (OrigLength != NewStr.size())
-    AddReplaceDelta(OrigOffset, NewStr.size() - OrigLength);
+  بیعلامت Real_جابه_جایی = get_Mapped_جابه_جایی(Orig_جابه_جایی, درست);
+  میانگیر.erase(Real_جابه_جایی, Orig_درازی);
+  میانگیر.درج(Real_جابه_جایی, NewStr.begin(), NewStr.انتها());
+  إذا (Orig_درازی != NewStr.اندازه_2())
+    جمع_کن_Replace_Delta(Orig_جابه_جایی, NewStr.اندازه_2() - Orig_درازی);
 }

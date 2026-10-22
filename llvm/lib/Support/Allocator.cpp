@@ -10,36 +10,36 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/PerThreadBumpPtrAllocator.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/Allocator.h"
+#ضمن "llvm/Support/PerThreadBumpPtrAllocator.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-#include <atomic>
+#ضمن <atomic>
 
-namespace llvm {
+نطاق llvm {
 
-namespace detail {
+نطاق detail {
 
-void printBumpPtrAllocatorStats(unsigned NumSlabs, size_t TotalMemory) {
-  errs() << "\nNumber of memory regions: " << NumSlabs << '\n'
-         << "Bytes allocated: " << TotalMemory << '\n'
+فراغ printBumpPtrAllocatorStats(بیعلامت رقم_Slabs, size_t مجموع_حافظه) {
+  errs() << "\nNumber of memory regions: " << رقم_Slabs << '\n'
+         << "Bytes allocated: " << مجموع_حافظه << '\n'
          << " (includes alignment, etc)\n";
 }
 
 } // namespace detail
 
-void PrintRecyclerStats(size_t Size,
+فراغ PrintRecyclerStats(size_t اندازه,
                         size_t Align,
-                        size_t FreeListSize) {
-  errs() << "Recycler element size: " << Size << '\n'
+                        size_t Free_List_اندازه) {
+  errs() << "Recycler element size: " << اندازه << '\n'
          << "Recycler element alignment: " << Align << '\n'
-         << "Number of elements free for recycling: " << FreeListSize << '\n';
+         << "Number of elements free for recycling: " << Free_List_اندازه << '\n';
 }
 
-namespace parallel::detail {
-unsigned claimPerThreadAllocatorId() {
-  static std::atomic<unsigned> Counter;
-  return Counter.fetch_add(1, std::memory_order_relaxed);
+نطاق parallel::detail {
+بیعلامت claim_در_هر_Thread_Allocator_Id() {
+  ساكن std::atomic<بیعلامت> Counter;
+  أرجع Counter.fetch_جمع_کن(1, std::memory_order_relaxed);
 }
 } // namespace parallel::detail
 

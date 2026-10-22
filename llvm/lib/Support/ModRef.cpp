@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ModRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/ModRef.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
-  switch (MR) {
-  case ModRefInfo::NoModRef:
+raw_ostream &llvm::عملگر<<(raw_ostream &OS, ModRefInfo MR) {
+  بدل (MR) {
+  حالة ModRefInfo::NoModRef:
     OS << "NoModRef";
-    break;
-  case ModRefInfo::Ref:
+    اكسر;
+  حالة ModRefInfo::Ref:
     OS << "Ref";
-    break;
-  case ModRefInfo::Mod:
+    اكسر;
+  حالة ModRefInfo::Mod:
     OS << "Mod";
-    break;
-  case ModRefInfo::ModRef:
+    اكسر;
+  حالة ModRefInfo::ModRef:
     OS << "ModRef";
-    break;
+    اكسر;
   }
-  return OS;
+  أرجع OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
-  interleaveComma(MemoryEffects::locations(), OS, [&](IRMemLocation Loc) {
-    switch (Loc) {
-    case IRMemLocation::ArgMem:
+raw_ostream &llvm::عملگر<<(raw_ostream &OS, حافظه_Effects ME) {
+  interleaveComma(حافظه_Effects::locations(), OS, [&](IRMemLocation Loc) {
+    بدل (Loc) {
+    حالة IRMemLocation::ArgMem:
       OS << "ArgMem: ";
-      break;
-    case IRMemLocation::InaccessibleMem:
+      اكسر;
+    حالة IRMemLocation::InaccessibleMem:
       OS << "InaccessibleMem: ";
-      break;
-    case IRMemLocation::ErrnoMem:
+      اكسر;
+    حالة IRMemLocation::ErrnoMem:
       OS << "ErrnoMem: ";
-      break;
-    case IRMemLocation::Other:
+      اكسر;
+    حالة IRMemLocation::Other:
       OS << "Other: ";
-      break;
-    case IRMemLocation::TargetMem0:
+      اكسر;
+    حالة IRMemLocation::هدف_Mem0:
       OS << "TargetMem0: ";
-      break;
-    case IRMemLocation::TargetMem1:
+      اكسر;
+    حالة IRMemLocation::هدف_Mem1:
       OS << "TargetMem1: ";
-      break;
+      اكسر;
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  أرجع OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+raw_ostream &llvm::عملگر<<(raw_ostream &OS, CaptureComponents CC) {
+  إذا (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    أرجع OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  إذا (captures_آدرس_Is_Null_Only(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  وإلا إذا (captures_آدرس(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  إذا (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  إذا (captures_پر_Provenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  أرجع OS;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
+raw_ostream &llvm::عملگر<<(raw_ostream &OS, CaptureInfo CI) {
   ListSeparator LS;
   CaptureComponents Other = CI.getOtherComponents();
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  إذا (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  إذا (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  أرجع OS;
 }

@@ -6,114 +6,114 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64BuildAttributes.h"
-#include "llvm/ADT/StringSwitch.h"
+#ضمن "llvm/Support/AArch64BuildAttributes.h"
+#ضمن "llvm/ADT/StringSwitch.h"
 
-using namespace llvm;
-using namespace llvm::AArch64BuildAttributes;
+استفاده نطاق llvm;
+استفاده نطاق llvm::AArch64_Build_صفات;
 
-StringRef AArch64BuildAttributes::getVendorName(unsigned Vendor) {
-  switch (Vendor) {
-  case AEABI_FEATURE_AND_BITS:
-    return "aeabi_feature_and_bits";
-  case AEABI_PAUTHABI:
-    return "aeabi_pauthabi";
-  case VENDOR_UNKNOWN:
-    return "";
-  default:
-    assert(0 && "Vendor name error");
-    return "";
+StringRef AArch64_Build_صفات::getVendorName(بیعلامت Vendor) {
+  بدل (Vendor) {
+  حالة AEABI_FEATURE_AND_بیتها:
+    أرجع "aeabi_feature_and_bits";
+  حالة AEABI_PAUTHABI:
+    أرجع "aeabi_pauthabi";
+  حالة VENDOR_UNKNOWN:
+    أرجع "";
+  افتراضي:
+    أكد(0 && "Vendor name error");
+    أرجع "";
   }
 }
-VendorID AArch64BuildAttributes::getVendorID(StringRef Vendor) {
-  return StringSwitch<VendorID>(Vendor)
-      .Case("aeabi_feature_and_bits", AEABI_FEATURE_AND_BITS)
+VendorID AArch64_Build_صفات::getVendorID(StringRef Vendor) {
+  أرجع StringSwitch<VendorID>(Vendor)
+      .Case("aeabi_feature_and_bits", AEABI_FEATURE_AND_بیتها)
       .Case("aeabi_pauthabi", AEABI_PAUTHABI)
       .Default(VENDOR_UNKNOWN);
 }
 
-StringRef AArch64BuildAttributes::getOptionalStr(unsigned Optional) {
-  switch (Optional) {
-  case REQUIRED:
-    return "required";
-  case OPTIONAL:
-    return "optional";
-  case OPTIONAL_NOT_FOUND:
-  default:
-    return "";
+StringRef AArch64_Build_صفات::getOptionalStr(بیعلامت Optional) {
+  بدل (Optional) {
+  حالة REQUIRED:
+    أرجع "required";
+  حالة OPTIONAL:
+    أرجع "optional";
+  حالة OPTIONAL_NOT_یافت:
+  افتراضي:
+    أرجع "";
   }
 }
-SubsectionOptional AArch64BuildAttributes::getOptionalID(StringRef Optional) {
-  return StringSwitch<SubsectionOptional>(Optional)
+SubsectionOptional AArch64_Build_صفات::getOptionalID(StringRef Optional) {
+  أرجع StringSwitch<SubsectionOptional>(Optional)
       .Case("required", REQUIRED)
       .Case("optional", OPTIONAL)
-      .Default(OPTIONAL_NOT_FOUND);
+      .Default(OPTIONAL_NOT_یافت);
 }
-StringRef AArch64BuildAttributes::getSubsectionOptionalUnknownError() {
-  return "unknown AArch64 build attributes optionality, expected "
+StringRef AArch64_Build_صفات::getSubsectionOptionalUnknownError() {
+  أرجع "unknown AArch64 build attributes optionality, expected "
          "required|optional";
 }
 
-StringRef AArch64BuildAttributes::getTypeStr(unsigned Type) {
-  switch (Type) {
-  case ULEB128:
-    return "uleb128";
-  case NTBS:
-    return "ntbs";
-  case TYPE_NOT_FOUND:
-  default:
-    return "";
+StringRef AArch64_Build_صفات::getTypeStr(بیعلامت Type) {
+  بدل (Type) {
+  حالة ULEB128:
+    أرجع "uleb128";
+  حالة NTBS:
+    أرجع "ntbs";
+  حالة TYPE_NOT_یافت:
+  افتراضي:
+    أرجع "";
   }
 }
-SubsectionType AArch64BuildAttributes::getTypeID(StringRef Type) {
-  return StringSwitch<SubsectionType>(Type)
+SubsectionType AArch64_Build_صفات::getTypeID(StringRef Type) {
+  أرجع StringSwitch<SubsectionType>(Type)
       .Cases({"uleb128", "ULEB128"}, ULEB128)
       .Cases({"ntbs", "NTBS"}, NTBS)
-      .Default(TYPE_NOT_FOUND);
+      .Default(TYPE_NOT_یافت);
 }
-StringRef AArch64BuildAttributes::getSubsectionTypeUnknownError() {
-  return "unknown AArch64 build attributes type, expected uleb128|ntbs";
+StringRef AArch64_Build_صفات::getSubsectionTypeUnknownError() {
+  أرجع "unknown AArch64 build attributes type, expected uleb128|ntbs";
 }
 
-StringRef AArch64BuildAttributes::getPauthABITagsStr(unsigned PauthABITag) {
-  switch (PauthABITag) {
-  case TAG_PAUTH_PLATFORM:
-    return "Tag_PAuth_Platform";
-  case TAG_PAUTH_SCHEMA:
-    return "Tag_PAuth_Schema";
-  case PAUTHABI_TAG_NOT_FOUND:
-  default:
-    return "";
+StringRef AArch64_Build_صفات::getPauthABITagsStr(بیعلامت PauthABITag) {
+  بدل (PauthABITag) {
+  حالة برچسب_PAUTH_PLATFORM:
+    أرجع "Tag_PAuth_Platform";
+  حالة برچسب_PAUTH_SCHEMA:
+    أرجع "Tag_PAuth_Schema";
+  حالة PAUTHABI_برچسب_NOT_یافت:
+  افتراضي:
+    أرجع "";
   }
 }
 
-PauthABITags AArch64BuildAttributes::getPauthABITagsID(StringRef PauthABITag) {
-  return StringSwitch<PauthABITags>(PauthABITag)
-      .Case("Tag_PAuth_Platform", TAG_PAUTH_PLATFORM)
-      .Case("Tag_PAuth_Schema", TAG_PAUTH_SCHEMA)
-      .Default(PAUTHABI_TAG_NOT_FOUND);
+PauthABITags AArch64_Build_صفات::getPauthABITagsID(StringRef PauthABITag) {
+  أرجع StringSwitch<PauthABITags>(PauthABITag)
+      .Case("Tag_PAuth_Platform", برچسب_PAUTH_PLATFORM)
+      .Case("Tag_PAuth_Schema", برچسب_PAUTH_SCHEMA)
+      .Default(PAUTHABI_برچسب_NOT_یافت);
 }
 
 StringRef
-AArch64BuildAttributes::getFeatureAndBitsTagsStr(unsigned FeatureAndBitsTag) {
-  switch (FeatureAndBitsTag) {
-  case TAG_FEATURE_BTI:
-    return "Tag_Feature_BTI";
-  case TAG_FEATURE_PAC:
-    return "Tag_Feature_PAC";
-  case TAG_FEATURE_GCS:
-    return "Tag_Feature_GCS";
-  case FEATURE_AND_BITS_TAG_NOT_FOUND:
-  default:
-    return "";
+AArch64_Build_صفات::get_Feature_And_بیتها_برچسبها_Str(بیعلامت Feature_And_بیتها_برچسب) {
+  بدل (Feature_And_بیتها_برچسب) {
+  حالة برچسب_FEATURE_BTI:
+    أرجع "Tag_Feature_BTI";
+  حالة برچسب_FEATURE_PAC:
+    أرجع "Tag_Feature_PAC";
+  حالة برچسب_FEATURE_GCS:
+    أرجع "Tag_Feature_GCS";
+  حالة FEATURE_AND_بیتها_برچسب_NOT_یافت:
+  افتراضي:
+    أرجع "";
   }
 }
 
-FeatureAndBitsTags
-AArch64BuildAttributes::getFeatureAndBitsTagsID(StringRef FeatureAndBitsTag) {
-  return StringSwitch<FeatureAndBitsTags>(FeatureAndBitsTag)
-      .Case("Tag_Feature_BTI", TAG_FEATURE_BTI)
-      .Case("Tag_Feature_PAC", TAG_FEATURE_PAC)
-      .Case("Tag_Feature_GCS", TAG_FEATURE_GCS)
-      .Default(FEATURE_AND_BITS_TAG_NOT_FOUND);
+Feature_And_بیتها_برچسبها
+AArch64_Build_صفات::get_Feature_And_بیتها_برچسبها_ID(StringRef Feature_And_بیتها_برچسب) {
+  أرجع StringSwitch<Feature_And_بیتها_برچسبها>(Feature_And_بیتها_برچسب)
+      .Case("Tag_Feature_BTI", برچسب_FEATURE_BTI)
+      .Case("Tag_Feature_PAC", برچسب_FEATURE_PAC)
+      .Case("Tag_Feature_GCS", برچسب_FEATURE_GCS)
+      .Default(FEATURE_AND_بیتها_برچسب_NOT_یافت);
 }

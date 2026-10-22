@@ -10,269 +10,269 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/ScaledNumber.h"
+#ضمن "llvm/ADT/APFloat.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::ScaledNumbers;
+استفاده نطاق llvm;
+استفاده نطاق llvm::ScaledNumbers;
 
 std::pair<uint64_t, int16_t> ScaledNumbers::multiply64(uint64_t LHS,
                                                        uint64_t RHS) {
-  uint64_t Upper, Lower;
-#if defined(__SIZEOF_INT128__) ||                                              \
-    (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-  auto Product = __uint128_t(LHS) * RHS;
-  Upper = uint64_t(Product >> 64);
-  Lower = uint64_t(Product);
-#else
+  uint64_t فوقانی_2, پایینی_2;
+#إذا defined(__SIZEOF_INT128__) ||                                              \
+    (defined(INTEGRAL_MAX_بیتها) && INTEGRAL_MAX_بیتها >= 128)
+  خودکار حاصلضرب = __uint128_t(LHS) * RHS;
+  فوقانی_2 = uint64_t(حاصلضرب >> 64);
+  پایینی_2 = uint64_t(حاصلضرب);
+#وإلا
   // Separate into two 32-bit digits (U.L).
-  auto getU = [](uint64_t N) { return N >> 32; };
-  auto getL = [](uint64_t N) { return N & UINT32_MAX; };
+  خودکار getU = [](uint64_t N) { أرجع N >> 32; };
+  خودکار getL = [](uint64_t N) { أرجع N & UINT32_MAX; };
   uint64_t UL = getU(LHS), LL = getL(LHS), UR = getU(RHS), LR = getL(RHS);
 
   // Compute cross products.
   uint64_t P1 = UL * UR, P2 = UL * LR, P3 = LL * UR, P4 = LL * LR;
 
   // Sum into two 64-bit digits.
-  Upper = P1;
-  Lower = P4;
-  auto addWithCarry = [&](uint64_t N) {
-    uint64_t NewLower = Lower + (getL(N) << 32);
-    Upper += getU(N) + (NewLower < Lower);
-    Lower = NewLower;
+  فوقانی_2 = P1;
+  پایینی_2 = P4;
+  خودکار جمع_کن_With_انتقال = [&](uint64_t N) {
+    uint64_t New_پایینی = پایینی_2 + (getL(N) << 32);
+    فوقانی_2 += getU(N) + (New_پایینی < پایینی_2);
+    پایینی_2 = New_پایینی;
   };
-  addWithCarry(P2);
-  addWithCarry(P3);
-#endif
+  جمع_کن_With_انتقال(P2);
+  جمع_کن_With_انتقال(P3);
+#پایان_اگر
 
   // Check whether the upper digit is empty.
-  if (!Upper)
-    return {Lower, 0};
+  إذا (!فوقانی_2)
+    أرجع {پایینی_2, 0};
 
   // Shift as little as possible to maximize precision.
-  unsigned LeadingZeros = llvm::countl_zero(Upper);
-  int Shift = 64 - LeadingZeros;
-  if (LeadingZeros)
-    Upper = Upper << LeadingZeros | Lower >> Shift;
-  return getRounded(Upper, Shift,
-                    Shift && (Lower & UINT64_C(1) << (Shift - 1)));
+  بیعلامت LeadingZeros = llvm::countl_zero(فوقانی_2);
+  صحيح لغزش_2 = 64 - LeadingZeros;
+  إذا (LeadingZeros)
+    فوقانی_2 = فوقانی_2 << LeadingZeros | پایینی_2 >> لغزش_2;
+  أرجع getRounded(فوقانی_2, لغزش_2,
+                    لغزش_2 && (پایینی_2 & UINT64_C(1) << (لغزش_2 - 1)));
 }
 
-static uint64_t getHalf(uint64_t N) { return (N >> 1) + (N & 1); }
+ساكن uint64_t getHalf(uint64_t N) { أرجع (N >> 1) + (N & 1); }
 
 std::pair<uint32_t, int16_t> ScaledNumbers::divide32(uint32_t Dividend,
-                                                     uint32_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint32_t مقسوم_علیه_2) {
+  أكد(Dividend && "expected non-zero dividend");
+  أكد(مقسوم_علیه_2 && "expected non-zero divisor");
 
   // Use 64-bit math and canonicalize the dividend to gain precision.
   uint64_t Dividend64 = Dividend;
-  int Shift = 0;
-  if (int Zeros = llvm::countl_zero(Dividend64)) {
-    Shift -= Zeros;
+  صحيح لغزش_2 = 0;
+  إذا (صحيح Zeros = llvm::countl_zero(Dividend64)) {
+    لغزش_2 -= Zeros;
     Dividend64 <<= Zeros;
   }
-  uint64_t Quotient = Dividend64 / Divisor;
-  uint64_t Remainder = Dividend64 % Divisor;
+  uint64_t Quotient = Dividend64 / مقسوم_علیه_2;
+  uint64_t Remainder = Dividend64 % مقسوم_علیه_2;
 
   // If Quotient needs to be shifted, leave the rounding to getAdjusted().
-  if (Quotient > UINT32_MAX)
-    return getAdjusted<uint32_t>(Quotient, Shift);
+  إذا (Quotient > UINT32_MAX)
+    أرجع getAdjusted<uint32_t>(Quotient, لغزش_2);
 
   // Round based on the value of the next bit.
-  return getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(Divisor));
+  أرجع getRounded<uint32_t>(Quotient, لغزش_2, Remainder >= getHalf(مقسوم_علیه_2));
 }
 
 std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
-                                                     uint64_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint64_t مقسوم_علیه_2) {
+  أكد(Dividend && "expected non-zero dividend");
+  أكد(مقسوم_علیه_2 && "expected non-zero divisor");
 
   // Minimize size of divisor.
-  int Shift = 0;
-  if (int Zeros = llvm::countr_zero(Divisor)) {
-    Shift -= Zeros;
-    Divisor >>= Zeros;
+  صحيح لغزش_2 = 0;
+  إذا (صحيح Zeros = llvm::countr_zero(مقسوم_علیه_2)) {
+    لغزش_2 -= Zeros;
+    مقسوم_علیه_2 >>= Zeros;
   }
 
   // Check for powers of two.
-  if (Divisor == 1)
-    return {Dividend, Shift};
+  إذا (مقسوم_علیه_2 == 1)
+    أرجع {Dividend, لغزش_2};
 
   // Maximize size of dividend.
-  if (int Zeros = llvm::countl_zero(Dividend)) {
-    Shift -= Zeros;
+  إذا (صحيح Zeros = llvm::countl_zero(Dividend)) {
+    لغزش_2 -= Zeros;
     Dividend <<= Zeros;
   }
 
   // Start with the result of a divide.
-  uint64_t Quotient = Dividend / Divisor;
-  Dividend %= Divisor;
+  uint64_t Quotient = Dividend / مقسوم_علیه_2;
+  Dividend %= مقسوم_علیه_2;
 
   // Continue building the quotient with long division.
-  while (!(Quotient >> 63) && Dividend) {
+  طالما (!(Quotient >> 63) && Dividend) {
     // Shift Dividend and check for overflow.
-    bool IsOverflow = Dividend >> 63;
+    منطقي Is_سرریز = Dividend >> 63;
     Dividend <<= 1;
-    --Shift;
+    --لغزش_2;
 
     // Get the next bit of Quotient.
     Quotient <<= 1;
-    if (IsOverflow || Divisor <= Dividend) {
+    إذا (Is_سرریز || مقسوم_علیه_2 <= Dividend) {
       Quotient |= 1;
-      Dividend -= Divisor;
+      Dividend -= مقسوم_علیه_2;
     }
   }
 
-  return getRounded(Quotient, Shift, Dividend >= getHalf(Divisor));
+  أرجع getRounded(Quotient, لغزش_2, Dividend >= getHalf(مقسوم_علیه_2));
 }
 
-int ScaledNumbers::compareImpl(uint64_t L, uint64_t R, int ScaleDiff) {
-  assert(ScaleDiff >= 0 && "wrong argument order");
-  assert(ScaleDiff < 64 && "numbers too far apart");
+صحيح ScaledNumbers::compareImpl(uint64_t L, uint64_t R, صحيح ScaleDiff) {
+  أكد(ScaleDiff >= 0 && "wrong argument order");
+  أكد(ScaleDiff < 64 && "numbers too far apart");
 
   uint64_t L_adjusted = L >> ScaleDiff;
-  if (L_adjusted < R)
-    return -1;
-  if (L_adjusted > R)
-    return 1;
+  إذا (L_adjusted < R)
+    أرجع -1;
+  إذا (L_adjusted > R)
+    أرجع 1;
 
-  return L > L_adjusted << ScaleDiff ? 1 : 0;
+  أرجع L > L_adjusted << ScaleDiff ? 1 : 0;
 }
 
-static void appendDigit(std::string &Str, unsigned D) {
-  assert(D < 10);
+ساكن فراغ appendDigit(std::string &Str, بیعلامت D) {
+  أكد(D < 10);
   Str += '0' + D % 10;
 }
 
-static void appendNumber(std::string &Str, uint64_t N) {
-  while (N) {
+ساكن فراغ append_عدد(std::string &Str, uint64_t N) {
+  طالما (N) {
     appendDigit(Str, N % 10);
     N /= 10;
   }
 }
 
-static bool doesRoundUp(char Digit) {
-  switch (Digit) {
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-    return true;
-  default:
-    return false;
+ساكن منطقي does_دور_به_بالا(حرف Digit) {
+  بدل (Digit) {
+  حالة '5':
+  حالة '6':
+  حالة '7':
+  حالة '8':
+  حالة '9':
+    أرجع درست;
+  افتراضي:
+    أرجع خطأ;
   }
 }
 
-static std::string toStringAPFloat(uint64_t D, int E, unsigned Precision) {
-  assert(E >= ScaledNumbers::MinScale);
-  assert(E <= ScaledNumbers::MaxScale);
+ساكن std::string مقصد_String_APFloat(uint64_t D, صحيح E, بیعلامت Precision) {
+  أكد(E >= ScaledNumbers::MinScale);
+  أكد(E <= ScaledNumbers::MaxScale);
 
   // Find a new E, but don't let it increase past MaxScale.
-  int LeadingZeros = ScaledNumberBase::countLeadingZeros64(D);
-  int NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
-  int Shift = 63 - (NewE - E);
-  assert(Shift <= LeadingZeros);
-  assert(Shift == LeadingZeros || NewE == ScaledNumbers::MaxScale);
-  assert(Shift >= 0 && Shift < 64 && "undefined behavior");
-  D <<= Shift;
+  صحيح LeadingZeros = Scaled_عدد_پایه::شمار_Leading_Zeros64(D);
+  صحيح NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
+  صحيح لغزش_2 = 63 - (NewE - E);
+  أكد(لغزش_2 <= LeadingZeros);
+  أكد(لغزش_2 == LeadingZeros || NewE == ScaledNumbers::MaxScale);
+  أكد(لغزش_2 >= 0 && لغزش_2 < 64 && "undefined behavior");
+  D <<= لغزش_2;
   E = NewE;
 
   // Check for a denormal.
-  unsigned AdjustedE = E + 16383;
-  if (!(D >> 63)) {
-    assert(E == ScaledNumbers::MaxScale);
+  بیعلامت AdjustedE = E + 16383;
+  إذا (!(D >> 63)) {
+    أكد(E == ScaledNumbers::MaxScale);
     AdjustedE = 0;
   }
 
   // Build the float and print it.
-  uint64_t RawBits[2] = {D, AdjustedE};
-  APFloat Float(APFloat::x87DoubleExtended(), APInt(80, RawBits));
-  SmallVector<char, 24> Chars;
-  Float.toString(Chars, Precision, 0);
-  return std::string(Chars.begin(), Chars.end());
+  uint64_t Raw_بیتها[2] = {D, AdjustedE};
+  APFloat Float(APFloat::x87DoubleExtended(), APInt(80, Raw_بیتها));
+  Small_وکتور<حرف, 24> Chars;
+  Float.مقصد_String(Chars, Precision, 0);
+  أرجع std::string(Chars.begin(), Chars.انتها());
 }
 
-static std::string stripTrailingZeros(const std::string &Float) {
-  size_t NonZero = Float.find_last_not_of('0');
-  assert(NonZero != std::string::npos && "no . in floating point string");
+ساكن std::string stripTrailingZeros(ثابت std::string &Float) {
+  size_t NonZero = Float.پیدا_کن_آخرین_not_از('0');
+  أكد(NonZero != std::string::npos && "no . in floating point string");
 
-  if (Float[NonZero] == '.')
+  إذا (Float[NonZero] == '.')
     ++NonZero;
 
-  return Float.substr(0, NonZero + 1);
+  أرجع Float.substr(0, NonZero + 1);
 }
 
-std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
-                                       unsigned Precision) {
-  if (!D)
-    return "0.0";
+std::string Scaled_عدد_پایه::مقصد_String(uint64_t D, int16_t E, صحيح عرض,
+                                       بیعلامت Precision) {
+  إذا (!D)
+    أرجع "0.0";
 
   // Canonicalize exponent and digits.
   uint64_t Above0 = 0;
   uint64_t Below0 = 0;
   uint64_t Extra = 0;
-  int ExtraShift = 0;
-  if (E == 0) {
+  صحيح Extra_لغزش = 0;
+  إذا (E == 0) {
     Above0 = D;
-  } else if (E > 0) {
-    if (int Shift = std::min(int16_t(countLeadingZeros64(D)), E)) {
-      D <<= Shift;
-      E -= Shift;
+  } وإلا إذا (E > 0) {
+    إذا (صحيح لغزش_2 = std::min(int16_t(شمار_Leading_Zeros64(D)), E)) {
+      D <<= لغزش_2;
+      E -= لغزش_2;
 
-      if (!E)
+      إذا (!E)
         Above0 = D;
     }
-  } else if (E > -64) {
+  } وإلا إذا (E > -64) {
     Above0 = D >> -E;
     Below0 = D << (64 + E);
-  } else if (E == -64) {
+  } وإلا إذا (E == -64) {
     // Special case: shift by 64 bits is undefined behavior.
     Below0 = D;
-  } else if (E > -120) {
+  } وإلا إذا (E > -120) {
     Below0 = D >> (-E - 64);
     Extra = D << (128 + E);
-    ExtraShift = -64 - E;
+    Extra_لغزش = -64 - E;
   }
 
   // Fall back on APFloat for very small and very large numbers.
-  if (!Above0 && !Below0)
-    return toStringAPFloat(D, E, Precision);
+  إذا (!Above0 && !Below0)
+    أرجع مقصد_String_APFloat(D, E, Precision);
 
   // Append the digits before the decimal.
   std::string Str;
-  size_t DigitsOut = 0;
-  if (Above0) {
-    appendNumber(Str, Above0);
-    DigitsOut = Str.size();
-  } else {
+  size_t Digits_بیرون = 0;
+  إذا (Above0) {
+    append_عدد(Str, Above0);
+    Digits_بیرون = Str.اندازه_2();
+  } وإلا {
     appendDigit(Str, 0);
   }
-  std::reverse(Str.begin(), Str.end());
+  std::معکوس(Str.begin(), Str.انتها());
 
   // Return early if there's nothing after the decimal.
-  if (!Below0)
-    return Str + ".0";
+  إذا (!Below0)
+    أرجع Str + ".0";
 
   // Append the decimal and beyond.
   Str += '.';
-  uint64_t Error = UINT64_C(1) << (64 - Width);
+  uint64_t Error = UINT64_C(1) << (64 - عرض);
 
   // We need to shift Below0 to the right to make space for calculating
   // digits.  Save the precision we're losing in Extra.
   Extra = (Below0 & 0xf) << 56 | (Extra >> 8);
   Below0 >>= 4;
   size_t SinceDot = 0;
-  size_t AfterDot = Str.size();
-  do {
-    if (ExtraShift) {
-      --ExtraShift;
+  size_t AfterDot = Str.اندازه_2();
+  افعل {
+    إذا (Extra_لغزش) {
+      --Extra_لغزش;
       Error *= 5;
-    } else {
+    } وإلا {
       Error *= 10;
     }
 
@@ -282,53 +282,53 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
     Extra = Extra & (UINT64_MAX >> 4);
     appendDigit(Str, Below0 >> 60);
     Below0 = Below0 & (UINT64_MAX >> 4);
-    if (DigitsOut || Str.back() != '0')
-      ++DigitsOut;
+    إذا (Digits_بیرون || Str.پشت() != '0')
+      ++Digits_بیرون;
     ++SinceDot;
-  } while (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
-           (!Precision || DigitsOut <= Precision || SinceDot < 2));
+  } طالما (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
+           (!Precision || Digits_بیرون <= Precision || SinceDot < 2));
 
   // Return early for maximum precision.
-  if (!Precision || DigitsOut <= Precision)
-    return stripTrailingZeros(Str);
+  إذا (!Precision || Digits_بیرون <= Precision)
+    أرجع stripTrailingZeros(Str);
 
   // Find where to truncate.
   size_t Truncate =
-      std::max(Str.size() - (DigitsOut - Precision), AfterDot + 1);
+      std::max(Str.اندازه_2() - (Digits_بیرون - Precision), AfterDot + 1);
 
   // Check if there's anything to truncate.
-  if (Truncate >= Str.size())
-    return stripTrailingZeros(Str);
+  إذا (Truncate >= Str.اندازه_2())
+    أرجع stripTrailingZeros(Str);
 
-  bool Carry = doesRoundUp(Str[Truncate]);
-  if (!Carry)
-    return stripTrailingZeros(Str.substr(0, Truncate));
+  منطقي انتقال_2 = does_دور_به_بالا(Str[Truncate]);
+  إذا (!انتقال_2)
+    أرجع stripTrailingZeros(Str.substr(0, Truncate));
 
   // Round with the first truncated digit.
-  for (std::string::reverse_iterator I(Str.begin() + Truncate), E = Str.rend();
+  لكل (std::string::معکوس_iterator I(Str.begin() + Truncate), E = Str.rend();
        I != E; ++I) {
-    if (*I == '.')
-      continue;
-    if (*I == '9') {
+    إذا (*I == '.')
+      استمر;
+    إذا (*I == '9') {
       *I = '0';
-      continue;
+      استمر;
     }
 
     ++*I;
-    Carry = false;
-    break;
+    انتقال_2 = خطأ;
+    اكسر;
   }
 
   // Add "1" in front if we still need to carry.
-  return stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
+  أرجع stripTrailingZeros(std::string(انتقال_2, '1') + Str.substr(0, Truncate));
 }
 
-raw_ostream &ScaledNumberBase::print(raw_ostream &OS, uint64_t D, int16_t E,
-                                     int Width, unsigned Precision) {
-  return OS << toString(D, E, Width, Precision);
+raw_ostream &Scaled_عدد_پایه::print(raw_ostream &OS, uint64_t D, int16_t E,
+                                     صحيح عرض, بیعلامت Precision) {
+  أرجع OS << مقصد_String(D, E, عرض, Precision);
 }
 
-void ScaledNumberBase::dump(uint64_t D, int16_t E, int Width) {
-  print(dbgs(), D, E, Width, 0) << "[" << Width << ":" << D << "*2^" << E
+فراغ Scaled_عدد_پایه::dump(uint64_t D, int16_t E, صحيح عرض) {
+  print(dbgs(), D, E, عرض, 0) << "[" << عرض << ":" << D << "*2^" << E
                                 << "]";
 }

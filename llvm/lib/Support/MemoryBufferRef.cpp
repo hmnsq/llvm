@@ -10,10 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemoryBufferRef.h"
-#include "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/MemoryBufferRef.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-MemoryBufferRef::MemoryBufferRef(const MemoryBuffer &Buffer)
-    : Buffer(Buffer.getBuffer()), Identifier(Buffer.getBufferIdentifier()) {}
+حافظه_میانگیر_Ref::حافظه_میانگیر_Ref(ثابت حافظه_میانگیر &میانگیر)
+    : میانگیر(میانگیر.get_میانگیر()), Identifier(میانگیر.get_میانگیر_Identifier()) {}

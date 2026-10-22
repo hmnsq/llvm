@@ -6,118 +6,118 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/BinaryByteStream.h"
+#ضمن "llvm/Support/BinaryStreamRef.h"
+#ضمن "llvm/Support/BinaryByteStream.h"
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-namespace {
+نطاق {
 
-class ArrayRefImpl : public BinaryStream {
-public:
-  ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
+صنف ArrayRefImpl : عام دودویی_جریان {
+عام:
+  ArrayRefImpl(ArrayRef<uint8_t> داده_2, endianness Endian) : BBS(داده_2, Endian) {}
 
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() ثابت override { أرجع BBS.getEndian(); }
+  Error read_بایتها(uint64_t جابه_جایی, uint64_t اندازه,
+                  ArrayRef<uint8_t> &میانگیر) override {
+    أرجع BBS.read_بایتها(جابه_جایی, اندازه, میانگیر);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t جابه_جایی,
+                                   ArrayRef<uint8_t> &میانگیر) override {
+    أرجع BBS.readLongestContiguousChunk(جابه_جایی, میانگیر);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_درازی() override { أرجع BBS.get_درازی(); }
 
-private:
-  BinaryByteStream BBS;
+خاص:
+  دودویی_Byte_جریان BBS;
 };
 
-class MutableArrayRefImpl : public WritableBinaryStream {
-public:
-  MutableArrayRefImpl(MutableArrayRef<uint8_t> Data, endianness Endian)
-      : BBS(Data, Endian) {}
+صنف MutableArrayRefImpl : عام Writable_دودویی_جریان {
+عام:
+  MutableArrayRefImpl(MutableArrayRef<uint8_t> داده_2, endianness Endian)
+      : BBS(داده_2, Endian) {}
 
   // Inherited via WritableBinaryStream
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
-  Error readBytes(uint64_t Offset, uint64_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+  llvm::endianness getEndian() ثابت override { أرجع BBS.getEndian(); }
+  Error read_بایتها(uint64_t جابه_جایی, uint64_t اندازه,
+                  ArrayRef<uint8_t> &میانگیر) override {
+    أرجع BBS.read_بایتها(جابه_جایی, اندازه, میانگیر);
   }
-  Error readLongestContiguousChunk(uint64_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+  Error readLongestContiguousChunk(uint64_t جابه_جایی,
+                                   ArrayRef<uint8_t> &میانگیر) override {
+    أرجع BBS.readLongestContiguousChunk(جابه_جایی, میانگیر);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t get_درازی() override { أرجع BBS.get_درازی(); }
 
-  Error writeBytes(uint64_t Offset, ArrayRef<uint8_t> Data) override {
-    return BBS.writeBytes(Offset, Data);
+  Error write_بایتها(uint64_t جابه_جایی, ArrayRef<uint8_t> داده_2) override {
+    أرجع BBS.write_بایتها(جابه_جایی, داده_2);
   }
-  Error commit() override { return BBS.commit(); }
+  Error commit() override { أرجع BBS.commit(); }
 
-private:
-  MutableBinaryByteStream BBS;
+خاص:
+  Mutable_دودویی_Byte_جریان BBS;
 };
 } // namespace
 
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream, uint64_t Offset,
-                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
-BinaryStreamRef::BinaryStreamRef(ArrayRef<uint8_t> Data, endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
-                          Data.size()) {}
-BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
-    : BinaryStreamRef(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
+دودویی_جریان_Ref::دودویی_جریان_Ref(دودویی_جریان &جریان)
+    : دودویی_جریان_Ref_پایه(جریان) {}
+دودویی_جریان_Ref::دودویی_جریان_Ref(دودویی_جریان &جریان, uint64_t جابه_جایی,
+                                 std::optional<uint64_t> درازی)
+    : دودویی_جریان_Ref_پایه(جریان, جابه_جایی, درازی) {}
+دودویی_جریان_Ref::دودویی_جریان_Ref(ArrayRef<uint8_t> داده_2, endianness Endian)
+    : دودویی_جریان_Ref_پایه(std::make_shared<ArrayRefImpl>(داده_2, Endian), 0,
+                          داده_2.اندازه_2()) {}
+دودویی_جریان_Ref::دودویی_جریان_Ref(StringRef داده_2, endianness Endian)
+    : دودویی_جریان_Ref(ArrayRef(داده_2.بایتها_begin(), داده_2.بایتها_انتها()), Endian) {}
 
-Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
-                                 ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, Size))
-    return EC;
-  return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
+Error دودویی_جریان_Ref::read_بایتها(uint64_t جابه_جایی, uint64_t اندازه,
+                                 ArrayRef<uint8_t> &میانگیر) ثابت {
+  إذا (خودکار EC = check_جابه_جایی_For_Read(جابه_جایی, اندازه))
+    أرجع EC;
+  أرجع BorrowedImpl->read_بایتها(View_جابه_جایی + جابه_جایی, اندازه, میانگیر);
 }
 
-Error BinaryStreamRef::readLongestContiguousChunk(
-    uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, 1))
-    return EC;
+Error دودویی_جریان_Ref::readLongestContiguousChunk(
+    uint64_t جابه_جایی, ArrayRef<uint8_t> &میانگیر) ثابت {
+  إذا (خودکار EC = check_جابه_جایی_For_Read(جابه_جایی, 1))
+    أرجع EC;
 
-  if (auto EC =
-          BorrowedImpl->readLongestContiguousChunk(ViewOffset + Offset, Buffer))
-    return EC;
+  إذا (خودکار EC =
+          BorrowedImpl->readLongestContiguousChunk(View_جابه_جایی + جابه_جایی, میانگیر))
+    أرجع EC;
   // This StreamRef might refer to a smaller window over a larger stream.  In
   // that case we will have read out more bytes than we should return, because
   // we should not read past the end of the current view.
-  uint64_t MaxLength = getLength() - Offset;
-  if (Buffer.size() > MaxLength)
-    Buffer = Buffer.slice(0, MaxLength);
-  return Error::success();
+  uint64_t Max_درازی = get_درازی() - جابه_جایی;
+  إذا (میانگیر.اندازه_2() > Max_درازی)
+    میانگیر = میانگیر.برش(0, Max_درازی);
+  أرجع Error::success();
 }
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
+Writable_دودویی_جریان_Ref::Writable_دودویی_جریان_Ref(Writable_دودویی_جریان &جریان)
+    : دودویی_جریان_Ref_پایه(جریان) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream,
-                                                 uint64_t Offset,
-                                                 std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
+Writable_دودویی_جریان_Ref::Writable_دودویی_جریان_Ref(Writable_دودویی_جریان &جریان,
+                                                 uint64_t جابه_جایی,
+                                                 std::optional<uint64_t> درازی)
+    : دودویی_جریان_Ref_پایه(جریان, جابه_جایی, درازی) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
+Writable_دودویی_جریان_Ref::Writable_دودویی_جریان_Ref(MutableArrayRef<uint8_t> داده_2,
                                                  endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<MutableArrayRefImpl>(Data, Endian),
-                          0, Data.size()) {}
+    : دودویی_جریان_Ref_پایه(std::make_shared<MutableArrayRefImpl>(داده_2, Endian),
+                          0, داده_2.اندازه_2()) {}
 
-Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
-                                          ArrayRef<uint8_t> Data) const {
-  if (auto EC = checkOffsetForWrite(Offset, Data.size()))
-    return EC;
+Error Writable_دودویی_جریان_Ref::write_بایتها(uint64_t جابه_جایی,
+                                          ArrayRef<uint8_t> داده_2) ثابت {
+  إذا (خودکار EC = check_جابه_جایی_For_Write(جابه_جایی, داده_2.اندازه_2()))
+    أرجع EC;
 
-  return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
+  أرجع BorrowedImpl->write_بایتها(View_جابه_جایی + جابه_جایی, داده_2);
 }
 
-WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+Writable_دودویی_جریان_Ref::عملگر دودویی_جریان_Ref() ثابت {
+  أرجع دودویی_جریان_Ref(*BorrowedImpl, View_جابه_جایی, درازی);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error Writable_دودویی_جریان_Ref::commit() { أرجع BorrowedImpl->commit(); }

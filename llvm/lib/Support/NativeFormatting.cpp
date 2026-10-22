@@ -6,229 +6,229 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#ضمن "llvm/Support/NativeFormatting.h"
+#ضمن "llvm/ADT/ArrayRef.h"
+#ضمن "llvm/ADT/SmallString.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/raw_ostream.h"
 
-#include <cmath>
+#ضمن <cmath>
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <float.h> // For _fpclass in llvm::write_double.
-#endif
+#إذا defined(_WIN32) && !defined(__MINGW32__)
+#ضمن <float.h> // For _fpclass in llvm::write_double.
+#پایان_اگر
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-template<typename T, std::size_t N>
-static int format_to_buffer(T Value, char (&Buffer)[N]) {
-  char *EndPtr = std::end(Buffer);
-  char *CurPtr = EndPtr;
+قالب<نام_نوع T, std::size_t N>
+ساكن صحيح format_مقصد_میانگیر(T مقدار, حرف (&میانگیر)[N]) {
+  حرف *انتها_Ptr = std::انتها(میانگیر);
+  حرف *CurPtr = انتها_Ptr;
 
-  do {
-    *--CurPtr = '0' + char(Value % 10);
-    Value /= 10;
-  } while (Value);
-  return EndPtr - CurPtr;
+  افعل {
+    *--CurPtr = '0' + حرف(مقدار % 10);
+    مقدار /= 10;
+  } طالما (مقدار);
+  أرجع انتها_Ptr - CurPtr;
 }
 
-static void writeWithCommas(raw_ostream &S, ArrayRef<char> Buffer) {
-  assert(!Buffer.empty());
+ساكن فراغ writeWithCommas(raw_ostream &S, ArrayRef<حرف> میانگیر) {
+  أكد(!میانگیر.خالی());
 
-  ArrayRef<char> ThisGroup;
-  int InitialDigits = ((Buffer.size() - 1) % 3) + 1;
-  ThisGroup = Buffer.take_front(InitialDigits);
-  S.write(ThisGroup.data(), ThisGroup.size());
+  ArrayRef<حرف> This_گروه;
+  صحيح InitialDigits = ((میانگیر.اندازه_2() - 1) % 3) + 1;
+  This_گروه = میانگیر.take_front(InitialDigits);
+  S.اكتب(This_گروه.داده(), This_گروه.اندازه_2());
 
-  Buffer = Buffer.drop_front(InitialDigits);
-  assert(Buffer.size() % 3 == 0);
-  while (!Buffer.empty()) {
+  میانگیر = میانگیر.drop_front(InitialDigits);
+  أكد(میانگیر.اندازه_2() % 3 == 0);
+  طالما (!میانگیر.خالی()) {
     S << ',';
-    ThisGroup = Buffer.take_front(3);
-    S.write(ThisGroup.data(), 3);
-    Buffer = Buffer.drop_front(3);
+    This_گروه = میانگیر.take_front(3);
+    S.اكتب(This_گروه.داده(), 3);
+    میانگیر = میانگیر.drop_front(3);
   }
 }
 
-template <typename T>
-static void write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
-                                IntegerStyle Style, bool IsNegative,
-                                bool NonNegativePlus) {
+قالب <نام_نوع T>
+ساكن فراغ write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
+                                IntegerStyle Style, منطقي IsNegative,
+                                منطقي NonNegativePlus) {
   static_assert(std::is_unsigned_v<T>, "Value is not unsigned!");
 
-  char NumberBuffer[128];
-  size_t Len = format_to_buffer(N, NumberBuffer);
+  حرف عدد_میانگیر[128];
+  size_t Len = format_مقصد_میانگیر(N, عدد_میانگیر);
 
-  if (IsNegative)
+  إذا (IsNegative)
     S << '-';
-  else if (NonNegativePlus)
+  وإلا إذا (NonNegativePlus)
     S << '+';
 
-  if (Len < MinDigits && Style != IntegerStyle::Number) {
-    for (size_t I = Len; I < MinDigits; ++I)
+  إذا (Len < MinDigits && Style != IntegerStyle::عدد) {
+    لكل (size_t I = Len; I < MinDigits; ++I)
       S << '0';
   }
 
-  if (Style == IntegerStyle::Number) {
-    writeWithCommas(S, ArrayRef<char>(std::end(NumberBuffer) - Len, Len));
-  } else {
-    S.write(std::end(NumberBuffer) - Len, Len);
+  إذا (Style == IntegerStyle::عدد) {
+    writeWithCommas(S, ArrayRef<حرف>(std::انتها(عدد_میانگیر) - Len, Len));
+  } وإلا {
+    S.اكتب(std::انتها(عدد_میانگیر) - Len, Len);
   }
 }
 
-template <typename T>
-static void write_unsigned(raw_ostream &S, T N, size_t MinDigits,
-                           IntegerStyle Style, bool IsNegative = false,
-                           bool NonNegativePlus = false) {
+قالب <نام_نوع T>
+ساكن فراغ write_unsigned(raw_ostream &S, T N, size_t MinDigits,
+                           IntegerStyle Style, منطقي IsNegative = خطأ,
+                           منطقي NonNegativePlus = خطأ) {
   // Output using 32-bit div/mod if possible.
-  if (N == static_cast<uint32_t>(N))
+  إذا (N == static_cast<uint32_t>(N))
     write_unsigned_impl(S, static_cast<uint32_t>(N), MinDigits, Style,
                         IsNegative, NonNegativePlus);
-  else
+  وإلا
     write_unsigned_impl(S, N, MinDigits, Style, IsNegative, NonNegativePlus);
 }
 
-template <typename T>
-static void write_signed(raw_ostream &S, T N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus = false) {
+قالب <نام_نوع T>
+ساكن فراغ write_signed(raw_ostream &S, T N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus = خطأ) {
   static_assert(std::is_signed_v<T>, "Value is not signed!");
 
-  using UnsignedT = std::make_unsigned_t<T>;
+  استفاده UnsignedT = std::make_unsigned_t<T>;
 
-  if (N >= 0) {
-    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, false,
+  إذا (N >= 0) {
+    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, خطأ,
                    NonNegativePlus);
-    return;
+    أرجع;
   }
 
   UnsignedT UN = -(UnsignedT)N;
-  write_unsigned(S, UN, MinDigits, Style, true, NonNegativePlus);
+  write_unsigned(S, UN, MinDigits, Style, درست, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+فراغ llvm::write_integer(raw_ostream &S, بیعلامت صحيح N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, خطأ, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+فراغ llvm::write_integer(raw_ostream &S, صحيح N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+فراغ llvm::write_integer(raw_ostream &S, بیعلامت دراز N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, خطأ, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+فراغ llvm::write_integer(raw_ostream &S, دراز N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+فراغ llvm::write_integer(raw_ostream &S, بیعلامت دراز دراز N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, خطأ, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+فراغ llvm::write_integer(raw_ostream &S, دراز دراز N, size_t MinDigits,
+                         IntegerStyle Style, منطقي NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
-                     std::optional<size_t> Width) {
-  const size_t kMaxWidth = 128u;
+فراغ llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
+                     std::optional<size_t> عرض) {
+  ثابت size_t k_Max_عرض = 128u;
 
-  size_t W = std::min(kMaxWidth, Width.value_or(0u));
+  size_t W = std::min(k_Max_عرض, عرض.مقدار_or(0u));
 
-  unsigned Nibbles = (llvm::bit_width(N) + 3) / 4;
-  bool Prefix = (Style == HexPrintStyle::PrefixLower ||
-                 Style == HexPrintStyle::PrefixUpper);
-  bool Upper =
-      (Style == HexPrintStyle::Upper || Style == HexPrintStyle::PrefixUpper);
-  unsigned PrefixChars = Prefix ? 2 : 0;
-  unsigned NumChars =
-      std::max(static_cast<unsigned>(W), std::max(1u, Nibbles) + PrefixChars);
+  بیعلامت Nibbles = (llvm::بیت_عرض_3(N) + 3) / 4;
+  منطقي پیشوند = (Style == HexPrintStyle::پیشوند_پایینی ||
+                 Style == HexPrintStyle::پیشوند_فوقانی);
+  منطقي فوقانی_2 =
+      (Style == HexPrintStyle::فوقانی_2 || Style == HexPrintStyle::پیشوند_فوقانی);
+  بیعلامت پیشوند_Chars = پیشوند ? 2 : 0;
+  بیعلامت رقم_Chars =
+      std::max(static_cast<بیعلامت>(W), std::max(1u, Nibbles) + پیشوند_Chars);
 
-  char NumberBuffer[kMaxWidth];
-  ::memset(NumberBuffer, '0', std::size(NumberBuffer));
-  if (Prefix)
-    NumberBuffer[1] = 'x';
-  char *EndPtr = NumberBuffer + NumChars;
-  char *CurPtr = EndPtr;
-  while (N) {
-    unsigned char x = static_cast<unsigned char>(N) % 16;
-    *--CurPtr = hexdigit(x, !Upper);
+  حرف عدد_میانگیر[k_Max_عرض];
+  ::memset(عدد_میانگیر, '0', std::اندازه_2(عدد_میانگیر));
+  إذا (پیشوند)
+    عدد_میانگیر[1] = 'x';
+  حرف *انتها_Ptr = عدد_میانگیر + رقم_Chars;
+  حرف *CurPtr = انتها_Ptr;
+  طالما (N) {
+    بیعلامت حرف x = static_cast<بیعلامت حرف>(N) % 16;
+    *--CurPtr = hexdigit(x, !فوقانی_2);
     N /= 16;
   }
 
-  S.write(NumberBuffer, NumChars);
+  S.اكتب(عدد_میانگیر, رقم_Chars);
 }
 
-void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
+فراغ llvm::write_double(raw_ostream &S, مزدوج N, FloatStyle Style,
                         std::optional<size_t> Precision) {
-  size_t Prec = Precision.value_or(getDefaultPrecision(Style));
+  size_t Prec = Precision.مقدار_or(getDefaultPrecision(Style));
 
-  if (std::isnan(N)) {
+  إذا (std::isnan(N)) {
     S << "nan";
-    return;
-  } else if (std::isinf(N)) {
+    أرجع;
+  } وإلا إذا (std::isinf(N)) {
     S << (std::signbit(N) ? "-INF" : "INF");
-    return;
+    أرجع;
   }
 
-  char Letter;
-  if (Style == FloatStyle::Exponent)
+  حرف Letter;
+  إذا (Style == FloatStyle::Exponent)
     Letter = 'e';
-  else if (Style == FloatStyle::ExponentUpper)
+  وإلا إذا (Style == FloatStyle::Exponent_فوقانی)
     Letter = 'E';
-  else
+  وإلا
     Letter = 'f';
 
   SmallString<8> Spec;
-  llvm::raw_svector_ostream Out(Spec);
-  Out << "%." << Prec << Letter;
+  llvm::raw_svector_ostream بیرون(Spec);
+  بیرون << "%." << Prec << Letter;
 
-  if (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
-#ifdef _WIN32
+  إذا (Style == FloatStyle::Exponent || Style == FloatStyle::Exponent_فوقانی) {
+#اگر_تعریف_شده _WIN32
 // On MSVCRT and compatible, output of %e is incompatible to Posix
 // by default. Number of exponent digits should be at least 2. "%+03d"
 // FIXME: Implement our formatter to here or Support/Format.h!
-#if defined(__MINGW32__)
+#إذا defined(__MINGW32__)
     // FIXME: It should be generic to C++11.
-    if (N == 0.0 && std::signbit(N)) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
-        NegativeZero[strlen(NegativeZero) - 4] = 'E';
+    إذا (N == 0.0 && std::signbit(N)) {
+      حرف NegativeZero[] = "-0.000000e+00";
+      إذا (Style == FloatStyle::Exponent_فوقانی)
+        NegativeZero[طول_رشته(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      أرجع;
     }
-#else
-    int fpcl = _fpclass(N);
+#وإلا
+    صحيح fpcl = _fpclass(N);
 
     // negative zero
-    if (fpcl == _FPCLASS_NZ) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
-        NegativeZero[strlen(NegativeZero) - 4] = 'E';
+    إذا (fpcl == _FPCLASS_NZ) {
+      حرف NegativeZero[] = "-0.000000e+00";
+      إذا (Style == FloatStyle::Exponent_فوقانی)
+        NegativeZero[طول_رشته(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      أرجع;
     }
-#endif
+#پایان_اگر
 
-    char buf[32];
-    unsigned len;
-    len = format(Spec.c_str(), N).snprint(buf, sizeof(buf));
-    if (len <= sizeof(buf) - 2) {
-      if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
+    حرف buf[32];
+    بیعلامت len;
+    len = format(Spec.c_str(), N).snprint(buf, حجم(buf));
+    إذا (len <= حجم(buf) - 2) {
+      إذا (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
           buf[len - 3] == '0') {
-        int cs = buf[len - 4];
-        if (cs == '+' || cs == '-') {
-          int c1 = buf[len - 2];
-          int c0 = buf[len - 1];
-          if (isdigit(static_cast<unsigned char>(c1)) &&
-              isdigit(static_cast<unsigned char>(c0))) {
+        صحيح cs = buf[len - 4];
+        إذا (cs == '+' || cs == '-') {
+          صحيح c1 = buf[len - 2];
+          صحيح c0 = buf[len - 1];
+          إذا (آیا_رقم(static_cast<بیعلامت حرف>(c1)) &&
+              آیا_رقم(static_cast<بیعلامت حرف>(c0))) {
             // Trim leading '0': "...e+012" -> "...e+12\0"
             buf[len - 3] = c1;
             buf[len - 2] = c0;
@@ -237,33 +237,33 @@ void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
         }
       }
       S << buf;
-      return;
+      أرجع;
     }
-#endif
+#پایان_اگر
   }
 
-  if (Style == FloatStyle::Percent)
+  إذا (Style == FloatStyle::Percent)
     N *= 100.0;
 
-  char Buf[32];
-  format(Spec.c_str(), N).snprint(Buf, sizeof(Buf));
+  حرف Buf[32];
+  format(Spec.c_str(), N).snprint(Buf, حجم(Buf));
   S << Buf;
-  if (Style == FloatStyle::Percent)
+  إذا (Style == FloatStyle::Percent)
     S << '%';
 }
 
-bool llvm::isPrefixedHexStyle(HexPrintStyle S) {
-  return (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
+منطقي llvm::isPrefixedHexStyle(HexPrintStyle S) {
+  أرجع (S == HexPrintStyle::پیشوند_پایینی || S == HexPrintStyle::پیشوند_فوقانی);
 }
 
 size_t llvm::getDefaultPrecision(FloatStyle Style) {
-  switch (Style) {
-  case FloatStyle::Exponent:
-  case FloatStyle::ExponentUpper:
-    return 6; // Number of decimal places.
-  case FloatStyle::Fixed:
-  case FloatStyle::Percent:
-    return 2; // Number of decimal places.
+  بدل (Style) {
+  حالة FloatStyle::Exponent:
+  حالة FloatStyle::Exponent_فوقانی:
+    أرجع 6; // Number of decimal places.
+  حالة FloatStyle::Fixed:
+  حالة FloatStyle::Percent:
+    أرجع 2; // Number of decimal places.
   }
   llvm_unreachable("Unknown FloatStyle enum");
 }

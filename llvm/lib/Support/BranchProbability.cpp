@@ -10,102 +10,102 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cmath>
+#ضمن "llvm/Support/BranchProbability.h"
+#ضمن "llvm/Config/llvm-config.h"
+#ضمن "llvm/Support/Debug.h"
+#ضمن "llvm/Support/Format.h"
+#ضمن "llvm/Support/raw_ostream.h"
+#ضمن <cassert>
+#ضمن <cmath>
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-raw_ostream &BranchProbability::print(raw_ostream &OS) const {
-  if (isUnknown())
-    return OS << "?%";
+raw_ostream &BranchProbability::print(raw_ostream &OS) ثابت {
+  إذا (isUnknown())
+    أرجع OS << "?%";
 
   // Get a percentage rounded to two decimal digits. This avoids
   // implementation-defined rounding inside printf.
-  double Percent = rint(((double)N / D) * 100.0 * 100.0) / 100.0;
-  return OS << format("0x%08" PRIx32 " / 0x%08" PRIx32 " = %.2f%%", N, D,
+  مزدوج Percent = rint(((مزدوج)N / D) * 100.0 * 100.0) / 100.0;
+  أرجع OS << format("0x%08" PRIx32 " / 0x%08" PRIx32 " = %.2f%%", N, D,
                       Percent);
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void BranchProbability::dump() const { print(dbgs()) << '\n'; }
-#endif
+#إذا !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_روش فراغ BranchProbability::dump() ثابت { print(dbgs()) << '\n'; }
+#پایان_اگر
 
 BranchProbability
 BranchProbability::getBranchProbability(uint64_t Numerator,
                                         uint64_t Denominator) {
-  assert(Numerator <= Denominator && "Probability cannot be bigger than 1!");
+  أكد(Numerator <= Denominator && "Probability cannot be bigger than 1!");
   // Scale down Denominator to fit in a 32-bit integer.
-  int Scale = 0;
-  while (Denominator > UINT32_MAX) {
+  صحيح Scale = 0;
+  طالما (Denominator > UINT32_MAX) {
     Denominator >>= 1;
     Scale++;
   }
-  return BranchProbability(Numerator >> Scale, Denominator);
+  أرجع BranchProbability(Numerator >> Scale, Denominator);
 }
 
-BranchProbability BranchProbability::getBranchProbability(double Prob) {
-  assert(0 <= Prob && Prob <= 1 && "Probability must be between 0 and 1!");
-  return BranchProbability(std::round(Prob * D), D);
+BranchProbability BranchProbability::getBranchProbability(مزدوج Prob) {
+  أكد(0 <= Prob && Prob <= 1 && "Probability must be between 0 and 1!");
+  أرجع BranchProbability(std::دور(Prob * D), D);
 }
 
 // If ConstD is not zero, then replace D by ConstD so that division and modulo
 // operations by D can be optimized, in case this function is not inlined by the
 // compiler.
-template <uint32_t ConstD>
-static uint64_t scale(uint64_t Num, uint32_t N, uint32_t D) {
-  if (ConstD > 0)
+قالب <uint32_t ConstD>
+ساكن uint64_t scale(uint64_t رقم, uint32_t N, uint32_t D) {
+  إذا (ConstD > 0)
     D = ConstD;
 
-  assert(D && "divide by 0");
+  أكد(D && "divide by 0");
 
   // Fast path for multiplying by 1.0.
-  if (!Num || D == N)
-    return Num;
+  إذا (!رقم || D == N)
+    أرجع رقم;
 
   // Split Num into upper and lower parts to multiply, then recombine.
-  uint64_t ProductHigh = (Num >> 32) * N;
-  uint64_t ProductLow = (Num & UINT32_MAX) * N;
+  uint64_t حاصلضرب_بالا = (رقم >> 32) * N;
+  uint64_t حاصلضرب_کم = (رقم & UINT32_MAX) * N;
 
   // Split into 32-bit digits.
-  uint32_t Upper32 = ProductHigh >> 32;
-  uint32_t Lower32 = ProductLow & UINT32_MAX;
-  uint32_t Mid32Partial = ProductHigh & UINT32_MAX;
-  uint32_t Mid32 = Mid32Partial + (ProductLow >> 32);
+  uint32_t Upper32 = حاصلضرب_بالا >> 32;
+  uint32_t Lower32 = حاصلضرب_کم & UINT32_MAX;
+  uint32_t Mid32Partial = حاصلضرب_بالا & UINT32_MAX;
+  uint32_t Mid32 = Mid32Partial + (حاصلضرب_کم >> 32);
 
   // Carry.
   Upper32 += Mid32 < Mid32Partial;
 
   uint64_t Rem = (uint64_t(Upper32) << 32) | Mid32;
-  uint64_t UpperQ = Rem / D;
+  uint64_t فوقانی_Q = Rem / D;
 
   // Check for overflow.
-  if (UpperQ > UINT32_MAX)
-    return UINT64_MAX;
+  إذا (فوقانی_Q > UINT32_MAX)
+    أرجع UINT64_MAX;
 
   Rem = ((Rem % D) << 32) | Lower32;
-  uint64_t LowerQ = Rem / D;
-  uint64_t Q = (UpperQ << 32) + LowerQ;
+  uint64_t پایینی_Q = Rem / D;
+  uint64_t Q = (فوقانی_Q << 32) + پایینی_Q;
 
   // Check for overflow.
-  return Q < LowerQ ? UINT64_MAX : Q;
+  أرجع Q < پایینی_Q ? UINT64_MAX : Q;
 }
 
-uint64_t BranchProbability::scale(uint64_t Num) const {
-  return ::scale<D>(Num, N, D);
+uint64_t BranchProbability::scale(uint64_t رقم) ثابت {
+  أرجع ::scale<D>(رقم, N, D);
 }
 
-uint64_t BranchProbability::scaleByInverse(uint64_t Num) const {
-  return ::scale<0>(Num, D, N);
+uint64_t BranchProbability::scaleByInverse(uint64_t رقم) ثابت {
+  أرجع ::scale<0>(رقم, D, N);
 }
 
-BranchProbability BranchProbability::pow(unsigned N) const {
+BranchProbability BranchProbability::توان(بیعلامت N) ثابت {
   BranchProbability Res = BranchProbability::getOne();
-  for (unsigned I = 0; I < N; ++I)
-    Res *= *this;
-  return Res;
+  لكل (بیعلامت I = 0; I < N; ++I)
+    Res *= *هذا;
+  أرجع Res;
 }

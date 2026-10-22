@@ -10,79 +10,79 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/OptimizedStructLayout.h"
-#include <optional>
+#ضمن "llvm/Support/OptimizedStructLayout.h"
+#ضمن <optional>
 
-using namespace llvm;
+استفاده نطاق llvm;
 
-using Field = OptimizedStructLayoutField;
+استفاده فیلد_2 = Optimized_Struct_Layout_فیلد;
 
-#ifndef NDEBUG
-static void checkValidLayout(ArrayRef<Field> Fields, uint64_t Size,
+#اگر_تعریف_نشده NDEBUG
+ساكن فراغ checkValidLayout(ArrayRef<فیلد_2> Fields, uint64_t اندازه,
                              Align MaxAlign) {
-  uint64_t LastEnd = 0;
+  uint64_t آخرین_انتها = 0;
   Align ComputedMaxAlign;
-  for (auto &Field : Fields) {
-    assert(Field.hasFixedOffset() &&
+  لكل (خودکار &فیلد_2 : Fields) {
+    أكد(فیلد_2.has_Fixed_جابه_جایی() &&
            "didn't assign a fixed offset to field");
-    assert(isAligned(Field.Alignment, Field.Offset) &&
+    أكد(isAligned(فیلد_2.Alignment, فیلد_2.جابه_جایی) &&
            "didn't assign a correctly-aligned offset to field");
-    assert(Field.Offset >= LastEnd &&
+    أكد(فیلد_2.جابه_جایی >= آخرین_انتها &&
            "didn't assign offsets in ascending order");
-    LastEnd = Field.getEndOffset();
-    assert(Field.Alignment <= MaxAlign &&
+    آخرین_انتها = فیلد_2.get_انتها_جابه_جایی();
+    أكد(فیلد_2.Alignment <= MaxAlign &&
            "didn't compute MaxAlign correctly");
-    ComputedMaxAlign = std::max(Field.Alignment, MaxAlign);
+    ComputedMaxAlign = std::max(فیلد_2.Alignment, MaxAlign);
   }
-  assert(LastEnd == Size && "didn't compute LastEnd correctly");
-  assert(ComputedMaxAlign == MaxAlign && "didn't compute MaxAlign correctly");
+  أكد(آخرین_انتها == اندازه && "didn't compute LastEnd correctly");
+  أكد(ComputedMaxAlign == MaxAlign && "didn't compute MaxAlign correctly");
 }
-#endif
+#پایان_اگر
 
 std::pair<uint64_t, Align>
-llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
-#ifndef NDEBUG
+llvm::performOptimizedStructLayout(MutableArrayRef<فیلد_2> Fields) {
+#اگر_تعریف_نشده NDEBUG
   // Do some simple precondition checks.
   {
-    bool InFixedPrefix = true;
-    size_t LastEnd = 0;
-    for (auto &Field : Fields) {
-      assert(Field.Size > 0 && "field of zero size");
-      if (Field.hasFixedOffset()) {
-        assert(InFixedPrefix &&
+    منطقي درون_Fixed_پیشوند = درست;
+    size_t آخرین_انتها = 0;
+    لكل (خودکار &فیلد_2 : Fields) {
+      أكد(فیلد_2.اندازه > 0 && "field of zero size");
+      إذا (فیلد_2.has_Fixed_جابه_جایی()) {
+        أكد(درون_Fixed_پیشوند &&
                "fixed-offset fields are not a strict prefix of array");
-        assert(LastEnd <= Field.Offset &&
+        أكد(آخرین_انتها <= فیلد_2.جابه_جایی &&
                "fixed-offset fields overlap or are not in order");
-        LastEnd = Field.getEndOffset();
-        assert(LastEnd > Field.Offset &&
+        آخرین_انتها = فیلد_2.get_انتها_جابه_جایی();
+        أكد(آخرین_انتها > فیلد_2.جابه_جایی &&
                "overflow in fixed-offset end offset");
-      } else {
-        InFixedPrefix = false;
+      } وإلا {
+        درون_Fixed_پیشوند = خطأ;
       }
     }
   }
-#endif
+#پایان_اگر
 
   // Do an initial pass over the fields.
   Align MaxAlign;
 
   // Find the first flexible-offset field, tracking MaxAlign.
-  auto FirstFlexible = Fields.begin(), E = Fields.end();
-  while (FirstFlexible != E && FirstFlexible->hasFixedOffset()) {
-    MaxAlign = std::max(MaxAlign, FirstFlexible->Alignment);
-    ++FirstFlexible;
+  خودکار اولی_Flexible = Fields.begin(), E = Fields.انتها();
+  طالما (اولی_Flexible != E && اولی_Flexible->has_Fixed_جابه_جایی()) {
+    MaxAlign = std::max(MaxAlign, اولی_Flexible->Alignment);
+    ++اولی_Flexible;
   }
 
   // If there are no flexible fields, we're done.
-  if (FirstFlexible == E) {
-    uint64_t Size = 0;
-    if (!Fields.empty())
-      Size = Fields.back().getEndOffset();
+  إذا (اولی_Flexible == E) {
+    uint64_t اندازه = 0;
+    إذا (!Fields.خالی())
+      اندازه = Fields.پشت().get_انتها_جابه_جایی();
 
-#ifndef NDEBUG
-    checkValidLayout(Fields, Size, MaxAlign);
-#endif
-    return {Size, MaxAlign};
+#اگر_تعریف_نشده NDEBUG
+    checkValidLayout(Fields, اندازه, MaxAlign);
+#پایان_اگر
+    أرجع {اندازه, MaxAlign};
   }
 
   // Walk over the flexible-offset fields, tracking MaxAlign and
@@ -91,9 +91,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // we can use array_pod_sort, which isn't stable.  We won't use it
   // past that point.
   {
-    uintptr_t UniqueNumber = 0;
-    for (auto I = FirstFlexible; I != E; ++I) {
-      I->Scratch = reinterpret_cast<void*>(UniqueNumber++);
+    uintptr_t Unique_عدد = 0;
+    لكل (خودکار I = اولی_Flexible; I != E; ++I) {
+      I->Scratch = reinterpret_cast<فراغ*>(Unique_عدد++);
       MaxAlign = std::max(MaxAlign, I->Alignment);
     }
   }
@@ -103,23 +103,23 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // in Scratch.  The decreasing-size aspect of this is only really
   // important if we get into the gap-filling stage below, but it
   // doesn't hurt here.
-  array_pod_sort(FirstFlexible, E,
-                 [](const Field *lhs, const Field *rhs) -> int {
+  array_pod_مرتب_سازی(اولی_Flexible, E,
+                 [](ثابت فیلد_2 *lhs, ثابت فیلد_2 *rhs) -> صحيح {
     // Decreasing alignment.
-    if (lhs->Alignment != rhs->Alignment)
-      return (lhs->Alignment < rhs->Alignment ? 1 : -1);
+    إذا (lhs->Alignment != rhs->Alignment)
+      أرجع (lhs->Alignment < rhs->Alignment ? 1 : -1);
 
     // Decreasing size.
-    if (lhs->Size != rhs->Size)
-      return (lhs->Size < rhs->Size ? 1 : -1);
+    إذا (lhs->اندازه != rhs->اندازه)
+      أرجع (lhs->اندازه < rhs->اندازه ? 1 : -1);
 
     // Original order.
-    auto lhsNumber = reinterpret_cast<uintptr_t>(lhs->Scratch);
-    auto rhsNumber = reinterpret_cast<uintptr_t>(rhs->Scratch);
-    if (lhsNumber != rhsNumber)
-      return (lhsNumber < rhsNumber ? -1 : 1);
+    خودکار lhs_عدد = reinterpret_cast<uintptr_t>(lhs->Scratch);
+    خودکار rhs_عدد = reinterpret_cast<uintptr_t>(rhs->Scratch);
+    إذا (lhs_عدد != rhs_عدد)
+      أرجع (lhs_عدد < rhs_عدد ? -1 : 1);
 
-    return 0;
+    أرجع 0;
   });
 
   // Do a quick check for whether that sort alone has given us a perfect
@@ -129,17 +129,17 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // and the flexible-layout fields all have sizes that are multiples
   // of their alignment, then this will reliably trigger.
   {
-    bool HasPadding = false;
-    uint64_t LastEnd = 0;
+    منطقي HasPadding = خطأ;
+    uint64_t آخرین_انتها = 0;
 
     // Walk the fixed-offset fields.
-    for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
-      assert(I->hasFixedOffset());
-      if (LastEnd != I->Offset) {
-        HasPadding = true;
-        break;
+    لكل (خودکار I = Fields.begin(); I != اولی_Flexible; ++I) {
+      أكد(I->has_Fixed_جابه_جایی());
+      إذا (آخرین_انتها != I->جابه_جایی) {
+        HasPadding = درست;
+        اكسر;
       }
-      LastEnd = I->getEndOffset();
+      آخرین_انتها = I->get_انتها_جابه_جایی();
     }
 
     // Walk the flexible-offset fields, optimistically assigning fixed
@@ -147,24 +147,24 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     // fixed-offset and flexible-offset fields, so if we end up
     // discovering padding later in this loop, we can just abandon this
     // work and we'll ignore the offsets we already assigned.
-    if (!HasPadding) {
-      for (auto I = FirstFlexible; I != E; ++I) {
-        auto Offset = alignTo(LastEnd, I->Alignment);
-        if (LastEnd != Offset) {
-          HasPadding = true;
-          break;
+    إذا (!HasPadding) {
+      لكل (خودکار I = اولی_Flexible; I != E; ++I) {
+        خودکار جابه_جایی = align_مقصد(آخرین_انتها, I->Alignment);
+        إذا (آخرین_انتها != جابه_جایی) {
+          HasPadding = درست;
+          اكسر;
         }
-        I->Offset = Offset;
-        LastEnd = I->getEndOffset();
+        I->جابه_جایی = جابه_جایی;
+        آخرین_انتها = I->get_انتها_جابه_جایی();
       }
     }
 
     // If we already have a perfect layout, we're done.
-    if (!HasPadding) {
-#ifndef NDEBUG
-      checkValidLayout(Fields, LastEnd, MaxAlign);
-#endif
-      return {LastEnd, MaxAlign};
+    إذا (!HasPadding) {
+#اگر_تعریف_نشده NDEBUG
+      checkValidLayout(Fields, آخرین_انتها, MaxAlign);
+#پایان_اگر
+      أرجع {آخرین_انتها, MaxAlign};
     }
   }
 
@@ -233,139 +233,139 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // Start by organizing the flexible-offset fields into bins according to
   // their alignment.  We expect a small enough number of bins that we
   // don't care about the asymptotic costs of walking this.
-  struct AlignmentQueue {
+  بنية Alignment_صف {
     /// The minimum size of anything currently in this queue.
-    uint64_t MinSize;
+    uint64_t Min_اندازه;
 
     /// The head of the queue.  A singly-linked list.  The order here should
     /// be consistent with the earlier sort, i.e. the elements should be
     /// monotonically descending in size and otherwise in the original order.
     ///
     /// We remove the queue from the array as soon as this is empty.
-    OptimizedStructLayoutField *Head;
+    Optimized_Struct_Layout_فیلد *سر_2;
 
     /// The alignment requirement of the queue.
     Align Alignment;
 
-    static Field *getNext(Field *Cur) {
-      return static_cast<Field *>(Cur->Scratch);
+    ساكن فیلد_2 *get_بعدی(فیلد_2 *Cur) {
+      أرجع static_cast<فیلد_2 *>(Cur->Scratch);
     }
   };
-  SmallVector<AlignmentQueue, 8> FlexibleFieldsByAlignment;
-  for (auto I = FirstFlexible; I != E; ) {
-    auto Head = I;
-    auto Alignment = I->Alignment;
+  Small_وکتور<Alignment_صف, 8> FlexibleFieldsByAlignment;
+  لكل (خودکار I = اولی_Flexible; I != E; ) {
+    خودکار سر_2 = I;
+    خودکار Alignment = I->Alignment;
 
-    uint64_t MinSize = I->Size;
-    auto LastInQueue = I;
-    for (++I; I != E && I->Alignment == Alignment; ++I) {
-      LastInQueue->Scratch = I;
-      LastInQueue = I;
-      MinSize = std::min(MinSize, I->Size);
+    uint64_t Min_اندازه = I->اندازه;
+    خودکار آخرین_درون_صف = I;
+    لكل (++I; I != E && I->Alignment == Alignment; ++I) {
+      آخرین_درون_صف->Scratch = I;
+      آخرین_درون_صف = I;
+      Min_اندازه = std::min(Min_اندازه, I->اندازه);
     }
-    LastInQueue->Scratch = nullptr;
+    آخرین_درون_صف->Scratch = اشاره_تهی;
 
-    FlexibleFieldsByAlignment.push_back({MinSize, Head, Alignment});
+    FlexibleFieldsByAlignment.افزودن_پشت({Min_اندازه, سر_2, Alignment});
   }
 
-#ifndef NDEBUG
+#اگر_تعریف_نشده NDEBUG
   // Verify that we set the queues up correctly.
-  auto checkQueues = [&]{
-    bool FirstQueue = true;
-    Align LastQueueAlignment;
-    for (auto &Queue : FlexibleFieldsByAlignment) {
-      assert((FirstQueue || Queue.Alignment < LastQueueAlignment) &&
+  خودکار checkQueues = [&]{
+    منطقي اولی_صف = درست;
+    Align آخرین_صف_Alignment;
+    لكل (خودکار &صف : FlexibleFieldsByAlignment) {
+      أكد((اولی_صف || صف.Alignment < آخرین_صف_Alignment) &&
              "bins not in order of descending alignment");
-      LastQueueAlignment = Queue.Alignment;
-      FirstQueue = false;
+      آخرین_صف_Alignment = صف.Alignment;
+      اولی_صف = خطأ;
 
-      assert(Queue.Head && "queue was empty");
-      uint64_t LastSize = ~(uint64_t)0;
-      for (auto I = Queue.Head; I; I = Queue.getNext(I)) {
-        assert(I->Alignment == Queue.Alignment && "bad field in queue");
-        assert(I->Size <= LastSize && "queue not in descending size order");
-        LastSize = I->Size;
+      أكد(صف.سر_2 && "queue was empty");
+      uint64_t آخرین_اندازه = ~(uint64_t)0;
+      لكل (خودکار I = صف.سر_2; I; I = صف.get_بعدی(I)) {
+        أكد(I->Alignment == صف.Alignment && "bad field in queue");
+        أكد(I->اندازه <= آخرین_اندازه && "queue not in descending size order");
+        آخرین_اندازه = I->اندازه;
       }
     }
   };
   checkQueues();
-#endif
+#پایان_اگر
 
   /// Helper function to remove a field from a queue.
-  auto spliceFromQueue = [&](AlignmentQueue *Queue, Field *Last, Field *Cur) {
-    assert(Last ? Queue->getNext(Last) == Cur : Queue->Head == Cur);
+  خودکار splice_From_صف = [&](Alignment_صف *صف, فیلد_2 *آخرین, فیلد_2 *Cur) {
+    أكد(آخرین ? صف->get_بعدی(آخرین) == Cur : صف->سر_2 == Cur);
 
     // If we're removing Cur from a non-initial position, splice it out
     // of the linked list.
-    if (Last) {
-      Last->Scratch = Cur->Scratch;
+    إذا (آخرین) {
+      آخرین->Scratch = Cur->Scratch;
 
       // If Cur was the last field in the list, we need to update MinSize.
       // We can just use the last field's size because the list is in
       // descending order of size.
-      if (!Cur->Scratch)
-        Queue->MinSize = Last->Size;
+      إذا (!Cur->Scratch)
+        صف->Min_اندازه = آخرین->اندازه;
 
     // Otherwise, replace the head.
-    } else {
-      if (auto NewHead = Queue->getNext(Cur))
-        Queue->Head = NewHead;
+    } وإلا {
+      إذا (خودکار New_سر = صف->get_بعدی(Cur))
+        صف->سر_2 = New_سر;
 
       // If we just emptied the queue, destroy its bin.
-      else
-        FlexibleFieldsByAlignment.erase(Queue);
+      وإلا
+        FlexibleFieldsByAlignment.erase(صف);
     }
   };
 
   // Do layout into a local array.  Doing this in-place on Fields is
   // not really feasible.
-  SmallVector<Field, 16> Layout;
-  Layout.reserve(Fields.size());
+  Small_وکتور<فیلد_2, 16> Layout;
+  Layout.reserve(Fields.اندازه_2());
 
   // The offset that we're currently looking to insert at (or after).
-  uint64_t LastEnd = 0;
+  uint64_t آخرین_انتها = 0;
 
   // Helper function to splice Cur out of the given queue and add it
   // to the layout at the given offset.
-  auto addToLayout = [&](AlignmentQueue *Queue, Field *Last, Field *Cur,
-                         uint64_t Offset) -> bool {
-    assert(Offset == alignTo(LastEnd, Cur->Alignment));
+  خودکار جمع_کن_مقصد_Layout = [&](Alignment_صف *صف, فیلد_2 *آخرین, فیلد_2 *Cur,
+                         uint64_t جابه_جایی) -> منطقي {
+    أكد(جابه_جایی == align_مقصد(آخرین_انتها, Cur->Alignment));
 
     // Splice out.  This potentially invalidates Queue.
-    spliceFromQueue(Queue, Last, Cur);
+    splice_From_صف(صف, آخرین, Cur);
 
     // Add Cur to the layout.
-    Layout.push_back(*Cur);
-    Layout.back().Offset = Offset;
-    LastEnd = Layout.back().getEndOffset();
+    Layout.افزودن_پشت(*Cur);
+    Layout.پشت().جابه_جایی = جابه_جایی;
+    آخرین_انتها = Layout.پشت().get_انتها_جابه_جایی();
 
     // Always return true so that we can be tail-called.
-    return true;
+    أرجع درست;
   };
 
   // Helper function to try to find a field in the given queue that'll
   // fit starting at StartOffset but before EndOffset (if present).
   // Note that this never fails if EndOffset is not provided.
-  auto tryAddFillerFromQueue = [&](AlignmentQueue *Queue, uint64_t StartOffset,
-                                   std::optional<uint64_t> EndOffset) -> bool {
-    assert(Queue->Head);
-    assert(StartOffset == alignTo(LastEnd, Queue->Alignment));
-    assert(!EndOffset || StartOffset < *EndOffset);
+  خودکار try_جمع_کن_Filler_From_صف = [&](Alignment_صف *صف, uint64_t شروع_جابه_جایی,
+                                   std::optional<uint64_t> انتها_جابه_جایی) -> منطقي {
+    أكد(صف->سر_2);
+    أكد(شروع_جابه_جایی == align_مقصد(آخرین_انتها, صف->Alignment));
+    أكد(!انتها_جابه_جایی || شروع_جابه_جایی < *انتها_جابه_جایی);
 
     // Figure out the maximum size that a field can be, and ignore this
     // queue if there's nothing in it that small.
-    auto MaxViableSize =
-      (EndOffset ? *EndOffset - StartOffset : ~(uint64_t)0);
-    if (Queue->MinSize > MaxViableSize)
-      return false;
+    خودکار Max_Viable_اندازه =
+      (انتها_جابه_جایی ? *انتها_جابه_جایی - شروع_جابه_جایی : ~(uint64_t)0);
+    إذا (صف->Min_اندازه > Max_Viable_اندازه)
+      أرجع خطأ;
 
     // Find the matching field.  Note that this should always find
     // something because of the MinSize check above.
-    for (Field *Cur = Queue->Head, *Last = nullptr; true;
-           Last = Cur, Cur = Queue->getNext(Cur)) {
-      assert(Cur && "didn't find a match in queue despite its MinSize");
-      if (Cur->Size <= MaxViableSize)
-        return addToLayout(Queue, Last, Cur, StartOffset);
+    لكل (فیلد_2 *Cur = صف->سر_2, *آخرین = اشاره_تهی; درست;
+           آخرین = Cur, Cur = صف->get_بعدی(Cur)) {
+      أكد(Cur && "didn't find a match in queue despite its MinSize");
+      إذا (Cur->اندازه <= Max_Viable_اندازه)
+        أرجع جمع_کن_مقصد_Layout(صف, آخرین, Cur, شروع_جابه_جایی);
     }
 
     llvm_unreachable("didn't find a match in queue despite its MinSize");
@@ -373,84 +373,84 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
   // Helper function to find the "best" flexible-offset field according
   // to the criteria described above.
-  auto tryAddBestField = [&](std::optional<uint64_t> BeforeOffset) -> bool {
-    assert(!BeforeOffset || LastEnd < *BeforeOffset);
-    auto QueueB = FlexibleFieldsByAlignment.begin();
-    auto QueueE = FlexibleFieldsByAlignment.end();
+  خودکار try_جمع_کن_بهترین_فیلد = [&](std::optional<uint64_t> Before_جابه_جایی) -> منطقي {
+    أكد(!Before_جابه_جایی || آخرین_انتها < *Before_جابه_جایی);
+    خودکار صف_B = FlexibleFieldsByAlignment.begin();
+    خودکار صف_E = FlexibleFieldsByAlignment.انتها();
 
     // Start by looking for the most-aligned queue that doesn't need any
     // leading padding after LastEnd.
-    auto FirstQueueToSearch = QueueB;
-    for (; FirstQueueToSearch != QueueE; ++FirstQueueToSearch) {
-      if (isAligned(FirstQueueToSearch->Alignment, LastEnd))
-        break;
+    خودکار اولی_صف_مقصد_جستجو = صف_B;
+    لكل (; اولی_صف_مقصد_جستجو != صف_E; ++اولی_صف_مقصد_جستجو) {
+      إذا (isAligned(اولی_صف_مقصد_جستجو->Alignment, آخرین_انتها))
+        اكسر;
     }
 
-    uint64_t Offset = LastEnd;
-    while (true) {
+    uint64_t جابه_جایی = آخرین_انتها;
+    طالما (درست) {
       // Invariant: all of the queues in [FirstQueueToSearch, QueueE)
       // require the same initial padding offset.
 
       // Search those queues in descending order of alignment for a
       // satisfactory field.
-      for (auto Queue = FirstQueueToSearch; Queue != QueueE; ++Queue) {
-        if (tryAddFillerFromQueue(Queue, Offset, BeforeOffset))
-          return true;
+      لكل (خودکار صف = اولی_صف_مقصد_جستجو; صف != صف_E; ++صف) {
+        إذا (try_جمع_کن_Filler_From_صف(صف, جابه_جایی, Before_جابه_جایی))
+          أرجع درست;
       }
 
       // Okay, we don't need to scan those again.
-      QueueE = FirstQueueToSearch;
+      صف_E = اولی_صف_مقصد_جستجو;
 
       // If we started from the first queue, we're done.
-      if (FirstQueueToSearch == QueueB)
-        return false;
+      إذا (اولی_صف_مقصد_جستجو == صف_B)
+        أرجع خطأ;
 
       // Otherwise, scan backwards to find the most-aligned queue that
       // still has minimal leading padding after LastEnd.  If that
       // minimal padding is already at or past the end point, we're done.
-      --FirstQueueToSearch;
-      Offset = alignTo(LastEnd, FirstQueueToSearch->Alignment);
-      if (BeforeOffset && Offset >= *BeforeOffset)
-        return false;
-      while (FirstQueueToSearch != QueueB &&
-             Offset == alignTo(LastEnd, FirstQueueToSearch[-1].Alignment))
-        --FirstQueueToSearch;
+      --اولی_صف_مقصد_جستجو;
+      جابه_جایی = align_مقصد(آخرین_انتها, اولی_صف_مقصد_جستجو->Alignment);
+      إذا (Before_جابه_جایی && جابه_جایی >= *Before_جابه_جایی)
+        أرجع خطأ;
+      طالما (اولی_صف_مقصد_جستجو != صف_B &&
+             جابه_جایی == align_مقصد(آخرین_انتها, اولی_صف_مقصد_جستجو[-1].Alignment))
+        --اولی_صف_مقصد_جستجو;
     }
   };
 
   // Phase 1: fill the gaps between fixed-offset fields with the best
   // flexible-offset field that fits.
-  for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
-    assert(LastEnd <= I->Offset);
-    while (LastEnd != I->Offset) {
-      if (!tryAddBestField(I->Offset))
-        break;
+  لكل (خودکار I = Fields.begin(); I != اولی_Flexible; ++I) {
+    أكد(آخرین_انتها <= I->جابه_جایی);
+    طالما (آخرین_انتها != I->جابه_جایی) {
+      إذا (!try_جمع_کن_بهترین_فیلد(I->جابه_جایی))
+        اكسر;
     }
-    Layout.push_back(*I);
-    LastEnd = I->getEndOffset();
+    Layout.افزودن_پشت(*I);
+    آخرین_انتها = I->get_انتها_جابه_جایی();
   }
 
-#ifndef NDEBUG
+#اگر_تعریف_نشده NDEBUG
   checkQueues();
-#endif
+#پایان_اگر
 
   // Phase 2: repeatedly add the best flexible-offset field until
   // they're all gone.
-  while (!FlexibleFieldsByAlignment.empty()) {
-    bool Success = tryAddBestField(std::nullopt);
-    assert(Success && "didn't find a field with no fixed limit?");
-    (void) Success;
+  طالما (!FlexibleFieldsByAlignment.خالی()) {
+    منطقي Success = try_جمع_کن_بهترین_فیلد(std::nullopt);
+    أكد(Success && "didn't find a field with no fixed limit?");
+    (فراغ) Success;
   }
 
   // Copy the layout back into place.
-  assert(Layout.size() == Fields.size());
-  memcpy(Fields.data(), Layout.data(),
-         Fields.size() * sizeof(OptimizedStructLayoutField));
+  أكد(Layout.اندازه_2() == Fields.اندازه_2());
+  کپی_حافظه(Fields.داده(), Layout.داده(),
+         Fields.اندازه_2() * حجم(Optimized_Struct_Layout_فیلد));
 
-#ifndef NDEBUG
+#اگر_تعریف_نشده NDEBUG
   // Make a final check that the layout is valid.
-  checkValidLayout(Fields, LastEnd, MaxAlign);
-#endif
+  checkValidLayout(Fields, آخرین_انتها, MaxAlign);
+#پایان_اگر
 
-  return {LastEnd, MaxAlign};
+  أرجع {آخرین_انتها, MaxAlign};
 }
