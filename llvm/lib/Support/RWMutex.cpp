@@ -10,154 +10,154 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RWMutex.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Allocator.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/RWMutex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Allocator.h"
 
-#if defined(LLVM_USE_RW_MUTEX_IMPL)
-using namespace llvm;
-using namespace sys;
+#ਜੇ defined(LLVM_USE_RW_MUTEX_IMPL)
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ sys;
 
-#if !defined(LLVM_ENABLE_THREADS) || LLVM_ENABLE_THREADS == 0
+#ਜੇ !defined(LLVM_ENABLE_ਧਾਗੇ) || LLVM_ENABLE_ਧਾਗੇ == 0
 // Define all methods as no-ops if threading is explicitly disabled
 
-RWMutexImpl::RWMutexImpl() = default;
-RWMutexImpl::~RWMutexImpl() = default;
+RWMutexImpl::RWMutexImpl() = ਮੂਲ;
+RWMutexImpl::~RWMutexImpl() = ਮੂਲ;
 
-bool RWMutexImpl::lock_shared() { return true; }
-bool RWMutexImpl::unlock_shared() { return true; }
-bool RWMutexImpl::try_lock_shared() { return true; }
-bool RWMutexImpl::lock() { return true; }
-bool RWMutexImpl::unlock() { return true; }
-bool RWMutexImpl::try_lock() { return true; }
+ਤਾਰਕਿਕ RWMutexImpl::ਤਾਲਾ_shared() { ਵਾਪਸ ਸੱਚ; }
+ਤਾਰਕਿਕ RWMutexImpl::unlock_shared() { ਵਾਪਸ ਸੱਚ; }
+ਤਾਰਕਿਕ RWMutexImpl::try_ਤਾਲਾ_shared() { ਵਾਪਸ ਸੱਚ; }
+ਤਾਰਕਿਕ RWMutexImpl::ਤਾਲਾ() { ਵਾਪਸ ਸੱਚ; }
+ਤਾਰਕਿਕ RWMutexImpl::unlock() { ਵਾਪਸ ਸੱਚ; }
+ਤਾਰਕਿਕ RWMutexImpl::try_ਤਾਲਾ_2() { ਵਾਪਸ ਸੱਚ; }
 
-#else
+#ਨਹੀਂਤਾਂ
 
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
+#ਜੇ defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_RWLOCK_INIT)
 
-#include <cassert>
-#include <cstdlib>
-#include <pthread.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstdlib>
+#ਅਨ੍ਤਰ੍ਭਾਵ <pthread.h>
 
 // Construct a RWMutex using pthread calls
 RWMutexImpl::RWMutexImpl()
 {
   // Declare the pthread_rwlock data structures
   pthread_rwlock_t* rwlock =
-    static_cast<pthread_rwlock_t*>(safe_malloc(sizeof(pthread_rwlock_t)));
+    static_cast<pthread_rwlock_t*>(ਸੁਰੱਖਿਅਤ_malloc(ਆਕਾਰ(pthread_rwlock_t)));
 
-#ifdef __APPLE__
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __APPLE__
   // Workaround a bug/mis-feature in Darwin's pthread_rwlock_init.
-  bzero(rwlock, sizeof(pthread_rwlock_t));
-#endif
+  bzero(rwlock, ਆਕਾਰ(pthread_rwlock_t));
+#ਜੇ_ਅੰਤ
 
   // Initialize the rwlock
-  int errorcode = pthread_rwlock_init(rwlock, nullptr);
-  (void)errorcode;
-  assert(errorcode == 0);
+  ਪੂਰਨ errorcode = pthread_rwlock_init(rwlock, ਖਾਲੀ_ਸੂਚਕ);
+  (ਖਾਲੀ)errorcode;
+  ਪ੍ਰਤਿਜ੍ਞਾ(errorcode == 0);
 
   // Assign the data member
-  data_ = rwlock;
+  ਅੰਕੜੇ_3 = rwlock;
 }
 
 // Destruct a RWMutex
 RWMutexImpl::~RWMutexImpl()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
   pthread_rwlock_destroy(rwlock);
-  free(rwlock);
+  ਮੁਕਤ(rwlock);
 }
 
-bool
-RWMutexImpl::lock_shared()
+ਤਾਰਕਿਕ
+RWMutexImpl::ਤਾਲਾ_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
 
-  int errorcode = pthread_rwlock_rdlock(rwlock);
-  return errorcode == 0;
+  ਪੂਰਨ errorcode = pthread_rwlock_rdlock(rwlock);
+  ਵਾਪਸ errorcode == 0;
 }
 
-bool
+ਤਾਰਕਿਕ
 RWMutexImpl::unlock_shared()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  ਪੂਰਨ errorcode = pthread_rwlock_unlock(rwlock);
+  ਵਾਪਸ errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+ਤਾਰਕਿਕ RWMutexImpl::try_ਤਾਲਾ_shared() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
 
-  int errorcode = pthread_rwlock_tryrdlock(rwlock);
-  return errorcode == 0;
+  ਪੂਰਨ errorcode = pthread_rwlock_tryrdlock(rwlock);
+  ਵਾਪਸ errorcode == 0;
 }
 
-bool
-RWMutexImpl::lock()
+ਤਾਰਕਿਕ
+RWMutexImpl::ਤਾਲਾ()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
 
-  int errorcode = pthread_rwlock_wrlock(rwlock);
-  return errorcode == 0;
+  ਪੂਰਨ errorcode = pthread_rwlock_wrlock(rwlock);
+  ਵਾਪਸ errorcode == 0;
 }
 
-bool
+ਤਾਰਕਿਕ
 RWMutexImpl::unlock()
 {
-  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(data_);
-  assert(rwlock != nullptr);
+  pthread_rwlock_t* rwlock = static_cast<pthread_rwlock_t*>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
 
-  int errorcode = pthread_rwlock_unlock(rwlock);
-  return errorcode == 0;
+  ਪੂਰਨ errorcode = pthread_rwlock_unlock(rwlock);
+  ਵਾਪਸ errorcode == 0;
 }
 
-bool RWMutexImpl::try_lock() {
-  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(data_);
-  assert(rwlock != nullptr);
+ਤਾਰਕਿਕ RWMutexImpl::try_ਤਾਲਾ_2() {
+  pthread_rwlock_t *rwlock = static_cast<pthread_rwlock_t *>(ਅੰਕੜੇ_3);
+  ਪ੍ਰਤਿਜ੍ਞਾ(rwlock != ਖਾਲੀ_ਸੂਚਕ);
 
-  int errorcode = pthread_rwlock_trywrlock(rwlock);
-  return errorcode == 0;
+  ਪੂਰਨ errorcode = pthread_rwlock_trywrlock(rwlock);
+  ਵਾਪਸ errorcode == 0;
 }
 
-#else
+#ਨਹੀਂਤਾਂ
 
-RWMutexImpl::RWMutexImpl() : data_(new MutexImpl(false)) { }
+RWMutexImpl::RWMutexImpl() : ਅੰਕੜੇ_3(ਨਵਾਂ MutexImpl(ਝੂਠ)) { }
 
 RWMutexImpl::~RWMutexImpl() {
-  delete static_cast<MutexImpl *>(data_);
+  ਮਿਟਾਓ static_cast<MutexImpl *>(ਅੰਕੜੇ_3);
 }
 
-bool RWMutexImpl::lock_shared() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+ਤਾਰਕਿਕ RWMutexImpl::ਤਾਲਾ_shared() {
+  ਵਾਪਸ static_cast<MutexImpl *>(ਅੰਕੜੇ_3)->acquire();
 }
 
-bool RWMutexImpl::unlock_shared() {
-  return static_cast<MutexImpl *>(data_)->release();
+ਤਾਰਕਿਕ RWMutexImpl::unlock_shared() {
+  ਵਾਪਸ static_cast<MutexImpl *>(ਅੰਕੜੇ_3)->release();
 }
 
-bool RWMutexImpl::try_lock_shared() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+ਤਾਰਕਿਕ RWMutexImpl::try_ਤਾਲਾ_shared() {
+  ਵਾਪਸ static_cast<MutexImpl *>(ਅੰਕੜੇ_3)->tryacquire();
 }
 
-bool RWMutexImpl::lock() {
-  return static_cast<MutexImpl *>(data_)->acquire();
+ਤਾਰਕਿਕ RWMutexImpl::ਤਾਲਾ() {
+  ਵਾਪਸ static_cast<MutexImpl *>(ਅੰਕੜੇ_3)->acquire();
 }
 
-bool RWMutexImpl::unlock() {
-  return static_cast<MutexImpl *>(data_)->release();
+ਤਾਰਕਿਕ RWMutexImpl::unlock() {
+  ਵਾਪਸ static_cast<MutexImpl *>(ਅੰਕੜੇ_3)->release();
 }
 
-bool RWMutexImpl::try_lock() {
-  return static_cast<MutexImpl *>(data_)->tryacquire();
+ਤਾਰਕਿਕ RWMutexImpl::try_ਤਾਲਾ_2() {
+  ਵਾਪਸ static_cast<MutexImpl *>(ਅੰਕੜੇ_3)->tryacquire();
 }
 
-#endif
-#endif
-#endif
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ

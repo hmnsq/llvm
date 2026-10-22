@@ -10,56 +10,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Regex.h"
-#include "regex_impl.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Regex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "regex_impl.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallVector.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/Twine.h"
 
-#include <cassert>
-#include <string>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string>
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-Regex::Regex() : preg(nullptr), error(REG_BADPAT) {}
+Regex::Regex() : preg(ਖਾਲੀ_ਸੂਚਕ), error(REG_BADPAT) {}
 
 Regex::Regex(StringRef regex, RegexFlags Flags) {
-  unsigned flags = 0;
-  preg = new llvm_regex();
-  preg->re_endp = regex.end();
-  if (Flags & IgnoreCase)
+  ਬਿਨਾਨਿਸ਼ਾਨੀ flags = 0;
+  preg = ਨਵਾਂ llvm_regex();
+  preg->re_endp = regex.ਸਿਰਾ();
+  ਜੇ (Flags & IgnoreCase)
     flags |= REG_ICASE;
-  if (Flags & Newline)
+  ਜੇ (Flags & Newline)
     flags |= REG_NEWLINE;
-  if (!(Flags & BasicRegex))
+  ਜੇ (!(Flags & BasicRegex))
     flags |= REG_EXTENDED;
-  error = llvm_regcomp(preg, regex.data(), flags|REG_PEND);
+  error = llvm_regcomp(preg, regex.ਅੰਕੜੇ(), flags|REG_PEND);
 }
 
-Regex::Regex(StringRef regex, unsigned Flags)
+Regex::Regex(StringRef regex, ਬਿਨਾਨਿਸ਼ਾਨੀ Flags)
     : Regex(regex, static_cast<RegexFlags>(Flags)) {}
 
 Regex::Regex(Regex &&regex) {
   preg = regex.preg;
   error = regex.error;
-  regex.preg = nullptr;
+  regex.preg = ਖਾਲੀ_ਸੂਚਕ;
   regex.error = REG_BADPAT;
 }
 
 Regex::~Regex() {
-  if (preg) {
+  ਜੇ (preg) {
     llvm_regfree(preg);
-    delete preg;
+    ਮਿਟਾਓ preg;
   }
 }
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
 /// Utility to convert a regex error code into a human-readable string.
-void RegexErrorToString(int error, struct llvm_regex *preg,
+ਖਾਲੀ Regex_Error_ਮੰਜ਼ਿਲ_String(ਪੂਰਨ error, ਬਣਤਰ llvm_regex *preg,
                         std::string &Error) {
-  size_t len = llvm_regerror(error, preg, nullptr, 0);
+  size_t len = llvm_regerror(error, preg, ਖਾਲੀ_ਸੂਚਕ, 0);
 
   Error.resize(len - 1);
   llvm_regerror(error, preg, &Error[0], len);
@@ -67,194 +67,194 @@ void RegexErrorToString(int error, struct llvm_regex *preg,
 
 } // namespace
 
-bool Regex::isValid(std::string &Error) const {
-  if (!error)
-    return true;
+ਤਾਰਕਿਕ Regex::isValid(std::string &Error) ਅਚਲ {
+  ਜੇ (!error)
+    ਵਾਪਸ ਸੱਚ;
 
-  RegexErrorToString(error, preg, Error);
-  return false;
+  Regex_Error_ਮੰਜ਼ਿਲ_String(error, preg, Error);
+  ਵਾਪਸ ਝੂਠ;
 }
 
 /// getNumMatches - In a valid regex, return the number of parenthesized
 /// matches it contains.
-unsigned Regex::getNumMatches() const {
-  return preg->re_nsub;
+ਬਿਨਾਨਿਸ਼ਾਨੀ Regex::get_ਅੰਕ_Matches() ਅਚਲ {
+  ਵਾਪਸ preg->re_nsub;
 }
 
-bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
-                  std::string *Error) const {
+ਤਾਰਕਿਕ Regex::ਮੇਲ(StringRef String, Small_ਸਦਿਸ਼_Impl<StringRef> *Matches,
+                  std::string *Error) ਅਚਲ {
   // Reset error, if given.
-  if (Error && !Error->empty())
+  ਜੇ (Error && !Error->ਖਾਲੀ_ਥਾਵਾਂ())
     *Error = "";
 
   // Check if the regex itself didn't successfully compile.
-  if (Error ? !isValid(*Error) : !isValid())
-    return false;
+  ਜੇ (Error ? !isValid(*Error) : !isValid())
+    ਵਾਪਸ ਝੂਠ;
 
-  unsigned nmatch = Matches ? preg->re_nsub+1 : 0;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ nmatch = Matches ? preg->re_nsub+1 : 0;
 
   // Update null string to empty string.
-  if (String.data() == nullptr)
+  ਜੇ (String.ਅੰਕੜੇ() == ਖਾਲੀ_ਸੂਚਕ)
     String = "";
 
   // pmatch needs to have at least one element.
-  SmallVector<llvm_regmatch_t, 8> pm;
+  Small_ਸਦਿਸ਼<llvm_regmatch_t, 8> pm;
   pm.resize(nmatch > 0 ? nmatch : 1);
   pm[0].rm_so = 0;
-  pm[0].rm_eo = String.size();
+  pm[0].rm_eo = String.ਮਾਪ_2();
 
-  int rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
+  ਪੂਰਨ rc = llvm_regexec(preg, String.ਅੰਕੜੇ(), nmatch, pm.ਅੰਕੜੇ(), REG_STARTEND);
 
   // Failure to match is not an error, it's just a normal return value.
   // Any other error code is considered abnormal, and is logged in the Error.
-  if (rc == REG_NOMATCH)
-    return false;
-  if (rc != 0) {
-    if (Error)
-      RegexErrorToString(error, preg, *Error);
-    return false;
+  ਜੇ (rc == REG_NOMATCH)
+    ਵਾਪਸ ਝੂਠ;
+  ਜੇ (rc != 0) {
+    ਜੇ (Error)
+      Regex_Error_ਮੰਜ਼ਿਲ_String(error, preg, *Error);
+    ਵਾਪਸ ਝੂਠ;
   }
 
   // There was a match.
 
-  if (Matches) { // match position requested
+  ਜੇ (Matches) { // match position requested
     Matches->clear();
 
-    for (unsigned i = 0; i != nmatch; ++i) {
-      if (pm[i].rm_so == -1) {
+    ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0; i != nmatch; ++i) {
+      ਜੇ (pm[i].rm_so == -1) {
         // this group didn't match
-        Matches->push_back(StringRef());
-        continue;
+        Matches->ਧੱਕੋ_ਪਿੱਠ(StringRef());
+        ਜਾਰੀ;
       }
-      assert(pm[i].rm_eo >= pm[i].rm_so);
-      Matches->push_back(StringRef(String.data()+pm[i].rm_so,
+      ਪ੍ਰਤਿਜ੍ਞਾ(pm[i].rm_eo >= pm[i].rm_so);
+      Matches->ਧੱਕੋ_ਪਿੱਠ(StringRef(String.ਅੰਕੜੇ()+pm[i].rm_so,
                                    pm[i].rm_eo-pm[i].rm_so));
     }
   }
 
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
 std::string Regex::sub(StringRef Repl, StringRef String,
-                       std::string *Error) const {
-  SmallVector<StringRef, 8> Matches;
+                       std::string *Error) ਅਚਲ {
+  Small_ਸਦਿਸ਼<StringRef, 8> Matches;
 
   // Return the input if there was no match.
-  if (!match(String, &Matches, Error))
-    return std::string(String);
+  ਜੇ (!ਮੇਲ(String, &Matches, Error))
+    ਵਾਪਸ std::string(String);
 
   // Otherwise splice in the replacement string, starting with the prefix before
   // the match.
   std::string Res(String.begin(), Matches[0].begin());
 
   // Then the replacement string, honoring possible substitutions.
-  while (!Repl.empty()) {
+  ਜਦੋਂ (!Repl.ਖਾਲੀ_ਥਾਵਾਂ()) {
     // Skip to the next escape.
-    std::pair<StringRef, StringRef> Split = Repl.split('\\');
+    std::pair<StringRef, StringRef> ਵੰਡੋ_2 = Repl.ਵੰਡੋ('\\');
 
     // Add the skipped substring.
-    Res += Split.first;
+    Res += ਵੰਡੋ_2.ਪਹਿਲਾ_2;
 
     // Check for termination and trailing backslash.
-    if (Split.second.empty()) {
-      if (Repl.size() != Split.first.size() &&
-          Error && Error->empty())
+    ਜੇ (ਵੰਡੋ_2.ਦੂਜਾ_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+      ਜੇ (Repl.ਮਾਪ_2() != ਵੰਡੋ_2.ਪਹਿਲਾ_2.ਮਾਪ_2() &&
+          Error && Error->ਖਾਲੀ_ਥਾਵਾਂ())
         *Error = "replacement string contained trailing backslash";
-      break;
+      ਰੋਕੋ;
     }
 
     // Otherwise update the replacement string and interpret escapes.
-    Repl = Split.second;
+    Repl = ਵੰਡੋ_2.ਦੂਜਾ_2;
 
     // FIXME: We should have a StringExtras function for mapping C99 escapes.
-    switch (Repl[0]) {
+    ਚੋਣ (Repl[0]) {
 
       // Backreference with the "\g<ref>" syntax
-    case 'g':
-      if (Repl.size() >= 4 && Repl[1] == '<') {
-        size_t End = Repl.find('>');
-        StringRef Ref = Repl.slice(2, End);
-        unsigned RefValue;
-        if (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
-          Repl = Repl.substr(End + 1);
-          if (RefValue < Matches.size())
-            Res += Matches[RefValue];
-          else if (Error && Error->empty())
+    ਹਾਲਤ 'g':
+      ਜੇ (Repl.ਮਾਪ_2() >= 4 && Repl[1] == '<') {
+        size_t ਸਿਰਾ_2 = Repl.ਲੱਭੋ('>');
+        StringRef Ref = Repl.ਟੁਕੜਾ(2, ਸਿਰਾ_2);
+        ਬਿਨਾਨਿਸ਼ਾਨੀ Ref_ਮੁੱਲ;
+        ਜੇ (ਸਿਰਾ_2 != StringRef::npos && !Ref.getAsInteger(10, Ref_ਮੁੱਲ)) {
+          Repl = Repl.substr(ਸਿਰਾ_2 + 1);
+          ਜੇ (Ref_ਮੁੱਲ < Matches.ਮਾਪ_2())
+            Res += Matches[Ref_ਮੁੱਲ];
+          ਨਹੀਂਤਾਂ ਜੇ (Error && Error->ਖਾਲੀ_ਥਾਵਾਂ())
             *Error =
                 ("invalid backreference string 'g<" + Twine(Ref) + ">'").str();
-          break;
+          ਰੋਕੋ;
         }
       }
       [[fallthrough]];
 
       // Treat all unrecognized characters as self-quoting.
-    default:
+    ਮੂਲ:
       Res += Repl[0];
       Repl = Repl.substr(1);
-      break;
+      ਰੋਕੋ;
 
       // Single character escapes.
-    case 't':
+    ਹਾਲਤ 't':
       Res += '\t';
       Repl = Repl.substr(1);
-      break;
-    case 'n':
+      ਰੋਕੋ;
+    ਹਾਲਤ 'n':
       Res += '\n';
       Repl = Repl.substr(1);
-      break;
+      ਰੋਕੋ;
 
       // Hex character escapes.
-    case 'x':
-      if (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
-        Res += char(hexDigitValue(Repl[1]) * 16 + hexDigitValue(Repl[2]));
+    ਹਾਲਤ 'x':
+      ਜੇ (Repl.ਮਾਪ_2() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
+        Res += ਅੱਖਰ(hex_Digit_ਮੁੱਲ(Repl[1]) * 16 + hex_Digit_ਮੁੱਲ(Repl[2]));
         Repl = Repl.substr(3);
-      } else {
+      } ਨਹੀਂਤਾਂ {
         Res += Repl[0];
         Repl = Repl.substr(1);
       }
-      break;
+      ਰੋਕੋ;
 
       // Decimal escapes are backreferences.
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': {
+    ਹਾਲਤ '0': ਹਾਲਤ '1': ਹਾਲਤ '2': ਹਾਲਤ '3': ਹਾਲਤ '4':
+    ਹਾਲਤ '5': ਹਾਲਤ '6': ਹਾਲਤ '7': ਹਾਲਤ '8': ਹਾਲਤ '9': {
       // Extract the backreference number.
-      StringRef Ref = Repl.slice(0, Repl.find_first_not_of("0123456789"));
-      Repl = Repl.substr(Ref.size());
+      StringRef Ref = Repl.ਟੁਕੜਾ(0, Repl.ਲੱਭੋ_ਪਹਿਲਾ_not_ਦਾ("0123456789"));
+      Repl = Repl.substr(Ref.ਮਾਪ_2());
 
-      unsigned RefValue;
-      if (!Ref.getAsInteger(10, RefValue) &&
-          RefValue < Matches.size())
-        Res += Matches[RefValue];
-      else if (Error && Error->empty())
+      ਬਿਨਾਨਿਸ਼ਾਨੀ Ref_ਮੁੱਲ;
+      ਜੇ (!Ref.getAsInteger(10, Ref_ਮੁੱਲ) &&
+          Ref_ਮੁੱਲ < Matches.ਮਾਪ_2())
+        Res += Matches[Ref_ਮੁੱਲ];
+      ਨਹੀਂਤਾਂ ਜੇ (Error && Error->ਖਾਲੀ_ਥਾਵਾਂ())
         *Error = ("invalid backreference string '" + Twine(Ref) + "'").str();
-      break;
+      ਰੋਕੋ;
     }
     }
   }
 
   // And finally the suffix.
-  Res += StringRef(Matches[0].end(), String.end() - Matches[0].end());
+  Res += StringRef(Matches[0].ਸਿਰਾ(), String.ਸਿਰਾ() - Matches[0].ਸਿਰਾ());
 
-  return Res;
+  ਵਾਪਸ Res;
 }
 
 // These are the special characters matched in functions like "p_ere_exp".
-static const char RegexMetachars[] = "()^$|*+?.[]\\{}";
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ RegexMetachars[] = "()^$|*+?.[]\\{}";
 
-bool Regex::isLiteralERE(StringRef Str) {
+ਤਾਰਕਿਕ Regex::isLiteralERE(StringRef Str) {
   // Check for regex metacharacters.  This list was derived from our regex
   // implementation in regcomp.c and double checked against the POSIX extended
   // regular expression specification.
-  return Str.find_first_of(RegexMetachars) == StringRef::npos;
+  ਵਾਪਸ Str.ਲੱਭੋ_ਪਹਿਲਾ_ਦਾ(RegexMetachars) == StringRef::npos;
 }
 
 std::string Regex::escape(StringRef String) {
   std::string RegexStr;
-  for (char C : String) {
-    if (strchr(RegexMetachars, C))
+  ਲਈ (ਅੱਖਰ C : String) {
+    ਜੇ (strchr(RegexMetachars, C))
       RegexStr += '\\';
     RegexStr += C;
   }
 
-  return RegexStr;
+  ਵਾਪਸ RegexStr;
 }

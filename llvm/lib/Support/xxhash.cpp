@@ -38,57 +38,57 @@
 // xxh3_128bits is based on commit b0adcc54188c3130b1793e7b19c62eb1e669f7df
 // (June 2024).
 
-#include "llvm/Support/xxhash.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Endian.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/xxhash.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Compiler.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Endian.h"
 
-#include <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
 
-#if !defined(LLVM_XXH_USE_NEON)
-#if (defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)) &&      \
+#ਜੇ !defined(LLVM_XXH_USE_NEON)
+#ਜੇ (defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)) &&      \
     !defined(__ARM_BIG_ENDIAN)
-#define LLVM_XXH_USE_NEON 1
-#else
-#define LLVM_XXH_USE_NEON 0
-#endif
-#endif
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LLVM_XXH_USE_NEON 1
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LLVM_XXH_USE_NEON 0
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
 
-#if LLVM_XXH_USE_NEON
-#include <arm_neon.h>
-#endif
+#ਜੇ LLVM_XXH_USE_NEON
+#ਅਨ੍ਤਰ੍ਭਾਵ <arm_neon.h>
+#ਜੇ_ਅੰਤ
 
-using namespace llvm;
-using namespace support;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ support;
 
-static uint64_t rotl64(uint64_t X, size_t R) {
-  return (X << R) | (X >> (64 - R));
+ਸਥਿਰ uint64_t rotl64(uint64_t X, size_t R) {
+  ਵਾਪਸ (X << R) | (X >> (64 - R));
 }
 
 constexpr uint32_t PRIME32_1 = 0x9E3779B1;
 constexpr uint32_t PRIME32_2 = 0x85EBCA77;
 constexpr uint32_t PRIME32_3 = 0xC2B2AE3D;
 
-static const uint64_t PRIME64_1 = 11400714785074694791ULL;
-static const uint64_t PRIME64_2 = 14029467366897019727ULL;
-static const uint64_t PRIME64_3 = 1609587929392839161ULL;
-static const uint64_t PRIME64_4 = 9650029242287828579ULL;
-static const uint64_t PRIME64_5 = 2870177450012600261ULL;
+ਸਥਿਰ ਅਚਲ uint64_t PRIME64_1 = 11400714785074694791ULL;
+ਸਥਿਰ ਅਚਲ uint64_t PRIME64_2 = 14029467366897019727ULL;
+ਸਥਿਰ ਅਚਲ uint64_t PRIME64_3 = 1609587929392839161ULL;
+ਸਥਿਰ ਅਚਲ uint64_t PRIME64_4 = 9650029242287828579ULL;
+ਸਥਿਰ ਅਚਲ uint64_t PRIME64_5 = 2870177450012600261ULL;
 
-static uint64_t XXH64_avalanche(uint64_t hash) {
+ਸਥਿਰ uint64_t XXH64_avalanche(uint64_t hash) {
   hash ^= hash >> 33;
   hash *= PRIME64_2;
   hash ^= hash >> 29;
   hash *= PRIME64_3;
   hash ^= hash >> 32;
-  return hash;
+  ਵਾਪਸ hash;
 }
 
 constexpr size_t XXH3_SECRETSIZE_MIN = 136;
-constexpr size_t XXH_SECRET_DEFAULT_SIZE = 192;
+constexpr size_t XXH_SECRET_DEFAULT_ਮਾਪ = 192;
 
 /* Pseudorandom data taken directly from FARSH */
 // clang-format off
-constexpr uint8_t kSecret[XXH_SECRET_DEFAULT_SIZE] = {
+constexpr uint8_t kSecret[XXH_SECRET_DEFAULT_ਮਾਪ] = {
     0xb8, 0xfe, 0x6c, 0x39, 0x23, 0xa4, 0x4b, 0xbe, 0x7c, 0x01, 0x81, 0x2c, 0xf7, 0x21, 0xad, 0x1c,
     0xde, 0xd4, 0x6d, 0xe9, 0x83, 0x90, 0x97, 0xdb, 0x72, 0x40, 0xa4, 0xa4, 0xb7, 0xb3, 0x67, 0x1f,
     0xcb, 0x79, 0xe6, 0x4e, 0xcc, 0xc0, 0xe5, 0x78, 0x82, 0x5a, 0xd0, 0x7d, 0xcc, 0xff, 0x72, 0x21,
@@ -104,131 +104,131 @@ constexpr uint8_t kSecret[XXH_SECRET_DEFAULT_SIZE] = {
 };
 // clang-format on
 
-constexpr uint64_t PRIME_MX1 = 0x165667919E3779F9;
-constexpr uint64_t PRIME_MX2 = 0x9FB21C651E98DF25;
+constexpr uint64_t ਅਭਾਜ_MX1 = 0x165667919E3779F9;
+constexpr uint64_t ਅਭਾਜ_MX2 = 0x9FB21C651E98DF25;
 
 // Calculates a 64-bit to 128-bit multiply, then XOR folds it.
-static uint64_t XXH3_mul128_fold64(uint64_t lhs, uint64_t rhs) {
-#if defined(__SIZEOF_INT128__) ||                                              \
-    (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-  __uint128_t product = (__uint128_t)lhs * (__uint128_t)rhs;
-  return uint64_t(product) ^ uint64_t(product >> 64);
+ਸਥਿਰ uint64_t XXH3_mul128_fold64(uint64_t lhs, uint64_t rhs) {
+#ਜੇ defined(__SIZEOF_INT128__) ||                                              \
+    (defined(INTEGRAL_MAX_ਬਿੱਟ) && INTEGRAL_MAX_ਬਿੱਟ >= 128)
+  __uint128_t ਗੁਣਨਫਲ_2 = (__uint128_t)lhs * (__uint128_t)rhs;
+  ਵਾਪਸ uint64_t(ਗੁਣਨਫਲ_2) ^ uint64_t(ਗੁਣਨਫਲ_2 >> 64);
 
-#else
+#ਨਹੀਂਤਾਂ
   /* First calculate all of the cross products. */
-  const uint64_t lo_lo = (lhs & 0xFFFFFFFF) * (rhs & 0xFFFFFFFF);
-  const uint64_t hi_lo = (lhs >> 32) * (rhs & 0xFFFFFFFF);
-  const uint64_t lo_hi = (lhs & 0xFFFFFFFF) * (rhs >> 32);
-  const uint64_t hi_hi = (lhs >> 32) * (rhs >> 32);
+  ਅਚਲ uint64_t lo_lo = (lhs & 0xFFFFFFFF) * (rhs & 0xFFFFFFFF);
+  ਅਚਲ uint64_t hi_lo = (lhs >> 32) * (rhs & 0xFFFFFFFF);
+  ਅਚਲ uint64_t lo_hi = (lhs & 0xFFFFFFFF) * (rhs >> 32);
+  ਅਚਲ uint64_t hi_hi = (lhs >> 32) * (rhs >> 32);
 
   /* Now add the products together. These will never overflow. */
-  const uint64_t cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
-  const uint64_t upper = (hi_lo >> 32) + (cross >> 32) + hi_hi;
-  const uint64_t lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
+  ਅਚਲ uint64_t cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
+  ਅਚਲ uint64_t ਉੱਤਲਾ = (hi_lo >> 32) + (cross >> 32) + hi_hi;
+  ਅਚਲ uint64_t ਹੇਠਲਾ = (cross << 32) | (lo_lo & 0xFFFFFFFF);
 
-  return upper ^ lower;
-#endif
+  ਵਾਪਸ ਉੱਤਲਾ ^ ਹੇਠਲਾ;
+#ਜੇ_ਅੰਤ
 }
 
 constexpr size_t XXH_STRIPE_LEN = 64;
-constexpr size_t XXH_SECRET_CONSUME_RATE = 8;
-constexpr size_t XXH_ACC_NB = XXH_STRIPE_LEN / sizeof(uint64_t);
+constexpr size_t XXH_SECRET_CONSUME_ਦਰ = 8;
+constexpr size_t XXH_ACC_NB = XXH_STRIPE_LEN / ਆਕਾਰ(uint64_t);
 
-static uint64_t XXH3_avalanche(uint64_t hash) {
+ਸਥਿਰ uint64_t XXH3_avalanche(uint64_t hash) {
   hash ^= hash >> 37;
-  hash *= PRIME_MX1;
+  hash *= ਅਭਾਜ_MX1;
   hash ^= hash >> 32;
-  return hash;
+  ਵਾਪਸ hash;
 }
 
-static uint64_t XXH3_len_1to3_64b(const uint8_t *input, size_t len,
-                                  const uint8_t *secret, uint64_t seed) {
-  const uint8_t c1 = input[0];
-  const uint8_t c2 = input[len >> 1];
-  const uint8_t c3 = input[len - 1];
+ਸਥਿਰ uint64_t XXH3_len_1to3_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                  ਅਚਲ uint8_t *secret, uint64_t ਬੀਜ_2) {
+  ਅਚਲ uint8_t c1 = ਨਿਵੇਸ਼_2[0];
+  ਅਚਲ uint8_t c2 = ਨਿਵੇਸ਼_2[len >> 1];
+  ਅਚਲ uint8_t c3 = ਨਿਵੇਸ਼_2[len - 1];
   uint32_t combined = ((uint32_t)c1 << 16) | ((uint32_t)c2 << 24) |
                       ((uint32_t)c3 << 0) | ((uint32_t)len << 8);
   uint64_t bitflip =
       (uint64_t)(endian::read32le(secret) ^ endian::read32le(secret + 4)) +
-      seed;
-  return XXH64_avalanche(uint64_t(combined) ^ bitflip);
+      ਬੀਜ_2;
+  ਵਾਪਸ XXH64_avalanche(uint64_t(combined) ^ bitflip);
 }
 
-static uint64_t XXH3_len_4to8_64b(const uint8_t *input, size_t len,
-                                  const uint8_t *secret, uint64_t seed) {
-  seed ^= (uint64_t)byteswap(uint32_t(seed)) << 32;
-  const uint32_t input1 = endian::read32le(input);
-  const uint32_t input2 = endian::read32le(input + len - 4);
+ਸਥਿਰ uint64_t XXH3_len_4to8_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                  ਅਚਲ uint8_t *secret, uint64_t ਬੀਜ_2) {
+  ਬੀਜ_2 ^= (uint64_t)byteswap(uint32_t(ਬੀਜ_2)) << 32;
+  ਅਚਲ uint32_t input1 = endian::read32le(ਨਿਵੇਸ਼_2);
+  ਅਚਲ uint32_t input2 = endian::read32le(ਨਿਵੇਸ਼_2 + len - 4);
   uint64_t acc =
-      (endian::read64le(secret + 8) ^ endian::read64le(secret + 16)) - seed;
-  const uint64_t input64 = (uint64_t)input2 | ((uint64_t)input1 << 32);
+      (endian::read64le(secret + 8) ^ endian::read64le(secret + 16)) - ਬੀਜ_2;
+  ਅਚਲ uint64_t input64 = (uint64_t)input2 | ((uint64_t)input1 << 32);
   acc ^= input64;
   // XXH3_rrmxmx(acc, len)
   acc ^= rotl64(acc, 49) ^ rotl64(acc, 24);
-  acc *= PRIME_MX2;
+  acc *= ਅਭਾਜ_MX2;
   acc ^= (acc >> 35) + (uint64_t)len;
-  acc *= PRIME_MX2;
-  return acc ^ (acc >> 28);
+  acc *= ਅਭਾਜ_MX2;
+  ਵਾਪਸ acc ^ (acc >> 28);
 }
 
-static uint64_t XXH3_len_9to16_64b(const uint8_t *input, size_t len,
-                                   const uint8_t *secret, uint64_t const seed) {
-  uint64_t input_lo =
-      (endian::read64le(secret + 24) ^ endian::read64le(secret + 32)) + seed;
-  uint64_t input_hi =
-      (endian::read64le(secret + 40) ^ endian::read64le(secret + 48)) - seed;
-  input_lo ^= endian::read64le(input);
-  input_hi ^= endian::read64le(input + len - 8);
-  uint64_t acc = uint64_t(len) + byteswap(input_lo) + input_hi +
-                 XXH3_mul128_fold64(input_lo, input_hi);
-  return XXH3_avalanche(acc);
+ਸਥਿਰ uint64_t XXH3_len_9to16_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                   ਅਚਲ uint8_t *secret, uint64_t ਅਚਲ ਬੀਜ_2) {
+  uint64_t ਨਿਵੇਸ਼_lo =
+      (endian::read64le(secret + 24) ^ endian::read64le(secret + 32)) + ਬੀਜ_2;
+  uint64_t ਨਿਵੇਸ਼_hi =
+      (endian::read64le(secret + 40) ^ endian::read64le(secret + 48)) - ਬੀਜ_2;
+  ਨਿਵੇਸ਼_lo ^= endian::read64le(ਨਿਵੇਸ਼_2);
+  ਨਿਵੇਸ਼_hi ^= endian::read64le(ਨਿਵੇਸ਼_2 + len - 8);
+  uint64_t acc = uint64_t(len) + byteswap(ਨਿਵੇਸ਼_lo) + ਨਿਵੇਸ਼_hi +
+                 XXH3_mul128_fold64(ਨਿਵੇਸ਼_lo, ਨਿਵੇਸ਼_hi);
+  ਵਾਪਸ XXH3_avalanche(acc);
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static uint64_t XXH3_len_0to16_64b(const uint8_t *input, size_t len,
-                                   const uint8_t *secret, uint64_t const seed) {
-  if (LLVM_LIKELY(len > 8))
-    return XXH3_len_9to16_64b(input, len, secret, seed);
-  if (LLVM_LIKELY(len >= 4))
-    return XXH3_len_4to8_64b(input, len, secret, seed);
-  if (len != 0)
-    return XXH3_len_1to3_64b(input, len, secret, seed);
-  return XXH64_avalanche(seed ^ endian::read64le(secret + 56) ^
+ਸਥਿਰ uint64_t XXH3_len_0to16_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                   ਅਚਲ uint8_t *secret, uint64_t ਅਚਲ ਬੀਜ_2) {
+  ਜੇ (LLVM_LIKELY(len > 8))
+    ਵਾਪਸ XXH3_len_9to16_64b(ਨਿਵੇਸ਼_2, len, secret, ਬੀਜ_2);
+  ਜੇ (LLVM_LIKELY(len >= 4))
+    ਵਾਪਸ XXH3_len_4to8_64b(ਨਿਵੇਸ਼_2, len, secret, ਬੀਜ_2);
+  ਜੇ (len != 0)
+    ਵਾਪਸ XXH3_len_1to3_64b(ਨਿਵੇਸ਼_2, len, secret, ਬੀਜ_2);
+  ਵਾਪਸ XXH64_avalanche(ਬੀਜ_2 ^ endian::read64le(secret + 56) ^
                          endian::read64le(secret + 64));
 }
 
-static uint64_t XXH3_mix16B(const uint8_t *input, uint8_t const *secret,
-                            uint64_t seed) {
-  uint64_t lhs = seed;
-  uint64_t rhs = 0U - seed;
+ਸਥਿਰ uint64_t XXH3_mix16B(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, uint8_t ਅਚਲ *secret,
+                            uint64_t ਬੀਜ_2) {
+  uint64_t lhs = ਬੀਜ_2;
+  uint64_t rhs = 0U - ਬੀਜ_2;
   lhs += endian::read64le(secret);
   rhs += endian::read64le(secret + 8);
-  lhs ^= endian::read64le(input);
-  rhs ^= endian::read64le(input + 8);
-  return XXH3_mul128_fold64(lhs, rhs);
+  lhs ^= endian::read64le(ਨਿਵੇਸ਼_2);
+  rhs ^= endian::read64le(ਨਿਵੇਸ਼_2 + 8);
+  ਵਾਪਸ XXH3_mul128_fold64(lhs, rhs);
 }
 
 /* For mid range keys, XXH3 uses a Mum-hash variant. */
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static uint64_t XXH3_len_17to128_64b(const uint8_t *input, size_t len,
-                                     const uint8_t *secret,
-                                     uint64_t const seed) {
-  uint64_t acc = len * PRIME64_1, acc_end;
-  acc += XXH3_mix16B(input + 0, secret + 0, seed);
-  acc_end = XXH3_mix16B(input + len - 16, secret + 16, seed);
-  if (len > 32) {
-    acc += XXH3_mix16B(input + 16, secret + 32, seed);
-    acc_end += XXH3_mix16B(input + len - 32, secret + 48, seed);
-    if (len > 64) {
-      acc += XXH3_mix16B(input + 32, secret + 64, seed);
-      acc_end += XXH3_mix16B(input + len - 48, secret + 80, seed);
-      if (len > 96) {
-        acc += XXH3_mix16B(input + 48, secret + 96, seed);
-        acc_end += XXH3_mix16B(input + len - 64, secret + 112, seed);
+ਸਥਿਰ uint64_t XXH3_len_17to128_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                     ਅਚਲ uint8_t *secret,
+                                     uint64_t ਅਚਲ ਬੀਜ_2) {
+  uint64_t acc = len * PRIME64_1, acc_ਸਿਰਾ;
+  acc += XXH3_mix16B(ਨਿਵੇਸ਼_2 + 0, secret + 0, ਬੀਜ_2);
+  acc_ਸਿਰਾ = XXH3_mix16B(ਨਿਵੇਸ਼_2 + len - 16, secret + 16, ਬੀਜ_2);
+  ਜੇ (len > 32) {
+    acc += XXH3_mix16B(ਨਿਵੇਸ਼_2 + 16, secret + 32, ਬੀਜ_2);
+    acc_ਸਿਰਾ += XXH3_mix16B(ਨਿਵੇਸ਼_2 + len - 32, secret + 48, ਬੀਜ_2);
+    ਜੇ (len > 64) {
+      acc += XXH3_mix16B(ਨਿਵੇਸ਼_2 + 32, secret + 64, ਬੀਜ_2);
+      acc_ਸਿਰਾ += XXH3_mix16B(ਨਿਵੇਸ਼_2 + len - 48, secret + 80, ਬੀਜ_2);
+      ਜੇ (len > 96) {
+        acc += XXH3_mix16B(ਨਿਵੇਸ਼_2 + 48, secret + 96, ਬੀਜ_2);
+        acc_ਸਿਰਾ += XXH3_mix16B(ਨਿਵੇਸ਼_2 + len - 64, secret + 112, ਬੀਜ_2);
       }
     }
   }
-  return XXH3_avalanche(acc + acc_end);
+  ਵਾਪਸ XXH3_avalanche(acc + acc_ਸਿਰਾ);
 }
 
 constexpr size_t XXH3_MIDSIZE_MAX = 240;
@@ -236,29 +236,29 @@ constexpr size_t XXH3_MIDSIZE_STARTOFFSET = 3;
 constexpr size_t XXH3_MIDSIZE_LASTOFFSET = 17;
 
 LLVM_ATTRIBUTE_NOINLINE
-static uint64_t XXH3_len_129to240_64b(const uint8_t *input, size_t len,
-                                      const uint8_t *secret, uint64_t seed) {
+ਸਥਿਰ uint64_t XXH3_len_129to240_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                      ਅਚਲ uint8_t *secret, uint64_t ਬੀਜ_2) {
   uint64_t acc = (uint64_t)len * PRIME64_1;
-  const unsigned nbRounds = len / 16;
-  for (unsigned i = 0; i < 8; ++i)
-    acc += XXH3_mix16B(input + 16 * i, secret + 16 * i, seed);
+  ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ nb_ਗੇੜ = len / 16;
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0; i < 8; ++i)
+    acc += XXH3_mix16B(ਨਿਵੇਸ਼_2 + 16 * i, secret + 16 * i, ਬੀਜ_2);
   acc = XXH3_avalanche(acc);
 
-  for (unsigned i = 8; i < nbRounds; ++i) {
-    acc += XXH3_mix16B(input + 16 * i,
-                       secret + 16 * (i - 8) + XXH3_MIDSIZE_STARTOFFSET, seed);
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 8; i < nb_ਗੇੜ; ++i) {
+    acc += XXH3_mix16B(ਨਿਵੇਸ਼_2 + 16 * i,
+                       secret + 16 * (i - 8) + XXH3_MIDSIZE_STARTOFFSET, ਬੀਜ_2);
   }
   /* last bytes */
   acc +=
-      XXH3_mix16B(input + len - 16,
-                  secret + XXH3_SECRETSIZE_MIN - XXH3_MIDSIZE_LASTOFFSET, seed);
-  return XXH3_avalanche(acc);
+      XXH3_mix16B(ਨਿਵੇਸ਼_2 + len - 16,
+                  secret + XXH3_SECRETSIZE_MIN - XXH3_MIDSIZE_LASTOFFSET, ਬੀਜ_2);
+  ਵਾਪਸ XXH3_avalanche(acc);
 }
 
-#if LLVM_XXH_USE_NEON
+#ਜੇ LLVM_XXH_USE_NEON
 
-#define XXH3_accumulate_512 XXH3_accumulate_512_neon
-#define XXH3_scrambleAcc XXH3_scrambleAcc_neon
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH3_accumulate_512 XXH3_accumulate_512_neon
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH3_scrambleAcc XXH3_scrambleAcc_neon
 
 // NEON implementation based on commit a57f6cce2698049863af8c25787084ae0489d849
 // (July 2024), with the following removed:
@@ -268,42 +268,42 @@ static uint64_t XXH3_len_129to240_64b(const uint8_t *input, size_t len,
 // - configurable split between NEON and scalar lanes (benchmarking shows no
 //   penalty when fully doing SIMD on the Apple M1)
 
-#if defined(__GNUC__) || defined(__clang__)
-#define XXH_ALIASING __attribute__((__may_alias__))
-#else
-#define XXH_ALIASING /* nothing */
-#endif
+#ਜੇ defined(__GNUC__) || defined(__clang__)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_ALIASING __attribute__((__may_alias__))
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_ALIASING /* nothing */
+#ਜੇ_ਅੰਤ
 
-typedef uint64x2_t xxh_aliasing_uint64x2_t XXH_ALIASING;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ uint64x2_t xxh_aliasing_uint64x2_t XXH_ALIASING;
 
-LLVM_ATTRIBUTE_ALWAYS_INLINE static uint64x2_t XXH_vld1q_u64(void const *ptr) {
-  return vreinterpretq_u64_u8(vld1q_u8((uint8_t const *)ptr));
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ uint64x2_t XXH_vld1q_u64(ਖਾਲੀ ਅਚਲ *ptr) {
+  ਵਾਪਸ vreinterpretq_u64_u8(vld1q_u8((uint8_t ਅਚਲ *)ptr));
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
-                                     const uint8_t *secret) {
-  xxh_aliasing_uint64x2_t *const xacc = (xxh_aliasing_uint64x2_t *)acc;
+ਸਥਿਰ ਖਾਲੀ XXH3_accumulate_512_neon(uint64_t *acc, ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2,
+                                     ਅਚਲ uint8_t *secret) {
+  xxh_aliasing_uint64x2_t *ਅਚਲ xacc = (xxh_aliasing_uint64x2_t *)acc;
 
-#ifdef __clang__
-#pragma clang loop unroll(full)
-#endif
-  for (size_t i = 0; i < XXH_ACC_NB / 2; i += 2) {
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __clang__
+#ਹਦਾਇਤ clang loop unroll(ਭਰਿਆ)
+#ਜੇ_ਅੰਤ
+  ਲਈ (size_t i = 0; i < XXH_ACC_NB / 2; i += 2) {
     /* data_vec = input[i]; */
-    uint64x2_t data_vec_1 = XXH_vld1q_u64(input + (i * 16));
-    uint64x2_t data_vec_2 = XXH_vld1q_u64(input + ((i + 1) * 16));
+    uint64x2_t ਅੰਕੜੇ_vec_1 = XXH_vld1q_u64(ਨਿਵੇਸ਼_2 + (i * 16));
+    uint64x2_t ਅੰਕੜੇ_vec_2 = XXH_vld1q_u64(ਨਿਵੇਸ਼_2 + ((i + 1) * 16));
 
     /* key_vec  = secret[i];  */
-    uint64x2_t key_vec_1 = XXH_vld1q_u64(secret + (i * 16));
-    uint64x2_t key_vec_2 = XXH_vld1q_u64(secret + ((i + 1) * 16));
+    uint64x2_t ਕੁੰਜੀ_vec_1 = XXH_vld1q_u64(secret + (i * 16));
+    uint64x2_t ਕੁੰਜੀ_vec_2 = XXH_vld1q_u64(secret + ((i + 1) * 16));
 
     /* data_swap = swap(data_vec) */
-    uint64x2_t data_swap_1 = vextq_u64(data_vec_1, data_vec_1, 1);
-    uint64x2_t data_swap_2 = vextq_u64(data_vec_2, data_vec_2, 1);
+    uint64x2_t ਅੰਕੜੇ_ਅਦਲਾ_ਬਦਲੀ_1 = vextq_u64(ਅੰਕੜੇ_vec_1, ਅੰਕੜੇ_vec_1, 1);
+    uint64x2_t ਅੰਕੜੇ_ਅਦਲਾ_ਬਦਲੀ_2 = vextq_u64(ਅੰਕੜੇ_vec_2, ਅੰਕੜੇ_vec_2, 1);
 
     /* data_key = data_vec ^ key_vec; */
-    uint64x2_t data_key_1 = veorq_u64(data_vec_1, key_vec_1);
-    uint64x2_t data_key_2 = veorq_u64(data_vec_2, key_vec_2);
+    uint64x2_t ਅੰਕੜੇ_ਕੁੰਜੀ_1 = veorq_u64(ਅੰਕੜੇ_vec_1, ਕੁੰਜੀ_vec_1);
+    uint64x2_t ਅੰਕੜੇ_ਕੁੰਜੀ_2 = veorq_u64(ਅੰਕੜੇ_vec_2, ਕੁੰਜੀ_vec_2);
 
     /*
      * If we reinterpret the 64x2 vectors as 32x4 vectors, we can use a
@@ -318,13 +318,13 @@ static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
      *  [ dk11L | dk11H | dk12L | dk12H ] -> [ dk11L | dk12L | dk21L | dk22L ]
      *  [ dk21L | dk21H | dk22L | dk22H ] -> [ dk11H | dk12H | dk21H | dk22H ]
      */
-    uint32x4x2_t unzipped = vuzpq_u32(vreinterpretq_u32_u64(data_key_1),
-                                      vreinterpretq_u32_u64(data_key_2));
+    uint32x4x2_t unzipped = vuzpq_u32(vreinterpretq_u32_u64(ਅੰਕੜੇ_ਕੁੰਜੀ_1),
+                                      vreinterpretq_u32_u64(ਅੰਕੜੇ_ਕੁੰਜੀ_2));
 
     /* data_key_lo = data_key & 0xFFFFFFFF */
-    uint32x4_t data_key_lo = unzipped.val[0];
+    uint32x4_t ਅੰਕੜੇ_ਕੁੰਜੀ_lo = unzipped.val[0];
     /* data_key_hi = data_key >> 32 */
-    uint32x4_t data_key_hi = unzipped.val[1];
+    uint32x4_t ਅੰਕੜੇ_ਕੁੰਜੀ_hi = unzipped.val[1];
 
     /*
      * Then, we can split the vectors horizontally and multiply which, as for
@@ -334,36 +334,36 @@ static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
      *
      * sum = data_swap + (u64x2) data_key_lo * (u64x2) data_key_hi
      */
-    uint64x2_t sum_1 = vmlal_u32(data_swap_1, vget_low_u32(data_key_lo),
-                                 vget_low_u32(data_key_hi));
-    uint64x2_t sum_2 = vmlal_u32(data_swap_2, vget_high_u32(data_key_lo),
-                                 vget_high_u32(data_key_hi));
+    uint64x2_t ਜੋੜ_1 = vmlal_u32(ਅੰਕੜੇ_ਅਦਲਾ_ਬਦਲੀ_1, vget_ਨੀਵਾਂ_u32(ਅੰਕੜੇ_ਕੁੰਜੀ_lo),
+                                 vget_ਨੀਵਾਂ_u32(ਅੰਕੜੇ_ਕੁੰਜੀ_hi));
+    uint64x2_t ਜੋੜ_2 = vmlal_u32(ਅੰਕੜੇ_ਅਦਲਾ_ਬਦਲੀ_2, vget_ਉੱਚਾ_u32(ਅੰਕੜੇ_ਕੁੰਜੀ_lo),
+                                 vget_ਉੱਚਾ_u32(ਅੰਕੜੇ_ਕੁੰਜੀ_hi));
 
     /* xacc[i] = acc_vec + sum; */
-    xacc[i] = vaddq_u64(xacc[i], sum_1);
-    xacc[i + 1] = vaddq_u64(xacc[i + 1], sum_2);
+    xacc[i] = vaddq_u64(xacc[i], ਜੋੜ_1);
+    xacc[i + 1] = vaddq_u64(xacc[i + 1], ਜੋੜ_2);
   }
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
-  xxh_aliasing_uint64x2_t *const xacc = (xxh_aliasing_uint64x2_t *)acc;
+ਸਥਿਰ ਖਾਲੀ XXH3_scrambleAcc_neon(uint64_t *acc, ਅਚਲ uint8_t *secret) {
+  xxh_aliasing_uint64x2_t *ਅਚਲ xacc = (xxh_aliasing_uint64x2_t *)acc;
 
   /* { prime32_1, prime32_1 } */
-  uint32x2_t const kPrimeLo = vdup_n_u32(PRIME32_1);
+  uint32x2_t ਅਚਲ k_ਅਭਾਜ_Lo = vdup_n_u32(PRIME32_1);
   /* { 0, prime32_1, 0, prime32_1 } */
-  uint32x4_t const kPrimeHi =
+  uint32x4_t ਅਚਲ k_ਅਭਾਜ_Hi =
       vreinterpretq_u32_u64(vdupq_n_u64((uint64_t)PRIME32_1 << 32));
 
-  for (size_t i = 0; i < XXH_ACC_NB / 2; ++i) {
+  ਲਈ (size_t i = 0; i < XXH_ACC_NB / 2; ++i) {
     /* xacc[i] ^= (xacc[i] >> 47); */
     uint64x2_t acc_vec = XXH_vld1q_u64(acc + (2 * i));
     uint64x2_t shifted = vshrq_n_u64(acc_vec, 47);
-    uint64x2_t data_vec = veorq_u64(acc_vec, shifted);
+    uint64x2_t ਅੰਕੜੇ_vec = veorq_u64(acc_vec, shifted);
 
     /* xacc[i] ^= secret[i]; */
-    uint64x2_t key_vec = XXH_vld1q_u64(secret + (i * 16));
-    uint64x2_t data_key = veorq_u64(data_vec, key_vec);
+    uint64x2_t ਕੁੰਜੀ_vec = XXH_vld1q_u64(secret + (i * 16));
+    uint64x2_t ਅੰਕੜੇ_ਕੁੰਜੀ = veorq_u64(ਅੰਕੜੇ_vec, ਕੁੰਜੀ_vec);
 
     /*
      * xacc[i] *= XXH_PRIME32_1
@@ -379,104 +379,104 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
      * { 0, prime, 0, prime } to cancel out the unwanted bits and avoid the
      * shift.
      */
-    uint32x4_t prod_hi = vmulq_u32(vreinterpretq_u32_u64(data_key), kPrimeHi);
+    uint32x4_t prod_hi = vmulq_u32(vreinterpretq_u32_u64(ਅੰਕੜੇ_ਕੁੰਜੀ), k_ਅਭਾਜ_Hi);
 
     /* Extract low bits for vmlal_u32  */
-    uint32x2_t data_key_lo = vmovn_u64(data_key);
+    uint32x2_t ਅੰਕੜੇ_ਕੁੰਜੀ_lo = vmovn_u64(ਅੰਕੜੇ_ਕੁੰਜੀ);
 
     /* xacc[i] = prod_hi + lo(data_key) * XXH_PRIME32_1; */
-    xacc[i] = vmlal_u32(vreinterpretq_u64_u32(prod_hi), data_key_lo, kPrimeLo);
+    xacc[i] = vmlal_u32(vreinterpretq_u64_u32(prod_hi), ਅੰਕੜੇ_ਕੁੰਜੀ_lo, k_ਅਭਾਜ_Lo);
   }
 }
-#else
+#ਨਹੀਂਤਾਂ
 
-#define XXH3_accumulate_512 XXH3_accumulate_512_scalar
-#define XXH3_scrambleAcc XXH3_scrambleAcc_scalar
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH3_accumulate_512 XXH3_accumulate_512_scalar
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH3_scrambleAcc XXH3_scrambleAcc_scalar
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_accumulate_512_scalar(uint64_t *acc, const uint8_t *input,
-                                       const uint8_t *secret) {
-  for (size_t i = 0; i < XXH_ACC_NB; ++i) {
-    uint64_t data_val = endian::read64le(input + 8 * i);
-    uint64_t data_key = data_val ^ endian::read64le(secret + 8 * i);
-    acc[i ^ 1] += data_val;
-    acc[i] += uint32_t(data_key) * (data_key >> 32);
+ਸਥਿਰ ਖਾਲੀ XXH3_accumulate_512_scalar(uint64_t *acc, ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2,
+                                       ਅਚਲ uint8_t *secret) {
+  ਲਈ (size_t i = 0; i < XXH_ACC_NB; ++i) {
+    uint64_t ਅੰਕੜੇ_val = endian::read64le(ਨਿਵੇਸ਼_2 + 8 * i);
+    uint64_t ਅੰਕੜੇ_ਕੁੰਜੀ = ਅੰਕੜੇ_val ^ endian::read64le(secret + 8 * i);
+    acc[i ^ 1] += ਅੰਕੜੇ_val;
+    acc[i] += uint32_t(ਅੰਕੜੇ_ਕੁੰਜੀ) * (ਅੰਕੜੇ_ਕੁੰਜੀ >> 32);
   }
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_scrambleAcc_scalar(uint64_t *acc, const uint8_t *secret) {
-  for (size_t i = 0; i < XXH_ACC_NB; ++i) {
+ਸਥਿਰ ਖਾਲੀ XXH3_scrambleAcc_scalar(uint64_t *acc, ਅਚਲ uint8_t *secret) {
+  ਲਈ (size_t i = 0; i < XXH_ACC_NB; ++i) {
     acc[i] ^= acc[i] >> 47;
     acc[i] ^= endian::read64le(secret + 8 * i);
     acc[i] *= PRIME32_1;
   }
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_accumulate(uint64_t *acc, const uint8_t *input,
-                            const uint8_t *secret, size_t nbStripes) {
-  for (size_t n = 0; n < nbStripes; ++n) {
-    XXH3_accumulate_512(acc, input + n * XXH_STRIPE_LEN,
-                        secret + n * XXH_SECRET_CONSUME_RATE);
+ਸਥਿਰ ਖਾਲੀ XXH3_accumulate(uint64_t *acc, ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2,
+                            ਅਚਲ uint8_t *secret, size_t nbStripes) {
+  ਲਈ (size_t n = 0; n < nbStripes; ++n) {
+    XXH3_accumulate_512(acc, ਨਿਵੇਸ਼_2 + n * XXH_STRIPE_LEN,
+                        secret + n * XXH_SECRET_CONSUME_ਦਰ);
   }
 }
 
-static uint64_t XXH3_mix2Accs(const uint64_t *acc, const uint8_t *secret) {
-  return XXH3_mul128_fold64(acc[0] ^ endian::read64le(secret),
+ਸਥਿਰ uint64_t XXH3_mix2Accs(ਅਚਲ uint64_t *acc, ਅਚਲ uint8_t *secret) {
+  ਵਾਪਸ XXH3_mul128_fold64(acc[0] ^ endian::read64le(secret),
                             acc[1] ^ endian::read64le(secret + 8));
 }
 
-static uint64_t XXH3_mergeAccs(const uint64_t *acc, const uint8_t *key,
-                               uint64_t start) {
-  uint64_t result64 = start;
-  for (size_t i = 0; i < 4; ++i)
-    result64 += XXH3_mix2Accs(acc + 2 * i, key + 16 * i);
-  return XXH3_avalanche(result64);
+ਸਥਿਰ uint64_t XXH3_ਮਿਲਾਓ_Accs(ਅਚਲ uint64_t *acc, ਅਚਲ uint8_t *ਕੁੰਜੀ_2,
+                               uint64_t ਸ਼ੁਰੂ_2) {
+  uint64_t result64 = ਸ਼ੁਰੂ_2;
+  ਲਈ (size_t i = 0; i < 4; ++i)
+    result64 += XXH3_mix2Accs(acc + 2 * i, ਕੁੰਜੀ_2 + 16 * i);
+  ਵਾਪਸ XXH3_avalanche(result64);
 }
 
 LLVM_ATTRIBUTE_NOINLINE
-static uint64_t XXH3_hashLong_64b(const uint8_t *input, size_t len,
-                                  const uint8_t *secret, size_t secretSize) {
-  const size_t nbStripesPerBlock =
-      (secretSize - XXH_STRIPE_LEN) / XXH_SECRET_CONSUME_RATE;
-  const size_t block_len = XXH_STRIPE_LEN * nbStripesPerBlock;
-  const size_t nb_blocks = (len - 1) / block_len;
+ਸਥਿਰ uint64_t XXH3_hashLong_64b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len,
+                                  ਅਚਲ uint8_t *secret, size_t secret_ਮਾਪ) {
+  ਅਚਲ size_t nb_Stripes_ਪ੍ਰਤੀ_ਖੰਡ =
+      (secret_ਮਾਪ - XXH_STRIPE_LEN) / XXH_SECRET_CONSUME_ਦਰ;
+  ਅਚਲ size_t ਖੰਡ_len = XXH_STRIPE_LEN * nb_Stripes_ਪ੍ਰਤੀ_ਖੰਡ;
+  ਅਚਲ size_t nb_ਖੰਡਾਂ = (len - 1) / ਖੰਡ_len;
   alignas(16) uint64_t acc[XXH_ACC_NB] = {
       PRIME32_3, PRIME64_1, PRIME64_2, PRIME64_3,
       PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1,
   };
-  for (size_t n = 0; n < nb_blocks; ++n) {
-    XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
-    XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
+  ਲਈ (size_t n = 0; n < nb_ਖੰਡਾਂ; ++n) {
+    XXH3_accumulate(acc, ਨਿਵੇਸ਼_2 + n * ਖੰਡ_len, secret, nb_Stripes_ਪ੍ਰਤੀ_ਖੰਡ);
+    XXH3_scrambleAcc(acc, secret + secret_ਮਾਪ - XXH_STRIPE_LEN);
   }
 
   /* last partial block */
-  const size_t nbStripes = (len - 1 - (block_len * nb_blocks)) / XXH_STRIPE_LEN;
-  assert(nbStripes <= secretSize / XXH_SECRET_CONSUME_RATE);
-  XXH3_accumulate(acc, input + nb_blocks * block_len, secret, nbStripes);
+  ਅਚਲ size_t nbStripes = (len - 1 - (ਖੰਡ_len * nb_ਖੰਡਾਂ)) / XXH_STRIPE_LEN;
+  ਪ੍ਰਤਿਜ੍ਞਾ(nbStripes <= secret_ਮਾਪ / XXH_SECRET_CONSUME_ਦਰ);
+  XXH3_accumulate(acc, ਨਿਵੇਸ਼_2 + nb_ਖੰਡਾਂ * ਖੰਡ_len, secret, nbStripes);
 
   /* last stripe */
-  constexpr size_t XXH_SECRET_LASTACC_START = 7;
-  XXH3_accumulate_512(acc, input + len - XXH_STRIPE_LEN,
-                      secret + secretSize - XXH_STRIPE_LEN -
-                          XXH_SECRET_LASTACC_START);
+  constexpr size_t XXH_SECRET_LASTACC_ਸ਼ੁਰੂ = 7;
+  XXH3_accumulate_512(acc, ਨਿਵੇਸ਼_2 + len - XXH_STRIPE_LEN,
+                      secret + secret_ਮਾਪ - XXH_STRIPE_LEN -
+                          XXH_SECRET_LASTACC_ਸ਼ੁਰੂ);
 
   /* converge into final hash */
-  constexpr size_t XXH_SECRET_MERGEACCS_START = 11;
-  return XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START,
+  constexpr size_t XXH_SECRET_MERGEACCS_ਸ਼ੁਰੂ = 11;
+  ਵਾਪਸ XXH3_ਮਿਲਾਓ_Accs(acc, secret + XXH_SECRET_MERGEACCS_ਸ਼ੁਰੂ,
                         (uint64_t)len * PRIME64_1);
 }
 
-uint64_t llvm::xxh3_64bits(const uint8_t *in, size_t len) {
-  if (len <= 16)
-    return XXH3_len_0to16_64b(in, len, kSecret, 0);
-  if (len <= 128)
-    return XXH3_len_17to128_64b(in, len, kSecret, 0);
-  if (len <= XXH3_MIDSIZE_MAX)
-    return XXH3_len_129to240_64b(in, len, kSecret, 0);
-  return XXH3_hashLong_64b(in, len, kSecret, sizeof(kSecret));
+uint64_t llvm::xxh3_64bits(ਅਚਲ uint8_t *ਵਿੱਚ_4, size_t len) {
+  ਜੇ (len <= 16)
+    ਵਾਪਸ XXH3_len_0to16_64b(ਵਿੱਚ_4, len, kSecret, 0);
+  ਜੇ (len <= 128)
+    ਵਾਪਸ XXH3_len_17to128_64b(ਵਿੱਚ_4, len, kSecret, 0);
+  ਜੇ (len <= XXH3_MIDSIZE_MAX)
+    ਵਾਪਸ XXH3_len_129to240_64b(ਵਿੱਚ_4, len, kSecret, 0);
+  ਵਾਪਸ XXH3_hashLong_64b(ਵਿੱਚ_4, len, kSecret, ਆਕਾਰ(kSecret));
 }
 
 /* ==========================================
@@ -509,21 +509,21 @@ uint64_t llvm::xxh3_64bits(const uint8_t *in, size_t len) {
  *   @p x and @p r may be evaluated multiple times.
  * @return The rotated result.
  */
-#if __has_builtin(__builtin_rotateleft32) &&                                   \
+#ਜੇ __has_builtin(__builtin_rotateleft32) &&                                   \
     __has_builtin(__builtin_rotateleft64)
-#define XXH_rotl32 __builtin_rotateleft32
-#define XXH_rotl64 __builtin_rotateleft64
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_rotl32 __builtin_rotateleft32
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_rotl64 __builtin_rotateleft64
 /* Note: although _rotl exists for minGW (GCC under windows), performance seems
  * poor */
-#elif defined(_MSC_VER)
-#define XXH_rotl32(x, r) _rotl(x, r)
-#define XXH_rotl64(x, r) _rotl64(x, r)
-#else
-#define XXH_rotl32(x, r) (((x) << (r)) | ((x) >> (32 - (r))))
-#define XXH_rotl64(x, r) (((x) << (r)) | ((x) >> (64 - (r))))
-#endif
+#ਜਾਂਜੇ defined(_MSC_VER)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_rotl32(x, r) _rotl(x, r)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_rotl64(x, r) _rotl64(x, r)
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_rotl32(x, r) (((x) << (r)) | ((x) >> (32 - (r))))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_rotl64(x, r) (((x) << (r)) | ((x) >> (64 - (r))))
+#ਜੇ_ਅੰਤ
 
-#define XXH_mult32to64(x, y) ((uint64_t)(uint32_t)(x) * (uint64_t)(uint32_t)(y))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ XXH_mult32to64(x, y) ((uint64_t)(uint32_t)(x) * (uint64_t)(uint32_t)(y))
 
 /*!
  * @brief Calculates a 64->128-bit long multiply.
@@ -534,7 +534,7 @@ uint64_t llvm::xxh3_64bits(const uint8_t *in, size_t len) {
  * @param lhs , rhs The 64-bit integers to be multiplied
  * @return The 128-bit result represented in an @ref XXH128_hash_t.
  */
-static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
+ਸਥਿਰ XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
   /*
    * GCC/Clang __uint128_t method.
    *
@@ -550,15 +550,15 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
    * In that case it is best to use the portable one.
    * https://github.com/Cyan4973/xxHash/issues/211#issuecomment-515575677
    */
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(__wasm__) &&         \
+#ਜੇ (defined(__GNUC__) || defined(__clang__)) && !defined(__wasm__) &&         \
         defined(__SIZEOF_INT128__) ||                                          \
-    (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
+    (defined(INTEGRAL_MAX_ਬਿੱਟ) && INTEGRAL_MAX_ਬਿੱਟ >= 128)
 
-  __uint128_t const product = (__uint128_t)lhs * (__uint128_t)rhs;
+  __uint128_t ਅਚਲ ਗੁਣਨਫਲ_2 = (__uint128_t)lhs * (__uint128_t)rhs;
   XXH128_hash_t r128;
-  r128.low64 = (uint64_t)(product);
-  r128.high64 = (uint64_t)(product >> 64);
-  return r128;
+  r128.low64 = (uint64_t)(ਗੁਣਨਫਲ_2);
+  r128.high64 = (uint64_t)(ਗੁਣਨਫਲ_2 >> 64);
+  ਵਾਪਸ r128;
 
   /*
    * MSVC for x64's _umul128 method.
@@ -568,34 +568,34 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
    *
    * This compiles to single operand MUL on x64.
    */
-#elif (defined(_M_X64) || defined(_M_IA64)) && !defined(_M_ARM64EC)
+#ਜਾਂਜੇ (defined(_M_X64) || defined(_M_IA64)) && !defined(_M_ARM64EC)
 
-#ifndef _MSC_VER
-#pragma intrinsic(_umul128)
-#endif
-  uint64_t product_high;
-  uint64_t const product_low = _umul128(lhs, rhs, &product_high);
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ _MSC_VER
+#ਹਦਾਇਤ intrinsic(_umul128)
+#ਜੇ_ਅੰਤ
+  uint64_t ਗੁਣਨਫਲ_ਉੱਚਾ_2;
+  uint64_t ਅਚਲ ਗੁਣਨਫਲ_ਨੀਵਾਂ_2 = _umul128(lhs, rhs, &ਗੁਣਨਫਲ_ਉੱਚਾ_2);
   XXH128_hash_t r128;
-  r128.low64 = product_low;
-  r128.high64 = product_high;
-  return r128;
+  r128.low64 = ਗੁਣਨਫਲ_ਨੀਵਾਂ_2;
+  r128.high64 = ਗੁਣਨਫਲ_ਉੱਚਾ_2;
+  ਵਾਪਸ r128;
 
   /*
    * MSVC for ARM64's __umulh method.
    *
    * This compiles to the same MUL + UMULH as GCC/Clang's __uint128_t method.
    */
-#elif defined(_M_ARM64) || defined(_M_ARM64EC)
+#ਜਾਂਜੇ defined(_M_ARM64) || defined(_M_ARM64EC)
 
-#ifndef _MSC_VER
-#pragma intrinsic(__umulh)
-#endif
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ _MSC_VER
+#ਹਦਾਇਤ intrinsic(__umulh)
+#ਜੇ_ਅੰਤ
   XXH128_hash_t r128;
   r128.low64 = lhs * rhs;
   r128.high64 = __umulh(lhs, rhs);
-  return r128;
+  ਵਾਪਸ r128;
 
-#else
+#ਨਹੀਂਤਾਂ
   /*
    * Portable scalar method. Optimized for 32-bit and 64-bit ALUs.
    *
@@ -640,66 +640,66 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
    */
 
   /* First calculate all of the cross products. */
-  uint64_t const lo_lo = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs & 0xFFFFFFFF);
-  uint64_t const hi_lo = XXH_mult32to64(lhs >> 32, rhs & 0xFFFFFFFF);
-  uint64_t const lo_hi = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs >> 32);
-  uint64_t const hi_hi = XXH_mult32to64(lhs >> 32, rhs >> 32);
+  uint64_t ਅਚਲ lo_lo = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs & 0xFFFFFFFF);
+  uint64_t ਅਚਲ hi_lo = XXH_mult32to64(lhs >> 32, rhs & 0xFFFFFFFF);
+  uint64_t ਅਚਲ lo_hi = XXH_mult32to64(lhs & 0xFFFFFFFF, rhs >> 32);
+  uint64_t ਅਚਲ hi_hi = XXH_mult32to64(lhs >> 32, rhs >> 32);
 
   /* Now add the products together. These will never overflow. */
-  uint64_t const cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
-  uint64_t const upper = (hi_lo >> 32) + (cross >> 32) + hi_hi;
-  uint64_t const lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
+  uint64_t ਅਚਲ cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
+  uint64_t ਅਚਲ ਉੱਤਲਾ = (hi_lo >> 32) + (cross >> 32) + hi_hi;
+  uint64_t ਅਚਲ ਹੇਠਲਾ = (cross << 32) | (lo_lo & 0xFFFFFFFF);
 
   XXH128_hash_t r128;
-  r128.low64 = lower;
-  r128.high64 = upper;
-  return r128;
-#endif
+  r128.low64 = ਹੇਠਲਾ;
+  r128.high64 = ਉੱਤਲਾ;
+  ਵਾਪਸ r128;
+#ਜੇ_ਅੰਤ
 }
 
 /*! Seems to produce slightly better code on GCC for some reason. */
 LLVM_ATTRIBUTE_ALWAYS_INLINE constexpr uint64_t XXH_xorshift64(uint64_t v64,
-                                                               int shift) {
-  return v64 ^ (v64 >> shift);
+                                                               ਪੂਰਨ ਖਿਸਕਾਓ) {
+  ਵਾਪਸ v64 ^ (v64 >> ਖਿਸਕਾਓ);
 }
 
-LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_1to3_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                   uint64_t seed) {
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ XXH128_hash_t
+XXH3_len_1to3_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                   uint64_t ਬੀਜ_2) {
   /* A doubled version of 1to3_64b with different constants. */
   /*
    * len = 1: combinedl = { input[0], 0x01, input[0], input[0] }
    * len = 2: combinedl = { input[1], 0x02, input[0], input[1] }
    * len = 3: combinedl = { input[2], 0x03, input[0], input[1] }
    */
-  uint8_t const c1 = input[0];
-  uint8_t const c2 = input[len >> 1];
-  uint8_t const c3 = input[len - 1];
-  uint32_t const combinedl = ((uint32_t)c1 << 16) | ((uint32_t)c2 << 24) |
+  uint8_t ਅਚਲ c1 = ਨਿਵੇਸ਼_2[0];
+  uint8_t ਅਚਲ c2 = ਨਿਵੇਸ਼_2[len >> 1];
+  uint8_t ਅਚਲ c3 = ਨਿਵੇਸ਼_2[len - 1];
+  uint32_t ਅਚਲ combinedl = ((uint32_t)c1 << 16) | ((uint32_t)c2 << 24) |
                              ((uint32_t)c3 << 0) | ((uint32_t)len << 8);
-  uint32_t const combinedh = XXH_rotl32(byteswap(combinedl), 13);
-  uint64_t const bitflipl =
-      (endian::read32le(secret) ^ endian::read32le(secret + 4)) + seed;
-  uint64_t const bitfliph =
-      (endian::read32le(secret + 8) ^ endian::read32le(secret + 12)) - seed;
-  uint64_t const keyed_lo = (uint64_t)combinedl ^ bitflipl;
-  uint64_t const keyed_hi = (uint64_t)combinedh ^ bitfliph;
+  uint32_t ਅਚਲ combinedh = XXH_rotl32(byteswap(combinedl), 13);
+  uint64_t ਅਚਲ bitflipl =
+      (endian::read32le(secret) ^ endian::read32le(secret + 4)) + ਬੀਜ_2;
+  uint64_t ਅਚਲ bitfliph =
+      (endian::read32le(secret + 8) ^ endian::read32le(secret + 12)) - ਬੀਜ_2;
+  uint64_t ਅਚਲ keyed_lo = (uint64_t)combinedl ^ bitflipl;
+  uint64_t ਅਚਲ keyed_hi = (uint64_t)combinedh ^ bitfliph;
   XXH128_hash_t h128;
   h128.low64 = XXH64_avalanche(keyed_lo);
   h128.high64 = XXH64_avalanche(keyed_hi);
-  return h128;
+  ਵਾਪਸ h128;
 }
 
-LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_4to8_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                   uint64_t seed) {
-  seed ^= (uint64_t)byteswap((uint32_t)seed) << 32;
-  uint32_t const input_lo = endian::read32le(input);
-  uint32_t const input_hi = endian::read32le(input + len - 4);
-  uint64_t const input_64 = input_lo + ((uint64_t)input_hi << 32);
-  uint64_t const bitflip =
-      (endian::read64le(secret + 16) ^ endian::read64le(secret + 24)) + seed;
-  uint64_t const keyed = input_64 ^ bitflip;
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ XXH128_hash_t
+XXH3_len_4to8_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                   uint64_t ਬੀਜ_2) {
+  ਬੀਜ_2 ^= (uint64_t)byteswap((uint32_t)ਬੀਜ_2) << 32;
+  uint32_t ਅਚਲ ਨਿਵੇਸ਼_lo = endian::read32le(ਨਿਵੇਸ਼_2);
+  uint32_t ਅਚਲ ਨਿਵੇਸ਼_hi = endian::read32le(ਨਿਵੇਸ਼_2 + len - 4);
+  uint64_t ਅਚਲ ਨਿਵੇਸ਼_64 = ਨਿਵੇਸ਼_lo + ((uint64_t)ਨਿਵੇਸ਼_hi << 32);
+  uint64_t ਅਚਲ bitflip =
+      (endian::read64le(secret + 16) ^ endian::read64le(secret + 24)) + ਬੀਜ_2;
+  uint64_t ਅਚਲ keyed = ਨਿਵੇਸ਼_64 ^ bitflip;
 
   /* Shift len to the left to ensure it is even, this avoids even multiplies.
    */
@@ -709,29 +709,29 @@ XXH3_len_4to8_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   m128.low64 ^= (m128.high64 >> 3);
 
   m128.low64 = XXH_xorshift64(m128.low64, 35);
-  m128.low64 *= PRIME_MX2;
+  m128.low64 *= ਅਭਾਜ_MX2;
   m128.low64 = XXH_xorshift64(m128.low64, 28);
   m128.high64 = XXH3_avalanche(m128.high64);
-  return m128;
+  ਵਾਪਸ m128;
 }
 
-LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                    uint64_t seed) {
-  uint64_t const bitflipl =
-      (endian::read64le(secret + 32) ^ endian::read64le(secret + 40)) - seed;
-  uint64_t const bitfliph =
-      (endian::read64le(secret + 48) ^ endian::read64le(secret + 56)) + seed;
-  uint64_t const input_lo = endian::read64le(input);
-  uint64_t input_hi = endian::read64le(input + len - 8);
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ XXH128_hash_t
+XXH3_len_9to16_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                    uint64_t ਬੀਜ_2) {
+  uint64_t ਅਚਲ bitflipl =
+      (endian::read64le(secret + 32) ^ endian::read64le(secret + 40)) - ਬੀਜ_2;
+  uint64_t ਅਚਲ bitfliph =
+      (endian::read64le(secret + 48) ^ endian::read64le(secret + 56)) + ਬੀਜ_2;
+  uint64_t ਅਚਲ ਨਿਵੇਸ਼_lo = endian::read64le(ਨਿਵੇਸ਼_2);
+  uint64_t ਨਿਵੇਸ਼_hi = endian::read64le(ਨਿਵੇਸ਼_2 + len - 8);
   XXH128_hash_t m128 =
-      XXH_mult64to128(input_lo ^ input_hi ^ bitflipl, PRIME64_1);
+      XXH_mult64to128(ਨਿਵੇਸ਼_lo ^ ਨਿਵੇਸ਼_hi ^ bitflipl, PRIME64_1);
   /*
    * Put len in the middle of m128 to ensure that the length gets mixed to
    * both the low and high bits in the 128x64 multiply below.
    */
   m128.low64 += (uint64_t)(len - 1) << 54;
-  input_hi ^= bitfliph;
+  ਨਿਵੇਸ਼_hi ^= bitfliph;
   /*
    * Add the high 32 bits of input_hi to the high 32 bits of m128, then
    * add the long product of the low 32 bits of input_hi and PRIME32_2 to
@@ -739,16 +739,16 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    *
    * The best approach to this operation is different on 32-bit and 64-bit.
    */
-  if (sizeof(void *) < sizeof(uint64_t)) { /* 32-bit */
+  ਜੇ (ਆਕਾਰ(ਖਾਲੀ *) < ਆਕਾਰ(uint64_t)) { /* 32-bit */
     /*
      * 32-bit optimized version, which is more readable.
      *
      * On 32-bit, it removes an ADC and delays a dependency between the two
      * halves of m128.high64, but it generates an extra mask on 64-bit.
      */
-    m128.high64 += (input_hi & 0xFFFFFFFF00000000ULL) +
-                   XXH_mult32to64((uint32_t)input_hi, PRIME32_2);
-  } else {
+    m128.high64 += (ਨਿਵੇਸ਼_hi & 0xFFFFFFFF00000000ULL) +
+                   XXH_mult32to64((uint32_t)ਨਿਵੇਸ਼_hi, PRIME32_2);
+  } ਨਹੀਂਤਾਂ {
     /*
      * 64-bit optimized (albeit more confusing) version.
      *
@@ -774,7 +774,7 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
      * Since input_hi.hi + input_hi.lo == input_hi, we get this:
      *    input_hi + ((uint64_t)input_hi.lo * (PRIME32_2 - 1))
      */
-    m128.high64 += input_hi + XXH_mult32to64((uint32_t)input_hi, PRIME32_2 - 1);
+    m128.high64 += ਨਿਵੇਸ਼_hi + XXH_mult32to64((uint32_t)ਨਿਵੇਸ਼_hi, PRIME32_2 - 1);
   }
   /* m128 ^= XXH_swap64(m128 >> 64); */
   m128.low64 ^= byteswap(m128.high64);
@@ -785,80 +785,80 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
 
   h128.low64 = XXH3_avalanche(h128.low64);
   h128.high64 = XXH3_avalanche(h128.high64);
-  return h128;
+  ਵਾਪਸ h128;
 }
 
 /*
  * Assumption: `secret` size is >= XXH3_SECRET_SIZE_MIN
  */
-LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_0to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                    uint64_t seed) {
-  if (len > 8)
-    return XXH3_len_9to16_128b(input, len, secret, seed);
-  if (len >= 4)
-    return XXH3_len_4to8_128b(input, len, secret, seed);
-  if (len)
-    return XXH3_len_1to3_128b(input, len, secret, seed);
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ XXH128_hash_t
+XXH3_len_0to16_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                    uint64_t ਬੀਜ_2) {
+  ਜੇ (len > 8)
+    ਵਾਪਸ XXH3_len_9to16_128b(ਨਿਵੇਸ਼_2, len, secret, ਬੀਜ_2);
+  ਜੇ (len >= 4)
+    ਵਾਪਸ XXH3_len_4to8_128b(ਨਿਵੇਸ਼_2, len, secret, ਬੀਜ_2);
+  ਜੇ (len)
+    ਵਾਪਸ XXH3_len_1to3_128b(ਨਿਵੇਸ਼_2, len, secret, ਬੀਜ_2);
   XXH128_hash_t h128;
-  uint64_t const bitflipl =
+  uint64_t ਅਚਲ bitflipl =
       endian::read64le(secret + 64) ^ endian::read64le(secret + 72);
-  uint64_t const bitfliph =
+  uint64_t ਅਚਲ bitfliph =
       endian::read64le(secret + 80) ^ endian::read64le(secret + 88);
-  h128.low64 = XXH64_avalanche(seed ^ bitflipl);
-  h128.high64 = XXH64_avalanche(seed ^ bitfliph);
-  return h128;
+  h128.low64 = XXH64_avalanche(ਬੀਜ_2 ^ bitflipl);
+  h128.high64 = XXH64_avalanche(ਬੀਜ_2 ^ bitfliph);
+  ਵਾਪਸ h128;
 }
 
 /*
  * A bit slower than XXH3_mix16B, but handles multiply by zero better.
  */
-LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH128_mix32B(XXH128_hash_t acc, const uint8_t *input_1, const uint8_t *input_2,
-              const uint8_t *secret, uint64_t seed) {
-  acc.low64 += XXH3_mix16B(input_1, secret + 0, seed);
-  acc.low64 ^= endian::read64le(input_2) + endian::read64le(input_2 + 8);
-  acc.high64 += XXH3_mix16B(input_2, secret + 16, seed);
-  acc.high64 ^= endian::read64le(input_1) + endian::read64le(input_1 + 8);
-  return acc;
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ XXH128_hash_t
+XXH128_mix32B(XXH128_hash_t acc, ਅਚਲ uint8_t *ਨਿਵੇਸ਼_1, ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2_2,
+              ਅਚਲ uint8_t *secret, uint64_t ਬੀਜ_2) {
+  acc.low64 += XXH3_mix16B(ਨਿਵੇਸ਼_1, secret + 0, ਬੀਜ_2);
+  acc.low64 ^= endian::read64le(ਨਿਵੇਸ਼_2_2) + endian::read64le(ਨਿਵੇਸ਼_2_2 + 8);
+  acc.high64 += XXH3_mix16B(ਨਿਵੇਸ਼_2_2, secret + 16, ਬੀਜ_2);
+  acc.high64 ^= endian::read64le(ਨਿਵੇਸ਼_1) + endian::read64le(ਨਿਵੇਸ਼_1 + 8);
+  ਵਾਪਸ acc;
 }
 
-LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_17to128_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                      size_t secretSize, uint64_t seed) {
-  (void)secretSize;
+LLVM_ATTRIBUTE_ALWAYS_INLINE ਸਥਿਰ XXH128_hash_t
+XXH3_len_17to128_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                      size_t secret_ਮਾਪ, uint64_t ਬੀਜ_2) {
+  (ਖਾਲੀ)secret_ਮਾਪ;
 
   XXH128_hash_t acc;
   acc.low64 = len * PRIME64_1;
   acc.high64 = 0;
 
-  if (len > 32) {
-    if (len > 64) {
-      if (len > 96) {
+  ਜੇ (len > 32) {
+    ਜੇ (len > 64) {
+      ਜੇ (len > 96) {
         acc =
-            XXH128_mix32B(acc, input + 48, input + len - 64, secret + 96, seed);
+            XXH128_mix32B(acc, ਨਿਵੇਸ਼_2 + 48, ਨਿਵੇਸ਼_2 + len - 64, secret + 96, ਬੀਜ_2);
       }
-      acc = XXH128_mix32B(acc, input + 32, input + len - 48, secret + 64, seed);
+      acc = XXH128_mix32B(acc, ਨਿਵੇਸ਼_2 + 32, ਨਿਵੇਸ਼_2 + len - 48, secret + 64, ਬੀਜ_2);
     }
-    acc = XXH128_mix32B(acc, input + 16, input + len - 32, secret + 32, seed);
+    acc = XXH128_mix32B(acc, ਨਿਵੇਸ਼_2 + 16, ਨਿਵੇਸ਼_2 + len - 32, secret + 32, ਬੀਜ_2);
   }
-  acc = XXH128_mix32B(acc, input, input + len - 16, secret, seed);
+  acc = XXH128_mix32B(acc, ਨਿਵੇਸ਼_2, ਨਿਵੇਸ਼_2 + len - 16, secret, ਬੀਜ_2);
   XXH128_hash_t h128;
   h128.low64 = acc.low64 + acc.high64;
   h128.high64 = (acc.low64 * PRIME64_1) + (acc.high64 * PRIME64_4) +
-                ((len - seed) * PRIME64_2);
+                ((len - ਬੀਜ_2) * PRIME64_2);
   h128.low64 = XXH3_avalanche(h128.low64);
   h128.high64 = (uint64_t)0 - XXH3_avalanche(h128.high64);
-  return h128;
+  ਵਾਪਸ h128;
 }
 
-LLVM_ATTRIBUTE_NOINLINE static XXH128_hash_t
-XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                       size_t secretSize, uint64_t seed) {
-  (void)secretSize;
+LLVM_ATTRIBUTE_NOINLINE ਸਥਿਰ XXH128_hash_t
+XXH3_len_129to240_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                       size_t secret_ਮਾਪ, uint64_t ਬੀਜ_2) {
+  (ਖਾਲੀ)secret_ਮਾਪ;
 
   XXH128_hash_t acc;
-  unsigned i;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ i;
   acc.low64 = len * PRIME64_1;
   acc.high64 = 0;
   /*
@@ -867,9 +867,9 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * where both x86 and aarch64 get simple agen and good codegen
    * for the loop.
    */
-  for (i = 32; i < 160; i += 32) {
-    acc = XXH128_mix32B(acc, input + i - 32, input + i - 16, secret + i - 32,
-                        seed);
+  ਲਈ (i = 32; i < 160; i += 32) {
+    acc = XXH128_mix32B(acc, ਨਿਵੇਸ਼_2 + i - 32, ਨਿਵੇਸ਼_2 + i - 16, secret + i - 32,
+                        ਬੀਜ_2);
   }
   acc.low64 = XXH3_avalanche(acc.low64);
   acc.high64 = XXH3_avalanche(acc.high64);
@@ -878,79 +878,79 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * len % 32 was zero. This is an unfortunate necessity to keep
    * the hash result stable.
    */
-  for (i = 160; i <= len; i += 32) {
-    acc = XXH128_mix32B(acc, input + i - 32, input + i - 16,
-                        secret + XXH3_MIDSIZE_STARTOFFSET + i - 160, seed);
+  ਲਈ (i = 160; i <= len; i += 32) {
+    acc = XXH128_mix32B(acc, ਨਿਵੇਸ਼_2 + i - 32, ਨਿਵੇਸ਼_2 + i - 16,
+                        secret + XXH3_MIDSIZE_STARTOFFSET + i - 160, ਬੀਜ_2);
   }
   /* last bytes */
   acc =
-      XXH128_mix32B(acc, input + len - 16, input + len - 32,
+      XXH128_mix32B(acc, ਨਿਵੇਸ਼_2 + len - 16, ਨਿਵੇਸ਼_2 + len - 32,
                     secret + XXH3_SECRETSIZE_MIN - XXH3_MIDSIZE_LASTOFFSET - 16,
-                    (uint64_t)0 - seed);
+                    (uint64_t)0 - ਬੀਜ_2);
 
   XXH128_hash_t h128;
   h128.low64 = acc.low64 + acc.high64;
   h128.high64 = (acc.low64 * PRIME64_1) + (acc.high64 * PRIME64_4) +
-                ((len - seed) * PRIME64_2);
+                ((len - ਬੀਜ_2) * PRIME64_2);
   h128.low64 = XXH3_avalanche(h128.low64);
   h128.high64 = (uint64_t)0 - XXH3_avalanche(h128.high64);
-  return h128;
+  ਵਾਪਸ h128;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE XXH128_hash_t
-XXH3_hashLong_128b(const uint8_t *input, size_t len, const uint8_t *secret,
-                   size_t secretSize) {
-  const size_t nbStripesPerBlock =
-      (secretSize - XXH_STRIPE_LEN) / XXH_SECRET_CONSUME_RATE;
-  const size_t block_len = XXH_STRIPE_LEN * nbStripesPerBlock;
-  const size_t nb_blocks = (len - 1) / block_len;
+XXH3_hashLong_128b(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len, ਅਚਲ uint8_t *secret,
+                   size_t secret_ਮਾਪ) {
+  ਅਚਲ size_t nb_Stripes_ਪ੍ਰਤੀ_ਖੰਡ =
+      (secret_ਮਾਪ - XXH_STRIPE_LEN) / XXH_SECRET_CONSUME_ਦਰ;
+  ਅਚਲ size_t ਖੰਡ_len = XXH_STRIPE_LEN * nb_Stripes_ਪ੍ਰਤੀ_ਖੰਡ;
+  ਅਚਲ size_t nb_ਖੰਡਾਂ = (len - 1) / ਖੰਡ_len;
   alignas(16) uint64_t acc[XXH_ACC_NB] = {
       PRIME32_3, PRIME64_1, PRIME64_2, PRIME64_3,
       PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1,
   };
 
-  for (size_t n = 0; n < nb_blocks; ++n) {
-    XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
-    XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
+  ਲਈ (size_t n = 0; n < nb_ਖੰਡਾਂ; ++n) {
+    XXH3_accumulate(acc, ਨਿਵੇਸ਼_2 + n * ਖੰਡ_len, secret, nb_Stripes_ਪ੍ਰਤੀ_ਖੰਡ);
+    XXH3_scrambleAcc(acc, secret + secret_ਮਾਪ - XXH_STRIPE_LEN);
   }
 
   /* last partial block */
-  const size_t nbStripes = (len - 1 - (block_len * nb_blocks)) / XXH_STRIPE_LEN;
-  assert(nbStripes <= secretSize / XXH_SECRET_CONSUME_RATE);
-  XXH3_accumulate(acc, input + nb_blocks * block_len, secret, nbStripes);
+  ਅਚਲ size_t nbStripes = (len - 1 - (ਖੰਡ_len * nb_ਖੰਡਾਂ)) / XXH_STRIPE_LEN;
+  ਪ੍ਰਤਿਜ੍ਞਾ(nbStripes <= secret_ਮਾਪ / XXH_SECRET_CONSUME_ਦਰ);
+  XXH3_accumulate(acc, ਨਿਵੇਸ਼_2 + nb_ਖੰਡਾਂ * ਖੰਡ_len, secret, nbStripes);
 
   /* last stripe */
-  constexpr size_t XXH_SECRET_LASTACC_START = 7;
-  XXH3_accumulate_512(acc, input + len - XXH_STRIPE_LEN,
-                      secret + secretSize - XXH_STRIPE_LEN -
-                          XXH_SECRET_LASTACC_START);
+  constexpr size_t XXH_SECRET_LASTACC_ਸ਼ੁਰੂ = 7;
+  XXH3_accumulate_512(acc, ਨਿਵੇਸ਼_2 + len - XXH_STRIPE_LEN,
+                      secret + secret_ਮਾਪ - XXH_STRIPE_LEN -
+                          XXH_SECRET_LASTACC_ਸ਼ੁਰੂ);
 
   /* converge into final hash */
-  static_assert(sizeof(acc) == 64);
+  static_assert(ਆਕਾਰ(acc) == 64);
   XXH128_hash_t h128;
-  constexpr size_t XXH_SECRET_MERGEACCS_START = 11;
-  h128.low64 = XXH3_mergeAccs(acc, secret + XXH_SECRET_MERGEACCS_START,
+  constexpr size_t XXH_SECRET_MERGEACCS_ਸ਼ੁਰੂ = 11;
+  h128.low64 = XXH3_ਮਿਲਾਓ_Accs(acc, secret + XXH_SECRET_MERGEACCS_ਸ਼ੁਰੂ,
                               (uint64_t)len * PRIME64_1);
-  h128.high64 = XXH3_mergeAccs(
-      acc, secret + secretSize - sizeof(acc) - XXH_SECRET_MERGEACCS_START,
+  h128.high64 = XXH3_ਮਿਲਾਓ_Accs(
+      acc, secret + secret_ਮਾਪ - ਆਕਾਰ(acc) - XXH_SECRET_MERGEACCS_ਸ਼ੁਰੂ,
       ~((uint64_t)len * PRIME64_2));
-  return h128;
+  ਵਾਪਸ h128;
 }
 
-llvm::XXH128_hash_t llvm::xxh3_128bits(const uint8_t *input, size_t len) {
+llvm::XXH128_hash_t llvm::xxh3_128bits(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t len) {
   /*
    * If an action is to be taken if `secret` conditions are not respected,
    * it should be done here.
    * For now, it's a contract pre-condition.
    * Adding a check and a branch here would cost performance at every hash.
    */
-  if (len <= 16)
-    return XXH3_len_0to16_128b(input, len, kSecret, /*seed64=*/0);
-  if (len <= 128)
-    return XXH3_len_17to128_128b(input, len, kSecret, sizeof(kSecret),
+  ਜੇ (len <= 16)
+    ਵਾਪਸ XXH3_len_0to16_128b(ਨਿਵੇਸ਼_2, len, kSecret, /*seed64=*/0);
+  ਜੇ (len <= 128)
+    ਵਾਪਸ XXH3_len_17to128_128b(ਨਿਵੇਸ਼_2, len, kSecret, ਆਕਾਰ(kSecret),
                                  /*seed64=*/0);
-  if (len <= XXH3_MIDSIZE_MAX)
-    return XXH3_len_129to240_128b(input, len, kSecret, sizeof(kSecret),
+  ਜੇ (len <= XXH3_MIDSIZE_MAX)
+    ਵਾਪਸ XXH3_len_129to240_128b(ਨਿਵੇਸ਼_2, len, kSecret, ਆਕਾਰ(kSecret),
                                   /*seed64=*/0);
-  return XXH3_hashLong_128b(input, len, kSecret, sizeof(kSecret));
+  ਵਾਪਸ XXH3_hashLong_128b(ਨਿਵੇਸ਼_2, len, kSecret, ਆਕਾਰ(kSecret));
 }

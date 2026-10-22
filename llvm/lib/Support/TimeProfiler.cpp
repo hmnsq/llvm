@@ -10,101 +10,101 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/TimeProfiler.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/STLFunctionalExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Support/Compression.h"
-#include "llvm/Support/JSON.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Threading.h"
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <vector>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/TimeProfiler.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/STLExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/STLFunctionalExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallVector.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringMap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Compression.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/JSON.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Process.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Threading.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <algorithm>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <chrono>
+#ਅਨ੍ਤਰ੍ਭਾਵ <memory>
+#ਅਨ੍ਤਰ੍ਭਾਵ <mutex>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string>
+#ਅਨ੍ਤਰ੍ਭਾਵ <vector>
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::microseconds;
-using std::chrono::steady_clock;
-using std::chrono::system_clock;
-using std::chrono::time_point;
-using std::chrono::time_point_cast;
+ਵਰਤੋਂ std::chrono::duration;
+ਵਰਤੋਂ std::chrono::duration_cast;
+ਵਰਤੋਂ std::chrono::microseconds;
+ਵਰਤੋਂ std::chrono::steady_clock;
+ਵਰਤੋਂ std::chrono::system_clock;
+ਵਰਤੋਂ std::chrono::ਸਮਾਂ_ਬਿੰਦੂ_2;
+ਵਰਤੋਂ std::chrono::ਸਮਾਂ_ਬਿੰਦੂ_cast;
 
-struct TimeTraceProfilerInstances {
-  std::mutex Lock;
-  std::vector<TimeTraceProfiler *> List;
+ਬਣਤਰ ਸਮਾਂ_Trace_Profiler_Instances {
+  std::mutex ਤਾਲਾ_2;
+  std::ਸਦਿਸ਼<ਸਮਾਂ_Trace_Profiler *> List;
 };
 
-TimeTraceProfilerInstances &getTimeTraceProfilerInstances() {
-  static TimeTraceProfilerInstances Instances;
-  return Instances;
+ਸਮਾਂ_Trace_Profiler_Instances &get_ਸਮਾਂ_Trace_Profiler_Instances() {
+  ਸਥਿਰ ਸਮਾਂ_Trace_Profiler_Instances Instances;
+  ਵਾਪਸ Instances;
 }
 
-static const char TimeTraceFileExtension[] = ".time-trace.json";
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ ਸਮਾਂ_Trace_File_Extension[] = ".time-trace.json";
 
 } // anonymous namespace
 
 // Per Thread instance
-static LLVM_THREAD_LOCAL TimeTraceProfiler *TimeTraceProfilerInstance = nullptr;
+ਸਥਿਰ LLVM_THREAD_LOCAL ਸਮਾਂ_Trace_Profiler *ਸਮਾਂ_Trace_Profiler_Instance = ਖਾਲੀ_ਸੂਚਕ;
 
-TimeTraceProfiler *llvm::getTimeTraceProfilerInstance() {
-  return TimeTraceProfilerInstance;
+ਸਮਾਂ_Trace_Profiler *llvm::get_ਸਮਾਂ_Trace_Profiler_Instance() {
+  ਵਾਪਸ ਸਮਾਂ_Trace_Profiler_Instance;
 }
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
-using ClockType = steady_clock;
-using TimePointType = time_point<ClockType>;
-using DurationType = duration<ClockType::rep, ClockType::period>;
-using CountAndDurationType = std::pair<size_t, DurationType>;
-using NameAndCountAndDurationType =
-    std::pair<std::string, CountAndDurationType>;
+ਵਰਤੋਂ ClockType = steady_clock;
+ਵਰਤੋਂ ਸਮਾਂ_ਬਿੰਦੂ_Type = ਸਮਾਂ_ਬਿੰਦੂ_2<ClockType>;
+ਵਰਤੋਂ DurationType = duration<ClockType::rep, ClockType::period>;
+ਵਰਤੋਂ ਗਿਣਤੀ_And_Duration_Type = std::pair<size_t, DurationType>;
+ਵਰਤੋਂ Name_And_ਗਿਣਤੀ_And_Duration_Type =
+    std::pair<std::string, ਗਿਣਤੀ_And_Duration_Type>;
 
 } // anonymous namespace
 
 /// Represents an open or completed time section entry to be captured.
-struct llvm::TimeTraceProfilerEntry {
-  const TimePointType Start;
-  TimePointType End;
-  const std::string Name;
-  TimeTraceMetadata Metadata;
+ਬਣਤਰ llvm::ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ {
+  ਅਚਲ ਸਮਾਂ_ਬਿੰਦੂ_Type ਸ਼ੁਰੂ;
+  ਸਮਾਂ_ਬਿੰਦੂ_Type ਸਿਰਾ_2;
+  ਅਚਲ std::string Name;
+  ਸਮਾਂ_Trace_Metadata Metadata;
 
-  const TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent;
-  TimeTraceProfilerEntry(TimePointType &&S, TimePointType &&E, std::string &&N,
-                         std::string &&Dt, TimeTraceEventType Et)
-      : Start(std::move(S)), End(std::move(E)), Name(std::move(N)), Metadata(),
+  ਅਚਲ ਸਮਾਂ_Trace_Event_Type EventType = ਸਮਾਂ_Trace_Event_Type::CompleteEvent;
+  ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ(ਸਮਾਂ_ਬਿੰਦੂ_Type &&S, ਸਮਾਂ_ਬਿੰਦੂ_Type &&E, std::string &&N,
+                         std::string &&Dt, ਸਮਾਂ_Trace_Event_Type Et)
+      : ਸ਼ੁਰੂ(std::move(S)), ਸਿਰਾ_2(std::move(E)), Name(std::move(N)), Metadata(),
         EventType(Et) {
     Metadata.Detail = std::move(Dt);
   }
 
-  TimeTraceProfilerEntry(TimePointType &&S, TimePointType &&E, std::string &&N,
-                         TimeTraceMetadata &&Mt, TimeTraceEventType Et)
-      : Start(std::move(S)), End(std::move(E)), Name(std::move(N)),
+  ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ(ਸਮਾਂ_ਬਿੰਦੂ_Type &&S, ਸਮਾਂ_ਬਿੰਦੂ_Type &&E, std::string &&N,
+                         ਸਮਾਂ_Trace_Metadata &&Mt, ਸਮਾਂ_Trace_Event_Type Et)
+      : ਸ਼ੁਰੂ(std::move(S)), ਸਿਰਾ_2(std::move(E)), Name(std::move(N)),
         Metadata(std::move(Mt)), EventType(Et) {}
 
   // Calculate timings for FlameGraph. Cast time points to microsecond precision
   // rather than casting duration. This avoids truncation issues causing inner
   // scopes overruning outer scopes.
-  ClockType::rep getFlameGraphStartUs(TimePointType StartTime) const {
-    return (time_point_cast<microseconds>(Start) -
-            time_point_cast<microseconds>(StartTime))
-        .count();
+  ClockType::rep get_Flame_ਗ੍ਰਾਫ_ਸ਼ੁਰੂ_Us(ਸਮਾਂ_ਬਿੰਦੂ_Type ਸ਼ੁਰੂ_ਸਮਾਂ) ਅਚਲ {
+    ਵਾਪਸ (ਸਮਾਂ_ਬਿੰਦੂ_cast<microseconds>(ਸ਼ੁਰੂ) -
+            ਸਮਾਂ_ਬਿੰਦੂ_cast<microseconds>(ਸ਼ੁਰੂ_ਸਮਾਂ))
+        .ਗਿਣਤੀ_2();
   }
 
-  ClockType::rep getFlameGraphDurUs() const {
-    return (time_point_cast<microseconds>(End) -
-            time_point_cast<microseconds>(Start))
-        .count();
+  ClockType::rep get_Flame_ਗ੍ਰਾਫ_Dur_Us() ਅਚਲ {
+    ਵਾਪਸ (ਸਮਾਂ_ਬਿੰਦੂ_cast<microseconds>(ਸਿਰਾ_2) -
+            ਸਮਾਂ_ਬਿੰਦੂ_cast<microseconds>(ਸ਼ੁਰੂ))
+        .ਗਿਣਤੀ_2();
   }
 };
 
@@ -112,88 +112,88 @@ struct llvm::TimeTraceProfilerEntry {
 // that happen during an open event are associated with the duration of this
 // parent event and they are dropped if parent duration is shorter than
 // the granularity.
-struct InProgressEntry {
-  TimeTraceProfilerEntry Event;
-  std::vector<TimeTraceProfilerEntry> InstantEvents;
+ਬਣਤਰ ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ {
+  ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ Event;
+  std::ਸਦਿਸ਼<ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ> InstantEvents;
 
-  InProgressEntry(TimePointType S, TimePointType E, std::string N,
-                  std::string Dt, TimeTraceEventType Et)
+  ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ(ਸਮਾਂ_ਬਿੰਦੂ_Type S, ਸਮਾਂ_ਬਿੰਦੂ_Type E, std::string N,
+                  std::string Dt, ਸਮਾਂ_Trace_Event_Type Et)
       : Event(std::move(S), std::move(E), std::move(N), std::move(Dt), Et),
         InstantEvents() {}
 
-  InProgressEntry(TimePointType S, TimePointType E, std::string N,
-                  TimeTraceMetadata Mt, TimeTraceEventType Et)
+  ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ(ਸਮਾਂ_ਬਿੰਦੂ_Type S, ਸਮਾਂ_ਬਿੰਦੂ_Type E, std::string N,
+                  ਸਮਾਂ_Trace_Metadata Mt, ਸਮਾਂ_Trace_Event_Type Et)
       : Event(std::move(S), std::move(E), std::move(N), std::move(Mt), Et),
         InstantEvents() {}
 };
 
-struct llvm::TimeTraceProfiler {
-  TimeTraceProfiler(
-      unsigned TimeTraceGranularity = 0, StringRef ProcName = "",
-      bool TimeTraceVerbose = false,
-      TimeTraceCompression TimeTraceCompress = TimeTraceCompression::Infer)
-      : BeginningOfTime(system_clock::now()), StartTime(ClockType::now()),
+ਬਣਤਰ llvm::ਸਮਾਂ_Trace_Profiler {
+  ਸਮਾਂ_Trace_Profiler(
+      ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਮਾਂ_Trace_Granularity = 0, StringRef ProcName = "",
+      ਤਾਰਕਿਕ ਸਮਾਂ_Trace_Verbose = ਝੂਠ,
+      ਸਮਾਂ_Trace_Compression ਸਮਾਂ_Trace_Compress = ਸਮਾਂ_Trace_Compression::Infer)
+      : Beginning_ਦਾ_ਸਮਾਂ(system_clock::now()), ਸ਼ੁਰੂ_ਸਮਾਂ(ClockType::now()),
         ProcName(ProcName), Pid(sys::Process::getProcessId()),
-        Tid(llvm::get_threadid()), TimeTraceGranularity(TimeTraceGranularity),
-        TimeTraceVerbose(TimeTraceVerbose),
-        TimeTraceCompress(TimeTraceCompress) {
+        Tid(llvm::get_threadid()), ਸਮਾਂ_Trace_Granularity(ਸਮਾਂ_Trace_Granularity),
+        ਸਮਾਂ_Trace_Verbose(ਸਮਾਂ_Trace_Verbose),
+        ਸਮਾਂ_Trace_Compress(ਸਮਾਂ_Trace_Compress) {
     llvm::get_thread_name(ThreadName);
   }
 
-  TimeTraceProfilerEntry *
+  ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *
   begin(std::string Name, llvm::function_ref<std::string()> Detail,
-        TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent) {
-    assert(EventType != TimeTraceEventType::InstantEvent &&
+        ਸਮਾਂ_Trace_Event_Type EventType = ਸਮਾਂ_Trace_Event_Type::CompleteEvent) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(EventType != ਸਮਾਂ_Trace_Event_Type::InstantEvent &&
            "Instant Events don't have begin and end.");
-    Stack.emplace_back(std::make_unique<InProgressEntry>(
-        ClockType::now(), TimePointType(), std::move(Name), Detail(),
+    ਢੇਰ.emplace_ਪਿੱਠ(std::make_unique<ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ>(
+        ClockType::now(), ਸਮਾਂ_ਬਿੰਦੂ_Type(), std::move(Name), Detail(),
         EventType));
-    return &Stack.back()->Event;
+    ਵਾਪਸ &ਢੇਰ.ਪਿੱਠ()->Event;
   }
 
-  TimeTraceProfilerEntry *
-  begin(std::string Name, llvm::function_ref<TimeTraceMetadata()> Metadata,
-        TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent) {
-    assert(EventType != TimeTraceEventType::InstantEvent &&
+  ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *
+  begin(std::string Name, llvm::function_ref<ਸਮਾਂ_Trace_Metadata()> Metadata,
+        ਸਮਾਂ_Trace_Event_Type EventType = ਸਮਾਂ_Trace_Event_Type::CompleteEvent) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(EventType != ਸਮਾਂ_Trace_Event_Type::InstantEvent &&
            "Instant Events don't have begin and end.");
-    Stack.emplace_back(std::make_unique<InProgressEntry>(
-        ClockType::now(), TimePointType(), std::move(Name), Metadata(),
+    ਢੇਰ.emplace_ਪਿੱਠ(std::make_unique<ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ>(
+        ClockType::now(), ਸਮਾਂ_ਬਿੰਦੂ_Type(), std::move(Name), Metadata(),
         EventType));
-    return &Stack.back()->Event;
+    ਵਾਪਸ &ਢੇਰ.ਪਿੱਠ()->Event;
   }
 
-  void insert(std::string Name, llvm::function_ref<std::string()> Detail) {
-    if (Stack.empty())
-      return;
+  ਖਾਲੀ ਪਾਓ(std::string Name, llvm::function_ref<std::string()> Detail) {
+    ਜੇ (ਢੇਰ.ਖਾਲੀ_ਥਾਵਾਂ())
+      ਵਾਪਸ;
 
-    Stack.back()->InstantEvents.emplace_back(TimeTraceProfilerEntry(
-        ClockType::now(), TimePointType(), std::move(Name), Detail(),
-        TimeTraceEventType::InstantEvent));
+    ਢੇਰ.ਪਿੱਠ()->InstantEvents.emplace_ਪਿੱਠ(ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ(
+        ClockType::now(), ਸਮਾਂ_ਬਿੰਦੂ_Type(), std::move(Name), Detail(),
+        ਸਮਾਂ_Trace_Event_Type::InstantEvent));
   }
 
-  void end() {
-    assert(!Stack.empty() && "Must call begin() first");
-    end(Stack.back()->Event);
+  ਖਾਲੀ ਸਿਰਾ() {
+    ਪ੍ਰਤਿਜ੍ਞਾ(!ਢੇਰ.ਖਾਲੀ_ਥਾਵਾਂ() && "Must call begin() first");
+    ਸਿਰਾ(ਢੇਰ.ਪਿੱਠ()->Event);
   }
 
-  void end(TimeTraceProfilerEntry &E) {
-    assert(!Stack.empty() && "Must call begin() first");
-    E.End = ClockType::now();
+  ਖਾਲੀ ਸਿਰਾ(ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ &E) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(!ਢੇਰ.ਖਾਲੀ_ਥਾਵਾਂ() && "Must call begin() first");
+    E.ਸਿਰਾ_2 = ClockType::now();
 
     // Calculate duration at full precision for overall counts.
-    DurationType Duration = E.End - E.Start;
+    DurationType Duration = E.ਸਿਰਾ_2 - E.ਸ਼ੁਰੂ;
 
-    const auto *Iter =
-        llvm::find_if(Stack, [&](const std::unique_ptr<InProgressEntry> &Val) {
-          return &Val->Event == &E;
+    ਅਚਲ ਸਵੈਚਾਲਿਤ *Iter =
+        llvm::ਲੱਭੋ_if(ਢੇਰ, [&](ਅਚਲ std::unique_ptr<ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ> &Val) {
+          ਵਾਪਸ &Val->Event == &E;
         });
-    assert(Iter != Stack.end() && "Event not in the Stack");
+    ਪ੍ਰਤਿਜ੍ਞਾ(Iter != ਢੇਰ.ਸਿਰਾ() && "Event not in the Stack");
 
     // Only include sections longer or equal to TimeTraceGranularity msec.
-    if (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
-      Entries.emplace_back(E);
-      for (auto &IE : Iter->get()->InstantEvents) {
-        Entries.emplace_back(IE);
+    ਜੇ (duration_cast<microseconds>(Duration).ਗਿਣਤੀ_2() >= ਸਮਾਂ_Trace_Granularity) {
+      Entries.emplace_ਪਿੱਠ(E);
+      ਲਈ (ਸਵੈਚਾਲਿਤ &IE : Iter->get()->InstantEvents) {
+        Entries.emplace_ਪਿੱਠ(IE);
       }
     }
 
@@ -202,28 +202,28 @@ struct llvm::TimeTraceProfiler {
     // templates from within, we only want to add the topmost one. "topmost"
     // happens to be the ones that don't have any currently open entries above
     // itself.
-    if (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
-                      [&](const std::unique_ptr<InProgressEntry> &Val) {
-                        return Val->Event.Name == E.Name;
+    ਜੇ (llvm::none_ਦਾ(llvm::drop_begin(llvm::ਉਲਟ(ਢੇਰ)),
+                      [&](ਅਚਲ std::unique_ptr<ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ> &Val) {
+                        ਵਾਪਸ Val->Event.Name == E.Name;
                       })) {
-      auto &CountAndTotal = CountAndTotalPerName[E.Name];
-      CountAndTotal.first++;
-      CountAndTotal.second += Duration;
+      ਸਵੈਚਾਲਿਤ &ਗਿਣਤੀ_And_ਕੁੱਲ = ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name[E.Name];
+      ਗਿਣਤੀ_And_ਕੁੱਲ.ਪਹਿਲਾ_2++;
+      ਗਿਣਤੀ_And_ਕੁੱਲ.ਦੂਜਾ_2 += Duration;
     };
 
-    Stack.erase(Iter);
+    ਢੇਰ.erase(Iter);
   }
 
   // Write events from this TimeTraceProfilerInstance and
   // ThreadTimeTraceProfilerInstances.
-  void write(raw_ostream &OS) {
+  ਖਾਲੀ ਲਿਖ(raw_ostream &OS) {
     // Acquire Mutex as reading ThreadTimeTraceProfilerInstances.
-    auto &Instances = getTimeTraceProfilerInstances();
-    std::lock_guard<std::mutex> Lock(Instances.Lock);
-    assert(Stack.empty() &&
+    ਸਵੈਚਾਲਿਤ &Instances = get_ਸਮਾਂ_Trace_Profiler_Instances();
+    std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(Instances.ਤਾਲਾ_2);
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਢੇਰ.ਖਾਲੀ_ਥਾਵਾਂ() &&
            "All profiler sections should be ended when calling write");
-    assert(llvm::all_of(Instances.List,
-                        [](const auto &TTP) { return TTP->Stack.empty(); }) &&
+    ਪ੍ਰਤਿਜ੍ਞਾ(llvm::all_ਦਾ(Instances.List,
+                        [](ਅਚਲ ਸਵੈਚਾਲਿਤ &TTP) { ਵਾਪਸ TTP->ਢੇਰ.ਖਾਲੀ_ਥਾਵਾਂ(); }) &&
            "All profiler sections should be ended when calling write");
 
     json::OStream J(OS);
@@ -232,44 +232,44 @@ struct llvm::TimeTraceProfiler {
     J.arrayBegin();
 
     // Emit all events for the main flame graph.
-    auto writeEvent = [&](const auto &E, uint64_t Tid) {
-      auto StartUs = E.getFlameGraphStartUs(StartTime);
-      auto DurUs = E.getFlameGraphDurUs();
+    ਸਵੈਚਾਲਿਤ writeEvent = [&](ਅਚਲ ਸਵੈਚਾਲਿਤ &E, uint64_t Tid) {
+      ਸਵੈਚਾਲਿਤ ਸ਼ੁਰੂ_Us = E.get_Flame_ਗ੍ਰਾਫ_ਸ਼ੁਰੂ_Us(ਸ਼ੁਰੂ_ਸਮਾਂ);
+      ਸਵੈਚਾਲਿਤ DurUs = E.get_Flame_ਗ੍ਰਾਫ_Dur_Us();
 
       J.object([&] {
         J.attribute("pid", Pid);
         J.attribute("tid", int64_t(Tid));
-        J.attribute("ts", StartUs);
-        if (E.EventType == TimeTraceEventType::AsyncEvent) {
+        J.attribute("ts", ਸ਼ੁਰੂ_Us);
+        ਜੇ (E.EventType == ਸਮਾਂ_Trace_Event_Type::AsyncEvent) {
           J.attribute("cat", E.Name);
           J.attribute("ph", "b");
           J.attribute("id", 0);
-        } else if (E.EventType == TimeTraceEventType::CompleteEvent) {
+        } ਨਹੀਂਤਾਂ ਜੇ (E.EventType == ਸਮਾਂ_Trace_Event_Type::CompleteEvent) {
           J.attribute("ph", "X");
           J.attribute("dur", DurUs);
-        } else { // instant event
-          assert(E.EventType == TimeTraceEventType::InstantEvent &&
+        } ਨਹੀਂਤਾਂ { // instant event
+          ਪ੍ਰਤਿਜ੍ਞਾ(E.EventType == ਸਮਾਂ_Trace_Event_Type::InstantEvent &&
                  "InstantEvent expected");
           J.attribute("ph", "i");
         }
         J.attribute("name", E.Name);
-        if (!E.Metadata.isEmpty()) {
+        ਜੇ (!E.Metadata.is_ਖਾਲੀ_ਥਾਵਾਂ()) {
           J.attributeObject("args", [&] {
-            if (!E.Metadata.Detail.empty())
+            ਜੇ (!E.Metadata.Detail.ਖਾਲੀ_ਥਾਵਾਂ())
               J.attribute("detail", E.Metadata.Detail);
-            if (!E.Metadata.File.empty())
+            ਜੇ (!E.Metadata.File.ਖਾਲੀ_ਥਾਵਾਂ())
               J.attribute("file", E.Metadata.File);
-            if (E.Metadata.Line > 0)
-              J.attribute("line", E.Metadata.Line);
+            ਜੇ (E.Metadata.ਸਤਰ > 0)
+              J.attribute("line", E.Metadata.ਸਤਰ);
           });
         }
       });
 
-      if (E.EventType == TimeTraceEventType::AsyncEvent) {
+      ਜੇ (E.EventType == ਸਮਾਂ_Trace_Event_Type::AsyncEvent) {
         J.object([&] {
           J.attribute("pid", Pid);
           J.attribute("tid", int64_t(Tid));
-          J.attribute("ts", StartUs + DurUs);
+          J.attribute("ts", ਸ਼ੁਰੂ_Us + DurUs);
           J.attribute("cat", E.Name);
           J.attribute("ph", "e");
           J.attribute("id", 0);
@@ -277,67 +277,67 @@ struct llvm::TimeTraceProfiler {
         });
       }
     };
-    for (const TimeTraceProfilerEntry &E : Entries)
-      writeEvent(E, this->Tid);
-    for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const TimeTraceProfilerEntry &E : TTP->Entries)
+    ਲਈ (ਅਚਲ ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ &E : Entries)
+      writeEvent(E, ਇਹ->Tid);
+    ਲਈ (ਅਚਲ ਸਮਾਂ_Trace_Profiler *TTP : Instances.List)
+      ਲਈ (ਅਚਲ ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ &E : TTP->Entries)
         writeEvent(E, TTP->Tid);
 
     // Emit totals by section name as additional "thread" events, sorted from
     // longest one.
     // Find highest used thread id.
-    uint64_t MaxTid = this->Tid;
-    for (const TimeTraceProfiler *TTP : Instances.List)
+    uint64_t MaxTid = ਇਹ->Tid;
+    ਲਈ (ਅਚਲ ਸਮਾਂ_Trace_Profiler *TTP : Instances.List)
       MaxTid = std::max(MaxTid, TTP->Tid);
 
     // Combine all CountAndTotalPerName from threads into one.
-    StringMap<CountAndDurationType> AllCountAndTotalPerName;
-    auto combineStat = [&](const auto &Stat) {
-      StringRef Key = Stat.getKey();
-      auto Value = Stat.getValue();
-      auto &CountAndTotal = AllCountAndTotalPerName[Key];
-      CountAndTotal.first += Value.first;
-      CountAndTotal.second += Value.second;
+    StringMap<ਗਿਣਤੀ_And_Duration_Type> All_ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name;
+    ਸਵੈਚਾਲਿਤ combineStat = [&](ਅਚਲ ਸਵੈਚਾਲਿਤ &Stat) {
+      StringRef ਕੁੰਜੀ = Stat.get_ਕੁੰਜੀ();
+      ਸਵੈਚਾਲਿਤ ਮੁੱਲ = Stat.get_ਮੁੱਲ();
+      ਸਵੈਚਾਲਿਤ &ਗਿਣਤੀ_And_ਕੁੱਲ = All_ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name[ਕੁੰਜੀ];
+      ਗਿਣਤੀ_And_ਕੁੱਲ.ਪਹਿਲਾ_2 += ਮੁੱਲ.ਪਹਿਲਾ_2;
+      ਗਿਣਤੀ_And_ਕੁੱਲ.ਦੂਜਾ_2 += ਮੁੱਲ.ਦੂਜਾ_2;
     };
-    for (const auto &Stat : CountAndTotalPerName)
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Stat : ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name)
       combineStat(Stat);
-    for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const auto &Stat : TTP->CountAndTotalPerName)
+    ਲਈ (ਅਚਲ ਸਮਾਂ_Trace_Profiler *TTP : Instances.List)
+      ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Stat : TTP->ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name)
         combineStat(Stat);
 
-    std::vector<NameAndCountAndDurationType> SortedTotals;
-    SortedTotals.reserve(AllCountAndTotalPerName.size());
-    for (const auto &Total : AllCountAndTotalPerName)
-      SortedTotals.emplace_back(std::string(Total.getKey()), Total.getValue());
+    std::ਸਦਿਸ਼<Name_And_ਗਿਣਤੀ_And_Duration_Type> SortedTotals;
+    SortedTotals.reserve(All_ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name.ਮਾਪ_2());
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &ਕੁੱਲ : All_ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name)
+      SortedTotals.emplace_ਪਿੱਠ(std::string(ਕੁੱਲ.get_ਕੁੰਜੀ()), ਕੁੱਲ.get_ਮੁੱਲ());
 
-    llvm::sort(SortedTotals, [](const NameAndCountAndDurationType &A,
-                                const NameAndCountAndDurationType &B) {
-      return A.second.second > B.second.second;
+    llvm::ਛਾਂਟੋ(SortedTotals, [](ਅਚਲ Name_And_ਗਿਣਤੀ_And_Duration_Type &A,
+                                ਅਚਲ Name_And_ਗਿਣਤੀ_And_Duration_Type &B) {
+      ਵਾਪਸ A.ਦੂਜਾ_2.ਦੂਜਾ_2 > B.ਦੂਜਾ_2.ਦੂਜਾ_2;
     });
 
     // Report totals on separate threads of tracing file.
-    uint64_t TotalTid = MaxTid + 1;
-    for (const NameAndCountAndDurationType &Total : SortedTotals) {
-      auto DurUs = duration_cast<microseconds>(Total.second.second).count();
-      auto Count = AllCountAndTotalPerName[Total.first].first;
+    uint64_t ਕੁੱਲ_Tid = MaxTid + 1;
+    ਲਈ (ਅਚਲ Name_And_ਗਿਣਤੀ_And_Duration_Type &ਕੁੱਲ : SortedTotals) {
+      ਸਵੈਚਾਲਿਤ DurUs = duration_cast<microseconds>(ਕੁੱਲ.ਦੂਜਾ_2.ਦੂਜਾ_2).ਗਿਣਤੀ_2();
+      ਸਵੈਚਾਲਿਤ ਗਿਣਤੀ_3 = All_ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name[ਕੁੱਲ.ਪਹਿਲਾ_2].ਪਹਿਲਾ_2;
 
       J.object([&] {
         J.attribute("pid", Pid);
-        J.attribute("tid", int64_t(TotalTid));
+        J.attribute("tid", int64_t(ਕੁੱਲ_Tid));
         J.attribute("ph", "X");
         J.attribute("ts", 0);
         J.attribute("dur", DurUs);
-        J.attribute("name", "Total " + Total.first);
+        J.attribute("name", "Total " + ਕੁੱਲ.ਪਹਿਲਾ_2);
         J.attributeObject("args", [&] {
-          J.attribute("count", int64_t(Count));
-          J.attribute("avg ms", int64_t(DurUs / Count / 1000));
+          J.attribute("count", int64_t(ਗਿਣਤੀ_3));
+          J.attribute("avg ms", int64_t(DurUs / ਗਿਣਤੀ_3 / 1000));
         });
       });
 
-      ++TotalTid;
+      ++ਕੁੱਲ_Tid;
     }
 
-    auto writeMetadataEvent = [&](const char *Name, uint64_t Tid,
+    ਸਵੈਚਾਲਿਤ writeMetadataEvent = [&](ਅਚਲ ਅੱਖਰ *Name, uint64_t Tid,
                                   StringRef arg) {
       J.object([&] {
         J.attribute("cat", "");
@@ -352,207 +352,207 @@ struct llvm::TimeTraceProfiler {
 
     writeMetadataEvent("process_name", Tid, ProcName);
     writeMetadataEvent("thread_name", Tid, ThreadName);
-    for (const TimeTraceProfiler *TTP : Instances.List)
+    ਲਈ (ਅਚਲ ਸਮਾਂ_Trace_Profiler *TTP : Instances.List)
       writeMetadataEvent("thread_name", TTP->Tid, TTP->ThreadName);
 
-    J.arrayEnd();
-    J.attributeEnd();
+    J.array_ਸਿਰਾ();
+    J.attribute_ਸਿਰਾ();
 
     // Emit the absolute time when this TimeProfiler started.
     // This can be used to combine the profiling data from
     // multiple processes and preserve actual time intervals.
     J.attribute("beginningOfTime",
-                time_point_cast<microseconds>(BeginningOfTime)
-                    .time_since_epoch()
-                    .count());
+                ਸਮਾਂ_ਬਿੰਦੂ_cast<microseconds>(Beginning_ਦਾ_ਸਮਾਂ)
+                    .ਸਮਾਂ_since_epoch()
+                    .ਗਿਣਤੀ_2());
 
-    J.objectEnd();
+    J.object_ਸਿਰਾ();
   }
 
-  SmallVector<std::unique_ptr<InProgressEntry>, 16> Stack;
-  SmallVector<TimeTraceProfilerEntry, 128> Entries;
-  StringMap<CountAndDurationType> CountAndTotalPerName;
+  Small_ਸਦਿਸ਼<std::unique_ptr<ਵਿੱਚ_ਤਰੱਕੀ_ਇੰਦਰਾਜ>, 16> ਢੇਰ;
+  Small_ਸਦਿਸ਼<ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ, 128> Entries;
+  StringMap<ਗਿਣਤੀ_And_Duration_Type> ਗਿਣਤੀ_And_ਕੁੱਲ_ਪ੍ਰਤੀ_Name;
   // System clock time when the session was begun.
-  const time_point<system_clock> BeginningOfTime;
+  ਅਚਲ ਸਮਾਂ_ਬਿੰਦੂ_2<system_clock> Beginning_ਦਾ_ਸਮਾਂ;
   // Profiling clock time when the session was begun.
-  const TimePointType StartTime;
-  const std::string ProcName;
-  const sys::Process::Pid Pid;
+  ਅਚਲ ਸਮਾਂ_ਬਿੰਦੂ_Type ਸ਼ੁਰੂ_ਸਮਾਂ;
+  ਅਚਲ std::string ProcName;
+  ਅਚਲ sys::Process::Pid Pid;
   SmallString<0> ThreadName;
-  const uint64_t Tid;
+  ਅਚਲ uint64_t Tid;
 
   // Minimum time granularity (in microseconds)
-  const unsigned TimeTraceGranularity;
+  ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਮਾਂ_Trace_Granularity;
 
   // Make time trace capture verbose event details (e.g. source filenames). This
   // can increase the size of the output by 2-3 times.
-  const bool TimeTraceVerbose;
+  ਅਚਲ ਤਾਰਕਿਕ ਸਮਾਂ_Trace_Verbose;
 
   // Compression mode for output.
-  TimeTraceCompression TimeTraceCompress;
+  ਸਮਾਂ_Trace_Compression ਸਮਾਂ_Trace_Compress;
 };
 
-bool llvm::isTimeTraceVerbose() {
-  return getTimeTraceProfilerInstance() &&
-         getTimeTraceProfilerInstance()->TimeTraceVerbose;
+ਤਾਰਕਿਕ llvm::is_ਸਮਾਂ_Trace_Verbose() {
+  ਵਾਪਸ get_ਸਮਾਂ_Trace_Profiler_Instance() &&
+         get_ਸਮਾਂ_Trace_Profiler_Instance()->ਸਮਾਂ_Trace_Verbose;
 }
 
-TimeTraceCompression llvm::inferTimeTraceCompressionFromPath(StringRef Path) {
-  StringRef Ext = llvm::sys::path::extension(Path);
-  if (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
-    return TimeTraceCompression::Zstd;
-  return TimeTraceCompression::None;
+ਸਮਾਂ_Trace_Compression llvm::infer_ਸਮਾਂ_Trace_Compression_From_ਰਸਤਾ(StringRef ਰਸਤਾ) {
+  StringRef Ext = llvm::sys::ਰਸਤਾ_2::extension(ਰਸਤਾ);
+  ਜੇ (Ext.equals_insensitive(".zst") || Ext.equals_insensitive(".zstd"))
+    ਵਾਪਸ ਸਮਾਂ_Trace_Compression::Zstd;
+  ਵਾਪਸ ਸਮਾਂ_Trace_Compression::None;
 }
 
-void llvm::timeTraceProfilerInitialize(unsigned TimeTraceGranularity,
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_Profiler_Initialize(ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਮਾਂ_Trace_Granularity,
                                        StringRef ProcName,
-                                       bool TimeTraceVerbose,
-                                       TimeTraceCompression TimeTraceCompress) {
-  assert(TimeTraceProfilerInstance == nullptr &&
+                                       ਤਾਰਕਿਕ ਸਮਾਂ_Trace_Verbose,
+                                       ਸਮਾਂ_Trace_Compression ਸਮਾਂ_Trace_Compress) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਸਮਾਂ_Trace_Profiler_Instance == ਖਾਲੀ_ਸੂਚਕ &&
          "Profiler should not be initialized");
-  TimeTraceProfilerInstance = new TimeTraceProfiler(
-      TimeTraceGranularity, llvm::sys::path::filename(ProcName),
-      TimeTraceVerbose, TimeTraceCompress);
+  ਸਮਾਂ_Trace_Profiler_Instance = ਨਵਾਂ ਸਮਾਂ_Trace_Profiler(
+      ਸਮਾਂ_Trace_Granularity, llvm::sys::ਰਸਤਾ_2::filename(ProcName),
+      ਸਮਾਂ_Trace_Verbose, ਸਮਾਂ_Trace_Compress);
 }
 
 // Removes all TimeTraceProfilerInstances.
 // Called from main thread.
-void llvm::timeTraceProfilerCleanup() {
-  delete TimeTraceProfilerInstance;
-  TimeTraceProfilerInstance = nullptr;
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_Profiler_Cleanup() {
+  ਮਿਟਾਓ ਸਮਾਂ_Trace_Profiler_Instance;
+  ਸਮਾਂ_Trace_Profiler_Instance = ਖਾਲੀ_ਸੂਚਕ;
 
-  auto &Instances = getTimeTraceProfilerInstances();
-  std::lock_guard<std::mutex> Lock(Instances.Lock);
-  for (auto *TTP : Instances.List)
-    delete TTP;
+  ਸਵੈਚਾਲਿਤ &Instances = get_ਸਮਾਂ_Trace_Profiler_Instances();
+  std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(Instances.ਤਾਲਾ_2);
+  ਲਈ (ਸਵੈਚਾਲਿਤ *TTP : Instances.List)
+    ਮਿਟਾਓ TTP;
   Instances.List.clear();
 }
 
 // Finish TimeTraceProfilerInstance on a worker thread.
 // This doesn't remove the instance, just moves the pointer to global vector.
-void llvm::timeTraceProfilerFinishThread() {
-  auto &Instances = getTimeTraceProfilerInstances();
-  std::lock_guard<std::mutex> Lock(Instances.Lock);
-  Instances.List.push_back(TimeTraceProfilerInstance);
-  TimeTraceProfilerInstance = nullptr;
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_Profiler_ਅੰਤ_Thread() {
+  ਸਵੈਚਾਲਿਤ &Instances = get_ਸਮਾਂ_Trace_Profiler_Instances();
+  std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(Instances.ਤਾਲਾ_2);
+  Instances.List.ਧੱਕੋ_ਪਿੱਠ(ਸਮਾਂ_Trace_Profiler_Instance);
+  ਸਮਾਂ_Trace_Profiler_Instance = ਖਾਲੀ_ਸੂਚਕ;
 }
 
-void llvm::timeTraceProfilerWrite(raw_pwrite_stream &OS) {
-  assert(TimeTraceProfilerInstance != nullptr &&
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_Profiler_Write(raw_pwrite_ਧਾਰਾ &OS) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ &&
          "Profiler object can't be null");
-  TimeTraceCompression CompressType =
-      TimeTraceProfilerInstance->TimeTraceCompress;
-  if (CompressType != TimeTraceCompression::Zstd) {
-    TimeTraceProfilerInstance->write(OS);
-    return;
+  ਸਮਾਂ_Trace_Compression CompressType =
+      ਸਮਾਂ_Trace_Profiler_Instance->ਸਮਾਂ_Trace_Compress;
+  ਜੇ (CompressType != ਸਮਾਂ_Trace_Compression::Zstd) {
+    ਸਮਾਂ_Trace_Profiler_Instance->ਲਿਖ(OS);
+    ਵਾਪਸ;
   }
 
   compression::Format F = compression::Format::Zstd;
-  if (const char *Reason = compression::getReasonIfUnsupported(F))
+  ਜੇ (ਅਚਲ ਅੱਖਰ *Reason = compression::getReasonIfUnsupported(F))
     report_fatal_error(Reason);
 
-  SmallVector<char, 0> Uncompressed;
+  Small_ਸਦਿਸ਼<ਅੱਖਰ, 0> Uncompressed;
   {
     raw_svector_ostream UncompressedOS(Uncompressed);
-    TimeTraceProfilerInstance->write(UncompressedOS);
+    ਸਮਾਂ_Trace_Profiler_Instance->ਲਿਖ(UncompressedOS);
   }
-  SmallVector<uint8_t, 0> Compressed;
+  Small_ਸਦਿਸ਼<uint8_t, 0> Compressed;
   compression::compress(
       compression::Params(F),
-      ArrayRef(reinterpret_cast<const uint8_t *>(Uncompressed.data()),
-               Uncompressed.size()),
+      ArrayRef(reinterpret_cast<ਅਚਲ uint8_t *>(Uncompressed.ਅੰਕੜੇ()),
+               Uncompressed.ਮਾਪ_2()),
       Compressed);
-  OS.write(reinterpret_cast<const char *>(Compressed.data()),
-           Compressed.size());
+  OS.ਲਿਖ(reinterpret_cast<ਅਚਲ ਅੱਖਰ *>(Compressed.ਅੰਕੜੇ()),
+           Compressed.ਮਾਪ_2());
 }
 
-Error llvm::timeTraceProfilerWrite(StringRef PreferredFileName,
+Error llvm::ਸਮਾਂ_Trace_Profiler_Write(StringRef PreferredFileName,
                                    StringRef FallbackFileName) {
-  assert(TimeTraceProfilerInstance != nullptr &&
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ &&
          "Profiler object can't be null");
 
-  TimeTraceCompression CompressType =
-      TimeTraceProfilerInstance->TimeTraceCompress;
-  std::string Path = PreferredFileName.str();
-  if (Path.empty()) {
-    Path = FallbackFileName == "-" ? "out" : FallbackFileName.str();
-    Path += TimeTraceFileExtension;
-    if (CompressType == TimeTraceCompression::Zstd)
-      Path += ".zst";
-  } else if (CompressType == TimeTraceCompression::Infer) {
-    CompressType = inferTimeTraceCompressionFromPath(Path);
+  ਸਮਾਂ_Trace_Compression CompressType =
+      ਸਮਾਂ_Trace_Profiler_Instance->ਸਮਾਂ_Trace_Compress;
+  std::string ਰਸਤਾ = PreferredFileName.str();
+  ਜੇ (ਰਸਤਾ.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਰਸਤਾ = FallbackFileName == "-" ? "out" : FallbackFileName.str();
+    ਰਸਤਾ += ਸਮਾਂ_Trace_File_Extension;
+    ਜੇ (CompressType == ਸਮਾਂ_Trace_Compression::Zstd)
+      ਰਸਤਾ += ".zst";
+  } ਨਹੀਂਤਾਂ ਜੇ (CompressType == ਸਮਾਂ_Trace_Compression::Infer) {
+    CompressType = infer_ਸਮਾਂ_Trace_Compression_From_ਰਸਤਾ(ਰਸਤਾ);
   }
 
-  if (CompressType == TimeTraceCompression::Zstd) {
-    if (const char *Reason =
+  ਜੇ (CompressType == ਸਮਾਂ_Trace_Compression::Zstd) {
+    ਜੇ (ਅਚਲ ਅੱਖਰ *Reason =
             compression::getReasonIfUnsupported(compression::Format::Zstd))
-      return createStringError(inconvertibleErrorCode(), Reason);
+      ਵਾਪਸ createStringError(inconvertible_Error_ਕੋਡ(), Reason);
   }
 
-  std::error_code EC;
-  sys::fs::OpenFlags Flags = CompressType == TimeTraceCompression::Zstd
-                                 ? sys::fs::OF_None
-                                 : sys::fs::OF_TextWithCRLF;
-  raw_fd_ostream OS(Path, EC, Flags);
-  if (EC)
-    return createStringError(EC, "Could not open " + Path);
+  std::error_ਕੋਡ EC;
+  sys::fs::OpenFlags Flags = CompressType == ਸਮਾਂ_Trace_Compression::Zstd
+                                 ? sys::fs::ਦਾ_None
+                                 : sys::fs::ਦਾ_ਪਾਠ_With_CRLF;
+  raw_fd_ostream OS(ਰਸਤਾ, EC, Flags);
+  ਜੇ (EC)
+    ਵਾਪਸ createStringError(EC, "Could not open " + ਰਸਤਾ);
 
-  TimeTraceCompression SavedCompress =
-      TimeTraceProfilerInstance->TimeTraceCompress;
-  TimeTraceProfilerInstance->TimeTraceCompress = CompressType;
-  timeTraceProfilerWrite(OS);
-  TimeTraceProfilerInstance->TimeTraceCompress = SavedCompress;
-  return Error::success();
+  ਸਮਾਂ_Trace_Compression SavedCompress =
+      ਸਮਾਂ_Trace_Profiler_Instance->ਸਮਾਂ_Trace_Compress;
+  ਸਮਾਂ_Trace_Profiler_Instance->ਸਮਾਂ_Trace_Compress = CompressType;
+  ਸਮਾਂ_Trace_Profiler_Write(OS);
+  ਸਮਾਂ_Trace_Profiler_Instance->ਸਮਾਂ_Trace_Compress = SavedCompress;
+  ਵਾਪਸ Error::success();
 }
 
-TimeTraceProfilerEntry *llvm::timeTraceProfilerBegin(StringRef Name,
+ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *llvm::ਸਮਾਂ_Trace_Profiler_Begin(StringRef Name,
                                                      StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
-        TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਵਾਪਸ ਸਮਾਂ_Trace_Profiler_Instance->begin(
+        std::string(Name), [&]() { ਵਾਪਸ std::string(Detail); },
+        ਸਮਾਂ_Trace_Event_Type::CompleteEvent);
+  ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 }
 
-TimeTraceProfilerEntry *
-llvm::timeTraceProfilerBegin(StringRef Name,
+ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *
+llvm::ਸਮਾਂ_Trace_Profiler_Begin(StringRef Name,
                              llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Detail,
-                                            TimeTraceEventType::CompleteEvent);
-  return nullptr;
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਵਾਪਸ ਸਮਾਂ_Trace_Profiler_Instance->begin(std::string(Name), Detail,
+                                            ਸਮਾਂ_Trace_Event_Type::CompleteEvent);
+  ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 }
 
-TimeTraceProfilerEntry *
-llvm::timeTraceProfilerBegin(StringRef Name,
-                             llvm::function_ref<TimeTraceMetadata()> Metadata) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(std::string(Name), Metadata,
-                                            TimeTraceEventType::CompleteEvent);
-  return nullptr;
+ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *
+llvm::ਸਮਾਂ_Trace_Profiler_Begin(StringRef Name,
+                             llvm::function_ref<ਸਮਾਂ_Trace_Metadata()> Metadata) {
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਵਾਪਸ ਸਮਾਂ_Trace_Profiler_Instance->begin(std::string(Name), Metadata,
+                                            ਸਮਾਂ_Trace_Event_Type::CompleteEvent);
+  ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 }
 
-TimeTraceProfilerEntry *llvm::timeTraceAsyncProfilerBegin(StringRef Name,
+ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *llvm::ਸਮਾਂ_Trace_Async_Profiler_Begin(StringRef Name,
                                                           StringRef Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    return TimeTraceProfilerInstance->begin(
-        std::string(Name), [&]() { return std::string(Detail); },
-        TimeTraceEventType::AsyncEvent);
-  return nullptr;
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਵਾਪਸ ਸਮਾਂ_Trace_Profiler_Instance->begin(
+        std::string(Name), [&]() { ਵਾਪਸ std::string(Detail); },
+        ਸਮਾਂ_Trace_Event_Type::AsyncEvent);
+  ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 }
 
-void llvm::timeTraceAddInstantEvent(StringRef Name,
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_ਜੋੜੋ_Instant_Event(StringRef Name,
                                     llvm::function_ref<std::string()> Detail) {
-  if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->insert(std::string(Name), Detail);
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਸਮਾਂ_Trace_Profiler_Instance->ਪਾਓ(std::string(Name), Detail);
 }
 
-void llvm::timeTraceProfilerEnd() {
-  if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->end();
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_Profiler_ਸਿਰਾ() {
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਸਮਾਂ_Trace_Profiler_Instance->ਸਿਰਾ();
 }
 
-void llvm::timeTraceProfilerEnd(TimeTraceProfilerEntry *E) {
-  if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->end(*E);
+ਖਾਲੀ llvm::ਸਮਾਂ_Trace_Profiler_ਸਿਰਾ(ਸਮਾਂ_Trace_Profiler_ਇੰਦਰਾਜ *E) {
+  ਜੇ (ਸਮਾਂ_Trace_Profiler_Instance != ਖਾਲੀ_ਸੂਚਕ)
+    ਸਮਾਂ_Trace_Profiler_Instance->ਸਿਰਾ(*E);
 }

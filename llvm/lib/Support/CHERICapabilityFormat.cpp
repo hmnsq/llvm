@@ -6,58 +6,58 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CHERICapabilityFormat.h"
-#include "llvm/ADT/bit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/CHERICapabilityFormat.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/bit.h"
 
-namespace llvm {
+ਨਾਮਾਕਾਸ਼ llvm {
 
-template <typename AddressType, unsigned MW, unsigned MAX_E>
-AddressType RVYCapabilityFormat<AddressType, MW, MAX_E>::getAlignmentMaskImpl(
-    uint64_t Length) {
-  static constexpr unsigned int IE_TAKE_BITS = 3;
+ਸਾਂਚਾ <ਕਿਸਮ_ਨਾਂ ਪਤਾ_Type, ਬਿਨਾਨਿਸ਼ਾਨੀ MW, ਬਿਨਾਨਿਸ਼ਾਨੀ MAX_E>
+ਪਤਾ_Type RVYCapabilityFormat<ਪਤਾ_Type, MW, MAX_E>::get_Alignment_ਨਕਾਬ_Impl(
+    uint64_t ਲੰਮਾਈ) {
+  ਸਥਿਰ constexpr ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ IE_TAKE_ਬਿੱਟ = 3;
 
-  if (Length == 0)
-    return RVYCapabilityFormat::AddressMask;
+  ਜੇ (ਲੰਮਾਈ == 0)
+    ਵਾਪਸ RVYCapabilityFormat::ਪਤਾ_ਨਕਾਬ;
 
   // Extract bits that overflow the uncompressed mantissa window.
-  uint64_t Slice = static_cast<uint64_t>(Length) >> (MW - 1);
-  unsigned int E = 64 - llvm::countl_zero(Slice);
+  uint64_t ਟੁਕੜਾ_2 = static_cast<uint64_t>(ਲੰਮਾਈ) >> (MW - 1);
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ E = 64 - llvm::countl_zero(ਟੁਕੜਾ_2);
   // We use internal exponent if length overflows OR the denormal boundary
   // bit is set.
-  bool IE = (E != 0) || ((static_cast<uint64_t>(Length) >> (MW - 2)) & 1);
+  ਤਾਰਕਿਕ IE = (E != 0) || ((static_cast<uint64_t>(ਲੰਮਾਈ) >> (MW - 2)) & 1);
   // Include bits used by the internal exponent for the shift value.
-  unsigned int Eprime = IE ? (E + IE_TAKE_BITS) : 0;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ Eprime = IE ? (E + IE_TAKE_ਬਿੱਟ) : 0;
 
-  assert(E <= MAX_E && "Raw exponent exceeds architecture maximum");
-  assert(Eprime <= sizeof(AddressType) * 8 &&
+  ਪ੍ਰਤਿਜ੍ਞਾ(E <= MAX_E && "Raw exponent exceeds architecture maximum");
+  ਪ੍ਰਤਿਜ੍ਞਾ(Eprime <= ਆਕਾਰ(ਪਤਾ_Type) * 8 &&
          "Shift amount exceeds integer width");
 
   // Left-shift ~0 to mask out the lost precision bits
-  return RVYCapabilityFormat::AddressMask << Eprime;
+  ਵਾਪਸ RVYCapabilityFormat::ਪਤਾ_ਨਕਾਬ << Eprime;
 }
 
-template struct CHERICapabilityFormatBase<RVYCapabilityFormat<uint32_t, 10, 24>,
+ਸਾਂਚਾ ਬਣਤਰ CHERICapability_Format_ਅਧਾਰ<RVYCapabilityFormat<uint32_t, 10, 24>,
                                           uint32_t>;
-template struct CHERICapabilityFormatBase<RVYCapabilityFormat<uint64_t, 14, 52>,
+ਸਾਂਚਾ ਬਣਤਰ CHERICapability_Format_ਅਧਾਰ<RVYCapabilityFormat<uint64_t, 14, 52>,
                                           uint64_t>;
-template struct RVYCapabilityFormat<uint32_t, 10, 24>;
-template struct RVYCapabilityFormat<uint64_t, 14, 52>;
+ਸਾਂਚਾ ਬਣਤਰ RVYCapabilityFormat<uint32_t, 10, 24>;
+ਸਾਂਚਾ ਬਣਤਰ RVYCapabilityFormat<uint64_t, 14, 52>;
 
-uint32_t CHERIoTCapabilityFormat::getAlignmentMaskImpl(uint32_t Length) {
+uint32_t CHERIoTCapabilityFormat::get_Alignment_ਨਕਾਬ_Impl(uint32_t ਲੰਮਾਈ) {
   // Per section 7.13.4 and table 7.4 in the v1.0 CHERIoT specification.
-  constexpr uint32_t NINE_SET_BITS = 511;
+  constexpr uint32_t NINE_ਸੈੱਟ_ਬਿੱਟ = 511;
   uint32_t E;
-  if (Length > NINE_SET_BITS << 14)
+  ਜੇ (ਲੰਮਾਈ > NINE_ਸੈੱਟ_ਬਿੱਟ << 14)
     E = 24;
-  else {
-    E = Length > NINE_SET_BITS ? 32 - llvm::countl_zero(Length) - 9 : 0;
-    if (Length > NINE_SET_BITS << E)
+  ਨਹੀਂਤਾਂ {
+    E = ਲੰਮਾਈ > NINE_ਸੈੱਟ_ਬਿੱਟ ? 32 - llvm::countl_zero(ਲੰਮਾਈ) - 9 : 0;
+    ਜੇ (ਲੰਮਾਈ > NINE_ਸੈੱਟ_ਬਿੱਟ << E)
       ++E;
-    assert(E <= 14 && "CHERIoT capabilities cannot encode E between 14 and 24");
+    ਪ੍ਰਤਿਜ੍ਞਾ(E <= 14 && "CHERIoT capabilities cannot encode E between 14 and 24");
   }
-  return CHERIoTCapabilityFormat::AddressMask << E;
+  ਵਾਪਸ CHERIoTCapabilityFormat::ਪਤਾ_ਨਕਾਬ << E;
 }
 
-template struct CHERICapabilityFormatBase<CHERIoTCapabilityFormat, uint32_t>;
+ਸਾਂਚਾ ਬਣਤਰ CHERICapability_Format_ਅਧਾਰ<CHERIoTCapabilityFormat, uint32_t>;
 
 } // namespace llvm

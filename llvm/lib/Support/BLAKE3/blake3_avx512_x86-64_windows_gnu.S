@@ -2,12 +2,12 @@
 
 .intel_syntax noprefix
 
-.global _blake3_hash_many_avx512
-.global blake3_hash_many_avx512
-.global blake3_compress_in_place_avx512
-.global _blake3_compress_in_place_avx512
-.global blake3_compress_xof_avx512
-.global _blake3_compress_xof_avx512
+.ਵੈਸ਼੍ਵਿਕ _blake3_hash_many_avx512
+.ਵੈਸ਼੍ਵਿਕ blake3_hash_many_avx512
+.ਵੈਸ਼੍ਵਿਕ blake3_compress_in_place_avx512
+.ਵੈਸ਼੍ਵਿਕ _blake3_compress_in_place_avx512
+.ਵੈਸ਼੍ਵਿਕ blake3_compress_xof_avx512
+.ਵੈਸ਼੍ਵਿਕ _blake3_compress_xof_avx512
 
 .section .text
 .p2align  6

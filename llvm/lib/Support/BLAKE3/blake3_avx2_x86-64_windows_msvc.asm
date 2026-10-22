@@ -4,8 +4,8 @@ public llvm_blake3_hash_many_avx2
 _TEXT   SEGMENT ALIGN(16) 'CODE'
 
 ALIGN   16
-llvm_blake3_hash_many_avx2 PROC
-_llvm_blake3_hash_many_avx2 PROC
+llvm_blake3_hash_many_avx2 ਵਿਧੀ
+_llvm_blake3_hash_many_avx2 ਵਿਧੀ
         push    r15
         push    r14
         push    r13
@@ -1825,4 +1825,4 @@ BLAKE3_IV:
         dd 6A09E667H, 0BB67AE85H, 3C6EF372H, 0A54FF53AH
 
 _RDATA ENDS
-END
+ਅੰਤ

@@ -6,112 +6,112 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/APInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/edit_distance.h"
-#include "llvm/Support/Error.h"
-#include <bitset>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/APFloat.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/APInt.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/Hashing.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/edit_distance.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Error.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <bitset>
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
 // strncasecmp() is not available on non-POSIX systems, so define an
 // alternative function here.
-static int ascii_strncasecmp(StringRef LHS, StringRef RHS) {
-  for (auto [LC, RC] : zip_equal(LHS, RHS)) {
-    unsigned char LHC = toLower(LC);
-    unsigned char RHC = toLower(RC);
-    if (LHC != RHC)
-      return LHC < RHC ? -1 : 1;
+ਸਥਿਰ ਪੂਰਨ ascii_strncasecmp(StringRef LHS, StringRef RHS) {
+  ਲਈ (ਸਵੈਚਾਲਿਤ [LC, RC] : zip_equal(LHS, RHS)) {
+    ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ LHC = ਮੰਜ਼ਿਲ_ਹੇਠਲਾ(LC);
+    ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ RHC = ਮੰਜ਼ਿਲ_ਹੇਠਲਾ(RC);
+    ਜੇ (LHC != RHC)
+      ਵਾਪਸ LHC < RHC ? -1 : 1;
   }
-  return 0;
+  ਵਾਪਸ 0;
 }
 
-int StringRef::compare_insensitive(StringRef RHS) const {
-  size_t Min = std::min(size(), RHS.size());
-  if (int Res = ascii_strncasecmp(take_front(Min), RHS.take_front(Min)))
-    return Res;
-  if (size() == RHS.size())
-    return 0;
-  return size() < RHS.size() ? -1 : 1;
+ਪੂਰਨ StringRef::compare_insensitive(StringRef RHS) ਅਚਲ {
+  size_t Min = std::min(ਮਾਪ_2(), RHS.ਮਾਪ_2());
+  ਜੇ (ਪੂਰਨ Res = ascii_strncasecmp(take_front(Min), RHS.take_front(Min)))
+    ਵਾਪਸ Res;
+  ਜੇ (ਮਾਪ_2() == RHS.ਮਾਪ_2())
+    ਵਾਪਸ 0;
+  ਵਾਪਸ ਮਾਪ_2() < RHS.ਮਾਪ_2() ? -1 : 1;
 }
 
-bool StringRef::starts_with_insensitive(StringRef Prefix) const {
-  return size() >= Prefix.size() &&
-         ascii_strncasecmp(take_front(Prefix.size()), Prefix) == 0;
+ਤਾਰਕਿਕ StringRef::starts_with_insensitive(StringRef ਅਗੇਤਰ) ਅਚਲ {
+  ਵਾਪਸ ਮਾਪ_2() >= ਅਗੇਤਰ.ਮਾਪ_2() &&
+         ascii_strncasecmp(take_front(ਅਗੇਤਰ.ਮਾਪ_2()), ਅਗੇਤਰ) == 0;
 }
 
-bool StringRef::ends_with_insensitive(StringRef Suffix) const {
-  return size() >= Suffix.size() &&
-         ascii_strncasecmp(take_back(Suffix.size()), Suffix) == 0;
+ਤਾਰਕਿਕ StringRef::ਸਿਰੇ_with_insensitive(StringRef Suffix) ਅਚਲ {
+  ਵਾਪਸ ਮਾਪ_2() >= Suffix.ਮਾਪ_2() &&
+         ascii_strncasecmp(take_ਪਿੱਠ(Suffix.ਮਾਪ_2()), Suffix) == 0;
 }
 
-size_t StringRef::find_insensitive(char C, size_t From) const {
-  char L = toLower(C);
-  return find_if([L](char D) { return toLower(D) == L; }, From);
+size_t StringRef::ਲੱਭੋ_insensitive(ਅੱਖਰ C, size_t From) ਅਚਲ {
+  ਅੱਖਰ L = ਮੰਜ਼ਿਲ_ਹੇਠਲਾ(C);
+  ਵਾਪਸ ਲੱਭੋ_if([L](ਅੱਖਰ D) { ਵਾਪਸ ਮੰਜ਼ਿਲ_ਹੇਠਲਾ(D) == L; }, From);
 }
 
 /// compare_numeric - Compare strings, handle embedded numbers.
-int StringRef::compare_numeric(StringRef RHS) const {
-  for (size_t I = 0, E = std::min(size(), RHS.size()); I != E; ++I) {
+ਪੂਰਨ StringRef::compare_numeric(StringRef RHS) ਅਚਲ {
+  ਲਈ (size_t I = 0, E = std::min(ਮਾਪ_2(), RHS.ਮਾਪ_2()); I != E; ++I) {
     // Check for sequences of digits.
-    if (isDigit(data()[I]) && isDigit(RHS.data()[I])) {
+    ਜੇ (isDigit(ਅੰਕੜੇ()[I]) && isDigit(RHS.ਅੰਕੜੇ()[I])) {
       // The longer sequence of numbers is considered larger.
       // This doesn't really handle prefixed zeros well.
       size_t J;
-      for (J = I + 1; J != E + 1; ++J) {
-        bool ld = J < size() && isDigit(data()[J]);
-        bool rd = J < RHS.size() && isDigit(RHS.data()[J]);
-        if (ld != rd)
-          return rd ? -1 : 1;
-        if (!rd)
-          break;
+      ਲਈ (J = I + 1; J != E + 1; ++J) {
+        ਤਾਰਕਿਕ ld = J < ਮਾਪ_2() && isDigit(ਅੰਕੜੇ()[J]);
+        ਤਾਰਕਿਕ rd = J < RHS.ਮਾਪ_2() && isDigit(RHS.ਅੰਕੜੇ()[J]);
+        ਜੇ (ld != rd)
+          ਵਾਪਸ rd ? -1 : 1;
+        ਜੇ (!rd)
+          ਰੋਕੋ;
       }
       // The two number sequences have the same length (J-I), just memcmp them.
-      if (int Res = compareMemory(data() + I, RHS.data() + I, J - I))
-        return Res < 0 ? -1 : 1;
+      ਜੇ (ਪੂਰਨ Res = compare_ਸਮ੍ਰਿਤੀ(ਅੰਕੜੇ() + I, RHS.ਅੰਕੜੇ() + I, J - I))
+        ਵਾਪਸ Res < 0 ? -1 : 1;
       // Identical number sequences, continue search after the numbers.
       I = J - 1;
-      continue;
+      ਜਾਰੀ;
     }
-    if (data()[I] != RHS.data()[I])
-      return (unsigned char)data()[I] < (unsigned char)RHS.data()[I] ? -1 : 1;
+    ਜੇ (ਅੰਕੜੇ()[I] != RHS.ਅੰਕੜੇ()[I])
+      ਵਾਪਸ (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)ਅੰਕੜੇ()[I] < (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)RHS.ਅੰਕੜੇ()[I] ? -1 : 1;
   }
-  if (size() == RHS.size())
-    return 0;
-  return size() < RHS.size() ? -1 : 1;
+  ਜੇ (ਮਾਪ_2() == RHS.ਮਾਪ_2())
+    ਵਾਪਸ 0;
+  ਵਾਪਸ ਮਾਪ_2() < RHS.ਮਾਪ_2() ? -1 : 1;
 }
 
 // Compute the edit distance between the two given strings.
-unsigned StringRef::edit_distance(llvm::StringRef Other,
-                                  bool AllowReplacements,
-                                  unsigned MaxEditDistance) const {
-  return llvm::ComputeEditDistance(ArrayRef(data(), size()),
-                                   ArrayRef(Other.data(), Other.size()),
-                                   AllowReplacements, MaxEditDistance);
+ਬਿਨਾਨਿਸ਼ਾਨੀ StringRef::edit_ਦੂਰੀ(llvm::StringRef Other,
+                                  ਤਾਰਕਿਕ AllowReplacements,
+                                  ਬਿਨਾਨਿਸ਼ਾਨੀ Max_Edit_ਦੂਰੀ) ਅਚਲ {
+  ਵਾਪਸ llvm::Compute_Edit_ਦੂਰੀ(ArrayRef(ਅੰਕੜੇ(), ਮਾਪ_2()),
+                                   ArrayRef(Other.ਅੰਕੜੇ(), Other.ਮਾਪ_2()),
+                                   AllowReplacements, Max_Edit_ਦੂਰੀ);
 }
 
-unsigned llvm::StringRef::edit_distance_insensitive(
-    StringRef Other, bool AllowReplacements, unsigned MaxEditDistance) const {
-  return llvm::ComputeMappedEditDistance(
-      ArrayRef(data(), size()), ArrayRef(Other.data(), Other.size()),
-      llvm::toLower, AllowReplacements, MaxEditDistance);
+ਬਿਨਾਨਿਸ਼ਾਨੀ llvm::StringRef::edit_ਦੂਰੀ_insensitive(
+    StringRef Other, ਤਾਰਕਿਕ AllowReplacements, ਬਿਨਾਨਿਸ਼ਾਨੀ Max_Edit_ਦੂਰੀ) ਅਚਲ {
+  ਵਾਪਸ llvm::Compute_Mapped_Edit_ਦੂਰੀ(
+      ArrayRef(ਅੰਕੜੇ(), ਮਾਪ_2()), ArrayRef(Other.ਅੰਕੜੇ(), Other.ਮਾਪ_2()),
+      llvm::ਮੰਜ਼ਿਲ_ਹੇਠਲਾ, AllowReplacements, Max_Edit_ਦੂਰੀ);
 }
 
 //===----------------------------------------------------------------------===//
 // String Operations
 //===----------------------------------------------------------------------===//
 
-std::string StringRef::lower() const {
-  return std::string(map_iterator(begin(), toLower),
-                     map_iterator(end(), toLower));
+std::string StringRef::ਹੇਠਲਾ() ਅਚਲ {
+  ਵਾਪਸ std::string(map_iterator(begin(), ਮੰਜ਼ਿਲ_ਹੇਠਲਾ),
+                     map_iterator(ਸਿਰਾ(), ਮੰਜ਼ਿਲ_ਹੇਠਲਾ));
 }
 
-std::string StringRef::upper() const {
-  return std::string(map_iterator(begin(), toUpper),
-                     map_iterator(end(), toUpper));
+std::string StringRef::ਉੱਤਲਾ() ਅਚਲ {
+  ਵਾਪਸ std::string(map_iterator(begin(), ਮੰਜ਼ਿਲ_ਉੱਤਲਾ),
+                     map_iterator(ਸਿਰਾ(), ਮੰਜ਼ਿਲ_ਉੱਤਲਾ));
 }
 
 //===----------------------------------------------------------------------===//
@@ -123,239 +123,239 @@ std::string StringRef::upper() const {
 ///
 /// \return - The index of the first occurrence of \arg Str, or npos if not
 /// found.
-size_t StringRef::find(StringRef Str, size_t From) const {
-  if (From > size())
-    return npos;
+size_t StringRef::ਲੱਭੋ(StringRef Str, size_t From) ਅਚਲ {
+  ਜੇ (From > ਮਾਪ_2())
+    ਵਾਪਸ npos;
 
-  const char *Start = data() + From;
-  size_t Size = size() - From;
+  ਅਚਲ ਅੱਖਰ *ਸ਼ੁਰੂ = ਅੰਕੜੇ() + From;
+  size_t ਮਾਪ = ਮਾਪ_2() - From;
 
-  const char *Needle = Str.data();
-  size_t N = Str.size();
-  if (N == 0)
-    return From;
-  if (Size < N)
-    return npos;
-  if (N == 1) {
-    const char *Ptr = (const char *)::memchr(Start, Needle[0], Size);
-    return Ptr == nullptr ? npos : Ptr - data();
+  ਅਚਲ ਅੱਖਰ *Needle = Str.ਅੰਕੜੇ();
+  size_t N = Str.ਮਾਪ_2();
+  ਜੇ (N == 0)
+    ਵਾਪਸ From;
+  ਜੇ (ਮਾਪ < N)
+    ਵਾਪਸ npos;
+  ਜੇ (N == 1) {
+    ਅਚਲ ਅੱਖਰ *Ptr = (ਅਚਲ ਅੱਖਰ *)::memchr(ਸ਼ੁਰੂ, Needle[0], ਮਾਪ);
+    ਵਾਪਸ Ptr == ਖਾਲੀ_ਸੂਚਕ ? npos : Ptr - ਅੰਕੜੇ();
   }
 
-  const char *Stop = Start + (Size - N + 1);
+  ਅਚਲ ਅੱਖਰ *Stop = ਸ਼ੁਰੂ + (ਮਾਪ - N + 1);
 
-  if (N == 2) {
+  ਜੇ (N == 2) {
     // Provide a fast path for newline finding (CRLF case) in InclusionRewriter.
     // Not the most optimized strategy, but getting memcmp inlined should be
     // good enough.
-    do {
-      if (std::memcmp(Start, Needle, 2) == 0)
-        return Start - data();
-      ++Start;
-    } while (Start < Stop);
-    return npos;
+    ਕਰੋ {
+      ਜੇ (std::memcmp(ਸ਼ੁਰੂ, Needle, 2) == 0)
+        ਵਾਪਸ ਸ਼ੁਰੂ - ਅੰਕੜੇ();
+      ++ਸ਼ੁਰੂ;
+    } ਜਦੋਂ (ਸ਼ੁਰੂ < Stop);
+    ਵਾਪਸ npos;
   }
 
   // For short haystacks or unsupported needles fall back to the naive algorithm
-  if (Size < 16 || N > 255) {
-    do {
-      if (std::memcmp(Start, Needle, N) == 0)
-        return Start - data();
-      ++Start;
-    } while (Start < Stop);
-    return npos;
+  ਜੇ (ਮਾਪ < 16 || N > 255) {
+    ਕਰੋ {
+      ਜੇ (std::memcmp(ਸ਼ੁਰੂ, Needle, N) == 0)
+        ਵਾਪਸ ਸ਼ੁਰੂ - ਅੰਕੜੇ();
+      ++ਸ਼ੁਰੂ;
+    } ਜਦੋਂ (ਸ਼ੁਰੂ < Stop);
+    ਵਾਪਸ npos;
   }
 
   // Build the bad char heuristic table, with uint8_t to reduce cache thrashing.
   uint8_t BadCharSkip[256];
   std::memset(BadCharSkip, N, 256);
-  for (unsigned i = 0; i != N-1; ++i)
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0; i != N-1; ++i)
     BadCharSkip[(uint8_t)Str[i]] = N-1-i;
 
-  do {
-    uint8_t Last = Start[N - 1];
-    if (LLVM_UNLIKELY(Last == (uint8_t)Needle[N - 1]))
-      if (std::memcmp(Start, Needle, N - 1) == 0)
-        return Start - data();
+  ਕਰੋ {
+    uint8_t ਆਖਰੀ = ਸ਼ੁਰੂ[N - 1];
+    ਜੇ (LLVM_UNLIKELY(ਆਖਰੀ == (uint8_t)Needle[N - 1]))
+      ਜੇ (std::memcmp(ਸ਼ੁਰੂ, Needle, N - 1) == 0)
+        ਵਾਪਸ ਸ਼ੁਰੂ - ਅੰਕੜੇ();
 
     // Otherwise skip the appropriate number of bytes.
-    Start += BadCharSkip[Last];
-  } while (Start < Stop);
+    ਸ਼ੁਰੂ += BadCharSkip[ਆਖਰੀ];
+  } ਜਦੋਂ (ਸ਼ੁਰੂ < Stop);
 
-  return npos;
+  ਵਾਪਸ npos;
 }
 
-size_t StringRef::find_insensitive(StringRef Str, size_t From) const {
+size_t StringRef::ਲੱਭੋ_insensitive(StringRef Str, size_t From) ਅਚਲ {
   StringRef This = substr(From);
-  while (This.size() >= Str.size()) {
-    if (This.starts_with_insensitive(Str))
-      return From;
+  ਜਦੋਂ (This.ਮਾਪ_2() >= Str.ਮਾਪ_2()) {
+    ਜੇ (This.starts_with_insensitive(Str))
+      ਵਾਪਸ From;
     This = This.drop_front();
     ++From;
   }
-  return npos;
+  ਵਾਪਸ npos;
 }
 
-size_t StringRef::rfind_insensitive(char C, size_t From) const {
-  From = std::min(From, size());
+size_t StringRef::rfind_insensitive(ਅੱਖਰ C, size_t From) ਅਚਲ {
+  From = std::min(From, ਮਾਪ_2());
   size_t i = From;
-  while (i != 0) {
+  ਜਦੋਂ (i != 0) {
     --i;
-    if (toLower(data()[i]) == toLower(C))
-      return i;
+    ਜੇ (ਮੰਜ਼ਿਲ_ਹੇਠਲਾ(ਅੰਕੜੇ()[i]) == ਮੰਜ਼ਿਲ_ਹੇਠਲਾ(C))
+      ਵਾਪਸ i;
   }
-  return npos;
+  ਵਾਪਸ npos;
 }
 
 /// rfind - Search for the last string \arg Str in the string.
 ///
 /// \return - The index of the last occurrence of \arg Str, or npos if not
 /// found.
-size_t StringRef::rfind(StringRef Str) const {
-  return std::string_view(*this).rfind(Str);
+size_t StringRef::rfind(StringRef Str) ਅਚਲ {
+  ਵਾਪਸ std::string_view(*ਇਹ).rfind(Str);
 }
 
-size_t StringRef::rfind_insensitive(StringRef Str) const {
-  size_t N = Str.size();
-  if (N > size())
-    return npos;
-  for (size_t i = size() - N + 1, e = 0; i != e;) {
+size_t StringRef::rfind_insensitive(StringRef Str) ਅਚਲ {
+  size_t N = Str.ਮਾਪ_2();
+  ਜੇ (N > ਮਾਪ_2())
+    ਵਾਪਸ npos;
+  ਲਈ (size_t i = ਮਾਪ_2() - N + 1, e = 0; i != e;) {
     --i;
-    if (substr(i, N).equals_insensitive(Str))
-      return i;
+    ਜੇ (substr(i, N).equals_insensitive(Str))
+      ਵਾਪਸ i;
   }
-  return npos;
+  ਵਾਪਸ npos;
 }
 
 /// find_first_of - Find the first character in the string that is in \arg
 /// Chars, or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_first_of(StringRef Chars,
-                                              size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::ਮਾਪ_type StringRef::ਲੱਭੋ_ਪਹਿਲਾ_ਦਾ(StringRef Chars,
+                                              size_t From) ਅਚਲ {
+  std::bitset<1 << CHAR_BIT> Char_ਬਿੱਟ;
+  ਲਈ (ਅੱਖਰ C : Chars)
+    Char_ਬਿੱਟ.ਸੈੱਟ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)C);
 
-  for (size_type i = std::min(From, size()), e = size(); i != e; ++i)
-    if (CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  ਲਈ (ਮਾਪ_type i = std::min(From, ਮਾਪ_2()), e = ਮਾਪ_2(); i != e; ++i)
+    ਜੇ (Char_ਬਿੱਟ.test((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)ਅੰਕੜੇ()[i]))
+      ਵਾਪਸ i;
+  ਵਾਪਸ npos;
 }
 
 /// find_first_not_of - Find the first character in the string that is not
 /// \arg C or npos if not found.
-StringRef::size_type StringRef::find_first_not_of(char C, size_t From) const {
-  return std::string_view(*this).find_first_not_of(C, From);
+StringRef::ਮਾਪ_type StringRef::ਲੱਭੋ_ਪਹਿਲਾ_not_ਦਾ(ਅੱਖਰ C, size_t From) ਅਚਲ {
+  ਵਾਪਸ std::string_view(*ਇਹ).ਲੱਭੋ_ਪਹਿਲਾ_not_ਦਾ(C, From);
 }
 
 /// find_first_not_of - Find the first character in the string that is not
 /// in the string \arg Chars, or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_first_not_of(StringRef Chars,
-                                                  size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::ਮਾਪ_type StringRef::ਲੱਭੋ_ਪਹਿਲਾ_not_ਦਾ(StringRef Chars,
+                                                  size_t From) ਅਚਲ {
+  std::bitset<1 << CHAR_BIT> Char_ਬਿੱਟ;
+  ਲਈ (ਅੱਖਰ C : Chars)
+    Char_ਬਿੱਟ.ਸੈੱਟ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)C);
 
-  for (size_type i = std::min(From, size()), e = size(); i != e; ++i)
-    if (!CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  ਲਈ (ਮਾਪ_type i = std::min(From, ਮਾਪ_2()), e = ਮਾਪ_2(); i != e; ++i)
+    ਜੇ (!Char_ਬਿੱਟ.test((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)ਅੰਕੜੇ()[i]))
+      ਵਾਪਸ i;
+  ਵਾਪਸ npos;
 }
 
 /// find_last_of - Find the last character in the string that is in \arg C,
 /// or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_last_of(StringRef Chars,
-                                             size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::ਮਾਪ_type StringRef::ਲੱਭੋ_ਆਖਰੀ_ਦਾ(StringRef Chars,
+                                             size_t From) ਅਚਲ {
+  std::bitset<1 << CHAR_BIT> Char_ਬਿੱਟ;
+  ਲਈ (ਅੱਖਰ C : Chars)
+    Char_ਬਿੱਟ.ਸੈੱਟ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)C);
 
-  for (size_type i = std::min(From, size()) - 1, e = -1; i != e; --i)
-    if (CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  ਲਈ (ਮਾਪ_type i = std::min(From, ਮਾਪ_2()) - 1, e = -1; i != e; --i)
+    ਜੇ (Char_ਬਿੱਟ.test((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)ਅੰਕੜੇ()[i]))
+      ਵਾਪਸ i;
+  ਵਾਪਸ npos;
 }
 
 /// find_last_not_of - Find the last character in the string that is not
 /// \arg C, or npos if not found.
-StringRef::size_type StringRef::find_last_not_of(char C, size_t From) const {
-  for (size_type i = std::min(From, size()) - 1, e = -1; i != e; --i)
-    if (data()[i] != C)
-      return i;
-  return npos;
+StringRef::ਮਾਪ_type StringRef::ਲੱਭੋ_ਆਖਰੀ_not_ਦਾ(ਅੱਖਰ C, size_t From) ਅਚਲ {
+  ਲਈ (ਮਾਪ_type i = std::min(From, ਮਾਪ_2()) - 1, e = -1; i != e; --i)
+    ਜੇ (ਅੰਕੜੇ()[i] != C)
+      ਵਾਪਸ i;
+  ਵਾਪਸ npos;
 }
 
 /// find_last_not_of - Find the last character in the string that is not in
 /// \arg Chars, or npos if not found.
 ///
 /// Note: O(size() + Chars.size())
-StringRef::size_type StringRef::find_last_not_of(StringRef Chars,
-                                                 size_t From) const {
-  std::bitset<1 << CHAR_BIT> CharBits;
-  for (char C : Chars)
-    CharBits.set((unsigned char)C);
+StringRef::ਮਾਪ_type StringRef::ਲੱਭੋ_ਆਖਰੀ_not_ਦਾ(StringRef Chars,
+                                                 size_t From) ਅਚਲ {
+  std::bitset<1 << CHAR_BIT> Char_ਬਿੱਟ;
+  ਲਈ (ਅੱਖਰ C : Chars)
+    Char_ਬਿੱਟ.ਸੈੱਟ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)C);
 
-  for (size_type i = std::min(From, size()) - 1, e = -1; i != e; --i)
-    if (!CharBits.test((unsigned char)data()[i]))
-      return i;
-  return npos;
+  ਲਈ (ਮਾਪ_type i = std::min(From, ਮਾਪ_2()) - 1, e = -1; i != e; --i)
+    ਜੇ (!Char_ਬਿੱਟ.test((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)ਅੰਕੜੇ()[i]))
+      ਵਾਪਸ i;
+  ਵਾਪਸ npos;
 }
 
-void StringRef::split(SmallVectorImpl<StringRef> &A,
-                      StringRef Separator, int MaxSplit,
-                      bool KeepEmpty) const {
-  StringRef S = *this;
+ਖਾਲੀ StringRef::ਵੰਡੋ(Small_ਸਦਿਸ਼_Impl<StringRef> &A,
+                      StringRef Separator, ਪੂਰਨ Max_ਵੰਡੋ,
+                      ਤਾਰਕਿਕ Keep_ਖਾਲੀ_ਥਾਵਾਂ) ਅਚਲ {
+  StringRef S = *ਇਹ;
 
   // Count down from MaxSplit. When MaxSplit is -1, this will just split
   // "forever". This doesn't support splitting more than 2^31 times
   // intentionally; if we ever want that we can make MaxSplit a 64-bit integer
   // but that seems unlikely to be useful.
-  while (MaxSplit-- != 0) {
-    size_t Idx = S.find(Separator);
-    if (Idx == npos)
-      break;
+  ਜਦੋਂ (Max_ਵੰਡੋ-- != 0) {
+    size_t Idx = S.ਲੱਭੋ(Separator);
+    ਜੇ (Idx == npos)
+      ਰੋਕੋ;
 
     // Push this split.
-    if (KeepEmpty || Idx > 0)
-      A.push_back(S.slice(0, Idx));
+    ਜੇ (Keep_ਖਾਲੀ_ਥਾਵਾਂ || Idx > 0)
+      A.ਧੱਕੋ_ਪਿੱਠ(S.ਟੁਕੜਾ(0, Idx));
 
     // Jump forward.
-    S = S.substr(Idx + Separator.size());
+    S = S.substr(Idx + Separator.ਮਾਪ_2());
   }
 
   // Push the tail.
-  if (KeepEmpty || !S.empty())
-    A.push_back(S);
+  ਜੇ (Keep_ਖਾਲੀ_ਥਾਵਾਂ || !S.ਖਾਲੀ_ਥਾਵਾਂ())
+    A.ਧੱਕੋ_ਪਿੱਠ(S);
 }
 
-void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
-                      int MaxSplit, bool KeepEmpty) const {
-  StringRef S = *this;
+ਖਾਲੀ StringRef::ਵੰਡੋ(Small_ਸਦਿਸ਼_Impl<StringRef> &A, ਅੱਖਰ Separator,
+                      ਪੂਰਨ Max_ਵੰਡੋ, ਤਾਰਕਿਕ Keep_ਖਾਲੀ_ਥਾਵਾਂ) ਅਚਲ {
+  StringRef S = *ਇਹ;
 
   // Count down from MaxSplit. When MaxSplit is -1, this will just split
   // "forever". This doesn't support splitting more than 2^31 times
   // intentionally; if we ever want that we can make MaxSplit a 64-bit integer
   // but that seems unlikely to be useful.
-  while (MaxSplit-- != 0) {
-    size_t Idx = S.find(Separator);
-    if (Idx == npos)
-      break;
+  ਜਦੋਂ (Max_ਵੰਡੋ-- != 0) {
+    size_t Idx = S.ਲੱਭੋ(Separator);
+    ਜੇ (Idx == npos)
+      ਰੋਕੋ;
 
     // Push this split.
-    if (KeepEmpty || Idx > 0)
-      A.push_back(S.slice(0, Idx));
+    ਜੇ (Keep_ਖਾਲੀ_ਥਾਵਾਂ || Idx > 0)
+      A.ਧੱਕੋ_ਪਿੱਠ(S.ਟੁਕੜਾ(0, Idx));
 
     // Jump forward.
     S = S.substr(Idx + 1);
   }
 
   // Push the tail.
-  if (KeepEmpty || !S.empty())
-    A.push_back(S);
+  ਜੇ (Keep_ਖਾਲੀ_ਥਾਵਾਂ || !S.ਖਾਲੀ_ਥਾਵਾਂ())
+    A.ਧੱਕੋ_ਪਿੱਠ(S);
 }
 
 //===----------------------------------------------------------------------===//
@@ -364,224 +364,224 @@ void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
 
 /// count - Return the number of non-overlapped occurrences of \arg Str in
 /// the string.
-size_t StringRef::count(StringRef Str) const {
-  size_t Count = 0;
+size_t StringRef::ਗਿਣਤੀ_2(StringRef Str) ਅਚਲ {
+  size_t ਗਿਣਤੀ_3 = 0;
   size_t Pos = 0;
-  size_t N = Str.size();
+  size_t N = Str.ਮਾਪ_2();
   // TODO: For an empty `Str` we return 0 for legacy reasons. Consider changing
   //       this to `Length + 1` which is more in-line with the function
   //       description.
-  if (!N)
-    return 0;
-  while ((Pos = find(Str, Pos)) != npos) {
-    ++Count;
+  ਜੇ (!N)
+    ਵਾਪਸ 0;
+  ਜਦੋਂ ((Pos = ਲੱਭੋ(Str, Pos)) != npos) {
+    ++ਗਿਣਤੀ_3;
     Pos += N;
   }
-  return Count;
+  ਵਾਪਸ ਗਿਣਤੀ_3;
 }
 
-unsigned llvm::getAutoSenseRadix(StringRef &Str) {
-  if (Str.empty())
-    return 10;
+ਬਿਨਾਨਿਸ਼ਾਨੀ llvm::getAutoSenseRadix(StringRef &Str) {
+  ਜੇ (Str.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ 10;
 
-  if (Str.consume_front_insensitive("0x"))
-    return 16;
+  ਜੇ (Str.consume_front_insensitive("0x"))
+    ਵਾਪਸ 16;
 
-  if (Str.consume_front_insensitive("0b"))
-    return 2;
+  ਜੇ (Str.consume_front_insensitive("0b"))
+    ਵਾਪਸ 2;
 
-  if (Str.consume_front("0o"))
-    return 8;
+  ਜੇ (Str.consume_front("0o"))
+    ਵਾਪਸ 8;
 
-  if (Str[0] == '0' && Str.size() > 1 && isDigit(Str[1])) {
+  ਜੇ (Str[0] == '0' && Str.ਮਾਪ_2() > 1 && isDigit(Str[1])) {
     Str = Str.substr(1);
-    return 8;
+    ਵਾਪਸ 8;
   }
 
-  return 10;
+  ਵਾਪਸ 10;
 }
 
-bool llvm::consumeUnsignedInteger(StringRef &Str, unsigned Radix,
-                                  unsigned long long &Result) {
+ਤਾਰਕਿਕ llvm::consumeUnsignedInteger(StringRef &Str, ਬਿਨਾਨਿਸ਼ਾਨੀ Radix,
+                                  ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ &ਨਤੀਜਾ) {
   // Autosense radix if not specified.
-  if (Radix == 0)
+  ਜੇ (Radix == 0)
     Radix = getAutoSenseRadix(Str);
 
   // Empty strings (after the radix autosense) are invalid.
-  if (Str.empty()) return true;
+  ਜੇ (Str.ਖਾਲੀ_ਥਾਵਾਂ()) ਵਾਪਸ ਸੱਚ;
 
   // Parse all the bytes of the string given this radix.  Watch for overflow.
   StringRef Str2 = Str;
-  Result = 0;
-  while (!Str2.empty()) {
-    unsigned CharVal;
-    if (Str2[0] >= '0' && Str2[0] <= '9')
+  ਨਤੀਜਾ = 0;
+  ਜਦੋਂ (!Str2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਬਿਨਾਨਿਸ਼ਾਨੀ CharVal;
+    ਜੇ (Str2[0] >= '0' && Str2[0] <= '9')
       CharVal = Str2[0] - '0';
-    else if (Str2[0] >= 'a' && Str2[0] <= 'z')
+    ਨਹੀਂਤਾਂ ਜੇ (Str2[0] >= 'a' && Str2[0] <= 'z')
       CharVal = Str2[0] - 'a' + 10;
-    else if (Str2[0] >= 'A' && Str2[0] <= 'Z')
+    ਨਹੀਂਤਾਂ ਜੇ (Str2[0] >= 'A' && Str2[0] <= 'Z')
       CharVal = Str2[0] - 'A' + 10;
-    else
-      break;
+    ਨਹੀਂਤਾਂ
+      ਰੋਕੋ;
 
     // If the parsed value is larger than the integer radix, we cannot
     // consume any more characters.
-    if (CharVal >= Radix)
-      break;
+    ਜੇ (CharVal >= Radix)
+      ਰੋਕੋ;
 
     // Add in this character.
-    unsigned long long PrevResult = Result;
-    Result = Result * Radix + CharVal;
+    ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ Prev_ਨਤੀਜਾ = ਨਤੀਜਾ;
+    ਨਤੀਜਾ = ਨਤੀਜਾ * Radix + CharVal;
 
     // Check for overflow by shifting back and seeing if bits were lost.
-    if (Result / Radix < PrevResult)
-      return true;
+    ਜੇ (ਨਤੀਜਾ / Radix < Prev_ਨਤੀਜਾ)
+      ਵਾਪਸ ਸੱਚ;
 
     Str2 = Str2.substr(1);
   }
 
   // We consider the operation a failure if no characters were consumed
   // successfully.
-  if (Str.size() == Str2.size())
-    return true;
+  ਜੇ (Str.ਮਾਪ_2() == Str2.ਮਾਪ_2())
+    ਵਾਪਸ ਸੱਚ;
 
   Str = Str2;
-  return false;
+  ਵਾਪਸ ਝੂਠ;
 }
 
-bool llvm::consumeSignedInteger(StringRef &Str, unsigned Radix,
-                                long long &Result) {
-  unsigned long long ULLVal;
+ਤਾਰਕਿਕ llvm::consumeSignedInteger(StringRef &Str, ਬਿਨਾਨਿਸ਼ਾਨੀ Radix,
+                                ਲੰਮਾ ਲੰਮਾ &ਨਤੀਜਾ) {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ ULLVal;
 
   // Handle positive strings first.
-  if (!Str.starts_with("-")) {
-    if (consumeUnsignedInteger(Str, Radix, ULLVal) ||
+  ਜੇ (!Str.starts_with("-")) {
+    ਜੇ (consumeUnsignedInteger(Str, Radix, ULLVal) ||
         // Check for value so large it overflows a signed value.
-        (long long)ULLVal < 0)
-      return true;
-    Result = ULLVal;
-    return false;
+        (ਲੰਮਾ ਲੰਮਾ)ULLVal < 0)
+      ਵਾਪਸ ਸੱਚ;
+    ਨਤੀਜਾ = ULLVal;
+    ਵਾਪਸ ਝੂਠ;
   }
 
   // Get the positive part of the value.
   StringRef Str2 = Str.drop_front(1);
-  if (consumeUnsignedInteger(Str2, Radix, ULLVal) ||
+  ਜੇ (consumeUnsignedInteger(Str2, Radix, ULLVal) ||
       // Reject values so large they'd overflow as negative signed, but allow
       // "-0".  This negates the unsigned so that the negative isn't undefined
       // on signed overflow.
-      (long long)-ULLVal > 0)
-    return true;
+      (ਲੰਮਾ ਲੰਮਾ)-ULLVal > 0)
+    ਵਾਪਸ ਸੱਚ;
 
   Str = Str2;
-  Result = -ULLVal;
-  return false;
+  ਨਤੀਜਾ = -ULLVal;
+  ਵਾਪਸ ਝੂਠ;
 }
 
 /// GetAsUnsignedInteger - Workhorse method that converts a integer character
 /// sequence of radix up to 36 to an unsigned long long value.
-bool llvm::getAsUnsignedInteger(StringRef Str, unsigned Radix,
-                                unsigned long long &Result) {
-  if (consumeUnsignedInteger(Str, Radix, Result))
-    return true;
+ਤਾਰਕਿਕ llvm::getAsUnsignedInteger(StringRef Str, ਬਿਨਾਨਿਸ਼ਾਨੀ Radix,
+                                ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ &ਨਤੀਜਾ) {
+  ਜੇ (consumeUnsignedInteger(Str, Radix, ਨਤੀਜਾ))
+    ਵਾਪਸ ਸੱਚ;
 
   // For getAsUnsignedInteger, we require the whole string to be consumed or
   // else we consider it a failure.
-  return !Str.empty();
+  ਵਾਪਸ !Str.ਖਾਲੀ_ਥਾਵਾਂ();
 }
 
-bool llvm::getAsSignedInteger(StringRef Str, unsigned Radix,
-                              long long &Result) {
-  if (consumeSignedInteger(Str, Radix, Result))
-    return true;
+ਤਾਰਕਿਕ llvm::getAsSignedInteger(StringRef Str, ਬਿਨਾਨਿਸ਼ਾਨੀ Radix,
+                              ਲੰਮਾ ਲੰਮਾ &ਨਤੀਜਾ) {
+  ਜੇ (consumeSignedInteger(Str, Radix, ਨਤੀਜਾ))
+    ਵਾਪਸ ਸੱਚ;
 
   // For getAsSignedInteger, we require the whole string to be consumed or else
   // we consider it a failure.
-  return !Str.empty();
+  ਵਾਪਸ !Str.ਖਾਲੀ_ਥਾਵਾਂ();
 }
 
-bool StringRef::consumeInteger(unsigned Radix, APInt &Result) {
-  StringRef Str = *this;
+ਤਾਰਕਿਕ StringRef::consumeInteger(ਬਿਨਾਨਿਸ਼ਾਨੀ Radix, APInt &ਨਤੀਜਾ) {
+  StringRef Str = *ਇਹ;
 
   // Autosense radix if not specified.
-  if (Radix == 0)
+  ਜੇ (Radix == 0)
     Radix = getAutoSenseRadix(Str);
 
-  assert(Radix > 1 && Radix <= 36);
+  ਪ੍ਰਤਿਜ੍ਞਾ(Radix > 1 && Radix <= 36);
 
   // Empty strings (after the radix autosense) are invalid.
-  if (Str.empty()) return true;
+  ਜੇ (Str.ਖਾਲੀ_ਥਾਵਾਂ()) ਵਾਪਸ ਸੱਚ;
 
   // Skip leading zeroes.  This can be a significant improvement if
   // it means we don't need > 64 bits.
   Str = Str.ltrim('0');
 
   // If it was nothing but zeroes....
-  if (Str.empty()) {
-    Result = APInt(64, 0);
-    *this = Str;
-    return false;
+  ਜੇ (Str.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਨਤੀਜਾ = APInt(64, 0);
+    *ਇਹ = Str;
+    ਵਾਪਸ ਝੂਠ;
   }
 
-  unsigned Log2Radix = 0;
-  while ((1U << Log2Radix) < Radix) Log2Radix++;
-  bool IsPowerOf2Radix = ((1U << Log2Radix) == Radix);
+  ਬਿਨਾਨਿਸ਼ਾਨੀ Log2Radix = 0;
+  ਜਦੋਂ ((1U << Log2Radix) < Radix) Log2Radix++;
+  ਤਾਰਕਿਕ IsPowerOf2Radix = ((1U << Log2Radix) == Radix);
 
   // Initialize Result to a reasonable starting width (at least 64 bits),
   // but do not shrink it if it was already larger.
-  unsigned BitWidth = std::max(64U, Result.getBitWidth());
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2 = std::max(64U, ਨਤੀਜਾ.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ());
 
-  if (Result.getBitWidth() < BitWidth) {
-    Result = Result.zext(BitWidth);
+  ਜੇ (ਨਤੀਜਾ.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ() < ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2) {
+    ਨਤੀਜਾ = ਨਤੀਜਾ.zext(ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2);
   }
 
   APInt RadixAP, CharAP; // unused unless !IsPowerOf2Radix
-  if (!IsPowerOf2Radix) {
+  ਜੇ (!IsPowerOf2Radix) {
     // These must have the same bit-width as Result.
-    RadixAP = APInt(BitWidth, Radix);
-    CharAP = APInt(BitWidth, 0);
+    RadixAP = APInt(ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2, Radix);
+    CharAP = APInt(ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2, 0);
   }
 
   // Parse all the bytes of the string given this radix.
-  Result = 0;
-  while (!Str.empty()) {
-    unsigned CharVal;
-    if (Str[0] >= '0' && Str[0] <= '9')
+  ਨਤੀਜਾ = 0;
+  ਜਦੋਂ (!Str.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਬਿਨਾਨਿਸ਼ਾਨੀ CharVal;
+    ਜੇ (Str[0] >= '0' && Str[0] <= '9')
       CharVal = Str[0]-'0';
-    else if (Str[0] >= 'a' && Str[0] <= 'z')
+    ਨਹੀਂਤਾਂ ਜੇ (Str[0] >= 'a' && Str[0] <= 'z')
       CharVal = Str[0]-'a'+10;
-    else if (Str[0] >= 'A' && Str[0] <= 'Z')
+    ਨਹੀਂਤਾਂ ਜੇ (Str[0] >= 'A' && Str[0] <= 'Z')
       CharVal = Str[0]-'A'+10;
-    else
-      break;
+    ਨਹੀਂਤਾਂ
+      ਰੋਕੋ;
 
     // If the parsed value is larger than the integer radix, the string is
     // invalid.
-    if (CharVal >= Radix)
-      break;
+    ਜੇ (CharVal >= Radix)
+      ਰੋਕੋ;
 
     // Check if one more digit will overflow, and grow if so.
-    if (Result.getActiveBits() + Log2Radix > Result.getBitWidth()) {
-      unsigned NewWidth = Result.getBitWidth() * 2;
+    ਜੇ (ਨਤੀਜਾ.get_ਸਰਗਰਮ_ਬਿੱਟ() + Log2Radix > ਨਤੀਜਾ.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ()) {
+      ਬਿਨਾਨਿਸ਼ਾਨੀ New_ਚੌੜਾਈ = ਨਤੀਜਾ.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ() * 2;
 
       // Guard against overflow of the NewWidth itself
-      if (NewWidth < Result.getBitWidth())
-        return true;
+      ਜੇ (New_ਚੌੜਾਈ < ਨਤੀਜਾ.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ())
+        ਵਾਪਸ ਸੱਚ;
 
-      Result = Result.zext(NewWidth);
-      if (!IsPowerOf2Radix) {
-        RadixAP = RadixAP.zext(NewWidth);
-        CharAP = CharAP.zext(NewWidth);
+      ਨਤੀਜਾ = ਨਤੀਜਾ.zext(New_ਚੌੜਾਈ);
+      ਜੇ (!IsPowerOf2Radix) {
+        RadixAP = RadixAP.zext(New_ਚੌੜਾਈ);
+        CharAP = CharAP.zext(New_ਚੌੜਾਈ);
       }
     }
 
     // Add in this character.
-    if (IsPowerOf2Radix) {
-      Result <<= Log2Radix;
-      Result |= CharVal;
-    } else {
-      Result *= RadixAP;
+    ਜੇ (IsPowerOf2Radix) {
+      ਨਤੀਜਾ <<= Log2Radix;
+      ਨਤੀਜਾ |= CharVal;
+    } ਨਹੀਂਤਾਂ {
+      ਨਤੀਜਾ *= RadixAP;
       CharAP = CharVal;
-      Result += CharAP;
+      ਨਤੀਜਾ += CharAP;
     }
 
     Str = Str.substr(1);
@@ -589,42 +589,42 @@ bool StringRef::consumeInteger(unsigned Radix, APInt &Result) {
 
   // We consider the operation a failure if no characters were consumed
   // successfully.
-  if (size() == Str.size())
-    return true;
+  ਜੇ (ਮਾਪ_2() == Str.ਮਾਪ_2())
+    ਵਾਪਸ ਸੱਚ;
 
-  *this = Str;
-  return false;
+  *ਇਹ = Str;
+  ਵਾਪਸ ਝੂਠ;
 }
 
-bool StringRef::getAsInteger(unsigned Radix, APInt &Result) const {
-  StringRef Str = *this;
-  if (Str.consumeInteger(Radix, Result))
-    return true;
+ਤਾਰਕਿਕ StringRef::getAsInteger(ਬਿਨਾਨਿਸ਼ਾਨੀ Radix, APInt &ਨਤੀਜਾ) ਅਚਲ {
+  StringRef Str = *ਇਹ;
+  ਜੇ (Str.consumeInteger(Radix, ਨਤੀਜਾ))
+    ਵਾਪਸ ਸੱਚ;
 
   // For getAsInteger, we require the whole string to be consumed or else we
   // consider it a failure.
-  return !Str.empty();
+  ਵਾਪਸ !Str.ਖਾਲੀ_ਥਾਵਾਂ();
 }
 
-bool StringRef::getAsDouble(double &Result, bool AllowInexact) const {
+ਤਾਰਕਿਕ StringRef::getAsDouble(ਦੁੱਗਣਾ &ਨਤੀਜਾ, ਤਾਰਕਿਕ AllowInexact) ਅਚਲ {
   APFloat F(0.0);
-  auto StatusOrErr = F.convertFromString(*this, APFloat::rmNearestTiesToEven);
-  if (errorToBool(StatusOrErr.takeError()))
-    return true;
+  ਸਵੈਚਾਲਿਤ ਸਥਿਤੀ_Or_Err = F.convertFromString(*ਇਹ, APFloat::rm_ਸਭ_ਤੋਂ_ਨੇੜੇ_Ties_ਮੰਜ਼ਿਲ_Even);
+  ਜੇ (error_ਮੰਜ਼ਿਲ_Bool(ਸਥਿਤੀ_Or_Err.takeError()))
+    ਵਾਪਸ ਸੱਚ;
 
-  APFloat::opStatus Status = *StatusOrErr;
-  if (Status != APFloat::opOK) {
-    if (!AllowInexact || !(Status & APFloat::opInexact))
-      return true;
+  APFloat::op_ਸਥਿਤੀ ਸਥਿਤੀ = *ਸਥਿਤੀ_Or_Err;
+  ਜੇ (ਸਥਿਤੀ != APFloat::opOK) {
+    ਜੇ (!AllowInexact || !(ਸਥਿਤੀ & APFloat::opInexact))
+      ਵਾਪਸ ਸੱਚ;
   }
 
-  Result = F.convertToDouble();
-  return false;
+  ਨਤੀਜਾ = F.convert_ਮੰਜ਼ਿਲ_Double();
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // Implementation of StringRef hashing.
-hash_code llvm::hash_value(StringRef S) { return hash_combine_range(S); }
+hash_ਕੋਡ llvm::hash_ਮੁੱਲ(StringRef S) { ਵਾਪਸ hash_combine_range(S); }
 
-unsigned DenseMapInfo<StringRef, void>::getHashValue(StringRef Val) {
-  return (unsigned)(hash_value(Val));
+ਬਿਨਾਨਿਸ਼ਾਨੀ DenseMapInfo<StringRef, ਖਾਲੀ>::get_Hash_ਮੁੱਲ(StringRef Val) {
+  ਵਾਪਸ (ਬਿਨਾਨਿਸ਼ਾਨੀ)(hash_ਮੁੱਲ(Val));
 }

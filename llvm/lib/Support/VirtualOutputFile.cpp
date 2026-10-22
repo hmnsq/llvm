@@ -11,100 +11,100 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputFile.h"
-#include "llvm/Support/VirtualOutputError.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/raw_ostream_proxy.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/VirtualOutputFile.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/VirtualOutputError.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream_proxy.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm::vfs;
 
-char OutputFileImpl::ID = 0;
-char NullOutputFileImpl::ID = 0;
+ਅੱਖਰ OutputFileImpl::ID = 0;
+ਅੱਖਰ NullOutputFileImpl::ID = 0;
 
-void OutputFileImpl::anchor() {}
-void NullOutputFileImpl::anchor() {}
+ਖਾਲੀ OutputFileImpl::anchor() {}
+ਖਾਲੀ NullOutputFileImpl::anchor() {}
 
-class OutputFile::TrackedProxy : public raw_pwrite_stream_proxy {
-public:
-  void resetProxy() {
-    TrackingPointer = nullptr;
+ਵਰਗ OutputFile::TrackedProxy : ਜਨਤਕ raw_pwrite_ਧਾਰਾ_proxy {
+ਜਨਤਕ:
+  ਖਾਲੀ resetProxy() {
+    Tracking_ਸੂਚਕ = ਖਾਲੀ_ਸੂਚਕ;
     resetProxiedOS();
   }
 
-  explicit TrackedProxy(TrackedProxy *&TrackingPointer, raw_pwrite_stream &OS)
-      : raw_pwrite_stream_proxy(OS), TrackingPointer(TrackingPointer) {
-    assert(!TrackingPointer && "Expected to add a proxy");
-    TrackingPointer = this;
+  ਸਪਸ਼ਟ TrackedProxy(TrackedProxy *&Tracking_ਸੂਚਕ, raw_pwrite_ਧਾਰਾ &OS)
+      : raw_pwrite_ਧਾਰਾ_proxy(OS), Tracking_ਸੂਚਕ(Tracking_ਸੂਚਕ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(!Tracking_ਸੂਚਕ && "Expected to add a proxy");
+    Tracking_ਸੂਚਕ = ਇਹ;
   }
 
   ~TrackedProxy() override { resetProxy(); }
 
-  TrackedProxy *&TrackingPointer;
+  TrackedProxy *&Tracking_ਸੂਚਕ;
 };
 
-Expected<std::unique_ptr<raw_pwrite_stream>> OutputFile::createProxy() {
-  if (OpenProxy)
-    return make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy);
+Expected<std::unique_ptr<raw_pwrite_ਧਾਰਾ>> OutputFile::createProxy() {
+  ਜੇ (OpenProxy)
+    ਵਾਪਸ make_error<OutputError>(get_ਰਸਤਾ(), Output_Error_ਕੋਡ::has_open_proxy);
 
-  return std::make_unique<TrackedProxy>(OpenProxy, getOS());
+  ਵਾਪਸ std::make_unique<TrackedProxy>(OpenProxy, getOS());
 }
 
 Error OutputFile::keep() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  ਜੇ (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
-        make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
+        make_error<OutputError>(get_ਰਸਤਾ(), Output_Error_ਕੋਡ::already_closed));
 
   // Report a fatal error if there's an open proxy and the file is being kept.
   // This is safer than relying on clients to remember to flush(). Also call
   // OutputFile::discard() to give the backend a chance to clean up any
   // side effects (such as temporaries).
-  if (LLVM_UNLIKELY(OpenProxy))
+  ਜੇ (LLVM_UNLIKELY(OpenProxy))
     report_fatal_error(joinErrors(
-        make_error<OutputError>(getPath(), OutputErrorCode::has_open_proxy),
+        make_error<OutputError>(get_ਰਸਤਾ(), Output_Error_ਕੋਡ::has_open_proxy),
         discard()));
 
   Error E = Impl->keep();
-  Impl = nullptr;
-  DiscardOnDestroyHandler = nullptr;
-  return E;
+  Impl = ਖਾਲੀ_ਸੂਚਕ;
+  DiscardOnDestroyHandler = ਖਾਲੀ_ਸੂਚਕ;
+  ਵਾਪਸ E;
 }
 
 Error OutputFile::discard() {
   // Catch double-closing logic bugs.
-  if (LLVM_UNLIKELY(!Impl))
+  ਜੇ (LLVM_UNLIKELY(!Impl))
     report_fatal_error(
-        make_error<OutputError>(getPath(), OutputErrorCode::already_closed));
+        make_error<OutputError>(get_ਰਸਤਾ(), Output_Error_ਕੋਡ::already_closed));
 
   // Be lenient about open proxies since client teardown paths won't
   // necessarily clean up in the right order. Reset the proxy to flush any
   // current content; if there is another write, there should be quick crash on
   // null dereference.
-  if (OpenProxy)
+  ਜੇ (OpenProxy)
     OpenProxy->resetProxy();
 
   Error E = Impl->discard();
-  Impl = nullptr;
-  DiscardOnDestroyHandler = nullptr;
-  return E;
+  Impl = ਖਾਲੀ_ਸੂਚਕ;
+  DiscardOnDestroyHandler = ਖਾਲੀ_ਸੂਚਕ;
+  ਵਾਪਸ E;
 }
 
-void OutputFile::destroy() {
-  if (!Impl)
-    return;
+ਖਾਲੀ OutputFile::destroy() {
+  ਜੇ (!Impl)
+    ਵਾਪਸ;
 
   // Clean up the file. Move the discard handler into a local since discard
   // will reset it.
-  auto DiscardHandler = std::move(DiscardOnDestroyHandler);
+  ਸਵੈਚਾਲਿਤ DiscardHandler = std::move(DiscardOnDestroyHandler);
   Error E = discard();
-  assert(!Impl && "Expected discard to destroy Impl");
+  ਪ੍ਰਤਿਜ੍ਞਾ(!Impl && "Expected discard to destroy Impl");
 
   // If there's no handler, report a fatal error.
-  if (LLVM_UNLIKELY(!DiscardHandler))
+  ਜੇ (LLVM_UNLIKELY(!DiscardHandler))
     llvm::report_fatal_error(joinErrors(
-        make_error<OutputError>(getPath(), OutputErrorCode::not_closed),
+        make_error<OutputError>(get_ਰਸਤਾ(), Output_Error_ਕੋਡ::not_closed),
         std::move(E)));
-  else if (E)
+  ਨਹੀਂਤਾਂ ਜੇ (E)
     DiscardHandler(std::move(E));
 }

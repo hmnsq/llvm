@@ -11,62 +11,62 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputError.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm::vfs;
 
-void OutputError::anchor() {}
-void OutputConfigError::anchor() {}
-void TempFileOutputError::anchor() {}
+ਖਾਲੀ OutputError::anchor() {}
+ਖਾਲੀ OutputConfigError::anchor() {}
+ਖਾਲੀ ਆਰਜ਼ੀ_File_Output_Error::anchor() {}
 
-char OutputError::ID = 0;
-char OutputConfigError::ID = 0;
-char TempFileOutputError::ID = 0;
+ਅੱਖਰ OutputError::ID = 0;
+ਅੱਖਰ OutputConfigError::ID = 0;
+ਅੱਖਰ ਆਰਜ਼ੀ_File_Output_Error::ID = 0;
 
-void OutputError::log(raw_ostream &OS) const {
-  OS << getOutputPath() << ": ";
-  ECError::log(OS);
+ਖਾਲੀ OutputError::ਲਘੂਗਣਕ(raw_ostream &OS) ਅਚਲ {
+  OS << get_Output_ਰਸਤਾ() << ": ";
+  ECError::ਲਘੂਗਣਕ(OS);
 }
 
-void OutputConfigError::log(raw_ostream &OS) const {
-  OutputError::log(OS);
+ਖਾਲੀ OutputConfigError::ਲਘੂਗਣਕ(raw_ostream &OS) ਅਚਲ {
+  OutputError::ਲਘੂਗਣਕ(OS);
   OS << ": " << Config;
 }
 
-void TempFileOutputError::log(raw_ostream &OS) const {
-  OS << getTempPath() << " => ";
-  OutputError::log(OS);
+ਖਾਲੀ ਆਰਜ਼ੀ_File_Output_Error::ਲਘੂਗਣਕ(raw_ostream &OS) ਅਚਲ {
+  OS << get_ਆਰਜ਼ੀ_ਰਸਤਾ() << " => ";
+  OutputError::ਲਘੂਗਣਕ(OS);
 }
 
-namespace {
-class OutputErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override;
-  std::string message(int EV) const override;
+ਨਾਮਾਕਾਸ਼ {
+ਵਰਗ OutputErrorCategory : ਜਨਤਕ std::error_category {
+ਜਨਤਕ:
+  ਅਚਲ ਅੱਖਰ *name() ਅਚਲ noexcept override;
+  std::string ਸੁਨੇਹਾ_2(ਪੂਰਨ EV) ਅਚਲ override;
 };
 } // end namespace
 
-const std::error_category &vfs::output_category() {
-  static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+ਅਚਲ std::error_category &vfs::output_category() {
+  ਸਥਿਰ OutputErrorCategory ErrorCategory;
+  ਵਾਪਸ ErrorCategory;
 }
 
-const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+ਅਚਲ ਅੱਖਰ *OutputErrorCategory::name() ਅਚਲ noexcept {
+  ਵਾਪਸ "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
-  OutputErrorCode E = static_cast<OutputErrorCode>(EV);
-  switch (E) {
-  case OutputErrorCode::invalid_config:
-    return "invalid config";
-  case OutputErrorCode::not_closed:
-    return "output not closed";
-  case OutputErrorCode::already_closed:
-    return "output already closed";
-  case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+std::string OutputErrorCategory::ਸੁਨੇਹਾ_2(ਪੂਰਨ EV) ਅਚਲ {
+  Output_Error_ਕੋਡ E = static_cast<Output_Error_ਕੋਡ>(EV);
+  ਚੋਣ (E) {
+  ਹਾਲਤ Output_Error_ਕੋਡ::invalid_config:
+    ਵਾਪਸ "invalid config";
+  ਹਾਲਤ Output_Error_ਕੋਡ::not_closed:
+    ਵਾਪਸ "output not closed";
+  ਹਾਲਤ Output_Error_ਕੋਡ::already_closed:
+    ਵਾਪਸ "output already closed";
+  ਹਾਲਤ Output_Error_ਕੋਡ::has_open_proxy:
+    ਵਾਪਸ "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");

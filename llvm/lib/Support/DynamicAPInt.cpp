@@ -5,33 +5,33 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "llvm/ADT/DynamicAPInt.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/DynamicAPInt.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/Hashing.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Debug.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-hash_code llvm::hash_value(const DynamicAPInt &X) {
-  if (X.isSmall())
-    return llvm::hash_value(X.getSmall());
-  return detail::hash_value(X.getLarge());
+hash_ਕੋਡ llvm::hash_ਮੁੱਲ(ਅਚਲ DynamicAPInt &X) {
+  ਜੇ (X.isSmall())
+    ਵਾਪਸ llvm::hash_ਮੁੱਲ(X.getSmall());
+  ਵਾਪਸ detail::hash_ਮੁੱਲ(X.getLarge());
 }
 
-void DynamicAPInt::static_assert_layout() {
-  constexpr size_t ValLargeOffset =
-      offsetof(DynamicAPInt, ValLarge.Val.BitWidth);
-  constexpr size_t ValSmallOffset = offsetof(DynamicAPInt, ValSmall);
-  constexpr size_t ValSmallSize = sizeof(ValSmall);
-  static_assert(ValLargeOffset >= ValSmallOffset + ValSmallSize);
+ਖਾਲੀ DynamicAPInt::static_assert_layout() {
+  constexpr size_t Val_Large_ਵਿੱਥ =
+      offsetof(DynamicAPInt, ValLarge.Val.ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2);
+  constexpr size_t Val_Small_ਵਿੱਥ = offsetof(DynamicAPInt, ValSmall);
+  constexpr size_t Val_Small_ਮਾਪ = ਆਕਾਰ(ValSmall);
+  static_assert(Val_Large_ਵਿੱਥ >= Val_Small_ਵਿੱਥ + Val_Small_ਮਾਪ);
 }
 
-raw_ostream &DynamicAPInt::print(raw_ostream &OS) const {
-  if (isSmall())
-    return OS << ValSmall;
-  return OS << ValLarge;
+raw_ostream &DynamicAPInt::print(raw_ostream &OS) ਅਚਲ {
+  ਜੇ (isSmall())
+    ਵਾਪਸ OS << ValSmall;
+  ਵਾਪਸ OS << ValLarge;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void DynamicAPInt::dump() const { print(dbgs()); }
-#endif
+#ਜੇ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_ਵਿਧੀ ਖਾਲੀ DynamicAPInt::dump() ਅਚਲ { print(dbgs()); }
+#ਜੇ_ਅੰਤ

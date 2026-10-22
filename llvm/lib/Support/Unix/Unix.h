@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_SUPPORT_UNIX_UNIX_H
-#define LLVM_LIB_SUPPORT_UNIX_UNIX_H
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ LLVM_LIB_SUPPORT_UNIX_UNIX_H
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LLVM_LIB_SUPPORT_UNIX_UNIX_H
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only generic UNIX code that
 //===          is guaranteed to work on all UNIX variants.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <assert.h>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <sys/types.h>
-#include <sys/wait.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Chrono.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Errno.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ErrorHandling.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <assert.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cerrno>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstdio>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstdlib>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstring>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/wait.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_UNISTD_H
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਜੇ_ਅੰਤ
 
-#include <sys/time.h>
-#include <time.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/time.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <time.h>
 
-#include <dlfcn.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <dlfcn.h>
 
 # include <fcntl.h>
 
@@ -49,21 +49,21 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
-    return true;
-  if (errnum == -1)
+ਸਥਿਰ ਸਤਰਅੰਦਰ bool Make_Err_ਸੁਨੇਹਾ(
+  std::string* Err_ਸੁਨੇਹਾ, ਅਚਲ std::string& ਅਗੇਤਰ_2, ਪੂਰਨ errnum = -1) {
+  ਜੇ (!Err_ਸੁਨੇਹਾ)
+    ਵਾਪਸ true;
+  ਜੇ (errnum == -1)
     errnum = errno;
-  *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
-  return true;
+  *Err_ਸੁਨੇਹਾ = ਅਗੇਤਰ_2 + ": " + llvm::sys::StrError(errnum);
+  ਵਾਪਸ true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
-  std::string ErrMsg;
-  MakeErrMsg(&ErrMsg, Msg, errnum);
-  llvm::report_fatal_error(llvm::Twine(ErrMsg));
+[[noreturn]] ਸਥਿਰ ਸਤਰਅੰਦਰ ਖਾਲੀ ReportErrnumFatal(ਅਚਲ ਅੱਖਰ *ਸੁਨੇਹਾ_4, ਪੂਰਨ errnum) {
+  std::string Err_ਸੁਨੇਹਾ;
+  Make_Err_ਸੁਨੇਹਾ(&Err_ਸੁਨੇਹਾ, ਸੁਨੇਹਾ_4, errnum);
+  llvm::report_fatal_error(llvm::Twine(Err_ਸੁਨੇਹਾ));
 }
 
 namespace llvm {
@@ -71,32 +71,32 @@ namespace sys {
 
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
-inline std::chrono::microseconds toDuration(const struct timeval &TV) {
-  return std::chrono::seconds(TV.tv_sec) +
+ਸਤਰਅੰਦਰ std::chrono::microseconds ਮੰਜ਼ਿਲ_Duration(ਅਚਲ ਬਣਤਰ timeval &TV) {
+  ਵਾਪਸ std::chrono::seconds(TV.tv_sec) +
          std::chrono::microseconds(TV.tv_usec);
 }
 
 /// Convert a time point to struct timespec.
-inline struct timespec toTimeSpec(TimePoint<> TP) {
+ਸਤਰਅੰਦਰ ਬਣਤਰ timespec ਮੰਜ਼ਿਲ_ਸਮਾਂ_Spec(ਸਮਾਂ_ਬਿੰਦੂ<> TP) {
   using namespace std::chrono;
 
-  struct timespec RetVal;
-  RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  ਬਣਤਰ timespec RetVal;
+  RetVal.tv_sec = ਮੰਜ਼ਿਲ_ਸਮਾਂ_T(TP);
+  RetVal.tv_nsec = (TP.ਸਮਾਂ_since_epoch() % seconds(1)).ਗਿਣਤੀ_2();
+  ਵਾਪਸ RetVal;
 }
 
 /// Convert a time point to struct timeval.
-inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
+ਸਤਰਅੰਦਰ ਬਣਤਰ timeval ਮੰਜ਼ਿਲ_ਸਮਾਂ_Val(ਸਮਾਂ_ਬਿੰਦੂ<std::chrono::microseconds> TP) {
   using namespace std::chrono;
 
-  struct timeval RetVal;
-  RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
-  return RetVal;
+  ਬਣਤਰ timeval RetVal;
+  RetVal.tv_sec = ਮੰਜ਼ਿਲ_ਸਮਾਂ_T(TP);
+  RetVal.tv_usec = (TP.ਸਮਾਂ_since_epoch() % seconds(1)).ਗਿਣਤੀ_2();
+  ਵਾਪਸ RetVal;
 }
 
 } // namespace sys
 } // namespace llvm
 
-#endif
+#ਜੇ_ਅੰਤ

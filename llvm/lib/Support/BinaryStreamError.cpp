@@ -6,50 +6,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamError.h"
-#include "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/BinaryStreamError.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-char BinaryStreamError::ID = 0;
+ਅੱਖਰ ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::ID = 0;
 
-BinaryStreamError::BinaryStreamError(stream_error_code C)
-    : BinaryStreamError(C, "") {}
+ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error(ਧਾਰਾ_error_ਕੋਡ C)
+    : ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error(C, "") {}
 
-BinaryStreamError::BinaryStreamError(StringRef Context)
-    : BinaryStreamError(stream_error_code::unspecified, Context) {}
+ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error(StringRef Context)
+    : ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error(ਧਾਰਾ_error_ਕੋਡ::unspecified, Context) {}
 
-BinaryStreamError::BinaryStreamError(stream_error_code C, StringRef Context)
-    : Code(C) {
-  ErrMsg = "Stream Error: ";
-  switch (C) {
-  case stream_error_code::unspecified:
-    ErrMsg += "An unspecified error has occurred.";
-    break;
-  case stream_error_code::stream_too_short:
-    ErrMsg += "The stream is too short to perform the requested operation.";
-    break;
-  case stream_error_code::invalid_array_size:
-    ErrMsg += "The buffer size is not a multiple of the array element size.";
-    break;
-  case stream_error_code::invalid_offset:
-    ErrMsg += "The specified offset is invalid for the current stream.";
-    break;
-  case stream_error_code::filesystem_error:
-    ErrMsg += "An I/O error occurred on the file system.";
-    break;
+ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error(ਧਾਰਾ_error_ਕੋਡ C, StringRef Context)
+    : ਕੋਡ(C) {
+  Err_ਸੁਨੇਹਾ = "Stream Error: ";
+  ਚੋਣ (C) {
+  ਹਾਲਤ ਧਾਰਾ_error_ਕੋਡ::unspecified:
+    Err_ਸੁਨੇਹਾ += "An unspecified error has occurred.";
+    ਰੋਕੋ;
+  ਹਾਲਤ ਧਾਰਾ_error_ਕੋਡ::ਧਾਰਾ_too_short:
+    Err_ਸੁਨੇਹਾ += "The stream is too short to perform the requested operation.";
+    ਰੋਕੋ;
+  ਹਾਲਤ ਧਾਰਾ_error_ਕੋਡ::invalid_array_ਮਾਪ:
+    Err_ਸੁਨੇਹਾ += "The buffer size is not a multiple of the array element size.";
+    ਰੋਕੋ;
+  ਹਾਲਤ ਧਾਰਾ_error_ਕੋਡ::invalid_ਵਿੱਥ:
+    Err_ਸੁਨੇਹਾ += "The specified offset is invalid for the current stream.";
+    ਰੋਕੋ;
+  ਹਾਲਤ ਧਾਰਾ_error_ਕੋਡ::filesystem_error:
+    Err_ਸੁਨੇਹਾ += "An I/O error occurred on the file system.";
+    ਰੋਕੋ;
   }
 
-  if (!Context.empty()) {
-    ErrMsg += "  ";
-    ErrMsg += Context;
+  ਜੇ (!Context.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    Err_ਸੁਨੇਹਾ += "  ";
+    Err_ਸੁਨੇਹਾ += Context;
   }
 }
 
-void BinaryStreamError::log(raw_ostream &OS) const { OS << ErrMsg; }
+ਖਾਲੀ ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::ਲਘੂਗਣਕ(raw_ostream &OS) ਅਚਲ { OS << Err_ਸੁਨੇਹਾ; }
 
-StringRef BinaryStreamError::getErrorMessage() const { return ErrMsg; }
+StringRef ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::get_Error_ਸੁਨੇਹਾ() ਅਚਲ { ਵਾਪਸ Err_ਸੁਨੇਹਾ; }
 
-std::error_code BinaryStreamError::convertToErrorCode() const {
-  return inconvertibleErrorCode();
+std::error_ਕੋਡ ਦੁਆਧਾਰੀ_ਧਾਰਾ_Error::convert_ਮੰਜ਼ਿਲ_Error_ਕੋਡ() ਅਚਲ {
+  ਵਾਪਸ inconvertible_Error_ਕੋਡ();
 }

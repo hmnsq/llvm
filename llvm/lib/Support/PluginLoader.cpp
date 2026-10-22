@@ -10,49 +10,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DONT_GET_PLUGIN_LOADER_OPTION
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/PluginLoader.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/DynamicLibrary.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Mutex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <vector>
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
-  std::vector<std::string> List;
+ਬਣਤਰ Plugins {
+  sys::SmartMutex<ਸੱਚ> ਤਾਲਾ_2;
+  std::ਸਦਿਸ਼<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  ਸਥਿਰ Plugins P;
+  ਵਾਪਸ P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+ਖਾਲੀ PluginLoader::ਸੰਚਾਲਕ=(ਅਚਲ std::string &Filename) {
+  ਸਵੈਚਾਲਿਤ &P = getPlugins();
+  sys::Smart_Scoped_ਤਾਲਾ<ਸੱਚ> ਤਾਲਾ_2(P.ਤਾਲਾ_2);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  ਜੇ (sys::DynamicLibrary::ਲੱਦੋ_Library_Permanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } ਨਹੀਂਤਾਂ {
+    P.List.ਧੱਕੋ_ਪਿੱਠ(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+ਬਿਨਾਨਿਸ਼ਾਨੀ PluginLoader::get_ਅੰਕ_Plugins() {
+  ਸਵੈਚਾਲਿਤ &P = getPlugins();
+  sys::Smart_Scoped_ਤਾਲਾ<ਸੱਚ> ਤਾਲਾ_2(P.ਤਾਲਾ_2);
+  ਵਾਪਸ P.List.ਮਾਪ_2();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+std::string &PluginLoader::getPlugin(ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੰਕ_2) {
+  ਸਵੈਚਾਲਿਤ &P = getPlugins();
+  sys::Smart_Scoped_ਤਾਲਾ<ਸੱਚ> ਤਾਲਾ_2(P.ਤਾਲਾ_2);
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਅੰਕ_2 < P.List.ਮਾਪ_2() && "Asking for an out of bounds plugin");
+  ਵਾਪਸ P.List[ਅੰਕ_2];
 }

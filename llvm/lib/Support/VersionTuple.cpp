@@ -11,129 +11,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/VersionTuple.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-std::string VersionTuple::getAsString() const {
-  std::string Result;
+std::string ਸੰਸਕਰਣ_Tuple::getAsString() ਅਚਲ {
+  std::string ਨਤੀਜਾ;
   {
-    llvm::raw_string_ostream Out(Result);
-    Out << *this;
+    llvm::raw_string_ostream ਬਾਹਰਲਾ(ਨਤੀਜਾ);
+    ਬਾਹਰਲਾ << *ਇਹ;
   }
-  return Result;
+  ਵਾਪਸ ਨਤੀਜਾ;
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
-  Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
-    Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
-    Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
-    Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
-    Out << '.' << *Subbuild;
-  return Out;
+raw_ostream &llvm::ਸੰਚਾਲਕ<<(raw_ostream &ਬਾਹਰਲਾ, ਅਚਲ ਸੰਸਕਰਣ_Tuple &V) {
+  ਬਾਹਰਲਾ << V.getMajor();
+  ਜੇ (std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> Minor = V.getMinor())
+    ਬਾਹਰਲਾ << '.' << *Minor;
+  ਜੇ (std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> Subminor = V.getSubminor())
+    ਬਾਹਰਲਾ << '.' << *Subminor;
+  ਜੇ (std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> Build = V.getBuild())
+    ਬਾਹਰਲਾ << '.' << *Build;
+  ਜੇ (std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> Subbuild = V.getSubbuild())
+    ਬਾਹਰਲਾ << '.' << *Subbuild;
+  ਵਾਪਸ ਬਾਹਰਲਾ;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
-    return true;
+ਸਥਿਰ ਤਾਰਕਿਕ parseInt(StringRef &ਨਿਵੇਸ਼_2, ਬਿਨਾਨਿਸ਼ਾਨੀ &ਮੁੱਲ_2) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਮੁੱਲ_2 == 0);
+  ਜੇ (ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ ਸੱਚ;
 
-  char next = input[0];
-  input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
-  value = (unsigned)(next - '0');
+  ਅੱਖਰ ਅਗਲਾ = ਨਿਵੇਸ਼_2[0];
+  ਨਿਵੇਸ਼_2 = ਨਿਵੇਸ਼_2.substr(1);
+  ਜੇ (ਅਗਲਾ < '0' || ਅਗਲਾ > '9')
+    ਵਾਪਸ ਸੱਚ;
+  ਮੁੱਲ_2 = (ਬਿਨਾਨਿਸ਼ਾਨੀ)(ਅਗਲਾ - '0');
 
-  while (!input.empty()) {
-    next = input[0];
-    if (next < '0' || next > '9')
-      return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+  ਜਦੋਂ (!ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਅਗਲਾ = ਨਿਵੇਸ਼_2[0];
+    ਜੇ (ਅਗਲਾ < '0' || ਅਗਲਾ > '9')
+      ਵਾਪਸ ਝੂਠ;
+    ਨਿਵੇਸ਼_2 = ਨਿਵੇਸ਼_2.substr(1);
+    ਮੁੱਲ_2 = ਮੁੱਲ_2 * 10 + (ਬਿਨਾਨਿਸ਼ਾਨੀ)(ਅਗਲਾ - '0');
   }
 
-  return false;
+  ਵਾਪਸ ਝੂਠ;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
-  unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
+ਤਾਰਕਿਕ ਸੰਸਕਰਣ_Tuple::tryParse(StringRef ਨਿਵੇਸ਼_2) {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  ਜੇ (parseInt(ਨਿਵੇਸ਼_2, major))
+    ਵਾਪਸ ਸੱਚ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major);
-    return false;
+  ਜੇ (ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    *ਇਹ = ਸੰਸਕਰਣ_Tuple(major);
+    ਵਾਪਸ ਝੂਠ;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  ਜੇ (ਨਿਵੇਸ਼_2[0] != '.')
+    ਵਾਪਸ ਸੱਚ;
+  ਨਿਵੇਸ਼_2 = ਨਿਵੇਸ਼_2.substr(1);
+  ਜੇ (parseInt(ਨਿਵੇਸ਼_2, minor))
+    ਵਾਪਸ ਸੱਚ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor);
-    return false;
+  ਜੇ (ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    *ਇਹ = ਸੰਸਕਰਣ_Tuple(major, minor);
+    ਵਾਪਸ ਝੂਠ;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  ਜੇ (!ਨਿਵੇਸ਼_2.consume_front("."))
+    ਵਾਪਸ ਸੱਚ;
+  ਜੇ (parseInt(ਨਿਵੇਸ਼_2, subminor))
+    ਵਾਪਸ ਸੱਚ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor);
-    return false;
+  ਜੇ (ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    *ਇਹ = ਸੰਸਕਰਣ_Tuple(major, minor, subminor);
+    ਵਾਪਸ ਝੂਠ;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  ਜੇ (!ਨਿਵੇਸ਼_2.consume_front("."))
+    ਵਾਪਸ ਸੱਚ;
+  ਜੇ (parseInt(ਨਿਵੇਸ਼_2, build))
+    ਵਾਪਸ ਸੱਚ;
+  ਜੇ (build >= 1024 * 1024)
+    ਵਾਪਸ ਸੱਚ;
 
-  if (input.empty()) {
-    *this = VersionTuple(major, minor, subminor, build);
-    return false;
+  ਜੇ (ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    *ਇਹ = ਸੰਸਕਰਣ_Tuple(major, minor, subminor, build);
+    ਵਾਪਸ ਝੂਠ;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  ਜੇ (!ਨਿਵੇਸ਼_2.consume_front("."))
+    ਵਾਪਸ ਸੱਚ;
+  ਜੇ (parseInt(ਨਿਵੇਸ਼_2, subbuild))
+    ਵਾਪਸ ਸੱਚ;
+  ਜੇ (subbuild >= 1024)
+    ਵਾਪਸ ਸੱਚ;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  ਜੇ (!ਨਿਵੇਸ਼_2.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ ਸੱਚ;
 
-  *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  *ਇਹ = ਸੰਸਕਰਣ_Tuple(major, minor, subminor, build, subbuild);
+  ਵਾਪਸ ਝੂਠ;
 }
 
-VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+ਸੰਸਕਰਣ_Tuple ਸੰਸਕਰਣ_Tuple::withMajorReplaced(ਬਿਨਾਨਿਸ਼ਾਨੀ NewMajor) ਅਚਲ {
+  ਜੇ (HasSubbuild)
+    ਵਾਪਸ ਸੰਸਕਰਣ_Tuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  ਜੇ (HasBuild)
+    ਵਾਪਸ ਸੰਸਕਰਣ_Tuple(NewMajor, Minor, Subminor, Build);
+  ਜੇ (HasSubminor)
+    ਵਾਪਸ ਸੰਸਕਰਣ_Tuple(NewMajor, Minor, Subminor);
+  ਜੇ (HasMinor)
+    ਵਾਪਸ ਸੰਸਕਰਣ_Tuple(NewMajor, Minor);
+  ਵਾਪਸ ਸੰਸਕਰਣ_Tuple(NewMajor);
 }

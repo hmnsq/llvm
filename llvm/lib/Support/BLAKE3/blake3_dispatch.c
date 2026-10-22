@@ -1,97 +1,97 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdbool.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stddef.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdint.h>
 
-#include "blake3_impl.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "blake3_impl.h"
 
-#if defined(_MSC_VER)
-#include <Windows.h>
-#endif
+#ਜੇ defined(_MSC_VER)
+#ਅਨ੍ਤਰ੍ਭਾਵ <Windows.h>
+#ਜੇ_ਅੰਤ
 
-#if defined(IS_X86)
-#if defined(_MSC_VER)
-#include <intrin.h>
-#elif defined(__GNUC__)
-#include <immintrin.h>
-#else
-#undef IS_X86 /* Unimplemented! */
-#endif
-#endif
+#ਜੇ defined(IS_X86)
+#ਜੇ defined(_MSC_VER)
+#ਅਨ੍ਤਰ੍ਭਾਵ <intrin.h>
+#ਜਾਂਜੇ defined(__GNUC__)
+#ਅਨ੍ਤਰ੍ਭਾਵ <immintrin.h>
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਾ_ਰੱਦ IS_X86 /* Unimplemented! */
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
 
-#if !defined(BLAKE3_ATOMICS)
-#if defined(__has_include)
-#if __has_include(<stdatomic.h>) && !defined(_MSC_VER)
-#define BLAKE3_ATOMICS 1
-#else
-#define BLAKE3_ATOMICS 0
-#endif /* __has_include(<stdatomic.h>) && !defined(_MSC_VER) */
-#else
-#define BLAKE3_ATOMICS 0
-#endif /* defined(__has_include) */
-#endif /* BLAKE3_ATOMICS */
+#ਜੇ !defined(BLAKE3_ATOMICS)
+#ਜੇ defined(__has_include)
+#ਜੇ __has_include(<stdatomic.h>) && !defined(_MSC_VER)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ BLAKE3_ATOMICS 1
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ BLAKE3_ATOMICS 0
+#ਜੇ_ਅੰਤ /* __has_include(<stdatomic.h>) && !defined(_MSC_VER) */
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ BLAKE3_ATOMICS 0
+#ਜੇ_ਅੰਤ /* defined(__has_include) */
+#ਜੇ_ਅੰਤ /* BLAKE3_ATOMICS */
 
-#if BLAKE3_ATOMICS
-#define ATOMIC_INT _Atomic int
-#define ATOMIC_LOAD(x) x
-#define ATOMIC_STORE(x, y) x = y
-#elif defined(_MSC_VER)
-#define ATOMIC_INT LONG
-#define ATOMIC_LOAD(x) InterlockedOr(&x, 0)
-#define ATOMIC_STORE(x, y) InterlockedExchange(&x, y)
-#else
-#define ATOMIC_INT int
-#define ATOMIC_LOAD(x) x
-#define ATOMIC_STORE(x, y) x = y
-#endif
+#ਜੇ BLAKE3_ATOMICS
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_INT _Atomic ਪੂਰਨ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_ਲੱਦੋ(x) x
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_STORE(x, y) x = y
+#ਜਾਂਜੇ defined(_MSC_VER)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_INT LONG
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_ਲੱਦੋ(x) InterlockedOr(&x, 0)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_STORE(x, y) InterlockedExchange(&x, y)
+#ਨਹੀਂਤਾਂ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_INT ਪੂਰਨ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_ਲੱਦੋ(x) x
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ATOMIC_STORE(x, y) x = y
+#ਜੇ_ਅੰਤ
 
-#define MAYBE_UNUSED(x) (void)((x))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MAYBE_ਅਣਵਰਤਿਆ(x) (ਖਾਲੀ)((x))
 
-#if defined(IS_X86)
-static uint64_t xgetbv(void) {
-#if defined(_MSC_VER)
-  return _xgetbv(0);
-#else
+#ਜੇ defined(IS_X86)
+ਸਥਿਰ uint64_t xgetbv(ਖਾਲੀ) {
+#ਜੇ defined(_MSC_VER)
+  ਵਾਪਸ _xgetbv(0);
+#ਨਹੀਂਤਾਂ
   uint32_t eax = 0, edx = 0;
   __asm__ __volatile__("xgetbv\n" : "=a"(eax), "=d"(edx) : "c"(0));
-  return ((uint64_t)edx << 32) | eax;
-#endif
+  ਵਾਪਸ ((uint64_t)edx << 32) | eax;
+#ਜੇ_ਅੰਤ
 }
 
-static void cpuid(uint32_t out[4], uint32_t id) {
-#if defined(_MSC_VER)
-  __cpuid((int *)out, id);
-#elif defined(__i386__) || defined(_M_IX86)
+ਸਥਿਰ ਖਾਲੀ cpuid(uint32_t ਬਾਹਰਲਾ_2[4], uint32_t id) {
+#ਜੇ defined(_MSC_VER)
+  __cpuid((ਪੂਰਨ *)ਬਾਹਰਲਾ_2, id);
+#ਜਾਂਜੇ defined(__i386__) || defined(_M_IX86)
   __asm__ __volatile__("movl %%ebx, %1\n"
                        "cpuid\n"
                        "xchgl %1, %%ebx\n"
-                       : "=a"(out[0]), "=r"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(ਬਾਹਰਲਾ_2[0]), "=r"(ਬਾਹਰਲਾ_2[1]), "=c"(ਬਾਹਰਲਾ_2[2]), "=d"(ਬਾਹਰਲਾ_2[3])
                        : "a"(id));
-#else
+#ਨਹੀਂਤਾਂ
   __asm__ __volatile__("cpuid\n"
-                       : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(ਬਾਹਰਲਾ_2[0]), "=b"(ਬਾਹਰਲਾ_2[1]), "=c"(ਬਾਹਰਲਾ_2[2]), "=d"(ਬਾਹਰਲਾ_2[3])
                        : "a"(id));
-#endif
+#ਜੇ_ਅੰਤ
 }
 
-static void cpuidex(uint32_t out[4], uint32_t id, uint32_t sid) {
-#if defined(_MSC_VER)
-  __cpuidex((int *)out, id, sid);
-#elif defined(__i386__) || defined(_M_IX86)
+ਸਥਿਰ ਖਾਲੀ cpuidex(uint32_t ਬਾਹਰਲਾ_2[4], uint32_t id, uint32_t sid) {
+#ਜੇ defined(_MSC_VER)
+  __cpuidex((ਪੂਰਨ *)ਬਾਹਰਲਾ_2, id, sid);
+#ਜਾਂਜੇ defined(__i386__) || defined(_M_IX86)
   __asm__ __volatile__("movl %%ebx, %1\n"
                        "cpuid\n"
                        "xchgl %1, %%ebx\n"
-                       : "=a"(out[0]), "=r"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(ਬਾਹਰਲਾ_2[0]), "=r"(ਬਾਹਰਲਾ_2[1]), "=c"(ਬਾਹਰਲਾ_2[2]), "=d"(ਬਾਹਰਲਾ_2[3])
                        : "a"(id), "c"(sid));
-#else
+#ਨਹੀਂਤਾਂ
   __asm__ __volatile__("cpuid\n"
-                       : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3])
+                       : "=a"(ਬਾਹਰਲਾ_2[0]), "=b"(ਬਾਹਰਲਾ_2[1]), "=c"(ਬਾਹਰਲਾ_2[2]), "=d"(ਬਾਹਰਲਾ_2[3])
                        : "a"(id), "c"(sid));
-#endif
+#ਜੇ_ਅੰਤ
 }
 
-#endif
+#ਜੇ_ਅੰਤ
 
-enum cpu_feature {
+ਗਿਣਤੀ cpu_feature {
   SSE2 = 1 << 0,
   SSSE3 = 1 << 1,
   SSE41 = 1 << 2,
@@ -103,231 +103,231 @@ enum cpu_feature {
   UNDEFINED = 1 << 30
 };
 
-#if !defined(BLAKE3_TESTING)
-static /* Allow the variable to be controlled manually for testing */
-#endif
+#ਜੇ !defined(BLAKE3_TESTING)
+ਸਥਿਰ /* Allow the variable to be controlled manually for testing */
+#ਜੇ_ਅੰਤ
     ATOMIC_INT g_cpu_features = UNDEFINED;
 
-LLVM_ATTRIBUTE_USED
-#if !defined(BLAKE3_TESTING)
-static
-#endif
-    enum cpu_feature
-    get_cpu_features(void) {
+LLVM_ATTRIBUTE_ਵਰਤਿਆ
+#ਜੇ !defined(BLAKE3_TESTING)
+ਸਥਿਰ
+#ਜੇ_ਅੰਤ
+    ਗਿਣਤੀ cpu_feature
+    get_cpu_features(ਖਾਲੀ) {
 
   /* If TSAN detects a data race here, try compiling with -DBLAKE3_ATOMICS=1 */
-  enum cpu_feature features = ATOMIC_LOAD(g_cpu_features);
-  if (features != UNDEFINED) {
-    return features;
-  } else {
-#if defined(IS_X86)
+  ਗਿਣਤੀ cpu_feature features = ATOMIC_ਲੱਦੋ(g_cpu_features);
+  ਜੇ (features != UNDEFINED) {
+    ਵਾਪਸ features;
+  } ਨਹੀਂਤਾਂ {
+#ਜੇ defined(IS_X86)
     uint32_t regs[4] = {0};
     uint32_t *eax = &regs[0], *ebx = &regs[1], *ecx = &regs[2], *edx = &regs[3];
-    (void)edx;
+    (ਖਾਲੀ)edx;
     features = 0;
     cpuid(regs, 0);
-    const int max_id = *eax;
+    ਅਚਲ ਪੂਰਨ max_id = *eax;
     cpuid(regs, 1);
-#if defined(__amd64__) || defined(_M_X64)
+#ਜੇ defined(__amd64__) || defined(_M_X64)
     features |= SSE2;
-#else
-    if (*edx & (1UL << 26))
+#ਨਹੀਂਤਾਂ
+    ਜੇ (*edx & (1UL << 26))
       features |= SSE2;
-#endif
-    if (*ecx & (1UL << 9))
+#ਜੇ_ਅੰਤ
+    ਜੇ (*ecx & (1UL << 9))
       features |= SSSE3;
-    if (*ecx & (1UL << 19))
+    ਜੇ (*ecx & (1UL << 19))
       features |= SSE41;
 
-    if (*ecx & (1UL << 27)) { // OSXSAVE
-      const uint64_t mask = xgetbv();
-      if ((mask & 6) == 6) { // SSE and AVX states
-        if (*ecx & (1UL << 28))
+    ਜੇ (*ecx & (1UL << 27)) { // OSXSAVE
+      ਅਚਲ uint64_t ਨਕਾਬ_2 = xgetbv();
+      ਜੇ ((ਨਕਾਬ_2 & 6) == 6) { // SSE and AVX states
+        ਜੇ (*ecx & (1UL << 28))
           features |= AVX;
-        if (max_id >= 7) {
+        ਜੇ (max_id >= 7) {
           cpuidex(regs, 7, 0);
-          if (*ebx & (1UL << 5))
+          ਜੇ (*ebx & (1UL << 5))
             features |= AVX2;
-          if ((mask & 224) == 224) { // Opmask, ZMM_Hi256, Hi16_Zmm
-            if (*ebx & (1UL << 31))
+          ਜੇ ((ਨਕਾਬ_2 & 224) == 224) { // Opmask, ZMM_Hi256, Hi16_Zmm
+            ਜੇ (*ebx & (1UL << 31))
               features |= AVX512VL;
-            if (*ebx & (1UL << 16))
+            ਜੇ (*ebx & (1UL << 16))
               features |= AVX512F;
           }
         }
       }
     }
     ATOMIC_STORE(g_cpu_features, features);
-    return features;
-#else
+    ਵਾਪਸ features;
+#ਨਹੀਂਤਾਂ
     /* How to detect NEON? */
-    return 0;
-#endif
+    ਵਾਪਸ 0;
+#ਜੇ_ਅੰਤ
   }
 }
 
-void blake3_compress_in_place(uint32_t cv[8],
-                              const uint8_t block[BLAKE3_BLOCK_LEN],
-                              uint8_t block_len, uint64_t counter,
+ਖਾਲੀ blake3_compress_ਵਿੱਚ_ਰੱਖੋ(uint32_t cv[8],
+                              ਅਚਲ uint8_t ਖੰਡ[BLAKE3_ਖੰਡ_LEN],
+                              uint8_t ਖੰਡ_len, uint64_t counter,
                               uint8_t flags) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_compress_in_place_avx512(cv, block, block_len, counter, flags);
-    return;
+#ਜੇ defined(IS_X86)
+  ਅਚਲ ਗਿਣਤੀ cpu_feature features = get_cpu_features();
+  MAYBE_ਅਣਵਰਤਿਆ(features);
+#ਜੇ !defined(BLAKE3_NO_AVX512)
+  ਜੇ (features & AVX512VL) {
+    blake3_compress_ਵਿੱਚ_ਰੱਖੋ_avx512(cv, ਖੰਡ, ਖੰਡ_len, counter, flags);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_compress_in_place_sse41(cv, block, block_len, counter, flags);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE41)
+  ਜੇ (features & SSE41) {
+    blake3_compress_ਵਿੱਚ_ਰੱਖੋ_sse41(cv, ਖੰਡ, ਖੰਡ_len, counter, flags);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_compress_in_place_sse2(cv, block, block_len, counter, flags);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE2)
+  ਜੇ (features & SSE2) {
+    blake3_compress_ਵਿੱਚ_ਰੱਖੋ_sse2(cv, ਖੰਡ, ਖੰਡ_len, counter, flags);
+    ਵਾਪਸ;
   }
-#endif
-#endif
-  blake3_compress_in_place_portable(cv, block, block_len, counter, flags);
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
+  blake3_compress_ਵਿੱਚ_ਰੱਖੋ_portable(cv, ਖੰਡ, ਖੰਡ_len, counter, flags);
 }
 
-void blake3_compress_xof(const uint32_t cv[8],
-                         const uint8_t block[BLAKE3_BLOCK_LEN],
-                         uint8_t block_len, uint64_t counter, uint8_t flags,
-                         uint8_t out[64]) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_compress_xof_avx512(cv, block, block_len, counter, flags, out);
-    return;
+ਖਾਲੀ blake3_compress_xof(ਅਚਲ uint32_t cv[8],
+                         ਅਚਲ uint8_t ਖੰਡ[BLAKE3_ਖੰਡ_LEN],
+                         uint8_t ਖੰਡ_len, uint64_t counter, uint8_t flags,
+                         uint8_t ਬਾਹਰਲਾ_2[64]) {
+#ਜੇ defined(IS_X86)
+  ਅਚਲ ਗਿਣਤੀ cpu_feature features = get_cpu_features();
+  MAYBE_ਅਣਵਰਤਿਆ(features);
+#ਜੇ !defined(BLAKE3_NO_AVX512)
+  ਜੇ (features & AVX512VL) {
+    blake3_compress_xof_avx512(cv, ਖੰਡ, ਖੰਡ_len, counter, flags, ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_compress_xof_sse41(cv, block, block_len, counter, flags, out);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE41)
+  ਜੇ (features & SSE41) {
+    blake3_compress_xof_sse41(cv, ਖੰਡ, ਖੰਡ_len, counter, flags, ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_compress_xof_sse2(cv, block, block_len, counter, flags, out);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE2)
+  ਜੇ (features & SSE2) {
+    blake3_compress_xof_sse2(cv, ਖੰਡ, ਖੰਡ_len, counter, flags, ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#endif
-  blake3_compress_xof_portable(cv, block, block_len, counter, flags, out);
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
+  blake3_compress_xof_portable(cv, ਖੰਡ, ਖੰਡ_len, counter, flags, ਬਾਹਰਲਾ_2);
 }
 
 
-void blake3_xof_many(const uint32_t cv[8],
-                     const uint8_t block[BLAKE3_BLOCK_LEN],
-                     uint8_t block_len, uint64_t counter, uint8_t flags,
-                     uint8_t out[64], size_t outblocks) {
-  if (outblocks == 0) {
+ਖਾਲੀ blake3_xof_many(ਅਚਲ uint32_t cv[8],
+                     ਅਚਲ uint8_t ਖੰਡ[BLAKE3_ਖੰਡ_LEN],
+                     uint8_t ਖੰਡ_len, uint64_t counter, uint8_t flags,
+                     uint8_t ਬਾਹਰਲਾ_2[64], size_t outblocks) {
+  ਜੇ (outblocks == 0) {
     // The current assembly implementation always outputs at least 1 block.
-    return;
+    ਵਾਪਸ;
   }
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(BLAKE3_NO_AVX512)
-  if (features & AVX512VL) {
-    blake3_xof_many_avx512(cv, block, block_len, counter, flags, out, outblocks);
-    return;
+#ਜੇ defined(IS_X86)
+  ਅਚਲ ਗਿਣਤੀ cpu_feature features = get_cpu_features();
+  MAYBE_ਅਣਵਰਤਿਆ(features);
+#ਜੇ !defined(_WIN32) && !defined(__CYGWIN__) && !defined(BLAKE3_NO_AVX512)
+  ਜੇ (features & AVX512VL) {
+    blake3_xof_many_avx512(cv, ਖੰਡ, ਖੰਡ_len, counter, flags, ਬਾਹਰਲਾ_2, outblocks);
+    ਵਾਪਸ;
   }
-#endif
-#endif
-  for(size_t i = 0; i < outblocks; ++i) {
-    blake3_compress_xof(cv, block, block_len, counter + i, flags, out + 64*i);
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
+  ਲਈ(size_t i = 0; i < outblocks; ++i) {
+    blake3_compress_xof(cv, ਖੰਡ, ਖੰਡ_len, counter + i, flags, ਬਾਹਰਲਾ_2 + 64*i);
   }
 }
 
-void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
-                      size_t blocks, const uint32_t key[8], uint64_t counter,
+ਖਾਲੀ blake3_hash_many(ਅਚਲ uint8_t *ਅਚਲ *inputs, size_t ਅੰਕ_inputs,
+                      size_t ਖੰਡਾਂ, ਅਚਲ uint32_t ਕੁੰਜੀ_2[8], uint64_t counter,
                       bool increment_counter, uint8_t flags,
-                      uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    blake3_hash_many_avx512(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
-    return;
+                      uint8_t flags_ਸ਼ੁਰੂ, uint8_t flags_ਸਿਰਾ, uint8_t *ਬਾਹਰਲਾ_2) {
+#ਜੇ defined(IS_X86)
+  ਅਚਲ ਗਿਣਤੀ cpu_feature features = get_cpu_features();
+  MAYBE_ਅਣਵਰਤਿਆ(features);
+#ਜੇ !defined(BLAKE3_NO_AVX512)
+  ਜੇ ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    blake3_hash_many_avx512(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                            increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ,
+                            ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_AVX2)
-  if (features & AVX2) {
-    blake3_hash_many_avx2(inputs, num_inputs, blocks, key, counter,
-                          increment_counter, flags, flags_start, flags_end,
-                          out);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_AVX2)
+  ਜੇ (features & AVX2) {
+    blake3_hash_many_avx2(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                          increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ,
+                          ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
-                           increment_counter, flags, flags_start, flags_end,
-                           out);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE41)
+  ਜੇ (features & SSE41) {
+    blake3_hash_many_sse41(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                           increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ,
+                           ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    blake3_hash_many_sse2(inputs, num_inputs, blocks, key, counter,
-                          increment_counter, flags, flags_start, flags_end,
-                          out);
-    return;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE2)
+  ਜੇ (features & SSE2) {
+    blake3_hash_many_sse2(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                          increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ,
+                          ਬਾਹਰਲਾ_2);
+    ਵਾਪਸ;
   }
-#endif
-#endif
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
 
-#if BLAKE3_USE_NEON == 1
-  blake3_hash_many_neon(inputs, num_inputs, blocks, key, counter,
-                        increment_counter, flags, flags_start, flags_end, out);
-  return;
-#endif
+#ਜੇ BLAKE3_USE_NEON == 1
+  blake3_hash_many_neon(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                        increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ, ਬਾਹਰਲਾ_2);
+  ਵਾਪਸ;
+#ਜੇ_ਅੰਤ
 
-  blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
+  blake3_hash_many_portable(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                            increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ,
+                            ਬਾਹਰਲਾ_2);
 }
 
 // The dynamically detected SIMD degree of the current platform.
-size_t blake3_simd_degree(void) {
-#if defined(IS_X86)
-  const enum cpu_feature features = get_cpu_features();
-  MAYBE_UNUSED(features);
-#if !defined(BLAKE3_NO_AVX512)
-  if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    return 16;
+size_t blake3_simd_degree(ਖਾਲੀ) {
+#ਜੇ defined(IS_X86)
+  ਅਚਲ ਗਿਣਤੀ cpu_feature features = get_cpu_features();
+  MAYBE_ਅਣਵਰਤਿਆ(features);
+#ਜੇ !defined(BLAKE3_NO_AVX512)
+  ਜੇ ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
+    ਵਾਪਸ 16;
   }
-#endif
-#if !defined(BLAKE3_NO_AVX2)
-  if (features & AVX2) {
-    return 8;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_AVX2)
+  ਜੇ (features & AVX2) {
+    ਵਾਪਸ 8;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE41)
-  if (features & SSE41) {
-    return 4;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE41)
+  ਜੇ (features & SSE41) {
+    ਵਾਪਸ 4;
   }
-#endif
-#if !defined(BLAKE3_NO_SSE2)
-  if (features & SSE2) {
-    return 4;
+#ਜੇ_ਅੰਤ
+#ਜੇ !defined(BLAKE3_NO_SSE2)
+  ਜੇ (features & SSE2) {
+    ਵਾਪਸ 4;
   }
-#endif
-#endif
-#if BLAKE3_USE_NEON == 1
-  return 4;
-#endif
-  return 1;
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
+#ਜੇ BLAKE3_USE_NEON == 1
+  ਵਾਪਸ 4;
+#ਜੇ_ਅੰਤ
+  ਵਾਪਸ 1;
 }

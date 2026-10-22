@@ -30,113 +30,113 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DAGDeltaAlgorithm.h"
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <map>
-using namespace llvm;
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/DAGDeltaAlgorithm.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/DeltaAlgorithm.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Debug.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Format.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <map>
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-#define DEBUG_TYPE "dag-delta"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEBUG_TYPE "dag-delta"
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
-class DAGDeltaAlgorithmImpl {
-  friend class DeltaActiveSetHelper;
+ਵਰਗ DAGDeltaAlgorithmImpl {
+  ਮਿੱਤਰ ਵਰਗ Delta_ਸਰਗਰਮ_ਸੈੱਟ_Helper;
 
-public:
-  using change_ty = DAGDeltaAlgorithm::change_ty;
-  using changeset_ty = DAGDeltaAlgorithm::changeset_ty;
-  using changesetlist_ty = DAGDeltaAlgorithm::changesetlist_ty;
-  using edge_ty = DAGDeltaAlgorithm::edge_ty;
+ਜਨਤਕ:
+  ਵਰਤੋਂ change_ty = DAGDeltaAlgorithm::change_ty;
+  ਵਰਤੋਂ changeset_ty = DAGDeltaAlgorithm::changeset_ty;
+  ਵਰਤੋਂ changesetlist_ty = DAGDeltaAlgorithm::changesetlist_ty;
+  ਵਰਤੋਂ ਕਿਨਾਰਾ_ty = DAGDeltaAlgorithm::ਕਿਨਾਰਾ_ty;
 
-private:
-  using pred_iterator_ty = std::vector<change_ty>::iterator;
-  using succ_iterator_ty = std::vector<change_ty>::iterator;
-  using pred_closure_iterator_ty = std::set<change_ty>::iterator;
-  using succ_closure_iterator_ty = std::set<change_ty>::iterator;
+ਨਿਜੀ:
+  ਵਰਤੋਂ pred_iterator_ty = std::ਸਦਿਸ਼<change_ty>::iterator;
+  ਵਰਤੋਂ succ_iterator_ty = std::ਸਦਿਸ਼<change_ty>::iterator;
+  ਵਰਤੋਂ pred_ਘੇਰਾ_iterator_ty = std::ਸੈੱਟ<change_ty>::iterator;
+  ਵਰਤੋਂ succ_ਘੇਰਾ_iterator_ty = std::ਸੈੱਟ<change_ty>::iterator;
 
   DAGDeltaAlgorithm &DDA;
 
-  std::vector<change_ty> Roots;
+  std::ਸਦਿਸ਼<change_ty> Roots;
 
   /// Cache of failed test results. Successful test results are never cached
   /// since we always reduce following a success. We maintain an independent
   /// cache from that used by the individual delta passes because we may get
   /// hits across multiple individual delta invocations.
-  mutable std::set<changeset_ty> FailedTestsCache;
+  ਬਦਲਣਯੋਗ std::ਸੈੱਟ<changeset_ty> FailedTestsCache;
 
   // FIXME: Gross.
-  std::map<change_ty, std::vector<change_ty> > Predecessors;
-  std::map<change_ty, std::vector<change_ty> > Successors;
+  std::map<change_ty, std::ਸਦਿਸ਼<change_ty> > Predecessors;
+  std::map<change_ty, std::ਸਦਿਸ਼<change_ty> > ਉੱਤਰਾਧਿਕਾਰੀ;
 
-  std::map<change_ty, std::set<change_ty> > PredClosure;
-  std::map<change_ty, std::set<change_ty> > SuccClosure;
+  std::map<change_ty, std::ਸੈੱਟ<change_ty> > Pred_ਘੇਰਾ;
+  std::map<change_ty, std::ਸੈੱਟ<change_ty> > Succ_ਘੇਰਾ;
 
-private:
-  pred_iterator_ty pred_begin(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].begin();
+ਨਿਜੀ:
+  pred_iterator_ty pred_begin(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Predecessors.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ Predecessors[ਗੰਢ].begin();
   }
-  pred_iterator_ty pred_end(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].end();
-  }
-
-  pred_closure_iterator_ty pred_closure_begin(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].begin();
-  }
-  pred_closure_iterator_ty pred_closure_end(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].end();
+  pred_iterator_ty pred_ਸਿਰਾ(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Predecessors.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ Predecessors[ਗੰਢ].ਸਿਰਾ();
   }
 
-  succ_iterator_ty succ_begin(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].begin();
+  pred_ਘੇਰਾ_iterator_ty pred_ਘੇਰਾ_begin(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Pred_ਘੇਰਾ.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ Pred_ਘੇਰਾ[ਗੰਢ].begin();
   }
-  succ_iterator_ty succ_end(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].end();
-  }
-
-  succ_closure_iterator_ty succ_closure_begin(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].begin();
-  }
-  succ_closure_iterator_ty succ_closure_end(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].end();
+  pred_ਘੇਰਾ_iterator_ty pred_ਘੇਰਾ_ਸਿਰਾ(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Pred_ਘੇਰਾ.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ Pred_ਘੇਰਾ[ਗੰਢ].ਸਿਰਾ();
   }
 
-  void UpdatedSearchState(const changeset_ty &Changes,
-                          const changesetlist_ty &Sets,
-                          const changeset_ty &Required) {
-    DDA.UpdatedSearchState(Changes, Sets, Required);
+  succ_iterator_ty succ_begin(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਉੱਤਰਾਧਿਕਾਰੀ.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ ਉੱਤਰਾਧਿਕਾਰੀ[ਗੰਢ].begin();
+  }
+  succ_iterator_ty succ_ਸਿਰਾ(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਉੱਤਰਾਧਿਕਾਰੀ.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ ਉੱਤਰਾਧਿਕਾਰੀ[ਗੰਢ].ਸਿਰਾ();
+  }
+
+  succ_ਘੇਰਾ_iterator_ty succ_ਘੇਰਾ_begin(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Succ_ਘੇਰਾ.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ Succ_ਘੇਰਾ[ਗੰਢ].begin();
+  }
+  succ_ਘੇਰਾ_iterator_ty succ_ਘੇਰਾ_ਸਿਰਾ(change_ty ਗੰਢ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Succ_ਘੇਰਾ.ਗਿਣਤੀ_2(ਗੰਢ) && "Invalid node!");
+    ਵਾਪਸ Succ_ਘੇਰਾ[ਗੰਢ].ਸਿਰਾ();
+  }
+
+  ਖਾਲੀ Updated_ਖੋਜ_State(ਅਚਲ changeset_ty &Changes,
+                          ਅਚਲ changesetlist_ty &Sets,
+                          ਅਚਲ changeset_ty &Required) {
+    DDA.Updated_ਖੋਜ_State(Changes, Sets, Required);
   }
 
   /// ExecuteOneTest - Execute a single test predicate on the change set \p S.
-  bool ExecuteOneTest(const changeset_ty &S) {
+  ਤਾਰਕਿਕ ExecuteOneTest(ਅਚਲ changeset_ty &S) {
     // Check dependencies invariant.
     LLVM_DEBUG({
-      for (changeset_ty::const_iterator it = S.begin(), ie = S.end(); it != ie;
+      ਲਈ (changeset_ty::const_iterator it = S.begin(), ie = S.ਸਿਰਾ(); it != ie;
            ++it)
-        for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
+        ਲਈ (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_ਸਿਰਾ(*it);
              it2 != ie2; ++it2)
-          assert(S.count(*it2) && "Attempt to run invalid changeset!");
+          ਪ੍ਰਤਿਜ੍ਞਾ(S.ਗਿਣਤੀ_2(*it2) && "Attempt to run invalid changeset!");
     });
 
-    return DDA.ExecuteOneTest(S);
+    ਵਾਪਸ DDA.ExecuteOneTest(S);
   }
 
-public:
-  DAGDeltaAlgorithmImpl(DAGDeltaAlgorithm &DDA, const changeset_ty &Changes,
-                        const std::vector<edge_ty> &Dependencies);
+ਜਨਤਕ:
+  DAGDeltaAlgorithmImpl(DAGDeltaAlgorithm &DDA, ਅਚਲ changeset_ty &Changes,
+                        ਅਚਲ std::ਸਦਿਸ਼<ਕਿਨਾਰਾ_ty> &Dependencies);
 
-  changeset_ty Run();
+  changeset_ty ਲੜੀਵਾਰ_2();
 
   /// GetTestResult - Get the test result for the active set \p Changes with
   /// \p Required changes from the cache, executing the test if necessary.
@@ -146,92 +146,92 @@ public:
   /// \param Required - The set of changes which have previously been
   /// established to be required.
   /// \return - The test result.
-  bool GetTestResult(const changeset_ty &Changes, const changeset_ty &Required);
+  ਤਾਰਕਿਕ Get_Test_ਨਤੀਜਾ(ਅਚਲ changeset_ty &Changes, ਅਚਲ changeset_ty &Required);
 };
 
 /// Helper object for minimizing an active set of changes.
-class DeltaActiveSetHelper : public DeltaAlgorithm {
+ਵਰਗ Delta_ਸਰਗਰਮ_ਸੈੱਟ_Helper : ਜਨਤਕ DeltaAlgorithm {
   DAGDeltaAlgorithmImpl &DDAI;
 
-  const changeset_ty &Required;
+  ਅਚਲ changeset_ty &Required;
 
-protected:
+ਸੁਰੱਖਿਅਤ:
   /// UpdatedSearchState - Callback used when the search state changes.
-  void UpdatedSearchState(const changeset_ty &Changes,
-                                  const changesetlist_ty &Sets) override {
-    DDAI.UpdatedSearchState(Changes, Sets, Required);
+  ਖਾਲੀ Updated_ਖੋਜ_State(ਅਚਲ changeset_ty &Changes,
+                                  ਅਚਲ changesetlist_ty &Sets) override {
+    DDAI.Updated_ਖੋਜ_State(Changes, Sets, Required);
   }
 
-  bool ExecuteOneTest(const changeset_ty &S) override {
-    return DDAI.GetTestResult(S, Required);
+  ਤਾਰਕਿਕ ExecuteOneTest(ਅਚਲ changeset_ty &S) override {
+    ਵਾਪਸ DDAI.Get_Test_ਨਤੀਜਾ(S, Required);
   }
 
-public:
-  DeltaActiveSetHelper(DAGDeltaAlgorithmImpl &DDAI,
-                       const changeset_ty &Required)
+ਜਨਤਕ:
+  Delta_ਸਰਗਰਮ_ਸੈੱਟ_Helper(DAGDeltaAlgorithmImpl &DDAI,
+                       ਅਚਲ changeset_ty &Required)
       : DDAI(DDAI), Required(Required) {}
 };
 
 } // namespace
 
 DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
-    DAGDeltaAlgorithm &DDA, const changeset_ty &Changes,
-    const std::vector<edge_ty> &Dependencies)
+    DAGDeltaAlgorithm &DDA, ਅਚਲ changeset_ty &Changes,
+    ਅਚਲ std::ਸਦਿਸ਼<ਕਿਨਾਰਾ_ty> &Dependencies)
     : DDA(DDA) {
-  for (change_ty Change : Changes) {
+  ਲਈ (change_ty Change : Changes) {
     Predecessors.try_emplace(Change);
-    Successors.try_emplace(Change);
+    ਉੱਤਰਾਧਿਕਾਰੀ.try_emplace(Change);
   }
-  for (const edge_ty &Dep : Dependencies) {
-    Predecessors[Dep.second].push_back(Dep.first);
-    Successors[Dep.first].push_back(Dep.second);
+  ਲਈ (ਅਚਲ ਕਿਨਾਰਾ_ty &Dep : Dependencies) {
+    Predecessors[Dep.ਦੂਜਾ_2].ਧੱਕੋ_ਪਿੱਠ(Dep.ਪਹਿਲਾ_2);
+    ਉੱਤਰਾਧਿਕਾਰੀ[Dep.ਪਹਿਲਾ_2].ਧੱਕੋ_ਪਿੱਠ(Dep.ਦੂਜਾ_2);
   }
 
   // Compute the roots.
-  for (change_ty Change : Changes)
-    if (succ_begin(Change) == succ_end(Change))
-      Roots.push_back(Change);
+  ਲਈ (change_ty Change : Changes)
+    ਜੇ (succ_begin(Change) == succ_ਸਿਰਾ(Change))
+      Roots.ਧੱਕੋ_ਪਿੱਠ(Change);
 
   // Pre-compute the closure of the successor relation.
-  std::vector<change_ty> Worklist(Roots.begin(), Roots.end());
-  while (!Worklist.empty()) {
-    change_ty Change = Worklist.back();
-    Worklist.pop_back();
+  std::ਸਦਿਸ਼<change_ty> Worklist(Roots.begin(), Roots.ਸਿਰਾ());
+  ਜਦੋਂ (!Worklist.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    change_ty Change = Worklist.ਪਿੱਠ();
+    Worklist.ਕੱਢੋ_ਪਿੱਠ();
 
-    std::set<change_ty> &ChangeSuccs = SuccClosure[Change];
-    for (pred_iterator_ty it = pred_begin(Change),
-           ie = pred_end(Change); it != ie; ++it) {
-      auto &SC = SuccClosure[*it];
-      SC.insert(Change);
-      SC.insert(ChangeSuccs.begin(), ChangeSuccs.end());
-      Worklist.push_back(*it);
+    std::ਸੈੱਟ<change_ty> &ChangeSuccs = Succ_ਘੇਰਾ[Change];
+    ਲਈ (pred_iterator_ty it = pred_begin(Change),
+           ie = pred_ਸਿਰਾ(Change); it != ie; ++it) {
+      ਸਵੈਚਾਲਿਤ &SC = Succ_ਘੇਰਾ[*it];
+      SC.ਪਾਓ(Change);
+      SC.ਪਾਓ(ChangeSuccs.begin(), ChangeSuccs.ਸਿਰਾ());
+      Worklist.ਧੱਕੋ_ਪਿੱਠ(*it);
     }
   }
 
   // Invert to form the predecessor closure map.
-  for (change_ty Change : Changes)
-    PredClosure.try_emplace(Change);
-  for (change_ty Change : Changes)
-    for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
-                                  ie2 = succ_closure_end(Change);
+  ਲਈ (change_ty Change : Changes)
+    Pred_ਘੇਰਾ.try_emplace(Change);
+  ਲਈ (change_ty Change : Changes)
+    ਲਈ (succ_ਘੇਰਾ_iterator_ty it2 = succ_ਘੇਰਾ_begin(Change),
+                                  ie2 = succ_ਘੇਰਾ_ਸਿਰਾ(Change);
          it2 != ie2; ++it2)
-      PredClosure[*it2].insert(Change);
+      Pred_ਘੇਰਾ[*it2].ਪਾਓ(Change);
 
   // Dump useful debug info.
   LLVM_DEBUG({
     llvm::errs() << "-- DAGDeltaAlgorithmImpl --\n";
     llvm::errs() << "Changes: [";
-    for (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.end();
+    ਲਈ (changeset_ty::const_iterator it = Changes.begin(), ie = Changes.ਸਿਰਾ();
          it != ie; ++it) {
-      if (it != Changes.begin())
+      ਜੇ (it != Changes.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
 
-      if (succ_begin(*it) != succ_end(*it)) {
+      ਜੇ (succ_begin(*it) != succ_ਸਿਰਾ(*it)) {
         llvm::errs() << "(";
-        for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
+        ਲਈ (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_ਸਿਰਾ(*it);
              it2 != ie2; ++it2) {
-          if (it2 != succ_begin(*it))
+          ਜੇ (it2 != succ_begin(*it))
             llvm::errs() << ", ";
           llvm::errs() << "->" << *it2;
         }
@@ -241,22 +241,22 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     llvm::errs() << "]\n";
 
     llvm::errs() << "Roots: [";
-    for (std::vector<change_ty>::const_iterator it = Roots.begin(),
-                                                ie = Roots.end();
+    ਲਈ (std::ਸਦਿਸ਼<change_ty>::const_iterator it = Roots.begin(),
+                                                ie = Roots.ਸਿਰਾ();
          it != ie; ++it) {
-      if (it != Roots.begin())
+      ਜੇ (it != Roots.begin())
         llvm::errs() << ", ";
       llvm::errs() << *it;
     }
     llvm::errs() << "]\n";
 
     llvm::errs() << "Predecessor Closure:\n";
-    for (change_ty Change : Changes) {
+    ਲਈ (change_ty Change : Changes) {
       llvm::errs() << format("  %-4d: [", Change);
-      for (pred_closure_iterator_ty it2 = pred_closure_begin(Change),
-                                    ie2 = pred_closure_end(Change);
+      ਲਈ (pred_ਘੇਰਾ_iterator_ty it2 = pred_ਘੇਰਾ_begin(Change),
+                                    ie2 = pred_ਘੇਰਾ_ਸਿਰਾ(Change);
            it2 != ie2; ++it2) {
-        if (it2 != pred_closure_begin(Change))
+        ਜੇ (it2 != pred_ਘੇਰਾ_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -264,12 +264,12 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     }
 
     llvm::errs() << "Successor Closure:\n";
-    for (change_ty Change : Changes) {
+    ਲਈ (change_ty Change : Changes) {
       llvm::errs() << format("  %-4d: [", Change);
-      for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
-                                    ie2 = succ_closure_end(Change);
+      ਲਈ (succ_ਘੇਰਾ_iterator_ty it2 = succ_ਘੇਰਾ_begin(Change),
+                                    ie2 = succ_ਘੇਰਾ_ਸਿਰਾ(Change);
            it2 != ie2; ++it2) {
-        if (it2 != succ_closure_begin(Change))
+        ਜੇ (it2 != succ_ਘੇਰਾ_begin(Change))
           llvm::errs() << ", ";
         llvm::errs() << *it2;
       }
@@ -280,27 +280,27 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
   });
 }
 
-bool DAGDeltaAlgorithmImpl::GetTestResult(const changeset_ty &Changes,
-                                          const changeset_ty &Required) {
+ਤਾਰਕਿਕ DAGDeltaAlgorithmImpl::Get_Test_ਨਤੀਜਾ(ਅਚਲ changeset_ty &Changes,
+                                          ਅਚਲ changeset_ty &Required) {
   changeset_ty Extended(Required);
-  Extended.insert(Changes.begin(), Changes.end());
-  for (change_ty Change : Changes)
-    Extended.insert(pred_closure_begin(Change), pred_closure_end(Change));
+  Extended.ਪਾਓ(Changes.begin(), Changes.ਸਿਰਾ());
+  ਲਈ (change_ty Change : Changes)
+    Extended.ਪਾਓ(pred_ਘੇਰਾ_begin(Change), pred_ਘੇਰਾ_ਸਿਰਾ(Change));
 
-  if (FailedTestsCache.count(Extended))
-    return false;
+  ਜੇ (FailedTestsCache.ਗਿਣਤੀ_2(Extended))
+    ਵਾਪਸ ਝੂਠ;
 
-  bool Result = ExecuteOneTest(Extended);
-  if (!Result)
-    FailedTestsCache.insert(Extended);
+  ਤਾਰਕਿਕ ਨਤੀਜਾ = ExecuteOneTest(Extended);
+  ਜੇ (!ਨਤੀਜਾ)
+    FailedTestsCache.ਪਾਓ(Extended);
 
-  return Result;
+  ਵਾਪਸ ਨਤੀਜਾ;
 }
 
 DAGDeltaAlgorithm::changeset_ty
-DAGDeltaAlgorithmImpl::Run() {
+DAGDeltaAlgorithmImpl::ਲੜੀਵਾਰ_2() {
   // The current set of changes we are minimizing, starting at the roots.
-  changeset_ty CurrentSet(Roots.begin(), Roots.end());
+  changeset_ty Current_ਸੈੱਟ(Roots.begin(), Roots.ਸਿਰਾ());
 
   // The set of required changes.
   changeset_ty Required;
@@ -310,15 +310,15 @@ DAGDeltaAlgorithmImpl::Run() {
   //
   // Invariant:  CurrentSet intersect Required == {}
   // Invariant:  Required == (Required union succ*(Required))
-  while (!CurrentSet.empty()) {
+  ਜਦੋਂ (!Current_ਸੈੱਟ.ਖਾਲੀ_ਥਾਵਾਂ()) {
     LLVM_DEBUG({
-      llvm::errs() << "DAG_DD - " << CurrentSet.size() << " active changes, "
-                   << Required.size() << " required changes\n";
+      llvm::errs() << "DAG_DD - " << Current_ਸੈੱਟ.ਮਾਪ_2() << " active changes, "
+                   << Required.ਮਾਪ_2() << " required changes\n";
     });
 
     // Minimize the current set of changes.
-    DeltaActiveSetHelper Helper(*this, Required);
-    changeset_ty CurrentMinSet = Helper.Run(CurrentSet);
+    Delta_ਸਰਗਰਮ_ਸੈੱਟ_Helper Helper(*ਇਹ, Required);
+    changeset_ty Current_Min_ਸੈੱਟ = Helper.ਲੜੀਵਾਰ_2(Current_ਸੈੱਟ);
 
     // Update the set of required changes. Since
     //   CurrentMinSet subset CurrentSet
@@ -327,26 +327,26 @@ DAGDeltaAlgorithmImpl::Run() {
     // then
     //   succ(CurrentMinSet) subset Required
     // and our invariant on Required is maintained.
-    Required.insert(CurrentMinSet.begin(), CurrentMinSet.end());
+    Required.ਪਾਓ(Current_Min_ਸੈੱਟ.begin(), Current_Min_ਸੈੱਟ.ਸਿਰਾ());
 
     // Replace the current set with the predecssors of the minimized set of
     // active changes.
-    CurrentSet.clear();
-    for (change_ty CT : CurrentMinSet)
-      CurrentSet.insert(pred_begin(CT), pred_end(CT));
+    Current_ਸੈੱਟ.clear();
+    ਲਈ (change_ty CT : Current_Min_ਸੈੱਟ)
+      Current_ਸੈੱਟ.ਪਾਓ(pred_begin(CT), pred_ਸਿਰਾ(CT));
 
     // FIXME: We could enforce CurrentSet intersect Required == {} here if we
     // wanted to protect against cyclic graphs.
   }
 
-  return Required;
+  ਵਾਪਸ Required;
 }
 
-void DAGDeltaAlgorithm::anchor() {
+ਖਾਲੀ DAGDeltaAlgorithm::anchor() {
 }
 
 DAGDeltaAlgorithm::changeset_ty
-DAGDeltaAlgorithm::Run(const changeset_ty &Changes,
-                       const std::vector<edge_ty> &Dependencies) {
-  return DAGDeltaAlgorithmImpl(*this, Changes, Dependencies).Run();
+DAGDeltaAlgorithm::ਲੜੀਵਾਰ_2(ਅਚਲ changeset_ty &Changes,
+                       ਅਚਲ std::ਸਦਿਸ਼<ਕਿਨਾਰਾ_ty> &Dependencies) {
+  ਵਾਪਸ DAGDeltaAlgorithmImpl(*ਇਹ, Changes, Dependencies).ਲੜੀਵਾਰ_2();
 }

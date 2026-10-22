@@ -11,43 +11,43 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm-c/ErrorHandling.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/Errno.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/Threading.h"
-#include "llvm/Support/WindowsError.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdlib>
-#include <mutex>
-#include <new>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ErrorHandling.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm-c/ErrorHandling.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallVector.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/Twine.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/llvm-config.h" // for LLVM_ENABLE_THREADS
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Debug.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Errc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Errno.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Error.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Process.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Signals.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Threading.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/WindowsError.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstdlib>
+#ਅਨ੍ਤਰ੍ਭਾਵ <mutex>
+#ਅਨ੍ਤਰ੍ਭਾਵ <new>
 
-#if defined(HAVE_UNISTD_H)
+#ਜੇ defined(HAVE_UNISTD_H)
 # include <unistd.h>
-#endif
-#if defined(_WIN32)
+#ਜੇ_ਅੰਤ
+#ਜੇ defined(_WIN32)
 # include <io.h>
 # include <fcntl.h>
-#endif
+#ਜੇ_ਅੰਤ
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-static fatal_error_handler_t ErrorHandler = nullptr;
-static void *ErrorHandlerUserData = nullptr;
+ਸਥਿਰ fatal_error_handler_t ErrorHandler = ਖਾਲੀ_ਸੂਚਕ;
+ਸਥਿਰ ਖਾਲੀ *Error_Handler_User_ਅੰਕੜੇ = ਖਾਲੀ_ਸੂਚਕ;
 
-static fatal_error_handler_t BadAllocErrorHandler = nullptr;
-static void *BadAllocErrorHandlerUserData = nullptr;
+ਸਥਿਰ fatal_error_handler_t BadAllocErrorHandler = ਖਾਲੀ_ਸੂਚਕ;
+ਸਥਿਰ ਖਾਲੀ *Bad_Alloc_Error_Handler_User_ਅੰਕੜੇ = ਖਾਲੀ_ਸੂਚਕ;
 
-#if LLVM_ENABLE_THREADS == 1
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
 // Mutexes to synchronize installing error handlers and calling error handlers.
 // Do not use ManagedStatic, or that may allocate memory while attempting to
 // report an OOM.
@@ -59,219 +59,219 @@ static void *BadAllocErrorHandlerUserData = nullptr;
 // STL and hide all of its symbols with 'opt -internalize'. To reduce size, it
 // cuts out the threading portions of the hermetic copy of libc++ that it
 // builds. We can remove these ifdefs if that script goes away.
-static std::mutex ErrorHandlerMutex;
-static std::mutex BadAllocErrorHandlerMutex;
-#endif
+ਸਥਿਰ std::mutex ErrorHandlerMutex;
+ਸਥਿਰ std::mutex BadAllocErrorHandlerMutex;
+#ਜੇ_ਅੰਤ
 
-static bool write_retry(int fd, const char *buf, size_t count) {
-  while (count > 0) {
-    ssize_t written = sys::RetryAfterSignal(-1, ::write, fd, buf, count);
-    if (written <= 0)
-      return false;
+ਸਥਿਰ ਤਾਰਕਿਕ write_retry(ਪੂਰਨ fd, ਅਚਲ ਅੱਖਰ *buf, size_t ਗਿਣਤੀ_2) {
+  ਜਦੋਂ (ਗਿਣਤੀ_2 > 0) {
+    ssize_t written = sys::RetryAfterSignal(-1, ::ਲਿਖ, fd, buf, ਗਿਣਤੀ_2);
+    ਜੇ (written <= 0)
+      ਵਾਪਸ ਝੂਠ;
     buf += written;
-    count -= written;
+    ਗਿਣਤੀ_2 -= written;
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
-void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
-                                       void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
-#endif
-  assert(!ErrorHandler && "Error handler already registered!\n");
+ਖਾਲੀ llvm::install_fatal_error_handler(fatal_error_handler_t handler,
+                                       ਖਾਲੀ *user_ਅੰਕੜੇ) {
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
+  std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(ErrorHandlerMutex);
+#ਜੇ_ਅੰਤ
+  ਪ੍ਰਤਿਜ੍ਞਾ(!ErrorHandler && "Error handler already registered!\n");
   ErrorHandler = handler;
-  ErrorHandlerUserData = user_data;
+  Error_Handler_User_ਅੰਕੜੇ = user_ਅੰਕੜੇ;
 }
 
-void llvm::remove_fatal_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
-#endif
-  ErrorHandler = nullptr;
-  ErrorHandlerUserData = nullptr;
+ਖਾਲੀ llvm::remove_fatal_error_handler() {
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
+  std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(ErrorHandlerMutex);
+#ਜੇ_ਅੰਤ
+  ErrorHandler = ਖਾਲੀ_ਸੂਚਕ;
+  Error_Handler_User_ਅੰਕੜੇ = ਖਾਲੀ_ਸੂਚਕ;
 }
 
-void llvm::report_fatal_error(const char *Reason, bool GenCrashDiag) {
+ਖਾਲੀ llvm::report_fatal_error(ਅਚਲ ਅੱਖਰ *Reason, ਤਾਰਕਿਕ GenCrashDiag) {
   report_fatal_error(Twine(Reason), GenCrashDiag);
 }
 
-void llvm::report_fatal_error(StringRef Reason, bool GenCrashDiag) {
+ਖਾਲੀ llvm::report_fatal_error(StringRef Reason, ਤਾਰਕਿਕ GenCrashDiag) {
   report_fatal_error(Twine(Reason), GenCrashDiag);
 }
 
-void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
-  llvm::fatal_error_handler_t handler = nullptr;
-  void* handlerData = nullptr;
+ਖਾਲੀ llvm::report_fatal_error(ਅਚਲ Twine &Reason, ਤਾਰਕਿਕ GenCrashDiag) {
+  llvm::fatal_error_handler_t handler = ਖਾਲੀ_ਸੂਚਕ;
+  ਖਾਲੀ* handler_ਅੰਕੜੇ = ਖਾਲੀ_ਸੂਚਕ;
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
-    std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
-#endif
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
+    std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(ErrorHandlerMutex);
+#ਜੇ_ਅੰਤ
     handler = ErrorHandler;
-    handlerData = ErrorHandlerUserData;
+    handler_ਅੰਕੜੇ = Error_Handler_User_ਅੰਕੜੇ;
   }
 
-  if (handler) {
-    handler(handlerData, Reason.str().c_str(), GenCrashDiag);
-  } else {
+  ਜੇ (handler) {
+    handler(handler_ਅੰਕੜੇ, Reason.str().c_str(), GenCrashDiag);
+  } ਨਹੀਂਤਾਂ {
     // Blast the result out to stderr.  We don't try hard to make sure this
     // succeeds (e.g. handling EINTR) and we can't use errs() here because
     // raw ostreams can call report_fatal_error.
-    SmallVector<char, 64> Buffer;
-    raw_svector_ostream OS(Buffer);
+    Small_ਸਦਿਸ਼<ਅੱਖਰ, 64> ਬਫਰ;
+    raw_svector_ostream OS(ਬਫਰ);
     OS << "LLVM ERROR: " << Reason << "\n";
-    StringRef MessageStr = OS.str();
-    write_retry(2, MessageStr.data(), MessageStr.size());
+    StringRef ਸੁਨੇਹਾ_Str = OS.str();
+    write_retry(2, ਸੁਨੇਹਾ_Str.ਅੰਕੜੇ(), ਸੁਨੇਹਾ_Str.ਮਾਪ_2());
   }
 
   // If we reached here, we are failing ungracefully. Run the interrupt handlers
   // to make sure any special cleanups get done, in particular that we remove
   // files registered with RemoveFileOnSignal.
-  sys::RunInterruptHandlers();
+  sys::ਲੜੀਵਾਰ_ਰੁਕਾਵਟ_Handlers();
 
-  if (GenCrashDiag)
+  ਜੇ (GenCrashDiag)
     abort();
-  else
-    exit(1);
+  ਨਹੀਂਤਾਂ
+    ਬਾਹਰ_ਨਿਕਲੋ(1);
 }
 
-void llvm::reportFatalInternalError(const char *reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/true);
+ਖਾਲੀ llvm::report_Fatal_ਅੰਦਰੂਨੀ_Error(ਅਚਲ ਅੱਖਰ *reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/ਸੱਚ);
 }
-void llvm::reportFatalInternalError(StringRef reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/true);
+ਖਾਲੀ llvm::report_Fatal_ਅੰਦਰੂਨੀ_Error(StringRef reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/ਸੱਚ);
 }
-void llvm::reportFatalInternalError(const Twine &reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/true);
+ਖਾਲੀ llvm::report_Fatal_ਅੰਦਰੂਨੀ_Error(ਅਚਲ Twine &reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/ਸੱਚ);
 }
-void llvm::reportFatalUsageError(const char *reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/false);
+ਖਾਲੀ llvm::reportFatalUsageError(ਅਚਲ ਅੱਖਰ *reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/ਝੂਠ);
 }
-void llvm::reportFatalUsageError(StringRef reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/false);
+ਖਾਲੀ llvm::reportFatalUsageError(StringRef reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/ਝੂਠ);
 }
-void llvm::reportFatalUsageError(const Twine &reason) {
-  report_fatal_error(reason, /*GenCrashDiag=*/false);
+ਖਾਲੀ llvm::reportFatalUsageError(ਅਚਲ Twine &reason) {
+  report_fatal_error(reason, /*GenCrashDiag=*/ਝੂਠ);
 }
 
-void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
-                                           void *user_data) {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
-#endif
-  assert(!BadAllocErrorHandler &&
+ਖਾਲੀ llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
+                                           ਖਾਲੀ *user_ਅੰਕੜੇ) {
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
+  std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(BadAllocErrorHandlerMutex);
+#ਜੇ_ਅੰਤ
+  ਪ੍ਰਤਿਜ੍ਞਾ(!BadAllocErrorHandler &&
          "Bad alloc error handler already registered!\n");
   BadAllocErrorHandler = handler;
-  BadAllocErrorHandlerUserData = user_data;
+  Bad_Alloc_Error_Handler_User_ਅੰਕੜੇ = user_ਅੰਕੜੇ;
 }
 
-void llvm::remove_bad_alloc_error_handler() {
-#if LLVM_ENABLE_THREADS == 1
-  std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
-#endif
-  BadAllocErrorHandler = nullptr;
-  BadAllocErrorHandlerUserData = nullptr;
+ਖਾਲੀ llvm::remove_bad_alloc_error_handler() {
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
+  std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(BadAllocErrorHandlerMutex);
+#ਜੇ_ਅੰਤ
+  BadAllocErrorHandler = ਖਾਲੀ_ਸੂਚਕ;
+  Bad_Alloc_Error_Handler_User_ਅੰਕੜੇ = ਖਾਲੀ_ਸੂਚਕ;
 }
 
-void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
-  fatal_error_handler_t Handler = nullptr;
-  void *HandlerData = nullptr;
+ਖਾਲੀ llvm::report_bad_alloc_error(ਅਚਲ ਅੱਖਰ *Reason, ਤਾਰਕਿਕ GenCrashDiag) {
+  fatal_error_handler_t Handler = ਖਾਲੀ_ਸੂਚਕ;
+  ਖਾਲੀ *Handler_ਅੰਕੜੇ = ਖਾਲੀ_ਸੂਚਕ;
   {
     // Only acquire the mutex while reading the handler, so as not to invoke a
     // user-supplied callback under a lock.
-#if LLVM_ENABLE_THREADS == 1
-    std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
-#endif
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 1
+    std::ਤਾਲਾ_guard<std::mutex> ਤਾਲਾ_2(BadAllocErrorHandlerMutex);
+#ਜੇ_ਅੰਤ
     Handler = BadAllocErrorHandler;
-    HandlerData = BadAllocErrorHandlerUserData;
+    Handler_ਅੰਕੜੇ = Bad_Alloc_Error_Handler_User_ਅੰਕੜੇ;
   }
 
-  if (Handler) {
-    Handler(HandlerData, Reason, GenCrashDiag);
+  ਜੇ (Handler) {
+    Handler(Handler_ਅੰਕੜੇ, Reason, GenCrashDiag);
     llvm_unreachable("bad alloc handler should not return");
   }
 
-#ifdef LLVM_ENABLE_EXCEPTIONS
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_ENABLE_EXCEPTIONS
   // If exceptions are enabled, make OOM in malloc look like OOM in new.
-  throw std::bad_alloc();
-#else
+  ਸੁੱਟੋ std::bad_alloc();
+#ਨਹੀਂਤਾਂ
   // Don't call the normal error handler. It may allocate memory. Directly write
   // an OOM to stderr and abort.
-  const char *OOMMessage = "LLVM ERROR: out of memory\n";
-  const char *Newline = "\n";
-  write_retry(2, OOMMessage, strlen(OOMMessage));
-  write_retry(2, Reason, strlen(Reason));
-  write_retry(2, Newline, strlen(Newline));
+  ਅਚਲ ਅੱਖਰ *OOMMessage = "LLVM ERROR: out of memory\n";
+  ਅਚਲ ਅੱਖਰ *Newline = "\n";
+  write_retry(2, OOMMessage, ਲੜੀ_ਲੰਬਾਈ(OOMMessage));
+  write_retry(2, Reason, ਲੜੀ_ਲੰਬਾਈ(Reason));
+  write_retry(2, Newline, ਲੜੀ_ਲੰਬਾਈ(Newline));
   abort();
-#endif
+#ਜੇ_ਅੰਤ
 }
 
-#ifdef LLVM_ENABLE_EXCEPTIONS
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_ENABLE_EXCEPTIONS
 // Do not set custom new handler if exceptions are enabled. In this case OOM
 // errors are handled by throwing 'std::bad_alloc'.
-void llvm::install_out_of_memory_new_handler() {
+ਖਾਲੀ llvm::install_ਬਾਹਰਲਾ_ਦਾ_ਸਮ੍ਰਿਤੀ_new_handler() {
 }
-#else
+#ਨਹੀਂਤਾਂ
 // Causes crash on allocation failure. It is called prior to the handler set by
 // 'install_bad_alloc_error_handler'.
-static void out_of_memory_new_handler() {
+ਸਥਿਰ ਖਾਲੀ ਬਾਹਰਲਾ_ਦਾ_ਸਮ੍ਰਿਤੀ_new_handler() {
   llvm::report_bad_alloc_error("Allocation failed");
 }
 
 // Installs new handler that causes crash on allocation failure. It is called by
 // InitLLVM.
-void llvm::install_out_of_memory_new_handler() {
-  std::new_handler old = std::set_new_handler(out_of_memory_new_handler);
-  (void)old;
-  assert((old == nullptr || old == out_of_memory_new_handler) &&
+ਖਾਲੀ llvm::install_ਬਾਹਰਲਾ_ਦਾ_ਸਮ੍ਰਿਤੀ_new_handler() {
+  std::new_handler old = std::ਸੈੱਟ_new_handler(ਬਾਹਰਲਾ_ਦਾ_ਸਮ੍ਰਿਤੀ_new_handler);
+  (ਖਾਲੀ)old;
+  ਪ੍ਰਤਿਜ੍ਞਾ((old == ਖਾਲੀ_ਸੂਚਕ || old == ਬਾਹਰਲਾ_ਦਾ_ਸਮ੍ਰਿਤੀ_new_handler) &&
          "new-handler already installed");
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-void llvm::llvm_unreachable_internal(const char *msg, const char *file,
-                                     unsigned line) {
+ਖਾਲੀ llvm::llvm_unreachable_ਅੰਦਰੂਨੀ(ਅਚਲ ਅੱਖਰ *ਸੁਨੇਹਾ, ਅਚਲ ਅੱਖਰ *file,
+                                     ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਤਰ_2) {
   // This code intentionally doesn't call the ErrorHandler callback, because
   // llvm_unreachable is intended to be used to indicate "impossible"
   // situations, and not legitimate runtime errors.
-  if (msg)
-    dbgs() << msg << "\n";
+  ਜੇ (ਸੁਨੇਹਾ)
+    dbgs() << ਸੁਨੇਹਾ << "\n";
   dbgs() << "UNREACHABLE executed";
-  if (file)
-    dbgs() << " at " << file << ":" << line;
+  ਜੇ (file)
+    dbgs() << " at " << file << ":" << ਸਤਰ_2;
   dbgs() << "!\n";
   abort();
-#ifdef LLVM_BUILTIN_UNREACHABLE
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_BUILTIN_UNREACHABLE
   // Windows systems and possibly others don't declare abort() to be noreturn,
   // so use the unreachable builtin to avoid a Clang self-host warning.
   LLVM_BUILTIN_UNREACHABLE;
-#endif
+#ਜੇ_ਅੰਤ
 }
 
-static void bindingsErrorHandler(void *user_data, const char *reason,
-                                 bool gen_crash_diag) {
+ਸਥਿਰ ਖਾਲੀ bindingsErrorHandler(ਖਾਲੀ *user_ਅੰਕੜੇ, ਅਚਲ ਅੱਖਰ *reason,
+                                 ਤਾਰਕਿਕ gen_crash_diag) {
   LLVMFatalErrorHandler handler =
-      LLVM_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_data);
+      LLVM_EXTENSION reinterpret_cast<LLVMFatalErrorHandler>(user_ਅੰਕੜੇ);
   handler(reason);
 }
 
-void LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
+ਖਾਲੀ LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
   install_fatal_error_handler(bindingsErrorHandler,
-                              LLVM_EXTENSION reinterpret_cast<void *>(Handler));
+                              LLVM_EXTENSION reinterpret_cast<ਖਾਲੀ *>(Handler));
 }
 
-void LLVMResetFatalErrorHandler() {
+ਖਾਲੀ LLVMResetFatalErrorHandler() {
   remove_fatal_error_handler();
 }
 
-#ifdef _WIN32
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
 
-#define WIN32_NO_STATUS
-#include "llvm/Support/Windows/WindowsSupport.h"
-#undef WIN32_NO_STATUS
-#include <ntstatus.h>
-#include <winerror.h>
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ WIN32_NO_ਸਥਿਤੀ
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Windows/WindowsSupport.h"
+#ਪਰਿਭਾਸ਼ਾ_ਰੱਦ WIN32_NO_ਸਥਿਤੀ
+#ਅਨ੍ਤਰ੍ਭਾਵ <ntstatus.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <winerror.h>
 
 // This is equivalent to NtCurrentTeb()->LastStatusValue, but the public
 // _TEB definition does not expose the LastStatusValue field directly.
@@ -285,89 +285,89 @@ void LLVMResetFatalErrorHandler() {
 // For more information, see:
 // https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/teb/index.htm
 // https://github.com/llvm/llvm-project/issues/89137
-extern "C" NTSYSAPI NTSTATUS NTAPI RtlGetLastNtStatus();
+ਬਾਹਰੀ "C" NTSYSAPI NTSTATUS NTAPI Rtl_Get_ਆਖਰੀ_Nt_ਸਥਿਤੀ();
 
 // This function obtains the last error code and maps it. It may call
 // RtlGetLastNtStatus, which is a lower level API that can return a
 // more specific error code than GetLastError.
-std::error_code llvm::mapLastWindowsError() {
-  unsigned EV = ::GetLastError();
+std::error_ਕੋਡ llvm::map_ਆਖਰੀ_Windows_Error() {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ EV = ::Get_ਆਖਰੀ_Error();
   // The mapping of NTSTATUS to Win32 error loses some information; special
   // case the generic ERROR_ACCESS_DENIED code to check the underlying
   // NTSTATUS and potentially return a more accurate error code.
-  if (EV == ERROR_ACCESS_DENIED) {
-    llvm::errc code = RtlGetLastNtStatus() == STATUS_DELETE_PENDING
+  ਜੇ (EV == ERROR_ACCESS_DENIED) {
+    llvm::errc ਕੋਡ_2 = Rtl_Get_ਆਖਰੀ_Nt_ਸਥਿਤੀ() == ਸਥਿਤੀ_DELETE_PENDING
                           ? errc::delete_pending
                           : errc::permission_denied;
-    return make_error_code(code);
+    ਵਾਪਸ make_error_ਕੋਡ(ਕੋਡ_2);
   }
-  return mapWindowsError(EV);
+  ਵਾਪਸ mapWindowsError(EV);
 }
 
 // I'd rather not double the line count of the following.
-#define MAP_ERR_TO_COND(x, y)                                                  \
-  case x:                                                                      \
-    return make_error_code(errc::y)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MAP_ERR_ਮੰਜ਼ਿਲ_COND(x, y)                                                  \
+  ਹਾਲਤ x:                                                                      \
+    ਵਾਪਸ make_error_ਕੋਡ(errc::y)
 
-std::error_code llvm::mapWindowsError(unsigned EV) {
-  switch (EV) {
-    MAP_ERR_TO_COND(ERROR_ACCESS_DENIED, permission_denied);
-    MAP_ERR_TO_COND(ERROR_ALREADY_EXISTS, file_exists);
-    MAP_ERR_TO_COND(ERROR_BAD_NETPATH, no_such_file_or_directory);
-    MAP_ERR_TO_COND(ERROR_BAD_PATHNAME, no_such_file_or_directory);
-    MAP_ERR_TO_COND(ERROR_BAD_UNIT, no_such_device);
-    MAP_ERR_TO_COND(ERROR_BROKEN_PIPE, broken_pipe);
-    MAP_ERR_TO_COND(ERROR_BUFFER_OVERFLOW, filename_too_long);
-    MAP_ERR_TO_COND(ERROR_BUSY, device_or_resource_busy);
-    MAP_ERR_TO_COND(ERROR_BUSY_DRIVE, device_or_resource_busy);
-    MAP_ERR_TO_COND(ERROR_CANNOT_MAKE, permission_denied);
-    MAP_ERR_TO_COND(ERROR_CANTOPEN, io_error);
-    MAP_ERR_TO_COND(ERROR_CANTREAD, io_error);
-    MAP_ERR_TO_COND(ERROR_CANTWRITE, io_error);
-    MAP_ERR_TO_COND(ERROR_CURRENT_DIRECTORY, permission_denied);
-    MAP_ERR_TO_COND(ERROR_DEV_NOT_EXIST, no_such_device);
-    MAP_ERR_TO_COND(ERROR_DEVICE_IN_USE, device_or_resource_busy);
-    MAP_ERR_TO_COND(ERROR_DIR_NOT_EMPTY, directory_not_empty);
-    MAP_ERR_TO_COND(ERROR_DIRECTORY, invalid_argument);
-    MAP_ERR_TO_COND(ERROR_DISK_FULL, no_space_on_device);
-    MAP_ERR_TO_COND(ERROR_FILE_EXISTS, file_exists);
-    MAP_ERR_TO_COND(ERROR_FILE_NOT_FOUND, no_such_file_or_directory);
-    MAP_ERR_TO_COND(ERROR_HANDLE_DISK_FULL, no_space_on_device);
-    MAP_ERR_TO_COND(ERROR_INVALID_ACCESS, permission_denied);
-    MAP_ERR_TO_COND(ERROR_INVALID_DRIVE, no_such_device);
-    MAP_ERR_TO_COND(ERROR_INVALID_FUNCTION, function_not_supported);
-    MAP_ERR_TO_COND(ERROR_INVALID_HANDLE, invalid_argument);
-    MAP_ERR_TO_COND(ERROR_INVALID_NAME, invalid_argument);
-    MAP_ERR_TO_COND(ERROR_INVALID_PARAMETER, invalid_argument);
-    MAP_ERR_TO_COND(ERROR_LOCK_VIOLATION, no_lock_available);
-    MAP_ERR_TO_COND(ERROR_LOCKED, no_lock_available);
-    MAP_ERR_TO_COND(ERROR_NEGATIVE_SEEK, invalid_argument);
-    MAP_ERR_TO_COND(ERROR_NOACCESS, permission_denied);
-    MAP_ERR_TO_COND(ERROR_NOT_ENOUGH_MEMORY, not_enough_memory);
-    MAP_ERR_TO_COND(ERROR_NOT_READY, resource_unavailable_try_again);
-    MAP_ERR_TO_COND(ERROR_NOT_SUPPORTED, not_supported);
-    MAP_ERR_TO_COND(ERROR_OPEN_FAILED, io_error);
-    MAP_ERR_TO_COND(ERROR_OPEN_FILES, device_or_resource_busy);
-    MAP_ERR_TO_COND(ERROR_OUTOFMEMORY, not_enough_memory);
-    MAP_ERR_TO_COND(ERROR_PATH_NOT_FOUND, no_such_file_or_directory);
-    MAP_ERR_TO_COND(ERROR_READ_FAULT, io_error);
-    MAP_ERR_TO_COND(ERROR_REPARSE_TAG_INVALID, invalid_argument);
-    MAP_ERR_TO_COND(ERROR_RETRY, resource_unavailable_try_again);
-    MAP_ERR_TO_COND(ERROR_SEEK, io_error);
-    MAP_ERR_TO_COND(ERROR_SHARING_VIOLATION, permission_denied);
-    MAP_ERR_TO_COND(ERROR_TOO_MANY_OPEN_FILES, too_many_files_open);
-    MAP_ERR_TO_COND(ERROR_WRITE_FAULT, io_error);
-    MAP_ERR_TO_COND(ERROR_WRITE_PROTECT, permission_denied);
-    MAP_ERR_TO_COND(WSAEACCES, permission_denied);
-    MAP_ERR_TO_COND(WSAEBADF, bad_file_descriptor);
-    MAP_ERR_TO_COND(WSAEFAULT, bad_address);
-    MAP_ERR_TO_COND(WSAEINTR, interrupted);
-    MAP_ERR_TO_COND(WSAEINVAL, invalid_argument);
-    MAP_ERR_TO_COND(WSAEMFILE, too_many_files_open);
-    MAP_ERR_TO_COND(WSAENAMETOOLONG, filename_too_long);
-  default:
-    return std::error_code(EV, std::system_category());
+std::error_ਕੋਡ llvm::mapWindowsError(ਬਿਨਾਨਿਸ਼ਾਨੀ EV) {
+  ਚੋਣ (EV) {
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_ACCESS_DENIED, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_ALREADY_EXISTS, file_exists);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_BAD_NETPATH, no_such_file_or_directory);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_BAD_PATHNAME, no_such_file_or_directory);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_BAD_UNIT, no_such_device);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_BROKEN_PIPE, broken_pipe);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_ਬਫਰ_ਉਛਾਲ, filename_too_long);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_BUSY, device_or_resource_busy);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_BUSY_DRIVE, device_or_resource_busy);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_CANNOT_MAKE, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_CANTOPEN, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_CANTREAD, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_CANTWRITE, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_CURRENT_DIRECTORY, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_DEV_NOT_EXIST, no_such_device);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_DEVICE_ਵਿੱਚ_USE, device_or_resource_busy);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_DIR_NOT_ਖਾਲੀ_ਥਾਵਾਂ, directory_not_ਖਾਲੀ_ਥਾਵਾਂ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_DIRECTORY, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_DISK_ਭਰਿਆ, no_space_on_device);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_FILE_EXISTS, file_exists);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_FILE_NOT_ਮਿਲਿਆ, no_such_file_or_directory);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_HANDLE_DISK_ਭਰਿਆ, no_space_on_device);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_INVALID_ACCESS, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_INVALID_DRIVE, no_such_device);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_INVALID_FUNCTION, function_not_supported);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_INVALID_HANDLE, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_INVALID_NAME, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_INVALID_PARAMETER, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_ਤਾਲਾ_VIOLATION, no_ਤਾਲਾ_ਉਪਲਬਧ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_LOCKED, no_ਤਾਲਾ_ਉਪਲਬਧ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_NEGATIVE_SEEK, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_NOACCESS, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_NOT_ENOUGH_ਸਮ੍ਰਿਤੀ, not_enough_ਸਮ੍ਰਿਤੀ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_NOT_READY, resource_unavailable_try_again);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_NOT_SUPPORTED, not_supported);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_OPEN_FAILED, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_OPEN_FILES, device_or_resource_busy);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_OUTOFMEMORY, not_enough_ਸਮ੍ਰਿਤੀ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_ਰਸਤਾ_NOT_ਮਿਲਿਆ, no_such_file_or_directory);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_READ_FAULT, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_REPARSE_ਟੈਗ_INVALID, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_RETRY, resource_unavailable_try_again);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_SEEK, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_SHARING_VIOLATION, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_TOO_MANY_OPEN_FILES, too_many_files_open);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_WRITE_FAULT, io_error);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(ERROR_WRITE_PROTECT, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAEACCES, permission_denied);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAEBADF, bad_file_descriptor);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAEFAULT, bad_ਪਤਾ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAEINTR, interrupted);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAEINVAL, invalid_ਦਲੀਲ);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAEMFILE, too_many_files_open);
+    MAP_ERR_ਮੰਜ਼ਿਲ_COND(WSAENAMETOOLONG, filename_too_long);
+  ਮੂਲ:
+    ਵਾਪਸ std::error_ਕੋਡ(EV, std::system_category());
   }
 }
 
-#endif
+#ਜੇ_ਅੰਤ

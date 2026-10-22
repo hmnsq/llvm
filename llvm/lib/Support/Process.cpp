@@ -10,20 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Process.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Process.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/STLExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/llvm-config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/CrashRecoveryContext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/FileSystem.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Path.h"
 
-#include <optional>
-#include <stdlib.h> // for _Exit
+#ਅਨ੍ਤਰ੍ਭਾਵ <optional>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h> // for _Exit
 
-using namespace llvm;
-using namespace sys;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
@@ -31,45 +31,45 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+Process::ਲੱਭੋ_ਵਿੱਚ_Env_ਰਸਤਾ(StringRef EnvName, StringRef FileName, ਅੱਖਰ Separator) {
+  ਵਾਪਸ ਲੱਭੋ_ਵਿੱਚ_Env_ਰਸਤਾ(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
-                       ArrayRef<std::string> IgnoreList, char Separator) {
-  assert(!path::is_absolute(FileName));
-  std::optional<std::string> FoundPath;
-  std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+Process::ਲੱਭੋ_ਵਿੱਚ_Env_ਰਸਤਾ(StringRef EnvName, StringRef FileName,
+                       ArrayRef<std::string> IgnoreList, ਅੱਖਰ Separator) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(!ਰਸਤਾ_2::is_absolute(FileName));
+  std::optional<std::string> ਮਿਲਿਆ_ਰਸਤਾ;
+  std::optional<std::string> Opt_ਰਸਤਾ = Process::GetEnv(EnvName);
+  ਜੇ (!Opt_ਰਸਤਾ)
+    ਵਾਪਸ ਮਿਲਿਆ_ਰਸਤਾ;
 
-  const char EnvPathSeparatorStr[] = {Separator, '\0'};
-  SmallVector<StringRef, 8> Dirs;
-  SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
+  ਅਚਲ ਅੱਖਰ Env_ਰਸਤਾ_Separator_Str[] = {Separator, '\0'};
+  Small_ਸਦਿਸ਼<StringRef, 8> Dirs;
+  ਵੰਡੋ_String(*Opt_ਰਸਤਾ, Dirs, Env_ਰਸਤਾ_Separator_Str);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
-      continue;
+  ਲਈ (StringRef Dir : Dirs) {
+    ਜੇ (Dir.ਖਾਲੀ_ਥਾਵਾਂ())
+      ਜਾਰੀ;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
-      continue;
+    ਜੇ (any_ਦਾ(IgnoreList, [&](StringRef S) { ਵਾਪਸ fs::equivalent(S, Dir); }))
+      ਜਾਰੀ;
 
-    SmallString<128> FilePath(Dir);
-    path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
-      FoundPath = std::string(FilePath);
-      break;
+    SmallString<128> File_ਰਸਤਾ(Dir);
+    ਰਸਤਾ_2::append(File_ਰਸਤਾ, FileName);
+    ਜੇ (fs::exists(Twine(File_ਰਸਤਾ))) {
+      ਮਿਲਿਆ_ਰਸਤਾ = std::string(File_ਰਸਤਾ);
+      ਰੋਕੋ;
     }
   }
 
-  return FoundPath;
+  ਵਾਪਸ ਮਿਲਿਆ_ਰਸਤਾ;
 }
 
 // clang-format off
-#define COLOR(FGBG, CODE, BOLD) "\033[0;" BOLD FGBG CODE "m"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ COLOR(FGBG, ਕੋਡ_3, BOLD) "\033[0;" BOLD FGBG ਕੋਡ_3 "m"
 
-#define ALLCOLORS(FGBG, BRIGHT, BOLD) \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ALLCOLORS(FGBG, BRIGHT, BOLD) \
   {                           \
     COLOR(FGBG, "0", BOLD),   \
     COLOR(FGBG, "1", BOLD),   \
@@ -95,7 +95,7 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
 //                           |  |   codes
 //                           |  |   |
 //                           |  |   |
-static const char colorcodes[2][2][16][11] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ colorcodes[2][2][16][11] = {
     { ALLCOLORS("3", "9", ""), ALLCOLORS("3", "9", "1;"),},
     { ALLCOLORS("4", "10", ""), ALLCOLORS("4", "10", "1;")}
 };
@@ -103,24 +103,24 @@ static const char colorcodes[2][2][16][11] = {
 
 // A CMake option controls wheter we emit core dumps by default. An application
 // may disable core dumps by calling Process::PreventCoreFiles().
-static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
+ਸਥਿਰ ਤਾਰਕਿਕ coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+ਤਾਰਕਿਕ Process::AreCoreFilesPrevented() { ਵਾਪਸ coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
-    CRC->HandleExit(RetCode);
+[[noreturn]] ਖਾਲੀ Process::Exit(ਪੂਰਨ Ret_ਕੋਡ, ਤਾਰਕਿਕ NoCleanup) {
+  ਜੇ (CrashRecoveryContext *ਚੱਕਰੀ_ਜਾਂਚ = CrashRecoveryContext::GetCurrent())
+    ਚੱਕਰੀ_ਜਾਂਚ->HandleExit(Ret_ਕੋਡ);
 
-  if (NoCleanup)
-    ExitNoCleanup(RetCode);
-  else
-    ::exit(RetCode);
+  ਜੇ (NoCleanup)
+    ExitNoCleanup(Ret_ਕੋਡ);
+  ਨਹੀਂਤਾਂ
+    ::ਬਾਹਰ_ਨਿਕਲੋ(Ret_ਕੋਡ);
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Process.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Process.inc"
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_ON_UNIX
+#ਅਨ੍ਤਰ੍ਭਾਵ "Unix/Process.inc"
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+#ਅਨ੍ਤਰ੍ਭਾਵ "Windows/Process.inc"
+#ਜੇ_ਅੰਤ

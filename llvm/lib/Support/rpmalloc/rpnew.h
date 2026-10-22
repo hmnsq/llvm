@@ -11,103 +11,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __cplusplus
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <new>
+#ਅਨ੍ਤਰ੍ਭਾਵ <rpmalloc.h>
 
-#ifndef __CRTDECL
-#define __CRTDECL
-#endif
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ __CRTDECL
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ __CRTDECL
+#ਜੇ_ਅੰਤ
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete(ਖਾਲੀ *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete[](ਖਾਲੀ *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new(std::size_t ਮਾਪ_2) noexcept(false) {
+  ਵਾਪਸ rpmalloc(ਮਾਪ_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new[](std::size_t ਮਾਪ_2) noexcept(false) {
+  ਵਾਪਸ rpmalloc(ਮਾਪ_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new(std::size_t ਮਾਪ_2,
+                                    ਅਚਲ std::nothrow_t &ਟੈਗ_2) noexcept {
+  (ਖਾਲੀ)ਆਕਾਰ(ਟੈਗ_2);
+  ਵਾਪਸ rpmalloc(ਮਾਪ_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new[](std::size_t ਮਾਪ_2,
+                                      ਅਚਲ std::nothrow_t &ਟੈਗ_2) noexcept {
+  (ਖਾਲੀ)ਆਕਾਰ(ਟੈਗ_2);
+  ਵਾਪਸ rpmalloc(ਮਾਪ_2);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#ਜੇ (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete(ਖਾਲੀ *p, std::size_t ਮਾਪ_2) noexcept {
+  (ਖਾਲੀ)ਆਕਾਰ(ਮਾਪ_2);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete[](ਖਾਲੀ *p, std::size_t ਮਾਪ_2) noexcept {
+  (ਖਾਲੀ)ਆਕਾਰ(ਮਾਪ_2);
   rpfree(p);
 }
 
-#endif
+#ਜੇ_ਅੰਤ
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#ਜੇ (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete(ਖਾਲੀ *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (ਖਾਲੀ)ਆਕਾਰ(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete[](ਖਾਲੀ *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (ਖਾਲੀ)ਆਕਾਰ(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete(ਖਾਲੀ *p, std::size_t ਮਾਪ_2,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (ਖਾਲੀ)ਆਕਾਰ(ਮਾਪ_2);
+  (ਖਾਲੀ)ਆਕਾਰ(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+ਬਾਹਰੀ ਖਾਲੀ __CRTDECL ਸੰਚਾਲਕ delete[](ਖਾਲੀ *p, std::size_t ਮਾਪ_2,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (ਖਾਲੀ)ਆਕਾਰ(ਮਾਪ_2);
+  (ਖਾਲੀ)ਆਕਾਰ(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new(std::size_t ਮਾਪ_2,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  ਵਾਪਸ rpaligned_alloc(static_cast<size_t>(align), ਮਾਪ_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new[](std::size_t ਮਾਪ_2,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  ਵਾਪਸ rpaligned_alloc(static_cast<size_t>(align), ਮਾਪ_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new(std::size_t ਮਾਪ_2, std::align_val_t align,
+                                    ਅਚਲ std::nothrow_t &ਟੈਗ_2) noexcept {
+  (ਖਾਲੀ)ਆਕਾਰ(ਟੈਗ_2);
+  ਵਾਪਸ rpaligned_alloc(static_cast<size_t>(align), ਮਾਪ_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+ਬਾਹਰੀ ਖਾਲੀ *__CRTDECL ਸੰਚਾਲਕ new[](std::size_t ਮਾਪ_2, std::align_val_t align,
+                                      ਅਚਲ std::nothrow_t &ਟੈਗ_2) noexcept {
+  (ਖਾਲੀ)ਆਕਾਰ(ਟੈਗ_2);
+  ਵਾਪਸ rpaligned_alloc(static_cast<size_t>(align), ਮਾਪ_2);
 }
 
-#endif
+#ਜੇ_ਅੰਤ
 
-#endif
+#ਜੇ_ਅੰਤ

@@ -11,17 +11,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SystemUtils.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/SystemUtils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-bool llvm::CheckBitcodeOutputToConsole(raw_ostream &stream_to_check) {
-  if (stream_to_check.is_displayed()) {
+ਤਾਰਕਿਕ llvm::Check_Bitcode_Output_ਮੰਜ਼ਿਲ_Console(raw_ostream &ਧਾਰਾ_ਮੰਜ਼ਿਲ_check) {
+  ਜੇ (ਧਾਰਾ_ਮੰਜ਼ਿਲ_check.is_displayed()) {
     errs() << "WARNING: You're attempting to print out a bitcode file.\n"
               "This is inadvisable as it may cause display problems. If\n"
               "you REALLY want to taste LLVM bitcode first-hand, you\n"
               "can force output with the `-f' option.\n\n";
-    return true;
+    ਵਾਪਸ ਸੱਚ;
   }
-  return false;
+  ਵਾਪਸ ਝੂਠ;
 }

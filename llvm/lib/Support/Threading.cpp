@@ -11,107 +11,107 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Threading.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Jobserver.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Threading.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/llvm-config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Jobserver.h"
 
-#include <cassert>
-#include <optional>
-#include <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <optional>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-#if LLVM_ENABLE_THREADS == 0 ||                                                \
+#ਜੇ LLVM_ENABLE_ਧਾਗੇ == 0 ||                                                \
     (!defined(_WIN32) && !defined(HAVE_PTHREAD_H))
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-uint64_t llvm::get_threadid() { return 0; }
+uint64_t llvm::get_threadid() { ਵਾਪਸ 0; }
 
-uint32_t llvm::get_max_thread_name_length() { return 0; }
+uint32_t llvm::get_max_thread_name_ਲੰਮਾਈ() { ਵਾਪਸ 0; }
 
-void llvm::set_thread_name(const Twine &Name) {}
+ਖਾਲੀ llvm::ਸੈੱਟ_thread_name(ਅਚਲ Twine &Name) {}
 
-void llvm::get_thread_name(SmallVectorImpl<char> &Name) { Name.clear(); }
+ਖਾਲੀ llvm::get_thread_name(Small_ਸਦਿਸ਼_Impl<ਅੱਖਰ> &Name) { Name.clear(); }
 
-llvm::BitVector llvm::get_thread_affinity_mask() { return {}; }
+llvm::ਦੋਆਧਾਰੀ_ਅੰਕ_ਸਦਿਸ਼ llvm::get_thread_affinity_ਨਕਾਬ() { ਵਾਪਸ {}; }
 
-unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
+ਬਿਨਾਨਿਸ਼ਾਨੀ llvm::ThreadPoolStrategy::compute_thread_ਗਿਣਤੀ() ਅਚਲ {
   // When threads are disabled, ensure clients will loop at least once.
-  return 1;
+  ਵਾਪਸ 1;
 }
 
 // Unknown if threading turned off
-int llvm::get_physical_cores() { return -1; }
+ਪੂਰਨ llvm::get_physical_cores() { ਵਾਪਸ -1; }
 
-#else
+#ਨਹੀਂਤਾਂ
 
-static int computeHostNumHardwareThreads();
+ਸਥਿਰ ਪੂਰਨ compute_Host_ਅੰਕ_Hardware_ਧਾਗੇ();
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Threading.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Threading.inc"
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_ON_UNIX
+#ਅਨ੍ਤਰ੍ਭਾਵ "Unix/Threading.inc"
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+#ਅਨ੍ਤਰ੍ਭਾਵ "Windows/Threading.inc"
+#ਜੇ_ਅੰਤ
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
-  if (UseJobserver)
-    if (auto JS = JobserverClient::getInstance())
-      return JS->getNumJobs();
+ਬਿਨਾਨਿਸ਼ਾਨੀ llvm::ThreadPoolStrategy::compute_thread_ਗਿਣਤੀ() ਅਚਲ {
+  ਜੇ (UseJobserver)
+    ਜੇ (ਸਵੈਚਾਲਿਤ JS = JobserverClient::getInstance())
+      ਵਾਪਸ JS->get_ਅੰਕ_Jobs();
 
-  int MaxThreadCount =
-      UseHyperThreads ? computeHostNumHardwareThreads() : get_physical_cores();
-  if (MaxThreadCount <= 0)
-    MaxThreadCount = 1;
-  if (ThreadsRequested == 0)
-    return MaxThreadCount;
-  if (!Limit)
-    return ThreadsRequested;
-  return std::min((unsigned)MaxThreadCount, ThreadsRequested);
+  ਪੂਰਨ Max_Thread_ਗਿਣਤੀ =
+      Use_Hyper_ਧਾਗੇ ? compute_Host_ਅੰਕ_Hardware_ਧਾਗੇ() : get_physical_cores();
+  ਜੇ (Max_Thread_ਗਿਣਤੀ <= 0)
+    Max_Thread_ਗਿਣਤੀ = 1;
+  ਜੇ (ਧਾਗੇ_Requested == 0)
+    ਵਾਪਸ Max_Thread_ਗਿਣਤੀ;
+  ਜੇ (!ਹੱਦਬੰਦੀ_2)
+    ਵਾਪਸ ਧਾਗੇ_Requested;
+  ਵਾਪਸ std::min((ਬਿਨਾਨਿਸ਼ਾਨੀ)Max_Thread_ਗਿਣਤੀ, ਧਾਗੇ_Requested);
 }
 
-#if defined(__APPLE__)
+#ਜੇ defined(__APPLE__)
   // Darwin's default stack size for threads except the main one is only 512KB,
   // which is not enough for some/many normal LLVM compilations. This implements
   // the same interface as std::thread but requests the same stack size as the
   // main thread (8MB) before creation.
-const std::optional<unsigned> llvm::thread::DefaultStackSize = 8 * 1024 * 1024;
-#elif defined(_AIX)
+ਅਚਲ std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> llvm::thread::Default_ਢੇਰ_ਮਾਪ = 8 * 1024 * 1024;
+#ਜਾਂਜੇ defined(_AIX)
   // On AIX, the default pthread stack size limit is ~192k for 64-bit programs.
   // This limit is easily reached when doing link-time thinLTO. AIX library
   // developers have used 4MB, so we'll do the same.
-const std::optional<unsigned> llvm::thread::DefaultStackSize = 4 * 1024 * 1024;
-#else
-const std::optional<unsigned> llvm::thread::DefaultStackSize;
-#endif
+ਅਚਲ std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> llvm::thread::Default_ਢੇਰ_ਮਾਪ = 4 * 1024 * 1024;
+#ਨਹੀਂਤਾਂ
+ਅਚਲ std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> llvm::thread::Default_ਢੇਰ_ਮਾਪ;
+#ਜੇ_ਅੰਤ
 
 
-#endif
+#ਜੇ_ਅੰਤ
 
 std::optional<ThreadPoolStrategy>
-llvm::get_threadpool_strategy(StringRef Num, ThreadPoolStrategy Default) {
-  if (Num == "all")
-    return llvm::hardware_concurrency();
-  if (Num.empty())
-    return Default;
-  unsigned V;
-  if (Num.getAsInteger(10, V))
-    return std::nullopt; // malformed 'Num' value
-  if (V == 0)
-    return Default;
+llvm::get_threadpool_strategy(StringRef ਅੰਕ, ThreadPoolStrategy Default) {
+  ਜੇ (ਅੰਕ == "all")
+    ਵਾਪਸ llvm::hardware_concurrency();
+  ਜੇ (ਅੰਕ.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ Default;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ V;
+  ਜੇ (ਅੰਕ.getAsInteger(10, V))
+    ਵਾਪਸ std::nullopt; // malformed 'Num' value
+  ਜੇ (V == 0)
+    ਵਾਪਸ Default;
 
   // Do not take the Default into account. This effectively disables
   // heavyweight_hardware_concurrency() if the user asks for any number of
   // threads on the cmd-line.
   ThreadPoolStrategy S = llvm::hardware_concurrency();
-  S.ThreadsRequested = V;
-  return S;
+  S.ਧਾਗੇ_Requested = V;
+  ਵਾਪਸ S;
 }

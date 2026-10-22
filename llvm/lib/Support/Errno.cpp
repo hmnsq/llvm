@@ -10,53 +10,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Errno.h"
-#include "llvm/Config/config.h"
-#include <cstring>
-#include <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Errno.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstring>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-namespace llvm {
-namespace sys {
+ਨਾਮਾਕਾਸ਼ llvm {
+ਨਾਮਾਕਾਸ਼ sys {
 
 std::string StrError() {
-  return StrError(errno);
+  ਵਾਪਸ StrError(errno);
 }
 
-std::string StrError(int errnum) {
+std::string StrError(ਪੂਰਨ errnum) {
   std::string str;
-  if (errnum == 0)
-    return str;
-#if defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
-  const int MaxErrStrLen = 2000;
-  char buffer[MaxErrStrLen];
-  buffer[0] = '\0';
-#endif
+  ਜੇ (errnum == 0)
+    ਵਾਪਸ str;
+#ਜੇ defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
+  ਅਚਲ ਪੂਰਨ MaxErrStrLen = 2000;
+  ਅੱਖਰ ਬਫਰ_2[MaxErrStrLen];
+  ਬਫਰ_2[0] = '\0';
+#ਜੇ_ਅੰਤ
 
-#ifdef HAVE_STRERROR_R
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_STRERROR_R
   // strerror_r is thread-safe.
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#ਜੇ defined(__GLIBC__) && defined(_GNU_SOURCE)
   // glibc defines its own incompatible version of strerror_r
   // which may not use the buffer supplied.
-  str = strerror_r(errnum, buffer, MaxErrStrLen - 1);
-#else
-  strerror_r(errnum, buffer, MaxErrStrLen - 1);
-  str = buffer;
-#endif
-#elif HAVE_DECL_STRERROR_S // "Windows Secure API"
-  strerror_s(buffer, MaxErrStrLen - 1, errnum);
-  str = buffer;
-#else
+  str = strerror_r(errnum, ਬਫਰ_2, MaxErrStrLen - 1);
+#ਨਹੀਂਤਾਂ
+  strerror_r(errnum, ਬਫਰ_2, MaxErrStrLen - 1);
+  str = ਬਫਰ_2;
+#ਜੇ_ਅੰਤ
+#ਜਾਂਜੇ HAVE_DECL_STRERROR_S // "Windows Secure API"
+  strerror_s(ਬਫਰ_2, MaxErrStrLen - 1, errnum);
+  str = ਬਫਰ_2;
+#ਨਹੀਂਤਾਂ
   // Copy the thread un-safe result of strerror into
   // the buffer as fast as possible to minimize impact
   // of collision of strerror in multiple threads.
   str = strerror(errnum);
-#endif
-  return str;
+#ਜੇ_ਅੰਤ
+  ਵਾਪਸ str;
 }
 
 }  // namespace sys

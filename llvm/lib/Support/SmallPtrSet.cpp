@@ -11,260 +11,260 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/DenseMapInfo.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/MemAlloc.h"
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallPtrSet.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/DenseMapInfo.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/STLExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/MathExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/MemAlloc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <algorithm>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cassert>
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstdlib>
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-void SmallPtrSetImplBase::shrink_and_clear() {
-  assert(!isSmall() && "Can't shrink a small set!");
-  free(CurArray);
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::shrink_and_clear() {
+  ਪ੍ਰਤਿਜ੍ਞਾ(!isSmall() && "Can't shrink a small set!");
+  ਮੁਕਤ(CurArray);
 
   // Reduce the number of buckets.
-  unsigned Size = size();
-  CurArraySize = Size > 16 ? 1 << (Log2_32_Ceil(Size) + 1) : 32;
-  NumEntries = 0;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਮਾਪ = ਮਾਪ_2();
+  Cur_Array_ਮਾਪ = ਮਾਪ > 16 ? 1 << (Log2_32_Ceil(ਮਾਪ) + 1) : 32;
+  ਅੰਕ_Entries = 0;
 
   // Install the new array.  Clear all the buckets to empty.
-  CurArray = (const void**)safe_malloc(sizeof(void*) * CurArraySize);
+  CurArray = (ਅਚਲ ਖਾਲੀ**)ਸੁਰੱਖਿਅਤ_malloc(ਆਕਾਰ(ਖਾਲੀ*) * Cur_Array_ਮਾਪ);
 
-  memset(CurArray, -1, CurArraySize*sizeof(void*));
+  memset(CurArray, -1, Cur_Array_ਮਾਪ*ਆਕਾਰ(ਖਾਲੀ*));
 }
 
-std::pair<const void *const *, bool>
-SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
-  if (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
+std::pair<ਅਚਲ ਖਾਲੀ *ਅਚਲ *, ਤਾਰਕਿਕ>
+Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::ਪਾਓ_imp_big(ਅਚਲ ਖਾਲੀ *Ptr) {
+  ਜੇ (LLVM_UNLIKELY(ਮਾਪ_2() * 3 >= Cur_Array_ਮਾਪ * 2)) {
     // If more than 2/3 of the array is full, grow.
-    Grow(CurArraySize < 64 ? 128 : CurArraySize * 2);
+    Grow(Cur_Array_ਮਾਪ < 64 ? 128 : Cur_Array_ਮਾਪ * 2);
   }
 
   // Find the first empty bucket or Ptr itself on the probe chain.
-  unsigned Mask = CurArraySize - 1;
-  unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  const void **Array = CurArray;
-  while (Array[I] != getEmptyMarker()) {
-    if (Array[I] == Ptr)
-      return {Array + I, false};
-    I = (I + 1) & Mask;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਨਕਾਬ = Cur_Array_ਮਾਪ - 1;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ I = DenseMapInfo<ਖਾਲੀ *>::get_Hash_ਮੁੱਲ(Ptr) & ਨਕਾਬ;
+  ਅਚਲ ਖਾਲੀ **Array = CurArray;
+  ਜਦੋਂ (Array[I] != get_ਖਾਲੀ_ਥਾਵਾਂ_Marker()) {
+    ਜੇ (Array[I] == Ptr)
+      ਵਾਪਸ {Array + I, ਝੂਠ};
+    I = (I + 1) & ਨਕਾਬ;
   }
 
   // Insert into the empty bucket.
-  ++NumEntries;
+  ++ਅੰਕ_Entries;
   Array[I] = Ptr;
   incrementEpoch();
-  return {Array + I, true};
+  ਵਾਪਸ {Array + I, ਸੱਚ};
 }
 
-const void *const *SmallPtrSetImplBase::doFind(const void *Ptr) const {
-  unsigned Mask = CurArraySize - 1;
-  unsigned BucketNo = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  while (true) {
-    const void *const *Bucket = CurArray + BucketNo;
-    if (LLVM_LIKELY(*Bucket == Ptr))
-      return Bucket;
-    if (LLVM_LIKELY(*Bucket == getEmptyMarker()))
-      return nullptr;
-    BucketNo = (BucketNo + 1) & Mask;
+ਅਚਲ ਖਾਲੀ *ਅਚਲ *Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::do_ਲੱਭੋ(ਅਚਲ ਖਾਲੀ *Ptr) ਅਚਲ {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਨਕਾਬ = Cur_Array_ਮਾਪ - 1;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਬਾਲਟੀ_No = DenseMapInfo<ਖਾਲੀ *>::get_Hash_ਮੁੱਲ(Ptr) & ਨਕਾਬ;
+  ਜਦੋਂ (ਸੱਚ) {
+    ਅਚਲ ਖਾਲੀ *ਅਚਲ *ਬਾਲਟੀ = CurArray + ਬਾਲਟੀ_No;
+    ਜੇ (LLVM_LIKELY(*ਬਾਲਟੀ == Ptr))
+      ਵਾਪਸ ਬਾਲਟੀ;
+    ਜੇ (LLVM_LIKELY(*ਬਾਲਟੀ == get_ਖਾਲੀ_ਥਾਵਾਂ_Marker()))
+      ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
+    ਬਾਲਟੀ_No = (ਬਾਲਟੀ_No + 1) & ਨਕਾਬ;
   }
 }
 
-void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::erase_From_ਬਾਲਟੀ(ਅਚਲ ਖਾਲੀ **ਬਾਲਟੀ) {
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  unsigned Mask = CurArraySize - 1;
-  unsigned I = Bucket - CurArray;
-  unsigned J = I;
-  const void *Empty = getEmptyMarker();
-  while ((J = (J + 1) & Mask), CurArray[J] != Empty) {
-    auto Ideal = DenseMapInfo<void *>::getHashValue(CurArray[J]);
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਨਕਾਬ = Cur_Array_ਮਾਪ - 1;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ I = ਬਾਲਟੀ - CurArray;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ J = I;
+  ਅਚਲ ਖਾਲੀ *ਖਾਲੀ_ਥਾਵਾਂ_2 = get_ਖਾਲੀ_ਥਾਵਾਂ_Marker();
+  ਜਦੋਂ ((J = (J + 1) & ਨਕਾਬ), CurArray[J] != ਖਾਲੀ_ਥਾਵਾਂ_2) {
+    ਸਵੈਚਾਲਿਤ Ideal = DenseMapInfo<ਖਾਲੀ *>::get_Hash_ਮੁੱਲ(CurArray[J]);
+    ਜੇ (((I - Ideal) & ਨਕਾਬ) < ((J - Ideal) & ਨਕਾਬ)) {
       CurArray[I] = CurArray[J];
       I = J;
     }
   }
-  CurArray[I] = Empty;
+  CurArray[I] = ਖਾਲੀ_ਥਾਵਾਂ_2;
 }
 
 /// Grow - Allocate a larger backing store for the buckets and move it over.
 ///
-void SmallPtrSetImplBase::Grow(unsigned NewSize) {
-  auto OldBuckets = buckets();
-  bool WasSmall = isSmall();
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::Grow(ਬਿਨਾਨਿਸ਼ਾਨੀ New_ਮਾਪ) {
+  ਸਵੈਚਾਲਿਤ OldBuckets = buckets();
+  ਤਾਰਕਿਕ WasSmall = isSmall();
 
   // Install the new array.  Clear all the buckets to empty.
-  const void **NewBuckets = (const void**) safe_malloc(sizeof(void*) * NewSize);
+  ਅਚਲ ਖਾਲੀ **NewBuckets = (ਅਚਲ ਖਾਲੀ**) ਸੁਰੱਖਿਅਤ_malloc(ਆਕਾਰ(ਖਾਲੀ*) * New_ਮਾਪ);
 
   // Reset member only if memory was allocated successfully
   CurArray = NewBuckets;
-  CurArraySize = NewSize;
-  memset(CurArray, -1, NewSize*sizeof(void*));
+  Cur_Array_ਮਾਪ = New_ਮਾਪ;
+  memset(CurArray, -1, New_ਮਾਪ*ਆਕਾਰ(ਖਾਲੀ*));
 
   // Copy over all valid entries.
-  unsigned Mask = CurArraySize - 1;
-  for (const void *Ptr : OldBuckets) {
-    if (Ptr == getEmptyMarker())
-      continue;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਨਕਾਬ = Cur_Array_ਮਾਪ - 1;
+  ਲਈ (ਅਚਲ ਖਾਲੀ *Ptr : OldBuckets) {
+    ਜੇ (Ptr == get_ਖਾਲੀ_ਥਾਵਾਂ_Marker())
+      ਜਾਰੀ;
     // Find the first empty bucket on this key's probe chain; there is no equal
     // key, so nothing to compare against.
-    unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-    while (NewBuckets[I] != getEmptyMarker())
-      I = (I + 1) & Mask;
+    ਬਿਨਾਨਿਸ਼ਾਨੀ I = DenseMapInfo<ਖਾਲੀ *>::get_Hash_ਮੁੱਲ(Ptr) & ਨਕਾਬ;
+    ਜਦੋਂ (NewBuckets[I] != get_ਖਾਲੀ_ਥਾਵਾਂ_Marker())
+      I = (I + 1) & ਨਕਾਬ;
     NewBuckets[I] = Ptr;
   }
 
-  if (!WasSmall)
-    free(OldBuckets.begin());
-  IsSmall = false;
+  ਜੇ (!WasSmall)
+    ਮੁਕਤ(OldBuckets.begin());
+  IsSmall = ਝੂਠ;
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
-                                         const SmallPtrSetImplBase &that) {
+Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ(ਅਚਲ ਖਾਲੀ **SmallStorage,
+                                         ਅਚਲ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &that) {
   IsSmall = that.isSmall();
-  if (IsSmall) {
+  ਜੇ (IsSmall) {
     // If we're becoming small, prepare to insert into our stack space
     CurArray = SmallStorage;
-  } else {
+  } ਨਹੀਂਤਾਂ {
     // Otherwise, allocate new heap space (unless we were the same size)
-    CurArray = (const void**)safe_malloc(sizeof(void*) * that.CurArraySize);
+    CurArray = (ਅਚਲ ਖਾਲੀ**)ਸੁਰੱਖਿਅਤ_malloc(ਆਕਾਰ(ਖਾਲੀ*) * that.Cur_Array_ਮਾਪ);
   }
 
   // Copy over the that array.
   copyHelper(that);
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
-                                         unsigned SmallSize,
-                                         const void **RHSSmallStorage,
-                                         SmallPtrSetImplBase &&that) {
-  moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(that));
+Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ(ਅਚਲ ਖਾਲੀ **SmallStorage,
+                                         ਬਿਨਾਨਿਸ਼ਾਨੀ Small_ਮਾਪ,
+                                         ਅਚਲ ਖਾਲੀ **RHSSmallStorage,
+                                         Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &&that) {
+  moveHelper(SmallStorage, Small_ਮਾਪ, RHSSmallStorage, std::move(that));
 }
 
-void SmallPtrSetImplBase::copyFrom(const void **SmallStorage,
-                                   const SmallPtrSetImplBase &RHS) {
-  assert(&RHS != this && "Self-copy should be handled by the caller.");
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::copyFrom(ਅਚਲ ਖਾਲੀ **SmallStorage,
+                                   ਅਚਲ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &RHS) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(&RHS != ਇਹ && "Self-copy should be handled by the caller.");
 
-  if (isSmall() && RHS.isSmall())
-    assert(CurArraySize == RHS.CurArraySize &&
+  ਜੇ (isSmall() && RHS.isSmall())
+    ਪ੍ਰਤਿਜ੍ਞਾ(Cur_Array_ਮਾਪ == RHS.Cur_Array_ਮਾਪ &&
            "Cannot assign sets with different small sizes");
 
   // If we're becoming small, prepare to insert into our stack space
-  if (RHS.isSmall()) {
-    if (!isSmall())
-      free(CurArray);
+  ਜੇ (RHS.isSmall()) {
+    ਜੇ (!isSmall())
+      ਮੁਕਤ(CurArray);
     CurArray = SmallStorage;
-    IsSmall = true;
+    IsSmall = ਸੱਚ;
     // Otherwise, allocate new heap space (unless we were the same size)
-  } else if (CurArraySize != RHS.CurArraySize) {
-    if (isSmall())
-      CurArray = (const void**)safe_malloc(sizeof(void*) * RHS.CurArraySize);
-    else {
-      const void **T = (const void**)safe_realloc(CurArray,
-                                             sizeof(void*) * RHS.CurArraySize);
+  } ਨਹੀਂਤਾਂ ਜੇ (Cur_Array_ਮਾਪ != RHS.Cur_Array_ਮਾਪ) {
+    ਜੇ (isSmall())
+      CurArray = (ਅਚਲ ਖਾਲੀ**)ਸੁਰੱਖਿਅਤ_malloc(ਆਕਾਰ(ਖਾਲੀ*) * RHS.Cur_Array_ਮਾਪ);
+    ਨਹੀਂਤਾਂ {
+      ਅਚਲ ਖਾਲੀ **T = (ਅਚਲ ਖਾਲੀ**)ਸੁਰੱਖਿਅਤ_realloc(CurArray,
+                                             ਆਕਾਰ(ਖਾਲੀ*) * RHS.Cur_Array_ਮਾਪ);
       CurArray = T;
     }
-    IsSmall = false;
+    IsSmall = ਝੂਠ;
   }
 
   copyHelper(RHS);
 }
 
-void SmallPtrSetImplBase::copyHelper(const SmallPtrSetImplBase &RHS) {
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::copyHelper(ਅਚਲ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &RHS) {
   // Copy over the new array size
-  CurArraySize = RHS.CurArraySize;
+  Cur_Array_ਮਾਪ = RHS.Cur_Array_ਮਾਪ;
 
   // Copy over the contents from the other set
   llvm::copy(RHS.buckets(), CurArray);
 
-  NumEntries = RHS.NumEntries;
+  ਅੰਕ_Entries = RHS.ਅੰਕ_Entries;
 }
 
-void SmallPtrSetImplBase::moveFrom(const void **SmallStorage,
-                                   unsigned SmallSize,
-                                   const void **RHSSmallStorage,
-                                   SmallPtrSetImplBase &&RHS) {
-  if (!isSmall())
-    free(CurArray);
-  moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(RHS));
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::moveFrom(ਅਚਲ ਖਾਲੀ **SmallStorage,
+                                   ਬਿਨਾਨਿਸ਼ਾਨੀ Small_ਮਾਪ,
+                                   ਅਚਲ ਖਾਲੀ **RHSSmallStorage,
+                                   Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &&RHS) {
+  ਜੇ (!isSmall())
+    ਮੁਕਤ(CurArray);
+  moveHelper(SmallStorage, Small_ਮਾਪ, RHSSmallStorage, std::move(RHS));
 }
 
-void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
-                                     unsigned SmallSize,
-                                     const void **RHSSmallStorage,
-                                     SmallPtrSetImplBase &&RHS) {
-  assert(&RHS != this && "Self-move should be handled by the caller.");
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::moveHelper(ਅਚਲ ਖਾਲੀ **SmallStorage,
+                                     ਬਿਨਾਨਿਸ਼ਾਨੀ Small_ਮਾਪ,
+                                     ਅਚਲ ਖਾਲੀ **RHSSmallStorage,
+                                     Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &&RHS) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(&RHS != ਇਹ && "Self-move should be handled by the caller.");
   incrementEpoch();
   RHS.incrementEpoch();
 
-  if (RHS.isSmall()) {
+  ਜੇ (RHS.isSmall()) {
     // Copy a small RHS rather than moving.
     CurArray = SmallStorage;
     llvm::copy(RHS.small_buckets(), CurArray);
-  } else {
+  } ਨਹੀਂਤਾਂ {
     CurArray = RHS.CurArray;
     RHS.CurArray = RHSSmallStorage;
   }
 
   // Copy the rest of the trivial members.
-  CurArraySize = RHS.CurArraySize;
-  NumEntries = RHS.NumEntries;
+  Cur_Array_ਮਾਪ = RHS.Cur_Array_ਮਾਪ;
+  ਅੰਕ_Entries = RHS.ਅੰਕ_Entries;
   IsSmall = RHS.IsSmall;
 
   // Make the RHS small and empty.
-  RHS.CurArraySize = SmallSize;
-  RHS.NumEntries = 0;
-  RHS.IsSmall = true;
+  RHS.Cur_Array_ਮਾਪ = Small_ਮਾਪ;
+  RHS.ਅੰਕ_Entries = 0;
+  RHS.IsSmall = ਸੱਚ;
 }
 
-void SmallPtrSetImplBase::swap(const void **SmallStorage,
-                               const void **RHSSmallStorage,
-                               SmallPtrSetImplBase &RHS) {
-  if (this == &RHS) return;
+ਖਾਲੀ Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ::ਅਦਲਾ_ਬਦਲੀ(ਅਚਲ ਖਾਲੀ **SmallStorage,
+                               ਅਚਲ ਖਾਲੀ **RHSSmallStorage,
+                               Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &RHS) {
+  ਜੇ (ਇਹ == &RHS) ਵਾਪਸ;
   incrementEpoch();
   RHS.incrementEpoch();
 
   // We can only avoid copying elements if neither set is small.
-  if (!this->isSmall() && !RHS.isSmall()) {
-    std::swap(this->CurArray, RHS.CurArray);
-    std::swap(this->CurArraySize, RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+  ਜੇ (!ਇਹ->isSmall() && !RHS.isSmall()) {
+    std::ਅਦਲਾ_ਬਦਲੀ(ਇਹ->CurArray, RHS.CurArray);
+    std::ਅਦਲਾ_ਬਦਲੀ(ਇਹ->Cur_Array_ਮਾਪ, RHS.Cur_Array_ਮਾਪ);
+    std::ਅਦਲਾ_ਬਦਲੀ(ਇਹ->ਅੰਕ_Entries, RHS.ਅੰਕ_Entries);
+    ਵਾਪਸ;
   }
 
   // FIXME: From here on we assume that both sets have the same small size.
 
   // Both a small, just swap the small elements.
-  if (this->isSmall() && RHS.isSmall()) {
-    unsigned MinEntries = std::min(this->NumEntries, RHS.NumEntries);
-    std::swap_ranges(this->CurArray, this->CurArray + MinEntries, RHS.CurArray);
-    if (this->NumEntries > MinEntries) {
-      std::copy(this->CurArray + MinEntries, this->CurArray + this->NumEntries,
+  ਜੇ (ਇਹ->isSmall() && RHS.isSmall()) {
+    ਬਿਨਾਨਿਸ਼ਾਨੀ MinEntries = std::min(ਇਹ->ਅੰਕ_Entries, RHS.ਅੰਕ_Entries);
+    std::ਅਦਲਾ_ਬਦਲੀ_ranges(ਇਹ->CurArray, ਇਹ->CurArray + MinEntries, RHS.CurArray);
+    ਜੇ (ਇਹ->ਅੰਕ_Entries > MinEntries) {
+      std::copy(ਇਹ->CurArray + MinEntries, ਇਹ->CurArray + ਇਹ->ਅੰਕ_Entries,
                 RHS.CurArray + MinEntries);
-    } else {
-      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.NumEntries,
-                this->CurArray + MinEntries);
+    } ਨਹੀਂਤਾਂ {
+      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.ਅੰਕ_Entries,
+                ਇਹ->CurArray + MinEntries);
     }
-    assert(this->CurArraySize == RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਇਹ->Cur_Array_ਮਾਪ == RHS.Cur_Array_ਮਾਪ);
+    std::ਅਦਲਾ_ਬਦਲੀ(ਇਹ->ਅੰਕ_Entries, RHS.ਅੰਕ_Entries);
+    ਵਾਪਸ;
   }
 
   // If only one side is small, copy the small elements into the large side and
   // move the pointer from the large side to the small side.
-  SmallPtrSetImplBase &SmallSide = this->isSmall() ? *this : RHS;
-  SmallPtrSetImplBase &LargeSide = this->isSmall() ? RHS : *this;
-  const void **LargeSideInlineStorage =
-      this->isSmall() ? RHSSmallStorage : SmallStorage;
+  Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &SmallSide = ਇਹ->isSmall() ? *ਇਹ : RHS;
+  Small_Ptr_ਸੈੱਟ_Impl_ਅਧਾਰ &LargeSide = ਇਹ->isSmall() ? RHS : *ਇਹ;
+  ਅਚਲ ਖਾਲੀ **LargeSideInlineStorage =
+      ਇਹ->isSmall() ? RHSSmallStorage : SmallStorage;
   llvm::copy(SmallSide.small_buckets(), LargeSideInlineStorage);
-  std::swap(LargeSide.CurArraySize, SmallSide.CurArraySize);
-  std::swap(LargeSide.NumEntries, SmallSide.NumEntries);
+  std::ਅਦਲਾ_ਬਦਲੀ(LargeSide.Cur_Array_ਮਾਪ, SmallSide.Cur_Array_ਮਾਪ);
+  std::ਅਦਲਾ_ਬਦਲੀ(LargeSide.ਅੰਕ_Entries, SmallSide.ਅੰਕ_Entries);
   SmallSide.CurArray = LargeSide.CurArray;
-  SmallSide.IsSmall = false;
+  SmallSide.IsSmall = ਝੂਠ;
   LargeSide.CurArray = LargeSideInlineStorage;
-  LargeSide.IsSmall = true;
+  LargeSide.IsSmall = ਸੱਚ;
 }

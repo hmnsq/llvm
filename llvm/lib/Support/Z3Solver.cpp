@@ -6,49 +6,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/Support/SMTAPI.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/ScopeExit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/NativeFormatting.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/SMTAPI.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-#if LLVM_WITH_Z3
+#ਜੇ LLVM_WITH_Z3
 
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/Twine.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallString.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringMap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/Twine.h"
 
-#include <set>
+#ਅਨ੍ਤਰ੍ਭਾਵ <set>
 
-#include <z3.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <z3.h>
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
 /// Configuration class for Z3
-class Z3Config {
-  friend class Z3Context;
+ਵਰਗ Z3Config {
+  ਮਿੱਤਰ ਵਰਗ Z3Context;
 
   Z3_config Config = Z3_mk_config();
 
-public:
-  Z3Config() = default;
-  Z3Config(const Z3Config &) = delete;
-  Z3Config(Z3Config &&) = default;
-  Z3Config &operator=(Z3Config &) = delete;
-  Z3Config &operator=(Z3Config &&) = default;
+ਜਨਤਕ:
+  Z3Config() = ਮੂਲ;
+  Z3Config(ਅਚਲ Z3Config &) = ਮਿਟਾਓ;
+  Z3Config(Z3Config &&) = ਮੂਲ;
+  Z3Config &ਸੰਚਾਲਕ=(Z3Config &) = ਮਿਟਾਓ;
+  Z3Config &ਸੰਚਾਲਕ=(Z3Config &&) = ਮੂਲ;
   ~Z3Config() { Z3_del_config(Config); }
 }; // end class Z3Config
 
 // Function used to report errors
-void Z3ErrorHandler(Z3_context Context, Z3_error_code Error) {
+ਖਾਲੀ Z3ErrorHandler(Z3_context Context, Z3_error_ਕੋਡ Error) {
   llvm::report_fatal_error("Z3 error: " +
-                           llvm::Twine(Z3_get_error_msg(Context, Error)));
+                           llvm::Twine(Z3_get_error_ਸੁਨੇਹਾ(Context, Error)));
 }
 
 /// Wrapper for Z3 context
-class Z3Context {
-public:
+ਵਰਗ Z3Context {
+ਜਨਤਕ:
   Z3Config Config;
   Z3_context Context;
 
@@ -56,934 +56,934 @@ public:
     Context = Z3_mk_context_rc(Config.Config);
     // The error function is set here because the context is the first object
     // created by the backend
-    Z3_set_error_handler(Context, Z3ErrorHandler);
+    Z3_ਸੈੱਟ_error_handler(Context, Z3ErrorHandler);
   }
 
-  Z3Context(const Z3Context &) = delete;
-  Z3Context(Z3Context &&) = default;
-  Z3Context &operator=(Z3Context &) = delete;
-  Z3Context &operator=(Z3Context &&) = default;
+  Z3Context(ਅਚਲ Z3Context &) = ਮਿਟਾਓ;
+  Z3Context(Z3Context &&) = ਮੂਲ;
+  Z3Context &ਸੰਚਾਲਕ=(Z3Context &) = ਮਿਟਾਓ;
+  Z3Context &ਸੰਚਾਲਕ=(Z3Context &&) = ਮੂਲ;
 
   ~Z3Context() {
     Z3_del_context(Context);
-    Context = nullptr;
+    Context = ਖਾਲੀ_ਸੂਚਕ;
   }
 }; // end class Z3Context
 
 /// Wrapper for Z3 Sort
-class Z3Sort : public SMTSort {
-  friend class Z3Solver;
+ਵਰਗ Z3_ਛਾਂਟੋ : ਜਨਤਕ SMTSort {
+  ਮਿੱਤਰ ਵਰਗ Z3Solver;
 
   Z3Context &Context;
 
-  Z3_sort Sort;
+  Z3_ਛਾਂਟੋ_2 ਛਾਂਟੋ_2;
 
-public:
+ਜਨਤਕ:
   /// Default constructor, mainly used by make_shared
-  Z3Sort(Z3Context &C, Z3_sort ZS) : Context(C), Sort(ZS) {
-    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
+  Z3_ਛਾਂਟੋ(Z3Context &C, Z3_ਛਾਂਟੋ_2 ZS) : Context(C), ਛਾਂਟੋ_2(ZS) {
+    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(ਛਾਂਟੋ_2));
   }
 
   /// Override implicit copy constructor for correct reference counting.
-  Z3Sort(const Z3Sort &Other) : Context(Other.Context), Sort(Other.Sort) {
-    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
+  Z3_ਛਾਂਟੋ(ਅਚਲ Z3_ਛਾਂਟੋ &Other) : Context(Other.Context), ਛਾਂਟੋ_2(Other.ਛਾਂਟੋ_2) {
+    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(ਛਾਂਟੋ_2));
   }
 
   /// Override implicit copy assignment constructor for correct reference
   /// counting.
-  Z3Sort &operator=(const Z3Sort &Other) {
-    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Other.Sort));
-    Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
-    Sort = Other.Sort;
-    return *this;
+  Z3_ਛਾਂਟੋ &ਸੰਚਾਲਕ=(ਅਚਲ Z3_ਛਾਂਟੋ &Other) {
+    Z3_inc_ref(Context.Context, reinterpret_cast<Z3_ast>(Other.ਛਾਂਟੋ_2));
+    Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(ਛਾਂਟੋ_2));
+    ਛਾਂਟੋ_2 = Other.ਛਾਂਟੋ_2;
+    ਵਾਪਸ *ਇਹ;
   }
 
-  Z3Sort(Z3Sort &&Other) = delete;
-  Z3Sort &operator=(Z3Sort &&Other) = delete;
+  Z3_ਛਾਂਟੋ(Z3_ਛਾਂਟੋ &&Other) = ਮਿਟਾਓ;
+  Z3_ਛਾਂਟੋ &ਸੰਚਾਲਕ=(Z3_ਛਾਂਟੋ &&Other) = ਮਿਟਾਓ;
 
-  ~Z3Sort() {
-    if (Sort)
-      Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(Sort));
+  ~Z3_ਛਾਂਟੋ() {
+    ਜੇ (ਛਾਂਟੋ_2)
+      Z3_dec_ref(Context.Context, reinterpret_cast<Z3_ast>(ਛਾਂਟੋ_2));
   }
 
-  void Profile(llvm::FoldingSetNodeID &ID) const override {
-    ID.AddInteger(
-        Z3_get_ast_id(Context.Context, reinterpret_cast<Z3_ast>(Sort)));
+  ਖਾਲੀ Profile(llvm::Folding_ਸੈੱਟ_ਗੰਢ_ID &ID) ਅਚਲ override {
+    ID.ਜੋੜੋ_Integer(
+        Z3_get_ast_id(Context.Context, reinterpret_cast<Z3_ast>(ਛਾਂਟੋ_2)));
   }
 
-  bool isBitvectorSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_BV_SORT);
+  ਤਾਰਕਿਕ is_Bitvector_ਛਾਂਟੋ_Impl() ਅਚਲ override {
+    ਵਾਪਸ (Z3_get_ਛਾਂਟੋ_ਕਿਸਮ(Context.Context, ਛਾਂਟੋ_2) == Z3_BV_ਛਾਂਟੋ);
   }
 
-  bool isFloatSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_FLOATING_POINT_SORT);
+  ਤਾਰਕਿਕ is_Float_ਛਾਂਟੋ_Impl() ਅਚਲ override {
+    ਵਾਪਸ (Z3_get_ਛਾਂਟੋ_ਕਿਸਮ(Context.Context, ਛਾਂਟੋ_2) == Z3_FLOATING_ਬਿੰਦੂ_ਛਾਂਟੋ);
   }
 
-  bool isBooleanSortImpl() const override {
-    return (Z3_get_sort_kind(Context.Context, Sort) == Z3_BOOL_SORT);
+  ਤਾਰਕਿਕ is_Boolean_ਛਾਂਟੋ_Impl() ਅਚਲ override {
+    ਵਾਪਸ (Z3_get_ਛਾਂਟੋ_ਕਿਸਮ(Context.Context, ਛਾਂਟੋ_2) == Z3_BOOL_ਛਾਂਟੋ);
   }
 
-  unsigned getBitvectorSortSizeImpl() const override {
-    return Z3_get_bv_sort_size(Context.Context, Sort);
+  ਬਿਨਾਨਿਸ਼ਾਨੀ get_Bitvector_ਛਾਂਟੋ_ਮਾਪ_Impl() ਅਚਲ override {
+    ਵਾਪਸ Z3_get_bv_ਛਾਂਟੋ_ਮਾਪ(Context.Context, ਛਾਂਟੋ_2);
   }
 
-  unsigned getFloatSortSizeImpl() const override {
-    return Z3_fpa_get_ebits(Context.Context, Sort) +
-           Z3_fpa_get_sbits(Context.Context, Sort);
+  ਬਿਨਾਨਿਸ਼ਾਨੀ get_Float_ਛਾਂਟੋ_ਮਾਪ_Impl() ਅਚਲ override {
+    ਵਾਪਸ Z3_fpa_get_ebits(Context.Context, ਛਾਂਟੋ_2) +
+           Z3_fpa_get_sbits(Context.Context, ਛਾਂਟੋ_2);
   }
 
-  bool equal_to(SMTSort const &Other) const override {
-    return Z3_is_eq_sort(Context.Context, Sort,
-                         static_cast<const Z3Sort &>(Other).Sort);
+  ਤਾਰਕਿਕ equal_ਮੰਜ਼ਿਲ(SMTSort ਅਚਲ &Other) ਅਚਲ override {
+    ਵਾਪਸ Z3_is_eq_ਛਾਂਟੋ(Context.Context, ਛਾਂਟੋ_2,
+                         static_cast<ਅਚਲ Z3_ਛਾਂਟੋ &>(Other).ਛਾਂਟੋ_2);
   }
 
-  void print(raw_ostream &OS) const override {
-    OS << Z3_sort_to_string(Context.Context, Sort);
+  ਖਾਲੀ print(raw_ostream &OS) ਅਚਲ override {
+    OS << Z3_ਛਾਂਟੋ_ਮੰਜ਼ਿਲ_string(Context.Context, ਛਾਂਟੋ_2);
   }
 }; // end class Z3Sort
 
-static const Z3Sort &toZ3Sort(const SMTSort &S) {
-  return static_cast<const Z3Sort &>(S);
+ਸਥਿਰ ਅਚਲ Z3_ਛਾਂਟੋ &ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(ਅਚਲ SMTSort &S) {
+  ਵਾਪਸ static_cast<ਅਚਲ Z3_ਛਾਂਟੋ &>(S);
 }
 
-class Z3Expr : public SMTExpr {
-  friend class Z3Solver;
+ਵਰਗ Z3_ਵਿਅੰਜਕ : ਜਨਤਕ SMTExpr {
+  ਮਿੱਤਰ ਵਰਗ Z3Solver;
 
   Z3Context &Context;
 
   Z3_ast AST;
 
-public:
-  Z3Expr(Z3Context &C, Z3_ast ZA) : SMTExpr(), Context(C), AST(ZA) {
+ਜਨਤਕ:
+  Z3_ਵਿਅੰਜਕ(Z3Context &C, Z3_ast ZA) : SMTExpr(), Context(C), AST(ZA) {
     Z3_inc_ref(Context.Context, AST);
   }
 
   /// Override implicit copy constructor for correct reference counting.
-  Z3Expr(const Z3Expr &Copy) : SMTExpr(), Context(Copy.Context), AST(Copy.AST) {
+  Z3_ਵਿਅੰਜਕ(ਅਚਲ Z3_ਵਿਅੰਜਕ &Copy) : SMTExpr(), Context(Copy.Context), AST(Copy.AST) {
     Z3_inc_ref(Context.Context, AST);
   }
 
   /// Override implicit copy assignment constructor for correct reference
   /// counting.
-  Z3Expr &operator=(const Z3Expr &Other) {
+  Z3_ਵਿਅੰਜਕ &ਸੰਚਾਲਕ=(ਅਚਲ Z3_ਵਿਅੰਜਕ &Other) {
     Z3_inc_ref(Context.Context, Other.AST);
     Z3_dec_ref(Context.Context, AST);
     AST = Other.AST;
-    return *this;
+    ਵਾਪਸ *ਇਹ;
   }
 
-  Z3Expr(Z3Expr &&Other) = delete;
-  Z3Expr &operator=(Z3Expr &&Other) = delete;
+  Z3_ਵਿਅੰਜਕ(Z3_ਵਿਅੰਜਕ &&Other) = ਮਿਟਾਓ;
+  Z3_ਵਿਅੰਜਕ &ਸੰਚਾਲਕ=(Z3_ਵਿਅੰਜਕ &&Other) = ਮਿਟਾਓ;
 
-  ~Z3Expr() {
-    if (AST)
+  ~Z3_ਵਿਅੰਜਕ() {
+    ਜੇ (AST)
       Z3_dec_ref(Context.Context, AST);
   }
 
-  void Profile(llvm::FoldingSetNodeID &ID) const override {
-    ID.AddInteger(Z3_get_ast_id(Context.Context, AST));
+  ਖਾਲੀ Profile(llvm::Folding_ਸੈੱਟ_ਗੰਢ_ID &ID) ਅਚਲ override {
+    ID.ਜੋੜੋ_Integer(Z3_get_ast_id(Context.Context, AST));
   }
 
   /// Comparison of AST equality, not model equivalence.
-  bool equal_to(SMTExpr const &Other) const override {
-    assert(Z3_is_eq_sort(Context.Context, Z3_get_sort(Context.Context, AST),
-                         Z3_get_sort(Context.Context,
-                                     static_cast<const Z3Expr &>(Other).AST)) &&
+  ਤਾਰਕਿਕ equal_ਮੰਜ਼ਿਲ(SMTExpr ਅਚਲ &Other) ਅਚਲ override {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Z3_is_eq_ਛਾਂਟੋ(Context.Context, Z3_get_ਛਾਂਟੋ(Context.Context, AST),
+                         Z3_get_ਛਾਂਟੋ(Context.Context,
+                                     static_cast<ਅਚਲ Z3_ਵਿਅੰਜਕ &>(Other).AST)) &&
            "AST's must have the same sort");
-    return Z3_is_eq_ast(Context.Context, AST,
-                        static_cast<const Z3Expr &>(Other).AST);
+    ਵਾਪਸ Z3_is_eq_ast(Context.Context, AST,
+                        static_cast<ਅਚਲ Z3_ਵਿਅੰਜਕ &>(Other).AST);
   }
 
-  void print(raw_ostream &OS) const override {
-    OS << Z3_ast_to_string(Context.Context, AST);
+  ਖਾਲੀ print(raw_ostream &OS) ਅਚਲ override {
+    OS << Z3_ast_ਮੰਜ਼ਿਲ_string(Context.Context, AST);
   }
 }; // end class Z3Expr
 
-static const Z3Expr &toZ3Expr(const SMTExpr &E) {
-  return static_cast<const Z3Expr &>(E);
+ਸਥਿਰ ਅਚਲ Z3_ਵਿਅੰਜਕ &ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(ਅਚਲ SMTExpr &E) {
+  ਵਾਪਸ static_cast<ਅਚਲ Z3_ਵਿਅੰਜਕ &>(E);
 }
 
-class Z3Model {
-  friend class Z3Solver;
+ਵਰਗ Z3Model {
+  ਮਿੱਤਰ ਵਰਗ Z3Solver;
 
   Z3Context &Context;
 
   Z3_model Model;
 
-public:
+ਜਨਤਕ:
   Z3Model(Z3Context &C, Z3_model ZM) : Context(C), Model(ZM) {
     Z3_model_inc_ref(Context.Context, Model);
   }
 
-  Z3Model(const Z3Model &Other) = delete;
-  Z3Model(Z3Model &&Other) = delete;
-  Z3Model &operator=(Z3Model &Other) = delete;
-  Z3Model &operator=(Z3Model &&Other) = delete;
+  Z3Model(ਅਚਲ Z3Model &Other) = ਮਿਟਾਓ;
+  Z3Model(Z3Model &&Other) = ਮਿਟਾਓ;
+  Z3Model &ਸੰਚਾਲਕ=(Z3Model &Other) = ਮਿਟਾਓ;
+  Z3Model &ਸੰਚਾਲਕ=(Z3Model &&Other) = ਮਿਟਾਓ;
 
   ~Z3Model() {
-    if (Model)
+    ਜੇ (Model)
       Z3_model_dec_ref(Context.Context, Model);
   }
 
-  void print(raw_ostream &OS) const {
-    OS << Z3_model_to_string(Context.Context, Model);
+  ਖਾਲੀ print(raw_ostream &OS) ਅਚਲ {
+    OS << Z3_model_ਮੰਜ਼ਿਲ_string(Context.Context, Model);
   }
 
-  LLVM_DUMP_METHOD void dump() const { print(llvm::errs()); }
+  LLVM_DUMP_ਵਿਧੀ ਖਾਲੀ dump() ਅਚਲ { print(llvm::errs()); }
 }; // end class Z3Model
 
 /// Get the corresponding IEEE floating-point type for a given bitwidth.
-static const llvm::fltSemantics &getFloatSemantics(unsigned BitWidth) {
-  switch (BitWidth) {
-  default:
+ਸਥਿਰ ਅਚਲ llvm::fltSemantics &getFloatSemantics(ਬਿਨਾਨਿਸ਼ਾਨੀ ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2) {
+  ਚੋਣ (ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2) {
+  ਮੂਲ:
     llvm_unreachable("Unsupported floating-point semantics!");
-    break;
-  case 16:
-    return llvm::APFloat::IEEEhalf();
-  case 32:
-    return llvm::APFloat::IEEEsingle();
-  case 64:
-    return llvm::APFloat::IEEEdouble();
-  case 128:
-    return llvm::APFloat::IEEEquad();
+    ਰੋਕੋ;
+  ਹਾਲਤ 16:
+    ਵਾਪਸ llvm::APFloat::IEEEhalf();
+  ਹਾਲਤ 32:
+    ਵਾਪਸ llvm::APFloat::IEEEsingle();
+  ਹਾਲਤ 64:
+    ਵਾਪਸ llvm::APFloat::IEEEdouble();
+  ਹਾਲਤ 128:
+    ਵਾਪਸ llvm::APFloat::IEEEquad();
   }
 }
 
 // Determine whether two float semantics are equivalent
-static bool areEquivalent(const llvm::fltSemantics &LHS,
-                          const llvm::fltSemantics &RHS) {
-  return (llvm::APFloat::semanticsPrecision(LHS) ==
+ਸਥਿਰ ਤਾਰਕਿਕ areEquivalent(ਅਚਲ llvm::fltSemantics &LHS,
+                          ਅਚਲ llvm::fltSemantics &RHS) {
+  ਵਾਪਸ (llvm::APFloat::semanticsPrecision(LHS) ==
           llvm::APFloat::semanticsPrecision(RHS)) &&
          (llvm::APFloat::semanticsMinExponent(LHS) ==
           llvm::APFloat::semanticsMinExponent(RHS)) &&
          (llvm::APFloat::semanticsMaxExponent(LHS) ==
           llvm::APFloat::semanticsMaxExponent(RHS)) &&
-         (llvm::APFloat::semanticsSizeInBits(LHS) ==
-          llvm::APFloat::semanticsSizeInBits(RHS));
+         (llvm::APFloat::semantics_ਮਾਪ_ਵਿੱਚ_ਬਿੱਟ(LHS) ==
+          llvm::APFloat::semantics_ਮਾਪ_ਵਿੱਚ_ਬਿੱਟ(RHS));
 }
 
-class Z3Solver : public SMTSolver {
-  friend class Z3ConstraintManager;
+ਵਰਗ Z3Solver : ਜਨਤਕ SMTSolver {
+  ਮਿੱਤਰ ਵਰਗ Z3ConstraintManager;
 
   Z3Context Context;
 
-  Z3_solver Solver = [this] {
+  Z3_solver Solver = [ਇਹ] {
     Z3_solver S = Z3_mk_simple_solver(Context.Context);
     Z3_solver_inc_ref(Context.Context, S);
-    return S;
+    ਵਾਪਸ S;
   }();
 
-  Z3_params Params = [this] {
+  Z3_params Params = [ਇਹ] {
     Z3_params P = Z3_mk_params(Context.Context);
     Z3_params_inc_ref(Context.Context, P);
-    return P;
+    ਵਾਪਸ P;
   }();
 
   // Cache Sorts
-  std::set<Z3Sort> CachedSorts;
+  std::ਸੈੱਟ<Z3_ਛਾਂਟੋ> CachedSorts;
 
   // Cache Exprs
-  std::set<Z3Expr> CachedExprs;
+  std::ਸੈੱਟ<Z3_ਵਿਅੰਜਕ> CachedExprs;
 
-public:
-  Z3Solver() = default;
-  Z3Solver(const Z3Solver &Other) = delete;
-  Z3Solver(Z3Solver &&Other) = delete;
-  Z3Solver &operator=(Z3Solver &Other) = delete;
-  Z3Solver &operator=(Z3Solver &&Other) = delete;
+ਜਨਤਕ:
+  Z3Solver() = ਮੂਲ;
+  Z3Solver(ਅਚਲ Z3Solver &Other) = ਮਿਟਾਓ;
+  Z3Solver(Z3Solver &&Other) = ਮਿਟਾਓ;
+  Z3Solver &ਸੰਚਾਲਕ=(Z3Solver &Other) = ਮਿਟਾਓ;
+  Z3Solver &ਸੰਚਾਲਕ=(Z3Solver &&Other) = ਮਿਟਾਓ;
 
   ~Z3Solver() override {
     Z3_params_dec_ref(Context.Context, Params);
     Z3_solver_dec_ref(Context.Context, Solver);
   }
 
-  void addConstraint(const SMTExprRef &Exp) const override {
-    Z3_solver_assert(Context.Context, Solver, toZ3Expr(*Exp).AST);
+  ਖਾਲੀ ਜੋੜੋ_Constraint(ਅਚਲ SMTExprRef &Exp) ਅਚਲ override {
+    Z3_solver_assert(Context.Context, Solver, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST);
   }
 
   // Given an SMTSort, adds/retrives it from the cache and returns
   // an SMTSortRef to the SMTSort in the cache
-  SMTSortRef newSortRef(const SMTSort &Sort) {
-    auto It = CachedSorts.insert(toZ3Sort(Sort));
-    return &(*It.first);
+  SMTSortRef new_ਛਾਂਟੋ_Ref(ਅਚਲ SMTSort &ਛਾਂਟੋ_2) {
+    ਸਵੈਚਾਲਿਤ It = CachedSorts.ਪਾਓ(ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(ਛਾਂਟੋ_2));
+    ਵਾਪਸ &(*It.ਪਹਿਲਾ_2);
   }
 
   // Given an SMTExpr, adds/retrives it from the cache and returns
   // an SMTExprRef to the SMTExpr in the cache
-  SMTExprRef newExprRef(const SMTExpr &Exp) {
-    auto It = CachedExprs.insert(toZ3Expr(Exp));
-    return &(*It.first);
+  SMTExprRef new_ਵਿਅੰਜਕ_Ref(ਅਚਲ SMTExpr &Exp) {
+    ਸਵੈਚਾਲਿਤ It = CachedExprs.ਪਾਓ(ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(Exp));
+    ਵਾਪਸ &(*It.ਪਹਿਲਾ_2);
   }
 
-  SMTSortRef getBoolSort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_bool_sort(Context.Context)));
+  SMTSortRef get_Bool_ਛਾਂਟੋ() override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(Z3_ਛਾਂਟੋ(Context, Z3_mk_bool_ਛਾਂਟੋ(Context.Context)));
   }
 
-  SMTSortRef getBitvectorSort(unsigned BitWidth) override {
-    return newSortRef(
-        Z3Sort(Context, Z3_mk_bv_sort(Context.Context, BitWidth)));
+  SMTSortRef get_Bitvector_ਛਾਂਟੋ(ਬਿਨਾਨਿਸ਼ਾਨੀ ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2) override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(
+        Z3_ਛਾਂਟੋ(Context, Z3_mk_bv_ਛਾਂਟੋ(Context.Context, ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2)));
   }
 
-  SMTSortRef getSort(const SMTExprRef &Exp) override {
-    return newSortRef(
-        Z3Sort(Context, Z3_get_sort(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTSortRef get_ਛਾਂਟੋ(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(
+        Z3_ਛਾਂਟੋ(Context, Z3_get_ਛਾਂਟੋ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTSortRef getFloat16Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_16(Context.Context)));
+  SMTSortRef get_Float16_ਛਾਂਟੋ() override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(Z3_ਛਾਂਟੋ(Context, Z3_mk_fpa_ਛਾਂਟੋ_16(Context.Context)));
   }
 
-  SMTSortRef getFloat32Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_32(Context.Context)));
+  SMTSortRef get_Float32_ਛਾਂਟੋ() override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(Z3_ਛਾਂਟੋ(Context, Z3_mk_fpa_ਛਾਂਟੋ_32(Context.Context)));
   }
 
-  SMTSortRef getFloat64Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_64(Context.Context)));
+  SMTSortRef get_Float64_ਛਾਂਟੋ() override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(Z3_ਛਾਂਟੋ(Context, Z3_mk_fpa_ਛਾਂਟੋ_64(Context.Context)));
   }
 
-  SMTSortRef getFloat128Sort() override {
-    return newSortRef(Z3Sort(Context, Z3_mk_fpa_sort_128(Context.Context)));
+  SMTSortRef get_Float128_ਛਾਂਟੋ() override {
+    ਵਾਪਸ new_ਛਾਂਟੋ_Ref(Z3_ਛਾਂਟੋ(Context, Z3_mk_fpa_ਛਾਂਟੋ_128(Context.Context)));
   }
 
-  SMTExprRef mkBVNeg(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvneg(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVNeg(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvneg(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVNot(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvnot(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVNot(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvnot(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkNot(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_not(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkNot(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_not(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVAdd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvadd(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAdd(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvadd(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSub(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsub(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSub(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvsub(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVMul(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvmul(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVMul(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvmul(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSRem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsrem(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSRem(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvsrem(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVURem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvurem(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVURem(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvurem(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsdiv(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSDiv(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvsdiv(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvudiv(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUDiv(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvudiv(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVShl(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvshl(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVShl(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvshl(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVAshr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvashr(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAshr(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvashr(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVLshr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvlshr(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVLshr(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvlshr(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVXor(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvxor(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVXor(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvxor(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVOr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvor(Context.Context, toZ3Expr(*LHS).AST,
-                                   toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVOr(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvor(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                   ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVAnd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvand(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAnd(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvand(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUlt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvult(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUlt(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvult(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSlt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvslt(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSlt(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvslt(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUgt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvugt(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUgt(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvugt(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSgt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsgt(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSgt(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvsgt(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUle(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvule(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUle(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvule(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSle(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsle(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSle(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvsle(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVUge(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvuge(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVUge(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvuge(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVSge(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_bvsge(Context.Context, toZ3Expr(*LHS).AST,
-                                    toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVSge(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_bvsge(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkAnd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    Z3_ast Args[2] = {toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST};
-    return newExprRef(Z3Expr(Context, Z3_mk_and(Context.Context, 2, Args)));
+  SMTExprRef mkAnd(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    Z3_ast ਦਲੀਲਾਂ[2] = {ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST};
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(Context, Z3_mk_and(Context.Context, 2, ਦਲੀਲਾਂ)));
   }
 
-  SMTExprRef mkOr(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    Z3_ast Args[2] = {toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST};
-    return newExprRef(Z3Expr(Context, Z3_mk_or(Context.Context, 2, Args)));
+  SMTExprRef mkOr(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    Z3_ast ਦਲੀਲਾਂ[2] = {ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST};
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(Context, Z3_mk_or(Context.Context, 2, ਦਲੀਲਾਂ)));
   }
 
-  SMTExprRef mkEqual(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_eq(Context.Context, toZ3Expr(*LHS).AST,
-                                 toZ3Expr(*RHS).AST)));
+  SMTExprRef mkEqual(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_eq(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                 ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPNeg(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_neg(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPNeg(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_neg(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsInfinite(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_is_infinite(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPIsInfinite(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_fpa_is_infinite(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsNaN(const SMTExprRef &Exp) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_is_nan(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPIsNaN(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_is_nan(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsNormal(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_is_normal(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mk_FPIs_ਸਾਧਾਰਨ(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_fpa_is_ਸਾਧਾਰਨ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPIsZero(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_is_zero(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkFPIsZero(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_fpa_is_zero(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkFPMul(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_mul(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPMul(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context,
+               Z3_mk_fpa_mul(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                             ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPDiv(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_div(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPDiv(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context,
+               Z3_mk_fpa_div(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                             ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPRem(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_rem(Context.Context, toZ3Expr(*LHS).AST,
-                                      toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPRem(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_rem(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                      ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPAdd(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_add(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPAdd(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context,
+               Z3_mk_fpa_ਜੋੜੋ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                             ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPSub(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(
-        Z3Expr(Context,
-               Z3_mk_fpa_sub(Context.Context, toZ3Expr(*RoundingMode).AST,
-                             toZ3Expr(*LHS).AST, toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPSub(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context,
+               Z3_mk_fpa_sub(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                             ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPLt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_lt(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPLt(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_lt(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPGt(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_gt(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPGt(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_gt(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPLe(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_leq(Context.Context, toZ3Expr(*LHS).AST,
-                                      toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPLe(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_leq(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                      ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPGe(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_geq(Context.Context, toZ3Expr(*LHS).AST,
-                                      toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPGe(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_geq(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                      ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPEqual(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_fpa_eq(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkFPEqual(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_eq(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkIte(const SMTExprRef &Cond, const SMTExprRef &T,
-                   const SMTExprRef &F) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_ite(Context.Context, toZ3Expr(*Cond).AST,
-                                  toZ3Expr(*T).AST, toZ3Expr(*F).AST)));
+  SMTExprRef mkIte(ਅਚਲ SMTExprRef &Cond, ਅਚਲ SMTExprRef &T,
+                   ਅਚਲ SMTExprRef &F) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_ite(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Cond).AST,
+                                  ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*T).AST, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*F).AST)));
   }
 
-  SMTExprRef mkBVSignExt(unsigned i, const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_sign_ext(Context.Context, i, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVSignExt(ਬਿਨਾਨਿਸ਼ਾਨੀ i, ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_sign_ext(Context.Context, i, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVZeroExt(unsigned i, const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_zero_ext(Context.Context, i, toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVZeroExt(ਬਿਨਾਨਿਸ਼ਾਨੀ i, ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_zero_ext(Context.Context, i, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
-  SMTExprRef mkBVExtract(unsigned High, unsigned Low,
-                         const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(Context, Z3_mk_extract(Context.Context, High, Low,
-                                                    toZ3Expr(*Exp).AST)));
+  SMTExprRef mkBVExtract(ਬਿਨਾਨਿਸ਼ਾਨੀ ਉੱਚਾ_2, ਬਿਨਾਨਿਸ਼ਾਨੀ ਨੀਵਾਂ_2,
+                         ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(Context, Z3_mk_ਕੱਢੋ(Context.Context, ਉੱਚਾ_2, ਨੀਵਾਂ_2,
+                                                    ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a bitvector addition
   /// operation
-  SMTExprRef mkBVAddNoOverflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
-                               bool isSigned) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvadd_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                         toZ3Expr(*RHS).AST, isSigned)));
+  SMTExprRef mk_BVAdd_No_ਉਛਾਲ(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS,
+                               ਤਾਰਕਿਕ isSigned) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvadd_no_ਉਛਾਲ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                         ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST, isSigned)));
   }
 
   /// Creates a predicate that checks for underflow in a signed bitvector
   /// addition operation
-  SMTExprRef mkBVAddNoUnderflow(const SMTExprRef &LHS,
-                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvadd_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVAddNoUnderflow(ਅਚਲ SMTExprRef &LHS,
+                                ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvadd_no_underflow(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                          ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a signed bitvector
   /// subtraction operation
-  SMTExprRef mkBVSubNoOverflow(const SMTExprRef &LHS,
-                               const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvsub_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                         toZ3Expr(*RHS).AST)));
+  SMTExprRef mk_BVSub_No_ਉਛਾਲ(ਅਚਲ SMTExprRef &LHS,
+                               ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvsub_no_ਉਛਾਲ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                         ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
   /// Creates a predicate that checks for underflow in a bitvector subtraction
   /// operation
-  SMTExprRef mkBVSubNoUnderflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
-                                bool isSigned) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvsub_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST, isSigned)));
+  SMTExprRef mkBVSubNoUnderflow(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS,
+                                ਤਾਰਕਿਕ isSigned) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvsub_no_underflow(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                          ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST, isSigned)));
   }
 
   /// Creates a predicate that checks for overflow in a signed bitvector
   /// division/modulus operation
-  SMTExprRef mkBVSDivNoOverflow(const SMTExprRef &LHS,
-                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvsdiv_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST)));
+  SMTExprRef mk_BVSDiv_No_ਉਛਾਲ(ਅਚਲ SMTExprRef &LHS,
+                                ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvsdiv_no_ਉਛਾਲ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                          ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a bitvector negation
   /// operation
-  SMTExprRef mkBVNegNoOverflow(const SMTExprRef &Exp) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvneg_no_overflow(Context.Context, toZ3Expr(*Exp).AST)));
+  SMTExprRef mk_BVNeg_No_ਉਛਾਲ(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvneg_no_ਉਛਾਲ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST)));
   }
 
   /// Creates a predicate that checks for overflow in a bitvector multiplication
   /// operation
-  SMTExprRef mkBVMulNoOverflow(const SMTExprRef &LHS, const SMTExprRef &RHS,
-                               bool isSigned) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvmul_no_overflow(Context.Context, toZ3Expr(*LHS).AST,
-                                         toZ3Expr(*RHS).AST, isSigned)));
+  SMTExprRef mk_BVMul_No_ਉਛਾਲ(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS,
+                               ਤਾਰਕਿਕ isSigned) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvmul_no_ਉਛਾਲ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                         ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST, isSigned)));
   }
 
   /// Creates a predicate that checks for underflow in a signed bitvector
   /// multiplication operation
-  SMTExprRef mkBVMulNoUnderflow(const SMTExprRef &LHS,
-                                const SMTExprRef &RHS) override {
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_bvmul_no_underflow(Context.Context, toZ3Expr(*LHS).AST,
-                                          toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVMulNoUnderflow(ਅਚਲ SMTExprRef &LHS,
+                                ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_bvmul_no_underflow(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                          ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkBVConcat(const SMTExprRef &LHS, const SMTExprRef &RHS) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_concat(Context.Context, toZ3Expr(*LHS).AST,
-                                     toZ3Expr(*RHS).AST)));
+  SMTExprRef mkBVConcat(ਅਚਲ SMTExprRef &LHS, ਅਚਲ SMTExprRef &RHS) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_concat(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*LHS).AST,
+                                     ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*RHS).AST)));
   }
 
-  SMTExprRef mkFPtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+  SMTExprRef mkFPtoFP(ਅਚਲ SMTExprRef &From, ਅਚਲ SMTSortRef &ਮੰਜ਼ਿਲ) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
         Context,
-        Z3_mk_fpa_to_fp_float(Context.Context, toZ3Expr(*RoundingMode).AST,
-                              toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
+        Z3_mk_fpa_ਮੰਜ਼ਿਲ_fp_float(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                              ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*From).AST, ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(*ਮੰਜ਼ਿਲ).ਛਾਂਟੋ_2)));
   }
 
-  SMTExprRef mkSBVtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+  SMTExprRef mkSBVtoFP(ਅਚਲ SMTExprRef &From, ਅਚਲ SMTSortRef &ਮੰਜ਼ਿਲ) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
         Context,
-        Z3_mk_fpa_to_fp_signed(Context.Context, toZ3Expr(*RoundingMode).AST,
-                               toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
+        Z3_mk_fpa_ਮੰਜ਼ਿਲ_fp_signed(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                               ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*From).AST, ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(*ਮੰਜ਼ਿਲ).ਛਾਂਟੋ_2)));
   }
 
-  SMTExprRef mkUBVtoFP(const SMTExprRef &From, const SMTSortRef &To) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
+  SMTExprRef mkUBVtoFP(ਅਚਲ SMTExprRef &From, ਅਚਲ SMTSortRef &ਮੰਜ਼ਿਲ) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
         Context,
-        Z3_mk_fpa_to_fp_unsigned(Context.Context, toZ3Expr(*RoundingMode).AST,
-                                 toZ3Expr(*From).AST, toZ3Sort(*To).Sort)));
+        Z3_mk_fpa_ਮੰਜ਼ਿਲ_fp_unsigned(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                                 ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*From).AST, ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(*ਮੰਜ਼ਿਲ).ਛਾਂਟੋ_2)));
   }
 
-  SMTExprRef mkFPtoSBV(const SMTExprRef &From, unsigned ToWidth) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_to_sbv(Context.Context, toZ3Expr(*RoundingMode).AST,
-                                  toZ3Expr(*From).AST, ToWidth)));
+  SMTExprRef mkFPtoSBV(ਅਚਲ SMTExprRef &From, ਬਿਨਾਨਿਸ਼ਾਨੀ ਮੰਜ਼ਿਲ_ਚੌੜਾਈ) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_fpa_ਮੰਜ਼ਿਲ_sbv(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                                  ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*From).AST, ਮੰਜ਼ਿਲ_ਚੌੜਾਈ)));
   }
 
-  SMTExprRef mkFPtoUBV(const SMTExprRef &From, unsigned ToWidth) override {
-    SMTExprRef RoundingMode = getFloatRoundingMode();
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_to_ubv(Context.Context, toZ3Expr(*RoundingMode).AST,
-                                  toZ3Expr(*From).AST, ToWidth)));
+  SMTExprRef mkFPtoUBV(ਅਚਲ SMTExprRef &From, ਬਿਨਾਨਿਸ਼ਾਨੀ ਮੰਜ਼ਿਲ_ਚੌੜਾਈ) override {
+    SMTExprRef Rounding_ਬਹੁਲਕ = get_Float_Rounding_ਬਹੁਲਕ();
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_fpa_ਮੰਜ਼ਿਲ_ubv(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Rounding_ਬਹੁਲਕ).AST,
+                                  ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*From).AST, ਮੰਜ਼ਿਲ_ਚੌੜਾਈ)));
   }
 
-  SMTExprRef mkBoolean(const bool b) override {
-    return newExprRef(Z3Expr(Context, b ? Z3_mk_true(Context.Context)
+  SMTExprRef mkBoolean(ਅਚਲ ਤਾਰਕਿਕ b) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(Context, b ? Z3_mk_true(Context.Context)
                                         : Z3_mk_false(Context.Context)));
   }
 
-  SMTExprRef mkBitvector(const llvm::APSInt Int, unsigned BitWidth) override {
-    const Z3_sort Z3Sort = toZ3Sort(*getBitvectorSort(BitWidth)).Sort;
+  SMTExprRef mkBitvector(ਅਚਲ llvm::APSInt Int, ਬਿਨਾਨਿਸ਼ਾਨੀ ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2) override {
+    ਅਚਲ Z3_ਛਾਂਟੋ_2 Z3_ਛਾਂਟੋ = ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(*get_Bitvector_ਛਾਂਟੋ(ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2)).ਛਾਂਟੋ_2;
 
     // Slow path, when 64 bits are not enough.
-    if (LLVM_UNLIKELY(!Int.isRepresentableByInt64())) {
-      SmallString<40> Buffer;
-      Int.toString(Buffer, 10);
-      return newExprRef(Z3Expr(
-          Context, Z3_mk_numeral(Context.Context, Buffer.c_str(), Z3Sort)));
+    ਜੇ (LLVM_UNLIKELY(!Int.isRepresentableByInt64())) {
+      SmallString<40> ਬਫਰ;
+      Int.ਮੰਜ਼ਿਲ_String(ਬਫਰ, 10);
+      ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+          Context, Z3_mk_numeral(Context.Context, ਬਫਰ.c_str(), Z3_ਛਾਂਟੋ)));
     }
 
-    const int64_t BitReprAsSigned = Int.getExtValue();
-    const uint64_t BitReprAsUnsigned =
-        reinterpret_cast<const uint64_t &>(BitReprAsSigned);
+    ਅਚਲ int64_t ਦੋਆਧਾਰੀ_ਅੰਕ_Repr_As_Signed = Int.get_Ext_ਮੁੱਲ();
+    ਅਚਲ uint64_t ਦੋਆਧਾਰੀ_ਅੰਕ_Repr_As_Unsigned =
+        reinterpret_cast<ਅਚਲ uint64_t &>(ਦੋਆਧਾਰੀ_ਅੰਕ_Repr_As_Signed);
 
     Z3_ast Literal =
         Int.isSigned()
-            ? Z3_mk_int64(Context.Context, BitReprAsSigned, Z3Sort)
-            : Z3_mk_unsigned_int64(Context.Context, BitReprAsUnsigned, Z3Sort);
-    return newExprRef(Z3Expr(Context, Literal));
+            ? Z3_mk_int64(Context.Context, ਦੋਆਧਾਰੀ_ਅੰਕ_Repr_As_Signed, Z3_ਛਾਂਟੋ)
+            : Z3_mk_unsigned_int64(Context.Context, ਦੋਆਧਾਰੀ_ਅੰਕ_Repr_As_Unsigned, Z3_ਛਾਂਟੋ);
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(Context, Literal));
   }
 
-  SMTExprRef mkFloat(const llvm::APFloat Float) override {
-    SMTSortRef Sort =
-        getFloatSort(llvm::APFloat::semanticsSizeInBits(Float.getSemantics()));
+  SMTExprRef mkFloat(ਅਚਲ llvm::APFloat Float) override {
+    SMTSortRef ਛਾਂਟੋ_2 =
+        get_Float_ਛਾਂਟੋ(llvm::APFloat::semantics_ਮਾਪ_ਵਿੱਚ_ਬਿੱਟ(Float.getSemantics()));
 
-    llvm::APSInt Int = llvm::APSInt(Float.bitcastToAPInt(), false);
-    SMTExprRef Z3Int = mkBitvector(Int, Int.getBitWidth());
-    return newExprRef(Z3Expr(
-        Context, Z3_mk_fpa_to_fp_bv(Context.Context, toZ3Expr(*Z3Int).AST,
-                                    toZ3Sort(*Sort).Sort)));
+    llvm::APSInt Int = llvm::APSInt(Float.bitcast_ਮੰਜ਼ਿਲ_APInt(), ਝੂਠ);
+    SMTExprRef Z3Int = mkBitvector(Int, Int.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ());
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(
+        Context, Z3_mk_fpa_ਮੰਜ਼ਿਲ_fp_bv(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Z3Int).AST,
+                                    ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(*ਛਾਂਟੋ_2).ਛਾਂਟੋ_2)));
   }
 
-  SMTExprRef mkSymbol(const char *Name, SMTSortRef Sort) override {
-    return newExprRef(
-        Z3Expr(Context, Z3_mk_const(Context.Context,
-                                    Z3_mk_string_symbol(Context.Context, Name),
-                                    toZ3Sort(*Sort).Sort)));
+  SMTExprRef mk_ਚਿੰਨ੍ਹ(ਅਚਲ ਅੱਖਰ *Name, SMTSortRef ਛਾਂਟੋ_2) override {
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context, Z3_mk_const(Context.Context,
+                                    Z3_mk_string_ਚਿੰਨ੍ਹ(Context.Context, Name),
+                                    ਮੰਜ਼ਿਲ_Z3_ਛਾਂਟੋ(*ਛਾਂਟੋ_2).ਛਾਂਟੋ_2)));
   }
 
-  llvm::APSInt getBitvector(const SMTExprRef &Exp, unsigned BitWidth,
-                            bool isUnsigned) override {
-    return llvm::APSInt(
-        llvm::APInt(BitWidth,
-                    Z3_get_numeral_string(Context.Context, toZ3Expr(*Exp).AST),
+  llvm::APSInt getBitvector(ਅਚਲ SMTExprRef &Exp, ਬਿਨਾਨਿਸ਼ਾਨੀ ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2,
+                            ਤਾਰਕਿਕ isUnsigned) override {
+    ਵਾਪਸ llvm::APSInt(
+        llvm::APInt(ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ_2,
+                    Z3_get_numeral_string(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST),
                     10),
         isUnsigned);
   }
 
-  bool getBoolean(const SMTExprRef &Exp) override {
-    return Z3_get_bool_value(Context.Context, toZ3Expr(*Exp).AST) == Z3_L_TRUE;
+  ਤਾਰਕਿਕ getBoolean(ਅਚਲ SMTExprRef &Exp) override {
+    ਵਾਪਸ Z3_get_bool_ਮੁੱਲ(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST) == Z3_L_TRUE;
   }
 
-  SMTExprRef getFloatRoundingMode() override {
+  SMTExprRef get_Float_Rounding_ਬਹੁਲਕ() override {
     // TODO: Don't assume nearest ties to even rounding mode
-    return newExprRef(Z3Expr(Context, Z3_mk_fpa_rne(Context.Context)));
+    ਵਾਪਸ new_ਵਿਅੰਜਕ_Ref(Z3_ਵਿਅੰਜਕ(Context, Z3_mk_fpa_rne(Context.Context)));
   }
 
-  bool toAPFloat(const SMTSortRef &Sort, const SMTExprRef &AST,
-                 llvm::APFloat &Float, bool useSemantics) {
-    assert(Sort->isFloatSort() && "Unsupported sort to floating-point!");
+  ਤਾਰਕਿਕ ਮੰਜ਼ਿਲ_APFloat(ਅਚਲ SMTSortRef &ਛਾਂਟੋ_2, ਅਚਲ SMTExprRef &AST,
+                 llvm::APFloat &Float, ਤਾਰਕਿਕ useSemantics) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਛਾਂਟੋ_2->is_Float_ਛਾਂਟੋ() && "Unsupported sort to floating-point!");
 
-    llvm::APSInt Int(Sort->getFloatSortSize(), true);
-    const llvm::fltSemantics &Semantics =
-        getFloatSemantics(Sort->getFloatSortSize());
-    SMTSortRef BVSort = getBitvectorSort(Sort->getFloatSortSize());
-    if (!toAPSInt(BVSort, AST, Int, true)) {
-      return false;
+    llvm::APSInt Int(ਛਾਂਟੋ_2->get_Float_ਛਾਂਟੋ_ਮਾਪ(), ਸੱਚ);
+    ਅਚਲ llvm::fltSemantics &Semantics =
+        getFloatSemantics(ਛਾਂਟੋ_2->get_Float_ਛਾਂਟੋ_ਮਾਪ());
+    SMTSortRef BVSort = get_Bitvector_ਛਾਂਟੋ(ਛਾਂਟੋ_2->get_Float_ਛਾਂਟੋ_ਮਾਪ());
+    ਜੇ (!ਮੰਜ਼ਿਲ_APSInt(BVSort, AST, Int, ਸੱਚ)) {
+      ਵਾਪਸ ਝੂਠ;
     }
 
-    if (useSemantics && !areEquivalent(Float.getSemantics(), Semantics)) {
-      assert(false && "Floating-point types don't match!");
-      return false;
+    ਜੇ (useSemantics && !areEquivalent(Float.getSemantics(), Semantics)) {
+      ਪ੍ਰਤਿਜ੍ਞਾ(ਝੂਠ && "Floating-point types don't match!");
+      ਵਾਪਸ ਝੂਠ;
     }
 
     Float = llvm::APFloat(Semantics, Int);
-    return true;
+    ਵਾਪਸ ਸੱਚ;
   }
 
-  bool toAPSInt(const SMTSortRef &Sort, const SMTExprRef &AST,
-                llvm::APSInt &Int, bool useSemantics) {
-    if (Sort->isBitvectorSort()) {
-      if (useSemantics && Int.getBitWidth() != Sort->getBitvectorSortSize()) {
-        assert(false && "Bitvector types don't match!");
-        return false;
+  ਤਾਰਕਿਕ ਮੰਜ਼ਿਲ_APSInt(ਅਚਲ SMTSortRef &ਛਾਂਟੋ_2, ਅਚਲ SMTExprRef &AST,
+                llvm::APSInt &Int, ਤਾਰਕਿਕ useSemantics) {
+    ਜੇ (ਛਾਂਟੋ_2->is_Bitvector_ਛਾਂਟੋ()) {
+      ਜੇ (useSemantics && Int.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ() != ਛਾਂਟੋ_2->get_Bitvector_ਛਾਂਟੋ_ਮਾਪ()) {
+        ਪ੍ਰਤਿਜ੍ਞਾ(ਝੂਠ && "Bitvector types don't match!");
+        ਵਾਪਸ ਝੂਠ;
       }
 
       // FIXME: This function is also used to retrieve floating-point values,
       // which can be 16, 32, 64 or 128 bits long. In the future, we need proper
       // calls in the backend to retrieve floating-points and its special values
       // (NaN, +/-infinity, +/-zero).
-      Int = getBitvector(AST, Int.getBitWidth(), Int.isUnsigned());
-      return true;
+      Int = getBitvector(AST, Int.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ(), Int.isUnsigned());
+      ਵਾਪਸ ਸੱਚ;
     }
 
-    if (Sort->isBooleanSort()) {
-      if (useSemantics && Int.getBitWidth() < 1) {
-        assert(false && "Boolean type doesn't match!");
-        return false;
+    ਜੇ (ਛਾਂਟੋ_2->is_Boolean_ਛਾਂਟੋ()) {
+      ਜੇ (useSemantics && Int.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ() < 1) {
+        ਪ੍ਰਤਿਜ੍ਞਾ(ਝੂਠ && "Boolean type doesn't match!");
+        ਵਾਪਸ ਝੂਠ;
       }
 
-      Int = llvm::APSInt(llvm::APInt(Int.getBitWidth(), getBoolean(AST)),
+      Int = llvm::APSInt(llvm::APInt(Int.get_ਦੋਆਧਾਰੀ_ਅੰਕ_ਚੌੜਾਈ(), getBoolean(AST)),
                          Int.isUnsigned());
-      return true;
+      ਵਾਪਸ ਸੱਚ;
     }
 
     llvm_unreachable("Unsupported sort to integer!");
   }
 
-  bool getInterpretation(const SMTExprRef &Exp, llvm::APSInt &Int) override {
+  ਤਾਰਕਿਕ getInterpretation(ਅਚਲ SMTExprRef &Exp, llvm::APSInt &Int) override {
     Z3Model Model(Context, Z3_solver_get_model(Context.Context, Solver));
     Z3_func_decl Func = Z3_get_app_decl(
-        Context.Context, Z3_to_app(Context.Context, toZ3Expr(*Exp).AST));
-    if (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
-      return false;
+        Context.Context, Z3_ਮੰਜ਼ਿਲ_app(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST));
+    ਜੇ (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
+      ਵਾਪਸ ਝੂਠ;
 
-    SMTExprRef Assign = newExprRef(
-        Z3Expr(Context,
+    SMTExprRef ਸੌਂਪੋ_2 = new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context,
                Z3_model_get_const_interp(Context.Context, Model.Model, Func)));
-    SMTSortRef Sort = getSort(Assign);
-    return toAPSInt(Sort, Assign, Int, true);
+    SMTSortRef ਛਾਂਟੋ_2 = get_ਛਾਂਟੋ(ਸੌਂਪੋ_2);
+    ਵਾਪਸ ਮੰਜ਼ਿਲ_APSInt(ਛਾਂਟੋ_2, ਸੌਂਪੋ_2, Int, ਸੱਚ);
   }
 
-  bool getInterpretation(const SMTExprRef &Exp, llvm::APFloat &Float) override {
+  ਤਾਰਕਿਕ getInterpretation(ਅਚਲ SMTExprRef &Exp, llvm::APFloat &Float) override {
     Z3Model Model(Context, Z3_solver_get_model(Context.Context, Solver));
     Z3_func_decl Func = Z3_get_app_decl(
-        Context.Context, Z3_to_app(Context.Context, toZ3Expr(*Exp).AST));
-    if (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
-      return false;
+        Context.Context, Z3_ਮੰਜ਼ਿਲ_app(Context.Context, ਮੰਜ਼ਿਲ_Z3_ਵਿਅੰਜਕ(*Exp).AST));
+    ਜੇ (Z3_model_has_interp(Context.Context, Model.Model, Func) != Z3_L_TRUE)
+      ਵਾਪਸ ਝੂਠ;
 
-    SMTExprRef Assign = newExprRef(
-        Z3Expr(Context,
+    SMTExprRef ਸੌਂਪੋ_2 = new_ਵਿਅੰਜਕ_Ref(
+        Z3_ਵਿਅੰਜਕ(Context,
                Z3_model_get_const_interp(Context.Context, Model.Model, Func)));
-    SMTSortRef Sort = getSort(Assign);
-    return toAPFloat(Sort, Assign, Float, true);
+    SMTSortRef ਛਾਂਟੋ_2 = get_ਛਾਂਟੋ(ਸੌਂਪੋ_2);
+    ਵਾਪਸ ਮੰਜ਼ਿਲ_APFloat(ਛਾਂਟੋ_2, ਸੌਂਪੋ_2, Float, ਸੱਚ);
   }
 
-  std::optional<bool> check() const override {
-    Z3_solver_set_params(Context.Context, Solver, Params);
+  std::optional<ਤਾਰਕਿਕ> check() ਅਚਲ override {
+    Z3_solver_ਸੈੱਟ_params(Context.Context, Solver, Params);
     Z3_lbool res = Z3_solver_check(Context.Context, Solver);
-    if (res == Z3_L_TRUE)
-      return true;
+    ਜੇ (res == Z3_L_TRUE)
+      ਵਾਪਸ ਸੱਚ;
 
-    if (res == Z3_L_FALSE)
-      return false;
+    ਜੇ (res == Z3_L_FALSE)
+      ਵਾਪਸ ਝੂਠ;
 
-    return std::nullopt;
+    ਵਾਪਸ std::nullopt;
   }
 
-  void push() override { return Z3_solver_push(Context.Context, Solver); }
+  ਖਾਲੀ ਧੱਕੋ() override { ਵਾਪਸ Z3_solver_ਧੱਕੋ(Context.Context, Solver); }
 
-  void pop(unsigned NumStates = 1) override {
-    assert(Z3_solver_get_num_scopes(Context.Context, Solver) >= NumStates);
-    return Z3_solver_pop(Context.Context, Solver, NumStates);
+  ਖਾਲੀ ਕੱਢੋ(ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੰਕ_ਹਾਲਤਾਂ = 1) override {
+    ਪ੍ਰਤਿਜ੍ਞਾ(Z3_solver_get_ਅੰਕ_scopes(Context.Context, Solver) >= ਅੰਕ_ਹਾਲਤਾਂ);
+    ਵਾਪਸ Z3_solver_ਕੱਢੋ(Context.Context, Solver, ਅੰਕ_ਹਾਲਤਾਂ);
   }
 
-  bool isFPSupported() override { return true; }
+  ਤਾਰਕਿਕ isFPSupported() override { ਵਾਪਸ ਸੱਚ; }
 
   /// Reset the solver and remove all constraints.
-  void reset() override { Z3_solver_reset(Context.Context, Solver); }
+  ਖਾਲੀ reset() override { Z3_solver_reset(Context.Context, Solver); }
 
-  void print(raw_ostream &OS) const override {
-    OS << Z3_solver_to_string(Context.Context, Solver);
+  ਖਾਲੀ print(raw_ostream &OS) ਅਚਲ override {
+    OS << Z3_solver_ਮੰਜ਼ਿਲ_string(Context.Context, Solver);
   }
 
-  void setUnsignedParam(StringRef Key, unsigned Value) override {
-    Z3_symbol Sym = Z3_mk_string_symbol(Context.Context, Key.str().c_str());
-    Z3_params_set_uint(Context.Context, Params, Sym, Value);
+  ਖਾਲੀ ਸੈੱਟ_Unsigned_Param(StringRef ਕੁੰਜੀ, ਬਿਨਾਨਿਸ਼ਾਨੀ ਮੁੱਲ) override {
+    Z3_ਚਿੰਨ੍ਹ Sym = Z3_mk_string_ਚਿੰਨ੍ਹ(Context.Context, ਕੁੰਜੀ.str().c_str());
+    Z3_params_ਸੈੱਟ_uint(Context.Context, Params, Sym, ਮੁੱਲ);
   }
 
-  void setBoolParam(StringRef Key, bool Value) override {
-    Z3_symbol Sym = Z3_mk_string_symbol(Context.Context, Key.str().c_str());
-    Z3_params_set_bool(Context.Context, Params, Sym, Value);
+  ਖਾਲੀ ਸੈੱਟ_Bool_Param(StringRef ਕੁੰਜੀ, ਤਾਰਕਿਕ ਮੁੱਲ) override {
+    Z3_ਚਿੰਨ੍ਹ Sym = Z3_mk_string_ਚਿੰਨ੍ਹ(Context.Context, ਕੁੰਜੀ.str().c_str());
+    Z3_params_ਸੈੱਟ_bool(Context.Context, Params, Sym, ਮੁੱਲ);
   }
 
-  std::unique_ptr<SMTSolverStatistics> getStatistics() const override;
+  std::unique_ptr<SMTSolverStatistics> getStatistics() ਅਚਲ override;
 }; // end class Z3Solver
 
-class Z3Statistics final : public SMTSolverStatistics {
-public:
-  double getDouble(StringRef Key) const override {
-    auto It = DoubleValues.find(Key.str());
-    assert(It != DoubleValues.end());
-    return It->second;
+ਵਰਗ Z3Statistics final : ਜਨਤਕ SMTSolverStatistics {
+ਜਨਤਕ:
+  ਦੁੱਗਣਾ getDouble(StringRef ਕੁੰਜੀ) ਅਚਲ override {
+    ਸਵੈਚਾਲਿਤ It = Double_ਮੁੱਲਾਂ.ਲੱਭੋ(ਕੁੰਜੀ.str());
+    ਪ੍ਰਤਿਜ੍ਞਾ(It != Double_ਮੁੱਲਾਂ.ਸਿਰਾ());
+    ਵਾਪਸ It->ਦੂਜਾ_2;
   };
-  unsigned getUnsigned(StringRef Key) const override {
-    auto It = UnsignedValues.find(Key.str());
-    if (It == UnsignedValues.end())
-      return 0;
-    return It->second;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ getUnsigned(StringRef ਕੁੰਜੀ) ਅਚਲ override {
+    ਸਵੈਚਾਲਿਤ It = Unsigned_ਮੁੱਲਾਂ.ਲੱਭੋ(ਕੁੰਜੀ.str());
+    ਜੇ (It == Unsigned_ਮੁੱਲਾਂ.ਸਿਰਾ())
+      ਵਾਪਸ 0;
+    ਵਾਪਸ It->ਦੂਜਾ_2;
   };
 
-  void print(raw_ostream &OS) const override {
-    for (const auto &E : UnsignedValues)
-      OS << E.first() << ": " << E.second << '\n';
-    for (const auto &E : DoubleValues) {
-      write_double(OS << E.first() << ": ", E.second, FloatStyle::Fixed);
+  ਖਾਲੀ print(raw_ostream &OS) ਅਚਲ override {
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &E : Unsigned_ਮੁੱਲਾਂ)
+      OS << E.ਪਹਿਲਾ_2() << ": " << E.ਦੂਜਾ_2 << '\n';
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &E : Double_ਮੁੱਲਾਂ) {
+      write_double(OS << E.ਪਹਿਲਾ_2() << ": ", E.ਦੂਜਾ_2, FloatStyle::Fixed);
       OS << '\n';
     }
   }
 
-private:
-  friend class Z3Solver;
-  StringMap<unsigned> UnsignedValues;
-  StringMap<double> DoubleValues;
+ਨਿਜੀ:
+  ਮਿੱਤਰ ਵਰਗ Z3Solver;
+  StringMap<ਬਿਨਾਨਿਸ਼ਾਨੀ> Unsigned_ਮੁੱਲਾਂ;
+  StringMap<ਦੁੱਗਣਾ> Double_ਮੁੱਲਾਂ;
 };
 
-std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() const {
-  auto const &C = Context.Context;
+std::unique_ptr<SMTSolverStatistics> Z3Solver::getStatistics() ਅਚਲ {
+  ਸਵੈਚਾਲਿਤ ਅਚਲ &C = Context.Context;
   Z3_stats S = Z3_solver_get_statistics(C, Solver);
   Z3_stats_inc_ref(C, S);
   llvm::scope_exit StatsGuard([&C, &S] { Z3_stats_dec_ref(C, S); });
-  Z3Statistics Result;
+  Z3Statistics ਨਤੀਜਾ;
 
-  unsigned NumKeys = Z3_stats_size(C, S);
-  for (unsigned Idx = 0; Idx < NumKeys; ++Idx) {
-    const char *Key = Z3_stats_get_key(C, S, Idx);
-    if (Z3_stats_is_uint(C, S, Idx)) {
-      auto Value = Z3_stats_get_uint_value(C, S, Idx);
-      Result.UnsignedValues.try_emplace(Key, Value);
-    } else {
-      assert(Z3_stats_is_double(C, S, Idx));
-      auto Value = Z3_stats_get_double_value(C, S, Idx);
-      Result.DoubleValues.try_emplace(Key, Value);
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੰਕ_ਕੁੰਜੀਆਂ = Z3_stats_ਮਾਪ(C, S);
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ Idx = 0; Idx < ਅੰਕ_ਕੁੰਜੀਆਂ; ++Idx) {
+    ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ = Z3_stats_get_ਕੁੰਜੀ(C, S, Idx);
+    ਜੇ (Z3_stats_is_uint(C, S, Idx)) {
+      ਸਵੈਚਾਲਿਤ ਮੁੱਲ = Z3_stats_get_uint_ਮੁੱਲ(C, S, Idx);
+      ਨਤੀਜਾ.Unsigned_ਮੁੱਲਾਂ.try_emplace(ਕੁੰਜੀ, ਮੁੱਲ);
+    } ਨਹੀਂਤਾਂ {
+      ਪ੍ਰਤਿਜ੍ਞਾ(Z3_stats_is_double(C, S, Idx));
+      ਸਵੈਚਾਲਿਤ ਮੁੱਲ = Z3_stats_get_double_ਮੁੱਲ(C, S, Idx);
+      ਨਤੀਜਾ.Double_ਮੁੱਲਾਂ.try_emplace(ਕੁੰਜੀ, ਮੁੱਲ);
     }
   }
-  return std::make_unique<Z3Statistics>(std::move(Result));
+  ਵਾਪਸ std::make_unique<Z3Statistics>(std::move(ਨਤੀਜਾ));
 }
 
 } // end anonymous namespace
 
-#endif
+#ਜੇ_ਅੰਤ
 
 llvm::SMTSolverRef llvm::CreateZ3Solver() {
-#if LLVM_WITH_Z3
-  return std::make_unique<Z3Solver>();
-#else
+#ਜੇ LLVM_WITH_Z3
+  ਵਾਪਸ std::make_unique<Z3Solver>();
+#ਨਹੀਂਤਾਂ
   llvm::report_fatal_error("LLVM was not compiled with Z3 support, rebuild "
                            "with -DLLVM_ENABLE_Z3_SOLVER=ON",
-                           false);
-  return nullptr;
-#endif
+                           ਝੂਠ);
+  ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
+#ਜੇ_ਅੰਤ
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void SMTSort::dump() const { print(llvm::errs()); }
-LLVM_DUMP_METHOD void SMTExpr::dump() const { print(llvm::errs()); }
-LLVM_DUMP_METHOD void SMTSolver::dump() const { print(llvm::errs()); }
-LLVM_DUMP_METHOD void SMTSolverStatistics::dump() const { print(llvm::errs()); }
-#endif
+#ਜੇ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_ਵਿਧੀ ਖਾਲੀ SMTSort::dump() ਅਚਲ { print(llvm::errs()); }
+LLVM_DUMP_ਵਿਧੀ ਖਾਲੀ SMTExpr::dump() ਅਚਲ { print(llvm::errs()); }
+LLVM_DUMP_ਵਿਧੀ ਖਾਲੀ SMTSolver::dump() ਅਚਲ { print(llvm::errs()); }
+LLVM_DUMP_ਵਿਧੀ ਖਾਲੀ SMTSolverStatistics::dump() ਅਚਲ { print(llvm::errs()); }
+#ਜੇ_ਅੰਤ

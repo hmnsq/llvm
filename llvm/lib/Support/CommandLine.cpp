@@ -15,239 +15,239 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/CommandLine.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/CommandLine.h"
 
-#include "DebugOptions.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "DebugOptions.h"
 
-#include "llvm-c/Support.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLFunctionalExtras.h"
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/LibraryOptionsContext.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/StringSaver.h"
-#include "llvm/Support/TypeSize.h"
-#include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cstdlib>
-#include <optional>
-#include <string>
-using namespace llvm;
-using namespace cl;
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm-c/Support.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/ArrayRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/STLFunctionalExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallPtrSet.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallString.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringMap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/Twine.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Compiler.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ConvertUTF.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Debug.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Error.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ErrorHandling.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/FileSystem.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/LibraryOptionsContext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ManagedStatic.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/MemoryBuffer.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Process.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/StringSaver.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/TypeSize.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/VirtualFileSystem.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <cstdlib>
+#ਅਨ੍ਤਰ੍ਭਾਵ <optional>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string>
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ cl;
 
-#define DEBUG_TYPE "commandline"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEBUG_TYPE "commandline"
 
 //===----------------------------------------------------------------------===//
 // Template instantiations and anchors.
 //
-namespace llvm {
-namespace cl {
-template class LLVM_EXPORT_TEMPLATE basic_parser<bool>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<boolOrDefault>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<int>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<long long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<unsigned>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<unsigned long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<unsigned long long>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<double>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<float>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<std::string>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<char>;
-template class LLVM_EXPORT_TEMPLATE basic_parser<ElementCount>;
+ਨਾਮਾਕਾਸ਼ llvm {
+ਨਾਮਾਕਾਸ਼ cl {
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਤਾਰਕਿਕ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<boolOrDefault>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਪੂਰਨ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਲੰਮਾ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਲੰਮਾ ਲੰਮਾ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਬਿਨਾਨਿਸ਼ਾਨੀ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਦੁੱਗਣਾ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਦਸ਼ਮਲਵ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<std::string>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<ਅੱਖਰ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE basic_parser<Element_ਗਿਣਤੀ>;
 
-#if !(defined(LLVM_ENABLE_LLVM_EXPORT_ANNOTATIONS) && defined(_MSC_VER))
+#ਜੇ !(defined(LLVM_ENABLE_LLVM_EXPORT_ANNOTATIONS) && defined(_MSC_VER))
 // Only instantiate opt<std::string> when not building a Windows DLL. When
 // exporting opt<std::string>, MSVC implicitly exports symbols for
 // std::basic_string through transitive inheritance via std::string. These
 // symbols may appear in clients, leading to duplicate symbol conflicts.
-template class LLVM_EXPORT_TEMPLATE opt<std::string>;
-#endif
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE opt<std::string>;
+#ਜੇ_ਅੰਤ
 
-template class LLVM_EXPORT_TEMPLATE opt<bool>;
-template class LLVM_EXPORT_TEMPLATE opt<char>;
-template class LLVM_EXPORT_TEMPLATE opt<int>;
-template class LLVM_EXPORT_TEMPLATE opt<unsigned>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE opt<ਤਾਰਕਿਕ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE opt<ਅੱਖਰ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE opt<ਪੂਰਨ>;
+ਸਾਂਚਾ ਵਰਗ LLVM_EXPORT_TEMPLATE opt<ਬਿਨਾਨਿਸ਼ਾਨੀ>;
 
 } // namespace cl
 } // namespace llvm
 
 // Pin the vtables to this file.
-void GenericOptionValue::anchor() {}
-void OptionValue<boolOrDefault>::anchor() {}
-void OptionValue<std::string>::anchor() {}
-void Option::anchor() {}
-void basic_parser_impl::anchor() {}
-void parser<bool>::anchor() {}
-void parser<boolOrDefault>::anchor() {}
-void parser<int>::anchor() {}
-void parser<long>::anchor() {}
-void parser<long long>::anchor() {}
-void parser<unsigned>::anchor() {}
-void parser<unsigned long>::anchor() {}
-void parser<unsigned long long>::anchor() {}
-void parser<double>::anchor() {}
-void parser<float>::anchor() {}
-void parser<std::string>::anchor() {}
-void parser<std::optional<std::string>>::anchor() {}
-void parser<char>::anchor() {}
-void parser<ElementCount>::anchor() {}
+ਖਾਲੀ Generic_Option_ਮੁੱਲ::anchor() {}
+ਖਾਲੀ Option_ਮੁੱਲ<boolOrDefault>::anchor() {}
+ਖਾਲੀ Option_ਮੁੱਲ<std::string>::anchor() {}
+ਖਾਲੀ Option::anchor() {}
+ਖਾਲੀ basic_parser_impl::anchor() {}
+ਖਾਲੀ parser<ਤਾਰਕਿਕ>::anchor() {}
+ਖਾਲੀ parser<boolOrDefault>::anchor() {}
+ਖਾਲੀ parser<ਪੂਰਨ>::anchor() {}
+ਖਾਲੀ parser<ਲੰਮਾ>::anchor() {}
+ਖਾਲੀ parser<ਲੰਮਾ ਲੰਮਾ>::anchor() {}
+ਖਾਲੀ parser<ਬਿਨਾਨਿਸ਼ਾਨੀ>::anchor() {}
+ਖਾਲੀ parser<ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ>::anchor() {}
+ਖਾਲੀ parser<ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ>::anchor() {}
+ਖਾਲੀ parser<ਦੁੱਗਣਾ>::anchor() {}
+ਖਾਲੀ parser<ਦਸ਼ਮਲਵ>::anchor() {}
+ਖਾਲੀ parser<std::string>::anchor() {}
+ਖਾਲੀ parser<std::optional<std::string>>::anchor() {}
+ਖਾਲੀ parser<ਅੱਖਰ>::anchor() {}
+ਖਾਲੀ parser<Element_ਗਿਣਤੀ>::anchor() {}
 
 // These anchor functions instantiate opt<T> and reference its virtual
 // destructor to ensure MSVC exports the corresponding vtable and typeinfo when
 // building a Windows DLL. Without an explicit reference, MSVC may omit the
 // instantiation at link time even if it is marked DLL-export.
-void opt_bool_anchor() { opt<bool> anchor{""}; }
-void opt_char_anchor() { opt<char> anchor{""}; }
-void opt_int_anchor() { opt<int> anchor{""}; }
-void opt_unsigned_anchor() { opt<unsigned> anchor{""}; }
+ਖਾਲੀ opt_bool_anchor() { opt<ਤਾਰਕਿਕ> anchor{""}; }
+ਖਾਲੀ opt_char_anchor() { opt<ਅੱਖਰ> anchor{""}; }
+ਖਾਲੀ opt_int_anchor() { opt<ਪੂਰਨ> anchor{""}; }
+ਖਾਲੀ opt_unsigned_anchor() { opt<ਬਿਨਾਨਿਸ਼ਾਨੀ> anchor{""}; }
 
 //===----------------------------------------------------------------------===//
 
-const static size_t DefaultPad = 2;
+ਅਚਲ ਸਥਿਰ size_t DefaultPad = 2;
 
-static StringRef ArgPrefix = "-";
-static StringRef ArgPrefixLong = "--";
-static StringRef ArgHelpPrefix = " - ";
+ਸਥਿਰ StringRef Arg_ਅਗੇਤਰ = "-";
+ਸਥਿਰ StringRef Arg_ਅਗੇਤਰ_Long = "--";
+ਸਥਿਰ StringRef Arg_Help_ਅਗੇਤਰ = " - ";
 
-static size_t argPlusPrefixesSize(StringRef ArgName, size_t Pad = DefaultPad) {
-  size_t Len = ArgName.size();
-  if (Len == 1)
-    return Len + Pad + ArgPrefix.size() + ArgHelpPrefix.size();
-  return Len + Pad + ArgPrefixLong.size() + ArgHelpPrefix.size();
+ਸਥਿਰ size_t arg_Plus_Prefixes_ਮਾਪ(StringRef ArgName, size_t Pad = DefaultPad) {
+  size_t Len = ArgName.ਮਾਪ_2();
+  ਜੇ (Len == 1)
+    ਵਾਪਸ Len + Pad + Arg_ਅਗੇਤਰ.ਮਾਪ_2() + Arg_Help_ਅਗੇਤਰ.ਮਾਪ_2();
+  ਵਾਪਸ Len + Pad + Arg_ਅਗੇਤਰ_Long.ਮਾਪ_2() + Arg_Help_ਅਗੇਤਰ.ਮਾਪ_2();
 }
 
-static SmallString<8> argPrefix(StringRef ArgName, size_t Pad = DefaultPad) {
-  SmallString<8> Prefix;
-  for (size_t I = 0; I < Pad; ++I) {
-    Prefix.push_back(' ');
+ਸਥਿਰ SmallString<8> arg_ਅਗੇਤਰ(StringRef ArgName, size_t Pad = DefaultPad) {
+  SmallString<8> ਅਗੇਤਰ;
+  ਲਈ (size_t I = 0; I < Pad; ++I) {
+    ਅਗੇਤਰ.ਧੱਕੋ_ਪਿੱਠ(' ');
   }
-  Prefix.append(ArgName.size() > 1 ? ArgPrefixLong : ArgPrefix);
-  return Prefix;
+  ਅਗੇਤਰ.append(ArgName.ਮਾਪ_2() > 1 ? Arg_ਅਗੇਤਰ_Long : Arg_ਅਗੇਤਰ);
+  ਵਾਪਸ ਅਗੇਤਰ;
 }
 
-using OptionsMapTy = DenseMap<StringRef, Option *>;
+ਵਰਤੋਂ OptionsMapTy = DenseMap<StringRef, Option *>;
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
-class PrintArg {
+ਵਰਗ PrintArg {
   StringRef ArgName;
   size_t Pad;
-public:
+ਜਨਤਕ:
   PrintArg(StringRef ArgName, size_t Pad = DefaultPad) : ArgName(ArgName), Pad(Pad) {}
-  friend raw_ostream &operator<<(raw_ostream &OS, const PrintArg &);
+  ਮਿੱਤਰ raw_ostream &ਸੰਚਾਲਕ<<(raw_ostream &OS, ਅਚਲ PrintArg &);
 };
 
-raw_ostream &operator<<(raw_ostream &OS, const PrintArg& Arg) {
-  OS << argPrefix(Arg.ArgName, Arg.Pad) << Arg.ArgName;
-  return OS;
+raw_ostream &ਸੰਚਾਲਕ<<(raw_ostream &OS, ਅਚਲ PrintArg& Arg) {
+  OS << arg_ਅਗੇਤਰ(Arg.ArgName, Arg.Pad) << Arg.ArgName;
+  ਵਾਪਸ OS;
 }
 
-class CommandLineParser {
-public:
+ਵਰਗ Command_ਸਤਰ_Parser {
+ਜਨਤਕ:
   // Globals for name and overview of program.  Program name is not a string to
   // avoid static ctor/dtor issues.
-  std::string ProgramName;
-  StringRef ProgramOverview;
+  std::string ਪ੍ਰੋਗਰਾਮ_Name;
+  StringRef ਪ੍ਰੋਗਰਾਮ_Overview;
 
   // This collects additional help to be printed.
-  std::vector<StringRef> MoreHelp;
+  std::ਸਦਿਸ਼<StringRef> ਹੋਰ_Help;
 
   // This collects the different option categories that have been registered.
-  SmallPtrSet<OptionCategory *, 16> RegisteredOptionCategories;
+  Small_Ptr_ਸੈੱਟ<OptionCategory *, 16> RegisteredOptionCategories;
 
   // This collects the different subcommands that have been registered.
-  SmallPtrSet<SubCommand *, 4> RegisteredSubCommands;
+  Small_Ptr_ਸੈੱਟ<SubCommand *, 4> RegisteredSubCommands;
 
   // Libraries whose options are declared in TableGen, and an index from their
   // option names. Libraries[NumIndexedLibraries:] are not indexed yet.
-  SmallVector<LibraryOptions *, 0> Libraries;
-  DenseMap<StringRef, LibraryOptions *> LibraryIndex;
-  size_t NumIndexedLibraries = 0;
+  Small_ਸਦਿਸ਼<LibraryOptions *, 0> Libraries;
+  DenseMap<StringRef, LibraryOptions *> Library_ਸੂਚਕਾਂਕ;
+  size_t ਅੰਕ_ਸੂਚਕਾਂਕਿਤ_Libraries = 0;
   // Storage that library options refer to: copies of the arguments passed to
   // LibraryOptions::parse and what it allocates. Response file expansions do
   // not outlive parsing.
   BumpPtrAllocator LibraryArgAlloc;
 
-  CommandLineParser() { registerSubCommand(&SubCommand::getTopLevel()); }
+  Command_ਸਤਰ_Parser() { ਰਜਿਸਟਰ_Sub_Command(&SubCommand::get_ਸਿਖਰ_Level()); }
 
-  void ResetAllOptionOccurrences();
+  ਖਾਲੀ ResetAllOptionOccurrences();
 
-  bool ParseCommandLineOptions(int argc, const char *const *argv,
-                               StringRef Overview, raw_ostream *Errs = nullptr,
-                               vfs::FileSystem *VFS = nullptr,
-                               LibraryOptionsContext *Context = nullptr);
+  ਤਾਰਕਿਕ Parse_Command_ਸਤਰ_Options(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ *ਅਚਲ *argv,
+                               StringRef Overview, raw_ostream *Errs = ਖਾਲੀ_ਸੂਚਕ,
+                               vfs::FileSystem *VFS = ਖਾਲੀ_ਸੂਚਕ,
+                               LibraryOptionsContext *Context = ਖਾਲੀ_ਸੂਚਕ);
 
-  void forEachSubCommand(Option &Opt, function_ref<void(SubCommand &)> Action) {
-    if (Opt.Subs.empty()) {
-      Action(SubCommand::getTopLevel());
-      return;
+  ਖਾਲੀ forEachSubCommand(Option &Opt, function_ref<ਖਾਲੀ(SubCommand &)> Action) {
+    ਜੇ (Opt.Subs.ਖਾਲੀ_ਥਾਵਾਂ()) {
+      Action(SubCommand::get_ਸਿਖਰ_Level());
+      ਵਾਪਸ;
     }
-    if (Opt.Subs.size() == 1 && *Opt.Subs.begin() == &SubCommand::getAll()) {
-      for (auto *SC : RegisteredSubCommands)
+    ਜੇ (Opt.Subs.ਮਾਪ_2() == 1 && *Opt.Subs.begin() == &SubCommand::getAll()) {
+      ਲਈ (ਸਵੈਚਾਲਿਤ *SC : RegisteredSubCommands)
         Action(*SC);
       Action(SubCommand::getAll());
-      return;
+      ਵਾਪਸ;
     }
-    for (auto *SC : Opt.Subs) {
-      assert(SC != &SubCommand::getAll() &&
+    ਲਈ (ਸਵੈਚਾਲਿਤ *SC : Opt.Subs) {
+      ਪ੍ਰਤਿਜ੍ਞਾ(SC != &SubCommand::getAll() &&
              "SubCommand::getAll() should not be used with other subcommands");
       Action(*SC);
     }
   }
 
-  void addLiteralOption(Option &Opt, SubCommand *SC, StringRef Name) {
-    if (Opt.hasArgStr())
-      return;
-    if (!SC->OptionsMap.insert(std::make_pair(Name, &Opt)).second) {
-      errs() << ProgramName << ": CommandLine Error: Option '" << Name
+  ਖਾਲੀ ਜੋੜੋ_Literal_Option(Option &Opt, SubCommand *SC, StringRef Name) {
+    ਜੇ (Opt.hasArgStr())
+      ਵਾਪਸ;
+    ਜੇ (!SC->OptionsMap.ਪਾਓ(std::make_pair(Name, &Opt)).ਦੂਜਾ_2) {
+      errs() << ਪ੍ਰੋਗਰਾਮ_Name << ": CommandLine Error: Option '" << Name
              << "' registered more than once!\n";
       report_fatal_error("inconsistency in registered CommandLine options");
     }
   }
 
-  void addLiteralOption(Option &Opt, StringRef Name) {
+  ਖਾਲੀ ਜੋੜੋ_Literal_Option(Option &Opt, StringRef Name) {
     forEachSubCommand(
-        Opt, [&](SubCommand &SC) { addLiteralOption(Opt, &SC, Name); });
+        Opt, [&](SubCommand &SC) { ਜੋੜੋ_Literal_Option(Opt, &SC, Name); });
   }
 
-  void addOption(Option *O, SubCommand *SC) {
-    bool HadErrors = false;
-    if (O->hasArgStr()) {
+  ਖਾਲੀ ਜੋੜੋ_Option(Option *O, SubCommand *SC) {
+    ਤਾਰਕਿਕ HadErrors = ਝੂਠ;
+    ਜੇ (O->hasArgStr()) {
       // Add argument to the argument map!
       // An unregistered subcommand, such as MLIR's PassOptions, parses its
       // own arguments.
-      if (!SC->OptionsMap.insert(std::make_pair(O->ArgStr, O)).second ||
-          (RegisteredSubCommands.contains(SC) &&
-           LibraryIndex.contains(O->ArgStr))) {
-        errs() << ProgramName << ": CommandLine Error: Option '" << O->ArgStr
+      ਜੇ (!SC->OptionsMap.ਪਾਓ(std::make_pair(O->ArgStr, O)).ਦੂਜਾ_2 ||
+          (RegisteredSubCommands.ਸ਼ਾਮਲ_ਹੈ(SC) &&
+           Library_ਸੂਚਕਾਂਕ.ਸ਼ਾਮਲ_ਹੈ(O->ArgStr))) {
+        errs() << ਪ੍ਰੋਗਰਾਮ_Name << ": CommandLine Error: Option '" << O->ArgStr
                << "' registered more than once!\n";
-        HadErrors = true;
+        HadErrors = ਸੱਚ;
       }
     }
 
     // Remember information about positional options.
-    if (O->getFormattingFlag() == cl::Positional)
-      SC->PositionalOpts.push_back(O);
-    else if (O->getNumOccurrencesFlag() == cl::ConsumeAfter) {
-      if (SC->ConsumeAfterOpt) {
+    ਜੇ (O->getFormattingFlag() == cl::Positional)
+      SC->PositionalOpts.ਧੱਕੋ_ਪਿੱਠ(O);
+    ਨਹੀਂਤਾਂ ਜੇ (O->get_ਅੰਕ_Occurrences_Flag() == cl::ConsumeAfter) {
+      ਜੇ (SC->ConsumeAfterOpt) {
         O->error("Cannot specify more than one option with cl::ConsumeAfter!");
-        HadErrors = true;
+        HadErrors = ਸੱਚ;
       }
       SC->ConsumeAfterOpt = O;
     }
@@ -256,178 +256,178 @@ public:
     // indicate serious issues such as conflicting option names or an
     // incorrectly
     // linked LLVM distribution.
-    if (HadErrors)
+    ਜੇ (HadErrors)
       report_fatal_error("inconsistency in registered CommandLine options");
   }
 
-  void addOption(Option *O) {
-    forEachSubCommand(*O, [&](SubCommand &SC) { addOption(O, &SC); });
+  ਖਾਲੀ ਜੋੜੋ_Option(Option *O) {
+    forEachSubCommand(*O, [&](SubCommand &SC) { ਜੋੜੋ_Option(O, &SC); });
   }
 
-  void removeOption(Option *O, SubCommand *SC) {
-    SmallVector<StringRef, 16> OptionNames;
-    O->getExtraOptionNames(OptionNames);
-    if (O->hasArgStr())
-      OptionNames.push_back(O->ArgStr);
+  ਖਾਲੀ removeOption(Option *O, SubCommand *SC) {
+    Small_ਸਦਿਸ਼<StringRef, 16> Option_ਨਾਂ;
+    O->get_Extra_Option_ਨਾਂ(Option_ਨਾਂ);
+    ਜੇ (O->hasArgStr())
+      Option_ਨਾਂ.ਧੱਕੋ_ਪਿੱਠ(O->ArgStr);
 
     SubCommand &Sub = *SC;
-    for (auto Name : OptionNames) {
-      auto I = Sub.OptionsMap.find(Name);
+    ਲਈ (ਸਵੈਚਾਲਿਤ Name : Option_ਨਾਂ) {
+      ਸਵੈਚਾਲਿਤ I = Sub.OptionsMap.ਲੱਭੋ(Name);
       // Re-query end() each iteration: a prior erase invalidates iterators
       // (including a cached end()) under backward-shift deletion.
-      if (I != Sub.OptionsMap.end() && I->second == O)
+      ਜੇ (I != Sub.OptionsMap.ਸਿਰਾ() && I->ਦੂਜਾ_2 == O)
         Sub.OptionsMap.erase(I);
     }
 
-    if (O->getFormattingFlag() == cl::Positional)
-      for (auto *Opt = Sub.PositionalOpts.begin();
-           Opt != Sub.PositionalOpts.end(); ++Opt) {
-        if (*Opt == O) {
+    ਜੇ (O->getFormattingFlag() == cl::Positional)
+      ਲਈ (ਸਵੈਚਾਲਿਤ *Opt = Sub.PositionalOpts.begin();
+           Opt != Sub.PositionalOpts.ਸਿਰਾ(); ++Opt) {
+        ਜੇ (*Opt == O) {
           Sub.PositionalOpts.erase(Opt);
-          break;
+          ਰੋਕੋ;
         }
       }
-    else if (O == Sub.ConsumeAfterOpt)
-      Sub.ConsumeAfterOpt = nullptr;
+    ਨਹੀਂਤਾਂ ਜੇ (O == Sub.ConsumeAfterOpt)
+      Sub.ConsumeAfterOpt = ਖਾਲੀ_ਸੂਚਕ;
   }
 
-  void removeOption(Option *O) {
+  ਖਾਲੀ removeOption(Option *O) {
     forEachSubCommand(*O, [&](SubCommand &SC) { removeOption(O, &SC); });
   }
 
-  bool hasOptions(const SubCommand &Sub) const {
-    return (!Sub.OptionsMap.empty() || !Sub.PositionalOpts.empty() ||
-            nullptr != Sub.ConsumeAfterOpt);
+  ਤਾਰਕਿਕ hasOptions(ਅਚਲ SubCommand &Sub) ਅਚਲ {
+    ਵਾਪਸ (!Sub.OptionsMap.ਖਾਲੀ_ਥਾਵਾਂ() || !Sub.PositionalOpts.ਖਾਲੀ_ਥਾਵਾਂ() ||
+            ਖਾਲੀ_ਸੂਚਕ != Sub.ConsumeAfterOpt);
   }
 
-  bool hasOptions() const {
-    for (const auto *S : RegisteredSubCommands) {
-      if (hasOptions(*S))
-        return true;
+  ਤਾਰਕਿਕ hasOptions() ਅਚਲ {
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ *S : RegisteredSubCommands) {
+      ਜੇ (hasOptions(*S))
+        ਵਾਪਸ ਸੱਚ;
     }
-    return !Libraries.empty();
+    ਵਾਪਸ !Libraries.ਖਾਲੀ_ਥਾਵਾਂ();
   }
 
-  bool hasNamedSubCommands() const {
-    for (const auto *S : RegisteredSubCommands)
-      if (!S->getName().empty())
-        return true;
-    return false;
+  ਤਾਰਕਿਕ hasNamedSubCommands() ਅਚਲ {
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ *S : RegisteredSubCommands)
+      ਜੇ (!S->getName().ਖਾਲੀ_ਥਾਵਾਂ())
+        ਵਾਪਸ ਸੱਚ;
+    ਵਾਪਸ ਝੂਠ;
   }
 
-  SubCommand *getActiveSubCommand() { return ActiveSubCommand; }
+  SubCommand *get_ਸਰਗਰਮ_Sub_Command() { ਵਾਪਸ ਸਰਗਰਮ_Sub_Command; }
 
-  void updateArgStr(Option *O, StringRef NewName, SubCommand *SC) {
+  ਖਾਲੀ updateArgStr(Option *O, StringRef NewName, SubCommand *SC) {
     SubCommand &Sub = *SC;
-    if (!Sub.OptionsMap.insert(std::make_pair(NewName, O)).second) {
-      errs() << ProgramName << ": CommandLine Error: Option '" << O->ArgStr
+    ਜੇ (!Sub.OptionsMap.ਪਾਓ(std::make_pair(NewName, O)).ਦੂਜਾ_2) {
+      errs() << ਪ੍ਰੋਗਰਾਮ_Name << ": CommandLine Error: Option '" << O->ArgStr
              << "' registered more than once!\n";
       report_fatal_error("inconsistency in registered CommandLine options");
     }
     Sub.OptionsMap.erase(O->ArgStr);
   }
 
-  void updateArgStr(Option *O, StringRef NewName) {
+  ਖਾਲੀ updateArgStr(Option *O, StringRef NewName) {
     forEachSubCommand(*O,
                       [&](SubCommand &SC) { updateArgStr(O, NewName, &SC); });
   }
 
-  void printOptionValues();
+  ਖਾਲੀ print_Option_ਮੁੱਲਾਂ();
 
-  void indexLibraryOptions() {
-    bool HadErrors = false;
-    for (; NumIndexedLibraries != Libraries.size(); ++NumIndexedLibraries) {
-      LibraryOptions *L = Libraries[NumIndexedLibraries];
+  ਖਾਲੀ ਸੂਚਕਾਂਕ_Library_Options() {
+    ਤਾਰਕਿਕ HadErrors = ਝੂਠ;
+    ਲਈ (; ਅੰਕ_ਸੂਚਕਾਂਕਿਤ_Libraries != Libraries.ਮਾਪ_2(); ++ਅੰਕ_ਸੂਚਕਾਂਕਿਤ_Libraries) {
+      LibraryOptions *L = Libraries[ਅੰਕ_ਸੂਚਕਾਂਕਿਤ_Libraries];
       L->forEachOption([&](StringRef Spelling, StringRef, StringRef) {
         StringRef Name = Spelling.rtrim('=');
-        auto [It, Inserted] = LibraryIndex.try_emplace(Name, L);
-        if (Inserted ? none_of(RegisteredSubCommands,
+        ਸਵੈਚਾਲਿਤ [It, Inserted] = Library_ਸੂਚਕਾਂਕ.try_emplace(Name, L);
+        ਜੇ (Inserted ? none_ਦਾ(RegisteredSubCommands,
                                [&](SubCommand *SC) {
-                                 return SC->OptionsMap.contains(Name);
+                                 ਵਾਪਸ SC->OptionsMap.ਸ਼ਾਮਲ_ਹੈ(Name);
                                })
-                     : It->second == L)
-          return;
-        errs() << ProgramName << ": CommandLine Error: Option '" << Name
+                     : It->ਦੂਜਾ_2 == L)
+          ਵਾਪਸ;
+        errs() << ਪ੍ਰੋਗਰਾਮ_Name << ": CommandLine Error: Option '" << Name
                << "' registered more than once!\n";
-        HadErrors = true;
+        HadErrors = ਸੱਚ;
       });
     }
-    if (HadErrors)
+    ਜੇ (HadErrors)
       report_fatal_error("inconsistency in registered CommandLine options");
   }
 
   // A library loaded while parsing (e.g. a pass plugin) may define the name.
   LibraryOptions *lookupLibraryOption(StringRef Name) {
-    indexLibraryOptions();
-    return LibraryIndex.lookup(Name);
+    ਸੂਚਕਾਂਕ_Library_Options();
+    ਵਾਪਸ Library_ਸੂਚਕਾਂਕ.lookup(Name);
   }
 
-  void registerCategory(OptionCategory *cat) {
-    assert(count_if(RegisteredOptionCategories,
-                    [cat](const OptionCategory *Category) {
-             return cat->getName() == Category->getName();
+  ਖਾਲੀ ਰਜਿਸਟਰ_Category(OptionCategory *cat) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਗਿਣਤੀ_if(RegisteredOptionCategories,
+                    [cat](ਅਚਲ OptionCategory *Category) {
+             ਵਾਪਸ cat->getName() == Category->getName();
            }) == 0 &&
            "Duplicate option categories");
 
-    RegisteredOptionCategories.insert(cat);
+    RegisteredOptionCategories.ਪਾਓ(cat);
   }
 
-  void registerSubCommand(SubCommand *sub) {
-    assert(count_if(RegisteredSubCommands,
-                    [sub](const SubCommand *Sub) {
-                      return (!sub->getName().empty()) &&
+  ਖਾਲੀ ਰਜਿਸਟਰ_Sub_Command(SubCommand *sub) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਗਿਣਤੀ_if(RegisteredSubCommands,
+                    [sub](ਅਚਲ SubCommand *Sub) {
+                      ਵਾਪਸ (!sub->getName().ਖਾਲੀ_ਥਾਵਾਂ()) &&
                              (Sub->getName() == sub->getName());
                     }) == 0 &&
            "Duplicate subcommands");
-    RegisteredSubCommands.insert(sub);
+    RegisteredSubCommands.ਪਾਓ(sub);
 
     // For all options that have been registered for all subcommands, add the
     // option to this subcommand now.
-    assert(sub != &SubCommand::getAll() &&
+    ਪ੍ਰਤਿਜ੍ਞਾ(sub != &SubCommand::getAll() &&
            "SubCommand::getAll() should not be registered");
-    for (auto &E : SubCommand::getAll().OptionsMap) {
-      Option *O = E.second;
-      if (O->isPositional() || O->isConsumeAfter() || O->hasArgStr())
-        addOption(O, sub);
-      else
-        addLiteralOption(*O, sub, E.first);
+    ਲਈ (ਸਵੈਚਾਲਿਤ &E : SubCommand::getAll().OptionsMap) {
+      Option *O = E.ਦੂਜਾ_2;
+      ਜੇ (O->isPositional() || O->isConsumeAfter() || O->hasArgStr())
+        ਜੋੜੋ_Option(O, sub);
+      ਨਹੀਂਤਾਂ
+        ਜੋੜੋ_Literal_Option(*O, sub, E.ਪਹਿਲਾ_2);
     }
   }
 
-  void unregisterSubCommand(SubCommand *sub) {
+  ਖਾਲੀ unregisterSubCommand(SubCommand *sub) {
     RegisteredSubCommands.erase(sub);
   }
 
-  iterator_range<SmallPtrSet<SubCommand *, 4>::iterator>
+  iterator_range<Small_Ptr_ਸੈੱਟ<SubCommand *, 4>::iterator>
   getRegisteredSubcommands() {
-    return make_range(RegisteredSubCommands.begin(),
-                      RegisteredSubCommands.end());
+    ਵਾਪਸ make_range(RegisteredSubCommands.begin(),
+                      RegisteredSubCommands.ਸਿਰਾ());
   }
 
-  void reset() {
-    ActiveSubCommand = nullptr;
-    ProgramName.clear();
-    ProgramOverview = StringRef();
+  ਖਾਲੀ reset() {
+    ਸਰਗਰਮ_Sub_Command = ਖਾਲੀ_ਸੂਚਕ;
+    ਪ੍ਰੋਗਰਾਮ_Name.clear();
+    ਪ੍ਰੋਗਰਾਮ_Overview = StringRef();
 
-    MoreHelp.clear();
+    ਹੋਰ_Help.clear();
     RegisteredOptionCategories.clear();
 
     ResetAllOptionOccurrences();
     RegisteredSubCommands.clear();
     Libraries.clear();
-    LibraryIndex.clear();
-    NumIndexedLibraries = 0;
+    Library_ਸੂਚਕਾਂਕ.clear();
+    ਅੰਕ_ਸੂਚਕਾਂਕਿਤ_Libraries = 0;
 
-    SubCommand::getTopLevel().reset();
+    SubCommand::get_ਸਿਖਰ_Level().reset();
     SubCommand::getAll().reset();
-    registerSubCommand(&SubCommand::getTopLevel());
+    ਰਜਿਸਟਰ_Sub_Command(&SubCommand::get_ਸਿਖਰ_Level());
   }
 
-private:
-  SubCommand *ActiveSubCommand = nullptr;
+ਨਿਜੀ:
+  SubCommand *ਸਰਗਰਮ_Sub_Command = ਖਾਲੀ_ਸੂਚਕ;
 
-  Option *LookupOption(SubCommand &Sub, StringRef &Arg, StringRef &Value);
-  SubCommand *LookupSubCommand(StringRef Name, std::string &NearestString);
+  Option *LookupOption(SubCommand &Sub, StringRef &Arg, StringRef &ਮੁੱਲ);
+  SubCommand *LookupSubCommand(StringRef Name, std::string &ਸਭ_ਤੋਂ_ਨੇੜੇ_String);
 };
 
 } // namespace
@@ -437,95 +437,95 @@ private:
 // units never reference a namespace-scope global whose initialization order
 // is unspecified. The ManagedStatic keeps construction lazy and destruction
 // tied to llvm_shutdown().
-static CommandLineParser &globalParser() {
-  static ManagedStatic<CommandLineParser> GlobalParser;
-  return *GlobalParser;
+ਸਥਿਰ Command_ਸਤਰ_Parser &globalParser() {
+  ਸਥਿਰ ManagedStatic<Command_ਸਤਰ_Parser> GlobalParser;
+  ਵਾਪਸ *GlobalParser;
 }
 
 // Parses the library option spelled by Args[0], which takes at most one
 // separate value, into Opts. Opts may refer to the arguments, so they are
 // copied into Alloc, and appended to Record if given.
-static Error
-parseLibraryOption(LibraryOptions &L, void *Opts, ArrayRef<const char *> Args,
-                   unsigned &Consumed, BumpPtrAllocator &Alloc,
-                   SmallVectorImpl<const char *> *Record = nullptr) {
+ਸਥਿਰ Error
+parseLibraryOption(LibraryOptions &L, ਖਾਲੀ *Opts, ArrayRef<ਅਚਲ ਅੱਖਰ *> ਦਲੀਲਾਂ,
+                   ਬਿਨਾਨਿਸ਼ਾਨੀ &Consumed, BumpPtrAllocator &Alloc,
+                   Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> *ਰਿਕਾਰਡ = ਖਾਲੀ_ਸੂਚਕ) {
   StringSaver Saver(Alloc);
-  const char *Saved[2];
-  unsigned NumArgs = std::min<size_t>(Args.size(), 2);
-  for (unsigned J = 0; J != NumArgs; ++J)
-    Saved[J] = Saver.save(Args[J]).data();
+  ਅਚਲ ਅੱਖਰ *Saved[2];
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੰਕ_ਦਲੀਲਾਂ = std::min<size_t>(ਦਲੀਲਾਂ.ਮਾਪ_2(), 2);
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ J = 0; J != ਅੰਕ_ਦਲੀਲਾਂ; ++J)
+    Saved[J] = Saver.save(ਦਲੀਲਾਂ[J]).ਅੰਕੜੇ();
   Consumed = 1;
-  if (Error E = L.parse(Opts, ArrayRef(Saved, NumArgs), Consumed, Alloc))
-    return E;
-  if (Record)
-    Record->append(Saved, Saved + Consumed);
-  return Error::success();
+  ਜੇ (Error E = L.parse(Opts, ArrayRef(Saved, ਅੰਕ_ਦਲੀਲਾਂ), Consumed, Alloc))
+    ਵਾਪਸ E;
+  ਜੇ (ਰਿਕਾਰਡ)
+    ਰਿਕਾਰਡ->append(Saved, Saved + Consumed);
+  ਵਾਪਸ Error::success();
 }
 
-template <typename T, T TrueVal, T FalseVal>
-static bool parseBool(Option &O, StringRef ArgName, StringRef Arg, T &Value) {
+ਸਾਂਚਾ <ਕਿਸਮ_ਨਾਂ T, T TrueVal, T FalseVal>
+ਸਥਿਰ ਤਾਰਕਿਕ parseBool(Option &O, StringRef ArgName, StringRef Arg, T &ਮੁੱਲ) {
   // ProvideOption passes a null Arg for a bare -flag (treated as true) and an
   // empty one for -flag= (treated as invalid).
-  if (!Arg.data() || Arg == "true" || Arg == "1") {
-    Value = TrueVal;
-    return false;
+  ਜੇ (!Arg.ਅੰਕੜੇ() || Arg == "true" || Arg == "1") {
+    ਮੁੱਲ = TrueVal;
+    ਵਾਪਸ ਝੂਠ;
   }
 
-  if (Arg == "false" || Arg == "0") {
-    Value = FalseVal;
-    return false;
+  ਜੇ (Arg == "false" || Arg == "0") {
+    ਮੁੱਲ = FalseVal;
+    ਵਾਪਸ ਝੂਠ;
   }
-  return O.error("'" + Arg +
+  ਵਾਪਸ O.error("'" + Arg +
                  "' is invalid value for boolean argument! Try 0 or 1");
 }
 
-void cl::AddLiteralOption(Option &O, StringRef Name) {
-  globalParser().addLiteralOption(O, Name);
+ਖਾਲੀ cl::ਜੋੜੋ_Literal_Option_2(Option &O, StringRef Name) {
+  globalParser().ਜੋੜੋ_Literal_Option(O, Name);
 }
 
 extrahelp::extrahelp(StringRef Help) : morehelp(Help) {
-  globalParser().MoreHelp.push_back(Help);
+  globalParser().ਹੋਰ_Help.ਧੱਕੋ_ਪਿੱਠ(Help);
 }
 
-Option::Option(NumOccurrencesFlag OccurrencesFlag, OptionHidden Hidden)
-    : NumOccurrences(0), Occurrences(OccurrencesFlag), Value(0),
-      HiddenFlag(Hidden), Formatting(NormalFormatting), Misc(0),
-      FullyInitialized(false), Position(0) {
-  Categories.push_back(&getGeneralCategory());
+Option::Option(ਅੰਕ_Occurrences_Flag OccurrencesFlag, OptionHidden Hidden)
+    : ਅੰਕ_Occurrences(0), Occurrences(OccurrencesFlag), ਮੁੱਲ(0),
+      HiddenFlag(Hidden), Formatting(ਸਾਧਾਰਨ_Formatting), Misc(0),
+      FullyInitialized(ਝੂਠ), Position(0) {
+  Categories.ਧੱਕੋ_ਪਿੱਠ(&getGeneralCategory());
 }
 
-void Option::addArgument() {
-  globalParser().addOption(this);
-  FullyInitialized = true;
+ਖਾਲੀ Option::ਜੋੜੋ_ਦਲੀਲ() {
+  globalParser().ਜੋੜੋ_Option(ਇਹ);
+  FullyInitialized = ਸੱਚ;
 }
 
-void Option::removeArgument() { globalParser().removeOption(this); }
+ਖਾਲੀ Option::remove_ਦਲੀਲ() { globalParser().removeOption(ਇਹ); }
 
-void Option::setArgStr(StringRef S) {
-  if (FullyInitialized)
-    globalParser().updateArgStr(this, S);
-  assert(!S.starts_with("-") && "Option can't start with '-");
+ਖਾਲੀ Option::ਸੈੱਟ_Arg_Str(StringRef S) {
+  ਜੇ (FullyInitialized)
+    globalParser().updateArgStr(ਇਹ, S);
+  ਪ੍ਰਤਿਜ੍ਞਾ(!S.starts_with("-") && "Option can't start with '-");
   ArgStr = S;
 }
 
-void Option::addCategory(OptionCategory &C) {
-  assert(!Categories.empty() && "Categories cannot be empty.");
+ਖਾਲੀ Option::ਜੋੜੋ_Category(OptionCategory &C) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(!Categories.ਖਾਲੀ_ਥਾਵਾਂ() && "Categories cannot be empty.");
   // Maintain backward compatibility by replacing the default GeneralCategory
   // if it's still set.  Otherwise, just add the new one.  The GeneralCategory
   // must be explicitly added if you want multiple categories that include it.
-  if (&C != &getGeneralCategory() && Categories[0] == &getGeneralCategory())
+  ਜੇ (&C != &getGeneralCategory() && Categories[0] == &getGeneralCategory())
     Categories[0] = &C;
-  else if (!is_contained(Categories, &C))
-    Categories.push_back(&C);
+  ਨਹੀਂਤਾਂ ਜੇ (!is_contained(Categories, &C))
+    Categories.ਧੱਕੋ_ਪਿੱਠ(&C);
 }
 
-void Option::reset() {
-  NumOccurrences = 0;
-  setDefault();
+ਖਾਲੀ Option::reset() {
+  ਅੰਕ_Occurrences = 0;
+  ਸੈੱਟ_Default();
 }
 
-void OptionCategory::registerCategory() {
-  globalParser().registerCategory(this);
+ਖਾਲੀ OptionCategory::ਰਜਿਸਟਰ_Category() {
+  globalParser().ਰਜਿਸਟਰ_Category(ਇਹ);
 }
 
 // A special subcommand representing no subcommand. It is kept as a
@@ -533,34 +533,34 @@ void OptionCategory::registerCategory() {
 // which run dynamically in an arbitrary order across translation units;
 // block-scope statics are initialized on first use and therefore have no
 // initialization-order hazard.
-SubCommand &SubCommand::getTopLevel() {
-  static ManagedStatic<SubCommand> TopLevelSubCommand;
-  return *TopLevelSubCommand;
+SubCommand &SubCommand::get_ਸਿਖਰ_Level() {
+  ਸਥਿਰ ManagedStatic<SubCommand> ਸਿਖਰ_Level_Sub_Command;
+  ਵਾਪਸ *ਸਿਖਰ_Level_Sub_Command;
 }
 
 // A special subcommand that can be used to put an option into all subcommands.
 SubCommand &SubCommand::getAll() {
-  static ManagedStatic<SubCommand> AllSubCommands;
-  return *AllSubCommands;
+  ਸਥਿਰ ManagedStatic<SubCommand> AllSubCommands;
+  ਵਾਪਸ *AllSubCommands;
 }
 
-void SubCommand::registerSubCommand() {
-  globalParser().registerSubCommand(this);
+ਖਾਲੀ SubCommand::ਰਜਿਸਟਰ_Sub_Command() {
+  globalParser().ਰਜਿਸਟਰ_Sub_Command(ਇਹ);
 }
 
-void SubCommand::unregisterSubCommand() {
-  globalParser().unregisterSubCommand(this);
+ਖਾਲੀ SubCommand::unregisterSubCommand() {
+  globalParser().unregisterSubCommand(ਇਹ);
 }
 
-void SubCommand::reset() {
+ਖਾਲੀ SubCommand::reset() {
   PositionalOpts.clear();
   OptionsMap.clear();
 
-  ConsumeAfterOpt = nullptr;
+  ConsumeAfterOpt = ਖਾਲੀ_ਸੂਚਕ;
 }
 
-SubCommand::operator bool() const {
-  return (globalParser().getActiveSubCommand() == this);
+SubCommand::ਸੰਚਾਲਕ ਤਾਰਕਿਕ() ਅਚਲ {
+  ਵਾਪਸ (globalParser().get_ਸਰਗਰਮ_Sub_Command() == ਇਹ);
 }
 
 //===----------------------------------------------------------------------===//
@@ -570,293 +570,293 @@ SubCommand::operator bool() const {
 /// LookupOption - Lookup the option specified by the specified option on the
 /// command line.  If there is a value specified (after an equal sign) return
 /// that as well.  This assumes that leading dashes have already been stripped.
-Option *CommandLineParser::LookupOption(SubCommand &Sub, StringRef &Arg,
-                                        StringRef &Value) {
+Option *Command_ਸਤਰ_Parser::LookupOption(SubCommand &Sub, StringRef &Arg,
+                                        StringRef &ਮੁੱਲ) {
   // Reject all dashes.
-  if (Arg.empty())
-    return nullptr;
-  assert(&Sub != &SubCommand::getAll());
+  ਜੇ (Arg.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
+  ਪ੍ਰਤਿਜ੍ਞਾ(&Sub != &SubCommand::getAll());
 
-  size_t EqualPos = Arg.find('=');
+  size_t EqualPos = Arg.ਲੱਭੋ('=');
 
   // If we have an equals sign, remember the value.
-  if (EqualPos == StringRef::npos) {
+  ਜੇ (EqualPos == StringRef::npos) {
     // Look up the option.
-    return Sub.OptionsMap.lookup(Arg);
+    ਵਾਪਸ Sub.OptionsMap.lookup(Arg);
   }
 
   // If the argument before the = is a valid option name and the option allows
   // non-prefix form (ie is not AlwaysPrefix), we match.  If not, signal match
   // failure by returning nullptr.
-  auto I = Sub.OptionsMap.find(Arg.substr(0, EqualPos));
-  if (I == Sub.OptionsMap.end())
-    return nullptr;
+  ਸਵੈਚਾਲਿਤ I = Sub.OptionsMap.ਲੱਭੋ(Arg.substr(0, EqualPos));
+  ਜੇ (I == Sub.OptionsMap.ਸਿਰਾ())
+    ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 
-  auto *O = I->second;
-  if (O->getFormattingFlag() == cl::AlwaysPrefix)
-    return nullptr;
+  ਸਵੈਚਾਲਿਤ *O = I->ਦੂਜਾ_2;
+  ਜੇ (O->getFormattingFlag() == cl::Always_ਅਗੇਤਰ)
+    ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 
-  Value = Arg.substr(EqualPos + 1);
+  ਮੁੱਲ = Arg.substr(EqualPos + 1);
   Arg = Arg.substr(0, EqualPos);
-  return I->second;
+  ਵਾਪਸ I->ਦੂਜਾ_2;
 }
 
-SubCommand *CommandLineParser::LookupSubCommand(StringRef Name,
-                                                std::string &NearestString) {
-  if (Name.empty())
-    return &SubCommand::getTopLevel();
+SubCommand *Command_ਸਤਰ_Parser::LookupSubCommand(StringRef Name,
+                                                std::string &ਸਭ_ਤੋਂ_ਨੇੜੇ_String) {
+  ਜੇ (Name.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ &SubCommand::get_ਸਿਖਰ_Level();
   // Find a subcommand with the edit distance == 1.
-  SubCommand *NearestMatch = nullptr;
-  for (auto *S : RegisteredSubCommands) {
-    assert(S != &SubCommand::getAll() &&
+  SubCommand *ਸਭ_ਤੋਂ_ਨੇੜੇ_ਮੇਲ = ਖਾਲੀ_ਸੂਚਕ;
+  ਲਈ (ਸਵੈਚਾਲਿਤ *S : RegisteredSubCommands) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(S != &SubCommand::getAll() &&
            "SubCommand::getAll() is not expected in RegisteredSubCommands");
-    if (S->getName().empty())
-      continue;
+    ਜੇ (S->getName().ਖਾਲੀ_ਥਾਵਾਂ())
+      ਜਾਰੀ;
 
-    if (S->getName() == Name)
-      return S;
+    ਜੇ (S->getName() == Name)
+      ਵਾਪਸ S;
 
-    if (!NearestMatch && S->getName().edit_distance(Name) < 2)
-      NearestMatch = S;
+    ਜੇ (!ਸਭ_ਤੋਂ_ਨੇੜੇ_ਮੇਲ && S->getName().edit_ਦੂਰੀ(Name) < 2)
+      ਸਭ_ਤੋਂ_ਨੇੜੇ_ਮੇਲ = S;
   }
 
-  if (NearestMatch)
-    NearestString = NearestMatch->getName();
+  ਜੇ (ਸਭ_ਤੋਂ_ਨੇੜੇ_ਮੇਲ)
+    ਸਭ_ਤੋਂ_ਨੇੜੇ_String = ਸਭ_ਤੋਂ_ਨੇੜੇ_ਮੇਲ->getName();
 
-  return &SubCommand::getTopLevel();
+  ਵਾਪਸ &SubCommand::get_ਸਿਖਰ_Level();
 }
 
 /// LookupNearestOption - Lookup the closest match to the option specified by
 /// the specified option on the command line.  If there is a value specified
 /// (after an equal sign) return that as well.  This assumes that leading dashes
 /// have already been stripped.
-static Option *LookupNearestOption(StringRef Arg,
-                                   const OptionsMapTy &OptionsMap,
-                                   std::string &NearestString) {
+ਸਥਿਰ Option *Lookup_ਸਭ_ਤੋਂ_ਨੇੜੇ_Option(StringRef Arg,
+                                   ਅਚਲ OptionsMapTy &OptionsMap,
+                                   std::string &ਸਭ_ਤੋਂ_ਨੇੜੇ_String) {
   // Reject all dashes.
-  if (Arg.empty())
-    return nullptr;
+  ਜੇ (Arg.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 
   // Split on any equal sign.
-  std::pair<StringRef, StringRef> SplitArg = Arg.split('=');
-  StringRef &LHS = SplitArg.first; // LHS == Arg when no '=' is present.
-  StringRef &RHS = SplitArg.second;
+  std::pair<StringRef, StringRef> ਵੰਡੋ_Arg = Arg.ਵੰਡੋ('=');
+  StringRef &LHS = ਵੰਡੋ_Arg.ਪਹਿਲਾ_2; // LHS == Arg when no '=' is present.
+  StringRef &RHS = ਵੰਡੋ_Arg.ਦੂਜਾ_2;
 
   // Find the closest match.
-  Option *Best = nullptr;
-  unsigned BestDistance = 0;
-  for (const auto &[_, O] : OptionsMap) {
+  Option *ਉੱਤਮ = ਖਾਲੀ_ਸੂਚਕ;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਉੱਤਮ_ਦੂਰੀ = 0;
+  ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &[_, O] : OptionsMap) {
     // Do not suggest really hidden options (not shown in any help).
-    if (O->getOptionHiddenFlag() == ReallyHidden)
-      continue;
+    ਜੇ (O->getOptionHiddenFlag() == ReallyHidden)
+      ਜਾਰੀ;
 
-    SmallVector<StringRef, 16> OptionNames;
-    O->getExtraOptionNames(OptionNames);
-    if (O->hasArgStr())
-      OptionNames.push_back(O->ArgStr);
+    Small_ਸਦਿਸ਼<StringRef, 16> Option_ਨਾਂ;
+    O->get_Extra_Option_ਨਾਂ(Option_ਨਾਂ);
+    ਜੇ (O->hasArgStr())
+      Option_ਨਾਂ.ਧੱਕੋ_ਪਿੱਠ(O->ArgStr);
 
-    bool PermitValue = O->getValueExpectedFlag() != cl::ValueDisallowed;
-    StringRef Flag = PermitValue ? LHS : Arg;
-    for (const auto &Name : OptionNames) {
-      unsigned Distance = StringRef(Name).edit_distance(
-          Flag, /*AllowReplacements=*/true, /*MaxEditDistance=*/BestDistance);
-      if (!Best || Distance < BestDistance) {
-        Best = O;
-        BestDistance = Distance;
-        if (RHS.empty() || !PermitValue)
-          NearestString = std::string(Name);
-        else
-          NearestString = (Twine(Name) + "=" + RHS).str();
+    ਤਾਰਕਿਕ Permit_ਮੁੱਲ = O->get_ਮੁੱਲ_Expected_Flag() != cl::ਮੁੱਲ_Disallowed;
+    StringRef Flag = Permit_ਮੁੱਲ ? LHS : Arg;
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Name : Option_ਨਾਂ) {
+      ਬਿਨਾਨਿਸ਼ਾਨੀ ਦੂਰੀ_2 = StringRef(Name).edit_ਦੂਰੀ(
+          Flag, /*AllowReplacements=*/ਸੱਚ, /*MaxEditDistance=*/ਉੱਤਮ_ਦੂਰੀ);
+      ਜੇ (!ਉੱਤਮ || ਦੂਰੀ_2 < ਉੱਤਮ_ਦੂਰੀ) {
+        ਉੱਤਮ = O;
+        ਉੱਤਮ_ਦੂਰੀ = ਦੂਰੀ_2;
+        ਜੇ (RHS.ਖਾਲੀ_ਥਾਵਾਂ() || !Permit_ਮੁੱਲ)
+          ਸਭ_ਤੋਂ_ਨੇੜੇ_String = std::string(Name);
+        ਨਹੀਂਤਾਂ
+          ਸਭ_ਤੋਂ_ਨੇੜੇ_String = (Twine(Name) + "=" + RHS).str();
       }
     }
   }
 
-  return Best;
+  ਵਾਪਸ ਉੱਤਮ;
 }
 
 /// CommaSeparateAndAddOccurrence - A wrapper around Handler->addOccurrence()
 /// that does special handling of cl::CommaSeparated options.
-static bool CommaSeparateAndAddOccurrence(Option *Handler, unsigned pos,
-                                          StringRef ArgName, StringRef Value) {
+ਸਥਿਰ ਤਾਰਕਿਕ Comma_Separate_And_ਜੋੜੋ_Occurrence(Option *Handler, ਬਿਨਾਨਿਸ਼ਾਨੀ pos,
+                                          StringRef ArgName, StringRef ਮੁੱਲ) {
   // Check to see if this option accepts a comma separated list of values.  If
   // it does, we have to split up the value into multiple values.
-  if (Handler->getMiscFlags() & CommaSeparated) {
-    StringRef Val(Value);
-    StringRef::size_type Pos = Val.find(',');
+  ਜੇ (Handler->getMiscFlags() & CommaSeparated) {
+    StringRef Val(ਮੁੱਲ);
+    StringRef::ਮਾਪ_type Pos = Val.ਲੱਭੋ(',');
 
-    while (Pos != StringRef::npos) {
+    ਜਦੋਂ (Pos != StringRef::npos) {
       // Process the portion before the comma.
-      if (Handler->addOccurrence(pos, ArgName, Val.substr(0, Pos)))
-        return true;
+      ਜੇ (Handler->ਜੋੜੋ_Occurrence(pos, ArgName, Val.substr(0, Pos)))
+        ਵਾਪਸ ਸੱਚ;
       // Erase the portion before the comma, AND the comma.
       Val = Val.substr(Pos + 1);
       // Check for another comma.
-      Pos = Val.find(',');
+      Pos = Val.ਲੱਭੋ(',');
     }
 
-    Value = Val;
+    ਮੁੱਲ = Val;
   }
 
-  return Handler->addOccurrence(pos, ArgName, Value);
+  ਵਾਪਸ Handler->ਜੋੜੋ_Occurrence(pos, ArgName, ਮੁੱਲ);
 }
 
 /// ProvideOption - For Value, this differentiates between an empty value ("")
 /// and a null value (StringRef()).  The later is accepted for arguments that
 /// don't allow a value (-foo) the former is rejected (-foo=).
-static inline bool ProvideOption(Option *Handler, StringRef ArgName,
-                                 StringRef Value, int argc,
-                                 const char *const *argv, int &i) {
+ਸਥਿਰ ਸਤਰਅੰਦਰ ਤਾਰਕਿਕ ProvideOption(Option *Handler, StringRef ArgName,
+                                 StringRef ਮੁੱਲ, ਪੂਰਨ argc,
+                                 ਅਚਲ ਅੱਖਰ *ਅਚਲ *argv, ਪੂਰਨ &i) {
   // Enforce value requirements
-  switch (Handler->getValueExpectedFlag()) {
-  case ValueRequired:
-    if (!Value.data()) { // No value specified?
+  ਚੋਣ (Handler->get_ਮੁੱਲ_Expected_Flag()) {
+  ਹਾਲਤ ਮੁੱਲ_Required:
+    ਜੇ (!ਮੁੱਲ.ਅੰਕੜੇ()) { // No value specified?
       // If no other argument or the option only supports prefix form, we
       // cannot look at the next argument.
-      if (i + 1 >= argc || Handler->getFormattingFlag() == cl::AlwaysPrefix)
-        return Handler->error("requires a value!");
+      ਜੇ (i + 1 >= argc || Handler->getFormattingFlag() == cl::Always_ਅਗੇਤਰ)
+        ਵਾਪਸ Handler->error("requires a value!");
       // Steal the next argument, like for '-o filename'
-      assert(argv && "null check");
-      Value = StringRef(argv[++i]);
+      ਪ੍ਰਤਿਜ੍ਞਾ(argv && "null check");
+      ਮੁੱਲ = StringRef(argv[++i]);
     }
-    break;
-  case ValueDisallowed:
-    if (Value.data())
-      return Handler->error("does not allow a value! '" + Twine(Value) +
+    ਰੋਕੋ;
+  ਹਾਲਤ ਮੁੱਲ_Disallowed:
+    ਜੇ (ਮੁੱਲ.ਅੰਕੜੇ())
+      ਵਾਪਸ Handler->error("does not allow a value! '" + Twine(ਮੁੱਲ) +
                             "' specified.");
-    break;
-  case ValueOptional:
-    break;
+    ਰੋਕੋ;
+  ਹਾਲਤ ਮੁੱਲ_Optional:
+    ਰੋਕੋ;
   }
 
-  return CommaSeparateAndAddOccurrence(Handler, i, ArgName, Value);
+  ਵਾਪਸ Comma_Separate_And_ਜੋੜੋ_Occurrence(Handler, i, ArgName, ਮੁੱਲ);
 }
 
-bool llvm::cl::ProvidePositionalOption(Option *Handler, StringRef Arg, int i) {
-  int Dummy = i;
-  return ProvideOption(Handler, Handler->ArgStr, Arg, 0, nullptr, Dummy);
+ਤਾਰਕਿਕ llvm::cl::ProvidePositionalOption(Option *Handler, StringRef Arg, ਪੂਰਨ i) {
+  ਪੂਰਨ Dummy = i;
+  ਵਾਪਸ ProvideOption(Handler, Handler->ArgStr, Arg, 0, ਖਾਲੀ_ਸੂਚਕ, Dummy);
 }
 
 // Find the cl::Prefix or cl::AlwaysPrefix option whose name is the longest
 // prefix of Name.
-static Option *findPrefixOption(StringRef Name, size_t &Length,
-                                const OptionsMapTy &OptionsMap) {
-  for (; !Name.empty(); Name = Name.drop_back()) {
+ਸਥਿਰ Option *ਲੱਭੋ_ਅਗੇਤਰ_Option(StringRef Name, size_t &ਲੰਮਾਈ,
+                                ਅਚਲ OptionsMapTy &OptionsMap) {
+  ਲਈ (; !Name.ਖਾਲੀ_ਥਾਵਾਂ(); Name = Name.drop_ਪਿੱਠ()) {
     Option *O = OptionsMap.lookup(Name);
-    if (O && (O->getFormattingFlag() == cl::Prefix ||
-              O->getFormattingFlag() == cl::AlwaysPrefix)) {
-      Length = Name.size();
-      return O;
+    ਜੇ (O && (O->getFormattingFlag() == cl::ਅਗੇਤਰ ||
+              O->getFormattingFlag() == cl::Always_ਅਗੇਤਰ)) {
+      ਲੰਮਾਈ = Name.ਮਾਪ_2();
+      ਵਾਪਸ O;
     }
   }
-  return nullptr;
+  ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 }
 
 /// The specified argument string (which started with at least one '-') does not
 /// fully match an available option.  Check to see if this is a prefix option.
 /// If so, split arg into output an Arg/Value pair and return the Option to
 /// parse it with.
-static Option *HandlePrefixedOption(StringRef &Arg, StringRef &Value,
-                                    const OptionsMapTy &OptionsMap) {
-  if (Arg.size() == 1)
-    return nullptr;
+ਸਥਿਰ Option *HandlePrefixedOption(StringRef &Arg, StringRef &ਮੁੱਲ,
+                                    ਅਚਲ OptionsMapTy &OptionsMap) {
+  ਜੇ (Arg.ਮਾਪ_2() == 1)
+    ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 
-  size_t Length = 0;
-  Option *POpt = findPrefixOption(Arg, Length, OptionsMap);
-  if (!POpt)
-    return nullptr;
+  size_t ਲੰਮਾਈ = 0;
+  Option *POpt = ਲੱਭੋ_ਅਗੇਤਰ_Option(Arg, ਲੰਮਾਈ, OptionsMap);
+  ਜੇ (!POpt)
+    ਵਾਪਸ ਖਾਲੀ_ਸੂਚਕ;
 
-  StringRef MaybeValue =
-      (Length < Arg.size()) ? Arg.substr(Length) : StringRef();
-  Arg = Arg.substr(0, Length);
+  StringRef Maybe_ਮੁੱਲ =
+      (ਲੰਮਾਈ < Arg.ਮਾਪ_2()) ? Arg.substr(ਲੰਮਾਈ) : StringRef();
+  Arg = Arg.substr(0, ਲੰਮਾਈ);
 
   // cl::Prefix options do not preserve '=' when used separately.
-  if (POpt->getFormattingFlag() == cl::Prefix && MaybeValue.starts_with("="))
-    MaybeValue = MaybeValue.drop_front();
-  Value = MaybeValue;
-  return POpt;
+  ਜੇ (POpt->getFormattingFlag() == cl::ਅਗੇਤਰ && Maybe_ਮੁੱਲ.starts_with("="))
+    Maybe_ਮੁੱਲ = Maybe_ਮੁੱਲ.drop_front();
+  ਮੁੱਲ = Maybe_ਮੁੱਲ;
+  ਵਾਪਸ POpt;
 }
 
-static bool RequiresValue(const Option *O) {
-  return O->getNumOccurrencesFlag() == cl::Required ||
-         O->getNumOccurrencesFlag() == cl::OneOrMore;
+ਸਥਿਰ ਤਾਰਕਿਕ Requires_ਮੁੱਲ(ਅਚਲ Option *O) {
+  ਵਾਪਸ O->get_ਅੰਕ_Occurrences_Flag() == cl::Required ||
+         O->get_ਅੰਕ_Occurrences_Flag() == cl::One_Or_ਹੋਰ;
 }
 
-static bool EatsUnboundedNumberOfValues(const Option *O) {
-  return O->getNumOccurrencesFlag() == cl::ZeroOrMore ||
-         O->getNumOccurrencesFlag() == cl::OneOrMore;
+ਸਥਿਰ ਤਾਰਕਿਕ Eats_Unbounded_ਸੰਖਿਆ_ਦਾ_ਮੁੱਲਾਂ(ਅਚਲ Option *O) {
+  ਵਾਪਸ O->get_ਅੰਕ_Occurrences_Flag() == cl::Zero_Or_ਹੋਰ ||
+         O->get_ਅੰਕ_Occurrences_Flag() == cl::One_Or_ਹੋਰ;
 }
 
-static bool isWhitespace(char C) {
-  return C == ' ' || C == '\t' || C == '\r' || C == '\n';
+ਸਥਿਰ ਤਾਰਕਿਕ isWhitespace(ਅੱਖਰ C) {
+  ਵਾਪਸ C == ' ' || C == '\t' || C == '\r' || C == '\n';
 }
 
-static bool isWhitespaceOrNull(char C) {
-  return isWhitespace(C) || C == '\0';
+ਸਥਿਰ ਤਾਰਕਿਕ isWhitespaceOrNull(ਅੱਖਰ C) {
+  ਵਾਪਸ isWhitespace(C) || C == '\0';
 }
 
-static bool isQuote(char C) { return C == '\"' || C == '\''; }
+ਸਥਿਰ ਤਾਰਕਿਕ isQuote(ਅੱਖਰ C) { ਵਾਪਸ C == '\"' || C == '\''; }
 
-void cl::TokenizeGNUCommandLine(StringRef Src, StringSaver &Saver,
-                                SmallVectorImpl<const char *> &NewArgv,
-                                bool MarkEOLs) {
+ਖਾਲੀ cl::Tokenize_GNUCommand_ਸਤਰ(StringRef Src, StringSaver &Saver,
+                                Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &NewArgv,
+                                ਤਾਰਕਿਕ MarkEOLs) {
   SmallString<128> Token;
-  bool InToken = false;
-  for (size_t I = 0, E = Src.size(); I != E; ++I) {
+  ਤਾਰਕਿਕ ਵਿੱਚ_Token = ਝੂਠ;
+  ਲਈ (size_t I = 0, E = Src.ਮਾਪ_2(); I != E; ++I) {
     // Consume runs of whitespace.
-    if (!InToken) {
-      while (I != E && isWhitespace(Src[I])) {
+    ਜੇ (!ਵਿੱਚ_Token) {
+      ਜਦੋਂ (I != E && isWhitespace(Src[I])) {
         // Mark the end of lines in response files.
-        if (MarkEOLs && Src[I] == '\n')
-          NewArgv.push_back(nullptr);
+        ਜੇ (MarkEOLs && Src[I] == '\n')
+          NewArgv.ਧੱਕੋ_ਪਿੱਠ(ਖਾਲੀ_ਸੂਚਕ);
         ++I;
       }
-      if (I == E)
-        break;
-      InToken = true;
+      ਜੇ (I == E)
+        ਰੋਕੋ;
+      ਵਿੱਚ_Token = ਸੱਚ;
     }
 
-    char C = Src[I];
+    ਅੱਖਰ C = Src[I];
 
     // Backslash escapes the next character.
-    if (I + 1 < E && C == '\\') {
+    ਜੇ (I + 1 < E && C == '\\') {
       ++I; // Skip the escape.
-      Token.push_back(Src[I]);
-      continue;
+      Token.ਧੱਕੋ_ਪਿੱਠ(Src[I]);
+      ਜਾਰੀ;
     }
 
     // Consume a quoted string.
-    if (isQuote(C)) {
+    ਜੇ (isQuote(C)) {
       ++I;
-      while (I != E && Src[I] != C) {
+      ਜਦੋਂ (I != E && Src[I] != C) {
         // Backslash escapes the next character.
-        if (Src[I] == '\\' && I + 1 != E)
+        ਜੇ (Src[I] == '\\' && I + 1 != E)
           ++I;
-        Token.push_back(Src[I]);
+        Token.ਧੱਕੋ_ਪਿੱਠ(Src[I]);
         ++I;
       }
-      if (I == E)
-        break;
-      continue;
+      ਜੇ (I == E)
+        ਰੋਕੋ;
+      ਜਾਰੀ;
     }
 
     // End the token if this is whitespace.
-    if (isWhitespace(C)) {
-      NewArgv.push_back(Saver.save(Token.str()).data());
+    ਜੇ (isWhitespace(C)) {
+      NewArgv.ਧੱਕੋ_ਪਿੱਠ(Saver.save(Token.str()).ਅੰਕੜੇ());
       // Mark the end of lines in response files.
-      if (MarkEOLs && C == '\n')
-        NewArgv.push_back(nullptr);
+      ਜੇ (MarkEOLs && C == '\n')
+        NewArgv.ਧੱਕੋ_ਪਿੱਠ(ਖਾਲੀ_ਸੂਚਕ);
       Token.clear();
-      InToken = false;
-      continue;
+      ਵਿੱਚ_Token = ਝੂਠ;
+      ਜਾਰੀ;
     }
 
     // This is a normal character.  Append it.
-    Token.push_back(C);
+    Token.ਧੱਕੋ_ਪਿੱਠ(C);
   }
 
   // Append the last token after hitting EOF with no whitespace.
-  if (InToken)
-    NewArgv.push_back(Saver.save(Token.str()).data());
+  ਜੇ (ਵਿੱਚ_Token)
+    NewArgv.ਧੱਕੋ_ਪਿੱਠ(Saver.save(Token.str()).ਅੰਕੜੇ());
 }
 
 /// Backslashes are interpreted in a rather complicated way in the Windows-style
@@ -876,42 +876,42 @@ void cl::TokenizeGNUCommandLine(StringRef Src, StringSaver &Saver,
 ///    consumed in this case.
 ///
 ///  * Otherwise, backslashes are interpreted literally.
-static size_t parseBackslash(StringRef Src, size_t I, SmallString<128> &Token) {
-  size_t E = Src.size();
-  int BackslashCount = 0;
+ਸਥਿਰ size_t parseBackslash(StringRef Src, size_t I, SmallString<128> &Token) {
+  size_t E = Src.ਮਾਪ_2();
+  ਪੂਰਨ Backslash_ਗਿਣਤੀ = 0;
   // Skip the backslashes.
-  do {
+  ਕਰੋ {
     ++I;
-    ++BackslashCount;
-  } while (I != E && Src[I] == '\\');
+    ++Backslash_ਗਿਣਤੀ;
+  } ਜਦੋਂ (I != E && Src[I] == '\\');
 
-  bool FollowedByDoubleQuote = (I != E && Src[I] == '"');
-  if (FollowedByDoubleQuote) {
-    Token.append(BackslashCount / 2, '\\');
-    if (BackslashCount % 2 == 0)
-      return I - 1;
-    Token.push_back('"');
-    return I;
+  ਤਾਰਕਿਕ FollowedByDoubleQuote = (I != E && Src[I] == '"');
+  ਜੇ (FollowedByDoubleQuote) {
+    Token.append(Backslash_ਗਿਣਤੀ / 2, '\\');
+    ਜੇ (Backslash_ਗਿਣਤੀ % 2 == 0)
+      ਵਾਪਸ I - 1;
+    Token.ਧੱਕੋ_ਪਿੱਠ('"');
+    ਵਾਪਸ I;
   }
-  Token.append(BackslashCount, '\\');
-  return I - 1;
+  Token.append(Backslash_ਗਿਣਤੀ, '\\');
+  ਵਾਪਸ I - 1;
 }
 
 // Windows treats whitespace, double quotes, and backslashes specially, except
 // when parsing the first token of a full command line, in which case
 // backslashes are not special.
-static bool isWindowsSpecialChar(char C) {
-  return isWhitespaceOrNull(C) || C == '\\' || C == '\"';
+ਸਥਿਰ ਤਾਰਕਿਕ isWindowsSpecialChar(ਅੱਖਰ C) {
+  ਵਾਪਸ isWhitespaceOrNull(C) || C == '\\' || C == '\"';
 }
-static bool isWindowsSpecialCharInCommandName(char C) {
-  return isWhitespaceOrNull(C) || C == '\"';
+ਸਥਿਰ ਤਾਰਕਿਕ is_Windows_Special_Char_ਵਿੱਚ_Command_Name(ਅੱਖਰ C) {
+  ਵਾਪਸ isWhitespaceOrNull(C) || C == '\"';
 }
 
 // Windows tokenization implementation. The implementation is designed to be
 // inlined and specialized for the two user entry points.
-static inline void tokenizeWindowsCommandLineImpl(
-    StringRef Src, StringSaver &Saver, function_ref<void(StringRef)> AddToken,
-    bool AlwaysCopy, function_ref<void()> MarkEOL, bool InitialCommandName) {
+ਸਥਿਰ ਸਤਰਅੰਦਰ ਖਾਲੀ tokenize_Windows_Command_ਸਤਰ_Impl(
+    StringRef Src, StringSaver &Saver, function_ref<ਖਾਲੀ(StringRef)> ਜੋੜੋ_Token,
+    ਤਾਰਕਿਕ AlwaysCopy, function_ref<ਖਾਲੀ()> MarkEOL, ਤਾਰਕਿਕ InitialCommandName) {
   SmallString<128> Token;
 
   // Sometimes, this function will be handling a full command line including an
@@ -920,265 +920,265 @@ static inline void tokenizeWindowsCommandLineImpl(
   // CreateProcess or cmd.exe scans the pathname, it doesn't treat \ as
   // escaping the quote character, whereas when libc scans the rest of the
   // command line, it does.
-  bool CommandName = InitialCommandName;
+  ਤਾਰਕਿਕ CommandName = InitialCommandName;
 
   // Try to do as much work inside the state machine as possible.
-  enum { INIT, UNQUOTED, QUOTED } State = INIT;
+  ਗਿਣਤੀ { INIT, UNQUOTED, QUOTED } State = INIT;
 
-  for (size_t I = 0, E = Src.size(); I < E; ++I) {
-    switch (State) {
-    case INIT: {
-      assert(Token.empty() && "token should be empty in initial state");
+  ਲਈ (size_t I = 0, E = Src.ਮਾਪ_2(); I < E; ++I) {
+    ਚੋਣ (State) {
+    ਹਾਲਤ INIT: {
+      ਪ੍ਰਤਿਜ੍ਞਾ(Token.ਖਾਲੀ_ਥਾਵਾਂ() && "token should be empty in initial state");
       // Eat whitespace before a token.
-      while (I < E && isWhitespaceOrNull(Src[I])) {
-        if (Src[I] == '\n')
+      ਜਦੋਂ (I < E && isWhitespaceOrNull(Src[I])) {
+        ਜੇ (Src[I] == '\n')
           MarkEOL();
         ++I;
       }
       // Stop if this was trailing whitespace.
-      if (I >= E)
-        break;
-      size_t Start = I;
-      if (CommandName) {
-        while (I < E && !isWindowsSpecialCharInCommandName(Src[I]))
+      ਜੇ (I >= E)
+        ਰੋਕੋ;
+      size_t ਸ਼ੁਰੂ = I;
+      ਜੇ (CommandName) {
+        ਜਦੋਂ (I < E && !is_Windows_Special_Char_ਵਿੱਚ_Command_Name(Src[I]))
           ++I;
-      } else {
-        while (I < E && !isWindowsSpecialChar(Src[I]))
+      } ਨਹੀਂਤਾਂ {
+        ਜਦੋਂ (I < E && !isWindowsSpecialChar(Src[I]))
           ++I;
       }
-      StringRef NormalChars = Src.slice(Start, I);
-      if (I >= E || isWhitespaceOrNull(Src[I])) {
+      StringRef ਸਾਧਾਰਨ_Chars = Src.ਟੁਕੜਾ(ਸ਼ੁਰੂ, I);
+      ਜੇ (I >= E || isWhitespaceOrNull(Src[I])) {
         // No special characters: slice out the substring and start the next
         // token. Copy the string if the caller asks us to.
-        AddToken(AlwaysCopy ? Saver.save(NormalChars) : NormalChars);
-        if (I < E && Src[I] == '\n') {
+        ਜੋੜੋ_Token(AlwaysCopy ? Saver.save(ਸਾਧਾਰਨ_Chars) : ਸਾਧਾਰਨ_Chars);
+        ਜੇ (I < E && Src[I] == '\n') {
           MarkEOL();
           CommandName = InitialCommandName;
-        } else {
-          CommandName = false;
+        } ਨਹੀਂਤਾਂ {
+          CommandName = ਝੂਠ;
         }
-      } else if (Src[I] == '\"') {
-        Token += NormalChars;
+      } ਨਹੀਂਤਾਂ ਜੇ (Src[I] == '\"') {
+        Token += ਸਾਧਾਰਨ_Chars;
         State = QUOTED;
-      } else if (Src[I] == '\\') {
-        assert(!CommandName && "or else we'd have treated it as a normal char");
-        Token += NormalChars;
+      } ਨਹੀਂਤਾਂ ਜੇ (Src[I] == '\\') {
+        ਪ੍ਰਤਿਜ੍ਞਾ(!CommandName && "or else we'd have treated it as a normal char");
+        Token += ਸਾਧਾਰਨ_Chars;
         I = parseBackslash(Src, I, Token);
         State = UNQUOTED;
-      } else {
+      } ਨਹੀਂਤਾਂ {
         llvm_unreachable("unexpected special character");
       }
-      break;
+      ਰੋਕੋ;
     }
 
-    case UNQUOTED:
-      if (isWhitespaceOrNull(Src[I])) {
+    ਹਾਲਤ UNQUOTED:
+      ਜੇ (isWhitespaceOrNull(Src[I])) {
         // Whitespace means the end of the token. If we are in this state, the
         // token must have contained a special character, so we must copy the
         // token.
-        AddToken(Saver.save(Token.str()));
+        ਜੋੜੋ_Token(Saver.save(Token.str()));
         Token.clear();
-        if (Src[I] == '\n') {
+        ਜੇ (Src[I] == '\n') {
           CommandName = InitialCommandName;
           MarkEOL();
-        } else {
-          CommandName = false;
+        } ਨਹੀਂਤਾਂ {
+          CommandName = ਝੂਠ;
         }
         State = INIT;
-      } else if (Src[I] == '\"') {
+      } ਨਹੀਂਤਾਂ ਜੇ (Src[I] == '\"') {
         State = QUOTED;
-      } else if (Src[I] == '\\' && !CommandName) {
+      } ਨਹੀਂਤਾਂ ਜੇ (Src[I] == '\\' && !CommandName) {
         I = parseBackslash(Src, I, Token);
-      } else {
-        Token.push_back(Src[I]);
+      } ਨਹੀਂਤਾਂ {
+        Token.ਧੱਕੋ_ਪਿੱਠ(Src[I]);
       }
-      break;
+      ਰੋਕੋ;
 
-    case QUOTED:
-      if (Src[I] == '\"') {
-        if (I < (E - 1) && Src[I + 1] == '"') {
+    ਹਾਲਤ QUOTED:
+      ਜੇ (Src[I] == '\"') {
+        ਜੇ (I < (E - 1) && Src[I + 1] == '"') {
           // Consecutive double-quotes inside a quoted string implies one
           // double-quote.
-          Token.push_back('"');
+          Token.ਧੱਕੋ_ਪਿੱਠ('"');
           ++I;
-        } else {
+        } ਨਹੀਂਤਾਂ {
           // Otherwise, end the quoted portion and return to the unquoted state.
           State = UNQUOTED;
         }
-      } else if (Src[I] == '\\' && !CommandName) {
+      } ਨਹੀਂਤਾਂ ਜੇ (Src[I] == '\\' && !CommandName) {
         I = parseBackslash(Src, I, Token);
-      } else {
-        Token.push_back(Src[I]);
+      } ਨਹੀਂਤਾਂ {
+        Token.ਧੱਕੋ_ਪਿੱਠ(Src[I]);
       }
-      break;
+      ਰੋਕੋ;
     }
   }
 
-  if (State != INIT)
-    AddToken(Saver.save(Token.str()));
+  ਜੇ (State != INIT)
+    ਜੋੜੋ_Token(Saver.save(Token.str()));
 }
 
-void cl::TokenizeWindowsCommandLine(StringRef Src, StringSaver &Saver,
-                                    SmallVectorImpl<const char *> &NewArgv,
-                                    bool MarkEOLs) {
-  auto AddToken = [&](StringRef Tok) { NewArgv.push_back(Tok.data()); };
-  auto OnEOL = [&]() {
-    if (MarkEOLs)
-      NewArgv.push_back(nullptr);
+ਖਾਲੀ cl::Tokenize_Windows_Command_ਸਤਰ(StringRef Src, StringSaver &Saver,
+                                    Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &NewArgv,
+                                    ਤਾਰਕਿਕ MarkEOLs) {
+  ਸਵੈਚਾਲਿਤ ਜੋੜੋ_Token = [&](StringRef Tok) { NewArgv.ਧੱਕੋ_ਪਿੱਠ(Tok.ਅੰਕੜੇ()); };
+  ਸਵੈਚਾਲਿਤ OnEOL = [&]() {
+    ਜੇ (MarkEOLs)
+      NewArgv.ਧੱਕੋ_ਪਿੱਠ(ਖਾਲੀ_ਸੂਚਕ);
   };
-  tokenizeWindowsCommandLineImpl(Src, Saver, AddToken,
-                                 /*AlwaysCopy=*/true, OnEOL, false);
+  tokenize_Windows_Command_ਸਤਰ_Impl(Src, Saver, ਜੋੜੋ_Token,
+                                 /*AlwaysCopy=*/ਸੱਚ, OnEOL, ਝੂਠ);
 }
 
-void cl::TokenizeWindowsCommandLineNoCopy(StringRef Src, StringSaver &Saver,
-                                          SmallVectorImpl<StringRef> &NewArgv) {
-  auto AddToken = [&](StringRef Tok) { NewArgv.push_back(Tok); };
-  auto OnEOL = []() {};
-  tokenizeWindowsCommandLineImpl(Src, Saver, AddToken, /*AlwaysCopy=*/false,
-                                 OnEOL, false);
+ਖਾਲੀ cl::Tokenize_Windows_Command_ਸਤਰ_No_Copy(StringRef Src, StringSaver &Saver,
+                                          Small_ਸਦਿਸ਼_Impl<StringRef> &NewArgv) {
+  ਸਵੈਚਾਲਿਤ ਜੋੜੋ_Token = [&](StringRef Tok) { NewArgv.ਧੱਕੋ_ਪਿੱਠ(Tok); };
+  ਸਵੈਚਾਲਿਤ OnEOL = []() {};
+  tokenize_Windows_Command_ਸਤਰ_Impl(Src, Saver, ਜੋੜੋ_Token, /*AlwaysCopy=*/ਝੂਠ,
+                                 OnEOL, ਝੂਠ);
 }
 
-void cl::TokenizeWindowsCommandLineFull(StringRef Src, StringSaver &Saver,
-                                        SmallVectorImpl<const char *> &NewArgv,
-                                        bool MarkEOLs) {
-  auto AddToken = [&](StringRef Tok) { NewArgv.push_back(Tok.data()); };
-  auto OnEOL = [&]() {
-    if (MarkEOLs)
-      NewArgv.push_back(nullptr);
+ਖਾਲੀ cl::Tokenize_Windows_Command_ਸਤਰ_ਭਰਿਆ(StringRef Src, StringSaver &Saver,
+                                        Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &NewArgv,
+                                        ਤਾਰਕਿਕ MarkEOLs) {
+  ਸਵੈਚਾਲਿਤ ਜੋੜੋ_Token = [&](StringRef Tok) { NewArgv.ਧੱਕੋ_ਪਿੱਠ(Tok.ਅੰਕੜੇ()); };
+  ਸਵੈਚਾਲਿਤ OnEOL = [&]() {
+    ਜੇ (MarkEOLs)
+      NewArgv.ਧੱਕੋ_ਪਿੱਠ(ਖਾਲੀ_ਸੂਚਕ);
   };
-  tokenizeWindowsCommandLineImpl(Src, Saver, AddToken,
-                                 /*AlwaysCopy=*/true, OnEOL, true);
+  tokenize_Windows_Command_ਸਤਰ_Impl(Src, Saver, ਜੋੜੋ_Token,
+                                 /*AlwaysCopy=*/ਸੱਚ, OnEOL, ਸੱਚ);
 }
 
-void cl::tokenizeConfigFile(StringRef Source, StringSaver &Saver,
-                            SmallVectorImpl<const char *> &NewArgv,
-                            bool MarkEOLs) {
-  for (const char *Cur = Source.begin(); Cur != Source.end();) {
-    SmallString<128> Line;
+ਖਾਲੀ cl::tokenizeConfigFile(StringRef ਸਰੋਤ, StringSaver &Saver,
+                            Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &NewArgv,
+                            ਤਾਰਕਿਕ MarkEOLs) {
+  ਲਈ (ਅਚਲ ਅੱਖਰ *Cur = ਸਰੋਤ.begin(); Cur != ਸਰੋਤ.ਸਿਰਾ();) {
+    SmallString<128> ਸਤਰ;
     // Check for comment line.
-    if (isWhitespace(*Cur)) {
-      while (Cur != Source.end() && isWhitespace(*Cur))
+    ਜੇ (isWhitespace(*Cur)) {
+      ਜਦੋਂ (Cur != ਸਰੋਤ.ਸਿਰਾ() && isWhitespace(*Cur))
         ++Cur;
-      continue;
+      ਜਾਰੀ;
     }
-    if (*Cur == '#') {
-      while (Cur != Source.end() && *Cur != '\n')
+    ਜੇ (*Cur == '#') {
+      ਜਦੋਂ (Cur != ਸਰੋਤ.ਸਿਰਾ() && *Cur != '\n')
         ++Cur;
-      continue;
+      ਜਾਰੀ;
     }
     // Find end of the current line, splicing backslash-newline continuations.
     // A '#' that begins a new unquoted token starts a comment running to the
     // next literal newline; escapes and continuations are not honored inside
     // the comment.
-    const char *Start = Cur;
-    const char *LineEnd = nullptr;
-    char Quote = 0;
-    bool AtTokenStart = true;
-    for (const char *End = Source.end(); Cur != End; ++Cur) {
-      char C = *Cur;
-      if (C == '\\') {
-        if (Cur + 1 != End) {
+    ਅਚਲ ਅੱਖਰ *ਸ਼ੁਰੂ = Cur;
+    ਅਚਲ ਅੱਖਰ *ਸਤਰ_ਸਿਰਾ = ਖਾਲੀ_ਸੂਚਕ;
+    ਅੱਖਰ Quote = 0;
+    ਤਾਰਕਿਕ At_Token_ਸ਼ੁਰੂ = ਸੱਚ;
+    ਲਈ (ਅਚਲ ਅੱਖਰ *ਸਿਰਾ_2 = ਸਰੋਤ.ਸਿਰਾ(); Cur != ਸਿਰਾ_2; ++Cur) {
+      ਅੱਖਰ C = *Cur;
+      ਜੇ (C == '\\') {
+        ਜੇ (Cur + 1 != ਸਿਰਾ_2) {
           ++Cur;
-          if (*Cur == '\n' ||
-              (*Cur == '\r' && (Cur + 1 != End) && Cur[1] == '\n')) {
-            Line.append(Start, Cur - 1);
-            if (*Cur == '\r')
+          ਜੇ (*Cur == '\n' ||
+              (*Cur == '\r' && (Cur + 1 != ਸਿਰਾ_2) && Cur[1] == '\n')) {
+            ਸਤਰ.append(ਸ਼ੁਰੂ, Cur - 1);
+            ਜੇ (*Cur == '\r')
               ++Cur;
-            Start = Cur + 1;
+            ਸ਼ੁਰੂ = Cur + 1;
             // Splicing does not introduce a token boundary.
-            continue;
+            ਜਾਰੀ;
           }
         }
-        AtTokenStart = false;
-        continue;
+        At_Token_ਸ਼ੁਰੂ = ਝੂਠ;
+        ਜਾਰੀ;
       }
-      if (C == '\n')
-        break;
-      if (Quote) {
-        if (C == Quote)
+      ਜੇ (C == '\n')
+        ਰੋਕੋ;
+      ਜੇ (Quote) {
+        ਜੇ (C == Quote)
           Quote = 0;
-      } else if (isQuote(C)) {
+      } ਨਹੀਂਤਾਂ ਜੇ (isQuote(C)) {
         Quote = C;
-      } else if (C == '#' && AtTokenStart) {
-        LineEnd = Cur;
-        while (Cur != End && *Cur != '\n')
+      } ਨਹੀਂਤਾਂ ਜੇ (C == '#' && At_Token_ਸ਼ੁਰੂ) {
+        ਸਤਰ_ਸਿਰਾ = Cur;
+        ਜਦੋਂ (Cur != ਸਿਰਾ_2 && *Cur != '\n')
           ++Cur;
-        break;
+        ਰੋਕੋ;
       }
-      AtTokenStart = isWhitespace(C);
+      At_Token_ਸ਼ੁਰੂ = isWhitespace(C);
     }
     // Tokenize line.
-    Line.append(Start, LineEnd ? LineEnd : Cur);
-    cl::TokenizeGNUCommandLine(Line, Saver, NewArgv, MarkEOLs);
+    ਸਤਰ.append(ਸ਼ੁਰੂ, ਸਤਰ_ਸਿਰਾ ? ਸਤਰ_ਸਿਰਾ : Cur);
+    cl::Tokenize_GNUCommand_ਸਤਰ(ਸਤਰ, Saver, NewArgv, MarkEOLs);
   }
 }
 
 // It is called byte order marker but the UTF-8 BOM is actually not affected
 // by the host system's endianness.
-static bool hasUTF8ByteOrderMark(ArrayRef<char> S) {
-  return (S.size() >= 3 && S[0] == '\xef' && S[1] == '\xbb' && S[2] == '\xbf');
+ਸਥਿਰ ਤਾਰਕਿਕ has_UTF8_Byte_ਕ੍ਰਮ_Mark(ArrayRef<ਅੱਖਰ> S) {
+  ਵਾਪਸ (S.ਮਾਪ_2() >= 3 && S[0] == '\xef' && S[1] == '\xbb' && S[2] == '\xbf');
 }
 
 // Substitute <CFGDIR> with the file's base path.
-static void ExpandBasePaths(StringRef BasePath, StringSaver &Saver,
-                            const char *&Arg) {
-  assert(sys::path::is_absolute(BasePath));
+ਸਥਿਰ ਖਾਲੀ Expand_ਅਧਾਰ_Paths(StringRef ਅਧਾਰ_ਰਸਤਾ, StringSaver &Saver,
+                            ਅਚਲ ਅੱਖਰ *&Arg) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(sys::ਰਸਤਾ_2::is_absolute(ਅਧਾਰ_ਰਸਤਾ));
   constexpr StringLiteral Token("<CFGDIR>");
-  const StringRef ArgString(Arg);
+  ਅਚਲ StringRef ArgString(Arg);
 
   SmallString<128> ResponseFile;
-  StringRef::size_type StartPos = 0;
-  for (StringRef::size_type TokenPos = ArgString.find(Token);
+  StringRef::ਮਾਪ_type ਸ਼ੁਰੂ_Pos = 0;
+  ਲਈ (StringRef::ਮਾਪ_type TokenPos = ArgString.ਲੱਭੋ(Token);
        TokenPos != StringRef::npos;
-       TokenPos = ArgString.find(Token, StartPos)) {
+       TokenPos = ArgString.ਲੱਭੋ(Token, ਸ਼ੁਰੂ_Pos)) {
     // Token may appear more than once per arg (e.g. comma-separated linker
     // args). Support by using path-append on any subsequent appearances.
-    const StringRef LHS = ArgString.substr(StartPos, TokenPos - StartPos);
-    if (ResponseFile.empty())
+    ਅਚਲ StringRef LHS = ArgString.substr(ਸ਼ੁਰੂ_Pos, TokenPos - ਸ਼ੁਰੂ_Pos);
+    ਜੇ (ResponseFile.ਖਾਲੀ_ਥਾਵਾਂ())
       ResponseFile = LHS;
-    else
-      llvm::sys::path::append(ResponseFile, LHS);
-    ResponseFile.append(BasePath);
-    StartPos = TokenPos + Token.size();
+    ਨਹੀਂਤਾਂ
+      llvm::sys::ਰਸਤਾ_2::append(ResponseFile, LHS);
+    ResponseFile.append(ਅਧਾਰ_ਰਸਤਾ);
+    ਸ਼ੁਰੂ_Pos = TokenPos + Token.ਮਾਪ_2();
   }
 
-  if (!ResponseFile.empty()) {
+  ਜੇ (!ResponseFile.ਖਾਲੀ_ਥਾਵਾਂ()) {
     // Path-append the remaining arg substring if at least one token appeared.
-    const StringRef Remaining = ArgString.substr(StartPos);
-    if (!Remaining.empty())
-      llvm::sys::path::append(ResponseFile, Remaining);
-    Arg = Saver.save(ResponseFile.str()).data();
+    ਅਚਲ StringRef ਬਚਿਆ = ArgString.substr(ਸ਼ੁਰੂ_Pos);
+    ਜੇ (!ਬਚਿਆ.ਖਾਲੀ_ਥਾਵਾਂ())
+      llvm::sys::ਰਸਤਾ_2::append(ResponseFile, ਬਚਿਆ);
+    Arg = Saver.save(ResponseFile.str()).ਅੰਕੜੇ();
   }
 }
 
 // FName must be an absolute path.
 Error ExpansionContext::expandResponseFile(
-    StringRef FName, SmallVectorImpl<const char *> &NewArgv) {
-  assert(sys::path::is_absolute(FName));
-  llvm::ErrorOr<std::unique_ptr<MemoryBuffer>> MemBufOrErr =
-      FS->getBufferForFile(FName);
-  if (!MemBufOrErr) {
-    std::error_code EC = MemBufOrErr.getError();
-    return llvm::createStringError(EC, Twine("cannot not open file '") + FName +
-                                           "': " + EC.message());
+    StringRef FName, Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &NewArgv) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(sys::ਰਸਤਾ_2::is_absolute(FName));
+  llvm::ErrorOr<std::unique_ptr<ਸਮ੍ਰਿਤੀ_ਬਫਰ>> MemBufOrErr =
+      FS->get_ਬਫਰ_For_File(FName);
+  ਜੇ (!MemBufOrErr) {
+    std::error_ਕੋਡ EC = MemBufOrErr.getError();
+    ਵਾਪਸ llvm::createStringError(EC, Twine("cannot not open file '") + FName +
+                                           "': " + EC.ਸੁਨੇਹਾ_2());
   }
-  MemoryBuffer &MemBuf = *MemBufOrErr.get();
-  StringRef Str(MemBuf.getBufferStart(), MemBuf.getBufferSize());
+  ਸਮ੍ਰਿਤੀ_ਬਫਰ &MemBuf = *MemBufOrErr.get();
+  StringRef Str(MemBuf.get_ਬਫਰ_ਸ਼ੁਰੂ(), MemBuf.get_ਬਫਰ_ਮਾਪ());
 
   // If we have a UTF-16 byte order mark, convert to UTF-8 for parsing.
-  ArrayRef<char> BufRef(MemBuf.getBufferStart(), MemBuf.getBufferEnd());
+  ArrayRef<ਅੱਖਰ> BufRef(MemBuf.get_ਬਫਰ_ਸ਼ੁਰੂ(), MemBuf.get_ਬਫਰ_ਸਿਰਾ());
   std::string UTF8Buf;
-  if (hasUTF16ByteOrderMark(BufRef)) {
-    if (!convertUTF16ToUTF8String(BufRef, UTF8Buf))
-      return llvm::createStringError(std::errc::illegal_byte_sequence,
+  ਜੇ (has_UTF16_Byte_ਕ੍ਰਮ_Mark(BufRef)) {
+    ਜੇ (!convert_UTF16_ਮੰਜ਼ਿਲ_UTF8_String(BufRef, UTF8Buf))
+      ਵਾਪਸ llvm::createStringError(std::errc::illegal_byte_sequence,
                                      "Could not convert UTF16 to UTF8");
     Str = StringRef(UTF8Buf);
   }
   // If we see UTF-8 BOM sequence at the beginning of a file, we shall remove
   // these bytes before parsing.
   // Reference: http://en.wikipedia.org/wiki/UTF-8#Byte_order_mark
-  else if (hasUTF8ByteOrderMark(BufRef))
-    Str = StringRef(BufRef.data() + 3, BufRef.size() - 3);
+  ਨਹੀਂਤਾਂ ਜੇ (has_UTF8_Byte_ਕ੍ਰਮ_Mark(BufRef))
+    Str = StringRef(BufRef.ਅੰਕੜੇ() + 3, BufRef.ਮਾਪ_2() - 3);
 
   // Tokenize the contents into NewArgv.
   Tokenizer(Str, Saver, NewArgv, MarkEOLs);
@@ -1186,163 +1186,163 @@ Error ExpansionContext::expandResponseFile(
   // Expanded file content may require additional transformations, like using
   // absolute paths instead of relative in '@file' constructs or expanding
   // macros.
-  if (!RelativeNames && !InConfigFile)
-    return Error::success();
+  ਜੇ (!Relative_ਨਾਂ && !ਵਿੱਚ_Config_File)
+    ਵਾਪਸ Error::success();
 
-  StringRef BasePath = llvm::sys::path::parent_path(FName);
-  for (const char *&Arg : NewArgv) {
-    if (!Arg)
-      continue;
+  StringRef ਅਧਾਰ_ਰਸਤਾ = llvm::sys::ਰਸਤਾ_2::ਮਾਪਾ_ਰਸਤਾ(FName);
+  ਲਈ (ਅਚਲ ਅੱਖਰ *&Arg : NewArgv) {
+    ਜੇ (!Arg)
+      ਜਾਰੀ;
 
     // Substitute <CFGDIR> with the file's base path.
-    if (InConfigFile)
-      ExpandBasePaths(BasePath, Saver, Arg);
+    ਜੇ (ਵਿੱਚ_Config_File)
+      Expand_ਅਧਾਰ_Paths(ਅਧਾਰ_ਰਸਤਾ, Saver, Arg);
 
     // Discover the case, when argument should be transformed into '@file' and
     // evaluate 'file' for it.
     StringRef ArgStr(Arg);
     StringRef FileName;
-    bool ConfigInclusion = false;
-    if (ArgStr.consume_front("@")) {
+    ਤਾਰਕਿਕ ConfigInclusion = ਝੂਠ;
+    ਜੇ (ArgStr.consume_front("@")) {
       FileName = ArgStr;
-      if (!llvm::sys::path::is_relative(FileName))
-        continue;
-    } else if (ArgStr.consume_front("--config=")) {
+      ਜੇ (!llvm::sys::ਰਸਤਾ_2::is_relative(FileName))
+        ਜਾਰੀ;
+    } ਨਹੀਂਤਾਂ ਜੇ (ArgStr.consume_front("--config=")) {
       FileName = ArgStr;
-      ConfigInclusion = true;
-    } else {
-      continue;
+      ConfigInclusion = ਸੱਚ;
+    } ਨਹੀਂਤਾਂ {
+      ਜਾਰੀ;
     }
 
     // Update expansion construct.
     SmallString<128> ResponseFile;
-    ResponseFile.push_back('@');
-    if (ConfigInclusion && !llvm::sys::path::has_parent_path(FileName)) {
-      SmallString<128> FilePath;
-      if (!findConfigFile(FileName, FilePath))
-        return createStringError(
-            std::make_error_code(std::errc::no_such_file_or_directory),
+    ResponseFile.ਧੱਕੋ_ਪਿੱਠ('@');
+    ਜੇ (ConfigInclusion && !llvm::sys::ਰਸਤਾ_2::has_ਮਾਪਾ_ਰਸਤਾ(FileName)) {
+      SmallString<128> File_ਰਸਤਾ;
+      ਜੇ (!ਲੱਭੋ_Config_File(FileName, File_ਰਸਤਾ))
+        ਵਾਪਸ createStringError(
+            std::make_error_ਕੋਡ(std::errc::no_such_file_or_directory),
             "cannot not find configuration file: " + FileName);
-      ResponseFile.append(FilePath);
-    } else {
-      ResponseFile.append(BasePath);
-      llvm::sys::path::append(ResponseFile, FileName);
+      ResponseFile.append(File_ਰਸਤਾ);
+    } ਨਹੀਂਤਾਂ {
+      ResponseFile.append(ਅਧਾਰ_ਰਸਤਾ);
+      llvm::sys::ਰਸਤਾ_2::append(ResponseFile, FileName);
     }
-    Arg = Saver.save(ResponseFile.str()).data();
+    Arg = Saver.save(ResponseFile.str()).ਅੰਕੜੇ();
   }
-  return Error::success();
+  ਵਾਪਸ Error::success();
 }
 
 /// Expand response files on a command line recursively using the given
 /// StringSaver and tokenization strategy.
 Error ExpansionContext::expandResponseFiles(
-    SmallVectorImpl<const char *> &Argv) {
-  struct ResponseFileRecord {
+    Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &Argv) {
+  ਬਣਤਰ Response_File_ਰਿਕਾਰਡ {
     std::string File;
-    size_t End;
+    size_t ਸਿਰਾ_2;
   };
 
   // To detect recursive response files, we maintain a stack of files and the
   // position of the last argument in the file. This position is updated
   // dynamically as we recursively expand files.
-  SmallVector<ResponseFileRecord, 3> FileStack;
+  Small_ਸਦਿਸ਼<Response_File_ਰਿਕਾਰਡ, 3> File_ਢੇਰ;
 
   // Push a dummy entry that represents the initial command line, removing
   // the need to check for an empty list.
-  FileStack.push_back({"", Argv.size()});
+  File_ਢੇਰ.ਧੱਕੋ_ਪਿੱਠ({"", Argv.ਮਾਪ_2()});
 
   // Don't cache Argv.size() because it can change.
-  for (unsigned I = 0; I != Argv.size();) {
-    while (I == FileStack.back().End) {
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ I = 0; I != Argv.ਮਾਪ_2();) {
+    ਜਦੋਂ (I == File_ਢੇਰ.ਪਿੱਠ().ਸਿਰਾ_2) {
       // Passing the end of a file's argument list, so we can remove it from the
       // stack.
-      FileStack.pop_back();
+      File_ਢੇਰ.ਕੱਢੋ_ਪਿੱਠ();
     }
 
-    const char *Arg = Argv[I];
+    ਅਚਲ ਅੱਖਰ *Arg = Argv[I];
     // Check if it is an EOL marker
-    if (Arg == nullptr) {
+    ਜੇ (Arg == ਖਾਲੀ_ਸੂਚਕ) {
       ++I;
-      continue;
+      ਜਾਰੀ;
     }
 
-    if (Arg[0] != '@') {
+    ਜੇ (Arg[0] != '@') {
       ++I;
-      continue;
+      ਜਾਰੀ;
     }
 
-    const char *FName = Arg + 1;
+    ਅਚਲ ਅੱਖਰ *FName = Arg + 1;
     // Note that CurrentDir is only used for top-level rsp files, the rest will
     // always have an absolute path deduced from the containing file.
     SmallString<128> CurrDir;
-    if (llvm::sys::path::is_relative(FName)) {
-      if (CurrentDir.empty()) {
-        if (auto CWD = FS->getCurrentWorkingDirectory()) {
+    ਜੇ (llvm::sys::ਰਸਤਾ_2::is_relative(FName)) {
+      ਜੇ (CurrentDir.ਖਾਲੀ_ਥਾਵਾਂ()) {
+        ਜੇ (ਸਵੈਚਾਲਿਤ CWD = FS->getCurrentWorkingDirectory()) {
           CurrDir = *CWD;
-        } else {
-          return createStringError(
+        } ਨਹੀਂਤਾਂ {
+          ਵਾਪਸ createStringError(
               CWD.getError(), Twine("cannot get absolute path for: ") + FName);
         }
-      } else {
+      } ਨਹੀਂਤਾਂ {
         CurrDir = CurrentDir;
       }
-      llvm::sys::path::append(CurrDir, FName);
+      llvm::sys::ਰਸਤਾ_2::append(CurrDir, FName);
       FName = CurrDir.c_str();
     }
 
-    ErrorOr<llvm::vfs::Status> Res = FS->status(FName);
-    if (!Res || !Res->exists()) {
-      std::error_code EC = Res.getError();
-      if (!InConfigFile) {
+    ErrorOr<llvm::vfs::ਸਥਿਤੀ> Res = FS->ਸਥਿਤੀ_2(FName);
+    ਜੇ (!Res || !Res->exists()) {
+      std::error_ਕੋਡ EC = Res.getError();
+      ਜੇ (!ਵਿੱਚ_Config_File) {
         // If the specified file does not exist, leave '@file' unexpanded, as
         // libiberty does.
-        if (!EC || EC == llvm::errc::no_such_file_or_directory) {
+        ਜੇ (!EC || EC == llvm::errc::no_such_file_or_directory) {
           ++I;
-          continue;
+          ਜਾਰੀ;
         }
       }
-      if (!EC)
+      ਜੇ (!EC)
         EC = llvm::errc::no_such_file_or_directory;
-      return createStringError(EC, Twine("cannot not open file '") + FName +
-                                       "': " + EC.message());
+      ਵਾਪਸ createStringError(EC, Twine("cannot not open file '") + FName +
+                                       "': " + EC.ਸੁਨੇਹਾ_2());
     }
-    const llvm::vfs::Status &FileStatus = Res.get();
+    ਅਚਲ llvm::vfs::ਸਥਿਤੀ &File_ਸਥਿਤੀ = Res.get();
 
-    auto IsEquivalent =
-        [FileStatus, this](const ResponseFileRecord &RFile) -> ErrorOr<bool> {
-      ErrorOr<llvm::vfs::Status> RHS = FS->status(RFile.File);
-      if (!RHS)
-        return RHS.getError();
-      return FileStatus.equivalent(*RHS);
+    ਸਵੈਚਾਲਿਤ IsEquivalent =
+        [File_ਸਥਿਤੀ, ਇਹ](ਅਚਲ Response_File_ਰਿਕਾਰਡ &RFile) -> ErrorOr<ਤਾਰਕਿਕ> {
+      ErrorOr<llvm::vfs::ਸਥਿਤੀ> RHS = FS->ਸਥਿਤੀ_2(RFile.File);
+      ਜੇ (!RHS)
+        ਵਾਪਸ RHS.getError();
+      ਵਾਪਸ File_ਸਥਿਤੀ.equivalent(*RHS);
     };
 
     // Check for recursive response files.
-    for (const auto &F : drop_begin(FileStack)) {
-      if (ErrorOr<bool> R = IsEquivalent(F)) {
-        if (R.get())
-          return createStringError(
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &F : drop_begin(File_ਢੇਰ)) {
+      ਜੇ (ErrorOr<ਤਾਰਕਿਕ> R = IsEquivalent(F)) {
+        ਜੇ (R.get())
+          ਵਾਪਸ createStringError(
               R.getError(), Twine("recursive expansion of: '") + F.File + "'");
-      } else {
-        return createStringError(R.getError(),
+      } ਨਹੀਂਤਾਂ {
+        ਵਾਪਸ createStringError(R.getError(),
                                  Twine("cannot open file: ") + F.File);
       }
     }
 
     // Replace this response file argument with the tokenization of its
     // contents.  Nested response files are expanded in subsequent iterations.
-    SmallVector<const char *, 0> ExpandedArgv;
-    if (Error Err = expandResponseFile(FName, ExpandedArgv))
-      return Err;
+    Small_ਸਦਿਸ਼<ਅਚਲ ਅੱਖਰ *, 0> ExpandedArgv;
+    ਜੇ (Error Err = expandResponseFile(FName, ExpandedArgv))
+      ਵਾਪਸ Err;
 
-    for (ResponseFileRecord &Record : FileStack) {
+    ਲਈ (Response_File_ਰਿਕਾਰਡ &ਰਿਕਾਰਡ : File_ਢੇਰ) {
       // Increase the end of all active records by the number of newly expanded
       // arguments, minus the response file itself.
-      Record.End += ExpandedArgv.size() - 1;
+      ਰਿਕਾਰਡ.ਸਿਰਾ_2 += ExpandedArgv.ਮਾਪ_2() - 1;
     }
 
-    FileStack.push_back({FName, I + ExpandedArgv.size()});
+    File_ਢੇਰ.ਧੱਕੋ_ਪਿੱਠ({FName, I + ExpandedArgv.ਮਾਪ_2()});
     Argv.erase(Argv.begin() + I);
-    Argv.insert(Argv.begin() + I, ExpandedArgv.begin(), ExpandedArgv.end());
+    Argv.ਪਾਓ(Argv.begin() + I, ExpandedArgv.begin(), ExpandedArgv.ਸਿਰਾ());
   }
 
   // If successful, the top of the file stack will mark the end of the Argv
@@ -1350,319 +1350,319 @@ Error ExpansionContext::expandResponseFiles(
   // Note that FileStack may have more than one element at this point because we
   // don't have a chance to pop the stack when encountering recursive files at
   // the end of the stream, so seeing that doesn't indicate a bug.
-  assert(FileStack.size() > 0 && Argv.size() == FileStack.back().End);
-  return Error::success();
+  ਪ੍ਰਤਿਜ੍ਞਾ(File_ਢੇਰ.ਮਾਪ_2() > 0 && Argv.ਮਾਪ_2() == File_ਢੇਰ.ਪਿੱਠ().ਸਿਰਾ_2);
+  ਵਾਪਸ Error::success();
 }
 
-bool cl::expandResponseFiles(int Argc, const char *const *Argv,
-                             const char *EnvVar, StringSaver &Saver,
-                             SmallVectorImpl<const char *> &NewArgv) {
-#ifdef _WIN32
-  auto Tokenize = cl::TokenizeWindowsCommandLine;
-#else
-  auto Tokenize = cl::TokenizeGNUCommandLine;
-#endif
+ਤਾਰਕਿਕ cl::expandResponseFiles(ਪੂਰਨ Argc, ਅਚਲ ਅੱਖਰ *ਅਚਲ *Argv,
+                             ਅਚਲ ਅੱਖਰ *EnvVar, StringSaver &Saver,
+                             Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &NewArgv) {
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+  ਸਵੈਚਾਲਿਤ Tokenize = cl::Tokenize_Windows_Command_ਸਤਰ;
+#ਨਹੀਂਤਾਂ
+  ਸਵੈਚਾਲਿਤ Tokenize = cl::Tokenize_GNUCommand_ਸਤਰ;
+#ਜੇ_ਅੰਤ
   // The environment variable specifies initial options.
-  if (EnvVar)
-    if (std::optional<std::string> EnvValue = sys::Process::GetEnv(EnvVar))
-      Tokenize(*EnvValue, Saver, NewArgv, /*MarkEOLs=*/false);
+  ਜੇ (EnvVar)
+    ਜੇ (std::optional<std::string> Env_ਮੁੱਲ = sys::Process::GetEnv(EnvVar))
+      Tokenize(*Env_ਮੁੱਲ, Saver, NewArgv, /*MarkEOLs=*/ਝੂਠ);
 
   // Command line options can override the environment variable.
   NewArgv.append(Argv + 1, Argv + Argc);
   ExpansionContext ECtx(Saver.getAllocator(), Tokenize);
-  if (Error Err = ECtx.expandResponseFiles(NewArgv)) {
-    errs() << toString(std::move(Err)) << '\n';
-    return false;
+  ਜੇ (Error Err = ECtx.expandResponseFiles(NewArgv)) {
+    errs() << ਮੰਜ਼ਿਲ_String(std::move(Err)) << '\n';
+    ਵਾਪਸ ਝੂਠ;
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
-bool cl::ExpandResponseFiles(StringSaver &Saver, TokenizerCallback Tokenizer,
-                             SmallVectorImpl<const char *> &Argv) {
+ਤਾਰਕਿਕ cl::ExpandResponseFiles(StringSaver &Saver, TokenizerCallback Tokenizer,
+                             Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &Argv) {
   ExpansionContext ECtx(Saver.getAllocator(), Tokenizer);
-  if (Error Err = ECtx.expandResponseFiles(Argv)) {
-    errs() << toString(std::move(Err)) << '\n';
-    return false;
+  ਜੇ (Error Err = ECtx.expandResponseFiles(Argv)) {
+    errs() << ਮੰਜ਼ਿਲ_String(std::move(Err)) << '\n';
+    ਵਾਪਸ ਝੂਠ;
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
 ExpansionContext::ExpansionContext(BumpPtrAllocator &A, TokenizerCallback T,
                                    vfs::FileSystem *FS)
     : Saver(A), Tokenizer(T), FS(FS ? FS : vfs::getRealFileSystem().get()) {}
 
-bool ExpansionContext::findConfigFile(StringRef FileName,
-                                      SmallVectorImpl<char> &FilePath) {
-  SmallString<128> CfgFilePath;
-  const auto FileExists = [this](SmallString<128> Path) -> bool {
-    auto Status = FS->status(Path);
-    return Status &&
-           Status->getType() == llvm::sys::fs::file_type::regular_file;
+ਤਾਰਕਿਕ ExpansionContext::ਲੱਭੋ_Config_File(StringRef FileName,
+                                      Small_ਸਦਿਸ਼_Impl<ਅੱਖਰ> &File_ਰਸਤਾ) {
+  SmallString<128> Cfg_File_ਰਸਤਾ;
+  ਅਚਲ ਸਵੈਚਾਲਿਤ FileExists = [ਇਹ](SmallString<128> ਰਸਤਾ) -> ਤਾਰਕਿਕ {
+    ਸਵੈਚਾਲਿਤ ਸਥਿਤੀ = FS->ਸਥਿਤੀ_2(ਰਸਤਾ);
+    ਵਾਪਸ ਸਥਿਤੀ &&
+           ਸਥਿਤੀ->getType() == llvm::sys::fs::file_type::regular_file;
   };
 
   // If file name contains directory separator, treat it as a path to
   // configuration file.
-  if (llvm::sys::path::has_parent_path(FileName)) {
-    CfgFilePath = FileName;
-    if (llvm::sys::path::is_relative(FileName) && FS->makeAbsolute(CfgFilePath))
-      return false;
-    if (!FileExists(CfgFilePath))
-      return false;
-    FilePath.assign(CfgFilePath.begin(), CfgFilePath.end());
-    return true;
+  ਜੇ (llvm::sys::ਰਸਤਾ_2::has_ਮਾਪਾ_ਰਸਤਾ(FileName)) {
+    Cfg_File_ਰਸਤਾ = FileName;
+    ਜੇ (llvm::sys::ਰਸਤਾ_2::is_relative(FileName) && FS->makeAbsolute(Cfg_File_ਰਸਤਾ))
+      ਵਾਪਸ ਝੂਠ;
+    ਜੇ (!FileExists(Cfg_File_ਰਸਤਾ))
+      ਵਾਪਸ ਝੂਠ;
+    File_ਰਸਤਾ.ਸੌਂਪੋ(Cfg_File_ਰਸਤਾ.begin(), Cfg_File_ਰਸਤਾ.ਸਿਰਾ());
+    ਵਾਪਸ ਸੱਚ;
   }
 
   // Look for the file in search directories.
-  for (const StringRef &Dir : SearchDirs) {
-    if (Dir.empty())
-      continue;
-    CfgFilePath.assign(Dir);
-    llvm::sys::path::append(CfgFilePath, FileName);
-    llvm::sys::path::native(CfgFilePath);
-    if (FileExists(CfgFilePath)) {
-      FilePath.assign(CfgFilePath.begin(), CfgFilePath.end());
-      return true;
+  ਲਈ (ਅਚਲ StringRef &Dir : ਖੋਜ_Dirs) {
+    ਜੇ (Dir.ਖਾਲੀ_ਥਾਵਾਂ())
+      ਜਾਰੀ;
+    Cfg_File_ਰਸਤਾ.ਸੌਂਪੋ(Dir);
+    llvm::sys::ਰਸਤਾ_2::append(Cfg_File_ਰਸਤਾ, FileName);
+    llvm::sys::ਰਸਤਾ_2::native(Cfg_File_ਰਸਤਾ);
+    ਜੇ (FileExists(Cfg_File_ਰਸਤਾ)) {
+      File_ਰਸਤਾ.ਸੌਂਪੋ(Cfg_File_ਰਸਤਾ.begin(), Cfg_File_ਰਸਤਾ.ਸਿਰਾ());
+      ਵਾਪਸ ਸੱਚ;
     }
   }
 
-  return false;
+  ਵਾਪਸ ਝੂਠ;
 }
 
 Error ExpansionContext::readConfigFile(StringRef CfgFile,
-                                       SmallVectorImpl<const char *> &Argv) {
-  SmallString<128> AbsPath;
-  if (sys::path::is_relative(CfgFile)) {
-    AbsPath.assign(CfgFile);
-    if (std::error_code EC = FS->makeAbsolute(AbsPath))
-      return make_error<StringError>(
+                                       Small_ਸਦਿਸ਼_Impl<ਅਚਲ ਅੱਖਰ *> &Argv) {
+  SmallString<128> Abs_ਰਸਤਾ;
+  ਜੇ (sys::ਰਸਤਾ_2::is_relative(CfgFile)) {
+    Abs_ਰਸਤਾ.ਸੌਂਪੋ(CfgFile);
+    ਜੇ (std::error_ਕੋਡ EC = FS->makeAbsolute(Abs_ਰਸਤਾ))
+      ਵਾਪਸ make_error<StringError>(
           EC, Twine("cannot get absolute path for " + CfgFile));
-    CfgFile = AbsPath.str();
+    CfgFile = Abs_ਰਸਤਾ.str();
   }
-  InConfigFile = true;
-  RelativeNames = true;
-  if (Error Err = expandResponseFile(CfgFile, Argv))
-    return Err;
-  return expandResponseFiles(Argv);
+  ਵਿੱਚ_Config_File = ਸੱਚ;
+  Relative_ਨਾਂ = ਸੱਚ;
+  ਜੇ (Error Err = expandResponseFile(CfgFile, Argv))
+    ਵਾਪਸ Err;
+  ਵਾਪਸ expandResponseFiles(Argv);
 }
 
-static void initCommonOptions();
-static bool parseCommandLineOptionsImpl(LibraryOptionsContext *Context,
-                                        ArrayRef<const char *> Args,
+ਸਥਿਰ ਖਾਲੀ initCommonOptions();
+ਸਥਿਰ ਤਾਰਕਿਕ parse_Command_ਸਤਰ_Options_Impl(LibraryOptionsContext *Context,
+                                        ArrayRef<ਅਚਲ ਅੱਖਰ *> ਦਲੀਲਾਂ,
                                         StringRef Overview, raw_ostream *Errs,
                                         vfs::FileSystem *VFS,
-                                        const char *EnvVar) {
+                                        ਅਚਲ ਅੱਖਰ *EnvVar) {
   initCommonOptions();
-  SmallVector<const char *, 20> NewArgv;
+  Small_ਸਦਿਸ਼<ਅਚਲ ਅੱਖਰ *, 20> NewArgv;
   BumpPtrAllocator A;
   StringSaver Saver(A);
-  NewArgv.push_back(Args[0]);
+  NewArgv.ਧੱਕੋ_ਪਿੱਠ(ਦਲੀਲਾਂ[0]);
 
   // Parse options from environment variable.
-  if (EnvVar) {
-    if (std::optional<std::string> EnvValue =
+  ਜੇ (EnvVar) {
+    ਜੇ (std::optional<std::string> Env_ਮੁੱਲ =
             sys::Process::GetEnv(StringRef(EnvVar)))
-      TokenizeGNUCommandLine(*EnvValue, Saver, NewArgv);
+      Tokenize_GNUCommand_ਸਤਰ(*Env_ਮੁੱਲ, Saver, NewArgv);
   }
 
   // Append options from command line.
-  append_range(NewArgv, Args.drop_front());
-  int NewArgc = static_cast<int>(NewArgv.size());
+  append_range(NewArgv, ਦਲੀਲਾਂ.drop_front());
+  ਪੂਰਨ NewArgc = static_cast<ਪੂਰਨ>(NewArgv.ਮਾਪ_2());
 
   // Parse all options.
-  return globalParser().ParseCommandLineOptions(NewArgc, &NewArgv[0], Overview,
+  ਵਾਪਸ globalParser().Parse_Command_ਸਤਰ_Options(NewArgc, &NewArgv[0], Overview,
                                                 Errs, VFS, Context);
 }
 
-bool cl::ParseCommandLineOptions(int argc, const char *const *argv,
+ਤਾਰਕਿਕ cl::Parse_Command_ਸਤਰ_Options(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ *ਅਚਲ *argv,
                                  StringRef Overview, raw_ostream *Errs,
-                                 vfs::FileSystem *VFS, const char *EnvVar) {
-  return parseCommandLineOptionsImpl(nullptr, ArrayRef(argv, argc), Overview,
+                                 vfs::FileSystem *VFS, ਅਚਲ ਅੱਖਰ *EnvVar) {
+  ਵਾਪਸ parse_Command_ਸਤਰ_Options_Impl(ਖਾਲੀ_ਸੂਚਕ, ArrayRef(argv, argc), Overview,
                                      Errs, VFS, EnvVar);
 }
 
-bool cl::parseCommandLineOptions(LibraryOptionsContext &Context,
-                                 ArrayRef<const char *> Args,
+ਤਾਰਕਿਕ cl::parse_Command_ਸਤਰ_Options(LibraryOptionsContext &Context,
+                                 ArrayRef<ਅਚਲ ਅੱਖਰ *> ਦਲੀਲਾਂ,
                                  StringRef Overview, raw_ostream *Errs,
-                                 vfs::FileSystem *VFS, const char *EnvVar) {
-  return parseCommandLineOptionsImpl(&Context, Args, Overview, Errs, VFS,
+                                 vfs::FileSystem *VFS, ਅਚਲ ਅੱਖਰ *EnvVar) {
+  ਵਾਪਸ parse_Command_ਸਤਰ_Options_Impl(&Context, ਦਲੀਲਾਂ, Overview, Errs, VFS,
                                      EnvVar);
 }
 
 /// Reset all options at least once, so that we can parse different options.
-void CommandLineParser::ResetAllOptionOccurrences() {
+ਖਾਲੀ Command_ਸਤਰ_Parser::ResetAllOptionOccurrences() {
   // Reset all option values to look like they have never been seen before.
   // Options might be reset twice (they can be reference in both OptionsMap
   // and one of the other members), but that does not harm.
-  for (auto *SC : RegisteredSubCommands) {
+  ਲਈ (ਸਵੈਚਾਲਿਤ *SC : RegisteredSubCommands) {
     // reset() removes default options from OptionsMap (via removeArgument), so
     // collect the options first to avoid invalidating the map iterator.
-    SmallVector<Option *, 0> Opts;
-    Opts.reserve(SC->OptionsMap.size());
-    for (auto &O : SC->OptionsMap)
-      Opts.push_back(O.second);
-    for (Option *O : Opts)
+    Small_ਸਦਿਸ਼<Option *, 0> Opts;
+    Opts.reserve(SC->OptionsMap.ਮਾਪ_2());
+    ਲਈ (ਸਵੈਚਾਲਿਤ &O : SC->OptionsMap)
+      Opts.ਧੱਕੋ_ਪਿੱਠ(O.ਦੂਜਾ_2);
+    ਲਈ (Option *O : Opts)
       O->reset();
-    for (Option *O : SC->PositionalOpts)
+    ਲਈ (Option *O : SC->PositionalOpts)
       O->reset();
-    if (SC->ConsumeAfterOpt)
+    ਜੇ (SC->ConsumeAfterOpt)
       SC->ConsumeAfterOpt->reset();
   }
-  for (LibraryOptions *L : Libraries)
+  ਲਈ (LibraryOptions *L : Libraries)
     L->reset();
   LibraryArgAlloc.Reset();
 }
 
-bool CommandLineParser::ParseCommandLineOptions(
-    int argc, const char *const *argv, StringRef Overview, raw_ostream *Errs,
+ਤਾਰਕਿਕ Command_ਸਤਰ_Parser::Parse_Command_ਸਤਰ_Options(
+    ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ *ਅਚਲ *argv, StringRef Overview, raw_ostream *Errs,
     vfs::FileSystem *VFS, LibraryOptionsContext *Context) {
-  assert(hasOptions() && "No options specified!");
+  ਪ੍ਰਤਿਜ੍ਞਾ(hasOptions() && "No options specified!");
 
-  ProgramOverview = Overview;
-  bool IgnoreErrors = Errs;
-  if (!Errs)
+  ਪ੍ਰੋਗਰਾਮ_Overview = Overview;
+  ਤਾਰਕਿਕ IgnoreErrors = Errs;
+  ਜੇ (!Errs)
     Errs = &errs();
-  if (!VFS)
+  ਜੇ (!VFS)
     VFS = vfs::getRealFileSystem().get();
-  bool ErrorParsing = false;
+  ਤਾਰਕਿਕ ErrorParsing = ਝੂਠ;
 
   // Expand response files.
-  SmallVector<const char *, 20> newArgv(argv, argv + argc);
+  Small_ਸਦਿਸ਼<ਅਚਲ ਅੱਖਰ *, 20> newArgv(argv, argv + argc);
   BumpPtrAllocator A;
-#ifdef _WIN32
-  auto Tokenize = cl::TokenizeWindowsCommandLine;
-#else
-  auto Tokenize = cl::TokenizeGNUCommandLine;
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+  ਸਵੈਚਾਲਿਤ Tokenize = cl::Tokenize_Windows_Command_ਸਤਰ;
+#ਨਹੀਂਤਾਂ
+  ਸਵੈਚਾਲਿਤ Tokenize = cl::Tokenize_GNUCommand_ਸਤਰ;
+#ਜੇ_ਅੰਤ
   ExpansionContext ECtx(A, Tokenize, VFS);
-  if (Error Err = ECtx.expandResponseFiles(newArgv)) {
-    *Errs << toString(std::move(Err)) << '\n';
-    return false;
+  ਜੇ (Error Err = ECtx.expandResponseFiles(newArgv)) {
+    *Errs << ਮੰਜ਼ਿਲ_String(std::move(Err)) << '\n';
+    ਵਾਪਸ ਝੂਠ;
   }
   argv = &newArgv[0];
-  argc = static_cast<int>(newArgv.size());
+  argc = static_cast<ਪੂਰਨ>(newArgv.ਮਾਪ_2());
 
   // Copy the program name into ProgName, making sure not to overflow it.
-  ProgramName = std::string(sys::path::filename(StringRef(argv[0])));
-  indexLibraryOptions();
+  ਪ੍ਰੋਗਰਾਮ_Name = std::string(sys::ਰਸਤਾ_2::filename(StringRef(argv[0])));
+  ਸੂਚਕਾਂਕ_Library_Options();
 
   // Check out the positional arguments to collect information about them.
-  unsigned NumPositionalRequired = 0;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੰਕ_Positional_Required = 0;
 
   // Determine whether or not there are an unlimited number of positionals
-  bool HasUnlimitedPositionals = false;
+  ਤਾਰਕਿਕ HasUnlimitedPositionals = ਝੂਠ;
 
-  int FirstArg = 1;
-  SubCommand *ChosenSubCommand = &SubCommand::getTopLevel();
-  std::string NearestSubCommandString;
-  bool MaybeNamedSubCommand =
-      argc >= 2 && argv[FirstArg][0] != '-' && hasNamedSubCommands();
-  if (MaybeNamedSubCommand) {
+  ਪੂਰਨ ਪਹਿਲਾ_Arg = 1;
+  SubCommand *ChosenSubCommand = &SubCommand::get_ਸਿਖਰ_Level();
+  std::string ਸਭ_ਤੋਂ_ਨੇੜੇ_Sub_Command_String;
+  ਤਾਰਕਿਕ MaybeNamedSubCommand =
+      argc >= 2 && argv[ਪਹਿਲਾ_Arg][0] != '-' && hasNamedSubCommands();
+  ਜੇ (MaybeNamedSubCommand) {
     // If the first argument specifies a valid subcommand, start processing
     // options from the second argument.
     ChosenSubCommand =
-        LookupSubCommand(StringRef(argv[FirstArg]), NearestSubCommandString);
-    if (ChosenSubCommand != &SubCommand::getTopLevel())
-      FirstArg = 2;
+        LookupSubCommand(StringRef(argv[ਪਹਿਲਾ_Arg]), ਸਭ_ਤੋਂ_ਨੇੜੇ_Sub_Command_String);
+    ਜੇ (ChosenSubCommand != &SubCommand::get_ਸਿਖਰ_Level())
+      ਪਹਿਲਾ_Arg = 2;
   }
-  globalParser().ActiveSubCommand = ChosenSubCommand;
+  globalParser().ਸਰਗਰਮ_Sub_Command = ChosenSubCommand;
 
-  assert(ChosenSubCommand);
-  auto &ConsumeAfterOpt = ChosenSubCommand->ConsumeAfterOpt;
-  auto &PositionalOpts = ChosenSubCommand->PositionalOpts;
-  auto &OptionsMap = ChosenSubCommand->OptionsMap;
+  ਪ੍ਰਤਿਜ੍ਞਾ(ChosenSubCommand);
+  ਸਵੈਚਾਲਿਤ &ConsumeAfterOpt = ChosenSubCommand->ConsumeAfterOpt;
+  ਸਵੈਚਾਲਿਤ &PositionalOpts = ChosenSubCommand->PositionalOpts;
+  ਸਵੈਚਾਲਿਤ &OptionsMap = ChosenSubCommand->OptionsMap;
 
-  if (ConsumeAfterOpt) {
-    assert(PositionalOpts.size() > 0 &&
+  ਜੇ (ConsumeAfterOpt) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(PositionalOpts.ਮਾਪ_2() > 0 &&
            "Cannot specify cl::ConsumeAfter without a positional argument!");
   }
-  if (!PositionalOpts.empty()) {
+  ਜੇ (!PositionalOpts.ਖਾਲੀ_ਥਾਵਾਂ()) {
 
     // Calculate how many positional values are _required_.
-    bool UnboundedFound = false;
-    for (size_t i = 0, e = PositionalOpts.size(); i != e; ++i) {
+    ਤਾਰਕਿਕ Unbounded_ਮਿਲਿਆ = ਝੂਠ;
+    ਲਈ (size_t i = 0, e = PositionalOpts.ਮਾਪ_2(); i != e; ++i) {
       Option *Opt = PositionalOpts[i];
-      if (RequiresValue(Opt))
-        ++NumPositionalRequired;
-      else if (ConsumeAfterOpt) {
+      ਜੇ (Requires_ਮੁੱਲ(Opt))
+        ++ਅੰਕ_Positional_Required;
+      ਨਹੀਂਤਾਂ ਜੇ (ConsumeAfterOpt) {
         // ConsumeAfter cannot be combined with "optional" positional options
         // unless there is only one positional argument...
-        if (PositionalOpts.size() > 1) {
-          if (!IgnoreErrors)
+        ਜੇ (PositionalOpts.ਮਾਪ_2() > 1) {
+          ਜੇ (!IgnoreErrors)
             Opt->error("error - this positional option will never be matched, "
                        "because it does not Require a value, and a "
                        "cl::ConsumeAfter option is active!");
-          ErrorParsing = true;
+          ErrorParsing = ਸੱਚ;
         }
-      } else if (UnboundedFound && !Opt->hasArgStr()) {
+      } ਨਹੀਂਤਾਂ ਜੇ (Unbounded_ਮਿਲਿਆ && !Opt->hasArgStr()) {
         // This option does not "require" a value...  Make sure this option is
         // not specified after an option that eats all extra arguments, or this
         // one will never get any!
         //
-        if (!IgnoreErrors)
+        ਜੇ (!IgnoreErrors)
           Opt->error("error - option can never match, because "
                      "another positional argument will match an "
                      "unbounded number of values, and this option"
                      " does not require a value!");
-        *Errs << ProgramName << ": CommandLine Error: Option '" << Opt->ArgStr
+        *Errs << ਪ੍ਰੋਗਰਾਮ_Name << ": CommandLine Error: Option '" << Opt->ArgStr
               << "' is all messed up!\n";
-        *Errs << PositionalOpts.size();
-        ErrorParsing = true;
+        *Errs << PositionalOpts.ਮਾਪ_2();
+        ErrorParsing = ਸੱਚ;
       }
-      UnboundedFound |= EatsUnboundedNumberOfValues(Opt);
+      Unbounded_ਮਿਲਿਆ |= Eats_Unbounded_ਸੰਖਿਆ_ਦਾ_ਮੁੱਲਾਂ(Opt);
     }
-    HasUnlimitedPositionals = UnboundedFound || ConsumeAfterOpt;
+    HasUnlimitedPositionals = Unbounded_ਮਿਲਿਆ || ConsumeAfterOpt;
   }
 
   // PositionalVals - A vector of "positional" arguments we accumulate into
   // the process at the end.
   //
-  SmallVector<std::pair<StringRef, unsigned>, 4> PositionalVals;
+  Small_ਸਦਿਸ਼<std::pair<StringRef, ਬਿਨਾਨਿਸ਼ਾਨੀ>, 4> PositionalVals;
 
   // If the program has named positional arguments, and the name has been run
   // across, keep track of which positional argument was named.  Otherwise put
   // the positional args into the PositionalVals list...
-  Option *ActivePositionalArg = nullptr;
+  Option *ਸਰਗਰਮ_Positional_Arg = ਖਾਲੀ_ਸੂਚਕ;
 
   // Loop over all of the arguments... processing them.
-  bool DashDashFound = false; // Have we read '--'?
-  for (int i = FirstArg; i < argc; ++i) {
-    Option *Handler = nullptr;
-    std::string NearestHandlerString;
-    StringRef Value;
+  ਤਾਰਕਿਕ Dash_Dash_ਮਿਲਿਆ = ਝੂਠ; // Have we read '--'?
+  ਲਈ (ਪੂਰਨ i = ਪਹਿਲਾ_Arg; i < argc; ++i) {
+    Option *Handler = ਖਾਲੀ_ਸੂਚਕ;
+    std::string ਸਭ_ਤੋਂ_ਨੇੜੇ_Handler_String;
+    StringRef ਮੁੱਲ;
     StringRef ArgName = "";
 
     // Check to see if this is a positional argument.  This argument is
     // considered to be positional if it doesn't start with '-', if it is "-"
     // itself, or if we have seen "--" already.
     //
-    if (argv[i][0] != '-' || argv[i][1] == 0 || DashDashFound) {
+    ਜੇ (argv[i][0] != '-' || argv[i][1] == 0 || Dash_Dash_ਮਿਲਿਆ) {
       // Positional argument!
-      if (ActivePositionalArg) {
-        ProvidePositionalOption(ActivePositionalArg, StringRef(argv[i]), i);
-        continue; // We are done!
+      ਜੇ (ਸਰਗਰਮ_Positional_Arg) {
+        ProvidePositionalOption(ਸਰਗਰਮ_Positional_Arg, StringRef(argv[i]), i);
+        ਜਾਰੀ; // We are done!
       }
 
-      if (!PositionalOpts.empty()) {
-        PositionalVals.push_back(std::make_pair(StringRef(argv[i]), i));
+      ਜੇ (!PositionalOpts.ਖਾਲੀ_ਥਾਵਾਂ()) {
+        PositionalVals.ਧੱਕੋ_ਪਿੱਠ(std::make_pair(StringRef(argv[i]), i));
 
         // All of the positional arguments have been fulfulled, give the rest to
         // the consume after option... if it's specified...
         //
-        if (PositionalVals.size() >= NumPositionalRequired && ConsumeAfterOpt) {
-          for (++i; i < argc; ++i)
-            PositionalVals.push_back(std::make_pair(StringRef(argv[i]), i));
-          break; // Handle outside of the argument processing loop...
+        ਜੇ (PositionalVals.ਮਾਪ_2() >= ਅੰਕ_Positional_Required && ConsumeAfterOpt) {
+          ਲਈ (++i; i < argc; ++i)
+            PositionalVals.ਧੱਕੋ_ਪਿੱਠ(std::make_pair(StringRef(argv[i]), i));
+          ਰੋਕੋ; // Handle outside of the argument processing loop...
         }
 
         // Delay processing positional arguments until the end...
-        continue;
+        ਜਾਰੀ;
       }
-    } else if (argv[i][0] == '-' && argv[i][1] == '-' && argv[i][2] == 0 &&
-               !DashDashFound) {
-      DashDashFound = true; // This is the mythical "--"?
-      continue;             // Don't try to process it as an argument itself.
-    } else if (ActivePositionalArg &&
-               (ActivePositionalArg->getMiscFlags() & PositionalEatsArgs)) {
+    } ਨਹੀਂਤਾਂ ਜੇ (argv[i][0] == '-' && argv[i][1] == '-' && argv[i][2] == 0 &&
+               !Dash_Dash_ਮਿਲਿਆ) {
+      Dash_Dash_ਮਿਲਿਆ = ਸੱਚ; // This is the mythical "--"?
+      ਜਾਰੀ;             // Don't try to process it as an argument itself.
+    } ਨਹੀਂਤਾਂ ਜੇ (ਸਰਗਰਮ_Positional_Arg &&
+               (ਸਰਗਰਮ_Positional_Arg->getMiscFlags() & Positional_Eats_ਦਲੀਲਾਂ)) {
       // If there is a positional argument eating options, check to see if this
       // option is another positional argument.  If so, treat it as an argument,
       // otherwise feed it to the eating positional.
@@ -1670,148 +1670,148 @@ bool CommandLineParser::ParseCommandLineOptions(
       // Eat second dash.
       ArgName.consume_front("-");
 
-      Handler = LookupOption(*ChosenSubCommand, ArgName, Value);
-      if (!Handler || Handler->getFormattingFlag() != cl::Positional) {
-        ProvidePositionalOption(ActivePositionalArg, StringRef(argv[i]), i);
-        continue; // We are done!
+      Handler = LookupOption(*ChosenSubCommand, ArgName, ਮੁੱਲ);
+      ਜੇ (!Handler || Handler->getFormattingFlag() != cl::Positional) {
+        ProvidePositionalOption(ਸਰਗਰਮ_Positional_Arg, StringRef(argv[i]), i);
+        ਜਾਰੀ; // We are done!
       }
-    } else { // We start with a '-', must be an argument.
+    } ਨਹੀਂਤਾਂ { // We start with a '-', must be an argument.
       ArgName = StringRef(argv[i] + 1);
       // Eat second dash.
       ArgName.consume_front("-");
 
-      Handler = LookupOption(*ChosenSubCommand, ArgName, Value);
+      Handler = LookupOption(*ChosenSubCommand, ArgName, ਮੁੱਲ);
 
       // If Handler is not found in a specialized subcommand, look up handler
       // in the top-level subcommand.
       // cl::opt without cl::sub belongs to top-level subcommand.
-      if (!Handler && ChosenSubCommand != &SubCommand::getTopLevel())
-        Handler = LookupOption(SubCommand::getTopLevel(), ArgName, Value);
+      ਜੇ (!Handler && ChosenSubCommand != &SubCommand::get_ਸਿਖਰ_Level())
+        Handler = LookupOption(SubCommand::get_ਸਿਖਰ_Level(), ArgName, ਮੁੱਲ);
 
-      if (!Handler) {
-        if (LibraryOptions *L = lookupLibraryOption(ArgName.split('=').first)) {
-          ArrayRef<const char *> Rest(argv + i, argc - i);
-          unsigned N;
-          if (Error E = Context && L->isPerContext()
+      ਜੇ (!Handler) {
+        ਜੇ (LibraryOptions *L = lookupLibraryOption(ArgName.ਵੰਡੋ('=').ਪਹਿਲਾ_2)) {
+          ArrayRef<ਅਚਲ ਅੱਖਰ *> Rest(argv + i, argc - i);
+          ਬਿਨਾਨਿਸ਼ਾਨੀ N;
+          ਜੇ (Error E = Context && L->is_ਪ੍ਰਤੀ_Context()
                             ? Context->parse(*L, Rest, N)
                             : parseLibraryOption(*L, L->global(), Rest, N,
                                                  LibraryArgAlloc)) {
-            *Errs << ProgramName << ": " << toString(std::move(E)) << '\n';
-            ErrorParsing = true;
+            *Errs << ਪ੍ਰੋਗਰਾਮ_Name << ": " << ਮੰਜ਼ਿਲ_String(std::move(E)) << '\n';
+            ErrorParsing = ਸੱਚ;
           }
           i += N - 1;
-          continue;
+          ਜਾਰੀ;
         }
       }
 
       // Check to see if this "option" is really a prefixed argument.
-      if (!Handler)
-        Handler = HandlePrefixedOption(ArgName, Value, OptionsMap);
+      ਜੇ (!Handler)
+        Handler = HandlePrefixedOption(ArgName, ਮੁੱਲ, OptionsMap);
 
       // Otherwise, look for the closest available option to report to the user
       // in the upcoming error.
-      if (!Handler)
-        LookupNearestOption(ArgName, OptionsMap, NearestHandlerString);
+      ਜੇ (!Handler)
+        Lookup_ਸਭ_ਤੋਂ_ਨੇੜੇ_Option(ArgName, OptionsMap, ਸਭ_ਤੋਂ_ਨੇੜੇ_Handler_String);
     }
 
-    if (!Handler) {
-      auto ReportUnknownArgument = [&](bool IsArg,
-                                       StringRef NearestArgumentName) {
-        *Errs << ProgramName << ": Unknown "
+    ਜੇ (!Handler) {
+      ਸਵੈਚਾਲਿਤ Report_Unknown_ਦਲੀਲ = [&](ਤਾਰਕਿਕ IsArg,
+                                       StringRef ਸਭ_ਤੋਂ_ਨੇੜੇ_ਦਲੀਲ_Name) {
+        *Errs << ਪ੍ਰੋਗਰਾਮ_Name << ": Unknown "
               << (IsArg ? "command line argument" : "subcommand") << " '"
               << argv[i] << "'.  Try: '" << argv[0] << " --help'\n";
 
-        if (NearestArgumentName.empty())
-          return;
+        ਜੇ (ਸਭ_ਤੋਂ_ਨੇੜੇ_ਦਲੀਲ_Name.ਖਾਲੀ_ਥਾਵਾਂ())
+          ਵਾਪਸ;
 
-        *Errs << ProgramName << ": Did you mean '";
-        if (IsArg)
-          *Errs << PrintArg(NearestArgumentName, 0);
-        else
-          *Errs << NearestArgumentName;
+        *Errs << ਪ੍ਰੋਗਰਾਮ_Name << ": Did you mean '";
+        ਜੇ (IsArg)
+          *Errs << PrintArg(ਸਭ_ਤੋਂ_ਨੇੜੇ_ਦਲੀਲ_Name, 0);
+        ਨਹੀਂਤਾਂ
+          *Errs << ਸਭ_ਤੋਂ_ਨੇੜੇ_ਦਲੀਲ_Name;
         *Errs << "'?\n";
       };
 
-      if (i > 1 || !MaybeNamedSubCommand)
-        ReportUnknownArgument(/*IsArg=*/true, NearestHandlerString);
-      else
-        ReportUnknownArgument(/*IsArg=*/false, NearestSubCommandString);
+      ਜੇ (i > 1 || !MaybeNamedSubCommand)
+        Report_Unknown_ਦਲੀਲ(/*IsArg=*/ਸੱਚ, ਸਭ_ਤੋਂ_ਨੇੜੇ_Handler_String);
+      ਨਹੀਂਤਾਂ
+        Report_Unknown_ਦਲੀਲ(/*IsArg=*/ਝੂਠ, ਸਭ_ਤੋਂ_ਨੇੜੇ_Sub_Command_String);
 
-      ErrorParsing = true;
-      continue;
+      ErrorParsing = ਸੱਚ;
+      ਜਾਰੀ;
     }
 
     // If this is a named positional argument, just remember that it is the
     // active one...
-    if (Handler->getFormattingFlag() == cl::Positional) {
-      if ((Handler->getMiscFlags() & PositionalEatsArgs) && !Value.empty()) {
+    ਜੇ (Handler->getFormattingFlag() == cl::Positional) {
+      ਜੇ ((Handler->getMiscFlags() & Positional_Eats_ਦਲੀਲਾਂ) && !ਮੁੱਲ.ਖਾਲੀ_ਥਾਵਾਂ()) {
         Handler->error("This argument does not take a value.\n"
                        "\tInstead, it consumes any positional arguments until "
                        "the next recognized option.", *Errs);
-        ErrorParsing = true;
+        ErrorParsing = ਸੱਚ;
       }
-      ActivePositionalArg = Handler;
+      ਸਰਗਰਮ_Positional_Arg = Handler;
     }
-    else
-      ErrorParsing |= ProvideOption(Handler, ArgName, Value, argc, argv, i);
+    ਨਹੀਂਤਾਂ
+      ErrorParsing |= ProvideOption(Handler, ArgName, ਮੁੱਲ, argc, argv, i);
   }
 
   // Check and handle positional arguments now...
-  if (NumPositionalRequired > PositionalVals.size()) {
-      *Errs << ProgramName
+  ਜੇ (ਅੰਕ_Positional_Required > PositionalVals.ਮਾਪ_2()) {
+      *Errs << ਪ੍ਰੋਗਰਾਮ_Name
              << ": Not enough positional command line arguments specified!\n"
-             << "Must specify at least " << NumPositionalRequired
-             << " positional argument" << (NumPositionalRequired > 1 ? "s" : "")
+             << "Must specify at least " << ਅੰਕ_Positional_Required
+             << " positional argument" << (ਅੰਕ_Positional_Required > 1 ? "s" : "")
              << ": See: " << argv[0] << " --help\n";
 
-    ErrorParsing = true;
-  } else if (!HasUnlimitedPositionals &&
-             PositionalVals.size() > PositionalOpts.size()) {
-    *Errs << ProgramName << ": Too many positional arguments specified!\n"
-          << "Can specify at most " << PositionalOpts.size()
+    ErrorParsing = ਸੱਚ;
+  } ਨਹੀਂਤਾਂ ਜੇ (!HasUnlimitedPositionals &&
+             PositionalVals.ਮਾਪ_2() > PositionalOpts.ਮਾਪ_2()) {
+    *Errs << ਪ੍ਰੋਗਰਾਮ_Name << ": Too many positional arguments specified!\n"
+          << "Can specify at most " << PositionalOpts.ਮਾਪ_2()
           << " positional arguments: See: " << argv[0] << " --help\n";
-    ErrorParsing = true;
+    ErrorParsing = ਸੱਚ;
 
-  } else if (!ConsumeAfterOpt) {
+  } ਨਹੀਂਤਾਂ ਜੇ (!ConsumeAfterOpt) {
     // Positional args have already been handled if ConsumeAfter is specified.
-    unsigned ValNo = 0, NumVals = static_cast<unsigned>(PositionalVals.size());
-    for (Option *Opt : PositionalOpts) {
-      if (RequiresValue(Opt)) {
-        ProvidePositionalOption(Opt, PositionalVals[ValNo].first,
-                                PositionalVals[ValNo].second);
+    ਬਿਨਾਨਿਸ਼ਾਨੀ ValNo = 0, ਅੰਕ_Vals = static_cast<ਬਿਨਾਨਿਸ਼ਾਨੀ>(PositionalVals.ਮਾਪ_2());
+    ਲਈ (Option *Opt : PositionalOpts) {
+      ਜੇ (Requires_ਮੁੱਲ(Opt)) {
+        ProvidePositionalOption(Opt, PositionalVals[ValNo].ਪਹਿਲਾ_2,
+                                PositionalVals[ValNo].ਦੂਜਾ_2);
         ValNo++;
-        --NumPositionalRequired; // We fulfilled our duty...
+        --ਅੰਕ_Positional_Required; // We fulfilled our duty...
       }
 
       // If we _can_ give this option more arguments, do so now, as long as we
       // do not give it values that others need.  'Done' controls whether the
       // option even _WANTS_ any more.
       //
-      bool Done = Opt->getNumOccurrencesFlag() == cl::Required;
-      while (NumVals - ValNo > NumPositionalRequired && !Done) {
-        switch (Opt->getNumOccurrencesFlag()) {
-        case cl::Optional:
-          Done = true; // Optional arguments want _at most_ one value
+      ਤਾਰਕਿਕ ਪੂਰਾ = Opt->get_ਅੰਕ_Occurrences_Flag() == cl::Required;
+      ਜਦੋਂ (ਅੰਕ_Vals - ValNo > ਅੰਕ_Positional_Required && !ਪੂਰਾ) {
+        ਚੋਣ (Opt->get_ਅੰਕ_Occurrences_Flag()) {
+        ਹਾਲਤ cl::Optional:
+          ਪੂਰਾ = ਸੱਚ; // Optional arguments want _at most_ one value
           [[fallthrough]];
-        case cl::ZeroOrMore: // Zero or more will take all they can get...
-        case cl::OneOrMore:  // One or more will take all they can get...
-          ProvidePositionalOption(Opt, PositionalVals[ValNo].first,
-                                  PositionalVals[ValNo].second);
+        ਹਾਲਤ cl::Zero_Or_ਹੋਰ: // Zero or more will take all they can get...
+        ਹਾਲਤ cl::One_Or_ਹੋਰ:  // One or more will take all they can get...
+          ProvidePositionalOption(Opt, PositionalVals[ValNo].ਪਹਿਲਾ_2,
+                                  PositionalVals[ValNo].ਦੂਜਾ_2);
           ValNo++;
-          break;
-        default:
+          ਰੋਕੋ;
+        ਮੂਲ:
           llvm_unreachable("Internal error, unexpected NumOccurrences flag in "
                            "positional argument processing!");
         }
       }
     }
-  } else {
-    assert(ConsumeAfterOpt && NumPositionalRequired <= PositionalVals.size());
-    unsigned ValNo = 0;
-    for (Option *Opt : PositionalOpts)
-      if (RequiresValue(Opt)) {
+  } ਨਹੀਂਤਾਂ {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ConsumeAfterOpt && ਅੰਕ_Positional_Required <= PositionalVals.ਮਾਪ_2());
+    ਬਿਨਾਨਿਸ਼ਾਨੀ ValNo = 0;
+    ਲਈ (Option *Opt : PositionalOpts)
+      ਜੇ (Requires_ਮੁੱਲ(Opt)) {
         ErrorParsing |= ProvidePositionalOption(
-            Opt, PositionalVals[ValNo].first, PositionalVals[ValNo].second);
+            Opt, PositionalVals[ValNo].ਪਹਿਲਾ_2, PositionalVals[ValNo].ਦੂਜਾ_2);
         ValNo++;
       }
 
@@ -1820,33 +1820,33 @@ bool CommandLineParser::ParseCommandLineOptions(
     // positional option and keep the rest for the consume after.  The above
     // loop would have assigned no values to positional options in this case.
     //
-    if (PositionalOpts.size() == 1 && ValNo == 0 && !PositionalVals.empty()) {
+    ਜੇ (PositionalOpts.ਮਾਪ_2() == 1 && ValNo == 0 && !PositionalVals.ਖਾਲੀ_ਥਾਵਾਂ()) {
       ErrorParsing |= ProvidePositionalOption(PositionalOpts[0],
-                                              PositionalVals[ValNo].first,
-                                              PositionalVals[ValNo].second);
+                                              PositionalVals[ValNo].ਪਹਿਲਾ_2,
+                                              PositionalVals[ValNo].ਦੂਜਾ_2);
       ValNo++;
     }
 
     // Handle over all of the rest of the arguments to the
     // cl::ConsumeAfter command line option...
-    for (; ValNo != PositionalVals.size(); ++ValNo)
+    ਲਈ (; ValNo != PositionalVals.ਮਾਪ_2(); ++ValNo)
       ErrorParsing |=
-          ProvidePositionalOption(ConsumeAfterOpt, PositionalVals[ValNo].first,
-                                  PositionalVals[ValNo].second);
+          ProvidePositionalOption(ConsumeAfterOpt, PositionalVals[ValNo].ਪਹਿਲਾ_2,
+                                  PositionalVals[ValNo].ਦੂਜਾ_2);
   }
 
   // Loop over args and make sure all required args are specified!
-  for (const auto &Opt : OptionsMap) {
-    switch (Opt.second->getNumOccurrencesFlag()) {
-    case Required:
-    case OneOrMore:
-      if (Opt.second->getNumOccurrences() == 0) {
-        Opt.second->error("must be specified at least once!");
-        ErrorParsing = true;
+  ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Opt : OptionsMap) {
+    ਚੋਣ (Opt.ਦੂਜਾ_2->get_ਅੰਕ_Occurrences_Flag()) {
+    ਹਾਲਤ Required:
+    ਹਾਲਤ One_Or_ਹੋਰ:
+      ਜੇ (Opt.ਦੂਜਾ_2->get_ਅੰਕ_Occurrences() == 0) {
+        Opt.ਦੂਜਾ_2->error("must be specified at least once!");
+        ErrorParsing = ਸੱਚ;
       }
       [[fallthrough]];
-    default:
-      break;
+    ਮੂਲ:
+      ਰੋਕੋ;
     }
   }
 
@@ -1854,50 +1854,50 @@ bool CommandLineParser::ParseCommandLineOptions(
   // Note that if ReadResponseFiles == true, this must be done before the
   // memory allocated for the expanded command line is free()d below.
   LLVM_DEBUG(dbgs() << "Args: ";
-             for (int i = 0; i < argc; ++i) dbgs() << argv[i] << ' ';
+             ਲਈ (ਪੂਰਨ i = 0; i < argc; ++i) dbgs() << argv[i] << ' ';
              dbgs() << '\n';);
 
   // Free all of the memory allocated to the map.  Command line options may only
   // be processed once!
-  MoreHelp.clear();
+  ਹੋਰ_Help.clear();
 
   // If we had an error processing our arguments, don't let the program execute
-  if (ErrorParsing) {
-    if (!IgnoreErrors)
-      exit(1);
-    return false;
+  ਜੇ (ErrorParsing) {
+    ਜੇ (!IgnoreErrors)
+      ਬਾਹਰ_ਨਿਕਲੋ(1);
+    ਵਾਪਸ ਝੂਠ;
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
 //===----------------------------------------------------------------------===//
 // Option Base class implementation
 //
 
-bool Option::error(const Twine &Message, StringRef ArgName, raw_ostream &Errs) {
-  if (!ArgName.data())
+ਤਾਰਕਿਕ Option::error(ਅਚਲ Twine &ਸੁਨੇਹਾ_3, StringRef ArgName, raw_ostream &Errs) {
+  ਜੇ (!ArgName.ਅੰਕੜੇ())
     ArgName = ArgStr;
-  if (ArgName.empty())
+  ਜੇ (ArgName.ਖਾਲੀ_ਥਾਵਾਂ())
     Errs << HelpStr; // Be nice for positional arguments
-  else
-    Errs << globalParser().ProgramName << ": for the " << PrintArg(ArgName, 0);
+  ਨਹੀਂਤਾਂ
+    Errs << globalParser().ਪ੍ਰੋਗਰਾਮ_Name << ": for the " << PrintArg(ArgName, 0);
 
-  Errs << " option: " << Message << "\n";
-  return true;
+  Errs << " option: " << ਸੁਨੇਹਾ_3 << "\n";
+  ਵਾਪਸ ਸੱਚ;
 }
 
-bool Option::addOccurrence(unsigned pos, StringRef ArgName, StringRef Value) {
-  ++NumOccurrences;
-  return handleOccurrence(pos, ArgName, Value);
+ਤਾਰਕਿਕ Option::ਜੋੜੋ_Occurrence(ਬਿਨਾਨਿਸ਼ਾਨੀ pos, StringRef ArgName, StringRef ਮੁੱਲ) {
+  ++ਅੰਕ_Occurrences;
+  ਵਾਪਸ handleOccurrence(pos, ArgName, ਮੁੱਲ);
 }
 
 // getValueStr - Get the value description string, using "DefaultMsg" if nothing
 // has been specified yet.
 //
-static StringRef getValueStr(const Option &O, StringRef DefaultMsg) {
-  if (O.ValueStr.empty())
-    return DefaultMsg;
-  return O.ValueStr;
+ਸਥਿਰ StringRef get_ਮੁੱਲ_Str(ਅਚਲ Option &O, StringRef Default_ਸੁਨੇਹਾ) {
+  ਜੇ (O.ਮੁੱਲ_Str.ਖਾਲੀ_ਥਾਵਾਂ())
+    ਵਾਪਸ Default_ਸੁਨੇਹਾ;
+  ਵਾਪਸ O.ਮੁੱਲ_Str;
 }
 
 //===----------------------------------------------------------------------===//
@@ -1905,39 +1905,39 @@ static StringRef getValueStr(const Option &O, StringRef DefaultMsg) {
 //
 
 // Return the width of the option tag for printing...
-size_t alias::getOptionWidth() const {
-  return argPlusPrefixesSize(ArgStr);
+size_t alias::get_Option_ਚੌੜਾਈ() ਅਚਲ {
+  ਵਾਪਸ arg_Plus_Prefixes_ਮਾਪ(ArgStr);
 }
 
-void Option::printHelpStr(StringRef HelpStr, size_t Indent,
-                          size_t FirstLineIndentedBy) {
-  assert(Indent >= FirstLineIndentedBy);
-  std::pair<StringRef, StringRef> Split = HelpStr.split('\n');
-  outs().indent(Indent - FirstLineIndentedBy)
-      << ArgHelpPrefix << Split.first << "\n";
-  while (!Split.second.empty()) {
-    Split = Split.second.split('\n');
-    outs().indent(Indent) << Split.first << "\n";
+ਖਾਲੀ Option::printHelpStr(StringRef HelpStr, size_t Indent,
+                          size_t ਪਹਿਲਾ_ਸਤਰ_Indented_By) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(Indent >= ਪਹਿਲਾ_ਸਤਰ_Indented_By);
+  std::pair<StringRef, StringRef> ਵੰਡੋ_2 = HelpStr.ਵੰਡੋ('\n');
+  outs().indent(Indent - ਪਹਿਲਾ_ਸਤਰ_Indented_By)
+      << Arg_Help_ਅਗੇਤਰ << ਵੰਡੋ_2.ਪਹਿਲਾ_2 << "\n";
+  ਜਦੋਂ (!ਵੰਡੋ_2.ਦੂਜਾ_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਵੰਡੋ_2 = ਵੰਡੋ_2.ਦੂਜਾ_2.ਵੰਡੋ('\n');
+    outs().indent(Indent) << ਵੰਡੋ_2.ਪਹਿਲਾ_2 << "\n";
   }
 }
 
-void Option::printEnumValHelpStr(StringRef HelpStr, size_t BaseIndent,
-                                 size_t FirstLineIndentedBy) {
-  const StringRef ValHelpPrefix = "  ";
-  assert(BaseIndent >= FirstLineIndentedBy);
-  std::pair<StringRef, StringRef> Split = HelpStr.split('\n');
-  outs().indent(BaseIndent - FirstLineIndentedBy)
-      << ArgHelpPrefix << ValHelpPrefix << Split.first << "\n";
-  while (!Split.second.empty()) {
-    Split = Split.second.split('\n');
-    outs().indent(BaseIndent + ValHelpPrefix.size()) << Split.first << "\n";
+ਖਾਲੀ Option::printEnumValHelpStr(StringRef HelpStr, size_t ਅਧਾਰ_Indent,
+                                 size_t ਪਹਿਲਾ_ਸਤਰ_Indented_By) {
+  ਅਚਲ StringRef Val_Help_ਅਗੇਤਰ = "  ";
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਅਧਾਰ_Indent >= ਪਹਿਲਾ_ਸਤਰ_Indented_By);
+  std::pair<StringRef, StringRef> ਵੰਡੋ_2 = HelpStr.ਵੰਡੋ('\n');
+  outs().indent(ਅਧਾਰ_Indent - ਪਹਿਲਾ_ਸਤਰ_Indented_By)
+      << Arg_Help_ਅਗੇਤਰ << Val_Help_ਅਗੇਤਰ << ਵੰਡੋ_2.ਪਹਿਲਾ_2 << "\n";
+  ਜਦੋਂ (!ਵੰਡੋ_2.ਦੂਜਾ_2.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਵੰਡੋ_2 = ਵੰਡੋ_2.ਦੂਜਾ_2.ਵੰਡੋ('\n');
+    outs().indent(ਅਧਾਰ_Indent + Val_Help_ਅਗੇਤਰ.ਮਾਪ_2()) << ਵੰਡੋ_2.ਪਹਿਲਾ_2 << "\n";
   }
 }
 
 // Print out the option for the alias.
-void alias::printOptionInfo(size_t GlobalWidth) const {
+ਖਾਲੀ alias::printOptionInfo(size_t Global_ਚੌੜਾਈ) ਅਚਲ {
   outs() << PrintArg(ArgStr);
-  printHelpStr(HelpStr, GlobalWidth, argPlusPrefixesSize(ArgStr));
+  printHelpStr(HelpStr, Global_ਚੌੜਾਈ, arg_Plus_Prefixes_ਮਾਪ(ArgStr));
 }
 
 //===----------------------------------------------------------------------===//
@@ -1948,182 +1948,182 @@ void alias::printOptionInfo(size_t GlobalWidth) const {
 //
 
 // Return the width of the option tag for printing...
-size_t basic_parser_impl::getOptionWidth(const Option &O) const {
-  size_t Len = argPlusPrefixesSize(O.ArgStr);
-  auto ValName = getValueName();
-  if (!ValName.empty()) {
+size_t basic_parser_impl::get_Option_ਚੌੜਾਈ(ਅਚਲ Option &O) ਅਚਲ {
+  size_t Len = arg_Plus_Prefixes_ਮਾਪ(O.ArgStr);
+  ਸਵੈਚਾਲਿਤ ValName = get_ਮੁੱਲ_Name();
+  ਜੇ (!ValName.ਖਾਲੀ_ਥਾਵਾਂ()) {
     size_t FormattingLen = 3;
-    if (O.getMiscFlags() & PositionalEatsArgs)
+    ਜੇ (O.getMiscFlags() & Positional_Eats_ਦਲੀਲਾਂ)
       FormattingLen = 6;
-    Len += getValueStr(O, ValName).size() + FormattingLen;
+    Len += get_ਮੁੱਲ_Str(O, ValName).ਮਾਪ_2() + FormattingLen;
   }
 
-  return Len;
+  ਵਾਪਸ Len;
 }
 
 // printOptionInfo - Print out information about this option.  The
 // to-be-maintained width is specified.
 //
-void basic_parser_impl::printOptionInfo(const Option &O,
-                                        size_t GlobalWidth) const {
+ਖਾਲੀ basic_parser_impl::printOptionInfo(ਅਚਲ Option &O,
+                                        size_t Global_ਚੌੜਾਈ) ਅਚਲ {
   outs() << PrintArg(O.ArgStr);
 
-  auto ValName = getValueName();
-  if (!ValName.empty()) {
-    if (O.getMiscFlags() & PositionalEatsArgs) {
-      outs() << " <" << getValueStr(O, ValName) << ">...";
-    } else if (O.getValueExpectedFlag() == ValueOptional)
-      outs() << "[=<" << getValueStr(O, ValName) << ">]";
-    else {
-      outs() << (O.ArgStr.size() == 1 ? " <" : "=<") << getValueStr(O, ValName)
+  ਸਵੈਚਾਲਿਤ ValName = get_ਮੁੱਲ_Name();
+  ਜੇ (!ValName.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਜੇ (O.getMiscFlags() & Positional_Eats_ਦਲੀਲਾਂ) {
+      outs() << " <" << get_ਮੁੱਲ_Str(O, ValName) << ">...";
+    } ਨਹੀਂਤਾਂ ਜੇ (O.get_ਮੁੱਲ_Expected_Flag() == ਮੁੱਲ_Optional)
+      outs() << "[=<" << get_ਮੁੱਲ_Str(O, ValName) << ">]";
+    ਨਹੀਂਤਾਂ {
+      outs() << (O.ArgStr.ਮਾਪ_2() == 1 ? " <" : "=<") << get_ਮੁੱਲ_Str(O, ValName)
              << '>';
     }
   }
 
-  Option::printHelpStr(O.HelpStr, GlobalWidth, getOptionWidth(O));
+  Option::printHelpStr(O.HelpStr, Global_ਚੌੜਾਈ, get_Option_ਚੌੜਾਈ(O));
 }
 
-void basic_parser_impl::printOptionName(const Option &O,
-                                        size_t GlobalWidth) const {
+ਖਾਲੀ basic_parser_impl::printOptionName(ਅਚਲ Option &O,
+                                        size_t Global_ਚੌੜਾਈ) ਅਚਲ {
   outs() << PrintArg(O.ArgStr);
-  outs().indent(GlobalWidth - O.ArgStr.size());
+  outs().indent(Global_ਚੌੜਾਈ - O.ArgStr.ਮਾਪ_2());
 }
 
 // parser<bool> implementation
 //
-bool parser<bool>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                         bool &Value) {
-  return parseBool<bool, true, false>(O, ArgName, Arg, Value);
+ਤਾਰਕਿਕ parser<ਤਾਰਕਿਕ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                         ਤਾਰਕਿਕ &ਮੁੱਲ) {
+  ਵਾਪਸ parseBool<ਤਾਰਕਿਕ, ਸੱਚ, ਝੂਠ>(O, ArgName, Arg, ਮੁੱਲ);
 }
 
 // parser<boolOrDefault> implementation
 //
-bool parser<boolOrDefault>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                                  boolOrDefault &Value) {
-  return parseBool<boolOrDefault, boolOrDefault::BOU_TRUE,
-                   boolOrDefault::BOU_FALSE>(O, ArgName, Arg, Value);
+ਤਾਰਕਿਕ parser<boolOrDefault>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                                  boolOrDefault &ਮੁੱਲ) {
+  ਵਾਪਸ parseBool<boolOrDefault, boolOrDefault::BOU_TRUE,
+                   boolOrDefault::BOU_FALSE>(O, ArgName, Arg, ਮੁੱਲ);
 }
 
 // parser<FixedOrScalableQuantity> implementation
 //
-template <typename FixedOrScalableQuantityT>
-static bool parseFixedOrScalableQuantity(Option &O, StringRef Arg,
-                                         StringRef ValueKind,
-                                         FixedOrScalableQuantityT &Value) {
-  using ScalarTy = typename FixedOrScalableQuantityT::ScalarTy;
+ਸਾਂਚਾ <ਕਿਸਮ_ਨਾਂ FixedOrScalableQuantityT>
+ਸਥਿਰ ਤਾਰਕਿਕ parseFixedOrScalableQuantity(Option &O, StringRef Arg,
+                                         StringRef ਮੁੱਲ_ਕਿਸਮ,
+                                         FixedOrScalableQuantityT &ਮੁੱਲ) {
+  ਵਰਤੋਂ ScalarTy = ਕਿਸਮ_ਨਾਂ FixedOrScalableQuantityT::ScalarTy;
 
   Arg = Arg.trim();
 
-  ScalarTy MinValue;
-  if (!Arg.getAsInteger(0, MinValue)) {
-    Value = FixedOrScalableQuantityT::getFixed(MinValue);
-    return false;
+  ScalarTy Min_ਮੁੱਲ;
+  ਜੇ (!Arg.getAsInteger(0, Min_ਮੁੱਲ)) {
+    ਮੁੱਲ = FixedOrScalableQuantityT::getFixed(Min_ਮੁੱਲ);
+    ਵਾਪਸ ਝੂਠ;
   }
 
   StringRef Remainder = Arg;
-  if (!Remainder.consume_front("vscale"))
-    return O.error("'" + Arg + "' value invalid for " + ValueKind +
+  ਜੇ (!Remainder.consume_front("vscale"))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for " + ਮੁੱਲ_ਕਿਸਮ +
                    " argument!");
 
   Remainder = Remainder.ltrim();
-  if (!Remainder.consume_front('x'))
-    return O.error("'" + Arg + "' value invalid for " + ValueKind +
+  ਜੇ (!Remainder.consume_front('x'))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for " + ਮੁੱਲ_ਕਿਸਮ +
                    " argument!");
 
   Remainder = Remainder.ltrim();
-  if (Remainder.getAsInteger(0, MinValue))
-    return O.error("'" + Arg + "' value invalid for " + ValueKind +
+  ਜੇ (Remainder.getAsInteger(0, Min_ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for " + ਮੁੱਲ_ਕਿਸਮ +
                    " argument!");
 
-  Value = FixedOrScalableQuantityT::getScalable(MinValue);
-  return false;
+  ਮੁੱਲ = FixedOrScalableQuantityT::getScalable(Min_ਮੁੱਲ);
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<int> implementation
 //
-bool parser<int>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                        int &Value) {
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for integer argument!");
-  return false;
+ਤਾਰਕਿਕ parser<ਪੂਰਨ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                        ਪੂਰਨ &ਮੁੱਲ) {
+  ਜੇ (Arg.getAsInteger(0, ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for integer argument!");
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<long> implementation
 //
-bool parser<long>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                         long &Value) {
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for long argument!");
-  return false;
+ਤਾਰਕਿਕ parser<ਲੰਮਾ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                         ਲੰਮਾ &ਮੁੱਲ) {
+  ਜੇ (Arg.getAsInteger(0, ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for long argument!");
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<long long> implementation
 //
-bool parser<long long>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                              long long &Value) {
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for llong argument!");
-  return false;
+ਤਾਰਕਿਕ parser<ਲੰਮਾ ਲੰਮਾ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                              ਲੰਮਾ ਲੰਮਾ &ਮੁੱਲ) {
+  ਜੇ (Arg.getAsInteger(0, ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for llong argument!");
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<unsigned> implementation
 //
-bool parser<unsigned>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                             unsigned &Value) {
+ਤਾਰਕਿਕ parser<ਬਿਨਾਨਿਸ਼ਾਨੀ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                             ਬਿਨਾਨਿਸ਼ਾਨੀ &ਮੁੱਲ) {
 
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for uint argument!");
-  return false;
+  ਜੇ (Arg.getAsInteger(0, ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for uint argument!");
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<unsigned long> implementation
 //
-bool parser<unsigned long>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                                  unsigned long &Value) {
+ਤਾਰਕਿਕ parser<ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                                  ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ &ਮੁੱਲ) {
 
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for ulong argument!");
-  return false;
+  ਜੇ (Arg.getAsInteger(0, ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for ulong argument!");
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<unsigned long long> implementation
 //
-bool parser<unsigned long long>::parse(Option &O, StringRef ArgName,
+ਤਾਰਕਿਕ parser<ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ>::parse(Option &O, StringRef ArgName,
                                        StringRef Arg,
-                                       unsigned long long &Value) {
+                                       ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ &ਮੁੱਲ) {
 
-  if (Arg.getAsInteger(0, Value))
-    return O.error("'" + Arg + "' value invalid for ullong argument!");
-  return false;
+  ਜੇ (Arg.getAsInteger(0, ਮੁੱਲ))
+    ਵਾਪਸ O.error("'" + Arg + "' value invalid for ullong argument!");
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // parser<ElementCount> implementation
 //
-bool parser<ElementCount>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                                 ElementCount &Value) {
-  return parseFixedOrScalableQuantity(O, Arg, getValueName(), Value);
+ਤਾਰਕਿਕ parser<Element_ਗਿਣਤੀ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                                 Element_ਗਿਣਤੀ &ਮੁੱਲ) {
+  ਵਾਪਸ parseFixedOrScalableQuantity(O, Arg, get_ਮੁੱਲ_Name(), ਮੁੱਲ);
 }
 
 // parser<double>/parser<float> implementation
 //
-static bool parseDouble(Option &O, StringRef Arg, double &Value) {
-  if (to_float(Arg, Value))
-    return false;
-  return O.error("'" + Arg + "' value invalid for floating point argument!");
+ਸਥਿਰ ਤਾਰਕਿਕ parseDouble(Option &O, StringRef Arg, ਦੁੱਗਣਾ &ਮੁੱਲ) {
+  ਜੇ (ਮੰਜ਼ਿਲ_float(Arg, ਮੁੱਲ))
+    ਵਾਪਸ ਝੂਠ;
+  ਵਾਪਸ O.error("'" + Arg + "' value invalid for floating point argument!");
 }
 
-bool parser<double>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                           double &Val) {
-  return parseDouble(O, Arg, Val);
+ਤਾਰਕਿਕ parser<ਦੁੱਗਣਾ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                           ਦੁੱਗਣਾ &Val) {
+  ਵਾਪਸ parseDouble(O, Arg, Val);
 }
 
-bool parser<float>::parse(Option &O, StringRef ArgName, StringRef Arg,
-                          float &Val) {
-  double dVal;
-  if (parseDouble(O, Arg, dVal))
-    return true;
-  Val = (float)dVal;
-  return false;
+ਤਾਰਕਿਕ parser<ਦਸ਼ਮਲਵ>::parse(Option &O, StringRef ArgName, StringRef Arg,
+                          ਦਸ਼ਮਲਵ &Val) {
+  ਦੁੱਗਣਾ dVal;
+  ਜੇ (parseDouble(O, Arg, dVal))
+    ਵਾਪਸ ਸੱਚ;
+  Val = (ਦਸ਼ਮਲਵ)dVal;
+  ਵਾਪਸ ਝੂਠ;
 }
 
 // generic_parser_base implementation
@@ -2132,210 +2132,210 @@ bool parser<float>::parse(Option &O, StringRef ArgName, StringRef Arg,
 // findOption - Return the option number corresponding to the specified
 // argument string.  If the option is not found, getNumOptions() is returned.
 //
-unsigned generic_parser_base::findOption(StringRef Name) {
-  unsigned e = getNumOptions();
+ਬਿਨਾਨਿਸ਼ਾਨੀ generic_parser_ਅਧਾਰ::ਲੱਭੋ_Option(StringRef Name) {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ e = get_ਅੰਕ_Options();
 
-  for (unsigned i = 0; i != e; ++i) {
-    if (getOption(i) == Name)
-      return i;
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0; i != e; ++i) {
+    ਜੇ (getOption(i) == Name)
+      ਵਾਪਸ i;
   }
-  return e;
+  ਵਾਪਸ e;
 }
 
-static StringRef EqValue = "=<value>";
-static StringRef EmptyOption = "<empty>";
-static StringRef OptionPrefix = "    =";
-static size_t getOptionPrefixesSize() {
-  return OptionPrefix.size() + ArgHelpPrefix.size();
+ਸਥਿਰ StringRef Eq_ਮੁੱਲ = "=<value>";
+ਸਥਿਰ StringRef ਖਾਲੀ_ਥਾਵਾਂ_Option = "<empty>";
+ਸਥਿਰ StringRef Option_ਅਗੇਤਰ = "    =";
+ਸਥਿਰ size_t get_Option_Prefixes_ਮਾਪ() {
+  ਵਾਪਸ Option_ਅਗੇਤਰ.ਮਾਪ_2() + Arg_Help_ਅਗੇਤਰ.ਮਾਪ_2();
 }
 
-static bool shouldPrintOption(StringRef Name, StringRef Description,
-                              const Option &O) {
-  return O.getValueExpectedFlag() != ValueOptional || !Name.empty() ||
-         !Description.empty();
+ਸਥਿਰ ਤਾਰਕਿਕ shouldPrintOption(StringRef Name, StringRef Description,
+                              ਅਚਲ Option &O) {
+  ਵਾਪਸ O.get_ਮੁੱਲ_Expected_Flag() != ਮੁੱਲ_Optional || !Name.ਖਾਲੀ_ਥਾਵਾਂ() ||
+         !Description.ਖਾਲੀ_ਥਾਵਾਂ();
 }
 
 // Return the width of the option tag for printing...
-size_t generic_parser_base::getOptionWidth(const Option &O) const {
-  if (O.hasArgStr()) {
-    size_t Size =
-        argPlusPrefixesSize(O.ArgStr) + EqValue.size();
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
+size_t generic_parser_ਅਧਾਰ::get_Option_ਚੌੜਾਈ(ਅਚਲ Option &O) ਅਚਲ {
+  ਜੇ (O.hasArgStr()) {
+    size_t ਮਾਪ =
+        arg_Plus_Prefixes_ਮਾਪ(O.ArgStr) + Eq_ਮੁੱਲ.ਮਾਪ_2();
+    ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0, e = get_ਅੰਕ_Options(); i != e; ++i) {
       StringRef Name = getOption(i);
-      if (!shouldPrintOption(Name, getDescription(i), O))
-        continue;
-      size_t NameSize = Name.empty() ? EmptyOption.size() : Name.size();
-      Size = std::max(Size, NameSize + getOptionPrefixesSize());
+      ਜੇ (!shouldPrintOption(Name, getDescription(i), O))
+        ਜਾਰੀ;
+      size_t Name_ਮਾਪ = Name.ਖਾਲੀ_ਥਾਵਾਂ() ? ਖਾਲੀ_ਥਾਵਾਂ_Option.ਮਾਪ_2() : Name.ਮਾਪ_2();
+      ਮਾਪ = std::max(ਮਾਪ, Name_ਮਾਪ + get_Option_Prefixes_ਮਾਪ());
     }
-    return Size;
-  } else {
-    size_t BaseSize = 0;
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i)
-      BaseSize = std::max(BaseSize, getOption(i).size() + 8);
-    return BaseSize;
+    ਵਾਪਸ ਮਾਪ;
+  } ਨਹੀਂਤਾਂ {
+    size_t ਅਧਾਰ_ਮਾਪ = 0;
+    ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0, e = get_ਅੰਕ_Options(); i != e; ++i)
+      ਅਧਾਰ_ਮਾਪ = std::max(ਅਧਾਰ_ਮਾਪ, getOption(i).ਮਾਪ_2() + 8);
+    ਵਾਪਸ ਅਧਾਰ_ਮਾਪ;
   }
 }
 
 // printOptionInfo - Print out information about this option.  The
 // to-be-maintained width is specified.
 //
-void generic_parser_base::printOptionInfo(const Option &O,
-                                          size_t GlobalWidth) const {
-  if (O.hasArgStr()) {
+ਖਾਲੀ generic_parser_ਅਧਾਰ::printOptionInfo(ਅਚਲ Option &O,
+                                          size_t Global_ਚੌੜਾਈ) ਅਚਲ {
+  ਜੇ (O.hasArgStr()) {
     // When the value is optional, first print a line just describing the
     // option without values.
-    if (O.getValueExpectedFlag() == ValueOptional) {
-      for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
-        if (getOption(i).empty()) {
+    ਜੇ (O.get_ਮੁੱਲ_Expected_Flag() == ਮੁੱਲ_Optional) {
+      ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0, e = get_ਅੰਕ_Options(); i != e; ++i) {
+        ਜੇ (getOption(i).ਖਾਲੀ_ਥਾਵਾਂ()) {
           outs() << PrintArg(O.ArgStr);
-          Option::printHelpStr(O.HelpStr, GlobalWidth,
-                               argPlusPrefixesSize(O.ArgStr));
-          break;
+          Option::printHelpStr(O.HelpStr, Global_ਚੌੜਾਈ,
+                               arg_Plus_Prefixes_ਮਾਪ(O.ArgStr));
+          ਰੋਕੋ;
         }
       }
     }
 
-    outs() << PrintArg(O.ArgStr) << EqValue;
-    Option::printHelpStr(O.HelpStr, GlobalWidth,
-                         EqValue.size() +
-                             argPlusPrefixesSize(O.ArgStr));
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
+    outs() << PrintArg(O.ArgStr) << Eq_ਮੁੱਲ;
+    Option::printHelpStr(O.HelpStr, Global_ਚੌੜਾਈ,
+                         Eq_ਮੁੱਲ.ਮਾਪ_2() +
+                             arg_Plus_Prefixes_ਮਾਪ(O.ArgStr));
+    ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0, e = get_ਅੰਕ_Options(); i != e; ++i) {
       StringRef OptionName = getOption(i);
       StringRef Description = getDescription(i);
-      if (!shouldPrintOption(OptionName, Description, O))
-        continue;
-      size_t FirstLineIndent = OptionName.size() + getOptionPrefixesSize();
-      outs() << OptionPrefix << OptionName;
-      if (OptionName.empty()) {
-        outs() << EmptyOption;
-        assert(FirstLineIndent >= EmptyOption.size());
-        FirstLineIndent += EmptyOption.size();
+      ਜੇ (!shouldPrintOption(OptionName, Description, O))
+        ਜਾਰੀ;
+      size_t ਪਹਿਲਾ_ਸਤਰ_Indent = OptionName.ਮਾਪ_2() + get_Option_Prefixes_ਮਾਪ();
+      outs() << Option_ਅਗੇਤਰ << OptionName;
+      ਜੇ (OptionName.ਖਾਲੀ_ਥਾਵਾਂ()) {
+        outs() << ਖਾਲੀ_ਥਾਵਾਂ_Option;
+        ਪ੍ਰਤਿਜ੍ਞਾ(ਪਹਿਲਾ_ਸਤਰ_Indent >= ਖਾਲੀ_ਥਾਵਾਂ_Option.ਮਾਪ_2());
+        ਪਹਿਲਾ_ਸਤਰ_Indent += ਖਾਲੀ_ਥਾਵਾਂ_Option.ਮਾਪ_2();
       }
-      if (!Description.empty())
-        Option::printEnumValHelpStr(Description, GlobalWidth, FirstLineIndent);
-      else
+      ਜੇ (!Description.ਖਾਲੀ_ਥਾਵਾਂ())
+        Option::printEnumValHelpStr(Description, Global_ਚੌੜਾਈ, ਪਹਿਲਾ_ਸਤਰ_Indent);
+      ਨਹੀਂਤਾਂ
         outs() << '\n';
     }
-  } else {
-    if (!O.HelpStr.empty())
+  } ਨਹੀਂਤਾਂ {
+    ਜੇ (!O.HelpStr.ਖਾਲੀ_ਥਾਵਾਂ())
       outs() << "  " << O.HelpStr << '\n';
-    for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
+    ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0, e = get_ਅੰਕ_Options(); i != e; ++i) {
       StringRef Option = getOption(i);
       outs() << "    " << PrintArg(Option);
-      Option::printHelpStr(getDescription(i), GlobalWidth, Option.size() + 8);
+      Option::printHelpStr(getDescription(i), Global_ਚੌੜਾਈ, Option.ਮਾਪ_2() + 8);
     }
   }
 }
 
-static const size_t MaxOptWidth = 8; // arbitrary spacing for printOptionDiff
+ਸਥਿਰ ਅਚਲ size_t Max_Opt_ਚੌੜਾਈ = 8; // arbitrary spacing for printOptionDiff
 
 // printGenericOptionDiff - Print the value of this option and it's default.
 //
 // "Generic" options have each value mapped to a name.
-void generic_parser_base::printGenericOptionDiff(
-    const Option &O, const GenericOptionValue &Value,
-    const GenericOptionValue &Default, size_t GlobalWidth) const {
+ਖਾਲੀ generic_parser_ਅਧਾਰ::printGenericOptionDiff(
+    ਅਚਲ Option &O, ਅਚਲ Generic_Option_ਮੁੱਲ &ਮੁੱਲ,
+    ਅਚਲ Generic_Option_ਮੁੱਲ &Default, size_t Global_ਚੌੜਾਈ) ਅਚਲ {
   outs() << "  " << PrintArg(O.ArgStr);
-  outs().indent(GlobalWidth - O.ArgStr.size());
+  outs().indent(Global_ਚੌੜਾਈ - O.ArgStr.ਮਾਪ_2());
 
-  unsigned NumOpts = getNumOptions();
-  for (unsigned i = 0; i != NumOpts; ++i) {
-    if (!Value.compare(getOptionValue(i)))
-      continue;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੰਕ_Opts = get_ਅੰਕ_Options();
+  ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ i = 0; i != ਅੰਕ_Opts; ++i) {
+    ਜੇ (!ਮੁੱਲ.compare(get_Option_ਮੁੱਲ(i)))
+      ਜਾਰੀ;
 
     outs() << "= " << getOption(i);
-    size_t L = getOption(i).size();
-    size_t NumSpaces = MaxOptWidth > L ? MaxOptWidth - L : 0;
-    outs().indent(NumSpaces) << " (default: ";
-    for (unsigned j = 0; j != NumOpts; ++j) {
-      if (!Default.compare(getOptionValue(j)))
-        continue;
+    size_t L = getOption(i).ਮਾਪ_2();
+    size_t ਅੰਕ_Spaces = Max_Opt_ਚੌੜਾਈ > L ? Max_Opt_ਚੌੜਾਈ - L : 0;
+    outs().indent(ਅੰਕ_Spaces) << " (default: ";
+    ਲਈ (ਬਿਨਾਨਿਸ਼ਾਨੀ j = 0; j != ਅੰਕ_Opts; ++j) {
+      ਜੇ (!Default.compare(get_Option_ਮੁੱਲ(j)))
+        ਜਾਰੀ;
       outs() << getOption(j);
-      break;
+      ਰੋਕੋ;
     }
     outs() << ")\n";
-    return;
+    ਵਾਪਸ;
   }
   outs() << "= *unknown option value*\n";
 }
 
 // printOptionDiff - Specializations for printing basic value types.
 //
-namespace llvm {
-namespace cl {
-static raw_ostream &operator<<(raw_ostream &OS, boolOrDefault V) {
-  return OS << static_cast<int>(V);
+ਨਾਮਾਕਾਸ਼ llvm {
+ਨਾਮਾਕਾਸ਼ cl {
+ਸਥਿਰ raw_ostream &ਸੰਚਾਲਕ<<(raw_ostream &OS, boolOrDefault V) {
+  ਵਾਪਸ OS << static_cast<ਪੂਰਨ>(V);
 }
 } // namespace cl
 } // namespace llvm
 
-#define PRINT_OPT_DIFF(T)                                                      \
-  void parser<T>::printOptionDiff(const Option &O, T V, OptionValue<T> D,      \
-                                  size_t GlobalWidth) const {                  \
-    printOptionName(O, GlobalWidth);                                           \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ PRINT_OPT_DIFF(T)                                                      \
+  ਖਾਲੀ parser<T>::printOptionDiff(ਅਚਲ Option &O, T V, Option_ਮੁੱਲ<T> D,      \
+                                  size_t Global_ਚੌੜਾਈ) ਅਚਲ {                  \
+    printOptionName(O, Global_ਚੌੜਾਈ);                                           \
     std::string Str;                                                           \
     {                                                                          \
       raw_string_ostream SS(Str);                                              \
       SS << V;                                                                 \
     }                                                                          \
     outs() << "= " << Str;                                                     \
-    size_t NumSpaces =                                                         \
-        MaxOptWidth > Str.size() ? MaxOptWidth - Str.size() : 0;               \
-    outs().indent(NumSpaces) << " (default: ";                                 \
-    if (D.hasValue())                                                          \
-      outs() << D.getValue();                                                  \
-    else                                                                       \
+    size_t ਅੰਕ_Spaces =                                                         \
+        Max_Opt_ਚੌੜਾਈ > Str.ਮਾਪ_2() ? Max_Opt_ਚੌੜਾਈ - Str.ਮਾਪ_2() : 0;               \
+    outs().indent(ਅੰਕ_Spaces) << " (default: ";                                 \
+    ਜੇ (D.has_ਮੁੱਲ())                                                          \
+      outs() << D.get_ਮੁੱਲ();                                                  \
+    ਨਹੀਂਤਾਂ                                                                       \
       outs() << "*no default*";                                                \
     outs() << ")\n";                                                           \
   }
 
-PRINT_OPT_DIFF(bool)
+PRINT_OPT_DIFF(ਤਾਰਕਿਕ)
 PRINT_OPT_DIFF(boolOrDefault)
-PRINT_OPT_DIFF(int)
-PRINT_OPT_DIFF(long)
-PRINT_OPT_DIFF(long long)
-PRINT_OPT_DIFF(unsigned)
-PRINT_OPT_DIFF(unsigned long)
-PRINT_OPT_DIFF(unsigned long long)
-PRINT_OPT_DIFF(double)
-PRINT_OPT_DIFF(float)
-PRINT_OPT_DIFF(char)
-PRINT_OPT_DIFF(ElementCount)
+PRINT_OPT_DIFF(ਪੂਰਨ)
+PRINT_OPT_DIFF(ਲੰਮਾ)
+PRINT_OPT_DIFF(ਲੰਮਾ ਲੰਮਾ)
+PRINT_OPT_DIFF(ਬਿਨਾਨਿਸ਼ਾਨੀ)
+PRINT_OPT_DIFF(ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ)
+PRINT_OPT_DIFF(ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ)
+PRINT_OPT_DIFF(ਦੁੱਗਣਾ)
+PRINT_OPT_DIFF(ਦਸ਼ਮਲਵ)
+PRINT_OPT_DIFF(ਅੱਖਰ)
+PRINT_OPT_DIFF(Element_ਗਿਣਤੀ)
 
-void parser<std::string>::printOptionDiff(const Option &O, StringRef V,
-                                          const OptionValue<std::string> &D,
-                                          size_t GlobalWidth) const {
-  printOptionName(O, GlobalWidth);
+ਖਾਲੀ parser<std::string>::printOptionDiff(ਅਚਲ Option &O, StringRef V,
+                                          ਅਚਲ Option_ਮੁੱਲ<std::string> &D,
+                                          size_t Global_ਚੌੜਾਈ) ਅਚਲ {
+  printOptionName(O, Global_ਚੌੜਾਈ);
   outs() << "= " << V;
-  size_t NumSpaces = MaxOptWidth > V.size() ? MaxOptWidth - V.size() : 0;
-  outs().indent(NumSpaces) << " (default: ";
-  if (D.hasValue())
-    outs() << D.getValue();
-  else
+  size_t ਅੰਕ_Spaces = Max_Opt_ਚੌੜਾਈ > V.ਮਾਪ_2() ? Max_Opt_ਚੌੜਾਈ - V.ਮਾਪ_2() : 0;
+  outs().indent(ਅੰਕ_Spaces) << " (default: ";
+  ਜੇ (D.has_ਮੁੱਲ())
+    outs() << D.get_ਮੁੱਲ();
+  ਨਹੀਂਤਾਂ
     outs() << "*no default*";
   outs() << ")\n";
 }
 
-void parser<std::optional<std::string>>::printOptionDiff(
-    const Option &O, std::optional<StringRef> V,
-    const OptionValue<std::optional<std::string>> &D,
-    size_t GlobalWidth) const {
-  printOptionName(O, GlobalWidth);
+ਖਾਲੀ parser<std::optional<std::string>>::printOptionDiff(
+    ਅਚਲ Option &O, std::optional<StringRef> V,
+    ਅਚਲ Option_ਮੁੱਲ<std::optional<std::string>> &D,
+    size_t Global_ਚੌੜਾਈ) ਅਚਲ {
+  printOptionName(O, Global_ਚੌੜਾਈ);
   outs() << "= " << V;
-  size_t VSize = V.has_value() ? V.value().size() : 0;
-  size_t NumSpaces = MaxOptWidth > VSize ? MaxOptWidth - VSize : 0;
-  outs().indent(NumSpaces) << " (default: ";
-  if (D.hasValue() && D.getValue().has_value())
-    outs() << D.getValue();
-  else
+  size_t VSize = V.has_ਮੁੱਲ_2() ? V.ਮੁੱਲ_2().ਮਾਪ_2() : 0;
+  size_t ਅੰਕ_Spaces = Max_Opt_ਚੌੜਾਈ > VSize ? Max_Opt_ਚੌੜਾਈ - VSize : 0;
+  outs().indent(ਅੰਕ_Spaces) << " (default: ";
+  ਜੇ (D.has_ਮੁੱਲ() && D.get_ਮੁੱਲ().has_ਮੁੱਲ_2())
+    outs() << D.get_ਮੁੱਲ();
+  ਨਹੀਂਤਾਂ
     outs() << "*no value*";
   outs() << ")\n";
 }
 
 // Print a placeholder for options that don't yet support printOptionDiff().
-void basic_parser_impl::printOptionNoValue(const Option &O,
-                                           size_t GlobalWidth) const {
-  printOptionName(O, GlobalWidth);
+ਖਾਲੀ basic_parser_impl::print_Option_No_ਮੁੱਲ(ਅਚਲ Option &O,
+                                           size_t Global_ਚੌੜਾਈ) ਅਚਲ {
+  printOptionName(O, Global_ਚੌੜਾਈ);
   outs() << "= *cannot print option value*\n";
 }
 
@@ -2343,144 +2343,144 @@ void basic_parser_impl::printOptionNoValue(const Option &O,
 // -help and -help-hidden option implementation
 //
 
-static int OptNameCompare(const std::pair<const char *, Option *> *LHS,
-                          const std::pair<const char *, Option *> *RHS) {
-  return strcmp(LHS->first, RHS->first);
+ਸਥਿਰ ਪੂਰਨ OptNameCompare(ਅਚਲ std::pair<ਅਚਲ ਅੱਖਰ *, Option *> *LHS,
+                          ਅਚਲ std::pair<ਅਚਲ ਅੱਖਰ *, Option *> *RHS) {
+  ਵਾਪਸ strcmp(LHS->ਪਹਿਲਾ_2, RHS->ਪਹਿਲਾ_2);
 }
 
-static int SubNameCompare(const std::pair<const char *, SubCommand *> *LHS,
-                          const std::pair<const char *, SubCommand *> *RHS) {
-  return strcmp(LHS->first, RHS->first);
+ਸਥਿਰ ਪੂਰਨ SubNameCompare(ਅਚਲ std::pair<ਅਚਲ ਅੱਖਰ *, SubCommand *> *LHS,
+                          ਅਚਲ std::pair<ਅਚਲ ਅੱਖਰ *, SubCommand *> *RHS) {
+  ਵਾਪਸ strcmp(LHS->ਪਹਿਲਾ_2, RHS->ਪਹਿਲਾ_2);
 }
 
 // Copy Options into a vector so we can sort them as we like.
-static void sortOpts(OptionsMapTy &OptMap,
-                     SmallVectorImpl<std::pair<const char *, Option *>> &Opts,
-                     bool ShowHidden) {
-  SmallPtrSet<Option *, 32> OptionSet; // Duplicate option detection.
+ਸਥਿਰ ਖਾਲੀ ਛਾਂਟੋ_Opts(OptionsMapTy &OptMap,
+                     Small_ਸਦਿਸ਼_Impl<std::pair<ਅਚਲ ਅੱਖਰ *, Option *>> &Opts,
+                     ਤਾਰਕਿਕ ShowHidden) {
+  Small_Ptr_ਸੈੱਟ<Option *, 32> Option_ਸੈੱਟ; // Duplicate option detection.
 
-  for (auto I = OptMap.begin(), E = OptMap.end(); I != E; ++I) {
+  ਲਈ (ਸਵੈਚਾਲਿਤ I = OptMap.begin(), E = OptMap.ਸਿਰਾ(); I != E; ++I) {
     // Ignore really-hidden options.
-    if (I->second->getOptionHiddenFlag() == ReallyHidden)
-      continue;
+    ਜੇ (I->ਦੂਜਾ_2->getOptionHiddenFlag() == ReallyHidden)
+      ਜਾਰੀ;
 
     // Unless showhidden is set, ignore hidden flags.
-    if (I->second->getOptionHiddenFlag() == Hidden && !ShowHidden)
-      continue;
+    ਜੇ (I->ਦੂਜਾ_2->getOptionHiddenFlag() == Hidden && !ShowHidden)
+      ਜਾਰੀ;
 
     // If we've already seen this option, don't add it to the list again.
-    if (!OptionSet.insert(I->second).second)
-      continue;
+    ਜੇ (!Option_ਸੈੱਟ.ਪਾਓ(I->ਦੂਜਾ_2).ਦੂਜਾ_2)
+      ਜਾਰੀ;
 
-    Opts.push_back(
-        std::pair<const char *, Option *>(I->first.data(), I->second));
+    Opts.ਧੱਕੋ_ਪਿੱਠ(
+        std::pair<ਅਚਲ ਅੱਖਰ *, Option *>(I->ਪਹਿਲਾ_2.ਅੰਕੜੇ(), I->ਦੂਜਾ_2));
   }
 
   // Sort the options list alphabetically.
-  array_pod_sort(Opts.begin(), Opts.end(), OptNameCompare);
+  array_pod_ਛਾਂਟੋ(Opts.begin(), Opts.ਸਿਰਾ(), OptNameCompare);
 }
 
-static void
-sortSubCommands(const SmallPtrSetImpl<SubCommand *> &SubMap,
-                SmallVectorImpl<std::pair<const char *, SubCommand *>> &Subs) {
-  for (auto *S : SubMap) {
-    if (S->getName().empty())
-      continue;
-    Subs.push_back(std::make_pair(S->getName().data(), S));
+ਸਥਿਰ ਖਾਲੀ
+ਛਾਂਟੋ_Sub_Commands(ਅਚਲ Small_Ptr_ਸੈੱਟ_Impl<SubCommand *> &SubMap,
+                Small_ਸਦਿਸ਼_Impl<std::pair<ਅਚਲ ਅੱਖਰ *, SubCommand *>> &Subs) {
+  ਲਈ (ਸਵੈਚਾਲਿਤ *S : SubMap) {
+    ਜੇ (S->getName().ਖਾਲੀ_ਥਾਵਾਂ())
+      ਜਾਰੀ;
+    Subs.ਧੱਕੋ_ਪਿੱਠ(std::make_pair(S->getName().ਅੰਕੜੇ(), S));
   }
-  array_pod_sort(Subs.begin(), Subs.end(), SubNameCompare);
+  array_pod_ਛਾਂਟੋ(Subs.begin(), Subs.ਸਿਰਾ(), SubNameCompare);
 }
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 
-class HelpPrinter {
-protected:
-  const bool ShowHidden;
-  using StrOptionPairVector =
-      SmallVector<std::pair<const char *, Option *>, 128>;
-  using StrSubCommandPairVector =
-      SmallVector<std::pair<const char *, SubCommand *>, 128>;
+ਵਰਗ HelpPrinter {
+ਸੁਰੱਖਿਅਤ:
+  ਅਚਲ ਤਾਰਕਿਕ ShowHidden;
+  ਵਰਤੋਂ Str_Option_Pair_ਸਦਿਸ਼ =
+      Small_ਸਦਿਸ਼<std::pair<ਅਚਲ ਅੱਖਰ *, Option *>, 128>;
+  ਵਰਤੋਂ Str_Sub_Command_Pair_ਸਦਿਸ਼ =
+      Small_ਸਦਿਸ਼<std::pair<ਅਚਲ ਅੱਖਰ *, SubCommand *>, 128>;
   // Print the options. Opts is assumed to be alphabetically sorted.
-  virtual void printOptions(StrOptionPairVector &Opts, size_t MaxArgLen) {
-    for (const auto &Opt : Opts)
-      Opt.second->printOptionInfo(MaxArgLen);
+  ਆਭਾਸੀ ਖਾਲੀ printOptions(Str_Option_Pair_ਸਦਿਸ਼ &Opts, size_t MaxArgLen) {
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Opt : Opts)
+      Opt.ਦੂਜਾ_2->printOptionInfo(MaxArgLen);
   }
 
-  void printSubCommands(StrSubCommandPairVector &Subs, size_t MaxSubLen) {
-    for (const auto &S : Subs) {
-      outs() << "  " << S.first;
-      if (!S.second->getDescription().empty()) {
-        outs().indent(MaxSubLen - strlen(S.first));
-        outs() << " - " << S.second->getDescription();
+  ਖਾਲੀ printSubCommands(Str_Sub_Command_Pair_ਸਦਿਸ਼ &Subs, size_t MaxSubLen) {
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &S : Subs) {
+      outs() << "  " << S.ਪਹਿਲਾ_2;
+      ਜੇ (!S.ਦੂਜਾ_2->getDescription().ਖਾਲੀ_ਥਾਵਾਂ()) {
+        outs().indent(MaxSubLen - ਲੜੀ_ਲੰਬਾਈ(S.ਪਹਿਲਾ_2));
+        outs() << " - " << S.ਦੂਜਾ_2->getDescription();
       }
       outs() << "\n";
     }
   }
 
-public:
-  explicit HelpPrinter(bool showHidden) : ShowHidden(showHidden) {}
-  virtual ~HelpPrinter() = default;
+ਜਨਤਕ:
+  ਸਪਸ਼ਟ HelpPrinter(ਤਾਰਕਿਕ showHidden) : ShowHidden(showHidden) {}
+  ਆਭਾਸੀ ~HelpPrinter() = ਮੂਲ;
 
   // Invoke the printer.
-  void operator=(bool Value) {
-    if (!Value)
-      return;
+  ਖਾਲੀ ਸੰਚਾਲਕ=(ਤਾਰਕਿਕ ਮੁੱਲ) {
+    ਜੇ (!ਮੁੱਲ)
+      ਵਾਪਸ;
     printHelp();
 
     // Halt the program since help information was printed
-    exit(0);
+    ਬਾਹਰ_ਨਿਕਲੋ(0);
   }
 
-  void printHelp() {
-    SubCommand *Sub = globalParser().getActiveSubCommand();
-    auto &OptionsMap = Sub->OptionsMap;
-    auto &PositionalOpts = Sub->PositionalOpts;
-    auto &ConsumeAfterOpt = Sub->ConsumeAfterOpt;
+  ਖਾਲੀ printHelp() {
+    SubCommand *Sub = globalParser().get_ਸਰਗਰਮ_Sub_Command();
+    ਸਵੈਚਾਲਿਤ &OptionsMap = Sub->OptionsMap;
+    ਸਵੈਚਾਲਿਤ &PositionalOpts = Sub->PositionalOpts;
+    ਸਵੈਚਾਲਿਤ &ConsumeAfterOpt = Sub->ConsumeAfterOpt;
 
-    StrOptionPairVector Opts;
-    sortOpts(OptionsMap, Opts, ShowHidden);
+    Str_Option_Pair_ਸਦਿਸ਼ Opts;
+    ਛਾਂਟੋ_Opts(OptionsMap, Opts, ShowHidden);
 
-    StrSubCommandPairVector Subs;
-    sortSubCommands(globalParser().RegisteredSubCommands, Subs);
+    Str_Sub_Command_Pair_ਸਦਿਸ਼ Subs;
+    ਛਾਂਟੋ_Sub_Commands(globalParser().RegisteredSubCommands, Subs);
 
-    if (!globalParser().ProgramOverview.empty())
-      outs() << "OVERVIEW: " << globalParser().ProgramOverview << "\n";
+    ਜੇ (!globalParser().ਪ੍ਰੋਗਰਾਮ_Overview.ਖਾਲੀ_ਥਾਵਾਂ())
+      outs() << "OVERVIEW: " << globalParser().ਪ੍ਰੋਗਰਾਮ_Overview << "\n";
 
-    if (Sub == &SubCommand::getTopLevel()) {
-      outs() << "USAGE: " << globalParser().ProgramName;
-      if (!Subs.empty())
+    ਜੇ (Sub == &SubCommand::get_ਸਿਖਰ_Level()) {
+      outs() << "USAGE: " << globalParser().ਪ੍ਰੋਗਰਾਮ_Name;
+      ਜੇ (!Subs.ਖਾਲੀ_ਥਾਵਾਂ())
         outs() << " [subcommand]";
       outs() << " [options]";
-    } else {
-      if (!Sub->getDescription().empty()) {
+    } ਨਹੀਂਤਾਂ {
+      ਜੇ (!Sub->getDescription().ਖਾਲੀ_ਥਾਵਾਂ()) {
         outs() << "SUBCOMMAND '" << Sub->getName()
                << "': " << Sub->getDescription() << "\n\n";
       }
-      outs() << "USAGE: " << globalParser().ProgramName << " " << Sub->getName()
+      outs() << "USAGE: " << globalParser().ਪ੍ਰੋਗਰਾਮ_Name << " " << Sub->getName()
              << " [options]";
     }
 
-    for (auto *Opt : PositionalOpts) {
-      if (Opt->hasArgStr())
+    ਲਈ (ਸਵੈਚਾਲਿਤ *Opt : PositionalOpts) {
+      ਜੇ (Opt->hasArgStr())
         outs() << " --" << Opt->ArgStr;
       outs() << " " << Opt->HelpStr;
     }
 
     // Print the consume after option info if it exists...
-    if (ConsumeAfterOpt)
+    ਜੇ (ConsumeAfterOpt)
       outs() << " " << ConsumeAfterOpt->HelpStr;
 
-    if (Sub == &SubCommand::getTopLevel() && !Subs.empty()) {
+    ਜੇ (Sub == &SubCommand::get_ਸਿਖਰ_Level() && !Subs.ਖਾਲੀ_ਥਾਵਾਂ()) {
       // Compute the maximum subcommand length...
       size_t MaxSubLen = 0;
-      for (const auto &Sub : Subs)
-        MaxSubLen = std::max(MaxSubLen, strlen(Sub.first));
+      ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Sub : Subs)
+        MaxSubLen = std::max(MaxSubLen, ਲੜੀ_ਲੰਬਾਈ(Sub.ਪਹਿਲਾ_2));
 
       outs() << "\n\n";
       outs() << "SUBCOMMANDS:\n\n";
       printSubCommands(Subs, MaxSubLen);
       outs() << "\n";
-      outs() << "  Type \"" << globalParser().ProgramName
+      outs() << "  Type \"" << globalParser().ਪ੍ਰੋਗਰਾਮ_Name
              << " <subcommand> --help\" to get more help on a specific "
                 "subcommand";
     }
@@ -2489,58 +2489,58 @@ public:
 
     // Compute the maximum argument length...
     size_t MaxArgLen = 0;
-    for (const auto &Opt : Opts)
-      MaxArgLen = std::max(MaxArgLen, Opt.second->getOptionWidth());
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Opt : Opts)
+      MaxArgLen = std::max(MaxArgLen, Opt.ਦੂਜਾ_2->get_Option_ਚੌੜਾਈ());
 
-    SmallVector<std::pair<std::string, StringRef>, 0> LibraryOpts;
-    if (ShowHidden)
-      for (LibraryOptions *L : globalParser().Libraries)
+    Small_ਸਦਿਸ਼<std::pair<std::string, StringRef>, 0> LibraryOpts;
+    ਜੇ (ShowHidden)
+      ਲਈ (LibraryOptions *L : globalParser().Libraries)
         L->forEachOption(
             [&](StringRef Spelling, StringRef MetaVar, StringRef Help) {
-              if (!Help.empty())
-                LibraryOpts.emplace_back((Spelling + MetaVar).str(), Help);
+              ਜੇ (!Help.ਖਾਲੀ_ਥਾਵਾਂ())
+                LibraryOpts.emplace_ਪਿੱਠ((Spelling + MetaVar).str(), Help);
             });
-    llvm::sort(LibraryOpts);
-    for (const auto &[Name, Help] : LibraryOpts)
-      MaxArgLen = std::max(MaxArgLen, argPlusPrefixesSize(Name));
+    llvm::ਛਾਂਟੋ(LibraryOpts);
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &[Name, Help] : LibraryOpts)
+      MaxArgLen = std::max(MaxArgLen, arg_Plus_Prefixes_ਮਾਪ(Name));
 
     outs() << "OPTIONS:\n";
     printOptions(Opts, MaxArgLen);
 
-    if (!LibraryOpts.empty())
+    ਜੇ (!LibraryOpts.ਖਾਲੀ_ਥਾਵਾਂ())
       outs() << "\nLibrary options:\n\n";
-    for (const auto &[Name, Help] : LibraryOpts) {
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &[Name, Help] : LibraryOpts) {
       outs() << PrintArg(Name);
-      Option::printHelpStr(Help, MaxArgLen, argPlusPrefixesSize(Name));
+      Option::printHelpStr(Help, MaxArgLen, arg_Plus_Prefixes_ਮਾਪ(Name));
     }
 
     // Print any extra help the user has declared.
-    for (const auto &I : globalParser().MoreHelp)
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &I : globalParser().ਹੋਰ_Help)
       outs() << I;
-    globalParser().MoreHelp.clear();
+    globalParser().ਹੋਰ_Help.clear();
   }
 };
 
-class CategorizedHelpPrinter : public HelpPrinter {
-public:
-  explicit CategorizedHelpPrinter(bool showHidden) : HelpPrinter(showHidden) {}
+ਵਰਗ CategorizedHelpPrinter : ਜਨਤਕ HelpPrinter {
+ਜਨਤਕ:
+  ਸਪਸ਼ਟ CategorizedHelpPrinter(ਤਾਰਕਿਕ showHidden) : HelpPrinter(showHidden) {}
 
   // Helper function for printOptions().
   // It shall return a negative value if A's name should be lexicographically
   // ordered before B's name. It returns a value greater than zero if B's name
   // should be ordered before A's name, and it returns 0 otherwise.
-  static int OptionCategoryCompare(OptionCategory *const *A,
-                                   OptionCategory *const *B) {
-    return (*A)->getName().compare((*B)->getName());
+  ਸਥਿਰ ਪੂਰਨ OptionCategoryCompare(OptionCategory *ਅਚਲ *A,
+                                   OptionCategory *ਅਚਲ *B) {
+    ਵਾਪਸ (*A)->getName().compare((*B)->getName());
   }
 
   // Make sure we inherit our base class's operator=()
-  using HelpPrinter::operator=;
+  ਵਰਤੋਂ HelpPrinter::ਸੰਚਾਲਕ=;
 
-protected:
-  void printOptions(StrOptionPairVector &Opts, size_t MaxArgLen) override {
-    std::vector<OptionCategory *> SortedCategories;
-    DenseMap<OptionCategory *, std::vector<Option *>> CategorizedOptions;
+ਸੁਰੱਖਿਅਤ:
+  ਖਾਲੀ printOptions(Str_Option_Pair_ਸਦਿਸ਼ &Opts, size_t MaxArgLen) override {
+    std::ਸਦਿਸ਼<OptionCategory *> SortedCategories;
+    DenseMap<OptionCategory *, std::ਸਦਿਸ਼<Option *>> CategorizedOptions;
 
     // Collect registered option categories into vector in preparation for
     // sorting.
@@ -2548,41 +2548,41 @@ protected:
                        globalParser().RegisteredOptionCategories);
 
     // Sort the different option categories alphabetically.
-    assert(SortedCategories.size() > 0 && "No option categories registered!");
-    array_pod_sort(SortedCategories.begin(), SortedCategories.end(),
+    ਪ੍ਰਤਿਜ੍ਞਾ(SortedCategories.ਮਾਪ_2() > 0 && "No option categories registered!");
+    array_pod_ਛਾਂਟੋ(SortedCategories.begin(), SortedCategories.ਸਿਰਾ(),
                    OptionCategoryCompare);
 
     // Walk through pre-sorted options and assign into categories.
     // Because the options are already alphabetically sorted the
     // options within categories will also be alphabetically sorted.
-    for (const auto &I : Opts) {
-      Option *Opt = I.second;
-      for (OptionCategory *Cat : Opt->Categories) {
-        assert(llvm::is_contained(SortedCategories, Cat) &&
+    ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &I : Opts) {
+      Option *Opt = I.ਦੂਜਾ_2;
+      ਲਈ (OptionCategory *Cat : Opt->Categories) {
+        ਪ੍ਰਤਿਜ੍ਞਾ(llvm::is_contained(SortedCategories, Cat) &&
                "Option has an unregistered category");
-        CategorizedOptions[Cat].push_back(Opt);
+        CategorizedOptions[Cat].ਧੱਕੋ_ਪਿੱਠ(Opt);
       }
     }
 
     // Now do printing.
-    for (OptionCategory *Category : SortedCategories) {
+    ਲਈ (OptionCategory *Category : SortedCategories) {
       // Hide empty categories for --help, but show for --help-hidden.
-      const auto &CategoryOptions = CategorizedOptions[Category];
-      if (CategoryOptions.empty())
-        continue;
+      ਅਚਲ ਸਵੈਚਾਲਿਤ &CategoryOptions = CategorizedOptions[Category];
+      ਜੇ (CategoryOptions.ਖਾਲੀ_ਥਾਵਾਂ())
+        ਜਾਰੀ;
 
       // Print category information.
       outs() << "\n";
       outs() << Category->getName() << ":\n";
 
       // Check if description is set.
-      if (!Category->getDescription().empty())
+      ਜੇ (!Category->getDescription().ਖਾਲੀ_ਥਾਵਾਂ())
         outs() << Category->getDescription() << "\n\n";
-      else
+      ਨਹੀਂਤਾਂ
         outs() << "\n";
 
       // Loop over the options in the category and print.
-      for (const Option *Opt : CategoryOptions)
+      ਲਈ (ਅਚਲ Option *Opt : CategoryOptions)
         Opt->printOptionInfo(MaxArgLen);
     }
   }
@@ -2590,87 +2590,87 @@ protected:
 
 // This wraps the Uncategorizing and Categorizing printers and decides
 // at run time which should be invoked.
-class HelpPrinterWrapper {
-private:
+ਵਰਗ HelpPrinterWrapper {
+ਨਿਜੀ:
   HelpPrinter &UncategorizedPrinter;
   CategorizedHelpPrinter &CategorizedPrinter;
 
-public:
-  explicit HelpPrinterWrapper(HelpPrinter &UncategorizedPrinter,
+ਜਨਤਕ:
+  ਸਪਸ਼ਟ HelpPrinterWrapper(HelpPrinter &UncategorizedPrinter,
                               CategorizedHelpPrinter &CategorizedPrinter)
       : UncategorizedPrinter(UncategorizedPrinter),
         CategorizedPrinter(CategorizedPrinter) {}
 
   // Invoke the printer.
-  void operator=(bool Value);
+  ਖਾਲੀ ਸੰਚਾਲਕ=(ਤਾਰਕਿਕ ਮੁੱਲ);
 };
 
 } // End anonymous namespace
 
-#if defined(__GNUC__)
+#ਜੇ defined(__GNUC__)
 // GCC and GCC-compatible compilers define __OPTIMIZE__ when optimizations are
 // enabled.
-# if defined(__OPTIMIZE__)
+# ਜੇ defined(__OPTIMIZE__)
 #  define LLVM_IS_DEBUG_BUILD 0
-# else
+# ਨਹੀਂਤਾਂ
 #  define LLVM_IS_DEBUG_BUILD 1
 # endif
-#elif defined(_MSC_VER)
+#ਜਾਂਜੇ defined(_MSC_VER)
 // MSVC doesn't have a predefined macro indicating if optimizations are enabled.
 // Use _DEBUG instead. This macro actually corresponds to the choice between
 // debug and release CRTs, but it is a reasonable proxy.
-# if defined(_DEBUG)
+# ਜੇ defined(_DEBUG)
 #  define LLVM_IS_DEBUG_BUILD 1
-# else
+# ਨਹੀਂਤਾਂ
 #  define LLVM_IS_DEBUG_BUILD 0
 # endif
-#else
+#ਨਹੀਂਤਾਂ
 // Otherwise, for an unknown compiler, assume this is an optimized build.
 # define LLVM_IS_DEBUG_BUILD 0
-#endif
+#ਜੇ_ਅੰਤ
 
-namespace {
-class VersionPrinter {
-public:
-  void print(const std::vector<VersionPrinterTy> &ExtraPrinters) {
+ਨਾਮਾਕਾਸ਼ {
+ਵਰਗ ਸੰਸਕਰਣ_Printer {
+ਜਨਤਕ:
+  ਖਾਲੀ print(ਅਚਲ std::ਸਦਿਸ਼<ਸੰਸਕਰਣ_Printer_Ty> &ExtraPrinters) {
     raw_ostream &OS = outs();
-#ifdef PACKAGE_VENDOR
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ PACKAGE_VENDOR
     OS << PACKAGE_VENDOR << " ";
-#else
+#ਨਹੀਂਤਾਂ
     OS << "LLVM (http://llvm.org/):\n  ";
-#endif
-    OS << PACKAGE_NAME << " version " << PACKAGE_VERSION << "\n  ";
-#if LLVM_IS_DEBUG_BUILD
+#ਜੇ_ਅੰਤ
+    OS << PACKAGE_NAME << " version " << PACKAGE_ਸੰਸਕਰਣ << "\n  ";
+#ਜੇ LLVM_IS_DEBUG_BUILD
     OS << "DEBUG build";
-#else
+#ਨਹੀਂਤਾਂ
     OS << "Optimized build";
-#endif
-#ifndef NDEBUG
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
     OS << " with assertions";
-#endif
+#ਜੇ_ਅੰਤ
     OS << ".\n";
 
     // Iterate over any registered extra printers and call them to add further
     // information.
-    if (!ExtraPrinters.empty()) {
-      for (const auto &I : ExtraPrinters)
+    ਜੇ (!ExtraPrinters.ਖਾਲੀ_ਥਾਵਾਂ()) {
+      ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &I : ExtraPrinters)
         I(outs());
     }
   }
-  void operator=(bool OptionWasSpecified);
+  ਖਾਲੀ ਸੰਚਾਲਕ=(ਤਾਰਕਿਕ OptionWasSpecified);
 };
 
-struct CommandLineCommonOptions {
+ਬਣਤਰ Command_ਸਤਰ_Common_Options {
   // Declare the four HelpPrinter instances that are used to print out help, or
   // help-hidden as an uncategorized list or in categories.
-  HelpPrinter UncategorizedNormalPrinter{false};
-  HelpPrinter UncategorizedHiddenPrinter{true};
-  CategorizedHelpPrinter CategorizedNormalPrinter{false};
-  CategorizedHelpPrinter CategorizedHiddenPrinter{true};
+  HelpPrinter Uncategorized_ਸਾਧਾਰਨ_Printer{ਝੂਠ};
+  HelpPrinter UncategorizedHiddenPrinter{ਸੱਚ};
+  CategorizedHelpPrinter Categorized_ਸਾਧਾਰਨ_Printer{ਝੂਠ};
+  CategorizedHelpPrinter CategorizedHiddenPrinter{ਸੱਚ};
   // Declare HelpPrinter wrappers that will decide whether or not to invoke
   // a categorizing help printer
-  HelpPrinterWrapper WrappedNormalPrinter{UncategorizedNormalPrinter,
-                                          CategorizedNormalPrinter};
+  HelpPrinterWrapper Wrapped_ਸਾਧਾਰਨ_Printer{Uncategorized_ਸਾਧਾਰਨ_Printer,
+                                          Categorized_ਸਾਧਾਰਨ_Printer};
   HelpPrinterWrapper WrappedHiddenPrinter{UncategorizedHiddenPrinter,
                                           CategorizedHiddenPrinter};
   // Define a category for generic options that all tools should have.
@@ -2679,302 +2679,302 @@ struct CommandLineCommonOptions {
   // Define uncategorized help printers.
   // --help-list is hidden by default because if Option categories are being
   // used then --help behaves the same as --help-list.
-  cl::opt<HelpPrinter, true, parser<bool>> HLOp{
+  cl::opt<HelpPrinter, ਸੱਚ, parser<ਤਾਰਕਿਕ>> HLOp{
       "help-list",
       cl::desc(
           "Display list of available options (--help-list-hidden for more)"),
-      cl::location(UncategorizedNormalPrinter),
+      cl::location(Uncategorized_ਸਾਧਾਰਨ_Printer),
       cl::Hidden,
-      cl::ValueDisallowed,
+      cl::ਮੁੱਲ_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  cl::opt<HelpPrinter, true, parser<bool>> HLHOp{
+  cl::opt<HelpPrinter, ਸੱਚ, parser<ਤਾਰਕਿਕ>> HLHOp{
       "help-list-hidden",
       cl::desc("Display list of all available options"),
       cl::location(UncategorizedHiddenPrinter),
       cl::Hidden,
-      cl::ValueDisallowed,
+      cl::ਮੁੱਲ_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
   // Define uncategorized/categorized help printers. These printers change their
   // behaviour at runtime depending on whether one or more Option categories
   // have been declared.
-  cl::opt<HelpPrinterWrapper, true, parser<bool>> HOp{
+  cl::opt<HelpPrinterWrapper, ਸੱਚ, parser<ਤਾਰਕਿਕ>> HOp{
       "help",
       cl::desc("Display available options (--help-hidden for more)"),
-      cl::location(WrappedNormalPrinter),
-      cl::ValueDisallowed,
+      cl::location(Wrapped_ਸਾਧਾਰਨ_Printer),
+      cl::ਮੁੱਲ_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
   cl::alias HOpA{"h", cl::desc("Alias for --help"), cl::aliasopt(HOp)};
 
-  cl::opt<HelpPrinterWrapper, true, parser<bool>> HHOp{
+  cl::opt<HelpPrinterWrapper, ਸੱਚ, parser<ਤਾਰਕਿਕ>> HHOp{
       "help-hidden",
       cl::desc("Display all available options"),
       cl::location(WrappedHiddenPrinter),
       cl::Hidden,
-      cl::ValueDisallowed,
+      cl::ਮੁੱਲ_Disallowed,
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  cl::opt<bool> PrintOptions{
+  cl::opt<ਤਾਰਕਿਕ> PrintOptions{
       "print-options",
       cl::desc("Print non-default options after command line parsing"),
       cl::Hidden,
-      cl::init(false),
+      cl::init(ਝੂਠ),
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  cl::opt<bool> PrintAllOptions{
+  cl::opt<ਤਾਰਕਿਕ> PrintAllOptions{
       "print-all-options",
       cl::desc("Print all option values after command line parsing"),
       cl::Hidden,
-      cl::init(false),
+      cl::init(ਝੂਠ),
       cl::cat(GenericCategory),
       cl::sub(SubCommand::getAll())};
 
-  VersionPrinterTy OverrideVersionPrinter = nullptr;
+  ਸੰਸਕਰਣ_Printer_Ty Override_ਸੰਸਕਰਣ_Printer = ਖਾਲੀ_ਸੂਚਕ;
 
-  std::vector<VersionPrinterTy> ExtraVersionPrinters;
+  std::ਸਦਿਸ਼<ਸੰਸਕਰਣ_Printer_Ty> Extra_ਸੰਸਕਰਣ_Printers;
 
   // Define the --version option that prints out the LLVM version for the tool
-  VersionPrinter VersionPrinterInstance;
+  ਸੰਸਕਰਣ_Printer ਸੰਸਕਰਣ_Printer_Instance;
 
-  cl::opt<VersionPrinter, true, parser<bool>> VersOp{
+  cl::opt<ਸੰਸਕਰਣ_Printer, ਸੱਚ, parser<ਤਾਰਕਿਕ>> VersOp{
       "version", cl::desc("Display the version of this program"),
-      cl::location(VersionPrinterInstance), cl::ValueDisallowed,
+      cl::location(ਸੰਸਕਰਣ_Printer_Instance), cl::ਮੁੱਲ_Disallowed,
       cl::cat(GenericCategory)};
 };
 } // End anonymous namespace
 
 // Lazy-initialized global instance of options controlling the command-line
 // parser and general handling.
-static ManagedStatic<CommandLineCommonOptions> CommonOptions;
+ਸਥਿਰ ManagedStatic<Command_ਸਤਰ_Common_Options> CommonOptions;
 
-static void initCommonOptions() {
+ਸਥਿਰ ਖਾਲੀ initCommonOptions() {
   *CommonOptions;
   initDebugCounterOptions();
-  initGraphWriterOptions();
-  initSignalsOptions();
+  init_ਗ੍ਰਾਫ_Writer_Options();
+  init_ਸੰਕੇਤ_Options();
   initStatisticOptions();
   initTimerOptions();
   initWithColorOptions();
   initDebugOptions();
-  initRandomSeedOptions();
+  init_Random_ਬੀਜ_Options();
 }
 
 OptionCategory &cl::getGeneralCategory() {
   // Initialise the general option category.
-  static OptionCategory GeneralCategory{"General options"};
-  return GeneralCategory;
+  ਸਥਿਰ OptionCategory GeneralCategory{"General options"};
+  ਵਾਪਸ GeneralCategory;
 }
 
-void VersionPrinter::operator=(bool OptionWasSpecified) {
-  if (!OptionWasSpecified)
-    return;
+ਖਾਲੀ ਸੰਸਕਰਣ_Printer::ਸੰਚਾਲਕ=(ਤਾਰਕਿਕ OptionWasSpecified) {
+  ਜੇ (!OptionWasSpecified)
+    ਵਾਪਸ;
 
-  if (CommonOptions->OverrideVersionPrinter != nullptr) {
-    CommonOptions->OverrideVersionPrinter(outs());
-    exit(0);
+  ਜੇ (CommonOptions->Override_ਸੰਸਕਰਣ_Printer != ਖਾਲੀ_ਸੂਚਕ) {
+    CommonOptions->Override_ਸੰਸਕਰਣ_Printer(outs());
+    ਬਾਹਰ_ਨਿਕਲੋ(0);
   }
-  print(CommonOptions->ExtraVersionPrinters);
+  print(CommonOptions->Extra_ਸੰਸਕਰਣ_Printers);
 
-  exit(0);
+  ਬਾਹਰ_ਨਿਕਲੋ(0);
 }
 
-void HelpPrinterWrapper::operator=(bool Value) {
-  if (!Value)
-    return;
+ਖਾਲੀ HelpPrinterWrapper::ਸੰਚਾਲਕ=(ਤਾਰਕਿਕ ਮੁੱਲ) {
+  ਜੇ (!ਮੁੱਲ)
+    ਵਾਪਸ;
 
   // Decide which printer to invoke. If more than one option category is
   // registered then it is useful to show the categorized help instead of
   // uncategorized help.
-  if (globalParser().RegisteredOptionCategories.size() > 1) {
+  ਜੇ (globalParser().RegisteredOptionCategories.ਮਾਪ_2() > 1) {
     // unhide --help-list option so user can have uncategorized output if they
     // want it.
-    CommonOptions->HLOp.setHiddenFlag(NotHidden);
+    CommonOptions->HLOp.ਸੈੱਟ_Hidden_Flag(NotHidden);
 
-    CategorizedPrinter = true; // Invoke categorized printer
-  } else {
-    UncategorizedPrinter = true; // Invoke uncategorized printer
+    CategorizedPrinter = ਸੱਚ; // Invoke categorized printer
+  } ਨਹੀਂਤਾਂ {
+    UncategorizedPrinter = ਸੱਚ; // Invoke uncategorized printer
   }
 }
 
 // Print the value of each option.
-void cl::PrintOptionValues() { globalParser().printOptionValues(); }
+ਖਾਲੀ cl::Print_Option_ਮੁੱਲਾਂ() { globalParser().print_Option_ਮੁੱਲਾਂ(); }
 
-void CommandLineParser::printOptionValues() {
-  if (!CommonOptions->PrintOptions && !CommonOptions->PrintAllOptions)
-    return;
+ਖਾਲੀ Command_ਸਤਰ_Parser::print_Option_ਮੁੱਲਾਂ() {
+  ਜੇ (!CommonOptions->PrintOptions && !CommonOptions->PrintAllOptions)
+    ਵਾਪਸ;
 
-  SmallVector<std::pair<const char *, Option *>, 128> Opts;
-  sortOpts(ActiveSubCommand->OptionsMap, Opts, /*ShowHidden*/ true);
+  Small_ਸਦਿਸ਼<std::pair<ਅਚਲ ਅੱਖਰ *, Option *>, 128> Opts;
+  ਛਾਂਟੋ_Opts(ਸਰਗਰਮ_Sub_Command->OptionsMap, Opts, /*ShowHidden*/ ਸੱਚ);
 
   // Compute the maximum argument length...
   size_t MaxArgLen = 0;
-  for (const auto &Opt : Opts)
-    MaxArgLen = std::max(MaxArgLen, Opt.second->getOptionWidth());
+  ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Opt : Opts)
+    MaxArgLen = std::max(MaxArgLen, Opt.ਦੂਜਾ_2->get_Option_ਚੌੜਾਈ());
 
-  for (const auto &Opt : Opts)
-    Opt.second->printOptionValue(MaxArgLen, CommonOptions->PrintAllOptions);
+  ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ &Opt : Opts)
+    Opt.ਦੂਜਾ_2->print_Option_ਮੁੱਲ(MaxArgLen, CommonOptions->PrintAllOptions);
 }
 
 // Utility function for printing the help message.
-void cl::PrintHelpMessage(bool Hidden, bool Categorized) {
-  if (!Hidden && !Categorized)
-    CommonOptions->UncategorizedNormalPrinter.printHelp();
-  else if (!Hidden && Categorized)
-    CommonOptions->CategorizedNormalPrinter.printHelp();
-  else if (Hidden && !Categorized)
+ਖਾਲੀ cl::Print_Help_ਸੁਨੇਹਾ(ਤਾਰਕਿਕ Hidden, ਤਾਰਕਿਕ Categorized) {
+  ਜੇ (!Hidden && !Categorized)
+    CommonOptions->Uncategorized_ਸਾਧਾਰਨ_Printer.printHelp();
+  ਨਹੀਂਤਾਂ ਜੇ (!Hidden && Categorized)
+    CommonOptions->Categorized_ਸਾਧਾਰਨ_Printer.printHelp();
+  ਨਹੀਂਤਾਂ ਜੇ (Hidden && !Categorized)
     CommonOptions->UncategorizedHiddenPrinter.printHelp();
-  else
+  ਨਹੀਂਤਾਂ
     CommonOptions->CategorizedHiddenPrinter.printHelp();
 }
 
 ArrayRef<StringRef> cl::getCompilerBuildConfig() {
-  static const StringRef Config[] = {
+  ਸਥਿਰ ਅਚਲ StringRef Config[] = {
       // Placeholder to ensure the array always has elements, since it's an
       // error to have a zero-sized array. Slice this off before returning.
       "",
   // Actual compiler build config feature list:
-#if LLVM_IS_DEBUG_BUILD
+#ਜੇ LLVM_IS_DEBUG_BUILD
       "+unoptimized",
-#endif
-#ifndef NDEBUG
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
       "+assertions",
-#endif
-#ifdef EXPENSIVE_CHECKS
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ EXPENSIVE_CHECKS
       "+expensive-checks",
-#endif
-#if __has_feature(address_sanitizer)
+#ਜੇ_ਅੰਤ
+#ਜੇ __has_feature(ਪਤਾ_sanitizer)
       "+asan",
-#endif
-#if __has_feature(dataflow_sanitizer)
+#ਜੇ_ਅੰਤ
+#ਜੇ __has_feature(dataflow_sanitizer)
       "+dfsan",
-#endif
-#if __has_feature(hwaddress_sanitizer)
+#ਜੇ_ਅੰਤ
+#ਜੇ __has_feature(hwaddress_sanitizer)
       "+hwasan",
-#endif
-#if __has_feature(memory_sanitizer)
+#ਜੇ_ਅੰਤ
+#ਜੇ __has_feature(ਸਮ੍ਰਿਤੀ_sanitizer)
       "+msan",
-#endif
-#if __has_feature(thread_sanitizer)
+#ਜੇ_ਅੰਤ
+#ਜੇ __has_feature(thread_sanitizer)
       "+tsan",
-#endif
-#if __has_feature(undefined_behavior_sanitizer)
+#ਜੇ_ਅੰਤ
+#ਜੇ __has_feature(undefined_behavior_sanitizer)
       "+ubsan",
-#endif
-#ifdef LLVM_INTEGRATED_CRT_ALLOC
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_INTEGRATED_CRT_ALLOC
       "+alloc:" LLVM_INTEGRATED_CRT_ALLOC,
-#endif
+#ਜੇ_ਅੰਤ
   };
-  return ArrayRef(Config).drop_front(1);
+  ਵਾਪਸ ArrayRef(Config).drop_front(1);
 }
 
 // Utility function for printing the build config.
-void cl::printBuildConfig(raw_ostream &OS) {
-#if LLVM_VERSION_PRINTER_SHOW_BUILD_CONFIG
+ਖਾਲੀ cl::printBuildConfig(raw_ostream &OS) {
+#ਜੇ LLVM_ਸੰਸਕਰਣ_PRINTER_SHOW_BUILD_CONFIG
   OS << "Build config: ";
   llvm::interleaveComma(cl::getCompilerBuildConfig(), OS);
   OS << '\n';
-#endif
+#ਜੇ_ਅੰਤ
 }
 
 /// Utility function for printing version number.
-void cl::PrintVersionMessage() {
-  CommonOptions->VersionPrinterInstance.print(CommonOptions->ExtraVersionPrinters);
+ਖਾਲੀ cl::Print_ਸੰਸਕਰਣ_ਸੁਨੇਹਾ() {
+  CommonOptions->ਸੰਸਕਰਣ_Printer_Instance.print(CommonOptions->Extra_ਸੰਸਕਰਣ_Printers);
 }
 
-void cl::SetVersionPrinter(VersionPrinterTy func) {
-  CommonOptions->OverrideVersionPrinter = func;
+ਖਾਲੀ cl::ਸੈੱਟ_ਸੰਸਕਰਣ_Printer(ਸੰਸਕਰਣ_Printer_Ty func) {
+  CommonOptions->Override_ਸੰਸਕਰਣ_Printer = func;
 }
 
-void cl::AddExtraVersionPrinter(VersionPrinterTy func) {
-  CommonOptions->ExtraVersionPrinters.push_back(func);
+ਖਾਲੀ cl::ਜੋੜੋ_Extra_ਸੰਸਕਰਣ_Printer(ਸੰਸਕਰਣ_Printer_Ty func) {
+  CommonOptions->Extra_ਸੰਸਕਰਣ_Printers.ਧੱਕੋ_ਪਿੱਠ(func);
 }
 
 OptionsMapTy &cl::getRegisteredOptions(SubCommand &Sub) {
   initCommonOptions();
-  auto &Subs = globalParser().RegisteredSubCommands;
-  (void)Subs;
-  assert(Subs.contains(&Sub));
-  return Sub.OptionsMap;
+  ਸਵੈਚਾਲਿਤ &Subs = globalParser().RegisteredSubCommands;
+  (ਖਾਲੀ)Subs;
+  ਪ੍ਰਤਿਜ੍ਞਾ(Subs.ਸ਼ਾਮਲ_ਹੈ(&Sub));
+  ਵਾਪਸ Sub.OptionsMap;
 }
 
-iterator_range<SmallPtrSet<SubCommand *, 4>::iterator>
+iterator_range<Small_Ptr_ਸੈੱਟ<SubCommand *, 4>::iterator>
 cl::getRegisteredSubcommands() {
-  return globalParser().getRegisteredSubcommands();
+  ਵਾਪਸ globalParser().getRegisteredSubcommands();
 }
 
-void cl::HideUnrelatedOptions(cl::OptionCategory &Category, SubCommand &Sub) {
+ਖਾਲੀ cl::HideUnrelatedOptions(cl::OptionCategory &Category, SubCommand &Sub) {
   initCommonOptions();
-  for (auto &I : Sub.OptionsMap) {
-    bool Unrelated = true;
-    for (auto &Cat : I.second->Categories) {
-      if (Cat == &Category || Cat == &CommonOptions->GenericCategory)
-        Unrelated = false;
+  ਲਈ (ਸਵੈਚਾਲਿਤ &I : Sub.OptionsMap) {
+    ਤਾਰਕਿਕ Unrelated = ਸੱਚ;
+    ਲਈ (ਸਵੈਚਾਲਿਤ &Cat : I.ਦੂਜਾ_2->Categories) {
+      ਜੇ (Cat == &Category || Cat == &CommonOptions->GenericCategory)
+        Unrelated = ਝੂਠ;
     }
-    if (Unrelated)
-      I.second->setHiddenFlag(cl::ReallyHidden);
+    ਜੇ (Unrelated)
+      I.ਦੂਜਾ_2->ਸੈੱਟ_Hidden_Flag(cl::ReallyHidden);
   }
 }
 
-void cl::HideUnrelatedOptions(ArrayRef<const cl::OptionCategory *> Categories,
+ਖਾਲੀ cl::HideUnrelatedOptions(ArrayRef<ਅਚਲ cl::OptionCategory *> Categories,
                               SubCommand &Sub) {
   initCommonOptions();
-  for (auto &I : Sub.OptionsMap) {
-    bool Unrelated = true;
-    for (auto &Cat : I.second->Categories) {
-      if (is_contained(Categories, Cat) ||
+  ਲਈ (ਸਵੈਚਾਲਿਤ &I : Sub.OptionsMap) {
+    ਤਾਰਕਿਕ Unrelated = ਸੱਚ;
+    ਲਈ (ਸਵੈਚਾਲਿਤ &Cat : I.ਦੂਜਾ_2->Categories) {
+      ਜੇ (is_contained(Categories, Cat) ||
           Cat == &CommonOptions->GenericCategory)
-        Unrelated = false;
+        Unrelated = ਝੂਠ;
     }
-    if (Unrelated)
-      I.second->setHiddenFlag(cl::ReallyHidden);
+    ਜੇ (Unrelated)
+      I.ਦੂਜਾ_2->ਸੈੱਟ_Hidden_Flag(cl::ReallyHidden);
   }
 }
 
-void cl::ResetCommandLineParser() { globalParser().reset(); }
+ਖਾਲੀ cl::Reset_Command_ਸਤਰ_Parser() { globalParser().reset(); }
 
-void cl::addLibraryOptions(LibraryOptions &L) {
-  globalParser().Libraries.push_back(&L);
+ਖਾਲੀ cl::ਜੋੜੋ_Library_Options(LibraryOptions &L) {
+  globalParser().Libraries.ਧੱਕੋ_ਪਿੱਠ(&L);
 }
 
-void LibraryOptionsContext::assign(const LibraryOptionsContext &Other) {
-  assert(this != &Other);
-  Values.clear();
-  SavedArgs.clear();
-  ArrayRef<const char *> Args = Other.SavedArgs;
-  for (size_t I = 0, E = Args.size(); I != E;) {
-    StringRef Name = Args[I];
+ਖਾਲੀ LibraryOptionsContext::ਸੌਂਪੋ(ਅਚਲ LibraryOptionsContext &Other) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਇਹ != &Other);
+  ਮੁੱਲਾਂ.clear();
+  Saved_ਦਲੀਲਾਂ.clear();
+  ArrayRef<ਅਚਲ ਅੱਖਰ *> ਦਲੀਲਾਂ = Other.Saved_ਦਲੀਲਾਂ;
+  ਲਈ (size_t I = 0, E = ਦਲੀਲਾਂ.ਮਾਪ_2(); I != E;) {
+    StringRef Name = ਦਲੀਲਾਂ[I];
     Name.consume_front("-");
     Name.consume_front("-");
     LibraryOptions *L =
-        globalParser().lookupLibraryOption(Name.split('=').first);
-    unsigned N;
-    cantFail(parse(*L, Args.drop_front(I), N));
+        globalParser().lookupLibraryOption(Name.ਵੰਡੋ('=').ਪਹਿਲਾ_2);
+    ਬਿਨਾਨਿਸ਼ਾਨੀ N;
+    cantFail(parse(*L, ਦਲੀਲਾਂ.drop_front(I), N));
     I += N;
   }
 }
 
 Error LibraryOptionsContext::parse(LibraryOptions &L,
-                                   ArrayRef<const char *> Args,
-                                   unsigned &Consumed) {
-  auto [It, Inserted] = Values.try_emplace(L.getDefault());
-  if (Inserted)
-    It->second = L.copyDefault(Alloc);
-  return parseLibraryOption(L, It->second, Args, Consumed, Alloc, &SavedArgs);
+                                   ArrayRef<ਅਚਲ ਅੱਖਰ *> ਦਲੀਲਾਂ,
+                                   ਬਿਨਾਨਿਸ਼ਾਨੀ &Consumed) {
+  ਸਵੈਚਾਲਿਤ [It, Inserted] = ਮੁੱਲਾਂ.try_emplace(L.getDefault());
+  ਜੇ (Inserted)
+    It->ਦੂਜਾ_2 = L.copyDefault(Alloc);
+  ਵਾਪਸ parseLibraryOption(L, It->ਦੂਜਾ_2, ਦਲੀਲਾਂ, Consumed, Alloc, &Saved_ਦਲੀਲਾਂ);
 }
 
-void cl::ResetAllOptionOccurrences() {
+ਖਾਲੀ cl::ResetAllOptionOccurrences() {
   globalParser().ResetAllOptionOccurrences();
 }
 
-void LLVMParseCommandLineOptions(int argc, const char *const *argv,
-                                 const char *Overview) {
-  llvm::cl::ParseCommandLineOptions(argc, argv, StringRef(Overview),
+ਖਾਲੀ LLVMParse_Command_ਸਤਰ_Options(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ *ਅਚਲ *argv,
+                                 ਅਚਲ ਅੱਖਰ *Overview) {
+  llvm::cl::Parse_Command_ਸਤਰ_Options(argc, argv, StringRef(Overview),
                                     &llvm::nulls());
 }

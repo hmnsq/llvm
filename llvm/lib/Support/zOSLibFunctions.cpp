@@ -12,14 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __MVS__
-#include <stdio.h>
-#include <string.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __MVS__
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/resource.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/wait.h>
 
-const char *signalName[] = {
-    /*  0 */ nullptr,
+ਅਚਲ ਅੱਖਰ *signalName[] = {
+    /*  0 */ ਖਾਲੀ_ਸੂਚਕ,
     /*  1 */ "Hangup",                   // SIGHUP
     /*  2 */ "Interrupt",                // SIGINT
     /*  3 */ "Aborted",                  // SIGABRT
@@ -55,31 +55,31 @@ const char *signalName[] = {
     /* 33 */ "OMVS subsystem shutdown",  // SIGDANGER
     /* 34 */ "Thread stop",              // SIGTHSTOP
     /* 35 */ "Thread resume",            // SIGTHCONT
-    /* 36 */ nullptr,                    // n/a
+    /* 36 */ ਖਾਲੀ_ਸੂਚਕ,                    // n/a
     /* 37 */ "Toggle syscall trace",     // SIGTRACE
-    /* 38 */ nullptr,                    // SIGDCE
+    /* 38 */ ਖਾਲੀ_ਸੂਚਕ,                    // SIGDCE
     /* 39 */ "System dump",              // SIGDUMP
 };
 
 // z/OS Unix System Services does not have strsignal() support, so the
 // strsignal() function is implemented here.
-char *strsignal(int sig) {
-  if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
+ਅੱਖਰ *strsignal(ਪੂਰਨ sig) {
+  ਜੇ (static_cast<size_t>(sig) < (ਆਕਾਰ(signalName) / ਆਕਾਰ(signalName[0])) &&
       signalName[sig])
-    return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+    ਵਾਪਸ const_cast<ਅੱਖਰ *>(signalName[sig]);
+  ਸਥਿਰ ਅੱਖਰ ਸੁਨੇਹਾ[256];
+  snprintf(ਸੁਨੇਹਾ, ਆਕਾਰ(ਸੁਨੇਹਾ), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  ਸੁਨੇਹਾ[ਆਕਾਰ(ਸੁਨੇਹਾ) - 1] = '\0';
+  ਵਾਪਸ ਸੁਨੇਹਾ;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()
 // function is implemented here.
-size_t strnlen(const char *S, size_t MaxLen) {
-  const char *PtrToNullChar =
-      static_cast<const char *>(memchr(S, '\0', MaxLen));
-  return PtrToNullChar ? PtrToNullChar - S : MaxLen;
+size_t strnlen(ਅਚਲ ਅੱਖਰ *S, size_t MaxLen) {
+  ਅਚਲ ਅੱਖਰ *Ptr_ਮੰਜ਼ਿਲ_Null_Char =
+      static_cast<ਅਚਲ ਅੱਖਰ *>(memchr(S, '\0', MaxLen));
+  ਵਾਪਸ Ptr_ਮੰਜ਼ਿਲ_Null_Char ? Ptr_ਮੰਜ਼ਿਲ_Null_Char - S : MaxLen;
 }
-#endif
+#ਜੇ_ਅੰਤ

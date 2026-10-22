@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਗੰਢ::get_ਸ਼ੁਰੂ_Idx() ਅਚਲ { ਵਾਪਸ ਸ਼ੁਰੂ_Idx; }
+ਖਾਲੀ Suffix_ਰੁੱਖ_ਗੰਢ::increment_ਸ਼ੁਰੂ_Idx(ਬਿਨਾਨਿਸ਼ਾਨੀ Inc) { ਸ਼ੁਰੂ_Idx += Inc; }
+ਖਾਲੀ Suffix_ਰੁੱਖ_ਗੰਢ::ਸੈੱਟ_Concat_Len(ਬਿਨਾਨਿਸ਼ਾਨੀ Len) { ConcatLen = Len; }
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਗੰਢ::getConcatLen() ਅਚਲ { ਵਾਪਸ ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+ਤਾਰਕਿਕ Suffix_ਰੁੱਖ_ਅੰਦਰੂਨੀ_ਗੰਢ::is_ਜੜ੍ਹ() ਅਚਲ {
+  ਵਾਪਸ get_ਸ਼ੁਰੂ_Idx() == ਖਾਲੀ_ਥਾਵਾਂ_Idx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਅੰਦਰੂਨੀ_ਗੰਢ::get_ਸਿਰਾ_Idx() ਅਚਲ { ਵਾਪਸ ਸਿਰਾ_Idx; }
+ਖਾਲੀ Suffix_ਰੁੱਖ_ਅੰਦਰੂਨੀ_ਗੰਢ::ਸੈੱਟ_Link(Suffix_ਰੁੱਖ_ਅੰਦਰੂਨੀ_ਗੰਢ *L) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_ਰੁੱਖ_ਅੰਦਰੂਨੀ_ਗੰਢ *Suffix_ਰੁੱਖ_ਅੰਦਰੂਨੀ_ਗੰਢ::getLink() ਅਚਲ { ਵਾਪਸ Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਪੱਤੀ_ਗੰਢ::get_ਸਿਰਾ_Idx() ਅਚਲ {
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਸਿਰਾ_Idx && "EndIdx is empty?");
+  ਵਾਪਸ *ਸਿਰਾ_Idx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਪੱਤੀ_ਗੰਢ::getSuffixIdx() ਅਚਲ { ਵਾਪਸ SuffixIdx; }
+ਖਾਲੀ Suffix_ਰੁੱਖ_ਪੱਤੀ_ਗੰਢ::ਸੈੱਟ_Suffix_Idx(ਬਿਨਾਨਿਸ਼ਾਨੀ Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਗੰਢ::get_ਖੱਬਾ_ਪੱਤੀ_Idx() ਅਚਲ { ਵਾਪਸ ਖੱਬਾ_ਪੱਤੀ_Idx; }
+ਬਿਨਾਨਿਸ਼ਾਨੀ Suffix_ਰੁੱਖ_ਗੰਢ::get_ਸੱਜਾ_ਪੱਤੀ_Idx() ਅਚਲ { ਵਾਪਸ ਸੱਜਾ_ਪੱਤੀ_Idx; }
+ਖਾਲੀ Suffix_ਰੁੱਖ_ਗੰਢ::ਸੈੱਟ_ਖੱਬਾ_ਪੱਤੀ_Idx(ਬਿਨਾਨਿਸ਼ਾਨੀ Idx) { ਖੱਬਾ_ਪੱਤੀ_Idx = Idx; }
+ਖਾਲੀ Suffix_ਰੁੱਖ_ਗੰਢ::ਸੈੱਟ_ਸੱਜਾ_ਪੱਤੀ_Idx(ਬਿਨਾਨਿਸ਼ਾਨੀ Idx) { ਸੱਜਾ_ਪੱਤੀ_Idx = Idx; }

@@ -1,49 +1,49 @@
-#include "blake3_impl.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "blake3_impl.h"
 
-#include <immintrin.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <immintrin.h>
 
-#define DEGREE 8
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEGREE 8
 
-INLINE __m256i loadu(const uint8_t src[32]) {
-  return _mm256_loadu_si256((const __m256i *)src);
+INLINE __m256i loadu(ਅਚਲ uint8_t src[32]) {
+  ਵਾਪਸ _mm256_loadu_si256((ਅਚਲ __m256i *)src);
 }
 
-INLINE void storeu(__m256i src, uint8_t dest[16]) {
+INLINE ਖਾਲੀ storeu(__m256i src, uint8_t dest[16]) {
   _mm256_storeu_si256((__m256i *)dest, src);
 }
 
-INLINE __m256i addv(__m256i a, __m256i b) { return _mm256_add_epi32(a, b); }
+INLINE __m256i addv(__m256i a, __m256i b) { ਵਾਪਸ mm256_ਜੋੜੋ_epi32(a, b); }
 
 // Note that clang-format doesn't like the name "xor" for some reason.
-INLINE __m256i xorv(__m256i a, __m256i b) { return _mm256_xor_si256(a, b); }
+INLINE __m256i xorv(__m256i a, __m256i b) { ਵਾਪਸ _mm256_xor_si256(a, b); }
 
-INLINE __m256i set1(uint32_t x) { return _mm256_set1_epi32((int32_t)x); }
+INLINE __m256i set1(uint32_t x) { ਵਾਪਸ _mm256_set1_epi32((int32_t)x); }
 
 INLINE __m256i rot16(__m256i x) {
-  return _mm256_shuffle_epi8(
-      x, _mm256_set_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2,
+  ਵਾਪਸ _mm256_shuffle_epi8(
+      x, mm256_ਸੈੱਟ_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2,
                          13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2));
 }
 
 INLINE __m256i rot12(__m256i x) {
-  return _mm256_or_si256(_mm256_srli_epi32(x, 12), _mm256_slli_epi32(x, 32 - 12));
+  ਵਾਪਸ _mm256_or_si256(_mm256_srli_epi32(x, 12), _mm256_slli_epi32(x, 32 - 12));
 }
 
 INLINE __m256i rot8(__m256i x) {
-  return _mm256_shuffle_epi8(
-      x, _mm256_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1,
+  ਵਾਪਸ _mm256_shuffle_epi8(
+      x, mm256_ਸੈੱਟ_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1,
                          12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1));
 }
 
 INLINE __m256i rot7(__m256i x) {
-  return _mm256_or_si256(_mm256_srli_epi32(x, 7), _mm256_slli_epi32(x, 32 - 7));
+  ਵਾਪਸ _mm256_or_si256(_mm256_srli_epi32(x, 7), _mm256_slli_epi32(x, 32 - 7));
 }
 
-INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][0]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][2]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][4]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][6]]);
+INLINE ਖਾਲੀ ਗੇੜਾ_fn(__m256i v[16], __m256i m[16], size_t r) {
+  v[0] = addv(v[0], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][0]]);
+  v[1] = addv(v[1], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][2]]);
+  v[2] = addv(v[2], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][4]]);
+  v[3] = addv(v[3], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][6]]);
   v[0] = addv(v[0], v[4]);
   v[1] = addv(v[1], v[5]);
   v[2] = addv(v[2], v[6]);
@@ -68,10 +68,10 @@ INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
   v[5] = rot12(v[5]);
   v[6] = rot12(v[6]);
   v[7] = rot12(v[7]);
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][1]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][3]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][5]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][7]]);
+  v[0] = addv(v[0], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][1]]);
+  v[1] = addv(v[1], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][3]]);
+  v[2] = addv(v[2], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][5]]);
+  v[3] = addv(v[3], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][7]]);
   v[0] = addv(v[0], v[4]);
   v[1] = addv(v[1], v[5]);
   v[2] = addv(v[2], v[6]);
@@ -97,10 +97,10 @@ INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
   v[6] = rot7(v[6]);
   v[7] = rot7(v[7]);
 
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][8]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][10]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][12]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][14]]);
+  v[0] = addv(v[0], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][8]]);
+  v[1] = addv(v[1], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][10]]);
+  v[2] = addv(v[2], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][12]]);
+  v[3] = addv(v[3], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][14]]);
   v[0] = addv(v[0], v[5]);
   v[1] = addv(v[1], v[6]);
   v[2] = addv(v[2], v[7]);
@@ -125,10 +125,10 @@ INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
   v[6] = rot12(v[6]);
   v[7] = rot12(v[7]);
   v[4] = rot12(v[4]);
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][9]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][11]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][13]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][15]]);
+  v[0] = addv(v[0], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][9]]);
+  v[1] = addv(v[1], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][11]]);
+  v[2] = addv(v[2], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][13]]);
+  v[3] = addv(v[3], m[(size_t)ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[r][15]]);
   v[0] = addv(v[0], v[5]);
   v[1] = addv(v[1], v[6]);
   v[2] = addv(v[2], v[7]);
@@ -155,7 +155,7 @@ INLINE void round_fn(__m256i v[16], __m256i m[16], size_t r) {
   v[4] = rot7(v[4]);
 }
 
-INLINE void transpose_vecs(__m256i vecs[DEGREE]) {
+INLINE ਖਾਲੀ transpose_vecs(__m256i vecs[DEGREE]) {
   // Interleave 32-bit lanes. The low unpack is lanes 00/11/44/55, and the high
   // is 22/33/66/77.
   __m256i ab_0145 = _mm256_unpacklo_epi32(vecs[0], vecs[1]);
@@ -189,80 +189,80 @@ INLINE void transpose_vecs(__m256i vecs[DEGREE]) {
   vecs[7] = _mm256_permute2x128_si256(abcd_37, efgh_37, 0x31);
 }
 
-INLINE void transpose_msg_vecs(const uint8_t *const *inputs,
-                               size_t block_offset, __m256i out[16]) {
-  out[0] = loadu(&inputs[0][block_offset + 0 * sizeof(__m256i)]);
-  out[1] = loadu(&inputs[1][block_offset + 0 * sizeof(__m256i)]);
-  out[2] = loadu(&inputs[2][block_offset + 0 * sizeof(__m256i)]);
-  out[3] = loadu(&inputs[3][block_offset + 0 * sizeof(__m256i)]);
-  out[4] = loadu(&inputs[4][block_offset + 0 * sizeof(__m256i)]);
-  out[5] = loadu(&inputs[5][block_offset + 0 * sizeof(__m256i)]);
-  out[6] = loadu(&inputs[6][block_offset + 0 * sizeof(__m256i)]);
-  out[7] = loadu(&inputs[7][block_offset + 0 * sizeof(__m256i)]);
-  out[8] = loadu(&inputs[0][block_offset + 1 * sizeof(__m256i)]);
-  out[9] = loadu(&inputs[1][block_offset + 1 * sizeof(__m256i)]);
-  out[10] = loadu(&inputs[2][block_offset + 1 * sizeof(__m256i)]);
-  out[11] = loadu(&inputs[3][block_offset + 1 * sizeof(__m256i)]);
-  out[12] = loadu(&inputs[4][block_offset + 1 * sizeof(__m256i)]);
-  out[13] = loadu(&inputs[5][block_offset + 1 * sizeof(__m256i)]);
-  out[14] = loadu(&inputs[6][block_offset + 1 * sizeof(__m256i)]);
-  out[15] = loadu(&inputs[7][block_offset + 1 * sizeof(__m256i)]);
-  for (size_t i = 0; i < 8; ++i) {
-    _mm_prefetch((const void *)&inputs[i][block_offset + 256], _MM_HINT_T0);
+INLINE ਖਾਲੀ transpose_ਸੁਨੇਹਾ_vecs(ਅਚਲ uint8_t *ਅਚਲ *inputs,
+                               size_t ਖੰਡ_ਵਿੱਥ, __m256i ਬਾਹਰਲਾ_2[16]) {
+  ਬਾਹਰਲਾ_2[0] = loadu(&inputs[0][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[1] = loadu(&inputs[1][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[2] = loadu(&inputs[2][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[3] = loadu(&inputs[3][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[4] = loadu(&inputs[4][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[5] = loadu(&inputs[5][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[6] = loadu(&inputs[6][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[7] = loadu(&inputs[7][ਖੰਡ_ਵਿੱਥ + 0 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[8] = loadu(&inputs[0][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[9] = loadu(&inputs[1][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[10] = loadu(&inputs[2][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[11] = loadu(&inputs[3][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[12] = loadu(&inputs[4][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[13] = loadu(&inputs[5][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[14] = loadu(&inputs[6][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਬਾਹਰਲਾ_2[15] = loadu(&inputs[7][ਖੰਡ_ਵਿੱਥ + 1 * ਆਕਾਰ(__m256i)]);
+  ਲਈ (size_t i = 0; i < 8; ++i) {
+    _mm_prefetch((ਅਚਲ ਖਾਲੀ *)&inputs[i][ਖੰਡ_ਵਿੱਥ + 256], _MM_HINT_T0);
   }
-  transpose_vecs(&out[0]);
-  transpose_vecs(&out[8]);
+  transpose_vecs(&ਬਾਹਰਲਾ_2[0]);
+  transpose_vecs(&ਬਾਹਰਲਾ_2[8]);
 }
 
-INLINE void load_counters(uint64_t counter, bool increment_counter,
-                          __m256i *out_lo, __m256i *out_hi) {
-  const __m256i mask = _mm256_set1_epi32(-(int32_t)increment_counter);
-  const __m256i add0 = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
-  const __m256i add1 = _mm256_and_si256(mask, add0);
-  __m256i l = _mm256_add_epi32(_mm256_set1_epi32((int32_t)counter), add1);
-  __m256i carry = _mm256_cmpgt_epi32(_mm256_xor_si256(add1, _mm256_set1_epi32(0x80000000)), 
+INLINE ਖਾਲੀ ਲੱਦੋ_counters(uint64_t counter, bool increment_counter,
+                          __m256i *ਬਾਹਰਲਾ_lo, __m256i *ਬਾਹਰਲਾ_hi) {
+  ਅਚਲ __m256i ਨਕਾਬ_2 = _mm256_set1_epi32(-(int32_t)increment_counter);
+  ਅਚਲ __m256i add0 = mm256_ਸੈੱਟ_epi32(7, 6, 5, 4, 3, 2, 1, 0);
+  ਅਚਲ __m256i add1 = _mm256_and_si256(ਨਕਾਬ_2, add0);
+  __m256i l = mm256_ਜੋੜੋ_epi32(_mm256_set1_epi32((int32_t)counter), add1);
+  __m256i ਹਾਸਲ = _mm256_cmpgt_epi32(_mm256_xor_si256(add1, _mm256_set1_epi32(0x80000000)), 
                                      _mm256_xor_si256(   l, _mm256_set1_epi32(0x80000000)));
-  __m256i h = _mm256_sub_epi32(_mm256_set1_epi32((int32_t)(counter >> 32)), carry);
-  *out_lo = l;
-  *out_hi = h;
+  __m256i h = _mm256_sub_epi32(_mm256_set1_epi32((int32_t)(counter >> 32)), ਹਾਸਲ);
+  *ਬਾਹਰਲਾ_lo = l;
+  *ਬਾਹਰਲਾ_hi = h;
 }
 
-static
-void blake3_hash8_avx2(const uint8_t *const *inputs, size_t blocks,
-                       const uint32_t key[8], uint64_t counter,
+ਸਥਿਰ
+ਖਾਲੀ blake3_hash8_avx2(ਅਚਲ uint8_t *ਅਚਲ *inputs, size_t ਖੰਡਾਂ,
+                       ਅਚਲ uint32_t ਕੁੰਜੀ_2[8], uint64_t counter,
                        bool increment_counter, uint8_t flags,
-                       uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
+                       uint8_t flags_ਸ਼ੁਰੂ, uint8_t flags_ਸਿਰਾ, uint8_t *ਬਾਹਰਲਾ_2) {
   __m256i h_vecs[8] = {
-      set1(key[0]), set1(key[1]), set1(key[2]), set1(key[3]),
-      set1(key[4]), set1(key[5]), set1(key[6]), set1(key[7]),
+      set1(ਕੁੰਜੀ_2[0]), set1(ਕੁੰਜੀ_2[1]), set1(ਕੁੰਜੀ_2[2]), set1(ਕੁੰਜੀ_2[3]),
+      set1(ਕੁੰਜੀ_2[4]), set1(ਕੁੰਜੀ_2[5]), set1(ਕੁੰਜੀ_2[6]), set1(ਕੁੰਜੀ_2[7]),
   };
-  __m256i counter_low_vec, counter_high_vec;
-  load_counters(counter, increment_counter, &counter_low_vec,
-                &counter_high_vec);
-  uint8_t block_flags = flags | flags_start;
+  __m256i counter_ਨੀਵਾਂ_vec, counter_ਉੱਚਾ_vec;
+  ਲੱਦੋ_counters(counter, increment_counter, &counter_ਨੀਵਾਂ_vec,
+                &counter_ਉੱਚਾ_vec);
+  uint8_t ਖੰਡ_flags = flags | flags_ਸ਼ੁਰੂ;
 
-  for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
-      block_flags |= flags_end;
+  ਲਈ (size_t ਖੰਡ = 0; ਖੰਡ < ਖੰਡਾਂ; ਖੰਡ++) {
+    ਜੇ (ਖੰਡ + 1 == ਖੰਡਾਂ) {
+      ਖੰਡ_flags |= flags_ਸਿਰਾ;
     }
-    __m256i block_len_vec = set1(BLAKE3_BLOCK_LEN);
-    __m256i block_flags_vec = set1(block_flags);
-    __m256i msg_vecs[16];
-    transpose_msg_vecs(inputs, block * BLAKE3_BLOCK_LEN, msg_vecs);
+    __m256i ਖੰਡ_len_vec = set1(BLAKE3_ਖੰਡ_LEN);
+    __m256i ਖੰਡ_flags_vec = set1(ਖੰਡ_flags);
+    __m256i ਸੁਨੇਹਾ_vecs[16];
+    transpose_ਸੁਨੇਹਾ_vecs(inputs, ਖੰਡ * BLAKE3_ਖੰਡ_LEN, ਸੁਨੇਹਾ_vecs);
 
     __m256i v[16] = {
         h_vecs[0],       h_vecs[1],        h_vecs[2],     h_vecs[3],
         h_vecs[4],       h_vecs[5],        h_vecs[6],     h_vecs[7],
         set1(IV[0]),     set1(IV[1]),      set1(IV[2]),   set1(IV[3]),
-        counter_low_vec, counter_high_vec, block_len_vec, block_flags_vec,
+        counter_ਨੀਵਾਂ_vec, counter_ਉੱਚਾ_vec, ਖੰਡ_len_vec, ਖੰਡ_flags_vec,
     };
-    round_fn(v, msg_vecs, 0);
-    round_fn(v, msg_vecs, 1);
-    round_fn(v, msg_vecs, 2);
-    round_fn(v, msg_vecs, 3);
-    round_fn(v, msg_vecs, 4);
-    round_fn(v, msg_vecs, 5);
-    round_fn(v, msg_vecs, 6);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 0);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 1);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 2);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 3);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 4);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 5);
+    ਗੇੜਾ_fn(v, ਸੁਨੇਹਾ_vecs, 6);
     h_vecs[0] = xorv(v[0], v[8]);
     h_vecs[1] = xorv(v[1], v[9]);
     h_vecs[2] = xorv(v[2], v[10]);
@@ -272,55 +272,55 @@ void blake3_hash8_avx2(const uint8_t *const *inputs, size_t blocks,
     h_vecs[6] = xorv(v[6], v[14]);
     h_vecs[7] = xorv(v[7], v[15]);
 
-    block_flags = flags;
+    ਖੰਡ_flags = flags;
   }
 
   transpose_vecs(h_vecs);
-  storeu(h_vecs[0], &out[0 * sizeof(__m256i)]);
-  storeu(h_vecs[1], &out[1 * sizeof(__m256i)]);
-  storeu(h_vecs[2], &out[2 * sizeof(__m256i)]);
-  storeu(h_vecs[3], &out[3 * sizeof(__m256i)]);
-  storeu(h_vecs[4], &out[4 * sizeof(__m256i)]);
-  storeu(h_vecs[5], &out[5 * sizeof(__m256i)]);
-  storeu(h_vecs[6], &out[6 * sizeof(__m256i)]);
-  storeu(h_vecs[7], &out[7 * sizeof(__m256i)]);
+  storeu(h_vecs[0], &ਬਾਹਰਲਾ_2[0 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[1], &ਬਾਹਰਲਾ_2[1 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[2], &ਬਾਹਰਲਾ_2[2 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[3], &ਬਾਹਰਲਾ_2[3 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[4], &ਬਾਹਰਲਾ_2[4 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[5], &ਬਾਹਰਲਾ_2[5 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[6], &ਬਾਹਰਲਾ_2[6 * ਆਕਾਰ(__m256i)]);
+  storeu(h_vecs[7], &ਬਾਹਰਲਾ_2[7 * ਆਕਾਰ(__m256i)]);
 }
 
-#if !defined(BLAKE3_NO_SSE41)
-void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t num_inputs,
-                            size_t blocks, const uint32_t key[8],
+#ਜੇ !defined(BLAKE3_NO_SSE41)
+ਖਾਲੀ blake3_hash_many_sse41(ਅਚਲ uint8_t *ਅਚਲ *inputs, size_t ਅੰਕ_inputs,
+                            size_t ਖੰਡਾਂ, ਅਚਲ uint32_t ਕੁੰਜੀ_2[8],
                             uint64_t counter, bool increment_counter,
-                            uint8_t flags, uint8_t flags_start,
-                            uint8_t flags_end, uint8_t *out);
-#else
-void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
-                               size_t blocks, const uint32_t key[8],
+                            uint8_t flags, uint8_t flags_ਸ਼ੁਰੂ,
+                            uint8_t flags_ਸਿਰਾ, uint8_t *ਬਾਹਰਲਾ_2);
+#ਨਹੀਂਤਾਂ
+ਖਾਲੀ blake3_hash_many_portable(ਅਚਲ uint8_t *ਅਚਲ *inputs, size_t ਅੰਕ_inputs,
+                               size_t ਖੰਡਾਂ, ਅਚਲ uint32_t ਕੁੰਜੀ_2[8],
                                uint64_t counter, bool increment_counter,
-                               uint8_t flags, uint8_t flags_start,
-                               uint8_t flags_end, uint8_t *out);
-#endif
+                               uint8_t flags, uint8_t flags_ਸ਼ੁਰੂ,
+                               uint8_t flags_ਸਿਰਾ, uint8_t *ਬਾਹਰਲਾ_2);
+#ਜੇ_ਅੰਤ
 
-void blake3_hash_many_avx2(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+ਖਾਲੀ blake3_hash_many_avx2(ਅਚਲ uint8_t *ਅਚਲ *inputs, size_t ਅੰਕ_inputs,
+                           size_t ਖੰਡਾਂ, ਅਚਲ uint32_t ਕੁੰਜੀ_2[8],
                            uint64_t counter, bool increment_counter,
-                           uint8_t flags, uint8_t flags_start,
-                           uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= DEGREE) {
-    blake3_hash8_avx2(inputs, blocks, key, counter, increment_counter, flags,
-                      flags_start, flags_end, out);
-    if (increment_counter) {
+                           uint8_t flags, uint8_t flags_ਸ਼ੁਰੂ,
+                           uint8_t flags_ਸਿਰਾ, uint8_t *ਬਾਹਰਲਾ_2) {
+  ਜਦੋਂ (ਅੰਕ_inputs >= DEGREE) {
+    blake3_hash8_avx2(inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter, increment_counter, flags,
+                      flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ, ਬਾਹਰਲਾ_2);
+    ਜੇ (increment_counter) {
       counter += DEGREE;
     }
     inputs += DEGREE;
-    num_inputs -= DEGREE;
-    out = &out[DEGREE * BLAKE3_OUT_LEN];
+    ਅੰਕ_inputs -= DEGREE;
+    ਬਾਹਰਲਾ_2 = &ਬਾਹਰਲਾ_2[DEGREE * BLAKE3_ਬਾਹਰਲਾ_LEN];
   }
-#if !defined(BLAKE3_NO_SSE41)
-  blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
-                         increment_counter, flags, flags_start, flags_end, out);
-#else
-  blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
-                            increment_counter, flags, flags_start, flags_end,
-                            out);
-#endif
+#ਜੇ !defined(BLAKE3_NO_SSE41)
+  blake3_hash_many_sse41(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                         increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ, ਬਾਹਰਲਾ_2);
+#ਨਹੀਂਤਾਂ
+  blake3_hash_many_portable(inputs, ਅੰਕ_inputs, ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter,
+                            increment_counter, flags, flags_ਸ਼ੁਰੂ, flags_ਸਿਰਾ,
+                            ਬਾਹਰਲਾ_2);
+#ਜੇ_ਅੰਤ
 }

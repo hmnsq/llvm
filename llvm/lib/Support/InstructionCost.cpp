@@ -11,27 +11,27 @@
 /// instructions.
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InstructionCost.h"
-#include "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/InstructionCost.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
-  using UnsignedCostType = std::make_unsigned_t<CostType>;
-  if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+ਖਾਲੀ Instruction_ਲਾਗਤ::print(raw_ostream &OS) ਅਚਲ {
+  ਵਰਤੋਂ Unsigned_ਲਾਗਤ_Type = std::make_unsigned_t<ਲਾਗਤ_Type>;
+  ਜੇ (isValid()) {
+    Unsigned_ਲਾਗਤ_Type Abs_ਮੁੱਲ =
+        (ਮੁੱਲ < 0) ? -((Unsigned_ਲਾਗਤ_Type)ਮੁੱਲ) : ((Unsigned_ਲਾਗਤ_Type)ਮੁੱਲ);
+    Unsigned_ਲਾਗਤ_Type ਸਾਰਾ_ਸੰਖਿਆ = Abs_ਮੁੱਲ / ਲਾਗਤ_Granularity;
+    Unsigned_ਲਾਗਤ_Type Remainder = Abs_ਮੁੱਲ % ਲਾਗਤ_Granularity;
+    ਜੇ (ਮੁੱਲ < 0)
       OS << "-";
-    UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
-    while (RemainderHundreds % 10 == 0 && RemainderHundreds)
+    Unsigned_ਲਾਗਤ_Type RemainderHundreds = (Remainder * 100) / ਲਾਗਤ_Granularity;
+    ਜਦੋਂ (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
-    if (RemainderHundreds)
+    OS << ਸਾਰਾ_ਸੰਖਿਆ;
+    ਜੇ (RemainderHundreds)
       OS << "." << RemainderHundreds;
-  } else {
+  } ਨਹੀਂਤਾਂ {
     OS << "Invalid";
   }
 }

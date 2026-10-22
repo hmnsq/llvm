@@ -6,76 +6,76 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Transport.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/LSP/Logging.h"
-#include "llvm/Support/LSP/Protocol.h"
-#include <atomic>
-#include <optional>
-#include <system_error>
-#include <utility>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/LSP/Transport.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/SmallString.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Error.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/LSP/Logging.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/LSP/Protocol.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <atomic>
+#ਅਨ੍ਤਰ੍ਭਾਵ <optional>
+#ਅਨ੍ਤਰ੍ਭਾਵ <system_error>
+#ਅਨ੍ਤਰ੍ਭਾਵ <utility>
 
-using namespace llvm;
-using namespace llvm::lsp;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm::lsp;
 
 //===----------------------------------------------------------------------===//
-// Reply
+//ਜਵਾਬ
 //===----------------------------------------------------------------------===//
 
-namespace {
+ਨਾਮਾਕਾਸ਼ {
 /// Function object to reply to an LSP call.
 /// Each instance must be called exactly once, otherwise:
 ///  - if there was no reply, an error reply is sent
 ///  - if there were multiple replies, only the first is sent
-class Reply {
-public:
-  Reply(const llvm::json::Value &Id, StringRef Method, JSONTransport &Transport,
+ਵਰਗ ਜਵਾਬ {
+ਜਨਤਕ:
+  ਜਵਾਬ(ਅਚਲ llvm::json::ਮੁੱਲ &Id, StringRef ਵਿਧੀ_2, JSONTransport &Transport,
         std::mutex &TransportOutputMutex);
-  Reply(Reply &&Other);
-  Reply &operator=(Reply &&) = delete;
-  Reply(const Reply &) = delete;
-  Reply &operator=(const Reply &) = delete;
+  ਜਵਾਬ(ਜਵਾਬ &&Other);
+  ਜਵਾਬ &ਸੰਚਾਲਕ=(ਜਵਾਬ &&) = ਮਿਟਾਓ;
+  ਜਵਾਬ(ਅਚਲ ਜਵਾਬ &) = ਮਿਟਾਓ;
+  ਜਵਾਬ &ਸੰਚਾਲਕ=(ਅਚਲ ਜਵਾਬ &) = ਮਿਟਾਓ;
 
-  void operator()(llvm::Expected<llvm::json::Value> Reply);
+  ਖਾਲੀ ਸੰਚਾਲਕ()(llvm::Expected<llvm::json::ਮੁੱਲ> ਜਵਾਬ);
 
-private:
-  std::string Method;
-  std::atomic<bool> Replied = {false};
-  llvm::json::Value Id;
+ਨਿਜੀ:
+  std::string ਵਿਧੀ_2;
+  std::atomic<ਤਾਰਕਿਕ> Replied = {ਝੂਠ};
+  llvm::json::ਮੁੱਲ Id;
   JSONTransport *Transport;
   std::mutex &TransportOutputMutex;
 };
 } // namespace
 
-Reply::Reply(const llvm::json::Value &Id, llvm::StringRef Method,
+ਜਵਾਬ::ਜਵਾਬ(ਅਚਲ llvm::json::ਮੁੱਲ &Id, llvm::StringRef ਵਿਧੀ_2,
              JSONTransport &Transport, std::mutex &TransportOutputMutex)
-    : Method(Method), Id(Id), Transport(&Transport),
+    : ਵਿਧੀ_2(ਵਿਧੀ_2), Id(Id), Transport(&Transport),
       TransportOutputMutex(TransportOutputMutex) {}
 
-Reply::Reply(Reply &&Other)
-    : Method(Other.Method), Replied(Other.Replied.load()),
+ਜਵਾਬ::ਜਵਾਬ(ਜਵਾਬ &&Other)
+    : ਵਿਧੀ_2(Other.ਵਿਧੀ_2), Replied(Other.Replied.ਲੱਦੋ()),
       Id(std::move(Other.Id)), Transport(Other.Transport),
       TransportOutputMutex(Other.TransportOutputMutex) {
-  Other.Transport = nullptr;
+  Other.Transport = ਖਾਲੀ_ਸੂਚਕ;
 }
 
-void Reply::operator()(llvm::Expected<llvm::json::Value> Reply) {
-  if (Replied.exchange(true)) {
-    Logger::error("Replied twice to message {0}({1})", Method, Id);
-    assert(false && "must reply to each call only once!");
-    return;
+ਖਾਲੀ ਜਵਾਬ::ਸੰਚਾਲਕ()(llvm::Expected<llvm::json::ਮੁੱਲ> ਜਵਾਬ) {
+  ਜੇ (Replied.exchange(ਸੱਚ)) {
+    Logger::error("Replied twice to message {0}({1})", ਵਿਧੀ_2, Id);
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਝੂਠ && "must reply to each call only once!");
+    ਵਾਪਸ;
   }
-  assert(Transport && "expected valid transport to reply to");
+  ਪ੍ਰਤਿਜ੍ਞਾ(Transport && "expected valid transport to reply to");
 
-  std::lock_guard<std::mutex> TransportLock(TransportOutputMutex);
-  if (Reply) {
-    Logger::info("--> reply:{0}({1})", Method, Id);
-    Transport->reply(std::move(Id), std::move(Reply));
-  } else {
-    llvm::Error Error = Reply.takeError();
-    Logger::info("--> reply:{0}({1}): {2}", Method, Id, Error);
-    Transport->reply(std::move(Id), std::move(Error));
+  std::ਤਾਲਾ_guard<std::mutex> Transport_ਤਾਲਾ(TransportOutputMutex);
+  ਜੇ (ਜਵਾਬ) {
+    Logger::info("--> reply:{0}({1})", ਵਿਧੀ_2, Id);
+    Transport->ਜਵਾਬ_2(std::move(Id), std::move(ਜਵਾਬ));
+  } ਨਹੀਂਤਾਂ {
+    llvm::Error Error = ਜਵਾਬ.takeError();
+    Logger::info("--> reply:{0}({1}): {2}", ਵਿਧੀ_2, Id, Error);
+    Transport->ਜਵਾਬ_2(std::move(Id), std::move(Error));
   }
 }
 
@@ -85,78 +85,78 @@ void Reply::operator()(llvm::Expected<llvm::json::Value> Reply) {
 
 // Keep handleParseError out of every parse<T> instantiation.
 LLVM_ATTRIBUTE_NOINLINE llvm::Error
-MessageHandler::handleParseError(const llvm::json::Value &Raw,
-                                 StringRef PayloadName, StringRef PayloadKind,
-                                 const llvm::json::Path::Root &Root) {
+ਸੁਨੇਹਾ_Handler::handleParseError(ਅਚਲ llvm::json::ਮੁੱਲ &Raw,
+                                 StringRef PayloadName, StringRef Payload_ਕਿਸਮ,
+                                 ਅਚਲ llvm::json::ਰਸਤਾ::ਜੜ੍ਹ_2 &ਜੜ੍ਹ_2) {
   // Dump the relevant parts of the broken message.
   std::string Context;
   llvm::raw_string_ostream Os(Context);
-  Root.printErrorContext(Raw, Os);
+  ਜੜ੍ਹ_2.printErrorContext(Raw, Os);
 
   // Report the error (e.g. to the client).
-  return llvm::make_error<LSPError>(
-      llvm::formatv("failed to decode {0} {1}: {2}", PayloadName, PayloadKind,
-                    fmt_consume(Root.getError())),
-      ErrorCode::InvalidParams);
+  ਵਾਪਸ llvm::make_error<LSPError>(
+      llvm::formatv("failed to decode {0} {1}: {2}", PayloadName, Payload_ਕਿਸਮ,
+                    fmt_consume(ਜੜ੍ਹ_2.getError())),
+      Error_ਕੋਡ::InvalidParams);
 }
 
-bool MessageHandler::onNotify(llvm::StringRef Method, llvm::json::Value Value) {
-  Logger::info("--> {0}", Method);
+ਤਾਰਕਿਕ ਸੁਨੇਹਾ_Handler::onNotify(llvm::StringRef ਵਿਧੀ_2, llvm::json::ਮੁੱਲ ਮੁੱਲ) {
+  Logger::info("--> {0}", ਵਿਧੀ_2);
 
-  if (Method == "exit")
-    return false;
-  if (Method == "$cancel") {
+  ਜੇ (ਵਿਧੀ_2 == "exit")
+    ਵਾਪਸ ਝੂਠ;
+  ਜੇ (ਵਿਧੀ_2 == "$cancel") {
     // TODO: Add support for cancelling requests.
-  } else {
-    auto It = NotificationHandlers.find(Method);
-    if (It != NotificationHandlers.end())
-      It->second(std::move(Value));
+  } ਨਹੀਂਤਾਂ {
+    ਸਵੈਚਾਲਿਤ It = NotificationHandlers.ਲੱਭੋ(ਵਿਧੀ_2);
+    ਜੇ (It != NotificationHandlers.ਸਿਰਾ())
+      It->ਦੂਜਾ_2(std::move(ਮੁੱਲ));
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
-bool MessageHandler::onCall(llvm::StringRef Method, llvm::json::Value Params,
-                            llvm::json::Value Id) {
-  Logger::info("--> {0}({1})", Method, Id);
+ਤਾਰਕਿਕ ਸੁਨੇਹਾ_Handler::onCall(llvm::StringRef ਵਿਧੀ_2, llvm::json::ਮੁੱਲ Params,
+                            llvm::json::ਮੁੱਲ Id) {
+  Logger::info("--> {0}({1})", ਵਿਧੀ_2, Id);
 
-  Reply Reply(Id, Method, Transport, TransportOutputMutex);
+  ਜਵਾਬ ਜਵਾਬ(Id, ਵਿਧੀ_2, Transport, TransportOutputMutex);
 
-  auto It = MethodHandlers.find(Method);
-  if (It != MethodHandlers.end()) {
-    It->second(std::move(Params), std::move(Reply));
-  } else {
-    Reply(llvm::make_error<LSPError>("method not found: " + Method.str(),
-                                     ErrorCode::MethodNotFound));
+  ਸਵੈਚਾਲਿਤ It = ਵਿਧੀ_Handlers.ਲੱਭੋ(ਵਿਧੀ_2);
+  ਜੇ (It != ਵਿਧੀ_Handlers.ਸਿਰਾ()) {
+    It->ਦੂਜਾ_2(std::move(Params), std::move(ਜਵਾਬ));
+  } ਨਹੀਂਤਾਂ {
+    ਜਵਾਬ(llvm::make_error<LSPError>("method not found: " + ਵਿਧੀ_2.str(),
+                                     Error_ਕੋਡ::ਵਿਧੀ_Not_ਮਿਲਿਆ));
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
-bool MessageHandler::onReply(llvm::json::Value Id,
-                             llvm::Expected<llvm::json::Value> Result) {
+ਤਾਰਕਿਕ ਸੁਨੇਹਾ_Handler::on_ਜਵਾਬ(llvm::json::ਮੁੱਲ Id,
+                             llvm::Expected<llvm::json::ਮੁੱਲ> ਨਤੀਜਾ) {
   // Find the response handler in the mapping. If it exists, move it out of the
   // mapping and erase it.
   ResponseHandlerTy ResponseHandler;
   {
-    std::lock_guard<std::mutex> responseHandlersLock(ResponseHandlersMutex);
-    auto It = ResponseHandlers.find(debugString(Id));
-    if (It != ResponseHandlers.end()) {
-      ResponseHandler = std::move(It->second);
+    std::ਤਾਲਾ_guard<std::mutex> response_Handlers_ਤਾਲਾ(ResponseHandlersMutex);
+    ਸਵੈਚਾਲਿਤ It = ResponseHandlers.ਲੱਭੋ(debugString(Id));
+    ਜੇ (It != ResponseHandlers.ਸਿਰਾ()) {
+      ResponseHandler = std::move(It->ਦੂਜਾ_2);
       ResponseHandlers.erase(It);
     }
   }
 
   // If we found a response handler, invoke it. Otherwise, log an error.
-  if (ResponseHandler.second) {
-    Logger::info("--> reply:{0}({1})", ResponseHandler.first, Id);
-    ResponseHandler.second(std::move(Id), std::move(Result));
-  } else {
+  ਜੇ (ResponseHandler.ਦੂਜਾ_2) {
+    Logger::info("--> reply:{0}({1})", ResponseHandler.ਪਹਿਲਾ_2, Id);
+    ResponseHandler.ਦੂਜਾ_2(std::move(Id), std::move(ਨਤੀਜਾ));
+  } ਨਹੀਂਤਾਂ {
     Logger::error(
         "received a reply with ID {0}, but there was no such outgoing request",
         Id);
-    if (!Result)
-      llvm::consumeError(Result.takeError());
+    ਜੇ (!ਨਤੀਜਾ)
+      llvm::consumeError(ਨਤੀਜਾ.takeError());
   }
-  return true;
+  ਵਾਪਸ ਸੱਚ;
 }
 
 //===----------------------------------------------------------------------===//
@@ -164,200 +164,200 @@ bool MessageHandler::onReply(llvm::json::Value Id,
 //===----------------------------------------------------------------------===//
 
 /// Encode the given error as a JSON object.
-static llvm::json::Object encodeError(llvm::Error Error) {
-  std::string Message;
-  ErrorCode Code = ErrorCode::UnknownErrorCode;
-  auto HandlerFn = [&](const LSPError &LspError) -> llvm::Error {
-    Message = LspError.message;
-    Code = LspError.code;
-    return llvm::Error::success();
+ਸਥਿਰ llvm::json::Object encodeError(llvm::Error Error) {
+  std::string ਸੁਨੇਹਾ_3;
+  Error_ਕੋਡ ਕੋਡ = Error_ਕੋਡ::Unknown_Error_ਕੋਡ;
+  ਸਵੈਚਾਲਿਤ HandlerFn = [&](ਅਚਲ LSPError &LspError) -> llvm::Error {
+    ਸੁਨੇਹਾ_3 = LspError.ਸੁਨੇਹਾ_2;
+    ਕੋਡ = LspError.ਕੋਡ_2;
+    ਵਾਪਸ llvm::Error::success();
   };
-  if (llvm::Error Unhandled = llvm::handleErrors(std::move(Error), HandlerFn))
-    Message = llvm::toString(std::move(Unhandled));
+  ਜੇ (llvm::Error Unhandled = llvm::handleErrors(std::move(Error), HandlerFn))
+    ਸੁਨੇਹਾ_3 = llvm::ਮੰਜ਼ਿਲ_String(std::move(Unhandled));
 
-  return llvm::json::Object{
-      {"message", std::move(Message)},
-      {"code", int64_t(Code)},
+  ਵਾਪਸ llvm::json::Object{
+      {"message", std::move(ਸੁਨੇਹਾ_3)},
+      {"code", int64_t(ਕੋਡ)},
   };
 }
 
 /// Decode the given JSON object into an error.
-llvm::Error decodeError(const llvm::json::Object &O) {
-  StringRef Msg = O.getString("message").value_or("Unspecified error");
-  if (std::optional<int64_t> Code = O.getInteger("code"))
-    return llvm::make_error<LSPError>(Msg.str(), ErrorCode(*Code));
-  return llvm::make_error<llvm::StringError>(llvm::inconvertibleErrorCode(),
-                                             Msg.str());
+llvm::Error decodeError(ਅਚਲ llvm::json::Object &O) {
+  StringRef ਸੁਨੇਹਾ_4 = O.getString("message").ਮੁੱਲ_or("Unspecified error");
+  ਜੇ (std::optional<int64_t> ਕੋਡ = O.getInteger("code"))
+    ਵਾਪਸ llvm::make_error<LSPError>(ਸੁਨੇਹਾ_4.str(), Error_ਕੋਡ(*ਕੋਡ));
+  ਵਾਪਸ llvm::make_error<llvm::StringError>(llvm::inconvertible_Error_ਕੋਡ(),
+                                             ਸੁਨੇਹਾ_4.str());
 }
 
-void JSONTransport::notify(StringRef Method, llvm::json::Value Params) {
-  sendMessage(llvm::json::Object{
+ਖਾਲੀ JSONTransport::notify(StringRef ਵਿਧੀ_2, llvm::json::ਮੁੱਲ Params) {
+  send_ਸੁਨੇਹਾ(llvm::json::Object{
       {"jsonrpc", "2.0"},
-      {"method", Method},
+      {"method", ਵਿਧੀ_2},
       {"params", std::move(Params)},
   });
 }
-void JSONTransport::call(StringRef Method, llvm::json::Value Params,
-                         llvm::json::Value Id) {
-  sendMessage(llvm::json::Object{
+ਖਾਲੀ JSONTransport::call(StringRef ਵਿਧੀ_2, llvm::json::ਮੁੱਲ Params,
+                         llvm::json::ਮੁੱਲ Id) {
+  send_ਸੁਨੇਹਾ(llvm::json::Object{
       {"jsonrpc", "2.0"},
       {"id", std::move(Id)},
-      {"method", Method},
+      {"method", ਵਿਧੀ_2},
       {"params", std::move(Params)},
   });
 }
-void JSONTransport::reply(llvm::json::Value Id,
-                          llvm::Expected<llvm::json::Value> Result) {
-  if (Result) {
-    return sendMessage(llvm::json::Object{
+ਖਾਲੀ JSONTransport::ਜਵਾਬ_2(llvm::json::ਮੁੱਲ Id,
+                          llvm::Expected<llvm::json::ਮੁੱਲ> ਨਤੀਜਾ) {
+  ਜੇ (ਨਤੀਜਾ) {
+    ਵਾਪਸ send_ਸੁਨੇਹਾ(llvm::json::Object{
         {"jsonrpc", "2.0"},
         {"id", std::move(Id)},
-        {"result", std::move(*Result)},
+        {"result", std::move(*ਨਤੀਜਾ)},
     });
   }
 
-  sendMessage(llvm::json::Object{
+  send_ਸੁਨੇਹਾ(llvm::json::Object{
       {"jsonrpc", "2.0"},
       {"id", std::move(Id)},
-      {"error", encodeError(Result.takeError())},
+      {"error", encodeError(ਨਤੀਜਾ.takeError())},
   });
 }
 
-llvm::Error JSONTransport::run(MessageHandler &Handler) {
+llvm::Error JSONTransport::ਲੜੀਵਾਰ(ਸੁਨੇਹਾ_Handler &Handler) {
   std::string Json;
-  while (!In->isEndOfInput()) {
-    if (In->hasError()) {
-      return llvm::errorCodeToError(
-          std::error_code(errno, std::system_category()));
+  ਜਦੋਂ (!ਵਿੱਚ_3->is_ਸਿਰਾ_ਦਾ_ਨਿਵੇਸ਼()) {
+    ਜੇ (ਵਿੱਚ_3->hasError()) {
+      ਵਾਪਸ llvm::error_ਕੋਡ_ਮੰਜ਼ਿਲ_Error(
+          std::error_ਕੋਡ(errno, std::system_category()));
     }
 
-    if (succeeded(In->readMessage(Json))) {
-      if (llvm::Expected<llvm::json::Value> Doc = llvm::json::parse(Json)) {
-        if (!handleMessage(std::move(*Doc), Handler))
-          return llvm::Error::success();
-      } else {
-        Logger::error("JSON parse error: {0}", llvm::toString(Doc.takeError()));
+    ਜੇ (succeeded(ਵਿੱਚ_3->read_ਸੁਨੇਹਾ(Json))) {
+      ਜੇ (llvm::Expected<llvm::json::ਮੁੱਲ> Doc = llvm::json::parse(Json)) {
+        ਜੇ (!handle_ਸੁਨੇਹਾ(std::move(*Doc), Handler))
+          ਵਾਪਸ llvm::Error::success();
+      } ਨਹੀਂਤਾਂ {
+        Logger::error("JSON parse error: {0}", llvm::ਮੰਜ਼ਿਲ_String(Doc.takeError()));
       }
     }
   }
-  return llvm::errorCodeToError(std::make_error_code(std::errc::io_error));
+  ਵਾਪਸ llvm::error_ਕੋਡ_ਮੰਜ਼ਿਲ_Error(std::make_error_ਕੋਡ(std::errc::io_error));
 }
 
-void JSONTransport::sendMessage(llvm::json::Value Msg) {
-  OutputBuffer.clear();
-  llvm::raw_svector_ostream os(OutputBuffer);
-  os << llvm::formatv(PrettyOutput ? "{0:2}\n" : "{0}", Msg);
-  Out << "Content-Length: " << OutputBuffer.size() << "\r\n\r\n"
-      << OutputBuffer;
-  Out.flush();
-  Logger::debug(">>> {0}\n", OutputBuffer);
+ਖਾਲੀ JSONTransport::send_ਸੁਨੇਹਾ(llvm::json::ਮੁੱਲ ਸੁਨੇਹਾ_4) {
+  Output_ਬਫਰ.clear();
+  llvm::raw_svector_ostream os(Output_ਬਫਰ);
+  os << llvm::formatv(PrettyOutput ? "{0:2}\n" : "{0}", ਸੁਨੇਹਾ_4);
+  ਬਾਹਰਲਾ << "Content-Length: " << Output_ਬਫਰ.ਮਾਪ_2() << "\r\n\r\n"
+      << Output_ਬਫਰ;
+  ਬਾਹਰਲਾ.flush();
+  Logger::debug(">>> {0}\n", Output_ਬਫਰ);
 }
 
-bool JSONTransport::handleMessage(llvm::json::Value Msg,
-                                  MessageHandler &Handler) {
+ਤਾਰਕਿਕ JSONTransport::handle_ਸੁਨੇਹਾ(llvm::json::ਮੁੱਲ ਸੁਨੇਹਾ_4,
+                                  ਸੁਨੇਹਾ_Handler &Handler) {
   // Message must be an object with "jsonrpc":"2.0".
-  llvm::json::Object *Object = Msg.getAsObject();
-  if (!Object ||
+  llvm::json::Object *Object = ਸੁਨੇਹਾ_4.getAsObject();
+  ਜੇ (!Object ||
       Object->getString("jsonrpc") != std::optional<StringRef>("2.0"))
-    return false;
+    ਵਾਪਸ ਝੂਠ;
 
   // `id` may be any JSON value. If absent, this is a notification.
-  std::optional<llvm::json::Value> Id;
-  if (llvm::json::Value *I = Object->get("id"))
+  std::optional<llvm::json::ਮੁੱਲ> Id;
+  ਜੇ (llvm::json::ਮੁੱਲ *I = Object->get("id"))
     Id = std::move(*I);
-  std::optional<StringRef> Method = Object->getString("method");
+  std::optional<StringRef> ਵਿਧੀ_2 = Object->getString("method");
 
   // This is a response.
-  if (!Method) {
-    if (!Id)
-      return false;
-    if (auto *Err = Object->getObject("error"))
-      return Handler.onReply(std::move(*Id), decodeError(*Err));
+  ਜੇ (!ਵਿਧੀ_2) {
+    ਜੇ (!Id)
+      ਵਾਪਸ ਝੂਠ;
+    ਜੇ (ਸਵੈਚਾਲਿਤ *Err = Object->getObject("error"))
+      ਵਾਪਸ Handler.on_ਜਵਾਬ(std::move(*Id), decodeError(*Err));
     // result should be given, use null if not.
-    llvm::json::Value Result = nullptr;
-    if (llvm::json::Value *R = Object->get("result"))
-      Result = std::move(*R);
-    return Handler.onReply(std::move(*Id), std::move(Result));
+    llvm::json::ਮੁੱਲ ਨਤੀਜਾ = ਖਾਲੀ_ਸੂਚਕ;
+    ਜੇ (llvm::json::ਮੁੱਲ *R = Object->get("result"))
+      ਨਤੀਜਾ = std::move(*R);
+    ਵਾਪਸ Handler.on_ਜਵਾਬ(std::move(*Id), std::move(ਨਤੀਜਾ));
   }
 
   // Params should be given, use null if not.
-  llvm::json::Value Params = nullptr;
-  if (llvm::json::Value *P = Object->get("params"))
+  llvm::json::ਮੁੱਲ Params = ਖਾਲੀ_ਸੂਚਕ;
+  ਜੇ (llvm::json::ਮੁੱਲ *P = Object->get("params"))
     Params = std::move(*P);
 
-  if (Id)
-    return Handler.onCall(*Method, std::move(Params), std::move(*Id));
-  return Handler.onNotify(*Method, std::move(Params));
+  ਜੇ (Id)
+    ਵਾਪਸ Handler.onCall(*ਵਿਧੀ_2, std::move(Params), std::move(*Id));
+  ਵਾਪਸ Handler.onNotify(*ਵਿਧੀ_2, std::move(Params));
 }
 
 /// Tries to read a line up to and including \n.
 /// If failing, feof(), ferror(), or shutdownRequested() will be set.
-LogicalResult readLine(std::FILE *In, SmallVectorImpl<char> &Out) {
+Logical_ਨਤੀਜਾ read_ਸਤਰ(std::FILE *ਵਿੱਚ_3, Small_ਸਦਿਸ਼_Impl<ਅੱਖਰ> &ਬਾਹਰਲਾ) {
   // Big enough to hold any reasonable header line. May not fit content lines
   // in delimited mode, but performance doesn't matter for that mode.
-  static constexpr int BufSize = 128;
-  size_t Size = 0;
-  Out.clear();
-  for (;;) {
-    Out.resize_for_overwrite(Size + BufSize);
-    if (!std::fgets(&Out[Size], BufSize, In))
-      return failure();
+  ਸਥਿਰ constexpr ਪੂਰਨ Buf_ਮਾਪ = 128;
+  size_t ਮਾਪ = 0;
+  ਬਾਹਰਲਾ.clear();
+  ਲਈ (;;) {
+    ਬਾਹਰਲਾ.resize_for_overwrite(ਮਾਪ + Buf_ਮਾਪ);
+    ਜੇ (!std::fgets(&ਬਾਹਰਲਾ[ਮਾਪ], Buf_ਮਾਪ, ਵਿੱਚ_3))
+      ਵਾਪਸ failure();
 
-    clearerr(In);
+    clearerr(ਵਿੱਚ_3);
 
     // If the line contained null bytes, anything after it (including \n) will
     // be ignored. Fortunately this is not a legal header or JSON.
-    size_t Read = std::strlen(&Out[Size]);
-    if (Read > 0 && Out[Size + Read - 1] == '\n') {
-      Out.resize(Size + Read);
-      return success();
+    size_t Read = std::ਲੜੀ_ਲੰਬਾਈ(&ਬਾਹਰਲਾ[ਮਾਪ]);
+    ਜੇ (Read > 0 && ਬਾਹਰਲਾ[ਮਾਪ + Read - 1] == '\n') {
+      ਬਾਹਰਲਾ.resize(ਮਾਪ + Read);
+      ਵਾਪਸ success();
     }
-    Size += Read;
+    ਮਾਪ += Read;
   }
 }
 
 // Returns std::nullopt when:
 //  - ferror(), feof(), or shutdownRequested() are set.
 //  - Content-Length is missing or empty (protocol error)
-LogicalResult
-JSONTransportInputOverFile::readStandardMessage(std::string &Json) {
+Logical_ਨਤੀਜਾ
+JSONTransport_ਨਿਵੇਸ਼_Over_File::read_Standard_ਸੁਨੇਹਾ(std::string &Json) {
   // A Language Server Protocol message starts with a set of HTTP headers,
   // delimited  by \r\n, and terminated by an empty line (\r\n).
-  unsigned long long ContentLength = 0;
-  llvm::SmallString<128> Line;
-  while (true) {
-    if (feof(In) || hasError() || failed(readLine(In, Line)))
-      return failure();
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਲੰਮਾ Content_ਲੰਮਾਈ = 0;
+  llvm::SmallString<128> ਸਤਰ;
+  ਜਦੋਂ (ਸੱਚ) {
+    ਜੇ (feof(ਵਿੱਚ_3) || hasError() || failed(read_ਸਤਰ(ਵਿੱਚ_3, ਸਤਰ)))
+      ਵਾਪਸ failure();
 
     // Content-Length is a mandatory header, and the only one we handle.
-    StringRef LineRef = Line;
-    if (LineRef.consume_front("Content-Length: ")) {
-      llvm::getAsUnsignedInteger(LineRef.trim(), 0, ContentLength);
-    } else if (!LineRef.trim().empty()) {
+    StringRef ਸਤਰ_Ref = ਸਤਰ;
+    ਜੇ (ਸਤਰ_Ref.consume_front("Content-Length: ")) {
+      llvm::getAsUnsignedInteger(ਸਤਰ_Ref.trim(), 0, Content_ਲੰਮਾਈ);
+    } ਨਹੀਂਤਾਂ ਜੇ (!ਸਤਰ_Ref.trim().ਖਾਲੀ_ਥਾਵਾਂ()) {
       // It's another header, ignore it.
-      continue;
-    } else {
+      ਜਾਰੀ;
+    } ਨਹੀਂਤਾਂ {
       // An empty line indicates the end of headers. Go ahead and read the JSON.
-      break;
+      ਰੋਕੋ;
     }
   }
 
   // The fuzzer likes crashing us by sending "Content-Length: 9999999999999999"
-  if (ContentLength == 0 || ContentLength > 1 << 30)
-    return failure();
+  ਜੇ (Content_ਲੰਮਾਈ == 0 || Content_ਲੰਮਾਈ > 1 << 30)
+    ਵਾਪਸ failure();
 
-  Json.resize(ContentLength);
-  for (size_t Pos = 0, Read; Pos < ContentLength; Pos += Read) {
-    Read = std::fread(&Json[Pos], 1, ContentLength - Pos, In);
-    if (Read == 0)
-      return failure();
+  Json.resize(Content_ਲੰਮਾਈ);
+  ਲਈ (size_t Pos = 0, Read; Pos < Content_ਲੰਮਾਈ; Pos += Read) {
+    Read = std::fread(&Json[Pos], 1, Content_ਲੰਮਾਈ - Pos, ਵਿੱਚ_3);
+    ਜੇ (Read == 0)
+      ਵਾਪਸ failure();
 
     // If we're done, the error was transient. If we're not done, either it was
     // transient or we'll see it again on retry.
-    clearerr(In);
+    clearerr(ਵਿੱਚ_3);
     Pos += Read;
   }
-  return success();
+  ਵਾਪਸ success();
 }
 
 /// For lit tests we support a simplified syntax:
@@ -366,21 +366,21 @@ JSONTransportInputOverFile::readStandardMessage(std::string &Json) {
 /// This is a testing path, so favor simplicity over performance here.
 /// When returning failure: feof(), ferror(), or shutdownRequested() will be
 /// set.
-LogicalResult
-JSONTransportInputOverFile::readDelimitedMessage(std::string &Json) {
+Logical_ਨਤੀਜਾ
+JSONTransport_ਨਿਵੇਸ਼_Over_File::read_Delimited_ਸੁਨੇਹਾ(std::string &Json) {
   Json.clear();
-  llvm::SmallString<128> Line;
-  while (succeeded(readLine(In, Line))) {
-    StringRef LineRef = Line.str().trim();
-    if (LineRef.starts_with("//")) {
+  llvm::SmallString<128> ਸਤਰ;
+  ਜਦੋਂ (succeeded(read_ਸਤਰ(ਵਿੱਚ_3, ਸਤਰ))) {
+    StringRef ਸਤਰ_Ref = ਸਤਰ.str().trim();
+    ਜੇ (ਸਤਰ_Ref.starts_with("//")) {
       // Found a delimiter for the message.
-      if (LineRef == "// -----")
-        break;
-      continue;
+      ਜੇ (ਸਤਰ_Ref == "// -----")
+        ਰੋਕੋ;
+      ਜਾਰੀ;
     }
 
-    Json += Line;
+    Json += ਸਤਰ;
   }
 
-  return failure(ferror(In));
+  ਵਾਪਸ failure(ferror(ਵਿੱਚ_3));
 }

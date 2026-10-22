@@ -35,26 +35,26 @@
  *	@(#)regerror.c	8.4 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <limits.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "regex_impl.h"
 
-#include "regutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "regutils.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _MSC_VER
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ snprintf _snprintf
+#ਜੇ_ਅੰਤ
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *regatoi(ਅਚਲ llvm_regex_t *, ਅੱਖਰ *, ਪੂਰਨ);
 
-static struct rerr {
-	int code;
-	const char *name;
-	const char *explain;
+ਸਥਿਰ ਬਣਤਰ rerr {
+	ਪੂਰਨ ਕੋਡ_2;
+	ਅਚਲ ਅੱਖਰ *name;
+	ਅਚਲ ਅੱਖਰ *explain;
 } rerrs[] = {
 	{ REG_NOMATCH,	"REG_NOMATCH",	"llvm_regexec() failed to match" },
 	{ REG_BADPAT,	"REG_BADPAT",	"invalid regular expression" },
@@ -69,7 +69,7 @@ static struct rerr {
 	{ REG_ERANGE,	"REG_ERANGE",	"invalid character range" },
 	{ REG_ESPACE,	"REG_ESPACE",	"out of memory" },
 	{ REG_BADRPT,	"REG_BADRPT",	"repetition-operator operand invalid" },
-	{ REG_EMPTY,	"REG_EMPTY",	"empty (sub)expression" },
+	{ REG_ਖਾਲੀ_ਥਾਵਾਂ,	"REG_EMPTY",	"empty (sub)expression" },
 	{ REG_ASSERT,	"REG_ASSERT",	"\"can't happen\" -- you found a bug" },
 	{ REG_INVARG,	"REG_INVARG",	"invalid argument to regex routine" },
 	{ 0,		"",		"*** unknown regexp error code ***" }
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(ਪੂਰਨ errcode, ਅਚਲ llvm_regex_t *preg, ਅੱਖਰ *errbuf, size_t errbuf_ਮਾਪ)
 {
-	struct rerr *r;
+	ਬਣਤਰ rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
-	const char *s;
-	char convbuf[50];
+	ਪੂਰਨ ਨਿਸ਼ਾਨਾ = errcode &~ REG_ITOA;
+	ਅਚਲ ਅੱਖਰ *s;
+	ਅੱਖਰ convbuf[50];
 
-	if (errcode == REG_ATOI)
-		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
-				break;
+	ਜੇ (errcode == REG_ATOI)
+		s = regatoi(preg, convbuf, ਆਕਾਰ convbuf);
+	ਨਹੀਂਤਾਂ {
+		ਲਈ (r = rerrs; r->ਕੋਡ_2 != 0; r++)
+			ਜੇ (r->ਕੋਡ_2 == ਨਿਸ਼ਾਨਾ)
+				ਰੋਕੋ;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
-				assert(strlen(r->name) < sizeof(convbuf));
-				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
-				(void)snprintf(convbuf, sizeof convbuf,
-				    "REG_0x%x", target);
+		ਜੇ (errcode&REG_ITOA) {
+			ਜੇ (r->ਕੋਡ_2 != 0) {
+				ਪ੍ਰਤਿਜ੍ਞਾ(ਲੜੀ_ਲੰਬਾਈ(r->name) < ਆਕਾਰ(convbuf));
+				(ਖਾਲੀ) llvm_strlcpy(convbuf, r->name, ਆਕਾਰ convbuf);
+			} ਨਹੀਂਤਾਂ
+				(ਖਾਲੀ)snprintf(convbuf, ਆਕਾਰ convbuf,
+				    "REG_0x%x", ਨਿਸ਼ਾਨਾ);
 			s = convbuf;
-		} else
+		} ਨਹੀਂਤਾਂ
 			s = r->explain;
 	}
 
-	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
-		llvm_strlcpy(errbuf, s, errbuf_size);
+	len = ਲੜੀ_ਲੰਬਾਈ(s) + 1;
+	ਜੇ (errbuf_ਮਾਪ > 0) {
+		llvm_strlcpy(errbuf, s, errbuf_ਮਾਪ);
 	}
 
-	return(len);
+	ਵਾਪਸ(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
-static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *
+regatoi(ਅਚਲ llvm_regex_t *preg, ਅੱਖਰ *localbuf, ਪੂਰਨ localbufsize)
 {
-	struct rerr *r;
+	ਬਣਤਰ rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
-			break;
-	if (r->code == 0)
-		return("0");
+	ਲਈ (r = rerrs; r->ਕੋਡ_2 != 0; r++)
+		ਜੇ (strcmp(r->name, preg->re_endp) == 0)
+			ਰੋਕੋ;
+	ਜੇ (r->ਕੋਡ_2 == 0)
+		ਵਾਪਸ("0");
 
-	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	(ਖਾਲੀ)snprintf(localbuf, localbufsize, "%d", r->ਕੋਡ_2);
+	ਵਾਪਸ(localbuf);
 }

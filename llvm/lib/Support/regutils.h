@@ -35,24 +35,24 @@
  *	@(#)utils.h	8.3 (Berkeley) 3/20/94
  */
 
-#ifndef LLVM_SUPPORT_REGUTILS_H
-#define LLVM_SUPPORT_REGUTILS_H
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ LLVM_SUPPORT_REGUTILS_H
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LLVM_SUPPORT_REGUTILS_H
 
 /* utility definitions */
-#define	NC		(CHAR_MAX - CHAR_MIN + 1)
-typedef unsigned char uch;
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	NC		(CHAR_MAX - CHAR_MIN + 1)
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */
-#ifndef REDEBUG
-#ifndef NDEBUG
-#define	NDEBUG	/* no assertions please */
-#endif
-#endif
-#include <assert.h>
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ REDEBUG
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	NDEBUG	/* no assertions please */
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਅੰਤ
+#ਅਨ੍ਤਰ੍ਭਾਵ <assert.h>
 
 /* for old systems with bcopy() but no memmove() */
-#ifdef USEBCOPY
-#define	memmove(d, s, c)	bcopy(s, d, c)
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ USEBCOPY
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	memmove(d, s, c)	bcopy(s, d, c)
+#ਜੇ_ਅੰਤ
 
-#endif
+#ਜੇ_ਅੰਤ

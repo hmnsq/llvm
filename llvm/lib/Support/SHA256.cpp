@@ -19,74 +19,74 @@
  */
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SHA256.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/SHA256.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/ArrayRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Endian.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/SwapByteOrder.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
-namespace llvm {
+ਨਾਮਾਕਾਸ਼ llvm {
 
-#define SHR(x, c) ((x) >> (c))
-#define ROTR(x, n) (((x) >> n) | ((x) << (32 - (n))))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SHR(x, c) ((x) >> (c))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ROTR(x, n) (((x) >> n) | ((x) << (32 - (n))))
 
-#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
-#define SIGMA_0(x) (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-#define SIGMA_1(x) (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SIGMA_0(x) (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SIGMA_1(x) (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
 
-#define SIGMA_2(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10))
-#define SIGMA_3(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SIGMA_2(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SIGMA_3(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
 
-#define F_EXPAND(A, B, C, D, E, F, G, H, M1, M2, M3, M4, k)                    \
-  do {                                                                         \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ F_EXPAND(A, B, C, D, E, F, G, H, M1, M2, M3, M4, k)                    \
+  ਕਰੋ {                                                                         \
     H += SIGMA_1(E) + CH(E, F, G) + M1 + k;                                    \
     D += H;                                                                    \
     H += SIGMA_0(A) + MAJ(A, B, C);                                            \
     M1 += SIGMA_2(M2) + M3 + SIGMA_3(M4);                                      \
-  } while (0);
+  } ਜਦੋਂ (0);
 
-void SHA256::init() {
-  InternalState.State[0] = 0x6A09E667;
-  InternalState.State[1] = 0xBB67AE85;
-  InternalState.State[2] = 0x3C6EF372;
-  InternalState.State[3] = 0xA54FF53A;
-  InternalState.State[4] = 0x510E527F;
-  InternalState.State[5] = 0x9B05688C;
-  InternalState.State[6] = 0x1F83D9AB;
-  InternalState.State[7] = 0x5BE0CD19;
-  InternalState.ByteCount = 0;
-  InternalState.BufferOffset = 0;
+ਖਾਲੀ SHA256::init() {
+  ਅੰਦਰੂਨੀ_State.State[0] = 0x6A09E667;
+  ਅੰਦਰੂਨੀ_State.State[1] = 0xBB67AE85;
+  ਅੰਦਰੂਨੀ_State.State[2] = 0x3C6EF372;
+  ਅੰਦਰੂਨੀ_State.State[3] = 0xA54FF53A;
+  ਅੰਦਰੂਨੀ_State.State[4] = 0x510E527F;
+  ਅੰਦਰੂਨੀ_State.State[5] = 0x9B05688C;
+  ਅੰਦਰੂਨੀ_State.State[6] = 0x1F83D9AB;
+  ਅੰਦਰੂਨੀ_State.State[7] = 0x5BE0CD19;
+  ਅੰਦਰੂਨੀ_State.Byte_ਗਿਣਤੀ = 0;
+  ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ = 0;
 }
 
-void SHA256::hashBlock() {
-  uint32_t A = InternalState.State[0];
-  uint32_t B = InternalState.State[1];
-  uint32_t C = InternalState.State[2];
-  uint32_t D = InternalState.State[3];
-  uint32_t E = InternalState.State[4];
-  uint32_t F = InternalState.State[5];
-  uint32_t G = InternalState.State[6];
-  uint32_t H = InternalState.State[7];
+ਖਾਲੀ SHA256::hash_ਖੰਡ() {
+  uint32_t A = ਅੰਦਰੂਨੀ_State.State[0];
+  uint32_t B = ਅੰਦਰੂਨੀ_State.State[1];
+  uint32_t C = ਅੰਦਰੂਨੀ_State.State[2];
+  uint32_t D = ਅੰਦਰੂਨੀ_State.State[3];
+  uint32_t E = ਅੰਦਰੂਨੀ_State.State[4];
+  uint32_t F = ਅੰਦਰੂਨੀ_State.State[5];
+  uint32_t G = ਅੰਦਰੂਨੀ_State.State[6];
+  uint32_t H = ਅੰਦਰੂਨੀ_State.State[7];
 
-  uint32_t W00 = InternalState.Buffer.L[0];
-  uint32_t W01 = InternalState.Buffer.L[1];
-  uint32_t W02 = InternalState.Buffer.L[2];
-  uint32_t W03 = InternalState.Buffer.L[3];
-  uint32_t W04 = InternalState.Buffer.L[4];
-  uint32_t W05 = InternalState.Buffer.L[5];
-  uint32_t W06 = InternalState.Buffer.L[6];
-  uint32_t W07 = InternalState.Buffer.L[7];
-  uint32_t W08 = InternalState.Buffer.L[8];
-  uint32_t W09 = InternalState.Buffer.L[9];
-  uint32_t W10 = InternalState.Buffer.L[10];
-  uint32_t W11 = InternalState.Buffer.L[11];
-  uint32_t W12 = InternalState.Buffer.L[12];
-  uint32_t W13 = InternalState.Buffer.L[13];
-  uint32_t W14 = InternalState.Buffer.L[14];
-  uint32_t W15 = InternalState.Buffer.L[15];
+  uint32_t W00 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[0];
+  uint32_t W01 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[1];
+  uint32_t W02 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[2];
+  uint32_t W03 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[3];
+  uint32_t W04 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[4];
+  uint32_t W05 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[5];
+  uint32_t W06 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[6];
+  uint32_t W07 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[7];
+  uint32_t W08 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[8];
+  uint32_t W09 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[9];
+  uint32_t W10 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[10];
+  uint32_t W11 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[11];
+  uint32_t W12 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[12];
+  uint32_t W13 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[13];
+  uint32_t W14 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[14];
+  uint32_t W15 = ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[15];
 
   F_EXPAND(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0x428A2F98);
   F_EXPAND(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0x71374491);
@@ -156,131 +156,131 @@ void SHA256::hashBlock() {
   F_EXPAND(C, D, E, F, G, H, A, B, W14, W12, W07, W15, 0xBEF9A3F7);
   F_EXPAND(B, C, D, E, F, G, H, A, W15, W13, W08, W00, 0xC67178F2);
 
-  InternalState.State[0] += A;
-  InternalState.State[1] += B;
-  InternalState.State[2] += C;
-  InternalState.State[3] += D;
-  InternalState.State[4] += E;
-  InternalState.State[5] += F;
-  InternalState.State[6] += G;
-  InternalState.State[7] += H;
+  ਅੰਦਰੂਨੀ_State.State[0] += A;
+  ਅੰਦਰੂਨੀ_State.State[1] += B;
+  ਅੰਦਰੂਨੀ_State.State[2] += C;
+  ਅੰਦਰੂਨੀ_State.State[3] += D;
+  ਅੰਦਰੂਨੀ_State.State[4] += E;
+  ਅੰਦਰੂਨੀ_State.State[5] += F;
+  ਅੰਦਰੂਨੀ_State.State[6] += G;
+  ਅੰਦਰੂਨੀ_State.State[7] += H;
 }
 
-void SHA256::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
-    InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
-    InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
+ਖਾਲੀ SHA256::ਜੋੜੋ_Uncounted(uint8_t ਅੰਕੜੇ_2) {
+  ਜੇ constexpr (sys::IsBigEndianHost)
+    ਅੰਦਰੂਨੀ_State.ਬਫਰ.C[ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ] = ਅੰਕੜੇ_2;
+  ਨਹੀਂਤਾਂ
+    ਅੰਦਰੂਨੀ_State.ਬਫਰ.C[ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ ^ 3] = ਅੰਕੜੇ_2;
 
-  InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
-    hashBlock();
-    InternalState.BufferOffset = 0;
+  ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ++;
+  ਜੇ (ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ == ਖੰਡ_ਲੰਮਾਈ) {
+    hash_ਖੰਡ();
+    ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ = 0;
   }
 }
 
-void SHA256::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
-  addUncounted(Data);
+ਖਾਲੀ SHA256::writebyte(uint8_t ਅੰਕੜੇ_2) {
+  ++ਅੰਦਰੂਨੀ_State.Byte_ਗਿਣਤੀ;
+  ਜੋੜੋ_Uncounted(ਅੰਕੜੇ_2);
 }
 
-void SHA256::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+ਖਾਲੀ SHA256::update(ArrayRef<uint8_t> ਅੰਕੜੇ_2) {
+  ਅੰਦਰੂਨੀ_State.Byte_ਗਿਣਤੀ += ਅੰਕੜੇ_2.ਮਾਪ_2();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
-    const size_t Remainder = std::min<size_t>(
-        Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
-    for (size_t I = 0; I < Remainder; ++I)
-      addUncounted(Data[I]);
-    Data = Data.drop_front(Remainder);
+  ਜੇ (ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ > 0) {
+    ਅਚਲ size_t Remainder = std::min<size_t>(
+        ਅੰਕੜੇ_2.ਮਾਪ_2(), ਖੰਡ_ਲੰਮਾਈ - ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ);
+    ਲਈ (size_t I = 0; I < Remainder; ++I)
+      ਜੋੜੋ_Uncounted(ਅੰਕੜੇ_2[I]);
+    ਅੰਕੜੇ_2 = ਅੰਕੜੇ_2.drop_front(Remainder);
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
-    assert(InternalState.BufferOffset == 0);
-    static_assert(BLOCK_LENGTH % 4 == 0);
-    constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
-    for (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
-      InternalState.Buffer.L[I] = support::endian::read32be(&Data[I * 4]);
-    hashBlock();
-    Data = Data.drop_front(BLOCK_LENGTH);
+  ਜਦੋਂ (ਅੰਕੜੇ_2.ਮਾਪ_2() >= ਖੰਡ_ਲੰਮਾਈ) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ == 0);
+    static_assert(ਖੰਡ_ਲੰਮਾਈ % 4 == 0);
+    constexpr size_t ਖੰਡ_ਲੰਮਾਈ_32 = ਖੰਡ_ਲੰਮਾਈ / 4;
+    ਲਈ (size_t I = 0; I < ਖੰਡ_ਲੰਮਾਈ_32; ++I)
+      ਅੰਦਰੂਨੀ_State.ਬਫਰ.L[I] = support::endian::read32be(&ਅੰਕੜੇ_2[I * 4]);
+    hash_ਖੰਡ();
+    ਅੰਕੜੇ_2 = ਅੰਕੜੇ_2.drop_front(ਖੰਡ_ਲੰਮਾਈ);
   }
 
   // Finish the remainder.
-  for (uint8_t C : Data)
-    addUncounted(C);
+  ਲਈ (uint8_t C : ਅੰਕੜੇ_2)
+    ਜੋੜੋ_Uncounted(C);
 }
 
-void SHA256::update(StringRef Str) {
+ਖਾਲੀ SHA256::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<ਅੱਖਰ *>(Str.ਅੰਕੜੇ()), Str.ਮਾਪ_2()));
 }
 
-void SHA256::pad() {
+ਖਾਲੀ SHA256::pad() {
   // Implement SHA-2 padding (fips180-2 5.1.1)
 
   // Pad with 0x80 followed by 0x00 until the end of the block
-  addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
-    addUncounted(0x00);
+  ਜੋੜੋ_Uncounted(0x80);
+  ਜਦੋਂ (ਅੰਦਰੂਨੀ_State.ਬਫਰ_ਵਿੱਥ != 56)
+    ਜੋੜੋ_Uncounted(0x00);
 
-  uint64_t len = InternalState.ByteCount << 3; // bit size
+  uint64_t len = ਅੰਦਰੂਨੀ_State.Byte_ਗਿਣਤੀ << 3; // bit size
 
   // Append length in the last 8 bytes big edian encoded
-  addUncounted(len >> 56);
-  addUncounted(len >> 48);
-  addUncounted(len >> 40);
-  addUncounted(len >> 32);
-  addUncounted(len >> 24);
-  addUncounted(len >> 16);
-  addUncounted(len >> 8);
-  addUncounted(len);
+  ਜੋੜੋ_Uncounted(len >> 56);
+  ਜੋੜੋ_Uncounted(len >> 48);
+  ਜੋੜੋ_Uncounted(len >> 40);
+  ਜੋੜੋ_Uncounted(len >> 32);
+  ਜੋੜੋ_Uncounted(len >> 24);
+  ਜੋੜੋ_Uncounted(len >> 16);
+  ਜੋੜੋ_Uncounted(len >> 8);
+  ਜੋੜੋ_Uncounted(len);
 }
 
-void SHA256::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
+ਖਾਲੀ SHA256::final(std::array<uint32_t, HASH_ਲੰਮਾਈ / 4> &Hash_ਨਤੀਜਾ) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  ਜੇ constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 8; i++) {
-      HashResult[i] = InternalState.State[i];
+    ਲਈ (ਪੂਰਨ i = 0; i < 8; i++) {
+      Hash_ਨਤੀਜਾ[i] = ਅੰਦਰੂਨੀ_State.State[i];
     }
-  } else {
+  } ਨਹੀਂਤਾਂ {
     // Swap byte order back
-    for (int i = 0; i < 8; i++) {
-      HashResult[i] = llvm::byteswap(InternalState.State[i]);
+    ਲਈ (ਪੂਰਨ i = 0; i < 8; i++) {
+      Hash_ਨਤੀਜਾ[i] = llvm::byteswap(ਅੰਦਰੂਨੀ_State.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 32> SHA256::final() {
-  union {
-    std::array<uint32_t, HASH_LENGTH / 4> HashResult;
-    std::array<uint8_t, HASH_LENGTH> ReturnResult;
+  ਸੰਘ {
+    std::array<uint32_t, HASH_ਲੰਮਾਈ / 4> Hash_ਨਤੀਜਾ;
+    std::array<uint8_t, HASH_ਲੰਮਾਈ> Return_ਨਤੀਜਾ;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
-  final(HashResult);
-  return ReturnResult;
+  static_assert(ਆਕਾਰ(Hash_ਨਤੀਜਾ) == ਆਕਾਰ(Return_ਨਤੀਜਾ));
+  final(Hash_ਨਤੀਜਾ);
+  ਵਾਪਸ Return_ਨਤੀਜਾ;
 }
 
-std::array<uint8_t, 32> SHA256::result() {
-  auto StateToRestore = InternalState;
+std::array<uint8_t, 32> SHA256::ਨਤੀਜਾ_2() {
+  ਸਵੈਚਾਲਿਤ State_ਮੰਜ਼ਿਲ_Restore = ਅੰਦਰੂਨੀ_State;
 
-  auto Hash = final();
+  ਸਵੈਚਾਲਿਤ Hash = final();
 
   // Restore the state
-  InternalState = StateToRestore;
+  ਅੰਦਰੂਨੀ_State = State_ਮੰਜ਼ਿਲ_Restore;
 
   // Return pointer to hash (32 characters)
-  return Hash;
+  ਵਾਪਸ Hash;
 }
 
-std::array<uint8_t, 32> SHA256::hash(ArrayRef<uint8_t> Data) {
+std::array<uint8_t, 32> SHA256::hash(ArrayRef<uint8_t> ਅੰਕੜੇ_2) {
   SHA256 Hash;
-  Hash.update(Data);
-  return Hash.final();
+  Hash.update(ਅੰਕੜੇ_2);
+  ਵਾਪਸ Hash.final();
 }
 
 } // namespace llvm

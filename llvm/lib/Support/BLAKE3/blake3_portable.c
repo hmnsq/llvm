@@ -1,11 +1,11 @@
-#include "blake3_impl.h"
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "blake3_impl.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
 INLINE uint32_t rotr32(uint32_t w, uint32_t c) {
-  return (w >> c) | (w << (32 - c));
+  ਵਾਪਸ (w >> c) | (w << (32 - c));
 }
 
-INLINE void g(uint32_t *state, size_t a, size_t b, size_t c, size_t d,
+INLINE ਖਾਲੀ g(uint32_t *state, size_t a, size_t b, size_t c, size_t d,
               uint32_t x, uint32_t y) {
   state[a] = state[a] + state[b] + x;
   state[d] = rotr32(state[d] ^ state[a], 16);
@@ -17,43 +17,43 @@ INLINE void g(uint32_t *state, size_t a, size_t b, size_t c, size_t d,
   state[b] = rotr32(state[b] ^ state[c], 7);
 }
 
-INLINE void round_fn(uint32_t state[16], const uint32_t *msg, size_t round) {
+INLINE ਖਾਲੀ ਗੇੜਾ_fn(uint32_t state[16], ਅਚਲ uint32_t *ਸੁਨੇਹਾ, size_t ਗੇੜਾ) {
   // Select the message schedule based on the round.
-  const uint8_t *schedule = MSG_SCHEDULE[round];
+  ਅਚਲ uint8_t *ਸਮਾਂ_ਸਾਰਣੀ = ਸੁਨੇਹਾ_ਸਮਾਂ_ਸਾਰਣੀ[ਗੇੜਾ];
 
   // Mix the columns.
-  g(state, 0, 4, 8, 12, msg[schedule[0]], msg[schedule[1]]);
-  g(state, 1, 5, 9, 13, msg[schedule[2]], msg[schedule[3]]);
-  g(state, 2, 6, 10, 14, msg[schedule[4]], msg[schedule[5]]);
-  g(state, 3, 7, 11, 15, msg[schedule[6]], msg[schedule[7]]);
+  g(state, 0, 4, 8, 12, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[0]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[1]]);
+  g(state, 1, 5, 9, 13, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[2]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[3]]);
+  g(state, 2, 6, 10, 14, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[4]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[5]]);
+  g(state, 3, 7, 11, 15, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[6]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[7]]);
 
   // Mix the rows.
-  g(state, 0, 5, 10, 15, msg[schedule[8]], msg[schedule[9]]);
-  g(state, 1, 6, 11, 12, msg[schedule[10]], msg[schedule[11]]);
-  g(state, 2, 7, 8, 13, msg[schedule[12]], msg[schedule[13]]);
-  g(state, 3, 4, 9, 14, msg[schedule[14]], msg[schedule[15]]);
+  g(state, 0, 5, 10, 15, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[8]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[9]]);
+  g(state, 1, 6, 11, 12, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[10]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[11]]);
+  g(state, 2, 7, 8, 13, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[12]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[13]]);
+  g(state, 3, 4, 9, 14, ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[14]], ਸੁਨੇਹਾ[ਸਮਾਂ_ਸਾਰਣੀ[15]]);
 }
 
-INLINE void compress_pre(uint32_t state[16], const uint32_t cv[8],
-                         const uint8_t block[BLAKE3_BLOCK_LEN],
-                         uint8_t block_len, uint64_t counter, uint8_t flags) {
-  uint32_t block_words[16];
-  block_words[0] = load32(block + 4 * 0);
-  block_words[1] = load32(block + 4 * 1);
-  block_words[2] = load32(block + 4 * 2);
-  block_words[3] = load32(block + 4 * 3);
-  block_words[4] = load32(block + 4 * 4);
-  block_words[5] = load32(block + 4 * 5);
-  block_words[6] = load32(block + 4 * 6);
-  block_words[7] = load32(block + 4 * 7);
-  block_words[8] = load32(block + 4 * 8);
-  block_words[9] = load32(block + 4 * 9);
-  block_words[10] = load32(block + 4 * 10);
-  block_words[11] = load32(block + 4 * 11);
-  block_words[12] = load32(block + 4 * 12);
-  block_words[13] = load32(block + 4 * 13);
-  block_words[14] = load32(block + 4 * 14);
-  block_words[15] = load32(block + 4 * 15);
+INLINE ਖਾਲੀ compress_pre(uint32_t state[16], ਅਚਲ uint32_t cv[8],
+                         ਅਚਲ uint8_t ਖੰਡ[BLAKE3_ਖੰਡ_LEN],
+                         uint8_t ਖੰਡ_len, uint64_t counter, uint8_t flags) {
+  uint32_t ਖੰਡ_ਸ਼ਬਦ[16];
+  ਖੰਡ_ਸ਼ਬਦ[0] = load32(ਖੰਡ + 4 * 0);
+  ਖੰਡ_ਸ਼ਬਦ[1] = load32(ਖੰਡ + 4 * 1);
+  ਖੰਡ_ਸ਼ਬਦ[2] = load32(ਖੰਡ + 4 * 2);
+  ਖੰਡ_ਸ਼ਬਦ[3] = load32(ਖੰਡ + 4 * 3);
+  ਖੰਡ_ਸ਼ਬਦ[4] = load32(ਖੰਡ + 4 * 4);
+  ਖੰਡ_ਸ਼ਬਦ[5] = load32(ਖੰਡ + 4 * 5);
+  ਖੰਡ_ਸ਼ਬਦ[6] = load32(ਖੰਡ + 4 * 6);
+  ਖੰਡ_ਸ਼ਬਦ[7] = load32(ਖੰਡ + 4 * 7);
+  ਖੰਡ_ਸ਼ਬਦ[8] = load32(ਖੰਡ + 4 * 8);
+  ਖੰਡ_ਸ਼ਬਦ[9] = load32(ਖੰਡ + 4 * 9);
+  ਖੰਡ_ਸ਼ਬਦ[10] = load32(ਖੰਡ + 4 * 10);
+  ਖੰਡ_ਸ਼ਬਦ[11] = load32(ਖੰਡ + 4 * 11);
+  ਖੰਡ_ਸ਼ਬਦ[12] = load32(ਖੰਡ + 4 * 12);
+  ਖੰਡ_ਸ਼ਬਦ[13] = load32(ਖੰਡ + 4 * 13);
+  ਖੰਡ_ਸ਼ਬਦ[14] = load32(ਖੰਡ + 4 * 14);
+  ਖੰਡ_ਸ਼ਬਦ[15] = load32(ਖੰਡ + 4 * 15);
 
   state[0] = cv[0];
   state[1] = cv[1];
@@ -67,26 +67,26 @@ INLINE void compress_pre(uint32_t state[16], const uint32_t cv[8],
   state[9] = IV[1];
   state[10] = IV[2];
   state[11] = IV[3];
-  state[12] = counter_low(counter);
-  state[13] = counter_high(counter);
-  state[14] = (uint32_t)block_len;
+  state[12] = counter_ਨੀਵਾਂ(counter);
+  state[13] = counter_ਉੱਚਾ(counter);
+  state[14] = (uint32_t)ਖੰਡ_len;
   state[15] = (uint32_t)flags;
 
-  round_fn(state, &block_words[0], 0);
-  round_fn(state, &block_words[0], 1);
-  round_fn(state, &block_words[0], 2);
-  round_fn(state, &block_words[0], 3);
-  round_fn(state, &block_words[0], 4);
-  round_fn(state, &block_words[0], 5);
-  round_fn(state, &block_words[0], 6);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 0);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 1);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 2);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 3);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 4);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 5);
+  ਗੇੜਾ_fn(state, &ਖੰਡ_ਸ਼ਬਦ[0], 6);
 }
 
-void blake3_compress_in_place_portable(uint32_t cv[8],
-                                       const uint8_t block[BLAKE3_BLOCK_LEN],
-                                       uint8_t block_len, uint64_t counter,
+ਖਾਲੀ blake3_compress_ਵਿੱਚ_ਰੱਖੋ_portable(uint32_t cv[8],
+                                       ਅਚਲ uint8_t ਖੰਡ[BLAKE3_ਖੰਡ_LEN],
+                                       uint8_t ਖੰਡ_len, uint64_t counter,
                                        uint8_t flags) {
   uint32_t state[16];
-  compress_pre(state, cv, block, block_len, counter, flags);
+  compress_pre(state, cv, ਖੰਡ, ਖੰਡ_len, counter, flags);
   cv[0] = state[0] ^ state[8];
   cv[1] = state[1] ^ state[9];
   cv[2] = state[2] ^ state[10];
@@ -97,64 +97,64 @@ void blake3_compress_in_place_portable(uint32_t cv[8],
   cv[7] = state[7] ^ state[15];
 }
 
-void blake3_compress_xof_portable(const uint32_t cv[8],
-                                  const uint8_t block[BLAKE3_BLOCK_LEN],
-                                  uint8_t block_len, uint64_t counter,
-                                  uint8_t flags, uint8_t out[64]) {
+ਖਾਲੀ blake3_compress_xof_portable(ਅਚਲ uint32_t cv[8],
+                                  ਅਚਲ uint8_t ਖੰਡ[BLAKE3_ਖੰਡ_LEN],
+                                  uint8_t ਖੰਡ_len, uint64_t counter,
+                                  uint8_t flags, uint8_t ਬਾਹਰਲਾ_2[64]) {
   uint32_t state[16];
-  compress_pre(state, cv, block, block_len, counter, flags);
+  compress_pre(state, cv, ਖੰਡ, ਖੰਡ_len, counter, flags);
 
-  store32(&out[0 * 4], state[0] ^ state[8]);
-  store32(&out[1 * 4], state[1] ^ state[9]);
-  store32(&out[2 * 4], state[2] ^ state[10]);
-  store32(&out[3 * 4], state[3] ^ state[11]);
-  store32(&out[4 * 4], state[4] ^ state[12]);
-  store32(&out[5 * 4], state[5] ^ state[13]);
-  store32(&out[6 * 4], state[6] ^ state[14]);
-  store32(&out[7 * 4], state[7] ^ state[15]);
-  store32(&out[8 * 4], state[8] ^ cv[0]);
-  store32(&out[9 * 4], state[9] ^ cv[1]);
-  store32(&out[10 * 4], state[10] ^ cv[2]);
-  store32(&out[11 * 4], state[11] ^ cv[3]);
-  store32(&out[12 * 4], state[12] ^ cv[4]);
-  store32(&out[13 * 4], state[13] ^ cv[5]);
-  store32(&out[14 * 4], state[14] ^ cv[6]);
-  store32(&out[15 * 4], state[15] ^ cv[7]);
+  store32(&ਬਾਹਰਲਾ_2[0 * 4], state[0] ^ state[8]);
+  store32(&ਬਾਹਰਲਾ_2[1 * 4], state[1] ^ state[9]);
+  store32(&ਬਾਹਰਲਾ_2[2 * 4], state[2] ^ state[10]);
+  store32(&ਬਾਹਰਲਾ_2[3 * 4], state[3] ^ state[11]);
+  store32(&ਬਾਹਰਲਾ_2[4 * 4], state[4] ^ state[12]);
+  store32(&ਬਾਹਰਲਾ_2[5 * 4], state[5] ^ state[13]);
+  store32(&ਬਾਹਰਲਾ_2[6 * 4], state[6] ^ state[14]);
+  store32(&ਬਾਹਰਲਾ_2[7 * 4], state[7] ^ state[15]);
+  store32(&ਬਾਹਰਲਾ_2[8 * 4], state[8] ^ cv[0]);
+  store32(&ਬਾਹਰਲਾ_2[9 * 4], state[9] ^ cv[1]);
+  store32(&ਬਾਹਰਲਾ_2[10 * 4], state[10] ^ cv[2]);
+  store32(&ਬਾਹਰਲਾ_2[11 * 4], state[11] ^ cv[3]);
+  store32(&ਬਾਹਰਲਾ_2[12 * 4], state[12] ^ cv[4]);
+  store32(&ਬਾਹਰਲਾ_2[13 * 4], state[13] ^ cv[5]);
+  store32(&ਬਾਹਰਲਾ_2[14 * 4], state[14] ^ cv[6]);
+  store32(&ਬਾਹਰਲਾ_2[15 * 4], state[15] ^ cv[7]);
 }
 
-INLINE void hash_one_portable(const uint8_t *input, size_t blocks,
-                              const uint32_t key[8], uint64_t counter,
-                              uint8_t flags, uint8_t flags_start,
-                              uint8_t flags_end, uint8_t out[BLAKE3_OUT_LEN]) {
+INLINE ਖਾਲੀ hash_one_portable(ਅਚਲ uint8_t *ਨਿਵੇਸ਼_2, size_t ਖੰਡਾਂ,
+                              ਅਚਲ uint32_t ਕੁੰਜੀ_2[8], uint64_t counter,
+                              uint8_t flags, uint8_t flags_ਸ਼ੁਰੂ,
+                              uint8_t flags_ਸਿਰਾ, uint8_t ਬਾਹਰਲਾ_2[BLAKE3_ਬਾਹਰਲਾ_LEN]) {
   uint32_t cv[8];
-  memcpy(cv, key, BLAKE3_KEY_LEN);
-  uint8_t block_flags = flags | flags_start;
-  while (blocks > 0) {
-    if (blocks == 1) {
-      block_flags |= flags_end;
+  ਸਮ੍ਰਿਤੀ_ਨਕਲ(cv, ਕੁੰਜੀ_2, BLAKE3_ਕੁੰਜੀ_LEN);
+  uint8_t ਖੰਡ_flags = flags | flags_ਸ਼ੁਰੂ;
+  ਜਦੋਂ (ਖੰਡਾਂ > 0) {
+    ਜੇ (ਖੰਡਾਂ == 1) {
+      ਖੰਡ_flags |= flags_ਸਿਰਾ;
     }
-    blake3_compress_in_place_portable(cv, input, BLAKE3_BLOCK_LEN, counter,
-                                      block_flags);
-    input = &input[BLAKE3_BLOCK_LEN];
-    blocks -= 1;
-    block_flags = flags;
+    blake3_compress_ਵਿੱਚ_ਰੱਖੋ_portable(cv, ਨਿਵੇਸ਼_2, BLAKE3_ਖੰਡ_LEN, counter,
+                                      ਖੰਡ_flags);
+    ਨਿਵੇਸ਼_2 = &ਨਿਵੇਸ਼_2[BLAKE3_ਖੰਡ_LEN];
+    ਖੰਡਾਂ -= 1;
+    ਖੰਡ_flags = flags;
   }
-  store_cv_words(out, cv);
+  store_cv_ਸ਼ਬਦ(ਬਾਹਰਲਾ_2, cv);
 }
 
-void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
-                               size_t blocks, const uint32_t key[8],
+ਖਾਲੀ blake3_hash_many_portable(ਅਚਲ uint8_t *ਅਚਲ *inputs, size_t ਅੰਕ_inputs,
+                               size_t ਖੰਡਾਂ, ਅਚਲ uint32_t ਕੁੰਜੀ_2[8],
                                uint64_t counter, bool increment_counter,
-                               uint8_t flags, uint8_t flags_start,
-                               uint8_t flags_end, uint8_t *out) {
-  while (num_inputs > 0) {
-    hash_one_portable(inputs[0], blocks, key, counter, flags, flags_start,
-                      flags_end, out);
-    if (increment_counter) {
+                               uint8_t flags, uint8_t flags_ਸ਼ੁਰੂ,
+                               uint8_t flags_ਸਿਰਾ, uint8_t *ਬਾਹਰਲਾ_2) {
+  ਜਦੋਂ (ਅੰਕ_inputs > 0) {
+    hash_one_portable(inputs[0], ਖੰਡਾਂ, ਕੁੰਜੀ_2, counter, flags, flags_ਸ਼ੁਰੂ,
+                      flags_ਸਿਰਾ, ਬਾਹਰਲਾ_2);
+    ਜੇ (increment_counter) {
       counter += 1;
     }
     inputs += 1;
-    num_inputs -= 1;
-    out = &out[BLAKE3_OUT_LEN];
+    ਅੰਕ_inputs -= 1;
+    ਬਾਹਰਲਾ_2 = &ਬਾਹਰਲਾ_2[BLAKE3_ਬਾਹਰਲਾ_LEN];
   }
 }

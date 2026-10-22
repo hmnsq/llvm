@@ -10,86 +10,86 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Program.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/raw_ostream.h"
-using namespace llvm;
-using namespace sys;
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Program.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/llvm-config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-static bool Execute(ProcessInfo &PI, StringRef Program,
-                    ArrayRef<StringRef> Args,
+ਸਥਿਰ ਤਾਰਕਿਕ Execute(ProcessInfo &PI, StringRef ਪ੍ਰੋਗਰਾਮ_2,
+                    ArrayRef<StringRef> ਦਲੀਲਾਂ,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
-                    BitVector *AffinityMask, bool DetachProcess);
+                    ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਮ੍ਰਿਤੀ_ਹੱਦਬੰਦੀ, std::string *Err_ਸੁਨੇਹਾ,
+                    ਦੋਆਧਾਰੀ_ਅੰਕ_ਸਦਿਸ਼ *Affinity_ਨਕਾਬ, ਤਾਰਕਿਕ DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+ਪੂਰਨ sys::ExecuteAndWait(StringRef ਪ੍ਰੋਗਰਾਮ_2, ArrayRef<StringRef> ਦਲੀਲਾਂ,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
-                        unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        ਬਿਨਾਨਿਸ਼ਾਨੀ Seconds_ਮੰਜ਼ਿਲ_Wait, ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਮ੍ਰਿਤੀ_ਹੱਦਬੰਦੀ,
+                        std::string *Err_ਸੁਨੇਹਾ, ਤਾਰਕਿਕ *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
-                        BitVector *AffinityMask) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                        ਦੋਆਧਾਰੀ_ਅੰਕ_ਸਦਿਸ਼ *Affinity_ਨਕਾਬ) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(Redirects.ਖਾਲੀ_ਥਾਵਾਂ() || Redirects.ਮਾਪ_2() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-              AffinityMask, /*DetachProcess=*/false)) {
-    if (ExecutionFailed)
-      *ExecutionFailed = false;
-    ProcessInfo Result = Wait(
-        PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
-    return Result.ReturnCode;
+  ਜੇ (Execute(PI, ਪ੍ਰੋਗਰਾਮ_2, ਦਲੀਲਾਂ, Env, Redirects, ਸਮ੍ਰਿਤੀ_ਹੱਦਬੰਦੀ, Err_ਸੁਨੇਹਾ,
+              Affinity_ਨਕਾਬ, /*DetachProcess=*/ਝੂਠ)) {
+    ਜੇ (ExecutionFailed)
+      *ExecutionFailed = ਝੂਠ;
+    ProcessInfo ਨਤੀਜਾ = Wait(
+        PI, Seconds_ਮੰਜ਼ਿਲ_Wait == 0 ? std::nullopt : std::optional(Seconds_ਮੰਜ਼ਿਲ_Wait),
+        Err_ਸੁਨੇਹਾ, ProcStat);
+    ਵਾਪਸ ਨਤੀਜਾ.Return_ਕੋਡ;
   }
 
-  if (ExecutionFailed)
-    *ExecutionFailed = true;
+  ਜੇ (ExecutionFailed)
+    *ExecutionFailed = ਸੱਚ;
 
-  return -1;
+  ਵਾਪਸ -1;
 }
 
-ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
+ProcessInfo sys::ExecuteNoWait(StringRef ਪ੍ਰੋਗਰਾਮ_2, ArrayRef<StringRef> ਦਲੀਲਾਂ,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
-                               bool *ExecutionFailed, BitVector *AffinityMask,
-                               bool DetachProcess) {
-  assert(Redirects.empty() || Redirects.size() == 3);
+                               ਬਿਨਾਨਿਸ਼ਾਨੀ ਸਮ੍ਰਿਤੀ_ਹੱਦਬੰਦੀ, std::string *Err_ਸੁਨੇਹਾ,
+                               ਤਾਰਕਿਕ *ExecutionFailed, ਦੋਆਧਾਰੀ_ਅੰਕ_ਸਦਿਸ਼ *Affinity_ਨਕਾਬ,
+                               ਤਾਰਕਿਕ DetachProcess) {
+  ਪ੍ਰਤਿਜ੍ਞਾ(Redirects.ਖਾਲੀ_ਥਾਵਾਂ() || Redirects.ਮਾਪ_2() == 3);
   ProcessInfo PI;
-  if (ExecutionFailed)
-    *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
-               AffinityMask, DetachProcess))
-    if (ExecutionFailed)
-      *ExecutionFailed = true;
+  ਜੇ (ExecutionFailed)
+    *ExecutionFailed = ਝੂਠ;
+  ਜੇ (!Execute(PI, ਪ੍ਰੋਗਰਾਮ_2, ਦਲੀਲਾਂ, Env, Redirects, ਸਮ੍ਰਿਤੀ_ਹੱਦਬੰਦੀ, Err_ਸੁਨੇਹਾ,
+               Affinity_ਨਕਾਬ, DetachProcess))
+    ਜੇ (ExecutionFailed)
+      *ExecutionFailed = ਸੱਚ;
 
-  return PI;
+  ਵਾਪਸ PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
-  SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+ਤਾਰਕਿਕ sys::command_ਸਤਰ_ਸਮਾਉਂਦਾ_Within_System_Limits(StringRef ਪ੍ਰੋਗਰਾਮ_2,
+                                            ArrayRef<ਅਚਲ ਅੱਖਰ *> ਦਲੀਲਾਂ) {
+  Small_ਸਦਿਸ਼<StringRef, 8> String_Ref_ਦਲੀਲਾਂ(ਦਲੀਲਾਂ);
+  ਵਾਪਸ command_ਸਤਰ_ਸਮਾਉਂਦਾ_Within_System_Limits(ਪ੍ਰੋਗਰਾਮ_2, String_Ref_ਦਲੀਲਾਂ);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+ਖਾਲੀ sys::printArg(raw_ostream &OS, StringRef Arg, ਤਾਰਕਿਕ Quote) {
+  ਅਚਲ ਤਾਰਕਿਕ Escape = Arg.ਲੱਭੋ_ਪਹਿਲਾ_ਦਾ(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
+  ਜੇ (!Quote && !Escape) {
     OS << Arg;
-    return;
+    ਵਾਪਸ;
   }
 
   // Quote and escape. This isn't really complete, but good enough.
   OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
+  ਲਈ (ਅਚਲ ਸਵੈਚਾਲਿਤ c : Arg) {
+    ਜੇ (c == '"' || c == '\\' || c == '$')
       OS << '\\';
     OS << c;
   }
@@ -97,9 +97,9 @@ void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Program.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Program.inc"
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_ON_UNIX
+#ਅਨ੍ਤਰ੍ਭਾਵ "Unix/Program.inc"
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+#ਅਨ੍ਤਰ੍ਭਾਵ "Windows/Program.inc"
+#ਜੇ_ਅੰਤ

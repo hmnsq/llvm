@@ -10,79 +10,79 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/OptimizedStructLayout.h"
-#include <optional>
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/OptimizedStructLayout.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <optional>
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-using Field = OptimizedStructLayoutField;
+ਵਰਤੋਂ ਖੇਤਰ_2 = Optimized_Struct_Layout_ਖੇਤਰ;
 
-#ifndef NDEBUG
-static void checkValidLayout(ArrayRef<Field> Fields, uint64_t Size,
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
+ਸਥਿਰ ਖਾਲੀ checkValidLayout(ArrayRef<ਖੇਤਰ_2> Fields, uint64_t ਮਾਪ,
                              Align MaxAlign) {
-  uint64_t LastEnd = 0;
+  uint64_t ਆਖਰੀ_ਸਿਰਾ = 0;
   Align ComputedMaxAlign;
-  for (auto &Field : Fields) {
-    assert(Field.hasFixedOffset() &&
+  ਲਈ (ਸਵੈਚਾਲਿਤ &ਖੇਤਰ_2 : Fields) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਖੇਤਰ_2.has_Fixed_ਵਿੱਥ() &&
            "didn't assign a fixed offset to field");
-    assert(isAligned(Field.Alignment, Field.Offset) &&
+    ਪ੍ਰਤਿਜ੍ਞਾ(isAligned(ਖੇਤਰ_2.Alignment, ਖੇਤਰ_2.ਵਿੱਥ) &&
            "didn't assign a correctly-aligned offset to field");
-    assert(Field.Offset >= LastEnd &&
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਖੇਤਰ_2.ਵਿੱਥ >= ਆਖਰੀ_ਸਿਰਾ &&
            "didn't assign offsets in ascending order");
-    LastEnd = Field.getEndOffset();
-    assert(Field.Alignment <= MaxAlign &&
+    ਆਖਰੀ_ਸਿਰਾ = ਖੇਤਰ_2.get_ਸਿਰਾ_ਵਿੱਥ();
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਖੇਤਰ_2.Alignment <= MaxAlign &&
            "didn't compute MaxAlign correctly");
-    ComputedMaxAlign = std::max(Field.Alignment, MaxAlign);
+    ComputedMaxAlign = std::max(ਖੇਤਰ_2.Alignment, MaxAlign);
   }
-  assert(LastEnd == Size && "didn't compute LastEnd correctly");
-  assert(ComputedMaxAlign == MaxAlign && "didn't compute MaxAlign correctly");
+  ਪ੍ਰਤਿਜ੍ਞਾ(ਆਖਰੀ_ਸਿਰਾ == ਮਾਪ && "didn't compute LastEnd correctly");
+  ਪ੍ਰਤਿਜ੍ਞਾ(ComputedMaxAlign == MaxAlign && "didn't compute MaxAlign correctly");
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 std::pair<uint64_t, Align>
-llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
-#ifndef NDEBUG
+llvm::performOptimizedStructLayout(MutableArrayRef<ਖੇਤਰ_2> Fields) {
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
   // Do some simple precondition checks.
   {
-    bool InFixedPrefix = true;
-    size_t LastEnd = 0;
-    for (auto &Field : Fields) {
-      assert(Field.Size > 0 && "field of zero size");
-      if (Field.hasFixedOffset()) {
-        assert(InFixedPrefix &&
+    ਤਾਰਕਿਕ ਵਿੱਚ_Fixed_ਅਗੇਤਰ = ਸੱਚ;
+    size_t ਆਖਰੀ_ਸਿਰਾ = 0;
+    ਲਈ (ਸਵੈਚਾਲਿਤ &ਖੇਤਰ_2 : Fields) {
+      ਪ੍ਰਤਿਜ੍ਞਾ(ਖੇਤਰ_2.ਮਾਪ > 0 && "field of zero size");
+      ਜੇ (ਖੇਤਰ_2.has_Fixed_ਵਿੱਥ()) {
+        ਪ੍ਰਤਿਜ੍ਞਾ(ਵਿੱਚ_Fixed_ਅਗੇਤਰ &&
                "fixed-offset fields are not a strict prefix of array");
-        assert(LastEnd <= Field.Offset &&
+        ਪ੍ਰਤਿਜ੍ਞਾ(ਆਖਰੀ_ਸਿਰਾ <= ਖੇਤਰ_2.ਵਿੱਥ &&
                "fixed-offset fields overlap or are not in order");
-        LastEnd = Field.getEndOffset();
-        assert(LastEnd > Field.Offset &&
+        ਆਖਰੀ_ਸਿਰਾ = ਖੇਤਰ_2.get_ਸਿਰਾ_ਵਿੱਥ();
+        ਪ੍ਰਤਿਜ੍ਞਾ(ਆਖਰੀ_ਸਿਰਾ > ਖੇਤਰ_2.ਵਿੱਥ &&
                "overflow in fixed-offset end offset");
-      } else {
-        InFixedPrefix = false;
+      } ਨਹੀਂਤਾਂ {
+        ਵਿੱਚ_Fixed_ਅਗੇਤਰ = ਝੂਠ;
       }
     }
   }
-#endif
+#ਜੇ_ਅੰਤ
 
   // Do an initial pass over the fields.
   Align MaxAlign;
 
   // Find the first flexible-offset field, tracking MaxAlign.
-  auto FirstFlexible = Fields.begin(), E = Fields.end();
-  while (FirstFlexible != E && FirstFlexible->hasFixedOffset()) {
-    MaxAlign = std::max(MaxAlign, FirstFlexible->Alignment);
-    ++FirstFlexible;
+  ਸਵੈਚਾਲਿਤ ਪਹਿਲਾ_Flexible = Fields.begin(), E = Fields.ਸਿਰਾ();
+  ਜਦੋਂ (ਪਹਿਲਾ_Flexible != E && ਪਹਿਲਾ_Flexible->has_Fixed_ਵਿੱਥ()) {
+    MaxAlign = std::max(MaxAlign, ਪਹਿਲਾ_Flexible->Alignment);
+    ++ਪਹਿਲਾ_Flexible;
   }
 
   // If there are no flexible fields, we're done.
-  if (FirstFlexible == E) {
-    uint64_t Size = 0;
-    if (!Fields.empty())
-      Size = Fields.back().getEndOffset();
+  ਜੇ (ਪਹਿਲਾ_Flexible == E) {
+    uint64_t ਮਾਪ = 0;
+    ਜੇ (!Fields.ਖਾਲੀ_ਥਾਵਾਂ())
+      ਮਾਪ = Fields.ਪਿੱਠ().get_ਸਿਰਾ_ਵਿੱਥ();
 
-#ifndef NDEBUG
-    checkValidLayout(Fields, Size, MaxAlign);
-#endif
-    return {Size, MaxAlign};
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
+    checkValidLayout(Fields, ਮਾਪ, MaxAlign);
+#ਜੇ_ਅੰਤ
+    ਵਾਪਸ {ਮਾਪ, MaxAlign};
   }
 
   // Walk over the flexible-offset fields, tracking MaxAlign and
@@ -91,9 +91,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // we can use array_pod_sort, which isn't stable.  We won't use it
   // past that point.
   {
-    uintptr_t UniqueNumber = 0;
-    for (auto I = FirstFlexible; I != E; ++I) {
-      I->Scratch = reinterpret_cast<void*>(UniqueNumber++);
+    uintptr_t Unique_ਸੰਖਿਆ = 0;
+    ਲਈ (ਸਵੈਚਾਲਿਤ I = ਪਹਿਲਾ_Flexible; I != E; ++I) {
+      I->Scratch = reinterpret_cast<ਖਾਲੀ*>(Unique_ਸੰਖਿਆ++);
       MaxAlign = std::max(MaxAlign, I->Alignment);
     }
   }
@@ -103,23 +103,23 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // in Scratch.  The decreasing-size aspect of this is only really
   // important if we get into the gap-filling stage below, but it
   // doesn't hurt here.
-  array_pod_sort(FirstFlexible, E,
-                 [](const Field *lhs, const Field *rhs) -> int {
+  array_pod_ਛਾਂਟੋ(ਪਹਿਲਾ_Flexible, E,
+                 [](ਅਚਲ ਖੇਤਰ_2 *lhs, ਅਚਲ ਖੇਤਰ_2 *rhs) -> ਪੂਰਨ {
     // Decreasing alignment.
-    if (lhs->Alignment != rhs->Alignment)
-      return (lhs->Alignment < rhs->Alignment ? 1 : -1);
+    ਜੇ (lhs->Alignment != rhs->Alignment)
+      ਵਾਪਸ (lhs->Alignment < rhs->Alignment ? 1 : -1);
 
     // Decreasing size.
-    if (lhs->Size != rhs->Size)
-      return (lhs->Size < rhs->Size ? 1 : -1);
+    ਜੇ (lhs->ਮਾਪ != rhs->ਮਾਪ)
+      ਵਾਪਸ (lhs->ਮਾਪ < rhs->ਮਾਪ ? 1 : -1);
 
     // Original order.
-    auto lhsNumber = reinterpret_cast<uintptr_t>(lhs->Scratch);
-    auto rhsNumber = reinterpret_cast<uintptr_t>(rhs->Scratch);
-    if (lhsNumber != rhsNumber)
-      return (lhsNumber < rhsNumber ? -1 : 1);
+    ਸਵੈਚਾਲਿਤ lhs_ਸੰਖਿਆ = reinterpret_cast<uintptr_t>(lhs->Scratch);
+    ਸਵੈਚਾਲਿਤ rhs_ਸੰਖਿਆ = reinterpret_cast<uintptr_t>(rhs->Scratch);
+    ਜੇ (lhs_ਸੰਖਿਆ != rhs_ਸੰਖਿਆ)
+      ਵਾਪਸ (lhs_ਸੰਖਿਆ < rhs_ਸੰਖਿਆ ? -1 : 1);
 
-    return 0;
+    ਵਾਪਸ 0;
   });
 
   // Do a quick check for whether that sort alone has given us a perfect
@@ -129,17 +129,17 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // and the flexible-layout fields all have sizes that are multiples
   // of their alignment, then this will reliably trigger.
   {
-    bool HasPadding = false;
-    uint64_t LastEnd = 0;
+    ਤਾਰਕਿਕ HasPadding = ਝੂਠ;
+    uint64_t ਆਖਰੀ_ਸਿਰਾ = 0;
 
     // Walk the fixed-offset fields.
-    for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
-      assert(I->hasFixedOffset());
-      if (LastEnd != I->Offset) {
-        HasPadding = true;
-        break;
+    ਲਈ (ਸਵੈਚਾਲਿਤ I = Fields.begin(); I != ਪਹਿਲਾ_Flexible; ++I) {
+      ਪ੍ਰਤਿਜ੍ਞਾ(I->has_Fixed_ਵਿੱਥ());
+      ਜੇ (ਆਖਰੀ_ਸਿਰਾ != I->ਵਿੱਥ) {
+        HasPadding = ਸੱਚ;
+        ਰੋਕੋ;
       }
-      LastEnd = I->getEndOffset();
+      ਆਖਰੀ_ਸਿਰਾ = I->get_ਸਿਰਾ_ਵਿੱਥ();
     }
 
     // Walk the flexible-offset fields, optimistically assigning fixed
@@ -147,24 +147,24 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     // fixed-offset and flexible-offset fields, so if we end up
     // discovering padding later in this loop, we can just abandon this
     // work and we'll ignore the offsets we already assigned.
-    if (!HasPadding) {
-      for (auto I = FirstFlexible; I != E; ++I) {
-        auto Offset = alignTo(LastEnd, I->Alignment);
-        if (LastEnd != Offset) {
-          HasPadding = true;
-          break;
+    ਜੇ (!HasPadding) {
+      ਲਈ (ਸਵੈਚਾਲਿਤ I = ਪਹਿਲਾ_Flexible; I != E; ++I) {
+        ਸਵੈਚਾਲਿਤ ਵਿੱਥ = align_ਮੰਜ਼ਿਲ(ਆਖਰੀ_ਸਿਰਾ, I->Alignment);
+        ਜੇ (ਆਖਰੀ_ਸਿਰਾ != ਵਿੱਥ) {
+          HasPadding = ਸੱਚ;
+          ਰੋਕੋ;
         }
-        I->Offset = Offset;
-        LastEnd = I->getEndOffset();
+        I->ਵਿੱਥ = ਵਿੱਥ;
+        ਆਖਰੀ_ਸਿਰਾ = I->get_ਸਿਰਾ_ਵਿੱਥ();
       }
     }
 
     // If we already have a perfect layout, we're done.
-    if (!HasPadding) {
-#ifndef NDEBUG
-      checkValidLayout(Fields, LastEnd, MaxAlign);
-#endif
-      return {LastEnd, MaxAlign};
+    ਜੇ (!HasPadding) {
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
+      checkValidLayout(Fields, ਆਖਰੀ_ਸਿਰਾ, MaxAlign);
+#ਜੇ_ਅੰਤ
+      ਵਾਪਸ {ਆਖਰੀ_ਸਿਰਾ, MaxAlign};
     }
   }
 
@@ -233,139 +233,139 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // Start by organizing the flexible-offset fields into bins according to
   // their alignment.  We expect a small enough number of bins that we
   // don't care about the asymptotic costs of walking this.
-  struct AlignmentQueue {
+  ਬਣਤਰ Alignment_ਕਤਾਰ {
     /// The minimum size of anything currently in this queue.
-    uint64_t MinSize;
+    uint64_t Min_ਮਾਪ;
 
     /// The head of the queue.  A singly-linked list.  The order here should
     /// be consistent with the earlier sort, i.e. the elements should be
     /// monotonically descending in size and otherwise in the original order.
     ///
     /// We remove the queue from the array as soon as this is empty.
-    OptimizedStructLayoutField *Head;
+    Optimized_Struct_Layout_ਖੇਤਰ *ਸਿਰ_2;
 
     /// The alignment requirement of the queue.
     Align Alignment;
 
-    static Field *getNext(Field *Cur) {
-      return static_cast<Field *>(Cur->Scratch);
+    ਸਥਿਰ ਖੇਤਰ_2 *get_ਅਗਲਾ(ਖੇਤਰ_2 *Cur) {
+      ਵਾਪਸ static_cast<ਖੇਤਰ_2 *>(Cur->Scratch);
     }
   };
-  SmallVector<AlignmentQueue, 8> FlexibleFieldsByAlignment;
-  for (auto I = FirstFlexible; I != E; ) {
-    auto Head = I;
-    auto Alignment = I->Alignment;
+  Small_ਸਦਿਸ਼<Alignment_ਕਤਾਰ, 8> FlexibleFieldsByAlignment;
+  ਲਈ (ਸਵੈਚਾਲਿਤ I = ਪਹਿਲਾ_Flexible; I != E; ) {
+    ਸਵੈਚਾਲਿਤ ਸਿਰ_2 = I;
+    ਸਵੈਚਾਲਿਤ Alignment = I->Alignment;
 
-    uint64_t MinSize = I->Size;
-    auto LastInQueue = I;
-    for (++I; I != E && I->Alignment == Alignment; ++I) {
-      LastInQueue->Scratch = I;
-      LastInQueue = I;
-      MinSize = std::min(MinSize, I->Size);
+    uint64_t Min_ਮਾਪ = I->ਮਾਪ;
+    ਸਵੈਚਾਲਿਤ ਆਖਰੀ_ਵਿੱਚ_ਕਤਾਰ = I;
+    ਲਈ (++I; I != E && I->Alignment == Alignment; ++I) {
+      ਆਖਰੀ_ਵਿੱਚ_ਕਤਾਰ->Scratch = I;
+      ਆਖਰੀ_ਵਿੱਚ_ਕਤਾਰ = I;
+      Min_ਮਾਪ = std::min(Min_ਮਾਪ, I->ਮਾਪ);
     }
-    LastInQueue->Scratch = nullptr;
+    ਆਖਰੀ_ਵਿੱਚ_ਕਤਾਰ->Scratch = ਖਾਲੀ_ਸੂਚਕ;
 
-    FlexibleFieldsByAlignment.push_back({MinSize, Head, Alignment});
+    FlexibleFieldsByAlignment.ਧੱਕੋ_ਪਿੱਠ({Min_ਮਾਪ, ਸਿਰ_2, Alignment});
   }
 
-#ifndef NDEBUG
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
   // Verify that we set the queues up correctly.
-  auto checkQueues = [&]{
-    bool FirstQueue = true;
-    Align LastQueueAlignment;
-    for (auto &Queue : FlexibleFieldsByAlignment) {
-      assert((FirstQueue || Queue.Alignment < LastQueueAlignment) &&
+  ਸਵੈਚਾਲਿਤ checkQueues = [&]{
+    ਤਾਰਕਿਕ ਪਹਿਲਾ_ਕਤਾਰ = ਸੱਚ;
+    Align ਆਖਰੀ_ਕਤਾਰ_Alignment;
+    ਲਈ (ਸਵੈਚਾਲਿਤ &ਕਤਾਰ : FlexibleFieldsByAlignment) {
+      ਪ੍ਰਤਿਜ੍ਞਾ((ਪਹਿਲਾ_ਕਤਾਰ || ਕਤਾਰ.Alignment < ਆਖਰੀ_ਕਤਾਰ_Alignment) &&
              "bins not in order of descending alignment");
-      LastQueueAlignment = Queue.Alignment;
-      FirstQueue = false;
+      ਆਖਰੀ_ਕਤਾਰ_Alignment = ਕਤਾਰ.Alignment;
+      ਪਹਿਲਾ_ਕਤਾਰ = ਝੂਠ;
 
-      assert(Queue.Head && "queue was empty");
-      uint64_t LastSize = ~(uint64_t)0;
-      for (auto I = Queue.Head; I; I = Queue.getNext(I)) {
-        assert(I->Alignment == Queue.Alignment && "bad field in queue");
-        assert(I->Size <= LastSize && "queue not in descending size order");
-        LastSize = I->Size;
+      ਪ੍ਰਤਿਜ੍ਞਾ(ਕਤਾਰ.ਸਿਰ_2 && "queue was empty");
+      uint64_t ਆਖਰੀ_ਮਾਪ = ~(uint64_t)0;
+      ਲਈ (ਸਵੈਚਾਲਿਤ I = ਕਤਾਰ.ਸਿਰ_2; I; I = ਕਤਾਰ.get_ਅਗਲਾ(I)) {
+        ਪ੍ਰਤਿਜ੍ਞਾ(I->Alignment == ਕਤਾਰ.Alignment && "bad field in queue");
+        ਪ੍ਰਤਿਜ੍ਞਾ(I->ਮਾਪ <= ਆਖਰੀ_ਮਾਪ && "queue not in descending size order");
+        ਆਖਰੀ_ਮਾਪ = I->ਮਾਪ;
       }
     }
   };
   checkQueues();
-#endif
+#ਜੇ_ਅੰਤ
 
   /// Helper function to remove a field from a queue.
-  auto spliceFromQueue = [&](AlignmentQueue *Queue, Field *Last, Field *Cur) {
-    assert(Last ? Queue->getNext(Last) == Cur : Queue->Head == Cur);
+  ਸਵੈਚਾਲਿਤ splice_From_ਕਤਾਰ = [&](Alignment_ਕਤਾਰ *ਕਤਾਰ, ਖੇਤਰ_2 *ਆਖਰੀ, ਖੇਤਰ_2 *Cur) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਆਖਰੀ ? ਕਤਾਰ->get_ਅਗਲਾ(ਆਖਰੀ) == Cur : ਕਤਾਰ->ਸਿਰ_2 == Cur);
 
     // If we're removing Cur from a non-initial position, splice it out
     // of the linked list.
-    if (Last) {
-      Last->Scratch = Cur->Scratch;
+    ਜੇ (ਆਖਰੀ) {
+      ਆਖਰੀ->Scratch = Cur->Scratch;
 
       // If Cur was the last field in the list, we need to update MinSize.
       // We can just use the last field's size because the list is in
       // descending order of size.
-      if (!Cur->Scratch)
-        Queue->MinSize = Last->Size;
+      ਜੇ (!Cur->Scratch)
+        ਕਤਾਰ->Min_ਮਾਪ = ਆਖਰੀ->ਮਾਪ;
 
     // Otherwise, replace the head.
-    } else {
-      if (auto NewHead = Queue->getNext(Cur))
-        Queue->Head = NewHead;
+    } ਨਹੀਂਤਾਂ {
+      ਜੇ (ਸਵੈਚਾਲਿਤ New_ਸਿਰ = ਕਤਾਰ->get_ਅਗਲਾ(Cur))
+        ਕਤਾਰ->ਸਿਰ_2 = New_ਸਿਰ;
 
       // If we just emptied the queue, destroy its bin.
-      else
-        FlexibleFieldsByAlignment.erase(Queue);
+      ਨਹੀਂਤਾਂ
+        FlexibleFieldsByAlignment.erase(ਕਤਾਰ);
     }
   };
 
   // Do layout into a local array.  Doing this in-place on Fields is
   // not really feasible.
-  SmallVector<Field, 16> Layout;
-  Layout.reserve(Fields.size());
+  Small_ਸਦਿਸ਼<ਖੇਤਰ_2, 16> Layout;
+  Layout.reserve(Fields.ਮਾਪ_2());
 
   // The offset that we're currently looking to insert at (or after).
-  uint64_t LastEnd = 0;
+  uint64_t ਆਖਰੀ_ਸਿਰਾ = 0;
 
   // Helper function to splice Cur out of the given queue and add it
   // to the layout at the given offset.
-  auto addToLayout = [&](AlignmentQueue *Queue, Field *Last, Field *Cur,
-                         uint64_t Offset) -> bool {
-    assert(Offset == alignTo(LastEnd, Cur->Alignment));
+  ਸਵੈਚਾਲਿਤ ਜੋੜੋ_ਮੰਜ਼ਿਲ_Layout = [&](Alignment_ਕਤਾਰ *ਕਤਾਰ, ਖੇਤਰ_2 *ਆਖਰੀ, ਖੇਤਰ_2 *Cur,
+                         uint64_t ਵਿੱਥ) -> ਤਾਰਕਿਕ {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਵਿੱਥ == align_ਮੰਜ਼ਿਲ(ਆਖਰੀ_ਸਿਰਾ, Cur->Alignment));
 
     // Splice out.  This potentially invalidates Queue.
-    spliceFromQueue(Queue, Last, Cur);
+    splice_From_ਕਤਾਰ(ਕਤਾਰ, ਆਖਰੀ, Cur);
 
     // Add Cur to the layout.
-    Layout.push_back(*Cur);
-    Layout.back().Offset = Offset;
-    LastEnd = Layout.back().getEndOffset();
+    Layout.ਧੱਕੋ_ਪਿੱਠ(*Cur);
+    Layout.ਪਿੱਠ().ਵਿੱਥ = ਵਿੱਥ;
+    ਆਖਰੀ_ਸਿਰਾ = Layout.ਪਿੱਠ().get_ਸਿਰਾ_ਵਿੱਥ();
 
     // Always return true so that we can be tail-called.
-    return true;
+    ਵਾਪਸ ਸੱਚ;
   };
 
   // Helper function to try to find a field in the given queue that'll
   // fit starting at StartOffset but before EndOffset (if present).
   // Note that this never fails if EndOffset is not provided.
-  auto tryAddFillerFromQueue = [&](AlignmentQueue *Queue, uint64_t StartOffset,
-                                   std::optional<uint64_t> EndOffset) -> bool {
-    assert(Queue->Head);
-    assert(StartOffset == alignTo(LastEnd, Queue->Alignment));
-    assert(!EndOffset || StartOffset < *EndOffset);
+  ਸਵੈਚਾਲਿਤ try_ਜੋੜੋ_Filler_From_ਕਤਾਰ = [&](Alignment_ਕਤਾਰ *ਕਤਾਰ, uint64_t ਸ਼ੁਰੂ_ਵਿੱਥ,
+                                   std::optional<uint64_t> ਸਿਰਾ_ਵਿੱਥ) -> ਤਾਰਕਿਕ {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਕਤਾਰ->ਸਿਰ_2);
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਸ਼ੁਰੂ_ਵਿੱਥ == align_ਮੰਜ਼ਿਲ(ਆਖਰੀ_ਸਿਰਾ, ਕਤਾਰ->Alignment));
+    ਪ੍ਰਤਿਜ੍ਞਾ(!ਸਿਰਾ_ਵਿੱਥ || ਸ਼ੁਰੂ_ਵਿੱਥ < *ਸਿਰਾ_ਵਿੱਥ);
 
     // Figure out the maximum size that a field can be, and ignore this
     // queue if there's nothing in it that small.
-    auto MaxViableSize =
-      (EndOffset ? *EndOffset - StartOffset : ~(uint64_t)0);
-    if (Queue->MinSize > MaxViableSize)
-      return false;
+    ਸਵੈਚਾਲਿਤ Max_Viable_ਮਾਪ =
+      (ਸਿਰਾ_ਵਿੱਥ ? *ਸਿਰਾ_ਵਿੱਥ - ਸ਼ੁਰੂ_ਵਿੱਥ : ~(uint64_t)0);
+    ਜੇ (ਕਤਾਰ->Min_ਮਾਪ > Max_Viable_ਮਾਪ)
+      ਵਾਪਸ ਝੂਠ;
 
     // Find the matching field.  Note that this should always find
     // something because of the MinSize check above.
-    for (Field *Cur = Queue->Head, *Last = nullptr; true;
-           Last = Cur, Cur = Queue->getNext(Cur)) {
-      assert(Cur && "didn't find a match in queue despite its MinSize");
-      if (Cur->Size <= MaxViableSize)
-        return addToLayout(Queue, Last, Cur, StartOffset);
+    ਲਈ (ਖੇਤਰ_2 *Cur = ਕਤਾਰ->ਸਿਰ_2, *ਆਖਰੀ = ਖਾਲੀ_ਸੂਚਕ; ਸੱਚ;
+           ਆਖਰੀ = Cur, Cur = ਕਤਾਰ->get_ਅਗਲਾ(Cur)) {
+      ਪ੍ਰਤਿਜ੍ਞਾ(Cur && "didn't find a match in queue despite its MinSize");
+      ਜੇ (Cur->ਮਾਪ <= Max_Viable_ਮਾਪ)
+        ਵਾਪਸ ਜੋੜੋ_ਮੰਜ਼ਿਲ_Layout(ਕਤਾਰ, ਆਖਰੀ, Cur, ਸ਼ੁਰੂ_ਵਿੱਥ);
     }
 
     llvm_unreachable("didn't find a match in queue despite its MinSize");
@@ -373,84 +373,84 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
   // Helper function to find the "best" flexible-offset field according
   // to the criteria described above.
-  auto tryAddBestField = [&](std::optional<uint64_t> BeforeOffset) -> bool {
-    assert(!BeforeOffset || LastEnd < *BeforeOffset);
-    auto QueueB = FlexibleFieldsByAlignment.begin();
-    auto QueueE = FlexibleFieldsByAlignment.end();
+  ਸਵੈਚਾਲਿਤ try_ਜੋੜੋ_ਉੱਤਮ_ਖੇਤਰ = [&](std::optional<uint64_t> Before_ਵਿੱਥ) -> ਤਾਰਕਿਕ {
+    ਪ੍ਰਤਿਜ੍ਞਾ(!Before_ਵਿੱਥ || ਆਖਰੀ_ਸਿਰਾ < *Before_ਵਿੱਥ);
+    ਸਵੈਚਾਲਿਤ ਕਤਾਰ_B = FlexibleFieldsByAlignment.begin();
+    ਸਵੈਚਾਲਿਤ ਕਤਾਰ_E = FlexibleFieldsByAlignment.ਸਿਰਾ();
 
     // Start by looking for the most-aligned queue that doesn't need any
     // leading padding after LastEnd.
-    auto FirstQueueToSearch = QueueB;
-    for (; FirstQueueToSearch != QueueE; ++FirstQueueToSearch) {
-      if (isAligned(FirstQueueToSearch->Alignment, LastEnd))
-        break;
+    ਸਵੈਚਾਲਿਤ ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ = ਕਤਾਰ_B;
+    ਲਈ (; ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ != ਕਤਾਰ_E; ++ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ) {
+      ਜੇ (isAligned(ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ->Alignment, ਆਖਰੀ_ਸਿਰਾ))
+        ਰੋਕੋ;
     }
 
-    uint64_t Offset = LastEnd;
-    while (true) {
+    uint64_t ਵਿੱਥ = ਆਖਰੀ_ਸਿਰਾ;
+    ਜਦੋਂ (ਸੱਚ) {
       // Invariant: all of the queues in [FirstQueueToSearch, QueueE)
       // require the same initial padding offset.
 
       // Search those queues in descending order of alignment for a
       // satisfactory field.
-      for (auto Queue = FirstQueueToSearch; Queue != QueueE; ++Queue) {
-        if (tryAddFillerFromQueue(Queue, Offset, BeforeOffset))
-          return true;
+      ਲਈ (ਸਵੈਚਾਲਿਤ ਕਤਾਰ = ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ; ਕਤਾਰ != ਕਤਾਰ_E; ++ਕਤਾਰ) {
+        ਜੇ (try_ਜੋੜੋ_Filler_From_ਕਤਾਰ(ਕਤਾਰ, ਵਿੱਥ, Before_ਵਿੱਥ))
+          ਵਾਪਸ ਸੱਚ;
       }
 
       // Okay, we don't need to scan those again.
-      QueueE = FirstQueueToSearch;
+      ਕਤਾਰ_E = ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ;
 
       // If we started from the first queue, we're done.
-      if (FirstQueueToSearch == QueueB)
-        return false;
+      ਜੇ (ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ == ਕਤਾਰ_B)
+        ਵਾਪਸ ਝੂਠ;
 
       // Otherwise, scan backwards to find the most-aligned queue that
       // still has minimal leading padding after LastEnd.  If that
       // minimal padding is already at or past the end point, we're done.
-      --FirstQueueToSearch;
-      Offset = alignTo(LastEnd, FirstQueueToSearch->Alignment);
-      if (BeforeOffset && Offset >= *BeforeOffset)
-        return false;
-      while (FirstQueueToSearch != QueueB &&
-             Offset == alignTo(LastEnd, FirstQueueToSearch[-1].Alignment))
-        --FirstQueueToSearch;
+      --ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ;
+      ਵਿੱਥ = align_ਮੰਜ਼ਿਲ(ਆਖਰੀ_ਸਿਰਾ, ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ->Alignment);
+      ਜੇ (Before_ਵਿੱਥ && ਵਿੱਥ >= *Before_ਵਿੱਥ)
+        ਵਾਪਸ ਝੂਠ;
+      ਜਦੋਂ (ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ != ਕਤਾਰ_B &&
+             ਵਿੱਥ == align_ਮੰਜ਼ਿਲ(ਆਖਰੀ_ਸਿਰਾ, ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ[-1].Alignment))
+        --ਪਹਿਲਾ_ਕਤਾਰ_ਮੰਜ਼ਿਲ_ਖੋਜ;
     }
   };
 
   // Phase 1: fill the gaps between fixed-offset fields with the best
   // flexible-offset field that fits.
-  for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
-    assert(LastEnd <= I->Offset);
-    while (LastEnd != I->Offset) {
-      if (!tryAddBestField(I->Offset))
-        break;
+  ਲਈ (ਸਵੈਚਾਲਿਤ I = Fields.begin(); I != ਪਹਿਲਾ_Flexible; ++I) {
+    ਪ੍ਰਤਿਜ੍ਞਾ(ਆਖਰੀ_ਸਿਰਾ <= I->ਵਿੱਥ);
+    ਜਦੋਂ (ਆਖਰੀ_ਸਿਰਾ != I->ਵਿੱਥ) {
+      ਜੇ (!try_ਜੋੜੋ_ਉੱਤਮ_ਖੇਤਰ(I->ਵਿੱਥ))
+        ਰੋਕੋ;
     }
-    Layout.push_back(*I);
-    LastEnd = I->getEndOffset();
+    Layout.ਧੱਕੋ_ਪਿੱਠ(*I);
+    ਆਖਰੀ_ਸਿਰਾ = I->get_ਸਿਰਾ_ਵਿੱਥ();
   }
 
-#ifndef NDEBUG
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
   checkQueues();
-#endif
+#ਜੇ_ਅੰਤ
 
   // Phase 2: repeatedly add the best flexible-offset field until
   // they're all gone.
-  while (!FlexibleFieldsByAlignment.empty()) {
-    bool Success = tryAddBestField(std::nullopt);
-    assert(Success && "didn't find a field with no fixed limit?");
-    (void) Success;
+  ਜਦੋਂ (!FlexibleFieldsByAlignment.ਖਾਲੀ_ਥਾਵਾਂ()) {
+    ਤਾਰਕਿਕ Success = try_ਜੋੜੋ_ਉੱਤਮ_ਖੇਤਰ(std::nullopt);
+    ਪ੍ਰਤਿਜ੍ਞਾ(Success && "didn't find a field with no fixed limit?");
+    (ਖਾਲੀ) Success;
   }
 
   // Copy the layout back into place.
-  assert(Layout.size() == Fields.size());
-  memcpy(Fields.data(), Layout.data(),
-         Fields.size() * sizeof(OptimizedStructLayoutField));
+  ਪ੍ਰਤਿਜ੍ਞਾ(Layout.ਮਾਪ_2() == Fields.ਮਾਪ_2());
+  ਸਮ੍ਰਿਤੀ_ਨਕਲ(Fields.ਅੰਕੜੇ(), Layout.ਅੰਕੜੇ(),
+         Fields.ਮਾਪ_2() * ਆਕਾਰ(Optimized_Struct_Layout_ਖੇਤਰ));
 
-#ifndef NDEBUG
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
   // Make a final check that the layout is valid.
-  checkValidLayout(Fields, LastEnd, MaxAlign);
-#endif
+  checkValidLayout(Fields, ਆਖਰੀ_ਸਿਰਾ, MaxAlign);
+#ਜੇ_ਅੰਤ
 
-  return {LastEnd, MaxAlign};
+  ਵਾਪਸ {ਆਖਰੀ_ਸਿਰਾ, MaxAlign};
 }

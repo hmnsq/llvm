@@ -35,74 +35,74 @@
  *	@(#)regex.h	8.1 (Berkeley) 6/2/93
  */
 
-#ifndef LLVM_SUPPORT_REGEX_IMPL_H
-#define LLVM_SUPPORT_REGEX_IMPL_H
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ LLVM_SUPPORT_REGEX_IMPL_H
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LLVM_SUPPORT_REGEX_IMPL_H
 
-#include <sys/types.h>
-typedef off_t llvm_regoff_t;
-typedef struct {
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ off_t llvm_regoff_t;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ {
   llvm_regoff_t rm_so;		/* start of match */
   llvm_regoff_t rm_eo;		/* end of match */
 } llvm_regmatch_t;
 
-typedef struct llvm_regex {
-  int re_magic;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ llvm_regex {
+  ਪੂਰਨ re_magic;
   size_t re_nsub;		/* number of parenthesized subexpressions */
-  const char *re_endp;	/* end pointer for REG_PEND */
-  struct re_guts *re_g;	/* none of your business :-) */
+  ਅਚਲ ਅੱਖਰ *re_endp;	/* end pointer for REG_PEND */
+  ਬਣਤਰ re_guts *re_g;	/* none of your business :-) */
 } llvm_regex_t;
 
 /* llvm_regcomp() flags */
-#define	REG_BASIC	0000
-#define	REG_EXTENDED	0001
-#define	REG_ICASE	0002
-#define	REG_NOSUB	0004
-#define	REG_NEWLINE	0010
-#define	REG_NOSPEC	0020
-#define	REG_PEND	0040
-#define	REG_DUMP	0200
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_BASIC	0000
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_EXTENDED	0001
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ICASE	0002
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_NOSUB	0004
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_NEWLINE	0010
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_NOSPEC	0020
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_PEND	0040
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_DUMP	0200
 
 /* llvm_regerror() flags */
-#define	REG_NOMATCH	 1
-#define	REG_BADPAT	 2
-#define	REG_ECOLLATE	 3
-#define	REG_ECTYPE	 4
-#define	REG_EESCAPE	 5
-#define	REG_ESUBREG	 6
-#define	REG_EBRACK	 7
-#define	REG_EPAREN	 8
-#define	REG_EBRACE	 9
-#define	REG_BADBR	10
-#define	REG_ERANGE	11
-#define	REG_ESPACE	12
-#define	REG_BADRPT	13
-#define	REG_EMPTY	14
-#define	REG_ASSERT	15
-#define	REG_INVARG	16
-#define	REG_ATOI	255	/* convert name to number (!) */
-#define	REG_ITOA	0400	/* convert number to name (!) */
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_NOMATCH	 1
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_BADPAT	 2
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ECOLLATE	 3
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ECTYPE	 4
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_EESCAPE	 5
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ESUBREG	 6
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_EBRACK	 7
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_EPAREN	 8
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_EBRACE	 9
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_BADBR	10
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ERANGE	11
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ESPACE	12
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_BADRPT	13
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ਖਾਲੀ_ਥਾਵਾਂ	14
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ASSERT	15
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_INVARG	16
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ATOI	255	/* convert name to number (!) */
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_ITOA	0400	/* convert number to name (!) */
 
 /* llvm_regexec() flags */
-#define	REG_NOTBOL	00001
-#define	REG_NOTEOL	00002
-#define	REG_STARTEND	00004
-#define	REG_TRACE	00400	/* tracing of execution */
-#define	REG_LARGE	01000	/* force large representation */
-#define	REG_BACKR	02000	/* force use of backref code */
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_NOTBOL	00001
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_NOTEOL	00002
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_STARTEND	00004
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_TRACE	00400	/* tracing of execution */
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_LARGE	01000	/* force large representation */
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	REG_BACKR	02000	/* force use of backref code */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __cplusplus
+ਬਾਹਰੀ "C" {
+#ਜੇ_ਅੰਤ
 
-int	llvm_regcomp(llvm_regex_t *, const char *, int);
-size_t	llvm_regerror(int, const llvm_regex_t *, char *, size_t);
-int	llvm_regexec(const llvm_regex_t *, const char *, size_t,
-                     llvm_regmatch_t [], int);
-void	llvm_regfree(llvm_regex_t *);
-size_t  llvm_strlcpy(char *dst, const char *src, size_t siz);
+ਪੂਰਨ	llvm_regcomp(llvm_regex_t *, ਅਚਲ ਅੱਖਰ *, ਪੂਰਨ);
+size_t	llvm_regerror(ਪੂਰਨ, ਅਚਲ llvm_regex_t *, ਅੱਖਰ *, size_t);
+ਪੂਰਨ	llvm_regexec(ਅਚਲ llvm_regex_t *, ਅਚਲ ਅੱਖਰ *, size_t,
+                     llvm_regmatch_t [], ਪੂਰਨ);
+ਖਾਲੀ	llvm_regfree(llvm_regex_t *);
+size_t  llvm_strlcpy(ਅੱਖਰ *dst, ਅਚਲ ਅੱਖਰ *src, size_t siz);
 
-#ifdef __cplusplus
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __cplusplus
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-#endif /* LLVM_SUPPORT_REGEX_IMPL_H */
+#ਜੇ_ਅੰਤ /* LLVM_SUPPORT_REGEX_IMPL_H */

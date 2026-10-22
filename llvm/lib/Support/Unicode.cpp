@@ -11,28 +11,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Unicode.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/UnicodeCharRanges.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Unicode.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ConvertUTF.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/UnicodeCharRanges.h"
 
-namespace llvm {
-namespace sys {
-namespace unicode {
+ਨਾਮਾਕਾਸ਼ llvm {
+ਨਾਮਾਕਾਸ਼ sys {
+ਨਾਮਾਕਾਸ਼ unicode {
 
-extern const UnicodeCharSet::CharRanges GeneratedCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedPrintableRanges;
-extern const UnicodeCharSet::CharRanges GeneratedControlCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedFormatCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedCombiningCharacterRanges;
-extern const UnicodeCharSet::CharRanges GeneratedDoubleWidthCharacterRanges;
+ਬਾਹਰੀ ਅਚਲ Unicode_Char_ਸੈੱਟ::CharRanges GeneratedCharacterRanges;
+ਬਾਹਰੀ ਅਚਲ Unicode_Char_ਸੈੱਟ::CharRanges GeneratedPrintableRanges;
+ਬਾਹਰੀ ਅਚਲ Unicode_Char_ਸੈੱਟ::CharRanges GeneratedControlCharacterRanges;
+ਬਾਹਰੀ ਅਚਲ Unicode_Char_ਸੈੱਟ::CharRanges GeneratedFormatCharacterRanges;
+ਬਾਹਰੀ ਅਚਲ Unicode_Char_ਸੈੱਟ::CharRanges GeneratedCombiningCharacterRanges;
+ਬਾਹਰੀ ਅਚਲ Unicode_Char_ਸੈੱਟ::CharRanges Generated_Double_ਚੌੜਾਈ_Character_Ranges;
 
 /// Unicode code points that are considered characters. This function
 /// returns true for any code point defined by Unicode as a character, false for
 /// any code point defined as a non-character, as reserved, as a surrogate code
 /// point, or not defined at all.
-bool isCharacter(int UCS) {
-  static const UnicodeCharSet Character(GeneratedCharacterRanges);
-  return Character.contains(UCS);
+ਤਾਰਕਿਕ isCharacter(ਪੂਰਨ UCS) {
+  ਸਥਿਰ ਅਚਲ Unicode_Char_ਸੈੱਟ Character(GeneratedCharacterRanges);
+  ਵਾਪਸ Character.ਸ਼ਾਮਲ_ਹੈ(UCS);
 }
 
 /// Unicode code points of the categories L, M, N, P, S and Zs are considered
@@ -40,25 +40,25 @@ bool isCharacter(int UCS) {
 /// In addition, U+00AD SOFT HYPHEN is also considered printable, as
 /// it's actually displayed on most terminals. \return true if the character is
 /// considered printable.
-bool isPrintable(int UCS) {
-  static const UnicodeCharSet Printables(GeneratedPrintableRanges);
+ਤਾਰਕਿਕ isPrintable(ਪੂਰਨ UCS) {
+  ਸਥਿਰ ਅਚਲ Unicode_Char_ਸੈੱਟ Printables(GeneratedPrintableRanges);
   // Clang special cases 0x00AD (SOFT HYPHEN) which is rendered as an actual
   // hyphen in most terminals.
-  return UCS == 0x00AD || Printables.contains(UCS);
+  ਵਾਪਸ UCS == 0x00AD || Printables.ਸ਼ਾਮਲ_ਹੈ(UCS);
 }
 
 /// Unicode code points of the Cc category are considered
 /// control characters.
-bool isControl(int UCS) {
-  static const UnicodeCharSet Control(GeneratedControlCharacterRanges);
-  return Control.contains(UCS);
+ਤਾਰਕਿਕ isControl(ਪੂਰਨ UCS) {
+  ਸਥਿਰ ਅਚਲ Unicode_Char_ਸੈੱਟ Control(GeneratedControlCharacterRanges);
+  ਵਾਪਸ Control.ਸ਼ਾਮਲ_ਹੈ(UCS);
 }
 
 /// Unicode code points of the Cf category are considered
 /// formatting characters.
-bool isFormatting(int UCS) {
-  static const UnicodeCharSet Format(GeneratedFormatCharacterRanges);
-  return Format.contains(UCS);
+ਤਾਰਕਿਕ isFormatting(ਪੂਰਨ UCS) {
+  ਸਥਿਰ ਅਚਲ Unicode_Char_ਸੈੱਟ Format(GeneratedFormatCharacterRanges);
+  ਵਾਪਸ Format.ਸ਼ਾਮਲ_ਹੈ(UCS);
 }
 
 /// Gets the number of positions a character is likely to occupy when output
@@ -72,54 +72,54 @@ bool isFormatting(int UCS) {
 ///   * 0 for non-spacing and enclosing combining marks;
 ///   * 2 for CJK characters excluding halfwidth forms;
 ///   * 1 for all remaining characters.
-static inline int charWidth(int UCS) {
-  if (!isPrintable(UCS))
-    return ErrorNonPrintableCharacter;
+ਸਥਿਰ ਸਤਰਅੰਦਰ ਪੂਰਨ char_ਚੌੜਾਈ(ਪੂਰਨ UCS) {
+  ਜੇ (!isPrintable(UCS))
+    ਵਾਪਸ ErrorNonPrintableCharacter;
 
-  static const UnicodeCharSet CombiningCharacters(
+  ਸਥਿਰ ਅਚਲ Unicode_Char_ਸੈੱਟ CombiningCharacters(
       GeneratedCombiningCharacterRanges);
 
-  if (CombiningCharacters.contains(UCS))
-    return 0;
+  ਜੇ (CombiningCharacters.ਸ਼ਾਮਲ_ਹੈ(UCS))
+    ਵਾਪਸ 0;
 
-  static const UnicodeCharSet DoubleWidthCharacters(
-      GeneratedDoubleWidthCharacterRanges);
+  ਸਥਿਰ ਅਚਲ Unicode_Char_ਸੈੱਟ Double_ਚੌੜਾਈ_Characters(
+      Generated_Double_ਚੌੜਾਈ_Character_Ranges);
 
-  if (DoubleWidthCharacters.contains(UCS))
-    return 2;
-  return 1;
+  ਜੇ (Double_ਚੌੜਾਈ_Characters.ਸ਼ਾਮਲ_ਹੈ(UCS))
+    ਵਾਪਸ 2;
+  ਵਾਪਸ 1;
 }
 
-static bool isprintableascii(char c) { return c > 31 && c < 127; }
+ਸਥਿਰ ਤਾਰਕਿਕ isprintableascii(ਅੱਖਰ c) { ਵਾਪਸ c > 31 && c < 127; }
 
-int columnWidthUTF8(StringRef Text) {
-  unsigned ColumnWidth = 0;
-  unsigned Length;
-  for (size_t i = 0, e = Text.size(); i < e; i += Length) {
-    Length = getNumBytesForUTF8(Text[i]);
+ਪੂਰਨ ਕਾਲਮ_ਚੌੜਾਈ_UTF8(StringRef ਪਾਠ_2) {
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਕਾਲਮ_ਚੌੜਾਈ_2 = 0;
+  ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾਈ;
+  ਲਈ (size_t i = 0, e = ਪਾਠ_2.ਮਾਪ_2(); i < e; i += ਲੰਮਾਈ) {
+    ਲੰਮਾਈ = get_ਅੰਕ_ਬਾਈਟਾਂ_For_UTF8(ਪਾਠ_2[i]);
 
     // fast path for ASCII characters
-    if (Length == 1) {
-      if (!isprintableascii(Text[i]))
-        return ErrorNonPrintableCharacter;
-      ColumnWidth += 1;
-      continue;
+    ਜੇ (ਲੰਮਾਈ == 1) {
+      ਜੇ (!isprintableascii(ਪਾਠ_2[i]))
+        ਵਾਪਸ ErrorNonPrintableCharacter;
+      ਕਾਲਮ_ਚੌੜਾਈ_2 += 1;
+      ਜਾਰੀ;
     }
 
-    if (Length <= 0 || i + Length > Text.size())
-      return ErrorInvalidUTF8;
+    ਜੇ (ਲੰਮਾਈ <= 0 || i + ਲੰਮਾਈ > ਪਾਠ_2.ਮਾਪ_2())
+      ਵਾਪਸ ErrorInvalidUTF8;
     UTF32 buf[1];
-    const UTF8 *Start = reinterpret_cast<const UTF8 *>(Text.data() + i);
-    UTF32 *Target = &buf[0];
-    if (conversionOK != ConvertUTF8toUTF32(&Start, Start + Length, &Target,
-                                           Target + 1, strictConversion))
-      return ErrorInvalidUTF8;
-    int Width = charWidth(buf[0]);
-    if (Width < 0)
-      return ErrorNonPrintableCharacter;
-    ColumnWidth += Width;
+    ਅਚਲ UTF8 *ਸ਼ੁਰੂ = reinterpret_cast<ਅਚਲ UTF8 *>(ਪਾਠ_2.ਅੰਕੜੇ() + i);
+    UTF32 *ਨਿਸ਼ਾਨਾ_2 = &buf[0];
+    ਜੇ (conversionOK != ConvertUTF8toUTF32(&ਸ਼ੁਰੂ, ਸ਼ੁਰੂ + ਲੰਮਾਈ, &ਨਿਸ਼ਾਨਾ_2,
+                                           ਨਿਸ਼ਾਨਾ_2 + 1, strictConversion))
+      ਵਾਪਸ ErrorInvalidUTF8;
+    ਪੂਰਨ ਚੌੜਾਈ = char_ਚੌੜਾਈ(buf[0]);
+    ਜੇ (ਚੌੜਾਈ < 0)
+      ਵਾਪਸ ErrorNonPrintableCharacter;
+    ਕਾਲਮ_ਚੌੜਾਈ_2 += ਚੌੜਾਈ;
   }
-  return ColumnWidth;
+  ਵਾਪਸ ਕਾਲਮ_ਚੌੜਾਈ_2;
 }
 
 } // namespace unicode

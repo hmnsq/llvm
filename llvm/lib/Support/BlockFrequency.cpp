@@ -10,60 +10,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BlockFrequency.h"
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/Support/raw_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/BlockFrequency.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/BranchProbability.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/MathExtras.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ScaledNumber.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
+ਖੰਡ_Frequency &ਖੰਡ_Frequency::ਸੰਚਾਲਕ*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  ਵਾਪਸ *ਇਹ;
 }
 
-BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+ਖੰਡ_Frequency ਖੰਡ_Frequency::ਸੰਚਾਲਕ*(BranchProbability Prob) ਅਚਲ {
+  ਖੰਡ_Frequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  ਵਾਪਸ Freq;
 }
 
-BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
+ਖੰਡ_Frequency &ਖੰਡ_Frequency::ਸੰਚਾਲਕ/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  ਵਾਪਸ *ਇਹ;
 }
 
-BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+ਖੰਡ_Frequency ਖੰਡ_Frequency::ਸੰਚਾਲਕ/(BranchProbability Prob) ਅਚਲ {
+  ਖੰਡ_Frequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  ਵਾਪਸ Freq;
 }
 
-std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
-  bool Overflow;
-  uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+std::optional<ਖੰਡ_Frequency> ਖੰਡ_Frequency::mul(uint64_t ਗੁਣਕ) ਅਚਲ {
+  ਤਾਰਕਿਕ ਉਛਾਲ;
+  uint64_t ਨਤੀਜਾ_Frequency = SaturatingMultiply(Frequency, ਗੁਣਕ, &ਉਛਾਲ);
+  ਜੇ (ਉਛਾਲ)
+    ਵਾਪਸ {};
+  ਵਾਪਸ ਖੰਡ_Frequency(ਨਤੀਜਾ_Frequency);
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
+raw_ostream &llvm::ਸੰਚਾਲਕ<<(raw_ostream &OS, ਖੰਡ_Frequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  ਵਾਪਸ OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
-                                  BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+ਖਾਲੀ llvm::print_Relative_ਖੰਡ_Freq(raw_ostream &OS, ਖੰਡ_Frequency ਇੰਦਰਾਜ_Freq,
+                                  ਖੰਡ_Frequency Freq) {
+  ਜੇ (Freq == ਖੰਡ_Frequency(0)) {
     OS << "0";
-    return;
+    ਵਾਪਸ;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  ਜੇ (ਇੰਦਰਾਜ_Freq == ਖੰਡ_Frequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    ਵਾਪਸ;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
-  OS << Block / Entry;
+  Scaled_ਸੰਖਿਆ<uint64_t> ਖੰਡ_2(Freq.getFrequency(), 0);
+  Scaled_ਸੰਖਿਆ<uint64_t> ਇੰਦਰਾਜ(ਇੰਦਰਾਜ_Freq.getFrequency(), 0);
+  OS << ਖੰਡ_2 / ਇੰਦਰਾਜ;
 }

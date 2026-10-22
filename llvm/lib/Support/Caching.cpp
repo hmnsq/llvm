@@ -12,56 +12,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Caching.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Caching.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Errc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/FileSystem.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/MemoryBuffer.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Path.h"
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-#include <unistd.h>
-#else
-#include "llvm/Support/Windows/WindowsSupport.h"
-#include <io.h>
-#endif
+#ਜੇ !defined(_MSC_VER) && !defined(__MINGW32__)
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਨਹੀਂਤਾਂ
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Windows/WindowsSupport.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <io.h>
+#ਜੇ_ਅੰਤ
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
-                                     const Twine &TempFilePrefixRef,
-                                     const Twine &CacheDirectoryPathRef,
-                                     AddBufferFn AddBuffer, bool CacheRename) {
+Expected<FileCache> llvm::localCache(ਅਚਲ Twine &CacheNameRef,
+                                     ਅਚਲ Twine &ਆਰਜ਼ੀ_File_ਅਗੇਤਰ_Ref,
+                                     ਅਚਲ Twine &Cache_Directory_ਰਸਤਾ_Ref,
+                                     ਜੋੜੋ_ਬਫਰ_Fn ਜੋੜੋ_ਬਫਰ, ਤਾਰਕਿਕ CacheRename) {
 
   // Create local copies which are safely captured-by-copy in lambdas
-  SmallString<64> CacheName, TempFilePrefix, CacheDirectoryPath;
-  CacheNameRef.toVector(CacheName);
-  TempFilePrefixRef.toVector(TempFilePrefix);
-  CacheDirectoryPathRef.toVector(CacheDirectoryPath);
+  SmallString<64> CacheName, ਆਰਜ਼ੀ_File_ਅਗੇਤਰ, Cache_Directory_ਰਸਤਾ;
+  CacheNameRef.ਮੰਜ਼ਿਲ_ਸਦਿਸ਼(CacheName);
+  ਆਰਜ਼ੀ_File_ਅਗੇਤਰ_Ref.ਮੰਜ਼ਿਲ_ਸਦਿਸ਼(ਆਰਜ਼ੀ_File_ਅਗੇਤਰ);
+  Cache_Directory_ਰਸਤਾ_Ref.ਮੰਜ਼ਿਲ_ਸਦਿਸ਼(Cache_Directory_ਰਸਤਾ);
 
-  auto Func = [=](unsigned Task, StringRef Key,
-                  const Twine &ModuleName) -> Expected<AddStreamFn> {
+  ਸਵੈਚਾਲਿਤ Func = [=](ਬਿਨਾਨਿਸ਼ਾਨੀ Task, StringRef ਕੁੰਜੀ,
+                  ਅਚਲ Twine &ModuleName) -> Expected<ਜੋੜੋ_ਧਾਰਾ_Fn> {
     // This choice of file name allows the cache to be pruned (see pruneCache()
     // in include/llvm/Support/CachePruning.h).
-    SmallString<64> EntryPath;
-    sys::path::append(EntryPath, CacheDirectoryPath, "llvmcache-" + Key);
+    SmallString<64> ਇੰਦਰਾਜ_ਰਸਤਾ;
+    sys::ਰਸਤਾ_2::append(ਇੰਦਰਾਜ_ਰਸਤਾ, Cache_Directory_ਰਸਤਾ, "llvmcache-" + ਕੁੰਜੀ);
     // First, see if we have a cache hit.
-    SmallString<64> ResultPath;
+    SmallString<64> ਨਤੀਜਾ_ਰਸਤਾ;
     Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(
-        Twine(EntryPath), sys::fs::OF_UpdateAtime, &ResultPath);
-    std::error_code EC;
-    if (FDOrErr) {
-      ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-          MemoryBuffer::getOpenFile(*FDOrErr, EntryPath,
+        Twine(ਇੰਦਰਾਜ_ਰਸਤਾ), sys::fs::ਦਾ_Update_Atime, &ਨਤੀਜਾ_ਰਸਤਾ);
+    std::error_ਕੋਡ EC;
+    ਜੇ (FDOrErr) {
+      ErrorOr<std::unique_ptr<ਸਮ੍ਰਿਤੀ_ਬਫਰ>> MBOrErr =
+          ਸਮ੍ਰਿਤੀ_ਬਫਰ::getOpenFile(*FDOrErr, ਇੰਦਰਾਜ_ਰਸਤਾ,
                                     /*FileSize=*/-1,
-                                    /*RequiresNullTerminator=*/false);
+                                    /*RequiresNullTerminator=*/ਝੂਠ);
       sys::fs::closeFile(*FDOrErr);
-      if (MBOrErr) {
-        AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return AddStreamFn();
+      ਜੇ (MBOrErr) {
+        ਜੋੜੋ_ਬਫਰ(Task, ModuleName, std::move(*MBOrErr));
+        ਵਾਪਸ ਜੋੜੋ_ਧਾਰਾ_Fn();
       }
       EC = MBOrErr.getError();
-    } else {
-      EC = errorToErrorCode(FDOrErr.takeError());
+    } ਨਹੀਂਤਾਂ {
+      EC = error_ਮੰਜ਼ਿਲ_Error_ਕੋਡ(FDOrErr.takeError());
     }
 
     // On Windows we can fail to open a cache file with a permission denied
@@ -70,43 +70,43 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
     // process has opened the file without the sharing permissions we need.
     // Since the file is probably being deleted we handle it in the same way as
     // if the file did not exist at all.
-    if (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
-      return createStringError(EC, Twine("Failed to open cache file ") +
-                                       EntryPath + ": " + EC.message() + "\n");
+    ਜੇ (EC != errc::no_such_file_or_directory && EC != errc::permission_denied)
+      ਵਾਪਸ createStringError(EC, Twine("Failed to open cache file ") +
+                                       ਇੰਦਰਾਜ_ਰਸਤਾ + ": " + EC.ਸੁਨੇਹਾ_2() + "\n");
 
     // This file stream is responsible for commiting the resulting file to the
     // cache and calling AddBuffer to add it to the link.
-    struct CacheStream : CachedFileStream {
-      AddBufferFn AddBuffer;
-      sys::fs::TempFile TempFile;
+    ਬਣਤਰ Cache_ਧਾਰਾ : Cached_File_ਧਾਰਾ {
+      ਜੋੜੋ_ਬਫਰ_Fn ਜੋੜੋ_ਬਫਰ;
+      sys::fs::ਆਰਜ਼ੀ_File ਆਰਜ਼ੀ_File;
       std::string ModuleName;
-      unsigned Task;
+      ਬਿਨਾਨਿਸ਼ਾਨੀ Task;
 
-      CacheStream(std::unique_ptr<raw_pwrite_stream> OS, AddBufferFn AddBuffer,
-                  sys::fs::TempFile TempFile, std::string EntryPath,
-                  std::string ModuleName, unsigned Task)
-          : CachedFileStream(std::move(OS), std::move(EntryPath)),
-            AddBuffer(std::move(AddBuffer)), TempFile(std::move(TempFile)),
+      Cache_ਧਾਰਾ(std::unique_ptr<raw_pwrite_ਧਾਰਾ> OS, ਜੋੜੋ_ਬਫਰ_Fn ਜੋੜੋ_ਬਫਰ,
+                  sys::fs::ਆਰਜ਼ੀ_File ਆਰਜ਼ੀ_File, std::string ਇੰਦਰਾਜ_ਰਸਤਾ,
+                  std::string ModuleName, ਬਿਨਾਨਿਸ਼ਾਨੀ Task)
+          : Cached_File_ਧਾਰਾ(std::move(OS), std::move(ਇੰਦਰਾਜ_ਰਸਤਾ)),
+            ਜੋੜੋ_ਬਫਰ(std::move(ਜੋੜੋ_ਬਫਰ)), ਆਰਜ਼ੀ_File(std::move(ਆਰਜ਼ੀ_File)),
             ModuleName(ModuleName), Task(Task) {}
 
       Error commit() override {
-        Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+        Error E = Cached_File_ਧਾਰਾ::commit();
+        ਜੇ (E)
+          ਵਾਪਸ E;
 
         // Make sure the stream is closed before committing it.
         OS.reset();
 
         // Open the file first to avoid racing with a cache pruner.
-        ErrorOr<std::unique_ptr<MemoryBuffer>> MBOrErr =
-            MemoryBuffer::getOpenFile(
-                sys::fs::convertFDToNativeFile(TempFile.FD), ObjectPathName,
-                /*FileSize=*/-1, /*RequiresNullTerminator=*/false);
-        if (!MBOrErr) {
-          std::error_code EC = MBOrErr.getError();
-          return createStringError(EC, Twine("Failed to open new cache file ") +
-                                           TempFile.TmpName + ": " +
-                                           EC.message() + "\n");
+        ErrorOr<std::unique_ptr<ਸਮ੍ਰਿਤੀ_ਬਫਰ>> MBOrErr =
+            ਸਮ੍ਰਿਤੀ_ਬਫਰ::getOpenFile(
+                sys::fs::convertFDToNativeFile(ਆਰਜ਼ੀ_File.FD), Object_ਰਸਤਾ_Name,
+                /*FileSize=*/-1, /*RequiresNullTerminator=*/ਝੂਠ);
+        ਜੇ (!MBOrErr) {
+          std::error_ਕੋਡ EC = MBOrErr.getError();
+          ਵਾਪਸ createStringError(EC, Twine("Failed to open new cache file ") +
+                                           ਆਰਜ਼ੀ_File.TmpName + ": " +
+                                           EC.ਸੁਨੇਹਾ_2() + "\n");
         }
 
         // On POSIX systems, this will atomically replace the destination if
@@ -118,116 +118,116 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
         // AddBuffer a copy of the bytes we wrote in that case. We do this
         // instead of just using the existing file, because the pruner might
         // delete the file before we get a chance to use it.
-        E = TempFile.keep(ObjectPathName);
-        E = handleErrors(std::move(E), [&](const ECError &E) -> Error {
-          std::error_code EC = E.convertToErrorCode();
-          if (EC != errc::permission_denied)
-            return createStringError(
+        E = ਆਰਜ਼ੀ_File.keep(Object_ਰਸਤਾ_Name);
+        E = handleErrors(std::move(E), [&](ਅਚਲ ECError &E) -> Error {
+          std::error_ਕੋਡ EC = E.convert_ਮੰਜ਼ਿਲ_Error_ਕੋਡ();
+          ਜੇ (EC != errc::permission_denied)
+            ਵਾਪਸ createStringError(
                 EC, Twine("Failed to rename temporary file ") +
-                        TempFile.TmpName + " to " + ObjectPathName + ": " +
-                        EC.message() + "\n");
+                        ਆਰਜ਼ੀ_File.TmpName + " to " + Object_ਰਸਤਾ_Name + ": " +
+                        EC.ਸੁਨੇਹਾ_2() + "\n");
 
-          auto MBCopy = MemoryBuffer::getMemBufferCopy((*MBOrErr)->getBuffer(),
-                                                       ObjectPathName);
+          ਸਵੈਚਾਲਿਤ MBCopy = ਸਮ੍ਰਿਤੀ_ਬਫਰ::get_Mem_ਬਫਰ_Copy((*MBOrErr)->get_ਬਫਰ(),
+                                                       Object_ਰਸਤਾ_Name);
           MBOrErr = std::move(MBCopy);
 
           // FIXME: should we consume the discard error?
-          consumeError(TempFile.discard());
+          consumeError(ਆਰਜ਼ੀ_File.discard());
 
-          return Error::success();
+          ਵਾਪਸ Error::success();
         });
 
-        if (E)
-          return E;
+        ਜੇ (E)
+          ਵਾਪਸ E;
 
-        AddBuffer(Task, ModuleName, std::move(*MBOrErr));
-        return Error::success();
+        ਜੋੜੋ_ਬਫਰ(Task, ModuleName, std::move(*MBOrErr));
+        ਵਾਪਸ Error::success();
       }
 
       Error abort() override {
-        Error E1 = CachedFileStream::abort();
-        Error E2 = TempFile.discard();
-        return joinErrors(std::move(E1), std::move(E2));
+        Error E1 = Cached_File_ਧਾਰਾ::abort();
+        Error E2 = ਆਰਜ਼ੀ_File.discard();
+        ਵਾਪਸ joinErrors(std::move(E1), std::move(E2));
       }
     };
 
     // This class is responsible for renaming/moving existing file into a
     // cache directory. The path for an input file is passed through a string
     // stream.
-    struct MoveFileToCache : CachedFileStream {
-      AddBufferFn AddBuffer;
+    ਬਣਤਰ Move_File_ਮੰਜ਼ਿਲ_Cache : Cached_File_ਧਾਰਾ {
+      ਜੋੜੋ_ਬਫਰ_Fn ਜੋੜੋ_ਬਫਰ;
       std::string ModuleName;
       size_t Task;
-      StringRef FilePath;
+      StringRef File_ਰਸਤਾ;
 
-      MoveFileToCache(AddBufferFn AddBuffer, std::string EntryPath,
+      Move_File_ਮੰਜ਼ਿਲ_Cache(ਜੋੜੋ_ਬਫਰ_Fn ਜੋੜੋ_ਬਫਰ, std::string ਇੰਦਰਾਜ_ਰਸਤਾ,
                       std::string ModuleID, size_t Task)
-          : CachedFileStream({}, std::move(EntryPath)),
-            AddBuffer(std::move(AddBuffer)), ModuleName(ModuleID), Task(Task) {}
-      virtual ~MoveFileToCache() = default;
+          : Cached_File_ਧਾਰਾ({}, std::move(ਇੰਦਰਾਜ_ਰਸਤਾ)),
+            ਜੋੜੋ_ਬਫਰ(std::move(ਜੋੜੋ_ਬਫਰ)), ModuleName(ModuleID), Task(Task) {}
+      ਆਭਾਸੀ ~Move_File_ਮੰਜ਼ਿਲ_Cache() = ਮੂਲ;
 
-      virtual Error commit(std::unique_ptr<MemoryBuffer> MemBuf) override {
-        Error E = CachedFileStream::commit();
-        if (E)
-          return E;
+      ਆਭਾਸੀ Error commit(std::unique_ptr<ਸਮ੍ਰਿਤੀ_ਬਫਰ> MemBuf) override {
+        Error E = Cached_File_ਧਾਰਾ::commit();
+        ਜੇ (E)
+          ਵਾਪਸ E;
 
-        FilePath = MemBuf->getBufferIdentifier();
-        assert(!FilePath.empty() && "File path is empty.");
+        File_ਰਸਤਾ = MemBuf->get_ਬਫਰ_Identifier();
+        ਪ੍ਰਤਿਜ੍ਞਾ(!File_ਰਸਤਾ.ਖਾਲੀ_ਥਾਵਾਂ() && "File path is empty.");
 
         // Rename/move native object file into cache directory, if they are
         // located the same device/logical drive, otherwise we use a copy.
-        std::error_code EC = sys::fs::rename(FilePath, ObjectPathName);
-#ifdef _WIN32
-        if (EC ==
-            std::error_code(ERROR_NOT_SAME_DEVICE, std::system_category()))
-#else
-        if (EC == std::make_error_code(std::errc::cross_device_link))
-#endif
-          EC = sys::fs::copy_file(FilePath, ObjectPathName);
-        if (EC)
-          return createStringError(EC, Twine("Failed to rename or copy file ") +
-                                           FilePath + " to " + ObjectPathName +
-                                           ": " + EC.message() + "\n");
+        std::error_ਕੋਡ EC = sys::fs::rename(File_ਰਸਤਾ, Object_ਰਸਤਾ_Name);
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+        ਜੇ (EC ==
+            std::error_ਕੋਡ(ERROR_NOT_SAME_DEVICE, std::system_category()))
+#ਨਹੀਂਤਾਂ
+        ਜੇ (EC == std::make_error_ਕੋਡ(std::errc::cross_device_link))
+#ਜੇ_ਅੰਤ
+          EC = sys::fs::copy_file(File_ਰਸਤਾ, Object_ਰਸਤਾ_Name);
+        ਜੇ (EC)
+          ਵਾਪਸ createStringError(EC, Twine("Failed to rename or copy file ") +
+                                           File_ਰਸਤਾ + " to " + Object_ਰਸਤਾ_Name +
+                                           ": " + EC.ਸੁਨੇਹਾ_2() + "\n");
 
-        AddBuffer(Task, ModuleName, std::move(MemBuf));
+        ਜੋੜੋ_ਬਫਰ(Task, ModuleName, std::move(MemBuf));
 
-        return Error::success();
+        ਵਾਪਸ Error::success();
       }
     };
 
-    return [=](size_t Task, const Twine &ModuleName)
-               -> Expected<std::unique_ptr<CachedFileStream>> {
+    ਵਾਪਸ [=](size_t Task, ਅਚਲ Twine &ModuleName)
+               -> Expected<std::unique_ptr<Cached_File_ਧਾਰਾ>> {
       // Create the cache directory if not already done. Doing this lazily
       // ensures the filesystem isn't mutated until the cache is.
-      if (std::error_code EC = sys::fs::create_directories(
-              CacheDirectoryPath, /*IgnoreExisting=*/true))
-        return createStringError(EC, Twine("can't create cache directory ") +
-                                         CacheDirectoryPath + ": " +
-                                         EC.message());
+      ਜੇ (std::error_ਕੋਡ EC = sys::fs::create_directories(
+              Cache_Directory_ਰਸਤਾ, /*IgnoreExisting=*/ਸੱਚ))
+        ਵਾਪਸ createStringError(EC, Twine("can't create cache directory ") +
+                                         Cache_Directory_ਰਸਤਾ + ": " +
+                                         EC.ਸੁਨੇਹਾ_2());
       // MoveFileToChache class will rename/move the file into the cache on
       // destruction.
-      if (CacheRename) {
-        return std::make_unique<MoveFileToCache>(
-            AddBuffer, std::string(EntryPath.str()), ModuleName.str(), Task);
+      ਜੇ (CacheRename) {
+        ਵਾਪਸ std::make_unique<Move_File_ਮੰਜ਼ਿਲ_Cache>(
+            ਜੋੜੋ_ਬਫਰ, std::string(ਇੰਦਰਾਜ_ਰਸਤਾ.str()), ModuleName.str(), Task);
       }
 
       // Write to a temporary to avoid race condition
-      SmallString<64> TempFilenameModel;
-      sys::path::append(TempFilenameModel, CacheDirectoryPath,
-                        TempFilePrefix + "-%%%%%%.tmp.o");
-      Expected<sys::fs::TempFile> Temp = sys::fs::TempFile::create(
-          TempFilenameModel, sys::fs::owner_read | sys::fs::owner_write);
-      if (!Temp)
-        return createStringError(errc::io_error,
-                                 toString(Temp.takeError()) + ": " + CacheName +
+      SmallString<64> ਆਰਜ਼ੀ_Filename_Model;
+      sys::ਰਸਤਾ_2::append(ਆਰਜ਼ੀ_Filename_Model, Cache_Directory_ਰਸਤਾ,
+                        ਆਰਜ਼ੀ_File_ਅਗੇਤਰ + "-%%%%%%.tmp.o");
+      Expected<sys::fs::ਆਰਜ਼ੀ_File> ਆਰਜ਼ੀ = sys::fs::ਆਰਜ਼ੀ_File::create(
+          ਆਰਜ਼ੀ_Filename_Model, sys::fs::owner_read | sys::fs::owner_write);
+      ਜੇ (!ਆਰਜ਼ੀ)
+        ਵਾਪਸ createStringError(errc::io_error,
+                                 ਮੰਜ਼ਿਲ_String(ਆਰਜ਼ੀ.takeError()) + ": " + CacheName +
                                      ": Can't get a temporary file");
 
       // This CacheStream will move the temporary file into the cache when done.
-      return std::make_unique<CacheStream>(
-          std::make_unique<raw_fd_ostream>(Temp->FD, /* ShouldClose */ false),
-          AddBuffer, std::move(*Temp), std::string(EntryPath), ModuleName.str(),
+      ਵਾਪਸ std::make_unique<Cache_ਧਾਰਾ>(
+          std::make_unique<raw_fd_ostream>(ਆਰਜ਼ੀ->FD, /* ShouldClose */ ਝੂਠ),
+          ਜੋੜੋ_ਬਫਰ, std::move(*ਆਰਜ਼ੀ), std::string(ਇੰਦਰਾਜ_ਰਸਤਾ), ModuleName.str(),
           Task);
     };
   };
-  return FileCache(Func, CacheDirectoryPathRef.str());
+  ਵਾਪਸ FileCache(Func, Cache_Directory_ਰਸਤਾ_Ref.str());
 }

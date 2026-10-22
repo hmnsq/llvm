@@ -10,9 +10,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_os_ostream.h"
-#include <ostream>
-using namespace llvm;
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_os_ostream.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <ostream>
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
 //===----------------------------------------------------------------------===//
 //  raw_os_ostream
@@ -22,8 +22,8 @@ raw_os_ostream::~raw_os_ostream() {
   flush();
 }
 
-void raw_os_ostream::write_impl(const char *Ptr, size_t Size) {
-  OS.write(Ptr, Size);
+ਖਾਲੀ raw_os_ostream::write_impl(ਅਚਲ ਅੱਖਰ *Ptr, size_t ਮਾਪ) {
+  OS.ਲਿਖ(Ptr, ਮਾਪ);
 }
 
-uint64_t raw_os_ostream::current_pos() const { return OS.tellp(); }
+uint64_t raw_os_ostream::current_pos() ਅਚਲ { ਵਾਪਸ OS.tellp(); }

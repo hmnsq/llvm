@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVAttributes.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/RISCVAttributes.h"
 
-using namespace llvm;
-using namespace llvm::RISCVAttrs;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm::RISCVAttrs;
 
-static constexpr TagNameItem tagData[] = {
-    {STACK_ALIGN, "Tag_stack_align"},
+ਸਥਿਰ constexpr ਟੈਗ_Name_ਵਸਤੂ ਟੈਗ_ਅੰਕੜੇ[] = {
+    {ਢੇਰ_ALIGN, "Tag_stack_align"},
     {ARCH, "Tag_arch"},
     {UNALIGNED_ACCESS, "Tag_unaligned_access"},
     {PRIV_SPEC, "Tag_priv_spec"},
@@ -21,7 +21,7 @@ static constexpr TagNameItem tagData[] = {
     {ATOMIC_ABI, "Tag_atomic_abi"},
 };
 
-constexpr TagNameMap RISCVAttributeTags{tagData};
-const TagNameMap &llvm::RISCVAttrs::getRISCVAttributeTags() {
-  return RISCVAttributeTags;
+constexpr ਟੈਗ_Name_Map RISCVAttribute_ਟੈਗ_ਸੂਚੀ{ਟੈਗ_ਅੰਕੜੇ};
+ਅਚਲ ਟੈਗ_Name_Map &llvm::RISCVAttrs::get_RISCVAttribute_ਟੈਗ_ਸੂਚੀ() {
+  ਵਾਪਸ RISCVAttribute_ਟੈਗ_ਸੂਚੀ;
 }

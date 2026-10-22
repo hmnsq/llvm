@@ -6,29 +6,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/ADT/StringRef.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/ELFAttributes.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/ADT/StringRef.h"
 
-using namespace llvm;
+ਵਰਤੋਂ ਨਾਮਾਕਾਸ਼ llvm;
 
-StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
-                                     bool hasTagPrefix) {
-  auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
-  StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+StringRef ELFAttrs::attrTypeAsString(ਬਿਨਾਨਿਸ਼ਾਨੀ attr, ਟੈਗ_Name_Map ਟੈਗ_Name_Map_2,
+                                     ਤਾਰਕਿਕ has_ਟੈਗ_ਅਗੇਤਰ) {
+  ਸਵੈਚਾਲਿਤ ਟੈਗ_Name_It = ਲੱਭੋ_if(
+      ਟੈਗ_Name_Map_2, [attr](ਅਚਲ ਟੈਗ_Name_ਵਸਤੂ ਵਸਤੂ_2) { ਵਾਪਸ ਵਸਤੂ_2.attr == attr; });
+  ਜੇ (ਟੈਗ_Name_It == ਟੈਗ_Name_Map_2.ਸਿਰਾ())
+    ਵਾਪਸ "";
+  StringRef ਟੈਗ_Name = ਟੈਗ_Name_It->ਟੈਗ_Name;
+  ਵਾਪਸ has_ਟੈਗ_ਅਗੇਤਰ ? ਟੈਗ_Name : ਟੈਗ_Name.drop_front(4);
 }
 
-std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
-                                                     TagNameMap tagNameMap) {
-  bool hasTagPrefix = tag.starts_with("Tag_");
-  auto tagNameIt =
-      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+std::optional<ਬਿਨਾਨਿਸ਼ਾਨੀ> ELFAttrs::attrTypeFromString(StringRef ਟੈਗ_2,
+                                                     ਟੈਗ_Name_Map ਟੈਗ_Name_Map_2) {
+  ਤਾਰਕਿਕ has_ਟੈਗ_ਅਗੇਤਰ = ਟੈਗ_2.starts_with("Tag_");
+  ਸਵੈਚਾਲਿਤ ਟੈਗ_Name_It =
+      ਲੱਭੋ_if(ਟੈਗ_Name_Map_2, [ਟੈਗ_2, has_ਟੈਗ_ਅਗੇਤਰ](ਅਚਲ ਟੈਗ_Name_ਵਸਤੂ ਵਸਤੂ_2) {
+        ਵਾਪਸ ਵਸਤੂ_2.ਟੈਗ_Name.drop_front(has_ਟੈਗ_ਅਗੇਤਰ ? 0 : 4) == ਟੈਗ_2;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  ਜੇ (ਟੈਗ_Name_It == ਟੈਗ_Name_Map_2.ਸਿਰਾ())
+    ਵਾਪਸ std::nullopt;
+  ਵਾਪਸ ਟੈਗ_Name_It->attr;
 }

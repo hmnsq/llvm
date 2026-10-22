@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/Memory.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
+#ਅਨ੍ਤਰ੍ਭਾਵ "llvm/Support/raw_ostream.h"
+#ਜੇ_ਅੰਤ // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ LLVM_ON_UNIX
+#ਅਨ੍ਤਰ੍ਭਾਵ "Unix/Memory.inc"
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _WIN32
+#ਅਨ੍ਤਰ੍ਭਾਵ "Windows/Memory.inc"
+#ਜੇ_ਅੰਤ
 
-#ifndef NDEBUG
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NDEBUG
 
-namespace llvm {
-namespace sys {
+ਨਾਮਾਕਾਸ਼ llvm {
+ਨਾਮਾਕਾਸ਼ sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &ਸੰਚਾਲਕ<<(raw_ostream &OS, ਅਚਲ ਸਮ੍ਰਿਤੀ_2::ProtectionFlags &PF) {
+  ਪ੍ਰਤਿਜ੍ਞਾ((PF & ~(ਸਮ੍ਰਿਤੀ_2::MF_READ | ਸਮ੍ਰਿਤੀ_2::MF_WRITE | ਸਮ੍ਰਿਤੀ_2::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
-            << (PF & Memory::MF_WRITE ? 'W' : '-')
-            << (PF & Memory::MF_EXEC ? 'X' : '-');
+  ਵਾਪਸ OS << (PF & ਸਮ੍ਰਿਤੀ_2::MF_READ ? 'R' : '-')
+            << (PF & ਸਮ੍ਰਿਤੀ_2::MF_WRITE ? 'W' : '-')
+            << (PF & ਸਮ੍ਰਿਤੀ_2::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &ਸੰਚਾਲਕ<<(raw_ostream &OS, ਅਚਲ ਸਮ੍ਰਿਤੀ_ਖੰਡ &MB) {
+  ਵਾਪਸ OS << "[ " << MB.ਅਧਾਰ_2() << " .. "
+            << (ਖਾਲੀ *)((ਅੱਖਰ *)MB.ਅਧਾਰ_2() + MB.allocated_ਮਾਪ()) << " ] ("
+            << MB.allocated_ਮਾਪ() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#ਜੇ_ਅੰਤ // ifndef NDEBUG
