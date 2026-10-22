@@ -13,853 +13,853 @@
 
 #include "llvm/Support/Unicode.h"
 
-int llvm::sys::unicode::foldCharSimple(int C) {
-  if (C < 0x0041)
-    return C;
+ཧྲིལ llvm::sys::unicode::foldCharSimple(ཧྲིལ C) {
+  གལ་སྲིད (C < 0x0041)
+    ལོག C;
   // 26 characters
-  if (C <= 0x005a)
-    return C + 32;
+  གལ་སྲིད (C <= 0x005a)
+    ལོག C + 32;
   // MICRO SIGN
-  if (C == 0x00b5)
-    return 0x03bc;
-  if (C < 0x00c0)
-    return C;
+  གལ་སྲིད (C == 0x00b5)
+    ལོག 0x03bc;
+  གལ་སྲིད (C < 0x00c0)
+    ལོག C;
   // 23 characters
-  if (C <= 0x00d6)
-    return C + 32;
-  if (C < 0x00d8)
-    return C;
+  གལ་སྲིད (C <= 0x00d6)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x00d8)
+    ལོག C;
   // 7 characters
-  if (C <= 0x00de)
-    return C + 32;
-  if (C < 0x0100)
-    return C;
+  གལ་སྲིད (C <= 0x00de)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x0100)
+    ལོག C;
   // 24 characters
-  if (C <= 0x012e)
-    return C | 1;
-  if (C < 0x0132)
-    return C;
+  གལ་སྲིད (C <= 0x012e)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x0132)
+    ལོག C;
   // 3 characters
-  if (C <= 0x0136)
-    return C | 1;
-  if (C < 0x0139)
-    return C;
+  གལ་སྲིད (C <= 0x0136)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x0139)
+    ལོག C;
   // 8 characters
-  if (C <= 0x0147 && C % 2 == 1)
-    return C + 1;
-  if (C < 0x014a)
-    return C;
+  གལ་སྲིད (C <= 0x0147 && C % 2 == 1)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x014a)
+    ལོག C;
   // 23 characters
-  if (C <= 0x0176)
-    return C | 1;
+  གལ་སྲིད (C <= 0x0176)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER Y WITH DIAERESIS
-  if (C == 0x0178)
-    return 0x00ff;
-  if (C < 0x0179)
-    return C;
+  གལ་སྲིད (C == 0x0178)
+    ལོག 0x00ff;
+  གལ་སྲིད (C < 0x0179)
+    ལོག C;
   // 3 characters
-  if (C <= 0x017d && C % 2 == 1)
-    return C + 1;
+  གལ་སྲིད (C <= 0x017d && C % 2 == 1)
+    ལོག C + 1;
   // LATIN SMALL LETTER LONG S
-  if (C == 0x017f)
-    return 0x0073;
+  གལ་སྲིད (C == 0x017f)
+    ལོག 0x0073;
   // LATIN CAPITAL LETTER B WITH HOOK
-  if (C == 0x0181)
-    return 0x0253;
-  if (C < 0x0182)
-    return C;
+  གལ་སྲིད (C == 0x0181)
+    ལོག 0x0253;
+  གལ་སྲིད (C < 0x0182)
+    ལོག C;
   // 2 characters
-  if (C <= 0x0184)
-    return C | 1;
+  གལ་སྲིད (C <= 0x0184)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER OPEN O
-  if (C == 0x0186)
-    return 0x0254;
+  གལ་སྲིད (C == 0x0186)
+    ལོག 0x0254;
   // LATIN CAPITAL LETTER C WITH HOOK
-  if (C == 0x0187)
-    return 0x0188;
-  if (C < 0x0189)
-    return C;
+  གལ་སྲིད (C == 0x0187)
+    ལོག 0x0188;
+  གལ་སྲིད (C < 0x0189)
+    ལོག C;
   // 2 characters
-  if (C <= 0x018a)
-    return C + 205;
+  གལ་སྲིད (C <= 0x018a)
+    ལོག C + 205;
   // LATIN CAPITAL LETTER D WITH TOPBAR
-  if (C == 0x018b)
-    return 0x018c;
+  གལ་སྲིད (C == 0x018b)
+    ལོག 0x018c;
   // LATIN CAPITAL LETTER REVERSED E
-  if (C == 0x018e)
-    return 0x01dd;
+  གལ་སྲིད (C == 0x018e)
+    ལོག 0x01dd;
   // LATIN CAPITAL LETTER SCHWA
-  if (C == 0x018f)
-    return 0x0259;
+  གལ་སྲིད (C == 0x018f)
+    ལོག 0x0259;
   // LATIN CAPITAL LETTER OPEN E
-  if (C == 0x0190)
-    return 0x025b;
+  གལ་སྲིད (C == 0x0190)
+    ལོག 0x025b;
   // LATIN CAPITAL LETTER F WITH HOOK
-  if (C == 0x0191)
-    return 0x0192;
+  གལ་སྲིད (C == 0x0191)
+    ལོག 0x0192;
   // LATIN CAPITAL LETTER G WITH HOOK
-  if (C == 0x0193)
-    return 0x0260;
+  གལ་སྲིད (C == 0x0193)
+    ལོག 0x0260;
   // LATIN CAPITAL LETTER GAMMA
-  if (C == 0x0194)
-    return 0x0263;
+  གལ་སྲིད (C == 0x0194)
+    ལོག 0x0263;
   // LATIN CAPITAL LETTER IOTA
-  if (C == 0x0196)
-    return 0x0269;
+  གལ་སྲིད (C == 0x0196)
+    ལོག 0x0269;
   // LATIN CAPITAL LETTER I WITH STROKE
-  if (C == 0x0197)
-    return 0x0268;
+  གལ་སྲིད (C == 0x0197)
+    ལོག 0x0268;
   // LATIN CAPITAL LETTER K WITH HOOK
-  if (C == 0x0198)
-    return 0x0199;
+  གལ་སྲིད (C == 0x0198)
+    ལོག 0x0199;
   // LATIN CAPITAL LETTER TURNED M
-  if (C == 0x019c)
-    return 0x026f;
+  གལ་སྲིད (C == 0x019c)
+    ལོག 0x026f;
   // LATIN CAPITAL LETTER N WITH LEFT HOOK
-  if (C == 0x019d)
-    return 0x0272;
+  གལ་སྲིད (C == 0x019d)
+    ལོག 0x0272;
   // LATIN CAPITAL LETTER O WITH MIDDLE TILDE
-  if (C == 0x019f)
-    return 0x0275;
-  if (C < 0x01a0)
-    return C;
+  གལ་སྲིད (C == 0x019f)
+    ལོག 0x0275;
+  གལ་སྲིད (C < 0x01a0)
+    ལོག C;
   // 3 characters
-  if (C <= 0x01a4)
-    return C | 1;
+  གལ་སྲིད (C <= 0x01a4)
+    ལོག C | 1;
   // LATIN LETTER YR
-  if (C == 0x01a6)
-    return 0x0280;
+  གལ་སྲིད (C == 0x01a6)
+    ལོག 0x0280;
   // LATIN CAPITAL LETTER TONE TWO
-  if (C == 0x01a7)
-    return 0x01a8;
+  གལ་སྲིད (C == 0x01a7)
+    ལོག 0x01a8;
   // LATIN CAPITAL LETTER ESH
-  if (C == 0x01a9)
-    return 0x0283;
+  གལ་སྲིད (C == 0x01a9)
+    ལོག 0x0283;
   // LATIN CAPITAL LETTER T WITH HOOK
-  if (C == 0x01ac)
-    return 0x01ad;
+  གལ་སྲིད (C == 0x01ac)
+    ལོག 0x01ad;
   // LATIN CAPITAL LETTER T WITH RETROFLEX HOOK
-  if (C == 0x01ae)
-    return 0x0288;
+  གལ་སྲིད (C == 0x01ae)
+    ལོག 0x0288;
   // LATIN CAPITAL LETTER U WITH HORN
-  if (C == 0x01af)
-    return 0x01b0;
-  if (C < 0x01b1)
-    return C;
+  གལ་སྲིད (C == 0x01af)
+    ལོག 0x01b0;
+  གལ་སྲིད (C < 0x01b1)
+    ལོག C;
   // 2 characters
-  if (C <= 0x01b2)
-    return C + 217;
-  if (C < 0x01b3)
-    return C;
+  གལ་སྲིད (C <= 0x01b2)
+    ལོག C + 217;
+  གལ་སྲིད (C < 0x01b3)
+    ལོག C;
   // 2 characters
-  if (C <= 0x01b5 && C % 2 == 1)
-    return C + 1;
+  གལ་སྲིད (C <= 0x01b5 && C % 2 == 1)
+    ལོག C + 1;
   // LATIN CAPITAL LETTER EZH
-  if (C == 0x01b7)
-    return 0x0292;
-  if (C < 0x01b8)
-    return C;
+  གལ་སྲིད (C == 0x01b7)
+    ལོག 0x0292;
+  གལ་སྲིད (C < 0x01b8)
+    ལོག C;
   // 2 characters
-  if (C <= 0x01bc && C % 4 == 0)
-    return C + 1;
+  གལ་སྲིད (C <= 0x01bc && C % 4 == 0)
+    ལོག C + 1;
   // LATIN CAPITAL LETTER DZ WITH CARON
-  if (C == 0x01c4)
-    return 0x01c6;
+  གལ་སྲིད (C == 0x01c4)
+    ལོག 0x01c6;
   // LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
-  if (C == 0x01c5)
-    return 0x01c6;
+  གལ་སྲིད (C == 0x01c5)
+    ལོག 0x01c6;
   // LATIN CAPITAL LETTER LJ
-  if (C == 0x01c7)
-    return 0x01c9;
+  གལ་སྲིད (C == 0x01c7)
+    ལོག 0x01c9;
   // LATIN CAPITAL LETTER L WITH SMALL LETTER J
-  if (C == 0x01c8)
-    return 0x01c9;
+  གལ་སྲིད (C == 0x01c8)
+    ལོག 0x01c9;
   // LATIN CAPITAL LETTER NJ
-  if (C == 0x01ca)
-    return 0x01cc;
-  if (C < 0x01cb)
-    return C;
+  གལ་སྲིད (C == 0x01ca)
+    ལོག 0x01cc;
+  གལ་སྲིད (C < 0x01cb)
+    ལོག C;
   // 9 characters
-  if (C <= 0x01db && C % 2 == 1)
-    return C + 1;
-  if (C < 0x01de)
-    return C;
+  གལ་སྲིད (C <= 0x01db && C % 2 == 1)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x01de)
+    ལོག C;
   // 9 characters
-  if (C <= 0x01ee)
-    return C | 1;
+  གལ་སྲིད (C <= 0x01ee)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER DZ
-  if (C == 0x01f1)
-    return 0x01f3;
-  if (C < 0x01f2)
-    return C;
+  གལ་སྲིད (C == 0x01f1)
+    ལོག 0x01f3;
+  གལ་སྲིད (C < 0x01f2)
+    ལོག C;
   // 2 characters
-  if (C <= 0x01f4)
-    return C | 1;
+  གལ་སྲིད (C <= 0x01f4)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER HWAIR
-  if (C == 0x01f6)
-    return 0x0195;
+  གལ་སྲིད (C == 0x01f6)
+    ལོག 0x0195;
   // LATIN CAPITAL LETTER WYNN
-  if (C == 0x01f7)
-    return 0x01bf;
-  if (C < 0x01f8)
-    return C;
+  གལ་སྲིད (C == 0x01f7)
+    ལོག 0x01bf;
+  གལ་སྲིད (C < 0x01f8)
+    ལོག C;
   // 20 characters
-  if (C <= 0x021e)
-    return C | 1;
+  གལ་སྲིད (C <= 0x021e)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER N WITH LONG RIGHT LEG
-  if (C == 0x0220)
-    return 0x019e;
-  if (C < 0x0222)
-    return C;
+  གལ་སྲིད (C == 0x0220)
+    ལོག 0x019e;
+  གལ་སྲིད (C < 0x0222)
+    ལོག C;
   // 9 characters
-  if (C <= 0x0232)
-    return C | 1;
+  གལ་སྲིད (C <= 0x0232)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER A WITH STROKE
-  if (C == 0x023a)
-    return 0x2c65;
+  གལ་སྲིད (C == 0x023a)
+    ལོག 0x2c65;
   // LATIN CAPITAL LETTER C WITH STROKE
-  if (C == 0x023b)
-    return 0x023c;
+  གལ་སྲིད (C == 0x023b)
+    ལོག 0x023c;
   // LATIN CAPITAL LETTER L WITH BAR
-  if (C == 0x023d)
-    return 0x019a;
+  གལ་སྲིད (C == 0x023d)
+    ལོག 0x019a;
   // LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
-  if (C == 0x023e)
-    return 0x2c66;
+  གལ་སྲིད (C == 0x023e)
+    ལོག 0x2c66;
   // LATIN CAPITAL LETTER GLOTTAL STOP
-  if (C == 0x0241)
-    return 0x0242;
+  གལ་སྲིད (C == 0x0241)
+    ལོག 0x0242;
   // LATIN CAPITAL LETTER B WITH STROKE
-  if (C == 0x0243)
-    return 0x0180;
+  གལ་སྲིད (C == 0x0243)
+    ལོག 0x0180;
   // LATIN CAPITAL LETTER U BAR
-  if (C == 0x0244)
-    return 0x0289;
+  གལ་སྲིད (C == 0x0244)
+    ལོག 0x0289;
   // LATIN CAPITAL LETTER TURNED V
-  if (C == 0x0245)
-    return 0x028c;
-  if (C < 0x0246)
-    return C;
+  གལ་སྲིད (C == 0x0245)
+    ལོག 0x028c;
+  གལ་སྲིད (C < 0x0246)
+    ལོག C;
   // 5 characters
-  if (C <= 0x024e)
-    return C | 1;
+  གལ་སྲིད (C <= 0x024e)
+    ལོག C | 1;
   // COMBINING GREEK YPOGEGRAMMENI
-  if (C == 0x0345)
-    return 0x03b9;
-  if (C < 0x0370)
-    return C;
+  གལ་སྲིད (C == 0x0345)
+    ལོག 0x03b9;
+  གལ་སྲིད (C < 0x0370)
+    ལོག C;
   // 2 characters
-  if (C <= 0x0372)
-    return C | 1;
+  གལ་སྲིད (C <= 0x0372)
+    ལོག C | 1;
   // GREEK CAPITAL LETTER PAMPHYLIAN DIGAMMA
-  if (C == 0x0376)
-    return 0x0377;
+  གལ་སྲིད (C == 0x0376)
+    ལོག 0x0377;
   // GREEK CAPITAL LETTER YOT
-  if (C == 0x037f)
-    return 0x03f3;
+  གལ་སྲིད (C == 0x037f)
+    ལོག 0x03f3;
   // GREEK CAPITAL LETTER ALPHA WITH TONOS
-  if (C == 0x0386)
-    return 0x03ac;
-  if (C < 0x0388)
-    return C;
+  གལ་སྲིད (C == 0x0386)
+    ལོག 0x03ac;
+  གལ་སྲིད (C < 0x0388)
+    ལོག C;
   // 3 characters
-  if (C <= 0x038a)
-    return C + 37;
+  གལ་སྲིད (C <= 0x038a)
+    ལོག C + 37;
   // GREEK CAPITAL LETTER OMICRON WITH TONOS
-  if (C == 0x038c)
-    return 0x03cc;
-  if (C < 0x038e)
-    return C;
+  གལ་སྲིད (C == 0x038c)
+    ལོག 0x03cc;
+  གལ་སྲིད (C < 0x038e)
+    ལོག C;
   // 2 characters
-  if (C <= 0x038f)
-    return C + 63;
-  if (C < 0x0391)
-    return C;
+  གལ་སྲིད (C <= 0x038f)
+    ལོག C + 63;
+  གལ་སྲིད (C < 0x0391)
+    ལོག C;
   // 17 characters
-  if (C <= 0x03a1)
-    return C + 32;
-  if (C < 0x03a3)
-    return C;
+  གལ་སྲིད (C <= 0x03a1)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x03a3)
+    ལོག C;
   // 9 characters
-  if (C <= 0x03ab)
-    return C + 32;
+  གལ་སྲིད (C <= 0x03ab)
+    ལོག C + 32;
   // GREEK SMALL LETTER FINAL SIGMA
-  if (C == 0x03c2)
-    return 0x03c3;
+  གལ་སྲིད (C == 0x03c2)
+    ལོག 0x03c3;
   // GREEK CAPITAL KAI SYMBOL
-  if (C == 0x03cf)
-    return 0x03d7;
+  གལ་སྲིད (C == 0x03cf)
+    ལོག 0x03d7;
   // GREEK BETA SYMBOL
-  if (C == 0x03d0)
-    return 0x03b2;
+  གལ་སྲིད (C == 0x03d0)
+    ལོག 0x03b2;
   // GREEK THETA SYMBOL
-  if (C == 0x03d1)
-    return 0x03b8;
+  གལ་སྲིད (C == 0x03d1)
+    ལོག 0x03b8;
   // GREEK PHI SYMBOL
-  if (C == 0x03d5)
-    return 0x03c6;
+  གལ་སྲིད (C == 0x03d5)
+    ལོག 0x03c6;
   // GREEK PI SYMBOL
-  if (C == 0x03d6)
-    return 0x03c0;
-  if (C < 0x03d8)
-    return C;
+  གལ་སྲིད (C == 0x03d6)
+    ལོག 0x03c0;
+  གལ་སྲིད (C < 0x03d8)
+    ལོག C;
   // 12 characters
-  if (C <= 0x03ee)
-    return C | 1;
+  གལ་སྲིད (C <= 0x03ee)
+    ལོག C | 1;
   // GREEK KAPPA SYMBOL
-  if (C == 0x03f0)
-    return 0x03ba;
+  གལ་སྲིད (C == 0x03f0)
+    ལོག 0x03ba;
   // GREEK RHO SYMBOL
-  if (C == 0x03f1)
-    return 0x03c1;
+  གལ་སྲིད (C == 0x03f1)
+    ལོག 0x03c1;
   // GREEK CAPITAL THETA SYMBOL
-  if (C == 0x03f4)
-    return 0x03b8;
+  གལ་སྲིད (C == 0x03f4)
+    ལོག 0x03b8;
   // GREEK LUNATE EPSILON SYMBOL
-  if (C == 0x03f5)
-    return 0x03b5;
+  གལ་སྲིད (C == 0x03f5)
+    ལོག 0x03b5;
   // GREEK CAPITAL LETTER SHO
-  if (C == 0x03f7)
-    return 0x03f8;
+  གལ་སྲིད (C == 0x03f7)
+    ལོག 0x03f8;
   // GREEK CAPITAL LUNATE SIGMA SYMBOL
-  if (C == 0x03f9)
-    return 0x03f2;
+  གལ་སྲིད (C == 0x03f9)
+    ལོག 0x03f2;
   // GREEK CAPITAL LETTER SAN
-  if (C == 0x03fa)
-    return 0x03fb;
-  if (C < 0x03fd)
-    return C;
+  གལ་སྲིད (C == 0x03fa)
+    ལོག 0x03fb;
+  གལ་སྲིད (C < 0x03fd)
+    ལོག C;
   // 3 characters
-  if (C <= 0x03ff)
-    return C + -130;
-  if (C < 0x0400)
-    return C;
+  གལ་སྲིད (C <= 0x03ff)
+    ལོག C + -130;
+  གལ་སྲིད (C < 0x0400)
+    ལོག C;
   // 16 characters
-  if (C <= 0x040f)
-    return C + 80;
-  if (C < 0x0410)
-    return C;
+  གལ་སྲིད (C <= 0x040f)
+    ལོག C + 80;
+  གལ་སྲིད (C < 0x0410)
+    ལོག C;
   // 32 characters
-  if (C <= 0x042f)
-    return C + 32;
-  if (C < 0x0460)
-    return C;
+  གལ་སྲིད (C <= 0x042f)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x0460)
+    ལོག C;
   // 17 characters
-  if (C <= 0x0480)
-    return C | 1;
-  if (C < 0x048a)
-    return C;
+  གལ་སྲིད (C <= 0x0480)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x048a)
+    ལོག C;
   // 27 characters
-  if (C <= 0x04be)
-    return C | 1;
+  གལ་སྲིད (C <= 0x04be)
+    ལོག C | 1;
   // CYRILLIC LETTER PALOCHKA
-  if (C == 0x04c0)
-    return 0x04cf;
-  if (C < 0x04c1)
-    return C;
+  གལ་སྲིད (C == 0x04c0)
+    ལོག 0x04cf;
+  གལ་སྲིད (C < 0x04c1)
+    ལོག C;
   // 7 characters
-  if (C <= 0x04cd && C % 2 == 1)
-    return C + 1;
-  if (C < 0x04d0)
-    return C;
+  གལ་སྲིད (C <= 0x04cd && C % 2 == 1)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x04d0)
+    ལོག C;
   // 48 characters
-  if (C <= 0x052e)
-    return C | 1;
-  if (C < 0x0531)
-    return C;
+  གལ་སྲིད (C <= 0x052e)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x0531)
+    ལོག C;
   // 38 characters
-  if (C <= 0x0556)
-    return C + 48;
-  if (C < 0x10a0)
-    return C;
+  གལ་སྲིད (C <= 0x0556)
+    ལོག C + 48;
+  གལ་སྲིད (C < 0x10a0)
+    ལོག C;
   // 38 characters
-  if (C <= 0x10c5)
-    return C + 7264;
-  if (C < 0x10c7)
-    return C;
+  གལ་སྲིད (C <= 0x10c5)
+    ལོག C + 7264;
+  གལ་སྲིད (C < 0x10c7)
+    ལོག C;
   // 2 characters
-  if (C <= 0x10cd && C % 6 == 5)
-    return C + 7264;
-  if (C < 0x13f8)
-    return C;
+  གལ་སྲིད (C <= 0x10cd && C % 6 == 5)
+    ལོག C + 7264;
+  གལ་སྲིད (C < 0x13f8)
+    ལོག C;
   // 6 characters
-  if (C <= 0x13fd)
-    return C + -8;
+  གལ་སྲིད (C <= 0x13fd)
+    ལོག C + -8;
   // CYRILLIC SMALL LETTER ROUNDED VE
-  if (C == 0x1c80)
-    return 0x0432;
+  གལ་སྲིད (C == 0x1c80)
+    ལོག 0x0432;
   // CYRILLIC SMALL LETTER LONG-LEGGED DE
-  if (C == 0x1c81)
-    return 0x0434;
+  གལ་སྲིད (C == 0x1c81)
+    ལོག 0x0434;
   // CYRILLIC SMALL LETTER NARROW O
-  if (C == 0x1c82)
-    return 0x043e;
-  if (C < 0x1c83)
-    return C;
+  གལ་སྲིད (C == 0x1c82)
+    ལོག 0x043e;
+  གལ་སྲིད (C < 0x1c83)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1c84)
-    return C + -6210;
+  གལ་སྲིད (C <= 0x1c84)
+    ལོག C + -6210;
   // CYRILLIC SMALL LETTER THREE-LEGGED TE
-  if (C == 0x1c85)
-    return 0x0442;
+  གལ་སྲིད (C == 0x1c85)
+    ལོག 0x0442;
   // CYRILLIC SMALL LETTER TALL HARD SIGN
-  if (C == 0x1c86)
-    return 0x044a;
+  གལ་སྲིད (C == 0x1c86)
+    ལོག 0x044a;
   // CYRILLIC SMALL LETTER TALL YAT
-  if (C == 0x1c87)
-    return 0x0463;
+  གལ་སྲིད (C == 0x1c87)
+    ལོག 0x0463;
   // CYRILLIC SMALL LETTER UNBLENDED UK
-  if (C == 0x1c88)
-    return 0xa64b;
+  གལ་སྲིད (C == 0x1c88)
+    ལོག 0xa64b;
   // CYRILLIC CAPITAL LETTER TJE
-  if (C == 0x1c89)
-    return 0x1c8a;
-  if (C < 0x1c90)
-    return C;
+  གལ་སྲིད (C == 0x1c89)
+    ལོག 0x1c8a;
+  གལ་སྲིད (C < 0x1c90)
+    ལོག C;
   // 43 characters
-  if (C <= 0x1cba)
-    return C + -3008;
-  if (C < 0x1cbd)
-    return C;
+  གལ་སྲིད (C <= 0x1cba)
+    ལོག C + -3008;
+  གལ་སྲིད (C < 0x1cbd)
+    ལོག C;
   // 3 characters
-  if (C <= 0x1cbf)
-    return C + -3008;
-  if (C < 0x1e00)
-    return C;
+  གལ་སྲིད (C <= 0x1cbf)
+    ལོག C + -3008;
+  གལ་སྲིད (C < 0x1e00)
+    ལོག C;
   // 75 characters
-  if (C <= 0x1e94)
-    return C | 1;
+  གལ་སྲིད (C <= 0x1e94)
+    ལོག C | 1;
   // LATIN SMALL LETTER LONG S WITH DOT ABOVE
-  if (C == 0x1e9b)
-    return 0x1e61;
+  གལ་སྲིད (C == 0x1e9b)
+    ལོག 0x1e61;
   // LATIN CAPITAL LETTER SHARP S
-  if (C == 0x1e9e)
-    return 0x00df;
-  if (C < 0x1ea0)
-    return C;
+  གལ་སྲིད (C == 0x1e9e)
+    ལོག 0x00df;
+  གལ་སྲིད (C < 0x1ea0)
+    ལོག C;
   // 48 characters
-  if (C <= 0x1efe)
-    return C | 1;
-  if (C < 0x1f08)
-    return C;
+  གལ་སྲིད (C <= 0x1efe)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x1f08)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1f0f)
-    return C + -8;
-  if (C < 0x1f18)
-    return C;
+  གལ་སྲིད (C <= 0x1f0f)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f18)
+    ལོག C;
   // 6 characters
-  if (C <= 0x1f1d)
-    return C + -8;
-  if (C < 0x1f28)
-    return C;
+  གལ་སྲིད (C <= 0x1f1d)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f28)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1f2f)
-    return C + -8;
-  if (C < 0x1f38)
-    return C;
+  གལ་སྲིད (C <= 0x1f2f)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f38)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1f3f)
-    return C + -8;
-  if (C < 0x1f48)
-    return C;
+  གལ་སྲིད (C <= 0x1f3f)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f48)
+    ལོག C;
   // 6 characters
-  if (C <= 0x1f4d)
-    return C + -8;
-  if (C < 0x1f59)
-    return C;
+  གལ་སྲིད (C <= 0x1f4d)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f59)
+    ལོག C;
   // 4 characters
-  if (C <= 0x1f5f && C % 2 == 1)
-    return C + -8;
-  if (C < 0x1f68)
-    return C;
+  གལ་སྲིད (C <= 0x1f5f && C % 2 == 1)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f68)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1f6f)
-    return C + -8;
-  if (C < 0x1f88)
-    return C;
+  གལ་སྲིད (C <= 0x1f6f)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f88)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1f8f)
-    return C + -8;
-  if (C < 0x1f98)
-    return C;
+  གལ་སྲིད (C <= 0x1f8f)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1f98)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1f9f)
-    return C + -8;
-  if (C < 0x1fa8)
-    return C;
+  གལ་སྲིད (C <= 0x1f9f)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1fa8)
+    ལོག C;
   // 8 characters
-  if (C <= 0x1faf)
-    return C + -8;
-  if (C < 0x1fb8)
-    return C;
+  གལ་སྲིད (C <= 0x1faf)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1fb8)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1fb9)
-    return C + -8;
-  if (C < 0x1fba)
-    return C;
+  གལ་སྲིད (C <= 0x1fb9)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1fba)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1fbb)
-    return C + -74;
+  གལ་སྲིད (C <= 0x1fbb)
+    ལོག C + -74;
   // GREEK CAPITAL LETTER ALPHA WITH PROSGEGRAMMENI
-  if (C == 0x1fbc)
-    return 0x1fb3;
+  གལ་སྲིད (C == 0x1fbc)
+    ལོག 0x1fb3;
   // GREEK PROSGEGRAMMENI
-  if (C == 0x1fbe)
-    return 0x03b9;
-  if (C < 0x1fc8)
-    return C;
+  གལ་སྲིད (C == 0x1fbe)
+    ལོག 0x03b9;
+  གལ་སྲིད (C < 0x1fc8)
+    ལོག C;
   // 4 characters
-  if (C <= 0x1fcb)
-    return C + -86;
+  གལ་སྲིད (C <= 0x1fcb)
+    ལོག C + -86;
   // GREEK CAPITAL LETTER ETA WITH PROSGEGRAMMENI
-  if (C == 0x1fcc)
-    return 0x1fc3;
+  གལ་སྲིད (C == 0x1fcc)
+    ལོག 0x1fc3;
   // GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
-  if (C == 0x1fd3)
-    return 0x0390;
-  if (C < 0x1fd8)
-    return C;
+  གལ་སྲིད (C == 0x1fd3)
+    ལོག 0x0390;
+  གལ་སྲིད (C < 0x1fd8)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1fd9)
-    return C + -8;
-  if (C < 0x1fda)
-    return C;
+  གལ་སྲིད (C <= 0x1fd9)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1fda)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1fdb)
-    return C + -100;
+  གལ་སྲིད (C <= 0x1fdb)
+    ལོག C + -100;
   // GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
-  if (C == 0x1fe3)
-    return 0x03b0;
-  if (C < 0x1fe8)
-    return C;
+  གལ་སྲིད (C == 0x1fe3)
+    ལོག 0x03b0;
+  གལ་སྲིད (C < 0x1fe8)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1fe9)
-    return C + -8;
-  if (C < 0x1fea)
-    return C;
+  གལ་སྲིད (C <= 0x1fe9)
+    ལོག C + -8;
+  གལ་སྲིད (C < 0x1fea)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1feb)
-    return C + -112;
+  གལ་སྲིད (C <= 0x1feb)
+    ལོག C + -112;
   // GREEK CAPITAL LETTER RHO WITH DASIA
-  if (C == 0x1fec)
-    return 0x1fe5;
-  if (C < 0x1ff8)
-    return C;
+  གལ་སྲིད (C == 0x1fec)
+    ལོག 0x1fe5;
+  གལ་སྲིད (C < 0x1ff8)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1ff9)
-    return C + -128;
-  if (C < 0x1ffa)
-    return C;
+  གལ་སྲིད (C <= 0x1ff9)
+    ལོག C + -128;
+  གལ་སྲིད (C < 0x1ffa)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1ffb)
-    return C + -126;
+  གལ་སྲིད (C <= 0x1ffb)
+    ལོག C + -126;
   // GREEK CAPITAL LETTER OMEGA WITH PROSGEGRAMMENI
-  if (C == 0x1ffc)
-    return 0x1ff3;
+  གལ་སྲིད (C == 0x1ffc)
+    ལོག 0x1ff3;
   // OHM SIGN
-  if (C == 0x2126)
-    return 0x03c9;
+  གལ་སྲིད (C == 0x2126)
+    ལོག 0x03c9;
   // KELVIN SIGN
-  if (C == 0x212a)
-    return 0x006b;
+  གལ་སྲིད (C == 0x212a)
+    ལོག 0x006b;
   // ANGSTROM SIGN
-  if (C == 0x212b)
-    return 0x00e5;
+  གལ་སྲིད (C == 0x212b)
+    ལོག 0x00e5;
   // TURNED CAPITAL F
-  if (C == 0x2132)
-    return 0x214e;
-  if (C < 0x2160)
-    return C;
+  གལ་སྲིད (C == 0x2132)
+    ལོག 0x214e;
+  གལ་སྲིད (C < 0x2160)
+    ལོག C;
   // 16 characters
-  if (C <= 0x216f)
-    return C + 16;
+  གལ་སྲིད (C <= 0x216f)
+    ལོག C + 16;
   // ROMAN NUMERAL REVERSED ONE HUNDRED
-  if (C == 0x2183)
-    return 0x2184;
-  if (C < 0x24b6)
-    return C;
+  གལ་སྲིད (C == 0x2183)
+    ལོག 0x2184;
+  གལ་སྲིད (C < 0x24b6)
+    ལོག C;
   // 26 characters
-  if (C <= 0x24cf)
-    return C + 26;
-  if (C < 0x2c00)
-    return C;
+  གལ་སྲིད (C <= 0x24cf)
+    ལོག C + 26;
+  གལ་སྲིད (C < 0x2c00)
+    ལོག C;
   // 48 characters
-  if (C <= 0x2c2f)
-    return C + 48;
+  གལ་སྲིད (C <= 0x2c2f)
+    ལོག C + 48;
   // LATIN CAPITAL LETTER L WITH DOUBLE BAR
-  if (C == 0x2c60)
-    return 0x2c61;
+  གལ་སྲིད (C == 0x2c60)
+    ལོག 0x2c61;
   // LATIN CAPITAL LETTER L WITH MIDDLE TILDE
-  if (C == 0x2c62)
-    return 0x026b;
+  གལ་སྲིད (C == 0x2c62)
+    ལོག 0x026b;
   // LATIN CAPITAL LETTER P WITH STROKE
-  if (C == 0x2c63)
-    return 0x1d7d;
+  གལ་སྲིད (C == 0x2c63)
+    ལོག 0x1d7d;
   // LATIN CAPITAL LETTER R WITH TAIL
-  if (C == 0x2c64)
-    return 0x027d;
-  if (C < 0x2c67)
-    return C;
+  གལ་སྲིད (C == 0x2c64)
+    ལོག 0x027d;
+  གལ་སྲིད (C < 0x2c67)
+    ལོག C;
   // 3 characters
-  if (C <= 0x2c6b && C % 2 == 1)
-    return C + 1;
+  གལ་སྲིད (C <= 0x2c6b && C % 2 == 1)
+    ལོག C + 1;
   // LATIN CAPITAL LETTER ALPHA
-  if (C == 0x2c6d)
-    return 0x0251;
+  གལ་སྲིད (C == 0x2c6d)
+    ལོག 0x0251;
   // LATIN CAPITAL LETTER M WITH HOOK
-  if (C == 0x2c6e)
-    return 0x0271;
+  གལ་སྲིད (C == 0x2c6e)
+    ལོག 0x0271;
   // LATIN CAPITAL LETTER TURNED A
-  if (C == 0x2c6f)
-    return 0x0250;
+  གལ་སྲིད (C == 0x2c6f)
+    ལོག 0x0250;
   // LATIN CAPITAL LETTER TURNED ALPHA
-  if (C == 0x2c70)
-    return 0x0252;
-  if (C < 0x2c72)
-    return C;
+  གལ་སྲིད (C == 0x2c70)
+    ལོག 0x0252;
+  གལ་སྲིད (C < 0x2c72)
+    ལོག C;
   // 2 characters
-  if (C <= 0x2c75 && C % 3 == 2)
-    return C + 1;
-  if (C < 0x2c7e)
-    return C;
+  གལ་སྲིད (C <= 0x2c75 && C % 3 == 2)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x2c7e)
+    ལོག C;
   // 2 characters
-  if (C <= 0x2c7f)
-    return C + -10815;
-  if (C < 0x2c80)
-    return C;
+  གལ་སྲིད (C <= 0x2c7f)
+    ལོག C + -10815;
+  གལ་སྲིད (C < 0x2c80)
+    ལོག C;
   // 50 characters
-  if (C <= 0x2ce2)
-    return C | 1;
-  if (C < 0x2ceb)
-    return C;
+  གལ་སྲིད (C <= 0x2ce2)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x2ceb)
+    ལོག C;
   // 2 characters
-  if (C <= 0x2ced && C % 2 == 1)
-    return C + 1;
-  if (C < 0x2cf2)
-    return C;
+  གལ་སྲིད (C <= 0x2ced && C % 2 == 1)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x2cf2)
+    ལོག C;
   // 2 characters
-  if (C <= 0xa640 && C % 31054 == 11506)
-    return C + 1;
-  if (C < 0xa642)
-    return C;
+  གལ་སྲིད (C <= 0xa640 && C % 31054 == 11506)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0xa642)
+    ལོག C;
   // 22 characters
-  if (C <= 0xa66c)
-    return C | 1;
-  if (C < 0xa680)
-    return C;
+  གལ་སྲིད (C <= 0xa66c)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0xa680)
+    ལོག C;
   // 14 characters
-  if (C <= 0xa69a)
-    return C | 1;
-  if (C < 0xa722)
-    return C;
+  གལ་སྲིད (C <= 0xa69a)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0xa722)
+    ལོག C;
   // 7 characters
-  if (C <= 0xa72e)
-    return C | 1;
-  if (C < 0xa732)
-    return C;
+  གལ་སྲིད (C <= 0xa72e)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0xa732)
+    ལོག C;
   // 31 characters
-  if (C <= 0xa76e)
-    return C | 1;
-  if (C < 0xa779)
-    return C;
+  གལ་སྲིད (C <= 0xa76e)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0xa779)
+    ལོག C;
   // 2 characters
-  if (C <= 0xa77b && C % 2 == 1)
-    return C + 1;
+  གལ་སྲིད (C <= 0xa77b && C % 2 == 1)
+    ལོག C + 1;
   // LATIN CAPITAL LETTER INSULAR G
-  if (C == 0xa77d)
-    return 0x1d79;
-  if (C < 0xa77e)
-    return C;
+  གལ་སྲིད (C == 0xa77d)
+    ལོག 0x1d79;
+  གལ་སྲིད (C < 0xa77e)
+    ལོག C;
   // 5 characters
-  if (C <= 0xa786)
-    return C | 1;
+  གལ་སྲིད (C <= 0xa786)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER SALTILLO
-  if (C == 0xa78b)
-    return 0xa78c;
+  གལ་སྲིད (C == 0xa78b)
+    ལོག 0xa78c;
   // LATIN CAPITAL LETTER TURNED H
-  if (C == 0xa78d)
-    return 0x0265;
-  if (C < 0xa790)
-    return C;
+  གལ་སྲིད (C == 0xa78d)
+    ལོག 0x0265;
+  གལ་སྲིད (C < 0xa790)
+    ལོག C;
   // 2 characters
-  if (C <= 0xa792)
-    return C | 1;
-  if (C < 0xa796)
-    return C;
+  གལ་སྲིད (C <= 0xa792)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0xa796)
+    ལོག C;
   // 10 characters
-  if (C <= 0xa7a8)
-    return C | 1;
+  གལ་སྲིད (C <= 0xa7a8)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER H WITH HOOK
-  if (C == 0xa7aa)
-    return 0x0266;
+  གལ་སྲིད (C == 0xa7aa)
+    ལོག 0x0266;
   // LATIN CAPITAL LETTER REVERSED OPEN E
-  if (C == 0xa7ab)
-    return 0x025c;
+  གལ་སྲིད (C == 0xa7ab)
+    ལོག 0x025c;
   // LATIN CAPITAL LETTER SCRIPT G
-  if (C == 0xa7ac)
-    return 0x0261;
+  གལ་སྲིད (C == 0xa7ac)
+    ལོག 0x0261;
   // LATIN CAPITAL LETTER L WITH BELT
-  if (C == 0xa7ad)
-    return 0x026c;
+  གལ་སྲིད (C == 0xa7ad)
+    ལོག 0x026c;
   // LATIN CAPITAL LETTER SMALL CAPITAL I
-  if (C == 0xa7ae)
-    return 0x026a;
+  གལ་སྲིད (C == 0xa7ae)
+    ལོག 0x026a;
   // LATIN CAPITAL LETTER TURNED K
-  if (C == 0xa7b0)
-    return 0x029e;
+  གལ་སྲིད (C == 0xa7b0)
+    ལོག 0x029e;
   // LATIN CAPITAL LETTER TURNED T
-  if (C == 0xa7b1)
-    return 0x0287;
+  གལ་སྲིད (C == 0xa7b1)
+    ལོག 0x0287;
   // LATIN CAPITAL LETTER J WITH CROSSED-TAIL
-  if (C == 0xa7b2)
-    return 0x029d;
+  གལ་སྲིད (C == 0xa7b2)
+    ལོག 0x029d;
   // LATIN CAPITAL LETTER CHI
-  if (C == 0xa7b3)
-    return 0xab53;
-  if (C < 0xa7b4)
-    return C;
+  གལ་སྲིད (C == 0xa7b3)
+    ལོག 0xab53;
+  གལ་སྲིད (C < 0xa7b4)
+    ལོག C;
   // 8 characters
-  if (C <= 0xa7c2)
-    return C | 1;
+  གལ་སྲིད (C <= 0xa7c2)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER C WITH PALATAL HOOK
-  if (C == 0xa7c4)
-    return 0xa794;
+  གལ་སྲིད (C == 0xa7c4)
+    ལོག 0xa794;
   // LATIN CAPITAL LETTER S WITH HOOK
-  if (C == 0xa7c5)
-    return 0x0282;
+  གལ་སྲིད (C == 0xa7c5)
+    ལོག 0x0282;
   // LATIN CAPITAL LETTER Z WITH PALATAL HOOK
-  if (C == 0xa7c6)
-    return 0x1d8e;
-  if (C < 0xa7c7)
-    return C;
+  གལ་སྲིད (C == 0xa7c6)
+    ལོག 0x1d8e;
+  གལ་སྲིད (C < 0xa7c7)
+    ལོག C;
   // 2 characters
-  if (C <= 0xa7c9 && C % 2 == 1)
-    return C + 1;
+  གལ་སྲིད (C <= 0xa7c9 && C % 2 == 1)
+    ལོག C + 1;
   // LATIN CAPITAL LETTER RAMS HORN
-  if (C == 0xa7cb)
-    return 0x0264;
-  if (C < 0xa7cc)
-    return C;
+  གལ་སྲིད (C == 0xa7cb)
+    ལོག 0x0264;
+  གལ་སྲིད (C < 0xa7cc)
+    ལོག C;
   // 8 characters
-  if (C <= 0xa7da)
-    return C | 1;
+  གལ་སྲིད (C <= 0xa7da)
+    ལོག C | 1;
   // LATIN CAPITAL LETTER LAMBDA WITH STROKE
-  if (C == 0xa7dc)
-    return 0x019b;
-  if (C < 0xa7dd)
-    return C;
+  གལ་སྲིད (C == 0xa7dc)
+    ལོག 0x019b;
+  གལ་སྲིད (C < 0xa7dd)
+    ལོག C;
   // 2 characters
-  if (C <= 0xa7e2 && C % 5 == 3)
-    return C + -42342;
+  གལ་སྲིད (C <= 0xa7e2 && C % 5 == 3)
+    ལོག C + -42342;
   // LATIN CAPITAL LETTER REVERSED HALF H
-  if (C == 0xa7f5)
-    return 0xa7f6;
-  if (C < 0xab6c)
-    return C;
+  གལ་སྲིད (C == 0xa7f5)
+    ལོག 0xa7f6;
+  གལ་སྲིད (C < 0xab6c)
+    ལོག C;
   // 2 characters
-  if (C <= 0xab6d)
-    return C + -33;
-  if (C < 0xab70)
-    return C;
+  གལ་སྲིད (C <= 0xab6d)
+    ལོག C + -33;
+  གལ་སྲིད (C < 0xab70)
+    ལོག C;
   // 80 characters
-  if (C <= 0xabbf)
-    return C + -38864;
+  གལ་སྲིད (C <= 0xabbf)
+    ལོག C + -38864;
   // LATIN SMALL LIGATURE LONG S T
-  if (C == 0xfb05)
-    return 0xfb06;
-  if (C < 0xff21)
-    return C;
+  གལ་སྲིད (C == 0xfb05)
+    ལོག 0xfb06;
+  གལ་སྲིད (C < 0xff21)
+    ལོག C;
   // 26 characters
-  if (C <= 0xff3a)
-    return C + 32;
-  if (C < 0x10400)
-    return C;
+  གལ་སྲིད (C <= 0xff3a)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x10400)
+    ལོག C;
   // 40 characters
-  if (C <= 0x10427)
-    return C + 40;
-  if (C < 0x104b0)
-    return C;
+  གལ་སྲིད (C <= 0x10427)
+    ལོག C + 40;
+  གལ་སྲིད (C < 0x104b0)
+    ལོག C;
   // 36 characters
-  if (C <= 0x104d3)
-    return C + 40;
-  if (C < 0x10570)
-    return C;
+  གལ་སྲིད (C <= 0x104d3)
+    ལོག C + 40;
+  གལ་སྲིད (C < 0x10570)
+    ལོག C;
   // 11 characters
-  if (C <= 0x1057a)
-    return C + 39;
-  if (C < 0x1057c)
-    return C;
+  གལ་སྲིད (C <= 0x1057a)
+    ལོག C + 39;
+  གལ་སྲིད (C < 0x1057c)
+    ལོག C;
   // 15 characters
-  if (C <= 0x1058a)
-    return C + 39;
-  if (C < 0x1058c)
-    return C;
+  གལ་སྲིད (C <= 0x1058a)
+    ལོག C + 39;
+  གལ་སྲིད (C < 0x1058c)
+    ལོག C;
   // 7 characters
-  if (C <= 0x10592)
-    return C + 39;
-  if (C < 0x10594)
-    return C;
+  གལ་སྲིད (C <= 0x10592)
+    ལོག C + 39;
+  གལ་སྲིད (C < 0x10594)
+    ལོག C;
   // 2 characters
-  if (C <= 0x10595)
-    return C + 39;
-  if (C < 0x10c80)
-    return C;
+  གལ་སྲིད (C <= 0x10595)
+    ལོག C + 39;
+  གལ་སྲིད (C < 0x10c80)
+    ལོག C;
   // 51 characters
-  if (C <= 0x10cb2)
-    return C + 64;
-  if (C < 0x10d50)
-    return C;
+  གལ་སྲིད (C <= 0x10cb2)
+    ལོག C + 64;
+  གལ་སྲིད (C < 0x10d50)
+    ལོག C;
   // 22 characters
-  if (C <= 0x10d65)
-    return C + 32;
-  if (C < 0x118a0)
-    return C;
+  གལ་སྲིད (C <= 0x10d65)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x118a0)
+    ལོག C;
   // 32 characters
-  if (C <= 0x118bf)
-    return C + 32;
-  if (C < 0x16e40)
-    return C;
+  གལ་སྲིད (C <= 0x118bf)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x16e40)
+    ལོག C;
   // 32 characters
-  if (C <= 0x16e5f)
-    return C + 32;
-  if (C < 0x16ea0)
-    return C;
+  གལ་སྲིད (C <= 0x16e5f)
+    ལོག C + 32;
+  གལ་སྲིད (C < 0x16ea0)
+    ལོག C;
   // 25 characters
-  if (C <= 0x16eb8)
-    return C + 27;
-  if (C < 0x1df40)
-    return C;
+  གལ་སྲིད (C <= 0x16eb8)
+    ལོག C + 27;
+  གལ་སྲིད (C < 0x1df40)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1df48 && C % 8 == 0)
-    return C + 1;
-  if (C < 0x1df4a)
-    return C;
+  གལ་སྲིད (C <= 0x1df48 && C % 8 == 0)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x1df4a)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1df4d && C % 3 == 1)
-    return C + 1;
-  if (C < 0x1df51)
-    return C;
+  གལ་སྲིད (C <= 0x1df4d && C % 3 == 1)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x1df51)
+    ལོག C;
   // 2 characters
-  if (C <= 0x1df68 && C % 23 == 0)
-    return C + 1;
-  if (C < 0x1df6a)
-    return C;
+  གལ་སྲིད (C <= 0x1df68 && C % 23 == 0)
+    ལོག C + 1;
+  གལ་སྲིད (C < 0x1df6a)
+    ལོག C;
   // 3 characters
-  if (C <= 0x1df6e)
-    return C | 1;
-  if (C < 0x1df72)
-    return C;
+  གལ་སྲིད (C <= 0x1df6e)
+    ལོག C | 1;
+  གལ་སྲིད (C < 0x1df72)
+    ལོག C;
   // 7 characters
-  if (C <= 0x1df7e)
-    return C | 1;
+  གལ་སྲིད (C <= 0x1df7e)
+    ལོག C | 1;
   // LATIN SMALL LIGATURE LONG S WITH DESCENDER S
-  if (C == 0x1df95)
-    return 0x00df;
-  if (C < 0x1e900)
-    return C;
+  གལ་སྲིད (C == 0x1df95)
+    ལོག 0x00df;
+  གལ་སྲིད (C < 0x1e900)
+    ལོག C;
   // 34 characters
-  if (C <= 0x1e921)
-    return C + 34;
+  གལ་སྲིད (C <= 0x1e921)
+    ལོག C + 34;
 
-  return C;
+  ལོག C;
 }

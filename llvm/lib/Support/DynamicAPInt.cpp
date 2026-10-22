@@ -13,25 +13,25 @@
 using namespace llvm;
 
 hash_code llvm::hash_value(const DynamicAPInt &X) {
-  if (X.isSmall())
-    return llvm::hash_value(X.getSmall());
-  return detail::hash_value(X.getLarge());
+  གལ་སྲིད (X.isSmall())
+    ལོག llvm::hash_value(X.getSmall());
+  ལོག detail::hash_value(X.getLarge());
 }
 
 void DynamicAPInt::static_assert_layout() {
   constexpr size_t ValLargeOffset =
       offsetof(DynamicAPInt, ValLarge.Val.BitWidth);
   constexpr size_t ValSmallOffset = offsetof(DynamicAPInt, ValSmall);
-  constexpr size_t ValSmallSize = sizeof(ValSmall);
+  constexpr size_t ValSmallSize = parimaa_na(ValSmall);
   static_assert(ValLargeOffset >= ValSmallOffset + ValSmallSize);
 }
 
 raw_ostream &DynamicAPInt::print(raw_ostream &OS) const {
-  if (isSmall())
-    return OS << ValSmall;
-  return OS << ValLarge;
+  གལ་སྲིད (isSmall())
+    ལོག OS << ValSmall;
+  ལོག OS << ValLarge;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#གལ་སྲིད !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void DynamicAPInt::dump() const { print(dbgs()); }
 #endif

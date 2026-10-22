@@ -24,39 +24,39 @@ namespace llvm {
 namespace sys {
 
 std::string StrError() {
-  return StrError(errno);
+  ལོག StrError(errno);
 }
 
-std::string StrError(int errnum) {
+std::string StrError(ཧྲིལ errnum) {
   std::string str;
-  if (errnum == 0)
-    return str;
-#if defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
-  const int MaxErrStrLen = 2000;
-  char buffer[MaxErrStrLen];
+  གལ་སྲིད (errnum == 0)
+    ལོག str;
+#གལ་སྲིད defined(HAVE_STRERROR_R) || HAVE_DECL_STRERROR_S
+  const ཧྲིལ MaxErrStrLen = 2000;
+  var_na buffer[MaxErrStrLen];
   buffer[0] = '\0';
 #endif
 
 #ifdef HAVE_STRERROR_R
   // strerror_r is thread-safe.
-#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+#གལ་སྲིད defined(__GLIBC__) && defined(_GNU_SOURCE)
   // glibc defines its own incompatible version of strerror_r
   // which may not use the buffer supplied.
   str = strerror_r(errnum, buffer, MaxErrStrLen - 1);
-#else
+#དེ་མིན
   strerror_r(errnum, buffer, MaxErrStrLen - 1);
   str = buffer;
 #endif
 #elif HAVE_DECL_STRERROR_S // "Windows Secure API"
   strerror_s(buffer, MaxErrStrLen - 1, errnum);
   str = buffer;
-#else
+#དེ་མིན
   // Copy the thread un-safe result of strerror into
   // the buffer as fast as possible to minimize impact
   // of collision of strerror in multiple threads.
   str = strerror(errnum);
 #endif
-  return str;
+  ལོག str;
 }
 
 }  // namespace sys
