@@ -1,0 +1,615 @@
+# What is still missing
+
+76 languages. Each line says in how many languages it is missing.
+
+## Files in languages BURP cannot read yet
+
+
+## Keywords with no word in a language's table
+
+- shraeni:get: 75
+- yantra:DWORD: 75
+- shraeni:outs: 75
+- shraeni:clear: 75
+- yantra:ALIGN: 75
+- shraeni:trunc: 75
+- shraeni:flush: 75
+- yantra:ENDP: 75
+- yantra:SEGMENT: 75
+- yantra:ENDS: 75
+- yantra:CH: 75
+- yantra:PAGE: 75
+- shraeni:eof: 75
+- yantra:QWORD: 75
+- shraeni:dec: 75
+- guru:__FILE__: 75
+- guru:size_t: 71
+- shraeni:size_t: 71
+- shraeni:NDEBUG: 71
+- guru:errno: 71
+- shraeni:close: 71
+- guru:fprintf: 71
+- shraeni:errno: 71
+- shraeni:remove: 71
+- guru:CHAR_BIT: 71
+- shraeni:memmove: 71
+- shraeni:tm: 71
+- shraeni:wchar_t: 71
+- guru:realloc: 71
+- shraeni:UINT_MAX: 71
+- shraeni:INT_MIN: 71
+- guru:memmove: 71
+- shraeni:abort: 71
+- shraeni:time_t: 71
+- shraeni:memcmp: 71
+- shraeni:strtod: 71
+- shraeni:getenv: 71
+- shraeni:islower: 71
+- shraeni:CHAR_BIT: 71
+- guru:NDEBUG: 71
+- guru:CHAR_MAX: 71
+- shraeni:tolower: 71
+- shraeni:rename: 71
+- shraeni:offsetof: 71
+- shraeni:ptrdiff_t: 71
+- shraeni:isupper: 71
+- guru:CHAR_MIN: 71
+- guru:ptrdiff_t: 71
+- shraeni:floor: 71
+- shraeni:strftime: 71
+- shraeni:stderr: 71
+- shraeni:ERANGE: 71
+- shraeni:clearerr: 71
+- shraeni:va_start: 71
+- shraeni:va_end: 71
+- shraeni:strchr: 71
+- shraeni:memchr: 71
+- shraeni:SEEK_SET: 71
+- guru:strtol: 71
+- shraeni:fprintf: 71
+- shraeni:fflush: 71
+- shraeni:jmp_buf: 71
+- shraeni:longjmp: 71
+- shraeni:SIGFPE: 71
+- shraeni:SIGILL: 71
+- shraeni:SIGSEGV: 71
+- shraeni:SIG_IGN: 71
+- shraeni:setjmp: 71
+- shraeni:strerror: 71
+- shraeni:isxdigit: 71
+- shraeni:ceil: 71
+- shraeni:FILE: 71
+- shraeni:fgets: 71
+- shraeni:feof: 71
+- shraeni:fread: 71
+- shraeni:ferror: 71
+- shraeni:asm: 71
+- shraeni:va_list: 71
+- shraeni:BUFSIZ: 71
+- shraeni:SEEK_CUR: 71
+- shraeni:fstat: 71
+- shraeni:strncpy: 71
+- guru:isupper: 71
+- guru:tolower: 71
+- guru:islower: 71
+- guru:memcmp: 71
+- guru:FILE: 71
+- guru:fopen: 71
+- guru:fgets: 71
+- guru:fclose: 71
+- shraeni:wait: 70
+- shraeni:memset: 70
+- guru:memset: 70
+- shraeni:strcmp: 70
+- shraeni:div: 70
+- shraeni:open: 70
+- guru:strcmp: 70
+- shraeni:nullptr: 67
+- shraeni:using: 67
+- shraeni:exp: 67
+- shraeni:typename: 67
+- shraeni:log: 67
+- shraeni:explicit: 67
+- shraeni:mutable: 67
+- shraeni:sin: 67
+- guru:restrict: 67
+- shraeni:cos: 67
+- guru:#define: 66
+- guru:#endif: 66
+- shraeni:#endif: 66
+- shraeni:#ifdef: 66
+- shraeni:#define: 66
+- shraeni:delete: 66
+- shraeni:#ifndef: 66
+- guru:#ifndef: 66
+- guru:#undef: 66
+- guru:#ifdef: 66
+- guru:#pragma: 66
+- shraeni:#undef: 66
+- shraeni:#pragma: 66
+- guru:#error: 66
+- shraeni:unsigned: 62
+- shraeni:auto: 62
+- shraeni:operator: 62
+- shraeni:long: 62
+- shraeni:template: 62
+- shraeni:memcpy: 62
+- guru:unsigned: 62
+- guru:memcpy: 62
+- guru:long: 62
+- shraeni:friend: 62
+- shraeni:strlen: 62
+- guru:operator: 62
+- shraeni:abs: 62
+- shraeni:exit: 62
+- guru:strlen: 62
+- guru:malloc: 62
+- guru:isdigit: 62
+- shraeni:pow: 62
+- guru:calloc: 62
+- shraeni:short: 62
+- guru:strncmp: 62
+- guru:isalpha: 62
+- shraeni:isdigit: 62
+- shraeni:sqrt: 62
+- shraeni:malloc: 62
+- shraeni:INT_MAX: 62
+- shraeni:isalpha: 62
+- guru:toupper: 62
+- guru:isalnum: 62
+- guru:strstr: 62
+- yantra:global: 45
+- shraeni:virtual: 40
+- shraeni:true: 38
+- shraeni:bool: 26
+- shraeni:false: 26
+- shraeni:namespace: 26
+- shraeni:sync: 26
+- shraeni:const: 25
+- shraeni:void: 25
+- guru:void: 25
+- shraeni:assert: 25
+- shraeni:static: 25
+- shraeni:this: 25
+- guru:const: 25
+- guru:static: 25
+- yantra:PTR: 25
+- shraeni:switch: 25
+- shraeni:public: 25
+- shraeni:default: 25
+- shraeni:continue: 25
+- shraeni:new: 25
+- shraeni:class: 25
+- guru:extern: 25
+- shraeni:write: 25
+- guru:assert: 25
+- shraeni:do: 25
+- guru:NULL: 25
+- shraeni:private: 25
+- guru:typedef: 25
+- guru:#elif: 25
+- shraeni:float: 25
+- shraeni:free: 25
+- guru:do: 25
+- shraeni:extern: 25
+- shraeni:#elif: 25
+- yantra:PROC: 25
+- shraeni:NULL: 25
+- guru:free: 25
+- guru:switch: 25
+- shraeni:read: 25
+- guru:default: 25
+- guru:continue: 25
+- guru:goto: 25
+- yantra:END: 25
+- shraeni:raise: 25
+- shraeni:goto: 25
+- guru:read: 25
+- shraeni:typedef: 25
+- shraeni:pipe: 10
+
+## Names with no dictionary entry (the most common first)
+
+- `v`: 76
+- `std`: 76
+- `llvm`: 76
+- `StringRef`: 76
+- `i`: 76
+- `C`: 76
+- `APInt`: 76
+- `I`: 76
+- `RHS`: 76
+- `sys`: 76
+- `OS`: 76
+- `S`: 76
+- `p`: 76
+- `EC`: 76
+- `E`: 76
+- `LHS`: 76
+- `fs`: 76
+- `string`: 76
+- `Error`: 76
+- `Context`: 76
+- `N`: 76
+- `APFloat`: 76
+- `A`: 76
+- `defined`: 76
+- `Name`: 76
+- `O`: 76
+- `Twine`: 76
+- `B`: 76
+- `T`: 76
+- `raw_ostream`: 76
+- `D`: 76
+- `move`: 76
+- `Str`: 76
+- `json`: 76
+- `Val`: 76
+- `flags`: 76
+- `semantics`: 76
+- `c`: 76
+- `Token`: 76
+- `U`: 76
+- `IEEEFloat`: 76
+- `override`: 76
+- `Current`: 76
+- `ArrayRef`: 76
+- `h_vecs`: 76
+- `iclass`: 76
+- `begin`: 76
+- `cl`: 76
+- `L`: 76
+- `n`: 76
+- `x`: 76
+- `P`: 76
+- `FD`: 76
+- `a`: 76
+- `Ptr`: 76
+- `str`: 76
+- `SMTExprRef`: 76
+- `b`: 76
+- `inputs`: 76
+- `optional`: 76
+- `V`: 76
+- `Arg`: 76
+- `rhs`: 76
+- `m`: 76
+- `r`: 76
+- `dst`: 76
+- `Res`: 76
+- `g`: 76
+- `SlowDynamicAPInt`: 76
+- `addv`: 76
+- `e`: 76
+- `INLINE`: 76
+- `cv`: 76
+- `pVal`: 76
+- `RedirectingFileSystem`: 76
+- `SmallString`: 76
+- `xorv`: 76
+- `Position`: 76
+- `vecs`: 76
+- `unique_ptr`: 76
+- `style`: 76
+- `AST`: 76
+- `F`: 76
+- `Style`: 76
+- `Output`: 76
+- `ptr`: 76
+- `self`: 76
+- `len`: 76
+- `R`: 76
+- `isNegative`: 76
+- `errc`: 76
+- `Zero`: 76
+- `One`: 76
+- `Type`: 76
+- `Err`: 76
+- `Storage`: 76
+- `Filename`: 76
+- `Floats`: 76
+- `G`: 76
+- `FS`: 76
+- `ch`: 76
+- `fltSemantics`: 76
+- `detail`: 76
+- `ROT16`: 76
+- `ROT8`: 76
+- `H`: 76
+- `precision`: 76
+- `fcZero`: 76
+- `substr`: 76
+- `tt`: 76
+- `J`: 76
+- `DoubleAPFloat`: 76
+- `iterator`: 76
+- `sign`: 76
+- `ErrorOr`: 76
+- `d`: 76
+- `Pos`: 76
+- `Other`: 76
+- `t2`: 76
+- `t3`: 76
+- `parse`: 76
+- `parts`: 76
+- `RM`: 76
+- `exponent`: 76
+- `YIO`: 76
+- `int64_t`: 76
+- `t0`: 76
+- `t1`: 76
+- `acc`: 76
+- `llvm_unreachable`: 76
+- `integerPart`: 76
+- `align`: 76
+- `createStringError`: 76
+- `xor_128`: 76
+- `UTF8`: 76
+- `secret`: 76
+- `error`: 76
+- `dbgs`: 76
+- `Option`: 76
+- `Src`: 76
+- `pos`: 76
+- `opOK`: 76
+- `Config`: 76
+- `Object`: 76
+- `cs`: 76
+- `errs`: 76
+- `Expected`: 76
+- `val`: 76
+- `output`: 76
+- `_WIN32`: 76
+- `Ret`: 76
+- `src`: 76
+- `append`: 76
+- `nullopt`: 76
+- `m1`: 76
+- `m2`: 76
+- `m3`: 76
+- `State`: 76
+- `Tmp`: 76
+- `Idx`: 76
+- `api`: 76
+- `Ctx`: 76
+- `category`: 76
+- `Dir`: 76
+- `success`: 76
+- `X`: 76
+- `Exp`: 76
+- `lsp`: 76
+- `From`: 76
+- `significandParts`: 76
+- `npos`: 76
+- `SubCommand`: 76
+- `UTF32`: 76
+- `fcNaN`: 76
+- `fcInfinity`: 76
+- `Scanner`: 76
+- `rpmalloc_assert`: 76
+- `W`: 76
+- `endian`: 76
+- `drop_front`: 76
+- `ARMBuildAttrs`: 76
+- `loadu`: 76
+- `Stat`: 76
+- `s`: 76
+- `File`: 76
+- `F_EXPAND`: 76
+- `cache`: 76
+- `atomic_load32`: 76
+- `vfs`: 76
+- `Inv`: 76
+- `m0`: 76
+- `It`: 76
+- `APSInt`: 76
+- `isSigned`: 76
+- `Range`: 76
+- `significand`: 76
+- `Impl`: 76
+- `VAL`: 76
+- `t`: 76
+- `min`: 76
+- `pair`: 76
+- `l`: 76
+- `IV`: 76
+- `Remainder`: 76
+- `uint32x4_t`: 76
+- `Opt`: 76
+- `Semantics`: 76
+- `file_type`: 76
+- `alignment`: 76
+- `MD`: 76
+- `isZero`: 76
+- `Len`: 76
+- `dyn_cast`: 76
+- `Kernel`: 76
+- `Sem`: 76
+- `takeError`: 76
+- `Indent`: 76
+- `max`: 76
+- `row3`: 76
+- `sandbox`: 76
+- `RPALIAS`: 76
+- `Dst`: 76
+- `make_error`: 76
+- `Radix`: 76
+- `anchor`: 76
+- `Cur`: 76
+- `Info`: 76
+- `Cursor`: 76
+- `Quotient`: 76
+- `raw_fd_ostream`: 76
+- `map`: 76
+- `_mm_shuffle_ps2`: 76
+- `Buf`: 76
+- `Alignment`: 76
+- `ThisVal`: 76
+- `sw`: 76
+- `FileSystem`: 76
+- `Children`: 76
+- `GET`: 76
+- `ARMAttributeParser`: 76
+- `AttrType`: 76
+- `parseStringAttribute`: 76
+- `Handler`: 76
+- `StringError`: 76
+- `cursor`: 76
+- `Hash`: 76
+- `ArgName`: 76
+- `Entries`: 76
+- `LLVM_LIKELY`: 76
+- `make_unique`: 76
+- `getName`: 76
+- `atomic32_t`: 76
+- `sext`: 76
+- `TrieSubtrie`: 76
+- `class_idx`: 76
+- `getSemantics`: 76
+- `fltNonfiniteBehavior`: 76
+- `Query`: 76
+- `getError`: 76
+- `set1`: 76
+- `set1_128`: 76
+- `g1`: 76
+- `g2`: 76
+- `Sub`: 76
+- `ASTNode`: 76
+- `Metadata`: 76
+- `ATTRIBUTE_HANDLER`: 76
+- `opt`: 76
+- `String`: 76
+- `CommonFXSema`: 76
+- `u`: 76
+- `fcNegSubnormal`: 76
+- `isNonNegative`: 76
+- `xor_256`: 76
+- `xor_512`: 76
+- `mutex`: 76
+- `chrono`: 76
+- `Matches`: 76
+- `free_list`: 76
+- `_MSC_VER`: 76
+- `EN`: 76
+- `OtherVal`: 76
+- `opInvalidOp`: 76
+- `Delta`: 76
+- `loadu_128`: 76
+- `row0`: 76
+- `row2`: 76
+- `directory_iterator`: 76
+- `const_iterator`: 76
+- `it`: 76
+- `Flags`: 76
+- `sopno`: 76
+- `ID`: 76
+- `lhs`: 76
+- `Nodes`: 76
+- `changeset_ty`: 76
+- `K`: 76
+- `CurArray`: 76
+- `rpfree`: 76
+- `attribute`: 76
+
+## Comments with no translation
+
+- namespace: 76
+- namespace llvm: 76
+- 2 characters: 76
+- Neg=: 76
+- OrderedZeroSign=: 76
+- / If there is no space in this subtree for the extra piece, the extra tree: 76
+- / node is returned and must be inserted into a parent.: 76
+- / \file: 76
+- Neg =: 76
+- NUW=: 76
+- NSW=: 76
+- 8 characters: 76
+- end namespace llvm: 76
+- return to the illegal value itself: 76
+- GenCrashDiag=: 76
+- Add=: 76
+- 3 characters: 76
+- FollowFinalSymlink=: 76
+- Include the platform-specific parts of this class.: 76
+- namespace sys: 76
+- end anonymous namespace: 76
+- isUnsigned=: 76
+- isSigned=: 76
+- anonymous namespace: 76
+- RequiresNullTerminator=: 76
+- Back up source pointer!: 76
+- remove_dot_dot=: 76
+- / split - Split the range containing the specified offset so that we are: 76
+- / guaranteed that there is a place to do an insertion at the specified: 76
+- / offset.  The offset is relative, so "0" is the start of the node.: 76
+- / erase - Remove NumBytes from this node at the specified offset.  We are: 76
+- / guaranteed that there is a split at Offset.: 76
+- TODO: Report error.: 76
+- _WIN32: 76
+- nextDown=: 76
+- hasTagPrefix=: 76
+- cvtcmd: 76
+- pccsid: 76
+- fccsid: 76
+- === WARNING: Implementation here must contain only TRULY operating system: 76
+- ===          independent code.: 76
+- IsFMA=: 76
+- For example:: 76
+- / insert - Insert the specified ropepiece into this tree node at the: 76
+- / specified offset.  The offset is relative, so "0" is the start of the: 76
+- / node.: 76
+- 7 characters: 76
+- false on error: 76
+- avoid making error situations worse: 76
+- Alignment must be a power of two and a multiple of sizeof(void*),: 76
+- and should ideally be less than memory page size. A caveat of rpmalloc: 76
+- internals is that this must also be strictly less than the span size: 76
+- (default 64KiB): 76
+- Radix=: 76
+- implicitTrunc=: 76
+- First, deal with the easy case: 76
+- X / Y ===> 0, iff X < Y: 76
+- rhsWords is 1 if lhsWords is 1.: 76
+- We have to compute it the hard way. Invoke the Knuth divide algorithm.: 76
+- Check the degenerate cases: 76
+- X % Y ===> X, iff X < Y: 76
+- Round 3: 76
+- Round 4: 76
+- The first four vecs now contain the first half of each output, and the: 76
+- second four vecs contain the second half of each output.: 76
+- FileSize=: 76
+- IgnoreExisting=: 76
+- UTF-16 surrogate values are illegal in UTF-32: 76
+- shouldClose=: 76
+- uadd.sat: 76
+- Signed: 76
+- IsText=: 76
+- clang-format off: 76
+- clang-format on: 76
+- if !HAVE_ANY_SIGNPOST_IMPL: 76
+- / Note: O(size() + Chars.size()): 76
+- 9 characters: 76
+- Attempt to find the original file first, only falling back to the: 76
+- mapped file if that fails.: 76
+- Was not able to map file, fallthrough to using the original path if: 76
+- that was the specified redirection type.: 76
+- Mapped the file but it wasn't found in the underlying filesystem,: 76
+- fallthrough to using the original path if that was the specified: 76
+- redirection type.: 76
+- / Return false if an error occurred.: 76
+- / operation: 76
+- This library provides a cross-platform lock free thread caching malloc: 76
+- implementation in C11.: 76
+- ! Number of spans transitioned from reserved state: 76
+- end namespace yaml: 76
+- semantic, we either have overflow or saturation.: 76
+- A lot.: 76
+- [IEEE Std 754-2008 6.2]:: 76
+- We want (in interchange format):: 76
+- sign = {Negative}: 76
+- IsSigned=: 76
+- namespace detail: 76
+- Can we just losslessly truncate it?: 76
+- Don't bother performing a no-op shift.: 76
+- Fastpath for moving by whole words.: 76
