@@ -17,27 +17,27 @@ using namespace llvm;
 // precede any other options which prefix them). Additionally, if two options
 // are identical ignoring case, they are ordered according to case sensitive
 // ordering if `FallbackCaseSensitive` is true.
-int llvm::StrCmpOptionName(StringRef A, StringRef B,
+ཧྲིལ llvm::StrCmpOptionName(StringRef A, StringRef B,
                            bool FallbackCaseSensitive) {
   size_t MinSize = std::min(A.size(), B.size());
-  if (int Res = A.substr(0, MinSize).compare_insensitive(B.substr(0, MinSize)))
-    return Res;
+  གལ་ཏེ (ཧྲིལ Res = A.substr(0, MinSize).compare_insensitive(B.substr(0, MinSize)))
+    ཕྱིར Res;
 
   // If they are identical ignoring case, use case sensitive ordering.
-  if (A.size() == B.size())
-    return FallbackCaseSensitive ? A.compare(B) : 0;
+  གལ་ཏེ (A.size() == B.size())
+    ཕྱིར FallbackCaseSensitive ? A.compare(B) : 0;
 
-  return (A.size() == MinSize) ? 1 /* A is a prefix of B. */
+  ཕྱིར (A.size() == MinSize) ? 1 /* A is a prefix of B. */
                                : -1 /* B is a prefix of A */;
 }
 
 // Comparison function for Option prefixes.
-int llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
+ཧྲིལ llvm::StrCmpOptionPrefixes(ArrayRef<StringRef> APrefixes,
                                ArrayRef<StringRef> BPrefixes) {
-  for (const auto &[APre, BPre] : zip(APrefixes, BPrefixes)) {
-    if (int Cmp = StrCmpOptionName(APre, BPre))
-      return Cmp;
+  ཆེད་དུ (const auto &[APre, BPre] : zip(APrefixes, BPrefixes)) {
+    གལ་ཏེ (ཧྲིལ Cmp = StrCmpOptionName(APre, BPre))
+      ཕྱིར Cmp;
   }
   // Both prefixes are identical.
-  return 0;
+  ཕྱིར 0;
 }

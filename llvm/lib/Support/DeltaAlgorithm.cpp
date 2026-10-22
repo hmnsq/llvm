@@ -13,14 +13,14 @@ using namespace llvm;
 DeltaAlgorithm::~DeltaAlgorithm() = default;
 
 bool DeltaAlgorithm::GetTestResult(const changeset_ty &Changes) {
-  if (FailedTestsCache.count(Changes))
-    return false;
+  གལ་ཏེ (FailedTestsCache.count(Changes))
+    ཕྱིར false;
 
   bool Result = ExecuteOneTest(Changes);
-  if (!Result)
+  གལ་ཏེ (!Result)
     FailedTestsCache.insert(Changes);
 
-  return Result;
+  ཕྱིར Result;
 }
 
 void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
@@ -29,12 +29,12 @@ void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
   // FIXME: This is really slow.
   changeset_ty LHS, RHS;
   unsigned idx = 0, N = S.size() / 2;
-  for (changeset_ty::const_iterator it = S.begin(),
+  ཆེད་དུ (changeset_ty::const_iterator it = S.begin(),
          ie = S.end(); it != ie; ++it, ++idx)
     ((idx < N) ? LHS : RHS).insert(*it);
-  if (!LHS.empty())
+  གལ་ཏེ (!LHS.empty())
     Res.push_back(LHS);
-  if (!RHS.empty())
+  གལ་ཏེ (!RHS.empty())
     Res.push_back(RHS);
 }
 
@@ -45,67 +45,67 @@ DeltaAlgorithm::Delta(const changeset_ty &Changes,
   UpdatedSearchState(Changes, Sets);
 
   // If there is nothing left we can remove, we are done.
-  if (Sets.size() <= 1)
-    return Changes;
+  གལ་ཏེ (Sets.size() <= 1)
+    ཕྱིར Changes;
 
   // Look for a passing subset.
   changeset_ty Res;
-  if (Search(Changes, Sets, Res))
-    return Res;
+  གལ་ཏེ (Search(Changes, Sets, Res))
+    ཕྱིར Res;
 
   // Otherwise, partition the sets if possible; if not we are done.
   changesetlist_ty SplitSets;
-  for (const changeset_ty &Set : Sets)
+  ཆེད་དུ (const changeset_ty &Set : Sets)
     Split(Set, SplitSets);
-  if (SplitSets.size() == Sets.size())
-    return Changes;
+  གལ་ཏེ (SplitSets.size() == Sets.size())
+    ཕྱིར Changes;
 
-  return Delta(Changes, SplitSets);
+  ཕྱིར Delta(Changes, SplitSets);
 }
 
 bool DeltaAlgorithm::Search(const changeset_ty &Changes,
                             const changesetlist_ty &Sets,
                             changeset_ty &Res) {
   // FIXME: Parallelize.
-  for (changesetlist_ty::const_iterator it = Sets.begin(),
+  ཆེད་དུ (changesetlist_ty::const_iterator it = Sets.begin(),
          ie = Sets.end(); it != ie; ++it) {
     // If the test passes on this subset alone, recurse.
-    if (GetTestResult(*it)) {
+    གལ་ཏེ (GetTestResult(*it)) {
       changesetlist_ty Sets;
       Split(*it, Sets);
       Res = Delta(*it, Sets);
-      return true;
+      ཕྱིར true;
     }
 
     // Otherwise, if we have more than two sets, see if test passes on the
     // complement.
-    if (Sets.size() > 2) {
+    གལ་ཏེ (Sets.size() > 2) {
       // FIXME: This is really slow.
       changeset_ty Complement;
       std::set_difference(Changes.begin(), Changes.end(), it->begin(),
                           it->end(),
                           std::inserter(Complement, Complement.begin()));
-      if (GetTestResult(Complement)) {
+      གལ་ཏེ (GetTestResult(Complement)) {
         changesetlist_ty ComplementSets;
         ComplementSets.insert(ComplementSets.end(), Sets.begin(), it);
         ComplementSets.insert(ComplementSets.end(), it + 1, Sets.end());
         Res = Delta(Complement, ComplementSets);
-        return true;
+        ཕྱིར true;
       }
     }
   }
 
-  return false;
+  ཕྱིར false;
 }
 
 DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(const changeset_ty &Changes) {
   // Check empty set first to quickly find poor test functions.
-  if (GetTestResult(changeset_ty()))
-    return changeset_ty();
+  གལ་ཏེ (GetTestResult(changeset_ty()))
+    ཕྱིར changeset_ty();
 
   // Otherwise run the real delta algorithm.
   changesetlist_ty Sets;
   Split(Changes, Sets);
 
-  return Delta(Changes, Sets);
+  ཕྱིར Delta(Changes, Sets);
 }

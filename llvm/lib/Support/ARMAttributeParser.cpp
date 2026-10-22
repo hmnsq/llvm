@@ -74,17 +74,17 @@ Error ARMAttributeParser::stringAttribute(AttrType tag) {
       ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
   StringRef desc = de.getCStrRef(cursor);
 
-  if (sw) {
+  གལ་ཏེ (sw) {
     DictScope scope(*sw, "Attribute");
     sw->printNumber("Tag", tag);
-    if (!tagName.empty())
+    གལ་ཏེ (!tagName.empty())
       sw->printString("TagName", tagName);
     sw->printString("Value", desc);
   }
-  return Error::success();
+  ཕྱིར Error::success();
 }
 
-static const char *const CPU_arch_strings[] = {"Pre-v4",
+static const var_na *const CPU_arch_strings[] = {"Pre-v4",
                                                "ARM v4",
                                                "ARM v4T",
                                                "ARM v5T",
@@ -109,7 +109,7 @@ static const char *const CPU_arch_strings[] = {"Pre-v4",
                                                "ARM v9-A"};
 
 Error ARMAttributeParser::CPU_arch(AttrType tag) {
-  return parseStringAttribute("CPU_arch", tag, ArrayRef(CPU_arch_strings));
+  ཕྱིར parseStringAttribute("CPU_arch", tag, ArrayRef(CPU_arch_strings));
 }
 
 Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
@@ -117,55 +117,55 @@ Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
 
   StringRef profile;
   switch (value) {
-  default: profile = "Unknown"; break;
-  case 'A': profile = "Application"; break;
-  case 'R': profile = "Real-time"; break;
-  case 'M': profile = "Microcontroller"; break;
-  case 'S': profile = "Classic"; break;
-  case 0: profile = "None"; break;
+  default: profile = "Unknown"; bha_nga;
+  pak_sa 'A': profile = "Application"; bha_nga;
+  pak_sa 'R': profile = "Real-time"; bha_nga;
+  pak_sa 'M': profile = "Microcontroller"; bha_nga;
+  pak_sa 'S': profile = "Classic"; bha_nga;
+  pak_sa 0: profile = "None"; bha_nga;
   }
 
   printAttribute(tag, value, profile);
-  return Error::success();
+  ཕྱིར Error::success();
 }
 
 Error ARMAttributeParser::ARM_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("ARM_ISA_use", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "Permitted"};
+  ཕྱིར parseStringAttribute("ARM_ISA_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::THUMB_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Thumb-1", "Thumb-2",
+  static const var_na *const strings[] = {"Not Permitted", "Thumb-1", "Thumb-2",
                                         "Permitted"};
-  return parseStringAttribute("THUMB_ISA_use", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("THUMB_ISA_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::FP_arch(AttrType tag) {
-  static const char *const strings[] = {
+  static const var_na *const strings[] = {
       "Not Permitted", "VFPv1",     "VFPv2",      "VFPv3",         "VFPv3-D16",
       "VFPv4",         "VFPv4-D16", "ARMv8-a FP", "ARMv8-a FP-D16"};
-  return parseStringAttribute("FP_arch", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("FP_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::WMMX_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
-  return parseStringAttribute("WMMX_arch", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
+  ཕྱིར parseStringAttribute("WMMX_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::Advanced_SIMD_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
+  static const var_na *const strings[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
                                         "ARMv8-a NEON", "ARMv8.1-a NEON"};
-  return parseStringAttribute("Advanced_SIMD_arch", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("Advanced_SIMD_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::MVE_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "MVE integer",
+  static const var_na *const strings[] = {"Not Permitted", "MVE integer",
                                         "MVE integer and float"};
-  return parseStringAttribute("MVE_arch", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("MVE_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::PCS_config(AttrType tag) {
-  static const char *const strings[] = {"None",
+  static const var_na *const strings[] = {"None",
                                         "Bare Platform",
                                         "Linux Application",
                                         "Linux DSO",
@@ -173,137 +173,137 @@ Error ARMAttributeParser::PCS_config(AttrType tag) {
                                         "Reserved (Palm OS)",
                                         "Symbian OS 2004",
                                         "Reserved (Symbian OS)"};
-  return parseStringAttribute("PCS_config", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("PCS_config", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_R9_use(AttrType tag) {
-  static const char *const strings[] = {"v6", "Static Base", "TLS", "Unused"};
-  return parseStringAttribute("ABI_PCS_R9_use", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"v6", "Static Base", "TLS", "Unused"};
+  ཕྱིར parseStringAttribute("ABI_PCS_R9_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_RW_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+  static const var_na *const strings[] = {"Absolute", "PC-relative",
                                         "SB-relative", "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RW_data", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_PCS_RW_data", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_RO_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+  static const var_na *const strings[] = {"Absolute", "PC-relative",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RO_data", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_PCS_RO_data", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_GOT_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Direct",
+  static const var_na *const strings[] = {"Not Permitted", "Direct",
                                         "GOT-Indirect"};
-  return parseStringAttribute("ABI_PCS_GOT_use", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_PCS_GOT_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_wchar_t(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Unknown", "2-byte",
+  static const var_na *const strings[] = {"Not Permitted", "Unknown", "2-byte",
                                         "Unknown", "4-byte"};
-  return parseStringAttribute("ABI_PCS_wchar_t", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_PCS_wchar_t", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_rounding(AttrType tag) {
-  static const char *const strings[] = {"IEEE-754", "Runtime"};
-  return parseStringAttribute("ABI_FP_rounding", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"IEEE-754", "Runtime"};
+  ཕྱིར parseStringAttribute("ABI_FP_rounding", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_denormal(AttrType tag) {
-  static const char *const strings[] = {"Unsupported", "IEEE-754", "Sign Only"};
-  return parseStringAttribute("ABI_FP_denormal", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Unsupported", "IEEE-754", "Sign Only"};
+  ཕྱིར parseStringAttribute("ABI_FP_denormal", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_exceptions", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "IEEE-754"};
+  ཕྱིར parseStringAttribute("ABI_FP_exceptions", tag, ArrayRef(strings));
 }
 Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "IEEE-754"};
+  ཕྱིར parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_number_model(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Finite Only", "RTABI",
+  static const var_na *const strings[] = {"Not Permitted", "Finite Only", "RTABI",
                                         "IEEE-754"};
-  return parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_align_needed(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "8-byte alignment",
+  static const var_na *const strings[] = {"Not Permitted", "8-byte alignment",
                                         "4-byte alignment", "Reserved"};
 
   uint64_t value = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
+  གལ་ཏེ (value < std::size(strings))
     description = strings[value];
-  else if (value <= 12)
+  དེ་མིན གལ་ཏེ (value <= 12)
     description = "8-byte alignment, " + utostr(1ULL << value) +
                   "-byte extended alignment";
-  else
+  དེ་མིན
     description = "Invalid";
 
   printAttribute(tag, value, description);
-  return Error::success();
+  ཕྱིར Error::success();
 }
 
 Error ARMAttributeParser::ABI_align_preserved(AttrType tag) {
-  static const char *strings[] = {"Not Required", "8-byte data alignment",
+  static const var_na *strings[] = {"Not Required", "8-byte data alignment",
                                   "8-byte data and code alignment", "Reserved"};
 
   uint64_t value = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
+  གལ་ཏེ (value < std::size(strings))
     description = std::string(strings[value]);
-  else if (value <= 12)
+  དེ་མིན གལ་ཏེ (value <= 12)
     description = std::string("8-byte stack alignment, ") +
                   utostr(1ULL << value) + std::string("-byte data alignment");
-  else
+  དེ་མིན
     description = "Invalid";
 
   printAttribute(tag, value, description);
-  return Error::success();
+  ཕྱིར Error::success();
 }
 
 Error ARMAttributeParser::ABI_enum_size(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Packed", "Int32",
+  static const var_na *const strings[] = {"Not Permitted", "Packed", "Int32",
                                         "External Int32"};
-  return parseStringAttribute("ABI_enum_size", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_enum_size", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_HardFP_use(AttrType tag) {
-  static const char *const strings[] = {"Tag_FP_arch", "Single-Precision",
+  static const var_na *const strings[] = {"Tag_FP_arch", "Single-Precision",
                                         "Reserved", "Tag_FP_arch (deprecated)"};
-  return parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_VFP_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "AAPCS VFP", "Custom",
+  static const var_na *const strings[] = {"AAPCS", "AAPCS VFP", "Custom",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_WMMX_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "iWMMX", "Custom"};
-  return parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"AAPCS", "iWMMX", "Custom"};
+  ཕྱིར parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+  static const var_na *const strings[] = {
       "None",          "Speed",           "Aggressive Speed",
       "Size",          "Aggressive Size", "Debugging",
       "Best Debugging"};
-  return parseStringAttribute("ABI_optimization_goals", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("ABI_optimization_goals", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+  static const var_na *const strings[] = {
       "None",     "Speed",        "Aggressive Speed", "Size", "Aggressive Size",
       "Accuracy", "Best Accuracy"};
-  return parseStringAttribute("ABI_FP_optimization_goals", tag,
+  ཕྱིར parseStringAttribute("ABI_FP_optimization_goals", tag,
                               ArrayRef(strings));
 }
 
@@ -311,7 +311,7 @@ Error ARMAttributeParser::compatibility(AttrType tag) {
   uint64_t integer = de.getULEB128(cursor);
   StringRef string = de.getCStrRef(cursor);
 
-  if (sw) {
+  གལ་ཏེ (sw) {
     DictScope scope(*sw, "Attribute");
     sw->printNumber("Tag", tag);
     sw->startLine() << "Value: " << integer << ", " << string << '\n';
@@ -319,89 +319,89 @@ Error ARMAttributeParser::compatibility(AttrType tag) {
                     ELFAttrs::attrTypeAsString(tag, tagToStringMap,
                                                /*hasTagPrefix=*/false));
     switch (integer) {
-    case 0:
+    pak_sa 0:
       sw->printString("Description", StringRef("No Specific Requirements"));
-      break;
-    case 1:
+      bha_nga;
+    pak_sa 1:
       sw->printString("Description", StringRef("AEABI Conformant"));
-      break;
+      bha_nga;
     default:
       sw->printString("Description", StringRef("AEABI Non-Conformant"));
-      break;
+      bha_nga;
     }
   }
-  return Error::success();
+  ཕྱིར Error::success();
 }
 
 Error ARMAttributeParser::CPU_unaligned_access(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "v6-style"};
-  return parseStringAttribute("CPU_unaligned_access", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "v6-style"};
+  ཕྱིར parseStringAttribute("CPU_unaligned_access", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::FP_HP_extension(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Permitted"};
-  return parseStringAttribute("FP_HP_extension", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"If Available", "Permitted"};
+  ཕྱིར parseStringAttribute("FP_HP_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_16bit_format(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754", "VFPv3"};
-  return parseStringAttribute("ABI_FP_16bit_format", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "IEEE-754", "VFPv3"};
+  ཕྱིར parseStringAttribute("ABI_FP_16bit_format", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::MPextension_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("MPextension_use", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "Permitted"};
+  ཕྱིར parseStringAttribute("MPextension_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::DIV_use(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Not Permitted",
+  static const var_na *const strings[] = {"If Available", "Not Permitted",
                                         "Permitted"};
-  return parseStringAttribute("DIV_use", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("DIV_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::DSP_extension(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("DSP_extension", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "Permitted"};
+  ཕྱིར parseStringAttribute("DSP_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::T2EE_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("T2EE_use", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Permitted", "Permitted"};
+  ཕྱིར parseStringAttribute("T2EE_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::Virtualization_use(AttrType tag) {
-  static const char *const strings[] = {
+  static const var_na *const strings[] = {
       "Not Permitted", "TrustZone", "Virtualization Extensions",
       "TrustZone + Virtualization Extensions"};
-  return parseStringAttribute("Virtualization_use", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("Virtualization_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::PAC_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+  static const var_na *const strings[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("PAC_extension", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("PAC_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::BTI_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+  static const var_na *const strings[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("BTI_extension", tag, ArrayRef(strings));
+  ཕྱིར parseStringAttribute("BTI_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::PACRET_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("PACRET_use", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Used", "Used"};
+  ཕྱིར parseStringAttribute("PACRET_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("BTI_use", tag, ArrayRef(strings));
+  static const var_na *const strings[] = {"Not Used", "Used"};
+  ཕྱིར parseStringAttribute("BTI_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::nodefaults(AttrType tag) {
   uint64_t value = de.getULEB128(cursor);
   printAttribute(tag, value, "Unspecified Tags UNDEFINED");
-  return Error::success();
+  ཕྱིར Error::success();
 }
 
 Error ARMAttributeParser::also_compatible_with(AttrType tag) {
@@ -420,46 +420,46 @@ Error ARMAttributeParser::also_compatible_with(AttrType tag) {
 
   bool ValidInnerTag =
       any_of(tagToStringMap, [InnerTag](const TagNameItem &Item) {
-        return Item.attr == InnerTag;
+        ཕྱིར Item.attr == InnerTag;
       });
 
-  if (!ValidInnerTag) {
+  གལ་ཏེ (!ValidInnerTag) {
     returnValue =
         createStringError(errc::argument_out_of_domain,
                           Twine(InnerTag) + " is not a valid tag number");
-  } else {
+  } དེ་མིན {
     switch (InnerTag) {
-    case ARMBuildAttrs::CPU_arch: {
+    pak_sa ARMBuildAttrs::CPU_arch: {
       uint64_t InnerValue = de.getULEB128(cursor);
       auto strings = ArrayRef(CPU_arch_strings);
-      if (InnerValue >= strings.size()) {
+      གལ་ཏེ (InnerValue >= strings.size()) {
         returnValue = createStringError(
             errc::argument_out_of_domain,
             Twine(InnerValue) + " is not a valid " +
                 ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
                 " value");
-      } else {
+      } དེ་མིན {
         DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
                    << " = " << InnerValue;
-        if (strings[InnerValue])
+        གལ་ཏེ (strings[InnerValue])
           DescStream << " (" << strings[InnerValue] << ')';
       }
-      break;
+      bha_nga;
     }
-    case ARMBuildAttrs::also_compatible_with:
+    pak_sa ARMBuildAttrs::also_compatible_with:
       returnValue = createStringError(
           errc::invalid_argument,
           ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
               " cannot be recursively defined");
-      break;
-    case ARMBuildAttrs::CPU_raw_name:
-    case ARMBuildAttrs::CPU_name:
-    case ARMBuildAttrs::compatibility:
-    case ARMBuildAttrs::conformance: {
+      bha_nga;
+    pak_sa ARMBuildAttrs::CPU_raw_name:
+    pak_sa ARMBuildAttrs::CPU_name:
+    pak_sa ARMBuildAttrs::compatibility:
+    pak_sa ARMBuildAttrs::conformance: {
       StringRef InnerValue = de.getCStrRef(cursor);
       DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
                  << " = " << InnerValue;
-      break;
+      bha_nga;
     }
     default: {
       uint64_t InnerValue = de.getULEB128(cursor);
@@ -470,32 +470,32 @@ Error ARMAttributeParser::also_compatible_with(AttrType tag) {
   }
 
   setAttributeString(tag, RawStringValue);
-  if (sw) {
+  གལ་ཏེ (sw) {
     DictScope scope(*sw, "Attribute");
     sw->printNumber("Tag", tag);
     sw->printString("TagName",
                     ELFAttrs::attrTypeAsString(tag, tagToStringMap, false));
     sw->printStringEscaped("Value", RawStringValue);
-    if (!Description.empty()) {
+    གལ་ཏེ (!Description.empty()) {
       sw->printString("Description", Description);
     }
   }
 
   cursor.seek(FinalOffset);
 
-  return returnValue ? std::move(*returnValue) : Error::success();
+  ཕྱིར returnValue ? std::move(*returnValue) : Error::success();
 }
 
 Error ARMAttributeParser::handler(uint64_t tag, bool &handled) {
   handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(static_cast<AttrType>(tag)))
-        return e;
+  ཆེད་དུ (const auto &AH : displayRoutines) {
+    གལ་ཏེ (uint64_t(AH.attribute) == tag) {
+      གལ་ཏེ (Error e = (this->*AH.routine)(static_cast<AttrType>(tag)))
+        ཕྱིར e;
       handled = true;
-      break;
+      bha_nga;
     }
   }
 
-  return Error::success();
+  ཕྱིར Error::success();
 }

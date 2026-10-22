@@ -43,7 +43,7 @@ private:
     // width, so we do the same.
     Option::printHelpStr(HelpStr, GlobalWidth, ArgStr.size() + 6);
     const auto &CounterInstance = DebugCounter::instance();
-    for (const auto &Entry : CounterInstance) {
+    ཆེད་དུ (const auto &Entry : CounterInstance) {
       const auto &[Name, Desc] = CounterInstance.getCounterDesc(Entry.second);
       size_t NumSpaces = GlobalWidth - Name.size() - 8;
       outs() << "    =" << Name;
@@ -56,7 +56,7 @@ private:
 // itself, are owned by a single global instance of the DebugCounterOwner
 // struct. This makes it easier to control the order in which constructors and
 // destructors are run.
-struct DebugCounterOwner : DebugCounter {
+sa_nracanaa DebugCounterOwner : DebugCounter {
   DebugCounterList DebugCounterOption{
       "debug-counter", cl::Hidden,
       cl::desc("Comma separated list of debug counter skip and count"),
@@ -68,7 +68,7 @@ struct DebugCounterOwner : DebugCounter {
       cl::init(false),
       cl::desc("Print out debug counter info after all counters accumulated"),
       cl::callback([&](const bool &Value) {
-        if (Value)
+        གལ་ཏེ (Value)
           activateAllCounters();
       })};
   cl::opt<bool, true> PrintDebugCounterQueries{
@@ -93,7 +93,7 @@ struct DebugCounterOwner : DebugCounter {
 
   // Print information when destroyed, iff command line option is specified.
   ~DebugCounterOwner() {
-    if (ShouldPrintCounter)
+    གལ་ཏེ (ShouldPrintCounter)
       print(dbgs());
   }
 };
@@ -107,32 +107,32 @@ static ManagedStatic<DebugCounterOwner> Owner;
 
 void llvm::initDebugCounterOptions() { (void)DebugCounter::instance(); }
 
-DebugCounter &DebugCounter::instance() { return *Owner; }
+DebugCounter &DebugCounter::instance() { ཕྱིར *Owner; }
 
 // This is called by the command line parser when it sees a value for the
 // debug-counter option defined above.
 void DebugCounter::push_back(const std::string &Val) {
-  if (Val.empty())
-    return;
+  གལ་ཏེ (Val.empty())
+    ཕྱིར;
 
   // The strings should come in as counter=chunk_list
   auto CounterPair = StringRef(Val).split('=');
-  if (CounterPair.second.empty()) {
+  གལ་ཏེ (CounterPair.second.empty()) {
     errs() << "DebugCounter Error: " << Val << " does not have an = in it\n";
     exit(1);
   }
   StringRef CounterName = CounterPair.first;
 
   CounterInfo *Counter = getCounterInfo(CounterName);
-  if (!Counter) {
+  གལ་ཏེ (!Counter) {
     errs() << "DebugCounter Error: " << CounterName
            << " is not a registered counter\n";
-    return;
+    ཕྱིར;
   }
 
   auto ExpectedChunks =
       IntegerInclusiveIntervalUtils::parseIntervals(CounterPair.second, ':');
-  if (!ExpectedChunks) {
+  གལ་ཏེ (!ExpectedChunks) {
     handleAllErrors(ExpectedChunks.takeError(), [&](const StringError &E) {
       errs() << "DebugCounter Error: " << E.getMessage() << "\n";
     });
@@ -147,7 +147,7 @@ void DebugCounter::print(raw_ostream &OS) const {
   sort(CounterNames);
 
   OS << "Counters and values:\n";
-  for (StringRef CounterName : CounterNames) {
+  ཆེད་དུ (StringRef CounterName : CounterNames) {
     const CounterInfo *C = getCounterInfo(CounterName);
     OS << left_justify(C->Name, 32) << ": {" << C->Count << ",";
     printChunks(OS, C->Chunks);
@@ -159,38 +159,38 @@ bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
   int64_t CurrCount = Info.Count++;
   uint64_t CurrIdx = Info.CurrChunkIdx;
 
-  if (Info.Chunks.empty())
-    return true;
-  if (CurrIdx >= Info.Chunks.size())
-    return false;
+  གལ་ཏེ (Info.Chunks.empty())
+    ཕྱིར true;
+  གལ་ཏེ (CurrIdx >= Info.Chunks.size())
+    ཕྱིར false;
 
   bool Res = Info.Chunks[CurrIdx].contains(CurrCount);
-  if (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
+  གལ་ཏེ (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
       CurrCount == Info.Chunks[CurrIdx].getEnd()) {
     LLVM_BUILTIN_DEBUGTRAP;
   }
-  if (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
+  གལ་ཏེ (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
     Info.CurrChunkIdx++;
 
     /// Handle consecutive blocks.
-    if (Info.CurrChunkIdx < Info.Chunks.size() &&
+    གལ་ཏེ (Info.CurrChunkIdx < Info.Chunks.size() &&
         CurrCount == Info.Chunks[Info.CurrChunkIdx].getBegin())
-      return true;
+      ཕྱིར true;
   }
-  return Res;
+  ཕྱིར Res;
 }
 
 bool DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
   auto &Us = instance();
   bool Res = Us.handleCounterIncrement(Counter);
-  if (Us.ShouldPrintCounterQueries && Counter.IsSet) {
+  གལ་ཏེ (Us.ShouldPrintCounterQueries && Counter.IsSet) {
     dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.Count - 1)
            << (Res ? " execute" : " skip") << "\n";
   }
-  return Res;
+  ཕྱིར Res;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#གལ་ཏེ !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void DebugCounter::dump() const {
   print(dbgs());
 }

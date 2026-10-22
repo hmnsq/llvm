@@ -39,7 +39,7 @@ void PrintRecyclerStats(size_t Size,
 namespace parallel::detail {
 unsigned claimPerThreadAllocatorId() {
   static std::atomic<unsigned> Counter;
-  return Counter.fetch_add(1, std::memory_order_relaxed);
+  ཕྱིར Counter.fetch_add(1, std::memory_order_relaxed);
 }
 } // namespace parallel::detail
 

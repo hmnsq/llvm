@@ -14,11 +14,11 @@ using namespace llvm;
 StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
                                      bool hasTagPrefix) {
   auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
+      tagNameMap, [attr](const TagNameItem item) { ཕྱིར item.attr == attr; });
+  གལ་ཏེ (tagNameIt == tagNameMap.end())
+    ཕྱིར "";
   StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+  ཕྱིར hasTagPrefix ? tagName : tagName.drop_front(4);
 }
 
 std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
@@ -26,9 +26,9 @@ std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
   bool hasTagPrefix = tag.starts_with("Tag_");
   auto tagNameIt =
       find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+        ཕྱིར item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  གལ་ཏེ (tagNameIt == tagNameMap.end())
+    ཕྱིར std::nullopt;
+  ཕྱིར tagNameIt->attr;
 }

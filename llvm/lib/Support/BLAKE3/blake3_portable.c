@@ -2,7 +2,7 @@
 #include <string.h>
 
 INLINE uint32_t rotr32(uint32_t w, uint32_t c) {
-  return (w >> c) | (w << (32 - c));
+  ཕྱིར (w >> c) | (w << (32 - c));
 }
 
 INLINE void g(uint32_t *state, size_t a, size_t b, size_t c, size_t d,
@@ -129,8 +129,8 @@ INLINE void hash_one_portable(const uint8_t *input, size_t blocks,
   uint32_t cv[8];
   memcpy(cv, key, BLAKE3_KEY_LEN);
   uint8_t block_flags = flags | flags_start;
-  while (blocks > 0) {
-    if (blocks == 1) {
+  སྐབས (blocks > 0) {
+    གལ་ཏེ (blocks == 1) {
       block_flags |= flags_end;
     }
     blake3_compress_in_place_portable(cv, input, BLAKE3_BLOCK_LEN, counter,
@@ -147,10 +147,10 @@ void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
                                uint64_t counter, bool increment_counter,
                                uint8_t flags, uint8_t flags_start,
                                uint8_t flags_end, uint8_t *out) {
-  while (num_inputs > 0) {
+  སྐབས (num_inputs > 0) {
     hash_one_portable(inputs[0], blocks, key, counter, flags, flags_start,
                       flags_end, out);
-    if (increment_counter) {
+    གལ་ཏེ (increment_counter) {
       counter += 1;
     }
     inputs += 1;
