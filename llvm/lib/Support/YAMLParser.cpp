@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/ADT/AllocatorList.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/Unicode.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <string>
-#include <system_error>
-#include <utility>
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/YAMLParser.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/AllocatorList.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/ArrayRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/STLExtras.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/SmallString.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/SmallVector.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringExtras.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/Twine.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Compiler.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ErrorHandling.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/MemoryBuffer.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/SMLoc.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/SourceMgr.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Unicode.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/raw_ostream.h"
+#ଅନ୍ତର୍ଭାଵ <cassert>
+#ଅନ୍ତର୍ଭାଵ <cstddef>
+#ଅନ୍ତର୍ଭାଵ <cstdint>
+#ଅନ୍ତର୍ଭାଵ <map>
+#ଅନ୍ତର୍ଭାଵ <memory>
+#ଅନ୍ତର୍ଭାଵ <string>
+#ଅନ୍ତର୍ଭାଵ <system_error>
+#ଅନ୍ତର୍ଭାଵ <utility>
 
-using namespace llvm;
-using namespace yaml;
+using ନାମାକାଶ llvm;
+using ନାମାକାଶ yaml;
 
-enum UnicodeEncodingForm {
+ଗଣନା UnicodeEncodingForm {
   UEF_UTF32_LE, ///< UTF-32 Little Endian
   UEF_UTF32_BE, ///< UTF-32 Big Endian
   UEF_UTF16_LE, ///< UTF-16 Little Endian
@@ -57,72 +57,72 @@ using EncodingInfo = std::pair<UnicodeEncodingForm, unsigned>;
 /// @param Input A string of length 0 or more.
 /// @returns An EncodingInfo indicating the Unicode encoding form of the input
 ///          and how long the byte order mark is if one exists.
-static EncodingInfo getUnicodeEncoding(StringRef Input) {
-  if (Input.empty())
-    return {UEF_Unknown, 0};
+ସ୍ଥିର EncodingInfo getUnicodeEncoding(StringRef ନିବେଶ) {
+  ଯଦି (ନିବେଶ.empty())
+    ଫେରନ୍ତୁ {UEF_Unknown, 0};
 
-  switch (uint8_t(Input[0])) {
-  case 0x00:
-    if (Input.size() >= 4) {
-      if (  Input[1] == 0
-         && uint8_t(Input[2]) == 0xFE
-         && uint8_t(Input[3]) == 0xFF)
-        return {UEF_UTF32_BE, 4};
-      if (Input[1] == 0 && Input[2] == 0 && Input[3] != 0)
-        return {UEF_UTF32_BE, 0};
+  ବାଛ (uint8_t(ନିବେଶ[0])) {
+  ସ୍ଥିତି 0x00:
+    ଯଦି (ନିବେଶ.size() >= 4) {
+      ଯଦି (  ନିବେଶ[1] == 0
+         && uint8_t(ନିବେଶ[2]) == 0xFE
+         && uint8_t(ନିବେଶ[3]) == 0xFF)
+        ଫେରନ୍ତୁ {UEF_UTF32_BE, 4};
+      ଯଦି (ନିବେଶ[1] == 0 && ନିବେଶ[2] == 0 && ନିବେଶ[3] != 0)
+        ଫେରନ୍ତୁ {UEF_UTF32_BE, 0};
     }
 
-    if (Input.size() >= 2 && Input[1] != 0)
-      return {UEF_UTF16_BE, 0};
-    return {UEF_Unknown, 0};
-  case 0xFF:
-    if (  Input.size() >= 4
-       && uint8_t(Input[1]) == 0xFE
-       && Input[2] == 0
-       && Input[3] == 0)
-      return {UEF_UTF32_LE, 4};
+    ଯଦି (ନିବେଶ.size() >= 2 && ନିବେଶ[1] != 0)
+      ଫେରନ୍ତୁ {UEF_UTF16_BE, 0};
+    ଫେରନ୍ତୁ {UEF_Unknown, 0};
+  ସ୍ଥିତି 0xFF:
+    ଯଦି (  ନିବେଶ.size() >= 4
+       && uint8_t(ନିବେଶ[1]) == 0xFE
+       && ନିବେଶ[2] == 0
+       && ନିବେଶ[3] == 0)
+      ଫେରନ୍ତୁ {UEF_UTF32_LE, 4};
 
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFE)
-      return {UEF_UTF16_LE, 2};
-    return {UEF_Unknown, 0};
-  case 0xFE:
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFF)
-      return {UEF_UTF16_BE, 2};
-    return {UEF_Unknown, 0};
-  case 0xEF:
-    if (  Input.size() >= 3
-       && uint8_t(Input[1]) == 0xBB
-       && uint8_t(Input[2]) == 0xBF)
-      return {UEF_UTF8, 3};
-    return {UEF_Unknown, 0};
+    ଯଦି (ନିବେଶ.size() >= 2 && uint8_t(ନିବେଶ[1]) == 0xFE)
+      ଫେରନ୍ତୁ {UEF_UTF16_LE, 2};
+    ଫେରନ୍ତୁ {UEF_Unknown, 0};
+  ସ୍ଥିତି 0xFE:
+    ଯଦି (ନିବେଶ.size() >= 2 && uint8_t(ନିବେଶ[1]) == 0xFF)
+      ଫେରନ୍ତୁ {UEF_UTF16_BE, 2};
+    ଫେରନ୍ତୁ {UEF_Unknown, 0};
+  ସ୍ଥିତି 0xEF:
+    ଯଦି (  ନିବେଶ.size() >= 3
+       && uint8_t(ନିବେଶ[1]) == 0xBB
+       && uint8_t(ନିବେଶ[2]) == 0xBF)
+      ଫେରନ୍ତୁ {UEF_UTF8, 3};
+    ଫେରନ୍ତୁ {UEF_Unknown, 0};
   }
 
   // It could still be utf-32 or utf-16.
-  if (Input.size() >= 4 && Input[1] == 0 && Input[2] == 0 && Input[3] == 0)
-    return {UEF_UTF32_LE, 0};
+  ଯଦି (ନିବେଶ.size() >= 4 && ନିବେଶ[1] == 0 && ନିବେଶ[2] == 0 && ନିବେଶ[3] == 0)
+    ଫେରନ୍ତୁ {UEF_UTF32_LE, 0};
 
-  if (Input.size() >= 2 && Input[1] == 0)
-    return {UEF_UTF16_LE, 0};
+  ଯଦି (ନିବେଶ.size() >= 2 && ନିବେଶ[1] == 0)
+    ଫେରନ୍ତୁ {UEF_UTF16_LE, 0};
 
-  return {UEF_UTF8, 0};
+  ଫେରନ୍ତୁ {UEF_UTF8, 0};
 }
 
 /// Pin the vtables to this file.
-void Node::anchor() {}
-void NullNode::anchor() {}
-void ScalarNode::anchor() {}
-void BlockScalarNode::anchor() {}
-void KeyValueNode::anchor() {}
-void MappingNode::anchor() {}
-void SequenceNode::anchor() {}
-void AliasNode::anchor() {}
+ଶୂନ୍ୟ ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ Null_ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ Scalar_ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ Block_Scalar_ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ ଚାବି_ମୂଲ୍ୟ_ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ Mapping_ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ Sequence_ଗଣ୍ଠି::anchor() {}
+ଶୂନ୍ୟ Alias_ଗଣ୍ଠି::anchor() {}
 
-namespace llvm {
-namespace yaml {
+ନାମାକାଶ llvm {
+ନାମାକାଶ yaml {
 
 /// Token - A single YAML token.
-struct Token {
-  enum TokenKind {
+ସଂରଚନା Token {
+  ଗଣନା TokenKind {
     TK_Error, // Uninitialized token.
     TK_StreamStart,
     TK_StreamEnd,
@@ -139,8 +139,8 @@ struct Token {
     TK_FlowSequenceEnd,
     TK_FlowMappingStart,
     TK_FlowMappingEnd,
-    TK_Key,
-    TK_Value,
+    TK_ଚାବି,
+    TK_ମୂଲ୍ୟ,
     TK_Scalar,
     TK_BlockScalar,
     TK_Alias,
@@ -153,9 +153,9 @@ struct Token {
   StringRef Range;
 
   /// The value of a block scalar node.
-  std::string Value;
+  std::string ମୂଲ୍ୟ;
 
-  Token() = default;
+  Token() = ପୂର୍ବନିର୍ଦ୍ଧାରିତ;
 };
 
 } // end namespace yaml
@@ -163,7 +163,7 @@ struct Token {
 
 using TokenQueueT = BumpPtrList<Token>;
 
-namespace {
+ନାମାକାଶ {
 
 /// This struct is used to track simple keys.
 ///
@@ -174,15 +174,15 @@ namespace {
 /// a simple key (we moved on to the next line or went further than 1024 chars).
 /// Or when we run into a Value, and then insert a Key token (and possibly
 /// others) before the SimpleKey's Tok.
-struct SimpleKey {
+ସଂରଚନା Simple_ଚାବି {
   TokenQueueT::iterator Tok;
   unsigned Column = 0;
-  unsigned Line = 0;
+  unsigned ଧାଡ଼ି = 0;
   unsigned FlowLevel = 0;
-  bool IsRequired = false;
+  ତାର୍କିକ IsRequired = ମିଥ୍ୟା;
 
-  bool operator ==(const SimpleKey &Other) {
-    return Tok == Other.Tok;
+  ତାର୍କିକ operator ==(ଅଚଳ Simple_ଚାବି &Other) {
+    ଫେରନ୍ତୁ Tok == Other.Tok;
   }
 };
 
@@ -193,26 +193,26 @@ struct SimpleKey {
 ///        A length of 0 represents an error.
 using UTF8Decoded = std::pair<uint32_t, unsigned>;
 
-static UTF8Decoded decodeUTF8(StringRef Range) {
+ସ୍ଥିର UTF8Decoded decodeUTF8(StringRef Range) {
   StringRef::iterator Position= Range.begin();
   StringRef::iterator End = Range.end();
   // 1 byte: [0x00, 0x7f]
   // Bit pattern: 0xxxxxxx
-  if (Position < End && (*Position & 0x80) == 0) {
-    return {*Position, 1};
+  ଯଦି (Position < End && (*Position & 0x80) == 0) {
+    ଫେରନ୍ତୁ {*Position, 1};
   }
   // 2 bytes: [0x80, 0x7ff]
   // Bit pattern: 110xxxxx 10xxxxxx
-  if (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
+  ଯଦି (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
       ((*(Position + 1) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x1F) << 6) |
                           (*(Position + 1) & 0x3F);
-    if (codepoint >= 0x80)
-      return {codepoint, 2};
+    ଯଦି (codepoint >= 0x80)
+      ଫେରନ୍ତୁ {codepoint, 2};
   }
   // 3 bytes: [0x8000, 0xffff]
   // Bit pattern: 1110xxxx 10xxxxxx 10xxxxxx
-  if (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
+  ଯଦି (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x0F) << 12) |
@@ -220,13 +220,13 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                           (*(Position + 2) & 0x3F);
     // Codepoints between 0xD800 and 0xDFFF are invalid, as
     // they are high / low surrogate halves used by UTF-16.
-    if (codepoint >= 0x800 &&
+    ଯଦି (codepoint >= 0x800 &&
         (codepoint < 0xD800 || codepoint > 0xDFFF))
-      return {codepoint, 3};
+      ଫେରନ୍ତୁ {codepoint, 3};
   }
   // 4 bytes: [0x10000, 0x10FFFF]
   // Bit pattern: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-  if (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
+  ଯଦି (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80) &&
       ((*(Position + 3) & 0xC0) == 0x80)) {
@@ -234,21 +234,21 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                          ((*(Position + 1) & 0x3F) << 12) |
                          ((*(Position + 2) & 0x3F) << 6) |
                           (*(Position + 3) & 0x3F);
-    if (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
-      return {codepoint, 4};
+    ଯଦି (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
+      ଫେରନ୍ତୁ {codepoint, 4};
   }
-  return {0, 0};
+  ଫେରନ୍ତୁ {0, 0};
 }
 
-namespace llvm {
-namespace yaml {
+ନାମାକାଶ llvm {
+ନାମାକାଶ yaml {
 
 /// Scans YAML tokens from a MemoryBuffer.
-class Scanner {
-public:
-  Scanner(StringRef Input, SourceMgr &SM, bool ShowColors = true,
+ଶ୍ରେଣୀ Scanner {
+ସର୍ବସାଧାରଣ:
+  Scanner(StringRef ନିବେଶ, SourceMgr &SM, ତାର୍କିକ ShowColors = ସତ୍ୟ,
           std::error_code *EC = nullptr);
-  Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors = true,
+  Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, ତାର୍କିକ ShowColors = ସତ୍ୟ,
           std::error_code *EC = nullptr);
 
   /// Parse the next token and return it without popping it.
@@ -257,36 +257,36 @@ public:
   /// Parse the next token and pop it from the queue.
   Token getNext();
 
-  void printError(SMLoc Loc, SourceMgr::DiagKind Kind, const Twine &Message,
+  ଶୂନ୍ୟ printError(SMLoc Loc, SourceMgr::DiagKind Kind, ଅଚଳ Twine &Message,
                   ArrayRef<SMRange> Ranges = {}) {
     SM.PrintMessage(Loc, Kind, Message, Ranges, /* FixIts= */ {}, ShowColors);
   }
 
-  void setError(const Twine &Message, StringRef::iterator Position) {
-    if (Position >= End)
+  ଶୂନ୍ୟ setError(ଅଚଳ Twine &Message, StringRef::iterator Position) {
+    ଯଦି (Position >= End)
       Position = End - 1;
 
     // propagate the error if possible
-    if (EC)
+    ଯଦି (EC)
       *EC = make_error_code(std::errc::invalid_argument);
 
     // Don't print out more errors after the first one we encounter. The rest
     // are just the result of the first, and have no meaning.
-    if (!Failed)
+    ଯଦି (!Failed)
       printError(SMLoc::getFromPointer(Position), SourceMgr::DK_Error, Message);
-    Failed = true;
+    Failed = ସତ୍ୟ;
   }
 
   /// Returns true if an error occurred while parsing.
-  bool failed() {
-    return Failed;
+  ତାର୍କିକ failed() {
+    ଫେରନ୍ତୁ Failed;
   }
 
-private:
-  void init(MemoryBufferRef Buffer);
+ବ୍ୟକ୍ତିଗତ:
+  ଶୂନ୍ୟ init(MemoryBufferRef Buffer);
 
-  StringRef currentInput() {
-    return StringRef(Current, End - Current);
+  StringRef current_ନିବେଶ() {
+    ଫେରନ୍ତୁ StringRef(Current, End - Current);
   }
 
   /// Decode a UTF-8 minimal well-formed code unit subsequence starting
@@ -296,7 +296,7 @@ private:
   /// code unit subsequence, then the Unicode scalar value is 0, and the length
   /// is 0.
   UTF8Decoded decodeUTF8(StringRef::iterator Position) {
-    return ::decodeUTF8(StringRef(Position, End - Position));
+    ଫେରନ୍ତୁ ::decodeUTF8(StringRef(Position, End - Position));
   }
 
   // The following functions are based on the gramar rules in the YAML spec. The
@@ -372,109 +372,109 @@ private:
 
   /// Skip minimal well-formed code unit subsequences until Func returns its
   /// input.
-  void advanceWhile(SkipWhileFunc Func);
+  ଶୂନ୍ୟ advanceWhile(SkipWhileFunc Func);
 
   /// Scan ns-uri-char[39]s starting at Cur.
   ///
   /// This updates Cur and Column while scanning.
-  void scan_ns_uri_char();
+  ଶୂନ୍ୟ scan_ns_uri_char();
 
   /// Consume a minimal well-formed code unit subsequence starting at
   ///        \a Cur. Return false if it is not the same Unicode scalar value as
   ///        \a Expected. This updates \a Column.
-  bool consume(uint32_t Expected);
+  ତାର୍କିକ consume(uint32_t Expected);
 
   /// Skip \a Distance UTF-8 code units. Updates \a Cur and \a Column.
-  void skip(uint32_t Distance);
+  ଶୂନ୍ୟ skip(uint32_t Distance);
 
   /// Return true if the minimal well-formed code unit subsequence at
   ///        Pos is whitespace or a new line
-  bool isBlankOrBreak(StringRef::iterator Position);
+  ତାର୍କିକ isBlankOrBreak(StringRef::iterator Position);
 
   /// Return true if the minimal well-formed code unit subsequence at
   ///        Pos is considered a "safe" character for plain scalars.
-  bool isPlainSafeNonBlank(StringRef::iterator Position);
+  ତାର୍କିକ isPlainSafeNonBlank(StringRef::iterator Position);
 
   /// Return true if the line is a line break, false otherwise.
-  bool isLineEmpty(StringRef Line);
+  ତାର୍କିକ is_ଧାଡ଼ି_Empty(StringRef ଧାଡ଼ି);
 
   /// Consume a single b-break[28] if it's present at the current position.
   ///
   /// Return false if the code unit at the current position isn't a line break.
-  bool consumeLineBreakIfPresent();
+  ତାର୍କିକ consume_ଧାଡ଼ି_Break_If_Present();
 
   /// If IsSimpleKeyAllowed, create and push_back a new SimpleKey.
-  void saveSimpleKeyCandidate( TokenQueueT::iterator Tok
+  ଶୂନ୍ୟ save_Simple_ଚାବି_Candidate( TokenQueueT::iterator Tok
                              , unsigned AtColumn
-                             , bool IsRequired);
+                             , ତାର୍କିକ IsRequired);
 
   /// Remove simple keys that can no longer be valid simple keys.
   ///
   /// Invalid simple keys are not on the current line or are further than 1024
   /// columns back.
-  void removeStaleSimpleKeyCandidates();
+  ଶୂନ୍ୟ remove_Stale_Simple_ଚାବି_Candidates();
 
   /// Remove all simple keys on FlowLevel \a Level.
-  void removeSimpleKeyCandidatesOnFlowLevel(unsigned Level);
+  ଶୂନ୍ୟ remove_Simple_ଚାବି_Candidates_On_Flow_Level(unsigned Level);
 
   /// Unroll indentation in \a Indents back to \a Col. Creates BlockEnd
   ///        tokens if needed.
-  bool unrollIndent(int ToColumn);
+  ତାର୍କିକ unrollIndent(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ToColumn);
 
   /// Increase indent to \a Col. Creates \a Kind token at \a InsertPoint
   ///        if needed.
-  bool rollIndent( int ToColumn
+  ତାର୍କିକ rollIndent( ପୂର୍ଣ୍ଣସଂଖ୍ୟା ToColumn
                  , Token::TokenKind Kind
-                 , TokenQueueT::iterator InsertPoint);
+                 , TokenQueueT::iterator ଭର୍ତ୍ତି_Point);
 
   /// Skip a single-line comment when the comment starts at the current
   /// position of the scanner.
-  void skipComment();
+  ଶୂନ୍ୟ skipComment();
 
   /// Skip whitespace and comments until the start of the next token.
-  void scanToNextToken();
+  ଶୂନ୍ୟ scanToNextToken();
 
   /// Must be the first token generated.
-  bool scanStreamStart();
+  ତାର୍କିକ scanStreamStart();
 
   /// Generate tokens needed to close out the stream.
-  bool scanStreamEnd();
+  ତାର୍କିକ scanStreamEnd();
 
   /// Scan a %BLAH directive.
-  bool scanDirective();
+  ତାର୍କିକ scanDirective();
 
   /// Scan a ... or ---.
-  bool scanDocumentIndicator(bool IsStart);
+  ତାର୍କିକ scanDocumentIndicator(ତାର୍କିକ IsStart);
 
   /// Scan a [ or { and generate the proper flow collection start token.
-  bool scanFlowCollectionStart(bool IsSequence);
+  ତାର୍କିକ scanFlowCollectionStart(ତାର୍କିକ IsSequence);
 
   /// Scan a ] or } and generate the proper flow collection end token.
-  bool scanFlowCollectionEnd(bool IsSequence);
+  ତାର୍କିକ scanFlowCollectionEnd(ତାର୍କିକ IsSequence);
 
   /// Scan the , that separates entries in a flow collection.
-  bool scanFlowEntry();
+  ତାର୍କିକ scanFlowEntry();
 
   /// Scan the - that starts block sequence entries.
-  bool scanBlockEntry();
+  ତାର୍କିକ scanBlockEntry();
 
   /// Scan an explicit ? indicating a key.
-  bool scanKey();
+  ତାର୍କିକ scan_ଚାବି();
 
   /// Scan an explicit : indicating a value.
-  bool scanValue();
+  ତାର୍କିକ scan_ମୂଲ୍ୟ();
 
   /// Scan a quoted scalar.
-  bool scanFlowScalar(bool IsDoubleQuoted);
+  ତାର୍କିକ scanFlowScalar(ତାର୍କିକ IsDoubleQuoted);
 
   /// Scan an unquoted scalar.
-  bool scanPlainScalar();
+  ତାର୍କିକ scanPlainScalar();
 
   /// Scan an Alias or Anchor starting with * or &.
-  bool scanAliasOrAnchor(bool IsAlias);
+  ତାର୍କିକ scanAliasOrAnchor(ତାର୍କିକ IsAlias);
 
   /// Scan a block scalar starting with | or >.
-  bool scanBlockScalar(bool IsLiteral);
+  ତାର୍କିକ scanBlockScalar(ତାର୍କିକ IsLiteral);
 
   /// Scan a block scalar style indicator and header.
   ///
@@ -482,14 +482,14 @@ private:
   /// YAML does not consider the style indicator to be a part of the header.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarIndicators(char &StyleIndicator, char &ChompingIndicator,
-                                 unsigned &IndentIndicator, bool &IsDone);
+  ତାର୍କିକ scanBlockScalarIndicators(ଅକ୍ଷର &StyleIndicator, ଅକ୍ଷର &ChompingIndicator,
+                                 unsigned &IndentIndicator, ତାର୍କିକ &IsDone);
 
   /// Scan a style indicator in a block scalar header.
-  char scanBlockStyleIndicator();
+  ଅକ୍ଷର scanBlockStyleIndicator();
 
   /// Scan a chomping indicator in a block scalar header.
-  char scanBlockChompingIndicator();
+  ଅକ୍ଷର scanBlockChompingIndicator();
 
   /// Scan an indentation indicator in a block scalar header.
   unsigned scanBlockIndentationIndicator();
@@ -497,32 +497,32 @@ private:
   /// Scan a block scalar header.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarHeader(char &ChompingIndicator, unsigned &IndentIndicator,
-                             bool &IsDone);
+  ତାର୍କିକ scanBlockScalarHeader(ଅକ୍ଷର &ChompingIndicator, unsigned &IndentIndicator,
+                             ତାର୍କିକ &IsDone);
 
   /// Look for the indentation level of a block scalar.
   ///
   /// Return false if an error occurred.
-  bool findBlockScalarIndent(unsigned &BlockIndent, unsigned BlockExitIndent,
-                             unsigned &LineBreaks, bool &IsDone);
+  ତାର୍କିକ findBlockScalarIndent(unsigned &BlockIndent, unsigned BlockExitIndent,
+                             unsigned &ଧାଡ଼ି_Breaks, ତାର୍କିକ &IsDone);
 
   /// Scan the indentation of a text line in a block scalar.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarIndent(unsigned BlockIndent, unsigned BlockExitIndent,
-                             bool &IsDone);
+  ତାର୍କିକ scanBlockScalarIndent(unsigned BlockIndent, unsigned BlockExitIndent,
+                             ତାର୍କିକ &IsDone);
 
   /// Scan a tag of the form !stuff.
-  bool scanTag();
+  ତାର୍କିକ scanTag();
 
   /// Dispatch to the next scanning function based on \a *Cur.
-  bool fetchMoreTokens();
+  ତାର୍କିକ fetchMoreTokens();
 
   /// The SourceMgr used for diagnostics and buffer management.
   SourceMgr &SM;
 
   /// The original input.
-  MemoryBufferRef InputBuffer;
+  MemoryBufferRef ନିବେଶ_Buffer;
 
   /// The current position of the scanner.
   StringRef::iterator Current;
@@ -531,32 +531,32 @@ private:
   StringRef::iterator End;
 
   /// Current YAML indentation level in spaces.
-  int Indent;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା Indent;
 
   /// Current column number in Unicode code points.
   unsigned Column;
 
   /// Current line number.
-  unsigned Line;
+  unsigned ଧାଡ଼ି;
 
   /// How deep we are in flow style containers. 0 Means at block level.
   unsigned FlowLevel;
 
   /// Are we at the start of the stream?
-  bool IsStartOfStream;
+  ତାର୍କିକ IsStartOfStream;
 
   /// Can the next token be the start of a simple key?
-  bool IsSimpleKeyAllowed;
+  ତାର୍କିକ Is_Simple_ଚାବି_Allowed;
 
   /// Can the next token be a value indicator even if it does not have a
   /// trailing space?
-  bool IsAdjacentValueAllowedInFlow;
+  ତାର୍କିକ Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow;
 
   /// True if an error has occurred.
-  bool Failed;
+  ତାର୍କିକ Failed;
 
   /// Should colors be used when printing out the diagnostic messages?
-  bool ShowColors;
+  ତାର୍କିକ ShowColors;
 
   /// Queue of tokens. This is required to queue up tokens while looking
   ///        for the end of a simple key. And for cases where a single character
@@ -564,10 +564,10 @@ private:
   TokenQueueT TokenQueue;
 
   /// Indentation levels.
-  SmallVector<int, 4> Indents;
+  SmallVector<ପୂର୍ଣ୍ଣସଂଖ୍ୟା, 4> Indents;
 
   /// Potential simple keys.
-  SmallVector<SimpleKey, 4> SimpleKeys;
+  SmallVector<Simple_ଚାବି, 4> Simple_ଚାବିଗୁଡ଼ିକ;
 
   std::error_code *EC;
 };
@@ -576,366 +576,366 @@ private:
 } // end namespace llvm
 
 /// encodeUTF8 - Encode \a UnicodeScalarValue in UTF-8 and append it to result.
-static void encodeUTF8( uint32_t UnicodeScalarValue
-                      , SmallVectorImpl<char> &Result) {
-  if (UnicodeScalarValue <= 0x7F) {
-    Result.push_back(UnicodeScalarValue & 0x7F);
-  } else if (UnicodeScalarValue <= 0x7FF) {
-    uint8_t FirstByte = 0xC0 | ((UnicodeScalarValue & 0x7C0) >> 6);
-    uint8_t SecondByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-  } else if (UnicodeScalarValue <= 0xFFFF) {
-    uint8_t FirstByte = 0xE0 | ((UnicodeScalarValue & 0xF000) >> 12);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t ThirdByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-  } else if (UnicodeScalarValue <= 0x10FFFF) {
-    uint8_t FirstByte = 0xF0 | ((UnicodeScalarValue & 0x1F0000) >> 18);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0x3F000) >> 12);
-    uint8_t ThirdByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t FourthByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-    Result.push_back(FourthByte);
+ସ୍ଥିର ଶୂନ୍ୟ encodeUTF8( uint32_t Unicode_Scalar_ମୂଲ୍ୟ
+                      , SmallVectorImpl<ଅକ୍ଷର> &Result) {
+  ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ <= 0x7F) {
+    Result.ଠେଲ_back(Unicode_Scalar_ମୂଲ୍ୟ & 0x7F);
+  } ଅନ୍ୟଥା ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ <= 0x7FF) {
+    uint8_t FirstByte = 0xC0 | ((Unicode_Scalar_ମୂଲ୍ୟ & 0x7C0) >> 6);
+    uint8_t SecondByte = 0x80 | (Unicode_Scalar_ମୂଲ୍ୟ & 0x3F);
+    Result.ଠେଲ_back(FirstByte);
+    Result.ଠେଲ_back(SecondByte);
+  } ଅନ୍ୟଥା ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ <= 0xFFFF) {
+    uint8_t FirstByte = 0xE0 | ((Unicode_Scalar_ମୂଲ୍ୟ & 0xF000) >> 12);
+    uint8_t SecondByte = 0x80 | ((Unicode_Scalar_ମୂଲ୍ୟ & 0xFC0) >> 6);
+    uint8_t ThirdByte = 0x80 | (Unicode_Scalar_ମୂଲ୍ୟ & 0x3F);
+    Result.ଠେଲ_back(FirstByte);
+    Result.ଠେଲ_back(SecondByte);
+    Result.ଠେଲ_back(ThirdByte);
+  } ଅନ୍ୟଥା ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ <= 0x10FFFF) {
+    uint8_t FirstByte = 0xF0 | ((Unicode_Scalar_ମୂଲ୍ୟ & 0x1F0000) >> 18);
+    uint8_t SecondByte = 0x80 | ((Unicode_Scalar_ମୂଲ୍ୟ & 0x3F000) >> 12);
+    uint8_t ThirdByte = 0x80 | ((Unicode_Scalar_ମୂଲ୍ୟ & 0xFC0) >> 6);
+    uint8_t FourthByte = 0x80 | (Unicode_Scalar_ମୂଲ୍ୟ & 0x3F);
+    Result.ଠେଲ_back(FirstByte);
+    Result.ଠେଲ_back(SecondByte);
+    Result.ଠେଲ_back(ThirdByte);
+    Result.ଠେଲ_back(FourthByte);
   }
 }
 
-bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
+ତାର୍କିକ yaml::dumpTokens(StringRef ନିବେଶ, raw_ostream &OS) {
   SourceMgr SM;
-  Scanner scanner(Input, SM);
-  while (true) {
+  Scanner scanner(ନିବେଶ, SM);
+  ଯେତେବେଳେ (ସତ୍ୟ) {
     Token T = scanner.getNext();
-    switch (T.Kind) {
-    case Token::TK_StreamStart:
+    ବାଛ (T.Kind) {
+    ସ୍ଥିତି Token::TK_StreamStart:
       OS << "Stream-Start: ";
-      break;
-    case Token::TK_StreamEnd:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_StreamEnd:
       OS << "Stream-End: ";
-      break;
-    case Token::TK_VersionDirective:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_VersionDirective:
       OS << "Version-Directive: ";
-      break;
-    case Token::TK_TagDirective:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_TagDirective:
       OS << "Tag-Directive: ";
-      break;
-    case Token::TK_DocumentStart:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_DocumentStart:
       OS << "Document-Start: ";
-      break;
-    case Token::TK_DocumentEnd:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_DocumentEnd:
       OS << "Document-End: ";
-      break;
-    case Token::TK_BlockEntry:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_BlockEntry:
       OS << "Block-Entry: ";
-      break;
-    case Token::TK_BlockEnd:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_BlockEnd:
       OS << "Block-End: ";
-      break;
-    case Token::TK_BlockSequenceStart:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_BlockSequenceStart:
       OS << "Block-Sequence-Start: ";
-      break;
-    case Token::TK_BlockMappingStart:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_BlockMappingStart:
       OS << "Block-Mapping-Start: ";
-      break;
-    case Token::TK_FlowEntry:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_FlowEntry:
       OS << "Flow-Entry: ";
-      break;
-    case Token::TK_FlowSequenceStart:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_FlowSequenceStart:
       OS << "Flow-Sequence-Start: ";
-      break;
-    case Token::TK_FlowSequenceEnd:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_FlowSequenceEnd:
       OS << "Flow-Sequence-End: ";
-      break;
-    case Token::TK_FlowMappingStart:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_FlowMappingStart:
       OS << "Flow-Mapping-Start: ";
-      break;
-    case Token::TK_FlowMappingEnd:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_FlowMappingEnd:
       OS << "Flow-Mapping-End: ";
-      break;
-    case Token::TK_Key:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_ଚାବି:
       OS << "Key: ";
-      break;
-    case Token::TK_Value:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_ମୂଲ୍ୟ:
       OS << "Value: ";
-      break;
-    case Token::TK_Scalar:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_Scalar:
       OS << "Scalar: ";
-      break;
-    case Token::TK_BlockScalar:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_BlockScalar:
       OS << "Block Scalar: ";
-      break;
-    case Token::TK_Alias:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_Alias:
       OS << "Alias: ";
-      break;
-    case Token::TK_Anchor:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_Anchor:
       OS << "Anchor: ";
-      break;
-    case Token::TK_Tag:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_Tag:
       OS << "Tag: ";
-      break;
-    case Token::TK_Error:
-      break;
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_Error:
+      ଭାଙ୍ଗ;
     }
     OS << T.Range << "\n";
-    if (T.Kind == Token::TK_StreamEnd)
-      break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    ଯଦି (T.Kind == Token::TK_StreamEnd)
+      ଭାଙ୍ଗ;
+    ଅନ୍ୟଥା ଯଦି (T.Kind == Token::TK_Error)
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool yaml::scanTokens(StringRef Input) {
+ତାର୍କିକ yaml::scanTokens(StringRef ନିବେଶ) {
   SourceMgr SM;
-  Scanner scanner(Input, SM);
-  while (true) {
+  Scanner scanner(ନିବେଶ, SM);
+  ଯେତେବେଳେ (ସତ୍ୟ) {
     Token T = scanner.getNext();
-    if (T.Kind == Token::TK_StreamEnd)
-      break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    ଯଦି (T.Kind == Token::TK_StreamEnd)
+      ଭାଙ୍ଗ;
+    ଅନ୍ୟଥା ଯଦି (T.Kind == Token::TK_Error)
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-std::string yaml::escape(StringRef Input, bool EscapePrintable) {
-  std::string EscapedInput;
-  for (StringRef::iterator i = Input.begin(), e = Input.end(); i != e; ++i) {
-    if (*i == '\\')
-      EscapedInput += "\\\\";
-    else if (*i == '"')
-      EscapedInput += "\\\"";
-    else if (*i == 0)
-      EscapedInput += "\\0";
-    else if (*i == 0x07)
-      EscapedInput += "\\a";
-    else if (*i == 0x08)
-      EscapedInput += "\\b";
-    else if (*i == 0x09)
-      EscapedInput += "\\t";
-    else if (*i == 0x0A)
-      EscapedInput += "\\n";
-    else if (*i == 0x0B)
-      EscapedInput += "\\v";
-    else if (*i == 0x0C)
-      EscapedInput += "\\f";
-    else if (*i == 0x0D)
-      EscapedInput += "\\r";
-    else if (*i == 0x1B)
-      EscapedInput += "\\e";
-    else if ((unsigned char)*i < 0x20) { // Control characters not handled above.
+std::string yaml::escape(StringRef ନିବେଶ, ତାର୍କିକ EscapePrintable) {
+  std::string Escaped_ନିବେଶ;
+  ପାଇଁ (StringRef::iterator i = ନିବେଶ.begin(), e = ନିବେଶ.end(); i != e; ++i) {
+    ଯଦି (*i == '\\')
+      Escaped_ନିବେଶ += "\\\\";
+    ଅନ୍ୟଥା ଯଦି (*i == '"')
+      Escaped_ନିବେଶ += "\\\"";
+    ଅନ୍ୟଥା ଯଦି (*i == 0)
+      Escaped_ନିବେଶ += "\\0";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x07)
+      Escaped_ନିବେଶ += "\\a";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x08)
+      Escaped_ନିବେଶ += "\\b";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x09)
+      Escaped_ନିବେଶ += "\\t";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x0A)
+      Escaped_ନିବେଶ += "\\n";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x0B)
+      Escaped_ନିବେଶ += "\\v";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x0C)
+      Escaped_ନିବେଶ += "\\f";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x0D)
+      Escaped_ନିବେଶ += "\\r";
+    ଅନ୍ୟଥା ଯଦି (*i == 0x1B)
+      Escaped_ନିବେଶ += "\\e";
+    ଅନ୍ୟଥା ଯଦି ((unsigned ଅକ୍ଷର)*i < 0x20) { // Control characters not handled above.
       std::string HexStr = utohexstr(*i);
-      EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-    } else if (*i & 0x80) { // UTF-8 multiple code unit subsequence.
-      UTF8Decoded UnicodeScalarValue
-        = decodeUTF8(StringRef(i, Input.end() - i));
-      if (UnicodeScalarValue.second == 0) {
+      Escaped_ନିବେଶ += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
+    } ଅନ୍ୟଥା ଯଦି (*i & 0x80) { // UTF-8 multiple code unit subsequence.
+      UTF8Decoded Unicode_Scalar_ମୂଲ୍ୟ
+        = decodeUTF8(StringRef(i, ନିବେଶ.end() - i));
+      ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ.second == 0) {
         // Found invalid char.
         SmallString<4> Val;
         encodeUTF8(0xFFFD, Val);
-        llvm::append_range(EscapedInput, Val);
+        llvm::append_range(Escaped_ନିବେଶ, Val);
         // FIXME: Error reporting.
-        return EscapedInput;
+        ଫେରନ୍ତୁ Escaped_ନିବେଶ;
       }
-      if (UnicodeScalarValue.first == 0x85)
-        EscapedInput += "\\N";
-      else if (UnicodeScalarValue.first == 0xA0)
-        EscapedInput += "\\_";
-      else if (UnicodeScalarValue.first == 0x2028)
-        EscapedInput += "\\L";
-      else if (UnicodeScalarValue.first == 0x2029)
-        EscapedInput += "\\P";
-      else if (!EscapePrintable &&
-               sys::unicode::isPrintable(UnicodeScalarValue.first))
-        EscapedInput += StringRef(i, UnicodeScalarValue.second);
-      else {
-        std::string HexStr = utohexstr(UnicodeScalarValue.first);
-        if (HexStr.size() <= 2)
-          EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 4)
-          EscapedInput += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 8)
-          EscapedInput += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
+      ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ.first == 0x85)
+        Escaped_ନିବେଶ += "\\N";
+      ଅନ୍ୟଥା ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ.first == 0xA0)
+        Escaped_ନିବେଶ += "\\_";
+      ଅନ୍ୟଥା ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ.first == 0x2028)
+        Escaped_ନିବେଶ += "\\L";
+      ଅନ୍ୟଥା ଯଦି (Unicode_Scalar_ମୂଲ୍ୟ.first == 0x2029)
+        Escaped_ନିବେଶ += "\\P";
+      ଅନ୍ୟଥା ଯଦି (!EscapePrintable &&
+               sys::unicode::isPrintable(Unicode_Scalar_ମୂଲ୍ୟ.first))
+        Escaped_ନିବେଶ += StringRef(i, Unicode_Scalar_ମୂଲ୍ୟ.second);
+      ଅନ୍ୟଥା {
+        std::string HexStr = utohexstr(Unicode_Scalar_ମୂଲ୍ୟ.first);
+        ଯଦି (HexStr.size() <= 2)
+          Escaped_ନିବେଶ += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
+        ଅନ୍ୟଥା ଯଦି (HexStr.size() <= 4)
+          Escaped_ନିବେଶ += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
+        ଅନ୍ୟଥା ଯଦି (HexStr.size() <= 8)
+          Escaped_ନିବେଶ += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
       }
-      i += UnicodeScalarValue.second - 1;
-    } else {
-      EscapedInput.push_back(*i);
+      i += Unicode_Scalar_ମୂଲ୍ୟ.second - 1;
+    } ଅନ୍ୟଥା {
+      Escaped_ନିବେଶ.ଠେଲ_back(*i);
     }
   }
-  return EscapedInput;
+  ଫେରନ୍ତୁ Escaped_ନିବେଶ;
 }
 
-std::optional<bool> yaml::parseBool(StringRef S) {
-  switch (S.size()) {
-  case 1:
-    switch (S.front()) {
-    case 'y':
-    case 'Y':
-      return true;
-    case 'n':
-    case 'N':
-      return false;
-    default:
-      return std::nullopt;
+std::optional<ତାର୍କିକ> yaml::parseBool(StringRef S) {
+  ବାଛ (S.size()) {
+  ସ୍ଥିତି 1:
+    ବାଛ (S.front()) {
+    ସ୍ଥିତି 'y':
+    ସ୍ଥିତି 'Y':
+      ଫେରନ୍ତୁ ସତ୍ୟ;
+    ସ୍ଥିତି 'n':
+    ସ୍ଥିତି 'N':
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+      ଫେରନ୍ତୁ std::nullopt;
     }
-  case 2:
-    switch (S.front()) {
-    case 'O':
-      if (S[1] == 'N') // ON
-        return true;
+  ସ୍ଥିତି 2:
+    ବାଛ (S.front()) {
+    ସ୍ଥିତି 'O':
+      ଯଦି (S[1] == 'N') // ON
+        ଫେରନ୍ତୁ ସତ୍ୟ;
       [[fallthrough]];
-    case 'o':
-      if (S[1] == 'n') //[Oo]n
-        return true;
-      return std::nullopt;
-    case 'N':
-      if (S[1] == 'O') // NO
-        return false;
+    ସ୍ଥିତି 'o':
+      ଯଦି (S[1] == 'n') //[Oo]n
+        ଫେରନ୍ତୁ ସତ୍ୟ;
+      ଫେରନ୍ତୁ std::nullopt;
+    ସ୍ଥିତି 'N':
+      ଯଦି (S[1] == 'O') // NO
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
       [[fallthrough]];
-    case 'n':
-      if (S[1] == 'o') //[Nn]o
-        return false;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    ସ୍ଥିତି 'n':
+      ଯଦି (S[1] == 'o') //[Nn]o
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
+      ଫେରନ୍ତୁ std::nullopt;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+      ଫେରନ୍ତୁ std::nullopt;
     }
-  case 3:
-    switch (S.front()) {
-    case 'O':
-      if (S.drop_front() == "FF") // OFF
-        return false;
+  ସ୍ଥିତି 3:
+    ବାଛ (S.front()) {
+    ସ୍ଥିତି 'O':
+      ଯଦି (S.drop_front() == "FF") // OFF
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
       [[fallthrough]];
-    case 'o':
-      if (S.drop_front() == "ff") //[Oo]ff
-        return false;
-      return std::nullopt;
-    case 'Y':
-      if (S.drop_front() == "ES") // YES
-        return true;
+    ସ୍ଥିତି 'o':
+      ଯଦି (S.drop_front() == "ff") //[Oo]ff
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
+      ଫେରନ୍ତୁ std::nullopt;
+    ସ୍ଥିତି 'Y':
+      ଯଦି (S.drop_front() == "ES") // YES
+        ଫେରନ୍ତୁ ସତ୍ୟ;
       [[fallthrough]];
-    case 'y':
-      if (S.drop_front() == "es") //[Yy]es
-        return true;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    ସ୍ଥିତି 'y':
+      ଯଦି (S.drop_front() == "es") //[Yy]es
+        ଫେରନ୍ତୁ ସତ୍ୟ;
+      ଫେରନ୍ତୁ std::nullopt;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+      ଫେରନ୍ତୁ std::nullopt;
     }
-  case 4:
-    switch (S.front()) {
-    case 'T':
-      if (S.drop_front() == "RUE") // TRUE
-        return true;
+  ସ୍ଥିତି 4:
+    ବାଛ (S.front()) {
+    ସ୍ଥିତି 'T':
+      ଯଦି (S.drop_front() == "RUE") // TRUE
+        ଫେରନ୍ତୁ ସତ୍ୟ;
       [[fallthrough]];
-    case 't':
-      if (S.drop_front() == "rue") //[Tt]rue
-        return true;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    ସ୍ଥିତି 't':
+      ଯଦି (S.drop_front() == "rue") //[Tt]rue
+        ଫେରନ୍ତୁ ସତ୍ୟ;
+      ଫେରନ୍ତୁ std::nullopt;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+      ଫେରନ୍ତୁ std::nullopt;
     }
-  case 5:
-    switch (S.front()) {
-    case 'F':
-      if (S.drop_front() == "ALSE") // FALSE
-        return false;
+  ସ୍ଥିତି 5:
+    ବାଛ (S.front()) {
+    ସ୍ଥିତି 'F':
+      ଯଦି (S.drop_front() == "ALSE") // FALSE
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
       [[fallthrough]];
-    case 'f':
-      if (S.drop_front() == "alse") //[Ff]alse
-        return false;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    ସ୍ଥିତି 'f':
+      ଯଦି (S.drop_front() == "alse") //[Ff]alse
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
+      ଫେରନ୍ତୁ std::nullopt;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+      ଫେରନ୍ତୁ std::nullopt;
     }
-  default:
-    return std::nullopt;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+    ଫେରନ୍ତୁ std::nullopt;
   }
 }
 
-Scanner::Scanner(StringRef Input, SourceMgr &sm, bool ShowColors,
+Scanner::Scanner(StringRef ନିବେଶ, SourceMgr &sm, ତାର୍କିକ ShowColors,
                  std::error_code *EC)
     : SM(sm), ShowColors(ShowColors), EC(EC) {
-  init(MemoryBufferRef(Input, "YAML"));
+  init(MemoryBufferRef(ନିବେଶ, "YAML"));
 }
 
-Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors,
+Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, ତାର୍କିକ ShowColors,
                  std::error_code *EC)
     : SM(SM_), ShowColors(ShowColors), EC(EC) {
   init(Buffer);
 }
 
-void Scanner::init(MemoryBufferRef Buffer) {
-  InputBuffer = Buffer;
-  Current = InputBuffer.getBufferStart();
-  End = InputBuffer.getBufferEnd();
+ଶୂନ୍ୟ Scanner::init(MemoryBufferRef Buffer) {
+  ନିବେଶ_Buffer = Buffer;
+  Current = ନିବେଶ_Buffer.getBufferStart();
+  End = ନିବେଶ_Buffer.getBufferEnd();
   Indent = -1;
   Column = 0;
-  Line = 0;
+  ଧାଡ଼ି = 0;
   FlowLevel = 0;
-  IsStartOfStream = true;
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
-  Failed = false;
-  std::unique_ptr<MemoryBuffer> InputBufferOwner =
-      MemoryBuffer::getMemBuffer(Buffer, /*RequiresNullTerminator=*/false);
-  SM.AddNewSourceBuffer(std::move(InputBufferOwner), SMLoc());
+  IsStartOfStream = ସତ୍ୟ;
+  Is_Simple_ଚାବି_Allowed = ସତ୍ୟ;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
+  Failed = ମିଥ୍ୟା;
+  std::unique_ptr<MemoryBuffer> ନିବେଶ_Buffer_Owner =
+      MemoryBuffer::getMemBuffer(Buffer, /*RequiresNullTerminator=*/ମିଥ୍ୟା);
+  SM.AddNewSourceBuffer(std::move(ନିବେଶ_Buffer_Owner), SMLoc());
 }
 
 Token &Scanner::peekNext() {
   // If the current token is a possible simple key, keep parsing until we
   // can confirm.
-  bool NeedMore = false;
-  while (true) {
-    if (TokenQueue.empty() || NeedMore) {
-      if (!fetchMoreTokens()) {
+  ତାର୍କିକ NeedMore = ମିଥ୍ୟା;
+  ଯେତେବେଳେ (ସତ୍ୟ) {
+    ଯଦି (TokenQueue.empty() || NeedMore) {
+      ଯଦି (!fetchMoreTokens()) {
         TokenQueue.clear();
-        SimpleKeys.clear();
-        TokenQueue.push_back(Token());
-        return TokenQueue.front();
+        Simple_ଚାବିଗୁଡ଼ିକ.clear();
+        TokenQueue.ଠେଲ_back(Token());
+        ଫେରନ୍ତୁ TokenQueue.front();
       }
     }
-    assert(!TokenQueue.empty() &&
+    ପ୍ରତିଜ୍ଞା(!TokenQueue.empty() &&
             "fetchMoreTokens lied about getting tokens!");
 
-    removeStaleSimpleKeyCandidates();
-    SimpleKey SK;
+    remove_Stale_Simple_ଚାବି_Candidates();
+    Simple_ଚାବି SK;
     SK.Tok = TokenQueue.begin();
-    if (!is_contained(SimpleKeys, SK))
-      break;
-    else
-      NeedMore = true;
+    ଯଦି (!is_contained(Simple_ଚାବିଗୁଡ଼ିକ, SK))
+      ଭାଙ୍ଗ;
+    ଅନ୍ୟଥା
+      NeedMore = ସତ୍ୟ;
   }
-  return TokenQueue.front();
+  ଫେରନ୍ତୁ TokenQueue.front();
 }
 
 Token Scanner::getNext() {
   Token Ret = peekNext();
   // TokenQueue can be empty if there was an error getting the next token.
-  if (!TokenQueue.empty())
-    TokenQueue.pop_front();
+  ଯଦି (!TokenQueue.empty())
+    TokenQueue.କାଢ଼_front();
 
   // There cannot be any referenced Token's if the TokenQueue is empty. So do a
   // quick deallocation of them all.
-  if (TokenQueue.empty())
+  ଯଦି (TokenQueue.empty())
     TokenQueue.resetAlloc();
 
-  return Ret;
+  ଫେରନ୍ତୁ Ret;
 }
 
 StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
+  ଯଦି (Position == End)
+    ଫେରନ୍ତୁ Position;
   // Check 7 bit c-printable - b-char.
-  if (   *Position == 0x09
+  ଯଦି (   *Position == 0x09
       || (*Position >= 0x20 && *Position <= 0x7E))
-    return Position + 1;
+    ଫେରନ୍ତୁ Position + 1;
 
   // Check for valid UTF-8.
-  if (uint8_t(*Position) & 0x80) {
+  ଯଦି (uint8_t(*Position) & 0x80) {
     UTF8Decoded u8d = decodeUTF8(Position);
-    if (   u8d.second != 0
+    ଯଦି (   u8d.second != 0
         && u8d.first != 0xFEFF
         && ( u8d.first == 0x85
           || ( u8d.first >= 0xA0
@@ -944,228 +944,228 @@ StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
             && u8d.first <= 0xFFFD)
           || ( u8d.first >= 0x10000
             && u8d.first <= 0x10FFFF)))
-      return Position + u8d.second;
+      ଫେରନ୍ତୁ Position + u8d.second;
   }
-  return Position;
+  ଫେରନ୍ତୁ Position;
 }
 
 StringRef::iterator Scanner::skip_b_break(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == 0x0D) {
-    if (Position + 1 != End && *(Position + 1) == 0x0A)
-      return Position + 2;
-    return Position + 1;
+  ଯଦି (Position == End)
+    ଫେରନ୍ତୁ Position;
+  ଯଦି (*Position == 0x0D) {
+    ଯଦି (Position + 1 != End && *(Position + 1) == 0x0A)
+      ଫେରନ୍ତୁ Position + 2;
+    ଫେରନ୍ତୁ Position + 1;
   }
 
-  if (*Position == 0x0A)
-    return Position + 1;
-  return Position;
+  ଯଦି (*Position == 0x0A)
+    ଫେରନ୍ତୁ Position + 1;
+  ଫେରନ୍ତୁ Position;
 }
 
 StringRef::iterator Scanner::skip_s_space(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ')
-    return Position + 1;
-  return Position;
+  ଯଦି (Position == End)
+    ଫେରନ୍ତୁ Position;
+  ଯଦି (*Position == ' ')
+    ଫେରନ୍ତୁ Position + 1;
+  ଫେରନ୍ତୁ Position;
 }
 
 StringRef::iterator Scanner::skip_s_white(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position + 1;
-  return Position;
+  ଯଦି (Position == End)
+    ଫେରନ୍ତୁ Position;
+  ଯଦି (*Position == ' ' || *Position == '\t')
+    ଫେରନ୍ତୁ Position + 1;
+  ଫେରନ୍ତୁ Position;
 }
 
 StringRef::iterator Scanner::skip_ns_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position;
-  return skip_nb_char(Position);
+  ଯଦି (Position == End)
+    ଫେରନ୍ତୁ Position;
+  ଯଦି (*Position == ' ' || *Position == '\t')
+    ଫେରନ୍ତୁ Position;
+  ଫେରନ୍ତୁ skip_nb_char(Position);
 }
 
 StringRef::iterator Scanner::skip_while( SkipWhileFunc Func
                                        , StringRef::iterator Position) {
-  while (true) {
-    StringRef::iterator i = (this->*Func)(Position);
-    if (i == Position)
-      break;
+  ଯେତେବେଳେ (ସତ୍ୟ) {
+    StringRef::iterator i = (ଏହି->*Func)(Position);
+    ଯଦି (i == Position)
+      ଭାଙ୍ଗ;
     Position = i;
   }
-  return Position;
+  ଫେରନ୍ତୁ Position;
 }
 
-void Scanner::advanceWhile(SkipWhileFunc Func) {
+ଶୂନ୍ୟ Scanner::advanceWhile(SkipWhileFunc Func) {
   auto Final = skip_while(Func, Current);
   Column += Final - Current;
   Current = Final;
 }
 
-static bool is_ns_hex_digit(const char C) { return isAlnum(C); }
+ସ୍ଥିର ତାର୍କିକ is_ns_hex_digit(ଅଚଳ ଅକ୍ଷର C) { ଫେରନ୍ତୁ isAlnum(C); }
 
-static bool is_ns_word_char(const char C) { return C == '-' || isAlpha(C); }
+ସ୍ଥିର ତାର୍କିକ is_ns_word_char(ଅଚଳ ଅକ୍ଷର C) { ଫେରନ୍ତୁ C == '-' || isAlpha(C); }
 
-void Scanner::scan_ns_uri_char() {
-  while (true) {
-    if (Current == End)
-      break;
-    if ((*Current == '%' && Current + 2 < End &&
+ଶୂନ୍ୟ Scanner::scan_ns_uri_char() {
+  ଯେତେବେଳେ (ସତ୍ୟ) {
+    ଯଦି (Current == End)
+      ଭାଙ୍ଗ;
+    ଯଦି ((*Current == '%' && Current + 2 < End &&
          is_ns_hex_digit(*(Current + 1)) && is_ns_hex_digit(*(Current + 2))) ||
         is_ns_word_char(*Current) ||
         StringRef(Current, 1).find_first_of("#;/?:@&=+$,_.!~*'()[]") !=
             StringRef::npos) {
       ++Current;
       ++Column;
-    } else {
-      break;
+    } ଅନ୍ୟଥା {
+      ଭାଙ୍ଗ;
     }
   }
 }
 
-bool Scanner::consume(uint32_t Expected) {
-  if (Expected >= 0x80) {
+ତାର୍କିକ Scanner::consume(uint32_t Expected) {
+  ଯଦି (Expected >= 0x80) {
     setError("Cannot consume non-ascii characters", Current);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  if (Current == End)
-    return false;
-  if (uint8_t(*Current) >= 0x80) {
+  ଯଦି (Current == End)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (uint8_t(*Current) >= 0x80) {
     setError("Cannot consume non-ascii characters", Current);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  if (uint8_t(*Current) == Expected) {
+  ଯଦି (uint8_t(*Current) == Expected) {
     ++Current;
     ++Column;
-    return true;
+    ଫେରନ୍ତୁ ସତ୍ୟ;
   }
-  return false;
+  ଫେରନ୍ତୁ ମିଥ୍ୟା;
 }
 
-void Scanner::skip(uint32_t Distance) {
+ଶୂନ୍ୟ Scanner::skip(uint32_t Distance) {
   Current += Distance;
   Column += Distance;
-  assert(Current <= End && "Skipped past the end");
+  ପ୍ରତିଜ୍ଞା(Current <= End && "Skipped past the end");
 }
 
-bool Scanner::isBlankOrBreak(StringRef::iterator Position) {
-  if (Position == End)
-    return false;
-  return *Position == ' ' || *Position == '\t' || *Position == '\r' ||
+ତାର୍କିକ Scanner::isBlankOrBreak(StringRef::iterator Position) {
+  ଯଦି (Position == End)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଫେରନ୍ତୁ *Position == ' ' || *Position == '\t' || *Position == '\r' ||
          *Position == '\n';
 }
 
-bool Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
-  if (Position == End || isBlankOrBreak(Position))
-    return false;
-  if (FlowLevel &&
+ତାର୍କିକ Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
+  ଯଦି (Position == End || isBlankOrBreak(Position))
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (FlowLevel &&
       StringRef(Position, 1).find_first_of(",[]{}") != StringRef::npos)
-    return false;
-  return true;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::isLineEmpty(StringRef Line) {
-  for (const auto *Position = Line.begin(); Position != Line.end(); ++Position)
-    if (!isBlankOrBreak(Position))
-      return false;
-  return true;
+ତାର୍କିକ Scanner::is_ଧାଡ଼ି_Empty(StringRef ଧାଡ଼ି) {
+  ପାଇଁ (ଅଚଳ auto *Position = ଧାଡ଼ି.begin(); Position != ଧାଡ଼ି.end(); ++Position)
+    ଯଦି (!isBlankOrBreak(Position))
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::consumeLineBreakIfPresent() {
+ତାର୍କିକ Scanner::consume_ଧାଡ଼ି_Break_If_Present() {
   auto Next = skip_b_break(Current);
-  if (Next == Current)
-    return false;
+  ଯଦି (Next == Current)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   Column = 0;
-  ++Line;
+  ++ଧାଡ଼ି;
   Current = Next;
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-void Scanner::saveSimpleKeyCandidate( TokenQueueT::iterator Tok
+ଶୂନ୍ୟ Scanner::save_Simple_ଚାବି_Candidate( TokenQueueT::iterator Tok
                                     , unsigned AtColumn
-                                    , bool IsRequired) {
-  if (IsSimpleKeyAllowed) {
-    SimpleKey SK;
+                                    , ତାର୍କିକ IsRequired) {
+  ଯଦି (Is_Simple_ଚାବି_Allowed) {
+    Simple_ଚାବି SK;
     SK.Tok = Tok;
-    SK.Line = Line;
+    SK.ଧାଡ଼ି = ଧାଡ଼ି;
     SK.Column = AtColumn;
     SK.IsRequired = IsRequired;
     SK.FlowLevel = FlowLevel;
-    SimpleKeys.push_back(SK);
+    Simple_ଚାବିଗୁଡ଼ିକ.ଠେଲ_back(SK);
   }
 }
 
-void Scanner::removeStaleSimpleKeyCandidates() {
-  for (SmallVectorImpl<SimpleKey>::iterator i = SimpleKeys.begin();
-                                            i != SimpleKeys.end();) {
-    if (i->Line != Line || i->Column + 1024 < Column) {
-      if (i->IsRequired)
+ଶୂନ୍ୟ Scanner::remove_Stale_Simple_ଚାବି_Candidates() {
+  ପାଇଁ (SmallVectorImpl<Simple_ଚାବି>::iterator i = Simple_ଚାବିଗୁଡ଼ିକ.begin();
+                                            i != Simple_ଚାବିଗୁଡ଼ିକ.end();) {
+    ଯଦି (i->ଧାଡ଼ି != ଧାଡ଼ି || i->Column + 1024 < Column) {
+      ଯଦି (i->IsRequired)
         setError( "Could not find expected : for simple key"
                 , i->Tok->Range.begin());
-      i = SimpleKeys.erase(i);
-    } else {
+      i = Simple_ଚାବିଗୁଡ଼ିକ.erase(i);
+    } ଅନ୍ୟଥା {
       ++i;
     }
   }
 }
 
-void Scanner::removeSimpleKeyCandidatesOnFlowLevel(unsigned Level) {
-  if (!SimpleKeys.empty() && (SimpleKeys.end() - 1)->FlowLevel == Level)
-    SimpleKeys.pop_back();
+ଶୂନ୍ୟ Scanner::remove_Simple_ଚାବି_Candidates_On_Flow_Level(unsigned Level) {
+  ଯଦି (!Simple_ଚାବିଗୁଡ଼ିକ.empty() && (Simple_ଚାବିଗୁଡ଼ିକ.end() - 1)->FlowLevel == Level)
+    Simple_ଚାବିଗୁଡ଼ିକ.କାଢ଼_back();
 }
 
-bool Scanner::unrollIndent(int ToColumn) {
+ତାର୍କିକ Scanner::unrollIndent(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ToColumn) {
   Token T;
   // Indentation is ignored in flow.
-  if (FlowLevel != 0)
-    return true;
+  ଯଦି (FlowLevel != 0)
+    ଫେରନ୍ତୁ ସତ୍ୟ;
 
-  while (Indent > ToColumn) {
+  ଯେତେବେଳେ (Indent > ToColumn) {
     T.Kind = Token::TK_BlockEnd;
     T.Range = StringRef(Current, 1);
-    TokenQueue.push_back(T);
-    Indent = Indents.pop_back_val();
+    TokenQueue.ଠେଲ_back(T);
+    Indent = Indents.କାଢ଼_back_val();
   }
 
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::rollIndent( int ToColumn
+ତାର୍କିକ Scanner::rollIndent( ପୂର୍ଣ୍ଣସଂଖ୍ୟା ToColumn
                         , Token::TokenKind Kind
-                        , TokenQueueT::iterator InsertPoint) {
-  if (FlowLevel)
-    return true;
-  if (Indent < ToColumn) {
-    Indents.push_back(Indent);
+                        , TokenQueueT::iterator ଭର୍ତ୍ତି_Point) {
+  ଯଦି (FlowLevel)
+    ଫେରନ୍ତୁ ସତ୍ୟ;
+  ଯଦି (Indent < ToColumn) {
+    Indents.ଠେଲ_back(Indent);
     Indent = ToColumn;
 
     Token T;
     T.Kind = Kind;
     T.Range = StringRef(Current, 0);
-    TokenQueue.insert(InsertPoint, T);
+    TokenQueue.ଭର୍ତ୍ତି(ଭର୍ତ୍ତି_Point, T);
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-void Scanner::skipComment() {
-  if (Current == End || *Current != '#')
-    return;
-  while (true) {
+ଶୂନ୍ୟ Scanner::skipComment() {
+  ଯଦି (Current == End || *Current != '#')
+    ଫେରନ୍ତୁ;
+  ଯେତେବେଳେ (ସତ୍ୟ) {
     // This may skip more than one byte, thus Column is only incremented
     // for code points.
     StringRef::iterator I = skip_nb_char(Current);
-    if (I == Current)
-      break;
+    ଯଦି (I == Current)
+      ଭାଙ୍ଗ;
     Current = I;
     ++Column;
   }
 }
 
-void Scanner::scanToNextToken() {
-  while (true) {
-    while (Current != End && (*Current == ' ' || *Current == '\t')) {
+ଶୂନ୍ୟ Scanner::scanToNextToken() {
+  ଯେତେବେଳେ (ସତ୍ୟ) {
+    ଯେତେବେଳେ (Current != End && (*Current == ' ' || *Current == '\t')) {
       skip(1);
     }
 
@@ -1173,55 +1173,55 @@ void Scanner::scanToNextToken() {
 
     // Skip EOL.
     StringRef::iterator i = skip_b_break(Current);
-    if (i == Current)
-      break;
+    ଯଦି (i == Current)
+      ଭାଙ୍ଗ;
     Current = i;
-    ++Line;
+    ++ଧାଡ଼ି;
     Column = 0;
     // New lines may start a simple key.
-    if (!FlowLevel)
-      IsSimpleKeyAllowed = true;
+    ଯଦି (!FlowLevel)
+      Is_Simple_ଚାବି_Allowed = ସତ୍ୟ;
   }
 }
 
-bool Scanner::scanStreamStart() {
-  IsStartOfStream = false;
+ତାର୍କିକ Scanner::scanStreamStart() {
+  IsStartOfStream = ମିଥ୍ୟା;
 
-  EncodingInfo EI = getUnicodeEncoding(currentInput());
+  EncodingInfo EI = getUnicodeEncoding(current_ନିବେଶ());
 
   Token T;
   T.Kind = Token::TK_StreamStart;
   T.Range = StringRef(Current, EI.second);
-  TokenQueue.push_back(T);
+  TokenQueue.ଠେଲ_back(T);
   Current += EI.second;
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanStreamEnd() {
+ତାର୍କିକ Scanner::scanStreamEnd() {
   // Force an ending new line if one isn't present.
-  if (Column != 0) {
+  ଯଦି (Column != 0) {
     Column = 0;
-    ++Line;
+    ++ଧାଡ଼ି;
   }
 
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_ଚାବିଗୁଡ଼ିକ.clear();
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
   Token T;
   T.Kind = Token::TK_StreamEnd;
   T.Range = StringRef(Current, 0);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanDirective() {
+ତାର୍କିକ Scanner::scanDirective() {
   // Reset the indentation level.
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_ଚାବିଗୁଡ଼ିକ.clear();
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
   StringRef::iterator Start = Current;
   consume('%');
@@ -1231,529 +1231,529 @@ bool Scanner::scanDirective() {
   Current = skip_while(&Scanner::skip_s_white, Current);
 
   Token T;
-  if (Name == "YAML") {
+  ଯଦି (Name == "YAML") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_VersionDirective;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    return true;
-  } else if(Name == "TAG") {
+    TokenQueue.ଠେଲ_back(T);
+    ଫେରନ୍ତୁ ସତ୍ୟ;
+  } ଅନ୍ୟଥା ଯଦି(Name == "TAG") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     Current = skip_while(&Scanner::skip_s_white, Current);
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_TagDirective;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    return true;
+    TokenQueue.ଠେଲ_back(T);
+    ଫେରନ୍ତୁ ସତ୍ୟ;
   }
-  return false;
+  ଫେରନ୍ତୁ ମିଥ୍ୟା;
 }
 
-bool Scanner::scanDocumentIndicator(bool IsStart) {
+ତାର୍କିକ Scanner::scanDocumentIndicator(ତାର୍କିକ IsStart) {
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_ଚାବିଗୁଡ଼ିକ.clear();
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
   Token T;
   T.Kind = IsStart ? Token::TK_DocumentStart : Token::TK_DocumentEnd;
   T.Range = StringRef(Current, 3);
   skip(3);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanFlowCollectionStart(bool IsSequence) {
+ତାର୍କିକ Scanner::scanFlowCollectionStart(ତାର୍କିକ IsSequence) {
   Token T;
   T.Kind = IsSequence ? Token::TK_FlowSequenceStart
                       : Token::TK_FlowMappingStart;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.ଠେଲ_back(T);
 
   // [ and { may begin a simple key.
-  saveSimpleKeyCandidate(--TokenQueue.end(), Column - 1, false);
+  save_Simple_ଚାବି_Candidate(--TokenQueue.end(), Column - 1, ମିଥ୍ୟା);
 
   // And may also be followed by a simple key.
-  IsSimpleKeyAllowed = true;
+  Is_Simple_ଚାବି_Allowed = ସତ୍ୟ;
   // Adjacent values are allowed in flows only after JSON-style keys.
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
   ++FlowLevel;
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanFlowCollectionEnd(bool IsSequence) {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+ତାର୍କିକ Scanner::scanFlowCollectionEnd(ତାର୍କିକ IsSequence) {
+  remove_Simple_ଚାବି_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ସତ୍ୟ;
   Token T;
   T.Kind = IsSequence ? Token::TK_FlowSequenceEnd
                       : Token::TK_FlowMappingEnd;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  if (FlowLevel)
+  TokenQueue.ଠେଲ_back(T);
+  ଯଦି (FlowLevel)
     --FlowLevel;
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanFlowEntry() {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+ତାର୍କିକ Scanner::scanFlowEntry() {
+  remove_Simple_ଚାବି_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_ଚାବି_Allowed = ସତ୍ୟ;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
   Token T;
   T.Kind = Token::TK_FlowEntry;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanBlockEntry() {
+ତାର୍କିକ Scanner::scanBlockEntry() {
   rollIndent(Column, Token::TK_BlockSequenceStart, TokenQueue.end());
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_ଚାବି_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_ଚାବି_Allowed = ସତ୍ୟ;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
   Token T;
   T.Kind = Token::TK_BlockEntry;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanKey() {
-  if (!FlowLevel)
+ତାର୍କିକ Scanner::scan_ଚାବି() {
+  ଯଦି (!FlowLevel)
     rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
 
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = !FlowLevel;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_ଚାବି_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_ଚାବି_Allowed = !FlowLevel;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
   Token T;
-  T.Kind = Token::TK_Key;
+  T.Kind = Token::TK_ଚାବି;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanValue() {
+ତାର୍କିକ Scanner::scan_ମୂଲ୍ୟ() {
   // If the previous token could have been a simple key, insert the key token
   // into the token queue.
-  if (!SimpleKeys.empty()) {
-    SimpleKey SK = SimpleKeys.pop_back_val();
+  ଯଦି (!Simple_ଚାବିଗୁଡ଼ିକ.empty()) {
+    Simple_ଚାବି SK = Simple_ଚାବିଗୁଡ଼ିକ.କାଢ଼_back_val();
     Token T;
-    T.Kind = Token::TK_Key;
+    T.Kind = Token::TK_ଚାବି;
     T.Range = SK.Tok->Range;
     TokenQueueT::iterator i, e;
-    for (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
-      if (i == SK.Tok)
-        break;
+    ପାଇଁ (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
+      ଯଦି (i == SK.Tok)
+        ଭାଙ୍ଗ;
     }
-    if (i == e) {
-      Failed = true;
-      return false;
+    ଯଦି (i == e) {
+      Failed = ସତ୍ୟ;
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
     }
-    i = TokenQueue.insert(i, T);
+    i = TokenQueue.ଭର୍ତ୍ତି(i, T);
 
     // We may also need to add a Block-Mapping-Start token.
     rollIndent(SK.Column, Token::TK_BlockMappingStart, i);
 
-    IsSimpleKeyAllowed = false;
-  } else {
-    if (!FlowLevel)
+    Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  } ଅନ୍ୟଥା {
+    ଯଦି (!FlowLevel)
       rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
-    IsSimpleKeyAllowed = !FlowLevel;
+    Is_Simple_ଚାବି_Allowed = !FlowLevel;
   }
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
   Token T;
-  T.Kind = Token::TK_Value;
+  T.Kind = Token::TK_ମୂଲ୍ୟ;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
 // Forbidding inlining improves performance by roughly 20%.
 // FIXME: Remove once llvm optimizes this to the faster version without hints.
-LLVM_ATTRIBUTE_NOINLINE static bool
+LLVM_ATTRIBUTE_NOINLINE ସ୍ଥିର ତାର୍କିକ
 wasEscaped(StringRef::iterator First, StringRef::iterator Position);
 
 // Returns whether a character at 'Position' was escaped with a leading '\'.
 // 'First' specifies the position of the first character in the string.
-static bool wasEscaped(StringRef::iterator First,
+ସ୍ଥିର ତାର୍କିକ wasEscaped(StringRef::iterator First,
                        StringRef::iterator Position) {
-  assert(Position - 1 >= First);
+  ପ୍ରତିଜ୍ଞା(Position - 1 >= First);
   StringRef::iterator I = Position - 1;
   // We calculate the number of consecutive '\'s before the current position
   // by iterating backwards through our string.
-  while (I >= First && *I == '\\') --I;
+  ଯେତେବେଳେ (I >= First && *I == '\\') --I;
   // (Position - 1 - I) now contains the number of '\'s before the current
   // position. If it is odd, the character at 'Position' was escaped.
-  return (Position - 1 - I) % 2 == 1;
+  ଫେରନ୍ତୁ (Position - 1 - I) % 2 == 1;
 }
 
-bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
+ତାର୍କିକ Scanner::scanFlowScalar(ତାର୍କିକ IsDoubleQuoted) {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
-  if (IsDoubleQuoted) {
-    do {
+  ଯଦି (IsDoubleQuoted) {
+    କର {
       ++Current;
-      while (Current != End && *Current != '"')
+      ଯେତେବେଳେ (Current != End && *Current != '"')
         ++Current;
       // Repeat until the previous character was not a '\' or was an escaped
       // backslash.
-    } while (   Current != End
+    } ଯେତେବେଳେ (   Current != End
              && *(Current - 1) == '\\'
              && wasEscaped(Start + 1, Current));
-  } else {
+  } ଅନ୍ୟଥା {
     skip(1);
-    while (Current != End) {
+    ଯେତେବେଳେ (Current != End) {
       // Skip a ' followed by another '.
-      if (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
+      ଯଦି (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
         skip(2);
-        continue;
-      } else if (*Current == '\'')
-        break;
+        ଜାରି;
+      } ଅନ୍ୟଥା ଯଦି (*Current == '\'')
+        ଭାଙ୍ଗ;
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current) {
+      ଯଦି (i == Current) {
         i = skip_b_break(Current);
-        if (i == Current)
-          break;
+        ଯଦି (i == Current)
+          ଭାଙ୍ଗ;
         Current = i;
         Column = 0;
-        ++Line;
-      } else {
-        if (i == End)
-          break;
+        ++ଧାଡ଼ି;
+      } ଅନ୍ୟଥା {
+        ଯଦି (i == End)
+          ଭାଙ୍ଗ;
         Current = i;
         ++Column;
       }
     }
   }
 
-  if (Current == End) {
+  ଯଦି (Current == End) {
     setError("Expected quote at end of scalar", Current);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
 
   skip(1); // Skip ending quote.
   Token T;
   T.Kind = Token::TK_Scalar;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.ଠେଲ_back(T);
 
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_ଚାବି_Candidate(--TokenQueue.end(), ColStart, ମିଥ୍ୟା);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ସତ୍ୟ;
 
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanPlainScalar() {
+ତାର୍କିକ Scanner::scanPlainScalar() {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   unsigned LeadingBlanks = 0;
-  assert(Indent >= -1 && "Indent must be >= -1 !");
+  ପ୍ରତିଜ୍ଞା(Indent >= -1 && "Indent must be >= -1 !");
   unsigned indent = static_cast<unsigned>(Indent + 1);
-  while (Current != End) {
-    if (*Current == '#')
-      break;
+  ଯେତେବେଳେ (Current != End) {
+    ଯଦି (*Current == '#')
+      ଭାଙ୍ଗ;
 
-    while (Current != End &&
+    ଯେତେବେଳେ (Current != End &&
            ((*Current != ':' && isPlainSafeNonBlank(Current)) ||
             (*Current == ':' && isPlainSafeNonBlank(Current + 1)))) {
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current)
-        break;
+      ଯଦି (i == Current)
+        ଭାଙ୍ଗ;
       Current = i;
       ++Column;
     }
 
     // Are we at the end?
-    if (!isBlankOrBreak(Current))
-      break;
+    ଯଦି (!isBlankOrBreak(Current))
+      ଭାଙ୍ଗ;
 
     // Eat blanks.
     StringRef::iterator Tmp = Current;
-    while (isBlankOrBreak(Tmp)) {
+    ଯେତେବେଳେ (isBlankOrBreak(Tmp)) {
       StringRef::iterator i = skip_s_white(Tmp);
-      if (i != Tmp) {
-        if (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
+      ଯଦି (i != Tmp) {
+        ଯଦି (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
           setError("Found invalid tab character in indentation", Tmp);
-          return false;
+          ଫେରନ୍ତୁ ମିଥ୍ୟା;
         }
         Tmp = i;
         ++Column;
-      } else {
+      } ଅନ୍ୟଥା {
         i = skip_b_break(Tmp);
-        if (!LeadingBlanks)
+        ଯଦି (!LeadingBlanks)
           LeadingBlanks = 1;
         Tmp = i;
         Column = 0;
-        ++Line;
+        ++ଧାଡ଼ି;
       }
     }
 
-    if (!FlowLevel && Column < indent)
-      break;
+    ଯଦି (!FlowLevel && Column < indent)
+      ଭାଙ୍ଗ;
 
     Current = Tmp;
   }
-  if (Start == Current) {
+  ଯଦି (Start == Current) {
     setError("Got empty plain scalar", Start);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
   Token T;
   T.Kind = Token::TK_Scalar;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.ଠେଲ_back(T);
 
   // Plain scalars can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_ଚାବି_Candidate(--TokenQueue.end(), ColStart, ମିଥ୍ୟା);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanAliasOrAnchor(bool IsAlias) {
+ତାର୍କିକ Scanner::scanAliasOrAnchor(ତାର୍କିକ IsAlias) {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   skip(1);
-  while (Current != End) {
-    if (   *Current == '[' || *Current == ']'
+  ଯେତେବେଳେ (Current != End) {
+    ଯଦି (   *Current == '[' || *Current == ']'
         || *Current == '{' || *Current == '}'
         || *Current == ','
         || *Current == ':')
-      break;
+      ଭାଙ୍ଗ;
     StringRef::iterator i = skip_ns_char(Current);
-    if (i == Current)
-      break;
+    ଯଦି (i == Current)
+      ଭାଙ୍ଗ;
     Current = i;
     ++Column;
   }
 
-  if (Start + 1 == Current) {
+  ଯଦି (Start + 1 == Current) {
     setError("Got empty alias or anchor", Start);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
 
   Token T;
   T.Kind = IsAlias ? Token::TK_Alias : Token::TK_Anchor;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.ଠେଲ_back(T);
 
   // Alias and anchors can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_ଚାବି_Candidate(--TokenQueue.end(), ColStart, ମିଥ୍ୟା);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanBlockScalarIndicators(char &StyleIndicator,
-                                        char &ChompingIndicator,
+ତାର୍କିକ Scanner::scanBlockScalarIndicators(ଅକ୍ଷର &StyleIndicator,
+                                        ଅକ୍ଷର &ChompingIndicator,
                                         unsigned &IndentIndicator,
-                                        bool &IsDone) {
+                                        ତାର୍କିକ &IsDone) {
   StyleIndicator = scanBlockStyleIndicator();
-  if (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
-    return false;
-  return true;
+  ଯଦି (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-char Scanner::scanBlockStyleIndicator() {
-  char Indicator = ' ';
-  if (Current != End && (*Current == '>' || *Current == '|')) {
+ଅକ୍ଷର Scanner::scanBlockStyleIndicator() {
+  ଅକ୍ଷର Indicator = ' ';
+  ଯଦି (Current != End && (*Current == '>' || *Current == '|')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  ଫେରନ୍ତୁ Indicator;
 }
 
-char Scanner::scanBlockChompingIndicator() {
-  char Indicator = ' ';
-  if (Current != End && (*Current == '+' || *Current == '-')) {
+ଅକ୍ଷର Scanner::scanBlockChompingIndicator() {
+  ଅକ୍ଷର Indicator = ' ';
+  ଯଦି (Current != End && (*Current == '+' || *Current == '-')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  ଫେରନ୍ତୁ Indicator;
 }
 
 /// Get the number of line breaks after chomping.
 ///
 /// Return the number of trailing line breaks to emit, depending on
 /// \p ChompingIndicator.
-static unsigned getChompedLineBreaks(char ChompingIndicator,
-                                     unsigned LineBreaks, StringRef Str) {
-  if (ChompingIndicator == '-') // Strip all line breaks.
-    return 0;
-  if (ChompingIndicator == '+') // Keep all line breaks.
-    return LineBreaks;
+ସ୍ଥିର unsigned get_Chomped_ଧାଡ଼ି_Breaks(ଅକ୍ଷର ChompingIndicator,
+                                     unsigned ଧାଡ଼ି_Breaks, StringRef Str) {
+  ଯଦି (ChompingIndicator == '-') // Strip all line breaks.
+    ଫେରନ୍ତୁ 0;
+  ଯଦି (ChompingIndicator == '+') // Keep all line breaks.
+    ଫେରନ୍ତୁ ଧାଡ଼ି_Breaks;
   // Clip trailing lines.
-  return Str.empty() ? 0 : 1;
+  ଫେରନ୍ତୁ Str.empty() ? 0 : 1;
 }
 
 unsigned Scanner::scanBlockIndentationIndicator() {
   unsigned Indent = 0;
-  if (Current != End && (*Current >= '1' && *Current <= '9')) {
+  ଯଦି (Current != End && (*Current >= '1' && *Current <= '9')) {
     Indent = unsigned(*Current - '0');
     skip(1);
   }
-  return Indent;
+  ଫେରନ୍ତୁ Indent;
 }
 
-bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
-                                    unsigned &IndentIndicator, bool &IsDone) {
+ତାର୍କିକ Scanner::scanBlockScalarHeader(ଅକ୍ଷର &ChompingIndicator,
+                                    unsigned &IndentIndicator, ତାର୍କିକ &IsDone) {
   auto Start = Current;
 
   ChompingIndicator = scanBlockChompingIndicator();
   IndentIndicator = scanBlockIndentationIndicator();
   // Check for the chomping indicator once again.
-  if (ChompingIndicator == ' ')
+  ଯଦି (ChompingIndicator == ' ')
     ChompingIndicator = scanBlockChompingIndicator();
   Current = skip_while(&Scanner::skip_s_white, Current);
   skipComment();
 
-  if (Current == End) { // EOF, we have an empty scalar.
+  ଯଦି (Current == End) { // EOF, we have an empty scalar.
     Token T;
     T.Kind = Token::TK_BlockScalar;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    IsDone = true;
-    return true;
+    TokenQueue.ଠେଲ_back(T);
+    IsDone = ସତ୍ୟ;
+    ଫେରନ୍ତୁ ସତ୍ୟ;
   }
 
-  if (!consumeLineBreakIfPresent()) {
+  ଯଦି (!consume_ଧାଡ଼ି_Break_If_Present()) {
     setError("Expected a line break after block scalar header", Current);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
+ତାର୍କିକ Scanner::findBlockScalarIndent(unsigned &BlockIndent,
                                     unsigned BlockExitIndent,
-                                    unsigned &LineBreaks, bool &IsDone) {
-  unsigned MaxAllSpaceLineCharacters = 0;
-  StringRef::iterator LongestAllSpaceLine;
+                                    unsigned &ଧାଡ଼ି_Breaks, ତାର୍କିକ &IsDone) {
+  unsigned Max_All_Space_ଧାଡ଼ି_Characters = 0;
+  StringRef::iterator Longest_All_Space_ଧାଡ଼ି;
 
-  while (true) {
+  ଯେତେବେଳେ (ସତ୍ୟ) {
     advanceWhile(&Scanner::skip_s_space);
-    if (skip_nb_char(Current) != Current) {
+    ଯଦି (skip_nb_char(Current) != Current) {
       // This line isn't empty, so try and find the indentation.
-      if (Column <= BlockExitIndent) { // End of the block literal.
-        IsDone = true;
-        return true;
+      ଯଦି (Column <= BlockExitIndent) { // End of the block literal.
+        IsDone = ସତ୍ୟ;
+        ଫେରନ୍ତୁ ସତ୍ୟ;
       }
       // We found the block's indentation.
       BlockIndent = Column;
-      if (MaxAllSpaceLineCharacters > BlockIndent) {
+      ଯଦି (Max_All_Space_ଧାଡ଼ି_Characters > BlockIndent) {
         setError(
             "Leading all-spaces line must be smaller than the block indent",
-            LongestAllSpaceLine);
-        return false;
+            Longest_All_Space_ଧାଡ଼ି);
+        ଫେରନ୍ତୁ ମିଥ୍ୟା;
       }
-      return true;
+      ଫେରନ୍ତୁ ସତ୍ୟ;
     }
-    if (skip_b_break(Current) != Current &&
-        Column > MaxAllSpaceLineCharacters) {
+    ଯଦି (skip_b_break(Current) != Current &&
+        Column > Max_All_Space_ଧାଡ଼ି_Characters) {
       // Record the longest all-space line in case it's longer than the
       // discovered block indent.
-      MaxAllSpaceLineCharacters = Column;
-      LongestAllSpaceLine = Current;
+      Max_All_Space_ଧାଡ଼ି_Characters = Column;
+      Longest_All_Space_ଧାଡ଼ି = Current;
     }
 
     // Check for EOF.
-    if (Current == End) {
-      IsDone = true;
-      return true;
+    ଯଦି (Current == End) {
+      IsDone = ସତ୍ୟ;
+      ଫେରନ୍ତୁ ସତ୍ୟ;
     }
 
-    if (!consumeLineBreakIfPresent()) {
-      IsDone = true;
-      return true;
+    ଯଦି (!consume_ଧାଡ଼ି_Break_If_Present()) {
+      IsDone = ସତ୍ୟ;
+      ଫେରନ୍ତୁ ସତ୍ୟ;
     }
-    ++LineBreaks;
+    ++ଧାଡ଼ି_Breaks;
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanBlockScalarIndent(unsigned BlockIndent,
-                                    unsigned BlockExitIndent, bool &IsDone) {
+ତାର୍କିକ Scanner::scanBlockScalarIndent(unsigned BlockIndent,
+                                    unsigned BlockExitIndent, ତାର୍କିକ &IsDone) {
   // Skip the indentation.
-  while (Column < BlockIndent) {
+  ଯେତେବେଳେ (Column < BlockIndent) {
     auto I = skip_s_space(Current);
-    if (I == Current)
-      break;
+    ଯଦି (I == Current)
+      ଭାଙ୍ଗ;
     Current = I;
     ++Column;
   }
 
-  if (skip_nb_char(Current) == Current)
-    return true;
+  ଯଦି (skip_nb_char(Current) == Current)
+    ଫେରନ୍ତୁ ସତ୍ୟ;
 
-  if (Column <= BlockExitIndent) { // End of the block literal.
-    IsDone = true;
-    return true;
+  ଯଦି (Column <= BlockExitIndent) { // End of the block literal.
+    IsDone = ସତ୍ୟ;
+    ଫେରନ୍ତୁ ସତ୍ୟ;
   }
 
-  if (Column < BlockIndent) {
-    if (Current != End && *Current == '#') { // Trailing comment.
-      IsDone = true;
-      return true;
+  ଯଦି (Column < BlockIndent) {
+    ଯଦି (Current != End && *Current == '#') { // Trailing comment.
+      IsDone = ସତ୍ୟ;
+      ଫେରନ୍ତୁ ସତ୍ୟ;
     }
     setError("A text line is less indented than the block scalar", Current);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  return true; // A normal text line.
+  ଫେରନ୍ତୁ ସତ୍ୟ; // A normal text line.
 }
 
-bool Scanner::scanBlockScalar(bool IsLiteral) {
-  assert(*Current == '|' || *Current == '>');
-  char StyleIndicator;
-  char ChompingIndicator;
+ତାର୍କିକ Scanner::scanBlockScalar(ତାର୍କିକ IsLiteral) {
+  ପ୍ରତିଜ୍ଞା(*Current == '|' || *Current == '>');
+  ଅକ୍ଷର StyleIndicator;
+  ଅକ୍ଷର ChompingIndicator;
   unsigned BlockIndent;
-  bool IsDone = false;
-  if (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
+  ତାର୍କିକ IsDone = ମିଥ୍ୟା;
+  ଯଦି (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
                                  IsDone))
-    return false;
-  if (IsDone)
-    return true;
-  bool IsFolded = StyleIndicator == '>';
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (IsDone)
+    ଫେରନ୍ତୁ ସତ୍ୟ;
+  ତାର୍କିକ IsFolded = StyleIndicator == '>';
 
-  const auto *Start = Current;
+  ଅଚଳ auto *Start = Current;
   unsigned BlockExitIndent = Indent < 0 ? 0 : (unsigned)Indent;
-  unsigned LineBreaks = 0;
-  if (BlockIndent == 0) {
-    if (!findBlockScalarIndent(BlockIndent, BlockExitIndent, LineBreaks,
+  unsigned ଧାଡ଼ି_Breaks = 0;
+  ଯଦି (BlockIndent == 0) {
+    ଯଦି (!findBlockScalarIndent(BlockIndent, BlockExitIndent, ଧାଡ଼ି_Breaks,
                                IsDone))
-      return false;
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
 
   // Scan the block's scalars body.
   SmallString<256> Str;
-  while (!IsDone) {
-    if (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
-      return false;
-    if (IsDone)
-      break;
+  ଯେତେବେଳେ (!IsDone) {
+    ଯଦି (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
+    ଯଦି (IsDone)
+      ଭାଙ୍ଗ;
 
     // Parse the current line.
-    auto LineStart = Current;
+    auto ଧାଡ଼ି_Start = Current;
     advanceWhile(&Scanner::skip_nb_char);
-    if (LineStart != Current) {
-      if (LineBreaks && IsFolded && !Scanner::isLineEmpty(Str)) {
+    ଯଦି (ଧାଡ଼ି_Start != Current) {
+      ଯଦି (ଧାଡ଼ି_Breaks && IsFolded && !Scanner::is_ଧାଡ଼ି_Empty(Str)) {
         // The folded style "folds" any single line break between content into a
         // single space, except when that content is "empty" (only contains
         // whitespace) in which case the line break is left as-is.
-        if (LineBreaks == 1) {
-          Str.append(LineBreaks,
-                     isLineEmpty(StringRef(LineStart, Current - LineStart))
+        ଯଦି (ଧାଡ଼ି_Breaks == 1) {
+          Str.append(ଧାଡ଼ି_Breaks,
+                     is_ଧାଡ଼ି_Empty(StringRef(ଧାଡ଼ି_Start, Current - ଧାଡ଼ି_Start))
                          ? '\n'
                          : ' ');
         }
@@ -1761,51 +1761,51 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
         // want `LineBreaks == 0`. Otherwise this decrement accounts for the
         // fact that the first line break is "trimmed", only being used to
         // signal a sequence of line breaks which should not be folded.
-        LineBreaks--;
+        ଧାଡ଼ି_Breaks--;
       }
-      Str.append(LineBreaks, '\n');
-      Str.append(StringRef(LineStart, Current - LineStart));
-      LineBreaks = 0;
+      Str.append(ଧାଡ଼ି_Breaks, '\n');
+      Str.append(StringRef(ଧାଡ଼ି_Start, Current - ଧାଡ଼ି_Start));
+      ଧାଡ଼ି_Breaks = 0;
     }
 
     // Check for EOF.
-    if (Current == End)
-      break;
+    ଯଦି (Current == End)
+      ଭାଙ୍ଗ;
 
-    if (!consumeLineBreakIfPresent())
-      break;
-    ++LineBreaks;
+    ଯଦି (!consume_ଧାଡ଼ି_Break_If_Present())
+      ଭାଙ୍ଗ;
+    ++ଧାଡ଼ି_Breaks;
   }
 
-  if (Current == End && !LineBreaks)
+  ଯଦି (Current == End && !ଧାଡ଼ି_Breaks)
     // Ensure that there is at least one line break before the end of file.
-    LineBreaks = 1;
-  Str.append(getChompedLineBreaks(ChompingIndicator, LineBreaks, Str), '\n');
+    ଧାଡ଼ି_Breaks = 1;
+  Str.append(get_Chomped_ଧାଡ଼ି_Breaks(ChompingIndicator, ଧାଡ଼ି_Breaks, Str), '\n');
 
   // New lines may start a simple key.
-  if (!FlowLevel)
-    IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  ଯଦି (!FlowLevel)
+    Is_Simple_ଚାବି_Allowed = ସତ୍ୟ;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
   Token T;
   T.Kind = Token::TK_BlockScalar;
   T.Range = StringRef(Start, Current - Start);
-  T.Value = std::string(Str);
-  TokenQueue.push_back(T);
-  return true;
+  T.ମୂଲ୍ୟ = std::string(Str);
+  TokenQueue.ଠେଲ_back(T);
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::scanTag() {
+ତାର୍କିକ Scanner::scanTag() {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   skip(1); // Eat !.
-  if (Current == End || isBlankOrBreak(Current)); // An empty tag.
-  else if (*Current == '<') {
+  ଯଦି (Current == End || isBlankOrBreak(Current)); // An empty tag.
+  ଅନ୍ୟଥା ଯଦି (*Current == '<') {
     skip(1);
     scan_ns_uri_char();
-    if (!consume('>'))
-      return false;
-  } else {
+    ଯଦି (!consume('>'))
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  } ଅନ୍ୟଥା {
     // FIXME: Actually parse the c-ns-shorthand-tag rule.
     Current = skip_while(&Scanner::skip_ns_char, Current);
   }
@@ -1813,228 +1813,228 @@ bool Scanner::scanTag() {
   Token T;
   T.Kind = Token::TK_Tag;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.ଠେଲ_back(T);
 
   // Tags can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_ଚାବି_Candidate(--TokenQueue.end(), ColStart, ମିଥ୍ୟା);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_ଚାବି_Allowed = ମିଥ୍ୟା;
+  Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow = ମିଥ୍ୟା;
 
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
-bool Scanner::fetchMoreTokens() {
-  if (IsStartOfStream)
-    return scanStreamStart();
+ତାର୍କିକ Scanner::fetchMoreTokens() {
+  ଯଦି (IsStartOfStream)
+    ଫେରନ୍ତୁ scanStreamStart();
 
   scanToNextToken();
 
-  if (Current == End)
-    return scanStreamEnd();
+  ଯଦି (Current == End)
+    ଫେରନ୍ତୁ scanStreamEnd();
 
-  removeStaleSimpleKeyCandidates();
+  remove_Stale_Simple_ଚାବି_Candidates();
 
   unrollIndent(Column);
 
-  if (Column == 0 && *Current == '%')
-    return scanDirective();
+  ଯଦି (Column == 0 && *Current == '%')
+    ଫେରନ୍ତୁ scanDirective();
 
-  if (Column == 0 && Current + 3 <= End
+  ଯଦି (Column == 0 && Current + 3 <= End
       && *Current == '-'
       && *(Current + 1) == '-'
       && *(Current + 2) == '-'
       && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(true);
+    ଫେରନ୍ତୁ scanDocumentIndicator(ସତ୍ୟ);
 
-  if (Column == 0 && Current + 3 <= End
+  ଯଦି (Column == 0 && Current + 3 <= End
       && *Current == '.'
       && *(Current + 1) == '.'
       && *(Current + 2) == '.'
       && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(false);
+    ଫେରନ୍ତୁ scanDocumentIndicator(ମିଥ୍ୟା);
 
-  if (*Current == '[')
-    return scanFlowCollectionStart(true);
+  ଯଦି (*Current == '[')
+    ଫେରନ୍ତୁ scanFlowCollectionStart(ସତ୍ୟ);
 
-  if (*Current == '{')
-    return scanFlowCollectionStart(false);
+  ଯଦି (*Current == '{')
+    ଫେରନ୍ତୁ scanFlowCollectionStart(ମିଥ୍ୟା);
 
-  if (*Current == ']')
-    return scanFlowCollectionEnd(true);
+  ଯଦି (*Current == ']')
+    ଫେରନ୍ତୁ scanFlowCollectionEnd(ସତ୍ୟ);
 
-  if (*Current == '}')
-    return scanFlowCollectionEnd(false);
+  ଯଦି (*Current == '}')
+    ଫେରନ୍ତୁ scanFlowCollectionEnd(ମିଥ୍ୟା);
 
-  if (*Current == ',')
-    return scanFlowEntry();
+  ଯଦି (*Current == ',')
+    ଫେରନ୍ତୁ scanFlowEntry();
 
-  if (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
-    return scanBlockEntry();
+  ଯଦି (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
+    ଫେରନ୍ତୁ scanBlockEntry();
 
-  if (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
-    return scanKey();
+  ଯଦି (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
+    ଫେରନ୍ତୁ scan_ଚାବି();
 
-  if (*Current == ':' &&
-      (!isPlainSafeNonBlank(Current + 1) || IsAdjacentValueAllowedInFlow))
-    return scanValue();
+  ଯଦି (*Current == ':' &&
+      (!isPlainSafeNonBlank(Current + 1) || Is_Adjacent_ମୂଲ୍ୟ_Allowed_In_Flow))
+    ଫେରନ୍ତୁ scan_ମୂଲ୍ୟ();
 
-  if (*Current == '*')
-    return scanAliasOrAnchor(true);
+  ଯଦି (*Current == '*')
+    ଫେରନ୍ତୁ scanAliasOrAnchor(ସତ୍ୟ);
 
-  if (*Current == '&')
-    return scanAliasOrAnchor(false);
+  ଯଦି (*Current == '&')
+    ଫେରନ୍ତୁ scanAliasOrAnchor(ମିଥ୍ୟା);
 
-  if (*Current == '!')
-    return scanTag();
+  ଯଦି (*Current == '!')
+    ଫେରନ୍ତୁ scanTag();
 
-  if (*Current == '|' && !FlowLevel)
-    return scanBlockScalar(true);
+  ଯଦି (*Current == '|' && !FlowLevel)
+    ଫେରନ୍ତୁ scanBlockScalar(ସତ୍ୟ);
 
-  if (*Current == '>' && !FlowLevel)
-    return scanBlockScalar(false);
+  ଯଦି (*Current == '>' && !FlowLevel)
+    ଫେରନ୍ତୁ scanBlockScalar(ମିଥ୍ୟା);
 
-  if (*Current == '\'')
-    return scanFlowScalar(false);
+  ଯଦି (*Current == '\'')
+    ଫେରନ୍ତୁ scanFlowScalar(ମିଥ୍ୟା);
 
-  if (*Current == '"')
-    return scanFlowScalar(true);
+  ଯଦି (*Current == '"')
+    ଫେରନ୍ତୁ scanFlowScalar(ସତ୍ୟ);
 
   // Get a plain scalar.
   StringRef FirstChar(Current, 1);
-  if ((!isBlankOrBreak(Current) &&
+  ଯଦି ((!isBlankOrBreak(Current) &&
        FirstChar.find_first_of("-?:,[]{}#&*!|>'\"%@`") == StringRef::npos) ||
       (FirstChar.find_first_of("?:-") != StringRef::npos &&
        isPlainSafeNonBlank(Current + 1)))
-    return scanPlainScalar();
+    ଫେରନ୍ତୁ scanPlainScalar();
 
   setError("Unrecognized character while tokenizing.", Current);
-  return false;
+  ଫେରନ୍ତୁ ମିଥ୍ୟା;
 }
 
-Stream::Stream(StringRef Input, SourceMgr &SM, bool ShowColors,
+Stream::Stream(StringRef ନିବେଶ, SourceMgr &SM, ତାର୍କିକ ShowColors,
                std::error_code *EC)
-    : scanner(new Scanner(Input, SM, ShowColors, EC)) {}
+    : scanner(ନୂତନ Scanner(ନିବେଶ, SM, ShowColors, EC)) {}
 
-Stream::Stream(MemoryBufferRef InputBuffer, SourceMgr &SM, bool ShowColors,
+Stream::Stream(MemoryBufferRef ନିବେଶ_Buffer, SourceMgr &SM, ତାର୍କିକ ShowColors,
                std::error_code *EC)
-    : scanner(new Scanner(InputBuffer, SM, ShowColors, EC)) {}
+    : scanner(ନୂତନ Scanner(ନିବେଶ_Buffer, SM, ShowColors, EC)) {}
 
-Stream::~Stream() = default;
+Stream::~Stream() = ପୂର୍ବନିର୍ଦ୍ଧାରିତ;
 
-bool Stream::failed() { return scanner->failed(); }
+ତାର୍କିକ Stream::failed() { ଫେରନ୍ତୁ scanner->failed(); }
 
-void Stream::printError(Node *N, const Twine &Msg, SourceMgr::DiagKind Kind) {
-  printError(N ? N->getSourceRange() : SMRange(), Msg, Kind);
+ଶୂନ୍ୟ Stream::printError(ଗଣ୍ଠି *N, ଅଚଳ Twine &ସନ୍ଦେଶ_2, SourceMgr::DiagKind Kind) {
+  printError(N ? N->getSourceRange() : SMRange(), ସନ୍ଦେଶ_2, Kind);
 }
 
-void Stream::printError(const SMRange &Range, const Twine &Msg,
+ଶୂନ୍ୟ Stream::printError(ଅଚଳ SMRange &Range, ଅଚଳ Twine &ସନ୍ଦେଶ_2,
                         SourceMgr::DiagKind Kind) {
-  scanner->printError(Range.Start, Kind, Msg, Range);
+  scanner->printError(Range.Start, Kind, ସନ୍ଦେଶ_2, Range);
 }
 
 document_iterator Stream::begin() {
-  if (CurrentDoc)
+  ଯଦି (CurrentDoc)
     report_fatal_error("Can only iterate over the stream once");
 
   // Skip Stream-Start.
   scanner->getNext();
 
-  CurrentDoc.reset(new Document(*this));
-  return document_iterator(CurrentDoc);
+  CurrentDoc.reset(ନୂତନ Document(*ଏହି));
+  ଫେରନ୍ତୁ document_iterator(CurrentDoc);
 }
 
 document_iterator Stream::end() {
-  return document_iterator();
+  ଫେରନ୍ତୁ document_iterator();
 }
 
-void Stream::skip() {
-  for (Document &Doc : *this)
+ଶୂନ୍ୟ Stream::skip() {
+  ପାଇଁ (Document &Doc : *ଏହି)
     Doc.skip();
 }
 
-Node::Node(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
+ଗଣ୍ଠି::ଗଣ୍ଠି(unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା Type, std::unique_ptr<Document> &D, StringRef A,
            StringRef T)
     : Doc(D), TypeID(Type), Anchor(A), Tag(T) {
   SMLoc Start = SMLoc::getFromPointer(peekNext().Range.begin());
   SourceRange = SMRange(Start, Start);
 }
 
-std::string Node::getVerbatimTag() const {
+std::string ଗଣ୍ଠି::getVerbatimTag() ଅଚଳ {
   StringRef Raw = getRawTag();
-  if (!Raw.empty() && Raw != "!") {
+  ଯଦି (!Raw.empty() && Raw != "!") {
     std::string Ret;
-    if (Raw.find_last_of('!') == 0) {
+    ଯଦି (Raw.find_last_of('!') == 0) {
       Ret = std::string(Doc->getTagMap().find("!")->second);
       Ret += Raw.substr(1);
-      return Ret;
-    } else if (Raw.starts_with("!!")) {
+      ଫେରନ୍ତୁ Ret;
+    } ଅନ୍ୟଥା ଯଦି (Raw.starts_with("!!")) {
       Ret = std::string(Doc->getTagMap().find("!!")->second);
       Ret += Raw.substr(2);
-      return Ret;
-    } else {
+      ଫେରନ୍ତୁ Ret;
+    } ଅନ୍ୟଥା {
       StringRef TagHandle = Raw.substr(0, Raw.find_last_of('!') + 1);
       std::map<StringRef, StringRef>::const_iterator It =
           Doc->getTagMap().find(TagHandle);
-      if (It != Doc->getTagMap().end())
+      ଯଦି (It != Doc->getTagMap().end())
         Ret = std::string(It->second);
-      else {
+      ଅନ୍ୟଥା {
         Token T;
         T.Kind = Token::TK_Tag;
         T.Range = TagHandle;
         setError(Twine("Unknown tag handle ") + TagHandle, T);
       }
       Ret += Raw.substr(Raw.find_last_of('!') + 1);
-      return Ret;
+      ଫେରନ୍ତୁ Ret;
     }
   }
 
-  switch (getType()) {
-  case NK_Null:
-    return "tag:yaml.org,2002:null";
-  case NK_Scalar:
-  case NK_BlockScalar:
+  ବାଛ (getType()) {
+  ସ୍ଥିତି NK_Null:
+    ଫେରନ୍ତୁ "tag:yaml.org,2002:null";
+  ସ୍ଥିତି NK_Scalar:
+  ସ୍ଥିତି NK_BlockScalar:
     // TODO: Tag resolution.
-    return "tag:yaml.org,2002:str";
-  case NK_Mapping:
-    return "tag:yaml.org,2002:map";
-  case NK_Sequence:
-    return "tag:yaml.org,2002:seq";
+    ଫେରନ୍ତୁ "tag:yaml.org,2002:str";
+  ସ୍ଥିତି NK_Mapping:
+    ଫେରନ୍ତୁ "tag:yaml.org,2002:map";
+  ସ୍ଥିତି NK_Sequence:
+    ଫେରନ୍ତୁ "tag:yaml.org,2002:seq";
   }
 
-  return "";
+  ଫେରନ୍ତୁ "";
 }
 
-Token &Node::peekNext() {
-  return Doc->peekNext();
+Token &ଗଣ୍ଠି::peekNext() {
+  ଫେରନ୍ତୁ Doc->peekNext();
 }
 
-Token Node::getNext() {
-  return Doc->getNext();
+Token ଗଣ୍ଠି::getNext() {
+  ଫେରନ୍ତୁ Doc->getNext();
 }
 
-Node *Node::parseBlockNode() {
-  return Doc->parseBlockNode();
+ଗଣ୍ଠି *ଗଣ୍ଠି::parse_Block_ଗଣ୍ଠି() {
+  ଫେରନ୍ତୁ Doc->parse_Block_ଗଣ୍ଠି();
 }
 
-BumpPtrAllocator &Node::getAllocator() {
-  return Doc->NodeAllocator;
+BumpPtrAllocator &ଗଣ୍ଠି::getAllocator() {
+  ଫେରନ୍ତୁ Doc->ଗଣ୍ଠି_Allocator;
 }
 
-void Node::setError(const Twine &Msg, Token &Tok) const {
-  Doc->setError(Msg, Tok);
+ଶୂନ୍ୟ ଗଣ୍ଠି::setError(ଅଚଳ Twine &ସନ୍ଦେଶ_2, Token &Tok) ଅଚଳ {
+  Doc->setError(ସନ୍ଦେଶ_2, Tok);
 }
 
-bool Node::failed() const {
-  return Doc->failed();
+ତାର୍କିକ ଗଣ୍ଠି::failed() ଅଚଳ {
+  ଫେରନ୍ତୁ Doc->failed();
 }
 
-StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
-  if (Value[0] == '"')
-    return getDoubleQuotedValue(Value, Storage);
-  if (Value[0] == '\'')
-    return getSingleQuotedValue(Value, Storage);
-  return getPlainValue(Value, Storage);
+StringRef Scalar_ଗଣ୍ଠି::get_ମୂଲ୍ୟ(SmallVectorImpl<ଅକ୍ଷର> &Storage) ଅଚଳ {
+  ଯଦି (ମୂଲ୍ୟ[0] == '"')
+    ଫେରନ୍ତୁ get_Double_Quoted_ମୂଲ୍ୟ(ମୂଲ୍ୟ, Storage);
+  ଯଦି (ମୂଲ୍ୟ[0] == '\'')
+    ଫେରନ୍ତୁ get_Single_Quoted_ମୂଲ୍ୟ(ମୂଲ୍ୟ, Storage);
+  ଫେରନ୍ତୁ get_Plain_ମୂଲ୍ୟ(ମୂଲ୍ୟ, Storage);
 }
 
 /// parseScalarValue - A common parsing routine for all flow scalar styles.
@@ -2051,599 +2051,599 @@ StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
 /// \param UnescapeCallback - This is called when the escape character is found
 /// in the input.
 /// \returns - The unfolded and unescaped value.
-static StringRef
-parseScalarValue(StringRef UnquotedValue, SmallVectorImpl<char> &Storage,
+ସ୍ଥିର StringRef
+parse_Scalar_ମୂଲ୍ୟ(StringRef Unquoted_ମୂଲ୍ୟ, SmallVectorImpl<ଅକ୍ଷର> &Storage,
                  StringRef LookupChars,
-                 std::function<StringRef(StringRef, SmallVectorImpl<char> &)>
+                 std::function<StringRef(StringRef, SmallVectorImpl<ଅକ୍ଷର> &)>
                      UnescapeCallback) {
-  size_t I = UnquotedValue.find_first_of(LookupChars);
-  if (I == StringRef::npos)
-    return UnquotedValue;
+  size_t I = Unquoted_ମୂଲ୍ୟ.find_first_of(LookupChars);
+  ଯଦି (I == StringRef::npos)
+    ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ;
 
   Storage.clear();
-  Storage.reserve(UnquotedValue.size());
-  char LastNewLineAddedAs = '\0';
-  for (; I != StringRef::npos; I = UnquotedValue.find_first_of(LookupChars)) {
-    if (UnquotedValue[I] != '\r' && UnquotedValue[I] != '\n') {
-      llvm::append_range(Storage, UnquotedValue.take_front(I));
-      UnquotedValue = UnescapeCallback(UnquotedValue.drop_front(I), Storage);
-      LastNewLineAddedAs = '\0';
-      continue;
+  Storage.reserve(Unquoted_ମୂଲ୍ୟ.size());
+  ଅକ୍ଷର Last_New_ଧାଡ଼ି_Added_As = '\0';
+  ପାଇଁ (; I != StringRef::npos; I = Unquoted_ମୂଲ୍ୟ.find_first_of(LookupChars)) {
+    ଯଦି (Unquoted_ମୂଲ୍ୟ[I] != '\r' && Unquoted_ମୂଲ୍ୟ[I] != '\n') {
+      llvm::append_range(Storage, Unquoted_ମୂଲ୍ୟ.take_front(I));
+      Unquoted_ମୂଲ୍ୟ = UnescapeCallback(Unquoted_ମୂଲ୍ୟ.drop_front(I), Storage);
+      Last_New_ଧାଡ଼ି_Added_As = '\0';
+      ଜାରି;
     }
-    if (size_t LastNonSWhite = UnquotedValue.find_last_not_of(" \t", I);
+    ଯଦି (size_t LastNonSWhite = Unquoted_ମୂଲ୍ୟ.find_last_not_of(" \t", I);
         LastNonSWhite != StringRef::npos) {
-      llvm::append_range(Storage, UnquotedValue.take_front(LastNonSWhite + 1));
-      Storage.push_back(' ');
-      LastNewLineAddedAs = ' ';
-    } else {
+      llvm::append_range(Storage, Unquoted_ମୂଲ୍ୟ.take_front(LastNonSWhite + 1));
+      Storage.ଠେଲ_back(' ');
+      Last_New_ଧାଡ଼ି_Added_As = ' ';
+    } ଅନ୍ୟଥା {
       // Note: we can't just check if the last character in Storage is ' ',
       // '\n', or something else; that would give a wrong result for double
       // quoted values containing an escaped space character before a new-line
       // character.
-      switch (LastNewLineAddedAs) {
-      case ' ':
-        assert(!Storage.empty() && Storage.back() == ' ');
+      ବାଛ (Last_New_ଧାଡ଼ି_Added_As) {
+      ସ୍ଥିତି ' ':
+        ପ୍ରତିଜ୍ଞା(!Storage.empty() && Storage.back() == ' ');
         Storage.back() = '\n';
-        LastNewLineAddedAs = '\n';
-        break;
-      case '\n':
-        assert(!Storage.empty() && Storage.back() == '\n');
-        Storage.push_back('\n');
-        break;
-      default:
-        Storage.push_back(' ');
-        LastNewLineAddedAs = ' ';
-        break;
+        Last_New_ଧାଡ଼ି_Added_As = '\n';
+        ଭାଙ୍ଗ;
+      ସ୍ଥିତି '\n':
+        ପ୍ରତିଜ୍ଞା(!Storage.empty() && Storage.back() == '\n');
+        Storage.ଠେଲ_back('\n');
+        ଭାଙ୍ଗ;
+      ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+        Storage.ଠେଲ_back(' ');
+        Last_New_ଧାଡ଼ି_Added_As = ' ';
+        ଭାଙ୍ଗ;
       }
     }
     // Handle Windows-style EOL
-    if (UnquotedValue.substr(I, 2) == "\r\n")
+    ଯଦି (Unquoted_ମୂଲ୍ୟ.substr(I, 2) == "\r\n")
       I++;
-    UnquotedValue = UnquotedValue.drop_front(I + 1).ltrim(" \t");
+    Unquoted_ମୂଲ୍ୟ = Unquoted_ମୂଲ୍ୟ.drop_front(I + 1).ltrim(" \t");
   }
-  llvm::append_range(Storage, UnquotedValue);
-  return StringRef(Storage.begin(), Storage.size());
+  llvm::append_range(Storage, Unquoted_ମୂଲ୍ୟ);
+  ଫେରନ୍ତୁ StringRef(Storage.begin(), Storage.size());
 }
 
 StringRef
-ScalarNode::getDoubleQuotedValue(StringRef RawValue,
-                                 SmallVectorImpl<char> &Storage) const {
-  assert(RawValue.size() >= 2 && RawValue.front() == '"' &&
-         RawValue.back() == '"');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+Scalar_ଗଣ୍ଠି::get_Double_Quoted_ମୂଲ୍ୟ(StringRef Raw_ମୂଲ୍ୟ,
+                                 SmallVectorImpl<ଅକ୍ଷର> &Storage) ଅଚଳ {
+  ପ୍ରତିଜ୍ଞା(Raw_ମୂଲ୍ୟ.size() >= 2 && Raw_ମୂଲ୍ୟ.front() == '"' &&
+         Raw_ମୂଲ୍ୟ.back() == '"');
+  StringRef Unquoted_ମୂଲ୍ୟ = Raw_ମୂଲ୍ୟ.substr(1, Raw_ମୂଲ୍ୟ.size() - 2);
 
-  auto UnescapeFunc = [this](StringRef UnquotedValue,
-                             SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(1) == "\\");
-    if (UnquotedValue.size() == 1) {
+  auto UnescapeFunc = [ଏହି](StringRef Unquoted_ମୂଲ୍ୟ,
+                             SmallVectorImpl<ଅକ୍ଷର> &Storage) {
+    ପ୍ରତିଜ୍ଞା(Unquoted_ମୂଲ୍ୟ.take_front(1) == "\\");
+    ଯଦି (Unquoted_ମୂଲ୍ୟ.size() == 1) {
       Token T;
-      T.Range = UnquotedValue;
+      T.Range = Unquoted_ମୂଲ୍ୟ;
       setError("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      ଫେରନ୍ତୁ StringRef();
     }
-    UnquotedValue = UnquotedValue.drop_front(1);
-    switch (UnquotedValue[0]) {
-    default: {
+    Unquoted_ମୂଲ୍ୟ = Unquoted_ମୂଲ୍ୟ.drop_front(1);
+    ବାଛ (Unquoted_ମୂଲ୍ୟ[0]) {
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: {
       Token T;
-      T.Range = UnquotedValue.take_front(1);
+      T.Range = Unquoted_ମୂଲ୍ୟ.take_front(1);
       setError("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      ଫେରନ୍ତୁ StringRef();
     }
-    case '\r':
+    ସ୍ଥିତି '\r':
       // Shrink the Windows-style EOL.
-      if (UnquotedValue.size() >= 2 && UnquotedValue[1] == '\n')
-        UnquotedValue = UnquotedValue.drop_front(1);
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.size() >= 2 && Unquoted_ମୂଲ୍ୟ[1] == '\n')
+        Unquoted_ମୂଲ୍ୟ = Unquoted_ମୂଲ୍ୟ.drop_front(1);
       [[fallthrough]];
-    case '\n':
-      return UnquotedValue.drop_front(1).ltrim(" \t");
-    case '0':
-      Storage.push_back(0x00);
-      break;
-    case 'a':
-      Storage.push_back(0x07);
-      break;
-    case 'b':
-      Storage.push_back(0x08);
-      break;
-    case 't':
-    case 0x09:
-      Storage.push_back(0x09);
-      break;
-    case 'n':
-      Storage.push_back(0x0A);
-      break;
-    case 'v':
-      Storage.push_back(0x0B);
-      break;
-    case 'f':
-      Storage.push_back(0x0C);
-      break;
-    case 'r':
-      Storage.push_back(0x0D);
-      break;
-    case 'e':
-      Storage.push_back(0x1B);
-      break;
-    case ' ':
-      Storage.push_back(0x20);
-      break;
-    case '"':
-      Storage.push_back(0x22);
-      break;
-    case '/':
-      Storage.push_back(0x2F);
-      break;
-    case '\\':
-      Storage.push_back(0x5C);
-      break;
-    case 'N':
+    ସ୍ଥିତି '\n':
+      ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ.drop_front(1).ltrim(" \t");
+    ସ୍ଥିତି '0':
+      Storage.ଠେଲ_back(0x00);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'a':
+      Storage.ଠେଲ_back(0x07);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'b':
+      Storage.ଠେଲ_back(0x08);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 't':
+    ସ୍ଥିତି 0x09:
+      Storage.ଠେଲ_back(0x09);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'n':
+      Storage.ଠେଲ_back(0x0A);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'v':
+      Storage.ଠେଲ_back(0x0B);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'f':
+      Storage.ଠେଲ_back(0x0C);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'r':
+      Storage.ଠେଲ_back(0x0D);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'e':
+      Storage.ଠେଲ_back(0x1B);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି ' ':
+      Storage.ଠେଲ_back(0x20);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି '"':
+      Storage.ଠେଲ_back(0x22);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି '/':
+      Storage.ଠେଲ_back(0x2F);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି '\\':
+      Storage.ଠେଲ_back(0x5C);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'N':
       encodeUTF8(0x85, Storage);
-      break;
-    case '_':
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି '_':
       encodeUTF8(0xA0, Storage);
-      break;
-    case 'L':
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'L':
       encodeUTF8(0x2028, Storage);
-      break;
-    case 'P':
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'P':
       encodeUTF8(0x2029, Storage);
-      break;
-    case 'x': {
-      if (UnquotedValue.size() < 3)
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'x': {
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.size() < 3)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 2).getAsInteger(16, UnicodeScalarValue))
+        ଭାଙ୍ଗ;
+      unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା Unicode_Scalar_ମୂଲ୍ୟ;
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.substr(1, 2).getAsInteger(16, Unicode_Scalar_ମୂଲ୍ୟ))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(3);
+        Unicode_Scalar_ମୂଲ୍ୟ = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_ମୂଲ୍ୟ, Storage);
+      ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ.drop_front(3);
     }
-    case 'u': {
-      if (UnquotedValue.size() < 5)
+    ସ୍ଥିତି 'u': {
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.size() < 5)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 4).getAsInteger(16, UnicodeScalarValue))
+        ଭାଙ୍ଗ;
+      unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା Unicode_Scalar_ମୂଲ୍ୟ;
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.substr(1, 4).getAsInteger(16, Unicode_Scalar_ମୂଲ୍ୟ))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(5);
+        Unicode_Scalar_ମୂଲ୍ୟ = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_ମୂଲ୍ୟ, Storage);
+      ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ.drop_front(5);
     }
-    case 'U': {
-      if (UnquotedValue.size() < 9)
+    ସ୍ଥିତି 'U': {
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.size() < 9)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 8).getAsInteger(16, UnicodeScalarValue))
+        ଭାଙ୍ଗ;
+      unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା Unicode_Scalar_ମୂଲ୍ୟ;
+      ଯଦି (Unquoted_ମୂଲ୍ୟ.substr(1, 8).getAsInteger(16, Unicode_Scalar_ମୂଲ୍ୟ))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(9);
+        Unicode_Scalar_ମୂଲ୍ୟ = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_ମୂଲ୍ୟ, Storage);
+      ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ.drop_front(9);
     }
     }
-    return UnquotedValue.drop_front(1);
+    ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ.drop_front(1);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "\\\r\n", UnescapeFunc);
+  ଫେରନ୍ତୁ parse_Scalar_ମୂଲ୍ୟ(Unquoted_ମୂଲ୍ୟ, Storage, "\\\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getSingleQuotedValue(StringRef RawValue,
-                                           SmallVectorImpl<char> &Storage) {
-  assert(RawValue.size() >= 2 && RawValue.front() == '\'' &&
-         RawValue.back() == '\'');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+StringRef Scalar_ଗଣ୍ଠି::get_Single_Quoted_ମୂଲ୍ୟ(StringRef Raw_ମୂଲ୍ୟ,
+                                           SmallVectorImpl<ଅକ୍ଷର> &Storage) {
+  ପ୍ରତିଜ୍ଞା(Raw_ମୂଲ୍ୟ.size() >= 2 && Raw_ମୂଲ୍ୟ.front() == '\'' &&
+         Raw_ମୂଲ୍ୟ.back() == '\'');
+  StringRef Unquoted_ମୂଲ୍ୟ = Raw_ମୂଲ୍ୟ.substr(1, Raw_ମୂଲ୍ୟ.size() - 2);
 
-  auto UnescapeFunc = [](StringRef UnquotedValue,
-                         SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(2) == "''");
-    Storage.push_back('\'');
-    return UnquotedValue.drop_front(2);
+  auto UnescapeFunc = [](StringRef Unquoted_ମୂଲ୍ୟ,
+                         SmallVectorImpl<ଅକ୍ଷର> &Storage) {
+    ପ୍ରତିଜ୍ଞା(Unquoted_ମୂଲ୍ୟ.take_front(2) == "''");
+    Storage.ଠେଲ_back('\'');
+    ଫେରନ୍ତୁ Unquoted_ମୂଲ୍ୟ.drop_front(2);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "'\r\n", UnescapeFunc);
+  ଫେରନ୍ତୁ parse_Scalar_ମୂଲ୍ୟ(Unquoted_ମୂଲ୍ୟ, Storage, "'\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getPlainValue(StringRef RawValue,
-                                    SmallVectorImpl<char> &Storage) {
+StringRef Scalar_ଗଣ୍ଠି::get_Plain_ମୂଲ୍ୟ(StringRef Raw_ମୂଲ୍ୟ,
+                                    SmallVectorImpl<ଅକ୍ଷର> &Storage) {
   // Trim trailing whitespace ('b-char' and 's-white').
   // NOTE: Alternatively we could change the scanner to not include whitespace
   //       here in the first place.
-  RawValue = RawValue.rtrim("\r\n \t");
-  return parseScalarValue(RawValue, Storage, "\r\n", nullptr);
+  Raw_ମୂଲ୍ୟ = Raw_ମୂଲ୍ୟ.rtrim("\r\n \t");
+  ଫେରନ୍ତୁ parse_Scalar_ମୂଲ୍ୟ(Raw_ମୂଲ୍ୟ, Storage, "\r\n", nullptr);
 }
 
-Node *KeyValueNode::getKey() {
-  if (Key)
-    return Key;
+ଗଣ୍ଠି *ଚାବି_ମୂଲ୍ୟ_ଗଣ୍ଠି::get_ଚାବି() {
+  ଯଦି (ଚାବି)
+    ଫେରନ୍ତୁ ଚାବି;
   // Handle implicit null keys.
   {
     Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
-        || t.Kind == Token::TK_Value
+    ଯଦି (   t.Kind == Token::TK_BlockEnd
+        || t.Kind == Token::TK_ମୂଲ୍ୟ
         || t.Kind == Token::TK_Error) {
-      return Key = new (getAllocator()) NullNode(Doc);
+      ଫେରନ୍ତୁ ଚାବି = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
     }
-    if (t.Kind == Token::TK_Key)
+    ଯଦି (t.Kind == Token::TK_ଚାବି)
       getNext(); // skip TK_Key.
   }
 
   // Handle explicit null keys.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Value) {
-    return Key = new (getAllocator()) NullNode(Doc);
+  ଯଦି (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_ମୂଲ୍ୟ) {
+    ଫେରନ୍ତୁ ଚାବି = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
   }
 
   // We've got a normal key.
-  return Key = parseBlockNode();
+  ଫେରନ୍ତୁ ଚାବି = parse_Block_ଗଣ୍ଠି();
 }
 
-Node *KeyValueNode::getValue() {
-  if (Value)
-    return Value;
+ଗଣ୍ଠି *ଚାବି_ମୂଲ୍ୟ_ଗଣ୍ଠି::get_ମୂଲ୍ୟ() {
+  ଯଦି (ମୂଲ୍ୟ)
+    ଫେରନ୍ତୁ ମୂଲ୍ୟ;
 
-  if (Node* Key = getKey())
-    Key->skip();
-  else {
+  ଯଦି (ଗଣ୍ଠି* ଚାବି = get_ଚାବି())
+    ଚାବି->skip();
+  ଅନ୍ୟଥା {
     setError("Null key in Key Value.", peekNext());
-    return Value = new (getAllocator()) NullNode(Doc);
+    ଫେରନ୍ତୁ ମୂଲ୍ୟ = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
   }
 
-  if (failed())
-    return Value = new (getAllocator()) NullNode(Doc);
+  ଯଦି (failed())
+    ଫେରନ୍ତୁ ମୂଲ୍ୟ = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
 
   // Handle implicit null values.
   {
     Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
+    ଯଦି (   t.Kind == Token::TK_BlockEnd
         || t.Kind == Token::TK_FlowMappingEnd
-        || t.Kind == Token::TK_Key
+        || t.Kind == Token::TK_ଚାବି
         || t.Kind == Token::TK_FlowEntry
         || t.Kind == Token::TK_Error) {
-      return Value = new (getAllocator()) NullNode(Doc);
+      ଫେରନ୍ତୁ ମୂଲ୍ୟ = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
     }
 
-    if (t.Kind != Token::TK_Value) {
+    ଯଦି (t.Kind != Token::TK_ମୂଲ୍ୟ) {
       setError("Unexpected token in Key Value.", t);
-      return Value = new (getAllocator()) NullNode(Doc);
+      ଫେରନ୍ତୁ ମୂଲ୍ୟ = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
     }
     getNext(); // skip TK_Value.
   }
 
   // Handle explicit null values.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Key) {
-    return Value = new (getAllocator()) NullNode(Doc);
+  ଯଦି (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_ଚାବି) {
+    ଫେରନ୍ତୁ ମୂଲ୍ୟ = ନୂତନ (getAllocator()) Null_ଗଣ୍ଠି(Doc);
   }
 
   // We got a normal value.
-  return Value = parseBlockNode();
+  ଫେରନ୍ତୁ ମୂଲ୍ୟ = parse_Block_ଗଣ୍ଠି();
 }
 
-void MappingNode::increment() {
-  if (failed()) {
-    IsAtEnd = true;
+ଶୂନ୍ୟ Mapping_ଗଣ୍ଠି::increment() {
+  ଯଦି (failed()) {
+    IsAtEnd = ସତ୍ୟ;
     CurrentEntry = nullptr;
-    return;
+    ଫେରନ୍ତୁ;
   }
-  if (CurrentEntry) {
+  ଯଦି (CurrentEntry) {
     CurrentEntry->skip();
-    if (Type == MT_Inline) {
-      IsAtEnd = true;
+    ଯଦି (Type == MT_Inline) {
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
-      return;
+      ଫେରନ୍ତୁ;
     }
   }
   Token T = peekNext();
-  if (T.Kind == Token::TK_Key || T.Kind == Token::TK_Scalar) {
+  ଯଦି (T.Kind == Token::TK_ଚାବି || T.Kind == Token::TK_Scalar) {
     // KeyValueNode eats the TK_Key. That way it can detect null keys.
-    CurrentEntry = new (getAllocator()) KeyValueNode(Doc);
-  } else if (Type == MT_Block) {
-    switch (T.Kind) {
-    case Token::TK_BlockEnd:
+    CurrentEntry = ନୂତନ (getAllocator()) ଚାବି_ମୂଲ୍ୟ_ଗଣ୍ଠି(Doc);
+  } ଅନ୍ୟଥା ଯଦି (Type == MT_Block) {
+    ବାଛ (T.Kind) {
+    ସ୍ଥିତି Token::TK_BlockEnd:
       getNext();
-      IsAtEnd = true;
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
-      break;
-    default:
+      ଭାଙ୍ଗ;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
       setError("Unexpected token. Expected Key or Block End", T);
       [[fallthrough]];
-    case Token::TK_Error:
-      IsAtEnd = true;
+    ସ୍ଥିତି Token::TK_Error:
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
     }
-  } else {
-    switch (T.Kind) {
-    case Token::TK_FlowEntry:
+  } ଅନ୍ୟଥା {
+    ବାଛ (T.Kind) {
+    ସ୍ଥିତି Token::TK_FlowEntry:
       // Eat the flow entry and recurse.
       getNext();
-      return increment();
-    case Token::TK_FlowMappingEnd:
+      ଫେରନ୍ତୁ increment();
+    ସ୍ଥିତି Token::TK_FlowMappingEnd:
       getNext();
       [[fallthrough]];
-    case Token::TK_Error:
+    ସ୍ଥିତି Token::TK_Error:
       // Set this to end iterator.
-      IsAtEnd = true;
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
-      break;
-    default:
+      ଭାଙ୍ଗ;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
       setError( "Unexpected token. Expected Key, Flow Entry, or Flow "
                 "Mapping End."
               , T);
-      IsAtEnd = true;
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
     }
   }
 }
 
-void SequenceNode::increment() {
-  if (failed()) {
-    IsAtEnd = true;
+ଶୂନ୍ୟ Sequence_ଗଣ୍ଠି::increment() {
+  ଯଦି (failed()) {
+    IsAtEnd = ସତ୍ୟ;
     CurrentEntry = nullptr;
-    return;
+    ଫେରନ୍ତୁ;
   }
-  if (CurrentEntry)
+  ଯଦି (CurrentEntry)
     CurrentEntry->skip();
   Token T = peekNext();
-  if (SeqType == ST_Block) {
-    switch (T.Kind) {
-    case Token::TK_BlockEntry:
+  ଯଦି (SeqType == ST_Block) {
+    ବାଛ (T.Kind) {
+    ସ୍ଥିତି Token::TK_BlockEntry:
       getNext();
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
-        IsAtEnd = true;
+      CurrentEntry = parse_Block_ଗଣ୍ଠି();
+      ଯଦି (!CurrentEntry) { // An error occurred.
+        IsAtEnd = ସତ୍ୟ;
         CurrentEntry = nullptr;
       }
-      break;
-    case Token::TK_BlockEnd:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_BlockEnd:
       getNext();
-      IsAtEnd = true;
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
-      break;
-    default:
+      ଭାଙ୍ଗ;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
       setError( "Unexpected token. Expected Block Entry or Block End."
               , T);
       [[fallthrough]];
-    case Token::TK_Error:
-      IsAtEnd = true;
+    ସ୍ଥିତି Token::TK_Error:
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
     }
-  } else if (SeqType == ST_Indentless) {
-    switch (T.Kind) {
-    case Token::TK_BlockEntry:
+  } ଅନ୍ୟଥା ଯଦି (SeqType == ST_Indentless) {
+    ବାଛ (T.Kind) {
+    ସ୍ଥିତି Token::TK_BlockEntry:
       getNext();
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
-        IsAtEnd = true;
+      CurrentEntry = parse_Block_ଗଣ୍ଠି();
+      ଯଦି (!CurrentEntry) { // An error occurred.
+        IsAtEnd = ସତ୍ୟ;
         CurrentEntry = nullptr;
       }
-      break;
-    default:
-    case Token::TK_Error:
-      IsAtEnd = true;
+      ଭାଙ୍ଗ;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+    ସ୍ଥିତି Token::TK_Error:
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
     }
-  } else if (SeqType == ST_Flow) {
-    switch (T.Kind) {
-    case Token::TK_FlowEntry:
+  } ଅନ୍ୟଥା ଯଦି (SeqType == ST_Flow) {
+    ବାଛ (T.Kind) {
+    ସ୍ଥିତି Token::TK_FlowEntry:
       // Eat the flow entry and recurse.
       getNext();
-      WasPreviousTokenFlowEntry = true;
-      return increment();
-    case Token::TK_FlowSequenceEnd:
+      WasPreviousTokenFlowEntry = ସତ୍ୟ;
+      ଫେରନ୍ତୁ increment();
+    ସ୍ଥିତି Token::TK_FlowSequenceEnd:
       getNext();
       [[fallthrough]];
-    case Token::TK_Error:
+    ସ୍ଥିତି Token::TK_Error:
       // Set this to end iterator.
-      IsAtEnd = true;
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
-      break;
-    case Token::TK_StreamEnd:
-    case Token::TK_DocumentEnd:
-    case Token::TK_DocumentStart:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି Token::TK_StreamEnd:
+    ସ୍ଥିତି Token::TK_DocumentEnd:
+    ସ୍ଥିତି Token::TK_DocumentStart:
       setError("Could not find closing ]!", T);
       // Set this to end iterator.
-      IsAtEnd = true;
+      IsAtEnd = ସତ୍ୟ;
       CurrentEntry = nullptr;
-      break;
-    default:
-      if (!WasPreviousTokenFlowEntry) {
+      ଭାଙ୍ଗ;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+      ଯଦି (!WasPreviousTokenFlowEntry) {
         setError("Expected , between entries!", T);
-        IsAtEnd = true;
+        IsAtEnd = ସତ୍ୟ;
         CurrentEntry = nullptr;
-        break;
+        ଭାଙ୍ଗ;
       }
       // Otherwise it must be a flow entry.
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) {
-        IsAtEnd = true;
+      CurrentEntry = parse_Block_ଗଣ୍ଠି();
+      ଯଦି (!CurrentEntry) {
+        IsAtEnd = ସତ୍ୟ;
       }
-      WasPreviousTokenFlowEntry = false;
-      break;
+      WasPreviousTokenFlowEntry = ମିଥ୍ୟା;
+      ଭାଙ୍ଗ;
     }
   }
 }
 
-Document::Document(Stream &S) : stream(S), Root(nullptr) {
+Document::Document(Stream &S) : stream(S), ମୂଳ_2(nullptr) {
   // Tag maps starts with two default mappings.
   TagMap["!"] = "!";
   TagMap["!!"] = "tag:yaml.org,2002:";
 
-  if (parseDirectives())
+  ଯଦି (parseDirectives())
     expectToken(Token::TK_DocumentStart);
   Token &T = peekNext();
-  if (T.Kind == Token::TK_DocumentStart)
+  ଯଦି (T.Kind == Token::TK_DocumentStart)
     getNext();
 }
 
-bool Document::skip()  {
-  if (stream.scanner->failed())
-    return false;
-  if (!Root && !getRoot())
-    return false;
-  Root->skip();
+ତାର୍କିକ Document::skip()  {
+  ଯଦି (stream.scanner->failed())
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (!ମୂଳ_2 && !get_ମୂଳ())
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ମୂଳ_2->skip();
   Token &T = peekNext();
-  if (T.Kind == Token::TK_StreamEnd)
-    return false;
-  if (T.Kind == Token::TK_DocumentEnd) {
+  ଯଦି (T.Kind == Token::TK_StreamEnd)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (T.Kind == Token::TK_DocumentEnd) {
     getNext();
-    return skip();
+    ଫେରନ୍ତୁ skip();
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
 Token &Document::peekNext() {
-  return stream.scanner->peekNext();
+  ଫେରନ୍ତୁ stream.scanner->peekNext();
 }
 
 Token Document::getNext() {
-  return stream.scanner->getNext();
+  ଫେରନ୍ତୁ stream.scanner->getNext();
 }
 
-void Document::setError(const Twine &Message, Token &Location) const {
+ଶୂନ୍ୟ Document::setError(ଅଚଳ Twine &Message, Token &Location) ଅଚଳ {
   stream.scanner->setError(Message, Location.Range.begin());
 }
 
-bool Document::failed() const {
-  return stream.scanner->failed();
+ତାର୍କିକ Document::failed() ଅଚଳ {
+  ଫେରନ୍ତୁ stream.scanner->failed();
 }
 
-Node *Document::parseBlockNode() {
+ଗଣ୍ଠି *Document::parse_Block_ଗଣ୍ଠି() {
   Token T = peekNext();
   // Handle properties.
   Token AnchorInfo;
   Token TagInfo;
 parse_property:
-  switch (T.Kind) {
-  case Token::TK_Alias:
+  ବାଛ (T.Kind) {
+  ସ୍ଥିତି Token::TK_Alias:
     getNext();
-    return new (NodeAllocator) AliasNode(stream.CurrentDoc, T.Range.substr(1));
-  case Token::TK_Anchor:
-    if (AnchorInfo.Kind == Token::TK_Anchor) {
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator) Alias_ଗଣ୍ଠି(stream.CurrentDoc, T.Range.substr(1));
+  ସ୍ଥିତି Token::TK_Anchor:
+    ଯଦି (AnchorInfo.Kind == Token::TK_Anchor) {
       setError("Already encountered an anchor for this node!", T);
-      return nullptr;
+      ଫେରନ୍ତୁ nullptr;
     }
     AnchorInfo = getNext(); // Consume TK_Anchor.
     T = peekNext();
-    goto parse_property;
-  case Token::TK_Tag:
-    if (TagInfo.Kind == Token::TK_Tag) {
+    ଯାଅ parse_property;
+  ସ୍ଥିତି Token::TK_Tag:
+    ଯଦି (TagInfo.Kind == Token::TK_Tag) {
       setError("Already encountered a tag for this node!", T);
-      return nullptr;
+      ଫେରନ୍ତୁ nullptr;
     }
     TagInfo = getNext(); // Consume TK_Tag.
     T = peekNext();
-    goto parse_property;
-  default:
-    break;
+    ଯାଅ parse_property;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+    ଭାଙ୍ଗ;
   }
 
-  switch (T.Kind) {
-  case Token::TK_BlockEntry:
+  ବାଛ (T.Kind) {
+  ସ୍ଥିତି Token::TK_BlockEntry:
     // We got an unindented BlockEntry sequence. This is not terminated with
     // a BlockEnd.
     // Don't eat the TK_BlockEntry, SequenceNode needs it.
-    return new (NodeAllocator) SequenceNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator) Sequence_ଗଣ୍ଠି( stream.CurrentDoc
                                            , AnchorInfo.Range.substr(1)
                                            , TagInfo.Range
-                                           , SequenceNode::ST_Indentless);
-  case Token::TK_BlockSequenceStart:
+                                           , Sequence_ଗଣ୍ଠି::ST_Indentless);
+  ସ୍ଥିତି Token::TK_BlockSequenceStart:
     getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+      Sequence_ଗଣ୍ଠି( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
-                  , SequenceNode::ST_Block);
-  case Token::TK_BlockMappingStart:
+                  , Sequence_ଗଣ୍ଠି::ST_Block);
+  ସ୍ଥିତି Token::TK_BlockMappingStart:
     getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+      Mapping_ଗଣ୍ଠି( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Block);
-  case Token::TK_FlowSequenceStart:
+                 , Mapping_ଗଣ୍ଠି::MT_Block);
+  ସ୍ଥିତି Token::TK_FlowSequenceStart:
     getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+      Sequence_ଗଣ୍ଠି( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
-                  , SequenceNode::ST_Flow);
-  case Token::TK_FlowMappingStart:
+                  , Sequence_ଗଣ୍ଠି::ST_Flow);
+  ସ୍ଥିତି Token::TK_FlowMappingStart:
     getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+      Mapping_ଗଣ୍ଠି( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Flow);
-  case Token::TK_Scalar:
+                 , Mapping_ଗଣ୍ଠି::MT_Flow);
+  ସ୍ଥିତି Token::TK_Scalar:
     getNext();
-    return new (NodeAllocator)
-      ScalarNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+      Scalar_ଗଣ୍ଠି( stream.CurrentDoc
                 , AnchorInfo.Range.substr(1)
                 , TagInfo.Range
                 , T.Range);
-  case Token::TK_BlockScalar: {
+  ସ୍ଥିତି Token::TK_BlockScalar: {
     getNext();
-    StringRef NullTerminatedStr(T.Value.c_str(), T.Value.length() + 1);
-    StringRef StrCopy = NullTerminatedStr.copy(NodeAllocator).drop_back();
-    return new (NodeAllocator)
-        BlockScalarNode(stream.CurrentDoc, AnchorInfo.Range.substr(1),
+    StringRef NullTerminatedStr(T.ମୂଲ୍ୟ.c_str(), T.ମୂଲ୍ୟ.length() + 1);
+    StringRef StrCopy = NullTerminatedStr.copy(ଗଣ୍ଠି_Allocator).drop_back();
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+        Block_Scalar_ଗଣ୍ଠି(stream.CurrentDoc, AnchorInfo.Range.substr(1),
                         TagInfo.Range, StrCopy, T.Range);
   }
-  case Token::TK_Key:
+  ସ୍ଥିତି Token::TK_ଚାବି:
     // Don't eat the TK_Key, KeyValueNode expects it.
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator)
+      Mapping_ଗଣ୍ଠି( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Inline);
-  case Token::TK_DocumentStart:
-  case Token::TK_DocumentEnd:
-  case Token::TK_StreamEnd:
-  default:
+                 , Mapping_ଗଣ୍ଠି::MT_Inline);
+  ସ୍ଥିତି Token::TK_DocumentStart:
+  ସ୍ଥିତି Token::TK_DocumentEnd:
+  ସ୍ଥିତି Token::TK_StreamEnd:
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
     // TODO: Properly handle tags. "[!!str ]" should resolve to !!str "", not
     //       !!null null.
-    return new (NodeAllocator) NullNode(stream.CurrentDoc);
-  case Token::TK_FlowMappingEnd:
-  case Token::TK_FlowSequenceEnd:
-  case Token::TK_FlowEntry: {
-    if (Root && (isa<MappingNode>(Root) || isa<SequenceNode>(Root)))
-      return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator) Null_ଗଣ୍ଠି(stream.CurrentDoc);
+  ସ୍ଥିତି Token::TK_FlowMappingEnd:
+  ସ୍ଥିତି Token::TK_FlowSequenceEnd:
+  ସ୍ଥିତି Token::TK_FlowEntry: {
+    ଯଦି (ମୂଳ_2 && (isa<Mapping_ଗଣ୍ଠି>(ମୂଳ_2) || isa<Sequence_ଗଣ୍ଠି>(ମୂଳ_2)))
+      ଫେରନ୍ତୁ ନୂତନ (ଗଣ୍ଠି_Allocator) Null_ଗଣ୍ଠି(stream.CurrentDoc);
 
     setError("Unexpected token", T);
-    return nullptr;
+    ଫେରନ୍ତୁ nullptr;
   }
-  case Token::TK_Error:
-    return nullptr;
+  ସ୍ଥିତି Token::TK_Error:
+    ଫେରନ୍ତୁ nullptr;
   }
   llvm_unreachable("Control flow shouldn't reach here.");
-  return nullptr;
+  ଫେରନ୍ତୁ nullptr;
 }
 
-bool Document::parseDirectives() {
-  bool isDirective = false;
-  while (true) {
+ତାର୍କିକ Document::parseDirectives() {
+  ତାର୍କିକ isDirective = ମିଥ୍ୟା;
+  ଯେତେବେଳେ (ସତ୍ୟ) {
     Token T = peekNext();
-    if (T.Kind == Token::TK_TagDirective) {
+    ଯଦି (T.Kind == Token::TK_TagDirective) {
       parseTAGDirective();
-      isDirective = true;
-    } else if (T.Kind == Token::TK_VersionDirective) {
+      isDirective = ସତ୍ୟ;
+    } ଅନ୍ୟଥା ଯଦି (T.Kind == Token::TK_VersionDirective) {
       parseYAMLDirective();
-      isDirective = true;
-    } else {
-      break;
+      isDirective = ସତ୍ୟ;
+    } ଅନ୍ୟଥା {
+      ଭାଙ୍ଗ;
     }
   }
-  return isDirective;
+  ଫେରନ୍ତୁ isDirective;
 }
 
-void Document::parseYAMLDirective() {
+ଶୂନ୍ୟ Document::parseYAMLDirective() {
   getNext(); // Eat %YAML <version>
 }
 
-void Document::parseTAGDirective() {
+ଶୂନ୍ୟ Document::parseTAGDirective() {
   Token Tag = getNext(); // %TAG <handle> <prefix>
   StringRef T = Tag.Range;
   // Strip %TAG
@@ -2654,11 +2654,11 @@ void Document::parseTAGDirective() {
   TagMap[TagHandle] = TagPrefix;
 }
 
-bool Document::expectToken(int TK) {
+ତାର୍କିକ Document::expectToken(ପୂର୍ଣ୍ଣସଂଖ୍ୟା TK) {
   Token T = getNext();
-  if (T.Kind != TK) {
+  ଯଦି (T.Kind != TK) {
     setError("Unexpected token", T);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }

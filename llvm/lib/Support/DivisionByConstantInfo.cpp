@@ -10,23 +10,23 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DivisionByConstantInfo.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/DivisionByConstantInfo.h"
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
 /// Calculate the magic numbers required to implement a signed integer division
 /// by a constant as a sequence of multiplies, adds and shifts.  Requires that
 /// the divisor not be 0, 1, or -1.  Taken from "Hacker's Delight", Henry S.
 /// Warren, Jr., Chapter 10.
-SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
-  assert(!D.isZero() && "Precondition violation.");
+SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(ଅଚଳ APInt &D) {
+  ପ୍ରତିଜ୍ଞା(!D.isZero() && "Precondition violation.");
 
   // We'd be endlessly stuck in the loop.
-  assert(D.getBitWidth() >= 3 && "Does not work at smaller bitwidths.");
+  ପ୍ରତିଜ୍ଞା(D.getBitWidth() >= 3 && "Does not work at smaller bitwidths.");
 
   APInt Delta;
-  APInt SignedMin = APInt::getSignedMinValue(D.getBitWidth());
-  struct SignedDivisionByConstantInfo Retval;
+  APInt SignedMin = APInt::get_Signed_Min_ମୂଲ୍ୟ(D.getBitWidth());
+  ସଂରଚନା SignedDivisionByConstantInfo Retval;
 
   APInt AD = D.abs();
   APInt T = SignedMin + (D.lshr(D.getBitWidth() - 1));
@@ -37,31 +37,31 @@ SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
   APInt::udivrem(SignedMin, ANC, Q1, R1);
   // initialize Q2 = 2P/abs(D); R2 = rem(2P,abs(D))
   APInt::udivrem(SignedMin, AD, Q2, R2);
-  do {
+  କର {
     P = P + 1;
     Q1 <<= 1;      // update Q1 = 2P/abs(NC)
     R1 <<= 1;      // update R1 = rem(2P/abs(NC))
-    if (R1.uge(ANC)) { // must be unsigned comparison
+    ଯଦି (R1.uge(ANC)) { // must be unsigned comparison
       ++Q1;
       R1 -= ANC;
     }
     Q2 <<= 1;     // update Q2 = 2P/abs(D)
     R2 <<= 1;     // update R2 = rem(2P/abs(D))
-    if (R2.uge(AD)) { // must be unsigned comparison
+    ଯଦି (R2.uge(AD)) { // must be unsigned comparison
       ++Q2;
       R2 -= AD;
     }
     // Delta = AD - R2
     Delta = AD;
     Delta -= R2;
-  } while (Q1.ult(Delta) || (Q1 == Delta && R1.isZero()));
+  } ଯେତେବେଳେ (Q1.ult(Delta) || (Q1 == Delta && R1.isZero()));
 
   Retval.Magic = std::move(Q2);
   ++Retval.Magic;
-  if (D.isNegative())
+  ଯଦି (D.isNegative())
     Retval.Magic.negate();                  // resulting magic number
   Retval.ShiftAmount = P - D.getBitWidth(); // resulting shift
-  return Retval;
+  ଫେରନ୍ତୁ Retval;
 }
 
 /// Calculate the magic numbers required to implement an unsigned integer
@@ -71,46 +71,46 @@ SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
 /// LeadingZeros can be used to simplify the calculation if the upper bits
 /// of the divided value are known zero.
 UnsignedDivisionByConstantInfo
-UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
-                                    bool AllowEvenDivisorOptimization,
-                                    bool AllowWidenOptimization) {
-  assert(!D.isZero() && !D.isOne() && "Precondition violation.");
-  assert(D.getBitWidth() > 1 && "Does not work at smaller bitwidths.");
+UnsignedDivisionByConstantInfo::get(ଅଚଳ APInt &D, unsigned LeadingZeros,
+                                    ତାର୍କିକ Allow_Even_ଭାଜକ_Optimization,
+                                    ତାର୍କିକ AllowWidenOptimization) {
+  ପ୍ରତିଜ୍ଞା(!D.isZero() && !D.isOne() && "Precondition violation.");
+  ପ୍ରତିଜ୍ଞା(D.getBitWidth() > 1 && "Does not work at smaller bitwidths.");
 
   APInt Delta;
-  struct UnsignedDivisionByConstantInfo Retval;
-  Retval.IsAdd = false; // initialize "add" indicator
-  Retval.Widen = false; // initialize widen indicator
+  ସଂରଚନା UnsignedDivisionByConstantInfo Retval;
+  Retval.IsAdd = ମିଥ୍ୟା; // initialize "add" indicator
+  Retval.Widen = ମିଥ୍ୟା; // initialize widen indicator
   APInt AllOnes =
-      APInt::getLowBitsSet(D.getBitWidth(), D.getBitWidth() - LeadingZeros);
-  APInt SignedMin = APInt::getSignedMinValue(D.getBitWidth());
-  APInt SignedMax = APInt::getSignedMaxValue(D.getBitWidth());
+      APInt::get_ତଳ_Bits_Set(D.getBitWidth(), D.getBitWidth() - LeadingZeros);
+  APInt SignedMin = APInt::get_Signed_Min_ମୂଲ୍ୟ(D.getBitWidth());
+  APInt SignedMax = APInt::get_Signed_Max_ମୂଲ୍ୟ(D.getBitWidth());
 
   // Calculate NC, the largest dividend such that NC.urem(D) == D-1.
   APInt NC = AllOnes - (AllOnes + 1 - D).urem(D);
-  assert(NC.urem(D) == D - 1 && "Unexpected NC value");
+  ପ୍ରତିଜ୍ଞା(NC.urem(D) == D - 1 && "Unexpected NC value");
   unsigned P = D.getBitWidth() - 1; // initialize P
   APInt Q1, R1, Q2, R2;
   // initialize Q1 = 2P/NC; R1 = rem(2P,NC)
   APInt::udivrem(SignedMin, NC, Q1, R1);
   // initialize Q2 = (2P-1)/D; R2 = rem((2P-1),D)
   APInt::udivrem(SignedMax, D, Q2, R2);
-  do {
+  କର {
     P = P + 1;
-    if (R1.uge(NC - R1)) {
+    ଯଦି (R1.uge(NC - R1)) {
       // update Q1
       Q1 <<= 1;
       ++Q1;
       // update R1
       R1 <<= 1;
       R1 -= NC;
-    } else {
+    } ଅନ୍ୟଥା {
       Q1 <<= 1; // update Q1
       R1 <<= 1; // update R1
     }
-    if ((R2 + 1).uge(D - R2)) {
-      if (Q2.uge(SignedMax))
-        Retval.IsAdd = true;
+    ଯଦି ((R2 + 1).uge(D - R2)) {
+      ଯଦି (Q2.uge(SignedMax))
+        Retval.IsAdd = ସତ୍ୟ;
       // update Q2
       Q2 <<= 1;
       ++Q2;
@@ -118,9 +118,9 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
       R2 <<= 1;
       ++R2;
       R2 -= D;
-    } else {
-      if (Q2.uge(SignedMin))
-        Retval.IsAdd = true;
+    } ଅନ୍ୟଥା {
+      ଯଦି (Q2.uge(SignedMin))
+        Retval.IsAdd = ସତ୍ୟ;
       // update Q2
       Q2 <<= 1;
       // update R2
@@ -131,25 +131,25 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
     Delta = D;
     --Delta;
     Delta -= R2;
-  } while (P < D.getBitWidth() * 2 &&
+  } ଯେତେବେଳେ (P < D.getBitWidth() * 2 &&
            (Q1.ult(Delta) || (Q1 == Delta && R1.isZero())));
 
-  if (Retval.IsAdd && !D[0] && AllowEvenDivisorOptimization) {
+  ଯଦି (Retval.IsAdd && !D[0] && Allow_Even_ଭାଜକ_Optimization) {
     unsigned PreShift = D.countr_zero();
     APInt ShiftedD = D.lshr(PreShift);
     Retval =
         UnsignedDivisionByConstantInfo::get(ShiftedD, LeadingZeros + PreShift);
-    assert(!Retval.IsAdd && Retval.PreShift == 0);
+    ପ୍ରତିଜ୍ଞା(!Retval.IsAdd && Retval.PreShift == 0);
     Retval.PreShift = PreShift;
-    return Retval;
+    ଫେରନ୍ତୁ Retval;
   }
 
   Retval.Magic = std::move(Q2);             // resulting magic number
   ++Retval.Magic;
   Retval.PostShift = P - D.getBitWidth(); // resulting shift
   // Reduce shift amount for IsAdd.
-  if (Retval.IsAdd) {
-    assert(Retval.PostShift > 0 && "Unexpected shift");
+  ଯଦି (Retval.IsAdd) {
+    ପ୍ରତିଜ୍ଞା(Retval.PostShift > 0 && "Unexpected shift");
     Retval.PostShift -= 1;
   }
   Retval.PreShift = 0;
@@ -158,16 +158,16 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
   // This is for optimizing 32-bit division using 64-bit multiplication.
   // The actual magic constant is 2^W + Magic ((W+1)-bit).
   // We pre-shift it left by (W*2 - OriginalShift) to avoid runtime shift.
-  if (Retval.IsAdd && AllowWidenOptimization) {
+  ଯଦି (Retval.IsAdd && AllowWidenOptimization) {
     unsigned W = D.getBitWidth();
     unsigned OriginalShift = Retval.PostShift + W + 1;
     // Since PostShift >= 1, shift amount is at most W-2, so W*2 bits suffice.
     Retval.Magic = (APInt::getOneBitSet(W * 2, W) + Retval.Magic.zext(W * 2))
                        .shl(W * 2 - OriginalShift);
-    Retval.IsAdd = false;
+    Retval.IsAdd = ମିଥ୍ୟା;
     Retval.PostShift = 0;
-    Retval.Widen = true;
+    Retval.Widen = ସତ୍ୟ;
   }
 
-  return Retval;
+  ଫେରନ୍ତୁ Retval;
 }

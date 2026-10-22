@@ -14,54 +14,54 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SHA1.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <string.h>
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/SHA1.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/ArrayRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Endian.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/SwapByteOrder.h"
+#ଅନ୍ତର୍ଭାଵ <string.h>
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
-static inline uint32_t rol(uint32_t Number, int Bits) {
-  return (Number << Bits) | (Number >> (32 - Bits));
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ uint32_t rol(uint32_t ସଂଖ୍ୟା, ପୂର୍ଣ୍ଣସଂଖ୍ୟା Bits) {
+  ଫେରନ୍ତୁ (ସଂଖ୍ୟା << Bits) | (ସଂଖ୍ୟା >> (32 - Bits));
 }
 
-static inline uint32_t blk0(uint32_t *Buf, int I) { return Buf[I]; }
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ uint32_t blk0(uint32_t *Buf, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I) { ଫେରନ୍ତୁ Buf[I]; }
 
-static inline uint32_t blk(uint32_t *Buf, int I) {
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ uint32_t blk(uint32_t *Buf, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I) {
   Buf[I & 15] = rol(Buf[(I + 13) & 15] ^ Buf[(I + 8) & 15] ^ Buf[(I + 2) & 15] ^
                         Buf[I & 15],
                     1);
-  return Buf[I & 15];
+  ଫେରନ୍ତୁ Buf[I & 15];
 }
 
-static inline void r0(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ଶୂନ୍ୟ r0(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I, uint32_t *Buf) {
   E += ((B & (C ^ D)) ^ D) + blk0(Buf, I) + 0x5A827999 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r1(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ଶୂନ୍ୟ r1(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I, uint32_t *Buf) {
   E += ((B & (C ^ D)) ^ D) + blk(Buf, I) + 0x5A827999 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r2(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ଶୂନ୍ୟ r2(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I, uint32_t *Buf) {
   E += (B ^ C ^ D) + blk(Buf, I) + 0x6ED9EBA1 + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r3(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ଶୂନ୍ୟ r3(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I, uint32_t *Buf) {
   E += (((B | C) & D) | (B & C)) + blk(Buf, I) + 0x8F1BBCDC + rol(A, 5);
   B = rol(B, 30);
 }
 
-static inline void r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
-                      uint32_t &E, int I, uint32_t *Buf) {
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ଶୂନ୍ୟ r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
+                      uint32_t &E, ପୂର୍ଣ୍ଣସଂଖ୍ୟା I, uint32_t *Buf) {
   E += (B ^ C ^ D) + blk(Buf, I) + 0xCA62C1D6 + rol(A, 5);
   B = rol(B, 30);
 }
@@ -78,17 +78,17 @@ static inline void r4(uint32_t &A, uint32_t &B, uint32_t &C, uint32_t &D,
 #define SEED_3 0x10325476
 #define SEED_4 0xc3d2e1f0
 
-void SHA1::init() {
+ଶୂନ୍ୟ SHA1::init() {
   InternalState.State[0] = SEED_0;
   InternalState.State[1] = SEED_1;
   InternalState.State[2] = SEED_2;
   InternalState.State[3] = SEED_3;
   InternalState.State[4] = SEED_4;
-  InternalState.ByteCount = 0;
+  InternalState.Byte_ଗଣନା = 0;
   InternalState.BufferOffset = 0;
 }
 
-void SHA1::hashBlock() {
+ଶୂନ୍ୟ SHA1::hashBlock() {
   uint32_t A = InternalState.State[0];
   uint32_t B = InternalState.State[1];
   uint32_t C = InternalState.State[2];
@@ -187,102 +187,102 @@ void SHA1::hashBlock() {
   InternalState.State[4] += E;
 }
 
-void SHA1::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
+ଶୂନ୍ୟ SHA1::addUncounted(uint8_t Data) {
+  ଯଦି constexpr (sys::IsBigEndianHost)
     InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
+  ଅନ୍ୟଥା
     InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
 
   InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
+  ଯଦି (InternalState.BufferOffset == BLOCK_LENGTH) {
     hashBlock();
     InternalState.BufferOffset = 0;
   }
 }
 
-void SHA1::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
+ଶୂନ୍ୟ SHA1::writebyte(uint8_t Data) {
+  ++InternalState.Byte_ଗଣନା;
   addUncounted(Data);
 }
 
-void SHA1::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+ଶୂନ୍ୟ SHA1::update(ArrayRef<uint8_t> Data) {
+  InternalState.Byte_ଗଣନା += Data.size();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
-    const size_t Remainder = std::min<size_t>(
+  ଯଦି (InternalState.BufferOffset > 0) {
+    ଅଚଳ size_t Remainder = std::min<size_t>(
         Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
-    for (size_t I = 0; I < Remainder; ++I)
+    ପାଇଁ (size_t I = 0; I < Remainder; ++I)
       addUncounted(Data[I]);
     Data = Data.drop_front(Remainder);
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
-    assert(InternalState.BufferOffset == 0);
+  ଯେତେବେଳେ (Data.size() >= BLOCK_LENGTH) {
+    ପ୍ରତିଜ୍ଞା(InternalState.BufferOffset == 0);
     static_assert(BLOCK_LENGTH % 4 == 0);
     constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
-    for (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
+    ପାଇଁ (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
       InternalState.Buffer.L[I] = support::endian::read32be(&Data[I * 4]);
     hashBlock();
     Data = Data.drop_front(BLOCK_LENGTH);
   }
 
   // Finish the remainder.
-  for (uint8_t C : Data)
+  ପାଇଁ (uint8_t C : Data)
     addUncounted(C);
 }
 
-void SHA1::update(StringRef Str) {
+ଶୂନ୍ୟ SHA1::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<ଅକ୍ଷର *>(Str.data()), Str.size()));
 }
 
-void SHA1::pad() {
+ଶୂନ୍ୟ SHA1::pad() {
   // Implement SHA-1 padding (fips180-2 5.1.1)
 
   // Pad with 0x80 followed by 0x00 until the end of the block
   addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
+  ଯେତେବେଳେ (InternalState.BufferOffset != 56)
     addUncounted(0x00);
 
   // Append length in the last 8 bytes
   addUncounted(0); // We're only using 32 bit lengths
   addUncounted(0); // But SHA-1 supports 64 bit lengths
   addUncounted(0); // So zero pad the top bits
-  addUncounted(InternalState.ByteCount >> 29); // Shifting to multiply by 8
-  addUncounted(InternalState.ByteCount >>
+  addUncounted(InternalState.Byte_ଗଣନା >> 29); // Shifting to multiply by 8
+  addUncounted(InternalState.Byte_ଗଣନା >>
                21); // as SHA-1 supports bitstreams as well as
-  addUncounted(InternalState.ByteCount >> 13); // byte.
-  addUncounted(InternalState.ByteCount >> 5);
-  addUncounted(InternalState.ByteCount << 3);
+  addUncounted(InternalState.Byte_ଗଣନା >> 13); // byte.
+  addUncounted(InternalState.Byte_ଗଣନା >> 5);
+  addUncounted(InternalState.Byte_ଗଣନା << 3);
 }
 
-void SHA1::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
+ଶୂନ୍ୟ SHA1::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  ଯଦି constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 5; i++) {
+    ପାଇଁ (ପୂର୍ଣ୍ଣସଂଖ୍ୟା i = 0; i < 5; i++) {
       HashResult[i] = InternalState.State[i];
     }
-  } else {
+  } ଅନ୍ୟଥା {
     // Swap byte order back
-    for (int i = 0; i < 5; i++) {
+    ପାଇଁ (ପୂର୍ଣ୍ଣସଂଖ୍ୟା i = 0; i < 5; i++) {
       HashResult[i] = llvm::byteswap(InternalState.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 20> SHA1::final() {
-  union {
+  ସଂଘ {
     std::array<uint32_t, HASH_LENGTH / 4> HashResult;
     std::array<uint8_t, HASH_LENGTH> ReturnResult;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
+  static_assert(ଆକାର(HashResult) == ଆକାର(ReturnResult));
   final(HashResult);
-  return ReturnResult;
+  ଫେରନ୍ତୁ ReturnResult;
 }
 
 std::array<uint8_t, 20> SHA1::result() {
@@ -294,11 +294,11 @@ std::array<uint8_t, 20> SHA1::result() {
   InternalState = StateToRestore;
 
   // Return pointer to hash (20 characters)
-  return Hash;
+  ଫେରନ୍ତୁ Hash;
 }
 
 std::array<uint8_t, 20> SHA1::hash(ArrayRef<uint8_t> Data) {
   SHA1 Hash;
   Hash.update(Data);
-  return Hash.final();
+  ଫେରନ୍ତୁ Hash.final();
 }

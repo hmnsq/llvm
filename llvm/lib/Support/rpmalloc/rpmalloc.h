@@ -13,40 +13,40 @@
 
 #pragma once
 
-#include <stddef.h>
+#ଅନ୍ତର୍ଭାଵ <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {
+ବାହ୍ୟ "C" {
 #endif
 
-#if defined(__clang__) || defined(__GNUC__)
+#ଯଦି defined(__clang__) || defined(__GNUC__)
 #define RPMALLOC_EXPORT __attribute__((visibility("default")))
 #define RPMALLOC_ALLOCATOR
-#if (defined(__clang_major__) && (__clang_major__ < 4)) ||                     \
+#ଯଦି (defined(__clang_major__) && (__clang_major__ < 4)) ||                     \
     (defined(__GNUC__) && defined(ENABLE_PRELOAD) && ENABLE_PRELOAD)
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
-#else
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(ଗଣନା_2, size)
+#ଅନ୍ୟଥା
 #define RPMALLOC_ATTRIB_MALLOC __attribute__((__malloc__))
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size) __attribute__((alloc_size(size)))
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)                               \
-  __attribute__((alloc_size(count, size)))
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(ଗଣନା_2, size)                               \
+  __attribute__((alloc_size(ଗଣନା_2, size)))
 #endif
 #define RPMALLOC_CDECL
-#elif defined(_MSC_VER)
+#ନଚେତଯଦି defined(_MSC_VER)
 #define RPMALLOC_EXPORT
 #define RPMALLOC_ALLOCATOR __declspec(allocator) __declspec(restrict)
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(ଗଣନା_2, size)
 #define RPMALLOC_CDECL __cdecl
-#else
+#ଅନ୍ୟଥା
 #define RPMALLOC_EXPORT
 #define RPMALLOC_ALLOCATOR
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(ଗଣନା_2, size)
 #define RPMALLOC_CDECL
 #endif
 
@@ -72,7 +72,7 @@ extern "C" {
 //  realloc which failes to allocate a new block).
 #define RPMALLOC_GROW_OR_FAIL 2
 
-typedef struct rpmalloc_global_statistics_t {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା rpmalloc_global_statistics_t {
   //! Current amount of virtual memory mapped, all of which might not have been
   //! committed (only if ENABLE_STATISTICS=1)
   size_t mapped;
@@ -96,7 +96,7 @@ typedef struct rpmalloc_global_statistics_t {
   size_t unmapped_total;
 } rpmalloc_global_statistics_t;
 
-typedef struct rpmalloc_thread_statistics_t {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା rpmalloc_thread_statistics_t {
   //! Current number of bytes available in thread size class caches for small
   //! and medium sizes (<32KiB)
   size_t sizecache;
@@ -110,7 +110,7 @@ typedef struct rpmalloc_thread_statistics_t {
   //! if ENABLE_STATISTICS=1)
   size_t global_to_thread;
   //! Per span count statistics (only if ENABLE_STATISTICS=1)
-  struct {
+  ସଂରଚନା {
     //! Currently used number of spans
     size_t current;
     //! High water mark of spans used
@@ -132,7 +132,7 @@ typedef struct rpmalloc_thread_statistics_t {
     size_t map_calls;
   } span_use[64];
   //! Per size class statistics (only if ENABLE_STATISTICS=1)
-  struct {
+  ସଂରଚନା {
     //! Current number of allocations
     size_t alloc_current;
     //! Peak number of allocations
@@ -153,7 +153,7 @@ typedef struct rpmalloc_thread_statistics_t {
   } size_use[128];
 } rpmalloc_thread_statistics_t;
 
-typedef struct rpmalloc_config_t {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା rpmalloc_config_t {
   //! Map memory pages for the given number of bytes. The returned address MUST
   //! be
   //  aligned to the rpmalloc span size, which will always be a power of two.
@@ -166,7 +166,7 @@ typedef struct rpmalloc_config_t {
   //  set a memory_map function, you must also set a memory_unmap function or
   //  else the default implementation will be used for both. This function must
   //  be thread safe, it can be called by multiple threads simultaneously.
-  void *(*memory_map)(size_t size, size_t *offset);
+  ଶୂନ୍ୟ *(*memory_map)(size_t size, size_t *offset);
   //! Unmap the memory pages starting at address and spanning the given number
   //! of bytes.
   //  If release is set to non-zero, the unmap is for an entire span range as
@@ -177,12 +177,12 @@ typedef struct rpmalloc_config_t {
   //  a memory_map function or else the default implementation will be used for
   //  both. This function must be thread safe, it can be called by multiple
   //  threads simultaneously.
-  void (*memory_unmap)(void *address, size_t size, size_t offset,
+  ଶୂନ୍ୟ (*memory_unmap)(ଶୂନ୍ୟ *address, size_t size, size_t offset,
                        size_t release);
   //! Called when an assert fails, if asserts are enabled. Will use the standard
   //! assert()
   //  if this is not set.
-  void (*error_callback)(const char *message);
+  ଶୂନ୍ୟ (*error_callback)(ଅଚଳ ଅକ୍ଷର *message);
   //! Called when a call to map memory pages fails (out of memory). If this
   //! callback is
   //  not set or returns zero the library will return a null pointer in the
@@ -190,7 +190,7 @@ typedef struct rpmalloc_config_t {
   //  retried. The argument passed is the number of bytes that was requested in
   //  the map call. Only used if the default system memory map function is used
   //  (memory_map callback is not set).
-  int (*map_fail_callback)(size_t size);
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା (*map_fail_callback)(size_t size);
   //! Size of memory pages. The page size MUST be a power of two. All memory
   //! mapping
   //  requests to memory_map will be made with size set to a multiple of the
@@ -209,7 +209,7 @@ typedef struct rpmalloc_config_t {
   //  used, so physical committed memory should not be affected in the default
   //  implementation. Will be aligned to a multiple of spans that match memory
   //  page size in case of huge pages.
-  size_t span_map_count;
+  size_t span_map_ଗଣନା;
   //! Enable use of large/huge pages. If this flag is set to non-zero and page
   //! size is
   //  zero, the allocator will try to enable huge pages and auto detect the
@@ -218,63 +218,63 @@ typedef struct rpmalloc_config_t {
   //  prior to initializing the allocator. For Windows, see
   //  https://docs.microsoft.com/en-us/windows/desktop/memory/large-page-support
   //  For Linux, see https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-  int enable_huge_pages;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା enable_huge_pages;
   //! Respectively allocated pages and huge allocated pages names for systems
   //  supporting it to be able to distinguish among anonymous regions.
-  const char *page_name;
-  const char *huge_page_name;
+  ଅଚଳ ଅକ୍ଷର *page_name;
+  ଅଚଳ ଅକ୍ଷର *huge_page_name;
 } rpmalloc_config_t;
 
 //! Initialize allocator with default configuration
-RPMALLOC_EXPORT int rpmalloc_initialize(void);
+RPMALLOC_EXPORT ପୂର୍ଣ୍ଣସଂଖ୍ୟା rpmalloc_initialize(ଶୂନ୍ୟ);
 
 //! Initialize allocator with given configuration
-RPMALLOC_EXPORT int rpmalloc_initialize_config(const rpmalloc_config_t *config);
+RPMALLOC_EXPORT ପୂର୍ଣ୍ଣସଂଖ୍ୟା rpmalloc_initialize_config(ଅଚଳ rpmalloc_config_t *config);
 
 //! Get allocator configuration
-RPMALLOC_EXPORT const rpmalloc_config_t *rpmalloc_config(void);
+RPMALLOC_EXPORT ଅଚଳ rpmalloc_config_t *rpmalloc_config(ଶୂନ୍ୟ);
 
 //! Finalize allocator
-RPMALLOC_EXPORT void rpmalloc_finalize(void);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_finalize(ଶୂନ୍ୟ);
 
 //! Initialize allocator for calling thread
-RPMALLOC_EXPORT void rpmalloc_thread_initialize(void);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_thread_initialize(ଶୂନ୍ୟ);
 
 //! Finalize allocator for calling thread
-RPMALLOC_EXPORT void rpmalloc_thread_finalize(int release_caches);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_thread_finalize(ପୂର୍ଣ୍ଣସଂଖ୍ୟା release_caches);
 
 //! Perform deferred deallocations pending for the calling thread heap
-RPMALLOC_EXPORT void rpmalloc_thread_collect(void);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_thread_collect(ଶୂନ୍ୟ);
 
 //! Query if allocator is initialized for calling thread
-RPMALLOC_EXPORT int rpmalloc_is_thread_initialized(void);
+RPMALLOC_EXPORT ପୂର୍ଣ୍ଣସଂଖ୍ୟା rpmalloc_is_thread_initialized(ଶୂନ୍ୟ);
 
 //! Get per-thread statistics
-RPMALLOC_EXPORT void
+RPMALLOC_EXPORT ଶୂନ୍ୟ
 rpmalloc_thread_statistics(rpmalloc_thread_statistics_t *stats);
 
 //! Get global statistics
-RPMALLOC_EXPORT void
+RPMALLOC_EXPORT ଶୂନ୍ୟ
 rpmalloc_global_statistics(rpmalloc_global_statistics_t *stats);
 
 //! Dump all statistics in human readable format to file (should be a FILE*)
-RPMALLOC_EXPORT void rpmalloc_dump_statistics(void *file);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_dump_statistics(ଶୂନ୍ୟ *file);
 
 //! Allocate a memory block of at least the given size
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
 rpmalloc(size_t size) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(1);
 
 //! Free the given memory block
-RPMALLOC_EXPORT void rpfree(void *ptr);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpfree(ଶୂନ୍ୟ *ptr);
 
 //! Allocate a memory block of at least the given size and zero initialize it
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpcalloc(size_t num, size_t size) RPMALLOC_ATTRIB_MALLOC
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
+rpcalloc(size_t ଅଙ୍କ_2, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(1, 2);
 
 //! Reallocate the given block to at least the given size
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rprealloc(void *ptr, size_t size) RPMALLOC_ATTRIB_MALLOC
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
+rprealloc(ଶୂନ୍ୟ *ptr, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2);
 
 //! Reallocate the given block to at least the given size and alignment,
@@ -283,9 +283,9 @@ rprealloc(void *ptr, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpaligned_realloc(void *ptr, size_t alignment, size_t size, size_t oldsize,
-                  unsigned int flags) RPMALLOC_ATTRIB_MALLOC
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
+rpaligned_realloc(ଶୂନ୍ୟ *ptr, size_t alignment, size_t size, size_t oldsize,
+                  unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Allocate a memory block of at least the given size and alignment.
@@ -293,7 +293,7 @@ rpaligned_realloc(void *ptr, size_t alignment, size_t size, size_t oldsize,
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
 rpaligned_alloc(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2);
 
@@ -303,8 +303,8 @@ rpaligned_alloc(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpaligned_calloc(size_t alignment, size_t num,
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
+rpaligned_calloc(size_t alignment, size_t ଅଙ୍କ_2,
                  size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(2, 3);
 
@@ -313,7 +313,7 @@ rpaligned_calloc(size_t alignment, size_t num,
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
 rpmemalign(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2);
 
@@ -322,36 +322,36 @@ rpmemalign(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  and should ideally be less than memory page size. A caveat of rpmalloc
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
-RPMALLOC_EXPORT int rpposix_memalign(void **memptr, size_t alignment,
+RPMALLOC_EXPORT ପୂର୍ଣ୍ଣସଂଖ୍ୟା rpposix_memalign(ଶୂନ୍ୟ **memptr, size_t alignment,
                                      size_t size);
 
 //! Query the usable size of the given memory block (from given pointer to the
 //! end of block)
-RPMALLOC_EXPORT size_t rpmalloc_usable_size(void *ptr);
+RPMALLOC_EXPORT size_t rpmalloc_usable_size(ଶୂନ୍ୟ *ptr);
 
 //! Dummy empty function for forcing linker symbol inclusion
-RPMALLOC_EXPORT void rpmalloc_linker_reference(void);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_linker_reference(ଶୂନ୍ୟ);
 
-#if RPMALLOC_FIRST_CLASS_HEAPS
+#ଯଦି RPMALLOC_FIRST_CLASS_HEAPS
 
 //! Heap type
-typedef struct heap_t rpmalloc_heap_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା heap_t rpmalloc_heap_t;
 
 //! Acquire a new heap. Will reuse existing released heaps or allocate memory
 //! for a new heap
 //  if none available. Heap API is implemented with the strict assumption that
 //  only one single thread will call heap functions for a given heap at any
 //  given time, no functions are thread safe.
-RPMALLOC_EXPORT rpmalloc_heap_t *rpmalloc_heap_acquire(void);
+RPMALLOC_EXPORT rpmalloc_heap_t *rpmalloc_heap_acquire(ଶୂନ୍ୟ);
 
 //! Release a heap (does NOT free the memory allocated by the heap, use
 //! rpmalloc_heap_free_all before destroying the heap).
 //  Releasing a heap will enable it to be reused by other threads. Safe to pass
 //  a null pointer.
-RPMALLOC_EXPORT void rpmalloc_heap_release(rpmalloc_heap_t *heap);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_heap_release(rpmalloc_heap_t *heap);
 
 //! Allocate a memory block of at least the given size using the given heap.
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
 rpmalloc_heap_alloc(rpmalloc_heap_t *heap, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2);
 
@@ -361,15 +361,15 @@ rpmalloc_heap_alloc(rpmalloc_heap_t *heap, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  and a multiple of sizeof(void*), and should ideally be less than memory page
 //  size. A caveat of rpmalloc internals is that this must also be strictly less
 //  than the span size (default 64KiB).
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
 rpmalloc_heap_aligned_alloc(rpmalloc_heap_t *heap, size_t alignment,
                             size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Allocate a memory block of at least the given size using the given heap and
 //! zero initialize it.
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t num,
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
+rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t ଅଙ୍କ_2,
                      size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(2, 3);
 
@@ -379,17 +379,17 @@ rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t num,
 //  power of two and a multiple of sizeof(void*), and should ideally be less
 //  than memory page size. A caveat of rpmalloc internals is that this must also
 //  be strictly less than the span size (default 64KiB).
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
 rpmalloc_heap_aligned_calloc(rpmalloc_heap_t *heap, size_t alignment,
-                             size_t num, size_t size) RPMALLOC_ATTRIB_MALLOC
+                             size_t ଅଙ୍କ_2, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(2, 3);
 
 //! Reallocate the given block to at least the given size. The memory block MUST
 //! be allocated
 //  by the same heap given to this function.
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
-                      unsigned int flags) RPMALLOC_ATTRIB_MALLOC
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *
+rpmalloc_heap_realloc(rpmalloc_heap_t *heap, ଶୂନ୍ୟ *ptr, size_t size,
+                      unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(3);
 
 //! Reallocate the given block to at least the given size. The memory block MUST
@@ -399,27 +399,27 @@ rpmalloc_heap_realloc(rpmalloc_heap_t *heap, void *ptr, size_t size,
 //  multiple of sizeof(void*), and should ideally be less than memory page size.
 //  A caveat of rpmalloc internals is that this must also be strictly less than
 //  the span size (default 64KiB).
-RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *rpmalloc_heap_aligned_realloc(
-    rpmalloc_heap_t *heap, void *ptr, size_t alignment, size_t size,
-    unsigned int flags) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(4);
+RPMALLOC_EXPORT RPMALLOC_ALLOCATOR ଶୂନ୍ୟ *rpmalloc_heap_aligned_realloc(
+    rpmalloc_heap_t *heap, ଶୂନ୍ୟ *ptr, size_t alignment, size_t size,
+    unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags) RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE(4);
 
 //! Free the given memory block from the given heap. The memory block MUST be
 //! allocated
 //  by the same heap given to this function.
-RPMALLOC_EXPORT void rpmalloc_heap_free(rpmalloc_heap_t *heap, void *ptr);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_heap_free(rpmalloc_heap_t *heap, ଶୂନ୍ୟ *ptr);
 
 //! Free all memory allocated by the heap
-RPMALLOC_EXPORT void rpmalloc_heap_free_all(rpmalloc_heap_t *heap);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_heap_free_all(rpmalloc_heap_t *heap);
 
 //! Set the given heap as the current heap for the calling thread. A heap MUST
 //! only be current heap
 //  for a single thread, a heap can never be shared between multiple threads.
 //  The previous current heap for the calling thread is released to be reused by
 //  other threads.
-RPMALLOC_EXPORT void rpmalloc_heap_thread_set_current(rpmalloc_heap_t *heap);
+RPMALLOC_EXPORT ଶୂନ୍ୟ rpmalloc_heap_thread_set_current(rpmalloc_heap_t *heap);
 
 //! Returns which heap the given pointer is allocated on
-RPMALLOC_EXPORT rpmalloc_heap_t *rpmalloc_get_heap_for_ptr(void *ptr);
+RPMALLOC_EXPORT rpmalloc_heap_t *rpmalloc_get_heap_for_ptr(ଶୂନ୍ୟ *ptr);
 
 #endif
 

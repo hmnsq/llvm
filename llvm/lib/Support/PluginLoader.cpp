@@ -11,48 +11,48 @@
 //===----------------------------------------------------------------------===//
 
 #define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/PluginLoader.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/DynamicLibrary.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Mutex.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/raw_ostream.h"
+#ଅନ୍ତର୍ଭାଵ <vector>
+using ନାମାକାଶ llvm;
 
-namespace {
+ନାମାକାଶ {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
+ସଂରଚନା Plugins {
+  sys::SmartMutex<ସତ୍ୟ> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  ସ୍ଥିର Plugins P;
+  ଫେରନ୍ତୁ P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
+ଶୂନ୍ୟ PluginLoader::operator=(ଅଚଳ std::string &Filename) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+  sys::SmartScopedLock<ସତ୍ୟ> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  ଯଦି (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } ଅନ୍ୟଥା {
+    P.List.ଠେଲ_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
+unsigned PluginLoader::get_ଅଙ୍କ_Plugins() {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  sys::SmartScopedLock<ସତ୍ୟ> Lock(P.Lock);
+  ଫେରନ୍ତୁ P.List.size();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
+std::string &PluginLoader::getPlugin(unsigned ଅଙ୍କ_2) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  sys::SmartScopedLock<ସତ୍ୟ> Lock(P.Lock);
+  ପ୍ରତିଜ୍ଞା(ଅଙ୍କ_2 < P.List.size() && "Asking for an out of bounds plugin");
+  ଫେରନ୍ତୁ P.List[ଅଙ୍କ_2];
 }

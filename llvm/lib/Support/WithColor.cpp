@@ -6,35 +6,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/WithColor.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/WithColor.h"
 
-#include "DebugOptions.h"
+#ଅନ୍ତର୍ଭାଵ "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/CommandLine.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Error.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ManagedStatic.h"
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
 cl::OptionCategory &llvm::getColorCategory() {
-  static cl::OptionCategory ColorCategory("Color Options");
-  return ColorCategory;
+  ସ୍ଥିର cl::OptionCategory ColorCategory("Color Options");
+  ଫେରନ୍ତୁ ColorCategory;
 }
-namespace {
-struct CreateUseColor {
-  static void *call() {
-    return new cl::opt<cl::boolOrDefault>(
+ନାମାକାଶ {
+ସଂରଚନା CreateUseColor {
+  ସ୍ଥିର ଶୂନ୍ୟ *call() {
+    ଫେରନ୍ତୁ ନୂତନ cl::opt<cl::boolOrDefault>(
         "color", cl::cat(getColorCategory()),
         cl::desc("Use colors in output (default=autodetect)"),
         cl::init(cl::boolOrDefault::BOU_UNSET));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
-void llvm::initWithColorOptions() { *UseColor; }
+ସ୍ଥିର ManagedStatic<cl::opt<cl::boolOrDefault>, CreateUseColor> UseColor;
+ଶୂନ୍ୟ llvm::initWithColorOptions() { *UseColor; }
 
-static bool DefaultAutoDetectFunction(const raw_ostream &OS) {
-  return *UseColor == cl::boolOrDefault::BOU_UNSET
+ସ୍ଥିର ତାର୍କିକ DefaultAutoDetectFunction(ଅଚଳ raw_ostream &OS) {
+  ଫେରନ୍ତୁ *UseColor == cl::boolOrDefault::BOU_UNSET
              ? OS.has_colors()
              : *UseColor == cl::boolOrDefault::BOU_TRUE;
 }
@@ -45,134 +45,134 @@ WithColor::AutoDetectFunctionType WithColor::AutoDetectFunction =
 WithColor::WithColor(raw_ostream &OS, HighlightColor Color, ColorMode Mode)
     : OS(OS), Mode(Mode) {
   // Detect color from terminal type unless the user passed the --color option.
-  if (colorsEnabled()) {
-    switch (Color) {
-    case HighlightColor::Address:
+  ଯଦି (colorsEnabled()) {
+    ବାଛ (Color) {
+    ସ୍ଥିତି HighlightColor::Address:
       OS.changeColor(raw_ostream::YELLOW);
-      break;
-    case HighlightColor::String:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::String:
       OS.changeColor(raw_ostream::GREEN);
-      break;
-    case HighlightColor::Tag:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Tag:
       OS.changeColor(raw_ostream::BLUE);
-      break;
-    case HighlightColor::Attribute:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Attribute:
       OS.changeColor(raw_ostream::CYAN);
-      break;
-    case HighlightColor::Enumerator:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Enumerator:
       OS.changeColor(raw_ostream::MAGENTA);
-      break;
-    case HighlightColor::Macro:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Macro:
       OS.changeColor(raw_ostream::RED);
-      break;
-    case HighlightColor::Error:
-      OS.changeColor(raw_ostream::RED, true);
-      break;
-    case HighlightColor::Warning:
-      OS.changeColor(raw_ostream::MAGENTA, true);
-      break;
-    case HighlightColor::Note:
-      OS.changeColor(raw_ostream::BLACK, true);
-      break;
-    case HighlightColor::Remark:
-      OS.changeColor(raw_ostream::BLUE, true);
-      break;
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Error:
+      OS.changeColor(raw_ostream::RED, ସତ୍ୟ);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Warning:
+      OS.changeColor(raw_ostream::MAGENTA, ସତ୍ୟ);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Note:
+      OS.changeColor(raw_ostream::BLACK, ସତ୍ୟ);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି HighlightColor::Remark:
+      OS.changeColor(raw_ostream::BLUE, ସତ୍ୟ);
+      ଭାଙ୍ଗ;
     }
   }
 }
 
-raw_ostream &WithColor::error() { return error(errs()); }
+raw_ostream &WithColor::error() { ଫେରନ୍ତୁ error(errs()); }
 
-raw_ostream &WithColor::warning() { return warning(errs()); }
+raw_ostream &WithColor::warning() { ଫେରନ୍ତୁ warning(errs()); }
 
-raw_ostream &WithColor::note() { return note(errs()); }
+raw_ostream &WithColor::note() { ଫେରନ୍ତୁ note(errs()); }
 
-raw_ostream &WithColor::remark() { return remark(errs()); }
+raw_ostream &WithColor::remark() { ଫେରନ୍ତୁ remark(errs()); }
 
 raw_ostream &WithColor::error(raw_ostream &OS, StringRef Prefix,
-                              bool DisableColors) {
-  if (!Prefix.empty())
+                              ତାର୍କିକ DisableColors) {
+  ଯଦି (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Error,
+  ଫେରନ୍ତୁ WithColor(OS, HighlightColor::Error,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "error: ";
 }
 
 raw_ostream &WithColor::warning(raw_ostream &OS, StringRef Prefix,
-                                bool DisableColors) {
-  if (!Prefix.empty())
+                                ତାର୍କିକ DisableColors) {
+  ଯଦି (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Warning,
+  ଫେରନ୍ତୁ WithColor(OS, HighlightColor::Warning,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "warning: ";
 }
 
 raw_ostream &WithColor::note(raw_ostream &OS, StringRef Prefix,
-                             bool DisableColors) {
-  if (!Prefix.empty())
+                             ତାର୍କିକ DisableColors) {
+  ଯଦି (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Note,
+  ଫେରନ୍ତୁ WithColor(OS, HighlightColor::Note,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "note: ";
 }
 
 raw_ostream &WithColor::remark(raw_ostream &OS, StringRef Prefix,
-                               bool DisableColors) {
-  if (!Prefix.empty())
+                               ତାର୍କିକ DisableColors) {
+  ଯଦି (!Prefix.empty())
     OS << Prefix << ": ";
-  return WithColor(OS, HighlightColor::Remark,
+  ଫେରନ୍ତୁ WithColor(OS, HighlightColor::Remark,
                    DisableColors ? ColorMode::Disable : ColorMode::Auto)
              .get()
          << "remark: ";
 }
 
-bool WithColor::colorsEnabled() {
-  switch (Mode) {
-  case ColorMode::Enable:
-    return true;
-  case ColorMode::Disable:
-    return false;
-  case ColorMode::Auto:
-    return AutoDetectFunction(OS);
+ତାର୍କିକ WithColor::colorsEnabled() {
+  ବାଛ (Mode) {
+  ସ୍ଥିତି ColorMode::Enable:
+    ଫେରନ୍ତୁ ସତ୍ୟ;
+  ସ୍ଥିତି ColorMode::Disable:
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ସ୍ଥିତି ColorMode::Auto:
+    ଫେରନ୍ତୁ AutoDetectFunction(OS);
   }
   llvm_unreachable("All cases handled above.");
 }
 
-WithColor &WithColor::changeColor(raw_ostream::Colors Color, bool Bold,
-                                  bool BG) {
-  if (colorsEnabled())
+WithColor &WithColor::changeColor(raw_ostream::Colors Color, ତାର୍କିକ Bold,
+                                  ତାର୍କିକ BG) {
+  ଯଦି (colorsEnabled())
     OS.changeColor(Color, Bold, BG);
-  return *this;
+  ଫେରନ୍ତୁ *ଏହି;
 }
 
 WithColor &WithColor::resetColor() {
-  if (colorsEnabled())
+  ଯଦି (colorsEnabled())
     OS.resetColor();
-  return *this;
+  ଫେରନ୍ତୁ *ଏହି;
 }
 
 WithColor::~WithColor() { resetColor(); }
 
-void WithColor::defaultErrorHandler(Error Err) {
+ଶୂନ୍ୟ WithColor::defaultErrorHandler(Error Err) {
   handleAllErrors(std::move(Err), [](ErrorInfoBase &Info) {
     WithColor::error() << Info.message() << '\n';
   });
 }
 
-void WithColor::defaultWarningHandler(Error Warning) {
+ଶୂନ୍ୟ WithColor::defaultWarningHandler(Error Warning) {
   handleAllErrors(std::move(Warning), [](ErrorInfoBase &Info) {
     WithColor::warning() << Info.message() << '\n';
   });
 }
 
 WithColor::AutoDetectFunctionType WithColor::defaultAutoDetectFunction() {
-  return DefaultAutoDetectFunction;
+  ଫେରନ୍ତୁ DefaultAutoDetectFunction;
 }
 
-void WithColor::setAutoDetectFunction(
+ଶୂନ୍ୟ WithColor::setAutoDetectFunction(
     AutoDetectFunctionType NewAutoDetectFunction) {
   AutoDetectFunction = NewAutoDetectFunction;
 }

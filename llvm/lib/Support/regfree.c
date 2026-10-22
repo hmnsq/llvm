@@ -35,38 +35,38 @@
  *	@(#)regfree.c	8.3 (Berkeley) 3/20/94
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "regex_impl.h"
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#ଅନ୍ତର୍ଭାଵ "regutils.h"
+#ଅନ୍ତର୍ଭାଵ "regex2.h"
 
 /*
  - llvm_regfree - free everything
  */
-void
+ଶୂନ୍ୟ
 llvm_regfree(llvm_regex_t *preg)
 {
-	struct re_guts *g;
+	ସଂରଚନା re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	ଯଦି (preg->re_magic != MAGIC1)	/* oops */
+		ଫେରନ୍ତୁ;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	ଯଦି (g == ଖାଲି || g->magic != MAGIC2)	/* oops again */
+		ଫେରନ୍ତୁ;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
-		free((char *)g->strip);
-	if (g->sets != NULL)
-		free((char *)g->sets);
-	if (g->setbits != NULL)
-		free((char *)g->setbits);
-	if (g->must != NULL)
-		free(g->must);
-	free((char *)g);
+	ଯଦି (g->strip != ଖାଲି)
+		ମୁକ୍ତ((ଅକ୍ଷର *)g->strip);
+	ଯଦି (g->sets != ଖାଲି)
+		ମୁକ୍ତ((ଅକ୍ଷର *)g->sets);
+	ଯଦି (g->setbits != ଖାଲି)
+		ମୁକ୍ତ((ଅକ୍ଷର *)g->setbits);
+	ଯଦି (g->must != ଖାଲି)
+		ମୁକ୍ତ(g->must);
+	ମୁକ୍ତ((ଅକ୍ଷର *)g);
 }

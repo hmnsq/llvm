@@ -35,26 +35,26 @@
  *	@(#)regcomp.c	8.5 (Berkeley) 3/20/94
  */
 
-#include "regex_impl.h"
-#include <ctype.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ "regex_impl.h"
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <limits.h>
+#ଅନ୍ତର୍ଭାଵ <stdint.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
 
-#include "regex2.h"
-#include "regutils.h"
+#ଅନ୍ତର୍ଭାଵ "regex2.h"
+#ଅନ୍ତର୍ଭାଵ "regutils.h"
 
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Config/config.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Compiler.h"
 
 /* character-class table */
-static struct cclass {
-  const char *name;
-  const char *chars;
-  const char *multis;
+ସ୍ଥିର ସଂରଚନା cclass {
+  ଅଚଳ ଅକ୍ଷର *name;
+  ଅଚଳ ଅକ୍ଷର *chars;
+  ଅଚଳ ଅକ୍ଷର *multis;
 } cclasses[] = {
     {"alnum", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\
 0123456789",
@@ -76,12 +76,12 @@ static struct cclass {
     {"space", "\t\n\v\f\r ", ""},
     {"upper", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", ""},
     {"xdigit", "0123456789ABCDEFabcdef", ""},
-    {NULL, 0, ""}};
+    {ଖାଲି, 0, ""}};
 
 /* character-name table */
-static struct cname {
-  const char *name;
-  char code;
+ସ୍ଥିର ସଂରଚନା cname {
+  ଅଚଳ ଅକ୍ଷର *name;
+  ଅକ୍ଷର code;
 } cnames[] = {{"NUL", '\0'},
               {"SOH", '\001'},
               {"STX", '\002'},
@@ -177,66 +177,66 @@ static struct cname {
               {"right-curly-bracket", '}'},
               {"tilde", '~'},
               {"DEL", '\177'},
-              {NULL, 0}};
+              {ଖାଲି, 0}};
 
 /*
  * parse structure, passed up and down to avoid global variables and
  * other clumsinesses
  */
-struct parse {
-  const char *next; /* next character in RE */
-  const char *end;  /* end of string (-> NUL normally) */
-  int error;        /* has an error been seen? */
+ସଂରଚନା parse {
+  ଅଚଳ ଅକ୍ଷର *next; /* next character in RE */
+  ଅଚଳ ଅକ୍ଷର *end;  /* end of string (-> NUL normally) */
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା error;        /* has an error been seen? */
   sop *strip;       /* malloced strip */
   sopno ssize;      /* malloced strip size (allocated) */
   sopno slen;       /* malloced strip length (used) */
-  int ncsalloc;     /* number of csets allocated */
-  struct re_guts *g;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ncsalloc;     /* number of csets allocated */
+  ସଂରଚନା re_guts *g;
 #define NPAREN 21       /* we need to remember () 1-20 for back refs */
   sopno pbegin[NPAREN]; /* -> ( ([0] unused) */
   sopno pend[NPAREN];   /* -> ) ([0] unused) */
 };
 
-static void p_ere(struct parse *, int);
-static void p_ere_exp(struct parse *);
-static void p_str(struct parse *);
-static void p_bre(struct parse *, int, int);
-static int p_simp_re(struct parse *, int);
-static int p_count(struct parse *);
-static void p_bracket(struct parse *);
-static void p_b_term(struct parse *, cset *);
-static void p_b_cclass(struct parse *, cset *);
-static void p_b_eclass(struct parse *, cset *);
-static char p_b_symbol(struct parse *);
-static char p_b_coll_elem(struct parse *, int);
-static char othercase(int);
-static void bothcases(struct parse *, int);
-static void uncased(struct parse *, int);
-static void ordinary(struct parse *, int);
-static void nonnewline(struct parse *);
-static void repeat(struct parse *, sopno, int, int);
-static int seterr(struct parse *, int);
-static cset *allocset(struct parse *);
-static void freeset(struct parse *, cset *);
-static int freezeset(struct parse *, cset *);
-static int firstch(struct parse *, cset *);
-static int nch(struct parse *, cset *);
-static void mcadd(struct parse *, cset *, const char *);
-static void mcinvert(struct parse *, cset *);
-static void mccase(struct parse *, cset *);
-static int isinsets(struct re_guts *, int);
-static int samesets(struct re_guts *, int, int);
-static void categorize(struct parse *, struct re_guts *);
-static sopno dupl(struct parse *, sopno, sopno);
-static void doemit(struct parse *, sop, size_t);
-static void doinsert(struct parse *, sop, size_t, sopno);
-static void dofwd(struct parse *, sopno, sop);
-static void enlarge(struct parse *, sopno);
-static void stripsnug(struct parse *, struct re_guts *);
-static void findmust(struct parse *, struct re_guts *);
-static sopno pluscount(struct parse *, struct re_guts *);
+ସ୍ଥିର ଶୂନ୍ୟ p_ere(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଶୂନ୍ୟ p_ere_exp(ସଂରଚନା parse *);
+ସ୍ଥିର ଶୂନ୍ୟ p_str(ସଂରଚନା parse *);
+ସ୍ଥିର ଶୂନ୍ୟ p_bre(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା p_simp_re(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା p_ଗଣନା(ସଂରଚନା parse *);
+ସ୍ଥିର ଶୂନ୍ୟ p_bracket(ସଂରଚନା parse *);
+ସ୍ଥିର ଶୂନ୍ୟ p_b_term(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ଶୂନ୍ୟ p_b_cclass(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ଶୂନ୍ୟ p_b_eclass(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ଅକ୍ଷର p_b_ପ୍ରତୀକ(ସଂରଚନା parse *);
+ସ୍ଥିର ଅକ୍ଷର p_b_coll_elem(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଅକ୍ଷର othercase(ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଶୂନ୍ୟ bothcases(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଶୂନ୍ୟ uncased(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଶୂନ୍ୟ ordinary(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଶୂନ୍ୟ nonnewline(ସଂରଚନା parse *);
+ସ୍ଥିର ଶୂନ୍ୟ repeat(ସଂରଚନା parse *, sopno, ପୂର୍ଣ୍ଣସଂଖ୍ୟା, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା seterr(ସଂରଚନା parse *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର cset *allocset(ସଂରଚନା parse *);
+ସ୍ଥିର ଶୂନ୍ୟ freeset(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା freezeset(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା firstch(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା nch(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ଶୂନ୍ୟ mcadd(ସଂରଚନା parse *, cset *, ଅଚଳ ଅକ୍ଷର *);
+ସ୍ଥିର ଶୂନ୍ୟ mcinvert(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ଶୂନ୍ୟ mccase(ସଂରଚନା parse *, cset *);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା isinsets(ସଂରଚନା re_guts *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା samesets(ସଂରଚନା re_guts *, ପୂର୍ଣ୍ଣସଂଖ୍ୟା, ପୂର୍ଣ୍ଣସଂଖ୍ୟା);
+ସ୍ଥିର ଶୂନ୍ୟ categorize(ସଂରଚନା parse *, ସଂରଚନା re_guts *);
+ସ୍ଥିର sopno dupl(ସଂରଚନା parse *, sopno, sopno);
+ସ୍ଥିର ଶୂନ୍ୟ doemit(ସଂରଚନା parse *, sop, size_t);
+ସ୍ଥିର ଶୂନ୍ୟ doinsert(ସଂରଚନା parse *, sop, size_t, sopno);
+ସ୍ଥିର ଶୂନ୍ୟ dofwd(ସଂରଚନା parse *, sopno, sop);
+ସ୍ଥିର ଶୂନ୍ୟ enlarge(ସଂରଚନା parse *, sopno);
+ସ୍ଥିର ଶୂନ୍ୟ stripsnug(ସଂରଚନା parse *, ସଂରଚନା re_guts *);
+ସ୍ଥିର ଶୂନ୍ୟ findmust(ସଂରଚନା parse *, ସଂରଚନା re_guts *);
+ସ୍ଥିର sopno pluscount(ସଂରଚନା parse *, ସଂରଚନା re_guts *);
 
-static char nuls[10]; /* place to point scanner in event of error */
+ସ୍ଥିର ଅକ୍ଷର nuls[10]; /* place to point scanner in event of error */
 
 /*
  * macros for use with parse structure
@@ -255,12 +255,12 @@ static char nuls[10]; /* place to point scanner in event of error */
 #define NEXTn(n) (p->next += (n))
 #define GETNEXT() (*p->next++)
 #define SETERROR(e) seterr(p, (e))
-#define REQUIRE(co, e) (void)((co) || SETERROR(e))
+#define REQUIRE(co, e) (ଶୂନ୍ୟ)((co) || SETERROR(e))
 #define MUSTSEE(c, e) (REQUIRE(MORE() && PEEK() == (c), e))
 #define MUSTEAT(c, e) (REQUIRE(MORE() && GETNEXT() == (c), e))
 #define MUSTNOTSEE(c, e) (REQUIRE(!MORE() || PEEK() != (c), e))
 #define EMIT(op, sopnd) doemit(p, (sop)(op), (size_t)(sopnd))
-#define INSERT(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
+#define ଭର୍ତ୍ତି_3(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
 #define AHEAD(pos) dofwd(p, pos, HERE() - (pos))
 #define ASTERN(sop, pos) EMIT(sop, HERE() - pos)
 #define HERE() (p->slen)
@@ -270,56 +270,56 @@ static char nuls[10]; /* place to point scanner in event of error */
 
 #ifdef _POSIX2_RE_DUP_MAX
 #define DUPMAX _POSIX2_RE_DUP_MAX
-#else
+#ଅନ୍ୟଥା
 #define DUPMAX 255
 #endif
 #define REGINFINITY (DUPMAX + 1)
 
 #ifndef NDEBUG
-static int never = 0; /* for use in asserts; shuts lint up */
-#else
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା never = 0; /* for use in asserts; shuts lint up */
+#ଅନ୍ୟଥା
 #define never 0 /* some <assert.h>s have bugs too */
 #endif
 
 /*
  - llvm_regcomp - interface for parser and compilation
  */
-int /* 0 success, otherwise REG_something */
-llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
-  struct parse pa;
-  struct re_guts *g;
-  struct parse *p = &pa;
-  int i;
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* 0 success, otherwise REG_something */
+llvm_regcomp(llvm_regex_t *preg, ଅଚଳ ଅକ୍ଷର *pattern, ପୂର୍ଣ୍ଣସଂଖ୍ୟା cflags) {
+  ସଂରଚନା parse pa;
+  ସଂରଚନା re_guts *g;
+  ସଂରଚନା parse *p = &pa;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
   size_t len;
 #ifdef REDEBUG
 #define GOODFLAGS(f) (f)
-#else
+#ଅନ୍ୟଥା
 #define GOODFLAGS(f) ((f) & ~REG_DUMP)
 #endif
 
   cflags = GOODFLAGS(cflags);
-  if ((cflags & REG_EXTENDED) && (cflags & REG_NOSPEC))
-    return (REG_INVARG);
+  ଯଦି ((cflags & REG_EXTENDED) && (cflags & REG_NOSPEC))
+    ଫେରନ୍ତୁ (REG_INVARG);
 
-  if (cflags & REG_PEND) {
-    if (preg->re_endp < pattern)
-      return (REG_INVARG);
+  ଯଦି (cflags & REG_PEND) {
+    ଯଦି (preg->re_endp < pattern)
+      ଫେରନ୍ତୁ (REG_INVARG);
     len = preg->re_endp - pattern;
-  } else {
+  } ଅନ୍ୟଥା {
     len = strlen(pattern);
   }
 
   /* do the mallocs early so failure handling is easy */
-  g = (struct re_guts *)malloc(sizeof(struct re_guts) +
-                               (NC - 1) * sizeof(cat_t));
-  if (g == NULL)
-    return (REG_ESPACE);
+  g = (ସଂରଚନା re_guts *)malloc(ଆକାର(ସଂରଚନା re_guts) +
+                               (NC - 1) * ଆକାର(cat_t));
+  ଯଦି (g == ଖାଲି)
+    ଫେରନ୍ତୁ (REG_ESPACE);
   p->ssize = len / (size_t)2 * (size_t)3 + (size_t)1; /* ugh */
-  p->strip = (sop *)calloc(p->ssize, sizeof(sop));
+  p->strip = (sop *)calloc(p->ssize, ଆକାର(sop));
   p->slen = 0;
-  if (p->strip == NULL) {
-    free((char *)g);
-    return (REG_ESPACE);
+  ଯଦି (p->strip == ଖାଲି) {
+    ମୁକ୍ତ((ଅକ୍ଷର *)g);
+    ଫେରନ୍ତୁ (REG_ESPACE);
   }
 
   /* set things up */
@@ -328,34 +328,34 @@ llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
   p->end = p->next + len;
   p->error = 0;
   p->ncsalloc = 0;
-  for (i = 0; i < NPAREN; i++) {
+  ପାଇଁ (i = 0; i < NPAREN; i++) {
     p->pbegin[i] = 0;
     p->pend[i] = 0;
   }
   g->csetsize = NC;
-  g->sets = NULL;
-  g->setbits = NULL;
+  g->sets = ଖାଲି;
+  g->setbits = ଖାଲି;
   g->ncsets = 0;
   g->cflags = cflags;
   g->iflags = 0;
   g->nbol = 0;
   g->neol = 0;
-  g->must = NULL;
+  g->must = ଖାଲି;
   g->mlen = 0;
   g->nsub = 0;
   g->ncategories = 1; /* category 0 is "everything else" */
   g->categories = &g->catspace[-(CHAR_MIN)];
-  (void)memset((char *)g->catspace, 0, NC * sizeof(cat_t));
+  (ଶୂନ୍ୟ)memset((ଅକ୍ଷର *)g->catspace, 0, NC * ଆକାର(cat_t));
   g->backrefs = 0;
 
   /* do it */
   EMIT(OEND, 0);
   g->firststate = THERE();
-  if (cflags & REG_EXTENDED)
+  ଯଦି (cflags & REG_EXTENDED)
     p_ere(p, OUT);
-  else if (cflags & REG_NOSPEC)
+  ଅନ୍ୟଥା ଯଦି (cflags & REG_NOSPEC)
     p_str(p);
-  else
+  ଅନ୍ୟଥା
     p_bre(p, OUT, OUT);
   EMIT(OEND, 0);
   g->laststate = THERE();
@@ -371,40 +371,40 @@ llvm_regcomp(llvm_regex_t *preg, const char *pattern, int cflags) {
   preg->re_magic = MAGIC1;
 #ifndef REDEBUG
   /* not debugging, so can't rely on the assert() in llvm_regexec() */
-  if (g->iflags & REGEX_BAD)
+  ଯଦି (g->iflags & REGEX_BAD)
     SETERROR(REG_ASSERT);
 #endif
 
   /* win or lose, we're done */
-  if (p->error != 0) /* lose */
+  ଯଦି (p->error != 0) /* lose */
     llvm_regfree(preg);
-  return (p->error);
+  ଫେରନ୍ତୁ (p->error);
 }
 
 /*
  - p_ere - ERE parser top level, concatenation and alternation
  */
-static void p_ere(struct parse *p,
-                  int stop) /* character this ERE should end at */
+ସ୍ଥିର ଶୂନ୍ୟ p_ere(ସଂରଚନା parse *p,
+                  ପୂର୍ଣ୍ଣସଂଖ୍ୟା stop) /* character this ERE should end at */
 {
-  char c;
+  ଅକ୍ଷର c;
   sopno prevback = 0;
   sopno prevfwd = 0;
   sopno conc;
-  int first = 1; /* is this the first alternative? */
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା first = 1; /* is this the first alternative? */
 
-  for (;;) {
+  ପାଇଁ (;;) {
     /* do a bunch of concatenated expressions */
     conc = HERE();
-    while (MORE() && (c = PEEK()) != '|' && c != stop)
+    ଯେତେବେଳେ (MORE() && (c = PEEK()) != '|' && c != stop)
       p_ere_exp(p);
     REQUIRE(HERE() != conc, REG_EMPTY); /* require nonempty */
 
-    if (!EAT('|'))
-      break; /* NOTE BREAK OUT */
+    ଯଦି (!EAT('|'))
+      ଭାଙ୍ଗ; /* NOTE BREAK OUT */
 
-    if (first) {
-      INSERT(OCH_, conc); /* offset is wrong */
+    ଯଦି (first) {
+      ଭର୍ତ୍ତି_3(OCH_, conc); /* offset is wrong */
       prevfwd = conc;
       prevback = conc;
       first = 0;
@@ -416,49 +416,49 @@ static void p_ere(struct parse *p,
     EMIT(OOR2, 0); /* offset is very wrong */
   }
 
-  if (!first) { /* tail-end fixups */
+  ଯଦି (!first) { /* tail-end fixups */
     AHEAD(prevfwd);
     ASTERN(O_CH, prevback);
   }
 
-  assert(!MORE() || SEE(stop));
+  ପ୍ରତିଜ୍ଞା(!MORE() || SEE(stop));
 }
 
 /*
  - p_ere_exp - parse one subERE, an atom possibly followed by a repetition op
  */
-static void p_ere_exp(struct parse *p) {
-  char c;
+ସ୍ଥିର ଶୂନ୍ୟ p_ere_exp(ସଂରଚନା parse *p) {
+  ଅକ୍ଷର c;
   sopno pos;
-  int count;
-  int count2;
-  int backrefnum;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_2;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା count2;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା backrefnum;
   sopno subno;
-  int wascaret = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା wascaret = 0;
 
-  assert(MORE()); /* caller should have ensured this */
+  ପ୍ରତିଜ୍ଞା(MORE()); /* caller should have ensured this */
   c = GETNEXT();
 
   pos = HERE();
-  switch (c) {
-  case '(':
+  ବାଛ (c) {
+  ସ୍ଥିତି '(':
     REQUIRE(MORE(), REG_EPAREN);
     p->g->nsub++;
     subno = p->g->nsub;
-    if (subno < NPAREN)
+    ଯଦି (subno < NPAREN)
       p->pbegin[subno] = HERE();
     EMIT(OLPAREN, subno);
-    if (!SEE(')'))
+    ଯଦି (!SEE(')'))
       p_ere(p, ')');
-    if (subno < NPAREN) {
+    ଯଦି (subno < NPAREN) {
       p->pend[subno] = HERE();
-      assert(p->pend[subno] != 0);
+      ପ୍ରତିଜ୍ଞା(p->pend[subno] != 0);
     }
     EMIT(ORPAREN, subno);
     MUSTEAT(')', REG_EPAREN);
-    break;
+    ଭାଙ୍ଗ;
 #ifndef POSIX_MISTAKE
-  case ')': /* happens only if no current unmatched ( */
+  ସ୍ଥିତି ')': /* happens only if no current unmatched ( */
     /*
      * You may ask, why the ifndef?  Because I didn't notice
      * this until slightly too late for 1003.2, and none of the
@@ -467,47 +467,47 @@ static void p_ere_exp(struct parse *p) {
      * we can get it fixed.
      */
     SETERROR(REG_EPAREN);
-    break;
+    ଭାଙ୍ଗ;
 #endif
-  case '^':
+  ସ୍ଥିତି '^':
     EMIT(OBOL, 0);
     p->g->iflags |= USEBOL;
     p->g->nbol++;
     wascaret = 1;
-    break;
-  case '$':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '$':
     EMIT(OEOL, 0);
     p->g->iflags |= USEEOL;
     p->g->neol++;
-    break;
-  case '|':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '|':
     SETERROR(REG_EMPTY);
-    break;
-  case '*':
-  case '+':
-  case '?':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '*':
+  ସ୍ଥିତି '+':
+  ସ୍ଥିତି '?':
     SETERROR(REG_BADRPT);
-    break;
-  case '.':
-    if (p->g->cflags & REG_NEWLINE)
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '.':
+    ଯଦି (p->g->cflags & REG_NEWLINE)
       nonnewline(p);
-    else
+    ଅନ୍ୟଥା
       EMIT(OANY, 0);
-    break;
-  case '[':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '[':
     p_bracket(p);
-    break;
-  case '\\':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '\\':
     REQUIRE(MORE(), REG_EESCAPE);
     c = GETNEXT();
-    if (c >= '1' && c <= '9') {
+    ଯଦି (c >= '1' && c <= '9') {
       /* \[0-9] is taken to be a back-reference to a previously specified
        * matching group. backrefnum will hold the number. The matching
        * group must exist (i.e. if \4 is found there must have been at
        * least 4 matching groups specified in the pattern previously).
        */
       backrefnum = c - '0';
-    } else if (c == 'g') {
+    } ଅନ୍ୟଥା ଯଦି (c == 'g') {
       /* Support back-references with index greater 9.
        * These look like that: \g{n}
        * Extract the number inside the brackets.
@@ -515,139 +515,139 @@ static void p_ere_exp(struct parse *p) {
       MUSTEAT('{', REG_BADRPT);
 
       backrefnum = 0;
-      while (MORE() && isdigit(PEEK())) {
+      ଯେତେବେଳେ (MORE() && isdigit(PEEK())) {
         c = GETNEXT();
         backrefnum = backrefnum * 10 + c - '0';
       }
       MUSTEAT('}', REG_BADRPT);
-    } else if (c == 'n') {
+    } ଅନ୍ୟଥା ଯଦି (c == 'n') {
       ordinary(p, '\n');
-      break;
-    } else if (c == 't') {
+      ଭାଙ୍ଗ;
+    } ଅନ୍ୟଥା ଯଦି (c == 't') {
       ordinary(p, '\t');
-      break;
-    } else if (c == 'x') {
+      ଭାଙ୍ଗ;
+    } ଅନ୍ୟଥା ଯଦି (c == 'x') {
       /* Support \xAA hexadecimal escape sequences. \x must be followed by
        * exactly two hex digits, otherwise it is interpreted literally.
        */
-      char hexstr[3] = {0};
-      char *hexp;
-      int val;
-      if (MORE2()) {
+      ଅକ୍ଷର hexstr[3] = {0};
+      ଅକ୍ଷର *hexp;
+      ପୂର୍ଣ୍ଣସଂଖ୍ୟା val;
+      ଯଦି (MORE2()) {
         hexstr[0] = PEEK();
         hexstr[1] = PEEK2();
         val = strtol(hexstr, &hexp, 16);
-        if (*hexp == '\0') {
+        ଯଦି (*hexp == '\0') {
           NEXT2();
-          uncased(p, (char)val);
-          break;
+          uncased(p, (ଅକ୍ଷର)val);
+          ଭାଙ୍ଗ;
         }
       }
       ordinary(p, 'x');
-      break;
-    } else {
+      ଭାଙ୍ଗ;
+    } ଅନ୍ୟଥା {
       /* Other chars are simply themselves when escaped with a backslash.
        */
       ordinary(p, c);
-      break;
+      ଭାଙ୍ଗ;
     }
 
-    if (backrefnum >= NPAREN) {
+    ଯଦି (backrefnum >= NPAREN) {
       SETERROR(REG_ESUBREG);
-      break;
+      ଭାଙ୍ଗ;
     }
 
-    if (p->pend[backrefnum] == 0) {
+    ଯଦି (p->pend[backrefnum] == 0) {
       SETERROR(REG_ESUBREG);
-      break;
+      ଭାଙ୍ଗ;
     }
 
     /* Make sure everything checks out and emit the sequence
      * that marks a back-reference to the parse structure.
      */
-    assert(backrefnum <= p->g->nsub);
+    ପ୍ରତିଜ୍ଞା(backrefnum <= p->g->nsub);
     EMIT(OBACK_, backrefnum);
-    assert(p->pbegin[backrefnum] != 0);
-    assert(OP(p->strip[p->pbegin[backrefnum]]) == OLPAREN);
-    assert(OP(p->strip[p->pend[backrefnum]]) == ORPAREN);
-    (void)dupl(p, p->pbegin[backrefnum] + 1, p->pend[backrefnum]);
+    ପ୍ରତିଜ୍ଞା(p->pbegin[backrefnum] != 0);
+    ପ୍ରତିଜ୍ଞା(OP(p->strip[p->pbegin[backrefnum]]) == OLPAREN);
+    ପ୍ରତିଜ୍ଞା(OP(p->strip[p->pend[backrefnum]]) == ORPAREN);
+    (ଶୂନ୍ୟ)dupl(p, p->pbegin[backrefnum] + 1, p->pend[backrefnum]);
     EMIT(O_BACK, backrefnum);
     p->g->backrefs = 1;
-    break;
-  case '{': /* okay as ordinary except if digit follows */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '{': /* okay as ordinary except if digit follows */
     REQUIRE(!MORE() || !isdigit((uch)PEEK()), REG_BADRPT);
     LLVM_FALLTHROUGH;
-  default:
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
     ordinary(p, c);
-    break;
+    ଭାଙ୍ଗ;
   }
 
-  if (!MORE())
-    return;
+  ଯଦି (!MORE())
+    ଫେରନ୍ତୁ;
   c = PEEK();
   /* we call { a repetition if followed by a digit */
-  if (!(c == '*' || c == '+' || c == '?' ||
+  ଯଦି (!(c == '*' || c == '+' || c == '?' ||
         (c == '{' && MORE2() && isdigit((uch)PEEK2()))))
-    return; /* no repetition, we're done */
+    ଫେରନ୍ତୁ; /* no repetition, we're done */
   NEXT();
 
   REQUIRE(!wascaret, REG_BADRPT);
-  switch (c) {
-  case '*': /* implemented as +? */
+  ବାଛ (c) {
+  ସ୍ଥିତି '*': /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    ଭର୍ତ୍ତି_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    ଭର୍ତ୍ତି_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
-    break;
-  case '+':
-    INSERT(OPLUS_, pos);
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '+':
+    ଭର୍ତ୍ତି_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    break;
-  case '?':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '?':
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, pos); /* offset slightly wrong */
+    ଭର୍ତ୍ତି_3(OCH_, pos); /* offset slightly wrong */
     ASTERN(OOR1, pos); /* this one's right */
     AHEAD(pos);        /* fix the OCH_ */
     EMIT(OOR2, 0);     /* offset very wrong... */
     AHEAD(THERE());    /* ...so fix it */
     ASTERN(O_CH, THERETHERE());
-    break;
-  case '{':
-    count = p_count(p);
-    if (EAT(',')) {
-      if (isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
-      } else /* single number with comma */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '{':
+    ଗଣନା_2 = p_ଗଣନା(p);
+    ଯଦି (EAT(',')) {
+      ଯଦି (isdigit((uch)PEEK())) {
+        count2 = p_ଗଣନା(p);
+        REQUIRE(ଗଣନା_2 <= count2, REG_BADBR);
+      } ଅନ୍ୟଥା /* single number with comma */
         count2 = REGINFINITY;
-    } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
-    if (!EAT('}')) { /* error heuristics */
-      while (MORE() && PEEK() != '}')
+    } ଅନ୍ୟଥା /* just a single number */
+      count2 = ଗଣନା_2;
+    repeat(p, pos, ଗଣନା_2, count2);
+    ଯଦି (!EAT('}')) { /* error heuristics */
+      ଯେତେବେଳେ (MORE() && PEEK() != '}')
         NEXT();
       REQUIRE(MORE(), REG_EBRACE);
       SETERROR(REG_BADBR);
     }
-    break;
+    ଭାଙ୍ଗ;
   }
 
-  if (!MORE())
-    return;
+  ଯଦି (!MORE())
+    ଫେରନ୍ତୁ;
   c = PEEK();
-  if (!(c == '*' || c == '+' || c == '?' ||
+  ଯଦି (!(c == '*' || c == '+' || c == '?' ||
         (c == '{' && MORE2() && isdigit((uch)PEEK2()))))
-    return;
+    ଫେରନ୍ତୁ;
   SETERROR(REG_BADRPT);
 }
 
 /*
  - p_str - string (no metacharacters) "parser"
  */
-static void p_str(struct parse *p) {
+ସ୍ଥିର ଶୂନ୍ୟ p_str(ସଂରଚନା parse *p) {
   REQUIRE(MORE(), REG_EMPTY);
-  while (MORE())
+  ଯେତେବେଳେ (MORE())
     ordinary(p, GETNEXT());
 }
 
@@ -661,23 +661,23 @@ static void p_str(struct parse *p) {
  * category in such cases.  This is fairly harmless; not worth fixing.
  * The amount of lookahead needed to avoid this kludge is excessive.
  */
-static void p_bre(struct parse *p, int end1, /* first terminating character */
-                  int end2)                  /* second terminating character */
+ସ୍ଥିର ଶୂନ୍ୟ p_bre(ସଂରଚନା parse *p, ପୂର୍ଣ୍ଣସଂଖ୍ୟା end1, /* first terminating character */
+                  ପୂର୍ଣ୍ଣସଂଖ୍ୟା end2)                  /* second terminating character */
 {
   sopno start = HERE();
-  int first = 1; /* first subexpression? */
-  int wasdollar = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା first = 1; /* first subexpression? */
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା wasdollar = 0;
 
-  if (EAT('^')) {
+  ଯଦି (EAT('^')) {
     EMIT(OBOL, 0);
     p->g->iflags |= USEBOL;
     p->g->nbol++;
   }
-  while (MORE() && !SEETWO(end1, end2)) {
+  ଯେତେବେଳେ (MORE() && !SEETWO(end1, end2)) {
     wasdollar = p_simp_re(p, first);
     first = 0;
   }
-  if (wasdollar) { /* oops, that was a trailing anchor */
+  ଯଦି (wasdollar) { /* oops, that was a trailing anchor */
     DROP(1);
     EMIT(OEOL, 0);
     p->g->iflags |= USEEOL;
@@ -690,135 +690,135 @@ static void p_bre(struct parse *p, int end1, /* first terminating character */
 /*
  - p_simp_re - parse a simple RE, an atom possibly followed by a repetition
  */
-static int /* was the simple RE an unbackslashed $? */
-p_simp_re(struct parse *p,
-          int starordinary) /* is a leading * an ordinary character? */
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* was the simple RE an unbackslashed $? */
+p_simp_re(ସଂରଚନା parse *p,
+          ପୂର୍ଣ୍ଣସଂଖ୍ୟା starordinary) /* is a leading * an ordinary character? */
 {
-  int c;
-  int count;
-  int count2;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା c;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_2;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା count2;
   sopno pos;
-  int i;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
   sopno subno;
 #define BACKSL (1 << CHAR_BIT)
 
   pos = HERE(); /* repetition op, if any, covers from here */
 
-  assert(MORE()); /* caller should have ensured this */
+  ପ୍ରତିଜ୍ଞା(MORE()); /* caller should have ensured this */
   c = GETNEXT();
-  if (c == '\\') {
+  ଯଦି (c == '\\') {
     REQUIRE(MORE(), REG_EESCAPE);
     c = BACKSL | GETNEXT();
   }
-  switch (c) {
-  case '.':
-    if (p->g->cflags & REG_NEWLINE)
+  ବାଛ (c) {
+  ସ୍ଥିତି '.':
+    ଯଦି (p->g->cflags & REG_NEWLINE)
       nonnewline(p);
-    else
+    ଅନ୍ୟଥା
       EMIT(OANY, 0);
-    break;
-  case '[':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '[':
     p_bracket(p);
-    break;
-  case BACKSL | '{':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି BACKSL | '{':
     SETERROR(REG_BADRPT);
-    break;
-  case BACKSL | '(':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି BACKSL | '(':
     p->g->nsub++;
     subno = p->g->nsub;
-    if (subno < NPAREN)
+    ଯଦି (subno < NPAREN)
       p->pbegin[subno] = HERE();
     EMIT(OLPAREN, subno);
     /* the MORE here is an error heuristic */
-    if (MORE() && !SEETWO('\\', ')'))
+    ଯଦି (MORE() && !SEETWO('\\', ')'))
       p_bre(p, '\\', ')');
-    if (subno < NPAREN) {
+    ଯଦି (subno < NPAREN) {
       p->pend[subno] = HERE();
-      assert(p->pend[subno] != 0);
+      ପ୍ରତିଜ୍ଞା(p->pend[subno] != 0);
     }
     EMIT(ORPAREN, subno);
     REQUIRE(EATTWO('\\', ')'), REG_EPAREN);
-    break;
-  case BACKSL | ')': /* should not get here -- must be user */
-  case BACKSL | '}':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି BACKSL | ')': /* should not get here -- must be user */
+  ସ୍ଥିତି BACKSL | '}':
     SETERROR(REG_EPAREN);
-    break;
-  case BACKSL | '1':
-  case BACKSL | '2':
-  case BACKSL | '3':
-  case BACKSL | '4':
-  case BACKSL | '5':
-  case BACKSL | '6':
-  case BACKSL | '7':
-  case BACKSL | '8':
-  case BACKSL | '9':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି BACKSL | '1':
+  ସ୍ଥିତି BACKSL | '2':
+  ସ୍ଥିତି BACKSL | '3':
+  ସ୍ଥିତି BACKSL | '4':
+  ସ୍ଥିତି BACKSL | '5':
+  ସ୍ଥିତି BACKSL | '6':
+  ସ୍ଥିତି BACKSL | '7':
+  ସ୍ଥିତି BACKSL | '8':
+  ସ୍ଥିତି BACKSL | '9':
     i = (c & ~BACKSL) - '0';
-    assert(i < NPAREN);
-    if (p->pend[i] != 0) {
-      assert(i <= p->g->nsub);
+    ପ୍ରତିଜ୍ଞା(i < NPAREN);
+    ଯଦି (p->pend[i] != 0) {
+      ପ୍ରତିଜ୍ଞା(i <= p->g->nsub);
       EMIT(OBACK_, i);
-      assert(p->pbegin[i] != 0);
-      assert(OP(p->strip[p->pbegin[i]]) == OLPAREN);
-      assert(OP(p->strip[p->pend[i]]) == ORPAREN);
-      (void)dupl(p, p->pbegin[i] + 1, p->pend[i]);
+      ପ୍ରତିଜ୍ଞା(p->pbegin[i] != 0);
+      ପ୍ରତିଜ୍ଞା(OP(p->strip[p->pbegin[i]]) == OLPAREN);
+      ପ୍ରତିଜ୍ଞା(OP(p->strip[p->pend[i]]) == ORPAREN);
+      (ଶୂନ୍ୟ)dupl(p, p->pbegin[i] + 1, p->pend[i]);
       EMIT(O_BACK, i);
-    } else {
+    } ଅନ୍ୟଥା {
       SETERROR(REG_ESUBREG);
     }
     p->g->backrefs = 1;
-    break;
-  case '*':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '*':
     REQUIRE(starordinary, REG_BADRPT);
     LLVM_FALLTHROUGH;
-  default:
-    ordinary(p, (char)c);
-    break;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+    ordinary(p, (ଅକ୍ଷର)c);
+    ଭାଙ୍ଗ;
   }
 
-  if (EAT('*')) { /* implemented as +? */
+  ଯଦି (EAT('*')) { /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    ଭର୍ତ୍ତି_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    ଭର୍ତ୍ତି_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
-  } else if (EATTWO('\\', '{')) {
-    count = p_count(p);
-    if (EAT(',')) {
-      if (MORE() && isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
-      } else /* single number with comma */
+  } ଅନ୍ୟଥା ଯଦି (EATTWO('\\', '{')) {
+    ଗଣନା_2 = p_ଗଣନା(p);
+    ଯଦି (EAT(',')) {
+      ଯଦି (MORE() && isdigit((uch)PEEK())) {
+        count2 = p_ଗଣନା(p);
+        REQUIRE(ଗଣନା_2 <= count2, REG_BADBR);
+      } ଅନ୍ୟଥା /* single number with comma */
         count2 = REGINFINITY;
-    } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
-    if (!EATTWO('\\', '}')) { /* error heuristics */
-      while (MORE() && !SEETWO('\\', '}'))
+    } ଅନ୍ୟଥା /* just a single number */
+      count2 = ଗଣନା_2;
+    repeat(p, pos, ଗଣନା_2, count2);
+    ଯଦି (!EATTWO('\\', '}')) { /* error heuristics */
+      ଯେତେବେଳେ (MORE() && !SEETWO('\\', '}'))
         NEXT();
       REQUIRE(MORE(), REG_EBRACE);
       SETERROR(REG_BADBR);
     }
-  } else if (c == '$') /* $ (but not \$) ends it */
-    return (1);
+  } ଅନ୍ୟଥା ଯଦି (c == '$') /* $ (but not \$) ends it */
+    ଫେରନ୍ତୁ (1);
 
-  return (0);
+  ଫେରନ୍ତୁ (0);
 }
 
 /*
  - p_count - parse a repetition count
  */
-static int /* the value */
-p_count(struct parse *p) {
-  int count = 0;
-  int ndigits = 0;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* the value */
+p_ଗଣନା(ସଂରଚନା parse *p) {
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_2 = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ndigits = 0;
 
-  while (MORE() && isdigit((uch)PEEK()) && count <= DUPMAX) {
-    count = count * 10 + (GETNEXT() - '0');
+  ଯେତେବେଳେ (MORE() && isdigit((uch)PEEK()) && ଗଣନା_2 <= DUPMAX) {
+    ଗଣନା_2 = ଗଣନା_2 * 10 + (GETNEXT() - '0');
     ndigits++;
   }
 
-  REQUIRE(ndigits > 0 && count <= DUPMAX, REG_BADBR);
-  return (count);
+  REQUIRE(ndigits > 0 && ଗଣନା_2 <= DUPMAX, REG_BADBR);
+  ଫେରନ୍ତୁ (ଗଣନା_2);
 }
 
 /*
@@ -827,79 +827,79 @@ p_count(struct parse *p) {
  * Note a significant property of this code:  if the allocset() did SETERROR,
  * no set operations are done.
  */
-static void p_bracket(struct parse *p) {
+ସ୍ଥିର ଶୂନ୍ୟ p_bracket(ସଂରଚନା parse *p) {
   cset *cs;
-  int invert = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା invert = 0;
 
   /* Dept of Truly Sickening Special-Case Kludges */
-  if (p->end - p->next > 5) {
-    if (strncmp(p->next, "[:<:]]", 6) == 0) {
+  ଯଦି (p->end - p->next > 5) {
+    ଯଦି (strncmp(p->next, "[:<:]]", 6) == 0) {
       EMIT(OBOW, 0);
       NEXTn(6);
-      return;
+      ଫେରନ୍ତୁ;
     }
-    if (strncmp(p->next, "[:>:]]", 6) == 0) {
+    ଯଦି (strncmp(p->next, "[:>:]]", 6) == 0) {
       EMIT(OEOW, 0);
       NEXTn(6);
-      return;
+      ଫେରନ୍ତୁ;
     }
   }
 
-  if ((cs = allocset(p)) == NULL) {
+  ଯଦି ((cs = allocset(p)) == ଖାଲି) {
     /* allocset did set error status in p */
-    return;
+    ଫେରନ୍ତୁ;
   }
 
-  if (EAT('^'))
+  ଯଦି (EAT('^'))
     invert++; /* make note to invert set at end */
-  if (EAT(']'))
+  ଯଦି (EAT(']'))
     CHadd(cs, ']');
-  else if (EAT('-'))
+  ଅନ୍ୟଥା ଯଦି (EAT('-'))
     CHadd(cs, '-');
-  while (MORE() && PEEK() != ']' && !SEETWO('-', ']'))
+  ଯେତେବେଳେ (MORE() && PEEK() != ']' && !SEETWO('-', ']'))
     p_b_term(p, cs);
-  if (EAT('-'))
+  ଯଦି (EAT('-'))
     CHadd(cs, '-');
   MUSTEAT(']', REG_EBRACK);
 
-  if (p->error != 0) { /* don't mess things up further */
+  ଯଦି (p->error != 0) { /* don't mess things up further */
     freeset(p, cs);
-    return;
+    ଫେରନ୍ତୁ;
   }
 
-  if (p->g->cflags & REG_ICASE) {
-    int i;
-    int ci;
+  ଯଦି (p->g->cflags & REG_ICASE) {
+    ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+    ପୂର୍ଣ୍ଣସଂଖ୍ୟା ci;
 
-    for (i = p->g->csetsize - 1; i >= 0; i--)
-      if (CHIN(cs, i) && isalpha(i)) {
+    ପାଇଁ (i = p->g->csetsize - 1; i >= 0; i--)
+      ଯଦି (CHIN(cs, i) && isalpha(i)) {
         ci = othercase(i);
-        if (ci != i)
+        ଯଦି (ci != i)
           CHadd(cs, ci);
       }
-    if (cs->multis != NULL)
+    ଯଦି (cs->multis != ଖାଲି)
       mccase(p, cs);
   }
-  if (invert) {
-    int i;
+  ଯଦି (invert) {
+    ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-    for (i = p->g->csetsize - 1; i >= 0; i--)
-      if (CHIN(cs, i))
+    ପାଇଁ (i = p->g->csetsize - 1; i >= 0; i--)
+      ଯଦି (CHIN(cs, i))
         CHsub(cs, i);
-      else
+      ଅନ୍ୟଥା
         CHadd(cs, i);
-    if (p->g->cflags & REG_NEWLINE)
+    ଯଦି (p->g->cflags & REG_NEWLINE)
       CHsub(cs, '\n');
-    if (cs->multis != NULL)
+    ଯଦି (cs->multis != ଖାଲି)
       mcinvert(p, cs);
   }
 
-  assert(cs->multis == NULL); /* xxx */
+  ପ୍ରତିଜ୍ଞା(cs->multis == ଖାଲି); /* xxx */
 
-  if (nch(p, cs) == 1) { /* optimize singleton sets */
+  ଯଦି (nch(p, cs) == 1) { /* optimize singleton sets */
     ordinary(p, firstch(p, cs));
     freeset(p, cs);
-  } else {
+  } ଅନ୍ୟଥା {
     EMIT(OANYOF, freezeset(p, cs));
   }
 }
@@ -907,27 +907,27 @@ static void p_bracket(struct parse *p) {
 /*
  - p_b_term - parse one term of a bracketed character list
  */
-static void p_b_term(struct parse *p, cset *cs) {
-  char c;
-  char start, finish;
-  int i;
+ସ୍ଥିର ଶୂନ୍ୟ p_b_term(ସଂରଚନା parse *p, cset *cs) {
+  ଅକ୍ଷର c;
+  ଅକ୍ଷର start, finish;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
   /* classify what we've got */
-  switch ((MORE()) ? PEEK() : '\0') {
-  case '[':
+  ବାଛ ((MORE()) ? PEEK() : '\0') {
+  ସ୍ଥିତି '[':
     c = (MORE2()) ? PEEK2() : '\0';
-    break;
-  case '-':
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '-':
     SETERROR(REG_ERANGE);
-    return; /* NOTE RETURN */
-    break;
-  default:
+    ଫେରନ୍ତୁ; /* NOTE RETURN */
+    ଭାଙ୍ଗ;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
     c = '\0';
-    break;
+    ଭାଙ୍ଗ;
   }
 
-  switch (c) {
-  case ':': /* character class */
+  ବାଛ (c) {
+  ସ୍ଥିତି ':': /* character class */
     NEXT2();
     REQUIRE(MORE(), REG_EBRACK);
     c = PEEK();
@@ -935,8 +935,8 @@ static void p_b_term(struct parse *p, cset *cs) {
     p_b_cclass(p, cs);
     REQUIRE(MORE(), REG_EBRACK);
     REQUIRE(EATTWO(':', ']'), REG_ECTYPE);
-    break;
-  case '=': /* equivalence class */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି '=': /* equivalence class */
     NEXT2();
     REQUIRE(MORE(), REG_EBRACK);
     c = PEEK();
@@ -944,54 +944,54 @@ static void p_b_term(struct parse *p, cset *cs) {
     p_b_eclass(p, cs);
     REQUIRE(MORE(), REG_EBRACK);
     REQUIRE(EATTWO('=', ']'), REG_ECOLLATE);
-    break;
-  default: /* symbol, ordinary character, or range */
+    ଭାଙ୍ଗ;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ: /* symbol, ordinary character, or range */
            /* xxx revision needed for multichar stuff */
-    start = p_b_symbol(p);
-    if (SEE('-') && MORE2() && PEEK2() != ']') {
+    start = p_b_ପ୍ରତୀକ(p);
+    ଯଦି (SEE('-') && MORE2() && PEEK2() != ']') {
       /* range */
       NEXT();
-      if (EAT('-'))
+      ଯଦି (EAT('-'))
         finish = '-';
-      else
-        finish = p_b_symbol(p);
-    } else {
+      ଅନ୍ୟଥା
+        finish = p_b_ପ୍ରତୀକ(p);
+    } ଅନ୍ୟଥା {
       finish = start;
     }
     /* xxx what about signed chars here... */
     REQUIRE(start <= finish, REG_ERANGE);
-    for (i = start; i <= finish; i++)
+    ପାଇଁ (i = start; i <= finish; i++)
       CHadd(cs, i);
-    break;
+    ଭାଙ୍ଗ;
   }
 }
 
 /*
  - p_b_cclass - parse a character-class name and deal with it
  */
-static void p_b_cclass(struct parse *p, cset *cs) {
-  const char *sp = p->next;
-  struct cclass *cp;
+ସ୍ଥିର ଶୂନ୍ୟ p_b_cclass(ସଂରଚନା parse *p, cset *cs) {
+  ଅଚଳ ଅକ୍ଷର *sp = p->next;
+  ସଂରଚନା cclass *cp;
   size_t len;
-  const char *u;
-  char c;
+  ଅଚଳ ଅକ୍ଷର *u;
+  ଅକ୍ଷର c;
 
-  while (MORE() && isalpha((uch)PEEK()))
+  ଯେତେବେଳେ (MORE() && isalpha((uch)PEEK()))
     NEXT();
   len = p->next - sp;
-  for (cp = cclasses; cp->name != NULL; cp++)
-    if (strncmp(cp->name, sp, len) == 0 && cp->name[len] == '\0')
-      break;
-  if (cp->name == NULL) {
+  ପାଇଁ (cp = cclasses; cp->name != ଖାଲି; cp++)
+    ଯଦି (strncmp(cp->name, sp, len) == 0 && cp->name[len] == '\0')
+      ଭାଙ୍ଗ;
+  ଯଦି (cp->name == ଖାଲି) {
     /* oops, didn't find it */
     SETERROR(REG_ECTYPE);
-    return;
+    ଫେରନ୍ତୁ;
   }
 
   u = cp->chars;
-  while ((c = *u++) != '\0')
+  ଯେତେବେଳେ ((c = *u++) != '\0')
     CHadd(cs, c);
-  for (u = cp->multis; *u != '\0'; u += strlen(u) + 1)
+  ପାଇଁ (u = cp->multis; *u != '\0'; u += strlen(u) + 1)
     MCadd(p, cs, u);
 }
 
@@ -1000,8 +1000,8 @@ static void p_b_cclass(struct parse *p, cset *cs) {
  *
  * This implementation is incomplete. xxx
  */
-static void p_b_eclass(struct parse *p, cset *cs) {
-  char c;
+ସ୍ଥିର ଶୂନ୍ୟ p_b_eclass(ସଂରଚନା parse *p, cset *cs) {
+  ଅକ୍ଷର c;
 
   c = p_b_coll_elem(p, '=');
   CHadd(cs, c);
@@ -1010,59 +1010,59 @@ static void p_b_eclass(struct parse *p, cset *cs) {
 /*
  - p_b_symbol - parse a character or [..]ed multicharacter collating symbol
  */
-static char /* value of symbol */
-p_b_symbol(struct parse *p) {
-  char value;
+ସ୍ଥିର ଅକ୍ଷର /* value of symbol */
+p_b_ପ୍ରତୀକ(ସଂରଚନା parse *p) {
+  ଅକ୍ଷର ମୂଲ୍ୟ_2;
 
   REQUIRE(MORE(), REG_EBRACK);
-  if (!EATTWO('[', '.'))
-    return (GETNEXT());
+  ଯଦି (!EATTWO('[', '.'))
+    ଫେରନ୍ତୁ (GETNEXT());
 
   /* collating symbol */
-  value = p_b_coll_elem(p, '.');
+  ମୂଲ୍ୟ_2 = p_b_coll_elem(p, '.');
   REQUIRE(EATTWO('.', ']'), REG_ECOLLATE);
-  return (value);
+  ଫେରନ୍ତୁ (ମୂଲ୍ୟ_2);
 }
 
 /*
  - p_b_coll_elem - parse a collating-element name and look it up
  */
-static char                              /* value of collating element */
-p_b_coll_elem(struct parse *p, int endc) /* name ended by endc,']' */
+ସ୍ଥିର ଅକ୍ଷର                              /* value of collating element */
+p_b_coll_elem(ସଂରଚନା parse *p, ପୂର୍ଣ୍ଣସଂଖ୍ୟା endc) /* name ended by endc,']' */
 {
-  const char *sp = p->next;
-  struct cname *cp;
+  ଅଚଳ ଅକ୍ଷର *sp = p->next;
+  ସଂରଚନା cname *cp;
   size_t len;
 
-  while (MORE() && !SEETWO(endc, ']'))
+  ଯେତେବେଳେ (MORE() && !SEETWO(endc, ']'))
     NEXT();
-  if (!MORE()) {
+  ଯଦି (!MORE()) {
     SETERROR(REG_EBRACK);
-    return (0);
+    ଫେରନ୍ତୁ (0);
   }
   len = p->next - sp;
-  for (cp = cnames; cp->name != NULL; cp++)
-    if (strncmp(cp->name, sp, len) == 0 && strlen(cp->name) == len)
-      return (cp->code); /* known name */
-  if (len == 1)
-    return (*sp);         /* single character */
+  ପାଇଁ (cp = cnames; cp->name != ଖାଲି; cp++)
+    ଯଦି (strncmp(cp->name, sp, len) == 0 && strlen(cp->name) == len)
+      ଫେରନ୍ତୁ (cp->code); /* known name */
+  ଯଦି (len == 1)
+    ଫେରନ୍ତୁ (*sp);         /* single character */
   SETERROR(REG_ECOLLATE); /* neither */
-  return (0);
+  ଫେରନ୍ତୁ (0);
 }
 
 /*
  - othercase - return the case counterpart of an alphabetic
  */
-static char /* if no counterpart, return ch */
-othercase(int ch) {
+ସ୍ଥିର ଅକ୍ଷର /* if no counterpart, return ch */
+othercase(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ch) {
   ch = (uch)ch;
-  assert(isalpha(ch));
-  if (isupper(ch))
-    return ((uch)tolower(ch));
-  else if (islower(ch))
-    return ((uch)toupper(ch));
-  else /* peculiar, but could happen */
-    return (ch);
+  ପ୍ରତିଜ୍ଞା(isalpha(ch));
+  ଯଦି (isupper(ch))
+    ଫେରନ୍ତୁ ((uch)tolower(ch));
+  ଅନ୍ୟଥା ଯଦି (islower(ch))
+    ଫେରନ୍ତୁ ((uch)toupper(ch));
+  ଅନ୍ୟଥା /* peculiar, but could happen */
+    ଫେରନ୍ତୁ (ch);
 }
 
 /*
@@ -1070,20 +1070,20 @@ othercase(int ch) {
  *
  * Boy, is this implementation ever a kludge...
  */
-static void bothcases(struct parse *p, int ch) {
-  const char *oldnext = p->next;
-  const char *oldend = p->end;
-  char bracket[3];
+ସ୍ଥିର ଶୂନ୍ୟ bothcases(ସଂରଚନା parse *p, ପୂର୍ଣ୍ଣସଂଖ୍ୟା ch) {
+  ଅଚଳ ଅକ୍ଷର *oldnext = p->next;
+  ଅଚଳ ଅକ୍ଷର *oldend = p->end;
+  ଅକ୍ଷର bracket[3];
 
   ch = (uch)ch;
-  assert(othercase(ch) != ch); /* p_bracket() would recurse */
+  ପ୍ରତିଜ୍ଞା(othercase(ch) != ch); /* p_bracket() would recurse */
   p->next = bracket;
   p->end = bracket + 2;
   bracket[0] = ch;
   bracket[1] = ']';
   bracket[2] = '\0';
   p_bracket(p);
-  assert(p->next == bracket + 2);
+  ପ୍ରତିଜ୍ଞା(p->next == bracket + 2);
   p->next = oldnext;
   p->end = oldend;
 }
@@ -1091,21 +1091,21 @@ static void bothcases(struct parse *p, int ch) {
 /*
  - uncased - emit an ordinary character that is never treated as cased
  */
-static void uncased(struct parse *p, int ch) {
+ସ୍ଥିର ଶୂନ୍ୟ uncased(ସଂରଚନା parse *p, ପୂର୍ଣ୍ଣସଂଖ୍ୟା ch) {
   cat_t *cap = p->g->categories;
 
   EMIT(OCHAR, (uch)ch);
-  if (cap[ch] == 0)
+  ଯଦି (cap[ch] == 0)
     cap[ch] = p->g->ncategories++;
 }
 
 /*
  - ordinary - emit an ordinary character
  */
-static void ordinary(struct parse *p, int ch) {
-  if ((p->g->cflags & REG_ICASE) && isalpha((uch)ch) && othercase(ch) != ch)
+ସ୍ଥିର ଶୂନ୍ୟ ordinary(ସଂରଚନା parse *p, ପୂର୍ଣ୍ଣସଂଖ୍ୟା ch) {
+  ଯଦି ((p->g->cflags & REG_ICASE) && isalpha((uch)ch) && othercase(ch) != ch)
     bothcases(p, ch);
-  else
+  ଅନ୍ୟଥା
     uncased(p, ch);
 }
 
@@ -1114,15 +1114,15 @@ static void ordinary(struct parse *p, int ch) {
  *
  * Boy, is this implementation ever a kludge...
  */
-static void nonnewline(struct parse *p) {
-  const char *oldnext = p->next;
-  const char *oldend = p->end;
-  static const char bracket[4] = {'^', '\n', ']', '\0'};
+ସ୍ଥିର ଶୂନ୍ୟ nonnewline(ସଂରଚନା parse *p) {
+  ଅଚଳ ଅକ୍ଷର *oldnext = p->next;
+  ଅଚଳ ଅକ୍ଷର *oldend = p->end;
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର bracket[4] = {'^', '\n', ']', '\0'};
 
   p->next = bracket;
   p->end = bracket + 3;
   p_bracket(p);
-  assert(p->next == bracket + 3);
+  ପ୍ରତିଜ୍ଞା(p->next == bracket + 3);
   p->next = oldnext;
   p->end = oldend;
 }
@@ -1130,10 +1130,10 @@ static void nonnewline(struct parse *p) {
 /*
  - repeat - generate code for a bounded repetition, recursively if needed
  */
-static void repeat(struct parse *p,
+ସ୍ଥିର ଶୂନ୍ୟ repeat(ସଂରଚନା parse *p,
                    sopno start, /* operand from here to end of strip */
-                   int from,    /* repeated from this number */
-                   int to)      /* to this number of times (maybe INFINITY) */
+                   ପୂର୍ଣ୍ଣସଂଖ୍ୟା from,    /* repeated from this number */
+                   ପୂର୍ଣ୍ଣସଂଖ୍ୟା to)      /* to this number of times (maybe INFINITY) */
 {
   sopno finish = HERE();
 #define N 2
@@ -1142,142 +1142,142 @@ static void repeat(struct parse *p,
 #define MAP(n) (((n) <= 1) ? (n) : ((n) == REGINFINITY) ? INF : N)
   sopno copy;
 
-  if (p->error != 0) /* head off possible runaway recursion */
-    return;
+  ଯଦି (p->error != 0) /* head off possible runaway recursion */
+    ଫେରନ୍ତୁ;
 
-  assert(from <= to);
+  ପ୍ରତିଜ୍ଞା(from <= to);
 
-  switch (REP(MAP(from), MAP(to))) {
-  case REP(0, 0):         /* must be user doing this */
+  ବାଛ (REP(MAP(from), MAP(to))) {
+  ସ୍ଥିତି REP(0, 0):         /* must be user doing this */
     DROP(finish - start); /* drop the operand */
-    break;
-  case REP(0, 1):   /* as x{1,1}? */
-  case REP(0, N):   /* as x{1,n}? */
-  case REP(0, INF): /* as x{1,}? */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି REP(0, 1):   /* as x{1,1}? */
+  ସ୍ଥିତି REP(0, N):   /* as x{1,n}? */
+  ସ୍ଥିତି REP(0, INF): /* as x{1,}? */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start); /* offset is wrong... */
+    ଭର୍ତ୍ତି_3(OCH_, start); /* offset is wrong... */
     repeat(p, start + 1, 1, to);
     ASTERN(OOR1, start);
     AHEAD(start); /* ... fix it */
     EMIT(OOR2, 0);
     AHEAD(THERE());
     ASTERN(O_CH, THERETHERE());
-    break;
-  case REP(1, 1): /* trivial case */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି REP(1, 1): /* trivial case */
     /* done */
-    break;
-  case REP(1, N): /* as x?x{1,n-1} */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି REP(1, N): /* as x?x{1,n-1} */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start);
+    ଭର୍ତ୍ତି_3(OCH_, start);
     ASTERN(OOR1, start);
     AHEAD(start);
     EMIT(OOR2, 0);  /* offset very wrong... */
     AHEAD(THERE()); /* ...so fix it */
     ASTERN(O_CH, THERETHERE());
     copy = dupl(p, start + 1, finish + 1);
-    assert(copy == finish + 4);
+    ପ୍ରତିଜ୍ଞା(copy == finish + 4);
     repeat(p, copy, 1, to - 1);
-    break;
-  case REP(1, INF): /* as x+ */
-    INSERT(OPLUS_, start);
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି REP(1, INF): /* as x+ */
+    ଭର୍ତ୍ତି_3(OPLUS_, start);
     ASTERN(O_PLUS, start);
-    break;
-  case REP(N, N): /* as xx{m-1,n-1} */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି REP(N, N): /* as xx{m-1,n-1} */
     copy = dupl(p, start, finish);
     repeat(p, copy, from - 1, to - 1);
-    break;
-  case REP(N, INF): /* as xx{n-1,INF} */
+    ଭାଙ୍ଗ;
+  ସ୍ଥିତି REP(N, INF): /* as xx{n-1,INF} */
     copy = dupl(p, start, finish);
     repeat(p, copy, from - 1, to);
-    break;
-  default:                /* "can't happen" */
+    ଭାଙ୍ଗ;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ:                /* "can't happen" */
     SETERROR(REG_ASSERT); /* just in case */
-    break;
+    ଭାଙ୍ଗ;
   }
 }
 
 /*
  - seterr - set an error condition
  */
-static int /* useless but makes type checking happy */
-seterr(struct parse *p, int e) {
-  if (p->error == 0) /* keep earliest error condition */
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* useless but makes type checking happy */
+seterr(ସଂରଚନା parse *p, ପୂର୍ଣ୍ଣସଂଖ୍ୟା e) {
+  ଯଦି (p->error == 0) /* keep earliest error condition */
     p->error = e;
   p->next = nuls; /* try to bring things to a halt */
   p->end = nuls;
-  return (0); /* make the return value well-defined */
+  ଫେରନ୍ତୁ (0); /* make the return value well-defined */
 }
 
 /*
  - allocset - allocate a set of characters for []
  */
-static cset *allocset(struct parse *p) {
-  int no = p->g->ncsets++;
+ସ୍ଥିର cset *allocset(ସଂରଚନା parse *p) {
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା no = p->g->ncsets++;
   size_t nc;
   size_t nbytes;
   cset *cs;
   size_t css = (size_t)p->g->csetsize;
-  int i;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-  if (no >= p->ncsalloc) { /* need another column of space */
-    void *ptr;
+  ଯଦି (no >= p->ncsalloc) { /* need another column of space */
+    ଶୂନ୍ୟ *ptr;
 
     p->ncsalloc += CHAR_BIT;
     nc = p->ncsalloc;
-    if (nc > SIZE_MAX / sizeof(cset))
-      goto nomem;
-    assert(nc % CHAR_BIT == 0);
+    ଯଦି (nc > SIZE_MAX / ଆକାର(cset))
+      ଯାଅ nomem;
+    ପ୍ରତିଜ୍ଞା(nc % CHAR_BIT == 0);
     nbytes = nc / CHAR_BIT * css;
 
-    ptr = (cset *)realloc((char *)p->g->sets, nc * sizeof(cset));
-    if (ptr == NULL)
-      goto nomem;
+    ptr = (cset *)realloc((ଅକ୍ଷର *)p->g->sets, nc * ଆକାର(cset));
+    ଯଦି (ptr == ଖାଲି)
+      ଯାଅ nomem;
     p->g->sets = ptr;
 
-    ptr = (uch *)realloc((char *)p->g->setbits, nbytes);
-    if (ptr == NULL)
-      goto nomem;
+    ptr = (uch *)realloc((ଅକ୍ଷର *)p->g->setbits, nbytes);
+    ଯଦି (ptr == ଖାଲି)
+      ଯାଅ nomem;
     p->g->setbits = ptr;
 
-    for (i = 0; i < no; i++)
+    ପାଇଁ (i = 0; i < no; i++)
       p->g->sets[i].ptr = p->g->setbits + css * (i / CHAR_BIT);
 
-    (void)memset((char *)p->g->setbits + (nbytes - css), 0, css);
+    (ଶୂନ୍ୟ)memset((ଅକ୍ଷର *)p->g->setbits + (nbytes - css), 0, css);
   }
   /* XXX should not happen */
-  if (p->g->sets == NULL || p->g->setbits == NULL)
-    goto nomem;
+  ଯଦି (p->g->sets == ଖାଲି || p->g->setbits == ଖାଲି)
+    ଯାଅ nomem;
 
   cs = &p->g->sets[no];
   cs->ptr = p->g->setbits + css * ((no) / CHAR_BIT);
   cs->mask = 1 << ((no) % CHAR_BIT);
   cs->hash = 0;
   cs->smultis = 0;
-  cs->multis = NULL;
+  cs->multis = ଖାଲି;
 
-  return (cs);
+  ଫେରନ୍ତୁ (cs);
 nomem:
-  free(p->g->sets);
-  p->g->sets = NULL;
-  free(p->g->setbits);
-  p->g->setbits = NULL;
+  ମୁକ୍ତ(p->g->sets);
+  p->g->sets = ଖାଲି;
+  ମୁକ୍ତ(p->g->setbits);
+  p->g->setbits = ଖାଲି;
 
   SETERROR(REG_ESPACE);
   /* caller's responsibility not to do set ops */
-  return (NULL);
+  ଫେରନ୍ତୁ (ଖାଲି);
 }
 
 /*
  - freeset - free a now-unused set
  */
-static void freeset(struct parse *p, cset *cs) {
+ସ୍ଥିର ଶୂନ୍ୟ freeset(ସଂରଚନା parse *p, cset *cs) {
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *ଶୀର୍ଷ_2 = &p->g->sets[p->g->ncsets];
   size_t css = (size_t)p->g->csetsize;
 
-  for (i = 0; i < css; i++)
+  ପାଇଁ (i = 0; i < css; i++)
     CHsub(cs, i);
-  if (cs == top - 1) /* recover only the easy case */
+  ଯଦି (cs == ଶୀର୍ଷ_2 - 1) /* recover only the easy case */
     p->g->ncsets--;
 }
 
@@ -1290,77 +1290,77 @@ static void freeset(struct parse *p, cset *cs) {
  * is done using addition rather than xor -- all ASCII [aA] sets xor to
  * the same value!
  */
-static int /* set number */
-freezeset(struct parse *p, cset *cs) {
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* set number */
+freezeset(ସଂରଚନା parse *p, cset *cs) {
   uch h = cs->hash;
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *ଶୀର୍ଷ_2 = &p->g->sets[p->g->ncsets];
   cset *cs2;
   size_t css = (size_t)p->g->csetsize;
 
   /* look for an earlier one which is the same */
-  for (cs2 = &p->g->sets[0]; cs2 < top; cs2++)
-    if (cs2->hash == h && cs2 != cs) {
+  ପାଇଁ (cs2 = &p->g->sets[0]; cs2 < ଶୀର୍ଷ_2; cs2++)
+    ଯଦି (cs2->hash == h && cs2 != cs) {
       /* maybe */
-      for (i = 0; i < css; i++)
-        if (!!CHIN(cs2, i) != !!CHIN(cs, i))
-          break; /* no */
-      if (i == css)
-        break; /* yes */
+      ପାଇଁ (i = 0; i < css; i++)
+        ଯଦି (!!CHIN(cs2, i) != !!CHIN(cs, i))
+          ଭାଙ୍ଗ; /* no */
+      ଯଦି (i == css)
+        ଭାଙ୍ଗ; /* yes */
     }
 
-  if (cs2 < top) { /* found one */
+  ଯଦି (cs2 < ଶୀର୍ଷ_2) { /* found one */
     freeset(p, cs);
     cs = cs2;
   }
 
-  return ((int)(cs - p->g->sets));
+  ଫେରନ୍ତୁ ((ପୂର୍ଣ୍ଣସଂଖ୍ୟା)(cs - p->g->sets));
 }
 
 /*
  - firstch - return first character in a set (which must have at least one)
  */
-static int /* character; there is no "none" value */
-firstch(struct parse *p, cset *cs) {
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* character; there is no "none" value */
+firstch(ସଂରଚନା parse *p, cset *cs) {
   size_t i;
   size_t css = (size_t)p->g->csetsize;
 
-  for (i = 0; i < css; i++)
-    if (CHIN(cs, i))
-      return ((char)i);
-  assert(never);
-  return (0); /* arbitrary */
+  ପାଇଁ (i = 0; i < css; i++)
+    ଯଦି (CHIN(cs, i))
+      ଫେରନ୍ତୁ ((ଅକ୍ଷର)i);
+  ପ୍ରତିଜ୍ଞା(never);
+  ଫେରନ୍ତୁ (0); /* arbitrary */
 }
 
 /*
  - nch - number of characters in a set
  */
-static int nch(struct parse *p, cset *cs) {
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା nch(ସଂରଚନା parse *p, cset *cs) {
   size_t i;
   size_t css = (size_t)p->g->csetsize;
-  int n = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା n = 0;
 
-  for (i = 0; i < css; i++)
-    if (CHIN(cs, i))
+  ପାଇଁ (i = 0; i < css; i++)
+    ଯଦି (CHIN(cs, i))
       n++;
-  return (n);
+  ଫେରନ୍ତୁ (n);
 }
 
 /*
  - mcadd - add a collating element to a cset
  */
-static void mcadd(struct parse *p, cset *cs, const char *cp) {
+ସ୍ଥିର ଶୂନ୍ୟ mcadd(ସଂରଚନା parse *p, cset *cs, ଅଚଳ ଅକ୍ଷର *cp) {
   size_t oldend = cs->smultis;
-  void *np;
+  ଶୂନ୍ୟ *np;
 
   cs->smultis += strlen(cp) + 1;
   np = realloc(cs->multis, cs->smultis);
-  if (np == NULL) {
-    if (cs->multis)
-      free(cs->multis);
-    cs->multis = NULL;
+  ଯଦି (np == ଖାଲି) {
+    ଯଦି (cs->multis)
+      ମୁକ୍ତ(cs->multis);
+    cs->multis = ଖାଲି;
     SETERROR(REG_ESPACE);
-    return;
+    ଫେରନ୍ତୁ;
   }
   cs->multis = np;
 
@@ -1374,8 +1374,8 @@ static void mcadd(struct parse *p, cset *cs, const char *cp) {
  * is deferred.
  */
 /* ARGSUSED */
-static void mcinvert(struct parse *p, cset *cs) {
-  assert(cs->multis == NULL); /* xxx */
+ସ୍ଥିର ଶୂନ୍ୟ mcinvert(ସଂରଚନା parse *p, cset *cs) {
+  ପ୍ରତିଜ୍ଞା(cs->multis == ଖାଲି); /* xxx */
 }
 
 /*
@@ -1385,62 +1385,62 @@ static void mcinvert(struct parse *p, cset *cs) {
  * is deferred.
  */
 /* ARGSUSED */
-static void mccase(struct parse *p, cset *cs) {
-  assert(cs->multis == NULL); /* xxx */
+ସ୍ଥିର ଶୂନ୍ୟ mccase(ସଂରଚନା parse *p, cset *cs) {
+  ପ୍ରତିଜ୍ଞା(cs->multis == ଖାଲି); /* xxx */
 }
 
 /*
  - isinsets - is this character in any sets?
  */
-static int /* predicate */
-isinsets(struct re_guts *g, int c) {
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* predicate */
+isinsets(ସଂରଚନା re_guts *g, ପୂର୍ଣ୍ଣସଂଖ୍ୟା c) {
   uch *col;
-  int i;
-  int ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
   unsigned uc = (uch)c;
 
-  for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
-    if (col[uc] != 0)
-      return (1);
-  return (0);
+  ପାଇଁ (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
+    ଯଦି (col[uc] != 0)
+      ଫେରନ୍ତୁ (1);
+  ଫେରନ୍ତୁ (0);
 }
 
 /*
  - samesets - are these two characters in exactly the same sets?
  */
-static int /* predicate */
-samesets(struct re_guts *g, int c1, int c2) {
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା /* predicate */
+samesets(ସଂରଚନା re_guts *g, ପୂର୍ଣ୍ଣସଂଖ୍ୟା c1, ପୂର୍ଣ୍ଣସଂଖ୍ୟା c2) {
   uch *col;
-  int i;
-  int ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ncols = (g->ncsets + (CHAR_BIT - 1)) / CHAR_BIT;
   unsigned uc1 = (uch)c1;
   unsigned uc2 = (uch)c2;
 
-  for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
-    if (col[uc1] != col[uc2])
-      return (0);
-  return (1);
+  ପାଇଁ (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
+    ଯଦି (col[uc1] != col[uc2])
+      ଫେରନ୍ତୁ (0);
+  ଫେରନ୍ତୁ (1);
 }
 
 /*
  - categorize - sort out character categories
  */
-static void categorize(struct parse *p, struct re_guts *g) {
+ସ୍ଥିର ଶୂନ୍ୟ categorize(ସଂରଚନା parse *p, ସଂରଚନା re_guts *g) {
   cat_t *cats = g->categories;
-  int c;
-  int c2;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା c;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା c2;
   cat_t cat;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ଯଦି (p->error != 0)
+    ଫେରନ୍ତୁ;
 
-  for (c = CHAR_MIN; c <= CHAR_MAX; c++)
-    if (cats[c] == 0 && isinsets(g, c)) {
+  ପାଇଁ (c = CHAR_MIN; c <= CHAR_MAX; c++)
+    ଯଦି (cats[c] == 0 && isinsets(g, c)) {
       cat = g->ncategories++;
       cats[c] = cat;
-      for (c2 = c + 1; c2 <= CHAR_MAX; c2++)
-        if (cats[c2] == 0 && samesets(g, c, c2))
+      ପାଇଁ (c2 = c + 1; c2 <= CHAR_MAX; c2++)
+        ଯଦି (cats[c2] == 0 && samesets(g, c, c2))
           cats[c2] = cat;
     }
 }
@@ -1448,22 +1448,22 @@ static void categorize(struct parse *p, struct re_guts *g) {
 /*
  - dupl - emit a duplicate of a bunch of sops
  */
-static sopno                       /* start of duplicate */
-dupl(struct parse *p, sopno start, /* from here */
+ସ୍ଥିର sopno                       /* start of duplicate */
+dupl(ସଂରଚନା parse *p, sopno start, /* from here */
      sopno finish)                 /* to this less one */
 {
   sopno ret = HERE();
   sopno len = finish - start;
 
-  assert(finish >= start);
-  if (len == 0)
-    return (ret);
+  ପ୍ରତିଜ୍ଞା(finish >= start);
+  ଯଦି (len == 0)
+    ଫେରନ୍ତୁ (ret);
   enlarge(p, p->ssize + len); /* this many unexpected additions */
-  assert(p->ssize >= p->slen + len);
-  (void)memmove((char *)(p->strip + p->slen), (char *)(p->strip + start),
-                (size_t)len * sizeof(sop));
+  ପ୍ରତିଜ୍ଞା(p->ssize >= p->slen + len);
+  (ଶୂନ୍ୟ)memmove((ଅକ୍ଷର *)(p->strip + p->slen), (ଅକ୍ଷର *)(p->strip + start),
+                (size_t)len * ଆକାର(sop));
   p->slen += len;
-  return (ret);
+  ଫେରନ୍ତୁ (ret);
 }
 
 /*
@@ -1473,18 +1473,18 @@ dupl(struct parse *p, sopno start, /* from here */
  * hard-case backup, but it's just too big and messy unless there are
  * some changes to the data structures.  Maybe later.
  */
-static void doemit(struct parse *p, sop op, size_t opnd) {
+ସ୍ଥିର ଶୂନ୍ୟ doemit(ସଂରଚନା parse *p, sop op, size_t opnd) {
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ଯଦି (p->error != 0)
+    ଫେରନ୍ତୁ;
 
   /* deal with oversize operands ("can't happen", more or less) */
-  assert(opnd < 1 << OPSHIFT);
+  ପ୍ରତିଜ୍ଞା(opnd < 1 << OPSHIFT);
 
   /* deal with undersized strip */
-  if (p->slen >= p->ssize)
+  ଯଦି (p->slen >= p->ssize)
     enlarge(p, (p->ssize + 1) / 2 * 3); /* +50% */
-  assert(p->slen < p->ssize);
+  ପ୍ରତିଜ୍ଞା(p->slen < p->ssize);
 
   /* finally, it's all reduced to the easy case */
   p->strip[p->slen++] = SOP(op, opnd);
@@ -1493,66 +1493,66 @@ static void doemit(struct parse *p, sop op, size_t opnd) {
 /*
  - doinsert - insert a sop into the strip
  */
-static void doinsert(struct parse *p, sop op, size_t opnd, sopno pos) {
+ସ୍ଥିର ଶୂନ୍ୟ doinsert(ସଂରଚନା parse *p, sop op, size_t opnd, sopno pos) {
   sopno sn;
   sop s;
-  int i;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ଯଦି (p->error != 0)
+    ଫେରନ୍ତୁ;
 
   sn = HERE();
   EMIT(op, opnd); /* do checks, ensure space */
-  assert(HERE() == sn + 1);
+  ପ୍ରତିଜ୍ଞା(HERE() == sn + 1);
   s = p->strip[sn];
 
   /* adjust paren pointers */
-  assert(pos > 0);
-  for (i = 1; i < NPAREN; i++) {
-    if (p->pbegin[i] >= pos) {
+  ପ୍ରତିଜ୍ଞା(pos > 0);
+  ପାଇଁ (i = 1; i < NPAREN; i++) {
+    ଯଦି (p->pbegin[i] >= pos) {
       p->pbegin[i]++;
     }
-    if (p->pend[i] >= pos) {
+    ଯଦି (p->pend[i] >= pos) {
       p->pend[i]++;
     }
   }
 
-  memmove((char *)&p->strip[pos + 1], (char *)&p->strip[pos],
-          (HERE() - pos - 1) * sizeof(sop));
+  memmove((ଅକ୍ଷର *)&p->strip[pos + 1], (ଅକ୍ଷର *)&p->strip[pos],
+          (HERE() - pos - 1) * ଆକାର(sop));
   p->strip[pos] = s;
 }
 
 /*
  - dofwd - complete a forward reference
  */
-static void dofwd(struct parse *p, sopno pos, sop value) {
+ସ୍ଥିର ଶୂନ୍ୟ dofwd(ସଂରଚନା parse *p, sopno pos, sop ମୂଲ୍ୟ_2) {
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ଯଦି (p->error != 0)
+    ଫେରନ୍ତୁ;
 
-  assert(value < 1 << OPSHIFT);
-  p->strip[pos] = OP(p->strip[pos]) | value;
+  ପ୍ରତିଜ୍ଞା(ମୂଲ୍ୟ_2 < 1 << OPSHIFT);
+  p->strip[pos] = OP(p->strip[pos]) | ମୂଲ୍ୟ_2;
 }
 
 /*
  - enlarge - enlarge the strip
  */
-static void enlarge(struct parse *p, sopno size) {
+ସ୍ଥିର ଶୂନ୍ୟ enlarge(ସଂରଚନା parse *p, sopno size) {
   sop *sp;
 
-  if (p->ssize >= size)
-    return;
+  ଯଦି (p->ssize >= size)
+    ଫେରନ୍ତୁ;
 
-  if ((uintptr_t)size > SIZE_MAX / sizeof(sop)) {
+  ଯଦି ((uintptr_t)size > SIZE_MAX / ଆକାର(sop)) {
     SETERROR(REG_ESPACE);
-    return;
+    ଫେରନ୍ତୁ;
   }
 
-  sp = (sop *)realloc(p->strip, size * sizeof(sop));
-  if (sp == NULL) {
+  sp = (sop *)realloc(p->strip, size * ଆକାର(sop));
+  ଯଦି (sp == ଖାଲି) {
     SETERROR(REG_ESPACE);
-    return;
+    ଫେରନ୍ତୁ;
   }
   p->strip = sp;
   p->ssize = size;
@@ -1561,16 +1561,16 @@ static void enlarge(struct parse *p, sopno size) {
 /*
  - stripsnug - compact the strip
  */
-static void stripsnug(struct parse *p, struct re_guts *g) {
+ସ୍ଥିର ଶୂନ୍ୟ stripsnug(ସଂରଚନା parse *p, ସଂରଚନା re_guts *g) {
   g->nstates = p->slen;
-  if ((uintptr_t)p->slen > SIZE_MAX / sizeof(sop)) {
+  ଯଦି ((uintptr_t)p->slen > SIZE_MAX / ଆକାର(sop)) {
     g->strip = p->strip;
     SETERROR(REG_ESPACE);
-    return;
+    ଫେରନ୍ତୁ;
   }
 
-  g->strip = (sop *)realloc((char *)p->strip, p->slen * sizeof(sop));
-  if (g->strip == NULL) {
+  g->strip = (sop *)realloc((ଅକ୍ଷର *)p->strip, p->slen * ଆକାର(sop));
+  ଯଦି (g->strip == ଖାଲି) {
     SETERROR(REG_ESPACE);
     g->strip = p->strip;
   }
@@ -1585,106 +1585,106 @@ static void stripsnug(struct parse *p, struct re_guts *g) {
  *
  * Note that must and mlen got initialized during setup.
  */
-static void findmust(struct parse *p, struct re_guts *g) {
+ସ୍ଥିର ଶୂନ୍ୟ findmust(ସଂରଚନା parse *p, ସଂରଚନା re_guts *g) {
   sop *scan;
   sop *start = 0;    /* start initialized in the default case, after that */
   sop *newstart = 0; /* newstart was initialized in the OCHAR case */
   sopno newlen;
   sop s;
-  char *cp;
+  ଅକ୍ଷର *cp;
   sopno i;
 
   /* avoid making error situations worse */
-  if (p->error != 0)
-    return;
+  ଯଦି (p->error != 0)
+    ଫେରନ୍ତୁ;
 
   /* find the longest OCHAR sequence in strip */
   newlen = 0;
   scan = g->strip + 1;
-  do {
+  କର {
     s = *scan++;
-    switch (OP(s)) {
-    case OCHAR:        /* sequence member */
-      if (newlen == 0) /* new sequence */
+    ବାଛ (OP(s)) {
+    ସ୍ଥିତି OCHAR:        /* sequence member */
+      ଯଦି (newlen == 0) /* new sequence */
         newstart = scan - 1;
       newlen++;
-      break;
-    case OPLUS_: /* things that don't break one */
-    case OLPAREN:
-    case ORPAREN:
-      break;
-    case OQUEST_: /* things that must be skipped */
-    case OCH_:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି OPLUS_: /* things that don't break one */
+    ସ୍ଥିତି OLPAREN:
+    ସ୍ଥିତି ORPAREN:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି OQUEST_: /* things that must be skipped */
+    ସ୍ଥିତି OCH_:
       scan--;
-      do {
+      କର {
         scan += OPND(s);
         s = *scan;
         /* assert() interferes w debug printouts */
-        if (OP(s) != O_QUEST && OP(s) != O_CH && OP(s) != OOR2) {
+        ଯଦି (OP(s) != O_QUEST && OP(s) != O_CH && OP(s) != OOR2) {
           g->iflags |= REGEX_BAD;
-          return;
+          ଫେରନ୍ତୁ;
         }
-      } while (OP(s) != O_QUEST && OP(s) != O_CH);
+      } ଯେତେବେଳେ (OP(s) != O_QUEST && OP(s) != O_CH);
       LLVM_FALLTHROUGH;
-    default:                  /* things that break a sequence */
-      if (newlen > g->mlen) { /* ends one */
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:                  /* things that break a sequence */
+      ଯଦି (newlen > g->mlen) { /* ends one */
         start = newstart;
         g->mlen = newlen;
       }
       newlen = 0;
-      break;
+      ଭାଙ୍ଗ;
     }
-  } while (OP(s) != OEND);
+  } ଯେତେବେଳେ (OP(s) != OEND);
 
-  if (g->mlen == 0) /* there isn't one */
-    return;
+  ଯଦି (g->mlen == 0) /* there isn't one */
+    ଫେରନ୍ତୁ;
 
   /* turn it into a character string */
   g->must = malloc((size_t)g->mlen + 1);
-  if (g->must == NULL) { /* argh; just forget it */
+  ଯଦି (g->must == ଖାଲି) { /* argh; just forget it */
     g->mlen = 0;
-    return;
+    ଫେରନ୍ତୁ;
   }
   cp = g->must;
   scan = start;
-  for (i = g->mlen; i > 0; i--) {
-    while (OP(s = *scan++) != OCHAR)
-      continue;
-    assert(cp < g->must + g->mlen);
-    *cp++ = (char)OPND(s);
+  ପାଇଁ (i = g->mlen; i > 0; i--) {
+    ଯେତେବେଳେ (OP(s = *scan++) != OCHAR)
+      ଜାରି;
+    ପ୍ରତିଜ୍ଞା(cp < g->must + g->mlen);
+    *cp++ = (ଅକ୍ଷର)OPND(s);
   }
-  assert(cp == g->must + g->mlen);
+  ପ୍ରତିଜ୍ଞା(cp == g->must + g->mlen);
   *cp++ = '\0'; /* just on general principles */
 }
 
 /*
  - pluscount - count + nesting
  */
-static sopno /* nesting depth */
-pluscount(struct parse *p, struct re_guts *g) {
+ସ୍ଥିର sopno /* nesting depth */
+pluscount(ସଂରଚନା parse *p, ସଂରଚନା re_guts *g) {
   sop *scan;
   sop s;
   sopno plusnest = 0;
   sopno maxnest = 0;
 
-  if (p->error != 0)
-    return (0); /* there may not be an OEND */
+  ଯଦି (p->error != 0)
+    ଫେରନ୍ତୁ (0); /* there may not be an OEND */
 
   scan = g->strip + 1;
-  do {
+  କର {
     s = *scan++;
-    switch (OP(s)) {
-    case OPLUS_:
+    ବାଛ (OP(s)) {
+    ସ୍ଥିତି OPLUS_:
       plusnest++;
-      break;
-    case O_PLUS:
-      if (plusnest > maxnest)
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି O_PLUS:
+      ଯଦି (plusnest > maxnest)
         maxnest = plusnest;
       plusnest--;
-      break;
+      ଭାଙ୍ଗ;
     }
-  } while (OP(s) != OEND);
-  if (plusnest != 0)
+  } ଯେତେବେଳେ (OP(s) != OEND);
+  ଯଦି (plusnest != 0)
     g->iflags |= REGEX_BAD;
-  return (maxnest);
+  ଫେରନ୍ତୁ (maxnest);
 }

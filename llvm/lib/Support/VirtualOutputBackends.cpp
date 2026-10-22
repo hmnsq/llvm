@@ -15,113 +15,113 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/VirtualOutputBackends.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/IOSandbox.h"
-#include "llvm/Support/LockFileManager.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/VirtualOutputConfig.h"
-#include "llvm/Support/VirtualOutputError.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/VirtualOutputBackends.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/ScopeExit.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/FileSystem.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/IOSandbox.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/LockFileManager.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/MemoryBuffer.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Path.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Process.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Signals.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/VirtualOutputConfig.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/VirtualOutputError.h"
 
-using namespace llvm;
-using namespace llvm::vfs;
+using ନାମାକାଶ llvm;
+using ନାମାକାଶ llvm::vfs;
 
-void ProxyOutputBackend::anchor() {}
-void OnDiskOutputBackend::anchor() {}
+ଶୂନ୍ୟ ProxyOutputBackend::anchor() {}
+ଶୂନ୍ୟ OnDiskOutputBackend::anchor() {}
 
 IntrusiveRefCntPtr<OutputBackend> vfs::makeNullOutputBackend() {
-  struct NullOutputBackend : public OutputBackend {
-    IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return const_cast<NullOutputBackend *>(this);
+  ସଂରଚନା NullOutputBackend : ସର୍ବସାଧାରଣ OutputBackend {
+    IntrusiveRefCntPtr<OutputBackend> cloneImpl() ଅଚଳ override {
+      ଫେରନ୍ତୁ const_cast<NullOutputBackend *>(ଏହି);
     }
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path, std::optional<OutputConfig>) override {
-      return std::make_unique<NullOutputFileImpl>();
+      ଫେରନ୍ତୁ std::make_unique<NullOutputFileImpl>();
     }
   };
 
-  return makeIntrusiveRefCnt<NullOutputBackend>();
+  ଫେରନ୍ତୁ makeIntrusiveRefCnt<NullOutputBackend>();
 }
 
 IntrusiveRefCntPtr<OutputBackend> vfs::makeFilteringOutputBackend(
     IntrusiveRefCntPtr<OutputBackend> UnderlyingBackend,
-    std::function<bool(StringRef, std::optional<OutputConfig>)> Filter) {
-  struct FilteringOutputBackend : public ProxyOutputBackend {
+    std::function<ତାର୍କିକ(StringRef, std::optional<OutputConfig>)> Filter) {
+  ସଂରଚନା FilteringOutputBackend : ସର୍ବସାଧାରଣ ProxyOutputBackend {
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path,
                    std::optional<OutputConfig> Config) override {
-      if (Filter(Path, Config))
-        return ProxyOutputBackend::createFileImpl(Path, Config);
-      return std::make_unique<NullOutputFileImpl>();
+      ଯଦି (Filter(Path, Config))
+        ଫେରନ୍ତୁ ProxyOutputBackend::createFileImpl(Path, Config);
+      ଫେରନ୍ତୁ std::make_unique<NullOutputFileImpl>();
     }
 
-    IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return makeIntrusiveRefCnt<FilteringOutputBackend>(
+    IntrusiveRefCntPtr<OutputBackend> cloneImpl() ଅଚଳ override {
+      ଫେରନ୍ତୁ makeIntrusiveRefCnt<FilteringOutputBackend>(
           getUnderlyingBackend().clone(), Filter);
     }
 
     FilteringOutputBackend(
         IntrusiveRefCntPtr<OutputBackend> UnderlyingBackend,
-        std::function<bool(StringRef, std::optional<OutputConfig>)> Filter)
+        std::function<ତାର୍କିକ(StringRef, std::optional<OutputConfig>)> Filter)
         : ProxyOutputBackend(std::move(UnderlyingBackend)),
           Filter(std::move(Filter)) {
-      assert(this->Filter && "Expected a non-null function");
+      ପ୍ରତିଜ୍ଞା(ଏହି->Filter && "Expected a non-null function");
     }
-    std::function<bool(StringRef, std::optional<OutputConfig>)> Filter;
+    std::function<ତାର୍କିକ(StringRef, std::optional<OutputConfig>)> Filter;
   };
 
-  return makeIntrusiveRefCnt<FilteringOutputBackend>(
+  ଫେରନ୍ତୁ makeIntrusiveRefCnt<FilteringOutputBackend>(
       std::move(UnderlyingBackend), std::move(Filter));
 }
 
 IntrusiveRefCntPtr<OutputBackend>
 vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
                                 IntrusiveRefCntPtr<OutputBackend> Backend2) {
-  struct ProxyOutputBackend1 : public ProxyOutputBackend {
+  ସଂରଚନା ProxyOutputBackend1 : ସର୍ବସାଧାରଣ ProxyOutputBackend {
     using ProxyOutputBackend::ProxyOutputBackend;
   };
-  struct ProxyOutputBackend2 : public ProxyOutputBackend {
+  ସଂରଚନା ProxyOutputBackend2 : ସର୍ବସାଧାରଣ ProxyOutputBackend {
     using ProxyOutputBackend::ProxyOutputBackend;
   };
-  struct MirroringOutput final : public OutputFileImpl, raw_pwrite_stream {
+  ସଂରଚନା MirroringOutput final : ସର୍ବସାଧାରଣ OutputFileImpl, raw_pwrite_stream {
     Error keep() final {
       flush();
-      return joinErrors(F1->keep(), F2->keep());
+      ଫେରନ୍ତୁ joinErrors(F1->keep(), F2->keep());
     }
     Error discard() final {
       flush();
-      return joinErrors(F1->discard(), F2->discard());
+      ଫେରନ୍ତୁ joinErrors(F1->discard(), F2->discard());
     }
-    raw_pwrite_stream &getOS() final { return *this; }
+    raw_pwrite_stream &getOS() final { ଫେରନ୍ତୁ *ଏହି; }
 
-    void write_impl(const char *Ptr, size_t Size) override {
-      F1->getOS().write(Ptr, Size);
-      F2->getOS().write(Ptr, Size);
+    ଶୂନ୍ୟ write_impl(ଅଚଳ ଅକ୍ଷର *Ptr, size_t Size) override {
+      F1->getOS().ଲିଖ(Ptr, Size);
+      F2->getOS().ଲିଖ(Ptr, Size);
     }
-    void pwrite_impl(const char *Ptr, size_t Size, uint64_t Offset) override {
-      this->flush();
+    ଶୂନ୍ୟ pwrite_impl(ଅଚଳ ଅକ୍ଷର *Ptr, size_t Size, uint64_t Offset) override {
+      ଏହି->flush();
       F1->getOS().pwrite(Ptr, Size, Offset);
       F2->getOS().pwrite(Ptr, Size, Offset);
     }
-    uint64_t current_pos() const override { return F1->getOS().tell(); }
-    size_t preferred_buffer_size() const override {
-      return PreferredBufferSize;
+    uint64_t current_pos() ଅଚଳ override { ଫେରନ୍ତୁ F1->getOS().tell(); }
+    size_t preferred_buffer_size() ଅଚଳ override {
+      ଫେରନ୍ତୁ PreferredBufferSize;
     }
-    void reserveExtraSpace(uint64_t ExtraSize) override {
+    ଶୂନ୍ୟ reserveExtraSpace(uint64_t ExtraSize) override {
       F1->getOS().reserveExtraSpace(ExtraSize);
       F2->getOS().reserveExtraSpace(ExtraSize);
     }
-    bool is_displayed() const override {
-      return F1->getOS().is_displayed() && F2->getOS().is_displayed();
+    ତାର୍କିକ is_displayed() ଅଚଳ override {
+      ଫେରନ୍ତୁ F1->getOS().is_displayed() && F2->getOS().is_displayed();
     }
-    bool has_colors() const override {
-      return F1->getOS().has_colors() && F2->getOS().has_colors();
+    ତାର୍କିକ has_colors() ଅଚଳ override {
+      ଫେରନ୍ତୁ F1->getOS().has_colors() && F2->getOS().has_colors();
     }
-    void enable_colors(bool enable) override {
+    ଶୂନ୍ୟ enable_colors(ତାର୍କିକ enable) override {
       raw_pwrite_stream::enable_colors(enable);
       F1->getOS().enable_colors(enable);
       F2->getOS().enable_colors(enable);
@@ -137,41 +137,41 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
     std::unique_ptr<OutputFileImpl> F1;
     std::unique_ptr<OutputFileImpl> F2;
   };
-  struct MirroringOutputBackend : public ProxyOutputBackend1,
-                                  public ProxyOutputBackend2 {
+  ସଂରଚନା MirroringOutputBackend : ସର୍ବସାଧାରଣ ProxyOutputBackend1,
+                                  ସର୍ବସାଧାରଣ ProxyOutputBackend2 {
     Expected<std::unique_ptr<OutputFileImpl>>
     createFileImpl(StringRef Path,
                    std::optional<OutputConfig> Config) override {
       std::unique_ptr<OutputFileImpl> File1;
       std::unique_ptr<OutputFileImpl> File2;
-      if (Error E =
+      ଯଦି (Error E =
               ProxyOutputBackend1::createFileImpl(Path, Config).moveInto(File1))
-        return std::move(E);
-      if (Error E =
+        ଫେରନ୍ତୁ std::move(E);
+      ଯଦି (Error E =
               ProxyOutputBackend2::createFileImpl(Path, Config).moveInto(File2))
-        return joinErrors(std::move(E), File1->discard());
+        ଫେରନ୍ତୁ joinErrors(std::move(E), File1->discard());
 
       // Skip the extra indirection if one of these is a null output.
-      if (isa<NullOutputFileImpl>(*File1)) {
+      ଯଦି (isa<NullOutputFileImpl>(*File1)) {
         consumeError(File1->discard());
-        return std::move(File2);
+        ଫେରନ୍ତୁ std::move(File2);
       }
-      if (isa<NullOutputFileImpl>(*File2)) {
+      ଯଦି (isa<NullOutputFileImpl>(*File2)) {
         consumeError(File2->discard());
-        return std::move(File1);
+        ଫେରନ୍ତୁ std::move(File1);
       }
-      return std::make_unique<MirroringOutput>(std::move(File1),
+      ଫେରନ୍ତୁ std::make_unique<MirroringOutput>(std::move(File1),
                                                std::move(File2));
     }
 
-    IntrusiveRefCntPtr<OutputBackend> cloneImpl() const override {
-      return IntrusiveRefCntPtr<ProxyOutputBackend1>(
+    IntrusiveRefCntPtr<OutputBackend> cloneImpl() ଅଚଳ override {
+      ଫେରନ୍ତୁ IntrusiveRefCntPtr<ProxyOutputBackend1>(
           makeIntrusiveRefCnt<MirroringOutputBackend>(
               ProxyOutputBackend1::getUnderlyingBackend().clone(),
               ProxyOutputBackend2::getUnderlyingBackend().clone()));
     }
-    void Retain() const { ProxyOutputBackend1::Retain(); }
-    void Release() const { ProxyOutputBackend1::Release(); }
+    ଶୂନ୍ୟ Retain() ଅଚଳ { ProxyOutputBackend1::Retain(); }
+    ଶୂନ୍ୟ Release() ଅଚଳ { ProxyOutputBackend1::Release(); }
 
     MirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
                            IntrusiveRefCntPtr<OutputBackend> Backend2)
@@ -179,35 +179,35 @@ vfs::makeMirroringOutputBackend(IntrusiveRefCntPtr<OutputBackend> Backend1,
           ProxyOutputBackend2(std::move(Backend2)) {}
   };
 
-  assert(Backend1 && "Expected actual backend");
-  assert(Backend2 && "Expected actual backend");
-  return IntrusiveRefCntPtr<ProxyOutputBackend1>(
+  ପ୍ରତିଜ୍ଞା(Backend1 && "Expected actual backend");
+  ପ୍ରତିଜ୍ଞା(Backend2 && "Expected actual backend");
+  ଫେରନ୍ତୁ IntrusiveRefCntPtr<ProxyOutputBackend1>(
       makeIntrusiveRefCnt<MirroringOutputBackend>(std::move(Backend1),
                                                   std::move(Backend2)));
 }
 
-static OutputConfig
+ସ୍ଥିର OutputConfig
 applySettings(std::optional<OutputConfig> &&Config,
-              const OnDiskOutputBackend::OutputSettings &Settings) {
-  if (!Config)
+              ଅଚଳ OnDiskOutputBackend::OutputSettings &Settings) {
+  ଯଦି (!Config)
     Config = Settings.DefaultConfig;
-  if (!Settings.UseTemporaries)
+  ଯଦି (!Settings.UseTemporaries)
     Config->setNoAtomicWrite();
-  if (!Settings.RemoveOnSignal)
+  ଯଦି (!Settings.RemoveOnSignal)
     Config->setNoDiscardOnSignal();
-  return *Config;
+  ଫେରନ୍ତୁ *Config;
 }
 
-namespace {
-class OnDiskOutputFile final : public OutputFileImpl {
-public:
+ନାମାକାଶ {
+ଶ୍ରେଣୀ OnDiskOutputFile final : ସର୍ବସାଧାରଣ OutputFileImpl {
+ସର୍ବସାଧାରଣ:
   Error keep() override;
   Error discard() override;
   raw_pwrite_stream &getOS() override {
-    assert(FileOS && "Expected valid file");
-    if (BufferOS)
-      return *BufferOS;
-    return *FileOS;
+    ପ୍ରତିଜ୍ଞା(FileOS && "Expected valid file");
+    ଯଦି (BufferOS)
+      ଫେରନ୍ତୁ *BufferOS;
+    ଫେରନ୍ତୁ *FileOS;
   }
 
   /// Attempt to open a temporary file for \p OutputPath.
@@ -218,55 +218,55 @@ public:
   /// Config.
   ///
   /// \post FD and \a TempPath are initialized if this is successful.
-  Error tryToCreateTemporary(std::optional<int> &FD);
+  Error tryToCreateTemporary(std::optional<ପୂର୍ଣ୍ଣସଂଖ୍ୟା> &FD);
 
-  Error initializeFile(std::optional<int> &FD);
+  Error initializeFile(std::optional<ପୂର୍ଣ୍ଣସଂଖ୍ୟା> &FD);
   Error initializeStream();
   Error reset();
 
   OnDiskOutputFile(StringRef OutputPath, std::optional<OutputConfig> Config,
-                   const OnDiskOutputBackend::OutputSettings &Settings)
+                   ଅଚଳ OnDiskOutputBackend::OutputSettings &Settings)
       : Config(applySettings(std::move(Config), Settings)),
         OutputPath(OutputPath.str()) {}
 
   OutputConfig Config;
-  const std::string OutputPath;
+  ଅଚଳ std::string OutputPath;
   std::optional<std::string> TempPath;
   std::optional<raw_fd_ostream> FileOS;
   std::optional<buffer_ostream> BufferOS;
 };
 } // end namespace
 
-static Error createDirectoriesOnDemand(StringRef OutputPath,
+ସ୍ଥିର Error createDirectoriesOnDemand(StringRef OutputPath,
                                        OutputConfig Config,
                                        llvm::function_ref<Error()> CreateFile) {
-  return handleErrors(CreateFile(), [&](std::unique_ptr<ECError> EC) {
-    if (EC->convertToErrorCode() != std::errc::no_such_file_or_directory ||
+  ଫେରନ୍ତୁ handleErrors(CreateFile(), [&](std::unique_ptr<ECError> EC) {
+    ଯଦି (EC->convertToErrorCode() != std::errc::no_such_file_or_directory ||
         Config.getNoImplyCreateDirectories())
-      return Error(std::move(EC));
+      ଫେରନ୍ତୁ Error(std::move(EC));
 
     StringRef ParentPath = sys::path::parent_path(OutputPath);
-    if (std::error_code EC = sys::fs::create_directories(ParentPath))
-      return make_error<OutputError>(ParentPath, EC);
-    return CreateFile();
+    ଯଦି (std::error_code EC = sys::fs::create_directories(ParentPath))
+      ଫେରନ୍ତୁ make_error<OutputError>(ParentPath, EC);
+    ଫେରନ୍ତୁ CreateFile();
   });
 }
 
-static sys::fs::OpenFlags generateFlagsFromConfig(OutputConfig Config) {
+ସ୍ଥିର sys::fs::OpenFlags generateFlagsFromConfig(OutputConfig Config) {
   sys::fs::OpenFlags OF = sys::fs::OF_None;
-  if (Config.getTextWithCRLF())
+  ଯଦି (Config.getTextWithCRLF())
     OF |= sys::fs::OF_TextWithCRLF;
-  else if (Config.getText())
+  ଅନ୍ୟଥା ଯଦି (Config.getText())
     OF |= sys::fs::OF_Text;
   // Don't pass OF_Append if writting to temporary since OF_Append is
   // not Atomic Append
-  if (Config.getAppend() && !Config.getAtomicWrite())
+  ଯଦି (Config.getAppend() && !Config.getAtomicWrite())
     OF |= sys::fs::OF_Append;
 
-  return OF;
+  ଫେରନ୍ତୁ OF;
 }
 
-Error OnDiskOutputFile::tryToCreateTemporary(std::optional<int> &FD) {
+Error OnDiskOutputFile::tryToCreateTemporary(std::optional<ପୂର୍ଣ୍ଣସଂଖ୍ୟା> &FD) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Create a temporary file.
@@ -280,36 +280,36 @@ Error OnDiskOutputFile::tryToCreateTemporary(std::optional<int> &FD) {
   ModelPath += OutputExtension;
   ModelPath += ".tmp";
 
-  return createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
-    int NewFD;
+  ଫେରନ୍ତୁ createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
+    ପୂର୍ଣ୍ଣସଂଖ୍ୟା NewFD;
     SmallString<128> UniquePath;
     sys::fs::OpenFlags OF = generateFlagsFromConfig(Config);
-    if (std::error_code EC =
+    ଯଦି (std::error_code EC =
             sys::fs::createUniqueFile(ModelPath, NewFD, UniquePath, OF))
-      return make_error<TempFileOutputError>(ModelPath, OutputPath, EC);
+      ଫେରନ୍ତୁ make_error<TempFileOutputError>(ModelPath, OutputPath, EC);
 
-    if (Config.getDiscardOnSignal())
+    ଯଦି (Config.getDiscardOnSignal())
       sys::RemoveFileOnSignal(UniquePath);
 
     TempPath = UniquePath.str().str();
     FD.emplace(NewFD);
-    return Error::success();
+    ଫେରନ୍ତୁ Error::success();
   });
 }
 
-Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
+Error OnDiskOutputFile::initializeFile(std::optional<ପୂର୍ଣ୍ଣସଂଖ୍ୟା> &FD) {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  assert(OutputPath != "-" && "Unexpected request for FD of stdout");
+  ପ୍ରତିଜ୍ଞା(OutputPath != "-" && "Unexpected request for FD of stdout");
 
   // Disable temporary file for other non-regular files, and if we get a status
   // object, also check if in append mode we can write and disable write-through
   // buffers if appropriate.
-  if (Config.getAtomicWrite()) {
+  ଯଦି (Config.getAtomicWrite()) {
     sys::fs::file_status Status;
     sys::fs::status(OutputPath, Status);
-    if (sys::fs::exists(Status)) {
-      if (!sys::fs::is_regular_file(Status))
+    ଯଦି (sys::fs::exists(Status)) {
+      ଯଦି (!sys::fs::is_regular_file(Status))
         Config.setNoAtomicWrite();
 
       // In append mode, we will open the file for writing which will need write
@@ -317,8 +317,8 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
       // final destination.
       // In non-append mode, we will delete and replace the file. Permission
       // bits of the file itself are irrelevant in this case.
-      if (Config.getAppend() && !sys::fs::can_write(OutputPath))
-        return make_error<OutputError>(
+      ଯଦି (Config.getAppend() && !sys::fs::can_write(OutputPath))
+        ଫେରନ୍ତୁ make_error<OutputError>(
             OutputPath,
             std::make_error_code(std::errc::operation_not_permitted));
     }
@@ -326,22 +326,22 @@ Error OnDiskOutputFile::initializeFile(std::optional<int> &FD) {
 
   // If (still) using a temporary file, try to create it (and return success if
   // that works).
-  if (Config.getAtomicWrite())
-    if (!errorToBool(tryToCreateTemporary(FD)))
-      return Error::success();
+  ଯଦି (Config.getAtomicWrite())
+    ଯଦି (!errorToBool(tryToCreateTemporary(FD)))
+      ଫେରନ୍ତୁ Error::success();
 
   // Not using a temporary file. Open the final output file.
-  return createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
-    int NewFD;
+  ଫେରନ୍ତୁ createDirectoriesOnDemand(OutputPath, Config, [&]() -> Error {
+    ପୂର୍ଣ୍ଣସଂଖ୍ୟା NewFD;
     sys::fs::OpenFlags OF = generateFlagsFromConfig(Config);
-    if (std::error_code EC = sys::fs::openFileForWrite(
+    ଯଦି (std::error_code EC = sys::fs::openFileForWrite(
             OutputPath, NewFD, sys::fs::CD_CreateAlways, OF))
-      return convertToOutputError(OutputPath, EC);
+      ଫେରନ୍ତୁ convertToOutputError(OutputPath, EC);
     FD.emplace(NewFD);
 
-    if (Config.getDiscardOnSignal())
+    ଯଦି (Config.getDiscardOnSignal())
       sys::RemoveFileOnSignal(OutputPath);
-    return Error::success();
+    ଫେରନ୍ତୁ Error::success();
   });
 }
 
@@ -349,39 +349,39 @@ Error OnDiskOutputFile::initializeStream() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Open the file stream.
-  if (OutputPath == "-") {
+  ଯଦି (OutputPath == "-") {
     std::error_code EC;
     FileOS.emplace(OutputPath, EC);
-    if (EC)
-      return make_error<OutputError>(OutputPath, EC);
-  } else {
-    std::optional<int> FD;
-    if (Error E = initializeFile(FD))
-      return E;
-    FileOS.emplace(*FD, /*shouldClose=*/true);
+    ଯଦି (EC)
+      ଫେରନ୍ତୁ make_error<OutputError>(OutputPath, EC);
+  } ଅନ୍ୟଥା {
+    std::optional<ପୂର୍ଣ୍ଣସଂଖ୍ୟା> FD;
+    ଯଦି (Error E = initializeFile(FD))
+      ଫେରନ୍ତୁ E;
+    FileOS.emplace(*FD, /*shouldClose=*/ସତ୍ୟ);
   }
 
   // Buffer the stream if necessary.
-  if (!FileOS->supportsSeeking() && !Config.getText())
+  ଯଦି (!FileOS->supportsSeeking() && !Config.getText())
     BufferOS.emplace(*FileOS);
 
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
-namespace {
-class OpenFileRAII {
-  static const int InvalidFd = -1;
+ନାମାକାଶ {
+ଶ୍ରେଣୀ OpenFileRAII {
+  ସ୍ଥିର ଅଚଳ ପୂର୍ଣ୍ଣସଂଖ୍ୟା InvalidFd = -1;
 
-public:
-  int Fd = InvalidFd;
+ସର୍ବସାଧାରଣ:
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା Fd = InvalidFd;
 
   ~OpenFileRAII() {
-    if (Fd != InvalidFd)
+    ଯଦି (Fd != InvalidFd)
       llvm::sys::Process::SafelyCloseFileDescriptor(Fd);
   }
 };
 
-enum class FileDifference : uint8_t {
+ଗଣନା ଶ୍ରେଣୀ FileDifference : uint8_t {
   /// The source and destination paths refer to the exact same file.
   IdenticalFile,
   /// The source and destination paths refer to separate files with identical
@@ -393,40 +393,40 @@ enum class FileDifference : uint8_t {
 };
 } // end anonymous namespace
 
-static Expected<FileDifference>
-areFilesDifferent(const llvm::Twine &Source, const llvm::Twine &Destination) {
-  if (sys::fs::equivalent(Source, Destination))
-    return FileDifference::IdenticalFile;
+ସ୍ଥିର Expected<FileDifference>
+areFilesDifferent(ଅଚଳ llvm::Twine &Source, ଅଚଳ llvm::Twine &Destination) {
+  ଯଦି (sys::fs::equivalent(Source, Destination))
+    ଫେରନ୍ତୁ FileDifference::IdenticalFile;
 
   OpenFileRAII SourceFile;
   sys::fs::file_status SourceStatus;
   // If we can't open the source file, fail.
-  if (std::error_code EC = sys::fs::openFileForRead(Source, SourceFile.Fd))
-    return convertToOutputError(Source, EC);
+  ଯଦି (std::error_code EC = sys::fs::openFileForRead(Source, SourceFile.Fd))
+    ଫେରନ୍ତୁ convertToOutputError(Source, EC);
 
   // If we can't stat the source file, fail.
-  if (std::error_code EC = sys::fs::status(SourceFile.Fd, SourceStatus))
-    return convertToOutputError(Source, EC);
+  ଯଦି (std::error_code EC = sys::fs::status(SourceFile.Fd, SourceStatus))
+    ଫେରନ୍ତୁ convertToOutputError(Source, EC);
 
   OpenFileRAII DestFile;
   sys::fs::file_status DestStatus;
   // If we can't open the destination file, report different.
-  if (std::error_code Error =
+  ଯଦି (std::error_code Error =
           sys::fs::openFileForRead(Destination, DestFile.Fd))
-    return FileDifference::DifferentContents;
+    ଫେରନ୍ତୁ FileDifference::DifferentContents;
 
   // If we can't open the destination file, report different.
-  if (std::error_code Error = sys::fs::status(DestFile.Fd, DestStatus))
-    return FileDifference::DifferentContents;
+  ଯଦି (std::error_code Error = sys::fs::status(DestFile.Fd, DestStatus))
+    ଫେରନ୍ତୁ FileDifference::DifferentContents;
 
   // If the files are different sizes, they must be different.
   uint64_t Size = SourceStatus.getSize();
-  if (Size != DestStatus.getSize())
-    return FileDifference::DifferentContents;
+  ଯଦି (Size != DestStatus.getSize())
+    ଫେରନ୍ତୁ FileDifference::DifferentContents;
 
   // If both files are zero size, they must be the same.
-  if (Size == 0)
-    return FileDifference::SameContents;
+  ଯଦି (Size == 0)
+    ଫେରନ୍ତୁ FileDifference::SameContents;
 
   // The two files match in size, so we have to compare the bytes to determine
   // if they're the same.
@@ -434,21 +434,21 @@ areFilesDifferent(const llvm::Twine &Source, const llvm::Twine &Destination) {
   sys::fs::mapped_file_region SourceRegion(
       sys::fs::convertFDToNativeFile(SourceFile.Fd),
       sys::fs::mapped_file_region::readonly, Size, 0, SourceRegionErr);
-  if (SourceRegionErr)
-    return convertToOutputError(Source, SourceRegionErr);
+  ଯଦି (SourceRegionErr)
+    ଫେରନ୍ତୁ convertToOutputError(Source, SourceRegionErr);
 
   std::error_code DestRegionErr;
   sys::fs::mapped_file_region DestRegion(
       sys::fs::convertFDToNativeFile(DestFile.Fd),
       sys::fs::mapped_file_region::readonly, Size, 0, DestRegionErr);
 
-  if (DestRegionErr)
-    return FileDifference::DifferentContents;
+  ଯଦି (DestRegionErr)
+    ଫେରନ୍ତୁ FileDifference::DifferentContents;
 
-  if (memcmp(SourceRegion.const_data(), DestRegion.const_data(), Size) != 0)
-    return FileDifference::DifferentContents;
+  ଯଦି (memcmp(SourceRegion.const_data(), DestRegion.const_data(), Size) != 0)
+    ଫେରନ୍ତୁ FileDifference::DifferentContents;
 
-  return FileDifference::SameContents;
+  ଫେରନ୍ତୁ FileDifference::SameContents;
 }
 
 Error OnDiskOutputFile::reset() {
@@ -456,151 +456,151 @@ Error OnDiskOutputFile::reset() {
 
   // Destroy the streams to flush them.
   BufferOS.reset();
-  if (!FileOS)
-    return Error::success();
+  ଯଦି (!FileOS)
+    ଫେରନ୍ତୁ Error::success();
 
   // Remember the error in raw_fd_ostream to be reported later.
   std::error_code EC = FileOS->error();
   // Clear the error to avoid fatal error when reset.
   FileOS->clear_error();
   FileOS.reset();
-  return errorCodeToError(EC);
+  ଫେରନ୍ତୁ errorCodeToError(EC);
 }
 
 Error OnDiskOutputFile::keep() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
-  if (auto E = reset())
-    return E;
+  ଯଦି (auto E = reset())
+    ଫେରନ୍ତୁ E;
 
   // Close the file descriptor and remove crash cleanup before exit.
   llvm::scope_exit RemoveDiscardOnSignal([&]() {
-    if (Config.getDiscardOnSignal())
+    ଯଦି (Config.getDiscardOnSignal())
       sys::DontRemoveFileOnSignal(TempPath ? *TempPath : OutputPath);
   });
 
-  if (!TempPath)
-    return Error::success();
+  ଯଦି (!TempPath)
+    ଫେରନ୍ତୁ Error::success();
 
   // See if we should append instead of move.
-  if (Config.getAppend() && OutputPath != "-") {
+  ଯଦି (Config.getAppend() && OutputPath != "-") {
     // Read TempFile for the content to append.
     auto Content = MemoryBuffer::getFile(*TempPath);
-    if (!Content)
-      return convertToTempFileOutputError(*TempPath, OutputPath,
+    ଯଦି (!Content)
+      ଫେରନ୍ତୁ convertToTempFileOutputError(*TempPath, OutputPath,
                                           Content.getError());
-    while (1) {
+    ଯେତେବେଳେ (1) {
       // Attempt to lock the output file.
       // Only one process is allowed to append to this file at a time.
       llvm::LockFileManager Lock(OutputPath);
-      bool Owned;
-      if (Error Err = Lock.tryLock().moveInto(Owned)) {
+      ତାର୍କିକ Owned;
+      ଯଦି (Error Err = Lock.tryLock().moveInto(Owned)) {
         // If we error acquiring a lock, we cannot ensure appends
         // to the trace file are atomic - cannot ensure output correctness.
         Lock.unsafeUnlock();
-        return convertToOutputError(
+        ଫେରନ୍ତୁ convertToOutputError(
             OutputPath, std::make_error_code(std::errc::no_lock_available));
       }
-      if (Owned) {
+      ଯଦି (Owned) {
         // Lock acquired, perform the write and release the lock.
         std::error_code EC;
         llvm::raw_fd_ostream Out(OutputPath, EC, llvm::sys::fs::OF_Append);
-        if (EC)
-          return convertToOutputError(OutputPath, EC);
+        ଯଦି (EC)
+          ଫେରନ୍ତୁ convertToOutputError(OutputPath, EC);
         Out << (*Content)->getBuffer();
         Out.close();
         Lock.unsafeUnlock();
-        if (Out.has_error())
-          return convertToOutputError(OutputPath, Out.error());
+        ଯଦି (Out.has_error())
+          ଫେରନ୍ତୁ convertToOutputError(OutputPath, Out.error());
         // Remove temp file and done.
-        (void)sys::fs::remove(*TempPath);
-        return Error::success();
+        (ଶୂନ୍ୟ)sys::fs::remove(*TempPath);
+        ଫେରନ୍ତୁ Error::success();
       }
       // Someone else owns the lock on this file, wait.
-      switch (Lock.waitForUnlockFor(std::chrono::seconds(256))) {
-      case WaitForUnlockResult::Success:
+      ବାଛ (Lock.waitForUnlockFor(std::chrono::seconds(256))) {
+      ସ୍ଥିତି WaitForUnlockResult::Success:
         [[fallthrough]];
-      case WaitForUnlockResult::OwnerDied: {
-        continue; // try again to get the lock.
+      ସ୍ଥିତି WaitForUnlockResult::OwnerDied: {
+        ଜାରି; // try again to get the lock.
       }
-      case WaitForUnlockResult::Timeout: {
+      ସ୍ଥିତି WaitForUnlockResult::Timeout: {
         // We could error on timeout to avoid potentially hanging forever, but
         // it may be more likely that an interrupted process failed to clear
         // the lock, causing other waiting processes to time-out. Let's clear
         // the lock and try again right away. If we do start seeing compiler
         // hangs in this location, we will need to re-consider.
         Lock.unsafeUnlock();
-        continue;
+        ଜାରି;
       }
       }
-      break;
+      ଭାଙ୍ଗ;
     }
   }
 
-  if (Config.getOnlyIfDifferent()) {
+  ଯଦି (Config.getOnlyIfDifferent()) {
     auto Result = areFilesDifferent(*TempPath, OutputPath);
-    if (!Result)
-      return Result.takeError();
-    switch (*Result) {
-    case FileDifference::IdenticalFile:
+    ଯଦି (!Result)
+      ଫେରନ୍ତୁ Result.takeError();
+    ବାଛ (*Result) {
+    ସ୍ଥିତି FileDifference::IdenticalFile:
       // Do nothing for a self-move.
-      return Error::success();
+      ଫେରନ୍ତୁ Error::success();
 
-    case FileDifference::SameContents:
+    ସ୍ଥିତି FileDifference::SameContents:
       // Files are identical; remove the source file.
-      (void)sys::fs::remove(*TempPath);
-      return Error::success();
+      (ଶୂନ୍ୟ)sys::fs::remove(*TempPath);
+      ଫେରନ୍ତୁ Error::success();
 
-    case FileDifference::DifferentContents:
-      break; // Rename the file.
+    ସ୍ଥିତି FileDifference::DifferentContents:
+      ଭାଙ୍ଗ; // Rename the file.
     }
   }
 
   // Move temporary to the final output path and remove it if that fails.
   std::error_code RenameEC = sys::fs::rename(*TempPath, OutputPath);
-  if (!RenameEC)
-    return Error::success();
+  ଯଦି (!RenameEC)
+    ଫେରନ୍ତୁ Error::success();
 
   // FIXME: TempPath should be in the same directory as OutputPath but try to
   // copy the output to see if makes any difference. If this path is used,
   // investigate why we need to copy.
   RenameEC = sys::fs::copy_file(*TempPath, OutputPath);
-  (void)sys::fs::remove(*TempPath);
+  (ଶୂନ୍ୟ)sys::fs::remove(*TempPath);
 
-  if (!RenameEC)
-    return Error::success();
+  ଯଦି (!RenameEC)
+    ଫେରନ୍ତୁ Error::success();
 
-  return make_error<TempFileOutputError>(*TempPath, OutputPath, RenameEC);
+  ଫେରନ୍ତୁ make_error<TempFileOutputError>(*TempPath, OutputPath, RenameEC);
 }
 
 Error OnDiskOutputFile::discard() {
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   // Destroy the streams to flush them.
-  if (auto E = reset())
-    return E;
+  ଯଦି (auto E = reset())
+    ଫେରନ୍ତୁ E;
 
   // Nothing on the filesystem to remove for stdout.
-  if (OutputPath == "-")
-    return Error::success();
+  ଯଦି (OutputPath == "-")
+    ଫେରନ୍ତୁ Error::success();
 
   auto discardPath = [&](StringRef Path) {
     std::error_code EC = sys::fs::remove(Path);
     sys::DontRemoveFileOnSignal(Path);
-    return EC;
+    ଫେରନ୍ତୁ EC;
   };
 
   // Clean up the file that's in-progress.
-  if (!TempPath)
-    return convertToOutputError(OutputPath, discardPath(OutputPath));
-  return convertToTempFileOutputError(*TempPath, OutputPath,
+  ଯଦି (!TempPath)
+    ଫେରନ୍ତୁ convertToOutputError(OutputPath, discardPath(OutputPath));
+  ଫେରନ୍ତୁ convertToTempFileOutputError(*TempPath, OutputPath,
                                       discardPath(*TempPath));
 }
 
-Error OnDiskOutputBackend::makeAbsolute(SmallVectorImpl<char> &Path) const {
+Error OnDiskOutputBackend::makeAbsolute(SmallVectorImpl<ଅକ୍ଷର> &Path) ଅଚଳ {
   // FIXME: Should this really call sys::fs::make_absolute?
   auto BypassSandbox = sys::sandbox::scopedDisable();
-  return convertToOutputError(StringRef(Path.data(), Path.size()),
+  ଫେରନ୍ତୁ convertToOutputError(StringRef(Path.data(), Path.size()),
                               sys::fs::make_absolute(Path));
 }
 
@@ -610,16 +610,16 @@ OnDiskOutputBackend::createFileImpl(StringRef Path,
   auto BypassSandbox = sys::sandbox::scopedDisable();
 
   SmallString<256> AbsPath;
-  if (Path != "-") {
+  ଯଦି (Path != "-") {
     AbsPath = Path;
-    if (Error E = makeAbsolute(AbsPath))
-      return std::move(E);
+    ଯଦି (Error E = makeAbsolute(AbsPath))
+      ଫେରନ୍ତୁ std::move(E);
     Path = AbsPath;
   }
 
   auto File = std::make_unique<OnDiskOutputFile>(Path, Config, Settings);
-  if (Error E = File->initializeStream())
-    return std::move(E);
+  ଯଦି (Error E = File->initializeStream())
+    ଫେରନ୍ତୁ std::move(E);
 
-  return std::move(File);
+  ଫେରନ୍ତୁ std::move(File);
 }

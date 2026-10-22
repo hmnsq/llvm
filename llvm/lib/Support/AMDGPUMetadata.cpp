@@ -12,22 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AMDGPUMetadata.h"
-#include "llvm/Support/YAMLTraits.h"
-#include <optional>
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/AMDGPUMetadata.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/YAMLTraits.h"
+#ଅନ୍ତର୍ଭାଵ <optional>
 
-using namespace llvm::AMDGPU;
-using namespace llvm::AMDGPU::HSAMD;
+using ନାମାକାଶ llvm::AMDGPU;
+using ନାମାକାଶ llvm::AMDGPU::HSAMD;
 
 LLVM_YAML_IS_SEQUENCE_VECTOR(Kernel::Arg::Metadata)
 LLVM_YAML_IS_SEQUENCE_VECTOR(Kernel::Metadata)
 
-namespace llvm {
-namespace yaml {
+ନାମାକାଶ llvm {
+ନାମାକାଶ yaml {
 
 template <>
-struct ScalarEnumerationTraits<AccessQualifier> {
-  static void enumeration(IO &YIO, AccessQualifier &EN) {
+ସଂରଚନା ScalarEnumerationTraits<AccessQualifier> {
+  ସ୍ଥିର ଶୂନ୍ୟ enumeration(IO &YIO, AccessQualifier &EN) {
     YIO.enumCase(EN, "Default", AccessQualifier::Default);
     YIO.enumCase(EN, "ReadOnly", AccessQualifier::ReadOnly);
     YIO.enumCase(EN, "WriteOnly", AccessQualifier::WriteOnly);
@@ -36,8 +36,8 @@ struct ScalarEnumerationTraits<AccessQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<AddressSpaceQualifier> {
-  static void enumeration(IO &YIO, AddressSpaceQualifier &EN) {
+ସଂରଚନା ScalarEnumerationTraits<AddressSpaceQualifier> {
+  ସ୍ଥିର ଶୂନ୍ୟ enumeration(IO &YIO, AddressSpaceQualifier &EN) {
     YIO.enumCase(EN, "Private", AddressSpaceQualifier::Private);
     YIO.enumCase(EN, "Global", AddressSpaceQualifier::Global);
     YIO.enumCase(EN, "Constant", AddressSpaceQualifier::Constant);
@@ -48,180 +48,180 @@ struct ScalarEnumerationTraits<AddressSpaceQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueKind> {
-  static void enumeration(IO &YIO, ValueKind &EN) {
-    YIO.enumCase(EN, "ByValue", ValueKind::ByValue);
-    YIO.enumCase(EN, "GlobalBuffer", ValueKind::GlobalBuffer);
-    YIO.enumCase(EN, "DynamicSharedPointer", ValueKind::DynamicSharedPointer);
-    YIO.enumCase(EN, "Sampler", ValueKind::Sampler);
-    YIO.enumCase(EN, "Image", ValueKind::Image);
-    YIO.enumCase(EN, "Pipe", ValueKind::Pipe);
-    YIO.enumCase(EN, "Queue", ValueKind::Queue);
-    YIO.enumCase(EN, "HiddenGlobalOffsetX", ValueKind::HiddenGlobalOffsetX);
-    YIO.enumCase(EN, "HiddenGlobalOffsetY", ValueKind::HiddenGlobalOffsetY);
-    YIO.enumCase(EN, "HiddenGlobalOffsetZ", ValueKind::HiddenGlobalOffsetZ);
-    YIO.enumCase(EN, "HiddenNone", ValueKind::HiddenNone);
-    YIO.enumCase(EN, "HiddenPrintfBuffer", ValueKind::HiddenPrintfBuffer);
-    YIO.enumCase(EN, "HiddenHostcallBuffer", ValueKind::HiddenHostcallBuffer);
-    YIO.enumCase(EN, "HiddenDefaultQueue", ValueKind::HiddenDefaultQueue);
+ସଂରଚନା ScalarEnumerationTraits<ମୂଲ୍ୟ_Kind> {
+  ସ୍ଥିର ଶୂନ୍ୟ enumeration(IO &YIO, ମୂଲ୍ୟ_Kind &EN) {
+    YIO.enumCase(EN, "ByValue", ମୂଲ୍ୟ_Kind::By_ମୂଲ୍ୟ);
+    YIO.enumCase(EN, "GlobalBuffer", ମୂଲ୍ୟ_Kind::GlobalBuffer);
+    YIO.enumCase(EN, "DynamicSharedPointer", ମୂଲ୍ୟ_Kind::DynamicSharedPointer);
+    YIO.enumCase(EN, "Sampler", ମୂଲ୍ୟ_Kind::Sampler);
+    YIO.enumCase(EN, "Image", ମୂଲ୍ୟ_Kind::Image);
+    YIO.enumCase(EN, "Pipe", ମୂଲ୍ୟ_Kind::Pipe);
+    YIO.enumCase(EN, "Queue", ମୂଲ୍ୟ_Kind::Queue);
+    YIO.enumCase(EN, "HiddenGlobalOffsetX", ମୂଲ୍ୟ_Kind::HiddenGlobalOffsetX);
+    YIO.enumCase(EN, "HiddenGlobalOffsetY", ମୂଲ୍ୟ_Kind::HiddenGlobalOffsetY);
+    YIO.enumCase(EN, "HiddenGlobalOffsetZ", ମୂଲ୍ୟ_Kind::HiddenGlobalOffsetZ);
+    YIO.enumCase(EN, "HiddenNone", ମୂଲ୍ୟ_Kind::HiddenNone);
+    YIO.enumCase(EN, "HiddenPrintfBuffer", ମୂଲ୍ୟ_Kind::HiddenPrintfBuffer);
+    YIO.enumCase(EN, "HiddenHostcallBuffer", ମୂଲ୍ୟ_Kind::HiddenHostcallBuffer);
+    YIO.enumCase(EN, "HiddenDefaultQueue", ମୂଲ୍ୟ_Kind::HiddenDefaultQueue);
     YIO.enumCase(EN, "HiddenCompletionAction",
-                 ValueKind::HiddenCompletionAction);
+                 ମୂଲ୍ୟ_Kind::HiddenCompletionAction);
     YIO.enumCase(EN, "HiddenMultiGridSyncArg",
-		 ValueKind::HiddenMultiGridSyncArg);
+		 ମୂଲ୍ୟ_Kind::HiddenMultiGridSyncArg);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueType> {
-  static void enumeration(IO &YIO, ValueType &EN) {
-    YIO.enumCase(EN, "Struct", ValueType::Struct);
-    YIO.enumCase(EN, "I8", ValueType::I8);
-    YIO.enumCase(EN, "U8", ValueType::U8);
-    YIO.enumCase(EN, "I16", ValueType::I16);
-    YIO.enumCase(EN, "U16", ValueType::U16);
-    YIO.enumCase(EN, "F16", ValueType::F16);
-    YIO.enumCase(EN, "I32", ValueType::I32);
-    YIO.enumCase(EN, "U32", ValueType::U32);
-    YIO.enumCase(EN, "F32", ValueType::F32);
-    YIO.enumCase(EN, "I64", ValueType::I64);
-    YIO.enumCase(EN, "U64", ValueType::U64);
-    YIO.enumCase(EN, "F64", ValueType::F64);
+ସଂରଚନା ScalarEnumerationTraits<ମୂଲ୍ୟ_Type> {
+  ସ୍ଥିର ଶୂନ୍ୟ enumeration(IO &YIO, ମୂଲ୍ୟ_Type &EN) {
+    YIO.enumCase(EN, "Struct", ମୂଲ୍ୟ_Type::Struct);
+    YIO.enumCase(EN, "I8", ମୂଲ୍ୟ_Type::I8);
+    YIO.enumCase(EN, "U8", ମୂଲ୍ୟ_Type::U8);
+    YIO.enumCase(EN, "I16", ମୂଲ୍ୟ_Type::I16);
+    YIO.enumCase(EN, "U16", ମୂଲ୍ୟ_Type::U16);
+    YIO.enumCase(EN, "F16", ମୂଲ୍ୟ_Type::F16);
+    YIO.enumCase(EN, "I32", ମୂଲ୍ୟ_Type::I32);
+    YIO.enumCase(EN, "U32", ମୂଲ୍ୟ_Type::U32);
+    YIO.enumCase(EN, "F32", ମୂଲ୍ୟ_Type::F32);
+    YIO.enumCase(EN, "I64", ମୂଲ୍ୟ_Type::I64);
+    YIO.enumCase(EN, "U64", ମୂଲ୍ୟ_Type::U64);
+    YIO.enumCase(EN, "F64", ମୂଲ୍ୟ_Type::F64);
   }
 };
 
 template <>
-struct MappingTraits<Kernel::Attrs::Metadata> {
-  static void mapping(IO &YIO, Kernel::Attrs::Metadata &MD) {
-    YIO.mapOptional(Kernel::Attrs::Key::ReqdWorkGroupSize,
+ସଂରଚନା MappingTraits<Kernel::Attrs::Metadata> {
+  ସ୍ଥିର ଶୂନ୍ୟ mapping(IO &YIO, Kernel::Attrs::Metadata &MD) {
+    YIO.mapOptional(Kernel::Attrs::ଚାବି::ReqdWorkGroupSize,
                     MD.mReqdWorkGroupSize, std::vector<uint32_t>());
-    YIO.mapOptional(Kernel::Attrs::Key::WorkGroupSizeHint,
+    YIO.mapOptional(Kernel::Attrs::ଚାବି::WorkGroupSizeHint,
                     MD.mWorkGroupSizeHint, std::vector<uint32_t>());
-    YIO.mapOptional(Kernel::Attrs::Key::VecTypeHint,
+    YIO.mapOptional(Kernel::Attrs::ଚାବି::VecTypeHint,
                     MD.mVecTypeHint, std::string());
-    YIO.mapOptional(Kernel::Attrs::Key::RuntimeHandle, MD.mRuntimeHandle,
+    YIO.mapOptional(Kernel::Attrs::ଚାବି::RuntimeHandle, MD.mRuntimeHandle,
                     std::string());
   }
 };
 
 template <>
-struct MappingTraits<Kernel::Arg::Metadata> {
-  static void mapping(IO &YIO, Kernel::Arg::Metadata &MD) {
-    YIO.mapOptional(Kernel::Arg::Key::Name, MD.mName, std::string());
-    YIO.mapOptional(Kernel::Arg::Key::TypeName, MD.mTypeName, std::string());
-    YIO.mapRequired(Kernel::Arg::Key::Size, MD.mSize);
-    YIO.mapRequired(Kernel::Arg::Key::Align, MD.mAlign);
-    YIO.mapRequired(Kernel::Arg::Key::ValueKind, MD.mValueKind);
+ସଂରଚନା MappingTraits<Kernel::Arg::Metadata> {
+  ସ୍ଥିର ଶୂନ୍ୟ mapping(IO &YIO, Kernel::Arg::Metadata &MD) {
+    YIO.mapOptional(Kernel::Arg::ଚାବି::Name, MD.mName, std::string());
+    YIO.mapOptional(Kernel::Arg::ଚାବି::TypeName, MD.mTypeName, std::string());
+    YIO.mapRequired(Kernel::Arg::ଚାବି::Size, MD.mSize);
+    YIO.mapRequired(Kernel::Arg::ଚାବି::Align, MD.mAlign);
+    YIO.mapRequired(Kernel::Arg::ଚାବି::ମୂଲ୍ୟ_Kind, MD.m_ମୂଲ୍ୟ_Kind);
 
     // Removed. Accepted for parsing compatibility, but not emitted.
-    std::optional<ValueType> Unused;
-    YIO.mapOptional(Kernel::Arg::Key::ValueType, Unused);
+    std::optional<ମୂଲ୍ୟ_Type> Unused;
+    YIO.mapOptional(Kernel::Arg::ଚାବି::ମୂଲ୍ୟ_Type, Unused);
 
-    YIO.mapOptional(Kernel::Arg::Key::PointeeAlign, MD.mPointeeAlign,
+    YIO.mapOptional(Kernel::Arg::ଚାବି::PointeeAlign, MD.mPointeeAlign,
                     uint32_t(0));
-    YIO.mapOptional(Kernel::Arg::Key::AddrSpaceQual, MD.mAddrSpaceQual,
+    YIO.mapOptional(Kernel::Arg::ଚାବି::AddrSpaceQual, MD.mAddrSpaceQual,
                     AddressSpaceQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::AccQual, MD.mAccQual,
+    YIO.mapOptional(Kernel::Arg::ଚାବି::AccQual, MD.mAccQual,
                     AccessQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::ActualAccQual, MD.mActualAccQual,
+    YIO.mapOptional(Kernel::Arg::ଚାବି::ActualAccQual, MD.mActualAccQual,
                     AccessQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::IsConst, MD.mIsConst, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsRestrict, MD.mIsRestrict, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsVolatile, MD.mIsVolatile, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsPipe, MD.mIsPipe, false);
+    YIO.mapOptional(Kernel::Arg::ଚାବି::IsConst, MD.mIsConst, ମିଥ୍ୟା);
+    YIO.mapOptional(Kernel::Arg::ଚାବି::IsRestrict, MD.mIsRestrict, ମିଥ୍ୟା);
+    YIO.mapOptional(Kernel::Arg::ଚାବି::IsVolatile, MD.mIsVolatile, ମିଥ୍ୟା);
+    YIO.mapOptional(Kernel::Arg::ଚାବି::IsPipe, MD.mIsPipe, ମିଥ୍ୟା);
   }
 };
 
 template <>
-struct MappingTraits<Kernel::CodeProps::Metadata> {
-  static void mapping(IO &YIO, Kernel::CodeProps::Metadata &MD) {
-    YIO.mapRequired(Kernel::CodeProps::Key::KernargSegmentSize,
+ସଂରଚନା MappingTraits<Kernel::CodeProps::Metadata> {
+  ସ୍ଥିର ଶୂନ୍ୟ mapping(IO &YIO, Kernel::CodeProps::Metadata &MD) {
+    YIO.mapRequired(Kernel::CodeProps::ଚାବି::KernargSegmentSize,
                     MD.mKernargSegmentSize);
-    YIO.mapRequired(Kernel::CodeProps::Key::GroupSegmentFixedSize,
+    YIO.mapRequired(Kernel::CodeProps::ଚାବି::GroupSegmentFixedSize,
                     MD.mGroupSegmentFixedSize);
-    YIO.mapRequired(Kernel::CodeProps::Key::PrivateSegmentFixedSize,
+    YIO.mapRequired(Kernel::CodeProps::ଚାବି::PrivateSegmentFixedSize,
                     MD.mPrivateSegmentFixedSize);
-    YIO.mapRequired(Kernel::CodeProps::Key::KernargSegmentAlign,
+    YIO.mapRequired(Kernel::CodeProps::ଚାବି::KernargSegmentAlign,
                     MD.mKernargSegmentAlign);
-    YIO.mapRequired(Kernel::CodeProps::Key::WavefrontSize,
+    YIO.mapRequired(Kernel::CodeProps::ଚାବି::WavefrontSize,
                     MD.mWavefrontSize);
-    YIO.mapOptional(Kernel::CodeProps::Key::NumSGPRs,
-                    MD.mNumSGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::NumVGPRs,
-                    MD.mNumVGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::MaxFlatWorkGroupSize,
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::ଅଙ୍କ_SGPRs,
+                    MD.m_ଅଙ୍କ_SGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::ଅଙ୍କ_VGPRs,
+                    MD.m_ଅଙ୍କ_VGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::MaxFlatWorkGroupSize,
                     MD.mMaxFlatWorkGroupSize, uint32_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::IsDynamicCallStack,
-                    MD.mIsDynamicCallStack, false);
-    YIO.mapOptional(Kernel::CodeProps::Key::IsXNACKEnabled,
-                    MD.mIsXNACKEnabled, false);
-    YIO.mapOptional(Kernel::CodeProps::Key::NumSpilledSGPRs,
-                    MD.mNumSpilledSGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::NumSpilledVGPRs,
-                    MD.mNumSpilledVGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::Is_Dynamic_Call_ଗଦା,
+                    MD.m_Is_Dynamic_Call_ଗଦା, ମିଥ୍ୟା);
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::IsXNACKEnabled,
+                    MD.mIsXNACKEnabled, ମିଥ୍ୟା);
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::ଅଙ୍କ_Spilled_SGPRs,
+                    MD.m_ଅଙ୍କ_Spilled_SGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::ଚାବି::ଅଙ୍କ_Spilled_VGPRs,
+                    MD.m_ଅଙ୍କ_Spilled_VGPRs, uint16_t(0));
   }
 };
 
 template <>
-struct MappingTraits<Kernel::DebugProps::Metadata> {
-  static void mapping(IO &YIO, Kernel::DebugProps::Metadata &MD) {
-    YIO.mapOptional(Kernel::DebugProps::Key::DebuggerABIVersion,
+ସଂରଚନା MappingTraits<Kernel::DebugProps::Metadata> {
+  ସ୍ଥିର ଶୂନ୍ୟ mapping(IO &YIO, Kernel::DebugProps::Metadata &MD) {
+    YIO.mapOptional(Kernel::DebugProps::ଚାବି::DebuggerABIVersion,
                     MD.mDebuggerABIVersion, std::vector<uint32_t>());
-    YIO.mapOptional(Kernel::DebugProps::Key::ReservedNumVGPRs,
-                    MD.mReservedNumVGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::DebugProps::Key::ReservedFirstVGPR,
+    YIO.mapOptional(Kernel::DebugProps::ଚାବି::Reserved_ଅଙ୍କ_VGPRs,
+                    MD.m_Reserved_ଅଙ୍କ_VGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::DebugProps::ଚାବି::ReservedFirstVGPR,
                     MD.mReservedFirstVGPR, uint16_t(-1));
-    YIO.mapOptional(Kernel::DebugProps::Key::PrivateSegmentBufferSGPR,
+    YIO.mapOptional(Kernel::DebugProps::ଚାବି::PrivateSegmentBufferSGPR,
                     MD.mPrivateSegmentBufferSGPR, uint16_t(-1));
-    YIO.mapOptional(Kernel::DebugProps::Key::WavefrontPrivateSegmentOffsetSGPR,
+    YIO.mapOptional(Kernel::DebugProps::ଚାବି::WavefrontPrivateSegmentOffsetSGPR,
                     MD.mWavefrontPrivateSegmentOffsetSGPR, uint16_t(-1));
   }
 };
 
 template <>
-struct MappingTraits<Kernel::Metadata> {
-  static void mapping(IO &YIO, Kernel::Metadata &MD) {
-    YIO.mapRequired(Kernel::Key::Name, MD.mName);
-    YIO.mapRequired(Kernel::Key::SymbolName, MD.mSymbolName);
-    YIO.mapOptional(Kernel::Key::Language, MD.mLanguage, std::string());
-    YIO.mapOptional(Kernel::Key::LanguageVersion, MD.mLanguageVersion,
+ସଂରଚନା MappingTraits<Kernel::Metadata> {
+  ସ୍ଥିର ଶୂନ୍ୟ mapping(IO &YIO, Kernel::Metadata &MD) {
+    YIO.mapRequired(Kernel::ଚାବି::Name, MD.mName);
+    YIO.mapRequired(Kernel::ଚାବି::ପ୍ରତୀକ_Name, MD.m_ପ୍ରତୀକ_Name);
+    YIO.mapOptional(Kernel::ଚାବି::Language, MD.mLanguage, std::string());
+    YIO.mapOptional(Kernel::ଚାବି::LanguageVersion, MD.mLanguageVersion,
                     std::vector<uint32_t>());
-    if (!MD.mAttrs.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::Attrs, MD.mAttrs);
-    if (!MD.mArgs.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::Args, MD.mArgs);
-    if (!MD.mCodeProps.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::CodeProps, MD.mCodeProps);
-    if (!MD.mDebugProps.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::DebugProps, MD.mDebugProps);
+    ଯଦି (!MD.mAttrs.empty() || !YIO.outputting())
+      YIO.mapOptional(Kernel::ଚାବି::Attrs, MD.mAttrs);
+    ଯଦି (!MD.mArgs.empty() || !YIO.outputting())
+      YIO.mapOptional(Kernel::ଚାବି::Args, MD.mArgs);
+    ଯଦି (!MD.mCodeProps.empty() || !YIO.outputting())
+      YIO.mapOptional(Kernel::ଚାବି::CodeProps, MD.mCodeProps);
+    ଯଦି (!MD.mDebugProps.empty() || !YIO.outputting())
+      YIO.mapOptional(Kernel::ଚାବି::DebugProps, MD.mDebugProps);
   }
 };
 
 template <>
-struct MappingTraits<HSAMD::Metadata> {
-  static void mapping(IO &YIO, HSAMD::Metadata &MD) {
-    YIO.mapRequired(Key::Version, MD.mVersion);
-    YIO.mapOptional(Key::Printf, MD.mPrintf, std::vector<std::string>());
-    if (!MD.mKernels.empty() || !YIO.outputting())
-      YIO.mapOptional(Key::Kernels, MD.mKernels);
+ସଂରଚନା MappingTraits<HSAMD::Metadata> {
+  ସ୍ଥିର ଶୂନ୍ୟ mapping(IO &YIO, HSAMD::Metadata &MD) {
+    YIO.mapRequired(ଚାବି::Version, MD.mVersion);
+    YIO.mapOptional(ଚାବି::Printf, MD.mPrintf, std::vector<std::string>());
+    ଯଦି (!MD.mKernels.empty() || !YIO.outputting())
+      YIO.mapOptional(ଚାବି::Kernels, MD.mKernels);
   }
 };
 
 } // end namespace yaml
 
-namespace AMDGPU {
-namespace HSAMD {
+ନାମାକାଶ AMDGPU {
+ନାମାକାଶ HSAMD {
 
 std::error_code fromString(StringRef String, Metadata &HSAMetadata) {
-  yaml::Input YamlInput(String);
-  YamlInput >> HSAMetadata;
-  return YamlInput.error();
+  yaml::ନିବେଶ Yaml_ନିବେଶ(String);
+  Yaml_ନିବେଶ >> HSAMetadata;
+  ଫେରନ୍ତୁ Yaml_ନିବେଶ.error();
 }
 
 std::error_code toString(Metadata HSAMetadata, std::string &String) {
   raw_string_ostream YamlStream(String);
-  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<int>::max());
+  yaml::Output YamlOutput(YamlStream, nullptr, std::numeric_limits<ପୂର୍ଣ୍ଣସଂଖ୍ୟା>::max());
   YamlOutput << HSAMetadata;
-  return std::error_code();
+  ଫେରନ୍ତୁ std::error_code();
 }
 
 } // end namespace HSAMD

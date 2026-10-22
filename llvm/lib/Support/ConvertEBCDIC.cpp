@@ -13,13 +13,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ConvertEBCDIC.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/ErrorHandling.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ConvertEBCDIC.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ConvertUTF.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ErrorHandling.h"
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
-static const unsigned char ISO88591ToIBM1047[256] = {
+ସ୍ଥିର ଅଚଳ unsigned ଅକ୍ଷର ISO88591ToIBM1047[256] = {
     0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f, 0x16, 0x05, 0x15, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
     0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, 0x40, 0x5a, 0x7f, 0x7b,
@@ -43,7 +43,7 @@ static const unsigned char ISO88591ToIBM1047[256] = {
     0x8c, 0x49, 0xcd, 0xce, 0xcb, 0xcf, 0xcc, 0xe1, 0x70, 0xdd, 0xde, 0xdb,
     0xdc, 0x8d, 0x8e, 0xdf};
 
-static const unsigned char IBM1047ToISO88591[256] = {
+ସ୍ଥିର ଅଚଳ unsigned ଅକ୍ଷର IBM1047ToISO88591[256] = {
     0x00, 0x01, 0x02, 0x03, 0x9c, 0x09, 0x86, 0x7f, 0x97, 0x8d, 0x8e, 0x0b,
     0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x9d, 0x0a, 0x08, 0x87,
     0x18, 0x19, 0x92, 0x8f, 0x1c, 0x1d, 0x1e, 0x1f, 0x80, 0x81, 0x82, 0x83,
@@ -68,85 +68,85 @@ static const unsigned char IBM1047ToISO88591[256] = {
     0xdc, 0xd9, 0xda, 0x9f};
 
 // Returns true if [Ptr, End) can be completed to form a valid UTF-8 sequence.
-static bool isPotentiallyValidUTF8Prefix(const UTF8 *Ptr, const UTF8 *End) {
-  assert(Ptr != End);
+ସ୍ଥିର ତାର୍କିକ isPotentiallyValidUTF8Prefix(ଅଚଳ UTF8 *Ptr, ଅଚଳ UTF8 *End) {
+  ପ୍ରତିଜ୍ଞା(Ptr != End);
   UTF8 Lead = *Ptr++;
-  if (Lead < 0xc2 || Lead > 0xf4)
-    return false;
-  if (Ptr == End)
-    return true;
+  ଯଦି (Lead < 0xc2 || Lead > 0xf4)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (Ptr == End)
+    ଫେରନ୍ତୁ ସତ୍ୟ;
 
   UTF8 Second = *Ptr++;
-  if ((Second & 0xc0) != 0x80)
-    return false;
-  if ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
+  ଯଦି ((Second & 0xc0) != 0x80)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି ((Lead == 0xe0 && Second < 0xa0) || (Lead == 0xed && Second > 0x9f) ||
       (Lead == 0xf0 && Second < 0x90) || (Lead == 0xf4 && Second > 0x8f))
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
 
-  while (Ptr != End)
-    if ((*Ptr++ & 0xc0) != 0x80)
-      return false;
-  return true;
+  ଯେତେବେଳେ (Ptr != End)
+    ଯଦି ((*Ptr++ & 0xc0) != 0x80)
+      ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
 std::error_code
 ConverterEBCDIC::convertToEBCDIC(StringRef Source,
-                                 SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+                                 SmallVectorImpl<ଅକ୍ଷର> &Result) {
+  ପ୍ରତିଜ୍ଞା(Result.empty() && "Result must be empty!");
   Result.reserve(Source.size());
-  if (Source.empty())
-    return std::error_code();
+  ଯଦି (Source.empty())
+    ଫେରନ୍ତୁ std::error_code();
 
-  const UTF8 *Ptr = reinterpret_cast<const UTF8 *>(Source.data());
-  const UTF8 *End = Ptr + Source.size();
-  while (Ptr != End) {
-    if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
-      continue;
+  ଅଚଳ UTF8 *Ptr = reinterpret_cast<ଅଚଳ UTF8 *>(Source.data());
+  ଅଚଳ UTF8 *End = Ptr + Source.size();
+  ଯେତେବେଳେ (Ptr != End) {
+    ଯଦି (*Ptr < 0x80) {
+      Result.ଠେଲ_back(static_cast<ଅକ୍ଷର>(ISO88591ToIBM1047[*Ptr++]));
+      ଜାରି;
     }
 
     UTF32 Ch;
-    switch (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
-    case conversionOK:
-      break;
-    case sourceExhausted:
-      if (!isPotentiallyValidUTF8Prefix(Ptr, End))
-        return std::make_error_code(std::errc::illegal_byte_sequence);
-      return std::make_error_code(std::errc::invalid_argument);
-    case sourceIllegal:
-      return std::make_error_code(std::errc::illegal_byte_sequence);
-    case targetExhausted:
+    ବାଛ (convertUTF8Sequence(&Ptr, End, &Ch, strictConversion)) {
+    ସ୍ଥିତି conversionOK:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି sourceExhausted:
+      ଯଦି (!isPotentiallyValidUTF8Prefix(Ptr, End))
+        ଫେରନ୍ତୁ std::make_error_code(std::errc::illegal_byte_sequence);
+      ଫେରନ୍ତୁ std::make_error_code(std::errc::invalid_argument);
+    ସ୍ଥିତି sourceIllegal:
+      ଫେରନ୍ତୁ std::make_error_code(std::errc::illegal_byte_sequence);
+    ସ୍ଥିତି targetExhausted:
       llvm_unreachable("unexpected UTF-32 target exhaustion");
     }
 
-    if (Ch > 0xff)
-      return std::make_error_code(std::errc::illegal_byte_sequence);
+    ଯଦି (Ch > 0xff)
+      ଫେରନ୍ତୁ std::make_error_code(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    Result.ଠେଲ_back(static_cast<ଅକ୍ଷର>(ISO88591ToIBM1047[Ch]));
   }
-  return std::error_code();
+  ଫେରନ୍ତୁ std::error_code();
 }
 
-void ConverterEBCDIC::convertToUTF8(StringRef Source,
-                                    SmallVectorImpl<char> &Result) {
-  assert(Result.empty() && "Result must be empty!");
+ଶୂନ୍ୟ ConverterEBCDIC::convertToUTF8(StringRef Source,
+                                    SmallVectorImpl<ଅକ୍ଷର> &Result) {
+  ପ୍ରତିଜ୍ଞା(Result.empty() && "Result must be empty!");
 
-  const unsigned char *Table = IBM1047ToISO88591;
-  const unsigned char *Ptr =
-      reinterpret_cast<const unsigned char *>(Source.data());
+  ଅଚଳ unsigned ଅକ୍ଷର *Table = IBM1047ToISO88591;
+  ଅଚଳ unsigned ଅକ୍ଷର *Ptr =
+      reinterpret_cast<ଅଚଳ unsigned ଅକ୍ଷର *>(Source.data());
   size_t Length = Source.size();
   Result.reserve(Length);
-  while (Length--) {
-    unsigned char Ch = *Ptr++;
+  ଯେତେବେଳେ (Length--) {
+    unsigned ଅକ୍ଷର Ch = *Ptr++;
     // Translate the character.
     Ch = Table[Ch];
     // Handle UTF-8 2-byte-sequences in output.
-    if (Ch >= 128) {
+    ଯଦି (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      Result.ଠେଲ_back(static_cast<ଅକ୍ଷର>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    Result.ଠେଲ_back(static_cast<ଅକ୍ଷର>(Ch));
   }
 }

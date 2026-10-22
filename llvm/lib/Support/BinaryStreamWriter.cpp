@@ -6,99 +6,99 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamWriter.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/BinaryStreamWriter.h"
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/BinaryStreamReader.h"
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/LEB128.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringExtras.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/BinaryStreamReader.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/BinaryStreamRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/LEB128.h"
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
-BinaryStreamWriter::BinaryStreamWriter(WritableBinaryStreamRef Ref)
+ଦ୍ୱିମିକ_Stream_Writer::ଦ୍ୱିମିକ_Stream_Writer(Writable_ଦ୍ୱିମିକ_Stream_Ref Ref)
     : Stream(Ref) {}
 
-BinaryStreamWriter::BinaryStreamWriter(WritableBinaryStream &Stream)
+ଦ୍ୱିମିକ_Stream_Writer::ଦ୍ୱିମିକ_Stream_Writer(Writable_ଦ୍ୱିମିକ_Stream &Stream)
     : Stream(Stream) {}
 
-BinaryStreamWriter::BinaryStreamWriter(MutableArrayRef<uint8_t> Data,
+ଦ୍ୱିମିକ_Stream_Writer::ଦ୍ୱିମିକ_Stream_Writer(MutableArrayRef<uint8_t> Data,
                                        llvm::endianness Endian)
     : Stream(Data, Endian) {}
 
-Error BinaryStreamWriter::writeBytes(ArrayRef<uint8_t> Buffer) {
-  if (auto EC = Stream.writeBytes(Offset, Buffer))
-    return EC;
+Error ଦ୍ୱିମିକ_Stream_Writer::writeBytes(ArrayRef<uint8_t> Buffer) {
+  ଯଦି (auto EC = Stream.writeBytes(Offset, Buffer))
+    ଫେରନ୍ତୁ EC;
   Offset += Buffer.size();
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
-Error BinaryStreamWriter::writeULEB128(uint64_t Value) {
+Error ଦ୍ୱିମିକ_Stream_Writer::writeULEB128(uint64_t ମୂଲ୍ୟ) {
   uint8_t EncodedBytes[10] = {0};
-  unsigned Size = encodeULEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+  unsigned Size = encodeULEB128(ମୂଲ୍ୟ, &EncodedBytes[0]);
+  ଫେରନ୍ତୁ writeBytes({EncodedBytes, Size});
 }
 
-Error BinaryStreamWriter::writeSLEB128(int64_t Value) {
+Error ଦ୍ୱିମିକ_Stream_Writer::writeSLEB128(int64_t ମୂଲ୍ୟ) {
   uint8_t EncodedBytes[10] = {0};
-  unsigned Size = encodeSLEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+  unsigned Size = encodeSLEB128(ମୂଲ୍ୟ, &EncodedBytes[0]);
+  ଫେରନ୍ତୁ writeBytes({EncodedBytes, Size});
 }
 
-Error BinaryStreamWriter::writeCString(StringRef Str) {
-  if (auto EC = writeFixedString(Str))
-    return EC;
-  if (auto EC = writeObject('\0'))
-    return EC;
+Error ଦ୍ୱିମିକ_Stream_Writer::writeCString(StringRef Str) {
+  ଯଦି (auto EC = writeFixedString(Str))
+    ଫେରନ୍ତୁ EC;
+  ଯଦି (auto EC = writeObject('\0'))
+    ଫେରନ୍ତୁ EC;
 
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
-Error BinaryStreamWriter::writeFixedString(StringRef Str) {
+Error ଦ୍ୱିମିକ_Stream_Writer::writeFixedString(StringRef Str) {
 
-  return writeBytes(arrayRefFromStringRef(Str));
+  ଫେରନ୍ତୁ writeBytes(arrayRefFromStringRef(Str));
 }
 
-Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref) {
-  return writeStreamRef(Ref, Ref.getLength());
+Error ଦ୍ୱିମିକ_Stream_Writer::writeStreamRef(ଦ୍ୱିମିକ_Stream_Ref Ref) {
+  ଫେରନ୍ତୁ writeStreamRef(Ref, Ref.getLength());
 }
 
-Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref, uint64_t Length) {
-  BinaryStreamReader SrcReader(Ref.slice(0, Length));
+Error ଦ୍ୱିମିକ_Stream_Writer::writeStreamRef(ଦ୍ୱିମିକ_Stream_Ref Ref, uint64_t Length) {
+  ଦ୍ୱିମିକ_Stream_Reader SrcReader(Ref.slice(0, Length));
   // This is a bit tricky.  If we just call readBytes, we are requiring that it
   // return us the entire stream as a contiguous buffer.  There is no guarantee
   // this can be satisfied by returning a reference straight from the buffer, as
   // an implementation may not store all data in a single contiguous buffer.  So
   // we iterate over each contiguous chunk, writing each one in succession.
-  while (SrcReader.bytesRemaining() > 0) {
+  ଯେତେବେଳେ (SrcReader.bytesRemaining() > 0) {
     ArrayRef<uint8_t> Chunk;
-    if (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
-      return EC;
-    if (auto EC = writeBytes(Chunk))
-      return EC;
+    ଯଦି (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
+      ଫେରନ୍ତୁ EC;
+    ଯଦି (auto EC = writeBytes(Chunk))
+      ଫେରନ୍ତୁ EC;
   }
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
-std::pair<BinaryStreamWriter, BinaryStreamWriter>
-BinaryStreamWriter::split(uint64_t Off) const {
-  assert(getLength() >= Off);
+std::pair<ଦ୍ୱିମିକ_Stream_Writer, ଦ୍ୱିମିକ_Stream_Writer>
+ଦ୍ୱିମିକ_Stream_Writer::split(uint64_t Off) ଅଚଳ {
+  ପ୍ରତିଜ୍ଞା(getLength() >= Off);
 
-  WritableBinaryStreamRef First = Stream.drop_front(Offset);
+  Writable_ଦ୍ୱିମିକ_Stream_Ref First = Stream.drop_front(Offset);
 
-  WritableBinaryStreamRef Second = First.drop_front(Off);
+  Writable_ଦ୍ୱିମିକ_Stream_Ref Second = First.drop_front(Off);
   First = First.keep_front(Off);
-  BinaryStreamWriter W1{First};
-  BinaryStreamWriter W2{Second};
-  return {W1, W2};
+  ଦ୍ୱିମିକ_Stream_Writer W1{First};
+  ଦ୍ୱିମିକ_Stream_Writer W2{Second};
+  ଫେରନ୍ତୁ {W1, W2};
 }
 
-Error BinaryStreamWriter::padToAlignment(uint32_t Align) {
+Error ଦ୍ୱିମିକ_Stream_Writer::padToAlignment(uint32_t Align) {
   uint64_t NewOffset = alignTo(Offset, Align);
-  const uint64_t ZerosSize = 64;
-  static constexpr char Zeros[ZerosSize] = {};
-  while (Offset < NewOffset)
-    if (auto E = writeArray(
-            ArrayRef<char>(Zeros, std::min(ZerosSize, NewOffset - Offset))))
-      return E;
-  return Error::success();
+  ଅଚଳ uint64_t ZerosSize = 64;
+  ସ୍ଥିର constexpr ଅକ୍ଷର Zeros[ZerosSize] = {};
+  ଯେତେବେଳେ (Offset < NewOffset)
+    ଯଦି (auto E = writeArray(
+            ArrayRef<ଅକ୍ଷର>(Zeros, std::min(ZerosSize, NewOffset - Offset))))
+      ଫେରନ୍ତୁ E;
+  ଫେରନ୍ତୁ Error::success();
 }

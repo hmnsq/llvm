@@ -1,8 +1,8 @@
 #include "llvm_blake3_prefix.h"
 
 .intel_syntax noprefix
-.global _blake3_hash_many_avx2
-.global blake3_hash_many_avx2
+.ଵୈଶ୍ଵିକ _blake3_hash_many_avx2
+.ଵୈଶ୍ଵିକ blake3_hash_many_avx2
 .section .text
         .p2align  6
 _blake3_hash_many_avx2:

@@ -11,160 +11,160 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-#include <system_error>
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/FileUtilities.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/SmallString.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringExtras.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Error.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ErrorOr.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/MemoryBuffer.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Process.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/raw_ostream.h"
+#ଅନ୍ତର୍ଭାଵ <cmath>
+#ଅନ୍ତର୍ଭାଵ <cstdint>
+#ଅନ୍ତର୍ଭାଵ <cstdlib>
+#ଅନ୍ତର୍ଭାଵ <cstring>
+#ଅନ୍ତର୍ଭାଵ <memory>
+#ଅନ୍ତର୍ଭାଵ <system_error>
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
-static bool isSignedChar(char C) {
-  return (C == '+' || C == '-');
+ସ୍ଥିର ତାର୍କିକ isSignedChar(ଅକ୍ଷର C) {
+  ଫେରନ୍ତୁ (C == '+' || C == '-');
 }
 
-static bool isExponentChar(char C) {
-  switch (C) {
-  case 'D':  // Strange exponential notation.
-  case 'd':  // Strange exponential notation.
-  case 'e':
-  case 'E': return true;
-  default: return false;
+ସ୍ଥିର ତାର୍କିକ isExponentChar(ଅକ୍ଷର C) {
+  ବାଛ (C) {
+  ସ୍ଥିତି 'D':  // Strange exponential notation.
+  ସ୍ଥିତି 'd':  // Strange exponential notation.
+  ସ୍ଥିତି 'e':
+  ସ୍ଥିତି 'E': ଫେରନ୍ତୁ ସତ୍ୟ;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
 }
 
-static bool isNumberChar(char C) {
-  switch (C) {
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case '.': return true;
-  default: return isSignedChar(C) || isExponentChar(C);
+ସ୍ଥିର ତାର୍କିକ is_ସଂଖ୍ୟା_Char(ଅକ୍ଷର C) {
+  ବାଛ (C) {
+  ସ୍ଥିତି '0': ସ୍ଥିତି '1': ସ୍ଥିତି '2': ସ୍ଥିତି '3': ସ୍ଥିତି '4':
+  ସ୍ଥିତି '5': ସ୍ଥିତି '6': ସ୍ଥିତି '7': ସ୍ଥିତି '8': ସ୍ଥିତି '9':
+  ସ୍ଥିତି '.': ଫେରନ୍ତୁ ସତ୍ୟ;
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ isSignedChar(C) || isExponentChar(C);
   }
 }
 
-static const char *BackupNumber(const char *Pos, const char *FirstChar) {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *Backup_ସଂଖ୍ୟା(ଅଚଳ ଅକ୍ଷର *Pos, ଅଚଳ ଅକ୍ଷର *FirstChar) {
   // If we didn't stop in the middle of a number, don't backup.
-  if (!isNumberChar(*Pos)) return Pos;
+  ଯଦି (!is_ସଂଖ୍ୟା_Char(*Pos)) ଫେରନ୍ତୁ Pos;
 
   // Otherwise, return to the start of the number.
-  bool HasPeriod = false;
-  while (Pos > FirstChar && isNumberChar(Pos[-1])) {
+  ତାର୍କିକ HasPeriod = ମିଥ୍ୟା;
+  ଯେତେବେଳେ (Pos > FirstChar && is_ସଂଖ୍ୟା_Char(Pos[-1])) {
     // Backup over at most one period.
-    if (Pos[-1] == '.') {
-      if (HasPeriod)
-        break;
-      HasPeriod = true;
+    ଯଦି (Pos[-1] == '.') {
+      ଯଦି (HasPeriod)
+        ଭାଙ୍ଗ;
+      HasPeriod = ସତ୍ୟ;
     }
 
     --Pos;
-    if (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
-      break;
+    ଯଦି (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
+      ଭାଙ୍ଗ;
   }
-  return Pos;
+  ଫେରନ୍ତୁ Pos;
 }
 
 /// EndOfNumber - Return the first character that is not part of the specified
 /// number.  This assumes that the buffer is null terminated, so it won't fall
 /// off the end.
-static const char *EndOfNumber(const char *Pos) {
-  while (isNumberChar(*Pos))
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *End_Of_ସଂଖ୍ୟା(ଅଚଳ ଅକ୍ଷର *Pos) {
+  ଯେତେବେଳେ (is_ସଂଖ୍ୟା_Char(*Pos))
     ++Pos;
-  return Pos;
+  ଫେରନ୍ତୁ Pos;
 }
 
 /// CompareNumbers - compare two numbers, returning true if they are different.
-static bool CompareNumbers(const char *&F1P, const char *&F2P,
-                           const char *F1End, const char *F2End,
-                           double AbsTolerance, double RelTolerance,
-                           std::string *ErrorMsg) {
-  const char *F1NumEnd, *F2NumEnd;
-  double V1 = 0.0, V2 = 0.0;
+ସ୍ଥିର ତାର୍କିକ CompareNumbers(ଅଚଳ ଅକ୍ଷର *&F1P, ଅଚଳ ଅକ୍ଷର *&F2P,
+                           ଅଚଳ ଅକ୍ଷର *F1End, ଅଚଳ ଅକ୍ଷର *F2End,
+                           ଦ୍ୱିଗୁଣ AbsTolerance, ଦ୍ୱିଗୁଣ RelTolerance,
+                           std::string *Error_ସନ୍ଦେଶ) {
+  ଅଚଳ ଅକ୍ଷର *F1_ଅଙ୍କ_End, *F2_ଅଙ୍କ_End;
+  ଦ୍ୱିଗୁଣ V1 = 0.0, V2 = 0.0;
 
   // If one of the positions is at a space and the other isn't, chomp up 'til
   // the end of the space.
-  while (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
+  ଯେତେବେଳେ (isSpace(static_cast<unsigned ଅକ୍ଷର>(*F1P)) && F1P != F1End)
     ++F1P;
-  while (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
+  ଯେତେବେଳେ (isSpace(static_cast<unsigned ଅକ୍ଷର>(*F2P)) && F2P != F2End)
     ++F2P;
 
   // If we stop on numbers, compare their difference.
-  if (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
+  ଯଦି (!is_ସଂଖ୍ୟା_Char(*F1P) || !is_ସଂଖ୍ୟା_Char(*F2P)) {
     // The diff failed.
-    F1NumEnd = F1P;
-    F2NumEnd = F2P;
-  } else {
+    F1_ଅଙ୍କ_End = F1P;
+    F2_ଅଙ୍କ_End = F2P;
+  } ଅନ୍ୟଥା {
     // Note that some ugliness is built into this to permit support for numbers
     // that use "D" or "d" as their exponential marker, e.g. "1.234D45".  This
     // occurs in 200.sixtrack in spec2k.
-    V1 = strtod(F1P, const_cast<char**>(&F1NumEnd));
-    V2 = strtod(F2P, const_cast<char**>(&F2NumEnd));
+    V1 = strtod(F1P, const_cast<ଅକ୍ଷର**>(&F1_ଅଙ୍କ_End));
+    V2 = strtod(F2P, const_cast<ଅକ୍ଷର**>(&F2_ଅଙ୍କ_End));
 
-    if (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
+    ଯଦି (*F1_ଅଙ୍କ_End == 'D' || *F1_ଅଙ୍କ_End == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F1P, EndOfNumber(F1NumEnd)+1);
+      SmallString<200> StrTmp(F1P, End_Of_ସଂଖ୍ୟା(F1_ଅଙ୍କ_End)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F1NumEnd-F1P)] = 'e';
+      StrTmp[static_cast<unsigned>(F1_ଅଙ୍କ_End-F1P)] = 'e';
 
-      V1 = strtod(&StrTmp[0], const_cast<char**>(&F1NumEnd));
-      F1NumEnd = F1P + (F1NumEnd-&StrTmp[0]);
+      V1 = strtod(&StrTmp[0], const_cast<ଅକ୍ଷର**>(&F1_ଅଙ୍କ_End));
+      F1_ଅଙ୍କ_End = F1P + (F1_ଅଙ୍କ_End-&StrTmp[0]);
     }
 
-    if (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
+    ଯଦି (*F2_ଅଙ୍କ_End == 'D' || *F2_ଅଙ୍କ_End == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F2P, EndOfNumber(F2NumEnd)+1);
+      SmallString<200> StrTmp(F2P, End_Of_ସଂଖ୍ୟା(F2_ଅଙ୍କ_End)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F2NumEnd-F2P)] = 'e';
+      StrTmp[static_cast<unsigned>(F2_ଅଙ୍କ_End-F2P)] = 'e';
 
-      V2 = strtod(&StrTmp[0], const_cast<char**>(&F2NumEnd));
-      F2NumEnd = F2P + (F2NumEnd-&StrTmp[0]);
+      V2 = strtod(&StrTmp[0], const_cast<ଅକ୍ଷର**>(&F2_ଅଙ୍କ_End));
+      F2_ଅଙ୍କ_End = F2P + (F2_ଅଙ୍କ_End-&StrTmp[0]);
     }
   }
 
-  if (F1NumEnd == F1P || F2NumEnd == F2P) {
-    if (ErrorMsg) {
-      *ErrorMsg = "FP Comparison failed, not a numeric difference between '";
-      *ErrorMsg += F1P[0];
-      *ErrorMsg += "' and '";
-      *ErrorMsg += F2P[0];
-      *ErrorMsg += "'";
+  ଯଦି (F1_ଅଙ୍କ_End == F1P || F2_ଅଙ୍କ_End == F2P) {
+    ଯଦି (Error_ସନ୍ଦେଶ) {
+      *Error_ସନ୍ଦେଶ = "FP Comparison failed, not a numeric difference between '";
+      *Error_ସନ୍ଦେଶ += F1P[0];
+      *Error_ସନ୍ଦେଶ += "' and '";
+      *Error_ସନ୍ଦେଶ += F2P[0];
+      *Error_ସନ୍ଦେଶ += "'";
     }
-    return true;
+    ଫେରନ୍ତୁ ସତ୍ୟ;
   }
 
   // Check to see if these are inside the absolute tolerance
-  if (AbsTolerance < std::abs(V1-V2)) {
+  ଯଦି (AbsTolerance < std::abs(V1-V2)) {
     // Nope, check the relative tolerance...
-    double Diff;
-    if (V2)
+    ଦ୍ୱିଗୁଣ Diff;
+    ଯଦି (V2)
       Diff = std::abs(V1/V2 - 1.0);
-    else if (V1)
+    ଅନ୍ୟଥା ଯଦି (V1)
       Diff = std::abs(V2/V1 - 1.0);
-    else
+    ଅନ୍ୟଥା
       Diff = 0;  // Both zero.
-    if (Diff > RelTolerance) {
-      if (ErrorMsg) {
-        raw_string_ostream(*ErrorMsg)
+    ଯଦି (Diff > RelTolerance) {
+      ଯଦି (Error_ସନ୍ଦେଶ) {
+        raw_string_ostream(*Error_ସନ୍ଦେଶ)
           << "Compared: " << V1 << " and " << V2 << '\n'
           << "abs. diff = " << std::abs(V1-V2) << " rel.diff = " << Diff << '\n'
           << "Out of tolerance: rel/abs: " << RelTolerance << '/'
           << AbsTolerance;
       }
-      return true;
+      ଫେରନ୍ତୁ ସତ୍ୟ;
     }
   }
 
   // Otherwise, advance our read pointers to the end of the numbers.
-  F1P = F1NumEnd;  F2P = F2NumEnd;
-  return false;
+  F1P = F1_ଅଙ୍କ_End;  F2P = F2_ଅଙ୍କ_End;
+  ଫେରନ୍ତୁ ମିଥ୍ୟା;
 }
 
 /// DiffFilesWithTolerance - Compare the two files specified, returning 0 if the
@@ -175,160 +175,160 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 /// error occurs, allowing the caller to distinguish between a failed diff and a
 /// file system error.
 ///
-int llvm::DiffFilesWithTolerance(StringRef NameA,
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା llvm::DiffFilesWithTolerance(StringRef NameA,
                                  StringRef NameB,
-                                 double AbsTol, double RelTol,
+                                 ଦ୍ୱିଗୁଣ AbsTol, ଦ୍ୱିଗୁଣ RelTol,
                                  std::string *Error) {
   // Now its safe to mmap the files into memory because both files
   // have a non-zero size.
   ErrorOr<std::unique_ptr<MemoryBuffer>> F1OrErr = MemoryBuffer::getFile(NameA);
-  if (std::error_code EC = F1OrErr.getError()) {
-    if (Error)
+  ଯଦି (std::error_code EC = F1OrErr.getError()) {
+    ଯଦି (Error)
       *Error = EC.message();
-    return 2;
+    ଫେରନ୍ତୁ 2;
   }
   MemoryBuffer &F1 = *F1OrErr.get();
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> F2OrErr = MemoryBuffer::getFile(NameB);
-  if (std::error_code EC = F2OrErr.getError()) {
-    if (Error)
+  ଯଦି (std::error_code EC = F2OrErr.getError()) {
+    ଯଦି (Error)
       *Error = EC.message();
-    return 2;
+    ଫେରନ୍ତୁ 2;
   }
   MemoryBuffer &F2 = *F2OrErr.get();
 
   // Okay, now that we opened the files, scan them for the first difference.
-  const char *File1Start = F1.getBufferStart();
-  const char *File2Start = F2.getBufferStart();
-  const char *File1End = F1.getBufferEnd();
-  const char *File2End = F2.getBufferEnd();
-  const char *F1P = File1Start;
-  const char *F2P = File2Start;
+  ଅଚଳ ଅକ୍ଷର *File1Start = F1.getBufferStart();
+  ଅଚଳ ଅକ୍ଷର *File2Start = F2.getBufferStart();
+  ଅଚଳ ଅକ୍ଷର *File1End = F1.getBufferEnd();
+  ଅଚଳ ଅକ୍ଷର *File2End = F2.getBufferEnd();
+  ଅଚଳ ଅକ୍ଷର *F1P = File1Start;
+  ଅଚଳ ଅକ୍ଷର *F2P = File2Start;
   uint64_t A_size = F1.getBufferSize();
   uint64_t B_size = F2.getBufferSize();
 
   // Are the buffers identical?  Common case: Handle this efficiently.
-  if (A_size == B_size &&
+  ଯଦି (A_size == B_size &&
       std::memcmp(File1Start, File2Start, A_size) == 0)
-    return 0;
+    ଫେରନ୍ତୁ 0;
 
   // Otherwise, we are done a tolerances are set.
-  if (AbsTol == 0 && RelTol == 0) {
-    if (Error)
+  ଯଦି (AbsTol == 0 && RelTol == 0) {
+    ଯଦି (Error)
       *Error = "Files differ without tolerance allowance";
-    return 1;   // Files different!
+    ଫେରନ୍ତୁ 1;   // Files different!
   }
 
-  bool CompareFailed = false;
-  while (true) {
+  ତାର୍କିକ CompareFailed = ମିଥ୍ୟା;
+  ଯେତେବେଳେ (ସତ୍ୟ) {
     // Scan for the end of file or next difference.
-    while (F1P < File1End && F2P < File2End && *F1P == *F2P) {
+    ଯେତେବେଳେ (F1P < File1End && F2P < File2End && *F1P == *F2P) {
       ++F1P;
       ++F2P;
     }
 
-    if (F1P >= File1End || F2P >= File2End) break;
+    ଯଦି (F1P >= File1End || F2P >= File2End) ଭାଙ୍ଗ;
 
     // Okay, we must have found a difference.  Backup to the start of the
     // current number each stream is at so that we can compare from the
     // beginning.
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    F1P = Backup_ସଂଖ୍ୟା(F1P, File1Start);
+    F2P = Backup_ସଂଖ୍ୟା(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
-      CompareFailed = true;
-      break;
+    ଯଦି (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
+      CompareFailed = ସତ୍ୟ;
+      ଭାଙ୍ଗ;
     }
   }
 
   // Okay, we reached the end of file.  If both files are at the end, we
   // succeeded.
-  bool F1AtEnd = F1P >= File1End;
-  bool F2AtEnd = F2P >= File2End;
-  if (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
+  ତାର୍କିକ F1AtEnd = F1P >= File1End;
+  ତାର୍କିକ F2AtEnd = F2P >= File2End;
+  ଯଦି (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
     // Else, we might have run off the end due to a number: backup and retry.
-    if (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
-    if (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    ଯଦି (F1AtEnd && is_ସଂଖ୍ୟା_Char(F1P[-1])) --F1P;
+    ଯଦି (F2AtEnd && is_ସଂଖ୍ୟା_Char(F2P[-1])) --F2P;
+    F1P = Backup_ସଂଖ୍ୟା(F1P, File1Start);
+    F2P = Backup_ସଂଖ୍ୟା(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
-      CompareFailed = true;
+    ଯଦି (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
+      CompareFailed = ସତ୍ୟ;
 
     // If we found the end, we succeeded.
-    if (F1P < File1End || F2P < File2End)
-      CompareFailed = true;
+    ଯଦି (F1P < File1End || F2P < File2End)
+      CompareFailed = ସତ୍ୟ;
   }
 
-  return CompareFailed;
+  ଫେରନ୍ତୁ CompareFailed;
 }
 
 Expected<FilePermissionsApplier>
-FilePermissionsApplier::create(StringRef InputFilename) {
+FilePermissionsApplier::create(StringRef ନିବେଶ_Filename) {
   sys::fs::file_status Status;
 
-  if (InputFilename != "-") {
-    if (auto EC = sys::fs::status(InputFilename, Status))
-      return createFileError(InputFilename, EC);
-  } else {
+  ଯଦି (ନିବେଶ_Filename != "-") {
+    ଯଦି (auto EC = sys::fs::status(ନିବେଶ_Filename, Status))
+      ଫେରନ୍ତୁ createFileError(ନିବେଶ_Filename, EC);
+  } ଅନ୍ୟଥା {
     Status.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  return FilePermissionsApplier(InputFilename, Status);
+  ଫେରନ୍ତୁ FilePermissionsApplier(ନିବେଶ_Filename, Status);
 }
 
 Error FilePermissionsApplier::apply(
-    StringRef OutputFilename, bool CopyDates,
+    StringRef OutputFilename, ତାର୍କିକ CopyDates,
     std::optional<sys::fs::perms> OverwritePermissions) {
-  sys::fs::file_status Status = InputStatus;
+  sys::fs::file_status Status = ନିବେଶ_Status;
 
-  if (OverwritePermissions)
+  ଯଦି (OverwritePermissions)
     Status.permissions(*OverwritePermissions);
 
-  int FD = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା FD = 0;
 
   // Writing to stdout should not be treated as an error here, just
   // do not set access/modification times or permissions.
-  if (OutputFilename == "-")
-    return Error::success();
+  ଯଦି (OutputFilename == "-")
+    ଫେରନ୍ତୁ Error::success();
 
-  if (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
+  ଯଦି (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
                                                      sys::fs::CD_OpenExisting))
-    return createFileError(OutputFilename, EC);
+    ଫେରନ୍ତୁ createFileError(OutputFilename, EC);
 
-  if (CopyDates)
-    if (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
+  ଯଦି (CopyDates)
+    ଯଦି (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
             FD, Status.getLastAccessedTime(), Status.getLastModificationTime()))
-      return createFileError(OutputFilename, EC);
+      ଫେରନ୍ତୁ createFileError(OutputFilename, EC);
 
   sys::fs::file_status OStat;
-  if (std::error_code EC =
+  ଯଦି (std::error_code EC =
           sys::fs::status(sys::fs::convertFDToNativeFile(FD), OStat))
-    return createFileError(OutputFilename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file) {
+    ଫେରନ୍ତୁ createFileError(OutputFilename, EC);
+  ଯଦି (OStat.type() == sys::fs::file_type::regular_file) {
 #ifndef _WIN32
     // Keep ownership if llvm-objcopy is called under root.
-    if (OutputFilename == InputFilename && OStat.getUser() == 0)
+    ଯଦି (OutputFilename == ନିବେଶ_Filename && OStat.getUser() == 0)
       sys::fs::changeFileOwnership(FD, Status.getUser(), Status.getGroup());
 #endif
 
     sys::fs::perms Perm = Status.permissions();
-    if (OutputFilename != InputFilename)
+    ଯଦି (OutputFilename != ନିବେଶ_Filename)
       Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
 #ifdef _WIN32
-    if (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
-#else
-    if (std::error_code EC = sys::fs::setPermissions(FD, Perm))
+    ଯଦି (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
+#ଅନ୍ୟଥା
+    ଯଦି (std::error_code EC = sys::fs::setPermissions(FD, Perm))
 #endif
-      return createFileError(OutputFilename, EC);
+      ଫେରନ୍ତୁ createFileError(OutputFilename, EC);
   }
 
-  if (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return createFileError(OutputFilename, EC);
+  ଯଦି (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    ଫେରନ୍ତୁ createFileError(OutputFilename, EC);
 
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }

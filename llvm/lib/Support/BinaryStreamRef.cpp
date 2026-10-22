@@ -6,118 +6,118 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BinaryStreamRef.h"
-#include "llvm/Support/BinaryByteStream.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/BinaryStreamRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/BinaryByteStream.h"
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
-namespace {
+ନାମାକାଶ {
 
-class ArrayRefImpl : public BinaryStream {
-public:
+ଶ୍ରେଣୀ ArrayRefImpl : ସର୍ବସାଧାରଣ ଦ୍ୱିମିକ_Stream {
+ସର୍ବସାଧାରଣ:
   ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
 
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
+  llvm::endianness getEndian() ଅଚଳ override { ଫେରନ୍ତୁ BBS.getEndian(); }
   Error readBytes(uint64_t Offset, uint64_t Size,
                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+    ଫେରନ୍ତୁ BBS.readBytes(Offset, Size, Buffer);
   }
   Error readLongestContiguousChunk(uint64_t Offset,
                                    ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+    ଫେରନ୍ତୁ BBS.readLongestContiguousChunk(Offset, Buffer);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t getLength() override { ଫେରନ୍ତୁ BBS.getLength(); }
 
-private:
-  BinaryByteStream BBS;
+ବ୍ୟକ୍ତିଗତ:
+  ଦ୍ୱିମିକ_Byte_Stream BBS;
 };
 
-class MutableArrayRefImpl : public WritableBinaryStream {
-public:
+ଶ୍ରେଣୀ MutableArrayRefImpl : ସର୍ବସାଧାରଣ Writable_ଦ୍ୱିମିକ_Stream {
+ସର୍ବସାଧାରଣ:
   MutableArrayRefImpl(MutableArrayRef<uint8_t> Data, endianness Endian)
       : BBS(Data, Endian) {}
 
   // Inherited via WritableBinaryStream
-  llvm::endianness getEndian() const override { return BBS.getEndian(); }
+  llvm::endianness getEndian() ଅଚଳ override { ଫେରନ୍ତୁ BBS.getEndian(); }
   Error readBytes(uint64_t Offset, uint64_t Size,
                   ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readBytes(Offset, Size, Buffer);
+    ଫେରନ୍ତୁ BBS.readBytes(Offset, Size, Buffer);
   }
   Error readLongestContiguousChunk(uint64_t Offset,
                                    ArrayRef<uint8_t> &Buffer) override {
-    return BBS.readLongestContiguousChunk(Offset, Buffer);
+    ଫେରନ୍ତୁ BBS.readLongestContiguousChunk(Offset, Buffer);
   }
-  uint64_t getLength() override { return BBS.getLength(); }
+  uint64_t getLength() override { ଫେରନ୍ତୁ BBS.getLength(); }
 
   Error writeBytes(uint64_t Offset, ArrayRef<uint8_t> Data) override {
-    return BBS.writeBytes(Offset, Data);
+    ଫେରନ୍ତୁ BBS.writeBytes(Offset, Data);
   }
-  Error commit() override { return BBS.commit(); }
+  Error commit() override { ଫେରନ୍ତୁ BBS.commit(); }
 
-private:
-  MutableBinaryByteStream BBS;
+ବ୍ୟକ୍ତିଗତ:
+  Mutable_ଦ୍ୱିମିକ_Byte_Stream BBS;
 };
 } // namespace
 
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream, uint64_t Offset,
+ଦ୍ୱିମିକ_Stream_Ref::ଦ୍ୱିମିକ_Stream_Ref(ଦ୍ୱିମିକ_Stream &Stream)
+    : ଦ୍ୱିମିକ_Stream_Ref_Base(Stream) {}
+ଦ୍ୱିମିକ_Stream_Ref::ଦ୍ୱିମିକ_Stream_Ref(ଦ୍ୱିମିକ_Stream &Stream, uint64_t Offset,
                                  std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
-BinaryStreamRef::BinaryStreamRef(ArrayRef<uint8_t> Data, endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
+    : ଦ୍ୱିମିକ_Stream_Ref_Base(Stream, Offset, Length) {}
+ଦ୍ୱିମିକ_Stream_Ref::ଦ୍ୱିମିକ_Stream_Ref(ArrayRef<uint8_t> Data, endianness Endian)
+    : ଦ୍ୱିମିକ_Stream_Ref_Base(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
                           Data.size()) {}
-BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
-    : BinaryStreamRef(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
+ଦ୍ୱିମିକ_Stream_Ref::ଦ୍ୱିମିକ_Stream_Ref(StringRef Data, endianness Endian)
+    : ଦ୍ୱିମିକ_Stream_Ref(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
 
-Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
-                                 ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, Size))
-    return EC;
-  return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
+Error ଦ୍ୱିମିକ_Stream_Ref::readBytes(uint64_t Offset, uint64_t Size,
+                                 ArrayRef<uint8_t> &Buffer) ଅଚଳ {
+  ଯଦି (auto EC = checkOffsetForRead(Offset, Size))
+    ଫେରନ୍ତୁ EC;
+  ଫେରନ୍ତୁ BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
 }
 
-Error BinaryStreamRef::readLongestContiguousChunk(
-    uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
-  if (auto EC = checkOffsetForRead(Offset, 1))
-    return EC;
+Error ଦ୍ୱିମିକ_Stream_Ref::readLongestContiguousChunk(
+    uint64_t Offset, ArrayRef<uint8_t> &Buffer) ଅଚଳ {
+  ଯଦି (auto EC = checkOffsetForRead(Offset, 1))
+    ଫେରନ୍ତୁ EC;
 
-  if (auto EC =
+  ଯଦି (auto EC =
           BorrowedImpl->readLongestContiguousChunk(ViewOffset + Offset, Buffer))
-    return EC;
+    ଫେରନ୍ତୁ EC;
   // This StreamRef might refer to a smaller window over a larger stream.  In
   // that case we will have read out more bytes than we should return, because
   // we should not read past the end of the current view.
   uint64_t MaxLength = getLength() - Offset;
-  if (Buffer.size() > MaxLength)
+  ଯଦି (Buffer.size() > MaxLength)
     Buffer = Buffer.slice(0, MaxLength);
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
+Writable_ଦ୍ୱିମିକ_Stream_Ref::Writable_ଦ୍ୱିମିକ_Stream_Ref(Writable_ଦ୍ୱିମିକ_Stream &Stream)
+    : ଦ୍ୱିମିକ_Stream_Ref_Base(Stream) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream,
+Writable_ଦ୍ୱିମିକ_Stream_Ref::Writable_ଦ୍ୱିମିକ_Stream_Ref(Writable_ଦ୍ୱିମିକ_Stream &Stream,
                                                  uint64_t Offset,
                                                  std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
+    : ଦ୍ୱିମିକ_Stream_Ref_Base(Stream, Offset, Length) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
+Writable_ଦ୍ୱିମିକ_Stream_Ref::Writable_ଦ୍ୱିମିକ_Stream_Ref(MutableArrayRef<uint8_t> Data,
                                                  endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<MutableArrayRefImpl>(Data, Endian),
+    : ଦ୍ୱିମିକ_Stream_Ref_Base(std::make_shared<MutableArrayRefImpl>(Data, Endian),
                           0, Data.size()) {}
 
-Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
-                                          ArrayRef<uint8_t> Data) const {
-  if (auto EC = checkOffsetForWrite(Offset, Data.size()))
-    return EC;
+Error Writable_ଦ୍ୱିମିକ_Stream_Ref::writeBytes(uint64_t Offset,
+                                          ArrayRef<uint8_t> Data) ଅଚଳ {
+  ଯଦି (auto EC = checkOffsetForWrite(Offset, Data.size()))
+    ଫେରନ୍ତୁ EC;
 
-  return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
+  ଫେରନ୍ତୁ BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
 }
 
-WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+Writable_ଦ୍ୱିମିକ_Stream_Ref::operator ଦ୍ୱିମିକ_Stream_Ref() ଅଚଳ {
+  ଫେରନ୍ତୁ ଦ୍ୱିମିକ_Stream_Ref(*BorrowedImpl, ViewOffset, Length);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error Writable_ଦ୍ୱିମିକ_Stream_Ref::commit() { ଫେରନ୍ତୁ BorrowedImpl->commit(); }

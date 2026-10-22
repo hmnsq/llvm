@@ -19,14 +19,14 @@ namespace llvm {
 // These are invoked internally before parsing command line options.
 // This enables lazy-initialization of all the globals in libSupport, instead
 // of eagerly loading everything on program startup.
-void initDebugCounterOptions();
-void initGraphWriterOptions();
-void initSignalsOptions();
-void initStatisticOptions();
-void initTimerOptions();
-void initWithColorOptions();
-void initDebugOptions();
-void initRandomSeedOptions();
+ଶୂନ୍ୟ initDebugCounterOptions();
+ଶୂନ୍ୟ initGraphWriterOptions();
+ଶୂନ୍ୟ initSignalsOptions();
+ଶୂନ୍ୟ initStatisticOptions();
+ଶୂନ୍ୟ initTimerOptions();
+ଶୂନ୍ୟ initWithColorOptions();
+ଶୂନ୍ୟ initDebugOptions();
+ଶୂନ୍ୟ initRandomSeedOptions();
 
 } // namespace llvm
 

@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMWinEH.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ARMWinEH.h"
 
-namespace llvm {
-namespace ARM {
-namespace WinEH {
-std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
-                                                bool Prologue) {
-  uint8_t NumRegisters = RF.Reg();
+ନାମାକାଶ llvm {
+ନାମାକାଶ ARM {
+ନାମାକାଶ WinEH {
+std::pair<uint16_t, uint32_t> SavedRegisterMask(ଅଚଳ RuntimeFunction &RF,
+                                                ତାର୍କିକ Prologue) {
+  uint8_t ଅଙ୍କ_Registers = RF.Reg();
   uint8_t RegistersVFP = RF.R();
   uint8_t LinkRegister = RF.L();
   uint8_t ChainedFrame = RF.C();
@@ -21,27 +21,27 @@ std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
   uint16_t GPRMask = (ChainedFrame << 11);
   uint32_t VFPMask = 0;
 
-  if (Prologue) {
+  ଯଦି (Prologue) {
     GPRMask |= (LinkRegister << 14);
-  } else {
+  } ଅନ୍ୟଥା {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
+    ଯଦି (RF.Ret() != ReturnType::RT_କାଢ଼)
       GPRMask |= (LinkRegister << 14);
-    else if (!RF.H()) // If H == 0, we pop directly into Pc
+    ଅନ୍ୟଥା ଯଦି (!RF.H()) // If H == 0, we pop directly into Pc
       GPRMask |= (LinkRegister << 15);
     // else, Ret == 0 && H == 1, we pop into Pc separately afterwards
   }
 
-  if (RegistersVFP)
-    VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
-  else
-    GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
+  ଯଦି (RegistersVFP)
+    VFPMask |= (((1 << ((ଅଙ୍କ_Registers + 1) % 8)) - 1) << 8);
+  ଅନ୍ୟଥା
+    GPRMask |= (((1 << (ଅଙ୍କ_Registers + 1)) - 1) << 4);
 
-  if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
-    GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
-                << (~RF.StackAdjust() & 0x3));
+  ଯଦି ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
+    GPRMask |= (((1 << ((RF.ଗଦା_Adjust() & 0x3) + 1)) - 1)
+                << (~RF.ଗଦା_Adjust() & 0x3));
 
-  return {GPRMask, VFPMask};
+  ଫେରନ୍ତୁ {GPRMask, VFPMask};
 }
 } // namespace WinEH
 } // namespace ARM

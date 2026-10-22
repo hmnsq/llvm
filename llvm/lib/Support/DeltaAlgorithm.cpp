@@ -5,107 +5,107 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DeltaAlgorithm.h"
-#include <algorithm>
-#include <iterator>
-using namespace llvm;
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/DeltaAlgorithm.h"
+#ଅନ୍ତର୍ଭାଵ <algorithm>
+#ଅନ୍ତର୍ଭାଵ <iterator>
+using ନାମାକାଶ llvm;
 
-DeltaAlgorithm::~DeltaAlgorithm() = default;
+DeltaAlgorithm::~DeltaAlgorithm() = ପୂର୍ବନିର୍ଦ୍ଧାରିତ;
 
-bool DeltaAlgorithm::GetTestResult(const changeset_ty &Changes) {
-  if (FailedTestsCache.count(Changes))
-    return false;
+ତାର୍କିକ DeltaAlgorithm::GetTestResult(ଅଚଳ changeset_ty &Changes) {
+  ଯଦି (FailedTestsCache.ଗଣନା_2(Changes))
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
 
-  bool Result = ExecuteOneTest(Changes);
-  if (!Result)
-    FailedTestsCache.insert(Changes);
+  ତାର୍କିକ Result = ExecuteOneTest(Changes);
+  ଯଦି (!Result)
+    FailedTestsCache.ଭର୍ତ୍ତି(Changes);
 
-  return Result;
+  ଫେରନ୍ତୁ Result;
 }
 
-void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
+ଶୂନ୍ୟ DeltaAlgorithm::Split(ଅଚଳ changeset_ty &S, changesetlist_ty &Res) {
   // FIXME: Allow clients to provide heuristics for improved splitting.
 
   // FIXME: This is really slow.
   changeset_ty LHS, RHS;
   unsigned idx = 0, N = S.size() / 2;
-  for (changeset_ty::const_iterator it = S.begin(),
+  ପାଇଁ (changeset_ty::const_iterator it = S.begin(),
          ie = S.end(); it != ie; ++it, ++idx)
-    ((idx < N) ? LHS : RHS).insert(*it);
-  if (!LHS.empty())
-    Res.push_back(LHS);
-  if (!RHS.empty())
-    Res.push_back(RHS);
+    ((idx < N) ? LHS : RHS).ଭର୍ତ୍ତି(*it);
+  ଯଦି (!LHS.empty())
+    Res.ଠେଲ_back(LHS);
+  ଯଦି (!RHS.empty())
+    Res.ଠେଲ_back(RHS);
 }
 
 DeltaAlgorithm::changeset_ty
-DeltaAlgorithm::Delta(const changeset_ty &Changes,
-                      const changesetlist_ty &Sets) {
+DeltaAlgorithm::Delta(ଅଚଳ changeset_ty &Changes,
+                      ଅଚଳ changesetlist_ty &Sets) {
   // Invariant: union(Res) == Changes
-  UpdatedSearchState(Changes, Sets);
+  Updated_ସନ୍ଧାନ_State(Changes, Sets);
 
   // If there is nothing left we can remove, we are done.
-  if (Sets.size() <= 1)
-    return Changes;
+  ଯଦି (Sets.size() <= 1)
+    ଫେରନ୍ତୁ Changes;
 
   // Look for a passing subset.
   changeset_ty Res;
-  if (Search(Changes, Sets, Res))
-    return Res;
+  ଯଦି (ସନ୍ଧାନ(Changes, Sets, Res))
+    ଫେରନ୍ତୁ Res;
 
   // Otherwise, partition the sets if possible; if not we are done.
   changesetlist_ty SplitSets;
-  for (const changeset_ty &Set : Sets)
+  ପାଇଁ (ଅଚଳ changeset_ty &Set : Sets)
     Split(Set, SplitSets);
-  if (SplitSets.size() == Sets.size())
-    return Changes;
+  ଯଦି (SplitSets.size() == Sets.size())
+    ଫେରନ୍ତୁ Changes;
 
-  return Delta(Changes, SplitSets);
+  ଫେରନ୍ତୁ Delta(Changes, SplitSets);
 }
 
-bool DeltaAlgorithm::Search(const changeset_ty &Changes,
-                            const changesetlist_ty &Sets,
+ତାର୍କିକ DeltaAlgorithm::ସନ୍ଧାନ(ଅଚଳ changeset_ty &Changes,
+                            ଅଚଳ changesetlist_ty &Sets,
                             changeset_ty &Res) {
   // FIXME: Parallelize.
-  for (changesetlist_ty::const_iterator it = Sets.begin(),
+  ପାଇଁ (changesetlist_ty::const_iterator it = Sets.begin(),
          ie = Sets.end(); it != ie; ++it) {
     // If the test passes on this subset alone, recurse.
-    if (GetTestResult(*it)) {
+    ଯଦି (GetTestResult(*it)) {
       changesetlist_ty Sets;
       Split(*it, Sets);
       Res = Delta(*it, Sets);
-      return true;
+      ଫେରନ୍ତୁ ସତ୍ୟ;
     }
 
     // Otherwise, if we have more than two sets, see if test passes on the
     // complement.
-    if (Sets.size() > 2) {
+    ଯଦି (Sets.size() > 2) {
       // FIXME: This is really slow.
       changeset_ty Complement;
       std::set_difference(Changes.begin(), Changes.end(), it->begin(),
                           it->end(),
                           std::inserter(Complement, Complement.begin()));
-      if (GetTestResult(Complement)) {
+      ଯଦି (GetTestResult(Complement)) {
         changesetlist_ty ComplementSets;
-        ComplementSets.insert(ComplementSets.end(), Sets.begin(), it);
-        ComplementSets.insert(ComplementSets.end(), it + 1, Sets.end());
+        ComplementSets.ଭର୍ତ୍ତି(ComplementSets.end(), Sets.begin(), it);
+        ComplementSets.ଭର୍ତ୍ତି(ComplementSets.end(), it + 1, Sets.end());
         Res = Delta(Complement, ComplementSets);
-        return true;
+        ଫେରନ୍ତୁ ସତ୍ୟ;
       }
     }
   }
 
-  return false;
+  ଫେରନ୍ତୁ ମିଥ୍ୟା;
 }
 
-DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(const changeset_ty &Changes) {
+DeltaAlgorithm::changeset_ty DeltaAlgorithm::Run(ଅଚଳ changeset_ty &Changes) {
   // Check empty set first to quickly find poor test functions.
-  if (GetTestResult(changeset_ty()))
-    return changeset_ty();
+  ଯଦି (GetTestResult(changeset_ty()))
+    ଫେରନ୍ତୁ changeset_ty();
 
   // Otherwise run the real delta algorithm.
   changesetlist_ty Sets;
   Split(Changes, Sets);
 
-  return Delta(Changes, Sets);
+  ଫେରନ୍ତୁ Delta(Changes, Sets);
 }

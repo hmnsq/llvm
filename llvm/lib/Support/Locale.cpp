@@ -1,17 +1,17 @@
-#include "llvm/Support/Locale.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Unicode.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Locale.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Unicode.h"
 
-namespace llvm {
-namespace sys {
-namespace locale {
+ନାମାକାଶ llvm {
+ନାମାକାଶ sys {
+ନାମାକାଶ locale {
 
-int columnWidth(StringRef Text) {
-  return llvm::sys::unicode::columnWidthUTF8(Text);
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା columnWidth(StringRef Text) {
+  ଫେରନ୍ତୁ llvm::sys::unicode::columnWidthUTF8(Text);
 }
 
-bool isPrint(int UCS) {
-  return llvm::sys::unicode::isPrintable(UCS);
+ତାର୍କିକ isPrint(ପୂର୍ଣ୍ଣସଂଖ୍ୟା UCS) {
+  ଫେରନ୍ତୁ llvm::sys::unicode::isPrintable(UCS);
 }
 
 } // namespace locale

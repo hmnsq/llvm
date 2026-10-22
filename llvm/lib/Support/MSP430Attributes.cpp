@@ -6,17 +6,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MSP430Attributes.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/MSP430Attributes.h"
 
-using namespace llvm;
-using namespace llvm::MSP430Attrs;
+using ନାମାକାଶ llvm;
+using ନାମାକାଶ llvm::MSP430Attrs;
 
-static constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
+ସ୍ଥିର constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
                                           {TagCodeModel, "Tag_Code_Model"},
                                           {TagDataModel, "Tag_Data_Model"},
                                           {TagEnumSize, "Tag_Enum_Size"}};
 
 constexpr TagNameMap MSP430AttributeTags{TagData};
-const TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
-  return MSP430AttributeTags;
+ଅଚଳ TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
+  ଫେରନ୍ତୁ MSP430AttributeTags;
 }

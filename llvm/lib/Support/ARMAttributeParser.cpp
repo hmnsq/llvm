@@ -6,20 +6,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/ARMBuildAttributes.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include <optional>
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ARMAttributeParser.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringExtras.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ARMBuildAttributes.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Errc.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/ScopedPrinter.h"
+#ଅନ୍ତର୍ଭାଵ <optional>
 
-using namespace llvm;
-using namespace llvm::ARMBuildAttrs;
+using ନାମାକାଶ llvm;
+using ନାମାକାଶ llvm::ARMBuildAttrs;
 
 #define ATTRIBUTE_HANDLER(attr)                                                \
   { ARMBuildAttrs::attr, &ARMAttributeParser::attr }
 
-const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
+ଅଚଳ ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
     {
         {ARMBuildAttrs::CPU_raw_name, &ARMAttributeParser::stringAttribute},
         {ARMBuildAttrs::CPU_name, &ARMAttributeParser::stringAttribute},
@@ -41,7 +41,7 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
         ATTRIBUTE_HANDLER(ABI_FP_denormal),
         ATTRIBUTE_HANDLER(ABI_FP_exceptions),
         ATTRIBUTE_HANDLER(ABI_FP_user_exceptions),
-        ATTRIBUTE_HANDLER(ABI_FP_number_model),
+        ATTRIBUTE_HANDLER(ABI_FP_ସଂଖ୍ୟା_model),
         ATTRIBUTE_HANDLER(ABI_align_needed),
         ATTRIBUTE_HANDLER(ABI_align_preserved),
         ATTRIBUTE_HANDLER(ABI_enum_size),
@@ -71,20 +71,20 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
 
 Error ARMAttributeParser::stringAttribute(AttrType tag) {
   StringRef tagName =
-      ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
+      ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/ମିଥ୍ୟା);
   StringRef desc = de.getCStrRef(cursor);
 
-  if (sw) {
+  ଯଦି (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    if (!tagName.empty())
+    sw->print_ସଂଖ୍ୟା("Tag", tag);
+    ଯଦି (!tagName.empty())
       sw->printString("TagName", tagName);
     sw->printString("Value", desc);
   }
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
-static const char *const CPU_arch_strings[] = {"Pre-v4",
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ CPU_arch_strings[] = {"Pre-v4",
                                                "ARM v4",
                                                "ARM v4T",
                                                "ARM v5T",
@@ -109,63 +109,63 @@ static const char *const CPU_arch_strings[] = {"Pre-v4",
                                                "ARM v9-A"};
 
 Error ARMAttributeParser::CPU_arch(AttrType tag) {
-  return parseStringAttribute("CPU_arch", tag, ArrayRef(CPU_arch_strings));
+  ଫେରନ୍ତୁ parseStringAttribute("CPU_arch", tag, ArrayRef(CPU_arch_strings));
 }
 
 Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t ମୂଲ୍ୟ_2 = de.getULEB128(cursor);
 
   StringRef profile;
-  switch (value) {
-  default: profile = "Unknown"; break;
-  case 'A': profile = "Application"; break;
-  case 'R': profile = "Real-time"; break;
-  case 'M': profile = "Microcontroller"; break;
-  case 'S': profile = "Classic"; break;
-  case 0: profile = "None"; break;
+  ବାଛ (ମୂଲ୍ୟ_2) {
+  ପୂର୍ବନିର୍ଦ୍ଧାରିତ: profile = "Unknown"; ଭାଙ୍ଗ;
+  ସ୍ଥିତି 'A': profile = "Application"; ଭାଙ୍ଗ;
+  ସ୍ଥିତି 'R': profile = "Real-time"; ଭାଙ୍ଗ;
+  ସ୍ଥିତି 'M': profile = "Microcontroller"; ଭାଙ୍ଗ;
+  ସ୍ଥିତି 'S': profile = "Classic"; ଭାଙ୍ଗ;
+  ସ୍ଥିତି 0: profile = "None"; ଭାଙ୍ଗ;
   }
 
-  printAttribute(tag, value, profile);
-  return Error::success();
+  printAttribute(tag, ମୂଲ୍ୟ_2, profile);
+  ଫେରନ୍ତୁ Error::success();
 }
 
 Error ARMAttributeParser::ARM_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("ARM_ISA_use", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Permitted"};
+  ଫେରନ୍ତୁ parseStringAttribute("ARM_ISA_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::THUMB_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Thumb-1", "Thumb-2",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Thumb-1", "Thumb-2",
                                         "Permitted"};
-  return parseStringAttribute("THUMB_ISA_use", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("THUMB_ISA_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::FP_arch(AttrType tag) {
-  static const char *const strings[] = {
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {
       "Not Permitted", "VFPv1",     "VFPv2",      "VFPv3",         "VFPv3-D16",
       "VFPv4",         "VFPv4-D16", "ARMv8-a FP", "ARMv8-a FP-D16"};
-  return parseStringAttribute("FP_arch", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("FP_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::WMMX_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
-  return parseStringAttribute("WMMX_arch", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
+  ଫେରନ୍ତୁ parseStringAttribute("WMMX_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::Advanced_SIMD_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
                                         "ARMv8-a NEON", "ARMv8.1-a NEON"};
-  return parseStringAttribute("Advanced_SIMD_arch", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("Advanced_SIMD_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::MVE_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "MVE integer",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "MVE integer",
                                         "MVE integer and float"};
-  return parseStringAttribute("MVE_arch", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("MVE_arch", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::PCS_config(AttrType tag) {
-  static const char *const strings[] = {"None",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"None",
                                         "Bare Platform",
                                         "Linux Application",
                                         "Linux DSO",
@@ -173,137 +173,137 @@ Error ARMAttributeParser::PCS_config(AttrType tag) {
                                         "Reserved (Palm OS)",
                                         "Symbian OS 2004",
                                         "Reserved (Symbian OS)"};
-  return parseStringAttribute("PCS_config", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("PCS_config", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_R9_use(AttrType tag) {
-  static const char *const strings[] = {"v6", "Static Base", "TLS", "Unused"};
-  return parseStringAttribute("ABI_PCS_R9_use", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"v6", "Static Base", "TLS", "Unused"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_PCS_R9_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_RW_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Absolute", "PC-relative",
                                         "SB-relative", "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RW_data", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_PCS_RW_data", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_RO_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Absolute", "PC-relative",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RO_data", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_PCS_RO_data", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_GOT_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Direct",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Direct",
                                         "GOT-Indirect"};
-  return parseStringAttribute("ABI_PCS_GOT_use", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_PCS_GOT_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_PCS_wchar_t(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Unknown", "2-byte",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Unknown", "2-byte",
                                         "Unknown", "4-byte"};
-  return parseStringAttribute("ABI_PCS_wchar_t", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_PCS_wchar_t", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_rounding(AttrType tag) {
-  static const char *const strings[] = {"IEEE-754", "Runtime"};
-  return parseStringAttribute("ABI_FP_rounding", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"IEEE-754", "Runtime"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_rounding", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_denormal(AttrType tag) {
-  static const char *const strings[] = {"Unsupported", "IEEE-754", "Sign Only"};
-  return parseStringAttribute("ABI_FP_denormal", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Unsupported", "IEEE-754", "Sign Only"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_denormal", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_exceptions", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "IEEE-754"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_exceptions", tag, ArrayRef(strings));
 }
 Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "IEEE-754"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
 }
 
-Error ARMAttributeParser::ABI_FP_number_model(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Finite Only", "RTABI",
+Error ARMAttributeParser::ABI_FP_ସଂଖ୍ୟା_model(AttrType tag) {
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Finite Only", "RTABI",
                                         "IEEE-754"};
-  return parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_align_needed(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "8-byte alignment",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "8-byte alignment",
                                         "4-byte alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t ମୂଲ୍ୟ_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = strings[value];
-  else if (value <= 12)
-    description = "8-byte alignment, " + utostr(1ULL << value) +
+  ଯଦି (ମୂଲ୍ୟ_2 < std::size(strings))
+    description = strings[ମୂଲ୍ୟ_2];
+  ଅନ୍ୟଥା ଯଦି (ମୂଲ୍ୟ_2 <= 12)
+    description = "8-byte alignment, " + utostr(1ULL << ମୂଲ୍ୟ_2) +
                   "-byte extended alignment";
-  else
+  ଅନ୍ୟଥା
     description = "Invalid";
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(tag, ମୂଲ୍ୟ_2, description);
+  ଫେରନ୍ତୁ Error::success();
 }
 
 Error ARMAttributeParser::ABI_align_preserved(AttrType tag) {
-  static const char *strings[] = {"Not Required", "8-byte data alignment",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *strings[] = {"Not Required", "8-byte data alignment",
                                   "8-byte data and code alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t ମୂଲ୍ୟ_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = std::string(strings[value]);
-  else if (value <= 12)
+  ଯଦି (ମୂଲ୍ୟ_2 < std::size(strings))
+    description = std::string(strings[ମୂଲ୍ୟ_2]);
+  ଅନ୍ୟଥା ଯଦି (ମୂଲ୍ୟ_2 <= 12)
     description = std::string("8-byte stack alignment, ") +
-                  utostr(1ULL << value) + std::string("-byte data alignment");
-  else
+                  utostr(1ULL << ମୂଲ୍ୟ_2) + std::string("-byte data alignment");
+  ଅନ୍ୟଥା
     description = "Invalid";
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(tag, ମୂଲ୍ୟ_2, description);
+  ଫେରନ୍ତୁ Error::success();
 }
 
 Error ARMAttributeParser::ABI_enum_size(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Packed", "Int32",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Packed", "Int32",
                                         "External Int32"};
-  return parseStringAttribute("ABI_enum_size", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_enum_size", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_HardFP_use(AttrType tag) {
-  static const char *const strings[] = {"Tag_FP_arch", "Single-Precision",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Tag_FP_arch", "Single-Precision",
                                         "Reserved", "Tag_FP_arch (deprecated)"};
-  return parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_VFP_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "AAPCS VFP", "Custom",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"AAPCS", "AAPCS VFP", "Custom",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_WMMX_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "iWMMX", "Custom"};
-  return parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"AAPCS", "iWMMX", "Custom"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {
       "None",          "Speed",           "Aggressive Speed",
       "Size",          "Aggressive Size", "Debugging",
       "Best Debugging"};
-  return parseStringAttribute("ABI_optimization_goals", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_optimization_goals", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {
       "None",     "Speed",        "Aggressive Speed", "Size", "Aggressive Size",
       "Accuracy", "Best Accuracy"};
-  return parseStringAttribute("ABI_FP_optimization_goals", tag,
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_optimization_goals", tag,
                               ArrayRef(strings));
 }
 
@@ -311,191 +311,191 @@ Error ARMAttributeParser::compatibility(AttrType tag) {
   uint64_t integer = de.getULEB128(cursor);
   StringRef string = de.getCStrRef(cursor);
 
-  if (sw) {
+  ଯଦି (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->startLine() << "Value: " << integer << ", " << string << '\n';
+    sw->print_ସଂଖ୍ୟା("Tag", tag);
+    sw->start_ଧାଡ଼ି() << "Value: " << integer << ", " << string << '\n';
     sw->printString("TagName",
                     ELFAttrs::attrTypeAsString(tag, tagToStringMap,
-                                               /*hasTagPrefix=*/false));
-    switch (integer) {
-    case 0:
+                                               /*hasTagPrefix=*/ମିଥ୍ୟା));
+    ବାଛ (integer) {
+    ସ୍ଥିତି 0:
       sw->printString("Description", StringRef("No Specific Requirements"));
-      break;
-    case 1:
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 1:
       sw->printString("Description", StringRef("AEABI Conformant"));
-      break;
-    default:
+      ଭାଙ୍ଗ;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
       sw->printString("Description", StringRef("AEABI Non-Conformant"));
-      break;
+      ଭାଙ୍ଗ;
     }
   }
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }
 
 Error ARMAttributeParser::CPU_unaligned_access(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "v6-style"};
-  return parseStringAttribute("CPU_unaligned_access", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "v6-style"};
+  ଫେରନ୍ତୁ parseStringAttribute("CPU_unaligned_access", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::FP_HP_extension(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Permitted"};
-  return parseStringAttribute("FP_HP_extension", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"If Available", "Permitted"};
+  ଫେରନ୍ତୁ parseStringAttribute("FP_HP_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::ABI_FP_16bit_format(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754", "VFPv3"};
-  return parseStringAttribute("ABI_FP_16bit_format", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "IEEE-754", "VFPv3"};
+  ଫେରନ୍ତୁ parseStringAttribute("ABI_FP_16bit_format", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::MPextension_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("MPextension_use", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Permitted"};
+  ଫେରନ୍ତୁ parseStringAttribute("MPextension_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::DIV_use(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Not Permitted",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"If Available", "Not Permitted",
                                         "Permitted"};
-  return parseStringAttribute("DIV_use", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("DIV_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::DSP_extension(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("DSP_extension", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Permitted"};
+  ଫେରନ୍ତୁ parseStringAttribute("DSP_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::T2EE_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("T2EE_use", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted", "Permitted"};
+  ଫେରନ୍ତୁ parseStringAttribute("T2EE_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::Virtualization_use(AttrType tag) {
-  static const char *const strings[] = {
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {
       "Not Permitted", "TrustZone", "Virtualization Extensions",
       "TrustZone + Virtualization Extensions"};
-  return parseStringAttribute("Virtualization_use", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("Virtualization_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::PAC_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("PAC_extension", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("PAC_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::BTI_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("BTI_extension", tag, ArrayRef(strings));
+  ଫେରନ୍ତୁ parseStringAttribute("BTI_extension", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::PACRET_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("PACRET_use", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Used", "Used"};
+  ଫେରନ୍ତୁ parseStringAttribute("PACRET_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("BTI_use", tag, ArrayRef(strings));
+  ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ଅଚଳ strings[] = {"Not Used", "Used"};
+  ଫେରନ୍ତୁ parseStringAttribute("BTI_use", tag, ArrayRef(strings));
 }
 
 Error ARMAttributeParser::nodefaults(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
-  printAttribute(tag, value, "Unspecified Tags UNDEFINED");
-  return Error::success();
+  uint64_t ମୂଲ୍ୟ_2 = de.getULEB128(cursor);
+  printAttribute(tag, ମୂଲ୍ୟ_2, "Unspecified Tags UNDEFINED");
+  ଫେରନ୍ତୁ Error::success();
 }
 
 Error ARMAttributeParser::also_compatible_with(AttrType tag) {
   // Parse value as a C string first in order to print it in escaped form later.
   // Then, parse it again to catch errors or to pretty print if Tag_CPU_arch.
-  std::optional<Error> returnValue;
+  std::optional<Error> return_ମୂଲ୍ୟ;
 
   SmallString<8> Description;
   raw_svector_ostream DescStream(Description);
 
   uint64_t InitialOffset = cursor.tell();
-  StringRef RawStringValue = de.getCStrRef(cursor);
+  StringRef Raw_String_ମୂଲ୍ୟ = de.getCStrRef(cursor);
   uint64_t FinalOffset = cursor.tell();
   cursor.seek(InitialOffset);
   uint64_t InnerTag = de.getULEB128(cursor);
 
-  bool ValidInnerTag =
-      any_of(tagToStringMap, [InnerTag](const TagNameItem &Item) {
-        return Item.attr == InnerTag;
+  ତାର୍କିକ ValidInnerTag =
+      any_of(tagToStringMap, [InnerTag](ଅଚଳ TagNameItem &Item) {
+        ଫେରନ୍ତୁ Item.attr == InnerTag;
       });
 
-  if (!ValidInnerTag) {
-    returnValue =
+  ଯଦି (!ValidInnerTag) {
+    return_ମୂଲ୍ୟ =
         createStringError(errc::argument_out_of_domain,
                           Twine(InnerTag) + " is not a valid tag number");
-  } else {
-    switch (InnerTag) {
-    case ARMBuildAttrs::CPU_arch: {
-      uint64_t InnerValue = de.getULEB128(cursor);
+  } ଅନ୍ୟଥା {
+    ବାଛ (InnerTag) {
+    ସ୍ଥିତି ARMBuildAttrs::CPU_arch: {
+      uint64_t Inner_ମୂଲ୍ୟ = de.getULEB128(cursor);
       auto strings = ArrayRef(CPU_arch_strings);
-      if (InnerValue >= strings.size()) {
-        returnValue = createStringError(
+      ଯଦି (Inner_ମୂଲ୍ୟ >= strings.size()) {
+        return_ମୂଲ୍ୟ = createStringError(
             errc::argument_out_of_domain,
-            Twine(InnerValue) + " is not a valid " +
+            Twine(Inner_ମୂଲ୍ୟ) + " is not a valid " +
                 ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
                 " value");
-      } else {
+      } ଅନ୍ୟଥା {
         DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                   << " = " << InnerValue;
-        if (strings[InnerValue])
-          DescStream << " (" << strings[InnerValue] << ')';
+                   << " = " << Inner_ମୂଲ୍ୟ;
+        ଯଦି (strings[Inner_ମୂଲ୍ୟ])
+          DescStream << " (" << strings[Inner_ମୂଲ୍ୟ] << ')';
       }
-      break;
+      ଭାଙ୍ଗ;
     }
-    case ARMBuildAttrs::also_compatible_with:
-      returnValue = createStringError(
+    ସ୍ଥିତି ARMBuildAttrs::also_compatible_with:
+      return_ମୂଲ୍ୟ = createStringError(
           errc::invalid_argument,
           ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
               " cannot be recursively defined");
-      break;
-    case ARMBuildAttrs::CPU_raw_name:
-    case ARMBuildAttrs::CPU_name:
-    case ARMBuildAttrs::compatibility:
-    case ARMBuildAttrs::conformance: {
-      StringRef InnerValue = de.getCStrRef(cursor);
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି ARMBuildAttrs::CPU_raw_name:
+    ସ୍ଥିତି ARMBuildAttrs::CPU_name:
+    ସ୍ଥିତି ARMBuildAttrs::compatibility:
+    ସ୍ଥିତି ARMBuildAttrs::conformance: {
+      StringRef Inner_ମୂଲ୍ୟ = de.getCStrRef(cursor);
       DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
-      break;
+                 << " = " << Inner_ମୂଲ୍ୟ;
+      ଭାଙ୍ଗ;
     }
-    default: {
-      uint64_t InnerValue = de.getULEB128(cursor);
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: {
+      uint64_t Inner_ମୂଲ୍ୟ = de.getULEB128(cursor);
       DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
+                 << " = " << Inner_ମୂଲ୍ୟ;
     }
     }
   }
 
-  setAttributeString(tag, RawStringValue);
-  if (sw) {
+  setAttributeString(tag, Raw_String_ମୂଲ୍ୟ);
+  ଯଦି (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
+    sw->print_ସଂଖ୍ୟା("Tag", tag);
     sw->printString("TagName",
-                    ELFAttrs::attrTypeAsString(tag, tagToStringMap, false));
-    sw->printStringEscaped("Value", RawStringValue);
-    if (!Description.empty()) {
+                    ELFAttrs::attrTypeAsString(tag, tagToStringMap, ମିଥ୍ୟା));
+    sw->printStringEscaped("Value", Raw_String_ମୂଲ୍ୟ);
+    ଯଦି (!Description.empty()) {
       sw->printString("Description", Description);
     }
   }
 
   cursor.seek(FinalOffset);
 
-  return returnValue ? std::move(*returnValue) : Error::success();
+  ଫେରନ୍ତୁ return_ମୂଲ୍ୟ ? std::move(*return_ମୂଲ୍ୟ) : Error::success();
 }
 
-Error ARMAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(static_cast<AttrType>(tag)))
-        return e;
-      handled = true;
-      break;
+Error ARMAttributeParser::handler(uint64_t tag, ତାର୍କିକ &handled) {
+  handled = ମିଥ୍ୟା;
+  ପାଇଁ (ଅଚଳ auto &AH : displayRoutines) {
+    ଯଦି (uint64_t(AH.attribute) == tag) {
+      ଯଦି (Error e = (ଏହି->*AH.routine)(static_cast<AttrType>(tag)))
+        ଫେରନ୍ତୁ e;
+      handled = ସତ୍ୟ;
+      ଭାଙ୍ଗ;
     }
   }
 
-  return Error::success();
+  ଫେରନ୍ତୁ Error::success();
 }

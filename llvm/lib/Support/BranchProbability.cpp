@@ -10,72 +10,72 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cmath>
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/BranchProbability.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Config/llvm-config.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Debug.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Format.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/raw_ostream.h"
+#ଅନ୍ତର୍ଭାଵ <cassert>
+#ଅନ୍ତର୍ଭାଵ <cmath>
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
-raw_ostream &BranchProbability::print(raw_ostream &OS) const {
-  if (isUnknown())
-    return OS << "?%";
+raw_ostream &BranchProbability::print(raw_ostream &OS) ଅଚଳ {
+  ଯଦି (isUnknown())
+    ଫେରନ୍ତୁ OS << "?%";
 
   // Get a percentage rounded to two decimal digits. This avoids
   // implementation-defined rounding inside printf.
-  double Percent = rint(((double)N / D) * 100.0 * 100.0) / 100.0;
-  return OS << format("0x%08" PRIx32 " / 0x%08" PRIx32 " = %.2f%%", N, D,
+  ଦ୍ୱିଗୁଣ Percent = rint(((ଦ୍ୱିଗୁଣ)N / D) * 100.0 * 100.0) / 100.0;
+  ଫେରନ୍ତୁ OS << format("0x%08" PRIx32 " / 0x%08" PRIx32 " = %.2f%%", N, D,
                       Percent);
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void BranchProbability::dump() const { print(dbgs()) << '\n'; }
+#ଯଦି !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_DUMP_METHOD ଶୂନ୍ୟ BranchProbability::dump() ଅଚଳ { print(dbgs()) << '\n'; }
 #endif
 
 BranchProbability
 BranchProbability::getBranchProbability(uint64_t Numerator,
                                         uint64_t Denominator) {
-  assert(Numerator <= Denominator && "Probability cannot be bigger than 1!");
+  ପ୍ରତିଜ୍ଞା(Numerator <= Denominator && "Probability cannot be bigger than 1!");
   // Scale down Denominator to fit in a 32-bit integer.
-  int Scale = 0;
-  while (Denominator > UINT32_MAX) {
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା Scale = 0;
+  ଯେତେବେଳେ (Denominator > UINT32_MAX) {
     Denominator >>= 1;
     Scale++;
   }
-  return BranchProbability(Numerator >> Scale, Denominator);
+  ଫେରନ୍ତୁ BranchProbability(Numerator >> Scale, Denominator);
 }
 
-BranchProbability BranchProbability::getBranchProbability(double Prob) {
-  assert(0 <= Prob && Prob <= 1 && "Probability must be between 0 and 1!");
-  return BranchProbability(std::round(Prob * D), D);
+BranchProbability BranchProbability::getBranchProbability(ଦ୍ୱିଗୁଣ Prob) {
+  ପ୍ରତିଜ୍ଞା(0 <= Prob && Prob <= 1 && "Probability must be between 0 and 1!");
+  ଫେରନ୍ତୁ BranchProbability(std::round(Prob * D), D);
 }
 
 // If ConstD is not zero, then replace D by ConstD so that division and modulo
 // operations by D can be optimized, in case this function is not inlined by the
 // compiler.
 template <uint32_t ConstD>
-static uint64_t scale(uint64_t Num, uint32_t N, uint32_t D) {
-  if (ConstD > 0)
+ସ୍ଥିର uint64_t scale(uint64_t ଅଙ୍କ, uint32_t N, uint32_t D) {
+  ଯଦି (ConstD > 0)
     D = ConstD;
 
-  assert(D && "divide by 0");
+  ପ୍ରତିଜ୍ଞା(D && "divide by 0");
 
   // Fast path for multiplying by 1.0.
-  if (!Num || D == N)
-    return Num;
+  ଯଦି (!ଅଙ୍କ || D == N)
+    ଫେରନ୍ତୁ ଅଙ୍କ;
 
   // Split Num into upper and lower parts to multiply, then recombine.
-  uint64_t ProductHigh = (Num >> 32) * N;
-  uint64_t ProductLow = (Num & UINT32_MAX) * N;
+  uint64_t Product_ଉପର = (ଅଙ୍କ >> 32) * N;
+  uint64_t Product_ତଳ = (ଅଙ୍କ & UINT32_MAX) * N;
 
   // Split into 32-bit digits.
-  uint32_t Upper32 = ProductHigh >> 32;
-  uint32_t Lower32 = ProductLow & UINT32_MAX;
-  uint32_t Mid32Partial = ProductHigh & UINT32_MAX;
-  uint32_t Mid32 = Mid32Partial + (ProductLow >> 32);
+  uint32_t Upper32 = Product_ଉପର >> 32;
+  uint32_t Lower32 = Product_ତଳ & UINT32_MAX;
+  uint32_t Mid32Partial = Product_ଉପର & UINT32_MAX;
+  uint32_t Mid32 = Mid32Partial + (Product_ତଳ >> 32);
 
   // Carry.
   Upper32 += Mid32 < Mid32Partial;
@@ -84,28 +84,28 @@ static uint64_t scale(uint64_t Num, uint32_t N, uint32_t D) {
   uint64_t UpperQ = Rem / D;
 
   // Check for overflow.
-  if (UpperQ > UINT32_MAX)
-    return UINT64_MAX;
+  ଯଦି (UpperQ > UINT32_MAX)
+    ଫେରନ୍ତୁ UINT64_MAX;
 
   Rem = ((Rem % D) << 32) | Lower32;
   uint64_t LowerQ = Rem / D;
   uint64_t Q = (UpperQ << 32) + LowerQ;
 
   // Check for overflow.
-  return Q < LowerQ ? UINT64_MAX : Q;
+  ଫେରନ୍ତୁ Q < LowerQ ? UINT64_MAX : Q;
 }
 
-uint64_t BranchProbability::scale(uint64_t Num) const {
-  return ::scale<D>(Num, N, D);
+uint64_t BranchProbability::scale(uint64_t ଅଙ୍କ) ଅଚଳ {
+  ଫେରନ୍ତୁ ::scale<D>(ଅଙ୍କ, N, D);
 }
 
-uint64_t BranchProbability::scaleByInverse(uint64_t Num) const {
-  return ::scale<0>(Num, D, N);
+uint64_t BranchProbability::scaleByInverse(uint64_t ଅଙ୍କ) ଅଚଳ {
+  ଫେରନ୍ତୁ ::scale<0>(ଅଙ୍କ, D, N);
 }
 
-BranchProbability BranchProbability::pow(unsigned N) const {
+BranchProbability BranchProbability::pow(unsigned N) ଅଚଳ {
   BranchProbability Res = BranchProbability::getOne();
-  for (unsigned I = 0; I < N; ++I)
-    Res *= *this;
-  return Res;
+  ପାଇଁ (unsigned I = 0; I < N; ++I)
+    Res *= *ଏହି;
+  ଫେରନ୍ତୁ Res;
 }

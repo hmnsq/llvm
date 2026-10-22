@@ -10,29 +10,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Regex.h"
-#include "regex_impl.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/Support/Regex.h"
+#ଅନ୍ତର୍ଭାଵ "regex_impl.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/SmallVector.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringExtras.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/StringRef.h"
+#ଅନ୍ତର୍ଭାଵ "llvm/ADT/Twine.h"
 
-#include <cassert>
-#include <string>
+#ଅନ୍ତର୍ଭାଵ <cassert>
+#ଅନ୍ତର୍ଭାଵ <string>
 
-using namespace llvm;
+using ନାମାକାଶ llvm;
 
 Regex::Regex() : preg(nullptr), error(REG_BADPAT) {}
 
 Regex::Regex(StringRef regex, RegexFlags Flags) {
   unsigned flags = 0;
-  preg = new llvm_regex();
+  preg = ନୂତନ llvm_regex();
   preg->re_endp = regex.end();
-  if (Flags & IgnoreCase)
+  ଯଦି (Flags & IgnoreCase)
     flags |= REG_ICASE;
-  if (Flags & Newline)
+  ଯଦି (Flags & Newline)
     flags |= REG_NEWLINE;
-  if (!(Flags & BasicRegex))
+  ଯଦି (!(Flags & BasicRegex))
     flags |= REG_EXTENDED;
   error = llvm_regcomp(preg, regex.data(), flags|REG_PEND);
 }
@@ -48,16 +48,16 @@ Regex::Regex(Regex &&regex) {
 }
 
 Regex::~Regex() {
-  if (preg) {
+  ଯଦି (preg) {
     llvm_regfree(preg);
     delete preg;
   }
 }
 
-namespace {
+ନାମାକାଶ {
 
 /// Utility to convert a regex error code into a human-readable string.
-void RegexErrorToString(int error, struct llvm_regex *preg,
+ଶୂନ୍ୟ RegexErrorToString(ପୂର୍ଣ୍ଣସଂଖ୍ୟା error, ସଂରଚନା llvm_regex *preg,
                         std::string &Error) {
   size_t len = llvm_regerror(error, preg, nullptr, 0);
 
@@ -67,34 +67,34 @@ void RegexErrorToString(int error, struct llvm_regex *preg,
 
 } // namespace
 
-bool Regex::isValid(std::string &Error) const {
-  if (!error)
-    return true;
+ତାର୍କିକ Regex::isValid(std::string &Error) ଅଚଳ {
+  ଯଦି (!error)
+    ଫେରନ୍ତୁ ସତ୍ୟ;
 
   RegexErrorToString(error, preg, Error);
-  return false;
+  ଫେରନ୍ତୁ ମିଥ୍ୟା;
 }
 
 /// getNumMatches - In a valid regex, return the number of parenthesized
 /// matches it contains.
-unsigned Regex::getNumMatches() const {
-  return preg->re_nsub;
+unsigned Regex::get_ଅଙ୍କ_Matches() ଅଚଳ {
+  ଫେରନ୍ତୁ preg->re_nsub;
 }
 
-bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
-                  std::string *Error) const {
+ତାର୍କିକ Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
+                  std::string *Error) ଅଚଳ {
   // Reset error, if given.
-  if (Error && !Error->empty())
+  ଯଦି (Error && !Error->empty())
     *Error = "";
 
   // Check if the regex itself didn't successfully compile.
-  if (Error ? !isValid(*Error) : !isValid())
-    return false;
+  ଯଦି (Error ? !isValid(*Error) : !isValid())
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
 
   unsigned nmatch = Matches ? preg->re_nsub+1 : 0;
 
   // Update null string to empty string.
-  if (String.data() == nullptr)
+  ଯଦି (String.data() == nullptr)
     String = "";
 
   // pmatch needs to have at least one element.
@@ -103,52 +103,52 @@ bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
   pm[0].rm_so = 0;
   pm[0].rm_eo = String.size();
 
-  int rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
 
   // Failure to match is not an error, it's just a normal return value.
   // Any other error code is considered abnormal, and is logged in the Error.
-  if (rc == REG_NOMATCH)
-    return false;
-  if (rc != 0) {
-    if (Error)
+  ଯଦି (rc == REG_NOMATCH)
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
+  ଯଦି (rc != 0) {
+    ଯଦି (Error)
       RegexErrorToString(error, preg, *Error);
-    return false;
+    ଫେରନ୍ତୁ ମିଥ୍ୟା;
   }
 
   // There was a match.
 
-  if (Matches) { // match position requested
+  ଯଦି (Matches) { // match position requested
     Matches->clear();
 
-    for (unsigned i = 0; i != nmatch; ++i) {
-      if (pm[i].rm_so == -1) {
+    ପାଇଁ (unsigned i = 0; i != nmatch; ++i) {
+      ଯଦି (pm[i].rm_so == -1) {
         // this group didn't match
-        Matches->push_back(StringRef());
-        continue;
+        Matches->ଠେଲ_back(StringRef());
+        ଜାରି;
       }
-      assert(pm[i].rm_eo >= pm[i].rm_so);
-      Matches->push_back(StringRef(String.data()+pm[i].rm_so,
+      ପ୍ରତିଜ୍ଞା(pm[i].rm_eo >= pm[i].rm_so);
+      Matches->ଠେଲ_back(StringRef(String.data()+pm[i].rm_so,
                                    pm[i].rm_eo-pm[i].rm_so));
     }
   }
 
-  return true;
+  ଫେରନ୍ତୁ ସତ୍ୟ;
 }
 
 std::string Regex::sub(StringRef Repl, StringRef String,
-                       std::string *Error) const {
+                       std::string *Error) ଅଚଳ {
   SmallVector<StringRef, 8> Matches;
 
   // Return the input if there was no match.
-  if (!match(String, &Matches, Error))
-    return std::string(String);
+  ଯଦି (!match(String, &Matches, Error))
+    ଫେରନ୍ତୁ std::string(String);
 
   // Otherwise splice in the replacement string, starting with the prefix before
   // the match.
   std::string Res(String.begin(), Matches[0].begin());
 
   // Then the replacement string, honoring possible substitutions.
-  while (!Repl.empty()) {
+  ଯେତେବେଳେ (!Repl.empty()) {
     // Skip to the next escape.
     std::pair<StringRef, StringRef> Split = Repl.split('\\');
 
@@ -156,78 +156,78 @@ std::string Regex::sub(StringRef Repl, StringRef String,
     Res += Split.first;
 
     // Check for termination and trailing backslash.
-    if (Split.second.empty()) {
-      if (Repl.size() != Split.first.size() &&
+    ଯଦି (Split.second.empty()) {
+      ଯଦି (Repl.size() != Split.first.size() &&
           Error && Error->empty())
         *Error = "replacement string contained trailing backslash";
-      break;
+      ଭାଙ୍ଗ;
     }
 
     // Otherwise update the replacement string and interpret escapes.
     Repl = Split.second;
 
     // FIXME: We should have a StringExtras function for mapping C99 escapes.
-    switch (Repl[0]) {
+    ବାଛ (Repl[0]) {
 
       // Backreference with the "\g<ref>" syntax
-    case 'g':
-      if (Repl.size() >= 4 && Repl[1] == '<') {
+    ସ୍ଥିତି 'g':
+      ଯଦି (Repl.size() >= 4 && Repl[1] == '<') {
         size_t End = Repl.find('>');
         StringRef Ref = Repl.slice(2, End);
-        unsigned RefValue;
-        if (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
+        unsigned Ref_ମୂଲ୍ୟ;
+        ଯଦି (End != StringRef::npos && !Ref.getAsInteger(10, Ref_ମୂଲ୍ୟ)) {
           Repl = Repl.substr(End + 1);
-          if (RefValue < Matches.size())
-            Res += Matches[RefValue];
-          else if (Error && Error->empty())
+          ଯଦି (Ref_ମୂଲ୍ୟ < Matches.size())
+            Res += Matches[Ref_ମୂଲ୍ୟ];
+          ଅନ୍ୟଥା ଯଦି (Error && Error->empty())
             *Error =
                 ("invalid backreference string 'g<" + Twine(Ref) + ">'").str();
-          break;
+          ଭାଙ୍ଗ;
         }
       }
       [[fallthrough]];
 
       // Treat all unrecognized characters as self-quoting.
-    default:
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
       Res += Repl[0];
       Repl = Repl.substr(1);
-      break;
+      ଭାଙ୍ଗ;
 
       // Single character escapes.
-    case 't':
+    ସ୍ଥିତି 't':
       Res += '\t';
       Repl = Repl.substr(1);
-      break;
-    case 'n':
+      ଭାଙ୍ଗ;
+    ସ୍ଥିତି 'n':
       Res += '\n';
       Repl = Repl.substr(1);
-      break;
+      ଭାଙ୍ଗ;
 
       // Hex character escapes.
-    case 'x':
-      if (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
-        Res += char(hexDigitValue(Repl[1]) * 16 + hexDigitValue(Repl[2]));
+    ସ୍ଥିତି 'x':
+      ଯଦି (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
+        Res += ଅକ୍ଷର(hex_Digit_ମୂଲ୍ୟ(Repl[1]) * 16 + hex_Digit_ମୂଲ୍ୟ(Repl[2]));
         Repl = Repl.substr(3);
-      } else {
+      } ଅନ୍ୟଥା {
         Res += Repl[0];
         Repl = Repl.substr(1);
       }
-      break;
+      ଭାଙ୍ଗ;
 
       // Decimal escapes are backreferences.
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': {
+    ସ୍ଥିତି '0': ସ୍ଥିତି '1': ସ୍ଥିତି '2': ସ୍ଥିତି '3': ସ୍ଥିତି '4':
+    ସ୍ଥିତି '5': ସ୍ଥିତି '6': ସ୍ଥିତି '7': ସ୍ଥିତି '8': ସ୍ଥିତି '9': {
       // Extract the backreference number.
       StringRef Ref = Repl.slice(0, Repl.find_first_not_of("0123456789"));
       Repl = Repl.substr(Ref.size());
 
-      unsigned RefValue;
-      if (!Ref.getAsInteger(10, RefValue) &&
-          RefValue < Matches.size())
-        Res += Matches[RefValue];
-      else if (Error && Error->empty())
+      unsigned Ref_ମୂଲ୍ୟ;
+      ଯଦି (!Ref.getAsInteger(10, Ref_ମୂଲ୍ୟ) &&
+          Ref_ମୂଲ୍ୟ < Matches.size())
+        Res += Matches[Ref_ମୂଲ୍ୟ];
+      ଅନ୍ୟଥା ଯଦି (Error && Error->empty())
         *Error = ("invalid backreference string '" + Twine(Ref) + "'").str();
-      break;
+      ଭାଙ୍ଗ;
     }
     }
   }
@@ -235,26 +235,26 @@ std::string Regex::sub(StringRef Repl, StringRef String,
   // And finally the suffix.
   Res += StringRef(Matches[0].end(), String.end() - Matches[0].end());
 
-  return Res;
+  ଫେରନ୍ତୁ Res;
 }
 
 // These are the special characters matched in functions like "p_ere_exp".
-static const char RegexMetachars[] = "()^$|*+?.[]\\{}";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର RegexMetachars[] = "()^$|*+?.[]\\{}";
 
-bool Regex::isLiteralERE(StringRef Str) {
+ତାର୍କିକ Regex::isLiteralERE(StringRef Str) {
   // Check for regex metacharacters.  This list was derived from our regex
   // implementation in regcomp.c and double checked against the POSIX extended
   // regular expression specification.
-  return Str.find_first_of(RegexMetachars) == StringRef::npos;
+  ଫେରନ୍ତୁ Str.find_first_of(RegexMetachars) == StringRef::npos;
 }
 
 std::string Regex::escape(StringRef String) {
   std::string RegexStr;
-  for (char C : String) {
-    if (strchr(RegexMetachars, C))
+  ପାଇଁ (ଅକ୍ଷର C : String) {
+    ଯଦି (strchr(RegexMetachars, C))
       RegexStr += '\\';
     RegexStr += C;
   }
 
-  return RegexStr;
+  ଫେରନ୍ତୁ RegexStr;
 }
