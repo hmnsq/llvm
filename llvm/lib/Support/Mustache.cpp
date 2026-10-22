@@ -21,25 +21,25 @@ namespace {
 using Accessor = ArrayRef<StringRef>;
 
 static bool isFalsey(const json::Value &V) {
-  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
+  ပြန်ပေး V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
          (V.getAsArray() && V.getAsArray()->empty());
 }
 
 static bool isContextFalsey(const json::Value *V) {
   // A missing context (represented by a nullptr) is defined as falsey.
-  if (!V)
-    return true;
-  return isFalsey(*V);
+  အကယ်၍ (!V)
+    ပြန်ပေး true;
+  ပြန်ပေး isFalsey(*V);
 }
 
 static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
   size_t CurrentPos = 0;
-  while (CurrentPos < Str.size()) {
+  နေစဉ် (CurrentPos < Str.size()) {
     // Find the next delimiter.
     size_t DelimiterPos = Str.find('.', CurrentPos);
 
     // If no delimiter is found, process the rest of the string.
-    if (DelimiterPos == StringRef::npos)
+    အကယ်၍ (DelimiterPos == StringRef::npos)
       DelimiterPos = Str.size();
 
     // Get the current part, which may have whitespace.
@@ -47,7 +47,7 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
 
     // Manually trim the part without creating a new string object.
     size_t Start = Part.find_first_not_of(" \t\r\n");
-    if (Start != StringRef::npos) {
+    အကယ်၍ (Start != StringRef::npos) {
       size_t End = Part.find_last_not_of(" \t\r\n");
       Tokens.push_back(Part.slice(Start, End + 1));
     }
@@ -64,11 +64,11 @@ static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // We make an exception for a single dot which
   // refers to the current context.
   SmallVector<StringRef> Tokens;
-  if (Str == ".") {
+  အကယ်၍ (Str == ".") {
     // "." is a special accessor that refers to the current context.
     // It's a literal, so it doesn't need to be saved.
     Tokens.push_back(".");
-  } else {
+  } မဟုတ်ပါက {
     splitAndTrim(Str, Tokens);
   }
   // Now, allocate memory for the array of StringRefs in the arena.
@@ -76,7 +76,7 @@ static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // Copy the StringRefs from the stack vector to the arena.
   llvm::copy(Tokens, ArenaTokens);
   // Return an ArrayRef pointing to the stable arena memory.
-  return ArrayRef<StringRef>(ArenaTokens, Tokens.size());
+  ပြန်ပေး ArrayRef<StringRef>(ArenaTokens, Tokens.size());
 }
 } // namespace
 
@@ -103,15 +103,15 @@ public:
 private:
   raw_ostream &OS;
 
-  void write_impl(const char *Ptr, size_t Size) override {
+  void write_impl(const var_na *Ptr, size_t Size) override {
     OS.write(Ptr, Size);
   }
-  uint64_t current_pos() const override { return OS.tell(); }
+  uint64_t current_pos() const override { ပြန်ပေး OS.tell(); }
 };
 
 class Token {
 public:
-  enum class Type {
+  ga_nanaa class Type {
     Text,
     Variable,
     Partial,
@@ -127,44 +127,44 @@ public:
       : TokenType(Type::Text), RawBody(Str), TokenBody(RawBody),
         AccessorValue({}), Indentation(0) {};
 
-  Token(StringRef RawBody, StringRef TokenBody, char Identifier,
+  Token(StringRef RawBody, StringRef TokenBody, var_na Identifier,
         MustacheContext &Ctx)
       : RawBody(RawBody), TokenBody(TokenBody), Indentation(0) {
     TokenType = getTokenType(Identifier);
-    if (TokenType == Type::Comment)
-      return;
+    အကယ်၍ (TokenType == Type::Comment)
+      ပြန်ပေး;
     StringRef AccessorStr(this->TokenBody);
-    if (TokenType != Type::Variable)
+    အကယ်၍ (TokenType != Type::Variable)
       AccessorStr = AccessorStr.substr(1);
     AccessorValue = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
   }
 
-  ArrayRef<StringRef> getAccessor() const { return AccessorValue; }
+  ArrayRef<StringRef> getAccessor() const { ပြန်ပေး AccessorValue; }
 
-  Type getType() const { return TokenType; }
+  Type getType() const { ပြန်ပေး TokenType; }
 
   void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; }
 
-  size_t getIndentation() const { return Indentation; }
+  size_t getIndentation() const { ပြန်ပေး Indentation; }
 
-  static Type getTokenType(char Identifier) {
+  static Type getTokenType(var_na Identifier) {
     switch (Identifier) {
-    case '#':
-      return Type::SectionOpen;
-    case '/':
-      return Type::SectionClose;
-    case '^':
-      return Type::InvertSectionOpen;
-    case '!':
-      return Type::Comment;
-    case '>':
-      return Type::Partial;
-    case '&':
-      return Type::UnescapeVariable;
-    case '=':
-      return Type::SetDelimiter;
+    pak_sa '#':
+      ပြန်ပေး Type::SectionOpen;
+    pak_sa '/':
+      ပြန်ပေး Type::SectionClose;
+    pak_sa '^':
+      ပြန်ပေး Type::InvertSectionOpen;
+    pak_sa '!':
+      ပြန်ပေး Type::Comment;
+    pak_sa '>':
+      ပြန်ပေး Type::Partial;
+    pak_sa '&':
+      ပြန်ပေး Type::UnescapeVariable;
+    pak_sa '=':
+      ပြန်ပေး Type::SetDelimiter;
     default:
-      return Type::Variable;
+      ပြန်ပေး Type::Variable;
     }
   }
 
@@ -177,11 +177,11 @@ public:
   size_t Indentation;
 };
 
-using EscapeMap = DenseMap<char, std::string>;
+using EscapeMap = DenseMap<var_na, std::string>;
 
 class ASTNode : public ilist_node<ASTNode> {
 public:
-  enum Type {
+  ga_nanaa Type {
     Root,
     Text,
     Partial,
@@ -249,17 +249,17 @@ private:
 
 // A wrapper for arena allocator for ASTNodes
 static AstPtr createRootNode(MustacheContext &Ctx) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
+  ပြန်ပေး new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
 }
 
 static AstPtr createNode(MustacheContext &Ctx, ASTNode::Type T,
                          ArrayRef<StringRef> A, ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
+  ပြန်ပေး new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
 }
 
 static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
                              ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
+  ပြန်ပေး new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
 }
 
 // Function to check if there is meaningful text behind.
@@ -275,37 +275,37 @@ static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
 // For example:
 //  "{{#Section}}"
 static bool hasTextBehind(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx == 0)
-    return true;
+  အကယ်၍ (Idx == 0)
+    ပြန်ပေး true;
 
   size_t PrevIdx = Idx - 1;
-  if (Tokens[PrevIdx].getType() != Token::Type::Text)
-    return true;
+  အကယ်၍ (Tokens[PrevIdx].getType() != Token::Type::Text)
+    ပြန်ပေး true;
 
   const Token &PrevToken = Tokens[PrevIdx];
   StringRef TokenBody = StringRef(PrevToken.RawBody).rtrim(" \r\t\v");
-  return !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
+  ပြန်ပေး !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
 }
 
 // Function to check if there's no meaningful text ahead.
 // We determine if a token has text ahead if the left of previous
 // token does not start with a newline.
 static bool hasTextAhead(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx >= Tokens.size() - 1)
-    return true;
+  အကယ်၍ (Idx >= Tokens.size() - 1)
+    ပြန်ပေး true;
 
   size_t NextIdx = Idx + 1;
-  if (Tokens[NextIdx].getType() != Token::Type::Text)
-    return true;
+  အကယ်၍ (Tokens[NextIdx].getType() != Token::Type::Text)
+    ပြန်ပေး true;
 
   const Token &NextToken = Tokens[NextIdx];
   StringRef TokenBody = StringRef(NextToken.RawBody).ltrim(" ");
-  return !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
+  ပြန်ပေး !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
 }
 
 static bool requiresCleanUp(Token::Type T) {
   // We must clean up all the tokens that could contain child nodes.
-  return T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
+  ပြန်ပေး T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
          T == Token::Type::SectionClose || T == Token::Type::Comment ||
          T == Token::Type::Partial || T == Token::Type::SetDelimiter;
 }
@@ -320,9 +320,9 @@ static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
   Token &NextToken = Tokens[Idx + 1];
   StringRef NextTokenBody = NextToken.TokenBody;
   // Cut off the leading newline which could be \n or \r\n.
-  if (NextTokenBody.starts_with("\r\n"))
+  အကယ်၍ (NextTokenBody.starts_with("\r\n"))
     NextToken.TokenBody = NextTokenBody.substr(2);
-  else if (NextTokenBody.starts_with("\n"))
+  မဟုတ်ပါက အကယ်၍ (NextTokenBody.starts_with("\n"))
     NextToken.TokenBody = NextTokenBody.substr(1);
 }
 
@@ -342,8 +342,8 @@ void stripTokenBefore(SmallVectorImpl<Token> &Tokens, size_t Idx,
   CurrentToken.setIndentation(Indentation);
 }
 
-struct Tag {
-  enum class Kind {
+sa_nracanaa Tag {
+  ga_nanaa class Kind {
     None,
     Normal, // {{...}}
     Triple, // {{{...}}}
@@ -355,32 +355,32 @@ struct Tag {
   size_t StartPosition = StringRef::npos;
 };
 
-[[maybe_unused]] static const char *tagKindToString(Tag::Kind K) {
+[[maybe_unused]] static const var_na *tagKindToString(Tag::Kind K) {
   switch (K) {
-  case Tag::Kind::None:
-    return "None";
-  case Tag::Kind::Normal:
-    return "Normal";
-  case Tag::Kind::Triple:
-    return "Triple";
+  pak_sa Tag::Kind::None:
+    ပြန်ပေး "None";
+  pak_sa Tag::Kind::Normal:
+    ပြန်ပေး "Normal";
+  pak_sa Tag::Kind::Triple:
+    ပြန်ပေး "Triple";
   }
   llvm_unreachable("Unknown Tag::Kind");
 }
 
-[[maybe_unused]] static const char *jsonKindToString(json::Value::Kind K) {
+[[maybe_unused]] static const var_na *jsonKindToString(json::Value::Kind K) {
   switch (K) {
-  case json::Value::Kind::Null:
-    return "JSON_KIND_NULL";
-  case json::Value::Kind::Boolean:
-    return "JSON_KIND_BOOLEAN";
-  case json::Value::Kind::Number:
-    return "JSON_KIND_NUMBER";
-  case json::Value::Kind::String:
-    return "JSON_KIND_STRING";
-  case json::Value::Kind::Array:
-    return "JSON_KIND_ARRAY";
-  case json::Value::Kind::Object:
-    return "JSON_KIND_OBJECT";
+  pak_sa json::Value::Kind::Null:
+    ပြန်ပေး "JSON_KIND_NULL";
+  pak_sa json::Value::Kind::Boolean:
+    ပြန်ပေး "JSON_KIND_BOOLEAN";
+  pak_sa json::Value::Kind::Number:
+    ပြန်ပေး "JSON_KIND_NUMBER";
+  pak_sa json::Value::Kind::String:
+    ပြန်ပေး "JSON_KIND_STRING";
+  pak_sa json::Value::Kind::Array:
+    ပြန်ပေး "JSON_KIND_ARRAY";
+  pak_sa json::Value::Kind::Object:
+    ပြန်ပေး "JSON_KIND_OBJECT";
   }
   llvm_unreachable("Unknown json::Value::Kind");
 }
@@ -397,37 +397,37 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   const StringLiteral TripleOpen("{{{");
   const StringLiteral TripleClose("}}}");
 
-  while (Cursor < Template.size()) {
+  နေစဉ် (Cursor < Template.size()) {
     StringRef TemplateSuffix = Template.substr(Cursor);
     StringRef TagOpen, TagClose;
     Tag::Kind Kind;
 
     // Determine which tag we've encountered.
-    if (TemplateSuffix.starts_with(TripleOpen)) {
+    အကယ်၍ (TemplateSuffix.starts_with(TripleOpen)) {
       Kind = Tag::Kind::Triple;
       TagOpen = TripleOpen;
       TagClose = TripleClose;
-    } else if (TemplateSuffix.starts_with(Open)) {
+    } မဟုတ်ပါက အကယ်၍ (TemplateSuffix.starts_with(Open)) {
       Kind = Tag::Kind::Normal;
       TagOpen = Open;
       TagClose = Close;
-    } else {
+    } မဟုတ်ပါက {
       // Not at a tag, continue scanning.
       ++Cursor;
       continue;
     }
 
     // Found a tag, first add the preceding text.
-    if (Cursor > TextStart)
+    အကယ်၍ (Cursor > TextStart)
       Tokens.emplace_back(Template.slice(TextStart, Cursor));
 
     // Find the closing tag.
     size_t EndPos = Template.find(TagClose, Cursor + TagOpen.size());
-    if (EndPos == StringRef::npos) {
+    အကယ်၍ (EndPos == StringRef::npos) {
       // No closing tag, the rest is text.
       Tokens.emplace_back(Template.substr(Cursor));
       TextStart = Cursor = Template.size();
-      break;
+      bha_nga;
     }
 
     // Extract tag content and full match.
@@ -439,18 +439,18 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
     // Process the tag (inlined logic from processTag).
     LLVM_DEBUG(dbgs() << "[Tag] " << FullMatch << ", Content: " << Content
                       << ", Kind: " << tagKindToString(Kind) << "\n");
-    if (Kind == Tag::Kind::Triple) {
+    အကယ်၍ (Kind == Tag::Kind::Triple) {
       Tokens.emplace_back(FullMatch, Ctx.Saver.save("&" + Content), '&', Ctx);
-    } else { // Normal Tag
+    } မဟုတ်ပါက { // Normal Tag
       StringRef Interpolated = Content;
-      if (!Interpolated.trim().starts_with("=")) {
-        char Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
+      အကယ်၍ (!Interpolated.trim().starts_with("=")) {
+        var_na Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
         Tokens.emplace_back(FullMatch, Interpolated, Front, Ctx);
-      } else { // Set Delimiter
+      } မဟုတ်ပါက { // Set Delimiter
         Tokens.emplace_back(FullMatch, Interpolated, '=', Ctx);
         StringRef DelimSpec = Interpolated.trim();
         DelimSpec = DelimSpec.drop_front(1);
-        DelimSpec = DelimSpec.take_until([](char C) { return C == '='; });
+        DelimSpec = DelimSpec.take_until([](var_na C) { ပြန်ပေး C == '='; });
         DelimSpec = DelimSpec.trim();
 
         auto [NewOpen, NewClose] = DelimSpec.split(' ');
@@ -467,27 +467,27 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   }
 
   // Add any remaining text after the last tag.
-  if (TextStart < Template.size())
+  အကယ်၍ (TextStart < Template.size())
     Tokens.emplace_back(Template.substr(TextStart));
 
   // Fix up white spaces for standalone tags.
   size_t LastIdx = Tokens.size() - 1;
-  for (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
+  အတွက် (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
     Token &CurrentToken = Tokens[Idx];
     Token::Type CurrentType = CurrentToken.getType();
-    if (!requiresCleanUp(CurrentType))
+    အကယ်၍ (!requiresCleanUp(CurrentType))
       continue;
 
     bool HasTextBehind = hasTextBehind(Idx, Tokens);
     bool HasTextAhead = hasTextAhead(Idx, Tokens);
 
-    if ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
+    အကယ်၍ ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
       stripTokenAhead(Tokens, Idx);
 
-    if ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
+    အကယ်၍ ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
       stripTokenBefore(Tokens, Idx, CurrentToken, CurrentType);
   }
-  return Tokens;
+  ပြန်ပေး Tokens;
 }
 
 // Custom stream to escape strings.
@@ -500,22 +500,22 @@ public:
     SetUnbuffered();
   }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
+rak_sita:
+  void write_impl(const var_na *Ptr, size_t Size) override {
     StringRef Data(Ptr, Size);
     size_t Start = 0;
-    while (Start < Size) {
+    နေစဉ် (Start < Size) {
       // Find the next character that needs to be escaped.
       size_t Next = Data.find_first_of(EscapeChars.str(), Start);
 
       // If no escapable characters are found, write the rest of the string.
-      if (Next == StringRef::npos) {
+      အကယ်၍ (Next == StringRef::npos) {
         WrappedStream << Data.substr(Start);
-        return;
+        ပြန်ပေး;
       }
 
       // Write the chunk of text before the escapable character.
-      if (Next > Start)
+      အကယ်၍ (Next > Start)
         WrappedStream << Data.substr(Start, Next - Start);
 
       // Look up and write the escaped version of the character.
@@ -524,7 +524,7 @@ protected:
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() const override { ပြန်ပေး WrappedStream.tell(); }
 
 private:
   EscapeMap &Escape;
@@ -545,27 +545,27 @@ public:
   void suspendIndentation() override { IsSuspended = true; }
   void resumeIndentation() override { IsSuspended = false; }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
+rak_sita:
+  void write_impl(const var_na *Ptr, size_t Size) override {
     llvm::StringRef Data(Ptr, Size);
     SmallString<0> Indent;
     Indent.resize(Indentation, ' ');
 
-    for (char C : Data) {
+    အတွက် (var_na C : Data) {
       LLVM_DEBUG(dbgs() << "[Indentation Stream] NeedsIndent:" << NeedsIndent
                         << ", C:'" << C << "', Indentation:" << Indentation
                         << "\n");
-      if (NeedsIndent && C != '\n') {
+      အကယ်၍ (NeedsIndent && C != '\n') {
         WrappedStream << Indent;
         NeedsIndent = false;
       }
       WrappedStream << C;
-      if (C == '\n' && !IsSuspended)
+      အကယ်၍ (C == '\n' && !IsSuspended)
         NeedsIndent = true;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() const override { ပြန်ပေး WrappedStream.tell(); }
 
 private:
   size_t Indentation;
@@ -599,12 +599,12 @@ void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
   const size_t End = CurrentPtr - 1;
 
   size_t RawBodySize = 0;
-  for (size_t I = Start; I < End; ++I)
+  အတွက် (size_t I = Start; I < End; ++I)
     RawBodySize += Tokens[I].RawBody.size();
 
   SmallString<128> RawBody;
   RawBody.reserve(RawBodySize);
-  for (std::size_t I = Start; I < End; ++I)
+  အတွက် (std::size_t I = Start; I < End; ++I)
     RawBody += Tokens[I].RawBody;
 
   CurrentNode->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
@@ -616,52 +616,52 @@ AstPtr Parser::parse() {
   CurrentPtr = 0;
   AstPtr RootNode = createRootNode(Ctx);
   parseMustache(RootNode);
-  return RootNode;
+  ပြန်ပေး RootNode;
 }
 
 void Parser::parseMustache(ASTNode *Parent) {
 
-  while (CurrentPtr < Tokens.size()) {
+  နေစဉ် (CurrentPtr < Tokens.size()) {
     Token CurrentToken = Tokens[CurrentPtr];
     CurrentPtr++;
     ArrayRef<StringRef> A = CurrentToken.getAccessor();
     AstPtr CurrentNode;
 
     switch (CurrentToken.getType()) {
-    case Token::Type::Text: {
+    pak_sa Token::Type::Text: {
       CurrentNode = createTextNode(Ctx, CurrentToken.TokenBody, Parent);
       Parent->addChild(CurrentNode);
-      break;
+      bha_nga;
     }
-    case Token::Type::Variable: {
+    pak_sa Token::Type::Variable: {
       CurrentNode = createNode(Ctx, ASTNode::Variable, A, Parent);
       Parent->addChild(CurrentNode);
-      break;
+      bha_nga;
     }
-    case Token::Type::UnescapeVariable: {
+    pak_sa Token::Type::UnescapeVariable: {
       CurrentNode = createNode(Ctx, ASTNode::UnescapeVariable, A, Parent);
       Parent->addChild(CurrentNode);
-      break;
+      bha_nga;
     }
-    case Token::Type::Partial: {
+    pak_sa Token::Type::Partial: {
       CurrentNode = createNode(Ctx, ASTNode::Partial, A, Parent);
       CurrentNode->setIndentation(CurrentToken.getIndentation());
       Parent->addChild(CurrentNode);
-      break;
+      bha_nga;
     }
-    case Token::Type::SectionOpen: {
+    pak_sa Token::Type::SectionOpen: {
       parseSection(Parent, ASTNode::Section, A);
-      break;
+      bha_nga;
     }
-    case Token::Type::InvertSectionOpen: {
+    pak_sa Token::Type::InvertSectionOpen: {
       parseSection(Parent, ASTNode::InvertSection, A);
-      break;
+      bha_nga;
     }
-    case Token::Type::Comment:
-    case Token::Type::SetDelimiter:
-      break;
-    case Token::Type::SectionClose:
-      return;
+    pak_sa Token::Type::Comment:
+    pak_sa Token::Type::SetDelimiter:
+      bha_nga;
+    pak_sa Token::Type::SectionClose:
+      ပြန်ပေး;
     }
   }
 }
@@ -670,31 +670,31 @@ static void toMustacheString(const json::Value &Data, raw_ostream &OS) {
                     << jsonKindToString(Data.kind()) << ", Data: " << Data
                     << "\n");
   switch (Data.kind()) {
-  case json::Value::Null:
-    return;
-  case json::Value::Number: {
+  pak_sa json::Value::Null:
+    ပြန်ပေး;
+  pak_sa json::Value::Number: {
     auto Num = *Data.getAsNumber();
     std::ostringstream SS;
     SS << Num;
     OS << SS.str();
-    return;
+    ပြန်ပေး;
   }
-  case json::Value::String: {
+  pak_sa json::Value::String: {
     OS << *Data.getAsString();
-    return;
+    ပြန်ပေး;
   }
 
-  case json::Value::Array: {
+  pak_sa json::Value::Array: {
     auto Arr = *Data.getAsArray();
-    if (Arr.empty())
-      return;
+    အကယ်၍ (Arr.empty())
+      ပြန်ပေး;
     [[fallthrough]];
   }
-  case json::Value::Object:
-  case json::Value::Boolean: {
+  pak_sa json::Value::Object:
+  pak_sa json::Value::Boolean: {
     llvm::json::OStream JOS(OS, 2);
     JOS.value(Data);
-    break;
+    bha_nga;
   }
   }
 }
@@ -711,16 +711,16 @@ void ASTNode::renderPartial(const json::Value &CurrentCtx,
   LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << AccessorValue[0]
                     << ", Indentation:" << Indentation << "\n");
   auto Partial = Ctx.Partials.find(AccessorValue[0]);
-  if (Partial != Ctx.Partials.end())
+  အကယ်၍ (Partial != Ctx.Partials.end())
     renderPartial(CurrentCtx, OS, Partial->getValue());
 }
 
 void ASTNode::renderVariable(const json::Value &CurrentCtx,
                              MustacheOutputStream &OS) {
   auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
+  အကယ်၍ (Lambda != Ctx.Lambdas.end()) {
     renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  } မဟုတ်ပါက အကယ်၍ (const json::Value *ContextPtr = findContext()) {
     EscapeStringStream ES(OS, Ctx.Escapes);
     toMustacheString(*ContextPtr, ES);
   }
@@ -731,9 +731,9 @@ void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
   LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << AccessorValue[0]
                     << "\n");
   auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
+  အကယ်၍ (Lambda != Ctx.Lambdas.end()) {
     renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  } မဟုတ်ပါက အကယ်၍ (const json::Value *ContextPtr = findContext()) {
     OS.suspendIndentation();
     toMustacheString(*ContextPtr, OS);
     OS.resumeIndentation();
@@ -743,19 +743,19 @@ void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
 void ASTNode::renderSection(const json::Value &CurrentCtx,
                             MustacheOutputStream &OS) {
   auto SectionLambda = Ctx.SectionLambdas.find(AccessorValue[0]);
-  if (SectionLambda != Ctx.SectionLambdas.end()) {
+  အကယ်၍ (SectionLambda != Ctx.SectionLambdas.end()) {
     renderSectionLambdas(CurrentCtx, OS, SectionLambda->getValue());
-    return;
+    ပြန်ပေး;
   }
 
   const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr))
-    return;
+  အကယ်၍ (isContextFalsey(ContextPtr))
+    ပြန်ပေး;
 
-  if (const json::Array *Arr = ContextPtr->getAsArray()) {
-    for (const json::Value &V : *Arr)
+  အကယ်၍ (const json::Array *Arr = ContextPtr->getAsArray()) {
+    အတွက် (const json::Value &V : *Arr)
       renderChild(V, OS);
-    return;
+    ပြန်ပေး;
   }
   renderChild(*ContextPtr, OS);
 }
@@ -764,40 +764,40 @@ void ASTNode::renderInvertSection(const json::Value &CurrentCtx,
                                   MustacheOutputStream &OS) {
   bool IsLambda = Ctx.SectionLambdas.contains(AccessorValue[0]);
   const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr) && !IsLambda) {
+  အကယ်၍ (isContextFalsey(ContextPtr) && !IsLambda) {
     renderChild(CurrentCtx, OS);
   }
 }
 
 void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
-  if (Ty != Root && Ty != Text && AccessorValue.empty())
-    return;
+  အကယ်၍ (Ty != Root && Ty != Text && AccessorValue.empty())
+    ပြန်ပေး;
   // Set the parent context to the incoming context so that we
   // can walk up the context tree correctly in findContext().
   ParentContext = &Data;
 
   switch (Ty) {
-  case Root:
+  pak_sa Root:
     renderRoot(Data, OS);
-    return;
-  case Text:
+    ပြန်ပေး;
+  pak_sa Text:
     renderText(OS);
-    return;
-  case Partial:
+    ပြန်ပေး;
+  pak_sa Partial:
     renderPartial(Data, OS);
-    return;
-  case Variable:
+    ပြန်ပေး;
+  pak_sa Variable:
     renderVariable(Data, OS);
-    return;
-  case UnescapeVariable:
+    ပြန်ပေး;
+  pak_sa UnescapeVariable:
     renderUnescapeVariable(Data, OS);
-    return;
-  case Section:
+    ပြန်ပေး;
+  pak_sa Section:
     renderSection(Data, OS);
-    return;
-  case InvertSection:
+    ပြန်ပေး;
+  pak_sa InvertSection:
     renderInvertSection(Data, OS);
-    return;
+    ပြန်ပေး;
   }
   llvm_unreachable("Invalid ASTNode type");
 }
@@ -808,42 +808,42 @@ const json::Value *ASTNode::findContext() {
   // We attempt to find the JSON context in the current node, if it is not
   // found, then we traverse the parent nodes to find the context until we
   // reach the root node or the context is found.
-  if (AccessorValue.empty())
-    return nullptr;
-  if (AccessorValue[0] == ".")
-    return ParentContext;
+  အကယ်၍ (AccessorValue.empty())
+    ပြန်ပေး nullptr;
+  အကယ်၍ (AccessorValue[0] == ".")
+    ပြန်ပေး ParentContext;
 
   const json::Object *CurrentContext = ParentContext->getAsObject();
   StringRef CurrentAccessor = AccessorValue[0];
   ASTNode *CurrentParent = Parent;
 
-  while (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
-    if (CurrentParent->Ty != Root) {
+  နေစဉ် (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
+    အကယ်၍ (CurrentParent->Ty != Root) {
       CurrentContext = CurrentParent->ParentContext->getAsObject();
       CurrentParent = CurrentParent->Parent;
       continue;
     }
-    return nullptr;
+    ပြန်ပေး nullptr;
   }
   const json::Value *Context = nullptr;
-  for (auto [Idx, Acc] : enumerate(AccessorValue)) {
+  အတွက် (auto [Idx, Acc] : enumerate(AccessorValue)) {
     const json::Value *CurrentValue = CurrentContext->get(Acc);
-    if (!CurrentValue)
-      return nullptr;
-    if (Idx < AccessorValue.size() - 1) {
+    အကယ်၍ (!CurrentValue)
+      ပြန်ပေး nullptr;
+    အကယ်၍ (Idx < AccessorValue.size() - 1) {
       CurrentContext = CurrentValue->getAsObject();
-      if (!CurrentContext)
-        return nullptr;
-    } else {
+      အကယ်၍ (!CurrentContext)
+        ပြန်ပေး nullptr;
+    } မဟုတ်ပါက {
       Context = CurrentValue;
     }
   }
-  return Context;
+  ပြန်ပေး Context;
 }
 
 void ASTNode::renderChild(const json::Value &Contexts,
                           MustacheOutputStream &OS) {
-  for (ASTNode &Child : Children)
+  အတွက် (ASTNode &Child : Children)
     Child.render(Contexts, OS);
 }
 
@@ -864,9 +864,9 @@ void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
   AstPtr LambdaNode = P.parse();
 
   EscapeStringStream ES(OS, Ctx.Escapes);
-  if (Ty == Variable) {
+  အကယ်၍ (Ty == Variable) {
     LambdaNode->render(Contexts, ES);
-    return;
+    ပြန်ပေး;
   }
   LambdaNode->render(Contexts, OS);
 }
@@ -874,8 +874,8 @@ void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
 void ASTNode::renderSectionLambdas(const llvm::json::Value &Contexts,
                                    MustacheOutputStream &OS, SectionLambda &L) {
   json::Value Return = L(RawBody.str());
-  if (isFalsey(Return))
-    return;
+  အကယ်၍ (isFalsey(Return))
+    ပြန်ပေး;
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(Return, Output);

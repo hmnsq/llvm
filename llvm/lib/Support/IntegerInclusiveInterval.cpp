@@ -23,48 +23,48 @@ using namespace llvm;
 
 namespace llvm::IntegerInclusiveIntervalUtils {
 
-Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
+Expected<IntervalList> parseIntervals(StringRef Str, var_na Separator) {
   IntervalList Intervals;
 
-  if (Str.empty())
-    return std::move(Intervals);
+  အကယ်၍ (Str.empty())
+    ပြန်ပေး std::move(Intervals);
 
   // Regex to match either single number or interval "num1-num2".
   const Regex IntervalRegex("^([0-9]+)(-([0-9]+))?$");
 
-  for (StringRef Part : llvm::split(Str, Separator)) {
+  အတွက် (StringRef Part : llvm::split(Str, Separator)) {
     Part = Part.trim();
-    if (Part.empty())
+    အကယ်၍ (Part.empty())
       continue;
 
     SmallVector<StringRef, 4> Matches;
-    if (!IntervalRegex.match(Part, &Matches))
-      return createStringError(std::errc::invalid_argument,
+    အကယ်၍ (!IntervalRegex.match(Part, &Matches))
+      ပြန်ပေး createStringError(std::errc::invalid_argument,
                                "Invalid interval format: '%s'",
                                Part.str().c_str());
 
     int64_t Begin, End;
-    if (Matches[1].getAsInteger(10, Begin))
-      return createStringError(std::errc::invalid_argument,
+    အကယ်၍ (Matches[1].getAsInteger(10, Begin))
+      ပြန်ပေး createStringError(std::errc::invalid_argument,
                                "Failed to parse number: '%s'",
                                Matches[1].str().c_str());
 
-    if (!Matches[3].empty()) {
+    အကယ်၍ (!Matches[3].empty()) {
       // Interval format "begin-end".
-      if (Matches[3].getAsInteger(10, End))
-        return createStringError(std::errc::invalid_argument,
+      အကယ်၍ (Matches[3].getAsInteger(10, End))
+        ပြန်ပေး createStringError(std::errc::invalid_argument,
                                  "Failed to parse number: '%s'",
                                  Matches[3].str().c_str());
-      if (Begin >= End)
-        return createStringError(std::errc::invalid_argument,
+      အကယ်၍ (Begin >= End)
+        ပြန်ပေး createStringError(std::errc::invalid_argument,
                                  "Invalid interval: %lld >= %lld", Begin, End);
-    } else
+    } မဟုတ်ပါက
       // Single number.
       End = Begin;
 
     // Check ordering constraint (intervals must be in increasing order).
-    if (!Intervals.empty() && Begin <= Intervals.back().getEnd())
-      return createStringError(
+    အကယ်၍ (!Intervals.empty() && Begin <= Intervals.back().getEnd())
+      ပြန်ပေး createStringError(
           std::errc::invalid_argument,
           "Expected intervals to be in increasing order: %lld <= %lld", Begin,
           Intervals.back().getEnd());
@@ -72,28 +72,28 @@ Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
     Intervals.push_back(IntegerInclusiveInterval(Begin, End));
   }
 
-  return Intervals;
+  ပြန်ပေး Intervals;
 }
 
 bool contains(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t Value) {
-  for (const IntegerInclusiveInterval &It : Intervals) {
-    if (It.contains(Value))
-      return true;
+  အတွက် (const IntegerInclusiveInterval &It : Intervals) {
+    အကယ်၍ (It.contains(Value))
+      ပြန်ပေး true;
   }
-  return false;
+  ပြန်ပေး false;
 }
 
 void printIntervals(raw_ostream &OS,
                     ArrayRef<IntegerInclusiveInterval> Intervals,
-                    char Separator) {
-  if (Intervals.empty()) {
+                    var_na Separator) {
+  အကယ်၍ (Intervals.empty()) {
     OS << "empty";
-    return;
+    ပြန်ပေး;
   }
 
   std::string Sep(1, Separator);
   ListSeparator LS(Sep);
-  for (const IntegerInclusiveInterval &It : Intervals) {
+  အတွက် (const IntegerInclusiveInterval &It : Intervals) {
     OS << LS;
     It.print(OS);
   }
@@ -101,25 +101,25 @@ void printIntervals(raw_ostream &OS,
 
 IntervalList
 mergeAdjacentIntervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
-  if (Intervals.empty())
-    return {};
+  အကယ်၍ (Intervals.empty())
+    ပြန်ပေး {};
 
   IntervalList Result;
   Result.push_back(Intervals[0]);
 
-  for (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
+  အတွက် (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
     IntegerInclusiveInterval &Last = Result.back();
     // Check if current interval is adjacent to the last merged interval.
-    if (Current.getBegin() == Last.getEnd() + 1) {
+    အကယ်၍ (Current.getBegin() == Last.getEnd() + 1) {
       // Merge by extending the end of the last interval.
       Last.setEnd(Current.getEnd());
-    } else {
+    } မဟုတ်ပါက {
       // Not adjacent, add as separate interval.
       Result.push_back(Current);
     }
   }
 
-  return Result;
+  ပြန်ပေး Result;
 }
 
 } // end namespace llvm::IntegerInclusiveIntervalUtils

@@ -50,7 +50,7 @@ public:
   StringRef findRule(unsigned LineNo) const;
 
 private:
-  struct Reg {
+  sa_nracanaa Reg {
     Reg(StringRef Name, unsigned LineNo, Regex &&Rg)
         : Name(Name), LineNo(LineNo), Rg(std::move(Rg)) {}
     StringRef Name;
@@ -68,7 +68,7 @@ public:
   StringRef findRule(unsigned LineNo) const;
 
 private:
-  struct Glob {
+  sa_nracanaa Glob {
     Glob(StringRef Name, unsigned LineNo, GlobPattern &&Pattern)
         : Name(Name), LineNo(LineNo), Pattern(std::move(Pattern)) {}
     StringRef Name;
@@ -82,17 +82,17 @@ private:
 
   mutable RadixTree<iterator_range<StringRef::const_iterator>,
                     RadixTree<iterator_range<StringRef::const_reverse_iterator>,
-                              SmallVector<int, 1>>>
+                              SmallVector<ကိန်းပြည့်, 1>>>
       PrefixSuffixToGlob;
 
   mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    SmallVector<int, 1>>
+                    SmallVector<ကိန်းပြည့်, 1>>
       SubstrToGlob;
 
   mutable bool Initialized = false;
 };
 
-struct QueryOptions {
+sa_nracanaa QueryOptions {
   bool UseGlobs = true;
   bool RemoveDotSlash = false;
   bool WarnDotSlashMatch = false;
@@ -107,7 +107,7 @@ public:
   Error insert(StringRef Pattern, unsigned LineNumber);
   unsigned match(StringRef Query) const;
 
-  bool matchAny(StringRef Query) const { return match(Query); }
+  bool matchAny(StringRef Query) const { ပြန်ပေး match(Query); }
 
 private:
   unsigned matchInternal(StringRef Query) const;
@@ -120,13 +120,13 @@ private:
 
 Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
                            bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument,
+  အကယ်၍ (Pattern.empty())
+    ပြန်ပေး createStringError(errc::invalid_argument,
                              "Supplied regex was blank");
 
   // Replace * with .*
   auto Regexp = Pattern.str();
-  for (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
+  အတွက် (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
        pos += strlen(".*")) {
     Regexp.replace(pos, strlen("*"), ".*");
   }
@@ -136,54 +136,54 @@ Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
   // Check that the regexp is valid.
   Regex CheckRE(Regexp);
   std::string REError;
-  if (!CheckRE.isValid(REError))
-    return createStringError(errc::invalid_argument, REError);
+  အကယ်၍ (!CheckRE.isValid(REError))
+    ပြန်ပေး createStringError(errc::invalid_argument, REError);
 
   RegExes.emplace_back(Pattern, LineNumber, std::move(CheckRE));
-  return Error::success();
+  ပြန်ပေး Error::success();
 }
 
 unsigned RegexMatcher::match(StringRef Query) const {
-  for (const auto &R : reverse(RegExes))
-    if (R.Rg.match(Query))
-      return R.LineNo;
-  return 0;
+  အတွက် (const auto &R : reverse(RegExes))
+    အကယ်၍ (R.Rg.match(Query))
+      ပြန်ပေး R.LineNo;
+  ပြန်ပေး 0;
 }
 
 StringRef RegexMatcher::findRule(unsigned LineNo) const {
-  for (const auto &R : RegExes)
-    if (R.LineNo == LineNo)
-      return R.Name;
+  အတွက် (const auto &R : RegExes)
+    အကယ်၍ (R.LineNo == LineNo)
+      ပြန်ပေး R.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  ပြန်ပေး {};
 }
 
 Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
                           bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument, "Supplied glob was blank");
+  အကယ်၍ (Pattern.empty())
+    ပြန်ပေး createStringError(errc::invalid_argument, "Supplied glob was blank");
 
   auto Res =
       GlobPattern::create(Pattern, /*MaxSubPatterns=*/1024, SlashAgnostic);
-  if (auto Err = Res.takeError())
-    return Err;
+  အကယ်၍ (auto Err = Res.takeError())
+    ပြန်ပေး Err;
   Globs.emplace_back(Pattern, LineNumber, std::move(Res.get()));
-  return Error::success();
+  ပြန်ပေး Error::success();
 }
 
 void GlobMatcher::LazyInit() const {
-  if (LLVM_LIKELY(Initialized))
-    return;
+  အကယ်၍ (LLVM_LIKELY(Initialized))
+    ပြန်ပေး;
   Initialized = true;
-  for (const auto &[Idx, G] : enumerate(Globs)) {
+  အတွက် (const auto &[Idx, G] : enumerate(Globs)) {
     StringRef Prefix = G.Pattern.prefix();
     StringRef Suffix = G.Pattern.suffix();
 
-    if (Suffix.empty() && Prefix.empty()) {
+    အကယ်၍ (Suffix.empty() && Prefix.empty()) {
       // If both prefix and suffix are empty put into special tree to search by
       // substring in a middle.
       StringRef Substr = G.Pattern.longest_substr();
-      if (!Substr.empty()) {
+      အကယ်၍ (!Substr.empty()) {
         // But only if substring is not empty. Searching this tree is more
         // expensive.
         auto &V = SubstrToGlob.emplace(Substr).first->second;
@@ -201,70 +201,70 @@ void GlobMatcher::LazyInit() const {
 unsigned GlobMatcher::match(StringRef Query) const {
   LazyInit();
 
-  int Best = -1;
-  if (!PrefixSuffixToGlob.empty()) {
-    for (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
-      for (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
-            break;
+  ကိန်းပြည့် Best = -1;
+  အကယ်၍ (!PrefixSuffixToGlob.empty()) {
+    အတွက် (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
+      အတွက် (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
+        အတွက် (ကိန်းပြည့် Idx : reverse(V)) {
+          အကယ်၍ (Best > Idx)
+            bha_nga;
           const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
+          အကယ်၍ (G.Pattern.match(Query)) {
             Best = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
             // prefix group. However, we continue searching other prefix groups
             // in the map, as they may contain a better match overall.
-            break;
+            bha_nga;
           }
         }
       }
     }
   }
 
-  if (!SubstrToGlob.empty()) {
+  အကယ်၍ (!SubstrToGlob.empty()) {
     // As we don't know when substring exactly starts, we will try all
     // possibilities. In most cases search will fail on first characters.
-    for (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
-      for (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
-            break;
+    အတွက် (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
+      အတွက် (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
+        အတွက် (ကိန်းပြည့် Idx : reverse(V)) {
+          အကယ်၍ (Best > Idx)
+            bha_nga;
           const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
+          အကယ်၍ (G.Pattern.match(Query)) {
             Best = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
             // prefix group. However, we continue searching other prefix groups
             // in the map, as they may contain a better match overall.
-            break;
+            bha_nga;
           }
         }
       }
     }
   }
-  return Best < 0 ? 0 : Globs[Best].LineNo;
+  ပြန်ပေး Best < 0 ? 0 : Globs[Best].LineNo;
 }
 
 StringRef GlobMatcher::findRule(unsigned LineNo) const {
-  for (const auto &G : Globs)
-    if (G.LineNo == LineNo)
-      return G.Name;
+  အတွက် (const auto &G : Globs)
+    အကယ်၍ (G.LineNo == LineNo)
+      ပြန်ပေး G.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  ပြန်ပေး {};
 }
 
 Matcher::Matcher(QueryOptions QOpts) : Options(QOpts) {
-  if (Options.UseGlobs)
+  အကယ်၍ (Options.UseGlobs)
     M.emplace<GlobMatcher>();
-  else
+  မဟုတ်ပါက
     M.emplace<RegexMatcher>();
 }
 
 Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
-  return std::visit(
+  ပြန်ပေး std::visit(
       [&](auto &V) {
-        return V.insert(Pattern, LineNumber, Options.SlashAgnostic);
+        ပြန်ပေး V.insert(Pattern, LineNumber, Options.SlashAgnostic);
       },
       M);
 }
@@ -282,19 +282,19 @@ Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
 //   If a match only works with the old behavior (non-canonicalized), a warning
 //   is emitted.
 unsigned Matcher::match(StringRef Query) const {
-  if (!Options.RemoveDotSlash)
-    return matchInternal(Query);
+  အကယ်၍ (!Options.RemoveDotSlash)
+    ပြန်ပေး matchInternal(Query);
 
-  if (!Options.WarnDotSlashMatch)
-    return matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
+  အကယ်၍ (!Options.WarnDotSlashMatch)
+    ပြန်ပေး matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
 
   StringRef FixedQuery = llvm::sys::path::remove_leading_dotslash(Query);
   unsigned FixedMatched = matchInternal(FixedQuery);
-  if (FixedQuery == Query)
-    return FixedMatched;
+  အကယ်၍ (FixedQuery == Query)
+    ပြန်ပေး FixedMatched;
 
   unsigned OriginalMatch = matchInternal(Query);
-  if (OriginalMatch > FixedMatched) {
+  အကယ်၍ (OriginalMatch > FixedMatched) {
     std::call_once(Warned, [&]() {
       WithColor::warning() << "Deprecated behaviour: pattern '"
                            << findRule(OriginalMatch) << "' matches '" << Query
@@ -302,15 +302,15 @@ unsigned Matcher::match(StringRef Query) const {
                            << "' instead (further warnings suppressed).\n";
     });
   }
-  return std::max(OriginalMatch, FixedMatched);
+  ပြန်ပေး std::max(OriginalMatch, FixedMatched);
 }
 
 unsigned Matcher::matchInternal(StringRef Query) const {
-  return std::visit([&](auto &V) -> unsigned { return V.match(Query); }, M);
+  ပြန်ပေး std::visit([&](auto &V) -> unsigned { ပြန်ပေး V.match(Query); }, M);
 }
 
 StringRef Matcher::findRule(unsigned LineNo) const {
-  return std::visit([&](auto &V) -> StringRef { return V.findRule(LineNo); },
+  ပြန်ပေး std::visit([&](auto &V) -> StringRef { ပြန်ပေး V.findRule(LineNo); },
                     M);
 }
 } // namespace
@@ -332,52 +332,52 @@ std::unique_ptr<SpecialCaseList>
 SpecialCaseList::create(const std::vector<std::string> &Paths,
                         llvm::vfs::FileSystem &FS, std::string &Error) {
   std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(Paths, FS, Error))
-    return SCL;
-  return nullptr;
+  အကယ်၍ (SCL->createInternal(Paths, FS, Error))
+    ပြန်ပေး SCL;
+  ပြန်ပေး nullptr;
 }
 
 std::unique_ptr<SpecialCaseList> SpecialCaseList::create(const MemoryBuffer *MB,
                                                          std::string &Error) {
   std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(MB, Error))
-    return SCL;
-  return nullptr;
+  အကယ်၍ (SCL->createInternal(MB, Error))
+    ပြန်ပေး SCL;
+  ပြန်ပေး nullptr;
 }
 
 std::unique_ptr<SpecialCaseList>
 SpecialCaseList::createOrDie(const std::vector<std::string> &Paths,
                              llvm::vfs::FileSystem &FS) {
   std::string Error;
-  if (auto SCL = create(Paths, FS, Error))
-    return SCL;
+  အကယ်၍ (auto SCL = create(Paths, FS, Error))
+    ပြန်ပေး SCL;
   report_fatal_error(Twine(Error));
 }
 
 bool SpecialCaseList::createInternal(const std::vector<std::string> &Paths,
                                      vfs::FileSystem &VFS, std::string &Error) {
-  for (size_t i = 0; i < Paths.size(); ++i) {
+  အတွက် (size_t i = 0; i < Paths.size(); ++i) {
     const auto &Path = Paths[i];
     ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
         VFS.getBufferForFile(Path);
-    if (std::error_code EC = FileOrErr.getError()) {
+    အကယ်၍ (std::error_code EC = FileOrErr.getError()) {
       Error = (Twine("can't open file '") + Path + "': " + EC.message()).str();
-      return false;
+      ပြန်ပေး false;
     }
     std::string ParseError;
-    if (!parse(i, FileOrErr.get().get(), ParseError)) {
+    အကယ်၍ (!parse(i, FileOrErr.get().get(), ParseError)) {
       Error = (Twine("error parsing file '") + Path + "': " + ParseError).str();
-      return false;
+      ပြန်ပေး false;
     }
   }
-  return true;
+  ပြန်ပေး true;
 }
 
 bool SpecialCaseList::createInternal(const MemoryBuffer *MB,
                                      std::string &Error) {
-  if (!parse(0, MB, Error))
-    return false;
-  return true;
+  အကယ်၍ (!parse(0, MB, Error))
+    ပြန်ပေး false;
+  ပြန်ပေး true;
 }
 
 Expected<SpecialCaseList::Section *>
@@ -387,14 +387,14 @@ SpecialCaseList::addSection(StringRef SectionStr, unsigned FileNo,
   Sections.emplace_back(SectionStr, FileNo, UseGlobs);
   auto &Section = Sections.back();
 
-  if (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
-    return createStringError(errc::invalid_argument,
+  အကယ်၍ (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
+    ပြန်ပေး createStringError(errc::invalid_argument,
                              "malformed section at line " + Twine(LineNo) +
                                  ": '" + SectionStr +
                                  "': " + toString(std::move(Err)));
   }
 
-  return &Section;
+  ပြန်ပေး &Section;
 }
 
 bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
@@ -402,10 +402,10 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   unsigned long long Version = 2;
 
   StringRef Header = MB->getBuffer();
-  if (Header.consume_front("#!special-case-list-v"))
+  အကယ်၍ (Header.consume_front("#!special-case-list-v"))
     consumeUnsignedInteger(Header, 10, Version);
 
-  auto MinVersion = [&](unsigned V) { return Version >= V; };
+  auto MinVersion = [&](unsigned V) { ပြန်ပေး Version >= V; };
 
   // In https://reviews.llvm.org/D154014 we added glob support and planned
   // to remove regex support in patterns. We temporarily support the
@@ -426,9 +426,9 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
                                             llvm::sys::path::Style::native);
 
   auto ErrOrSection = addSection("*", FileIdx, 1, true);
-  if (auto Err = ErrOrSection.takeError()) {
+  အကယ်၍ (auto Err = ErrOrSection.takeError()) {
     Error = toString(std::move(Err));
-    return false;
+    ပြန်ပေး false;
   }
   Section::SectionImpl *CurrentImpl = ErrOrSection.get()->Impl.get();
 
@@ -436,27 +436,27 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   // path. We may need parametrization in constructor in future.
   constexpr StringRef PathPrefixes[] = {"src", "!src", "mainfile", "source"};
 
-  for (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
+  အတွက် (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
        !LineIt.is_at_eof(); LineIt++) {
     unsigned LineNo = LineIt.line_number();
     StringRef Line = LineIt->trim();
-    if (Line.empty())
+    အကယ်၍ (Line.empty())
       continue;
 
     // Save section names
-    if (Line.starts_with("[")) {
-      if (!Line.ends_with("]")) {
+    အကယ်၍ (Line.starts_with("[")) {
+      အကယ်၍ (!Line.ends_with("]")) {
         Error =
             ("malformed section header on line " + Twine(LineNo) + ": " + Line)
                 .str();
-        return false;
+        ပြန်ပေး false;
       }
 
       auto ErrOrSection =
           addSection(Line.drop_front().drop_back(), FileIdx, LineNo, UseGlobs);
-      if (auto Err = ErrOrSection.takeError()) {
+      အကယ်၍ (auto Err = ErrOrSection.takeError()) {
         Error = toString(std::move(Err));
-        return false;
+        ပြန်ပေး false;
       }
       CurrentImpl = ErrOrSection.get()->Impl.get();
       continue;
@@ -464,15 +464,15 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
 
     // Get our prefix and unparsed glob.
     auto [Prefix, Postfix] = Line.split(":");
-    if (Postfix.empty()) {
+    အကယ်၍ (Postfix.empty()) {
       // Missing ':' in the line.
       Error = ("malformed line " + Twine(LineNo) + ": '" + Line + "'").str();
-      return false;
+      ပြန်ပေး false;
     }
 
     QueryOptions QOpts;
     QOpts.UseGlobs = UseGlobs;
-    if (llvm::is_contained(PathPrefixes, Prefix)) {
+    အကယ်၍ (llvm::is_contained(PathPrefixes, Prefix)) {
       QOpts.RemoveDotSlash = RemoveDotSlash;
       QOpts.WarnDotSlashMatch = WarnDotSlash;
       QOpts.SlashAgnostic = SlashAgnostic;
@@ -481,16 +481,16 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
     auto [Pattern, Category] = Postfix.split("=");
     auto [It, _] = CurrentImpl->Entries[Prefix].try_emplace(Category, QOpts);
     Pattern = Pattern.copy(StrAlloc);
-    if (auto Err = It->second.insert(Pattern, LineNo)) {
+    အကယ်၍ (auto Err = It->second.insert(Pattern, LineNo)) {
       Error =
           (Twine("malformed ") + (UseGlobs ? "glob" : "regex") + " in line " +
            Twine(LineNo) + ": '" + Pattern + "': " + toString(std::move(Err)))
               .str();
-      return false;
+      ပြန်ပေး false;
     }
   }
 
-  return true;
+  ပြန်ပေး true;
 }
 
 SpecialCaseList::~SpecialCaseList() = default;
@@ -498,20 +498,20 @@ SpecialCaseList::~SpecialCaseList() = default;
 bool SpecialCaseList::inSection(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
   auto [FileIdx, LineNo] = inSectionBlame(Section, Prefix, Query, Category);
-  return LineNo;
+  ပြန်ပေး LineNo;
 }
 
 std::pair<unsigned, unsigned>
 SpecialCaseList::inSectionBlame(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
-  for (const auto &S : reverse(Sections)) {
-    if (S.Impl->SectionMatcher.matchAny(Section)) {
+  အတွက် (const auto &S : reverse(Sections)) {
+    အကယ်၍ (S.Impl->SectionMatcher.matchAny(Section)) {
       unsigned Blame = S.getLastMatch(Prefix, Query, Category);
-      if (Blame)
-        return {S.FileIdx, Blame};
+      အကယ်၍ (Blame)
+        ပြန်ပေး {S.FileIdx, Blame};
     }
   }
-  return NotFound;
+  ပြန်ပေး NotFound;
 }
 
 SpecialCaseList::Section::Section(StringRef Str, unsigned FileIdx,
@@ -525,32 +525,32 @@ SpecialCaseList::Section::Section(Section &&) = default;
 SpecialCaseList::Section::~Section() = default;
 
 bool SpecialCaseList::Section::matchName(StringRef Name) const {
-  return Impl->SectionMatcher.matchAny(Name);
+  ပြန်ပေး Impl->SectionMatcher.matchAny(Name);
 }
 
 const Matcher *
 SpecialCaseList::Section::SectionImpl::findMatcher(StringRef Prefix,
                                                    StringRef Category) const {
   SectionEntries::const_iterator I = Entries.find(Prefix);
-  if (I == Entries.end())
-    return nullptr;
+  အကယ်၍ (I == Entries.end())
+    ပြန်ပေး nullptr;
   StringMap<Matcher>::const_iterator II = I->second.find(Category);
-  if (II == I->second.end())
-    return nullptr;
+  အကယ်၍ (II == I->second.end())
+    ပြန်ပေး nullptr;
 
-  return &II->second;
+  ပြန်ပေး &II->second;
 }
 
 unsigned SpecialCaseList::Section::getLastMatch(StringRef Prefix,
                                                 StringRef Query,
                                                 StringRef Category) const {
-  if (const Matcher *M = Impl->findMatcher(Prefix, Category))
-    return M->match(Query);
-  return 0;
+  အကယ်၍ (const Matcher *M = Impl->findMatcher(Prefix, Category))
+    ပြန်ပေး M->match(Query);
+  ပြန်ပေး 0;
 }
 
 bool SpecialCaseList::Section::hasPrefix(StringRef Prefix) const {
-  return Impl->Entries.contains(Prefix);
+  ပြန်ပေး Impl->Entries.contains(Prefix);
 }
 
 } // namespace llvm

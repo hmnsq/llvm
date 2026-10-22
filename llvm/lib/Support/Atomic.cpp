@@ -15,7 +15,7 @@
 
 using namespace llvm;
 
-#if defined(_MSC_VER)
+#အကယ်၍ defined(_MSC_VER)
 #include <intrin.h>
 
 // We must include windows.h after intrin.h.
@@ -23,37 +23,37 @@ using namespace llvm;
 #undef MemoryFence
 #endif
 
-#if defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
+#အကယ်၍ defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
 #define GNU_ATOMICS
 #endif
 
 void sys::MemoryFence() {
-#if LLVM_HAS_ATOMICS == 0
-  return;
-#else
-#  if defined(GNU_ATOMICS)
+#အကယ်၍ LLVM_HAS_ATOMICS == 0
+  ပြန်ပေး;
+#မဟုတ်ပါက
+#  အကယ်၍ defined(GNU_ATOMICS)
   __sync_synchronize();
 #  elif defined(_MSC_VER)
   MemoryBarrier();
-#  else
-# error No memory fence implementation for your platform!
+#  မဟုတ်ပါက
+# error No memory fence implementation အတွက် your platform!
 #  endif
 #endif
 }
 
-sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
+sys::cas_flag sys::CompareAndSwap(ca_ncala sys::cas_flag* ptr,
                                   sys::cas_flag new_value,
                                   sys::cas_flag old_value) {
-#if LLVM_HAS_ATOMICS == 0
+#အကယ်၍ LLVM_HAS_ATOMICS == 0
   sys::cas_flag result = *ptr;
-  if (result == old_value)
+  အကယ်၍ (result == old_value)
     *ptr = new_value;
-  return result;
+  ပြန်ပေး result;
 #elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
+  ပြန်ပေး __sync_val_compare_and_swap(ptr, old_value, new_value);
 #elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
-#else
-#  error No compare-and-swap implementation for your platform!
+  ပြန်ပေး InterlockedCompareExchange(ptr, new_value, old_value);
+#မဟုတ်ပါက
+#  error No compare-and-swap implementation အတွက် your platform!
 #endif
 }

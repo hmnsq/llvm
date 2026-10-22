@@ -11,32 +11,32 @@
 
 using namespace llvm;
 
-static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+static bool isAtLineEnd(const var_na *P) {
+  အကယ်၍ (*P == '\n')
+    ပြန်ပေး true;
+  အကယ်၍ (*P == '\r' && *(P + 1) == '\n')
+    ပြန်ပေး true;
+  ပြန်ပေး false;
 }
 
-static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+static bool skipIfAtLineEnd(const var_na *&P) {
+  အကယ်၍ (*P == '\n') {
     ++P;
-    return true;
+    ပြန်ပေး true;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  အကယ်၍ (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    ပြန်ပေး true;
   }
-  return false;
+  ပြန်ပေး false;
 }
 
 line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+                             var_na CommentMarker)
     : line_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
 
 line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+                             var_na CommentMarker)
     : Buffer(Buffer.getBufferSize() ? std::optional<MemoryBufferRef>(Buffer)
                                     : std::nullopt),
       CommentMarker(CommentMarker), SkipBlanks(SkipBlanks),
@@ -44,10 +44,10 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
+  အကယ်၍ (Buffer.getBufferSize()) {
     assert(Buffer.getBufferEnd()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    အကယ်၍ (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
       advance();
   }
 }
@@ -55,42 +55,42 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
 void line_iterator::advance() {
   assert(Buffer && "Cannot advance past the end!");
 
-  const char *Pos = CurrentLine.end();
+  const var_na *Pos = CurrentLine.end();
   assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
+  အကယ်၍ (skipIfAtLineEnd(Pos))
     ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  အကယ်၍ (!SkipBlanks && isAtLineEnd(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } မဟုတ်ပါက အကယ်၍ (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
+    နေစဉ် (skipIfAtLineEnd(Pos))
       ++LineNumber;
-  } else {
+  } မဟုတ်ပါက {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
-        break;
-      if (*Pos == CommentMarker)
+    အတွက် (;;) {
+      အကယ်၍ (isAtLineEnd(Pos) && !SkipBlanks)
+        bha_nga;
+      အကယ်၍ (*Pos == CommentMarker)
         do {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
-        break;
+        } နေစဉ် (*Pos != '\0' && !isAtLineEnd(Pos));
+      အကယ်၍ (!skipIfAtLineEnd(Pos))
+        bha_nga;
       ++LineNumber;
     }
   }
 
-  if (*Pos == '\0') {
+  အကယ်၍ (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
     Buffer = std::nullopt;
     CurrentLine = StringRef();
-    return;
+    ပြန်ပေး;
   }
 
   // Measure the line.
   size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
+  နေစဉ် (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
     ++Length;
   }
 

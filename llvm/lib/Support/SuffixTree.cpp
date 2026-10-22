@@ -20,10 +20,10 @@ using namespace llvm;
 /// \returns the number of elements in the substring associated with \p N.
 static size_t numElementsInSubstring(const SuffixTreeNode *N) {
   assert(N && "Got a null node?");
-  if (auto *Internal = dyn_cast<SuffixTreeInternalNode>(N))
-    if (Internal->isRoot())
-      return 0;
-  return N->getEndIdx() - N->getStartIdx() + 1;
+  အကယ်၍ (auto *Internal = dyn_cast<SuffixTreeInternalNode>(N))
+    အကယ်၍ (Internal->isRoot())
+      ပြန်ပေး 0;
+  ပြန်ပေး N->getEndIdx() - N->getStartIdx() + 1;
 }
 
 SuffixTree::SuffixTree(const ArrayRef<unsigned> &Str,
@@ -39,7 +39,7 @@ SuffixTree::SuffixTree(const ArrayRef<unsigned> &Str,
   // Construct the suffix tree iteratively on each prefix of the string.
   // PfxEndIdx is the end index of the current prefix.
   // End is one past the last element in the string.
-  for (unsigned PfxEndIdx = 0, End = Str.size(); PfxEndIdx < End; PfxEndIdx++) {
+  အတွက် (unsigned PfxEndIdx = 0, End = Str.size(); PfxEndIdx < End; PfxEndIdx++) {
     SuffixesToAdd++;
     LeafEndIdx = PfxEndIdx; // Extend each of the leaves.
     SuffixesToAdd = extend(PfxEndIdx, SuffixesToAdd);
@@ -51,7 +51,7 @@ SuffixTree::SuffixTree(const ArrayRef<unsigned> &Str,
 
   // Collect all leaf nodes of the suffix tree. And for each internal node,
   // record the range of leaf nodes that are descendants of it.
-  if (OutlinerLeafDescendants)
+  အကယ်၍ (OutlinerLeafDescendants)
     setLeafNodes();
 }
 
@@ -61,7 +61,7 @@ SuffixTreeNode *SuffixTree::insertLeaf(SuffixTreeInternalNode &Parent,
   auto *N = new (LeafNodeAllocator.Allocate())
       SuffixTreeLeafNode(StartIdx, &LeafEndIdx);
   Parent.Children[Edge] = N;
-  return N;
+  ပြန်ပေး N;
 }
 
 SuffixTreeInternalNode *
@@ -73,13 +73,13 @@ SuffixTree::insertInternalNode(SuffixTreeInternalNode *Parent,
          "Non-root internal nodes must have parents!");
   auto *N = new (InternalNodeAllocator.Allocate())
       SuffixTreeInternalNode(StartIdx, EndIdx, Root);
-  if (Parent)
+  အကယ်၍ (Parent)
     Parent->Children[Edge] = N;
-  return N;
+  ပြန်ပေး N;
 }
 
 SuffixTreeInternalNode *SuffixTree::insertRoot() {
-  return insertInternalNode(/*Parent = */ nullptr, SuffixTreeNode::EmptyIdx,
+  ပြန်ပေး insertInternalNode(/*Parent = */ nullptr, SuffixTreeNode::EmptyIdx,
                             SuffixTreeNode::EmptyIdx, /*Edge = */ 0);
 }
 
@@ -94,19 +94,19 @@ void SuffixTree::setSuffixIndices() {
   // Sum of the lengths of the nodes down the path to the current one.
   unsigned CurrNodeLen = 0;
   ToVisit.push_back({CurrNode, CurrNodeLen});
-  while (!ToVisit.empty()) {
+  နေစဉ် (!ToVisit.empty()) {
     std::tie(CurrNode, CurrNodeLen) = ToVisit.pop_back_val();
     // Length of the current node from the root down to here.
     CurrNode->setConcatLen(CurrNodeLen);
-    if (auto *InternalNode = dyn_cast<SuffixTreeInternalNode>(CurrNode))
-      for (auto &ChildPair : InternalNode->Children) {
+    အကယ်၍ (auto *InternalNode = dyn_cast<SuffixTreeInternalNode>(CurrNode))
+      အတွက် (auto &ChildPair : InternalNode->Children) {
         assert(ChildPair.second && "Node had a null child!");
         ToVisit.push_back(
             {ChildPair.second,
              CurrNodeLen + numElementsInSubstring(ChildPair.second)});
       }
     // No children, so we are at the end of the string.
-    if (auto *LeafNode = dyn_cast<SuffixTreeLeafNode>(CurrNode))
+    အကယ်၍ (auto *LeafNode = dyn_cast<SuffixTreeLeafNode>(CurrNode))
       LeafNode->setSuffixIdx(Str.size() - CurrNodeLen);
   }
 }
@@ -127,28 +127,28 @@ void SuffixTree::setLeafNodes() {
       ChildrenMap;
 
   // Traverse the tree in post-order.
-  while (!ToVisit.empty()) {
+  နေစဉ် (!ToVisit.empty()) {
     SuffixTreeNode *CurrNode = ToVisit.pop_back_val();
-    if (auto *CurrInternalNode = dyn_cast<SuffixTreeInternalNode>(CurrNode)) {
+    အကယ်၍ (auto *CurrInternalNode = dyn_cast<SuffixTreeInternalNode>(CurrNode)) {
       // The current node is an internal node.
       auto I = ChildrenMap.find(CurrInternalNode);
-      if (I == ChildrenMap.end()) {
+      အကယ်၍ (I == ChildrenMap.end()) {
         // This is the first time we visit this node.
         // Its children have not been added to the stack yet.
         // We add current node back, and add its children to the stack.
         // We keep track of the first and last children of the current node.
         auto J = CurrInternalNode->Children.begin();
-        if (J != CurrInternalNode->Children.end()) {
+        အကယ်၍ (J != CurrInternalNode->Children.end()) {
           ToVisit.push_back(CurrNode);
           SuffixTreeNode *FirstChild = J->second;
           SuffixTreeNode *LastChild = nullptr;
-          for (; J != CurrInternalNode->Children.end(); ++J) {
+          အတွက် (; J != CurrInternalNode->Children.end(); ++J) {
             LastChild = J->second;
             ToVisit.push_back(LastChild);
           }
           ChildrenMap[CurrInternalNode] = {FirstChild, LastChild};
         }
-      } else {
+      } မဟုတ်ပါက {
         // This is the second time we visit this node.
         // All of its children have already been processed.
         // Now, we can set its LeftLeafIdx and RightLeafIdx;
@@ -163,7 +163,7 @@ void SuffixTree::setLeafNodes() {
         assert(CurrNode->getLeftLeafIdx() <= CurrNode->getRightLeafIdx() &&
                "LeftLeafIdx should not be larger than RightLeafIdx");
       }
-    } else {
+    } မဟုတ်ပါက {
       // The current node is a leaf node.
       // We can simply set its LeftLeafIdx and RightLeafIdx.
       CurrNode->setLeftLeafIdx(LeafCounter);
@@ -178,10 +178,10 @@ void SuffixTree::setLeafNodes() {
 unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
   SuffixTreeInternalNode *NeedsLink = nullptr;
 
-  while (SuffixesToAdd > 0) {
+  နေစဉ် (SuffixesToAdd > 0) {
 
     // Are we waiting to add anything other than just the last character?
-    if (Active.Len == 0) {
+    အကယ်၍ (Active.Len == 0) {
       // If not, then say the active index is the end index.
       Active.Idx = EndIdx;
     }
@@ -192,18 +192,18 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
     unsigned FirstChar = Str[Active.Idx];
 
     // Have we inserted anything starting with FirstChar at the current node?
-    if (auto It = Active.Node->Children.find(FirstChar);
+    အကယ်၍ (auto It = Active.Node->Children.find(FirstChar);
         It == Active.Node->Children.end()) {
       // If not, then we can just insert a leaf and move to the next step.
       insertLeaf(*Active.Node, EndIdx, FirstChar);
 
       // The active node is an internal node, and we visited it, so it must
       // need a link if it doesn't have one.
-      if (NeedsLink) {
+      အကယ်၍ (NeedsLink) {
         NeedsLink->setLink(Active.Node);
         NeedsLink = nullptr;
       }
-    } else {
+    } မဟုတ်ပါက {
       // There's a match with FirstChar, so look for the point in the tree to
       // insert a new node.
       SuffixTreeNode *NextNode = It->second;
@@ -212,7 +212,7 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
 
       // Is the current suffix we're trying to insert longer than the size of
       // the child we want to move to?
-      if (Active.Len >= SubstringLen) {
+      အကယ်၍ (Active.Len >= SubstringLen) {
         // If yes, then consume the characters we've seen and move to the next
         // node.
         assert(isa<SuffixTreeInternalNode>(NextNode) &&
@@ -228,17 +228,17 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
       unsigned LastChar = Str[EndIdx];
 
       // Is the string we're trying to insert a substring of the next node?
-      if (Str[NextNode->getStartIdx() + Active.Len] == LastChar) {
+      အကယ်၍ (Str[NextNode->getStartIdx() + Active.Len] == LastChar) {
         // If yes, then we're done for this step. Remember our insertion point
         // and move to the next end index. At this point, we have an implicit
         // suffix tree.
-        if (NeedsLink && !Active.Node->isRoot()) {
+        အကယ်၍ (NeedsLink && !Active.Node->isRoot()) {
           NeedsLink->setLink(Active.Node);
           NeedsLink = nullptr;
         }
 
         Active.Len++;
-        break;
+        bha_nga;
       }
 
       // The string we're trying to insert isn't a substring of the next node,
@@ -269,7 +269,7 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
       SplitNode->Children[Str[NextNode->getStartIdx()]] = NextNode;
 
       // SplitNode is an internal node, update the suffix link.
-      if (NeedsLink)
+      အကယ်၍ (NeedsLink)
         NeedsLink->setLink(SplitNode);
 
       NeedsLink = SplitNode;
@@ -279,18 +279,18 @@ unsigned SuffixTree::extend(unsigned EndIdx, unsigned SuffixesToAdd) {
     // add.
     SuffixesToAdd--;
 
-    if (Active.Node->isRoot()) {
-      if (Active.Len > 0) {
+    အကယ်၍ (Active.Node->isRoot()) {
+      အကယ်၍ (Active.Len > 0) {
         Active.Len--;
         Active.Idx = EndIdx - SuffixesToAdd + 1;
       }
-    } else {
+    } မဟုတ်ပါက {
       // Start the next phase at the next smallest suffix.
       Active.Node = Active.Node->getLink();
     }
   }
 
-  return SuffixesToAdd;
+  ပြန်ပေး SuffixesToAdd;
 }
 
 void SuffixTree::RepeatedSubstringIterator::advance() {
@@ -303,7 +303,7 @@ void SuffixTree::RepeatedSubstringIterator::advance() {
   SmallVector<unsigned> RepeatedSubstringStarts;
 
   // Continue visiting nodes until we find one which repeats more than once.
-  while (!InternalNodesToVisit.empty()) {
+  နေစဉ် (!InternalNodesToVisit.empty()) {
     RepeatedSubstringStarts.clear();
     auto *Curr = InternalNodesToVisit.pop_back_val();
 
@@ -313,41 +313,41 @@ void SuffixTree::RepeatedSubstringIterator::advance() {
 
     // Iterate over each child, saving internal nodes for visiting.
     // Internal nodes represent individual strings, which may repeat.
-    for (auto &ChildPair : Curr->Children)
+    အတွက် (auto &ChildPair : Curr->Children)
       // Save all of this node's children for processing.
-      if (auto *InternalChild =
+      အကယ်၍ (auto *InternalChild =
               dyn_cast<SuffixTreeInternalNode>(ChildPair.second))
         InternalNodesToVisit.push_back(InternalChild);
 
     // If length of repeated substring is below threshold, then skip it.
-    if (Length < MinLength)
+    အကယ်၍ (Length < MinLength)
       continue;
 
     // The root never represents a repeated substring. If we're looking at
     // that, then skip it.
-    if (Curr->isRoot())
+    အကယ်၍ (Curr->isRoot())
       continue;
 
     // Collect leaf children or leaf descendants by OutlinerLeafDescendants.
-    if (OutlinerLeafDescendants) {
-      for (unsigned I = Curr->getLeftLeafIdx(); I <= Curr->getRightLeafIdx();
+    အကယ်၍ (OutlinerLeafDescendants) {
+      အတွက် (unsigned I = Curr->getLeftLeafIdx(); I <= Curr->getRightLeafIdx();
            ++I)
         RepeatedSubstringStarts.push_back(LeafNodes[I]->getSuffixIdx());
-    } else {
-      for (auto &ChildPair : Curr->Children)
-        if (auto *Leaf = dyn_cast<SuffixTreeLeafNode>(ChildPair.second))
+    } မဟုတ်ပါက {
+      အတွက် (auto &ChildPair : Curr->Children)
+        အကယ်၍ (auto *Leaf = dyn_cast<SuffixTreeLeafNode>(ChildPair.second))
           RepeatedSubstringStarts.push_back(Leaf->getSuffixIdx());
     }
 
     // Do we have any repeated substrings?
-    if (RepeatedSubstringStarts.size() < 2)
+    အကယ်၍ (RepeatedSubstringStarts.size() < 2)
       continue;
 
     // Yes. Update the state to reflect this, and then bail out.
     N = Curr;
     RS.Length = Length;
     llvm::append_range(RS.StartIndices, RepeatedSubstringStarts);
-    break;
+    bha_nga;
   }
   // At this point, either NewRS is an empty RepeatedSubstring, or it was
   // set in the above loop. Similarly, N is either nullptr, or the node

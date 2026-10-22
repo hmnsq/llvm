@@ -20,14 +20,14 @@ using namespace llvm;
 
 namespace {
 
-struct Plugins {
+sa_nracanaa Plugins {
   sys::SmartMutex<true> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
   static Plugins P;
-  return P;
+  ပြန်ပေး P;
 }
 
 } // anonymous namespace
@@ -36,10 +36,10 @@ void PluginLoader::operator=(const std::string &Filename) {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  အကယ်၍ (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
+  } မဟုတ်ပါက {
     P.List.push_back(Filename);
   }
 }
@@ -47,12 +47,12 @@ void PluginLoader::operator=(const std::string &Filename) {
 unsigned PluginLoader::getNumPlugins() {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  ပြန်ပေး P.List.size();
 }
 
 std::string &PluginLoader::getPlugin(unsigned num) {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
   assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  ပြန်ပေး P.List[num];
 }

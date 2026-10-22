@@ -24,116 +24,116 @@ std::string VersionTuple::getAsString() const {
     llvm::raw_string_ostream Out(Result);
     Out << *this;
   }
-  return Result;
+  ပြန်ပေး Result;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   Out << V.getMajor();
-  if (std::optional<unsigned> Minor = V.getMinor())
+  အကယ်၍ (std::optional<unsigned> Minor = V.getMinor())
     Out << '.' << *Minor;
-  if (std::optional<unsigned> Subminor = V.getSubminor())
+  အကယ်၍ (std::optional<unsigned> Subminor = V.getSubminor())
     Out << '.' << *Subminor;
-  if (std::optional<unsigned> Build = V.getBuild())
+  အကယ်၍ (std::optional<unsigned> Build = V.getBuild())
     Out << '.' << *Build;
-  if (std::optional<unsigned> Subbuild = V.getSubbuild())
+  အကယ်၍ (std::optional<unsigned> Subbuild = V.getSubbuild())
     Out << '.' << *Subbuild;
-  return Out;
+  ပြန်ပေး Out;
 }
 
 static bool parseInt(StringRef &input, unsigned &value) {
   assert(value == 0);
-  if (input.empty())
-    return true;
+  အကယ်၍ (input.empty())
+    ပြန်ပေး true;
 
-  char next = input[0];
+  var_na next = input[0];
   input = input.substr(1);
-  if (next < '0' || next > '9')
-    return true;
+  အကယ်၍ (next < '0' || next > '9')
+    ပြန်ပေး true;
   value = (unsigned)(next - '0');
 
-  while (!input.empty()) {
+  နေစဉ် (!input.empty()) {
     next = input[0];
-    if (next < '0' || next > '9')
-      return false;
+    အကယ်၍ (next < '0' || next > '9')
+      ပြန်ပေး false;
     input = input.substr(1);
     value = value * 10 + (unsigned)(next - '0');
   }
 
-  return false;
+  ပြန်ပေး false;
 }
 
 bool VersionTuple::tryParse(StringRef input) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
-    return true;
+  အကယ်၍ (parseInt(input, major))
+    ပြန်ပေး true;
 
-  if (input.empty()) {
+  အကယ်၍ (input.empty()) {
     *this = VersionTuple(major);
-    return false;
+    ပြန်ပေး false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
-    return true;
+  အကယ်၍ (input[0] != '.')
+    ပြန်ပေး true;
   input = input.substr(1);
-  if (parseInt(input, minor))
-    return true;
+  အကယ်၍ (parseInt(input, minor))
+    ပြန်ပေး true;
 
-  if (input.empty()) {
+  အကယ်၍ (input.empty()) {
     *this = VersionTuple(major, minor);
-    return false;
+    ပြန်ပေး false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subminor))
-    return true;
+  အကယ်၍ (!input.consume_front("."))
+    ပြန်ပေး true;
+  အကယ်၍ (parseInt(input, subminor))
+    ပြန်ပေး true;
 
-  if (input.empty()) {
+  အကယ်၍ (input.empty()) {
     *this = VersionTuple(major, minor, subminor);
-    return false;
+    ပြန်ပေး false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, build))
-    return true;
-  if (build >= 1024 * 1024)
-    return true;
+  အကယ်၍ (!input.consume_front("."))
+    ပြန်ပေး true;
+  အကယ်၍ (parseInt(input, build))
+    ပြန်ပေး true;
+  အကယ်၍ (build >= 1024 * 1024)
+    ပြန်ပေး true;
 
-  if (input.empty()) {
+  အကယ်၍ (input.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
-    return false;
+    ပြန်ပေး false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
-    return true;
-  if (parseInt(input, subbuild))
-    return true;
-  if (subbuild >= 1024)
-    return true;
+  အကယ်၍ (!input.consume_front("."))
+    ပြန်ပေး true;
+  အကယ်၍ (parseInt(input, subbuild))
+    ပြန်ပေး true;
+  အကယ်၍ (subbuild >= 1024)
+    ပြန်ပေး true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
-    return true;
+  အကယ်၍ (!input.empty())
+    ပြန်ပေး true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);
-  return false;
+  ပြန်ပေး false;
 }
 
 VersionTuple VersionTuple::withMajorReplaced(unsigned NewMajor) const {
-  if (HasSubbuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
-  if (HasBuild)
-    return VersionTuple(NewMajor, Minor, Subminor, Build);
-  if (HasSubminor)
-    return VersionTuple(NewMajor, Minor, Subminor);
-  if (HasMinor)
-    return VersionTuple(NewMajor, Minor);
-  return VersionTuple(NewMajor);
+  အကယ်၍ (HasSubbuild)
+    ပြန်ပေး VersionTuple(NewMajor, Minor, Subminor, Build, Subbuild);
+  အကယ်၍ (HasBuild)
+    ပြန်ပေး VersionTuple(NewMajor, Minor, Subminor, Build);
+  အကယ်၍ (HasSubminor)
+    ပြန်ပေး VersionTuple(NewMajor, Minor, Subminor);
+  အကယ်၍ (HasMinor)
+    ပြန်ပေး VersionTuple(NewMajor, Minor);
+  ပြန်ပေး VersionTuple(NewMajor);
 }

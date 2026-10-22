@@ -13,49 +13,49 @@ using namespace llvm;
 
 FPClassTest llvm::fneg(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcNegInf)
+  အကယ်၍ (Mask & fcNegInf)
     NewMask |= fcPosInf;
-  if (Mask & fcNegNormal)
+  အကယ်၍ (Mask & fcNegNormal)
     NewMask |= fcPosNormal;
-  if (Mask & fcNegSubnormal)
+  အကယ်၍ (Mask & fcNegSubnormal)
     NewMask |= fcPosSubnormal;
-  if (Mask & fcNegZero)
+  အကယ်၍ (Mask & fcNegZero)
     NewMask |= fcPosZero;
-  if (Mask & fcPosZero)
+  အကယ်၍ (Mask & fcPosZero)
     NewMask |= fcNegZero;
-  if (Mask & fcPosSubnormal)
+  အကယ်၍ (Mask & fcPosSubnormal)
     NewMask |= fcNegSubnormal;
-  if (Mask & fcPosNormal)
+  အကယ်၍ (Mask & fcPosNormal)
     NewMask |= fcNegNormal;
-  if (Mask & fcPosInf)
+  အကယ်၍ (Mask & fcPosInf)
     NewMask |= fcNegInf;
-  return NewMask;
+  ပြန်ပေး NewMask;
 }
 
 FPClassTest llvm::inverse_fabs(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcPosZero)
+  အကယ်၍ (Mask & fcPosZero)
     NewMask |= fcZero;
-  if (Mask & fcPosSubnormal)
+  အကယ်၍ (Mask & fcPosSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcPosNormal)
+  အကယ်၍ (Mask & fcPosNormal)
     NewMask |= fcNormal;
-  if (Mask & fcPosInf)
+  အကယ်၍ (Mask & fcPosInf)
     NewMask |= fcInf;
-  return NewMask;
+  ပြန်ပေး NewMask;
 }
 
 FPClassTest llvm::unknown_sign(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcZero)
+  အကယ်၍ (Mask & fcZero)
     NewMask |= fcZero;
-  if (Mask & fcSubnormal)
+  အကယ်၍ (Mask & fcSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcNormal)
+  အကယ်၍ (Mask & fcNormal)
     NewMask |= fcNormal;
-  if (Mask & fcInf)
+  အကယ်၍ (Mask & fcInf)
     NewMask |= fcInf;
-  return NewMask;
+  ပြန်ပေး NewMask;
 }
 
 // Every bitfield has a unique name and one or more aliasing names that cover
@@ -86,14 +86,14 @@ static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
 raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   OS << '(';
 
-  if (Mask == fcNone) {
+  အကယ်၍ (Mask == fcNone) {
     OS << "none)";
-    return OS;
+    ပြန်ပေး OS;
   }
 
   ListSeparator LS(" ");
-  for (auto [BitTest, Name] : NoFPClassName) {
-    if ((Mask & BitTest) == BitTest) {
+  အတွက် (auto [BitTest, Name] : NoFPClassName) {
+    အကယ်၍ ((Mask & BitTest) == BitTest) {
       OS << LS << Name;
 
       // Clear the bits so we don't print any aliased names later.
@@ -104,17 +104,17 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   assert(Mask == 0 && "didn't print some mask bits");
 
   OS << ')';
-  return OS;
+  ပြန်ပေး OS;
 }
 
 void DenormalFPEnv::print(raw_ostream &OS, bool OmitIfSame) const {
-  if (F32Mode == DefaultMode) {
+  အကယ်၍ (F32Mode == DefaultMode) {
     DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
-    return;
+    ပြန်ပေး;
   }
 
   // Omit printing the base mode if only the f32 mode isn't the default.
-  if (DefaultMode != DenormalMode::getDefault()) {
+  အကယ်၍ (DefaultMode != DenormalMode::getDefault()) {
     DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
     OS << ", ";
   }
@@ -128,50 +128,50 @@ static bool cannotOrderStrictlyGreaterImpl(FPClassTest LHS, FPClassTest RHS,
   LHS &= ~fcNan;
   RHS &= ~fcNan;
 
-  if (LHS == fcNone || RHS == fcNone)
-    return true;
+  အကယ်၍ (LHS == fcNone || RHS == fcNone)
+    ပြန်ပေး true;
 
   FPClassTest LowestBitRHS = static_cast<FPClassTest>(RHS & -RHS);
   FPClassTest HighestBitLHS = static_cast<FPClassTest>(1 << Log2_32(LHS));
 
-  if (!OrderedZero) {
+  အကယ်၍ (!OrderedZero) {
     // Introduce conflict in zero bits if we're treating them as equal.
-    if (LowestBitRHS == fcNegZero)
+    အကယ်၍ (LowestBitRHS == fcNegZero)
       LowestBitRHS = fcPosZero;
-    if (HighestBitLHS == fcNegZero)
+    အကယ်၍ (HighestBitLHS == fcNegZero)
       HighestBitLHS = fcPosZero;
   }
 
-  if (LowestBitRHS > HighestBitLHS) {
+  အကယ်၍ (LowestBitRHS > HighestBitLHS) {
     assert((LHS & RHS) == fcNone && "no bits should intersect");
-    return true;
+    ပြန်ပေး true;
   }
 
-  if (LowestBitRHS < HighestBitLHS)
-    return false;
+  အကယ်၍ (LowestBitRHS < HighestBitLHS)
+    ပြန်ပေး false;
 
   constexpr FPClassTest ExactValuesMask = fcZero | fcInf;
-  return !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
+  ပြန်ပေး !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
 }
 
 bool llvm::cannotOrderStrictlyGreater(FPClassTest LHS, FPClassTest RHS,
                                       bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
+  ပြန်ပေး cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyGreaterEq(FPClassTest LHS, FPClassTest RHS,
                                         bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
+  ပြန်ပေး cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyLess(FPClassTest LHS, FPClassTest RHS,
                                    bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
+  ပြန်ပေး cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
 }
 
 bool llvm::cannotOrderStrictlyLessEq(FPClassTest LHS, FPClassTest RHS,
                                      bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
+  ပြန်ပေး cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
 }
 
 FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
@@ -190,9 +190,9 @@ FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is smaller
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  အကယ်၍ (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  ပြန်ပေး NewMask;
 }
 
 FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
@@ -207,7 +207,7 @@ FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is greater
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  အကယ်၍ (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  ပြန်ပေး NewMask;
 }

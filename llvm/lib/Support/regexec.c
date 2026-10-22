@@ -103,16 +103,16 @@
 #undef	SNAMES
 
 /* macros for manipulating states, large version */
-#define	states	char *
+#define	states	var_na *
 #define	CLEAR(v)	memset(v, 0, m->g->nstates)
 #define	SET0(v, n)	((v)[n] = 0)
 #define	SET1(v, n)	((v)[n] = 1)
 #define	ISSET(v, n)	((v)[n])
 #define	ASSIGN(d, s)	memmove(d, s, m->g->nstates)
 #define	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
-#define	STATEVARS	long vn; char *space
+#define	STATEVARS	long vn; var_na *space
 #define	STATESETUP(m, nv)	{ (m)->space = malloc((nv)*(m)->g->nstates); \
-				if ((m)->space == NULL) return(REG_ESPACE); \
+				အကယ်၍ ((m)->space == NULL) ပြန်ပေး(REG_ESPACE); \
 				(m)->vn = 0; }
 #define	STATETEARDOWN(m)	{ free((m)->space); }
 #define	SETUP(v)	((v) = &m->space[m->vn++ * m->g->nstates])
@@ -137,26 +137,26 @@
  * when choosing which matcher to call.  Also, by this point the matchers
  * have been prototyped.
  */
-int				/* 0 success, REG_NOMATCH failure */
-llvm_regexec(const llvm_regex_t *preg, const char *string, size_t nmatch,
-             llvm_regmatch_t pmatch[], int eflags)
+ကိန်းပြည့်				/* 0 success, REG_NOMATCH failure */
+llvm_regexec(const llvm_regex_t *preg, const var_na *string, size_t nmatch,
+             llvm_regmatch_t pmatch[], ကိန်းပြည့် eflags)
 {
-	struct re_guts *g = preg->re_g;
+	sa_nracanaa re_guts *g = preg->re_g;
 #ifdef REDEBUG
 #	define	GOODFLAGS(f)	(f)
-#else
+#မဟုတ်ပါက
 #	define	GOODFLAGS(f)	((f)&(REG_NOTBOL|REG_NOTEOL|REG_STARTEND))
 #endif
 
-	if (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
-		return(REG_BADPAT);
+	အကယ်၍ (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
+		ပြန်ပေး(REG_BADPAT);
 	assert(!(g->iflags&REGEX_BAD));
-	if (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
-		return(REG_BADPAT);
+	အကယ်၍ (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
+		ပြန်ပေး(REG_BADPAT);
 	eflags = GOODFLAGS(eflags);
 
-	if (g->nstates <= (long)(CHAR_BIT*sizeof(states1)) && !(eflags&REG_LARGE))
-		return(smatcher(g, string, nmatch, pmatch, eflags));
-	else
-		return(lmatcher(g, string, nmatch, pmatch, eflags));
+	အကယ်၍ (g->nstates <= (long)(CHAR_BIT*parimaa_na(states1)) && !(eflags&REG_LARGE))
+		ပြန်ပေး(smatcher(g, string, nmatch, pmatch, eflags));
+	မဟုတ်ပါက
+		ပြန်ပေး(lmatcher(g, string, nmatch, pmatch, eflags));
 }

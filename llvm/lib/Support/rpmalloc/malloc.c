@@ -16,23 +16,23 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if defined(__TINYC__)
+#အကယ်၍ defined(__TINYC__)
 #include <sys/types.h>
 #endif
 
 #ifndef ARCH_64BIT
-#if defined(__LLP64__) || defined(__LP64__) || defined(_WIN64)
+#အကယ်၍ defined(__LLP64__) || defined(__LP64__) || defined(_WIN64)
 #define ARCH_64BIT 1
-_Static_assert(sizeof(size_t) == 8, "Data type size mismatch");
-_Static_assert(sizeof(void *) == 8, "Data type size mismatch");
-#else
+_Static_assert(parimaa_na(size_t) == 8, "Data type size mismatch");
+_Static_assert(parimaa_na(void *) == 8, "Data type size mismatch");
+#မဟုတ်ပါက
 #define ARCH_64BIT 0
-_Static_assert(sizeof(size_t) == 4, "Data type size mismatch");
-_Static_assert(sizeof(void *) == 4, "Data type size mismatch");
+_Static_assert(parimaa_na(size_t) == 4, "Data type size mismatch");
+_Static_assert(parimaa_na(void *) == 4, "Data type size mismatch");
 #endif
 #endif
 
-#if (defined(__GNUC__) || defined(__clang__))
+#အကယ်၍ (defined(__GNUC__) || defined(__clang__))
 #pragma GCC visibility push(default)
 #endif
 
@@ -40,11 +40,11 @@ _Static_assert(sizeof(void *) == 4, "Data type size mismatch");
 #define USE_INTERPOSE 0
 #define USE_ALIAS 0
 
-#if defined(__APPLE__)
+#အကယ်၍ defined(__APPLE__)
 #undef USE_INTERPOSE
 #define USE_INTERPOSE 1
 
-typedef struct interpose_t {
+typedef sa_nracanaa interpose_t {
   void *new_func;
   void *orig_func;
 } interpose_t;
@@ -57,7 +57,7 @@ typedef struct interpose_t {
 
 #endif
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#အကယ်၍ !defined(_WIN32) && !defined(__APPLE__)
 #undef USE_IMPLEMENT
 #undef USE_ALIAS
 #define USE_IMPLEMENT 0
@@ -70,77 +70,77 @@ typedef struct interpose_t {
 #undef free
 #undef calloc
 #define RPMALLOC_RESTRICT __declspec(restrict)
-#else
+#မဟုတ်ပါက
 #define RPMALLOC_RESTRICT
 #endif
 
-#if ENABLE_OVERRIDE
+#အကယ်၍ ENABLE_OVERRIDE
 
-typedef struct rp_nothrow_t {
-  int __dummy;
+typedef sa_nracanaa rp_nothrow_t {
+  ကိန်းပြည့် __dummy;
 } rp_nothrow_t;
 
-#if USE_IMPLEMENT
+#အကယ်၍ USE_IMPLEMENT
 
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL malloc(size_t size) {
-  return rpmalloc(size);
+extern anta_hstha RPMALLOC_RESTRICT void *RPMALLOC_CDECL malloc(size_t size) {
+  ပြန်ပေး rpmalloc(size);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL calloc(size_t count,
+extern anta_hstha RPMALLOC_RESTRICT void *RPMALLOC_CDECL calloc(size_t count,
                                                             size_t size) {
-  return rpcalloc(count, size);
+  ပြန်ပေး rpcalloc(count, size);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL realloc(void *ptr,
+extern anta_hstha RPMALLOC_RESTRICT void *RPMALLOC_CDECL realloc(void *ptr,
                                                              size_t size) {
-  return rprealloc(ptr, size);
+  ပြန်ပေး rprealloc(ptr, size);
 }
-extern inline void *RPMALLOC_CDECL reallocf(void *ptr, size_t size) {
-  return rprealloc(ptr, size);
+extern anta_hstha void *RPMALLOC_CDECL reallocf(void *ptr, size_t size) {
+  ပြန်ပေး rprealloc(ptr, size);
 }
-extern inline void *RPMALLOC_CDECL aligned_alloc(size_t alignment,
+extern anta_hstha void *RPMALLOC_CDECL aligned_alloc(size_t alignment,
                                                  size_t size) {
-  return rpaligned_alloc(alignment, size);
+  ပြန်ပေး rpaligned_alloc(alignment, size);
 }
-extern inline void *RPMALLOC_CDECL memalign(size_t alignment, size_t size) {
-  return rpmemalign(alignment, size);
+extern anta_hstha void *RPMALLOC_CDECL memalign(size_t alignment, size_t size) {
+  ပြန်ပေး rpmemalign(alignment, size);
 }
-extern inline int RPMALLOC_CDECL posix_memalign(void **memptr, size_t alignment,
+extern anta_hstha ကိန်းပြည့် RPMALLOC_CDECL posix_memalign(void **memptr, size_t alignment,
                                                 size_t size) {
-  return rpposix_memalign(memptr, alignment, size);
+  ပြန်ပေး rpposix_memalign(memptr, alignment, size);
 }
-extern inline void RPMALLOC_CDECL free(void *ptr) { rpfree(ptr); }
-extern inline void RPMALLOC_CDECL cfree(void *ptr) { rpfree(ptr); }
-extern inline size_t RPMALLOC_CDECL malloc_usable_size(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+extern anta_hstha void RPMALLOC_CDECL free(void *ptr) { rpfree(ptr); }
+extern anta_hstha void RPMALLOC_CDECL cfree(void *ptr) { rpfree(ptr); }
+extern anta_hstha size_t RPMALLOC_CDECL malloc_usable_size(void *ptr) {
+  ပြန်ပေး rpmalloc_usable_size(ptr);
 }
-extern inline size_t RPMALLOC_CDECL malloc_size(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+extern anta_hstha size_t RPMALLOC_CDECL malloc_size(void *ptr) {
+  ပြန်ပေး rpmalloc_usable_size(ptr);
 }
 
 #ifdef _WIN32
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _malloc_base(size_t size) {
-  return rpmalloc(size);
+extern anta_hstha RPMALLOC_RESTRICT void *RPMALLOC_CDECL _malloc_base(size_t size) {
+  ပြန်ပေး rpmalloc(size);
 }
-extern inline void RPMALLOC_CDECL _free_base(void *ptr) { rpfree(ptr); }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _calloc_base(size_t count,
+extern anta_hstha void RPMALLOC_CDECL _free_base(void *ptr) { rpfree(ptr); }
+extern anta_hstha RPMALLOC_RESTRICT void *RPMALLOC_CDECL _calloc_base(size_t count,
                                                                   size_t size) {
-  return rpcalloc(count, size);
+  ပြန်ပေး rpcalloc(count, size);
 }
-extern inline size_t RPMALLOC_CDECL _msize(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+extern anta_hstha size_t RPMALLOC_CDECL _msize(void *ptr) {
+  ပြန်ပေး rpmalloc_usable_size(ptr);
 }
-extern inline size_t RPMALLOC_CDECL _msize_base(void *ptr) {
-  return rpmalloc_usable_size(ptr);
+extern anta_hstha size_t RPMALLOC_CDECL _msize_base(void *ptr) {
+  ပြန်ပေး rpmalloc_usable_size(ptr);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL
+extern anta_hstha RPMALLOC_RESTRICT void *RPMALLOC_CDECL
 _realloc_base(void *ptr, size_t size) {
-  return rprealloc(ptr, size);
+  ပြန်ပေး rprealloc(ptr, size);
 }
 #endif
 
 #ifdef _WIN32
 // For Windows, #include <rpnew.h> in one source file to get the C++ operator
 // overrides implemented in your module
-#else
+#မဟုတ်ပါက
 // Overload the C++ operators using the mangled names
 // (https://itanium-cxx-abi.github.io/cxx-abi/abi.html#mangling) operators
 // delete and delete[]
@@ -149,199 +149,199 @@ extern void _ZdlPv(void *p);
 void RPDEFVIS _ZdlPv(void *p) { rpfree(p); }
 extern void _ZdaPv(void *p);
 void RPDEFVIS _ZdaPv(void *p) { rpfree(p); }
-#if ARCH_64BIT
+#အကယ်၍ ARCH_64BIT
 // 64-bit operators new and new[], normal and aligned
 extern void *_Znwm(uint64_t size);
-void *RPDEFVIS _Znwm(uint64_t size) { return rpmalloc(size); }
+void *RPDEFVIS _Znwm(uint64_t size) { ပြန်ပေး rpmalloc(size); }
 extern void *_Znam(uint64_t size);
-void *RPDEFVIS _Znam(uint64_t size) { return rpmalloc(size); }
+void *RPDEFVIS _Znam(uint64_t size) { ပြန်ပေး rpmalloc(size); }
 extern void *_Znwmm(uint64_t size, uint64_t align);
 void *RPDEFVIS _Znwmm(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_Znamm(uint64_t size, uint64_t align);
 void *RPDEFVIS _Znamm(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnwmSt11align_val_t(uint64_t size, uint64_t align);
 void *RPDEFVIS _ZnwmSt11align_val_t(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnamSt11align_val_t(uint64_t size, uint64_t align);
 void *RPDEFVIS _ZnamSt11align_val_t(uint64_t size, uint64_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnwmRKSt9nothrow_t(uint64_t size, rp_nothrow_t t);
 void *RPDEFVIS _ZnwmRKSt9nothrow_t(uint64_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpmalloc(size);
 }
 extern void *_ZnamRKSt9nothrow_t(uint64_t size, rp_nothrow_t t);
 void *RPDEFVIS _ZnamRKSt9nothrow_t(uint64_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpmalloc(size);
 }
 extern void *_ZnwmSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                 rp_nothrow_t t);
 void *RPDEFVIS _ZnwmSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnamSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                 rp_nothrow_t t);
 void *RPDEFVIS _ZnamSt11align_val_tRKSt9nothrow_t(uint64_t size, uint64_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 // 64-bit operators sized delete and delete[], normal and aligned
 extern void _ZdlPvm(void *p, uint64_t size);
 void RPDEFVIS _ZdlPvm(void *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (void)parimaa_na(size);
 }
 extern void _ZdaPvm(void *p, uint64_t size);
 void RPDEFVIS _ZdaPvm(void *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (void)parimaa_na(size);
 }
 extern void _ZdlPvSt11align_val_t(void *p, uint64_t align);
 void RPDEFVIS _ZdlPvSt11align_val_t(void *p, uint64_t align) {
   rpfree(p);
-  (void)sizeof(align);
+  (void)parimaa_na(align);
 }
 extern void _ZdaPvSt11align_val_t(void *p, uint64_t align);
 void RPDEFVIS _ZdaPvSt11align_val_t(void *p, uint64_t align) {
   rpfree(p);
-  (void)sizeof(align);
+  (void)parimaa_na(align);
 }
 extern void _ZdlPvmSt11align_val_t(void *p, uint64_t size, uint64_t align);
 void RPDEFVIS _ZdlPvmSt11align_val_t(void *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (void)parimaa_na(size);
+  (void)parimaa_na(align);
 }
 extern void _ZdaPvmSt11align_val_t(void *p, uint64_t size, uint64_t align);
 void RPDEFVIS _ZdaPvmSt11align_val_t(void *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (void)parimaa_na(size);
+  (void)parimaa_na(align);
 }
-#else
+#မဟုတ်ပါက
 // 32-bit operators new and new[], normal and aligned
 extern void *_Znwj(uint32_t size);
-void *RPDEFVIS _Znwj(uint32_t size) { return rpmalloc(size); }
+void *RPDEFVIS _Znwj(uint32_t size) { ပြန်ပေး rpmalloc(size); }
 extern void *_Znaj(uint32_t size);
-void *RPDEFVIS _Znaj(uint32_t size) { return rpmalloc(size); }
+void *RPDEFVIS _Znaj(uint32_t size) { ပြန်ပေး rpmalloc(size); }
 extern void *_Znwjj(uint32_t size, uint32_t align);
 void *RPDEFVIS _Znwjj(uint32_t size, uint32_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_Znajj(uint32_t size, uint32_t align);
 void *RPDEFVIS _Znajj(uint32_t size, uint32_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnwjSt11align_val_t(size_t size, size_t align);
 void *RPDEFVIS _ZnwjSt11align_val_t(size_t size, size_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnajSt11align_val_t(size_t size, size_t align);
 void *RPDEFVIS _ZnajSt11align_val_t(size_t size, size_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnwjRKSt9nothrow_t(size_t size, rp_nothrow_t t);
 void *RPDEFVIS _ZnwjRKSt9nothrow_t(size_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpmalloc(size);
 }
 extern void *_ZnajRKSt9nothrow_t(size_t size, rp_nothrow_t t);
 void *RPDEFVIS _ZnajRKSt9nothrow_t(size_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpmalloc(size);
 }
 extern void *_ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                 rp_nothrow_t t);
 void *RPDEFVIS _ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 extern void *_ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                 rp_nothrow_t t);
 void *RPDEFVIS _ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align,
                                                   rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 // 32-bit operators sized delete and delete[], normal and aligned
 extern void _ZdlPvj(void *p, uint64_t size);
 void RPDEFVIS _ZdlPvj(void *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (void)parimaa_na(size);
 }
 extern void _ZdaPvj(void *p, uint64_t size);
 void RPDEFVIS _ZdaPvj(void *p, uint64_t size) {
   rpfree(p);
-  (void)sizeof(size);
+  (void)parimaa_na(size);
 }
 extern void _ZdlPvSt11align_val_t(void *p, uint32_t align);
 void RPDEFVIS _ZdlPvSt11align_val_t(void *p, uint64_t a) {
   rpfree(p);
-  (void)sizeof(align);
+  (void)parimaa_na(align);
 }
 extern void _ZdaPvSt11align_val_t(void *p, uint32_t align);
 void RPDEFVIS _ZdaPvSt11align_val_t(void *p, uint64_t a) {
   rpfree(p);
-  (void)sizeof(align);
+  (void)parimaa_na(align);
 }
 extern void _ZdlPvjSt11align_val_t(void *p, uint32_t size, uint32_t align);
 void RPDEFVIS _ZdlPvjSt11align_val_t(void *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(a);
+  (void)parimaa_na(size);
+  (void)parimaa_na(a);
 }
 extern void _ZdaPvjSt11align_val_t(void *p, uint32_t size, uint32_t align);
 void RPDEFVIS _ZdaPvjSt11align_val_t(void *p, uint64_t size, uint64_t align) {
   rpfree(p);
-  (void)sizeof(size);
-  (void)sizeof(a);
+  (void)parimaa_na(size);
+  (void)parimaa_na(a);
 }
 #endif
 #endif
 #endif
 
-#if USE_INTERPOSE || USE_ALIAS
+#အကယ်၍ USE_INTERPOSE || USE_ALIAS
 
 static void *rpmalloc_nothrow(size_t size, rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpmalloc(size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpmalloc(size);
 }
 static void *rpaligned_alloc_reverse(size_t size, size_t align) {
-  return rpaligned_alloc(align, size);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 static void *rpaligned_alloc_reverse_nothrow(size_t size, size_t align,
                                              rp_nothrow_t t) {
-  (void)sizeof(t);
-  return rpaligned_alloc(align, size);
+  (void)parimaa_na(t);
+  ပြန်ပေး rpaligned_alloc(align, size);
 }
 static void rpfree_size(void *p, size_t size) {
-  (void)sizeof(size);
+  (void)parimaa_na(size);
   rpfree(p);
 }
 static void rpfree_aligned(void *p, size_t align) {
-  (void)sizeof(align);
+  (void)parimaa_na(align);
   rpfree(p);
 }
 static void rpfree_size_aligned(void *p, size_t size, size_t align) {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (void)parimaa_na(size);
+  (void)parimaa_na(align);
   rpfree(p);
 }
 
 #endif
 
-#if USE_INTERPOSE
+#အကယ်၍ USE_INTERPOSE
 
 __attribute__((used)) static const interpose_t macinterpose_malloc[]
     __attribute__((section("__DATA, __interpose"))) = {
@@ -371,7 +371,7 @@ __attribute__((used)) static const interpose_t macinterpose_malloc[]
         MAC_INTERPOSE_PAIR(rpmalloc, calloc),
         MAC_INTERPOSE_PAIR(rprealloc, realloc),
         MAC_INTERPOSE_PAIR(rprealloc, reallocf),
-#if defined(__MAC_10_15) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_15
+#အကယ်၍ defined(__MAC_10_15) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_15
         MAC_INTERPOSE_PAIR(rpaligned_alloc, aligned_alloc),
 #endif
         MAC_INTERPOSE_PAIR(rpmemalign, memalign),
@@ -382,7 +382,7 @@ __attribute__((used)) static const interpose_t macinterpose_malloc[]
 
 #endif
 
-#if USE_ALIAS
+#အကယ်၍ USE_ALIAS
 
 #define RPALIAS(fn) __attribute__((alias(#fn), used, visibility("default")));
 
@@ -392,7 +392,7 @@ __attribute__((used)) static const interpose_t macinterpose_malloc[]
 // operators delete and delete[]
 void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
 
-#if ARCH_64BIT
+#အကယ်၍ ARCH_64BIT
     // 64-bit operators new and new[], normal and aligned
     void *_Znwm(uint64_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
@@ -430,7 +430,7 @@ void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
                     RPALIAS(rpfree_size_aligned) void _ZdaPvmSt11align_val_t(
                         void *p, size_t n, size_t a)
                         RPALIAS(rpfree_size_aligned)
-#else
+#မဟုတ်ပါက
     // 32-bit operators new and new[], normal and aligned
     void *_Znwj(uint32_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
@@ -481,14 +481,14 @@ void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
             RPALIAS(rpaligned_alloc) void *memalign(
                 size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2)
-        RPALIAS(rpmemalign) int posix_memalign(void **memptr, size_t alignment,
+        RPALIAS(rpmemalign) ကိန်းပြည့် posix_memalign(void **memptr, size_t alignment,
                                                size_t size)
             RPALIAS(rpposix_memalign) void free(void *ptr)
                 RPALIAS(rpfree) void cfree(void *ptr) RPALIAS(rpfree)
-#if defined(__ANDROID__) || defined(__FreeBSD__)
+#အကယ်၍ defined(__ANDROID__) || defined(__FreeBSD__)
                     size_t
     malloc_usable_size(const void *ptr) RPALIAS(rpmalloc_usable_size)
-#else
+#မဟုတ်ပါက
                     size_t
     malloc_usable_size(void *ptr) RPALIAS(rpmalloc_usable_size)
 #endif
@@ -496,59 +496,59 @@ void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
 
 #endif
 
-            static inline size_t _rpmalloc_page_size(void) {
-  return _memory_page_size;
+            static anta_hstha size_t _rpmalloc_page_size(void) {
+  ပြန်ပေး _memory_page_size;
 }
 
 extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t count, size_t size);
 
 extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t count, size_t size) {
   size_t total;
-#if ENABLE_VALIDATE_ARGS
+#အကယ်၍ ENABLE_VALIDATE_ARGS
 #ifdef _MSC_VER
-  int err = SizeTMult(count, size, &total);
-  if ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
+  ကိန်းပြည့် err = SizeTMult(count, size, &total);
+  အကယ်၍ ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    ပြန်ပေး 0;
   }
-#else
-  int err = __builtin_umull_overflow(count, size, &total);
-  if (err || (total >= MAX_ALLOC_SIZE)) {
+#မဟုတ်ပါက
+  ကိန်းပြည့် err = __builtin_umull_overflow(count, size, &total);
+  အကယ်၍ (err || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
-    return 0;
+    ပြန်ပေး 0;
   }
 #endif
-#else
+#မဟုတ်ပါက
   total = count * size;
 #endif
-  return realloc(ptr, total);
+  ပြန်ပေး realloc(ptr, total);
 }
 
-extern inline void *RPMALLOC_CDECL valloc(size_t size) {
+extern anta_hstha void *RPMALLOC_CDECL valloc(size_t size) {
   get_thread_heap();
-  return rpaligned_alloc(_rpmalloc_page_size(), size);
+  ပြန်ပေး rpaligned_alloc(_rpmalloc_page_size(), size);
 }
 
-extern inline void *RPMALLOC_CDECL pvalloc(size_t size) {
+extern anta_hstha void *RPMALLOC_CDECL pvalloc(size_t size) {
   get_thread_heap();
   const size_t page_size = _rpmalloc_page_size();
   const size_t aligned_size = ((size + page_size - 1) / page_size) * page_size;
-#if ENABLE_VALIDATE_ARGS
-  if (aligned_size < size) {
+#အကယ်၍ ENABLE_VALIDATE_ARGS
+  အကယ်၍ (aligned_size < size) {
     errno = EINVAL;
-    return 0;
+    ပြန်ပေး 0;
   }
 #endif
-  return rpaligned_alloc(_rpmalloc_page_size(), aligned_size);
+  ပြန်ပေး rpaligned_alloc(_rpmalloc_page_size(), aligned_size);
 }
 
 #endif // ENABLE_OVERRIDE
 
-#if ENABLE_PRELOAD
+#အကယ်၍ ENABLE_PRELOAD
 
 #ifdef _WIN32
 
-#if defined(BUILD_DYNAMIC_LINK) && BUILD_DYNAMIC_LINK
+#အကယ်၍ defined(BUILD_DYNAMIC_LINK) && BUILD_DYNAMIC_LINK
 
 extern __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
                                                  DWORD reason, LPVOID reserved);
@@ -556,28 +556,28 @@ extern __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
 extern __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE instance,
                                                  DWORD reason,
                                                  LPVOID reserved) {
-  (void)sizeof(reserved);
-  (void)sizeof(instance);
-  if (reason == DLL_PROCESS_ATTACH)
+  (void)parimaa_na(reserved);
+  (void)parimaa_na(instance);
+  အကယ်၍ (reason == DLL_PROCESS_ATTACH)
     rpmalloc_initialize();
-  else if (reason == DLL_PROCESS_DETACH)
+  မဟုတ်ပါက အကယ်၍ (reason == DLL_PROCESS_DETACH)
     rpmalloc_finalize();
-  else if (reason == DLL_THREAD_ATTACH)
+  မဟုတ်ပါက အကယ်၍ (reason == DLL_THREAD_ATTACH)
     rpmalloc_thread_initialize();
-  else if (reason == DLL_THREAD_DETACH)
+  မဟုတ်ပါက အကယ်၍ (reason == DLL_THREAD_DETACH)
     rpmalloc_thread_finalize(1);
-  return TRUE;
+  ပြန်ပေး TRUE;
 }
 
 // end BUILD_DYNAMIC_LINK
-#else
+#မဟုတ်ပါက
 
 extern void _global_rpmalloc_init(void) {
   rpmalloc_set_main_thread();
   rpmalloc_initialize();
 }
 
-#if defined(__clang__) || defined(__GNUC__)
+#အကယ်၍ defined(__clang__) || defined(__GNUC__)
 
 static void __attribute__((constructor)) initializer(void) {
   _global_rpmalloc_init();
@@ -585,18 +585,18 @@ static void __attribute__((constructor)) initializer(void) {
 
 #elif defined(_MSC_VER)
 
-static int _global_rpmalloc_xib(void) {
+static ကိန်းပြည့် _global_rpmalloc_xib(void) {
   _global_rpmalloc_init();
-  return 0;
+  ပြန်ပေး 0;
 }
 
 #pragma section(".CRT$XIB", read)
 __declspec(allocate(".CRT$XIB")) void (*_rpmalloc_module_init)(void) =
     _global_rpmalloc_xib;
-#if defined(_M_IX86) || defined(__i386__)
+#အကယ်၍ defined(_M_IX86) || defined(__i386__)
 #pragma comment(linker, "/include:"                                            \
                         "__rpmalloc_module_init")
-#else
+#မဟုတ်ပါက
 #pragma comment(linker, "/include:"                                            \
                         "_rpmalloc_module_init")
 #endif
@@ -606,7 +606,7 @@ __declspec(allocate(".CRT$XIB")) void (*_rpmalloc_module_init)(void) =
 // end !BUILD_DYNAMIC_LINK
 #endif
 
-#else
+#မဟုတ်ပါက
 
 #include <pthread.h>
 #include <stdint.h>
@@ -627,7 +627,7 @@ static void __attribute__((constructor)) initializer(void) {
 
 static void __attribute__((destructor)) finalizer(void) { rpmalloc_finalize(); }
 
-typedef struct {
+typedef sa_nracanaa {
   void *(*real_start)(void *);
   void *real_arg;
 } thread_starter_arg;
@@ -639,46 +639,46 @@ static void *thread_starter(void *argptr) {
   rpmalloc_thread_initialize();
   rpfree(argptr);
   pthread_setspecific(destructor_key, (void *)1);
-  return (*real_start)(real_arg);
+  ပြန်ပေး (*real_start)(real_arg);
 }
 
 static void thread_destructor(void *value) {
-  (void)sizeof(value);
+  (void)parimaa_na(value);
   rpmalloc_thread_finalize(1);
 }
 
 #ifdef __APPLE__
 
-static int pthread_create_proxy(pthread_t *thread, const pthread_attr_t *attr,
+static ကိန်းပြည့် pthread_create_proxy(pthread_t *thread, const pthread_attr_t *attr,
                                 void *(*start_routine)(void *), void *arg) {
   rpmalloc_initialize();
-  thread_starter_arg *starter_arg = rpmalloc(sizeof(thread_starter_arg));
+  thread_starter_arg *starter_arg = rpmalloc(parimaa_na(thread_starter_arg));
   starter_arg->real_start = start_routine;
   starter_arg->real_arg = arg;
-  return pthread_create(thread, attr, thread_starter, starter_arg);
+  ပြန်ပေး pthread_create(thread, attr, thread_starter, starter_arg);
 }
 
 MAC_INTERPOSE_SINGLE(pthread_create_proxy, pthread_create);
 
-#else
+#မဟုတ်ပါက
 
 #include <dlfcn.h>
 
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+ကိန်းပြည့် pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                    void *(*start_routine)(void *), void *arg) {
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||      \
+#အကယ်၍ defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||      \
     defined(__NetBSD__) || defined(__DragonFly__) || defined(__APPLE__) ||     \
     defined(__HAIKU__)
-  char fname[] = "pthread_create";
-#else
-  char fname[] = "_pthread_create";
+  var_na fname[] = "pthread_create";
+#မဟုတ်ပါက
+  var_na fname[] = "_pthread_create";
 #endif
   void *real_pthread_create = dlsym(RTLD_NEXT, fname);
   rpmalloc_thread_initialize();
-  thread_starter_arg *starter_arg = rpmalloc(sizeof(thread_starter_arg));
+  thread_starter_arg *starter_arg = rpmalloc(parimaa_na(thread_starter_arg));
   starter_arg->real_start = start_routine;
   starter_arg->real_arg = arg;
-  return (*(int (*)(pthread_t *, const pthread_attr_t *, void *(*)(void *),
+  ပြန်ပေး (*(ကိန်းပြည့် (*)(pthread_t *, const pthread_attr_t *, void *(*)(void *),
                     void *))real_pthread_create)(thread, attr, thread_starter,
                                                  starter_arg);
 }
@@ -689,9 +689,9 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 #endif
 
-#if ENABLE_OVERRIDE
+#အကယ်၍ ENABLE_OVERRIDE
 
-#if defined(__GLIBC__) && defined(__linux__)
+#အကယ်၍ defined(__GLIBC__) && defined(__linux__)
 
 void *__libc_malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
@@ -704,21 +704,21 @@ void *__libc_malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
             RPALIAS(rpfree) void *__libc_memalign(size_t align, size_t size)
                 RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(2)
-        RPALIAS(rpmemalign) int __posix_memalign(void **p, size_t align,
+        RPALIAS(rpmemalign) ကိန်းပြည့် __posix_memalign(void **p, size_t align,
                                                  size_t size)
             RPALIAS(rpposix_memalign)
 
                 extern void *__libc_valloc(size_t size);
 extern void *__libc_pvalloc(size_t size);
 
-void *__libc_valloc(size_t size) { return valloc(size); }
+void *__libc_valloc(size_t size) { ပြန်ပေး valloc(size); }
 
-void *__libc_pvalloc(size_t size) { return pvalloc(size); }
-
-#endif
+void *__libc_pvalloc(size_t size) { ပြန်ပေး pvalloc(size); }
 
 #endif
 
-#if (defined(__GNUC__) || defined(__clang__))
+#endif
+
+#အကယ်၍ (defined(__GNUC__) || defined(__clang__))
 #pragma GCC visibility pop
 #endif
