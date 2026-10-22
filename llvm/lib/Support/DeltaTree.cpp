@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DeltaTree.h"
-#include "llvm/Support/Casting.h"
-#include <cassert>
-#include <cstring>
+#ضمن "llvm/ADT/DeltaTree.h"
+#ضمن "llvm/Support/Casting.h"
+#ضمن <cassert>
+#ضمن <cstring>
 
-using namespace llvm;
+using نطاق llvm;
 
 /// The DeltaTree class is a multiway search tree (BTree) structure with some
 /// fancy features.  B-Trees are generally more memory and cache efficient
@@ -32,146 +32,146 @@ using namespace llvm;
 /// entries (recursively) contained inside of it, which allows us to get the
 /// full delta implied by a whole subtree in constant time.
 
-namespace {
+نطاق {
 
 /// SourceDelta - As code in the original input buffer is added and deleted,
 /// SourceDelta records are used to keep track of how the input SourceLocation
 /// object is mapped into the output buffer.
-struct SourceDelta {
+بنية SourceDelta {
   unsigned FileLoc;
-  int Delta;
+  صحيح Delta;
 
-  static SourceDelta get(unsigned Loc, int D) {
+  ساكن SourceDelta get(unsigned Loc, صحيح D) {
     SourceDelta Delta;
     Delta.FileLoc = Loc;
     Delta.Delta = D;
-    return Delta;
+    أرجع Delta;
   }
 };
 
 /// DeltaTreeNode - The common part of all nodes.
 ///
-class DeltaTreeNode {
-public:
-  struct InsertResult {
-    DeltaTreeNode *LHS, *RHS;
+صنف Delta_درخت_گرہ {
+عام:
+  بنية داخل_کرو_Result {
+    Delta_درخت_گرہ *LHS, *RHS;
     SourceDelta Split;
   };
 
-private:
-  friend class DeltaTreeInteriorNode;
+خاص:
+  friend صنف Delta_درخت_Interior_گرہ;
 
   /// WidthFactor - This controls the number of K/V slots held in the BTree:
   /// how wide it is.  Each level of the BTree is guaranteed to have at least
   /// WidthFactor-1 K/V pairs (except the root) and may have at most
   /// 2*WidthFactor-1 K/V pairs.
-  enum { WidthFactor = 8 };
+  تعداد { WidthFactor = 8 };
 
   /// Values - This tracks the SourceDelta's currently in this node.
-  SourceDelta Values[2 * WidthFactor - 1];
+  SourceDelta اقدار[2 * WidthFactor - 1];
 
   /// NumValuesUsed - This tracks the number of values this node currently
   /// holds.
-  unsigned char NumValuesUsed = 0;
+  unsigned حرف عدد_اقدار_Used = 0;
 
   /// IsLeaf - This is true if this is a leaf of the btree.  If false, this is
   /// an interior node, and is actually an instance of DeltaTreeInteriorNode.
-  bool IsLeaf;
+  منطقي IsLeaf;
 
   /// FullDelta - This is the full delta of all the values in this node and
   /// all children nodes.
-  int FullDelta = 0;
+  صحيح FullDelta = 0;
 
-public:
-  DeltaTreeNode(bool isLeaf = true) : IsLeaf(isLeaf) {}
+عام:
+  Delta_درخت_گرہ(منطقي isLeaf = true) : IsLeaf(isLeaf) {}
 
-  bool isLeaf() const { return IsLeaf; }
-  int getFullDelta() const { return FullDelta; }
-  bool isFull() const { return NumValuesUsed == 2 * WidthFactor - 1; }
+  منطقي isLeaf() ثابت { أرجع IsLeaf; }
+  صحيح getFullDelta() ثابت { أرجع FullDelta; }
+  منطقي isFull() ثابت { أرجع عدد_اقدار_Used == 2 * WidthFactor - 1; }
 
-  unsigned getNumValuesUsed() const { return NumValuesUsed; }
+  unsigned get_عدد_اقدار_Used() ثابت { أرجع عدد_اقدار_Used; }
 
-  const SourceDelta &getValue(unsigned i) const {
-    assert(i < NumValuesUsed && "Invalid value #");
-    return Values[i];
+  ثابت SourceDelta &get_قدر(unsigned i) ثابت {
+    أكد(i < عدد_اقدار_Used && "Invalid value #");
+    أرجع اقدار[i];
   }
 
-  SourceDelta &getValue(unsigned i) {
-    assert(i < NumValuesUsed && "Invalid value #");
-    return Values[i];
+  SourceDelta &get_قدر(unsigned i) {
+    أكد(i < عدد_اقدار_Used && "Invalid value #");
+    أرجع اقدار[i];
   }
 
   /// DoInsertion - Do an insertion of the specified FileIndex/Delta pair into
   /// this node.  If insertion is easy, do it and return false.  Otherwise,
   /// split the node, populate InsertRes with info about the split, and return
   /// true.
-  bool DoInsertion(unsigned FileIndex, int Delta, InsertResult *InsertRes);
+  منطقي DoInsertion(unsigned FileIndex, صحيح Delta, داخل_کرو_Result *داخل_کرو_Res);
 
-  void DoSplit(InsertResult &InsertRes);
+  فراغ DoSplit(داخل_کرو_Result &داخل_کرو_Res);
 
   /// RecomputeFullDeltaLocally - Recompute the FullDelta field by doing a
   /// local walk over our contained deltas.
-  void RecomputeFullDeltaLocally();
+  فراغ RecomputeFullDeltaLocally();
 
-  void Destroy();
+  فراغ Destroy();
 };
 
 /// DeltaTreeInteriorNode - When isLeaf = false, a node has child pointers.
 /// This class tracks them.
-class DeltaTreeInteriorNode : public DeltaTreeNode {
-  friend class DeltaTreeNode;
+صنف Delta_درخت_Interior_گرہ : عام Delta_درخت_گرہ {
+  friend صنف Delta_درخت_گرہ;
 
-  DeltaTreeNode *Children[2 * WidthFactor];
+  Delta_درخت_گرہ *Children[2 * WidthFactor];
 
-  ~DeltaTreeInteriorNode() {
-    for (unsigned i = 0, e = NumValuesUsed + 1; i != e; ++i)
+  ~Delta_درخت_Interior_گرہ() {
+    لكل (unsigned i = 0, e = عدد_اقدار_Used + 1; i != e; ++i)
       Children[i]->Destroy();
   }
 
-public:
-  DeltaTreeInteriorNode() : DeltaTreeNode(false /*nonleaf*/) {}
+عام:
+  Delta_درخت_Interior_گرہ() : Delta_درخت_گرہ(خطأ /*nonleaf*/) {}
 
-  DeltaTreeInteriorNode(const InsertResult &IR)
-      : DeltaTreeNode(false /*nonleaf*/) {
+  Delta_درخت_Interior_گرہ(ثابت داخل_کرو_Result &IR)
+      : Delta_درخت_گرہ(خطأ /*nonleaf*/) {
     Children[0] = IR.LHS;
     Children[1] = IR.RHS;
-    Values[0] = IR.Split;
+    اقدار[0] = IR.Split;
     FullDelta =
         IR.LHS->getFullDelta() + IR.RHS->getFullDelta() + IR.Split.Delta;
-    NumValuesUsed = 1;
+    عدد_اقدار_Used = 1;
   }
 
-  const DeltaTreeNode *getChild(unsigned i) const {
-    assert(i < getNumValuesUsed() + 1 && "Invalid child");
-    return Children[i];
+  ثابت Delta_درخت_گرہ *getChild(unsigned i) ثابت {
+    أكد(i < get_عدد_اقدار_Used() + 1 && "Invalid child");
+    أرجع Children[i];
   }
 
-  DeltaTreeNode *getChild(unsigned i) {
-    assert(i < getNumValuesUsed() + 1 && "Invalid child");
-    return Children[i];
+  Delta_درخت_گرہ *getChild(unsigned i) {
+    أكد(i < get_عدد_اقدار_Used() + 1 && "Invalid child");
+    أرجع Children[i];
   }
 
-  static bool classof(const DeltaTreeNode *N) { return !N->isLeaf(); }
+  ساكن منطقي classof(ثابت Delta_درخت_گرہ *N) { أرجع !N->isLeaf(); }
 };
 
 } // namespace
 
 /// Destroy - A 'virtual' destructor.
-void DeltaTreeNode::Destroy() {
-  if (isLeaf())
-    delete this;
-  else
-    delete cast<DeltaTreeInteriorNode>(this);
+فراغ Delta_درخت_گرہ::Destroy() {
+  إذا (isLeaf())
+    delete هذا;
+  وإلا
+    delete cast<Delta_درخت_Interior_گرہ>(هذا);
 }
 
 /// RecomputeFullDeltaLocally - Recompute the FullDelta field by doing a
 /// local walk over our contained deltas.
-void DeltaTreeNode::RecomputeFullDeltaLocally() {
-  int NewFullDelta = 0;
-  for (unsigned i = 0, e = getNumValuesUsed(); i != e; ++i)
-    NewFullDelta += Values[i].Delta;
-  if (auto *IN = dyn_cast<DeltaTreeInteriorNode>(this))
-    for (unsigned i = 0, e = getNumValuesUsed() + 1; i != e; ++i)
+فراغ Delta_درخت_گرہ::RecomputeFullDeltaLocally() {
+  صحيح NewFullDelta = 0;
+  لكل (unsigned i = 0, e = get_عدد_اقدار_Used(); i != e; ++i)
+    NewFullDelta += اقدار[i].Delta;
+  إذا (auto *IN = dyn_cast<Delta_درخت_Interior_گرہ>(هذا))
+    لكل (unsigned i = 0, e = get_عدد_اقدار_Used() + 1; i != e; ++i)
       NewFullDelta += IN->getChild(i)->getFullDelta();
   FullDelta = NewFullDelta;
 }
@@ -180,123 +180,123 @@ void DeltaTreeNode::RecomputeFullDeltaLocally() {
 /// this node.  If insertion is easy, do it and return false.  Otherwise,
 /// split the node, populate InsertRes with info about the split, and return
 /// true.
-bool DeltaTreeNode::DoInsertion(unsigned FileIndex, int Delta,
-                                InsertResult *InsertRes) {
+منطقي Delta_درخت_گرہ::DoInsertion(unsigned FileIndex, صحيح Delta,
+                                داخل_کرو_Result *داخل_کرو_Res) {
   // Maintain full delta for this node.
   FullDelta += Delta;
 
   // Find the insertion point, the first delta whose index is >= FileIndex.
-  unsigned i = 0, e = getNumValuesUsed();
-  while (i != e && FileIndex > getValue(i).FileLoc)
+  unsigned i = 0, e = get_عدد_اقدار_Used();
+  طالما (i != e && FileIndex > get_قدر(i).FileLoc)
     ++i;
 
   // If we found an a record for exactly this file index, just merge this
   // value into the pre-existing record and finish early.
-  if (i != e && getValue(i).FileLoc == FileIndex) {
+  إذا (i != e && get_قدر(i).FileLoc == FileIndex) {
     // NOTE: Delta could drop to zero here.  This means that the delta entry is
     // useless and could be removed.  Supporting erases is more complex than
     // leaving an entry with Delta=0, so we just leave an entry with Delta=0 in
     // the tree.
-    Values[i].Delta += Delta;
-    return false;
+    اقدار[i].Delta += Delta;
+    أرجع خطأ;
   }
 
   // Otherwise, we found an insertion point, and we know that the value at the
   // specified index is > FileIndex.  Handle the leaf case first.
-  if (isLeaf()) {
-    if (!isFull()) {
+  إذا (isLeaf()) {
+    إذا (!isFull()) {
       // For an insertion into a non-full leaf node, just insert the value in
       // its sorted position.  This requires moving later values over.
-      if (i != e)
-        memmove(&Values[i + 1], &Values[i], sizeof(Values[0]) * (e - i));
-      Values[i] = SourceDelta::get(FileIndex, Delta);
-      ++NumValuesUsed;
-      return false;
+      إذا (i != e)
+        memmove(&اقدار[i + 1], &اقدار[i], حجم(اقدار[0]) * (e - i));
+      اقدار[i] = SourceDelta::get(FileIndex, Delta);
+      ++عدد_اقدار_Used;
+      أرجع خطأ;
     }
 
     // Otherwise, if this is leaf is full, split the node at its median, insert
     // the value into one of the children, and return the result.
-    assert(InsertRes && "No result location specified");
-    DoSplit(*InsertRes);
+    أكد(داخل_کرو_Res && "No result location specified");
+    DoSplit(*داخل_کرو_Res);
 
-    if (InsertRes->Split.FileLoc > FileIndex)
-      InsertRes->LHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
-    else
-      InsertRes->RHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
-    return true;
+    إذا (داخل_کرو_Res->Split.FileLoc > FileIndex)
+      داخل_کرو_Res->LHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
+    وإلا
+      داخل_کرو_Res->RHS->DoInsertion(FileIndex, Delta, nullptr /*can't fail*/);
+    أرجع true;
   }
 
   // Otherwise, this is an interior node.  Send the request down the tree.
-  auto *IN = cast<DeltaTreeInteriorNode>(this);
-  if (!IN->Children[i]->DoInsertion(FileIndex, Delta, InsertRes))
-    return false; // If there was space in the child, just return.
+  auto *IN = cast<Delta_درخت_Interior_گرہ>(هذا);
+  إذا (!IN->Children[i]->DoInsertion(FileIndex, Delta, داخل_کرو_Res))
+    أرجع خطأ; // If there was space in the child, just return.
 
   // Okay, this split the subtree, producing a new value and two children to
   // insert here.  If this node is non-full, we can just insert it directly.
-  if (!isFull()) {
+  إذا (!isFull()) {
     // Now that we have two nodes and a new element, insert the perclated value
     // into ourself by moving all the later values/children down, then inserting
     // the new one.
-    if (i != e)
+    إذا (i != e)
       memmove(&IN->Children[i + 2], &IN->Children[i + 1],
-              (e - i) * sizeof(IN->Children[0]));
-    IN->Children[i] = InsertRes->LHS;
-    IN->Children[i + 1] = InsertRes->RHS;
+              (e - i) * حجم(IN->Children[0]));
+    IN->Children[i] = داخل_کرو_Res->LHS;
+    IN->Children[i + 1] = داخل_کرو_Res->RHS;
 
-    if (e != i)
-      memmove(&Values[i + 1], &Values[i], (e - i) * sizeof(Values[0]));
-    Values[i] = InsertRes->Split;
-    ++NumValuesUsed;
-    return false;
+    إذا (e != i)
+      memmove(&اقدار[i + 1], &اقدار[i], (e - i) * حجم(اقدار[0]));
+    اقدار[i] = داخل_کرو_Res->Split;
+    ++عدد_اقدار_Used;
+    أرجع خطأ;
   }
 
   // Finally, if this interior node was full and a node is percolated up, split
   // ourself and return that up the chain.  Start by saving all our info to
   // avoid having the split clobber it.
-  IN->Children[i] = InsertRes->LHS;
-  DeltaTreeNode *SubRHS = InsertRes->RHS;
-  SourceDelta SubSplit = InsertRes->Split;
+  IN->Children[i] = داخل_کرو_Res->LHS;
+  Delta_درخت_گرہ *SubRHS = داخل_کرو_Res->RHS;
+  SourceDelta SubSplit = داخل_کرو_Res->Split;
 
   // Do the split.
-  DoSplit(*InsertRes);
+  DoSplit(*داخل_کرو_Res);
 
   // Figure out where to insert SubRHS/NewSplit.
-  DeltaTreeInteriorNode *InsertSide;
-  if (SubSplit.FileLoc < InsertRes->Split.FileLoc)
-    InsertSide = cast<DeltaTreeInteriorNode>(InsertRes->LHS);
-  else
-    InsertSide = cast<DeltaTreeInteriorNode>(InsertRes->RHS);
+  Delta_درخت_Interior_گرہ *داخل_کرو_Side;
+  إذا (SubSplit.FileLoc < داخل_کرو_Res->Split.FileLoc)
+    داخل_کرو_Side = cast<Delta_درخت_Interior_گرہ>(داخل_کرو_Res->LHS);
+  وإلا
+    داخل_کرو_Side = cast<Delta_درخت_Interior_گرہ>(داخل_کرو_Res->RHS);
 
   // We now have a non-empty interior node 'InsertSide' to insert
   // SubRHS/SubSplit into.  Find out where to insert SubSplit.
 
   // Find the insertion point, the first delta whose index is >SubSplit.FileLoc.
   i = 0;
-  e = InsertSide->getNumValuesUsed();
-  while (i != e && SubSplit.FileLoc > InsertSide->getValue(i).FileLoc)
+  e = داخل_کرو_Side->get_عدد_اقدار_Used();
+  طالما (i != e && SubSplit.FileLoc > داخل_کرو_Side->get_قدر(i).FileLoc)
     ++i;
 
   // Now we know that i is the place to insert the split value into.  Insert it
   // and the child right after it.
-  if (i != e)
-    memmove(&InsertSide->Children[i + 2], &InsertSide->Children[i + 1],
-            (e - i) * sizeof(IN->Children[0]));
-  InsertSide->Children[i + 1] = SubRHS;
+  إذا (i != e)
+    memmove(&داخل_کرو_Side->Children[i + 2], &داخل_کرو_Side->Children[i + 1],
+            (e - i) * حجم(IN->Children[0]));
+  داخل_کرو_Side->Children[i + 1] = SubRHS;
 
-  if (e != i)
-    memmove(&InsertSide->Values[i + 1], &InsertSide->Values[i],
-            (e - i) * sizeof(Values[0]));
-  InsertSide->Values[i] = SubSplit;
-  ++InsertSide->NumValuesUsed;
-  InsertSide->FullDelta += SubSplit.Delta + SubRHS->getFullDelta();
-  return true;
+  إذا (e != i)
+    memmove(&داخل_کرو_Side->اقدار[i + 1], &داخل_کرو_Side->اقدار[i],
+            (e - i) * حجم(اقدار[0]));
+  داخل_کرو_Side->اقدار[i] = SubSplit;
+  ++داخل_کرو_Side->عدد_اقدار_Used;
+  داخل_کرو_Side->FullDelta += SubSplit.Delta + SubRHS->getFullDelta();
+  أرجع true;
 }
 
 /// DoSplit - Split the currently full node (which has 2*WidthFactor-1 values)
 /// into two subtrees each with "WidthFactor-1" values and a pivot value.
 /// Return the pieces in InsertRes.
-void DeltaTreeNode::DoSplit(InsertResult &InsertRes) {
-  assert(isFull() && "Why split a non-full node?");
+فراغ Delta_درخت_گرہ::DoSplit(داخل_کرو_Result &داخل_کرو_Res) {
+  أكد(isFull() && "Why split a non-full node?");
 
   // Since this node is full, it contains 2*WidthFactor-1 values.  We move
   // the first 'WidthFactor-1' values to the LHS child (which we leave in this
@@ -304,33 +304,33 @@ void DeltaTreeNode::DoSplit(InsertResult &InsertRes) {
   // into the RHS child.
 
   // Create the new child node.
-  DeltaTreeNode *NewNode;
-  if (auto *IN = dyn_cast<DeltaTreeInteriorNode>(this)) {
+  Delta_درخت_گرہ *New_گرہ;
+  إذا (auto *IN = dyn_cast<Delta_درخت_Interior_گرہ>(هذا)) {
     // If this is an interior node, also move over 'WidthFactor' children
     // into the new node.
-    DeltaTreeInteriorNode *New = new DeltaTreeInteriorNode();
+    Delta_درخت_Interior_گرہ *New = جديد Delta_درخت_Interior_گرہ();
     memcpy(&New->Children[0], &IN->Children[WidthFactor],
-           WidthFactor * sizeof(IN->Children[0]));
-    NewNode = New;
-  } else {
+           WidthFactor * حجم(IN->Children[0]));
+    New_گرہ = New;
+  } وإلا {
     // Just create the new leaf node.
-    NewNode = new DeltaTreeNode();
+    New_گرہ = جديد Delta_درخت_گرہ();
   }
 
   // Move over the last 'WidthFactor-1' values from here to NewNode.
-  memcpy(&NewNode->Values[0], &Values[WidthFactor],
-         (WidthFactor - 1) * sizeof(Values[0]));
+  memcpy(&New_گرہ->اقدار[0], &اقدار[WidthFactor],
+         (WidthFactor - 1) * حجم(اقدار[0]));
 
   // Decrease the number of values in the two nodes.
-  NewNode->NumValuesUsed = NumValuesUsed = WidthFactor - 1;
+  New_گرہ->عدد_اقدار_Used = عدد_اقدار_Used = WidthFactor - 1;
 
   // Recompute the two nodes' full delta.
-  NewNode->RecomputeFullDeltaLocally();
+  New_گرہ->RecomputeFullDeltaLocally();
   RecomputeFullDeltaLocally();
 
-  InsertRes.LHS = this;
-  InsertRes.RHS = NewNode;
-  InsertRes.Split = Values[WidthFactor - 1];
+  داخل_کرو_Res.LHS = هذا;
+  داخل_کرو_Res.RHS = New_گرہ;
+  داخل_کرو_Res.Split = اقدار[WidthFactor - 1];
 }
 
 //===----------------------------------------------------------------------===//
@@ -339,107 +339,107 @@ void DeltaTreeNode::DoSplit(InsertResult &InsertRes) {
 
 // #define VERIFY_TREE
 
-#ifdef VERIFY_TREE
+#ifdef VERIFY_درخت
 /// VerifyTree - Walk the btree performing assertions on various properties to
 /// verify consistency.  This is useful for debugging new changes to the tree.
-static void VerifyTree(const DeltaTreeNode *N) {
-  const auto *IN = dyn_cast<DeltaTreeInteriorNode>(N);
-  if (IN == 0) {
+ساكن فراغ Verify_درخت(ثابت Delta_درخت_گرہ *N) {
+  ثابت auto *IN = dyn_cast<Delta_درخت_Interior_گرہ>(N);
+  إذا (IN == 0) {
     // Verify leaves, just ensure that FullDelta matches up and the elements
     // are in proper order.
-    int FullDelta = 0;
-    for (unsigned i = 0, e = N->getNumValuesUsed(); i != e; ++i) {
-      if (i)
-        assert(N->getValue(i - 1).FileLoc < N->getValue(i).FileLoc);
-      FullDelta += N->getValue(i).Delta;
+    صحيح FullDelta = 0;
+    لكل (unsigned i = 0, e = N->get_عدد_اقدار_Used(); i != e; ++i) {
+      إذا (i)
+        أكد(N->get_قدر(i - 1).FileLoc < N->get_قدر(i).FileLoc);
+      FullDelta += N->get_قدر(i).Delta;
     }
-    assert(FullDelta == N->getFullDelta());
-    return;
+    أكد(FullDelta == N->getFullDelta());
+    أرجع;
   }
 
   // Verify interior nodes: Ensure that FullDelta matches up and the
   // elements are in proper order and the children are in proper order.
-  int FullDelta = 0;
-  for (unsigned i = 0, e = IN->getNumValuesUsed(); i != e; ++i) {
-    const SourceDelta &IVal = N->getValue(i);
-    const DeltaTreeNode *IChild = IN->getChild(i);
-    if (i)
-      assert(IN->getValue(i - 1).FileLoc < IVal.FileLoc);
+  صحيح FullDelta = 0;
+  لكل (unsigned i = 0, e = IN->get_عدد_اقدار_Used(); i != e; ++i) {
+    ثابت SourceDelta &IVal = N->get_قدر(i);
+    ثابت Delta_درخت_گرہ *IChild = IN->getChild(i);
+    إذا (i)
+      أكد(IN->get_قدر(i - 1).FileLoc < IVal.FileLoc);
     FullDelta += IVal.Delta;
     FullDelta += IChild->getFullDelta();
 
     // The largest value in child #i should be smaller than FileLoc.
-    assert(IChild->getValue(IChild->getNumValuesUsed() - 1).FileLoc <
+    أكد(IChild->get_قدر(IChild->get_عدد_اقدار_Used() - 1).FileLoc <
            IVal.FileLoc);
 
     // The smallest value in child #i+1 should be larger than FileLoc.
-    assert(IN->getChild(i + 1)->getValue(0).FileLoc > IVal.FileLoc);
-    VerifyTree(IChild);
+    أكد(IN->getChild(i + 1)->get_قدر(0).FileLoc > IVal.FileLoc);
+    Verify_درخت(IChild);
   }
 
-  FullDelta += IN->getChild(IN->getNumValuesUsed())->getFullDelta();
+  FullDelta += IN->getChild(IN->get_عدد_اقدار_Used())->getFullDelta();
 
-  assert(FullDelta == N->getFullDelta());
+  أكد(FullDelta == N->getFullDelta());
 }
 #endif // VERIFY_TREE
 
-static DeltaTreeNode *getRoot(void *Root) { return (DeltaTreeNode *)Root; }
+ساكن Delta_درخت_گرہ *get_جڑ(فراغ *جڑ_2) { أرجع (Delta_درخت_گرہ *)جڑ_2; }
 
-DeltaTree::DeltaTree() { Root = new DeltaTreeNode(); }
+Delta_درخت::Delta_درخت() { جڑ_2 = جديد Delta_درخت_گرہ(); }
 
-DeltaTree::DeltaTree(const DeltaTree &RHS) {
+Delta_درخت::Delta_درخت(ثابت Delta_درخت &RHS) {
   // Currently we only support copying when the RHS is empty.
-  assert(getRoot(RHS.Root)->getNumValuesUsed() == 0 &&
+  أكد(get_جڑ(RHS.جڑ_2)->get_عدد_اقدار_Used() == 0 &&
          "Can only copy empty tree");
-  Root = new DeltaTreeNode();
+  جڑ_2 = جديد Delta_درخت_گرہ();
 }
 
-DeltaTree::~DeltaTree() { getRoot(Root)->Destroy(); }
+Delta_درخت::~Delta_درخت() { get_جڑ(جڑ_2)->Destroy(); }
 
 /// getDeltaAt - Return the accumulated delta at the specified file offset.
 /// This includes all insertions or delections that occurred *before* the
 /// specified file index.
-int DeltaTree::getDeltaAt(unsigned FileIndex) const {
-  const DeltaTreeNode *Node = getRoot(Root);
+صحيح Delta_درخت::getDeltaAt(unsigned FileIndex) ثابت {
+  ثابت Delta_درخت_گرہ *گرہ = get_جڑ(جڑ_2);
 
-  int Result = 0;
+  صحيح Result = 0;
 
   // Walk down the tree.
-  while (true) {
+  طالما (true) {
     // For all nodes, include any local deltas before the specified file
     // index by summing them up directly.  Keep track of how many were
     // included.
-    unsigned NumValsGreater = 0;
-    for (unsigned e = Node->getNumValuesUsed(); NumValsGreater != e;
-         ++NumValsGreater) {
-      const SourceDelta &Val = Node->getValue(NumValsGreater);
+    unsigned عدد_Vals_Greater = 0;
+    لكل (unsigned e = گرہ->get_عدد_اقدار_Used(); عدد_Vals_Greater != e;
+         ++عدد_Vals_Greater) {
+      ثابت SourceDelta &Val = گرہ->get_قدر(عدد_Vals_Greater);
 
-      if (Val.FileLoc >= FileIndex)
-        break;
+      إذا (Val.FileLoc >= FileIndex)
+        اكسر;
       Result += Val.Delta;
     }
 
     // If we have an interior node, include information about children and
     // recurse.  Otherwise, if we have a leaf, we're done.
-    const auto *IN = dyn_cast<DeltaTreeInteriorNode>(Node);
-    if (!IN)
-      return Result;
+    ثابت auto *IN = dyn_cast<Delta_درخت_Interior_گرہ>(گرہ);
+    إذا (!IN)
+      أرجع Result;
 
     // Include any children to the left of the values we skipped, all of
     // their deltas should be included as well.
-    for (unsigned i = 0; i != NumValsGreater; ++i)
+    لكل (unsigned i = 0; i != عدد_Vals_Greater; ++i)
       Result += IN->getChild(i)->getFullDelta();
 
     // If we found exactly the value we were looking for, break off the
     // search early.  There is no need to search the RHS of the value for
     // partial results.
-    if (NumValsGreater != Node->getNumValuesUsed() &&
-        Node->getValue(NumValsGreater).FileLoc == FileIndex)
-      return Result + IN->getChild(NumValsGreater)->getFullDelta();
+    إذا (عدد_Vals_Greater != گرہ->get_عدد_اقدار_Used() &&
+        گرہ->get_قدر(عدد_Vals_Greater).FileLoc == FileIndex)
+      أرجع Result + IN->getChild(عدد_Vals_Greater)->getFullDelta();
 
     // Otherwise, traverse down the tree.  The selected subtree may be
     // partially included in the range.
-    Node = IN->getChild(NumValsGreater);
+    گرہ = IN->getChild(عدد_Vals_Greater);
   }
   // NOT REACHED.
 }
@@ -447,19 +447,19 @@ int DeltaTree::getDeltaAt(unsigned FileIndex) const {
 /// AddDelta - When a change is made that shifts around the text buffer,
 /// this method is used to record that info.  It inserts a delta of 'Delta'
 /// into the current DeltaTree at offset FileIndex.
-void DeltaTree::AddDelta(unsigned FileIndex, int Delta) {
-  assert(Delta && "Adding a noop?");
-  DeltaTreeNode *MyRoot = getRoot(Root);
+فراغ Delta_درخت::AddDelta(unsigned FileIndex, صحيح Delta) {
+  أكد(Delta && "Adding a noop?");
+  Delta_درخت_گرہ *My_جڑ = get_جڑ(جڑ_2);
 
-  DeltaTreeNode::InsertResult InsertRes;
-  if (MyRoot->DoInsertion(FileIndex, Delta, &InsertRes)) {
-    Root = new DeltaTreeInteriorNode(InsertRes);
-#ifdef VERIFY_TREE
-    MyRoot = Root;
+  Delta_درخت_گرہ::داخل_کرو_Result داخل_کرو_Res;
+  إذا (My_جڑ->DoInsertion(FileIndex, Delta, &داخل_کرو_Res)) {
+    جڑ_2 = جديد Delta_درخت_Interior_گرہ(داخل_کرو_Res);
+#ifdef VERIFY_درخت
+    My_جڑ = جڑ_2;
 #endif
   }
 
-#ifdef VERIFY_TREE
-  VerifyTree(MyRoot);
+#ifdef VERIFY_درخت
+  Verify_درخت(My_جڑ);
 #endif
 }
