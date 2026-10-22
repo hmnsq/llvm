@@ -41,20 +41,20 @@ static unsigned singleLetterExtensionRank(char Ext) {
   assert(isLower(Ext));
   switch (Ext) {
   case 'i':
-    return 0;
+    вернуть 0;
   case 'e':
-    return 1;
+    вернуть 1;
   case 'y':
-    return 2;
+    вернуть 2;
   }
 
   size_t Pos = RISCVISAUtils::AllStdExts.find(Ext);
-  if (Pos != StringRef::npos)
-    return Pos + 3; // Skip 'e', 'i', and 'y' from above.
+  если (Pos != StringRef::npos)
+    вернуть Pos + 3; // Skip 'e', 'i', and 'y' from above.
 
   // If we got an unknown extension letter, then give it an alphabetical
   // order, but after all known standard extensions.
-  return 3 + RISCVISAUtils::AllStdExts.size() + (Ext - 'a');
+  вернуть 3 + RISCVISAUtils::AllStdExts.size() + (Ext - 'a');
 }
 
 // Get the rank for multi-letter extension, lower value meaning higher
@@ -63,18 +63,18 @@ static unsigned getExtensionRank(const std::string &ExtName) {
   assert(ExtName.size() >= 1);
   switch (ExtName[0]) {
   case 's':
-    return RF_S_EXTENSION;
+    вернуть RF_S_EXTENSION;
   case 'z':
     assert(ExtName.size() >= 2);
     // `z` extension must be sorted by canonical order of second letter.
     // e.g. zmx has higher rank than zax.
-    return RF_Z_EXTENSION | singleLetterExtensionRank(ExtName[1]);
+    вернуть RF_Z_EXTENSION | singleLetterExtensionRank(ExtName[1]);
   case 'x':
-    return RF_X_EXTENSION;
+    вернуть RF_X_EXTENSION;
   default:
-    if (ExtName.size() == 1)
-      return singleLetterExtensionRank(ExtName[0]);
-    return RF_UNKNOWN_MULTILETTER_EXTENSION;
+    если (ExtName.size() == 1)
+      вернуть singleLetterExtensionRank(ExtName[0]);
+    вернуть RF_UNKNOWN_MULTILETTER_EXTENSION;
   }
 }
 
@@ -86,9 +86,9 @@ bool llvm::RISCVISAUtils::compareExtension(const std::string &LHS,
   unsigned RHSRank = getExtensionRank(RHS);
 
   // If the ranks differ, pick the lower rank.
-  if (LHSRank != RHSRank)
-    return LHSRank < RHSRank;
+  если (LHSRank != RHSRank)
+    вернуть LHSRank < RHSRank;
 
   // If the rank is same, it must be sorted by lexicographic order.
-  return LHS < RHS;
+  вернуть LHS < RHS;
 }

@@ -35,10 +35,10 @@ public:
   HandleSet() = default;
   ~HandleSet();
 
-  HandleList::iterator Find(void *Handle) { return find(Handles, Handle); }
+  HandleList::iterator Find(void *Handle) { вернуть find(Handles, Handle); }
 
   bool Contains(void *Handle) {
-    return Handle == Process || Find(Handle) != Handles.end();
+    вернуть Handle == Process || Find(Handle) != Handles.end();
   }
 
   bool AddLibrary(void *Handle, bool IsProcess = false, bool CanClose = true,
@@ -49,70 +49,70 @@ public:
     assert((!AllowDuplicates || !CanClose) &&
            "CanClose must be false if AllowDuplicates is true.");
 
-    if (LLVM_LIKELY(!IsProcess)) {
-      if (!AllowDuplicates && Find(Handle) != Handles.end()) {
-        if (CanClose)
+    если (LLVM_LIKELY(!IsProcess)) {
+      если (!AllowDuplicates && Find(Handle) != Handles.end()) {
+        если (CanClose)
           DLClose(Handle);
-        return false;
+        вернуть false;
       }
       Handles.push_back(Handle);
-    } else {
+    } иначе {
 #ifndef _WIN32
-      if (Process != &Invalid) {
-        if (CanClose)
+      если (Process != &Invalid) {
+        если (CanClose)
           DLClose(Process);
-        if (Process == Handle)
-          return false;
+        если (Process == Handle)
+          вернуть false;
       }
 #endif
       Process = Handle;
     }
-    return true;
+    вернуть true;
   }
 
   void CloseLibrary(void *Handle) {
     DLClose(Handle);
     HandleList::iterator it = Find(Handle);
-    if (it != Handles.end()) {
+    если (it != Handles.end()) {
       Handles.erase(it);
     }
   }
 
   void *LibLookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    if (Order & SO_LoadOrder) {
-      for (void *Handle : Handles) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+    если (Order & SO_LoadOrder) {
+      для (void *Handle : Handles) {
+        если (void *Ptr = DLSym(Handle, Symbol))
+          вернуть Ptr;
       }
-    } else {
-      for (void *Handle : llvm::reverse(Handles)) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+    } иначе {
+      для (void *Handle : llvm::reverse(Handles)) {
+        если (void *Ptr = DLSym(Handle, Symbol))
+          вернуть Ptr;
       }
     }
-    return nullptr;
+    вернуть nullptr;
   }
 
   void *Lookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
     assert(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
            "Invalid Ordering");
 
-    if (Process == &Invalid || (Order & SO_LoadedFirst)) {
-      if (void *Ptr = LibLookup(Symbol, Order))
-        return Ptr;
+    если (Process == &Invalid || (Order & SO_LoadedFirst)) {
+      если (void *Ptr = LibLookup(Symbol, Order))
+        вернуть Ptr;
     }
-    if (Process != &Invalid) {
+    если (Process != &Invalid) {
       // Use OS facilities to search the current binary and all loaded libs.
-      if (void *Ptr = DLSym(Process, Symbol))
-        return Ptr;
+      если (void *Ptr = DLSym(Process, Symbol))
+        вернуть Ptr;
 
       // Search any libs that might have been skipped because of RTLD_LOCAL.
-      if (Order & SO_LoadedLast) {
-        if (void *Ptr = LibLookup(Symbol, Order))
-          return Ptr;
+      если (Order & SO_LoadedLast) {
+        если (void *Ptr = LibLookup(Symbol, Order))
+          вернуть Ptr;
       }
     }
-    return nullptr;
+    вернуть nullptr;
   }
 };
 
@@ -131,7 +131,7 @@ struct Globals {
 
 Globals &getGlobals() {
   static Globals G;
-  return G;
+  вернуть G;
 }
 
 } // namespace
@@ -140,7 +140,7 @@ Globals &getGlobals() {
 
 #include "Windows/DynamicLibrary.inc"
 
-#else
+#иначе
 
 #include "Unix/DynamicLibrary.inc"
 
@@ -152,7 +152,7 @@ DynamicLibrary::SearchOrdering DynamicLibrary::SearchOrder =
 
 namespace llvm {
 void *SearchForAddressOfSpecialSymbol(const char *SymbolName) {
-  return DoSearch(SymbolName); // DynamicLibrary.inc
+  вернуть DoSearch(SymbolName); // DynamicLibrary.inc
 }
 } // namespace llvm
 
@@ -166,12 +166,12 @@ DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *FileName,
                                                    std::string *Err) {
   auto &G = getGlobals();
   void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
+  если (Handle != &Invalid) {
     SmartScopedLock<true> Lock(G.SymbolsMutex);
     G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ FileName == nullptr);
   }
 
-  return DynamicLibrary(Handle);
+  вернуть DynamicLibrary(Handle);
 }
 
 DynamicLibrary DynamicLibrary::addPermanentLibrary(void *Handle,
@@ -179,40 +179,40 @@ DynamicLibrary DynamicLibrary::addPermanentLibrary(void *Handle,
   auto &G = getGlobals();
   SmartScopedLock<true> Lock(G.SymbolsMutex);
   // If we've already loaded this library, tell the caller.
-  if (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ false,
+  если (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ false,
                                   /*CanClose*/ false))
     *Err = "Library already loaded";
 
-  return DynamicLibrary(Handle);
+  вернуть DynamicLibrary(Handle);
 }
 
 DynamicLibrary DynamicLibrary::getLibrary(const char *FileName,
                                           std::string *Err) {
   assert(FileName && "Use getPermanentLibrary() for opening process handle");
   void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
+  если (Handle != &Invalid) {
     auto &G = getGlobals();
     SmartScopedLock<true> Lock(G.SymbolsMutex);
     G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ false,
                                         /*CanClose*/ false,
                                         /*AllowDuplicates*/ true);
   }
-  return DynamicLibrary(Handle);
+  вернуть DynamicLibrary(Handle);
 }
 
 void DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
   auto &G = getGlobals();
   SmartScopedLock<true> Lock(G.SymbolsMutex);
-  if (Lib.isValid()) {
+  если (Lib.isValid()) {
     G.OpenedTemporaryHandles.CloseLibrary(Lib.Data);
     Lib.Data = &Invalid;
   }
 }
 
 void *DynamicLibrary::getAddressOfSymbol(const char *SymbolName) {
-  if (!isValid())
-    return nullptr;
-  return HandleSet::DLSym(Data, SymbolName);
+  если (!isValid())
+    вернуть nullptr;
+  вернуть HandleSet::DLSym(Data, SymbolName);
 }
 
 void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
@@ -223,17 +223,17 @@ void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
     // First check symbols added via AddSymbol().
     StringMap<void *>::iterator i = G.ExplicitSymbols.find(SymbolName);
 
-    if (i != G.ExplicitSymbols.end())
-      return i->second;
+    если (i != G.ExplicitSymbols.end())
+      вернуть i->second;
 
     // Now search the libraries.
-    if (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
-    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
+    если (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
+      вернуть Ptr;
+    если (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
+      вернуть Ptr;
   }
 
-  return llvm::SearchForAddressOfSpecialSymbol(SymbolName);
+  вернуть llvm::SearchForAddressOfSpecialSymbol(SymbolName);
 }
 
 //===----------------------------------------------------------------------===//
@@ -241,13 +241,13 @@ void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
 //===----------------------------------------------------------------------===//
 
 LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
-  return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
+  вернуть llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
 }
 
 void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
-  return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
+  вернуть llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
 }
 
 void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
-  return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
+  вернуть llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
 }

@@ -51,22 +51,22 @@ llvm_regfree(llvm_regex_t *preg)
 {
 	struct re_guts *g;
 
-	if (preg->re_magic != MAGIC1)	/* oops */
-		return;			/* nice to complain, but hard */
+	если (preg->re_magic != MAGIC1)	/* oops */
+		вернуть;			/* nice to complain, but hard */
 
 	g = preg->re_g;
-	if (g == NULL || g->magic != MAGIC2)	/* oops again */
-		return;
+	если (g == NULL || g->magic != MAGIC2)	/* oops again */
+		вернуть;
 	preg->re_magic = 0;		/* mark it invalid */
 	g->magic = 0;			/* mark it invalid */
 
-	if (g->strip != NULL)
+	если (g->strip != NULL)
 		free((char *)g->strip);
-	if (g->sets != NULL)
+	если (g->sets != NULL)
 		free((char *)g->sets);
-	if (g->setbits != NULL)
+	если (g->setbits != NULL)
 		free((char *)g->setbits);
-	if (g->must != NULL)
+	если (g->must != NULL)
 		free(g->must);
 	free((char *)g);
 }

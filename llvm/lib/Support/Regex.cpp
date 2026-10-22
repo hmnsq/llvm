@@ -28,11 +28,11 @@ Regex::Regex(StringRef regex, RegexFlags Flags) {
   unsigned flags = 0;
   preg = new llvm_regex();
   preg->re_endp = regex.end();
-  if (Flags & IgnoreCase)
+  если (Flags & IgnoreCase)
     flags |= REG_ICASE;
-  if (Flags & Newline)
+  если (Flags & Newline)
     flags |= REG_NEWLINE;
-  if (!(Flags & BasicRegex))
+  если (!(Flags & BasicRegex))
     flags |= REG_EXTENDED;
   error = llvm_regcomp(preg, regex.data(), flags|REG_PEND);
 }
@@ -48,7 +48,7 @@ Regex::Regex(Regex &&regex) {
 }
 
 Regex::~Regex() {
-  if (preg) {
+  если (preg) {
     llvm_regfree(preg);
     delete preg;
   }
@@ -57,7 +57,7 @@ Regex::~Regex() {
 namespace {
 
 /// Utility to convert a regex error code into a human-readable string.
-void RegexErrorToString(int error, struct llvm_regex *preg,
+void RegexErrorToString(целое error, struct llvm_regex *preg,
                         std::string &Error) {
   size_t len = llvm_regerror(error, preg, nullptr, 0);
 
@@ -68,33 +68,33 @@ void RegexErrorToString(int error, struct llvm_regex *preg,
 } // namespace
 
 bool Regex::isValid(std::string &Error) const {
-  if (!error)
-    return true;
+  если (!error)
+    вернуть true;
 
   RegexErrorToString(error, preg, Error);
-  return false;
+  вернуть false;
 }
 
 /// getNumMatches - In a valid regex, return the number of parenthesized
 /// matches it contains.
 unsigned Regex::getNumMatches() const {
-  return preg->re_nsub;
+  вернуть preg->re_nsub;
 }
 
 bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
                   std::string *Error) const {
   // Reset error, if given.
-  if (Error && !Error->empty())
+  если (Error && !Error->empty())
     *Error = "";
 
   // Check if the regex itself didn't successfully compile.
-  if (Error ? !isValid(*Error) : !isValid())
-    return false;
+  если (Error ? !isValid(*Error) : !isValid())
+    вернуть false;
 
   unsigned nmatch = Matches ? preg->re_nsub+1 : 0;
 
   // Update null string to empty string.
-  if (String.data() == nullptr)
+  если (String.data() == nullptr)
     String = "";
 
   // pmatch needs to have at least one element.
@@ -103,25 +103,25 @@ bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
   pm[0].rm_so = 0;
   pm[0].rm_eo = String.size();
 
-  int rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
+  целое rc = llvm_regexec(preg, String.data(), nmatch, pm.data(), REG_STARTEND);
 
   // Failure to match is not an error, it's just a normal return value.
   // Any other error code is considered abnormal, and is logged in the Error.
-  if (rc == REG_NOMATCH)
-    return false;
-  if (rc != 0) {
-    if (Error)
+  если (rc == REG_NOMATCH)
+    вернуть false;
+  если (rc != 0) {
+    если (Error)
       RegexErrorToString(error, preg, *Error);
-    return false;
+    вернуть false;
   }
 
   // There was a match.
 
-  if (Matches) { // match position requested
+  если (Matches) { // match position requested
     Matches->clear();
 
-    for (unsigned i = 0; i != nmatch; ++i) {
-      if (pm[i].rm_so == -1) {
+    для (unsigned i = 0; i != nmatch; ++i) {
+      если (pm[i].rm_so == -1) {
         // this group didn't match
         Matches->push_back(StringRef());
         continue;
@@ -132,7 +132,7 @@ bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
     }
   }
 
-  return true;
+  вернуть true;
 }
 
 std::string Regex::sub(StringRef Repl, StringRef String,
@@ -140,15 +140,15 @@ std::string Regex::sub(StringRef Repl, StringRef String,
   SmallVector<StringRef, 8> Matches;
 
   // Return the input if there was no match.
-  if (!match(String, &Matches, Error))
-    return std::string(String);
+  если (!match(String, &Matches, Error))
+    вернуть std::string(String);
 
   // Otherwise splice in the replacement string, starting with the prefix before
   // the match.
   std::string Res(String.begin(), Matches[0].begin());
 
   // Then the replacement string, honoring possible substitutions.
-  while (!Repl.empty()) {
+  пока (!Repl.empty()) {
     // Skip to the next escape.
     std::pair<StringRef, StringRef> Split = Repl.split('\\');
 
@@ -156,8 +156,8 @@ std::string Regex::sub(StringRef Repl, StringRef String,
     Res += Split.first;
 
     // Check for termination and trailing backslash.
-    if (Split.second.empty()) {
-      if (Repl.size() != Split.first.size() &&
+    если (Split.second.empty()) {
+      если (Repl.size() != Split.first.size() &&
           Error && Error->empty())
         *Error = "replacement string contained trailing backslash";
       break;
@@ -171,15 +171,15 @@ std::string Regex::sub(StringRef Repl, StringRef String,
 
       // Backreference with the "\g<ref>" syntax
     case 'g':
-      if (Repl.size() >= 4 && Repl[1] == '<') {
+      если (Repl.size() >= 4 && Repl[1] == '<') {
         size_t End = Repl.find('>');
         StringRef Ref = Repl.slice(2, End);
         unsigned RefValue;
-        if (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
+        если (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
           Repl = Repl.substr(End + 1);
-          if (RefValue < Matches.size())
+          если (RefValue < Matches.size())
             Res += Matches[RefValue];
-          else if (Error && Error->empty())
+          иначе если (Error && Error->empty())
             *Error =
                 ("invalid backreference string 'g<" + Twine(Ref) + ">'").str();
           break;
@@ -205,10 +205,10 @@ std::string Regex::sub(StringRef Repl, StringRef String,
 
       // Hex character escapes.
     case 'x':
-      if (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
+      если (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
         Res += char(hexDigitValue(Repl[1]) * 16 + hexDigitValue(Repl[2]));
         Repl = Repl.substr(3);
-      } else {
+      } иначе {
         Res += Repl[0];
         Repl = Repl.substr(1);
       }
@@ -222,10 +222,10 @@ std::string Regex::sub(StringRef Repl, StringRef String,
       Repl = Repl.substr(Ref.size());
 
       unsigned RefValue;
-      if (!Ref.getAsInteger(10, RefValue) &&
+      если (!Ref.getAsInteger(10, RefValue) &&
           RefValue < Matches.size())
         Res += Matches[RefValue];
-      else if (Error && Error->empty())
+      иначе если (Error && Error->empty())
         *Error = ("invalid backreference string '" + Twine(Ref) + "'").str();
       break;
     }
@@ -235,7 +235,7 @@ std::string Regex::sub(StringRef Repl, StringRef String,
   // And finally the suffix.
   Res += StringRef(Matches[0].end(), String.end() - Matches[0].end());
 
-  return Res;
+  вернуть Res;
 }
 
 // These are the special characters matched in functions like "p_ere_exp".
@@ -245,16 +245,16 @@ bool Regex::isLiteralERE(StringRef Str) {
   // Check for regex metacharacters.  This list was derived from our regex
   // implementation in regcomp.c and double checked against the POSIX extended
   // regular expression specification.
-  return Str.find_first_of(RegexMetachars) == StringRef::npos;
+  вернуть Str.find_first_of(RegexMetachars) == StringRef::npos;
 }
 
 std::string Regex::escape(StringRef String) {
   std::string RegexStr;
-  for (char C : String) {
-    if (strchr(RegexMetachars, C))
+  для (char C : String) {
+    если (strchr(RegexMetachars, C))
       RegexStr += '\\';
     RegexStr += C;
   }
 
-  return RegexStr;
+  вернуть RegexStr;
 }

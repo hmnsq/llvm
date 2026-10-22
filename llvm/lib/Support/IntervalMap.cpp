@@ -24,25 +24,25 @@ void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
 
 NodeRef Path::getLeftSibling(unsigned Level) const {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  если (Level == 0)
+    вернуть NodeRef();
 
   // Go up the tree until we can go left.
   unsigned l = Level - 1;
-  while (l && path[l].offset == 0)
+  пока (l && path[l].offset == 0)
     --l;
 
   // We can't go left.
-  if (path[l].offset == 0)
-    return NodeRef();
+  если (path[l].offset == 0)
+    вернуть NodeRef();
 
   // NR is the subtree containing our left sibling.
   NodeRef NR = path[l].subtree(path[l].offset - 1);
 
   // Keep right all the way down.
-  for (++l; l != Level; ++l)
+  для (++l; l != Level; ++l)
     NR = NR.subtree(NR.size() - 1);
-  return NR;
+  вернуть NR;
 }
 
 void Path::moveLeft(unsigned Level) {
@@ -50,13 +50,13 @@ void Path::moveLeft(unsigned Level) {
 
   // Go up the tree until we can go left.
   unsigned l = 0;
-  if (valid()) {
+  если (valid()) {
     l = Level - 1;
-    while (path[l].offset == 0) {
+    пока (path[l].offset == 0) {
       assert(l != 0 && "Cannot move beyond begin()");
       --l;
     }
-  } else if (height() < Level)
+  } иначе если (height() < Level)
     // end() may have created a height=0 path.
     path.resize(Level + 1, Entry(nullptr, 0, 0));
 
@@ -65,7 +65,7 @@ void Path::moveLeft(unsigned Level) {
   NodeRef NR = subtree(l);
 
   // Get the rightmost node in the subtree.
-  for (++l; l != Level; ++l) {
+  для (++l; l != Level; ++l) {
     path[l] = Entry(NR, NR.size() - 1);
     NR = NR.subtree(NR.size() - 1);
   }
@@ -74,25 +74,25 @@ void Path::moveLeft(unsigned Level) {
 
 NodeRef Path::getRightSibling(unsigned Level) const {
   // The root has no siblings.
-  if (Level == 0)
-    return NodeRef();
+  если (Level == 0)
+    вернуть NodeRef();
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  пока (l && atLastEntry(l))
     --l;
 
   // We can't go right.
-  if (atLastEntry(l))
-    return NodeRef();
+  если (atLastEntry(l))
+    вернуть NodeRef();
 
   // NR is the subtree containing our right sibling.
   NodeRef NR = path[l].subtree(path[l].offset + 1);
 
   // Keep left all the way down.
-  for (++l; l != Level; ++l)
+  для (++l; l != Level; ++l)
     NR = NR.subtree(0);
-  return NR;
+  вернуть NR;
 }
 
 void Path::moveRight(unsigned Level) {
@@ -100,16 +100,16 @@ void Path::moveRight(unsigned Level) {
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
-  while (l && atLastEntry(l))
+  пока (l && atLastEntry(l))
     --l;
 
   // NR is the subtree containing our right sibling. If we hit end(), we have
   // offset(0) == node(0).size().
-  if (++path[l].offset == path[l].size)
-    return;
+  если (++path[l].offset == path[l].size)
+    вернуть;
   NodeRef NR = subtree(l);
 
-  for (++l; l != Level; ++l) {
+  для (++l; l != Level; ++l) {
     path[l] = Entry(NR, 0);
     NR = NR.subtree(0);
   }
@@ -122,23 +122,23 @@ IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
                    unsigned Position, bool Grow) {
   assert(Elements + Grow <= Nodes * Capacity && "Not enough room for elements");
   assert(Position <= Elements && "Invalid position");
-  if (!Nodes)
-    return IdxPair();
+  если (!Nodes)
+    вернуть IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
   const unsigned PerNode = (Elements + Grow) / Nodes;
   const unsigned Extra = (Elements + Grow) % Nodes;
   IdxPair PosPair = IdxPair(Nodes, 0);
   unsigned Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
+  для (unsigned n = 0; n != Nodes; ++n) {
     Sum += NewSize[n] = PerNode + (n < Extra);
-    if (PosPair.first == Nodes && Sum > Position)
+    если (PosPair.first == Nodes && Sum > Position)
       PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
   }
   assert(Sum == Elements + Grow && "Bad distribution sum");
 
   // Subtract the Grow element that was added.
-  if (Grow) {
+  если (Grow) {
     assert(PosPair.first < Nodes && "Bad algebra");
     assert(NewSize[PosPair.first] && "Too few elements to need Grow");
     --NewSize[PosPair.first];
@@ -146,14 +146,14 @@ IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
 
 #ifndef NDEBUG
   Sum = 0;
-  for (unsigned n = 0; n != Nodes; ++n) {
+  для (unsigned n = 0; n != Nodes; ++n) {
     assert(NewSize[n] <= Capacity && "Overallocated node");
     Sum += NewSize[n];
   }
   assert(Sum == Elements && "Bad distribution sum");
 #endif
 
-  return PosPair;
+  вернуть PosPair;
 }
 
 } // namespace IntervalMapImpl

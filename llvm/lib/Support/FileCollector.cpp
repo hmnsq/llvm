@@ -21,7 +21,7 @@ FileCollectorBase::~FileCollectorBase() = default;
 void FileCollectorBase::addFile(const Twine &File) {
   std::lock_guard<std::mutex> lock(Mutex);
   std::string FileStr = File.str();
-  if (markAsSeen(FileStr))
+  если (markAsSeen(FileStr))
     addFileImpl(FileStr);
 }
 
@@ -35,8 +35,8 @@ static bool isCaseSensitivePath(StringRef Path) {
   SmallString<256> TmpDest = Path, UpperDest, RealDest;
 
   // Remove component traversals, links, etc.
-  if (sys::fs::real_path(Path, TmpDest))
-    return true; // Current default value in vfs.yaml
+  если (sys::fs::real_path(Path, TmpDest))
+    вернуть true; // Current default value in vfs.yaml
   Path = TmpDest;
 
   // Change path to all upper case and ask for its real path, if the latter
@@ -44,9 +44,9 @@ static bool isCaseSensitivePath(StringRef Path) {
   // sensitive in the absence of real_path, since this is the YAMLVFSWriter
   // default.
   UpperDest = Path.upper();
-  if (!sys::fs::real_path(UpperDest, RealDest) && Path == RealDest)
-    return false;
-  return true;
+  если (!sys::fs::real_path(UpperDest, RealDest) && Path == RealDest)
+    вернуть false;
+  вернуть true;
 }
 
 FileCollector::FileCollector(std::string Root, std::string OverlayRoot,
@@ -67,12 +67,12 @@ void FileCollector::PathCanonicalizer::updateWithRealPath(
   // expensive.
   SmallString<256> RealPath;
   auto DirWithSymlink = CachedDirs.find(Directory);
-  if (DirWithSymlink == CachedDirs.end()) {
+  если (DirWithSymlink == CachedDirs.end()) {
     // FIXME: What if there is nothing on disk?
-    if (VFS->getRealPath(Directory, RealPath))
-      return;
+    если (VFS->getRealPath(Directory, RealPath))
+      вернуть;
     CachedDirs[Directory] = std::string(RealPath);
-  } else {
+  } иначе {
     RealPath = DirWithSymlink->second;
   }
 
@@ -116,7 +116,7 @@ FileCollector::PathCanonicalizer::canonicalize(StringRef SrcPath) {
   // Canonicalize the virtual path by removing "..", "." components.
   sys::path::remove_dots(Paths.VirtualPath, /*remove_dot_dot=*/true);
 
-  return Paths;
+  вернуть Paths;
 }
 
 void FileCollector::addFileImpl(StringRef SrcPath) {
@@ -138,20 +138,20 @@ FileCollector::addDirectoryImpl(const llvm::Twine &Dir,
                                 IntrusiveRefCntPtr<vfs::FileSystem> FS,
                                 std::error_code &EC) {
   auto It = FS->dir_begin(Dir, EC);
-  if (EC)
-    return It;
+  если (EC)
+    вернуть It;
   addFile(Dir);
-  for (; !EC && It != llvm::vfs::directory_iterator(); It.increment(EC)) {
-    if (It->type() == sys::fs::file_type::regular_file ||
+  для (; !EC && It != llvm::vfs::directory_iterator(); It.increment(EC)) {
+    если (It->type() == sys::fs::file_type::regular_file ||
         It->type() == sys::fs::file_type::directory_file ||
         It->type() == sys::fs::file_type::symlink_file) {
       addFile(It->path());
     }
   }
-  if (EC)
-    return It;
+  если (EC)
+    вернуть It;
   // Return a new iterator.
-  return FS->dir_begin(Dir, EC);
+  вернуть FS->dir_begin(Dir, EC);
 }
 
 /// Set the access and modification time for the given file from the given
@@ -159,80 +159,80 @@ FileCollector::addDirectoryImpl(const llvm::Twine &Dir,
 static std::error_code
 copyAccessAndModificationTime(StringRef Filename,
                               const sys::fs::file_status &Stat) {
-  int FD;
+  целое FD;
 
-  if (auto EC =
+  если (auto EC =
           sys::fs::openFileForWrite(Filename, FD, sys::fs::CD_OpenExisting))
-    return EC;
+    вернуть EC;
 
-  if (auto EC = sys::fs::setLastAccessAndModificationTime(
+  если (auto EC = sys::fs::setLastAccessAndModificationTime(
           FD, Stat.getLastAccessedTime(), Stat.getLastModificationTime()))
-    return EC;
+    вернуть EC;
 
-  if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return EC;
+  если (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    вернуть EC;
 
-  return {};
+  вернуть {};
 }
 
 std::error_code FileCollector::copyFiles(bool StopOnError) {
   auto Err = sys::fs::create_directories(Root, /*IgnoreExisting=*/true);
-  if (Err) {
-    return Err;
+  если (Err) {
+    вернуть Err;
   }
 
   std::lock_guard<std::mutex> lock(Mutex);
 
-  for (auto &entry : VFSWriter.getMappings()) {
+  для (auto &entry : VFSWriter.getMappings()) {
     // Get the status of the original file/directory.
     sys::fs::file_status Stat;
-    if (std::error_code EC = sys::fs::status(entry.VPath, Stat)) {
-      if (StopOnError)
-        return EC;
+    если (std::error_code EC = sys::fs::status(entry.VPath, Stat)) {
+      если (StopOnError)
+        вернуть EC;
       continue;
     }
 
     // Continue if the file doesn't exist.
-    if (Stat.type() == sys::fs::file_type::file_not_found)
+    если (Stat.type() == sys::fs::file_type::file_not_found)
       continue;
 
     // Create directory tree.
-    if (std::error_code EC =
+    если (std::error_code EC =
             sys::fs::create_directories(sys::path::parent_path(entry.RPath),
                                         /*IgnoreExisting=*/true)) {
-      if (StopOnError)
-        return EC;
+      если (StopOnError)
+        вернуть EC;
     }
 
-    if (Stat.type() == sys::fs::file_type::directory_file) {
+    если (Stat.type() == sys::fs::file_type::directory_file) {
       // Construct a directory when it's just a directory entry.
-      if (std::error_code EC =
+      если (std::error_code EC =
               sys::fs::create_directories(entry.RPath,
                                           /*IgnoreExisting=*/true)) {
-        if (StopOnError)
-          return EC;
+        если (StopOnError)
+          вернуть EC;
       }
       continue;
     }
 
     // Copy file over.
-    if (std::error_code EC = sys::fs::copy_file(entry.VPath, entry.RPath)) {
-      if (StopOnError)
-        return EC;
+    если (std::error_code EC = sys::fs::copy_file(entry.VPath, entry.RPath)) {
+      если (StopOnError)
+        вернуть EC;
     }
 
     // Copy over permissions.
-    if (auto perms = sys::fs::getPermissions(entry.VPath)) {
-      if (std::error_code EC = sys::fs::setPermissions(entry.RPath, *perms)) {
-        if (StopOnError)
-          return EC;
+    если (auto perms = sys::fs::getPermissions(entry.VPath)) {
+      если (std::error_code EC = sys::fs::setPermissions(entry.RPath, *perms)) {
+        если (StopOnError)
+          вернуть EC;
       }
     }
 
     // Copy over modification time.
     copyAccessAndModificationTime(entry.RPath, Stat);
   }
-  return {};
+  вернуть {};
 }
 
 std::error_code FileCollector::writeMapping(StringRef MappingFile) {
@@ -244,12 +244,12 @@ std::error_code FileCollector::writeMapping(StringRef MappingFile) {
 
   std::error_code EC;
   raw_fd_ostream os(MappingFile, EC, sys::fs::OF_TextWithCRLF);
-  if (EC)
-    return EC;
+  если (EC)
+    вернуть EC;
 
   VFSWriter.write(os);
 
-  return {};
+  вернуть {};
 }
 
 namespace llvm {
@@ -262,33 +262,33 @@ public:
 
   llvm::ErrorOr<llvm::vfs::Status> status(const Twine &Path) override {
     auto Result = FS->status(Path);
-    if (Result && Result->exists())
+    если (Result && Result->exists())
       Collector->addFile(Path);
-    return Result;
+    вернуть Result;
   }
 
   llvm::ErrorOr<std::unique_ptr<llvm::vfs::File>>
   openFileForRead(const Twine &Path) override {
     auto Result = FS->openFileForRead(Path);
-    if (Result && *Result)
+    если (Result && *Result)
       Collector->addFile(Path);
-    return Result;
+    вернуть Result;
   }
 
   llvm::vfs::directory_iterator dir_begin(const llvm::Twine &Dir,
                                           std::error_code &EC) override {
-    return Collector->addDirectoryImpl(Dir, FS, EC);
+    вернуть Collector->addDirectoryImpl(Dir, FS, EC);
   }
 
   std::error_code getRealPath(const Twine &Path,
                               SmallVectorImpl<char> &Output) override {
     auto EC = FS->getRealPath(Path, Output);
-    if (!EC) {
+    если (!EC) {
       Collector->addFile(Path);
-      if (Output.size() > 0)
+      если (Output.size() > 0)
         Collector->addFile(Output);
     }
-    return EC;
+    вернуть EC;
   }
 
   void
@@ -298,15 +298,15 @@ public:
   }
 
   std::error_code isLocal(const Twine &Path, bool &Result) override {
-    return FS->isLocal(Path, Result);
+    вернуть FS->isLocal(Path, Result);
   }
 
   llvm::ErrorOr<std::string> getCurrentWorkingDirectory() const override {
-    return FS->getCurrentWorkingDirectory();
+    вернуть FS->getCurrentWorkingDirectory();
   }
 
   std::error_code setCurrentWorkingDirectory(const llvm::Twine &Path) override {
-    return FS->setCurrentWorkingDirectory(Path);
+    вернуть FS->setCurrentWorkingDirectory(Path);
   }
 
 private:
@@ -319,6 +319,6 @@ private:
 IntrusiveRefCntPtr<vfs::FileSystem>
 FileCollector::createCollectorVFS(IntrusiveRefCntPtr<vfs::FileSystem> BaseFS,
                                   std::shared_ptr<FileCollector> Collector) {
-  return makeIntrusiveRefCnt<FileCollectorFileSystem>(std::move(BaseFS),
+  вернуть makeIntrusiveRefCnt<FileCollectorFileSystem>(std::move(BaseFS),
                                                       std::move(Collector));
 }

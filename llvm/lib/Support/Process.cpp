@@ -32,7 +32,7 @@ using namespace sys;
 
 std::optional<std::string>
 Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+  вернуть FindInEnvPath(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
@@ -41,29 +41,29 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
   assert(!path::is_absolute(FileName));
   std::optional<std::string> FoundPath;
   std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+  если (!OptPath)
+    вернуть FoundPath;
 
   const char EnvPathSeparatorStr[] = {Separator, '\0'};
   SmallVector<StringRef, 8> Dirs;
   SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
+  для (StringRef Dir : Dirs) {
+    если (Dir.empty())
       continue;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
+    если (any_of(IgnoreList, [&](StringRef S) { вернуть fs::equivalent(S, Dir); }))
       continue;
 
     SmallString<128> FilePath(Dir);
     path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
+    если (fs::exists(Twine(FilePath))) {
       FoundPath = std::string(FilePath);
       break;
     }
   }
 
-  return FoundPath;
+  вернуть FoundPath;
 }
 
 // clang-format off
@@ -105,15 +105,15 @@ static const char colorcodes[2][2][16][11] = {
 // may disable core dumps by calling Process::PreventCoreFiles().
 static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+bool Process::AreCoreFilesPrevented() { вернуть coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
+[[noreturn]] void Process::Exit(целое RetCode, bool NoCleanup) {
+  если (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
     CRC->HandleExit(RetCode);
 
-  if (NoCleanup)
+  если (NoCleanup)
     ExitNoCleanup(RetCode);
-  else
+  иначе
     ::exit(RetCode);
 }
 

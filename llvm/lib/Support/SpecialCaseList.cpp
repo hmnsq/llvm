@@ -82,11 +82,11 @@ private:
 
   mutable RadixTree<iterator_range<StringRef::const_iterator>,
                     RadixTree<iterator_range<StringRef::const_reverse_iterator>,
-                              SmallVector<int, 1>>>
+                              SmallVector<целое, 1>>>
       PrefixSuffixToGlob;
 
   mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    SmallVector<int, 1>>
+                    SmallVector<целое, 1>>
       SubstrToGlob;
 
   mutable bool Initialized = false;
@@ -107,7 +107,7 @@ public:
   Error insert(StringRef Pattern, unsigned LineNumber);
   unsigned match(StringRef Query) const;
 
-  bool matchAny(StringRef Query) const { return match(Query); }
+  bool matchAny(StringRef Query) const { вернуть match(Query); }
 
 private:
   unsigned matchInternal(StringRef Query) const;
@@ -120,13 +120,13 @@ private:
 
 Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
                            bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument,
+  если (Pattern.empty())
+    вернуть createStringError(errc::invalid_argument,
                              "Supplied regex was blank");
 
   // Replace * with .*
   auto Regexp = Pattern.str();
-  for (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
+  для (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
        pos += strlen(".*")) {
     Regexp.replace(pos, strlen("*"), ".*");
   }
@@ -136,54 +136,54 @@ Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
   // Check that the regexp is valid.
   Regex CheckRE(Regexp);
   std::string REError;
-  if (!CheckRE.isValid(REError))
-    return createStringError(errc::invalid_argument, REError);
+  если (!CheckRE.isValid(REError))
+    вернуть createStringError(errc::invalid_argument, REError);
 
   RegExes.emplace_back(Pattern, LineNumber, std::move(CheckRE));
-  return Error::success();
+  вернуть Error::success();
 }
 
 unsigned RegexMatcher::match(StringRef Query) const {
-  for (const auto &R : reverse(RegExes))
-    if (R.Rg.match(Query))
-      return R.LineNo;
-  return 0;
+  для (const auto &R : reverse(RegExes))
+    если (R.Rg.match(Query))
+      вернуть R.LineNo;
+  вернуть 0;
 }
 
 StringRef RegexMatcher::findRule(unsigned LineNo) const {
-  for (const auto &R : RegExes)
-    if (R.LineNo == LineNo)
-      return R.Name;
+  для (const auto &R : RegExes)
+    если (R.LineNo == LineNo)
+      вернуть R.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  вернуть {};
 }
 
 Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
                           bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument, "Supplied glob was blank");
+  если (Pattern.empty())
+    вернуть createStringError(errc::invalid_argument, "Supplied glob was blank");
 
   auto Res =
       GlobPattern::create(Pattern, /*MaxSubPatterns=*/1024, SlashAgnostic);
-  if (auto Err = Res.takeError())
-    return Err;
+  если (auto Err = Res.takeError())
+    вернуть Err;
   Globs.emplace_back(Pattern, LineNumber, std::move(Res.get()));
-  return Error::success();
+  вернуть Error::success();
 }
 
 void GlobMatcher::LazyInit() const {
-  if (LLVM_LIKELY(Initialized))
-    return;
+  если (LLVM_LIKELY(Initialized))
+    вернуть;
   Initialized = true;
-  for (const auto &[Idx, G] : enumerate(Globs)) {
+  для (const auto &[Idx, G] : enumerate(Globs)) {
     StringRef Prefix = G.Pattern.prefix();
     StringRef Suffix = G.Pattern.suffix();
 
-    if (Suffix.empty() && Prefix.empty()) {
+    если (Suffix.empty() && Prefix.empty()) {
       // If both prefix and suffix are empty put into special tree to search by
       // substring in a middle.
       StringRef Substr = G.Pattern.longest_substr();
-      if (!Substr.empty()) {
+      если (!Substr.empty()) {
         // But only if substring is not empty. Searching this tree is more
         // expensive.
         auto &V = SubstrToGlob.emplace(Substr).first->second;
@@ -201,15 +201,15 @@ void GlobMatcher::LazyInit() const {
 unsigned GlobMatcher::match(StringRef Query) const {
   LazyInit();
 
-  int Best = -1;
-  if (!PrefixSuffixToGlob.empty()) {
-    for (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
-      for (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
+  целое Best = -1;
+  если (!PrefixSuffixToGlob.empty()) {
+    для (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
+      для (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
+        для (целое Idx : reverse(V)) {
+          если (Best > Idx)
             break;
           const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
+          если (G.Pattern.match(Query)) {
             Best = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
@@ -222,16 +222,16 @@ unsigned GlobMatcher::match(StringRef Query) const {
     }
   }
 
-  if (!SubstrToGlob.empty()) {
+  если (!SubstrToGlob.empty()) {
     // As we don't know when substring exactly starts, we will try all
     // possibilities. In most cases search will fail on first characters.
-    for (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
-      for (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
+    для (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
+      для (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
+        для (целое Idx : reverse(V)) {
+          если (Best > Idx)
             break;
           const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
+          если (G.Pattern.match(Query)) {
             Best = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
@@ -243,28 +243,28 @@ unsigned GlobMatcher::match(StringRef Query) const {
       }
     }
   }
-  return Best < 0 ? 0 : Globs[Best].LineNo;
+  вернуть Best < 0 ? 0 : Globs[Best].LineNo;
 }
 
 StringRef GlobMatcher::findRule(unsigned LineNo) const {
-  for (const auto &G : Globs)
-    if (G.LineNo == LineNo)
-      return G.Name;
+  для (const auto &G : Globs)
+    если (G.LineNo == LineNo)
+      вернуть G.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  вернуть {};
 }
 
 Matcher::Matcher(QueryOptions QOpts) : Options(QOpts) {
-  if (Options.UseGlobs)
+  если (Options.UseGlobs)
     M.emplace<GlobMatcher>();
-  else
+  иначе
     M.emplace<RegexMatcher>();
 }
 
 Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
-  return std::visit(
+  вернуть std::visit(
       [&](auto &V) {
-        return V.insert(Pattern, LineNumber, Options.SlashAgnostic);
+        вернуть V.insert(Pattern, LineNumber, Options.SlashAgnostic);
       },
       M);
 }
@@ -282,19 +282,19 @@ Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
 //   If a match only works with the old behavior (non-canonicalized), a warning
 //   is emitted.
 unsigned Matcher::match(StringRef Query) const {
-  if (!Options.RemoveDotSlash)
-    return matchInternal(Query);
+  если (!Options.RemoveDotSlash)
+    вернуть matchInternal(Query);
 
-  if (!Options.WarnDotSlashMatch)
-    return matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
+  если (!Options.WarnDotSlashMatch)
+    вернуть matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
 
   StringRef FixedQuery = llvm::sys::path::remove_leading_dotslash(Query);
   unsigned FixedMatched = matchInternal(FixedQuery);
-  if (FixedQuery == Query)
-    return FixedMatched;
+  если (FixedQuery == Query)
+    вернуть FixedMatched;
 
   unsigned OriginalMatch = matchInternal(Query);
-  if (OriginalMatch > FixedMatched) {
+  если (OriginalMatch > FixedMatched) {
     std::call_once(Warned, [&]() {
       WithColor::warning() << "Deprecated behaviour: pattern '"
                            << findRule(OriginalMatch) << "' matches '" << Query
@@ -302,15 +302,15 @@ unsigned Matcher::match(StringRef Query) const {
                            << "' instead (further warnings suppressed).\n";
     });
   }
-  return std::max(OriginalMatch, FixedMatched);
+  вернуть std::max(OriginalMatch, FixedMatched);
 }
 
 unsigned Matcher::matchInternal(StringRef Query) const {
-  return std::visit([&](auto &V) -> unsigned { return V.match(Query); }, M);
+  вернуть std::visit([&](auto &V) -> unsigned { вернуть V.match(Query); }, M);
 }
 
 StringRef Matcher::findRule(unsigned LineNo) const {
-  return std::visit([&](auto &V) -> StringRef { return V.findRule(LineNo); },
+  вернуть std::visit([&](auto &V) -> StringRef { вернуть V.findRule(LineNo); },
                     M);
 }
 } // namespace
@@ -332,52 +332,52 @@ std::unique_ptr<SpecialCaseList>
 SpecialCaseList::create(const std::vector<std::string> &Paths,
                         llvm::vfs::FileSystem &FS, std::string &Error) {
   std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(Paths, FS, Error))
-    return SCL;
-  return nullptr;
+  если (SCL->createInternal(Paths, FS, Error))
+    вернуть SCL;
+  вернуть nullptr;
 }
 
 std::unique_ptr<SpecialCaseList> SpecialCaseList::create(const MemoryBuffer *MB,
                                                          std::string &Error) {
   std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(MB, Error))
-    return SCL;
-  return nullptr;
+  если (SCL->createInternal(MB, Error))
+    вернуть SCL;
+  вернуть nullptr;
 }
 
 std::unique_ptr<SpecialCaseList>
 SpecialCaseList::createOrDie(const std::vector<std::string> &Paths,
                              llvm::vfs::FileSystem &FS) {
   std::string Error;
-  if (auto SCL = create(Paths, FS, Error))
-    return SCL;
+  если (auto SCL = create(Paths, FS, Error))
+    вернуть SCL;
   report_fatal_error(Twine(Error));
 }
 
 bool SpecialCaseList::createInternal(const std::vector<std::string> &Paths,
                                      vfs::FileSystem &VFS, std::string &Error) {
-  for (size_t i = 0; i < Paths.size(); ++i) {
+  для (size_t i = 0; i < Paths.size(); ++i) {
     const auto &Path = Paths[i];
     ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
         VFS.getBufferForFile(Path);
-    if (std::error_code EC = FileOrErr.getError()) {
+    если (std::error_code EC = FileOrErr.getError()) {
       Error = (Twine("can't open file '") + Path + "': " + EC.message()).str();
-      return false;
+      вернуть false;
     }
     std::string ParseError;
-    if (!parse(i, FileOrErr.get().get(), ParseError)) {
+    если (!parse(i, FileOrErr.get().get(), ParseError)) {
       Error = (Twine("error parsing file '") + Path + "': " + ParseError).str();
-      return false;
+      вернуть false;
     }
   }
-  return true;
+  вернуть true;
 }
 
 bool SpecialCaseList::createInternal(const MemoryBuffer *MB,
                                      std::string &Error) {
-  if (!parse(0, MB, Error))
-    return false;
-  return true;
+  если (!parse(0, MB, Error))
+    вернуть false;
+  вернуть true;
 }
 
 Expected<SpecialCaseList::Section *>
@@ -387,14 +387,14 @@ SpecialCaseList::addSection(StringRef SectionStr, unsigned FileNo,
   Sections.emplace_back(SectionStr, FileNo, UseGlobs);
   auto &Section = Sections.back();
 
-  if (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
-    return createStringError(errc::invalid_argument,
+  если (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
+    вернуть createStringError(errc::invalid_argument,
                              "malformed section at line " + Twine(LineNo) +
                                  ": '" + SectionStr +
                                  "': " + toString(std::move(Err)));
   }
 
-  return &Section;
+  вернуть &Section;
 }
 
 bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
@@ -402,10 +402,10 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   unsigned long long Version = 2;
 
   StringRef Header = MB->getBuffer();
-  if (Header.consume_front("#!special-case-list-v"))
+  если (Header.consume_front("#!special-case-list-v"))
     consumeUnsignedInteger(Header, 10, Version);
 
-  auto MinVersion = [&](unsigned V) { return Version >= V; };
+  auto MinVersion = [&](unsigned V) { вернуть Version >= V; };
 
   // In https://reviews.llvm.org/D154014 we added glob support and planned
   // to remove regex support in patterns. We temporarily support the
@@ -426,9 +426,9 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
                                             llvm::sys::path::Style::native);
 
   auto ErrOrSection = addSection("*", FileIdx, 1, true);
-  if (auto Err = ErrOrSection.takeError()) {
+  если (auto Err = ErrOrSection.takeError()) {
     Error = toString(std::move(Err));
-    return false;
+    вернуть false;
   }
   Section::SectionImpl *CurrentImpl = ErrOrSection.get()->Impl.get();
 
@@ -436,27 +436,27 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   // path. We may need parametrization in constructor in future.
   constexpr StringRef PathPrefixes[] = {"src", "!src", "mainfile", "source"};
 
-  for (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
+  для (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
        !LineIt.is_at_eof(); LineIt++) {
     unsigned LineNo = LineIt.line_number();
     StringRef Line = LineIt->trim();
-    if (Line.empty())
+    если (Line.empty())
       continue;
 
     // Save section names
-    if (Line.starts_with("[")) {
-      if (!Line.ends_with("]")) {
+    если (Line.starts_with("[")) {
+      если (!Line.ends_with("]")) {
         Error =
             ("malformed section header on line " + Twine(LineNo) + ": " + Line)
                 .str();
-        return false;
+        вернуть false;
       }
 
       auto ErrOrSection =
           addSection(Line.drop_front().drop_back(), FileIdx, LineNo, UseGlobs);
-      if (auto Err = ErrOrSection.takeError()) {
+      если (auto Err = ErrOrSection.takeError()) {
         Error = toString(std::move(Err));
-        return false;
+        вернуть false;
       }
       CurrentImpl = ErrOrSection.get()->Impl.get();
       continue;
@@ -464,15 +464,15 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
 
     // Get our prefix and unparsed glob.
     auto [Prefix, Postfix] = Line.split(":");
-    if (Postfix.empty()) {
+    если (Postfix.empty()) {
       // Missing ':' in the line.
       Error = ("malformed line " + Twine(LineNo) + ": '" + Line + "'").str();
-      return false;
+      вернуть false;
     }
 
     QueryOptions QOpts;
     QOpts.UseGlobs = UseGlobs;
-    if (llvm::is_contained(PathPrefixes, Prefix)) {
+    если (llvm::is_contained(PathPrefixes, Prefix)) {
       QOpts.RemoveDotSlash = RemoveDotSlash;
       QOpts.WarnDotSlashMatch = WarnDotSlash;
       QOpts.SlashAgnostic = SlashAgnostic;
@@ -481,16 +481,16 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
     auto [Pattern, Category] = Postfix.split("=");
     auto [It, _] = CurrentImpl->Entries[Prefix].try_emplace(Category, QOpts);
     Pattern = Pattern.copy(StrAlloc);
-    if (auto Err = It->second.insert(Pattern, LineNo)) {
+    если (auto Err = It->second.insert(Pattern, LineNo)) {
       Error =
           (Twine("malformed ") + (UseGlobs ? "glob" : "regex") + " in line " +
            Twine(LineNo) + ": '" + Pattern + "': " + toString(std::move(Err)))
               .str();
-      return false;
+      вернуть false;
     }
   }
 
-  return true;
+  вернуть true;
 }
 
 SpecialCaseList::~SpecialCaseList() = default;
@@ -498,20 +498,20 @@ SpecialCaseList::~SpecialCaseList() = default;
 bool SpecialCaseList::inSection(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
   auto [FileIdx, LineNo] = inSectionBlame(Section, Prefix, Query, Category);
-  return LineNo;
+  вернуть LineNo;
 }
 
 std::pair<unsigned, unsigned>
 SpecialCaseList::inSectionBlame(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
-  for (const auto &S : reverse(Sections)) {
-    if (S.Impl->SectionMatcher.matchAny(Section)) {
+  для (const auto &S : reverse(Sections)) {
+    если (S.Impl->SectionMatcher.matchAny(Section)) {
       unsigned Blame = S.getLastMatch(Prefix, Query, Category);
-      if (Blame)
-        return {S.FileIdx, Blame};
+      если (Blame)
+        вернуть {S.FileIdx, Blame};
     }
   }
-  return NotFound;
+  вернуть NotFound;
 }
 
 SpecialCaseList::Section::Section(StringRef Str, unsigned FileIdx,
@@ -525,32 +525,32 @@ SpecialCaseList::Section::Section(Section &&) = default;
 SpecialCaseList::Section::~Section() = default;
 
 bool SpecialCaseList::Section::matchName(StringRef Name) const {
-  return Impl->SectionMatcher.matchAny(Name);
+  вернуть Impl->SectionMatcher.matchAny(Name);
 }
 
 const Matcher *
 SpecialCaseList::Section::SectionImpl::findMatcher(StringRef Prefix,
                                                    StringRef Category) const {
   SectionEntries::const_iterator I = Entries.find(Prefix);
-  if (I == Entries.end())
-    return nullptr;
+  если (I == Entries.end())
+    вернуть nullptr;
   StringMap<Matcher>::const_iterator II = I->second.find(Category);
-  if (II == I->second.end())
-    return nullptr;
+  если (II == I->second.end())
+    вернуть nullptr;
 
-  return &II->second;
+  вернуть &II->second;
 }
 
 unsigned SpecialCaseList::Section::getLastMatch(StringRef Prefix,
                                                 StringRef Query,
                                                 StringRef Category) const {
-  if (const Matcher *M = Impl->findMatcher(Prefix, Category))
-    return M->match(Query);
-  return 0;
+  если (const Matcher *M = Impl->findMatcher(Prefix, Category))
+    вернуть M->match(Query);
+  вернуть 0;
 }
 
 bool SpecialCaseList::Section::hasPrefix(StringRef Prefix) const {
-  return Impl->Entries.contains(Prefix);
+  вернуть Impl->Entries.contains(Prefix);
 }
 
 } // namespace llvm
