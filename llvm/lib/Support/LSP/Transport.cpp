@@ -6,49 +6,49 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Transport.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/LSP/Logging.h"
-#include "llvm/Support/LSP/Protocol.h"
-#include <atomic>
-#include <optional>
-#include <system_error>
-#include <utility>
+#அந்தர்பாவ "llvm/Support/LSP/Transport.h"
+#அந்தர்பாவ "llvm/ADT/SmallString.h"
+#அந்தர்பாவ "llvm/Support/Error.h"
+#அந்தர்பாவ "llvm/Support/LSP/Logging.h"
+#அந்தர்பாவ "llvm/Support/LSP/Protocol.h"
+#அந்தர்பாவ <atomic>
+#அந்தர்பாவ <optional>
+#அந்தர்பாவ <system_error>
+#அந்தர்பாவ <utility>
 
-using namespace llvm;
-using namespace llvm::lsp;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::lsp;
 
 //===----------------------------------------------------------------------===//
 // Reply
 //===----------------------------------------------------------------------===//
 
-namespace {
+நாமாகாஶ {
 /// Function object to reply to an LSP call.
 /// Each instance must be called exactly once, otherwise:
 ///  - if there was no reply, an error reply is sent
 ///  - if there were multiple replies, only the first is sent
-class Reply {
-public:
-  Reply(const llvm::json::Value &Id, StringRef Method, JSONTransport &Transport,
+வகுப்பு Reply {
+பொது:
+  Reply(மாறிலி llvm::json::மதிப்பு &Id, StringRef Method, JSONTransport &Transport,
         std::mutex &TransportOutputMutex);
   Reply(Reply &&Other);
   Reply &operator=(Reply &&) = delete;
-  Reply(const Reply &) = delete;
-  Reply &operator=(const Reply &) = delete;
+  Reply(மாறிலி Reply &) = delete;
+  Reply &operator=(மாறிலி Reply &) = delete;
 
-  void operator()(llvm::Expected<llvm::json::Value> Reply);
+  வெறுமை operator()(llvm::Expected<llvm::json::மதிப்பு> Reply);
 
-private:
+தனிப்பட்ட:
   std::string Method;
-  std::atomic<bool> Replied = {false};
-  llvm::json::Value Id;
+  std::atomic<தருக்க> Replied = {பொய்};
+  llvm::json::மதிப்பு Id;
   JSONTransport *Transport;
   std::mutex &TransportOutputMutex;
 };
 } // namespace
 
-Reply::Reply(const llvm::json::Value &Id, llvm::StringRef Method,
+Reply::Reply(மாறிலி llvm::json::மதிப்பு &Id, llvm::StringRef Method,
              JSONTransport &Transport, std::mutex &TransportOutputMutex)
     : Method(Method), Id(Id), Transport(&Transport),
       TransportOutputMutex(TransportOutputMutex) {}
@@ -60,19 +60,19 @@ Reply::Reply(Reply &&Other)
   Other.Transport = nullptr;
 }
 
-void Reply::operator()(llvm::Expected<llvm::json::Value> Reply) {
-  if (Replied.exchange(true)) {
+வெறுமை Reply::operator()(llvm::Expected<llvm::json::மதிப்பு> Reply) {
+  எனில் (Replied.exchange(உண்மை)) {
     Logger::error("Replied twice to message {0}({1})", Method, Id);
-    assert(false && "must reply to each call only once!");
-    return;
+    ப்ரதிஜ்ஞா(பொய் && "must reply to each call only once!");
+    திரும்பு;
   }
-  assert(Transport && "expected valid transport to reply to");
+  ப்ரதிஜ்ஞா(Transport && "expected valid transport to reply to");
 
   std::lock_guard<std::mutex> TransportLock(TransportOutputMutex);
-  if (Reply) {
+  எனில் (Reply) {
     Logger::info("--> reply:{0}({1})", Method, Id);
     Transport->reply(std::move(Id), std::move(Reply));
-  } else {
+  } இல்லையெனில் {
     llvm::Error Error = Reply.takeError();
     Logger::info("--> reply:{0}({1}): {2}", Method, Id, Error);
     Transport->reply(std::move(Id), std::move(Error));
@@ -85,78 +85,78 @@ void Reply::operator()(llvm::Expected<llvm::json::Value> Reply) {
 
 // Keep handleParseError out of every parse<T> instantiation.
 LLVM_ATTRIBUTE_NOINLINE llvm::Error
-MessageHandler::handleParseError(const llvm::json::Value &Raw,
+MessageHandler::handleParseError(மாறிலி llvm::json::மதிப்பு &Raw,
                                  StringRef PayloadName, StringRef PayloadKind,
-                                 const llvm::json::Path::Root &Root) {
+                                 மாறிலி llvm::json::Path::வேர்_2 &வேர்_2) {
   // Dump the relevant parts of the broken message.
   std::string Context;
   llvm::raw_string_ostream Os(Context);
-  Root.printErrorContext(Raw, Os);
+  வேர்_2.printErrorContext(Raw, Os);
 
   // Report the error (e.g. to the client).
-  return llvm::make_error<LSPError>(
+  திரும்பு llvm::make_error<LSPError>(
       llvm::formatv("failed to decode {0} {1}: {2}", PayloadName, PayloadKind,
-                    fmt_consume(Root.getError())),
+                    fmt_consume(வேர்_2.getError())),
       ErrorCode::InvalidParams);
 }
 
-bool MessageHandler::onNotify(llvm::StringRef Method, llvm::json::Value Value) {
+தருக்க MessageHandler::onNotify(llvm::StringRef Method, llvm::json::மதிப்பு மதிப்பு) {
   Logger::info("--> {0}", Method);
 
-  if (Method == "exit")
-    return false;
-  if (Method == "$cancel") {
+  எனில் (Method == "exit")
+    திரும்பு பொய்;
+  எனில் (Method == "$cancel") {
     // TODO: Add support for cancelling requests.
-  } else {
+  } இல்லையெனில் {
     auto It = NotificationHandlers.find(Method);
-    if (It != NotificationHandlers.end())
-      It->second(std::move(Value));
+    எனில் (It != NotificationHandlers.end())
+      It->second(std::move(மதிப்பு));
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool MessageHandler::onCall(llvm::StringRef Method, llvm::json::Value Params,
-                            llvm::json::Value Id) {
+தருக்க MessageHandler::onCall(llvm::StringRef Method, llvm::json::மதிப்பு Params,
+                            llvm::json::மதிப்பு Id) {
   Logger::info("--> {0}({1})", Method, Id);
 
   Reply Reply(Id, Method, Transport, TransportOutputMutex);
 
   auto It = MethodHandlers.find(Method);
-  if (It != MethodHandlers.end()) {
+  எனில் (It != MethodHandlers.end()) {
     It->second(std::move(Params), std::move(Reply));
-  } else {
+  } இல்லையெனில் {
     Reply(llvm::make_error<LSPError>("method not found: " + Method.str(),
                                      ErrorCode::MethodNotFound));
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool MessageHandler::onReply(llvm::json::Value Id,
-                             llvm::Expected<llvm::json::Value> Result) {
+தருக்க MessageHandler::onReply(llvm::json::மதிப்பு Id,
+                             llvm::Expected<llvm::json::மதிப்பு> Result) {
   // Find the response handler in the mapping. If it exists, move it out of the
   // mapping and erase it.
   ResponseHandlerTy ResponseHandler;
   {
     std::lock_guard<std::mutex> responseHandlersLock(ResponseHandlersMutex);
     auto It = ResponseHandlers.find(debugString(Id));
-    if (It != ResponseHandlers.end()) {
+    எனில் (It != ResponseHandlers.end()) {
       ResponseHandler = std::move(It->second);
       ResponseHandlers.erase(It);
     }
   }
 
   // If we found a response handler, invoke it. Otherwise, log an error.
-  if (ResponseHandler.second) {
+  எனில் (ResponseHandler.second) {
     Logger::info("--> reply:{0}({1})", ResponseHandler.first, Id);
     ResponseHandler.second(std::move(Id), std::move(Result));
-  } else {
+  } இல்லையெனில் {
     Logger::error(
         "received a reply with ID {0}, but there was no such outgoing request",
         Id);
-    if (!Result)
+    எனில் (!Result)
       llvm::consumeError(Result.takeError());
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
@@ -164,41 +164,41 @@ bool MessageHandler::onReply(llvm::json::Value Id,
 //===----------------------------------------------------------------------===//
 
 /// Encode the given error as a JSON object.
-static llvm::json::Object encodeError(llvm::Error Error) {
+நிலையான llvm::json::Object encodeError(llvm::Error Error) {
   std::string Message;
   ErrorCode Code = ErrorCode::UnknownErrorCode;
-  auto HandlerFn = [&](const LSPError &LspError) -> llvm::Error {
+  auto HandlerFn = [&](மாறிலி LSPError &LspError) -> llvm::Error {
     Message = LspError.message;
     Code = LspError.code;
-    return llvm::Error::success();
+    திரும்பு llvm::Error::success();
   };
-  if (llvm::Error Unhandled = llvm::handleErrors(std::move(Error), HandlerFn))
+  எனில் (llvm::Error Unhandled = llvm::handleErrors(std::move(Error), HandlerFn))
     Message = llvm::toString(std::move(Unhandled));
 
-  return llvm::json::Object{
+  திரும்பு llvm::json::Object{
       {"message", std::move(Message)},
       {"code", int64_t(Code)},
   };
 }
 
 /// Decode the given JSON object into an error.
-llvm::Error decodeError(const llvm::json::Object &O) {
-  StringRef Msg = O.getString("message").value_or("Unspecified error");
-  if (std::optional<int64_t> Code = O.getInteger("code"))
-    return llvm::make_error<LSPError>(Msg.str(), ErrorCode(*Code));
-  return llvm::make_error<llvm::StringError>(llvm::inconvertibleErrorCode(),
-                                             Msg.str());
+llvm::Error decodeError(மாறிலி llvm::json::Object &O) {
+  StringRef செய்தி_2 = O.getString("message").மதிப்பு_or("Unspecified error");
+  எனில் (std::optional<int64_t> Code = O.getInteger("code"))
+    திரும்பு llvm::make_error<LSPError>(செய்தி_2.str(), ErrorCode(*Code));
+  திரும்பு llvm::make_error<llvm::StringError>(llvm::inconvertibleErrorCode(),
+                                             செய்தி_2.str());
 }
 
-void JSONTransport::notify(StringRef Method, llvm::json::Value Params) {
+வெறுமை JSONTransport::notify(StringRef Method, llvm::json::மதிப்பு Params) {
   sendMessage(llvm::json::Object{
       {"jsonrpc", "2.0"},
       {"method", Method},
       {"params", std::move(Params)},
   });
 }
-void JSONTransport::call(StringRef Method, llvm::json::Value Params,
-                         llvm::json::Value Id) {
+வெறுமை JSONTransport::call(StringRef Method, llvm::json::மதிப்பு Params,
+                         llvm::json::மதிப்பு Id) {
   sendMessage(llvm::json::Object{
       {"jsonrpc", "2.0"},
       {"id", std::move(Id)},
@@ -206,10 +206,10 @@ void JSONTransport::call(StringRef Method, llvm::json::Value Params,
       {"params", std::move(Params)},
   });
 }
-void JSONTransport::reply(llvm::json::Value Id,
-                          llvm::Expected<llvm::json::Value> Result) {
-  if (Result) {
-    return sendMessage(llvm::json::Object{
+வெறுமை JSONTransport::reply(llvm::json::மதிப்பு Id,
+                          llvm::Expected<llvm::json::மதிப்பு> Result) {
+  எனில் (Result) {
+    திரும்பு sendMessage(llvm::json::Object{
         {"jsonrpc", "2.0"},
         {"id", std::move(Id)},
         {"result", std::move(*Result)},
@@ -225,92 +225,92 @@ void JSONTransport::reply(llvm::json::Value Id,
 
 llvm::Error JSONTransport::run(MessageHandler &Handler) {
   std::string Json;
-  while (!In->isEndOfInput()) {
-    if (In->hasError()) {
-      return llvm::errorCodeToError(
+  போது (!In->is_End_Of_உள்ளீடு()) {
+    எனில் (In->hasError()) {
+      திரும்பு llvm::errorCodeToError(
           std::error_code(errno, std::system_category()));
     }
 
-    if (succeeded(In->readMessage(Json))) {
-      if (llvm::Expected<llvm::json::Value> Doc = llvm::json::parse(Json)) {
-        if (!handleMessage(std::move(*Doc), Handler))
-          return llvm::Error::success();
-      } else {
+    எனில் (succeeded(In->readMessage(Json))) {
+      எனில் (llvm::Expected<llvm::json::மதிப்பு> Doc = llvm::json::parse(Json)) {
+        எனில் (!handleMessage(std::move(*Doc), Handler))
+          திரும்பு llvm::Error::success();
+      } இல்லையெனில் {
         Logger::error("JSON parse error: {0}", llvm::toString(Doc.takeError()));
       }
     }
   }
-  return llvm::errorCodeToError(std::make_error_code(std::errc::io_error));
+  திரும்பு llvm::errorCodeToError(std::make_error_code(std::errc::io_error));
 }
 
-void JSONTransport::sendMessage(llvm::json::Value Msg) {
+வெறுமை JSONTransport::sendMessage(llvm::json::மதிப்பு செய்தி_2) {
   OutputBuffer.clear();
   llvm::raw_svector_ostream os(OutputBuffer);
-  os << llvm::formatv(PrettyOutput ? "{0:2}\n" : "{0}", Msg);
+  os << llvm::formatv(PrettyOutput ? "{0:2}\n" : "{0}", செய்தி_2);
   Out << "Content-Length: " << OutputBuffer.size() << "\r\n\r\n"
       << OutputBuffer;
   Out.flush();
   Logger::debug(">>> {0}\n", OutputBuffer);
 }
 
-bool JSONTransport::handleMessage(llvm::json::Value Msg,
+தருக்க JSONTransport::handleMessage(llvm::json::மதிப்பு செய்தி_2,
                                   MessageHandler &Handler) {
   // Message must be an object with "jsonrpc":"2.0".
-  llvm::json::Object *Object = Msg.getAsObject();
-  if (!Object ||
+  llvm::json::Object *Object = செய்தி_2.getAsObject();
+  எனில் (!Object ||
       Object->getString("jsonrpc") != std::optional<StringRef>("2.0"))
-    return false;
+    திரும்பு பொய்;
 
   // `id` may be any JSON value. If absent, this is a notification.
-  std::optional<llvm::json::Value> Id;
-  if (llvm::json::Value *I = Object->get("id"))
+  std::optional<llvm::json::மதிப்பு> Id;
+  எனில் (llvm::json::மதிப்பு *I = Object->get("id"))
     Id = std::move(*I);
   std::optional<StringRef> Method = Object->getString("method");
 
   // This is a response.
-  if (!Method) {
-    if (!Id)
-      return false;
-    if (auto *Err = Object->getObject("error"))
-      return Handler.onReply(std::move(*Id), decodeError(*Err));
+  எனில் (!Method) {
+    எனில் (!Id)
+      திரும்பு பொய்;
+    எனில் (auto *Err = Object->getObject("error"))
+      திரும்பு Handler.onReply(std::move(*Id), decodeError(*Err));
     // result should be given, use null if not.
-    llvm::json::Value Result = nullptr;
-    if (llvm::json::Value *R = Object->get("result"))
+    llvm::json::மதிப்பு Result = nullptr;
+    எனில் (llvm::json::மதிப்பு *R = Object->get("result"))
       Result = std::move(*R);
-    return Handler.onReply(std::move(*Id), std::move(Result));
+    திரும்பு Handler.onReply(std::move(*Id), std::move(Result));
   }
 
   // Params should be given, use null if not.
-  llvm::json::Value Params = nullptr;
-  if (llvm::json::Value *P = Object->get("params"))
+  llvm::json::மதிப்பு Params = nullptr;
+  எனில் (llvm::json::மதிப்பு *P = Object->get("params"))
     Params = std::move(*P);
 
-  if (Id)
-    return Handler.onCall(*Method, std::move(Params), std::move(*Id));
-  return Handler.onNotify(*Method, std::move(Params));
+  எனில் (Id)
+    திரும்பு Handler.onCall(*Method, std::move(Params), std::move(*Id));
+  திரும்பு Handler.onNotify(*Method, std::move(Params));
 }
 
 /// Tries to read a line up to and including \n.
 /// If failing, feof(), ferror(), or shutdownRequested() will be set.
-LogicalResult readLine(std::FILE *In, SmallVectorImpl<char> &Out) {
+LogicalResult read_வரி(std::FILE *In, SmallVectorImpl<எழுத்து> &Out) {
   // Big enough to hold any reasonable header line. May not fit content lines
   // in delimited mode, but performance doesn't matter for that mode.
-  static constexpr int BufSize = 128;
+  நிலையான constexpr முழு BufSize = 128;
   size_t Size = 0;
   Out.clear();
-  for (;;) {
+  க்கு (;;) {
     Out.resize_for_overwrite(Size + BufSize);
-    if (!std::fgets(&Out[Size], BufSize, In))
-      return failure();
+    எனில் (!std::fgets(&Out[Size], BufSize, In))
+      திரும்பு failure();
 
     clearerr(In);
 
     // If the line contained null bytes, anything after it (including \n) will
     // be ignored. Fortunately this is not a legal header or JSON.
     size_t Read = std::strlen(&Out[Size]);
-    if (Read > 0 && Out[Size + Read - 1] == '\n') {
+    எனில் (Read > 0 && Out[Size + Read - 1] == '\n') {
       Out.resize(Size + Read);
-      return success();
+      திரும்பு success();
     }
     Size += Read;
   }
@@ -320,44 +320,44 @@ LogicalResult readLine(std::FILE *In, SmallVectorImpl<char> &Out) {
 //  - ferror(), feof(), or shutdownRequested() are set.
 //  - Content-Length is missing or empty (protocol error)
 LogicalResult
-JSONTransportInputOverFile::readStandardMessage(std::string &Json) {
+JSONTransport_உள்ளீடு_Over_File::readStandardMessage(std::string &Json) {
   // A Language Server Protocol message starts with a set of HTTP headers,
   // delimited  by \r\n, and terminated by an empty line (\r\n).
   unsigned long long ContentLength = 0;
-  llvm::SmallString<128> Line;
-  while (true) {
-    if (feof(In) || hasError() || failed(readLine(In, Line)))
-      return failure();
+  llvm::SmallString<128> வரி;
+  போது (உண்மை) {
+    எனில் (feof(In) || hasError() || failed(read_வரி(In, வரி)))
+      திரும்பு failure();
 
     // Content-Length is a mandatory header, and the only one we handle.
-    StringRef LineRef = Line;
-    if (LineRef.consume_front("Content-Length: ")) {
-      llvm::getAsUnsignedInteger(LineRef.trim(), 0, ContentLength);
-    } else if (!LineRef.trim().empty()) {
+    StringRef வரி_Ref = வரி;
+    எனில் (வரி_Ref.consume_front("Content-Length: ")) {
+      llvm::getAsUnsignedInteger(வரி_Ref.trim(), 0, ContentLength);
+    } இல்லையெனில் எனில் (!வரி_Ref.trim().empty()) {
       // It's another header, ignore it.
-      continue;
-    } else {
+      தொடர்;
+    } இல்லையெனில் {
       // An empty line indicates the end of headers. Go ahead and read the JSON.
-      break;
+      நிறுத்து;
     }
   }
 
   // The fuzzer likes crashing us by sending "Content-Length: 9999999999999999"
-  if (ContentLength == 0 || ContentLength > 1 << 30)
-    return failure();
+  எனில் (ContentLength == 0 || ContentLength > 1 << 30)
+    திரும்பு failure();
 
   Json.resize(ContentLength);
-  for (size_t Pos = 0, Read; Pos < ContentLength; Pos += Read) {
+  க்கு (size_t Pos = 0, Read; Pos < ContentLength; Pos += Read) {
     Read = std::fread(&Json[Pos], 1, ContentLength - Pos, In);
-    if (Read == 0)
-      return failure();
+    எனில் (Read == 0)
+      திரும்பு failure();
 
     // If we're done, the error was transient. If we're not done, either it was
     // transient or we'll see it again on retry.
     clearerr(In);
     Pos += Read;
   }
-  return success();
+  திரும்பு success();
 }
 
 /// For lit tests we support a simplified syntax:
@@ -367,20 +367,20 @@ JSONTransportInputOverFile::readStandardMessage(std::string &Json) {
 /// When returning failure: feof(), ferror(), or shutdownRequested() will be
 /// set.
 LogicalResult
-JSONTransportInputOverFile::readDelimitedMessage(std::string &Json) {
+JSONTransport_உள்ளீடு_Over_File::readDelimitedMessage(std::string &Json) {
   Json.clear();
-  llvm::SmallString<128> Line;
-  while (succeeded(readLine(In, Line))) {
-    StringRef LineRef = Line.str().trim();
-    if (LineRef.starts_with("//")) {
+  llvm::SmallString<128> வரி;
+  போது (succeeded(read_வரி(In, வரி))) {
+    StringRef வரி_Ref = வரி.str().trim();
+    எனில் (வரி_Ref.starts_with("//")) {
       // Found a delimiter for the message.
-      if (LineRef == "// -----")
-        break;
-      continue;
+      எனில் (வரி_Ref == "// -----")
+        நிறுத்து;
+      தொடர்;
     }
 
-    Json += Line;
+    Json += வரி;
   }
 
-  return failure(ferror(In));
+  திரும்பு failure(ferror(In));
 }

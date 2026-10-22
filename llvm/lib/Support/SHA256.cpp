@@ -19,14 +19,14 @@
  */
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SHA256.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <string.h>
+#அந்தர்பாவ "llvm/Support/SHA256.h"
+#அந்தர்பாவ "llvm/ADT/ArrayRef.h"
+#அந்தர்பாவ "llvm/ADT/StringRef.h"
+#அந்தர்பாவ "llvm/Support/Endian.h"
+#அந்தர்பாவ "llvm/Support/SwapByteOrder.h"
+#அந்தர்பாவ <string.h>
 
-namespace llvm {
+நாமாகாஶ llvm {
 
 #define SHR(x, c) ((x) >> (c))
 #define ROTR(x, n) (((x) >> n) | ((x) << (32 - (n))))
@@ -41,14 +41,14 @@ namespace llvm {
 #define SIGMA_3(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
 
 #define F_EXPAND(A, B, C, D, E, F, G, H, M1, M2, M3, M4, k)                    \
-  do {                                                                         \
+  செய் {                                                                         \
     H += SIGMA_1(E) + CH(E, F, G) + M1 + k;                                    \
     D += H;                                                                    \
     H += SIGMA_0(A) + MAJ(A, B, C);                                            \
     M1 += SIGMA_2(M2) + M3 + SIGMA_3(M4);                                      \
-  } while (0);
+  } போது (0);
 
-void SHA256::init() {
+வெறுமை SHA256::init() {
   InternalState.State[0] = 0x6A09E667;
   InternalState.State[1] = 0xBB67AE85;
   InternalState.State[2] = 0x3C6EF372;
@@ -57,11 +57,11 @@ void SHA256::init() {
   InternalState.State[5] = 0x9B05688C;
   InternalState.State[6] = 0x1F83D9AB;
   InternalState.State[7] = 0x5BE0CD19;
-  InternalState.ByteCount = 0;
+  InternalState.Byte_மொத்தம் = 0;
   InternalState.BufferOffset = 0;
 }
 
-void SHA256::hashBlock() {
+வெறுமை SHA256::hashBlock() {
   uint32_t A = InternalState.State[0];
   uint32_t B = InternalState.State[1];
   uint32_t C = InternalState.State[2];
@@ -166,66 +166,66 @@ void SHA256::hashBlock() {
   InternalState.State[7] += H;
 }
 
-void SHA256::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
+வெறுமை SHA256::addUncounted(uint8_t Data) {
+  எனில் constexpr (sys::IsBigEndianHost)
     InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
+  இல்லையெனில்
     InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
 
   InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
+  எனில் (InternalState.BufferOffset == BLOCK_LENGTH) {
     hashBlock();
     InternalState.BufferOffset = 0;
   }
 }
 
-void SHA256::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
+வெறுமை SHA256::writebyte(uint8_t Data) {
+  ++InternalState.Byte_மொத்தம்;
   addUncounted(Data);
 }
 
-void SHA256::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+வெறுமை SHA256::update(ArrayRef<uint8_t> Data) {
+  InternalState.Byte_மொத்தம் += Data.size();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
-    const size_t Remainder = std::min<size_t>(
+  எனில் (InternalState.BufferOffset > 0) {
+    மாறிலி size_t Remainder = std::min<size_t>(
         Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
-    for (size_t I = 0; I < Remainder; ++I)
+    க்கு (size_t I = 0; I < Remainder; ++I)
       addUncounted(Data[I]);
     Data = Data.drop_front(Remainder);
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
-    assert(InternalState.BufferOffset == 0);
+  போது (Data.size() >= BLOCK_LENGTH) {
+    ப்ரதிஜ்ஞா(InternalState.BufferOffset == 0);
     static_assert(BLOCK_LENGTH % 4 == 0);
     constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
-    for (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
+    க்கு (size_t I = 0; I < BLOCK_LENGTH_32; ++I)
       InternalState.Buffer.L[I] = support::endian::read32be(&Data[I * 4]);
     hashBlock();
     Data = Data.drop_front(BLOCK_LENGTH);
   }
 
   // Finish the remainder.
-  for (uint8_t C : Data)
+  க்கு (uint8_t C : Data)
     addUncounted(C);
 }
 
-void SHA256::update(StringRef Str) {
+வெறுமை SHA256::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<எழுத்து *>(Str.data()), Str.size()));
 }
 
-void SHA256::pad() {
+வெறுமை SHA256::pad() {
   // Implement SHA-2 padding (fips180-2 5.1.1)
 
   // Pad with 0x80 followed by 0x00 until the end of the block
   addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
+  போது (InternalState.BufferOffset != 56)
     addUncounted(0x00);
 
-  uint64_t len = InternalState.ByteCount << 3; // bit size
+  uint64_t len = InternalState.Byte_மொத்தம் << 3; // bit size
 
   // Append length in the last 8 bytes big edian encoded
   addUncounted(len >> 56);
@@ -238,31 +238,31 @@ void SHA256::pad() {
   addUncounted(len);
 }
 
-void SHA256::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
+வெறுமை SHA256::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  எனில் constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 8; i++) {
+    க்கு (முழு i = 0; i < 8; i++) {
       HashResult[i] = InternalState.State[i];
     }
-  } else {
+  } இல்லையெனில் {
     // Swap byte order back
-    for (int i = 0; i < 8; i++) {
+    க்கு (முழு i = 0; i < 8; i++) {
       HashResult[i] = llvm::byteswap(InternalState.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 32> SHA256::final() {
-  union {
+  ஒன்றிப்பு {
     std::array<uint32_t, HASH_LENGTH / 4> HashResult;
     std::array<uint8_t, HASH_LENGTH> ReturnResult;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
+  static_assert(அளவு(HashResult) == அளவு(ReturnResult));
   final(HashResult);
-  return ReturnResult;
+  திரும்பு ReturnResult;
 }
 
 std::array<uint8_t, 32> SHA256::result() {
@@ -274,13 +274,13 @@ std::array<uint8_t, 32> SHA256::result() {
   InternalState = StateToRestore;
 
   // Return pointer to hash (32 characters)
-  return Hash;
+  திரும்பு Hash;
 }
 
 std::array<uint8_t, 32> SHA256::hash(ArrayRef<uint8_t> Data) {
   SHA256 Hash;
   Hash.update(Data);
-  return Hash.final();
+  திரும்பு Hash.final();
 }
 
 } // namespace llvm

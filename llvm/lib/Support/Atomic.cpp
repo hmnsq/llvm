@@ -10,50 +10,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Atomic.h"
-#include "llvm/Config/llvm-config.h"
+#அந்தர்பாவ "llvm/Support/Atomic.h"
+#அந்தர்பாவ "llvm/Config/llvm-config.h"
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
-#if defined(_MSC_VER)
-#include <intrin.h>
+#எனில் defined(_MSC_VER)
+#அந்தர்பாவ <intrin.h>
 
 // We must include windows.h after intrin.h.
-#include <windows.h>
+#அந்தர்பாவ <windows.h>
 #undef MemoryFence
 #endif
 
-#if defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
+#எனில் defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
 #define GNU_ATOMICS
 #endif
 
-void sys::MemoryFence() {
-#if LLVM_HAS_ATOMICS == 0
-  return;
-#else
-#  if defined(GNU_ATOMICS)
+வெறுமை sys::MemoryFence() {
+#எனில் LLVM_HAS_ATOMICS == 0
+  திரும்பு;
+#இல்லையெனில்
+#  எனில் defined(GNU_ATOMICS)
   __sync_synchronize();
 #  elif defined(_MSC_VER)
   MemoryBarrier();
-#  else
-# error No memory fence implementation for your platform!
+#  இல்லையெனில்
+# error No memory fence implementation க்கு your platform!
 #  endif
 #endif
 }
 
-sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
-                                  sys::cas_flag new_value,
-                                  sys::cas_flag old_value) {
-#if LLVM_HAS_ATOMICS == 0
+sys::cas_flag sys::CompareAndSwap(நிலையற்ற sys::cas_flag* ptr,
+                                  sys::cas_flag new_மதிப்பு,
+                                  sys::cas_flag old_மதிப்பு) {
+#எனில் LLVM_HAS_ATOMICS == 0
   sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
-  return result;
-#elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
-#elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
-#else
-#  error No compare-and-swap implementation for your platform!
+  எனில் (result == old_மதிப்பு)
+    *ptr = new_மதிப்பு;
+  திரும்பு result;
+#அல்லதெனில் defined(GNU_ATOMICS)
+  திரும்பு __sync_val_compare_and_swap(ptr, old_மதிப்பு, new_மதிப்பு);
+#அல்லதெனில் defined(_MSC_VER)
+  திரும்பு InterlockedCompareExchange(ptr, new_மதிப்பு, old_மதிப்பு);
+#இல்லையெனில்
+#  error No compare-and-swap implementation க்கு your platform!
 #endif
 }

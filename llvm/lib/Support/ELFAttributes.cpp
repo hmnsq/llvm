@@ -6,29 +6,29 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ELFAttributes.h"
-#include "llvm/ADT/StringRef.h"
+#அந்தர்பாவ "llvm/Support/ELFAttributes.h"
+#அந்தர்பாவ "llvm/ADT/StringRef.h"
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
 StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
-                                     bool hasTagPrefix) {
+                                     தருக்க hasTagPrefix) {
   auto tagNameIt = find_if(
-      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
-  if (tagNameIt == tagNameMap.end())
-    return "";
+      tagNameMap, [attr](மாறிலி TagNameItem item) { திரும்பு item.attr == attr; });
+  எனில் (tagNameIt == tagNameMap.end())
+    திரும்பு "";
   StringRef tagName = tagNameIt->tagName;
-  return hasTagPrefix ? tagName : tagName.drop_front(4);
+  திரும்பு hasTagPrefix ? tagName : tagName.drop_front(4);
 }
 
 std::optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
                                                      TagNameMap tagNameMap) {
-  bool hasTagPrefix = tag.starts_with("Tag_");
+  தருக்க hasTagPrefix = tag.starts_with("Tag_");
   auto tagNameIt =
-      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
-        return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
+      find_if(tagNameMap, [tag, hasTagPrefix](மாறிலி TagNameItem item) {
+        திரும்பு item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
       });
-  if (tagNameIt == tagNameMap.end())
-    return std::nullopt;
-  return tagNameIt->attr;
+  எனில் (tagNameIt == tagNameMap.end())
+    திரும்பு std::nullopt;
+  திரும்பு tagNameIt->attr;
 }

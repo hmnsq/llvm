@@ -10,35 +10,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/ADT/AllocatorList.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SMLoc.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/Unicode.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <string>
-#include <system_error>
-#include <utility>
+#அந்தர்பாவ "llvm/Support/YAMLParser.h"
+#அந்தர்பாவ "llvm/ADT/AllocatorList.h"
+#அந்தர்பாவ "llvm/ADT/ArrayRef.h"
+#அந்தர்பாவ "llvm/ADT/STLExtras.h"
+#அந்தர்பாவ "llvm/ADT/SmallString.h"
+#அந்தர்பாவ "llvm/ADT/SmallVector.h"
+#அந்தர்பாவ "llvm/ADT/StringExtras.h"
+#அந்தர்பாவ "llvm/ADT/StringRef.h"
+#அந்தர்பாவ "llvm/ADT/Twine.h"
+#அந்தர்பாவ "llvm/Support/Compiler.h"
+#அந்தர்பாவ "llvm/Support/ErrorHandling.h"
+#அந்தர்பாவ "llvm/Support/MemoryBuffer.h"
+#அந்தர்பாவ "llvm/Support/SMLoc.h"
+#அந்தர்பாவ "llvm/Support/SourceMgr.h"
+#அந்தர்பாவ "llvm/Support/Unicode.h"
+#அந்தர்பாவ "llvm/Support/raw_ostream.h"
+#அந்தர்பாவ <cassert>
+#அந்தர்பாவ <cstddef>
+#அந்தர்பாவ <cstdint>
+#அந்தர்பாவ <map>
+#அந்தர்பாவ <memory>
+#அந்தர்பாவ <string>
+#அந்தர்பாவ <system_error>
+#அந்தர்பாவ <utility>
 
-using namespace llvm;
-using namespace yaml;
+using நாமாகாஶ llvm;
+using நாமாகாஶ yaml;
 
-enum UnicodeEncodingForm {
+எண்ணிக்கை UnicodeEncodingForm {
   UEF_UTF32_LE, ///< UTF-32 Little Endian
   UEF_UTF32_BE, ///< UTF-32 Big Endian
   UEF_UTF16_LE, ///< UTF-16 Little Endian
@@ -57,72 +57,72 @@ using EncodingInfo = std::pair<UnicodeEncodingForm, unsigned>;
 /// @param Input A string of length 0 or more.
 /// @returns An EncodingInfo indicating the Unicode encoding form of the input
 ///          and how long the byte order mark is if one exists.
-static EncodingInfo getUnicodeEncoding(StringRef Input) {
-  if (Input.empty())
-    return {UEF_Unknown, 0};
+நிலையான EncodingInfo getUnicodeEncoding(StringRef உள்ளீடு) {
+  எனில் (உள்ளீடு.empty())
+    திரும்பு {UEF_Unknown, 0};
 
-  switch (uint8_t(Input[0])) {
-  case 0x00:
-    if (Input.size() >= 4) {
-      if (  Input[1] == 0
-         && uint8_t(Input[2]) == 0xFE
-         && uint8_t(Input[3]) == 0xFF)
-        return {UEF_UTF32_BE, 4};
-      if (Input[1] == 0 && Input[2] == 0 && Input[3] != 0)
-        return {UEF_UTF32_BE, 0};
+  தேர்வு (uint8_t(உள்ளீடு[0])) {
+  நிலை 0x00:
+    எனில் (உள்ளீடு.size() >= 4) {
+      எனில் (  உள்ளீடு[1] == 0
+         && uint8_t(உள்ளீடு[2]) == 0xFE
+         && uint8_t(உள்ளீடு[3]) == 0xFF)
+        திரும்பு {UEF_UTF32_BE, 4};
+      எனில் (உள்ளீடு[1] == 0 && உள்ளீடு[2] == 0 && உள்ளீடு[3] != 0)
+        திரும்பு {UEF_UTF32_BE, 0};
     }
 
-    if (Input.size() >= 2 && Input[1] != 0)
-      return {UEF_UTF16_BE, 0};
-    return {UEF_Unknown, 0};
-  case 0xFF:
-    if (  Input.size() >= 4
-       && uint8_t(Input[1]) == 0xFE
-       && Input[2] == 0
-       && Input[3] == 0)
-      return {UEF_UTF32_LE, 4};
+    எனில் (உள்ளீடு.size() >= 2 && உள்ளீடு[1] != 0)
+      திரும்பு {UEF_UTF16_BE, 0};
+    திரும்பு {UEF_Unknown, 0};
+  நிலை 0xFF:
+    எனில் (  உள்ளீடு.size() >= 4
+       && uint8_t(உள்ளீடு[1]) == 0xFE
+       && உள்ளீடு[2] == 0
+       && உள்ளீடு[3] == 0)
+      திரும்பு {UEF_UTF32_LE, 4};
 
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFE)
-      return {UEF_UTF16_LE, 2};
-    return {UEF_Unknown, 0};
-  case 0xFE:
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFF)
-      return {UEF_UTF16_BE, 2};
-    return {UEF_Unknown, 0};
-  case 0xEF:
-    if (  Input.size() >= 3
-       && uint8_t(Input[1]) == 0xBB
-       && uint8_t(Input[2]) == 0xBF)
-      return {UEF_UTF8, 3};
-    return {UEF_Unknown, 0};
+    எனில் (உள்ளீடு.size() >= 2 && uint8_t(உள்ளீடு[1]) == 0xFE)
+      திரும்பு {UEF_UTF16_LE, 2};
+    திரும்பு {UEF_Unknown, 0};
+  நிலை 0xFE:
+    எனில் (உள்ளீடு.size() >= 2 && uint8_t(உள்ளீடு[1]) == 0xFF)
+      திரும்பு {UEF_UTF16_BE, 2};
+    திரும்பு {UEF_Unknown, 0};
+  நிலை 0xEF:
+    எனில் (  உள்ளீடு.size() >= 3
+       && uint8_t(உள்ளீடு[1]) == 0xBB
+       && uint8_t(உள்ளீடு[2]) == 0xBF)
+      திரும்பு {UEF_UTF8, 3};
+    திரும்பு {UEF_Unknown, 0};
   }
 
   // It could still be utf-32 or utf-16.
-  if (Input.size() >= 4 && Input[1] == 0 && Input[2] == 0 && Input[3] == 0)
-    return {UEF_UTF32_LE, 0};
+  எனில் (உள்ளீடு.size() >= 4 && உள்ளீடு[1] == 0 && உள்ளீடு[2] == 0 && உள்ளீடு[3] == 0)
+    திரும்பு {UEF_UTF32_LE, 0};
 
-  if (Input.size() >= 2 && Input[1] == 0)
-    return {UEF_UTF16_LE, 0};
+  எனில் (உள்ளீடு.size() >= 2 && உள்ளீடு[1] == 0)
+    திரும்பு {UEF_UTF16_LE, 0};
 
-  return {UEF_UTF8, 0};
+  திரும்பு {UEF_UTF8, 0};
 }
 
 /// Pin the vtables to this file.
-void Node::anchor() {}
-void NullNode::anchor() {}
-void ScalarNode::anchor() {}
-void BlockScalarNode::anchor() {}
-void KeyValueNode::anchor() {}
-void MappingNode::anchor() {}
-void SequenceNode::anchor() {}
-void AliasNode::anchor() {}
+வெறுமை முனை::anchor() {}
+வெறுமை Null_முனை::anchor() {}
+வெறுமை Scalar_முனை::anchor() {}
+வெறுமை Block_Scalar_முனை::anchor() {}
+வெறுமை சாவி_மதிப்பு_முனை::anchor() {}
+வெறுமை Mapping_முனை::anchor() {}
+வெறுமை Sequence_முனை::anchor() {}
+வெறுமை Alias_முனை::anchor() {}
 
-namespace llvm {
-namespace yaml {
+நாமாகாஶ llvm {
+நாமாகாஶ yaml {
 
 /// Token - A single YAML token.
-struct Token {
-  enum TokenKind {
+கட்டமைப்பு Token {
+  எண்ணிக்கை TokenKind {
     TK_Error, // Uninitialized token.
     TK_StreamStart,
     TK_StreamEnd,
@@ -139,8 +139,8 @@ struct Token {
     TK_FlowSequenceEnd,
     TK_FlowMappingStart,
     TK_FlowMappingEnd,
-    TK_Key,
-    TK_Value,
+    TK_சாவி,
+    TK_மதிப்பு,
     TK_Scalar,
     TK_BlockScalar,
     TK_Alias,
@@ -153,9 +153,9 @@ struct Token {
   StringRef Range;
 
   /// The value of a block scalar node.
-  std::string Value;
+  std::string மதிப்பு;
 
-  Token() = default;
+  Token() = இயல்பு;
 };
 
 } // end namespace yaml
@@ -163,7 +163,7 @@ struct Token {
 
 using TokenQueueT = BumpPtrList<Token>;
 
-namespace {
+நாமாகாஶ {
 
 /// This struct is used to track simple keys.
 ///
@@ -174,15 +174,15 @@ namespace {
 /// a simple key (we moved on to the next line or went further than 1024 chars).
 /// Or when we run into a Value, and then insert a Key token (and possibly
 /// others) before the SimpleKey's Tok.
-struct SimpleKey {
+கட்டமைப்பு Simple_சாவி {
   TokenQueueT::iterator Tok;
   unsigned Column = 0;
-  unsigned Line = 0;
+  unsigned வரி = 0;
   unsigned FlowLevel = 0;
-  bool IsRequired = false;
+  தருக்க IsRequired = பொய்;
 
-  bool operator ==(const SimpleKey &Other) {
-    return Tok == Other.Tok;
+  தருக்க operator ==(மாறிலி Simple_சாவி &Other) {
+    திரும்பு Tok == Other.Tok;
   }
 };
 
@@ -193,26 +193,26 @@ struct SimpleKey {
 ///        A length of 0 represents an error.
 using UTF8Decoded = std::pair<uint32_t, unsigned>;
 
-static UTF8Decoded decodeUTF8(StringRef Range) {
+நிலையான UTF8Decoded decodeUTF8(StringRef Range) {
   StringRef::iterator Position= Range.begin();
   StringRef::iterator End = Range.end();
   // 1 byte: [0x00, 0x7f]
   // Bit pattern: 0xxxxxxx
-  if (Position < End && (*Position & 0x80) == 0) {
-    return {*Position, 1};
+  எனில் (Position < End && (*Position & 0x80) == 0) {
+    திரும்பு {*Position, 1};
   }
   // 2 bytes: [0x80, 0x7ff]
   // Bit pattern: 110xxxxx 10xxxxxx
-  if (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
+  எனில் (Position + 1 < End && ((*Position & 0xE0) == 0xC0) &&
       ((*(Position + 1) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x1F) << 6) |
                           (*(Position + 1) & 0x3F);
-    if (codepoint >= 0x80)
-      return {codepoint, 2};
+    எனில் (codepoint >= 0x80)
+      திரும்பு {codepoint, 2};
   }
   // 3 bytes: [0x8000, 0xffff]
   // Bit pattern: 1110xxxx 10xxxxxx 10xxxxxx
-  if (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
+  எனில் (Position + 2 < End && ((*Position & 0xF0) == 0xE0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80)) {
     uint32_t codepoint = ((*Position & 0x0F) << 12) |
@@ -220,13 +220,13 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                           (*(Position + 2) & 0x3F);
     // Codepoints between 0xD800 and 0xDFFF are invalid, as
     // they are high / low surrogate halves used by UTF-16.
-    if (codepoint >= 0x800 &&
+    எனில் (codepoint >= 0x800 &&
         (codepoint < 0xD800 || codepoint > 0xDFFF))
-      return {codepoint, 3};
+      திரும்பு {codepoint, 3};
   }
   // 4 bytes: [0x10000, 0x10FFFF]
   // Bit pattern: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-  if (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
+  எனில் (Position + 3 < End && ((*Position & 0xF8) == 0xF0) &&
       ((*(Position + 1) & 0xC0) == 0x80) &&
       ((*(Position + 2) & 0xC0) == 0x80) &&
       ((*(Position + 3) & 0xC0) == 0x80)) {
@@ -234,21 +234,21 @@ static UTF8Decoded decodeUTF8(StringRef Range) {
                          ((*(Position + 1) & 0x3F) << 12) |
                          ((*(Position + 2) & 0x3F) << 6) |
                           (*(Position + 3) & 0x3F);
-    if (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
-      return {codepoint, 4};
+    எனில் (codepoint >= 0x10000 && codepoint <= 0x10FFFF)
+      திரும்பு {codepoint, 4};
   }
-  return {0, 0};
+  திரும்பு {0, 0};
 }
 
-namespace llvm {
-namespace yaml {
+நாமாகாஶ llvm {
+நாமாகாஶ yaml {
 
 /// Scans YAML tokens from a MemoryBuffer.
-class Scanner {
-public:
-  Scanner(StringRef Input, SourceMgr &SM, bool ShowColors = true,
+வகுப்பு Scanner {
+பொது:
+  Scanner(StringRef உள்ளீடு, SourceMgr &SM, தருக்க ShowColors = உண்மை,
           std::error_code *EC = nullptr);
-  Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors = true,
+  Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, தருக்க ShowColors = உண்மை,
           std::error_code *EC = nullptr);
 
   /// Parse the next token and return it without popping it.
@@ -257,36 +257,36 @@ public:
   /// Parse the next token and pop it from the queue.
   Token getNext();
 
-  void printError(SMLoc Loc, SourceMgr::DiagKind Kind, const Twine &Message,
+  வெறுமை printError(SMLoc Loc, SourceMgr::DiagKind Kind, மாறிலி Twine &Message,
                   ArrayRef<SMRange> Ranges = {}) {
     SM.PrintMessage(Loc, Kind, Message, Ranges, /* FixIts= */ {}, ShowColors);
   }
 
-  void setError(const Twine &Message, StringRef::iterator Position) {
-    if (Position >= End)
+  வெறுமை setError(மாறிலி Twine &Message, StringRef::iterator Position) {
+    எனில் (Position >= End)
       Position = End - 1;
 
     // propagate the error if possible
-    if (EC)
+    எனில் (EC)
       *EC = make_error_code(std::errc::invalid_argument);
 
     // Don't print out more errors after the first one we encounter. The rest
     // are just the result of the first, and have no meaning.
-    if (!Failed)
+    எனில் (!Failed)
       printError(SMLoc::getFromPointer(Position), SourceMgr::DK_Error, Message);
-    Failed = true;
+    Failed = உண்மை;
   }
 
   /// Returns true if an error occurred while parsing.
-  bool failed() {
-    return Failed;
+  தருக்க failed() {
+    திரும்பு Failed;
   }
 
-private:
-  void init(MemoryBufferRef Buffer);
+தனிப்பட்ட:
+  வெறுமை init(MemoryBufferRef Buffer);
 
-  StringRef currentInput() {
-    return StringRef(Current, End - Current);
+  StringRef current_உள்ளீடு() {
+    திரும்பு StringRef(Current, End - Current);
   }
 
   /// Decode a UTF-8 minimal well-formed code unit subsequence starting
@@ -296,7 +296,7 @@ private:
   /// code unit subsequence, then the Unicode scalar value is 0, and the length
   /// is 0.
   UTF8Decoded decodeUTF8(StringRef::iterator Position) {
-    return ::decodeUTF8(StringRef(Position, End - Position));
+    திரும்பு ::decodeUTF8(StringRef(Position, End - Position));
   }
 
   // The following functions are based on the gramar rules in the YAML spec. The
@@ -372,109 +372,109 @@ private:
 
   /// Skip minimal well-formed code unit subsequences until Func returns its
   /// input.
-  void advanceWhile(SkipWhileFunc Func);
+  வெறுமை advanceWhile(SkipWhileFunc Func);
 
   /// Scan ns-uri-char[39]s starting at Cur.
   ///
   /// This updates Cur and Column while scanning.
-  void scan_ns_uri_char();
+  வெறுமை scan_ns_uri_char();
 
   /// Consume a minimal well-formed code unit subsequence starting at
   ///        \a Cur. Return false if it is not the same Unicode scalar value as
   ///        \a Expected. This updates \a Column.
-  bool consume(uint32_t Expected);
+  தருக்க consume(uint32_t Expected);
 
   /// Skip \a Distance UTF-8 code units. Updates \a Cur and \a Column.
-  void skip(uint32_t Distance);
+  வெறுமை skip(uint32_t Distance);
 
   /// Return true if the minimal well-formed code unit subsequence at
   ///        Pos is whitespace or a new line
-  bool isBlankOrBreak(StringRef::iterator Position);
+  தருக்க isBlankOrBreak(StringRef::iterator Position);
 
   /// Return true if the minimal well-formed code unit subsequence at
   ///        Pos is considered a "safe" character for plain scalars.
-  bool isPlainSafeNonBlank(StringRef::iterator Position);
+  தருக்க isPlainSafeNonBlank(StringRef::iterator Position);
 
   /// Return true if the line is a line break, false otherwise.
-  bool isLineEmpty(StringRef Line);
+  தருக்க is_வரி_Empty(StringRef வரி);
 
   /// Consume a single b-break[28] if it's present at the current position.
   ///
   /// Return false if the code unit at the current position isn't a line break.
-  bool consumeLineBreakIfPresent();
+  தருக்க consume_வரி_Break_If_Present();
 
   /// If IsSimpleKeyAllowed, create and push_back a new SimpleKey.
-  void saveSimpleKeyCandidate( TokenQueueT::iterator Tok
+  வெறுமை save_Simple_சாவி_Candidate( TokenQueueT::iterator Tok
                              , unsigned AtColumn
-                             , bool IsRequired);
+                             , தருக்க IsRequired);
 
   /// Remove simple keys that can no longer be valid simple keys.
   ///
   /// Invalid simple keys are not on the current line or are further than 1024
   /// columns back.
-  void removeStaleSimpleKeyCandidates();
+  வெறுமை remove_Stale_Simple_சாவி_Candidates();
 
   /// Remove all simple keys on FlowLevel \a Level.
-  void removeSimpleKeyCandidatesOnFlowLevel(unsigned Level);
+  வெறுமை remove_Simple_சாவி_Candidates_On_Flow_Level(unsigned Level);
 
   /// Unroll indentation in \a Indents back to \a Col. Creates BlockEnd
   ///        tokens if needed.
-  bool unrollIndent(int ToColumn);
+  தருக்க unrollIndent(முழு ToColumn);
 
   /// Increase indent to \a Col. Creates \a Kind token at \a InsertPoint
   ///        if needed.
-  bool rollIndent( int ToColumn
+  தருக்க rollIndent( முழு ToColumn
                  , Token::TokenKind Kind
-                 , TokenQueueT::iterator InsertPoint);
+                 , TokenQueueT::iterator செருகு_Point);
 
   /// Skip a single-line comment when the comment starts at the current
   /// position of the scanner.
-  void skipComment();
+  வெறுமை skipComment();
 
   /// Skip whitespace and comments until the start of the next token.
-  void scanToNextToken();
+  வெறுமை scanToNextToken();
 
   /// Must be the first token generated.
-  bool scanStreamStart();
+  தருக்க scanStreamStart();
 
   /// Generate tokens needed to close out the stream.
-  bool scanStreamEnd();
+  தருக்க scanStreamEnd();
 
   /// Scan a %BLAH directive.
-  bool scanDirective();
+  தருக்க scanDirective();
 
   /// Scan a ... or ---.
-  bool scanDocumentIndicator(bool IsStart);
+  தருக்க scanDocumentIndicator(தருக்க IsStart);
 
   /// Scan a [ or { and generate the proper flow collection start token.
-  bool scanFlowCollectionStart(bool IsSequence);
+  தருக்க scanFlowCollectionStart(தருக்க IsSequence);
 
   /// Scan a ] or } and generate the proper flow collection end token.
-  bool scanFlowCollectionEnd(bool IsSequence);
+  தருக்க scanFlowCollectionEnd(தருக்க IsSequence);
 
   /// Scan the , that separates entries in a flow collection.
-  bool scanFlowEntry();
+  தருக்க scanFlowEntry();
 
   /// Scan the - that starts block sequence entries.
-  bool scanBlockEntry();
+  தருக்க scanBlockEntry();
 
   /// Scan an explicit ? indicating a key.
-  bool scanKey();
+  தருக்க scan_சாவி();
 
   /// Scan an explicit : indicating a value.
-  bool scanValue();
+  தருக்க scan_மதிப்பு();
 
   /// Scan a quoted scalar.
-  bool scanFlowScalar(bool IsDoubleQuoted);
+  தருக்க scanFlowScalar(தருக்க IsDoubleQuoted);
 
   /// Scan an unquoted scalar.
-  bool scanPlainScalar();
+  தருக்க scanPlainScalar();
 
   /// Scan an Alias or Anchor starting with * or &.
-  bool scanAliasOrAnchor(bool IsAlias);
+  தருக்க scanAliasOrAnchor(தருக்க IsAlias);
 
   /// Scan a block scalar starting with | or >.
-  bool scanBlockScalar(bool IsLiteral);
+  தருக்க scanBlockScalar(தருக்க IsLiteral);
 
   /// Scan a block scalar style indicator and header.
   ///
@@ -482,14 +482,14 @@ private:
   /// YAML does not consider the style indicator to be a part of the header.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarIndicators(char &StyleIndicator, char &ChompingIndicator,
-                                 unsigned &IndentIndicator, bool &IsDone);
+  தருக்க scanBlockScalarIndicators(எழுத்து &StyleIndicator, எழுத்து &ChompingIndicator,
+                                 unsigned &IndentIndicator, தருக்க &IsDone);
 
   /// Scan a style indicator in a block scalar header.
-  char scanBlockStyleIndicator();
+  எழுத்து scanBlockStyleIndicator();
 
   /// Scan a chomping indicator in a block scalar header.
-  char scanBlockChompingIndicator();
+  எழுத்து scanBlockChompingIndicator();
 
   /// Scan an indentation indicator in a block scalar header.
   unsigned scanBlockIndentationIndicator();
@@ -497,32 +497,32 @@ private:
   /// Scan a block scalar header.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarHeader(char &ChompingIndicator, unsigned &IndentIndicator,
-                             bool &IsDone);
+  தருக்க scanBlockScalarHeader(எழுத்து &ChompingIndicator, unsigned &IndentIndicator,
+                             தருக்க &IsDone);
 
   /// Look for the indentation level of a block scalar.
   ///
   /// Return false if an error occurred.
-  bool findBlockScalarIndent(unsigned &BlockIndent, unsigned BlockExitIndent,
-                             unsigned &LineBreaks, bool &IsDone);
+  தருக்க findBlockScalarIndent(unsigned &BlockIndent, unsigned BlockExitIndent,
+                             unsigned &வரி_Breaks, தருக்க &IsDone);
 
   /// Scan the indentation of a text line in a block scalar.
   ///
   /// Return false if an error occurred.
-  bool scanBlockScalarIndent(unsigned BlockIndent, unsigned BlockExitIndent,
-                             bool &IsDone);
+  தருக்க scanBlockScalarIndent(unsigned BlockIndent, unsigned BlockExitIndent,
+                             தருக்க &IsDone);
 
   /// Scan a tag of the form !stuff.
-  bool scanTag();
+  தருக்க scanTag();
 
   /// Dispatch to the next scanning function based on \a *Cur.
-  bool fetchMoreTokens();
+  தருக்க fetchMoreTokens();
 
   /// The SourceMgr used for diagnostics and buffer management.
   SourceMgr &SM;
 
   /// The original input.
-  MemoryBufferRef InputBuffer;
+  MemoryBufferRef உள்ளீடு_Buffer;
 
   /// The current position of the scanner.
   StringRef::iterator Current;
@@ -531,32 +531,32 @@ private:
   StringRef::iterator End;
 
   /// Current YAML indentation level in spaces.
-  int Indent;
+  முழு Indent;
 
   /// Current column number in Unicode code points.
   unsigned Column;
 
   /// Current line number.
-  unsigned Line;
+  unsigned வரி;
 
   /// How deep we are in flow style containers. 0 Means at block level.
   unsigned FlowLevel;
 
   /// Are we at the start of the stream?
-  bool IsStartOfStream;
+  தருக்க IsStartOfStream;
 
   /// Can the next token be the start of a simple key?
-  bool IsSimpleKeyAllowed;
+  தருக்க Is_Simple_சாவி_Allowed;
 
   /// Can the next token be a value indicator even if it does not have a
   /// trailing space?
-  bool IsAdjacentValueAllowedInFlow;
+  தருக்க Is_Adjacent_மதிப்பு_Allowed_In_Flow;
 
   /// True if an error has occurred.
-  bool Failed;
+  தருக்க Failed;
 
   /// Should colors be used when printing out the diagnostic messages?
-  bool ShowColors;
+  தருக்க ShowColors;
 
   /// Queue of tokens. This is required to queue up tokens while looking
   ///        for the end of a simple key. And for cases where a single character
@@ -564,10 +564,10 @@ private:
   TokenQueueT TokenQueue;
 
   /// Indentation levels.
-  SmallVector<int, 4> Indents;
+  SmallVector<முழு, 4> Indents;
 
   /// Potential simple keys.
-  SmallVector<SimpleKey, 4> SimpleKeys;
+  SmallVector<Simple_சாவி, 4> Simple_சாவிகள்;
 
   std::error_code *EC;
 };
@@ -576,366 +576,366 @@ private:
 } // end namespace llvm
 
 /// encodeUTF8 - Encode \a UnicodeScalarValue in UTF-8 and append it to result.
-static void encodeUTF8( uint32_t UnicodeScalarValue
-                      , SmallVectorImpl<char> &Result) {
-  if (UnicodeScalarValue <= 0x7F) {
-    Result.push_back(UnicodeScalarValue & 0x7F);
-  } else if (UnicodeScalarValue <= 0x7FF) {
-    uint8_t FirstByte = 0xC0 | ((UnicodeScalarValue & 0x7C0) >> 6);
-    uint8_t SecondByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-  } else if (UnicodeScalarValue <= 0xFFFF) {
-    uint8_t FirstByte = 0xE0 | ((UnicodeScalarValue & 0xF000) >> 12);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t ThirdByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-  } else if (UnicodeScalarValue <= 0x10FFFF) {
-    uint8_t FirstByte = 0xF0 | ((UnicodeScalarValue & 0x1F0000) >> 18);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0x3F000) >> 12);
-    uint8_t ThirdByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t FourthByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-    Result.push_back(FourthByte);
+நிலையான வெறுமை encodeUTF8( uint32_t Unicode_Scalar_மதிப்பு
+                      , SmallVectorImpl<எழுத்து> &Result) {
+  எனில் (Unicode_Scalar_மதிப்பு <= 0x7F) {
+    Result.தள்ளு_back(Unicode_Scalar_மதிப்பு & 0x7F);
+  } இல்லையெனில் எனில் (Unicode_Scalar_மதிப்பு <= 0x7FF) {
+    uint8_t FirstByte = 0xC0 | ((Unicode_Scalar_மதிப்பு & 0x7C0) >> 6);
+    uint8_t SecondByte = 0x80 | (Unicode_Scalar_மதிப்பு & 0x3F);
+    Result.தள்ளு_back(FirstByte);
+    Result.தள்ளு_back(SecondByte);
+  } இல்லையெனில் எனில் (Unicode_Scalar_மதிப்பு <= 0xFFFF) {
+    uint8_t FirstByte = 0xE0 | ((Unicode_Scalar_மதிப்பு & 0xF000) >> 12);
+    uint8_t SecondByte = 0x80 | ((Unicode_Scalar_மதிப்பு & 0xFC0) >> 6);
+    uint8_t ThirdByte = 0x80 | (Unicode_Scalar_மதிப்பு & 0x3F);
+    Result.தள்ளு_back(FirstByte);
+    Result.தள்ளு_back(SecondByte);
+    Result.தள்ளு_back(ThirdByte);
+  } இல்லையெனில் எனில் (Unicode_Scalar_மதிப்பு <= 0x10FFFF) {
+    uint8_t FirstByte = 0xF0 | ((Unicode_Scalar_மதிப்பு & 0x1F0000) >> 18);
+    uint8_t SecondByte = 0x80 | ((Unicode_Scalar_மதிப்பு & 0x3F000) >> 12);
+    uint8_t ThirdByte = 0x80 | ((Unicode_Scalar_மதிப்பு & 0xFC0) >> 6);
+    uint8_t FourthByte = 0x80 | (Unicode_Scalar_மதிப்பு & 0x3F);
+    Result.தள்ளு_back(FirstByte);
+    Result.தள்ளு_back(SecondByte);
+    Result.தள்ளு_back(ThirdByte);
+    Result.தள்ளு_back(FourthByte);
   }
 }
 
-bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
+தருக்க yaml::dumpTokens(StringRef உள்ளீடு, raw_ostream &OS) {
   SourceMgr SM;
-  Scanner scanner(Input, SM);
-  while (true) {
+  Scanner scanner(உள்ளீடு, SM);
+  போது (உண்மை) {
     Token T = scanner.getNext();
-    switch (T.Kind) {
-    case Token::TK_StreamStart:
+    தேர்வு (T.Kind) {
+    நிலை Token::TK_StreamStart:
       OS << "Stream-Start: ";
-      break;
-    case Token::TK_StreamEnd:
+      நிறுத்து;
+    நிலை Token::TK_StreamEnd:
       OS << "Stream-End: ";
-      break;
-    case Token::TK_VersionDirective:
+      நிறுத்து;
+    நிலை Token::TK_VersionDirective:
       OS << "Version-Directive: ";
-      break;
-    case Token::TK_TagDirective:
+      நிறுத்து;
+    நிலை Token::TK_TagDirective:
       OS << "Tag-Directive: ";
-      break;
-    case Token::TK_DocumentStart:
+      நிறுத்து;
+    நிலை Token::TK_DocumentStart:
       OS << "Document-Start: ";
-      break;
-    case Token::TK_DocumentEnd:
+      நிறுத்து;
+    நிலை Token::TK_DocumentEnd:
       OS << "Document-End: ";
-      break;
-    case Token::TK_BlockEntry:
+      நிறுத்து;
+    நிலை Token::TK_BlockEntry:
       OS << "Block-Entry: ";
-      break;
-    case Token::TK_BlockEnd:
+      நிறுத்து;
+    நிலை Token::TK_BlockEnd:
       OS << "Block-End: ";
-      break;
-    case Token::TK_BlockSequenceStart:
+      நிறுத்து;
+    நிலை Token::TK_BlockSequenceStart:
       OS << "Block-Sequence-Start: ";
-      break;
-    case Token::TK_BlockMappingStart:
+      நிறுத்து;
+    நிலை Token::TK_BlockMappingStart:
       OS << "Block-Mapping-Start: ";
-      break;
-    case Token::TK_FlowEntry:
+      நிறுத்து;
+    நிலை Token::TK_FlowEntry:
       OS << "Flow-Entry: ";
-      break;
-    case Token::TK_FlowSequenceStart:
+      நிறுத்து;
+    நிலை Token::TK_FlowSequenceStart:
       OS << "Flow-Sequence-Start: ";
-      break;
-    case Token::TK_FlowSequenceEnd:
+      நிறுத்து;
+    நிலை Token::TK_FlowSequenceEnd:
       OS << "Flow-Sequence-End: ";
-      break;
-    case Token::TK_FlowMappingStart:
+      நிறுத்து;
+    நிலை Token::TK_FlowMappingStart:
       OS << "Flow-Mapping-Start: ";
-      break;
-    case Token::TK_FlowMappingEnd:
+      நிறுத்து;
+    நிலை Token::TK_FlowMappingEnd:
       OS << "Flow-Mapping-End: ";
-      break;
-    case Token::TK_Key:
+      நிறுத்து;
+    நிலை Token::TK_சாவி:
       OS << "Key: ";
-      break;
-    case Token::TK_Value:
+      நிறுத்து;
+    நிலை Token::TK_மதிப்பு:
       OS << "Value: ";
-      break;
-    case Token::TK_Scalar:
+      நிறுத்து;
+    நிலை Token::TK_Scalar:
       OS << "Scalar: ";
-      break;
-    case Token::TK_BlockScalar:
+      நிறுத்து;
+    நிலை Token::TK_BlockScalar:
       OS << "Block Scalar: ";
-      break;
-    case Token::TK_Alias:
+      நிறுத்து;
+    நிலை Token::TK_Alias:
       OS << "Alias: ";
-      break;
-    case Token::TK_Anchor:
+      நிறுத்து;
+    நிலை Token::TK_Anchor:
       OS << "Anchor: ";
-      break;
-    case Token::TK_Tag:
+      நிறுத்து;
+    நிலை Token::TK_Tag:
       OS << "Tag: ";
-      break;
-    case Token::TK_Error:
-      break;
+      நிறுத்து;
+    நிலை Token::TK_Error:
+      நிறுத்து;
     }
     OS << T.Range << "\n";
-    if (T.Kind == Token::TK_StreamEnd)
-      break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    எனில் (T.Kind == Token::TK_StreamEnd)
+      நிறுத்து;
+    இல்லையெனில் எனில் (T.Kind == Token::TK_Error)
+      திரும்பு பொய்;
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool yaml::scanTokens(StringRef Input) {
+தருக்க yaml::scanTokens(StringRef உள்ளீடு) {
   SourceMgr SM;
-  Scanner scanner(Input, SM);
-  while (true) {
+  Scanner scanner(உள்ளீடு, SM);
+  போது (உண்மை) {
     Token T = scanner.getNext();
-    if (T.Kind == Token::TK_StreamEnd)
-      break;
-    else if (T.Kind == Token::TK_Error)
-      return false;
+    எனில் (T.Kind == Token::TK_StreamEnd)
+      நிறுத்து;
+    இல்லையெனில் எனில் (T.Kind == Token::TK_Error)
+      திரும்பு பொய்;
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-std::string yaml::escape(StringRef Input, bool EscapePrintable) {
-  std::string EscapedInput;
-  for (StringRef::iterator i = Input.begin(), e = Input.end(); i != e; ++i) {
-    if (*i == '\\')
-      EscapedInput += "\\\\";
-    else if (*i == '"')
-      EscapedInput += "\\\"";
-    else if (*i == 0)
-      EscapedInput += "\\0";
-    else if (*i == 0x07)
-      EscapedInput += "\\a";
-    else if (*i == 0x08)
-      EscapedInput += "\\b";
-    else if (*i == 0x09)
-      EscapedInput += "\\t";
-    else if (*i == 0x0A)
-      EscapedInput += "\\n";
-    else if (*i == 0x0B)
-      EscapedInput += "\\v";
-    else if (*i == 0x0C)
-      EscapedInput += "\\f";
-    else if (*i == 0x0D)
-      EscapedInput += "\\r";
-    else if (*i == 0x1B)
-      EscapedInput += "\\e";
-    else if ((unsigned char)*i < 0x20) { // Control characters not handled above.
+std::string yaml::escape(StringRef உள்ளீடு, தருக்க EscapePrintable) {
+  std::string Escaped_உள்ளீடு;
+  க்கு (StringRef::iterator i = உள்ளீடு.begin(), e = உள்ளீடு.end(); i != e; ++i) {
+    எனில் (*i == '\\')
+      Escaped_உள்ளீடு += "\\\\";
+    இல்லையெனில் எனில் (*i == '"')
+      Escaped_உள்ளீடு += "\\\"";
+    இல்லையெனில் எனில் (*i == 0)
+      Escaped_உள்ளீடு += "\\0";
+    இல்லையெனில் எனில் (*i == 0x07)
+      Escaped_உள்ளீடு += "\\a";
+    இல்லையெனில் எனில் (*i == 0x08)
+      Escaped_உள்ளீடு += "\\b";
+    இல்லையெனில் எனில் (*i == 0x09)
+      Escaped_உள்ளீடு += "\\t";
+    இல்லையெனில் எனில் (*i == 0x0A)
+      Escaped_உள்ளீடு += "\\n";
+    இல்லையெனில் எனில் (*i == 0x0B)
+      Escaped_உள்ளீடு += "\\v";
+    இல்லையெனில் எனில் (*i == 0x0C)
+      Escaped_உள்ளீடு += "\\f";
+    இல்லையெனில் எனில் (*i == 0x0D)
+      Escaped_உள்ளீடு += "\\r";
+    இல்லையெனில் எனில் (*i == 0x1B)
+      Escaped_உள்ளீடு += "\\e";
+    இல்லையெனில் எனில் ((unsigned எழுத்து)*i < 0x20) { // Control characters not handled above.
       std::string HexStr = utohexstr(*i);
-      EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-    } else if (*i & 0x80) { // UTF-8 multiple code unit subsequence.
-      UTF8Decoded UnicodeScalarValue
-        = decodeUTF8(StringRef(i, Input.end() - i));
-      if (UnicodeScalarValue.second == 0) {
+      Escaped_உள்ளீடு += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
+    } இல்லையெனில் எனில் (*i & 0x80) { // UTF-8 multiple code unit subsequence.
+      UTF8Decoded Unicode_Scalar_மதிப்பு
+        = decodeUTF8(StringRef(i, உள்ளீடு.end() - i));
+      எனில் (Unicode_Scalar_மதிப்பு.second == 0) {
         // Found invalid char.
         SmallString<4> Val;
         encodeUTF8(0xFFFD, Val);
-        llvm::append_range(EscapedInput, Val);
+        llvm::append_range(Escaped_உள்ளீடு, Val);
         // FIXME: Error reporting.
-        return EscapedInput;
+        திரும்பு Escaped_உள்ளீடு;
       }
-      if (UnicodeScalarValue.first == 0x85)
-        EscapedInput += "\\N";
-      else if (UnicodeScalarValue.first == 0xA0)
-        EscapedInput += "\\_";
-      else if (UnicodeScalarValue.first == 0x2028)
-        EscapedInput += "\\L";
-      else if (UnicodeScalarValue.first == 0x2029)
-        EscapedInput += "\\P";
-      else if (!EscapePrintable &&
-               sys::unicode::isPrintable(UnicodeScalarValue.first))
-        EscapedInput += StringRef(i, UnicodeScalarValue.second);
-      else {
-        std::string HexStr = utohexstr(UnicodeScalarValue.first);
-        if (HexStr.size() <= 2)
-          EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 4)
-          EscapedInput += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
-        else if (HexStr.size() <= 8)
-          EscapedInput += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
+      எனில் (Unicode_Scalar_மதிப்பு.first == 0x85)
+        Escaped_உள்ளீடு += "\\N";
+      இல்லையெனில் எனில் (Unicode_Scalar_மதிப்பு.first == 0xA0)
+        Escaped_உள்ளீடு += "\\_";
+      இல்லையெனில் எனில் (Unicode_Scalar_மதிப்பு.first == 0x2028)
+        Escaped_உள்ளீடு += "\\L";
+      இல்லையெனில் எனில் (Unicode_Scalar_மதிப்பு.first == 0x2029)
+        Escaped_உள்ளீடு += "\\P";
+      இல்லையெனில் எனில் (!EscapePrintable &&
+               sys::unicode::isPrintable(Unicode_Scalar_மதிப்பு.first))
+        Escaped_உள்ளீடு += StringRef(i, Unicode_Scalar_மதிப்பு.second);
+      இல்லையெனில் {
+        std::string HexStr = utohexstr(Unicode_Scalar_மதிப்பு.first);
+        எனில் (HexStr.size() <= 2)
+          Escaped_உள்ளீடு += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
+        இல்லையெனில் எனில் (HexStr.size() <= 4)
+          Escaped_உள்ளீடு += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
+        இல்லையெனில் எனில் (HexStr.size() <= 8)
+          Escaped_உள்ளீடு += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
       }
-      i += UnicodeScalarValue.second - 1;
-    } else {
-      EscapedInput.push_back(*i);
+      i += Unicode_Scalar_மதிப்பு.second - 1;
+    } இல்லையெனில் {
+      Escaped_உள்ளீடு.தள்ளு_back(*i);
     }
   }
-  return EscapedInput;
+  திரும்பு Escaped_உள்ளீடு;
 }
 
-std::optional<bool> yaml::parseBool(StringRef S) {
-  switch (S.size()) {
-  case 1:
-    switch (S.front()) {
-    case 'y':
-    case 'Y':
-      return true;
-    case 'n':
-    case 'N':
-      return false;
-    default:
-      return std::nullopt;
+std::optional<தருக்க> yaml::parseBool(StringRef S) {
+  தேர்வு (S.size()) {
+  நிலை 1:
+    தேர்வு (S.front()) {
+    நிலை 'y':
+    நிலை 'Y':
+      திரும்பு உண்மை;
+    நிலை 'n':
+    நிலை 'N':
+      திரும்பு பொய்;
+    இயல்பு:
+      திரும்பு std::nullopt;
     }
-  case 2:
-    switch (S.front()) {
-    case 'O':
-      if (S[1] == 'N') // ON
-        return true;
+  நிலை 2:
+    தேர்வு (S.front()) {
+    நிலை 'O':
+      எனில் (S[1] == 'N') // ON
+        திரும்பு உண்மை;
       [[fallthrough]];
-    case 'o':
-      if (S[1] == 'n') //[Oo]n
-        return true;
-      return std::nullopt;
-    case 'N':
-      if (S[1] == 'O') // NO
-        return false;
+    நிலை 'o':
+      எனில் (S[1] == 'n') //[Oo]n
+        திரும்பு உண்மை;
+      திரும்பு std::nullopt;
+    நிலை 'N':
+      எனில் (S[1] == 'O') // NO
+        திரும்பு பொய்;
       [[fallthrough]];
-    case 'n':
-      if (S[1] == 'o') //[Nn]o
-        return false;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    நிலை 'n':
+      எனில் (S[1] == 'o') //[Nn]o
+        திரும்பு பொய்;
+      திரும்பு std::nullopt;
+    இயல்பு:
+      திரும்பு std::nullopt;
     }
-  case 3:
-    switch (S.front()) {
-    case 'O':
-      if (S.drop_front() == "FF") // OFF
-        return false;
+  நிலை 3:
+    தேர்வு (S.front()) {
+    நிலை 'O':
+      எனில் (S.drop_front() == "FF") // OFF
+        திரும்பு பொய்;
       [[fallthrough]];
-    case 'o':
-      if (S.drop_front() == "ff") //[Oo]ff
-        return false;
-      return std::nullopt;
-    case 'Y':
-      if (S.drop_front() == "ES") // YES
-        return true;
+    நிலை 'o':
+      எனில் (S.drop_front() == "ff") //[Oo]ff
+        திரும்பு பொய்;
+      திரும்பு std::nullopt;
+    நிலை 'Y':
+      எனில் (S.drop_front() == "ES") // YES
+        திரும்பு உண்மை;
       [[fallthrough]];
-    case 'y':
-      if (S.drop_front() == "es") //[Yy]es
-        return true;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    நிலை 'y':
+      எனில் (S.drop_front() == "es") //[Yy]es
+        திரும்பு உண்மை;
+      திரும்பு std::nullopt;
+    இயல்பு:
+      திரும்பு std::nullopt;
     }
-  case 4:
-    switch (S.front()) {
-    case 'T':
-      if (S.drop_front() == "RUE") // TRUE
-        return true;
+  நிலை 4:
+    தேர்வு (S.front()) {
+    நிலை 'T':
+      எனில் (S.drop_front() == "RUE") // TRUE
+        திரும்பு உண்மை;
       [[fallthrough]];
-    case 't':
-      if (S.drop_front() == "rue") //[Tt]rue
-        return true;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    நிலை 't':
+      எனில் (S.drop_front() == "rue") //[Tt]rue
+        திரும்பு உண்மை;
+      திரும்பு std::nullopt;
+    இயல்பு:
+      திரும்பு std::nullopt;
     }
-  case 5:
-    switch (S.front()) {
-    case 'F':
-      if (S.drop_front() == "ALSE") // FALSE
-        return false;
+  நிலை 5:
+    தேர்வு (S.front()) {
+    நிலை 'F':
+      எனில் (S.drop_front() == "ALSE") // FALSE
+        திரும்பு பொய்;
       [[fallthrough]];
-    case 'f':
-      if (S.drop_front() == "alse") //[Ff]alse
-        return false;
-      return std::nullopt;
-    default:
-      return std::nullopt;
+    நிலை 'f':
+      எனில் (S.drop_front() == "alse") //[Ff]alse
+        திரும்பு பொய்;
+      திரும்பு std::nullopt;
+    இயல்பு:
+      திரும்பு std::nullopt;
     }
-  default:
-    return std::nullopt;
+  இயல்பு:
+    திரும்பு std::nullopt;
   }
 }
 
-Scanner::Scanner(StringRef Input, SourceMgr &sm, bool ShowColors,
+Scanner::Scanner(StringRef உள்ளீடு, SourceMgr &sm, தருக்க ShowColors,
                  std::error_code *EC)
     : SM(sm), ShowColors(ShowColors), EC(EC) {
-  init(MemoryBufferRef(Input, "YAML"));
+  init(MemoryBufferRef(உள்ளீடு, "YAML"));
 }
 
-Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors,
+Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, தருக்க ShowColors,
                  std::error_code *EC)
     : SM(SM_), ShowColors(ShowColors), EC(EC) {
   init(Buffer);
 }
 
-void Scanner::init(MemoryBufferRef Buffer) {
-  InputBuffer = Buffer;
-  Current = InputBuffer.getBufferStart();
-  End = InputBuffer.getBufferEnd();
+வெறுமை Scanner::init(MemoryBufferRef Buffer) {
+  உள்ளீடு_Buffer = Buffer;
+  Current = உள்ளீடு_Buffer.getBufferStart();
+  End = உள்ளீடு_Buffer.getBufferEnd();
   Indent = -1;
   Column = 0;
-  Line = 0;
+  வரி = 0;
   FlowLevel = 0;
-  IsStartOfStream = true;
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
-  Failed = false;
-  std::unique_ptr<MemoryBuffer> InputBufferOwner =
-      MemoryBuffer::getMemBuffer(Buffer, /*RequiresNullTerminator=*/false);
-  SM.AddNewSourceBuffer(std::move(InputBufferOwner), SMLoc());
+  IsStartOfStream = உண்மை;
+  Is_Simple_சாவி_Allowed = உண்மை;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
+  Failed = பொய்;
+  std::unique_ptr<MemoryBuffer> உள்ளீடு_Buffer_Owner =
+      MemoryBuffer::getMemBuffer(Buffer, /*RequiresNullTerminator=*/பொய்);
+  SM.AddNewSourceBuffer(std::move(உள்ளீடு_Buffer_Owner), SMLoc());
 }
 
 Token &Scanner::peekNext() {
   // If the current token is a possible simple key, keep parsing until we
   // can confirm.
-  bool NeedMore = false;
-  while (true) {
-    if (TokenQueue.empty() || NeedMore) {
-      if (!fetchMoreTokens()) {
+  தருக்க NeedMore = பொய்;
+  போது (உண்மை) {
+    எனில் (TokenQueue.empty() || NeedMore) {
+      எனில் (!fetchMoreTokens()) {
         TokenQueue.clear();
-        SimpleKeys.clear();
-        TokenQueue.push_back(Token());
-        return TokenQueue.front();
+        Simple_சாவிகள்.clear();
+        TokenQueue.தள்ளு_back(Token());
+        திரும்பு TokenQueue.front();
       }
     }
-    assert(!TokenQueue.empty() &&
+    ப்ரதிஜ்ஞா(!TokenQueue.empty() &&
             "fetchMoreTokens lied about getting tokens!");
 
-    removeStaleSimpleKeyCandidates();
-    SimpleKey SK;
+    remove_Stale_Simple_சாவி_Candidates();
+    Simple_சாவி SK;
     SK.Tok = TokenQueue.begin();
-    if (!is_contained(SimpleKeys, SK))
-      break;
-    else
-      NeedMore = true;
+    எனில் (!is_contained(Simple_சாவிகள், SK))
+      நிறுத்து;
+    இல்லையெனில்
+      NeedMore = உண்மை;
   }
-  return TokenQueue.front();
+  திரும்பு TokenQueue.front();
 }
 
 Token Scanner::getNext() {
   Token Ret = peekNext();
   // TokenQueue can be empty if there was an error getting the next token.
-  if (!TokenQueue.empty())
-    TokenQueue.pop_front();
+  எனில் (!TokenQueue.empty())
+    TokenQueue.எடு_front();
 
   // There cannot be any referenced Token's if the TokenQueue is empty. So do a
   // quick deallocation of them all.
-  if (TokenQueue.empty())
+  எனில் (TokenQueue.empty())
     TokenQueue.resetAlloc();
 
-  return Ret;
+  திரும்பு Ret;
 }
 
 StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
+  எனில் (Position == End)
+    திரும்பு Position;
   // Check 7 bit c-printable - b-char.
-  if (   *Position == 0x09
+  எனில் (   *Position == 0x09
       || (*Position >= 0x20 && *Position <= 0x7E))
-    return Position + 1;
+    திரும்பு Position + 1;
 
   // Check for valid UTF-8.
-  if (uint8_t(*Position) & 0x80) {
+  எனில் (uint8_t(*Position) & 0x80) {
     UTF8Decoded u8d = decodeUTF8(Position);
-    if (   u8d.second != 0
+    எனில் (   u8d.second != 0
         && u8d.first != 0xFEFF
         && ( u8d.first == 0x85
           || ( u8d.first >= 0xA0
@@ -944,228 +944,228 @@ StringRef::iterator Scanner::skip_nb_char(StringRef::iterator Position) {
             && u8d.first <= 0xFFFD)
           || ( u8d.first >= 0x10000
             && u8d.first <= 0x10FFFF)))
-      return Position + u8d.second;
+      திரும்பு Position + u8d.second;
   }
-  return Position;
+  திரும்பு Position;
 }
 
 StringRef::iterator Scanner::skip_b_break(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == 0x0D) {
-    if (Position + 1 != End && *(Position + 1) == 0x0A)
-      return Position + 2;
-    return Position + 1;
+  எனில் (Position == End)
+    திரும்பு Position;
+  எனில் (*Position == 0x0D) {
+    எனில் (Position + 1 != End && *(Position + 1) == 0x0A)
+      திரும்பு Position + 2;
+    திரும்பு Position + 1;
   }
 
-  if (*Position == 0x0A)
-    return Position + 1;
-  return Position;
+  எனில் (*Position == 0x0A)
+    திரும்பு Position + 1;
+  திரும்பு Position;
 }
 
 StringRef::iterator Scanner::skip_s_space(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ')
-    return Position + 1;
-  return Position;
+  எனில் (Position == End)
+    திரும்பு Position;
+  எனில் (*Position == ' ')
+    திரும்பு Position + 1;
+  திரும்பு Position;
 }
 
 StringRef::iterator Scanner::skip_s_white(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position + 1;
-  return Position;
+  எனில் (Position == End)
+    திரும்பு Position;
+  எனில் (*Position == ' ' || *Position == '\t')
+    திரும்பு Position + 1;
+  திரும்பு Position;
 }
 
 StringRef::iterator Scanner::skip_ns_char(StringRef::iterator Position) {
-  if (Position == End)
-    return Position;
-  if (*Position == ' ' || *Position == '\t')
-    return Position;
-  return skip_nb_char(Position);
+  எனில் (Position == End)
+    திரும்பு Position;
+  எனில் (*Position == ' ' || *Position == '\t')
+    திரும்பு Position;
+  திரும்பு skip_nb_char(Position);
 }
 
 StringRef::iterator Scanner::skip_while( SkipWhileFunc Func
                                        , StringRef::iterator Position) {
-  while (true) {
-    StringRef::iterator i = (this->*Func)(Position);
-    if (i == Position)
-      break;
+  போது (உண்மை) {
+    StringRef::iterator i = (இது->*Func)(Position);
+    எனில் (i == Position)
+      நிறுத்து;
     Position = i;
   }
-  return Position;
+  திரும்பு Position;
 }
 
-void Scanner::advanceWhile(SkipWhileFunc Func) {
+வெறுமை Scanner::advanceWhile(SkipWhileFunc Func) {
   auto Final = skip_while(Func, Current);
   Column += Final - Current;
   Current = Final;
 }
 
-static bool is_ns_hex_digit(const char C) { return isAlnum(C); }
+நிலையான தருக்க is_ns_hex_digit(மாறிலி எழுத்து C) { திரும்பு isAlnum(C); }
 
-static bool is_ns_word_char(const char C) { return C == '-' || isAlpha(C); }
+நிலையான தருக்க is_ns_word_char(மாறிலி எழுத்து C) { திரும்பு C == '-' || isAlpha(C); }
 
-void Scanner::scan_ns_uri_char() {
-  while (true) {
-    if (Current == End)
-      break;
-    if ((*Current == '%' && Current + 2 < End &&
+வெறுமை Scanner::scan_ns_uri_char() {
+  போது (உண்மை) {
+    எனில் (Current == End)
+      நிறுத்து;
+    எனில் ((*Current == '%' && Current + 2 < End &&
          is_ns_hex_digit(*(Current + 1)) && is_ns_hex_digit(*(Current + 2))) ||
         is_ns_word_char(*Current) ||
         StringRef(Current, 1).find_first_of("#;/?:@&=+$,_.!~*'()[]") !=
             StringRef::npos) {
       ++Current;
       ++Column;
-    } else {
-      break;
+    } இல்லையெனில் {
+      நிறுத்து;
     }
   }
 }
 
-bool Scanner::consume(uint32_t Expected) {
-  if (Expected >= 0x80) {
+தருக்க Scanner::consume(uint32_t Expected) {
+  எனில் (Expected >= 0x80) {
     setError("Cannot consume non-ascii characters", Current);
-    return false;
+    திரும்பு பொய்;
   }
-  if (Current == End)
-    return false;
-  if (uint8_t(*Current) >= 0x80) {
+  எனில் (Current == End)
+    திரும்பு பொய்;
+  எனில் (uint8_t(*Current) >= 0x80) {
     setError("Cannot consume non-ascii characters", Current);
-    return false;
+    திரும்பு பொய்;
   }
-  if (uint8_t(*Current) == Expected) {
+  எனில் (uint8_t(*Current) == Expected) {
     ++Current;
     ++Column;
-    return true;
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-void Scanner::skip(uint32_t Distance) {
+வெறுமை Scanner::skip(uint32_t Distance) {
   Current += Distance;
   Column += Distance;
-  assert(Current <= End && "Skipped past the end");
+  ப்ரதிஜ்ஞா(Current <= End && "Skipped past the end");
 }
 
-bool Scanner::isBlankOrBreak(StringRef::iterator Position) {
-  if (Position == End)
-    return false;
-  return *Position == ' ' || *Position == '\t' || *Position == '\r' ||
+தருக்க Scanner::isBlankOrBreak(StringRef::iterator Position) {
+  எனில் (Position == End)
+    திரும்பு பொய்;
+  திரும்பு *Position == ' ' || *Position == '\t' || *Position == '\r' ||
          *Position == '\n';
 }
 
-bool Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
-  if (Position == End || isBlankOrBreak(Position))
-    return false;
-  if (FlowLevel &&
+தருக்க Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
+  எனில் (Position == End || isBlankOrBreak(Position))
+    திரும்பு பொய்;
+  எனில் (FlowLevel &&
       StringRef(Position, 1).find_first_of(",[]{}") != StringRef::npos)
-    return false;
-  return true;
+    திரும்பு பொய்;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::isLineEmpty(StringRef Line) {
-  for (const auto *Position = Line.begin(); Position != Line.end(); ++Position)
-    if (!isBlankOrBreak(Position))
-      return false;
-  return true;
+தருக்க Scanner::is_வரி_Empty(StringRef வரி) {
+  க்கு (மாறிலி auto *Position = வரி.begin(); Position != வரி.end(); ++Position)
+    எனில் (!isBlankOrBreak(Position))
+      திரும்பு பொய்;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::consumeLineBreakIfPresent() {
+தருக்க Scanner::consume_வரி_Break_If_Present() {
   auto Next = skip_b_break(Current);
-  if (Next == Current)
-    return false;
+  எனில் (Next == Current)
+    திரும்பு பொய்;
   Column = 0;
-  ++Line;
+  ++வரி;
   Current = Next;
-  return true;
+  திரும்பு உண்மை;
 }
 
-void Scanner::saveSimpleKeyCandidate( TokenQueueT::iterator Tok
+வெறுமை Scanner::save_Simple_சாவி_Candidate( TokenQueueT::iterator Tok
                                     , unsigned AtColumn
-                                    , bool IsRequired) {
-  if (IsSimpleKeyAllowed) {
-    SimpleKey SK;
+                                    , தருக்க IsRequired) {
+  எனில் (Is_Simple_சாவி_Allowed) {
+    Simple_சாவி SK;
     SK.Tok = Tok;
-    SK.Line = Line;
+    SK.வரி = வரி;
     SK.Column = AtColumn;
     SK.IsRequired = IsRequired;
     SK.FlowLevel = FlowLevel;
-    SimpleKeys.push_back(SK);
+    Simple_சாவிகள்.தள்ளு_back(SK);
   }
 }
 
-void Scanner::removeStaleSimpleKeyCandidates() {
-  for (SmallVectorImpl<SimpleKey>::iterator i = SimpleKeys.begin();
-                                            i != SimpleKeys.end();) {
-    if (i->Line != Line || i->Column + 1024 < Column) {
-      if (i->IsRequired)
+வெறுமை Scanner::remove_Stale_Simple_சாவி_Candidates() {
+  க்கு (SmallVectorImpl<Simple_சாவி>::iterator i = Simple_சாவிகள்.begin();
+                                            i != Simple_சாவிகள்.end();) {
+    எனில் (i->வரி != வரி || i->Column + 1024 < Column) {
+      எனில் (i->IsRequired)
         setError( "Could not find expected : for simple key"
                 , i->Tok->Range.begin());
-      i = SimpleKeys.erase(i);
-    } else {
+      i = Simple_சாவிகள்.erase(i);
+    } இல்லையெனில் {
       ++i;
     }
   }
 }
 
-void Scanner::removeSimpleKeyCandidatesOnFlowLevel(unsigned Level) {
-  if (!SimpleKeys.empty() && (SimpleKeys.end() - 1)->FlowLevel == Level)
-    SimpleKeys.pop_back();
+வெறுமை Scanner::remove_Simple_சாவி_Candidates_On_Flow_Level(unsigned Level) {
+  எனில் (!Simple_சாவிகள்.empty() && (Simple_சாவிகள்.end() - 1)->FlowLevel == Level)
+    Simple_சாவிகள்.எடு_back();
 }
 
-bool Scanner::unrollIndent(int ToColumn) {
+தருக்க Scanner::unrollIndent(முழு ToColumn) {
   Token T;
   // Indentation is ignored in flow.
-  if (FlowLevel != 0)
-    return true;
+  எனில் (FlowLevel != 0)
+    திரும்பு உண்மை;
 
-  while (Indent > ToColumn) {
+  போது (Indent > ToColumn) {
     T.Kind = Token::TK_BlockEnd;
     T.Range = StringRef(Current, 1);
-    TokenQueue.push_back(T);
-    Indent = Indents.pop_back_val();
+    TokenQueue.தள்ளு_back(T);
+    Indent = Indents.எடு_back_val();
   }
 
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::rollIndent( int ToColumn
+தருக்க Scanner::rollIndent( முழு ToColumn
                         , Token::TokenKind Kind
-                        , TokenQueueT::iterator InsertPoint) {
-  if (FlowLevel)
-    return true;
-  if (Indent < ToColumn) {
-    Indents.push_back(Indent);
+                        , TokenQueueT::iterator செருகு_Point) {
+  எனில் (FlowLevel)
+    திரும்பு உண்மை;
+  எனில் (Indent < ToColumn) {
+    Indents.தள்ளு_back(Indent);
     Indent = ToColumn;
 
     Token T;
     T.Kind = Kind;
     T.Range = StringRef(Current, 0);
-    TokenQueue.insert(InsertPoint, T);
+    TokenQueue.செருகு(செருகு_Point, T);
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-void Scanner::skipComment() {
-  if (Current == End || *Current != '#')
-    return;
-  while (true) {
+வெறுமை Scanner::skipComment() {
+  எனில் (Current == End || *Current != '#')
+    திரும்பு;
+  போது (உண்மை) {
     // This may skip more than one byte, thus Column is only incremented
     // for code points.
     StringRef::iterator I = skip_nb_char(Current);
-    if (I == Current)
-      break;
+    எனில் (I == Current)
+      நிறுத்து;
     Current = I;
     ++Column;
   }
 }
 
-void Scanner::scanToNextToken() {
-  while (true) {
-    while (Current != End && (*Current == ' ' || *Current == '\t')) {
+வெறுமை Scanner::scanToNextToken() {
+  போது (உண்மை) {
+    போது (Current != End && (*Current == ' ' || *Current == '\t')) {
       skip(1);
     }
 
@@ -1173,55 +1173,55 @@ void Scanner::scanToNextToken() {
 
     // Skip EOL.
     StringRef::iterator i = skip_b_break(Current);
-    if (i == Current)
-      break;
+    எனில் (i == Current)
+      நிறுத்து;
     Current = i;
-    ++Line;
+    ++வரி;
     Column = 0;
     // New lines may start a simple key.
-    if (!FlowLevel)
-      IsSimpleKeyAllowed = true;
+    எனில் (!FlowLevel)
+      Is_Simple_சாவி_Allowed = உண்மை;
   }
 }
 
-bool Scanner::scanStreamStart() {
-  IsStartOfStream = false;
+தருக்க Scanner::scanStreamStart() {
+  IsStartOfStream = பொய்;
 
-  EncodingInfo EI = getUnicodeEncoding(currentInput());
+  EncodingInfo EI = getUnicodeEncoding(current_உள்ளீடு());
 
   Token T;
   T.Kind = Token::TK_StreamStart;
   T.Range = StringRef(Current, EI.second);
-  TokenQueue.push_back(T);
+  TokenQueue.தள்ளு_back(T);
   Current += EI.second;
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanStreamEnd() {
+தருக்க Scanner::scanStreamEnd() {
   // Force an ending new line if one isn't present.
-  if (Column != 0) {
+  எனில் (Column != 0) {
     Column = 0;
-    ++Line;
+    ++வரி;
   }
 
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_சாவிகள்.clear();
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
   Token T;
   T.Kind = Token::TK_StreamEnd;
   T.Range = StringRef(Current, 0);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanDirective() {
+தருக்க Scanner::scanDirective() {
   // Reset the indentation level.
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_சாவிகள்.clear();
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
   StringRef::iterator Start = Current;
   consume('%');
@@ -1231,529 +1231,529 @@ bool Scanner::scanDirective() {
   Current = skip_while(&Scanner::skip_s_white, Current);
 
   Token T;
-  if (Name == "YAML") {
+  எனில் (Name == "YAML") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_VersionDirective;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    return true;
-  } else if(Name == "TAG") {
+    TokenQueue.தள்ளு_back(T);
+    திரும்பு உண்மை;
+  } இல்லையெனில் எனில்(Name == "TAG") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     Current = skip_while(&Scanner::skip_s_white, Current);
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_TagDirective;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    return true;
+    TokenQueue.தள்ளு_back(T);
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-bool Scanner::scanDocumentIndicator(bool IsStart) {
+தருக்க Scanner::scanDocumentIndicator(தருக்க IsStart) {
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_சாவிகள்.clear();
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
   Token T;
   T.Kind = IsStart ? Token::TK_DocumentStart : Token::TK_DocumentEnd;
   T.Range = StringRef(Current, 3);
   skip(3);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanFlowCollectionStart(bool IsSequence) {
+தருக்க Scanner::scanFlowCollectionStart(தருக்க IsSequence) {
   Token T;
   T.Kind = IsSequence ? Token::TK_FlowSequenceStart
                       : Token::TK_FlowMappingStart;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.தள்ளு_back(T);
 
   // [ and { may begin a simple key.
-  saveSimpleKeyCandidate(--TokenQueue.end(), Column - 1, false);
+  save_Simple_சாவி_Candidate(--TokenQueue.end(), Column - 1, பொய்);
 
   // And may also be followed by a simple key.
-  IsSimpleKeyAllowed = true;
+  Is_Simple_சாவி_Allowed = உண்மை;
   // Adjacent values are allowed in flows only after JSON-style keys.
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
   ++FlowLevel;
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanFlowCollectionEnd(bool IsSequence) {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+தருக்க Scanner::scanFlowCollectionEnd(தருக்க IsSequence) {
+  remove_Simple_சாவி_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = உண்மை;
   Token T;
   T.Kind = IsSequence ? Token::TK_FlowSequenceEnd
                       : Token::TK_FlowMappingEnd;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  if (FlowLevel)
+  TokenQueue.தள்ளு_back(T);
+  எனில் (FlowLevel)
     --FlowLevel;
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanFlowEntry() {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+தருக்க Scanner::scanFlowEntry() {
+  remove_Simple_சாவி_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_சாவி_Allowed = உண்மை;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
   Token T;
   T.Kind = Token::TK_FlowEntry;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanBlockEntry() {
+தருக்க Scanner::scanBlockEntry() {
   rollIndent(Column, Token::TK_BlockSequenceStart, TokenQueue.end());
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_சாவி_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_சாவி_Allowed = உண்மை;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
   Token T;
   T.Kind = Token::TK_BlockEntry;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanKey() {
-  if (!FlowLevel)
+தருக்க Scanner::scan_சாவி() {
+  எனில் (!FlowLevel)
     rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
 
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = !FlowLevel;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_சாவி_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_சாவி_Allowed = !FlowLevel;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
   Token T;
-  T.Kind = Token::TK_Key;
+  T.Kind = Token::TK_சாவி;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanValue() {
+தருக்க Scanner::scan_மதிப்பு() {
   // If the previous token could have been a simple key, insert the key token
   // into the token queue.
-  if (!SimpleKeys.empty()) {
-    SimpleKey SK = SimpleKeys.pop_back_val();
+  எனில் (!Simple_சாவிகள்.empty()) {
+    Simple_சாவி SK = Simple_சாவிகள்.எடு_back_val();
     Token T;
-    T.Kind = Token::TK_Key;
+    T.Kind = Token::TK_சாவி;
     T.Range = SK.Tok->Range;
     TokenQueueT::iterator i, e;
-    for (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
-      if (i == SK.Tok)
-        break;
+    க்கு (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
+      எனில் (i == SK.Tok)
+        நிறுத்து;
     }
-    if (i == e) {
-      Failed = true;
-      return false;
+    எனில் (i == e) {
+      Failed = உண்மை;
+      திரும்பு பொய்;
     }
-    i = TokenQueue.insert(i, T);
+    i = TokenQueue.செருகு(i, T);
 
     // We may also need to add a Block-Mapping-Start token.
     rollIndent(SK.Column, Token::TK_BlockMappingStart, i);
 
-    IsSimpleKeyAllowed = false;
-  } else {
-    if (!FlowLevel)
+    Is_Simple_சாவி_Allowed = பொய்;
+  } இல்லையெனில் {
+    எனில் (!FlowLevel)
       rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
-    IsSimpleKeyAllowed = !FlowLevel;
+    Is_Simple_சாவி_Allowed = !FlowLevel;
   }
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
   Token T;
-  T.Kind = Token::TK_Value;
+  T.Kind = Token::TK_மதிப்பு;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
-  return true;
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
 // Forbidding inlining improves performance by roughly 20%.
 // FIXME: Remove once llvm optimizes this to the faster version without hints.
-LLVM_ATTRIBUTE_NOINLINE static bool
+LLVM_ATTRIBUTE_NOINLINE நிலையான தருக்க
 wasEscaped(StringRef::iterator First, StringRef::iterator Position);
 
 // Returns whether a character at 'Position' was escaped with a leading '\'.
 // 'First' specifies the position of the first character in the string.
-static bool wasEscaped(StringRef::iterator First,
+நிலையான தருக்க wasEscaped(StringRef::iterator First,
                        StringRef::iterator Position) {
-  assert(Position - 1 >= First);
+  ப்ரதிஜ்ஞா(Position - 1 >= First);
   StringRef::iterator I = Position - 1;
   // We calculate the number of consecutive '\'s before the current position
   // by iterating backwards through our string.
-  while (I >= First && *I == '\\') --I;
+  போது (I >= First && *I == '\\') --I;
   // (Position - 1 - I) now contains the number of '\'s before the current
   // position. If it is odd, the character at 'Position' was escaped.
-  return (Position - 1 - I) % 2 == 1;
+  திரும்பு (Position - 1 - I) % 2 == 1;
 }
 
-bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
+தருக்க Scanner::scanFlowScalar(தருக்க IsDoubleQuoted) {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
-  if (IsDoubleQuoted) {
-    do {
+  எனில் (IsDoubleQuoted) {
+    செய் {
       ++Current;
-      while (Current != End && *Current != '"')
+      போது (Current != End && *Current != '"')
         ++Current;
       // Repeat until the previous character was not a '\' or was an escaped
       // backslash.
-    } while (   Current != End
+    } போது (   Current != End
              && *(Current - 1) == '\\'
              && wasEscaped(Start + 1, Current));
-  } else {
+  } இல்லையெனில் {
     skip(1);
-    while (Current != End) {
+    போது (Current != End) {
       // Skip a ' followed by another '.
-      if (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
+      எனில் (Current + 1 < End && *Current == '\'' && *(Current + 1) == '\'') {
         skip(2);
-        continue;
-      } else if (*Current == '\'')
-        break;
+        தொடர்;
+      } இல்லையெனில் எனில் (*Current == '\'')
+        நிறுத்து;
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current) {
+      எனில் (i == Current) {
         i = skip_b_break(Current);
-        if (i == Current)
-          break;
+        எனில் (i == Current)
+          நிறுத்து;
         Current = i;
         Column = 0;
-        ++Line;
-      } else {
-        if (i == End)
-          break;
+        ++வரி;
+      } இல்லையெனில் {
+        எனில் (i == End)
+          நிறுத்து;
         Current = i;
         ++Column;
       }
     }
   }
 
-  if (Current == End) {
+  எனில் (Current == End) {
     setError("Expected quote at end of scalar", Current);
-    return false;
+    திரும்பு பொய்;
   }
 
   skip(1); // Skip ending quote.
   Token T;
   T.Kind = Token::TK_Scalar;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.தள்ளு_back(T);
 
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_சாவி_Candidate(--TokenQueue.end(), ColStart, பொய்);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = உண்மை;
 
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanPlainScalar() {
+தருக்க Scanner::scanPlainScalar() {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   unsigned LeadingBlanks = 0;
-  assert(Indent >= -1 && "Indent must be >= -1 !");
+  ப்ரதிஜ்ஞா(Indent >= -1 && "Indent must be >= -1 !");
   unsigned indent = static_cast<unsigned>(Indent + 1);
-  while (Current != End) {
-    if (*Current == '#')
-      break;
+  போது (Current != End) {
+    எனில் (*Current == '#')
+      நிறுத்து;
 
-    while (Current != End &&
+    போது (Current != End &&
            ((*Current != ':' && isPlainSafeNonBlank(Current)) ||
             (*Current == ':' && isPlainSafeNonBlank(Current + 1)))) {
       StringRef::iterator i = skip_nb_char(Current);
-      if (i == Current)
-        break;
+      எனில் (i == Current)
+        நிறுத்து;
       Current = i;
       ++Column;
     }
 
     // Are we at the end?
-    if (!isBlankOrBreak(Current))
-      break;
+    எனில் (!isBlankOrBreak(Current))
+      நிறுத்து;
 
     // Eat blanks.
     StringRef::iterator Tmp = Current;
-    while (isBlankOrBreak(Tmp)) {
+    போது (isBlankOrBreak(Tmp)) {
       StringRef::iterator i = skip_s_white(Tmp);
-      if (i != Tmp) {
-        if (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
+      எனில் (i != Tmp) {
+        எனில் (LeadingBlanks && (Column < indent) && *Tmp == '\t') {
           setError("Found invalid tab character in indentation", Tmp);
-          return false;
+          திரும்பு பொய்;
         }
         Tmp = i;
         ++Column;
-      } else {
+      } இல்லையெனில் {
         i = skip_b_break(Tmp);
-        if (!LeadingBlanks)
+        எனில் (!LeadingBlanks)
           LeadingBlanks = 1;
         Tmp = i;
         Column = 0;
-        ++Line;
+        ++வரி;
       }
     }
 
-    if (!FlowLevel && Column < indent)
-      break;
+    எனில் (!FlowLevel && Column < indent)
+      நிறுத்து;
 
     Current = Tmp;
   }
-  if (Start == Current) {
+  எனில் (Start == Current) {
     setError("Got empty plain scalar", Start);
-    return false;
+    திரும்பு பொய்;
   }
   Token T;
   T.Kind = Token::TK_Scalar;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.தள்ளு_back(T);
 
   // Plain scalars can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_சாவி_Candidate(--TokenQueue.end(), ColStart, பொய்);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanAliasOrAnchor(bool IsAlias) {
+தருக்க Scanner::scanAliasOrAnchor(தருக்க IsAlias) {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   skip(1);
-  while (Current != End) {
-    if (   *Current == '[' || *Current == ']'
+  போது (Current != End) {
+    எனில் (   *Current == '[' || *Current == ']'
         || *Current == '{' || *Current == '}'
         || *Current == ','
         || *Current == ':')
-      break;
+      நிறுத்து;
     StringRef::iterator i = skip_ns_char(Current);
-    if (i == Current)
-      break;
+    எனில் (i == Current)
+      நிறுத்து;
     Current = i;
     ++Column;
   }
 
-  if (Start + 1 == Current) {
+  எனில் (Start + 1 == Current) {
     setError("Got empty alias or anchor", Start);
-    return false;
+    திரும்பு பொய்;
   }
 
   Token T;
   T.Kind = IsAlias ? Token::TK_Alias : Token::TK_Anchor;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.தள்ளு_back(T);
 
   // Alias and anchors can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_சாவி_Candidate(--TokenQueue.end(), ColStart, பொய்);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanBlockScalarIndicators(char &StyleIndicator,
-                                        char &ChompingIndicator,
+தருக்க Scanner::scanBlockScalarIndicators(எழுத்து &StyleIndicator,
+                                        எழுத்து &ChompingIndicator,
                                         unsigned &IndentIndicator,
-                                        bool &IsDone) {
+                                        தருக்க &IsDone) {
   StyleIndicator = scanBlockStyleIndicator();
-  if (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
-    return false;
-  return true;
+  எனில் (!scanBlockScalarHeader(ChompingIndicator, IndentIndicator, IsDone))
+    திரும்பு பொய்;
+  திரும்பு உண்மை;
 }
 
-char Scanner::scanBlockStyleIndicator() {
-  char Indicator = ' ';
-  if (Current != End && (*Current == '>' || *Current == '|')) {
+எழுத்து Scanner::scanBlockStyleIndicator() {
+  எழுத்து Indicator = ' ';
+  எனில் (Current != End && (*Current == '>' || *Current == '|')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  திரும்பு Indicator;
 }
 
-char Scanner::scanBlockChompingIndicator() {
-  char Indicator = ' ';
-  if (Current != End && (*Current == '+' || *Current == '-')) {
+எழுத்து Scanner::scanBlockChompingIndicator() {
+  எழுத்து Indicator = ' ';
+  எனில் (Current != End && (*Current == '+' || *Current == '-')) {
     Indicator = *Current;
     skip(1);
   }
-  return Indicator;
+  திரும்பு Indicator;
 }
 
 /// Get the number of line breaks after chomping.
 ///
 /// Return the number of trailing line breaks to emit, depending on
 /// \p ChompingIndicator.
-static unsigned getChompedLineBreaks(char ChompingIndicator,
-                                     unsigned LineBreaks, StringRef Str) {
-  if (ChompingIndicator == '-') // Strip all line breaks.
-    return 0;
-  if (ChompingIndicator == '+') // Keep all line breaks.
-    return LineBreaks;
+நிலையான unsigned get_Chomped_வரி_Breaks(எழுத்து ChompingIndicator,
+                                     unsigned வரி_Breaks, StringRef Str) {
+  எனில் (ChompingIndicator == '-') // Strip all line breaks.
+    திரும்பு 0;
+  எனில் (ChompingIndicator == '+') // Keep all line breaks.
+    திரும்பு வரி_Breaks;
   // Clip trailing lines.
-  return Str.empty() ? 0 : 1;
+  திரும்பு Str.empty() ? 0 : 1;
 }
 
 unsigned Scanner::scanBlockIndentationIndicator() {
   unsigned Indent = 0;
-  if (Current != End && (*Current >= '1' && *Current <= '9')) {
+  எனில் (Current != End && (*Current >= '1' && *Current <= '9')) {
     Indent = unsigned(*Current - '0');
     skip(1);
   }
-  return Indent;
+  திரும்பு Indent;
 }
 
-bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
-                                    unsigned &IndentIndicator, bool &IsDone) {
+தருக்க Scanner::scanBlockScalarHeader(எழுத்து &ChompingIndicator,
+                                    unsigned &IndentIndicator, தருக்க &IsDone) {
   auto Start = Current;
 
   ChompingIndicator = scanBlockChompingIndicator();
   IndentIndicator = scanBlockIndentationIndicator();
   // Check for the chomping indicator once again.
-  if (ChompingIndicator == ' ')
+  எனில் (ChompingIndicator == ' ')
     ChompingIndicator = scanBlockChompingIndicator();
   Current = skip_while(&Scanner::skip_s_white, Current);
   skipComment();
 
-  if (Current == End) { // EOF, we have an empty scalar.
+  எனில் (Current == End) { // EOF, we have an empty scalar.
     Token T;
     T.Kind = Token::TK_BlockScalar;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
-    IsDone = true;
-    return true;
+    TokenQueue.தள்ளு_back(T);
+    IsDone = உண்மை;
+    திரும்பு உண்மை;
   }
 
-  if (!consumeLineBreakIfPresent()) {
+  எனில் (!consume_வரி_Break_If_Present()) {
     setError("Expected a line break after block scalar header", Current);
-    return false;
+    திரும்பு பொய்;
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
+தருக்க Scanner::findBlockScalarIndent(unsigned &BlockIndent,
                                     unsigned BlockExitIndent,
-                                    unsigned &LineBreaks, bool &IsDone) {
-  unsigned MaxAllSpaceLineCharacters = 0;
-  StringRef::iterator LongestAllSpaceLine;
+                                    unsigned &வரி_Breaks, தருக்க &IsDone) {
+  unsigned Max_All_Space_வரி_Characters = 0;
+  StringRef::iterator Longest_All_Space_வரி;
 
-  while (true) {
+  போது (உண்மை) {
     advanceWhile(&Scanner::skip_s_space);
-    if (skip_nb_char(Current) != Current) {
+    எனில் (skip_nb_char(Current) != Current) {
       // This line isn't empty, so try and find the indentation.
-      if (Column <= BlockExitIndent) { // End of the block literal.
-        IsDone = true;
-        return true;
+      எனில் (Column <= BlockExitIndent) { // End of the block literal.
+        IsDone = உண்மை;
+        திரும்பு உண்மை;
       }
       // We found the block's indentation.
       BlockIndent = Column;
-      if (MaxAllSpaceLineCharacters > BlockIndent) {
+      எனில் (Max_All_Space_வரி_Characters > BlockIndent) {
         setError(
             "Leading all-spaces line must be smaller than the block indent",
-            LongestAllSpaceLine);
-        return false;
+            Longest_All_Space_வரி);
+        திரும்பு பொய்;
       }
-      return true;
+      திரும்பு உண்மை;
     }
-    if (skip_b_break(Current) != Current &&
-        Column > MaxAllSpaceLineCharacters) {
+    எனில் (skip_b_break(Current) != Current &&
+        Column > Max_All_Space_வரி_Characters) {
       // Record the longest all-space line in case it's longer than the
       // discovered block indent.
-      MaxAllSpaceLineCharacters = Column;
-      LongestAllSpaceLine = Current;
+      Max_All_Space_வரி_Characters = Column;
+      Longest_All_Space_வரி = Current;
     }
 
     // Check for EOF.
-    if (Current == End) {
-      IsDone = true;
-      return true;
+    எனில் (Current == End) {
+      IsDone = உண்மை;
+      திரும்பு உண்மை;
     }
 
-    if (!consumeLineBreakIfPresent()) {
-      IsDone = true;
-      return true;
+    எனில் (!consume_வரி_Break_If_Present()) {
+      IsDone = உண்மை;
+      திரும்பு உண்மை;
     }
-    ++LineBreaks;
+    ++வரி_Breaks;
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanBlockScalarIndent(unsigned BlockIndent,
-                                    unsigned BlockExitIndent, bool &IsDone) {
+தருக்க Scanner::scanBlockScalarIndent(unsigned BlockIndent,
+                                    unsigned BlockExitIndent, தருக்க &IsDone) {
   // Skip the indentation.
-  while (Column < BlockIndent) {
+  போது (Column < BlockIndent) {
     auto I = skip_s_space(Current);
-    if (I == Current)
-      break;
+    எனில் (I == Current)
+      நிறுத்து;
     Current = I;
     ++Column;
   }
 
-  if (skip_nb_char(Current) == Current)
-    return true;
+  எனில் (skip_nb_char(Current) == Current)
+    திரும்பு உண்மை;
 
-  if (Column <= BlockExitIndent) { // End of the block literal.
-    IsDone = true;
-    return true;
+  எனில் (Column <= BlockExitIndent) { // End of the block literal.
+    IsDone = உண்மை;
+    திரும்பு உண்மை;
   }
 
-  if (Column < BlockIndent) {
-    if (Current != End && *Current == '#') { // Trailing comment.
-      IsDone = true;
-      return true;
+  எனில் (Column < BlockIndent) {
+    எனில் (Current != End && *Current == '#') { // Trailing comment.
+      IsDone = உண்மை;
+      திரும்பு உண்மை;
     }
     setError("A text line is less indented than the block scalar", Current);
-    return false;
+    திரும்பு பொய்;
   }
-  return true; // A normal text line.
+  திரும்பு உண்மை; // A normal text line.
 }
 
-bool Scanner::scanBlockScalar(bool IsLiteral) {
-  assert(*Current == '|' || *Current == '>');
-  char StyleIndicator;
-  char ChompingIndicator;
+தருக்க Scanner::scanBlockScalar(தருக்க IsLiteral) {
+  ப்ரதிஜ்ஞா(*Current == '|' || *Current == '>');
+  எழுத்து StyleIndicator;
+  எழுத்து ChompingIndicator;
   unsigned BlockIndent;
-  bool IsDone = false;
-  if (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
+  தருக்க IsDone = பொய்;
+  எனில் (!scanBlockScalarIndicators(StyleIndicator, ChompingIndicator, BlockIndent,
                                  IsDone))
-    return false;
-  if (IsDone)
-    return true;
-  bool IsFolded = StyleIndicator == '>';
+    திரும்பு பொய்;
+  எனில் (IsDone)
+    திரும்பு உண்மை;
+  தருக்க IsFolded = StyleIndicator == '>';
 
-  const auto *Start = Current;
+  மாறிலி auto *Start = Current;
   unsigned BlockExitIndent = Indent < 0 ? 0 : (unsigned)Indent;
-  unsigned LineBreaks = 0;
-  if (BlockIndent == 0) {
-    if (!findBlockScalarIndent(BlockIndent, BlockExitIndent, LineBreaks,
+  unsigned வரி_Breaks = 0;
+  எனில் (BlockIndent == 0) {
+    எனில் (!findBlockScalarIndent(BlockIndent, BlockExitIndent, வரி_Breaks,
                                IsDone))
-      return false;
+      திரும்பு பொய்;
   }
 
   // Scan the block's scalars body.
   SmallString<256> Str;
-  while (!IsDone) {
-    if (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
-      return false;
-    if (IsDone)
-      break;
+  போது (!IsDone) {
+    எனில் (!scanBlockScalarIndent(BlockIndent, BlockExitIndent, IsDone))
+      திரும்பு பொய்;
+    எனில் (IsDone)
+      நிறுத்து;
 
     // Parse the current line.
-    auto LineStart = Current;
+    auto வரி_Start = Current;
     advanceWhile(&Scanner::skip_nb_char);
-    if (LineStart != Current) {
-      if (LineBreaks && IsFolded && !Scanner::isLineEmpty(Str)) {
+    எனில் (வரி_Start != Current) {
+      எனில் (வரி_Breaks && IsFolded && !Scanner::is_வரி_Empty(Str)) {
         // The folded style "folds" any single line break between content into a
         // single space, except when that content is "empty" (only contains
         // whitespace) in which case the line break is left as-is.
-        if (LineBreaks == 1) {
-          Str.append(LineBreaks,
-                     isLineEmpty(StringRef(LineStart, Current - LineStart))
+        எனில் (வரி_Breaks == 1) {
+          Str.append(வரி_Breaks,
+                     is_வரி_Empty(StringRef(வரி_Start, Current - வரி_Start))
                          ? '\n'
                          : ' ');
         }
@@ -1761,51 +1761,51 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
         // want `LineBreaks == 0`. Otherwise this decrement accounts for the
         // fact that the first line break is "trimmed", only being used to
         // signal a sequence of line breaks which should not be folded.
-        LineBreaks--;
+        வரி_Breaks--;
       }
-      Str.append(LineBreaks, '\n');
-      Str.append(StringRef(LineStart, Current - LineStart));
-      LineBreaks = 0;
+      Str.append(வரி_Breaks, '\n');
+      Str.append(StringRef(வரி_Start, Current - வரி_Start));
+      வரி_Breaks = 0;
     }
 
     // Check for EOF.
-    if (Current == End)
-      break;
+    எனில் (Current == End)
+      நிறுத்து;
 
-    if (!consumeLineBreakIfPresent())
-      break;
-    ++LineBreaks;
+    எனில் (!consume_வரி_Break_If_Present())
+      நிறுத்து;
+    ++வரி_Breaks;
   }
 
-  if (Current == End && !LineBreaks)
+  எனில் (Current == End && !வரி_Breaks)
     // Ensure that there is at least one line break before the end of file.
-    LineBreaks = 1;
-  Str.append(getChompedLineBreaks(ChompingIndicator, LineBreaks, Str), '\n');
+    வரி_Breaks = 1;
+  Str.append(get_Chomped_வரி_Breaks(ChompingIndicator, வரி_Breaks, Str), '\n');
 
   // New lines may start a simple key.
-  if (!FlowLevel)
-    IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  எனில் (!FlowLevel)
+    Is_Simple_சாவி_Allowed = உண்மை;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
   Token T;
   T.Kind = Token::TK_BlockScalar;
   T.Range = StringRef(Start, Current - Start);
-  T.Value = std::string(Str);
-  TokenQueue.push_back(T);
-  return true;
+  T.மதிப்பு = std::string(Str);
+  TokenQueue.தள்ளு_back(T);
+  திரும்பு உண்மை;
 }
 
-bool Scanner::scanTag() {
+தருக்க Scanner::scanTag() {
   StringRef::iterator Start = Current;
   unsigned ColStart = Column;
   skip(1); // Eat !.
-  if (Current == End || isBlankOrBreak(Current)); // An empty tag.
-  else if (*Current == '<') {
+  எனில் (Current == End || isBlankOrBreak(Current)); // An empty tag.
+  இல்லையெனில் எனில் (*Current == '<') {
     skip(1);
     scan_ns_uri_char();
-    if (!consume('>'))
-      return false;
-  } else {
+    எனில் (!consume('>'))
+      திரும்பு பொய்;
+  } இல்லையெனில் {
     // FIXME: Actually parse the c-ns-shorthand-tag rule.
     Current = skip_while(&Scanner::skip_ns_char, Current);
   }
@@ -1813,228 +1813,228 @@ bool Scanner::scanTag() {
   Token T;
   T.Kind = Token::TK_Tag;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.தள்ளு_back(T);
 
   // Tags can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_சாவி_Candidate(--TokenQueue.end(), ColStart, பொய்);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_சாவி_Allowed = பொய்;
+  Is_Adjacent_மதிப்பு_Allowed_In_Flow = பொய்;
 
-  return true;
+  திரும்பு உண்மை;
 }
 
-bool Scanner::fetchMoreTokens() {
-  if (IsStartOfStream)
-    return scanStreamStart();
+தருக்க Scanner::fetchMoreTokens() {
+  எனில் (IsStartOfStream)
+    திரும்பு scanStreamStart();
 
   scanToNextToken();
 
-  if (Current == End)
-    return scanStreamEnd();
+  எனில் (Current == End)
+    திரும்பு scanStreamEnd();
 
-  removeStaleSimpleKeyCandidates();
+  remove_Stale_Simple_சாவி_Candidates();
 
   unrollIndent(Column);
 
-  if (Column == 0 && *Current == '%')
-    return scanDirective();
+  எனில் (Column == 0 && *Current == '%')
+    திரும்பு scanDirective();
 
-  if (Column == 0 && Current + 3 <= End
+  எனில் (Column == 0 && Current + 3 <= End
       && *Current == '-'
       && *(Current + 1) == '-'
       && *(Current + 2) == '-'
       && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(true);
+    திரும்பு scanDocumentIndicator(உண்மை);
 
-  if (Column == 0 && Current + 3 <= End
+  எனில் (Column == 0 && Current + 3 <= End
       && *Current == '.'
       && *(Current + 1) == '.'
       && *(Current + 2) == '.'
       && (Current + 3 == End || isBlankOrBreak(Current + 3)))
-    return scanDocumentIndicator(false);
+    திரும்பு scanDocumentIndicator(பொய்);
 
-  if (*Current == '[')
-    return scanFlowCollectionStart(true);
+  எனில் (*Current == '[')
+    திரும்பு scanFlowCollectionStart(உண்மை);
 
-  if (*Current == '{')
-    return scanFlowCollectionStart(false);
+  எனில் (*Current == '{')
+    திரும்பு scanFlowCollectionStart(பொய்);
 
-  if (*Current == ']')
-    return scanFlowCollectionEnd(true);
+  எனில் (*Current == ']')
+    திரும்பு scanFlowCollectionEnd(உண்மை);
 
-  if (*Current == '}')
-    return scanFlowCollectionEnd(false);
+  எனில் (*Current == '}')
+    திரும்பு scanFlowCollectionEnd(பொய்);
 
-  if (*Current == ',')
-    return scanFlowEntry();
+  எனில் (*Current == ',')
+    திரும்பு scanFlowEntry();
 
-  if (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
-    return scanBlockEntry();
+  எனில் (*Current == '-' && (isBlankOrBreak(Current + 1) || Current + 1 == End))
+    திரும்பு scanBlockEntry();
 
-  if (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
-    return scanKey();
+  எனில் (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
+    திரும்பு scan_சாவி();
 
-  if (*Current == ':' &&
-      (!isPlainSafeNonBlank(Current + 1) || IsAdjacentValueAllowedInFlow))
-    return scanValue();
+  எனில் (*Current == ':' &&
+      (!isPlainSafeNonBlank(Current + 1) || Is_Adjacent_மதிப்பு_Allowed_In_Flow))
+    திரும்பு scan_மதிப்பு();
 
-  if (*Current == '*')
-    return scanAliasOrAnchor(true);
+  எனில் (*Current == '*')
+    திரும்பு scanAliasOrAnchor(உண்மை);
 
-  if (*Current == '&')
-    return scanAliasOrAnchor(false);
+  எனில் (*Current == '&')
+    திரும்பு scanAliasOrAnchor(பொய்);
 
-  if (*Current == '!')
-    return scanTag();
+  எனில் (*Current == '!')
+    திரும்பு scanTag();
 
-  if (*Current == '|' && !FlowLevel)
-    return scanBlockScalar(true);
+  எனில் (*Current == '|' && !FlowLevel)
+    திரும்பு scanBlockScalar(உண்மை);
 
-  if (*Current == '>' && !FlowLevel)
-    return scanBlockScalar(false);
+  எனில் (*Current == '>' && !FlowLevel)
+    திரும்பு scanBlockScalar(பொய்);
 
-  if (*Current == '\'')
-    return scanFlowScalar(false);
+  எனில் (*Current == '\'')
+    திரும்பு scanFlowScalar(பொய்);
 
-  if (*Current == '"')
-    return scanFlowScalar(true);
+  எனில் (*Current == '"')
+    திரும்பு scanFlowScalar(உண்மை);
 
   // Get a plain scalar.
   StringRef FirstChar(Current, 1);
-  if ((!isBlankOrBreak(Current) &&
+  எனில் ((!isBlankOrBreak(Current) &&
        FirstChar.find_first_of("-?:,[]{}#&*!|>'\"%@`") == StringRef::npos) ||
       (FirstChar.find_first_of("?:-") != StringRef::npos &&
        isPlainSafeNonBlank(Current + 1)))
-    return scanPlainScalar();
+    திரும்பு scanPlainScalar();
 
   setError("Unrecognized character while tokenizing.", Current);
-  return false;
+  திரும்பு பொய்;
 }
 
-Stream::Stream(StringRef Input, SourceMgr &SM, bool ShowColors,
+Stream::Stream(StringRef உள்ளீடு, SourceMgr &SM, தருக்க ShowColors,
                std::error_code *EC)
-    : scanner(new Scanner(Input, SM, ShowColors, EC)) {}
+    : scanner(புதிய Scanner(உள்ளீடு, SM, ShowColors, EC)) {}
 
-Stream::Stream(MemoryBufferRef InputBuffer, SourceMgr &SM, bool ShowColors,
+Stream::Stream(MemoryBufferRef உள்ளீடு_Buffer, SourceMgr &SM, தருக்க ShowColors,
                std::error_code *EC)
-    : scanner(new Scanner(InputBuffer, SM, ShowColors, EC)) {}
+    : scanner(புதிய Scanner(உள்ளீடு_Buffer, SM, ShowColors, EC)) {}
 
-Stream::~Stream() = default;
+Stream::~Stream() = இயல்பு;
 
-bool Stream::failed() { return scanner->failed(); }
+தருக்க Stream::failed() { திரும்பு scanner->failed(); }
 
-void Stream::printError(Node *N, const Twine &Msg, SourceMgr::DiagKind Kind) {
-  printError(N ? N->getSourceRange() : SMRange(), Msg, Kind);
+வெறுமை Stream::printError(முனை *N, மாறிலி Twine &செய்தி_2, SourceMgr::DiagKind Kind) {
+  printError(N ? N->getSourceRange() : SMRange(), செய்தி_2, Kind);
 }
 
-void Stream::printError(const SMRange &Range, const Twine &Msg,
+வெறுமை Stream::printError(மாறிலி SMRange &Range, மாறிலி Twine &செய்தி_2,
                         SourceMgr::DiagKind Kind) {
-  scanner->printError(Range.Start, Kind, Msg, Range);
+  scanner->printError(Range.Start, Kind, செய்தி_2, Range);
 }
 
 document_iterator Stream::begin() {
-  if (CurrentDoc)
+  எனில் (CurrentDoc)
     report_fatal_error("Can only iterate over the stream once");
 
   // Skip Stream-Start.
   scanner->getNext();
 
-  CurrentDoc.reset(new Document(*this));
-  return document_iterator(CurrentDoc);
+  CurrentDoc.reset(புதிய Document(*இது));
+  திரும்பு document_iterator(CurrentDoc);
 }
 
 document_iterator Stream::end() {
-  return document_iterator();
+  திரும்பு document_iterator();
 }
 
-void Stream::skip() {
-  for (Document &Doc : *this)
+வெறுமை Stream::skip() {
+  க்கு (Document &Doc : *இது)
     Doc.skip();
 }
 
-Node::Node(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
+முனை::முனை(unsigned முழு Type, std::unique_ptr<Document> &D, StringRef A,
            StringRef T)
     : Doc(D), TypeID(Type), Anchor(A), Tag(T) {
   SMLoc Start = SMLoc::getFromPointer(peekNext().Range.begin());
   SourceRange = SMRange(Start, Start);
 }
 
-std::string Node::getVerbatimTag() const {
+std::string முனை::getVerbatimTag() மாறிலி {
   StringRef Raw = getRawTag();
-  if (!Raw.empty() && Raw != "!") {
+  எனில் (!Raw.empty() && Raw != "!") {
     std::string Ret;
-    if (Raw.find_last_of('!') == 0) {
+    எனில் (Raw.find_last_of('!') == 0) {
       Ret = std::string(Doc->getTagMap().find("!")->second);
       Ret += Raw.substr(1);
-      return Ret;
-    } else if (Raw.starts_with("!!")) {
+      திரும்பு Ret;
+    } இல்லையெனில் எனில் (Raw.starts_with("!!")) {
       Ret = std::string(Doc->getTagMap().find("!!")->second);
       Ret += Raw.substr(2);
-      return Ret;
-    } else {
+      திரும்பு Ret;
+    } இல்லையெனில் {
       StringRef TagHandle = Raw.substr(0, Raw.find_last_of('!') + 1);
       std::map<StringRef, StringRef>::const_iterator It =
           Doc->getTagMap().find(TagHandle);
-      if (It != Doc->getTagMap().end())
+      எனில் (It != Doc->getTagMap().end())
         Ret = std::string(It->second);
-      else {
+      இல்லையெனில் {
         Token T;
         T.Kind = Token::TK_Tag;
         T.Range = TagHandle;
         setError(Twine("Unknown tag handle ") + TagHandle, T);
       }
       Ret += Raw.substr(Raw.find_last_of('!') + 1);
-      return Ret;
+      திரும்பு Ret;
     }
   }
 
-  switch (getType()) {
-  case NK_Null:
-    return "tag:yaml.org,2002:null";
-  case NK_Scalar:
-  case NK_BlockScalar:
+  தேர்வு (getType()) {
+  நிலை NK_Null:
+    திரும்பு "tag:yaml.org,2002:null";
+  நிலை NK_Scalar:
+  நிலை NK_BlockScalar:
     // TODO: Tag resolution.
-    return "tag:yaml.org,2002:str";
-  case NK_Mapping:
-    return "tag:yaml.org,2002:map";
-  case NK_Sequence:
-    return "tag:yaml.org,2002:seq";
+    திரும்பு "tag:yaml.org,2002:str";
+  நிலை NK_Mapping:
+    திரும்பு "tag:yaml.org,2002:map";
+  நிலை NK_Sequence:
+    திரும்பு "tag:yaml.org,2002:seq";
   }
 
-  return "";
+  திரும்பு "";
 }
 
-Token &Node::peekNext() {
-  return Doc->peekNext();
+Token &முனை::peekNext() {
+  திரும்பு Doc->peekNext();
 }
 
-Token Node::getNext() {
-  return Doc->getNext();
+Token முனை::getNext() {
+  திரும்பு Doc->getNext();
 }
 
-Node *Node::parseBlockNode() {
-  return Doc->parseBlockNode();
+முனை *முனை::parse_Block_முனை() {
+  திரும்பு Doc->parse_Block_முனை();
 }
 
-BumpPtrAllocator &Node::getAllocator() {
-  return Doc->NodeAllocator;
+BumpPtrAllocator &முனை::getAllocator() {
+  திரும்பு Doc->முனை_Allocator;
 }
 
-void Node::setError(const Twine &Msg, Token &Tok) const {
-  Doc->setError(Msg, Tok);
+வெறுமை முனை::setError(மாறிலி Twine &செய்தி_2, Token &Tok) மாறிலி {
+  Doc->setError(செய்தி_2, Tok);
 }
 
-bool Node::failed() const {
-  return Doc->failed();
+தருக்க முனை::failed() மாறிலி {
+  திரும்பு Doc->failed();
 }
 
-StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
-  if (Value[0] == '"')
-    return getDoubleQuotedValue(Value, Storage);
-  if (Value[0] == '\'')
-    return getSingleQuotedValue(Value, Storage);
-  return getPlainValue(Value, Storage);
+StringRef Scalar_முனை::get_மதிப்பு(SmallVectorImpl<எழுத்து> &Storage) மாறிலி {
+  எனில் (மதிப்பு[0] == '"')
+    திரும்பு get_Double_Quoted_மதிப்பு(மதிப்பு, Storage);
+  எனில் (மதிப்பு[0] == '\'')
+    திரும்பு get_Single_Quoted_மதிப்பு(மதிப்பு, Storage);
+  திரும்பு get_Plain_மதிப்பு(மதிப்பு, Storage);
 }
 
 /// parseScalarValue - A common parsing routine for all flow scalar styles.
@@ -2051,599 +2051,599 @@ StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
 /// \param UnescapeCallback - This is called when the escape character is found
 /// in the input.
 /// \returns - The unfolded and unescaped value.
-static StringRef
-parseScalarValue(StringRef UnquotedValue, SmallVectorImpl<char> &Storage,
+நிலையான StringRef
+parse_Scalar_மதிப்பு(StringRef Unquoted_மதிப்பு, SmallVectorImpl<எழுத்து> &Storage,
                  StringRef LookupChars,
-                 std::function<StringRef(StringRef, SmallVectorImpl<char> &)>
+                 std::function<StringRef(StringRef, SmallVectorImpl<எழுத்து> &)>
                      UnescapeCallback) {
-  size_t I = UnquotedValue.find_first_of(LookupChars);
-  if (I == StringRef::npos)
-    return UnquotedValue;
+  size_t I = Unquoted_மதிப்பு.find_first_of(LookupChars);
+  எனில் (I == StringRef::npos)
+    திரும்பு Unquoted_மதிப்பு;
 
   Storage.clear();
-  Storage.reserve(UnquotedValue.size());
-  char LastNewLineAddedAs = '\0';
-  for (; I != StringRef::npos; I = UnquotedValue.find_first_of(LookupChars)) {
-    if (UnquotedValue[I] != '\r' && UnquotedValue[I] != '\n') {
-      llvm::append_range(Storage, UnquotedValue.take_front(I));
-      UnquotedValue = UnescapeCallback(UnquotedValue.drop_front(I), Storage);
-      LastNewLineAddedAs = '\0';
-      continue;
+  Storage.reserve(Unquoted_மதிப்பு.size());
+  எழுத்து Last_New_வரி_Added_As = '\0';
+  க்கு (; I != StringRef::npos; I = Unquoted_மதிப்பு.find_first_of(LookupChars)) {
+    எனில் (Unquoted_மதிப்பு[I] != '\r' && Unquoted_மதிப்பு[I] != '\n') {
+      llvm::append_range(Storage, Unquoted_மதிப்பு.take_front(I));
+      Unquoted_மதிப்பு = UnescapeCallback(Unquoted_மதிப்பு.drop_front(I), Storage);
+      Last_New_வரி_Added_As = '\0';
+      தொடர்;
     }
-    if (size_t LastNonSWhite = UnquotedValue.find_last_not_of(" \t", I);
+    எனில் (size_t LastNonSWhite = Unquoted_மதிப்பு.find_last_not_of(" \t", I);
         LastNonSWhite != StringRef::npos) {
-      llvm::append_range(Storage, UnquotedValue.take_front(LastNonSWhite + 1));
-      Storage.push_back(' ');
-      LastNewLineAddedAs = ' ';
-    } else {
+      llvm::append_range(Storage, Unquoted_மதிப்பு.take_front(LastNonSWhite + 1));
+      Storage.தள்ளு_back(' ');
+      Last_New_வரி_Added_As = ' ';
+    } இல்லையெனில் {
       // Note: we can't just check if the last character in Storage is ' ',
       // '\n', or something else; that would give a wrong result for double
       // quoted values containing an escaped space character before a new-line
       // character.
-      switch (LastNewLineAddedAs) {
-      case ' ':
-        assert(!Storage.empty() && Storage.back() == ' ');
+      தேர்வு (Last_New_வரி_Added_As) {
+      நிலை ' ':
+        ப்ரதிஜ்ஞா(!Storage.empty() && Storage.back() == ' ');
         Storage.back() = '\n';
-        LastNewLineAddedAs = '\n';
-        break;
-      case '\n':
-        assert(!Storage.empty() && Storage.back() == '\n');
-        Storage.push_back('\n');
-        break;
-      default:
-        Storage.push_back(' ');
-        LastNewLineAddedAs = ' ';
-        break;
+        Last_New_வரி_Added_As = '\n';
+        நிறுத்து;
+      நிலை '\n':
+        ப்ரதிஜ்ஞா(!Storage.empty() && Storage.back() == '\n');
+        Storage.தள்ளு_back('\n');
+        நிறுத்து;
+      இயல்பு:
+        Storage.தள்ளு_back(' ');
+        Last_New_வரி_Added_As = ' ';
+        நிறுத்து;
       }
     }
     // Handle Windows-style EOL
-    if (UnquotedValue.substr(I, 2) == "\r\n")
+    எனில் (Unquoted_மதிப்பு.substr(I, 2) == "\r\n")
       I++;
-    UnquotedValue = UnquotedValue.drop_front(I + 1).ltrim(" \t");
+    Unquoted_மதிப்பு = Unquoted_மதிப்பு.drop_front(I + 1).ltrim(" \t");
   }
-  llvm::append_range(Storage, UnquotedValue);
-  return StringRef(Storage.begin(), Storage.size());
+  llvm::append_range(Storage, Unquoted_மதிப்பு);
+  திரும்பு StringRef(Storage.begin(), Storage.size());
 }
 
 StringRef
-ScalarNode::getDoubleQuotedValue(StringRef RawValue,
-                                 SmallVectorImpl<char> &Storage) const {
-  assert(RawValue.size() >= 2 && RawValue.front() == '"' &&
-         RawValue.back() == '"');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+Scalar_முனை::get_Double_Quoted_மதிப்பு(StringRef Raw_மதிப்பு,
+                                 SmallVectorImpl<எழுத்து> &Storage) மாறிலி {
+  ப்ரதிஜ்ஞா(Raw_மதிப்பு.size() >= 2 && Raw_மதிப்பு.front() == '"' &&
+         Raw_மதிப்பு.back() == '"');
+  StringRef Unquoted_மதிப்பு = Raw_மதிப்பு.substr(1, Raw_மதிப்பு.size() - 2);
 
-  auto UnescapeFunc = [this](StringRef UnquotedValue,
-                             SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(1) == "\\");
-    if (UnquotedValue.size() == 1) {
+  auto UnescapeFunc = [இது](StringRef Unquoted_மதிப்பு,
+                             SmallVectorImpl<எழுத்து> &Storage) {
+    ப்ரதிஜ்ஞா(Unquoted_மதிப்பு.take_front(1) == "\\");
+    எனில் (Unquoted_மதிப்பு.size() == 1) {
       Token T;
-      T.Range = UnquotedValue;
+      T.Range = Unquoted_மதிப்பு;
       setError("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      திரும்பு StringRef();
     }
-    UnquotedValue = UnquotedValue.drop_front(1);
-    switch (UnquotedValue[0]) {
-    default: {
+    Unquoted_மதிப்பு = Unquoted_மதிப்பு.drop_front(1);
+    தேர்வு (Unquoted_மதிப்பு[0]) {
+    இயல்பு: {
       Token T;
-      T.Range = UnquotedValue.take_front(1);
+      T.Range = Unquoted_மதிப்பு.take_front(1);
       setError("Unrecognized escape code", T);
       Storage.clear();
-      return StringRef();
+      திரும்பு StringRef();
     }
-    case '\r':
+    நிலை '\r':
       // Shrink the Windows-style EOL.
-      if (UnquotedValue.size() >= 2 && UnquotedValue[1] == '\n')
-        UnquotedValue = UnquotedValue.drop_front(1);
+      எனில் (Unquoted_மதிப்பு.size() >= 2 && Unquoted_மதிப்பு[1] == '\n')
+        Unquoted_மதிப்பு = Unquoted_மதிப்பு.drop_front(1);
       [[fallthrough]];
-    case '\n':
-      return UnquotedValue.drop_front(1).ltrim(" \t");
-    case '0':
-      Storage.push_back(0x00);
-      break;
-    case 'a':
-      Storage.push_back(0x07);
-      break;
-    case 'b':
-      Storage.push_back(0x08);
-      break;
-    case 't':
-    case 0x09:
-      Storage.push_back(0x09);
-      break;
-    case 'n':
-      Storage.push_back(0x0A);
-      break;
-    case 'v':
-      Storage.push_back(0x0B);
-      break;
-    case 'f':
-      Storage.push_back(0x0C);
-      break;
-    case 'r':
-      Storage.push_back(0x0D);
-      break;
-    case 'e':
-      Storage.push_back(0x1B);
-      break;
-    case ' ':
-      Storage.push_back(0x20);
-      break;
-    case '"':
-      Storage.push_back(0x22);
-      break;
-    case '/':
-      Storage.push_back(0x2F);
-      break;
-    case '\\':
-      Storage.push_back(0x5C);
-      break;
-    case 'N':
+    நிலை '\n':
+      திரும்பு Unquoted_மதிப்பு.drop_front(1).ltrim(" \t");
+    நிலை '0':
+      Storage.தள்ளு_back(0x00);
+      நிறுத்து;
+    நிலை 'a':
+      Storage.தள்ளு_back(0x07);
+      நிறுத்து;
+    நிலை 'b':
+      Storage.தள்ளு_back(0x08);
+      நிறுத்து;
+    நிலை 't':
+    நிலை 0x09:
+      Storage.தள்ளு_back(0x09);
+      நிறுத்து;
+    நிலை 'n':
+      Storage.தள்ளு_back(0x0A);
+      நிறுத்து;
+    நிலை 'v':
+      Storage.தள்ளு_back(0x0B);
+      நிறுத்து;
+    நிலை 'f':
+      Storage.தள்ளு_back(0x0C);
+      நிறுத்து;
+    நிலை 'r':
+      Storage.தள்ளு_back(0x0D);
+      நிறுத்து;
+    நிலை 'e':
+      Storage.தள்ளு_back(0x1B);
+      நிறுத்து;
+    நிலை ' ':
+      Storage.தள்ளு_back(0x20);
+      நிறுத்து;
+    நிலை '"':
+      Storage.தள்ளு_back(0x22);
+      நிறுத்து;
+    நிலை '/':
+      Storage.தள்ளு_back(0x2F);
+      நிறுத்து;
+    நிலை '\\':
+      Storage.தள்ளு_back(0x5C);
+      நிறுத்து;
+    நிலை 'N':
       encodeUTF8(0x85, Storage);
-      break;
-    case '_':
+      நிறுத்து;
+    நிலை '_':
       encodeUTF8(0xA0, Storage);
-      break;
-    case 'L':
+      நிறுத்து;
+    நிலை 'L':
       encodeUTF8(0x2028, Storage);
-      break;
-    case 'P':
+      நிறுத்து;
+    நிலை 'P':
       encodeUTF8(0x2029, Storage);
-      break;
-    case 'x': {
-      if (UnquotedValue.size() < 3)
+      நிறுத்து;
+    நிலை 'x': {
+      எனில் (Unquoted_மதிப்பு.size() < 3)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 2).getAsInteger(16, UnicodeScalarValue))
+        நிறுத்து;
+      unsigned முழு Unicode_Scalar_மதிப்பு;
+      எனில் (Unquoted_மதிப்பு.substr(1, 2).getAsInteger(16, Unicode_Scalar_மதிப்பு))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(3);
+        Unicode_Scalar_மதிப்பு = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_மதிப்பு, Storage);
+      திரும்பு Unquoted_மதிப்பு.drop_front(3);
     }
-    case 'u': {
-      if (UnquotedValue.size() < 5)
+    நிலை 'u': {
+      எனில் (Unquoted_மதிப்பு.size() < 5)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 4).getAsInteger(16, UnicodeScalarValue))
+        நிறுத்து;
+      unsigned முழு Unicode_Scalar_மதிப்பு;
+      எனில் (Unquoted_மதிப்பு.substr(1, 4).getAsInteger(16, Unicode_Scalar_மதிப்பு))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(5);
+        Unicode_Scalar_மதிப்பு = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_மதிப்பு, Storage);
+      திரும்பு Unquoted_மதிப்பு.drop_front(5);
     }
-    case 'U': {
-      if (UnquotedValue.size() < 9)
+    நிலை 'U': {
+      எனில் (Unquoted_மதிப்பு.size() < 9)
         // TODO: Report error.
-        break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 8).getAsInteger(16, UnicodeScalarValue))
+        நிறுத்து;
+      unsigned முழு Unicode_Scalar_மதிப்பு;
+      எனில் (Unquoted_மதிப்பு.substr(1, 8).getAsInteger(16, Unicode_Scalar_மதிப்பு))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(9);
+        Unicode_Scalar_மதிப்பு = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_மதிப்பு, Storage);
+      திரும்பு Unquoted_மதிப்பு.drop_front(9);
     }
     }
-    return UnquotedValue.drop_front(1);
+    திரும்பு Unquoted_மதிப்பு.drop_front(1);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "\\\r\n", UnescapeFunc);
+  திரும்பு parse_Scalar_மதிப்பு(Unquoted_மதிப்பு, Storage, "\\\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getSingleQuotedValue(StringRef RawValue,
-                                           SmallVectorImpl<char> &Storage) {
-  assert(RawValue.size() >= 2 && RawValue.front() == '\'' &&
-         RawValue.back() == '\'');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+StringRef Scalar_முனை::get_Single_Quoted_மதிப்பு(StringRef Raw_மதிப்பு,
+                                           SmallVectorImpl<எழுத்து> &Storage) {
+  ப்ரதிஜ்ஞா(Raw_மதிப்பு.size() >= 2 && Raw_மதிப்பு.front() == '\'' &&
+         Raw_மதிப்பு.back() == '\'');
+  StringRef Unquoted_மதிப்பு = Raw_மதிப்பு.substr(1, Raw_மதிப்பு.size() - 2);
 
-  auto UnescapeFunc = [](StringRef UnquotedValue,
-                         SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(2) == "''");
-    Storage.push_back('\'');
-    return UnquotedValue.drop_front(2);
+  auto UnescapeFunc = [](StringRef Unquoted_மதிப்பு,
+                         SmallVectorImpl<எழுத்து> &Storage) {
+    ப்ரதிஜ்ஞா(Unquoted_மதிப்பு.take_front(2) == "''");
+    Storage.தள்ளு_back('\'');
+    திரும்பு Unquoted_மதிப்பு.drop_front(2);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "'\r\n", UnescapeFunc);
+  திரும்பு parse_Scalar_மதிப்பு(Unquoted_மதிப்பு, Storage, "'\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getPlainValue(StringRef RawValue,
-                                    SmallVectorImpl<char> &Storage) {
+StringRef Scalar_முனை::get_Plain_மதிப்பு(StringRef Raw_மதிப்பு,
+                                    SmallVectorImpl<எழுத்து> &Storage) {
   // Trim trailing whitespace ('b-char' and 's-white').
   // NOTE: Alternatively we could change the scanner to not include whitespace
   //       here in the first place.
-  RawValue = RawValue.rtrim("\r\n \t");
-  return parseScalarValue(RawValue, Storage, "\r\n", nullptr);
+  Raw_மதிப்பு = Raw_மதிப்பு.rtrim("\r\n \t");
+  திரும்பு parse_Scalar_மதிப்பு(Raw_மதிப்பு, Storage, "\r\n", nullptr);
 }
 
-Node *KeyValueNode::getKey() {
-  if (Key)
-    return Key;
+முனை *சாவி_மதிப்பு_முனை::get_சாவி() {
+  எனில் (சாவி)
+    திரும்பு சாவி;
   // Handle implicit null keys.
   {
     Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
-        || t.Kind == Token::TK_Value
+    எனில் (   t.Kind == Token::TK_BlockEnd
+        || t.Kind == Token::TK_மதிப்பு
         || t.Kind == Token::TK_Error) {
-      return Key = new (getAllocator()) NullNode(Doc);
+      திரும்பு சாவி = புதிய (getAllocator()) Null_முனை(Doc);
     }
-    if (t.Kind == Token::TK_Key)
+    எனில் (t.Kind == Token::TK_சாவி)
       getNext(); // skip TK_Key.
   }
 
   // Handle explicit null keys.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Value) {
-    return Key = new (getAllocator()) NullNode(Doc);
+  எனில் (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_மதிப்பு) {
+    திரும்பு சாவி = புதிய (getAllocator()) Null_முனை(Doc);
   }
 
   // We've got a normal key.
-  return Key = parseBlockNode();
+  திரும்பு சாவி = parse_Block_முனை();
 }
 
-Node *KeyValueNode::getValue() {
-  if (Value)
-    return Value;
+முனை *சாவி_மதிப்பு_முனை::get_மதிப்பு() {
+  எனில் (மதிப்பு)
+    திரும்பு மதிப்பு;
 
-  if (Node* Key = getKey())
-    Key->skip();
-  else {
+  எனில் (முனை* சாவி = get_சாவி())
+    சாவி->skip();
+  இல்லையெனில் {
     setError("Null key in Key Value.", peekNext());
-    return Value = new (getAllocator()) NullNode(Doc);
+    திரும்பு மதிப்பு = புதிய (getAllocator()) Null_முனை(Doc);
   }
 
-  if (failed())
-    return Value = new (getAllocator()) NullNode(Doc);
+  எனில் (failed())
+    திரும்பு மதிப்பு = புதிய (getAllocator()) Null_முனை(Doc);
 
   // Handle implicit null values.
   {
     Token &t = peekNext();
-    if (   t.Kind == Token::TK_BlockEnd
+    எனில் (   t.Kind == Token::TK_BlockEnd
         || t.Kind == Token::TK_FlowMappingEnd
-        || t.Kind == Token::TK_Key
+        || t.Kind == Token::TK_சாவி
         || t.Kind == Token::TK_FlowEntry
         || t.Kind == Token::TK_Error) {
-      return Value = new (getAllocator()) NullNode(Doc);
+      திரும்பு மதிப்பு = புதிய (getAllocator()) Null_முனை(Doc);
     }
 
-    if (t.Kind != Token::TK_Value) {
+    எனில் (t.Kind != Token::TK_மதிப்பு) {
       setError("Unexpected token in Key Value.", t);
-      return Value = new (getAllocator()) NullNode(Doc);
+      திரும்பு மதிப்பு = புதிய (getAllocator()) Null_முனை(Doc);
     }
     getNext(); // skip TK_Value.
   }
 
   // Handle explicit null values.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Key) {
-    return Value = new (getAllocator()) NullNode(Doc);
+  எனில் (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_சாவி) {
+    திரும்பு மதிப்பு = புதிய (getAllocator()) Null_முனை(Doc);
   }
 
   // We got a normal value.
-  return Value = parseBlockNode();
+  திரும்பு மதிப்பு = parse_Block_முனை();
 }
 
-void MappingNode::increment() {
-  if (failed()) {
-    IsAtEnd = true;
+வெறுமை Mapping_முனை::increment() {
+  எனில் (failed()) {
+    IsAtEnd = உண்மை;
     CurrentEntry = nullptr;
-    return;
+    திரும்பு;
   }
-  if (CurrentEntry) {
+  எனில் (CurrentEntry) {
     CurrentEntry->skip();
-    if (Type == MT_Inline) {
-      IsAtEnd = true;
+    எனில் (Type == MT_Inline) {
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
-      return;
+      திரும்பு;
     }
   }
   Token T = peekNext();
-  if (T.Kind == Token::TK_Key || T.Kind == Token::TK_Scalar) {
+  எனில் (T.Kind == Token::TK_சாவி || T.Kind == Token::TK_Scalar) {
     // KeyValueNode eats the TK_Key. That way it can detect null keys.
-    CurrentEntry = new (getAllocator()) KeyValueNode(Doc);
-  } else if (Type == MT_Block) {
-    switch (T.Kind) {
-    case Token::TK_BlockEnd:
+    CurrentEntry = புதிய (getAllocator()) சாவி_மதிப்பு_முனை(Doc);
+  } இல்லையெனில் எனில் (Type == MT_Block) {
+    தேர்வு (T.Kind) {
+    நிலை Token::TK_BlockEnd:
       getNext();
-      IsAtEnd = true;
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
-      break;
-    default:
+      நிறுத்து;
+    இயல்பு:
       setError("Unexpected token. Expected Key or Block End", T);
       [[fallthrough]];
-    case Token::TK_Error:
-      IsAtEnd = true;
+    நிலை Token::TK_Error:
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
     }
-  } else {
-    switch (T.Kind) {
-    case Token::TK_FlowEntry:
+  } இல்லையெனில் {
+    தேர்வு (T.Kind) {
+    நிலை Token::TK_FlowEntry:
       // Eat the flow entry and recurse.
       getNext();
-      return increment();
-    case Token::TK_FlowMappingEnd:
+      திரும்பு increment();
+    நிலை Token::TK_FlowMappingEnd:
       getNext();
       [[fallthrough]];
-    case Token::TK_Error:
+    நிலை Token::TK_Error:
       // Set this to end iterator.
-      IsAtEnd = true;
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
-      break;
-    default:
+      நிறுத்து;
+    இயல்பு:
       setError( "Unexpected token. Expected Key, Flow Entry, or Flow "
                 "Mapping End."
               , T);
-      IsAtEnd = true;
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
     }
   }
 }
 
-void SequenceNode::increment() {
-  if (failed()) {
-    IsAtEnd = true;
+வெறுமை Sequence_முனை::increment() {
+  எனில் (failed()) {
+    IsAtEnd = உண்மை;
     CurrentEntry = nullptr;
-    return;
+    திரும்பு;
   }
-  if (CurrentEntry)
+  எனில் (CurrentEntry)
     CurrentEntry->skip();
   Token T = peekNext();
-  if (SeqType == ST_Block) {
-    switch (T.Kind) {
-    case Token::TK_BlockEntry:
+  எனில் (SeqType == ST_Block) {
+    தேர்வு (T.Kind) {
+    நிலை Token::TK_BlockEntry:
       getNext();
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
-        IsAtEnd = true;
+      CurrentEntry = parse_Block_முனை();
+      எனில் (!CurrentEntry) { // An error occurred.
+        IsAtEnd = உண்மை;
         CurrentEntry = nullptr;
       }
-      break;
-    case Token::TK_BlockEnd:
+      நிறுத்து;
+    நிலை Token::TK_BlockEnd:
       getNext();
-      IsAtEnd = true;
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
-      break;
-    default:
+      நிறுத்து;
+    இயல்பு:
       setError( "Unexpected token. Expected Block Entry or Block End."
               , T);
       [[fallthrough]];
-    case Token::TK_Error:
-      IsAtEnd = true;
+    நிலை Token::TK_Error:
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
     }
-  } else if (SeqType == ST_Indentless) {
-    switch (T.Kind) {
-    case Token::TK_BlockEntry:
+  } இல்லையெனில் எனில் (SeqType == ST_Indentless) {
+    தேர்வு (T.Kind) {
+    நிலை Token::TK_BlockEntry:
       getNext();
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) { // An error occurred.
-        IsAtEnd = true;
+      CurrentEntry = parse_Block_முனை();
+      எனில் (!CurrentEntry) { // An error occurred.
+        IsAtEnd = உண்மை;
         CurrentEntry = nullptr;
       }
-      break;
-    default:
-    case Token::TK_Error:
-      IsAtEnd = true;
+      நிறுத்து;
+    இயல்பு:
+    நிலை Token::TK_Error:
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
     }
-  } else if (SeqType == ST_Flow) {
-    switch (T.Kind) {
-    case Token::TK_FlowEntry:
+  } இல்லையெனில் எனில் (SeqType == ST_Flow) {
+    தேர்வு (T.Kind) {
+    நிலை Token::TK_FlowEntry:
       // Eat the flow entry and recurse.
       getNext();
-      WasPreviousTokenFlowEntry = true;
-      return increment();
-    case Token::TK_FlowSequenceEnd:
+      WasPreviousTokenFlowEntry = உண்மை;
+      திரும்பு increment();
+    நிலை Token::TK_FlowSequenceEnd:
       getNext();
       [[fallthrough]];
-    case Token::TK_Error:
+    நிலை Token::TK_Error:
       // Set this to end iterator.
-      IsAtEnd = true;
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
-      break;
-    case Token::TK_StreamEnd:
-    case Token::TK_DocumentEnd:
-    case Token::TK_DocumentStart:
+      நிறுத்து;
+    நிலை Token::TK_StreamEnd:
+    நிலை Token::TK_DocumentEnd:
+    நிலை Token::TK_DocumentStart:
       setError("Could not find closing ]!", T);
       // Set this to end iterator.
-      IsAtEnd = true;
+      IsAtEnd = உண்மை;
       CurrentEntry = nullptr;
-      break;
-    default:
-      if (!WasPreviousTokenFlowEntry) {
+      நிறுத்து;
+    இயல்பு:
+      எனில் (!WasPreviousTokenFlowEntry) {
         setError("Expected , between entries!", T);
-        IsAtEnd = true;
+        IsAtEnd = உண்மை;
         CurrentEntry = nullptr;
-        break;
+        நிறுத்து;
       }
       // Otherwise it must be a flow entry.
-      CurrentEntry = parseBlockNode();
-      if (!CurrentEntry) {
-        IsAtEnd = true;
+      CurrentEntry = parse_Block_முனை();
+      எனில் (!CurrentEntry) {
+        IsAtEnd = உண்மை;
       }
-      WasPreviousTokenFlowEntry = false;
-      break;
+      WasPreviousTokenFlowEntry = பொய்;
+      நிறுத்து;
     }
   }
 }
 
-Document::Document(Stream &S) : stream(S), Root(nullptr) {
+Document::Document(Stream &S) : stream(S), வேர்_2(nullptr) {
   // Tag maps starts with two default mappings.
   TagMap["!"] = "!";
   TagMap["!!"] = "tag:yaml.org,2002:";
 
-  if (parseDirectives())
+  எனில் (parseDirectives())
     expectToken(Token::TK_DocumentStart);
   Token &T = peekNext();
-  if (T.Kind == Token::TK_DocumentStart)
+  எனில் (T.Kind == Token::TK_DocumentStart)
     getNext();
 }
 
-bool Document::skip()  {
-  if (stream.scanner->failed())
-    return false;
-  if (!Root && !getRoot())
-    return false;
-  Root->skip();
+தருக்க Document::skip()  {
+  எனில் (stream.scanner->failed())
+    திரும்பு பொய்;
+  எனில் (!வேர்_2 && !get_வேர்())
+    திரும்பு பொய்;
+  வேர்_2->skip();
   Token &T = peekNext();
-  if (T.Kind == Token::TK_StreamEnd)
-    return false;
-  if (T.Kind == Token::TK_DocumentEnd) {
+  எனில் (T.Kind == Token::TK_StreamEnd)
+    திரும்பு பொய்;
+  எனில் (T.Kind == Token::TK_DocumentEnd) {
     getNext();
-    return skip();
+    திரும்பு skip();
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
 Token &Document::peekNext() {
-  return stream.scanner->peekNext();
+  திரும்பு stream.scanner->peekNext();
 }
 
 Token Document::getNext() {
-  return stream.scanner->getNext();
+  திரும்பு stream.scanner->getNext();
 }
 
-void Document::setError(const Twine &Message, Token &Location) const {
+வெறுமை Document::setError(மாறிலி Twine &Message, Token &Location) மாறிலி {
   stream.scanner->setError(Message, Location.Range.begin());
 }
 
-bool Document::failed() const {
-  return stream.scanner->failed();
+தருக்க Document::failed() மாறிலி {
+  திரும்பு stream.scanner->failed();
 }
 
-Node *Document::parseBlockNode() {
+முனை *Document::parse_Block_முனை() {
   Token T = peekNext();
   // Handle properties.
   Token AnchorInfo;
   Token TagInfo;
 parse_property:
-  switch (T.Kind) {
-  case Token::TK_Alias:
+  தேர்வு (T.Kind) {
+  நிலை Token::TK_Alias:
     getNext();
-    return new (NodeAllocator) AliasNode(stream.CurrentDoc, T.Range.substr(1));
-  case Token::TK_Anchor:
-    if (AnchorInfo.Kind == Token::TK_Anchor) {
+    திரும்பு புதிய (முனை_Allocator) Alias_முனை(stream.CurrentDoc, T.Range.substr(1));
+  நிலை Token::TK_Anchor:
+    எனில் (AnchorInfo.Kind == Token::TK_Anchor) {
       setError("Already encountered an anchor for this node!", T);
-      return nullptr;
+      திரும்பு nullptr;
     }
     AnchorInfo = getNext(); // Consume TK_Anchor.
     T = peekNext();
-    goto parse_property;
-  case Token::TK_Tag:
-    if (TagInfo.Kind == Token::TK_Tag) {
+    செல் parse_property;
+  நிலை Token::TK_Tag:
+    எனில் (TagInfo.Kind == Token::TK_Tag) {
       setError("Already encountered a tag for this node!", T);
-      return nullptr;
+      திரும்பு nullptr;
     }
     TagInfo = getNext(); // Consume TK_Tag.
     T = peekNext();
-    goto parse_property;
-  default:
-    break;
+    செல் parse_property;
+  இயல்பு:
+    நிறுத்து;
   }
 
-  switch (T.Kind) {
-  case Token::TK_BlockEntry:
+  தேர்வு (T.Kind) {
+  நிலை Token::TK_BlockEntry:
     // We got an unindented BlockEntry sequence. This is not terminated with
     // a BlockEnd.
     // Don't eat the TK_BlockEntry, SequenceNode needs it.
-    return new (NodeAllocator) SequenceNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator) Sequence_முனை( stream.CurrentDoc
                                            , AnchorInfo.Range.substr(1)
                                            , TagInfo.Range
-                                           , SequenceNode::ST_Indentless);
-  case Token::TK_BlockSequenceStart:
+                                           , Sequence_முனை::ST_Indentless);
+  நிலை Token::TK_BlockSequenceStart:
     getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator)
+      Sequence_முனை( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
-                  , SequenceNode::ST_Block);
-  case Token::TK_BlockMappingStart:
+                  , Sequence_முனை::ST_Block);
+  நிலை Token::TK_BlockMappingStart:
     getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator)
+      Mapping_முனை( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Block);
-  case Token::TK_FlowSequenceStart:
+                 , Mapping_முனை::MT_Block);
+  நிலை Token::TK_FlowSequenceStart:
     getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator)
+      Sequence_முனை( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
-                  , SequenceNode::ST_Flow);
-  case Token::TK_FlowMappingStart:
+                  , Sequence_முனை::ST_Flow);
+  நிலை Token::TK_FlowMappingStart:
     getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator)
+      Mapping_முனை( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Flow);
-  case Token::TK_Scalar:
+                 , Mapping_முனை::MT_Flow);
+  நிலை Token::TK_Scalar:
     getNext();
-    return new (NodeAllocator)
-      ScalarNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator)
+      Scalar_முனை( stream.CurrentDoc
                 , AnchorInfo.Range.substr(1)
                 , TagInfo.Range
                 , T.Range);
-  case Token::TK_BlockScalar: {
+  நிலை Token::TK_BlockScalar: {
     getNext();
-    StringRef NullTerminatedStr(T.Value.c_str(), T.Value.length() + 1);
-    StringRef StrCopy = NullTerminatedStr.copy(NodeAllocator).drop_back();
-    return new (NodeAllocator)
-        BlockScalarNode(stream.CurrentDoc, AnchorInfo.Range.substr(1),
+    StringRef NullTerminatedStr(T.மதிப்பு.c_str(), T.மதிப்பு.length() + 1);
+    StringRef StrCopy = NullTerminatedStr.copy(முனை_Allocator).drop_back();
+    திரும்பு புதிய (முனை_Allocator)
+        Block_Scalar_முனை(stream.CurrentDoc, AnchorInfo.Range.substr(1),
                         TagInfo.Range, StrCopy, T.Range);
   }
-  case Token::TK_Key:
+  நிலை Token::TK_சாவி:
     // Don't eat the TK_Key, KeyValueNode expects it.
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    திரும்பு புதிய (முனை_Allocator)
+      Mapping_முனை( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Inline);
-  case Token::TK_DocumentStart:
-  case Token::TK_DocumentEnd:
-  case Token::TK_StreamEnd:
-  default:
+                 , Mapping_முனை::MT_Inline);
+  நிலை Token::TK_DocumentStart:
+  நிலை Token::TK_DocumentEnd:
+  நிலை Token::TK_StreamEnd:
+  இயல்பு:
     // TODO: Properly handle tags. "[!!str ]" should resolve to !!str "", not
     //       !!null null.
-    return new (NodeAllocator) NullNode(stream.CurrentDoc);
-  case Token::TK_FlowMappingEnd:
-  case Token::TK_FlowSequenceEnd:
-  case Token::TK_FlowEntry: {
-    if (Root && (isa<MappingNode>(Root) || isa<SequenceNode>(Root)))
-      return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    திரும்பு புதிய (முனை_Allocator) Null_முனை(stream.CurrentDoc);
+  நிலை Token::TK_FlowMappingEnd:
+  நிலை Token::TK_FlowSequenceEnd:
+  நிலை Token::TK_FlowEntry: {
+    எனில் (வேர்_2 && (isa<Mapping_முனை>(வேர்_2) || isa<Sequence_முனை>(வேர்_2)))
+      திரும்பு புதிய (முனை_Allocator) Null_முனை(stream.CurrentDoc);
 
     setError("Unexpected token", T);
-    return nullptr;
+    திரும்பு nullptr;
   }
-  case Token::TK_Error:
-    return nullptr;
+  நிலை Token::TK_Error:
+    திரும்பு nullptr;
   }
   llvm_unreachable("Control flow shouldn't reach here.");
-  return nullptr;
+  திரும்பு nullptr;
 }
 
-bool Document::parseDirectives() {
-  bool isDirective = false;
-  while (true) {
+தருக்க Document::parseDirectives() {
+  தருக்க isDirective = பொய்;
+  போது (உண்மை) {
     Token T = peekNext();
-    if (T.Kind == Token::TK_TagDirective) {
+    எனில் (T.Kind == Token::TK_TagDirective) {
       parseTAGDirective();
-      isDirective = true;
-    } else if (T.Kind == Token::TK_VersionDirective) {
+      isDirective = உண்மை;
+    } இல்லையெனில் எனில் (T.Kind == Token::TK_VersionDirective) {
       parseYAMLDirective();
-      isDirective = true;
-    } else {
-      break;
+      isDirective = உண்மை;
+    } இல்லையெனில் {
+      நிறுத்து;
     }
   }
-  return isDirective;
+  திரும்பு isDirective;
 }
 
-void Document::parseYAMLDirective() {
+வெறுமை Document::parseYAMLDirective() {
   getNext(); // Eat %YAML <version>
 }
 
-void Document::parseTAGDirective() {
+வெறுமை Document::parseTAGDirective() {
   Token Tag = getNext(); // %TAG <handle> <prefix>
   StringRef T = Tag.Range;
   // Strip %TAG
@@ -2654,11 +2654,11 @@ void Document::parseTAGDirective() {
   TagMap[TagHandle] = TagPrefix;
 }
 
-bool Document::expectToken(int TK) {
+தருக்க Document::expectToken(முழு TK) {
   Token T = getNext();
-  if (T.Kind != TK) {
+  எனில் (T.Kind != TK) {
     setError("Unexpected token", T);
-    return false;
+    திரும்பு பொய்;
   }
-  return true;
+  திரும்பு உண்மை;
 }

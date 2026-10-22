@@ -11,48 +11,48 @@
 //===----------------------------------------------------------------------===//
 
 #define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#அந்தர்பாவ "llvm/Support/PluginLoader.h"
+#அந்தர்பாவ "llvm/Support/DynamicLibrary.h"
+#அந்தர்பாவ "llvm/Support/Mutex.h"
+#அந்தர்பாவ "llvm/Support/raw_ostream.h"
+#அந்தர்பாவ <vector>
+using நாமாகாஶ llvm;
 
-namespace {
+நாமாகாஶ {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
+கட்டமைப்பு Plugins {
+  sys::SmartMutex<உண்மை> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  நிலையான Plugins P;
+  திரும்பு P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
+வெறுமை PluginLoader::operator=(மாறிலி std::string &Filename) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+  sys::SmartScopedLock<உண்மை> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  எனில் (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } இல்லையெனில் {
+    P.List.தள்ளு_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
+unsigned PluginLoader::get_இலக்கம்_Plugins() {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+  sys::SmartScopedLock<உண்மை> Lock(P.Lock);
+  திரும்பு P.List.size();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
+std::string &PluginLoader::getPlugin(unsigned இலக்கம்_2) {
   auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  sys::SmartScopedLock<உண்மை> Lock(P.Lock);
+  ப்ரதிஜ்ஞா(இலக்கம்_2 < P.List.size() && "Asking for an out of bounds plugin");
+  திரும்பு P.List[இலக்கம்_2];
 }

@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MSP430AttributeParser.h"
-#include "llvm/ADT/ArrayRef.h"
+#அந்தர்பாவ "llvm/Support/MSP430AttributeParser.h"
+#அந்தர்பாவ "llvm/ADT/ArrayRef.h"
 
-using namespace llvm;
-using namespace llvm::MSP430Attrs;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::MSP430Attrs;
 
 constexpr std::array<MSP430AttributeParser::DisplayHandler, 4>
     MSP430AttributeParser::DisplayRoutines{
@@ -20,36 +20,36 @@ constexpr std::array<MSP430AttributeParser::DisplayHandler, 4>
          {MSP430Attrs::TagEnumSize, &MSP430AttributeParser::parseEnumSize}}};
 
 Error MSP430AttributeParser::parseISA(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "MSP430", "MSP430X"};
-  return parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
+  நிலையான மாறிலி எழுத்து *மாறிலி StringVals[] = {"None", "MSP430", "MSP430X"};
+  திரும்பு parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseCodeModel(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Large"};
-  return parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
+  நிலையான மாறிலி எழுத்து *மாறிலி StringVals[] = {"None", "Small", "Large"};
+  திரும்பு parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseDataModel(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Large",
+  நிலையான மாறிலி எழுத்து *மாறிலி StringVals[] = {"None", "Small", "Large",
                                            "Restricted"};
-  return parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
+  திரும்பு parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseEnumSize(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Integer",
+  நிலையான மாறிலி எழுத்து *மாறிலி StringVals[] = {"None", "Small", "Integer",
                                            "Don't Care"};
-  return parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
+  திரும்பு parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
 }
 
-Error MSP430AttributeParser::handler(uint64_t Tag, bool &Handled) {
-  Handled = false;
-  for (const DisplayHandler &Disp : DisplayRoutines) {
-    if (uint64_t(Disp.Attribute) != Tag)
-      continue;
-    if (Error E = (this->*Disp.Routine)(static_cast<AttrType>(Tag)))
-      return E;
-    Handled = true;
-    break;
+Error MSP430AttributeParser::handler(uint64_t Tag, தருக்க &Handled) {
+  Handled = பொய்;
+  க்கு (மாறிலி DisplayHandler &Disp : DisplayRoutines) {
+    எனில் (uint64_t(Disp.Attribute) != Tag)
+      தொடர்;
+    எனில் (Error E = (இது->*Disp.Routine)(static_cast<AttrType>(Tag)))
+      திரும்பு E;
+    Handled = உண்மை;
+    நிறுத்து;
   }
-  return Error::success();
+  திரும்பு Error::success();
 }

@@ -61,25 +61,25 @@
 
 ------------------------------------------------------------------------ */
 
-#include "llvm/Support/ConvertUTF.h"
+#அந்தர்பாவ "llvm/Support/ConvertUTF.h"
 #ifdef CVTUTF_DEBUG
-#include <stdio.h>
+#அந்தர்பாவ <stdio.h>
 #endif
-#include <assert.h>
+#அந்தர்பாவ <assert.h>
 
 /*
  * This code extensively uses fall-through switches.
  * Keep the compiler from warning about that.
  */
-#if defined(__clang__) && defined(__has_warning)
-# if __has_warning("-Wimplicit-fallthrough")
+#எனில் defined(__clang__) && defined(__has_warning)
+# எனில் __has_warning("-Wimplicit-fallthrough")
 #  define ConvertUTF_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push")  \
     _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"")
 #  define ConvertUTF_RESTORE_WARNINGS \
     _Pragma("clang diagnostic pop")
 # endif
-#elif defined(__GNUC__)
+#அல்லதெனில் defined(__GNUC__)
 # define ConvertUTF_DISABLE_WARNINGS \
    _Pragma("GCC diagnostic push")    \
    _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"")
@@ -95,17 +95,17 @@
 
 ConvertUTF_DISABLE_WARNINGS
 
-namespace llvm {
+நாமாகாஶ llvm {
 
-static const int halfShift  = 10; /* used for shifting by 10 bits */
+நிலையான மாறிலி முழு halfShift  = 10; /* used for shifting by 10 bits */
 
-static const UTF32 halfBase = 0x0010000UL;
-static const UTF32 halfMask = 0x3FFUL;
+நிலையான மாறிலி UTF32 halfBase = 0x0010000UL;
+நிலையான மாறிலி UTF32 halfMask = 0x3FFUL;
 
-#define UNI_SUR_HIGH_START  (UTF32)0xD800
-#define UNI_SUR_HIGH_END    (UTF32)0xDBFF
-#define UNI_SUR_LOW_START   (UTF32)0xDC00
-#define UNI_SUR_LOW_END     (UTF32)0xDFFF
+#define UNI_SUR_உயர்வு_START  (UTF32)0xD800
+#define UNI_SUR_உயர்வு_END    (UTF32)0xDBFF
+#define UNI_SUR_கீழ்_START   (UTF32)0xDC00
+#define UNI_SUR_கீழ்_END     (UTF32)0xDFFF
 
 /* --------------------------------------------------------------------- */
 
@@ -116,7 +116,7 @@ static const UTF32 halfMask = 0x3FFUL;
  * left as-is for anyone who may want to do such conversion, which was
  * allowed in earlier algorithms.
  */
-static const char trailingBytesForUTF8[256] = {
+நிலையான மாறிலி எழுத்து trailingBytesForUTF8[256] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -132,7 +132,7 @@ static const char trailingBytesForUTF8[256] = {
  * This table contains as many values as there might be trailing bytes
  * in a UTF-8 sequence.
  */
-static const UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
+நிலையான மாறிலி UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
                      0x03C82080UL, 0xFA082080UL, 0x82082080UL };
 
 /*
@@ -142,7 +142,7 @@ static const UTF32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080
  * (I.e., one byte sequence, two byte... etc.). Remember that sequencs
  * for *legal* UTF-8 will be 4 or fewer bytes total.
  */
-static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+நிலையான மாறிலி UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
 /* --------------------------------------------------------------------- */
 
@@ -158,227 +158,227 @@ static const UTF8 firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF32toUTF16 (
-        const UTF32** sourceStart, const UTF32* sourceEnd,
+        மாறிலி UTF32** sourceStart, மாறிலி UTF32* sourceEnd,
         UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF32* source = *sourceStart;
+    மாறிலி UTF32* source = *sourceStart;
     UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+    போது (source < sourceEnd) {
         UTF32 ch;
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        எனில் (target >= targetEnd) {
+            result = targetExhausted; நிறுத்து;
         }
         ch = *source++;
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        எனில் (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            எனில் (ch >= UNI_SUR_உயர்வு_START && ch <= UNI_SUR_கீழ்_END) {
+                எனில் (flags == strictConversion) {
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    நிறுத்து;
+                } இல்லையெனில் {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } இல்லையெனில் {
                 *target++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_LEGAL_UTF32) {
-            if (flags == strictConversion) {
+        } இல்லையெனில் எனில் (ch > UNI_MAX_LEGAL_UTF32) {
+            எனில் (flags == strictConversion) {
                 result = sourceIllegal;
-            } else {
+            } இல்லையெனில் {
                 *target++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } இல்லையெனில் {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
+            எனில் (target + 1 >= targetEnd) {
                 --source; /* Back up source pointer! */
-                result = targetExhausted; break;
+                result = targetExhausted; நிறுத்து;
             }
             ch -= halfBase;
-            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_உயர்வு_START);
+            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_கீழ்_START);
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    திரும்பு result;
 }
 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF16toUTF32 (
-        const UTF16** sourceStart, const UTF16* sourceEnd,
+        மாறிலி UTF16** sourceStart, மாறிலி UTF16* sourceEnd,
         UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF16* source = *sourceStart;
+    மாறிலி UTF16* source = *sourceStart;
     UTF32* target = *targetStart;
     UTF32 ch, ch2;
-    while (source < sourceEnd) {
-        const UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
+    போது (source < sourceEnd) {
+        மாறிலி UTF16* oldSource = source; /*  In case we have to back up because of target overflow. */
         ch = *source++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        எனில் (ch >= UNI_SUR_உயர்வு_START && ch <= UNI_SUR_உயர்வு_END) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
+            எனில் (source < sourceEnd) {
                 ch2 = *source;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-                    ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
-                        + (ch2 - UNI_SUR_LOW_START) + halfBase;
+                எனில் (ch2 >= UNI_SUR_கீழ்_START && ch2 <= UNI_SUR_கீழ்_END) {
+                    ch = ((ch - UNI_SUR_உயர்வு_START) << halfShift)
+                        + (ch2 - UNI_SUR_கீழ்_START) + halfBase;
                     ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
+                } இல்லையெனில் எனில் (flags == strictConversion) { /* it's an unpaired high surrogate */
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
+                    நிறுத்து;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
+            } இல்லையெனில் { /* We don't have the 16 bits following the high surrogate. */
                 --source; /* return to the high surrogate */
                 result = sourceExhausted;
-                break;
+                நிறுத்து;
             }
-        } else if (flags == strictConversion) {
+        } இல்லையெனில் எனில் (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
+            எனில் (ch >= UNI_SUR_கீழ்_START && ch <= UNI_SUR_கீழ்_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                நிறுத்து;
             }
         }
-        if (target >= targetEnd) {
+        எனில் (target >= targetEnd) {
             source = oldSource; /* Back up source pointer! */
-            result = targetExhausted; break;
+            result = targetExhausted; நிறுத்து;
         }
         *target++ = ch;
     }
     *sourceStart = source;
     *targetStart = target;
 #ifdef CVTUTF_DEBUG
-if (result == sourceIllegal) {
+எனில் (result == sourceIllegal) {
     fprintf(stderr, "ConvertUTF16toUTF32 illegal seq 0x%04x,%04x\n", ch, ch2);
     fflush(stderr);
 }
 #endif
-    return result;
+    திரும்பு result;
 }
 ConversionResult ConvertUTF16toUTF8 (
-        const UTF16** sourceStart, const UTF16* sourceEnd,
+        மாறிலி UTF16** sourceStart, மாறிலி UTF16* sourceEnd,
         UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF16* source = *sourceStart;
+    மாறிலி UTF16* source = *sourceStart;
     UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+    போது (source < sourceEnd) {
         UTF32 ch;
         unsigned short bytesToWrite = 0;
-        const UTF32 byteMask = 0xBF;
-        const UTF32 byteMark = 0x80;
-        const UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
+        மாறிலி UTF32 byteMask = 0xBF;
+        மாறிலி UTF32 byteMark = 0x80;
+        மாறிலி UTF16* oldSource = source; /* In case we have to back up because of target overflow. */
         ch = *source++;
         /* If we have a surrogate pair, convert to UTF32 first. */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+        எனில் (ch >= UNI_SUR_உயர்வு_START && ch <= UNI_SUR_உயர்வு_END) {
             /* If the 16 bits following the high surrogate are in the source buffer... */
-            if (source < sourceEnd) {
+            எனில் (source < sourceEnd) {
                 UTF32 ch2 = *source;
                 /* If it's a low surrogate, convert to UTF32. */
-                if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-                    ch = ((ch - UNI_SUR_HIGH_START) << halfShift)
-                        + (ch2 - UNI_SUR_LOW_START) + halfBase;
+                எனில் (ch2 >= UNI_SUR_கீழ்_START && ch2 <= UNI_SUR_கீழ்_END) {
+                    ch = ((ch - UNI_SUR_உயர்வு_START) << halfShift)
+                        + (ch2 - UNI_SUR_கீழ்_START) + halfBase;
                     ++source;
-                } else if (flags == strictConversion) { /* it's an unpaired high surrogate */
+                } இல்லையெனில் எனில் (flags == strictConversion) { /* it's an unpaired high surrogate */
                     --source; /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
+                    நிறுத்து;
                 }
-            } else { /* We don't have the 16 bits following the high surrogate. */
+            } இல்லையெனில் { /* We don't have the 16 bits following the high surrogate. */
                 --source; /* return to the high surrogate */
                 result = sourceExhausted;
-                break;
+                நிறுத்து;
             }
-        } else if (flags == strictConversion) {
+        } இல்லையெனில் எனில் (flags == strictConversion) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
+            எனில் (ch >= UNI_SUR_கீழ்_START && ch <= UNI_SUR_கீழ்_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                நிறுத்து;
             }
         }
         /* Figure out how many bytes the result will require */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch < (UTF32)0x110000) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        எனில் (ch < (UTF32)0x80) {      bytesToWrite = 1;
+        } இல்லையெனில் எனில் (ch < (UTF32)0x800) {     bytesToWrite = 2;
+        } இல்லையெனில் எனில் (ch < (UTF32)0x10000) {   bytesToWrite = 3;
+        } இல்லையெனில் எனில் (ch < (UTF32)0x110000) {  bytesToWrite = 4;
+        } இல்லையெனில் {                            bytesToWrite = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
         }
 
         target += bytesToWrite;
-        if (target > targetEnd) {
+        எனில் (target > targetEnd) {
             source = oldSource; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+            target -= bytesToWrite; result = targetExhausted; நிறுத்து;
         }
-        switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
+        தேர்வு (bytesToWrite) { /* note: everything falls through. */
+            நிலை 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            நிலை 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            நிலை 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            நிலை 1: *--target =  (UTF8)(ch | firstByteMark[bytesToWrite]);
         }
         target += bytesToWrite;
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    திரும்பு result;
 }
 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF32toUTF8 (
-        const UTF32** sourceStart, const UTF32* sourceEnd,
+        மாறிலி UTF32** sourceStart, மாறிலி UTF32* sourceEnd,
         UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF32* source = *sourceStart;
+    மாறிலி UTF32* source = *sourceStart;
     UTF8* target = *targetStart;
-    while (source < sourceEnd) {
+    போது (source < sourceEnd) {
         UTF32 ch;
         unsigned short bytesToWrite = 0;
-        const UTF32 byteMask = 0xBF;
-        const UTF32 byteMark = 0x80;
+        மாறிலி UTF32 byteMask = 0xBF;
+        மாறிலி UTF32 byteMark = 0x80;
         ch = *source++;
-        if (flags == strictConversion ) {
+        எனில் (flags == strictConversion ) {
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
+            எனில் (ch >= UNI_SUR_உயர்வு_START && ch <= UNI_SUR_கீழ்_END) {
                 --source; /* return to the illegal value itself */
                 result = sourceIllegal;
-                break;
+                நிறுத்து;
             }
         }
         /*
          * Figure out how many bytes the result will require. Turn any
          * illegally large UTF32 things (> Plane 17) into replacement chars.
          */
-        if (ch < (UTF32)0x80) {      bytesToWrite = 1;
-        } else if (ch < (UTF32)0x800) {     bytesToWrite = 2;
-        } else if (ch < (UTF32)0x10000) {   bytesToWrite = 3;
-        } else if (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
-        } else {                            bytesToWrite = 3;
+        எனில் (ch < (UTF32)0x80) {      bytesToWrite = 1;
+        } இல்லையெனில் எனில் (ch < (UTF32)0x800) {     bytesToWrite = 2;
+        } இல்லையெனில் எனில் (ch < (UTF32)0x10000) {   bytesToWrite = 3;
+        } இல்லையெனில் எனில் (ch <= UNI_MAX_LEGAL_UTF32) {  bytesToWrite = 4;
+        } இல்லையெனில் {                            bytesToWrite = 3;
                                             ch = UNI_REPLACEMENT_CHAR;
                                             result = sourceIllegal;
         }
 
         target += bytesToWrite;
-        if (target > targetEnd) {
+        எனில் (target > targetEnd) {
             --source; /* Back up source pointer! */
-            target -= bytesToWrite; result = targetExhausted; break;
+            target -= bytesToWrite; result = targetExhausted; நிறுத்து;
         }
-        switch (bytesToWrite) { /* note: everything falls through. */
-            case 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
+        தேர்வு (bytesToWrite) { /* note: everything falls through. */
+            நிலை 4: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            நிலை 3: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            நிலை 2: *--target = (UTF8)((ch | byteMark) & byteMask); ch >>= 6;
+            நிலை 1: *--target = (UTF8) (ch | firstByteMark[bytesToWrite]);
         }
         target += bytesToWrite;
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    திரும்பு result;
 }
 
 /* --------------------------------------------------------------------- */
@@ -394,29 +394,29 @@ ConversionResult ConvertUTF32toUTF8 (
  * definition of UTF-8 goes up to 4-byte sequences.
  */
 
-static Boolean isLegalUTF8(const UTF8 *source, int length) {
+நிலையான Boolean isLegalUTF8(மாறிலி UTF8 *source, முழு length) {
     UTF8 a;
-    const UTF8 *srcptr = source+length;
-    switch (length) {
-    default: return false;
+    மாறிலி UTF8 *srcptr = source+length;
+    தேர்வு (length) {
+    இயல்பு: திரும்பு பொய்;
         /* Everything else falls through when "true"... */
-    case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-    case 2: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+    நிலை 4: எனில் ((a = (*--srcptr)) < 0x80 || a > 0xBF) திரும்பு பொய்;
+    நிலை 3: எனில் ((a = (*--srcptr)) < 0x80 || a > 0xBF) திரும்பு பொய்;
+    நிலை 2: எனில் ((a = (*--srcptr)) < 0x80 || a > 0xBF) திரும்பு பொய்;
 
-        switch (*source) {
+        தேர்வு (*source) {
             /* no fall-through in this inner switch */
-            case 0xE0: if (a < 0xA0) return false; break;
-            case 0xED: if (a > 0x9F) return false; break;
-            case 0xF0: if (a < 0x90) return false; break;
-            case 0xF4: if (a > 0x8F) return false; break;
-            default:   if (a < 0x80) return false;
+            நிலை 0xE0: எனில் (a < 0xA0) திரும்பு பொய்; நிறுத்து;
+            நிலை 0xED: எனில் (a > 0x9F) திரும்பு பொய்; நிறுத்து;
+            நிலை 0xF0: எனில் (a < 0x90) திரும்பு பொய்; நிறுத்து;
+            நிலை 0xF4: எனில் (a > 0x8F) திரும்பு பொய்; நிறுத்து;
+            இயல்பு:   எனில் (a < 0x80) திரும்பு பொய்;
         }
 
-    case 1: if (*source >= 0x80 && *source < 0xC2) return false;
+    நிலை 1: எனில் (*source >= 0x80 && *source < 0xC2) திரும்பு பொய்;
     }
-    if (*source > 0xF4) return false;
-    return true;
+    எனில் (*source > 0xF4) திரும்பு பொய்;
+    திரும்பு உண்மை;
 }
 
 /* --------------------------------------------------------------------- */
@@ -425,31 +425,31 @@ static Boolean isLegalUTF8(const UTF8 *source, int length) {
  * Exported function to return whether a UTF-8 sequence is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd) {
-    int length = trailingBytesForUTF8[*source]+1;
-    if (length > sourceEnd - source) {
-        return false;
+Boolean isLegalUTF8Sequence(மாறிலி UTF8 *source, மாறிலி UTF8 *sourceEnd) {
+    முழு length = trailingBytesForUTF8[*source]+1;
+    எனில் (length > sourceEnd - source) {
+        திரும்பு பொய்;
     }
-    return isLegalUTF8(source, length);
+    திரும்பு isLegalUTF8(source, length);
 }
 
 /*
  * Exported function to return the size of the first utf-8 code unit sequence,
  * Or 0 if the sequence is not valid;
  */
-unsigned getUTF8SequenceSize(const UTF8 *source, const UTF8 *sourceEnd) {
-  int length = trailingBytesForUTF8[*source] + 1;
-  return (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
+unsigned getUTF8SequenceSize(மாறிலி UTF8 *source, மாறிலி UTF8 *sourceEnd) {
+  முழு length = trailingBytesForUTF8[*source] + 1;
+  திரும்பு (length <= sourceEnd - source && isLegalUTF8(source, length)) ? length
                                                                        : 0;
 }
 
 /* --------------------------------------------------------------------- */
 
-unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
-                                                   const UTF8 *sourceEnd) {
+unsigned findMaximalSubpartOfIllFormedUTF8Sequence(மாறிலி UTF8 *source,
+                                                   மாறிலி UTF8 *sourceEnd) {
   UTF8 b1, b2, b3;
 
-  assert(!isLegalUTF8Sequence(source, sourceEnd));
+  ப்ரதிஜ்ஞா(!isLegalUTF8Sequence(source, sourceEnd));
 
   /*
    * Unicode 6.3.0, D93b:
@@ -460,8 +460,8 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
    *   b. a subsequence of length one.
    */
 
-  if (source == sourceEnd)
-    return 0;
+  எனில் (source == sourceEnd)
+    திரும்பு 0;
 
   /*
    * Perform case analysis.  See Unicode 6.3.0, Table 3-7. Well-Formed UTF-8
@@ -470,69 +470,69 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
 
   b1 = *source;
   ++source;
-  if (b1 >= 0xC2 && b1 <= 0xDF) {
+  எனில் (b1 >= 0xC2 && b1 <= 0xDF) {
     /*
      * First byte is valid, but we know that this code unit sequence is
      * invalid, so the maximal subpart has to end after the first byte.
      */
-    return 1;
+    திரும்பு 1;
   }
 
-  if (source == sourceEnd)
-    return 1;
+  எனில் (source == sourceEnd)
+    திரும்பு 1;
 
   b2 = *source;
   ++source;
 
-  if (b1 == 0xE0) {
-    return (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
+  எனில் (b1 == 0xE0) {
+    திரும்பு (b2 >= 0xA0 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 >= 0xE1 && b1 <= 0xEC) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  எனில் (b1 >= 0xE1 && b1 <= 0xEC) {
+    திரும்பு (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xED) {
-    return (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
+  எனில் (b1 == 0xED) {
+    திரும்பு (b2 >= 0x80 && b2 <= 0x9F) ? 2 : 1;
   }
-  if (b1 >= 0xEE && b1 <= 0xEF) {
-    return (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
+  எனில் (b1 >= 0xEE && b1 <= 0xEF) {
+    திரும்பு (b2 >= 0x80 && b2 <= 0xBF) ? 2 : 1;
   }
-  if (b1 == 0xF0) {
-    if (b2 >= 0x90 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  எனில் (b1 == 0xF0) {
+    எனில் (b2 >= 0x90 && b2 <= 0xBF) {
+      எனில் (source == sourceEnd)
+        திரும்பு 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      திரும்பு (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    திரும்பு 1;
   }
-  if (b1 >= 0xF1 && b1 <= 0xF3) {
-    if (b2 >= 0x80 && b2 <= 0xBF) {
-      if (source == sourceEnd)
-        return 2;
+  எனில் (b1 >= 0xF1 && b1 <= 0xF3) {
+    எனில் (b2 >= 0x80 && b2 <= 0xBF) {
+      எனில் (source == sourceEnd)
+        திரும்பு 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      திரும்பு (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    திரும்பு 1;
   }
-  if (b1 == 0xF4) {
-    if (b2 >= 0x80 && b2 <= 0x8F) {
-      if (source == sourceEnd)
-        return 2;
+  எனில் (b1 == 0xF4) {
+    எனில் (b2 >= 0x80 && b2 <= 0x8F) {
+      எனில் (source == sourceEnd)
+        திரும்பு 2;
 
       b3 = *source;
-      return (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
+      திரும்பு (b3 >= 0x80 && b3 <= 0xBF) ? 3 : 2;
     }
-    return 1;
+    திரும்பு 1;
   }
 
-  assert((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
+  ப்ரதிஜ்ஞா((b1 >= 0x80 && b1 <= 0xC1) || b1 >= 0xF5);
   /*
    * There are no valid sequences that start with these bytes.  Maximal subpart
    * is defined to have length 1 in these cases.
    */
-  return 1;
+  திரும்பு 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -541,8 +541,8 @@ unsigned findMaximalSubpartOfIllFormedUTF8Sequence(const UTF8 *source,
  * Exported function to return the total number of bytes in a codepoint
  * represented in UTF-8, given the value of the first byte.
  */
-unsigned getNumBytesForUTF8(UTF8 first) {
-  return trailingBytesForUTF8[first] + 1;
+unsigned get_இலக்கம்_Bytes_For_UTF8(UTF8 first) {
+  திரும்பு trailingBytesForUTF8[first] + 1;
 }
 
 /* --------------------------------------------------------------------- */
@@ -551,106 +551,106 @@ unsigned getNumBytesForUTF8(UTF8 first) {
  * Exported function to return whether a UTF-8 string is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean isLegalUTF8String(const UTF8 **source, const UTF8 *sourceEnd) {
-    while (*source != sourceEnd) {
-        int length = trailingBytesForUTF8[**source] + 1;
-        if (length > sourceEnd - *source || !isLegalUTF8(*source, length))
-            return false;
+Boolean isLegalUTF8String(மாறிலி UTF8 **source, மாறிலி UTF8 *sourceEnd) {
+    போது (*source != sourceEnd) {
+        முழு length = trailingBytesForUTF8[**source] + 1;
+        எனில் (length > sourceEnd - *source || !isLegalUTF8(*source, length))
+            திரும்பு பொய்;
         *source += length;
     }
-    return true;
+    திரும்பு உண்மை;
 }
 
 /* --------------------------------------------------------------------- */
 
 ConversionResult ConvertUTF8toUTF16 (
-        const UTF8** sourceStart, const UTF8* sourceEnd,
+        மாறிலி UTF8** sourceStart, மாறிலி UTF8* sourceEnd,
         UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags) {
     ConversionResult result = conversionOK;
-    const UTF8* source = *sourceStart;
+    மாறிலி UTF8* source = *sourceStart;
     UTF16* target = *targetStart;
-    while (source < sourceEnd) {
+    போது (source < sourceEnd) {
         UTF32 ch = 0;
         unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            result = sourceExhausted; break;
+        எனில் (extraBytesToRead >= sourceEnd - source) {
+            result = sourceExhausted; நிறுத்து;
         }
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
+        எனில் (!isLegalUTF8(source, extraBytesToRead+1)) {
             result = sourceIllegal;
-            break;
+            நிறுத்து;
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
-        switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+        தேர்வு (extraBytesToRead) {
+            நிலை 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
+            நிலை 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
+            நிலை 3: ch += *source++; ch <<= 6;
+            நிலை 2: ch += *source++; ch <<= 6;
+            நிலை 1: ch += *source++; ch <<= 6;
+            நிலை 0: ch += *source++;
         }
         ch -= offsetsFromUTF8[extraBytesToRead];
 
-        if (target >= targetEnd) {
+        எனில் (target >= targetEnd) {
             source -= (extraBytesToRead+1); /* Back up source pointer! */
-            result = targetExhausted; break;
+            result = targetExhausted; நிறுத்து;
         }
-        if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
+        எனில் (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
             /* UTF-16 surrogate values are illegal in UTF-32 */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            எனில் (ch >= UNI_SUR_உயர்வு_START && ch <= UNI_SUR_கீழ்_END) {
+                எனில் (flags == strictConversion) {
                     source -= (extraBytesToRead+1); /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    நிறுத்து;
+                } இல்லையெனில் {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } இல்லையெனில் {
                 *target++ = (UTF16)ch; /* normal case */
             }
-        } else if (ch > UNI_MAX_UTF16) {
-            if (flags == strictConversion) {
+        } இல்லையெனில் எனில் (ch > UNI_MAX_UTF16) {
+            எனில் (flags == strictConversion) {
                 result = sourceIllegal;
                 source -= (extraBytesToRead+1); /* return to the start */
-                break; /* Bail out; shouldn't continue */
-            } else {
+                நிறுத்து; /* Bail out; shouldn't continue */
+            } இல்லையெனில் {
                 *target++ = UNI_REPLACEMENT_CHAR;
             }
-        } else {
+        } இல்லையெனில் {
             /* target is a character in range 0xFFFF - 0x10FFFF. */
-            if (target + 1 >= targetEnd) {
+            எனில் (target + 1 >= targetEnd) {
                 source -= (extraBytesToRead+1); /* Back up source pointer! */
-                result = targetExhausted; break;
+                result = targetExhausted; நிறுத்து;
             }
             ch -= halfBase;
-            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+            *target++ = (UTF16)((ch >> halfShift) + UNI_SUR_உயர்வு_START);
+            *target++ = (UTF16)((ch & halfMask) + UNI_SUR_கீழ்_START);
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    திரும்பு result;
 }
 
 /* --------------------------------------------------------------------- */
 
-static ConversionResult ConvertUTF8toUTF32Impl(
-        const UTF8** sourceStart, const UTF8* sourceEnd,
+நிலையான ConversionResult ConvertUTF8toUTF32Impl(
+        மாறிலி UTF8** sourceStart, மாறிலி UTF8* sourceEnd,
         UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags,
-        Boolean InputIsPartial) {
+        Boolean உள்ளீடு_Is_Partial) {
     ConversionResult result = conversionOK;
-    const UTF8* source = *sourceStart;
+    மாறிலி UTF8* source = *sourceStart;
     UTF32* target = *targetStart;
-    while (source < sourceEnd) {
+    போது (source < sourceEnd) {
         UTF32 ch = 0;
         unsigned short extraBytesToRead = trailingBytesForUTF8[*source];
-        if (extraBytesToRead >= sourceEnd - source) {
-            if (flags == strictConversion || InputIsPartial) {
+        எனில் (extraBytesToRead >= sourceEnd - source) {
+            எனில் (flags == strictConversion || உள்ளீடு_Is_Partial) {
                 result = sourceExhausted;
-                break;
-            } else {
+                நிறுத்து;
+            } இல்லையெனில் {
                 result = sourceIllegal;
 
                 /*
@@ -660,20 +660,20 @@ static ConversionResult ConvertUTF8toUTF32Impl(
                 source += findMaximalSubpartOfIllFormedUTF8Sequence(source,
                                                                     sourceEnd);
                 *target++ = UNI_REPLACEMENT_CHAR;
-                continue;
+                தொடர்;
             }
         }
-        if (target >= targetEnd) {
-            result = targetExhausted; break;
+        எனில் (target >= targetEnd) {
+            result = targetExhausted; நிறுத்து;
         }
 
         /* Do this check whether lenient or strict */
-        if (!isLegalUTF8(source, extraBytesToRead+1)) {
+        எனில் (!isLegalUTF8(source, extraBytesToRead+1)) {
             result = sourceIllegal;
-            if (flags == strictConversion) {
+            எனில் (flags == strictConversion) {
                 /* Abort conversion. */
-                break;
-            } else {
+                நிறுத்து;
+            } இல்லையெனில் {
                 /*
                  * Replace the maximal subpart of ill-formed sequence with
                  * replacement character.
@@ -681,62 +681,62 @@ static ConversionResult ConvertUTF8toUTF32Impl(
                 source += findMaximalSubpartOfIllFormedUTF8Sequence(source,
                                                                     sourceEnd);
                 *target++ = UNI_REPLACEMENT_CHAR;
-                continue;
+                தொடர்;
             }
         }
         /*
          * The cases all fall through. See "Note A" below.
          */
-        switch (extraBytesToRead) {
-            case 5: ch += *source++; ch <<= 6;
-            case 4: ch += *source++; ch <<= 6;
-            case 3: ch += *source++; ch <<= 6;
-            case 2: ch += *source++; ch <<= 6;
-            case 1: ch += *source++; ch <<= 6;
-            case 0: ch += *source++;
+        தேர்வு (extraBytesToRead) {
+            நிலை 5: ch += *source++; ch <<= 6;
+            நிலை 4: ch += *source++; ch <<= 6;
+            நிலை 3: ch += *source++; ch <<= 6;
+            நிலை 2: ch += *source++; ch <<= 6;
+            நிலை 1: ch += *source++; ch <<= 6;
+            நிலை 0: ch += *source++;
         }
         ch -= offsetsFromUTF8[extraBytesToRead];
 
-        if (ch <= UNI_MAX_LEGAL_UTF32) {
+        எனில் (ch <= UNI_MAX_LEGAL_UTF32) {
             /*
              * UTF-16 surrogate values are illegal in UTF-32, and anything
              * over Plane 17 (> 0x10FFFF) is illegal.
              */
-            if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-                if (flags == strictConversion) {
+            எனில் (ch >= UNI_SUR_உயர்வு_START && ch <= UNI_SUR_கீழ்_END) {
+                எனில் (flags == strictConversion) {
                     source -= (extraBytesToRead+1); /* return to the illegal value itself */
                     result = sourceIllegal;
-                    break;
-                } else {
+                    நிறுத்து;
+                } இல்லையெனில் {
                     *target++ = UNI_REPLACEMENT_CHAR;
                 }
-            } else {
+            } இல்லையெனில் {
                 *target++ = ch;
             }
-        } else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
+        } இல்லையெனில் { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
             result = sourceIllegal;
             *target++ = UNI_REPLACEMENT_CHAR;
         }
     }
     *sourceStart = source;
     *targetStart = target;
-    return result;
+    திரும்பு result;
 }
 
-ConversionResult ConvertUTF8toUTF32Partial(const UTF8 **sourceStart,
-                                           const UTF8 *sourceEnd,
+ConversionResult ConvertUTF8toUTF32Partial(மாறிலி UTF8 **sourceStart,
+                                           மாறிலி UTF8 *sourceEnd,
                                            UTF32 **targetStart,
                                            UTF32 *targetEnd,
                                            ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
-                                flags, /*InputIsPartial=*/true);
+  திரும்பு ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
+                                flags, /*InputIsPartial=*/உண்மை);
 }
 
-ConversionResult ConvertUTF8toUTF32(const UTF8 **sourceStart,
-                                    const UTF8 *sourceEnd, UTF32 **targetStart,
+ConversionResult ConvertUTF8toUTF32(மாறிலி UTF8 **sourceStart,
+                                    மாறிலி UTF8 *sourceEnd, UTF32 **targetStart,
                                     UTF32 *targetEnd, ConversionFlags flags) {
-  return ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
-                                flags, /*InputIsPartial=*/false);
+  திரும்பு ConvertUTF8toUTF32Impl(sourceStart, sourceEnd, targetStart, targetEnd,
+                                flags, /*InputIsPartial=*/பொய்);
 }
 
 /* ---------------------------------------------------------------------

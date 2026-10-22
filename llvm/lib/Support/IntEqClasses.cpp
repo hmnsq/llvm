@@ -17,61 +17,61 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/IntEqClasses.h"
-#include <cassert>
+#அந்தர்பாவ "llvm/ADT/IntEqClasses.h"
+#அந்தர்பாவ <cassert>
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
-void IntEqClasses::grow(unsigned N) {
-  assert(NumClasses == 0 && "grow() called after compress().");
+வெறுமை IntEqClasses::grow(unsigned N) {
+  ப்ரதிஜ்ஞா(இலக்கம்_Classes == 0 && "grow() called after compress().");
   EC.reserve(N);
-  while (EC.size() < N)
-    EC.push_back(EC.size());
+  போது (EC.size() < N)
+    EC.தள்ளு_back(EC.size());
 }
 
 unsigned IntEqClasses::join(unsigned a, unsigned b) {
-  assert(NumClasses == 0 && "join() called after compress().");
+  ப்ரதிஜ்ஞா(இலக்கம்_Classes == 0 && "join() called after compress().");
   unsigned eca = EC[a];
   unsigned ecb = EC[b];
   // Update pointers while searching for the leaders, compressing the paths
   // incrementally. The larger leader will eventually be updated, joining the
   // classes.
-  while (eca != ecb)
-    if (eca < ecb) {
+  போது (eca != ecb)
+    எனில் (eca < ecb) {
       EC[b] = eca;
       b = ecb;
       ecb = EC[b];
-    } else {
+    } இல்லையெனில் {
       EC[a] = ecb;
       a = eca;
       eca = EC[a];
     }
 
-  return eca;
+  திரும்பு eca;
 }
 
-unsigned IntEqClasses::findLeader(unsigned a) const {
-  assert(NumClasses == 0 && "findLeader() called after compress().");
-  while (a != EC[a])
+unsigned IntEqClasses::findLeader(unsigned a) மாறிலி {
+  ப்ரதிஜ்ஞா(இலக்கம்_Classes == 0 && "findLeader() called after compress().");
+  போது (a != EC[a])
     a = EC[a];
-  return a;
+  திரும்பு a;
 }
 
-void IntEqClasses::compress() {
-  if (NumClasses)
-    return;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    EC[i] = (EC[i] == i) ? NumClasses++ : EC[EC[i]];
+வெறுமை IntEqClasses::compress() {
+  எனில் (இலக்கம்_Classes)
+    திரும்பு;
+  க்கு (unsigned i = 0, e = EC.size(); i != e; ++i)
+    EC[i] = (EC[i] == i) ? இலக்கம்_Classes++ : EC[EC[i]];
 }
 
-void IntEqClasses::uncompress() {
-  if (!NumClasses)
-    return;
+வெறுமை IntEqClasses::uncompress() {
+  எனில் (!இலக்கம்_Classes)
+    திரும்பு;
   SmallVector<unsigned, 8> Leader;
-  for (unsigned i = 0, e = EC.size(); i != e; ++i)
-    if (EC[i] < Leader.size())
+  க்கு (unsigned i = 0, e = EC.size(); i != e; ++i)
+    எனில் (EC[i] < Leader.size())
       EC[i] = Leader[EC[i]];
-    else
-      Leader.push_back(EC[i] = i);
-  NumClasses = 0;
+    இல்லையெனில்
+      Leader.தள்ளு_back(EC[i] = i);
+  இலக்கம்_Classes = 0;
 }

@@ -37,14 +37,14 @@
  * compile-time configuration.
  */
 
-#include "llvm/Support/MD5.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include <cstdint>
-#include <cstring>
+#அந்தர்பாவ "llvm/Support/MD5.h"
+#அந்தர்பாவ "llvm/ADT/ArrayRef.h"
+#அந்தர்பாவ "llvm/ADT/SmallString.h"
+#அந்தர்பாவ "llvm/ADT/StringExtras.h"
+#அந்தர்பாவ "llvm/ADT/StringRef.h"
+#அந்தர்பாவ "llvm/Support/Endian.h"
+#அந்தர்பாவ <cstdint>
+#அந்தர்பாவ <cstring>
 
 // The basic MD5 functions.
 
@@ -71,12 +71,12 @@
                               ((MD5_u32plus)ptr[(n)*4 + 3] << 24))
 #define GET(n) (InternalState.block[(n)])
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
 /// This processes one or more 64-byte data blocks, but does NOT update
 ///the bit counters.  There are no alignment requirements.
-const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
-  const uint8_t *ptr;
+மாறிலி uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
+  மாறிலி uint8_t *ptr;
   MD5_u32plus a, b, c, d;
   MD5_u32plus saved_a, saved_b, saved_c, saved_d;
   unsigned long Size = Data.size();
@@ -88,7 +88,7 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
   c = InternalState.c;
   d = InternalState.d;
 
-  do {
+  செய் {
     saved_a = a;
     saved_b = b;
     saved_c = c;
@@ -172,47 +172,47 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
     d += saved_d;
 
     ptr += 64;
-  } while (Size -= 64);
+  } போது (Size -= 64);
 
   InternalState.a = a;
   InternalState.b = b;
   InternalState.c = c;
   InternalState.d = d;
 
-  return ptr;
+  திரும்பு ptr;
 }
 
-MD5::MD5() = default;
+MD5::MD5() = இயல்பு;
 
 /// Incrementally add the bytes in \p Data to the hash.
-void MD5::update(ArrayRef<uint8_t> Data) {
+வெறுமை MD5::update(ArrayRef<uint8_t> Data) {
   MD5_u32plus saved_lo;
-  unsigned long used, free;
-  const uint8_t *Ptr = Data.data();
+  unsigned long used, விடுவி;
+  மாறிலி uint8_t *Ptr = Data.data();
   unsigned long Size = Data.size();
 
   saved_lo = InternalState.lo;
-  if ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
+  எனில் ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
     InternalState.hi++;
   InternalState.hi += Size >> 29;
 
   used = saved_lo & 0x3f;
 
-  if (used) {
-    free = 64 - used;
+  எனில் (used) {
+    விடுவி = 64 - used;
 
-    if (Size < free) {
+    எனில் (Size < விடுவி) {
       memcpy(&InternalState.buffer[used], Ptr, Size);
-      return;
+      திரும்பு;
     }
 
-    memcpy(&InternalState.buffer[used], Ptr, free);
-    Ptr = Ptr + free;
-    Size -= free;
+    memcpy(&InternalState.buffer[used], Ptr, விடுவி);
+    Ptr = Ptr + விடுவி;
+    Size -= விடுவி;
     body(ArrayRef(InternalState.buffer, 64));
   }
 
-  if (Size >= 64) {
+  எனில் (Size >= 64) {
     Ptr = body(ArrayRef(Ptr, Size & ~(unsigned long)0x3f));
     Size &= 0x3f;
   }
@@ -223,30 +223,30 @@ void MD5::update(ArrayRef<uint8_t> Data) {
 /// Add the bytes in the StringRef \p Str to the hash.
 // Note that this isn't a string and so this won't include any trailing NULL
 // bytes.
-void MD5::update(StringRef Str) {
-  ArrayRef<uint8_t> SVal((const uint8_t *)Str.data(), Str.size());
+வெறுமை MD5::update(StringRef Str) {
+  ArrayRef<uint8_t> SVal((மாறிலி uint8_t *)Str.data(), Str.size());
   update(SVal);
 }
 
 /// Finish the hash and place the resulting hash into \p result.
 /// \param Result is assumed to be a minimum of 16-bytes in size.
-void MD5::final(MD5Result &Result) {
-  unsigned long used, free;
+வெறுமை MD5::final(MD5Result &Result) {
+  unsigned long used, விடுவி;
 
   used = InternalState.lo & 0x3f;
 
   InternalState.buffer[used++] = 0x80;
 
-  free = 64 - used;
+  விடுவி = 64 - used;
 
-  if (free < 8) {
-    memset(&InternalState.buffer[used], 0, free);
+  எனில் (விடுவி < 8) {
+    memset(&InternalState.buffer[used], 0, விடுவி);
     body(ArrayRef(InternalState.buffer, 64));
     used = 0;
-    free = 64;
+    விடுவி = 64;
   }
 
-  memset(&InternalState.buffer[used], 0, free - 8);
+  memset(&InternalState.buffer[used], 0, விடுவி - 8);
 
   InternalState.lo <<= 3;
   support::endian::write32le(&InternalState.buffer[56], InternalState.lo);
@@ -263,7 +263,7 @@ void MD5::final(MD5Result &Result) {
 MD5::MD5Result MD5::final() {
   MD5Result Result;
   final(Result);
-  return Result;
+  திரும்பு Result;
 }
 
 MD5::MD5Result MD5::result() {
@@ -274,17 +274,17 @@ MD5::MD5Result MD5::result() {
   // Restore the state
   InternalState = StateToRestore;
 
-  return Hash;
+  திரும்பு Hash;
 }
 
-SmallString<32> MD5::MD5Result::digest() const {
+SmallString<32> MD5::MD5Result::digest() மாறிலி {
   SmallString<32> Str;
-  toHex(*this, /*LowerCase*/ true, Str);
-  return Str;
+  toHex(*இது, /*LowerCase*/ உண்மை, Str);
+  திரும்பு Str;
 }
 
-void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<char> &Str) {
-  toHex(Result, /*LowerCase*/ true, Str);
+வெறுமை MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<எழுத்து> &Str) {
+  toHex(Result, /*LowerCase*/ உண்மை, Str);
 }
 
 MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
@@ -293,7 +293,7 @@ MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
   MD5::MD5Result Res;
   Hash.final(Res);
 
-  return Res;
+  திரும்பு Res;
 }
 
 #undef F

@@ -6,16 +6,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/PGOOptions.h"
+#அந்தர்பாவ "llvm/Support/PGOOptions.h"
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
 PGOOptions::PGOOptions(std::string ProfileFile, std::string CSProfileGenFile,
                        std::string ProfileRemappingFile,
                        std::string MemoryProfile, PGOAction Action,
                        CSPGOAction CSAction, ColdFuncOpt ColdType,
-                       bool DebugInfoForProfiling, bool PseudoProbeForProfiling,
-                       bool AtomicCounterUpdate)
+                       தருக்க DebugInfoForProfiling, தருக்க PseudoProbeForProfiling,
+                       தருக்க AtomicCounterUpdate)
     : ProfileFile(ProfileFile), CSProfileGenFile(CSProfileGenFile),
       ProfileRemappingFile(ProfileRemappingFile), MemoryProfile(MemoryProfile),
       Action(Action), CSAction(CSAction), ColdOptType(ColdType),
@@ -27,28 +27,28 @@ PGOOptions::PGOOptions(std::string ProfileFile, std::string CSProfileGenFile,
   // callback with IRUse action without ProfileFile.
 
   // If there is a CSAction, PGOAction cannot be IRInstr or SampleUse.
-  assert(this->CSAction == NoCSAction ||
-         (this->Action != IRInstr && this->Action != SampleUse));
+  ப்ரதிஜ்ஞா(இது->CSAction == NoCSAction ||
+         (இது->Action != IRInstr && இது->Action != SampleUse));
 
   // For CSIRInstr, CSProfileGenFile also needs to be nonempty.
-  assert(this->CSAction != CSIRInstr || !this->CSProfileGenFile.empty());
+  ப்ரதிஜ்ஞா(இது->CSAction != CSIRInstr || !இது->CSProfileGenFile.empty());
 
   // If CSAction is CSIRUse, PGOAction needs to be IRUse as they share
   // a profile.
-  assert(this->CSAction != CSIRUse || this->Action == IRUse);
+  ப்ரதிஜ்ஞா(இது->CSAction != CSIRUse || இது->Action == IRUse);
 
   // Cannot optimize with MemProf profile during IR instrumentation.
-  assert(this->MemoryProfile.empty() || this->Action != PGOOptions::IRInstr);
+  ப்ரதிஜ்ஞா(இது->MemoryProfile.empty() || இது->Action != PGOOptions::IRInstr);
 
   // If neither Action nor CSAction nor MemoryProfile are set,
   // DebugInfoForProfiling or PseudoProbeForProfiling needs to be true.
-  assert(this->Action != NoAction || this->CSAction != NoCSAction ||
-         !this->MemoryProfile.empty() || this->DebugInfoForProfiling ||
-         this->PseudoProbeForProfiling);
+  ப்ரதிஜ்ஞா(இது->Action != NoAction || இது->CSAction != NoCSAction ||
+         !இது->MemoryProfile.empty() || இது->DebugInfoForProfiling ||
+         இது->PseudoProbeForProfiling);
 }
 
-PGOOptions::PGOOptions(const PGOOptions &) = default;
+PGOOptions::PGOOptions(மாறிலி PGOOptions &) = இயல்பு;
 
-PGOOptions &PGOOptions::operator=(const PGOOptions &O) = default;
+PGOOptions &PGOOptions::operator=(மாறிலி PGOOptions &O) = இயல்பு;
 
-PGOOptions::~PGOOptions() = default;
+PGOOptions::~PGOOptions() = இயல்பு;

@@ -10,192 +10,192 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LSP/Protocol.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringSet.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/JSON.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/raw_ostream.h"
+#அந்தர்பாவ "llvm/Support/LSP/Protocol.h"
+#அந்தர்பாவ "llvm/ADT/StringExtras.h"
+#அந்தர்பாவ "llvm/ADT/StringSet.h"
+#அந்தர்பாவ "llvm/Support/ErrorHandling.h"
+#அந்தர்பாவ "llvm/Support/JSON.h"
+#அந்தர்பாவ "llvm/Support/MemoryBuffer.h"
+#அந்தர்பாவ "llvm/Support/Path.h"
+#அந்தர்பாவ "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::lsp;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::lsp;
 
 // Helper that doesn't treat `null` and absent fields as failures.
 template <typename T>
-static bool mapOptOrNull(const llvm::json::Value &Params,
+நிலையான தருக்க mapOptOrNull(மாறிலி llvm::json::மதிப்பு &Params,
                          llvm::StringLiteral Prop, T &Out,
                          llvm::json::Path Path) {
-  const llvm::json::Object *O = Params.getAsObject();
-  assert(O);
+  மாறிலி llvm::json::Object *O = Params.getAsObject();
+  ப்ரதிஜ்ஞா(O);
 
   // Field is missing or null.
   auto *V = O->get(Prop);
-  if (!V || V->getAsNull())
-    return true;
-  return fromJSON(*V, Out, Path.field(Prop));
+  எனில் (!V || V->getAsNull())
+    திரும்பு உண்மை;
+  திரும்பு fromJSON(*V, Out, Path.field(Prop));
 }
 
 //===----------------------------------------------------------------------===//
 // LSPError
 //===----------------------------------------------------------------------===//
 
-char LSPError::ID;
+எழுத்து LSPError::ID;
 
 //===----------------------------------------------------------------------===//
 // URIForFile
 //===----------------------------------------------------------------------===//
 
-static bool isWindowsPath(StringRef Path) {
-  return Path.size() > 1 && llvm::isAlpha(Path[0]) && Path[1] == ':';
+நிலையான தருக்க isWindowsPath(StringRef Path) {
+  திரும்பு Path.size() > 1 && llvm::isAlpha(Path[0]) && Path[1] == ':';
 }
 
-static bool isNetworkPath(StringRef Path) {
-  return Path.size() > 2 && Path[0] == Path[1] &&
+நிலையான தருக்க isNetworkPath(StringRef Path) {
+  திரும்பு Path.size() > 2 && Path[0] == Path[1] &&
          llvm::sys::path::is_separator(Path[0]);
 }
 
-static bool shouldEscapeInURI(unsigned char C) {
+நிலையான தருக்க shouldEscapeInURI(unsigned எழுத்து C) {
   // Unreserved characters.
-  if ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
+  எனில் ((C >= 'a' && C <= 'z') || (C >= 'A' && C <= 'Z') ||
       (C >= '0' && C <= '9'))
-    return false;
+    திரும்பு பொய்;
 
-  switch (C) {
-  case '-':
-  case '_':
-  case '.':
-  case '~':
+  தேர்வு (C) {
+  நிலை '-':
+  நிலை '_':
+  நிலை '.':
+  நிலை '~':
   // '/' is only reserved when parsing.
-  case '/':
+  நிலை '/':
   // ':' is only reserved for relative URI paths, which we doesn't produce.
-  case ':':
-    return false;
+  நிலை ':':
+    திரும்பு பொய்;
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
 /// Encodes a string according to percent-encoding.
 /// - Unreserved characters are not escaped.
 /// - Reserved characters always escaped with exceptions like '/'.
 /// - All other characters are escaped.
-static void percentEncode(StringRef Content, std::string &Out) {
-  for (unsigned char C : Content) {
-    if (shouldEscapeInURI(C)) {
-      Out.push_back('%');
-      Out.push_back(llvm::hexdigit(C / 16));
-      Out.push_back(llvm::hexdigit(C % 16));
-    } else {
-      Out.push_back(C);
+நிலையான வெறுமை percentEncode(StringRef Content, std::string &Out) {
+  க்கு (unsigned எழுத்து C : Content) {
+    எனில் (shouldEscapeInURI(C)) {
+      Out.தள்ளு_back('%');
+      Out.தள்ளு_back(llvm::hexdigit(C / 16));
+      Out.தள்ளு_back(llvm::hexdigit(C % 16));
+    } இல்லையெனில் {
+      Out.தள்ளு_back(C);
     }
   }
 }
 
 /// Decodes a string according to percent-encoding.
-static std::string percentDecode(StringRef Content) {
+நிலையான std::string percentDecode(StringRef Content) {
   std::string Result;
-  for (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
-    if (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
+  க்கு (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
+    எனில் (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
         llvm::isHexDigit(*(I + 2))) {
-      Result.push_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
+      Result.தள்ளு_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
       I += 2;
-    } else {
-      Result.push_back(*I);
+    } இல்லையெனில் {
+      Result.தள்ளு_back(*I);
     }
   }
-  return Result;
+  திரும்பு Result;
 }
 
 /// Return the set containing the supported URI schemes.
-static StringSet<> &getSupportedSchemes() {
-  static StringSet<> Schemes({"file", "test"});
-  return Schemes;
+நிலையான StringSet<> &getSupportedSchemes() {
+  நிலையான StringSet<> Schemes({"file", "test"});
+  திரும்பு Schemes;
 }
 
 /// Returns true if the given scheme is structurally valid, i.e. it does not
 /// contain any invalid scheme characters. This does not check that the scheme
 /// is actually supported.
-static bool isStructurallyValidScheme(StringRef Scheme) {
-  if (Scheme.empty())
-    return false;
-  if (!llvm::isAlpha(Scheme[0]))
-    return false;
-  return llvm::all_of(llvm::drop_begin(Scheme), [](char C) {
-    return llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
+நிலையான தருக்க isStructurallyValidScheme(StringRef Scheme) {
+  எனில் (Scheme.empty())
+    திரும்பு பொய்;
+  எனில் (!llvm::isAlpha(Scheme[0]))
+    திரும்பு பொய்;
+  திரும்பு llvm::all_of(llvm::drop_begin(Scheme), [](எழுத்து C) {
+    திரும்பு llvm::isAlnum(C) || C == '+' || C == '.' || C == '-';
   });
 }
 
-static llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
+நிலையான llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
                                                        StringRef Scheme) {
   std::string Body;
   StringRef Authority;
-  StringRef Root = llvm::sys::path::root_name(AbsolutePath);
-  if (isNetworkPath(Root)) {
+  StringRef வேர்_2 = llvm::sys::path::வேர்_name(AbsolutePath);
+  எனில் (isNetworkPath(வேர்_2)) {
     // Windows UNC paths e.g. \\server\share => file://server/share
-    Authority = Root.drop_front(2);
-    AbsolutePath.consume_front(Root);
-  } else if (isWindowsPath(Root)) {
+    Authority = வேர்_2.drop_front(2);
+    AbsolutePath.consume_front(வேர்_2);
+  } இல்லையெனில் எனில் (isWindowsPath(வேர்_2)) {
     // Windows paths e.g. X:\path => file:///X:/path
     Body = "/";
   }
   Body += llvm::sys::path::convert_to_slash(AbsolutePath);
 
   std::string Uri = Scheme.str() + ":";
-  if (Authority.empty() && Body.empty())
-    return Uri;
+  எனில் (Authority.empty() && Body.empty())
+    திரும்பு Uri;
 
   // If authority if empty, we only print body if it starts with "/"; otherwise,
   // the URI is invalid.
-  if (!Authority.empty() || StringRef(Body).starts_with("/")) {
+  எனில் (!Authority.empty() || StringRef(Body).starts_with("/")) {
     Uri.append("//");
     percentEncode(Authority, Uri);
   }
   percentEncode(Body, Uri);
-  return Uri;
+  திரும்பு Uri;
 }
 
-static llvm::Expected<std::string> getAbsolutePath(StringRef Authority,
+நிலையான llvm::Expected<std::string> getAbsolutePath(StringRef Authority,
                                                    StringRef Body) {
-  if (!Body.starts_with("/"))
-    return llvm::createStringError(
+  எனில் (!Body.starts_with("/"))
+    திரும்பு llvm::createStringError(
         llvm::inconvertibleErrorCode(),
         "File scheme: expect body to be an absolute path starting "
         "with '/': " +
             Body);
   SmallString<128> Path;
-  if (!Authority.empty()) {
+  எனில் (!Authority.empty()) {
     // Windows UNC paths e.g. file://server/share => \\server\share
     ("//" + Authority).toVector(Path);
-  } else if (isWindowsPath(Body.substr(1))) {
+  } இல்லையெனில் எனில் (isWindowsPath(Body.substr(1))) {
     // Windows paths e.g. file:///X:/path => X:\path
     Body.consume_front("/");
   }
   Path.append(Body);
   llvm::sys::path::native(Path);
-  return std::string(Path);
+  திரும்பு std::string(Path);
 }
 
-static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
+நிலையான llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
   StringRef Uri = OrigUri;
 
   // Decode the scheme of the URI.
   size_t Pos = Uri.find(':');
-  if (Pos == StringRef::npos)
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  எனில் (Pos == StringRef::npos)
+    திரும்பு llvm::createStringError(llvm::inconvertibleErrorCode(),
                                    "Scheme must be provided in URI: " +
                                        OrigUri);
   StringRef SchemeStr = Uri.substr(0, Pos);
   std::string UriScheme = percentDecode(SchemeStr);
-  if (!isStructurallyValidScheme(UriScheme))
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  எனில் (!isStructurallyValidScheme(UriScheme))
+    திரும்பு llvm::createStringError(llvm::inconvertibleErrorCode(),
                                    "Invalid scheme: " + SchemeStr +
                                        " (decoded: " + UriScheme + ")");
   Uri = Uri.substr(Pos + 1);
 
   // Decode the authority of the URI.
   std::string UriAuthority;
-  if (Uri.consume_front("//")) {
+  எனில் (Uri.consume_front("//")) {
     Pos = Uri.find('/');
     UriAuthority = percentDecode(Uri.substr(0, Pos));
     Uri = Uri.substr(Pos);
@@ -205,151 +205,151 @@ static llvm::Expected<std::string> parseFilePathFromURI(StringRef OrigUri) {
   std::string UriBody = percentDecode(Uri);
 
   // Compute the absolute path for this uri.
-  if (!getSupportedSchemes().contains(UriScheme)) {
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+  எனில் (!getSupportedSchemes().contains(UriScheme)) {
+    திரும்பு llvm::createStringError(llvm::inconvertibleErrorCode(),
                                    "unsupported URI scheme `" + UriScheme +
                                        "' for workspace files");
   }
-  return getAbsolutePath(UriAuthority, UriBody);
+  திரும்பு getAbsolutePath(UriAuthority, UriBody);
 }
 
 llvm::Expected<URIForFile> URIForFile::fromURI(StringRef Uri) {
   llvm::Expected<std::string> FilePath = parseFilePathFromURI(Uri);
-  if (!FilePath)
-    return FilePath.takeError();
-  return URIForFile(std::move(*FilePath), Uri.str());
+  எனில் (!FilePath)
+    திரும்பு FilePath.takeError();
+  திரும்பு URIForFile(std::move(*FilePath), Uri.str());
 }
 
 llvm::Expected<URIForFile> URIForFile::fromFile(StringRef AbsoluteFilepath,
                                                 StringRef Scheme) {
   llvm::Expected<std::string> Uri =
       uriFromAbsolutePath(AbsoluteFilepath, Scheme);
-  if (!Uri)
-    return Uri.takeError();
-  return fromURI(*Uri);
+  எனில் (!Uri)
+    திரும்பு Uri.takeError();
+  திரும்பு fromURI(*Uri);
 }
 
-StringRef URIForFile::scheme() const { return uri().split(':').first; }
+StringRef URIForFile::scheme() மாறிலி { திரும்பு uri().split(':').first; }
 
-void URIForFile::registerSupportedScheme(StringRef Scheme) {
-  getSupportedSchemes().insert(Scheme);
+வெறுமை URIForFile::registerSupportedScheme(StringRef Scheme) {
+  getSupportedSchemes().செருகு(Scheme);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, URIForFile &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, URIForFile &Result,
                          llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
+  எனில் (std::optional<StringRef> Str = மதிப்பு.getAsString()) {
     llvm::Expected<URIForFile> ExpectedUri = URIForFile::fromURI(*Str);
-    if (!ExpectedUri) {
+    எனில் (!ExpectedUri) {
       Path.report("unresolvable URI");
       consumeError(ExpectedUri.takeError());
-      return false;
+      திரும்பு பொய்;
     }
     Result = std::move(*ExpectedUri);
-    return true;
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const URIForFile &Value) {
-  return Value.uri();
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி URIForFile &மதிப்பு) {
+  திரும்பு மதிப்பு.uri();
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const URIForFile &Value) {
-  return Os << Value.uri();
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, மாறிலி URIForFile &மதிப்பு) {
+  திரும்பு Os << மதிப்பு.uri();
 }
 
 //===----------------------------------------------------------------------===//
 // ClientCapabilities
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          ClientCapabilities &Result, llvm::json::Path Path) {
-  const llvm::json::Object *O = Value.getAsObject();
-  if (!O) {
+  மாறிலி llvm::json::Object *O = மதிப்பு.getAsObject();
+  எனில் (!O) {
     Path.report("expected object");
-    return false;
+    திரும்பு பொய்;
   }
-  if (const llvm::json::Object *TextDocument = O->getObject("textDocument")) {
-    if (const llvm::json::Object *DocumentSymbol =
+  எனில் (மாறிலி llvm::json::Object *TextDocument = O->getObject("textDocument")) {
+    எனில் (மாறிலி llvm::json::Object *Document_குறியீடு =
             TextDocument->getObject("documentSymbol")) {
-      if (std::optional<bool> HierarchicalSupport =
-              DocumentSymbol->getBoolean("hierarchicalDocumentSymbolSupport"))
-        Result.hierarchicalDocumentSymbol = *HierarchicalSupport;
+      எனில் (std::optional<தருக்க> HierarchicalSupport =
+              Document_குறியீடு->getBoolean("hierarchicalDocumentSymbolSupport"))
+        Result.hierarchical_Document_குறியீடு = *HierarchicalSupport;
     }
-    if (auto *CodeAction = TextDocument->getObject("codeAction")) {
-      if (CodeAction->getObject("codeActionLiteralSupport"))
-        Result.codeActionStructure = true;
+    எனில் (auto *CodeAction = TextDocument->getObject("codeAction")) {
+      எனில் (CodeAction->getObject("codeActionLiteralSupport"))
+        Result.codeActionStructure = உண்மை;
     }
   }
-  if (auto *Window = O->getObject("window")) {
-    if (std::optional<bool> WorkDoneProgressSupport =
+  எனில் (auto *Window = O->getObject("window")) {
+    எனில் (std::optional<தருக்க> WorkDoneProgressSupport =
             Window->getBoolean("workDoneProgress"))
       Result.workDoneProgress = *WorkDoneProgressSupport;
   }
-  return true;
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
 // ClientInfo
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, ClientInfo &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, ClientInfo &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("name", Result.name))
-    return false;
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  எனில் (!O || !O.map("name", Result.name))
+    திரும்பு பொய்;
 
   // Don't fail if we can't parse version.
   O.map("version", Result.version);
-  return true;
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
 // InitializeParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TraceLevel &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, TraceLevel &Result,
                          llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
-    if (*Str == "off") {
+  எனில் (std::optional<StringRef> Str = மதிப்பு.getAsString()) {
+    எனில் (*Str == "off") {
       Result = TraceLevel::Off;
-      return true;
+      திரும்பு உண்மை;
     }
-    if (*Str == "messages") {
+    எனில் (*Str == "messages") {
       Result = TraceLevel::Messages;
-      return true;
+      திரும்பு உண்மை;
     }
-    if (*Str == "verbose") {
+    எனில் (*Str == "verbose") {
       Result = TraceLevel::Verbose;
-      return true;
+      திரும்பு உண்மை;
     }
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          InitializeParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  எனில் (!O)
+    திரும்பு பொய்;
   // We deliberately don't fail if we can't parse individual fields.
   O.map("capabilities", Result.capabilities);
   O.map("trace", Result.trace);
-  O.map("rootUri", Result.rootUri);
-  O.map("rootPath", Result.rootPath);
-  mapOptOrNull(Value, "clientInfo", Result.clientInfo, Path);
+  O.map("rootUri", Result.வேர்_Uri);
+  O.map("rootPath", Result.வேர்_Path);
+  mapOptOrNull(மதிப்பு, "clientInfo", Result.clientInfo, Path);
 
-  return true;
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentItem
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          TextDocumentItem &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("uri", Result.uri) &&
          O.map("languageId", Result.languageId) && O.map("text", Result.text) &&
          O.map("version", Result.version);
 }
@@ -358,109 +358,109 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // TextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const TextDocumentIdentifier &Value) {
-  return llvm::json::Object{{"uri", Value.uri}};
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி TextDocumentIdentifier &மதிப்பு) {
+  திரும்பு llvm::json::Object{{"uri", மதிப்பு.uri}};
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          TextDocumentIdentifier &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("uri", Result.uri);
 }
 
 //===----------------------------------------------------------------------===//
 // VersionedTextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value
-llvm::lsp::toJSON(const VersionedTextDocumentIdentifier &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"version", Value.version},
+llvm::json::மதிப்பு
+llvm::lsp::toJSON(மாறிலி VersionedTextDocumentIdentifier &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"uri", மதிப்பு.uri},
+      {"version", மதிப்பு.version},
   };
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          VersionedTextDocumentIdentifier &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("version", Result.version);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("uri", Result.uri) && O.map("version", Result.version);
 }
 
 //===----------------------------------------------------------------------===//
 // Position
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Position &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, Position &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("line", Result.line) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("line", Result.வரி_2) &&
          O.map("character", Result.character);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Position &Value) {
-  return llvm::json::Object{
-      {"line", Value.line},
-      {"character", Value.character},
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி Position &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"line", மதிப்பு.வரி_2},
+      {"character", மதிப்பு.character},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Position &Value) {
-  return Os << Value.line << ':' << Value.character;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, மாறிலி Position &மதிப்பு) {
+  திரும்பு Os << மதிப்பு.வரி_2 << ':' << மதிப்பு.character;
 }
 
 //===----------------------------------------------------------------------===//
 // Range
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Range &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, Range &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("start", Result.start) && O.map("end", Result.end);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("start", Result.start) && O.map("end", Result.end);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Range &Value) {
-  return llvm::json::Object{
-      {"start", Value.start},
-      {"end", Value.end},
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி Range &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"start", மதிப்பு.start},
+      {"end", மதிப்பு.end},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Range &Value) {
-  return Os << Value.start << '-' << Value.end;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, மாறிலி Range &மதிப்பு) {
+  திரும்பு Os << மதிப்பு.start << '-' << மதிப்பு.end;
 }
 
 //===----------------------------------------------------------------------===//
 // Location
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Location &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, Location &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("uri", Result.uri) && O.map("range", Result.range);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("uri", Result.uri) && O.map("range", Result.range);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Location &Value) {
-  return llvm::json::Object{
-      {"uri", Value.uri},
-      {"range", Value.range},
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி Location &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"uri", மதிப்பு.uri},
+      {"range", மதிப்பு.range},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Location &Value) {
-  return Os << Value.range << '@' << Value.uri;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, மாறிலி Location &மதிப்பு) {
+  திரும்பு Os << மதிப்பு.range << '@' << மதிப்பு.uri;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentPositionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          TextDocumentPositionParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument) &&
          O.map("position", Result.position);
 }
 
@@ -468,17 +468,17 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // ReferenceParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          ReferenceContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          ReferenceParams &Result, llvm::json::Path Path) {
   TextDocumentPositionParams &Base = Result;
-  llvm::json::ObjectMapper O(Value, Path);
-  return fromJSON(Value, Base, Path) && O &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு fromJSON(மதிப்பு, Base, Path) && O &&
          O.mapOptional("context", Result.context);
 }
 
@@ -486,32 +486,32 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DidOpenTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          DidOpenTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DidCloseTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          DidCloseTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DidSaveTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &Params,
                          DidSaveTextDocumentParams &R, llvm::json::Path P) {
   llvm::json::ObjectMapper O(Params, P);
-  return O && O.map("textDocument", R.textDocument);
+  திரும்பு O && O.map("textDocument", R.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
@@ -519,11 +519,11 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
 //===----------------------------------------------------------------------===//
 
 LogicalResult
-TextDocumentContentChangeEvent::applyTo(std::string &Contents) const {
+TextDocumentContentChangeEvent::applyTo(std::string &Contents) மாறிலி {
   // If there is no range, the full document changed.
-  if (!range) {
+  எனில் (!range) {
     Contents = text;
-    return success();
+    திரும்பு success();
   }
 
   // Try to map the replacement range to the content.
@@ -531,36 +531,36 @@ TextDocumentContentChangeEvent::applyTo(std::string &Contents) const {
   TmpScrMgr.AddNewSourceBuffer(llvm::MemoryBuffer::getMemBuffer(Contents),
                                SMLoc());
   SMRange RangeLoc = range->getAsSMRange(TmpScrMgr);
-  if (!RangeLoc.isValid())
-    return failure();
+  எனில் (!RangeLoc.isValid())
+    திரும்பு failure();
 
   Contents.replace(RangeLoc.Start.getPointer() - Contents.data(),
                    RangeLoc.End.getPointer() - RangeLoc.Start.getPointer(),
                    text);
-  return success();
+  திரும்பு success();
 }
 
 LogicalResult TextDocumentContentChangeEvent::applyTo(
     ArrayRef<TextDocumentContentChangeEvent> Changes, std::string &Contents) {
-  for (const auto &Change : Changes)
-    if (failed(Change.applyTo(Contents)))
-      return failure();
-  return success();
+  க்கு (மாறிலி auto &Change : Changes)
+    எனில் (failed(Change.applyTo(Contents)))
+      திரும்பு failure();
+  திரும்பு success();
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          TextDocumentContentChangeEvent &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("range", Result.range) &&
          O.map("rangeLength", Result.rangeLength) && O.map("text", Result.text);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          DidChangeTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument) &&
          O.map("contentChanges", Result.contentChanges);
 }
 
@@ -568,27 +568,27 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // MarkupContent
 //===----------------------------------------------------------------------===//
 
-static llvm::StringRef toTextKind(MarkupKind Kind) {
-  switch (Kind) {
-  case MarkupKind::PlainText:
-    return "plaintext";
-  case MarkupKind::Markdown:
-    return "markdown";
+நிலையான llvm::StringRef toTextKind(MarkupKind Kind) {
+  தேர்வு (Kind) {
+  நிலை MarkupKind::PlainText:
+    திரும்பு "plaintext";
+  நிலை MarkupKind::Markdown:
+    திரும்பு "markdown";
   }
   llvm_unreachable("Invalid MarkupKind");
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, MarkupKind Kind) {
-  return Os << toTextKind(Kind);
+  திரும்பு Os << toTextKind(Kind);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
-  if (Mc.value.empty())
-    return nullptr;
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி MarkupContent &Mc) {
+  எனில் (Mc.மதிப்பு_2.empty())
+    திரும்பு nullptr;
 
-  return llvm::json::Object{
+  திரும்பு llvm::json::Object{
       {"kind", toTextKind(Mc.kind)},
-      {"value", Mc.value},
+      {"value", Mc.மதிப்பு_2},
   };
 }
 
@@ -596,54 +596,54 @@ llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
 // Hover
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const Hover &Hover) {
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி Hover &Hover) {
   llvm::json::Object Result{{"contents", toJSON(Hover.contents)}};
-  if (Hover.range)
+  எனில் (Hover.range)
     Result["range"] = toJSON(*Hover.range);
-  return std::move(Result);
+  திரும்பு std::move(Result);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbol
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentSymbol &Symbol) {
-  llvm::json::Object Result{{"name", Symbol.name},
-                            {"kind", static_cast<int>(Symbol.kind)},
-                            {"range", Symbol.range},
-                            {"selectionRange", Symbol.selectionRange}};
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி Document_குறியீடு &குறியீடு) {
+  llvm::json::Object Result{{"name", குறியீடு.name},
+                            {"kind", static_cast<முழு>(குறியீடு.kind)},
+                            {"range", குறியீடு.range},
+                            {"selectionRange", குறியீடு.selectionRange}};
 
-  if (!Symbol.detail.empty())
-    Result["detail"] = Symbol.detail;
-  if (!Symbol.children.empty())
-    Result["children"] = Symbol.children;
-  return std::move(Result);
+  எனில் (!குறியீடு.detail.empty())
+    Result["detail"] = குறியீடு.detail;
+  எனில் (!குறியீடு.children.empty())
+    Result["children"] = குறியீடு.children;
+  திரும்பு std::move(Result);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentSymbolParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentSymbolParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
+                         Document_குறியீடு_Params &Result, llvm::json::Path Path) {
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DiagnosticRelatedInformation
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          DiagnosticRelatedInformation &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("location", Result.location) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("location", Result.location) &&
          O.map("message", Result.message);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
-  return llvm::json::Object{
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி DiagnosticRelatedInformation &Info) {
+  திரும்பு llvm::json::Object{
       {"location", Info.location},
       {"message", Info.message},
   };
@@ -653,61 +653,61 @@ llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
 // Diagnostic
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(DiagnosticTag Tag) {
-  return static_cast<int>(Tag);
+llvm::json::மதிப்பு llvm::lsp::toJSON(DiagnosticTag Tag) {
+  திரும்பு static_cast<முழு>(Tag);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, DiagnosticTag &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, DiagnosticTag &Result,
                          llvm::json::Path Path) {
-  if (std::optional<int64_t> I = Value.getAsInteger()) {
+  எனில் (std::optional<int64_t> I = மதிப்பு.getAsInteger()) {
     Result = (DiagnosticTag)*I;
-    return true;
+    திரும்பு உண்மை;
   }
 
-  return false;
+  திரும்பு பொய்;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Diagnostic &Diag) {
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி Diagnostic &Diag) {
   llvm::json::Object Result{
       {"range", Diag.range},
-      {"severity", (int)Diag.severity},
+      {"severity", (முழு)Diag.severity},
       {"message", Diag.message},
   };
-  if (Diag.category)
+  எனில் (Diag.category)
     Result["category"] = *Diag.category;
-  if (!Diag.source.empty())
+  எனில் (!Diag.source.empty())
     Result["source"] = Diag.source;
-  if (Diag.relatedInformation)
+  எனில் (Diag.relatedInformation)
     Result["relatedInformation"] = *Diag.relatedInformation;
-  if (!Diag.tags.empty())
+  எனில் (!Diag.tags.empty())
     Result["tags"] = Diag.tags;
-  return std::move(Result);
+  திரும்பு std::move(Result);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Diagnostic &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, Diagnostic &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O)
-    return false;
-  int Severity = 0;
-  if (!mapOptOrNull(Value, "severity", Severity, Path))
-    return false;
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  எனில் (!O)
+    திரும்பு பொய்;
+  முழு Severity = 0;
+  எனில் (!mapOptOrNull(மதிப்பு, "severity", Severity, Path))
+    திரும்பு பொய்;
   Result.severity = (DiagnosticSeverity)Severity;
 
-  return O.map("range", Result.range) && O.map("message", Result.message) &&
-         mapOptOrNull(Value, "category", Result.category, Path) &&
-         mapOptOrNull(Value, "source", Result.source, Path) &&
-         mapOptOrNull(Value, "relatedInformation", Result.relatedInformation,
+  திரும்பு O.map("range", Result.range) && O.map("message", Result.message) &&
+         mapOptOrNull(மதிப்பு, "category", Result.category, Path) &&
+         mapOptOrNull(மதிப்பு, "source", Result.source, Path) &&
+         mapOptOrNull(மதிப்பு, "relatedInformation", Result.relatedInformation,
                       Path) &&
-         mapOptOrNull(Value, "tags", Result.tags, Path);
+         mapOptOrNull(மதிப்பு, "tags", Result.tags, Path);
 }
 
 //===----------------------------------------------------------------------===//
 // PublishDiagnosticsParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
-  return llvm::json::Object{
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி PublishDiagnosticsParams &Params) {
+  திரும்பு llvm::json::Object{
       {"uri", Params.uri},
       {"diagnostics", Params.diagnostics},
       {"version", Params.version},
@@ -718,117 +718,117 @@ llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
 // TextEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TextEdit &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, TextEdit &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("range", Result.range) && O.map("newText", Result.newText);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("range", Result.range) && O.map("newText", Result.newText);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const TextEdit &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"newText", Value.newText},
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி TextEdit &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"range", மதிப்பு.range},
+      {"newText", மதிப்பு.newText},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &Value) {
-  Os << Value.range << " => \"";
-  llvm::printEscapedString(Value.newText, Os);
-  return Os << '"';
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, மாறிலி TextEdit &மதிப்பு) {
+  Os << மதிப்பு.range << " => \"";
+  llvm::printEscapedString(மதிப்பு.newText, Os);
+  திரும்பு Os << '"';
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItemKind
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          CompletionItemKind &Result, llvm::json::Path Path) {
-  if (std::optional<int64_t> IntValue = Value.getAsInteger()) {
-    if (*IntValue < static_cast<int>(CompletionItemKind::Text) ||
-        *IntValue > static_cast<int>(CompletionItemKind::TypeParameter))
-      return false;
-    Result = static_cast<CompletionItemKind>(*IntValue);
-    return true;
+  எனில் (std::optional<int64_t> Int_மதிப்பு = மதிப்பு.getAsInteger()) {
+    எனில் (*Int_மதிப்பு < static_cast<முழு>(CompletionItemKind::Text) ||
+        *Int_மதிப்பு > static_cast<முழு>(CompletionItemKind::TypeParameter))
+      திரும்பு பொய்;
+    Result = static_cast<CompletionItemKind>(*Int_மதிப்பு);
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
 CompletionItemKind llvm::lsp::adjustKindToCapability(
     CompletionItemKind Kind,
     CompletionItemKindBitset &SupportedCompletionItemKinds) {
   size_t KindVal = static_cast<size_t>(Kind);
-  if (KindVal >= kCompletionItemKindMin &&
+  எனில் (KindVal >= kCompletionItemKindMin &&
       KindVal <= SupportedCompletionItemKinds.size() &&
       SupportedCompletionItemKinds[KindVal])
-    return Kind;
+    திரும்பு Kind;
 
   // Provide some fall backs for common kinds that are close enough.
-  switch (Kind) {
-  case CompletionItemKind::Folder:
-    return CompletionItemKind::File;
-  case CompletionItemKind::EnumMember:
-    return CompletionItemKind::Enum;
-  case CompletionItemKind::Struct:
-    return CompletionItemKind::Class;
-  default:
-    return CompletionItemKind::Text;
+  தேர்வு (Kind) {
+  நிலை CompletionItemKind::Folder:
+    திரும்பு CompletionItemKind::File;
+  நிலை CompletionItemKind::EnumMember:
+    திரும்பு CompletionItemKind::Enum;
+  நிலை CompletionItemKind::Struct:
+    திரும்பு CompletionItemKind::Class;
+  இயல்பு:
+    திரும்பு CompletionItemKind::Text;
   }
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          CompletionItemKindBitset &Result,
                          llvm::json::Path Path) {
-  if (const llvm::json::Array *ArrayValue = Value.getAsArray()) {
-    for (size_t I = 0, E = ArrayValue->size(); I < E; ++I) {
+  எனில் (மாறிலி llvm::json::Array *Array_மதிப்பு = மதிப்பு.getAsArray()) {
+    க்கு (size_t I = 0, E = Array_மதிப்பு->size(); I < E; ++I) {
       CompletionItemKind KindOut;
-      if (fromJSON((*ArrayValue)[I], KindOut, Path.index(I)))
+      எனில் (fromJSON((*Array_மதிப்பு)[I], KindOut, Path.index(I)))
         Result.set(size_t(KindOut));
     }
-    return true;
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionItem
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionItem &Value) {
-  assert(!Value.label.empty() && "completion item label is required");
-  llvm::json::Object Result{{"label", Value.label}};
-  if (Value.kind != CompletionItemKind::Missing)
-    Result["kind"] = static_cast<int>(Value.kind);
-  if (!Value.detail.empty())
-    Result["detail"] = Value.detail;
-  if (Value.documentation)
-    Result["documentation"] = Value.documentation;
-  if (!Value.sortText.empty())
-    Result["sortText"] = Value.sortText;
-  if (!Value.filterText.empty())
-    Result["filterText"] = Value.filterText;
-  if (!Value.insertText.empty())
-    Result["insertText"] = Value.insertText;
-  if (Value.insertTextFormat != InsertTextFormat::Missing)
-    Result["insertTextFormat"] = static_cast<int>(Value.insertTextFormat);
-  if (Value.textEdit)
-    Result["textEdit"] = *Value.textEdit;
-  if (!Value.additionalTextEdits.empty()) {
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி CompletionItem &மதிப்பு) {
+  ப்ரதிஜ்ஞா(!மதிப்பு.label.empty() && "completion item label is required");
+  llvm::json::Object Result{{"label", மதிப்பு.label}};
+  எனில் (மதிப்பு.kind != CompletionItemKind::Missing)
+    Result["kind"] = static_cast<முழு>(மதிப்பு.kind);
+  எனில் (!மதிப்பு.detail.empty())
+    Result["detail"] = மதிப்பு.detail;
+  எனில் (மதிப்பு.documentation)
+    Result["documentation"] = மதிப்பு.documentation;
+  எனில் (!மதிப்பு.sortText.empty())
+    Result["sortText"] = மதிப்பு.sortText;
+  எனில் (!மதிப்பு.filterText.empty())
+    Result["filterText"] = மதிப்பு.filterText;
+  எனில் (!மதிப்பு.செருகு_Text.empty())
+    Result["insertText"] = மதிப்பு.செருகு_Text;
+  எனில் (மதிப்பு.செருகு_Text_Format != செருகு_Text_Format_2::Missing)
+    Result["insertTextFormat"] = static_cast<முழு>(மதிப்பு.செருகு_Text_Format);
+  எனில் (மதிப்பு.textEdit)
+    Result["textEdit"] = *மதிப்பு.textEdit;
+  எனில் (!மதிப்பு.additionalTextEdits.empty()) {
     Result["additionalTextEdits"] =
-        llvm::json::Array(Value.additionalTextEdits);
+        llvm::json::Array(மதிப்பு.additionalTextEdits);
   }
-  if (Value.deprecated)
-    Result["deprecated"] = Value.deprecated;
-  return std::move(Result);
+  எனில் (மதிப்பு.deprecated)
+    Result["deprecated"] = மதிப்பு.deprecated;
+  திரும்பு std::move(Result);
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const CompletionItem &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+                                   மாறிலி CompletionItem &மதிப்பு) {
+  திரும்பு Os << மதிப்பு.label << " - " << toJSON(மதிப்பு);
 }
 
-bool llvm::lsp::operator<(const CompletionItem &Lhs,
-                          const CompletionItem &Rhs) {
-  return (Lhs.sortText.empty() ? Lhs.label : Lhs.sortText) <
+தருக்க llvm::lsp::operator<(மாறிலி CompletionItem &Lhs,
+                          மாறிலி CompletionItem &Rhs) {
+  திரும்பு (Lhs.sortText.empty() ? Lhs.label : Lhs.sortText) <
          (Rhs.sortText.empty() ? Rhs.label : Rhs.sortText);
 }
 
@@ -836,10 +836,10 @@ bool llvm::lsp::operator<(const CompletionItem &Lhs,
 // CompletionList
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
-  return llvm::json::Object{
-      {"isIncomplete", Value.isIncomplete},
-      {"items", llvm::json::Array(Value.items)},
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி CompletionList &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"isIncomplete", மதிப்பு.isIncomplete},
+      {"items", llvm::json::Array(மதிப்பு.பொருட்கள்)},
   };
 }
 
@@ -847,81 +847,81 @@ llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
 // CompletionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          CompletionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  int TriggerKind;
-  if (!O || !O.map("triggerKind", TriggerKind) ||
-      !mapOptOrNull(Value, "triggerCharacter", Result.triggerCharacter, Path))
-    return false;
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  முழு TriggerKind;
+  எனில் (!O || !O.map("triggerKind", TriggerKind) ||
+      !mapOptOrNull(மதிப்பு, "triggerCharacter", Result.triggerCharacter, Path))
+    திரும்பு பொய்;
   Result.triggerKind = static_cast<CompletionTriggerKind>(TriggerKind);
-  return true;
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
 // CompletionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          CompletionParams &Result, llvm::json::Path Path) {
-  if (!fromJSON(Value, static_cast<TextDocumentPositionParams &>(Result), Path))
-    return false;
-  if (const llvm::json::Value *Context = Value.getAsObject()->get("context"))
-    return fromJSON(*Context, Result.context, Path.field("context"));
-  return true;
+  எனில் (!fromJSON(மதிப்பு, static_cast<TextDocumentPositionParams &>(Result), Path))
+    திரும்பு பொய்;
+  எனில் (மாறிலி llvm::json::மதிப்பு *Context = மதிப்பு.getAsObject()->get("context"))
+    திரும்பு fromJSON(*Context, Result.context, Path.field("context"));
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
 // ParameterInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ParameterInformation &Value) {
-  assert((Value.labelOffsets || !Value.labelString.empty()) &&
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி ParameterInformation &மதிப்பு) {
+  ப்ரதிஜ்ஞா((மதிப்பு.labelOffsets || !மதிப்பு.labelString.empty()) &&
          "parameter information label is required");
   llvm::json::Object Result;
-  if (Value.labelOffsets)
+  எனில் (மதிப்பு.labelOffsets)
     Result["label"] = llvm::json::Array(
-        {Value.labelOffsets->first, Value.labelOffsets->second});
-  else
-    Result["label"] = Value.labelString;
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+        {மதிப்பு.labelOffsets->first, மதிப்பு.labelOffsets->second});
+  இல்லையெனில்
+    Result["label"] = மதிப்பு.labelString;
+  எனில் (!மதிப்பு.documentation.empty())
+    Result["documentation"] = மதிப்பு.documentation;
+  திரும்பு std::move(Result);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureInformation &Value) {
-  assert(!Value.label.empty() && "signature information label is required");
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி SignatureInformation &மதிப்பு) {
+  ப்ரதிஜ்ஞா(!மதிப்பு.label.empty() && "signature information label is required");
   llvm::json::Object Result{
-      {"label", Value.label},
-      {"parameters", llvm::json::Array(Value.parameters)},
+      {"label", மதிப்பு.label},
+      {"parameters", llvm::json::Array(மதிப்பு.parameters)},
   };
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
-  return std::move(Result);
+  எனில் (!மதிப்பு.documentation.empty())
+    Result["documentation"] = மதிப்பு.documentation;
+  திரும்பு std::move(Result);
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const SignatureInformation &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+                                   மாறிலி SignatureInformation &மதிப்பு) {
+  திரும்பு Os << மதிப்பு.label << " - " << toJSON(மதிப்பு);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureHelp
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
-  assert(Value.activeSignature >= 0 &&
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி SignatureHelp &மதிப்பு) {
+  ப்ரதிஜ்ஞா(மதிப்பு.activeSignature >= 0 &&
          "Unexpected negative value for number of active signatures.");
-  assert(Value.activeParameter >= 0 &&
+  ப்ரதிஜ்ஞா(மதிப்பு.activeParameter >= 0 &&
          "Unexpected negative value for active parameter index");
-  return llvm::json::Object{
-      {"activeSignature", Value.activeSignature},
-      {"activeParameter", Value.activeParameter},
-      {"signatures", llvm::json::Array(Value.signatures)},
+  திரும்பு llvm::json::Object{
+      {"activeSignature", மதிப்பு.activeSignature},
+      {"activeParameter", மதிப்பு.activeParameter},
+      {"signatures", llvm::json::Array(மதிப்பு.signatures)},
   };
 }
 
@@ -929,20 +929,20 @@ llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
 // DocumentLinkParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          DocumentLinkParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument);
 }
 
 //===----------------------------------------------------------------------===//
 // DocumentLink
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
-  return llvm::json::Object{
-      {"range", Value.range},
-      {"target", Value.target},
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி DocumentLink &மதிப்பு) {
+  திரும்பு llvm::json::Object{
+      {"range", மதிப்பு.range},
+      {"target", மதிப்பு.target},
   };
 }
 
@@ -950,10 +950,10 @@ llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
 // InlayHintsParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          InlayHintsParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument) &&
          O.map("range", Result.range);
 }
 
@@ -961,29 +961,29 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // InlayHint
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const InlayHint &Value) {
-  return llvm::json::Object{{"position", Value.position},
-                            {"kind", (int)Value.kind},
-                            {"label", Value.label},
-                            {"paddingLeft", Value.paddingLeft},
-                            {"paddingRight", Value.paddingRight}};
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி InlayHint &மதிப்பு) {
+  திரும்பு llvm::json::Object{{"position", மதிப்பு.position},
+                            {"kind", (முழு)மதிப்பு.kind},
+                            {"label", மதிப்பு.label},
+                            {"paddingLeft", மதிப்பு.padding_இடது},
+                            {"paddingRight", மதிப்பு.padding_வலது}};
 }
-bool llvm::lsp::operator==(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
+தருக்க llvm::lsp::operator==(மாறிலி InlayHint &Lhs, மாறிலி InlayHint &Rhs) {
+  திரும்பு std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
          std::tie(Rhs.position, Rhs.kind, Rhs.label);
 }
-bool llvm::lsp::operator<(const InlayHint &Lhs, const InlayHint &Rhs) {
-  return std::tie(Lhs.position, Lhs.kind, Lhs.label) <
+தருக்க llvm::lsp::operator<(மாறிலி InlayHint &Lhs, மாறிலி InlayHint &Rhs) {
+  திரும்பு std::tie(Lhs.position, Lhs.kind, Lhs.label) <
          std::tie(Rhs.position, Rhs.kind, Rhs.label);
 }
 
 llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
-                                         InlayHintKind Value) {
-  switch (Value) {
-  case InlayHintKind::Parameter:
-    return Os << "parameter";
-  case InlayHintKind::Type:
-    return Os << "type";
+                                         InlayHintKind மதிப்பு) {
+  தேர்வு (மதிப்பு) {
+  நிலை InlayHintKind::Parameter:
+    திரும்பு Os << "parameter";
+  நிலை InlayHintKind::Type:
+    திரும்பு Os << "type";
   }
   llvm_unreachable("Unknown InlayHintKind");
 }
@@ -992,23 +992,23 @@ llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
 // CodeActionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          CodeActionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  if (!O || !O.map("diagnostics", Result.diagnostics))
-    return false;
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  எனில் (!O || !O.map("diagnostics", Result.diagnostics))
+    திரும்பு பொய்;
   O.map("only", Result.only);
-  return true;
+  திரும்பு உண்மை;
 }
 
 //===----------------------------------------------------------------------===//
 // CodeActionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு,
                          CodeActionParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("textDocument", Result.textDocument) &&
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("textDocument", Result.textDocument) &&
          O.map("range", Result.range) && O.map("context", Result.context);
 }
 
@@ -1016,54 +1016,54 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // WorkspaceEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, WorkspaceEdit &Result,
+தருக்க llvm::lsp::fromJSON(மாறிலி llvm::json::மதிப்பு &மதிப்பு, WorkspaceEdit &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("changes", Result.changes);
+  llvm::json::ObjectMapper O(மதிப்பு, Path);
+  திரும்பு O && O.map("changes", Result.changes);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const WorkspaceEdit &Value) {
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி WorkspaceEdit &மதிப்பு) {
   llvm::json::Object FileChanges;
-  for (auto &Change : Value.changes)
+  க்கு (auto &Change : மதிப்பு.changes)
     FileChanges[Change.first] = llvm::json::Array(Change.second);
-  return llvm::json::Object{{"changes", std::move(FileChanges)}};
+  திரும்பு llvm::json::Object{{"changes", std::move(FileChanges)}};
 }
 
 //===----------------------------------------------------------------------===//
 // CodeAction
 //===----------------------------------------------------------------------===//
 
-const llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
-const llvm::StringLiteral CodeAction::kRefactor = "refactor";
-const llvm::StringLiteral CodeAction::kInfo = "info";
+மாறிலி llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
+மாறிலி llvm::StringLiteral CodeAction::kRefactor = "refactor";
+மாறிலி llvm::StringLiteral CodeAction::kInfo = "info";
 
-llvm::json::Value llvm::lsp::toJSON(const CodeAction &Value) {
-  llvm::json::Object CodeAction{{"title", Value.title}};
-  if (Value.kind)
-    CodeAction["kind"] = *Value.kind;
-  if (Value.diagnostics)
-    CodeAction["diagnostics"] = llvm::json::Array(*Value.diagnostics);
-  if (Value.isPreferred)
-    CodeAction["isPreferred"] = true;
-  if (Value.edit)
-    CodeAction["edit"] = *Value.edit;
-  return std::move(CodeAction);
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி CodeAction &மதிப்பு) {
+  llvm::json::Object CodeAction{{"title", மதிப்பு.title}};
+  எனில் (மதிப்பு.kind)
+    CodeAction["kind"] = *மதிப்பு.kind;
+  எனில் (மதிப்பு.diagnostics)
+    CodeAction["diagnostics"] = llvm::json::Array(*மதிப்பு.diagnostics);
+  எனில் (மதிப்பு.isPreferred)
+    CodeAction["isPreferred"] = உண்மை;
+  எனில் (மதிப்பு.edit)
+    CodeAction["edit"] = *மதிப்பு.edit;
+  திரும்பு std::move(CodeAction);
 }
 
 //===----------------------------------------------------------------------===//
 // ShowMessageParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ShowMessageParams &Params) {
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி ShowMessageParams &Params) {
   auto Out = llvm::json::Object{
-      {"type", static_cast<int>(Params.type)},
+      {"type", static_cast<முழு>(Params.type)},
       {"message", Params.message},
   };
-  if (Params.actions)
+  எனில் (Params.actions)
     Out["actions"] = *Params.actions;
-  return Out;
+  திரும்பு Out;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MessageActionItem &Params) {
-  return llvm::json::Object{{"title", Params.title}};
+llvm::json::மதிப்பு llvm::lsp::toJSON(மாறிலி MessageActionItem &Params) {
+  திரும்பு llvm::json::Object{{"title", Params.title}};
 }

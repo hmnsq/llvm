@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributes.h"
+#அந்தர்பாவ "llvm/Support/HexagonAttributes.h"
 
-using namespace llvm;
-using namespace llvm::HexagonAttrs;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::HexagonAttrs;
 
-static constexpr TagNameItem TagData[] = {
+நிலையான constexpr TagNameItem TagData[] = {
     {ARCH, "Tag_arch"},
     {HVXARCH, "Tag_hvx_arch"},
     {HVXIEEEFP, "Tag_hvx_ieeefp"},
@@ -22,6 +22,6 @@ static constexpr TagNameItem TagData[] = {
 };
 
 constexpr TagNameMap HexagonAttributeTags{TagData};
-const TagNameMap &llvm::HexagonAttrs::getHexagonAttributeTags() {
-  return HexagonAttributeTags;
+மாறிலி TagNameMap &llvm::HexagonAttrs::getHexagonAttributeTags() {
+  திரும்பு HexagonAttributeTags;
 }

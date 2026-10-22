@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cctype>
+#அந்தர்பாவ "llvm/ADT/StringExtras.h"
+#அந்தர்பாவ "llvm/ADT/SmallVector.h"
+#அந்தர்பாவ "llvm/Support/raw_ostream.h"
+#அந்தர்பாவ <cctype>
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
 /// getToken - This function extracts one token from source, ignoring any
 /// leading characters that appear in the Delimiters string, and ending the
@@ -31,103 +31,103 @@ std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
   // Find the next occurrence of the delimiter.
   StringRef::size_type End = Source.find_first_of(Delimiters, Start);
 
-  return {Source.slice(Start, End), Source.substr(End)};
+  திரும்பு {Source.slice(Start, End), Source.substr(End)};
 }
 
 /// SplitString - Split up the specified string according to the specified
 /// delimiters, appending the result fragments to the output list.
-void llvm::SplitString(StringRef Source,
+வெறுமை llvm::SplitString(StringRef Source,
                        SmallVectorImpl<StringRef> &OutFragments,
                        StringRef Delimiters) {
   std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
-    OutFragments.push_back(S.first);
+  போது (!S.first.empty()) {
+    OutFragments.தள்ளு_back(S.first);
     S = getToken(S.second, Delimiters);
   }
 }
 
-void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned char C : Name) {
-    if (C == '\\')
+வெறுமை llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
+  க்கு (unsigned எழுத்து C : Name) {
+    எனில் (C == '\\')
       Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
+    இல்லையெனில் எனில் (isPrint(C) && C != '"')
       Out << C;
-    else
+    இல்லையெனில்
       Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
+வெறுமை llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
+  க்கு (எழுத்து C : String) {
+    எனில் (C == '&')
       Out << "&amp;";
-    else if (C == '<')
+    இல்லையெனில் எனில் (C == '<')
       Out << "&lt;";
-    else if (C == '>')
+    இல்லையெனில் எனில் (C == '>')
       Out << "&gt;";
-    else if (C == '\"')
+    இல்லையெனில் எனில் (C == '\"')
       Out << "&quot;";
-    else if (C == '\'')
+    இல்லையெனில் எனில் (C == '\'')
       Out << "&apos;";
-    else
+    இல்லையெனில்
       Out << C;
   }
 }
 
-void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
+வெறுமை llvm::printLowerCase(StringRef String, raw_ostream &Out) {
+  க்கு (மாறிலி எழுத்து C : String)
     Out << toLower(C);
 }
 
-void llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
-  for (unsigned char C : String) {
-    if (isAlnum(C) || StringRef("-_.~").contains(C))
+வெறுமை llvm::printPercentEncoded(StringRef String, raw_ostream &Out) {
+  க்கு (unsigned எழுத்து C : String) {
+    எனில் (isAlnum(C) || StringRef("-_.~").contains(C))
       Out << C;
-    else
+    இல்லையெனில்
       Out << '%' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
   }
 }
 
-std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+std::string llvm::convertToSnakeFromCamelCase(StringRef உள்ளீடு_2) {
+  எனில் (உள்ளீடு_2.empty())
+    திரும்பு "";
 
   std::string snakeCase;
-  snakeCase.reserve(input.size());
-  auto check = [&input](size_t j, function_ref<bool(int)> predicate) {
-    return j < input.size() && predicate(input[j]);
+  snakeCase.reserve(உள்ளீடு_2.size());
+  auto check = [&உள்ளீடு_2](size_t j, function_ref<தருக்க(முழு)> predicate) {
+    திரும்பு j < உள்ளீடு_2.size() && predicate(உள்ளீடு_2[j]);
   };
-  for (size_t i = 0; i < input.size(); ++i) {
-    snakeCase.push_back(tolower(input[i]));
+  க்கு (size_t i = 0; i < உள்ளீடு_2.size(); ++i) {
+    snakeCase.தள்ளு_back(tolower(உள்ளீடு_2[i]));
     // Handles "runs" of capitals, such as in OPName -> op_name.
-    if (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
-      snakeCase.push_back('_');
-    if ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
-      snakeCase.push_back('_');
+    எனில் (check(i, isupper) && check(i + 1, isupper) && check(i + 2, islower))
+      snakeCase.தள்ளு_back('_');
+    எனில் ((check(i, islower) || check(i, isdigit)) && check(i + 1, isupper))
+      snakeCase.தள்ளு_back('_');
   }
-  return snakeCase;
+  திரும்பு snakeCase;
 }
 
-std::string llvm::convertToCamelFromSnakeCase(StringRef input,
-                                              bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+std::string llvm::convertToCamelFromSnakeCase(StringRef உள்ளீடு_2,
+                                              தருக்க capitalizeFirst) {
+  எனில் (உள்ளீடு_2.empty())
+    திரும்பு "";
 
   std::string output;
-  output.reserve(input.size());
+  output.reserve(உள்ளீடு_2.size());
 
   // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
-    output.push_back(llvm::toUpper(input.front()));
-  else
-    output.push_back(input.front());
+  எனில் (capitalizeFirst && std::islower(உள்ளீடு_2.front()))
+    output.தள்ளு_back(llvm::toUpper(உள்ளீடு_2.front()));
+  இல்லையெனில்
+    output.தள்ளு_back(உள்ளீடு_2.front());
 
   // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
-      output.push_back(llvm::toUpper(input[++pos]));
-    else
-      output.push_back(input[pos]);
+  க்கு (size_t pos = 1, e = உள்ளீடு_2.size(); pos < e; ++pos) {
+    எனில் (உள்ளீடு_2[pos] == '_' && pos != (e - 1) && std::islower(உள்ளீடு_2[pos + 1]))
+      output.தள்ளு_back(llvm::toUpper(உள்ளீடு_2[++pos]));
+    இல்லையெனில்
+      output.தள்ளு_back(உள்ளீடு_2[pos]);
   }
-  return output;
+  திரும்பு output;
 }

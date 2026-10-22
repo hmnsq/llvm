@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#அந்தர்பாவ "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned Suffix_மரம்_முனை::getStartIdx() மாறிலி { திரும்பு StartIdx; }
+வெறுமை Suffix_மரம்_முனை::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
+வெறுமை Suffix_மரம்_முனை::setConcatLen(unsigned Len) { ConcatLen = Len; }
+unsigned Suffix_மரம்_முனை::getConcatLen() மாறிலி { திரும்பு ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+தருக்க Suffix_மரம்_Internal_முனை::is_வேர்() மாறிலி {
+  திரும்பு getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+unsigned Suffix_மரம்_Internal_முனை::getEndIdx() மாறிலி { திரும்பு EndIdx; }
+வெறுமை Suffix_மரம்_Internal_முனை::setLink(Suffix_மரம்_Internal_முனை *L) {
+  ப்ரதிஜ்ஞா(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_மரம்_Internal_முனை *Suffix_மரம்_Internal_முனை::getLink() மாறிலி { திரும்பு Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+unsigned Suffix_மரம்_Leaf_முனை::getEndIdx() மாறிலி {
+  ப்ரதிஜ்ஞா(EndIdx && "EndIdx is empty?");
+  திரும்பு *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+unsigned Suffix_மரம்_Leaf_முனை::getSuffixIdx() மாறிலி { திரும்பு SuffixIdx; }
+வெறுமை Suffix_மரம்_Leaf_முனை::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+unsigned Suffix_மரம்_முனை::get_இடது_Leaf_Idx() மாறிலி { திரும்பு இடது_Leaf_Idx; }
+unsigned Suffix_மரம்_முனை::get_வலது_Leaf_Idx() மாறிலி { திரும்பு வலது_Leaf_Idx; }
+வெறுமை Suffix_மரம்_முனை::set_இடது_Leaf_Idx(unsigned Idx) { இடது_Leaf_Idx = Idx; }
+வெறுமை Suffix_மரம்_முனை::set_வலது_Leaf_Idx(unsigned Idx) { வலது_Leaf_Idx = Idx; }

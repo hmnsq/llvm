@@ -42,16 +42,16 @@
  * macros that code uses.  This lets the same code operate on two different
  * representations for state sets.
  */
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
-#include "regex_impl.h"
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#அந்தர்பாவ "regutils.h"
+#அந்தர்பாவ "regex2.h"
 
 /* macros for manipulating states, small version */
 /* FIXME: 'states' is assumed as 'long' on small version. */
@@ -79,7 +79,7 @@
 /* function names */
 #define SNAMES			/* engine.inc looks after details */
 
-#include "regengine.inc"
+#அந்தர்பாவ "regengine.inc"
 
 /* now undo things */
 #undef	states
@@ -103,18 +103,18 @@
 #undef	SNAMES
 
 /* macros for manipulating states, large version */
-#define	states	char *
+#define	states	எழுத்து *
 #define	CLEAR(v)	memset(v, 0, m->g->nstates)
 #define	SET0(v, n)	((v)[n] = 0)
 #define	SET1(v, n)	((v)[n] = 1)
 #define	ISSET(v, n)	((v)[n])
 #define	ASSIGN(d, s)	memmove(d, s, m->g->nstates)
 #define	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
-#define	STATEVARS	long vn; char *space
+#define	STATEVARS	long vn; எழுத்து *space
 #define	STATESETUP(m, nv)	{ (m)->space = malloc((nv)*(m)->g->nstates); \
-				if ((m)->space == NULL) return(REG_ESPACE); \
+				எனில் ((m)->space == வெற்று) திரும்பு(REG_ESPACE); \
 				(m)->vn = 0; }
-#define	STATETEARDOWN(m)	{ free((m)->space); }
+#define	STATETEARDOWN(m)	{ விடுவி((m)->space); }
 #define	SETUP(v)	((v) = &m->space[m->vn++ * m->g->nstates])
 #define	onestate	long
 #define	INIT(o, n)	((o) = (n))
@@ -128,7 +128,7 @@
 /* function names */
 #define	LNAMES			/* flag */
 
-#include "regengine.inc"
+#அந்தர்பாவ "regengine.inc"
 
 /*
  - llvm_regexec - interface for matching
@@ -137,26 +137,26 @@
  * when choosing which matcher to call.  Also, by this point the matchers
  * have been prototyped.
  */
-int				/* 0 success, REG_NOMATCH failure */
-llvm_regexec(const llvm_regex_t *preg, const char *string, size_t nmatch,
-             llvm_regmatch_t pmatch[], int eflags)
+முழு				/* 0 success, REG_NOMATCH failure */
+llvm_regexec(மாறிலி llvm_regex_t *preg, மாறிலி எழுத்து *string, size_t nmatch,
+             llvm_regmatch_t pmatch[], முழு eflags)
 {
-	struct re_guts *g = preg->re_g;
+	கட்டமைப்பு re_guts *g = preg->re_g;
 #ifdef REDEBUG
 #	define	GOODFLAGS(f)	(f)
-#else
+#இல்லையெனில்
 #	define	GOODFLAGS(f)	((f)&(REG_NOTBOL|REG_NOTEOL|REG_STARTEND))
 #endif
 
-	if (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
-		return(REG_BADPAT);
-	assert(!(g->iflags&REGEX_BAD));
-	if (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
-		return(REG_BADPAT);
+	எனில் (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
+		திரும்பு(REG_BADPAT);
+	ப்ரதிஜ்ஞா(!(g->iflags&REGEX_BAD));
+	எனில் (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
+		திரும்பு(REG_BADPAT);
 	eflags = GOODFLAGS(eflags);
 
-	if (g->nstates <= (long)(CHAR_BIT*sizeof(states1)) && !(eflags&REG_LARGE))
-		return(smatcher(g, string, nmatch, pmatch, eflags));
-	else
-		return(lmatcher(g, string, nmatch, pmatch, eflags));
+	எனில் (g->nstates <= (long)(CHAR_BIT*அளவு(states1)) && !(eflags&REG_LARGE))
+		திரும்பு(smatcher(g, string, nmatch, pmatch, eflags));
+	இல்லையெனில்
+		திரும்பு(lmatcher(g, string, nmatch, pmatch, eflags));
 }

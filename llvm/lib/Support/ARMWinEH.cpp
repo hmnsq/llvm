@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMWinEH.h"
+#அந்தர்பாவ "llvm/Support/ARMWinEH.h"
 
-namespace llvm {
-namespace ARM {
-namespace WinEH {
-std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
-                                                bool Prologue) {
-  uint8_t NumRegisters = RF.Reg();
+நாமாகாஶ llvm {
+நாமாகாஶ ARM {
+நாமாகாஶ WinEH {
+std::pair<uint16_t, uint32_t> SavedRegisterMask(மாறிலி RuntimeFunction &RF,
+                                                தருக்க Prologue) {
+  uint8_t இலக்கம்_Registers = RF.Reg();
   uint8_t RegistersVFP = RF.R();
   uint8_t LinkRegister = RF.L();
   uint8_t ChainedFrame = RF.C();
@@ -21,27 +21,27 @@ std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
   uint16_t GPRMask = (ChainedFrame << 11);
   uint32_t VFPMask = 0;
 
-  if (Prologue) {
+  எனில் (Prologue) {
     GPRMask |= (LinkRegister << 14);
-  } else {
+  } இல்லையெனில் {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
+    எனில் (RF.Ret() != ReturnType::RT_எடு)
       GPRMask |= (LinkRegister << 14);
-    else if (!RF.H()) // If H == 0, we pop directly into Pc
+    இல்லையெனில் எனில் (!RF.H()) // If H == 0, we pop directly into Pc
       GPRMask |= (LinkRegister << 15);
     // else, Ret == 0 && H == 1, we pop into Pc separately afterwards
   }
 
-  if (RegistersVFP)
-    VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
-  else
-    GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
+  எனில் (RegistersVFP)
+    VFPMask |= (((1 << ((இலக்கம்_Registers + 1) % 8)) - 1) << 8);
+  இல்லையெனில்
+    GPRMask |= (((1 << (இலக்கம்_Registers + 1)) - 1) << 4);
 
-  if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
-    GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
-                << (~RF.StackAdjust() & 0x3));
+  எனில் ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
+    GPRMask |= (((1 << ((RF.அடுக்கு_Adjust() & 0x3) + 1)) - 1)
+                << (~RF.அடுக்கு_Adjust() & 0x3));
 
-  return {GPRMask, VFPMask};
+  திரும்பு {GPRMask, VFPMask};
 }
 } // namespace WinEH
 } // namespace ARM

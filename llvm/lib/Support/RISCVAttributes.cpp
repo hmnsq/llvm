@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVAttributes.h"
+#அந்தர்பாவ "llvm/Support/RISCVAttributes.h"
 
-using namespace llvm;
-using namespace llvm::RISCVAttrs;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::RISCVAttrs;
 
-static constexpr TagNameItem tagData[] = {
-    {STACK_ALIGN, "Tag_stack_align"},
+நிலையான constexpr TagNameItem tagData[] = {
+    {அடுக்கு_ALIGN, "Tag_stack_align"},
     {ARCH, "Tag_arch"},
     {UNALIGNED_ACCESS, "Tag_unaligned_access"},
     {PRIV_SPEC, "Tag_priv_spec"},
@@ -22,6 +22,6 @@ static constexpr TagNameItem tagData[] = {
 };
 
 constexpr TagNameMap RISCVAttributeTags{tagData};
-const TagNameMap &llvm::RISCVAttrs::getRISCVAttributeTags() {
-  return RISCVAttributeTags;
+மாறிலி TagNameMap &llvm::RISCVAttrs::getRISCVAttributeTags() {
+  திரும்பு RISCVAttributeTags;
 }

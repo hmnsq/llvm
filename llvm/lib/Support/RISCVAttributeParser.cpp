@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RISCVAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
+#அந்தர்பாவ "llvm/Support/RISCVAttributeParser.h"
+#அந்தர்பாவ "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
-const RISCVAttributeParser::DisplayHandler
+மாறிலி RISCVAttributeParser::DisplayHandler
     RISCVAttributeParser::displayRoutines[] = {
         {
             RISCVAttrs::ARCH,
@@ -30,8 +30,8 @@ const RISCVAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         },
         {
-            RISCVAttrs::STACK_ALIGN,
-            &RISCVAttributeParser::stackAlign,
+            RISCVAttrs::அடுக்கு_ALIGN,
+            &RISCVAttributeParser::அடுக்கு_Align,
         },
         {
             RISCVAttrs::UNALIGNED_ACCESS,
@@ -44,35 +44,35 @@ const RISCVAttributeParser::DisplayHandler
 };
 
 Error RISCVAttributeParser::atomicAbi(unsigned Tag) {
-  uint64_t Value = de.getULEB128(cursor);
-  printAttribute(Tag, Value, "Atomic ABI is " + utostr(Value));
-  return Error::success();
+  uint64_t மதிப்பு = de.getULEB128(cursor);
+  printAttribute(Tag, மதிப்பு, "Atomic ABI is " + utostr(மதிப்பு));
+  திரும்பு Error::success();
 }
 
 Error RISCVAttributeParser::unalignedAccess(unsigned tag) {
-  static const char *const strings[] = {"No unaligned access",
+  நிலையான மாறிலி எழுத்து *மாறிலி strings[] = {"No unaligned access",
                                         "Unaligned access"};
-  return parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
+  திரும்பு parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
 }
 
-Error RISCVAttributeParser::stackAlign(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error RISCVAttributeParser::அடுக்கு_Align(unsigned tag) {
+  uint64_t மதிப்பு_2 = de.getULEB128(cursor);
   std::string description =
-      "Stack alignment is " + utostr(value) + std::string("-bytes");
-  printAttribute(tag, value, description);
-  return Error::success();
+      "Stack alignment is " + utostr(மதிப்பு_2) + std::string("-bytes");
+  printAttribute(tag, மதிப்பு_2, description);
+  திரும்பு Error::success();
 }
 
-Error RISCVAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(tag))
-        return e;
-      handled = true;
-      break;
+Error RISCVAttributeParser::handler(uint64_t tag, தருக்க &handled) {
+  handled = பொய்;
+  க்கு (மாறிலி auto &AH : displayRoutines) {
+    எனில் (uint64_t(AH.attribute) == tag) {
+      எனில் (Error e = (இது->*AH.routine)(tag))
+        திரும்பு e;
+      handled = உண்மை;
+      நிறுத்து;
     }
   }
 
-  return Error::success();
+  திரும்பு Error::success();
 }

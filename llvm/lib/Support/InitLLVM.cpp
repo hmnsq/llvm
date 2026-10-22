@@ -6,21 +6,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/AutoConvert.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Signals.h"
+#அந்தர்பாவ "llvm/Support/InitLLVM.h"
+#அந்தர்பாவ "llvm/ADT/StringRef.h"
+#அந்தர்பாவ "llvm/Support/AutoConvert.h"
+#அந்தர்பாவ "llvm/Support/Error.h"
+#அந்தர்பாவ "llvm/Support/ErrorHandling.h"
+#அந்தர்பாவ "llvm/Support/ManagedStatic.h"
+#அந்தர்பாவ "llvm/Support/Signals.h"
 
 #ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
+#அந்தர்பாவ "llvm/Support/Windows/WindowsSupport.h"
 #endif
 
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#else
+#எனில் defined(HAVE_UNISTD_H)
+#அந்தர்பாவ <unistd.h>
+#இல்லையெனில்
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
 #endif
@@ -32,16 +32,16 @@
 #endif
 #endif
 
-static void RaiseLimits() {
+நிலையான வெறுமை RaiseLimits() {
 #ifdef _AIX
   // AIX has restrictive memory soft-limits out-of-box, so raise them if needed.
-  auto RaiseLimit = [](int resource) {
-    struct rlimit r;
+  auto RaiseLimit = [](முழு resource) {
+    கட்டமைப்பு rlimit r;
     getrlimit(resource, &r);
 
     // Increase the soft limit to the hard limit, if necessary and
     // possible.
-    if (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
+    எனில் (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
       r.rlim_cur = r.rlim_max;
       setrlimit(resource, &r);
     }
@@ -60,7 +60,7 @@ static void RaiseLimits() {
 #endif
 }
 
-void CleanupStdHandles(void *Cookie) {
+வெறுமை CleanupStdHandles(வெறுமை *Cookie) {
   llvm::raw_ostream *Outs = &llvm::outs(), *Errs = &llvm::errs();
   Outs->flush();
   Errs->flush();
@@ -69,27 +69,27 @@ void CleanupStdHandles(void *Cookie) {
   llvm::restoreStdHandleAutoConversion(STDERR_FILENO);
 }
 
-using namespace llvm;
-using namespace llvm::sys;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::sys;
 
-InitLLVM::InitLLVM(int &Argc, const char **&Argv,
-                   bool InstallPipeSignalExitHandler,
-                   bool NeedsPOSIXUtilitySignalHandling) {
+InitLLVM::InitLLVM(முழு &Argc, மாறிலி எழுத்து **&Argv,
+                   தருக்க InstallPipeSignalExitHandler,
+                   தருக்க NeedsPOSIXUtilitySignalHandling) {
 #ifndef NDEBUG
-  static std::atomic<bool> Initialized{false};
-  assert(!Initialized && "InitLLVM was already initialized!");
-  Initialized = true;
+  நிலையான std::atomic<தருக்க> Initialized{பொய்};
+  ப்ரதிஜ்ஞா(!Initialized && "InitLLVM was already initialized!");
+  Initialized = உண்மை;
 #endif
 
   // Bring stdin/stdout/stderr into a known state.
 #ifdef _WIN32
   sys::AddSignalHandler(CleanupStdHandles, nullptr);
-#else
+#இல்லையெனில்
   sys::AddSignalHandler(CleanupStdHandles, nullptr,
                         NeedsPOSIXUtilitySignalHandling);
 #endif
 
-  if (InstallPipeSignalExitHandler)
+  எனில் (InstallPipeSignalExitHandler)
     // The pipe signal handler must be installed before any other handlers are
     // registered. This is because the Unix \ref RegisterHandlers function does
     // not perform a sigaction() for SIGPIPE unless a one-shot handler is
@@ -98,8 +98,8 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
     sys::SetOneShotPipeSignalFunction(sys::DefaultOneShotPipeSignalHandler);
   // Initialize the stack printer after installing the one-shot pipe signal
   // handler, so we can perform a sigaction() for SIGPIPE on Unix if requested.
-  StackPrinter.emplace(Argc, Argv);
-  sys::PrintStackTraceOnErrorSignal(Argv[0]);
+  அடுக்கு_Printer.emplace(Argc, Argv);
+  sys::Print_அடுக்கு_Trace_On_Error_Signal(Argv[0]);
   install_out_of_memory_new_handler();
   RaiseLimits();
 
@@ -130,11 +130,11 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
   std::string Banner = std::string(Argv[0]) + ": ";
   ExitOnError ExitOnErr(Banner);
 
-  ExitOnErr(errorCodeToError(windows::GetCommandLineArguments(Args, Alloc)));
+  ExitOnErr(errorCodeToError(windows::Get_Command_வரி_Arguments(Args, Alloc)));
 
   // GetCommandLineArguments doesn't terminate the vector with a
   // nullptr.  Do it to make it compatible with the real argv.
-  Args.push_back(nullptr);
+  Args.தள்ளு_back(nullptr);
 
   Argc = Args.size() - 1;
   Argv = Args.data();

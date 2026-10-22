@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/HexagonAttributeParser.h"
+#அந்தர்பாவ "llvm/Support/HexagonAttributeParser.h"
 
-using namespace llvm;
+using நாமாகாஶ llvm;
 
-const HexagonAttributeParser::DisplayHandler
+மாறிலி HexagonAttributeParser::DisplayHandler
     HexagonAttributeParser::DisplayRoutines[] = {
         {
             HexagonAttrs::ARCH,
@@ -41,15 +41,15 @@ const HexagonAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         }};
 
-Error HexagonAttributeParser::handler(uint64_t Tag, bool &Handled) {
-  Handled = false;
-  for (const auto &R : DisplayRoutines) {
-    if (uint64_t(R.Attribute) == Tag) {
-      if (Error E = (this->*R.Routine)(Tag))
-        return E;
-      Handled = true;
-      break;
+Error HexagonAttributeParser::handler(uint64_t Tag, தருக்க &Handled) {
+  Handled = பொய்;
+  க்கு (மாறிலி auto &R : DisplayRoutines) {
+    எனில் (uint64_t(R.Attribute) == Tag) {
+      எனில் (Error E = (இது->*R.Routine)(Tag))
+        திரும்பு E;
+      Handled = உண்மை;
+      நிறுத்து;
     }
   }
-  return Error::success();
+  திரும்பு Error::success();
 }

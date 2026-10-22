@@ -6,400 +6,400 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/VersionTuple.h"
-#include "llvm/Support/YAMLParser.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdint>
-#include <cstring>
-#include <string>
-#include <vector>
+#அந்தர்பாவ "llvm/Support/YAMLTraits.h"
+#அந்தர்பாவ "llvm/ADT/STLExtras.h"
+#அந்தர்பாவ "llvm/ADT/SmallString.h"
+#அந்தர்பாவ "llvm/ADT/StringExtras.h"
+#அந்தர்பாவ "llvm/ADT/StringRef.h"
+#அந்தர்பாவ "llvm/ADT/Twine.h"
+#அந்தர்பாவ "llvm/Support/Casting.h"
+#அந்தர்பாவ "llvm/Support/Errc.h"
+#அந்தர்பாவ "llvm/Support/ErrorHandling.h"
+#அந்தர்பாவ "llvm/Support/Format.h"
+#அந்தர்பாவ "llvm/Support/LineIterator.h"
+#அந்தர்பாவ "llvm/Support/MemoryBuffer.h"
+#அந்தர்பாவ "llvm/Support/VersionTuple.h"
+#அந்தர்பாவ "llvm/Support/YAMLParser.h"
+#அந்தர்பாவ "llvm/Support/raw_ostream.h"
+#அந்தர்பாவ <cassert>
+#அந்தர்பாவ <cstdint>
+#அந்தர்பாவ <cstring>
+#அந்தர்பாவ <string>
+#அந்தர்பாவ <vector>
 
-using namespace llvm;
-using namespace yaml;
+using நாமாகாஶ llvm;
+using நாமாகாஶ yaml;
 
 //===----------------------------------------------------------------------===//
 //  IO
 //===----------------------------------------------------------------------===//
 
-IO::IO(void *Context) : Ctxt(Context) {}
+IO::IO(வெறுமை *Context) : Ctxt(Context) {}
 
-IO::~IO() = default;
+IO::~IO() = இயல்பு;
 
-void *IO::getContext() const {
-  return Ctxt;
+வெறுமை *IO::getContext() மாறிலி {
+  திரும்பு Ctxt;
 }
 
-void IO::setContext(void *Context) {
+வெறுமை IO::setContext(வெறுமை *Context) {
   Ctxt = Context;
 }
 
-void IO::setAllowUnknownKeys(bool Allow) {
+வெறுமை IO::set_Allow_Unknown_சாவிகள்(தருக்க Allow) {
   llvm_unreachable("Only supported for Input");
 }
 
 //===----------------------------------------------------------------------===//
-//  Input
+//உள்ளீடு
 //===----------------------------------------------------------------------===//
 
-Input::Input(StringRef InputContent, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(InputContent, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+உள்ளீடு::உள்ளீடு(StringRef உள்ளீடு_Content, வெறுமை *Ctxt,
+             SourceMgr::DiagHandlerTy DiagHandler, வெறுமை *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(புதிய Stream(உள்ளீடு_Content, SrcMgr, பொய், &EC)) {
+  எனில் (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::Input(MemoryBufferRef Input, void *Ctxt,
-             SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
-    : IO(Ctxt), Strm(new Stream(Input, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+உள்ளீடு::உள்ளீடு(MemoryBufferRef உள்ளீடு, வெறுமை *Ctxt,
+             SourceMgr::DiagHandlerTy DiagHandler, வெறுமை *DiagHandlerCtxt)
+    : IO(Ctxt), Strm(புதிய Stream(உள்ளீடு, SrcMgr, பொய், &EC)) {
+  எனில் (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
-Input::~Input() = default;
+உள்ளீடு::~உள்ளீடு() = இயல்பு;
 
-std::error_code Input::error() { return EC; }
+std::error_code உள்ளீடு::error() { திரும்பு EC; }
 
-bool Input::outputting() const {
-  return false;
+தருக்க உள்ளீடு::outputting() மாறிலி {
+  திரும்பு பொய்;
 }
 
-bool Input::setCurrentDocument() {
-  if (DocIterator != Strm->end()) {
-    Node *N = DocIterator->getRoot();
-    if (!N) {
+தருக்க உள்ளீடு::setCurrentDocument() {
+  எனில் (DocIterator != Strm->end()) {
+    முனை *N = DocIterator->get_வேர்();
+    எனில் (!N) {
       EC = make_error_code(errc::invalid_argument);
-      return false;
+      திரும்பு பொய்;
     }
 
-    if (isa<NullNode>(N)) {
+    எனில் (isa<Null_முனை>(N)) {
       // Empty files are allowed and ignored
       ++DocIterator;
-      return setCurrentDocument();
+      திரும்பு setCurrentDocument();
     }
     releaseHNodeBuffers();
-    TopNode = createHNodes(N);
-    CurrentNode = TopNode;
-    return true;
+    உச்சி_முனை = createHNodes(N);
+    Current_முனை = உச்சி_முனை;
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-bool Input::nextDocument() {
-  return ++DocIterator != Strm->end();
+தருக்க உள்ளீடு::nextDocument() {
+  திரும்பு ++DocIterator != Strm->end();
 }
 
-const Node *Input::getCurrentNode() const {
-  return CurrentNode ? CurrentNode->_node : nullptr;
+மாறிலி முனை *உள்ளீடு::get_Current_முனை() மாறிலி {
+  திரும்பு Current_முனை ? Current_முனை->முனை_2 : nullptr;
 }
 
-bool Input::mapTag(StringRef Tag, bool Default) {
+தருக்க உள்ளீடு::mapTag(StringRef Tag, தருக்க Default) {
   // CurrentNode can be null if setCurrentDocument() was unable to
   // parse the document because it was invalid or empty.
-  if (!CurrentNode)
-    return false;
+  எனில் (!Current_முனை)
+    திரும்பு பொய்;
 
-  std::string foundTag = CurrentNode->_node->getVerbatimTag();
-  if (foundTag.empty()) {
+  std::string foundTag = Current_முனை->முனை_2->getVerbatimTag();
+  எனில் (foundTag.empty()) {
     // If no tag found and 'Tag' is the default, say it was found.
-    return Default;
+    திரும்பு Default;
   }
   // Return true iff found tag matches supplied tag.
-  return Tag == foundTag;
+  திரும்பு Tag == foundTag;
 }
 
-void Input::beginMapping() {
-  if (EC)
-    return;
+வெறுமை உள்ளீடு::beginMapping() {
+  எனில் (EC)
+    திரும்பு;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (MN) {
-    MN->ValidKeys.clear();
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_முனை);
+  எனில் (MN) {
+    MN->Valid_சாவிகள்.clear();
   }
 }
 
-std::vector<StringRef> Input::keys() {
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
+std::vector<StringRef> உள்ளீடு::சாவிகள்() {
+  MapHNode *MN = dyn_cast<MapHNode>(Current_முனை);
   std::vector<StringRef> Ret;
-  if (!MN) {
-    setError(CurrentNode, "not a mapping");
-    return Ret;
+  எனில் (!MN) {
+    setError(Current_முனை, "not a mapping");
+    திரும்பு Ret;
   }
-  for (auto &P : MN->Mapping)
-    Ret.push_back(P.first());
-  return Ret;
+  க்கு (auto &P : MN->Mapping)
+    Ret.தள்ளு_back(P.first());
+  திரும்பு Ret;
 }
 
-bool Input::preflightKey(StringRef Key, bool Required, bool, bool &UseDefault,
-                         void *&SaveInfo) {
-  UseDefault = false;
-  if (EC)
-    return false;
+தருக்க உள்ளீடு::preflight_சாவி(StringRef சாவி, தருக்க Required, தருக்க, தருக்க &UseDefault,
+                         வெறுமை *&SaveInfo) {
+  UseDefault = பொய்;
+  எனில் (EC)
+    திரும்பு பொய்;
 
   // CurrentNode is null for empty documents, which is an error in case required
   // nodes are present.
-  if (!CurrentNode) {
-    if (Required)
+  எனில் (!Current_முனை) {
+    எனில் (Required)
       EC = make_error_code(errc::invalid_argument);
-    else
-      UseDefault = true;
-    return false;
+    இல்லையெனில்
+      UseDefault = உண்மை;
+    திரும்பு பொய்;
   }
 
-  MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  if (!MN) {
-    if (Required || !isa<EmptyHNode>(CurrentNode))
-      setError(CurrentNode, "not a mapping");
-    else
-      UseDefault = true;
-    return false;
+  MapHNode *MN = dyn_cast<MapHNode>(Current_முனை);
+  எனில் (!MN) {
+    எனில் (Required || !isa<EmptyHNode>(Current_முனை))
+      setError(Current_முனை, "not a mapping");
+    இல்லையெனில்
+      UseDefault = உண்மை;
+    திரும்பு பொய்;
   }
-  MN->ValidKeys.push_back(Key.str());
-  HNode *Value = MN->Mapping[Key].first;
-  if (!Value) {
-    if (Required)
-      setError(CurrentNode, Twine("missing required key '") + Key + "'");
-    else
-      UseDefault = true;
-    return false;
+  MN->Valid_சாவிகள்.தள்ளு_back(சாவி.str());
+  HNode *மதிப்பு = MN->Mapping[சாவி].first;
+  எனில் (!மதிப்பு) {
+    எனில் (Required)
+      setError(Current_முனை, Twine("missing required key '") + சாவி + "'");
+    இல்லையெனில்
+      UseDefault = உண்மை;
+    திரும்பு பொய்;
   }
-  SaveInfo = CurrentNode;
-  CurrentNode = Value;
-  return true;
+  SaveInfo = Current_முனை;
+  Current_முனை = மதிப்பு;
+  திரும்பு உண்மை;
 }
 
-void Input::postflightKey(void *saveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(saveInfo);
+வெறுமை உள்ளீடு::postflight_சாவி(வெறுமை *saveInfo) {
+  Current_முனை = reinterpret_cast<HNode *>(saveInfo);
 }
 
-void Input::endMapping() {
-  if (EC)
-    return;
+வெறுமை உள்ளீடு::endMapping() {
+  எனில் (EC)
+    திரும்பு;
   // CurrentNode can be null if the document is empty.
-  MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (!MN)
-    return;
-  for (const auto &NN : MN->Mapping) {
-    if (!is_contained(MN->ValidKeys, NN.first())) {
-      const SMRange &ReportLoc = NN.second.second;
-      if (!AllowUnknownKeys) {
+  MapHNode *MN = dyn_cast_or_null<MapHNode>(Current_முனை);
+  எனில் (!MN)
+    திரும்பு;
+  க்கு (மாறிலி auto &NN : MN->Mapping) {
+    எனில் (!is_contained(MN->Valid_சாவிகள், NN.first())) {
+      மாறிலி SMRange &ReportLoc = NN.second.second;
+      எனில் (!Allow_Unknown_சாவிகள்) {
         setError(ReportLoc, Twine("unknown key '") + NN.first() + "'");
-        break;
-      } else
+        நிறுத்து;
+      } இல்லையெனில்
         reportWarning(ReportLoc, Twine("unknown key '") + NN.first() + "'");
     }
   }
 }
 
-void Input::beginFlowMapping() { beginMapping(); }
+வெறுமை உள்ளீடு::beginFlowMapping() { beginMapping(); }
 
-void Input::endFlowMapping() { endMapping(); }
+வெறுமை உள்ளீடு::endFlowMapping() { endMapping(); }
 
-unsigned Input::beginSequence() {
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
-    return SQ->Entries.size();
-  if (isa<EmptyHNode>(CurrentNode))
-    return 0;
+unsigned உள்ளீடு::beginSequence() {
+  எனில் (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_முனை))
+    திரும்பு SQ->Entries.size();
+  எனில் (isa<EmptyHNode>(Current_முனை))
+    திரும்பு 0;
   // Treat case where there's a scalar "null" value as an empty sequence.
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (isNull(SN->value()))
-      return 0;
+  எனில் (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_முனை)) {
+    எனில் (isNull(SN->மதிப்பு_2()))
+      திரும்பு 0;
   }
   // Any other type of HNode is an error.
-  setError(CurrentNode, "not a sequence");
-  return 0;
+  setError(Current_முனை, "not a sequence");
+  திரும்பு 0;
 }
 
-void Input::endSequence() {
+வெறுமை உள்ளீடு::endSequence() {
 }
 
-bool Input::preflightElement(unsigned Index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[Index];
-    return true;
+தருக்க உள்ளீடு::preflightElement(unsigned Index, வெறுமை *&SaveInfo) {
+  எனில் (EC)
+    திரும்பு பொய்;
+  எனில் (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_முனை)) {
+    SaveInfo = Current_முனை;
+    Current_முனை = SQ->Entries[Index];
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-void Input::postflightElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+வெறுமை உள்ளீடு::postflightElement(வெறுமை *SaveInfo) {
+  Current_முனை = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-unsigned Input::beginFlowSequence() { return beginSequence(); }
+unsigned உள்ளீடு::beginFlowSequence() { திரும்பு beginSequence(); }
 
-bool Input::preflightFlowElement(unsigned index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    SaveInfo = CurrentNode;
-    CurrentNode = SQ->Entries[index];
-    return true;
+தருக்க உள்ளீடு::preflightFlowElement(unsigned index, வெறுமை *&SaveInfo) {
+  எனில் (EC)
+    திரும்பு பொய்;
+  எனில் (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_முனை)) {
+    SaveInfo = Current_முனை;
+    Current_முனை = SQ->Entries[index];
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-void Input::postflightFlowElement(void *SaveInfo) {
-  CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
+வெறுமை உள்ளீடு::postflightFlowElement(வெறுமை *SaveInfo) {
+  Current_முனை = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-void Input::endFlowSequence() {
+வெறுமை உள்ளீடு::endFlowSequence() {
 }
 
-void Input::beginEnumScalar() {
-  ScalarMatchFound = false;
+வெறுமை உள்ளீடு::beginEnumScalar() {
+  ScalarMatchFound = பொய்;
 }
 
-bool Input::matchEnumScalar(StringRef Str, bool) {
-  if (ScalarMatchFound)
-    return false;
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (SN->value() == Str) {
-      ScalarMatchFound = true;
-      return true;
+தருக்க உள்ளீடு::matchEnumScalar(StringRef Str, தருக்க) {
+  எனில் (ScalarMatchFound)
+    திரும்பு பொய்;
+  எனில் (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_முனை)) {
+    எனில் (SN->மதிப்பு_2() == Str) {
+      ScalarMatchFound = உண்மை;
+      திரும்பு உண்மை;
     }
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-bool Input::matchEnumFallback() {
-  if (ScalarMatchFound)
-    return false;
-  ScalarMatchFound = true;
-  return true;
+தருக்க உள்ளீடு::matchEnumFallback() {
+  எனில் (ScalarMatchFound)
+    திரும்பு பொய்;
+  ScalarMatchFound = உண்மை;
+  திரும்பு உண்மை;
 }
 
-void Input::endEnumScalar() {
-  if (!ScalarMatchFound) {
-    setError(CurrentNode, "unknown enumerated scalar");
+வெறுமை உள்ளீடு::endEnumScalar() {
+  எனில் (!ScalarMatchFound) {
+    setError(Current_முனை, "unknown enumerated scalar");
   }
 }
 
-bool Input::beginBitSetScalar(bool &DoClear) {
-  BitValuesUsed.clear();
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    BitValuesUsed.resize(SQ->Entries.size());
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+தருக்க உள்ளீடு::beginBitSetScalar(தருக்க &DoClear) {
+  Bit_மதிப்புகள்_Used.clear();
+  எனில் (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_முனை)) {
+    Bit_மதிப்புகள்_Used.resize(SQ->Entries.size());
+  } இல்லையெனில் {
+    setError(Current_முனை, "expected sequence of bit values");
   }
-  DoClear = true;
-  return true;
+  DoClear = உண்மை;
+  திரும்பு உண்மை;
 }
 
-bool Input::bitSetMatch(StringRef Str, bool) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+தருக்க உள்ளீடு::bitSetMatch(StringRef Str, தருக்க) {
+  எனில் (EC)
+    திரும்பு பொய்;
+  எனில் (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_முனை)) {
     unsigned Index = 0;
-    for (auto &N : SQ->Entries) {
-      if (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
-        if (SN->value() == Str) {
-          BitValuesUsed[Index] = true;
-          return true;
+    க்கு (auto &N : SQ->Entries) {
+      எனில் (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
+        எனில் (SN->மதிப்பு_2() == Str) {
+          Bit_மதிப்புகள்_Used[Index] = உண்மை;
+          திரும்பு உண்மை;
         }
-      } else {
-        setError(CurrentNode, "unexpected scalar in sequence of bit values");
+      } இல்லையெனில் {
+        setError(Current_முனை, "unexpected scalar in sequence of bit values");
       }
       ++Index;
     }
-  } else {
-    setError(CurrentNode, "expected sequence of bit values");
+  } இல்லையெனில் {
+    setError(Current_முனை, "expected sequence of bit values");
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-void Input::endBitSetScalar() {
-  if (EC)
-    return;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
-    assert(BitValuesUsed.size() == SQ->Entries.size());
-    for (unsigned i = 0; i < SQ->Entries.size(); ++i) {
-      if (!BitValuesUsed[i]) {
+வெறுமை உள்ளீடு::endBitSetScalar() {
+  எனில் (EC)
+    திரும்பு;
+  எனில் (SequenceHNode *SQ = dyn_cast<SequenceHNode>(Current_முனை)) {
+    ப்ரதிஜ்ஞா(Bit_மதிப்புகள்_Used.size() == SQ->Entries.size());
+    க்கு (unsigned i = 0; i < SQ->Entries.size(); ++i) {
+      எனில் (!Bit_மதிப்புகள்_Used[i]) {
         setError(SQ->Entries[i], "unknown bit value");
-        return;
+        திரும்பு;
       }
     }
   }
 }
 
-void Input::scalarString(StringRef &S, QuotingType) {
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    S = SN->value();
-  } else {
-    setError(CurrentNode, "unexpected scalar");
+வெறுமை உள்ளீடு::scalarString(StringRef &S, QuotingType) {
+  எனில் (ScalarHNode *SN = dyn_cast<ScalarHNode>(Current_முனை)) {
+    S = SN->மதிப்பு_2();
+  } இல்லையெனில் {
+    setError(Current_முனை, "unexpected scalar");
   }
 }
 
-void Input::blockScalarString(StringRef &S) { scalarString(S, QuotingType::None); }
+வெறுமை உள்ளீடு::blockScalarString(StringRef &S) { scalarString(S, QuotingType::None); }
 
-void Input::scalarTag(std::string &Tag) {
-  Tag = CurrentNode->_node->getVerbatimTag();
+வெறுமை உள்ளீடு::scalarTag(std::string &Tag) {
+  Tag = Current_முனை->முனை_2->getVerbatimTag();
 }
 
-void Input::setError(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  setError(hnode->_node, message);
+வெறுமை உள்ளீடு::setError(HNode *hnode, மாறிலி Twine &message) {
+  ப்ரதிஜ்ஞா(hnode && "HNode must not be NULL");
+  setError(hnode->முனை_2, message);
 }
 
-NodeKind Input::getNodeKind() {
-  if (isa<ScalarHNode>(CurrentNode))
-    return NodeKind::Scalar;
-  else if (isa<MapHNode>(CurrentNode))
-    return NodeKind::Map;
-  else if (isa<SequenceHNode>(CurrentNode))
-    return NodeKind::Sequence;
+முனை_Kind உள்ளீடு::get_முனை_Kind() {
+  எனில் (isa<ScalarHNode>(Current_முனை))
+    திரும்பு முனை_Kind::Scalar;
+  இல்லையெனில் எனில் (isa<MapHNode>(Current_முனை))
+    திரும்பு முனை_Kind::Map;
+  இல்லையெனில் எனில் (isa<SequenceHNode>(Current_முனை))
+    திரும்பு முனை_Kind::Sequence;
   llvm_unreachable("Unsupported node kind");
 }
 
-void Input::setError(Node *node, const Twine &message) {
-  Strm->printError(node, message);
+வெறுமை உள்ளீடு::setError(முனை *முனை_3, மாறிலி Twine &message) {
+  Strm->printError(முனை_3, message);
   EC = make_error_code(errc::invalid_argument);
 }
 
-void Input::setError(const SMRange &range, const Twine &message) {
+வெறுமை உள்ளீடு::setError(மாறிலி SMRange &range, மாறிலி Twine &message) {
   Strm->printError(range, message);
   EC = make_error_code(errc::invalid_argument);
 }
 
-void Input::reportWarning(HNode *hnode, const Twine &message) {
-  assert(hnode && "HNode must not be NULL");
-  Strm->printError(hnode->_node, message, SourceMgr::DK_Warning);
+வெறுமை உள்ளீடு::reportWarning(HNode *hnode, மாறிலி Twine &message) {
+  ப்ரதிஜ்ஞா(hnode && "HNode must not be NULL");
+  Strm->printError(hnode->முனை_2, message, SourceMgr::DK_Warning);
 }
 
-void Input::reportWarning(Node *node, const Twine &message) {
-  Strm->printError(node, message, SourceMgr::DK_Warning);
+வெறுமை உள்ளீடு::reportWarning(முனை *முனை_3, மாறிலி Twine &message) {
+  Strm->printError(முனை_3, message, SourceMgr::DK_Warning);
 }
 
-void Input::reportWarning(const SMRange &range, const Twine &message) {
+வெறுமை உள்ளீடு::reportWarning(மாறிலி SMRange &range, மாறிலி Twine &message) {
   Strm->printError(range, message, SourceMgr::DK_Warning);
 }
 
-void Input::releaseHNodeBuffers() {
+வெறுமை உள்ளீடு::releaseHNodeBuffers() {
   EmptyHNodeAllocator.DestroyAll();
   ScalarHNodeAllocator.DestroyAll();
   SequenceHNodeAllocator.DestroyAll();
   MapHNodeAllocator.DestroyAll();
 }
 
-void Input::saveAliasHNode(Node *N, HNode *HN) {
+வெறுமை உள்ளீடு::saveAliasHNode(முனை *N, HNode *HN) {
   StringRef Anchor = N->getAnchor();
-  if (!Anchor.empty())
+  எனில் (!Anchor.empty())
     // YAML 1.2.2 - 3.2.2.2. Anchors and Aliases:
     //
     // An alias event refers to the most recent event in the serialization
@@ -409,403 +409,403 @@ void Input::saveAliasHNode(Node *N, HNode *HN) {
     AliasMap[Anchor] = HN;
 }
 
-Input::HNode *Input::createHNodes(Node *N) {
+உள்ளீடு::HNode *உள்ளீடு::createHNodes(முனை *N) {
   SmallString<128> StringStorage;
-  switch (N->getType()) {
-  case Node::NK_Scalar: {
-    ScalarNode *SN = dyn_cast<ScalarNode>(N);
-    StringRef KeyStr = SN->getValue(StringStorage);
-    if (!StringStorage.empty()) {
+  தேர்வு (N->getType()) {
+  நிலை முனை::NK_Scalar: {
+    Scalar_முனை *SN = dyn_cast<Scalar_முனை>(N);
+    StringRef சாவி_Str = SN->get_மதிப்பு(StringStorage);
+    எனில் (!StringStorage.empty()) {
       // Copy string to permanent storage
-      KeyStr = StringStorage.str().copy(StringAllocator);
+      சாவி_Str = StringStorage.str().copy(StringAllocator);
     }
-    auto *SHNode = new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, KeyStr);
+    auto *SHNode = புதிய (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, சாவி_Str);
     saveAliasHNode(SN, SHNode);
-    return SHNode;
+    திரும்பு SHNode;
   }
-  case Node::NK_BlockScalar: {
-    BlockScalarNode *BSN = dyn_cast<BlockScalarNode>(N);
-    StringRef ValueCopy = BSN->getValue().copy(StringAllocator);
+  நிலை முனை::NK_BlockScalar: {
+    Block_Scalar_முனை *BSN = dyn_cast<Block_Scalar_முனை>(N);
+    StringRef மதிப்பு_Copy = BSN->get_மதிப்பு().copy(StringAllocator);
     auto *BSHNode =
-        new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ValueCopy);
+        புதிய (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, மதிப்பு_Copy);
     saveAliasHNode(BSN, BSHNode);
-    return BSHNode;
+    திரும்பு BSHNode;
   }
-  case Node::NK_Sequence: {
-    SequenceNode *SQ = dyn_cast<SequenceNode>(N);
-    auto SQHNode = new (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
-    for (Node &SN : *SQ) {
+  நிலை முனை::NK_Sequence: {
+    Sequence_முனை *SQ = dyn_cast<Sequence_முனை>(N);
+    auto SQHNode = புதிய (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
+    க்கு (முனை &SN : *SQ) {
       auto Entry = createHNodes(&SN);
-      if (EC)
-        break;
-      SQHNode->Entries.push_back(Entry);
+      எனில் (EC)
+        நிறுத்து;
+      SQHNode->Entries.தள்ளு_back(Entry);
     }
     saveAliasHNode(SQ, SQHNode);
-    return SQHNode;
+    திரும்பு SQHNode;
   }
-  case Node::NK_Mapping: {
-    MappingNode *Map = dyn_cast<MappingNode>(N);
-    auto mapHNode = new (MapHNodeAllocator.Allocate()) MapHNode(N);
-    for (KeyValueNode &KVN : *Map) {
-      Node *KeyNode = KVN.getKey();
-      ScalarNode *Key = dyn_cast_if_present<ScalarNode>(KeyNode);
-      Node *Value = KVN.getValue();
-      if (!Key || !Value) {
-        if (!Key)
-          setError(KeyNode, "Map key must be a scalar");
-        if (!Value)
-          setError(KeyNode, "Map value must not be empty");
-        break;
+  நிலை முனை::NK_Mapping: {
+    Mapping_முனை *Map = dyn_cast<Mapping_முனை>(N);
+    auto mapHNode = புதிய (MapHNodeAllocator.Allocate()) MapHNode(N);
+    க்கு (சாவி_மதிப்பு_முனை &KVN : *Map) {
+      முனை *சாவி_முனை = KVN.get_சாவி();
+      Scalar_முனை *சாவி = dyn_cast_if_present<Scalar_முனை>(சாவி_முனை);
+      முனை *மதிப்பு = KVN.get_மதிப்பு();
+      எனில் (!சாவி || !மதிப்பு) {
+        எனில் (!சாவி)
+          setError(சாவி_முனை, "Map key must be a scalar");
+        எனில் (!மதிப்பு)
+          setError(சாவி_முனை, "Map value must not be empty");
+        நிறுத்து;
       }
       StringStorage.clear();
-      StringRef KeyStr = Key->getValue(StringStorage);
-      if (!StringStorage.empty()) {
+      StringRef சாவி_Str = சாவி->get_மதிப்பு(StringStorage);
+      எனில் (!StringStorage.empty()) {
         // Copy string to permanent storage
-        KeyStr = StringStorage.str().copy(StringAllocator);
+        சாவி_Str = StringStorage.str().copy(StringAllocator);
       }
-      if (mapHNode->Mapping.count(KeyStr))
+      எனில் (mapHNode->Mapping.மொத்தம்(சாவி_Str))
         // From YAML spec: "The content of a mapping node is an unordered set of
         // key/value node pairs, with the restriction that each of the keys is
         // unique."
-        setError(KeyNode, Twine("duplicated mapping key '") + KeyStr + "'");
-      auto ValueHNode = createHNodes(Value);
-      if (EC)
-        break;
-      mapHNode->Mapping[KeyStr] =
-          std::make_pair(std::move(ValueHNode), KeyNode->getSourceRange());
+        setError(சாவி_முனை, Twine("duplicated mapping key '") + சாவி_Str + "'");
+      auto மதிப்பு_HNode = createHNodes(மதிப்பு);
+      எனில் (EC)
+        நிறுத்து;
+      mapHNode->Mapping[சாவி_Str] =
+          std::make_pair(std::move(மதிப்பு_HNode), சாவி_முனை->getSourceRange());
     }
     saveAliasHNode(Map, mapHNode);
-    return std::move(mapHNode);
+    திரும்பு std::move(mapHNode);
   }
-  case Node::NK_Null:
+  நிலை முனை::NK_Null:
     // TODO: Anchor is not set for NullNode in the parser. Update the parser to
     // faithfully preserve anchors.
-    return new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
-  case Node::NK_Alias: {
-    AliasNode *AN = dyn_cast<AliasNode>(N);
+    திரும்பு புதிய (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
+  நிலை முனை::NK_Alias: {
+    Alias_முனை *AN = dyn_cast<Alias_முனை>(N);
     auto AliasName = AN->getName();
     auto AHN = AliasMap.find(AliasName);
-    if (AHN == AliasMap.end()) {
+    எனில் (AHN == AliasMap.end()) {
       setError(AN, Twine("undefined alias '" + AliasName + "'"));
-      return nullptr;
+      திரும்பு nullptr;
     }
-    return AHN->second;
+    திரும்பு AHN->second;
   }
-  default:
+  இயல்பு:
     setError(N, "unknown node kind");
-    return nullptr;
+    திரும்பு nullptr;
   }
 }
 
-void Input::setError(const Twine &Message) {
-  setError(CurrentNode, Message);
+வெறுமை உள்ளீடு::setError(மாறிலி Twine &Message) {
+  setError(Current_முனை, Message);
 }
 
-void Input::setAllowUnknownKeys(bool Allow) { AllowUnknownKeys = Allow; }
+வெறுமை உள்ளீடு::set_Allow_Unknown_சாவிகள்(தருக்க Allow) { Allow_Unknown_சாவிகள் = Allow; }
 
-bool Input::canElideEmptySequence() {
-  return false;
+தருக்க உள்ளீடு::canElideEmptySequence() {
+  திரும்பு பொய்;
 }
 
 //===----------------------------------------------------------------------===//
 //  Output
 //===----------------------------------------------------------------------===//
 
-Output::Output(raw_ostream &yout, void *context, int WrapColumn)
+Output::Output(raw_ostream &yout, வெறுமை *context, முழு WrapColumn)
     : IO(context), Out(yout), WrapColumn(WrapColumn) {}
 
-Output::~Output() = default;
+Output::~Output() = இயல்பு;
 
-bool Output::outputting() const {
-  return true;
+தருக்க Output::outputting() மாறிலி {
+  திரும்பு உண்மை;
 }
 
-void Output::beginMapping() {
-  StateStack.push_back(inMapFirstKey);
+வெறுமை Output::beginMapping() {
+  State_அடுக்கு.தள்ளு_back(in_Map_First_சாவி);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
 }
 
-bool Output::mapTag(StringRef Tag, bool Use) {
-  if (Use) {
+தருக்க Output::mapTag(StringRef Tag, தருக்க Use) {
+  எனில் (Use) {
     // If this tag is being written inside a sequence we should write the start
     // of the sequence before writing the tag, otherwise the tag won't be
     // attached to the element in the sequence, but rather the sequence itself.
-    bool SequenceElement = false;
-    if (StateStack.size() > 1) {
-      auto &E = StateStack[StateStack.size() - 2];
+    தருக்க SequenceElement = பொய்;
+    எனில் (State_அடுக்கு.size() > 1) {
+      auto &E = State_அடுக்கு[State_அடுக்கு.size() - 2];
       SequenceElement = inSeqAnyElement(E) || inFlowSeqAnyElement(E);
     }
-    if (SequenceElement && StateStack.back() == inMapFirstKey) {
-      newLineCheck();
-    } else {
+    எனில் (SequenceElement && State_அடுக்கு.back() == in_Map_First_சாவி) {
+      new_வரி_Check();
+    } இல்லையெனில் {
       output(" ");
     }
     output(Tag);
-    if (SequenceElement) {
+    எனில் (SequenceElement) {
       // If we're writing the tag during the first element of a map, the tag
       // takes the place of the first element in the sequence.
-      if (StateStack.back() == inMapFirstKey) {
-        StateStack.pop_back();
-        StateStack.push_back(inMapOtherKey);
+      எனில் (State_அடுக்கு.back() == in_Map_First_சாவி) {
+        State_அடுக்கு.எடு_back();
+        State_அடுக்கு.தள்ளு_back(in_Map_Other_சாவி);
       }
       // Tags inside maps in sequences should act as keys in the map from a
       // formatting perspective, so we always want a newline in a sequence.
       Padding = "\n";
     }
   }
-  return Use;
+  திரும்பு Use;
 }
 
-void Output::endMapping() {
+வெறுமை Output::endMapping() {
   // If we did not map anything, we should explicitly emit an empty map
-  if (StateStack.back() == inMapFirstKey) {
+  எனில் (State_அடுக்கு.back() == in_Map_First_சாவி) {
     Padding = PaddingBeforeContainer;
-    newLineCheck();
+    new_வரி_Check();
     output("{}");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_அடுக்கு.எடு_back();
 }
 
-std::vector<StringRef> Output::keys() {
+std::vector<StringRef> Output::சாவிகள்() {
   report_fatal_error("invalid call");
 }
 
-bool Output::preflightKey(StringRef Key, bool Required, bool SameAsDefault,
-                          bool &UseDefault, void *&SaveInfo) {
-  UseDefault = false;
+தருக்க Output::preflight_சாவி(StringRef சாவி, தருக்க Required, தருக்க SameAsDefault,
+                          தருக்க &UseDefault, வெறுமை *&SaveInfo) {
+  UseDefault = பொய்;
   SaveInfo = nullptr;
-  if (Required || !SameAsDefault || WriteDefaultValues) {
-    auto State = StateStack.back();
-    if (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
-      flowKey(Key);
-    } else {
-      newLineCheck();
-      paddedKey(Key);
+  எனில் (Required || !SameAsDefault || Write_Default_மதிப்புகள்) {
+    auto State = State_அடுக்கு.back();
+    எனில் (State == in_Flow_Map_First_சாவி || State == in_Flow_Map_Other_சாவி) {
+      flow_சாவி(சாவி);
+    } இல்லையெனில் {
+      new_வரி_Check();
+      padded_சாவி(சாவி);
     }
-    return true;
+    திரும்பு உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-void Output::postflightKey(void *) {
-  if (StateStack.back() == inMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inMapOtherKey);
-  } else if (StateStack.back() == inFlowMapFirstKey) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowMapOtherKey);
+வெறுமை Output::postflight_சாவி(வெறுமை *) {
+  எனில் (State_அடுக்கு.back() == in_Map_First_சாவி) {
+    State_அடுக்கு.எடு_back();
+    State_அடுக்கு.தள்ளு_back(in_Map_Other_சாவி);
+  } இல்லையெனில் எனில் (State_அடுக்கு.back() == in_Flow_Map_First_சாவி) {
+    State_அடுக்கு.எடு_back();
+    State_அடுக்கு.தள்ளு_back(in_Flow_Map_Other_சாவி);
   }
 }
 
-void Output::beginFlowMapping() {
-  StateStack.push_back(inFlowMapFirstKey);
-  newLineCheck();
+வெறுமை Output::beginFlowMapping() {
+  State_அடுக்கு.தள்ளு_back(in_Flow_Map_First_சாவி);
+  new_வரி_Check();
   ColumnAtMapFlowStart = Column;
   output("{ ");
 }
 
-void Output::endFlowMapping() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" }");
+வெறுமை Output::endFlowMapping() {
+  State_அடுக்கு.எடு_back();
+  output_Up_To_End_Of_வரி(" }");
 }
 
-void Output::beginDocuments() {
-  outputUpToEndOfLine("---");
+வெறுமை Output::beginDocuments() {
+  output_Up_To_End_Of_வரி("---");
 }
 
-bool Output::preflightDocument(unsigned index) {
-  if (index > 0)
-    outputUpToEndOfLine("\n---");
-  return true;
+தருக்க Output::preflightDocument(unsigned index) {
+  எனில் (index > 0)
+    output_Up_To_End_Of_வரி("\n---");
+  திரும்பு உண்மை;
 }
 
-void Output::postflightDocument() {
+வெறுமை Output::postflightDocument() {
 }
 
-void Output::endDocuments() {
+வெறுமை Output::endDocuments() {
   output("\n...\n");
 }
 
 unsigned Output::beginSequence() {
-  StateStack.push_back(inSeqFirstElement);
+  State_அடுக்கு.தள்ளு_back(inSeqFirstElement);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
-  return 0;
+  திரும்பு 0;
 }
 
-void Output::endSequence() {
+வெறுமை Output::endSequence() {
   // If we did not emit anything, we should explicitly emit an empty sequence
-  if (StateStack.back() == inSeqFirstElement) {
+  எனில் (State_அடுக்கு.back() == inSeqFirstElement) {
     Padding = PaddingBeforeContainer;
-    newLineCheck(/*EmptySequence=*/true);
+    new_வரி_Check(/*EmptySequence=*/உண்மை);
     output("[]");
     Padding = "\n";
   }
-  StateStack.pop_back();
+  State_அடுக்கு.எடு_back();
 }
 
-bool Output::preflightElement(unsigned, void *&SaveInfo) {
+தருக்க Output::preflightElement(unsigned, வெறுமை *&SaveInfo) {
   SaveInfo = nullptr;
-  return true;
+  திரும்பு உண்மை;
 }
 
-void Output::postflightElement(void *) {
-  if (StateStack.back() == inSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inSeqOtherElement);
-  } else if (StateStack.back() == inFlowSeqFirstElement) {
-    StateStack.pop_back();
-    StateStack.push_back(inFlowSeqOtherElement);
+வெறுமை Output::postflightElement(வெறுமை *) {
+  எனில் (State_அடுக்கு.back() == inSeqFirstElement) {
+    State_அடுக்கு.எடு_back();
+    State_அடுக்கு.தள்ளு_back(inSeqOtherElement);
+  } இல்லையெனில் எனில் (State_அடுக்கு.back() == inFlowSeqFirstElement) {
+    State_அடுக்கு.எடு_back();
+    State_அடுக்கு.தள்ளு_back(inFlowSeqOtherElement);
   }
 }
 
 unsigned Output::beginFlowSequence() {
-  StateStack.push_back(inFlowSeqFirstElement);
-  newLineCheck();
+  State_அடுக்கு.தள்ளு_back(inFlowSeqFirstElement);
+  new_வரி_Check();
   ColumnAtFlowStart = Column;
   output("[ ");
-  NeedFlowSequenceComma = false;
-  return 0;
+  NeedFlowSequenceComma = பொய்;
+  திரும்பு 0;
 }
 
-void Output::endFlowSequence() {
-  StateStack.pop_back();
-  outputUpToEndOfLine(" ]");
+வெறுமை Output::endFlowSequence() {
+  State_அடுக்கு.எடு_back();
+  output_Up_To_End_Of_வரி(" ]");
 }
 
-bool Output::preflightFlowElement(unsigned, void *&SaveInfo) {
-  if (NeedFlowSequenceComma)
+தருக்க Output::preflightFlowElement(unsigned, வெறுமை *&SaveInfo) {
+  எனில் (NeedFlowSequenceComma)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  எனில் (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int i = 0; i < ColumnAtFlowStart; ++i)
+    க்கு (முழு i = 0; i < ColumnAtFlowStart; ++i)
       output(" ");
     Column = ColumnAtFlowStart;
     output("  ");
   }
   SaveInfo = nullptr;
-  return true;
+  திரும்பு உண்மை;
 }
 
-void Output::postflightFlowElement(void *) {
-  NeedFlowSequenceComma = true;
+வெறுமை Output::postflightFlowElement(வெறுமை *) {
+  NeedFlowSequenceComma = உண்மை;
 }
 
-void Output::beginEnumScalar() {
-  EnumerationMatchFound = false;
+வெறுமை Output::beginEnumScalar() {
+  EnumerationMatchFound = பொய்;
 }
 
-bool Output::matchEnumScalar(StringRef Str, bool Match) {
-  if (Match && !EnumerationMatchFound) {
-    newLineCheck();
-    outputUpToEndOfLine(Str);
-    EnumerationMatchFound = true;
+தருக்க Output::matchEnumScalar(StringRef Str, தருக்க Match) {
+  எனில் (Match && !EnumerationMatchFound) {
+    new_வரி_Check();
+    output_Up_To_End_Of_வரி(Str);
+    EnumerationMatchFound = உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-bool Output::matchEnumFallback() {
-  if (EnumerationMatchFound)
-    return false;
-  EnumerationMatchFound = true;
-  return true;
+தருக்க Output::matchEnumFallback() {
+  எனில் (EnumerationMatchFound)
+    திரும்பு பொய்;
+  EnumerationMatchFound = உண்மை;
+  திரும்பு உண்மை;
 }
 
-void Output::endEnumScalar() {
-  if (!EnumerationMatchFound)
+வெறுமை Output::endEnumScalar() {
+  எனில் (!EnumerationMatchFound)
     llvm_unreachable("bad runtime enum value");
 }
 
-bool Output::beginBitSetScalar(bool &DoClear) {
-  newLineCheck();
+தருக்க Output::beginBitSetScalar(தருக்க &DoClear) {
+  new_வரி_Check();
   output("[ ");
-  NeedBitValueComma = false;
-  DoClear = false;
-  return true;
+  Need_Bit_மதிப்பு_Comma = பொய்;
+  DoClear = பொய்;
+  திரும்பு உண்மை;
 }
 
-bool Output::bitSetMatch(StringRef Str, bool Matches) {
-  if (Matches) {
-    if (NeedBitValueComma)
+தருக்க Output::bitSetMatch(StringRef Str, தருக்க Matches) {
+  எனில் (Matches) {
+    எனில் (Need_Bit_மதிப்பு_Comma)
       output(", ");
     output(Str);
-    NeedBitValueComma = true;
+    Need_Bit_மதிப்பு_Comma = உண்மை;
   }
-  return false;
+  திரும்பு பொய்;
 }
 
-void Output::endBitSetScalar() {
-  outputUpToEndOfLine(" ]");
+வெறுமை Output::endBitSetScalar() {
+  output_Up_To_End_Of_வரி(" ]");
 }
 
-void Output::scalarString(StringRef &S, QuotingType MustQuote) {
-  newLineCheck();
-  if (S.empty()) {
+வெறுமை Output::scalarString(StringRef &S, QuotingType MustQuote) {
+  new_வரி_Check();
+  எனில் (S.empty()) {
     // Print '' for the empty string because leaving the field empty is not
     // allowed.
-    outputUpToEndOfLine("''");
-    return;
+    output_Up_To_End_Of_வரி("''");
+    திரும்பு;
   }
   output(S, MustQuote);
-  outputUpToEndOfLine("");
+  output_Up_To_End_Of_வரி("");
 }
 
-void Output::blockScalarString(StringRef &S) {
-  if (!StateStack.empty())
-    newLineCheck();
+வெறுமை Output::blockScalarString(StringRef &S) {
+  எனில் (!State_அடுக்கு.empty())
+    new_வரி_Check();
   output(" |");
 
-  unsigned Indent = StateStack.empty() ? 1 : StateStack.size();
+  unsigned Indent = State_அடுக்கு.empty() ? 1 : State_அடுக்கு.size();
 
-  auto Buffer = MemoryBuffer::getMemBuffer(S, "", false);
-  for (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
-    outputNewLine();
-    for (unsigned I = 0; I < Indent; ++I) {
+  auto Buffer = MemoryBuffer::getMemBuffer(S, "", பொய்);
+  க்கு (வரி_iterator வரிகள்(*Buffer, பொய்); !வரிகள்.is_at_end(); ++வரிகள்) {
+    output_New_வரி();
+    க்கு (unsigned I = 0; I < Indent; ++I) {
       output("  ");
     }
-    output(*Lines);
+    output(*வரிகள்);
   }
-  outputUpToEndOfLine("");
+  output_Up_To_End_Of_வரி("");
 }
 
-void Output::scalarTag(std::string &Tag) {
-  if (Tag.empty())
-    return;
-  newLineCheck();
+வெறுமை Output::scalarTag(std::string &Tag) {
+  எனில் (Tag.empty())
+    திரும்பு;
+  new_வரி_Check();
   output(Tag);
   output(" ");
 }
 
-void Output::setError(const Twine &message) {
+வெறுமை Output::setError(மாறிலி Twine &message) {
 }
 
-std::error_code Output::error() { return {}; }
+std::error_code Output::error() { திரும்பு {}; }
 
-bool Output::canElideEmptySequence() {
+தருக்க Output::canElideEmptySequence() {
   // Normally, with an optional key/value where the value is an empty sequence,
   // the whole key/value can be not written.  But, that produces wrong yaml
   // if the key/value is the only thing in the map and the map is used in
   // a sequence.  This detects if the this sequence is the first key/value
   // in map that itself is embedded in a sequence.
-  if (StateStack.size() < 2)
-    return true;
-  if (StateStack.back() != inMapFirstKey)
-    return true;
-  return !inSeqAnyElement(StateStack[StateStack.size() - 2]);
+  எனில் (State_அடுக்கு.size() < 2)
+    திரும்பு உண்மை;
+  எனில் (State_அடுக்கு.back() != in_Map_First_சாவி)
+    திரும்பு உண்மை;
+  திரும்பு !inSeqAnyElement(State_அடுக்கு[State_அடுக்கு.size() - 2]);
 }
 
-void Output::output(StringRef s) {
+வெறுமை Output::output(StringRef s) {
   Column += s.size();
   Out << s;
 }
 
-void Output::output(StringRef S, QuotingType MustQuote) {
-  if (MustQuote == QuotingType::None) {
+வெறுமை Output::output(StringRef S, QuotingType MustQuote) {
+  எனில் (MustQuote == QuotingType::None) {
     // Only quote if we must.
     output(S);
-    return;
+    திரும்பு;
   }
 
   StringLiteral Quote = MustQuote == QuotingType::Single ? StringLiteral("'")
@@ -816,21 +816,21 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   // characters may be present, and will be escaped using a variety of
   // unicode-scalar and special short-form escapes. This is handled in
   // yaml::escape.
-  if (MustQuote == QuotingType::Double) {
-    output(yaml::escape(S, /* EscapePrintable= */ false));
+  எனில் (MustQuote == QuotingType::Double) {
+    output(yaml::escape(S, /* EscapePrintable= */ பொய்));
     output(Quote);
-    return;
+    திரும்பு;
   }
 
   unsigned i = 0;
   unsigned j = 0;
   unsigned End = S.size();
-  const char *Base = S.data();
+  மாறிலி எழுத்து *Base = S.data();
 
   // When using single-quoted strings, any single quote ' must be doubled to be
   // escaped.
-  while (j < End) {
-    if (S[j] == '\'') {                   // Escape quotes.
+  போது (j < End) {
+    எனில் (S[j] == '\'') {                   // Escape quotes.
       output(StringRef(&Base[i], j - i)); // "flush".
       output(StringLiteral("''"));        // Print it as ''
       i = j + 1;
@@ -841,14 +841,14 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   output(Quote); // Ending quote.
 }
 
-void Output::outputUpToEndOfLine(StringRef s) {
+வெறுமை Output::output_Up_To_End_Of_வரி(StringRef s) {
   output(s);
-  if (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
-                             !inFlowMapAnyKey(StateStack.back())))
+  எனில் (State_அடுக்கு.empty() || (!inFlowSeqAnyElement(State_அடுக்கு.back()) &&
+                             !in_Flow_Map_Any_சாவி(State_அடுக்கு.back())))
     Padding = "\n";
 }
 
-void Output::outputNewLine() {
+வெறுமை Output::output_New_வரி() {
   Out << "\n";
   Column = 0;
 }
@@ -857,339 +857,339 @@ void Output::outputNewLine() {
 // if seq in middle, use "- " if firstKey, else use "  "
 //
 
-void Output::newLineCheck(bool EmptySequence) {
-  if (Padding != "\n") {
+வெறுமை Output::new_வரி_Check(தருக்க EmptySequence) {
+  எனில் (Padding != "\n") {
     output(Padding);
     Padding = {};
-    return;
+    திரும்பு;
   }
-  outputNewLine();
+  output_New_வரி();
   Padding = {};
 
-  if (StateStack.size() == 0 || EmptySequence)
-    return;
+  எனில் (State_அடுக்கு.size() == 0 || EmptySequence)
+    திரும்பு;
 
-  unsigned Indent = StateStack.size() - 1;
-  bool PossiblyNestedSeq = false;
-  auto I = StateStack.rbegin(), E = StateStack.rend();
+  unsigned Indent = State_அடுக்கு.size() - 1;
+  தருக்க PossiblyNestedSeq = பொய்;
+  auto I = State_அடுக்கு.rbegin(), E = State_அடுக்கு.rend();
 
-  if (inSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true; // Not possibly but always.
+  எனில் (inSeqAnyElement(*I)) {
+    PossiblyNestedSeq = உண்மை; // Not possibly but always.
     ++Indent;
-  } else if (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
+  } இல்லையெனில் எனில் (*I == in_Map_First_சாவி || *I == in_Flow_Map_First_சாவி ||
              inFlowSeqAnyElement(*I)) {
-    PossiblyNestedSeq = true;
+    PossiblyNestedSeq = உண்மை;
     ++I; // Skip back().
   }
 
-  unsigned OutputDashCount = 0;
-  if (PossiblyNestedSeq) {
+  unsigned Output_Dash_மொத்தம் = 0;
+  எனில் (PossiblyNestedSeq) {
     // Count up consecutive inSeqFirstElement from the end, unless
     // inSeqFirstElement is the top of nested sequence.
-    while (I != E) {
+    போது (I != E) {
       // Don't count the top of nested sequence.
-      if (!inSeqAnyElement(*I))
-        break;
+      எனில் (!inSeqAnyElement(*I))
+        நிறுத்து;
 
-      ++OutputDashCount;
+      ++Output_Dash_மொத்தம்;
 
       // Stop counting if consecutive inSeqFirstElement ends.
-      if (*I++ != inSeqFirstElement)
-        break;
+      எனில் (*I++ != inSeqFirstElement)
+        நிறுத்து;
     }
   }
 
-  for (unsigned I = OutputDashCount; I < Indent; ++I)
+  க்கு (unsigned I = Output_Dash_மொத்தம்; I < Indent; ++I)
     output("  ");
 
-  for (unsigned I = 0; I < OutputDashCount; ++I)
+  க்கு (unsigned I = 0; I < Output_Dash_மொத்தம்; ++I)
     output("- ");
 }
 
-void Output::paddedKey(StringRef key) {
-  output(key, needsQuotes(key, false));
+வெறுமை Output::padded_சாவி(StringRef சாவி_2) {
+  output(சாவி_2, needsQuotes(சாவி_2, பொய்));
   output(":");
-  const char *spaces = "                ";
-  if (key.size() < strlen(spaces))
-    Padding = &spaces[key.size()];
-  else
+  மாறிலி எழுத்து *spaces = "                ";
+  எனில் (சாவி_2.size() < strlen(spaces))
+    Padding = &spaces[சாவி_2.size()];
+  இல்லையெனில்
     Padding = " ";
 }
 
-void Output::flowKey(StringRef Key) {
-  if (StateStack.back() == inFlowMapOtherKey)
+வெறுமை Output::flow_சாவி(StringRef சாவி) {
+  எனில் (State_அடுக்கு.back() == in_Flow_Map_Other_சாவி)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  எனில் (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int I = 0; I < ColumnAtMapFlowStart; ++I)
+    க்கு (முழு I = 0; I < ColumnAtMapFlowStart; ++I)
       output(" ");
     Column = ColumnAtMapFlowStart;
     output("  ");
   }
-  output(Key, needsQuotes(Key, false));
+  output(சாவி, needsQuotes(சாவி, பொய்));
   output(": ");
 }
 
-NodeKind Output::getNodeKind() { report_fatal_error("invalid call"); }
+முனை_Kind Output::get_முனை_Kind() { report_fatal_error("invalid call"); }
 
-bool Output::inSeqAnyElement(InState State) {
-  return State == inSeqFirstElement || State == inSeqOtherElement;
+தருக்க Output::inSeqAnyElement(InState State) {
+  திரும்பு State == inSeqFirstElement || State == inSeqOtherElement;
 }
 
-bool Output::inFlowSeqAnyElement(InState State) {
-  return State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
+தருக்க Output::inFlowSeqAnyElement(InState State) {
+  திரும்பு State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
 }
 
-bool Output::inMapAnyKey(InState State) {
-  return State == inMapFirstKey || State == inMapOtherKey;
+தருக்க Output::in_Map_Any_சாவி(InState State) {
+  திரும்பு State == in_Map_First_சாவி || State == in_Map_Other_சாவி;
 }
 
-bool Output::inFlowMapAnyKey(InState State) {
-  return State == inFlowMapFirstKey || State == inFlowMapOtherKey;
+தருக்க Output::in_Flow_Map_Any_சாவி(InState State) {
+  திரும்பு State == in_Flow_Map_First_சாவி || State == in_Flow_Map_Other_சாவி;
 }
 
 //===----------------------------------------------------------------------===//
 //  traits for built-in types
 //===----------------------------------------------------------------------===//
 
-void ScalarTraits<bool>::output(const bool &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<தருக்க>::output(மாறிலி தருக்க &Val, வெறுமை *, raw_ostream &Out) {
   Out << (Val ? "true" : "false");
 }
 
-StringRef ScalarTraits<bool>::input(StringRef Scalar, void *, bool &Val) {
-  if (std::optional<bool> Parsed = parseBool(Scalar)) {
+StringRef ScalarTraits<தருக்க>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, தருக்க &Val) {
+  எனில் (std::optional<தருக்க> Parsed = parseBool(Scalar)) {
     Val = *Parsed;
-    return StringRef();
+    திரும்பு StringRef();
   }
-  return "invalid boolean";
+  திரும்பு "invalid boolean";
 }
 
-void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
+வெறுமை ScalarTraits<StringRef>::output(மாறிலி StringRef &Val, வெறுமை *,
                                      raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<StringRef>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<StringRef>::உள்ளீடு_2(StringRef Scalar, வெறுமை *,
                                          StringRef &Val) {
   Val = Scalar;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<std::string>::output(const std::string &Val, void *,
+வெறுமை ScalarTraits<std::string>::output(மாறிலி std::string &Val, வெறுமை *,
                                        raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<std::string>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<std::string>::உள்ளீடு_2(StringRef Scalar, வெறுமை *,
                                            std::string &Val) {
   Val = Scalar.str();
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
+வெறுமை ScalarTraits<uint8_t>::output(மாறிலி uint8_t &Val, வெறுமை *,
                                    raw_ostream &Out) {
   // use temp uin32_t because ostream thinks uint8_t is a character
-  uint32_t Num = Val;
-  Out << Num;
+  uint32_t இலக்கம் = Val;
+  Out << இலக்கம்;
 }
 
-StringRef ScalarTraits<uint8_t>::input(StringRef Scalar, void *, uint8_t &Val) {
+StringRef ScalarTraits<uint8_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, uint8_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFF)
-    return "out of range number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, n))
+    திரும்பு "invalid number";
+  எனில் (n > 0xFF)
+    திரும்பு "out of range number";
   Val = n;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
+வெறுமை ScalarTraits<uint16_t>::output(மாறிலி uint16_t &Val, வெறுமை *,
                                     raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<uint16_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint16_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *,
                                         uint16_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFF)
-    return "out of range number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, n))
+    திரும்பு "invalid number";
+  எனில் (n > 0xFFFF)
+    திரும்பு "out of range number";
   Val = n;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
+வெறுமை ScalarTraits<uint32_t>::output(மாறிலி uint32_t &Val, வெறுமை *,
                                     raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<uint32_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint32_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *,
                                         uint32_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, n))
+    திரும்பு "invalid number";
+  எனில் (n > 0xFFFFFFFFUL)
+    திரும்பு "out of range number";
   Val = n;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
+வெறுமை ScalarTraits<uint64_t>::output(மாறிலி uint64_t &Val, வெறுமை *,
                                     raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<uint64_t>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<uint64_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *,
                                         uint64_t &Val) {
   unsigned long long N;
-  if (getAsUnsignedInteger(Scalar, 0, N))
-    return "invalid number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, N))
+    திரும்பு "invalid number";
   Val = N;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<int8_t>::output(மாறிலி int8_t &Val, வெறுமை *, raw_ostream &Out) {
   // use temp in32_t because ostream thinks int8_t is a character
-  int32_t Num = Val;
-  Out << Num;
+  int32_t இலக்கம் = Val;
+  Out << இலக்கம்;
 }
 
-StringRef ScalarTraits<int8_t>::input(StringRef Scalar, void *, int8_t &Val) {
+StringRef ScalarTraits<int8_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, int8_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > 127) || (N < -128))
-    return "out of range number";
+  எனில் (getAsSignedInteger(Scalar, 0, N))
+    திரும்பு "invalid number";
+  எனில் ((N > 127) || (N < -128))
+    திரும்பு "out of range number";
   Val = N;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
+வெறுமை ScalarTraits<int16_t>::output(மாறிலி int16_t &Val, வெறுமை *,
                                    raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<int16_t>::input(StringRef Scalar, void *, int16_t &Val) {
+StringRef ScalarTraits<int16_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, int16_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT16_MAX) || (N < INT16_MIN))
-    return "out of range number";
+  எனில் (getAsSignedInteger(Scalar, 0, N))
+    திரும்பு "invalid number";
+  எனில் ((N > INT16_MAX) || (N < INT16_MIN))
+    திரும்பு "out of range number";
   Val = N;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
+வெறுமை ScalarTraits<int32_t>::output(மாறிலி int32_t &Val, வெறுமை *,
                                    raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<int32_t>::input(StringRef Scalar, void *, int32_t &Val) {
+StringRef ScalarTraits<int32_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, int32_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT32_MAX) || (N < INT32_MIN))
-    return "out of range number";
+  எனில் (getAsSignedInteger(Scalar, 0, N))
+    திரும்பு "invalid number";
+  எனில் ((N > INT32_MAX) || (N < INT32_MIN))
+    திரும்பு "out of range number";
   Val = N;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
+வெறுமை ScalarTraits<int64_t>::output(மாறிலி int64_t &Val, வெறுமை *,
                                    raw_ostream &Out) {
   Out << Val;
 }
 
-StringRef ScalarTraits<int64_t>::input(StringRef Scalar, void *, int64_t &Val) {
+StringRef ScalarTraits<int64_t>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, int64_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
+  எனில் (getAsSignedInteger(Scalar, 0, N))
+    திரும்பு "invalid number";
   Val = N;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<இரட்டை>::output(மாறிலி இரட்டை &Val, வெறுமை *, raw_ostream &Out) {
   Out << format("%g", Val);
 }
 
-StringRef ScalarTraits<double>::input(StringRef Scalar, void *, double &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<இரட்டை>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, இரட்டை &Val) {
+  எனில் (to_float(Scalar, Val))
+    திரும்பு StringRef();
+  திரும்பு "invalid floating point number";
 }
 
-void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<தசம>::output(மாறிலி தசம &Val, வெறுமை *, raw_ostream &Out) {
   Out << format("%g", Val);
 }
 
-StringRef ScalarTraits<float>::input(StringRef Scalar, void *, float &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+StringRef ScalarTraits<தசம>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, தசம &Val) {
+  எனில் (to_float(Scalar, Val))
+    திரும்பு StringRef();
+  திரும்பு "invalid floating point number";
 }
 
-void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<Hex8>::output(மாறிலி Hex8 &Val, வெறுமை *, raw_ostream &Out) {
   Out << format("0x%" PRIX8, (uint8_t)Val);
 }
 
-StringRef ScalarTraits<Hex8>::input(StringRef Scalar, void *, Hex8 &Val) {
+StringRef ScalarTraits<Hex8>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, Hex8 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex8 number";
-  if (n > 0xFF)
-    return "out of range hex8 number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, n))
+    திரும்பு "invalid hex8 number";
+  எனில் (n > 0xFF)
+    திரும்பு "out of range hex8 number";
   Val = n;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<Hex16>::output(மாறிலி Hex16 &Val, வெறுமை *, raw_ostream &Out) {
   Out << format("0x%" PRIX16, (uint16_t)Val);
 }
 
-StringRef ScalarTraits<Hex16>::input(StringRef Scalar, void *, Hex16 &Val) {
+StringRef ScalarTraits<Hex16>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, Hex16 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex16 number";
-  if (n > 0xFFFF)
-    return "out of range hex16 number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, n))
+    திரும்பு "invalid hex16 number";
+  எனில் (n > 0xFFFF)
+    திரும்பு "out of range hex16 number";
   Val = n;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<Hex32>::output(மாறிலி Hex32 &Val, வெறுமை *, raw_ostream &Out) {
   Out << format("0x%" PRIX32, (uint32_t)Val);
 }
 
-StringRef ScalarTraits<Hex32>::input(StringRef Scalar, void *, Hex32 &Val) {
+StringRef ScalarTraits<Hex32>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, Hex32 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex32 number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range hex32 number";
+  எனில் (getAsUnsignedInteger(Scalar, 0, n))
+    திரும்பு "invalid hex32 number";
+  எனில் (n > 0xFFFFFFFFUL)
+    திரும்பு "out of range hex32 number";
   Val = n;
-  return StringRef();
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
+வெறுமை ScalarTraits<Hex64>::output(மாறிலி Hex64 &Val, வெறுமை *, raw_ostream &Out) {
   Out << format("0x%" PRIX64, (uint64_t)Val);
 }
 
-StringRef ScalarTraits<Hex64>::input(StringRef Scalar, void *, Hex64 &Val) {
-  unsigned long long Num;
-  if (getAsUnsignedInteger(Scalar, 0, Num))
-    return "invalid hex64 number";
-  Val = Num;
-  return StringRef();
+StringRef ScalarTraits<Hex64>::உள்ளீடு_2(StringRef Scalar, வெறுமை *, Hex64 &Val) {
+  unsigned long long இலக்கம்;
+  எனில் (getAsUnsignedInteger(Scalar, 0, இலக்கம்))
+    திரும்பு "invalid hex64 number";
+  Val = இலக்கம்;
+  திரும்பு StringRef();
 }
 
-void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
+வெறுமை ScalarTraits<VersionTuple>::output(மாறிலி VersionTuple &Val, வெறுமை *,
                                         llvm::raw_ostream &Out) {
   Out << Val.getAsString();
 }
 
-StringRef ScalarTraits<VersionTuple>::input(StringRef Scalar, void *,
+StringRef ScalarTraits<VersionTuple>::உள்ளீடு_2(StringRef Scalar, வெறுமை *,
                                             VersionTuple &Val) {
-  if (Val.tryParse(Scalar))
-    return "invalid version format";
-  return StringRef();
+  எனில் (Val.tryParse(Scalar))
+    திரும்பு "invalid version format";
+  திரும்பு StringRef();
 }

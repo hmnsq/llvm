@@ -5,41 +5,41 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "llvm/Support/Mustache.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
-#include <sstream>
+#அந்தர்பாவ "llvm/Support/Mustache.h"
+#அந்தர்பாவ "llvm/ADT/SmallVector.h"
+#அந்தர்பாவ "llvm/Support/Debug.h"
+#அந்தர்பாவ "llvm/Support/raw_ostream.h"
+#அந்தர்பாவ <sstream>
 
 #define DEBUG_TYPE "mustache"
 
-using namespace llvm;
-using namespace llvm::mustache;
+using நாமாகாஶ llvm;
+using நாமாகாஶ llvm::mustache;
 
-namespace {
+நாமாகாஶ {
 
 using Accessor = ArrayRef<StringRef>;
 
-static bool isFalsey(const json::Value &V) {
-  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
+நிலையான தருக்க isFalsey(மாறிலி json::மதிப்பு &V) {
+  திரும்பு V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().மதிப்பு_2()) ||
          (V.getAsArray() && V.getAsArray()->empty());
 }
 
-static bool isContextFalsey(const json::Value *V) {
+நிலையான தருக்க isContextFalsey(மாறிலி json::மதிப்பு *V) {
   // A missing context (represented by a nullptr) is defined as falsey.
-  if (!V)
-    return true;
-  return isFalsey(*V);
+  எனில் (!V)
+    திரும்பு உண்மை;
+  திரும்பு isFalsey(*V);
 }
 
-static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
+நிலையான வெறுமை splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
   size_t CurrentPos = 0;
-  while (CurrentPos < Str.size()) {
+  போது (CurrentPos < Str.size()) {
     // Find the next delimiter.
     size_t DelimiterPos = Str.find('.', CurrentPos);
 
     // If no delimiter is found, process the rest of the string.
-    if (DelimiterPos == StringRef::npos)
+    எனில் (DelimiterPos == StringRef::npos)
       DelimiterPos = Str.size();
 
     // Get the current part, which may have whitespace.
@@ -47,9 +47,9 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
 
     // Manually trim the part without creating a new string object.
     size_t Start = Part.find_first_not_of(" \t\r\n");
-    if (Start != StringRef::npos) {
+    எனில் (Start != StringRef::npos) {
       size_t End = Part.find_last_not_of(" \t\r\n");
-      Tokens.push_back(Part.slice(Start, End + 1));
+      Tokens.தள்ளு_back(Part.slice(Start, End + 1));
     }
 
     // Move past the delimiter for the next iteration.
@@ -57,18 +57,18 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
   }
 }
 
-static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
+நிலையான Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // We split the mustache string into an accessor.
   // For example:
   //    "a.b.c" would be split into {"a", "b", "c"}
   // We make an exception for a single dot which
   // refers to the current context.
   SmallVector<StringRef> Tokens;
-  if (Str == ".") {
+  எனில் (Str == ".") {
     // "." is a special accessor that refers to the current context.
     // It's a literal, so it doesn't need to be saved.
-    Tokens.push_back(".");
-  } else {
+    Tokens.தள்ளு_back(".");
+  } இல்லையெனில் {
     splitAndTrim(Str, Tokens);
   }
   // Now, allocate memory for the array of StringRefs in the arena.
@@ -76,42 +76,42 @@ static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   // Copy the StringRefs from the stack vector to the arena.
   llvm::copy(Tokens, ArenaTokens);
   // Return an ArrayRef pointing to the stable arena memory.
-  return ArrayRef<StringRef>(ArenaTokens, Tokens.size());
+  திரும்பு ArrayRef<StringRef>(ArenaTokens, Tokens.size());
 }
 } // namespace
 
-namespace llvm::mustache {
+நாமாகாஶ llvm::mustache {
 
-class MustacheOutputStream : public raw_ostream {
-public:
-  MustacheOutputStream() = default;
-  ~MustacheOutputStream() override = default;
+வகுப்பு MustacheOutputStream : பொது raw_ostream {
+பொது:
+  MustacheOutputStream() = இயல்பு;
+  ~MustacheOutputStream() override = இயல்பு;
 
-  virtual void suspendIndentation() {}
-  virtual void resumeIndentation() {}
+  மெய்நிகர் வெறுமை suspendIndentation() {}
+  மெய்நிகர் வெறுமை resumeIndentation() {}
 
-private:
-  void anchor() override;
+தனிப்பட்ட:
+  வெறுமை anchor() override;
 };
 
-void MustacheOutputStream::anchor() {}
+வெறுமை MustacheOutputStream::anchor() {}
 
-class RawMustacheOutputStream : public MustacheOutputStream {
-public:
+வகுப்பு RawMustacheOutputStream : பொது MustacheOutputStream {
+பொது:
   RawMustacheOutputStream(raw_ostream &OS) : OS(OS) { SetUnbuffered(); }
 
-private:
+தனிப்பட்ட:
   raw_ostream &OS;
 
-  void write_impl(const char *Ptr, size_t Size) override {
-    OS.write(Ptr, Size);
+  வெறுமை write_impl(மாறிலி எழுத்து *Ptr, size_t Size) override {
+    OS.லிக(Ptr, Size);
   }
-  uint64_t current_pos() const override { return OS.tell(); }
+  uint64_t current_pos() மாறிலி override { திரும்பு OS.tell(); }
 };
 
-class Token {
-public:
-  enum class Type {
+வகுப்பு Token {
+பொது:
+  எண்ணிக்கை வகுப்பு Type {
     Text,
     Variable,
     Partial,
@@ -125,46 +125,46 @@ public:
 
   Token(StringRef Str)
       : TokenType(Type::Text), RawBody(Str), TokenBody(RawBody),
-        AccessorValue({}), Indentation(0) {};
+        Accessor_மதிப்பு({}), Indentation(0) {};
 
-  Token(StringRef RawBody, StringRef TokenBody, char Identifier,
+  Token(StringRef RawBody, StringRef TokenBody, எழுத்து Identifier,
         MustacheContext &Ctx)
       : RawBody(RawBody), TokenBody(TokenBody), Indentation(0) {
     TokenType = getTokenType(Identifier);
-    if (TokenType == Type::Comment)
-      return;
-    StringRef AccessorStr(this->TokenBody);
-    if (TokenType != Type::Variable)
+    எனில் (TokenType == Type::Comment)
+      திரும்பு;
+    StringRef AccessorStr(இது->TokenBody);
+    எனில் (TokenType != Type::Variable)
       AccessorStr = AccessorStr.substr(1);
-    AccessorValue = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
+    Accessor_மதிப்பு = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
   }
 
-  ArrayRef<StringRef> getAccessor() const { return AccessorValue; }
+  ArrayRef<StringRef> getAccessor() மாறிலி { திரும்பு Accessor_மதிப்பு; }
 
-  Type getType() const { return TokenType; }
+  Type getType() மாறிலி { திரும்பு TokenType; }
 
-  void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; }
+  வெறுமை setIndentation(size_t NewIndentation) { Indentation = NewIndentation; }
 
-  size_t getIndentation() const { return Indentation; }
+  size_t getIndentation() மாறிலி { திரும்பு Indentation; }
 
-  static Type getTokenType(char Identifier) {
-    switch (Identifier) {
-    case '#':
-      return Type::SectionOpen;
-    case '/':
-      return Type::SectionClose;
-    case '^':
-      return Type::InvertSectionOpen;
-    case '!':
-      return Type::Comment;
-    case '>':
-      return Type::Partial;
-    case '&':
-      return Type::UnescapeVariable;
-    case '=':
-      return Type::SetDelimiter;
-    default:
-      return Type::Variable;
+  நிலையான Type getTokenType(எழுத்து Identifier) {
+    தேர்வு (Identifier) {
+    நிலை '#':
+      திரும்பு Type::SectionOpen;
+    நிலை '/':
+      திரும்பு Type::SectionClose;
+    நிலை '^':
+      திரும்பு Type::InvertSectionOpen;
+    நிலை '!':
+      திரும்பு Type::Comment;
+    நிலை '>':
+      திரும்பு Type::Partial;
+    நிலை '&':
+      திரும்பு Type::UnescapeVariable;
+    நிலை '=':
+      திரும்பு Type::SetDelimiter;
+    இயல்பு:
+      திரும்பு Type::Variable;
     }
   }
 
@@ -173,16 +173,16 @@ public:
   StringRef RawBody;
   // TokenBody is the original string with the identifier removed.
   StringRef TokenBody;
-  ArrayRef<StringRef> AccessorValue;
+  ArrayRef<StringRef> Accessor_மதிப்பு;
   size_t Indentation;
 };
 
-using EscapeMap = DenseMap<char, std::string>;
+using EscapeMap = DenseMap<எழுத்து, std::string>;
 
-class ASTNode : public ilist_node<ASTNode> {
-public:
-  enum Type {
-    Root,
+வகுப்பு ASTNode : பொது ilist_முனை<ASTNode> {
+பொது:
+  எண்ணிக்கை Type {
+    வேர்_2,
     Text,
     Partial,
     Variable,
@@ -192,7 +192,7 @@ public:
   };
 
   ASTNode(MustacheContext &Ctx)
-      : Ctx(Ctx), Ty(Type::Root), Parent(nullptr), ParentContext(nullptr) {}
+      : Ctx(Ctx), Ty(Type::வேர்_2), Parent(nullptr), ParentContext(nullptr) {}
 
   ASTNode(MustacheContext &Ctx, StringRef Body, ASTNode *Parent)
       : Ctx(Ctx), Ty(Type::Text), Body(Body), Parent(Parent),
@@ -201,39 +201,39 @@ public:
   // Constructor for Section/InvertSection/Variable/UnescapeVariable Nodes
   ASTNode(MustacheContext &Ctx, Type Ty, ArrayRef<StringRef> Accessor,
           ASTNode *Parent)
-      : Ctx(Ctx), Ty(Ty), Parent(Parent), AccessorValue(Accessor),
+      : Ctx(Ctx), Ty(Ty), Parent(Parent), Accessor_மதிப்பு(Accessor),
         ParentContext(nullptr) {}
 
-  void addChild(AstPtr Child) { Children.push_back(Child); };
+  வெறுமை addChild(AstPtr Child) { Children.தள்ளு_back(Child); };
 
-  void setRawBody(StringRef NewBody) { RawBody = NewBody; };
+  வெறுமை setRawBody(StringRef NewBody) { RawBody = NewBody; };
 
-  void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; };
+  வெறுமை setIndentation(size_t NewIndentation) { Indentation = NewIndentation; };
 
-  void render(const llvm::json::Value &Data, MustacheOutputStream &OS);
+  வெறுமை render(மாறிலி llvm::json::மதிப்பு &Data, MustacheOutputStream &OS);
 
-private:
-  void renderLambdas(const llvm::json::Value &Contexts,
+தனிப்பட்ட:
+  வெறுமை renderLambdas(மாறிலி llvm::json::மதிப்பு &Contexts,
                      MustacheOutputStream &OS, Lambda &L);
 
-  void renderSectionLambdas(const llvm::json::Value &Contexts,
+  வெறுமை renderSectionLambdas(மாறிலி llvm::json::மதிப்பு &Contexts,
                             MustacheOutputStream &OS, SectionLambda &L);
 
-  void renderPartial(const llvm::json::Value &Contexts,
+  வெறுமை renderPartial(மாறிலி llvm::json::மதிப்பு &Contexts,
                      MustacheOutputStream &OS, ASTNode *Partial);
 
-  void renderChild(const llvm::json::Value &Context, MustacheOutputStream &OS);
+  வெறுமை renderChild(மாறிலி llvm::json::மதிப்பு &Context, MustacheOutputStream &OS);
 
-  const llvm::json::Value *findContext();
+  மாறிலி llvm::json::மதிப்பு *findContext();
 
-  void renderRoot(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderText(MustacheOutputStream &OS);
-  void renderPartial(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderVariable(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderUnescapeVariable(const json::Value &CurrentCtx,
+  வெறுமை render_வேர்(மாறிலி json::மதிப்பு &CurrentCtx, MustacheOutputStream &OS);
+  வெறுமை renderText(MustacheOutputStream &OS);
+  வெறுமை renderPartial(மாறிலி json::மதிப்பு &CurrentCtx, MustacheOutputStream &OS);
+  வெறுமை renderVariable(மாறிலி json::மதிப்பு &CurrentCtx, MustacheOutputStream &OS);
+  வெறுமை renderUnescapeVariable(மாறிலி json::மதிப்பு &CurrentCtx,
                               MustacheOutputStream &OS);
-  void renderSection(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderInvertSection(const json::Value &CurrentCtx,
+  வெறுமை renderSection(மாறிலி json::மதிப்பு &CurrentCtx, MustacheOutputStream &OS);
+  வெறுமை renderInvertSection(மாறிலி json::மதிப்பு &CurrentCtx,
                            MustacheOutputStream &OS);
 
   MustacheContext &Ctx;
@@ -243,23 +243,23 @@ private:
   StringRef Body;
   ASTNode *Parent;
   ASTNodeList Children;
-  const ArrayRef<StringRef> AccessorValue;
-  const llvm::json::Value *ParentContext;
+  மாறிலி ArrayRef<StringRef> Accessor_மதிப்பு;
+  மாறிலி llvm::json::மதிப்பு *ParentContext;
 };
 
 // A wrapper for arena allocator for ASTNodes
-static AstPtr createRootNode(MustacheContext &Ctx) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
+நிலையான AstPtr create_வேர்_முனை(MustacheContext &Ctx) {
+  திரும்பு புதிய (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
 }
 
-static AstPtr createNode(MustacheContext &Ctx, ASTNode::Type T,
+நிலையான AstPtr create_முனை(MustacheContext &Ctx, ASTNode::Type T,
                          ArrayRef<StringRef> A, ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
+  திரும்பு புதிய (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
 }
 
-static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
+நிலையான AstPtr create_Text_முனை(MustacheContext &Ctx, StringRef Body,
                              ASTNode *Parent) {
-  return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
+  திரும்பு புதிய (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
 }
 
 // Function to check if there is meaningful text behind.
@@ -274,38 +274,38 @@ static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
 // and the current token is the second token.
 // For example:
 //  "{{#Section}}"
-static bool hasTextBehind(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx == 0)
-    return true;
+நிலையான தருக்க hasTextBehind(size_t Idx, மாறிலி ArrayRef<Token> &Tokens) {
+  எனில் (Idx == 0)
+    திரும்பு உண்மை;
 
   size_t PrevIdx = Idx - 1;
-  if (Tokens[PrevIdx].getType() != Token::Type::Text)
-    return true;
+  எனில் (Tokens[PrevIdx].getType() != Token::Type::Text)
+    திரும்பு உண்மை;
 
-  const Token &PrevToken = Tokens[PrevIdx];
+  மாறிலி Token &PrevToken = Tokens[PrevIdx];
   StringRef TokenBody = StringRef(PrevToken.RawBody).rtrim(" \r\t\v");
-  return !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
+  திரும்பு !TokenBody.ends_with("\n") && !(TokenBody.empty() && Idx == 1);
 }
 
 // Function to check if there's no meaningful text ahead.
 // We determine if a token has text ahead if the left of previous
 // token does not start with a newline.
-static bool hasTextAhead(size_t Idx, const ArrayRef<Token> &Tokens) {
-  if (Idx >= Tokens.size() - 1)
-    return true;
+நிலையான தருக்க hasTextAhead(size_t Idx, மாறிலி ArrayRef<Token> &Tokens) {
+  எனில் (Idx >= Tokens.size() - 1)
+    திரும்பு உண்மை;
 
   size_t NextIdx = Idx + 1;
-  if (Tokens[NextIdx].getType() != Token::Type::Text)
-    return true;
+  எனில் (Tokens[NextIdx].getType() != Token::Type::Text)
+    திரும்பு உண்மை;
 
-  const Token &NextToken = Tokens[NextIdx];
+  மாறிலி Token &NextToken = Tokens[NextIdx];
   StringRef TokenBody = StringRef(NextToken.RawBody).ltrim(" ");
-  return !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
+  திரும்பு !TokenBody.starts_with("\r\n") && !TokenBody.starts_with("\n");
 }
 
-static bool requiresCleanUp(Token::Type T) {
+நிலையான தருக்க requiresCleanUp(Token::Type T) {
   // We must clean up all the tokens that could contain child nodes.
-  return T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
+  திரும்பு T == Token::Type::SectionOpen || T == Token::Type::InvertSectionOpen ||
          T == Token::Type::SectionClose || T == Token::Type::Comment ||
          T == Token::Type::Partial || T == Token::Type::SetDelimiter;
 }
@@ -316,13 +316,13 @@ static bool requiresCleanUp(Token::Type T) {
 //  "{{! Comment }} \nLine 2"
 // would be considered as no text ahead and should be rendered as
 //  " Line 2"
-static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
+நிலையான வெறுமை stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
   Token &NextToken = Tokens[Idx + 1];
   StringRef NextTokenBody = NextToken.TokenBody;
   // Cut off the leading newline which could be \n or \r\n.
-  if (NextTokenBody.starts_with("\r\n"))
+  எனில் (NextTokenBody.starts_with("\r\n"))
     NextToken.TokenBody = NextTokenBody.substr(2);
-  else if (NextTokenBody.starts_with("\n"))
+  இல்லையெனில் எனில் (NextTokenBody.starts_with("\n"))
     NextToken.TokenBody = NextTokenBody.substr(1);
 }
 
@@ -332,7 +332,7 @@ static void stripTokenAhead(SmallVectorImpl<Token> &Tokens, size_t Idx) {
 //  " \t{{#section}}A{{/section}}"
 // would be considered as having no text ahead and would be render as:
 //  "A"
-void stripTokenBefore(SmallVectorImpl<Token> &Tokens, size_t Idx,
+வெறுமை stripTokenBefore(SmallVectorImpl<Token> &Tokens, size_t Idx,
                       Token &CurrentToken, Token::Type CurrentType) {
   Token &PrevToken = Tokens[Idx - 1];
   StringRef PrevTokenBody = PrevToken.TokenBody;
@@ -342,8 +342,8 @@ void stripTokenBefore(SmallVectorImpl<Token> &Tokens, size_t Idx,
   CurrentToken.setIndentation(Indentation);
 }
 
-struct Tag {
-  enum class Kind {
+கட்டமைப்பு Tag {
+  எண்ணிக்கை வகுப்பு Kind {
     None,
     Normal, // {{...}}
     Triple, // {{{...}}}
@@ -355,38 +355,38 @@ struct Tag {
   size_t StartPosition = StringRef::npos;
 };
 
-[[maybe_unused]] static const char *tagKindToString(Tag::Kind K) {
-  switch (K) {
-  case Tag::Kind::None:
-    return "None";
-  case Tag::Kind::Normal:
-    return "Normal";
-  case Tag::Kind::Triple:
-    return "Triple";
+[[maybe_unused]] நிலையான மாறிலி எழுத்து *tagKindToString(Tag::Kind K) {
+  தேர்வு (K) {
+  நிலை Tag::Kind::None:
+    திரும்பு "None";
+  நிலை Tag::Kind::Normal:
+    திரும்பு "Normal";
+  நிலை Tag::Kind::Triple:
+    திரும்பு "Triple";
   }
   llvm_unreachable("Unknown Tag::Kind");
 }
 
-[[maybe_unused]] static const char *jsonKindToString(json::Value::Kind K) {
-  switch (K) {
-  case json::Value::Kind::Null:
-    return "JSON_KIND_NULL";
-  case json::Value::Kind::Boolean:
-    return "JSON_KIND_BOOLEAN";
-  case json::Value::Kind::Number:
-    return "JSON_KIND_NUMBER";
-  case json::Value::Kind::String:
-    return "JSON_KIND_STRING";
-  case json::Value::Kind::Array:
-    return "JSON_KIND_ARRAY";
-  case json::Value::Kind::Object:
-    return "JSON_KIND_OBJECT";
+[[maybe_unused]] நிலையான மாறிலி எழுத்து *jsonKindToString(json::மதிப்பு::Kind K) {
+  தேர்வு (K) {
+  நிலை json::மதிப்பு::Kind::Null:
+    திரும்பு "JSON_KIND_NULL";
+  நிலை json::மதிப்பு::Kind::Boolean:
+    திரும்பு "JSON_KIND_BOOLEAN";
+  நிலை json::மதிப்பு::Kind::எண்:
+    திரும்பு "JSON_KIND_NUMBER";
+  நிலை json::மதிப்பு::Kind::String:
+    திரும்பு "JSON_KIND_STRING";
+  நிலை json::மதிப்பு::Kind::Array:
+    திரும்பு "JSON_KIND_ARRAY";
+  நிலை json::மதிப்பு::Kind::Object:
+    திரும்பு "JSON_KIND_OBJECT";
   }
   llvm_unreachable("Unknown json::Value::Kind");
 }
 
 // Simple tokenizer that splits the template into tokens.
-static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
+நிலையான SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   LLVM_DEBUG(dbgs() << "[Tokenize Template] \"" << Template << "\"\n");
   SmallVector<Token> Tokens;
   SmallString<8> Open("{{");
@@ -394,40 +394,40 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   size_t Cursor = 0;
   size_t TextStart = 0;
 
-  const StringLiteral TripleOpen("{{{");
-  const StringLiteral TripleClose("}}}");
+  மாறிலி StringLiteral TripleOpen("{{{");
+  மாறிலி StringLiteral TripleClose("}}}");
 
-  while (Cursor < Template.size()) {
+  போது (Cursor < Template.size()) {
     StringRef TemplateSuffix = Template.substr(Cursor);
     StringRef TagOpen, TagClose;
     Tag::Kind Kind;
 
     // Determine which tag we've encountered.
-    if (TemplateSuffix.starts_with(TripleOpen)) {
+    எனில் (TemplateSuffix.starts_with(TripleOpen)) {
       Kind = Tag::Kind::Triple;
       TagOpen = TripleOpen;
       TagClose = TripleClose;
-    } else if (TemplateSuffix.starts_with(Open)) {
+    } இல்லையெனில் எனில் (TemplateSuffix.starts_with(Open)) {
       Kind = Tag::Kind::Normal;
       TagOpen = Open;
       TagClose = Close;
-    } else {
+    } இல்லையெனில் {
       // Not at a tag, continue scanning.
       ++Cursor;
-      continue;
+      தொடர்;
     }
 
     // Found a tag, first add the preceding text.
-    if (Cursor > TextStart)
+    எனில் (Cursor > TextStart)
       Tokens.emplace_back(Template.slice(TextStart, Cursor));
 
     // Find the closing tag.
     size_t EndPos = Template.find(TagClose, Cursor + TagOpen.size());
-    if (EndPos == StringRef::npos) {
+    எனில் (EndPos == StringRef::npos) {
       // No closing tag, the rest is text.
       Tokens.emplace_back(Template.substr(Cursor));
       TextStart = Cursor = Template.size();
-      break;
+      நிறுத்து;
     }
 
     // Extract tag content and full match.
@@ -439,18 +439,18 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
     // Process the tag (inlined logic from processTag).
     LLVM_DEBUG(dbgs() << "[Tag] " << FullMatch << ", Content: " << Content
                       << ", Kind: " << tagKindToString(Kind) << "\n");
-    if (Kind == Tag::Kind::Triple) {
+    எனில் (Kind == Tag::Kind::Triple) {
       Tokens.emplace_back(FullMatch, Ctx.Saver.save("&" + Content), '&', Ctx);
-    } else { // Normal Tag
+    } இல்லையெனில் { // Normal Tag
       StringRef Interpolated = Content;
-      if (!Interpolated.trim().starts_with("=")) {
-        char Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
+      எனில் (!Interpolated.trim().starts_with("=")) {
+        எழுத்து Front = Interpolated.empty() ? ' ' : Interpolated.trim().front();
         Tokens.emplace_back(FullMatch, Interpolated, Front, Ctx);
-      } else { // Set Delimiter
+      } இல்லையெனில் { // Set Delimiter
         Tokens.emplace_back(FullMatch, Interpolated, '=', Ctx);
         StringRef DelimSpec = Interpolated.trim();
         DelimSpec = DelimSpec.drop_front(1);
-        DelimSpec = DelimSpec.take_until([](char C) { return C == '='; });
+        DelimSpec = DelimSpec.take_until([](எழுத்து C) { திரும்பு C == '='; });
         DelimSpec = DelimSpec.trim();
 
         auto [NewOpen, NewClose] = DelimSpec.split(' ');
@@ -467,55 +467,55 @@ static SmallVector<Token> tokenize(StringRef Template, MustacheContext &Ctx) {
   }
 
   // Add any remaining text after the last tag.
-  if (TextStart < Template.size())
+  எனில் (TextStart < Template.size())
     Tokens.emplace_back(Template.substr(TextStart));
 
   // Fix up white spaces for standalone tags.
   size_t LastIdx = Tokens.size() - 1;
-  for (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
+  க்கு (size_t Idx = 0, End = Tokens.size(); Idx < End; ++Idx) {
     Token &CurrentToken = Tokens[Idx];
     Token::Type CurrentType = CurrentToken.getType();
-    if (!requiresCleanUp(CurrentType))
-      continue;
+    எனில் (!requiresCleanUp(CurrentType))
+      தொடர்;
 
-    bool HasTextBehind = hasTextBehind(Idx, Tokens);
-    bool HasTextAhead = hasTextAhead(Idx, Tokens);
+    தருக்க HasTextBehind = hasTextBehind(Idx, Tokens);
+    தருக்க HasTextAhead = hasTextAhead(Idx, Tokens);
 
-    if ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
+    எனில் ((!HasTextAhead && !HasTextBehind) || (!HasTextAhead && Idx == 0))
       stripTokenAhead(Tokens, Idx);
 
-    if ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
+    எனில் ((!HasTextBehind && !HasTextAhead) || (!HasTextBehind && Idx == LastIdx))
       stripTokenBefore(Tokens, Idx, CurrentToken, CurrentType);
   }
-  return Tokens;
+  திரும்பு Tokens;
 }
 
 // Custom stream to escape strings.
-class EscapeStringStream : public MustacheOutputStream {
-public:
+வகுப்பு EscapeStringStream : பொது MustacheOutputStream {
+பொது:
   explicit EscapeStringStream(llvm::raw_ostream &WrappedStream,
                               EscapeMap &Escape)
-      : Escape(Escape), EscapeChars(Escape.keys().begin(), Escape.keys().end()),
+      : Escape(Escape), EscapeChars(Escape.சாவிகள்().begin(), Escape.சாவிகள்().end()),
         WrappedStream(WrappedStream) {
     SetUnbuffered();
   }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
+பாதுகாக்கப்பட்ட:
+  வெறுமை write_impl(மாறிலி எழுத்து *Ptr, size_t Size) override {
     StringRef Data(Ptr, Size);
     size_t Start = 0;
-    while (Start < Size) {
+    போது (Start < Size) {
       // Find the next character that needs to be escaped.
       size_t Next = Data.find_first_of(EscapeChars.str(), Start);
 
       // If no escapable characters are found, write the rest of the string.
-      if (Next == StringRef::npos) {
+      எனில் (Next == StringRef::npos) {
         WrappedStream << Data.substr(Start);
-        return;
+        திரும்பு;
       }
 
       // Write the chunk of text before the escapable character.
-      if (Next > Start)
+      எனில் (Next > Start)
         WrappedStream << Data.substr(Start, Next - Start);
 
       // Look up and write the escaped version of the character.
@@ -524,66 +524,66 @@ protected:
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() மாறிலி override { திரும்பு WrappedStream.tell(); }
 
-private:
+தனிப்பட்ட:
   EscapeMap &Escape;
   SmallString<8> EscapeChars;
   llvm::raw_ostream &WrappedStream;
 };
 
 // Custom stream to add indentation used to for rendering partials.
-class AddIndentationStringStream : public MustacheOutputStream {
-public:
+வகுப்பு AddIndentationStringStream : பொது MustacheOutputStream {
+பொது:
   explicit AddIndentationStringStream(raw_ostream &WrappedStream,
                                       size_t Indentation)
       : Indentation(Indentation), WrappedStream(WrappedStream),
-        NeedsIndent(true), IsSuspended(false) {
+        NeedsIndent(உண்மை), IsSuspended(பொய்) {
     SetUnbuffered();
   }
 
-  void suspendIndentation() override { IsSuspended = true; }
-  void resumeIndentation() override { IsSuspended = false; }
+  வெறுமை suspendIndentation() override { IsSuspended = உண்மை; }
+  வெறுமை resumeIndentation() override { IsSuspended = பொய்; }
 
-protected:
-  void write_impl(const char *Ptr, size_t Size) override {
+பாதுகாக்கப்பட்ட:
+  வெறுமை write_impl(மாறிலி எழுத்து *Ptr, size_t Size) override {
     llvm::StringRef Data(Ptr, Size);
     SmallString<0> Indent;
     Indent.resize(Indentation, ' ');
 
-    for (char C : Data) {
+    க்கு (எழுத்து C : Data) {
       LLVM_DEBUG(dbgs() << "[Indentation Stream] NeedsIndent:" << NeedsIndent
                         << ", C:'" << C << "', Indentation:" << Indentation
                         << "\n");
-      if (NeedsIndent && C != '\n') {
+      எனில் (NeedsIndent && C != '\n') {
         WrappedStream << Indent;
-        NeedsIndent = false;
+        NeedsIndent = பொய்;
       }
       WrappedStream << C;
-      if (C == '\n' && !IsSuspended)
-        NeedsIndent = true;
+      எனில் (C == '\n' && !IsSuspended)
+        NeedsIndent = உண்மை;
     }
   }
 
-  uint64_t current_pos() const override { return WrappedStream.tell(); }
+  uint64_t current_pos() மாறிலி override { திரும்பு WrappedStream.tell(); }
 
-private:
+தனிப்பட்ட:
   size_t Indentation;
   raw_ostream &WrappedStream;
-  bool NeedsIndent;
-  bool IsSuspended;
+  தருக்க NeedsIndent;
+  தருக்க IsSuspended;
 };
 
-class Parser {
-public:
+வகுப்பு Parser {
+பொது:
   Parser(StringRef TemplateStr, MustacheContext &Ctx)
       : Ctx(Ctx), TemplateStr(TemplateStr) {}
 
   AstPtr parse();
 
-private:
-  void parseMustache(ASTNode *Parent);
-  void parseSection(ASTNode *Parent, ASTNode::Type Ty, const Accessor &A);
+தனிப்பட்ட:
+  வெறுமை parseMustache(ASTNode *Parent);
+  வெறுமை parseSection(ASTNode *Parent, ASTNode::Type Ty, மாறிலி Accessor &A);
 
   MustacheContext &Ctx;
   SmallVector<Token> Tokens;
@@ -591,328 +591,328 @@ private:
   StringRef TemplateStr;
 };
 
-void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
-                          const Accessor &A) {
-  AstPtr CurrentNode = createNode(Ctx, Ty, A, Parent);
+வெறுமை Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
+                          மாறிலி Accessor &A) {
+  AstPtr Current_முனை = create_முனை(Ctx, Ty, A, Parent);
   size_t Start = CurrentPtr;
-  parseMustache(CurrentNode);
-  const size_t End = CurrentPtr - 1;
+  parseMustache(Current_முனை);
+  மாறிலி size_t End = CurrentPtr - 1;
 
   size_t RawBodySize = 0;
-  for (size_t I = Start; I < End; ++I)
+  க்கு (size_t I = Start; I < End; ++I)
     RawBodySize += Tokens[I].RawBody.size();
 
   SmallString<128> RawBody;
   RawBody.reserve(RawBodySize);
-  for (std::size_t I = Start; I < End; ++I)
+  க்கு (std::size_t I = Start; I < End; ++I)
     RawBody += Tokens[I].RawBody;
 
-  CurrentNode->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
-  Parent->addChild(CurrentNode);
+  Current_முனை->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
+  Parent->addChild(Current_முனை);
 }
 
 AstPtr Parser::parse() {
   Tokens = tokenize(TemplateStr, Ctx);
   CurrentPtr = 0;
-  AstPtr RootNode = createRootNode(Ctx);
-  parseMustache(RootNode);
-  return RootNode;
+  AstPtr வேர்_முனை = create_வேர்_முனை(Ctx);
+  parseMustache(வேர்_முனை);
+  திரும்பு வேர்_முனை;
 }
 
-void Parser::parseMustache(ASTNode *Parent) {
+வெறுமை Parser::parseMustache(ASTNode *Parent) {
 
-  while (CurrentPtr < Tokens.size()) {
+  போது (CurrentPtr < Tokens.size()) {
     Token CurrentToken = Tokens[CurrentPtr];
     CurrentPtr++;
     ArrayRef<StringRef> A = CurrentToken.getAccessor();
-    AstPtr CurrentNode;
+    AstPtr Current_முனை;
 
-    switch (CurrentToken.getType()) {
-    case Token::Type::Text: {
-      CurrentNode = createTextNode(Ctx, CurrentToken.TokenBody, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    தேர்வு (CurrentToken.getType()) {
+    நிலை Token::Type::Text: {
+      Current_முனை = create_Text_முனை(Ctx, CurrentToken.TokenBody, Parent);
+      Parent->addChild(Current_முனை);
+      நிறுத்து;
     }
-    case Token::Type::Variable: {
-      CurrentNode = createNode(Ctx, ASTNode::Variable, A, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    நிலை Token::Type::Variable: {
+      Current_முனை = create_முனை(Ctx, ASTNode::Variable, A, Parent);
+      Parent->addChild(Current_முனை);
+      நிறுத்து;
     }
-    case Token::Type::UnescapeVariable: {
-      CurrentNode = createNode(Ctx, ASTNode::UnescapeVariable, A, Parent);
-      Parent->addChild(CurrentNode);
-      break;
+    நிலை Token::Type::UnescapeVariable: {
+      Current_முனை = create_முனை(Ctx, ASTNode::UnescapeVariable, A, Parent);
+      Parent->addChild(Current_முனை);
+      நிறுத்து;
     }
-    case Token::Type::Partial: {
-      CurrentNode = createNode(Ctx, ASTNode::Partial, A, Parent);
-      CurrentNode->setIndentation(CurrentToken.getIndentation());
-      Parent->addChild(CurrentNode);
-      break;
+    நிலை Token::Type::Partial: {
+      Current_முனை = create_முனை(Ctx, ASTNode::Partial, A, Parent);
+      Current_முனை->setIndentation(CurrentToken.getIndentation());
+      Parent->addChild(Current_முனை);
+      நிறுத்து;
     }
-    case Token::Type::SectionOpen: {
+    நிலை Token::Type::SectionOpen: {
       parseSection(Parent, ASTNode::Section, A);
-      break;
+      நிறுத்து;
     }
-    case Token::Type::InvertSectionOpen: {
+    நிலை Token::Type::InvertSectionOpen: {
       parseSection(Parent, ASTNode::InvertSection, A);
-      break;
+      நிறுத்து;
     }
-    case Token::Type::Comment:
-    case Token::Type::SetDelimiter:
-      break;
-    case Token::Type::SectionClose:
-      return;
+    நிலை Token::Type::Comment:
+    நிலை Token::Type::SetDelimiter:
+      நிறுத்து;
+    நிலை Token::Type::SectionClose:
+      திரும்பு;
     }
   }
 }
-static void toMustacheString(const json::Value &Data, raw_ostream &OS) {
+நிலையான வெறுமை toMustacheString(மாறிலி json::மதிப்பு &Data, raw_ostream &OS) {
   LLVM_DEBUG(dbgs() << "[To Mustache String] Kind: "
                     << jsonKindToString(Data.kind()) << ", Data: " << Data
                     << "\n");
-  switch (Data.kind()) {
-  case json::Value::Null:
-    return;
-  case json::Value::Number: {
-    auto Num = *Data.getAsNumber();
+  தேர்வு (Data.kind()) {
+  நிலை json::மதிப்பு::Null:
+    திரும்பு;
+  நிலை json::மதிப்பு::எண்: {
+    auto இலக்கம் = *Data.get_As_எண்();
     std::ostringstream SS;
-    SS << Num;
+    SS << இலக்கம்;
     OS << SS.str();
-    return;
+    திரும்பு;
   }
-  case json::Value::String: {
+  நிலை json::மதிப்பு::String: {
     OS << *Data.getAsString();
-    return;
+    திரும்பு;
   }
 
-  case json::Value::Array: {
+  நிலை json::மதிப்பு::Array: {
     auto Arr = *Data.getAsArray();
-    if (Arr.empty())
-      return;
+    எனில் (Arr.empty())
+      திரும்பு;
     [[fallthrough]];
   }
-  case json::Value::Object:
-  case json::Value::Boolean: {
+  நிலை json::மதிப்பு::Object:
+  நிலை json::மதிப்பு::Boolean: {
     llvm::json::OStream JOS(OS, 2);
-    JOS.value(Data);
-    break;
+    JOS.மதிப்பு_2(Data);
+    நிறுத்து;
   }
   }
 }
 
-void ASTNode::renderRoot(const json::Value &CurrentCtx,
+வெறுமை ASTNode::render_வேர்(மாறிலி json::மதிப்பு &CurrentCtx,
                          MustacheOutputStream &OS) {
   renderChild(CurrentCtx, OS);
 }
 
-void ASTNode::renderText(MustacheOutputStream &OS) { OS << Body; }
+வெறுமை ASTNode::renderText(MustacheOutputStream &OS) { OS << Body; }
 
-void ASTNode::renderPartial(const json::Value &CurrentCtx,
+வெறுமை ASTNode::renderPartial(மாறிலி json::மதிப்பு &CurrentCtx,
                             MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << AccessorValue[0]
+  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << Accessor_மதிப்பு[0]
                     << ", Indentation:" << Indentation << "\n");
-  auto Partial = Ctx.Partials.find(AccessorValue[0]);
-  if (Partial != Ctx.Partials.end())
-    renderPartial(CurrentCtx, OS, Partial->getValue());
+  auto Partial = Ctx.Partials.find(Accessor_மதிப்பு[0]);
+  எனில் (Partial != Ctx.Partials.end())
+    renderPartial(CurrentCtx, OS, Partial->get_மதிப்பு());
 }
 
-void ASTNode::renderVariable(const json::Value &CurrentCtx,
+வெறுமை ASTNode::renderVariable(மாறிலி json::மதிப்பு &CurrentCtx,
                              MustacheOutputStream &OS) {
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  auto Lambda = Ctx.Lambdas.find(Accessor_மதிப்பு[0]);
+  எனில் (Lambda != Ctx.Lambdas.end()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_மதிப்பு());
+  } இல்லையெனில் எனில் (மாறிலி json::மதிப்பு *ContextPtr = findContext()) {
     EscapeStringStream ES(OS, Ctx.Escapes);
     toMustacheString(*ContextPtr, ES);
   }
 }
 
-void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
+வெறுமை ASTNode::renderUnescapeVariable(மாறிலி json::மதிப்பு &CurrentCtx,
                                      MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << AccessorValue[0]
+  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << Accessor_மதிப்பு[0]
                     << "\n");
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
-  if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+  auto Lambda = Ctx.Lambdas.find(Accessor_மதிப்பு[0]);
+  எனில் (Lambda != Ctx.Lambdas.end()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_மதிப்பு());
+  } இல்லையெனில் எனில் (மாறிலி json::மதிப்பு *ContextPtr = findContext()) {
     OS.suspendIndentation();
     toMustacheString(*ContextPtr, OS);
     OS.resumeIndentation();
   }
 }
 
-void ASTNode::renderSection(const json::Value &CurrentCtx,
+வெறுமை ASTNode::renderSection(மாறிலி json::மதிப்பு &CurrentCtx,
                             MustacheOutputStream &OS) {
-  auto SectionLambda = Ctx.SectionLambdas.find(AccessorValue[0]);
-  if (SectionLambda != Ctx.SectionLambdas.end()) {
-    renderSectionLambdas(CurrentCtx, OS, SectionLambda->getValue());
-    return;
+  auto SectionLambda = Ctx.SectionLambdas.find(Accessor_மதிப்பு[0]);
+  எனில் (SectionLambda != Ctx.SectionLambdas.end()) {
+    renderSectionLambdas(CurrentCtx, OS, SectionLambda->get_மதிப்பு());
+    திரும்பு;
   }
 
-  const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr))
-    return;
+  மாறிலி json::மதிப்பு *ContextPtr = findContext();
+  எனில் (isContextFalsey(ContextPtr))
+    திரும்பு;
 
-  if (const json::Array *Arr = ContextPtr->getAsArray()) {
-    for (const json::Value &V : *Arr)
+  எனில் (மாறிலி json::Array *Arr = ContextPtr->getAsArray()) {
+    க்கு (மாறிலி json::மதிப்பு &V : *Arr)
       renderChild(V, OS);
-    return;
+    திரும்பு;
   }
   renderChild(*ContextPtr, OS);
 }
 
-void ASTNode::renderInvertSection(const json::Value &CurrentCtx,
+வெறுமை ASTNode::renderInvertSection(மாறிலி json::மதிப்பு &CurrentCtx,
                                   MustacheOutputStream &OS) {
-  bool IsLambda = Ctx.SectionLambdas.contains(AccessorValue[0]);
-  const json::Value *ContextPtr = findContext();
-  if (isContextFalsey(ContextPtr) && !IsLambda) {
+  தருக்க IsLambda = Ctx.SectionLambdas.contains(Accessor_மதிப்பு[0]);
+  மாறிலி json::மதிப்பு *ContextPtr = findContext();
+  எனில் (isContextFalsey(ContextPtr) && !IsLambda) {
     renderChild(CurrentCtx, OS);
   }
 }
 
-void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
-  if (Ty != Root && Ty != Text && AccessorValue.empty())
-    return;
+வெறுமை ASTNode::render(மாறிலி llvm::json::மதிப்பு &Data, MustacheOutputStream &OS) {
+  எனில் (Ty != வேர்_2 && Ty != Text && Accessor_மதிப்பு.empty())
+    திரும்பு;
   // Set the parent context to the incoming context so that we
   // can walk up the context tree correctly in findContext().
   ParentContext = &Data;
 
-  switch (Ty) {
-  case Root:
-    renderRoot(Data, OS);
-    return;
-  case Text:
+  தேர்வு (Ty) {
+  நிலை வேர்_2:
+    render_வேர்(Data, OS);
+    திரும்பு;
+  நிலை Text:
     renderText(OS);
-    return;
-  case Partial:
+    திரும்பு;
+  நிலை Partial:
     renderPartial(Data, OS);
-    return;
-  case Variable:
+    திரும்பு;
+  நிலை Variable:
     renderVariable(Data, OS);
-    return;
-  case UnescapeVariable:
+    திரும்பு;
+  நிலை UnescapeVariable:
     renderUnescapeVariable(Data, OS);
-    return;
-  case Section:
+    திரும்பு;
+  நிலை Section:
     renderSection(Data, OS);
-    return;
-  case InvertSection:
+    திரும்பு;
+  நிலை InvertSection:
     renderInvertSection(Data, OS);
-    return;
+    திரும்பு;
   }
   llvm_unreachable("Invalid ASTNode type");
 }
 
-const json::Value *ASTNode::findContext() {
+மாறிலி json::மதிப்பு *ASTNode::findContext() {
   // The mustache spec allows for dot notation to access nested values
   // a single dot refers to the current context.
   // We attempt to find the JSON context in the current node, if it is not
   // found, then we traverse the parent nodes to find the context until we
   // reach the root node or the context is found.
-  if (AccessorValue.empty())
-    return nullptr;
-  if (AccessorValue[0] == ".")
-    return ParentContext;
+  எனில் (Accessor_மதிப்பு.empty())
+    திரும்பு nullptr;
+  எனில் (Accessor_மதிப்பு[0] == ".")
+    திரும்பு ParentContext;
 
-  const json::Object *CurrentContext = ParentContext->getAsObject();
-  StringRef CurrentAccessor = AccessorValue[0];
+  மாறிலி json::Object *CurrentContext = ParentContext->getAsObject();
+  StringRef CurrentAccessor = Accessor_மதிப்பு[0];
   ASTNode *CurrentParent = Parent;
 
-  while (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
-    if (CurrentParent->Ty != Root) {
+  போது (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
+    எனில் (CurrentParent->Ty != வேர்_2) {
       CurrentContext = CurrentParent->ParentContext->getAsObject();
       CurrentParent = CurrentParent->Parent;
-      continue;
+      தொடர்;
     }
-    return nullptr;
+    திரும்பு nullptr;
   }
-  const json::Value *Context = nullptr;
-  for (auto [Idx, Acc] : enumerate(AccessorValue)) {
-    const json::Value *CurrentValue = CurrentContext->get(Acc);
-    if (!CurrentValue)
-      return nullptr;
-    if (Idx < AccessorValue.size() - 1) {
-      CurrentContext = CurrentValue->getAsObject();
-      if (!CurrentContext)
-        return nullptr;
-    } else {
-      Context = CurrentValue;
+  மாறிலி json::மதிப்பு *Context = nullptr;
+  க்கு (auto [Idx, Acc] : enumerate(Accessor_மதிப்பு)) {
+    மாறிலி json::மதிப்பு *Current_மதிப்பு = CurrentContext->get(Acc);
+    எனில் (!Current_மதிப்பு)
+      திரும்பு nullptr;
+    எனில் (Idx < Accessor_மதிப்பு.size() - 1) {
+      CurrentContext = Current_மதிப்பு->getAsObject();
+      எனில் (!CurrentContext)
+        திரும்பு nullptr;
+    } இல்லையெனில் {
+      Context = Current_மதிப்பு;
     }
   }
-  return Context;
+  திரும்பு Context;
 }
 
-void ASTNode::renderChild(const json::Value &Contexts,
+வெறுமை ASTNode::renderChild(மாறிலி json::மதிப்பு &Contexts,
                           MustacheOutputStream &OS) {
-  for (ASTNode &Child : Children)
+  க்கு (ASTNode &Child : Children)
     Child.render(Contexts, OS);
 }
 
-void ASTNode::renderPartial(const json::Value &Contexts,
+வெறுமை ASTNode::renderPartial(மாறிலி json::மதிப்பு &Contexts,
                             MustacheOutputStream &OS, ASTNode *Partial) {
   LLVM_DEBUG(dbgs() << "[Render Partial Indentation] Indentation: " << Indentation << "\n");
   AddIndentationStringStream IS(OS, Indentation);
   Partial->render(Contexts, IS);
 }
 
-void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
+வெறுமை ASTNode::renderLambdas(மாறிலி llvm::json::மதிப்பு &Contexts,
                             MustacheOutputStream &OS, Lambda &L) {
-  json::Value LambdaResult = L();
+  json::மதிப்பு LambdaResult = L();
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(LambdaResult, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
+  AstPtr Lambda_முனை = P.parse();
 
   EscapeStringStream ES(OS, Ctx.Escapes);
-  if (Ty == Variable) {
-    LambdaNode->render(Contexts, ES);
-    return;
+  எனில் (Ty == Variable) {
+    Lambda_முனை->render(Contexts, ES);
+    திரும்பு;
   }
-  LambdaNode->render(Contexts, OS);
+  Lambda_முனை->render(Contexts, OS);
 }
 
-void ASTNode::renderSectionLambdas(const llvm::json::Value &Contexts,
+வெறுமை ASTNode::renderSectionLambdas(மாறிலி llvm::json::மதிப்பு &Contexts,
                                    MustacheOutputStream &OS, SectionLambda &L) {
-  json::Value Return = L(RawBody.str());
-  if (isFalsey(Return))
-    return;
+  json::மதிப்பு Return = L(RawBody.str());
+  எனில் (isFalsey(Return))
+    திரும்பு;
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(Return, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
-  LambdaNode->render(Contexts, OS);
+  AstPtr Lambda_முனை = P.parse();
+  Lambda_முனை->render(Contexts, OS);
 }
 
-void Template::render(const llvm::json::Value &Data, llvm::raw_ostream &OS) {
+வெறுமை Template::render(மாறிலி llvm::json::மதிப்பு &Data, llvm::raw_ostream &OS) {
   RawMustacheOutputStream MOS(OS);
-  Tree->render(Data, MOS);
+  மரம்->render(Data, MOS);
 }
 
-void Template::registerPartial(std::string Name, std::string Partial) {
+வெறுமை Template::registerPartial(std::string Name, std::string Partial) {
   StringRef SavedPartial = Ctx.Saver.save(Partial);
   Parser P(SavedPartial, Ctx);
-  AstPtr PartialTree = P.parse();
-  Ctx.Partials.insert(std::make_pair(Name, PartialTree));
+  AstPtr Partial_மரம் = P.parse();
+  Ctx.Partials.செருகு(std::make_pair(Name, Partial_மரம்));
 }
 
-void Template::registerLambda(std::string Name, Lambda L) {
+வெறுமை Template::registerLambda(std::string Name, Lambda L) {
   Ctx.Lambdas[Name] = std::move(L);
 }
 
-void Template::registerLambda(std::string Name, SectionLambda L) {
+வெறுமை Template::registerLambda(std::string Name, SectionLambda L) {
   Ctx.SectionLambdas[Name] = std::move(L);
 }
 
-void Template::overrideEscapeCharacters(EscapeMap E) {
+வெறுமை Template::overrideEscapeCharacters(EscapeMap E) {
   Ctx.Escapes = std::move(E);
 }
 
 Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
   Parser P(TemplateStr, Ctx);
-  Tree = P.parse();
+  மரம் = P.parse();
   // The default behavior is to escape html entities.
-  const EscapeMap HtmlEntities = {{'&', "&amp;"},
+  மாறிலி EscapeMap HtmlEntities = {{'&', "&amp;"},
                                   {'<', "&lt;"},
                                   {'>', "&gt;"},
                                   {'"', "&quot;"},
@@ -921,11 +921,11 @@ Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
 }
 
 Template::Template(Template &&Other) noexcept
-    : Ctx(Other.Ctx), Tree(Other.Tree) {
-  Other.Tree = nullptr;
+    : Ctx(Other.Ctx), மரம்(Other.மரம்) {
+  Other.மரம் = nullptr;
 }
 
-Template::~Template() = default;
+Template::~Template() = இயல்பு;
 
 } // namespace llvm::mustache
 
