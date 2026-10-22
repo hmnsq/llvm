@@ -57,65 +57,65 @@ using EncodingInfo = std::pair<UnicodeEncodingForm, unsigned>;
 /// @param Input A string of length 0 or more.
 /// @returns An EncodingInfo indicating the Unicode encoding form of the input
 ///          and how long the byte order mark is if one exists.
-static EncodingInfo getUnicodeEncoding(StringRef Input) {
-  if (Input.empty())
+static EncodingInfo getUnicodeEncoding(StringRef पासोक) {
+  if (पासोक.empty())
     return {UEF_Unknown, 0};
 
-  switch (uint8_t(Input[0])) {
+  switch (uint8_t(पासोक[0])) {
   case 0x00:
-    if (Input.size() >= 4) {
-      if (  Input[1] == 0
-         && uint8_t(Input[2]) == 0xFE
-         && uint8_t(Input[3]) == 0xFF)
+    if (पासोक.size() >= 4) {
+      if (  पासोक[1] == 0
+         && uint8_t(पासोक[2]) == 0xFE
+         && uint8_t(पासोक[3]) == 0xFF)
         return {UEF_UTF32_BE, 4};
-      if (Input[1] == 0 && Input[2] == 0 && Input[3] != 0)
+      if (पासोक[1] == 0 && पासोक[2] == 0 && पासोक[3] != 0)
         return {UEF_UTF32_BE, 0};
     }
 
-    if (Input.size() >= 2 && Input[1] != 0)
+    if (पासोक.size() >= 2 && पासोक[1] != 0)
       return {UEF_UTF16_BE, 0};
     return {UEF_Unknown, 0};
   case 0xFF:
-    if (  Input.size() >= 4
-       && uint8_t(Input[1]) == 0xFE
-       && Input[2] == 0
-       && Input[3] == 0)
+    if (  पासोक.size() >= 4
+       && uint8_t(पासोक[1]) == 0xFE
+       && पासोक[2] == 0
+       && पासोक[3] == 0)
       return {UEF_UTF32_LE, 4};
 
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFE)
+    if (पासोक.size() >= 2 && uint8_t(पासोक[1]) == 0xFE)
       return {UEF_UTF16_LE, 2};
     return {UEF_Unknown, 0};
   case 0xFE:
-    if (Input.size() >= 2 && uint8_t(Input[1]) == 0xFF)
+    if (पासोक.size() >= 2 && uint8_t(पासोक[1]) == 0xFF)
       return {UEF_UTF16_BE, 2};
     return {UEF_Unknown, 0};
   case 0xEF:
-    if (  Input.size() >= 3
-       && uint8_t(Input[1]) == 0xBB
-       && uint8_t(Input[2]) == 0xBF)
+    if (  पासोक.size() >= 3
+       && uint8_t(पासोक[1]) == 0xBB
+       && uint8_t(पासोक[2]) == 0xBF)
       return {UEF_UTF8, 3};
     return {UEF_Unknown, 0};
   }
 
   // It could still be utf-32 or utf-16.
-  if (Input.size() >= 4 && Input[1] == 0 && Input[2] == 0 && Input[3] == 0)
+  if (पासोक.size() >= 4 && पासोक[1] == 0 && पासोक[2] == 0 && पासोक[3] == 0)
     return {UEF_UTF32_LE, 0};
 
-  if (Input.size() >= 2 && Input[1] == 0)
+  if (पासोक.size() >= 2 && पासोक[1] == 0)
     return {UEF_UTF16_LE, 0};
 
   return {UEF_UTF8, 0};
 }
 
 /// Pin the vtables to this file.
-void Node::anchor() {}
-void NullNode::anchor() {}
-void ScalarNode::anchor() {}
-void BlockScalarNode::anchor() {}
-void KeyValueNode::anchor() {}
-void MappingNode::anchor() {}
-void SequenceNode::anchor() {}
-void AliasNode::anchor() {}
+void बुहोल::anchor() {}
+void Null_बुहोल::anchor() {}
+void Scalar_बुहोल::anchor() {}
+void Block_Scalar_बुहोल::anchor() {}
+void सुसि_हालागा_बुहोल::anchor() {}
+void Mapping_बुहोल::anchor() {}
+void Sequence_बुहोल::anchor() {}
+void Alias_बुहोल::anchor() {}
 
 namespace llvm {
 namespace yaml {
@@ -139,8 +139,8 @@ struct Token {
     TK_FlowSequenceEnd,
     TK_FlowMappingStart,
     TK_FlowMappingEnd,
-    TK_Key,
-    TK_Value,
+    TK_सुसि,
+    TK_हालागा,
     TK_Scalar,
     TK_BlockScalar,
     TK_Alias,
@@ -153,7 +153,7 @@ struct Token {
   StringRef Range;
 
   /// The value of a block scalar node.
-  std::string Value;
+  std::string हालागा;
 
   Token() = default;
 };
@@ -174,14 +174,14 @@ namespace {
 /// a simple key (we moved on to the next line or went further than 1024 chars).
 /// Or when we run into a Value, and then insert a Key token (and possibly
 /// others) before the SimpleKey's Tok.
-struct SimpleKey {
+struct Simple_सुसि {
   TokenQueueT::iterator Tok;
   unsigned Column = 0;
-  unsigned Line = 0;
+  unsigned लिन्या = 0;
   unsigned FlowLevel = 0;
   bool IsRequired = false;
 
-  bool operator ==(const SimpleKey &Other) {
+  bool operator ==(const Simple_सुसि &Other) {
     return Tok == Other.Tok;
   }
 };
@@ -246,7 +246,7 @@ namespace yaml {
 /// Scans YAML tokens from a MemoryBuffer.
 class Scanner {
 public:
-  Scanner(StringRef Input, SourceMgr &SM, bool ShowColors = true,
+  Scanner(StringRef पासोक, SourceMgr &SM, bool ShowColors = true,
           std::error_code *EC = nullptr);
   Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors = true,
           std::error_code *EC = nullptr);
@@ -257,9 +257,9 @@ public:
   /// Parse the next token and pop it from the queue.
   Token getNext();
 
-  void printError(SMLoc Loc, SourceMgr::DiagKind Kind, const Twine &Message,
+  void इलिम्बाग_Error(SMLoc Loc, SourceMgr::DiagKind Kind, const Twine &Message,
                   ArrayRef<SMRange> Ranges = {}) {
-    SM.PrintMessage(Loc, Kind, Message, Ranges, /* FixIts= */ {}, ShowColors);
+    SM.इलिम्बाग_Message(Loc, Kind, Message, Ranges, /* FixIts= */ {}, ShowColors);
   }
 
   void setError(const Twine &Message, StringRef::iterator Position) {
@@ -273,7 +273,7 @@ public:
     // Don't print out more errors after the first one we encounter. The rest
     // are just the result of the first, and have no meaning.
     if (!Failed)
-      printError(SMLoc::getFromPointer(Position), SourceMgr::DK_Error, Message);
+      इलिम्बाग_Error(SMLoc::getFromPointer(Position), SourceMgr::DK_Error, Message);
     Failed = true;
   }
 
@@ -285,7 +285,7 @@ public:
 private:
   void init(MemoryBufferRef Buffer);
 
-  StringRef currentInput() {
+  StringRef current_पासोक() {
     return StringRef(Current, End - Current);
   }
 
@@ -396,15 +396,15 @@ private:
   bool isPlainSafeNonBlank(StringRef::iterator Position);
 
   /// Return true if the line is a line break, false otherwise.
-  bool isLineEmpty(StringRef Line);
+  bool is_लिन्या_Empty(StringRef लिन्या);
 
   /// Consume a single b-break[28] if it's present at the current position.
   ///
   /// Return false if the code unit at the current position isn't a line break.
-  bool consumeLineBreakIfPresent();
+  bool consume_लिन्या_Break_If_Present();
 
   /// If IsSimpleKeyAllowed, create and push_back a new SimpleKey.
-  void saveSimpleKeyCandidate( TokenQueueT::iterator Tok
+  void save_Simple_सुसि_Candidate( TokenQueueT::iterator Tok
                              , unsigned AtColumn
                              , bool IsRequired);
 
@@ -412,10 +412,10 @@ private:
   ///
   /// Invalid simple keys are not on the current line or are further than 1024
   /// columns back.
-  void removeStaleSimpleKeyCandidates();
+  void remove_Stale_Simple_सुसि_Candidates();
 
   /// Remove all simple keys on FlowLevel \a Level.
-  void removeSimpleKeyCandidatesOnFlowLevel(unsigned Level);
+  void remove_Simple_सुसि_Candidates_On_Flow_Level(unsigned Level);
 
   /// Unroll indentation in \a Indents back to \a Col. Creates BlockEnd
   ///        tokens if needed.
@@ -425,7 +425,7 @@ private:
   ///        if needed.
   bool rollIndent( int ToColumn
                  , Token::TokenKind Kind
-                 , TokenQueueT::iterator InsertPoint);
+                 , TokenQueueT::iterator इसिंगित_Point);
 
   /// Skip a single-line comment when the comment starts at the current
   /// position of the scanner.
@@ -459,10 +459,10 @@ private:
   bool scanBlockEntry();
 
   /// Scan an explicit ? indicating a key.
-  bool scanKey();
+  bool scan_सुसि();
 
   /// Scan an explicit : indicating a value.
-  bool scanValue();
+  bool scan_हालागा();
 
   /// Scan a quoted scalar.
   bool scanFlowScalar(bool IsDoubleQuoted);
@@ -504,7 +504,7 @@ private:
   ///
   /// Return false if an error occurred.
   bool findBlockScalarIndent(unsigned &BlockIndent, unsigned BlockExitIndent,
-                             unsigned &LineBreaks, bool &IsDone);
+                             unsigned &लिन्या_Breaks, bool &IsDone);
 
   /// Scan the indentation of a text line in a block scalar.
   ///
@@ -522,7 +522,7 @@ private:
   SourceMgr &SM;
 
   /// The original input.
-  MemoryBufferRef InputBuffer;
+  MemoryBufferRef पासोक_Buffer;
 
   /// The current position of the scanner.
   StringRef::iterator Current;
@@ -537,7 +537,7 @@ private:
   unsigned Column;
 
   /// Current line number.
-  unsigned Line;
+  unsigned लिन्या;
 
   /// How deep we are in flow style containers. 0 Means at block level.
   unsigned FlowLevel;
@@ -546,11 +546,11 @@ private:
   bool IsStartOfStream;
 
   /// Can the next token be the start of a simple key?
-  bool IsSimpleKeyAllowed;
+  bool Is_Simple_सुसि_Allowed;
 
   /// Can the next token be a value indicator even if it does not have a
   /// trailing space?
-  bool IsAdjacentValueAllowedInFlow;
+  bool Is_Adjacent_हालागा_Allowed_In_Flow;
 
   /// True if an error has occurred.
   bool Failed;
@@ -567,7 +567,7 @@ private:
   SmallVector<int, 4> Indents;
 
   /// Potential simple keys.
-  SmallVector<SimpleKey, 4> SimpleKeys;
+  SmallVector<Simple_सुसि, 4> Simple_मगा_सुसि;
 
   std::error_code *EC;
 };
@@ -576,37 +576,37 @@ private:
 } // end namespace llvm
 
 /// encodeUTF8 - Encode \a UnicodeScalarValue in UTF-8 and append it to result.
-static void encodeUTF8( uint32_t UnicodeScalarValue
+static void encodeUTF8( uint32_t Unicode_Scalar_हालागा
                       , SmallVectorImpl<char> &Result) {
-  if (UnicodeScalarValue <= 0x7F) {
-    Result.push_back(UnicodeScalarValue & 0x7F);
-  } else if (UnicodeScalarValue <= 0x7FF) {
-    uint8_t FirstByte = 0xC0 | ((UnicodeScalarValue & 0x7C0) >> 6);
-    uint8_t SecondByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-  } else if (UnicodeScalarValue <= 0xFFFF) {
-    uint8_t FirstByte = 0xE0 | ((UnicodeScalarValue & 0xF000) >> 12);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t ThirdByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-  } else if (UnicodeScalarValue <= 0x10FFFF) {
-    uint8_t FirstByte = 0xF0 | ((UnicodeScalarValue & 0x1F0000) >> 18);
-    uint8_t SecondByte = 0x80 | ((UnicodeScalarValue & 0x3F000) >> 12);
-    uint8_t ThirdByte = 0x80 | ((UnicodeScalarValue & 0xFC0) >> 6);
-    uint8_t FourthByte = 0x80 | (UnicodeScalarValue & 0x3F);
-    Result.push_back(FirstByte);
-    Result.push_back(SecondByte);
-    Result.push_back(ThirdByte);
-    Result.push_back(FourthByte);
+  if (Unicode_Scalar_हालागा <= 0x7F) {
+    Result.इतुलाक_back(Unicode_Scalar_हालागा & 0x7F);
+  } else if (Unicode_Scalar_हालागा <= 0x7FF) {
+    uint8_t FirstByte = 0xC0 | ((Unicode_Scalar_हालागा & 0x7C0) >> 6);
+    uint8_t SecondByte = 0x80 | (Unicode_Scalar_हालागा & 0x3F);
+    Result.इतुलाक_back(FirstByte);
+    Result.इतुलाक_back(SecondByte);
+  } else if (Unicode_Scalar_हालागा <= 0xFFFF) {
+    uint8_t FirstByte = 0xE0 | ((Unicode_Scalar_हालागा & 0xF000) >> 12);
+    uint8_t SecondByte = 0x80 | ((Unicode_Scalar_हालागा & 0xFC0) >> 6);
+    uint8_t ThirdByte = 0x80 | (Unicode_Scalar_हालागा & 0x3F);
+    Result.इतुलाक_back(FirstByte);
+    Result.इतुलाक_back(SecondByte);
+    Result.इतुलाक_back(ThirdByte);
+  } else if (Unicode_Scalar_हालागा <= 0x10FFFF) {
+    uint8_t FirstByte = 0xF0 | ((Unicode_Scalar_हालागा & 0x1F0000) >> 18);
+    uint8_t SecondByte = 0x80 | ((Unicode_Scalar_हालागा & 0x3F000) >> 12);
+    uint8_t ThirdByte = 0x80 | ((Unicode_Scalar_हालागा & 0xFC0) >> 6);
+    uint8_t FourthByte = 0x80 | (Unicode_Scalar_हालागा & 0x3F);
+    Result.इतुलाक_back(FirstByte);
+    Result.इतुलाक_back(SecondByte);
+    Result.इतुलाक_back(ThirdByte);
+    Result.इतुलाक_back(FourthByte);
   }
 }
 
-bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
+bool yaml::dumpTokens(StringRef पासोक, raw_ostream &OS) {
   SourceMgr SM;
-  Scanner scanner(Input, SM);
+  Scanner scanner(पासोक, SM);
   while (true) {
     Token T = scanner.getNext();
     switch (T.Kind) {
@@ -655,10 +655,10 @@ bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
     case Token::TK_FlowMappingEnd:
       OS << "Flow-Mapping-End: ";
       break;
-    case Token::TK_Key:
+    case Token::TK_सुसि:
       OS << "Key: ";
       break;
-    case Token::TK_Value:
+    case Token::TK_हालागा:
       OS << "Value: ";
       break;
     case Token::TK_Scalar:
@@ -688,9 +688,9 @@ bool yaml::dumpTokens(StringRef Input, raw_ostream &OS) {
   return true;
 }
 
-bool yaml::scanTokens(StringRef Input) {
+bool yaml::scanTokens(StringRef पासोक) {
   SourceMgr SM;
-  Scanner scanner(Input, SM);
+  Scanner scanner(पासोक, SM);
   while (true) {
     Token T = scanner.getNext();
     if (T.Kind == Token::TK_StreamEnd)
@@ -701,71 +701,71 @@ bool yaml::scanTokens(StringRef Input) {
   return true;
 }
 
-std::string yaml::escape(StringRef Input, bool EscapePrintable) {
-  std::string EscapedInput;
-  for (StringRef::iterator i = Input.begin(), e = Input.end(); i != e; ++i) {
+std::string yaml::escape(StringRef पासोक, bool EscapePrintable) {
+  std::string Escaped_पासोक;
+  for (StringRef::iterator i = पासोक.begin(), e = पासोक.end(); i != e; ++i) {
     if (*i == '\\')
-      EscapedInput += "\\\\";
+      Escaped_पासोक += "\\\\";
     else if (*i == '"')
-      EscapedInput += "\\\"";
+      Escaped_पासोक += "\\\"";
     else if (*i == 0)
-      EscapedInput += "\\0";
+      Escaped_पासोक += "\\0";
     else if (*i == 0x07)
-      EscapedInput += "\\a";
+      Escaped_पासोक += "\\a";
     else if (*i == 0x08)
-      EscapedInput += "\\b";
+      Escaped_पासोक += "\\b";
     else if (*i == 0x09)
-      EscapedInput += "\\t";
+      Escaped_पासोक += "\\t";
     else if (*i == 0x0A)
-      EscapedInput += "\\n";
+      Escaped_पासोक += "\\n";
     else if (*i == 0x0B)
-      EscapedInput += "\\v";
+      Escaped_पासोक += "\\v";
     else if (*i == 0x0C)
-      EscapedInput += "\\f";
+      Escaped_पासोक += "\\f";
     else if (*i == 0x0D)
-      EscapedInput += "\\r";
+      Escaped_पासोक += "\\r";
     else if (*i == 0x1B)
-      EscapedInput += "\\e";
+      Escaped_पासोक += "\\e";
     else if ((unsigned char)*i < 0x20) { // Control characters not handled above.
       std::string HexStr = utohexstr(*i);
-      EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
+      Escaped_पासोक += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
     } else if (*i & 0x80) { // UTF-8 multiple code unit subsequence.
-      UTF8Decoded UnicodeScalarValue
-        = decodeUTF8(StringRef(i, Input.end() - i));
-      if (UnicodeScalarValue.second == 0) {
+      UTF8Decoded Unicode_Scalar_हालागा
+        = decodeUTF8(StringRef(i, पासोक.end() - i));
+      if (Unicode_Scalar_हालागा.second == 0) {
         // Found invalid char.
         SmallString<4> Val;
         encodeUTF8(0xFFFD, Val);
-        llvm::append_range(EscapedInput, Val);
+        llvm::append_range(Escaped_पासोक, Val);
         // FIXME: Error reporting.
-        return EscapedInput;
+        return Escaped_पासोक;
       }
-      if (UnicodeScalarValue.first == 0x85)
-        EscapedInput += "\\N";
-      else if (UnicodeScalarValue.first == 0xA0)
-        EscapedInput += "\\_";
-      else if (UnicodeScalarValue.first == 0x2028)
-        EscapedInput += "\\L";
-      else if (UnicodeScalarValue.first == 0x2029)
-        EscapedInput += "\\P";
+      if (Unicode_Scalar_हालागा.first == 0x85)
+        Escaped_पासोक += "\\N";
+      else if (Unicode_Scalar_हालागा.first == 0xA0)
+        Escaped_पासोक += "\\_";
+      else if (Unicode_Scalar_हालागा.first == 0x2028)
+        Escaped_पासोक += "\\L";
+      else if (Unicode_Scalar_हालागा.first == 0x2029)
+        Escaped_पासोक += "\\P";
       else if (!EscapePrintable &&
-               sys::unicode::isPrintable(UnicodeScalarValue.first))
-        EscapedInput += StringRef(i, UnicodeScalarValue.second);
+               sys::unicode::isPrintable(Unicode_Scalar_हालागा.first))
+        Escaped_पासोक += StringRef(i, Unicode_Scalar_हालागा.second);
       else {
-        std::string HexStr = utohexstr(UnicodeScalarValue.first);
+        std::string HexStr = utohexstr(Unicode_Scalar_हालागा.first);
         if (HexStr.size() <= 2)
-          EscapedInput += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
+          Escaped_पासोक += "\\x" + std::string(2 - HexStr.size(), '0') + HexStr;
         else if (HexStr.size() <= 4)
-          EscapedInput += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
+          Escaped_पासोक += "\\u" + std::string(4 - HexStr.size(), '0') + HexStr;
         else if (HexStr.size() <= 8)
-          EscapedInput += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
+          Escaped_पासोक += "\\U" + std::string(8 - HexStr.size(), '0') + HexStr;
       }
-      i += UnicodeScalarValue.second - 1;
+      i += Unicode_Scalar_हालागा.second - 1;
     } else {
-      EscapedInput.push_back(*i);
+      Escaped_पासोक.इतुलाक_back(*i);
     }
   }
-  return EscapedInput;
+  return Escaped_पासोक;
 }
 
 std::optional<bool> yaml::parseBool(StringRef S) {
@@ -854,10 +854,10 @@ std::optional<bool> yaml::parseBool(StringRef S) {
   }
 }
 
-Scanner::Scanner(StringRef Input, SourceMgr &sm, bool ShowColors,
+Scanner::Scanner(StringRef पासोक, SourceMgr &sm, bool ShowColors,
                  std::error_code *EC)
     : SM(sm), ShowColors(ShowColors), EC(EC) {
-  init(MemoryBufferRef(Input, "YAML"));
+  init(MemoryBufferRef(पासोक, "YAML"));
 }
 
 Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors,
@@ -867,20 +867,20 @@ Scanner::Scanner(MemoryBufferRef Buffer, SourceMgr &SM_, bool ShowColors,
 }
 
 void Scanner::init(MemoryBufferRef Buffer) {
-  InputBuffer = Buffer;
-  Current = InputBuffer.getBufferStart();
-  End = InputBuffer.getBufferEnd();
+  पासोक_Buffer = Buffer;
+  Current = पासोक_Buffer.getBufferStart();
+  End = पासोक_Buffer.getBufferEnd();
   Indent = -1;
   Column = 0;
-  Line = 0;
+  लिन्या = 0;
   FlowLevel = 0;
   IsStartOfStream = true;
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_सुसि_Allowed = true;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
   Failed = false;
-  std::unique_ptr<MemoryBuffer> InputBufferOwner =
+  std::unique_ptr<MemoryBuffer> पासोक_Buffer_Owner =
       MemoryBuffer::getMemBuffer(Buffer, /*RequiresNullTerminator=*/false);
-  SM.AddNewSourceBuffer(std::move(InputBufferOwner), SMLoc());
+  SM.AddNewSourceBuffer(std::move(पासोक_Buffer_Owner), SMLoc());
 }
 
 Token &Scanner::peekNext() {
@@ -891,18 +891,18 @@ Token &Scanner::peekNext() {
     if (TokenQueue.empty() || NeedMore) {
       if (!fetchMoreTokens()) {
         TokenQueue.clear();
-        SimpleKeys.clear();
-        TokenQueue.push_back(Token());
+        Simple_मगा_सुसि.clear();
+        TokenQueue.इतुलाक_back(Token());
         return TokenQueue.front();
       }
     }
     assert(!TokenQueue.empty() &&
             "fetchMoreTokens lied about getting tokens!");
 
-    removeStaleSimpleKeyCandidates();
-    SimpleKey SK;
+    remove_Stale_Simple_सुसि_Candidates();
+    Simple_सुसि SK;
     SK.Tok = TokenQueue.begin();
-    if (!is_contained(SimpleKeys, SK))
+    if (!is_contained(Simple_मगा_सुसि, SK))
       break;
     else
       NeedMore = true;
@@ -914,7 +914,7 @@ Token Scanner::getNext() {
   Token Ret = peekNext();
   // TokenQueue can be empty if there was an error getting the next token.
   if (!TokenQueue.empty())
-    TokenQueue.pop_front();
+    TokenQueue.आलिसिन_front();
 
   // There cannot be any referenced Token's if the TokenQueue is empty. So do a
   // quick deallocation of them all.
@@ -1066,54 +1066,54 @@ bool Scanner::isPlainSafeNonBlank(StringRef::iterator Position) {
   return true;
 }
 
-bool Scanner::isLineEmpty(StringRef Line) {
-  for (const auto *Position = Line.begin(); Position != Line.end(); ++Position)
+bool Scanner::is_लिन्या_Empty(StringRef लिन्या) {
+  for (const auto *Position = लिन्या.begin(); Position != लिन्या.end(); ++Position)
     if (!isBlankOrBreak(Position))
       return false;
   return true;
 }
 
-bool Scanner::consumeLineBreakIfPresent() {
+bool Scanner::consume_लिन्या_Break_If_Present() {
   auto Next = skip_b_break(Current);
   if (Next == Current)
     return false;
   Column = 0;
-  ++Line;
+  ++लिन्या;
   Current = Next;
   return true;
 }
 
-void Scanner::saveSimpleKeyCandidate( TokenQueueT::iterator Tok
+void Scanner::save_Simple_सुसि_Candidate( TokenQueueT::iterator Tok
                                     , unsigned AtColumn
                                     , bool IsRequired) {
-  if (IsSimpleKeyAllowed) {
-    SimpleKey SK;
+  if (Is_Simple_सुसि_Allowed) {
+    Simple_सुसि SK;
     SK.Tok = Tok;
-    SK.Line = Line;
+    SK.लिन्या = लिन्या;
     SK.Column = AtColumn;
     SK.IsRequired = IsRequired;
     SK.FlowLevel = FlowLevel;
-    SimpleKeys.push_back(SK);
+    Simple_मगा_सुसि.इतुलाक_back(SK);
   }
 }
 
-void Scanner::removeStaleSimpleKeyCandidates() {
-  for (SmallVectorImpl<SimpleKey>::iterator i = SimpleKeys.begin();
-                                            i != SimpleKeys.end();) {
-    if (i->Line != Line || i->Column + 1024 < Column) {
+void Scanner::remove_Stale_Simple_सुसि_Candidates() {
+  for (SmallVectorImpl<Simple_सुसि>::iterator i = Simple_मगा_सुसि.begin();
+                                            i != Simple_मगा_सुसि.end();) {
+    if (i->लिन्या != लिन्या || i->Column + 1024 < Column) {
       if (i->IsRequired)
         setError( "Could not find expected : for simple key"
                 , i->Tok->Range.begin());
-      i = SimpleKeys.erase(i);
+      i = Simple_मगा_सुसि.erase(i);
     } else {
       ++i;
     }
   }
 }
 
-void Scanner::removeSimpleKeyCandidatesOnFlowLevel(unsigned Level) {
-  if (!SimpleKeys.empty() && (SimpleKeys.end() - 1)->FlowLevel == Level)
-    SimpleKeys.pop_back();
+void Scanner::remove_Simple_सुसि_Candidates_On_Flow_Level(unsigned Level) {
+  if (!Simple_मगा_सुसि.empty() && (Simple_मगा_सुसि.end() - 1)->FlowLevel == Level)
+    Simple_मगा_सुसि.आलिसिन_back();
 }
 
 bool Scanner::unrollIndent(int ToColumn) {
@@ -1125,8 +1125,8 @@ bool Scanner::unrollIndent(int ToColumn) {
   while (Indent > ToColumn) {
     T.Kind = Token::TK_BlockEnd;
     T.Range = StringRef(Current, 1);
-    TokenQueue.push_back(T);
-    Indent = Indents.pop_back_val();
+    TokenQueue.इतुलाक_back(T);
+    Indent = Indents.आलिसिन_back_val();
   }
 
   return true;
@@ -1134,17 +1134,17 @@ bool Scanner::unrollIndent(int ToColumn) {
 
 bool Scanner::rollIndent( int ToColumn
                         , Token::TokenKind Kind
-                        , TokenQueueT::iterator InsertPoint) {
+                        , TokenQueueT::iterator इसिंगित_Point) {
   if (FlowLevel)
     return true;
   if (Indent < ToColumn) {
-    Indents.push_back(Indent);
+    Indents.इतुलाक_back(Indent);
     Indent = ToColumn;
 
     Token T;
     T.Kind = Kind;
     T.Range = StringRef(Current, 0);
-    TokenQueue.insert(InsertPoint, T);
+    TokenQueue.इसिंगित(इसिंगित_Point, T);
   }
   return true;
 }
@@ -1176,23 +1176,23 @@ void Scanner::scanToNextToken() {
     if (i == Current)
       break;
     Current = i;
-    ++Line;
+    ++लिन्या;
     Column = 0;
     // New lines may start a simple key.
     if (!FlowLevel)
-      IsSimpleKeyAllowed = true;
+      Is_Simple_सुसि_Allowed = true;
   }
 }
 
 bool Scanner::scanStreamStart() {
   IsStartOfStream = false;
 
-  EncodingInfo EI = getUnicodeEncoding(currentInput());
+  EncodingInfo EI = getUnicodeEncoding(current_पासोक());
 
   Token T;
   T.Kind = Token::TK_StreamStart;
   T.Range = StringRef(Current, EI.second);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   Current += EI.second;
   return true;
 }
@@ -1201,27 +1201,27 @@ bool Scanner::scanStreamEnd() {
   // Force an ending new line if one isn't present.
   if (Column != 0) {
     Column = 0;
-    ++Line;
+    ++लिन्या;
   }
 
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_मगा_सुसि.clear();
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   Token T;
   T.Kind = Token::TK_StreamEnd;
   T.Range = StringRef(Current, 0);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
 bool Scanner::scanDirective() {
   // Reset the indentation level.
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_मगा_सुसि.clear();
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   StringRef::iterator Start = Current;
   consume('%');
@@ -1235,7 +1235,7 @@ bool Scanner::scanDirective() {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_VersionDirective;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
+    TokenQueue.इतुलाक_back(T);
     return true;
   } else if(Name == "TAG") {
     Current = skip_while(&Scanner::skip_ns_char, Current);
@@ -1243,7 +1243,7 @@ bool Scanner::scanDirective() {
     Current = skip_while(&Scanner::skip_ns_char, Current);
     T.Kind = Token::TK_TagDirective;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
+    TokenQueue.इतुलाक_back(T);
     return true;
   }
   return false;
@@ -1251,15 +1251,15 @@ bool Scanner::scanDirective() {
 
 bool Scanner::scanDocumentIndicator(bool IsStart) {
   unrollIndent(-1);
-  SimpleKeys.clear();
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Simple_मगा_सुसि.clear();
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   Token T;
   T.Kind = IsStart ? Token::TK_DocumentStart : Token::TK_DocumentEnd;
   T.Range = StringRef(Current, 3);
   skip(3);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
@@ -1269,82 +1269,82 @@ bool Scanner::scanFlowCollectionStart(bool IsSequence) {
                       : Token::TK_FlowMappingStart;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
 
   // [ and { may begin a simple key.
-  saveSimpleKeyCandidate(--TokenQueue.end(), Column - 1, false);
+  save_Simple_सुसि_Candidate(--TokenQueue.end(), Column - 1, false);
 
   // And may also be followed by a simple key.
-  IsSimpleKeyAllowed = true;
+  Is_Simple_सुसि_Allowed = true;
   // Adjacent values are allowed in flows only after JSON-style keys.
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
   ++FlowLevel;
   return true;
 }
 
 bool Scanner::scanFlowCollectionEnd(bool IsSequence) {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+  remove_Simple_सुसि_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = true;
   Token T;
   T.Kind = IsSequence ? Token::TK_FlowSequenceEnd
                       : Token::TK_FlowMappingEnd;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   if (FlowLevel)
     --FlowLevel;
   return true;
 }
 
 bool Scanner::scanFlowEntry() {
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_सुसि_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_सुसि_Allowed = true;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
   Token T;
   T.Kind = Token::TK_FlowEntry;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
 bool Scanner::scanBlockEntry() {
   rollIndent(Column, Token::TK_BlockSequenceStart, TokenQueue.end());
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_सुसि_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_सुसि_Allowed = true;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
   Token T;
   T.Kind = Token::TK_BlockEntry;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
-bool Scanner::scanKey() {
+bool Scanner::scan_सुसि() {
   if (!FlowLevel)
     rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
 
-  removeSimpleKeyCandidatesOnFlowLevel(FlowLevel);
-  IsSimpleKeyAllowed = !FlowLevel;
-  IsAdjacentValueAllowedInFlow = false;
+  remove_Simple_सुसि_Candidates_On_Flow_Level(FlowLevel);
+  Is_Simple_सुसि_Allowed = !FlowLevel;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   Token T;
-  T.Kind = Token::TK_Key;
+  T.Kind = Token::TK_सुसि;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
-bool Scanner::scanValue() {
+bool Scanner::scan_हालागा() {
   // If the previous token could have been a simple key, insert the key token
   // into the token queue.
-  if (!SimpleKeys.empty()) {
-    SimpleKey SK = SimpleKeys.pop_back_val();
+  if (!Simple_मगा_सुसि.empty()) {
+    Simple_सुसि SK = Simple_मगा_सुसि.आलिसिन_back_val();
     Token T;
-    T.Kind = Token::TK_Key;
+    T.Kind = Token::TK_सुसि;
     T.Range = SK.Tok->Range;
     TokenQueueT::iterator i, e;
     for (i = TokenQueue.begin(), e = TokenQueue.end(); i != e; ++i) {
@@ -1355,24 +1355,24 @@ bool Scanner::scanValue() {
       Failed = true;
       return false;
     }
-    i = TokenQueue.insert(i, T);
+    i = TokenQueue.इसिंगित(i, T);
 
     // We may also need to add a Block-Mapping-Start token.
     rollIndent(SK.Column, Token::TK_BlockMappingStart, i);
 
-    IsSimpleKeyAllowed = false;
+    Is_Simple_सुसि_Allowed = false;
   } else {
     if (!FlowLevel)
       rollIndent(Column, Token::TK_BlockMappingStart, TokenQueue.end());
-    IsSimpleKeyAllowed = !FlowLevel;
+    Is_Simple_सुसि_Allowed = !FlowLevel;
   }
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   Token T;
-  T.Kind = Token::TK_Value;
+  T.Kind = Token::TK_हालागा;
   T.Range = StringRef(Current, 1);
   skip(1);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
@@ -1424,7 +1424,7 @@ bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
           break;
         Current = i;
         Column = 0;
-        ++Line;
+        ++लिन्या;
       } else {
         if (i == End)
           break;
@@ -1443,12 +1443,12 @@ bool Scanner::scanFlowScalar(bool IsDoubleQuoted) {
   Token T;
   T.Kind = Token::TK_Scalar;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
 
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_सुसि_Candidate(--TokenQueue.end(), ColStart, false);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = true;
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = true;
 
   return true;
 }
@@ -1494,7 +1494,7 @@ bool Scanner::scanPlainScalar() {
           LeadingBlanks = 1;
         Tmp = i;
         Column = 0;
-        ++Line;
+        ++लिन्या;
       }
     }
 
@@ -1510,13 +1510,13 @@ bool Scanner::scanPlainScalar() {
   Token T;
   T.Kind = Token::TK_Scalar;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
 
   // Plain scalars can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_सुसि_Candidate(--TokenQueue.end(), ColStart, false);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   return true;
 }
@@ -1546,13 +1546,13 @@ bool Scanner::scanAliasOrAnchor(bool IsAlias) {
   Token T;
   T.Kind = IsAlias ? Token::TK_Alias : Token::TK_Anchor;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
 
   // Alias and anchors can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_सुसि_Candidate(--TokenQueue.end(), ColStart, false);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   return true;
 }
@@ -1589,12 +1589,12 @@ char Scanner::scanBlockChompingIndicator() {
 ///
 /// Return the number of trailing line breaks to emit, depending on
 /// \p ChompingIndicator.
-static unsigned getChompedLineBreaks(char ChompingIndicator,
-                                     unsigned LineBreaks, StringRef Str) {
+static unsigned get_Chomped_लिन्या_Breaks(char ChompingIndicator,
+                                     unsigned लिन्या_Breaks, StringRef Str) {
   if (ChompingIndicator == '-') // Strip all line breaks.
     return 0;
   if (ChompingIndicator == '+') // Keep all line breaks.
-    return LineBreaks;
+    return लिन्या_Breaks;
   // Clip trailing lines.
   return Str.empty() ? 0 : 1;
 }
@@ -1624,12 +1624,12 @@ bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
     Token T;
     T.Kind = Token::TK_BlockScalar;
     T.Range = StringRef(Start, Current - Start);
-    TokenQueue.push_back(T);
+    TokenQueue.इतुलाक_back(T);
     IsDone = true;
     return true;
   }
 
-  if (!consumeLineBreakIfPresent()) {
+  if (!consume_लिन्या_Break_If_Present()) {
     setError("Expected a line break after block scalar header", Current);
     return false;
   }
@@ -1638,9 +1638,9 @@ bool Scanner::scanBlockScalarHeader(char &ChompingIndicator,
 
 bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
                                     unsigned BlockExitIndent,
-                                    unsigned &LineBreaks, bool &IsDone) {
-  unsigned MaxAllSpaceLineCharacters = 0;
-  StringRef::iterator LongestAllSpaceLine;
+                                    unsigned &लिन्या_Breaks, bool &IsDone) {
+  unsigned Max_All_Space_लिन्या_Characters = 0;
+  StringRef::iterator Longest_All_Space_लिन्या;
 
   while (true) {
     advanceWhile(&Scanner::skip_s_space);
@@ -1652,20 +1652,20 @@ bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
       }
       // We found the block's indentation.
       BlockIndent = Column;
-      if (MaxAllSpaceLineCharacters > BlockIndent) {
+      if (Max_All_Space_लिन्या_Characters > BlockIndent) {
         setError(
             "Leading all-spaces line must be smaller than the block indent",
-            LongestAllSpaceLine);
+            Longest_All_Space_लिन्या);
         return false;
       }
       return true;
     }
     if (skip_b_break(Current) != Current &&
-        Column > MaxAllSpaceLineCharacters) {
+        Column > Max_All_Space_लिन्या_Characters) {
       // Record the longest all-space line in case it's longer than the
       // discovered block indent.
-      MaxAllSpaceLineCharacters = Column;
-      LongestAllSpaceLine = Current;
+      Max_All_Space_लिन्या_Characters = Column;
+      Longest_All_Space_लिन्या = Current;
     }
 
     // Check for EOF.
@@ -1674,11 +1674,11 @@ bool Scanner::findBlockScalarIndent(unsigned &BlockIndent,
       return true;
     }
 
-    if (!consumeLineBreakIfPresent()) {
+    if (!consume_लिन्या_Break_If_Present()) {
       IsDone = true;
       return true;
     }
-    ++LineBreaks;
+    ++लिन्या_Breaks;
   }
   return true;
 }
@@ -1728,9 +1728,9 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
 
   const auto *Start = Current;
   unsigned BlockExitIndent = Indent < 0 ? 0 : (unsigned)Indent;
-  unsigned LineBreaks = 0;
+  unsigned लिन्या_Breaks = 0;
   if (BlockIndent == 0) {
-    if (!findBlockScalarIndent(BlockIndent, BlockExitIndent, LineBreaks,
+    if (!findBlockScalarIndent(BlockIndent, BlockExitIndent, लिन्या_Breaks,
                                IsDone))
       return false;
   }
@@ -1744,16 +1744,16 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
       break;
 
     // Parse the current line.
-    auto LineStart = Current;
+    auto लिन्या_Start = Current;
     advanceWhile(&Scanner::skip_nb_char);
-    if (LineStart != Current) {
-      if (LineBreaks && IsFolded && !Scanner::isLineEmpty(Str)) {
+    if (लिन्या_Start != Current) {
+      if (लिन्या_Breaks && IsFolded && !Scanner::is_लिन्या_Empty(Str)) {
         // The folded style "folds" any single line break between content into a
         // single space, except when that content is "empty" (only contains
         // whitespace) in which case the line break is left as-is.
-        if (LineBreaks == 1) {
-          Str.append(LineBreaks,
-                     isLineEmpty(StringRef(LineStart, Current - LineStart))
+        if (लिन्या_Breaks == 1) {
+          Str.append(लिन्या_Breaks,
+                     is_लिन्या_Empty(StringRef(लिन्या_Start, Current - लिन्या_Start))
                          ? '\n'
                          : ' ');
         }
@@ -1761,37 +1761,37 @@ bool Scanner::scanBlockScalar(bool IsLiteral) {
         // want `LineBreaks == 0`. Otherwise this decrement accounts for the
         // fact that the first line break is "trimmed", only being used to
         // signal a sequence of line breaks which should not be folded.
-        LineBreaks--;
+        लिन्या_Breaks--;
       }
-      Str.append(LineBreaks, '\n');
-      Str.append(StringRef(LineStart, Current - LineStart));
-      LineBreaks = 0;
+      Str.append(लिन्या_Breaks, '\n');
+      Str.append(StringRef(लिन्या_Start, Current - लिन्या_Start));
+      लिन्या_Breaks = 0;
     }
 
     // Check for EOF.
     if (Current == End)
       break;
 
-    if (!consumeLineBreakIfPresent())
+    if (!consume_लिन्या_Break_If_Present())
       break;
-    ++LineBreaks;
+    ++लिन्या_Breaks;
   }
 
-  if (Current == End && !LineBreaks)
+  if (Current == End && !लिन्या_Breaks)
     // Ensure that there is at least one line break before the end of file.
-    LineBreaks = 1;
-  Str.append(getChompedLineBreaks(ChompingIndicator, LineBreaks, Str), '\n');
+    लिन्या_Breaks = 1;
+  Str.append(get_Chomped_लिन्या_Breaks(ChompingIndicator, लिन्या_Breaks, Str), '\n');
 
   // New lines may start a simple key.
   if (!FlowLevel)
-    IsSimpleKeyAllowed = true;
-  IsAdjacentValueAllowedInFlow = false;
+    Is_Simple_सुसि_Allowed = true;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   Token T;
   T.Kind = Token::TK_BlockScalar;
   T.Range = StringRef(Start, Current - Start);
-  T.Value = std::string(Str);
-  TokenQueue.push_back(T);
+  T.हालागा = std::string(Str);
+  TokenQueue.इतुलाक_back(T);
   return true;
 }
 
@@ -1813,13 +1813,13 @@ bool Scanner::scanTag() {
   Token T;
   T.Kind = Token::TK_Tag;
   T.Range = StringRef(Start, Current - Start);
-  TokenQueue.push_back(T);
+  TokenQueue.इतुलाक_back(T);
 
   // Tags can be simple keys.
-  saveSimpleKeyCandidate(--TokenQueue.end(), ColStart, false);
+  save_Simple_सुसि_Candidate(--TokenQueue.end(), ColStart, false);
 
-  IsSimpleKeyAllowed = false;
-  IsAdjacentValueAllowedInFlow = false;
+  Is_Simple_सुसि_Allowed = false;
+  Is_Adjacent_हालागा_Allowed_In_Flow = false;
 
   return true;
 }
@@ -1833,7 +1833,7 @@ bool Scanner::fetchMoreTokens() {
   if (Current == End)
     return scanStreamEnd();
 
-  removeStaleSimpleKeyCandidates();
+  remove_Stale_Simple_सुसि_Candidates();
 
   unrollIndent(Column);
 
@@ -1873,11 +1873,11 @@ bool Scanner::fetchMoreTokens() {
     return scanBlockEntry();
 
   if (*Current == '?' && (Current + 1 == End || isBlankOrBreak(Current + 1)))
-    return scanKey();
+    return scan_सुसि();
 
   if (*Current == ':' &&
-      (!isPlainSafeNonBlank(Current + 1) || IsAdjacentValueAllowedInFlow))
-    return scanValue();
+      (!isPlainSafeNonBlank(Current + 1) || Is_Adjacent_हालागा_Allowed_In_Flow))
+    return scan_हालागा();
 
   if (*Current == '*')
     return scanAliasOrAnchor(true);
@@ -1912,25 +1912,25 @@ bool Scanner::fetchMoreTokens() {
   return false;
 }
 
-Stream::Stream(StringRef Input, SourceMgr &SM, bool ShowColors,
+Stream::Stream(StringRef पासोक, SourceMgr &SM, bool ShowColors,
                std::error_code *EC)
-    : scanner(new Scanner(Input, SM, ShowColors, EC)) {}
+    : scanner(new Scanner(पासोक, SM, ShowColors, EC)) {}
 
-Stream::Stream(MemoryBufferRef InputBuffer, SourceMgr &SM, bool ShowColors,
+Stream::Stream(MemoryBufferRef पासोक_Buffer, SourceMgr &SM, bool ShowColors,
                std::error_code *EC)
-    : scanner(new Scanner(InputBuffer, SM, ShowColors, EC)) {}
+    : scanner(new Scanner(पासोक_Buffer, SM, ShowColors, EC)) {}
 
 Stream::~Stream() = default;
 
 bool Stream::failed() { return scanner->failed(); }
 
-void Stream::printError(Node *N, const Twine &Msg, SourceMgr::DiagKind Kind) {
-  printError(N ? N->getSourceRange() : SMRange(), Msg, Kind);
+void Stream::इलिम्बाग_Error(बुहोल *N, const Twine &मेनसाहे_2, SourceMgr::DiagKind Kind) {
+  इलिम्बाग_Error(N ? N->getSourceRange() : SMRange(), मेनसाहे_2, Kind);
 }
 
-void Stream::printError(const SMRange &Range, const Twine &Msg,
+void Stream::इलिम्बाग_Error(const SMRange &Range, const Twine &मेनसाहे_2,
                         SourceMgr::DiagKind Kind) {
-  scanner->printError(Range.Start, Kind, Msg, Range);
+  scanner->इलिम्बाग_Error(Range.Start, Kind, मेनसाहे_2, Range);
 }
 
 document_iterator Stream::begin() {
@@ -1953,14 +1953,14 @@ void Stream::skip() {
     Doc.skip();
 }
 
-Node::Node(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
+बुहोल::बुहोल(unsigned int Type, std::unique_ptr<Document> &D, StringRef A,
            StringRef T)
     : Doc(D), TypeID(Type), Anchor(A), Tag(T) {
   SMLoc Start = SMLoc::getFromPointer(peekNext().Range.begin());
   SourceRange = SMRange(Start, Start);
 }
 
-std::string Node::getVerbatimTag() const {
+std::string बुहोल::getVerbatimTag() const {
   StringRef Raw = getRawTag();
   if (!Raw.empty() && Raw != "!") {
     std::string Ret;
@@ -2005,36 +2005,36 @@ std::string Node::getVerbatimTag() const {
   return "";
 }
 
-Token &Node::peekNext() {
+Token &बुहोल::peekNext() {
   return Doc->peekNext();
 }
 
-Token Node::getNext() {
+Token बुहोल::getNext() {
   return Doc->getNext();
 }
 
-Node *Node::parseBlockNode() {
-  return Doc->parseBlockNode();
+बुहोल *बुहोल::parse_Block_बुहोल() {
+  return Doc->parse_Block_बुहोल();
 }
 
-BumpPtrAllocator &Node::getAllocator() {
-  return Doc->NodeAllocator;
+BumpPtrAllocator &बुहोल::getAllocator() {
+  return Doc->बुहोल_Allocator;
 }
 
-void Node::setError(const Twine &Msg, Token &Tok) const {
-  Doc->setError(Msg, Tok);
+void बुहोल::setError(const Twine &मेनसाहे_2, Token &Tok) const {
+  Doc->setError(मेनसाहे_2, Tok);
 }
 
-bool Node::failed() const {
+bool बुहोल::failed() const {
   return Doc->failed();
 }
 
-StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
-  if (Value[0] == '"')
-    return getDoubleQuotedValue(Value, Storage);
-  if (Value[0] == '\'')
-    return getSingleQuotedValue(Value, Storage);
-  return getPlainValue(Value, Storage);
+StringRef Scalar_बुहोल::get_हालागा(SmallVectorImpl<char> &Storage) const {
+  if (हालागा[0] == '"')
+    return get_Double_Quoted_हालागा(हालागा, Storage);
+  if (हालागा[0] == '\'')
+    return get_Single_Quoted_हालागा(हालागा, Storage);
+  return get_Plain_हालागा(हालागा, Storage);
 }
 
 /// parseScalarValue - A common parsing routine for all flow scalar styles.
@@ -2052,131 +2052,131 @@ StringRef ScalarNode::getValue(SmallVectorImpl<char> &Storage) const {
 /// in the input.
 /// \returns - The unfolded and unescaped value.
 static StringRef
-parseScalarValue(StringRef UnquotedValue, SmallVectorImpl<char> &Storage,
+parse_Scalar_हालागा(StringRef Unquoted_हालागा, SmallVectorImpl<char> &Storage,
                  StringRef LookupChars,
                  std::function<StringRef(StringRef, SmallVectorImpl<char> &)>
                      UnescapeCallback) {
-  size_t I = UnquotedValue.find_first_of(LookupChars);
+  size_t I = Unquoted_हालागा.find_first_of(LookupChars);
   if (I == StringRef::npos)
-    return UnquotedValue;
+    return Unquoted_हालागा;
 
   Storage.clear();
-  Storage.reserve(UnquotedValue.size());
-  char LastNewLineAddedAs = '\0';
-  for (; I != StringRef::npos; I = UnquotedValue.find_first_of(LookupChars)) {
-    if (UnquotedValue[I] != '\r' && UnquotedValue[I] != '\n') {
-      llvm::append_range(Storage, UnquotedValue.take_front(I));
-      UnquotedValue = UnescapeCallback(UnquotedValue.drop_front(I), Storage);
-      LastNewLineAddedAs = '\0';
+  Storage.reserve(Unquoted_हालागा.size());
+  char Last_New_लिन्या_Added_As = '\0';
+  for (; I != StringRef::npos; I = Unquoted_हालागा.find_first_of(LookupChars)) {
+    if (Unquoted_हालागा[I] != '\r' && Unquoted_हालागा[I] != '\n') {
+      llvm::append_range(Storage, Unquoted_हालागा.take_front(I));
+      Unquoted_हालागा = UnescapeCallback(Unquoted_हालागा.drop_front(I), Storage);
+      Last_New_लिन्या_Added_As = '\0';
       continue;
     }
-    if (size_t LastNonSWhite = UnquotedValue.find_last_not_of(" \t", I);
+    if (size_t LastNonSWhite = Unquoted_हालागा.find_last_not_of(" \t", I);
         LastNonSWhite != StringRef::npos) {
-      llvm::append_range(Storage, UnquotedValue.take_front(LastNonSWhite + 1));
-      Storage.push_back(' ');
-      LastNewLineAddedAs = ' ';
+      llvm::append_range(Storage, Unquoted_हालागा.take_front(LastNonSWhite + 1));
+      Storage.इतुलाक_back(' ');
+      Last_New_लिन्या_Added_As = ' ';
     } else {
       // Note: we can't just check if the last character in Storage is ' ',
       // '\n', or something else; that would give a wrong result for double
       // quoted values containing an escaped space character before a new-line
       // character.
-      switch (LastNewLineAddedAs) {
+      switch (Last_New_लिन्या_Added_As) {
       case ' ':
         assert(!Storage.empty() && Storage.back() == ' ');
         Storage.back() = '\n';
-        LastNewLineAddedAs = '\n';
+        Last_New_लिन्या_Added_As = '\n';
         break;
       case '\n':
         assert(!Storage.empty() && Storage.back() == '\n');
-        Storage.push_back('\n');
+        Storage.इतुलाक_back('\n');
         break;
       default:
-        Storage.push_back(' ');
-        LastNewLineAddedAs = ' ';
+        Storage.इतुलाक_back(' ');
+        Last_New_लिन्या_Added_As = ' ';
         break;
       }
     }
     // Handle Windows-style EOL
-    if (UnquotedValue.substr(I, 2) == "\r\n")
+    if (Unquoted_हालागा.substr(I, 2) == "\r\n")
       I++;
-    UnquotedValue = UnquotedValue.drop_front(I + 1).ltrim(" \t");
+    Unquoted_हालागा = Unquoted_हालागा.drop_front(I + 1).ltrim(" \t");
   }
-  llvm::append_range(Storage, UnquotedValue);
+  llvm::append_range(Storage, Unquoted_हालागा);
   return StringRef(Storage.begin(), Storage.size());
 }
 
 StringRef
-ScalarNode::getDoubleQuotedValue(StringRef RawValue,
+Scalar_बुहोल::get_Double_Quoted_हालागा(StringRef Raw_हालागा,
                                  SmallVectorImpl<char> &Storage) const {
-  assert(RawValue.size() >= 2 && RawValue.front() == '"' &&
-         RawValue.back() == '"');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+  assert(Raw_हालागा.size() >= 2 && Raw_हालागा.front() == '"' &&
+         Raw_हालागा.back() == '"');
+  StringRef Unquoted_हालागा = Raw_हालागा.substr(1, Raw_हालागा.size() - 2);
 
-  auto UnescapeFunc = [this](StringRef UnquotedValue,
+  auto UnescapeFunc = [this](StringRef Unquoted_हालागा,
                              SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(1) == "\\");
-    if (UnquotedValue.size() == 1) {
+    assert(Unquoted_हालागा.take_front(1) == "\\");
+    if (Unquoted_हालागा.size() == 1) {
       Token T;
-      T.Range = UnquotedValue;
+      T.Range = Unquoted_हालागा;
       setError("Unrecognized escape code", T);
       Storage.clear();
       return StringRef();
     }
-    UnquotedValue = UnquotedValue.drop_front(1);
-    switch (UnquotedValue[0]) {
+    Unquoted_हालागा = Unquoted_हालागा.drop_front(1);
+    switch (Unquoted_हालागा[0]) {
     default: {
       Token T;
-      T.Range = UnquotedValue.take_front(1);
+      T.Range = Unquoted_हालागा.take_front(1);
       setError("Unrecognized escape code", T);
       Storage.clear();
       return StringRef();
     }
     case '\r':
       // Shrink the Windows-style EOL.
-      if (UnquotedValue.size() >= 2 && UnquotedValue[1] == '\n')
-        UnquotedValue = UnquotedValue.drop_front(1);
+      if (Unquoted_हालागा.size() >= 2 && Unquoted_हालागा[1] == '\n')
+        Unquoted_हालागा = Unquoted_हालागा.drop_front(1);
       [[fallthrough]];
     case '\n':
-      return UnquotedValue.drop_front(1).ltrim(" \t");
+      return Unquoted_हालागा.drop_front(1).ltrim(" \t");
     case '0':
-      Storage.push_back(0x00);
+      Storage.इतुलाक_back(0x00);
       break;
     case 'a':
-      Storage.push_back(0x07);
+      Storage.इतुलाक_back(0x07);
       break;
     case 'b':
-      Storage.push_back(0x08);
+      Storage.इतुलाक_back(0x08);
       break;
     case 't':
     case 0x09:
-      Storage.push_back(0x09);
+      Storage.इतुलाक_back(0x09);
       break;
     case 'n':
-      Storage.push_back(0x0A);
+      Storage.इतुलाक_back(0x0A);
       break;
     case 'v':
-      Storage.push_back(0x0B);
+      Storage.इतुलाक_back(0x0B);
       break;
     case 'f':
-      Storage.push_back(0x0C);
+      Storage.इतुलाक_back(0x0C);
       break;
     case 'r':
-      Storage.push_back(0x0D);
+      Storage.इतुलाक_back(0x0D);
       break;
     case 'e':
-      Storage.push_back(0x1B);
+      Storage.इतुलाक_back(0x1B);
       break;
     case ' ':
-      Storage.push_back(0x20);
+      Storage.इतुलाक_back(0x20);
       break;
     case '"':
-      Storage.push_back(0x22);
+      Storage.इतुलाक_back(0x22);
       break;
     case '/':
-      Storage.push_back(0x2F);
+      Storage.इतुलाक_back(0x2F);
       break;
     case '\\':
-      Storage.push_back(0x5C);
+      Storage.इतुलाक_back(0x5C);
       break;
     case 'N':
       encodeUTF8(0x85, Storage);
@@ -2191,138 +2191,138 @@ ScalarNode::getDoubleQuotedValue(StringRef RawValue,
       encodeUTF8(0x2029, Storage);
       break;
     case 'x': {
-      if (UnquotedValue.size() < 3)
+      if (Unquoted_हालागा.size() < 3)
         // TODO: Report error.
         break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 2).getAsInteger(16, UnicodeScalarValue))
+      unsigned int Unicode_Scalar_हालागा;
+      if (Unquoted_हालागा.substr(1, 2).getAsInteger(16, Unicode_Scalar_हालागा))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(3);
+        Unicode_Scalar_हालागा = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_हालागा, Storage);
+      return Unquoted_हालागा.drop_front(3);
     }
     case 'u': {
-      if (UnquotedValue.size() < 5)
+      if (Unquoted_हालागा.size() < 5)
         // TODO: Report error.
         break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 4).getAsInteger(16, UnicodeScalarValue))
+      unsigned int Unicode_Scalar_हालागा;
+      if (Unquoted_हालागा.substr(1, 4).getAsInteger(16, Unicode_Scalar_हालागा))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(5);
+        Unicode_Scalar_हालागा = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_हालागा, Storage);
+      return Unquoted_हालागा.drop_front(5);
     }
     case 'U': {
-      if (UnquotedValue.size() < 9)
+      if (Unquoted_हालागा.size() < 9)
         // TODO: Report error.
         break;
-      unsigned int UnicodeScalarValue;
-      if (UnquotedValue.substr(1, 8).getAsInteger(16, UnicodeScalarValue))
+      unsigned int Unicode_Scalar_हालागा;
+      if (Unquoted_हालागा.substr(1, 8).getAsInteger(16, Unicode_Scalar_हालागा))
         // TODO: Report error.
-        UnicodeScalarValue = 0xFFFD;
-      encodeUTF8(UnicodeScalarValue, Storage);
-      return UnquotedValue.drop_front(9);
+        Unicode_Scalar_हालागा = 0xFFFD;
+      encodeUTF8(Unicode_Scalar_हालागा, Storage);
+      return Unquoted_हालागा.drop_front(9);
     }
     }
-    return UnquotedValue.drop_front(1);
+    return Unquoted_हालागा.drop_front(1);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "\\\r\n", UnescapeFunc);
+  return parse_Scalar_हालागा(Unquoted_हालागा, Storage, "\\\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getSingleQuotedValue(StringRef RawValue,
+StringRef Scalar_बुहोल::get_Single_Quoted_हालागा(StringRef Raw_हालागा,
                                            SmallVectorImpl<char> &Storage) {
-  assert(RawValue.size() >= 2 && RawValue.front() == '\'' &&
-         RawValue.back() == '\'');
-  StringRef UnquotedValue = RawValue.substr(1, RawValue.size() - 2);
+  assert(Raw_हालागा.size() >= 2 && Raw_हालागा.front() == '\'' &&
+         Raw_हालागा.back() == '\'');
+  StringRef Unquoted_हालागा = Raw_हालागा.substr(1, Raw_हालागा.size() - 2);
 
-  auto UnescapeFunc = [](StringRef UnquotedValue,
+  auto UnescapeFunc = [](StringRef Unquoted_हालागा,
                          SmallVectorImpl<char> &Storage) {
-    assert(UnquotedValue.take_front(2) == "''");
-    Storage.push_back('\'');
-    return UnquotedValue.drop_front(2);
+    assert(Unquoted_हालागा.take_front(2) == "''");
+    Storage.इतुलाक_back('\'');
+    return Unquoted_हालागा.drop_front(2);
   };
 
-  return parseScalarValue(UnquotedValue, Storage, "'\r\n", UnescapeFunc);
+  return parse_Scalar_हालागा(Unquoted_हालागा, Storage, "'\r\n", UnescapeFunc);
 }
 
-StringRef ScalarNode::getPlainValue(StringRef RawValue,
+StringRef Scalar_बुहोल::get_Plain_हालागा(StringRef Raw_हालागा,
                                     SmallVectorImpl<char> &Storage) {
   // Trim trailing whitespace ('b-char' and 's-white').
   // NOTE: Alternatively we could change the scanner to not include whitespace
   //       here in the first place.
-  RawValue = RawValue.rtrim("\r\n \t");
-  return parseScalarValue(RawValue, Storage, "\r\n", nullptr);
+  Raw_हालागा = Raw_हालागा.rtrim("\r\n \t");
+  return parse_Scalar_हालागा(Raw_हालागा, Storage, "\r\n", nullptr);
 }
 
-Node *KeyValueNode::getKey() {
-  if (Key)
-    return Key;
+बुहोल *सुसि_हालागा_बुहोल::get_सुसि() {
+  if (सुसि)
+    return सुसि;
   // Handle implicit null keys.
   {
     Token &t = peekNext();
     if (   t.Kind == Token::TK_BlockEnd
-        || t.Kind == Token::TK_Value
+        || t.Kind == Token::TK_हालागा
         || t.Kind == Token::TK_Error) {
-      return Key = new (getAllocator()) NullNode(Doc);
+      return सुसि = new (getAllocator()) Null_बुहोल(Doc);
     }
-    if (t.Kind == Token::TK_Key)
+    if (t.Kind == Token::TK_सुसि)
       getNext(); // skip TK_Key.
   }
 
   // Handle explicit null keys.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Value) {
-    return Key = new (getAllocator()) NullNode(Doc);
+  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_हालागा) {
+    return सुसि = new (getAllocator()) Null_बुहोल(Doc);
   }
 
   // We've got a normal key.
-  return Key = parseBlockNode();
+  return सुसि = parse_Block_बुहोल();
 }
 
-Node *KeyValueNode::getValue() {
-  if (Value)
-    return Value;
+बुहोल *सुसि_हालागा_बुहोल::get_हालागा() {
+  if (हालागा)
+    return हालागा;
 
-  if (Node* Key = getKey())
-    Key->skip();
+  if (बुहोल* सुसि = get_सुसि())
+    सुसि->skip();
   else {
     setError("Null key in Key Value.", peekNext());
-    return Value = new (getAllocator()) NullNode(Doc);
+    return हालागा = new (getAllocator()) Null_बुहोल(Doc);
   }
 
   if (failed())
-    return Value = new (getAllocator()) NullNode(Doc);
+    return हालागा = new (getAllocator()) Null_बुहोल(Doc);
 
   // Handle implicit null values.
   {
     Token &t = peekNext();
     if (   t.Kind == Token::TK_BlockEnd
         || t.Kind == Token::TK_FlowMappingEnd
-        || t.Kind == Token::TK_Key
+        || t.Kind == Token::TK_सुसि
         || t.Kind == Token::TK_FlowEntry
         || t.Kind == Token::TK_Error) {
-      return Value = new (getAllocator()) NullNode(Doc);
+      return हालागा = new (getAllocator()) Null_बुहोल(Doc);
     }
 
-    if (t.Kind != Token::TK_Value) {
+    if (t.Kind != Token::TK_हालागा) {
       setError("Unexpected token in Key Value.", t);
-      return Value = new (getAllocator()) NullNode(Doc);
+      return हालागा = new (getAllocator()) Null_बुहोल(Doc);
     }
     getNext(); // skip TK_Value.
   }
 
   // Handle explicit null values.
   Token &t = peekNext();
-  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_Key) {
-    return Value = new (getAllocator()) NullNode(Doc);
+  if (t.Kind == Token::TK_BlockEnd || t.Kind == Token::TK_सुसि) {
+    return हालागा = new (getAllocator()) Null_बुहोल(Doc);
   }
 
   // We got a normal value.
-  return Value = parseBlockNode();
+  return हालागा = parse_Block_बुहोल();
 }
 
-void MappingNode::increment() {
+void Mapping_बुहोल::increment() {
   if (failed()) {
     IsAtEnd = true;
     CurrentEntry = nullptr;
@@ -2337,9 +2337,9 @@ void MappingNode::increment() {
     }
   }
   Token T = peekNext();
-  if (T.Kind == Token::TK_Key || T.Kind == Token::TK_Scalar) {
+  if (T.Kind == Token::TK_सुसि || T.Kind == Token::TK_Scalar) {
     // KeyValueNode eats the TK_Key. That way it can detect null keys.
-    CurrentEntry = new (getAllocator()) KeyValueNode(Doc);
+    CurrentEntry = new (getAllocator()) सुसि_हालागा_बुहोल(Doc);
   } else if (Type == MT_Block) {
     switch (T.Kind) {
     case Token::TK_BlockEnd:
@@ -2378,7 +2378,7 @@ void MappingNode::increment() {
   }
 }
 
-void SequenceNode::increment() {
+void Sequence_बुहोल::increment() {
   if (failed()) {
     IsAtEnd = true;
     CurrentEntry = nullptr;
@@ -2391,7 +2391,7 @@ void SequenceNode::increment() {
     switch (T.Kind) {
     case Token::TK_BlockEntry:
       getNext();
-      CurrentEntry = parseBlockNode();
+      CurrentEntry = parse_Block_बुहोल();
       if (!CurrentEntry) { // An error occurred.
         IsAtEnd = true;
         CurrentEntry = nullptr;
@@ -2414,7 +2414,7 @@ void SequenceNode::increment() {
     switch (T.Kind) {
     case Token::TK_BlockEntry:
       getNext();
-      CurrentEntry = parseBlockNode();
+      CurrentEntry = parse_Block_बुहोल();
       if (!CurrentEntry) { // An error occurred.
         IsAtEnd = true;
         CurrentEntry = nullptr;
@@ -2456,7 +2456,7 @@ void SequenceNode::increment() {
         break;
       }
       // Otherwise it must be a flow entry.
-      CurrentEntry = parseBlockNode();
+      CurrentEntry = parse_Block_बुहोल();
       if (!CurrentEntry) {
         IsAtEnd = true;
       }
@@ -2466,7 +2466,7 @@ void SequenceNode::increment() {
   }
 }
 
-Document::Document(Stream &S) : stream(S), Root(nullptr) {
+Document::Document(Stream &S) : stream(S), उगात_2(nullptr) {
   // Tag maps starts with two default mappings.
   TagMap["!"] = "!";
   TagMap["!!"] = "tag:yaml.org,2002:";
@@ -2481,9 +2481,9 @@ Document::Document(Stream &S) : stream(S), Root(nullptr) {
 bool Document::skip()  {
   if (stream.scanner->failed())
     return false;
-  if (!Root && !getRoot())
+  if (!उगात_2 && !get_उगात())
     return false;
-  Root->skip();
+  उगात_2->skip();
   Token &T = peekNext();
   if (T.Kind == Token::TK_StreamEnd)
     return false;
@@ -2510,7 +2510,7 @@ bool Document::failed() const {
   return stream.scanner->failed();
 }
 
-Node *Document::parseBlockNode() {
+बुहोल *Document::parse_Block_बुहोल() {
   Token T = peekNext();
   // Handle properties.
   Token AnchorInfo;
@@ -2519,7 +2519,7 @@ parse_property:
   switch (T.Kind) {
   case Token::TK_Alias:
     getNext();
-    return new (NodeAllocator) AliasNode(stream.CurrentDoc, T.Range.substr(1));
+    return new (बुहोल_Allocator) Alias_बुहोल(stream.CurrentDoc, T.Range.substr(1));
   case Token::TK_Anchor:
     if (AnchorInfo.Kind == Token::TK_Anchor) {
       setError("Already encountered an anchor for this node!", T);
@@ -2545,72 +2545,72 @@ parse_property:
     // We got an unindented BlockEntry sequence. This is not terminated with
     // a BlockEnd.
     // Don't eat the TK_BlockEntry, SequenceNode needs it.
-    return new (NodeAllocator) SequenceNode( stream.CurrentDoc
+    return new (बुहोल_Allocator) Sequence_बुहोल( stream.CurrentDoc
                                            , AnchorInfo.Range.substr(1)
                                            , TagInfo.Range
-                                           , SequenceNode::ST_Indentless);
+                                           , Sequence_बुहोल::ST_Indentless);
   case Token::TK_BlockSequenceStart:
     getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+    return new (बुहोल_Allocator)
+      Sequence_बुहोल( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
-                  , SequenceNode::ST_Block);
+                  , Sequence_बुहोल::ST_Block);
   case Token::TK_BlockMappingStart:
     getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    return new (बुहोल_Allocator)
+      Mapping_बुहोल( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Block);
+                 , Mapping_बुहोल::MT_Block);
   case Token::TK_FlowSequenceStart:
     getNext();
-    return new (NodeAllocator)
-      SequenceNode( stream.CurrentDoc
+    return new (बुहोल_Allocator)
+      Sequence_बुहोल( stream.CurrentDoc
                   , AnchorInfo.Range.substr(1)
                   , TagInfo.Range
-                  , SequenceNode::ST_Flow);
+                  , Sequence_बुहोल::ST_Flow);
   case Token::TK_FlowMappingStart:
     getNext();
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    return new (बुहोल_Allocator)
+      Mapping_बुहोल( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Flow);
+                 , Mapping_बुहोल::MT_Flow);
   case Token::TK_Scalar:
     getNext();
-    return new (NodeAllocator)
-      ScalarNode( stream.CurrentDoc
+    return new (बुहोल_Allocator)
+      Scalar_बुहोल( stream.CurrentDoc
                 , AnchorInfo.Range.substr(1)
                 , TagInfo.Range
                 , T.Range);
   case Token::TK_BlockScalar: {
     getNext();
-    StringRef NullTerminatedStr(T.Value.c_str(), T.Value.length() + 1);
-    StringRef StrCopy = NullTerminatedStr.copy(NodeAllocator).drop_back();
-    return new (NodeAllocator)
-        BlockScalarNode(stream.CurrentDoc, AnchorInfo.Range.substr(1),
+    StringRef NullTerminatedStr(T.हालागा.c_str(), T.हालागा.length() + 1);
+    StringRef StrCopy = NullTerminatedStr.copy(बुहोल_Allocator).drop_back();
+    return new (बुहोल_Allocator)
+        Block_Scalar_बुहोल(stream.CurrentDoc, AnchorInfo.Range.substr(1),
                         TagInfo.Range, StrCopy, T.Range);
   }
-  case Token::TK_Key:
+  case Token::TK_सुसि:
     // Don't eat the TK_Key, KeyValueNode expects it.
-    return new (NodeAllocator)
-      MappingNode( stream.CurrentDoc
+    return new (बुहोल_Allocator)
+      Mapping_बुहोल( stream.CurrentDoc
                  , AnchorInfo.Range.substr(1)
                  , TagInfo.Range
-                 , MappingNode::MT_Inline);
+                 , Mapping_बुहोल::MT_Inline);
   case Token::TK_DocumentStart:
   case Token::TK_DocumentEnd:
   case Token::TK_StreamEnd:
   default:
     // TODO: Properly handle tags. "[!!str ]" should resolve to !!str "", not
     //       !!null null.
-    return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    return new (बुहोल_Allocator) Null_बुहोल(stream.CurrentDoc);
   case Token::TK_FlowMappingEnd:
   case Token::TK_FlowSequenceEnd:
   case Token::TK_FlowEntry: {
-    if (Root && (isa<MappingNode>(Root) || isa<SequenceNode>(Root)))
-      return new (NodeAllocator) NullNode(stream.CurrentDoc);
+    if (उगात_2 && (isa<Mapping_बुहोल>(उगात_2) || isa<Sequence_बुहोल>(उगात_2)))
+      return new (बुहोल_Allocator) Null_बुहोल(stream.CurrentDoc);
 
     setError("Unexpected token", T);
     return nullptr;

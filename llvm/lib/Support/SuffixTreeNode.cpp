@@ -15,30 +15,30 @@
 
 using namespace llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+unsigned Suffix_पुनो_बुहोल::getStartIdx() const { return StartIdx; }
+void Suffix_पुनो_बुहोल::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
+void Suffix_पुनो_बुहोल::setConcatLen(unsigned Len) { ConcatLen = Len; }
+unsigned Suffix_पुनो_बुहोल::getConcatLen() const { return ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
+bool Suffix_पुनो_Internal_बुहोल::is_उगात() const {
   return getStartIdx() == EmptyIdx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
+unsigned Suffix_पुनो_Internal_बुहोल::getEndIdx() const { return EndIdx; }
+void Suffix_पुनो_Internal_बुहोल::setLink(Suffix_पुनो_Internal_बुहोल *L) {
   assert(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_पुनो_Internal_बुहोल *Suffix_पुनो_Internal_बुहोल::getLink() const { return Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
+unsigned Suffix_पुनो_Leaf_बुहोल::getEndIdx() const {
   assert(EndIdx && "EndIdx is empty?");
   return *EndIdx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+unsigned Suffix_पुनो_Leaf_बुहोल::getSuffixIdx() const { return SuffixIdx; }
+void Suffix_पुनो_Leaf_बुहोल::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+unsigned Suffix_पुनो_बुहोल::get_कालिवा_Leaf_Idx() const { return कालिवा_Leaf_Idx; }
+unsigned Suffix_पुनो_बुहोल::get_कानान_Leaf_Idx() const { return कानान_Leaf_Idx; }
+void Suffix_पुनो_बुहोल::set_कालिवा_Leaf_Idx(unsigned Idx) { कालिवा_Leaf_Idx = Idx; }
+void Suffix_पुनो_बुहोल::set_कानान_Leaf_Idx(unsigned Idx) { कानान_Leaf_Idx = Idx; }

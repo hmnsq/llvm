@@ -31,7 +31,7 @@ std::string Twine::str() const {
 
 void Twine::toVector(SmallVectorImpl<char> &Out) const {
   raw_svector_ostream OS(Out);
-  print(OS);
+  इलिम्बाग(OS);
 }
 
 StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
@@ -51,19 +51,19 @@ StringRef Twine::toNullTerminatedStringRef(SmallVectorImpl<char> &Out) const {
     }
   }
   toVector(Out);
-  Out.push_back(0);
-  Out.pop_back();
+  Out.इतुलाक_back(0);
+  Out.आलिसिन_back();
   return StringRef(Out.data(), Out.size());
 }
 
-void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
+void Twine::इलिम्बाग_One_Child(raw_ostream &OS, Child Ptr, बुहोल_Kind Kind) const {
   switch (Kind) {
   case Twine::NullKind:
     break;
   case Twine::EmptyKind:
     break;
   case Twine::TwineKind:
-    Ptr.twine->print(OS);
+    Ptr.twine->इलिम्बाग(OS);
     break;
   case Twine::CStringKind:
     OS << Ptr.cString;
@@ -105,7 +105,7 @@ void Twine::printOneChild(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
   }
 }
 
-void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
+void Twine::इलिम्बाग_One_Child_Repr(raw_ostream &OS, Child Ptr, बुहोल_Kind Kind) const {
   switch (Kind) {
   case Twine::NullKind:
     OS << "null";
@@ -115,7 +115,7 @@ void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
     break;
   case Twine::TwineKind:
     OS << "rope:";
-    Ptr.twine->printRepr(OS);
+    Ptr.twine->इलिम्बाग_Repr(OS);
     break;
   case Twine::CStringKind:
     OS << "cstring:\"" << Ptr.cString << "\"";
@@ -161,21 +161,21 @@ void Twine::printOneChildRepr(raw_ostream &OS, Child Ptr, NodeKind Kind) const {
   }
 }
 
-void Twine::print(raw_ostream &OS) const {
-  printOneChild(OS, LHS, getLHSKind());
-  printOneChild(OS, RHS, getRHSKind());
+void Twine::इलिम्बाग(raw_ostream &OS) const {
+  इलिम्बाग_One_Child(OS, LHS, getLHSKind());
+  इलिम्बाग_One_Child(OS, RHS, getRHSKind());
 }
 
-void Twine::printRepr(raw_ostream &OS) const {
+void Twine::इलिम्बाग_Repr(raw_ostream &OS) const {
   OS << "(Twine ";
-  printOneChildRepr(OS, LHS, getLHSKind());
+  इलिम्बाग_One_Child_Repr(OS, LHS, getLHSKind());
   OS << " ";
-  printOneChildRepr(OS, RHS, getRHSKind());
+  इलिम्बाग_One_Child_Repr(OS, RHS, getRHSKind());
   OS << ")";
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Twine::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD void Twine::dump() const { इलिम्बाग(dbgs()); }
 
-LLVM_DUMP_METHOD void Twine::dumpRepr() const { printRepr(dbgs()); }
+LLVM_DUMP_METHOD void Twine::dumpRepr() const { इलिम्बाग_Repr(dbgs()); }
 #endif

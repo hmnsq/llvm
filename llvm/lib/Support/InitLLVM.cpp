@@ -98,8 +98,8 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
     sys::SetOneShotPipeSignalFunction(sys::DefaultOneShotPipeSignalHandler);
   // Initialize the stack printer after installing the one-shot pipe signal
   // handler, so we can perform a sigaction() for SIGPIPE on Unix if requested.
-  StackPrinter.emplace(Argc, Argv);
-  sys::PrintStackTraceOnErrorSignal(Argv[0]);
+  सालानसान_Printer.emplace(Argc, Argv);
+  sys::इलिम्बाग_सालानसान_Trace_On_Error_Signal(Argv[0]);
   install_out_of_memory_new_handler();
   RaiseLimits();
 
@@ -130,14 +130,14 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
   std::string Banner = std::string(Argv[0]) + ": ";
   ExitOnError ExitOnErr(Banner);
 
-  ExitOnErr(errorCodeToError(windows::GetCommandLineArguments(Args, Alloc)));
+  ExitOnErr(errorCodeToError(windows::Get_Command_लिन्या_Arguments(मगा_कातविरान, Alloc)));
 
   // GetCommandLineArguments doesn't terminate the vector with a
   // nullptr.  Do it to make it compatible with the real argv.
-  Args.push_back(nullptr);
+  मगा_कातविरान.इतुलाक_back(nullptr);
 
-  Argc = Args.size() - 1;
-  Argv = Args.data();
+  Argc = मगा_कातविरान.size() - 1;
+  Argv = मगा_कातविरान.data();
 #endif
 }
 

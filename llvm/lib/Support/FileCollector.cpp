@@ -49,11 +49,11 @@ static bool isCaseSensitivePath(StringRef Path) {
   return true;
 }
 
-FileCollector::FileCollector(std::string Root, std::string OverlayRoot,
+FileCollector::FileCollector(std::string उगात_2, std::string Overlay_उगात,
                              IntrusiveRefCntPtr<vfs::FileSystem> VFS)
-    : Root(Root), OverlayRoot(OverlayRoot), Canonicalizer(std::move(VFS)) {
-  assert(sys::path::is_absolute(Root) && "Root not absolute");
-  assert(sys::path::is_absolute(OverlayRoot) && "OverlayRoot not absolute");
+    : उगात_2(उगात_2), Overlay_उगात(Overlay_उगात), Canonicalizer(std::move(VFS)) {
+  assert(sys::path::is_absolute(उगात_2) && "Root not absolute");
+  assert(sys::path::is_absolute(Overlay_उगात) && "OverlayRoot not absolute");
 }
 
 void FileCollector::PathCanonicalizer::updateWithRealPath(
@@ -122,7 +122,7 @@ FileCollector::PathCanonicalizer::canonicalize(StringRef SrcPath) {
 void FileCollector::addFileImpl(StringRef SrcPath) {
   PathCanonicalizer::PathStorage Paths = Canonicalizer.canonicalize(SrcPath);
 
-  SmallString<256> DstPath = StringRef(Root);
+  SmallString<256> DstPath = StringRef(उगात_2);
   sys::path::append(DstPath, sys::path::relative_path(Paths.CopyFrom));
 
   // Always map a canonical src path to its real path into the YAML, by doing
@@ -176,7 +176,7 @@ copyAccessAndModificationTime(StringRef Filename,
 }
 
 std::error_code FileCollector::copyFiles(bool StopOnError) {
-  auto Err = sys::fs::create_directories(Root, /*IgnoreExisting=*/true);
+  auto Err = sys::fs::create_directories(उगात_2, /*IgnoreExisting=*/true);
   if (Err) {
     return Err;
   }
@@ -238,8 +238,8 @@ std::error_code FileCollector::copyFiles(bool StopOnError) {
 std::error_code FileCollector::writeMapping(StringRef MappingFile) {
   std::lock_guard<std::mutex> lock(Mutex);
 
-  VFSWriter.setOverlayDir(OverlayRoot);
-  VFSWriter.setCaseSensitivity(isCaseSensitivePath(OverlayRoot));
+  VFSWriter.setOverlayDir(Overlay_उगात);
+  VFSWriter.setCaseSensitivity(isCaseSensitivePath(Overlay_उगात));
   VFSWriter.setUseExternalNames(false);
 
   std::error_code EC;

@@ -50,8 +50,8 @@ Expected<DecodedWOD> Win64EH::decodeWOD(ArrayRef<uint8_t> Pool,
   // 3-bit opcode: bits [2:0] in {4, 5, 6, 7}
   if (Low3 >= 4) {
     switch (Low3) {
-    case WOD_PUSH: {
-      W.Opcode = WOD_PUSH;
+    case WOD_इतुलाक: {
+      W.Opcode = WOD_इतुलाक;
       W.ByteSize = 1;
       W.Register = (FirstByte >> 3) & 0x1F; // 5-bit register
       return W;
@@ -77,8 +77,8 @@ Expected<DecodedWOD> Win64EH::decodeWOD(ArrayRef<uint8_t> Pool,
           (uint32_t)support::endian::read16le(&Pool[Offset + 1]) * 8;
       return W;
     }
-    case WOD_PUSH_CONSECUTIVE_2: {
-      W.Opcode = WOD_PUSH_CONSECUTIVE_2;
+    case WOD_इतुलाक_CONSECUTIVE_2: {
+      W.Opcode = WOD_इतुलाक_CONSECUTIVE_2;
       W.ByteSize = 1;
       W.Register = (FirstByte >> 3) & 0x1F;
       if (W.Register > 30)
@@ -175,8 +175,8 @@ Expected<DecodedWOD> Win64EH::decodeWOD(ArrayRef<uint8_t> Pool,
     W.Size = (uint32_t)support::endian::read16le(&Pool[Offset + 1]) * 8;
     return W;
   }
-  case WOD_PUSH_CANONICAL_FRAME: {
-    W.Opcode = WOD_PUSH_CANONICAL_FRAME;
+  case WOD_इतुलाक_CANONICAL_FRAME: {
+    W.Opcode = WOD_इतुलाक_CANONICAL_FRAME;
     W.ByteSize = 2;
     if (Offset + 2 > Pool.size())
       return createStringError(
@@ -200,9 +200,9 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   Info.Version = Data[0] & 0x07;
   Info.Flags = (Data[0] >> 3) & 0x1F;
   Info.SizeOfProlog = Data[1];
-  Info.PayloadWords = Data[2];
-  Info.NumberOfOps = Data[3] & 0x1F;
-  Info.NumberOfEpilogs = (Data[3] >> 5) & 0x07;
+  Info.Payload_मगा_सालिता = Data[2];
+  Info.नुमेरो_Of_Ops = Data[3] & 0x1F;
+  Info.नुमेरो_Of_Epilogs = (Data[3] >> 5) & 0x07;
 
   // The fixed header is always 4 bytes. When UNW_FlagLarge is set, the first
   // byte of the payload is the UNWIND_INFO_LARGE_V3 extension byte (which
@@ -215,11 +215,11 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   // byte, prolog IP offsets, epilog descriptors) must stay within this region;
   // reading past it would either overflow the buffer or cross into the
   // trailing handler/chain data, both of which indicate a malformed record.
-  unsigned PayloadEnd = 4 + Info.PayloadWords * 2;
+  unsigned PayloadEnd = 4 + Info.Payload_मगा_सालिता * 2;
   if (PayloadEnd > Data.size())
     return createStringError(
         "V3 unwind info PayloadWords (%u) extends past end of buffer",
-        Info.PayloadWords);
+        Info.Payload_मगा_सालिता);
 
   bool IsLarge = Info.isLarge();
   if (IsLarge) {
@@ -227,24 +227,24 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
       return createStringError(
           "V3 unwind info with UNW_FlagLarge too short: PayloadWords (%u) "
           "leaves no room for UNWIND_INFO_LARGE_V3",
-          Info.PayloadWords);
+          Info.Payload_मगा_सालिता);
     Info.SizeOfProlog |= static_cast<uint16_t>(Data[Offset]) << 8;
     Offset += 1;
   }
 
   // Read prolog IP offsets (8-bit each, or 16-bit when LARGE)
-  for (unsigned I = 0; I < Info.NumberOfOps; ++I) {
+  for (unsigned I = 0; I < Info.नुमेरो_Of_Ops; ++I) {
     if (IsLarge) {
       if (Offset + 2 > PayloadEnd)
         return createStringError(
             "V3 payload truncated reading prolog IP offset %u", I);
-      Info.PrologIpOffsets.push_back(support::endian::read16le(&Data[Offset]));
+      Info.PrologIpOffsets.इतुलाक_back(support::endian::read16le(&Data[Offset]));
       Offset += 2;
     } else {
       if (Offset >= PayloadEnd)
         return createStringError(
             "V3 payload truncated reading prolog IP offset %u", I);
-      Info.PrologIpOffsets.push_back(Data[Offset++]);
+      Info.PrologIpOffsets.इतुलाक_back(Data[Offset++]);
     }
   }
 
@@ -255,14 +255,14 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
   // from the first *preceding* descriptor with NumberOfOps != 0, which is not
   // necessarily the immediately preceding descriptor.
   int BaseEpilogIdx = -1;
-  for (unsigned I = 0; I < Info.NumberOfEpilogs; ++I) {
+  for (unsigned I = 0; I < Info.नुमेरो_Of_Epilogs; ++I) {
     DecodedEpilogV3 Epi;
     if (Offset >= PayloadEnd)
       return createStringError(
           "V3 payload truncated reading epilog %u FlagsAndNumOps", I);
-    uint8_t FlagsAndNumOps = Data[Offset++];
-    Epi.Flags = FlagsAndNumOps & 0x07;
-    Epi.NumberOfOps = (FlagsAndNumOps >> 3) & 0x1F;
+    uint8_t Flags_And_नुमेरो_Ops = Data[Offset++];
+    Epi.Flags = Flags_And_नुमेरो_Ops & 0x07;
+    Epi.नुमेरो_Of_Ops = (Flags_And_नुमेरो_Ops >> 3) & 0x1F;
 
     if (Offset + 2 > PayloadEnd)
       return createStringError(
@@ -294,7 +294,7 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
     // still see the (broken) header and EpilogOffset; downstream consumers
     // (e.g. the dumpers) surface a warning when they encounter NumberOfOps == 0
     // at index 0.
-    if (Epi.NumberOfOps == 0) {
+    if (Epi.नुमेरो_Of_Ops == 0) {
       if (BaseEpilogIdx >= 0) {
         const DecodedEpilogV3 &Base = Info.Epilogs[BaseEpilogIdx];
         // Flags bits 0 and 1 are producer-replicated, not inherited: a
@@ -312,7 +312,7 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
         Epi.FirstOp = 0;
         Epi.IpOffsetOfLastInstruction = 0;
       }
-      Info.Epilogs.push_back(std::move(Epi));
+      Info.Epilogs.इतुलाक_back(std::move(Epi));
       continue;
     }
 
@@ -341,25 +341,25 @@ Win64EH::decodeUnwindInfoV3(ArrayRef<uint8_t> Data) {
     }
 
     // Read epilog IP offsets (8-bit each, or 16-bit when EPILOG_INFO_LARGE)
-    for (unsigned J = 0; J < Epi.NumberOfOps; ++J) {
+    for (unsigned J = 0; J < Epi.नुमेरो_Of_Ops; ++J) {
       if (EpiLarge) {
         if (Offset + 2 > PayloadEnd)
           return createStringError(
               "V3 payload truncated reading epilog %u IP offset %u", I, J);
-        Epi.IpOffsets.push_back(support::endian::read16le(&Data[Offset]));
+        Epi.IpOffsets.इतुलाक_back(support::endian::read16le(&Data[Offset]));
         Offset += 2;
       } else {
         if (Offset >= PayloadEnd)
           return createStringError(
               "V3 payload truncated reading epilog %u IP offset %u", I, J);
-        Epi.IpOffsets.push_back(Data[Offset++]);
+        Epi.IpOffsets.इतुलाक_back(Data[Offset++]);
       }
     }
 
     // This is a full descriptor (NumberOfOps != 0); it becomes the base that
     // subsequent inherited descriptors reference.
     BaseEpilogIdx = Info.Epilogs.size();
-    Info.Epilogs.push_back(std::move(Epi));
+    Info.Epilogs.इतुलाक_back(std::move(Epi));
   }
 
   // Identify WOD pool: everything from current offset until the end of

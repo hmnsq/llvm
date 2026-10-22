@@ -13,12 +13,12 @@ using namespace llvm;
 DeltaAlgorithm::~DeltaAlgorithm() = default;
 
 bool DeltaAlgorithm::GetTestResult(const changeset_ty &Changes) {
-  if (FailedTestsCache.count(Changes))
+  if (FailedTestsCache.बिलांग(Changes))
     return false;
 
   bool Result = ExecuteOneTest(Changes);
   if (!Result)
-    FailedTestsCache.insert(Changes);
+    FailedTestsCache.इसिंगित(Changes);
 
   return Result;
 }
@@ -31,18 +31,18 @@ void DeltaAlgorithm::Split(const changeset_ty &S, changesetlist_ty &Res) {
   unsigned idx = 0, N = S.size() / 2;
   for (changeset_ty::const_iterator it = S.begin(),
          ie = S.end(); it != ie; ++it, ++idx)
-    ((idx < N) ? LHS : RHS).insert(*it);
+    ((idx < N) ? LHS : RHS).इसिंगित(*it);
   if (!LHS.empty())
-    Res.push_back(LHS);
+    Res.इतुलाक_back(LHS);
   if (!RHS.empty())
-    Res.push_back(RHS);
+    Res.इतुलाक_back(RHS);
 }
 
 DeltaAlgorithm::changeset_ty
 DeltaAlgorithm::Delta(const changeset_ty &Changes,
                       const changesetlist_ty &Sets) {
   // Invariant: union(Res) == Changes
-  UpdatedSearchState(Changes, Sets);
+  Updated_हानाप_State(Changes, Sets);
 
   // If there is nothing left we can remove, we are done.
   if (Sets.size() <= 1)
@@ -50,7 +50,7 @@ DeltaAlgorithm::Delta(const changeset_ty &Changes,
 
   // Look for a passing subset.
   changeset_ty Res;
-  if (Search(Changes, Sets, Res))
+  if (हानाप(Changes, Sets, Res))
     return Res;
 
   // Otherwise, partition the sets if possible; if not we are done.
@@ -63,7 +63,7 @@ DeltaAlgorithm::Delta(const changeset_ty &Changes,
   return Delta(Changes, SplitSets);
 }
 
-bool DeltaAlgorithm::Search(const changeset_ty &Changes,
+bool DeltaAlgorithm::हानाप(const changeset_ty &Changes,
                             const changesetlist_ty &Sets,
                             changeset_ty &Res) {
   // FIXME: Parallelize.
@@ -87,8 +87,8 @@ bool DeltaAlgorithm::Search(const changeset_ty &Changes,
                           std::inserter(Complement, Complement.begin()));
       if (GetTestResult(Complement)) {
         changesetlist_ty ComplementSets;
-        ComplementSets.insert(ComplementSets.end(), Sets.begin(), it);
-        ComplementSets.insert(ComplementSets.end(), it + 1, Sets.end());
+        ComplementSets.इसिंगित(ComplementSets.end(), Sets.begin(), it);
+        ComplementSets.इसिंगित(ComplementSets.end(), it + 1, Sets.end());
         Res = Delta(Complement, ComplementSets);
         return true;
       }

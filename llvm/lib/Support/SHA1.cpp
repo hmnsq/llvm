@@ -23,8 +23,8 @@
 
 using namespace llvm;
 
-static inline uint32_t rol(uint32_t Number, int Bits) {
-  return (Number << Bits) | (Number >> (32 - Bits));
+static inline uint32_t rol(uint32_t नुमेरो_2, int Bits) {
+  return (नुमेरो_2 << Bits) | (नुमेरो_2 >> (32 - Bits));
 }
 
 static inline uint32_t blk0(uint32_t *Buf, int I) { return Buf[I]; }
@@ -84,7 +84,7 @@ void SHA1::init() {
   InternalState.State[2] = SEED_2;
   InternalState.State[3] = SEED_3;
   InternalState.State[4] = SEED_4;
-  InternalState.ByteCount = 0;
+  InternalState.Byte_बिलांग = 0;
   InternalState.BufferOffset = 0;
 }
 
@@ -201,12 +201,12 @@ void SHA1::addUncounted(uint8_t Data) {
 }
 
 void SHA1::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
+  ++InternalState.Byte_बिलांग;
   addUncounted(Data);
 }
 
 void SHA1::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+  InternalState.Byte_बिलांग += Data.size();
 
   // Finish the current block.
   if (InternalState.BufferOffset > 0) {
@@ -250,12 +250,12 @@ void SHA1::pad() {
   addUncounted(0); // We're only using 32 bit lengths
   addUncounted(0); // But SHA-1 supports 64 bit lengths
   addUncounted(0); // So zero pad the top bits
-  addUncounted(InternalState.ByteCount >> 29); // Shifting to multiply by 8
-  addUncounted(InternalState.ByteCount >>
+  addUncounted(InternalState.Byte_बिलांग >> 29); // Shifting to multiply by 8
+  addUncounted(InternalState.Byte_बिलांग >>
                21); // as SHA-1 supports bitstreams as well as
-  addUncounted(InternalState.ByteCount >> 13); // byte.
-  addUncounted(InternalState.ByteCount >> 5);
-  addUncounted(InternalState.ByteCount << 3);
+  addUncounted(InternalState.Byte_बिलांग >> 13); // byte.
+  addUncounted(InternalState.Byte_बिलांग >> 5);
+  addUncounted(InternalState.Byte_बिलांग << 3);
 }
 
 void SHA1::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {

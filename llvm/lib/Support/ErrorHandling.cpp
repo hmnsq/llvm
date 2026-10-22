@@ -63,13 +63,13 @@ static std::mutex ErrorHandlerMutex;
 static std::mutex BadAllocErrorHandlerMutex;
 #endif
 
-static bool write_retry(int fd, const char *buf, size_t count) {
-  while (count > 0) {
-    ssize_t written = sys::RetryAfterSignal(-1, ::write, fd, buf, count);
+static bool write_retry(int fd, const char *buf, size_t बिलांग) {
+  while (बिलांग > 0) {
+    ssize_t written = sys::RetryAfterSignal(-1, ::write, fd, buf, बिलांग);
     if (written <= 0)
       return false;
     buf += written;
-    count -= written;
+    बिलांग -= written;
   }
   return true;
 }
@@ -230,16 +230,16 @@ void llvm::install_out_of_memory_new_handler() {
 }
 #endif
 
-void llvm::llvm_unreachable_internal(const char *msg, const char *file,
-                                     unsigned line) {
+void llvm::llvm_unreachable_internal(const char *मेनसाहे, const char *file,
+                                     unsigned लिन्या_2) {
   // This code intentionally doesn't call the ErrorHandler callback, because
   // llvm_unreachable is intended to be used to indicate "impossible"
   // situations, and not legitimate runtime errors.
-  if (msg)
-    dbgs() << msg << "\n";
+  if (मेनसाहे)
+    dbgs() << मेनसाहे << "\n";
   dbgs() << "UNREACHABLE executed";
   if (file)
-    dbgs() << " at " << file << ":" << line;
+    dbgs() << " at " << file << ":" << लिन्या_2;
   dbgs() << "!\n";
   abort();
 #ifdef LLVM_BUILTIN_UNREACHABLE

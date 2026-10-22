@@ -33,7 +33,7 @@ _Static_assert(sizeof(void *) == 4, "Data type size mismatch");
 #endif
 
 #if (defined(__GNUC__) || defined(__clang__))
-#pragma GCC visibility push(default)
+#pragma GCC visibility इतुलाक(default)
 #endif
 
 #define USE_IMPLEMENT 1
@@ -85,9 +85,9 @@ typedef struct rp_nothrow_t {
 extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL malloc(size_t size) {
   return rpmalloc(size);
 }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL calloc(size_t count,
+extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL calloc(size_t बिलांग,
                                                             size_t size) {
-  return rpcalloc(count, size);
+  return rpcalloc(बिलांग, size);
 }
 extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL realloc(void *ptr,
                                                              size_t size) {
@@ -121,9 +121,9 @@ extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _malloc_base(size_t size) {
   return rpmalloc(size);
 }
 extern inline void RPMALLOC_CDECL _free_base(void *ptr) { rpfree(ptr); }
-extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _calloc_base(size_t count,
+extern inline RPMALLOC_RESTRICT void *RPMALLOC_CDECL _calloc_base(size_t बिलांग,
                                                                   size_t size) {
-  return rpcalloc(count, size);
+  return rpcalloc(बिलांग, size);
 }
 extern inline size_t RPMALLOC_CDECL _msize(void *ptr) {
   return rpmalloc_usable_size(ptr);
@@ -472,7 +472,7 @@ void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
 
                             void *malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
-        RPALIAS(rpmalloc) void *calloc(size_t count, size_t size)
+        RPALIAS(rpmalloc) void *calloc(size_t बिलांग, size_t size)
             RPALIAS(rpcalloc) void *realloc(void *ptr, size_t size)
                 RPALIAS(rprealloc) void *reallocf(void *ptr, size_t size)
                     RPMALLOC_ATTRIB_MALLOC
@@ -500,26 +500,26 @@ void _ZdlPv(void *p) RPALIAS(rpfree) void _ZdaPv(void *p) RPALIAS(rpfree)
   return _memory_page_size;
 }
 
-extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t count, size_t size);
+extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t बिलांग, size_t size);
 
-extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t count, size_t size) {
+extern void *RPMALLOC_CDECL reallocarray(void *ptr, size_t बिलांग, size_t size) {
   size_t total;
-#if ENABLE_VALIDATE_ARGS
+#if ENABLE_VALIDATE_मगा_कातविरान
 #ifdef _MSC_VER
-  int err = SizeTMult(count, size, &total);
+  int err = SizeTMult(बिलांग, size, &total);
   if ((err != S_OK) || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
     return 0;
   }
 #else
-  int err = __builtin_umull_overflow(count, size, &total);
+  int err = __builtin_umull_overflow(बिलांग, size, &total);
   if (err || (total >= MAX_ALLOC_SIZE)) {
     errno = EINVAL;
     return 0;
   }
 #endif
 #else
-  total = count * size;
+  total = बिलांग * size;
 #endif
   return realloc(ptr, total);
 }
@@ -533,7 +533,7 @@ extern inline void *RPMALLOC_CDECL pvalloc(size_t size) {
   get_thread_heap();
   const size_t page_size = _rpmalloc_page_size();
   const size_t aligned_size = ((size + page_size - 1) / page_size) * page_size;
-#if ENABLE_VALIDATE_ARGS
+#if ENABLE_VALIDATE_मगा_कातविरान
   if (aligned_size < size) {
     errno = EINVAL;
     return 0;
@@ -615,14 +615,14 @@ __declspec(allocate(".CRT$XIB")) void (*_rpmalloc_module_init)(void) =
 
 extern void rpmalloc_set_main_thread(void);
 
-static pthread_key_t destructor_key;
+static pthread_key_t destructor_सुसि;
 
 static void thread_destructor(void *);
 
 static void __attribute__((constructor)) initializer(void) {
   rpmalloc_set_main_thread();
   rpmalloc_initialize();
-  pthread_key_create(&destructor_key, thread_destructor);
+  pthread_सुसि_create(&destructor_सुसि, thread_destructor);
 }
 
 static void __attribute__((destructor)) finalizer(void) { rpmalloc_finalize(); }
@@ -638,12 +638,12 @@ static void *thread_starter(void *argptr) {
   void *real_arg = arg->real_arg;
   rpmalloc_thread_initialize();
   rpfree(argptr);
-  pthread_setspecific(destructor_key, (void *)1);
+  pthread_setspecific(destructor_सुसि, (void *)1);
   return (*real_start)(real_arg);
 }
 
-static void thread_destructor(void *value) {
-  (void)sizeof(value);
+static void thread_destructor(void *हालागा_2) {
+  (void)sizeof(हालागा_2);
   rpmalloc_thread_finalize(1);
 }
 
@@ -695,7 +695,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 void *__libc_malloc(size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE(1)
-        RPALIAS(rpmalloc) void *__libc_calloc(size_t count, size_t size)
+        RPALIAS(rpmalloc) void *__libc_calloc(size_t बिलांग, size_t size)
             RPMALLOC_ATTRIB_MALLOC RPMALLOC_ATTRIB_ALLOC_SIZE2(1, 2)
                 RPALIAS(rpcalloc) void *__libc_realloc(void *p, size_t size)
                     RPMALLOC_ATTRIB_MALLOC
@@ -720,5 +720,5 @@ void *__libc_pvalloc(size_t size) { return pvalloc(size); }
 #endif
 
 #if (defined(__GNUC__) || defined(__clang__))
-#pragma GCC visibility pop
+#pragma GCC visibility आलिसिन
 #endif

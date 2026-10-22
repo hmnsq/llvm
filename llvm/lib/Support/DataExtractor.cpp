@@ -57,7 +57,7 @@ T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) const {
 }
 
 template <typename T>
-T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
+T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t बिलांग,
                         Error *Err) const {
   ErrorAsOutParameter ErrAsOut(Err);
   if (isError(Err))
@@ -65,11 +65,11 @@ T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
 
   uint64_t offset = *offset_ptr;
 
-  if (!prepareRead(offset, sizeof(*dst) * count, Err))
+  if (!prepareRead(offset, sizeof(*dst) * बिलांग, Err))
     return nullptr;
-  for (T *value_ptr = dst, *end = dst + count; value_ptr != end;
-       ++value_ptr, offset += sizeof(*dst))
-    *value_ptr = getU<T>(offset_ptr, Err);
+  for (T *हालागा_ptr = dst, *end = dst + बिलांग; हालागा_ptr != end;
+       ++हालागा_ptr, offset += sizeof(*dst))
+    *हालागा_ptr = getU<T>(offset_ptr, Err);
   // Advance the offset
   *offset_ptr = offset;
   // Return a non-NULL pointer to the converted data as an indicator of
@@ -82,12 +82,12 @@ uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) const {
 }
 
 uint8_t *DataExtractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
-                              uint32_t count) const {
-  return getUs<uint8_t>(offset_ptr, dst, count, nullptr);
+                              uint32_t बिलांग) const {
+  return getUs<uint8_t>(offset_ptr, dst, बिलांग, nullptr);
 }
 
-uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t Count) const {
-  return getUs<uint8_t>(&C.Offset, Dst, Count, &C.Err);
+uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t बिलांग_2) const {
+  return getUs<uint8_t>(&C.Offset, Dst, बिलांग_2, &C.Err);
 }
 
 uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
@@ -95,8 +95,8 @@ uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
 }
 
 uint16_t *DataExtractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
-                                uint32_t count) const {
-  return getUs<uint16_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t बिलांग) const {
+  return getUs<uint16_t>(offset_ptr, dst, बिलांग, nullptr);
 }
 
 uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) const {
@@ -110,8 +110,8 @@ uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) const {
 }
 
 uint32_t *DataExtractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
-                                uint32_t count) const {
-  return getUs<uint32_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t बिलांग) const {
+  return getUs<uint32_t>(offset_ptr, dst, बिलांग, nullptr);
 }
 
 uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
@@ -119,8 +119,8 @@ uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
 }
 
 uint64_t *DataExtractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
-                                uint32_t count) const {
-  return getUs<uint64_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t बिलांग) const {
+  return getUs<uint64_t>(offset_ptr, dst, बिलांग, nullptr);
 }
 
 uint64_t DataExtractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_size,
@@ -251,7 +251,7 @@ APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
     return APSInt();
 
   uint64_t Offset = *OffsetPtr;
-  APInt Value;
+  APInt हालागा;
   unsigned Shift = 0;
   uint8_t Byte;
   do {
@@ -260,20 +260,20 @@ APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
     Byte = Data[Offset++];
     APInt Slice(7, Byte & 0x7f);
     if (Shift == 0)
-      Value = Slice;
+      हालागा = Slice;
     else {
-      Value = Value.zext(Shift + 7);
-      Value.insertBits(Slice, Shift);
+      हालागा = हालागा.zext(Shift + 7);
+      हालागा.इसिंगित_Bits(Slice, Shift);
     }
     Shift += 7;
   } while (Byte & 0x80);
 
   // Sign extend Value to at least 64 bits to match getSLEB128.
   if (Shift < 64)
-    Value = Value.sext(64);
+    हालागा = हालागा.sext(64);
 
   *OffsetPtr = Offset;
-  return APSInt(std::move(Value), /*isUnsigned=*/false);
+  return APSInt(std::move(हालागा), /*isUnsigned=*/false);
 }
 
 void DataExtractor::skip(Cursor &C, uint64_t Length) const {

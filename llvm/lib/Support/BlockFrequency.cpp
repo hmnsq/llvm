@@ -53,7 +53,7 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
   return OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
+void llvm::इलिम्बाग_Relative_Block_Freq(raw_ostream &OS, BlockFrequency EntryFreq,
                                   BlockFrequency Freq) {
   if (Freq == BlockFrequency(0)) {
     OS << "0";
@@ -63,7 +63,7 @@ void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
     OS << "<invalid BFI>";
     return;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
+  Scaled_नुमेरो<uint64_t> Block(Freq.getFrequency(), 0);
+  Scaled_नुमेरो<uint64_t> Entry(EntryFreq.getFrequency(), 0);
   OS << Block / Entry;
 }

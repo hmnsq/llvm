@@ -27,7 +27,7 @@ static inline bool isWhitespaceExceptNL(unsigned char c) {
 }
 
 void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
-                               bool removeLineIfEmpty) {
+                               bool remove_लिन्या_If_Empty) {
   // Nothing to remove, exit early.
   if (Size == 0)
     return;
@@ -41,30 +41,30 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
   // Add a delta so that future changes are offset correctly.
   AddReplaceDelta(OrigOffset, -Size);
 
-  if (removeLineIfEmpty) {
+  if (remove_लिन्या_If_Empty) {
     // Find the line that the remove occurred and if it is completely empty
     // remove the line as well.
 
-    iterator curLineStart = begin();
-    unsigned curLineStartOffs = 0;
+    iterator cur_लिन्या_Start = begin();
+    unsigned cur_लिन्या_Start_Offs = 0;
     iterator posI = begin();
     for (unsigned i = 0; i != RealOffset; ++i) {
       if (*posI == '\n') {
-        curLineStart = posI;
-        ++curLineStart;
-        curLineStartOffs = i + 1;
+        cur_लिन्या_Start = posI;
+        ++cur_लिन्या_Start;
+        cur_लिन्या_Start_Offs = i + 1;
       }
       ++posI;
     }
 
-    unsigned lineSize = 0;
-    posI = curLineStart;
+    unsigned लिन्या_Size = 0;
+    posI = cur_लिन्या_Start;
     while (posI != end() && isWhitespaceExceptNL(*posI)) {
       ++posI;
-      ++lineSize;
+      ++लिन्या_Size;
     }
     if (posI != end() && *posI == '\n') {
-      Buffer.erase(curLineStartOffs, lineSize + 1 /* + '\n'*/);
+      Buffer.erase(cur_लिन्या_Start_Offs, लिन्या_Size + 1 /* + '\n'*/);
       // FIXME: Here, the offset of the start of the line is supposed to be
       // expressed in terms of the original input not the "real" rewrite
       // buffer.  How do we compute that reliably?  It might be tempting to use
@@ -76,22 +76,22 @@ void RewriteBuffer::RemoveText(unsigned OrigOffset, unsigned Size,
       // clang::Rewriter::RewriteOptions::RemoveLineIfEmpty.  A reproducer for
       // the implementation below is the test RemoveLineIfEmpty in
       // clang/unittests/Rewrite/RewriteBufferTest.cpp.
-      AddReplaceDelta(curLineStartOffs, -(lineSize + 1 /* + '\n'*/));
+      AddReplaceDelta(cur_लिन्या_Start_Offs, -(लिन्या_Size + 1 /* + '\n'*/));
     }
   }
 }
 
-void RewriteBuffer::InsertText(unsigned OrigOffset, StringRef Str,
-                               bool InsertAfter) {
+void RewriteBuffer::इसिंगित_Text_2(unsigned OrigOffset, StringRef Str,
+                               bool इसिंगित_After) {
   // Nothing to insert, exit early.
   if (Str.empty())
     return;
 
-  unsigned RealOffset = getMappedOffset(OrigOffset, InsertAfter);
-  Buffer.insert(RealOffset, Str.begin(), Str.end());
+  unsigned RealOffset = getMappedOffset(OrigOffset, इसिंगित_After);
+  Buffer.इसिंगित(RealOffset, Str.begin(), Str.end());
 
   // Add a delta so that future changes are offset correctly.
-  AddInsertDelta(OrigOffset, Str.size());
+  Add_इसिंगित_Delta(OrigOffset, Str.size());
 }
 
 /// ReplaceText - This method replaces a range of characters in the input
@@ -101,7 +101,7 @@ void RewriteBuffer::ReplaceText(unsigned OrigOffset, unsigned OrigLength,
                                 StringRef NewStr) {
   unsigned RealOffset = getMappedOffset(OrigOffset, true);
   Buffer.erase(RealOffset, OrigLength);
-  Buffer.insert(RealOffset, NewStr.begin(), NewStr.end());
+  Buffer.इसिंगित(RealOffset, NewStr.begin(), NewStr.end());
   if (OrigLength != NewStr.size())
     AddReplaceDelta(OrigOffset, NewStr.size() - OrigLength);
 }

@@ -13,7 +13,7 @@ using namespace llvm;
 
 namespace {
 
-class ArrayRefImpl : public BinaryStream {
+class ArrayRefImpl : public दालावाहान_Stream {
 public:
   ArrayRefImpl(ArrayRef<uint8_t> Data, endianness Endian) : BBS(Data, Endian) {}
 
@@ -29,10 +29,10 @@ public:
   uint64_t getLength() override { return BBS.getLength(); }
 
 private:
-  BinaryByteStream BBS;
+  दालावाहान_Byte_Stream BBS;
 };
 
-class MutableArrayRefImpl : public WritableBinaryStream {
+class MutableArrayRefImpl : public Writable_दालावाहान_Stream {
 public:
   MutableArrayRefImpl(MutableArrayRef<uint8_t> Data, endianness Endian)
       : BBS(Data, Endian) {}
@@ -55,29 +55,29 @@ public:
   Error commit() override { return BBS.commit(); }
 
 private:
-  MutableBinaryByteStream BBS;
+  Mutable_दालावाहान_Byte_Stream BBS;
 };
 } // namespace
 
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
-BinaryStreamRef::BinaryStreamRef(BinaryStream &Stream, uint64_t Offset,
+दालावाहान_Stream_Ref::दालावाहान_Stream_Ref(दालावाहान_Stream &Stream)
+    : दालावाहान_Stream_Ref_Base(Stream) {}
+दालावाहान_Stream_Ref::दालावाहान_Stream_Ref(दालावाहान_Stream &Stream, uint64_t Offset,
                                  std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
-BinaryStreamRef::BinaryStreamRef(ArrayRef<uint8_t> Data, endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
+    : दालावाहान_Stream_Ref_Base(Stream, Offset, Length) {}
+दालावाहान_Stream_Ref::दालावाहान_Stream_Ref(ArrayRef<uint8_t> Data, endianness Endian)
+    : दालावाहान_Stream_Ref_Base(std::make_shared<ArrayRefImpl>(Data, Endian), 0,
                           Data.size()) {}
-BinaryStreamRef::BinaryStreamRef(StringRef Data, endianness Endian)
-    : BinaryStreamRef(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
+दालावाहान_Stream_Ref::दालावाहान_Stream_Ref(StringRef Data, endianness Endian)
+    : दालावाहान_Stream_Ref(ArrayRef(Data.bytes_begin(), Data.bytes_end()), Endian) {}
 
-Error BinaryStreamRef::readBytes(uint64_t Offset, uint64_t Size,
+Error दालावाहान_Stream_Ref::readBytes(uint64_t Offset, uint64_t Size,
                                  ArrayRef<uint8_t> &Buffer) const {
   if (auto EC = checkOffsetForRead(Offset, Size))
     return EC;
   return BorrowedImpl->readBytes(ViewOffset + Offset, Size, Buffer);
 }
 
-Error BinaryStreamRef::readLongestContiguousChunk(
+Error दालावाहान_Stream_Ref::readLongestContiguousChunk(
     uint64_t Offset, ArrayRef<uint8_t> &Buffer) const {
   if (auto EC = checkOffsetForRead(Offset, 1))
     return EC;
@@ -94,20 +94,20 @@ Error BinaryStreamRef::readLongestContiguousChunk(
   return Error::success();
 }
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream)
-    : BinaryStreamRefBase(Stream) {}
+Writable_दालावाहान_Stream_Ref::Writable_दालावाहान_Stream_Ref(Writable_दालावाहान_Stream &Stream)
+    : दालावाहान_Stream_Ref_Base(Stream) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(WritableBinaryStream &Stream,
+Writable_दालावाहान_Stream_Ref::Writable_दालावाहान_Stream_Ref(Writable_दालावाहान_Stream &Stream,
                                                  uint64_t Offset,
                                                  std::optional<uint64_t> Length)
-    : BinaryStreamRefBase(Stream, Offset, Length) {}
+    : दालावाहान_Stream_Ref_Base(Stream, Offset, Length) {}
 
-WritableBinaryStreamRef::WritableBinaryStreamRef(MutableArrayRef<uint8_t> Data,
+Writable_दालावाहान_Stream_Ref::Writable_दालावाहान_Stream_Ref(MutableArrayRef<uint8_t> Data,
                                                  endianness Endian)
-    : BinaryStreamRefBase(std::make_shared<MutableArrayRefImpl>(Data, Endian),
+    : दालावाहान_Stream_Ref_Base(std::make_shared<MutableArrayRefImpl>(Data, Endian),
                           0, Data.size()) {}
 
-Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
+Error Writable_दालावाहान_Stream_Ref::writeBytes(uint64_t Offset,
                                           ArrayRef<uint8_t> Data) const {
   if (auto EC = checkOffsetForWrite(Offset, Data.size()))
     return EC;
@@ -115,9 +115,9 @@ Error WritableBinaryStreamRef::writeBytes(uint64_t Offset,
   return BorrowedImpl->writeBytes(ViewOffset + Offset, Data);
 }
 
-WritableBinaryStreamRef::operator BinaryStreamRef() const {
-  return BinaryStreamRef(*BorrowedImpl, ViewOffset, Length);
+Writable_दालावाहान_Stream_Ref::operator दालावाहान_Stream_Ref() const {
+  return दालावाहान_Stream_Ref(*BorrowedImpl, ViewOffset, Length);
 }
 
 /// For buffered streams, commits changes to the backing store.
-Error WritableBinaryStreamRef::commit() { return BorrowedImpl->commit(); }
+Error Writable_दालावाहान_Stream_Ref::commit() { return BorrowedImpl->commit(); }

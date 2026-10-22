@@ -26,7 +26,7 @@ StringRef StringSaver::save(const Twine &S) {
 }
 
 StringRef UniqueStringSaver::save(StringRef S) {
-  auto R = Unique.insert(S);
+  auto R = Unique.इसिंगित(S);
   if (R.second)                 // cache miss, need to actually save the string
     *R.first = Strings.save(S); // safe replacement with equal value
   return *R.first;

@@ -41,13 +41,13 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
         ATTRIBUTE_HANDLER(ABI_FP_denormal),
         ATTRIBUTE_HANDLER(ABI_FP_exceptions),
         ATTRIBUTE_HANDLER(ABI_FP_user_exceptions),
-        ATTRIBUTE_HANDLER(ABI_FP_number_model),
+        ATTRIBUTE_HANDLER(ABI_FP_नुमेरो_model),
         ATTRIBUTE_HANDLER(ABI_align_needed),
         ATTRIBUTE_HANDLER(ABI_align_preserved),
         ATTRIBUTE_HANDLER(ABI_enum_size),
         ATTRIBUTE_HANDLER(ABI_HardFP_use),
-        ATTRIBUTE_HANDLER(ABI_VFP_args),
-        ATTRIBUTE_HANDLER(ABI_WMMX_args),
+        ATTRIBUTE_HANDLER(ABI_VFP_मगा_कातविरान),
+        ATTRIBUTE_HANDLER(ABI_WMMX_मगा_कातविरान),
         ATTRIBUTE_HANDLER(ABI_optimization_goals),
         ATTRIBUTE_HANDLER(ABI_FP_optimization_goals),
         ATTRIBUTE_HANDLER(compatibility),
@@ -76,10 +76,10 @@ Error ARMAttributeParser::stringAttribute(AttrType tag) {
 
   if (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
+    sw->इलिम्बाग_नुमेरो("Tag", tag);
     if (!tagName.empty())
-      sw->printString("TagName", tagName);
-    sw->printString("Value", desc);
+      sw->इलिम्बाग_String("TagName", tagName);
+    sw->इलिम्बाग_String("Value", desc);
   }
   return Error::success();
 }
@@ -113,10 +113,10 @@ Error ARMAttributeParser::CPU_arch(AttrType tag) {
 }
 
 Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t हालागा_2 = de.getULEB128(cursor);
 
   StringRef profile;
-  switch (value) {
+  switch (हालागा_2) {
   default: profile = "Unknown"; break;
   case 'A': profile = "Application"; break;
   case 'R': profile = "Real-time"; break;
@@ -125,7 +125,7 @@ Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
   case 0: profile = "None"; break;
   }
 
-  printAttribute(tag, value, profile);
+  इलिम्बाग_Attribute(tag, हालागा_2, profile);
   return Error::success();
 }
 
@@ -224,7 +224,7 @@ Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType tag) {
   return parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
 }
 
-Error ARMAttributeParser::ABI_FP_number_model(AttrType tag) {
+Error ARMAttributeParser::ABI_FP_नुमेरो_model(AttrType tag) {
   static const char *const strings[] = {"Not Permitted", "Finite Only", "RTABI",
                                         "IEEE-754"};
   return parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
@@ -234,18 +234,18 @@ Error ARMAttributeParser::ABI_align_needed(AttrType tag) {
   static const char *const strings[] = {"Not Permitted", "8-byte alignment",
                                         "4-byte alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t हालागा_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = strings[value];
-  else if (value <= 12)
-    description = "8-byte alignment, " + utostr(1ULL << value) +
+  if (हालागा_2 < std::size(strings))
+    description = strings[हालागा_2];
+  else if (हालागा_2 <= 12)
+    description = "8-byte alignment, " + utostr(1ULL << हालागा_2) +
                   "-byte extended alignment";
   else
     description = "Invalid";
 
-  printAttribute(tag, value, description);
+  इलिम्बाग_Attribute(tag, हालागा_2, description);
   return Error::success();
 }
 
@@ -253,18 +253,18 @@ Error ARMAttributeParser::ABI_align_preserved(AttrType tag) {
   static const char *strings[] = {"Not Required", "8-byte data alignment",
                                   "8-byte data and code alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t हालागा_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = std::string(strings[value]);
-  else if (value <= 12)
+  if (हालागा_2 < std::size(strings))
+    description = std::string(strings[हालागा_2]);
+  else if (हालागा_2 <= 12)
     description = std::string("8-byte stack alignment, ") +
-                  utostr(1ULL << value) + std::string("-byte data alignment");
+                  utostr(1ULL << हालागा_2) + std::string("-byte data alignment");
   else
     description = "Invalid";
 
-  printAttribute(tag, value, description);
+  इलिम्बाग_Attribute(tag, हालागा_2, description);
   return Error::success();
 }
 
@@ -280,13 +280,13 @@ Error ARMAttributeParser::ABI_HardFP_use(AttrType tag) {
   return parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
 }
 
-Error ARMAttributeParser::ABI_VFP_args(AttrType tag) {
+Error ARMAttributeParser::ABI_VFP_मगा_कातविरान(AttrType tag) {
   static const char *const strings[] = {"AAPCS", "AAPCS VFP", "Custom",
                                         "Not Permitted"};
   return parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
 }
 
-Error ARMAttributeParser::ABI_WMMX_args(AttrType tag) {
+Error ARMAttributeParser::ABI_WMMX_मगा_कातविरान(AttrType tag) {
   static const char *const strings[] = {"AAPCS", "iWMMX", "Custom"};
   return parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
 }
@@ -313,20 +313,20 @@ Error ARMAttributeParser::compatibility(AttrType tag) {
 
   if (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->startLine() << "Value: " << integer << ", " << string << '\n';
-    sw->printString("TagName",
+    sw->इलिम्बाग_नुमेरो("Tag", tag);
+    sw->start_लिन्या() << "Value: " << integer << ", " << string << '\n';
+    sw->इलिम्बाग_String("TagName",
                     ELFAttrs::attrTypeAsString(tag, tagToStringMap,
                                                /*hasTagPrefix=*/false));
     switch (integer) {
     case 0:
-      sw->printString("Description", StringRef("No Specific Requirements"));
+      sw->इलिम्बाग_String("Description", StringRef("No Specific Requirements"));
       break;
     case 1:
-      sw->printString("Description", StringRef("AEABI Conformant"));
+      sw->इलिम्बाग_String("Description", StringRef("AEABI Conformant"));
       break;
     default:
-      sw->printString("Description", StringRef("AEABI Non-Conformant"));
+      sw->इलिम्बाग_String("Description", StringRef("AEABI Non-Conformant"));
       break;
     }
   }
@@ -399,21 +399,21 @@ Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType tag) {
 }
 
 Error ARMAttributeParser::nodefaults(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
-  printAttribute(tag, value, "Unspecified Tags UNDEFINED");
+  uint64_t हालागा_2 = de.getULEB128(cursor);
+  इलिम्बाग_Attribute(tag, हालागा_2, "Unspecified Tags UNDEFINED");
   return Error::success();
 }
 
 Error ARMAttributeParser::also_compatible_with(AttrType tag) {
   // Parse value as a C string first in order to print it in escaped form later.
   // Then, parse it again to catch errors or to pretty print if Tag_CPU_arch.
-  std::optional<Error> returnValue;
+  std::optional<Error> return_हालागा;
 
   SmallString<8> Description;
   raw_svector_ostream DescStream(Description);
 
   uint64_t InitialOffset = cursor.tell();
-  StringRef RawStringValue = de.getCStrRef(cursor);
+  StringRef Raw_String_हालागा = de.getCStrRef(cursor);
   uint64_t FinalOffset = cursor.tell();
   cursor.seek(InitialOffset);
   uint64_t InnerTag = de.getULEB128(cursor);
@@ -424,30 +424,30 @@ Error ARMAttributeParser::also_compatible_with(AttrType tag) {
       });
 
   if (!ValidInnerTag) {
-    returnValue =
+    return_हालागा =
         createStringError(errc::argument_out_of_domain,
                           Twine(InnerTag) + " is not a valid tag number");
   } else {
     switch (InnerTag) {
     case ARMBuildAttrs::CPU_arch: {
-      uint64_t InnerValue = de.getULEB128(cursor);
+      uint64_t Inner_हालागा = de.getULEB128(cursor);
       auto strings = ArrayRef(CPU_arch_strings);
-      if (InnerValue >= strings.size()) {
-        returnValue = createStringError(
+      if (Inner_हालागा >= strings.size()) {
+        return_हालागा = createStringError(
             errc::argument_out_of_domain,
-            Twine(InnerValue) + " is not a valid " +
+            Twine(Inner_हालागा) + " is not a valid " +
                 ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
                 " value");
       } else {
         DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                   << " = " << InnerValue;
-        if (strings[InnerValue])
-          DescStream << " (" << strings[InnerValue] << ')';
+                   << " = " << Inner_हालागा;
+        if (strings[Inner_हालागा])
+          DescStream << " (" << strings[Inner_हालागा] << ')';
       }
       break;
     }
     case ARMBuildAttrs::also_compatible_with:
-      returnValue = createStringError(
+      return_हालागा = createStringError(
           errc::invalid_argument,
           ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
               " cannot be recursively defined");
@@ -456,34 +456,34 @@ Error ARMAttributeParser::also_compatible_with(AttrType tag) {
     case ARMBuildAttrs::CPU_name:
     case ARMBuildAttrs::compatibility:
     case ARMBuildAttrs::conformance: {
-      StringRef InnerValue = de.getCStrRef(cursor);
+      StringRef Inner_हालागा = de.getCStrRef(cursor);
       DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
+                 << " = " << Inner_हालागा;
       break;
     }
     default: {
-      uint64_t InnerValue = de.getULEB128(cursor);
+      uint64_t Inner_हालागा = de.getULEB128(cursor);
       DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
+                 << " = " << Inner_हालागा;
     }
     }
   }
 
-  setAttributeString(tag, RawStringValue);
+  setAttributeString(tag, Raw_String_हालागा);
   if (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->printString("TagName",
+    sw->इलिम्बाग_नुमेरो("Tag", tag);
+    sw->इलिम्बाग_String("TagName",
                     ELFAttrs::attrTypeAsString(tag, tagToStringMap, false));
-    sw->printStringEscaped("Value", RawStringValue);
+    sw->इलिम्बाग_String_Escaped("Value", Raw_String_हालागा);
     if (!Description.empty()) {
-      sw->printString("Description", Description);
+      sw->इलिम्बाग_String("Description", Description);
     }
   }
 
   cursor.seek(FinalOffset);
 
-  return returnValue ? std::move(*returnValue) : Error::success();
+  return return_हालागा ? std::move(*return_हालागा) : Error::success();
 }
 
 Error ARMAttributeParser::handler(uint64_t tag, bool &handled) {

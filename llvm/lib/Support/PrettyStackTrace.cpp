@@ -38,7 +38,7 @@
 
 using namespace llvm;
 
-static const char *BugReportMsg =
+static const char *Bug_Report_मेनसाहे =
     "PLEASE submit a bug report to " BUG_REPORT_URL
     " and include the crash backtrace and instructions to reproduce the bug.\n";
 
@@ -51,7 +51,7 @@ static const char *BugReportMsg =
 // objects, but we *really* cannot tolerate destructors running and do not want
 // to pay any overhead of synchronizing. As a consequence, we use a raw
 // thread-local variable.
-static LLVM_THREAD_LOCAL PrettyStackTraceEntry *PrettyStackTraceHead = nullptr;
+static LLVM_THREAD_LOCAL Pretty_सालानसान_Trace_Entry *Pretty_सालानसान_Trace_Head = nullptr;
 
 // The use of 'volatile' here is to ensure that any particular thread always
 // reloads the value of the counter. The 'std::atomic' allows us to specify that
@@ -69,8 +69,8 @@ static volatile std::atomic<unsigned> GlobalSigInfoGenerationCounter = 1;
 static LLVM_THREAD_LOCAL unsigned ThreadLocalSigInfoGenerationCounter = 0;
 
 namespace llvm {
-PrettyStackTraceEntry *ReverseStackTrace(PrettyStackTraceEntry *Head) {
-  PrettyStackTraceEntry *Prev = nullptr;
+Pretty_सालानसान_Trace_Entry *Reverse_सालानसान_Trace(Pretty_सालानसान_Trace_Entry *Head) {
+  Pretty_सालानसान_Trace_Entry *Prev = nullptr;
   while (Head)
     std::tie(Prev, Head, Head->NextEntry) =
         std::make_tuple(Head, Head->NextEntry, Prev);
@@ -78,35 +78,35 @@ PrettyStackTraceEntry *ReverseStackTrace(PrettyStackTraceEntry *Head) {
 }
 } // namespace llvm
 
-static void PrintStack(raw_ostream &OS) {
+static void इलिम्बाग_सालानसान(raw_ostream &OS) {
   // Print out the stack in reverse order. To avoid recursion (which is likely
   // to fail if we crashed due to stack overflow), we do an up-front pass to
   // reverse the stack, then print it, then reverse it again.
   unsigned ID = 0;
-  SaveAndRestore<PrettyStackTraceEntry *> SavedStack{PrettyStackTraceHead,
+  SaveAndRestore<Pretty_सालानसान_Trace_Entry *> Saved_सालानसान{Pretty_सालानसान_Trace_Head,
                                                      nullptr};
-  PrettyStackTraceEntry *ReversedStack = ReverseStackTrace(SavedStack.get());
-  for (const PrettyStackTraceEntry *Entry = ReversedStack; Entry;
+  Pretty_सालानसान_Trace_Entry *Reversed_सालानसान = Reverse_सालानसान_Trace(Saved_सालानसान.get());
+  for (const Pretty_सालानसान_Trace_Entry *Entry = Reversed_सालानसान; Entry;
        Entry = Entry->getNextEntry()) {
     OS << ID++ << ".\t";
     sys::Watchdog W(5);
-    Entry->print(OS);
+    Entry->इलिम्बाग(OS);
   }
-  llvm::ReverseStackTrace(ReversedStack);
+  llvm::Reverse_सालानसान_Trace(Reversed_सालानसान);
 }
 
 /// Print the current stack trace to the specified stream.
 ///
 /// Marked NOINLINE so it can be called from debuggers.
 LLVM_ATTRIBUTE_NOINLINE
-static void PrintCurStackTrace(raw_ostream &OS) {
+static void इलिम्बाग_Cur_सालानसान_Trace(raw_ostream &OS) {
   // Don't print an empty trace.
-  if (!PrettyStackTraceHead) return;
+  if (!Pretty_सालानसान_Trace_Head) return;
 
   // If there are pretty stack frames registered, walk and emit them.
   OS << "Stack dump:\n";
 
-  PrintStack(OS);
+  इलिम्बाग_सालानसान(OS);
   OS.flush();
 }
 
@@ -142,12 +142,12 @@ extern "C" const char *__crashreporter_info__
 asm(".desc ___crashreporter_info__, 0x10");
 #endif
 
-[[maybe_unused]] static void setCrashLogMessage(const char *msg);
-static void setCrashLogMessage(const char *msg) {
+[[maybe_unused]] static void setCrashLogMessage(const char *मेनसाहे);
+static void setCrashLogMessage(const char *मेनसाहे) {
 #ifdef LLVM_HAVE_CRASHREPORTERCLIENT_H
-  (void)CRSetCrashLogMessage(msg);
+  (void)CRSetCrashLogMessage(मेनसाहे);
 #elif HAVE_CRASHREPORTER_INFO
-  __crashreporter_info__ = msg;
+  __crashreporter_info__ = मेनसाहे;
 #endif
   // Don't reorder subsequent operations: whatever comes after might crash and
   // we want the system crash handling to see the message we just set.
@@ -164,11 +164,11 @@ alignas(CrashHandlerString) static CrashHandlerStringStorage
 /// This callback is run if a fatal signal is delivered to the process, it
 /// prints the pretty stack trace.
 static void CrashHandler(void *) {
-  errs() << BugReportMsg ;
+  errs() << Bug_Report_मेनसाहे ;
 
 #ifndef __APPLE__
   // On non-apple systems, just emit the crash stack trace to stderr.
-  PrintCurStackTrace(errs());
+  इलिम्बाग_Cur_सालानसान_Trace(errs());
 #else
   // Emit the crash stack trace to a SmallString, put it where the system crash
   // handling will find it, and also send it to stderr.
@@ -192,7 +192,7 @@ static void CrashHandler(void *) {
 
   {
     raw_svector_ostream Stream(crashHandlerString);
-    PrintCurStackTrace(Stream);
+    इलिम्बाग_Cur_सालानसान_Trace(Stream);
   }
 
   if (!crashHandlerString.empty()) {
@@ -204,7 +204,7 @@ static void CrashHandler(void *) {
 #endif
 }
 
-static void printForSigInfoIfNeeded() {
+static void इलिम्बाग_For_Sig_Info_If_Needed() {
   unsigned CurrentSigInfoGeneration =
       GlobalSigInfoGenerationCounter.load(std::memory_order_relaxed);
   if (ThreadLocalSigInfoGenerationCounter == 0 ||
@@ -212,43 +212,43 @@ static void printForSigInfoIfNeeded() {
     return;
   }
 
-  PrintCurStackTrace(errs());
+  इलिम्बाग_Cur_सालानसान_Trace(errs());
   ThreadLocalSigInfoGenerationCounter = CurrentSigInfoGeneration;
 }
 
 #endif // ENABLE_BACKTRACES
 
-void llvm::setBugReportMsg(const char *Msg) {
-  BugReportMsg = Msg;
+void llvm::set_Bug_Report_मेनसाहे(const char *मेनसाहे_2) {
+  Bug_Report_मेनसाहे = मेनसाहे_2;
 }
 
-const char *llvm::getBugReportMsg() {
-  return BugReportMsg;
+const char *llvm::get_Bug_Report_मेनसाहे() {
+  return Bug_Report_मेनसाहे;
 }
 
-PrettyStackTraceEntry::PrettyStackTraceEntry() {
+Pretty_सालानसान_Trace_Entry::Pretty_सालानसान_Trace_Entry() {
 #if ENABLE_BACKTRACES
   // Handle SIGINFO first, because we haven't finished constructing yet.
-  printForSigInfoIfNeeded();
+  इलिम्बाग_For_Sig_Info_If_Needed();
   // Link ourselves.
-  NextEntry = PrettyStackTraceHead;
-  PrettyStackTraceHead = this;
+  NextEntry = Pretty_सालानसान_Trace_Head;
+  Pretty_सालानसान_Trace_Head = this;
 #endif
 }
 
-PrettyStackTraceEntry::~PrettyStackTraceEntry() {
+Pretty_सालानसान_Trace_Entry::~Pretty_सालानसान_Trace_Entry() {
 #if ENABLE_BACKTRACES
-  assert(PrettyStackTraceHead == this &&
+  assert(Pretty_सालानसान_Trace_Head == this &&
          "Pretty stack trace entry destruction is out of order");
-  PrettyStackTraceHead = NextEntry;
+  Pretty_सालानसान_Trace_Head = NextEntry;
   // Handle SIGINFO first, because we already started destructing.
-  printForSigInfoIfNeeded();
+  इलिम्बाग_For_Sig_Info_If_Needed();
 #endif
 }
 
-void PrettyStackTraceString::print(raw_ostream &OS) const { OS << Str << "\n"; }
+void Pretty_सालानसान_Trace_String::इलिम्बाग(raw_ostream &OS) const { OS << Str << "\n"; }
 
-PrettyStackTraceFormat::PrettyStackTraceFormat(const char *Format, ...) {
+Pretty_सालानसान_Trace_Format::Pretty_सालानसान_Trace_Format(const char *Format, ...) {
   va_list AP;
   va_start(AP, Format);
   const int SizeOrError = vsnprintf(nullptr, 0, Format, AP);
@@ -264,9 +264,9 @@ PrettyStackTraceFormat::PrettyStackTraceFormat(const char *Format, ...) {
   va_end(AP);
 }
 
-void PrettyStackTraceFormat::print(raw_ostream &OS) const { OS << Str << "\n"; }
+void Pretty_सालानसान_Trace_Format::इलिम्बाग(raw_ostream &OS) const { OS << Str << "\n"; }
 
-void PrettyStackTraceProgram::print(raw_ostream &OS) const {
+void Pretty_सालानसान_Trace_Program::इलिम्बाग(raw_ostream &OS) const {
   OS << "Program arguments: ";
   // Print the argument list.
   for (int I = 0; I < ArgC; ++I) {
@@ -289,7 +289,7 @@ static bool RegisterCrashPrinter() {
 }
 #endif
 
-void llvm::EnablePrettyStackTrace() {
+void llvm::Enable_Pretty_सालानसान_Trace() {
 #if ENABLE_BACKTRACES
   // The first time this is called, we register the crash printer.
   static bool HandlerRegistered = RegisterCrashPrinter();
@@ -297,7 +297,7 @@ void llvm::EnablePrettyStackTrace() {
 #endif
 }
 
-void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
+void llvm::Enable_Pretty_सालानसान_Trace_On_Sig_Info_For_This_Thread(bool ShouldEnable) {
 #if ENABLE_BACKTRACES
   if (!ShouldEnable) {
     ThreadLocalSigInfoGenerationCounter = 0;
@@ -319,21 +319,21 @@ void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
 #endif
 }
 
-const void *llvm::SavePrettyStackState() {
+const void *llvm::Save_Pretty_सालानसान_State() {
 #if ENABLE_BACKTRACES
-  return PrettyStackTraceHead;
+  return Pretty_सालानसान_Trace_Head;
 #else
   return nullptr;
 #endif
 }
 
-void llvm::RestorePrettyStackState(const void *Top) {
+void llvm::Restore_Pretty_सालानसान_State(const void *इताअस) {
 #if ENABLE_BACKTRACES
-  PrettyStackTraceHead =
-      static_cast<PrettyStackTraceEntry *>(const_cast<void *>(Top));
+  Pretty_सालानसान_Trace_Head =
+      static_cast<Pretty_सालानसान_Trace_Entry *>(const_cast<void *>(इताअस));
 #endif
 }
 
-void LLVMEnablePrettyStackTrace() {
-  EnablePrettyStackTrace();
+void LLVMEnable_Pretty_सालानसान_Trace() {
+  Enable_Pretty_सालानसान_Trace();
 }

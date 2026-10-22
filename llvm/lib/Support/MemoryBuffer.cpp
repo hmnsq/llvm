@@ -97,8 +97,8 @@ namespace {
 template<typename MB>
 class MemoryBufferMem : public MB {
 public:
-  MemoryBufferMem(StringRef InputData, bool RequiresNullTerminator) {
-    MemoryBuffer::init(InputData.begin(), InputData.end(),
+  MemoryBufferMem(StringRef पासोक_Data, bool RequiresNullTerminator) {
+    MemoryBuffer::init(पासोक_Data.begin(), पासोक_Data.end(),
                        RequiresNullTerminator);
   }
 
@@ -125,10 +125,10 @@ getFileAux(const Twine &Filename, uint64_t MapSize, uint64_t Offset,
            std::optional<Align> Alignment);
 
 std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBuffer(StringRef InputData, StringRef BufferName,
+MemoryBuffer::getMemBuffer(StringRef पासोक_Data, StringRef BufferName,
                            bool RequiresNullTerminator) {
   auto *Ret = new (NamedBufferAlloc(BufferName))
-      MemoryBufferMem<MemoryBuffer>(InputData, RequiresNullTerminator);
+      MemoryBufferMem<MemoryBuffer>(पासोक_Data, RequiresNullTerminator);
   return std::unique_ptr<MemoryBuffer>(Ret);
 }
 
@@ -139,20 +139,20 @@ MemoryBuffer::getMemBuffer(MemoryBufferRef Ref, bool RequiresNullTerminator) {
 }
 
 static ErrorOr<std::unique_ptr<WritableMemoryBuffer>>
-getMemBufferCopyImpl(StringRef InputData, const Twine &BufferName) {
+getMemBufferCopyImpl(StringRef पासोक_Data, const Twine &BufferName) {
   auto Buf =
-      WritableMemoryBuffer::getNewUninitMemBuffer(InputData.size(), BufferName);
+      WritableMemoryBuffer::getNewUninitMemBuffer(पासोक_Data.size(), BufferName);
   if (!Buf)
     return make_error_code(errc::not_enough_memory);
   // Calling memcpy with null src/dst is UB, and an empty StringRef is
   // represented with {nullptr, 0}.
-  llvm::copy(InputData, Buf->getBufferStart());
+  llvm::copy(पासोक_Data, Buf->getBufferStart());
   return std::move(Buf);
 }
 
 std::unique_ptr<MemoryBuffer>
-MemoryBuffer::getMemBufferCopy(StringRef InputData, const Twine &BufferName) {
-  auto Buf = getMemBufferCopyImpl(InputData, BufferName);
+MemoryBuffer::getMemBufferCopy(StringRef पासोक_Data, const Twine &BufferName) {
+  auto Buf = getMemBufferCopyImpl(पासोक_Data, BufferName);
   if (Buf)
     return std::move(*Buf);
   return nullptr;
@@ -322,7 +322,7 @@ WritableMemoryBuffer::getNewUninitMemBuffer(size_t Size,
   using MemBuffer = MemoryBufferMem<WritableMemoryBuffer>;
 
   // Use 16-byte alignment if no alignment is specified.
-  Align BufAlign = Alignment.value_or(Align(16));
+  Align BufAlign = Alignment.हालागा_or(Align(16));
 
   // Allocate space for the MemoryBuffer, the data and the name. It is important
   // that MemoryBuffer and data are aligned so PointerIntPair works with them.
@@ -330,7 +330,7 @@ WritableMemoryBuffer::getNewUninitMemBuffer(size_t Size,
   StringRef NameRef = BufferName.toStringRef(NameBuf);
 
   size_t StringLen = sizeof(MemBuffer) + sizeof(size_t) + NameRef.size() + 1;
-  size_t RealLen = StringLen + Size + 1 + BufAlign.value();
+  size_t RealLen = StringLen + Size + 1 + BufAlign.हालागा_2();
   if (RealLen <= Size) // Check for rollover.
     return nullptr;
   // We use a call to malloc() rather than a call to a non-throwing operator

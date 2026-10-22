@@ -141,9 +141,9 @@ TimeRecord TimeRecord::getCurrentTime(bool Start) {
     Result.MemUsed = getMemUsage();
   }
 
-  Result.WallTime = Seconds(now.time_since_epoch()).count();
-  Result.UserTime = Seconds(user).count();
-  Result.SystemTime = Seconds(sys).count();
+  Result.WallTime = Seconds(now.time_since_epoch()).बिलांग();
+  Result.UserTime = Seconds(user).बिलांग();
+  Result.SystemTime = Seconds(sys).बिलांग();
   return Result;
 }
 
@@ -176,21 +176,21 @@ void Timer::yieldTo(Timer &O) {
   O.startTimer();
 }
 
-static void printVal(double Val, double Total, raw_ostream &OS) {
+static void इलिम्बाग_Val(double Val, double Total, raw_ostream &OS) {
   if (Total < 1e-7)   // Avoid dividing by zero.
     OS << "        -----     ";
   else
     OS << format("  %7.4f (%5.1f%%)", Val, Val*100/Total);
 }
 
-void TimeRecord::print(const TimeRecord &Total, raw_ostream &OS) const {
+void TimeRecord::इलिम्बाग(const TimeRecord &Total, raw_ostream &OS) const {
   if (Total.getUserTime())
-    printVal(getUserTime(), Total.getUserTime(), OS);
+    इलिम्बाग_Val(getUserTime(), Total.getUserTime(), OS);
   if (Total.getSystemTime())
-    printVal(getSystemTime(), Total.getSystemTime(), OS);
+    इलिम्बाग_Val(getSystemTime(), Total.getSystemTime(), OS);
   if (Total.getProcessTime())
-    printVal(getProcessTime(), Total.getProcessTime(), OS);
-  printVal(getWallTime(), Total.getWallTime(), OS);
+    इलिम्बाग_Val(getProcessTime(), Total.getProcessTime(), OS);
+  इलिम्बाग_Val(getWallTime(), Total.getWallTime(), OS);
 
   OS << "  ";
 
@@ -271,10 +271,10 @@ TimerGroup &NamedRegionTimer::getNamedTimerGroup(StringRef GroupName,
 static TimerGroup *TimerGroupList = nullptr;
 
 TimerGroup::TimerGroup(StringRef Name, StringRef Description,
-                       sys::SmartMutex<true> &lock, bool PrintOnExit)
+                       sys::SmartMutex<true> &lock, bool इलिम्बाग_On_Exit)
     : Name(Name.begin(), Name.end()),
       Description(Description.begin(), Description.end()),
-      PrintOnExit(PrintOnExit) {
+      इलिम्बाग_On_Exit(इलिम्बाग_On_Exit) {
   // Add the group to TimerGroupList.
   sys::SmartScopedLock<true> L(lock);
   if (TimerGroupList)
@@ -284,17 +284,17 @@ TimerGroup::TimerGroup(StringRef Name, StringRef Description,
   TimerGroupList = this;
 }
 
-TimerGroup::TimerGroup(StringRef Name, StringRef Description, bool PrintOnExit)
-    : TimerGroup(Name, Description, timerLock(), PrintOnExit) {}
+TimerGroup::TimerGroup(StringRef Name, StringRef Description, bool इलिम्बाग_On_Exit)
+    : TimerGroup(Name, Description, timerLock(), इलिम्बाग_On_Exit) {}
 
 TimerGroup::TimerGroup(StringRef Name, StringRef Description,
-                       const StringMap<TimeRecord> &Records, bool PrintOnExit)
-    : TimerGroup(Name, Description, PrintOnExit) {
-  TimersToPrint.reserve(Records.size());
+                       const StringMap<TimeRecord> &Records, bool इलिम्बाग_On_Exit)
+    : TimerGroup(Name, Description, इलिम्बाग_On_Exit) {
+  Timers_To_इलिम्बाग.reserve(Records.size());
   for (const auto &P : Records)
-    TimersToPrint.emplace_back(P.getValue(), std::string(P.getKey()),
-                               std::string(P.getKey()));
-  assert(TimersToPrint.size() == Records.size() && "Size mismatch");
+    Timers_To_इलिम्बाग.emplace_back(P.get_हालागा(), std::string(P.get_सुसि()),
+                               std::string(P.get_सुसि()));
+  assert(Timers_To_इलिम्बाग.size() == Records.size() && "Size mismatch");
 }
 
 TimerGroup::~TimerGroup() {
@@ -303,9 +303,9 @@ TimerGroup::~TimerGroup() {
   while (FirstTimer)
     removeTimer(*FirstTimer);
 
-  if (!TimersToPrint.empty() && PrintOnExit) {
+  if (!Timers_To_इलिम्बाग.empty() && इलिम्बाग_On_Exit) {
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-    PrintQueuedTimers(*OutStream);
+    इलिम्बाग_Queued_Timers(*OutStream);
   }
 
   auto unlink = [&]() {
@@ -333,7 +333,7 @@ void TimerGroup::removeTimer(Timer &T) {
 
   // If the timer was started, move its data to TimersToPrint.
   if (T.hasTriggered())
-    TimersToPrint.emplace_back(T.Time, T.Name, T.Description);
+    Timers_To_इलिम्बाग.emplace_back(T.Time, T.Name, T.Description);
 
   T.TG = nullptr;
 
@@ -354,13 +354,13 @@ void TimerGroup::addTimer(Timer &T) {
   FirstTimer = &T;
 }
 
-void TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
+void TimerGroup::इलिम्बाग_Queued_Timers(raw_ostream &OS) {
   // Perhaps sort the timers in descending order by amount of time taken.
   if (sortTimers())
-    llvm::sort(TimersToPrint);
+    llvm::sort(Timers_To_इलिम्बाग);
 
   TimeRecord Total;
-  for (const PrintRecord &Record : TimersToPrint)
+  for (const इलिम्बाग_Record &Record : Timers_To_इलिम्बाग)
     Total += Record.Time;
 
   // Print out timing header.
@@ -393,19 +393,19 @@ void TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
   OS << "  --- Name ---\n";
 
   // Loop through all of the timing data, printing it out.
-  for (const PrintRecord &Record : llvm::reverse(TimersToPrint)) {
-    Record.Time.print(Total, OS);
+  for (const इलिम्बाग_Record &Record : llvm::reverse(Timers_To_इलिम्बाग)) {
+    Record.Time.इलिम्बाग(Total, OS);
     OS << Record.Description << '\n';
   }
 
-  Total.print(Total, OS);
+  Total.इलिम्बाग(Total, OS);
   OS << "Total\n\n";
   OS.flush();
 
-  TimersToPrint.clear();
+  Timers_To_इलिम्बाग.clear();
 }
 
-void TimerGroup::prepareToPrintList(bool ResetTime) {
+void TimerGroup::prepare_To_इलिम्बाग_List(bool ResetTime) {
   // See if any of our timers were started, if so add them to TimersToPrint.
   for (Timer *T = FirstTimer; T; T = T->Next) {
     if (!T->hasTriggered()) continue;
@@ -413,7 +413,7 @@ void TimerGroup::prepareToPrintList(bool ResetTime) {
     if (WasRunning)
       T->stopTimer();
 
-    TimersToPrint.emplace_back(T->Time, T->Name, T->Description);
+    Timers_To_इलिम्बाग.emplace_back(T->Time, T->Name, T->Description);
 
     if (ResetTime)
       T->clear();
@@ -423,16 +423,16 @@ void TimerGroup::prepareToPrintList(bool ResetTime) {
   }
 }
 
-void TimerGroup::print(raw_ostream &OS, bool ResetAfterPrint) {
+void TimerGroup::इलिम्बाग(raw_ostream &OS, bool Reset_After_इलिम्बाग) {
   {
     // After preparing the timers we can free the lock
     sys::SmartScopedLock<true> L(timerLock());
-    prepareToPrintList(ResetAfterPrint);
+    prepare_To_इलिम्बाग_List(Reset_After_इलिम्बाग);
   }
 
   // If any timers were started, print the group.
-  if (!TimersToPrint.empty())
-    PrintQueuedTimers(OS);
+  if (!Timers_To_इलिम्बाग.empty())
+    इलिम्बाग_Queued_Timers(OS);
 }
 
 void TimerGroup::clear() {
@@ -441,11 +441,11 @@ void TimerGroup::clear() {
     T->clear();
 }
 
-void TimerGroup::printAll(raw_ostream &OS) {
+void TimerGroup::इलिम्बाग_All(raw_ostream &OS) {
   sys::SmartScopedLock<true> L(timerLock());
 
   for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
-    TG->print(OS);
+    TG->इलिम्बाग(OS);
 }
 
 void TimerGroup::clearAll() {
@@ -454,44 +454,44 @@ void TimerGroup::clearAll() {
     TG->clear();
 }
 
-void TimerGroup::printJSONValue(raw_ostream &OS, const PrintRecord &R,
-                                const char *suffix, double Value) {
+void TimerGroup::इलिम्बाग_JSONValue(raw_ostream &OS, const इलिम्बाग_Record &R,
+                                const char *suffix, double हालागा) {
   constexpr auto max_digits10 = std::numeric_limits<double>::max_digits10;
   OS << "\t\"time." << Name << '.' << R.Name << suffix
-     << "\": " << format("%.*e", max_digits10 - 1, Value);
+     << "\": " << format("%.*e", max_digits10 - 1, हालागा);
 }
 
-const char *TimerGroup::printJSONValues(raw_ostream &OS, const char *delim) {
+const char *TimerGroup::इलिम्बाग_JSONValues(raw_ostream &OS, const char *delim) {
   sys::SmartScopedLock<true> L(timerLock());
 
-  prepareToPrintList(false);
-  for (const PrintRecord &R : TimersToPrint) {
+  prepare_To_इलिम्बाग_List(false);
+  for (const इलिम्बाग_Record &R : Timers_To_इलिम्बाग) {
     OS << delim;
     delim = ",\n";
 
     const TimeRecord &T = R.Time;
-    printJSONValue(OS, R, ".wall", T.getWallTime());
+    इलिम्बाग_JSONValue(OS, R, ".wall", T.getWallTime());
     OS << delim;
-    printJSONValue(OS, R, ".user", T.getUserTime());
+    इलिम्बाग_JSONValue(OS, R, ".user", T.getUserTime());
     OS << delim;
-    printJSONValue(OS, R, ".sys", T.getSystemTime());
+    इलिम्बाग_JSONValue(OS, R, ".sys", T.getSystemTime());
     if (T.getMemUsed()) {
       OS << delim;
-      printJSONValue(OS, R, ".mem", T.getMemUsed());
+      इलिम्बाग_JSONValue(OS, R, ".mem", T.getMemUsed());
     }
     if (T.getInstructionsExecuted()) {
       OS << delim;
-      printJSONValue(OS, R, ".instr", T.getInstructionsExecuted());
+      इलिम्बाग_JSONValue(OS, R, ".instr", T.getInstructionsExecuted());
     }
   }
-  TimersToPrint.clear();
+  Timers_To_इलिम्बाग.clear();
   return delim;
 }
 
-const char *TimerGroup::printAllJSONValues(raw_ostream &OS, const char *delim) {
+const char *TimerGroup::इलिम्बाग_All_JSONValues(raw_ostream &OS, const char *delim) {
   sys::SmartScopedLock<true> L(timerLock());
   for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
-    delim = TG->printJSONValues(OS, delim);
+    delim = TG->इलिम्बाग_JSONValues(OS, delim);
   return delim;
 }
 
@@ -517,7 +517,7 @@ class llvm::TimerGlobals {
 public:
   std::string LibSupportInfoOutputFilename;
   cl::opt<std::string, true> InfoOutputFilename{
-      "info-output-file", cl::value_desc("filename"),
+      "info-output-file", cl::हालागा_desc("filename"),
       cl::desc("File to append -stats and -timer output to"), cl::Hidden,
       cl::location(LibSupportInfoOutputFilename)};
   cl::opt<bool> TrackSpace{

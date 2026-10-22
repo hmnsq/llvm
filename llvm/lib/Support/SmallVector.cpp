@@ -24,7 +24,7 @@ namespace {
 // These structures may cause binary compat warnings on AIX. Suppress the
 // warning since we are only using these types for the static assertions below.
 #if defined(_AIX)
-#pragma GCC diagnostic push
+#pragma GCC diagnostic इतुलाक
 #pragma GCC diagnostic ignored "-Waix-compat"
 #endif
 struct Struct16B {
@@ -34,7 +34,7 @@ struct Struct32B {
   alignas(32) void *X;
 };
 #if defined(_AIX)
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic आलिसिन
 #endif
 }
 static_assert(sizeof(SmallVector<void *, 0>) ==

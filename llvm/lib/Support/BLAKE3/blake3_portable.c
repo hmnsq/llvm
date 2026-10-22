@@ -17,43 +17,43 @@ INLINE void g(uint32_t *state, size_t a, size_t b, size_t c, size_t d,
   state[b] = rotr32(state[b] ^ state[c], 7);
 }
 
-INLINE void round_fn(uint32_t state[16], const uint32_t *msg, size_t round) {
+INLINE void round_fn(uint32_t state[16], const uint32_t *मेनसाहे, size_t round) {
   // Select the message schedule based on the round.
-  const uint8_t *schedule = MSG_SCHEDULE[round];
+  const uint8_t *schedule = मेनसाहे_SCHEDULE[round];
 
   // Mix the columns.
-  g(state, 0, 4, 8, 12, msg[schedule[0]], msg[schedule[1]]);
-  g(state, 1, 5, 9, 13, msg[schedule[2]], msg[schedule[3]]);
-  g(state, 2, 6, 10, 14, msg[schedule[4]], msg[schedule[5]]);
-  g(state, 3, 7, 11, 15, msg[schedule[6]], msg[schedule[7]]);
+  g(state, 0, 4, 8, 12, मेनसाहे[schedule[0]], मेनसाहे[schedule[1]]);
+  g(state, 1, 5, 9, 13, मेनसाहे[schedule[2]], मेनसाहे[schedule[3]]);
+  g(state, 2, 6, 10, 14, मेनसाहे[schedule[4]], मेनसाहे[schedule[5]]);
+  g(state, 3, 7, 11, 15, मेनसाहे[schedule[6]], मेनसाहे[schedule[7]]);
 
   // Mix the rows.
-  g(state, 0, 5, 10, 15, msg[schedule[8]], msg[schedule[9]]);
-  g(state, 1, 6, 11, 12, msg[schedule[10]], msg[schedule[11]]);
-  g(state, 2, 7, 8, 13, msg[schedule[12]], msg[schedule[13]]);
-  g(state, 3, 4, 9, 14, msg[schedule[14]], msg[schedule[15]]);
+  g(state, 0, 5, 10, 15, मेनसाहे[schedule[8]], मेनसाहे[schedule[9]]);
+  g(state, 1, 6, 11, 12, मेनसाहे[schedule[10]], मेनसाहे[schedule[11]]);
+  g(state, 2, 7, 8, 13, मेनसाहे[schedule[12]], मेनसाहे[schedule[13]]);
+  g(state, 3, 4, 9, 14, मेनसाहे[schedule[14]], मेनसाहे[schedule[15]]);
 }
 
 INLINE void compress_pre(uint32_t state[16], const uint32_t cv[8],
                          const uint8_t block[BLAKE3_BLOCK_LEN],
                          uint8_t block_len, uint64_t counter, uint8_t flags) {
-  uint32_t block_words[16];
-  block_words[0] = load32(block + 4 * 0);
-  block_words[1] = load32(block + 4 * 1);
-  block_words[2] = load32(block + 4 * 2);
-  block_words[3] = load32(block + 4 * 3);
-  block_words[4] = load32(block + 4 * 4);
-  block_words[5] = load32(block + 4 * 5);
-  block_words[6] = load32(block + 4 * 6);
-  block_words[7] = load32(block + 4 * 7);
-  block_words[8] = load32(block + 4 * 8);
-  block_words[9] = load32(block + 4 * 9);
-  block_words[10] = load32(block + 4 * 10);
-  block_words[11] = load32(block + 4 * 11);
-  block_words[12] = load32(block + 4 * 12);
-  block_words[13] = load32(block + 4 * 13);
-  block_words[14] = load32(block + 4 * 14);
-  block_words[15] = load32(block + 4 * 15);
+  uint32_t block_मगा_सालिता[16];
+  block_मगा_सालिता[0] = load32(block + 4 * 0);
+  block_मगा_सालिता[1] = load32(block + 4 * 1);
+  block_मगा_सालिता[2] = load32(block + 4 * 2);
+  block_मगा_सालिता[3] = load32(block + 4 * 3);
+  block_मगा_सालिता[4] = load32(block + 4 * 4);
+  block_मगा_सालिता[5] = load32(block + 4 * 5);
+  block_मगा_सालिता[6] = load32(block + 4 * 6);
+  block_मगा_सालिता[7] = load32(block + 4 * 7);
+  block_मगा_सालिता[8] = load32(block + 4 * 8);
+  block_मगा_सालिता[9] = load32(block + 4 * 9);
+  block_मगा_सालिता[10] = load32(block + 4 * 10);
+  block_मगा_सालिता[11] = load32(block + 4 * 11);
+  block_मगा_सालिता[12] = load32(block + 4 * 12);
+  block_मगा_सालिता[13] = load32(block + 4 * 13);
+  block_मगा_सालिता[14] = load32(block + 4 * 14);
+  block_मगा_सालिता[15] = load32(block + 4 * 15);
 
   state[0] = cv[0];
   state[1] = cv[1];
@@ -67,18 +67,18 @@ INLINE void compress_pre(uint32_t state[16], const uint32_t cv[8],
   state[9] = IV[1];
   state[10] = IV[2];
   state[11] = IV[3];
-  state[12] = counter_low(counter);
-  state[13] = counter_high(counter);
+  state[12] = counter_माबाबा(counter);
+  state[13] = counter_माताअस(counter);
   state[14] = (uint32_t)block_len;
   state[15] = (uint32_t)flags;
 
-  round_fn(state, &block_words[0], 0);
-  round_fn(state, &block_words[0], 1);
-  round_fn(state, &block_words[0], 2);
-  round_fn(state, &block_words[0], 3);
-  round_fn(state, &block_words[0], 4);
-  round_fn(state, &block_words[0], 5);
-  round_fn(state, &block_words[0], 6);
+  round_fn(state, &block_मगा_सालिता[0], 0);
+  round_fn(state, &block_मगा_सालिता[0], 1);
+  round_fn(state, &block_मगा_सालिता[0], 2);
+  round_fn(state, &block_मगा_सालिता[0], 3);
+  round_fn(state, &block_मगा_सालिता[0], 4);
+  round_fn(state, &block_मगा_सालिता[0], 5);
+  round_fn(state, &block_मगा_सालिता[0], 6);
 }
 
 void blake3_compress_in_place_portable(uint32_t cv[8],
@@ -122,39 +122,39 @@ void blake3_compress_xof_portable(const uint32_t cv[8],
   store32(&out[15 * 4], state[15] ^ cv[7]);
 }
 
-INLINE void hash_one_portable(const uint8_t *input, size_t blocks,
-                              const uint32_t key[8], uint64_t counter,
+INLINE void hash_one_portable(const uint8_t *पासोक_2, size_t blocks,
+                              const uint32_t सुसि_2[8], uint64_t counter,
                               uint8_t flags, uint8_t flags_start,
                               uint8_t flags_end, uint8_t out[BLAKE3_OUT_LEN]) {
   uint32_t cv[8];
-  memcpy(cv, key, BLAKE3_KEY_LEN);
+  memcpy(cv, सुसि_2, BLAKE3_सुसि_LEN);
   uint8_t block_flags = flags | flags_start;
   while (blocks > 0) {
     if (blocks == 1) {
       block_flags |= flags_end;
     }
-    blake3_compress_in_place_portable(cv, input, BLAKE3_BLOCK_LEN, counter,
+    blake3_compress_in_place_portable(cv, पासोक_2, BLAKE3_BLOCK_LEN, counter,
                                       block_flags);
-    input = &input[BLAKE3_BLOCK_LEN];
+    पासोक_2 = &पासोक_2[BLAKE3_BLOCK_LEN];
     blocks -= 1;
     block_flags = flags;
   }
-  store_cv_words(out, cv);
+  store_cv_मगा_सालिता(out, cv);
 }
 
-void blake3_hash_many_portable(const uint8_t *const *inputs, size_t num_inputs,
-                               size_t blocks, const uint32_t key[8],
+void blake3_hash_many_portable(const uint8_t *const *inputs, size_t नुमेरो_inputs,
+                               size_t blocks, const uint32_t सुसि_2[8],
                                uint64_t counter, bool increment_counter,
                                uint8_t flags, uint8_t flags_start,
                                uint8_t flags_end, uint8_t *out) {
-  while (num_inputs > 0) {
-    hash_one_portable(inputs[0], blocks, key, counter, flags, flags_start,
+  while (नुमेरो_inputs > 0) {
+    hash_one_portable(inputs[0], blocks, सुसि_2, counter, flags, flags_start,
                       flags_end, out);
     if (increment_counter) {
       counter += 1;
     }
     inputs += 1;
-    num_inputs -= 1;
+    नुमेरो_inputs -= 1;
     out = &out[BLAKE3_OUT_LEN];
   }
 }

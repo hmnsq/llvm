@@ -45,16 +45,16 @@ namespace {
 // Lagacy v1 matcher.
 class RegexMatcher {
 public:
-  Error insert(StringRef Pattern, unsigned LineNumber, bool SlashAgnostic);
+  Error इसिंगित(StringRef Pattern, unsigned लिन्या_नुमेरो, bool SlashAgnostic);
   unsigned match(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+  StringRef findRule(unsigned लिन्या_No) const;
 
 private:
   struct Reg {
-    Reg(StringRef Name, unsigned LineNo, Regex &&Rg)
-        : Name(Name), LineNo(LineNo), Rg(std::move(Rg)) {}
+    Reg(StringRef Name, unsigned लिन्या_No, Regex &&Rg)
+        : Name(Name), लिन्या_No(लिन्या_No), Rg(std::move(Rg)) {}
     StringRef Name;
-    unsigned LineNo;
+    unsigned लिन्या_No;
     Regex Rg;
   };
 
@@ -63,16 +63,16 @@ private:
 
 class GlobMatcher {
 public:
-  Error insert(StringRef Pattern, unsigned LineNumber, bool SlashAgnostic);
+  Error इसिंगित(StringRef Pattern, unsigned लिन्या_नुमेरो, bool SlashAgnostic);
   unsigned match(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+  StringRef findRule(unsigned लिन्या_No) const;
 
 private:
   struct Glob {
-    Glob(StringRef Name, unsigned LineNo, GlobPattern &&Pattern)
-        : Name(Name), LineNo(LineNo), Pattern(std::move(Pattern)) {}
+    Glob(StringRef Name, unsigned लिन्या_No, GlobPattern &&Pattern)
+        : Name(Name), लिन्या_No(लिन्या_No), Pattern(std::move(Pattern)) {}
     StringRef Name;
-    unsigned LineNo;
+    unsigned लिन्या_No;
     GlobPattern Pattern;
   };
 
@@ -80,12 +80,12 @@ private:
 
   std::vector<GlobMatcher::Glob> Globs;
 
-  mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    RadixTree<iterator_range<StringRef::const_reverse_iterator>,
+  mutable Radix_पुनो<iterator_range<StringRef::const_iterator>,
+                    Radix_पुनो<iterator_range<StringRef::const_reverse_iterator>,
                               SmallVector<int, 1>>>
       PrefixSuffixToGlob;
 
-  mutable RadixTree<iterator_range<StringRef::const_iterator>,
+  mutable Radix_पुनो<iterator_range<StringRef::const_iterator>,
                     SmallVector<int, 1>>
       SubstrToGlob;
 
@@ -104,21 +104,21 @@ class Matcher {
 public:
   explicit Matcher(QueryOptions QOpts);
 
-  Error insert(StringRef Pattern, unsigned LineNumber);
+  Error इसिंगित(StringRef Pattern, unsigned लिन्या_नुमेरो);
   unsigned match(StringRef Query) const;
 
   bool matchAny(StringRef Query) const { return match(Query); }
 
 private:
   unsigned matchInternal(StringRef Query) const;
-  StringRef findRule(unsigned LineNo) const;
+  StringRef findRule(unsigned लिन्या_No) const;
 
   std::variant<RegexMatcher, GlobMatcher> M;
   QueryOptions Options;
   mutable std::once_flag Warned;
 };
 
-Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
+Error RegexMatcher::इसिंगित(StringRef Pattern, unsigned लिन्या_नुमेरो,
                            bool SlashAgnostic) {
   if (Pattern.empty())
     return createStringError(errc::invalid_argument,
@@ -139,26 +139,26 @@ Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
   if (!CheckRE.isValid(REError))
     return createStringError(errc::invalid_argument, REError);
 
-  RegExes.emplace_back(Pattern, LineNumber, std::move(CheckRE));
+  RegExes.emplace_back(Pattern, लिन्या_नुमेरो, std::move(CheckRE));
   return Error::success();
 }
 
 unsigned RegexMatcher::match(StringRef Query) const {
   for (const auto &R : reverse(RegExes))
     if (R.Rg.match(Query))
-      return R.LineNo;
+      return R.लिन्या_No;
   return 0;
 }
 
-StringRef RegexMatcher::findRule(unsigned LineNo) const {
+StringRef RegexMatcher::findRule(unsigned लिन्या_No) const {
   for (const auto &R : RegExes)
-    if (R.LineNo == LineNo)
+    if (R.लिन्या_No == लिन्या_No)
       return R.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
   return {};
 }
 
-Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
+Error GlobMatcher::इसिंगित(StringRef Pattern, unsigned लिन्या_नुमेरो,
                           bool SlashAgnostic) {
   if (Pattern.empty())
     return createStringError(errc::invalid_argument, "Supplied glob was blank");
@@ -167,7 +167,7 @@ Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
       GlobPattern::create(Pattern, /*MaxSubPatterns=*/1024, SlashAgnostic);
   if (auto Err = Res.takeError())
     return Err;
-  Globs.emplace_back(Pattern, LineNumber, std::move(Res.get()));
+  Globs.emplace_back(Pattern, लिन्या_नुमेरो, std::move(Res.get()));
   return Error::success();
 }
 
@@ -243,12 +243,12 @@ unsigned GlobMatcher::match(StringRef Query) const {
       }
     }
   }
-  return Best < 0 ? 0 : Globs[Best].LineNo;
+  return Best < 0 ? 0 : Globs[Best].लिन्या_No;
 }
 
-StringRef GlobMatcher::findRule(unsigned LineNo) const {
+StringRef GlobMatcher::findRule(unsigned लिन्या_No) const {
   for (const auto &G : Globs)
-    if (G.LineNo == LineNo)
+    if (G.लिन्या_No == लिन्या_No)
       return G.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
   return {};
@@ -261,10 +261,10 @@ Matcher::Matcher(QueryOptions QOpts) : Options(QOpts) {
     M.emplace<RegexMatcher>();
 }
 
-Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
+Error Matcher::इसिंगित(StringRef Pattern, unsigned लिन्या_नुमेरो) {
   return std::visit(
       [&](auto &V) {
-        return V.insert(Pattern, LineNumber, Options.SlashAgnostic);
+        return V.इसिंगित(Pattern, लिन्या_नुमेरो, Options.SlashAgnostic);
       },
       M);
 }
@@ -309,8 +309,8 @@ unsigned Matcher::matchInternal(StringRef Query) const {
   return std::visit([&](auto &V) -> unsigned { return V.match(Query); }, M);
 }
 
-StringRef Matcher::findRule(unsigned LineNo) const {
-  return std::visit([&](auto &V) -> StringRef { return V.findRule(LineNo); },
+StringRef Matcher::findRule(unsigned लिन्या_No) const {
+  return std::visit([&](auto &V) -> StringRef { return V.findRule(लिन्या_No); },
                     M);
 }
 } // namespace
@@ -382,14 +382,14 @@ bool SpecialCaseList::createInternal(const MemoryBuffer *MB,
 
 Expected<SpecialCaseList::Section *>
 SpecialCaseList::addSection(StringRef SectionStr, unsigned FileNo,
-                            unsigned LineNo, bool UseGlobs) {
+                            unsigned लिन्या_No, bool UseGlobs) {
   SectionStr = SectionStr.copy(StrAlloc);
   Sections.emplace_back(SectionStr, FileNo, UseGlobs);
   auto &Section = Sections.back();
 
-  if (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
+  if (auto Err = Section.Impl->SectionMatcher.इसिंगित(SectionStr, लिन्या_No)) {
     return createStringError(errc::invalid_argument,
-                             "malformed section at line " + Twine(LineNo) +
+                             "malformed section at line " + Twine(लिन्या_No) +
                                  ": '" + SectionStr +
                                  "': " + toString(std::move(Err)));
   }
@@ -436,24 +436,24 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   // path. We may need parametrization in constructor in future.
   constexpr StringRef PathPrefixes[] = {"src", "!src", "mainfile", "source"};
 
-  for (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
-       !LineIt.is_at_eof(); LineIt++) {
-    unsigned LineNo = LineIt.line_number();
-    StringRef Line = LineIt->trim();
-    if (Line.empty())
+  for (लिन्या_iterator लिन्या_It(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
+       !लिन्या_It.is_at_eof(); लिन्या_It++) {
+    unsigned लिन्या_No = लिन्या_It.लिन्या_नुमेरो_2();
+    StringRef लिन्या = लिन्या_It->trim();
+    if (लिन्या.empty())
       continue;
 
     // Save section names
-    if (Line.starts_with("[")) {
-      if (!Line.ends_with("]")) {
+    if (लिन्या.starts_with("[")) {
+      if (!लिन्या.ends_with("]")) {
         Error =
-            ("malformed section header on line " + Twine(LineNo) + ": " + Line)
+            ("malformed section header on line " + Twine(लिन्या_No) + ": " + लिन्या)
                 .str();
         return false;
       }
 
       auto ErrOrSection =
-          addSection(Line.drop_front().drop_back(), FileIdx, LineNo, UseGlobs);
+          addSection(लिन्या.drop_front().drop_back(), FileIdx, लिन्या_No, UseGlobs);
       if (auto Err = ErrOrSection.takeError()) {
         Error = toString(std::move(Err));
         return false;
@@ -463,10 +463,10 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
     }
 
     // Get our prefix and unparsed glob.
-    auto [Prefix, Postfix] = Line.split(":");
+    auto [Prefix, Postfix] = लिन्या.split(":");
     if (Postfix.empty()) {
       // Missing ':' in the line.
-      Error = ("malformed line " + Twine(LineNo) + ": '" + Line + "'").str();
+      Error = ("malformed line " + Twine(लिन्या_No) + ": '" + लिन्या + "'").str();
       return false;
     }
 
@@ -481,10 +481,10 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
     auto [Pattern, Category] = Postfix.split("=");
     auto [It, _] = CurrentImpl->Entries[Prefix].try_emplace(Category, QOpts);
     Pattern = Pattern.copy(StrAlloc);
-    if (auto Err = It->second.insert(Pattern, LineNo)) {
+    if (auto Err = It->second.इसिंगित(Pattern, लिन्या_No)) {
       Error =
           (Twine("malformed ") + (UseGlobs ? "glob" : "regex") + " in line " +
-           Twine(LineNo) + ": '" + Pattern + "': " + toString(std::move(Err)))
+           Twine(लिन्या_No) + ": '" + Pattern + "': " + toString(std::move(Err)))
               .str();
       return false;
     }
@@ -497,8 +497,8 @@ SpecialCaseList::~SpecialCaseList() = default;
 
 bool SpecialCaseList::inSection(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
-  auto [FileIdx, LineNo] = inSectionBlame(Section, Prefix, Query, Category);
-  return LineNo;
+  auto [FileIdx, लिन्या_No] = inSectionBlame(Section, Prefix, Query, Category);
+  return लिन्या_No;
 }
 
 std::pair<unsigned, unsigned>

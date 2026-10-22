@@ -57,7 +57,7 @@ void SHA256::init() {
   InternalState.State[5] = 0x9B05688C;
   InternalState.State[6] = 0x1F83D9AB;
   InternalState.State[7] = 0x5BE0CD19;
-  InternalState.ByteCount = 0;
+  InternalState.Byte_बिलांग = 0;
   InternalState.BufferOffset = 0;
 }
 
@@ -180,12 +180,12 @@ void SHA256::addUncounted(uint8_t Data) {
 }
 
 void SHA256::writebyte(uint8_t Data) {
-  ++InternalState.ByteCount;
+  ++InternalState.Byte_बिलांग;
   addUncounted(Data);
 }
 
 void SHA256::update(ArrayRef<uint8_t> Data) {
-  InternalState.ByteCount += Data.size();
+  InternalState.Byte_बिलांग += Data.size();
 
   // Finish the current block.
   if (InternalState.BufferOffset > 0) {
@@ -225,7 +225,7 @@ void SHA256::pad() {
   while (InternalState.BufferOffset != 56)
     addUncounted(0x00);
 
-  uint64_t len = InternalState.ByteCount << 3; // bit size
+  uint64_t len = InternalState.Byte_बिलांग << 3; // bit size
 
   // Append length in the last 8 bytes big edian encoded
   addUncounted(len >> 56);

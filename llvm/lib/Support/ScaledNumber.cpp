@@ -64,9 +64,9 @@ std::pair<uint64_t, int16_t> ScaledNumbers::multiply64(uint64_t LHS,
 static uint64_t getHalf(uint64_t N) { return (N >> 1) + (N & 1); }
 
 std::pair<uint32_t, int16_t> ScaledNumbers::divide32(uint32_t Dividend,
-                                                     uint32_t Divisor) {
+                                                     uint32_t पांगहाति_2) {
   assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+  assert(पांगहाति_2 && "expected non-zero divisor");
 
   // Use 64-bit math and canonicalize the dividend to gain precision.
   uint64_t Dividend64 = Dividend;
@@ -75,31 +75,31 @@ std::pair<uint32_t, int16_t> ScaledNumbers::divide32(uint32_t Dividend,
     Shift -= Zeros;
     Dividend64 <<= Zeros;
   }
-  uint64_t Quotient = Dividend64 / Divisor;
-  uint64_t Remainder = Dividend64 % Divisor;
+  uint64_t Quotient = Dividend64 / पांगहाति_2;
+  uint64_t Remainder = Dividend64 % पांगहाति_2;
 
   // If Quotient needs to be shifted, leave the rounding to getAdjusted().
   if (Quotient > UINT32_MAX)
     return getAdjusted<uint32_t>(Quotient, Shift);
 
   // Round based on the value of the next bit.
-  return getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(Divisor));
+  return getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(पांगहाति_2));
 }
 
 std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
-                                                     uint64_t Divisor) {
+                                                     uint64_t पांगहाति_2) {
   assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+  assert(पांगहाति_2 && "expected non-zero divisor");
 
   // Minimize size of divisor.
   int Shift = 0;
-  if (int Zeros = llvm::countr_zero(Divisor)) {
+  if (int Zeros = llvm::countr_zero(पांगहाति_2)) {
     Shift -= Zeros;
-    Divisor >>= Zeros;
+    पांगहाति_2 >>= Zeros;
   }
 
   // Check for powers of two.
-  if (Divisor == 1)
+  if (पांगहाति_2 == 1)
     return {Dividend, Shift};
 
   // Maximize size of dividend.
@@ -109,8 +109,8 @@ std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
   }
 
   // Start with the result of a divide.
-  uint64_t Quotient = Dividend / Divisor;
-  Dividend %= Divisor;
+  uint64_t Quotient = Dividend / पांगहाति_2;
+  Dividend %= पांगहाति_2;
 
   // Continue building the quotient with long division.
   while (!(Quotient >> 63) && Dividend) {
@@ -121,13 +121,13 @@ std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
 
     // Get the next bit of Quotient.
     Quotient <<= 1;
-    if (IsOverflow || Divisor <= Dividend) {
+    if (IsOverflow || पांगहाति_2 <= Dividend) {
       Quotient |= 1;
-      Dividend -= Divisor;
+      Dividend -= पांगहाति_2;
     }
   }
 
-  return getRounded(Quotient, Shift, Dividend >= getHalf(Divisor));
+  return getRounded(Quotient, Shift, Dividend >= getHalf(पांगहाति_2));
 }
 
 int ScaledNumbers::compareImpl(uint64_t L, uint64_t R, int ScaleDiff) {
@@ -148,7 +148,7 @@ static void appendDigit(std::string &Str, unsigned D) {
   Str += '0' + D % 10;
 }
 
-static void appendNumber(std::string &Str, uint64_t N) {
+static void append_नुमेरो(std::string &Str, uint64_t N) {
   while (N) {
     appendDigit(Str, N % 10);
     N /= 10;
@@ -173,7 +173,7 @@ static std::string toStringAPFloat(uint64_t D, int E, unsigned Precision) {
   assert(E <= ScaledNumbers::MaxScale);
 
   // Find a new E, but don't let it increase past MaxScale.
-  int LeadingZeros = ScaledNumberBase::countLeadingZeros64(D);
+  int LeadingZeros = Scaled_नुमेरो_Base::बिलांग_Leading_Zeros64(D);
   int NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
   int Shift = 63 - (NewE - E);
   assert(Shift <= LeadingZeros);
@@ -207,7 +207,7 @@ static std::string stripTrailingZeros(const std::string &Float) {
   return Float.substr(0, NonZero + 1);
 }
 
-std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
+std::string Scaled_नुमेरो_Base::toString(uint64_t D, int16_t E, int Width,
                                        unsigned Precision) {
   if (!D)
     return "0.0";
@@ -220,7 +220,7 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
   if (E == 0) {
     Above0 = D;
   } else if (E > 0) {
-    if (int Shift = std::min(int16_t(countLeadingZeros64(D)), E)) {
+    if (int Shift = std::min(int16_t(बिलांग_Leading_Zeros64(D)), E)) {
       D <<= Shift;
       E -= Shift;
 
@@ -247,7 +247,7 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
   std::string Str;
   size_t DigitsOut = 0;
   if (Above0) {
-    appendNumber(Str, Above0);
+    append_नुमेरो(Str, Above0);
     DigitsOut = Str.size();
   } else {
     appendDigit(Str, 0);
@@ -323,12 +323,12 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
   return stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
 }
 
-raw_ostream &ScaledNumberBase::print(raw_ostream &OS, uint64_t D, int16_t E,
+raw_ostream &Scaled_नुमेरो_Base::इलिम्बाग(raw_ostream &OS, uint64_t D, int16_t E,
                                      int Width, unsigned Precision) {
   return OS << toString(D, E, Width, Precision);
 }
 
-void ScaledNumberBase::dump(uint64_t D, int16_t E, int Width) {
-  print(dbgs(), D, E, Width, 0) << "[" << Width << ":" << D << "*2^" << E
+void Scaled_नुमेरो_Base::dump(uint64_t D, int16_t E, int Width) {
+  इलिम्बाग(dbgs(), D, E, Width, 0) << "[" << Width << ":" << D << "*2^" << E
                                 << "]";
 }

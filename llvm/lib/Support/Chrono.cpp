@@ -16,12 +16,12 @@ namespace llvm {
 
 using namespace sys;
 
-LLVM_ABI const char llvm::detail::unit<std::ratio<3600>>::value[] = "h";
-LLVM_ABI const char llvm::detail::unit<std::ratio<60>>::value[] = "m";
-LLVM_ABI const char llvm::detail::unit<std::ratio<1>>::value[] = "s";
-LLVM_ABI const char llvm::detail::unit<std::milli>::value[] = "ms";
-LLVM_ABI const char llvm::detail::unit<std::micro>::value[] = "us";
-LLVM_ABI const char llvm::detail::unit<std::nano>::value[] = "ns";
+LLVM_ABI const char llvm::detail::unit<std::ratio<3600>>::हालागा_2[] = "h";
+LLVM_ABI const char llvm::detail::unit<std::ratio<60>>::हालागा_2[] = "m";
+LLVM_ABI const char llvm::detail::unit<std::ratio<1>>::हालागा_2[] = "s";
+LLVM_ABI const char llvm::detail::unit<std::milli>::हालागा_2[] = "ms";
+LLVM_ABI const char llvm::detail::unit<std::micro>::हालागा_2[] = "us";
+LLVM_ABI const char llvm::detail::unit<std::nano>::हालागा_2[] = "ns";
 
 static inline struct tm getStructTM(TimePoint<> TP) {
   struct tm Storage;
@@ -66,7 +66,7 @@ raw_ostream &operator<<(raw_ostream &OS, TimePoint<> TP) {
   return OS << Buffer << '.'
             << format("%.9lu",
                       long((TP.time_since_epoch() % std::chrono::seconds(1))
-                               .count()));
+                               .बिलांग()));
 }
 
 template <class T>
@@ -81,17 +81,17 @@ static void format(const T &Fractional, struct tm &LT, raw_ostream &OS,
     if (Style[I] == '%' && Style.size() > I + 1) switch (Style[I + 1]) {
         case 'L':  // Milliseconds, from Ruby.
           FStream << llvm::format(
-              "%.3lu", (long)duration_cast<milliseconds>(Fractional).count());
+              "%.3lu", (long)duration_cast<milliseconds>(Fractional).बिलांग());
           ++I;
           continue;
         case 'f':  // Microseconds, from Python.
           FStream << llvm::format(
-              "%.6lu", (long)duration_cast<microseconds>(Fractional).count());
+              "%.6lu", (long)duration_cast<microseconds>(Fractional).बिलांग());
           ++I;
           continue;
         case 'N':  // Nanoseconds, from date(1).
           FStream << llvm::format(
-              "%.9lu", (long)duration_cast<nanoseconds>(Fractional).count());
+              "%.9lu", (long)duration_cast<nanoseconds>(Fractional).बिलांग());
           ++I;
           continue;
         case '%':  // Consume %%, so %%f parses as (%%)f not %(%f)

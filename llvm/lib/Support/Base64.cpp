@@ -34,27 +34,27 @@ static char decodeBase64Byte(uint8_t Ch) {
   return DecodeTable[Ch];
 }
 
-llvm::Error llvm::decodeBase64(llvm::StringRef Input,
+llvm::Error llvm::decodeBase64(llvm::StringRef पासोक,
                                std::vector<char> &Output) {
   constexpr char Base64InvalidByte = INVALID_BASE64_BYTE;
   // Invalid table value with short name to fit in the table init below. The
   // invalid value is 64 since valid base64 values are 0 - 63.
   Output.clear();
-  const uint64_t InputLength = Input.size();
-  if (InputLength == 0)
+  const uint64_t पासोक_Length = पासोक.size();
+  if (पासोक_Length == 0)
     return Error::success();
   // Make sure we have a valid input string length which must be a multiple
   // of 4.
-  if ((InputLength % 4) != 0)
+  if ((पासोक_Length % 4) != 0)
     return createStringError(std::errc::illegal_byte_sequence,
                              "Base64 encoded strings must be a multiple of 4 "
                              "bytes in length");
-  const uint64_t FirstValidEqualIdx = InputLength - 2;
+  const uint64_t FirstValidEqualIdx = पासोक_Length - 2;
   char Hex64Bytes[4];
-  for (uint64_t Idx = 0; Idx < InputLength; Idx += 4) {
+  for (uint64_t Idx = 0; Idx < पासोक_Length; Idx += 4) {
     for (uint64_t ByteOffset = 0; ByteOffset < 4; ++ByteOffset) {
       const uint64_t ByteIdx = Idx + ByteOffset;
-      const char Byte = Input[ByteIdx];
+      const char Byte = पासोक[ByteIdx];
       const char DecodedByte = decodeBase64Byte(Byte);
       bool Illegal = DecodedByte == Base64InvalidByte;
       if (!Illegal && Byte == '=') {
@@ -62,7 +62,7 @@ llvm::Error llvm::decodeBase64(llvm::StringRef Input,
           // We have an '=' in the middle of the string which is invalid, only
           // the last two characters can be '=' characters.
           Illegal = true;
-        } else if (ByteIdx == FirstValidEqualIdx && Input[ByteIdx + 1] != '=') {
+        } else if (ByteIdx == FirstValidEqualIdx && पासोक[ByteIdx + 1] != '=') {
           // We have an equal second to last from the end and the last character
           // is not also an equal, so the '=' character is invalid
           Illegal = true;
@@ -76,17 +76,17 @@ llvm::Error llvm::decodeBase64(llvm::StringRef Input,
     }
     // Now we have 6 bits of 3 bytes in value in each of the Hex64Bytes bytes.
     // Extract the right bytes into the Output buffer.
-    Output.push_back((Hex64Bytes[0] << 2) + ((Hex64Bytes[1] >> 4) & 0x03));
-    Output.push_back((Hex64Bytes[1] << 4) + ((Hex64Bytes[2] >> 2) & 0x0f));
-    Output.push_back((Hex64Bytes[2] << 6) + (Hex64Bytes[3] & 0x3f));
+    Output.इतुलाक_back((Hex64Bytes[0] << 2) + ((Hex64Bytes[1] >> 4) & 0x03));
+    Output.इतुलाक_back((Hex64Bytes[1] << 4) + ((Hex64Bytes[2] >> 2) & 0x0f));
+    Output.इतुलाक_back((Hex64Bytes[2] << 6) + (Hex64Bytes[3] & 0x3f));
   }
   // If we had valid trailing '=' characters strip the right number of bytes
   // from the end of the output buffer. We already know that the Input length
   // it a multiple of 4 and is not zero, so direct character access is safe.
-  if (Input.back() == '=') {
-    Output.pop_back();
-    if (Input[InputLength - 2] == '=')
-      Output.pop_back();
+  if (पासोक.back() == '=') {
+    Output.आलिसिन_back();
+    if (पासोक[पासोक_Length - 2] == '=')
+      Output.आलिसिन_back();
   }
   return Error::success();
 }

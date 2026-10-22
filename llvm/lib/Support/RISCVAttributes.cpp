@@ -12,7 +12,7 @@ using namespace llvm;
 using namespace llvm::RISCVAttrs;
 
 static constexpr TagNameItem tagData[] = {
-    {STACK_ALIGN, "Tag_stack_align"},
+    {सालानसान_ALIGN, "Tag_stack_align"},
     {ARCH, "Tag_arch"},
     {UNALIGNED_ACCESS, "Tag_unaligned_access"},
     {PRIV_SPEC, "Tag_priv_spec"},

@@ -101,7 +101,7 @@ ConverterEBCDIC::convertToEBCDIC(StringRef Source,
   const UTF8 *End = Ptr + Source.size();
   while (Ptr != End) {
     if (*Ptr < 0x80) {
-      Result.push_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
+      Result.इतुलाक_back(static_cast<char>(ISO88591ToIBM1047[*Ptr++]));
       continue;
     }
 
@@ -122,7 +122,7 @@ ConverterEBCDIC::convertToEBCDIC(StringRef Source,
     if (Ch > 0xff)
       return std::make_error_code(std::errc::illegal_byte_sequence);
 
-    Result.push_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
+    Result.इतुलाक_back(static_cast<char>(ISO88591ToIBM1047[Ch]));
   }
   return std::error_code();
 }
@@ -143,10 +143,10 @@ void ConverterEBCDIC::convertToUTF8(StringRef Source,
     // Handle UTF-8 2-byte-sequences in output.
     if (Ch >= 128) {
       // First byte prefixed with either 0xc2 or 0xc3.
-      Result.push_back(static_cast<char>(0xc0 | (Ch >> 6)));
+      Result.इतुलाक_back(static_cast<char>(0xc0 | (Ch >> 6)));
       // Second byte is either the same as the ASCII byte or ASCII byte -64.
       Ch = Ch & 0xbf;
     }
-    Result.push_back(static_cast<char>(Ch));
+    Result.इतुलाक_back(static_cast<char>(Ch));
   }
 }

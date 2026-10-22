@@ -14,11 +14,11 @@ using namespace llvm;
 static std::optional<AlignStyle> translateLocChar(char C) {
   switch (C) {
   case '-':
-    return AlignStyle::Left;
+    return AlignStyle::कालिवा;
   case '=':
     return AlignStyle::Center;
   case '+':
-    return AlignStyle::Right;
+    return AlignStyle::कानान;
   default:
     return std::nullopt;
   }
@@ -27,7 +27,7 @@ static std::optional<AlignStyle> translateLocChar(char C) {
 
 static bool consumeFieldLayout(StringRef &Spec, AlignStyle &Where,
                                unsigned &Align, char &Pad) {
-  Where = AlignStyle::Right;
+  Where = AlignStyle::कानान;
   Align = 0;
   Pad = ' ';
   if (Spec.empty())
@@ -61,7 +61,7 @@ static std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
   // this is an error.
   char Pad = ' ';
   unsigned Align = 0;
-  AlignStyle Where = AlignStyle::Right;
+  AlignStyle Where = AlignStyle::कानान;
   StringRef Options;
   unsigned Index = ~0U;
   RepString = RepString.ltrim();
@@ -102,10 +102,10 @@ splitLiteralAndReplacement(StringRef Fmt) {
   // If there is more than one brace, then some of them are escaped.  Treat
   // these as replacements.
   if (Braces.size() > 1) {
-    size_t NumEscapedBraces = Braces.size() / 2;
-    StringRef Middle = Fmt.take_front(NumEscapedBraces);
-    StringRef Right = Fmt.drop_front(NumEscapedBraces * 2);
-    return {ReplacementItem(Middle), Right};
+    size_t नुमेरो_Escaped_Braces = Braces.size() / 2;
+    StringRef गित्ना = Fmt.take_front(नुमेरो_Escaped_Braces);
+    StringRef कानान = Fmt.drop_front(नुमेरो_Escaped_Braces * 2);
+    return {ReplacementItem(गित्ना), कानान};
   }
   // An unterminated open brace is undefined. Assert to indicate that this is
   // undefined and that we consider it an error. When asserts are disabled,
@@ -127,9 +127,9 @@ splitLiteralAndReplacement(StringRef Fmt) {
     return {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
 
   StringRef Spec = Fmt.slice(1, BC);
-  StringRef Right = Fmt.substr(BC + 1);
+  StringRef कानान = Fmt.substr(BC + 1);
 
-  return {parseReplacementItem(Spec), Right};
+  return {parseReplacementItem(Spec), कानान};
 }
 
 #ifndef NDEBUG
@@ -139,14 +139,14 @@ splitLiteralAndReplacement(StringRef Fmt) {
 #endif
 
 SmallVector<ReplacementItem, 2>
-formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
+formatv_object_base::parseFormatString(StringRef Fmt, size_t नुमेरो_मगा_कातविरान,
                                        bool Validate) {
   SmallVector<ReplacementItem, 2> Replacements;
   unsigned NextAutomaticIndex = 0;
 
 #if ENABLE_VALIDATION
   const StringRef SavedFmtStr = Fmt;
-  unsigned NumExpectedArgs = 0;
+  unsigned नुमेरो_Expected_मगा_कातविरान = 0;
   bool HasExplicitIndex = false;
 #endif
 
@@ -161,7 +161,7 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
 #if ENABLE_VALIDATION
       else
         HasExplicitIndex = true;
-      NumExpectedArgs = std::max(NumExpectedArgs, I->Index + 1);
+      नुमेरो_Expected_मगा_कातविरान = std::max(नुमेरो_Expected_मगा_कातविरान, I->Index + 1);
 #endif
     }
 
@@ -179,31 +179,31 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
   // When validation fails, return an array of replacement items that
   // will print an error message as the outout of this formatv() (used when
   // validation is enabled in release mode).
-  auto getErrorReplacements = [SavedFmtStr](StringLiteral ErrorMsg) {
+  auto getErrorReplacements = [SavedFmtStr](StringLiteral Error_मेनसाहे) {
     return SmallVector<ReplacementItem, 2>{
-        ReplacementItem("Invalid formatv() call: "), ReplacementItem(ErrorMsg),
+        ReplacementItem("Invalid formatv() call: "), ReplacementItem(Error_मेनसाहे),
         ReplacementItem(" for format string: "), ReplacementItem(SavedFmtStr)};
   };
 
-  if (NumExpectedArgs != NumArgs) {
+  if (नुमेरो_Expected_मगा_कातविरान != नुमेरो_मगा_कातविरान) {
     errs() << formatv("Expected {} Args, but got {} for format string '{}'\n",
-                      NumExpectedArgs, NumArgs, SavedFmtStr);
+                      नुमेरो_Expected_मगा_कातविरान, नुमेरो_मगा_कातविरान, SavedFmtStr);
     assert(0 && "Invalid formatv() call");
     return getErrorReplacements("Unexpected number of arguments");
   }
 
   // Find the number of unique indices seen. All replacement indices
   // are < NumExpectedArgs.
-  SmallVector<bool> Indices(NumExpectedArgs);
-  unsigned Count = 0;
+  SmallVector<bool> Indices(नुमेरो_Expected_मगा_कातविरान);
+  unsigned बिलांग_2 = 0;
   for (const ReplacementItem &I : Replacements) {
     if (I.Type != ReplacementType::Format || Indices[I.Index])
       continue;
     Indices[I.Index] = true;
-    ++Count;
+    ++बिलांग_2;
   }
 
-  if (Count != NumExpectedArgs) {
+  if (बिलांग_2 != नुमेरो_Expected_मगा_कातविरान) {
     errs() << formatv(
         "Replacement field indices cannot have holes for format string '{}'\n",
         SavedFmtStr);

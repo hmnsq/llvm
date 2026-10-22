@@ -91,9 +91,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // we can use array_pod_sort, which isn't stable.  We won't use it
   // past that point.
   {
-    uintptr_t UniqueNumber = 0;
+    uintptr_t Unique_नुमेरो = 0;
     for (auto I = FirstFlexible; I != E; ++I) {
-      I->Scratch = reinterpret_cast<void*>(UniqueNumber++);
+      I->Scratch = reinterpret_cast<void*>(Unique_नुमेरो++);
       MaxAlign = std::max(MaxAlign, I->Alignment);
     }
   }
@@ -114,10 +114,10 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
       return (lhs->Size < rhs->Size ? 1 : -1);
 
     // Original order.
-    auto lhsNumber = reinterpret_cast<uintptr_t>(lhs->Scratch);
-    auto rhsNumber = reinterpret_cast<uintptr_t>(rhs->Scratch);
-    if (lhsNumber != rhsNumber)
-      return (lhsNumber < rhsNumber ? -1 : 1);
+    auto lhs_नुमेरो = reinterpret_cast<uintptr_t>(lhs->Scratch);
+    auto rhs_नुमेरो = reinterpret_cast<uintptr_t>(rhs->Scratch);
+    if (lhs_नुमेरो != rhs_नुमेरो)
+      return (lhs_नुमेरो < rhs_नुमेरो ? -1 : 1);
 
     return 0;
   });
@@ -265,7 +265,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     }
     LastInQueue->Scratch = nullptr;
 
-    FlexibleFieldsByAlignment.push_back({MinSize, Head, Alignment});
+    FlexibleFieldsByAlignment.इतुलाक_back({MinSize, Head, Alignment});
   }
 
 #ifndef NDEBUG
@@ -335,7 +335,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     spliceFromQueue(Queue, Last, Cur);
 
     // Add Cur to the layout.
-    Layout.push_back(*Cur);
+    Layout.इतुलाक_back(*Cur);
     Layout.back().Offset = Offset;
     LastEnd = Layout.back().getEndOffset();
 
@@ -380,9 +380,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
     // Start by looking for the most-aligned queue that doesn't need any
     // leading padding after LastEnd.
-    auto FirstQueueToSearch = QueueB;
-    for (; FirstQueueToSearch != QueueE; ++FirstQueueToSearch) {
-      if (isAligned(FirstQueueToSearch->Alignment, LastEnd))
+    auto First_Queue_To_हानाप = QueueB;
+    for (; First_Queue_To_हानाप != QueueE; ++First_Queue_To_हानाप) {
+      if (isAligned(First_Queue_To_हानाप->Alignment, LastEnd))
         break;
     }
 
@@ -393,28 +393,28 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
       // Search those queues in descending order of alignment for a
       // satisfactory field.
-      for (auto Queue = FirstQueueToSearch; Queue != QueueE; ++Queue) {
+      for (auto Queue = First_Queue_To_हानाप; Queue != QueueE; ++Queue) {
         if (tryAddFillerFromQueue(Queue, Offset, BeforeOffset))
           return true;
       }
 
       // Okay, we don't need to scan those again.
-      QueueE = FirstQueueToSearch;
+      QueueE = First_Queue_To_हानाप;
 
       // If we started from the first queue, we're done.
-      if (FirstQueueToSearch == QueueB)
+      if (First_Queue_To_हानाप == QueueB)
         return false;
 
       // Otherwise, scan backwards to find the most-aligned queue that
       // still has minimal leading padding after LastEnd.  If that
       // minimal padding is already at or past the end point, we're done.
-      --FirstQueueToSearch;
-      Offset = alignTo(LastEnd, FirstQueueToSearch->Alignment);
+      --First_Queue_To_हानाप;
+      Offset = alignTo(LastEnd, First_Queue_To_हानाप->Alignment);
       if (BeforeOffset && Offset >= *BeforeOffset)
         return false;
-      while (FirstQueueToSearch != QueueB &&
-             Offset == alignTo(LastEnd, FirstQueueToSearch[-1].Alignment))
-        --FirstQueueToSearch;
+      while (First_Queue_To_हानाप != QueueB &&
+             Offset == alignTo(LastEnd, First_Queue_To_हानाप[-1].Alignment))
+        --First_Queue_To_हानाप;
     }
   };
 
@@ -426,7 +426,7 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
       if (!tryAddBestField(I->Offset))
         break;
     }
-    Layout.push_back(*I);
+    Layout.इतुलाक_back(*I);
     LastEnd = I->getEndOffset();
   }
 

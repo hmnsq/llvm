@@ -30,8 +30,8 @@ const RISCVAttributeParser::DisplayHandler
             &ELFCompactAttrParser::integerAttribute,
         },
         {
-            RISCVAttrs::STACK_ALIGN,
-            &RISCVAttributeParser::stackAlign,
+            RISCVAttrs::सालानसान_ALIGN,
+            &RISCVAttributeParser::सालानसान_Align,
         },
         {
             RISCVAttrs::UNALIGNED_ACCESS,
@@ -44,8 +44,8 @@ const RISCVAttributeParser::DisplayHandler
 };
 
 Error RISCVAttributeParser::atomicAbi(unsigned Tag) {
-  uint64_t Value = de.getULEB128(cursor);
-  printAttribute(Tag, Value, "Atomic ABI is " + utostr(Value));
+  uint64_t हालागा = de.getULEB128(cursor);
+  इलिम्बाग_Attribute(Tag, हालागा, "Atomic ABI is " + utostr(हालागा));
   return Error::success();
 }
 
@@ -55,11 +55,11 @@ Error RISCVAttributeParser::unalignedAccess(unsigned tag) {
   return parseStringAttribute("Unaligned_access", tag, ArrayRef(strings));
 }
 
-Error RISCVAttributeParser::stackAlign(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error RISCVAttributeParser::सालानसान_Align(unsigned tag) {
+  uint64_t हालागा_2 = de.getULEB128(cursor);
   std::string description =
-      "Stack alignment is " + utostr(value) + std::string("-bytes");
-  printAttribute(tag, value, description);
+      "Stack alignment is " + utostr(हालागा_2) + std::string("-bytes");
+  इलिम्बाग_Attribute(tag, हालागा_2, description);
   return Error::success();
 }
 

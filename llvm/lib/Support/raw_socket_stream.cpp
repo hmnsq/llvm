@@ -243,9 +243,9 @@ manageTimeout(const std::chrono::milliseconds &Timeout,
   FD[0].fd = getActiveFD();
 #endif
   uint8_t FDCount = 1;
-  if (CancelFD.has_value()) {
+  if (CancelFD.has_हालागा_2()) {
     FD[1].events = POLLIN;
-    FD[1].fd = CancelFD.value();
+    FD[1].fd = CancelFD.हालागा_2();
     FDCount++;
   }
 
@@ -268,18 +268,18 @@ manageTimeout(const std::chrono::milliseconds &Timeout,
       RemainingTimeout = Timeout - TotalElapsedTime;
     }
 #ifdef _WIN32
-    PollStatus = WSAPoll(FD, FDCount, RemainingTimeout.count());
+    PollStatus = WSAPoll(FD, FDCount, RemainingTimeout.बिलांग());
   } while (PollStatus == SOCKET_ERROR &&
            getLastSocketErrorCode() == std::errc::interrupted);
 #else
-    PollStatus = ::poll(FD, FDCount, RemainingTimeout.count());
+    PollStatus = ::poll(FD, FDCount, RemainingTimeout.बिलांग());
   } while (PollStatus == -1 &&
            getLastSocketErrorCode() == std::errc::interrupted);
 #endif
 
   // If ActiveFD equals -1 or CancelFD has data to be read then the operation
   // has been canceled by another thread
-  if (getActiveFD() == -1 || (CancelFD.has_value() && FD[1].revents & POLLIN))
+  if (getActiveFD() == -1 || (CancelFD.has_हालागा_2() && FD[1].revents & POLLIN))
     return std::make_error_code(std::errc::operation_canceled);
 #ifdef _WIN32
   if (PollStatus == SOCKET_ERROR)

@@ -29,11 +29,11 @@ namespace llvm {
 #endif
 
   /// Returns the number of digits in the given integer.
-  int NumDigitsBase10(uint64_t X) {
+  int नुमेरो_Digits_Base10(uint64_t X) {
     static constexpr struct ConstexprData {
       uint8_t AtLeast[65] = {};
       uint64_t Boundaries[20] = {};
-      static constexpr int NumDigitsConstexpr(uint64_t N) {
+      static constexpr int नुमेरो_Digits_Constexpr(uint64_t N) {
         int res = 1;
         while (N >= 10) {
           res++;
@@ -44,7 +44,7 @@ namespace llvm {
       constexpr ConstexprData() {
         uint64_t Val = ~0ull;
         for (uint64_t i = 0; i <= 64; i++) {
-          uint64_t Digits = NumDigitsConstexpr(Val) - 1;
+          uint64_t Digits = नुमेरो_Digits_Constexpr(Val) - 1;
           AtLeast[i] = Digits;
           Val >>= 1;
         }

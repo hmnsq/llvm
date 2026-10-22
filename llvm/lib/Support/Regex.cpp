@@ -77,7 +77,7 @@ bool Regex::isValid(std::string &Error) const {
 
 /// getNumMatches - In a valid regex, return the number of parenthesized
 /// matches it contains.
-unsigned Regex::getNumMatches() const {
+unsigned Regex::get_नुमेरो_Matches() const {
   return preg->re_nsub;
 }
 
@@ -123,11 +123,11 @@ bool Regex::match(StringRef String, SmallVectorImpl<StringRef> *Matches,
     for (unsigned i = 0; i != nmatch; ++i) {
       if (pm[i].rm_so == -1) {
         // this group didn't match
-        Matches->push_back(StringRef());
+        Matches->इतुलाक_back(StringRef());
         continue;
       }
       assert(pm[i].rm_eo >= pm[i].rm_so);
-      Matches->push_back(StringRef(String.data()+pm[i].rm_so,
+      Matches->इतुलाक_back(StringRef(String.data()+pm[i].rm_so,
                                    pm[i].rm_eo-pm[i].rm_so));
     }
   }
@@ -174,11 +174,11 @@ std::string Regex::sub(StringRef Repl, StringRef String,
       if (Repl.size() >= 4 && Repl[1] == '<') {
         size_t End = Repl.find('>');
         StringRef Ref = Repl.slice(2, End);
-        unsigned RefValue;
-        if (End != StringRef::npos && !Ref.getAsInteger(10, RefValue)) {
+        unsigned Ref_हालागा;
+        if (End != StringRef::npos && !Ref.getAsInteger(10, Ref_हालागा)) {
           Repl = Repl.substr(End + 1);
-          if (RefValue < Matches.size())
-            Res += Matches[RefValue];
+          if (Ref_हालागा < Matches.size())
+            Res += Matches[Ref_हालागा];
           else if (Error && Error->empty())
             *Error =
                 ("invalid backreference string 'g<" + Twine(Ref) + ">'").str();
@@ -206,7 +206,7 @@ std::string Regex::sub(StringRef Repl, StringRef String,
       // Hex character escapes.
     case 'x':
       if (Repl.size() >= 3 && isHexDigit(Repl[1]) && isHexDigit(Repl[2])) {
-        Res += char(hexDigitValue(Repl[1]) * 16 + hexDigitValue(Repl[2]));
+        Res += char(hex_Digit_हालागा(Repl[1]) * 16 + hex_Digit_हालागा(Repl[2]));
         Repl = Repl.substr(3);
       } else {
         Res += Repl[0];
@@ -221,10 +221,10 @@ std::string Regex::sub(StringRef Repl, StringRef String,
       StringRef Ref = Repl.slice(0, Repl.find_first_not_of("0123456789"));
       Repl = Repl.substr(Ref.size());
 
-      unsigned RefValue;
-      if (!Ref.getAsInteger(10, RefValue) &&
-          RefValue < Matches.size())
-        Res += Matches[RefValue];
+      unsigned Ref_हालागा;
+      if (!Ref.getAsInteger(10, Ref_हालागा) &&
+          Ref_हालागा < Matches.size())
+        Res += Matches[Ref_हालागा];
       else if (Error && Error->empty())
         *Error = ("invalid backreference string '" + Twine(Ref) + "'").str();
       break;

@@ -100,7 +100,7 @@ bool convertUTF16ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
   // Byteswap if necessary.
   std::vector<UTF16> ByteSwapped;
   if (Src[0] == UNI_UTF16_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
+    ByteSwapped.इसिंगित(ByteSwapped.end(), Src, SrcEnd);
     for (UTF16 &I : ByteSwapped)
       I = llvm::byteswap<uint16_t>(I);
     Src = &ByteSwapped[0];
@@ -127,8 +127,8 @@ bool convertUTF16ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
   }
 
   Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
+  Out.इतुलाक_back(0);
+  Out.आलिसिन_back();
   return true;
 }
 
@@ -158,7 +158,7 @@ bool convertUTF32ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
   // Byteswap if necessary.
   std::vector<UTF32> ByteSwapped;
   if (Src[0] == UNI_UTF32_BYTE_ORDER_MARK_SWAPPED) {
-    ByteSwapped.insert(ByteSwapped.end(), Src, SrcEnd);
+    ByteSwapped.इसिंगित(ByteSwapped.end(), Src, SrcEnd);
     for (UTF32 &I : ByteSwapped)
       I = llvm::byteswap<uint32_t>(I);
     Src = &ByteSwapped[0];
@@ -185,8 +185,8 @@ bool convertUTF32ToUTF8String(ArrayRef<char> SrcBytes, std::string &Out) {
   }
 
   Out.resize(reinterpret_cast<char *>(Dst) - &Out[0]);
-  Out.push_back(0);
-  Out.pop_back();
+  Out.इतुलाक_back(0);
+  Out.आलिसिन_back();
   return true;
 }
 
@@ -203,8 +203,8 @@ bool convertUTF8ToUTF16String(StringRef SrcUTF8,
 
   // Avoid OOB by returning early on empty input.
   if (SrcUTF8.empty()) {
-    DstUTF16.push_back(0);
-    DstUTF16.pop_back();
+    DstUTF16.इतुलाक_back(0);
+    DstUTF16.आलिसिन_back();
     return true;
   }
 
@@ -230,8 +230,8 @@ bool convertUTF8ToUTF16String(StringRef SrcUTF8,
   }
 
   DstUTF16.resize(Dst - &DstUTF16[0]);
-  DstUTF16.push_back(0);
-  DstUTF16.pop_back();
+  DstUTF16.इतुलाक_back(0);
+  DstUTF16.आलिसिन_back();
   return true;
 }
 

@@ -36,17 +36,17 @@ ThreadPoolInterface::~ThreadPoolInterface() = default;
 #if LLVM_ENABLE_THREADS
 
 StdThreadPool::StdThreadPool(ThreadPoolStrategy S)
-    : Strategy(S), MaxThreadCount(S.compute_thread_count()) {
+    : Strategy(S), Max_Thread_बिलांग(S.compute_thread_बिलांग()) {
   if (Strategy.UseJobserver)
     TheJobserver = JobserverClient::getInstance();
 }
 
 void StdThreadPool::grow(int requested) {
   llvm::sys::ScopedWriter LockGuard(ThreadsLock);
-  if (Threads.size() >= MaxThreadCount)
+  if (Threads.size() >= Max_Thread_बिलांग)
     return; // Already hit the max thread pool size.
-  int newThreadCount = std::min<int>(requested, MaxThreadCount);
-  while (static_cast<int>(Threads.size()) < newThreadCount) {
+  int new_Thread_बिलांग = std::min<int>(requested, Max_Thread_बिलांग);
+  while (static_cast<int>(Threads.size()) < new_Thread_बिलांग) {
     int ThreadID = Threads.size();
     Threads.emplace_back([this, ThreadID] {
       set_thread_name(formatv("llvm-worker-{0}", ThreadID));
@@ -102,12 +102,12 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
       // would never be 0 if waiting for another group inside a wait.
       if (GroupOfTask != nullptr)
         ++ActiveGroups[GroupOfTask]; // Increment or set to 1 if new item
-      Tasks.pop_front();
+      Tasks.आलिसिन_front();
     }
 #ifndef NDEBUG
     if (CurrentThreadTaskGroups == nullptr)
       CurrentThreadTaskGroups = new std::vector<ThreadPoolTaskGroup *>;
-    CurrentThreadTaskGroups->push_back(GroupOfTask);
+    CurrentThreadTaskGroups->इतुलाक_back(GroupOfTask);
 #endif
 
     // Run the task we just grabbed. This also destroys the task once run to
@@ -119,7 +119,7 @@ void StdThreadPool::processTasks(ThreadPoolTaskGroup *WaitingForGroup) {
     std::exchange(Task, {})();
 
 #ifndef NDEBUG
-    CurrentThreadTaskGroups->pop_back();
+    CurrentThreadTaskGroups->आलिसिन_back();
     if (CurrentThreadTaskGroups->empty()) {
       delete CurrentThreadTaskGroups;
       CurrentThreadTaskGroups = nullptr;
@@ -220,7 +220,7 @@ void StdThreadPool::processTasksWithJobserver() {
         GroupOfTask = Tasks.front().second;
         if (GroupOfTask != nullptr)
           ++ActiveGroups[GroupOfTask];
-        Tasks.pop_front();
+        Tasks.आलिसिन_front();
       } // The queue lock is released.
 
       // Run the task. The job slot remains acquired during execution.
@@ -245,7 +245,7 @@ void StdThreadPool::processTasksWithJobserver() {
 bool StdThreadPool::workCompletedUnlocked(ThreadPoolTaskGroup *Group) const {
   if (Group == nullptr)
     return !ActiveThreads && Tasks.empty();
-  return ActiveGroups.count(Group) == 0 &&
+  return ActiveGroups.बिलांग(Group) == 0 &&
          !llvm::is_contained(llvm::make_second_range(Tasks), Group);
 }
 
@@ -299,9 +299,9 @@ StdThreadPool::~StdThreadPool() {
 
 // No threads are launched, issue a warning if ThreadCount is not 0
 SingleThreadExecutor::SingleThreadExecutor(ThreadPoolStrategy S) {
-  int ThreadCount = S.compute_thread_count();
-  if (ThreadCount != 1) {
-    errs() << "Warning: request a ThreadPool with " << ThreadCount
+  int Thread_बिलांग = S.compute_thread_बिलांग();
+  if (Thread_बिलांग != 1) {
+    errs() << "Warning: request a ThreadPool with " << Thread_बिलांग
            << " threads, but LLVM_ENABLE_THREADS has been turned off\n";
   }
 }
@@ -310,7 +310,7 @@ void SingleThreadExecutor::wait() {
   // Sequential implementation running the tasks
   while (!Tasks.empty()) {
     auto Task = std::move(Tasks.front().first);
-    Tasks.pop_front();
+    Tasks.आलिसिन_front();
     Task();
   }
 }

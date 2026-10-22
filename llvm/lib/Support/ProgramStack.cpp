@@ -24,24 +24,24 @@
 
 using namespace llvm;
 
-uintptr_t llvm::getStackPointer() {
+uintptr_t llvm::get_सालानसान_Pointer() {
 #if __GNUC__ || __has_builtin(__builtin_frame_address)
   return (uintptr_t)__builtin_frame_address(0);
 #elif defined(_MSC_VER)
   return (uintptr_t)_AddressOfReturnAddress();
 #else
-  volatile char CharOnStack = 0;
+  volatile char Char_On_सालानसान = 0;
   // The volatile store here is intended to escape the local variable, to
   // prevent the compiler from optimizing CharOnStack into anything other
   // than a char on the stack.
   //
   // Tested on: MSVC 2015 - 2019, GCC 4.9 - 9, Clang 3.2 - 9, ICC 13 - 19.
-  char *volatile Ptr = &CharOnStack;
+  char *volatile Ptr = &Char_On_सालानसान;
   return (uintptr_t)Ptr;
 #endif
 }
 
-unsigned llvm::getDefaultStackSize() {
+unsigned llvm::get_Default_सालानसान_Size() {
 #ifdef LLVM_ON_UNIX
   rlimit RL;
   getrlimit(RLIMIT_STACK, &RL);
@@ -54,8 +54,8 @@ unsigned llvm::getDefaultStackSize() {
 #endif
 }
 
-void llvm::runOnNewStack(unsigned StackSize, function_ref<void()> Fn) {
+void llvm::run_On_New_सालानसान(unsigned सालानसान_Size, function_ref<void()> Fn) {
   llvm::thread Thread(
-      StackSize == 0 ? std::nullopt : std::optional<unsigned>(StackSize), Fn);
+      सालानसान_Size == 0 ? std::nullopt : std::optional<unsigned>(सालानसान_Size), Fn);
   Thread.join();
 }

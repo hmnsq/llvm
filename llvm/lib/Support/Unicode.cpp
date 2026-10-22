@@ -96,7 +96,7 @@ int columnWidthUTF8(StringRef Text) {
   unsigned ColumnWidth = 0;
   unsigned Length;
   for (size_t i = 0, e = Text.size(); i < e; i += Length) {
-    Length = getNumBytesForUTF8(Text[i]);
+    Length = get_नुमेरो_Bytes_For_UTF8(Text[i]);
 
     // fast path for ASCII characters
     if (Length == 1) {

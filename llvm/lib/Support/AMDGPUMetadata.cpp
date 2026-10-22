@@ -48,57 +48,57 @@ struct ScalarEnumerationTraits<AddressSpaceQualifier> {
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueKind> {
-  static void enumeration(IO &YIO, ValueKind &EN) {
-    YIO.enumCase(EN, "ByValue", ValueKind::ByValue);
-    YIO.enumCase(EN, "GlobalBuffer", ValueKind::GlobalBuffer);
-    YIO.enumCase(EN, "DynamicSharedPointer", ValueKind::DynamicSharedPointer);
-    YIO.enumCase(EN, "Sampler", ValueKind::Sampler);
-    YIO.enumCase(EN, "Image", ValueKind::Image);
-    YIO.enumCase(EN, "Pipe", ValueKind::Pipe);
-    YIO.enumCase(EN, "Queue", ValueKind::Queue);
-    YIO.enumCase(EN, "HiddenGlobalOffsetX", ValueKind::HiddenGlobalOffsetX);
-    YIO.enumCase(EN, "HiddenGlobalOffsetY", ValueKind::HiddenGlobalOffsetY);
-    YIO.enumCase(EN, "HiddenGlobalOffsetZ", ValueKind::HiddenGlobalOffsetZ);
-    YIO.enumCase(EN, "HiddenNone", ValueKind::HiddenNone);
-    YIO.enumCase(EN, "HiddenPrintfBuffer", ValueKind::HiddenPrintfBuffer);
-    YIO.enumCase(EN, "HiddenHostcallBuffer", ValueKind::HiddenHostcallBuffer);
-    YIO.enumCase(EN, "HiddenDefaultQueue", ValueKind::HiddenDefaultQueue);
+struct ScalarEnumerationTraits<हालागा_Kind> {
+  static void enumeration(IO &YIO, हालागा_Kind &EN) {
+    YIO.enumCase(EN, "ByValue", हालागा_Kind::By_हालागा);
+    YIO.enumCase(EN, "GlobalBuffer", हालागा_Kind::GlobalBuffer);
+    YIO.enumCase(EN, "DynamicSharedPointer", हालागा_Kind::DynamicSharedPointer);
+    YIO.enumCase(EN, "Sampler", हालागा_Kind::Sampler);
+    YIO.enumCase(EN, "Image", हालागा_Kind::Image);
+    YIO.enumCase(EN, "Pipe", हालागा_Kind::Pipe);
+    YIO.enumCase(EN, "Queue", हालागा_Kind::Queue);
+    YIO.enumCase(EN, "HiddenGlobalOffsetX", हालागा_Kind::HiddenGlobalOffsetX);
+    YIO.enumCase(EN, "HiddenGlobalOffsetY", हालागा_Kind::HiddenGlobalOffsetY);
+    YIO.enumCase(EN, "HiddenGlobalOffsetZ", हालागा_Kind::HiddenGlobalOffsetZ);
+    YIO.enumCase(EN, "HiddenNone", हालागा_Kind::HiddenNone);
+    YIO.enumCase(EN, "HiddenPrintfBuffer", हालागा_Kind::HiddenPrintfBuffer);
+    YIO.enumCase(EN, "HiddenHostcallBuffer", हालागा_Kind::HiddenHostcallBuffer);
+    YIO.enumCase(EN, "HiddenDefaultQueue", हालागा_Kind::HiddenDefaultQueue);
     YIO.enumCase(EN, "HiddenCompletionAction",
-                 ValueKind::HiddenCompletionAction);
+                 हालागा_Kind::HiddenCompletionAction);
     YIO.enumCase(EN, "HiddenMultiGridSyncArg",
-		 ValueKind::HiddenMultiGridSyncArg);
+		 हालागा_Kind::HiddenMultiGridSyncArg);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<ValueType> {
-  static void enumeration(IO &YIO, ValueType &EN) {
-    YIO.enumCase(EN, "Struct", ValueType::Struct);
-    YIO.enumCase(EN, "I8", ValueType::I8);
-    YIO.enumCase(EN, "U8", ValueType::U8);
-    YIO.enumCase(EN, "I16", ValueType::I16);
-    YIO.enumCase(EN, "U16", ValueType::U16);
-    YIO.enumCase(EN, "F16", ValueType::F16);
-    YIO.enumCase(EN, "I32", ValueType::I32);
-    YIO.enumCase(EN, "U32", ValueType::U32);
-    YIO.enumCase(EN, "F32", ValueType::F32);
-    YIO.enumCase(EN, "I64", ValueType::I64);
-    YIO.enumCase(EN, "U64", ValueType::U64);
-    YIO.enumCase(EN, "F64", ValueType::F64);
+struct ScalarEnumerationTraits<हालागा_Type> {
+  static void enumeration(IO &YIO, हालागा_Type &EN) {
+    YIO.enumCase(EN, "Struct", हालागा_Type::Struct);
+    YIO.enumCase(EN, "I8", हालागा_Type::I8);
+    YIO.enumCase(EN, "U8", हालागा_Type::U8);
+    YIO.enumCase(EN, "I16", हालागा_Type::I16);
+    YIO.enumCase(EN, "U16", हालागा_Type::U16);
+    YIO.enumCase(EN, "F16", हालागा_Type::F16);
+    YIO.enumCase(EN, "I32", हालागा_Type::I32);
+    YIO.enumCase(EN, "U32", हालागा_Type::U32);
+    YIO.enumCase(EN, "F32", हालागा_Type::F32);
+    YIO.enumCase(EN, "I64", हालागा_Type::I64);
+    YIO.enumCase(EN, "U64", हालागा_Type::U64);
+    YIO.enumCase(EN, "F64", हालागा_Type::F64);
   }
 };
 
 template <>
 struct MappingTraits<Kernel::Attrs::Metadata> {
   static void mapping(IO &YIO, Kernel::Attrs::Metadata &MD) {
-    YIO.mapOptional(Kernel::Attrs::Key::ReqdWorkGroupSize,
+    YIO.mapOptional(Kernel::Attrs::सुसि::ReqdWorkGroupSize,
                     MD.mReqdWorkGroupSize, std::vector<uint32_t>());
-    YIO.mapOptional(Kernel::Attrs::Key::WorkGroupSizeHint,
+    YIO.mapOptional(Kernel::Attrs::सुसि::WorkGroupSizeHint,
                     MD.mWorkGroupSizeHint, std::vector<uint32_t>());
-    YIO.mapOptional(Kernel::Attrs::Key::VecTypeHint,
+    YIO.mapOptional(Kernel::Attrs::सुसि::VecTypeHint,
                     MD.mVecTypeHint, std::string());
-    YIO.mapOptional(Kernel::Attrs::Key::RuntimeHandle, MD.mRuntimeHandle,
+    YIO.mapOptional(Kernel::Attrs::सुसि::RuntimeHandle, MD.mRuntimeHandle,
                     std::string());
   }
 };
@@ -106,73 +106,73 @@ struct MappingTraits<Kernel::Attrs::Metadata> {
 template <>
 struct MappingTraits<Kernel::Arg::Metadata> {
   static void mapping(IO &YIO, Kernel::Arg::Metadata &MD) {
-    YIO.mapOptional(Kernel::Arg::Key::Name, MD.mName, std::string());
-    YIO.mapOptional(Kernel::Arg::Key::TypeName, MD.mTypeName, std::string());
-    YIO.mapRequired(Kernel::Arg::Key::Size, MD.mSize);
-    YIO.mapRequired(Kernel::Arg::Key::Align, MD.mAlign);
-    YIO.mapRequired(Kernel::Arg::Key::ValueKind, MD.mValueKind);
+    YIO.mapOptional(Kernel::Arg::सुसि::Name, MD.mName, std::string());
+    YIO.mapOptional(Kernel::Arg::सुसि::TypeName, MD.mTypeName, std::string());
+    YIO.mapRequired(Kernel::Arg::सुसि::Size, MD.mSize);
+    YIO.mapRequired(Kernel::Arg::सुसि::Align, MD.mAlign);
+    YIO.mapRequired(Kernel::Arg::सुसि::हालागा_Kind, MD.m_हालागा_Kind);
 
     // Removed. Accepted for parsing compatibility, but not emitted.
-    std::optional<ValueType> Unused;
-    YIO.mapOptional(Kernel::Arg::Key::ValueType, Unused);
+    std::optional<हालागा_Type> Unused;
+    YIO.mapOptional(Kernel::Arg::सुसि::हालागा_Type, Unused);
 
-    YIO.mapOptional(Kernel::Arg::Key::PointeeAlign, MD.mPointeeAlign,
+    YIO.mapOptional(Kernel::Arg::सुसि::PointeeAlign, MD.mPointeeAlign,
                     uint32_t(0));
-    YIO.mapOptional(Kernel::Arg::Key::AddrSpaceQual, MD.mAddrSpaceQual,
+    YIO.mapOptional(Kernel::Arg::सुसि::AddrSpaceQual, MD.mAddrSpaceQual,
                     AddressSpaceQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::AccQual, MD.mAccQual,
+    YIO.mapOptional(Kernel::Arg::सुसि::AccQual, MD.mAccQual,
                     AccessQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::ActualAccQual, MD.mActualAccQual,
+    YIO.mapOptional(Kernel::Arg::सुसि::ActualAccQual, MD.mActualAccQual,
                     AccessQualifier::Unknown);
-    YIO.mapOptional(Kernel::Arg::Key::IsConst, MD.mIsConst, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsRestrict, MD.mIsRestrict, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsVolatile, MD.mIsVolatile, false);
-    YIO.mapOptional(Kernel::Arg::Key::IsPipe, MD.mIsPipe, false);
+    YIO.mapOptional(Kernel::Arg::सुसि::IsConst, MD.mIsConst, false);
+    YIO.mapOptional(Kernel::Arg::सुसि::IsRestrict, MD.mIsRestrict, false);
+    YIO.mapOptional(Kernel::Arg::सुसि::IsVolatile, MD.mIsVolatile, false);
+    YIO.mapOptional(Kernel::Arg::सुसि::IsPipe, MD.mIsPipe, false);
   }
 };
 
 template <>
 struct MappingTraits<Kernel::CodeProps::Metadata> {
   static void mapping(IO &YIO, Kernel::CodeProps::Metadata &MD) {
-    YIO.mapRequired(Kernel::CodeProps::Key::KernargSegmentSize,
+    YIO.mapRequired(Kernel::CodeProps::सुसि::KernargSegmentSize,
                     MD.mKernargSegmentSize);
-    YIO.mapRequired(Kernel::CodeProps::Key::GroupSegmentFixedSize,
+    YIO.mapRequired(Kernel::CodeProps::सुसि::GroupSegmentFixedSize,
                     MD.mGroupSegmentFixedSize);
-    YIO.mapRequired(Kernel::CodeProps::Key::PrivateSegmentFixedSize,
+    YIO.mapRequired(Kernel::CodeProps::सुसि::PrivateSegmentFixedSize,
                     MD.mPrivateSegmentFixedSize);
-    YIO.mapRequired(Kernel::CodeProps::Key::KernargSegmentAlign,
+    YIO.mapRequired(Kernel::CodeProps::सुसि::KernargSegmentAlign,
                     MD.mKernargSegmentAlign);
-    YIO.mapRequired(Kernel::CodeProps::Key::WavefrontSize,
+    YIO.mapRequired(Kernel::CodeProps::सुसि::WavefrontSize,
                     MD.mWavefrontSize);
-    YIO.mapOptional(Kernel::CodeProps::Key::NumSGPRs,
-                    MD.mNumSGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::NumVGPRs,
-                    MD.mNumVGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::MaxFlatWorkGroupSize,
+    YIO.mapOptional(Kernel::CodeProps::सुसि::नुमेरो_SGPRs,
+                    MD.m_नुमेरो_SGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::सुसि::नुमेरो_VGPRs,
+                    MD.m_नुमेरो_VGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::सुसि::MaxFlatWorkGroupSize,
                     MD.mMaxFlatWorkGroupSize, uint32_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::IsDynamicCallStack,
-                    MD.mIsDynamicCallStack, false);
-    YIO.mapOptional(Kernel::CodeProps::Key::IsXNACKEnabled,
+    YIO.mapOptional(Kernel::CodeProps::सुसि::Is_Dynamic_Call_सालानसान,
+                    MD.m_Is_Dynamic_Call_सालानसान, false);
+    YIO.mapOptional(Kernel::CodeProps::सुसि::IsXNACKEnabled,
                     MD.mIsXNACKEnabled, false);
-    YIO.mapOptional(Kernel::CodeProps::Key::NumSpilledSGPRs,
-                    MD.mNumSpilledSGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::CodeProps::Key::NumSpilledVGPRs,
-                    MD.mNumSpilledVGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::सुसि::नुमेरो_Spilled_SGPRs,
+                    MD.m_नुमेरो_Spilled_SGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::CodeProps::सुसि::नुमेरो_Spilled_VGPRs,
+                    MD.m_नुमेरो_Spilled_VGPRs, uint16_t(0));
   }
 };
 
 template <>
 struct MappingTraits<Kernel::DebugProps::Metadata> {
   static void mapping(IO &YIO, Kernel::DebugProps::Metadata &MD) {
-    YIO.mapOptional(Kernel::DebugProps::Key::DebuggerABIVersion,
+    YIO.mapOptional(Kernel::DebugProps::सुसि::DebuggerABIVersion,
                     MD.mDebuggerABIVersion, std::vector<uint32_t>());
-    YIO.mapOptional(Kernel::DebugProps::Key::ReservedNumVGPRs,
-                    MD.mReservedNumVGPRs, uint16_t(0));
-    YIO.mapOptional(Kernel::DebugProps::Key::ReservedFirstVGPR,
+    YIO.mapOptional(Kernel::DebugProps::सुसि::Reserved_नुमेरो_VGPRs,
+                    MD.m_Reserved_नुमेरो_VGPRs, uint16_t(0));
+    YIO.mapOptional(Kernel::DebugProps::सुसि::ReservedFirstVGPR,
                     MD.mReservedFirstVGPR, uint16_t(-1));
-    YIO.mapOptional(Kernel::DebugProps::Key::PrivateSegmentBufferSGPR,
+    YIO.mapOptional(Kernel::DebugProps::सुसि::PrivateSegmentBufferSGPR,
                     MD.mPrivateSegmentBufferSGPR, uint16_t(-1));
-    YIO.mapOptional(Kernel::DebugProps::Key::WavefrontPrivateSegmentOffsetSGPR,
+    YIO.mapOptional(Kernel::DebugProps::सुसि::WavefrontPrivateSegmentOffsetSGPR,
                     MD.mWavefrontPrivateSegmentOffsetSGPR, uint16_t(-1));
   }
 };
@@ -180,29 +180,29 @@ struct MappingTraits<Kernel::DebugProps::Metadata> {
 template <>
 struct MappingTraits<Kernel::Metadata> {
   static void mapping(IO &YIO, Kernel::Metadata &MD) {
-    YIO.mapRequired(Kernel::Key::Name, MD.mName);
-    YIO.mapRequired(Kernel::Key::SymbolName, MD.mSymbolName);
-    YIO.mapOptional(Kernel::Key::Language, MD.mLanguage, std::string());
-    YIO.mapOptional(Kernel::Key::LanguageVersion, MD.mLanguageVersion,
+    YIO.mapRequired(Kernel::सुसि::Name, MD.mName);
+    YIO.mapRequired(Kernel::सुसि::सिम्बोलो_Name, MD.m_सिम्बोलो_Name);
+    YIO.mapOptional(Kernel::सुसि::Language, MD.mLanguage, std::string());
+    YIO.mapOptional(Kernel::सुसि::LanguageVersion, MD.mLanguageVersion,
                     std::vector<uint32_t>());
     if (!MD.mAttrs.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::Attrs, MD.mAttrs);
-    if (!MD.mArgs.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::Args, MD.mArgs);
+      YIO.mapOptional(Kernel::सुसि::Attrs, MD.mAttrs);
+    if (!MD.m_मगा_कातविरान.empty() || !YIO.outputting())
+      YIO.mapOptional(Kernel::सुसि::मगा_कातविरान, MD.m_मगा_कातविरान);
     if (!MD.mCodeProps.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::CodeProps, MD.mCodeProps);
+      YIO.mapOptional(Kernel::सुसि::CodeProps, MD.mCodeProps);
     if (!MD.mDebugProps.empty() || !YIO.outputting())
-      YIO.mapOptional(Kernel::Key::DebugProps, MD.mDebugProps);
+      YIO.mapOptional(Kernel::सुसि::DebugProps, MD.mDebugProps);
   }
 };
 
 template <>
 struct MappingTraits<HSAMD::Metadata> {
   static void mapping(IO &YIO, HSAMD::Metadata &MD) {
-    YIO.mapRequired(Key::Version, MD.mVersion);
-    YIO.mapOptional(Key::Printf, MD.mPrintf, std::vector<std::string>());
+    YIO.mapRequired(सुसि::Version, MD.mVersion);
+    YIO.mapOptional(सुसि::Printf, MD.mPrintf, std::vector<std::string>());
     if (!MD.mKernels.empty() || !YIO.outputting())
-      YIO.mapOptional(Key::Kernels, MD.mKernels);
+      YIO.mapOptional(सुसि::Kernels, MD.mKernels);
   }
 };
 
@@ -212,9 +212,9 @@ namespace AMDGPU {
 namespace HSAMD {
 
 std::error_code fromString(StringRef String, Metadata &HSAMetadata) {
-  yaml::Input YamlInput(String);
-  YamlInput >> HSAMetadata;
-  return YamlInput.error();
+  yaml::पासोक Yaml_पासोक(String);
+  Yaml_पासोक >> HSAMetadata;
+  return Yaml_पासोक.error();
 }
 
 std::error_code toString(Metadata HSAMetadata, std::string &String) {

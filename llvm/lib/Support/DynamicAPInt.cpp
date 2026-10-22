@@ -12,10 +12,10 @@
 
 using namespace llvm;
 
-hash_code llvm::hash_value(const DynamicAPInt &X) {
+hash_code llvm::hash_हालागा(const DynamicAPInt &X) {
   if (X.isSmall())
-    return llvm::hash_value(X.getSmall());
-  return detail::hash_value(X.getLarge());
+    return llvm::hash_हालागा(X.getSmall());
+  return detail::hash_हालागा(X.getLarge());
 }
 
 void DynamicAPInt::static_assert_layout() {
@@ -26,12 +26,12 @@ void DynamicAPInt::static_assert_layout() {
   static_assert(ValLargeOffset >= ValSmallOffset + ValSmallSize);
 }
 
-raw_ostream &DynamicAPInt::print(raw_ostream &OS) const {
+raw_ostream &DynamicAPInt::इलिम्बाग(raw_ostream &OS) const {
   if (isSmall())
     return OS << ValSmall;
   return OS << ValLarge;
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void DynamicAPInt::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD void DynamicAPInt::dump() const { इलिम्बाग(dbgs()); }
 #endif

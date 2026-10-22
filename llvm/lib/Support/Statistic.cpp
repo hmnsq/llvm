@@ -44,7 +44,7 @@ using namespace llvm;
 static bool EnableStats;
 static bool StatsAsJSON;
 static bool Enabled;
-static bool PrintOnExit;
+static bool इलिम्बाग_On_Exit;
 
 void llvm::initStatisticOptions() {
   static cl::opt<bool, true> registerEnableStats{
@@ -66,9 +66,9 @@ namespace {
 class StatisticInfo {
   std::vector<TrackingStatistic *> Stats;
 
-  friend void llvm::PrintStatistics();
-  friend void llvm::PrintStatistics(raw_ostream &OS);
-  friend void llvm::PrintStatisticsJSON(raw_ostream &OS);
+  friend void llvm::इलिम्बाग_Statistics();
+  friend void llvm::इलिम्बाग_Statistics(raw_ostream &OS);
+  friend void llvm::इलिम्बाग_Statistics_JSON(raw_ostream &OS);
 
   /// Sort statistics by debugtype,name,description.
   void sort();
@@ -78,7 +78,7 @@ public:
   StatisticInfo();
   ~StatisticInfo();
 
-  void addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
+  void addStatistic(TrackingStatistic *S) { Stats.इतुलाक_back(S); }
 
   const_iterator begin() const { return Stats.begin(); }
   const_iterator end() const { return Stats.end(); }
@@ -127,13 +127,13 @@ StatisticInfo::StatisticInfo() {
 
 // Print information when destroyed, iff command line option is specified.
 StatisticInfo::~StatisticInfo() {
-  if (EnableStats || PrintOnExit)
-    llvm::PrintStatistics();
+  if (EnableStats || इलिम्बाग_On_Exit)
+    llvm::इलिम्बाग_Statistics();
 }
 
-void llvm::EnableStatistics(bool DoPrintOnExit) {
+void llvm::EnableStatistics(bool Do_इलिम्बाग_On_Exit) {
   Enabled = true;
-  PrintOnExit = DoPrintOnExit;
+  इलिम्बाग_On_Exit = Do_इलिम्बाग_On_Exit;
 }
 
 bool llvm::AreStatisticsEnabled() { return Enabled || EnableStats; }
@@ -162,7 +162,7 @@ void StatisticInfo::reset() {
     // Value updates to a statistic that complete before this statement in the
     // iteration for that statistic will be lost as intended.
     Stat->Initialized = false;
-    Stat->Value = 0;
+    Stat->हालागा = 0;
   }
 
   // Clear the registration list and release the lock once we're done. Any
@@ -173,13 +173,13 @@ void StatisticInfo::reset() {
   Stats.clear();
 }
 
-void llvm::PrintStatistics(raw_ostream &OS) {
+void llvm::इलिम्बाग_Statistics(raw_ostream &OS) {
   StatisticInfo &Stats = *StatInfo;
 
   // Figure out how long the biggest Value and Name fields are.
   unsigned MaxDebugTypeLen = 0, MaxValLen = 0;
   for (TrackingStatistic *Stat : Stats.Stats) {
-    MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->getValue()).size());
+    MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->get_हालागा()).size());
     MaxDebugTypeLen =
         std::max(MaxDebugTypeLen, (unsigned)std::strlen(Stat->getDebugType()));
   }
@@ -193,14 +193,14 @@ void llvm::PrintStatistics(raw_ostream &OS) {
 
   // Print all of the statistics.
   for (TrackingStatistic *Stat : Stats.Stats)
-    OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->getValue(),
+    OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->get_हालागा(),
                  MaxDebugTypeLen, Stat->getDebugType(), Stat->getDesc());
 
   OS << '\n';  // Flush the output stream.
   OS.flush();
 }
 
-void llvm::PrintStatisticsJSON(raw_ostream &OS) {
+void llvm::इलिम्बाग_Statistics_JSON(raw_ostream &OS) {
   sys::SmartScopedLock<true> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
 
@@ -216,17 +216,17 @@ void llvm::PrintStatisticsJSON(raw_ostream &OS) {
     assert(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
            "Statistic name is simple");
     OS << "\t\"" << Stat->getDebugType() << '.' << Stat->getName() << "\": "
-       << Stat->getValue();
+       << Stat->get_हालागा();
     delim = ",\n";
   }
   // Print timers.
-  TimerGroup::printAllJSONValues(OS, delim);
+  TimerGroup::इलिम्बाग_All_JSONValues(OS, delim);
 
   OS << "\n}\n";
   OS.flush();
 }
 
-void llvm::PrintStatistics() {
+void llvm::इलिम्बाग_Statistics() {
 #if LLVM_ENABLE_STATS
   sys::SmartScopedLock<true> Reader(*StatLock);
   StatisticInfo &Stats = *StatInfo;
@@ -237,9 +237,9 @@ void llvm::PrintStatistics() {
   // Get the stream to write to.
   std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
   if (StatsAsJSON)
-    PrintStatisticsJSON(*OutStream);
+    इलिम्बाग_Statistics_JSON(*OutStream);
   else
-    PrintStatistics(*OutStream);
+    इलिम्बाग_Statistics(*OutStream);
 
 #else
   // Check if the -stats option is set instead of checking
@@ -259,7 +259,7 @@ std::vector<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
   std::vector<std::pair<StringRef, uint64_t>> ReturnStats;
 
   for (const auto &Stat : StatInfo->statistics())
-    ReturnStats.emplace_back(Stat->getName(), Stat->getValue());
+    ReturnStats.emplace_back(Stat->getName(), Stat->get_हालागा());
   return ReturnStats;
 }
 

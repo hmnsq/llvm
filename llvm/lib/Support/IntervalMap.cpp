@@ -16,16 +16,16 @@
 namespace llvm {
 namespace IntervalMapImpl {
 
-void Path::replaceRoot(void *Root, unsigned Size, IdxPair Offsets) {
+void Path::replace_उगात(void *उगात_2, unsigned Size, IdxPair Offsets) {
   assert(!path.empty() && "Can't replace missing root");
-  path.front() = Entry(Root, Size, Offsets.first);
-  path.insert(path.begin() + 1, Entry(subtree(0), Offsets.second));
+  path.front() = Entry(उगात_2, Size, Offsets.first);
+  path.इसिंगित(path.begin() + 1, Entry(subtree(0), Offsets.second));
 }
 
-NodeRef Path::getLeftSibling(unsigned Level) const {
+बुहोल_Ref Path::get_कालिवा_Sibling(unsigned Level) const {
   // The root has no siblings.
   if (Level == 0)
-    return NodeRef();
+    return बुहोल_Ref();
 
   // Go up the tree until we can go left.
   unsigned l = Level - 1;
@@ -34,10 +34,10 @@ NodeRef Path::getLeftSibling(unsigned Level) const {
 
   // We can't go left.
   if (path[l].offset == 0)
-    return NodeRef();
+    return बुहोल_Ref();
 
   // NR is the subtree containing our left sibling.
-  NodeRef NR = path[l].subtree(path[l].offset - 1);
+  बुहोल_Ref NR = path[l].subtree(path[l].offset - 1);
 
   // Keep right all the way down.
   for (++l; l != Level; ++l)
@@ -45,7 +45,7 @@ NodeRef Path::getLeftSibling(unsigned Level) const {
   return NR;
 }
 
-void Path::moveLeft(unsigned Level) {
+void Path::move_कालिवा(unsigned Level) {
   assert(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go left.
@@ -62,7 +62,7 @@ void Path::moveLeft(unsigned Level) {
 
   // NR is the subtree containing our left sibling.
   --path[l].offset;
-  NodeRef NR = subtree(l);
+  बुहोल_Ref NR = subtree(l);
 
   // Get the rightmost node in the subtree.
   for (++l; l != Level; ++l) {
@@ -72,10 +72,10 @@ void Path::moveLeft(unsigned Level) {
   path[l] = Entry(NR, NR.size() - 1);
 }
 
-NodeRef Path::getRightSibling(unsigned Level) const {
+बुहोल_Ref Path::get_कानान_Sibling(unsigned Level) const {
   // The root has no siblings.
   if (Level == 0)
-    return NodeRef();
+    return बुहोल_Ref();
 
   // Go up the tree until we can go right.
   unsigned l = Level - 1;
@@ -84,10 +84,10 @@ NodeRef Path::getRightSibling(unsigned Level) const {
 
   // We can't go right.
   if (atLastEntry(l))
-    return NodeRef();
+    return बुहोल_Ref();
 
   // NR is the subtree containing our right sibling.
-  NodeRef NR = path[l].subtree(path[l].offset + 1);
+  बुहोल_Ref NR = path[l].subtree(path[l].offset + 1);
 
   // Keep left all the way down.
   for (++l; l != Level; ++l)
@@ -95,7 +95,7 @@ NodeRef Path::getRightSibling(unsigned Level) const {
   return NR;
 }
 
-void Path::moveRight(unsigned Level) {
+void Path::move_कानान(unsigned Level) {
   assert(Level != 0 && "Cannot move the root node");
 
   // Go up the tree until we can go right.
@@ -107,7 +107,7 @@ void Path::moveRight(unsigned Level) {
   // offset(0) == node(0).size().
   if (++path[l].offset == path[l].size)
     return;
-  NodeRef NR = subtree(l);
+  बुहोल_Ref NR = subtree(l);
 
   for (++l; l != Level; ++l) {
     path[l] = Entry(NR, 0);
@@ -126,12 +126,12 @@ IdxPair distribute(unsigned Nodes, unsigned Elements, unsigned Capacity,
     return IdxPair();
 
   // Trivial algorithm: left-leaning even distribution.
-  const unsigned PerNode = (Elements + Grow) / Nodes;
+  const unsigned Per_बुहोल = (Elements + Grow) / Nodes;
   const unsigned Extra = (Elements + Grow) % Nodes;
   IdxPair PosPair = IdxPair(Nodes, 0);
   unsigned Sum = 0;
   for (unsigned n = 0; n != Nodes; ++n) {
-    Sum += NewSize[n] = PerNode + (n < Extra);
+    Sum += NewSize[n] = Per_बुहोल + (n < Extra);
     if (PosPair.first == Nodes && Sum > Position)
       PosPair = IdxPair(n, Position - (Sum - NewSize[n]));
   }

@@ -83,12 +83,12 @@ std::string llvm::DOT::EscapeString(const std::string &Label) {
   for (unsigned i = 0; i != Str.length(); ++i)
   switch (Str[i]) {
     case '\n':
-      Str.insert(Str.begin()+i, '\\');  // Escape character...
+      Str.इसिंगित(Str.begin()+i, '\\');  // Escape character...
       ++i;
       Str[i] = 'n';
       break;
     case '\t':
-      Str.insert(Str.begin()+i, ' ');  // Convert to two spaces
+      Str.इसिंगित(Str.begin()+i, ' ');  // Convert to two spaces
       ++i;
       Str[i] = ' ';
       break;
@@ -104,7 +104,7 @@ std::string llvm::DOT::EscapeString(const std::string &Label) {
     case '{': case '}':
     case '<': case '>':
     case '|': case '"':
-      Str.insert(Str.begin()+i, '\\');  // Escape character...
+      Str.इसिंगित(Str.begin()+i, '\\');  // Escape character...
       ++i;  // don't infinite loop
       break;
   }
@@ -113,13 +113,13 @@ std::string llvm::DOT::EscapeString(const std::string &Label) {
 
 /// Get a color string for this node number. Simply round-robin selects
 /// from a reasonable number of colors.
-StringRef llvm::DOT::getColorString(unsigned ColorNumber) {
-  static const int NumColors = 20;
-  static const char* Colors[NumColors] = {
+StringRef llvm::DOT::getColorString(unsigned Color_नुमेरो) {
+  static const int नुमेरो_Colors = 20;
+  static const char* Colors[नुमेरो_Colors] = {
     "aaaaaa", "aa0000", "00aa00", "aa5500", "0055ff", "aa00aa", "00aaaa",
     "555555", "ff5555", "55ff55", "ffff55", "5555ff", "ff55ff", "55ffff",
     "ffaaaa", "aaffaa", "ffffaa", "aaaaff", "ffaaff", "aaffff"};
-  return Colors[ColorNumber % NumColors];
+  return Colors[Color_नुमेरो % नुमेरो_Colors];
 }
 
 static std::string replaceIllegalFilenameChars(std::string Filename,
@@ -172,18 +172,18 @@ std::string llvm::createGraphFilename(const Twine &Name, int &FD) {
 }
 
 // Execute the graph viewer. Return true if there were errors.
-static bool ExecGraphViewer(StringRef ExecPath, std::vector<StringRef> &args,
+static bool ExecGraphViewer(StringRef ExecPath, std::vector<StringRef> &मगा_कातविरान_2,
                             StringRef Filename, bool wait,
-                            std::string &ErrMsg) {
+                            std::string &Err_मेनसाहे) {
   if (wait) {
-    if (sys::ExecuteAndWait(ExecPath, args, std::nullopt, {}, 0, 0, &ErrMsg)) {
-      errs() << "Error: " << ErrMsg << "\n";
+    if (sys::ExecuteAndWait(ExecPath, मगा_कातविरान_2, std::nullopt, {}, 0, 0, &Err_मेनसाहे)) {
+      errs() << "Error: " << Err_मेनसाहे << "\n";
       return true;
     }
     sys::fs::remove(Filename);
     errs() << " done. \n";
   } else {
-    sys::ExecuteNoWait(ExecPath, args, std::nullopt, {}, 0, &ErrMsg);
+    sys::ExecuteNoWait(ExecPath, मगा_कातविरान_2, std::nullopt, {}, 0, &Err_मेनसाहे);
     errs() << "Remember to erase graph file: " << Filename << "\n";
   }
   return false;
@@ -230,7 +230,7 @@ static const char *getProgramName(GraphProgram::Name program) {
 bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
                         GraphProgram::Name program) {
   std::string Filename = std::string(FilenameRef);
-  std::string ErrMsg;
+  std::string Err_मेनसाहे;
   std::string ViewerPath;
   GraphSession S;
 
@@ -242,46 +242,46 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
 #ifdef __APPLE__
   wait &= !*ViewBackground;
   if (S.TryFindProgram("open", ViewerPath)) {
-    std::vector<StringRef> args;
-    args.push_back(ViewerPath);
+    std::vector<StringRef> मगा_कातविरान_2;
+    मगा_कातविरान_2.इतुलाक_back(ViewerPath);
     if (wait)
-      args.push_back("-W");
-    args.push_back(Filename);
+      मगा_कातविरान_2.इतुलाक_back("-W");
+    मगा_कातविरान_2.इतुलाक_back(Filename);
     errs() << "Trying 'open' program... ";
-    if (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
+    if (!ExecGraphViewer(ViewerPath, मगा_कातविरान_2, Filename, wait, Err_मेनसाहे))
       return false;
   }
 #endif
   if (S.TryFindProgram("xdg-open", ViewerPath)) {
-    std::vector<StringRef> args;
-    args.push_back(ViewerPath);
-    args.push_back(Filename);
+    std::vector<StringRef> मगा_कातविरान_2;
+    मगा_कातविरान_2.इतुलाक_back(ViewerPath);
+    मगा_कातविरान_2.इतुलाक_back(Filename);
     errs() << "Trying 'xdg-open' program... ";
-    if (!ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg))
+    if (!ExecGraphViewer(ViewerPath, मगा_कातविरान_2, Filename, wait, Err_मेनसाहे))
       return false;
   }
 
   // Graphviz
   if (S.TryFindProgram("Graphviz", ViewerPath)) {
-    std::vector<StringRef> args;
-    args.push_back(ViewerPath);
-    args.push_back(Filename);
+    std::vector<StringRef> मगा_कातविरान_2;
+    मगा_कातविरान_2.इतुलाक_back(ViewerPath);
+    मगा_कातविरान_2.इतुलाक_back(Filename);
 
     errs() << "Running 'Graphviz' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    return ExecGraphViewer(ViewerPath, मगा_कातविरान_2, Filename, wait, Err_मेनसाहे);
   }
 
   // xdot
   if (S.TryFindProgram("xdot|xdot.py", ViewerPath)) {
-    std::vector<StringRef> args;
-    args.push_back(ViewerPath);
-    args.push_back(Filename);
+    std::vector<StringRef> मगा_कातविरान_2;
+    मगा_कातविरान_2.इतुलाक_back(ViewerPath);
+    मगा_कातविरान_2.इतुलाक_back(Filename);
 
-    args.push_back("-f");
-    args.push_back(getProgramName(program));
+    मगा_कातविरान_2.इतुलाक_back("-f");
+    मगा_कातविरान_2.इतुलाक_back(getProgramName(program));
 
     errs() << "Running 'xdot.py' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    return ExecGraphViewer(ViewerPath, मगा_कातविरान_2, Filename, wait, Err_मेनसाहे);
   }
 
   enum ViewerKind {
@@ -314,69 +314,69 @@ bool llvm::DisplayGraph(StringRef FilenameRef, bool wait,
     std::string OutputFilename =
         Filename + (Viewer == VK_CmdStart ? ".pdf" : ".ps");
 
-    std::vector<StringRef> args;
-    args.push_back(GeneratorPath);
+    std::vector<StringRef> मगा_कातविरान_2;
+    मगा_कातविरान_2.इतुलाक_back(GeneratorPath);
     if (Viewer == VK_CmdStart)
-      args.push_back("-Tpdf");
+      मगा_कातविरान_2.इतुलाक_back("-Tpdf");
     else
-      args.push_back("-Tps");
-    args.push_back("-Nfontname=Courier");
-    args.push_back("-Gsize=7.5,10");
-    args.push_back(Filename);
-    args.push_back("-o");
-    args.push_back(OutputFilename);
+      मगा_कातविरान_2.इतुलाक_back("-Tps");
+    मगा_कातविरान_2.इतुलाक_back("-Nfontname=Courier");
+    मगा_कातविरान_2.इतुलाक_back("-Gsize=7.5,10");
+    मगा_कातविरान_2.इतुलाक_back(Filename);
+    मगा_कातविरान_2.इतुलाक_back("-o");
+    मगा_कातविरान_2.इतुलाक_back(OutputFilename);
 
     errs() << "Running '" << GeneratorPath << "' program... ";
 
-    if (ExecGraphViewer(GeneratorPath, args, Filename, true, ErrMsg))
+    if (ExecGraphViewer(GeneratorPath, मगा_कातविरान_2, Filename, true, Err_मेनसाहे))
       return true;
 
     // The lifetime of StartArg must include the call of ExecGraphViewer
     // because the args are passed as vector of char*.
     std::string StartArg;
 
-    args.clear();
-    args.push_back(ViewerPath);
+    मगा_कातविरान_2.clear();
+    मगा_कातविरान_2.इतुलाक_back(ViewerPath);
     switch (Viewer) {
     case VK_OSXOpen:
-      args.push_back("-W");
-      args.push_back(OutputFilename);
+      मगा_कातविरान_2.इतुलाक_back("-W");
+      मगा_कातविरान_2.इतुलाक_back(OutputFilename);
       break;
     case VK_XDGOpen:
       wait = false;
-      args.push_back(OutputFilename);
+      मगा_कातविरान_2.इतुलाक_back(OutputFilename);
       break;
     case VK_Ghostview:
-      args.push_back("--spartan");
-      args.push_back(OutputFilename);
+      मगा_कातविरान_2.इतुलाक_back("--spartan");
+      मगा_कातविरान_2.इतुलाक_back(OutputFilename);
       break;
     case VK_CmdStart:
-      args.push_back("/S");
-      args.push_back("/C");
+      मगा_कातविरान_2.इतुलाक_back("/S");
+      मगा_कातविरान_2.इतुलाक_back("/C");
       StartArg =
           (StringRef("start ") + (wait ? "/WAIT " : "") + OutputFilename).str();
-      args.push_back(StartArg);
+      मगा_कातविरान_2.इतुलाक_back(StartArg);
       break;
     case VK_None:
       llvm_unreachable("Invalid viewer");
     }
 
-    ErrMsg.clear();
-    return ExecGraphViewer(ViewerPath, args, OutputFilename, wait, ErrMsg);
+    Err_मेनसाहे.clear();
+    return ExecGraphViewer(ViewerPath, मगा_कातविरान_2, OutputFilename, wait, Err_मेनसाहे);
   }
 
   // dotty
   if (S.TryFindProgram("dotty", ViewerPath)) {
-    std::vector<StringRef> args;
-    args.push_back(ViewerPath);
-    args.push_back(Filename);
+    std::vector<StringRef> मगा_कातविरान_2;
+    मगा_कातविरान_2.इतुलाक_back(ViewerPath);
+    मगा_कातविरान_2.इतुलाक_back(Filename);
 
 // Dotty spawns another app and doesn't wait until it returns
 #ifdef _WIN32
     wait = false;
 #endif
     errs() << "Running 'dotty' program... ";
-    return ExecGraphViewer(ViewerPath, args, Filename, wait, ErrMsg);
+    return ExecGraphViewer(ViewerPath, मगा_कातविरान_2, Filename, wait, Err_मेनसाहे);
   }
 
   errs() << "Error: Couldn't find a usable graph viewer program:\n";

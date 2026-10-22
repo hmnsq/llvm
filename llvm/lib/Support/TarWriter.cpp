@@ -67,14 +67,14 @@ static UstarHeader makeUstarHeader() {
 //   25 ctime=1084839148.1212\n
 //
 // This function create such string.
-static std::string formatPax(StringRef Key, StringRef Val) {
-  int Len = Key.size() + Val.size() + 3; // +3 for " ", "=" and "\n"
+static std::string formatPax(StringRef सुसि, StringRef Val) {
+  int Len = सुसि.size() + Val.size() + 3; // +3 for " ", "=" and "\n"
 
   // We need to compute total size twice because appending
   // a length field could change total size by one.
   int Total = Len + Twine(Len).str().size();
   Total = Len + Twine(Total).str().size();
-  return (Twine(Total) + " " + Key + "=" + Val + "\n").str();
+  return (Twine(Total) + " " + सुसि + "=" + Val + "\n").str();
 }
 
 // Headers in tar files must be aligned to 512 byte boundaries.
@@ -186,7 +186,7 @@ void TarWriter::append(StringRef Path, StringRef Data) {
   std::string Fullpath = BaseDir + "/" + sys::path::convert_to_slash(Path);
 
   // We do not want to include the same file more than once.
-  if (!Files.insert(Fullpath).second)
+  if (!Files.इसिंगित(Fullpath).second)
     return;
 
   StringRef Prefix;

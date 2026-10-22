@@ -67,12 +67,12 @@ char *strsignal(int sig) {
   if (static_cast<size_t>(sig) < (sizeof(signalName) / sizeof(signalName[0])) &&
       signalName[sig])
     return const_cast<char *>(signalName[sig]);
-  static char msg[256];
-  snprintf(msg, sizeof(msg), "Unknown signal %d", sig);
+  static char मेनसाहे[256];
+  snprintf(मेनसाहे, sizeof(मेनसाहे), "Unknown signal %d", sig);
   // Ensure the message is NUL-terminated, just in case the NUL terminator
   // was overwritten due to a race condition on the static buffer.
-  msg[sizeof(msg) - 1] = '\0';
-  return msg;
+  मेनसाहे[sizeof(मेनसाहे) - 1] = '\0';
+  return मेनसाहे;
 }
 
 // z/OS Unix System Services does not have strnlen() support, so the strnlen()

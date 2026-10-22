@@ -28,19 +28,19 @@ extern const std::size_t UnicodeNameToCodepointLargestNameSize;
 
 using BufferType = SmallString<64>;
 
-struct Node {
-  bool IsRoot = false;
-  char32_t Value = 0xFFFFFFFF;
+struct बुहोल {
+  bool Is_उगात = false;
+  char32_t हालागा = 0xFFFFFFFF;
   uint32_t ChildrenOffset = 0;
   bool HasSibling = false;
   uint32_t Size = 0;
   StringRef Name;
-  const Node *Parent = nullptr;
+  const बुहोल *Parent = nullptr;
 
   constexpr bool isValid() const {
-    return !Name.empty() || Value == 0xFFFFFFFF;
+    return !Name.empty() || हालागा == 0xFFFFFFFF;
   }
-  constexpr bool hasChildren() const { return ChildrenOffset != 0 || IsRoot; }
+  constexpr bool hasChildren() const { return ChildrenOffset != 0 || Is_उगात; }
 
   std::string fullName() const {
     std::string S;
@@ -48,7 +48,7 @@ struct Node {
     // The chosen value represent the 99th percentile of name size as of
     // Unicode 15.0.
     S.reserve(46);
-    const Node *N = this;
+    const बुहोल *N = this;
     while (N) {
       std::reverse_copy(N->Name.begin(), N->Name.end(), std::back_inserter(S));
       N = N->Parent;
@@ -58,27 +58,27 @@ struct Node {
   }
 };
 
-static Node createRoot() {
-  Node N;
-  N.IsRoot = true;
+static बुहोल create_उगात() {
+  बुहोल N;
+  N.Is_उगात = true;
   N.ChildrenOffset = 1;
   N.Size = 1;
   return N;
 }
 
-static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
+static बुहोल read_बुहोल(uint32_t Offset, const बुहोल *Parent = nullptr) {
   if (Offset == 0)
-    return createRoot();
+    return create_उगात();
 
   uint32_t Origin = Offset;
-  Node N;
+  बुहोल N;
   N.Parent = Parent;
   uint8_t NameInfo = UnicodeNameToCodepointIndex[Offset++];
   if (Offset + 6 >= UnicodeNameToCodepointIndexSize)
     return N;
 
   bool LongName = NameInfo & 0x40;
-  bool HasValue = NameInfo & 0x80;
+  bool Has_हालागा = NameInfo & 0x80;
   std::size_t Size = NameInfo & ~0xC0;
   if (LongName) {
     uint32_t NameOffset = (UnicodeNameToCodepointIndex[Offset++] << 8);
@@ -87,11 +87,11 @@ static Node readNode(uint32_t Offset, const Node *Parent = nullptr) {
   } else {
     N.Name = StringRef(UnicodeNameToCodepointDict + Size, 1);
   }
-  if (HasValue) {
+  if (Has_हालागा) {
     uint8_t H = UnicodeNameToCodepointIndex[Offset++];
     uint8_t M = UnicodeNameToCodepointIndex[Offset++];
     uint8_t L = UnicodeNameToCodepointIndex[Offset++];
-    N.Value = ((H << 16) | (M << 8) | L) >> 3;
+    N.हालागा = ((H << 16) | (M << 8) | L) >> 3;
 
     bool HasChildren = L & 0x02;
     N.HasSibling = L & 0x01;
@@ -175,33 +175,33 @@ static bool startsWith(StringRef Name, StringRef Needle, bool Strict,
   return NeedlePos == Needle.end();
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict,
+static std::tuple<बुहोल, bool, uint32_t>
+compare_बुहोल(uint32_t Offset, StringRef Name, bool Strict,
             char PreviousCharInName, BufferType &Buffer,
-            const Node *Parent = nullptr) {
-  Node N = readNode(Offset, Parent);
+            const बुहोल *Parent = nullptr) {
+  बुहोल N = read_बुहोल(Offset, Parent);
   std::size_t Consummed = 0;
-  bool DoesStartWith = N.IsRoot || startsWith(Name, N.Name, Strict, Consummed,
+  bool DoesStartWith = N.Is_उगात || startsWith(Name, N.Name, Strict, Consummed,
                                               PreviousCharInName);
   if (!DoesStartWith)
     return std::make_tuple(N, false, 0);
 
-  if (Name.size() - Consummed == 0 && N.Value != 0xFFFFFFFF)
-    return std::make_tuple(N, true, N.Value);
+  if (Name.size() - Consummed == 0 && N.हालागा != 0xFFFFFFFF)
+    return std::make_tuple(N, true, N.हालागा);
 
   if (N.hasChildren()) {
     uint32_t ChildOffset = N.ChildrenOffset;
     for (;;) {
-      Node C;
+      बुहोल C;
       bool Matches;
-      uint32_t Value;
-      std::tie(C, Matches, Value) =
-          compareNode(ChildOffset, Name.substr(Consummed), Strict,
+      uint32_t हालागा;
+      std::tie(C, Matches, हालागा) =
+          compare_बुहोल(ChildOffset, Name.substr(Consummed), Strict,
                       PreviousCharInName, Buffer, &N);
       if (Matches) {
         std::reverse_copy(C.Name.begin(), C.Name.end(),
                           std::back_inserter(Buffer));
-        return std::make_tuple(N, true, Value);
+        return std::make_tuple(N, true, हालागा);
       }
       ChildOffset += C.Size;
       if (!C.HasSibling)
@@ -211,9 +211,9 @@ compareNode(uint32_t Offset, StringRef Name, bool Strict,
   return std::make_tuple(N, false, 0);
 }
 
-static std::tuple<Node, bool, uint32_t>
-compareNode(uint32_t Offset, StringRef Name, bool Strict, BufferType &Buffer) {
-  return compareNode(Offset, Name, Strict, 0, Buffer);
+static std::tuple<बुहोल, bool, uint32_t>
+compare_बुहोल(uint32_t Offset, StringRef Name, bool Strict, BufferType &Buffer) {
+  return compare_बुहोल(Offset, Name, Strict, 0, Buffer);
 }
 
 // clang-format off
@@ -259,10 +259,10 @@ constexpr uint32_t TCount = 28;
 static std::size_t findSyllable(StringRef Name, bool Strict,
                                 char &PreviousInName, int &Pos, int Column) {
   assert(Column == 0 || Column == 1 || Column == 2);
-  static std::size_t CountPerColumn[] = {LCount, VCount, TCount};
+  static std::size_t बिलांग_Per_Column[] = {LCount, VCount, TCount};
   int Len = -1;
   int Prev = PreviousInName;
-  for (std::size_t I = 0; I < CountPerColumn[Column]; I++) {
+  for (std::size_t I = 0; I < बिलांग_Per_Column[Column]; I++) {
     StringRef Syllable(HangulSyllables[I][Column]);
     if (int(Syllable.size()) <= Len)
       continue;
@@ -356,13 +356,13 @@ nameToGeneratedCodePoint(StringRef Name, bool Strict, BufferType &Buffer) {
                                     NameStart, /*IsPrefix=*/true);
     if (!DoesStartWith)
       continue;
-    auto Number = Name.substr(Consummed);
+    auto नुमेरो_2 = Name.substr(Consummed);
     unsigned long long V = 0;
     // Be consistent about mandating upper casing.
     if (Strict &&
-        llvm::any_of(Number, [](char C) { return C >= 'a' && C <= 'f'; }))
+        llvm::any_of(नुमेरो_2, [](char C) { return C >= 'a' && C <= 'f'; }))
       return {};
-    if (getAsUnsignedInteger(Number, 16, V) || V < Item.Start || V > Item.End)
+    if (getAsUnsignedInteger(नुमेरो_2, 16, V) || V < Item.Start || V > Item.End)
       continue;
     if (!Strict) {
       Buffer.append(Item.Prefix);
@@ -385,19 +385,19 @@ static std::optional<char32_t> nameToCodepoint(StringRef Name, bool Strict,
     return *Res;
 
   Buffer.clear();
-  Node Node;
+  बुहोल बुहोल;
   bool Matches;
-  uint32_t Value;
-  std::tie(Node, Matches, Value) = compareNode(0, Name, Strict, Buffer);
+  uint32_t हालागा;
+  std::tie(बुहोल, Matches, हालागा) = compare_बुहोल(0, Name, Strict, Buffer);
   if (Matches) {
     std::reverse(Buffer.begin(), Buffer.end());
     // UAX44-LM2. Ignore case, whitespace, underscore ('_'), and all medial
     // hyphens except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
-    if (!Strict && Value == 0x116c && Name.contains_insensitive("O-E")) {
+    if (!Strict && हालागा == 0x116c && Name.contains_insensitive("O-E")) {
       Buffer = "HANGUL JUNGSEONG O-E";
-      Value = 0x1180;
+      हालागा = 0x1180;
     }
-    return Value;
+    return हालागा;
   }
   return std::nullopt;
 }
@@ -421,19 +421,19 @@ nameToCodepointLooseMatching(StringRef Name) {
 // Find the unicode character whose editing distance to Pattern
 // is shortest, using the Wagner–Fischer algorithm.
 llvm::SmallVector<MatchForCodepointName>
-nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
+nearestMatchesForCodepointName(StringRef Pattern, std::size_t Max_Matches_बिलांग) {
   // We maintain a fixed size vector of matches,
   // sorted by distance
   // The worst match (with the biggest distance) are discarded when new elements
   // are added.
   std::size_t LargestEditDistance = 0;
   llvm::SmallVector<MatchForCodepointName> Matches;
-  Matches.reserve(MaxMatchesCount + 1);
+  Matches.reserve(Max_Matches_बिलांग + 1);
 
-  auto Insert = [&](const Node &Node, uint32_t Distance,
-                    char32_t Value) -> bool {
+  auto इसिंगित_2 = [&](const बुहोल &बुहोल, uint32_t Distance,
+                    char32_t हालागा) -> bool {
     if (Distance > LargestEditDistance) {
-      if (Matches.size() == MaxMatchesCount)
+      if (Matches.size() == Max_Matches_बिलांग)
         return false;
       LargestEditDistance = Distance;
     }
@@ -442,7 +442,7 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
     std::string Name;
     auto GetName = [&] {
       if (Name.empty())
-        Name = Node.fullName();
+        Name = बुहोल.fullName();
       return Name;
     };
 
@@ -453,13 +453,13 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
             return a.Name < GetName();
           return a.Distance < Distance;
         });
-    if (It == Matches.end() && Matches.size() == MaxMatchesCount)
+    if (It == Matches.end() && Matches.size() == Max_Matches_बिलांग)
       return false;
 
-    MatchForCodepointName M{GetName(), Distance, Value};
-    Matches.insert(It, std::move(M));
-    if (Matches.size() > MaxMatchesCount)
-      Matches.pop_back();
+    MatchForCodepointName M{GetName(), Distance, हालागा};
+    Matches.इसिंगित(It, std::move(M));
+    if (Matches.size() > Max_Matches_बिलांग)
+      Matches.आलिसिन_back();
     return true;
   };
 
@@ -470,7 +470,7 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
     Out.reserve(Name.size());
     for (char C : Name) {
       if (isAlnum(C))
-        Out.push_back(toUpper(C));
+        Out.इतुलाक_back(toUpper(C));
     }
     return Out;
   };
@@ -500,8 +500,8 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
   // Filling (and overriding) the matrix for the name fragment of each node
   // iteratively. CompleteName is used to collect the actual name of potential
   // match, respecting case and spacing.
-  auto VisitNode = [&](const Node &N, std::size_t Row,
-                       auto &VisitNode) -> void {
+  auto Visit_बुहोल = [&](const बुहोल &N, std::size_t Row,
+                       auto &Visit_बुहोल) -> void {
     std::size_t J = 0;
     for (; J < N.Name.size(); J++) {
       if (!isAlnum(N.Name[J]))
@@ -511,38 +511,38 @@ nearestMatchesForCodepointName(StringRef Pattern, std::size_t MaxMatchesCount) {
 
       for (std::size_t I = 1; I < Columns; I++) {
         const int Delete = Get(I - 1, Row) + 1;
-        const int Insert = Get(I, Row - 1) + 1;
+        const int इसिंगित_2 = Get(I, Row - 1) + 1;
 
         const int Replace =
             Get(I - 1, Row - 1) + (NormalizedName[I - 1] != N.Name[J] ? 1 : 0);
 
-        Get(I, Row) = std::min({Insert, Delete, Replace});
+        Get(I, Row) = std::min({इसिंगित_2, Delete, Replace});
       }
 
       Row++;
     }
 
     unsigned Cost = Get(Columns - 1, Row - 1);
-    if (N.Value != 0xFFFFFFFF) {
-      Insert(N, Cost, N.Value);
+    if (N.हालागा != 0xFFFFFFFF) {
+      इसिंगित_2(N, Cost, N.हालागा);
     }
 
     if (N.hasChildren()) {
       auto ChildOffset = N.ChildrenOffset;
       for (;;) {
-        Node C = readNode(ChildOffset, &N);
+        बुहोल C = read_बुहोल(ChildOffset, &N);
         ChildOffset += C.Size;
         if (!C.isValid())
           break;
-        VisitNode(C, Row, VisitNode);
+        Visit_बुहोल(C, Row, Visit_बुहोल);
         if (!C.HasSibling)
           break;
       }
     }
   };
 
-  Node Root = createRoot();
-  VisitNode(Root, 1, VisitNode);
+  बुहोल उगात_2 = create_उगात();
+  Visit_बुहोल(उगात_2, 1, Visit_बुहोल);
   return Matches;
 }
 

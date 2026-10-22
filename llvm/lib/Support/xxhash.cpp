@@ -104,8 +104,8 @@ constexpr uint8_t kSecret[XXH_SECRET_DEFAULT_SIZE] = {
 };
 // clang-format on
 
-constexpr uint64_t PRIME_MX1 = 0x165667919E3779F9;
-constexpr uint64_t PRIME_MX2 = 0x9FB21C651E98DF25;
+constexpr uint64_t पांगुनाहिन_MX1 = 0x165667919E3779F9;
+constexpr uint64_t पांगुनाहिन_MX2 = 0x9FB21C651E98DF25;
 
 // Calculates a 64-bit to 128-bit multiply, then XOR folds it.
 static uint64_t XXH3_mul128_fold64(uint64_t lhs, uint64_t rhs) {
@@ -136,16 +136,16 @@ constexpr size_t XXH_ACC_NB = XXH_STRIPE_LEN / sizeof(uint64_t);
 
 static uint64_t XXH3_avalanche(uint64_t hash) {
   hash ^= hash >> 37;
-  hash *= PRIME_MX1;
+  hash *= पांगुनाहिन_MX1;
   hash ^= hash >> 32;
   return hash;
 }
 
-static uint64_t XXH3_len_1to3_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_len_1to3_64b(const uint8_t *पासोक_2, size_t len,
                                   const uint8_t *secret, uint64_t seed) {
-  const uint8_t c1 = input[0];
-  const uint8_t c2 = input[len >> 1];
-  const uint8_t c3 = input[len - 1];
+  const uint8_t c1 = पासोक_2[0];
+  const uint8_t c2 = पासोक_2[len >> 1];
+  const uint8_t c3 = पासोक_2[len - 1];
   uint32_t combined = ((uint32_t)c1 << 16) | ((uint32_t)c2 << 24) |
                       ((uint32_t)c3 << 0) | ((uint32_t)len << 8);
   uint64_t bitflip =
@@ -154,77 +154,77 @@ static uint64_t XXH3_len_1to3_64b(const uint8_t *input, size_t len,
   return XXH64_avalanche(uint64_t(combined) ^ bitflip);
 }
 
-static uint64_t XXH3_len_4to8_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_len_4to8_64b(const uint8_t *पासोक_2, size_t len,
                                   const uint8_t *secret, uint64_t seed) {
   seed ^= (uint64_t)byteswap(uint32_t(seed)) << 32;
-  const uint32_t input1 = endian::read32le(input);
-  const uint32_t input2 = endian::read32le(input + len - 4);
+  const uint32_t input1 = endian::read32le(पासोक_2);
+  const uint32_t input2 = endian::read32le(पासोक_2 + len - 4);
   uint64_t acc =
       (endian::read64le(secret + 8) ^ endian::read64le(secret + 16)) - seed;
   const uint64_t input64 = (uint64_t)input2 | ((uint64_t)input1 << 32);
   acc ^= input64;
   // XXH3_rrmxmx(acc, len)
   acc ^= rotl64(acc, 49) ^ rotl64(acc, 24);
-  acc *= PRIME_MX2;
+  acc *= पांगुनाहिन_MX2;
   acc ^= (acc >> 35) + (uint64_t)len;
-  acc *= PRIME_MX2;
+  acc *= पांगुनाहिन_MX2;
   return acc ^ (acc >> 28);
 }
 
-static uint64_t XXH3_len_9to16_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_len_9to16_64b(const uint8_t *पासोक_2, size_t len,
                                    const uint8_t *secret, uint64_t const seed) {
-  uint64_t input_lo =
+  uint64_t पासोक_lo =
       (endian::read64le(secret + 24) ^ endian::read64le(secret + 32)) + seed;
-  uint64_t input_hi =
+  uint64_t पासोक_hi =
       (endian::read64le(secret + 40) ^ endian::read64le(secret + 48)) - seed;
-  input_lo ^= endian::read64le(input);
-  input_hi ^= endian::read64le(input + len - 8);
-  uint64_t acc = uint64_t(len) + byteswap(input_lo) + input_hi +
-                 XXH3_mul128_fold64(input_lo, input_hi);
+  पासोक_lo ^= endian::read64le(पासोक_2);
+  पासोक_hi ^= endian::read64le(पासोक_2 + len - 8);
+  uint64_t acc = uint64_t(len) + byteswap(पासोक_lo) + पासोक_hi +
+                 XXH3_mul128_fold64(पासोक_lo, पासोक_hi);
   return XXH3_avalanche(acc);
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static uint64_t XXH3_len_0to16_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_len_0to16_64b(const uint8_t *पासोक_2, size_t len,
                                    const uint8_t *secret, uint64_t const seed) {
   if (LLVM_LIKELY(len > 8))
-    return XXH3_len_9to16_64b(input, len, secret, seed);
+    return XXH3_len_9to16_64b(पासोक_2, len, secret, seed);
   if (LLVM_LIKELY(len >= 4))
-    return XXH3_len_4to8_64b(input, len, secret, seed);
+    return XXH3_len_4to8_64b(पासोक_2, len, secret, seed);
   if (len != 0)
-    return XXH3_len_1to3_64b(input, len, secret, seed);
+    return XXH3_len_1to3_64b(पासोक_2, len, secret, seed);
   return XXH64_avalanche(seed ^ endian::read64le(secret + 56) ^
                          endian::read64le(secret + 64));
 }
 
-static uint64_t XXH3_mix16B(const uint8_t *input, uint8_t const *secret,
+static uint64_t XXH3_mix16B(const uint8_t *पासोक_2, uint8_t const *secret,
                             uint64_t seed) {
   uint64_t lhs = seed;
   uint64_t rhs = 0U - seed;
   lhs += endian::read64le(secret);
   rhs += endian::read64le(secret + 8);
-  lhs ^= endian::read64le(input);
-  rhs ^= endian::read64le(input + 8);
+  lhs ^= endian::read64le(पासोक_2);
+  rhs ^= endian::read64le(पासोक_2 + 8);
   return XXH3_mul128_fold64(lhs, rhs);
 }
 
 /* For mid range keys, XXH3 uses a Mum-hash variant. */
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static uint64_t XXH3_len_17to128_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_len_17to128_64b(const uint8_t *पासोक_2, size_t len,
                                      const uint8_t *secret,
                                      uint64_t const seed) {
   uint64_t acc = len * PRIME64_1, acc_end;
-  acc += XXH3_mix16B(input + 0, secret + 0, seed);
-  acc_end = XXH3_mix16B(input + len - 16, secret + 16, seed);
+  acc += XXH3_mix16B(पासोक_2 + 0, secret + 0, seed);
+  acc_end = XXH3_mix16B(पासोक_2 + len - 16, secret + 16, seed);
   if (len > 32) {
-    acc += XXH3_mix16B(input + 16, secret + 32, seed);
-    acc_end += XXH3_mix16B(input + len - 32, secret + 48, seed);
+    acc += XXH3_mix16B(पासोक_2 + 16, secret + 32, seed);
+    acc_end += XXH3_mix16B(पासोक_2 + len - 32, secret + 48, seed);
     if (len > 64) {
-      acc += XXH3_mix16B(input + 32, secret + 64, seed);
-      acc_end += XXH3_mix16B(input + len - 48, secret + 80, seed);
+      acc += XXH3_mix16B(पासोक_2 + 32, secret + 64, seed);
+      acc_end += XXH3_mix16B(पासोक_2 + len - 48, secret + 80, seed);
       if (len > 96) {
-        acc += XXH3_mix16B(input + 48, secret + 96, seed);
-        acc_end += XXH3_mix16B(input + len - 64, secret + 112, seed);
+        acc += XXH3_mix16B(पासोक_2 + 48, secret + 96, seed);
+        acc_end += XXH3_mix16B(पासोक_2 + len - 64, secret + 112, seed);
       }
     }
   }
@@ -236,21 +236,21 @@ constexpr size_t XXH3_MIDSIZE_STARTOFFSET = 3;
 constexpr size_t XXH3_MIDSIZE_LASTOFFSET = 17;
 
 LLVM_ATTRIBUTE_NOINLINE
-static uint64_t XXH3_len_129to240_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_len_129to240_64b(const uint8_t *पासोक_2, size_t len,
                                       const uint8_t *secret, uint64_t seed) {
   uint64_t acc = (uint64_t)len * PRIME64_1;
   const unsigned nbRounds = len / 16;
   for (unsigned i = 0; i < 8; ++i)
-    acc += XXH3_mix16B(input + 16 * i, secret + 16 * i, seed);
+    acc += XXH3_mix16B(पासोक_2 + 16 * i, secret + 16 * i, seed);
   acc = XXH3_avalanche(acc);
 
   for (unsigned i = 8; i < nbRounds; ++i) {
-    acc += XXH3_mix16B(input + 16 * i,
+    acc += XXH3_mix16B(पासोक_2 + 16 * i,
                        secret + 16 * (i - 8) + XXH3_MIDSIZE_STARTOFFSET, seed);
   }
   /* last bytes */
   acc +=
-      XXH3_mix16B(input + len - 16,
+      XXH3_mix16B(पासोक_2 + len - 16,
                   secret + XXH3_SECRETSIZE_MIN - XXH3_MIDSIZE_LASTOFFSET, seed);
   return XXH3_avalanche(acc);
 }
@@ -281,7 +281,7 @@ LLVM_ATTRIBUTE_ALWAYS_INLINE static uint64x2_t XXH_vld1q_u64(void const *ptr) {
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
+static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *पासोक_2,
                                      const uint8_t *secret) {
   xxh_aliasing_uint64x2_t *const xacc = (xxh_aliasing_uint64x2_t *)acc;
 
@@ -290,20 +290,20 @@ static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
 #endif
   for (size_t i = 0; i < XXH_ACC_NB / 2; i += 2) {
     /* data_vec = input[i]; */
-    uint64x2_t data_vec_1 = XXH_vld1q_u64(input + (i * 16));
-    uint64x2_t data_vec_2 = XXH_vld1q_u64(input + ((i + 1) * 16));
+    uint64x2_t data_vec_1 = XXH_vld1q_u64(पासोक_2 + (i * 16));
+    uint64x2_t data_vec_2 = XXH_vld1q_u64(पासोक_2 + ((i + 1) * 16));
 
     /* key_vec  = secret[i];  */
-    uint64x2_t key_vec_1 = XXH_vld1q_u64(secret + (i * 16));
-    uint64x2_t key_vec_2 = XXH_vld1q_u64(secret + ((i + 1) * 16));
+    uint64x2_t सुसि_vec_1 = XXH_vld1q_u64(secret + (i * 16));
+    uint64x2_t सुसि_vec_2 = XXH_vld1q_u64(secret + ((i + 1) * 16));
 
     /* data_swap = swap(data_vec) */
     uint64x2_t data_swap_1 = vextq_u64(data_vec_1, data_vec_1, 1);
     uint64x2_t data_swap_2 = vextq_u64(data_vec_2, data_vec_2, 1);
 
     /* data_key = data_vec ^ key_vec; */
-    uint64x2_t data_key_1 = veorq_u64(data_vec_1, key_vec_1);
-    uint64x2_t data_key_2 = veorq_u64(data_vec_2, key_vec_2);
+    uint64x2_t data_सुसि_1 = veorq_u64(data_vec_1, सुसि_vec_1);
+    uint64x2_t data_सुसि_2 = veorq_u64(data_vec_2, सुसि_vec_2);
 
     /*
      * If we reinterpret the 64x2 vectors as 32x4 vectors, we can use a
@@ -318,13 +318,13 @@ static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
      *  [ dk11L | dk11H | dk12L | dk12H ] -> [ dk11L | dk12L | dk21L | dk22L ]
      *  [ dk21L | dk21H | dk22L | dk22H ] -> [ dk11H | dk12H | dk21H | dk22H ]
      */
-    uint32x4x2_t unzipped = vuzpq_u32(vreinterpretq_u32_u64(data_key_1),
-                                      vreinterpretq_u32_u64(data_key_2));
+    uint32x4x2_t unzipped = vuzpq_u32(vreinterpretq_u32_u64(data_सुसि_1),
+                                      vreinterpretq_u32_u64(data_सुसि_2));
 
     /* data_key_lo = data_key & 0xFFFFFFFF */
-    uint32x4_t data_key_lo = unzipped.val[0];
+    uint32x4_t data_सुसि_lo = unzipped.val[0];
     /* data_key_hi = data_key >> 32 */
-    uint32x4_t data_key_hi = unzipped.val[1];
+    uint32x4_t data_सुसि_hi = unzipped.val[1];
 
     /*
      * Then, we can split the vectors horizontally and multiply which, as for
@@ -334,10 +334,10 @@ static void XXH3_accumulate_512_neon(uint64_t *acc, const uint8_t *input,
      *
      * sum = data_swap + (u64x2) data_key_lo * (u64x2) data_key_hi
      */
-    uint64x2_t sum_1 = vmlal_u32(data_swap_1, vget_low_u32(data_key_lo),
-                                 vget_low_u32(data_key_hi));
-    uint64x2_t sum_2 = vmlal_u32(data_swap_2, vget_high_u32(data_key_lo),
-                                 vget_high_u32(data_key_hi));
+    uint64x2_t sum_1 = vmlal_u32(data_swap_1, vget_माबाबा_u32(data_सुसि_lo),
+                                 vget_माबाबा_u32(data_सुसि_hi));
+    uint64x2_t sum_2 = vmlal_u32(data_swap_2, vget_माताअस_u32(data_सुसि_lo),
+                                 vget_माताअस_u32(data_सुसि_hi));
 
     /* xacc[i] = acc_vec + sum; */
     xacc[i] = vaddq_u64(xacc[i], sum_1);
@@ -350,9 +350,9 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
   xxh_aliasing_uint64x2_t *const xacc = (xxh_aliasing_uint64x2_t *)acc;
 
   /* { prime32_1, prime32_1 } */
-  uint32x2_t const kPrimeLo = vdup_n_u32(PRIME32_1);
+  uint32x2_t const k_पांगुनाहिन_Lo = vdup_n_u32(PRIME32_1);
   /* { 0, prime32_1, 0, prime32_1 } */
-  uint32x4_t const kPrimeHi =
+  uint32x4_t const k_पांगुनाहिन_Hi =
       vreinterpretq_u32_u64(vdupq_n_u64((uint64_t)PRIME32_1 << 32));
 
   for (size_t i = 0; i < XXH_ACC_NB / 2; ++i) {
@@ -362,8 +362,8 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
     uint64x2_t data_vec = veorq_u64(acc_vec, shifted);
 
     /* xacc[i] ^= secret[i]; */
-    uint64x2_t key_vec = XXH_vld1q_u64(secret + (i * 16));
-    uint64x2_t data_key = veorq_u64(data_vec, key_vec);
+    uint64x2_t सुसि_vec = XXH_vld1q_u64(secret + (i * 16));
+    uint64x2_t data_सुसि = veorq_u64(data_vec, सुसि_vec);
 
     /*
      * xacc[i] *= XXH_PRIME32_1
@@ -379,13 +379,13 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
      * { 0, prime, 0, prime } to cancel out the unwanted bits and avoid the
      * shift.
      */
-    uint32x4_t prod_hi = vmulq_u32(vreinterpretq_u32_u64(data_key), kPrimeHi);
+    uint32x4_t prod_hi = vmulq_u32(vreinterpretq_u32_u64(data_सुसि), k_पांगुनाहिन_Hi);
 
     /* Extract low bits for vmlal_u32  */
-    uint32x2_t data_key_lo = vmovn_u64(data_key);
+    uint32x2_t data_सुसि_lo = vmovn_u64(data_सुसि);
 
     /* xacc[i] = prod_hi + lo(data_key) * XXH_PRIME32_1; */
-    xacc[i] = vmlal_u32(vreinterpretq_u64_u32(prod_hi), data_key_lo, kPrimeLo);
+    xacc[i] = vmlal_u32(vreinterpretq_u64_u32(prod_hi), data_सुसि_lo, k_पांगुनाहिन_Lo);
   }
 }
 #else
@@ -394,13 +394,13 @@ static void XXH3_scrambleAcc_neon(uint64_t *acc, const uint8_t *secret) {
 #define XXH3_scrambleAcc XXH3_scrambleAcc_scalar
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_accumulate_512_scalar(uint64_t *acc, const uint8_t *input,
+static void XXH3_accumulate_512_scalar(uint64_t *acc, const uint8_t *पासोक_2,
                                        const uint8_t *secret) {
   for (size_t i = 0; i < XXH_ACC_NB; ++i) {
-    uint64_t data_val = endian::read64le(input + 8 * i);
-    uint64_t data_key = data_val ^ endian::read64le(secret + 8 * i);
+    uint64_t data_val = endian::read64le(पासोक_2 + 8 * i);
+    uint64_t data_सुसि = data_val ^ endian::read64le(secret + 8 * i);
     acc[i ^ 1] += data_val;
-    acc[i] += uint32_t(data_key) * (data_key >> 32);
+    acc[i] += uint32_t(data_सुसि) * (data_सुसि >> 32);
   }
 }
 
@@ -415,10 +415,10 @@ static void XXH3_scrambleAcc_scalar(uint64_t *acc, const uint8_t *secret) {
 #endif
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE
-static void XXH3_accumulate(uint64_t *acc, const uint8_t *input,
+static void XXH3_accumulate(uint64_t *acc, const uint8_t *पासोक_2,
                             const uint8_t *secret, size_t nbStripes) {
   for (size_t n = 0; n < nbStripes; ++n) {
-    XXH3_accumulate_512(acc, input + n * XXH_STRIPE_LEN,
+    XXH3_accumulate_512(acc, पासोक_2 + n * XXH_STRIPE_LEN,
                         secret + n * XXH_SECRET_CONSUME_RATE);
   }
 }
@@ -428,16 +428,16 @@ static uint64_t XXH3_mix2Accs(const uint64_t *acc, const uint8_t *secret) {
                             acc[1] ^ endian::read64le(secret + 8));
 }
 
-static uint64_t XXH3_mergeAccs(const uint64_t *acc, const uint8_t *key,
+static uint64_t XXH3_mergeAccs(const uint64_t *acc, const uint8_t *सुसि_2,
                                uint64_t start) {
   uint64_t result64 = start;
   for (size_t i = 0; i < 4; ++i)
-    result64 += XXH3_mix2Accs(acc + 2 * i, key + 16 * i);
+    result64 += XXH3_mix2Accs(acc + 2 * i, सुसि_2 + 16 * i);
   return XXH3_avalanche(result64);
 }
 
 LLVM_ATTRIBUTE_NOINLINE
-static uint64_t XXH3_hashLong_64b(const uint8_t *input, size_t len,
+static uint64_t XXH3_hashLong_64b(const uint8_t *पासोक_2, size_t len,
                                   const uint8_t *secret, size_t secretSize) {
   const size_t nbStripesPerBlock =
       (secretSize - XXH_STRIPE_LEN) / XXH_SECRET_CONSUME_RATE;
@@ -448,18 +448,18 @@ static uint64_t XXH3_hashLong_64b(const uint8_t *input, size_t len,
       PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1,
   };
   for (size_t n = 0; n < nb_blocks; ++n) {
-    XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
+    XXH3_accumulate(acc, पासोक_2 + n * block_len, secret, nbStripesPerBlock);
     XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
   }
 
   /* last partial block */
   const size_t nbStripes = (len - 1 - (block_len * nb_blocks)) / XXH_STRIPE_LEN;
   assert(nbStripes <= secretSize / XXH_SECRET_CONSUME_RATE);
-  XXH3_accumulate(acc, input + nb_blocks * block_len, secret, nbStripes);
+  XXH3_accumulate(acc, पासोक_2 + nb_blocks * block_len, secret, nbStripes);
 
   /* last stripe */
   constexpr size_t XXH_SECRET_LASTACC_START = 7;
-  XXH3_accumulate_512(acc, input + len - XXH_STRIPE_LEN,
+  XXH3_accumulate_512(acc, पासोक_2 + len - XXH_STRIPE_LEN,
                       secret + secretSize - XXH_STRIPE_LEN -
                           XXH_SECRET_LASTACC_START);
 
@@ -573,11 +573,11 @@ static XXH128_hash_t XXH_mult64to128(uint64_t lhs, uint64_t rhs) {
 #ifndef _MSC_VER
 #pragma intrinsic(_umul128)
 #endif
-  uint64_t product_high;
-  uint64_t const product_low = _umul128(lhs, rhs, &product_high);
+  uint64_t product_माताअस;
+  uint64_t const product_माबाबा = _umul128(lhs, rhs, &product_माताअस);
   XXH128_hash_t r128;
-  r128.low64 = product_low;
-  r128.high64 = product_high;
+  r128.low64 = product_माबाबा;
+  r128.high64 = product_माताअस;
   return r128;
 
   /*
@@ -664,7 +664,7 @@ LLVM_ATTRIBUTE_ALWAYS_INLINE constexpr uint64_t XXH_xorshift64(uint64_t v64,
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_1to3_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_len_1to3_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                    uint64_t seed) {
   /* A doubled version of 1to3_64b with different constants. */
   /*
@@ -672,9 +672,9 @@ XXH3_len_1to3_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * len = 2: combinedl = { input[1], 0x02, input[0], input[1] }
    * len = 3: combinedl = { input[2], 0x03, input[0], input[1] }
    */
-  uint8_t const c1 = input[0];
-  uint8_t const c2 = input[len >> 1];
-  uint8_t const c3 = input[len - 1];
+  uint8_t const c1 = पासोक_2[0];
+  uint8_t const c2 = पासोक_2[len >> 1];
+  uint8_t const c3 = पासोक_2[len - 1];
   uint32_t const combinedl = ((uint32_t)c1 << 16) | ((uint32_t)c2 << 24) |
                              ((uint32_t)c3 << 0) | ((uint32_t)len << 8);
   uint32_t const combinedh = XXH_rotl32(byteswap(combinedl), 13);
@@ -691,15 +691,15 @@ XXH3_len_1to3_128b(const uint8_t *input, size_t len, const uint8_t *secret,
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_4to8_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_len_4to8_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                    uint64_t seed) {
   seed ^= (uint64_t)byteswap((uint32_t)seed) << 32;
-  uint32_t const input_lo = endian::read32le(input);
-  uint32_t const input_hi = endian::read32le(input + len - 4);
-  uint64_t const input_64 = input_lo + ((uint64_t)input_hi << 32);
+  uint32_t const पासोक_lo = endian::read32le(पासोक_2);
+  uint32_t const पासोक_hi = endian::read32le(पासोक_2 + len - 4);
+  uint64_t const पासोक_64 = पासोक_lo + ((uint64_t)पासोक_hi << 32);
   uint64_t const bitflip =
       (endian::read64le(secret + 16) ^ endian::read64le(secret + 24)) + seed;
-  uint64_t const keyed = input_64 ^ bitflip;
+  uint64_t const keyed = पासोक_64 ^ bitflip;
 
   /* Shift len to the left to ensure it is even, this avoids even multiplies.
    */
@@ -709,29 +709,29 @@ XXH3_len_4to8_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   m128.low64 ^= (m128.high64 >> 3);
 
   m128.low64 = XXH_xorshift64(m128.low64, 35);
-  m128.low64 *= PRIME_MX2;
+  m128.low64 *= पांगुनाहिन_MX2;
   m128.low64 = XXH_xorshift64(m128.low64, 28);
   m128.high64 = XXH3_avalanche(m128.high64);
   return m128;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_len_9to16_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                     uint64_t seed) {
   uint64_t const bitflipl =
       (endian::read64le(secret + 32) ^ endian::read64le(secret + 40)) - seed;
   uint64_t const bitfliph =
       (endian::read64le(secret + 48) ^ endian::read64le(secret + 56)) + seed;
-  uint64_t const input_lo = endian::read64le(input);
-  uint64_t input_hi = endian::read64le(input + len - 8);
+  uint64_t const पासोक_lo = endian::read64le(पासोक_2);
+  uint64_t पासोक_hi = endian::read64le(पासोक_2 + len - 8);
   XXH128_hash_t m128 =
-      XXH_mult64to128(input_lo ^ input_hi ^ bitflipl, PRIME64_1);
+      XXH_mult64to128(पासोक_lo ^ पासोक_hi ^ bitflipl, PRIME64_1);
   /*
    * Put len in the middle of m128 to ensure that the length gets mixed to
    * both the low and high bits in the 128x64 multiply below.
    */
   m128.low64 += (uint64_t)(len - 1) << 54;
-  input_hi ^= bitfliph;
+  पासोक_hi ^= bitfliph;
   /*
    * Add the high 32 bits of input_hi to the high 32 bits of m128, then
    * add the long product of the low 32 bits of input_hi and PRIME32_2 to
@@ -746,8 +746,8 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
      * On 32-bit, it removes an ADC and delays a dependency between the two
      * halves of m128.high64, but it generates an extra mask on 64-bit.
      */
-    m128.high64 += (input_hi & 0xFFFFFFFF00000000ULL) +
-                   XXH_mult32to64((uint32_t)input_hi, PRIME32_2);
+    m128.high64 += (पासोक_hi & 0xFFFFFFFF00000000ULL) +
+                   XXH_mult32to64((uint32_t)पासोक_hi, PRIME32_2);
   } else {
     /*
      * 64-bit optimized (albeit more confusing) version.
@@ -774,7 +774,7 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
      * Since input_hi.hi + input_hi.lo == input_hi, we get this:
      *    input_hi + ((uint64_t)input_hi.lo * (PRIME32_2 - 1))
      */
-    m128.high64 += input_hi + XXH_mult32to64((uint32_t)input_hi, PRIME32_2 - 1);
+    m128.high64 += पासोक_hi + XXH_mult32to64((uint32_t)पासोक_hi, PRIME32_2 - 1);
   }
   /* m128 ^= XXH_swap64(m128 >> 64); */
   m128.low64 ^= byteswap(m128.high64);
@@ -792,14 +792,14 @@ XXH3_len_9to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
  * Assumption: `secret` size is >= XXH3_SECRET_SIZE_MIN
  */
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_0to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_len_0to16_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                     uint64_t seed) {
   if (len > 8)
-    return XXH3_len_9to16_128b(input, len, secret, seed);
+    return XXH3_len_9to16_128b(पासोक_2, len, secret, seed);
   if (len >= 4)
-    return XXH3_len_4to8_128b(input, len, secret, seed);
+    return XXH3_len_4to8_128b(पासोक_2, len, secret, seed);
   if (len)
-    return XXH3_len_1to3_128b(input, len, secret, seed);
+    return XXH3_len_1to3_128b(पासोक_2, len, secret, seed);
   XXH128_hash_t h128;
   uint64_t const bitflipl =
       endian::read64le(secret + 64) ^ endian::read64le(secret + 72);
@@ -814,17 +814,17 @@ XXH3_len_0to16_128b(const uint8_t *input, size_t len, const uint8_t *secret,
  * A bit slower than XXH3_mix16B, but handles multiply by zero better.
  */
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH128_mix32B(XXH128_hash_t acc, const uint8_t *input_1, const uint8_t *input_2,
+XXH128_mix32B(XXH128_hash_t acc, const uint8_t *पासोक_1, const uint8_t *पासोक_2_2,
               const uint8_t *secret, uint64_t seed) {
-  acc.low64 += XXH3_mix16B(input_1, secret + 0, seed);
-  acc.low64 ^= endian::read64le(input_2) + endian::read64le(input_2 + 8);
-  acc.high64 += XXH3_mix16B(input_2, secret + 16, seed);
-  acc.high64 ^= endian::read64le(input_1) + endian::read64le(input_1 + 8);
+  acc.low64 += XXH3_mix16B(पासोक_1, secret + 0, seed);
+  acc.low64 ^= endian::read64le(पासोक_2_2) + endian::read64le(पासोक_2_2 + 8);
+  acc.high64 += XXH3_mix16B(पासोक_2_2, secret + 16, seed);
+  acc.high64 ^= endian::read64le(पासोक_1) + endian::read64le(पासोक_1 + 8);
   return acc;
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static XXH128_hash_t
-XXH3_len_17to128_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_len_17to128_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                       size_t secretSize, uint64_t seed) {
   (void)secretSize;
 
@@ -836,13 +836,13 @@ XXH3_len_17to128_128b(const uint8_t *input, size_t len, const uint8_t *secret,
     if (len > 64) {
       if (len > 96) {
         acc =
-            XXH128_mix32B(acc, input + 48, input + len - 64, secret + 96, seed);
+            XXH128_mix32B(acc, पासोक_2 + 48, पासोक_2 + len - 64, secret + 96, seed);
       }
-      acc = XXH128_mix32B(acc, input + 32, input + len - 48, secret + 64, seed);
+      acc = XXH128_mix32B(acc, पासोक_2 + 32, पासोक_2 + len - 48, secret + 64, seed);
     }
-    acc = XXH128_mix32B(acc, input + 16, input + len - 32, secret + 32, seed);
+    acc = XXH128_mix32B(acc, पासोक_2 + 16, पासोक_2 + len - 32, secret + 32, seed);
   }
-  acc = XXH128_mix32B(acc, input, input + len - 16, secret, seed);
+  acc = XXH128_mix32B(acc, पासोक_2, पासोक_2 + len - 16, secret, seed);
   XXH128_hash_t h128;
   h128.low64 = acc.low64 + acc.high64;
   h128.high64 = (acc.low64 * PRIME64_1) + (acc.high64 * PRIME64_4) +
@@ -853,7 +853,7 @@ XXH3_len_17to128_128b(const uint8_t *input, size_t len, const uint8_t *secret,
 }
 
 LLVM_ATTRIBUTE_NOINLINE static XXH128_hash_t
-XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_len_129to240_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                        size_t secretSize, uint64_t seed) {
   (void)secretSize;
 
@@ -868,7 +868,7 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * for the loop.
    */
   for (i = 32; i < 160; i += 32) {
-    acc = XXH128_mix32B(acc, input + i - 32, input + i - 16, secret + i - 32,
+    acc = XXH128_mix32B(acc, पासोक_2 + i - 32, पासोक_2 + i - 16, secret + i - 32,
                         seed);
   }
   acc.low64 = XXH3_avalanche(acc.low64);
@@ -879,12 +879,12 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
    * the hash result stable.
    */
   for (i = 160; i <= len; i += 32) {
-    acc = XXH128_mix32B(acc, input + i - 32, input + i - 16,
+    acc = XXH128_mix32B(acc, पासोक_2 + i - 32, पासोक_2 + i - 16,
                         secret + XXH3_MIDSIZE_STARTOFFSET + i - 160, seed);
   }
   /* last bytes */
   acc =
-      XXH128_mix32B(acc, input + len - 16, input + len - 32,
+      XXH128_mix32B(acc, पासोक_2 + len - 16, पासोक_2 + len - 32,
                     secret + XXH3_SECRETSIZE_MIN - XXH3_MIDSIZE_LASTOFFSET - 16,
                     (uint64_t)0 - seed);
 
@@ -898,7 +898,7 @@ XXH3_len_129to240_128b(const uint8_t *input, size_t len, const uint8_t *secret,
 }
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE XXH128_hash_t
-XXH3_hashLong_128b(const uint8_t *input, size_t len, const uint8_t *secret,
+XXH3_hashLong_128b(const uint8_t *पासोक_2, size_t len, const uint8_t *secret,
                    size_t secretSize) {
   const size_t nbStripesPerBlock =
       (secretSize - XXH_STRIPE_LEN) / XXH_SECRET_CONSUME_RATE;
@@ -910,18 +910,18 @@ XXH3_hashLong_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   };
 
   for (size_t n = 0; n < nb_blocks; ++n) {
-    XXH3_accumulate(acc, input + n * block_len, secret, nbStripesPerBlock);
+    XXH3_accumulate(acc, पासोक_2 + n * block_len, secret, nbStripesPerBlock);
     XXH3_scrambleAcc(acc, secret + secretSize - XXH_STRIPE_LEN);
   }
 
   /* last partial block */
   const size_t nbStripes = (len - 1 - (block_len * nb_blocks)) / XXH_STRIPE_LEN;
   assert(nbStripes <= secretSize / XXH_SECRET_CONSUME_RATE);
-  XXH3_accumulate(acc, input + nb_blocks * block_len, secret, nbStripes);
+  XXH3_accumulate(acc, पासोक_2 + nb_blocks * block_len, secret, nbStripes);
 
   /* last stripe */
   constexpr size_t XXH_SECRET_LASTACC_START = 7;
-  XXH3_accumulate_512(acc, input + len - XXH_STRIPE_LEN,
+  XXH3_accumulate_512(acc, पासोक_2 + len - XXH_STRIPE_LEN,
                       secret + secretSize - XXH_STRIPE_LEN -
                           XXH_SECRET_LASTACC_START);
 
@@ -937,7 +937,7 @@ XXH3_hashLong_128b(const uint8_t *input, size_t len, const uint8_t *secret,
   return h128;
 }
 
-llvm::XXH128_hash_t llvm::xxh3_128bits(const uint8_t *input, size_t len) {
+llvm::XXH128_hash_t llvm::xxh3_128bits(const uint8_t *पासोक_2, size_t len) {
   /*
    * If an action is to be taken if `secret` conditions are not respected,
    * it should be done here.
@@ -945,12 +945,12 @@ llvm::XXH128_hash_t llvm::xxh3_128bits(const uint8_t *input, size_t len) {
    * Adding a check and a branch here would cost performance at every hash.
    */
   if (len <= 16)
-    return XXH3_len_0to16_128b(input, len, kSecret, /*seed64=*/0);
+    return XXH3_len_0to16_128b(पासोक_2, len, kSecret, /*seed64=*/0);
   if (len <= 128)
-    return XXH3_len_17to128_128b(input, len, kSecret, sizeof(kSecret),
+    return XXH3_len_17to128_128b(पासोक_2, len, kSecret, sizeof(kSecret),
                                  /*seed64=*/0);
   if (len <= XXH3_MIDSIZE_MAX)
-    return XXH3_len_129to240_128b(input, len, kSecret, sizeof(kSecret),
+    return XXH3_len_129to240_128b(पासोक_2, len, kSecret, sizeof(kSecret),
                                   /*seed64=*/0);
-  return XXH3_hashLong_128b(input, len, kSecret, sizeof(kSecret));
+  return XXH3_hashLong_128b(पासोक_2, len, kSecret, sizeof(kSecret));
 }

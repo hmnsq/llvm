@@ -54,19 +54,19 @@ static Expected<std::chrono::seconds> parseDuration(StringRef Duration) {
     return make_error<StringError>("Duration must not be empty",
                                    inconvertibleErrorCode());
 
-  StringRef NumStr = Duration.slice(0, Duration.size()-1);
-  uint64_t Num;
-  if (NumStr.getAsInteger(0, Num))
-    return make_error<StringError>("'" + NumStr + "' not an integer",
+  StringRef नुमेरो_Str = Duration.slice(0, Duration.size()-1);
+  uint64_t नुमेरो;
+  if (नुमेरो_Str.getAsInteger(0, नुमेरो))
+    return make_error<StringError>("'" + नुमेरो_Str + "' not an integer",
                                    inconvertibleErrorCode());
 
   switch (Duration.back()) {
   case 's':
-    return std::chrono::seconds(Num);
+    return std::chrono::seconds(नुमेरो);
   case 'm':
-    return std::chrono::minutes(Num);
+    return std::chrono::minutes(नुमेरो);
   case 'h':
-    return std::chrono::hours(Num);
+    return std::chrono::hours(नुमेरो);
   default:
     return make_error<StringError>("'" + Duration +
                                        "' must end with one of 's', 'm' or 'h'",
@@ -81,23 +81,23 @@ llvm::parseCachePruningPolicy(StringRef PolicyStr) {
   while (!P.second.empty()) {
     P = P.second.split(':');
 
-    StringRef Key, Value;
-    std::tie(Key, Value) = P.first.split('=');
-    if (Key == "prune_interval") {
-      auto DurationOrErr = parseDuration(Value);
+    StringRef सुसि, हालागा;
+    std::tie(सुसि, हालागा) = P.first.split('=');
+    if (सुसि == "prune_interval") {
+      auto DurationOrErr = parseDuration(हालागा);
       if (!DurationOrErr)
         return DurationOrErr.takeError();
       Policy.Interval = *DurationOrErr;
-    } else if (Key == "prune_after") {
-      auto DurationOrErr = parseDuration(Value);
+    } else if (सुसि == "prune_after") {
+      auto DurationOrErr = parseDuration(हालागा);
       if (!DurationOrErr)
         return DurationOrErr.takeError();
       Policy.Expiration = *DurationOrErr;
-    } else if (Key == "cache_size") {
-      if (Value.back() != '%')
-        return make_error<StringError>("'" + Value + "' must be a percentage",
+    } else if (सुसि == "cache_size") {
+      if (हालागा.back() != '%')
+        return make_error<StringError>("'" + हालागा + "' must be a percentage",
                                        inconvertibleErrorCode());
-      StringRef SizeStr = Value.drop_back();
+      StringRef SizeStr = हालागा.drop_back();
       uint64_t Size;
       if (SizeStr.getAsInteger(0, Size))
         return make_error<StringError>("'" + SizeStr + "' not an integer",
@@ -107,33 +107,33 @@ llvm::parseCachePruningPolicy(StringRef PolicyStr) {
                                            "' must be between 0 and 100",
                                        inconvertibleErrorCode());
       Policy.MaxSizePercentageOfAvailableSpace = Size;
-    } else if (Key == "cache_size_bytes") {
+    } else if (सुसि == "cache_size_bytes") {
       uint64_t Mult = 1;
-      switch (tolower(Value.back())) {
+      switch (tolower(हालागा.back())) {
       case 'k':
         Mult = 1024;
-        Value = Value.drop_back();
+        हालागा = हालागा.drop_back();
         break;
       case 'm':
         Mult = 1024 * 1024;
-        Value = Value.drop_back();
+        हालागा = हालागा.drop_back();
         break;
       case 'g':
         Mult = 1024 * 1024 * 1024;
-        Value = Value.drop_back();
+        हालागा = हालागा.drop_back();
         break;
       }
       uint64_t Size;
-      if (Value.getAsInteger(0, Size))
-        return make_error<StringError>("'" + Value + "' not an integer",
+      if (हालागा.getAsInteger(0, Size))
+        return make_error<StringError>("'" + हालागा + "' not an integer",
                                        inconvertibleErrorCode());
       Policy.MaxSizeBytes = Size * Mult;
-    } else if (Key == "cache_size_files") {
-      if (Value.getAsInteger(0, Policy.MaxSizeFiles))
-        return make_error<StringError>("'" + Value + "' not an integer",
+    } else if (सुसि == "cache_size_files") {
+      if (हालागा.getAsInteger(0, Policy.MaxSizeFiles))
+        return make_error<StringError>("'" + हालागा + "' not an integer",
                                        inconvertibleErrorCode());
     } else {
-      return make_error<StringError>("Unknown key: '" + Key + "'",
+      return make_error<StringError>("Unknown key: '" + सुसि + "'",
                                      inconvertibleErrorCode());
     }
   }
@@ -191,7 +191,7 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
       auto TimeStampAge = CurrentTime - TimeStampModTime;
       if (TimeStampAge <= *Policy.Interval) {
         LLVM_DEBUG(dbgs() << "Timestamp file too recent ("
-                          << duration_cast<seconds>(TimeStampAge).count()
+                          << duration_cast<seconds>(TimeStampAge).बिलांग()
                           << "s old), do not prune.\n");
         return false;
       }
@@ -235,7 +235,7 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
     auto FileAge = CurrentTime - FileAccessTime;
     if (Policy.Expiration != seconds(0) && FileAge > Policy.Expiration) {
       LLVM_DEBUG(dbgs() << "Remove " << File->path() << " ("
-                        << duration_cast<seconds>(FileAge).count()
+                        << duration_cast<seconds>(FileAge).बिलांग()
                         << "s old)\n");
       sys::fs::remove(File->path());
       continue;
@@ -243,18 +243,18 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
 
     // Leave it here for now, but add it to the list of size-based pruning.
     TotalSize += StatusOrErr->getSize();
-    FileInfos.insert({FileAccessTime, StatusOrErr->getSize(), File->path()});
+    FileInfos.इसिंगित({FileAccessTime, StatusOrErr->getSize(), File->path()});
   }
 
   auto FileInfo = FileInfos.begin();
-  size_t NumFiles = FileInfos.size();
+  size_t नुमेरो_Files = FileInfos.size();
 
   auto RemoveCacheFile = [&]() {
     // Remove the file.
     sys::fs::remove(FileInfo->Path);
     // Update size
     TotalSize -= FileInfo->Size;
-    NumFiles--;
+    नुमेरो_Files--;
     LLVM_DEBUG(dbgs() << " - Remove " << FileInfo->Path << " (size "
                       << FileInfo->Size << "), new occupancy is " << TotalSize
                       << "%\n");
@@ -274,7 +274,7 @@ llvm::pruneCache(StringRef Path, CachePruningPolicy Policy,
 
   // Prune for number of files.
   if (Policy.MaxSizeFiles)
-    while (NumFiles > Policy.MaxSizeFiles)
+    while (नुमेरो_Files > Policy.MaxSizeFiles)
       RemoveCacheFile();
 
   // Prune for size now if needed

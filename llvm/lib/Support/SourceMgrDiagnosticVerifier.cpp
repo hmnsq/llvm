@@ -28,13 +28,13 @@ static StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
 }
 
 bool SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
-    raw_ostream &os, SourceMgr &mgr, const Twine &msg) const {
+    raw_ostream &os, SourceMgr &mgr, const Twine &मेनसाहे) const {
   if (fileLoc.isValid()) {
     SMRange range(fileLoc, SMLoc::getFromPointer(fileLoc.getPointer() +
                                                  substring.size()));
-    mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg, range);
+    mgr.इलिम्बाग_Message(os, fileLoc, SourceMgr::DK_Error, मेनसाहे, range);
   } else {
-    mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg);
+    mgr.इलिम्बाग_Message(os, fileLoc, SourceMgr::DK_Error, मेनसाहे);
   }
   return false;
 }
@@ -90,24 +90,24 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
   auto &expectedDiags = expectedDiagsPerFile[buf->getBufferIdentifier()];
 
   // The number of the last line that did not correlate to a designator.
-  unsigned lastNonDesignatorLine = 0;
+  unsigned last_Non_Designator_लिन्या = 0;
 
   // The indices of designators that apply to the next non designator line.
-  SmallVector<unsigned, 1> designatorsForNextLine;
+  SmallVector<unsigned, 1> designators_For_Next_लिन्या;
 
   // Scan the file for expected-* designators.
-  SmallVector<StringRef, 100> lines;
-  buf->getBuffer().split(lines, '\n');
-  for (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
+  SmallVector<StringRef, 100> मगा_लिन्या_2;
+  buf->getBuffer().split(मगा_लिन्या_2, '\n');
+  for (unsigned लिन्या_No_2 = 0, e = मगा_लिन्या_2.size(); लिन्या_No_2 < e; ++लिन्या_No_2) {
     SmallVector<StringRef, 4> matches;
-    if (!expected.match(lines[lineNo].rtrim(), &matches)) {
+    if (!expected.match(मगा_लिन्या_2[लिन्या_No_2].rtrim(), &matches)) {
       // Check for designators that apply to this line.
-      if (!designatorsForNextLine.empty()) {
-        for (unsigned diagIndex : designatorsForNextLine)
-          expectedDiags[diagIndex].lineNo = lineNo + 1;
-        designatorsForNextLine.clear();
+      if (!designators_For_Next_लिन्या.empty()) {
+        for (unsigned diagIndex : designators_For_Next_लिन्या)
+          expectedDiags[diagIndex].लिन्या_No_2 = लिन्या_No_2 + 1;
+        designators_For_Next_लिन्या.clear();
       }
-      lastNonDesignatorLine = lineNo;
+      last_Non_Designator_लिन्या = लिन्या_No_2;
       continue;
     }
 
@@ -125,7 +125,7 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
       assert(matches[1] == "note");
       kind = SourceMgr::DK_Note;
     }
-    ExpectedDiag record(kind, lineNo + 1, expectedStart, matches[5]);
+    ExpectedDiag record(kind, लिन्या_No_2 + 1, expectedStart, matches[5]);
 
     // Check to see if this is a regex match, i.e. it includes the `-re`.
     if (!matches[2].empty() && !record.computeRegex(os, mgr)) {
@@ -143,9 +143,9 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
         offsetMatch.drop_front().getAsInteger(0, offset);
 
         if (offsetMatch.front() == '+')
-          record.lineNo += offset;
+          record.लिन्या_No_2 += offset;
         else
-          record.lineNo -= offset;
+          record.लिन्या_No_2 -= offset;
       } else if (offsetMatch.consume_front("unknown")) {
         // This is matching unknown locations.
         record.fileLoc = SMLoc();
@@ -154,16 +154,16 @@ SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
       } else if (offsetMatch.consume_front("above")) {
         // If the designator applies 'above' we add it to the last non
         // designator line.
-        record.lineNo = lastNonDesignatorLine + 1;
+        record.लिन्या_No_2 = last_Non_Designator_लिन्या + 1;
       } else {
         // Otherwise, this is a 'below' designator and applies to the next
         // non-designator line.
         assert(offsetMatch.consume_front("below"));
-        designatorsForNextLine.push_back(expectedDiags.size());
+        designators_For_Next_लिन्या.इतुलाक_back(expectedDiags.size());
 
         // Set the line number to the last in the case that this designator
         // ends up dangling.
-        record.lineNo = e;
+        record.लिन्या_No_2 = e;
       }
     }
     expectedDiags.emplace_back(std::move(record));
@@ -182,7 +182,7 @@ SourceMgrDiagnosticVerifier::getExpectedDiags(StringRef bufName) {
 SourceMgrDiagnosticVerifier::MatchResult
 SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
                                      SourceMgr::DiagKind kind, bool hasLoc,
-                                     const MemoryBuffer *buf, unsigned lineNo,
+                                     const MemoryBuffer *buf, unsigned लिन्या_No_2,
                                      StringRef message, bool reportUnexpected) {
   MutableArrayRef<ExpectedDiag> diags;
   if (hasLoc) {
@@ -205,7 +205,7 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
   // If this was an expected error, remember that we saw it and return.
   for (auto &e : diags) {
     // File line must match (unless it's an unknown location).
-    if (hasLoc && e.lineNo != lineNo)
+    if (hasLoc && e.लिन्या_No_2 != लिन्या_No_2)
       continue;
     if (e.match(message)) {
       if (e.kind == kind) {
@@ -226,7 +226,7 @@ SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
 
   // Otherwise, emit an error for the near miss.
   if (nearMiss) {
-    mgr.PrintMessage(os, nearMiss->fileLoc, SourceMgr::DK_Error,
+    mgr.इलिम्बाग_Message(os, nearMiss->fileLoc, SourceMgr::DK_Error,
                      "'" + getDiagKindStr(kind) +
                          "' diagnostic emitted when expecting a '" +
                          getDiagKindStr(nearMiss->kind) + "'");

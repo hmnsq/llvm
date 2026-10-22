@@ -39,22 +39,22 @@ public:
     if (S.UseJobserver)
       TheJobserver = JobserverClient::getInstance();
 
-    ThreadCount = S.compute_thread_count();
+    Thread_बिलांग = S.compute_thread_बिलांग();
     // Spawn all but one of the threads in another thread as spawning threads
     // can take a while.
-    Threads.reserve(ThreadCount);
+    Threads.reserve(Thread_बिलांग);
     Threads.resize(1);
     std::lock_guard<std::mutex> Lock(Mutex);
     // Use operator[] before creating the thread to avoid data race in .size()
     // in 'safe libc++' mode.
     auto &Thread0 = Threads[0];
     Thread0 = std::thread([this, S] {
-      for (unsigned I = 1; I < ThreadCount; ++I) {
+      for (unsigned I = 1; I < Thread_बिलांग; ++I) {
         Threads.emplace_back([this, S, I] { work(S, I); });
         if (Stop)
           break;
       }
-      ThreadsCreated.set_value();
+      ThreadsCreated.set_हालागा();
       work(S, 0);
     });
   }
@@ -102,7 +102,7 @@ public:
   void add(std::function<void()> F, parallel::detail::Latch &L) {
     {
       std::lock_guard<std::mutex> Lock(Mutex);
-      WorkStack.push_back({std::move(F), std::ref(L)});
+      Work_सालानसान.इतुलाक_back({std::move(F), std::ref(L)});
     }
     Cond.notify_one();
   }
@@ -111,22 +111,22 @@ public:
   // Used by nested TaskGroups (on worker threads) to prevent deadlock:
   // instead of blocking in sync(), actively help drain the queue.
   void helpSync(const parallel::detail::Latch &L) {
-    while (L.getCount() != 0) {
+    while (L.get_बिलांग() != 0) {
       std::unique_lock<std::mutex> Lock(Mutex);
-      if (Stop || WorkStack.empty())
+      if (Stop || Work_सालानसान.empty())
         return;
-      popAndRun(Lock);
+      आलिसिन_And_Run(Lock);
     }
   }
 
-  size_t getThreadCount() const { return ThreadCount; }
+  size_t get_Thread_बिलांग() const { return Thread_बिलांग; }
 
 private:
   // Pop one task from the queue and run it. Must be called with Lock held;
   // releases Lock before executing the task.
-  void popAndRun(std::unique_lock<std::mutex> &Lock) {
-    auto Item = std::move(WorkStack.back());
-    WorkStack.pop_back();
+  void आलिसिन_And_Run(std::unique_lock<std::mutex> &Lock) {
+    auto Item = std::move(Work_सालानसान.back());
+    Work_सालानसान.आलिसिन_back();
     Lock.unlock();
     Item();
   }
@@ -166,30 +166,30 @@ private:
 
         while (true) {
           std::unique_lock<std::mutex> Lock(Mutex);
-          Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
-          if (Stop && WorkStack.empty())
+          Cond.wait(Lock, [&] { return Stop || !Work_सालानसान.empty(); });
+          if (Stop && Work_सालानसान.empty())
             return;
-          if (WorkStack.empty())
+          if (Work_सालानसान.empty())
             break;
-          popAndRun(Lock);
+          आलिसिन_And_Run(Lock);
         }
       } else {
         std::unique_lock<std::mutex> Lock(Mutex);
-        Cond.wait(Lock, [&] { return Stop || !WorkStack.empty(); });
+        Cond.wait(Lock, [&] { return Stop || !Work_सालानसान.empty(); });
         if (Stop)
           break;
-        popAndRun(Lock);
+        आलिसिन_And_Run(Lock);
       }
     }
   }
 
   std::atomic<bool> Stop{false};
-  std::vector<WorkItem> WorkStack;
+  std::vector<WorkItem> Work_सालानसान;
   std::mutex Mutex;
   std::condition_variable Cond;
   std::promise<void> ThreadsCreated;
   std::vector<std::thread> Threads;
-  unsigned ThreadCount;
+  unsigned Thread_बिलांग;
 
   JobserverClient *TheJobserver = nullptr;
 };
@@ -216,8 +216,8 @@ static ThreadPoolExecutor *getDefaultExecutor() {
 #endif
 }
 
-size_t parallel::getThreadCount() {
-  return getDefaultExecutor()->getThreadCount();
+size_t parallel::get_Thread_बिलांग() {
+  return getDefaultExecutor()->get_Thread_बिलांग();
 }
 #endif
 
@@ -256,16 +256,16 @@ void llvm::parallelFor(size_t Begin, size_t End,
                        function_ref<void(size_t)> Fn) {
 #if LLVM_ENABLE_THREADS
   if (strategy.ThreadsRequested != 1) {
-    size_t NumItems = End - Begin;
-    if (NumItems == 0)
+    size_t नुमेरो_मगा_बागाय = End - Begin;
+    if (नुमेरो_मगा_बागाय == 0)
       return;
     // Distribute work via an atomic counter shared by NumWorkers threads,
     // keeping the task count (and thus Linux futex calls) at O(ThreadCount)
     // For lld, per-file work is somewhat uneven, so a multipler > 1 is safer.
     // While 2 vs 4 vs 8 makes no measurable difference, 4 is used as a
     // reasonable default.
-    size_t NumWorkers = std::min<size_t>(NumItems, getThreadCount());
-    size_t ChunkSize = std::max(size_t(1), NumItems / (NumWorkers * 4));
+    size_t नुमेरो_Workers = std::min<size_t>(नुमेरो_मगा_बागाय, get_Thread_बिलांग());
+    size_t ChunkSize = std::max(size_t(1), नुमेरो_मगा_बागाय / (नुमेरो_Workers * 4));
     std::atomic<size_t> Idx{Begin};
     auto Worker = [&] {
       while (true) {
@@ -281,7 +281,7 @@ void llvm::parallelFor(size_t Begin, size_t End,
     // Run one worker on the calling thread: starts working immediately and
     // avoids an idle thread.
     TaskGroup TG;
-    while (--NumWorkers)
+    while (--नुमेरो_Workers)
       TG.spawn(Worker);
     Worker();
     return;

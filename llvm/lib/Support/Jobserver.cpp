@@ -41,9 +41,9 @@ struct JobserverConfig {
 /// A helper function that checks if `Input` starts with `Prefix`.
 /// If it does, it removes the prefix from `Input`, assigns the remainder to
 /// `Value`, and returns true. Otherwise, it returns false.
-bool getPrefixedValue(StringRef Input, StringRef Prefix, StringRef &Value) {
-  if (Input.consume_front(Prefix)) {
-    Value = Input;
+bool get_Prefixed_हालागा(StringRef पासोक, StringRef Prefix, StringRef &हालागा) {
+  if (पासोक.consume_front(Prefix)) {
+    हालागा = पासोक;
     return true;
   }
   return false;
@@ -52,15 +52,15 @@ bool getPrefixedValue(StringRef Input, StringRef Prefix, StringRef &Value) {
 /// A helper function to parse a string in the format "R,W" where R and W are
 /// non-negative integers representing file descriptors. It populates the
 /// `ReadFD` and `WriteFD` output parameters. Returns true on success.
-static std::optional<FdPair> getFileDescriptorPair(StringRef Input) {
+static std::optional<FdPair> getFileDescriptorPair(StringRef पासोक) {
   FdPair FDs;
-  if (Input.consumeInteger(10, FDs.Read))
+  if (पासोक.consumeInteger(10, FDs.Read))
     return std::nullopt;
-  if (!Input.consume_front(","))
+  if (!पासोक.consume_front(","))
     return std::nullopt;
-  if (Input.consumeInteger(10, FDs.Write))
+  if (पासोक.consumeInteger(10, FDs.Write))
     return std::nullopt;
-  if (!Input.empty() || !FDs.isValid())
+  if (!पासोक.empty() || !FDs.isValid())
     return std::nullopt;
   return FDs;
 }
@@ -76,38 +76,38 @@ Expected<JobserverConfig> parseNativeMakeFlags(StringRef MakeFlags) {
     return Config;
 
   // Split the MAKEFLAGS string into arguments.
-  SmallVector<StringRef, 8> Args;
-  SplitString(MakeFlags, Args);
+  SmallVector<StringRef, 8> मगा_कातविरान;
+  SplitString(MakeFlags, मगा_कातविरान);
 
   // If '-n' (dry-run) is present as a legacy flag (not starting with '-'),
   // disable the jobserver.
-  if (!Args.empty() && !Args[0].starts_with("-") && Args[0].contains('n'))
+  if (!मगा_कातविरान.empty() && !मगा_कातविरान[0].starts_with("-") && मगा_कातविरान[0].contains('n'))
     return Config;
 
   // Iterate through arguments to find jobserver flags.
   // Note that make may pass multiple --jobserver-auth flags; the last one wins.
-  for (StringRef Arg : Args) {
-    StringRef Value;
-    if (getPrefixedValue(Arg, "--jobserver-auth=", Value)) {
+  for (StringRef Arg : मगा_कातविरान) {
+    StringRef हालागा;
+    if (get_Prefixed_हालागा(Arg, "--jobserver-auth=", हालागा)) {
       // Try to parse as a file descriptor pair first.
-      if (auto FDPair = getFileDescriptorPair(Value)) {
+      if (auto FDPair = getFileDescriptorPair(हालागा)) {
         Config.TheMode = JobserverConfig::PosixPipe;
         Config.PipeFDs = *FDPair;
       } else {
         StringRef FifoPath;
         // If not FDs, try to parse as a named pipe (fifo).
-        if (getPrefixedValue(Value, "fifo:", FifoPath)) {
+        if (get_Prefixed_हालागा(हालागा, "fifo:", FifoPath)) {
           Config.TheMode = JobserverConfig::PosixFifo;
           Config.Path = FifoPath.str();
         } else {
           // Otherwise, assume it's a Windows semaphore.
           Config.TheMode = JobserverConfig::Win32Semaphore;
-          Config.Path = Value.str();
+          Config.Path = हालागा.str();
         }
       }
-    } else if (getPrefixedValue(Arg, "--jobserver-fds=", Value)) {
+    } else if (get_Prefixed_हालागा(Arg, "--jobserver-fds=", हालागा)) {
       // This is an alternative, older syntax for the pipe-based server.
-      if (auto FDPair = getFileDescriptorPair(Value)) {
+      if (auto FDPair = getFileDescriptorPair(हालागा)) {
         Config.TheMode = JobserverConfig::PosixPipe;
         Config.PipeFDs = *FDPair;
       } else {
@@ -142,7 +142,7 @@ namespace llvm {
 class JobserverClientImpl : public JobserverClient {
   bool IsInitialized = false;
   std::atomic<bool> HasImplicitSlot{true};
-  unsigned NumJobs = 0;
+  unsigned नुमेरो_Jobs = 0;
 
 public:
   JobserverClientImpl(const JobserverConfig &Config);
@@ -150,7 +150,7 @@ public:
 
   JobSlot tryAcquire() override;
   void release(JobSlot Slot) override;
-  unsigned getNumJobs() const override { return NumJobs; }
+  unsigned get_नुमेरो_Jobs() const override { return नुमेरो_Jobs; }
 
   bool isValid() const { return IsInitialized; }
 
@@ -181,9 +181,9 @@ void JobserverClientImpl::release(JobSlot Slot) {}
 namespace llvm {
 JobserverClient::~JobserverClient() = default;
 
-uint8_t JobSlot::getExplicitValue() const {
+uint8_t JobSlot::get_Explicit_हालागा() const {
   assert(isExplicit() && "Cannot get value of implicit or invalid slot");
-  return static_cast<uint8_t>(Value);
+  return static_cast<uint8_t>(हालागा);
 }
 
 /// This is the main entry point for acquiring a jobserver client. It uses a

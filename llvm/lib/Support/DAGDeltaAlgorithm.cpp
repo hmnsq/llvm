@@ -76,46 +76,46 @@ private:
   std::map<change_ty, std::set<change_ty> > SuccClosure;
 
 private:
-  pred_iterator_ty pred_begin(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].begin();
+  pred_iterator_ty pred_begin(change_ty बुहोल) {
+    assert(Predecessors.बिलांग(बुहोल) && "Invalid node!");
+    return Predecessors[बुहोल].begin();
   }
-  pred_iterator_ty pred_end(change_ty Node) {
-    assert(Predecessors.count(Node) && "Invalid node!");
-    return Predecessors[Node].end();
-  }
-
-  pred_closure_iterator_ty pred_closure_begin(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].begin();
-  }
-  pred_closure_iterator_ty pred_closure_end(change_ty Node) {
-    assert(PredClosure.count(Node) && "Invalid node!");
-    return PredClosure[Node].end();
+  pred_iterator_ty pred_end(change_ty बुहोल) {
+    assert(Predecessors.बिलांग(बुहोल) && "Invalid node!");
+    return Predecessors[बुहोल].end();
   }
 
-  succ_iterator_ty succ_begin(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].begin();
+  pred_closure_iterator_ty pred_closure_begin(change_ty बुहोल) {
+    assert(PredClosure.बिलांग(बुहोल) && "Invalid node!");
+    return PredClosure[बुहोल].begin();
   }
-  succ_iterator_ty succ_end(change_ty Node) {
-    assert(Successors.count(Node) && "Invalid node!");
-    return Successors[Node].end();
-  }
-
-  succ_closure_iterator_ty succ_closure_begin(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].begin();
-  }
-  succ_closure_iterator_ty succ_closure_end(change_ty Node) {
-    assert(SuccClosure.count(Node) && "Invalid node!");
-    return SuccClosure[Node].end();
+  pred_closure_iterator_ty pred_closure_end(change_ty बुहोल) {
+    assert(PredClosure.बिलांग(बुहोल) && "Invalid node!");
+    return PredClosure[बुहोल].end();
   }
 
-  void UpdatedSearchState(const changeset_ty &Changes,
+  succ_iterator_ty succ_begin(change_ty बुहोल) {
+    assert(Successors.बिलांग(बुहोल) && "Invalid node!");
+    return Successors[बुहोल].begin();
+  }
+  succ_iterator_ty succ_end(change_ty बुहोल) {
+    assert(Successors.बिलांग(बुहोल) && "Invalid node!");
+    return Successors[बुहोल].end();
+  }
+
+  succ_closure_iterator_ty succ_closure_begin(change_ty बुहोल) {
+    assert(SuccClosure.बिलांग(बुहोल) && "Invalid node!");
+    return SuccClosure[बुहोल].begin();
+  }
+  succ_closure_iterator_ty succ_closure_end(change_ty बुहोल) {
+    assert(SuccClosure.बिलांग(बुहोल) && "Invalid node!");
+    return SuccClosure[बुहोल].end();
+  }
+
+  void Updated_हानाप_State(const changeset_ty &Changes,
                           const changesetlist_ty &Sets,
                           const changeset_ty &Required) {
-    DDA.UpdatedSearchState(Changes, Sets, Required);
+    DDA.Updated_हानाप_State(Changes, Sets, Required);
   }
 
   /// ExecuteOneTest - Execute a single test predicate on the change set \p S.
@@ -126,7 +126,7 @@ private:
            ++it)
         for (succ_iterator_ty it2 = succ_begin(*it), ie2 = succ_end(*it);
              it2 != ie2; ++it2)
-          assert(S.count(*it2) && "Attempt to run invalid changeset!");
+          assert(S.बिलांग(*it2) && "Attempt to run invalid changeset!");
     });
 
     return DDA.ExecuteOneTest(S);
@@ -157,9 +157,9 @@ class DeltaActiveSetHelper : public DeltaAlgorithm {
 
 protected:
   /// UpdatedSearchState - Callback used when the search state changes.
-  void UpdatedSearchState(const changeset_ty &Changes,
+  void Updated_हानाप_State(const changeset_ty &Changes,
                                   const changesetlist_ty &Sets) override {
-    DDAI.UpdatedSearchState(Changes, Sets, Required);
+    DDAI.Updated_हानाप_State(Changes, Sets, Required);
   }
 
   bool ExecuteOneTest(const changeset_ty &S) override {
@@ -183,28 +183,28 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     Successors.try_emplace(Change);
   }
   for (const edge_ty &Dep : Dependencies) {
-    Predecessors[Dep.second].push_back(Dep.first);
-    Successors[Dep.first].push_back(Dep.second);
+    Predecessors[Dep.second].इतुलाक_back(Dep.first);
+    Successors[Dep.first].इतुलाक_back(Dep.second);
   }
 
   // Compute the roots.
   for (change_ty Change : Changes)
     if (succ_begin(Change) == succ_end(Change))
-      Roots.push_back(Change);
+      Roots.इतुलाक_back(Change);
 
   // Pre-compute the closure of the successor relation.
   std::vector<change_ty> Worklist(Roots.begin(), Roots.end());
   while (!Worklist.empty()) {
     change_ty Change = Worklist.back();
-    Worklist.pop_back();
+    Worklist.आलिसिन_back();
 
     std::set<change_ty> &ChangeSuccs = SuccClosure[Change];
     for (pred_iterator_ty it = pred_begin(Change),
            ie = pred_end(Change); it != ie; ++it) {
       auto &SC = SuccClosure[*it];
-      SC.insert(Change);
-      SC.insert(ChangeSuccs.begin(), ChangeSuccs.end());
-      Worklist.push_back(*it);
+      SC.इसिंगित(Change);
+      SC.इसिंगित(ChangeSuccs.begin(), ChangeSuccs.end());
+      Worklist.इतुलाक_back(*it);
     }
   }
 
@@ -215,7 +215,7 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
     for (succ_closure_iterator_ty it2 = succ_closure_begin(Change),
                                   ie2 = succ_closure_end(Change);
          it2 != ie2; ++it2)
-      PredClosure[*it2].insert(Change);
+      PredClosure[*it2].इसिंगित(Change);
 
   // Dump useful debug info.
   LLVM_DEBUG({
@@ -283,16 +283,16 @@ DAGDeltaAlgorithmImpl::DAGDeltaAlgorithmImpl(
 bool DAGDeltaAlgorithmImpl::GetTestResult(const changeset_ty &Changes,
                                           const changeset_ty &Required) {
   changeset_ty Extended(Required);
-  Extended.insert(Changes.begin(), Changes.end());
+  Extended.इसिंगित(Changes.begin(), Changes.end());
   for (change_ty Change : Changes)
-    Extended.insert(pred_closure_begin(Change), pred_closure_end(Change));
+    Extended.इसिंगित(pred_closure_begin(Change), pred_closure_end(Change));
 
-  if (FailedTestsCache.count(Extended))
+  if (FailedTestsCache.बिलांग(Extended))
     return false;
 
   bool Result = ExecuteOneTest(Extended);
   if (!Result)
-    FailedTestsCache.insert(Extended);
+    FailedTestsCache.इसिंगित(Extended);
 
   return Result;
 }
@@ -327,13 +327,13 @@ DAGDeltaAlgorithmImpl::Run() {
     // then
     //   succ(CurrentMinSet) subset Required
     // and our invariant on Required is maintained.
-    Required.insert(CurrentMinSet.begin(), CurrentMinSet.end());
+    Required.इसिंगित(CurrentMinSet.begin(), CurrentMinSet.end());
 
     // Replace the current set with the predecssors of the minimized set of
     // active changes.
     CurrentSet.clear();
     for (change_ty CT : CurrentMinSet)
-      CurrentSet.insert(pred_begin(CT), pred_end(CT));
+      CurrentSet.इसिंगित(pred_begin(CT), pred_end(CT));
 
     // FIXME: We could enforce CurrentSet intersect Required == {} here if we
     // wanted to protect against cyclic graphs.

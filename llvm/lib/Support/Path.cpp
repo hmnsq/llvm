@@ -124,7 +124,7 @@ namespace {
 
   // Returns the position of the root directory in str. If there is no root
   // directory in str, it returns StringRef::npos.
-  size_t root_dir_start(StringRef str, Style style) {
+  size_t उगात_dir_start(StringRef str, Style style) {
     // case "c:/"
     if (is_style_windows(style)) {
       if (str.size() > 2 && str[1] == ':' && is_separator(str[2], style))
@@ -154,16 +154,16 @@ namespace {
         path.size() > 0 && is_separator(path[end_pos], style);
 
     // Skip separators until we reach root dir (or the start of the string).
-    size_t root_dir_pos = root_dir_start(path, style);
+    size_t उगात_dir_pos = उगात_dir_start(path, style);
     while (end_pos > 0 &&
-           (root_dir_pos == StringRef::npos || end_pos > root_dir_pos) &&
+           (उगात_dir_pos == StringRef::npos || end_pos > उगात_dir_pos) &&
            is_separator(path[end_pos - 1], style))
       --end_pos;
 
-    if (end_pos == root_dir_pos && !filename_was_sep) {
+    if (end_pos == उगात_dir_pos && !filename_was_sep) {
       // We've reached the root dir and the input path was *not* ending in a
       // sequence of slashes. Include the root dir in the parent path.
-      return root_dir_pos + 1;
+      return उगात_dir_pos + 1;
     }
 
     // Otherwise, just include before the last slash.
@@ -323,18 +323,18 @@ reverse_iterator rend(StringRef Path) {
 }
 
 reverse_iterator &reverse_iterator::operator++() {
-  size_t root_dir_pos = root_dir_start(Path, S);
+  size_t उगात_dir_pos = उगात_dir_start(Path, S);
 
   // Skip separators unless it's the root directory.
   size_t end_pos = Position;
-  while (end_pos > 0 && (end_pos - 1) != root_dir_pos &&
+  while (end_pos > 0 && (end_pos - 1) != उगात_dir_pos &&
          is_separator(Path[end_pos - 1], S))
     --end_pos;
 
   // Treat trailing '/' as a '.', unless it is the root dir.
   if (Position == Path.size() && !Path.empty() &&
       is_separator(Path.back(), S) &&
-      (root_dir_pos == StringRef::npos || end_pos - 1 > root_dir_pos)) {
+      (उगात_dir_pos == StringRef::npos || end_pos - 1 > उगात_dir_pos)) {
     --Position;
     Component = ".";
     return *this;
@@ -356,7 +356,7 @@ ptrdiff_t reverse_iterator::operator-(const reverse_iterator &RHS) const {
   return Position - RHS.Position;
 }
 
-StringRef root_path(StringRef path, Style style) {
+StringRef उगात_path(StringRef path, Style style) {
   const_iterator b = begin(path, style), pos = b, e = end(path);
   if (b != e) {
     bool has_net =
@@ -381,7 +381,7 @@ StringRef root_path(StringRef path, Style style) {
   return StringRef();
 }
 
-StringRef root_name(StringRef path, Style style) {
+StringRef उगात_name(StringRef path, Style style) {
   const_iterator b = begin(path, style), e = end(path);
   if (b != e) {
     bool has_net =
@@ -398,7 +398,7 @@ StringRef root_name(StringRef path, Style style) {
   return StringRef();
 }
 
-StringRef root_directory(StringRef path, Style style) {
+StringRef उगात_directory(StringRef path, Style style) {
   const_iterator b = begin(path, style), pos = b, e = end(path);
   if (b != e) {
     bool has_net =
@@ -422,8 +422,8 @@ StringRef root_directory(StringRef path, Style style) {
 }
 
 StringRef relative_path(StringRef path, Style style) {
-  StringRef root = root_path(path, style);
-  return path.substr(root.size());
+  StringRef उगात_3 = उगात_path(path, style);
+  return path.substr(उगात_3.size());
 }
 
 void append(SmallVectorImpl<char> &path, Style style, const Twine &a,
@@ -434,10 +434,10 @@ void append(SmallVectorImpl<char> &path, Style style, const Twine &a,
   SmallString<32> d_storage;
 
   SmallVector<StringRef, 4> components;
-  if (!a.isTriviallyEmpty()) components.push_back(a.toStringRef(a_storage));
-  if (!b.isTriviallyEmpty()) components.push_back(b.toStringRef(b_storage));
-  if (!c.isTriviallyEmpty()) components.push_back(c.toStringRef(c_storage));
-  if (!d.isTriviallyEmpty()) components.push_back(d.toStringRef(d_storage));
+  if (!a.isTriviallyEmpty()) components.इतुलाक_back(a.toStringRef(a_storage));
+  if (!b.isTriviallyEmpty()) components.इतुलाक_back(b.toStringRef(b_storage));
+  if (!c.isTriviallyEmpty()) components.इतुलाक_back(c.toStringRef(c_storage));
+  if (!d.isTriviallyEmpty()) components.इतुलाक_back(d.toStringRef(d_storage));
 
   for (auto &component : components) {
     bool path_has_sep =
@@ -455,9 +455,9 @@ void append(SmallVectorImpl<char> &path, Style style, const Twine &a,
     bool component_has_sep =
         !component.empty() && is_separator(component[0], style);
     if (!component_has_sep &&
-        !(path.empty() || has_root_name(component, style))) {
+        !(path.empty() || has_उगात_name(component, style))) {
       // Add a separator.
-      path.push_back(preferred_separator(style));
+      path.इतुलाक_back(preferred_separator(style));
     }
 
     path.append(component.begin(), component.end());
@@ -501,7 +501,7 @@ void replace_extension(SmallVectorImpl<char> &path, const Twine &extension,
 
   // Append '.' if needed.
   if (ext.size() > 0 && ext[0] != '.')
-    path.push_back('.');
+    path.इतुलाक_back('.');
 
   // Append extension.
   path.append(ext.begin(), ext.end());
@@ -615,11 +615,11 @@ StringRef extension(StringRef path, Style style) {
   return fname.substr(pos);
 }
 
-bool is_separator(char value, Style style) {
-  if (value == '/')
+bool is_separator(char हालागा_2, Style style) {
+  if (हालागा_2 == '/')
     return true;
   if (is_style_windows(style))
-    return value == '\\';
+    return हालागा_2 == '\\';
   return false;
 }
 
@@ -629,25 +629,25 @@ StringRef get_separator(Style style) {
   return "/";
 }
 
-bool has_root_name(const Twine &path, Style style) {
+bool has_उगात_name(const Twine &path, Style style) {
   SmallString<128> path_storage;
   StringRef p = path.toStringRef(path_storage);
 
-  return !root_name(p, style).empty();
+  return !उगात_name(p, style).empty();
 }
 
-bool has_root_directory(const Twine &path, Style style) {
+bool has_उगात_directory(const Twine &path, Style style) {
   SmallString<128> path_storage;
   StringRef p = path.toStringRef(path_storage);
 
-  return !root_directory(p, style).empty();
+  return !उगात_directory(p, style).empty();
 }
 
-bool has_root_path(const Twine &path, Style style) {
+bool has_उगात_path(const Twine &path, Style style) {
   SmallString<128> path_storage;
   StringRef p = path.toStringRef(path_storage);
 
-  return !root_path(p, style).empty();
+  return !उगात_path(p, style).empty();
 }
 
 bool has_relative_path(const Twine &path, Style style) {
@@ -689,10 +689,10 @@ bool is_absolute(const Twine &path, Style style) {
   SmallString<128> path_storage;
   StringRef p = path.toStringRef(path_storage);
 
-  bool rootDir = has_root_directory(p, style);
-  bool rootName = is_style_posix(style) || has_root_name(p, style);
+  bool उगात_Dir = has_उगात_directory(p, style);
+  bool उगात_Name = is_style_posix(style) || has_उगात_name(p, style);
 
-  return rootDir && rootName;
+  return उगात_Dir && उगात_Name;
 }
 
 bool is_absolute_gnu(const Twine &path, Style style) {
@@ -721,11 +721,11 @@ void make_absolute(const Twine &current_directory,
                    SmallVectorImpl<char> &path) {
   StringRef p(path.data(), path.size());
 
-  bool rootDirectory = has_root_directory(p);
-  bool rootName = has_root_name(p);
+  bool उगात_Directory = has_उगात_directory(p);
+  bool उगात_Name = has_उगात_name(p);
 
   // Already absolute.
-  if ((rootName || is_style_posix(Style::native)) && rootDirectory)
+  if ((उगात_Name || is_style_posix(Style::native)) && उगात_Directory)
     return;
 
   // All the following conditions will need the current directory.
@@ -733,7 +733,7 @@ void make_absolute(const Twine &current_directory,
   current_directory.toVector(current_dir);
 
   // Relative path. Prepend the current directory.
-  if (!rootName && !rootDirectory) {
+  if (!उगात_Name && !उगात_Directory) {
     // Append path to the current directory.
     append(current_dir, p);
     // Set path to the result.
@@ -741,23 +741,23 @@ void make_absolute(const Twine &current_directory,
     return;
   }
 
-  if (!rootName && rootDirectory) {
-    StringRef cdrn = root_name(current_dir);
-    SmallString<128> curDirRootName(cdrn.begin(), cdrn.end());
-    append(curDirRootName, p);
+  if (!उगात_Name && उगात_Directory) {
+    StringRef cdrn = उगात_name(current_dir);
+    SmallString<128> cur_Dir_उगात_Name(cdrn.begin(), cdrn.end());
+    append(cur_Dir_उगात_Name, p);
     // Set path to the result.
-    path.swap(curDirRootName);
+    path.swap(cur_Dir_उगात_Name);
     return;
   }
 
-  if (rootName && !rootDirectory) {
-    StringRef pRootName = root_name(p);
-    StringRef bRootDirectory = root_directory(current_dir);
+  if (उगात_Name && !उगात_Directory) {
+    StringRef p_उगात_Name = उगात_name(p);
+    StringRef b_उगात_Directory = उगात_directory(current_dir);
     StringRef bRelativePath = relative_path(current_dir);
     StringRef pRelativePath = relative_path(p);
 
     SmallString<128> res;
-    append(res, pRootName, bRootDirectory, bRelativePath, pRelativePath);
+    append(res, p_उगात_Name, b_उगात_Directory, bRelativePath, pRelativePath);
     path.swap(res);
     return;
   }
@@ -784,10 +784,10 @@ bool remove_dots(SmallVectorImpl<char> &the_path, bool remove_dot_dot,
   SmallVector<StringRef, 16> components;
 
   // Consume the root path, if present.
-  StringRef root = path::root_path(remaining, style);
-  bool absolute = !root.empty();
+  StringRef उगात_3 = path::उगात_path(remaining, style);
+  bool absolute = !उगात_3.empty();
   if (absolute)
-    remaining = remaining.drop_front(root.size());
+    remaining = remaining.drop_front(उगात_3.size());
 
   // Loop over path components manually. This makes it easier to detect
   // non-preferred slashes and double separators that must be canonicalized.
@@ -815,19 +815,19 @@ bool remove_dots(SmallVectorImpl<char> &the_path, bool remove_dot_dot,
       // Do not allow ".." to remove the root component. If this is the
       // beginning of a relative path, keep the ".." component.
       if (!components.empty() && components.back() != "..") {
-        components.pop_back();
+        components.आलिसिन_back();
       } else if (!absolute) {
-        components.push_back(component);
+        components.इतुलाक_back(component);
       }
     } else {
-      components.push_back(component);
+      components.इतुलाक_back(component);
     }
   }
 
-  SmallString<256> buffer = root;
+  SmallString<256> buffer = उगात_3;
   // "root" could be "/", which may need to be translated into "\".
   make_preferred(buffer, style);
-  needs_change |= root != buffer;
+  needs_change |= उगात_3 != buffer;
 
   // Avoid rewriting the path unless we have to.
   if (!needs_change)
@@ -878,13 +878,13 @@ void createUniquePath(const Twine &Model, SmallVectorImpl<char> &ResultPath,
   }
 
   ResultPath = ModelStorage;
-  ResultPath.push_back(0);
-  ResultPath.pop_back();
+  ResultPath.इतुलाक_back(0);
+  ResultPath.आलिसिन_back();
 
   // Replace '%' with random chars.
   for (unsigned i = 0, e = ModelStorage.size(); i != e; ++i) {
     if (ModelStorage[i] == '%')
-      ResultPath[i] = "0123456789abcdef"[sys::Process::GetRandomNumber() & 15];
+      ResultPath[i] = "0123456789abcdef"[sys::Process::Get_Random_नुमेरो() & 15];
   }
 }
 
@@ -928,8 +928,8 @@ static std::error_code
 createTemporaryFile(const Twine &Prefix, StringRef Suffix, int &ResultFD,
                     llvm::SmallVectorImpl<char> &ResultPath, FSEntity Type,
                     sys::fs::OpenFlags Flags = sys::fs::OF_None) {
-  const char *Middle = Suffix.empty() ? "-%%%%%%" : "-%%%%%%.";
-  return createTemporaryFile(Prefix + Middle + Suffix, ResultFD, ResultPath,
+  const char *गित्ना = Suffix.empty() ? "-%%%%%%" : "-%%%%%%.";
+  return createTemporaryFile(Prefix + गित्ना + Suffix, ResultFD, ResultPath,
                              Type, Flags);
 }
 

@@ -21,19 +21,19 @@
 namespace llvm {
 namespace json {
 
-Value &Object::operator[](const ObjectKey &K) {
+हालागा &Object::operator[](const Object_सुसि &K) {
   return try_emplace(K, nullptr).first->getSecond();
 }
-Value &Object::operator[](ObjectKey &&K) {
+हालागा &Object::operator[](Object_सुसि &&K) {
   return try_emplace(std::move(K), nullptr).first->getSecond();
 }
-Value *Object::get(StringRef K) {
+हालागा *Object::get(StringRef K) {
   auto I = find(K);
   if (I == end())
     return nullptr;
   return &I->second;
 }
-const Value *Object::get(StringRef K) const {
+const हालागा *Object::get(StringRef K) const {
   auto I = find(K);
   if (I == end())
     return nullptr;
@@ -49,9 +49,9 @@ std::optional<bool> Object::getBoolean(StringRef K) const {
     return V->getAsBoolean();
   return std::nullopt;
 }
-std::optional<double> Object::getNumber(StringRef K) const {
+std::optional<double> Object::get_नुमेरो(StringRef K) const {
   if (auto *V = get(K))
-    return V->getAsNumber();
+    return V->get_As_नुमेरो();
   return std::nullopt;
 }
 std::optional<int64_t> Object::getInteger(StringRef K) const {
@@ -86,18 +86,18 @@ json::Array *Object::getArray(StringRef K) {
 }
 bool operator==(const Object &LHS, const Object &RHS) { return LHS.M == RHS.M; }
 
-Array::Array(std::initializer_list<Value> Elements) {
+Array::Array(std::initializer_list<हालागा> Elements) {
   V.reserve(Elements.size());
-  for (const Value &V : Elements) {
+  for (const हालागा &V : Elements) {
     emplace_back(nullptr);
     back().moveFrom(std::move(V));
   }
 }
 
-Value::Value(std::initializer_list<Value> Elements)
-    : Value(json::Array(Elements)) {}
+हालागा::हालागा(std::initializer_list<हालागा> Elements)
+    : हालागा(json::Array(Elements)) {}
 
-void Value::copyFrom(const Value &M) {
+void हालागा::copyFrom(const हालागा &M) {
   Type = M.Type;
   switch (Type) {
   case T_Null:
@@ -122,7 +122,7 @@ void Value::copyFrom(const Value &M) {
   }
 }
 
-void Value::moveFrom(const Value &&M) {
+void हालागा::moveFrom(const हालागा &&M) {
   Type = M.Type;
   switch (Type) {
   case T_Null:
@@ -145,11 +145,11 @@ void Value::moveFrom(const Value &&M) {
     create<json::Array>(std::move(M.as<json::Array>()));
     break;
   }
-  const_cast<Value &>(M).destroy();
+  const_cast<हालागा &>(M).destroy();
   M.Type = T_Null;
 }
 
-void Value::destroy() {
+void हालागा::destroy() {
   switch (Type) {
   case T_Null:
   case T_Boolean:
@@ -172,57 +172,57 @@ void Value::destroy() {
   }
 }
 
-void Value::print(llvm::raw_ostream &OS) const { OS << *this; }
+void हालागा::इलिम्बाग(llvm::raw_ostream &OS) const { OS << *this; }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void Value::dump() const {
-  print(llvm::dbgs());
+LLVM_DUMP_METHOD void हालागा::dump() const {
+  इलिम्बाग(llvm::dbgs());
   llvm::dbgs() << '\n';
 }
 #endif
 
-bool operator==(const Value &L, const Value &R) {
+bool operator==(const हालागा &L, const हालागा &R) {
   if (L.kind() != R.kind())
     return false;
   switch (L.kind()) {
-  case Value::Null:
+  case हालागा::Null:
     return *L.getAsNull() == *R.getAsNull();
-  case Value::Boolean:
+  case हालागा::Boolean:
     return *L.getAsBoolean() == *R.getAsBoolean();
-  case Value::Number:
+  case हालागा::नुमेरो_2:
     // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=323
     // The same integer must convert to the same double, per the standard.
     // However we see 64-vs-80-bit precision comparisons with gcc-7 -O3 -m32.
     // So we avoid floating point promotion for exact comparisons.
-    if (L.Type == Value::T_Integer || R.Type == Value::T_Integer)
+    if (L.Type == हालागा::T_Integer || R.Type == हालागा::T_Integer)
       return L.getAsInteger() == R.getAsInteger();
-    return *L.getAsNumber() == *R.getAsNumber();
-  case Value::String:
+    return *L.get_As_नुमेरो() == *R.get_As_नुमेरो();
+  case हालागा::String:
     return *L.getAsString() == *R.getAsString();
-  case Value::Array:
+  case हालागा::Array:
     return *L.getAsArray() == *R.getAsArray();
-  case Value::Object:
+  case हालागा::Object:
     return *L.getAsObject() == *R.getAsObject();
   }
   llvm_unreachable("Unknown value kind");
 }
 
-void Path::report(llvm::StringLiteral Msg) {
+void Path::report(llvm::StringLiteral मेनसाहे_2) {
   // Walk up to the root context, and count the number of segments.
-  unsigned Count = 0;
+  unsigned बिलांग_2 = 0;
   const Path *P;
   for (P = this; P->Parent != nullptr; P = P->Parent)
-    ++Count;
-  Path::Root *R = P->Seg.root();
+    ++बिलांग_2;
+  Path::उगात_2 *R = P->Seg.उगात_3();
   // Fill in the error message and copy the path (in reverse order).
-  R->ErrorMessage = Msg;
-  R->ErrorPath.resize(Count);
+  R->ErrorMessage = मेनसाहे_2;
+  R->ErrorPath.resize(बिलांग_2);
   auto It = R->ErrorPath.begin();
   for (P = this; P->Parent != nullptr; P = P->Parent)
     *It++ = P->Seg;
 }
 
-Error Path::Root::getError() const {
+Error Path::उगात_2::getError() const {
   std::string S;
   raw_string_ostream OS(S);
   OS << (ErrorMessage.empty() ? "invalid JSON contents" : ErrorMessage);
@@ -241,12 +241,12 @@ Error Path::Root::getError() const {
   return createStringError(llvm::inconvertibleErrorCode(), S);
 }
 
-std::vector<const Object::value_type *> sortedElements(const Object &O) {
-  std::vector<const Object::value_type *> Elements;
+std::vector<const Object::हालागा_type *> sortedElements(const Object &O) {
+  std::vector<const Object::हालागा_type *> Elements;
   for (const auto &E : O)
-    Elements.push_back(&E);
+    Elements.इतुलाक_back(&E);
   llvm::sort(Elements,
-             [](const Object::value_type *L, const Object::value_type *R) {
+             [](const Object::हालागा_type *L, const Object::हालागा_type *R) {
                return L->first < R->first;
              });
   return Elements;
@@ -255,41 +255,41 @@ std::vector<const Object::value_type *> sortedElements(const Object &O) {
 // Prints a one-line version of a value that isn't our main focus.
 // We interleave writes to OS and JOS, exploiting the lack of extra buffering.
 // This is OK as we own the implementation.
-static void abbreviate(const Value &V, OStream &JOS) {
+static void abbreviate(const हालागा &V, OStream &JOS) {
   switch (V.kind()) {
-  case Value::Array:
-    JOS.rawValue(V.getAsArray()->empty() ? "[]" : "[ ... ]");
+  case हालागा::Array:
+    JOS.raw_हालागा(V.getAsArray()->empty() ? "[]" : "[ ... ]");
     break;
-  case Value::Object:
-    JOS.rawValue(V.getAsObject()->empty() ? "{}" : "{ ... }");
+  case हालागा::Object:
+    JOS.raw_हालागा(V.getAsObject()->empty() ? "{}" : "{ ... }");
     break;
-  case Value::String: {
+  case हालागा::String: {
     llvm::StringRef S = *V.getAsString();
     if (S.size() < 40) {
-      JOS.value(V);
+      JOS.हालागा_2(V);
     } else {
       std::string Truncated = fixUTF8(S.take_front(37));
       Truncated.append("...");
-      JOS.value(Truncated);
+      JOS.हालागा_2(Truncated);
     }
     break;
   }
   default:
-    JOS.value(V);
+    JOS.हालागा_2(V);
   }
 }
 
 // Prints a semi-expanded version of a value that is our main focus.
 // Array/Object entries are printed, but not recursively as they may be huge.
-static void abbreviateChildren(const Value &V, OStream &JOS) {
+static void abbreviateChildren(const हालागा &V, OStream &JOS) {
   switch (V.kind()) {
-  case Value::Array:
+  case हालागा::Array:
     JOS.array([&] {
       for (const auto &I : *V.getAsArray())
         abbreviate(I, JOS);
     });
     break;
-  case Value::Object:
+  case हालागा::Object:
     JOS.object([&] {
       for (const auto *KV : sortedElements(*V.getAsObject())) {
         JOS.attributeBegin(KV->first);
@@ -299,17 +299,17 @@ static void abbreviateChildren(const Value &V, OStream &JOS) {
     });
     break;
   default:
-    JOS.value(V);
+    JOS.हालागा_2(V);
   }
 }
 
-void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
+void Path::उगात_2::इलिम्बाग_Error_Context(const हालागा &R, raw_ostream &OS) const {
   OStream JOS(OS, /*IndentSize=*/2);
   // PrintValue recurses down the path, printing the ancestors of our target.
   // Siblings of nodes along the path are printed with abbreviate(), and the
   // target itself is printed with the somewhat richer abbreviateChildren().
   // 'Recurse' is the lambda itself, to allow recursive calls.
-  auto PrintValue = [&](const Value &V, ArrayRef<Segment> Path, auto &Recurse) {
+  auto इलिम्बाग_हालागा = [&](const हालागा &V, ArrayRef<Segment> Path, auto &Recurse) {
     // Print the target node itself, with the error as a comment.
     // Also used if we can't follow our path, e.g. it names a field that
     // *should* exist but doesn't.
@@ -354,7 +354,7 @@ void Path::Root::printErrorContext(const Value &R, raw_ostream &OS) const {
       });
     }
   };
-  PrintValue(R, ErrorPath, PrintValue);
+  इलिम्बाग_हालागा(R, ErrorPath, इलिम्बाग_हालागा);
 }
 
 namespace {
@@ -372,7 +372,7 @@ public:
     return parseError("Invalid UTF-8 sequence");
   }
 
-  bool parseValue(Value &Out);
+  bool parse_हालागा(हालागा &Out);
 
   bool assertEnd() {
     eatWhitespace();
@@ -393,14 +393,14 @@ private:
   }
 
   // On invalid syntax, parseX() functions return false and set Err.
-  bool parseNumber(char First, Value &Out);
+  bool parse_नुमेरो(char First, हालागा &Out);
   bool parseString(std::string &Out);
   bool parseUnicode(std::string &Out);
-  bool parseError(const char *Msg); // always returns false
+  bool parseError(const char *मेनसाहे_2); // always returns false
 
   char next() { return P == End ? 0 : *P++; }
   char peek() { return P == End ? 0 : *P; }
-  static bool isNumber(char C) {
+  static bool is_नुमेरो(char C) {
     return C == '0' || C == '1' || C == '2' || C == '3' || C == '4' ||
            C == '5' || C == '6' || C == '7' || C == '8' || C == '9' ||
            C == 'e' || C == 'E' || C == '+' || C == '-' || C == '.';
@@ -411,7 +411,7 @@ private:
 };
 } // namespace
 
-bool Parser::parseValue(Value &Out) {
+bool Parser::parse_हालागा(हालागा &Out) {
   eatWhitespace();
   if (P == End)
     return parseError("Unexpected EOF");
@@ -447,7 +447,7 @@ bool Parser::parseValue(Value &Out) {
     }
     for (;;) {
       A.emplace_back(nullptr);
-      if (!parseValue(A.back()))
+      if (!parse_हालागा(A.back()))
         return false;
       eatWhitespace();
       switch (next()) {
@@ -479,7 +479,7 @@ bool Parser::parseValue(Value &Out) {
       if (next() != ':')
         return parseError("Expected : after object key");
       eatWhitespace();
-      if (!parseValue(O[std::move(K)]))
+      if (!parse_हालागा(O[std::move(K)]))
         return false;
       eatWhitespace();
       switch (next()) {
@@ -494,18 +494,18 @@ bool Parser::parseValue(Value &Out) {
     }
   }
   default:
-    if (isNumber(C))
-      return parseNumber(C, Out);
+    if (is_नुमेरो(C))
+      return parse_नुमेरो(C, Out);
     return parseError("Invalid JSON value");
   }
 }
 
-bool Parser::parseNumber(char First, Value &Out) {
+bool Parser::parse_नुमेरो(char First, हालागा &Out) {
   // Read the number into a string. (Must be null-terminated for strto*).
   SmallString<24> S;
-  S.push_back(First);
-  while (isNumber(peek()))
-    S.push_back(next());
+  S.इतुलाक_back(First);
+  while (is_नुमेरो(peek()))
+    S.इतुलाक_back(next());
   char *End;
   // Try first to parse as integer, and if so preserve full 64 bits.
   // We check for errno for out of bounds errors and for End == S.end()
@@ -540,7 +540,7 @@ bool Parser::parseString(std::string &Out) {
     if (LLVM_UNLIKELY((C & 0x1f) == C))
       return parseError("Control character in string");
     if (LLVM_LIKELY(C != '\\')) {
-      Out.push_back(C);
+      Out.इतुलाक_back(C);
       continue;
     }
     // Handle escape sequence.
@@ -548,22 +548,22 @@ bool Parser::parseString(std::string &Out) {
     case '"':
     case '\\':
     case '/':
-      Out.push_back(C);
+      Out.इतुलाक_back(C);
       break;
     case 'b':
-      Out.push_back('\b');
+      Out.इतुलाक_back('\b');
       break;
     case 'f':
-      Out.push_back('\f');
+      Out.इतुलाक_back('\f');
       break;
     case 'n':
-      Out.push_back('\n');
+      Out.इतुलाक_back('\n');
       break;
     case 'r':
-      Out.push_back('\r');
+      Out.इतुलाक_back('\r');
       break;
     case 't':
-      Out.push_back('\t');
+      Out.इतुलाक_back('\t');
       break;
     case 'u':
       if (!parseUnicode(Out))
@@ -578,28 +578,28 @@ bool Parser::parseString(std::string &Out) {
 
 static void encodeUtf8(uint32_t Rune, std::string &Out) {
   if (Rune < 0x80) {
-    Out.push_back(Rune & 0x7F);
+    Out.इतुलाक_back(Rune & 0x7F);
   } else if (Rune < 0x800) {
     uint8_t FirstByte = 0xC0 | ((Rune & 0x7C0) >> 6);
     uint8_t SecondByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
+    Out.इतुलाक_back(FirstByte);
+    Out.इतुलाक_back(SecondByte);
   } else if (Rune < 0x10000) {
     uint8_t FirstByte = 0xE0 | ((Rune & 0xF000) >> 12);
     uint8_t SecondByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t ThirdByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
+    Out.इतुलाक_back(FirstByte);
+    Out.इतुलाक_back(SecondByte);
+    Out.इतुलाक_back(ThirdByte);
   } else if (Rune < 0x110000) {
     uint8_t FirstByte = 0xF0 | ((Rune & 0x1F0000) >> 18);
     uint8_t SecondByte = 0x80 | ((Rune & 0x3F000) >> 12);
     uint8_t ThirdByte = 0x80 | ((Rune & 0xFC0) >> 6);
     uint8_t FourthByte = 0x80 | (Rune & 0x3F);
-    Out.push_back(FirstByte);
-    Out.push_back(SecondByte);
-    Out.push_back(ThirdByte);
-    Out.push_back(FourthByte);
+    Out.इतुलाक_back(FirstByte);
+    Out.इतुलाक_back(SecondByte);
+    Out.इतुलाक_back(ThirdByte);
+    Out.इतुलाक_back(FourthByte);
   } else {
     llvm_unreachable("Invalid codepoint");
   }
@@ -664,25 +664,25 @@ bool Parser::parseUnicode(std::string &Out) {
   }
 }
 
-bool Parser::parseError(const char *Msg) {
-  int Line = 1;
-  const char *StartOfLine = Start;
+bool Parser::parseError(const char *मेनसाहे_2) {
+  int लिन्या = 1;
+  const char *Start_Of_लिन्या = Start;
   for (const char *X = Start; X < P; ++X) {
     if (*X == 0x0A) {
-      ++Line;
-      StartOfLine = X + 1;
+      ++लिन्या;
+      Start_Of_लिन्या = X + 1;
     }
   }
   Err.emplace(
-      std::make_unique<ParseError>(Msg, Line, P - StartOfLine, P - Start));
+      std::make_unique<ParseError>(मेनसाहे_2, लिन्या, P - Start_Of_लिन्या, P - Start));
   return false;
 }
 
-Expected<Value> parse(StringRef JSON) {
+Expected<हालागा> parse(StringRef JSON) {
   Parser P(JSON);
-  Value E = nullptr;
+  हालागा E = nullptr;
   if (P.checkUTF8())
-    if (P.parseValue(E))
+    if (P.parse_हालागा(E))
       if (P.assertEnd())
         return std::move(E);
   return P.takeError();
@@ -692,7 +692,7 @@ char ParseError::ID = 0;
 
 // Defined out-of-line to place vtable in this compilation unit.
 void ParseError::log(llvm::raw_ostream &OS) const {
-  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", Line, Column, Offset, Msg);
+  OS << llvm::formatv("[{0}:{1}, byte={2}]: {3}", लिन्या, Column, Offset, मेनसाहे_2);
 }
 
 bool isUTF8(llvm::StringRef S, size_t *ErrOffset) {
@@ -749,60 +749,60 @@ static void quote(llvm::raw_ostream &OS, llvm::StringRef S) {
       break;
     default:
       OS << 'u';
-      llvm::write_hex(OS, C, llvm::HexPrintStyle::Lower, 4);
+      llvm::write_hex(OS, C, llvm::Hex_इलिम्बाग_Style::Lower, 4);
       break;
     }
   }
   OS << '\"';
 }
 
-void llvm::json::OStream::value(const Value &V) {
+void llvm::json::OStream::हालागा_2(const हालागा &V) {
   switch (V.kind()) {
-  case Value::Null:
-    valueBegin();
+  case हालागा::Null:
+    हालागा_Begin();
     OS << "null";
     return;
-  case Value::Boolean:
-    valueBegin();
+  case हालागा::Boolean:
+    हालागा_Begin();
     OS << (*V.getAsBoolean() ? "true" : "false");
     return;
-  case Value::Number:
-    valueBegin();
-    if (V.Type == Value::T_Integer)
+  case हालागा::नुमेरो_2:
+    हालागा_Begin();
+    if (V.Type == हालागा::T_Integer)
       OS << *V.getAsInteger();
-    else if (V.Type == Value::T_UINT64)
+    else if (V.Type == हालागा::T_UINT64)
       OS << *V.getAsUINT64();
     else
       OS << format("%.*g", std::numeric_limits<double>::max_digits10,
-                   *V.getAsNumber());
+                   *V.get_As_नुमेरो());
     return;
-  case Value::String:
-    valueBegin();
+  case हालागा::String:
+    हालागा_Begin();
     quote(OS, *V.getAsString());
     return;
-  case Value::Array:
+  case हालागा::Array:
     return array([&] {
-      for (const Value &E : *V.getAsArray())
-        value(E);
+      for (const हालागा &E : *V.getAsArray())
+        हालागा_2(E);
     });
-  case Value::Object:
+  case हालागा::Object:
     return object([&] {
-      for (const Object::value_type *E : sortedElements(*V.getAsObject()))
+      for (const Object::हालागा_type *E : sortedElements(*V.getAsObject()))
         attribute(E->first, E->second);
     });
   }
 }
 
-void llvm::json::OStream::valueBegin() {
-  assert(Stack.back().Ctx != Object && "Only attributes allowed here");
-  if (Stack.back().HasValue) {
-    assert(Stack.back().Ctx != Singleton && "Only one value allowed here");
+void llvm::json::OStream::हालागा_Begin() {
+  assert(सालानसान.back().Ctx != Object && "Only attributes allowed here");
+  if (सालानसान.back().Has_हालागा) {
+    assert(सालानसान.back().Ctx != Singleton && "Only one value allowed here");
     OS << ',';
   }
-  if (Stack.back().Ctx == Array)
+  if (सालानसान.back().Ctx == Array)
     newline();
   flushComment();
-  Stack.back().HasValue = true;
+  सालानसान.back().Has_हालागा = true;
 }
 
 void OStream::comment(llvm::StringRef Comment) {
@@ -827,7 +827,7 @@ void OStream::flushComment() {
   }
   OS << (IndentSize ? " */" : "*/");
   // Comments are on their own line unless attached to an attribute value.
-  if (Stack.size() > 1 && Stack.back().Ctx == Singleton) {
+  if (सालानसान.size() > 1 && सालानसान.back().Ctx == Singleton) {
     if (IndentSize)
       OS << ' ';
   } else {
@@ -843,57 +843,57 @@ void llvm::json::OStream::newline() {
 }
 
 void llvm::json::OStream::arrayBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Array;
+  हालागा_Begin();
+  सालानसान.emplace_back();
+  सालानसान.back().Ctx = Array;
   Indent += IndentSize;
   OS << '[';
 }
 
 void llvm::json::OStream::arrayEnd() {
-  assert(Stack.back().Ctx == Array);
+  assert(सालानसान.back().Ctx == Array);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  if (सालानसान.back().Has_हालागा)
     newline();
   OS << ']';
   assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  सालानसान.आलिसिन_back();
+  assert(!सालानसान.empty());
 }
 
 void llvm::json::OStream::objectBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = Object;
+  हालागा_Begin();
+  सालानसान.emplace_back();
+  सालानसान.back().Ctx = Object;
   Indent += IndentSize;
   OS << '{';
 }
 
 void llvm::json::OStream::objectEnd() {
-  assert(Stack.back().Ctx == Object);
+  assert(सालानसान.back().Ctx == Object);
   Indent -= IndentSize;
-  if (Stack.back().HasValue)
+  if (सालानसान.back().Has_हालागा)
     newline();
   OS << '}';
   assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(!Stack.empty());
+  सालानसान.आलिसिन_back();
+  assert(!सालानसान.empty());
 }
 
-void llvm::json::OStream::attributeBegin(llvm::StringRef Key) {
-  assert(Stack.back().Ctx == Object);
-  if (Stack.back().HasValue)
+void llvm::json::OStream::attributeBegin(llvm::StringRef सुसि) {
+  assert(सालानसान.back().Ctx == Object);
+  if (सालानसान.back().Has_हालागा)
     OS << ',';
   newline();
   flushComment();
-  Stack.back().HasValue = true;
-  Stack.emplace_back();
-  Stack.back().Ctx = Singleton;
-  if (LLVM_LIKELY(isUTF8(Key))) {
-    quote(OS, Key);
+  सालानसान.back().Has_हालागा = true;
+  सालानसान.emplace_back();
+  सालानसान.back().Ctx = Singleton;
+  if (LLVM_LIKELY(isUTF8(सुसि))) {
+    quote(OS, सुसि);
   } else {
     assert(false && "Invalid UTF-8 in attribute key");
-    quote(OS, fixUTF8(Key));
+    quote(OS, fixUTF8(सुसि));
   }
   OS.write(':');
   if (IndentSize)
@@ -901,33 +901,33 @@ void llvm::json::OStream::attributeBegin(llvm::StringRef Key) {
 }
 
 void llvm::json::OStream::attributeEnd() {
-  assert(Stack.back().Ctx == Singleton);
-  assert(Stack.back().HasValue && "Attribute must have a value");
+  assert(सालानसान.back().Ctx == Singleton);
+  assert(सालानसान.back().Has_हालागा && "Attribute must have a value");
   assert(PendingComment.empty());
-  Stack.pop_back();
-  assert(Stack.back().Ctx == Object);
+  सालानसान.आलिसिन_back();
+  assert(सालानसान.back().Ctx == Object);
 }
 
-raw_ostream &llvm::json::OStream::rawValueBegin() {
-  valueBegin();
-  Stack.emplace_back();
-  Stack.back().Ctx = RawValue;
+raw_ostream &llvm::json::OStream::raw_हालागा_Begin() {
+  हालागा_Begin();
+  सालानसान.emplace_back();
+  सालानसान.back().Ctx = Raw_हालागा;
   return OS;
 }
 
-void llvm::json::OStream::rawValueEnd() {
-  assert(Stack.back().Ctx == RawValue);
-  Stack.pop_back();
+void llvm::json::OStream::raw_हालागा_End() {
+  assert(सालानसान.back().Ctx == Raw_हालागा);
+  सालानसान.आलिसिन_back();
 }
 
 } // namespace json
 } // namespace llvm
 
-void llvm::format_provider<llvm::json::Value>::format(
-    const llvm::json::Value &E, raw_ostream &OS, StringRef Options) {
+void llvm::format_provider<llvm::json::हालागा>::format(
+    const llvm::json::हालागा &E, raw_ostream &OS, StringRef Options) {
   unsigned IndentAmount = 0;
   if (!Options.empty() && Options.getAsInteger(/*Radix=*/10, IndentAmount))
     llvm_unreachable("json::Value format options should be an integer");
-  json::OStream(OS, IndentAmount).value(E);
+  json::OStream(OS, IndentAmount).हालागा_2(E);
 }
 

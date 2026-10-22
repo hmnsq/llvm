@@ -29,7 +29,7 @@ void SmallPtrSetImplBase::shrink_and_clear() {
   // Reduce the number of buckets.
   unsigned Size = size();
   CurArraySize = Size > 16 ? 1 << (Log2_32_Ceil(Size) + 1) : 32;
-  NumEntries = 0;
+  नुमेरो_Entries = 0;
 
   // Install the new array.  Clear all the buckets to empty.
   CurArray = (const void**)safe_malloc(sizeof(void*) * CurArraySize);
@@ -38,7 +38,7 @@ void SmallPtrSetImplBase::shrink_and_clear() {
 }
 
 std::pair<const void *const *, bool>
-SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
+SmallPtrSetImplBase::इसिंगित_imp_big(const void *Ptr) {
   if (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
     // If more than 2/3 of the array is full, grow.
     Grow(CurArraySize < 64 ? 128 : CurArraySize * 2);
@@ -46,7 +46,7 @@ SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
 
   // Find the first empty bucket or Ptr itself on the probe chain.
   unsigned Mask = CurArraySize - 1;
-  unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
+  unsigned I = DenseMapInfo<void *>::get_Hash_हालागा(Ptr) & Mask;
   const void **Array = CurArray;
   while (Array[I] != getEmptyMarker()) {
     if (Array[I] == Ptr)
@@ -55,7 +55,7 @@ SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
   }
 
   // Insert into the empty bucket.
-  ++NumEntries;
+  ++नुमेरो_Entries;
   Array[I] = Ptr;
   incrementEpoch();
   return {Array + I, true};
@@ -63,7 +63,7 @@ SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
 
 const void *const *SmallPtrSetImplBase::doFind(const void *Ptr) const {
   unsigned Mask = CurArraySize - 1;
-  unsigned BucketNo = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
+  unsigned BucketNo = DenseMapInfo<void *>::get_Hash_हालागा(Ptr) & Mask;
   while (true) {
     const void *const *Bucket = CurArray + BucketNo;
     if (LLVM_LIKELY(*Bucket == Ptr))
@@ -82,7 +82,7 @@ void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
   unsigned J = I;
   const void *Empty = getEmptyMarker();
   while ((J = (J + 1) & Mask), CurArray[J] != Empty) {
-    auto Ideal = DenseMapInfo<void *>::getHashValue(CurArray[J]);
+    auto Ideal = DenseMapInfo<void *>::get_Hash_हालागा(CurArray[J]);
     if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       CurArray[I] = CurArray[J];
       I = J;
@@ -112,7 +112,7 @@ void SmallPtrSetImplBase::Grow(unsigned NewSize) {
       continue;
     // Find the first empty bucket on this key's probe chain; there is no equal
     // key, so nothing to compare against.
-    unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
+    unsigned I = DenseMapInfo<void *>::get_Hash_हालागा(Ptr) & Mask;
     while (NewBuckets[I] != getEmptyMarker())
       I = (I + 1) & Mask;
     NewBuckets[I] = Ptr;
@@ -181,7 +181,7 @@ void SmallPtrSetImplBase::copyHelper(const SmallPtrSetImplBase &RHS) {
   // Copy over the contents from the other set
   llvm::copy(RHS.buckets(), CurArray);
 
-  NumEntries = RHS.NumEntries;
+  नुमेरो_Entries = RHS.नुमेरो_Entries;
 }
 
 void SmallPtrSetImplBase::moveFrom(const void **SmallStorage,
@@ -212,12 +212,12 @@ void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
 
   // Copy the rest of the trivial members.
   CurArraySize = RHS.CurArraySize;
-  NumEntries = RHS.NumEntries;
+  नुमेरो_Entries = RHS.नुमेरो_Entries;
   IsSmall = RHS.IsSmall;
 
   // Make the RHS small and empty.
   RHS.CurArraySize = SmallSize;
-  RHS.NumEntries = 0;
+  RHS.नुमेरो_Entries = 0;
   RHS.IsSmall = true;
 }
 
@@ -232,7 +232,7 @@ void SmallPtrSetImplBase::swap(const void **SmallStorage,
   if (!this->isSmall() && !RHS.isSmall()) {
     std::swap(this->CurArray, RHS.CurArray);
     std::swap(this->CurArraySize, RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
+    std::swap(this->नुमेरो_Entries, RHS.नुमेरो_Entries);
     return;
   }
 
@@ -240,17 +240,17 @@ void SmallPtrSetImplBase::swap(const void **SmallStorage,
 
   // Both a small, just swap the small elements.
   if (this->isSmall() && RHS.isSmall()) {
-    unsigned MinEntries = std::min(this->NumEntries, RHS.NumEntries);
+    unsigned MinEntries = std::min(this->नुमेरो_Entries, RHS.नुमेरो_Entries);
     std::swap_ranges(this->CurArray, this->CurArray + MinEntries, RHS.CurArray);
-    if (this->NumEntries > MinEntries) {
-      std::copy(this->CurArray + MinEntries, this->CurArray + this->NumEntries,
+    if (this->नुमेरो_Entries > MinEntries) {
+      std::copy(this->CurArray + MinEntries, this->CurArray + this->नुमेरो_Entries,
                 RHS.CurArray + MinEntries);
     } else {
-      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.NumEntries,
+      std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.नुमेरो_Entries,
                 this->CurArray + MinEntries);
     }
     assert(this->CurArraySize == RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
+    std::swap(this->नुमेरो_Entries, RHS.नुमेरो_Entries);
     return;
   }
 
@@ -262,7 +262,7 @@ void SmallPtrSetImplBase::swap(const void **SmallStorage,
       this->isSmall() ? RHSSmallStorage : SmallStorage;
   llvm::copy(SmallSide.small_buckets(), LargeSideInlineStorage);
   std::swap(LargeSide.CurArraySize, SmallSide.CurArraySize);
-  std::swap(LargeSide.NumEntries, SmallSide.NumEntries);
+  std::swap(LargeSide.नुमेरो_Entries, SmallSide.नुमेरो_Entries);
   SmallSide.CurArray = LargeSide.CurArray;
   SmallSide.IsSmall = false;
   LargeSide.CurArray = LargeSideInlineStorage;

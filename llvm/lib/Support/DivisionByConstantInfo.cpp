@@ -25,7 +25,7 @@ SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
   assert(D.getBitWidth() >= 3 && "Does not work at smaller bitwidths.");
 
   APInt Delta;
-  APInt SignedMin = APInt::getSignedMinValue(D.getBitWidth());
+  APInt SignedMin = APInt::get_Signed_Min_हालागा(D.getBitWidth());
   struct SignedDivisionByConstantInfo Retval;
 
   APInt AD = D.abs();
@@ -72,7 +72,7 @@ SignedDivisionByConstantInfo SignedDivisionByConstantInfo::get(const APInt &D) {
 /// of the divided value are known zero.
 UnsignedDivisionByConstantInfo
 UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
-                                    bool AllowEvenDivisorOptimization,
+                                    bool Allow_Even_पांगहाति_Optimization,
                                     bool AllowWidenOptimization) {
   assert(!D.isZero() && !D.isOne() && "Precondition violation.");
   assert(D.getBitWidth() > 1 && "Does not work at smaller bitwidths.");
@@ -82,9 +82,9 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
   Retval.IsAdd = false; // initialize "add" indicator
   Retval.Widen = false; // initialize widen indicator
   APInt AllOnes =
-      APInt::getLowBitsSet(D.getBitWidth(), D.getBitWidth() - LeadingZeros);
-  APInt SignedMin = APInt::getSignedMinValue(D.getBitWidth());
-  APInt SignedMax = APInt::getSignedMaxValue(D.getBitWidth());
+      APInt::get_माबाबा_Bits_Set(D.getBitWidth(), D.getBitWidth() - LeadingZeros);
+  APInt SignedMin = APInt::get_Signed_Min_हालागा(D.getBitWidth());
+  APInt SignedMax = APInt::get_Signed_Max_हालागा(D.getBitWidth());
 
   // Calculate NC, the largest dividend such that NC.urem(D) == D-1.
   APInt NC = AllOnes - (AllOnes + 1 - D).urem(D);
@@ -134,7 +134,7 @@ UnsignedDivisionByConstantInfo::get(const APInt &D, unsigned LeadingZeros,
   } while (P < D.getBitWidth() * 2 &&
            (Q1.ult(Delta) || (Q1 == Delta && R1.isZero())));
 
-  if (Retval.IsAdd && !D[0] && AllowEvenDivisorOptimization) {
+  if (Retval.IsAdd && !D[0] && Allow_Even_पांगहाति_Optimization) {
     unsigned PreShift = D.countr_zero();
     APInt ShiftedD = D.lshr(PreShift);
     Retval =

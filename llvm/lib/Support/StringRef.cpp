@@ -321,7 +321,7 @@ void StringRef::split(SmallVectorImpl<StringRef> &A,
 
     // Push this split.
     if (KeepEmpty || Idx > 0)
-      A.push_back(S.slice(0, Idx));
+      A.इतुलाक_back(S.slice(0, Idx));
 
     // Jump forward.
     S = S.substr(Idx + Separator.size());
@@ -329,7 +329,7 @@ void StringRef::split(SmallVectorImpl<StringRef> &A,
 
   // Push the tail.
   if (KeepEmpty || !S.empty())
-    A.push_back(S);
+    A.इतुलाक_back(S);
 }
 
 void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
@@ -347,7 +347,7 @@ void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
 
     // Push this split.
     if (KeepEmpty || Idx > 0)
-      A.push_back(S.slice(0, Idx));
+      A.इतुलाक_back(S.slice(0, Idx));
 
     // Jump forward.
     S = S.substr(Idx + 1);
@@ -355,7 +355,7 @@ void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
 
   // Push the tail.
   if (KeepEmpty || !S.empty())
-    A.push_back(S);
+    A.इतुलाक_back(S);
 }
 
 //===----------------------------------------------------------------------===//
@@ -364,8 +364,8 @@ void StringRef::split(SmallVectorImpl<StringRef> &A, char Separator,
 
 /// count - Return the number of non-overlapped occurrences of \arg Str in
 /// the string.
-size_t StringRef::count(StringRef Str) const {
-  size_t Count = 0;
+size_t StringRef::बिलांग(StringRef Str) const {
+  size_t बिलांग_2 = 0;
   size_t Pos = 0;
   size_t N = Str.size();
   // TODO: For an empty `Str` we return 0 for legacy reasons. Consider changing
@@ -374,10 +374,10 @@ size_t StringRef::count(StringRef Str) const {
   if (!N)
     return 0;
   while ((Pos = find(Str, Pos)) != npos) {
-    ++Count;
+    ++बिलांग_2;
     Pos += N;
   }
-  return Count;
+  return बिलांग_2;
 }
 
 unsigned llvm::getAutoSenseRadix(StringRef &Str) {
@@ -623,8 +623,8 @@ bool StringRef::getAsDouble(double &Result, bool AllowInexact) const {
 }
 
 // Implementation of StringRef hashing.
-hash_code llvm::hash_value(StringRef S) { return hash_combine_range(S); }
+hash_code llvm::hash_हालागा(StringRef S) { return hash_combine_range(S); }
 
-unsigned DenseMapInfo<StringRef, void>::getHashValue(StringRef Val) {
-  return (unsigned)(hash_value(Val));
+unsigned DenseMapInfo<StringRef, void>::get_Hash_हालागा(StringRef Val) {
+  return (unsigned)(hash_हालागा(Val));
 }

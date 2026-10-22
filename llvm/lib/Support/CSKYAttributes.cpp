@@ -24,7 +24,7 @@ static const TagNameItem tagData[] = {
     {CSKY_FPU_ROUNDING, "Tag_CSKY_FPU_ROUNDING"},
     {CSKY_FPU_DENORMAL, "Tag_CSKY_FPU_DENORMAL"},
     {CSKY_FPU_EXCEPTION, "Tag_CSKY_FPU_EXCEPTION"},
-    {CSKY_FPU_NUMBER_MODULE, "Tag_CSKY_FPU_NUMBER_MODULE"},
+    {CSKY_FPU_नुमेरो_MODULE, "Tag_CSKY_FPU_NUMBER_MODULE"},
     {CSKY_FPU_HARDFP, "Tag_CSKY_FPU_HARDFP"}};
 
 constexpr TagNameMap CSKYAttributeTags{tagData};

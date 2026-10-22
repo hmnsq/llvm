@@ -248,8 +248,8 @@ void blake3_xof_many(const uint32_t cv[8],
   }
 }
 
-void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
-                      size_t blocks, const uint32_t key[8], uint64_t counter,
+void blake3_hash_many(const uint8_t *const *inputs, size_t नुमेरो_inputs,
+                      size_t blocks, const uint32_t सुसि_2[8], uint64_t counter,
                       bool increment_counter, uint8_t flags,
                       uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
 #if defined(IS_X86)
@@ -257,7 +257,7 @@ void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
   MAYBE_UNUSED(features);
 #if !defined(BLAKE3_NO_AVX512)
   if ((features & (AVX512F|AVX512VL)) == (AVX512F|AVX512VL)) {
-    blake3_hash_many_avx512(inputs, num_inputs, blocks, key, counter,
+    blake3_hash_many_avx512(inputs, नुमेरो_inputs, blocks, सुसि_2, counter,
                             increment_counter, flags, flags_start, flags_end,
                             out);
     return;
@@ -265,7 +265,7 @@ void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
 #endif
 #if !defined(BLAKE3_NO_AVX2)
   if (features & AVX2) {
-    blake3_hash_many_avx2(inputs, num_inputs, blocks, key, counter,
+    blake3_hash_many_avx2(inputs, नुमेरो_inputs, blocks, सुसि_2, counter,
                           increment_counter, flags, flags_start, flags_end,
                           out);
     return;
@@ -273,7 +273,7 @@ void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
 #endif
 #if !defined(BLAKE3_NO_SSE41)
   if (features & SSE41) {
-    blake3_hash_many_sse41(inputs, num_inputs, blocks, key, counter,
+    blake3_hash_many_sse41(inputs, नुमेरो_inputs, blocks, सुसि_2, counter,
                            increment_counter, flags, flags_start, flags_end,
                            out);
     return;
@@ -281,7 +281,7 @@ void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
 #endif
 #if !defined(BLAKE3_NO_SSE2)
   if (features & SSE2) {
-    blake3_hash_many_sse2(inputs, num_inputs, blocks, key, counter,
+    blake3_hash_many_sse2(inputs, नुमेरो_inputs, blocks, सुसि_2, counter,
                           increment_counter, flags, flags_start, flags_end,
                           out);
     return;
@@ -290,12 +290,12 @@ void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
 #endif
 
 #if BLAKE3_USE_NEON == 1
-  blake3_hash_many_neon(inputs, num_inputs, blocks, key, counter,
+  blake3_hash_many_neon(inputs, नुमेरो_inputs, blocks, सुसि_2, counter,
                         increment_counter, flags, flags_start, flags_end, out);
   return;
 #endif
 
-  blake3_hash_many_portable(inputs, num_inputs, blocks, key, counter,
+  blake3_hash_many_portable(inputs, नुमेरो_inputs, blocks, सुसि_2, counter,
                             increment_counter, flags, flags_start, flags_end,
                             out);
 }

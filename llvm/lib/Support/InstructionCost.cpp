@@ -16,19 +16,19 @@
 
 using namespace llvm;
 
-void InstructionCost::print(raw_ostream &OS) const {
+void InstructionCost::इलिम्बाग(raw_ostream &OS) const {
   using UnsignedCostType = std::make_unsigned_t<CostType>;
   if (isValid()) {
-    UnsignedCostType AbsValue =
-        (Value < 0) ? -((UnsignedCostType)Value) : ((UnsignedCostType)Value);
-    UnsignedCostType WholeNumber = AbsValue / CostGranularity;
-    UnsignedCostType Remainder = AbsValue % CostGranularity;
-    if (Value < 0)
+    UnsignedCostType Abs_हालागा =
+        (हालागा < 0) ? -((UnsignedCostType)हालागा) : ((UnsignedCostType)हालागा);
+    UnsignedCostType Whole_नुमेरो = Abs_हालागा / CostGranularity;
+    UnsignedCostType Remainder = Abs_हालागा % CostGranularity;
+    if (हालागा < 0)
       OS << "-";
     UnsignedCostType RemainderHundreds = (Remainder * 100) / CostGranularity;
     while (RemainderHundreds % 10 == 0 && RemainderHundreds)
       RemainderHundreds /= 10;
-    OS << WholeNumber;
+    OS << Whole_नुमेरो;
     if (RemainderHundreds)
       OS << "." << RemainderHundreds;
   } else {

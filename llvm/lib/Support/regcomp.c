@@ -202,12 +202,12 @@ static void p_ere_exp(struct parse *);
 static void p_str(struct parse *);
 static void p_bre(struct parse *, int, int);
 static int p_simp_re(struct parse *, int);
-static int p_count(struct parse *);
+static int p_बिलांग(struct parse *);
 static void p_bracket(struct parse *);
 static void p_b_term(struct parse *, cset *);
 static void p_b_cclass(struct parse *, cset *);
 static void p_b_eclass(struct parse *, cset *);
-static char p_b_symbol(struct parse *);
+static char p_b_सिम्बोलो(struct parse *);
 static char p_b_coll_elem(struct parse *, int);
 static char othercase(int);
 static void bothcases(struct parse *, int);
@@ -260,7 +260,7 @@ static char nuls[10]; /* place to point scanner in event of error */
 #define MUSTEAT(c, e) (REQUIRE(MORE() && GETNEXT() == (c), e))
 #define MUSTNOTSEE(c, e) (REQUIRE(!MORE() || PEEK() != (c), e))
 #define EMIT(op, sopnd) doemit(p, (sop)(op), (size_t)(sopnd))
-#define INSERT(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
+#define इसिंगित_3(op, pos) doinsert(p, (sop)(op), HERE() - (pos) + 1, pos)
 #define AHEAD(pos) dofwd(p, pos, HERE() - (pos))
 #define ASTERN(sop, pos) EMIT(sop, HERE() - pos)
 #define HERE() (p->slen)
@@ -404,7 +404,7 @@ static void p_ere(struct parse *p,
       break; /* NOTE BREAK OUT */
 
     if (first) {
-      INSERT(OCH_, conc); /* offset is wrong */
+      इसिंगित_3(OCH_, conc); /* offset is wrong */
       prevfwd = conc;
       prevback = conc;
       first = 0;
@@ -430,7 +430,7 @@ static void p_ere(struct parse *p,
 static void p_ere_exp(struct parse *p) {
   char c;
   sopno pos;
-  int count;
+  int बिलांग;
   int count2;
   int backrefnum;
   sopno subno;
@@ -595,18 +595,18 @@ static void p_ere_exp(struct parse *p) {
   switch (c) {
   case '*': /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    इसिंगित_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    इसिंगित_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
     break;
   case '+':
-    INSERT(OPLUS_, pos);
+    इसिंगित_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
     break;
   case '?':
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, pos); /* offset slightly wrong */
+    इसिंगित_3(OCH_, pos); /* offset slightly wrong */
     ASTERN(OOR1, pos); /* this one's right */
     AHEAD(pos);        /* fix the OCH_ */
     EMIT(OOR2, 0);     /* offset very wrong... */
@@ -614,16 +614,16 @@ static void p_ere_exp(struct parse *p) {
     ASTERN(O_CH, THERETHERE());
     break;
   case '{':
-    count = p_count(p);
+    बिलांग = p_बिलांग(p);
     if (EAT(',')) {
       if (isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
+        count2 = p_बिलांग(p);
+        REQUIRE(बिलांग <= count2, REG_BADBR);
       } else /* single number with comma */
         count2 = REGINFINITY;
     } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
+      count2 = बिलांग;
+    repeat(p, pos, बिलांग, count2);
     if (!EAT('}')) { /* error heuristics */
       while (MORE() && PEEK() != '}')
         NEXT();
@@ -695,7 +695,7 @@ p_simp_re(struct parse *p,
           int starordinary) /* is a leading * an ordinary character? */
 {
   int c;
-  int count;
+  int बिलांग;
   int count2;
   sopno pos;
   int i;
@@ -777,21 +777,21 @@ p_simp_re(struct parse *p,
 
   if (EAT('*')) { /* implemented as +? */
     /* this case does not require the (y|) trick, noKLUDGE */
-    INSERT(OPLUS_, pos);
+    इसिंगित_3(OPLUS_, pos);
     ASTERN(O_PLUS, pos);
-    INSERT(OQUEST_, pos);
+    इसिंगित_3(OQUEST_, pos);
     ASTERN(O_QUEST, pos);
   } else if (EATTWO('\\', '{')) {
-    count = p_count(p);
+    बिलांग = p_बिलांग(p);
     if (EAT(',')) {
       if (MORE() && isdigit((uch)PEEK())) {
-        count2 = p_count(p);
-        REQUIRE(count <= count2, REG_BADBR);
+        count2 = p_बिलांग(p);
+        REQUIRE(बिलांग <= count2, REG_BADBR);
       } else /* single number with comma */
         count2 = REGINFINITY;
     } else /* just a single number */
-      count2 = count;
-    repeat(p, pos, count, count2);
+      count2 = बिलांग;
+    repeat(p, pos, बिलांग, count2);
     if (!EATTWO('\\', '}')) { /* error heuristics */
       while (MORE() && !SEETWO('\\', '}'))
         NEXT();
@@ -808,17 +808,17 @@ p_simp_re(struct parse *p,
  - p_count - parse a repetition count
  */
 static int /* the value */
-p_count(struct parse *p) {
-  int count = 0;
+p_बिलांग(struct parse *p) {
+  int बिलांग = 0;
   int ndigits = 0;
 
-  while (MORE() && isdigit((uch)PEEK()) && count <= DUPMAX) {
-    count = count * 10 + (GETNEXT() - '0');
+  while (MORE() && isdigit((uch)PEEK()) && बिलांग <= DUPMAX) {
+    बिलांग = बिलांग * 10 + (GETNEXT() - '0');
     ndigits++;
   }
 
-  REQUIRE(ndigits > 0 && count <= DUPMAX, REG_BADBR);
-  return (count);
+  REQUIRE(ndigits > 0 && बिलांग <= DUPMAX, REG_BADBR);
+  return (बिलांग);
 }
 
 /*
@@ -947,14 +947,14 @@ static void p_b_term(struct parse *p, cset *cs) {
     break;
   default: /* symbol, ordinary character, or range */
            /* xxx revision needed for multichar stuff */
-    start = p_b_symbol(p);
+    start = p_b_सिम्बोलो(p);
     if (SEE('-') && MORE2() && PEEK2() != ']') {
       /* range */
       NEXT();
       if (EAT('-'))
         finish = '-';
       else
-        finish = p_b_symbol(p);
+        finish = p_b_सिम्बोलो(p);
     } else {
       finish = start;
     }
@@ -1011,17 +1011,17 @@ static void p_b_eclass(struct parse *p, cset *cs) {
  - p_b_symbol - parse a character or [..]ed multicharacter collating symbol
  */
 static char /* value of symbol */
-p_b_symbol(struct parse *p) {
-  char value;
+p_b_सिम्बोलो(struct parse *p) {
+  char हालागा_2;
 
   REQUIRE(MORE(), REG_EBRACK);
   if (!EATTWO('[', '.'))
     return (GETNEXT());
 
   /* collating symbol */
-  value = p_b_coll_elem(p, '.');
+  हालागा_2 = p_b_coll_elem(p, '.');
   REQUIRE(EATTWO('.', ']'), REG_ECOLLATE);
-  return (value);
+  return (हालागा_2);
 }
 
 /*
@@ -1155,7 +1155,7 @@ static void repeat(struct parse *p,
   case REP(0, N):   /* as x{1,n}? */
   case REP(0, INF): /* as x{1,}? */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start); /* offset is wrong... */
+    इसिंगित_3(OCH_, start); /* offset is wrong... */
     repeat(p, start + 1, 1, to);
     ASTERN(OOR1, start);
     AHEAD(start); /* ... fix it */
@@ -1168,7 +1168,7 @@ static void repeat(struct parse *p,
     break;
   case REP(1, N): /* as x?x{1,n-1} */
     /* KLUDGE: emit y? as (y|) until subtle bug gets fixed */
-    INSERT(OCH_, start);
+    इसिंगित_3(OCH_, start);
     ASTERN(OOR1, start);
     AHEAD(start);
     EMIT(OOR2, 0);  /* offset very wrong... */
@@ -1179,7 +1179,7 @@ static void repeat(struct parse *p,
     repeat(p, copy, 1, to - 1);
     break;
   case REP(1, INF): /* as x+ */
-    INSERT(OPLUS_, start);
+    इसिंगित_3(OPLUS_, start);
     ASTERN(O_PLUS, start);
     break;
   case REP(N, N): /* as xx{m-1,n-1} */
@@ -1272,12 +1272,12 @@ nomem:
  */
 static void freeset(struct parse *p, cset *cs) {
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *इताअस_2 = &p->g->sets[p->g->ncsets];
   size_t css = (size_t)p->g->csetsize;
 
   for (i = 0; i < css; i++)
     CHsub(cs, i);
-  if (cs == top - 1) /* recover only the easy case */
+  if (cs == इताअस_2 - 1) /* recover only the easy case */
     p->g->ncsets--;
 }
 
@@ -1294,12 +1294,12 @@ static int /* set number */
 freezeset(struct parse *p, cset *cs) {
   uch h = cs->hash;
   size_t i;
-  cset *top = &p->g->sets[p->g->ncsets];
+  cset *इताअस_2 = &p->g->sets[p->g->ncsets];
   cset *cs2;
   size_t css = (size_t)p->g->csetsize;
 
   /* look for an earlier one which is the same */
-  for (cs2 = &p->g->sets[0]; cs2 < top; cs2++)
+  for (cs2 = &p->g->sets[0]; cs2 < इताअस_2; cs2++)
     if (cs2->hash == h && cs2 != cs) {
       /* maybe */
       for (i = 0; i < css; i++)
@@ -1309,7 +1309,7 @@ freezeset(struct parse *p, cset *cs) {
         break; /* yes */
     }
 
-  if (cs2 < top) { /* found one */
+  if (cs2 < इताअस_2) { /* found one */
     freeset(p, cs);
     cs = cs2;
   }
@@ -1526,13 +1526,13 @@ static void doinsert(struct parse *p, sop op, size_t opnd, sopno pos) {
 /*
  - dofwd - complete a forward reference
  */
-static void dofwd(struct parse *p, sopno pos, sop value) {
+static void dofwd(struct parse *p, sopno pos, sop हालागा_2) {
   /* avoid making error situations worse */
   if (p->error != 0)
     return;
 
-  assert(value < 1 << OPSHIFT);
-  p->strip[pos] = OP(p->strip[pos]) | value;
+  assert(हालागा_2 < 1 << OPSHIFT);
+  p->strip[pos] = OP(p->strip[pos]) | हालागा_2;
 }
 
 /*

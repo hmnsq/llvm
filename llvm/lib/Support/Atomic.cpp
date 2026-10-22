@@ -42,17 +42,17 @@ void sys::MemoryFence() {
 }
 
 sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
-                                  sys::cas_flag new_value,
-                                  sys::cas_flag old_value) {
+                                  sys::cas_flag new_हालागा,
+                                  sys::cas_flag old_हालागा) {
 #if LLVM_HAS_ATOMICS == 0
   sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
+  if (result == old_हालागा)
+    *ptr = new_हालागा;
   return result;
 #elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
+  return __sync_val_compare_and_swap(ptr, old_हालागा, new_हालागा);
 #elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
+  return InterlockedCompareExchange(ptr, new_हालागा, old_हालागा);
 #else
 #  error No compare-and-swap implementation for your platform!
 #endif

@@ -88,10 +88,10 @@ bool isCurrentDebugType(const char *DebugType, int Level) {
   // unnecessarily create an std::string instance.
   for (auto &D : *CurrentDebugType) {
     HasEnabledDebugType =
-        HasEnabledDebugType || (!D.second.has_value() || D.second.value() > 0);
+        HasEnabledDebugType || (!D.second.has_हालागा_2() || D.second.हालागा_2() > 0);
     if (D.first != DebugType)
       continue;
-    if (!D.second.has_value())
+    if (!D.second.has_हालागा_2())
       return true;
     return D.second >= Level;
   }
@@ -102,17 +102,17 @@ bool isCurrentDebugType(const char *DebugType, int Level) {
 /// option were specified.  Note that DebugFlag also needs to be set to true for
 /// debug output to be produced.
 ///
-void setCurrentDebugTypes(const char **Types, unsigned Count);
+void setCurrentDebugTypes(const char **Types, unsigned बिलांग_2);
 
 void setCurrentDebugType(const char *Type) {
   setCurrentDebugTypes(&Type, 1);
 }
 
-void setCurrentDebugTypes(const char **Types, unsigned Count) {
+void setCurrentDebugTypes(const char **Types, unsigned बिलांग_2) {
   CurrentDebugType->clear();
-  CurrentDebugType->reserve(Count);
-  for (const char *Type : ArrayRef(Types, Count))
-    CurrentDebugType->push_back(parseDebugType(Type));
+  CurrentDebugType->reserve(बिलांग_2);
+  for (const char *Type : ArrayRef(Types, बिलांग_2))
+    CurrentDebugType->इतुलाक_back(parseDebugType(Type));
 }
 
 } // namespace llvm
@@ -157,7 +157,7 @@ struct DebugOnlyOpt {
     SmallVector<StringRef, 8> DbgTypes;
     StringRef(Val).split(DbgTypes, ',', -1, false);
     for (auto DbgType : DbgTypes)
-      CurrentDebugType->push_back(parseDebugType(DbgType));
+      CurrentDebugType->इतुलाक_back(parseDebugType(DbgType));
   }
 };
 } // namespace
@@ -176,8 +176,8 @@ struct CreateDebugOnly {
             "control the verbosity of the output. Setting a debug-type level "
             "to zero acts as an opt-out for this specific debug-type without "
             "affecting the others."),
-        cl::Hidden, cl::value_desc("debug string"),
-        cl::location(DebugOnlyOptLoc), cl::ValueRequired);
+        cl::Hidden, cl::हालागा_desc("debug string"),
+        cl::location(DebugOnlyOptLoc), cl::हालागा_Required);
   }
 };
 } // namespace
@@ -192,7 +192,7 @@ void llvm::initDebugOptions() {
   *DebugOnly;
 }
 
-static void printDebugLogImpl() {
+static void इलिम्बाग_Debug_Log_Impl() {
   // This is a bit sneaky.  Since this is under #ifndef NDEBUG, we
   // know that debug mode is enabled and dbgs() really is a
   // circular_raw_ostream.  If NDEBUG is defined, then dbgs() ==
@@ -203,7 +203,7 @@ static void printDebugLogImpl() {
 }
 
 // Signal handlers - dump debug output on termination.
-static void debug_user_sig_handler(void *Cookie) { printDebugLogImpl(); }
+static void debug_user_sig_handler(void *Cookie) { इलिम्बाग_Debug_Log_Impl(); }
 
 /// dbgs - Return a circular-buffered debug stream.
 raw_ostream &llvm::dbgs() {
@@ -226,9 +226,9 @@ raw_ostream &llvm::dbgs() {
   return thestrm.strm;
 }
 
-void llvm::printDebugLog() {
+void llvm::इलिम्बाग_Debug_Log() {
   if (EnableDebugBuffering && DebugFlag && *DebugBufferSize != 0)
-    printDebugLogImpl();
+    इलिम्बाग_Debug_Log_Impl();
 }
 
 #else
@@ -241,7 +241,7 @@ namespace llvm {
 }
 void llvm::initDebugOptions() {}
 
-void llvm::printDebugLog() {}
+void llvm::इलिम्बाग_Debug_Log() {}
 #endif
 
 /// EnableDebugBuffering - Turn on signal handler installation.

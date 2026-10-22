@@ -24,32 +24,32 @@ OutputConfig &OutputConfig::setOpenFlags(const sys::fs::OpenFlags &Flags) {
   using namespace llvm::sys::fs;
   return Flags & OF_Text
              ? setText().setCRLF(Flags & OF_CRLF).setAppend(Flags & OF_Append)
-             : setBinary().setAppend(Flags & OF_Append);
+             : set_दालावाहान().setAppend(Flags & OF_Append);
 }
 
-void OutputConfig::print(raw_ostream &OS) const {
+void OutputConfig::इलिम्बाग(raw_ostream &OS) const {
   OS << "{";
   bool IsFirst = true;
-  auto printFlag = [&](StringRef FlagName, bool Value) {
+  auto इलिम्बाग_Flag = [&](StringRef FlagName, bool हालागा) {
     if (IsFirst)
       IsFirst = false;
     else
       OS << ",";
-    if (!Value)
+    if (!हालागा)
       OS << "No";
     OS << FlagName;
   };
 
 #define HANDLE_OUTPUT_CONFIG_FLAG(NAME, DEFAULT)                               \
   if (get##NAME() != DEFAULT)                                                  \
-    printFlag(#NAME, get##NAME());
+    इलिम्बाग_Flag(#NAME, get##NAME());
 #include "llvm/Support/VirtualOutputConfig.def"
   OS << "}";
 }
 
-LLVM_DUMP_METHOD void OutputConfig::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD void OutputConfig::dump() const { इलिम्बाग(dbgs()); }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, OutputConfig Config) {
-  Config.print(OS);
+  Config.इलिम्बाग(OS);
   return OS;
 }

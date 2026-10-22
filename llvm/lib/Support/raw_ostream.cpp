@@ -100,7 +100,7 @@ void raw_ostream::SetBufferAndMode(char *BufferStart, size_t Size,
          "stream must be unbuffered or have at least one byte");
   // Make sure the current buffer is free of content (we can't flush here; the
   // child buffer management logic will be in write_impl).
-  assert(GetNumBytesInBuffer() == 0 && "Current buffer is non-empty!");
+  assert(Get_नुमेरो_Bytes_In_Buffer() == 0 && "Current buffer is non-empty!");
 
   if (BufferMode == BufferKind::InternalBuffer)
     delete [] OutBufStart;
@@ -133,7 +133,7 @@ raw_ostream &raw_ostream::operator<<(long long N) {
 }
 
 raw_ostream &raw_ostream::write_hex(unsigned long long N) {
-  llvm::write_hex(*this, N, HexPrintStyle::Lower);
+  llvm::write_hex(*this, N, Hex_इलिम्बाग_Style::Lower);
   return *this;
 }
 
@@ -172,7 +172,7 @@ raw_ostream &raw_ostream::write_escaped(StringRef Str,
       *this << '\\' << '"';
       break;
     default:
-      if (isPrint(c)) {
+      if (is_इलिम्बाग(c)) {
         *this << c;
         break;
       }
@@ -196,7 +196,7 @@ raw_ostream &raw_ostream::write_escaped(StringRef Str,
 }
 
 raw_ostream &raw_ostream::operator<<(const void *P) {
-  llvm::write_hex(*this, (uintptr_t)P, HexPrintStyle::PrefixLower);
+  llvm::write_hex(*this, (uintptr_t)P, Hex_इलिम्बाग_Style::PrefixLower);
   return *this;
 }
 
@@ -245,14 +245,14 @@ raw_ostream &raw_ostream::write(const char *Ptr, size_t Size) {
       return write(Ptr, Size);
     }
 
-    size_t NumBytes = OutBufEnd - OutBufCur;
+    size_t नुमेरो_Bytes = OutBufEnd - OutBufCur;
 
     // If the buffer is empty at this point we have a string that is larger
     // than the buffer. Directly write the chunk that is a multiple of the
     // preferred buffer size and put the remainder in the buffer.
     if (LLVM_UNLIKELY(OutBufCur == OutBufStart)) {
-      assert(NumBytes != 0 && "undefined behavior");
-      size_t BytesToWrite = Size - (Size % NumBytes);
+      assert(नुमेरो_Bytes != 0 && "undefined behavior");
+      size_t BytesToWrite = Size - (Size % नुमेरो_Bytes);
       write_impl(Ptr, BytesToWrite);
       size_t BytesRemaining = Size - BytesToWrite;
       if (BytesRemaining > size_t(OutBufEnd - OutBufCur)) {
@@ -265,9 +265,9 @@ raw_ostream &raw_ostream::write(const char *Ptr, size_t Size) {
 
     // We don't have enough space in the buffer to fit the string in. Insert as
     // much as possible, flush and start over with the remainder.
-    copy_to_buffer(Ptr, NumBytes);
+    copy_to_buffer(Ptr, नुमेरो_Bytes);
     flush_nonempty();
-    return write(Ptr + NumBytes, Size - NumBytes);
+    return write(Ptr + नुमेरो_Bytes, Size - नुमेरो_Bytes);
   }
 
   copy_to_buffer(Ptr, Size);
@@ -302,13 +302,13 @@ raw_ostream::operator<<(function_ref<int(char *, size_t)> Snprint) {
   // If we have more than a few bytes left in our output buffer, try
   // formatting directly onto its end.
   size_t Size = 128;
-  size_t BufferBytesLeft = OutBufEnd - OutBufCur;
-  if (BufferBytesLeft > 3) {
-    int N = Snprint(OutBufCur, BufferBytesLeft);
+  size_t Buffer_Bytes_कालिवा = OutBufEnd - OutBufCur;
+  if (Buffer_Bytes_कालिवा > 3) {
+    int N = Snprint(OutBufCur, Buffer_Bytes_कालिवा);
     if (N < 0)
       return *this;
     // Common case is that we have plenty of space.
-    if (size_t(N) < BufferBytesLeft) {
+    if (size_t(N) < Buffer_Bytes_कालिवा) {
       OutBufCur += N;
       return *this;
     }
@@ -335,47 +335,47 @@ raw_ostream &raw_ostream::operator<<(const formatv_object_base &Obj) {
 }
 
 raw_ostream &raw_ostream::operator<<(const FormattedString &FS) {
-  unsigned LeftIndent = 0;
-  unsigned RightIndent = 0;
+  unsigned कालिवा_Indent = 0;
+  unsigned कानान_Indent = 0;
   const ssize_t Difference = FS.Width - FS.Str.size();
   if (Difference > 0) {
     switch (FS.Justify) {
     case FormattedString::JustifyNone:
       break;
-    case FormattedString::JustifyLeft:
-      RightIndent = Difference;
+    case FormattedString::Justify_कालिवा:
+      कानान_Indent = Difference;
       break;
-    case FormattedString::JustifyRight:
-      LeftIndent = Difference;
+    case FormattedString::Justify_कानान:
+      कालिवा_Indent = Difference;
       break;
     case FormattedString::JustifyCenter:
-      LeftIndent = Difference / 2;
-      RightIndent = Difference - LeftIndent;
+      कालिवा_Indent = Difference / 2;
+      कानान_Indent = Difference - कालिवा_Indent;
       break;
     }
   }
-  indent(LeftIndent);
+  indent(कालिवा_Indent);
   (*this) << FS.Str;
-  indent(RightIndent);
+  indent(कानान_Indent);
   return *this;
 }
 
-raw_ostream &raw_ostream::operator<<(const FormattedNumber &FN) {
+raw_ostream &raw_ostream::operator<<(const Formatted_नुमेरो &FN) {
   if (FN.Hex) {
-    HexPrintStyle Style;
+    Hex_इलिम्बाग_Style Style;
     if (FN.Upper && FN.HexPrefix)
-      Style = HexPrintStyle::PrefixUpper;
+      Style = Hex_इलिम्बाग_Style::PrefixUpper;
     else if (FN.Upper && !FN.HexPrefix)
-      Style = HexPrintStyle::Upper;
+      Style = Hex_इलिम्बाग_Style::Upper;
     else if (!FN.Upper && FN.HexPrefix)
-      Style = HexPrintStyle::PrefixLower;
+      Style = Hex_इलिम्बाग_Style::PrefixLower;
     else
-      Style = HexPrintStyle::Lower;
-    llvm::write_hex(*this, FN.HexValue, Style, FN.Width);
+      Style = Hex_इलिम्बाग_Style::Lower;
+    llvm::write_hex(*this, FN.Hex_हालागा, Style, FN.Width);
   } else {
     llvm::SmallString<16> Buffer;
     llvm::raw_svector_ostream Stream(Buffer);
-    llvm::write_integer(Stream, FN.DecValue, 0, IntegerStyle::Integer);
+    llvm::write_integer(Stream, FN.Dec_हालागा, 0, IntegerStyle::Integer);
     if (Buffer.size() < FN.Width)
       indent(FN.Width - Buffer.size());
     (*this) << Buffer;
@@ -387,17 +387,17 @@ raw_ostream &raw_ostream::operator<<(const FormattedBytes &FB) {
   if (FB.Bytes.empty())
     return *this;
 
-  size_t LineIndex = 0;
+  size_t लिन्या_Index = 0;
   auto Bytes = FB.Bytes;
   const size_t Size = Bytes.size();
-  HexPrintStyle HPS = FB.Upper ? HexPrintStyle::Upper : HexPrintStyle::Lower;
+  Hex_इलिम्बाग_Style HPS = FB.Upper ? Hex_इलिम्बाग_Style::Upper : Hex_इलिम्बाग_Style::Lower;
   uint64_t OffsetWidth = 0;
   if (FB.FirstByteOffset) {
     // Figure out how many nibbles are needed to print the largest offset
     // represented by this data set, so that we can align the offset field
     // to the right width.
-    size_t Lines = Size / FB.NumPerLine;
-    uint64_t MaxOffset = *FB.FirstByteOffset + Lines * FB.NumPerLine;
+    size_t मगा_लिन्या = Size / FB.नुमेरो_Per_लिन्या;
+    uint64_t MaxOffset = *FB.FirstByteOffset + मगा_लिन्या * FB.नुमेरो_Per_लिन्या;
     unsigned Power = 0;
     if (MaxOffset > 0)
       Power = llvm::Log2_64_Ceil(MaxOffset);
@@ -405,29 +405,29 @@ raw_ostream &raw_ostream::operator<<(const FormattedBytes &FB) {
   }
 
   // The width of a block of data including all spaces for group separators.
-  unsigned NumByteGroups =
-      alignTo(FB.NumPerLine, FB.ByteGroupSize) / FB.ByteGroupSize;
-  unsigned BlockCharWidth = FB.NumPerLine * 2 + NumByteGroups - 1;
+  unsigned नुमेरो_Byte_Groups =
+      alignTo(FB.नुमेरो_Per_लिन्या, FB.ByteGroupSize) / FB.ByteGroupSize;
+  unsigned BlockCharWidth = FB.नुमेरो_Per_लिन्या * 2 + नुमेरो_Byte_Groups - 1;
 
   while (!Bytes.empty()) {
     indent(FB.IndentLevel);
 
     if (FB.FirstByteOffset) {
       uint64_t Offset = *FB.FirstByteOffset;
-      llvm::write_hex(*this, Offset + LineIndex, HPS, OffsetWidth);
+      llvm::write_hex(*this, Offset + लिन्या_Index, HPS, OffsetWidth);
       *this << ": ";
     }
 
-    auto Line = Bytes.take_front(FB.NumPerLine);
+    auto लिन्या = Bytes.take_front(FB.नुमेरो_Per_लिन्या);
 
     size_t CharsPrinted = 0;
     // Print the hex bytes for this line in groups
-    for (size_t I = 0; I < Line.size(); ++I, CharsPrinted += 2) {
+    for (size_t I = 0; I < लिन्या.size(); ++I, CharsPrinted += 2) {
       if (I && (I % FB.ByteGroupSize) == 0) {
         ++CharsPrinted;
         *this << " ";
       }
-      llvm::write_hex(*this, Line[I], HPS, 2);
+      llvm::write_hex(*this, लिन्या[I], HPS, 2);
     }
 
     if (FB.ASCII) {
@@ -438,8 +438,8 @@ raw_ostream &raw_ostream::operator<<(const FormattedBytes &FB) {
       *this << "|";
 
       // Print the ASCII char values for each byte on this line
-      for (uint8_t Byte : Line) {
-        if (isPrint(Byte))
+      for (uint8_t Byte : लिन्या) {
+        if (is_इलिम्बाग(Byte))
           *this << static_cast<char>(Byte);
         else
           *this << '.';
@@ -447,16 +447,16 @@ raw_ostream &raw_ostream::operator<<(const FormattedBytes &FB) {
       *this << '|';
     }
 
-    Bytes = Bytes.drop_front(Line.size());
-    LineIndex += Line.size();
-    if (LineIndex < Size)
+    Bytes = Bytes.drop_front(लिन्या.size());
+    लिन्या_Index += लिन्या.size();
+    if (लिन्या_Index < Size)
       *this << '\n';
   }
   return *this;
 }
 
 template <char C>
-static raw_ostream &write_padding(raw_ostream &OS, unsigned NumChars) {
+static raw_ostream &write_padding(raw_ostream &OS, unsigned नुमेरो_Chars) {
   static const char Chars[] = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
@@ -464,25 +464,25 @@ static raw_ostream &write_padding(raw_ostream &OS, unsigned NumChars) {
                                C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C};
 
   // Usually the indentation is small, handle it with a fastpath.
-  if (NumChars < std::size(Chars))
-    return OS.write(Chars, NumChars);
+  if (नुमेरो_Chars < std::size(Chars))
+    return OS.write(Chars, नुमेरो_Chars);
 
-  while (NumChars) {
-    unsigned NumToWrite = std::min(NumChars, (unsigned)std::size(Chars) - 1);
-    OS.write(Chars, NumToWrite);
-    NumChars -= NumToWrite;
+  while (नुमेरो_Chars) {
+    unsigned नुमेरो_To_Write = std::min(नुमेरो_Chars, (unsigned)std::size(Chars) - 1);
+    OS.write(Chars, नुमेरो_To_Write);
+    नुमेरो_Chars -= नुमेरो_To_Write;
   }
   return OS;
 }
 
 /// indent - Insert 'NumSpaces' spaces.
-raw_ostream &raw_ostream::indent(unsigned NumSpaces) {
-  return write_padding<' '>(*this, NumSpaces);
+raw_ostream &raw_ostream::indent(unsigned नुमेरो_Spaces) {
+  return write_padding<' '>(*this, नुमेरो_Spaces);
 }
 
 /// write_zeros - Insert 'NumZeros' nulls.
-raw_ostream &raw_ostream::write_zeros(unsigned NumZeros) {
-  return write_padding<'\0'>(*this, NumZeros);
+raw_ostream &raw_ostream::write_zeros(unsigned नुमेरो_Zeros) {
+  return write_padding<'\0'>(*this, नुमेरो_Zeros);
 }
 
 bool raw_ostream::prepare_colors() {

@@ -34,7 +34,7 @@ namespace {
 struct CreateSeed {
   static void *call() {
     return new cl::opt<uint64_t>(
-        "rng-seed", cl::value_desc("seed"), cl::Hidden,
+        "rng-seed", cl::हालागा_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
 };
@@ -42,7 +42,7 @@ struct CreateSeed {
 static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
 void llvm::initRandomSeedOptions() { *Seed; }
 
-RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
+Random_नुमेरो_Generator::Random_नुमेरो_Generator(StringRef Salt) {
   LLVM_DEBUG(if (*Seed == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
@@ -62,7 +62,7 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
   Generator.seed(SeedSeq);
 }
 
-RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
+Random_नुमेरो_Generator::result_type Random_नुमेरो_Generator::operator()() {
   return Generator();
 }
 

@@ -40,86 +40,86 @@ raw_ostream &llvm::operator<<(raw_ostream &Out, const VersionTuple &V) {
   return Out;
 }
 
-static bool parseInt(StringRef &input, unsigned &value) {
-  assert(value == 0);
-  if (input.empty())
+static bool parseInt(StringRef &पासोक_2, unsigned &हालागा_2) {
+  assert(हालागा_2 == 0);
+  if (पासोक_2.empty())
     return true;
 
-  char next = input[0];
-  input = input.substr(1);
+  char next = पासोक_2[0];
+  पासोक_2 = पासोक_2.substr(1);
   if (next < '0' || next > '9')
     return true;
-  value = (unsigned)(next - '0');
+  हालागा_2 = (unsigned)(next - '0');
 
-  while (!input.empty()) {
-    next = input[0];
+  while (!पासोक_2.empty()) {
+    next = पासोक_2[0];
     if (next < '0' || next > '9')
       return false;
-    input = input.substr(1);
-    value = value * 10 + (unsigned)(next - '0');
+    पासोक_2 = पासोक_2.substr(1);
+    हालागा_2 = हालागा_2 * 10 + (unsigned)(next - '0');
   }
 
   return false;
 }
 
-bool VersionTuple::tryParse(StringRef input) {
+bool VersionTuple::tryParse(StringRef पासोक_2) {
   unsigned major = 0, minor = 0, subminor = 0, build = 0, subbuild = 0;
 
   // Parse the major version, [0-9]+
-  if (parseInt(input, major))
+  if (parseInt(पासोक_2, major))
     return true;
 
-  if (input.empty()) {
+  if (पासोक_2.empty()) {
     *this = VersionTuple(major);
     return false;
   }
 
   // If we're not done, parse the minor version, \.[0-9]+
-  if (input[0] != '.')
+  if (पासोक_2[0] != '.')
     return true;
-  input = input.substr(1);
-  if (parseInt(input, minor))
+  पासोक_2 = पासोक_2.substr(1);
+  if (parseInt(पासोक_2, minor))
     return true;
 
-  if (input.empty()) {
+  if (पासोक_2.empty()) {
     *this = VersionTuple(major, minor);
     return false;
   }
 
   // If we're not done, parse the subminor version, \.[0-9]+
-  if (!input.consume_front("."))
+  if (!पासोक_2.consume_front("."))
     return true;
-  if (parseInt(input, subminor))
+  if (parseInt(पासोक_2, subminor))
     return true;
 
-  if (input.empty()) {
+  if (पासोक_2.empty()) {
     *this = VersionTuple(major, minor, subminor);
     return false;
   }
 
   // If we're not done, parse the build version, \.[0-9]+
-  if (!input.consume_front("."))
+  if (!पासोक_2.consume_front("."))
     return true;
-  if (parseInt(input, build))
+  if (parseInt(पासोक_2, build))
     return true;
   if (build >= 1024 * 1024)
     return true;
 
-  if (input.empty()) {
+  if (पासोक_2.empty()) {
     *this = VersionTuple(major, minor, subminor, build);
     return false;
   }
 
   // And the subbuild version, \.[0-9]+
-  if (!input.consume_front("."))
+  if (!पासोक_2.consume_front("."))
     return true;
-  if (parseInt(input, subbuild))
+  if (parseInt(पासोक_2, subbuild))
     return true;
   if (subbuild >= 1024)
     return true;
 
   // If we have characters left over, it's an error.
-  if (!input.empty())
+  if (!पासोक_2.empty())
     return true;
 
   *this = VersionTuple(major, minor, subminor, build, subbuild);

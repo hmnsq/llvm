@@ -92,19 +92,19 @@ ToolContext ToolSession::makeContext(StringRef RegisteredName,
   return Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
+ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> मगा_कातविरान) {
+  if (मगा_कातविरान.empty())
     return make_error_code(std::errc::invalid_argument);
 
-  StringRef InvokedName = Args.front();
+  StringRef InvokedName = मगा_कातविरान.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
   if (!Tool) {
     if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
       return make_error_code(std::errc::no_such_file_or_directory);
-    Args = Args.drop_front();
-    if (Args.empty())
+    मगा_कातविरान = मगा_कातविरान.drop_front();
+    if (मगा_कातविरान.empty())
       return make_error_code(std::errc::invalid_argument);
-    InvokedName = Args.front();
+    InvokedName = मगा_कातविरान.front();
     Tool = findTool(InvokedName);
   }
 
@@ -113,12 +113,12 @@ ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
 
   std::string PrependArg = sys::path::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
-  MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
-  MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  SmallVector<char *, 16> Mutable_मगा_कातविरान;
+  Mutable_मगा_कातविरान.reserve(मगा_कातविरान.size() + 1);
+  for (const char *Arg : मगा_कातविरान)
+    Mutable_मगा_कातविरान.इतुलाक_back(const_cast<char *>(Arg));
+  Mutable_मगा_कातविरान.इतुलाक_back(nullptr);
+  return Tool->Main(मगा_कातविरान.size(), Mutable_मगा_कातविरान.data(), Context);
 }
 
 ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
@@ -127,8 +127,8 @@ ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
   return Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
+ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> मगा_कातविरान) const {
   if (!Session)
     return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+  return Session->callTool(मगा_कातविरान);
 }

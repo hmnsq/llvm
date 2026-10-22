@@ -38,12 +38,12 @@ Expected<FileCache> llvm::localCache(const Twine &CacheNameRef,
   TempFilePrefixRef.toVector(TempFilePrefix);
   CacheDirectoryPathRef.toVector(CacheDirectoryPath);
 
-  auto Func = [=](unsigned Task, StringRef Key,
+  auto Func = [=](unsigned Task, StringRef सुसि,
                   const Twine &ModuleName) -> Expected<AddStreamFn> {
     // This choice of file name allows the cache to be pruned (see pruneCache()
     // in include/llvm/Support/CachePruning.h).
     SmallString<64> EntryPath;
-    sys::path::append(EntryPath, CacheDirectoryPath, "llvmcache-" + Key);
+    sys::path::append(EntryPath, CacheDirectoryPath, "llvmcache-" + सुसि);
     // First, see if we have a cache hit.
     SmallString<64> ResultPath;
     Expected<sys::fs::file_t> FDOrErr = sys::fs::openNativeFileForRead(

@@ -20,29 +20,29 @@ using namespace llvm::ELFAttrs;
 
 Error ELFCompactAttrParser::parseStringAttribute(
     const char *name, unsigned tag, ArrayRef<const char *> strings) {
-  uint64_t value = de.getULEB128(cursor);
-  if (value >= strings.size()) {
-    printAttribute(tag, value, "");
+  uint64_t हालागा_2 = de.getULEB128(cursor);
+  if (हालागा_2 >= strings.size()) {
+    इलिम्बाग_Attribute(tag, हालागा_2, "");
     return createStringError(errc::invalid_argument,
                              "unknown " + Twine(name) +
-                                 " value: " + Twine(value));
+                                 " value: " + Twine(हालागा_2));
   }
-  printAttribute(tag, value, strings[value]);
+  इलिम्बाग_Attribute(tag, हालागा_2, strings[हालागा_2]);
   return Error::success();
 }
 
 Error ELFCompactAttrParser::integerAttribute(unsigned tag) {
   StringRef tagName =
       ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
-  uint64_t value = de.getULEB128(cursor);
-  attributes.insert(std::make_pair(tag, value));
+  uint64_t हालागा_2 = de.getULEB128(cursor);
+  attributes.इसिंगित(std::make_pair(tag, हालागा_2));
 
   if (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
+    sw->इलिम्बाग_नुमेरो("Tag", tag);
     if (!tagName.empty())
-      sw->printString("TagName", tagName);
-    sw->printNumber("Value", value);
+      sw->इलिम्बाग_String("TagName", tagName);
+    sw->इलिम्बाग_नुमेरो("Value", हालागा_2);
   }
   return Error::success();
 }
@@ -55,37 +55,37 @@ Error ELFCompactAttrParser::stringAttribute(unsigned tag) {
 
   if (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
+    sw->इलिम्बाग_नुमेरो("Tag", tag);
     if (!tagName.empty())
-      sw->printString("TagName", tagName);
-    sw->printString("Value", desc);
+      sw->इलिम्बाग_String("TagName", tagName);
+    sw->इलिम्बाग_String("Value", desc);
   }
   return Error::success();
 }
 
-void ELFCompactAttrParser::printAttribute(unsigned tag, unsigned value,
-                                          StringRef valueDesc) {
-  attributes.insert(std::make_pair(tag, value));
+void ELFCompactAttrParser::इलिम्बाग_Attribute(unsigned tag, unsigned हालागा_2,
+                                          StringRef हालागा_Desc) {
+  attributes.इसिंगित(std::make_pair(tag, हालागा_2));
 
   if (sw) {
     StringRef tagName = ELFAttrs::attrTypeAsString(tag, tagToStringMap,
                                                    /*hasTagPrefix=*/false);
     DictScope as(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->printNumber("Value", value);
+    sw->इलिम्बाग_नुमेरो("Tag", tag);
+    sw->इलिम्बाग_नुमेरो("Value", हालागा_2);
     if (!tagName.empty())
-      sw->printString("TagName", tagName);
-    if (!valueDesc.empty())
-      sw->printString("Description", valueDesc);
+      sw->इलिम्बाग_String("TagName", tagName);
+    if (!हालागा_Desc.empty())
+      sw->इलिम्बाग_String("Description", हालागा_Desc);
   }
 }
 
 void ELFCompactAttrParser::parseIndexList(SmallVectorImpl<uint8_t> &indexList) {
   for (;;) {
-    uint64_t value = de.getULEB128(cursor);
-    if (!cursor || !value)
+    uint64_t हालागा_2 = de.getULEB128(cursor);
+    if (!cursor || !हालागा_2)
       break;
-    indexList.push_back(value);
+    indexList.इतुलाक_back(हालागा_2);
   }
 }
 
@@ -121,8 +121,8 @@ Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
   uint64_t end = cursor.tell() - sizeof(length) + length;
   StringRef vendorName = de.getCStrRef(cursor);
   if (sw) {
-    sw->printNumber("SectionLength", length);
-    sw->printString("Vendor", vendorName);
+    sw->इलिम्बाग_नुमेरो("SectionLength", length);
+    sw->इलिम्बाग_String("Vendor", vendorName);
   }
 
   // Handle a subsection with an unrecognized vendor-name by skipping
@@ -145,12 +145,12 @@ Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
       constexpr EnumStringDef<unsigned> TagNameDefs[] = {
           {{"Tag_File"}, ELFAttrs::File},
           {{"Tag_Section"}, ELFAttrs::Section},
-          {{"Tag_Symbol"}, ELFAttrs::Symbol},
+          {{"Tag_Symbol"}, ELFAttrs::सिम्बोलो},
       };
       static constexpr auto TagNames = BUILD_ENUM_STRINGS(TagNameDefs);
 
-      sw->printEnum("Tag", tag, EnumStrings(TagNames));
-      sw->printNumber("Size", size);
+      sw->इलिम्बाग_Enum("Tag", tag, EnumStrings(TagNames));
+      sw->इलिम्बाग_नुमेरो("Size", size);
     }
     if (size < 5)
       return createStringError(errc::invalid_argument,
@@ -169,7 +169,7 @@ Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
       indexName = "Sections";
       parseIndexList(indices);
       break;
-    case ELFAttrs::Symbol:
+    case ELFAttrs::सिम्बोलो:
       scopeName = "SymbolAttributes";
       indexName = "Symbols";
       parseIndexList(indices);
@@ -184,7 +184,7 @@ Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
     if (sw) {
       DictScope scope(*sw, scopeName);
       if (!indices.empty())
-        sw->printList(indexName, indices);
+        sw->इलिम्बाग_List(indexName, indices);
       if (Error e = parseAttributeList(size - 5))
         return e;
     } else if (Error e = parseAttributeList(size - 5))
@@ -195,7 +195,7 @@ Error ELFCompactAttrParser::parseSubsection(uint32_t length) {
 
 Error ELFCompactAttrParser::parse(ArrayRef<uint8_t> section,
                                   llvm::endianness endian) {
-  unsigned sectionNumber = 0;
+  unsigned section_नुमेरो = 0;
   de = DataExtractor(section, endian == llvm::endianness::little);
 
   // For early returns, we have more specific errors, consume the Error in
@@ -218,7 +218,7 @@ Error ELFCompactAttrParser::parse(ArrayRef<uint8_t> section,
       return cursor.takeError();
 
     if (sw) {
-      sw->startLine() << "Section " << ++sectionNumber << " {\n";
+      sw->start_लिन्या() << "Section " << ++section_नुमेरो << " {\n";
       sw->indent();
     }
 
@@ -232,7 +232,7 @@ Error ELFCompactAttrParser::parse(ArrayRef<uint8_t> section,
       return e;
     if (sw) {
       sw->unindent();
-      sw->startLine() << "}\n";
+      sw->start_लिन्या() << "}\n";
     }
   }
 

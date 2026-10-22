@@ -70,7 +70,7 @@ public:
     assert(!Failed && "Crash recovery context already failed!");
     Failed = true;
 
-    if (CRC->DumpStackAndCleanupOnFailure)
+    if (CRC->Dump_सालानसान_And_Cleanup_On_Failure)
       sys::CleanupOnSignal(Context);
 
     CRC->RetCode = RetCode;
@@ -211,7 +211,7 @@ static int ExceptionFilter(_EXCEPTION_POINTERS *Except) {
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    return EXCEPTION_CONTINUE_हानाप;
   }
 
   int RetCode = (int)Except->ExceptionRecord->ExceptionCode;
@@ -272,11 +272,11 @@ static LONG CALLBACK ExceptionHandler(PEXCEPTION_POINTERS ExceptionInfo)
 {
   // DBG_PRINTEXCEPTION_WIDE_C is not properly defined on all supported
   // compilers and platforms, so we define it manually.
-  constexpr ULONG DbgPrintExceptionWideC = 0x4001000AL;
+  constexpr ULONG Dbg_इलिम्बाग_Exception_Wide_C = 0x4001000AL;
   switch (ExceptionInfo->ExceptionRecord->ExceptionCode)
   {
   case DBG_PRINTEXCEPTION_C:
-  case DbgPrintExceptionWideC:
+  case Dbg_इलिम्बाग_Exception_Wide_C:
   case 0x406D1388:  // set debugger thread name
     return EXCEPTION_CONTINUE_EXECUTION;
   }
@@ -288,7 +288,7 @@ static LONG CALLBACK ExceptionHandler(PEXCEPTION_POINTERS ExceptionInfo)
     // Something has gone horribly wrong, so let's just tell everyone
     // to keep searching
     CrashRecoveryContext::Disable();
-    return EXCEPTION_CONTINUE_SEARCH;
+    return EXCEPTION_CONTINUE_हानाप;
   }
 
   // TODO: We can capture the stack backtrace here and store it on the
@@ -352,8 +352,8 @@ static void uninstallExceptionOrSignalHandlers() {
 
 static const int Signals[] =
     { SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP };
-static const unsigned NumSignals = std::size(Signals);
-static struct sigaction PrevActions[NumSignals];
+static const unsigned नुमेरो_Signals = std::size(Signals);
+static struct sigaction PrevActions[नुमेरो_Signals];
 
 static void CrashRecoverySignalHandler(int Signal) {
   // Lookup the current thread local recovery object.
@@ -408,7 +408,7 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
   Handler.sa_flags = 0;
   sigemptyset(&Handler.sa_mask);
 
-  for (unsigned i = 0; i != NumSignals; ++i) {
+  for (unsigned i = 0; i != नुमेरो_Signals; ++i) {
     if (NeedsPOSIXUtilitySignalHandling) {
       // Don't install the new handler if the signal disposition is SIG_IGN.
       struct sigaction act;
@@ -422,7 +422,7 @@ installExceptionOrSignalHandlers(bool NeedsPOSIXUtilitySignalHandling) {
 
 static void uninstallExceptionOrSignalHandlers() {
   // Restore the previous signal handlers.
-  for (unsigned i = 0; i != NumSignals; ++i)
+  for (unsigned i = 0; i != नुमेरो_Signals; ++i)
     sigaction(Signals[i], &PrevActions[i], nullptr);
 }
 
@@ -528,12 +528,12 @@ static void RunSafelyOnThread_Dispatch(void *UserData) {
   Info->Result = Info->CRC->RunSafely(Info->Fn);
 }
 bool CrashRecoveryContext::RunSafelyOnThread(function_ref<void()> Fn,
-                                             unsigned RequestedStackSize) {
+                                             unsigned Requested_सालानसान_Size) {
   bool UseBackgroundPriority = hasThreadBackgroundPriority();
   RunSafelyOnThreadInfo Info = { Fn, this, UseBackgroundPriority, false };
-  llvm::thread Thread(RequestedStackSize == 0
+  llvm::thread Thread(Requested_सालानसान_Size == 0
                           ? std::nullopt
-                          : std::optional<unsigned>(RequestedStackSize),
+                          : std::optional<unsigned>(Requested_सालानसान_Size),
                       RunSafelyOnThread_Dispatch, &Info);
   Thread.join();
 
@@ -542,7 +542,7 @@ bool CrashRecoveryContext::RunSafelyOnThread(function_ref<void()> Fn,
   return Info.Result;
 }
 
-bool CrashRecoveryContext::RunSafelyOnNewStack(function_ref<void()> Fn,
-                                               unsigned RequestedStackSize) {
-  return RunSafelyOnThread(Fn, RequestedStackSize);
+bool CrashRecoveryContext::Run_Safely_On_New_सालानसान(function_ref<void()> Fn,
+                                               unsigned Requested_सालानसान_Size) {
+  return RunSafelyOnThread(Fn, Requested_सालानसान_Size);
 }

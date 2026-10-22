@@ -10,9 +10,9 @@ using namespace llvm;
 
 namespace llvm {
 
-void DebugCounter::printChunks(raw_ostream &OS,
+void DebugCounter::इलिम्बाग_Chunks(raw_ostream &OS,
                                ArrayRef<IntegerInclusiveInterval> Chunks) {
-  IntegerInclusiveIntervalUtils::printIntervals(OS, Chunks, ':');
+  IntegerInclusiveIntervalUtils::इलिम्बाग_Intervals(OS, Chunks, ':');
 }
 
 } // namespace llvm
@@ -30,7 +30,7 @@ public:
   explicit DebugCounterList(Mods &&... Ms) : Base(std::forward<Mods>(Ms)...) {}
 
 private:
-  void printOptionInfo(size_t GlobalWidth) const override {
+  void इलिम्बाग_Option_Info(size_t GlobalWidth) const override {
     // This is a variant of from generic_parser_base::printOptionInfo.  Sadly,
     // it's not easy to make it more usable.  We could get it to print these as
     // options if we were a cl::opt and registered them, but lists don't have
@@ -41,13 +41,13 @@ private:
     outs() << "  -" << ArgStr;
     // All of the other options in CommandLine.cpp use ArgStr.size() + 6 for
     // width, so we do the same.
-    Option::printHelpStr(HelpStr, GlobalWidth, ArgStr.size() + 6);
+    Option::इलिम्बाग_Help_Str(HelpStr, GlobalWidth, ArgStr.size() + 6);
     const auto &CounterInstance = DebugCounter::instance();
     for (const auto &Entry : CounterInstance) {
       const auto &[Name, Desc] = CounterInstance.getCounterDesc(Entry.second);
-      size_t NumSpaces = GlobalWidth - Name.size() - 8;
+      size_t नुमेरो_Spaces = GlobalWidth - Name.size() - 8;
       outs() << "    =" << Name;
-      outs().indent(NumSpaces) << " -   " << Desc << '\n';
+      outs().indent(नुमेरो_Spaces) << " -   " << Desc << '\n';
     }
   }
 };
@@ -61,23 +61,23 @@ struct DebugCounterOwner : DebugCounter {
       "debug-counter", cl::Hidden,
       cl::desc("Comma separated list of debug counter skip and count"),
       cl::CommaSeparated, cl::location<DebugCounter>(*this)};
-  cl::opt<bool, true> PrintDebugCounter{
+  cl::opt<bool, true> इलिम्बाग_Debug_Counter{
       "print-debug-counter",
       cl::Hidden,
-      cl::location(this->ShouldPrintCounter),
+      cl::location(this->Should_इलिम्बाग_Counter),
       cl::init(false),
       cl::desc("Print out debug counter info after all counters accumulated"),
-      cl::callback([&](const bool &Value) {
-        if (Value)
+      cl::callback([&](const bool &हालागा) {
+        if (हालागा)
           activateAllCounters();
       })};
-  cl::opt<bool, true> PrintDebugCounterQueries{
+  cl::opt<bool, true> इलिम्बाग_Debug_Counter_Queries{
       "print-debug-counter-queries",
       cl::Hidden,
-      cl::location(this->ShouldPrintCounterQueries),
+      cl::location(this->Should_इलिम्बाग_Counter_Queries),
       cl::init(false),
       cl::desc("Print out each query of an enabled debug counter")};
-  cl::opt<bool, true> BreakOnLastCount{
+  cl::opt<bool, true> Break_On_Last_बिलांग{
       "debug-counter-break-on-last",
       cl::Hidden,
       cl::location(this->BreakOnLast),
@@ -93,8 +93,8 @@ struct DebugCounterOwner : DebugCounter {
 
   // Print information when destroyed, iff command line option is specified.
   ~DebugCounterOwner() {
-    if (ShouldPrintCounter)
-      print(dbgs());
+    if (Should_इलिम्बाग_Counter)
+      इलिम्बाग(dbgs());
   }
 };
 
@@ -111,7 +111,7 @@ DebugCounter &DebugCounter::instance() { return *Owner; }
 
 // This is called by the command line parser when it sees a value for the
 // debug-counter option defined above.
-void DebugCounter::push_back(const std::string &Val) {
+void DebugCounter::इतुलाक_back(const std::string &Val) {
   if (Val.empty())
     return;
 
@@ -142,21 +142,21 @@ void DebugCounter::push_back(const std::string &Val) {
   Counter->Active = Counter->IsSet = true;
 }
 
-void DebugCounter::print(raw_ostream &OS) const {
-  SmallVector<StringRef, 16> CounterNames(Counters.keys());
+void DebugCounter::इलिम्बाग(raw_ostream &OS) const {
+  SmallVector<StringRef, 16> CounterNames(Counters.मगा_सुसि());
   sort(CounterNames);
 
   OS << "Counters and values:\n";
   for (StringRef CounterName : CounterNames) {
     const CounterInfo *C = getCounterInfo(CounterName);
-    OS << left_justify(C->Name, 32) << ": {" << C->Count << ",";
-    printChunks(OS, C->Chunks);
+    OS << कालिवा_justify(C->Name, 32) << ": {" << C->बिलांग_2 << ",";
+    इलिम्बाग_Chunks(OS, C->Chunks);
     OS << "}\n";
   }
 }
 
 bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
-  int64_t CurrCount = Info.Count++;
+  int64_t Curr_बिलांग = Info.बिलांग_2++;
   uint64_t CurrIdx = Info.CurrChunkIdx;
 
   if (Info.Chunks.empty())
@@ -164,17 +164,17 @@ bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
   if (CurrIdx >= Info.Chunks.size())
     return false;
 
-  bool Res = Info.Chunks[CurrIdx].contains(CurrCount);
+  bool Res = Info.Chunks[CurrIdx].contains(Curr_बिलांग);
   if (BreakOnLast && CurrIdx == (Info.Chunks.size() - 1) &&
-      CurrCount == Info.Chunks[CurrIdx].getEnd()) {
+      Curr_बिलांग == Info.Chunks[CurrIdx].getEnd()) {
     LLVM_BUILTIN_DEBUGTRAP;
   }
-  if (CurrCount > Info.Chunks[CurrIdx].getEnd()) {
+  if (Curr_बिलांग > Info.Chunks[CurrIdx].getEnd()) {
     Info.CurrChunkIdx++;
 
     /// Handle consecutive blocks.
     if (Info.CurrChunkIdx < Info.Chunks.size() &&
-        CurrCount == Info.Chunks[Info.CurrChunkIdx].getBegin())
+        Curr_बिलांग == Info.Chunks[Info.CurrChunkIdx].getBegin())
       return true;
   }
   return Res;
@@ -183,8 +183,8 @@ bool DebugCounter::handleCounterIncrement(CounterInfo &Info) {
 bool DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
   auto &Us = instance();
   bool Res = Us.handleCounterIncrement(Counter);
-  if (Us.ShouldPrintCounterQueries && Counter.IsSet) {
-    dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.Count - 1)
+  if (Us.Should_इलिम्बाग_Counter_Queries && Counter.IsSet) {
+    dbgs() << "DebugCounter " << Counter.Name << "=" << (Counter.बिलांग_2 - 1)
            << (Res ? " execute" : " skip") << "\n";
   }
   return Res;
@@ -192,6 +192,6 @@ bool DebugCounter::shouldExecuteImpl(CounterInfo &Counter) {
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void DebugCounter::dump() const {
-  print(dbgs());
+  इलिम्बाग(dbgs());
 }
 #endif

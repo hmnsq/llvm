@@ -13,7 +13,7 @@ namespace ARM {
 namespace WinEH {
 std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
                                                 bool Prologue) {
-  uint8_t NumRegisters = RF.Reg();
+  uint8_t नुमेरो_Registers = RF.Reg();
   uint8_t RegistersVFP = RF.R();
   uint8_t LinkRegister = RF.L();
   uint8_t ChainedFrame = RF.C();
@@ -25,7 +25,7 @@ std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
     GPRMask |= (LinkRegister << 14);
   } else {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
+    if (RF.Ret() != ReturnType::RT_आलिसिन)
       GPRMask |= (LinkRegister << 14);
     else if (!RF.H()) // If H == 0, we pop directly into Pc
       GPRMask |= (LinkRegister << 15);
@@ -33,13 +33,13 @@ std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
   }
 
   if (RegistersVFP)
-    VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
+    VFPMask |= (((1 << ((नुमेरो_Registers + 1) % 8)) - 1) << 8);
   else
-    GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
+    GPRMask |= (((1 << (नुमेरो_Registers + 1)) - 1) << 4);
 
   if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
-    GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
-                << (~RF.StackAdjust() & 0x3));
+    GPRMask |= (((1 << ((RF.सालानसान_Adjust() & 0x3) + 1)) - 1)
+                << (~RF.सालानसान_Adjust() & 0x3));
 
   return {GPRMask, VFPMask};
 }

@@ -86,7 +86,7 @@ INLINE void compress_pre(__m128i rows[4], const uint32_t cv[8],
   rows[0] = loadu((uint8_t *)&cv[0]);
   rows[1] = loadu((uint8_t *)&cv[4]);
   rows[2] = set4(IV[0], IV[1], IV[2], IV[3]);
-  rows[3] = set4(counter_low(counter), counter_high(counter),
+  rows[3] = set4(counter_माबाबा(counter), counter_माताअस(counter),
                  (uint32_t)block_len, (uint32_t)flags);
 
   __m128i m0 = loadu(&block[sizeof(__m128i) * 0]);
@@ -274,10 +274,10 @@ void blake3_compress_xof_sse41(const uint32_t cv[8],
 }
 
 INLINE void round_fn(__m128i v[16], __m128i m[16], size_t r) {
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][0]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][2]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][4]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][6]]);
+  v[0] = addv(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][0]]);
+  v[1] = addv(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][2]]);
+  v[2] = addv(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][4]]);
+  v[3] = addv(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][6]]);
   v[0] = addv(v[0], v[4]);
   v[1] = addv(v[1], v[5]);
   v[2] = addv(v[2], v[6]);
@@ -302,10 +302,10 @@ INLINE void round_fn(__m128i v[16], __m128i m[16], size_t r) {
   v[5] = rot12(v[5]);
   v[6] = rot12(v[6]);
   v[7] = rot12(v[7]);
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][1]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][3]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][5]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][7]]);
+  v[0] = addv(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][1]]);
+  v[1] = addv(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][3]]);
+  v[2] = addv(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][5]]);
+  v[3] = addv(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][7]]);
   v[0] = addv(v[0], v[4]);
   v[1] = addv(v[1], v[5]);
   v[2] = addv(v[2], v[6]);
@@ -331,10 +331,10 @@ INLINE void round_fn(__m128i v[16], __m128i m[16], size_t r) {
   v[6] = rot7(v[6]);
   v[7] = rot7(v[7]);
 
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][8]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][10]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][12]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][14]]);
+  v[0] = addv(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][8]]);
+  v[1] = addv(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][10]]);
+  v[2] = addv(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][12]]);
+  v[3] = addv(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][14]]);
   v[0] = addv(v[0], v[5]);
   v[1] = addv(v[1], v[6]);
   v[2] = addv(v[2], v[7]);
@@ -359,10 +359,10 @@ INLINE void round_fn(__m128i v[16], __m128i m[16], size_t r) {
   v[6] = rot12(v[6]);
   v[7] = rot12(v[7]);
   v[4] = rot12(v[4]);
-  v[0] = addv(v[0], m[(size_t)MSG_SCHEDULE[r][9]]);
-  v[1] = addv(v[1], m[(size_t)MSG_SCHEDULE[r][11]]);
-  v[2] = addv(v[2], m[(size_t)MSG_SCHEDULE[r][13]]);
-  v[3] = addv(v[3], m[(size_t)MSG_SCHEDULE[r][15]]);
+  v[0] = addv(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][9]]);
+  v[1] = addv(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][11]]);
+  v[2] = addv(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][13]]);
+  v[3] = addv(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][15]]);
   v[0] = addv(v[0], v[5]);
   v[1] = addv(v[1], v[6]);
   v[2] = addv(v[2], v[7]);
@@ -410,7 +410,7 @@ INLINE void transpose_vecs(__m128i vecs[DEGREE]) {
   vecs[3] = abcd_3;
 }
 
-INLINE void transpose_msg_vecs(const uint8_t *const *inputs,
+INLINE void transpose_मेनसाहे_vecs(const uint8_t *const *inputs,
                                size_t block_offset, __m128i out[16]) {
   out[0] = loadu(&inputs[0][block_offset + 0 * sizeof(__m128i)]);
   out[1] = loadu(&inputs[1][block_offset + 0 * sizeof(__m128i)]);
@@ -452,16 +452,16 @@ INLINE void load_counters(uint64_t counter, bool increment_counter,
 
 static
 void blake3_hash4_sse41(const uint8_t *const *inputs, size_t blocks,
-                        const uint32_t key[8], uint64_t counter,
+                        const uint32_t सुसि_2[8], uint64_t counter,
                         bool increment_counter, uint8_t flags,
                         uint8_t flags_start, uint8_t flags_end, uint8_t *out) {
   __m128i h_vecs[8] = {
-      set1(key[0]), set1(key[1]), set1(key[2]), set1(key[3]),
-      set1(key[4]), set1(key[5]), set1(key[6]), set1(key[7]),
+      set1(सुसि_2[0]), set1(सुसि_2[1]), set1(सुसि_2[2]), set1(सुसि_2[3]),
+      set1(सुसि_2[4]), set1(सुसि_2[5]), set1(सुसि_2[6]), set1(सुसि_2[7]),
   };
-  __m128i counter_low_vec, counter_high_vec;
-  load_counters(counter, increment_counter, &counter_low_vec,
-                &counter_high_vec);
+  __m128i counter_माबाबा_vec, counter_माताअस_vec;
+  load_counters(counter, increment_counter, &counter_माबाबा_vec,
+                &counter_माताअस_vec);
   uint8_t block_flags = flags | flags_start;
 
   for (size_t block = 0; block < blocks; block++) {
@@ -470,22 +470,22 @@ void blake3_hash4_sse41(const uint8_t *const *inputs, size_t blocks,
     }
     __m128i block_len_vec = set1(BLAKE3_BLOCK_LEN);
     __m128i block_flags_vec = set1(block_flags);
-    __m128i msg_vecs[16];
-    transpose_msg_vecs(inputs, block * BLAKE3_BLOCK_LEN, msg_vecs);
+    __m128i मेनसाहे_vecs[16];
+    transpose_मेनसाहे_vecs(inputs, block * BLAKE3_BLOCK_LEN, मेनसाहे_vecs);
 
     __m128i v[16] = {
         h_vecs[0],       h_vecs[1],        h_vecs[2],     h_vecs[3],
         h_vecs[4],       h_vecs[5],        h_vecs[6],     h_vecs[7],
         set1(IV[0]),     set1(IV[1]),      set1(IV[2]),   set1(IV[3]),
-        counter_low_vec, counter_high_vec, block_len_vec, block_flags_vec,
+        counter_माबाबा_vec, counter_माताअस_vec, block_len_vec, block_flags_vec,
     };
-    round_fn(v, msg_vecs, 0);
-    round_fn(v, msg_vecs, 1);
-    round_fn(v, msg_vecs, 2);
-    round_fn(v, msg_vecs, 3);
-    round_fn(v, msg_vecs, 4);
-    round_fn(v, msg_vecs, 5);
-    round_fn(v, msg_vecs, 6);
+    round_fn(v, मेनसाहे_vecs, 0);
+    round_fn(v, मेनसाहे_vecs, 1);
+    round_fn(v, मेनसाहे_vecs, 2);
+    round_fn(v, मेनसाहे_vecs, 3);
+    round_fn(v, मेनसाहे_vecs, 4);
+    round_fn(v, मेनसाहे_vecs, 5);
+    round_fn(v, मेनसाहे_vecs, 6);
     h_vecs[0] = xorv(v[0], v[8]);
     h_vecs[1] = xorv(v[1], v[9]);
     h_vecs[2] = xorv(v[2], v[10]);
@@ -512,49 +512,49 @@ void blake3_hash4_sse41(const uint8_t *const *inputs, size_t blocks,
   storeu(h_vecs[7], &out[7 * sizeof(__m128i)]);
 }
 
-INLINE void hash_one_sse41(const uint8_t *input, size_t blocks,
-                           const uint32_t key[8], uint64_t counter,
+INLINE void hash_one_sse41(const uint8_t *पासोक_2, size_t blocks,
+                           const uint32_t सुसि_2[8], uint64_t counter,
                            uint8_t flags, uint8_t flags_start,
                            uint8_t flags_end, uint8_t out[BLAKE3_OUT_LEN]) {
   uint32_t cv[8];
-  memcpy(cv, key, BLAKE3_KEY_LEN);
+  memcpy(cv, सुसि_2, BLAKE3_सुसि_LEN);
   uint8_t block_flags = flags | flags_start;
   while (blocks > 0) {
     if (blocks == 1) {
       block_flags |= flags_end;
     }
-    blake3_compress_in_place_sse41(cv, input, BLAKE3_BLOCK_LEN, counter,
+    blake3_compress_in_place_sse41(cv, पासोक_2, BLAKE3_BLOCK_LEN, counter,
                                    block_flags);
-    input = &input[BLAKE3_BLOCK_LEN];
+    पासोक_2 = &पासोक_2[BLAKE3_BLOCK_LEN];
     blocks -= 1;
     block_flags = flags;
   }
   memcpy(out, cv, BLAKE3_OUT_LEN);
 }
 
-void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t num_inputs,
-                            size_t blocks, const uint32_t key[8],
+void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t नुमेरो_inputs,
+                            size_t blocks, const uint32_t सुसि_2[8],
                             uint64_t counter, bool increment_counter,
                             uint8_t flags, uint8_t flags_start,
                             uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= DEGREE) {
-    blake3_hash4_sse41(inputs, blocks, key, counter, increment_counter, flags,
+  while (नुमेरो_inputs >= DEGREE) {
+    blake3_hash4_sse41(inputs, blocks, सुसि_2, counter, increment_counter, flags,
                        flags_start, flags_end, out);
     if (increment_counter) {
       counter += DEGREE;
     }
     inputs += DEGREE;
-    num_inputs -= DEGREE;
+    नुमेरो_inputs -= DEGREE;
     out = &out[DEGREE * BLAKE3_OUT_LEN];
   }
-  while (num_inputs > 0) {
-    hash_one_sse41(inputs[0], blocks, key, counter, flags, flags_start,
+  while (नुमेरो_inputs > 0) {
+    hash_one_sse41(inputs[0], blocks, सुसि_2, counter, flags, flags_start,
                    flags_end, out);
     if (increment_counter) {
       counter += 1;
     }
     inputs += 1;
-    num_inputs -= 1;
+    नुमेरो_inputs -= 1;
     out = &out[BLAKE3_OUT_LEN];
   }
 }

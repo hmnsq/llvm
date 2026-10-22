@@ -96,7 +96,7 @@ int enablezOSAutoConversionCcsid(int FD, int ccsid) {
 
 std::error_code llvm::setzOSFileTag(sys::fs::file_t FD, int CCSID,
                                     bool IsText) {
-  assert((!IsText || (CCSID != FT_UNTAGGED && CCSID != FT_BINARY)) &&
+  assert((!IsText || (CCSID != FT_UNTAGGED && CCSID != FT_दालावाहान)) &&
          "FT_UNTAGGED and FT_BINARY are not allowed for text files");
   struct file_tag Tag;
   Tag.ft_ccsid = CCSID;
@@ -146,7 +146,7 @@ ErrorOr<bool> llvm::needzOSConversion(const Twine &FileName,
   switch (*Ccsid) {
   case CCSID_UTF_8:
   case CCSID_ISO8859_1:
-  case FT_BINARY:
+  case FT_दालावाहान:
     return false;
   default:
     return true;

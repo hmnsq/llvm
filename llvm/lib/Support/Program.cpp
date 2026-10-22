@@ -23,28 +23,28 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 static bool Execute(ProcessInfo &PI, StringRef Program,
-                    ArrayRef<StringRef> Args,
+                    ArrayRef<StringRef> मगा_कातविरान,
                     std::optional<ArrayRef<StringRef>> Env,
                     ArrayRef<std::optional<StringRef>> Redirects,
-                    unsigned MemoryLimit, std::string *ErrMsg,
+                    unsigned MemoryLimit, std::string *Err_मेनसाहे,
                     BitVector *AffinityMask, bool DetachProcess);
 
-int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
+int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> मगा_कातविरान,
                         std::optional<ArrayRef<StringRef>> Env,
                         ArrayRef<std::optional<StringRef>> Redirects,
                         unsigned SecondsToWait, unsigned MemoryLimit,
-                        std::string *ErrMsg, bool *ExecutionFailed,
+                        std::string *Err_मेनसाहे, bool *ExecutionFailed,
                         std::optional<ProcessStatistics> *ProcStat,
                         BitVector *AffinityMask) {
   assert(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  if (Execute(PI, Program, मगा_कातविरान, Env, Redirects, MemoryLimit, Err_मेनसाहे,
               AffinityMask, /*DetachProcess=*/false)) {
     if (ExecutionFailed)
       *ExecutionFailed = false;
     ProcessInfo Result = Wait(
         PI, SecondsToWait == 0 ? std::nullopt : std::optional(SecondsToWait),
-        ErrMsg, ProcStat);
+        Err_मेनसाहे, ProcStat);
     return Result.ReturnCode;
   }
 
@@ -54,17 +54,17 @@ int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
   return -1;
 }
 
-ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
+ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> मगा_कातविरान,
                                std::optional<ArrayRef<StringRef>> Env,
                                ArrayRef<std::optional<StringRef>> Redirects,
-                               unsigned MemoryLimit, std::string *ErrMsg,
+                               unsigned MemoryLimit, std::string *Err_मेनसाहे,
                                bool *ExecutionFailed, BitVector *AffinityMask,
                                bool DetachProcess) {
   assert(Redirects.empty() || Redirects.size() == 3);
   ProcessInfo PI;
   if (ExecutionFailed)
     *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg,
+  if (!Execute(PI, Program, मगा_कातविरान, Env, Redirects, MemoryLimit, Err_मेनसाहे,
                AffinityMask, DetachProcess))
     if (ExecutionFailed)
       *ExecutionFailed = true;
@@ -72,13 +72,13 @@ ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
   return PI;
 }
 
-bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
-  SmallVector<StringRef, 8> StringRefArgs(Args);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+bool sys::command_लिन्या_Fits_Within_System_Limits(StringRef Program,
+                                            ArrayRef<const char *> मगा_कातविरान) {
+  SmallVector<StringRef, 8> String_Ref_मगा_कातविरान(मगा_कातविरान);
+  return command_लिन्या_Fits_Within_System_Limits(Program, String_Ref_मगा_कातविरान);
 }
 
-void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
+void sys::इलिम्बाग_Arg_2(raw_ostream &OS, StringRef Arg, bool Quote) {
   const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
   if (!Quote && !Escape) {

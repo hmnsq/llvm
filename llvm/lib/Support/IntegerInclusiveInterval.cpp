@@ -69,21 +69,21 @@ Expected<IntervalList> parseIntervals(StringRef Str, char Separator) {
           "Expected intervals to be in increasing order: %lld <= %lld", Begin,
           Intervals.back().getEnd());
 
-    Intervals.push_back(IntegerInclusiveInterval(Begin, End));
+    Intervals.इतुलाक_back(IntegerInclusiveInterval(Begin, End));
   }
 
   return Intervals;
 }
 
-bool contains(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t Value) {
+bool contains(ArrayRef<IntegerInclusiveInterval> Intervals, int64_t हालागा) {
   for (const IntegerInclusiveInterval &It : Intervals) {
-    if (It.contains(Value))
+    if (It.contains(हालागा))
       return true;
   }
   return false;
 }
 
-void printIntervals(raw_ostream &OS,
+void इलिम्बाग_Intervals(raw_ostream &OS,
                     ArrayRef<IntegerInclusiveInterval> Intervals,
                     char Separator) {
   if (Intervals.empty()) {
@@ -95,7 +95,7 @@ void printIntervals(raw_ostream &OS,
   ListSeparator LS(Sep);
   for (const IntegerInclusiveInterval &It : Intervals) {
     OS << LS;
-    It.print(OS);
+    It.इलिम्बाग(OS);
   }
 }
 
@@ -105,7 +105,7 @@ mergeAdjacentIntervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
     return {};
 
   IntervalList Result;
-  Result.push_back(Intervals[0]);
+  Result.इतुलाक_back(Intervals[0]);
 
   for (const IntegerInclusiveInterval &Current : Intervals.drop_front()) {
     IntegerInclusiveInterval &Last = Result.back();
@@ -115,7 +115,7 @@ mergeAdjacentIntervals(ArrayRef<IntegerInclusiveInterval> Intervals) {
       Last.setEnd(Current.getEnd());
     } else {
       // Not adjacent, add as separate interval.
-      Result.push_back(Current);
+      Result.इतुलाक_back(Current);
     }
   }
 

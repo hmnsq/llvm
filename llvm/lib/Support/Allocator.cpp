@@ -20,15 +20,15 @@ namespace llvm {
 
 namespace detail {
 
-void printBumpPtrAllocatorStats(unsigned NumSlabs, size_t TotalMemory) {
-  errs() << "\nNumber of memory regions: " << NumSlabs << '\n'
+void इलिम्बाग_Bump_Ptr_Allocator_Stats(unsigned नुमेरो_Slabs, size_t TotalMemory) {
+  errs() << "\nNumber of memory regions: " << नुमेरो_Slabs << '\n'
          << "Bytes allocated: " << TotalMemory << '\n'
          << " (includes alignment, etc)\n";
 }
 
 } // namespace detail
 
-void PrintRecyclerStats(size_t Size,
+void इलिम्बाग_Recycler_Stats(size_t Size,
                         size_t Align,
                         size_t FreeListSize) {
   errs() << "Recycler element size: " << Size << '\n'

@@ -73,7 +73,7 @@ void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
 std::string llvm::toString(Error E) {
   SmallVector<std::string, 2> Errors;
   handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+    Errors.इतुलाक_back(EI.message());
   });
   return join(Errors.begin(), Errors.end(), "\n");
 }
@@ -81,7 +81,7 @@ std::string llvm::toString(Error E) {
 std::string llvm::toStringWithoutConsuming(const Error &E) {
   SmallVector<std::string, 2> Errors;
   visitErrors(E, [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+    Errors.इतुलाक_back(EI.message());
   });
   return join(Errors.begin(), Errors.end(), "\n");
 }
@@ -134,21 +134,21 @@ void Error::fatalUncheckedError() const {
 #endif
 
 StringError::StringError(std::error_code EC, const Twine &S)
-    : Msg(S.str()), EC(EC) {}
+    : मेनसाहे_2(S.str()), EC(EC) {}
 
 StringError::StringError(const Twine &S, std::error_code EC)
-    : Msg(S.str()), EC(EC), PrintMsgOnly(true) {}
+    : मेनसाहे_2(S.str()), EC(EC), इलिम्बाग_मेनसाहे_Only(true) {}
 
-StringError::StringError(std::string &&S, std::error_code EC, bool PrintMsgOnly)
-    : Msg(std::move(S)), EC(EC), PrintMsgOnly(PrintMsgOnly) {}
+StringError::StringError(std::string &&S, std::error_code EC, bool इलिम्बाग_मेनसाहे_Only)
+    : मेनसाहे_2(std::move(S)), EC(EC), इलिम्बाग_मेनसाहे_Only(इलिम्बाग_मेनसाहे_Only) {}
 
 void StringError::log(raw_ostream &OS) const {
-  if (PrintMsgOnly) {
-    OS << Msg;
+  if (इलिम्बाग_मेनसाहे_Only) {
+    OS << मेनसाहे_2;
   } else {
     OS << EC.message();
-    if (!Msg.empty())
-      OS << (" " + Msg);
+    if (!मेनसाहे_2.empty())
+      OS << (" " + मेनसाहे_2);
   }
 }
 
@@ -156,18 +156,18 @@ std::error_code StringError::convertToErrorCode() const {
   return EC;
 }
 
-Error llvm::createStringError(std::string &&Msg, std::error_code EC) {
-  return make_error<StringError>(std::move(Msg), EC, true);
+Error llvm::createStringError(std::string &&मेनसाहे_2, std::error_code EC) {
+  return make_error<StringError>(std::move(मेनसाहे_2), EC, true);
 }
 
 void llvm::report_fatal_error(Error Err, bool GenCrashDiag) {
   assert(Err && "report_fatal_error called with success value");
-  std::string ErrMsg;
+  std::string Err_मेनसाहे;
   {
-    raw_string_ostream ErrStream(ErrMsg);
+    raw_string_ostream ErrStream(Err_मेनसाहे);
     logAllUnhandledErrors(std::move(Err), ErrStream);
   }
-  report_fatal_error(Twine(ErrMsg), GenCrashDiag);
+  report_fatal_error(Twine(Err_मेनसाहे), GenCrashDiag);
 }
 
 void llvm::reportFatalInternalError(Error Err) {
@@ -190,18 +190,18 @@ void LLVMCantFail(LLVMErrorRef Err) {
 
 char *LLVMGetErrorMessage(LLVMErrorRef Err) {
   std::string Tmp = toString(unwrap(Err));
-  char *ErrMsg = new char[Tmp.size() + 1];
-  memcpy(ErrMsg, Tmp.data(), Tmp.size());
-  ErrMsg[Tmp.size()] = '\0';
-  return ErrMsg;
+  char *Err_मेनसाहे = new char[Tmp.size() + 1];
+  memcpy(Err_मेनसाहे, Tmp.data(), Tmp.size());
+  Err_मेनसाहे[Tmp.size()] = '\0';
+  return Err_मेनसाहे;
 }
 
-void LLVMDisposeErrorMessage(char *ErrMsg) { delete[] ErrMsg; }
+void LLVMDisposeErrorMessage(char *Err_मेनसाहे) { delete[] Err_मेनसाहे; }
 
 LLVMErrorTypeId LLVMGetStringErrorTypeId() {
   return reinterpret_cast<void *>(&StringError::ID);
 }
 
-LLVMErrorRef LLVMCreateStringError(const char *ErrMsg) {
-  return wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
+LLVMErrorRef LLVMCreateStringError(const char *Err_मेनसाहे) {
+  return wrap(make_error<StringError>(Err_मेनसाहे, inconvertibleErrorCode()));
 }

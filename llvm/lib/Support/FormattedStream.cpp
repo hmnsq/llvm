@@ -25,9 +25,9 @@ using namespace llvm;
 /// account Unicode characters which render as multiple columns wide.
 void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
   unsigned &Column = Position.first;
-  unsigned &Line = Position.second;
+  unsigned &लिन्या = Position.second;
 
-  auto ProcessUTF8CodePoint = [&Line, &Column](StringRef CP) {
+  auto ProcessUTF8CodePoint = [&लिन्या, &Column](StringRef CP) {
     int Width = sys::unicode::columnWidthUTF8(CP);
     if (Width != sys::unicode::ErrorNonPrintableCharacter)
       Column += Width;
@@ -38,7 +38,7 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
 
     switch (CP[0]) {
     case '\n':
-      Line += 1;
+      लिन्या += 1;
       [[fallthrough]];
     case '\r':
       Column = 0;
@@ -54,7 +54,7 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
   // first.
   if (PartialUTF8Char.size()) {
     size_t BytesFromBuffer =
-        getNumBytesForUTF8(PartialUTF8Char[0]) - PartialUTF8Char.size();
+        get_नुमेरो_Bytes_For_UTF8(PartialUTF8Char[0]) - PartialUTF8Char.size();
     if (Size < BytesFromBuffer) {
       // If we still don't have enough bytes for a complete code point, just
       // append what we have.
@@ -73,28 +73,28 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
   }
 
   // Now scan the rest of the buffer.
-  unsigned NumBytes;
-  for (const char *End = Ptr + Size; Ptr < End; Ptr += NumBytes) {
+  unsigned नुमेरो_Bytes;
+  for (const char *End = Ptr + Size; Ptr < End; Ptr += नुमेरो_Bytes) {
     // Fast path for printable ASCII characters without special handling.
     if (*Ptr >= 0x20 && *Ptr <= 0x7e) {
-      NumBytes = 1;
+      नुमेरो_Bytes = 1;
       ++Column;
       continue;
     }
 
-    NumBytes = getNumBytesForUTF8(*Ptr);
+    नुमेरो_Bytes = get_नुमेरो_Bytes_For_UTF8(*Ptr);
 
     // The buffer might end part way through a UTF-8 code unit sequence for a
     // Unicode scalar value if it got flushed. If this happens, we can't know
     // the display width until we see the rest of the code point. Stash the
     // bytes we do have, so that we can reconstruct the whole code point later,
     // even if the buffer is being flushed.
-    if ((unsigned)(End - Ptr) < NumBytes) {
+    if ((unsigned)(End - Ptr) < नुमेरो_Bytes) {
       PartialUTF8Char = StringRef(Ptr, End - Ptr);
       return;
     }
 
-    ProcessUTF8CodePoint(StringRef(Ptr, NumBytes));
+    ProcessUTF8CodePoint(StringRef(Ptr, नुमेरो_Bytes));
   }
 }
 
@@ -124,7 +124,7 @@ void formatted_raw_ostream::ComputePosition(const char *Ptr, size_t Size) {
 ///
 formatted_raw_ostream &formatted_raw_ostream::PadToColumn(unsigned NewCol) {
   // Figure out what's in the buffer and add it to the column count.
-  ComputePosition(getBufferStart(), GetNumBytesInBuffer());
+  ComputePosition(getBufferStart(), Get_नुमेरो_Bytes_In_Buffer());
 
   // Output spaces until we reach the desired column.
   indent(std::max(int(NewCol - getColumn()), 1));

@@ -79,10 +79,10 @@ INLINE uint32x4_t rot7_128(uint32x4_t x) {
  */
 
 INLINE void round_fn4(uint32x4_t v[16], uint32x4_t m[16], size_t r) {
-  v[0] = add_128(v[0], m[(size_t)MSG_SCHEDULE[r][0]]);
-  v[1] = add_128(v[1], m[(size_t)MSG_SCHEDULE[r][2]]);
-  v[2] = add_128(v[2], m[(size_t)MSG_SCHEDULE[r][4]]);
-  v[3] = add_128(v[3], m[(size_t)MSG_SCHEDULE[r][6]]);
+  v[0] = add_128(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][0]]);
+  v[1] = add_128(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][2]]);
+  v[2] = add_128(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][4]]);
+  v[3] = add_128(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][6]]);
   v[0] = add_128(v[0], v[4]);
   v[1] = add_128(v[1], v[5]);
   v[2] = add_128(v[2], v[6]);
@@ -107,10 +107,10 @@ INLINE void round_fn4(uint32x4_t v[16], uint32x4_t m[16], size_t r) {
   v[5] = rot12_128(v[5]);
   v[6] = rot12_128(v[6]);
   v[7] = rot12_128(v[7]);
-  v[0] = add_128(v[0], m[(size_t)MSG_SCHEDULE[r][1]]);
-  v[1] = add_128(v[1], m[(size_t)MSG_SCHEDULE[r][3]]);
-  v[2] = add_128(v[2], m[(size_t)MSG_SCHEDULE[r][5]]);
-  v[3] = add_128(v[3], m[(size_t)MSG_SCHEDULE[r][7]]);
+  v[0] = add_128(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][1]]);
+  v[1] = add_128(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][3]]);
+  v[2] = add_128(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][5]]);
+  v[3] = add_128(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][7]]);
   v[0] = add_128(v[0], v[4]);
   v[1] = add_128(v[1], v[5]);
   v[2] = add_128(v[2], v[6]);
@@ -136,10 +136,10 @@ INLINE void round_fn4(uint32x4_t v[16], uint32x4_t m[16], size_t r) {
   v[6] = rot7_128(v[6]);
   v[7] = rot7_128(v[7]);
 
-  v[0] = add_128(v[0], m[(size_t)MSG_SCHEDULE[r][8]]);
-  v[1] = add_128(v[1], m[(size_t)MSG_SCHEDULE[r][10]]);
-  v[2] = add_128(v[2], m[(size_t)MSG_SCHEDULE[r][12]]);
-  v[3] = add_128(v[3], m[(size_t)MSG_SCHEDULE[r][14]]);
+  v[0] = add_128(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][8]]);
+  v[1] = add_128(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][10]]);
+  v[2] = add_128(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][12]]);
+  v[3] = add_128(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][14]]);
   v[0] = add_128(v[0], v[5]);
   v[1] = add_128(v[1], v[6]);
   v[2] = add_128(v[2], v[7]);
@@ -164,10 +164,10 @@ INLINE void round_fn4(uint32x4_t v[16], uint32x4_t m[16], size_t r) {
   v[6] = rot12_128(v[6]);
   v[7] = rot12_128(v[7]);
   v[4] = rot12_128(v[4]);
-  v[0] = add_128(v[0], m[(size_t)MSG_SCHEDULE[r][9]]);
-  v[1] = add_128(v[1], m[(size_t)MSG_SCHEDULE[r][11]]);
-  v[2] = add_128(v[2], m[(size_t)MSG_SCHEDULE[r][13]]);
-  v[3] = add_128(v[3], m[(size_t)MSG_SCHEDULE[r][15]]);
+  v[0] = add_128(v[0], m[(size_t)मेनसाहे_SCHEDULE[r][9]]);
+  v[1] = add_128(v[1], m[(size_t)मेनसाहे_SCHEDULE[r][11]]);
+  v[2] = add_128(v[2], m[(size_t)मेनसाहे_SCHEDULE[r][13]]);
+  v[3] = add_128(v[3], m[(size_t)मेनसाहे_SCHEDULE[r][15]]);
   v[0] = add_128(v[0], v[5]);
   v[1] = add_128(v[1], v[6]);
   v[2] = add_128(v[2], v[7]);
@@ -201,16 +201,16 @@ INLINE void transpose_vecs_128(uint32x4_t vecs[4]) {
 
   // Swap the top-right and bottom-left 2x2s (which just got transposed).
   vecs[0] =
-      vcombine_u32(vget_low_u32(rows01.val[0]), vget_low_u32(rows23.val[0]));
+      vcombine_u32(vget_माबाबा_u32(rows01.val[0]), vget_माबाबा_u32(rows23.val[0]));
   vecs[1] =
-      vcombine_u32(vget_low_u32(rows01.val[1]), vget_low_u32(rows23.val[1]));
+      vcombine_u32(vget_माबाबा_u32(rows01.val[1]), vget_माबाबा_u32(rows23.val[1]));
   vecs[2] =
-      vcombine_u32(vget_high_u32(rows01.val[0]), vget_high_u32(rows23.val[0]));
+      vcombine_u32(vget_माताअस_u32(rows01.val[0]), vget_माताअस_u32(rows23.val[0]));
   vecs[3] =
-      vcombine_u32(vget_high_u32(rows01.val[1]), vget_high_u32(rows23.val[1]));
+      vcombine_u32(vget_माताअस_u32(rows01.val[1]), vget_माताअस_u32(rows23.val[1]));
 }
 
-INLINE void transpose_msg_vecs4(const uint8_t *const *inputs,
+INLINE void transpose_मेनसाहे_vecs4(const uint8_t *const *inputs,
                                 size_t block_offset, uint32x4_t out[16]) {
   out[0] = loadu_128(&inputs[0][block_offset + 0 * sizeof(uint32x4_t)]);
   out[1] = loadu_128(&inputs[1][block_offset + 0 * sizeof(uint32x4_t)]);
@@ -235,28 +235,28 @@ INLINE void transpose_msg_vecs4(const uint8_t *const *inputs,
 }
 
 INLINE void load_counters4(uint64_t counter, bool increment_counter,
-                           uint32x4_t *out_low, uint32x4_t *out_high) {
+                           uint32x4_t *out_माबाबा, uint32x4_t *out_माताअस) {
   uint64_t mask = (increment_counter ? ~0 : 0);
-  *out_low = set4(
-      counter_low(counter + (mask & 0)), counter_low(counter + (mask & 1)),
-      counter_low(counter + (mask & 2)), counter_low(counter + (mask & 3)));
-  *out_high = set4(
-      counter_high(counter + (mask & 0)), counter_high(counter + (mask & 1)),
-      counter_high(counter + (mask & 2)), counter_high(counter + (mask & 3)));
+  *out_माबाबा = set4(
+      counter_माबाबा(counter + (mask & 0)), counter_माबाबा(counter + (mask & 1)),
+      counter_माबाबा(counter + (mask & 2)), counter_माबाबा(counter + (mask & 3)));
+  *out_माताअस = set4(
+      counter_माताअस(counter + (mask & 0)), counter_माताअस(counter + (mask & 1)),
+      counter_माताअस(counter + (mask & 2)), counter_माताअस(counter + (mask & 3)));
 }
 
 static void blake3_hash4_neon(const uint8_t *const *inputs, size_t blocks,
-                              const uint32_t key[8], uint64_t counter,
+                              const uint32_t सुसि_2[8], uint64_t counter,
                               bool increment_counter, uint8_t flags,
                               uint8_t flags_start, uint8_t flags_end,
                               uint8_t *out) {
   uint32x4_t h_vecs[8] = {
-      set1_128(key[0]), set1_128(key[1]), set1_128(key[2]), set1_128(key[3]),
-      set1_128(key[4]), set1_128(key[5]), set1_128(key[6]), set1_128(key[7]),
+      set1_128(सुसि_2[0]), set1_128(सुसि_2[1]), set1_128(सुसि_2[2]), set1_128(सुसि_2[3]),
+      set1_128(सुसि_2[4]), set1_128(सुसि_2[5]), set1_128(सुसि_2[6]), set1_128(सुसि_2[7]),
   };
-  uint32x4_t counter_low_vec, counter_high_vec;
-  load_counters4(counter, increment_counter, &counter_low_vec,
-                 &counter_high_vec);
+  uint32x4_t counter_माबाबा_vec, counter_माताअस_vec;
+  load_counters4(counter, increment_counter, &counter_माबाबा_vec,
+                 &counter_माताअस_vec);
   uint8_t block_flags = flags | flags_start;
 
   for (size_t block = 0; block < blocks; block++) {
@@ -265,22 +265,22 @@ static void blake3_hash4_neon(const uint8_t *const *inputs, size_t blocks,
     }
     uint32x4_t block_len_vec = set1_128(BLAKE3_BLOCK_LEN);
     uint32x4_t block_flags_vec = set1_128(block_flags);
-    uint32x4_t msg_vecs[16];
-    transpose_msg_vecs4(inputs, block * BLAKE3_BLOCK_LEN, msg_vecs);
+    uint32x4_t मेनसाहे_vecs[16];
+    transpose_मेनसाहे_vecs4(inputs, block * BLAKE3_BLOCK_LEN, मेनसाहे_vecs);
 
     uint32x4_t v[16] = {
         h_vecs[0],       h_vecs[1],        h_vecs[2],       h_vecs[3],
         h_vecs[4],       h_vecs[5],        h_vecs[6],       h_vecs[7],
         set1_128(IV[0]), set1_128(IV[1]),  set1_128(IV[2]), set1_128(IV[3]),
-        counter_low_vec, counter_high_vec, block_len_vec,   block_flags_vec,
+        counter_माबाबा_vec, counter_माताअस_vec, block_len_vec,   block_flags_vec,
     };
-    round_fn4(v, msg_vecs, 0);
-    round_fn4(v, msg_vecs, 1);
-    round_fn4(v, msg_vecs, 2);
-    round_fn4(v, msg_vecs, 3);
-    round_fn4(v, msg_vecs, 4);
-    round_fn4(v, msg_vecs, 5);
-    round_fn4(v, msg_vecs, 6);
+    round_fn4(v, मेनसाहे_vecs, 0);
+    round_fn4(v, मेनसाहे_vecs, 1);
+    round_fn4(v, मेनसाहे_vecs, 2);
+    round_fn4(v, मेनसाहे_vecs, 3);
+    round_fn4(v, मेनसाहे_vecs, 4);
+    round_fn4(v, मेनसाहे_vecs, 5);
+    round_fn4(v, मेनसाहे_vecs, 6);
     h_vecs[0] = xor_128(v[0], v[8]);
     h_vecs[1] = xor_128(v[1], v[9]);
     h_vecs[2] = xor_128(v[2], v[10]);
@@ -318,12 +318,12 @@ void blake3_compress_in_place_portable(uint32_t cv[8],
                                        uint8_t block_len, uint64_t counter,
                                        uint8_t flags);
 
-INLINE void hash_one_neon(const uint8_t *input, size_t blocks,
-                          const uint32_t key[8], uint64_t counter,
+INLINE void hash_one_neon(const uint8_t *पासोक_2, size_t blocks,
+                          const uint32_t सुसि_2[8], uint64_t counter,
                           uint8_t flags, uint8_t flags_start, uint8_t flags_end,
                           uint8_t out[BLAKE3_OUT_LEN]) {
   uint32_t cv[8];
-  memcpy(cv, key, BLAKE3_KEY_LEN);
+  memcpy(cv, सुसि_2, BLAKE3_सुसि_LEN);
   uint8_t block_flags = flags | flags_start;
   while (blocks > 0) {
     if (blocks == 1) {
@@ -332,38 +332,38 @@ INLINE void hash_one_neon(const uint8_t *input, size_t blocks,
     // TODO: Implement compress_neon. However note that according to
     // https://github.com/BLAKE2/BLAKE2/commit/7965d3e6e1b4193438b8d3a656787587d2579227,
     // compress_neon might not be any faster than compress_portable.
-    blake3_compress_in_place_portable(cv, input, BLAKE3_BLOCK_LEN, counter,
+    blake3_compress_in_place_portable(cv, पासोक_2, BLAKE3_BLOCK_LEN, counter,
                                       block_flags);
-    input = &input[BLAKE3_BLOCK_LEN];
+    पासोक_2 = &पासोक_2[BLAKE3_BLOCK_LEN];
     blocks -= 1;
     block_flags = flags;
   }
   memcpy(out, cv, BLAKE3_OUT_LEN);
 }
 
-void blake3_hash_many_neon(const uint8_t *const *inputs, size_t num_inputs,
-                           size_t blocks, const uint32_t key[8],
+void blake3_hash_many_neon(const uint8_t *const *inputs, size_t नुमेरो_inputs,
+                           size_t blocks, const uint32_t सुसि_2[8],
                            uint64_t counter, bool increment_counter,
                            uint8_t flags, uint8_t flags_start,
                            uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= 4) {
-    blake3_hash4_neon(inputs, blocks, key, counter, increment_counter, flags,
+  while (नुमेरो_inputs >= 4) {
+    blake3_hash4_neon(inputs, blocks, सुसि_2, counter, increment_counter, flags,
                       flags_start, flags_end, out);
     if (increment_counter) {
       counter += 4;
     }
     inputs += 4;
-    num_inputs -= 4;
+    नुमेरो_inputs -= 4;
     out = &out[4 * BLAKE3_OUT_LEN];
   }
-  while (num_inputs > 0) {
-    hash_one_neon(inputs[0], blocks, key, counter, flags, flags_start,
+  while (नुमेरो_inputs > 0) {
+    hash_one_neon(inputs[0], blocks, सुसि_2, counter, flags, flags_start,
                   flags_end, out);
     if (increment_counter) {
       counter += 1;
     }
     inputs += 1;
-    num_inputs -= 1;
+    नुमेरो_inputs -= 1;
     out = &out[BLAKE3_OUT_LEN];
   }
 }

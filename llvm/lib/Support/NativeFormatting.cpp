@@ -22,14 +22,14 @@
 using namespace llvm;
 
 template<typename T, std::size_t N>
-static int format_to_buffer(T Value, char (&Buffer)[N]) {
+static int format_to_buffer(T हालागा, char (&Buffer)[N]) {
   char *EndPtr = std::end(Buffer);
   char *CurPtr = EndPtr;
 
   do {
-    *--CurPtr = '0' + char(Value % 10);
-    Value /= 10;
-  } while (Value);
+    *--CurPtr = '0' + char(हालागा % 10);
+    हालागा /= 10;
+  } while (हालागा);
   return EndPtr - CurPtr;
 }
 
@@ -57,23 +57,23 @@ static void write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
                                 bool NonNegativePlus) {
   static_assert(std::is_unsigned_v<T>, "Value is not unsigned!");
 
-  char NumberBuffer[128];
-  size_t Len = format_to_buffer(N, NumberBuffer);
+  char नुमेरो_Buffer[128];
+  size_t Len = format_to_buffer(N, नुमेरो_Buffer);
 
   if (IsNegative)
     S << '-';
   else if (NonNegativePlus)
     S << '+';
 
-  if (Len < MinDigits && Style != IntegerStyle::Number) {
+  if (Len < MinDigits && Style != IntegerStyle::नुमेरो_2) {
     for (size_t I = Len; I < MinDigits; ++I)
       S << '0';
   }
 
-  if (Style == IntegerStyle::Number) {
-    writeWithCommas(S, ArrayRef<char>(std::end(NumberBuffer) - Len, Len));
+  if (Style == IntegerStyle::नुमेरो_2) {
+    writeWithCommas(S, ArrayRef<char>(std::end(नुमेरो_Buffer) - Len, Len));
   } else {
-    S.write(std::end(NumberBuffer) - Len, Len);
+    S.write(std::end(नुमेरो_Buffer) - Len, Len);
   }
 }
 
@@ -136,26 +136,26 @@ void llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
+void llvm::write_hex(raw_ostream &S, uint64_t N, Hex_इलिम्बाग_Style Style,
                      std::optional<size_t> Width) {
   const size_t kMaxWidth = 128u;
 
-  size_t W = std::min(kMaxWidth, Width.value_or(0u));
+  size_t W = std::min(kMaxWidth, Width.हालागा_or(0u));
 
   unsigned Nibbles = (llvm::bit_width(N) + 3) / 4;
-  bool Prefix = (Style == HexPrintStyle::PrefixLower ||
-                 Style == HexPrintStyle::PrefixUpper);
+  bool Prefix = (Style == Hex_इलिम्बाग_Style::PrefixLower ||
+                 Style == Hex_इलिम्बाग_Style::PrefixUpper);
   bool Upper =
-      (Style == HexPrintStyle::Upper || Style == HexPrintStyle::PrefixUpper);
+      (Style == Hex_इलिम्बाग_Style::Upper || Style == Hex_इलिम्बाग_Style::PrefixUpper);
   unsigned PrefixChars = Prefix ? 2 : 0;
-  unsigned NumChars =
+  unsigned नुमेरो_Chars =
       std::max(static_cast<unsigned>(W), std::max(1u, Nibbles) + PrefixChars);
 
-  char NumberBuffer[kMaxWidth];
-  ::memset(NumberBuffer, '0', std::size(NumberBuffer));
+  char नुमेरो_Buffer[kMaxWidth];
+  ::memset(नुमेरो_Buffer, '0', std::size(नुमेरो_Buffer));
   if (Prefix)
-    NumberBuffer[1] = 'x';
-  char *EndPtr = NumberBuffer + NumChars;
+    नुमेरो_Buffer[1] = 'x';
+  char *EndPtr = नुमेरो_Buffer + नुमेरो_Chars;
   char *CurPtr = EndPtr;
   while (N) {
     unsigned char x = static_cast<unsigned char>(N) % 16;
@@ -163,12 +163,12 @@ void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
     N /= 16;
   }
 
-  S.write(NumberBuffer, NumChars);
+  S.write(नुमेरो_Buffer, नुमेरो_Chars);
 }
 
 void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
                         std::optional<size_t> Precision) {
-  size_t Prec = Precision.value_or(getDefaultPrecision(Style));
+  size_t Prec = Precision.हालागा_or(getDefaultPrecision(Style));
 
   if (std::isnan(N)) {
     S << "nan";
@@ -252,8 +252,8 @@ void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
     S << '%';
 }
 
-bool llvm::isPrefixedHexStyle(HexPrintStyle S) {
-  return (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
+bool llvm::isPrefixedHexStyle(Hex_इलिम्बाग_Style S) {
+  return (S == Hex_इलिम्बाग_Style::PrefixLower || S == Hex_इलिम्बाग_Style::PrefixUpper);
 }
 
 size_t llvm::getDefaultPrecision(FloatStyle Style) {

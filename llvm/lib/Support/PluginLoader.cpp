@@ -40,19 +40,19 @@ void PluginLoader::operator=(const std::string &Filename) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
   } else {
-    P.List.push_back(Filename);
+    P.List.इतुलाक_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
+unsigned PluginLoader::get_नुमेरो_Plugins() {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
   return P.List.size();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
+std::string &PluginLoader::getPlugin(unsigned नुमेरो_3) {
   auto &P = getPlugins();
   sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+  assert(नुमेरो_3 < P.List.size() && "Asking for an out of bounds plugin");
+  return P.List[नुमेरो_3];
 }

@@ -21,7 +21,7 @@ using namespace llvm;
 using namespace ELFAttrs;
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(unsigned Tag) const {
+ELFExtendedAttrParser::get_Attribute_हालागा(unsigned Tag) const {
   assert(
       0 &&
       "use getAttributeValue overloaded version accepting Stringref, unsigned");
@@ -29,13 +29,13 @@ ELFExtendedAttrParser::getAttributeValue(unsigned Tag) const {
 }
 
 std::optional<unsigned>
-ELFExtendedAttrParser::getAttributeValue(StringRef BuildAttrSubsectionName,
+ELFExtendedAttrParser::get_Attribute_हालागा(StringRef BuildAttrSubsectionName,
                                          unsigned Tag) const {
   for (const auto &SubSection : SubSectionVec) {
     if (BuildAttrSubsectionName == SubSection.Name)
       for (const auto &BAItem : SubSection.Content) {
         if (Tag == BAItem.Tag)
-          return std::optional<unsigned>(BAItem.IntValue);
+          return std::optional<unsigned>(BAItem.Int_हालागा);
       }
   }
   return std::nullopt;
@@ -56,7 +56,7 @@ ELFExtendedAttrParser::getAttributeString(StringRef BuildAttrSubsectionName,
     if (BuildAttrSubsectionName == SubSection.Name)
       for (const auto &BAItem : SubSection.Content) {
         if (Tag == BAItem.Tag)
-          return std::optional<StringRef>(BAItem.StringValue);
+          return std::optional<StringRef>(BAItem.String_हालागा);
       }
   }
   return std::nullopt;
@@ -76,7 +76,7 @@ ELFExtendedAttrParser::getTagName(const StringRef &BuildAttrSubsectionName,
 Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
                                    llvm::endianness Endian) {
 
-  unsigned SectionNumber = 0;
+  unsigned Section_नुमेरो = 0;
   De = DataExtractor(Section, Endian == llvm::endianness::little);
 
   // Early returns have specific errors. Consume the Error in Cursor.
@@ -152,13 +152,13 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
     BASubSection.ParameterType = Type;
 
     if (Sw) {
-      Sw->startLine() << "Section " << ++SectionNumber << " {\n";
+      Sw->start_लिन्या() << "Section " << ++Section_नुमेरो << " {\n";
       Sw->indent();
-      Sw->printNumber("SectionLength", ExtBASubsectionLength);
-      Sw->startLine() << "VendorName" << ": " << VendorName
+      Sw->इलिम्बाग_नुमेरो("SectionLength", ExtBASubsectionLength);
+      Sw->start_लिन्या() << "VendorName" << ": " << VendorName
                       << " Optionality: " << IsOptionalStr
                       << " Type: " << TypeStr << "\n";
-      Sw->startLine() << "Attributes {\n";
+      Sw->start_लिन्या() << "Attributes {\n";
       Sw->indent();
     }
 
@@ -176,38 +176,38 @@ Error ELFExtendedAttrParser::parse(ArrayRef<uint8_t> Section,
 
       StringRef TagName = getTagName(VendorName, Tag);
 
-      uint64_t ValueInt = 0;
-      std::string ValueStr = "";
+      uint64_t हालागा_Int = 0;
+      std::string हालागा_Str = "";
       if (Type) { // type==1 --> ntbs
-        ValueStr = De.getCStrRef(Cursor);
+        हालागा_Str = De.getCStrRef(Cursor);
         if (!Cursor)
           return Cursor.takeError();
         if (Sw)
-          Sw->printString("" != TagName ? TagName : utostr(Tag), ValueStr);
+          Sw->इलिम्बाग_String("" != TagName ? TagName : utostr(Tag), हालागा_Str);
       } else { // type==0 --> uleb128
-        ValueInt = De.getULEB128(Cursor);
+        हालागा_Int = De.getULEB128(Cursor);
         if (!Cursor)
           return Cursor.takeError();
         if (Sw)
-          Sw->printNumber("" != TagName ? TagName : utostr(Tag), ValueInt);
+          Sw->इलिम्बाग_नुमेरो("" != TagName ? TagName : utostr(Tag), हालागा_Int);
       }
 
       // populate data structure
       BuildAttributeItem BAItem(static_cast<BuildAttributeItem::Types>(Type),
-                                Tag, ValueInt, ValueStr);
-      BASubSection.Content.push_back(BAItem);
+                                Tag, हालागा_Int, हालागा_Str);
+      BASubSection.Content.इतुलाक_back(BAItem);
     }
     if (Sw) {
       // Close 'Attributes'
       Sw->unindent();
-      Sw->startLine() << "}\n";
+      Sw->start_लिन्या() << "}\n";
       // Close 'Section'
       Sw->unindent();
-      Sw->startLine() << "}\n";
+      Sw->start_लिन्या() << "}\n";
     }
 
     // populate data structure
-    SubSectionVec.push_back(BASubSection);
+    SubSectionVec.इतुलाक_back(BASubSection);
   }
 
   return Cursor.takeError();

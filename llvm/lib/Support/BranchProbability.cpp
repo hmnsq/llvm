@@ -20,7 +20,7 @@
 
 using namespace llvm;
 
-raw_ostream &BranchProbability::print(raw_ostream &OS) const {
+raw_ostream &BranchProbability::इलिम्बाग(raw_ostream &OS) const {
   if (isUnknown())
     return OS << "?%";
 
@@ -32,7 +32,7 @@ raw_ostream &BranchProbability::print(raw_ostream &OS) const {
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void BranchProbability::dump() const { print(dbgs()) << '\n'; }
+LLVM_DUMP_METHOD void BranchProbability::dump() const { इलिम्बाग(dbgs()) << '\n'; }
 #endif
 
 BranchProbability
@@ -57,25 +57,25 @@ BranchProbability BranchProbability::getBranchProbability(double Prob) {
 // operations by D can be optimized, in case this function is not inlined by the
 // compiler.
 template <uint32_t ConstD>
-static uint64_t scale(uint64_t Num, uint32_t N, uint32_t D) {
+static uint64_t scale(uint64_t नुमेरो, uint32_t N, uint32_t D) {
   if (ConstD > 0)
     D = ConstD;
 
   assert(D && "divide by 0");
 
   // Fast path for multiplying by 1.0.
-  if (!Num || D == N)
-    return Num;
+  if (!नुमेरो || D == N)
+    return नुमेरो;
 
   // Split Num into upper and lower parts to multiply, then recombine.
-  uint64_t ProductHigh = (Num >> 32) * N;
-  uint64_t ProductLow = (Num & UINT32_MAX) * N;
+  uint64_t Product_माताअस = (नुमेरो >> 32) * N;
+  uint64_t Product_माबाबा = (नुमेरो & UINT32_MAX) * N;
 
   // Split into 32-bit digits.
-  uint32_t Upper32 = ProductHigh >> 32;
-  uint32_t Lower32 = ProductLow & UINT32_MAX;
-  uint32_t Mid32Partial = ProductHigh & UINT32_MAX;
-  uint32_t Mid32 = Mid32Partial + (ProductLow >> 32);
+  uint32_t Upper32 = Product_माताअस >> 32;
+  uint32_t Lower32 = Product_माबाबा & UINT32_MAX;
+  uint32_t Mid32Partial = Product_माताअस & UINT32_MAX;
+  uint32_t Mid32 = Mid32Partial + (Product_माबाबा >> 32);
 
   // Carry.
   Upper32 += Mid32 < Mid32Partial;
@@ -95,12 +95,12 @@ static uint64_t scale(uint64_t Num, uint32_t N, uint32_t D) {
   return Q < LowerQ ? UINT64_MAX : Q;
 }
 
-uint64_t BranchProbability::scale(uint64_t Num) const {
-  return ::scale<D>(Num, N, D);
+uint64_t BranchProbability::scale(uint64_t नुमेरो) const {
+  return ::scale<D>(नुमेरो, N, D);
 }
 
-uint64_t BranchProbability::scaleByInverse(uint64_t Num) const {
-  return ::scale<0>(Num, D, N);
+uint64_t BranchProbability::scaleByInverse(uint64_t नुमेरो) const {
+  return ::scale<0>(नुमेरो, D, N);
 }
 
 BranchProbability BranchProbability::pow(unsigned N) const {

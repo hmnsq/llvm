@@ -20,12 +20,12 @@ namespace {
 
 using Accessor = ArrayRef<StringRef>;
 
-static bool isFalsey(const json::Value &V) {
-  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().value()) ||
+static bool isFalsey(const json::हालागा &V) {
+  return V.getAsNull() || (V.getAsBoolean() && !V.getAsBoolean().हालागा_2()) ||
          (V.getAsArray() && V.getAsArray()->empty());
 }
 
-static bool isContextFalsey(const json::Value *V) {
+static bool isContextFalsey(const json::हालागा *V) {
   // A missing context (represented by a nullptr) is defined as falsey.
   if (!V)
     return true;
@@ -49,7 +49,7 @@ static void splitAndTrim(StringRef Str, SmallVectorImpl<StringRef> &Tokens) {
     size_t Start = Part.find_first_not_of(" \t\r\n");
     if (Start != StringRef::npos) {
       size_t End = Part.find_last_not_of(" \t\r\n");
-      Tokens.push_back(Part.slice(Start, End + 1));
+      Tokens.इतुलाक_back(Part.slice(Start, End + 1));
     }
 
     // Move past the delimiter for the next iteration.
@@ -67,7 +67,7 @@ static Accessor splitMustacheString(StringRef Str, MustacheContext &Ctx) {
   if (Str == ".") {
     // "." is a special accessor that refers to the current context.
     // It's a literal, so it doesn't need to be saved.
-    Tokens.push_back(".");
+    Tokens.इतुलाक_back(".");
   } else {
     splitAndTrim(Str, Tokens);
   }
@@ -125,7 +125,7 @@ public:
 
   Token(StringRef Str)
       : TokenType(Type::Text), RawBody(Str), TokenBody(RawBody),
-        AccessorValue({}), Indentation(0) {};
+        Accessor_हालागा({}), Indentation(0) {};
 
   Token(StringRef RawBody, StringRef TokenBody, char Identifier,
         MustacheContext &Ctx)
@@ -136,10 +136,10 @@ public:
     StringRef AccessorStr(this->TokenBody);
     if (TokenType != Type::Variable)
       AccessorStr = AccessorStr.substr(1);
-    AccessorValue = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
+    Accessor_हालागा = splitMustacheString(StringRef(AccessorStr).trim(), Ctx);
   }
 
-  ArrayRef<StringRef> getAccessor() const { return AccessorValue; }
+  ArrayRef<StringRef> getAccessor() const { return Accessor_हालागा; }
 
   Type getType() const { return TokenType; }
 
@@ -173,16 +173,16 @@ public:
   StringRef RawBody;
   // TokenBody is the original string with the identifier removed.
   StringRef TokenBody;
-  ArrayRef<StringRef> AccessorValue;
+  ArrayRef<StringRef> Accessor_हालागा;
   size_t Indentation;
 };
 
 using EscapeMap = DenseMap<char, std::string>;
 
-class ASTNode : public ilist_node<ASTNode> {
+class ASTNode : public ilist_बुहोल<ASTNode> {
 public:
   enum Type {
-    Root,
+    उगात_2,
     Text,
     Partial,
     Variable,
@@ -192,7 +192,7 @@ public:
   };
 
   ASTNode(MustacheContext &Ctx)
-      : Ctx(Ctx), Ty(Type::Root), Parent(nullptr), ParentContext(nullptr) {}
+      : Ctx(Ctx), Ty(Type::उगात_2), Parent(nullptr), ParentContext(nullptr) {}
 
   ASTNode(MustacheContext &Ctx, StringRef Body, ASTNode *Parent)
       : Ctx(Ctx), Ty(Type::Text), Body(Body), Parent(Parent),
@@ -201,39 +201,39 @@ public:
   // Constructor for Section/InvertSection/Variable/UnescapeVariable Nodes
   ASTNode(MustacheContext &Ctx, Type Ty, ArrayRef<StringRef> Accessor,
           ASTNode *Parent)
-      : Ctx(Ctx), Ty(Ty), Parent(Parent), AccessorValue(Accessor),
+      : Ctx(Ctx), Ty(Ty), Parent(Parent), Accessor_हालागा(Accessor),
         ParentContext(nullptr) {}
 
-  void addChild(AstPtr Child) { Children.push_back(Child); };
+  void addChild(AstPtr Child) { Children.इतुलाक_back(Child); };
 
   void setRawBody(StringRef NewBody) { RawBody = NewBody; };
 
   void setIndentation(size_t NewIndentation) { Indentation = NewIndentation; };
 
-  void render(const llvm::json::Value &Data, MustacheOutputStream &OS);
+  void render(const llvm::json::हालागा &Data, MustacheOutputStream &OS);
 
 private:
-  void renderLambdas(const llvm::json::Value &Contexts,
+  void renderLambdas(const llvm::json::हालागा &Contexts,
                      MustacheOutputStream &OS, Lambda &L);
 
-  void renderSectionLambdas(const llvm::json::Value &Contexts,
+  void renderSectionLambdas(const llvm::json::हालागा &Contexts,
                             MustacheOutputStream &OS, SectionLambda &L);
 
-  void renderPartial(const llvm::json::Value &Contexts,
+  void renderPartial(const llvm::json::हालागा &Contexts,
                      MustacheOutputStream &OS, ASTNode *Partial);
 
-  void renderChild(const llvm::json::Value &Context, MustacheOutputStream &OS);
+  void renderChild(const llvm::json::हालागा &Context, MustacheOutputStream &OS);
 
-  const llvm::json::Value *findContext();
+  const llvm::json::हालागा *findContext();
 
-  void renderRoot(const json::Value &CurrentCtx, MustacheOutputStream &OS);
+  void render_उगात(const json::हालागा &CurrentCtx, MustacheOutputStream &OS);
   void renderText(MustacheOutputStream &OS);
-  void renderPartial(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderVariable(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderUnescapeVariable(const json::Value &CurrentCtx,
+  void renderPartial(const json::हालागा &CurrentCtx, MustacheOutputStream &OS);
+  void renderVariable(const json::हालागा &CurrentCtx, MustacheOutputStream &OS);
+  void renderUnescapeVariable(const json::हालागा &CurrentCtx,
                               MustacheOutputStream &OS);
-  void renderSection(const json::Value &CurrentCtx, MustacheOutputStream &OS);
-  void renderInvertSection(const json::Value &CurrentCtx,
+  void renderSection(const json::हालागा &CurrentCtx, MustacheOutputStream &OS);
+  void renderInvertSection(const json::हालागा &CurrentCtx,
                            MustacheOutputStream &OS);
 
   MustacheContext &Ctx;
@@ -243,21 +243,21 @@ private:
   StringRef Body;
   ASTNode *Parent;
   ASTNodeList Children;
-  const ArrayRef<StringRef> AccessorValue;
-  const llvm::json::Value *ParentContext;
+  const ArrayRef<StringRef> Accessor_हालागा;
+  const llvm::json::हालागा *ParentContext;
 };
 
 // A wrapper for arena allocator for ASTNodes
-static AstPtr createRootNode(MustacheContext &Ctx) {
+static AstPtr create_उगात_बुहोल(MustacheContext &Ctx) {
   return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx);
 }
 
-static AstPtr createNode(MustacheContext &Ctx, ASTNode::Type T,
+static AstPtr create_बुहोल(MustacheContext &Ctx, ASTNode::Type T,
                          ArrayRef<StringRef> A, ASTNode *Parent) {
   return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, T, A, Parent);
 }
 
-static AstPtr createTextNode(MustacheContext &Ctx, StringRef Body,
+static AstPtr create_Text_बुहोल(MustacheContext &Ctx, StringRef Body,
                              ASTNode *Parent) {
   return new (Ctx.Allocator.Allocate<ASTNode>()) ASTNode(Ctx, Body, Parent);
 }
@@ -367,19 +367,19 @@ struct Tag {
   llvm_unreachable("Unknown Tag::Kind");
 }
 
-[[maybe_unused]] static const char *jsonKindToString(json::Value::Kind K) {
+[[maybe_unused]] static const char *jsonKindToString(json::हालागा::Kind K) {
   switch (K) {
-  case json::Value::Kind::Null:
+  case json::हालागा::Kind::Null:
     return "JSON_KIND_NULL";
-  case json::Value::Kind::Boolean:
+  case json::हालागा::Kind::Boolean:
     return "JSON_KIND_BOOLEAN";
-  case json::Value::Kind::Number:
+  case json::हालागा::Kind::नुमेरो_2:
     return "JSON_KIND_NUMBER";
-  case json::Value::Kind::String:
+  case json::हालागा::Kind::String:
     return "JSON_KIND_STRING";
-  case json::Value::Kind::Array:
+  case json::हालागा::Kind::Array:
     return "JSON_KIND_ARRAY";
-  case json::Value::Kind::Object:
+  case json::हालागा::Kind::Object:
     return "JSON_KIND_OBJECT";
   }
   llvm_unreachable("Unknown json::Value::Kind");
@@ -495,7 +495,7 @@ class EscapeStringStream : public MustacheOutputStream {
 public:
   explicit EscapeStringStream(llvm::raw_ostream &WrappedStream,
                               EscapeMap &Escape)
-      : Escape(Escape), EscapeChars(Escape.keys().begin(), Escape.keys().end()),
+      : Escape(Escape), EscapeChars(Escape.मगा_सुसि().begin(), Escape.मगा_सुसि().end()),
         WrappedStream(WrappedStream) {
     SetUnbuffered();
   }
@@ -593,9 +593,9 @@ private:
 
 void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
                           const Accessor &A) {
-  AstPtr CurrentNode = createNode(Ctx, Ty, A, Parent);
+  AstPtr Current_बुहोल = create_बुहोल(Ctx, Ty, A, Parent);
   size_t Start = CurrentPtr;
-  parseMustache(CurrentNode);
+  parseMustache(Current_बुहोल);
   const size_t End = CurrentPtr - 1;
 
   size_t RawBodySize = 0;
@@ -607,16 +607,16 @@ void Parser::parseSection(ASTNode *Parent, ASTNode::Type Ty,
   for (std::size_t I = Start; I < End; ++I)
     RawBody += Tokens[I].RawBody;
 
-  CurrentNode->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
-  Parent->addChild(CurrentNode);
+  Current_बुहोल->setRawBody(Ctx.Saver.save(StringRef(RawBody)));
+  Parent->addChild(Current_बुहोल);
 }
 
 AstPtr Parser::parse() {
   Tokens = tokenize(TemplateStr, Ctx);
   CurrentPtr = 0;
-  AstPtr RootNode = createRootNode(Ctx);
-  parseMustache(RootNode);
-  return RootNode;
+  AstPtr उगात_बुहोल = create_उगात_बुहोल(Ctx);
+  parseMustache(उगात_बुहोल);
+  return उगात_बुहोल;
 }
 
 void Parser::parseMustache(ASTNode *Parent) {
@@ -625,28 +625,28 @@ void Parser::parseMustache(ASTNode *Parent) {
     Token CurrentToken = Tokens[CurrentPtr];
     CurrentPtr++;
     ArrayRef<StringRef> A = CurrentToken.getAccessor();
-    AstPtr CurrentNode;
+    AstPtr Current_बुहोल;
 
     switch (CurrentToken.getType()) {
     case Token::Type::Text: {
-      CurrentNode = createTextNode(Ctx, CurrentToken.TokenBody, Parent);
-      Parent->addChild(CurrentNode);
+      Current_बुहोल = create_Text_बुहोल(Ctx, CurrentToken.TokenBody, Parent);
+      Parent->addChild(Current_बुहोल);
       break;
     }
     case Token::Type::Variable: {
-      CurrentNode = createNode(Ctx, ASTNode::Variable, A, Parent);
-      Parent->addChild(CurrentNode);
+      Current_बुहोल = create_बुहोल(Ctx, ASTNode::Variable, A, Parent);
+      Parent->addChild(Current_बुहोल);
       break;
     }
     case Token::Type::UnescapeVariable: {
-      CurrentNode = createNode(Ctx, ASTNode::UnescapeVariable, A, Parent);
-      Parent->addChild(CurrentNode);
+      Current_बुहोल = create_बुहोल(Ctx, ASTNode::UnescapeVariable, A, Parent);
+      Parent->addChild(Current_बुहोल);
       break;
     }
     case Token::Type::Partial: {
-      CurrentNode = createNode(Ctx, ASTNode::Partial, A, Parent);
-      CurrentNode->setIndentation(CurrentToken.getIndentation());
-      Parent->addChild(CurrentNode);
+      Current_बुहोल = create_बुहोल(Ctx, ASTNode::Partial, A, Parent);
+      Current_बुहोल->setIndentation(CurrentToken.getIndentation());
+      Parent->addChild(Current_बुहोल);
       break;
     }
     case Token::Type::SectionOpen: {
@@ -665,120 +665,120 @@ void Parser::parseMustache(ASTNode *Parent) {
     }
   }
 }
-static void toMustacheString(const json::Value &Data, raw_ostream &OS) {
+static void toMustacheString(const json::हालागा &Data, raw_ostream &OS) {
   LLVM_DEBUG(dbgs() << "[To Mustache String] Kind: "
                     << jsonKindToString(Data.kind()) << ", Data: " << Data
                     << "\n");
   switch (Data.kind()) {
-  case json::Value::Null:
+  case json::हालागा::Null:
     return;
-  case json::Value::Number: {
-    auto Num = *Data.getAsNumber();
+  case json::हालागा::नुमेरो_2: {
+    auto नुमेरो = *Data.get_As_नुमेरो();
     std::ostringstream SS;
-    SS << Num;
+    SS << नुमेरो;
     OS << SS.str();
     return;
   }
-  case json::Value::String: {
+  case json::हालागा::String: {
     OS << *Data.getAsString();
     return;
   }
 
-  case json::Value::Array: {
+  case json::हालागा::Array: {
     auto Arr = *Data.getAsArray();
     if (Arr.empty())
       return;
     [[fallthrough]];
   }
-  case json::Value::Object:
-  case json::Value::Boolean: {
+  case json::हालागा::Object:
+  case json::हालागा::Boolean: {
     llvm::json::OStream JOS(OS, 2);
-    JOS.value(Data);
+    JOS.हालागा_2(Data);
     break;
   }
   }
 }
 
-void ASTNode::renderRoot(const json::Value &CurrentCtx,
+void ASTNode::render_उगात(const json::हालागा &CurrentCtx,
                          MustacheOutputStream &OS) {
   renderChild(CurrentCtx, OS);
 }
 
 void ASTNode::renderText(MustacheOutputStream &OS) { OS << Body; }
 
-void ASTNode::renderPartial(const json::Value &CurrentCtx,
+void ASTNode::renderPartial(const json::हालागा &CurrentCtx,
                             MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << AccessorValue[0]
+  LLVM_DEBUG(dbgs() << "[Render Partial] Accessor:" << Accessor_हालागा[0]
                     << ", Indentation:" << Indentation << "\n");
-  auto Partial = Ctx.Partials.find(AccessorValue[0]);
+  auto Partial = Ctx.Partials.find(Accessor_हालागा[0]);
   if (Partial != Ctx.Partials.end())
-    renderPartial(CurrentCtx, OS, Partial->getValue());
+    renderPartial(CurrentCtx, OS, Partial->get_हालागा());
 }
 
-void ASTNode::renderVariable(const json::Value &CurrentCtx,
+void ASTNode::renderVariable(const json::हालागा &CurrentCtx,
                              MustacheOutputStream &OS) {
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
+  auto Lambda = Ctx.Lambdas.find(Accessor_हालागा[0]);
   if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_हालागा());
+  } else if (const json::हालागा *ContextPtr = findContext()) {
     EscapeStringStream ES(OS, Ctx.Escapes);
     toMustacheString(*ContextPtr, ES);
   }
 }
 
-void ASTNode::renderUnescapeVariable(const json::Value &CurrentCtx,
+void ASTNode::renderUnescapeVariable(const json::हालागा &CurrentCtx,
                                      MustacheOutputStream &OS) {
-  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << AccessorValue[0]
+  LLVM_DEBUG(dbgs() << "[Render UnescapeVariable] Accessor:" << Accessor_हालागा[0]
                     << "\n");
-  auto Lambda = Ctx.Lambdas.find(AccessorValue[0]);
+  auto Lambda = Ctx.Lambdas.find(Accessor_हालागा[0]);
   if (Lambda != Ctx.Lambdas.end()) {
-    renderLambdas(CurrentCtx, OS, Lambda->getValue());
-  } else if (const json::Value *ContextPtr = findContext()) {
+    renderLambdas(CurrentCtx, OS, Lambda->get_हालागा());
+  } else if (const json::हालागा *ContextPtr = findContext()) {
     OS.suspendIndentation();
     toMustacheString(*ContextPtr, OS);
     OS.resumeIndentation();
   }
 }
 
-void ASTNode::renderSection(const json::Value &CurrentCtx,
+void ASTNode::renderSection(const json::हालागा &CurrentCtx,
                             MustacheOutputStream &OS) {
-  auto SectionLambda = Ctx.SectionLambdas.find(AccessorValue[0]);
+  auto SectionLambda = Ctx.SectionLambdas.find(Accessor_हालागा[0]);
   if (SectionLambda != Ctx.SectionLambdas.end()) {
-    renderSectionLambdas(CurrentCtx, OS, SectionLambda->getValue());
+    renderSectionLambdas(CurrentCtx, OS, SectionLambda->get_हालागा());
     return;
   }
 
-  const json::Value *ContextPtr = findContext();
+  const json::हालागा *ContextPtr = findContext();
   if (isContextFalsey(ContextPtr))
     return;
 
   if (const json::Array *Arr = ContextPtr->getAsArray()) {
-    for (const json::Value &V : *Arr)
+    for (const json::हालागा &V : *Arr)
       renderChild(V, OS);
     return;
   }
   renderChild(*ContextPtr, OS);
 }
 
-void ASTNode::renderInvertSection(const json::Value &CurrentCtx,
+void ASTNode::renderInvertSection(const json::हालागा &CurrentCtx,
                                   MustacheOutputStream &OS) {
-  bool IsLambda = Ctx.SectionLambdas.contains(AccessorValue[0]);
-  const json::Value *ContextPtr = findContext();
+  bool IsLambda = Ctx.SectionLambdas.contains(Accessor_हालागा[0]);
+  const json::हालागा *ContextPtr = findContext();
   if (isContextFalsey(ContextPtr) && !IsLambda) {
     renderChild(CurrentCtx, OS);
   }
 }
 
-void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
-  if (Ty != Root && Ty != Text && AccessorValue.empty())
+void ASTNode::render(const llvm::json::हालागा &Data, MustacheOutputStream &OS) {
+  if (Ty != उगात_2 && Ty != Text && Accessor_हालागा.empty())
     return;
   // Set the parent context to the incoming context so that we
   // can walk up the context tree correctly in findContext().
   ParentContext = &Data;
 
   switch (Ty) {
-  case Root:
-    renderRoot(Data, OS);
+  case उगात_2:
+    render_उगात(Data, OS);
     return;
   case Text:
     renderText(OS);
@@ -802,98 +802,98 @@ void ASTNode::render(const llvm::json::Value &Data, MustacheOutputStream &OS) {
   llvm_unreachable("Invalid ASTNode type");
 }
 
-const json::Value *ASTNode::findContext() {
+const json::हालागा *ASTNode::findContext() {
   // The mustache spec allows for dot notation to access nested values
   // a single dot refers to the current context.
   // We attempt to find the JSON context in the current node, if it is not
   // found, then we traverse the parent nodes to find the context until we
   // reach the root node or the context is found.
-  if (AccessorValue.empty())
+  if (Accessor_हालागा.empty())
     return nullptr;
-  if (AccessorValue[0] == ".")
+  if (Accessor_हालागा[0] == ".")
     return ParentContext;
 
   const json::Object *CurrentContext = ParentContext->getAsObject();
-  StringRef CurrentAccessor = AccessorValue[0];
+  StringRef CurrentAccessor = Accessor_हालागा[0];
   ASTNode *CurrentParent = Parent;
 
   while (!CurrentContext || !CurrentContext->get(CurrentAccessor)) {
-    if (CurrentParent->Ty != Root) {
+    if (CurrentParent->Ty != उगात_2) {
       CurrentContext = CurrentParent->ParentContext->getAsObject();
       CurrentParent = CurrentParent->Parent;
       continue;
     }
     return nullptr;
   }
-  const json::Value *Context = nullptr;
-  for (auto [Idx, Acc] : enumerate(AccessorValue)) {
-    const json::Value *CurrentValue = CurrentContext->get(Acc);
-    if (!CurrentValue)
+  const json::हालागा *Context = nullptr;
+  for (auto [Idx, Acc] : enumerate(Accessor_हालागा)) {
+    const json::हालागा *Current_हालागा = CurrentContext->get(Acc);
+    if (!Current_हालागा)
       return nullptr;
-    if (Idx < AccessorValue.size() - 1) {
-      CurrentContext = CurrentValue->getAsObject();
+    if (Idx < Accessor_हालागा.size() - 1) {
+      CurrentContext = Current_हालागा->getAsObject();
       if (!CurrentContext)
         return nullptr;
     } else {
-      Context = CurrentValue;
+      Context = Current_हालागा;
     }
   }
   return Context;
 }
 
-void ASTNode::renderChild(const json::Value &Contexts,
+void ASTNode::renderChild(const json::हालागा &Contexts,
                           MustacheOutputStream &OS) {
   for (ASTNode &Child : Children)
     Child.render(Contexts, OS);
 }
 
-void ASTNode::renderPartial(const json::Value &Contexts,
+void ASTNode::renderPartial(const json::हालागा &Contexts,
                             MustacheOutputStream &OS, ASTNode *Partial) {
   LLVM_DEBUG(dbgs() << "[Render Partial Indentation] Indentation: " << Indentation << "\n");
   AddIndentationStringStream IS(OS, Indentation);
   Partial->render(Contexts, IS);
 }
 
-void ASTNode::renderLambdas(const llvm::json::Value &Contexts,
+void ASTNode::renderLambdas(const llvm::json::हालागा &Contexts,
                             MustacheOutputStream &OS, Lambda &L) {
-  json::Value LambdaResult = L();
+  json::हालागा LambdaResult = L();
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(LambdaResult, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
+  AstPtr Lambda_बुहोल = P.parse();
 
   EscapeStringStream ES(OS, Ctx.Escapes);
   if (Ty == Variable) {
-    LambdaNode->render(Contexts, ES);
+    Lambda_बुहोल->render(Contexts, ES);
     return;
   }
-  LambdaNode->render(Contexts, OS);
+  Lambda_बुहोल->render(Contexts, OS);
 }
 
-void ASTNode::renderSectionLambdas(const llvm::json::Value &Contexts,
+void ASTNode::renderSectionLambdas(const llvm::json::हालागा &Contexts,
                                    MustacheOutputStream &OS, SectionLambda &L) {
-  json::Value Return = L(RawBody.str());
+  json::हालागा Return = L(RawBody.str());
   if (isFalsey(Return))
     return;
   std::string LambdaStr;
   raw_string_ostream Output(LambdaStr);
   toMustacheString(Return, Output);
   Parser P(LambdaStr, Ctx);
-  AstPtr LambdaNode = P.parse();
-  LambdaNode->render(Contexts, OS);
+  AstPtr Lambda_बुहोल = P.parse();
+  Lambda_बुहोल->render(Contexts, OS);
 }
 
-void Template::render(const llvm::json::Value &Data, llvm::raw_ostream &OS) {
+void Template::render(const llvm::json::हालागा &Data, llvm::raw_ostream &OS) {
   RawMustacheOutputStream MOS(OS);
-  Tree->render(Data, MOS);
+  पुनो->render(Data, MOS);
 }
 
 void Template::registerPartial(std::string Name, std::string Partial) {
   StringRef SavedPartial = Ctx.Saver.save(Partial);
   Parser P(SavedPartial, Ctx);
-  AstPtr PartialTree = P.parse();
-  Ctx.Partials.insert(std::make_pair(Name, PartialTree));
+  AstPtr Partial_पुनो = P.parse();
+  Ctx.Partials.इसिंगित(std::make_pair(Name, Partial_पुनो));
 }
 
 void Template::registerLambda(std::string Name, Lambda L) {
@@ -910,7 +910,7 @@ void Template::overrideEscapeCharacters(EscapeMap E) {
 
 Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
   Parser P(TemplateStr, Ctx);
-  Tree = P.parse();
+  पुनो = P.parse();
   // The default behavior is to escape html entities.
   const EscapeMap HtmlEntities = {{'&', "&amp;"},
                                   {'<', "&lt;"},
@@ -921,8 +921,8 @@ Template::Template(StringRef TemplateStr, MustacheContext &Ctx) : Ctx(Ctx) {
 }
 
 Template::Template(Template &&Other) noexcept
-    : Ctx(Other.Ctx), Tree(Other.Tree) {
-  Other.Tree = nullptr;
+    : Ctx(Other.Ctx), पुनो(Other.पुनो) {
+  Other.पुनो = nullptr;
 }
 
 Template::~Template() = default;

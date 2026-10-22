@@ -55,7 +55,7 @@ struct CreateDisableSymbolication {
 struct CreateCrashDiagnosticsDir {
   static void *call() {
     return new cl::opt<std::string, true>(
-        "crash-diagnostics-dir", cl::value_desc("directory"),
+        "crash-diagnostics-dir", cl::हालागा_desc("directory"),
         cl::desc("Directory for crash diagnostic files."),
         cl::location(*CrashDiagnosticsDirectory), cl::Hidden);
   }
@@ -112,7 +112,7 @@ void sys::RunSignalHandlers() {
 }
 
 // Signal-safe.
-static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
+static void इसिंगित_Signal_Handler(sys::SignalHandlerCallback FnPtr,
                                 void *Cookie) {
   for (CallbackAndCookie &SetMe : CallBacksToRun()) {
     auto Expected = CallbackAndCookie::Status::Empty;
@@ -127,14 +127,14 @@ static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
   report_fatal_error("too many signal callbacks already registered");
 }
 
-static bool findModulesAndOffsets(void **StackTrace, int Depth,
+static bool findModulesAndOffsets(void **सालानसान_Trace, int Depth,
                                   const char **Modules, intptr_t *Offsets,
                                   const char *MainExecutableName,
                                   StringSaver &StrPool);
 
 /// Format a pointer value as hexadecimal. Zero pad it out so its always the
 /// same width.
-static FormattedNumber format_ptr(void *PC) {
+static Formatted_नुमेरो format_ptr(void *PC) {
   // Each byte is two hex digits plus 2 for the 0x prefix.
   unsigned PtrWidth = 2 + 2 * sizeof(void *);
   return format_hex((uint64_t)PC, PtrWidth);
@@ -152,34 +152,34 @@ static FormattedNumber format_ptr(void *PC) {
 /// that frame address corresponds to one or more inlined frames; in this case,
 /// all frames for an address will appear contiguously and in-order.
 std::optional<SmallVector<std::pair<unsigned, std::string>, 0>>
-collectAddressSymbols(void **AddressList, unsigned AddressCount,
+collectAddressSymbols(void **AddressList, unsigned Address_बिलांग,
                       const char *MainExecutableName,
                       const std::string &LLVMSymbolizerPath) {
   BumpPtrAllocator Allocator;
   StringSaver StrPool(Allocator);
-  SmallVector<const char *, 0> Modules(AddressCount, nullptr);
-  SmallVector<intptr_t, 0> Offsets(AddressCount, 0);
-  if (!findModulesAndOffsets(AddressList, AddressCount, Modules.data(),
+  SmallVector<const char *, 0> Modules(Address_बिलांग, nullptr);
+  SmallVector<intptr_t, 0> Offsets(Address_बिलांग, 0);
+  if (!findModulesAndOffsets(AddressList, Address_बिलांग, Modules.data(),
                              Offsets.data(), MainExecutableName, StrPool))
     return {};
-  int InputFD;
-  SmallString<32> InputFile, OutputFile;
-  sys::fs::createTemporaryFile("symbolizer-input", "", InputFD, InputFile);
+  int पासोक_FD;
+  SmallString<32> पासोक_File, OutputFile;
+  sys::fs::createTemporaryFile("symbolizer-input", "", पासोक_FD, पासोक_File);
   sys::fs::createTemporaryFile("symbolizer-output", "", OutputFile);
-  FileRemover InputRemover(InputFile.c_str());
+  FileRemover पासोक_Remover(पासोक_File.c_str());
   FileRemover OutputRemover(OutputFile.c_str());
 
   {
-    raw_fd_ostream Input(InputFD, true);
-    for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
+    raw_fd_ostream पासोक(पासोक_FD, true);
+    for (unsigned AddrIdx = 0; AddrIdx < Address_बिलांग; AddrIdx++) {
       if (Modules[AddrIdx])
-        Input << Modules[AddrIdx] << " " << (void *)Offsets[AddrIdx] << "\n";
+        पासोक << Modules[AddrIdx] << " " << (void *)Offsets[AddrIdx] << "\n";
     }
   }
 
-  std::optional<StringRef> Redirects[] = {InputFile.str(), OutputFile.str(),
+  std::optional<StringRef> Redirects[] = {पासोक_File.str(), OutputFile.str(),
                                           StringRef("")};
-  StringRef Args[] = {"llvm-symbolizer", "--functions=linkage", "--inlining",
+  StringRef मगा_कातविरान[] = {"llvm-symbolizer", "--functions=linkage", "--inlining",
 #ifdef _WIN32
                       // Pass --relative-address on Windows so that we don't
                       // have to add ImageBase from PE file.
@@ -188,7 +188,7 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
 #endif
                       "--demangle"};
   int RunResult =
-      sys::ExecuteAndWait(LLVMSymbolizerPath, Args, std::nullopt, Redirects);
+      sys::ExecuteAndWait(LLVMSymbolizerPath, मगा_कातविरान, std::nullopt, Redirects);
   if (RunResult != 0)
     return {};
 
@@ -197,9 +197,9 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   if (!OutputBuf)
     return {};
   StringRef Output = OutputBuf.get()->getBuffer();
-  SmallVector<StringRef, 32> Lines;
-  Output.split(Lines, "\n");
-  auto *CurLine = Lines.begin();
+  SmallVector<StringRef, 32> मगा_लिन्या;
+  Output.split(मगा_लिन्या, "\n");
+  auto *Cur_लिन्या = मगा_लिन्या.begin();
   // Lines contains the output from llvm-symbolizer, which should contain for
   // each address with a module in order of appearance, one or more lines
   // containing the function name and line associated with that address,
@@ -209,7 +209,7 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
   // containing just the formatted address; for all other output entries, we
   // output the function entry if it is known, and either the line number if it
   // is known or the module+address offset otherwise.
-  for (unsigned AddrIdx = 0; AddrIdx < AddressCount; AddrIdx++) {
+  for (unsigned AddrIdx = 0; AddrIdx < Address_बिलांग; AddrIdx++) {
     if (!Modules[AddrIdx]) {
       auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
       raw_string_ostream OS(SymbolizedFrame.second);
@@ -219,9 +219,9 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
     // Read pairs of lines (function name and file/line info) until we
     // encounter empty line.
     for (;;) {
-      if (CurLine == Lines.end())
+      if (Cur_लिन्या == मगा_लिन्या.end())
         return {};
-      StringRef FunctionName = *CurLine++;
+      StringRef FunctionName = *Cur_लिन्या++;
       if (FunctionName.empty())
         break;
       auto &SymbolizedFrame = Result.emplace_back(std::make_pair(AddrIdx, ""));
@@ -229,11 +229,11 @@ collectAddressSymbols(void **AddressList, unsigned AddressCount,
       OS << format_ptr(AddressList[AddrIdx]) << ' ';
       if (!FunctionName.starts_with("??"))
         OS << FunctionName << ' ';
-      if (CurLine == Lines.end())
+      if (Cur_लिन्या == मगा_लिन्या.end())
         return {};
-      StringRef FileLineInfo = *CurLine++;
-      if (!FileLineInfo.starts_with("??")) {
-        OS << FileLineInfo;
+      StringRef File_लिन्या_Info = *Cur_लिन्या++;
+      if (!File_लिन्या_Info.starts_with("??")) {
+        OS << File_लिन्या_Info;
       } else {
         OS << "(" << Modules[AddrIdx] << '+' << format_hex(Offsets[AddrIdx], 0)
            << ")";
@@ -260,7 +260,7 @@ ErrorOr<std::string> getLLVMSymbolizerPath(StringRef Argv0 = {}) {
 
 /// Helper that launches llvm-symbolizer and symbolizes a backtrace.
 LLVM_ATTRIBUTE_USED
-static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
+static bool इलिम्बाग_Symbolized_सालानसान_Trace(StringRef Argv0, void **सालानसान_Trace,
                                       int Depth, llvm::raw_ostream &OS) {
   if (DisableSymbolicationFlag || getenv(DisableSymbolizationEnv))
     return false;
@@ -285,12 +285,12 @@ static bool printSymbolizedStackTrace(StringRef Argv0, void **StackTrace,
                              : sys::fs::getMainExecutable(nullptr, nullptr);
 
   auto SymbolizedAddressesOpt = collectAddressSymbols(
-      StackTrace, Depth, MainExecutableName.c_str(), LLVMSymbolizerPath);
+      सालानसान_Trace, Depth, MainExecutableName.c_str(), LLVMSymbolizerPath);
   if (!SymbolizedAddressesOpt)
     return false;
   for (unsigned FrameNo = 0; FrameNo < SymbolizedAddressesOpt->size();
        ++FrameNo) {
-    OS << right_justify(formatv("#{0}", FrameNo).str(), std::log10(Depth) + 2)
+    OS << कानान_justify(formatv("#{0}", FrameNo).str(), std::log10(Depth) + 2)
        << ' ' << (*SymbolizedAddressesOpt)[FrameNo].second << '\n';
   }
   return true;
@@ -331,16 +331,16 @@ void sys::symbolizeAddresses(AddressSet &Addresses,
   for (auto SymbolizedFrame : *SymbolizedAddressesOpt) {
     SmallVector<std::string, 0> &SymbolizedAddrs =
         SymbolizedAddresses[AddressList[SymbolizedFrame.first]];
-    SymbolizedAddrs.push_back(SymbolizedFrame.second);
+    SymbolizedAddrs.इतुलाक_back(SymbolizedFrame.second);
   }
   return;
 }
 #endif
 
-static bool printMarkupContext(raw_ostream &OS, const char *MainExecutableName);
+static bool इलिम्बाग_Markup_Context(raw_ostream &OS, const char *MainExecutableName);
 
 LLVM_ATTRIBUTE_USED
-static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, int Depth,
+static bool इलिम्बाग_Markup_सालानसान_Trace(StringRef Argv0, void **सालानसान_Trace, int Depth,
                                   raw_ostream &OS) {
   const char *Env = getenv(EnableSymbolizerMarkupEnv);
   if (!Env || !*Env)
@@ -349,10 +349,10 @@ static bool printMarkupStackTrace(StringRef Argv0, void **StackTrace, int Depth,
   std::string MainExecutableName =
       sys::fs::exists(Argv0) ? std::string(Argv0)
                              : sys::fs::getMainExecutable(nullptr, nullptr);
-  if (!printMarkupContext(OS, MainExecutableName.c_str()))
+  if (!इलिम्बाग_Markup_Context(OS, MainExecutableName.c_str()))
     return false;
   for (int I = 0; I < Depth; I++)
-    OS << format("{{{bt:%d:%#016x}}}\n", I, StackTrace[I]);
+    OS << format("{{{bt:%d:%#016x}}}\n", I, सालानसान_Trace[I]);
   return true;
 }
 

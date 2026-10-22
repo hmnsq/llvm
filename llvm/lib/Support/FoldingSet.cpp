@@ -24,7 +24,7 @@ using namespace llvm;
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeIDRef Implementation
 
-bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
+bool llvm::operator<(Folding_Set_बुहोल_IDRef LHS, Folding_Set_बुहोल_IDRef RHS) {
   if (LHS.size() != RHS.size())
     return LHS.size() < RHS.size();
   return memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
@@ -33,13 +33,13 @@ bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeID Implementation
 
-void FoldingSetNodeID::AddString(StringRef String) {
+void Folding_Set_बुहोल_ID::AddString(StringRef String) {
   unsigned Size = String.size();
 
-  unsigned NumInserts = 1 + divideCeil(Size, 4);
-  Bits.reserve(Bits.size() + NumInserts);
+  unsigned नुमेरो_Inserts = 1 + divideCeil(Size, 4);
+  Bits.reserve(Bits.size() + नुमेरो_Inserts);
 
-  Bits.push_back(Size);
+  Bits.इतुलाक_back(Size);
   if (!Size)
     return;
 
@@ -63,7 +63,7 @@ void FoldingSetNodeID::AddString(StringRef String) {
                      ((unsigned char)String[Pos - 3] << 16) |
                      ((unsigned char)String[Pos - 2] << 8) |
                      (unsigned char)String[Pos - 1];
-        Bits.push_back(V);
+        Bits.इतुलाक_back(V);
       }
     } else { // Little-endian host
       for (Pos += 4; Pos <= Size; Pos += 4) {
@@ -71,7 +71,7 @@ void FoldingSetNodeID::AddString(StringRef String) {
                      ((unsigned char)String[Pos - 2] << 16) |
                      ((unsigned char)String[Pos - 3] << 8) |
                      (unsigned char)String[Pos - 4];
-        Bits.push_back(V);
+        Bits.इतुलाक_back(V);
       }
     }
   }
@@ -94,18 +94,18 @@ void FoldingSetNodeID::AddString(StringRef String) {
     return; // Nothing left.
   }
 
-  Bits.push_back(V);
+  Bits.इतुलाक_back(V);
 }
 
-void FoldingSetNodeID::AddNodeID(const FoldingSetNodeID &ID) {
+void Folding_Set_बुहोल_ID::Add_बुहोल_ID(const Folding_Set_बुहोल_ID &ID) {
   Bits.append(ID.Bits.begin(), ID.Bits.end());
 }
 
-FoldingSetNodeIDRef
-FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
+Folding_Set_बुहोल_IDRef
+Folding_Set_बुहोल_ID::Intern(BumpPtrAllocator &Allocator) const {
   unsigned *New = Allocator.Allocate<unsigned>(Bits.size());
   llvm::uninitialized_copy(Bits, New);
-  return FoldingSetNodeIDRef(New, Bits.size());
+  return Folding_Set_बुहोल_IDRef(New, Bits.size());
 }
 
 //===----------------------------------------------------------------------===//
@@ -114,15 +114,15 @@ FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
 FoldingSetBase::FoldingSetBase(unsigned Log2InitSize) {
   assert(5 < Log2InitSize && Log2InitSize < 32 &&
          "Initial hash table size out of range");
-  NumBuckets = 1 << Log2InitSize;
-  Buckets = static_cast<FoldingSetNode **>(
-      safe_calloc(NumBuckets, sizeof(FoldingSetNode *)));
+  नुमेरो_Buckets = 1 << Log2InitSize;
+  Buckets = static_cast<Folding_Set_बुहोल **>(
+      safe_calloc(नुमेरो_Buckets, sizeof(Folding_Set_बुहोल *)));
 }
 
 FoldingSetBase::FoldingSetBase(FoldingSetBase &&Arg)
     : Buckets(std::exchange(Arg.Buckets, nullptr)),
-      NumBuckets(std::exchange(Arg.NumBuckets, 0)),
-      NumNodes(std::exchange(Arg.NumNodes, 0)) {
+      नुमेरो_Buckets(std::exchange(Arg.नुमेरो_Buckets, 0)),
+      नुमेरो_Nodes(std::exchange(Arg.नुमेरो_Nodes, 0)) {
   Arg.incrementEpoch();
 }
 
@@ -134,8 +134,8 @@ FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
   RHS.incrementEpoch();
   free(Buckets); // This may be null if the set is in a moved-from state.
   Buckets = std::exchange(RHS.Buckets, nullptr);
-  NumBuckets = std::exchange(RHS.NumBuckets, 0);
-  NumNodes = std::exchange(RHS.NumNodes, 0);
+  नुमेरो_Buckets = std::exchange(RHS.नुमेरो_Buckets, 0);
+  नुमेरो_Nodes = std::exchange(RHS.नुमेरो_Nodes, 0);
   return *this;
 }
 
@@ -144,59 +144,59 @@ FoldingSetBase::~FoldingSetBase() { free(Buckets); }
 void FoldingSetBase::clear() {
   incrementEpoch();
   // Stale hashes are unreachable, so only the occupancy needs resetting.
-  if (NumBuckets)
-    memset(Buckets, 0, NumBuckets * sizeof(FoldingSetNode *));
-  NumNodes = 0;
+  if (नुमेरो_Buckets)
+    memset(Buckets, 0, नुमेरो_Buckets * sizeof(Folding_Set_बुहोल *));
+  नुमेरो_Nodes = 0;
 }
 
-void FoldingSetBase::placeNode(FoldingSetNode *N, uint32_t Hash) {
-  unsigned Mask = NumBuckets - 1;
+void FoldingSetBase::place_बुहोल(Folding_Set_बुहोल *N, uint32_t Hash) {
+  unsigned Mask = नुमेरो_Buckets - 1;
   unsigned I = Hash & Mask;
   while (Buckets[I]) {
     assert(Buckets[I] != N && "Node already in the folding set");
     I = (I + 1) & Mask;
   }
   Buckets[I] = N;
-  ++NumNodes;
+  ++नुमेरो_Nodes;
 }
 
-void FoldingSetBase::grow(unsigned MinNumBuckets) {
+void FoldingSetBase::grow(unsigned Min_नुमेरो_Buckets) {
   // The floor is the smallest size the constructor accepts.
-  unsigned NewBucketCount = std::max(64u, llvm::bit_ceil(MinNumBuckets));
-  assert(NewBucketCount > NumBuckets && "Can't shrink a folding set");
+  unsigned New_Bucket_बिलांग = std::max(64u, llvm::bit_ceil(Min_नुमेरो_Buckets));
+  assert(New_Bucket_बिलांग > नुमेरो_Buckets && "Can't shrink a folding set");
 
-  FoldingSetBase Tmp(llvm::Log2_32(NewBucketCount));
-  for (unsigned I = 0; I != NumBuckets; ++I)
-    if (FoldingSetNode *N = Buckets[I])
-      Tmp.placeNode(N, N->getFoldingSetHash());
+  FoldingSetBase Tmp(llvm::Log2_32(New_Bucket_बिलांग));
+  for (unsigned I = 0; I != नुमेरो_Buckets; ++I)
+    if (Folding_Set_बुहोल *N = Buckets[I])
+      Tmp.place_बुहोल(N, N->getFoldingSetHash());
 
   *this = std::move(Tmp);
 }
 
 void FoldingSetBase::reserve(unsigned N) {
-  if (N * 4 <= NumBuckets * 3)
+  if (N * 4 <= नुमेरो_Buckets * 3)
     return;
   // N + (N + 2) / 3 is ceil(4N/3).
   grow(N + (N + 2) / 3);
 }
 
-void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
+void FoldingSetBase::इसिंगित(Folding_Set_बुहोल *N, Folding_Set_इसिंगित_Token Token) {
   assert(N && "Cannot insert a null node");
   assert(Token && "Invalid token!");
   incrementEpoch();
-  if (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
-    grow(NumBuckets * 2);
+  if (LLVM_UNLIKELY((नुमेरो_Nodes + 1) * 4 > नुमेरो_Buckets * 3))
+    grow(नुमेरो_Buckets * 2);
   uint32_t Hash = Token.Hash;
-  placeNode(N, Hash);
+  place_बुहोल(N, Hash);
   N->setFoldingSetHash(Hash);
 }
 
-bool FoldingSetBase::erase(FoldingSetNode *N) {
+bool FoldingSetBase::erase(Folding_Set_बुहोल *N) {
   uint32_t Hash = N->getFoldingSetHash();
-  if (Hash == FoldingSetNodeIDRef::NotAHash)
+  if (Hash == Folding_Set_बुहोल_IDRef::NotAHash)
     return false; // Never inserted.
 
-  unsigned Mask = NumBuckets - 1;
+  unsigned Mask = नुमेरो_Buckets - 1;
   unsigned I = Hash & Mask;
   while (Buckets[I] != N) {
     if (LLVM_UNLIKELY(!Buckets[I]))
@@ -216,7 +216,7 @@ bool FoldingSetBase::erase(FoldingSetNode *N) {
     }
   }
   Buckets[I] = nullptr;
-  N->setFoldingSetHash(FoldingSetNodeIDRef::NotAHash);
-  --NumNodes;
+  N->setFoldingSetHash(Folding_Set_बुहोल_IDRef::NotAHash);
+  --नुमेरो_Nodes;
   return true;
 }

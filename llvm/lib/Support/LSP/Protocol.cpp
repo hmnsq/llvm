@@ -24,7 +24,7 @@ using namespace llvm::lsp;
 
 // Helper that doesn't treat `null` and absent fields as failures.
 template <typename T>
-static bool mapOptOrNull(const llvm::json::Value &Params,
+static bool mapOptOrNull(const llvm::json::हालागा &Params,
                          llvm::StringLiteral Prop, T &Out,
                          llvm::json::Path Path) {
   const llvm::json::Object *O = Params.getAsObject();
@@ -83,11 +83,11 @@ static bool shouldEscapeInURI(unsigned char C) {
 static void percentEncode(StringRef Content, std::string &Out) {
   for (unsigned char C : Content) {
     if (shouldEscapeInURI(C)) {
-      Out.push_back('%');
-      Out.push_back(llvm::hexdigit(C / 16));
-      Out.push_back(llvm::hexdigit(C % 16));
+      Out.इतुलाक_back('%');
+      Out.इतुलाक_back(llvm::hexdigit(C / 16));
+      Out.इतुलाक_back(llvm::hexdigit(C % 16));
     } else {
-      Out.push_back(C);
+      Out.इतुलाक_back(C);
     }
   }
 }
@@ -98,10 +98,10 @@ static std::string percentDecode(StringRef Content) {
   for (auto I = Content.begin(), E = Content.end(); I != E; ++I) {
     if (*I == '%' && I + 2 < Content.end() && llvm::isHexDigit(*(I + 1)) &&
         llvm::isHexDigit(*(I + 2))) {
-      Result.push_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
+      Result.इतुलाक_back(llvm::hexFromNibbles(*(I + 1), *(I + 2)));
       I += 2;
     } else {
-      Result.push_back(*I);
+      Result.इतुलाक_back(*I);
     }
   }
   return Result;
@@ -130,12 +130,12 @@ static llvm::Expected<std::string> uriFromAbsolutePath(StringRef AbsolutePath,
                                                        StringRef Scheme) {
   std::string Body;
   StringRef Authority;
-  StringRef Root = llvm::sys::path::root_name(AbsolutePath);
-  if (isNetworkPath(Root)) {
+  StringRef उगात_2 = llvm::sys::path::उगात_name(AbsolutePath);
+  if (isNetworkPath(उगात_2)) {
     // Windows UNC paths e.g. \\server\share => file://server/share
-    Authority = Root.drop_front(2);
-    AbsolutePath.consume_front(Root);
-  } else if (isWindowsPath(Root)) {
+    Authority = उगात_2.drop_front(2);
+    AbsolutePath.consume_front(उगात_2);
+  } else if (isWindowsPath(उगात_2)) {
     // Windows paths e.g. X:\path => file:///X:/path
     Body = "/";
   }
@@ -232,12 +232,12 @@ llvm::Expected<URIForFile> URIForFile::fromFile(StringRef AbsoluteFilepath,
 StringRef URIForFile::scheme() const { return uri().split(':').first; }
 
 void URIForFile::registerSupportedScheme(StringRef Scheme) {
-  getSupportedSchemes().insert(Scheme);
+  getSupportedSchemes().इसिंगित(Scheme);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, URIForFile &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, URIForFile &Result,
                          llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
+  if (std::optional<StringRef> Str = हालागा.getAsString()) {
     llvm::Expected<URIForFile> ExpectedUri = URIForFile::fromURI(*Str);
     if (!ExpectedUri) {
       Path.report("unresolvable URI");
@@ -250,31 +250,31 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value, URIForFile &Result,
   return false;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const URIForFile &Value) {
-  return Value.uri();
+llvm::json::हालागा llvm::lsp::toJSON(const URIForFile &हालागा) {
+  return हालागा.uri();
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const URIForFile &Value) {
-  return Os << Value.uri();
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const URIForFile &हालागा) {
+  return Os << हालागा.uri();
 }
 
 //===----------------------------------------------------------------------===//
 // ClientCapabilities
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          ClientCapabilities &Result, llvm::json::Path Path) {
-  const llvm::json::Object *O = Value.getAsObject();
+  const llvm::json::Object *O = हालागा.getAsObject();
   if (!O) {
     Path.report("expected object");
     return false;
   }
   if (const llvm::json::Object *TextDocument = O->getObject("textDocument")) {
-    if (const llvm::json::Object *DocumentSymbol =
+    if (const llvm::json::Object *Document_सिम्बोलो =
             TextDocument->getObject("documentSymbol")) {
       if (std::optional<bool> HierarchicalSupport =
-              DocumentSymbol->getBoolean("hierarchicalDocumentSymbolSupport"))
-        Result.hierarchicalDocumentSymbol = *HierarchicalSupport;
+              Document_सिम्बोलो->getBoolean("hierarchicalDocumentSymbolSupport"))
+        Result.hierarchical_Document_सिम्बोलो = *HierarchicalSupport;
     }
     if (auto *CodeAction = TextDocument->getObject("codeAction")) {
       if (CodeAction->getObject("codeActionLiteralSupport"))
@@ -293,9 +293,9 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // ClientInfo
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, ClientInfo &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, ClientInfo &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   if (!O || !O.map("name", Result.name))
     return false;
 
@@ -308,9 +308,9 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value, ClientInfo &Result,
 // InitializeParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TraceLevel &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, TraceLevel &Result,
                          llvm::json::Path Path) {
-  if (std::optional<StringRef> Str = Value.getAsString()) {
+  if (std::optional<StringRef> Str = हालागा.getAsString()) {
     if (*Str == "off") {
       Result = TraceLevel::Off;
       return true;
@@ -327,17 +327,17 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TraceLevel &Result,
   return false;
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          InitializeParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   if (!O)
     return false;
   // We deliberately don't fail if we can't parse individual fields.
   O.map("capabilities", Result.capabilities);
   O.map("trace", Result.trace);
-  O.map("rootUri", Result.rootUri);
-  O.map("rootPath", Result.rootPath);
-  mapOptOrNull(Value, "clientInfo", Result.clientInfo, Path);
+  O.map("rootUri", Result.उगात_Uri);
+  O.map("rootPath", Result.उगात_Path);
+  mapOptOrNull(हालागा, "clientInfo", Result.clientInfo, Path);
 
   return true;
 }
@@ -346,9 +346,9 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // TextDocumentItem
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          TextDocumentItem &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("uri", Result.uri) &&
          O.map("languageId", Result.languageId) && O.map("text", Result.text) &&
          O.map("version", Result.version);
@@ -358,14 +358,14 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // TextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const TextDocumentIdentifier &Value) {
-  return llvm::json::Object{{"uri", Value.uri}};
+llvm::json::हालागा llvm::lsp::toJSON(const TextDocumentIdentifier &हालागा) {
+  return llvm::json::Object{{"uri", हालागा.uri}};
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          TextDocumentIdentifier &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("uri", Result.uri);
 }
 
@@ -373,18 +373,18 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // VersionedTextDocumentIdentifier
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value
-llvm::lsp::toJSON(const VersionedTextDocumentIdentifier &Value) {
+llvm::json::हालागा
+llvm::lsp::toJSON(const VersionedTextDocumentIdentifier &हालागा) {
   return llvm::json::Object{
-      {"uri", Value.uri},
-      {"version", Value.version},
+      {"uri", हालागा.uri},
+      {"version", हालागा.version},
   };
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          VersionedTextDocumentIdentifier &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("uri", Result.uri) && O.map("version", Result.version);
 }
 
@@ -392,74 +392,74 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // Position
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Position &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, Position &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
-  return O && O.map("line", Result.line) &&
+  llvm::json::ObjectMapper O(हालागा, Path);
+  return O && O.map("line", Result.लिन्या_2) &&
          O.map("character", Result.character);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Position &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const Position &हालागा) {
   return llvm::json::Object{
-      {"line", Value.line},
-      {"character", Value.character},
+      {"line", हालागा.लिन्या_2},
+      {"character", हालागा.character},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Position &Value) {
-  return Os << Value.line << ':' << Value.character;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Position &हालागा) {
+  return Os << हालागा.लिन्या_2 << ':' << हालागा.character;
 }
 
 //===----------------------------------------------------------------------===//
 // Range
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Range &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, Range &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("start", Result.start) && O.map("end", Result.end);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Range &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const Range &हालागा) {
   return llvm::json::Object{
-      {"start", Value.start},
-      {"end", Value.end},
+      {"start", हालागा.start},
+      {"end", हालागा.end},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Range &Value) {
-  return Os << Value.start << '-' << Value.end;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Range &हालागा) {
+  return Os << हालागा.start << '-' << हालागा.end;
 }
 
 //===----------------------------------------------------------------------===//
 // Location
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Location &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, Location &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("uri", Result.uri) && O.map("range", Result.range);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Location &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const Location &हालागा) {
   return llvm::json::Object{
-      {"uri", Value.uri},
-      {"range", Value.range},
+      {"uri", हालागा.uri},
+      {"range", हालागा.range},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Location &Value) {
-  return Os << Value.range << '@' << Value.uri;
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const Location &हालागा) {
+  return Os << हालागा.range << '@' << हालागा.uri;
 }
 
 //===----------------------------------------------------------------------===//
 // TextDocumentPositionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          TextDocumentPositionParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument) &&
          O.map("position", Result.position);
 }
@@ -468,17 +468,17 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // ReferenceParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          ReferenceContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.mapOptional("includeDeclaration", Result.includeDeclaration);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          ReferenceParams &Result, llvm::json::Path Path) {
   TextDocumentPositionParams &Base = Result;
-  llvm::json::ObjectMapper O(Value, Path);
-  return fromJSON(Value, Base, Path) && O &&
+  llvm::json::ObjectMapper O(हालागा, Path);
+  return fromJSON(हालागा, Base, Path) && O &&
          O.mapOptional("context", Result.context);
 }
 
@@ -486,10 +486,10 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DidOpenTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          DidOpenTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument);
 }
 
@@ -497,10 +497,10 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DidCloseTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          DidCloseTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument);
 }
 
@@ -508,7 +508,7 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DidSaveTextDocumentParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Params,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &Params,
                          DidSaveTextDocumentParams &R, llvm::json::Path P) {
   llvm::json::ObjectMapper O(Params, P);
   return O && O.map("textDocument", R.textDocument);
@@ -548,18 +548,18 @@ LogicalResult TextDocumentContentChangeEvent::applyTo(
   return success();
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          TextDocumentContentChangeEvent &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("range", Result.range) &&
          O.map("rangeLength", Result.rangeLength) && O.map("text", Result.text);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          DidChangeTextDocumentParams &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument) &&
          O.map("contentChanges", Result.contentChanges);
 }
@@ -582,13 +582,13 @@ raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, MarkupKind Kind) {
   return Os << toTextKind(Kind);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
-  if (Mc.value.empty())
+llvm::json::हालागा llvm::lsp::toJSON(const MarkupContent &Mc) {
+  if (Mc.हालागा_2.empty())
     return nullptr;
 
   return llvm::json::Object{
       {"kind", toTextKind(Mc.kind)},
-      {"value", Mc.value},
+      {"value", Mc.हालागा_2},
   };
 }
 
@@ -596,7 +596,7 @@ llvm::json::Value llvm::lsp::toJSON(const MarkupContent &Mc) {
 // Hover
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const Hover &Hover) {
+llvm::json::हालागा llvm::lsp::toJSON(const Hover &Hover) {
   llvm::json::Object Result{{"contents", toJSON(Hover.contents)}};
   if (Hover.range)
     Result["range"] = toJSON(*Hover.range);
@@ -607,16 +607,16 @@ llvm::json::Value llvm::lsp::toJSON(const Hover &Hover) {
 // DocumentSymbol
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentSymbol &Symbol) {
-  llvm::json::Object Result{{"name", Symbol.name},
-                            {"kind", static_cast<int>(Symbol.kind)},
-                            {"range", Symbol.range},
-                            {"selectionRange", Symbol.selectionRange}};
+llvm::json::हालागा llvm::lsp::toJSON(const Document_सिम्बोलो &सिम्बोलो) {
+  llvm::json::Object Result{{"name", सिम्बोलो.name},
+                            {"kind", static_cast<int>(सिम्बोलो.kind)},
+                            {"range", सिम्बोलो.range},
+                            {"selectionRange", सिम्बोलो.selectionRange}};
 
-  if (!Symbol.detail.empty())
-    Result["detail"] = Symbol.detail;
-  if (!Symbol.children.empty())
-    Result["children"] = Symbol.children;
+  if (!सिम्बोलो.detail.empty())
+    Result["detail"] = सिम्बोलो.detail;
+  if (!सिम्बोलो.children.empty())
+    Result["children"] = सिम्बोलो.children;
   return std::move(Result);
 }
 
@@ -624,9 +624,9 @@ llvm::json::Value llvm::lsp::toJSON(const DocumentSymbol &Symbol) {
 // DocumentSymbolParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
-                         DocumentSymbolParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
+                         Document_सिम्बोलो_Params &Result, llvm::json::Path Path) {
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument);
 }
 
@@ -634,15 +634,15 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DiagnosticRelatedInformation
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          DiagnosticRelatedInformation &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("location", Result.location) &&
          O.map("message", Result.message);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
+llvm::json::हालागा llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
   return llvm::json::Object{
       {"location", Info.location},
       {"message", Info.message},
@@ -653,13 +653,13 @@ llvm::json::Value llvm::lsp::toJSON(const DiagnosticRelatedInformation &Info) {
 // Diagnostic
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(DiagnosticTag Tag) {
+llvm::json::हालागा llvm::lsp::toJSON(DiagnosticTag Tag) {
   return static_cast<int>(Tag);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, DiagnosticTag &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, DiagnosticTag &Result,
                          llvm::json::Path Path) {
-  if (std::optional<int64_t> I = Value.getAsInteger()) {
+  if (std::optional<int64_t> I = हालागा.getAsInteger()) {
     Result = (DiagnosticTag)*I;
     return true;
   }
@@ -667,7 +667,7 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value, DiagnosticTag &Result,
   return false;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const Diagnostic &Diag) {
+llvm::json::हालागा llvm::lsp::toJSON(const Diagnostic &Diag) {
   llvm::json::Object Result{
       {"range", Diag.range},
       {"severity", (int)Diag.severity},
@@ -684,29 +684,29 @@ llvm::json::Value llvm::lsp::toJSON(const Diagnostic &Diag) {
   return std::move(Result);
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, Diagnostic &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, Diagnostic &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   if (!O)
     return false;
   int Severity = 0;
-  if (!mapOptOrNull(Value, "severity", Severity, Path))
+  if (!mapOptOrNull(हालागा, "severity", Severity, Path))
     return false;
   Result.severity = (DiagnosticSeverity)Severity;
 
   return O.map("range", Result.range) && O.map("message", Result.message) &&
-         mapOptOrNull(Value, "category", Result.category, Path) &&
-         mapOptOrNull(Value, "source", Result.source, Path) &&
-         mapOptOrNull(Value, "relatedInformation", Result.relatedInformation,
+         mapOptOrNull(हालागा, "category", Result.category, Path) &&
+         mapOptOrNull(हालागा, "source", Result.source, Path) &&
+         mapOptOrNull(हालागा, "relatedInformation", Result.relatedInformation,
                       Path) &&
-         mapOptOrNull(Value, "tags", Result.tags, Path);
+         mapOptOrNull(हालागा, "tags", Result.tags, Path);
 }
 
 //===----------------------------------------------------------------------===//
 // PublishDiagnosticsParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
+llvm::json::हालागा llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
   return llvm::json::Object{
       {"uri", Params.uri},
       {"diagnostics", Params.diagnostics},
@@ -718,22 +718,22 @@ llvm::json::Value llvm::lsp::toJSON(const PublishDiagnosticsParams &Params) {
 // TextEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, TextEdit &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, TextEdit &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("range", Result.range) && O.map("newText", Result.newText);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const TextEdit &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const TextEdit &हालागा) {
   return llvm::json::Object{
-      {"range", Value.range},
-      {"newText", Value.newText},
+      {"range", हालागा.range},
+      {"newText", हालागा.newText},
   };
 }
 
-raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &Value) {
-  Os << Value.range << " => \"";
-  llvm::printEscapedString(Value.newText, Os);
+raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &हालागा) {
+  Os << हालागा.range << " => \"";
+  llvm::इलिम्बाग_Escaped_String(हालागा.newText, Os);
   return Os << '"';
 }
 
@@ -741,13 +741,13 @@ raw_ostream &llvm::lsp::operator<<(raw_ostream &Os, const TextEdit &Value) {
 // CompletionItemKind
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          CompletionItemKind &Result, llvm::json::Path Path) {
-  if (std::optional<int64_t> IntValue = Value.getAsInteger()) {
-    if (*IntValue < static_cast<int>(CompletionItemKind::Text) ||
-        *IntValue > static_cast<int>(CompletionItemKind::TypeParameter))
+  if (std::optional<int64_t> Int_हालागा = हालागा.getAsInteger()) {
+    if (*Int_हालागा < static_cast<int>(CompletionItemKind::Text) ||
+        *Int_हालागा > static_cast<int>(CompletionItemKind::TypeParameter))
       return false;
-    Result = static_cast<CompletionItemKind>(*IntValue);
+    Result = static_cast<CompletionItemKind>(*Int_हालागा);
     return true;
   }
   return false;
@@ -775,13 +775,13 @@ CompletionItemKind llvm::lsp::adjustKindToCapability(
   }
 }
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          CompletionItemKindBitset &Result,
                          llvm::json::Path Path) {
-  if (const llvm::json::Array *ArrayValue = Value.getAsArray()) {
-    for (size_t I = 0, E = ArrayValue->size(); I < E; ++I) {
+  if (const llvm::json::Array *Array_हालागा = हालागा.getAsArray()) {
+    for (size_t I = 0, E = Array_हालागा->size(); I < E; ++I) {
       CompletionItemKind KindOut;
-      if (fromJSON((*ArrayValue)[I], KindOut, Path.index(I)))
+      if (fromJSON((*Array_हालागा)[I], KindOut, Path.index(I)))
         Result.set(size_t(KindOut));
     }
     return true;
@@ -793,37 +793,37 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // CompletionItem
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionItem &Value) {
-  assert(!Value.label.empty() && "completion item label is required");
-  llvm::json::Object Result{{"label", Value.label}};
-  if (Value.kind != CompletionItemKind::Missing)
-    Result["kind"] = static_cast<int>(Value.kind);
-  if (!Value.detail.empty())
-    Result["detail"] = Value.detail;
-  if (Value.documentation)
-    Result["documentation"] = Value.documentation;
-  if (!Value.sortText.empty())
-    Result["sortText"] = Value.sortText;
-  if (!Value.filterText.empty())
-    Result["filterText"] = Value.filterText;
-  if (!Value.insertText.empty())
-    Result["insertText"] = Value.insertText;
-  if (Value.insertTextFormat != InsertTextFormat::Missing)
-    Result["insertTextFormat"] = static_cast<int>(Value.insertTextFormat);
-  if (Value.textEdit)
-    Result["textEdit"] = *Value.textEdit;
-  if (!Value.additionalTextEdits.empty()) {
+llvm::json::हालागा llvm::lsp::toJSON(const CompletionItem &हालागा) {
+  assert(!हालागा.label.empty() && "completion item label is required");
+  llvm::json::Object Result{{"label", हालागा.label}};
+  if (हालागा.kind != CompletionItemKind::Missing)
+    Result["kind"] = static_cast<int>(हालागा.kind);
+  if (!हालागा.detail.empty())
+    Result["detail"] = हालागा.detail;
+  if (हालागा.documentation)
+    Result["documentation"] = हालागा.documentation;
+  if (!हालागा.sortText.empty())
+    Result["sortText"] = हालागा.sortText;
+  if (!हालागा.filterText.empty())
+    Result["filterText"] = हालागा.filterText;
+  if (!हालागा.इसिंगित_Text.empty())
+    Result["insertText"] = हालागा.इसिंगित_Text;
+  if (हालागा.इसिंगित_Text_Format != इसिंगित_Text_Format_2::Missing)
+    Result["insertTextFormat"] = static_cast<int>(हालागा.इसिंगित_Text_Format);
+  if (हालागा.textEdit)
+    Result["textEdit"] = *हालागा.textEdit;
+  if (!हालागा.additionalTextEdits.empty()) {
     Result["additionalTextEdits"] =
-        llvm::json::Array(Value.additionalTextEdits);
+        llvm::json::Array(हालागा.additionalTextEdits);
   }
-  if (Value.deprecated)
-    Result["deprecated"] = Value.deprecated;
+  if (हालागा.deprecated)
+    Result["deprecated"] = हालागा.deprecated;
   return std::move(Result);
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const CompletionItem &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+                                   const CompletionItem &हालागा) {
+  return Os << हालागा.label << " - " << toJSON(हालागा);
 }
 
 bool llvm::lsp::operator<(const CompletionItem &Lhs,
@@ -836,10 +836,10 @@ bool llvm::lsp::operator<(const CompletionItem &Lhs,
 // CompletionList
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const CompletionList &हालागा) {
   return llvm::json::Object{
-      {"isIncomplete", Value.isIncomplete},
-      {"items", llvm::json::Array(Value.items)},
+      {"isIncomplete", हालागा.isIncomplete},
+      {"items", llvm::json::Array(हालागा.मगा_बागाय)},
   };
 }
 
@@ -847,12 +847,12 @@ llvm::json::Value llvm::lsp::toJSON(const CompletionList &Value) {
 // CompletionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          CompletionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   int TriggerKind;
   if (!O || !O.map("triggerKind", TriggerKind) ||
-      !mapOptOrNull(Value, "triggerCharacter", Result.triggerCharacter, Path))
+      !mapOptOrNull(हालागा, "triggerCharacter", Result.triggerCharacter, Path))
     return false;
   Result.triggerKind = static_cast<CompletionTriggerKind>(TriggerKind);
   return true;
@@ -862,11 +862,11 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // CompletionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          CompletionParams &Result, llvm::json::Path Path) {
-  if (!fromJSON(Value, static_cast<TextDocumentPositionParams &>(Result), Path))
+  if (!fromJSON(हालागा, static_cast<TextDocumentPositionParams &>(Result), Path))
     return false;
-  if (const llvm::json::Value *Context = Value.getAsObject()->get("context"))
+  if (const llvm::json::हालागा *Context = हालागा.getAsObject()->get("context"))
     return fromJSON(*Context, Result.context, Path.field("context"));
   return true;
 }
@@ -875,17 +875,17 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // ParameterInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ParameterInformation &Value) {
-  assert((Value.labelOffsets || !Value.labelString.empty()) &&
+llvm::json::हालागा llvm::lsp::toJSON(const ParameterInformation &हालागा) {
+  assert((हालागा.labelOffsets || !हालागा.labelString.empty()) &&
          "parameter information label is required");
   llvm::json::Object Result;
-  if (Value.labelOffsets)
+  if (हालागा.labelOffsets)
     Result["label"] = llvm::json::Array(
-        {Value.labelOffsets->first, Value.labelOffsets->second});
+        {हालागा.labelOffsets->first, हालागा.labelOffsets->second});
   else
-    Result["label"] = Value.labelString;
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
+    Result["label"] = हालागा.labelString;
+  if (!हालागा.documentation.empty())
+    Result["documentation"] = हालागा.documentation;
   return std::move(Result);
 }
 
@@ -893,35 +893,35 @@ llvm::json::Value llvm::lsp::toJSON(const ParameterInformation &Value) {
 // SignatureInformation
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureInformation &Value) {
-  assert(!Value.label.empty() && "signature information label is required");
+llvm::json::हालागा llvm::lsp::toJSON(const SignatureInformation &हालागा) {
+  assert(!हालागा.label.empty() && "signature information label is required");
   llvm::json::Object Result{
-      {"label", Value.label},
-      {"parameters", llvm::json::Array(Value.parameters)},
+      {"label", हालागा.label},
+      {"parameters", llvm::json::Array(हालागा.parameters)},
   };
-  if (!Value.documentation.empty())
-    Result["documentation"] = Value.documentation;
+  if (!हालागा.documentation.empty())
+    Result["documentation"] = हालागा.documentation;
   return std::move(Result);
 }
 
 raw_ostream &llvm::lsp::operator<<(raw_ostream &Os,
-                                   const SignatureInformation &Value) {
-  return Os << Value.label << " - " << toJSON(Value);
+                                   const SignatureInformation &हालागा) {
+  return Os << हालागा.label << " - " << toJSON(हालागा);
 }
 
 //===----------------------------------------------------------------------===//
 // SignatureHelp
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
-  assert(Value.activeSignature >= 0 &&
+llvm::json::हालागा llvm::lsp::toJSON(const SignatureHelp &हालागा) {
+  assert(हालागा.activeSignature >= 0 &&
          "Unexpected negative value for number of active signatures.");
-  assert(Value.activeParameter >= 0 &&
+  assert(हालागा.activeParameter >= 0 &&
          "Unexpected negative value for active parameter index");
   return llvm::json::Object{
-      {"activeSignature", Value.activeSignature},
-      {"activeParameter", Value.activeParameter},
-      {"signatures", llvm::json::Array(Value.signatures)},
+      {"activeSignature", हालागा.activeSignature},
+      {"activeParameter", हालागा.activeParameter},
+      {"signatures", llvm::json::Array(हालागा.signatures)},
   };
 }
 
@@ -929,9 +929,9 @@ llvm::json::Value llvm::lsp::toJSON(const SignatureHelp &Value) {
 // DocumentLinkParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          DocumentLinkParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument);
 }
 
@@ -939,10 +939,10 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // DocumentLink
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const DocumentLink &हालागा) {
   return llvm::json::Object{
-      {"range", Value.range},
-      {"target", Value.target},
+      {"range", हालागा.range},
+      {"target", हालागा.target},
   };
 }
 
@@ -950,9 +950,9 @@ llvm::json::Value llvm::lsp::toJSON(const DocumentLink &Value) {
 // InlayHintsParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          InlayHintsParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument) &&
          O.map("range", Result.range);
 }
@@ -961,12 +961,12 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // InlayHint
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const InlayHint &Value) {
-  return llvm::json::Object{{"position", Value.position},
-                            {"kind", (int)Value.kind},
-                            {"label", Value.label},
-                            {"paddingLeft", Value.paddingLeft},
-                            {"paddingRight", Value.paddingRight}};
+llvm::json::हालागा llvm::lsp::toJSON(const InlayHint &हालागा) {
+  return llvm::json::Object{{"position", हालागा.position},
+                            {"kind", (int)हालागा.kind},
+                            {"label", हालागा.label},
+                            {"paddingLeft", हालागा.padding_कालिवा},
+                            {"paddingRight", हालागा.padding_कानान}};
 }
 bool llvm::lsp::operator==(const InlayHint &Lhs, const InlayHint &Rhs) {
   return std::tie(Lhs.position, Lhs.kind, Lhs.label) ==
@@ -978,8 +978,8 @@ bool llvm::lsp::operator<(const InlayHint &Lhs, const InlayHint &Rhs) {
 }
 
 llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
-                                         InlayHintKind Value) {
-  switch (Value) {
+                                         InlayHintKind हालागा) {
+  switch (हालागा) {
   case InlayHintKind::Parameter:
     return Os << "parameter";
   case InlayHintKind::Type:
@@ -992,9 +992,9 @@ llvm::raw_ostream &llvm::lsp::operator<<(llvm::raw_ostream &Os,
 // CodeActionContext
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          CodeActionContext &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   if (!O || !O.map("diagnostics", Result.diagnostics))
     return false;
   O.map("only", Result.only);
@@ -1005,9 +1005,9 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // CodeActionParams
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा,
                          CodeActionParams &Result, llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("textDocument", Result.textDocument) &&
          O.map("range", Result.range) && O.map("context", Result.context);
 }
@@ -1016,15 +1016,15 @@ bool llvm::lsp::fromJSON(const llvm::json::Value &Value,
 // WorkspaceEdit
 //===----------------------------------------------------------------------===//
 
-bool llvm::lsp::fromJSON(const llvm::json::Value &Value, WorkspaceEdit &Result,
+bool llvm::lsp::fromJSON(const llvm::json::हालागा &हालागा, WorkspaceEdit &Result,
                          llvm::json::Path Path) {
-  llvm::json::ObjectMapper O(Value, Path);
+  llvm::json::ObjectMapper O(हालागा, Path);
   return O && O.map("changes", Result.changes);
 }
 
-llvm::json::Value llvm::lsp::toJSON(const WorkspaceEdit &Value) {
+llvm::json::हालागा llvm::lsp::toJSON(const WorkspaceEdit &हालागा) {
   llvm::json::Object FileChanges;
-  for (auto &Change : Value.changes)
+  for (auto &Change : हालागा.changes)
     FileChanges[Change.first] = llvm::json::Array(Change.second);
   return llvm::json::Object{{"changes", std::move(FileChanges)}};
 }
@@ -1037,16 +1037,16 @@ const llvm::StringLiteral CodeAction::kQuickFix = "quickfix";
 const llvm::StringLiteral CodeAction::kRefactor = "refactor";
 const llvm::StringLiteral CodeAction::kInfo = "info";
 
-llvm::json::Value llvm::lsp::toJSON(const CodeAction &Value) {
-  llvm::json::Object CodeAction{{"title", Value.title}};
-  if (Value.kind)
-    CodeAction["kind"] = *Value.kind;
-  if (Value.diagnostics)
-    CodeAction["diagnostics"] = llvm::json::Array(*Value.diagnostics);
-  if (Value.isPreferred)
+llvm::json::हालागा llvm::lsp::toJSON(const CodeAction &हालागा) {
+  llvm::json::Object CodeAction{{"title", हालागा.title}};
+  if (हालागा.kind)
+    CodeAction["kind"] = *हालागा.kind;
+  if (हालागा.diagnostics)
+    CodeAction["diagnostics"] = llvm::json::Array(*हालागा.diagnostics);
+  if (हालागा.isPreferred)
     CodeAction["isPreferred"] = true;
-  if (Value.edit)
-    CodeAction["edit"] = *Value.edit;
+  if (हालागा.edit)
+    CodeAction["edit"] = *हालागा.edit;
   return std::move(CodeAction);
 }
 
@@ -1054,7 +1054,7 @@ llvm::json::Value llvm::lsp::toJSON(const CodeAction &Value) {
 // ShowMessageParams
 //===----------------------------------------------------------------------===//
 
-llvm::json::Value llvm::lsp::toJSON(const ShowMessageParams &Params) {
+llvm::json::हालागा llvm::lsp::toJSON(const ShowMessageParams &Params) {
   auto Out = llvm::json::Object{
       {"type", static_cast<int>(Params.type)},
       {"message", Params.message},
@@ -1064,6 +1064,6 @@ llvm::json::Value llvm::lsp::toJSON(const ShowMessageParams &Params) {
   return Out;
 }
 
-llvm::json::Value llvm::lsp::toJSON(const MessageActionItem &Params) {
+llvm::json::हालागा llvm::lsp::toJSON(const MessageActionItem &Params) {
   return llvm::json::Object{{"title", Params.title}};
 }

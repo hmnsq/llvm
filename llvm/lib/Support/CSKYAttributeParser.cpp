@@ -59,7 +59,7 @@ const CSKYAttributeParser::DisplayHandler
             &CSKYAttributeParser::fpuException,
         },
         {
-            CSKYAttrs::CSKY_FPU_NUMBER_MODULE,
+            CSKYAttrs::CSKY_FPU_नुमेरो_MODULE,
             &ELFCompactAttrParser::stringAttribute,
         },
         {
@@ -119,31 +119,31 @@ Error CSKYAttributeParser::fpuException(unsigned tag) {
 }
 
 Error CSKYAttributeParser::fpuHardFP(unsigned tag) {
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t हालागा_2 = de.getULEB128(cursor);
   ListSeparator LS(" ");
 
   std::string description;
 
-  if (value & 0x1) {
+  if (हालागा_2 & 0x1) {
     description += LS;
     description += "Half";
   }
-  if ((value >> 1) & 0x1) {
+  if ((हालागा_2 >> 1) & 0x1) {
     description += LS;
     description += "Single";
   }
-  if ((value >> 2) & 0x1) {
+  if ((हालागा_2 >> 2) & 0x1) {
     description += LS;
     description += "Double";
   }
 
   if (description.empty()) {
-    printAttribute(tag, value, "");
+    इलिम्बाग_Attribute(tag, हालागा_2, "");
     return createStringError(errc::invalid_argument,
                              "unknown Tag_CSKY_FPU_HARDFP value: " +
-                                 Twine(value));
+                                 Twine(हालागा_2));
   }
 
-  printAttribute(tag, value, description);
+  इलिम्बाग_Attribute(tag, हालागा_2, description);
   return Error::success();
 }

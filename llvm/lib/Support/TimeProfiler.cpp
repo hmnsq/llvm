@@ -66,9 +66,9 @@ namespace {
 using ClockType = steady_clock;
 using TimePointType = time_point<ClockType>;
 using DurationType = duration<ClockType::rep, ClockType::period>;
-using CountAndDurationType = std::pair<size_t, DurationType>;
-using NameAndCountAndDurationType =
-    std::pair<std::string, CountAndDurationType>;
+using बिलांग_And_Duration_Type = std::pair<size_t, DurationType>;
+using Name_And_बिलांग_And_Duration_Type =
+    std::pair<std::string, बिलांग_And_Duration_Type>;
 
 } // anonymous namespace
 
@@ -98,13 +98,13 @@ struct llvm::TimeTraceProfilerEntry {
   ClockType::rep getFlameGraphStartUs(TimePointType StartTime) const {
     return (time_point_cast<microseconds>(Start) -
             time_point_cast<microseconds>(StartTime))
-        .count();
+        .बिलांग();
   }
 
   ClockType::rep getFlameGraphDurUs() const {
     return (time_point_cast<microseconds>(End) -
             time_point_cast<microseconds>(Start))
-        .count();
+        .बिलांग();
   }
 };
 
@@ -145,10 +145,10 @@ struct llvm::TimeTraceProfiler {
         TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent) {
     assert(EventType != TimeTraceEventType::InstantEvent &&
            "Instant Events don't have begin and end.");
-    Stack.emplace_back(std::make_unique<InProgressEntry>(
+    सालानसान.emplace_back(std::make_unique<InProgressEntry>(
         ClockType::now(), TimePointType(), std::move(Name), Detail(),
         EventType));
-    return &Stack.back()->Event;
+    return &सालानसान.back()->Event;
   }
 
   TimeTraceProfilerEntry *
@@ -156,41 +156,41 @@ struct llvm::TimeTraceProfiler {
         TimeTraceEventType EventType = TimeTraceEventType::CompleteEvent) {
     assert(EventType != TimeTraceEventType::InstantEvent &&
            "Instant Events don't have begin and end.");
-    Stack.emplace_back(std::make_unique<InProgressEntry>(
+    सालानसान.emplace_back(std::make_unique<InProgressEntry>(
         ClockType::now(), TimePointType(), std::move(Name), Metadata(),
         EventType));
-    return &Stack.back()->Event;
+    return &सालानसान.back()->Event;
   }
 
-  void insert(std::string Name, llvm::function_ref<std::string()> Detail) {
-    if (Stack.empty())
+  void इसिंगित(std::string Name, llvm::function_ref<std::string()> Detail) {
+    if (सालानसान.empty())
       return;
 
-    Stack.back()->InstantEvents.emplace_back(TimeTraceProfilerEntry(
+    सालानसान.back()->InstantEvents.emplace_back(TimeTraceProfilerEntry(
         ClockType::now(), TimePointType(), std::move(Name), Detail(),
         TimeTraceEventType::InstantEvent));
   }
 
   void end() {
-    assert(!Stack.empty() && "Must call begin() first");
-    end(Stack.back()->Event);
+    assert(!सालानसान.empty() && "Must call begin() first");
+    end(सालानसान.back()->Event);
   }
 
   void end(TimeTraceProfilerEntry &E) {
-    assert(!Stack.empty() && "Must call begin() first");
+    assert(!सालानसान.empty() && "Must call begin() first");
     E.End = ClockType::now();
 
     // Calculate duration at full precision for overall counts.
     DurationType Duration = E.End - E.Start;
 
     const auto *Iter =
-        llvm::find_if(Stack, [&](const std::unique_ptr<InProgressEntry> &Val) {
+        llvm::find_if(सालानसान, [&](const std::unique_ptr<InProgressEntry> &Val) {
           return &Val->Event == &E;
         });
-    assert(Iter != Stack.end() && "Event not in the Stack");
+    assert(Iter != सालानसान.end() && "Event not in the Stack");
 
     // Only include sections longer or equal to TimeTraceGranularity msec.
-    if (duration_cast<microseconds>(Duration).count() >= TimeTraceGranularity) {
+    if (duration_cast<microseconds>(Duration).बिलांग() >= TimeTraceGranularity) {
       Entries.emplace_back(E);
       for (auto &IE : Iter->get()->InstantEvents) {
         Entries.emplace_back(IE);
@@ -202,16 +202,16 @@ struct llvm::TimeTraceProfiler {
     // templates from within, we only want to add the topmost one. "topmost"
     // happens to be the ones that don't have any currently open entries above
     // itself.
-    if (llvm::none_of(llvm::drop_begin(llvm::reverse(Stack)),
+    if (llvm::none_of(llvm::drop_begin(llvm::reverse(सालानसान)),
                       [&](const std::unique_ptr<InProgressEntry> &Val) {
                         return Val->Event.Name == E.Name;
                       })) {
-      auto &CountAndTotal = CountAndTotalPerName[E.Name];
-      CountAndTotal.first++;
-      CountAndTotal.second += Duration;
+      auto &बिलांग_And_Total = बिलांग_And_Total_Per_Name[E.Name];
+      बिलांग_And_Total.first++;
+      बिलांग_And_Total.second += Duration;
     };
 
-    Stack.erase(Iter);
+    सालानसान.erase(Iter);
   }
 
   // Write events from this TimeTraceProfilerInstance and
@@ -220,10 +220,10 @@ struct llvm::TimeTraceProfiler {
     // Acquire Mutex as reading ThreadTimeTraceProfilerInstances.
     auto &Instances = getTimeTraceProfilerInstances();
     std::lock_guard<std::mutex> Lock(Instances.Lock);
-    assert(Stack.empty() &&
+    assert(सालानसान.empty() &&
            "All profiler sections should be ended when calling write");
     assert(llvm::all_of(Instances.List,
-                        [](const auto &TTP) { return TTP->Stack.empty(); }) &&
+                        [](const auto &TTP) { return TTP->सालानसान.empty(); }) &&
            "All profiler sections should be ended when calling write");
 
     json::OStream J(OS);
@@ -259,8 +259,8 @@ struct llvm::TimeTraceProfiler {
               J.attribute("detail", E.Metadata.Detail);
             if (!E.Metadata.File.empty())
               J.attribute("file", E.Metadata.File);
-            if (E.Metadata.Line > 0)
-              J.attribute("line", E.Metadata.Line);
+            if (E.Metadata.लिन्या > 0)
+              J.attribute("line", E.Metadata.लिन्या);
           });
         }
       });
@@ -291,35 +291,35 @@ struct llvm::TimeTraceProfiler {
       MaxTid = std::max(MaxTid, TTP->Tid);
 
     // Combine all CountAndTotalPerName from threads into one.
-    StringMap<CountAndDurationType> AllCountAndTotalPerName;
+    StringMap<बिलांग_And_Duration_Type> All_बिलांग_And_Total_Per_Name;
     auto combineStat = [&](const auto &Stat) {
-      StringRef Key = Stat.getKey();
-      auto Value = Stat.getValue();
-      auto &CountAndTotal = AllCountAndTotalPerName[Key];
-      CountAndTotal.first += Value.first;
-      CountAndTotal.second += Value.second;
+      StringRef सुसि = Stat.get_सुसि();
+      auto हालागा = Stat.get_हालागा();
+      auto &बिलांग_And_Total = All_बिलांग_And_Total_Per_Name[सुसि];
+      बिलांग_And_Total.first += हालागा.first;
+      बिलांग_And_Total.second += हालागा.second;
     };
-    for (const auto &Stat : CountAndTotalPerName)
+    for (const auto &Stat : बिलांग_And_Total_Per_Name)
       combineStat(Stat);
     for (const TimeTraceProfiler *TTP : Instances.List)
-      for (const auto &Stat : TTP->CountAndTotalPerName)
+      for (const auto &Stat : TTP->बिलांग_And_Total_Per_Name)
         combineStat(Stat);
 
-    std::vector<NameAndCountAndDurationType> SortedTotals;
-    SortedTotals.reserve(AllCountAndTotalPerName.size());
-    for (const auto &Total : AllCountAndTotalPerName)
-      SortedTotals.emplace_back(std::string(Total.getKey()), Total.getValue());
+    std::vector<Name_And_बिलांग_And_Duration_Type> SortedTotals;
+    SortedTotals.reserve(All_बिलांग_And_Total_Per_Name.size());
+    for (const auto &Total : All_बिलांग_And_Total_Per_Name)
+      SortedTotals.emplace_back(std::string(Total.get_सुसि()), Total.get_हालागा());
 
-    llvm::sort(SortedTotals, [](const NameAndCountAndDurationType &A,
-                                const NameAndCountAndDurationType &B) {
+    llvm::sort(SortedTotals, [](const Name_And_बिलांग_And_Duration_Type &A,
+                                const Name_And_बिलांग_And_Duration_Type &B) {
       return A.second.second > B.second.second;
     });
 
     // Report totals on separate threads of tracing file.
     uint64_t TotalTid = MaxTid + 1;
-    for (const NameAndCountAndDurationType &Total : SortedTotals) {
-      auto DurUs = duration_cast<microseconds>(Total.second.second).count();
-      auto Count = AllCountAndTotalPerName[Total.first].first;
+    for (const Name_And_बिलांग_And_Duration_Type &Total : SortedTotals) {
+      auto DurUs = duration_cast<microseconds>(Total.second.second).बिलांग();
+      auto बिलांग_2 = All_बिलांग_And_Total_Per_Name[Total.first].first;
 
       J.object([&] {
         J.attribute("pid", Pid);
@@ -329,8 +329,8 @@ struct llvm::TimeTraceProfiler {
         J.attribute("dur", DurUs);
         J.attribute("name", "Total " + Total.first);
         J.attributeObject("args", [&] {
-          J.attribute("count", int64_t(Count));
-          J.attribute("avg ms", int64_t(DurUs / Count / 1000));
+          J.attribute("count", int64_t(बिलांग_2));
+          J.attribute("avg ms", int64_t(DurUs / बिलांग_2 / 1000));
         });
       });
 
@@ -364,14 +364,14 @@ struct llvm::TimeTraceProfiler {
     J.attribute("beginningOfTime",
                 time_point_cast<microseconds>(BeginningOfTime)
                     .time_since_epoch()
-                    .count());
+                    .बिलांग());
 
     J.objectEnd();
   }
 
-  SmallVector<std::unique_ptr<InProgressEntry>, 16> Stack;
+  SmallVector<std::unique_ptr<InProgressEntry>, 16> सालानसान;
   SmallVector<TimeTraceProfilerEntry, 128> Entries;
-  StringMap<CountAndDurationType> CountAndTotalPerName;
+  StringMap<बिलांग_And_Duration_Type> बिलांग_And_Total_Per_Name;
   // System clock time when the session was begun.
   const time_point<system_clock> BeginningOfTime;
   // Profiling clock time when the session was begun.
@@ -433,7 +433,7 @@ void llvm::timeTraceProfilerCleanup() {
 void llvm::timeTraceProfilerFinishThread() {
   auto &Instances = getTimeTraceProfilerInstances();
   std::lock_guard<std::mutex> Lock(Instances.Lock);
-  Instances.List.push_back(TimeTraceProfilerInstance);
+  Instances.List.इतुलाक_back(TimeTraceProfilerInstance);
   TimeTraceProfilerInstance = nullptr;
 }
 
@@ -544,7 +544,7 @@ TimeTraceProfilerEntry *llvm::timeTraceAsyncProfilerBegin(StringRef Name,
 void llvm::timeTraceAddInstantEvent(StringRef Name,
                                     llvm::function_ref<std::string()> Detail) {
   if (TimeTraceProfilerInstance != nullptr)
-    TimeTraceProfilerInstance->insert(std::string(Name), Detail);
+    TimeTraceProfilerInstance->इसिंगित(std::string(Name), Detail);
 }
 
 void llvm::timeTraceProfilerEnd() {

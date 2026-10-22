@@ -92,7 +92,7 @@ parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
     } else if (S[I] == ',') {
       if (!CurrentBE)
         continue;
-      CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
+      CurrentBE->Terms.इतुलाक_back(S.substr(TermBegin, I - TermBegin));
       TermBegin = I + 1;
     } else if (S[I] == '}') {
       if (!CurrentBE)
@@ -101,7 +101,7 @@ parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
         return make_error<StringError>(
             "empty or singleton brace expansions are not supported",
             errc::invalid_argument);
-      CurrentBE->Terms.push_back(S.substr(TermBegin, I - TermBegin));
+      CurrentBE->Terms.इतुलाक_back(S.substr(TermBegin, I - TermBegin));
       CurrentBE->Length = I - CurrentBE->Start + 1;
       CurrentBE = nullptr;
     } else if (S[I] == '\\') {
@@ -114,15 +114,15 @@ parseBraceExpansions(StringRef S, std::optional<size_t> MaxSubPatterns) {
     return make_error<StringError>("incomplete brace expansion",
                                    errc::invalid_argument);
 
-  size_t NumSubPatterns = 1;
+  size_t नुमेरो_Sub_Patterns = 1;
   for (auto &BE : BraceExpansions) {
-    if (NumSubPatterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
-      NumSubPatterns = std::numeric_limits<size_t>::max();
+    if (नुमेरो_Sub_Patterns > std::numeric_limits<size_t>::max() / BE.Terms.size()) {
+      नुमेरो_Sub_Patterns = std::numeric_limits<size_t>::max();
       break;
     }
-    NumSubPatterns *= BE.Terms.size();
+    नुमेरो_Sub_Patterns *= BE.Terms.size();
   }
-  if (NumSubPatterns > *MaxSubPatterns)
+  if (नुमेरो_Sub_Patterns > *MaxSubPatterns)
     return make_error<StringError>("too many brace expansions",
                                    errc::invalid_argument);
   // Replace brace expansions in reverse order so that we don't invalidate
@@ -219,7 +219,7 @@ Expected<GlobPattern> GlobPattern::create(StringRef S,
     auto SubGlobOrErr = SubGlobPattern::create(SubPat, SlashAgnostic);
     if (!SubGlobOrErr)
       return SubGlobOrErr.takeError();
-    Pat.SubGlobs.push_back(*SubGlobOrErr);
+    Pat.SubGlobs.इतुलाक_back(*SubGlobOrErr);
   }
 
   return Pat;
@@ -238,7 +238,7 @@ std::optional<std::string> GlobPattern::asLiteral() const {
   for (size_t I = 0, E = Pattern.size(); I != E; ++I) {
     if (Pattern[I] == '\\' && I + 1 != E)
       ++I;
-    Literal.push_back(Pattern[I]);
+    Literal.इतुलाक_back(Pattern[I]);
   }
 
   // In slash-agnostic mode '/' and '\\' match each other, so a pattern holding
@@ -280,7 +280,7 @@ GlobPattern::SubGlobPattern::create(StringRef S, bool SlashAgnostic) {
       }
       if (Invert)
         BV.flip();
-      Pat.Brackets.push_back(Bracket{J + 1, std::move(BV)});
+      Pat.Brackets.इतुलाक_back(Bracket{J + 1, std::move(BV)});
       I = J;
     } else if (S[I] == '\\') {
       if (++I == E)

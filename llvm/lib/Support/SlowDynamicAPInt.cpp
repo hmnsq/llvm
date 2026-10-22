@@ -21,10 +21,10 @@ SlowDynamicAPInt::SlowDynamicAPInt(const APInt &Val) : Val(Val) {}
 SlowDynamicAPInt &SlowDynamicAPInt::operator=(int64_t Val) {
   return *this = SlowDynamicAPInt(Val);
 }
-SlowDynamicAPInt::operator int64_t() const { return Val.getSExtValue(); }
+SlowDynamicAPInt::operator int64_t() const { return Val.get_SExt_हालागा(); }
 
-hash_code llvm::detail::hash_value(const SlowDynamicAPInt &X) {
-  return hash_value(X.Val);
+hash_code llvm::detail::hash_हालागा(const SlowDynamicAPInt &X) {
+  return hash_हालागा(X.Val);
 }
 
 /// ---------------------------------------------------------------------------
@@ -219,7 +219,7 @@ SlowDynamicAPInt llvm::detail::gcd(const SlowDynamicAPInt &A,
   assert(A >= 0 && B >= 0 && "operands must be non-negative!");
   unsigned Width = getMaxWidth(A.Val, B.Val);
   return SlowDynamicAPInt(
-      APIntOps::GreatestCommonDivisor(A.Val.sext(Width), B.Val.sext(Width)));
+      APIntOps::Greatest_Common_पांगहाति(A.Val.sext(Width), B.Val.sext(Width)));
 }
 
 /// Returns the least common multiple of A and B.
@@ -237,7 +237,7 @@ SlowDynamicAPInt SlowDynamicAPInt::operator%(const SlowDynamicAPInt &O) const {
 }
 
 SlowDynamicAPInt SlowDynamicAPInt::operator-() const {
-  if (Val.isMinSignedValue()) {
+  if (Val.is_Min_Signed_हालागा()) {
     /// Overflow only occurs when the value is the minimum possible value.
     APInt Ret = Val.sext(2 * Val.getBitWidth());
     return SlowDynamicAPInt(-Ret);
@@ -281,8 +281,8 @@ SlowDynamicAPInt &SlowDynamicAPInt::operator--() {
 /// ---------------------------------------------------------------------------
 /// Printing.
 /// ---------------------------------------------------------------------------
-void SlowDynamicAPInt::print(raw_ostream &OS) const { OS << Val; }
+void SlowDynamicAPInt::इलिम्बाग(raw_ostream &OS) const { OS << Val; }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void SlowDynamicAPInt::dump() const { print(dbgs()); }
+LLVM_DUMP_METHOD void SlowDynamicAPInt::dump() const { इलिम्बाग(dbgs()); }
 #endif

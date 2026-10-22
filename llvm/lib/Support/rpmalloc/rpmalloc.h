@@ -26,12 +26,12 @@ extern "C" {
     (defined(__GNUC__) && defined(ENABLE_PRELOAD) && ENABLE_PRELOAD)
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(बिलांग, size)
 #else
 #define RPMALLOC_ATTRIB_MALLOC __attribute__((__malloc__))
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size) __attribute__((alloc_size(size)))
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)                               \
-  __attribute__((alloc_size(count, size)))
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(बिलांग, size)                               \
+  __attribute__((alloc_size(बिलांग, size)))
 #endif
 #define RPMALLOC_CDECL
 #elif defined(_MSC_VER)
@@ -39,14 +39,14 @@ extern "C" {
 #define RPMALLOC_ALLOCATOR __declspec(allocator) __declspec(restrict)
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(बिलांग, size)
 #define RPMALLOC_CDECL __cdecl
 #else
 #define RPMALLOC_EXPORT
 #define RPMALLOC_ALLOCATOR
 #define RPMALLOC_ATTRIB_MALLOC
 #define RPMALLOC_ATTRIB_ALLOC_SIZE(size)
-#define RPMALLOC_ATTRIB_ALLOC_SIZE2(count, size)
+#define RPMALLOC_ATTRIB_ALLOC_SIZE2(बिलांग, size)
 #define RPMALLOC_CDECL
 #endif
 
@@ -209,7 +209,7 @@ typedef struct rpmalloc_config_t {
   //  used, so physical committed memory should not be affected in the default
   //  implementation. Will be aligned to a multiple of spans that match memory
   //  page size in case of huge pages.
-  size_t span_map_count;
+  size_t span_map_बिलांग;
   //! Enable use of large/huge pages. If this flag is set to non-zero and page
   //! size is
   //  zero, the allocator will try to enable huge pages and auto detect the
@@ -269,7 +269,7 @@ RPMALLOC_EXPORT void rpfree(void *ptr);
 
 //! Allocate a memory block of at least the given size and zero initialize it
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpcalloc(size_t num, size_t size) RPMALLOC_ATTRIB_MALLOC
+rpcalloc(size_t नुमेरो_3, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(1, 2);
 
 //! Reallocate the given block to at least the given size
@@ -304,7 +304,7 @@ rpaligned_alloc(size_t alignment, size_t size) RPMALLOC_ATTRIB_MALLOC
 //  internals is that this must also be strictly less than the span size
 //  (default 64KiB)
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpaligned_calloc(size_t alignment, size_t num,
+rpaligned_calloc(size_t alignment, size_t नुमेरो_3,
                  size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(2, 3);
 
@@ -369,7 +369,7 @@ rpmalloc_heap_aligned_alloc(rpmalloc_heap_t *heap, size_t alignment,
 //! Allocate a memory block of at least the given size using the given heap and
 //! zero initialize it.
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
-rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t num,
+rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t नुमेरो_3,
                      size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(2, 3);
 
@@ -381,7 +381,7 @@ rpmalloc_heap_calloc(rpmalloc_heap_t *heap, size_t num,
 //  be strictly less than the span size (default 64KiB).
 RPMALLOC_EXPORT RPMALLOC_ALLOCATOR void *
 rpmalloc_heap_aligned_calloc(rpmalloc_heap_t *heap, size_t alignment,
-                             size_t num, size_t size) RPMALLOC_ATTRIB_MALLOC
+                             size_t नुमेरो_3, size_t size) RPMALLOC_ATTRIB_MALLOC
     RPMALLOC_ATTRIB_ALLOC_SIZE2(2, 3);
 
 //! Reallocate the given block to at least the given size. The memory block MUST

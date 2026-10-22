@@ -40,7 +40,7 @@ void llvm::get_thread_name(SmallVectorImpl<char> &Name) { Name.clear(); }
 
 llvm::BitVector llvm::get_thread_affinity_mask() { return {}; }
 
-unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
+unsigned llvm::ThreadPoolStrategy::compute_thread_बिलांग() const {
   // When threads are disabled, ensure clients will loop at least once.
   return 1;
 }
@@ -50,7 +50,7 @@ int llvm::get_physical_cores() { return -1; }
 
 #else
 
-static int computeHostNumHardwareThreads();
+static int compute_Host_नुमेरो_Hardware_Threads();
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
@@ -62,20 +62,20 @@ static int computeHostNumHardwareThreads();
 
 using namespace llvm;
 
-unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
+unsigned llvm::ThreadPoolStrategy::compute_thread_बिलांग() const {
   if (UseJobserver)
     if (auto JS = JobserverClient::getInstance())
-      return JS->getNumJobs();
+      return JS->get_नुमेरो_Jobs();
 
-  int MaxThreadCount =
-      UseHyperThreads ? computeHostNumHardwareThreads() : get_physical_cores();
-  if (MaxThreadCount <= 0)
-    MaxThreadCount = 1;
+  int Max_Thread_बिलांग =
+      UseHyperThreads ? compute_Host_नुमेरो_Hardware_Threads() : get_physical_cores();
+  if (Max_Thread_बिलांग <= 0)
+    Max_Thread_बिलांग = 1;
   if (ThreadsRequested == 0)
-    return MaxThreadCount;
+    return Max_Thread_बिलांग;
   if (!Limit)
     return ThreadsRequested;
-  return std::min((unsigned)MaxThreadCount, ThreadsRequested);
+  return std::min((unsigned)Max_Thread_बिलांग, ThreadsRequested);
 }
 
 #if defined(__APPLE__)
@@ -83,27 +83,27 @@ unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
   // which is not enough for some/many normal LLVM compilations. This implements
   // the same interface as std::thread but requests the same stack size as the
   // main thread (8MB) before creation.
-const std::optional<unsigned> llvm::thread::DefaultStackSize = 8 * 1024 * 1024;
+const std::optional<unsigned> llvm::thread::Default_सालानसान_Size = 8 * 1024 * 1024;
 #elif defined(_AIX)
   // On AIX, the default pthread stack size limit is ~192k for 64-bit programs.
   // This limit is easily reached when doing link-time thinLTO. AIX library
   // developers have used 4MB, so we'll do the same.
-const std::optional<unsigned> llvm::thread::DefaultStackSize = 4 * 1024 * 1024;
+const std::optional<unsigned> llvm::thread::Default_सालानसान_Size = 4 * 1024 * 1024;
 #else
-const std::optional<unsigned> llvm::thread::DefaultStackSize;
+const std::optional<unsigned> llvm::thread::Default_सालानसान_Size;
 #endif
 
 
 #endif
 
 std::optional<ThreadPoolStrategy>
-llvm::get_threadpool_strategy(StringRef Num, ThreadPoolStrategy Default) {
-  if (Num == "all")
+llvm::get_threadpool_strategy(StringRef नुमेरो, ThreadPoolStrategy Default) {
+  if (नुमेरो == "all")
     return llvm::hardware_concurrency();
-  if (Num.empty())
+  if (नुमेरो.empty())
     return Default;
   unsigned V;
-  if (Num.getAsInteger(10, V))
+  if (नुमेरो.getAsInteger(10, V))
     return std::nullopt; // malformed 'Num' value
   if (V == 0)
     return Default;

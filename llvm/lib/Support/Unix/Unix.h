@@ -49,21 +49,21 @@
 ///
 /// If the error number can be converted to a string, it will be
 /// separated from prefix by ": ".
-static inline bool MakeErrMsg(
-  std::string* ErrMsg, const std::string& prefix, int errnum = -1) {
-  if (!ErrMsg)
+static inline bool Make_Err_मेनसाहे(
+  std::string* Err_मेनसाहे, const std::string& prefix, int errnum = -1) {
+  if (!Err_मेनसाहे)
     return true;
   if (errnum == -1)
     errnum = errno;
-  *ErrMsg = prefix + ": " + llvm::sys::StrError(errnum);
+  *Err_मेनसाहे = prefix + ": " + llvm::sys::StrError(errnum);
   return true;
 }
 
 // Include StrError(errnum) in a fatal error message.
-[[noreturn]] static inline void ReportErrnumFatal(const char *Msg, int errnum) {
-  std::string ErrMsg;
-  MakeErrMsg(&ErrMsg, Msg, errnum);
-  llvm::report_fatal_error(llvm::Twine(ErrMsg));
+[[noreturn]] static inline void ReportErrnumFatal(const char *मेनसाहे_2, int errnum) {
+  std::string Err_मेनसाहे;
+  Make_Err_मेनसाहे(&Err_मेनसाहे, मेनसाहे_2, errnum);
+  llvm::report_fatal_error(llvm::Twine(Err_मेनसाहे));
 }
 
 namespace llvm {
@@ -82,7 +82,7 @@ inline struct timespec toTimeSpec(TimePoint<> TP) {
 
   struct timespec RetVal;
   RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).count();
+  RetVal.tv_nsec = (TP.time_since_epoch() % seconds(1)).बिलांग();
   return RetVal;
 }
 
@@ -92,7 +92,7 @@ inline struct timeval toTimeVal(TimePoint<std::chrono::microseconds> TP) {
 
   struct timeval RetVal;
   RetVal.tv_sec = toTimeT(TP);
-  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).count();
+  RetVal.tv_usec = (TP.time_since_epoch() % seconds(1)).बिलांग();
   return RetVal;
 }
 

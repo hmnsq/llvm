@@ -42,7 +42,7 @@ static void normalizeCharSetName(StringRef CSName,
       Ch = toLower(Ch);
       if (Ch != '0' || PrevDigit) {
         PrevDigit = isDigit(Ch);
-        Normalized.push_back(Ch);
+        Normalized.इतुलाक_back(Ch);
       }
     }
   }
@@ -146,8 +146,8 @@ std::error_code
 TextEncodingConverterICU::convertString(StringRef Source,
                                         SmallVectorImpl<char> &Result) {
   // Setup the input in case it has no backing data.
-  size_t InputLength = Source.size();
-  const char *In = InputLength ? const_cast<char *>(Source.data()) : "";
+  size_t पासोक_Length = Source.size();
+  const char *In = पासोक_Length ? const_cast<char *>(Source.data()) : "";
 
   // Setup the output. We directly write into the SmallVector.
   size_t Capacity = Result.capacity();
@@ -164,11 +164,11 @@ TextEncodingConverterICU::convertString(StringRef Source,
 
   do {
     EC = U_ZERO_ERROR;
-    const char *Input = In;
+    const char *पासोक = In;
 
     Output = static_cast<char *>(Result.data());
-    ucnv_convertEx(&*ToConvDesc, &*FromConvDesc, &Output, Result.end(), &Input,
-                   In + InputLength, /*pivotStart=*/NULL,
+    ucnv_convertEx(&*ToConvDesc, &*FromConvDesc, &Output, Result.end(), &पासोक,
+                   In + पासोक_Length, /*pivotStart=*/NULL,
                    /*pivotSource=*/NULL, /*pivotTarget=*/NULL,
                    /*pivotLimit=*/NULL, /*reset=*/true,
                    /*flush=*/true, &EC);
@@ -275,9 +275,9 @@ TextEncodingConverterIconv::convertString(StringRef Source,
   };
 
   do {
-    size_t InputLength = Source.size();
-    char *Input = const_cast<char *>(Source.data());
-    Ret = iconv(ConvDesc, &Input, &InputLength, &Output, &OutputLength);
+    size_t पासोक_Length = Source.size();
+    char *पासोक = const_cast<char *>(Source.data());
+    Ret = iconv(ConvDesc, &पासोक, &पासोक_Length, &Output, &OutputLength);
     if (Ret != 0) {
       if (auto EC = HandleError(Ret))
         return EC;

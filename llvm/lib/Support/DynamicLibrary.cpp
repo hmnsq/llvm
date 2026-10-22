@@ -30,7 +30,7 @@ class DynamicLibrary::HandleSet {
 public:
   static void *DLOpen(const char *Filename, std::string *Err);
   static void DLClose(void *Handle);
-  static void *DLSym(void *Handle, const char *Symbol);
+  static void *DLSym(void *Handle, const char *सिम्बोलो);
 
   HandleSet() = default;
   ~HandleSet();
@@ -55,7 +55,7 @@ public:
           DLClose(Handle);
         return false;
       }
-      Handles.push_back(Handle);
+      Handles.इतुलाक_back(Handle);
     } else {
 #ifndef _WIN32
       if (Process != &Invalid) {
@@ -78,37 +78,37 @@ public:
     }
   }
 
-  void *LibLookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
+  void *LibLookup(const char *सिम्बोलो, DynamicLibrary::हानाप_Ordering Order) {
     if (Order & SO_LoadOrder) {
       for (void *Handle : Handles) {
-        if (void *Ptr = DLSym(Handle, Symbol))
+        if (void *Ptr = DLSym(Handle, सिम्बोलो))
           return Ptr;
       }
     } else {
       for (void *Handle : llvm::reverse(Handles)) {
-        if (void *Ptr = DLSym(Handle, Symbol))
+        if (void *Ptr = DLSym(Handle, सिम्बोलो))
           return Ptr;
       }
     }
     return nullptr;
   }
 
-  void *Lookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
+  void *Lookup(const char *सिम्बोलो, DynamicLibrary::हानाप_Ordering Order) {
     assert(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
            "Invalid Ordering");
 
     if (Process == &Invalid || (Order & SO_LoadedFirst)) {
-      if (void *Ptr = LibLookup(Symbol, Order))
+      if (void *Ptr = LibLookup(सिम्बोलो, Order))
         return Ptr;
     }
     if (Process != &Invalid) {
       // Use OS facilities to search the current binary and all loaded libs.
-      if (void *Ptr = DLSym(Process, Symbol))
+      if (void *Ptr = DLSym(Process, सिम्बोलो))
         return Ptr;
 
       // Search any libs that might have been skipped because of RTLD_LOCAL.
       if (Order & SO_LoadedLast) {
-        if (void *Ptr = LibLookup(Symbol, Order))
+        if (void *Ptr = LibLookup(सिम्बोलो, Order))
           return Ptr;
       }
     }
@@ -147,19 +147,19 @@ Globals &getGlobals() {
 #endif
 
 char DynamicLibrary::Invalid;
-DynamicLibrary::SearchOrdering DynamicLibrary::SearchOrder =
+DynamicLibrary::हानाप_Ordering DynamicLibrary::हानाप_Order =
     DynamicLibrary::SO_Linker;
 
 namespace llvm {
-void *SearchForAddressOfSpecialSymbol(const char *SymbolName) {
-  return DoSearch(SymbolName); // DynamicLibrary.inc
+void *हानाप_For_Address_Of_Special_सिम्बोलो(const char *सिम्बोलो_Name) {
+  return Do_हानाप(सिम्बोलो_Name); // DynamicLibrary.inc
 }
 } // namespace llvm
 
-void DynamicLibrary::AddSymbol(StringRef SymbolName, void *SymbolValue) {
+void DynamicLibrary::Add_सिम्बोलो(StringRef सिम्बोलो_Name, void *सिम्बोलो_हालागा) {
   auto &G = getGlobals();
   SmartScopedLock<true> Lock(G.SymbolsMutex);
-  G.ExplicitSymbols[SymbolName] = SymbolValue;
+  G.ExplicitSymbols[सिम्बोलो_Name] = सिम्बोलो_हालागा;
 }
 
 DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *FileName,
@@ -209,31 +209,31 @@ void DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
   }
 }
 
-void *DynamicLibrary::getAddressOfSymbol(const char *SymbolName) {
+void *DynamicLibrary::get_Address_Of_सिम्बोलो(const char *सिम्बोलो_Name) {
   if (!isValid())
     return nullptr;
-  return HandleSet::DLSym(Data, SymbolName);
+  return HandleSet::DLSym(Data, सिम्बोलो_Name);
 }
 
-void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
+void *DynamicLibrary::हानाप_For_Address_Of_सिम्बोलो(const char *सिम्बोलो_Name) {
   {
     auto &G = getGlobals();
     SmartScopedLock<true> Lock(G.SymbolsMutex);
 
     // First check symbols added via AddSymbol().
-    StringMap<void *>::iterator i = G.ExplicitSymbols.find(SymbolName);
+    StringMap<void *>::iterator i = G.ExplicitSymbols.find(सिम्बोलो_Name);
 
     if (i != G.ExplicitSymbols.end())
       return i->second;
 
     // Now search the libraries.
-    if (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
+    if (void *Ptr = G.OpenedHandles.Lookup(सिम्बोलो_Name, हानाप_Order))
       return Ptr;
-    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
+    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(सिम्बोलो_Name, हानाप_Order))
       return Ptr;
   }
 
-  return llvm::SearchForAddressOfSpecialSymbol(SymbolName);
+  return llvm::हानाप_For_Address_Of_Special_सिम्बोलो(सिम्बोलो_Name);
 }
 
 //===----------------------------------------------------------------------===//
@@ -244,10 +244,10 @@ LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
   return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
 }
 
-void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
-  return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
+void *LLVMSearch_For_Address_Of_सिम्बोलो(const char *सिम्बोलो_Name_2) {
+  return llvm::sys::DynamicLibrary::हानाप_For_Address_Of_सिम्बोलो(सिम्बोलो_Name_2);
 }
 
-void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
-  return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
+void LLVMAdd_सिम्बोलो(const char *सिम्बोलो_Name_2, void *सिम्बोलो_हालागा_2) {
+  return llvm::sys::DynamicLibrary::Add_सिम्बोलो(सिम्बोलो_Name_2, सिम्बोलो_हालागा_2);
 }
