@@ -11,67 +11,67 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Allocator.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/SwapByteOrder.h"
-#include <cassert>
-#include <cstring>
-using namespace llvm;
+#अन्तर्भाव "llvm/ADT/FoldingSet.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Support/Allocator.h"
+#अन्तर्भाव "llvm/Support/MathExtras.h"
+#अन्तर्भाव "llvm/Support/SwapByteOrder.h"
+#अन्तर्भाव <cassert>
+#अन्तर्भाव <cstring>
+using नामाकाश llvm;
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeIDRef Implementation
 
-bool llvm::operator<(FoldingSetNodeIDRef LHS, FoldingSetNodeIDRef RHS) {
-  if (LHS.size() != RHS.size())
-    return LHS.size() < RHS.size();
-  return memcmp(LHS.data(), RHS.data(), LHS.size() * sizeof(unsigned)) < 0;
+तार्किक llvm::operator<(Folding_Set_ग्रन्थिः_IDRef LHS, Folding_Set_ग्रन्थिः_IDRef RHS) {
+  सचे (LHS.size() != RHS.size())
+    पटिनिवत्त LHS.size() < RHS.size();
+  पटिनिवत्त memcmp(LHS.data(), RHS.data(), LHS.size() * परिमाण(unsigned)) < 0;
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetNodeID Implementation
 
-void FoldingSetNodeID::AddString(StringRef String) {
+शून्य Folding_Set_ग्रन्थिः_ID::AddString(StringRef String) {
   unsigned Size = String.size();
 
-  unsigned NumInserts = 1 + divideCeil(Size, 4);
-  Bits.reserve(Bits.size() + NumInserts);
+  unsigned अङ्कः_Inserts = 1 + divideCeil(Size, 4);
+  Bits.reserve(Bits.size() + अङ्कः_Inserts);
 
-  Bits.push_back(Size);
-  if (!Size)
-    return;
+  Bits.प्रक्षिप_back(Size);
+  सचे (!Size)
+    पटिनिवत्त;
 
   unsigned Units = Size / 4;
   unsigned Pos = 0;
-  const unsigned *Base = (const unsigned *)String.data();
+  ध्रुव unsigned *Base = (ध्रुव unsigned *)String.data();
 
   // If the string is aligned do a bulk transfer.
-  if (!((intptr_t)Base & 3)) {
+  सचे (!((intptr_t)Base & 3)) {
     Bits.append(Base, Base + Units);
     Pos = (Units + 1) * 4;
-  } else {
+  } अञ्ञथा {
     // Otherwise do it the hard way.
     // To be compatible with above bulk transfer, we need to take endianness
     // into account.
     static_assert(sys::IsBigEndianHost || sys::IsLittleEndianHost,
                   "Unexpected host endianness");
-    if (sys::IsBigEndianHost) {
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 4] << 24) |
-                     ((unsigned char)String[Pos - 3] << 16) |
-                     ((unsigned char)String[Pos - 2] << 8) |
-                     (unsigned char)String[Pos - 1];
-        Bits.push_back(V);
+    सचे (sys::IsBigEndianHost) {
+      अत्थाय (Pos += 4; Pos <= Size; Pos += 4) {
+        unsigned V = ((unsigned वर्ण)String[Pos - 4] << 24) |
+                     ((unsigned वर्ण)String[Pos - 3] << 16) |
+                     ((unsigned वर्ण)String[Pos - 2] << 8) |
+                     (unsigned वर्ण)String[Pos - 1];
+        Bits.प्रक्षिप_back(V);
       }
-    } else { // Little-endian host
-      for (Pos += 4; Pos <= Size; Pos += 4) {
-        unsigned V = ((unsigned char)String[Pos - 1] << 24) |
-                     ((unsigned char)String[Pos - 2] << 16) |
-                     ((unsigned char)String[Pos - 3] << 8) |
-                     (unsigned char)String[Pos - 4];
-        Bits.push_back(V);
+    } अञ्ञथा { // Little-endian host
+      अत्थाय (Pos += 4; Pos <= Size; Pos += 4) {
+        unsigned V = ((unsigned वर्ण)String[Pos - 1] << 24) |
+                     ((unsigned वर्ण)String[Pos - 2] << 16) |
+                     ((unsigned वर्ण)String[Pos - 3] << 8) |
+                     (unsigned वर्ण)String[Pos - 4];
+        Bits.प्रक्षिप_back(V);
       }
     }
   }
@@ -80,127 +80,127 @@ void FoldingSetNodeID::AddString(StringRef String) {
   unsigned V = 0;
   // Pos will have overshot size by 4 - #bytes left over.
   // No need to take endianness into account here - this is always executed.
-  switch (Pos - Size) {
-  case 1:
-    V = (V << 8) | (unsigned char)String[Size - 3];
+  विकल्प (Pos - Size) {
+  पक्ष 1:
+    V = (V << 8) | (unsigned वर्ण)String[Size - 3];
     [[fallthrough]];
-  case 2:
-    V = (V << 8) | (unsigned char)String[Size - 2];
+  पक्ष 2:
+    V = (V << 8) | (unsigned वर्ण)String[Size - 2];
     [[fallthrough]];
-  case 3:
-    V = (V << 8) | (unsigned char)String[Size - 1];
-    break;
-  default:
-    return; // Nothing left.
+  पक्ष 3:
+    V = (V << 8) | (unsigned वर्ण)String[Size - 1];
+    भङ्ग;
+  स्वभाव:
+    पटिनिवत्त; // Nothing left.
   }
 
-  Bits.push_back(V);
+  Bits.प्रक्षिप_back(V);
 }
 
-void FoldingSetNodeID::AddNodeID(const FoldingSetNodeID &ID) {
+शून्य Folding_Set_ग्रन्थिः_ID::Add_ग्रन्थिः_ID(ध्रुव Folding_Set_ग्रन्थिः_ID &ID) {
   Bits.append(ID.Bits.begin(), ID.Bits.end());
 }
 
-FoldingSetNodeIDRef
-FoldingSetNodeID::Intern(BumpPtrAllocator &Allocator) const {
+Folding_Set_ग्रन्थिः_IDRef
+Folding_Set_ग्रन्थिः_ID::Intern(BumpPtrAllocator &Allocator) ध्रुव {
   unsigned *New = Allocator.Allocate<unsigned>(Bits.size());
   llvm::uninitialized_copy(Bits, New);
-  return FoldingSetNodeIDRef(New, Bits.size());
+  पटिनिवत्त Folding_Set_ग्रन्थिः_IDRef(New, Bits.size());
 }
 
 //===----------------------------------------------------------------------===//
 // FoldingSetBase Implementation
 
 FoldingSetBase::FoldingSetBase(unsigned Log2InitSize) {
-  assert(5 < Log2InitSize && Log2InitSize < 32 &&
+  प्रतिज्ञा(5 < Log2InitSize && Log2InitSize < 32 &&
          "Initial hash table size out of range");
-  NumBuckets = 1 << Log2InitSize;
-  Buckets = static_cast<FoldingSetNode **>(
-      safe_calloc(NumBuckets, sizeof(FoldingSetNode *)));
+  अङ्कः_Buckets = 1 << Log2InitSize;
+  Buckets = static_cast<Folding_Set_ग्रन्थिः **>(
+      safe_calloc(अङ्कः_Buckets, परिमाण(Folding_Set_ग्रन्थिः *)));
 }
 
 FoldingSetBase::FoldingSetBase(FoldingSetBase &&Arg)
     : Buckets(std::exchange(Arg.Buckets, nullptr)),
-      NumBuckets(std::exchange(Arg.NumBuckets, 0)),
-      NumNodes(std::exchange(Arg.NumNodes, 0)) {
+      अङ्कः_Buckets(std::exchange(Arg.अङ्कः_Buckets, 0)),
+      अङ्कः_Nodes(std::exchange(Arg.अङ्कः_Nodes, 0)) {
   Arg.incrementEpoch();
 }
 
 FoldingSetBase &FoldingSetBase::operator=(FoldingSetBase &&RHS) {
-  if (this == &RHS)
-    return *this;
+  सचे (एतत् == &RHS)
+    पटिनिवत्त *एतत्;
 
   incrementEpoch();
   RHS.incrementEpoch();
-  free(Buckets); // This may be null if the set is in a moved-from state.
+  मुक्त(Buckets); // This may be null if the set is in a moved-from state.
   Buckets = std::exchange(RHS.Buckets, nullptr);
-  NumBuckets = std::exchange(RHS.NumBuckets, 0);
-  NumNodes = std::exchange(RHS.NumNodes, 0);
-  return *this;
+  अङ्कः_Buckets = std::exchange(RHS.अङ्कः_Buckets, 0);
+  अङ्कः_Nodes = std::exchange(RHS.अङ्कः_Nodes, 0);
+  पटिनिवत्त *एतत्;
 }
 
-FoldingSetBase::~FoldingSetBase() { free(Buckets); }
+FoldingSetBase::~FoldingSetBase() { मुक्त(Buckets); }
 
-void FoldingSetBase::clear() {
+शून्य FoldingSetBase::clear() {
   incrementEpoch();
   // Stale hashes are unreachable, so only the occupancy needs resetting.
-  if (NumBuckets)
-    memset(Buckets, 0, NumBuckets * sizeof(FoldingSetNode *));
-  NumNodes = 0;
+  सचे (अङ्कः_Buckets)
+    memset(Buckets, 0, अङ्कः_Buckets * परिमाण(Folding_Set_ग्रन्थिः *));
+  अङ्कः_Nodes = 0;
 }
 
-void FoldingSetBase::placeNode(FoldingSetNode *N, uint32_t Hash) {
-  unsigned Mask = NumBuckets - 1;
+शून्य FoldingSetBase::place_ग्रन्थिः(Folding_Set_ग्रन्थिः *N, uint32_t Hash) {
+  unsigned Mask = अङ्कः_Buckets - 1;
   unsigned I = Hash & Mask;
-  while (Buckets[I]) {
-    assert(Buckets[I] != N && "Node already in the folding set");
+  याव (Buckets[I]) {
+    प्रतिज्ञा(Buckets[I] != N && "Node already in the folding set");
     I = (I + 1) & Mask;
   }
   Buckets[I] = N;
-  ++NumNodes;
+  ++अङ्कः_Nodes;
 }
 
-void FoldingSetBase::grow(unsigned MinNumBuckets) {
+शून्य FoldingSetBase::grow(unsigned Min_अङ्कः_Buckets) {
   // The floor is the smallest size the constructor accepts.
-  unsigned NewBucketCount = std::max(64u, llvm::bit_ceil(MinNumBuckets));
-  assert(NewBucketCount > NumBuckets && "Can't shrink a folding set");
+  unsigned New_Bucket_गणनम् = std::max(64u, llvm::bit_ceil(Min_अङ्कः_Buckets));
+  प्रतिज्ञा(New_Bucket_गणनम् > अङ्कः_Buckets && "Can't shrink a folding set");
 
-  FoldingSetBase Tmp(llvm::Log2_32(NewBucketCount));
-  for (unsigned I = 0; I != NumBuckets; ++I)
-    if (FoldingSetNode *N = Buckets[I])
-      Tmp.placeNode(N, N->getFoldingSetHash());
+  FoldingSetBase Tmp(llvm::Log2_32(New_Bucket_गणनम्));
+  अत्थाय (unsigned I = 0; I != अङ्कः_Buckets; ++I)
+    सचे (Folding_Set_ग्रन्थिः *N = Buckets[I])
+      Tmp.place_ग्रन्थिः(N, N->getFoldingSetHash());
 
-  *this = std::move(Tmp);
+  *एतत् = std::move(Tmp);
 }
 
-void FoldingSetBase::reserve(unsigned N) {
-  if (N * 4 <= NumBuckets * 3)
-    return;
+शून्य FoldingSetBase::reserve(unsigned N) {
+  सचे (N * 4 <= अङ्कः_Buckets * 3)
+    पटिनिवत्त;
   // N + (N + 2) / 3 is ceil(4N/3).
   grow(N + (N + 2) / 3);
 }
 
-void FoldingSetBase::insert(FoldingSetNode *N, FoldingSetInsertToken Token) {
-  assert(N && "Cannot insert a null node");
-  assert(Token && "Invalid token!");
+शून्य FoldingSetBase::निवेशय(Folding_Set_ग्रन्थिः *N, Folding_Set_निवेशय_Token Token) {
+  प्रतिज्ञा(N && "Cannot insert a null node");
+  प्रतिज्ञा(Token && "Invalid token!");
   incrementEpoch();
-  if (LLVM_UNLIKELY((NumNodes + 1) * 4 > NumBuckets * 3))
-    grow(NumBuckets * 2);
+  सचे (LLVM_UNLIKELY((अङ्कः_Nodes + 1) * 4 > अङ्कः_Buckets * 3))
+    grow(अङ्कः_Buckets * 2);
   uint32_t Hash = Token.Hash;
-  placeNode(N, Hash);
+  place_ग्रन्थिः(N, Hash);
   N->setFoldingSetHash(Hash);
 }
 
-bool FoldingSetBase::erase(FoldingSetNode *N) {
+तार्किक FoldingSetBase::erase(Folding_Set_ग्रन्थिः *N) {
   uint32_t Hash = N->getFoldingSetHash();
-  if (Hash == FoldingSetNodeIDRef::NotAHash)
-    return false; // Never inserted.
+  सचे (Hash == Folding_Set_ग्रन्थिः_IDRef::NotAHash)
+    पटिनिवत्त मिच्छा; // Never inserted.
 
-  unsigned Mask = NumBuckets - 1;
+  unsigned Mask = अङ्कः_Buckets - 1;
   unsigned I = Hash & Mask;
-  while (Buckets[I] != N) {
-    if (LLVM_UNLIKELY(!Buckets[I]))
-      return false; // Not in folding set.
+  याव (Buckets[I] != N) {
+    सचे (LLVM_UNLIKELY(!Buckets[I]))
+      पटिनिवत्त मिच्छा; // Not in folding set.
     I = (I + 1) & Mask;
   }
 
@@ -208,15 +208,15 @@ bool FoldingSetBase::erase(FoldingSetNode *N) {
 
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
-  for (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
+  अत्थाय (unsigned J = (I + 1) & Mask; Buckets[J]; J = (J + 1) & Mask) {
     unsigned Ideal = Buckets[J]->getFoldingSetHash();
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+    सचे (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       Buckets[I] = Buckets[J];
       I = J;
     }
   }
   Buckets[I] = nullptr;
-  N->setFoldingSetHash(FoldingSetNodeIDRef::NotAHash);
-  --NumNodes;
-  return true;
+  N->setFoldingSetHash(Folding_Set_ग्रन्थिः_IDRef::NotAHash);
+  --अङ्कः_Nodes;
+  पटिनिवत्त सच्च;
 }

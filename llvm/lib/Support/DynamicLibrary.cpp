@@ -10,244 +10,244 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm-c/Support.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Mutex.h"
-#include <vector>
+#अन्तर्भाव "llvm/Support/DynamicLibrary.h"
+#अन्तर्भाव "llvm-c/Support.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringMap.h"
+#अन्तर्भाव "llvm/Config/config.h"
+#अन्तर्भाव "llvm/Support/Mutex.h"
+#अन्तर्भाव <vector>
 
-using namespace llvm;
-using namespace llvm::sys;
+using नामाकाश llvm;
+using नामाकाश llvm::sys;
 
 // All methods for HandleSet should be used holding SymbolsMutex.
-class DynamicLibrary::HandleSet {
-  using HandleList = std::vector<void *>;
+वग्ग DynamicLibrary::HandleSet {
+  using HandleList = std::vector<शून्य *>;
   HandleList Handles;
-  void *Process = &Invalid;
+  शून्य *Process = &Invalid;
 
-public:
-  static void *DLOpen(const char *Filename, std::string *Err);
-  static void DLClose(void *Handle);
-  static void *DLSym(void *Handle, const char *Symbol);
+सार्वजनिक:
+  स्थिर शून्य *DLOpen(ध्रुव वर्ण *Filename, std::string *Err);
+  स्थिर शून्य DLClose(शून्य *Handle);
+  स्थिर शून्य *DLSym(शून्य *Handle, ध्रुव वर्ण *चिह्नम्);
 
-  HandleSet() = default;
+  HandleSet() = स्वभाव;
   ~HandleSet();
 
-  HandleList::iterator Find(void *Handle) { return find(Handles, Handle); }
+  HandleList::iterator Find(शून्य *Handle) { पटिनिवत्त find(Handles, Handle); }
 
-  bool Contains(void *Handle) {
-    return Handle == Process || Find(Handle) != Handles.end();
+  तार्किक Contains(शून्य *Handle) {
+    पटिनिवत्त Handle == Process || Find(Handle) != Handles.end();
   }
 
-  bool AddLibrary(void *Handle, bool IsProcess = false, bool CanClose = true,
-                  bool AllowDuplicates = false) {
+  तार्किक AddLibrary(शून्य *Handle, तार्किक IsProcess = मिच्छा, तार्किक CanClose = सच्च,
+                  तार्किक AllowDuplicates = मिच्छा) {
 #ifdef _WIN32
-    assert((Handle == this ? IsProcess : !IsProcess) && "Bad Handle.");
+    प्रतिज्ञा((Handle == एतत् ? IsProcess : !IsProcess) && "Bad Handle.");
 #endif
-    assert((!AllowDuplicates || !CanClose) &&
+    प्रतिज्ञा((!AllowDuplicates || !CanClose) &&
            "CanClose must be false if AllowDuplicates is true.");
 
-    if (LLVM_LIKELY(!IsProcess)) {
-      if (!AllowDuplicates && Find(Handle) != Handles.end()) {
-        if (CanClose)
+    सचे (LLVM_LIKELY(!IsProcess)) {
+      सचे (!AllowDuplicates && Find(Handle) != Handles.end()) {
+        सचे (CanClose)
           DLClose(Handle);
-        return false;
+        पटिनिवत्त मिच्छा;
       }
-      Handles.push_back(Handle);
-    } else {
+      Handles.प्रक्षिप_back(Handle);
+    } अञ्ञथा {
 #ifndef _WIN32
-      if (Process != &Invalid) {
-        if (CanClose)
+      सचे (Process != &Invalid) {
+        सचे (CanClose)
           DLClose(Process);
-        if (Process == Handle)
-          return false;
+        सचे (Process == Handle)
+          पटिनिवत्त मिच्छा;
       }
 #endif
       Process = Handle;
     }
-    return true;
+    पटिनिवत्त सच्च;
   }
 
-  void CloseLibrary(void *Handle) {
+  शून्य CloseLibrary(शून्य *Handle) {
     DLClose(Handle);
     HandleList::iterator it = Find(Handle);
-    if (it != Handles.end()) {
+    सचे (it != Handles.end()) {
       Handles.erase(it);
     }
   }
 
-  void *LibLookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    if (Order & SO_LoadOrder) {
-      for (void *Handle : Handles) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+  शून्य *LibLookup(ध्रुव वर्ण *चिह्नम्, DynamicLibrary::अन्वेषणम्_Ordering Order) {
+    सचे (Order & SO_LoadOrder) {
+      अत्थाय (शून्य *Handle : Handles) {
+        सचे (शून्य *Ptr = DLSym(Handle, चिह्नम्))
+          पटिनिवत्त Ptr;
       }
-    } else {
-      for (void *Handle : llvm::reverse(Handles)) {
-        if (void *Ptr = DLSym(Handle, Symbol))
-          return Ptr;
+    } अञ्ञथा {
+      अत्थाय (शून्य *Handle : llvm::reverse(Handles)) {
+        सचे (शून्य *Ptr = DLSym(Handle, चिह्नम्))
+          पटिनिवत्त Ptr;
       }
     }
-    return nullptr;
+    पटिनिवत्त nullptr;
   }
 
-  void *Lookup(const char *Symbol, DynamicLibrary::SearchOrdering Order) {
-    assert(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
+  शून्य *Lookup(ध्रुव वर्ण *चिह्नम्, DynamicLibrary::अन्वेषणम्_Ordering Order) {
+    प्रतिज्ञा(!((Order & SO_LoadedFirst) && (Order & SO_LoadedLast)) &&
            "Invalid Ordering");
 
-    if (Process == &Invalid || (Order & SO_LoadedFirst)) {
-      if (void *Ptr = LibLookup(Symbol, Order))
-        return Ptr;
+    सचे (Process == &Invalid || (Order & SO_LoadedFirst)) {
+      सचे (शून्य *Ptr = LibLookup(चिह्नम्, Order))
+        पटिनिवत्त Ptr;
     }
-    if (Process != &Invalid) {
+    सचे (Process != &Invalid) {
       // Use OS facilities to search the current binary and all loaded libs.
-      if (void *Ptr = DLSym(Process, Symbol))
-        return Ptr;
+      सचे (शून्य *Ptr = DLSym(Process, चिह्नम्))
+        पटिनिवत्त Ptr;
 
       // Search any libs that might have been skipped because of RTLD_LOCAL.
-      if (Order & SO_LoadedLast) {
-        if (void *Ptr = LibLookup(Symbol, Order))
-          return Ptr;
+      सचे (Order & SO_LoadedLast) {
+        सचे (शून्य *Ptr = LibLookup(चिह्नम्, Order))
+          पटिनिवत्त Ptr;
       }
     }
-    return nullptr;
+    पटिनिवत्त nullptr;
   }
 };
 
-namespace {
+नामाकाश {
 
-struct Globals {
+संरचना Globals {
   // Collection of symbol name/value pairs to be searched prior to any
   // libraries.
-  llvm::StringMap<void *> ExplicitSymbols;
+  llvm::StringMap<शून्य *> ExplicitSymbols;
   // Collections of known library handles.
   DynamicLibrary::HandleSet OpenedHandles;
   DynamicLibrary::HandleSet OpenedTemporaryHandles;
   // Lock for ExplicitSymbols, OpenedHandles, and OpenedTemporaryHandles.
-  llvm::sys::SmartMutex<true> SymbolsMutex;
+  llvm::sys::SmartMutex<सच्च> SymbolsMutex;
 };
 
 Globals &getGlobals() {
-  static Globals G;
-  return G;
+  स्थिर Globals G;
+  पटिनिवत्त G;
 }
 
 } // namespace
 
 #ifdef _WIN32
 
-#include "Windows/DynamicLibrary.inc"
+#अन्तर्भाव "Windows/DynamicLibrary.inc"
 
-#else
+#अञ्ञथा
 
-#include "Unix/DynamicLibrary.inc"
+#अन्तर्भाव "Unix/DynamicLibrary.inc"
 
 #endif
 
-char DynamicLibrary::Invalid;
-DynamicLibrary::SearchOrdering DynamicLibrary::SearchOrder =
+वर्ण DynamicLibrary::Invalid;
+DynamicLibrary::अन्वेषणम्_Ordering DynamicLibrary::अन्वेषणम्_Order =
     DynamicLibrary::SO_Linker;
 
-namespace llvm {
-void *SearchForAddressOfSpecialSymbol(const char *SymbolName) {
-  return DoSearch(SymbolName); // DynamicLibrary.inc
+नामाकाश llvm {
+शून्य *अन्वेषणम्_For_Address_Of_Special_चिह्नम्(ध्रुव वर्ण *चिह्नम्_Name) {
+  पटिनिवत्त Do_अन्वेषणम्(चिह्नम्_Name); // DynamicLibrary.inc
 }
 } // namespace llvm
 
-void DynamicLibrary::AddSymbol(StringRef SymbolName, void *SymbolValue) {
+शून्य DynamicLibrary::Add_चिह्नम्(StringRef चिह्नम्_Name, शून्य *चिह्नम्_मानम्) {
   auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  G.ExplicitSymbols[SymbolName] = SymbolValue;
+  SmartScopedLock<सच्च> Lock(G.SymbolsMutex);
+  G.ExplicitSymbols[चिह्नम्_Name] = चिह्नम्_मानम्;
 }
 
-DynamicLibrary DynamicLibrary::getPermanentLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getPermanentLibrary(ध्रुव वर्ण *FileName,
                                                    std::string *Err) {
   auto &G = getGlobals();
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
+  शून्य *Handle = HandleSet::DLOpen(FileName, Err);
+  सचे (Handle != &Invalid) {
+    SmartScopedLock<सच्च> Lock(G.SymbolsMutex);
     G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ FileName == nullptr);
   }
 
-  return DynamicLibrary(Handle);
+  पटिनिवत्त DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::addPermanentLibrary(void *Handle,
+DynamicLibrary DynamicLibrary::addPermanentLibrary(शून्य *Handle,
                                                    std::string *Err) {
   auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
+  SmartScopedLock<सच्च> Lock(G.SymbolsMutex);
   // If we've already loaded this library, tell the caller.
-  if (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                  /*CanClose*/ false))
+  सचे (!G.OpenedHandles.AddLibrary(Handle, /*IsProcess*/ मिच्छा,
+                                  /*CanClose*/ मिच्छा))
     *Err = "Library already loaded";
 
-  return DynamicLibrary(Handle);
+  पटिनिवत्त DynamicLibrary(Handle);
 }
 
-DynamicLibrary DynamicLibrary::getLibrary(const char *FileName,
+DynamicLibrary DynamicLibrary::getLibrary(ध्रुव वर्ण *FileName,
                                           std::string *Err) {
-  assert(FileName && "Use getPermanentLibrary() for opening process handle");
-  void *Handle = HandleSet::DLOpen(FileName, Err);
-  if (Handle != &Invalid) {
+  प्रतिज्ञा(FileName && "Use getPermanentLibrary() for opening process handle");
+  शून्य *Handle = HandleSet::DLOpen(FileName, Err);
+  सचे (Handle != &Invalid) {
     auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
-    G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ false,
-                                        /*CanClose*/ false,
-                                        /*AllowDuplicates*/ true);
+    SmartScopedLock<सच्च> Lock(G.SymbolsMutex);
+    G.OpenedTemporaryHandles.AddLibrary(Handle, /*IsProcess*/ मिच्छा,
+                                        /*CanClose*/ मिच्छा,
+                                        /*AllowDuplicates*/ सच्च);
   }
-  return DynamicLibrary(Handle);
+  पटिनिवत्त DynamicLibrary(Handle);
 }
 
-void DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
+शून्य DynamicLibrary::closeLibrary(DynamicLibrary &Lib) {
   auto &G = getGlobals();
-  SmartScopedLock<true> Lock(G.SymbolsMutex);
-  if (Lib.isValid()) {
+  SmartScopedLock<सच्च> Lock(G.SymbolsMutex);
+  सचे (Lib.isValid()) {
     G.OpenedTemporaryHandles.CloseLibrary(Lib.Data);
     Lib.Data = &Invalid;
   }
 }
 
-void *DynamicLibrary::getAddressOfSymbol(const char *SymbolName) {
-  if (!isValid())
-    return nullptr;
-  return HandleSet::DLSym(Data, SymbolName);
+शून्य *DynamicLibrary::get_Address_Of_चिह्नम्(ध्रुव वर्ण *चिह्नम्_Name) {
+  सचे (!isValid())
+    पटिनिवत्त nullptr;
+  पटिनिवत्त HandleSet::DLSym(Data, चिह्नम्_Name);
 }
 
-void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
+शून्य *DynamicLibrary::अन्वेषणम्_For_Address_Of_चिह्नम्(ध्रुव वर्ण *चिह्नम्_Name) {
   {
     auto &G = getGlobals();
-    SmartScopedLock<true> Lock(G.SymbolsMutex);
+    SmartScopedLock<सच्च> Lock(G.SymbolsMutex);
 
     // First check symbols added via AddSymbol().
-    StringMap<void *>::iterator i = G.ExplicitSymbols.find(SymbolName);
+    StringMap<शून्य *>::iterator i = G.ExplicitSymbols.find(चिह्नम्_Name);
 
-    if (i != G.ExplicitSymbols.end())
-      return i->second;
+    सचे (i != G.ExplicitSymbols.end())
+      पटिनिवत्त i->second;
 
     // Now search the libraries.
-    if (void *Ptr = G.OpenedHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
-    if (void *Ptr = G.OpenedTemporaryHandles.Lookup(SymbolName, SearchOrder))
-      return Ptr;
+    सचे (शून्य *Ptr = G.OpenedHandles.Lookup(चिह्नम्_Name, अन्वेषणम्_Order))
+      पटिनिवत्त Ptr;
+    सचे (शून्य *Ptr = G.OpenedTemporaryHandles.Lookup(चिह्नम्_Name, अन्वेषणम्_Order))
+      पटिनिवत्त Ptr;
   }
 
-  return llvm::SearchForAddressOfSpecialSymbol(SymbolName);
+  पटिनिवत्त llvm::अन्वेषणम्_For_Address_Of_Special_चिह्नम्(चिह्नम्_Name);
 }
 
 //===----------------------------------------------------------------------===//
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
-  return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
+LLVMBool LLVMLoadLibraryPermanently(ध्रुव वर्ण *Filename) {
+  पटिनिवत्त llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
 }
 
-void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
-  return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
+शून्य *LLVMSearch_For_Address_Of_चिह्नम्(ध्रुव वर्ण *चिह्नम्_Name_2) {
+  पटिनिवत्त llvm::sys::DynamicLibrary::अन्वेषणम्_For_Address_Of_चिह्नम्(चिह्नम्_Name_2);
 }
 
-void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
-  return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
+शून्य LLVMAdd_चिह्नम्(ध्रुव वर्ण *चिह्नम्_Name_2, शून्य *चिह्नम्_मानम्_2) {
+  पटिनिवत्त llvm::sys::DynamicLibrary::Add_चिह्नम्(चिह्नम्_Name_2, चिह्नम्_मानम्_2);
 }

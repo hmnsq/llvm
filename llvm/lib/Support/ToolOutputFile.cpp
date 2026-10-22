@@ -10,26 +10,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ToolOutputFile.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Signals.h"
-using namespace llvm;
+#अन्तर्भाव "llvm/Support/ToolOutputFile.h"
+#अन्तर्भाव "llvm/Support/FileSystem.h"
+#अन्तर्भाव "llvm/Support/Signals.h"
+using नामाकाश llvm;
 
-static bool isStdout(StringRef Filename) { return Filename == "-"; }
+स्थिर तार्किक isStdout(StringRef Filename) { पटिनिवत्त Filename == "-"; }
 
 CleanupInstaller::CleanupInstaller(StringRef Filename)
-    : Filename(std::string(Filename)), Keep(false) {
+    : Filename(std::string(Filename)), Keep(मिच्छा) {
   // Arrange for the file to be deleted if the process is killed.
-  if (!isStdout(Filename))
+  सचे (!isStdout(Filename))
     sys::RemoveFileOnSignal(Filename);
 }
 
 CleanupInstaller::~CleanupInstaller() {
-  if (isStdout(Filename))
-    return;
+  सचे (isStdout(Filename))
+    पटिनिवत्त;
 
   // Delete the file if the client hasn't told us not to.
-  if (!Keep)
+  सचे (!Keep)
     sys::fs::remove(Filename);
 
   // Ok, the file is successfully written and closed, or deleted. There's no
@@ -40,20 +40,20 @@ CleanupInstaller::~CleanupInstaller() {
 ToolOutputFile::ToolOutputFile(StringRef Filename, std::error_code &EC,
                                sys::fs::OpenFlags Flags)
     : Installer(Filename) {
-  if (isStdout(Filename)) {
+  सचे (isStdout(Filename)) {
     OS = &outs();
     EC = std::error_code();
-    return;
+    पटिनिवत्त;
   }
   OSHolder.emplace(Filename, EC, Flags);
   OS = &*OSHolder;
   // If open fails, no cleanup is needed.
-  if (EC)
-    Installer.Keep = true;
+  सचे (EC)
+    Installer.Keep = सच्च;
 }
 
-ToolOutputFile::ToolOutputFile(StringRef Filename, int FD)
+ToolOutputFile::ToolOutputFile(StringRef Filename, पूर्णाङ्क FD)
     : Installer(Filename) {
-  OSHolder.emplace(FD, true);
+  OSHolder.emplace(FD, सच्च);
   OS = &*OSHolder;
 }

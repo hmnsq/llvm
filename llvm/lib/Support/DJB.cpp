@@ -10,74 +10,74 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DJB.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Unicode.h"
+#अन्तर्भाव "llvm/Support/DJB.h"
+#अन्तर्भाव "llvm/ADT/ArrayRef.h"
+#अन्तर्भाव "llvm/Support/Compiler.h"
+#अन्तर्भाव "llvm/Support/ConvertUTF.h"
+#अन्तर्भाव "llvm/Support/Unicode.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-static UTF32 chopOneUTF32(StringRef &Buffer) {
+स्थिर UTF32 chopOneUTF32(StringRef &Buffer) {
   UTF32 C;
-  const UTF8 *const Begin8Const =
-      reinterpret_cast<const UTF8 *>(Buffer.begin());
-  const UTF8 *Begin8 = Begin8Const;
+  ध्रुव UTF8 *ध्रुव Begin8Const =
+      reinterpret_cast<ध्रुव UTF8 *>(Buffer.begin());
+  ध्रुव UTF8 *Begin8 = Begin8Const;
   UTF32 *Begin32 = &C;
 
   // In lenient mode we will always end up with a "reasonable" value in C for
   // non-empty input.
-  assert(!Buffer.empty());
-  ConvertUTF8toUTF32(&Begin8, reinterpret_cast<const UTF8 *>(Buffer.end()),
+  प्रतिज्ञा(!Buffer.empty());
+  ConvertUTF8toUTF32(&Begin8, reinterpret_cast<ध्रुव UTF8 *>(Buffer.end()),
                      &Begin32, &C + 1, lenientConversion);
   Buffer = Buffer.drop_front(Begin8 - Begin8Const);
-  return C;
+  पटिनिवत्त C;
 }
 
-static StringRef toUTF8(UTF32 C, MutableArrayRef<UTF8> Storage) {
-  const UTF32 *Begin32 = &C;
+स्थिर StringRef toUTF8(UTF32 C, MutableArrayRef<UTF8> Storage) {
+  ध्रुव UTF32 *Begin32 = &C;
   UTF8 *Begin8 = Storage.begin();
 
   // The case-folded output should always be a valid unicode character, so use
   // strict mode here.
   ConversionResult CR = ConvertUTF32toUTF8(&Begin32, &C + 1, &Begin8,
                                            Storage.end(), strictConversion);
-  assert(CR == conversionOK && "Case folding produced invalid char?");
-  (void)CR;
-  return StringRef(reinterpret_cast<char *>(Storage.begin()),
+  प्रतिज्ञा(CR == conversionOK && "Case folding produced invalid char?");
+  (शून्य)CR;
+  पटिनिवत्त StringRef(reinterpret_cast<वर्ण *>(Storage.begin()),
                    Begin8 - Storage.begin());
 }
 
-static UTF32 foldCharDwarf(UTF32 C) {
+स्थिर UTF32 foldCharDwarf(UTF32 C) {
   // DWARF v5 addition to the unicode folding rules.
   // Fold "Latin Small Letter Dotless I" and "Latin Capital Letter I With Dot
   // Above" into "i".
-  if (C == 0x130 || C == 0x131)
-    return 'i';
-  return sys::unicode::foldCharSimple(C);
+  सचे (C == 0x130 || C == 0x131)
+    पटिनिवत्त 'i';
+  पटिनिवत्त sys::unicode::foldCharSimple(C);
 }
 
-static std::optional<uint32_t> fastCaseFoldingDjbHash(StringRef Buffer,
+स्थिर std::optional<uint32_t> fastCaseFoldingDjbHash(StringRef Buffer,
                                                       uint32_t H) {
-  bool AllASCII = true;
-  for (unsigned char C : Buffer) {
+  तार्किक AllASCII = सच्च;
+  अत्थाय (unsigned वर्ण C : Buffer) {
     H = H * 33 + ('A' <= C && C <= 'Z' ? C - 'A' + 'a' : C);
     AllASCII &= C <= 0x7f;
   }
-  if (AllASCII)
-    return H;
-  return std::nullopt;
+  सचे (AllASCII)
+    पटिनिवत्त H;
+  पटिनिवत्त std::nullopt;
 }
 
 uint32_t llvm::caseFoldingDjbHash(StringRef Buffer, uint32_t H) {
-  if (std::optional<uint32_t> Result = fastCaseFoldingDjbHash(Buffer, H))
-    return *Result;
+  सचे (std::optional<uint32_t> Result = fastCaseFoldingDjbHash(Buffer, H))
+    पटिनिवत्त *Result;
 
   std::array<UTF8, UNI_MAX_UTF8_BYTES_PER_CODE_POINT> Storage;
-  while (!Buffer.empty()) {
+  याव (!Buffer.empty()) {
     UTF32 C = foldCharDwarf(chopOneUTF32(Buffer));
     StringRef Folded = toUTF8(C, Storage);
     H = djbHash(Folded, H);
   }
-  return H;
+  पटिनिवत्त H;
 }

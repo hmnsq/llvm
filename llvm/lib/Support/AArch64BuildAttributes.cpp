@@ -6,89 +6,89 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/AArch64BuildAttributes.h"
-#include "llvm/ADT/StringSwitch.h"
+#अन्तर्भाव "llvm/Support/AArch64BuildAttributes.h"
+#अन्तर्भाव "llvm/ADT/StringSwitch.h"
 
-using namespace llvm;
-using namespace llvm::AArch64BuildAttributes;
+using नामाकाश llvm;
+using नामाकाश llvm::AArch64BuildAttributes;
 
 StringRef AArch64BuildAttributes::getVendorName(unsigned Vendor) {
-  switch (Vendor) {
-  case AEABI_FEATURE_AND_BITS:
-    return "aeabi_feature_and_bits";
-  case AEABI_PAUTHABI:
-    return "aeabi_pauthabi";
-  case VENDOR_UNKNOWN:
-    return "";
-  default:
-    assert(0 && "Vendor name error");
-    return "";
+  विकल्प (Vendor) {
+  पक्ष AEABI_FEATURE_AND_BITS:
+    पटिनिवत्त "aeabi_feature_and_bits";
+  पक्ष AEABI_PAUTHABI:
+    पटिनिवत्त "aeabi_pauthabi";
+  पक्ष VENDOR_UNKNOWN:
+    पटिनिवत्त "";
+  स्वभाव:
+    प्रतिज्ञा(0 && "Vendor name error");
+    पटिनिवत्त "";
   }
 }
 VendorID AArch64BuildAttributes::getVendorID(StringRef Vendor) {
-  return StringSwitch<VendorID>(Vendor)
+  पटिनिवत्त StringSwitch<VendorID>(Vendor)
       .Case("aeabi_feature_and_bits", AEABI_FEATURE_AND_BITS)
       .Case("aeabi_pauthabi", AEABI_PAUTHABI)
       .Default(VENDOR_UNKNOWN);
 }
 
 StringRef AArch64BuildAttributes::getOptionalStr(unsigned Optional) {
-  switch (Optional) {
-  case REQUIRED:
-    return "required";
-  case OPTIONAL:
-    return "optional";
-  case OPTIONAL_NOT_FOUND:
-  default:
-    return "";
+  विकल्प (Optional) {
+  पक्ष REQUIRED:
+    पटिनिवत्त "required";
+  पक्ष OPTIONAL:
+    पटिनिवत्त "optional";
+  पक्ष OPTIONAL_NOT_FOUND:
+  स्वभाव:
+    पटिनिवत्त "";
   }
 }
 SubsectionOptional AArch64BuildAttributes::getOptionalID(StringRef Optional) {
-  return StringSwitch<SubsectionOptional>(Optional)
+  पटिनिवत्त StringSwitch<SubsectionOptional>(Optional)
       .Case("required", REQUIRED)
       .Case("optional", OPTIONAL)
       .Default(OPTIONAL_NOT_FOUND);
 }
 StringRef AArch64BuildAttributes::getSubsectionOptionalUnknownError() {
-  return "unknown AArch64 build attributes optionality, expected "
+  पटिनिवत्त "unknown AArch64 build attributes optionality, expected "
          "required|optional";
 }
 
 StringRef AArch64BuildAttributes::getTypeStr(unsigned Type) {
-  switch (Type) {
-  case ULEB128:
-    return "uleb128";
-  case NTBS:
-    return "ntbs";
-  case TYPE_NOT_FOUND:
-  default:
-    return "";
+  विकल्प (Type) {
+  पक्ष ULEB128:
+    पटिनिवत्त "uleb128";
+  पक्ष NTBS:
+    पटिनिवत्त "ntbs";
+  पक्ष TYPE_NOT_FOUND:
+  स्वभाव:
+    पटिनिवत्त "";
   }
 }
 SubsectionType AArch64BuildAttributes::getTypeID(StringRef Type) {
-  return StringSwitch<SubsectionType>(Type)
+  पटिनिवत्त StringSwitch<SubsectionType>(Type)
       .Cases({"uleb128", "ULEB128"}, ULEB128)
       .Cases({"ntbs", "NTBS"}, NTBS)
       .Default(TYPE_NOT_FOUND);
 }
 StringRef AArch64BuildAttributes::getSubsectionTypeUnknownError() {
-  return "unknown AArch64 build attributes type, expected uleb128|ntbs";
+  पटिनिवत्त "unknown AArch64 build attributes type, expected uleb128|ntbs";
 }
 
 StringRef AArch64BuildAttributes::getPauthABITagsStr(unsigned PauthABITag) {
-  switch (PauthABITag) {
-  case TAG_PAUTH_PLATFORM:
-    return "Tag_PAuth_Platform";
-  case TAG_PAUTH_SCHEMA:
-    return "Tag_PAuth_Schema";
-  case PAUTHABI_TAG_NOT_FOUND:
-  default:
-    return "";
+  विकल्प (PauthABITag) {
+  पक्ष TAG_PAUTH_PLATFORM:
+    पटिनिवत्त "Tag_PAuth_Platform";
+  पक्ष TAG_PAUTH_SCHEMA:
+    पटिनिवत्त "Tag_PAuth_Schema";
+  पक्ष PAUTHABI_TAG_NOT_FOUND:
+  स्वभाव:
+    पटिनिवत्त "";
   }
 }
 
 PauthABITags AArch64BuildAttributes::getPauthABITagsID(StringRef PauthABITag) {
-  return StringSwitch<PauthABITags>(PauthABITag)
+  पटिनिवत्त StringSwitch<PauthABITags>(PauthABITag)
       .Case("Tag_PAuth_Platform", TAG_PAUTH_PLATFORM)
       .Case("Tag_PAuth_Schema", TAG_PAUTH_SCHEMA)
       .Default(PAUTHABI_TAG_NOT_FOUND);
@@ -96,22 +96,22 @@ PauthABITags AArch64BuildAttributes::getPauthABITagsID(StringRef PauthABITag) {
 
 StringRef
 AArch64BuildAttributes::getFeatureAndBitsTagsStr(unsigned FeatureAndBitsTag) {
-  switch (FeatureAndBitsTag) {
-  case TAG_FEATURE_BTI:
-    return "Tag_Feature_BTI";
-  case TAG_FEATURE_PAC:
-    return "Tag_Feature_PAC";
-  case TAG_FEATURE_GCS:
-    return "Tag_Feature_GCS";
-  case FEATURE_AND_BITS_TAG_NOT_FOUND:
-  default:
-    return "";
+  विकल्प (FeatureAndBitsTag) {
+  पक्ष TAG_FEATURE_BTI:
+    पटिनिवत्त "Tag_Feature_BTI";
+  पक्ष TAG_FEATURE_PAC:
+    पटिनिवत्त "Tag_Feature_PAC";
+  पक्ष TAG_FEATURE_GCS:
+    पटिनिवत्त "Tag_Feature_GCS";
+  पक्ष FEATURE_AND_BITS_TAG_NOT_FOUND:
+  स्वभाव:
+    पटिनिवत्त "";
   }
 }
 
 FeatureAndBitsTags
 AArch64BuildAttributes::getFeatureAndBitsTagsID(StringRef FeatureAndBitsTag) {
-  return StringSwitch<FeatureAndBitsTags>(FeatureAndBitsTag)
+  पटिनिवत्त StringSwitch<FeatureAndBitsTags>(FeatureAndBitsTag)
       .Case("Tag_Feature_BTI", TAG_FEATURE_BTI)
       .Case("Tag_Feature_PAC", TAG_FEATURE_PAC)
       .Case("Tag_Feature_GCS", TAG_FEATURE_GCS)

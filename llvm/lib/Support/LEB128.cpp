@@ -11,33 +11,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LEB128.h"
+#अन्तर्भाव "llvm/Support/LEB128.h"
 
-namespace llvm {
+नामाकाश llvm {
 
 /// Utility function to get the size of the ULEB128-encoded value.
-unsigned getULEB128Size(uint64_t Value) {
+unsigned getULEB128Size(uint64_t मानम्) {
   unsigned Size = 0;
-  do {
-    Value >>= 7;
-    Size += sizeof(int8_t);
-  } while (Value);
-  return Size;
+  करोहि {
+    मानम् >>= 7;
+    Size += परिमाण(int8_t);
+  } याव (मानम्);
+  पटिनिवत्त Size;
 }
 
 /// Utility function to get the size of the SLEB128-encoded value.
-unsigned getSLEB128Size(int64_t Value) {
+unsigned getSLEB128Size(int64_t मानम्) {
   unsigned Size = 0;
-  int Sign = Value >> (8 * sizeof(Value) - 1);
-  bool IsMore;
+  पूर्णाङ्क Sign = मानम् >> (8 * परिमाण(मानम्) - 1);
+  तार्किक IsMore;
 
-  do {
-    unsigned Byte = Value & 0x7f;
-    Value >>= 7;
-    IsMore = Value != Sign || ((Byte ^ Sign) & 0x40) != 0;
-    Size += sizeof(int8_t);
-  } while (IsMore);
-  return Size;
+  करोहि {
+    unsigned Byte = मानम् & 0x7f;
+    मानम् >>= 7;
+    IsMore = मानम् != Sign || ((Byte ^ Sign) & 0x40) != 0;
+    Size += परिमाण(int8_t);
+  } याव (IsMore);
+  पटिनिवत्त Size;
 }
 
 }  // namespace llvm

@@ -6,35 +6,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/Support/MemAlloc.h"
-#include <cstring>
+#अन्तर्भाव "llvm/ADT/DenseMap.h"
+#अन्तर्भाव "llvm/Support/MemAlloc.h"
+#अन्तर्भाव <cstring>
 
-using namespace llvm;
-using namespace llvm::densemap;
-using namespace llvm::densemap::detail;
+using नामाकाश llvm;
+using नामाकाश llvm::densemap;
+using नामाकाश llvm::densemap::detail;
 
 // A nonzero FixedSize turns the bucket copy into a couple of stores.
-template <size_t FixedSize, bool InlinePtrHash>
-static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
-                       const void *SrcBuckets, const UsedT *SrcUsed,
-                       unsigned SrcNumBuckets, size_t RuntimeSize,
+template <size_t FixedSize, तार्किक InlinePtrHash>
+स्थिर शून्य rehashLoop(शून्य *DstBuckets, UsedT *DstUsed, unsigned Mask,
+                       ध्रुव शून्य *SrcBuckets, ध्रुव UsedT *SrcUsed,
+                       unsigned Src_अङ्कः_Buckets, size_t RuntimeSize,
                        BucketHasher Hasher) {
-  const size_t BucketSize = FixedSize ? FixedSize : RuntimeSize;
-  char *Dst = static_cast<char *>(DstBuckets);
-  const char *Src = static_cast<const char *>(SrcBuckets);
-  forEachUsed(SrcUsed, SrcNumBuckets, [&](unsigned I) {
-    const char *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
+  ध्रुव size_t BucketSize = FixedSize ? FixedSize : RuntimeSize;
+  वर्ण *Dst = static_cast<वर्ण *>(DstBuckets);
+  ध्रुव वर्ण *Src = static_cast<ध्रुव वर्ण *>(SrcBuckets);
+  forEachUsed(SrcUsed, Src_अङ्कः_Buckets, [&](unsigned I) {
+    ध्रुव वर्ण *SrcBucket = Src + static_cast<size_t>(I) * BucketSize;
     unsigned Hash;
-    if constexpr (InlinePtrHash) {
-      void *Key;
-      std::memcpy(&Key, SrcBucket, sizeof(Key));
-      Hash = DenseMapInfo<void *>::getHashValue(Key);
-    } else {
+    सचे constexpr (InlinePtrHash) {
+      शून्य *कुञ्चिका;
+      std::memcpy(&कुञ्चिका, SrcBucket, परिमाण(कुञ्चिका));
+      Hash = DenseMapInfo<शून्य *>::get_Hash_मानम्(कुञ्चिका);
+    } अञ्ञथा {
       Hash = Hasher(SrcBucket);
     }
     unsigned BucketNo = Hash & Mask;
-    while (used(DstUsed, BucketNo))
+    याव (used(DstUsed, BucketNo))
       BucketNo = (BucketNo + 1) & Mask;
     std::memcpy(Dst + static_cast<size_t>(BucketNo) * BucketSize, SrcBucket,
                 BucketSize);
@@ -42,17 +42,17 @@ static void rehashLoop(void *DstBuckets, UsedT *DstUsed, unsigned Mask,
   });
 }
 
-template <bool InlinePtrHash>
-static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
-                         const void *Src, const UsedT *SrcUsed,
-                         unsigned SrcNumBuckets, size_t BucketSize,
+template <तार्किक InlinePtrHash>
+स्थिर शून्य rehashBySize(शून्य *Dst, UsedT *DstUsed, unsigned Mask,
+                         ध्रुव शून्य *Src, ध्रुव UsedT *SrcUsed,
+                         unsigned Src_अङ्कः_Buckets, size_t BucketSize,
                          BucketHasher Hasher) {
   // The bucket sizes of 95% of the grow instantiations in an LLVM build.
-  switch (BucketSize) {
+  विकल्प (BucketSize) {
 #define REHASH_CASE(N)                                                         \
-  case N:                                                                      \
-    return rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
-                                        SrcNumBuckets, BucketSize, Hasher);
+  पक्ष N:                                                                      \
+    पटिनिवत्त rehashLoop<N, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,      \
+                                        Src_अङ्कः_Buckets, BucketSize, Hasher);
     REHASH_CASE(4)
     REHASH_CASE(8)
     REHASH_CASE(12)
@@ -62,40 +62,40 @@ static void rehashBySize(void *Dst, UsedT *DstUsed, unsigned Mask,
     REHASH_CASE(40)
     REHASH_CASE(48)
 #undef REHASH_CASE
-  default:
-    return rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
-                                        SrcNumBuckets, BucketSize, Hasher);
+  स्वभाव:
+    पटिनिवत्त rehashLoop<0, InlinePtrHash>(Dst, DstUsed, Mask, Src, SrcUsed,
+                                        Src_अङ्कः_Buckets, BucketSize, Hasher);
   }
 }
 
-void densemap::detail::rehashRelocatable(void *Dst, UsedT *DstUsed,
-                                         unsigned DstNumBuckets,
-                                         const void *Src, const UsedT *SrcUsed,
-                                         unsigned SrcNumBuckets,
+शून्य densemap::detail::rehashRelocatable(शून्य *Dst, UsedT *DstUsed,
+                                         unsigned Dst_अङ्कः_Buckets,
+                                         ध्रुव शून्य *Src, ध्रुव UsedT *SrcUsed,
+                                         unsigned Src_अङ्कः_Buckets,
                                          size_t BucketSize,
                                          BucketHasher Hasher) {
-  const unsigned Mask = DstNumBuckets - 1;
-  if (!Hasher)
-    return rehashBySize<true>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  ध्रुव unsigned Mask = Dst_अङ्कः_Buckets - 1;
+  सचे (!Hasher)
+    पटिनिवत्त rehashBySize<सच्च>(Dst, DstUsed, Mask, Src, SrcUsed, Src_अङ्कः_Buckets,
                               BucketSize, Hasher);
-  return rehashBySize<false>(Dst, DstUsed, Mask, Src, SrcUsed, SrcNumBuckets,
+  पटिनिवत्त rehashBySize<मिच्छा>(Dst, DstUsed, Mask, Src, SrcUsed, Src_अङ्कः_Buckets,
                              BucketSize, Hasher);
 }
 
-void *densemap::detail::growRelocatable(void *OldBuckets, const UsedT *OldUsed,
-                                        unsigned OldNumBuckets,
-                                        unsigned NewNumBuckets,
+शून्य *densemap::detail::growRelocatable(शून्य *OldBuckets, ध्रुव UsedT *OldUsed,
+                                        unsigned Old_अङ्कः_Buckets,
+                                        unsigned New_अङ्कः_Buckets,
                                         size_t BucketSize, size_t Align,
-                                        BucketHasher Hasher, bool FreeOld) {
-  void *Storage = allocate_buffer(allocBytes(BucketSize, NewNumBuckets), Align);
-  UsedT *NewUsed = usedFor(Storage, BucketSize, NewNumBuckets);
-  clearUsed(NewUsed, NewNumBuckets);
-  if (OldNumBuckets) {
-    rehashRelocatable(Storage, NewUsed, NewNumBuckets, OldBuckets, OldUsed,
-                      OldNumBuckets, BucketSize, Hasher);
-    if (FreeOld)
-      deallocate_buffer(OldBuckets, allocBytes(BucketSize, OldNumBuckets),
+                                        BucketHasher Hasher, तार्किक FreeOld) {
+  शून्य *Storage = allocate_buffer(allocBytes(BucketSize, New_अङ्कः_Buckets), Align);
+  UsedT *NewUsed = usedFor(Storage, BucketSize, New_अङ्कः_Buckets);
+  clearUsed(NewUsed, New_अङ्कः_Buckets);
+  सचे (Old_अङ्कः_Buckets) {
+    rehashRelocatable(Storage, NewUsed, New_अङ्कः_Buckets, OldBuckets, OldUsed,
+                      Old_अङ्कः_Buckets, BucketSize, Hasher);
+    सचे (FreeOld)
+      deallocate_buffer(OldBuckets, allocBytes(BucketSize, Old_अङ्कः_Buckets),
                         Align);
   }
-  return Storage;
+  पटिनिवत्त Storage;
 }

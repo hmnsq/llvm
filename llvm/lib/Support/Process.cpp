@@ -10,20 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Process.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
+#अन्तर्भाव "llvm/Support/Process.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Config/config.h"
+#अन्तर्भाव "llvm/Config/llvm-config.h"
+#अन्तर्भाव "llvm/Support/CrashRecoveryContext.h"
+#अन्तर्भाव "llvm/Support/FileSystem.h"
+#अन्तर्भाव "llvm/Support/Path.h"
 
-#include <optional>
-#include <stdlib.h> // for _Exit
+#अन्तर्भाव <optional>
+#अन्तर्भाव <stdlib.h> // for _Exit
 
-using namespace llvm;
-using namespace sys;
+using नामाकाश llvm;
+using नामाकाश sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
@@ -31,39 +31,39 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+Process::FindInEnvPath(StringRef EnvName, StringRef FileName, वर्ण Separator) {
+  पटिनिवत्त FindInEnvPath(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
 Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
-                       ArrayRef<std::string> IgnoreList, char Separator) {
-  assert(!path::is_absolute(FileName));
+                       ArrayRef<std::string> IgnoreList, वर्ण Separator) {
+  प्रतिज्ञा(!path::is_absolute(FileName));
   std::optional<std::string> FoundPath;
   std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+  सचे (!OptPath)
+    पटिनिवत्त FoundPath;
 
-  const char EnvPathSeparatorStr[] = {Separator, '\0'};
+  ध्रुव वर्ण EnvPathSeparatorStr[] = {Separator, '\0'};
   SmallVector<StringRef, 8> Dirs;
   SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
-      continue;
+  अत्थाय (StringRef Dir : Dirs) {
+    सचे (Dir.empty())
+      अनुवर्त;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
-      continue;
+    सचे (any_of(IgnoreList, [&](StringRef S) { पटिनिवत्त fs::equivalent(S, Dir); }))
+      अनुवर्त;
 
     SmallString<128> FilePath(Dir);
     path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
+    सचे (fs::exists(Twine(FilePath))) {
       FoundPath = std::string(FilePath);
-      break;
+      भङ्ग;
     }
   }
 
-  return FoundPath;
+  पटिनिवत्त FoundPath;
 }
 
 // clang-format off
@@ -95,7 +95,7 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
 //                           |  |   codes
 //                           |  |   |
 //                           |  |   |
-static const char colorcodes[2][2][16][11] = {
+स्थिर ध्रुव वर्ण colorcodes[2][2][16][11] = {
     { ALLCOLORS("3", "9", ""), ALLCOLORS("3", "9", "1;"),},
     { ALLCOLORS("4", "10", ""), ALLCOLORS("4", "10", "1;")}
 };
@@ -103,24 +103,24 @@ static const char colorcodes[2][2][16][11] = {
 
 // A CMake option controls wheter we emit core dumps by default. An application
 // may disable core dumps by calling Process::PreventCoreFiles().
-static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
+स्थिर तार्किक coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+तार्किक Process::AreCoreFilesPrevented() { पटिनिवत्त coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
+[[noreturn]] शून्य Process::Exit(पूर्णाङ्क RetCode, तार्किक NoCleanup) {
+  सचे (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
     CRC->HandleExit(RetCode);
 
-  if (NoCleanup)
+  सचे (NoCleanup)
     ExitNoCleanup(RetCode);
-  else
+  अञ्ञथा
     ::exit(RetCode);
 }
 
 // Include the platform-specific parts of this class.
 #ifdef LLVM_ON_UNIX
-#include "Unix/Process.inc"
+#अन्तर्भाव "Unix/Process.inc"
 #endif
 #ifdef _WIN32
-#include "Windows/Process.inc"
+#अन्तर्भाव "Windows/Process.inc"
 #endif

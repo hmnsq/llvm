@@ -6,56 +6,56 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/FloatingPointMode.h"
-#include "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/FloatingPointMode.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
 FPClassTest llvm::fneg(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcNegInf)
+  सचे (Mask & fcNegInf)
     NewMask |= fcPosInf;
-  if (Mask & fcNegNormal)
+  सचे (Mask & fcNegNormal)
     NewMask |= fcPosNormal;
-  if (Mask & fcNegSubnormal)
+  सचे (Mask & fcNegSubnormal)
     NewMask |= fcPosSubnormal;
-  if (Mask & fcNegZero)
+  सचे (Mask & fcNegZero)
     NewMask |= fcPosZero;
-  if (Mask & fcPosZero)
+  सचे (Mask & fcPosZero)
     NewMask |= fcNegZero;
-  if (Mask & fcPosSubnormal)
+  सचे (Mask & fcPosSubnormal)
     NewMask |= fcNegSubnormal;
-  if (Mask & fcPosNormal)
+  सचे (Mask & fcPosNormal)
     NewMask |= fcNegNormal;
-  if (Mask & fcPosInf)
+  सचे (Mask & fcPosInf)
     NewMask |= fcNegInf;
-  return NewMask;
+  पटिनिवत्त NewMask;
 }
 
 FPClassTest llvm::inverse_fabs(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcPosZero)
+  सचे (Mask & fcPosZero)
     NewMask |= fcZero;
-  if (Mask & fcPosSubnormal)
+  सचे (Mask & fcPosSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcPosNormal)
+  सचे (Mask & fcPosNormal)
     NewMask |= fcNormal;
-  if (Mask & fcPosInf)
+  सचे (Mask & fcPosInf)
     NewMask |= fcInf;
-  return NewMask;
+  पटिनिवत्त NewMask;
 }
 
 FPClassTest llvm::unknown_sign(FPClassTest Mask) {
   FPClassTest NewMask = Mask & fcNan;
-  if (Mask & fcZero)
+  सचे (Mask & fcZero)
     NewMask |= fcZero;
-  if (Mask & fcSubnormal)
+  सचे (Mask & fcSubnormal)
     NewMask |= fcSubnormal;
-  if (Mask & fcNormal)
+  सचे (Mask & fcNormal)
     NewMask |= fcNormal;
-  if (Mask & fcInf)
+  सचे (Mask & fcInf)
     NewMask |= fcInf;
-  return NewMask;
+  पटिनिवत्त NewMask;
 }
 
 // Every bitfield has a unique name and one or more aliasing names that cover
@@ -64,7 +64,7 @@ FPClassTest llvm::unknown_sign(FPClassTest Mask) {
 //
 // Bits are consumed as printed. Each field should only be represented in one
 // printed field.
-static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
+स्थिर constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
   {fcAllFlags, "all"},
   {fcNan, "nan"},
   {fcSNan, "snan"},
@@ -86,14 +86,14 @@ static constexpr std::pair<FPClassTest, StringLiteral> NoFPClassName[] = {
 raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
   OS << '(';
 
-  if (Mask == fcNone) {
+  सचे (Mask == fcNone) {
     OS << "none)";
-    return OS;
+    पटिनिवत्त OS;
   }
 
   ListSeparator LS(" ");
-  for (auto [BitTest, Name] : NoFPClassName) {
-    if ((Mask & BitTest) == BitTest) {
+  अत्थाय (auto [BitTest, Name] : NoFPClassName) {
+    सचे ((Mask & BitTest) == BitTest) {
       OS << LS << Name;
 
       // Clear the bits so we don't print any aliased names later.
@@ -101,80 +101,80 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, FPClassTest Mask) {
     }
   }
 
-  assert(Mask == 0 && "didn't print some mask bits");
+  प्रतिज्ञा(Mask == 0 && "didn't print some mask bits");
 
   OS << ')';
-  return OS;
+  पटिनिवत्त OS;
 }
 
-void DenormalFPEnv::print(raw_ostream &OS, bool OmitIfSame) const {
-  if (F32Mode == DefaultMode) {
-    DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
-    return;
+शून्य DenormalFPEnv::print(raw_ostream &OS, तार्किक OmitIfSame) ध्रुव {
+  सचे (F32Mode == DefaultMode) {
+    DefaultMode.print(OS, /*Legacy=*/मिच्छा, OmitIfSame);
+    पटिनिवत्त;
   }
 
   // Omit printing the base mode if only the f32 mode isn't the default.
-  if (DefaultMode != DenormalMode::getDefault()) {
-    DefaultMode.print(OS, /*Legacy=*/false, OmitIfSame);
+  सचे (DefaultMode != DenormalMode::getDefault()) {
+    DefaultMode.print(OS, /*Legacy=*/मिच्छा, OmitIfSame);
     OS << ", ";
   }
 
   OS << "float: ";
-  F32Mode.print(OS, /*Legacy=*/false, OmitIfSame);
+  F32Mode.print(OS, /*Legacy=*/मिच्छा, OmitIfSame);
 }
 
-static bool cannotOrderStrictlyGreaterImpl(FPClassTest LHS, FPClassTest RHS,
-                                           bool OrEqual, bool OrderedZero) {
+स्थिर तार्किक cannotOrderStrictlyGreaterImpl(FPClassTest LHS, FPClassTest RHS,
+                                           तार्किक OrEqual, तार्किक OrderedZero) {
   LHS &= ~fcNan;
   RHS &= ~fcNan;
 
-  if (LHS == fcNone || RHS == fcNone)
-    return true;
+  सचे (LHS == fcNone || RHS == fcNone)
+    पटिनिवत्त सच्च;
 
   FPClassTest LowestBitRHS = static_cast<FPClassTest>(RHS & -RHS);
   FPClassTest HighestBitLHS = static_cast<FPClassTest>(1 << Log2_32(LHS));
 
-  if (!OrderedZero) {
+  सचे (!OrderedZero) {
     // Introduce conflict in zero bits if we're treating them as equal.
-    if (LowestBitRHS == fcNegZero)
+    सचे (LowestBitRHS == fcNegZero)
       LowestBitRHS = fcPosZero;
-    if (HighestBitLHS == fcNegZero)
+    सचे (HighestBitLHS == fcNegZero)
       HighestBitLHS = fcPosZero;
   }
 
-  if (LowestBitRHS > HighestBitLHS) {
-    assert((LHS & RHS) == fcNone && "no bits should intersect");
-    return true;
+  सचे (LowestBitRHS > HighestBitLHS) {
+    प्रतिज्ञा((LHS & RHS) == fcNone && "no bits should intersect");
+    पटिनिवत्त सच्च;
   }
 
-  if (LowestBitRHS < HighestBitLHS)
-    return false;
+  सचे (LowestBitRHS < HighestBitLHS)
+    पटिनिवत्त मिच्छा;
 
-  constexpr FPClassTest ExactValuesMask = fcZero | fcInf;
-  return !OrEqual && (LowestBitRHS & ExactValuesMask) != fcNone;
+  constexpr FPClassTest Exact_मानानि_Mask = fcZero | fcInf;
+  पटिनिवत्त !OrEqual && (LowestBitRHS & Exact_मानानि_Mask) != fcNone;
 }
 
-bool llvm::cannotOrderStrictlyGreater(FPClassTest LHS, FPClassTest RHS,
-                                      bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, false, OrderedZeroSign);
+तार्किक llvm::cannotOrderStrictlyGreater(FPClassTest LHS, FPClassTest RHS,
+                                      तार्किक OrderedZeroSign) {
+  पटिनिवत्त cannotOrderStrictlyGreaterImpl(LHS, RHS, मिच्छा, OrderedZeroSign);
 }
 
-bool llvm::cannotOrderStrictlyGreaterEq(FPClassTest LHS, FPClassTest RHS,
-                                        bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(LHS, RHS, true, OrderedZeroSign);
+तार्किक llvm::cannotOrderStrictlyGreaterEq(FPClassTest LHS, FPClassTest RHS,
+                                        तार्किक OrderedZeroSign) {
+  पटिनिवत्त cannotOrderStrictlyGreaterImpl(LHS, RHS, सच्च, OrderedZeroSign);
 }
 
-bool llvm::cannotOrderStrictlyLess(FPClassTest LHS, FPClassTest RHS,
-                                   bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, false, OrderedZeroSign);
+तार्किक llvm::cannotOrderStrictlyLess(FPClassTest LHS, FPClassTest RHS,
+                                   तार्किक OrderedZeroSign) {
+  पटिनिवत्त cannotOrderStrictlyGreaterImpl(RHS, LHS, मिच्छा, OrderedZeroSign);
 }
 
-bool llvm::cannotOrderStrictlyLessEq(FPClassTest LHS, FPClassTest RHS,
-                                     bool OrderedZeroSign) {
-  return cannotOrderStrictlyGreaterImpl(RHS, LHS, true, OrderedZeroSign);
+तार्किक llvm::cannotOrderStrictlyLessEq(FPClassTest LHS, FPClassTest RHS,
+                                     तार्किक OrderedZeroSign) {
+  पटिनिवत्त cannotOrderStrictlyGreaterImpl(RHS, LHS, सच्च, OrderedZeroSign);
 }
 
-FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
+FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, तार्किक OrderedZeroSign) {
   // Ignores NaN
   Mask &= ~fcNan;
   // Since the classes are ordered bits, we can get all classes which are
@@ -190,13 +190,13 @@ FPClassTest llvm::orderedStrictlyLess(FPClassTest Mask, bool OrderedZeroSign) {
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is smaller
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  सचे (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  पटिनिवत्त NewMask;
 }
 
 FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
-                                         bool OrderedZeroSign) {
+                                         तार्किक OrderedZeroSign) {
   // Counting the number of leading 0 bits and create a mask based on that,
   // removing the leading 1s that are outside the bitfield:
   // For example: 0b0000111100 = fcNegative
@@ -207,7 +207,7 @@ FPClassTest llvm::orderedStrictlyGreater(FPClassTest Mask,
   NewMask &= ~fcNan;
   // We cannot conclude that only one zero is greater
   // if the zeroes are not ordered
-  if (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
+  सचे (!OrderedZeroSign && ((NewMask & fcZero) != fcZero))
     NewMask &= ~fcZero;
-  return NewMask;
+  पटिनिवत्त NewMask;
 }
